@@ -1,0 +1,1033 @@
+      SUBROUTINE TAUOLA(MODE,KEYPOL) 
+C     *************************************
+C general tauola interface, should work in every case until 
+C hepevt is OK, does not check if hepevt is 'clean'
+C in particular will decay decayed taus...
+C only longitudinal spin effects are included.
+C in W decay v-a vertex is assumed
+C date: 12 DEC 1998. date: 21 June 1999. date: 24 Jan 2001 date: 24 Aug 2001
+C this is the hepevt class in old style. No d_h_ class pre-name
+      INTEGER NMXHEP
+      PARAMETER (NMXHEP=2000)
+      REAL*8  phep,  vhep ! to be real*4/ *8  depending on host
+      INTEGER nevhep,nhep,isthep,idhep,jmohep,
+     $        jdahep
+      COMMON /hepevt/
+     $      nevhep,               ! serial number
+     $      nhep,                 ! number of particles
+     $      isthep(nmxhep),   ! status code
+     $      idhep(nmxhep),    ! particle ident KF
+     $      jmohep(2,nmxhep), ! parent particles
+     $      jdahep(2,nmxhep), ! childreen particles
+     $      phep(5,nmxhep),   ! four-momentum, mass [GeV]
+     $      vhep(4,nmxhep)    ! vertex [mm]
+* ----------------------------------------------------------------------
+      LOGICAL qedrad
+      COMMON /phoqed/ 
+     $     qedrad(nmxhep)    ! Photos flag
+* ----------------------------------------------------------------------
+      SAVE hepevt,phoqed
+
+      COMMON /TAUPOS/ NP1, NP2 
+      REAL*4 PHOI(4),PHOF(4)
+      double precision Q1(4),Q2(4),P1(4),P2(4),P3(4),P4(4)
+      COMMON / MOMDEC / Q1,Q2,P1,P2,P3,P4
+* tauola, photos and jetset overall switches
+      COMMON /LIBRA/ JAK1,JAK2,ITDKRC,IFPHOT,IFHADM,IFHADP
+      REAL*4 RRR(1)
+
+C to switch tau polarization OFF in taus 
+      DIMENSION POL1(4), POL2(4)
+      DATA  POL1 /0.0,0.0,0.0,0.0/
+      DATA  POL2 /0.0,0.0,0.0,0.0/
+
+C store decay vertexes 
+      DIMENSION IMOTHER (20)
+      INTEGER KFHIGGS(3)
+
+      IF(MODE.EQ.-1) THEN
+C     ***********************
+
+         JAK1  =  0     ! decay mode first tau 
+         JAK2  =  0     ! decay mode second tau
+         ITDKRC=1.0     ! switch of radiative corrections in decay
+         IFPHOT=1.0     ! PHOTOS switch
+         IFHADM=1.0
+         IFHADP=1.0
+         POL=1.0        ! tau polarization dipswitch must be 1 or 0
+
+         KFHIGGS(1) = 25
+         KFHIGGS(2) = 35
+         KFHIGGS(3) = 36
+         KFHIGCH = 37
+         KFZ0    = 23
+         KFGAM   = 22
+         KFTAU   = 15
+         KFNUE   = 16
+
+
+         IF (IFPHOT.EQ.1) CALL  PHOINI  ! this if PHOTOS was not initialized earlier
+         CALL  INIETC(JAK1,JAK2,ITDKRC,IFPHOT)
+         CALL  INIMAS
+         CALL  INIPHX(0.01d0)
+         CALL  INITDK
+
+      ELSEIF(MODE.EQ.0) THEN
+C     ***********************
+C
+C..... find tau-s and fill common block /TAUPOS/
+C this is to avoid LUND history fillings. This call is optional
+      CALL PHYFIX(NSTOP,NSTART)
+C clear mothers of the previous event
+      DO II=1,20
+       IMOTHER(II)=0
+      ENDDO
+C ... and to find mothers giving taus.
+      NDEC    = 0
+      DO I=NSTART,NHEP
+        IF(ABS(IDHEP(I)).EQ.KFTAU) THEN
+           DO II=1,NDEC
+            IF(JMOHEP(1,I).EQ.IMOTHER(II)) GOTO 9999
+           ENDDO
+           NDEC=NDEC+1
+           IMOTHER(NDEC)= JMOHEP(1,I)
+        ENDIF
+ 9999   CONTINUE
+      ENDDO  
+
+C ... taus of every mother are treated in this main loop
+      DO II=1,NDEC
+         IM=IMOTHER(II)
+         NCOUNT=0
+         NP1=0
+         NP2=0
+C ... we check whether there are just two or more tau-likes 
+         DO I=JDAHEP(1,IM),JDAHEP(2,IM) 
+            IF(IDHEP(I).EQ.-KFTAU.OR.IDHEP(I).EQ.-KFNUE) NCOUNT=NCOUNT+1
+            IF(IDHEP(I).EQ. KFTAU.OR.IDHEP(I).EQ. KFNUE) NCOUNT=NCOUNT+1
+         ENDDO
+
+C ... if there will be more we will come here again
+ 666     CONTINUE
+
+         DO I=MAX(NP1+1,JDAHEP(1,IM)),JDAHEP(2,IM) 
+            IF(IDHEP(I).EQ.-KFTAU.OR.IDHEP(I).EQ.-KFNUE) NP1=I
+         ENDDO
+         DO I=MAX(NP2+1,JDAHEP(1,IM)),JDAHEP(2,IM) 
+            IF(IDHEP(I).EQ. KFTAU.OR.IDHEP(I).EQ. KFNUE) NP2=I
+         ENDDO
+         DO I=1,4
+            P1(I)= PHEP(I,NP1)    !momentum of tau+
+            P2(I)= PHEP(I,NP2)    !momentum of tau-
+            Q1(I)= P1(I)+P2(I)
+         ENDDO
+
+         POL1(3)=  0D0
+         POL2(3)=  0D0
+         
+         IF(KEYPOL.EQ.1) THEN
+c.....include polarisation effect
+         CALL RANMAR(RRR,1)
+
+         IF(IDHEP(IM).EQ.KFHIGGS(1).OR.IDHEP(IM).EQ.KFHIGGS(2).OR.
+     $    IDHEP(IM).EQ.KFHIGGS(3)) THEN   ! case of Higgs 
+            IF(RRR(1).LT.0.5) THEN
+               POL1(3)= POL
+               POL2(3)=-POL
+            ELSE     
+               POL1(3)=-POL
+               POL2(3)= POL
+            ENDIF
+         ELSEIF((IDHEP(IM).EQ.KFZ0).OR.(IDHEP(IM).EQ.KFGAM)) THEN ! case of gamma/Z 
+C there is no angular dependence in gamma/Z polarization 
+C there is no s-dependence in gamma/Z polarization at all
+C there is even no Z polarization in any form
+C main reason is that nobody asked ...
+C but it is prepared and longitudinal correlations 
+C can be included up to KORALZ standards
+
+            POLZ0=PLZAPX(.true.,IM,NP1,NP2)
+            IF(RRR(1).LT.POLZ0) THEN
+               POL1(3)= POL
+               POL2(3)= POL
+            ELSE     
+               POL1(3)=-POL
+               POL2(3)=-POL
+            ENDIF
+         ELSEIF(IDHEP(NP1).EQ.-IDHEP(NP2))THEN ! undef orig. only s-dep poss.
+            POLZ0=PLZAPX(.true.,IM,NP1,NP2)
+            IF(RRR(1).LT.POLZ0) THEN
+               POL1(3)= POL
+               POL2(3)= POL
+            ELSE     
+               POL1(3)=-POL
+               POL2(3)=-POL
+            ENDIF
+         ELSEIF(ABS(IDHEP(IM)).EQ.KFHIGCH) THEN ! case of charged Higgs 
+            POL1(3)=  POL
+            POL2(3)=  POL
+         ELSE ! case of W+ or W-
+            POL1(3)= -POL
+            POL2(3)= -POL
+         ENDIF
+c.....include polarisation effect
+         ENDIF  
+         IF(IDHEP(NP1).EQ.-KFTAU.AND.
+     $     (JDAHEP(1,NP1).LE.NP1.OR.JDAHEP(1,NP1).GT.NHEP)) THEN
+C          here check on if NP1 was not decayed should be verified
+           CALL DEXAY(1,POL1)
+           IF (IFPHOT.EQ.1) CALL PHOTOS(NP1)
+         ENDIF
+
+         IF(IDHEP(NP2).EQ. KFTAU.AND.
+     $     (JDAHEP(1,NP2).LE.NP2.OR.JDAHEP(1,NP2).GT.NHEP)) THEN
+C          here check on if NP2 was not decayed should be added
+           CALL DEXAY(2,POL2)
+           IF (IFPHOT.EQ.1) CALL PHOTOS(NP2)
+         ENDIF
+
+         NCOUNT=NCOUNT-2
+         IF (NCOUNT.GT.0) GOTO 666
+      ENDDO
+
+      ELSEIF(MODE.EQ.1) THEN
+C     ***********************
+C
+      CALL DEXAY(100,POL1)
+
+      ENDIF
+C     *****
+
+      END
+      FUNCTION PLZAPX(HOPE,IM0,NP1,NP2)
+C     IM0 NP1 NP2 are the positions of Z/gamma tau tau in hepevt common block.
+C     the purpose of this routine is to calculate polarization of Z along tau direction.
+C     this is highly non-trivial due to necessity of reading infromation from hard process
+C     history in HEPEVT, which is often written not up to the gramatic rules.
+      REAL*8 PLZAPX,PLZAP0,SVAR,COSTHE,sini,sfin,ZPROP2,
+     $       P1(4),P2(4),Q1(4),Q2(4),QQ(4),PH(4),PD1(4),PD2(4),
+     $       PQ1(4),PQ2(4)
+      INTEGER IM
+      LOGICAL HOPE
+C this is the hepevt class in old style. No d_h_ class pre-name
+      INTEGER NMXHEP
+      PARAMETER (NMXHEP=2000)
+      REAL*8  phep,  vhep ! to be real*4/ *8  depending on host
+      INTEGER nevhep,nhep,isthep,idhep,jmohep,
+     $        jdahep
+      COMMON /hepevt/
+     $      nevhep,               ! serial number
+     $      nhep,                 ! number of particles
+     $      isthep(nmxhep),   ! status code
+     $      idhep(nmxhep),    ! particle ident KF
+     $      jmohep(2,nmxhep), ! parent particles
+     $      jdahep(2,nmxhep), ! childreen particles
+     $      phep(5,nmxhep),   ! four-momentum, mass [GeV]
+     $      vhep(4,nmxhep)    ! vertex [mm]
+* ----------------------------------------------------------------------
+      LOGICAL qedrad
+      COMMON /phoqed/ 
+     $     qedrad(nmxhep)    ! Photos flag
+* ----------------------------------------------------------------------
+      SAVE hepevt,phoqed
+
+C >>
+C >> STEP 1: find where are particles in hepevent and pick them up
+C >>
+
+C sometimes shade Z of Z is its mother ...
+            IM=IM0
+            IM00=JMOHEP(1,IM0)
+C to protect against check on mother of beam particles.
+            IF (IM00.GT.0) THEN
+              IF (IDHEP(IM0).EQ.IDHEP(IM00)) IM=JMOHEP(1,IM0)
+            ENDIF                                                              
+C
+C find (host generator-level) incoming beam-bare-particles which form Z and co.
+            IMO1=JMOHEP(1,IM)
+            IMO2=JMOHEP(2,IM)
+
+            IFFULL=0
+C case when it was like e+e- --> tau+tau- gammas and e+e- were 'first' in hepevt.
+            IF     (IM01.EQ.0.AND.IMO2.EQ.0) THEN
+              IMO1=JMOHEP(1,NP1)
+              IMO2=JMOHEP(2,NP1)
+              IFFULL=1
+C case when it was like  qq --> tau+tau- gammas and qq were NOT 'first' in hepevt.
+
+            ELSEIF (IDHEP(IM).NE.22.AND.IDHEP(IM).NE.23) THEN
+              IMO1=JMOHEP(1,NP1)
+              IMO2=JMOHEP(2,NP1)
+              IFFULL=1
+            ENDIF
+
+            
+C and check if it really happened
+            IF (IMO1.EQ.0) HOPE=.FALSE.
+            IF (IMO2.EQ.0) HOPE=.FALSE.
+            IF (IMO1.EQ.IMO2) HOPE=.FALSE.
+
+C 
+         DO I=1,4
+            Q1(I)= PHEP(I,NP1)              !momentum of tau+
+            Q2(I)= PHEP(I,NP2)              !momentum of tau-
+            QQ(I)= Q1(I)+Q2(I)              !momentum of Z
+            IF (HOPE) P1(I)=PHEP(I,IMO1)    !momentum of beam1
+            IF (HOPE) P2(I)=PHEP(I,IMO2)    !momentum of beam2
+            PH(I)=0D0
+            PD1(I)=0D0
+            PD2(I)=0D0
+         ENDDO
+!        These momenta correspond to  quarks, gluons photons or taus
+                   IDFQ1=IDHEP(NP1)
+                   IDFQ2=IDHEP(NP2)
+         IF (HOPE) IDFP1=IDHEP(IMO1)
+         IF (HOPE) IDFP2=IDHEP(IMO2)
+
+         SVAR=QQ(4)**2-QQ(3)**2-QQ(2)**2-QQ(1)**2
+         IF (.NOT.HOPE) THEN
+C           PLZAPX=PLZAP0(11,IDFQ1,SVAR,0D0)
+           PLZAPX=0.5
+           RETURN
+         ENDIF
+C >>
+C >> STEP 2 look for brothers of Z which have to be included in effective incoming particles
+C >>
+C let us define beginning and end of particles which are produced in parallel to Z
+C in principle following should work
+         NX1=JDAHEP(1,IMO1)
+         NX2=JDAHEP(2,IMO1)
+C but ...
+           INBR=IM
+           IF(JMOHEP(1,NP1).EQ.IMO1) INBR=NP1
+         IF(NX1.EQ.0.OR.NX2.EQ.0) THEN
+           NX1=INBR
+           NX2=INBR
+           DO K=1,INBR-1
+             IF(JMOHEP(1,INBR-K).EQ.JMOHEP(1,INBR)) THEN
+              NX1=INBR-K
+             ELSE
+                GOTO 7
+             ENDIF
+           ENDDO
+ 7         CONTINUE
+
+           DO K=INBR+1,NHEP
+             IF(JMOHEP(1,K).EQ.JMOHEP(1,INBR)) THEN
+              NX2=K
+             ELSE
+                GOTO 8
+             ENDIF
+           ENDDO
+ 8         CONTINUE
+         ENDIF
+
+C case of annihilation of two bosons is hopeles
+         IF (ABS(IDFP1).GE.20.AND.ABS(IDFP2).GE.20) HOPE=.FALSE.
+C case of annihilation of non-matching flavors is hopeless
+         IF (ABS(IDFP1).LE.20.AND.ABS(IDFP2).LE.20.AND.IDFP1+IDFP2.NE.0)
+     $       HOPE=.FALSE.
+         IF (.NOT.HOPE) THEN
+C           PLZAPX=PLZAP0(11,IDFQ1,SVAR,0D0)
+           PLZAPX=0.5
+           RETURN
+         ENDIF
+         IF (ABS(IDFP1).LT.20) IDE= IDFP1
+         IF (ABS(IDFP2).LT.20) IDE=-IDFP2
+
+
+C >>
+C >> STEP 3  we combine gluons, photons  into incoming effective beams
+C >>
+
+C in the following we will ignore the possibility of photon emission from taus
+C however at certain moment it will be necessary to take care of
+
+           DO L=1,4
+            PD1(L)=P1(L)
+            PD2(L)=P2(L)
+           ENDDO 
+
+                DO L=1,4
+                PQ1(L)=Q1(L)
+                PQ2(L)=Q2(L)
+                ENDDO 
+
+         IFLAV=min(ABS(IDFP1),ABS(IDFP2))
+
+*--------------------------------------------------------------------------
+c                  IFLAV=min(ABS(IDFP1),ABS(IDFP2))
+c that means that always quark or lepton i.e. process like
+c      f g(gamma) --> f Z0 --> tau tau
+c we glue  fermions to effective  beams that is f f --> Z0 --> tau tau
+c  with  gamma/g emission from initial fermion.
+*---------------------------------------------------------------------------
+ 
+         IF (ABS(IDFP1).GE.20) THEN
+           DO k=NX1,NX2
+             IDP=IDHEP(k)
+             IF (ABS(IDP).EQ.IFLAV) THEN
+               DO L=1,4
+                 PD1(L)=-PHEP(L,K)
+               ENDDO
+             ENDIF
+           ENDDO
+         ENDIF
+
+         IF (ABS(IDFP2).GE.20) THEN
+           DO k=NX1,NX2
+             IDP=IDHEP(k)
+             IF (ABS(IDP).EQ.IFLAV) THEN
+               DO L=1,4
+                 PD2(L)=-PHEP(L,K)
+               ENDDO
+             ENDIF
+           ENDDO
+         ENDIF
+
+C if first beam was boson: gluing
+
+         IF (ABS(IDFP1).GE.20) THEN
+           DO L=1,4
+             PH(L)=P1(L)
+           ENDDO
+           xm1=abs((PD1(4)+PH(4))**2-(PD1(3)+PH(3))**2
+     $            -(PD1(2)+PH(2))**2-(PD1(1)+PH(1))**2)
+           xm2=abs((PD2(4)+PH(4))**2-(PD2(3)+PH(3))**2
+     $            -(PD2(2)+PH(2))**2-(PD2(1)+PH(1))**2)
+          IF (XM1.LT.XM2) THEN
+             DO L=1,4
+               PD1(L)=PD1(L)+P1(L)
+             ENDDO
+           ELSE
+             DO L=1,4
+               PD2(L)=PD2(L)+P1(L)
+             ENDDO
+           ENDIF
+         ENDIF
+
+C if second beam was boson: gluing 
+
+
+         IF (ABS(IDFP2).GE.20) THEN
+           DO L=1,4
+             PH(L)=P2(L)
+           ENDDO
+           xm1=abs((PD1(4)+PH(4))**2-(PD1(3)+PH(3))**2
+     $            -(PD1(2)+PH(2))**2-(PD1(1)+PH(1))**2)
+           xm2=abs((PD2(4)+PH(4))**2-(PD2(3)+PH(3))**2
+     $            -(PD2(2)+PH(2))**2-(PD2(1)+PH(1))**2)
+           IF (XM1.LT.XM2) THEN
+             DO L=1,4
+               PD1(L)=PD1(L)+P2(L)
+             ENDDO
+           ELSE
+             DO L=1,4
+               PD2(L)=PD2(L)+P2(L)
+             ENDDO
+           ENDIF
+         ENDIF
+
+C now spectators ...
+
+         DO k=NX1,NX2
+         IF (ABS(IDHEP(K)).NE.IFLAV.AND.K.NE.IM.AND.
+     $       K.NE.NP1.AND.K.NE.NP2) THEN 
+          IF(IDHEP(K).EQ.22.AND.IFFULL.EQ.1) THEN
+            DO L=1,4
+              PH(L)=PHEP(L,K)
+            ENDDO
+            xm1=abs((PD1(4)-PH(4))**2-(PD1(3)-PH(3))**2
+     $             -(PD1(2)-PH(2))**2-(PD1(1)-PH(1))**2)
+            xm2=abs((PD2(4)-PH(4))**2-(PD2(3)-PH(3))**2
+     $             -(PD2(2)-PH(2))**2-(PD2(1)-PH(1))**2)
+           xm3=abs((PQ1(4)+PH(4))**2-(PQ1(3)+PH(3))**2
+     $            -(PQ1(2)+PH(2))**2-(PQ1(1)+PH(1))**2)
+           xm4=abs((PQ2(4)+PH(4))**2-(PQ2(3)+PH(3))**2
+     $            -(PQ2(2)+PH(2))**2-(PQ2(1)+PH(1))**2)
+
+  
+            sini=abs((PD1(4)+PD2(4)-PH(4))**2-(PD1(3)+PD2(3)-PH(3))**2
+     $              -(PD1(2)+PD2(2)-PH(2))**2-(PD1(1)+PD2(1)-PH(1))**2)
+            sfin=abs((PD1(4)+PD2(4)      )**2-(PD1(3)+PD2(3)      )**2
+     $              -(PD1(2)+PD2(2)      )**2-(PD1(1)+PD2(1)      )**2)
+
+           FACINI=ZPROP2(sini)
+           FACFIN=ZPROP2(sfin)
+
+           XM1=XM1/FACINI
+           XM2=XM2/FACINI
+           XM3=XM3/FACFIN
+           XM4=XM4/FACFIN
+
+           XM=MIN(XM1,XM2,XM3,XM4)
+                  IF      (XM1.EQ.XM) THEN 
+                     DO L=1,4
+                       PD1(L)=PD1(L)-PH(L)
+                     ENDDO
+                  ELSEIF   (XM2.EQ.XM) THEN 
+                     DO L=1,4
+                       PD2(L)=PD2(L)-PH(L)
+                     ENDDO
+                  ELSEIF   (XM3.EQ.XM) THEN 
+                     DO L=1,4
+                        Q1(L)=PQ1(L)+PH(L)
+                     ENDDO
+                  ELSE
+                     DO L=1,4
+                        Q2(L)=PQ2(L)+PH(L)
+                     ENDDO
+                  ENDIF
+           ELSE
+            DO L=1,4
+              PH(L)=PHEP(L,K)
+            ENDDO
+            xm1=abs((PD1(4)-PH(4))**2-(PD1(3)-PH(3))**2
+     $             -(PD1(2)-PH(2))**2-(PD1(1)-PH(1))**2)
+            xm2=abs((PD2(4)-PH(4))**2-(PD2(3)-PH(3))**2
+     $             -(PD2(2)-PH(2))**2-(PD2(1)-PH(1))**2)
+            IF (XM1.LT.XM2) THEN
+              DO L=1,4
+                PD1(L)=PD1(L)-PH(L)
+              ENDDO
+            ELSE
+              DO L=1,4
+                PD2(L)=PD2(L)-PH(L)
+              ENDDO
+            ENDIF
+           ENDIF
+          ENDIF
+         ENDDO
+
+
+C >>
+C >> STEP 4 look for brothers of tau (sons of Z!) which have to be included in 
+c >>          effective outcoming taus
+C >>
+C let us define beginning and end of particles which are produced in 
+c  parallel to tau
+
+
+
+C find outcoming particles which come form Z   
+
+       
+            IDA1=JDAHEP(1,IM0)
+            IDA2=JDAHEP(2,IM0)
+
+         IF(abs(IDHEP(IM0)).EQ.22.OR.abs(IDHEP(IM0)).EQ.23) THEN
+         DO k=ida1,ida2
+         if(abs(idhep(k)).eq.22) then
+              do l=1,4
+              ph(l)=phep(l,k)
+              enddo
+
+           xm3=abs((PQ1(4)+PH(4))**2-(PQ1(3)+PH(3))**2
+     $            -(PQ1(2)+PH(2))**2-(PQ1(1)+PH(1))**2)
+           xm4=abs((PQ2(4)+PH(4))**2-(PQ2(3)+PH(3))**2
+     $            -(PQ2(2)+PH(2))**2-(PQ2(1)+PH(1))**2)  
+
+           XM=MIN(XM3,XM4) 
+
+                  IF   (XM3.EQ.XM) THEN 
+                     DO L=1,4
+                        Q1(L)=PQ1(L)+PH(L)
+                     ENDDO
+                  ELSE
+                     DO L=1,4
+                        Q2(L)=PQ2(L)+PH(L)
+                     ENDDO
+                  ENDIF
+            endif
+          enddo
+          ENDIF
+
+
+
+*------------------------------------------------------------------------
+
+
+C out of effective momenta we calculate COSTHE and later polarization
+      CALL ANGULU(PD1,PD2,Q1,Q2,COSTHE)
+     
+      PLZAPX=PLZAP0(IDE,IDFQ1,SVAR,COSTHE)
+      END
+
+      SUBROUTINE ANGULU(PD1,PD2,Q1,Q2,COSTHE)
+      REAL*8 PD1(4),PD2(4),Q1(4),Q2(4),COSTHE,P(4),QQ(4),QT(4)
+C take effective beam which is less massive, it should be irrelevant
+C but in case HEPEVT is particulary dirty may help.
+C this routine calculate reduced system transver and cosine of scattering 
+C angle.
+
+      XM1=ABS(PD1(4)**2-PD1(3)**2-PD1(2)**2-PD1(1)**2)
+      XM2=ABS(PD2(4)**2-PD2(3)**2-PD2(2)**2-PD2(1)**2)
+      IF (XM1.LT.XM2) THEN
+        SIGN=1D0
+        DO K=1,4
+          P(K)=PD1(K)
+        ENDDO
+      ELSE
+        SIGN=-1D0
+        DO K=1,4
+          P(K)=PD2(K)
+        ENDDO
+      ENDIF
+C calculate space like part of P (in Z restframe)
+      DO K=1,4
+       QQ(K)=Q1(k)+Q2(K)
+       QT(K)=Q1(K)-Q2(K)
+      ENDDO
+
+       XMQQ=SQRT(QQ(4)**2-QQ(3)**2-QQ(2)**2-QQ(1)**2)
+
+       QTXQQ=QT(4)*QQ(4)-QT(3)*QQ(3)-QT(2)*QQ(2)-QT(1)*QQ(1)
+      DO K=1,4
+       QT(K)=QT(K)-QQ(K)*QTXQQ/XMQQ**2
+      ENDDO
+
+       PXQQ=P(4)*QQ(4)-P(3)*QQ(3)-P(2)*QQ(2)-P(1)*QQ(1)
+      DO K=1,4
+       P(K)=P(K)-QQ(K)*PXQQ/XMQQ**2
+      ENDDO
+C calculate costhe
+       PXP  =SQRT(p(1)**2+p(2)**2+p(3)**2-p(4)**2)
+       QTXQT=SQRT(QT(3)**2+QT(2)**2+QT(1)**2-QT(4)**2)
+       PXQT =P(3)*QT(3)+P(2)*QT(2)+P(1)*QT(1)-P(4)*QT(4)
+       COSTHE=PXQT/PXP/QTXQT
+       COSTHE=COSTHE*SIGN
+      END
+
+      FUNCTION PLZAP0(IDE,IDF,SVAR,COSTH0)
+C this function calculates probability for the helicity +1 +1 configuration
+C of taus for given Z/gamma transfer and COSTH0 cosine of scattering angle
+      REAL*8 PLZAP0,SVAR,COSTHE,COSTH0
+
+      COSTHE=COSTH0
+C >>>>>      IF (IDE*IDF.LT.0) COSTHE=-COSTH0 ! this is probably not needed ID
+C >>>>>      of first beam is used by T_GIVIZ0 including sign
+
+      IF (IDF.GT.0) THEN
+        CALL INITWK(IDE,IDF,SVAR)
+      ELSE
+        CALL INITWK(-IDE,-IDF,SVAR)
+      ENDIF
+      PLZAP0=T_BORN(0,SVAR,COSTHE,1D0,1D0)
+     $  /(T_BORN(0,SVAR,COSTHE,1D0,1D0)+T_BORN(0,SVAR,COSTHE,-1D0,-1D0))
+
+!      PLZAP0=0.5
+      END
+      FUNCTION T_BORN(MODE,SVAR,COSTHE,TA,TB)
+C ----------------------------------------------------------------------
+C THIS ROUTINE PROVIDES BORN CROSS SECTION. IT HAS THE SAME         
+C STRUCTURE AS FUNTIS AND FUNTIH, THUS CAN BE USED AS SIMPLER       
+C EXAMPLE OF THE METHOD APPLIED THERE                               
+C INPUT PARAMETERS ARE: SVAR    -- transfer
+C                       COSTHE  -- cosine of angle between tau+ and 1st beam
+C                       TA,TB   -- helicity states of tau+ tau-
+C
+C     called by : BORNY, BORAS, BORNV, WAGA, WEIGHT
+C ----------------------------------------------------------------------
+      IMPLICIT REAL*8(A-H,O-Z)
+      COMMON / T_BEAMPM / ENE ,AMIN,AMFIN,IDE,IDF
+      REAL*8              ENE ,AMIN,AMFIN
+      COMMON / T_GAUSPM /SS,POLN,T3E,QE,T3F,QF
+     &                  ,XUPGI   ,XUPZI   ,XUPGF   ,XUPZF
+     &                  ,NDIAG0,NDIAGA,KEYA,KEYZ
+     &                  ,ITCE,JTCE,ITCF,JTCF,KOLOR
+      REAL*8             SS,POLN,T3E,QE,T3F,QF
+     &                  ,XUPGI(2),XUPZI(2),XUPGF(2),XUPZF(2)
+      REAL*8            SEPS1,SEPS2
+C=====================================================================
+      COMMON / T_GSWPRM /SWSQ,AMW,AMZ,AMH,AMTOP,GAMMZ
+      REAL*8             SWSQ,AMW,AMZ,AMH,AMTOP,GAMMZ
+C     SWSQ        = sin2 (theta Weinberg)
+C     AMW,AMZ     = W & Z boson masses respectively
+C     AMH         = the Higgs mass
+C     AMTOP       = the top mass
+C     GAMMZ       = Z0 width
+      COMPLEX*16 ABORN(2,2),APHOT(2,2),AZETT(2,2)
+      COMPLEX*16 XUPZFP(2),XUPZIP(2)
+      COMPLEX*16 ABORNM(2,2),APHOTM(2,2),AZETTM(2,2)
+      COMPLEX*16 PROPA,PROPZ
+      COMPLEX*16 XR,XI
+      COMPLEX*16 XUPF,XUPI,XFF(4),XFEM,XFOTA,XRHO,XKE,XKF,XKEF
+      COMPLEX*16 XTHING,XVE,XVF,XVEF
+      DATA XI/(0.D0,1.D0)/,XR/(1.D0,0.D0)/
+      DATA MODE0 /-5/
+      DATA IDE0 /-55/
+      DATA SVAR0,COST0 /-5.D0,-6.D0/
+      DATA PI /3.141592653589793238462643D0/
+      DATA SEPS1,SEPS2 /0D0,0D0/
+C
+C MEMORIZATION =========================================================
+      IF ( MODE.NE.MODE0.OR.SVAR.NE.SVAR0.OR.COSTHE.NE.COST0
+     $    .OR.IDE0.NE.IDE)THEN
+C
+        KEYGSW=1
+C ** PROPAGATORS
+        IDE0=IDE
+        MODE0=MODE
+        SVAR0=SVAR
+        COST0=COSTHE
+        SINTHE=SQRT(1.D0-COSTHE**2)
+        BETA=SQRT(MAX(0D0,1D0-4D0*AMFIN**2/SVAR))
+C I MULTIPLY AXIAL COUPLING BY BETA FACTOR.
+        XUPZFP(1)=0.5D0*(XUPZF(1)+XUPZF(2))+0.5*BETA*(XUPZF(1)-XUPZF(2))
+        XUPZFP(2)=0.5D0*(XUPZF(1)+XUPZF(2))-0.5*BETA*(XUPZF(1)-XUPZF(2))
+        XUPZIP(1)=0.5D0*(XUPZI(1)+XUPZI(2))+0.5*(XUPZI(1)-XUPZI(2))
+        XUPZIP(2)=0.5D0*(XUPZI(1)+XUPZI(2))-0.5*(XUPZI(1)-XUPZI(2))
+C FINAL STATE VECTOR COUPLING
+        XUPF     =0.5D0*(XUPZF(1)+XUPZF(2))
+        XUPI     =0.5D0*(XUPZI(1)+XUPZI(2))
+        XTHING   =0D0
+
+        PROPA =1D0/SVAR
+        PROPZ =1D0/DCMPLX(SVAR-AMZ**2,SVAR/AMZ*GAMMZ)
+        IF (KEYGSW.EQ.0) PROPZ=0.D0
+        DO 50 I=1,2
+         DO 50 J=1,2
+          REGULA= (3-2*I)*(3-2*J) + COSTHE
+          REGULM=-(3-2*I)*(3-2*J) * SINTHE *2.D0*AMFIN/SQRT(SVAR)
+          APHOT(I,J)=PROPA*(XUPGI(I)*XUPGF(J)*REGULA)
+          AZETT(I,J)=PROPZ*(XUPZIP(I)*XUPZFP(J)+XTHING)*REGULA
+          ABORN(I,J)=APHOT(I,J)+AZETT(I,J)
+          APHOTM(I,J)=PROPA*DCMPLX(0D0,1D0)*XUPGI(I)*XUPGF(J)*REGULM
+          AZETTM(I,J)=PROPZ*DCMPLX(0D0,1D0)*(XUPZIP(I)*XUPF+XTHING)*REGULM
+          ABORNM(I,J)=APHOTM(I,J)+AZETTM(I,J)
+   50   CONTINUE
+      ENDIF
+C
+C******************
+C* IN CALCULATING CROSS SECTION ONLY DIAGONAL ELEMENTS
+C* OF THE SPIN DENSITY MATRICES ENTER (LONGITUD. POL. ONLY.)
+C* HELICITY CONSERVATION EXPLICITLY OBEYED
+      POLAR1=  (SEPS1)
+      POLAR2= (-SEPS2)
+      BORN=0D0
+      DO 150 I=1,2
+       HELIC= 3-2*I
+       DO 150 J=1,2
+        HELIT=3-2*J
+        FACTOR=KOLOR*(1D0+HELIC*POLAR1)*(1D0-HELIC*POLAR2)/4D0
+        FACTOM=FACTOR*(1+HELIT*TA)*(1-HELIT*TB)
+        FACTOR=FACTOR*(1+HELIT*TA)*(1+HELIT*TB)
+
+        BORN=BORN+CDABS(ABORN(I,J))**2*FACTOR
+C      MASS TERM IN BORN
+        IF (MODE.GE.1) THEN
+         BORN=BORN+CDABS(ABORNM(I,J))**2*FACTOM
+        ENDIF
+
+  150 CONTINUE
+C************
+      FUNT=BORN
+      IF(FUNT.LT.0.D0)  FUNT=BORN
+
+C
+      IF (SVAR.GT.4D0*AMFIN**2) THEN
+C PHASE SPACE THRESHOLD FACTOR
+        THRESH=SQRT(1-4D0*AMFIN**2/SVAR)
+        T_BORN= FUNT*SVAR**2*THRESH
+      ELSE
+        THRESH=0.D0
+        T_BORN=0.D0
+      ENDIF
+C ZW HERE WAS AN ERROR 19. 05. 1989
+!      write(*,*) 'KKKK ',PROPA,PROPZ,XUPGI,XUPGF,XUPZI,XUPZF
+!      write(*,*) 'KKKK X',svar,costhe,TA,TB,T_BORN
+      END
+
+      SUBROUTINE INITWK(IDEX,IDFX,SVAR)
+! initialization routine coupling masses etc.
+      IMPLICIT REAL*8 (A-H,O-Z)
+      COMMON / T_BEAMPM / ENE ,AMIN,AMFIN,IDE,IDF
+      REAL*8              ENE ,AMIN,AMFIN
+      COMMON / T_GAUSPM /SS,POLN,T3E,QE,T3F,QF
+     &                  ,XUPGI   ,XUPZI   ,XUPGF   ,XUPZF
+     &                  ,NDIAG0,NDIAGA,KEYA,KEYZ
+     &                  ,ITCE,JTCE,ITCF,JTCF,KOLOR
+      REAL*8             SS,POLN,T3E,QE,T3F,QF
+     &                  ,XUPGI(2),XUPZI(2),XUPGF(2),XUPZF(2)
+      COMMON / T_GSWPRM /SWSQ,AMW,AMZ,AMH,AMTOP,GAMMZ
+      REAL*8             SWSQ,AMW,AMZ,AMH,AMTOP,GAMMZ
+C     SWSQ        = sin2 (theta Weinberg)
+C     AMW,AMZ     = W & Z boson masses respectively
+C     AMH         = the Higgs mass
+C     AMTOP       = the top mass
+C     GAMMZ       = Z0 width
+C
+      ENE=SQRT(SVAR)/2
+      AMIN=0.511D-3
+      SWSQ=0.23147
+      AMZ=91.1882
+      GAMMZ=2.4952
+      IF     (IDFX.EQ. 15) then       
+        IDF=2  ! denotes tau +2 tau-
+        AMFIN=1.77703 !this mass is irrelevant if small, used in ME only
+      ELSEIF (IDFX.EQ.-15) then
+        IDF=-2  ! denotes tau -2 tau-
+        AMFIN=1.77703 !this mass is irrelevant if small, used in ME only
+      ELSE
+        WRITE(*,*) 'INITWK: WRONG IDFX'
+        STOP
+      ENDIF
+
+      IF     (IDEX.EQ. 11) then      !electron
+        IDE= 2
+        AMIN=0.511D-3
+      ELSEIF (IDEX.EQ.-11) then      !positron
+        IDE=-2
+        AMIN=0.511D-3
+      ELSEIF (IDEX.EQ. 13) then      !mu+
+        IDE= 2
+        AMIN=0.105659
+      ELSEIF (IDEX.EQ.-13) then      !mu-
+        IDE=-2
+        AMIN=0.105659
+      ELSEIF (IDEX.EQ.  1) then      !d
+        IDE= 4
+        AMIN=0.05
+      ELSEIF (IDEX.EQ.- 1) then      !d~
+        IDE=-4
+        AMIN=0.05
+      ELSEIF (IDEX.EQ.  2) then      !u
+        IDE= 3
+        AMIN=0.02
+      ELSEIF (IDEX.EQ.- 2) then      !u~
+        IDE=-3
+        AMIN=0.02
+      ELSEIF (IDEX.EQ.  3) then      !s
+        IDE= 4
+        AMIN=0.3
+      ELSEIF (IDEX.EQ.- 3) then      !s~
+        IDE=-4
+        AMIN=0.3
+      ELSEIF (IDEX.EQ.  4) then      !c
+        IDE= 3
+        AMIN=1.3
+      ELSEIF (IDEX.EQ.- 4) then      !c~
+        IDE=-3
+        AMIN=1.3
+      ELSEIF (IDEX.EQ.  5) then      !b
+        IDE= 4
+        AMIN=4.5
+      ELSEIF (IDEX.EQ.- 5) then      !b~
+        IDE=-4
+        AMIN=4.5
+
+      ENDIF
+
+C ----------------------------------------------------------------------
+C
+C     INITIALISATION OF COUPLING CONSTANTS AND FERMION-GAMMA / Z0 VERTEX
+C
+C     called by : KORALZ
+C ----------------------------------------------------------------------
+      ITCE=IDE/IABS(IDE)
+      JTCE=(1-ITCE)/2
+      ITCF=IDF/IABS(IDF)
+      JTCF=(1-ITCF)/2
+      CALL T_GIVIZO( IDE, 1,AIZOR,QE,KDUMM)
+      CALL T_GIVIZO( IDE,-1,AIZOL,QE,KDUMM)
+      XUPGI(1)=QE
+      XUPGI(2)=QE
+      T3E    = AIZOL+AIZOR
+      XUPZI(1)=(AIZOR-QE*SWSQ)/SQRT(SWSQ*(1-SWSQ))
+      XUPZI(2)=(AIZOL-QE*SWSQ)/SQRT(SWSQ*(1-SWSQ))
+      CALL T_GIVIZO( IDF, 1,AIZOR,QF,KOLOR)
+      CALL T_GIVIZO( IDF,-1,AIZOL,QF,KOLOR)
+      XUPGF(1)=QF
+      XUPGF(2)=QF
+      T3F    =  AIZOL+AIZOR
+      XUPZF(1)=(AIZOR-QF*SWSQ)/SQRT(SWSQ*(1-SWSQ))
+      XUPZF(2)=(AIZOL-QF*SWSQ)/SQRT(SWSQ*(1-SWSQ))
+C
+      NDIAG0=2
+      NDIAGA=11
+      KEYA  = 1
+      KEYZ  = 1
+C
+C
+      RETURN
+      END
+
+      SUBROUTINE T_GIVIZO(IDFERM,IHELIC,SIZO3,CHARGE,KOLOR)
+C ----------------------------------------------------------------------
+C PROVIDES ELECTRIC CHARGE AND WEAK IZOSPIN OF A FAMILY FERMION
+C IDFERM=1,2,3,4 DENOTES NEUTRINO, LEPTON, UP AND DOWN QUARK
+C NEGATIVE IDFERM=-1,-2,-3,-4, DENOTES ANTIPARTICLE
+C IHELIC=+1,-1 DENOTES RIGHT AND LEFT HANDEDNES ( CHIRALITY)
+C SIZO3 IS THIRD PROJECTION OF WEAK IZOSPIN (PLUS MINUS HALF)
+C AND CHARGE IS ELECTRIC CHARGE IN UNITS OF ELECTRON CHARGE
+C KOLOR IS A QCD COLOUR, 1 FOR LEPTON, 3 FOR QUARKS
+C
+C     called by : EVENTE, EVENTM, FUNTIH, .....
+C ----------------------------------------------------------------------
+      IMPLICIT REAL*8(A-H,O-Z)
+C
+      IF(IDFERM.EQ.0.OR.IABS(IDFERM).GT.4) GOTO 901
+      IF(IABS(IHELIC).NE.1)                GOTO 901
+      IH  =IHELIC
+      IDTYPE =IABS(IDFERM)
+      IC  =IDFERM/IDTYPE
+      LEPQUA=INT(IDTYPE*0.4999999D0)
+      IUPDOW=IDTYPE-2*LEPQUA-1
+      CHARGE  =(-IUPDOW+2D0/3D0*LEPQUA)*IC
+      SIZO3   =0.25D0*(IC-IH)*(1-2*IUPDOW)
+      KOLOR=1+2*LEPQUA
+C** NOTE THAT CONVENTIONALY Z0 COUPLING IS
+C** XOUPZ=(SIZO3-CHARGE*SWSQ)/SQRT(SWSQ*(1-SWSQ))
+      RETURN
+ 901  PRINT *,' STOP IN GIVIZO: WRONG PARAMS.'
+      STOP
+      END
+
+
+      SUBROUTINE PHYFIX(NSTOP,NSTART)
+      COMMON/LUJETS/N,K(4000,5),P(4000,5),V(4000,5) 
+      SAVE /LUJETS/ 
+C NSTOP NSTART : when PHYTIA history ends and event starts.
+      NSTOP=0
+      NSTART=1
+      DO I=1, N
+       IF(K(I,1).NE.21) THEN
+           NSTOP = I-1
+           NSTART= I
+           GOTO 500
+       ENDIF
+      ENDDO
+ 500  CONTINUE
+      END
+      SUBROUTINE FILHEP(N,IST,ID,JMO1,JMO2,JDA1,JDA2,P4,PINV,PHFLAG)
+C ----------------------------------------------------------------------
+C this subroutine fills one entry into the HEPEVT common
+C and updates the information for affected mother entries
+C
+C written by Martin W. Gruenewald (91/01/28)
+C
+C     called by : ZTOHEP,BTOHEP,DWLUxy
+C ----------------------------------------------------------------------
+C
+C this is the hepevt class in old style. No d_h_ class pre-name
+      INTEGER NMXHEP
+      PARAMETER (NMXHEP=2000)
+      REAL*8  phep,  vhep ! to be real*4/ *8  depending on host
+      INTEGER nevhep,nhep,isthep,idhep,jmohep,
+     $        jdahep
+      COMMON /hepevt/
+     $      nevhep,               ! serial number
+     $      nhep,                 ! number of particles
+     $      isthep(nmxhep),   ! status code
+     $      idhep(nmxhep),    ! particle ident KF
+     $      jmohep(2,nmxhep), ! parent particles
+     $      jdahep(2,nmxhep), ! childreen particles
+     $      phep(5,nmxhep),   ! four-momentum, mass [GeV]
+     $      vhep(4,nmxhep)    ! vertex [mm]
+* ----------------------------------------------------------------------
+      LOGICAL qedrad
+      COMMON /phoqed/ 
+     $     qedrad(nmxhep)    ! Photos flag
+* ----------------------------------------------------------------------
+      SAVE hepevt,phoqed
+
+      LOGICAL PHFLAG
+C
+      REAL*4  P4(4)
+C
+C check address mode
+      IF (N.EQ.0) THEN
+C
+C append mode
+        IHEP=NHEP+1
+      ELSE IF (N.GT.0) THEN
+C
+C absolute position
+        IHEP=N
+      ELSE
+C
+C relative position
+        IHEP=NHEP+N
+      END IF
+C
+C check on IHEP
+      IF ((IHEP.LE.0).OR.(IHEP.GT.NMXHEP)) RETURN
+C
+C add entry
+      NHEP=IHEP
+      ISTHEP(IHEP)=IST
+      IDHEP(IHEP)=ID
+      JMOHEP(1,IHEP)=JMO1
+      IF(JMO1.LT.0)JMOHEP(1,IHEP)=JMOHEP(1,IHEP)+IHEP
+      JMOHEP(2,IHEP)=JMO2
+      IF(JMO2.LT.0)JMOHEP(2,IHEP)=JMOHEP(2,IHEP)+IHEP
+      JDAHEP(1,IHEP)=JDA1
+      JDAHEP(2,IHEP)=JDA2
+C
+      DO I=1,4
+        PHEP(I,IHEP)=P4(I)
+C
+C KORAL-B and KORAL-Z do not provide vertex and/or lifetime informations
+        VHEP(I,IHEP)=0.0
+      END DO
+      PHEP(5,IHEP)=PINV
+C FLAG FOR PHOTOS...
+      QEDRAD(IHEP)=PHFLAG
+C
+C update process:
+      DO IP=JMOHEP(1,IHEP),JMOHEP(2,IHEP)
+        IF(IP.GT.0)THEN
+C
+C if there is a daughter at IHEP, mother entry at IP has decayed
+          IF(ISTHEP(IP).EQ.1)ISTHEP(IP)=2
+C
+C and daughter pointers of mother entry must be updated
+          IF(JDAHEP(1,IP).EQ.0)THEN
+            JDAHEP(1,IP)=IHEP
+            JDAHEP(2,IP)=IHEP
+          ELSE
+            JDAHEP(2,IP)=MAX(IHEP,JDAHEP(2,IP))
+          END IF
+        END IF
+      END DO
+C
+      RETURN
+      END
+
+
+      FUNCTION IHEPDIM(DUM) 
+C this is the hepevt class in old style. No d_h_ class pre-name
+      INTEGER NMXHEP
+      PARAMETER (NMXHEP=2000)
+      REAL*8  phep,  vhep ! to be real*4/ *8  depending on host
+      INTEGER nevhep,nhep,isthep,idhep,jmohep,
+     $        jdahep
+      COMMON /hepevt/
+     $      nevhep,               ! serial number
+     $      nhep,                 ! number of particles
+     $      isthep(nmxhep),   ! status code
+     $      idhep(nmxhep),    ! particle ident KF
+     $      jmohep(2,nmxhep), ! parent particles
+     $      jdahep(2,nmxhep), ! childreen particles
+     $      phep(5,nmxhep),   ! four-momentum, mass [GeV]
+     $      vhep(4,nmxhep)    ! vertex [mm]
+* ----------------------------------------------------------------------
+      LOGICAL qedrad
+      COMMON /phoqed/ 
+     $     qedrad(nmxhep)    ! Photos flag
+* ----------------------------------------------------------------------
+      SAVE hepevt,phoqed
+
+
+      IHEPDIM=NHEP
+      END
+      FUNCTION ZPROP2(S)
+      IMPLICIT REAL*8(A-H,O-Z)
+      COMPLEX*16 CPRZ0,CPRZ0M
+      AMZ=91.1882
+      GAMMZ=2.49
+      CPRZ0=DCMPLX((S-AMZ**2),S/AMZ*GAMMZ)
+      CPRZ0M=1/CPRZ0
+      ZPROP2=(ABS(CPRZ0M))**2
+      END
+

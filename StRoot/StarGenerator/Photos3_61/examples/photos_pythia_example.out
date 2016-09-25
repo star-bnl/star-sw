@@ -1,0 +1,720 @@
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.201      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change: 14 Oct 2014  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 01 May 2015 at 16:35:33    |  | 
+ |  |                                                                              |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: torbjorn@thep.lu.se                                             |  | 
+ |  |   Jesper Roy Christiansen;  Department of Astronomy and Theoretical Physics, |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: Jesper.Roy.Christiansen@thep.lu.se                              |  | 
+ |  |   Nishita Desai;  Institut fuer Theoretische Physik,                         |  | 
+ |  |     Universitaet Heidelberg, Philosophenweg 16, D-69120 Heidelberg, Germany; |  | 
+ |  |      e-mail: Nishita.Desai@cern.ch                                           |  | 
+ |  |   Philip Ilten;  Massachusetts Institute of Technology,                      |  | 
+ |  |      stationed at CERN, CH-1211 Geneva 23, Switzerland;                      |  | 
+ |  |      e-mail: philten@cern.ch                                                 |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      e-mail: mrenna@fnal.gov                                                 |  | 
+ |  |   Stefan Prestel;  Theoretical Physics Group,                                |  | 
+ |  |      SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA;        |  | 
+ |  |      e-mail: prestel@slac.stanford.edu                                       |  | 
+ |  |   Christine O. Rasmussen;  Department of Astronomy and Theoretical Physics,  |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: christine.rasmussen@thep.lu.se                                  |  | 
+ |  |   Peter Skands;  School of Physics,                                          |  | 
+ |  |      Monash University, PO Box 27, 3800 Melbourne, Australia;                |  | 
+ |  |      e-mail: peter.skands@monash.edu                                         |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is 'An Introduction to PYTHIA 8.2',             |  | 
+ |  |   T. Sjostrand et al, arXiv:1410.3012 [hep-ph]                               |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]. |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/~torbjorn/Pythia.html                                |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2014 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide e- with e+ at a CM energy of 9.119e+01 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | f fbar -> gamma*/Z0                            221 |   2.051e-05 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec Settings (changes only)  -------------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | BeamRemnants:halfScaleForKT                   |                  1.50000 |      1.00000         0.0             | 
+ | BeamRemnants:primordialKThard                 |                  1.80000 |      2.00000         0.0             | 
+ | BeamRemnants:primordialKTsoft                 |                  0.90000 |      0.50000         0.0             | 
+ | Beams:eCM                                     |                 91.18700 |    14000.000    10.00000             | 
+ | Beams:idA                                     |                       11 |         2212                         | 
+ | Beams:idB                                     |                      -11 |         2212                         | 
+ | ColourReconnection:range                      |                  1.80000 |     10.00000         0.0    10.00000 | 
+ | Diffraction:largeMassSuppress                 |                  4.00000 |      2.00000         0.0             | 
+ | MultipartonInteractions:alphaSvalue           |                  0.13000 |      0.12700   0.0600000     0.25000 | 
+ | MultipartonInteractions:bProfile              |                        3 |            1           0           4 | 
+ | MultipartonInteractions:ecmPow                |                  0.21500 |      0.24000         0.0     0.50000 | 
+ | MultipartonInteractions:ecmRef                |                 7000.000 |     1800.000     1.00000             | 
+ | MultipartonInteractions:expPow                |                  1.85000 |      1.00000     0.40000    10.00000 | 
+ | MultipartonInteractions:pT0Ref                |                  2.28000 |      2.15000     0.50000    10.00000 | 
+ | PartonLevel:FSR                               |                      off |           on                         | 
+ | PDF:pSet                                      |                       13 |            2                         | 
+ | SigmaDiffractive:dampen                       |                       on |          off                         | 
+ | SigmaDiffractive:maxAX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXB                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaProcess:alphaSvalue                      |                  0.13000 |      0.12650   0.0600000     0.25000 | 
+ | SigmaTotal:zeroAXB                            |                       on |          off                         | 
+ | SpaceShower:alphaSvalue                       |                  0.13650 |      0.13700   0.0600000     0.25000 | 
+ | SpaceShower:ecmRef                            |                 7000.000 |     1800.000     1.00000             | 
+ | SpaceShower:rapidityOrder                     |                       on |          off                         | 
+ | StringFlav:etaSup                             |                  0.60000 |      0.63000         0.0     1.00000 | 
+ | StringFlav:mesonBvector                       |                  2.20000 |      3.00000         0.0     3.00000 | 
+ | StringFlav:mesonCvector                       |                  0.88000 |      1.06000         0.0     3.00000 | 
+ | StringFlav:mesonSvector                       |                  0.55000 |      0.72500         0.0     3.00000 | 
+ | StringFlav:mesonUDvector                      |                  0.50000 |      0.62000         0.0     3.00000 | 
+ | StringFlav:popcornSpair                       |                  0.90000 |      0.50000         0.0     1.00000 | 
+ | StringFlav:probQQ1toQQ0                       |                0.0275000 |    0.0270000         0.0     1.00000 | 
+ | StringFlav:probQQtoQ                          |                0.0810000 |    0.0900000         0.0     1.00000 | 
+ | StringFlav:probSQtoQQ                         |                  0.91500 |      1.00000         0.0     1.00000 | 
+ | StringFlav:probStoUD                          |                  0.21700 |      0.19000         0.0     1.00000 | 
+ | StringPT:sigma                                |                  0.33500 |      0.30400         0.0     1.00000 | 
+ | StringZ:aExtraDiquark                         |                  0.97000 |      0.50000         0.0     2.00000 | 
+ | StringZ:aLund                                 |                  0.68000 |      0.30000         0.0     2.00000 | 
+ | StringZ:bLund                                 |                  0.98000 |      0.80000     0.20000     2.00000 | 
+ | StringZ:rFactB                                |                  0.85500 |      0.67000         0.0     2.00000 | 
+ | StringZ:rFactC                                |                  1.32000 |      1.00000         0.0     2.00000 | 
+ | TimeShower:alphaSvalue                        |                  0.13650 |      0.13830   0.0600000     0.25000 | 
+ | TimeShower:pTmin                              |                  0.50000 |      0.40000     0.10000     2.00000 | 
+ | TimeShower:pTminChgQ                          |                  0.50000 |      0.40000     0.10000     2.00000 | 
+ | WeakSingleBoson:ffbar2gmZ                     |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec Settings  ------------------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+      23  Z0                                  3   0   0   91.18760    2.50419   10.00000    0.00000  0.00000e+00   1   1   0   0   0
+              0     0   0.1540492    0        1       -1 
+              1     0   0.1194935    0        2       -2 
+              2     0   0.1540386    0        3       -3 
+              3     0   0.1193325    0        4       -4 
+              4     0   0.1523269    0        5       -5 
+              5     0   0.0335480    0       11      -11 
+              6     0   0.0667305    0       12      -12 
+              7     1   0.0335477    0       13      -13 
+              8     0   0.0667305    0       14      -14 
+              9     0   0.0334720    0       15      -15 
+             10     0   0.0667305    0       16      -16 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+
+ *************************************
+ *        MC-TESTER v1.25.0          *
+ *-----------------------------------*
+ *    Testing decays of: Z0        *
+ *                                   *
+ *   (c) Nadia    Davidson,   (1,2)  *
+ *       Piotr    Golonka,    (3)    *
+ *       Tomasz   Przedzinski,(4)    *
+ *       Tomasz   Pierzchala, (5)    *
+ *       Zbigniew Was         (2,3)  *
+ *                                   *
+ *  1) Unimelb, Melbourne, Australia *
+ *  2)     INP, Krakow, Poland       *
+ *  3)    CERN, Geneva, Switzerland  *
+ *  4)      UJ, Krakow, Poland       *
+ *  5)    until version 1.112        *
+ *************************************
+
+ -> No event record type is set.
+ -> Will use HepMC or HEPEVT.
+ -> User Tree Analysis routine: UserTreeAnalysis
+ -> results from stage1 goes to:
+     /home/others/przedzinski/PHOTOS/examples/mc-tester.root
+
+Message from PHCORK(MODCOR):: initialization
+MODOP=5 -- corrects Energy from mass+flow
+
+********************************************************************************
+
+                            =========================
+                              PHOTOS, Version:  3.60
+                              Released at:  26/4/15
+                            =========================
+
+                     Photos QED corrections in Particle Decays
+
+           Monte Carlo Program - by E. Barberio, B. van Eijk and Z. Was
+           From version 2.09   - by P. Golonka and Z. Was
+           From version 3.00   - by N. Davidson, T. Przedzinski and Z. Was
+********************************************************************************
+
+                  Internal (default) input parameters: 
+
+                    INTERF= 1 ISEC= 0 ITRE= 0 IEXP= 1 IFTOP= 1 IFW= 1
+                    ALPHA_QED= 0.00729735 XPHCUT= 1e-07
+
+                    Option with interference is active
+                    Option with exponentiation is active EPSEXP=0.0001
+                    Emision in t tbar production is active
+                    Correction wt in decay of W is active
+
+          WARNING:  /HEPEVT/ is not anymore used.
+
+********************************************************************************
+MODOP=2 -- blocks emission in Kl  to gamma e+e-: DEFAULT
+MODOP=2 -- blocks emission in pi0 to gamma e+e-: DEFAULT
+ IPHQRK_setQarknoEmission MODOP=1 -- blocks emission from light quarks:  DEFAULT
+
+********************************************************************************
+
+                            =========================================
+                            PHOTOS, information routine
+                            Input parameters after reinitialization: 
+
+                            =========================================
+
+********************************************************************************
+
+                    INTERF= 1 ISEC= 0 ITRE= 0 IEXP= 1 IFTOP= 1 IFW= 1
+                    ALPHA_QED= 0.00729735 XPHCUT= 0.000109665
+
+                    Option with interference is active
+                    Option with exponentiation is active EPSEXP=0.0001
+                    Emision in t tbar production is active
+                    Correction wt in decay of W is active
+                    emission of photons is inactive
+
+          WARNING:  /HEPEVT/ is not anymore used.
+
+INFO from PHOTOS:
+Event: 0	(0.0000000%)
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =     11, pz =  4.559e+01, e =  4.559e+01, m =  5.110e-04.
+ Beam B: id =    -11, pz = -4.559e+01, e =  4.559e+01, m =  5.110e-04.
+
+ In 1: id =   11, x =  9.986e-01, pdf =  2.799e+01 at Q2 =  8.303e+03.
+ In 2: id =  -11, x =  1.000e+00, pdf =  3.404e+06 at same Q2.
+
+ Subprocess f fbar -> gamma*/Z0 with code 221 is 2 -> 1.
+ It has sHat =  8.303e+03.
+     alphaEM =  7.817e-03,  alphaS =  1.300e-01    at Q2 =  8.303e+03.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  9.119e+01, ISR =  9.119e+01, FSR =  9.119e+01.
+ Number of MPI =     1, ISR =     1, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     91.187     91.187
+     1        11   (e-)               -12     0     0     3     0     0     0      0.000      0.000     45.593     45.593      0.001
+     2       -11   (e+)               -12     0     0     4     0     0     0      0.000      0.000    -45.593     45.593      0.001
+     3        11   (e-)               -21     1     0     5     0     0     0      0.000      0.000     45.530     45.530      0.000
+     4       -11   (e+)               -21     2     0     5     0     0     0      0.000      0.000    -45.593     45.593      0.000
+     5        23   (Z0)               -22     3     4     6     7     0     0      0.000      0.000     -0.064     91.123     91.123
+     6        13   mu-                 23     5     0     0     0     0     0    -23.213    -26.335    -29.074     45.582      0.106
+     7       -13   mu+                 23     5     0     0     0     0     0     23.213     26.335     29.010     45.541      0.106
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.064     91.123     91.123
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     91.187     91.187
+     1        11   (e-)               -12     0     0    10     0     0     0      0.000      0.000     45.593     45.593      0.001
+     2       -11   (e+)               -12     0     0    11     0     0     0      0.000      0.000    -45.593     45.593      0.001
+     3        11   (e-)               -21     6     0     5     0     0     0      0.000      0.000     45.530     45.530      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -45.593     45.593      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.064     91.123     91.123
+     6        11   (e-)               -41    10    10     9     3     0     0      0.000     -0.000     45.593     45.593      0.000
+     7       -11   (e+)               -42    11    11     4     4     0     0     -0.000      0.000    -45.593     45.593      0.000
+     8        23   (Z0)               -44     5     5    12    12     0     0      0.027     -0.017     -0.055     91.123     91.123
+     9        22   (gamma)            -43     6     0    13    13     0     0     -0.027      0.017      0.055      0.064      0.000
+    10        11   (e-)               -61     1     0     6     6     0     0     -0.000      0.000     45.593     45.593      0.000
+    11       -11   (e+)               -61     2     0     7     7     0     0      0.000     -0.000    -45.593     45.593      0.000
+    12        23   (Z0)               -62     8     8    16    17     0     0      0.027     -0.017     -0.055     91.123     91.123
+    13        22   gamma               62     9     9     0     0     0     0     -0.027      0.017      0.055      0.064      0.000
+    14        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    15        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    16        13   mu-                 23    12     0     0     0     0     0    -23.200    -26.344    -29.070     45.577      0.106
+    17       -13   mu+                 23    12     0     0     0     0     0     23.227     26.327     29.014     45.546      0.106
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.000     91.187     91.187
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 -7.10543e-15 91.187
+
+Vector Sum: -2.55351e-15 6.66134e-16 -3.77476e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 2.66454e-15 91.187
+
+Vector Sum: 0 0 2.66454e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 -4.44089e-16 0 91.187
+
+Vector Sum: 4.44089e-16 -9.99201e-16 6.21725e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -7.10543e-15 -4.44089e-16 0 91.187
+
+Vector Sum: -7.10543e-15 -4.44089e-16 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.55271e-15 4.44089e-16 0 91.187
+
+Vector Sum: -3.55271e-15 4.44089e-16 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 -7.10543e-15 91.187
+
+Vector Sum: -3.82246e-15 -1.71998e-15 -2.66107e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 7.10543e-15 1.06581e-14 91.187
+
+Vector Sum: 0 7.10543e-15 1.06581e-14 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 3.55271e-15 91.187
+
+Vector Sum: 0 0 3.55271e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.55271e-15 0 1.77636e-15 91.187
+
+Vector Sum: -3.55271e-15 0 1.77636e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 91.187
+
+Vector Sum: 0 0 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 1.77636e-15 0 91.187
+
+Vector Sum: 0 1.77636e-15 0 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 3.55271e-15 0 0 91.187
+
+Vector Sum: 4.07313e-15 5.5728e-16 6.68215e-15 91.187
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 7.10543e-15 -3.55271e-15 91.187
+
+Vector Sum: 0 7.10543e-15 -3.55271e-15 91.187
+INFO from PHOTOS:
+Event: 1000	(10%)
+
+ Pythia::next(): 1000 events have been generated 
+INFO from PHOTOS:
+Event: 2000	(20%)
+
+ Pythia::next(): 2000 events have been generated 
+INFO from PHOTOS:
+Event: 3000	(30%)
+
+ Pythia::next(): 3000 events have been generated 
+INFO from PHOTOS:
+Event: 4000	(40%)
+
+ Pythia::next(): 4000 events have been generated 
+INFO from PHOTOS:
+Event: 5000	(50%)
+
+ Pythia::next(): 5000 events have been generated 
+INFO from PHOTOS:
+Event: 6000	(60%)
+
+ Pythia::next(): 6000 events have been generated 
+INFO from PHOTOS:
+Event: 7000	(70%)
+
+ Pythia::next(): 7000 events have been generated 
+INFO from PHOTOS:
+Event: 8000	(80%)
+
+ Pythia::next(): 8000 events have been generated 
+INFO from PHOTOS:
+Event: 9000	(90%)
+
+ Pythia::next(): 9000 events have been generated 
+________________________________________________________________________________
+GenEvent: #9995 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 11 vertices, 17 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1 [energy] 	 alphaQCD=-1	 alphaQED=-1
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00000000e+00,-2.77555756e-17,+4.55934993e+01,+4.55934993e+01  41        -1
+ O: 2         3       11 +0.00000000e+00,+0.00000000e+00,+4.46839271e+01,+4.46839271e+01  21        -3
+              9       22 -6.92194026e-01,-3.77518410e-01,+4.53504837e-01,+9.09570974e-01  43       -10
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +1.66533454e-16,+8.32667268e-17,-4.55932459e+01,+4.55932459e+01  42        -2
+ O: 1         4      -11 +0.00000000e+00,+0.00000000e+00,-4.55932459e+01,+4.55932459e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +0.00000000e+00,+0.00000000e+00,+4.46839271e+01,+4.46839271e+01  21        -3
+              4      -11 +0.00000000e+00,+0.00000000e+00,-4.55932459e+01,+4.55932459e+01  21        -3
+ O: 1         5       23 +0.00000000e+00,+0.00000000e+00,-9.09318874e-01,+9.02771730e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1        10       11 -1.23259516e-32,+0.00000000e+00,+4.55934993e+01,+4.55934993e+01  61        -4
+ O: 1         6       11 +0.00000000e+00,-2.77555756e-17,+4.55934993e+01,+4.55934993e+01  41        -1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1        11      -11 -2.46519033e-32,+6.16297582e-33,-4.55932459e+01,+4.55932459e+01  61        -5
+ O: 1         7      -11 +1.66533454e-16,+8.32667268e-17,-4.55932459e+01,+4.55932459e+01  42        -2
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00000000e+00,+0.00000000e+00,-9.09318874e-01,+9.02771730e+01  22        -6
+ O: 1         8       23 +6.92194026e-01,+3.77518410e-01,-4.53251470e-01,+9.02771743e+01  44        -9
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01   4        -7
+ O: 2        10       11 -1.23259516e-32,+0.00000000e+00,+4.55934993e+01,+4.55934993e+01  61        -4
+             14       22 +0.00000000e+00,+0.00000000e+00,+6.87565432e-07,+6.87565432e-07   1
+GenVertex:       -8 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00000000e+00,+0.00000000e+00,-4.55935000e+01,+4.55935000e+01   4        -8
+ O: 2        11      -11 -2.46519033e-32,+6.16297582e-33,-4.55932459e+01,+4.55932459e+01  61        -5
+             15       22 +0.00000000e+00,+0.00000000e+00,-2.54054482e-04,+2.54054482e-04   1
+GenVertex:       -9 ID:    0 (X,cT):0
+ I: 1         8       23 +6.92194026e-01,+3.77518410e-01,-4.53251470e-01,+9.02771743e+01  44        -9
+ O: 1        12       23 +6.92194026e-01,+3.77518410e-01,-4.53251470e-01,+9.02771743e+01  62       -11
+GenVertex:      -10 ID:    0 (X,cT):0
+ I: 1         9       22 -6.92194026e-01,-3.77518410e-01,+4.53504837e-01,+9.09570974e-01  43       -10
+ O: 1        13       22 -6.92194026e-01,-3.77518410e-01,+4.53504837e-01,+9.09570974e-01   1
+GenVertex:      -11 ID:    0 (X,cT):0
+ I: 1        12       23 +6.92194026e-01,+3.77518410e-01,-4.53251470e-01,+9.02771743e+01  62       -11
+ O: 2        16       13 +1.71941735e+01,+4.14800393e+01,+6.73884932e+00,+4.54054679e+01   1
+             17      -13 -1.65019795e+01,-4.11025209e+01,-7.19210079e+00,+4.48717063e+01   1
+________________________________________________________________________________
+________________________________________________________________________________
+GenEvent: #9996 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 16 vertices, 24 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1 [energy] 	 alphaQCD=-1	 alphaQED=-1
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +1.44732316e-14,-1.85910315e-14,+4.55934995e+01,+4.55934995e+01  42        -1
+ O: 1         3       11 +0.00000000e+00,+0.00000000e+00,+4.55934995e+01,+4.55934995e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 -1.44736653e-14,+1.85927662e-14,-4.55886983e+01,+4.55886983e+01  41        -2
+ O: 2         4      -11 +0.00000000e+00,+0.00000000e+00,-4.54915629e+01,+4.54915629e+01  21        -3
+              9       22 -6.25269785e-03,+8.03168184e-03,-9.66007241e-02,+9.71354932e-02  43       -10
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +0.00000000e+00,+0.00000000e+00,+4.55934995e+01,+4.55934995e+01  21        -3
+              4      -11 +0.00000000e+00,+0.00000000e+00,-4.54915629e+01,+4.54915629e+01  21        -3
+ O: 1         5       23 +0.00000000e+00,+0.00000000e+00,+1.01936595e-01,+9.10850623e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1        10       11 -1.62673694e-15,+7.82425340e-15,+4.55934995e+01,+4.55934995e+01  42        -4
+ O: 1         6       11 +1.44732316e-14,-1.85910315e-14,+4.55934995e+01,+4.55934995e+01  42        -1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1        11      -11 +1.62684536e-15,-7.82490392e-15,-4.55934983e+01,+4.55934983e+01  41        -5
+ O: 2         7      -11 -1.44736653e-14,+1.85927662e-14,-4.55886983e+01,+4.55886983e+01  41        -2
+             14       22 -7.49731692e-04,+3.60611970e-03,-3.07787237e-03,+4.79994742e-03  43       -15
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00000000e+00,+0.00000000e+00,+1.01936595e-01,+9.10850623e+01  22        -6
+ O: 1         8       23 +6.25269785e-03,-8.03168184e-03,+1.01401854e-01,+9.10850623e+01  44        -9
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1        15       11 -5.91645679e-31,+0.00000000e+00,+4.55934995e+01,+4.55934995e+01  61        -7
+ O: 1        10       11 -1.62673694e-15,+7.82425340e-15,+4.55934995e+01,+4.55934995e+01  42        -4
+GenVertex:       -8 ID:    0 (X,cT):0
+ I: 1        16      -11 +7.88860905e-31,+0.00000000e+00,-4.55934983e+01,+4.55934983e+01  61        -8
+ O: 1        11      -11 +1.62684536e-15,-7.82490392e-15,-4.55934983e+01,+4.55934983e+01  41        -5
+GenVertex:       -9 ID:    0 (X,cT):0
+ I: 1         8       23 +6.25269785e-03,-8.03168184e-03,+1.01401854e-01,+9.10850623e+01  44        -9
+ O: 1        12       23 +7.00083650e-03,-1.16301392e-02,+9.96819827e-02,+9.10850608e+01  44       -13
+GenVertex:      -10 ID:    0 (X,cT):0
+ I: 1         9       22 -6.25269785e-03,+8.03168184e-03,-9.66007241e-02,+9.71354932e-02  43       -10
+ O: 1        13       22 -6.25110480e-03,+8.02401946e-03,-9.66029276e-02,+9.71369488e-02  44       -14
+GenVertex:      -11 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01   4       -11
+ O: 2        15       11 -5.91645679e-31,+0.00000000e+00,+4.55934995e+01,+4.55934995e+01  61        -7
+             20       22 +0.00000000e+00,+0.00000000e+00,+5.38942423e-07,+5.38942423e-07   1
+GenVertex:      -12 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00000000e+00,+0.00000000e+00,-4.55935000e+01,+4.55935000e+01   4       -12
+ O: 2        16      -11 +7.88860905e-31,+0.00000000e+00,-4.55934983e+01,+4.55934983e+01  61        -8
+             21       22 +0.00000000e+00,+0.00000000e+00,-1.72166030e-06,+1.72166030e-06   1
+GenVertex:      -13 ID:    0 (X,cT):0
+ I: 1        12       23 +7.00083650e-03,-1.16301392e-02,+9.96819827e-02,+9.10850608e+01  44       -13
+ O: 1        17       23 +7.00083650e-03,-1.16301392e-02,+9.96819827e-02,+9.10850608e+01  62       -16
+GenVertex:      -14 ID:    0 (X,cT):0
+ I: 1        13       22 -6.25110480e-03,+8.02401946e-03,-9.66029276e-02,+9.71369488e-02  44       -14
+ O: 1        18       22 -6.25110480e-03,+8.02401946e-03,-9.66029276e-02,+9.71369488e-02   1
+GenVertex:      -15 ID:    0 (X,cT):0
+ I: 1        14       22 -7.49731692e-04,+3.60611970e-03,-3.07787237e-03,+4.79994742e-03  43       -15
+ O: 1        19       22 -7.49731692e-04,+3.60611970e-03,-3.07787237e-03,+4.79994742e-03   1
+GenVertex:      -16 ID:    0 (X,cT):0
+ I: 1        17       23 +7.00083650e-03,-1.16301392e-02,+9.96819827e-02,+9.10850608e+01  62       -16
+ O: 3        22       13 -1.77735188e+01,-4.10507103e+01,+6.57320672e+00,+4.52136815e+01   1
+             23      -13 +1.81349704e+01,+3.62747736e+01,-6.61699256e+00,+4.10917522e+01   1
+          10001       22 -3.54450735e-01,+4.76430655e+00,+1.43467823e-01,+4.77962710e+00   1
+________________________________________________________________________________
+________________________________________________________________________________
+GenEvent: #9997 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 11 vertices, 17 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1 [energy] 	 alphaQCD=-1	 alphaQED=-1
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 -1.70659927e-14,-9.67260126e-15,+4.55934998e+01,+4.55934998e+01  42        -1
+ O: 1         3       11 +0.00000000e+00,+0.00000000e+00,+4.55934998e+01,+4.55934998e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +1.70664264e-14,+9.67260126e-15,-4.55934999e+01,+4.55934999e+01  41        -2
+ O: 2         4      -11 +0.00000000e+00,+0.00000000e+00,-4.55835251e+01,+4.55835251e+01  21        -3
+              9       22 +2.17546508e-03,+1.23298994e-03,-9.65619205e-03,+9.97471590e-03  43       -10
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +0.00000000e+00,+0.00000000e+00,+4.55934998e+01,+4.55934998e+01  21        -3
+              4      -11 +0.00000000e+00,+0.00000000e+00,-4.55835251e+01,+4.55835251e+01  21        -3
+ O: 1         5       23 +0.00000000e+00,+0.00000000e+00,+9.97465925e-03,+9.11770249e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1        10       11 +0.00000000e+00,-3.15544362e-30,+4.55934998e+01,+4.55934998e+01  61        -4
+ O: 1         6       11 -1.70659927e-14,-9.67260126e-15,+4.55934998e+01,+4.55934998e+01  42        -1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1        11      -11 +0.00000000e+00,+3.15544362e-30,-4.55934999e+01,+4.55934999e+01  61        -5
+ O: 1         7      -11 +1.70664264e-14,+9.67260126e-15,-4.55934999e+01,+4.55934999e+01  41        -2
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00000000e+00,+0.00000000e+00,+9.97465925e-03,+9.11770249e+01  22        -6
+ O: 1         8       23 -2.17546508e-03,-1.23298994e-03,+9.65613539e-03,+9.11770249e+01  44        -9
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01   4        -7
+ O: 2        10       11 +0.00000000e+00,-3.15544362e-30,+4.55934998e+01,+4.55934998e+01  61        -4
+             14       22 +0.00000000e+00,+0.00000000e+00,+1.95974835e-07,+1.95974835e-07   1
+GenVertex:       -8 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00000000e+00,+0.00000000e+00,-4.55935000e+01,+4.55935000e+01   4        -8
+ O: 2        11      -11 +0.00000000e+00,+3.15544362e-30,-4.55934999e+01,+4.55934999e+01  61        -5
+             15       22 +0.00000000e+00,+0.00000000e+00,-1.39317436e-07,+1.39317436e-07   1
+GenVertex:       -9 ID:    0 (X,cT):0
+ I: 1         8       23 -2.17546508e-03,-1.23298994e-03,+9.65613539e-03,+9.11770249e+01  44        -9
+ O: 1        12       23 -2.17546508e-03,-1.23298994e-03,+9.65613539e-03,+9.11770249e+01  62       -11
+GenVertex:      -10 ID:    0 (X,cT):0
+ I: 1         9       22 +2.17546508e-03,+1.23298994e-03,-9.65619205e-03,+9.97471590e-03  43       -10
+ O: 1        13       22 +2.17546508e-03,+1.23298994e-03,-9.65619205e-03,+9.97471590e-03   1
+GenVertex:      -11 ID:    0 (X,cT):0
+ I: 1        12       23 -2.17546508e-03,-1.23298994e-03,+9.65613539e-03,+9.11770249e+01  62       -11
+ O: 2        16       13 -2.43663383e+01,-3.83587856e+01,+3.64992151e+00,+4.55899986e+01   1
+             17      -13 +2.43641629e+01,+3.83575526e+01,-3.64026538e+00,+4.55870264e+01   1
+________________________________________________________________________________
+________________________________________________________________________________
+GenEvent: #9998 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 7 vertices, 12 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1 [energy] 	 alphaQCD=-1	 alphaQED=-1
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01  61        -1
+ O: 1         3       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00000000e+00,+0.00000000e+00,-4.55934997e+01,+4.55934997e+01  61        -2
+ O: 1         4      -11 +0.00000000e+00,+0.00000000e+00,-4.55934997e+01,+4.55934997e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01  21        -3
+              4      -11 +0.00000000e+00,+0.00000000e+00,-4.55934997e+01,+4.55934997e+01  21        -3
+ O: 1         5       23 +0.00000000e+00,+0.00000000e+00,+2.47146737e-07,+9.11869997e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01   4        -4
+ O: 2         6       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01  61        -1
+              9       22 +0.00000000e+00,+0.00000000e+00,+1.90775751e-08,+1.90775751e-08   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00000000e+00,+0.00000000e+00,-4.55935000e+01,+4.55935000e+01   4        -5
+ O: 2         7      -11 +0.00000000e+00,+0.00000000e+00,-4.55934997e+01,+4.55934997e+01  61        -2
+             10       22 +0.00000000e+00,+0.00000000e+00,-2.66224312e-07,+2.66224312e-07   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00000000e+00,+0.00000000e+00,+2.47146737e-07,+9.11869997e+01  22        -6
+ O: 1         8       23 +0.00000000e+00,+0.00000000e+00,+2.47146737e-07,+9.11869997e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00000000e+00,+0.00000000e+00,+2.47146737e-07,+9.11869997e+01  62        -7
+ O: 2        11       13 -1.94024752e+01,+2.07588245e+01,+3.56562930e+01,+4.55935000e+01   1
+             12      -13 +1.94024752e+01,-2.07588245e+01,-3.56562928e+01,+4.55934998e+01   1
+________________________________________________________________________________
+________________________________________________________________________________
+GenEvent: #9999 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 7 vertices, 12 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1 [energy] 	 alphaQCD=-1	 alphaQED=-1
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00000000e+00,+0.00000000e+00,+4.55934994e+01,+4.55934994e+01  61        -1
+ O: 1         3       11 +0.00000000e+00,+0.00000000e+00,+4.55934994e+01,+4.55934994e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00000000e+00,+0.00000000e+00,-4.55934994e+01,+4.55934994e+01  61        -2
+ O: 1         4      -11 +0.00000000e+00,+0.00000000e+00,-4.55934994e+01,+4.55934994e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +0.00000000e+00,+0.00000000e+00,+4.55934994e+01,+4.55934994e+01  21        -3
+              4      -11 +0.00000000e+00,+0.00000000e+00,-4.55934994e+01,+4.55934994e+01  21        -3
+ O: 1         5       23 +0.00000000e+00,+0.00000000e+00,-6.06053590e-08,+9.11869988e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00000000e+00,+0.00000000e+00,+4.55935000e+01,+4.55935000e+01   4        -4
+ O: 2         6       11 +0.00000000e+00,+0.00000000e+00,+4.55934994e+01,+4.55934994e+01  61        -1
+              9       22 +0.00000000e+00,+0.00000000e+00,+6.25087957e-07,+6.25087957e-07   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00000000e+00,+0.00000000e+00,-4.55935000e+01,+4.55935000e+01   4        -5
+ O: 2         7      -11 +0.00000000e+00,+0.00000000e+00,-4.55934994e+01,+4.55934994e+01  61        -2
+             10       22 +0.00000000e+00,+0.00000000e+00,-5.64482598e-07,+5.64482598e-07   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00000000e+00,+0.00000000e+00,-6.06053590e-08,+9.11869988e+01  22        -6
+ O: 1         8       23 +0.00000000e+00,+0.00000000e+00,-6.06053590e-08,+9.11869988e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00000000e+00,+0.00000000e+00,-6.06053590e-08,+9.11869988e+01  62        -7
+ O: 2        11       13 +9.74029831e+00,-4.02886317e+01,+1.89923345e+01,+4.55934994e+01   1
+             12      -13 -9.74029831e+00,+4.02886317e+01,-1.89923345e+01,+4.55934994e+01   1
+________________________________________________________________________________
+
+ *-------  PYTHIA Event and Cross Section Statistics  -------------------------------------------------------------*
+ |                                                                                                                 |
+ | Subprocess                                    Code |            Number of events       |      sigma +- delta    |
+ |                                                    |       Tried   Selected   Accepted |     (estimated) (mb)   |
+ |                                                    |                                   |                        |
+ |-----------------------------------------------------------------------------------------------------------------|
+ |                                                    |                                   |                        |
+ | f fbar -> gamma*/Z0                            221 |      139202      10000      10000 |   1.471e-06  7.826e-09 |
+ |                                                    |                                   |                        |
+ | sum                                                |      139202      10000      10000 |   1.471e-06  7.826e-09 |
+ |                                                                                                                 |
+ *-------  End PYTHIA Event and Cross Section Statistics ----------------------------------------------------------*
+
+ *-------  PYTHIA Error and Warning Messages Statistics  ----------------------------------------------------------* 
+ |                                                                                                                 | 
+ |  times   message                                                                                                | 
+ |                                                                                                                 | 
+ |      0   no errors or warnings to report                                                                        | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Error and Warning Messages Statistics  ------------------------------------------------------* 
+  Z0 => mu+ mu-   (6383 entries)
+  Z0 => gamma mu+ mu-   (2895 entries)
+  Z0 => gamma gamma mu+ mu-   (722 entries)
+-------------END OF MC-TESTER RUN-------------------
+Total: 3 channels found, 10000 events analyzed
+
+ Total entries: 10000
+
+---------------------------- Photos Log Summary ------------------------------
+ Debug:   	(OFF)		130001	
+ Info:    			10	
+ Warnings:			0	
+ Errors:  			0	
+-----------------------------------
+------------------------------------------------------------------------------

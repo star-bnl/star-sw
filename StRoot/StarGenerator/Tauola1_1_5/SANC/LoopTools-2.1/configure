@@ -1,0 +1,237 @@
+#! /bin/sh
+# configure script for LoopTools
+# last modified 18 May 05 by Thomas Hahn
+# note: has nothing to do with GNU autoconf
+
+
+test=test$$
+
+trap "rm -f $test*" 0 1 2 15
+
+if (echo "test\c"; echo 1,2,3) | grep c > /dev/null ; then
+  if (echo -n test; echo 1,2,3) | grep n > /dev/null ; then
+    echo_n=
+    echo_c='
+'
+  else
+    echo_n=-n
+    echo_c=
+  fi
+else
+  echo_n=
+  echo_c='\c'
+fi
+
+
+findprog()
+{
+  echo $echo_n "looking for $1... $echo_c" 1>&2
+  shift
+  for prog in $* ; do
+    full=`which $prog`
+    if [ -x "$full" ] ; then
+      echo $full 1>&2
+      echo $prog
+      return 0
+    fi
+  done
+  echo "no $* in your path" 1>&2
+  return 1
+}
+
+
+ldflags()
+{
+  # Mma 5.1's mcc needs this for static linking
+  LDFLAGS="$LDFLAGS -lpthread"
+
+  while read cmd args ; do
+    case $cmd in
+    *collect2 | *ld)
+      set -- `echo $args | tr ':,' '  '`
+      while [ $# -gt 0 ] ; do
+        case $1 in
+        *.o)
+          ;;
+        -l* | -L* | *.a)
+          LDFLAGS="$LDFLAGS $1" ;;
+        /*)
+          LDFLAGS="$LDFLAGS -L$1" ;;
+        -rpath*)
+          LDFLAGS="$LDFLAGS -Wl,$1,$2"
+          shift ;;
+        esac
+        shift
+      done
+    esac
+  done
+
+  # this is supposed to fix the saveFP/restFP problem on Macs
+  case $CONF_HOSTTYPE in
+  *mac*) LDFLAGS=`echo $LDFLAGS | sed 's/-lgcc /-lcc_dynamic /g'` ;;
+  esac
+
+  echo $LDFLAGS
+}
+
+
+CONF_HOSTTYPE=`tcsh -cf 'echo $HOSTTYPE'`
+
+CONF_PREFIX=$CONF_HOSTTYPE
+
+for arg in "$@" ; do
+  case $arg in
+  --prefix=*) CONF_PREFIX=`expr "$arg" : ".*--prefix=\(.*\)"` ;;
+  -*) echo "Unknown option $arg" 1>&2 ;;
+  *=*) eval $arg ;;
+  *) echo "Unknown argument $arg" 1>&2 ;;
+  esac
+done
+
+
+## look for some programs
+
+CONF_MAKE=`findprog make gmake Make make` || exit 1
+
+CONF_CC=`findprog gcc $CC gcc` || exit 1
+
+CONF_CFLAGS="${CFLAGS--O3 -fomit-frame-pointer}"
+
+CONF_LTMMA="LoopTools"
+CONF_MCC=`findprog mcc mcc`
+if [ $? -eq 1 ] ; then
+  echo "Disabling compilation of the MathLink executable."
+  echo "Note: if you have Mathematica installed properly, this should not"
+  echo "      occur; if you want to work with LoopTools in Mathematica,"
+  echo "      check the installation of mcc (setting of paths, etc.) and"
+  echo "      then run $0 again."
+  CONF_LTMMA=""
+fi
+
+CONF_FC=`findprog f77 $FC pgf77 ifort xlf f77 fort77 f90 g77` || exit 1
+
+CONF_FFLAGS=${FFLAGS--O}
+
+
+## find the Fortran libraries
+
+echo $echo_n "extracting the Fortran libraries... $echo_c" 1>&2
+cat > $test.f << _EOF_
+	program dontpanic
+	print *, "Hi"
+	end
+_EOF_
+
+verbose=`$CONF_FC $CONF_FFLAGS -v -o $test $test.f 2>&1`
+case "$verbose" in
+*gcc?version*)
+  CONF_FFLAGS="-O0 `echo \"$CONF_FFLAGS\" | sed 's/-O[^ ]*//g'`"
+esac
+
+CONF_LDFLAGS=`echo "$verbose" | ldflags`
+
+echo $CONF_LDFLAGS 1>&2
+
+
+## does f77 recognize preprocessor statements?
+
+echo $echo_n "does $CONF_FC understand preprocessor directives... $echo_c" 1>&2
+cat > $test.F << _EOF_
+#define SAY_HI "Hi"
+	program dontpanic
+	print *, SAY_HI
+	end
+_EOF_
+
+rm -f $test
+
+$CONF_FC $CONF_FFLAGS $test.F -o $test > /dev/null 2>&1
+
+if [ -x $test ] ; then
+  echo "yes" 1>&2
+  CONF_FFC="$CONF_FC"
+else
+  echo "no" 1>&2
+  CONF_FFC="utils/F77"
+fi
+
+
+## does f77 support REAL*16?
+
+echo $echo_n "does $CONF_FC support REAL*16... $echo_c" 1>&2
+cat > $test.f << _EOF_
+	program test
+	real*16 r
+	r = qext(1d0)
+	end
+_EOF_
+
+rm -f $test
+
+$CONF_FC $CONF_FFLAGS $test.f -o $test > /dev/null 2>&1
+
+if [ -x $test ] ; then
+  echo "yes" 1>&2
+else
+  echo "no" 1>&2
+  CONF_FFLAGS="$CONF_FFLAGS -DQEXT=DBLE"
+fi
+
+
+## does Fortran append underscores to symbols?
+
+echo $echo_n "does $CONF_FC append underscores... $echo_c" 1>&2
+cat > $test.f << _EOF_
+	subroutine uscore
+	print *, "hi"
+	end
+_EOF_
+
+echo "extern void uscore(); main() { uscore(); }" > ${test}a.c
+
+$CONF_FC $CONF_FFLAGS -c $test.f > /dev/null 2>&1
+
+rm -f $test
+
+$CONF_CC $CONF_CFLAGS ${test}a.c $test.o -o $test $CONF_LDFLAGS > /dev/null 2>&1
+
+if [ -x $test ] ; then
+  echo "no" 1>&2
+  sed -e 's/_$//g' -e 's/base_/base/g' include/ltproto.h.in > include/ltproto.h
+else
+  echo "yes" 1>&2
+  cp include/ltproto.h.in include/ltproto.h
+  CONF_CFLAGS="$CONF_CFLAGS -DHAVE_UNDERSCORE"
+fi
+
+
+echo "creating makefile" 1>&2
+
+cat - makefile.in > makefile << _EOF_
+# --- variables defined by configure ---
+CC = $CONF_CC
+MCC = $CONF_MCC
+CFLAGS = $CONF_CFLAGS
+FC = $CONF_FC
+FFC = $CONF_FFC
+FFLAGS = $CONF_FFLAGS
+LTMMA = $CONF_LTMMA
+PREFIX = $CONF_PREFIX
+# --- end defs by configure ---
+
+
+_EOF_
+
+sed "s:f77:$CONF_FC:g" utils/F77.in > utils/F77
+chmod +x utils/F77
+
+sed "s:^gcc.*:& $CONF_LDFLAGS:g" utils/ccf.in > utils/ccf
+chmod +x utils/ccf
+
+
+echo "" 1>&2
+echo "now you must run $CONF_MAKE" 1>&2
+echo "" 1>&2
+
+exit 0
+

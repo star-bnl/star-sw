@@ -1,0 +1,47 @@
+# platform - dependant files
+include ../make.inc
+
+
+all:CePeCe
+
+#######################
+clean:  
+	@echo "Cleanup... "
+	@rm -f *.o
+	@rm -f *.a
+	@rm -f *~
+	@rm -f prod/*.f 
+	@rm -f *.diff 
+	@rm -rf ../tauola 
+
+#######################
+
+######################################
+###Check if link to HEPEVT.h exist...
+
+HEPEVT:
+	@if test ! -r ../include/HEPEVT.h; \
+	then echo "You must execute make xxx-all in PHOTOS-F directory first!!!";\
+	false; fi
+
+#######################################
+CPC: CePeCe
+cpc: CePeCe
+cleo:CLEO
+aleph:ALEPH
+
+CePeCe: HEPEVT clean tauola-dir
+	@echo Preparing CPC version of tauola in ../tauola
+	@( rm -f standalone-F/*.f )
+#     fill directory prod of CPC version
+	@( $(CPP) $(CPPFLAGS) -DCePeCe  formf.F prod/formf.f )
+	@( $(CPP) $(CPPFLAGS) -DCePeCe  tauola.F prod/tauola.f)       
+	@( cp  makefile.cpc prod/makefile) 
+	@( cp  makefile.templ.cpc prod/makefile.templ)
+#     create interfaces 
+	@( $(CPP) $(CPPFLAGS) -DCePeCe  tauface-KK-F/Tauface.F tauface-KK-F/Tauface.f)
+	@( $(CPP) $(CPPFLAGS) -DCePeCe  standalone-F/taumain.F standalone-F/taumain.f) 
+	@( $(CPP) $(CPPFLAGS) -DCePeCe  jetset-F/tauola_photos_ini.F jetset-F/tauola_photos_ini.f) 
+	@( $(CPP) $(CPPFLAGS) -DCePeCe  jetset-F/tauface-jetset.F jetset-F/tauface-jetset.f) 
+#     fill true (external) ../tauola directory 
+	@( cp prod/*.f ../tauola/.)

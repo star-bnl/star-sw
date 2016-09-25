@@ -1,0 +1,226 @@
+#!/bin/sh
+if [ $1 ]; then
+	if [  $1 = 'binp' ]; then 
+	{ echo "BINP"
+	cp ./naglowek_binp_1 ./prod/tauola.F
+	cat ./dziura_1.5        >> ./prod/tauola.F
+	cat ./Novosibirsk_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_1.6        >> ./prod/tauola.F
+	cat ./Novosibirsk_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_1.7        >> ./prod/tauola.F
+	cat ./Novosibirsk_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_1.8        >> ./prod/tauola.F
+        cat ./data_binp         >> ./prod/tauola.F
+	cat ./dziura_1.9        >> ./prod/tauola.F
+        cat ./data_binp         >> ./prod/tauola.F
+	cat ./dziura_2.1        >> ./prod/tauola.F
+	cat ./names_tp_mw.binp  >> ./prod/tauola.F
+	cat ./dziura_2.2        >> ./prod/tauola.F  
+	cat ./Novosibirsk_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_2.3        >> ./prod/tauola.F  
+	cat ./Novosibirsk_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_2.4        >> ./prod/tauola.F  
+	cat ./Novosibirsk_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_2.5        >> ./prod/tauola.F
+        cat ./data_binp         >> ./prod/tauola.F
+	cat ./dziura_2.6        >> ./prod/tauola.F
+        cat ./data_binp         >> ./prod/tauola.F
+	cat ./dziura_2.7        >> ./prod/tauola.F
+	cat ./names_tp_mw.binp  >> ./prod/tauola.F
+  	cat ./dziura_2.8       	>> ./prod/tauola.F
+	cat ./dadnew_binp_3 	>> ./prod/tauola.F
+	cat ./dziura_4.1_binp	>> ./prod/tauola.F
+	cat ./dph4pi_binp	>> ./prod/tauola.F
+	cat ./dam4pi_binp_5   	>> ./prod/tauola.F
+	cat ./koncowka_6	>> ./prod/tauola.F 
+
+        cp  ./makefile_0.55          ./prod/makefile
+	cat ./makefile_add_binp   >> ./prod/makefile
+	cat ./makefile_0.56_binp  >> ./prod/makefile
+	cat ./binp_label          >> ./prod/makefile
+	cat ./makefile_1.1        >> ./prod/makefile
+	cat ./makefile_2.15       >> ./prod/makefile
+	cat ./makefile_add_binp   >> ./prod/makefile
+	cat ./makefile_2.16_binp  >> ./prod/makefile
+	cat ./binp_label          >> ./prod/makefile  
+	cat ./makefile_2.25       >> ./prod/makefile
+	cat ./makefile_add_binp   >> ./prod/makefile
+	cat ./makefile_2.26_binp  >> ./prod/makefile
+	cat ./binp_label          >> ./prod/makefile
+	cat ./makefile_2.3_binp   >> ./prod/makefile  
+
+	cat ./makefile_demo_standalone.1  > ./prod/makefile_demo_standalone
+	cat ./makefile_demo_standalone.2_binp >> ./prod/makefile_demo_standalone
+	cat ./makefile_demo_jetset.1  > ./prod/makefile_demo_jetset
+	cat ./makefile_demo_jetset.2_binp >> ./prod/makefile_demo_jetset
+
+	diff ./prod/tauola.F       ../tauola-F/.
+	diff ./prod/makefile       ../tauola-F/.	
+	diff ./prod/makefile_demo_standalone ../tauola-F/standalone-F/makefile
+	diff ./prod/makefile_demo_jetset ../tauola-F/jetset-F/makefile-F
+
+
+
+
+	
+	diff Binp/binp.f   ../tauola-F/.
+	diff Binp/makefile.cleo  ../tauola-F/.
+	diff Binp/makefile.cpc  ../tauola-F/.
+} 
+	elif [ $1 = 'standard' ]; then
+	{ echo "Standard TAUOLA "
+	cp ./naglowek_stand_1 ./prod/tauola.F
+	cat ./dziura_1.5        >> ./prod/tauola.F
+	cat ./dziura_1.6        >> ./prod/tauola.F
+	cat ./dziura_1.7        >> ./prod/tauola.F
+	cat ./dziura_1.8        >> ./prod/tauola.F
+	cat ./dziura_1.9        >> ./prod/tauola.F
+	cat ./dziura_2.1        >> ./prod/tauola.F
+	cat ./dziura_2.2        >> ./prod/tauola.F  
+	cat ./dziura_2.3        >> ./prod/tauola.F  
+	cat ./dziura_2.4        >> ./prod/tauola.F  
+	cat ./dziura_2.5        >> ./prod/tauola.F  
+	cat ./dziura_2.6        >> ./prod/tauola.F
+	cat ./dziura_2.7        >> ./prod/tauola.F  
+	cat ./dziura_2.8        >> ./prod/tauola.F  
+	cat ./dadnew_stand_3 	>> ./prod/tauola.F
+	cat ./dziura_4.1_stand	>> ./prod/tauola.F
+	cat ./dph4pi_stand	>> ./prod/tauola.F
+	cat ./dam4pi_stand_5   	>> ./prod/tauola.F
+	cat ./koncowka_6	>> ./prod/tauola.F 
+
+        cp ./makefile_0.55           ./prod/makefile
+	cat ./makefile_0.56       >> ./prod/makefile
+	cat ./stand_label         >> ./prod/makefile
+	cat ./makefile_1.1        >> ./prod/makefile
+	cat ./makefile_add_stand  >> ./prod/makefile
+	cat ./makefile_2.15       >> ./prod/makefile
+	cat ./makefile_2.16       >> ./prod/makefile
+	cat ./stand_label         >> ./prod/makefile
+	cat ./makefile_2.25       >> ./prod/makefile
+	cat ./makefile_2.26       >> ./prod/makefile
+	cat ./stand_label         >> ./prod/makefile
+	cat ./makefile_2.3        >> ./prod/makefile  
+
+	cat ./makefile_demo_standalone.1  > ./prod/makefile_demo_standalone
+	cat ./makefile_demo_standalone.2 >> ./prod/makefile_demo_standalone
+
+	cat ./makefile_demo_jetset.1  > ./prod/makefile_demo_jetset
+	cat ./makefile_demo_jetset.2 >> ./prod/makefile_demo_jetset
+
+	diff ./prod/tauola.F       ../tauola-F/.
+	diff ./prod/makefile       ../tauola-F/.
+	diff ./prod/makefile_demo_standalone ../tauola-F/standalone-F/makefile
+	diff ./prod/makefile_demo_jetset ../tauola-F/jetset-F/makefile-F
+
+
+
+	diff Standart_Tauola/curr_cleo.F ../tauola-F/.
+	diff Standart_Tauola/makefile.cleo  ../tauola-F/.  
+	diff Standart_Tauola/makefile.cpc ../tauola-F/.
+
+} 
+	elif [ $1 = 'Karlsruhe' ]; then
+	{ echo "Karlsruhe 4 pions hadronic currents"
+	    
+	cp ./naglowek_karls_1 ./prod/tauola.F
+	cat ./dziura_1.5        >> ./prod/tauola.F
+	cat ./Karlsruhe_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_1.6        >> ./prod/tauola.F
+	cat ./Karlsruhe_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_1.7        >> ./prod/tauola.F
+	cat ./Karlsruhe_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_1.8        >> ./prod/tauola.F
+        cat ./data_karlsruhe         >> ./prod/tauola.F
+	cat ./dziura_1.9        >> ./prod/tauola.F
+        cat ./data_karlsruhe         >> ./prod/tauola.F
+	cat ./dziura_2.1        >> ./prod/tauola.F
+#	cat ./names_karlsruhe   >> ./prod/tauola.F
+	cat ./dziura_2.2        >> ./prod/tauola.F  
+	cat ./Karlsruhe_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_2.3        >> ./prod/tauola.F  
+	cat ./Karlsruhe_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_2.4        >> ./prod/tauola.F  
+	cat ./Karlsruhe_4_Pi  >> ./prod/tauola.F
+	cat ./dziura_2.5        >> ./prod/tauola.F
+        cat ./data_karlsruhe         >> ./prod/tauola.F
+	cat ./dziura_2.6        >> ./prod/tauola.F
+        cat ./data_karlsruhe         >> ./prod/tauola.F
+	cat ./dziura_2.7        >> ./prod/tauola.F
+#	cat ./names_karlsruhe   >> ./prod/tauola.F
+  	cat ./dziura_2.8       	>> ./prod/tauola.F
+	cat ./dadnew_karlsruhe 	>> ./prod/tauola.F
+	cat ./dziura_4.1_karls	>> ./prod/tauola.F
+	cat ./dph4pi_karls	>> ./prod/tauola.F
+	cat ./dam4pi_karls_5   	>> ./prod/tauola.F
+	cat ./koncowka_6	>> ./prod/tauola.F 
+
+        cp  ./makefile_0.55          ./prod/makefile
+	cat ./makefile_add_karls  >> ./prod/makefile
+	cat ./makefile_0.56_karls >> ./prod/makefile
+	cat ./karls_label         >> ./prod/makefile
+	cat ./makefile_1.1        >> ./prod/makefile
+	cat ./makefile_2.15       >> ./prod/makefile
+	cat ./makefile_add_karls  >> ./prod/makefile
+	cat ./makefile_2.16_karls >> ./prod/makefile
+	cat ./karls_label         >> ./prod/makefile  
+	cat ./makefile_2.25       >> ./prod/makefile
+	cat ./makefile_add_karls  >> ./prod/makefile
+	cat ./makefile_2.26_karls >> ./prod/makefile
+	cat ./karls_label         >> ./prod/makefile
+	cat ./makefile_2.3_karls  >> ./prod/makefile  
+
+	cat ./makefile_demo_standalone.1  > ./prod/makefile_demo_standalone
+	cat ./makefile_demo_standalone.2_karls >> ./prod/makefile_demo_standalone
+	cat ./makefile_demo_jetset.1  > ./prod/makefile_demo_jetset
+	cat ./makefile_demo_jetset.2_karls >> ./prod/makefile_demo_jetset
+
+	diff ./prod/tauola.F       ../tauola-F/.
+	diff ./prod/makefile       ../tauola-F/.
+	diff ./prod/makefile_demo_standalone ../tauola-F/standalone-F/makefile
+	diff ./prod/makefile_demo_jetset ../tauola-F/jetset-F/makefile-F
+
+
+
+
+	diff Karlsruhe/curr_karls.f Karlsruhe/curr_extracted.f ../tauola-F/.
+	diff Karlsruhe/makefile.cleo Karlsruhe/makefile.cpc  ../tauola-F/.
+} 
+	else
+	echo " This is wrong 'glue' parameter !!!"
+	fi
+else
+	echo
+	echo "     *******************************************************"
+	echo "     *                       G L U E                       *" 
+	echo "     *    facility to extend versions of tauola-F          *"
+	echo "     *    This version of glue is checking action only     *"
+	echo "     *    at present following options are available       *"
+	echo "     *_____________________________________________________*"
+	echo "     *  version of tauola-F     |      command line:       *"
+	echo "     *--------------------------+--------------------------*"
+	echo "     *         standard         |     ./glue1 standard     *"
+	echo "     *__________________________|__________________________*"
+	echo "     *                          |                          *"
+	echo "     * 4 pions tau decay chan.  |                          *"
+	echo "     * replaced by Novosibirsk  |     ./glue1 binp         *"
+	echo "     * parametrization          |                          *"
+	echo "     *__________________________|__________________________*"
+	echo "     *                          |                          *"
+	echo "     * 4 pions decay channels   |     ./glue1 Karlsruhe    *"
+	echo "     * based on Karlsruhe       |                          *"
+	echo "     * hadronic current         |                          *"
+	echo "     *__________________________|__________________________*"
+	echo "     *******************************************************"
+	echo
+fi
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1 @@
+	@( $(CPP) $(CPPFLAGS) -DCLEO    curr_cleo.F prod/curr_cleo.f)

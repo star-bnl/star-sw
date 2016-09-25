@@ -1,0 +1,14 @@
+--- PHOTOS/platform/make.inc.in	2014-04-07 17:20:07.000000000 +0100
++++ /home/epp/phsjao/tmp/make.inc.in	2015-09-15 13:30:40.278172119 +0100
+@@ -5,9 +5,9 @@
+ F77FLAGS = @FFLAGS@ -fPIC -fno-automatic -fno-backslash -ffixed-line-length-132
+ FFLAGS   = $(F77FLAGS)
+ 
+-LD       = @F77@
++LD       = @CC@
+ LDFLAGS  = -g -lstdc++
+-SOFLAGS  = -shared
++SOFLAGS  = -shared -undefined dynamic_lookup
+ 
+ RANLIB   = @RANLIB@
+ AR       = ar

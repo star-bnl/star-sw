@@ -1,0 +1,11 @@
+	@( $(CPP) $(CPPFLAGS) -DCLEO    f3pi.F prod/f3pi.f)
+	@( $(CPP) $(CPPFLAGS) -DCLEO    pkorb.F prod/pkorb.f)
+	@( cp  makefile.cleo prod/makefile) 
+	@( cp  makefile.templ.cleo prod/makefile.templ) 
+#     create interfaces 
+	@( $(CPP) $(CPPFLAGS) -DCLEO    tauface-KK-F/Tauface.F tauface-KK-F/Tauface.f)
+	@( $(CPP) $(CPPFLAGS) -DCLEO  standalone-F/taumain.F standalone-F/taumain.f)  
+	@( $(CPP) $(CPPFLAGS) -DCLEO  jetset-F/tauola_photos_ini.F jetset-F/tauola_photos_ini.f)
+	@( $(CPP) $(CPPFLAGS) -DCLEO  jetset-F/tauface-jetset.F jetset-F/tauface-jetset.f)  
+#     fill true (external) ../tauola directory 
+	@( cp prod/*.f ../tauola/.)

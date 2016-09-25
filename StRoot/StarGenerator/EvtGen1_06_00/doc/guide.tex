@@ -1,0 +1,126 @@
+
+%
+% main tex file for the EvtGen documentation
+%
+\documentstyle [12pt,epsf,epsfig,makeidx]{article}
+\addtolength{\topmargin}{-0.75in}
+\addtolength{\textwidth}{1.1in}
+\addtolength{\textheight}{1.25in}
+\addtolength{\hoffset}{-0.6in}
+\input{evt_macro.tex}
+
+\makeindex
+
+\begin{document}
+
+\begin{flushright}
+BAD 522 V6\\
+EvtGen V00-11-06
+\end{flushright}
+
+\vskip 2 cm
+
+
+\begin{center}
+\bf \Large {\bf EvtGen\\ 
+A Monte Carlo Generator for $B$-Physics}
+\end{center}
+
+\begin{center}
+Anders Ryd (ryd@hep.caltech.edu)\\
+David Lange (lange@charm.physics.ucsb.edu)\\
+Natalia Kuznetsova (natalia@charm.physics.ucsb.edu)\\
+Sophie Versille (versille@in2p3.fr)\\
+Marcello Rotondo (Marcello.Rotondo@roma1.infn.it)\\
+David Kirkby (davidk@slac.stanford.edu)\\
+Frank Wuerthwein (fkw@fnal.gov)\\
+Akimasa Ishikawa (akimasa@hepl.phys.nagoya-u.ac.jp)\\
+{\today} \\
+\end{center}
+
+\begin{abstract}
+\smallskip
+This note describes EvtGen, an event generator that 
+is well suited for $B$ physics. It implements many
+detailed models that are important for the
+physics of $B$ mesons. In particular, it has detailed
+models for semileptonic decays, $CP$-violating decays and
+produces correct results for the angular distributions
+in sequential decays, including all correlations.
+It also has an interface to JetSet for generation of 
+continuum at the $\Upsilon(4S)$ and for generic hadronic
+decays, e.g. of $B$ mesons, that are not implemented in the
+generator.   
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\input evt_intro
+\clearpage
+\input evt_includedintar.tex
+\clearpage
+\input evt_pdttable
+\clearpage
+\input evt_decaytable
+\clearpage
+\input evt_algorithm
+\clearpage
+\input evt_particlerep
+%\clearpage
+%\input evt_programstructure
+\clearpage
+\input evt_wrtmodel.tex
+\clearpage
+\input evt_conventions
+\clearpage
+\input evt_classes
+\clearpage
+\input evt_cpviolation
+\clearpage
+\input evt_semileptonic
+\clearpage
+\input sp5
+\clearpage
+\newpage
+
+\appendix
+
+\input evt_models.tex
+
+\newpage 
+
+\input evt_interface
+
+\input evt_finalstaterad
+
+\input evt_monitoring
+
+\input evt_jetset
+
+\input evt_helamp
+
+\input evt_util
+
+\input evt_optimization
+
+\input evt_code
+
+\newpage
+
+\bibliography{guide}
+
+\bibliographystyle{unsrt}
+
+\newpage
+
+\printindex
+
+\end{document}
+
+
+
+

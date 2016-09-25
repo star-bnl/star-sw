@@ -1,0 +1,14 @@
+        cp  ./makefile_0.55          ./prod/makefile
+	cat ./makefile_add_binp   >> ./prod/makefile
+	cat ./makefile_0.56       >> ./prod/makefile
+	cat ./binp_label          >> ./prod/makefile
+	cat ./makefile_1.1        >> ./prod/makefile
+	cat ./makefile_2.15       >> ./prod/makefile
+	cat ./makefile_add_binp   >> ./prod/makefile
+	cat ./makefile_2.16       >> ./prod/makefile
+	cat ./binp_label          >> ./prod/makefile  
+	cat ./makefile_2.25       >> ./prod/makefile
+	cat ./makefile_add_binp   >> ./prod/makefile
+	cat ./makefile_2.26       >> ./prod/makefile
+	cat ./binp_label          >> ./prod/makefile
+	cat ./makefile_2.3        >> ./prod/makefile  

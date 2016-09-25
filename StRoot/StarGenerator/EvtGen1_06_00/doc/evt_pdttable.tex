@@ -1,0 +1,30 @@
+\section{Particle properties in EvtGen}
+
+\label{sect:pdttable}
+\index{evt.pdl}
+\index{particle properties}
+
+In EvtGen, all particle property information is
+contained within {\tt evt.pdl} and is parsed
+at runtime.  Each line in {\tt evt.pdl} corresponds
+to a particle, and has the form
+\begin{verbatim}
+add  p Lepton  mu-       13  0.1056584  0     0   -3  1 658654.  13
+add  p Lepton  mu+      -13  0.1056584  0     0    3  1 658654.   0
+add  p Meson   pi+      211  0.139570   0     0    3  0  7804.5 101
+add  p Meson   pi-     -211  0.139570   0     0   -3  0  7804.5   0
+add  p Meson   rho+     213  0.7685     0.151 0.4  3  2       0 121
+add  p Meson   rho-    -213  0.7685     0.151 0.4 -3  2       0   0
+add  p Meson   D0       421  1.86451    0     0    0  0  0.1244 105
+add  p Meson   anti-D0 -421  1.86451    0     0    0  0  0.1244   0
+\end{verbatim}
+The first three columns are not used in EvtGen.  The fourth column
+corresponds to the particle name.  The fifth column is the particle
+number according to the stdhep numbering scheme.  
+The sixth through eighth columns
+contain the mass, width, and maximum allowed deviation from the mean mass
+in the downward direction,
+respectively.  The nineth column contains 3 times the charge of the particle.
+The tenth column contains twice the spin.  The eleventh column is $c \tau$
+in mm.  The twelvth column is the Lund-KC number. This is used for the
+interface to JetSet and has to match what is in lucomp.F.

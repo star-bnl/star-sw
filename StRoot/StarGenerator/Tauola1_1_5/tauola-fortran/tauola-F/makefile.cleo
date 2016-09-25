@@ -1,0 +1,16 @@
+include ../make.inc
+#######################################################
+LOCAL_LIB   =  glib.a 
+LIB_OBJECTS =  formf.o tauola.o curr_cleo.o f3pi.o pkorb.o
+##############   What has to be built
+all:	$(LOCAL_LIB) 
+
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+$(LOCAL_LIB): $(LIB_OBJECTS)
+	$(AR) rv  $(LOCAL_LIB) $(LIB_OBJECTS)
+	$(RANLIB) $(LOCAL_LIB)
+clean:
+	rm -f *.o; rm -f *.a; rm -f *~ 
+#######################################################
+

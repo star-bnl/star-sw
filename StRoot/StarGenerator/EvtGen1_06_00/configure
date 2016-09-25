@@ -1,0 +1,377 @@
+#! /bin/bash
+
+#Package-specific:>
+
+GENERATOR=EvtGen
+#VERSION=11
+
+# === Default values of input parameters ====
+PATH_TO_EXTERNAL=
+CLHEP_VERSION=
+PREFIX=.
+PYTHIADIR=${PYTHIADIR}
+PHOTOSDIR=${PHOTOSDIR}
+TAUOLADIR=${TAUOLADIR}
+HEPMCDIR=${HEPMCDIR}
+COMPMODE=OPT        # Default: compiler optimization mode
+EVTGEN_PHOTOS=
+EVTGEN_PYTHIA=
+EVTGEN_TAUOLA=
+EVTGEN_EXTERNAL=
+
+#<
+
+#--------------------------------------------------------------
+
+check_arguments () {
+  for arg in $* ; do
+    if   [ "x$arg" = "x--enable-debug" ] ; then
+      COMPMODE=DBG
+    elif [ "x$arg" = "x--help" ] ; then
+      echo -e \
+      "\nUsage: ./configure [options] , where options are:\n\n"\
+      "--help                                 : prints this help\n"\
+      "--prefix=[installation path]           : specifies installation path\n"\
+      "--hepmcdir=[full directory path]       : specifies location of HepMC base directory (required)\n"\
+      "--pythiadir=[full directory path]      : specifies location of Pythia 8 base directory (optional)\n"\
+      "--photosdir=[full directory path]      : specifies location of PHOTOS base directory (optional)\n"\
+      "--tauoladir=[full directory path]      : specifies location of TAUOLA base directory (optional)\n"\
+      "--enable-debug                         : turns on debugging flags (optional)\n"
+      exit
+    else
+      if [ "x${arg}" = "x${arg/=/}" ] ; then
+        echo "${arg}: wrong option. Ignored." >&2
+      else
+        option=${arg/=*/}
+        value=${arg/*=/}
+	if [ "x${option}" = "x--prefix" ] ; then
+	    PREFIX=${value}
+	elif [ "x${option}" = "x--pythiadir" ] ; then
+	    PYTHIADIR=${value}
+	elif [ "x${option}" = "x--hepmcdir" ] ; then
+	    HEPMCDIR=${value}
+	elif [ "x${option}" = "x--photosdir" ] ; then
+	    PHOTOSDIR=${value}
+	elif [ "x${option}" = "x--tauoladir" ] ; then
+	    TAUOLADIR=${value}
+	else
+	  echo "${arg}: wrong option. Ignored." >&2
+	fi
+      fi
+    fi
+  done
+  return
+}
+		
+#---------------------------------------
+
+# Check that we can see (some of) the header files for the external generators.
+# If not, print a warning message and ask the user to re-run configure
+# specifying the base directory correct location(s).
+
+check_dirs() {
+
+  echo "PREFIX = $PREFIX"
+
+  hepmcFile=${HEPMCDIR}/include/HepMC/GenParticle.h
+  pythiaFile=${PYTHIADIR}/include/Pythia8/Pythia.h
+  photosFile=${PHOTOSDIR}/include/Photos/Photos.h
+  tauolaFile=${TAUOLADIR}/include/Tauola/Tauola.h
+
+  stop=0
+  if [ -f $hepmcFile ]; then
+      echo "HEPMCDIR set to $HEPMCDIR";
+  else
+      echo "Mandatory: please specify the location of the HepMC base directory"\
+            "using the configure option --hepmcdir=[full directory path]"\
+            "or set the HEPMCDIR environment variable"
+      stop=1    
+  fi
+
+  if [ -f $pythiaFile ]; then
+      echo "PYTHIADIR set to $PYTHIADIR";
+      EVTGEN_PYTHIA=1
+      EVTGEN_EXTERNAL=1
+  else
+      echo "To use PYTHIA: --pythiadir=[full directory path] or set the PYTHIADIR"\
+           "environment variable"
+  fi
+
+
+  if [ -f $photosFile ]; then
+      echo "PHOTOSDIR set to $PHOTOSDIR";
+      EVTGEN_PHOTOS=1
+      EVTGEN_EXTERNAL=1
+  else
+      echo "To use PHOTOS: --photosdir=[full directory path] or set the PHOTOSDIR"\
+           " environment variable"
+  fi
+
+  if [ -f $tauolaFile ]; then
+      echo "TAUOLADIR set to $TAUOLADIR";
+      EVTGEN_TAUOLA=1
+      EVTGEN_EXTERNAL=1
+  else
+      echo "To use TAUOLA: --tauoladir=[full directory path] or set the TAUOLADIR"\
+           " environment variable"
+  fi
+
+  if [ $stop = 1 ] ; then
+      exit 1
+  fi
+
+}
+
+#--------------------------------------------------------------
+
+check_extlibs () {
+
+    # Set default shared libary lists for external packages
+    HEPMCLIBLIST="-lHepMC"
+
+    # For PHOTOS version 3.61 and above: default setting.
+    # Aside: avoid 3.60 since this does not work properly for EvtGen!
+    PHOTOSLIBLIST="-lPhotospp -lPhotosppHepMC"
+    # For PHOTOS version 3.56 and below: check to see
+    # if we need to modify this library list
+    if [ -f ${PHOTOSDIR}/lib/libPhotosFortran.so ]; then
+	PHOTOSLIBLIST="-lPhotosCxxInterface -lPhotosFortran"
+    fi
+
+    TAUOLALIBLIST="-lTauolaCxxInterface -lTauolaFortran"
+    PYTHIALIBLIST="-lpythia8 -llhapdfdummy"
+
+}
+
+#-------------------------------------------------------------
+
+check_arguments $* 
+check_dirs
+check_extlibs
+
+echo  "Compilation mode is ${COMPMODE}"
+
+#Package-specific:>
+
+#
+# User-changeable part, experts  -----------------------------
+#
+CXX=g++
+CXXFLAGS_OPT="-O2 -Wall"
+CXXFLAGS_DBG="-g -Wall"
+CFLAGS_OPT=-O2
+CFLAGS_DBG=-g
+FC=gfortran
+FFLAGS_OPT="-O2 -Wuninitialized"
+FFLAGS_DBG=-g
+ 
+FFLAGSSHARED=-fPIC
+CFLAGSSHARED=-fPIC
+CXXFLAGSSHARED=-fPIC
+ 
+LDFLAGSSHARED="${CXXFLAGS_OPT} -pthread -fPIC"
+
+#
+# Find platform.
+#
+ARCH=`uname`
+theGcc=`g++ --version | grep '[0-9]\.[0-9]\.[0-9]' -o | head -1 | awk -F . '{print $1}'`
+if [ ${theGcc} = 4 ]; then
+  ARCH=${ARCH}-gcc4
+fi
+echo "Platform is $ARCH"
+
+#default platform settings:
+FFLAGS="${FFLAGS_OPT}"
+CFLAGS="${CFLAGS_OPT}"
+CXXFLAGS="${CXXFLAGS_OPT}"
+FLIBS="-lfrtbegin -lg2c"
+SOFLAGS="-soname"
+
+if [ ${COMPMODE} = OPT ]; then
+  FFLAGS="${FFLAGS_OPT}"
+  CFLAGS="${CFLAGS_OPT}"
+  CXXFLAGS="${CXXFLAGS_OPT}"
+fi
+if [ ${COMPMODE} = DBG ]; then
+  FFLAGS="${FFLAGS_DBG}"
+  CFLAGS="${CFLAGS_DBG}"
+  CXXFLAGS="${CXXFLAGS_DBG}"
+fi
+if [ $ARCH = Linux ]; then
+  FFLAGS="${FFLAGS_OPT} -Wno-globals"
+  CFLAGS="${CFLAGS_OPT}"
+  CXXFLAGS="${CXXFLAGS_OPT}"
+  FLIBS="-lfrtbegin -lg2c"
+  if [ ${COMPMODE} = OPT ]; then
+    FFLAGS="${FFLAGS_OPT}"
+    CFLAGS="${CFLAGS_OPT}"
+    CXXFLAGS="${CXXFLAGS_OPT}"
+  fi
+  if [ ${COMPMODE} = DBG ]; then
+    FFLAGS="${FFLAGS_DBG} -Wno-globals"
+    CFLAGS="${CFLAGS_DBG}"
+    CXXFLAGS="${CXXFLAGS_DBG}"
+  fi
+fi
+
+# Linux platform with gcc4: new Fortran90 compiler.
+if [ $ARCH = Linux-gcc4 ]; then
+  FFLAGS="${FFLAGS_OPT}"
+  CFLAGS="${CFLAGS_OPT}"
+  CXXFLAGS="${CXXFLAGS_OPT}"
+  FLIBS="-lgfortran -lgfortranbegin"
+  if [ ${COMPMODE} = OPT ]; then
+    FFLAGS="${FFLAGS_OPT}"
+    CFLAGS="${CFLAGS_OPT}"
+    CXXFLAGS="${CXXFLAGS_OPT}"
+  fi
+  if [ ${COMPMODE} = DBG ]; then
+    FFLAGS="${FFLAGS_DBG}"
+    CFLAGS="${CFLAGS_DBG}"
+    CXXFLAGS="${CXXFLAGS_DBG}"
+  fi
+fi
+
+# Add C++11 options if required
+theGcc2=`g++ --version | grep '[0-9]\.[0-9]\.[0-9]' -o | head -1 | awk -F . '{print $2}'`
+gccVar=`echo $theGcc`
+gccVar2=`echo $theGcc2`
+# Flag to make sure c++11 is enabled for compiling certain classes, e.g. MT random engine.
+CPP11=1
+# Check that we have gcc version 4.7 and above
+if [ $gccVar -le 4 ]; then
+  if [ $gccVar2 -le 6 ]; then
+    echo "Not enabling c++11 features"
+    CPP11=0
+  fi
+fi
+
+if [ $CPP11 = 1 ]; then
+  echo "c++11 is enabled"
+fi
+
+# Mac OS platform with gcc4
+if [[ $ARCH == Darwin* ]]; then
+  tt=`gfortran -print-search-dirs|grep libraries|cut -d'=' -f2|sed  's/:/ /g'`
+  LIBGFORTRANLOCATION=''
+  for i in $tt
+  do
+    if [ -e $i/libgfortran.so ]
+    then
+      LIBGFORTRANLOCATION=$i
+      break
+    elif [ -e $i/libgfortran.dylib ]
+    then
+      LIBGFORTRANLOCATION=$i
+      break
+    fi
+  done
+  FLIBS="-L${LIBGFORTRANLOCATION} -lgfortran"
+  SOFLAGS="-install_name"
+fi
+
+#Platform & opt/dbg - independent flags and variables:
+
+echo -n "Creating config.mk ... "
+
+rm -f config.mk 
+
+cat > config.mk << EOF
+
+GENERATOR = ${GENERATOR}
+VERSION = ${VERSION}
+
+PREFIX = ${PREFIX}
+
+SHELL = /bin/bash 
+ARCH = ${ARCH} 
+LCGPLATFORM = ${LCGPLATFORM}
+FC = ${FC} 
+FFLAGS = ${FFLAGS} 
+CFLAGS = ${CFLAGS}
+CXX = ${CXX}
+CXXFLAGS = ${CXXFLAGS}
+SOFLAGS = ${SOFLAGS}
+
+EVTGENDIR = $(pwd)
+
+TMPDIR = \$(EVTGENDIR)/tmp
+INCLUDEDIR = \$(EVTGENDIR)
+
+HEPMCDIR = ${HEPMCDIR}
+HEPMCINCDIR = ${HEPMCDIR}/include
+HEPMCLIBDIR = ${HEPMCDIR}/lib
+HEPMCLIBLIST = ${HEPMCLIBLIST}
+
+SRCDIR = \$(EVTGENDIR)/src
+LIBDIR_SHARED = \$(EVTGENDIR)/lib
+LIBDIR_ARCHIVE = \$(EVTGENDIR)/lib/archive
+LIBDIRLIST = -lEvtGen
+
+LIB_SHARED = \$(LIBDIR_SHARED)/lib\$(GENERATOR).so
+LIB_ARCHIVE = \$(LIBDIR_ARCHIVE)/lib\$(GENERATOR).a
+
+LIBEXT_SHARED = \$(LIBDIR_SHARED)/lib\$(GENERATOR)External.so
+LIBEXT_ARCHIVE = \$(LIBDIR_ARCHIVE)/lib\$(GENERATOR)External.a
+
+# Flags:
+#
+FFLAGSSHARED = ${FFLAGSSHARED}
+CFLAGSSHARED = ${CFLAGSSHARED}
+CXXFLAGSSHARED = ${CXXFLAGSSHARED}
+
+LDFLAGSSHARED = ${LDFLAGSSHARED} 
+
+FLIBS = ${FLIBS}
+
+# External generators:
+
+EVTGEN_EXTERNAL = ${EVTGEN_EXTERNAL}
+
+EOF
+
+if [ "${EVTGEN_PYTHIA}" == "1" ] ; then
+  echo "EVTGEN_PYTHIA = 1" >> config.mk
+  echo "EXTRAFLAGS += -D EVTGEN_PYTHIA" >> config.mk
+  echo "PYTHIADIR = ${PYTHIADIR}" >> config.mk
+  echo "PYTHIAINCDIR = ${PYTHIADIR}/include" >> config.mk
+  echo "PYTHIALIBDIR = ${PYTHIADIR}/lib" >> config.mk
+  echo "PYTHIALIBLIST = ${PYTHIALIBLIST}" >> config.mk
+fi
+
+if [ "${EVTGEN_PHOTOS}" == "1" ] ; then
+  echo "EVTGEN_PHOTOS = 1" >> config.mk
+  echo "EXTRAFLAGS += -D EVTGEN_PHOTOS" >> config.mk
+  echo "PHOTOSDIR = ${PHOTOSDIR}" >> config.mk
+  echo "PHOTOSINCDIR = ${PHOTOSDIR}/include" >> config.mk
+  echo "PHOTOSLIBDIR = ${PHOTOSDIR}/lib" >> config.mk
+  echo "PHOTOSLIBLIST = ${PHOTOSLIBLIST}" >> config.mk
+fi
+
+if [ "${EVTGEN_TAUOLA}" == "1" ] ; then
+  echo "EVTGEN_TAUOLA = 1" >> config.mk
+  echo "EXTRAFLAGS += -D EVTGEN_TAUOLA" >> config.mk
+  echo "TAUOLADIR = ${TAUOLADIR}" >> config.mk
+  echo "TAUOLAINCDIR = ${TAUOLADIR}/include" >> config.mk
+  echo "TAUOLALIBDIR = ${TAUOLADIR}/lib" >> config.mk
+  echo "TAUOLALIBLIST = ${TAUOLALIBLIST}" >> config.mk
+fi
+
+if [ ${CPP11} == "1" ] ; then
+  echo "" >> config.mk
+  echo "# c++11 features:" >> config.mk
+  echo "EVTGEN_CPP11 = 1" >> config.mk
+  echo "CXXFLAGS += -std=c++11 -D EVTGEN_CPP11" >> config.mk
+fi
+
+
+echo " done"
+
+set -v
+mkdir -p tmp/ tmp/EvtGenBase tmp/EvtGenModels tmp_ext/EvtGenExternal lib/ lib/archive
+set +v 
+
+echo -e  "\n\nType 'make' to build everything or 'make help' to list build targets.\n\n"
+
+exit

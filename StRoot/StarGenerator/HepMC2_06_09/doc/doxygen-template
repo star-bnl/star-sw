@@ -1,0 +1,22 @@
+<head>
+<title>HepMC Reference Documentation </title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF">
+
+<!-------------------------------- Header ---------------------------->
+<table width="100%" border="1" height="70" cellpadding="10">
+  <tr bgcolor="#FFFFCC"> 
+    <td width="16%" height="64" valign="middle" align="center" bgcolor="#FFFFCC">
+     <!-- #BeginLibraryItem" -->
+      <img src="http://spi.cern.ch//LCG logo.jpg" width="61" height="61">
+     <!-- #EndLibraryItem --> 
+    </td>
+    <td width="84%" height="64" valign="middle" align="center">
+	<h1>HepMC Reference Documentation</h1> 
+	<a href=http://lcgapp.cern.ch/project/simu/HepMC/>HepMC</a>
+    </td> 
+  </tr>
+</table>
+<p>

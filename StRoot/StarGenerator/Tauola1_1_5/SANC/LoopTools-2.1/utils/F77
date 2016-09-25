@@ -1,0 +1,40 @@
+#!/bin/sh
+# script to compile Fortran programs that use the C preprocessor
+# (most Fortran compilers recognize the capital .F extension;
+# this script is for those which don't)
+# last modified 20 Feb 99 th
+
+
+if [ $# -eq 0 ]
+then
+  echo "usage: F77 options filenames"
+  exit 1
+fi
+
+cmdline=""
+cppfiles=""
+cppopt=""
+
+for arg in $*
+do
+  case $arg in
+  *.F)
+    cppfiles="$cppfiles $arg"
+    cmdline="$cmdline `basename $arg .F`.f"
+    ;;
+  -I*|-D*)
+    cppopt="$cppopt $arg"
+    ;;
+  *)
+    cmdline="$cmdline $arg"
+    ;;
+  esac
+done
+
+for arg in $cppfiles ; do
+  gcc -E -P $cppopt $arg > `basename $arg .F`.f
+done
+
+set -x
+f77 $cmdline
+

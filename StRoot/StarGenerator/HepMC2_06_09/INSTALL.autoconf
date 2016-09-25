@@ -1,0 +1,106 @@
+#-------------------------------------------------------------
+# installing HepMC with configure
+#-------------------------------------------------------------
+
+Although it may be possible to build the HepMC libraries from this directory,
+we recommend that you create a separate build directory and work from there.
+
+The directions below explain how to build with autoconf, etc.
+As of HepMC 2.06.06, you also have the option to build with cmake.
+We highly recommend that you build with cmake, as explained in 
+INSTALL.cmake   
+
+Cmake is preferred for MacOSX and required for Windows.
+
+#-------------------------------------------------------------
+#  installing from a source code tar ball
+#-------------------------------------------------------------
+
+Unwind the source code tar ball in some relevant directory.
+
+cd HepMC
+./bootstrap
+This will run automake and autoconf.
+Bootstrap will also check for and run doxygen and latex to build the documents.  
+
+Determine where the files will be installed.
+We recommend that you create a separate build directory that is NOT in 
+the source code directory tree.
+
+cd <build_directory>
+<source_code_direcotry>/configure --prefix=<install_dir>
+   (Note that files will be installed under /usr/local if you do not 
+    specify a prefix.)
+make
+   (Build temporary copies of libraries and executables.)
+make check
+   (Run the tests.)
+make install
+   (Copy libraries, headers, executables, etc. to relevant 
+    subdirectories under <install_dir>.)
+
+#-------------------------------------------------------------
+#  configure options
+#-------------------------------------------------------------
+
+A variety of options can be given to configure.  Below is a list 
+of the options that you are likely to find most useful.
+
+  --help                  provides a partial list of options
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [default is /usr/local]
+  --disable-shared        build only static libraries
+  --disable-static        build only shared libraries   
+  --enable-visual         on by default when using Visual C++
+  --enable-gmake          use gmake (default is make)
+  --with-CLHEP            --with-CLHEP=$CLHEP_DIR: 
+                          CLHEP is used ONLY in the examples
+  --with-GENSER           --with-GENSER=$GENSER_DIR: 
+                          GENSER is used ONLY in the examples
+ 
+#-------------------------------------------------------------
+# building from svn
+#-------------------------------------------------------------
+
+You will need current versions of automake, autoconf, and libtool.
+On some machines, you will need to build them.  See building autotools below.
+
+To work with a tagged branch:
+svn co svn+ssh://svn.cern.ch/reps/hepmc/tags/HEPMC_02_06_01
+
+To work with the head:
+svn co svn+ssh://svn.cern.ch/reps/hepmc/trunk HepMC 
+
+You may also download directly from the online browser
+http://svnweb.cern.ch/world/wsvn/hepmc/
+
+Now continue with directions as if you unpacked a source code tarball.
+
+#-------------------------------------------------------------
+# building autotools
+#-------------------------------------------------------------
+
+If you do not have at least autoconf 2.59 and automake 1.9.1, you will 
+need to build autoconf, automake, and libtool.  On some platforms, 
+you may also need to build m4 and texinfo.
+
+Download the relevant tarballs from gnu.org 
+(http://www.gnu.org/software/autoconf/, http://www.gnu.org/software/automake/,
+and http://www.gnu.org/software/libtool/)
+Untar them in a common source code tree.
+Decide whether you want to install them in /usr/local or your own
+install directory.  If you use your own install directory, use
+
+        --prefix=<install_dir> 
+
+with configure.
+
+For each autotool package:
+
+     <source_code_dir>/configure [--prefix=<install_dir>]
+     make
+     make install
+
+Make sure that <install_dir>/bin is before /usr/bin in your path.
+
+#-------------------------------------------------------------

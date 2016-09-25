@@ -1,0 +1,2275 @@
+\section{Decay models}
+\label{sect:models}
+\index{models}
+
+This section lists the different decay models that has been 
+implemented in EvtGen. It is strongly urged that all decays that
+are implemented are added to this list with, at least, a minimal 
+description of what they are doing. 
+
+The models are organized in alphabetical order here. Each model
+is briefly described with respect to what decays it can handle and
+what the arguments mean and one or more examples are given. For
+further examples of use please see the decay table, {\tt DECAY.DEC}
+
+\Model{BHADRONIC}
+
+\label{bhadronic}
+
+\Auth{Ryd}
+
+\Usage{P1 P2 ... PN}{JH JW;}
+
+\Expl
+This is an experimental model for hadronic $B$ decays. Until
+further developed this is not recommended to be used. For
+questions ask Anders Ryd.
+
+\Model{BTO3PI\_CP}
+
+\label{bto3picp}
+
+\Auth{Le Diberder, Versille}
+
+\Usage{P1 P2 P3}{dm alpha;}
+
+\Expl
+This model is for neutral B decays in $\pi^-\pi^+\pi^0$. 
+Several resonances are taken into account: the $\rho(770)$, the $\rho(1450)$, and the $\rho(1700)$, the generator therefore implements the interferences between all different final states (e.g. $B^0 \rightarrow \rho^+(770) \pi^- \rightarrow \pi^+\pi^0\pi^-$ and $B^0 \rightarrow \rho^-(770) \pi^+ \rightarrow \pi^-\pi^0\pi^+$). Several Breit-Wigners descriptions are available. By default, the generator is initialized with relativistic Breit-Wigners according to the Kuhn-Santamaria model where the parameters have been fitted by Aleph with $e^+e^-$ and $\tau^+\tau^-$ data~\cite{AlephRho}.
+It uses a pole-compensation method to generate the events efficiently by taking into account the poles due to the Breit-Wigners of the $\rho$'s \cite{3piNote}. 
+
+The generator returns the amplitudes for $B^0 \rightarrow 3\pi$, and $\overline{B^0} \rightarrow 3\pi$ for the kinematics of the generated final state. It makes use of values of Tree and Penguins amplitudes and phases which have
+been computed by the LPTHE using the factorization approximation and the Orsay
+quark model, on the basis of the Isospin relation (no ElectroWeak Penguins
+are included here, and the strong phases are set to zero).The $\rho^0\pi^0$ gets a very low branching ratio due to color-suppression \cite{3piBook}.
+
+\Example
+\noindent The example shows how to generate $B^0 \rightarrow \pi^-\pi^+\pi^0$.
+\begin{verbatim}
+Decay B0
+1.000 pi- pi+ pi0   BTO3PI_CP   dm alpha;
+Enddecay
+\end{verbatim}
+
+\Notes
+This routine makes use of a fortran routine to perform the 
+actual calculation of the amplitude.
+
+
+\Model{CB3PI-MPP}
+
+\label{cbto3pimpp}
+
+\Auth{Le Diberder, Versill\'e}
+
+\Usage{P1 P2 P3}{dm alpha;}
+
+\Expl
+This model is for charged B decays in $\pi^{\pm}\pi^+\pi^-$.
+It is built on the same basis than the BTO3PI\_CP model, making also use of interferences between the three $\rho$ bands: $\rho(770)$, the $\rho(1450)$, and the $\rho(1700)$. The amplitudes are computed by the LPTHE.
+
+\Example
+
+\noindent The example shows how to generate $B^+ \rightarrow \pi^+\pi^+\pi^-$.
+\begin{verbatim}
+Decay B+
+1.000 pi+ pi+ pi-   CB3PI-MPP   dm alpha;
+Enddecay
+\end{verbatim}
+
+\Notes
+This routine makes use of a fortran routine to perform the 
+actual calculation of the amplitude.
+
+
+\Model{CB3PI-P00}
+
+\label{cbto3pip00}
+
+\Auth{Le Diberder, Versill\'e}
+
+\Usage{P1 P2 P3}{dm alpha;}
+
+\Expl
+This model is for charged B decays in $\pi^{\pm}\pi^0\pi^0$.
+It is built on the same basis than the BTO3PI\_CP model, making also use of interferences between the three $\rho$ bands: $\rho(770)$, the $\rho(1450)$, and the $\rho(1700)$. The amplitudes are computed by the LPTHE.
+
+\Example
+
+\noindent The example shows how to generate $B^+ \rightarrow \pi^+\pi^0\pi^0$.
+\begin{verbatim}
+Decay B+
+1.000 pi+ pi0 pi0   CB3PI-P00   dm alpha;
+Enddecay
+\end{verbatim}
+
+\Notes
+This routine makes use of a fortran routine to perform the 
+actual calculation of the amplitude.
+
+
+\Model{BTOKPIPI\_CP}
+\label{btoKpipicp}
+
+\Auth{ Le Diberder, Versill\'e}
+
+\Usage{P1 P2 P3}{dm alpha;}
+
+\Expl
+This model is for neutral B decays in $K \pi\pi$ (note that the 
+$B^0$ decays in $K^+ \pi^- \pi^0$ and the $\overline{B^0}$ in
+$K^- \pi^+ \pi^0$). It generates interferences between different resonances:
+\begin{itemize}
+\item{} $  B^0 \rightarrow K^{*+} \pi^- $, 
+                       with $K^{*+} \rightarrow K^+ \pi^0$,
+\item{} $  B^0 \rightarrow {K^{*0}} \pi^0 $, 
+                       with ${K^{*0}} \rightarrow K^+ \pi^-$,
+\item{} $  B^0 \rightarrow K^- \rho^{+} $, 
+                       with $\rho^{+} \rightarrow \pi^+ \pi^0$
+\end{itemize}
+It also provides the amplitudes for the CP-conjugate channels
+$\overline{B^0} \rightarrow K^- \pi^+ \pi^0$.
+The Tree and Penguins amplitudes are computed by the LPTHE.
+
+\Example
+\noindent The example shows how to generate $B^0 \rightarrow K^+\pi^-\pi^0$.
+\begin{verbatim}
+Decay B0
+1.000 K+ pi- pi0    BTOKPIPI_CP dm alpha;
+Enddecay
+\end{verbatim}
+
+\Notes
+This routine makes use of a fortran routine to perform the 
+actual calculation of the amplitudes.
+
+\Model{BTO4PI\_CP}
+
+\label{bto4picp}
+
+\Auth{Ryd}
+
+\Usage{P1 P2 P3 P4}{dm alpha +8 amplitudes; }
+
+\Expl
+This model is for $B\rightarrow \pi^+\pi^-\pi^+\pi^-$. It implements the
+time dependence of the decay correctly depending on where in the
+dalitz plot you are. The amplitudes that needs to be specified are
+$B\rightarrow a_1^+ \pi^-$, $\bar B\rightarrow a_1^+ \pi^-$,
+$B\rightarrow a_2^+ \pi^-$, $\bar B\rightarrow a_2^+ \pi^-$,
+$B\rightarrow a_1^- \pi^+$, $\bar B\rightarrow a_1^- \pi^+$,
+$B\rightarrow a_2^- \pi^+$, and $\bar B\rightarrow a_2^- \pi^+$.
+
+\Example
+The example shows how to generate $B^0 \rightarrow \pi^+\pi^-\pi^+\pi^-$.
+\begin{verbatim}
+Decay B0
+1.000 pi+ pi- pi+ pi-   BTP4PI_CP   dm alpha 1.0 0.0 1.0 0.0
+                                               1.0 0.0 1.0 0.0
+                                               1.0 0.0 1.0 0.0
+                                               1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+This routine is still developing.
+
+
+\Model{BTO2PI\_CP\_ISO}
+
+\label{bto2picpiso}
+
+\Auth{NK}
+
+\Usage{P1 P2}{beta dm $|A_{2}|$ $\varphi_{A_{2}}$ $|\overline{A}_{2}|$ $\varphi_{\overline{A}_{2}}$ $|A_{0}|$ $\varphi_{A_{0}}$ $|\overline{A}_{0}|$ $\varphi_{\overline{A}_{0}}$;}
+
+\Expl
+This model approaches the three $B \rightarrow \pi \pi$ modes from the point of view of isospin analysis.  It is applicable to both the two $B^{0}$ ($\overline{B}^{0}$) modes, in which case it takes into account mixing, and to the $B^{+}$ ($B^{-}$) mode, as all three modes should indeed be treated together in this approach.  Following the conventions of Lipkin, Nir, Quinn, and Snyder (Phys. Rev. D{\bf 44}, 1454 (1991)), the various decay amplitudes can be written as follows:
+\begin{equation}
+A(B^{+} \rightarrow \pi^{+} \pi^{0}) \equiv A^{+0} = 3\,A_{2} 
+\end{equation}  
+
+\begin{equation}
+A(B^{0} \rightarrow \pi^{+} \pi^{-}) \equiv \sqrt{\frac{1}{2}} \,A^{+-} = A_{2}\,- \,A_{0}
+\end{equation} 
+
+\begin{equation}
+A(B^{0} \rightarrow \pi^{0} \pi^{0}) \equiv A^{00} = 2\,A_{2}\, +\,A_{0},  
+\end{equation}
+
+where $A_{2}$ is the amplitude for $I_{f}$ = 2 states (tree only), and $A_{0}$, for $I_{f}$ = 0 states (where both tree and penguin contribute).  
+
+The model's parameters are:
+\begin{itemize}
+\item
+beta = corresponding CKM angle
+\item
+dm = $B^{0} \overline{B}^{0}$ mass difference ($\approx 0.5 \times 10^{12} s^{-1}$).  
+\item
+$|A_{2}|$, $\varphi_{A_{2}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{A}_{2}|$, $\varphi_{\overline{A}_{2}}$ = magnitude and phase of the amplitude for the CP-conjugate process
+\item
+$|A_{0}|$, $\varphi_{A_{0}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{A}_{0}|$, $\varphi_{\overline{A}_{0}}$ = magnitude and phase of the amplitude for the CP-conjugate process
+\end{itemize}
+
+\Example
+
+\begin{verbatim}
+Decay B0
+1.000 pi+ pi-  BT02PI_CP_ISO  beta dm 1.0 gamma 1.0 -gamma
+                                      1.0 gamma 1.0 -gamma;
+Enddecay
+\end{verbatim}
+
+\Notes
+Precise numerical estimates for the amplitudes are not available at the moment.
+
+
+
+\Model{BTOKPI\_CP\_ISO}
+
+\label{btokpicpiso}
+
+\Auth{NK}
+
+\Usage{PI K}{beta dm $|U|$ $\varphi_{U}$ $|\overline{U}|$ $\varphi_{\overline{U}}$ $|V|$ $\varphi_{V}$ $|\overline{V}|$ $\varphi_{\overline{V}}$ $|W|$ $\varphi_{W}$ $|\overline{W}|$ $\varphi_{\overline{W}}$;}
+
+\Expl
+This model considers the four $B \rightarrow \pi K$ modes from the point of view of isospin analysis.  It is applicable to both the two $B^{0}$ ($\overline{B}^{0}$) modes and to the two $B^{+}$ ($B^{-}$) modes, as all four modes should indeed be treated together in this approach.  Following the conventions of Lipkin, Nir, Quinn, and Snyder (Phys. Rev. D{\bf 44}, 1454 (1991)), the various decay amplitudes can be written as follows:
+\begin{equation}
+A(B^{+} \rightarrow \pi^{0} K^{+}) \equiv A^{0+} = U\,-\,W 
+\end{equation}  
+
+\begin{equation}
+A(B^{+} \rightarrow \pi^{+} K^{0}) \equiv \sqrt{\frac{1}{2}} \,A^{+0} = V\,+\,W 
+\end{equation} 
+
+\begin{equation}
+A(B^{0} \rightarrow \pi^{-} K^{+}) \equiv \sqrt{\frac{1}{2}} \,A^{-+} = V\,-\,W 
+\end{equation}
+
+\begin{equation}
+A(B^{0} \rightarrow \pi^{0} K^{0}) \equiv A^{00} = U\,+\,W,  
+\end{equation}
+
+where $W$, $U$, and $V$ are linear combinations of the three independent amplitudes $A_{I_{t},I_{f}}$ for various transition ($I_{t}$) and final ($I_{f}$) isospins (please see the reference for more details).  Note that both $U$ and $V$ are tree-only amplitudes, whereas $W$ includes both tree and penguin contributions.
+
+The model's parameters are:
+\begin{itemize}
+\item
+beta = corresponding CKM angle
+\item
+dm = $B^{0} \overline{B}^{0}$ mass difference ($\approx 0.5 \times 10^{12} s^{-1}$).  
+\item
+$|U|$, $\varphi_{U}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{U}|$, $\varphi_{\overline{U}}$ = magnitude and phase of the amplitude for the CP-conjugate process
+\item
+$|V|$, $\varphi_{V}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{V}|$, $\varphi_{\overline{V}}$ = magnitude and phase of the amplitude for the CP-conjugate process
+\item
+$|W|$, $\varphi_{W}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{W}|$, $\varphi_{\overline{W}}$ = magnitude and phase of the amplitude for the CP-conjugate process
+\end{itemize}
+
+\Example
+
+\begin{verbatim}
+Decay B0
+1.000  K+ pi-  BTOKPI_CP_ISO   beta dm  1.0 gamma 1.0 -gamma 
+                                        1.0 gamma 1.0 -gamma 
+                                        1.0 gamma 1.0 -gamma; 
+Enddecay
+\end{verbatim}
+
+\Notes
+Precise numerical estimates for the amplitudes are not available at the moment.
+
+
+\Model{BTOXSGAMMA}
+
+\label{btoxsgamma}
+
+\Auth{ Francesca Di Lodovico, Jane Tinslay, Mark Ian Williams}
+
+\Usage{P1 P2}{model}
+or\\
+\Usage{P1 P2}{ model F $m_B$ $m_b$ $\mu$ $\lambda_1$ $\delta$ z (number of intervals to\\
+compute $\alpha_s$) (number of intervals tocompute the hadronic mass)}
+
+\Expl
+This model is for two-body non-resonant $B \rightarrow X_{s} \gamma$ decays 
+where strange hadrons, $X_{s}$, are generated with a linewidth given by 
+the mass spectrum predicted by either Ali and Greub~\cite{AliGreub} or
+Kagan and Neubert~\cite{KaganNeubert} model, according to the first parameter in the datacards given after the 
+model is chosen. In case the Ali and Greub
+model is chosen, a parameterisation of the mass spectrum predicted for given inputs is used.
+The input parameters where based on PDG 2000 values plus a 
+b quark Fermi momentum of 265 MeV for a spectator quark mass of 150 MeV, 
+which was taken from CLEO fits of the semileptonic B momentum spectrum.
+In case the Kagan and Neubert model is used, the input parameters can be given as an input 
+in the datacards. The are: F = Fermi momentum model (1 = exponential shape function, 
+2 = gaussian shape function, 3 = roman shape function), $m_B$, $m_b$, $\mu$, $\lambda_1$, 
+$\delta$, z, number of intervals to compute $\alpha_s$, number of intervals to
+compute the hadronic mass. Moreover, as a possible option, no input parameters can be given after the
+Kagan and Neubert model is chosen, and in this case default input parameters are chosen
+( F = 1, $m_B$ = 5.27885 GeV/c$^2$, $m_b$ =  4.80 GeV/c$^2$, $\mu$ = 4.80 GeV/c$^2$, $\lambda_1$ = 0.3, 
+$\delta$ = 0.9, z = 0.084, number of intervals to compute $\alpha_s$ = 100, number of intervals to
+compute the hadronic mass = 80). A a cut--off on the hadronic mass at 1.1 GeV/c$^2$ is applied in this case 
+according to~\cite{KaganNeubert}.
+
+The maximum mass value for all $X_{s}$ is 4.5 GeV/c$^2$ and the minimum mass 
+value is at the K$\pi$ threshold for $X_{su}$ and $X_{sd}$, and at the KK
+threshold for $X_{ss}$. JETSET is required to decay the resulting $X_{s}$ 
+into hadrons via phase-space production from the available quarks. The decay
+of $X_{s}$ needs to be switched on in the decay file using JETSET switches.
+
+\Example
+\noindent The example shows how to generate $B^{0} \rightarrow X_{sd} \gamma$ for the Ali and Greub Model.
+\begin{verbatim}
+#   Xsd meson  (sbar-d system, introduced for b->s gamma decays)
+
+# Set Xsd so it can decay:
+JetSetPar MDCY(455,1)=1
+# Set decay table entry pt for Xsd: 
+JetSetPar MDCY(455,2)=1154
+# Number of decay channels for Xsd:                
+JetSetPar MDCY(455,3)=1
+# Switch on Xsd decay
+JetSetPar MDME(1154,1)=1
+# Phase space decays into hadrons from available quarks
+JetSetPar MDME(1154,2)=11
+# Xsd decays into two quarks a d and an anti-s
+JetSetPar KFDP(1154,1)=-3
+JetSetPar KFDP(1154,2)=1
+
+Decay B0
+1.0000 Xsd   gamma   BTOXSGAMMA 1;
+Enddecay
+\end{verbatim}
+
+\Notes
+P1 should always be reserved for the $X_{s}$ particle and P2 should
+always be a gamma. Also, this model requires Jst74 V00-00-11 or higher 
+to work. 
+
+\Model{D\_DALITZ;}
+
+\label{dplusdalitz}
+
+\Auth{Kuznetsova}
+
+\Usage{D1 D2 D3}{}
+
+\Expl
+The Dalitz amplitude for three-body $K \pi \pi$ D decays; namely, for decays 
+\begin{itemize}
+\item
+$D^+\rightarrow K^- \pi^+ \pi^+$ or $D^-\rightarrow K^+ \pi^- \pi^-$,\\
+with the resonances (for the $D^{+}$ mode) $\overline{K}^{\,\ast}(892)^{0}\pi^{+}$, $\overline{K}^{\,\ast}(1430)^{0}\pi^{+}$, and $\overline{K}^{\,\ast}(1680)^{0}\pi^{+}$, using data from the E691 Fermilab experiment ~\cite{Anjos93}.
+\item
+$D^+\rightarrow \overline{K}^{0} \pi^+ \pi^0$ or $D^-\rightarrow K^0 \pi^- \pi^0$,\\
+with the resonances (for the $D^{+}$ mode) $\overline{K}^{\,\ast}(892)^{0}\pi^{+}$, and $\overline{K}^{0}\rho^{+}$, using data from MARK III ~\cite{Adler87}. 
+\item
+$D^0\rightarrow \overline{K}^0\, \pi^+ \pi^-$ or $\overline{D}^0\rightarrow K^0\, \pi^- \pi^+$,\\
+with the resonances (for the $D^{0}$ mode) $K^{\,\ast}(892)^{-} \pi{+}$ and $\overline{K}^{0} \rho(770)^{0}$, using data from ~\cite{Anjos93}. 
+\item
+$D^0\rightarrow K^{-} \pi^+ \pi^0$ or $\overline{D}^0\rightarrow K^+ \pi^- \pi^0$,\\
+with the resonances (for the $D^{0}$ mode) $\overline{K}^{\,\ast}(892)^{0}\pi^{0}$, $K^{\,\ast}(892)^{-}\pi^{+}$, and $K^{-}\rho(770)^{+}$, using data from ~\cite{Anjos93}. 
+\end{itemize}
+
+Be aware that the $D^+\rightarrow \overline{K}^{0} \pi^+ \pi^0$ and $D^-\rightarrow K^0 \pi^- \pi^0$ modes currently use the results from Mark III ~\cite{Adler87}, which are based on rather limited statistics.    
+\Example
+To generate the decay $D^+\rightarrow K^- \pi^+ \pi^+$ the 
+following entry in the decay table should be used
+\begin{verbatim}
+Decay D+
+1.000 K- pi+ pi+      D_DALITZ;
+Enddecay
+\end{verbatim}
+
+\Notes
+The order in which the particles are listed is very important: the kaon should 
+always be first, and for the modes with the neutral pion the $\pi^{0}$ should always be last.
+
+
+
+\Model{GOITY\_ROBERTS}
+
+\label{goityroberts}
+
+\Auth{Alain,Ryd}
+
+\Usage{M1 M2 L N}{;}
+
+\Expl
+Model for the non-resonant $D^{(*)}\pi\ell\nu$ decays of
+$B$ mesons. The daughters are in the order: $D$-meson,
+pion, lepton and last the neutrino.
+
+\Example
+\begin{verbatim}
+Decay B0
+1.000 D0B  pi- e+ nu_e                  GOITY_ROBERTS;
+Enddecay
+\end{verbatim}
+
+\Notes
+This is not exactly what was published by Goity and Roberts~\cite{Goity95a}, 
+partly
+due to errors in the paper and because the $D^*$ had to be 
+removed from the $D\pi$ non-resonant.
+
+
+
+\Model{HELAMP}
+
+\label{helamp}
+
+\Auth{Ryd}
+
+\Usage{M D1 D2}{Amplitudes;}
+
+\Expl
+This model allows simulation of any two body decay by specifying the 
+helicity amplitudes for the final state particles. The helicity amplitudes
+are complex numbers specified as pairs of magnitude and phase. The amplitudes
+are ordered, starting by the highest allowed helicity for the first particle.
+For a fixed helicity of the first particle the amplitudes are then specified
+starting with the highest allowed helicity of the second particle. This means
+that the helicities $H_{\lambda_1\lambda_2}$ are ordered first according the
+the value of $\lambda_1$ and then the value of $\lambda_2$.
+
+\Example
+Decay of $B^0->D^*\rho$, 
+\begin{verbatim}
+Decay B+
+1.000   anti-D*0  rho+           HELAMP 0.228 0.95 0.283 1.13 0.932 0;
+Enddecay
+\end{verbatim}
+
+\Notes
+The amplitudes are taken from ICHEP 98-852. This model has been tested on
+many special cases, but further testing is needed.
+
+
+\Model{HQET}
+
+\label{hqet}
+
+\Auth{Lange}
+
+\Usage{M L N}{RHO2 R1 R2;}
+
+\Expl
+Model for the $D^{*}\ell\nu$ decay of
+$B$ mesons according to a HQET inspired parameterization. 
+The daughters are in the order: $D^*$,
+lepton and last the neutrino. Since only the three
+form factors that contributes in the zero lepton mass
+limit are included the model is not accurate for $\tau$'s.
+The arguments, {\tt RHO2}, {\tt R1}, and {\tt R2} are the 
+form factor slope, $\rho^2_{A_1}$ and the form factor
+ratios $R_1$ and $R_2$ respectively. These are defined,
+and measured, in~\cite{Dubo96}
+
+\Example
+Decay of $B^0\rightarrow D^*\ell\nu$ using HQET model
+\begin{verbatim}
+Decay B0
+1.000 D*-  e+ nu_e              HQET3S1 0.92 1.18 0.72;
+Enddecay
+\end{verbatim}
+
+\Notes
+The values in the example above comes from the measurement 
+in~\cite{Dubo96} by the CLEO collaboration.
+
+
+\Model{HQET2}
+
+\label{hqet2}
+
+\Auth{Ishikawa}
+
+\Usage{M L N}{RHO2 R1 R2;}
+
+\Expl
+Model for the $D^{*}\ell\nu$ decay of $B$ mesons according to 
+the dispersive relation \cite{Cap98}. 
+The daughters are in the order: $D^*$,
+lepton and last the neutrino. 
+The arguments, {\tt RHO2}, {\tt R1}, and {\tt R2} are the 
+form factor slope, $\rho^2_{A_1}$ and the form factor
+ratios $R_1$ and $R_2$ respectively. 
+
+\Example
+Decay of $B^0\rightarrow D^*\ell\nu$ using HQET model
+\begin{verbatim}
+Decay B0
+1.000 D*-  e+ nu_e              HQET2 1.35 1.3 0.8;
+Enddecay
+\end{verbatim}
+
+\Notes
+The values in the example above comes from the measurement 
+in~\cite{Abe02} by the Belle collaboration.
+
+
+
+\Model{ISGW}
+
+\label{isgw}
+
+\Auth{Lange, Ryd}
+
+\Usage{D1 D2 D3}{;}
+
+\Expl
+This is a model for semileptonic decays of $B$, and $D$ mesons 
+according to the ISGW model~\cite{Isgur89a}. The first daughter
+is the meson produced in the semileptonic decay. The second and third
+argument is the lepton and the neutrino respectively.
+See Section~\ref{semileptonic} for more details about semileptonic
+decays.
+
+\Example
+The example shows how to generate $\bar B^0\rightarrow D^{*+}e\nu$
+\begin{verbatim}
+Decay anti-B0
+1.000 D*+ e- anti-nu_e     ISGW;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model does not include the $A_3$ form factor that is 
+needed for non-zero mass leptons, i.e., tau's. If tau's
+are generated the $A_3$ form factor will be zero.
+
+
+
+
+\Model{ISGW2}
+
+\label{isgw2}
+
+\Auth{Lange, Ryd}
+
+\Usage{D1 D2 D3}{;}
+
+\Expl
+This is a model for semileptonic decays of $B$, $D$, and $D_s$ mesons 
+according to the ISGW2 model~\cite{Scora95}. The first daughter
+is the meson produced in the semileptonic decay. The second and third
+argument is the lepton and the neutrino respectively.
+See Section~\ref{semileptonic} for more details about semileptonic
+decays.
+
+\Example
+The example shows how to generate $\bar B^0\rightarrow D^{*+}e\nu$
+\begin{verbatim}
+Decay anti-B0
+1.000 D*+ e- anti-nu_e     ISGW2;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model has been fairly well tested for $B$ decays, most form
+factors and distributions have been compared to the original 
+code that we obtained from D. Scora.
+
+
+\Model{JETSET}
+
+\label{jetset}
+
+\Auth{Ryd, Waldi}
+
+\Usage{D1 D2 DN}{MODE;}
+
+\Expl
+A particle who's decay is not implanted in EvtGen
+can be decayed by calling JetSet using this model as an interface.
+The decays that uses the {\tt JETSET} model are converted
+into the JetSet decay table format and read in by JetSet.
+However, if JetSet produces a final state which
+is explicitly listed as another decay of the parent it
+is rejected. E.g. consider this example:
+\begin{verbatim}
+Decay J/psi
+0.0602  e+  e-                            VLL;
+0.0602  mu+ mu-                           VLL;
+.
+.
+.
+0.8430  rndmflav  anti-rndmflav           JETSET         12;
+Enddecay
+\end{verbatim}
+In this example if JetSet decays the $J/\Psi$ to $e^+e^-$
+or $\mu^+\mu^-$ the decay is rejected and regenerated.
+For more details about the EvtGen-Jetset interface see
+Appendix~\ref{sect:jetsetinterface}.
+
+\Notes
+As discussed in Appendix~\ref{sect:jetsetinterface} the {\tt JETSET}
+model can not be used to decay a particle that is an alias. This is 
+bacause JetSet does not allow for more than one decay table per
+particle.
+
+
+
+\Model{JSCONT}
+
+\Auth{Ryd, Kim}
+
+\Usage{}{Flavor;}
+
+\Expl
+This decay model is for generation of continuum events at the 
+$\Upsilon(4S)$. It uses JetSet to fragment quark strings. The
+flavor of the primary string is given as the argument to the
+model and 1 means a $d\bar d$, 2 is $u\bar u$, 3 is $s\bar s$ and
+4 is $c\bar c$. If the flavor is 0 a mixture of the quarks will
+be generated in the appropriate amounts. 
+The first particle that is created is the {\tt vpho} which can be
+decayed using this decay model.
+The primary jets are created according to a $1+\cos^2\theta$
+distribution, where $\theta$ is the angle of the primary jet
+with respect to the beam line, or more precisely the $z$-axis.
+
+\Example
+\begin{verbatim}
+Decay vpho
+1.000          JSCONT 1;
+Enddecay
+\end{verbatim}
+
+
+
+
+\Model{KLL3P}
+
+\label{KLL3P}
+
+\Auth{Rotondo}
+
+\Usage{K L1 L2}{;}
+
+\Expl
+Implementation for the process $B\rightarrow K l^+ l^-$, as the previous model
+the form-factors are calculated in the framework of three-point QCD sum-rules ~\cite{Colangelo96}.
+ 
+\Example
+The example shows how to generate $B^+\rightarrow K^{+} e^+ e^-$
+\begin{verbatim}
+Decay B+
+1.000 K+ e+ e- KLL3P;
+Enddecay
+\end{verbatim}
+
+\Notes
+Only Short Distance interaction are considered.
+
+
+
+
+
+
+
+%\Model{KS}
+%
+%\label{ks}
+%
+%\Auth{Lange, Ryd}
+%
+%\Usage{D1 D2 D3}{;}
+%
+%\Expl
+%This is a model for semileptonic decays of $B$, and $D$ mesons 
+%according to the KS model~\cite{Korner88}. The first daughter
+%is the meson produced in the semileptonic decay. The second and third
+%argument is the lepton and the neutrino respectively.
+%See Section~\ref{semileptonic} for more details about semileptonic
+%decays.
+%
+%\Example
+%The example shows how to generate $\bar B^0\rightarrow D^{*+}e\nu$
+%\begin{verbatim}
+%Decay anti-B0
+%1.000 D*+ e- anti-nu_e     KS;
+%Enddecay
+%\end{verbatim}
+%
+%\Notes
+%This model does not include the $A_3$ form factor that is 
+%needed for non-zero mass leptons, i.e., tau's. If tau's
+%are generated the $A_3$ form factor will be zero.
+%
+%
+\Model{KSLLLCQCD}
+
+\label{KSLLLCQCD}
+
+\Auth{Rotondo}
+
+\Usage{K* L1 L2}{;}
+
+\Expl
+Implementation of the process $B\rightarrow K^* l^+ l^-$.
+In this model the hadronic part of the matrix element is 
+calculated in the framework of the light-cone QCD
+sum rules ~\cite{Aliev97}.
+ 
+\Example
+The example shows how to generate $B^0\rightarrow K^{*0} \tau^+ \tau^-$.
+\begin{verbatim}
+Decay B0
+1.000 K*0 tau+ tau- KSLLLCQCD;
+Enddecay
+\end{verbatim}
+
+\Notes
+In the Aliev's paper ~\cite{Aliev97} are taken in account some
+effects out the Standard-Model, this implementation recover only
+the $SM$ part of the interaction. \\
+Only Short Distance contribution are considered.\\
+Warning: a cut-off on the $q^2$ of the lepton pair are introduced. 
+The $q^2$ is required to be greater than $0.08 GeV^2$, 
+to avoid a large spend of time for the generation of the 
+right configuration. This approximation is 
+not useful for $B\rightarrow K^* e^+ e^-$.   
+
+
+
+
+\Model{KSLL3PQCD}
+
+\label{KSLL3PQCD}
+
+\Auth{Rotondo}
+
+\Usage{K* L1 L2}{;}
+
+\Expl
+Implementation for the process $B\rightarrow K^* l^+ l^-$ in which the hadronic 
+part of the matrix element is calculated in the framework of the three-point QCD 
+sum rules ~\cite{Colangelo96}.
+ 
+\Example
+The example shows how to generate $B^0\rightarrow K^{*0} \mu^+ \mu^-$.
+\begin{verbatim}
+Decay B0
+1.000 K*0 mu+ mu- KSLL3PQCD;
+Enddecay
+\end{verbatim}
+
+\Notes
+Only Short Distance interaction are considered.\\
+Warning: as the previous model.
+
+
+\Model{LNUGAMMA}
+
+\label{lnugamma}
+
+\Auth{edward}
+
+\Usage{L NU GAMMA}{PMC R M\_B FAFVZERO;}
+
+
+\Expl
+Calculation of the tree-level matrix element for the process ${ B^{+}} \rightarrow l^{+} \nu_{l} \gamma$ 
+  ~\cite{Korchemsky00}.
+ 
+\Example
+The example shows how to generate ${ B^{+}} \rightarrow l^{+} \nu_{l} \gamma$.
+\begin{verbatim}
+Decay B0
+1.0000 e+  nu_e  gamma  LNUGAMMA 0.35 3.0 5.0 0;
+Enddecay
+\end{verbatim}
+
+\Notes See the citation given above for more detail.
+
+Arg(0) is the photon mass cutoff in $GeV$, Arg(1) is $R$ in $GeV^{-1}$, Arg(2) is $m_b$ in $GeV$, and Arg(3) is set to 0 if the user wants $|f_{a}/f_{v}| = 1$, and set to 1 if the user wants $f_{a}/f_{v} = 0$. Arg(3)
+is optional, defaulting to 0. 
+
+
+\Model{MELIKHOV}
+
+\label{MELIKHOV}
+
+\Auth{Lange}
+
+\Usage{M L NU}{;}
+
+\Expl
+Implements the form factor model for $B \rightarrow \rho \ell \nu$
+according to Melikhov, as described in hep-ph/9603340.  There is
+one argument, which should be an integer between 1 and 4.  The
+arguement sets which set of form factors from Melikhov should be used.  
+ 
+\Example
+The example shows how to generate $B^0\rightarrow \rho^- \mu^+ \nu_{\mu}$.
+\begin{verbatim}
+Decay B0
+1.000 rho- mu+ nu_mu MELIKHOV 1;
+Enddecay
+\end{verbatim}
+
+%\Notes
+
+\Model{OMEGA\_DALITZ}
+
+\label{omegadalitz}
+
+\Auth{Lange}
+
+\Usage{P1 P2 P3}{;}
+
+\Expl
+The dalitz amplitude for the decay $\omega\rightarrow \pi^+\pi^-\pi^0$.
+The amplitude for this process is given by 
+$A=\epsilon_{\mu\nu\alpha\beta}
+p^{\mu}_{\pi^+}p^{\nu}_{\pi^-}p^{\alpha}_{\pi^0}\varepsilon^{\beta}$.
+
+\Example
+\begin{verbatim}
+Decay omega
+1.000 pi+  pi-  pi0           OMEGA_DALITZ;
+Enddecay
+\end{verbatim}
+
+
+
+\Model{PARTWAVE}
+
+\label{partwave}
+
+\Auth{Ryd}
+
+\Usage{M D1 D2}{Amplitudes;}
+
+\Expl
+This model is similar to the {\tt HELAMP} model in that it allows
+any two-body decay specified by the partial wave amplitudes. This model
+translates the partial wave amplitudes to helicity amplitudes using the 
+Jacob Wick transformation. The partial wave amplitudes are complex numbers,
+specified as a magnitude and a phase. The amplitudes $M_{LS}$ are
+sorted on the highest value of $L$ and then on the highest value of $S$.
+
+\Example
+Decay of $B^0->D^*\rho$ in this example would be in pure $P$-wave.
+\begin{verbatim}
+Decay B+
+1.000   anti-D*0  rho+           PARTWAVE 0.0 0.0 1.0 0.0 0.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model has been tested on
+some special cases, but further testing is needed.
+
+
+
+
+
+\Model{PHSP}
+
+\label{phsp}
+
+\Auth{Ryd}
+
+\Usage{P1 P2 ... PN}{;}
+
+\Expl
+Generic phase space to n-bodies. All spins of particles in
+the initial state and the final state are averaged.
+
+\Example
+As an example of using this model the decay 
+$D^0\rightarrow K^{*-}\pi^+\pi^0\pi^0$
+is used.
+\begin{verbatim}
+Decay D0
+1.000 K*-  pi+ pi0 pi0                    PHSP;
+Enddecay
+\end{verbatim}
+
+\Model{PTO3P}
+\label{pto3p}
+\Auth{Dvoretskii}
+
+The \texttt{PTO3P} model is a generic decay-file driven model for simulating 
+decays of a scalar (typically pseudoscalar, hence the \texttt{P}) particle
+into a final state composed of three scalar particles. $B^+\to K^+\pi^+\pi^-$
+would be an example of such a decay.
+
+It is possible to specify several channels through which the decay can proceed.
+The interference effects are proprely handled by the model. It is also possible
+to include time-dependent mixing in decays of neutral mesons.
+
+\Expl
+For an example of a decay, see the example below.
+The first two parameters specify the PDF maximum (e.g. \texttt{MAXPDF 116.2}).
+The PDF maximum is needed to perform accept/reject during generation. 
+Alternatively if the maximum is not known one can specify the number of points
+that will be sampled \texttt{SCANPDF 10000}. The PDF will be evaluated at each
+point. To be conservative this maximum will be increased by 20\%. Typically
+it's a good idea to do the scan once for a large number of events. Determine
+the maximum and then put it explicitly in the decay file.
+
+The other parameters are grouped into partial \texttt{AMPLITUDE} specifications and 
+\texttt{COEFFICIENT} specifications. Compelex coefficients can be in cartesian 
+or polar coordinates. The keywords are: \texttt{CARTESIAN} for 
+cartesian coordinates and \texttt{POLAR\_RAD} and \texttt{POLAR\_DEG} for polar coordinates.   
+
+
+Partial amplitudes can be either \texttt{PHASESPACE} or \texttt{RESONANCE}.
+For amplitudes describing intermediate resonances one should specify which 
+two particles form the resonance (\texttt{AB}, \texttt{BC}, \texttt{CA}),
+and the parameters of the resonance - spin, mass and width. The resonance parameters 
+can be specified, either as three numbers or as the particle name. In the latter case
+the parameters will be taken from the evt.pdl file. Finally, it's possible to 
+get the spin from the evt.pdl file and override the mass and the width of the particle.
+Examples:
+
+\begin{verbatim}
+RESONANCE BC 1 0.77 0.15
+RESONANCE BC rho+
+RESONANCE BC rho+ 0.77 0.15
+\end{verbatim}
+    
+\texttt{ANGULAR AB} declares between which two particles the helicity angle will be evaluated.
+(The rest frame was specified previously, e.g. \texttt{RESONANCE BC}. This disambiguates
+the sign of the amplitude.
+
+\texttt{TYPE} specifies the type of the propagator. Choose between non-relativistic
+Breit-Wigner (\texttt{NBW}), relativistic Zemach expression (\texttt{RBW\_ZEMACH}),
+Kuehn-Santamaria propagator (\texttt{RBW\_KUEHN}) and relativistic propagator 
+used e.g. in \texttt{CLEO hep-ex/0011065} (\texttt{RWB\_CLEO}). 
+
+Finally it's possible to supply Blatt-Weisskopf form factors at the 
+production (birth) vertex of the resonance and its decay vertex.
+
+\begin{verbatim}
+DVFF BLATTWEISSKOPF 3.0
+BVFF BLATTWEISSKOPF 1.0
+\end{verbatim} 
+
+
+
+
+For decays with mixing, e.g. $B^0 \to \pi^+ \pi^- \pi^0$ first 
+specify partial amplitudes for $B^0 \to \pi^+ \pi^- \pi^0$,
+then stick in keyword \texttt{CONJUGATE} followed by mixing 
+parameters (currently dm). Then specify partial amplitudes for
+$\bar{B^0}   \to \pi^+ \pi^- \pi^0$ in the usual way.
+
+
+For very narrow resonances the generation efficiency may be very low. 
+In that case one should use pole compensation. In PTO3P pole-compensation is 
+automatically turned on for all resonances. The pole-compensator PDF is created by 
+the same factory that creates the amplitude. EvtDalitzBwPdf is used for that purpose.
+If you would like to switch off pole-compensation you'll need to edit EvtPto3PAmpFactory.cc,
+there is no way to control it via the decay file at this point.
+
+\Example
+The example below shows the decay $D^+\to \bar K^0\pi^+\pi^0$ including
+the $\rho^+$ and $\bar K^{*0}$ resonances.
+
+\begin{verbatim}
+Decay D+
+
+1.0 anti-K0 pi+ pi0 PTO3P       
+        MAXPDF          75.0
+        #SCANPDF 10000
+        #gives 73.5
+
+        # Non-resonant
+        AMPLITUDE       PHASESPACE
+        COEFFICIENT     POLAR_RAD       0.9522  -1.8565
+
+        # rho+ (770) 
+        AMPLITUDE       RESONANCE       BC      rho+            0.7699  0.1512
+                        ANGULAR         AC
+                        TYPE            RBW_CLEO
+                        DVFF            BLATTWEISSKOPF  25.38
+        COEFFICIENT     POLAR_RAD       0.389   0.0 
+
+        # anti-K*0 (770) 
+        AMPLITUDE       RESONANCE       AC      anti-K*0        0.89159 0.0498
+                        ANGULAR         BC
+                        TYPE            RBW_CLEO
+                        DVFF            BLATTWEISSKOPF  10.15
+        COEFFICIENT     POLAR_RAD       0.194   0.7191
+        ;
+Enddecay
+
+\end{verbatim}
+
+
+
+
+\Model{SINGLE}
+
+\label{single}
+
+\Auth{Ryd}
+
+\Usage{P}{pmin pmax [cthetamin cthetamax [phimin phimax]];}
+
+\Expl
+Generates single particle rays in the region of phase space 
+specified by the arguments. This single particle generator 
+generates decays uniformly in the parents rest frame in 
+the momentum range from {\tt pmin} to {\tt pmax}. However,
+the range of $\theta$ is specified in the lab frame.
+
+The last two and four arguments need not be specified. If
+the last two are omitted the $\phi$ range is from $0$ to $2\pi$
+and if the last four arguments are omitted the $\cos\theta$ range
+is from $-1$ to $+1$.
+
+\Example 
+Generates $\mu^+$ with momentum from 0.5 to 1.0 GeV over $4\pi$.
+\begin{verbatim}
+Decay Upsilon(4S)
+1.000 mu+       SINGLE  0.5 1.0 -1.0 1.0 0.0 6.283185;
+Enddecay
+\end{verbatim}
+
+or simply
+
+\begin{verbatim}
+Decay Upsilon(4S)
+1.000 mu+       SINGLE  0.5 1.0;
+Enddecay
+\end{verbatim}
+
+\Model{SLN}
+
+\label{sln}
+
+\Auth{Songhoon,Ryd}
+
+\Usage{L N}{;}
+
+\Expl
+This decay generates the decay of a scalar to a lepton and a 
+neutrino. The amplitude for this process is given by
+$A=P^{\nu}\langle \ell | (V-A)_{\nu} | \nu \rangle$.
+
+\Example 
+As an example of using this model the decay $D_s^+\rightarrow \mu^+\bar\nu$
+is used.
+\begin{verbatim}
+Decay DS+
+1.000 mu+  nu_mu                         SLN;
+Enddecay
+\end{verbatim}
+
+
+
+\Model{SLPOLE}
+
+\label{SLPOLE}
+
+\Auth{Lange}
+
+\Usage{M L NU}{arguments;}
+
+\Expl
+Implements a semileptonic decay according to a pole form parametrization.
+For definition of the form factors that are used see 
+section~\ref{sect:EvtSLPole}.
+ 
+\Example
+The example shows how to generate $B^0\rightarrow \rho^- \mu^+ \nu_{\mu}$.
+\begin{verbatim}
+Decay B0
+1.000 rho- mu+ nu_mu SLPOLE 0.27 -0.11 -0.75 1.0 0.23 -0.77 
+             -0.40 1.0 0.34 -1.32 0.19 1.0 0.37 -1.42 0.50 1.0;
+
+Enddecay
+\end{verbatim}
+
+%\Notes
+
+
+
+
+
+\Model{SSD\_CP}
+
+\label{ssdcp}
+
+\Auth{Ryd}
+
+\Usage{S D}{dm dgog |q/p| arg(q/p) |A\_f| argA\_f |barA\_f| argbarA\_f\\
+            |A\_barf| argA\_barf |barA\_barf| argbarA\_barf |z| arg(z);}
+
+\Expl
+This model simulates the decay of a $B$ meson to a scalar and
+one other particle of arbitrary (integer) spin.
+An example of using this model is $B\to J/\psi K_S$
+\begin{verbatim}
+Decay B0
+1.000 J/psi K0S    SSD_CD dm dgog |qop| arg(qop) 
+                          |Af| arg(Af) |Abarf| arg(Abarf) 
+                          |Afbar| arg(Afbar) |Abarfbar| arg(Abarfbar)
+                          |z| arg(z);
+Enddecay
+\end{verbatim}
+
+where {\tt dm} is the mass difference of the two mass eigenstates, {\tt dgog} 
+is $2y$, $y\equiv (\Gamma_H-\Gamma_L)/(\Gamma_H+\Gamma_L)$. {\tt qop} is
+$q/p$ where $|B_{L,H}\rangle=p|B^0\rangle\pm q|\bar B^0\rangle$.
+{\tt Af} and {\tt Abarf} are the amplitudes for the decay of a $B^0$ and a 
+$\bar B^0$ respectively to the final state $f$. The set of amplitudes,
+{\tt Afbar} and {\tt Abarfbar} corresponds to the decay to the 
+$CP$ conjugate final state. These amplitudes are optional and are by
+default $A_{\bar f}=\bar A^*_{f}$ and ${\bar A}_{\bar f}=A^*_f$,
+consistent with $CPT$ for a common final state of the $B^0$ and $\bar B^0$.
+However, in modes such as $B\to D^*\pi$ it is usefull to be able to 
+specify these amplitudes separately. 
+
+The example below shows the decays $B\to J/\psi K_S$ and $B\to J/\psi K_L$
+\begin{verbatim}
+Define dm 0.472e12
+Define minusTwoBeta -0.85
+Decay B0
+0.5000 J/psi K0S   SSD_CD dm 0.0 1.0 minusTwoBeta 1.0 0.0 -1.0 0.0;
+0.5000 J/psi K0L   SSD_CD dm 0.0 1.0 minusTwoBeta 1.0 0.0  1.0 0.0;
+Enddecay
+\end{verbatim}
+Note that the sign of the amplitude for the $\bar B^0$ decay have the 
+oposite sign for the $K_S$ as this final state is odd under parity.
+
+To generate the final state $\pi^+\pi^-$. 
+\begin{verbatim}
+Define dm 0.472e12
+Define minusTwoBeta -0.85
+Define gamma 1.0
+Decay B0
+1.0000 pi+ pi-   SSD_CD dm 0.0 1.0 minusTwoBeta 1.0 gamma 1.0 -gamma;
+Enddecay
+\end{verbatim}
+These examples have used $|q/p|=1$ and $\Delta\Gamma=0$. An
+example with non-trivial values for these parameters
+would be $B_s\to J/\psi \eta$
+\begin{verbatim}
+Define dms 14e12
+DEfine dgog 0.1
+Decay B_s0
+1.0000 J/psi eta  SSD_CD dms dgog 1.0 0.0 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+This model can also be used for final states that are not $CP$
+eigenstates, such as $B^0\to D^{*+}\pi^-$
+and $B^0\to D^{*-}\pi^+$. We can generate these decays using
+\begin{verbatim}
+Define dms 14e12
+Define minusTwoBeta -0.85
+Define gamma 1.0
+Decay B0
+1.0000 D*+ pi-  SSD_CD dm 0.0 1.0 minusTwoBeta 1.0 0.0 0.3 gamma;
+Enddecay
+\end{verbatim}
+Where the Cabibbo-suppressed decay has a relative strong phase $\gamma$ with
+respect to the Cabibbo-favored decay.
+
+
+
+\Notes
+For more details about the treatment of CP violating decays 
+see Section~\ref{sect:cpviolation}.
+
+
+
+
+\Model{SSS\_CP}
+
+\label{ssscp}
+
+\Auth{Ryd}
+
+\Usage{S S}{ALPHA dm cp |A| argA |barA| argbarA;}
+
+\Expl
+Decay of a scalar to two scalar and allows for CP violating 
+time asymmetries. The first argument is the relevant CKM
+angle in radians. The second argument is the mass difference
+in s$^-1$ (approx $0.5\times 10^{12}$). 
+cp is the CP of the final state, it is $\pm 1$. 
+Next is the amplitude 
+of a $B^0$ to decay to the final state, where the third argument is the 
+magnitude of the amplitude and the fourth is the phase. The
+last two arguments are the magnitude and phase of the
+amplitude for a decay of a $\bar B^0$ to decay to the 
+final state. This model then uses these amplitudes 
+together with the time evolution of the
+$B\bar B$ system and the flavor of the other
+$B$ to generate the time distributions.
+
+\Example
+This example decays the $B$ meson to $\pi+\pi^-$
+\begin{verbatim}
+Decay B
+1.000 pi+  pi-                  SSS_CP alpha dm 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see Section~\ref{sect:cpviolation}.
+
+
+\Model{SSS\_CP\_PNG}
+
+\label{ssscppng}
+
+\Auth{Ryd, Kuznetsova}
+
+\Usage{S S}{\,BETA GAMMA DELTA dm cp $|A_{tree}|$ $|A_{tree}|/|A_{penguin}|$;}
+
+\Expl
+This model takes into account penguin contributions in $B \rightarrow \pi \,\pi$ decays.  It assumes single (top) quark dominance for the penguin.  The first two arguments are the relevant CKM angles in radians; the third argument is the relative strong phase in radians; dm is the mass difference
+in s$^{-1}$ (approx $0.5\times 10^{12}$); cp is the CP of the final state; $|A_{tree}|$ is the tree-level amplitude, and ${|A_{tree}|}/{|A_{penguin}|}$ is the ratio of the amplitudes for the tree and penguin diagrams ($\approx$ 0.2 for this decay mode).  This model automatically takes into account the correct number of $B^{0}$ tags for this decay, which is given by:
+\begin{equation}
+f =  \frac{|\overline{A}_{f}|^2 \left(1 + |\overline{r}_{f}|^2 + \frac{(1 - |\overline{r}_{f}|^2)}{1+x_{d}^2} \right)}{|\overline{A}_{f}|^2 \left(1 + |\overline{r}_{f}|^2 + \frac{(1 - |\overline{r}_{f}|^2)}{1+x_{d}^2} \right) + |{A}_{f}|^2 \left(1 + |r_{f}|^2 + \frac{(1 - |r_{f}|^2)}{1+x_{d}^2} \right)}
+\end{equation}    
+where $x_{d} \equiv \frac{\Delta m}{\Gamma} \approx 0.65$, and  
+\begin{equation}
+r_{f} = e^{2i\,\phi_{M}}\,\frac{\overline{A}_{f}}{A_{f}}, \,\,\overline{r}_{f} = \frac{1}{r_{f}}
+\end{equation}
+$\phi_{M}$ being the mixing angle, and the amplitude $A_{f}$ being:
+\begin{equation}
+A_{f} \equiv A(B^{0} \rightarrow \pi^{+} \pi^{-}) = A_{t}\,e^{i\phi_{t}} + A_{p}\,e^
+{i\phi_{p}}\,e^{i\delta}
+\end{equation}
+with
+\begin{equation}
+\overline{A}_{f} \equiv A(\overline{B}^{0} \rightarrow \pi^{+} \pi^{-}) = A_{t}\,e^{-i\phi_{t}} + A_{p}\,e^{-i\phi_{p}}\,e^{i\delta}
+\end{equation}
+
+Here, $A_{t}$, $\phi_{t}$ are tree-level amplitude and phase, respectively, $A_{p}$, $\phi_{p}$
+ are those for the penguin, and $\delta$ is the relative strong phase.
+
+
+\Example
+This example generates $B^{0} \rightarrow \pi^{+}\, \pi^{-}$.
+\begin{verbatim}
+Decay B0
+1.000 pi+  pi-    SSS_CP_PNG beta gamma 0.1 dm 1.0 1.0 0.2;
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see section~\ref{sect:cpviolation}.
+
+
+\Model{STS}
+
+\label{sts}
+
+\Auth{Ryd}
+
+\Usage{T S}{;}
+
+\Expl
+This model decays a scalar meson to a tensor and a scalar.
+
+\Example
+This example decays the $B^+$ meson to $D_2^*0\pi^+$
+\begin{verbatim}
+Decay B+
+1.000 D_2*0  pi+                  STS;
+Enddecay
+\end{verbatim}
+
+%\Notes
+
+
+
+\Model{STS\_CP}
+
+\label{stscp}
+
+\Auth{Ryd}
+
+\Usage{T S}{ALPHA dm cp |A| argA |barA| argbarA;}
+
+\Expl
+Decay of a scalar to a tensor and a scalar and allows for CP violating 
+time asymmetries. The first argument is the relevant CKM
+angle in radians. The second argument is the mass difference
+in s$^-1$ (approx $0.5\times 10^{12}$).
+cp is the CP of the final state, it is $\pm 1$. 
+Next is the amplitude 
+of a $B^0$ to decay to the final state, where the third argument is the 
+magnitude of the amplitude and the fourth is the phase. The
+last two arguments are the magnitude and phase of the
+amplitude for a decay of a $\bar B^0$ to decay to the 
+final state. This model then uses these amplitudes 
+together with the time evolution of the
+$B\bar B$ system and the flavor of the other
+$B$ to generate the time distributions.
+
+\Example
+This example decays the $B$ meson to $a_2^0\pi^0$
+\begin{verbatim}
+Decay B0
+1.000 a_20  pi0                  STS_CP alpha dm 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see section~\ref{sect:cpviolation}.
+
+
+
+
+\Model{SVP\_HELAMP}
+
+\label{svphelamp}
+
+\Auth{Ryd}
+
+\Usage{V P}{|H+| argH+ |H-| argH-;}
+
+\Expl
+The decay of a scalar to a vector and a photon. This decay is
+parameterized by the helicity amplitudes $H_+$ and $H_-$.
+For more information about helicity amplitudes see 
+Section~\ref{sect:helampconventions}/
+
+\Example
+\begin{verbatim}
+Decay B0
+1.000 K*0  gamma                  SVP_HELAMP 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Model{SVS}
+
+\label{svs}
+
+\Auth{Ryd}
+
+\Usage{V S}{;}
+
+\Expl
+The decay of a scalar to a vector and a scalar. The first 
+daughter is the vector meson.
+
+\Example
+As an example we consider $B\rightarrow D^*\pi$.
+
+\begin{verbatim}
+Decay B0
+1.000 D*+  pi-                  SVS;
+Enddecay
+\end{verbatim}
+
+
+\Model{SVS\_CP}
+
+\label{svscp}
+
+\Auth{Ryd}
+
+\Usage{V S}{ALPHA dm cp |A| argA |barA| argbarA;}
+
+\Expl
+Decay of a scalar to a vector and a scalar and allows for CP violating 
+time asymmetries. The first daughter has to be the vector.
+The first argument is the relevant CKM
+angle in radians. The second argument is the mass difference
+in s$^-1$ (approx $0.5\times 10^{12}$). 
+cp is the CP of the final state, it is $\pm 1$. 
+Next is the amplitude 
+of a $B^0$ to decay to the final state, where the third argument is the 
+magnitude of the amplitude and the fourth is the phase. The
+last two arguments are the magnitude and phase of the
+amplitude for a decay of a $\bar B^0$ to decay to the 
+final state. This model then uses these amplitudes 
+together with the time evolution of the
+$B\bar B$ system and the flavor of the other
+$B$ to generate the time distributions.
+
+
+\Example
+This example decays the $B^0$ meson to $J/\Psi K_s$
+\begin{verbatim}
+Decay B0
+1.000 J/psi  K_S0                  SVS_CP beta dm 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see Section~\ref{sect:cpviolation}.
+
+
+\Model{SVS\_CP\_ISO}
+
+\label{svscpiso}
+
+\Auth{NK}
+
+\Usage{V S}{beta dm flip |$T^{+0}$| arg$T^{+0}$ |$\overline{T^{+0}}$| arg$\overline{T^{+0}}$ \\
+               |$T^{0+}$| arg$T^{0+}$ |$\overline{T^{0+}}$| arg$\overline{T^{0+}}$ \\
+               |$T^{+-}$| arg$T^{+-}$ |$\overline{T^{+-}}$| arg$\overline{T^{+-}}$ \\
+               |$T^{-+}$| arg$T^{-+}$ |$\overline{T^{-+}}$| arg$\overline{T^{-+}}$ \\
+               |$P_{0}$| arg$P_{0}$ |$\overline{P_{0}}$| arg$\overline{P_{0}}$ \\
+               |$P_{2}$| arg$P_{2}$ |$\overline{P_{2}}$| arg$\overline{P_{2}}$;}
+
+\Expl
+This model considers $B$ decays into a vector ($V$) and a scalar ($S$) 
+from the point of view of isospin analysis.  The vector should always 
+be listed first.  For the three $B^{0}$ (or $\overline{B}^{0}$) 
+modes ($B^{0} \rightarrow V^{+} S^{-}$, $B^{0} \rightarrow V^{-} 
+S^{+}$, and $B^{0} \rightarrow V^{0} S^{0}$),
+it takes into account mixing, and generates the corresponding 
+CP-violating asymmetries.  It can also be used for the two 
+isospin-related $B^{+}$ 
+($B^{-}$) modes (e.g., $B^{+} \rightarrow V^{+} S^{0}$ and $B^{+} 
+\rightarrow V^{0} S^{+}$), as all five modes should 
+be treated together in this approach.  
+Following the conventions of Lipkin, Nir, Quinn, and Snyder 
+(Phys. Rev. D{\bf 44}, 1454 (1991)), the various decay 
+amplitudes can be written as follows:
+\begin{equation}
+A(B^{+} \rightarrow V^{+} S^{0}) \equiv \sqrt{2}A^{+0} = T^{+0} + 2 P_{1} 
+\end{equation}
+\begin{equation}
+A(B^{+} \rightarrow V^{0} S^{+}) \equiv \sqrt{2}A^{0+} = T^{0+} - 2 P_{1} 
+\end{equation}
+\begin{equation}
+A(B^{0} \rightarrow V^{+} S^{-}) \equiv A^{+-} = T^{+-} + P_{1} + P_{0} 
+\end{equation}
+\begin{equation}
+A(B^{0} \rightarrow V^{-} S^{+}) \equiv A^{-+} = T^{-+} - P_{1} + P_{0} 
+\end{equation}
+\begin{equation}
+A(B^{0} \rightarrow V^{0} S^{0}) \equiv 2 A^{00} = T^{0+} + T^{+0} - T^{-+} - T^{+-} - 2 P_{0} 
+\end{equation}
+
+where the amplitudes $T^{ij}$ contain no penguin contributions, $P_{1}$ is penguin amplitude for the final $I$ = 1 state, and $P_{0}$, for the final $I$ = 0 state.  
+
+The model's arguments are:
+\begin{itemize}
+\item
+beta = corresponding CKM angle
+\item
+dm = $B^{0} \overline{B}^{0}$ mass difference ($\approx 0.5 \times 10^{12} s^{-1}$).   
+\item
+``flip'' sets the fraction of $B \rightarrow f$ to $B \rightarrow \overline{f}$ decays, where the state specified in the .DEC table is considered the ``$f$'' state.  Set it to 0 to always get the $B \rightarrow f$ case, and to 1 to always get the $B \rightarrow \overline{f}$ case.  
+\item
+$|T^{+0}|$, $\varphi_{T^{+0}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{T^{+0}}|$, $\varphi_{\overline{T^{+0}}}$  = magnitude and phase of the corresponding amplitude for the CP-conjugate process.
+\item
+$|T^{0+}|$, $\varphi_{T^{0+}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{T^{0+}}|$, $\varphi_{\overline{T^{0+}}}$  = magnitude and phase of the corresponding amplitude for the CP-conjugate process.
+\item
+$|T^{+-}|$, $\varphi_{T^{+-}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{T^{+-}}|$, $\varphi_{\overline{T^{+-}}}$  = magnitude and phase of the corresponding amplitude for the CP-conjugate process.
+\item
+$|T^{-+}|$, $\varphi_{T^{-+}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{T^{-+}}|$, $\varphi_{\overline{T^{-+}}}$  = magnitude and phase of the corresponding amplitude for the CP-conjugate process.
+\item
+$|P_{0}|$, $\varphi_{P_{0}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{P_{0}}|$, $\varphi_{\overline{P_{0}}}$  = magnitude and phase of the corresponding amplitude for the CP-conjugate process.
+\item
+$|P_{2}|$, $\varphi_{P_{2}}$  = magnitude and phase of the corresponding amplitude
+\item
+$|\overline{P_{2}}|$, $\varphi_{\overline{P_{2}}}$  = magnitude and phase of the corresponding amplitude for the CP-conjugate process.
+\end{itemize}
+
+\Example
+This example decays the $B^{0}$ meson to $a_{1}^{-} \pi^{+}$ assuming no penguin contributions
+\begin{verbatim}
+Decay B0
+1.000 a_1-  pi+      SVS_CP_ISO beta dm 0.0 1.0 0.0 1.0 0.0
+                                              1.0 0.0 1.0 0.0
+                                              1.0 gamma 3.0 -gamma
+                                              3.0 gamma 1.0 -gamma
+                                              0.0  0.0  0.0 0.0;
+
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see section~\ref{sect:cpviolation}.
+
+
+\Model{SVS\_NONCPEIGEN}
+
+\label{svsnoncpeigen}
+
+\Auth{Natalia,Ryd}
+
+\Usage{V S}{\\[0.05truein] 
+	\begin{tabular}{ll} 
+	alpha dm flip 
+   &  |$A_{f}$| arg$A_{f}$ |$\overline{A}_{f}$| arg$\overline{A}_{f}$ 
+		\\[0.05truein]
+   & |$A_{\overline{f}}$| arg$A_{\overline{f}}$
+   |$\overline{A}_{\overline{f}}|$ args$\overline{A}_{\overline{f}}$; 
+	[these are optional]\\
+	\end{tabular}
+}
+
+\Expl
+This model allows to generate scalar $\rightarrow$ vector + scalar
+decays, where the final state is not a CP-eigenstate.  The {\tt flip}
+parameter sets the fraction of $f$ to $\bar f$ decays, where the state
+specified in the .DEC table is considered the ``$f$'' state.  Set it
+to 0 to always get the final $f$ case, and to 1 to always get the
+$\overline{f}$ final state. Otherwise, set it to 0.5 to get the
+physical situation. This model automatically generates the correct
+number of $B^{0}$ and $\bar{B}^{0}$ tags, depending on the specified
+amplitudes.
+
+Note that the last four parameters are optional. If they are not
+specified, then they are evaluated from the following relations
+between the complex amplitudes:
+%%%
+\begin{eqnarray}
+          A_{\overline f} &=& \overline A_f \nonumber\\
+\overline A_{\overline f} &=&           A_f  
+\label{eq:svs_noncpeigen}
+\end{eqnarray}
+
+\Example
+This example will generate a mixture of $a_1^+ \pi^-$ and $a_1^- \pi^+$
+final states with the appropriate number of $B^0$ and $\bar B^0$ tags.
+Note that the last 4 parameters could have been omitted, since they 
+agree with Eq.~(\ref{eq:svs_noncpeigen})
+
+\begin{verbatim}
+Alias MYB B0
+Decay Upsilon(4S)
+1.00  MYB B0
+Enddecay
+Decay MYB
+1.000 a_1- pi+    SVS_NONCPEIGEN alpha dm 0.5 
+                                           1.0 0.0 3.0 0.0 
+                                           3.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+For $B \rightarrow D{*\pm}\pi^\mp$, use the CKM phase betaPlusHalfGamma.
+
+{\bf Note:} Temporarily, this model only works for B0, not anti-B0. This
+will be fixed later.
+
+%Note that 0.5 will $50\%$ of the time charge conjugate the final state
+%$a_1^-\pi^+$ and that the tag $B$, the other $B$ in the $\Upsilon(4S)$ decay
+%will be selected as either a $B^0$ or a $\bar B^0$ according to the
+%amplitudes that are specified. Also, note that the $B$ that decays into
+%the CP mode has to be an alias for either a $B^0$ or a $\bar B^0$, it
+%can not be a $B^0$ or a $\bar B^0$ directly, since the {\tt SVS\_NONCPEIGEN}
+%model will create the other $B$ either as a $B^0$ or a $\bar B^0$!
+
+
+\Notes
+For more details about the treatment of CP violating decays 
+see Section~\ref{sect:cpviolation}.
+
+
+
+\Model{SVV\_CP}
+
+\label{svvcp}
+
+\Auth{Ryd}
+
+\Usage{V1 V2}{BETA dm eta |G1+| argG1+ |G0+| argG0+\\ |G1-| argG1-;}
+
+\Expl
+Decay of a scalar to two vector mesons and allows for CP violating 
+time asymmetries. The first argument is the relevant CKM
+angle in radians. The second argument is the $B^0-\bar B^0$ mass difference
+in s$^{-1}$ (approximately $0.5\times 10^{12}$). 
+The next argument is called $\eta$ in Ref.~\cite{Duni91} and
+is either $+1$ or $-1$. The last six arguments are $G_{1+}$,
+$G_{0+}$, and $G_{1-}$, and are expressed as their absolute values
+and phases again the definition of these parameters are in Ref.~\cite{Duni91}.
+This model then uses these amplitudes 
+together with the time evolution of the
+$B\bar B$ system and the flavor of the other
+$B$ to generate the time distributions.
+
+
+\Example
+This example decays the $B^0$ meson to $J/\Psi K^{*0}$
+\begin{verbatim}
+Decay B0
+1.000 J/psi  K*0        SVV_CP beta dm 1.0 1.0 0.0 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see Section~\ref{sect:cpviolation}. Note that the value of $\eta$
+depends on how the $K^{*0}$ decays, it is either $+1$ or $-1$ 
+depending on weather a $K_S$ or a $K_L$ is produced. (It needs
+to be checked which sign goes with the $K_S$ and the $K_L$.
+
+
+
+
+
+\Model{SVV\_CPLH}
+
+\label{svvcplh}
+
+\Auth{Ryd}
+
+\Usage{V1 V2}{BETA dm eta |G1+| argG1+ |G0+| argG0+\\ |G1-| argG1-;}
+
+\Expl
+Decay of a scalar to two vector mesons and allows for CP violating 
+time asymmetries including different lifetimes for the different
+mass eigenstates, the Light and Heavy state. This model is particularly
+intended for decays like $B_s\rightarrow J/\psi \phi$. The first argument is 
+the relevant CKM angle in radians. The second argument is the 
+$B_s-\bar B_s$ mass difference
+in s$^{-1}$ ($>1.8\times 10^{12}$). 
+The width difference is not an input parameter to the model.
+It is determined via the definition of B\_s0L and B\_s0H in the evt.pdl.
+%The third argument is the widht
+%difference between the two states. Given in units of mm, i.e. 
+%$c\hbar/(\Delta \Gamma)$.
+The next argument is called $\eta$ in Ref.~\cite{Duni91} and
+is either $+1$ or $-1$. The last six arguments are $G_{1+}$,
+$G_{0+}$, and $G_{1-}$, and are expressed as their absolute values
+and phases again the definition of these parameters are in Ref.~\cite{Duni91}.
+This model then uses these amplitudes 
+together with the time evolution of the $B_s$ to generate the time
+dependent angular distributions.
+
+
+\Example
+This example decays the $B_s$ meson to $\phi K^{*0}$
+\begin{verbatim}
+Decay B_s0
+1.000   J/psi  phi   SVV_CPLH  0.4 3.0e12 2.0 1 1.0 0.0 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+For more details about the treatment of CP violating decays 
+see Section~\ref{sect:cpviolation}. This code is not well tested
+at all. Please be aware that there can be serious mistakes in
+this model!
+
+
+
+\Model{SVS\_CPLH}
+
+\label{svscplh}
+
+\Auth{Ryd}
+
+\Usage{V S}{dm dGoG |q/p|  arg(q/p) |Af| arg(Af) |Abarf| arg(Abarf);}
+
+\Expl
+Decay of a neutral $B$ meson to a scalar and a vector CP eigenstate,
+e.g. $B^0\to J/\psi K_S$. The first argument is the $B^0-\bar B^0$ 
+mass difference. The second argument in $\Delta\Gamma/\Gamma$. The 
+third and fourth argument is the magnitude and phase of $q/p$, and the 
+last four arguments are the magnitude and phases of the amplitude
+for $B^0$ and $\bar B^0$ to decay to the final state $f$.
+
+
+
+\Example
+This example decays the $B^0$ meson to $J/\psi K_S$
+\begin{verbatim}
+Decay B0
+1.000   J/psi  K_S0   SVS_CPLH  0.472e12 0.1  1.0  0.7  1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+%\Notes
+
+
+
+\Model{SVV\_NONCPEIGEN}
+
+\label{svvnoncpeigen}
+
+\Auth{ Kurup}
+
+\Usage{V1 V2}{\\[0.05truein] 
+	\begin{tabular}{lll} 
+ dm beta gamma  
+& |$A_{+f}$| arg$A_{+f}$ |$A_{0f}$| arg$A_{0f}$ |$A_{-f}$| arg$A_{-f}$ 
+	&\\[0.05truein]
+%
+& |$\overline{A}_{+f}$| arg$\overline{A}_{+f}$ |$\overline{A}_{0f}$|
+ arg$\overline{A}_{0f}$ |$\overline{A}_{-f}$| arg$\overline{A}_{-f}$
+	&\\[0.05truein]
+%
+& |$A_{+\overline{f}}$| arg$A_{+\overline{f}}$ |$A_{0\overline{f}}$|
+ arg$A_{0\overline{f}}$ |$A_{-\overline{f}}$| arg$A_{-\overline{f}}$
+	&[optional] \\[0.05truein]
+%
+& |$\overline{A}_{+\overline{f}}$| arg$\overline{A}_{+\overline{f}}$
+|$\overline{A}_{0\overline{f}}$| arg$\overline{A}_{0\overline{f}}$
+|$\overline{A}_{-\overline{f}}$| arg$\overline{A}_{-\overline{f}}$;
+&[optional]\\ 
+\end{tabular}
+}
+
+\Expl
+This model is based on the SVS\_NONCPEIGEN model and allows the
+generation of CP violation in scalar~$\rightarrow$~vector~+~vector
+decays, where the final state is not a CP-eigenstate.  The first
+argument is the $B^0-\bar B^0$ mass difference. The second argument
+is the angle beta.  The third argument is the angle relevant to the
+decay mode being generated.  In the example below it is gamma (in
+fact, it's enough to specify 2~beta~+~gamma, perhaps in the next
+round of fixes).  The next 24 arguments are the magnitudes and phases
+of the amplitudes for the four types of decay, $A_f$, $\overline
+A_f$, $A_{\overline f}$ and $\overline A_{\overline f}$, which are
+split into the three different helicity states +, 0 and $-$.
+Depending on the specified amplitudes, the final state will be charge
+conjugated and the correct number of $B^0$ and $\bar B^0$ tags are
+generated.
+
+Note that the last 12 parameters are optional. If they are not
+specified, then they are evaluated according to the following relation
+between the complex amplitudes (with $i=+,0,-$):
+%%%
+\begin{eqnarray}
+          A_{i \overline f} &=& \overline A_{if} \nonumber\\
+\overline A_{i \overline f} &=&           A_{if}  
+\label{eq:svv_noncpeigen}
+\end{eqnarray}
+
+
+\Example
+This example will generate $B \rightarrow D^{*\pm} \rho^\mp$ 
+final states with the appropriate number of $B^0$ and $\bar B^0$ tags.
+The helicity amplitude parameters chosen for the first line are those
+measured by CLEO. The amplitudes on the second line are identical, but
+suppressed by a factor of 100. The last two lines were omitted, so that
+Eq~(\ref{eq:svv_noncpeigen}) takes effect:
+%%
+\begin{verbatim}
+Alias MYB B0
+Decay Upsilon(4S)
+1.00  MYB anti-B0
+Enddecay
+Decay MYB
+1.000 D*- rho+    SVV_NONCPEIGEN dm beta gamma  
+                                 0.152   1.47 0.936   0 0.317   0.19 
+                                 0.00152 1.47 0.00936 0 0.00317 0.19; 
+Enddecay
+\end{verbatim}
+
+{\bf Note:} Temporarily, this model only works for B0, not anti-B0. This
+will be fixed later.
+
+
+\Model{SVV\_HELAMP}
+
+\label{svvhelamp}
+
+\Auth{Ryd}
+
+\Usage{V1 V2}{|H+| argH+ |H0| argH0 |H-| argH-; }
+
+\Expl
+The decay of a scalar to two vectors. The decay amplitude is
+specified by the helicity amplitudes which are given as  arguments
+for the decay. The arguments are $H_+$, $H_0$, and $H_-$. Where
+these complex amplitudes are specified as magnitude and phase.
+The convention for the helicity amplitudes are that of 
+Jacob and Wick (at least I hope this is what it is!).
+For more details about helicity amplitudes see 
+Section~\ref{sect:helampconventions}.
+
+\Example
+\begin{verbatim}
+Decay D0
+1.000 K*0 rho0           SVV_HELAMP 1.0 0.0 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+
+
+
+
+
+
+\Model{TAULNUNU}
+
+\Auth{Ryd}
+
+\Usage{L N1 N2}{;}
+
+\Expl
+The decay of a tau to a lepton and two neutrinos. The first
+daughter is the produced lepton the second is the associated
+neutrino and the third is the tau neutrino. 
+The amplitude for this decay is given by 
+$A=\langle \tau | (V-A)_{\alpha} | \nu_{\tau} \rangle
+   \langle \ell | (V-A)^{\alpha} | \nu_{\ell} \rangle$.
+ 
+
+\Example
+The example shows the decay $\tau\rightarrow e\nu_{e}\bar\nu_tau$
+\begin{verbatim}
+Decay tau-
+1.000 e- anti-nu_e  nu_tau              TAULNUNU;
+Enddecay
+\end{verbatim}
+
+
+
+
+
+\Model{TAUSCALARNU}
+
+\label{tauscalarnu}
+
+\Auth{Ryd}
+
+\Usage{S N}{}
+
+\Expl
+The decay of a tau to a scalar meson and a tau neutrino.
+The meson is the first daughter.
+The amplitude for this decay is given by 
+$A=\langle \tau | (V-A)_{\alpha} | \nu_{\tau} \rangle P^{\alpha}$.
+
+\Example
+An example of the use of this model is in the decay 
+$\tau\rightarrow \pi\nu_{\tau}$
+
+\begin{verbatim}
+Decay tau-
+1.000 pi-   nu_tau              TAUSCALARNU;
+Enddecay
+\end{verbatim}
+
+
+\Model{TAUVECTORNU}
+
+\label{tauvector}
+
+\Auth{Ryd}
+
+\Usage{V N}{}
+
+\Expl
+The decay of a tau to a vector meson and a tau neutrino.
+The meson is the first daughter.
+The amplitude for this decay is given by 
+$A=\langle \tau | (V-A)_{\alpha} | \nu_{\tau} \rangle \varepsilon^{\alpha}$.
+
+\Example
+An example of the use of this model is in the decay 
+$\tau\rightarrow \rho\nu_{\tau}$
+
+\begin{verbatim}
+Decay tau-
+1.000 rho-   nu_tau              TAUVECTORNU;
+Enddecay
+\end{verbatim}
+
+
+
+\Model{TSS}
+
+\label{tss}
+
+\Auth{Ryd}
+
+\Usage{S1 S2}{}
+
+\Expl
+The decay of a tensor particle to two scalar mesons.
+
+\Example
+As an example the decay $D_2^{*0}\rightarrow D^0\pi^0$is used.
+\begin{verbatim}
+Decay D_2*0
+1.000 D0   pi0              TSS;
+Enddecay
+\end{verbatim}
+
+
+
+\Model{TVS\_PWAVE}
+
+\Auth{Ryd}
+
+\Usage{V S}{|P| argP |D| argD |F| argF;}
+
+\Expl
+The decay of a tensor particle to a vector and a scalar. The decay
+takes six arguments, which parameterizes the $P$, $D$, and $F$
+wave amplitudes. The first two arguments are the magnitude 
+and the phase of the $P$-wave amplitude, the third and forth
+are the $D$-wave amplitude and the last two are the $F$-wave
+amplitude. 
+
+\Example
+The decay $D_2^{*0}\rightarrow D^{*0} \pi^0$ which is expected, 
+by HQET, to be dominated by $D$ wave.
+\begin{verbatim}
+Decay D_2*0
+1.000 D*0 pi0           TVS_PWAVE 0.0 0.0 1.0 0.0 0.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model has only been used yet for $D$-wave so
+further test are needed before it is safe to use for nonzero
+$P$ and $F$ wave amplitudes.
+
+
+
+
+\Model{VECTORISR}
+
+\label{vectorisr}
+
+\Auth{Zallo,Ryd}
+
+\Usage{VECTOR GAMMA}{CSFWMN CSBKMN;}
+
+\Expl
+Generates the interaction, $e^+ e^- \rightarrow V \gamma$ where $V$
+is a vector meson according
+to~\cite{Bonn71}. This model should be used as a decay of the {\tt vpho}.
+
+\Example
+Example below shows how to generate the $\phi\gamma$ final state from
+an virtual photon.
+\begin{verbatim}
+Decay vpho
+1.000 phi gamma                    VECTORISR 0.878 0.95;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model produces an unpolarized vector meson.
+
+
+
+\Model{VLL}
+
+\label{vll}
+
+\Auth{Ryd}
+
+\Usage{L1 L2}{;}
+
+\Expl
+Decay of a vector meson to a pair of charged leptons, e.g., 
+$J/\psi\rightarrow\ell^+\ell^-$. The amplitude for this
+process is given by $A=\varepsilon^{\mu}L_{\mu}$ where
+$L_{\mu}=\langle \ell | V_{\mu} | \bar\ell \rangle$.
+
+\Example
+The example shows how to generate $J/\Psi \rightarrow e^-e^+$
+\begin{verbatim}
+Decay J/psi
+1.000 e- e+     VLL;
+Enddecay
+\end{verbatim}
+
+
+
+
+
+
+
+
+
+
+\Model{VSP\_PWAVE}
+
+\label{vsppwave}
+
+\Auth{Ryd}
+
+\Usage{S gamma}{;}
+
+\Expl
+The decay of a vector to a scalar meson and a photon, the decay 
+goes in P-wave. The first daughter is the scalar meson and the second
+daughter is the photon. 
+
+\Example
+This decay is useful for example in the decay $D^{*0}\rightarrow D^0\gamma$
+\begin{verbatim}
+Decay D*0
+1.000 D0  gamma                    VSP_PWAVE;
+Enddecay
+\end{verbatim}
+
+
+
+\Model{VSS}
+
+\label{vss}
+
+\Auth{Ryd}
+
+\Usage{S1 S2}{;}
+
+\Expl
+Decays a vector particle into two scalars. It generates the 
+correct decay angle distributions for the produced scalars.
+The amplitude for this decay is given by 
+$A=\varepsilon^{\mu}v_{\mu}$ where $\varepsilon$ is the 
+polarization vector of the parent particle and the $v$ is the
+(four) velocity of the first daughter.
+
+\Example
+The example shows how to generate $D^{*+} \rightarrow D^{0}\pi^+$
+\begin{verbatim}
+Decay D*+
+1.000 D0 pi+   VSS;
+Enddecay
+\end{verbatim}
+
+
+
+\Model{VSS\_MIX}
+
+\label{vssmix}
+
+\Auth{Ryd}
+
+\Usage{B1 B2}{dm;}
+
+\Expl
+Decays a vector particle into two scalar and generates the
+correct angular and time distributions for the particles  in the
+decay $\Upsilon(4S) \rightarrow B^0\bar B^0$. The mass
+difference is supplied as an argument to the model
+
+\Example
+The example shows how to generate the mixture of mixed and
+unmixed $B^0$ and $\bar B^0$ events.
+\begin{verbatim}
+Define dm 0.474e12
+Decay Upsilon(4S)
+0.420 B0      anti-B0                         VSS_MIX dm;
+0.040 anti-B0 anti-B0                         VSS_MIX dm;
+0.040 B0      B0                              VSS_MIX dm;
+Enddecay
+\end{verbatim}
+
+\Notes
+The user has to manually specify the fractions of mixed and un-mixed event
+through the branching fraction. This means that all this model does is to
+generate the right time distribution for the given final state.  Use the
+new VSS\_BMIX model to generate mixing in the correct proportions using a
+single decay channel.  See Section~\ref{sect:cpviolation} for more details
+about how mixing is implemented and how it works with CP violation.
+
+
+\Model{VSS\_BMIX}
+
+\label{vssbmix}
+
+\Auth{Kirkby}
+
+\Usage{B1 B2}{dm;}
+
+\Expl
+Decays a C=-1 vector particle into two scalar particles using $B^0 \bar
+B^0$-like coherent mixing. The two possible daughter particles must be
+charge conjugates and have the same lifetime. Their mass difference is
+supplied as an argument to the model, in units of $\hbar$/s.  
+While the mass difference is a required arguement, $\Delta \Gamma / \Gamma$
+and $\vert q/p \vert$ can be supplied as optional arguements,
+with defaults of 0 and 1 respectively.  The examples below
+illustrate how this model accomadates aliased daughters.
+
+\Example
+The example shows how to generate $\Upsilon(4S)\rightarrow B^0 \bar
+B^0$ decays with coherent mixing (but without CP violating effects).
+\begin{verbatim}
+Define dm 0.474e12
+Decay Upsilon(4S)
+  1.0 B0  anti-B0  VSS_BMIX dm;
+Enddecay
+\end{verbatim}
+to include a non-zero $\Delta \Gamma / \Gamma$:
+\begin{verbatim}
+Define dm 0.474e12
+Define dgog 0.5
+Decay Upsilon(4S)
+  1.0 B0  anti-B0  VSS_BMIX dm dgog;
+Enddecay
+\end{verbatim}
+and to specify $\vert q / p \vert$
+\begin{verbatim}
+Define dm 0.474e12
+Define dgog 0.5
+Define qoverp 1.2
+Decay Upsilon(4S)
+  1.0 B0  anti-B0  VSS_BMIX dm dgog qoverp;
+Enddecay
+\end{verbatim}
+Finally, aliased particles can be generated using
+this model
+\begin{verbatim}
+Define dm 0.474e12
+alias myB0 B0
+alias myanti-B0 anti-B0
+Decay Upsilon(4S)
+  1.0 B0  anti-B0 myB0 myanti-B0 VSS_BMIX dm;
+Enddecay
+\end{verbatim}
+generates either {\tt B0 myanti-B0},
+{\tt anti-B0 myanti-B0},
+{\tt myB0 anti-B0}, or
+{\tt myB0 B0}.
+
+\Notes
+This model is similar to the VSS\_MIX model, but it eliminates the need to
+manually specify the fractions of mixed and un-mixed events through
+branching fractions. This approach has the effect that the resulting mixing
+distributions are necessarily self consistent, which is not true for the
+VSS\_MIX model when using the wrong branching fractions.  See
+Section~\ref{sect:cpviolation} for more details about how mixing is
+implemented and how it works with CP violation.
+
+\Model{VVPIPI}
+
+\label{vvpipi}
+
+\Auth{Ryd}
+
+\Usage{V S S}{;}
+
+\Expl
+This decay model was constructed for the decay 
+$\psi'\rightarrow J/\psi \pi^+\pi^-$ but should work
+for any $V\rightarrow V' \pi\pi$ decay in which the
+approximation that the $\pi\pi$ system can be treated
+as one particle which combined with the $V'$ meson
+is dominated by $S$-wave. The amplitude for the
+mass of the $\pi\pi$ sstem is given by 
+$A\propto (m^2_{\pi\pi}-4m^{2}_{\pi})$.
+
+\Example
+\begin{verbatim}
+Decay psi(2S)
+1.000 J/psi pi+ pi-           VVPIPI;
+Enddecay
+\end{verbatim}
+
+%\Notes
+
+
+
+
+
+\Model{VVS\_PWAVE}
+
+\label{vvspwave}
+
+\Auth{Ryd}
+
+\Usage{V S}{|S| argS |P| argP |D| argD; }
+
+\Expl
+The decay of a vector particle to a vector and a scalar. The decay
+takes six arguments, which parameterizes the $S$, $P$, and $D$
+wave amplitudes. The first two arguments are the magnitude 
+and the phase of the $S$-wave amplitude, the third and forth
+are the $P$-wave amplitude and the last two are the $D$-wave
+amplitude. 
+
+\Example
+The example below shows how to decay the $a_1^0$ in pure 
+$P$ wave to $\rho\pi$.
+\begin{verbatim}
+Decay a_10
+1.000 rho0 pi0           VVS_PWAVE 0.0 0.0 1.0 0.0 0.0 0.0;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model has only been used yet for $P$-wave so
+further test are needed before it is safe to use use
+for nonzero $S$ and $D$ wave amplitudes.
+
+
+
+
+
+\Model{WSB}
+
+\label{wsb}
+
+\Auth{Lange, Ryd}
+
+\Usage{M L N}{;}
+
+\Expl
+This is a model for semileptonic decays of $B$, and $D$ mesons 
+according to the WSB model~\cite{Wirbel85}. The first daughter
+is the meson produced in the semileptonic decay. The second and third
+argument is the lepton and the neutrino respectively.
+See Section~\ref{semileptonic} for more details about semileptonic
+decays.
+
+
+\Example
+The example shows how to generate $\bar B^0\rightarrow D^{*+}e\bar\nu$
+\begin{verbatim}
+Decay anti-B0
+1.000 D*+ e- anti-nu_e     WSB;
+Enddecay
+\end{verbatim}
+
+\Notes
+This model does not include the $A_3$ form factor that is 
+needed for non-zero mass leptons, i.e., tau's. If tau's
+are generated the $A_3$ form factor will be zero.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

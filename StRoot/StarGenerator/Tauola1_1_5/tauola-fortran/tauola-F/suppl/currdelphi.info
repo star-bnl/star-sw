@@ -1,0 +1,21 @@
+                                                                         26 Dec 1999
+
+The currdelphi.for file contains the formfactors for 4-pion final states
+as fitted by Frans Verbeure of Delphi. 
+
+It was used in the following publication:
+A study of the hadronic resonance structure in the decay
+$\tau\rightarrow 3\pi\nu_{\tau}$, P. Abreu et al., Phys. Lett. B426
+(1998) 411 
+
+It is strongly recommended to reproduce some numbers from this paper before using the code.
+Note that the entries from common blocks  PARMAS DECPAR are used in currdelphi.for
+and if modified (e.g. modern defaults used), may lead to different results. 
+
+Please contact  VERBEURE@vxcern.cern.ch  when using this code.
+
+
+
+
+
+

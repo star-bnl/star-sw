@@ -1,0 +1,156 @@
+Message from PHCORK(MODCOR):: initialization
+MODOP=5 -- corrects Energy from mass+flow
+
+********************************************************************************
+
+                            =========================
+                              PHOTOS, Version:  3.60
+                              Released at:  26/4/15
+                            =========================
+
+                     Photos QED corrections in Particle Decays
+
+           Monte Carlo Program - by E. Barberio, B. van Eijk and Z. Was
+           From version 2.09   - by P. Golonka and Z. Was
+           From version 3.00   - by N. Davidson, T. Przedzinski and Z. Was
+********************************************************************************
+
+                  Internal (default) input parameters:
+
+                    INTERF= 1 ISEC= 0 ITRE= 0 IEXP= 1 IFTOP= 1 IFW= 1
+                    ALPHA_QED= 0.00729735 XPHCUT= 1e-07
+
+                    Option with interference is active
+                    Option with exponentiation is active EPSEXP=0.0001
+                    Emision in t tbar production is active
+                    Correction wt in decay of W is active
+
+          WARNING:  /HEPEVT/ is not anymore used.
+
+********************************************************************************
+MODOP=2 -- blocks emission in Kl  to gamma e+e-: DEFAULT
+MODOP=2 -- blocks emission in pi0 to gamma e+e-: DEFAULT
+ IPHQRK_setQarknoEmission MODOP=1 -- blocks emission from light quarks:  DEFAULT
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 5.00577e-12 5.68079e-12 -3.56672e-07 91.1705
+
+Vector Sum: -2.77799e-06 6.10045e-07 2.31994e-06 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.91491e-12 -2.36255e-12 4.15312e-12 91.1705
+
+Vector Sum: 1.86713e-06 2.21629e-06 -5.51962e-07 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -7.3257e-12 1.6076e-12 -6.99529e-12 91.1705
+
+Vector Sum: -8.57769e-12 1.88202e-12 -8.08989e-12 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 3.10862e-15 3.55271e-15 2.93099e-14 91.1705
+
+Vector Sum: 3.10862e-15 3.55271e-15 2.93099e-14 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.24345e-14 -8.88178e-16 1.02307e-12 91.1705
+
+Vector Sum: -1.24345e-14 -8.88178e-16 1.02307e-12 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 1.77636e-15 -1.77636e-15 2.14371e-11 91.1705
+
+Vector Sum: 6.77353e-07 5.2679e-07 -6.71724e-07 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -7.77156e-16 -1.11022e-16 -5.03336e-10 91.1705
+
+Vector Sum: 5.87117e-15 -7.76506e-15 -5.03314e-10 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.40119e-11 -2.62279e-12 1.37937e-06 91.1705
+
+Vector Sum: -1.40119e-11 -2.62279e-12 1.37937e-06 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.55271e-15 1.77636e-15 -1.07021e-06 91.1705
+
+Vector Sum: -3.55271e-15 1.77636e-15 -1.07021e-06 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 9.9929e-12 8.03002e-12 -7.59311e-08 91.1705
+
+Vector Sum: -2.54852e-09 -1.77943e-09 -7.52436e-08 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 5.4925e-12 -8.78408e-13 -9.82387e-08 91.1705
+
+Vector Sum: 3.59821e-08 -1.84307e-09 -8.44229e-08 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 4.8006e-12 1.12488e-12 -1.7104e-06 91.1705
+
+Vector Sum: 4.8006e-12 1.12488e-12 -1.7104e-06 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.55271e-15 0 -3.48181e-08 91.1705
+
+Vector Sum: -1.34686e-06 4.54478e-09 -3.4247e-06 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -4.78084e-12 -1.95144e-12 -5.89861e-12 91.1705
+
+Vector Sum: -4.78084e-12 -1.95144e-12 -5.89861e-12 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.77636e-15 0 3.11307e-13 91.1705
+
+Vector Sum: -1.77636e-15 0 3.11307e-13 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 5.2367e-12 2.54907e-12 7.74199e-08 91.1705
+
+Vector Sum: 5.5149e-12 2.68342e-12 7.742e-08 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -4.5306e-12 -1.53078e-12 4.38479e-09 91.1705
+
+Vector Sum: -2.7057e-07 2.38746e-07 -6.7473e-07 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 1.72307e-12 4.00746e-12 2.27871e-11 91.1705
+
+Vector Sum: 1.72307e-12 4.00746e-12 2.27871e-11 91.1705
+
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.55271e-15 0 -1.6378e-12 91.1705
+
+Vector Sum: -3.55271e-15 0 -1.6378e-12 91.1705
+
+Summary (whole event processing):
+100     events processed
+33      times one photon added to the event             (33%)
+8       times two photons added to the event            (8%)
+3       times more than two photons added to the event  (3%)
+
+(Contrary to results from MC-Tester, these values are technical and infrared unstable)
+

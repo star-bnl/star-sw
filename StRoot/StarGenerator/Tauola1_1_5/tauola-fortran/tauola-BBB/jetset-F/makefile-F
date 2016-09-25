@@ -1,0 +1,33 @@
+include ../../make.inc
+COMMAND = demo.exe
+COMMAND_OBJECTS = demo.o tauface-jetset.o tauola_photos_ini.o
+EXTER_LIB4  = ../glib.a
+CERNLIB = ../..
+JETSET =  ${CERNLIB}/jetset/jetset.a
+PHOTOS =  ${CERNLIB}/photos/glib.a 
+CLIBS = $(JETSET) $(PHOTOS)
+############
+all:	$(COMMAND)
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+$(EXTER_LIB4):
+	cd ..; make
+$(JETSET):
+	cd ${CERNLIB}/jetset; make
+$(PHOTOS):
+	cd $(CERNLIB)/photos; make	
+# Link procedure
+$(COMMAND): $(COMMAND_OBJECTS) $(EXTER_LIB4) $(CLIBS)
+	$(LD) -o  $@ $(LDFLAGS) $(COMMAND_OBJECTS) $(EXTER_LIB3) $(EXTER_LIB4) $(CLIBS) 
+clean:                                                     
+	rm -f *.o *.a  *~ *.exe
+Clean:	clean
+	cd prod; rm -f  *~ *.out *.ntup
+
+run:
+	@echo " this run will take some time:        "
+	cd prod; sh go
+	@echo " make a choice:           "
+	@echo " diff prod/demo.authors   prod/demo.out "
+	@echo " diff prod/demo.babar prod/demo.out "
+	@echo " diff prod/demo.belle  prod/demo.out "

@@ -1,0 +1,117 @@
+\section{EvtGen interface}
+\label{sect:interface}
+\index{API}
+
+
+
+The EvtGen package supplies a test program, testEvtGen.cc, which
+provides a main routine that tests various functions of the
+EvtGen package. However, a user of the EvtGen package is not
+expected to use this program in his application. Instead 
+it is expected that the event loop needed to generate the 
+events is written externally and invokes routines in EvtGen 
+to do initialization and event generation. This section
+describes the various functions that makes the user 
+interface. 
+
+The interface is provided through the class {\tt EvtGen} that
+provides member functions to do initialization of the
+generator, normally prior to generating events, and to
+generate events. It also provides access to controll of
+various configurations parameters that are used to control
+the generator.
+
+Initialization of the generator is done with the function
+\begin{verbatim}
+void EvtGen::init(char* decay, char* pdt, char *udecay);
+\end{verbatim} 
+where {\tt decay} is the name of the decay table to use, 
+{\tt pdt} is the name of the particle property file that is
+used by EvtGen and {\tt udecay} is the optional name of a
+user decay table that is read after the main decay table,
+{\tt decay}. If {\tt udecay} is either an empty string or
+an NULL pointer then no user decay file is read.
+If you want to read additional decay files this can be
+done with the 
+\begin{verbatim}
+EvtDecayTable::ReadDecay(char * decay);
+\end{verbatim}
+member function. 
+
+EvtGen can after this initialization be asked to generate one
+event at the time by calling the member function
+\begin{verbatim}
+void EvtGen::event(int stdhepid,LorentzVector p,LorentzVector d);
+\end{verbatim}
+where {\tt stdhepid} is the particle number according to the stdhep
+particle numbering scheme. {\tt p} is a four-vector giving the 
+initial momentum and energy of the initial particle. Similarly.
+{\tt d} gives the initial vertex and time for the initial particle.
+This function will generate an event and then store it in the
+stdhep comon block, {\tt hepevt}. This is the most convenient 
+form for having EvtGen to generate an event. In some test that
+are internal to EvtGen it is not an advantage to have EvtGen
+fill the stdhep common block. Instead these test work with
+the internal EvtGen structures. Here the user will need to create the
+initial particle and then generate the decay with the
+memebr function
+\begin{verbatim}
+void EvtGen::event(EvtParticle* p);
+\end{verbatim}
+Note that here the user is also responsible for destroying the 
+the created decay structure. This is done by
+\begin{verbatim}
+p->deleteTree();
+\end{verbatim}
+
+For the convienence of users more familar with fortran, we
+have also provided a fortran frontend to the {\tt EvtGen} 
+interface described above.  There are three necesary files:
+\begin{itemize}
+\item {\tt top.cc}
+\item {\tt myfunc.F}
+\item {\tt evtgenevent\_.cc}
+\end{itemize}
+
+The first of these simply is the main that calls 
+{\tt myfort.F}.  In order to link with a C++ compiler,
+there must be a main writen in C++.  {\tt evtgeninit\_}
+and {\tt evtgenevent\_}
+are the routines that actually call the {\tt EvtGen:Init}
+and {\tt EvtGen:Decay} routines.  These routine handles
+the initialization of EvtGen as well as
+the deletion of the particle tree from memory when it
+is no longer needed.  {\tt evtgenint\_} takes three 
+arguements, and is declared as
+\begin{verbatim}
+void evtgeninit_(char *decayname, char *udecayname, char *pdttablename)
+\end{verbatim}
+{\tt evtgenevent\_} also takes three
+input arguments:
+\begin{verbatim}
+void evtgenevent_(float *pos, float *tim, int *parent) 
+\end{verbatim}
+{\tt pos} is an array that contains the initial x, y, and
+z position of the particle.  {\tt tim} is the production
+time of the particle.  {\tt parent} is the standard HEP
+number of the particle.  The EvtGen output is returned
+in the standard HEP common block defined in {\tt stdhep/stdhep.inc}
+{\tt myfort.F} is the fortran
+routine that should be modified to suit your needs.  By
+default it will generate one event with a $B^0$ meson
+as the parent.  
+
+It is straightforward to modify this interface structure
+in order to include EvtGen inside of a larger fortran
+program.  {\tt top.cc} should be modified to call
+whichever routine is currently the top fortran routine.
+The routine {\tt myfort.F} can then be modified to suit
+your needs. 
+
+
+
+
+
+
+
+

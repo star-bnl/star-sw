@@ -1,0 +1,69 @@
+Message from PHCORK(MODCOR):: initialization
+MODOP=5 -- corrects Energy from mass+flow
+
+********************************************************************************
+
+                            =========================
+                              PHOTOS, Version:  3.60
+                              Released at:  26/4/15
+                            =========================
+
+                     Photos QED corrections in Particle Decays
+
+           Monte Carlo Program - by E. Barberio, B. van Eijk and Z. Was
+           From version 2.09   - by P. Golonka and Z. Was
+           From version 3.00   - by N. Davidson, T. Przedzinski and Z. Was
+********************************************************************************
+
+                  Internal (default) input parameters: 
+
+                    INTERF= 1 ISEC= 0 ITRE= 0 IEXP= 1 IFTOP= 1 IFW= 1
+                    ALPHA_QED= 0.00729735 XPHCUT= 1e-07
+
+                    Option with interference is active
+                    Option with exponentiation is active EPSEXP=0.0001
+                    Emision in t tbar production is active
+                    Correction wt in decay of W is active
+
+          WARNING:  /HEPEVT/ is not anymore used.
+
+********************************************************************************
+MODOP=2 -- blocks emission in Kl  to gamma e+e-: DEFAULT
+MODOP=2 -- blocks emission in pi0 to gamma e+e-: DEFAULT
+ IPHQRK_setQarknoEmission MODOP=1 -- blocks emission from light quarks:  DEFAULT
+ ##############
+ PHODMP: BEFORE
+ ##############
+0================================================================================
+                              Event No.:         0
+0      Particle Parameters
+0 Nr   Type   Parent(s)  Daughter(s)      Px       Py       Pz       E    Inv. M.
+    1     11      0         3 -    3     0.00     0.00    45.52    45.52     0.00
+    2    -11      0         3 -    3     0.00     0.00   -45.58    45.58     0.00
+    3     23   1 -    2     4 -    5     0.00     0.00    -0.06    91.11    91.11
+    4     15      3         6 -    7   -23.19   -26.31   -29.05    45.57     1.78
+    5    -15      3         8 -    9    23.19    26.31    28.98    45.53     1.78
+    6     16      4         Stable      -1.26    -1.80    -1.38     2.59     0.01
+    7   -211      4         Stable     -21.94   -24.51   -27.67    42.98     0.14
+    8    -16      5         Stable       8.44     8.32     9.62    15.26     0.01
+    9    211      5         Stable      14.76    17.99    19.36    30.27     0.14
+0                       Vector Sum:      0.00     0.00    -0.06    91.11    91.11
+ ##############
+ PHODMP: AFTER
+ ##############
+0================================================================================
+                              Event No.:         0
+0      Particle Parameters
+0 Nr   Type   Parent(s)  Daughter(s)      Px       Py       Pz       E    Inv. M.
+    1     11      0         3 -    3     0.00     0.00    45.52    45.52     0.00
+    2    -11      0         3 -    3     0.00     0.00   -45.58    45.58     0.00
+    3     23   1 -    2     4 -    7     0.00     0.00    -0.06    91.11    91.11
+    4     15      3         8 -    9   -23.28   -26.24   -28.87    45.47     1.78
+    5    -15      3        10 -   11    23.15    26.26    28.93    45.45     1.78
+    6     22      3         Stable       0.00     0.00     0.00     0.00     0.00
+    7     22      3         Stable       0.13    -0.02    -0.12     0.18     0.00
+    8     16      4         Stable      -1.27    -1.80    -1.37     2.60     0.01
+    9   -211      4         Stable     -22.01   -24.44   -27.50    42.88     0.14
+   10    -16      5         Stable       8.42     8.31     9.60    15.24     0.01
+   11    211      5         Stable      14.73    17.96    19.33    30.22     0.14
+0                       Vector Sum:      0.00     0.00    -0.06    91.11    91.11

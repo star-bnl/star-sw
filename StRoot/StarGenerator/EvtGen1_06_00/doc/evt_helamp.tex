@@ -1,0 +1,802 @@
+\section{Helicity amplitudes}
+\label{sect:helampconventions}
+\index{helicity amplitudes}
+
+This section will deal with some details related to helicity amplitudes
+and their relations to partial wave amplitudes. In particular 
+the sign conventions are described and
+the relations between the Jackson~\cite{Jack64} and the 
+Jackob-Wick~\cite{Jaco59} conventions
+for the helicity formalism is explained.
+
+This section is not meant as a complete guide to the use of
+helicity amplitudes. There are several references that gives a 
+good introduction to the use of helicity amplitudes for describing
+the dynamics of particle decays. Richman~\cite{Rich84} gives
+a pedagogical introduction following the conventions of
+Jacob and Wick~\cite{Jaco59}. Jackson~\cite{Jack64} uses a slightly
+different choice of conventions. One of the main purposes of this section is
+to describe these conventions and establish a map between the two
+conventions. Both of these conventions are used in the literature
+and, unfortunately, it is not always clear which convention is used. 
+
+The origin of the choice of conventions comes from how the 
+Euler angles are chosen. To make sure that there is no ambiguity
+about definitions and conventions the next section provides definitions
+for the terminology used. 
+
+\subsection{Preliminaries and definitions}
+
+A few definitions are stated explicitly here as to avoid
+confusion about what conventions are used.
+
+First, the basis vectors $\hat x$, $\hat y$, and $\hat z$ are
+said to form a right handed coordinate system if rotating the
+$\hat x$-axis 90 degrees counter-clockwise, as seen from the positive
+$\hat z$ directions, will take it to the direction of the $\hat y$
+directions. It is assumed that $\hat x$, $\hat y$, and $\hat z$ are
+mutually orthogonal. If the coordinate system is not right handed it is 
+left handed -- there is no other alternative. In the discussion
+below all coordinate systems considered are right handed.
+
+The Euler angles, $\alpha$, $\beta$, and $\gamma$ defines a 
+rotation $R(\alpha,\beta,\gamma)$ by
+\begin{equation}
+R(\alpha,\beta,\gamma)\equiv R_{z'}(\gamma)R_{y'}(\beta)R_{z}(\alpha)
+\end{equation}
+where this means that a rotation by $\alpha$ is first performed around the 
+$z$-axis. Then a rotation by $\beta$ around the $y'$-axis is done. Where
+the $y'$-axis is the new axis as obtained after the first rotation.
+Last the rotation around the new $z$-axis, $z'$, is performed by an
+amount given by $\gamma$. Note that these rotations are not according to
+a fixed set of rotation axis. This is inconvenient as the rotation operators
+that we have are with respect to a fixed coordinate system. However, 
+there is a simple way of rewriting the Euler rotation in terms of
+rotations around a fixed coordinate system,
+\begin{equation}
+R(\alpha,\beta,\gamma)=R_{z}(\alpha)R_{y}(\beta)R_{z}(\gamma).
+\end{equation}
+See e.g. Sakurai~\cite{Sakurai} page 171-174 for illustrations of the
+rotations.
+
+The $D^{J}_{m,m'}(\alpha,\beta,\gamma)$ functions are defined by
+\begin{equation}
+D^{J}_{m,m'}(\alpha,\beta,\gamma)\equiv 
+             \langle Jm|R(\alpha,\beta,\gamma)|Jm'\rangle.
+\end{equation}
+Using $d^{J}_{m,m'}(\beta)\equiv \langle Jm|e^{-i\beta J_y}|Jm'\rangle$\$ we
+can write
+\begin{equation}
+D^{J}_{m,m'}(\alpha,\beta,\gamma)=
+       e^{-im\alpha}d^{J}_{m,m'}(\beta)e^{-im'\gamma}.
+\end{equation}
+
+\subsection{Plane wave states}
+
+The state $\Psi_{p\lambda}$ denotes a state with momentum $p$
+along the $z$-axis with helicity $\lambda$. This state is obtained
+by applying a boost $L(p)$ along the $z$-axis to the state 
+$|J=s\quad m=\lambda\rangle$, where $|J m\rangle$ are the 
+canonical angular momentum states. The total angular momentum,
+$s$, is suppressed in the notation below.
+
+Following Jacob and Wick~\cite{Jaco59} we define the states $\chi_{p\lambda}$
+which have momentum $p$ along the negative $z$-direction
+\begin{equation}
+\chi_{p\lambda}=(-1)^{s-\lambda}e^{-i\pi J_y}\Psi_{p\lambda}.
+\end{equation}
+
+First we will verify that this state has the properties that
+we expect; 
+
+\begin{eqnarray}
+J_z\chi_{p\lambda} & = & J_z(-1)^{s-\lambda}e^{-i\pi J_y}\Psi_{p\lambda}\nonumber\\
+                   & = & (-1)^{s-\lambda}e^{-i\pi J_y} e^{i\pi J_y} 
+                          J_z e^{-i\pi J_y}\Psi_{p\lambda}\nonumber\\
+                   & = & (-1){s-\lambda}e^{-i\pi J_y}(-1)J_z\Psi_{p\lambda}\nonumber\\
+                   & = & -\lambda \chi_{p\lambda}
+\end{eqnarray}
+shows that the eigen value of $J_z$ is $-\lambda$ as expected. Further, we look
+at the application of the lowering operator, $J_{-}=J_x-iJ_y$, on the 
+state $\chi_{p\lambda}$
+\begin{eqnarray}
+J_-\chi_{p\lambda} & = & (-1)^{s-\lambda}(J_x-iJ_y)e^{-i\pi J_y}\Psi_{p\lambda}\nonumber\\
+                   & = & (-1)^{s-\lambda}e^{-i\pi J_y}e^{i\pi J_y}(J_x-iJ_y)
+                                         e^{-i\pi J_y}\Psi_{p\lambda}\nonumber\\
+                   & = & (-1)^{s-\lambda}e^{-i\pi J_y}(-J_x-iJ_y)\Psi_{p\lambda}\nonumber\\
+                   & = & -(-1)^{s-\lambda}e^{-i\pi J_y}J_+\Psi_{p\lambda}\nonumber\\
+                   & = & -(-1)^{s-\lambda}e^{-i\pi J_y}\sqrt{(s-\lambda)(s+\lambda+1)}
+                            \Psi_{p\lambda+1}\nonumber\\
+	           & = & \sqrt{(s-\lambda)(s+\lambda+1)}(-1)^{s-(\lambda+1)}
+                         e^{-i\pi J_y}\Psi_{p\lambda+1}
+\end{eqnarray}
+which shows that the application of $J_-$ on $\Psi_{p\lambda}$ behaves
+as expected for a particle with helicity $\lambda$ along the 
+negative $z$-direction. Note in particular that the factor $(-1)^{\lambda}$
+is important to ensure the right phase when applying the lowering
+operators. 
+In fact, the properties that we have demonstrated above almost shows
+the following property. If $p=0$, i.e. the particle is at rest, then
+\begin{equation}
+\chi_{0\lambda}=\Psi_{0-\lambda}.
+\label{eq:statesame}
+\end{equation}
+The properties of the lowering
+and raising operators and $J_z$ that we have shown above shows that the
+states $\chi_{0\lambda}$ and $\Psi_{0-\lambda}$ differs at most by a 
+phase and that this phase is independent of $\lambda$. However, it
+is easiest to show Eq.~\ref{eq:statesame} using the Wigner 
+$d$-functions
+\begin{equation}
+\chi_{0\lambda}=(-1)^{s-\lambda}e^{-i\pi J_y}\Psi_{0\lambda}
+ = (-1)^{s-\lambda}\sum_{\lambda'}d^s_{\lambda'\lambda}(\pi)\Psi_{0\lambda'}
+ = \Psi_{0-\lambda}
+\end{equation}
+since
+\begin{equation}
+d^s_{mm'}(\pi)=(-1)^{s-\lambda}\delta_{m,-m'}.
+\end{equation}
+
+An alternative way to define the states $\chi_{p\lambda}$ is by
+\begin{equation}
+\chi_{p\lambda}=(-i)^{2s}e^{-i\pi J_x}\Psi_{p\lambda}.
+\label{eq:newdef}
+\end{equation}
+we find that
+\begin{equation}
+\chi_{0\lambda}=(-i)^{2s}e^{-i\pi J_x}\Psi_{0\lambda}=
+(-i)^{2s}\sum_{\lambda'}\tilde d^s_{\lambda'\lambda}(\pi)\Psi_{0\lambda'}=\Psi_{0-\lambda}
+\end{equation}
+where
+\begin{equation}
+\tilde d^s_{m'm}(\theta)=\langle j m'|e^{-i\theta J_x}|j m\rangle.
+\end{equation}
+The $\tilde d$ function is similar to the standard Wigner $d$ function 
+except that it refers to expectation values for rotations around the 
+$x$-axis instead of the $y$-axis. An explicit formula for the 
+$\tilde d$ function is given by
+\begin{eqnarray}
+\tilde d^j_{m'm}(\theta)& = & \nonumber
+\sum {\sqrt{(j+m)!(j-m)!(j+m')!(j-m')!}\over (m+m'+k)!(j-m'-k)!k!(j-m-k)!}\times\\
+& &\left(\cos{\theta\over 2}\right)^{m'+m+2k}
+\left(-i\sin{\theta\over 2}\right)^{2j-2k-m'-m}
+\end{eqnarray}
+from which it is easy to show that
+\begin{equation}
+\tilde d^j_{m'm}(\pi)=(-1)^{2j}\delta_{m',-m}
+\end{equation}
+
+It is straight forward to show that the application of the raising and
+lowering operators as well as the operators $J_z$ on the state defined
+by Eq.~\ref{eq:newdef} is what is expected.
+Note in particular that there is no longer any need for phase factors
+to get the right phase on the different helicity states. This is
+particularly useful because it allows us to simply interpret
+the states $\chi_{p\lambda}$ in the rest frame of the particle with the
+momentum $p$ along the negative $z$ direction. That is, the state
+$\chi_{p\lambda}$ is equal to $|J=s\quad m=\lambda\rangle$ 
+in a coordinate system that 
+has been rotated by $\pi$ around the $x$ axis. This is very important
+because it tells us how to construct the coordinates systems in
+sequential decays when applying the helicity formalism, this will
+be discussed further below.
+
+We now define the two particle plane wave states when particle
+A is along the positive $z$-direction by
+\begin{equation}
+|p\lambda_{A}\lambda_{B}\rangle=\Psi_{p\lambda_{A}}\chi_{p\lambda_{B}}.
+\end{equation}
+Applying $J_z$ to this state we find 
+\begin{equation}
+J_z|p\lambda_{A}\lambda_{B}\rangle=
+(\lambda_A-\lambda_B)|p\lambda_{A}\lambda_{B}\rangle
+\end{equation}
+States where the relative momentum, $p$, is not along the $z$-axis are
+obtained by rotating the state $|p\lambda_{A}\lambda_{B}\rangle$.
+Let $\theta$ and $\phi$ denote the polar coordinates for particle A, then
+the we define the state $|p\theta\phi\lambda_{A}\lambda_{B}\rangle$ by
+\begin{eqnarray}
+|p\theta\phi\lambda_{A}\lambda_{B}\rangle=R(\alpha,\beta,\gamma)
+             |p\lambda_{A}\lambda_{B}\rangle
+\end{eqnarray}
+where $R(\alpha,\beta,\gamma)$ is an Euler rotation. Here there is a 
+choice of conventions. Jackson~\cite{Jack64} takes 
+$\alpha=\phi$, $\beta=\theta$, and $\gamma=0$ while Jacob 
+and Wick~\cite{Jaco59} uses $\alpha=\phi$, $\beta=\theta$, and $\gamma=-\phi$.
+The choice of the angle $\gamma$ is arbitrary but has to be used 
+consistently. 
+
+We have now defined the state $|p\theta\phi\lambda_A\lambda_B\rangle$
+and explored its properties in some detail. This state is used as the
+final state in the two body decays in the helicity formalism. 
+
+Before we are ready to use these states we need to construct a set
+of states that are labeled by $p$, $\lambda_A$, and $\lambda_B$ and
+have definite values of $J$ and $m$, i.e., are eigenstates of
+$J^2$ and $J_z$. That such states exists is obvious since $p$,
+$\lambda_A$, and $\lambda_B$ are invariant under rotations. We 
+denote these states by $|pJM\lambda_A\lambda_B\rangle$. The relation
+between these states and the plane wave states created above is given by
+\begin{equation}
+|pJM\lambda_A\lambda_B\rangle=\sqrt{{2J+1}\over{ 4\pi}}
+\int_{d\Omega}D^{*J}_{M\lambda_A-\lambda_B}(\phi,\theta,-\phi)
+|p\theta\phi\lambda_A\lambda_B\rangle.
+\label{eq:planewaveexpansion}
+\end{equation}
+Note that the states $|pJM\lambda_A\lambda_B\rangle$ are independent 
+of the choice of Euler angles.
+
+
+\subsection{Helicity amplitudes}
+
+We will now consider the decay $C\rightarrow A+B$. The initial
+particle, $C$, is assumed to be in the state $|J M\rangle$ and the 
+final state, $A+B$, is $|pJM\lambda_A\lambda_B\rangle$. We will assume
+that the interaction $U$ that causes this transition is invariant
+under rotation, but is otherwise arbitrary. We which to evaluate
+the matrix element 
+\begin{equation}
+M=\langle pJM\lambda_A\lambda_B\rangle | U | J M \rangle.
+\end{equation}
+To do this we insert the identity written as
+\begin{equation}
+I=\sum_{p'J'M'\lambda_A'\lambda_B'}
+|p'J'M'\lambda_A'\lambda_B'\rangle\langle p'J'M'\lambda_A'\lambda_B'|
+\end{equation}
+and use Eq.~\ref{eq:planewaveexpansion}.
+\begin{eqnarray}
+M & = & \langle p\theta\phi \lambda_A \lambda_B | U | J M \rangle\nonumber \\
+  & = & \sum_{p'J'M' \lambda_A' \lambda_B'}
+        \langle p\theta\phi \lambda_A \lambda_B |
+        p'J'M'\lambda_A'\lambda_B'\rangle\langle p'J'M'\lambda_A'\lambda_B'|
+        U | J M \rangle \nonumber\\
+  & = & \langle p\theta\phi \lambda_A \lambda_B |
+        pJM\lambda_A\lambda_B\rangle\langle pJM\lambda_A\lambda_B|
+        U | J M \rangle \nonumber\\
+  & = & \sqrt{2J+1\over 4\pi}\langle p\theta\phi \lambda_A \lambda_B |
+       \int_{d\Omega'}D^{*J}_{M,\lambda_A-\lambda_B}(\phi',\theta',-\phi')
+       |p\theta'\phi'\lambda_A\lambda_B\rangle
+       \langle pJM\lambda_A\lambda_B|U | J M \rangle\nonumber \\
+  & = & \sqrt{2J+1\over 4\pi}D^{*J}_{M,\lambda_A-\lambda_B}(\phi,\theta,-\phi)
+        H_{\lambda_A\lambda_B}
+\label{eq:helicityformula}
+\end{eqnarray}
+where the helicity amplitudes are defined by 
+\begin{equation}
+H_{\lambda_A\lambda_B}=\langle pJM\lambda_A\lambda_B|U | J M \rangle. 
+\end{equation}
+
+
+
+\subsection{Helicity amplitudes and sequential decays}
+
+The previous section explained how the helicity formalism 
+is used to calculate the amplitudes for a two body decay, $A\rightarrow B+C$.
+It is straight forward to now to use this in sequential decays.
+The only thing that requires a it of care is the construction 
+of the coordinate systems in which the decay angles are measured.
+
+To explain how to use the helicity formalism in sequential decays 
+we will consider the decay chain $A\rightarrow B+C$, $B\rightarrow D+E$, 
+and $C\rightarrow F+G$. The initial particle, $A$, is in the 
+state $|J=J_A\quad m=\lambda_A\rangle$. The amplitudes for
+the decay $A\rightarrow B+C$ is now given by
+\begin{equation}
+A^{A\rightarrow B+C}_{\lambda_A\lambda_B\lambda_C}=
+\sqrt{2J_A+1\over 4\pi} D^{*J_A}_{\lambda_A,\lambda_B-\lambda_C}
+(\phi_B,\theta_B,-\phi_B)H^{A}_{\lambda_B\lambda_C}
+\end{equation}
+where $\theta_B$ and $\phi_B$ are the polar angles of particle
+$B$ in the rest frame of particle $A$. 
+
+Similarly, we can write the amplitude for the decay of particle $B$
+\begin{equation}
+A^{B\rightarrow D+E}_{\lambda_B\lambda_D\lambda_E}=
+\sqrt{2J_B+1\over 4\pi} D^{*J_B}_{\lambda_B,\lambda_D-\lambda_E}
+(\phi_D,\theta_D,-\phi_D)H^{B}_{\lambda_D\lambda_E}.
+\end{equation}
+The coordinate system in which the angles $\theta_D$ and $\phi_D$
+are measured is obtained by rotating the coordinate system of the
+parent particle, $A$, using the same Euler angles as was used
+when calculating the amplitude for the decay of particle $A$.
+This means that the coordinate system for particle $B$ is obtained
+by doing the rotation $R(\phi_B,\theta_B,\phi_B)$ of the 
+coordinate system of particle $A$.
+
+In the same way we obtain the amplitude for the decay of particle
+$C$,
+\begin{equation}
+A^{C\rightarrow F+G}_{\lambda_C\lambda_F\lambda_G}=
+\sqrt{2J_C+1\over 4\pi} D^{*J_C}_{\lambda_C,\lambda_F-\lambda_G}
+(\phi_F,\theta_F,-\phi_F)H^{C}_{\lambda_F\lambda_G}.
+\end{equation}
+As discussed above the coordinate system for the second particle,
+here particle $C$ in the decay of particle $A$, is obtained by rotating
+the coordinates system of the first particle, $B$, by $\pi$ around
+its $x$ axis. I.e. the $x$-axis of particles $B$ and $C$ frames are
+parallel. 
+
+\subsubsection{Jackson convention}
+
+In the Jackson convention the Euler rotation is taken to be
+$R(\phi,\theta,0)$ where the angles $(\theta,\phi)$ are the 
+polar coordinates for $\vec p$. This is a 
+rotation first by $\phi$ around the 
+$z$-axis and then a rotation by $\theta$ around the new $y$-axis.
+The new $y$-axis is in the direction of $z\times \vec p$ and 
+the new $x$-axis is therefore in the direction $(z\times \vec p)\times \vec p$.
+
+This is a simple geometrical construction that allows the construction 
+of the coordinate system used with the Jackson convention for the
+Euler rotations.
+
+\subsubsection{Jacob-Wick convention}
+
+The coordinate system used in the Jacob-Wick convention is obtained by
+performing an additional rotation of $-\phi$ around the new $z$-axis
+as obtained in the Jackson conventions. 
+
+In the sense that there is a simple geometrical construction for the 
+coordinate system in the Jackson convention if might be argued that
+this convention is somewhat simpler to use. 
+
+%Consider the decay $A\rightarrow BC$. The particle $A$ is
+%described by the state $|J,m_z=\lambda_A\rangle$ in the 
+%coordinate system $x$, $y$, and $z$. As conventional, the 
+%$z$ axis has been chosen as the quantization axis.
+%
+%\begin{figure}
+%\begin{center}
+%\psfig{figure=helamp.eps,height=2.5in}
+%\caption{The state of the initial particle, A, with total angular
+%momentm $J$ and spin projection $\lambda_A=m_z$ along the
+%$z$-axis is labeled by $|J,m_z=\lambda_A\rangle$ in the 
+%coordinate system shown in the figure. The decay products, B and C,
+%are back to back in the rest frame of particle A and the
+%angles $(\theta_A,\phi_A)$ and $(\pi-\theta_A,\pi+\phi_A)$
+%gives the polar coordinates for B and C respectively. 
+%\label{fig:helamp}}
+%\end{center}
+%\end{figure}
+%
+%Particle $B$, produced in the decay, will have a direction
+%which will be labeled $\hat p$. The polar coordinates for 
+%this direction, as measured in $A$'s coordinate system will
+%be labeled $\theta_A$ and $\phi_A$, see Figure~\ref{fig:helamp}. 
+%To write down the
+%amplitude for this decay a choice of Euler angles has to be
+%made that rotates the original $z$ axis to the directions $\hat p$.
+%This can be accomplished by chosing $\alpha=\phi_A$ and
+%$\beta=\theta_A$. However, the azimuthal angle $\gamma$ around 
+%the new $z$ axis, $z'$, is arbitrary. This is the source 
+%of conventions for the helicity formalism. The two common
+%conventions are the Jackson convention which takes $\gamma=0$
+%and the Jacob-Wick convention which takes $\gamma=-\phi_A$.
+%
+%Given the choice of the Euler angels, $\alpha$, $\beta$, and $\gamma$
+%the amplitude for the decay can be written as
+%\begin{eqnarray}
+%A_{\lambda_A\lambda_B\lambda_C}&=&
+%\sqrt{2J+1 \over 4\pi}H_{\lambda_B\lambda_C}
+%D^{J*}_{\lambda_A,\lambda_B-\lambda_C}(\alpha,\beta,\gamma)\nonumber\\
+%&=&\sqrt{2J+1 \over 4\pi}H_{\lambda_B\lambda_C}
+%e^{i\lambda_A\alpha+i(\lambda_B-\lambda_C)\gamma}
+%d^{J}_{\lambda_A,\lambda_B-\lambda_C}(\beta)\label{eq:helamp}
+%\end{eqnarray}
+%Using the explicit choices for the Euler angles according to the 
+%conventions we obtain the amplitudes according to the two
+%different conventions
+%\begin{eqnarray}
+%A^{\rm Jack}_{\lambda_A\lambda_B\lambda_C}&=&
+%\sqrt{2J+1 \over 4\pi}H^{\rm Jack}_{\lambda_B\lambda_C}
+%e^{i\lambda_A\phi_A}
+%d^{J}_{\lambda_A,\lambda_B-\lambda_C}(\beta) \label{eq:helampjackson}\\
+%A^{\rm JW}_{\lambda_A\lambda_B\lambda_C}&=&
+%\sqrt{2J+1 \over 4\pi}H^{\rm JW}_{\lambda_B\lambda_C}
+%e^{i\phi_A(\lambda_A-(\lambda_B-\lambda_C))}
+%d^{J}_{\lambda_A,\lambda_B-\lambda_C}(\beta)\label{eq:helampJacobwick}
+%\end{eqnarray}
+%Since both of these amplitudes describe the same physics
+%process it is tempting to equate the two amplitudes and 
+%determine the relation between $H^{Jack}_{\lambda_B\lambda_C}$
+%and $H^{JW}_{\lambda_B\lambda_C}$. But this in not correct
+%since, they don't in fact describe the same system! This is
+%due to different phases that has been picked up by different
+%rotations in the two conventions.
+%
+%The Euler angles describes how the coordinate system that particle
+%A is at ret in is related to coordinate systems for the 
+%particles B and C. To derive the relation between the Jackson
+%and Jacob-Wick conventions it is sufficient to study the
+%simple case of $\theta_A=\phi_A=0$. First we consider the
+%Jackson convention. For particle B the Euler angles will
+%be $\alpha=0$, $\beta=0$, and $\gamma=0$. This means that
+%the cordinate system in the rest frame of particle B has
+%$z_B$ parallel to $z$ and that $x_B$ and $y_B$ are also
+%parallel to the orixinal $x$ and $y$ axis. However, for 
+%particle B the angles are $\alpha=\pi$, $\beta=\pi$, and $\gamma=0$..
+%This means that the new $z$-axis, $z_C$ is in the direction oposite
+%to the original $z$ axis. The new $x$-axis, $x_C$ is parallel to the 
+%old and the new $y$ axis, $y_C$, is in the oposite direction
+%to the old $y$-axis. This is illustrated in 
+%Figure~\ref{fig:helampjackson}.
+%
+%\begin{figure}
+%\begin{center}
+%\psfig{figure=helampjackson.eps,height=1.5in}
+%\caption{The coordinate systems in the Jackson convention for the
+%case of $\theta_A=\phi_A=0$.
+%\label{fig:helampjackson}}
+%\end{center}
+%\end{figure}
+%
+%Next consider the Jacob-Wick convention. Here the difference it that
+%$\gamma$ is taken to $-\alpha$. This will not affect the coordinate system for
+%particle B since $\alpha=0$. However, for particle C $\alpha=\pi$
+%so here there is an additional rotation of $\pi$ around the new 
+%$z$ axis. This means that the new $y$-axis $y_C$ is parallel to the
+%old $y$ axis, and that $x_C$ is anti-parallel to original $x$
+%axis, see Figure~\ref{fig:helampJacobwick}. 
+%
+%\begin{figure}
+%\begin{center}
+%\psfig{figure=helampjacobwick.eps,height=1.5in}
+%\caption{The coordinate systems in the Jacob-Wick convention for the
+%case of $\theta_A=\phi_A=0$.
+%\label{fig:helampJacobwick}}
+%\end{center}
+%\end{figure}
+%
+%Since the coordinate systems for the particles in the 
+%final states are not the same in the Jackson and the Jacob-Wick
+%convention it is clear that the amplitudes in 
+%Eq.~\ref{eq:helampjackson} and Eq.~\ref{eq:helampJacobwick}
+%don't describe the same reaction. But it is straight
+%forward to relate the to conventions. In fact, all we have to do
+%to compare the two conventions is to rotate particle C by 
+%an angle of $\pi$ around the $x_C$ axis. This rotation simply
+%picks up a phase of $e^{i\pi\lambda_C}$ which allows us to relate 
+%the helicity ampitudes of the Jackson and the Jacob-Wick conventions 
+%according to
+%\begin{equation}
+%H^{\rm Jack}_{\lambda_B\lambda_C}=e^{i\pi\lambda_C}H^{\rm JW}_{\lambda_B\lambda_C}.
+%\end{equation}
+%This shows that there are phase differences between the two conventions.
+%Note that this phase difference is easily observable in decays. E.g.
+%in the decay of a scalar to two vector particles where each of the
+%vectors decays to a pair of scalars this phase difference leads
+%to angular distributions that has the wrong sign of the angle
+%$\chi$\footnote{$\chi$ is the azimuthal angle between the decay planes 
+%of the two vector mesons.}  
+%if the phases are picked according to the wrong convention. 
+%
+%Also care has to be taken when converting from the helicty
+%basis to the partial wave basis using the Jacob Wick transformation.
+%If the helicity ampitudes are given in the Jackson convention
+%the Jacob Wick formula needs to be modified with the
+%appropriate phases. (Actually, I still have to convince myself that
+%the Jacob Wick transformation is correct for the Jacob-Wick convention
+%for helicity amplitudes.)
+%
+%Now consider the case of non zero angles $\theta_A$ and $\phi_A$ for
+%the direction, $\hat p$, of particle B. With a little thought
+%it is easy to convince oneself that the direction of the $y_B$ is
+%along $z\times\hat p$ an consequently that the direction of 
+%$y_B$ is $(z\times\hat p)\times \hat p$. Now applying this to 
+%particle C which is in the direction of $-\hat p$ we find that 
+%$x_C$ is parallel to $x_B$. This is just in agreement with what we
+%saw in the special case studied above. 
+%
+%In the Jacob-Wick convention an additional rotation of $-\phi_A$
+%is applied around the $z_B$ as comapred to the Jackson conventions.
+%For particle C this rotation is $-\pi-\phi_A$ around the $x_C$
+%axis. This gives an relative rotation of $\pi$ as compared to the
+%Jackson convention, which shows that $y_B$ and $y_C$ are 
+%parallel. Again this is consistent with the special case studied
+%above.
+%
+%It is now simple to explain in words exactly what the helicity amplitude
+%$A_{\lambda_A\lambda_B\lambda_C}$ means. (Note that we have suppresed
+%the dependence on the Euler angles to simplify the notation.)
+%Intuitively it is simply the amplitude for a state with spin
+%projection $\lambda_A$ along the $z$ axis to decay to two 
+%particles with helicity $\lambda_B$ and $\lambda_C$ respectively.
+%As we have noticed above this leaves important phases
+%unspecified. But it is easy to specify these phase by noting that
+%state of the final state particle is nothing but the canonical
+%state $|J_B,m_z=\lambda_B\rangle$ and $|J_C,m_z=\lambda_C\rangle$
+%repectively for particle B and C. These states are defined in the 
+%local coordinate system as specified by the Euler angels.
+%
+%\subsection{Example.}
+%
+%The have a concrete example to discuss, the decay 
+%$B\rightarrow D^{*+}D^{*-}$ with $D^{*+}\rightarrow D^0\pi^+$ and
+%$D^{*-}\rightarrow \bar D^0\pi^-$ is considered.
+%
+%First we discuss how the coordinate systems are set up in the
+%two different conventions. This is shown in 
+%figures~\ref{fig:jackson} and~\ref{fig:jacobwick}.
+%In both conventions the z axis of the coordinate system that 
+%describes the decay of the $D^*$'s is along the direction of
+%the flight of the $D^*$. But in the Jacob-Wick convention the
+%direction of the y axises are parallel while in the Jackson convention the
+%direction of the x axises are parallel. 
+%
+%\begin{figure}
+%\begin{center}
+%\psfig{figure=jackson.eps,height=2.0in}
+%\caption{The coordinate systems in the Jackson convention. The two
+%x axises are parallel.
+%\label{fig:jackson}}
+%\end{center}
+%\end{figure}
+%
+%\begin{figure}
+%\begin{center}
+%\psfig{figure=jacobwick.eps,height=2.0in}
+%\caption{The coordinate systems in the Jacob-Wick convention. The two
+%y axises are parallel.
+%\label{fig:jacobwick}}
+%\end{center}
+%\end{figure}
+
+
+\subsection{Explicit representations of SU(2)}
+
+This section describes the explicit representations of SU(2) that
+are used in the generator. As usual $\hbar=1$.
+
+\subsubsection{$J=1/2$}
+
+\begin{equation}
+S_n={1\over 2}\gamma_0\gamma_5 n\!\!\!/.
+\end{equation}
+
+\subsubsection{$J=1$}
+
+We will consider the representation of spin 1. 
+\begin{equation}
+J_x=\left[\begin{array}{rrr}
+          0 & 0 & 0  \\
+          0 & 0 &-i  \\
+          0 & i & 0  \\
+          \end{array}\right],\quad
+J_y=\left[\begin{array}{rrr}
+          0 & 0 & i  \\
+          0 & 0 & 0  \\
+          -i& 0 & 0  \\
+          \end{array}\right],\quad
+J_z=\left[\begin{array}{rrr}
+          0 &-i & 0  \\
+          i & 0 & 0  \\
+          0 & 0 & 0  \\
+          \end{array}\right]
+\end{equation}
+ 
+From these explicit representations it is trivial to show that they
+obey the standard commutation relations, e.g.,
+\begin{equation}
+[J_x,J_y]=iJ_z
+\end{equation}
+Further we find, as expected, that
+\begin{equation}
+J^2=J_x^2+J_y^2+J_z^2=2I
+\end{equation}
+such that $J^2=j(j+1)$ which shows that this in fact is a 
+representation of spin 1. The raising and lowering operators
+are as usual given by
+
+\begin{equation}
+J_+=J_x+iJ_y=\left[\begin{array}{rrr}
+          0 & 0 &-1  \\
+          0 & 0 &-i  \\
+          1 & i & 0  \\
+          \end{array}\right],\quad
+J_-=J_x-iJ_y\left[\begin{array}{rrr}
+          0 & 0 & 1  \\
+          0 & 0 &-i  \\
+          -1& i & 0  \\
+          \end{array}\right]
+\end{equation}
+It is also convenient to evaluate the expression for a finite rotation
+\begin{equation}
+R_z(\theta)=e^{-i\theta J_z}=\left[\begin{array}{ccc}
+	\cos\theta & -\sin\theta & 0 \\
+	\sin\theta &  \cos\theta & 0 \\
+	 0         &  0          & 1 \\
+	\end{array}\right].
+\end{equation}
+Of course we could have guessed the form of $R_z(\theta)$, but an
+explicit evaluation of $e^{-i\theta J_z}$ is possible through
+direct evaluation of the series expansion, but is more elegantly 
+done using Cayley-Hamilton's theorem.\footnote{Cayley-Hamilton's 
+theorem states that if $P_A(\lambda)=det(\lambda I-A)$ then $P_A(A)=0$
+for any symmetric matrix $A$. This means that if $A$ has dimension
+$n$ then $A^k$ can be written as a linear combination of $A^i$ for
+$i<n$. In particular it can be shown that $f(A)=q(A)$ where $q$
+is a polynomial of degree $<n$. The polynomial $q(A)$ is defined
+by  
+\begin{equation}
+{d^jf\over dz^j}(\lambda_k)={d^jq\over dz^j}(\lambda_k)
+\end{equation}
+where $\lambda_k$ are the eigen values of $A$, with multiplicity
+$n_k$ and $j=0..n_k-1$.
+}
+
+The states
+\begin{equation}
+\epsilon_+={1\over\sqrt{2}}\left[\begin{array}{r}
+          -1  \\
+          -i  \\
+          0  \\
+          \end{array}\right],\quad
+\epsilon_0=\left[\begin{array}{r}
+          0  \\
+          0  \\
+          1  \\
+          \end{array}\right],\quad
+\epsilon_-={1\over\sqrt{2}}\left[\begin{array}{r}
+          1  \\
+          -i  \\
+          0  \\
+          \end{array}\right]
+\label{eq:spinonestates}
+\end{equation}
+
+are easily seen to satisfy 
+\begin{equation}
+J_z\epsilon_{\lambda}=\lambda\epsilon_{\lambda}
+\end{equation}
+and therefore form a helicity eigenstate basis for a particle
+with $J=1$ moving in the direction of the positive $z$-axis.
+
+\subsection{Projections of helicity amplitudes}
+
+This section shows how the helicity amplitudes are related to the
+invariant amplitudes. Consider the decay of a scalar to two
+vector particles. Let the final states of the two vector particles
+be denoted by $\epsilon^1_{s_1}$ and $\epsilon^2_{s_2}$ and $\vec p$
+be the relative momentum of the two particles in the parents
+rest frame. The amplitude for this process is then written as
+\begin{equation}
+A_{s_1s_2}=\epsilon^{1*}_{is_1}\epsilon^{2*}_{js_2}M_{ij}(\vec p)
+\end{equation}
+where $M_{ij}(p)$ is a rank 2 tensor as a function of the available
+momenta in the process, i.e., a function of $\vec p$. The most
+general form of M is given by
+\begin{equation}
+M_{ij}=a\delta_{ij}+b\epsilon_{ijk}p_k+cp_ip_j.
+\end{equation}
+The coefficients $a$, $b$, and $c$ are the invariant amplitudes, we 
+wand to relate them to helicity amplitudes. First we note that there
+are three invariant amplitudes, this is the same as the number of 
+helicity amplitudes. 
+
+From Eq.~\ref{eq:helicityformula} the amplitude is given by
+\begin{equation}
+A_{\lambda_1\lambda_2}=\sqrt{2J+1\over 4\pi}H_{\lambda_1\lambda_2}
+D^{*J}_{M\lambda_1-\lambda_2}(\phi,\theta,-\phi).
+\end{equation}
+
+When relating the helicity amplitudes to the invariant amplitudes
+it is sufficient to look at one kinematic configuration, we chose
+the simplest possible in which $\theta=\phi=0$. From the
+definition of the $D$ function it is obvious that 
+$D^{*J}_{M\lambda_1-\lambda_2}(0,0,0)=\delta_{M,\lambda_1-\lambda_2}$.
+This gives
+\begin{equation}
+H_{\lambda_1\lambda_2}=\sqrt{4\pi\over 2J+1}A_{\lambda_1\lambda_2}.
+\end{equation}
+This allows us to simply evaluate the helicity amplitudes from the
+invariant amplitudes if we chose the states, $\epsilon^1$ and $\epsilon^2$,
+to correspond to the states in the helicity formalism. 
+For $\epsilon^1$ we take the states given by~\ref{eq:spinonestates}
+\begin{equation}
+\epsilon^1_+={1\over\sqrt{2}}\left[\begin{array}{r}
+          -1  \\
+          -i  \\
+          0  \\
+          \end{array}\right],\quad
+\epsilon^1_0=\left[\begin{array}{r}
+          0  \\
+          0  \\
+          1  \\
+          \end{array}\right],\quad
+\epsilon^1_-={1\over\sqrt{2}}\left[\begin{array}{r}
+          1  \\
+          -i  \\
+          0  \\
+          \end{array}\right].
+\end{equation}
+The states for the second particle have to satisfy 
+$\chi_{0\lambda}=\Psi_{0-\lambda}$ which gives
+\begin{equation}
+\epsilon^2_+={1\over\sqrt{2}}\left[\begin{array}{r}
+          1  \\
+          -i  \\
+          0  \\
+          \end{array}\right],\quad
+\epsilon^2_0=\left[\begin{array}{r}
+          0  \\
+          0  \\
+          1  \\
+          \end{array}\right],\quad
+\epsilon^2_-={1\over\sqrt{2}}\left[\begin{array}{r}
+          -1  \\
+          -i  \\
+          0  \\
+          \end{array}\right].
+\end{equation}
+Note that this is consistent with Eq.~\ref{eq:newdef}.
+Now it is straight forward to evaluate the helicity amplitudes
+\begin{eqnarray}
+ H_{++} & = & \sqrt{4\pi\over 3}(-a-ib), \\
+ H_{00} & = & \sqrt{4\pi\over 3}(a+c),\\
+ H_{--} & = & \sqrt{4\pi\over 3}(-a+ib).
+\end{eqnarray}
+These equations are easily inverted to give
+\begin{eqnarray}
+ a & = & -{1\over2}\sqrt{3\over 4\pi}(H_{++}+H_{--}), \\
+ b & = & \phantom{-}{i\over2}\sqrt{3\over 4\pi}(H_{++}-H_{--}), \\
+ c & = & \phantom{-{1\over2}}\sqrt{3\over 4\pi}(H_{00}+{1\over 2}(H_{++}+H_{--})), \\
+\end{eqnarray}
+
+
+\subsection{Jacob-Wick transformation}
+\index{Jacob-Wick transformation}
+\index{partial wave amplitudes}
+\label{sect:jacobwick}
+
+This section derives the relation between partial wave amplitudes 
+and helicity amplitudes. 
+
+The amplitude for a decay, given the partial wave amplitudes $M_{Ls}$,
+is given by
+$$A(\Omega,m1,m2,m3)=\sum_{L,s}C_{s_2s_3}(s\ m_s;m_2\ m_3)
+                               C_{Ls}(s_1\ m_1;m_L\ m_s)Y^{m_L}_L(\Omega)
+                               M_{Ls}.$$
+
+
+\subsection{{\tt HELAMP} and {\tt PARTWAVE} model implementations}
+\index{HELAMP}
+\index{PARTWAVE}
+
+The two models {\tt HELAMP} and {\tt PARTWAVE} implements generic
+two body decays where the amplitudes are specified by the
+helicity and partial wave amplitudes respectively. The partial
+wave model uses the translation to helicity amplitudes as given in
+Sect.~\ref{sect:jacobwick}. Henceforth, this section will focus
+in the description of the evalution of helicity amplitudes.
+
+ EvtGen uses a set of states, that are not the same as the helicity
+states. In this section it is important to distinguish between these two
+sets of states. The basis states used by EvtGen will be called
+$|n\rangle$ and the helicity states will be denoted $|\lambda, s\rangle$,
+or simply $|\lambda\rangle>$. 
+
+ We consider the decay of the form $A\rightarrow B C$ where the state
+of the initial particle is given by $|n_A\rangle$ and the two particles
+in the final state are labeled by $|n_B\rangle$ and $|n_C\rangle$. 
+For convenience we label the final state $|n_B, n_C\rangle=|n_B\rangle
+\otimes |n_C\rangle$. Given this notation we write the amplitude that
+we need to implement as 
+$$A^{B\rightarrow BC}_{n_A,n_B,n_C}=\langle n_B, n_C|H|n_A\rangle.$$
+Using the completeness of the basis states we write
+\begin{eqnarray}
+A^{B\rightarrow BC}_{n_A,n_B,n_C}&=&\sum_{\lambda_A,\lambda_B,\lambda_C}\langle n_B, n_C|\lambda_B\rangle\langle\lambda_B|\lambda_C\rangle\langle\lambda_C|H|\lambda_A\rangle\langle\lambda_A|n_A\rangle\\
+                                 &=&\sum_{\lambda_A,\lambda_B,\lambda_C}\langle n_B|\lambda_B\rangle \langle n_C|\lambda_C\rangle\langle\lambda_B|\langle\lambda_C|H|\lambda_A\rangle\langle\lambda_A|n_A\rangle\\
+                                 &=&\sum_{\lambda_A,\lambda_B,\lambda_C}R^{*}_{n_B\lambda_B} R^{*}_{n_C\lambda_C}\langle\lambda_B|\langle\lambda_C|H|\lambda_A\rangle R_{\lambda_A n_A}
+\end{eqnarray}
+Where 
+\begin{eqnarray}
+R_{n_A\lambda_A} & = & \langle \lambda_A | n_A \rangle \\ 
+R_{n_B\lambda_B} & = & \langle \lambda_B | n_B \rangle \\
+R_{n_C\lambda_C} & = & \langle \lambda_C | n_C \rangle
+\end{eqnarray}
+
+
+
+
+
+

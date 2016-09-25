@@ -1,0 +1,28 @@
+Photos C++ Interface
+--------------------
+Web page  http://photospp.web.cern.ch
+
+Documentation is in documentation/latex_documentation, type "make" there
+
+To compile the interface:
+- Execute "./configure" (if the path to HepMC is not set with
+                        HEPMCLOCATION, use "./configure --with-hepmc=<path>"
+                        or use "./configure --without-hepmc")
+- Execute "make"
+
+--------------------------------------
+  Alternatively cofiguration scripts based on autotools can be used.
+  In this case 'cd platform', './use-LCG-config.sh' and             
+  follow the instructions in the freshly created './INSTALL' readme file.
+  The configure file in the directory 'examples' will be absent.         
+  The instructions collected below should be then ignored.               
+  Under MAC OS one may need to remove '-lfreetype' from                  
+  'examples/Makefile'                                                    
+-------------------------------------- 
+
+To run the examples, "cd examples". There "./configure" and "make" as well.
+For some of the examples to work, pythia8.1 and MC-Tester will be needed.
+The most basic example does not need them.
+
+--
+Last Modified: T. Przedzinski, 07 Apr. 2015

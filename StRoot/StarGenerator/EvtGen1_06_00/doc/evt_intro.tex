@@ -1,0 +1,113 @@
+\section{Introduction}
+
+There are several event generators available 
+for simulation of particle decays in high energy physics experiments.
+Examples used for the simulation of $B$-physics include
+the well known packages
+QQ~\cite{qq} and JETSET~\cite{jetset}. 
+This paper describes a package that we hope will
+be a useful tool for the simulation of decays of $B$ mesons and other
+resonances. With several new $B$ physics experiments currently collecting data, 
+the physics of $B$ mesons will be studied in greater detail than previously possible.
+It is important to have tools for the simulation of the
+underlying physics processes at these experiments.  
+
+The EvtGen package provides a framework in which new decays can
+be added as modules. These modules, which perform the simulation
+of decays, are called models in EvtGen. One of the novel ideas
+in the design of EvtGen
+is that decay amplitudes, instead of probabilities, are used
+for the simulation of decays.
+The framework uses the amplitude for each node in the decay tree
+to simulate the entire decay chain, including all angular correlations. 
+A few examples of sequential decays are
+
+\begin{center}
+\begin{tabular}{ll}
+$B \rightarrow D^* \ell \nu,$ & $B\rightarrow D^*\ell \nu,$ \\
+$\phantom{B \rightarrow\;\; } \decaysto\!\! D \pi$ & $\phantom{B \rightarrow\;\;
+ } \decaysto\!\! D \gamma$ \\
+& \\
+$B \rightarrow D^*\quad D^*,$ & $B\rightarrow D^*\quad D^*.$ \\
+$\phantom{B \rightarrow\;\; } \decaysto\!\! D \pi\decaysto\!\! D\pi$ & $\phantom
+{B \rightarrow\;\; } \decaysto\!\! D\pi \decaysto\!\! D \gamma$ \\
+\end{tabular}
+\end{center}
+For these decays, the EvtGen framework
+models all decay distributions correctly,
+while implementing only the
+nodes ($B \rightarrow D^* \ell \nu$, $D^* 
+\rightarrow D \pi$, etc.) of the decay trees.  
+$CP$ violating decays have their own particular challenges,
+including  non-trivial decay time distributions.  Examples of 
+distributions from EvtGen for
+the decay $B \rightarrow J/ \psi K^*$ are shown in
+Figure~\ref{fig:cpvio}. 
+
+
+%uncomment this for the CPC paper.
+This document will describe the functionality and 
+organization of the EvtGen package.  Additionally, 
+we will discuss how to use EvtGen, as well as how to
+implement new physics models. 
+EvtGen is written in C++, contains about 150 classes and
+25000 lines of code. There are approximately 70 models implemented 
+that simulate a large variety of physics processes.  The modularity
+of the code allows for easy implementation of additional
+models.  
+
+%uncomment for CHEP paper.
+%The EvtGen package is written in C++, contains about 125 classes 
+%and
+%25000 lines of code. There are approximately 60 models implemented 
+%that simulate a large variety of physics processes.  
+%This short document can only outline some of the functionality of this
+%package. For a more detailed description of what is implemented and
+%how the generator works see Ref.~\cite{evtgen}.
+
+\begin{figure}[b]
+%\begin{minipage}[t]{0.45 \linewidth}
+%\makebox[0cm]{}
+\begin{center}
+\epsfig{figure=jpsikstarkine.eps,height=1.7in}
+\epsfig{figure=jpsikstar.eps,height=4.0in}
+%\end{minipage}
+%\hfill
+%\begin{minipage}[t]{0.40 \linewidth}
+%\makebox[0cm]{}
+\end{center}
+\caption{
+The top diagram defines the angles in the decay $B \rightarrow J/\psi K^*$
+with $J/\psi\rightarrow \mu^+\mu^-$ and $K^{*0}\rightarrow K^0_S\pi^0$. 
+The lower four plots show projections of the distributions from an EvtGen
+simulation of this decay. In this simulation the $B$ meson was produced
+in an $\Upsilon(4S)$ decay and $\Delta t$ is the difference in proper
+lifetimes of the two $B$ mesons.
+The lower four plots shows (from the upper left) the $\Delta t$ distribution,
+the $\chi$ angle distribution, $\chi$ vs. $\cos \theta_{K^*}$ for
+$\Delta t < 0$, and $\chi$ vs. $\cos \theta_{K^*}$ for
+$\Delta t > 0$.
+\label{fig:cpvio}
+}
+%\end{minipage}
+\end{figure}
+
+%\begin{references}
+%\bibitem{qq} See http://www.lns.cornell.edu/public/CLEO/soft/QQ.
+%\bibitem{jetset} T. Sj${\ddot {\rm o}}$strand, Computer Physics Commun. {\bf 82}, 74 (1994).
+%\bibitem{evtgen} Note in preparation.
+%\bibitem{spindensitynorm} In the calculation of the probability the spin
+%density matrix is renormalized such that it has a trace of 1. 
+%\bibitem{cleolep}CLEO collaboration, Phys. Rev. Lett. {\bf 71}, 4111 (1993).
+%\bibitem{isgw2}D. Scora and N. Isgur, Phys. Rev. {\bf D52}, 2783 (1995).
+%\bibitem{gr} J. L. Goity and W. Roberts, Phys. Rev. {\bf D51}, 3459 (1995).
+%\end{references}
+
+
+%\end{document}
+
+
+
+
+
+

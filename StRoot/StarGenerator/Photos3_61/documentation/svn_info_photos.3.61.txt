@@ -1,0 +1,14 @@
+PHOTOS.3.61.tar.gz created:
+Tue Sep 29 18:52:16 CEST 2015
+**********************************
+Output from svn info: 
+Path: PHOTOS
+URL: svn+ssh://svn-host/home/theory/svnroot/camtoph/PHOTOS/trunk/PHOTOS
+Repository Root: svn+ssh://svn-host/home/theory/svnroot/camtoph/PHOTOS
+Repository UUID: 01cb43c7-ae7e-4c19-9945-fa5d5fe85f6e
+Revision: 863
+Node Kind: directory
+Last Changed Author: przedzinski
+Last Changed Rev: 863
+Last Changed Date: 2015-09-29 18:51:38 +0200 (Tue, 29 Sep 2015)
+

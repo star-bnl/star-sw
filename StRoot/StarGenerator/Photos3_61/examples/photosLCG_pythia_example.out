@@ -1,0 +1,717 @@
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.201      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change: 14 Oct 2014  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 01 May 2015 at 16:35:59    |  | 
+ |  |                                                                              |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: torbjorn@thep.lu.se                                             |  | 
+ |  |   Jesper Roy Christiansen;  Department of Astronomy and Theoretical Physics, |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: Jesper.Roy.Christiansen@thep.lu.se                              |  | 
+ |  |   Nishita Desai;  Institut fuer Theoretische Physik,                         |  | 
+ |  |     Universitaet Heidelberg, Philosophenweg 16, D-69120 Heidelberg, Germany; |  | 
+ |  |      e-mail: Nishita.Desai@cern.ch                                           |  | 
+ |  |   Philip Ilten;  Massachusetts Institute of Technology,                      |  | 
+ |  |      stationed at CERN, CH-1211 Geneva 23, Switzerland;                      |  | 
+ |  |      e-mail: philten@cern.ch                                                 |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      e-mail: mrenna@fnal.gov                                                 |  | 
+ |  |   Stefan Prestel;  Theoretical Physics Group,                                |  | 
+ |  |      SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA;        |  | 
+ |  |      e-mail: prestel@slac.stanford.edu                                       |  | 
+ |  |   Christine O. Rasmussen;  Department of Astronomy and Theoretical Physics,  |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: christine.rasmussen@thep.lu.se                                  |  | 
+ |  |   Peter Skands;  School of Physics,                                          |  | 
+ |  |      Monash University, PO Box 27, 3800 Melbourne, Australia;                |  | 
+ |  |      e-mail: peter.skands@monash.edu                                         |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is 'An Introduction to PYTHIA 8.2',             |  | 
+ |  |   T. Sjostrand et al, arXiv:1410.3012 [hep-ph]                               |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]. |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/~torbjorn/Pythia.html                                |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2014 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide e- with e+ at a CM energy of 9.119e+01 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | f fbar -> gamma*/Z0                            221 |   2.051e-05 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec Settings (changes only)  -------------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | BeamRemnants:halfScaleForKT                   |                  1.50000 |      1.00000         0.0             | 
+ | BeamRemnants:primordialKThard                 |                  1.80000 |      2.00000         0.0             | 
+ | BeamRemnants:primordialKTsoft                 |                  0.90000 |      0.50000         0.0             | 
+ | Beams:eCM                                     |                 91.18700 |    14000.000    10.00000             | 
+ | Beams:idA                                     |                       11 |         2212                         | 
+ | Beams:idB                                     |                      -11 |         2212                         | 
+ | ColourReconnection:range                      |                  1.80000 |     10.00000         0.0    10.00000 | 
+ | Diffraction:largeMassSuppress                 |                  4.00000 |      2.00000         0.0             | 
+ | MultipartonInteractions:alphaSvalue           |                  0.13000 |      0.12700   0.0600000     0.25000 | 
+ | MultipartonInteractions:bProfile              |                        3 |            1           0           4 | 
+ | MultipartonInteractions:ecmPow                |                  0.21500 |      0.24000         0.0     0.50000 | 
+ | MultipartonInteractions:ecmRef                |                 7000.000 |     1800.000     1.00000             | 
+ | MultipartonInteractions:expPow                |                  1.85000 |      1.00000     0.40000    10.00000 | 
+ | MultipartonInteractions:pT0Ref                |                  2.28000 |      2.15000     0.50000    10.00000 | 
+ | PartonLevel:FSR                               |                      off |           on                         | 
+ | PDF:pSet                                      |                       13 |            2                         | 
+ | SigmaDiffractive:dampen                       |                       on |          off                         | 
+ | SigmaDiffractive:maxAX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXB                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaProcess:alphaSvalue                      |                  0.13000 |      0.12650   0.0600000     0.25000 | 
+ | SigmaTotal:zeroAXB                            |                       on |          off                         | 
+ | SpaceShower:alphaSvalue                       |                  0.13650 |      0.13700   0.0600000     0.25000 | 
+ | SpaceShower:ecmRef                            |                 7000.000 |     1800.000     1.00000             | 
+ | SpaceShower:rapidityOrder                     |                       on |          off                         | 
+ | StringFlav:etaSup                             |                  0.60000 |      0.63000         0.0     1.00000 | 
+ | StringFlav:mesonBvector                       |                  2.20000 |      3.00000         0.0     3.00000 | 
+ | StringFlav:mesonCvector                       |                  0.88000 |      1.06000         0.0     3.00000 | 
+ | StringFlav:mesonSvector                       |                  0.55000 |      0.72500         0.0     3.00000 | 
+ | StringFlav:mesonUDvector                      |                  0.50000 |      0.62000         0.0     3.00000 | 
+ | StringFlav:popcornSpair                       |                  0.90000 |      0.50000         0.0     1.00000 | 
+ | StringFlav:probQQ1toQQ0                       |                0.0275000 |    0.0270000         0.0     1.00000 | 
+ | StringFlav:probQQtoQ                          |                0.0810000 |    0.0900000         0.0     1.00000 | 
+ | StringFlav:probSQtoQQ                         |                  0.91500 |      1.00000         0.0     1.00000 | 
+ | StringFlav:probStoUD                          |                  0.21700 |      0.19000         0.0     1.00000 | 
+ | StringPT:sigma                                |                  0.33500 |      0.30400         0.0     1.00000 | 
+ | StringZ:aExtraDiquark                         |                  0.97000 |      0.50000         0.0     2.00000 | 
+ | StringZ:aLund                                 |                  0.68000 |      0.30000         0.0     2.00000 | 
+ | StringZ:bLund                                 |                  0.98000 |      0.80000     0.20000     2.00000 | 
+ | StringZ:rFactB                                |                  0.85500 |      0.67000         0.0     2.00000 | 
+ | StringZ:rFactC                                |                  1.32000 |      1.00000         0.0     2.00000 | 
+ | TimeShower:alphaSvalue                        |                  0.13650 |      0.13830   0.0600000     0.25000 | 
+ | TimeShower:pTmin                              |                  0.50000 |      0.40000     0.10000     2.00000 | 
+ | TimeShower:pTminChgQ                          |                  0.50000 |      0.40000     0.10000     2.00000 | 
+ | WeakSingleBoson:ffbar2gmZ                     |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec Settings  ------------------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+      23  Z0                                  3   0   0   91.18760    2.50419   10.00000    0.00000  0.00000e+00   1   1   0   0   0
+              0     0   0.1540492    0        1       -1 
+              1     0   0.1194935    0        2       -2 
+              2     0   0.1540386    0        3       -3 
+              3     0   0.1193325    0        4       -4 
+              4     0   0.1523269    0        5       -5 
+              5     0   0.0335480    0       11      -11 
+              6     0   0.0667305    0       12      -12 
+              7     1   0.0335477    0       13      -13 
+              8     0   0.0667305    0       14      -14 
+              9     0   0.0334720    0       15      -15 
+             10     0   0.0667305    0       16      -16 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+Message from PHCORK(MODCOR):: initialization
+MODOP=5 -- corrects Energy from mass+flow
+
+********************************************************************************
+
+                            =========================
+                              PHOTOS, Version:  3.60
+                              Released at:  26/4/15
+                            =========================
+
+                     Photos QED corrections in Particle Decays
+
+           Monte Carlo Program - by E. Barberio, B. van Eijk and Z. Was
+           From version 2.09   - by P. Golonka and Z. Was
+           From version 3.00   - by N. Davidson, T. Przedzinski and Z. Was
+********************************************************************************
+
+                  Internal (default) input parameters: 
+
+                    INTERF= 1 ISEC= 0 ITRE= 0 IEXP= 1 IFTOP= 1 IFW= 1
+                    ALPHA_QED= 0.00729735 XPHCUT= 1e-07
+
+                    Option with interference is active
+                    Option with exponentiation is active EPSEXP=0.0001
+                    Emision in t tbar production is active
+                    Correction wt in decay of W is active
+
+          WARNING:  /HEPEVT/ is not anymore used.
+
+********************************************************************************
+MODOP=2 -- blocks emission in Kl  to gamma e+e-: DEFAULT
+MODOP=2 -- blocks emission in pi0 to gamma e+e-: DEFAULT
+ IPHQRK_setQarknoEmission MODOP=1 -- blocks emission from light quarks:  DEFAULT
+Message from PHCORK(MODCOR):: initialization
+MODOP=5 -- corrects Energy from mass+flow
+INFO from PHOTOS:
+---------------- First run - EXP ----------------
+INFO from PHOTOS:
+Event: 0	(0.0000000%)
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =     11, pz =  4.559e+01, e =  4.559e+01, m =  5.110e-04.
+ Beam B: id =    -11, pz = -4.559e+01, e =  4.559e+01, m =  5.110e-04.
+
+ In 1: id =   11, x =  9.986e-01, pdf =  2.799e+01 at Q2 =  8.303e+03.
+ In 2: id =  -11, x =  1.000e+00, pdf =  3.404e+06 at same Q2.
+
+ Subprocess f fbar -> gamma*/Z0 with code 221 is 2 -> 1.
+ It has sHat =  8.303e+03.
+     alphaEM =  7.817e-03,  alphaS =  1.300e-01    at Q2 =  8.303e+03.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  9.119e+01, ISR =  9.119e+01, FSR =  9.119e+01.
+ Number of MPI =     1, ISR =     1, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     91.187     91.187
+     1        11   (e-)               -12     0     0     3     0     0     0      0.000      0.000     45.593     45.593      0.001
+     2       -11   (e+)               -12     0     0     4     0     0     0      0.000      0.000    -45.593     45.593      0.001
+     3        11   (e-)               -21     1     0     5     0     0     0      0.000      0.000     45.530     45.530      0.000
+     4       -11   (e+)               -21     2     0     5     0     0     0      0.000      0.000    -45.593     45.593      0.000
+     5        23   (Z0)               -22     3     4     6     7     0     0      0.000      0.000     -0.064     91.123     91.123
+     6        13   mu-                 23     5     0     0     0     0     0    -23.213    -26.335    -29.074     45.582      0.106
+     7       -13   mu+                 23     5     0     0     0     0     0     23.213     26.335     29.010     45.541      0.106
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.064     91.123     91.123
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     91.187     91.187
+     1        11   (e-)               -12     0     0    10     0     0     0      0.000      0.000     45.593     45.593      0.001
+     2       -11   (e+)               -12     0     0    11     0     0     0      0.000      0.000    -45.593     45.593      0.001
+     3        11   (e-)               -21     6     0     5     0     0     0      0.000      0.000     45.530     45.530      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -45.593     45.593      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.064     91.123     91.123
+     6        11   (e-)               -41    10    10     9     3     0     0      0.000     -0.000     45.593     45.593      0.000
+     7       -11   (e+)               -42    11    11     4     4     0     0     -0.000      0.000    -45.593     45.593      0.000
+     8        23   (Z0)               -44     5     5    12    12     0     0      0.027     -0.017     -0.055     91.123     91.123
+     9        22   (gamma)            -43     6     0    13    13     0     0     -0.027      0.017      0.055      0.064      0.000
+    10        11   (e-)               -61     1     0     6     6     0     0     -0.000      0.000     45.593     45.593      0.000
+    11       -11   (e+)               -61     2     0     7     7     0     0      0.000     -0.000    -45.593     45.593      0.000
+    12        23   (Z0)               -62     8     8    16    17     0     0      0.027     -0.017     -0.055     91.123     91.123
+    13        22   gamma               62     9     9     0     0     0     0     -0.027      0.017      0.055      0.064      0.000
+    14        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    15        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    16        13   mu-                 23    12     0     0     0     0     0    -23.200    -26.344    -29.070     45.577      0.106
+    17       -13   mu+                 23    12     0     0     0     0     0     23.227     26.327     29.014     45.546      0.106
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.000     91.187     91.187
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ Pythia::next(): 1000 events have been generated 
+
+ Pythia::next(): 2000 events have been generated 
+
+ Pythia::next(): 3000 events have been generated 
+
+ Pythia::next(): 4000 events have been generated 
+
+ Pythia::next(): 5000 events have been generated 
+
+ Pythia::next(): 6000 events have been generated 
+
+ Pythia::next(): 7000 events have been generated 
+
+ Pythia::next(): 8000 events have been generated 
+
+ Pythia::next(): 9000 events have been generated 
+INFO from PHOTOS:
+Event: 10000	(10.000%)
+
+ Pythia::next(): 10000 events have been generated 
+
+ Pythia::next(): 11000 events have been generated 
+
+ Pythia::next(): 12000 events have been generated 
+
+ Pythia::next(): 13000 events have been generated 
+
+ Pythia::next(): 14000 events have been generated 
+
+ Pythia::next(): 15000 events have been generated 
+
+ Pythia::next(): 16000 events have been generated 
+
+ Pythia::next(): 17000 events have been generated 
+
+ Pythia::next(): 18000 events have been generated 
+
+ Pythia::next(): 19000 events have been generated 
+INFO from PHOTOS:
+Event: 20000	(20.000%)
+
+ Pythia::next(): 20000 events have been generated 
+
+ Pythia::next(): 21000 events have been generated 
+
+ Pythia::next(): 22000 events have been generated 
+
+ Pythia::next(): 23000 events have been generated 
+
+ Pythia::next(): 24000 events have been generated 
+
+ Pythia::next(): 25000 events have been generated 
+
+ Pythia::next(): 26000 events have been generated 
+
+ Pythia::next(): 27000 events have been generated 
+
+ Pythia::next(): 28000 events have been generated 
+
+ Pythia::next(): 29000 events have been generated 
+INFO from PHOTOS:
+Event: 30000	(30.000%)
+
+ Pythia::next(): 30000 events have been generated 
+
+ Pythia::next(): 31000 events have been generated 
+
+ Pythia::next(): 32000 events have been generated 
+
+ Pythia::next(): 33000 events have been generated 
+
+ Pythia::next(): 34000 events have been generated 
+
+ Pythia::next(): 35000 events have been generated 
+
+ Pythia::next(): 36000 events have been generated 
+
+ Pythia::next(): 37000 events have been generated 
+
+ Pythia::next(): 38000 events have been generated 
+
+ Pythia::next(): 39000 events have been generated 
+INFO from PHOTOS:
+Event: 40000	(40.000%)
+
+ Pythia::next(): 40000 events have been generated 
+
+ Pythia::next(): 41000 events have been generated 
+
+ Pythia::next(): 42000 events have been generated 
+
+ Pythia::next(): 43000 events have been generated 
+
+ Pythia::next(): 44000 events have been generated 
+
+ Pythia::next(): 45000 events have been generated 
+
+ Pythia::next(): 46000 events have been generated 
+
+ Pythia::next(): 47000 events have been generated 
+
+ Pythia::next(): 48000 events have been generated 
+
+ Pythia::next(): 49000 events have been generated 
+INFO from PHOTOS:
+Event: 50000	(50.000%)
+
+ Pythia::next(): 50000 events have been generated 
+
+ Pythia::next(): 51000 events have been generated 
+
+ Pythia::next(): 52000 events have been generated 
+
+ Pythia::next(): 53000 events have been generated 
+
+ Pythia::next(): 54000 events have been generated 
+
+ Pythia::next(): 55000 events have been generated 
+
+ Pythia::next(): 56000 events have been generated 
+
+ Pythia::next(): 57000 events have been generated 
+
+ Pythia::next(): 58000 events have been generated 
+
+ Pythia::next(): 59000 events have been generated 
+INFO from PHOTOS:
+Event: 60000	(60.000%)
+
+ Pythia::next(): 60000 events have been generated 
+
+ Pythia::next(): 61000 events have been generated 
+
+ Pythia::next(): 62000 events have been generated 
+
+ Pythia::next(): 63000 events have been generated 
+
+ Pythia::next(): 64000 events have been generated 
+
+ Pythia::next(): 65000 events have been generated 
+
+ Pythia::next(): 66000 events have been generated 
+
+ Pythia::next(): 67000 events have been generated 
+
+ Pythia::next(): 68000 events have been generated 
+
+ Pythia::next(): 69000 events have been generated 
+INFO from PHOTOS:
+Event: 70000	(70.000%)
+
+ Pythia::next(): 70000 events have been generated 
+
+ Pythia::next(): 71000 events have been generated 
+
+ Pythia::next(): 72000 events have been generated 
+
+ Pythia::next(): 73000 events have been generated 
+
+ Pythia::next(): 74000 events have been generated 
+
+ Pythia::next(): 75000 events have been generated 
+
+ Pythia::next(): 76000 events have been generated 
+
+ Pythia::next(): 77000 events have been generated 
+
+ Pythia::next(): 78000 events have been generated 
+
+ Pythia::next(): 79000 events have been generated 
+INFO from PHOTOS:
+Event: 80000	(80.000%)
+
+ Pythia::next(): 80000 events have been generated 
+
+ Pythia::next(): 81000 events have been generated 
+
+ Pythia::next(): 82000 events have been generated 
+
+ Pythia::next(): 83000 events have been generated 
+
+ Pythia::next(): 84000 events have been generated 
+
+ Pythia::next(): 85000 events have been generated 
+
+ Pythia::next(): 86000 events have been generated 
+
+ Pythia::next(): 87000 events have been generated 
+
+ Pythia::next(): 88000 events have been generated 
+
+ Pythia::next(): 89000 events have been generated 
+INFO from PHOTOS:
+Event: 90000	(90.000%)
+
+ Pythia::next(): 90000 events have been generated 
+
+ Pythia::next(): 91000 events have been generated 
+
+ Pythia::next(): 92000 events have been generated 
+
+ Pythia::next(): 93000 events have been generated 
+
+ Pythia::next(): 94000 events have been generated 
+
+ Pythia::next(): 95000 events have been generated 
+
+ Pythia::next(): 96000 events have been generated 
+
+ Pythia::next(): 97000 events have been generated 
+
+ Pythia::next(): 98000 events have been generated 
+
+ Pythia::next(): 99000 events have been generated 
+INFO from PHOTOS:
+---------------- Second run - ALPHA ORDER ----------------
+INFO from PHOTOS:
+Event: 0	(0.000%)
+
+ Pythia::next(): 100000 events have been generated 
+
+ Pythia::next(): 101000 events have been generated 
+
+ Pythia::next(): 102000 events have been generated 
+
+ Pythia::next(): 103000 events have been generated 
+
+ Pythia::next(): 104000 events have been generated 
+
+ Pythia::next(): 105000 events have been generated 
+
+ Pythia::next(): 106000 events have been generated 
+
+ Pythia::next(): 107000 events have been generated 
+
+ Pythia::next(): 108000 events have been generated 
+
+ Pythia::next(): 109000 events have been generated 
+INFO from PHOTOS:
+Event: 10000	(10.000%)
+
+ Pythia::next(): 110000 events have been generated 
+
+ Pythia::next(): 111000 events have been generated 
+
+ Pythia::next(): 112000 events have been generated 
+
+ Pythia::next(): 113000 events have been generated 
+
+ Pythia::next(): 114000 events have been generated 
+
+ Pythia::next(): 115000 events have been generated 
+
+ Pythia::next(): 116000 events have been generated 
+
+ Pythia::next(): 117000 events have been generated 
+
+ Pythia::next(): 118000 events have been generated 
+
+ Pythia::next(): 119000 events have been generated 
+INFO from PHOTOS:
+Event: 20000	(20.000%)
+
+ Pythia::next(): 120000 events have been generated 
+
+ Pythia::next(): 121000 events have been generated 
+
+ Pythia::next(): 122000 events have been generated 
+
+ Pythia::next(): 123000 events have been generated 
+
+ Pythia::next(): 124000 events have been generated 
+
+ Pythia::next(): 125000 events have been generated 
+
+ Pythia::next(): 126000 events have been generated 
+
+ Pythia::next(): 127000 events have been generated 
+
+ Pythia::next(): 128000 events have been generated 
+
+ Pythia::next(): 129000 events have been generated 
+INFO from PHOTOS:
+Event: 30000	(30.000%)
+
+ Pythia::next(): 130000 events have been generated 
+
+ Pythia::next(): 131000 events have been generated 
+
+ Pythia::next(): 132000 events have been generated 
+
+ Pythia::next(): 133000 events have been generated 
+
+ Pythia::next(): 134000 events have been generated 
+
+ Pythia::next(): 135000 events have been generated 
+
+ Pythia::next(): 136000 events have been generated 
+
+ Pythia::next(): 137000 events have been generated 
+
+ Pythia::next(): 138000 events have been generated 
+
+ Pythia::next(): 139000 events have been generated 
+INFO from PHOTOS:
+Event: 40000	(40.000%)
+
+ Pythia::next(): 140000 events have been generated 
+
+ Pythia::next(): 141000 events have been generated 
+
+ Pythia::next(): 142000 events have been generated 
+
+ Pythia::next(): 143000 events have been generated 
+
+ Pythia::next(): 144000 events have been generated 
+
+ Pythia::next(): 145000 events have been generated 
+
+ Pythia::next(): 146000 events have been generated 
+
+ Pythia::next(): 147000 events have been generated 
+
+ Pythia::next(): 148000 events have been generated 
+
+ Pythia::next(): 149000 events have been generated 
+INFO from PHOTOS:
+Event: 50000	(50.000%)
+
+ Pythia::next(): 150000 events have been generated 
+
+ Pythia::next(): 151000 events have been generated 
+
+ Pythia::next(): 152000 events have been generated 
+
+ Pythia::next(): 153000 events have been generated 
+
+ Pythia::next(): 154000 events have been generated 
+
+ Pythia::next(): 155000 events have been generated 
+
+ Pythia::next(): 156000 events have been generated 
+
+ Pythia::next(): 157000 events have been generated 
+
+ Pythia::next(): 158000 events have been generated 
+
+ Pythia::next(): 159000 events have been generated 
+INFO from PHOTOS:
+Event: 60000	(60.000%)
+
+ Pythia::next(): 160000 events have been generated 
+
+ Pythia::next(): 161000 events have been generated 
+
+ Pythia::next(): 162000 events have been generated 
+
+ Pythia::next(): 163000 events have been generated 
+
+ Pythia::next(): 164000 events have been generated 
+
+ Pythia::next(): 165000 events have been generated 
+
+ Pythia::next(): 166000 events have been generated 
+
+ Pythia::next(): 167000 events have been generated 
+
+ Pythia::next(): 168000 events have been generated 
+
+ Pythia::next(): 169000 events have been generated 
+INFO from PHOTOS:
+Event: 70000	(70.000%)
+
+ Pythia::next(): 170000 events have been generated 
+
+ Pythia::next(): 171000 events have been generated 
+
+ Pythia::next(): 172000 events have been generated 
+
+ Pythia::next(): 173000 events have been generated 
+
+ Pythia::next(): 174000 events have been generated 
+
+ Pythia::next(): 175000 events have been generated 
+
+ Pythia::next(): 176000 events have been generated 
+
+ Pythia::next(): 177000 events have been generated 
+
+ Pythia::next(): 178000 events have been generated 
+
+ Pythia::next(): 179000 events have been generated 
+INFO from PHOTOS:
+Event: 80000	(80.000%)
+
+ Pythia::next(): 180000 events have been generated 
+
+ Pythia::next(): 181000 events have been generated 
+
+ Pythia::next(): 182000 events have been generated 
+
+ Pythia::next(): 183000 events have been generated 
+
+ Pythia::next(): 184000 events have been generated 
+
+ Pythia::next(): 185000 events have been generated 
+
+ Pythia::next(): 186000 events have been generated 
+
+ Pythia::next(): 187000 events have been generated 
+
+ Pythia::next(): 188000 events have been generated 
+
+ Pythia::next(): 189000 events have been generated 
+INFO from PHOTOS:
+Event: 90000	(90.000%)
+
+ Pythia::next(): 190000 events have been generated 
+
+ Pythia::next(): 191000 events have been generated 
+
+ Pythia::next(): 192000 events have been generated 
+
+ Pythia::next(): 193000 events have been generated 
+
+ Pythia::next(): 194000 events have been generated 
+
+ Pythia::next(): 195000 events have been generated 
+
+ Pythia::next(): 196000 events have been generated 
+
+ Pythia::next(): 197000 events have been generated 
+
+ Pythia::next(): 198000 events have been generated 
+
+ Pythia::next(): 199000 events have been generated 
+
+ *-------  PYTHIA Event and Cross Section Statistics  -------------------------------------------------------------*
+ |                                                                                                                 |
+ | Subprocess                                    Code |            Number of events       |      sigma +- delta    |
+ |                                                    |       Tried   Selected   Accepted |     (estimated) (mb)   |
+ |                                                    |                                   |                        |
+ |-----------------------------------------------------------------------------------------------------------------|
+ |                                                    |                                   |                        |
+ | f fbar -> gamma*/Z0                            221 |     2796008     200000     200000 |   1.470e-06  1.743e-09 |
+ |                                                    |                                   |                        |
+ | sum                                                |     2796008     200000     200000 |   1.470e-06  1.743e-09 |
+ |                                                                                                                 |
+ *-------  End PYTHIA Event and Cross Section Statistics ----------------------------------------------------------*
+
+ *-------  PYTHIA Error and Warning Messages Statistics  ----------------------------------------------------------* 
+ |                                                                                                                 | 
+ |  times   message                                                                                                | 
+ |                                                                                                                 | 
+ |      0   no errors or warnings to report                                                                        | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Error and Warning Messages Statistics  ------------------------------------------------------* 
+********************************************************
+* Z -> l + bar_l + gammas                              *
+* E(l + bar_l) / E(l + bar_l + gammas) ratio           *
+*                                                      *
+* PHOTOS - EXP:          0.981588 +/- 0.000195683      *
+* PHOTOS - ALPHA ORDER:  0.98176 +/- 0.000189991      *
+********************************************************
+---------------------------- Photos Log Summary ------------------------------
+ Debug:   	(OFF)		2600001	
+ Info:    			22	
+ Warnings:			0	
+ Errors:  			0	
+-----------------------------------
+------------------------------------------------------------------------------

@@ -1,0 +1,92 @@
+#-------------------------------------------------------------
+# running configure
+#-------------------------------------------------------------
+
+To avoid autotool confusion, we recommend running the bootstrap 
+in your cygwin environment before beginning the build.
+
+To build for Windows Visual C++, configure with CXX=cl CC=cl.
+
+#-------------------------------------------------------------
+# setup the compiler for cygwin
+#-------------------------------------------------------------
+
+For the compilation under cygwin using VC++, you have to make sure that 
+the PATH contains the path to the installation of Visual Studio.  
+The safest way to do this, is to add VC to your Cygwin.bat file.  
+Since it is possible to have several different versions of VC on the same 
+machine, we recommend keeping a generic Cygwin.bat and creating special 
+CygwinXXX.bat file for each compiler you want to use.  
+
+Here is an example for VC9:
+
+   @echo off
+
+   @call "C:\Program Files\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat"
+   @set PATH=%PATH%;C:\cygwin\bin
+
+   C:
+   chdir C:\cygwin\bin
+
+   bash --login -i
+
+Two lines, "@call..." and "@set...", have been added to the default Cygwin.bat.
+
+#-------------------------------------------------------------
+# building executables
+#-------------------------------------------------------------
+
+When building your own exectuables, we recommend using the Visual C++ command 
+shell, found under All Programs -> Visual C++ XXX -> Visual Studio Tools, 
+which will have the Visual C++ environment properly established.
+You will need to use the same compiler flags as used by configure.ac.
+
+Compile an object file:
+cl /EHsc /MD /GR /nologo /c \
+   /IC:\cygwin\home\garren\lcg\hepmc\config\vc9\include \
+   example_UsingIterators.cc
+
+Build an executable:
+cl /Feexample.exe example_UsingIterators.obj \
+   C:\cygwin\home\garren\lcg\hepmc\config\vc9\lib\HepMC.lib
+
+#-------------------------------------------------------------
+# setting the path explicitly for VC 7.1
+#-------------------------------------------------------------
+
+For the compilation under cygwin using VC 7.1 (Version 13.10.3077)
+you have to make sure that the PATH contains the path to the
+installation of Visual Studio .NET 2003.  This example also adds 
+CLHEP to the path.  CLHEP is not required, but you may need it for your 
+own purposes:
+
+export VSPATH="/cygdrive/c/Program Files/Microsoft Visual Studio .NET 2003"
+
+export PATH="/cygdrive/c/WINNT/Microsoft.NET/Framework/v1.1.4322":${PATH}
+
+export PATH="${VSPATH}/SDK/v1.1/bin":${PATH}
+export PATH="${VSPATH}/Common7/Tools/bin":${PATH}
+export PATH="${VSPATH}/Common7/Tools/bin/prerelease":${PATH}
+export PATH="${VSPATH}/Common7/Tools/":${PATH}
+
+export PATH="${VSPATH}/Vc7/bin":${PATH}
+export PATH="${VSPATH}/Common7/IDE":${PATH}
+
+The compiler also needs the following variables set up (and 
+as these are interpreted by the compiler, they have to be in 
+"windows-syntax"):
+
+export INCLUDE="C:/cygwin/home/clhep/1.9.2.2/include;c:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/include;C:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\include"
+export LIB="C:/cygwin/home/clhep/1.9.2.2/lib;c:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/lib;C:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Lib"
+
+Notice that CLHEP needs to be defined in LIB and INCLUDE.
+You may have to adapt to your installation path, if different.
+
+#-------------------------------------------------------------
+# trouble reports
+#-------------------------------------------------------------
+
+Please report problems using the bug-tracker of the savannah portal at: 
+
+http://savannah.cern.ch/projects/hepmc/
+

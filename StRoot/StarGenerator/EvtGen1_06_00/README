@@ -1,0 +1,198 @@
+RELEASE NOTES 
+=============
+
+Please see History.txt for a detailed list of changes to this package.
+
+The major points comparing this version with the 2009 release are the following:
+
+1. This version requires HepMC (version 2.04 and above) for storing event structures
+   of particle decays, and can also use Pythia 8 (version 8.180 and above is required) 
+   and the C++ interfaced packages Photos (version 3.5.2 and above) and Tauola 
+   (version 1.0.7 and above). These external generators are included via engine
+   classes in the new sub-directory EvtGenExternal.
+
+   Two libraries can be created for EvtGen:
+   i) libEvtGen.so contains the EvtGenBase and EvtGenModel core code/decay models,
+   ii) libEvtGenExternal.so contains _only_ the code within EvtGenExternal.
+   This means that the external generator interface can be ignored by not 
+   loading/creating the 2nd library libEvtGenExternal.so.
+
+   In the installation instructions below, it is possible to select which external
+   generators you want to use. Note, however, that the generic "DECAY.DEC" file 
+   contains Pythia decays, and if Pythia is not included in the build, these 
+   decays are not generated (in fact, they would need a new decay model specified). 
+   Likewise, if Photos is not included, there will be no radiative corrections 
+   done for particle decays.
+
+   To use the external generators, use the following code:
+   #include "EvtGenExternal/EvtExternalGenList.hh"
+   #include "EvtGenBase/EvtAbsRadCorr.hh"
+   #include "EvtGenBase/EvtDecayBase.hh"
+
+   // Set up the default external generator list: Photos, Pythia and/or Tauola
+   EvtExternalGenList genList;
+   EvtAbsRadCorr* radCorrEngine = genList.getPhotosModel();
+   std::list<EvtDecayBase*> extraModels = genList.getListOfModels();
+
+   // Create the EvtGen generator object
+   EvtGen myGenerator("decayFile.dec", "evt.pdl", randomEnginePointer,
+  		      radCorrEngine, &extraModels);
+
+   //If you don't want to use external generators, use the following:
+   //EvtGen myGenerator("decayFile.dec", "evt.pdl", randomEnginePointer);
+
+  
+   The files Pythia8_README.txt and Tauola_README.txt have more details about
+   using the new Pythia 8 and Tauola generators (called via the PYTHIA and TAUOLA 
+   "decay.dec" model names). The new Photos generator is still called via the PHOTOS 
+   "decay.dec" model name.
+
+   It is now possible to use alias particle decays for the Pythia 8 model.
+   Two Pythia 8 instances are used in EvtPythiaEngine for normal and aliased decays.
+   Since the underlying code for Photos and Tauola is still Fortran, it is only
+   possible to have one (unique) instance of each of these external generators. 
+   This can only be fixed if these packages are converted to pure C++ code.
+
+
+2. This version of EvtGen is effectively a merger of the latest LHCb and BaBar 
+   EvtGenBase and EvtGenModels code. Various decay models have been added, and 
+   there have been a range of bug fixes.
+
+
+3. There is also a new Dalitz decay class model "GENERIC_DALITZ" 
+   (EvtGenModels/EvtGenericDalitz.cpp), that should be used instead of EvtDDalitz. 
+   The generic Dalitz model uses xml files to configure the resonance amplitude 
+   parameters (instead of being hardcoded in EvtDDalitz):
+
+   Decay D+
+   1.0  K-  pi+  pi+  GENERIC_DALITZ MyDalitzParameters.xml;
+   Enddecay
+
+   Examples of xml Dalitz parameter files are given in the sub-directory 
+   validation/DalitzFiles, e.g. see DalitzDecays.xml.
+
+
+4. It is possible to use decay files in xml format. Use the python script
+   convertDecayFile.py for converting decay files to the new format. 
+   The src/EvtGen.cpp constructor has an additional boolean argument useXml that 
+   needs to be set to true if xml decay files are to be used (default is useXml=false).
+   For example, DECAY_2010.XML is the xml version of DECAY_2010.DEC.
+
+
+5. Bug fixes for Bs mixing decay/CP violation amplitudes.
+   Added the capability to use either coherent or incoherent mixing in EvtCPUtil. 
+   One or the other can be chosen as the mixing method for the B system by
+   choosing 0 (coherent) or 1 (incoherent) for the last integer argument 
+   in the EvtGen() constructor.
+
+
+BUILDING THE CODE
+=================
+
+To build the EvtGen code, first make sure that there is a valid (C++) version
+of HepMC avilable:
+
+HepMC    http://lcgapp.cern.ch/project/simu/HepMC/
+
+Optionally, it is possible to use other external generators, such as Pythia8
+(for Pythia decays in the DECAY.DEC file, for example), Photos (for
+radiative corrections) and Tauola (for tau decays):
+
+Pythia8  http://home.thep.lu.se/~torbjorn/Pythia.html
+
+Photos   http://photospp.web.cern.ch/photospp/
+
+Tauola   http://tauolapp.web.cern.ch/tauolapp/
+
+All of these packages have instructions for building them, usually by
+running their "configure" script. HepMC is used to store particle information.
+
+Once these packages are available, set up the EvtGen release by running
+
+./configure
+
+within the EvtGen base directory, using the following options:
+
+  --hepmcdir  = location of HepMC build directory (mandatory)
+  --photosdir = location of Photos base directory (optional)
+  --pythiadir = location of Pythia base directory (optional)
+  --tauoladir = location of Tauola base directory (optional)
+
+When successful, this will create a "config.mk" file that specifies the locations 
+of the include and library directories of these additional external generators.
+
+Then compile the EvtGen code using
+
+make
+
+This should create the libraries lib/libEvtGen.so and lib/libEvtGenExternal.so,
+as well as the archives lib/archive/libEvtGen.a and lib/archive/libEvtGenExternal.a.
+The "EvtGenExternal" library will not be created if no external generators
+are specified in the configuration script.
+
+
+Note that gfortran is needed to compile the code (mainly for Photos/Tauola).
+The alternative (not recommended) compilers g77 (f77) can be used instead 
+by changing the FC variable in the configure script.
+
+
+To create an EvtGen executable, the following libraries need to be included
+in the link path, owing to the dependence on the above external packages and 
+Fortran code (for some EvtGenModels and for Photos/Tauola):
+
+BASEDIR   = <EvtGen directory>
+HEPMCDIR  = <base directory of HepMC>
+PHOTOSDIR = <base directory of C++ Photos>
+TAUOLADIR = <base directory of C++ Tauola>
+PYTHIADIR = <base directory of Pythia8>
+
+LIBS = -L${BASEDIR}/lib -L${HEPMCDIR}/lib -L${PHOTOSDIR}/lib \
+       -L${TAUOLADIR}/lib -L${PYTHIADIR}/lib -lgfortran \
+       -lHepMC -lPhotosCxxInterface -lPhotosFortran -lTauolaCxxInterface -lTauolaFortran \
+       -lpythia8 -llhapdfdummy -lEvtGen -lEvtGenExternal
+
+Three example programs using EvtGen can be seen in the test sub-directory along 
+with the required Makefile. If there are errors about missing shared libraries,
+and they have been built correctly, then the LD_LIBRARY_PATH needs to be set-up
+to include them:
+
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:<location of HepMC library directory>
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:<location of Pythia 8 library directory>
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:<location of Tauola library directory>
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:<location of Photos library directory>
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:<location of EvtGen library directory>
+
+To use Pythia 8, the environment variable PYTHIA8DATA needs to be set to the location
+of the corresponding xml documentation directory, which also contains the default values 
+for particle decays and models.
+
+setenv PYTHIA8DATA <location of Pythia 8 base directory>/xmldoc
+
+
+Code validation
+===============
+
+The validation sub-directory contains code validation test cases for Pythia, Tauola 
+and B mixing models. Run the "configure" script here, which should create a file 
+called extraConfig.mk, and build the examples using "make". Note that some extra 
+configuration may be necessary to set the location of the ROOT libraries, which are 
+only used to create ntuples and plots for the validation examples.
+
+The script genAllDecayExamples.sh runs other scripts that generate a range of decay 
+modes using the genExampleRootFiles.cc program. The script compareAllDecays.sh runs 
+a range of scripts that creates comparison plots using the compareRootFiles.cc program. 
+For now, the comparisons use the same plots, but each of the "compare.sh" files can 
+be edited to compare any two versions of ROOT data created by the 
+genExampleRootFiles.cc program.
+
+The testCPVDecays.cc program runs a test for the B mixing decay model.
+
+Examples
+========
+
+Some examples are provided in the test sub-directory. 
+
+To run these, first build EvtGen, then run "configure", then type "make" in the 
+test directory. Note that these tests require ROOT to be installed. 
+Running the script "./do_tests" will run a series of EvtGen examples. 
+Example decay files are in the test/exampleFiles sub-directory.

@@ -1,0 +1,41 @@
+#----
+#----
+Tauface:
+	@echo "Copying Tauface to ../KK2f"
+	@(cp tauface-KK-F/Tauface.f ../KK2f/Tauface.f)
+
+tauola-dir: ../tauola ../tauola/demo-standalone ../tauola/demo-standalone/prod ../tauola/demo-jetset ../tauola/demo-jetset/prod ../tauola/demo-KK-face
+	@echo "Preparing distribution directory ../tauola"
+	@(cp standalone-F/makefile ../tauola/demo-standalone/makefile)
+	@(cp standalone-F/README ../tauola/demo-standalone/README)
+	@(cp standalone-F/prod/go ../tauola/demo-standalone/prod/go)
+	@(cp standalone-F/prod/dane.dat ../tauola/demo-standalone/prod/dane.dat)
+	@(cp standalone-F/prod/tauola.cpc.binp ../tauola/demo-standalone/prod/tauola.cpc.binp)
+	@(cp standalone-F/prod/tauola.aleph.binp ../tauola/demo-standalone/prod/tauola.aleph.binp)
+	@(cp standalone-F/prod/tauola.cleo.binp ../tauola/demo-standalone/prod/tauola.cleo.binp)
+	@(cp jetset-F/demo.f ../tauola/demo-jetset/demo.f)
+	@(cp jetset-F/makefile-F ../tauola/demo-jetset/makefile)
+	@(cp jetset-F/README ../tauola/demo-jetset/README)
+	@(cp jetset-F/prod/go ../tauola/demo-jetset/prod/go)
+	@(cp jetset-F/prod/demo.cpc.binp ../tauola/demo-jetset/prod/demo.cpc.binp)
+	@(cp jetset-F/prod/demo.aleph.binp ../tauola/demo-jetset/prod/demo.aleph.binp)
+	@(cp jetset-F/prod/demo.cleo.binp ../tauola/demo-jetset/prod/demo.cleo.binp)
+	@(cp tauface-KK-F/README ../tauola/demo-KK-face/README)
+../tauola:
+	@mkdir -p ../tauola
+../tauola/demo-standalone : ../tauola
+	@mkdir -p ../tauola/demo-standalone
+../tauola/demo-standalone/prod: ../tauola/demo-standalone
+	@mkdir -p ../tauola/demo-standalone/prod
+../tauola/demo-jetset: ../tauola/
+	@mkdir -p ../tauola/demo-jetset	
+../tauola/demo-jetset/prod: ../tauola/
+	@mkdir -p ../tauola/demo-jetset/prod	
+../tauola/demo-KK-face: ../tauola
+	@mkdir -p ../tauola/demo-KK-face
+pythia:
+	@(cp -rf ../tauola/demo-jetset  ../tauola/demo-pythia)
+	@(cp     ../eli/README ../tauola/demo-pythia/.)
+	@(cp     ../eli/demo.f ../tauola/demo-pythia/.)
+	@(cp     ../eli/makefile ../tauola/demo-pythia/.)
+

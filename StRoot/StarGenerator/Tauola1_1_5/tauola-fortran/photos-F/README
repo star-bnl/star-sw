@@ -1,0 +1,28 @@
+This is directory photos-F for PHOTOS adaptation to HEPEVT common block format.
+
+The true output is photos.f file which contains all fortran code.
+
+The possible options are: KK   -- for KK monte carlo
+                          4kD  -- dimension  4000 double precision
+                          2kR  -- dimension  2000 single precision
+                         10kD  -- dimension 10000 double precision
+
+This functionality is assured with the help of cpp pre-compiler which creates
+photos.f file from photos.F appropriate path to cpp must be updated in makefile
+
+It is possible to run 'make' and 'make run' from directory demo,
+but this is only after appropriate flags for compilation are set 
+in sub directory demo and directory photos-F.
+
+The directory photos-F can be placed instead of standard photos directory
+this was checked eg. in KK env to work properly. Then, appropriate 
+redristribution of flags is assured; makefile.template is of KK-style. 
+
+The agressive form of creating working photos directory (directory
+../photos) is by executing 
+make KK-all, make 4kD-all, make 2kR-all, make 10kD-all,
+
+note that then original directory located at ../photos will be erased
+
+
+

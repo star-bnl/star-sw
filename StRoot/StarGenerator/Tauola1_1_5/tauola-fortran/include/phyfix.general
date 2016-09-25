@@ -1,0 +1,6 @@
+      SUBROUTINE PHYFIX(NSTOP,NSTART)
+
+C NSTOP NSTART : general case no check on existence of history.
+      NSTOP=0
+      NSTART=1
+      END

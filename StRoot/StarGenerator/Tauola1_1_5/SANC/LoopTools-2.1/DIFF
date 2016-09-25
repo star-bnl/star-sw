@@ -1,0 +1,90 @@
+This file lists the most important things that have changed from
+LoopTools 1.2 to LoopTools 2:
+
+
+1. There is now only one LoopTools library, and no extra files containing
+   actual code like tools.F in version 1.2.
+
+   Also the filenames have been straightened out. They do not coincide
+   with the old ones, hence it is possible to have the old and new
+   version installed side by side. In particular, the names are now:
+	libooptools.a		-- the regular LoopTools library
+	libooptools_check.a	-- the version that double-checks the
+				   results
+	LoopTools		-- the MathLink executable
+	looptools.h		-- the (only) include file for Fortran
+	clooptools.h		-- the include file for C++
+
+
+2. The use of LoopTools in Fortran has simplified:
+   one needs to include only looptools.h in every function/subroutine
+   that needs the LoopTools functions. No tools.F. No defs.h.
+
+   The CSTORE and DSTORE variables are no longer needed, memory for
+   the caching of intermediate results is now allocated dynamically.
+
+
+3. Owing to the change in memory handling, the procedure for freeing
+   memory (more precisely, making memory reusable) is now:
+	call setcachelast(Ccache, 0)
+   or
+	call setcachelast(Dcache, 0)
+   which flushes the cache of the three- and four-point tensor
+   functions, respectively.
+
+   Likewise, the more sophisticated example in the manual which keeps
+   track of Cptr and Dptr would now be
+	integer Cptr
+	integer Dptr
+
+	(calculate some integrals)
+	Cptr = getcachelast(Ccache)
+	Dptr = getcachelast(Dcache)
+	
+	(calculate some more integrals)
+
+	setcachelast(Ccache, Cptr)
+	setcachelast(Dcache, Dptr)
+
+   Accessing the cached values is the same using Cval and Dval.
+   Cval and Dval are actually macros:
+	Cval(id, pos) = Ccache(pos + id)
+	Dval(id, pos) = Dcache(pos + id)
+
+   Because of the sneaky things needed to make Fortran use
+   dynamically allocated memory there are two caveats:
+   a) programs that use LoopTools cannot be compiled with options
+      that check array bounds (typically -C),
+   b) it is not recommended to build shared libraries because that,
+      too, may interfere with Fortran's use of dynamically allocated
+      memory. (Most loaders put shared libraries at the upper end
+      of address space, out of reach of Fortran's integer*4 indices.)
+
+
+4. For C++: libhep.a is gone. C++ links directly to libooptools.a.
+   In fact, the clooptools.h include file (formerly ctools.h)
+   supplies only some inline functions that couple directly to the
+   Fortran code. Consequently the doubledouble stuff is no longer needed.
+
+   Everything in C++ is now completely analogous to the Fortran
+   case, e.g. to access a cached value use
+	Cval(id, pos)
+   or the more direct Ccache(pos + id). Note the round brackets
+   like in Fortran.
+
+
+5. Setting the regularization parameters mudim, delta (for the UV
+   divergence) and lambda (for the IR divergence) is now easier:
+	setmudim(...)
+	setdelta(...)
+	setlambda(...)
+   plus the lookup-functions
+	getmudim(...)
+	getdelta(...)
+	getlambda(...)
+
+
+Success!
+
+Thomas Hahn <hahn@feynarts.de>
+

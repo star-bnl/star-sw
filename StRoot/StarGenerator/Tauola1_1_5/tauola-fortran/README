@@ -1,0 +1,187 @@
+This constructor utility for
+	TAUOLA & PHOTOS & ciekawostka
+is for software librarians and advanced users interested in updating
+the programs in multipurpose environment.
+=====================================================================
+
+It manages versioning of the tau lepton decay library TAUOLA and generator 
+for radiative corrections in decays PHOTOS. Care is taken of the main source, 
+interfaces in different applications as well as makefiles and compiler 
+flags etc. 
+
+It is expected that the user will create her/his version of tauola
+and photos libraries (subdirectories tauola and photos) and the rest will 
+be erased/stored.
+
+Reasons for versions:
+=====================
+
+PHOTOS: Versions of PHOTOS are motivated by the different versions of HEPEVT 
+        common block. Versions of HEPEVT are set in TAUOLA also.
+
+TAUOLA: Versions are motivated by the different physics options:
+
+1) tauola as published in Comp. Phys. Commun.
+2) tauola as initialized by ALEPH collaborations (see printout of this 
+   version for details, it is suggested to use this version only with 
+   the help of the collaboration advice). this is not active
+3) tauola as intialized by CLEO collaborations (see printout of this 
+   version for details).
+
+
+1a. Content of the main directory.
+=================================
+
+Before action of package is taken:
+-----------------------------------
+
+README            : the file you're reading.
+make.inc          : machine-dependent switches of compilers. See point 2 below.
+platform/         : directory containing all machine-dependent versions of
+                    make.inc files for all other supported platforms.
+photos-F/         : main directory containing PHOTOS code with options
+tauola-F/         : main directory containing TAUOLA code with options.
+
+glibk/            : histograming package
+jetset/           : JETSET MC to be replaced, used for demos only.
+randg/            : include.h files for random generators of TAUOLA
+                    and PHOTOS
+include/          : include files for options of HEPEVT as used in the program
+tauola-factory/   : include files needed to add Novosibirsk parametrization 
+                    to any versions of TAUOLA
+
+Directories created by the package
+-----------------------------------
+
+tauola/           : standard directory with Fortran code of PHOTOS MC and its
+                    demo.
+
+tauola/demo-standalone : standalone demo program for TAUOLA		
+tauola/demo-jetset     : universal interface; demo program use JETSET generator
+tauola/demo-KK-face    : interface to KK monte Carlo 
+tauola/demo-pythia     : interface to pythia 6.4
+
+photos/           : standard directory with Fortran code of PHOTOS MC and its
+                    demo.
+
+
+
+2. INSTALLATION.
+================
+
+1) It is safer to execute at the beginning make Clean from main directory 
+   to secure against mismatches. 
+2) PHOTOS and TAUOLA have their own private random generators. You
+   can replace them with the wrappers of your own one. The appropriate
+   subroutines are placed in directory 
+       randg
+   and the files to modify are: 
+       tauola-random.h
+       photos-random.h
+
+3) Platform dependent stuff must be checked. 
+   -Go to subdirectory platform/ 
+   -Determine if make-xxx.inc file specific for your computer is present there;   
+    for LINUX it is make-linux.inc, for AIX it is make-aix.inc
+    for other you need to clone/write it.
+    Erase symbolic link make.inc existing in this directory and create a new
+    one which points to chosen make-xxx.inc:
+			rm make.inc
+		for LINUX:	
+			ln -s make-linux.inc make.inc
+		for AIX:
+			ln -s make-aix.inc   make.inc
+   check whether the ln -s /platform/make.inc make.inc is present in the
+   main directory
+4) Later, the easiest is to use shortcut: 
+   - go to directory photos-F
+   - Run one of these to make a choice for the  version (and hepevt)
+       make KK-all:   (for older versions of KKMC interface)
+       make 4kD-all:  
+       make 2kR-all:  
+       make 2kD-all:  
+       make 10kD-all: 
+   - go to directory tauola-F:
+   - execute one of these
+       make cpc
+       make cleo
+       make aleph
+   - the directories tauola and photos are created for you. You will not
+     need the rest anymore.
+   - Note that after that all /tauola /photos stuff will be replaced from
+   - scratch. The original ones, if present, will disapear at this poin.
+   - Note that the KK interface is hepevt blind, as it uses KK routine 
+     where dimensionality is set.
+   - =========
+   - Demo for photos is ivoked in ./photos/demo
+     by command make and later make run
+   - Demo for tauola stand-alone is in ./tauola/demo-standalone
+   - and can be invoked by command make and later make run
+   - simmilarily demo in ./tauola/demo-jetset.
+   - interface to KK has to be moved:
+     ./tauola/KK-face/Tauface.f to ./KK2f/Tauface.f  of KK/.
+   - Demo for pythia is created by executing 'make pythia' in the 'tauola-F' 
+     subdirectory
+
+3. Let us continue with some instructive, even if not always needed details.
+============================================================================
+
+   go back to TAUOLA dir and verify that symbolic link make.inc exist:
+	ls -l make.inc
+   it should print
+	make.inc -> platform/make.inc
+   If make.inc is not present, make this link:
+	ln -s platform/make.inc .
+		
+4. How to run tauola and photos demos
+=====================================
+
+1) Go to newly created ./photos/ and execute 'make' to compile 
+   and link photos library
+2) Enter ./photos/demo/ subdirectory and execute 'make' there to compile 
+   photos demo.   Execute 'make run' to run the demo.
+3) Go to newly created ./tauola/ and execute 'make' to compile 
+   and link tauola library
+4) Enter ./tauola/demo-standalone/ subdirectory and execute 'make' there to compile 
+   tauola demo.   Execute 'make run' to run the demo.
+5) Enter ./tauola/demo-jetset and execute make to compile demo,
+   execute make run to run the demo.
+7) Output for example demos were constructed under linux red-hat 6.0
+   Note, that in older published versions tau-mass=1.7842 GeV was often used.
+
+5. UNSUPPORTED PLATFORMS.
+=========================
+To move tauola to another machine, one needs to provide make.inc
+file with proper compiler, linker and preprocessor switches.
+Please observe make-xxx.inc files in TAUOLA/platform as exemplary ones.
+
+-------------------------------------------------------------------------------
+6. 
+================
+
+Demo and initialization files: Tauface.F tauola_photos_ini.F taumain.F  
+can be updated out of text blocks. See README and script 'klej' in directory
+./demo-factory. This is necessary if one want to change input for tauola in a consistent
+way for all applications: demo-KK-face, demo-standalone, demo-jetset.
+
+7.
+=====================
+To add Novosibirsk parametrization to any versions of TAUOLA available till today
+special directory tauola-factory was added. Before calling make cpc (cleo aleph) 
+in directory tauola-F   (see documentation),
+command ./glue in directory   tauola-factory should be executed.
+
+8. This system was written by:
+=============================
+
+Piotr Golonka, Elzbieta Richter-Was, Zbigniew Was since Feb 2002 also by
+Tomasz Pierzchala and Malgorzata Worek.
+
+Physics content of the generators and interfaces is not modified.
+Only universal interface of tauola through hepevt is new, as well as potional
+parametrization of 4pi currents with Novosibirsk data. 
+
+
+
+
+

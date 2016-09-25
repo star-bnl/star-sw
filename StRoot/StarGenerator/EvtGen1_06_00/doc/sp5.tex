@@ -1,0 +1,231 @@
+\section{Lineshape determination (new 11/2002)}
+
+\subsection{Introduction}
+
+This note summarizes the proposed lineshape treatment
+for SP5 Monte Carlo production in {\tt EvtGen}.  Some 
+significant changes have been made since SP4 given 
+input from users during the past year.  The generater
+now works in several steps:
+\begin{enumerate}
+\item The complete decay chain is determined according
+to the branching fractions given in {\tt EvtGen/DECAY.DEC}
+and the user decay file.
+\item The mass of each particle in the decay chain 
+is determined, as described below.
+\item The kinematics of each particle are determined 
+according to the decay model specified.
+\end{enumerate}
+
+As these are separate steps, the algorithm for
+the determination of masses is not as general
+is would be possible if the mass determination and
+kinematic determination were combined.  This would
+entail a more significant code rewrite, which we
+were not able to undertake.  
+
+\subsection{Lineshapes}
+
+\subsubsection{What is the default?}
+
+The short answer is that it depends on the decay.  For a
+particle $P$, the algorithm is as follows:
+
+\begin{enumerate}
+\item Something like 30\% of $B$ mesons are decayed
+using JETSET. If $P$ is produced by JETSET, then
+its lineshape is determined by JETSET.  JETSET uses
+a nonrelativistic Breit-Wigner.
+\item If $P$ or any of its daughters has a spin other
+than 0, 1/2, 1, 3/2, or 2,
+a nonrelativistic Breit Wigner is used.
+\item If the decay $P \to D_1 D_2$ proceeds by
+a higher partial wave than $D$ wave, a nonrelativistic
+Breit Wigner is used. (in practice, this case appears
+to never occur in our DECAY.DEC)
+\item $G \to P P_1$ and $P \to D_1 D_2$ (ie, $P$ is
+produced and decayed in a two body decay): A relativistic
+Breit-Wigner is used.  The corresponding amplitude is
+\begin{equation}
+A(m) = {{(p_{G \to P P_1}^{L_{G \to P P_1}} )
+(p_{P \to D_1 D_2}^{L_{P \to D_1 D_2}})} \over {m^2 -{m_0}^2 + im \Gamma(m)}} 
+({B(p_{G \to P P_1}) \over B(p^{\prime}_{G \to P P_1})})
+({B(p_{P \to D_1 D_2}) \over B(p^{\prime}_{P \to D_1 D_2})})
+\label{eq:ls}
+\end{equation}
+where $m_0$ is the nominal particle mass as specified
+in {\tt PDT/pdt.table} and $p$ is the daughter
+momentum in the rest frame of its parent (for the
+specified decay chain). $p^{\prime}$ is the same, but for the nominal
+mass of P.
+$\Gamma(m)$ is
+\begin{equation}
+\Gamma(m) = \left( {p \over p^{\prime}} \right)^{2L_{P \to D_1 D_2}+1}
+\left( m_0 \over m \right) \Gamma_0 
+\left[ B(p) \over B(p^{\prime}) \right]. 
+\label{eq:gamma}
+\end{equation}
+Here $\Gamma_0$ is the nominal particle width has
+specified in {\tt PDT/pdt.table}.  $p$ and $p^{\prime}$
+are the daughter momenta in the rest frame of $P$, 
+if $P$ has mass $m$ or
+$m_0$, respectively.  $L$ is the angular momentum
+of the decay specified in its subscript, which is assumed 
+to be the lowest allowed given the parent and daughter spins.
+$B(p)$ is the Blatt-Weisskopf form factor, which depends on
+$L$:
+\begin{eqnarray}
+B(p) &=& 1  \nonumber \\
+B(p) &=& {1 \over \sqrt{1+(Rp)^2}} \nonumber \\
+B(p) &=& {1 \over \sqrt{1+{(Rp)^2 \over 3} + {(Rp)^4 \over 9}}} 
+\end{eqnarray}
+for $L_{P \to D_1 D_2}$ equal to 0, 1, or 2. $R$ is $3~{\rm GeV}^{-1}$.
+\item $G \to P P_1 P_2 X$ and $P \to D_1 D_2$ (ie, $P$ has
+two daughters): Very similar to the above case, except the
+birth momentum factor and form factor are removed:
+\begin{equation}
+A(m) = {{
+(p_{P \to D_1 D_2}^{L_{P \to D_1 D_2}})} \over {m^2 -{m_0}^2 + im \Gamma(m)}} 
+({B(p_{P \to D_1 D_2}) \over B(p^{\prime}_{P \to D_1 D_2})})
+\label{eq:ls2}
+\end{equation}
+
+
+\item $P \to P_1 P_2 P_3 X$ (ie, $P$ decays to more than
+two daughters): A nonrelativitic Breit-Wigner is
+used.
+
+\end{enumerate}
+
+
+
+
+\subsubsection{Mass cutoffs, etc}
+
+Cutoffs are listed in {\tt PDT/pdt.table}.  The cutoff
+given represents the maximum $\Delta$ allowed from the 
+nominal mass, but only on the low side.  That is, the
+lowest allowed mass is $m - \Delta$. The highest allowed
+mass is $m + 15 \Gamma$.  In the case that the cutoff
+is not given, the lowest mass is ${\rm max}(0, m-15 \Gamma)$.
+
+\subsubsection{What can be changed in user decay files?}
+
+We have added some flexibility in how lineshapes
+can be generated for signal Monte Carlo.  We hope
+that this will simplify systematic studies.  The
+various options are listed below.  As with other
+features of user decay files, be sure to test your
+changes with {\tt GeneratorsQA} before submitted your
+request for a Monte Carlo sample.  
+\begin{itemize}
+\item Lowest generated mass
+\begin{verbatim}
+ChangeMassMin rho0 0.7
+\end{verbatim}
+\item Highest generated mass
+\begin{verbatim}
+ChangeMassMax rho0 0.9
+\end{verbatim}
+\item Presence of the birth momentum factor and form factor
+(${p_P}^{L_{G \to P P_1}}$ and corresponding form factor)
+\begin{verbatim}
+IncludeBirthFactor rho0 no
+\end{verbatim}
+\item Presence of the decay momenum factor and form factor
+(${p_D}^{L_{P \to D_1 D_2}}$ and corresponding form factor)
+\begin{verbatim}
+IncludeDecayFactor rho0 no
+\end{verbatim}
+\item Blatt-Weisskopf factor (in $GeV^{-1}$)
+\begin{verbatim}
+BlattWeisskopf rho 3.0
+\end{verbatim}
+\item Lineshape used.  There are a few alternative
+lineshapes available:
+\begin{verbatim}
+LSNONRELBW rho0
+LSFLAT rho0
+\end{verbatim}
+Note that LSFLAT should be used together with the ChangeMassMin
+and ChangeMassMax options.
+\item Mass and width
+\begin{verbatim}
+Particle rho0 0.8 0.2
+\end{verbatim}
+\end{itemize}
+
+Some of these are illustrated in Figures~\ref{fig:nom}
+to~\ref{fig:flat} for the $\rho$ mass in the decay $B \to \rho \pi$ and $\rho
+\to \pi \pi$.
+
+\begin{figure}
+\epsfig{figure=nominal.eps,width=0.9\linewidth}
+\caption{The nominal $\rho$ mass distribution in 
+$B \to \rho \pi$ and $\rho \to \pi \pi$.}
+\label{fig:nom}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=masswid.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$ and $\rho \to \pi \pi$ having included {\tt Particle rho0 0.8 0.2} 
+in the user decay table.}
+\label{fig:masswid}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=min7.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$ and $\rho \to \pi \pi$ having included {\tt ChangeMassMin rho0 0.7} 
+in the user decay table.}
+\label{fig:min}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=max9.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$ and $\rho \to \pi \pi$ having included {\tt ChangeMassMax 0.9} 
+in the user decay table.}
+\label{fig:max}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=nodecayp.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$, $\rho \to \pi \pi$ using {\tt IncludeDecayFactor rho0 no} 
+in the user decay table.}
+\label{fig:decayfactor}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=nobirthp.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$, $\rho \to \pi \pi$ using {\tt IncludeBirthFactor rho0 no} 
+in the user decay table.}
+\label{fig:birthfactor}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=nonrel.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$ and $\rho \to \pi \pi$ having included {\tt LSNONRELBW rho0} 
+in the user decay table.}
+\label{fig:massnonrel}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=flat.eps,width=0.9\linewidth}
+\caption{The $\rho$ mass distribution in 
+$B \to \rho \pi$ and $\rho \to \pi \pi$ having included {\tt LSFLAT rho} 
+in the user decay table.}
+\label{fig:flat}
+\end{figure}
+
+
+
+
+
+
+
+

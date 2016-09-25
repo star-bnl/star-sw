@@ -1,0 +1,27 @@
+#!/bin/sh
+# script to compile C programs that are linked 
+# against Fortran libraries
+# last modified 11 Feb 03 th
+
+linkopt=""
+cpplib=""
+otheropt=""
+
+for opt in $* ; do
+  case $opt in
+  -[Ll]* | *.a)
+    linkopt="$linkopt $opt"
+    ;;
+  *.cc)
+    otheropt="$otheropt $opt"
+    cpplib="-lstdc++"
+    ;;
+  *)
+    otheropt="$otheropt $opt"
+    ;;
+  esac
+done
+
+set -x
+gcc $otheropt $linkopt $cpplib -lpthread -L/lib/ld-linux.so.2 -L/usr/lib/gcc/i486-linux-gnu/3.4.6 -L/usr/lib/gcc/i486-linux-gnu/3.4.6 -L/usr/lib/gcc/i486-linux-gnu/3.4.6/../../../../lib -L/usr/lib/gcc/i486-linux-gnu/3.4.6/../../.. -L/lib/../lib -L/usr/lib/../lib -lfrtbegin -lg2c -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc
+

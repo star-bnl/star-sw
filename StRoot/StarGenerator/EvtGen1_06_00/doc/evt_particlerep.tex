@@ -1,0 +1,103 @@
+\section{Particle representation}
+\label{sect:amplitudes}
+\index{amplitude}
+\index{spin}
+\index{representation}
+\index{scalar particle}
+\index{vector particle}
+\index{tensor particle}
+\index{spin 1/2 particle}
+\index{photon}
+\index{neutrino}
+
+Particles with spin up to spin 2, with the exception of spin 3/2,
+are handled by classes within the framework of EvtGen.\footnote{
+Other particles will be added as need arises.
+}
+This
+section will describe how spin degrees of freedom are
+represented, and will introduce the classes that represent
+particles in EvtGen.  Table~\ref{tab:reps} summarizes the different
+types of particles currently implemented.
+
+\begin{table}[htbp]
+\begin{center}
+\begin{tabular}{ccccl} \hline
+Class name     &  Rep. &  J   &  States   & Example \\ \hline
+EvtScalarParticle   &  1    &   0  &    1      &  $\pi$, $B^0$ \\
+EvtDiracParticle    & $u_{\alpha}$& 1/2 & 2       &  $e$, $\tau$ \\
+EvtNeutrinoParticle & $u_{\alpha}$& 1/2 & 1       &  $\nu_e$ \\
+EvtVectorParticle   & $\epsilon^{\mu}$ & 1 & 3&  $\rho$, $J/\Psi$ \\
+EvtPhotonParticle   & $\epsilon^{\mu}$ & 1 & 2&  $\gamma$ \\
+EvtTensorParticle   & $T^{\mu\nu}$ & 2 & 5 &   $D^*_2$, $f_2$ \\ \hline
+\end{tabular}
+\caption{The different types of particles that supported by EvtGen.
+The spin 3/2, Rarita-Schwinger, representation has not yet been
+implemented.
+\label{tab:reps}}
+\end{center}
+\end{table}
+
+In Table~\ref{tab:reps}, $u_{\alpha}$ 
+represents a four component Dirac spinor,
+defined in the Pauli-Dirac convention for the
+gamma matrices, as discussed in Section~\ref{sect:diracspinor}.
+The {\tt EvtDiracParticle} class represents
+massive spin 1/2 particles that have
+two spin degrees of freedom. Neutrinos are also represented
+with a 4-component Dirac spinor by the {\tt EvtNeutrinoParticle}
+class.  Neutrinos are assumed to
+be massless and only left handed neutrinos and 
+right handed anti-neutrinos
+are considered. 
+
+The complex 4-vector
+$\epsilon^{\mu}$ is used to represent 
+the spin degrees of freedom for
+spin 1 particles.  Massive spin 1 particles, represented
+by the {\tt EvtVectorParticle} class,
+have three degrees of freedom.  The
+{\tt EvtPhotonParticle} class represents massless
+spin 1 particles, which have only two (longitudinal) 
+degrees of freedom.
+
+Massive spin 2 particles are represented 
+with a complex symmetric rank 2 tensor and are
+implemented in the {\tt EvtTensorParticle}
+class. 
+
+For each particle initialized in EvtGen, a set of
+basis states is created, where the number of basis states is
+the same as the number of spin degrees of freedom.
+These basis states can be accessed 
+through the {\tt EvtParticle} class 
+in either the particle's rest frame or in
+the parent's rest frame. For massless particles, only states
+in the parent's rest frame are available.
+As an example, consider the basis
+for a massive spin 1 particle in it's own rest frame
+\begin{eqnarray}
+\epsilon^{\mu}_1&=&(0,1,0,0),\\
+\epsilon^{\mu}_2&=&(0,0,1,0),\\
+\epsilon^{\mu}_3&=&(0,0,0,1).
+\end{eqnarray}
+Note that these basis vectors are mutually orthogonal, and
+normalized. That is,
+\begin{equation}
+g_{\mu\nu}\epsilon^{*\mu}_i\epsilon^{\nu}_j=\delta_{ij}.
+\end{equation}
+Further, they form a complete set 
+\begin{equation}
+\sum_i\epsilon^{*\mu}_i\epsilon^{\nu}_i=g^{\mu\nu}-p^{\mu}p^{\nu}/m^2,
+\end{equation}
+where $g^{\mu\nu}-p^{\mu}p^{\nu}/m^2$
+is the propagator for an on-shell spin 1 particle.
+
+In order to write a new decay model, there
+is no reason to need to know the exact choice of
+these basis states.  The code needed to describe the amplitude
+for a decay process is independent of these states, as
+long as they are complete, orthogonal and normalized.
+
+
+

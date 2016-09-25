@@ -1,0 +1,21 @@
+\section{Performance monitoring}
+\label{sect:monitoring}
+
+This section describes various tools that are available to
+monitor and debug the performance of EvtGen.
+
+\subsection{Efficiency}
+\label{sect:mon_eff}
+
+One, of many, possible reason for the generator to run slowly is that
+the maximum probability, against which the acceptance-rejection
+method is applied, is to high. This means that the efficiency for
+accepting an event is low. Diagnostics of this can be studied by 
+setting the environment variable ``EVTINFO''. At the end of the
+job a summary will then be printed out which gives the number of
+times each decay model was invoked, the efficiency for accepting
+the decay and the ratio of the largest probability in the sample
+that was generated to the maximum probability. Optimal running
+condition wants to maximize both of these. 
+
+

@@ -1,0 +1,86 @@
+\section{Conventions}
+
+This section discusses the conventions we use
+for various physics quantities in the code.
+
+\subsection{Units}
+
+In EvtGen, $c=1$, such that 
+mass, energy and momentum are all measured in units of GeV. 
+Similarly, time and space have units of mm.
+
+
+\subsection{Four-vectors}
+There are two types of four-vectors used in EvtGen,
+{\tt EvtVector4R} and {\tt EvtVector4C}, which are real and
+complex respectively. 
+
+A four-vector is represented by $p^{\mu}=(E,\vec{p})$.
+When a four-vector is used its components
+are always corresponding to raised indices. 
+A contraction of
+two vectors $p$ and $k$ ({\tt p*k})  automatically lowers 
+the indices on $k$ according to the metric $g={\rm diag}(1,-1,-1,-1)$
+so that {\tt p*p} is the mass squared of a particle with
+four-momentum $p$.
+
+
+\subsection{Tensors}
+
+We currently only support complex second rank tensors. As
+in the case of vectors, tensors are always reperesented with
+all indices raised. The convention for the totaly antisymmetric
+tensor, $\epsilon_{\alpha\beta\mu\nu}$, is $\epsilon_{0123}=+1$.
+
+\subsection{Dirac spinors}
+\label{sect:diracspinor}
+
+Dirac spinors are represented as a 4 component spinor in the Dirac-Pauli representation,
+with initial state fermions or final state anti-fermions. 
+
+\subsection{Gamma matrices}
+
+Dirac gamma matrices are also represented in the Dirac-Pauli
+representation, which has
+
+\begin{eqnarray}
+\gamma^0=\left[\begin{array}{rrrr}
+          1 & 0 & 0 & 0 \\
+          0 & 1 & 0 & 0 \\
+          0 & 0 & -1 & 0 \\
+          0 & 0 & 0 & -1 \\
+          \end{array}\right],& &
+\gamma^1=\left[\begin{array}{rrrr}
+          0 & 0 & 0 & 1 \\
+          0 & 0 & 1 & 0 \\
+          0 & -1 & 0 & 0 \\
+         -1 & 0 & 0 & 0 \\
+          \end{array}\right],\\
+\gamma^2=\left[\begin{array}{rrrr}
+          0 & 0 & 0 & -i \\
+          0 & 0 & i & 0 \\
+          0 & i & 0 & 0 \\
+         -i & 0 & 0 & 0 \\
+          \end{array}\right],& &
+\gamma^3=\left[\begin{array}{rrrr}
+          0 & 0 & 1 & 0 \\
+          0 & 0 & 0 & -1 \\
+          -1 & 0 & 0 & 0 \\
+          0 & 1 & 0 & 0 \\
+          \end{array}\right].
+\end{eqnarray}
+This gives
+\begin{equation}
+\gamma^5=i\gamma^0\gamma^1\gamma^2\gamma^3
+	={i\over4!}\epsilon_{\lambda\mu\nu\pi}
+\gamma^{\lambda}\gamma^{\mu}\gamma^{\nu}\gamma^{\pi}
+=\left[\begin{array}{rrrr}
+          0 & 0 & 1 & 0 \\	
+          0 & 0 & 0 & 1 \\	
+          1 & 0 & 0 & 0 \\
+          0 & 1 & 0 & 0 \\
+          \end{array}\right].
+\end{equation}
+
+
+

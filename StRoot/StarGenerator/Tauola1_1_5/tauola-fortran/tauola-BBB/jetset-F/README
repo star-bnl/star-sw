@@ -1,0 +1,8 @@
+demo:   (demo.f) for universal interface of  
+tauola: (tauface-jetset.f tauola_photos_ini.f).
+
+hepevt common block is searched for taus and then decays are 
+performed. Spin effects are implemented up to KORALZ standards
+(nearly). This is since 25 08 2001.
+
+

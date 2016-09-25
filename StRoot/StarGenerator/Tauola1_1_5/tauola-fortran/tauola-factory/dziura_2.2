@@ -1,0 +1,354 @@
+     $ /,' *',     25X,'**AVAILABLE FROM: WASM AT CERNVM ******',9X,1H*,
+     $ /,' *',     25X,'***** PUBLISHED IN COMP. PHYS. COMM.***',9X,1H*,
+     $ /,' *',     25X,'*******CERN-TH-5856 SEPTEMBER 1990*****',9X,1H*,
+     $ /,' *',     25X,'*******CERN-TH-6195 SEPTEMBER 1991*****',9X,1H*,
+     $ /,' *',     25X,'*******CERN TH-6793 NOVEMBER  1992*****',9X,1H*,
+     $ /,' *',     25X,'*****DEKAY ROUTINE: FINAL REPORT*******',9X,1H*,
+     $ /,' *',I20  ,5X,'NEV1   = NO. OF TAU+ DECS. ACCEPTED    ',9X,1H*,
+     $ /,' *',I20  ,5X,'NEV2   = NO. OF TAU- DECS. ACCEPTED    ',9X,1H*,
+     $ /,' *',I20  ,5X,'NEVTOT = SUM                           ',9X,1H*,
+     $ /,' *','    NOEVTS ',
+     $   ' PART.WIDTH     ERROR       ROUTINE    DECAY MODE    ',9X,1H*)
+ 7011 FORMAT(1X,'*'
+     $       ,I10,2F12.7       ,'     DADMEL     ELECTRON      ',9X,1H*
+     $ /,' *',I10,2F12.7       ,'     DADMMU     MUON          ',9X,1H*
+     $ /,' *',I10,2F12.7       ,'     DADMPI     PION          ',9X,1H*
+     $ /,' *',I10,2F12.7,       '     DADMRO     RHO (->2PI)   ',9X,1H*
+     $ /,' *',I10,2F12.7,       '     DADMAA     A1  (->3PI)   ',9X,1H*
+     $ /,' *',I10,2F12.7,       '     DADMKK     KAON          ',9X,1H*
+     $ /,' *',I10,2F12.7,       '     DADMKS     K*            ',9X,1H*)
+ 7012 FORMAT(1X,'*'
+     $       ,I10,2F12.7,A31                                    ,8X,1H*)
+ 7013 FORMAT(1X,'*'
+     $       ,20X,'THE ERROR IS RELATIVE AND  PART.WIDTH      ',10X,1H*
+     $ /,' *',20X,'IN UNITS GFERMI**2*MASS**5/192/PI**3       ',10X,1H*
+     $  /,1X,15(5H*****)/)
+ 902  PRINT 9020
+ 9020 FORMAT(' ----- DEKAY: LACK OF INITIALISATION')
+      STOP
+ 910  PRINT 9100
+ 9100 FORMAT(' ----- DEKAY: WRONG VALUE OF KTO ')
+      STOP
+      END
+      SUBROUTINE DEKAY1(IMOD,HH,ISGN)
+C     *******************************
+C THIS ROUTINE  SIMULATES TAU+  DECAY
+#if defined (ALEPH)
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+      COMMON / DECP4 / PP1(4),PP2(4),KFF1,KFF2
+      REAL*4           PP1   ,PP2
+      INTEGER                        KFF1,KFF2
+#else
+      COMMON / DECP4 / PP1(4),PP2(4),KF1,KF2
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+#endif
+      REAL  HH(4)
+      REAL  HV(4),PNU(4),PPI(4)
+      REAL  PWB(4),PMU(4),PNM(4)
+      REAL  PRHO(4),PIC(4),PIZ(4)
+      REAL  PAA(4),PIM1(4),PIM2(4),PIPL(4)
+      REAL  PKK(4),PKS(4)
+      REAL  PNPI(4,9)
+      REAL  PHOT(4)
+      REAL  PDUM(4)
+      DATA NEV,NPRIN/0,10/
+      KTO=1
+      IF(JAK1.EQ.-1) RETURN
+      IMD=IMOD
+      IF(IMD.EQ.0) THEN
+C     =================
+      JAK=JAK1
+      IF(JAK1.EQ.0) CALL JAKER(JAK)
+      IF(JAK.EQ.1) THEN
+        CALL DADMEL(0, ISGN,HV,PNU,PWB,PMU,PNM,PHOT)
+      ELSEIF(JAK.EQ.2) THEN
+        CALL DADMMU(0, ISGN,HV,PNU,PWB,PMU,PNM,PHOT)
+      ELSEIF(JAK.EQ.3) THEN
+        CALL DADMPI(0, ISGN,HV,PPI,PNU)
+      ELSEIF(JAK.EQ.4) THEN
+        CALL DADMRO(0, ISGN,HV,PNU,PRHO,PIC,PIZ)
+      ELSEIF(JAK.EQ.5) THEN
+        CALL DADMAA(0, ISGN,HV,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+      ELSEIF(JAK.EQ.6) THEN
+        CALL DADMKK(0, ISGN,HV,PKK,PNU)
+      ELSEIF(JAK.EQ.7) THEN
+        CALL DADMKS(0, ISGN,HV,PNU,PKS ,PKK,PPI,JKST)
+      ELSE
+        CALL DADNEW(0, ISGN,HV,PNU,PWB,PNPI,JAK-7)
+      ENDIF
+      DO 33 I=1,3
+ 33   HH(I)=HV(I)
+      HH(4)=1.0
+ 
+      ELSEIF(IMD.EQ.1) THEN
+C     =====================
+      NEV=NEV+1
+        IF (JAK.LT.31) THEN
+           NEVDEC(JAK)=NEVDEC(JAK)+1
+         ENDIF
+      DO 34 I=1,4
+ 34   PDUM(I)=.0
+      IF(JAK.EQ.1) THEN
+        CALL DWLUEL(1,ISGN,PNU,PWB,PMU,PNM)
+        CALL DWRPH(KTOM,PHOT)
+        DO 10 I=1,4
+ 10     PP1(I)=PMU(I)
+ 
+      ELSEIF(JAK.EQ.2) THEN
+        CALL DWLUMU(1,ISGN,PNU,PWB,PMU,PNM)
+        CALL DWRPH(KTOM,PHOT)
+        DO 20 I=1,4
+ 20     PP1(I)=PMU(I)
+ 
+      ELSEIF(JAK.EQ.3) THEN
+        CALL DWLUPI(1,ISGN,PPI,PNU)
+        DO 30 I=1,4
+ 30     PP1(I)=PPI(I)
+ 
+      ELSEIF(JAK.EQ.4) THEN
+        CALL DWLURO(1,ISGN,PNU,PRHO,PIC,PIZ)
+        DO 40 I=1,4
+ 40     PP1(I)=PRHO(I)
+ 
+      ELSEIF(JAK.EQ.5) THEN
+        CALL DWLUAA(1,ISGN,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+        DO 50 I=1,4
+ 50     PP1(I)=PAA(I)
+      ELSEIF(JAK.EQ.6) THEN
+        CALL DWLUKK(1,ISGN,PKK,PNU)
+        DO 60 I=1,4
+ 60     PP1(I)=PKK(I)
+      ELSEIF(JAK.EQ.7) THEN
+        CALL DWLUKS(1,ISGN,PNU,PKS,PKK,PPI,JKST)
+        DO 70 I=1,4
+ 70     PP1(I)=PKS(I)
+      ELSE
+CAM     MULTIPION DECAY
+        CALL DWLNEW(1,ISGN,PNU,PWB,PNPI,JAK)
+        DO 80 I=1,4
+ 80     PP1(I)=PWB(I)
+      ENDIF
+ 
+      ENDIF
+C     =====
+      END
+      SUBROUTINE DEKAY2(IMOD,HH,ISGN)
+C     *******************************
+C THIS ROUTINE  SIMULATES TAU-  DECAY
+#if defined (ALEPH)
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+      COMMON / DECP4 / PP1(4),PP2(4),KFF1,KFF2
+      REAL*4           PP1   ,PP2
+      INTEGER                        KFF1,KFF2
+#else
+      COMMON / DECP4 / PP1(4),PP2(4),KF1,KF2
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+#endif
+      REAL  HH(4)
+      REAL  HV(4),PNU(4),PPI(4)
+      REAL  PWB(4),PMU(4),PNM(4)
+      REAL  PRHO(4),PIC(4),PIZ(4)
+      REAL  PAA(4),PIM1(4),PIM2(4),PIPL(4)
+      REAL  PKK(4),PKS(4)
+      REAL  PNPI(4,9)
+      REAL  PHOT(4)
+      REAL  PDUM(4)
+      DATA NEV,NPRIN/0,10/
+      KTO=2
+      IF(JAK2.EQ.-1) RETURN
+      IMD=IMOD
+      IF(IMD.EQ.0) THEN
+C     =================
+      JAK=JAK2
+      IF(JAK2.EQ.0) CALL JAKER(JAK)
+      IF(JAK.EQ.1) THEN
+        CALL DADMEL(0, ISGN,HV,PNU,PWB,PMU,PNM,PHOT)
+      ELSEIF(JAK.EQ.2) THEN
+        CALL DADMMU(0, ISGN,HV,PNU,PWB,PMU,PNM,PHOT)
+      ELSEIF(JAK.EQ.3) THEN
+        CALL DADMPI(0, ISGN,HV,PPI,PNU)
+      ELSEIF(JAK.EQ.4) THEN
+        CALL DADMRO(0, ISGN,HV,PNU,PRHO,PIC,PIZ)
+      ELSEIF(JAK.EQ.5) THEN
+        CALL DADMAA(0, ISGN,HV,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+      ELSEIF(JAK.EQ.6) THEN
+        CALL DADMKK(0, ISGN,HV,PKK,PNU)
+      ELSEIF(JAK.EQ.7) THEN
+        CALL DADMKS(0, ISGN,HV,PNU,PKS ,PKK,PPI,JKST)
+      ELSE
+        CALL DADNEW(0, ISGN,HV,PNU,PWB,PNPI,JAK-7)
+      ENDIF
+      DO 33 I=1,3
+ 33   HH(I)=HV(I)
+      HH(4)=1.0
+      ELSEIF(IMD.EQ.1) THEN
+C     =====================
+      NEV=NEV+1
+        IF (JAK.LT.31) THEN
+           NEVDEC(JAK)=NEVDEC(JAK)+1
+         ENDIF
+      DO 34 I=1,4
+ 34   PDUM(I)=.0
+      IF(JAK.EQ.1) THEN
+        CALL DWLUEL(2,ISGN,PNU,PWB,PMU,PNM)
+        CALL DWRPH(KTOM,PHOT)
+        DO 10 I=1,4
+ 10     PP2(I)=PMU(I)
+ 
+      ELSEIF(JAK.EQ.2) THEN
+        CALL DWLUMU(2,ISGN,PNU,PWB,PMU,PNM)
+        CALL DWRPH(KTOM,PHOT)
+        DO 20 I=1,4
+ 20     PP2(I)=PMU(I)
+ 
+      ELSEIF(JAK.EQ.3) THEN
+        CALL DWLUPI(2,ISGN,PPI,PNU)
+        DO 30 I=1,4
+ 30     PP2(I)=PPI(I)
+ 
+      ELSEIF(JAK.EQ.4) THEN
+        CALL DWLURO(2,ISGN,PNU,PRHO,PIC,PIZ)
+        DO 40 I=1,4
+ 40     PP2(I)=PRHO(I)
+ 
+      ELSEIF(JAK.EQ.5) THEN
+        CALL DWLUAA(2,ISGN,PNU,PAA,PIM1,PIM2,PIPL,JAA)
+        DO 50 I=1,4
+ 50     PP2(I)=PAA(I)
+      ELSEIF(JAK.EQ.6) THEN
+        CALL DWLUKK(2,ISGN,PKK,PNU)
+        DO 60 I=1,4
+ 60     PP1(I)=PKK(I)
+      ELSEIF(JAK.EQ.7) THEN
+        CALL DWLUKS(2,ISGN,PNU,PKS,PKK,PPI,JKST)
+        DO 70 I=1,4
+ 70     PP1(I)=PKS(I)
+      ELSE
+CAM     MULTIPION DECAY
+        CALL DWLNEW(2,ISGN,PNU,PWB,PNPI,JAK)
+        DO 80 I=1,4
+ 80     PP1(I)=PWB(I)
+      ENDIF
+C 
+      ENDIF
+C     =====
+      END
+      SUBROUTINE DEXAY(KTO,POL)
+C ----------------------------------------------------------------------
+C THIS 'DEXAY' IS A ROUTINE WHICH GENERATES DECAY OF THE SINGLE
+C POLARIZED TAU,  POL IS A POLARIZATION VECTOR (NOT A POLARIMETER
+C VECTOR AS IN DEKAY) OF THE TAU AND IT IS AN INPUT PARAMETER.
+C KTO=0 INITIALISATION (OBLIGATORY)
+C KTO=1 DENOTES TAU+ AND KTO=2 TAU-
+C DEXAY(1,POL) AND DEXAY(2,POL) ARE CALLED INTERNALLY BY MC GENERATOR.
+C DECAY PRODUCTS ARE TRANSFORMED READILY
+C TO CMS AND WRITEN IN THE  LUND RECORD IN /LUJETS/
+C KTO=100, PRINT FINAL REPORT (OPTIONAL).
+C
+C     called by : KORALZ
+C ----------------------------------------------------------------------
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+      COMMON / IDFC  / IDFF
+      COMMON /TAUPOS/ NP1,NP2                
+      PARAMETER (NMODE=15,NM1=0,NM2=1,NM3=8,NM4=2,NM5=1,NM6=3)
+#if defined (ALEPH)
+      COMMON / TAUDCD /IDFFIN(9,NMODE),MULPIK(NMODE)
+#else
+      COMMON / TAUDCD /IDFFIN(9,NMODE),MULPIK(NMODE)
+#endif
+     &                ,NAMES
+      CHARACTER NAMES(NMODE)*31
+      COMMON / INOUT / INUT,IOUT
+      REAL  POL(4)
+      REAL  PDUM1(4),PDUM2(4),PDUM3(4),PDUM4(4),PDUM5(4)
+      REAL  PDUM(4)
+      REAL  PDUMI(4,9)
+      DATA IWARM/0/
+      KTOM=KTO
+C
+      IF(KTO.EQ.-1) THEN
+C     ==================
+
+C       INITIALISATION OR REINITIALISATION
+C       first or second tau positions in HEPEVT as in KORALB/Z
+        NP1=3
+        NP2=4
+        IWARM=1
+        WRITE(IOUT, 7001) JAK1,JAK2
+        NEVTOT=0
+        NEV1=0
+        NEV2=0
+        IF(JAK1.NE.-1.OR.JAK2.NE.-1) THEN
+          CALL DEXEL(-1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DEXMU(-1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DEXPI(-1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DEXRO(-1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4)
+          CALL DEXAA(-1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5,IDUM)
+          CALL DEXKK(-1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DEXKS(-1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,IDUM)
+          CALL DEXNEW(-1,IDUM,PDUM,PDUM1,PDUM2,PDUMI,IDUM)
+        ENDIF
+        DO 21 I=1,30
+        NEVDEC(I)=0
+        GAMPMC(I)=0
+ 21     GAMPER(I)=0
+      ELSEIF(KTO.EQ.1) THEN
+C     =====================
+C DECAY OF TAU+ IN THE TAU REST FRAME
+        NEVTOT=NEVTOT+1
+        NEV1=NEV1+1
+        IF(IWARM.EQ.0) GOTO 902
+        ISGN=IDFF/IABS(IDFF)
+CAM     CALL DEXAY1(POL,ISGN)
+        CALL DEXAY1(KTO,JAK1,JAKP,POL,ISGN)
+      ELSEIF(KTO.EQ.2) THEN
+C     =================================
+C DECAY OF TAU- IN THE TAU REST FRAME
+        NEVTOT=NEVTOT+1
+        NEV2=NEV2+1
+        IF(IWARM.EQ.0) GOTO 902
+        ISGN=-IDFF/IABS(IDFF)
+CAM     CALL DEXAY2(POL,ISGN)
+        CALL DEXAY1(KTO,JAK2,JAKM,POL,ISGN)
+      ELSEIF(KTO.EQ.100) THEN
+C     =======================
+        IF(JAK1.NE.-1.OR.JAK2.NE.-1) THEN
+          CALL DEXEL( 1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DEXMU( 1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DEXPI( 1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DEXRO( 1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4)
+          CALL DEXAA( 1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5,IDUM)
+          CALL DEXKK( 1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DEXKS( 1,IDUM,PDUM,PDUM1,PDUM2,PDUM3,PDUM4,IDUM)
+          CALL DEXNEW( 1,IDUM,PDUM,PDUM1,PDUM2,PDUMI,IDUM)
+          WRITE(IOUT,7010) NEV1,NEV2,NEVTOT
+          WRITE(IOUT,7011) (NEVDEC(I),GAMPMC(I),GAMPER(I),I= 1,7)
+          WRITE(IOUT,7012) 
+     $         (NEVDEC(I),GAMPMC(I),GAMPER(I),NAMES(I-7),I=8,7+NMODE)
+          WRITE(IOUT,7013) 
+        ENDIF
+      ELSE
+        GOTO 910
+      ENDIF
+      RETURN
+ 7001 FORMAT(///1X,15(5H*****)
+#if defined (ALEPH)
+     $ /,' *',     25X,'*****TAUOLA LIBRARY: VERSION 2.7 ******',9X,1H*,
+     $ /,' *',     25X,'*DEC 1993; ALEPH fixes introd. dec 98 *',9X,1H*,
+     $ /,' *',     25X,'**AUTHORS: S.JADACH, Z.WAS*************',9X,1H*,
+     $ /,' *',     25X,'**R. DECKER, M. JEZABEK, J.H.KUEHN*****',9X,1H*,
+     $ /,' *',     25X,'Physics initialization by ALEPH collab ',9X,1H*,
+     $ /,' *',     25X,'it is suggested to use this version    ',9X,1H*,
+     $ /,' *',     25X,' with the help of the collab. advice   ',9X,1H*,
+     $ /,' *',     25X,'**AVAILABLE FROM: WASM AT CERNVM ******',9X,1H*,
+     $ /,' *',     25X,'***** PUBLISHED IN COMP. PHYS. COMM.***',9X,1H*,

@@ -1,0 +1,52 @@
+This set-up is generating directory of tauola library.
+Tauola sources may be built in one of the options mentioned below.
+.F sources are preprocessed using cpp precompiler and stored in 
+prod/ subdirectory.
+
+
+Basic options are:
+       make CPC
+       make CLEO 
+       make ALEPH
+========================
+
+As result:
+
+
+1) contents of existing external tauola/ subdirectory is erased (!)
+2) directory structure of external tauola/ is rebuilt: 
+3) directory prod/ is filled with appropriate fortran files and makefiles.
+2) interfaces to KK and main stand-alone programs are created
+3) external tauola/ directory is filled with fortran and makefiles.
+4) external tauola/ sub-directories are filled with fortran code of demos
+5) external tauola/KK-face is filled with fortran code of KK interface
+
+make: Tauface 
+=============
+
+Tauface.f will be placed in KK2f directory.
+
+Remarks:
+========
+
+1) All machine dependant settings are stored in TAUOLA/make.inc and
+    TAUOLA/platform/
+2) Makefiles templates  are compatible with KK: thus by executing 
+   make makflag from KK/ffbench/ will overwrite makefile in tauola/ 
+   with the one produced from makefile.templ files.
+3) demo and test programs do not know of KK. They use compiler settings
+   from TAUOLA/make.inc
+
+4) WARNING! 
+   ++++++++
+   The code of tauola and demos may need special compiler flags, when ported
+   to another platform. 
+5) Additional parametrizations of form-factors which can be useful
+   in some applications are stored in directory suppl. They are not
+   ready to use and some care cross checks are mandatory.
+
+===========
+execute: 'make pythia' for pythia demonstration code. 
+'demo-pythia' will be created in the 'tauola' directory
+
+

@@ -1,0 +1,30 @@
+\section{Guidelines for coding in EvtGen}
+\label{sect:codestd}
+\index{Nameing convention}
+
+This section is included for the convenience of the
+developers to make clear how classes, memeber functions
+etc. should be named. Note that a lot of the original code 
+was written completely without any of these guidelines
+and hence are in complete violation of this guide. It is,
+however, a goal of the developers to modify the old code 
+to be consistent with this standard.
+
+All classes, and in general any global symbols, should
+start with the three letters ``Evt''. This is the package TLA
+as used in BaBar. Further class names are written using
+capital letters for the first letter in each word that makes
+up the name, e.g., EvtDecayTable.
+
+Member functions start with a lower case letter and further words
+in the name are written with the first letter in capital, e.g., 
+getDecayModel() is then the way a member function that 
+returns the decay model should be named.
+
+Memeber data starts with an underscore, \_, and \_decaymodel
+is then how a the member data that stores the decay models 
+should be named. 
+
+Note in particular that it is discouraged to use an underscore
+in the name of either classes, member functions, or member data
+to separate words.

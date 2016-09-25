@@ -1,0 +1,110 @@
+\section{The routines {\tt decay\_angle} and {\tt decay\_angle\_chi}}
+\label{sect:evtutil}
+
+This section will describe the utility routines, 
+{\tt EvtDecayAngle}, {\tt EvtDecayPlaneNormalAngle}, 
+and  {\tt EvtDecayAngleChi},
+that compute decay angles.  The function {\tt EvtDecayAngle} is 
+useful for finding the decay angle, known as the helicity
+angle, in a decay tree that includes a two body decay.
+Teh routine {\tt EvtDecayPlaneNormalAngle} calculates the angle
+of the decay plane normal in a three-body decay.
+{\tt EvtDecayAngleChi} computes the azimuthal angle between two decay
+planes in sequencial decays such as $B \rightarrow D^* D^*$ or
+$B \rightarrow D^* \ell \nu$.
+
+To call {\tt EvtDecayAngle}, the syntax is 
+\begin{verbatim} 
+costheta=EvtDecayAngle(P,Q,D),
+\end{verbatim}
+where {\tt P}, {\tt Q} and {\tt D} are of type {\tt EvtVector4R}.
+This routine returns the cosine of the angle $\theta$, as defined in
+Figure~\ref{fig:decay_angle}. The decay angle calculated is that between
+the flight direction of the 
+daughter meson, {\tt D}, in the rest frame of {\tt Q} (the parent of {\tt D}),
+with respect to {\tt Q}'s
+flight direction in {\tt P}'s (the parent of {\tt Q})
+rest frame. {\tt P}, {\tt Q}, and {\tt D}
+are the momentum four vectors of these particles in any frame of reference.
+The decay angle is
+computed using the (manifestly invariant) expression
+\begin{equation}
+\cos\theta = { {(P\cdot D) M^2_Q- (P\cdot Q)(Q\cdot D)} \over
+        	      \sqrt{[(P\cdot Q)^2-M^2_QM^2_P]
+		[(Q\cdot D)^2-M^2_QM^2_D]}}.
+\end{equation}
+
+
+
+To call {\tt EvtDecayPlaneNormalAngle} the syntax is 
+\begin{verbatim} 
+costheta=EvtDecayPlaneNormalAngle(P,Q,D1,D2),
+\end{verbatim}
+where {\tt P}, {\tt Q}, {\tt D1}, and {\tt D2} are of type {\tt EvtVector4R}.
+This routine returns the cosine of the angle $\theta$ of the normal to the
+decay plane.
+ The angle calculated is that between
+the normal of the decay plane formed by the 
+daughter mesons, {\tt D1} and {\tt D2}, in the rest frame of {\tt Q} (the parent of {\tt D1} and {\tt D2}),
+with respect to {\tt Q}'s
+flight direction in {\tt P}'s (the parent of {\tt Q})
+rest frame. {\tt P}, {\tt Q}, {\tt D1}, and {\tt D2}
+are the momentum four-vectors of these particles in any frame of reference.
+The decay angle is
+computed using the (manifestly invariant) expression
+\begin{equation}
+\cos\theta = { M_QP\cdot L} \over
+        	      \sqrt{[(P\cdot Q)^2-M^2_PM^2_Q]
+		[-L^2]}
+\end{equation}
+where $L_{\nu}=\epsilon_{\nu\mu\alpha\beta}Q^{\nu}D_1^{\alpha}D_2^{\beta}$.
+
+
+
+
+The routine {\tt EvtDecayAngleChi} is used to calculate the azimuthal 
+angel, $\chi$, between the decay planes of a pair of two body
+decays.
+As illustrated in Figure~\ref{fig:decay_angle_chi},
+$\chi$ is the
+angle 
+calculated from the particle {\tt d1} to the particle {\tt h1} as
+seen from the direction of particle {\tt D}. The form of the call to this 
+subroutine is 
+\begin{verbatim} 
+chi=EvtDecayAngleChi(p4_parent,p4_d1,p4_d2,p4_h1,p4_h2),
+\end{verbatim} 
+
+where {\tt p4\_d1}, {\tt p4\_d2}, {\tt p4\_t1}, {\tt p4\_h2}
+are of type {\tt EvtVector4R} and are the four momenta
+of the daughter particles as illustrated in
+Figure~\ref{fig:decay_angle_chi}.
+
+
+\begin{figure}[hbtp]
+\centerline{\epsfig{figure=decay_angle.eps,height=3.5in,width=3.5in}}
+\caption[Definition of the decay angle.]
+{
+Definition of the decay angle.
+}
+\label{fig:decay_angle}
+\end{figure}
+
+\begin{figure}[hbtp]
+\centerline{\epsfig{figure=decay_angle_chi.eps,height=2.5in,width=4.5in}}
+\caption[Definition of the $\chi$ angle.]
+{
+Definition of the $\chi$ angle.
+}
+\label{fig:decay_angle_chi}
+\end{figure}
+
+
+
+
+
+
+
+
+
+

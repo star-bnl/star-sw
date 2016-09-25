@@ -1,0 +1,14 @@
+--- TAUOLA/platform/make.inc.in	2014-04-08 09:22:50.000000000 +0100
++++ /home/epp/phsjao/tmp/make.inc.in	2015-09-15 13:32:32.523476655 +0100
+@@ -7,9 +7,9 @@
+ F77FLAGS = -fPIC -fno-automatic -fno-backslash -ffixed-line-length-132
+ FFLAGS   = @FFLAGS@ $(F77FLAGS)
+ 
+-LD       = @F77@
++LD       = @CC@
+ LDFLAGS  = 
+-SOFLAGS  = -shared
++SOFLAGS  = -shared -undefined dynamic_lookup
+ 
+ RANLIB   = @RANLIB@
+ AR       = ar
