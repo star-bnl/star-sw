@@ -28,8 +28,8 @@ F77FLAGS    := -m32 -fd-lines-as-code -std=legacy -fno-second-underscore -w -fno
 LDFLAGS     := -shared -Wl,-Bdynamic
 
 #                           Number of simultaneous jobs to execute during build
-#NPROC       := $(shell cat /proc/cpuinfo | grep processor | wc -l)
-NPROC := 1
+NPROC       := $(shell cat /proc/cpuinfo | grep processor | wc -l)
+#NPROC := 1
 
 ######################################################################################
 #

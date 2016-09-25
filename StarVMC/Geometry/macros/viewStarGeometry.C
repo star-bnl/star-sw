@@ -1,11 +1,11 @@
 TGLViewer* viewer;
 
 Bool_t nocache = false;
-Bool_t viewall = kTRUE;
+Bool_t viewall = false;
 
-void viewStarGeometry( const Char_t *tag="y2013_1x", const Char_t *addons="",
+void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="",
 		       const Char_t *TOP="HALL",
-		       const Char_t *NODE="HALL_1"
+		       const Char_t *NODE="CAVE_1"
 		       )
 {
  
@@ -23,9 +23,9 @@ void viewStarGeometry( const Char_t *tag="y2013_1x", const Char_t *addons="",
   
   
   // Get the specified top volume and node to draw
-  TGeoNode *HALL = gGeoManager->GetTopNode();//gGeoManager->FindVolumeFast(TOP)->FindNode(NODE);
-  TEveGeoTopNode *hall = new TEveGeoTopNode( gGeoManager, HALL );
-  gEve -> AddGlobalElement(hall);
+  TGeoNode *CAVE = gGeoManager->FindVolumeFast(TOP)->FindNode(NODE);
+  TEveGeoTopNode *cave = new TEveGeoTopNode( gGeoManager, CAVE );
+  gEve -> AddGlobalElement(cave);
 
   
   // Draw the scene
@@ -76,7 +76,7 @@ void viewStarGeometry( const Char_t *tag="y2013_1x", const Char_t *addons="",
   //  gROOT->ProcessLine(".L applyColorScheme.C+");
   //  gROOT->ProcessLine(Form(".L %s+",file));
   gSystem->CompileMacro( file, "k-", "libApplyColorScheme", "/tmp" );
-  applyColorScheme("HALL");
+  applyColorScheme("CAVE");
 
 }
 

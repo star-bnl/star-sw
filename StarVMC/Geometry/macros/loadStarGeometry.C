@@ -11,7 +11,15 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   gROOT   -> LoadMacro("Load.C");
   //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
   //  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
-  Load("libGeom,St_base,StUtilities,libPhysics,StarAgmlUtil,StarAgmlLib,libGeometry");
+  Load("libGeom.so");
+  Load("StarRoot.so");
+  Load("St_base.so");
+  Load("StUtilities.so");
+  Load("libPhysics.so");
+  Load("StarAgmlUtil.so");
+  Load("StarAgmlLib.so");
+  Load("libStarGeometry.so");
+  Load("libGeometry.so");
 
   if (!mytag) return;
 
@@ -45,9 +53,7 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   //
   // Setup a geometry control structure for testing purposes
   //  
-#if 0
   gROOT->ProcessLine(Form(".!mkdir %s",mytag));
-#endif
   if ( agml )
     {
       if ( !gGeoManager ) new TGeoManager(tag,tag+" | dyson");	
@@ -76,11 +82,11 @@ void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
   TString tag = mytag;
   gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC ");
 
-  //  gROOT   -> LoadMacro("Load.C");
+  gROOT   -> LoadMacro("Load.C");
   //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
-  gSystem->Load("StarAgmlLib.so");
-  gSystem->Load("libGeometry.so");
-  //  gSystem->Load("libStarGeometry.so");
+  Load("StarAgmlLib.so");
+  Load("libGeometry.so");
+  Load("libStarGeometry.so");
 
   gErrorIgnoreLevel=9999;
 
@@ -101,9 +107,7 @@ void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
   // Setup a geometry control structure for testing purposes
   //  
   if ( !gGeoManager ) new TGeoManager(tag,tag+" | dyson");	
-#if 0
   gROOT->ProcessLine(Form(".!mkdir %s",mytag));
-#endif
   build -> ConstructGeometry ( tag );
   
   std::cout << "================================================================" << std::endl;
