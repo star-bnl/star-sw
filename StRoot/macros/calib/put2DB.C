@@ -46,6 +46,7 @@ void put2DB(const char* file=
 	      UPDATE svtDriftCorrection set entryTime=entryTime,beginTime=''2005-01-01 00:00:00' where beginTime like '2005-01-01%'; 
 	    */
 	    ){
+  gSystem->Setenv("DB_ACCESS_MODE","write");
 #if 0
   Load();
 #endif
@@ -123,7 +124,7 @@ void put2DB(const char* file=
   //  myTable->Print(0,NN);
   if ( myTable->IsA()->InheritsFrom( "St_tpcCorrection" ) ) {
     // enlarge table up to 50 rows
-    const Int_t Nmax = 50; 
+    const Int_t Nmax = 192; 
     if (N > Nmax) {cout << "Table has " << N << " more than " << Nmax << " rows. Possible BUG " << endl; return;}
     myTable->ReAllocate(Nmax);
     tpcCorrection_st row;
