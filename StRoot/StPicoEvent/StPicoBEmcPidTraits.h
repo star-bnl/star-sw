@@ -15,11 +15,11 @@ public:
 
   /// associated BEMC cluster id (STAR standard clustering algorithm)
   Int_t   bemcId() const;
-  /// associated bemc cluster adc0 (STAR standard clustering algorithm)
+  /// associated bemc cluster highest tower adc (STAR standard clustering algorithm)
   Int_t   bemcAdc0() const;
-  /// associated bemc cluster E0 (STAR standard clustering algorithm)
+  /// associated bemc cluster highest tower energy (STAR standard clustering algorithm)
   Float_t bemcE0() const;
-  /// associated bemc cluster E (STAR standard clustering algorithm)
+  /// associated bemc cluster energy (STAR standard clustering algorithm)
   Float_t bemcE() const;
   /// associated bemc cluster Z-distance (cm) (STAR standard clustering algorithm)
   Float_t bemcZDist() const;
