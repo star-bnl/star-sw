@@ -1312,6 +1312,10 @@ Bfc_st BFC[] = { // standard chains
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
+  {"picoEvt"    ,"","","StEvent,Stu","",            "StPicoEvent","Load picoEvent and dependencies",kFALSE},
+  {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
+   ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
+
 
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
@@ -1391,6 +1395,8 @@ Bfc_st BFC[] = { // standard chains
   //   ,                                                                     "<Early StEvent creation>",kFALSE},
   {"MakeEvent","0Event","","StEvent,detDb","StEventMaker","StTpcDb,StEventMaker"
      ,                                                                     "<Early StEvent creation>",kFALSE},
+  {"PicoVtxDefault","PicoVtxDefault",""           ,""                          ,"StPicoDstMaker","",kFALSE},
+  {"PicoVtxAuAu200","PicoVtxAuAu200",""           ,""                          ,"StPicoDstMaker","",kFALSE},
   {"LaserAvEv"          ,"","",""             ,"StLaserAvEventMaker","StLaserAvEventMaker","Hejrad",kFALSE},
   {"LaserAvCl"          ,"","",""               ,"StLaserAvClusterMaker","StLaserAvClusterMaker","",kFALSE},
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
@@ -1516,6 +1522,8 @@ Bfc_st BFC[] = { // standard chains
 
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
    "... SSD fast simulator"                                                                        ,kFALSE},
+  {"sstfast"     ,"","","sstDb,StMcEvent,StEvent","StSstFastSimMaker","StSstFastSimMaker",
+   "... SST fast simulator"                                                                        ,kFALSE},
   {"ssd"         ,"","","ssdCalDb,sls,spa,sptd"              ,"","","SSD full chain for simulation",kFALSE},
   {"sls","","","McEvent,Simu,svt_T,SvtCL"
    ,                                "St_sls_Maker","StSsdSimulationMaker", "... SSD slow simulator",kFALSE},
@@ -1801,6 +1809,12 @@ Bfc_st BFC[] = { // standard chains
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
+
+  {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
+  {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
+  //{"picoVtxVpd","","","","","",                                "pico Vtx cut on Tof and VPD mode",kFALSE},
+
+
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"
