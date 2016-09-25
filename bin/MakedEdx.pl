@@ -1573,8 +1573,18 @@ my @badruns = qw(
 
 #$hist = "RunXVIAuAu200p102"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/18/16 TpcSecRowB and TpcRowQ based on SecRow3CGFRunXVIAuAu200p101
 #$hist = "RunXVIAuAu200p103"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/18/16 update TpcRowQ, tpcPressureB, TpcLengthCorrectionMDF
-$hist = "RunXVIAuAu200p104"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/19/16 fix bug TpcRowQ => TpcEffectivedX
-
+#$hist = "RunXVIAuAu200p104"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/19/16 fix bug TpcRowQ => TpcEffectivedX
+#$hist = "RunXVIAuAu200p105"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/19/16 update TpcRowQ, tpcPressureB
+#$hist = "RunXVIAuAu200p106"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = "adev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/20/16 check with adev, run with old Tpc Alignment
+#$hist = "RunXVIAuAu200p107"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = "adev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/16 check with adev with new TPC alignment, got old TpcAdcCorrection
+#$hist = "RunXVIAuAu200p108"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = "adev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/22/16 check with adev with new TPC alignment, disable old TpcAdcCorrection for > 2015-12-00, 
+#/star/data9*/reco/dAu200_production_2016/ReversedFullField/P16ii_TOF_dEdx_HFT/2016/*/*
+#$hist = "RunXVIdAu200p200"; $NEvents = 1000; $disk = "data9*/"; $RECO = "reco/dAu200_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/22/16 the first pass with AuAu200 constants
+#$hist = "RunXVIdAu200p201"; $NEvents = 1000; $disk = "data9*/"; $RECO = "reco/dAu200_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/23/16  TpcRowQ and TpcSecRowB
+#$hist = "RunXVIdAu200p202"; $NEvents = 1000; $disk = "data9*/"; $RECO = "reco/dAu200_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/23/16  switch off TpcCurrentCorrection
+#$hist = "RunXVIdAu200p203"; $NEvents = 2000; $disk = "data9*/"; $RECO = "reco/dAu200_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/24/16 new TpcCurrentCorrectionX
+#$hist = "RunXVIdAu200p204"; $NEvents = 2000; $disk = "data9*/"; $RECO = "reco/dAu200_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/25/16 new TpcCurrentCorrectionX, recompile DetectorDb .sl64_x8664_gcc492/OBJ
+$hist = "RunXVIdAu200p205"; $NEvents = 2000; $disk = "data9*/"; $RECO = "reco/dAu200_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/25/16 new TpcCurrentCorrectionX, recompile DetectorDb .sl64_x8664_gcc492/OBJ, fix missing rows in TpcCurrentCorrectionX
 my $prod = $hist; #$Production;
 
 $prod =~ s/\*//g;
@@ -1749,13 +1759,12 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #      print OUT "source $GROUP_DIR/setup gcc451;\n";
       if ($STAR_LEVEL ne "\.DEV2") {
 	print OUT "source $GROUP_DIR/setup gcc;\n";
-#	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-      } 
-#      else {
+	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+      }  else {
 	print OUT "setenv NODEBUG yes\n";
         print OUT "source $GROUP_DIR/setup 64b;\n";
         print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-#      }
+      }
 #     print OUT "setenv Calibrations_tpc reconYuri\n";
 #      print OUT " unsetenv Calibrations_tpc\n";
 #      print OUT "cd $homedir; \n"; 

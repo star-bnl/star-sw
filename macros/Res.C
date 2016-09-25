@@ -114,7 +114,6 @@ void Res(const Char_t *select="x") {
   c1->SetTitle("Resolution versus Track Length");
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
-  TString option("");
   TH1F *frame = c1->DrawFrame(10,0.04,160,0.20);
   frame->SetTitle("Resolution versus Track Length");
   frame->SetXTitle("Track Length (cm)                   ");
@@ -226,7 +225,6 @@ void Res(const Char_t *select="x") {
 }
 //________________________________________________________________________________
 void Mu() {
-  //  const Char_t *FitNames[3] = {"Fit","I70","I60"};
   Int_t NF = 0;
   TList *files = (TList *) gROOT->GetListOfFiles();
   Int_t nn = files->GetSize();
@@ -240,10 +238,9 @@ void Mu() {
     if (! F.Contains("TPoints") && ! F.Contains("MPoints")) continue;
     //    if (! F.Contains("BGP") && ! F.Contains("BUGP") && ! F.Contains("BAGP")) continue;
     if (! F.Contains("GP")) continue;
-    Int_t indx = 0;
-    if ( F.Contains("70")) indx = 1;
-    FitFiles[NF] = f; NF++;
-    cout << "Found file[" << NF << "] = " << FitFiles[NF-1]->GetName() << endl;
+    FitFiles[NF] = f; 
+    cout << "Found file[" << NF << "] = " << FitFiles[NF]->GetName() << endl;
+    NF++;
   }
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
   if (! c1 ) c1 = new TCanvas("c1","Resolution versus Track Length");
@@ -251,18 +248,12 @@ void Mu() {
   c1->SetTitle("Shift versus Track Length");
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
-  TString option("");
-  for (int i = 0; i<NF; i++) {
-    if (FitFiles[i]) { 
-      FitFiles[i]->cd();
-    }
-  }  
   TH1F *frame = c1->DrawFrame(10,-0.05,100,0.05);
   frame->SetTitle("Shift versus Track Length");
   frame->SetXTitle("Track Length (cm)                   ");
   frame->SetYTitle("Resolution");
   TLegend *leg = new TLegend(0.25,0.6,0.9,0.9,"");
-  for (int i = 0; i<NF; i++) {
+  for (int i = 0; i < NF; i++) {
     if (FitFiles[i]) { 
       FitFiles[i]->cd();
       TH1 *Mu = 0;
@@ -272,11 +263,11 @@ void Mu() {
 	  Mu = ((TH2 *) mu)->ProjectionX("Mu",0,0);
 	} else Mu = mu;
       }
-      if (! mu) continue;
+      if (! Mu) continue;
       Int_t c = i + 1;
       if (c == 10) c = 11;
       Mu->SetMarkerColor(c); // Set(c);
-      if (Mu->GetEntries() < 1.) continue;
+      //      if (Mu->GetEntries() < 1.) continue;
       TF1 *powfit = new TF1("powfit","[0]",40,80);
       powfit->SetParameters(0.5,-0.5);
       powfit->SetLineColor(c);

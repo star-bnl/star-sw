@@ -64,15 +64,15 @@
 #set dirlist = $ROOTSYS/lib
 #set dirlist = /opt/gcc/4.8.2/lib/gcc/x86_64-redhat-linux7E/4.8.2/32
 #set dirlist = `gfortran -print-search-dirs | grep libraries | awk -F= '{print $2}' | sed -e 's/:/ /g'`
-#set dirlist = `echo .${STAR_HOST_SYS}/LIB`;# ${STAR}/.${STAR_HOST_SYS}/lib`
-set dirlist = /usr/lib
+set dirlist = `echo ${STAR_LIB}`;# ${STAR}/.${STAR_HOST_SYS}/lib`
+#set dirlist = /usr/lib
 foreach p ($dirlist) 
-#    set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
-    set list = `echo ${p}/libboost*.so`
+    set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
+#    set list = `echo ${p}/libboost*.so`
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep -i _ZNK5boost15program_options29value_semantic_codecvt_helperIcE5parseERNS_3anyERKSt6vectorISsSaISsEEb
+	nm -p $lib |  grep -i _ZN8ROOTDict20GenerateInitInstanceEPKN7BBCMGEO7BbcmGeoE
     end
 end
 #set list = `find .sl64_gcc447/obj/StarVMC/Geometry/ -name "*.o"`

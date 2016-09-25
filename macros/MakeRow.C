@@ -72,12 +72,12 @@ TF1* FitTH1R(TH1 *hist, const Char_t *fitF = "pol1") {
   return f;
 }
 //________________________________________________________________________________
-void MakeRow(TH2 *mu=0) {
+void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
   if (! mu) return;
   Int_t n = mu->GetNbinsX();
   for (Int_t i = 1; i <= n; i++) {
     TH1D *proj = mu->ProjectionY(Form("R%i",i),i,i);
-    TF1 *f = FitTH1R(proj,"pol3");
+    TF1 *f = FitTH1R(proj,fName);
     if (! f) continue;
     ofstream out;
     TString fOut =  Form("row.%03i.C",i);
