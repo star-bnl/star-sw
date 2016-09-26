@@ -63,7 +63,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
   mPicoDst(new StPicoDst()), mBField(0),
-  mVtxMode(PicoVtxMode::NotSet), // do not change mVtMode default value, it affects the behavior of the code, see ::Init()
+  mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
   mChain(nullptr), mTTree(nullptr), mEventCounter(0), mSplit(99), mCompression(9), mBufferSize(65536 * 4),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
@@ -230,11 +230,13 @@ int StPicoDstMaker::setVtxModeAttr()
   if (strcmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0)
   {
     setVtxMode(PicoVtxMode::Default);
+    LOG_INFO << " PicoVtxDefault is being used " << endm;
     return kStOK;
   }
-  else if (strcmp(SAttr("PicoVtxMode"), "PicoVtxAuAu200") == 0)
+  else if (strcmp(SAttr("PicoVtxMode"), "PicoVtxVpd") == 0)
   {
-    setVtxMode(PicoVtxMode::AuAu200);
+    setVtxMode(PicoVtxMode::Vpd);
+    LOG_INFO << " PicoVtxVpd is being used " << endm;
     return kStOK;
   }
 
@@ -1101,7 +1103,7 @@ bool StPicoDstMaker::selectVertex()
     // choose the default vertex, i.e. the first vertex
     mMuDst->setVertexIndex(0);
   }
-  else if (mVtxMode == PicoVtxMode::AuAu200)
+  else if (mVtxMode == PicoVtxMode::Vpd)
   {
     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
 
