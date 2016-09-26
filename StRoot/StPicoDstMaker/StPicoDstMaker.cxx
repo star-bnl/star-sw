@@ -180,14 +180,6 @@ void StPicoDstMaker::createArrays()
 //_____________________________________________________________________________
 Int_t StPicoDstMaker::Init()
 {
-  if (SAttr("picoVtxMode")) {
-    TString ts(SAttr("VtxMode"));
-    PicoVtxMode mode = PicoVtxMode::NotSet;
-    if (ts=="PicoVtxAuAu200") mode = PicoVtxMode::AuAu200;
-    if (ts=="PicoVtxDefault") mode = PicoVtxMode::Default;
-    setVtxMode(mode);
-  }
-
   switch (StMaker::m_Mode)
   {
     case PicoIoMode::IoWrite:
