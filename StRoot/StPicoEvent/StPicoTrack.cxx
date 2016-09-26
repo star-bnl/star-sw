@@ -45,7 +45,7 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
     mGMomentum = gHelix.momentum(B * kilogauss);
     mOrigin = gHelix.origin();
 
-    mDedx      = gTrk->dEdx();
+    mDedx      = gTrk->dEdx() * 1.e6;
     mDnDx      = gTrk->probPidTraits().dNdxFit();
     int flag = gTrk->flag();
     if (flag / 100 < 7) // TPC tracks
