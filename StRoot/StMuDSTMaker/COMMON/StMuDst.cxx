@@ -1040,7 +1040,7 @@ map<StMuMcVertex *,StMuMcTrack *>           &StMuDst::McVx2McParentTk() {
 map<Int_t,StMuMcTrack *>                    &StMuDst::Id2McTk() { // 
   if (! Id2McTkMap.size()) {
     //  Id => McTk
-    for (Int_t m = 0; m < numberOfMcTracks(); m++) {
+    for (UInt_t m = 0; m < numberOfMcTracks(); m++) {
       StMuMcTrack *McTrack = MCtrack(m);
       if (! McTrack) continue;
       
@@ -1058,7 +1058,7 @@ map<Int_t,StMuMcTrack *>                    &StMuDst::Id2McTk() { //
 map<Int_t,StMuMcVertex *>                   &StMuDst::Id2McVx() { // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id]();
   if (! Id2McVxMap.size()) {
     // IdVx => McVx
-    for (Int_t m = 0; m < numberOfMcVertices();  m++) {
+    for (UInt_t m = 0; m < numberOfMcVertices();  m++) {
       StMuMcVertex *McVx = MCvertex(m);
       if (! McVx) continue;
       //      PrPPD(*McVx);
@@ -1088,7 +1088,7 @@ map<Int_t,StMuMcVertex *>                   &StMuDst::Id2McVxR() {// Reconstruct
 //________________________________________________________________________________
 map<Int_t,StMuPrimaryVertex*>               &StMuDst::Id2RcVx() {
   if (! Id2RcVxMap.size()) {
-    for (Int_t l = 0; l < numberOfPrimaryVertices(); l++) {
+    for (UInt_t l = 0; l < numberOfPrimaryVertices(); l++) {
       StMuPrimaryVertex *RcVx = primaryVertex(l);
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
@@ -1101,7 +1101,7 @@ map<Int_t,StMuPrimaryVertex*>               &StMuDst::Id2RcVx() {
 //________________________________________________________________________________
 map<Int_t,Int_t>                            &StMuDst::IndxRcTk2Id() {
   if (! IndxRcTk2IdMap.size()) {
-    for (Int_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
+    for (UInt_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
       StMuTrack *gTrack = globalTracks(kg);
       if (! gTrack) continue;
       IndxRcTk2IdMap.insert(pair<Int_t,Int_t>(gTrack->id(),kg));
@@ -1112,7 +1112,7 @@ map<Int_t,Int_t>                            &StMuDst::IndxRcTk2Id() {
 //________________________________________________________________________________
 map<Int_t,Int_t>                            &StMuDst::IndxKFTk2Id() {
   if (! IndxKFTk2IdMap.size()) {
-    for (Int_t m = 0; m < numberOfKFTracks(); m++) {
+    for (UInt_t m = 0; m < numberOfKFTracks(); m++) {
       KFParticle *particle = KFtrack(m);
       if (! particle) continue;
       IndxKFTk2IdMap.insert(pair<Int_t,Int_t>(particle->Id(),m));
@@ -1126,7 +1126,7 @@ map<Int_t,Int_t>                            &StMuDst::IndxKFTk2Id() {
 //________________________________________________________________________________
 multimap<StMuPrimaryVertex*, StMuTrack *>   &StMuDst::RcVx2RcTk() {
   if (! RcVx2RcTkMap.size()) {
-    for (Int_t k = 0; k < numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) primaryTracks()->UncheckedAt(k);
       if (! Accept(pTrack)) continue;
       Int_t IdVx = pTrack->vertexIndex();
@@ -1139,11 +1139,10 @@ multimap<StMuPrimaryVertex*, StMuTrack *>   &StMuDst::RcVx2RcTk() {
 //________________________________________________________________________________
 map<StMuPrimaryVertex*,StMuMcVertex *>      &StMuDst::RcVx2McVx() {
   if (! RcVx2McVxMap.size()) {
-    for (Int_t l = 0; l < numberOfPrimaryVertices(); l++) {
+    for (UInt_t l = 0; l < numberOfPrimaryVertices(); l++) {
       StMuPrimaryVertex *RcVx = primaryVertex(l);
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
-      Int_t Id = RcVx->id();
       Int_t IdMc = RcVx->idTruth();
       if (IdMc > 0) {
 	StMuMcVertex *McVx = Id2McVx()[IdMc]; 
@@ -1159,7 +1158,7 @@ map<StMuPrimaryVertex*,StMuMcVertex *>      &StMuDst::RcVx2McVx() {
 //________________________________________________________________________________
 multimap<StMuMcVertex *,StMuPrimaryVertex*> &StMuDst::McVx2RcVx() {
   if (! McVx2RcVxMap.size()) {
-    for (Int_t l = 0; l < numberOfPrimaryVertices(); l++) {
+    for (UInt_t l = 0; l < numberOfPrimaryVertices(); l++) {
       StMuPrimaryVertex *RcVx = primaryVertex(l);
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
@@ -1176,11 +1175,10 @@ multimap<StMuMcVertex *,StMuPrimaryVertex*> &StMuDst::McVx2RcVx() {
 //________________________________________________________________________________
 vector<StMuPrimaryVertex *>                 &StMuDst::RcVxs() {  // All accepted RcVx
   if (! RcVxsVec.size()) {
-    for (Int_t l = 0; l < numberOfPrimaryVertices(); l++) {
+    for (UInt_t l = 0; l < numberOfPrimaryVertices(); l++) {
       StMuPrimaryVertex *RcVx = primaryVertex(l);
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
-      Int_t Id = RcVx->id();
       RcVxsVec.push_back(RcVx); 
     }
   }
@@ -1247,7 +1245,7 @@ vector<StMuPrimaryVertex *>                 &StMuDst::CloneVx() { //  1 to many 
 //________________________________________________________________________________
 vector<StMuPrimaryVertex *>                 &StMuDst::GhostVx() { //  no Mc match
   if (! GhostVxVec.size()) {
-    for (Int_t l = 0; l < numberOfPrimaryVertices(); l++) {
+    for (UInt_t l = 0; l < numberOfPrimaryVertices(); l++) {
       StMuPrimaryVertex *RcVx = primaryVertex(l);
       if (! Accept(RcVx)) continue;
       //      PrPPD(*RcVx);
@@ -1288,7 +1286,7 @@ vector<StMuMcVertex *>                      &StMuDst::LostVx() {  //  no Rc matc
 //________________________________________________________________________________
 map<Int_t,KFParticle*>                      &StMuDst::IdVx2KFVx() { // 
   if (! IdVx2KFVxMap.size()) {
-    for (Int_t m = 0; m < numberOfKFVertices(); m++) {
+    for (UInt_t m = 0; m < numberOfKFVertices(); m++) {
       KFParticle *KFVx = (KFParticle *) KFvertex(m);
       if (! KFVx) continue;
       //      PrPPD(*KFVx);
@@ -1311,7 +1309,7 @@ map<Int_t,KFParticle*>                      &StMuDst::IdVx2KFVx() { //
 //________________________________________________________________________________
 map<KFParticle*,StMuPrimaryVertex*>         &StMuDst::KFVx2RcVx() {
   if (! KFVx2RcVxMap.size()) {
-    for (Int_t m = 0; m < numberOfKFTracks(); m++) {
+    for (UInt_t m = 0; m < numberOfKFTracks(); m++) {
       KFParticle *KFVx = KFtrack(m);
       if (! KFVx) continue;
       if (! KFVx->NDaughters()) continue;
@@ -1327,13 +1325,11 @@ map<KFParticle*,StMuPrimaryVertex*>         &StMuDst::KFVx2RcVx() {
 //________________________________________________________________________________
 multimap<StMuPrimaryVertex*,KFParticle*>    &StMuDst::RcVx2KFVx() {
   if (! RcVx2KFVxMap.size()) {
-    for (Int_t m = 0; m < numberOfKFVertices(); m++) {
+    for (UInt_t m = 0; m < numberOfKFVertices(); m++) {
       KFParticle *KFVx = (KFParticle *) KFvertex(m);
       if (! KFVx) continue;
       //      PrPPD(*KFVx);
       Int_t IdVx = KFVx->Id(); // Rc Vertex Id
-      Int_t IdParentID = KFVx->GetParentID();
-      Int_t IdParentMcVx = KFVx->IdParentMcVx();
       StMuPrimaryVertex* RcVx = Id2RcVx()[IdVx];
       if (RcVx) {
 	//	PrPPD(*RcVx);
@@ -1346,7 +1342,7 @@ multimap<StMuPrimaryVertex*,KFParticle*>    &StMuDst::RcVx2KFVx() {
 //________________________________________________________________________________
 map<KFParticle*,StMuMcVertex *>             &StMuDst::KFVx2McVx() { 
   if (! KFVx2McVxMap.size()) {
-    for (Int_t m = 0; m < numberOfKFVertices(); m++) {
+    for (UInt_t m = 0; m < numberOfKFVertices(); m++) {
       KFParticle *KFVx = (KFParticle *) KFvertex(m);
       if (! KFVx) continue;
       Int_t IdVx = KFVx->Id(); // Rc Vertex Id
@@ -1361,7 +1357,7 @@ map<KFParticle*,StMuMcVertex *>             &StMuDst::KFVx2McVx() {
 //________________________________________________________________________________
 multimap<StMuMcVertex*,KFParticle*>         &StMuDst::McVx2KFVx() { 
   if (! McVx2KFVxMap.size()) {
-    for (Int_t m = 0; m < numberOfKFVertices(); m++) {
+    for (UInt_t m = 0; m < numberOfKFVertices(); m++) {
       KFParticle *KFVx = (KFParticle *) KFvertex(m);
       if (! KFVx) continue;
       Int_t IdVx = KFVx->Id(); // Rc Vertex Id
@@ -1379,7 +1375,7 @@ multimap<StMuMcVertex*,KFParticle*>         &StMuDst::McVx2KFVx() {
 multimap<Int_t,StMuTrack *>                 &StMuDst::IdMc2RcTk() { // Reconstucted Track to IdTruth
   if (! IdMc2RcTkMap.size()) {
     // Id (Truth, IdMcTk) => gTrack
-    for (Int_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
+    for (UInt_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
       StMuTrack *gTrack = (StMuTrack *) globalTracks()->UncheckedAt(kg);
       if (! Accept(gTrack)) continue;
       Int_t IdTruth = gTrack->idTruth();
@@ -1392,7 +1388,7 @@ multimap<Int_t,StMuTrack *>                 &StMuDst::IdMc2RcTk() { // Reconstuc
 //________________________________________________________________________________
 map<Int_t,Int_t> &StMuDst::IdGlobalId2IdPrimaryTrack() {
   if (! IdGlobalId2IdPrimaryTrackMap.size()) {
-    for (Int_t k = 0; k < numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) array(muPrimary)->UncheckedAt(k);
       if (! Accept(pTrack)) continue;
       Int_t l = pTrack->vertexIndex();
@@ -1409,7 +1405,7 @@ map<Int_t,Int_t> &StMuDst::IdGlobalId2IdPrimaryTrack() {
 //________________________________________________________________________________
 map<Int_t,Int_t> &StMuDst::IdGlobal2IdPrimaryTrack() {
   if (! IdGlobal2IdPrimaryTrackMap.size()) {
-    for (Int_t k = 0; k < numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) array(muPrimary)->UncheckedAt(k);
       if (! Accept(pTrack)) continue;
       Int_t l = pTrack->vertexIndex();
@@ -1426,12 +1422,12 @@ map<Int_t,Int_t> &StMuDst::IdGlobal2IdPrimaryTrack() {
 //________________________________________________________________________________
 multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcTracks() {
   if (! IdMc2IdRcTracksMap.size()) {
-    for (Int_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
+    for (UInt_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
       StMuTrack *gTrack = globalTracks(kg);
       if (! Accept(gTrack)) continue;
       //      gTrack->Print();
       // Check Mc
-      if (gTrack->idTruth() < 0 || gTrack->idTruth() > numberOfMcTracks()) {
+      if (gTrack->idTruth() < 0 || gTrack->idTruth() > (Int_t) numberOfMcTracks()) {
 	cout << "Illegal idTruth " << gTrack->idTruth() << " The track is ignored" << endl;
 	continue;
       }
@@ -1459,12 +1455,12 @@ multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcTracks() {
 //________________________________________________________________________________
 multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcVertices() {
   if (! IdMc2IdRcVerticesMap.size()) {
-    for (Int_t l = 0; l < numberOfPrimaryVertices(); l++) {
+    for (UInt_t l = 0; l < numberOfPrimaryVertices(); l++) {
       StMuPrimaryVertex *Vtx = primaryVertex(l);
       if (! Accept(Vtx)) continue;
       //      Vtx->Print();
       // Check Mc
-      if (Vtx->idTruth() < 0 || Vtx->idTruth() > numberOfMcVertices()) {
+      if (Vtx->idTruth() < 0 || Vtx->idTruth() > (Int_t) numberOfMcVertices()) {
 	cout << "Illegal idTruth " << Vtx->idTruth() << " The track is ignored" << endl;
 	continue;
       }
@@ -1488,7 +1484,7 @@ multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcVertices() {
 multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2GlobalTrack() { // McTrack to Reconstucted global Track
   if (! McTrack2GlobalTrackMap.size()) {
     // Id (Truth, IdMcTk) => gTrack
-    for (Int_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
+    for (UInt_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
       StMuTrack *gTrack = (StMuTrack *) globalTracks()->UncheckedAt(kg);
       if (! Accept(gTrack)) continue;
       Int_t IdTruth = gTrack->idTruth();
@@ -1518,7 +1514,7 @@ multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2PrimaryTrac
 //________________________________________________________________________________
 multimap<StMuMcTrack*,KFParticle *>                 &StMuDst::McTrack2KFParticle() { // McTrack to Reconstucted KFParticle
   if (! McTrack2KFParticleMap.size()) {
-    for (Int_t k = 0; k < numberOfKFTracks(); k++) {
+    for (UInt_t k = 0; k < numberOfKFTracks(); k++) {
       KFParticle *pTrack = KFtrack(k);
       if (! pTrack) continue;
       Int_t IdTruth = pTrack->IdTruth();
