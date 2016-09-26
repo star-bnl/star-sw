@@ -46,7 +46,7 @@ ELSE()
     # ROOT 5
     INCLUDE_DIRECTORIES ( ${PROJECT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
     # COMPONENT mechanism in the FIND_PACKAGE is not supported 
-    SET(ROOT_COMPONENT_LIBRARIES "-lGeom -Gdml")
+    SET(ROOT_COMPONENT_LIBRARIES "-lGeom -lGdml")
 ENDIF(DEFINED ROOT_INCLUDE_DIRS)
 
 ## add garfield  #######################################
