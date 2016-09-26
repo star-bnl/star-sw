@@ -529,6 +529,78 @@
 
   </Geometry>
 
+  <Geometry tag="y2013x"   check="false" comment="Y2013 asymptotic">
+
+    Copy of "c" series geometry.  Not intended for production.
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM02" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD07" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM03" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPv1" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD13" />
+    <Construct sys="pixl" config="PIXL05" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+    <Construct sys="fgtd" config="FGTD32" simu="2" />
+
+  </Geometry>
+  <Geometry tag="y2013_1x" check="false" comment="Y2013 asymptotic          [pixel in]">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM02" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD07" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM03" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPv1" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD13" />
+    <Construct sys="pixl" config="PIXL05" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+    <Construct sys="fgtd" config="FGTD32" simu="2" />
+
+  </Geometry>
+  <Geometry tag="y2013_2x" check="false" comment="Y2013 asymptotic          [pixel out]">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM02" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD07" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM03" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPv1" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD13" />
+    <Construct sys="pixl" config="PIXLof" />
+    <Construct sys="dtub" config="DTUBof" />
+    <Construct sys="psup" config="PSUPof" />
+    <Construct sys="fgtd" config="FGTD32" simu="2" />
+
+  </Geometry>
+
   <!-- y2012 series geometry tags -->
   <Geometry tag="y2012"  check="false" comment="Y2012 rough cut geometry">
     <Construct sys="cave" config="CAVE04" simu="1" />
