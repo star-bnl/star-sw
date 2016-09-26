@@ -80,7 +80,7 @@ protected:
   StThreeVectorF mPMomentum;  // primary momentum, (0.,0.,0.) if none
   StThreeVectorF mGMomentum;  // global momentum at point of DCA to StPicoEvent::mPrimaryVertex
   StThreeVectorF mOrigin;     // origin at dca to primary vertex
-  Float_t  mDedx;             // dEdx in nominal STAR units: GeV/cm
+  Float_t  mDedx;             // dEdx in KeV/cm.
   Float_t  mDnDx;             // fitted dN/dx
   Char_t   mNHitsFit;         // nHitsFit - TPC
   Char_t   mNHitsMax;         // nHitsMax - TPC
