@@ -980,7 +980,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			    "dNdx/Pion",
 			    "dNdx(uncorrected)/Pion"};
       TPoints[t]   = new TH3F(Form("TPoints%s",N[t]),
-			      Form("%s versus Length in Tpc and <log_{?}(dX)>",T[t]),
+			      Form("%s versus Length in Tpc and <log_{2}(dX)>",T[t]),
 			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
     }
     Pulls[0] = new TH2F("PullI70","log(I70/I(pi)))/D70  versus track length", 
