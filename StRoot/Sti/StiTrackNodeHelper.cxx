@@ -130,17 +130,19 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   }// end of rotation part
   ierr = rotPars.check(); // check parameter validity to continue
   if (ierr) return 1;
-  
 //  	Propagation 
   x1 = rotPars.x();
   x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
   dx = x2-x1;
-  if (fabs(dx)<1e-5) { proPars = rotPars; return 0;}
+  //yf  if (fabs(dx)<1e-5) { proPars = rotPars; return 0;}
   rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
-  if (fabs(sinCA2) > 0.99) return 2;
-  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
+  //yf  if (fabs(sinCA2) > 0.99) return 2;
+  //  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
+  if (sinCA2> 0.95) sinCA2= 0.95;
+  if (sinCA2<-0.95) sinCA2=-0.95;
+  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2))*TMath::Sign(1.,rotPars._cosCA);
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
   dy = dx*(sumSin/sumCos);
