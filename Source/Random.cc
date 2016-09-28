@@ -290,7 +290,12 @@ double RndmVavilov(const double rkappa, const double beta2) {
                fbkx3 = 2 / (bkmxx3 - bkmnx3), fbky1 = 2 / (bkmxy1 - bkmny1),
                fbky2 = 2 / (bkmxy2 - bkmny2), fbky3 = 2 / (bkmxy3 - bkmny3);
 
-  double ac[14], hc[9], h[9], drk[5], dsigm[5], alfa[5];
+  double ac[14] = {0};
+  double hc[9] = {0};
+  double h[9] = {0};
+  double drk[5] = {0};
+  double dsigm[5] = {0};
+  double alfa[5] = {0};
 
   // dimension ac(0:13),hc(0:8),h(9)
   // dimension edgec(2:7),fninv(5),drk[5-1],dsigm[5-1],alfa[2:5-1]
@@ -408,18 +413,16 @@ double RndmVavilov(const double rkappa, const double beta2) {
   double w8[] = {0.66184645e+1,  -0.73866379e+0, 0.44693973e-1,  0.,
                  -0.14540925e+1, -0.39529833e+0, -0.44293243e-1, 0.88741049e-1};
 
-  double v = 0, wk, x, y, xx, yy, x2, y2, x3, y3, xy, p2, p3, q2, q3, pq, t,
-         rlam, fl, s, fn, fu, s0;
-  int itype, npt;
-
   if (rkappa < 0.01 || rkappa > 12) {
-    return v;
+    return 0.;
   }
 
+  int itype = 0;
+  int npt = 1;
   if (rkappa >= 0.29) {
     itype = 1;
     npt = 100;
-    wk = 1 / sqrt(rkappa);
+    const double wk = 1. / sqrt(rkappa);
     ac[0] = (-0.032227 * beta2 - 0.074275) * rkappa +
             (0.24533 * beta2 + 0.070152) * wk + (-0.55610 * beta2 - 3.1579);
     ac[8] = (-0.013483 * beta2 - 0.048801) * rkappa +
@@ -447,20 +450,20 @@ double RndmVavilov(const double rkappa, const double beta2) {
   } else if (rkappa >= 0.22) {
     itype = 2;
     npt = 150;
-    x = 1 + (rkappa - bkmxx3) * fbkx3;
-    y = 1 + (sqrt(beta2) - bkmxy3) * fbky3;
-    xx = 2 * x;
-    yy = 2 * y;
-    x2 = xx * x - 1;
-    x3 = xx * x2 - x;
-    y2 = yy * y - 1;
-    y3 = yy * y2 - y;
-    xy = x * y;
-    p2 = x2 * y;
-    p3 = x3 * y;
-    q2 = y2 * x;
-    q3 = y3 * x;
-    pq = x2 * y2;
+    const double x = 1 + (rkappa - bkmxx3) * fbkx3;
+    const double y = 1 + (sqrt(beta2) - bkmxy3) * fbky3;
+    const double xx = 2 * x;
+    const double yy = 2 * y;
+    const double x2 = xx * x - 1;
+    const double x3 = xx * x2 - x;
+    const double y2 = yy * y - 1;
+    const double y3 = yy * y2 - y;
+    const double xy = x * y;
+    const double p2 = x2 * y;
+    const double p3 = x3 * y;
+    const double q2 = y2 * x;
+    const double q3 = y3 * x;
+    const double pq = x2 * y2;
     ac[1] = w1[1 - 1] + w1[2 - 1] * x + w1[4 - 1] * x3 + w1[5 - 1] * y +
             w1[6 - 1] * y2 + w1[7 - 1] * y3 + w1[8 - 1] * xy + w1[9 - 1] * p2 +
             w1[10 - 1] * p3 + w1[11 - 1] * q2 + w1[12 - 1] * q3 +
@@ -490,20 +493,20 @@ double RndmVavilov(const double rkappa, const double beta2) {
   } else if (rkappa >= 0.12) {
     itype = 3;
     npt = 200;
-    x = 1 + (rkappa - bkmxx2) * fbkx2;
-    y = 1 + (sqrt(beta2) - bkmxy2) * fbky2;
-    xx = 2 * x;
-    yy = 2 * y;
-    x2 = xx * x - 1;
-    x3 = xx * x2 - x;
-    y2 = yy * y - 1;
-    y3 = yy * y2 - y;
-    xy = x * y;
-    p2 = x2 * y;
-    p3 = x3 * y;
-    q2 = y2 * x;
-    q3 = y3 * x;
-    pq = x2 * y2;
+    const double x = 1 + (rkappa - bkmxx2) * fbkx2;
+    const double y = 1 + (sqrt(beta2) - bkmxy2) * fbky2;
+    const double xx = 2 * x;
+    const double yy = 2 * y;
+    const double x2 = xx * x - 1;
+    const double x3 = xx * x2 - x;
+    const double y2 = yy * y - 1;
+    const double y3 = yy * y2 - y;
+    const double xy = x * y;
+    const double p2 = x2 * y;
+    const double p3 = x3 * y;
+    const double q2 = y2 * x;
+    const double q3 = y3 * x;
+    const double pq = x2 * y2;
     ac[1] = v1[1 - 1] + v1[2 - 1] * x + v1[3 - 1] * x2 + v1[5 - 1] * y +
             v1[6 - 1] * y2 + v1[7 - 1] * y3 + v1[9 - 1] * p2 + v1[10 - 1] * p3 +
             v1[11 - 1] * q2 + v1[12 - 1] * q3;
@@ -536,20 +539,20 @@ double RndmVavilov(const double rkappa, const double beta2) {
       itype = 3;
     }
     npt = 200;
-    x = 1 + (rkappa - bkmxx1) * fbkx1;
-    y = 1 + (sqrt(beta2) - bkmxy1) * fbky1;
-    xx = 2 * x;
-    yy = 2 * y;
-    x2 = xx * x - 1;
-    x3 = xx * x2 - x;
-    y2 = yy * y - 1;
-    y3 = yy * y2 - y;
-    xy = x * y;
-    p2 = x2 * y;
-    p3 = x3 * y;
-    q2 = y2 * x;
-    q3 = y3 * x;
-    pq = x2 * y2;
+    const double x = 1 + (rkappa - bkmxx1) * fbkx1;
+    const double y = 1 + (sqrt(beta2) - bkmxy1) * fbky1;
+    const double xx = 2 * x;
+    const double yy = 2 * y;
+    const double x2 = xx * x - 1;
+    const double x3 = xx * x2 - x;
+    const double y2 = yy * y - 1;
+    const double y3 = yy * y2 - y;
+    const double xy = x * y;
+    const double p2 = x2 * y;
+    const double p3 = x3 * y;
+    const double q2 = y2 * x;
+    const double q3 = y3 * x;
+    const double pq = x2 * y2;
     if (itype == 3) {
       ac[1] = u1[1 - 1] + u1[2 - 1] * x + u1[3 - 1] * x2 + u1[5 - 1] * y +
               u1[6 - 1] * y2 + u1[7 - 1] * y3 + u1[8 - 1] * xy +
@@ -584,9 +587,9 @@ double RndmVavilov(const double rkappa, const double beta2) {
   }
   ac[9] = (ac[8] - ac[0]) / npt;
   if (itype == 3) {
-    x = (ac[7] - ac[8]) / (ac[7] * ac[8]);
-    y = 1 / log(ac[8] / ac[7]);
-    p2 = ac[7] * ac[7];
+    const double x = (ac[7] - ac[8]) / (ac[7] * ac[8]);
+    const double y = 1 / log(ac[8] / ac[7]);
+    const double p2 = ac[7] * ac[7];
     ac[11] = p2 * (ac[1] * exp(-ac[2] * (ac[7] + ac[5] * p2) -
                                ac[3] * exp(-ac[4] * (ac[7] + ac[6] * p2))) -
                    0.045 * y / ac[7]) /
@@ -597,22 +600,23 @@ double RndmVavilov(const double rkappa, const double beta2) {
     ac[10] = 0.995 / TMath::LandauI(ac[8]);
   }
 
-  t = 2 * ran / ac[9];
-  rlam = ac[0];
-  fl = 0;
-  s = 0;
+  const double t = 2 * ran / ac[9];
+  double rlam = ac[0];
+  double fl = 0.;
+  double fu = 0.;
+  double s = 0;
   for (int n = 1; n <= npt; n++) {
-    rlam = rlam + ac[9];
+    rlam += ac[9];
     if (itype == 1) {
-      fn = 1;
-      x = (rlam + hc[0]) * hc[1];
+      double fn = 1;
+      const double x = (rlam + hc[0]) * hc[1];
       h[1 - 1] = x;
       h[2 - 1] = x * x - 1;
       for (int k = 2; k <= 8; k++) {
-        fn = fn + 1;
+        fn += 1;
         h[k + 1 - 1] = x * h[k - 1] - fn * h[k - 1 - 1];
       }
-      y = 1 + hc[7] * h[9 - 1];
+      double y = 1 + hc[7] * h[9 - 1];
       for (int k = 2; k <= 6; k++) {
         y = y + hc[k] * h[k + 1 - 1];
       }
@@ -622,16 +626,16 @@ double RndmVavilov(const double rkappa, const double beta2) {
         fu = hc[8] * exp(-0.5 * x * x) * y;
       }
     } else if (itype == 2) {
-      x = rlam * rlam;
+      const double x = rlam * rlam;
       fu = ac[1] * exp(-ac[2] * (rlam + ac[5] * x) -
                        ac[3] * exp(-ac[4] * (rlam + ac[6] * x)));
     } else if (itype == 3) {
       if (rlam < ac[7]) {
-        x = rlam * rlam;
+        const double x = rlam * rlam;
         fu = ac[1] * exp(-ac[2] * (rlam + ac[5] * x) -
                          ac[3] * exp(-ac[4] * (rlam + ac[6] * x)));
       } else {
-        x = 1 / rlam;
+        const double x = 1 / rlam;
         fu = (ac[11] * x + ac[12]) * x;
       }
     } else {
@@ -644,10 +648,10 @@ double RndmVavilov(const double rkappa, const double beta2) {
     fl = fu;
   }
 
-  s0 = s - fl - fu;
-  v = rlam - ac[9];
+  const double s0 = s - fl - fu;
+  double v = rlam - ac[9];
   if (s > s0) {
-    v = v + ac[9] * (t - s0) / (s - s0);
+    v += ac[9] * (t - s0) / (s - s0);
   }
   return v;
 }
