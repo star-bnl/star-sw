@@ -199,14 +199,15 @@ if ( $pkg eq "OnlinePlots") {
   $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
 }
 if ( $pkg eq "Jevp") {
-  $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPlot"
-    .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPresenter"
-      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpServer"
-	.   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpData"
-	  .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
-	    .   $main::PATH_SEPARATOR .  $CPPPATH;
-  $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
-}
+    $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPlot"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPresenter"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpServer"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpData"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
+	      .   $main::PATH_SEPARATOR .  $CPPPATH;
+    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+} 
 if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
@@ -532,6 +533,108 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	@srcL = @src;
 
 	#print "DEBUG ".join(" ",@srcL)."\n";
+
+    } elsif ( $pkg =~ m/^EvtGen/ and $Dir =~ m/StarGenerator/ ){
+        # Append EvtGen include path and define version
+        #print "***** DEBUG ****\n";
+        $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Pythia8_1_86/include";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Photos3_61/include";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include";
+        $CXXFLAGS .= "-DEVTGEN_EXTERNAL=1 -DEVTGEN_PYTHIA=1 -DEVTGEN_PHOTOS=1 -DEVTGEN_TAUOLA=1 -DEvtGen_version=\\\"$pkg\\\" ";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, validation
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/test/ ||
+                     $s =~ m/validation/      );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
+    } elsif ( $pkg =~ m/^HepMC/ and $Dir =~ m/StarGenerator/ ){
+        # Append HepMC include path and define version
+        #print "***** DEBUG ****\n";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CXXFLAGS .= " -Dmomentum=GEV -Dlength=MM -DHepMC_version=\\\"$pkg\\\" ";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, examples
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/test/ ||
+                     $s =~ m/examples/      );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
+    } elsif ( $pkg =~ m/^Photos/ and $Dir =~ m/StarGenerator/ ){
+        # Append Photos include path and define version
+        #print "***** DEBUG ****\n";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/eventRecordInterfaces";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/photos-C";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/photosCInterfaces";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/utilities";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+        $CXXFLAGS .= " -DPhotos_version=\\\"$pkg\\\" ";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, examples
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/examples/      );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
+    } elsif ( $pkg =~ m/^Tauola/ and $Dir =~ m/StarGenerator/ ){
+        # Append Tauola include path and define version
+        #print "***** DEBUG ****\n";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include/Tauola";
+        $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
+        #$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
+        $CXXFLAGS .= " -DTauola_version=\\\"$pkg\\\" ";
+        $CPPFLAGS .= " -x c++";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, examples
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/SANC/ ||
+                     $s =~ m/tauola-fortran\/glibk/ ||
+                     $s =~ m/tauola-fortran\/jetset/ ||
+                     $s =~ m/tauola-fortran\/jetset2/ ||
+                     $s =~ m/tauola-fortran\/tauola-F/ ||
+                     $s =~ m/tauola-fortran\/photos-F/ ||
+                     $s =~ m/tauola-fortran\/demo-factory/ ||
+                     $s =~ m/tauola-fortran\/tauola-factory/ ||
+                     $s =~ m/tauola-fortran\/tauola-BBB/ ||
+                     #$s =~ m/src/ ||
+                     $s =~ m/TauSpinner/ ||
+                     $s =~ m/examples/     );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
 
 
   } elsif ( $pkg =~ m/^StHbtMaker$/ ) {
