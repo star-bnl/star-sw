@@ -317,20 +317,16 @@ class Medium {
   bool m_debug;
 
   // Field grids
-  unsigned int m_nEfields;
-  unsigned int m_nBfields;
-  unsigned int m_nAngles;
-
-  std::vector<double> eFields;
-  std::vector<double> bFields;
-  std::vector<double> bAngles;
+  std::vector<double> m_eFields;
+  std::vector<double> m_bFields;
+  std::vector<double> m_bAngles;
 
   // Tables of transport parameters
   bool m_map2d;
   // Electrons
   bool m_hasElectronVelocityE, m_hasElectronVelocityB, m_hasElectronVelocityExB;
   bool m_hasElectronDiffLong, m_hasElectronDiffTrans, m_hasElectronDiffTens;
-  bool m_hasElectronTownsend, m_hasElectronAttachment;
+  bool m_hasElectronAttachment;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
