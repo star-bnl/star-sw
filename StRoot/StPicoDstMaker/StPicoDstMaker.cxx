@@ -578,6 +578,7 @@ Int_t StPicoDstMaker::MakeWrite()
   if (!selectVertex())
   {
     LOG_INFO << "Vertex is not valid" << endm;
+    mMuDst->setVertexIndex(originalVertexId);
     return kStOK;
   }
 
