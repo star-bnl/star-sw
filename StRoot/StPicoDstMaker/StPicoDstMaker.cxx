@@ -1099,6 +1099,8 @@ void StPicoDstMaker::fillMtdHits()
 
 bool StPicoDstMaker::selectVertex()
 {
+  mMuDst->setVertexIndex(-1);
+
   if (mVtxMode == PicoVtxMode::Default)
   {
     // choose the default vertex, i.e. the first vertex
