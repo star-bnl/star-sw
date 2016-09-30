@@ -44,6 +44,7 @@ public:
   UInt_t  hftHitsMap() const;
   Float_t dEdx() const;
   Float_t dNdx() const;
+  Float_t dNdxError() const;
   Float_t nSigmaPion() const;
   Float_t nSigmaKaon() const;
   Float_t nSigmaProton() const;
@@ -82,6 +83,7 @@ protected:
   StThreeVectorF mOrigin;     // origin at dca to primary vertex
   Float_t  mDedx;             // dEdx in KeV/cm.
   Float_t  mDnDx;             // fitted dN/dx
+  Float_t  mDnDxError;        // fitted dN/dx error
   Char_t   mNHitsFit;         // nHitsFit - TPC
   Char_t   mNHitsMax;         // nHitsMax - TPC
   UChar_t  mNHitsDedx;        // nHitsDedx - TPC
@@ -118,6 +120,7 @@ inline Int_t   StPicoTrack::nHitsDedx() const { return mNHitsDedx; }
 inline UInt_t  StPicoTrack::hftHitsMap() const { return topologyMap(0) >> 1 & 0x7F; }
 inline Float_t StPicoTrack::dEdx() const { return mDedx;}
 inline Float_t StPicoTrack::dNdx() const { return mDnDx;}
+inline Float_t StPicoTrack::dNdxError() const { return mDnDxError;}
 inline Float_t StPicoTrack::nSigmaPion() const { return mNSigmaPion / 100.f; }
 inline Float_t StPicoTrack::nSigmaKaon() const { return mNSigmaKaon / 100.f; }
 inline Float_t StPicoTrack::nSigmaProton() const { return mNSigmaProton / 100.f; }
