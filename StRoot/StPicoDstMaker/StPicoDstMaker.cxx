@@ -582,9 +582,6 @@ Int_t StPicoDstMaker::MakeWrite()
     return kStOK;
   }
 
-  mEmcCollection = mMuDst->emcCollection();
-  if (mEmcCollection) buildEmcIndex();
-
   Int_t refMult = muEvent->refMult();
   mBField = muEvent->magneticField();
 
@@ -593,11 +590,19 @@ Int_t StPicoDstMaker::MakeWrite()
 
   LOG_DEBUG << " eventId = " << muEvent->eventId() << " refMult = " << refMult << " vtx = " << pVtx << endm;
 
+  mEmcCollection = mMuDst->emcCollection();
+  if (mEmcCollection) 
+  {
+    // build EmcIndex before ::fillTracks()
+    buildEmcIndex();
+    // fill BTOW hits only if ::buildEmcIndex() has been called for this event
+    fillBTOWHits();
+  }
+
   fillTracks();
   fillEvent();
   fillEmcTrigger();
   fillMtdTrigger();
-  fillBTOWHits();
   fillBTofHits();
   fillMtdHits();
 
