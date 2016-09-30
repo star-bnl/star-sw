@@ -12,7 +12,7 @@ StPicoTrack::StPicoTrack() : TObject(),
   mId(0),
   mChi2(std::numeric_limits<unsigned short>::max()),
   mPMomentum(0., 0., 0.), mGMomentum(0., 0., 0.), mOrigin(0., 0., 0.),
-  mDedx(0.), mDnDx(0.), mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
+  mDedx(0.), mDnDx(0.), mDnDxError(0.), mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
   mNSigmaPion(std::numeric_limits<short>::max()),
   mNSigmaKaon(std::numeric_limits<short>::max()),
   mNSigmaProton(std::numeric_limits<short>::max()),
@@ -47,6 +47,8 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
 
     mDedx      = gTrk->dEdx() * 1.e6;
     mDnDx      = gTrk->probPidTraits().dNdxFit();
+    mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
+
     int flag = gTrk->flag();
     if (flag / 100 < 7) // TPC tracks
     {
