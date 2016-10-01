@@ -1109,7 +1109,7 @@ void StPicoDstMaker::fillMtdHits()
 
 bool StPicoDstMaker::selectVertex()
 {
-  mMuDst->setVertexIndex(-1);
+  mMuDst->setVertexIndex(-2);
 
   if (mVtxMode == PicoVtxMode::Default)
   {
@@ -1145,5 +1145,5 @@ bool StPicoDstMaker::selectVertex()
   }
 
   // Retrun false if selected vertex is not valid
-  return (mMuDst->currentVertexIndex() !=-1 && mMuDst->primaryVertex())? true : false;
+  return (mMuDst->currentVertexIndex() !=-2 && mMuDst->primaryVertex())? true : false;
 }
