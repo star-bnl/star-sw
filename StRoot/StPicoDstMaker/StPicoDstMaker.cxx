@@ -1145,5 +1145,5 @@ bool StPicoDstMaker::selectVertex()
   }
 
   // Retrun false if selected vertex is not valid
-  return mMuDst->primaryVertex() ? true : false;
+  return (mMuDst->currentVertexIndex() !=-1 && mMuDst->primaryVertex())? true : false;
 }
