@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.65 2016/09/30 01:06:40 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.66 2016/10/01 21:23:25 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -68,7 +68,7 @@ StEmcCollection *StMuDst::mEmcCollection     = 0;
 StFmsCollection *StMuDst::mFmsCollection     = 0;
 TClonesArray** StMuDst::eztArrays            = 0;
 
-Int_t StMuDst::mCurrVertexId                 = -1;
+Int_t StMuDst::mCurrVertexId                 = -2;
 TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
 
 StMuDst::StMuDst() {
@@ -850,6 +850,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.66  2016/10/01 21:23:25  jdb
+ * Changed default vertex index to -2. Recently changed it to -1 which caused unintended segfault since -1 is used as a special case value in other parts of the code.
+ *
  * Revision 1.65  2016/09/30 01:06:40  jdb
  * initialize mCurrVertexId to -1 (was 0) so that when it is set the first time it will always cause the needed function call to collectVertexTracks().
  *
