@@ -315,7 +315,8 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
   push @items, "FmsPointMaker";
   push @items, "FmsUtil";
 }
- push @items, "StiCA";
+push @items, "StiCA";
+push @items, "StarVMC/xgeometry";
 #$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list
@@ -407,7 +408,7 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		   );# print "sysdirlist = @sysdirlist\n";
 #if ($STAR_HOST_SYS !~ /sl64/) {
 if (-r "StarDb/AgiGeometry" ) {push @sysdirlist, "StarDb/AgiGeometry";}
-if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
+####  if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
 #}
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
