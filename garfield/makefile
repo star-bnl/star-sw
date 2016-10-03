@@ -325,6 +325,10 @@ $(OBJDIR)/SolidSphere.o: \
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 
+$(OBJDIR)/Random.o: \
+	$(SRCDIR)/Random.cc $(INCDIR)/Random.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/RandomEngineGSL.o: \
 	$(SRCDIR)/RandomEngineGSL.cc $(INCDIR)/RandomEngineGSL.hh
 	$(CXX) $(CFLAGS) $< -o $@

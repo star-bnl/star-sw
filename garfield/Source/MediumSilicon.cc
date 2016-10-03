@@ -307,7 +307,7 @@ bool MediumSilicon::ElectronTownsend(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (m_hasElectronTownsend) {
+  if (!tabElectronTownsend.empty()) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }

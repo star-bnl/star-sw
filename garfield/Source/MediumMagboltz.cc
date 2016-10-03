@@ -5569,21 +5569,23 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   m_temperatureTable = m_temperature;
 
   // Initialize the parameter arrays.
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronVelocityE, 0.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronVelocityB, 0.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronVelocityExB, 0.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronDiffLong, 0.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronDiffTrans, 0.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronTownsend, -30.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, m_tabTownsendNoPenning, -30.);
-  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronAttachment, -30.);
+  const unsigned int nEfields = m_eFields.size();
+  const unsigned int nBfields = m_bFields.size();
+  const unsigned int nAngles = m_bAngles.size();
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityE, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityB, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityExB, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffLong, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffTrans, 0.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronTownsend, -30.);
+  InitParamArrays(nEfields, nBfields, nAngles, m_tabTownsendNoPenning, -30.);
+  InitParamArrays(nEfields, nBfields, nAngles, tabElectronAttachment, -30.);
 
   m_hasElectronVelocityE = true;
   m_hasElectronVelocityB = true;
   m_hasElectronVelocityExB = true;
   m_hasElectronDiffLong = true;
   m_hasElectronDiffTrans = true;
-  m_hasElectronTownsend = true;
   m_hasElectronAttachment = true;
 
   m_hasExcRates = false;
@@ -5614,15 +5616,15 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   double alphatof = 0.;
 
   // Run through the grid of E- and B-fields and angles.
-  for (unsigned int i = 0; i < m_nEfields; ++i) {
-    for (unsigned int j = 0; j < m_nAngles; ++j) {
-      for (unsigned int k = 0; k < m_nBfields; ++k) {
+  for (unsigned int i = 0; i < nEfields; ++i) {
+    for (unsigned int j = 0; j < nAngles; ++j) {
+      for (unsigned int k = 0; k < nBfields; ++k) {
         if (m_debug) {
           std::cout << m_className << "::GenerateGasTable:\n";
-          std::cout << "    E = " << eFields[i] << " V/cm, B = " << bFields[k]
-                    << " T, angle: " << bAngles[j] << " rad\n";
+          std::cout << "    E = " << m_eFields[i] << " V/cm, B = " << m_bFields[k]
+                    << " T, angle: " << m_bAngles[j] << " rad\n";
         }
-        RunMagboltz(eFields[i], bFields[k], bAngles[j], numColl, verbose, vx,
+        RunMagboltz(m_eFields[i], m_bFields[k], m_bAngles[j], numColl, verbose, vx,
                     vy, vz, difl, dift, alpha, eta, vxerr, vyerr, vzerr,
                     diflerr, difterr, alphaerr, etaerr, alphatof);
         tabElectronVelocityE[j][k][i] = vz;
