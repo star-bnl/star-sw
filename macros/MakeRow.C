@@ -78,7 +78,6 @@ void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
   for (Int_t i = 1; i <= n; i++) {
     TH1D *proj = mu->ProjectionY(Form("R%i",i),i,i);
     TF1 *f = FitTH1R(proj,fName);
-    if (! f) continue;
     ofstream out;
     TString fOut =  Form("row.%03i.C",i);
     TString Line;
@@ -89,9 +88,11 @@ void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
     Line = Form("  row.nrows = %3i;",n); cout << Line.Data() << endl;  out << Line.Data() << endl;
     //    Line = Form("  row.min =  %5.2f;",xmin); cout << Line.Data() << endl;  out << Line.Data() << endl;
     //    Line = Form("  row.max =  %5.2f;",xmax); cout << Line.Data() << endl;  out << Line.Data() << endl;
-    Line = Form("  row.npar       =            %2i;",f->GetNpar()); cout << Line.Data() << endl;  out << Line.Data() << endl;
-    for (Int_t i = 0; i < f->GetNpar(); i++) {
-      Line = Form("  row.a[%i]       = %13.7g;", i, f->GetParameter(i)); cout << Line.Data() << endl;  out << Line.Data() << endl;
+    if (f) {
+      Line = Form("  row.npar       =            %2i;",f->GetNpar()); cout << Line.Data() << endl;  out << Line.Data() << endl;
+      for (Int_t i = 0; i < f->GetNpar(); i++) {
+	Line = Form("  row.a[%i]       = %13.7g;", i, f->GetParameter(i)); cout << Line.Data() << endl;  out << Line.Data() << endl;
+      }
     }
     Line = Form("  tableSet->AddAt(&row); // row %3i",i); cout << Line.Data() << endl;  out << Line.Data() << endl;  
   }
