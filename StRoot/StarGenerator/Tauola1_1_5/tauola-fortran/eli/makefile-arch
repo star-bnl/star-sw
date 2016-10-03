@@ -1,0 +1,40 @@
+include ../../make.inc
+COMMAND = demo.exe
+COMMAND_OBJECTS = demo.o tauface-jetset.o tauola_photos_ini.o
+EXTER_LIB4  = ../glib.a
+CERNLIB = ../..
+JETSET =  ${CERNLIB}/jetset2/libjetset74.a
+PHOTOS =  ${CERNLIB}/photos/glib.a 
+CLIBS = $(JETSET) $(PHOTOS)
+############
+all:	$(COMMAND)
+	@echo "==================================================="
+	@echo "Warning: HEPEVT must be 2000 double precision      "
+	@echo "==================================================="
+
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+$(EXTER_LIB4):
+	make -C ..
+$(JETSET):
+	make -C ${CERNLIB}/jetset
+$(PHOTOS):
+	make -C $(CERNLIB)/photos	
+# Link procedure
+$(COMMAND): $(COMMAND_OBJECTS) $(EXTER_LIB4) $(CLIBS)
+	$(LD) -o  $@ $(LDFLAGS) $(COMMAND_OBJECTS) $(EXTER_LIB3) $(EXTER_LIB4) $(CLIBS) 
+run:
+	./$(COMMAND)
+	@echo " make a choice:           "
+	@echo " diff demo.cpc   demo.out "
+	@echo " diff demo.aleph demo.out "
+	@echo " diff demo.cleo  demo.out "
+clean:                                                     
+	rm -f *.o *.a  *~ *.exe
+Clean:	clean
+	cd prod; rm -f  *~ *.out *.ntup
+
+
+
+	 
+

@@ -130,14 +130,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.27 2015/07/19 22:48:14 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.28 2016/09/18 22:45:25 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.27 2015/07/19 22:48:14 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.28 2016/09/18 22:45:25 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.28  2016/09/18 22:45:25  fisyak
+// Clean up, add Heed model, adjust for new StTpcdEdxCorrections
+//
 // Revision 1.27  2015/07/19 22:48:14  fisyak
 // Fix cvs message
 //

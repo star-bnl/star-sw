@@ -1,0 +1,74 @@
+#!/bin/sh
+# compile script for quadruple precision
+# this file is part of LoopTools
+# last modified 26 May 04 th
+
+f77290=`dirname $0`/f77290
+[ ! -x $f77290 -a -f $f77290.c ] && gcc -O -o $f77290 $f77290.c
+if [ ! -x $f77290 ] ; then
+  echo "Cannot find the f77290 utility."
+  exit 1
+fi
+
+tmpdir=${TMPDIR:-/tmp}
+
+f90="f90 -r16"
+cpp="gcc -E -P -C -DLANGUAGE_FORTRAN_90"
+
+linkopt=""
+otheropt=""
+fppopt=""
+cppopt=""
+ffiles=""
+cfiles=""
+
+for arg in $* ; do
+  case $arg in
+  *.[fF])
+	ffiles="$ffiles $arg" ;;
+  *.c)
+	cfiles="$cfiles $arg" ;;
+  -I*)
+	fppopt="$fppopt $arg" ;;
+  -D*)
+	cppopt="$cppopt $arg" ;;
+  -looptools)
+	linkopt="$linkopt -looptoolsQ" ;;
+  -looptools_check)
+	linkopt="$linkopt -looptoolsQ_check" ;;
+  -[lL]*)
+	linkopt="$linkopt $arg" ;;
+  *)
+	otheropt="$otheropt $arg" ;;
+  esac
+done
+
+
+if [ -n "$ffiles" ] ; then
+  tmpfiles=""
+  for file in $ffiles ; do
+    tmp=$tmpdir/`basename $file | sed s/.$/f90/g`
+    tmpfiles="$tmpfiles $tmp"
+    tmpfppopt="-I`dirname $file` $fppopt"
+    sed "
+/^[cC*]/d
+/^[^#].*include / {
+  s/^[^i]*/#/
+  s/'/\"/g
+}" $file | $cpp $tmpfppopt $cppopt - | $f77290 - > $tmp
+  done
+  (set -x; $f90 $tmpfppopt $otheropt $tmpfiles $linkopt) || exit $?
+  rm -f $tmpfiles
+fi
+
+if [ -n "$cfiles" ] ; then
+  tmpfiles=""
+  for file in $cfiles ; do
+    tmp=$tmpdir/`basename $file`
+    tmpfiles="$tmpfiles $tmp"
+    sed 's/sizeof(double)/2*&/g' $file > $tmp
+  done
+  (set -x; gcc $fppopt $cppopt $otheropt $tmpfiles $linkopt) || exit $?
+  rm -f $tmpfiles
+fi
+

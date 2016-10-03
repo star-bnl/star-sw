@@ -1,0 +1,56 @@
+\newcommand{\html}[1]{}
+\newcommand{\latex}[1]{#1}
+
+\def\Model#1{
+ \def\Modelname{#1}
+ \subsection{#1}
+ \index{#1}
+ \index{models!#1}
+}
+\def\Auth#1{
+  \noindent
+ {\bf Author:}#1
+}
+\def\Usage#1#2{
+  \noindent
+  {\bf Usage:}\\
+  {\tt BrFr #1 \Modelname\ #2}
+}
+\def\Expl{
+  \vskip 0.5cm
+  \noindent
+  {\bf Explanation:}\\
+}
+\def\Example{
+  \vskip 0.5cm
+  \noindent
+  {\bf Example:}
+  \vskip 0.1cm
+}
+\def\Notes{
+  \vskip 0.5cm
+  \noindent
+  {\bf Notes:}\\
+}
+
+\latex{
+\def\decaysto{\vbox{
+   \hbox{\raise.5ex\hbox{\vrule height10pt}
+   \kern-.4025em{$\rightarrow$}}}\kern0.8ex}
+}
+
+\html{\def\decaysto{$\rightarrow$}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,436 @@
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.201      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change: 14 Oct 2014  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 01 May 2015 at 16:35:17    |  | 
+ |  |                                                                              |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: torbjorn@thep.lu.se                                             |  | 
+ |  |   Jesper Roy Christiansen;  Department of Astronomy and Theoretical Physics, |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: Jesper.Roy.Christiansen@thep.lu.se                              |  | 
+ |  |   Nishita Desai;  Institut fuer Theoretische Physik,                         |  | 
+ |  |     Universitaet Heidelberg, Philosophenweg 16, D-69120 Heidelberg, Germany; |  | 
+ |  |      e-mail: Nishita.Desai@cern.ch                                           |  | 
+ |  |   Philip Ilten;  Massachusetts Institute of Technology,                      |  | 
+ |  |      stationed at CERN, CH-1211 Geneva 23, Switzerland;                      |  | 
+ |  |      e-mail: philten@cern.ch                                                 |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      e-mail: mrenna@fnal.gov                                                 |  | 
+ |  |   Stefan Prestel;  Theoretical Physics Group,                                |  | 
+ |  |      SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA;        |  | 
+ |  |      e-mail: prestel@slac.stanford.edu                                       |  | 
+ |  |   Christine O. Rasmussen;  Department of Astronomy and Theoretical Physics,  |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: christine.rasmussen@thep.lu.se                                  |  | 
+ |  |   Peter Skands;  School of Physics,                                          |  | 
+ |  |      Monash University, PO Box 27, 3800 Melbourne, Australia;                |  | 
+ |  |      e-mail: peter.skands@monash.edu                                         |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is 'An Introduction to PYTHIA 8.2',             |  | 
+ |  |   T. Sjostrand et al, arXiv:1410.3012 [hep-ph]                               |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]. |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/~torbjorn/Pythia.html                                |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2014 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide e- with e+ at a CM energy of 9.200e+01 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | f fbar -> gamma*/Z0                            221 |   1.661e-05 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec Settings (changes only)  -------------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | BeamRemnants:halfScaleForKT                   |                  1.50000 |      1.00000         0.0             | 
+ | BeamRemnants:primordialKThard                 |                  1.80000 |      2.00000         0.0             | 
+ | BeamRemnants:primordialKTsoft                 |                  0.90000 |      0.50000         0.0             | 
+ | Beams:eCM                                     |                 92.00000 |    14000.000    10.00000             | 
+ | Beams:idA                                     |                       11 |         2212                         | 
+ | Beams:idB                                     |                      -11 |         2212                         | 
+ | ColourReconnection:range                      |                  1.80000 |     10.00000         0.0    10.00000 | 
+ | Diffraction:largeMassSuppress                 |                  4.00000 |      2.00000         0.0             | 
+ | HadronLevel:Hadronize                         |                      off |           on                         | 
+ | MultipartonInteractions:alphaSvalue           |                  0.13000 |      0.12700   0.0600000     0.25000 | 
+ | MultipartonInteractions:bProfile              |                        3 |            1           0           4 | 
+ | MultipartonInteractions:ecmPow                |                  0.21500 |      0.24000         0.0     0.50000 | 
+ | MultipartonInteractions:ecmRef                |                 7000.000 |     1800.000     1.00000             | 
+ | MultipartonInteractions:expPow                |                  1.85000 |      1.00000     0.40000    10.00000 | 
+ | MultipartonInteractions:pT0Ref                |                  2.28000 |      2.15000     0.50000    10.00000 | 
+ | PartonLevel:FSR                               |                      off |           on                         | 
+ | PartonLevel:ISR                               |                      off |           on                         | 
+ | PDF:pSet                                      |                       13 |            2                         | 
+ | SigmaDiffractive:dampen                       |                       on |          off                         | 
+ | SigmaDiffractive:maxAX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXB                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaProcess:alphaSvalue                      |                  0.13000 |      0.12650   0.0600000     0.25000 | 
+ | SigmaTotal:zeroAXB                            |                       on |          off                         | 
+ | SpaceShower:alphaSvalue                       |                  0.13650 |      0.13700   0.0600000     0.25000 | 
+ | SpaceShower:ecmRef                            |                 7000.000 |     1800.000     1.00000             | 
+ | SpaceShower:QEDshowerByL                      |                      off |           on                         | 
+ | SpaceShower:QEDshowerByQ                      |                      off |           on                         | 
+ | SpaceShower:rapidityOrder                     |                       on |          off                         | 
+ | StringFlav:etaSup                             |                  0.60000 |      0.63000         0.0     1.00000 | 
+ | StringFlav:mesonBvector                       |                  2.20000 |      3.00000         0.0     3.00000 | 
+ | StringFlav:mesonCvector                       |                  0.88000 |      1.06000         0.0     3.00000 | 
+ | StringFlav:mesonSvector                       |                  0.55000 |      0.72500         0.0     3.00000 | 
+ | StringFlav:mesonUDvector                      |                  0.50000 |      0.62000         0.0     3.00000 | 
+ | StringFlav:popcornSpair                       |                  0.90000 |      0.50000         0.0     1.00000 | 
+ | StringFlav:probQQ1toQQ0                       |                0.0275000 |    0.0270000         0.0     1.00000 | 
+ | StringFlav:probQQtoQ                          |                0.0810000 |    0.0900000         0.0     1.00000 | 
+ | StringFlav:probSQtoQQ                         |                  0.91500 |      1.00000         0.0     1.00000 | 
+ | StringFlav:probStoUD                          |                  0.21700 |      0.19000         0.0     1.00000 | 
+ | StringPT:sigma                                |                  0.33500 |      0.30400         0.0     1.00000 | 
+ | StringZ:aExtraDiquark                         |                  0.97000 |      0.50000         0.0     2.00000 | 
+ | StringZ:aLund                                 |                  0.68000 |      0.30000         0.0     2.00000 | 
+ | StringZ:bLund                                 |                  0.98000 |      0.80000     0.20000     2.00000 | 
+ | StringZ:rFactB                                |                  0.85500 |      0.67000         0.0     2.00000 | 
+ | StringZ:rFactC                                |                  1.32000 |      1.00000         0.0     2.00000 | 
+ | TimeShower:alphaSvalue                        |                  0.13650 |      0.13830   0.0600000     0.25000 | 
+ | TimeShower:pTmin                              |                  0.50000 |      0.40000     0.10000     2.00000 | 
+ | TimeShower:pTminChgQ                          |                  0.50000 |      0.40000     0.10000     2.00000 | 
+ | WeakSingleBoson:ffbar2gmZ                     |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word + FVec + MVec + PVec Settings  ------------------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+      23  Z0                                  3   0   0   91.18760    2.50419   10.00000    0.00000  0.00000e+00   1   1   0   0   0
+              0     0   0.1540492    0        1       -1 
+              1     0   0.1194935    0        2       -2 
+              2     0   0.1540386    0        3       -3 
+              3     0   0.1193325    0        4       -4 
+              4     0   0.1523269    0        5       -5 
+              5     0   0.0335480    0       11      -11 
+              6     0   0.0667305    0       12      -12 
+              7     0   0.0335477    0       13      -13 
+              8     0   0.0667305    0       14      -14 
+              9     1   0.0334720    0       15      -15 
+             10     0   0.0667305    0       16      -16 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+Message from PHCORK(MODCOR):: initialization
+MODOP=5 -- corrects Energy from mass+flow
+
+********************************************************************************
+
+                            =========================
+                              PHOTOS, Version:  3.60
+                              Released at:  26/4/15
+                            =========================
+
+                     Photos QED corrections in Particle Decays
+
+           Monte Carlo Program - by E. Barberio, B. van Eijk and Z. Was
+           From version 2.09   - by P. Golonka and Z. Was
+           From version 3.00   - by N. Davidson, T. Przedzinski and Z. Was
+********************************************************************************
+
+                  Internal (default) input parameters: 
+
+                    INTERF= 1 ISEC= 0 ITRE= 0 IEXP= 1 IFTOP= 1 IFW= 1
+                    ALPHA_QED= 0.00729735 XPHCUT= 1e-07
+
+                    Option with interference is active
+                    Option with exponentiation is active EPSEXP=0.0001
+                    Emision in t tbar production is active
+                    Correction wt in decay of W is active
+
+          WARNING:  /HEPEVT/ is not anymore used.
+
+********************************************************************************
+MODOP=2 -- blocks emission in Kl  to gamma e+e-: DEFAULT
+MODOP=2 -- blocks emission in pi0 to gamma e+e-: DEFAULT
+ IPHQRK_setQarknoEmission MODOP=1 -- blocks emission from light quarks:  DEFAULT
+INFO from PHOTOS:
+0
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =     11, pz =  4.600e+01, e =  4.600e+01, m =  5.110e-04.
+ Beam B: id =    -11, pz = -4.600e+01, e =  4.600e+01, m =  5.110e-04.
+
+ In 1: id =   11, x =  9.974e-01, pdf =  1.568e+01 at Q2 =  8.442e+03.
+ In 2: id =  -11, x =  1.000e+00, pdf =  2.821e+06 at same Q2.
+
+ Subprocess f fbar -> gamma*/Z0 with code 221 is 2 -> 1.
+ It has sHat =  8.442e+03.
+     alphaEM =  7.818e-03,  alphaS =  1.298e-01    at Q2 =  8.442e+03.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  9.200e+01, ISR =  9.200e+01, FSR =  9.200e+01.
+ Number of MPI =     1, ISR =     0, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     3     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     4     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     1     0     5     0     0     0      0.000      0.000     45.881     45.881      0.000
+     4       -11   (e+)               -21     2     0     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     6     7     0     0      0.000      0.000     -0.119     91.881     91.881
+     6        15   tau-                23     5     0     0     0     0     0    -23.389    -26.535    -29.321     45.978      1.777
+     7       -15   tau+                23     5     0     0     0     0     0     23.389     26.535     29.203     45.903      1.777
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.119     91.881     91.881
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     45.881     45.881      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.119     91.881     91.881
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     45.881     45.881      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -46.000     46.000      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000     -0.119     91.881     91.881
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.119      0.119      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    11        15   (tau-)             -23     8     0    16    18     0     0    -23.389    -26.535    -29.321     45.978      1.777
+    12       -15   (tau+)             -23     8     0    13    15     0     0     23.389     26.535     29.203     45.903      1.777
+    13       -16   nu_taubar           91    12     0     0     0     0     0      4.573      4.944      5.156      8.482      0.000
+    14       -11   e+                  91    12     0     0     0     0     0      5.222      5.710      7.272     10.618      0.001
+    15        12   nu_e                91    12     0     0     0     0     0     13.594     15.881     16.775     26.803      0.000
+    16        16   nu_tau              91    11     0     0     0     0     0    -17.419    -19.050    -21.340     33.492      0.000
+    17       111   (pi0)              -91    11     0    19    20     0     0     -4.077     -4.730     -4.904      7.941      0.135
+    18      -211   pi-                 91    11     0     0     0     0     0     -1.894     -2.755     -3.077      4.546      0.140
+    19        22   gamma               91    17     0     0     0     0     0     -1.034     -1.186     -1.310      2.048      0.000
+    20        22   gamma               91    17     0     0     0     0     0     -3.043     -3.544     -3.594      5.893      0.000
+                                   Charge sum:  0.000           Momentum sum:     -0.000      0.000     -0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.10862e-15 0 -7.99361e-15 92
+
+Vector Sum: -3.10862e-15 0 -7.99361e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 0 0 92
+
+Vector Sum: 0 0 0 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.77636e-15 -9.76996e-15 2.22045e-15 92
+
+Vector Sum: -1.77636e-15 -9.76996e-15 2.22045e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 6.10623e-16 -1.77636e-15 6.43929e-15 92
+
+Vector Sum: 6.10623e-16 -1.77636e-15 6.43929e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 1.42109e-14 1.06581e-14 -1.06581e-14 92
+
+Vector Sum: 6.39126e-12 8.36801e-12 -8.06488e-12 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -8.32667e-17 -4.44089e-16 1.9984e-15 92
+
+Vector Sum: -8.32667e-17 -4.44089e-16 1.9984e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.88578e-15 -7.77156e-15 8.32667e-17 92
+
+Vector Sum: 1.08363e-12 1.264e-12 -8.05354e-14 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 6.16174e-15 -6.99441e-15 5.55112e-17 92
+
+Vector Sum: 6.16174e-15 -6.99441e-15 5.55112e-17 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 8.88178e-15 -8.88178e-16 92
+
+Vector Sum: 0 8.88178e-15 -8.88178e-16 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 1.72085e-15 1.11022e-16 -2.94209e-15 92
+
+Vector Sum: 1.72085e-15 1.11022e-16 -2.94209e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 1.77636e-15 4.44089e-16 4.44089e-15 92
+
+Vector Sum: 1.77636e-15 4.44089e-16 4.44089e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.77636e-15 0 0 92
+
+Vector Sum: -6.37316e-11 6.76244e-11 -1.01816e-10 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.11022e-15 1.06581e-14 -1.24345e-14 92
+
+Vector Sum: -1.11022e-15 1.06581e-14 -1.24345e-14 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 5.32907e-15 -2.66454e-15 8.88178e-16 92
+
+Vector Sum: 5.32907e-15 -2.66454e-15 8.88178e-16 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 4.44089e-16 2.66454e-15 -1.42109e-14 92
+
+Vector Sum: 4.44089e-16 2.66454e-15 -1.42109e-14 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -1.06581e-14 -1.77636e-15 0 92
+
+Vector Sum: -1.06581e-14 -1.77636e-15 0 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -3.55271e-15 -3.55271e-15 -1.77636e-15 92
+
+Vector Sum: -3.55271e-15 -3.55271e-15 -1.77636e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 8.88178e-16 6.66134e-15 7.10543e-15 92
+
+Vector Sum: 8.88178e-16 6.66134e-15 7.10543e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: -2.22045e-16 9.4369e-16 -5.9952e-15 92
+
+Vector Sum: -2.22045e-16 9.4369e-16 -5.9952e-15 92
+                                          
+Momentum conservation chceck BEFORE/AFTER Photos
+
+Vector Sum: 0 1.06581e-14 -5.32907e-15 92
+
+Vector Sum: 0 1.06581e-14 -5.32907e-15 92
+INFO from PHOTOS:
+1000
+
+ Pythia::next(): 1000 events have been generated 
+INFO from PHOTOS:
+2000
+
+ Pythia::next(): 2000 events have been generated 
+INFO from PHOTOS:
+3000
+
+ Pythia::next(): 3000 events have been generated 
+INFO from PHOTOS:
+4000
+
+ Pythia::next(): 4000 events have been generated 
+INFO from PHOTOS:
+5000
+
+ Pythia::next(): 5000 events have been generated 
+INFO from PHOTOS:
+6000
+
+ Pythia::next(): 6000 events have been generated 
+INFO from PHOTOS:
+7000
+
+ Pythia::next(): 7000 events have been generated 
+INFO from PHOTOS:
+8000
+
+ Pythia::next(): 8000 events have been generated 
+INFO from PHOTOS:
+9000
+
+ Pythia::next(): 9000 events have been generated 
+
+ *-------  PYTHIA Event and Cross Section Statistics  -------------------------------------------------------------*
+ |                                                                                                                 |
+ | Subprocess                                    Code |            Number of events       |      sigma +- delta    |
+ |                                                    |       Tried   Selected   Accepted |     (estimated) (mb)   |
+ |                                                    |                                   |                        |
+ |-----------------------------------------------------------------------------------------------------------------|
+ |                                                    |                                   |                        |
+ | f fbar -> gamma*/Z0                            221 |      140976      10000      10000 |   1.175e-06  6.089e-09 |
+ |                                                    |                                   |                        |
+ | sum                                                |      140976      10000      10000 |   1.175e-06  6.089e-09 |
+ |                                                                                                                 |
+ *-------  End PYTHIA Event and Cross Section Statistics ----------------------------------------------------------*
+
+ *-------  PYTHIA Error and Warning Messages Statistics  ----------------------------------------------------------* 
+ |                                                                                                                 | 
+ |  times   message                                                                                                | 
+ |                                                                                                                 | 
+ |      0   no errors or warnings to report                                                                        | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Error and Warning Messages Statistics  ------------------------------------------------------* 
+
+Summary (single tau decay processing):
+10000	taus processed
+963	times one photon added to the decay           	(9.6%)
+96	times two photons added to the decay          	(0.96%)
+12	times more than two photons added to the decay	(0.12%)
+
+(Contrary to results from MC-Tester, these values are technical and infrared unstable)
+
+To proccess different number of events use:
+ ./single_photos_gun_example <number_of_events>
+

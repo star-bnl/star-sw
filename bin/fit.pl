@@ -14,7 +14,7 @@ my @histXF = ();
 my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
-#@histGF = qw (VoltC);
+#@histGF = qw (VoltageC);
 foreach my $arg (@ARGV) {
   if ($arg =~ /\.root$/) {push @rootfiles, $arg; next;}
 }

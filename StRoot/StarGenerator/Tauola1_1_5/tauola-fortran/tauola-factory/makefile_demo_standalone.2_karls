@@ -1,0 +1,7 @@
+run:
+	cd prod; sh go
+	@echo " diff prod/tauola.cpc.karlsruhe   prod/tauola.output "
+	@echo " diff prod/tauola.aleph.karlsruhe prod/tauola.output "
+	@echo " diff prod/tauola.cleo.karlsruhe  prod/tauola.output "
+
+

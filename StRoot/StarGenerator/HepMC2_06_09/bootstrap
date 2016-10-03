@@ -1,0 +1,36 @@
+#! /bin/sh
+
+set -x
+# cleanup should not be necessary
+# however, in some cases strange results are found if you do not start clean
+rm -rf autom4te.cache
+rm -f aclocal.m4
+rm -f Makefile.in */Makefile.in */defs.h.in
+rm -f missing install-sh depcomp 
+rm -f configure config.*
+rm -f ltmain.sh
+# run autotool commands
+OS=`uname`
+if [ $OS = "Darwin" ]; then
+  glibtoolize --copy
+  OSname=`uname -s`
+else
+  libtoolize --copy
+  OSname=`uname -o`
+fi
+aclocal 
+m4dir=`aclocal --print-ac-dir`
+if [ -f $m4dir/libtool.m4 ]; then
+   cat $m4dir/libtool.m4 >> aclocal.m4
+fi
+autoheader
+automake --add-missing --copy
+autoconf
+
+# To avoid confusing people with failures in the documentation build, 
+# build documents during the bootstrap process.
+if [ $OSname != "Cygwin" ]; then
+  cd doc; ./buildDoc.sh
+fi
+
+# ready to make a source code distribution tarball

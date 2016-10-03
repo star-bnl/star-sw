@@ -1,0 +1,13 @@
+#-------------------------------------------------------------
+# installing HepMC
+#-------------------------------------------------------------
+
+Although it may be possible to build the HepMC libraries from this directory,
+we recommend that you create a separate build directory and work from there.
+
+Although it may be possible to build with autotools, 
+we strongly recommend building with cmake. 
+Cmake is preferred for MacOSX and required for Windows.
+Cmake is also required if you are using clang, or any non-gcc compiler.
+
+Please see either INSTALL.cmake or INSTALL.autotools for directions.

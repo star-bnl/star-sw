@@ -1,0 +1,17 @@
+\section{Optimizing EvtGen code}
+\label{sect:optimization}
+\index{optimization}
+
+Broadly speaking there are two different categories of
+optimization. The firt type concerns just making the code
+more efficient, i.e., there are no changes to the algorithm.
+A very simple example of such optimization is the order in 
+which operations are performed, let a be a double and p and k 
+four-vectors.
+\begin{verbatim}
+   a*(p*k);
+\end{verbatim}
+is more efficient then 
+\begin{verbatim}
+   (a*p)*k;
+\end{verbatim}

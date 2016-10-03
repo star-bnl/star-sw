@@ -1,0 +1,266 @@
+\section{Decay tables in EvtGen}
+\label{sect:decaytable}
+\index{DECAY.DEC}
+
+The decay table included in the EvtGen package, 
+{\tt DECAY.DEC}, provides an extensive
+list of decays for resonances below the $\Upsilon(4S)$.
+However, the table is updated with available experimental
+and theoretical information on a regular basis.
+To describe the format of the decay table 
+consider the decay of a $D^{*+}$ meson
+\index{keywords}
+\index{Decay}
+\index{Enddecay}
+\index{branching fraction}
+\index{keywords!Decay}
+\index{keywords!Enddecay}
+\begin{verbatim}
+Decay D*+
+0.67  D0 pi+     VSS;
+0.33  D+ pi0     VSS;
+Enddecay
+\end{verbatim}
+A decay entry starts with the keyword ``Decay'' and ends with
+``Enddecay''.  Throughout the decay table, capitalization 
+is important.  Decay channel entries are separated by ``;''. 
+There are three main components needed to specify a
+decay channel.  First the branching ratio is given,
+followed by the list of final state particles.  Finally
+the model used to simulate the decay is specified. For many 
+models, the order of final state particles  is important.  The correct
+order for each model can be found in the {\tt DECAY.DEC} provided,
+or in Section~\ref{sect:models} of this documentation.  
+Details on available models can be found in Section~\ref{sect:models}.  
+
+Certain models also take arguments, as 
+in the case of the decay $B^0\rightarrow \pi^+\pi^-$
+\index{arguments}
+\begin{verbatim}
+Decay B0
+1.00  pi+ pi-   SSS_CP dm alpha 1 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+The meaning of these arguments are explained
+in Section~\ref{sect:models}.  
+
+The above example also shows the use of constants 
+defined in the decay table, in this case ``dm'' and ``alpha''.
+The syntax for defining constants is
+\index{Define}
+\index{keywords!Define}
+\begin{verbatim}
+Define alpha 0.9
+\end{verbatim}
+Note that a ``Define'' statement can not be within 
+a ``Decay-Enddecay'' statement and also must precede 
+the first use of the constant that it defines.  
+If a constant is redefined, the last value defined before the use in
+the decay table is used. To illustrate this consider the following example
+\begin{verbatim}
+Define alpha 0.9
+Decay B0
+1.00  pi+ pi-   SSS_CP dm alpha 1 1.0 0.0 1.0 0.0;
+Enddecay
+Define alpha 1.1
+Decay B0B
+1.00  pi+ pi-   SSS_CP dm alpha 1 1.0 0.0 1.0 0.0;
+Enddecay
+\end{verbatim}
+Here the decay of the $B^0$ will use $\alpha=0.9$ while the
+$\bar B^0$ decay will use $\alpha=1.1$. This means, in particular,
+that you can not create user decay files that change 
+parameter values to change the default decay table settings after
+the default decay table has been parsed.
+
+Once the decay channels of a particle (eg, a $D^0$) have been 
+specified, the decay channels of the
+charge conjugate particle ($\bar D^0$) can be specified 
+using the syntax
+\index{CDecay}
+\index{keywords!CDecay}
+\begin{verbatim}
+CDecay anti-D0
+\end{verbatim}
+
+Another feature is that particle aliases may be defined.
+These aliases are useful for various reasons, including the
+generation of Monte Carlo for special signal channels. Consider
+the case of Monte Carlo for the 
+decay $B^0\rightarrow J/\Psi K^0_s$
+with $J/\Psi\rightarrow \mu^+\mu^-$.
+Not all $J/\Psi$ mesons in the event should decay to $\mu^+\mu^-$, only
+the ones in the signal mode. The concept
+of particle aliases solves this problem.  Consider the 
+example
+\index{Alias}
+\index{keywords!Alias}
+\begin{verbatim}
+Alias myJ/psi  J/psi
+Decay B0
+1.00   myJ/psi  K_S0     SVS_CP dm beta 1.0 1.0 0.0 1.0 0.0;
+Endedecay
+Decay myJ/psi
+1.00   mu+   mu-         VLL;
+Enddecay
+\end{verbatim}
+Here, {\tt myJ/psi} has been created to alias the {\tt J/psi}. 
+Inside the generator, {\tt myJ/psi} is treated as a new particle, 
+with the same properties
+as the {\tt J/psi}, except for its decay channels.  This includes
+the particle name and number, such that at the end of each event,
+the output will contain the chain
+$B^0\rightarrow J/\Psi K^0_s$, $J/\Psi\rightarrow \mu^+\mu^-$.  There
+is no need for user analysis code to know about {\tt myJ/psi}.
+
+There is one small complication related to aliased particles involving
+the {\tt CDecay} feature described above.
+
+Sometimes it is necesary to define the charge conjugate of an alias.  This
+is used, for example by the {\tt CDecay} feature.  To use this feature 
+with aliases, you must specify the charge 
+conjugate state for each alias.  If you alias
+a particle that is its own charge conjugate, (eg, a $\pi^0$) the aliased
+particle will be its own charge conjugate. However, in the case
+of the alias {\tt mypi+},  which represents {\tt pi+}, a charge
+conjugate alais {\tt mypi-} must be defined and you will need
+to tell the generator that the charge conjugate of {\tt mypi-} is
+{\tt mypi+}:
+\index{ChargeConj}
+\index{keywords!ChargeConj}
+\begin{verbatim}
+ChargeConj mypi+ mypi-
+\end{verbatim}
+The charge conjugate of {\tt mypi+} can not be defined to 
+be {\tt pi-}.
+
+\index{PHOTOS}
+\index{keywords!PHOTOS}
+Final state radiation using 
+the PHOTOS~\cite{Was92} package may be included in each decay. 
+This option is invoked by the key word
+{\tt PHOTOS}, which is placed after the list of decay daughters, but before
+the model name. See Appendix~\ref{sect:finalstaterad} for more details.
+
+\index{JetSetPar}
+\index{lugive}
+\index{keywords!JetSetPar}
+The keyword {\tt JetSetPar} 
+allows for manipulation of parameters in the 
+JETSET common blocks using the {\tt lugive} subroutine. 
+For example, to set the parameter {\tt MSTJ(26)=0} (this turns
+off $B^0$-$\bar B^0$ mixing in JetSet) the line
+\begin{verbatim}
+JetSetPar MSTJ(26)=0
+\end{verbatim}
+is added
+to the decay table. Note that no spaces are allowed in the string that 
+is passed to lugive. This is due to a limitation of how the decay table
+is parsed by EvtGen. The setting of a global parameter, illustrated
+by {\tt JetSetPar},
+is a general feature that any decay model can implement. 
+This is discussed further in Section~\ref{sect:modelparameters}.
+
+\subsection{Guidelines to write decay files}
+
+\index{End}
+\index{keywords!End}
+There are several things to know when writing a decay table:
+\begin{itemize}
+\item
+The decay table must end with {\tt End}. This is
+also true for user decay tables as described in
+Section~\ref{sec:userdecayfiles}.
+\item 
+Everything in the decay table is case sensitive.
+\item Charge conservation will be checked on each decay in
+the decay table.
+\item Each parent and daughter particle must be contained
+in {\tt evt.pdl}.
+\item Most models included in the EvtGen package 
+will check that the number of daughters 
+as well as the spin of each daughter are correct.
+\item The number of arguements provided must be the same as is
+expected by the model.
+\item If the sum of branching ratios in the decay channels for
+a particle do not sum to 1.0, they will all be rescaled so that
+the sum is 1.0.
+\item Any line beginning with ``\#'' is considered a comment.
+\end{itemize}
+
+\subsection{User decay files}
+\label{sec:userdecayfiles}
+In addition to changing {\tt DECAY.DEC}, the output of
+EvtGen may be controlled via a user decay file.  
+We now give several examples of how to configure a user decay
+table. Many details of decay
+tables have already been discussed above. 
+
+As the first example, consider generating $\Upsilon(4S) \to B^+ B^-$,  
+$B^{+}\rightarrow D^{*0}e^{+}\nu_{e}$ with 
+$D^{*0}\rightarrow \bar D^{0}\pi^{0}$ and $\bar D^{0}\rightarrow K^{+}\pi^{-}$.
+The other $B$ from the $\Upsilon(4S)$ decays generically. 
+
+The standard way of running EvtGen begins with 
+parsing the full standard decay table, {\tt DECAY.DEC}.  After this,
+a user decay table is parsed in order to
+redefine the particle decays of interest.  This way, the
+user decay file will override the standard decay table.
+
+In the example above, the user decay table could be implemented as:
+\begin{verbatim}
+#  Ups(4S)->B+ B-
+#           |   |-> generic
+#           |->D*0 e+ nu_e
+#              |->D0B pi0
+#                 |->K+pi-
+#
+Alias myD*0      D*0
+Alias my-anti-D0 anti-D0
+#
+Decay  Upsilon(4S)
+1.000  B+      B-                   VSS;
+Enddecay
+#
+Decay  B+
+1.000  my-anti-D*0   e+   nu_e            ISGW2;
+Enddecay
+#
+Decay  my-anti-D*0
+1.000  my-anti-D0 pi0                  VSS;
+Enddecay
+#
+Decay  my-anti-D0
+1.000  K+      pi-                  PHSP;
+Enddecay
+#
+End
+\end{verbatim}
+
+The decay of the $\Upsilon(4S)$ is redefined.  In the default decay table
+it is defined to decay to a proper mixture of 
+charged and neutral $B$ mesons. Note that
+when a {\tt Decay} statement is found for a particle, it erases all previous 
+decays that have been defined for that particle. 
+The $\Upsilon(4S)$ above is redefined such that it 
+decays into a $B^+$ and a $B^-$
+$100\%$ of the time. The $B^-$ decay is not 
+redefined and hence it decays generically
+according to the entries in {\tt DECAY.DEC}. However, 
+the $B^+$ is redefined such that it is forced to
+decay semileptonically according to the model of 
+ISGW2. (For more information about details
+about what different models do, see Appendix~\ref{sect:models}.) 
+
+Another use of user decay files is to make a particle stable (if, for example,
+its decay is uninteresting for your purpose).  To make a $K_S$ stable do
+\index{stable}
+\begin{verbatim}
+Decay K0S
+Enddecay
+\end{verbatim}
+
+{\it Anders, add b0b0bar mixing example}
+
+
+

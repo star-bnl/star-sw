@@ -1,0 +1,32 @@
+#if defined (ALEPH)
+      IF (JPNI.EQ.1) THEN
+      	CALL DAM4PI(JNPI,PT,PN,PIM1,PIM2,PIZ,PIPL,AMPLIT,HV)
+      ELSE 
+      	CALL DAM4PI(JNPI,PT,PN,PIM1,PIM2,PIPL,PIZ,AMPLIT,HV)
+      ENDIF
+#else
+CAM     Assume neutrino mass=0. and sum over final polarisation
+C      AMX2=AM4**2
+C      BRAK= 2*(AMTAU**2-AMX2) * (AMTAU**2+2.*AMX2)
+C      AMPLIT=CCABIB**2*GFERMI**2/2. * BRAK * AMX2*SIGEE(AMX2,1)
+      IF     (JNPI.EQ.1) THEN
+        CALL DAM4PI(JNPI,PT,PN,PIM1,PIM2,PIZ,PIPL,AMPLIT,HV)
+      ELSEIF (JNPI.EQ.2) THEN
+        CALL DAM4PI(JNPI,PT,PN,PIM1,PIM2,PIPL,PIZ,AMPLIT,HV)
+      ENDIF
+#endif
+      DGAMT=1/(2.*AMTAU)*AMPLIT*PHSPAC
+C PHASE SPACE CHECK
+C      DGAMT=PHSPAC
+      DO 77 K=1,4
+        PMULT(K,1)=PIM1(K)
+        PMULT(K,2)=PIM2(K)
+#if defined (ALEPH)
+        PMULT(K,3)=PIZ (K)
+        PMULT(K,4)=PIPL(K)
+#else
+        PMULT(K,3)=PIPL(K)
+        PMULT(K,4)=PIZ (K)
+#endif
+ 77   CONTINUE
+      END

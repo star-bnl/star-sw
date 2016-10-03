@@ -1,0 +1,98 @@
+This set-up is generating directory of tauola library, new line of
+development starting Oct 09 2004.
+Tauola sources may be built in one of the options mentioned below.
+.F sources are preprocessed using cpp precompiler and stored in 
+prod/ subdirectory.
+
+
+Basic options are:
+       make authors
+       make BaBar
+       make Belle
+they will create the same files at this moment
+========================
+
+As result:
+
+
+1) contents of existing external tauola/ subdirectory is erased (!)
+2) directory structure of external tauola/ is rebuilt: 
+3) directory prod/ is filled with appropriate fortran files and makefiles.
+2) interfaces to KK and main stand-alone programs are created
+3) external tauola/ directory is filled with fortran and makefiles.
+4) external tauola/ sub-directories are filled with fortran code of demos
+5) external tauola/KK-face is filled with fortran code of KK interface
+
+make: Tauface 
+=============
+
+Tauface.f will be placed in KK2f directory.
+
+Remarks:
+========
+
+1) All machine dependant settings are stored in TAUOLA/make.inc and
+    TAUOLA/platform/
+2) Makefiles templates  are compatible with KK: thus by executing 
+   make makflag from KK/ffbench/ will overwrite makefile in tauola/ 
+   with the one produced from makefile.templ files.
+3) demo and test programs do not know of KK. They use compiler settings
+   from TAUOLA/make.inc
+
+4) WARNING! 
+   ++++++++
+   The code of tauola and demos may need special compiler flags, when ported
+   to another platform. 
+5) Additional parametrizations of form-factors which can be useful
+   in some applications are stored in directory suppl. They are not
+   ready to use and some care cross checks are mandatory.
+
+Remarks on physics update:
+==========================
+
+1)
+  There were 40+20 empty new slots (and one filled in) prepared for tauola running.
+  At present they are initialized with some dummy stuff, which make them running
+  but into unphysical configurations only.
+2) Nonetheless  the defaults for KKMC governing tau decays are not changed, re-mapping is done at tauola 
+   initialization. Tauface.f file of KKMC need change of course
+3) All phase space masses and flavours can be initialized in routine INITDK as always.
+   The matrices IDFFIN(9,NMODE),MULPIK(NMODE) are appropriately extended for that, this applies to all chanels
+   presented below.
+
+4) The new slot is for tau decay to pi-pi0pi0  is at the position 72 it has the same current as for channel 
+   5 but it can be now indepenently recoded, thus can have  different current than for channel 5 (pi+pi-pi-).
+   It is defined now for mnum=9 as defined in functions form1-form5, overall coeficients for the 
+   contributions to the current are defined (again for mnum=9) in routine  F3PI. The overall coeficients
+   are  defined in routine  DAMPPK wit the help of usual coefficients FNORM(0:19),COEF(1:5,0:19);
+   values at FNORM(9) and at COEF(1:5,9);
+5) extra 10 channels for 3 scalars  are prepared, they can be initialized using the same formfactors and coefficients
+   as in case of pi-pi0pi0, but for positions mnum=10 to 19. Dummy initializations for these channels is giving
+   now  charged non conserving final state pi0pi0pi0, they corrrspond to positions 53 to 62 for branching ratios
+6) extra 10 channels for n pions (it does not need to be 6!) are initialized at positions 54 to 63 of branching ratios
+   the appropriate inclusive spectra for dGamma/d(Q**2) are to be filled in in routine sigee(Q2,JNP)
+   for JNP from 7 to 16, the line in routine sigee:
+        IF(JNPI.GT.6) JNPI=6  ! warning
+   has to be replaced.  these channels write into hepevt 3pi-3pi+ or 2pi-2pi+2pi0.
+7) extra 20 channels for 4 scalars in list of branching ratios are at positions 10 to 29 of branching ratios
+   Their current ha to be provied in routine CURR_CLEO(MNUM,PIM1,PIM2,PIM3,PIM4,HADCUR), for mnum=3  to 22,
+   at present dumily mnum=2 for every of this cases, thus the current for pi-pi0pi0pi0p, the phase space factor 
+   1/6 has to be checked, if activated these channels put 3 pions and one Kaon into  the event record. 
+8) extra 20 channels for 5 scalars in list of branching ratios they are at positions 31 to 50 of branching ratios
+   the current  CURR5 can be used for that purpose, for the consecutive slots 31 to 50 dam5pi get the index
+   from 24 to 43. If activated these channels write into HEPEVT decays into one Kaon and 4 pions.
+9) Note that for 5pi channel 30 crappy matrix element is used as in old tauola.  From routine  DPH5PI
+   condition
+       if (jnpi.gt.13) !
+     $ CALL DAM5PI(
+   should be removed and current CURR5 should be used and initialized for  jnpi=23 exactly as in point 8)
+9) extra 10 channels for 2 scalars in list of branching ratios they are at positions 84 to 93 of branching ratios
+   current has to be adjusted in  DPHSRK parameter inum can be used to distinguish, but it is not done so far.
+   non-standard dcays like mu+mu+mu- are to be placed there (?), but some work on neutrino flavour in storing 
+   and in mass setting has to be done still. If activated these events write in HEPEVT tau decays into K-K-
+
+I hope that this file explains more than confuses ...
+
+
+
+

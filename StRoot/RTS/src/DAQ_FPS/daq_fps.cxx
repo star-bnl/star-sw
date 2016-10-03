@@ -72,13 +72,13 @@ daq_dta *daq_fps::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 
 
 	if(strcasecmp(bank,"raw")==0) {
-		return handle_raw() ;
+		return handle_raw(sec) ;
 	}
 	else if(strcasecmp(bank,"adc")==0) {
-		return handle_adc() ;
+		return handle_adc(sec) ;
 	}
 	else if(strcasecmp(bank,"pedrms")==0) {
-		return handle_pedrms() ;
+		return handle_pedrms(sec) ;
 	}
 
 
@@ -89,68 +89,83 @@ daq_dta *daq_fps::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 
 
 
-daq_dta *daq_fps::handle_adc()
+daq_dta *daq_fps::handle_adc(int sec)
 {
 
 	daq_dta *raw_d ;
+	int s_start, s_stop ;
 
-
-	raw_d = handle_raw() ;
-	if(raw_d==0) return 0 ;
-	if(raw_d->iterate() == 0) return 0 ;
-
-
-	fps_evt_hdr_t *hdr = (fps_evt_hdr_t *) raw_d->Void ;
-	u_int *d32 = (u_int *) raw_d->Void ;
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
 
 	adc->create(32,"fps_adc",rts_id,DAQ_DTA_STRUCT(fps_adc_t)) ;
 
-	int tb_cou = hdr->pre_post_cou ;
-	int qt_cou = hdr->qt_cou ;
+	for(int s=s_start;s<=s_stop;s++) {
 
-	//LOG(TERR,"tb %d, qt %d, hdr ver 0x%08X",tb_cou,qt_cou,hdr->ver) ;
+		raw_d = handle_raw(sec) ;
+		if(raw_d==0) continue ;
+		if(raw_d->iterate() == 0) continue ;
 
-	memcpy(&meta_hdr,hdr,sizeof(meta_hdr)) ;
-	adc->meta = (void *) &meta_hdr ;
 
-	d32 += (hdr->ver & 0xFF) ;	// skip to data...
+		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *) raw_d->Void ;
+		u_int *d32 = (u_int *) raw_d->Void ;
+
+
+
+		int tb_cou = hdr->pre_post_cou ;
+		int qt_cou = hdr->qt_cou ;
+
+		//LOG(TERR,"tb %d, qt %d, hdr ver 0x%08X",tb_cou,qt_cou,hdr->ver) ;
+
+		//note that this gets overriden sector by sector and can thus
+		//potentially only show data from the 2nd (last) sector!
+
+		memcpy(&meta_hdr,hdr,sizeof(meta_hdr)) ;
+		adc->meta = (void *) &meta_hdr ;
+
+		d32 += (hdr->ver & 0xFF) ;	// skip to data...
 
 
 	
-	for(int tb=0;tb<tb_cou;tb++) {
-		int rel_xing = *d32++ ;
+		for(int tb=0;tb<tb_cou;tb++) {
+			int rel_xing = *d32++ ;
 
-		//LOG(TERR,"Rel xing %d",rel_xing) ;
+			//LOG(TERR,"Rel xing %d",rel_xing) ;
 		
-		for(int q=0;q<qt_cou;q++) {
-			int qt = *d32++ ;
-			int chs = *d32++ ;
+			for(int q=0;q<qt_cou;q++) {
+				int qt = *d32++ ;
+				int chs = *d32++ ;
 	
 			//LOG(TERR,"qt %d, chs %d",qt,chs) ;
 
-			if(chs==0) continue ;
+				if(chs==0) continue ;
 
-			fps_adc_t *a = (fps_adc_t *) adc->request(chs) ;
+				fps_adc_t *a = (fps_adc_t *) adc->request(chs) ;
 
-			//LOG(TERR,"TB %d, QT %d, chs %d",tb,qt,chs) ;
+				//LOG(TERR,"TB %d, QT %d, chs %d",tb,qt,chs) ;
 			
-			for(int c=0;c<chs;c++) {
-				u_int datum = *d32++ ;
+				for(int c=0;c<chs;c++) {
+					u_int datum = *d32++ ;
 
-				int ch = datum >> 27 ;
-				int aadc = datum & 0x0FFF ;
-				int tdc = (datum >> 16) & 0x07FF ;
+					int ch = datum >> 27 ;
+					int aadc = datum & 0x0FFF ;
+					int tdc = (datum >> 16) & 0x07FF ;
 
-				a->ch = ch ;
-				a->adc = aadc ;
-				a->tdc = tdc ;
-				a++ ;
+					a->ch = ch ;
+					a->adc = aadc ;
+					a->tdc = tdc ;
+					a++ ;
+				}
+
+				adc->finalize(chs,s,qt,rel_xing) ;
 			}
-
-			adc->finalize(chs,rel_xing,qt,0) ;
 		}
 	}
-
 
 
 	adc->rewind() ;
@@ -160,13 +175,13 @@ daq_dta *daq_fps::handle_adc()
 }
 
 
-daq_dta *daq_fps::handle_raw()
+daq_dta *daq_fps::handle_raw(int sec)
 {
 	char *st ;
 	int bytes ;
 	char str[256] ;
 	char *full_name ;
-
+	int s_start, s_stop ;
 
 	assert(caller) ;	// sanity...
 
@@ -178,27 +193,38 @@ daq_dta *daq_fps::handle_raw()
 	}
 
 
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
+
+
 	raw->create(1024,"fps_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
 
 
-	sprintf(str,"%s/sec01/rb01/raw",sfs_name) ;
-	full_name = caller->get_sfs_name(str) ;
+	for(int s=s_start;s<=s_stop;s++) {
+		sprintf(str,"%s/sec0%d/rb01/raw",sfs_name,s) ;
+		full_name = caller->get_sfs_name(str) ;
 		
-	//LOG(TERR,"got full name") ;
+		//LOG(TERR,"got full name") ;
 
-	if(!full_name) return 0 ;
-	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+		if(!full_name) continue ;
+		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-	st = (char *) raw->request(bytes) ;
+		st = (char *) raw->request(bytes) ;
 		
-	int ret = caller->sfs->read(str, st, bytes) ;
-	if(ret != bytes) {
-		LOG(ERR,"ret is %d") ;
-	}
+		int ret = caller->sfs->read(str, st, bytes) ;
+		if(ret != bytes) {
+			LOG(ERR,"ret is %d") ;
+		}
 
-	//LOG(TERR,"got bytes",bytes) ;
+		//LOG(TERR,"got bytes",bytes) ;
 	
-	raw->finalize(bytes,0,0,0) ;	;
+		raw->finalize(bytes,s,0,0) ;	;
+	}
 
 	raw->rewind() ;
 
@@ -208,61 +234,72 @@ daq_dta *daq_fps::handle_raw()
 
 	
 
-daq_dta *daq_fps::handle_pedrms()
+daq_dta *daq_fps::handle_pedrms(int sec)
 {
 	char str[128] ;
 	char *full_name ;
 	int bytes ;
+	int s_start, s_stop ;
 
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
 
-	sprintf(str,"%s/sec%02d/pedrms",sfs_name, 1) ;
+	for(int s=s_start;s<=s_stop;s++) {
 
-	LOG(NOTE,"Trying %s",str) ;
+		sprintf(str,"%s/sec%02d/pedrms",sfs_name, s) ;
 
-	full_name = caller->get_sfs_name(str) ;
+		LOG(NOTE,"Trying %s",str) ;
+
+		full_name = caller->get_sfs_name(str) ;
 		
-	if(full_name) {
-		LOG(NOTE,"full_name %s",full_name) ;
-	}
-
-	if(!full_name) return 0 ;  ;
-
-
-	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
-
-	LOG(NOTE,"bytes %d",bytes) ;
-
-	int nitems = bytes / sizeof(fps_pedrms_t) ;
-	int remain = bytes % sizeof(fps_pedrms_t) ;
-
-	if(remain) {
-		LOG(ERR,"Got %d, expect %d",bytes,sizeof(fps_pedrms_t)) ;
-		return 0 ;
-	}
-
-	char *data = (char *)malloc(bytes) ;
-
-	int ret = caller->sfs->read(str, (char *)data, bytes) ;
-	if(ret != bytes) {
-		LOG(ERR,"ret is %d") ;
-	}
-
-	pedrms->create(1,"fps_pedrms",rts_id,DAQ_DTA_STRUCT(fps_pedrms_t)) ;
-
-	for(int i=0;i<nitems;i++) {
-
-		fps_pedrms_t *ped = (fps_pedrms_t *)pedrms->request(1) ;
-
-		memcpy(ped,data+i*sizeof(fps_pedrms_t),sizeof(fps_pedrms_t)) ;
-
-		if(ped->version != FPS_PED_VERSION) {
-			LOG(ERR,"Wrong version %d in file, expect %d",ped->version,FPS_PED_VERSION) ;
+		if(full_name) {
+			LOG(NOTE,"full_name %s",full_name) ;
 		}
 
-		pedrms->finalize(1,1,ped->qt_ix,0) ;
-	}
+		if(!full_name) continue ;  ;
 
-	free(data) ;
+
+		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(NOTE,"bytes %d",bytes) ;
+
+		int nitems = bytes / sizeof(fps_pedrms_t) ;
+		int remain = bytes % sizeof(fps_pedrms_t) ;
+
+		if(remain) {
+			LOG(ERR,"Got %d, expect %d",bytes,sizeof(fps_pedrms_t)) ;
+			return 0 ;
+		}
+
+		char *data = (char *)malloc(bytes) ;
+
+		int ret = caller->sfs->read(str, (char *)data, bytes) ;
+		if(ret != bytes) {
+			LOG(ERR,"ret is %d") ;
+		}
+
+		pedrms->create(1,"fps_pedrms",rts_id,DAQ_DTA_STRUCT(fps_pedrms_t)) ;
+
+		for(int i=0;i<nitems;i++) {
+
+			fps_pedrms_t *ped = (fps_pedrms_t *)pedrms->request(1) ;
+
+			memcpy(ped,data+i*sizeof(fps_pedrms_t),sizeof(fps_pedrms_t)) ;
+
+			if(ped->version != FPS_PED_VERSION) {
+				LOG(ERR,"Wrong version %d in file, expect %d",ped->version,FPS_PED_VERSION) ;
+			}
+
+			pedrms->finalize(1,s,ped->qt_ix,0) ;
+		}
+
+		free(data) ;
+	}
 
 	pedrms->rewind() ;
 

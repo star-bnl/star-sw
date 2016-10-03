@@ -1,0 +1,45 @@
+###########################################################
+LOCAL_LIB   =  glib.a 
+LIB_OBJECTS =  photos.o 
+##############   What has to be built
+all:	$(LOCAL_LIB) 
+FFLAGS = <FFLAGS>
+F77 = f77
+AR = ar
+RANLIB = ranlib
+LD = $(F77)
+CPP = /usr/lib/cpp
+CPPP = $(CPP)
+#############
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+$(LOCAL_LIB): $(LIB_OBJECTS)
+	$(AR) rv  $(LOCAL_LIB) $(LIB_OBJECTS)
+	$(RANLIB) $(LOCAL_LIB)
+clean:
+	rm -f *.o; rm -f *.a; rm -f *~ PHOINF.h HEPEVTCommonDef.h
+KK:
+	$(CPP) -P -DKORALK  photos.F photos.f
+4kD:
+	$(CPP) -P -DCZTERYD photos.F photos.f
+2kR:
+	$(CPP) -P -DDWAR    photos.F photos.f
+10kD:
+	$(CPP) -P -DDZIESD  photos.F photos.f
+KK: ../include
+	ln -s ../include/PHOINF-KORALK.h ./PHOINF.h
+	ln -s ../include/HEPEVT-KORALK.h ./HEPEVTCommonDef.h
+	$(CPP) -P -DKORALK  photos.F photos.f
+4kD: ../include
+        ln -s ../include/PHOINF-CZTERYD.h ./PHOINF.h
+        ln -s ../include/HEPEVT-CZTERYD.h ./HEPEVTCommonDef.h
+        $(CPP) -P -DCZTERYD photos.F photos.f
+2kR: ../include
+        ln -s ../include/PHOINF-DWAR.h ./PHOINF.h
+        ln -s ../include/HEPEVT-DWAR.h ./HEPEVTCommonDef.h
+        $(CPP) -P -DDWAR    photos.F photos.f
+10kD: ../include
+        ln -s ../include/PHOINF-DZIESD.h ./PHOINF.h
+        ln -s ../include/HEPEVT-DZIESD.h ./HEPEVTCommonDef.h
+        $(CPP) -P -DDZIESD  photos.F photos.f
+												    

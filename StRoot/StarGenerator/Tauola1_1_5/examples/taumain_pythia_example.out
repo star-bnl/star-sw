@@ -1,0 +1,1137 @@
+NOTE: This example output was created with command:
+
+  ./taumain_pythia_example.exe > taumain_pythia_example.out 2>&1
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.165      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change:  8 May 2012  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 09 Dec 2013 at 01:13:26    |  | 
+ |  |                                                                              |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      phone: + 46 - 46 - 222 48 16; e-mail: torbjorn@thep.lu.se               |  | 
+ |  |   Stefan Ask;  Department of Physics, University of Cambridge,               |  | 
+ |  |      Cavendish Laboratory, JJ Thomson Ave., Cambridge CB3 0HE, UK;           |  | 
+ |  |      phone: + 41 - 22 - 767 6707; e-mail: Stefan.Ask@cern.ch                 |  | 
+ |  |   Richard Corke;  Department of Astronomy and Theoretical Physics,           |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: richard.corke@thep.lu.se                                        |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      phone: + 1 - 630 - 840 - 2556; e-mail: mrenna@fnal.gov                  |  | 
+ |  |   Stefan Prestel;  Department of Astronomy and Theoretical Physics,          |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      phone: + 46 - 46 - 222 06 64; e-mail: stefan.prestel@thep.lu.se         |  | 
+ |  |   Peter Skands;  Theoretical Physics, CERN, CH-1211 Geneva 23, Switzerland;  |  | 
+ |  |      phone: + 41 - 22 - 767 2447; e-mail: peter.skands@cern.ch               |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is the 'Brief Introduction to PYTHIA 8.1',      |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, Comput. Phys. Comm. 178 (2008) 85   |  | 
+ |  |   [arXiv:0710.3820]                                                          |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]. |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/~torbjorn/Pythia.html                                |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2012 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10313
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10323
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10333
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide e- with e+ at a CM energy of 9.200e+01 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | f fbar -> gamma*/Z0                            221 |   1.659e-05 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Flag + Mode + Parm + Word Settings (changes only)  ----------------------------------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | BeamRemnants:reconnectRange                   |                  1.50000 |     10.00000         0.0    10.00000 | 
+ | Beams:eCM                                     |                 92.00000 |    14000.000    10.00000             | 
+ | Beams:idA                                     |                       11 |         2212                         | 
+ | Beams:idB                                     |                      -11 |         2212                         | 
+ | HadronLevel:Hadronize                         |                      off |           on                         | 
+ | MultipartonInteractions:alphaSvalue           |                  0.13500 |      0.12700   0.0600000     0.25000 | 
+ | MultipartonInteractions:bProfile              |                        3 |            1           0           4 | 
+ | MultipartonInteractions:ecmPow                |                  0.19000 |      0.24000         0.0     0.50000 | 
+ | MultipartonInteractions:expPow                |                  2.00000 |      1.00000     0.40000    10.00000 | 
+ | MultipartonInteractions:pT0Ref                |                  2.08500 |      2.15000     0.50000    10.00000 | 
+ | PartonLevel:FSR                               |                      off |           on                         | 
+ | PartonLevel:ISR                               |                      off |           on                         | 
+ | PDF:pSet                                      |                        8 |            2           1          12 | 
+ | SigmaDiffractive:dampen                       |                       on |          off                         | 
+ | SigmaDiffractive:maxAX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXB                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaProcess:alphaSvalue                      |                  0.13500 |      0.12650   0.0600000     0.25000 | 
+ | SpaceShower:QEDshowerByL                      |                      off |           on                         | 
+ | SpaceShower:QEDshowerByQ                      |                      off |           on                         | 
+ | SpaceShower:rapidityOrder                     |                       on |          off                         | 
+ | WeakSingleBoson:ffbar2gmZ                     |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word Settings  ---------------------------------------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+      23  Z0                                  3   0   0   91.18760    2.50687   10.00000    0.00000  0.00000e+00   1   1   0   0   0
+              0     0   0.1541199    0        1       -1 
+              1     0   0.1195484    0        2       -2 
+              2     0   0.1541093    0        3       -3 
+              3     0   0.1193873    0        4       -4 
+              4     0   0.1523969    0        5       -5 
+              5     0   0.0335122    0       11      -11 
+              6     0   0.0666593    0       12      -12 
+              7     0   0.0335119    0       13      -13 
+              8     0   0.0666593    0       14      -14 
+              9     1   0.0334362    0       15      -15 
+             10     0   0.0666593    0       16      -16 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+
+ *************************************
+ *     TAUOLA C++ Interface v1.1.4   *
+ *-----------------------------------*
+ *                                   *
+ *   (c) Nadia    Davidson,   (1,2)  *
+ *       Gizo     Nanava,     (3)    *
+ *       Tomasz   Przedzinski,(4)    *
+ *       Elzbieta Richter-Was,(2,4)  *
+ *       Zbigniew Was         (2,5)  *
+ *                                   *
+ *  1) Unimelb, Melbourne, Australia *
+ *  2)     INP, Krakow, Poland       *
+ *  3) University Bonn, Germany      *
+ *  4)      UJ, Krakow, Poland       *
+ *  5)    CERN, Geneva, Switzerland  *
+ *************************************
+Reading SANC input files.
+File 'table1-1.txt'  missing... skipped.
+File 'table2-2.txt'  missing... skipped.
+File 'table11-11.txt' missing... skipped.
+
+#########################################################################################
+Tauola++ parameters set at initialization
+(this check-method can be used at any moment of program execution).
+Parameters meaning, defaults, and allowed ranges are explained in program documentation 
+http://www.ph.unimelb.edu.au/~ndavidson/tauola/Tauola_interface_design.pdf 
+
+-----------------------------------------------------------
+
+variables used mainly  in C++ interface:  
+
+Tau mass:                                     1.776999950409
+Tau lifetime:                                 0.087110000000
+Tau PDG id:                                   15
+
+Decay of eta, K0s, pi on/off:                 0,0,0
+
+Length units:                                 MM
+Momentum units:                               GEV
+Momentum conservation threshold (for checks): 0.100000000000
+
+Higgs (scalar-pseudoscalar) PDG id:           35
+Higgs (scalar-pseudoscalar) mixing angle:     0.785398163397
+
+
+Switches used in spin correlation methods on/off for:
+GAMMA,Z0,HIGGS,HIGGS_H,HIGGS_A,HIGGS_PLUS,HIGGS_MINUS,W_PLUS,W_MINUS: 1,1,1,1,1,1,1,1,1
+
+-----------------------------------------------------------
+
+variables used in tau decays : 
+
+-----------------------------------------------------------
+
+tau+ decay mode:                                               0
+tau- decay mode:                                               0
+
+a1     relative branching ratio pi- pi- pi+ / pi- pi pi0:      0.500000000000
+K0     relative attribute K0_L / K0_S:                         0.500000000000
+K0_bar relative attribute K0_L / K0_S:                         0.500000000000
+Kstar  relative branching ratio K0 pi- /K- pi0 :               0.666700005531
+
+QED radiation in leptonic decays on/off:                       1
+QED radiation in leptonic decays minimal photon energy cutoff: 0.001000000000
+
+#########################################################################################
+Setup loaded from SETUP.C, GENERATION stage 1.
+
+ *************************************
+ *        MC-TESTER v1.25.0          *
+ *-----------------------------------*
+ *    Testing decays of: Z0        *
+ *                                   *
+ *   (c) Nadia    Davidson,   (1,2)  *
+ *       Piotr    Golonka,    (3)    *
+ *       Tomasz   Przedzinski,(4)    *
+ *       Tomasz   Pierzchala, (5)    *
+ *       Zbigniew Was         (2,3)  *
+ *                                   *
+ *  1) Unimelb, Melbourne, Australia *
+ *  2)     INP, Krakow, Poland       *
+ *  3)    CERN, Geneva, Switzerland  *
+ *  4)      UJ, Krakow, Poland       *
+ *  5)    until version 1.112        *
+ *************************************
+
+ -> No event record type is set.
+ -> Will use HepMC or HEPEVT.
+ -> results from stage1 goes to:
+     /tmp/TAUOLA/examples/mc-tester.root
+
+INFO from TAUOLA:
+Event: 0
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =     11, pz =  4.600e+01, e =  4.600e+01, m =  5.110e-04.
+ Beam B: id =    -11, pz = -4.600e+01, e =  4.600e+01, m =  5.110e-04.
+
+ In 1: id =   11, x =  9.974e-01, pdf =  1.568e+01 at Q2 =  8.442e+03.
+ In 2: id =  -11, x =  1.000e+00, pdf =  2.821e+06 at same Q2.
+
+ Subprocess f fbar -> gamma*/Z0 with code 221 is 2 -> 1.
+ It has sHat =  8.442e+03.
+     alphaEM =  7.818e-03,  alphaS =  1.348e-01    at Q2 =  8.442e+03.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  9.200e+01, ISR =  9.200e+01, FSR =  9.200e+01.
+ Number of MPI =     1, ISR =     0, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     3     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     4     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     1     0     5     0     0     0      0.000      0.000     45.881     45.881      0.000
+     4       -11   (e+)               -21     2     0     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     6     7     0     0      0.000      0.000     -0.119     91.881     91.881
+     6        15   tau-                23     5     0     0     0     0     0    -23.389    -26.535    -29.321     45.978      1.777
+     7       -15   tau+                23     5     0     0     0     0     0     23.389     26.535     29.202     45.903      1.777
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.119     91.881     91.881
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     45.881     45.881      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.119     91.881     91.881
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     45.881     45.881      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -46.000     46.000      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000     -0.119     91.881     91.881
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.119      0.119      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    11        15   (tau-)             -23     8     0    13    14     0     0    -23.389    -26.535    -29.321     45.978      1.777
+    12       -15   (tau+)             -23     8     0    15    17     0     0     23.389     26.535     29.202     45.903      1.777
+    13        16   nu_tau              91    11     0     0     0     0     0    -15.921    -19.252    -20.882     32.560      0.000
+    14      -211   pi-                 91    11     0     0     0     0     0     -7.468     -7.282     -8.440     13.418      0.140
+    15       -16   nu_taubar           91    12     0     0     0     0     0     16.911     18.388     20.333     32.211      0.000
+    16       111   (pi0)              -91    12     0    18    19     0     0      3.469      4.523      5.246      7.748      0.135
+    17       211   pi+                 91    12     0     0     0     0     0      3.009      3.623      3.624      5.944      0.140
+    18        22   gamma               91    16     0     0     0     0     0      2.585      3.273      3.845      5.673      0.000
+    19        22   gamma               91    16     0     0     0     0     0      0.884      1.250      1.401      2.075      0.000
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000      0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 9.21485e-15 6.66134e-15 1.26565e-14 92
+
+Vector Sum: 1.74229e-06 2.02167e-06 1.54855e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -5.55112e-17 8.88178e-16 1.55431e-15 92
+
+Vector Sum: 1.39784e-08 -1.90473e-06 -3.23301e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -3.33067e-15 -9.71445e-16 -7.32747e-15 92
+
+Vector Sum: -1.07053e-06 -6.55851e-07 -4.61442e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 1.22125e-15 3.55271e-15 6.10623e-16 92
+
+Vector Sum: 5.51458e-07 1.8801e-06 -3.75237e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 1.28786e-14 2.22045e-15 -6.66134e-16 92
+
+Vector Sum: 3.6285e-06 1.67138e-06 1.00889e-05 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -8.88178e-16 -4.44089e-16 8.88178e-15 92
+
+Vector Sum: -1.51549e-06 -2.58698e-07 2.71762e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -7.10543e-15 0 -3.55271e-15 92
+
+Vector Sum: 8.48791e-07 2.93462e-08 4.86818e-07 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 2.70339e-14 5.02931e-14 5.93969e-14 92
+
+Vector Sum: -2.9501e-08 -6.45334e-08 -2.19485e-07 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -2.44249e-15 -1.11022e-16 3.55271e-15 92
+
+Vector Sum: 3.42078e-07 -1.60512e-07 -1.30634e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -2.33147e-15 3.88578e-16 2.9976e-15 92
+
+Vector Sum: -1.84477e-06 7.21183e-07 3.36454e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -7.10543e-15 -8.88178e-16 -1.06581e-14 92
+
+Vector Sum: -2.0084e-07 -1.01883e-07 -4.23472e-07 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 1.06581e-14 -1.11022e-16 0 92
+
+Vector Sum: -8.92911e-07 -3.94474e-08 1.43898e-05 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 4.44089e-15 -3.33067e-16 -8.88178e-16 92
+
+Vector Sum: -3.0698e-07 -1.86466e-08 -6.78897e-08 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 3.16414e-15 -5.75928e-16 -2.498e-15 92
+
+Vector Sum: -4.27034e-08 -7.89041e-08 1.3156e-07 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -3.41394e-15 1.02834e-14 -7.70217e-15 92
+
+Vector Sum: 1.24764e-07 -1.54112e-07 1.39356e-07 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 3.55271e-15 -4.44089e-16 -8.88178e-16 92
+
+Vector Sum: -3.03786e-06 9.80641e-07 -1.68787e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -2.77556e-17 -9.76996e-15 -2.66454e-15 92
+
+Vector Sum: -2.09521e-07 -3.96381e-06 -1.96363e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -4.996e-16 1.55431e-14 5.32907e-15 92
+
+Vector Sum: 1.25258e-07 1.7074e-06 -7.55085e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 1.33227e-15 1.77636e-15 0 92
+
+Vector Sum: -7.63852e-08 2.48568e-07 -5.70304e-06 92.0005
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -6.66134e-16 -3.55271e-15 -1.77636e-15 92
+
+Vector Sum: 3.05989e-07 7.11818e-07 -1.33217e-06 92.0005
+INFO from TAUOLA:
+Event: 1000
+
+ Pythia::next(): 1000 events have been generated 
+INFO from TAUOLA:
+Event: 2000
+
+ Pythia::next(): 2000 events have been generated 
+INFO from TAUOLA:
+Event: 3000
+
+ Pythia::next(): 3000 events have been generated 
+INFO from TAUOLA:
+Event: 4000
+
+ Pythia::next(): 4000 events have been generated 
+INFO from TAUOLA:
+Event: 5000
+
+ Pythia::next(): 5000 events have been generated 
+INFO from TAUOLA:
+Event: 6000
+
+ Pythia::next(): 6000 events have been generated 
+INFO from TAUOLA:
+Event: 7000
+
+ Pythia::next(): 7000 events have been generated 
+INFO from TAUOLA:
+Event: 8000
+
+ Pythia::next(): 8000 events have been generated 
+INFO from TAUOLA:
+Event: 9000
+
+ Pythia::next(): 9000 events have been generated 
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     46.000     46.000      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -45.683     45.683      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000      0.317     91.683     91.682
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     46.000     46.000      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -45.683     45.683      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000      0.317     91.683     91.682
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.317      0.317      0.000
+    11        15   (tau-)             -23     8     0    16    18     0     0     29.469    -20.997     28.247     45.939      1.777
+    12       -15   (tau+)             -23     8     0    13    15     0     0    -29.469     20.997    -27.930     45.744      1.777
+    13       -16   nu_taubar           91    12     0     0     0     0     0     -9.648      6.455     -8.673     14.490      0.000
+    14       -13   mu+                 91    12     0     0     0     0     0    -13.036      8.862    -12.046     19.839      0.106
+    15        14   nu_mu               91    12     0     0     0     0     0     -6.785      5.680     -7.210     11.414      0.000
+    16        16   nu_tau              91    11     0     0     0     0     0     13.898     -9.792     13.015     21.410      0.000
+    17        13   mu-                 91    11     0     0     0     0     0      6.653     -4.039      6.082      9.878      0.106
+    18       -14   nu_mubar            91    11     0     0     0     0     0      8.918     -7.166      9.151     14.650      0.000
+                                   Charge sum:  0.000           Momentum sum:      0.000     -0.000      0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+________________________________________________________________________________
+GenEvent: #9995 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 9 vertices, 19 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1.000 [energy] 	 alphaQCD=-1.000	 alphaQED=-1.000
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+ O: 1         3       11 +5.33e-15,+6.15e-18,+4.60e+01,+4.60e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00e+00,+0.00e+00,-4.57e+01,+4.57e+01  61        -2
+ O: 1         4      -11 -5.33e-15,+3.55e-15,-4.57e+01,+4.57e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +5.33e-15,+6.15e-18,+4.60e+01,+4.60e+01  21        -3
+              4      -11 -5.33e-15,+3.55e-15,-4.57e+01,+4.57e+01  21        -3
+ O: 1         5       23 +0.00e+00,+0.00e+00,+3.17e-01,+9.17e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01   4        -4
+ O: 2         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+              9       22 +0.00e+00,+0.00e+00,+1.45e-08,+1.45e-08   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01   4        -5
+ O: 2         7      -11 +0.00e+00,+0.00e+00,-4.57e+01,+4.57e+01  61        -2
+             10       22 +0.00e+00,+0.00e+00,-3.17e-01,+3.17e-01   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00e+00,+0.00e+00,+3.17e-01,+9.17e+01  22        -6
+ O: 1         8       23 +0.00e+00,+0.00e+00,+3.17e-01,+9.17e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00e+00,+0.00e+00,+3.17e-01,+9.17e+01  62        -7
+ O: 2        11       15 +2.95e+01,-2.10e+01,+2.82e+01,+4.59e+01   2        -9
+             12      -15 -2.95e+01,+2.10e+01,-2.79e+01,+4.57e+01   2        -8
+Vertex:       -8 ID:    0 (X,cT)=-4.01e-01,+2.86e-01,-3.80e-01,+6.23e-01
+ I: 1        12      -15 -2.95e+01,+2.10e+01,-2.79e+01,+4.57e+01   2        -8
+ O: 4     10001      -16 -6.06e-01,+5.58e-01,-3.81e-01,+9.08e-01   1
+          10002      -11 -1.16e+01,+8.18e+00,-1.08e+01,+1.78e+01   1
+          10003       12 -8.88e+00,+6.36e+00,-8.94e+00,+1.41e+01   1
+          10004       22 -8.37e+00,+5.90e+00,-7.80e+00,+1.29e+01   1
+Vertex:       -9 ID:    0 (X,cT)=+7.27e+00,-5.18e+00,+6.97e+00,+1.13e+01
+ I: 1        11       15 +2.95e+01,-2.10e+01,+2.82e+01,+4.59e+01   2        -9
+ O: 3     10005       16 +6.57e+00,-5.20e+00,+6.49e+00,+1.06e+01   1
+          10006       11 +1.85e+01,-1.23e+01,+1.78e+01,+2.84e+01   1
+          10007      -12 +4.43e+00,-3.53e+00,+4.00e+00,+6.94e+00   1
+________________________________________________________________________________
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     46.000     46.000      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.000     92.000     92.000
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     46.000     46.000      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -46.000     46.000      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000     -0.000     92.000     92.000
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    11        15   (tau-)             -23     8     0    16    18     0     0    -21.963      9.860     39.157     46.000      1.777
+    12       -15   (tau+)             -23     8     0    13    15     0     0     21.963     -9.860    -39.157     46.000      1.777
+    13       -16   nu_taubar           91    12     0     0     0     0     0      4.083     -1.314     -6.283      7.608      0.000
+    14       111   (pi0)              -91    12     0    19    20     0     0     14.733     -6.892    -26.547     31.134      0.135
+    15       211   pi+                 91    12     0     0     0     0     0      3.146     -1.653     -6.327      7.258      0.140
+    16        16   nu_tau              91    11     0     0     0     0     0     -0.283      0.201      0.994      1.052      0.000
+    17        11   e-                  91    11     0     0     0     0     0    -17.200      7.977     30.577     35.978      0.001
+    18       -12   nu_ebar             91    11     0     0     0     0     0     -4.480      1.682      7.586      8.970      0.000
+    19        22   gamma               91    14     0     0     0     0     0      5.614     -2.558    -10.028     11.774      0.000
+    20        22   gamma               91    14     0     0     0     0     0      9.119     -4.334    -16.518     19.360      0.000
+                                   Charge sum:  0.000           Momentum sum:      0.000     -0.000     -0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+________________________________________________________________________________
+GenEvent: #9996 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 9 vertices, 18 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1.000 [energy] 	 alphaQCD=-1.000	 alphaQED=-1.000
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+ O: 1         3       11 +3.55e-15,-5.33e-15,+4.60e+01,+4.60e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+ O: 1         4      -11 +0.00e+00,+3.55e-15,-4.60e+01,+4.60e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 +3.55e-15,-5.33e-15,+4.60e+01,+4.60e+01  21        -3
+              4      -11 +0.00e+00,+3.55e-15,-4.60e+01,+4.60e+01  21        -3
+ O: 1         5       23 +0.00e+00,+0.00e+00,-6.07e-08,+9.20e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01   4        -4
+ O: 2         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+              9       22 +0.00e+00,+0.00e+00,+1.13e-07,+1.13e-07   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01   4        -5
+ O: 2         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+             10       22 +0.00e+00,+0.00e+00,-5.21e-08,+5.21e-08   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00e+00,+0.00e+00,-6.07e-08,+9.20e+01  22        -6
+ O: 1         8       23 +0.00e+00,+0.00e+00,-6.07e-08,+9.20e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00e+00,+0.00e+00,-6.07e-08,+9.20e+01  62        -7
+ O: 2        11       15 -2.20e+01,+9.86e+00,+3.92e+01,+4.60e+01   2        -9
+             12      -15 +2.20e+01,-9.86e+00,-3.92e+01,+4.60e+01   2        -8
+Vertex:       -8 ID:    0 (X,cT)=+6.09e+00,-2.73e+00,-1.09e+01,+1.28e+01
+ I: 1        12      -15 +2.20e+01,-9.86e+00,-3.92e+01,+4.60e+01   2        -8
+ O: 3     10001      -16 +3.24e+00,-1.13e+00,-4.63e+00,+5.76e+00   1
+          10002      -11 +1.29e+01,-5.92e+00,-2.40e+01,+2.79e+01   1
+          10003       12 +5.84e+00,-2.80e+00,-1.05e+01,+1.23e+01   1
+Vertex:       -9 ID:    0 (X,cT)=-2.77e-01,+1.24e-01,+4.94e-01,+5.80e-01
+ I: 1        11       15 -2.20e+01,+9.86e+00,+3.92e+01,+4.60e+01   2        -9
+ O: 3     10004       16 -6.62e+00,+3.61e+00,+1.18e+01,+1.40e+01   1
+          10005       13 -4.51e+00,+1.49e+00,+7.29e+00,+8.71e+00   1
+          10006      -14 -1.08e+01,+4.76e+00,+2.01e+01,+2.33e+01   1
+________________________________________________________________________________
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     46.000     46.000      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -45.999     45.999      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000      0.001     91.999     91.999
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     46.000     46.000      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -45.999     45.999      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000      0.001     91.999     91.999
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.001      0.001      0.000
+    11        15   (tau-)             -23     8     0    16    18     0     0     23.269    -25.879    -30.026     45.999      1.777
+    12       -15   (tau+)             -23     8     0    13    15     0     0    -23.269     25.879     30.027     46.000      1.777
+    13       -16   nu_taubar           91    12     0     0     0     0     0     -8.451      9.618     12.047     17.580      0.000
+    14       -11   e+                  91    12     0     0     0     0     0    -13.039     13.996     15.606     24.687      0.001
+    15        12   nu_e                91    12     0     0     0     0     0     -1.779      2.265      2.375      3.733      0.000
+    16        16   nu_tau              91    11     0     0     0     0     0     14.698    -17.322    -18.949     29.583      0.000
+    17        13   mu-                 91    11     0     0     0     0     0      4.200     -4.025     -5.229      7.823      0.106
+    18       -14   nu_mubar            91    11     0     0     0     0     0      4.372     -4.532     -5.848      8.594      0.000
+                                   Charge sum:  0.000           Momentum sum:     -0.000      0.000      0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+________________________________________________________________________________
+GenEvent: #9997 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 10 vertices, 20 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1.000 [energy] 	 alphaQCD=-1.000	 alphaQED=-1.000
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+ O: 1         3       11 -3.55e-15,+3.55e-15,+4.60e+01,+4.60e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+ O: 1         4      -11 +3.55e-15,-3.55e-15,-4.60e+01,+4.60e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 -3.55e-15,+3.55e-15,+4.60e+01,+4.60e+01  21        -3
+              4      -11 +3.55e-15,-3.55e-15,-4.60e+01,+4.60e+01  21        -3
+ O: 1         5       23 +0.00e+00,+0.00e+00,+6.62e-04,+9.20e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01   4        -4
+ O: 2         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+              9       22 +0.00e+00,+0.00e+00,+1.36e-05,+1.36e-05   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01   4        -5
+ O: 2         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+             10       22 +0.00e+00,+0.00e+00,-6.75e-04,+6.75e-04   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00e+00,+0.00e+00,+6.62e-04,+9.20e+01  22        -6
+ O: 1         8       23 +0.00e+00,+0.00e+00,+6.62e-04,+9.20e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00e+00,+0.00e+00,+6.62e-04,+9.20e+01  62        -7
+ O: 2        11       15 +2.33e+01,-2.59e+01,-3.00e+01,+4.60e+01   2       -10
+             12      -15 -2.33e+01,+2.59e+01,+3.00e+01,+4.60e+01   2        -8
+Vertex:       -8 ID:    0 (X,cT)=-3.19e-01,+3.54e-01,+4.11e-01,+6.30e-01
+ I: 1        12      -15 -2.33e+01,+2.59e+01,+3.00e+01,+4.60e+01   2        -8
+ O: 2     10001      -16 -5.99e+00,+7.50e+00,+8.52e+00,+1.28e+01   1
+          10002    20213 -1.73e+01,+1.84e+01,+2.15e+01,+3.32e+01   2        -9
+Vertex:       -9 ID:    0 (X,cT)=-3.19e-01,+3.54e-01,+4.11e-01,+6.30e-01
+ I: 1     10002    20213 -1.73e+01,+1.84e+01,+2.15e+01,+3.32e+01   2        -9
+ O: 3     10003      111 -1.13e+01,+1.18e+01,+1.39e+01,+2.14e+01   1
+          10004      111 -3.72e+00,+3.75e+00,+4.34e+00,+6.84e+00   1
+          10005      211 -2.30e+00,+2.85e+00,+3.25e+00,+4.90e+00   1
+Vertex:      -10 ID:    0 (X,cT)=+1.52e+00,-1.69e+00,-1.96e+00,+3.00e+00
+ I: 1        11       15 +2.33e+01,-2.59e+01,-3.00e+01,+4.60e+01   2       -10
+ O: 3     10006       16 +5.88e+00,-6.21e+00,-6.80e+00,+1.09e+01   1
+          10007       13 +7.60e+00,-8.92e+00,-1.11e+01,+1.61e+01   1
+          10008      -14 +9.80e+00,-1.07e+01,-1.21e+01,+1.89e+01   1
+________________________________________________________________________________
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     46.000     46.000      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000      0.000     92.000     92.000
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     46.000     46.000      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -46.000     46.000      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000      0.000     92.000     92.000
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    11        15   (tau-)             -23     8     0    13    15     0     0     20.874      2.750     40.860     46.000      1.777
+    12       -15   (tau+)             -23     8     0    16    17     0     0    -20.874     -2.750    -40.860     46.000      1.777
+    13        16   nu_tau              91    11     0     0     0     0     0      7.690      1.071     16.033     17.814      0.000
+    14        11   e-                  91    11     0     0     0     0     0     12.085      1.364     22.028     25.163      0.001
+    15       -12   nu_ebar             91    11     0     0     0     0     0      1.099      0.315      2.799      3.023      0.000
+    16       -16   nu_taubar           91    12     0     0     0     0     0     -6.220     -0.642    -13.908     15.249      0.000
+    17       211   pi+                 91    12     0     0     0     0     0    -14.654     -2.108    -26.952     30.751      0.140
+                                   Charge sum:  0.000           Momentum sum:      0.000     -0.000      0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+________________________________________________________________________________
+GenEvent: #9998 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 11 vertices, 22 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1.000 [energy] 	 alphaQCD=-1.000	 alphaQED=-1.000
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+ O: 1         3       11 -3.55e-15,+4.44e-16,+4.60e+01,+4.60e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+ O: 1         4      -11 +3.55e-15,+0.00e+00,-4.60e+01,+4.60e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 -3.55e-15,+4.44e-16,+4.60e+01,+4.60e+01  21        -3
+              4      -11 +3.55e-15,+0.00e+00,-4.60e+01,+4.60e+01  21        -3
+ O: 1         5       23 +0.00e+00,+0.00e+00,+2.21e-06,+9.20e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01   4        -4
+ O: 2         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+              9       22 +0.00e+00,+0.00e+00,+8.17e-07,+8.17e-07   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01   4        -5
+ O: 2         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+             10       22 +0.00e+00,+0.00e+00,-3.02e-06,+3.02e-06   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00e+00,+0.00e+00,+2.21e-06,+9.20e+01  22        -6
+ O: 1         8       23 +0.00e+00,+0.00e+00,+2.21e-06,+9.20e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00e+00,+0.00e+00,+2.21e-06,+9.20e+01  62        -7
+ O: 2        11       15 +2.09e+01,+2.75e+00,+4.09e+01,+4.60e+01   2       -10
+             12      -15 -2.09e+01,-2.75e+00,-4.09e+01,+4.60e+01   2        -8
+Vertex:       -8 ID:    0 (X,cT)=-6.77e-03,-8.92e-04,-1.33e-02,+1.49e-02
+ I: 1        12      -15 -2.09e+01,-2.75e+00,-4.09e+01,+4.60e+01   2        -8
+ O: 2     10001      -16 -6.10e+00,-4.00e-01,-1.12e+01,+1.28e+01   1
+          10002    20213 -1.48e+01,-2.35e+00,-2.96e+01,+3.32e+01   2        -9
+Vertex:       -9 ID:    0 (X,cT)=-6.77e-03,-8.92e-04,-1.33e-02,+1.49e-02
+ I: 1     10002    20213 -1.48e+01,-2.35e+00,-2.96e+01,+3.32e+01   2        -9
+ O: 3     10003      211 -4.90e+00,-1.04e+00,-9.73e+00,+1.09e+01   1
+          10004      211 -8.49e+00,-1.00e+00,-1.75e+01,+1.95e+01   1
+          10005     -211 -1.39e+00,-3.14e-01,-2.39e+00,+2.79e+00   1
+Vertex:      -10 ID:    0 (X,cT)=+3.49e-01,+4.60e-02,+6.83e-01,+7.69e-01
+ I: 1        11       15 +2.09e+01,+2.75e+00,+4.09e+01,+4.60e+01   2       -10
+ O: 2     10006       16 +1.13e+00,-7.71e-03,+1.79e+00,+2.12e+00   1
+          10007   -20213 +1.97e+01,+2.76e+00,+3.91e+01,+4.39e+01   2       -11
+Vertex:      -11 ID:    0 (X,cT)=+3.49e-01,+4.60e-02,+6.83e-01,+7.69e-01
+ I: 1     10007   -20213 +1.97e+01,+2.76e+00,+3.91e+01,+4.39e+01   2       -11
+ O: 3     10008     -211 +4.62e+00,+5.09e-01,+8.09e+00,+9.33e+00   1
+          10009     -211 +5.01e+00,+7.42e-01,+1.08e+01,+1.19e+01   1
+          10010      211 +1.01e+01,+1.51e+00,+2.02e+01,+2.26e+01   1
+________________________________________________________________________________
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     6     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     7     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     6     5     0     0     0      0.000      0.000     45.995     45.995      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.005     91.995     91.995
+     6        11   (e-)               -61     1     0     3     3     0     0      0.000      0.000     45.995     45.995      0.000
+     7       -11   (e+)               -61     2     0     4     4     0     0      0.000      0.000    -46.000     46.000      0.000
+     8        23   (Z0)               -62     5     5    11    12     0     0      0.000      0.000     -0.005     91.995     91.995
+     9        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.005      0.005      0.000
+    10        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    11        15   (tau-)             -23     8     0    13    15     0     0     -4.604    -12.841     43.890     45.995      1.777
+    12       -15   (tau+)             -23     8     0    16    18     0     0      4.604     12.841    -43.895     46.000      1.777
+    13        16   nu_tau              91    11     0     0     0     0     0     -0.402     -0.708      1.929      2.094      0.000
+    14       111   (pi0)              -91    11     0    19    20     0     0     -0.090     -0.172      1.203      1.226      0.135
+    15      -211   pi-                 91    11     0     0     0     0     0     -4.113    -11.961     40.757     42.675      0.140
+    16       -16   nu_taubar           91    12     0     0     0     0     0      2.671      6.432    -20.292     21.453      0.000
+    17       111   (pi0)              -91    12     0    21    22     0     0      0.490      1.191     -3.720      3.939      0.135
+    18       211   pi+                 91    12     0     0     0     0     0      1.443      5.219    -19.883     20.608      0.140
+    19        22   gamma               91    14     0     0     0     0     0     -0.099     -0.182      1.187      1.205      0.000
+    20        22   gamma               91    14     0     0     0     0     0      0.010      0.010      0.017      0.022      0.000
+    21        22   gamma               91    17     0     0     0     0     0      0.168      0.259     -0.857      0.910      0.000
+    22        22   gamma               91    17     0     0     0     0     0      0.323      0.933     -2.863      3.029      0.000
+                                   Charge sum:  0.000           Momentum sum:     -0.000     -0.000      0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+________________________________________________________________________________
+GenEvent: #9999 ID=0 SignalProcessGenVertex Barcode: 0
+ Momenutm units:     GEV     Position units:      MM
+ Entries this event: 10 vertices, 21 particles.
+ Beam Particle barcodes: 1 2 
+ RndmState(0)=
+ Wgts(0)=
+ EventScale -1.000 [energy] 	 alphaQCD=-1.000	 alphaQED=-1.000
+                                    GenParticle Legend
+        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx
+________________________________________________________________________________
+GenVertex:       -1 ID:    0 (X,cT):0
+ I: 1         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+ O: 1         3       11 -8.88e-16,-2.83e-19,+4.60e+01,+4.60e+01  21        -3
+GenVertex:       -2 ID:    0 (X,cT):0
+ I: 1         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+ O: 1         4      -11 +0.00e+00,-2.83e-19,-4.60e+01,+4.60e+01  21        -3
+GenVertex:       -3 ID:    0 (X,cT):0
+ I: 2         3       11 -8.88e-16,-2.83e-19,+4.60e+01,+4.60e+01  21        -3
+              4      -11 +0.00e+00,-2.83e-19,-4.60e+01,+4.60e+01  21        -3
+ O: 1         5       23 +0.00e+00,+0.00e+00,-4.62e-03,+9.20e+01  22        -6
+GenVertex:       -4 ID:    0 (X,cT):0
+ I: 1         1       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01   4        -4
+ O: 2         6       11 +0.00e+00,+0.00e+00,+4.60e+01,+4.60e+01  61        -1
+              9       22 +0.00e+00,+0.00e+00,+4.62e-03,+4.62e-03   1
+GenVertex:       -5 ID:    0 (X,cT):0
+ I: 1         2      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01   4        -5
+ O: 2         7      -11 +0.00e+00,+0.00e+00,-4.60e+01,+4.60e+01  61        -2
+             10       22 +0.00e+00,+0.00e+00,-1.14e-08,+1.14e-08   1
+GenVertex:       -6 ID:    0 (X,cT):0
+ I: 1         5       23 +0.00e+00,+0.00e+00,-4.62e-03,+9.20e+01  22        -6
+ O: 1         8       23 +0.00e+00,+0.00e+00,-4.62e-03,+9.20e+01  62        -7
+GenVertex:       -7 ID:    0 (X,cT):0
+ I: 1         8       23 +0.00e+00,+0.00e+00,-4.62e-03,+9.20e+01  62        -7
+ O: 2        11       15 -4.60e+00,-1.28e+01,+4.39e+01,+4.60e+01   2       -10
+             12      -15 +4.60e+00,+1.28e+01,-4.39e+01,+4.60e+01   2        -8
+Vertex:       -8 ID:    0 (X,cT)=+1.04e+00,+2.89e+00,-9.89e+00,+1.04e+01
+ I: 1        12      -15 +4.60e+00,+1.28e+01,-4.39e+01,+4.60e+01   2        -8
+ O: 2     10001      -16 +8.42e-01,+3.73e+00,-1.26e+01,+1.32e+01   1
+          10002       24 +3.76e+00,+9.11e+00,-3.13e+01,+3.28e+01   2        -9
+Vertex:       -9 ID:    0 (X,cT)=+1.04e+00,+2.89e+00,-9.89e+00,+1.04e+01
+ I: 1     10002       24 +3.76e+00,+9.11e+00,-3.13e+01,+3.28e+01   2        -9
+ O: 4     10003      211 +4.66e-01,+1.06e+00,-4.45e+00,+4.60e+00   1
+          10004      211 +8.24e-01,+2.23e+00,-6.68e+00,+7.09e+00   1
+          10005     -211 +1.96e+00,+4.87e+00,-1.71e+01,+1.79e+01   1
+          10006      111 +5.17e-01,+9.55e-01,-3.08e+00,+3.27e+00   1
+Vertex:      -10 ID:    0 (X,cT)=-2.99e-01,-8.34e-01,+2.85e+00,+2.99e+00
+ I: 1        11       15 -4.60e+00,-1.28e+01,+4.39e+01,+4.60e+01   2       -10
+ O: 3     10007       16 -4.93e-01,-2.57e+00,+8.75e+00,+9.13e+00   1
+          10008       13 -2.91e+00,-6.81e+00,+2.54e+01,+2.64e+01   1
+          10009      -14 -1.20e+00,-3.45e+00,+9.78e+00,+1.04e+01   1
+________________________________________________________________________________
+
+ *-------  PYTHIA Event and Cross Section Statistics  -------------------------------------------------------------*
+ |                                                                                                                 |
+ | Subprocess                                    Code |            Number of events       |      sigma +- delta    |
+ |                                                    |       Tried   Selected   Accepted |     (estimated) (mb)   |
+ |                                                    |                                   |                        |
+ |-----------------------------------------------------------------------------------------------------------------|
+ |                                                    |                                   |                        |
+ | f fbar -> gamma*/Z0                            221 |      140731      10000      10000 |   1.183e-06  6.145e-09 |
+ |                                                    |                                   |                        |
+ | sum                                                |      140731      10000      10000 |   1.183e-06  6.145e-09 |
+ |                                                                                                                 |
+ *-------  End PYTHIA Event and Cross Section Statistics ----------------------------------------------------------*
+
+ *-------  PYTHIA Error and Warning Messages Statistics  ----------------------------------------------------------* 
+ |                                                                                                                 | 
+ |  times   message                                                                                                | 
+ |                                                                                                                 | 
+ |      3   Warning in ParticleDataEntry::initBWmass: switching off width                                          | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Error and Warning Messages Statistics  ------------------------------------------------------* 
+  Z0 => pi- pi+ pi0 pi0 nu_tau~ nu_tau   (868 entries)
+  Z0 => pi- pi+ pi0 nu_tau~ nu_tau   (565 entries)
+  Z0 => pi- pi- pi+ pi+ pi0 nu_tau~ nu_tau   (512 entries)
+  Z0 => pi- pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (492 entries)
+  Z0 => pi- pi0 nu_tau~ nu_tau nu_mu mu+   (453 entries)
+  Z0 => pi- pi0 nu_tau~ nu_tau nu_e e+   (408 entries)
+  Z0 => pi- pi- pi+ pi+ pi0 pi0 nu_tau~ nu_tau   (406 entries)
+  Z0 => pi+ pi0 nu_tau~ nu_tau nu_mu~ mu-   (402 entries)
+  Z0 => pi+ pi0 nu_tau~ nu_tau nu_e~ e-   (396 entries)
+  Z0 => nu_tau~ nu_tau nu_mu~ mu- nu_e e+   (293 entries)
+  Z0 => nu_tau~ nu_tau nu_mu mu+ nu_e~ e-   (279 entries)
+  Z0 => nu_tau~ nu_tau nu_mu~ nu_mu mu+ mu-   (267 entries)
+  Z0 => nu_tau~ nu_tau nu_e~ nu_e e+ e-   (225 entries)
+  Z0 => pi+ nu_tau~ nu_tau nu_mu~ mu-   (204 entries)
+  Z0 => pi- nu_tau~ nu_tau nu_mu mu+   (195 entries)
+  Z0 => pi- pi- pi+ pi+ nu_tau~ nu_tau   (184 entries)
+  Z0 => pi+ pi0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (174 entries)
+  Z0 => pi+ nu_tau~ nu_tau nu_e~ e-   (171 entries)
+  Z0 => pi- pi0 pi0 nu_tau~ nu_tau nu_e e+   (167 entries)
+  Z0 => pi- nu_tau~ nu_tau nu_e e+   (161 entries)
+  Z0 => pi- pi- pi+ nu_tau~ nu_tau nu_mu mu+   (153 entries)
+  Z0 => pi+ pi0 pi0 nu_tau~ nu_tau nu_e~ e-   (147 entries)
+  Z0 => pi- pi+ pi+ nu_tau~ nu_tau nu_mu~ mu-   (143 entries)
+  Z0 => pi- pi+ pi0 pi0 pi0 pi0 nu_tau~ nu_tau   (139 entries)
+  Z0 => pi- pi- pi+ nu_tau~ nu_tau nu_e e+   (138 entries)
+  Z0 => pi- pi0 pi0 nu_tau~ nu_tau nu_mu mu+   (132 entries)
+  Z0 => pi- pi+ pi+ nu_tau~ nu_tau nu_e~ e-   (126 entries)
+  Z0 => pi- pi+ nu_tau~ nu_tau   (123 entries)
+  Z0 => pi- pi+ pi+ pi0 nu_tau~ nu_tau nu_mu~ mu-   (87 entries)
+  Z0 => pi- pi- pi+ pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (86 entries)
+  Z0 => pi- pi- pi- pi+ pi+ pi+ pi0 nu_tau~ nu_tau   (84 entries)
+  Z0 => pi- pi- pi+ pi0 nu_tau~ nu_tau nu_e e+   (83 entries)
+  Z0 => gamma nu_tau~ nu_tau nu_e~ nu_e e+ e-   (81 entries)
+  Z0 => pi- pi- pi- pi+ pi+ pi+ nu_tau~ nu_tau   (78 entries)
+  Z0 => pi- pi+ pi+ pi0 nu_tau~ nu_tau nu_e~ e-   (67 entries)
+  Z0 => pi- pi0 gamma nu_tau~ nu_tau nu_e e+   (65 entries)
+  Z0 => pi- pi- pi+ pi0 nu_tau~ nu_tau nu_mu mu+   (64 entries)
+  Z0 => pi+ pi0 gamma nu_tau~ nu_tau nu_e~ e-   (53 entries)
+  Z0 => pi- gamma nu_tau~ nu_tau nu_e e+   (52 entries)
+  Z0 => gamma nu_tau~ nu_tau nu_mu mu+ nu_e~ e-   (49 entries)
+  Z0 => gamma nu_tau~ nu_tau nu_mu~ mu- nu_e e+   (47 entries)
+  Z0 => pi- pi+ K_L0 pi0 nu_tau~ nu_tau   (35 entries)
+  Z0 => pi- pi- pi+ gamma nu_tau~ nu_tau nu_e e+   (31 entries)
+  Z0 => gamma nu_tau~ nu_tau nu_mu~ nu_mu mu+ mu-   (30 entries)
+  Z0 => K- pi+ pi0 nu_tau~ nu_tau   (29 entries)
+  Z0 => pi- pi0 pi0 pi0 nu_tau~ nu_tau nu_mu mu+   (29 entries)
+  Z0 => pi- pi0 pi0 gamma nu_tau~ nu_tau nu_e e+   (29 entries)
+  Z0 => pi+ gamma nu_tau~ nu_tau nu_e~ e-   (29 entries)
+  Z0 => K_S0 pi- pi+ pi0 nu_tau~ nu_tau   (27 entries)
+  Z0 => pi+ pi0 pi0 gamma nu_tau~ nu_tau nu_e~ e-   (24 entries)
+  Z0 => K_S0 pi- pi+ pi0 pi0 nu_tau~ nu_tau   (23 entries)
+  Z0 => pi- pi+ pi+ gamma nu_tau~ nu_tau nu_e~ e-   (22 entries)
+  Z0 => K+ pi- pi- pi+ pi0 nu_tau~ nu_tau   (22 entries)
+  Z0 => pi- pi+ pi0 pi0 pi0 pi0 pi0 nu_tau~ nu_tau   (22 entries)
+  Z0 => K+ pi- pi0 nu_tau~ nu_tau   (21 entries)
+  Z0 => K- pi+ pi0 pi0 nu_tau~ nu_tau   (21 entries)
+  Z0 => K- pi- pi+ pi+ pi0 nu_tau~ nu_tau   (20 entries)
+  Z0 => pi- pi+ K_L0 pi0 pi0 nu_tau~ nu_tau   (20 entries)
+  Z0 => pi- pi- pi- pi+ pi+ pi+ pi0 pi0 nu_tau~ nu_tau   (20 entries)
+  Z0 => pi- pi0 gamma nu_tau~ nu_tau nu_mu mu+   (19 entries)
+  Z0 => pi+ pi0 gamma nu_tau~ nu_tau nu_mu~ mu-   (17 entries)
+  Z0 => pi- pi0 pi0 pi0 nu_tau~ nu_tau nu_e e+   (16 entries)
+  Z0 => pi+ pi0 pi0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (15 entries)
+  Z0 => K- pi- pi+ nu_tau~ nu_tau nu_mu mu+   (15 entries)
+  Z0 => K+ pi- pi0 pi0 nu_tau~ nu_tau   (15 entries)
+  Z0 => K- nu_tau~ nu_tau nu_mu mu+   (15 entries)
+  Z0 => K- pi- pi+ pi+ nu_tau~ nu_tau   (14 entries)
+  Z0 => pi+ pi0 pi0 pi0 nu_tau~ nu_tau nu_e~ e-   (13 entries)
+  Z0 => K+ pi- pi- pi+ nu_tau~ nu_tau   (13 entries)
+  Z0 => pi- pi- pi+ pi+ K_L0 pi0 nu_tau~ nu_tau   (12 entries)
+  Z0 => pi- pi- pi+ pi0 gamma nu_tau~ nu_tau nu_e e+   (12 entries)
+  Z0 => K_S0 pi+ nu_tau~ nu_tau nu_mu~ mu-   (12 entries)
+  Z0 => pi- pi+ pi+ pi0 gamma nu_tau~ nu_tau nu_e~ e-   (12 entries)
+  Z0 => K+ pi0 nu_tau~ nu_tau nu_mu~ mu-   (11 entries)
+  Z0 => K+ nu_tau~ nu_tau nu_mu~ mu-   (11 entries)
+  Z0 => K_S0 pi- pi+ nu_tau~ nu_tau   (10 entries)
+  Z0 => K+ nu_tau~ nu_tau nu_e~ e-   (10 entries)
+  Z0 => pi- pi+ pi0 pi0 gamma nu_tau~ nu_tau   (10 entries)
+  Z0 => K_S0 pi- nu_tau~ nu_tau nu_mu mu+   (9 entries)
+  Z0 => K_S0 pi- pi- pi+ pi+ nu_tau~ nu_tau   (9 entries)
+  Z0 => K+ pi- nu_tau~ nu_tau   (9 entries)
+  Z0 => K+ pi- pi+ nu_tau~ nu_tau nu_mu~ mu-   (9 entries)
+  Z0 => K- K+ pi- pi+ pi0 nu_tau~ nu_tau   (9 entries)
+  Z0 => K- nu_tau~ nu_tau nu_e e+   (9 entries)
+  Z0 => K- pi0 nu_tau~ nu_tau nu_mu mu+   (9 entries)
+  Z0 => gamma gamma nu_tau~ nu_tau nu_e~ nu_e e+ e-   (8 entries)
+  Z0 => K_S0 pi- pi0 nu_tau~ nu_tau nu_e e+   (8 entries)
+  Z0 => pi- pi- pi+ pi+ K_L0 nu_tau~ nu_tau   (8 entries)
+  Z0 => K- pi- pi+ pi+ pi0 pi0 nu_tau~ nu_tau   (8 entries)
+  Z0 => eta pi- pi+ pi0 pi0 nu_tau~ nu_tau   (8 entries)
+  Z0 => K- pi- pi+ nu_tau~ nu_tau nu_e e+   (8 entries)
+  Z0 => pi- K_L0 nu_tau~ nu_tau nu_e e+   (7 entries)
+  Z0 => pi+ K_L0 pi0 nu_tau~ nu_tau nu_e~ e-   (7 entries)
+  Z0 => pi+ K_L0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (7 entries)
+  Z0 => K_S0 pi- pi- pi+ pi+ pi0 nu_tau~ nu_tau   (7 entries)
+  Z0 => pi- pi- pi+ pi+ pi0 pi0 pi0 pi0 nu_tau~ nu_tau   (7 entries)
+  Z0 => K- pi- pi- pi+ pi+ pi+ nu_tau~ nu_tau   (7 entries)
+  Z0 => pi- K_L0 nu_tau~ nu_tau nu_mu mu+   (7 entries)
+  Z0 => K+ pi- pi- pi+ pi0 pi0 nu_tau~ nu_tau   (6 entries)
+  Z0 => pi+ K_L0 nu_tau~ nu_tau nu_mu~ mu-   (6 entries)
+  Z0 => pi+ pi0 pi0 gamma nu_tau~ nu_tau nu_mu~ mu-   (6 entries)
+  Z0 => K+ pi- pi+ nu_tau~ nu_tau nu_e~ e-   (6 entries)
+  Z0 => pi- pi- pi+ gamma nu_tau~ nu_tau nu_mu mu+   (5 entries)
+  Z0 => pi+ pi0 pi0 pi0 gamma nu_tau~ nu_tau nu_e~ e-   (5 entries)
+  Z0 => K- pi0 pi0 nu_tau~ nu_tau nu_e e+   (5 entries)
+  Z0 => K- pi+ pi0 pi0 pi0 pi0 nu_tau~ nu_tau   (5 entries)
+  Z0 => K+ pi0 nu_tau~ nu_tau nu_e~ e-   (5 entries)
+  Z0 => K_S0 pi+ pi0 nu_tau~ nu_tau nu_e~ e-   (5 entries)
+  Z0 => pi+ gamma nu_tau~ nu_tau nu_mu~ mu-   (5 entries)
+  Z0 => eta pi- pi0 nu_tau~ nu_tau nu_e e+   (5 entries)
+  Z0 => eta pi- pi- pi+ pi+ pi0 nu_tau~ nu_tau   (5 entries)
+  Z0 => K- pi+ nu_tau~ nu_tau   (5 entries)
+  Z0 => K_S0 pi+ nu_tau~ nu_tau nu_e~ e-   (5 entries)
+  Z0 => K+ pi- pi0 pi0 pi0 nu_tau~ nu_tau   (5 entries)
+  Z0 => K- pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (4 entries)
+  Z0 => pi- pi+ pi+ pi0 gamma nu_tau~ nu_tau nu_mu~ mu-   (4 entries)
+  Z0 => pi- pi+ K_L0 K_L0 pi0 nu_tau~ nu_tau   (4 entries)
+  Z0 => K+ pi- pi- pi- pi+ pi+ nu_tau~ nu_tau   (4 entries)
+  Z0 => K- K+ pi- pi+ nu_tau~ nu_tau   (4 entries)
+  Z0 => K+ pi- K_L0 pi0 nu_tau~ nu_tau   (4 entries)
+  Z0 => K- K+ pi+ nu_tau~ nu_tau nu_e~ e-   (4 entries)
+  Z0 => pi- pi+ K_L0 nu_tau~ nu_tau   (4 entries)
+  Z0 => K- K_S0 pi+ pi0 pi0 nu_tau~ nu_tau   (4 entries)
+  Z0 => pi- K_L0 pi0 nu_tau~ nu_tau nu_mu mu+   (4 entries)
+  Z0 => pi- pi- pi+ pi0 gamma nu_tau~ nu_tau nu_mu mu+   (4 entries)
+  Z0 => K- pi0 nu_tau~ nu_tau nu_e e+   (4 entries)
+  Z0 => pi- pi- pi- pi- pi+ pi+ pi+ pi+ pi0 nu_tau~ nu_tau   (4 entries)
+  Z0 => K+ K_S0 pi- pi0 nu_tau~ nu_tau   (4 entries)
+  Z0 => K_S0 pi+ pi0 nu_tau~ nu_tau nu_mu~ mu-   (4 entries)
+  Z0 => pi- K_L0 pi0 nu_tau~ nu_tau nu_e e+   (3 entries)
+  Z0 => K_S0 pi- pi+ K_L0 pi0 pi0 nu_tau~ nu_tau   (3 entries)
+  Z0 => pi- pi+ pi+ gamma nu_tau~ nu_tau nu_mu~ mu-   (3 entries)
+  Z0 => gamma gamma nu_tau~ nu_tau nu_mu~ mu- nu_e e+   (3 entries)
+  Z0 => K_S0 pi- pi+ K_L0 nu_tau~ nu_tau   (3 entries)
+  Z0 => pi- pi+ K_L0 pi0 pi0 pi0 nu_tau~ nu_tau   (3 entries)
+  Z0 => K_S0 pi- pi- pi+ pi+ pi0 pi0 nu_tau~ nu_tau   (3 entries)
+  Z0 => K_S0 pi- pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (3 entries)
+  Z0 => pi+ K_L0 nu_tau~ nu_tau nu_e~ e-   (3 entries)
+  Z0 => K+ K_L0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (3 entries)
+  Z0 => K+ pi- K_L0 pi0 pi0 nu_tau~ nu_tau   (3 entries)
+  Z0 => pi- pi- pi+ pi+ pi0 gamma nu_tau~ nu_tau   (3 entries)
+  Z0 => eta pi- pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (3 entries)
+  Z0 => K- K+ pi- nu_tau~ nu_tau nu_e e+   (3 entries)
+  Z0 => pi- pi- pi+ pi0 pi0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => pi- pi+ pi+ pi0 pi0 nu_tau~ nu_tau nu_e~ e-   (2 entries)
+  Z0 => K_S0 pi- pi0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K+ K_S0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => K- pi+ K_L0 pi0 pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => pi- K_L0 K_L0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K- K_S0 pi0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => pi+ K_L0 gamma nu_tau~ nu_tau nu_e~ e-   (2 entries)
+  Z0 => pi- pi- pi- pi- pi+ pi+ pi+ pi+ nu_tau~ nu_tau   (2 entries)
+  Z0 => pi- pi- pi- pi+ pi+ pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => K+ pi0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => K_S0 pi- pi- pi+ pi+ K_L0 nu_tau~ nu_tau   (2 entries)
+  Z0 => pi- pi0 pi0 pi0 gamma nu_tau~ nu_tau nu_e e+   (2 entries)
+  Z0 => pi- pi+ pi+ pi0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => K- K_S0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => pi+ K_L0 K_L0 nu_tau~ nu_tau nu_e~ e-   (2 entries)
+  Z0 => eta pi- pi+ pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => eta pi+ pi0 nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => K_S0 pi+ K_L0 nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => pi- pi- pi+ pi+ pi+ pi0 nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => pi- pi- pi+ pi+ K_L0 K_L0 nu_tau~ nu_tau   (2 entries)
+  Z0 => K- K+ pi- nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K- pi- pi+ pi+ K_L0 nu_tau~ nu_tau   (2 entries)
+  Z0 => pi- pi0 pi0 pi0 gamma nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K- K_L0 pi0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K- K+ pi+ nu_tau~ nu_tau nu_mu~ mu-   (2 entries)
+  Z0 => K_S0 K_S0 pi- pi+ pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => K_S0 pi- pi+ K_L0 pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => eta pi- pi- pi+ pi+ pi0 pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => pi- pi- pi+ pi0 pi0 pi0 nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K- K+ pi- pi- pi+ pi+ nu_tau~ nu_tau   (2 entries)
+  Z0 => pi- pi- pi+ pi+ K_L0 pi0 pi0 nu_tau~ nu_tau   (2 entries)
+  Z0 => K- pi- pi+ gamma nu_tau~ nu_tau nu_e e+   (2 entries)
+  Z0 => pi- gamma nu_tau~ nu_tau nu_mu mu+   (2 entries)
+  Z0 => K- K_S0 pi- pi+ pi+ nu_tau~ nu_tau   (2 entries)
+  Z0 => K+ gamma nu_tau~ nu_tau nu_e~ e-   (2 entries)
+  Z0 => K- K+ K_L0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K_S0 pi- nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K- pi+ K_L0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- eta pi- pi+ pi+ pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi0 pi0 gamma nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => K_S0 pi- pi+ pi0 pi0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K+ pi- pi+ gamma nu_tau~ nu_tau nu_mu~ mu-   (1 entries)
+  Z0 => pi- K_L0 pi0 gamma nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => K- pi0 gamma nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K- K_L0 nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => K_S0 pi- pi+ K_L0 pi0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K+ pi0 gamma nu_tau~ nu_tau nu_e~ e-   (1 entries)
+  Z0 => K- pi- pi+ pi+ K_L0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- K_S0 pi+ pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi+ pi0 pi0 pi0 gamma nu_tau~ nu_tau   (1 entries)
+  Z0 => K_S0 K_S0 pi- nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => K_S0 K_S0 pi- pi- pi+ pi+ nu_tau~ nu_tau   (1 entries)
+  Z0 => K- K+ pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi+ K_L0 K_L0 nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi- pi+ pi+ K_L0 pi0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K+ K_S0 pi0 nu_tau~ nu_tau nu_e~ e-   (1 entries)
+  Z0 => eta pi- pi0 nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => pi- pi- pi+ pi+ pi+ nu_tau~ nu_tau nu_mu~ mu-   (1 entries)
+  Z0 => K_S0 K_S0 pi- nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K- K+ pi+ gamma nu_tau~ nu_tau nu_e~ e-   (1 entries)
+  Z0 => K- K+ K_S0 pi- pi+ nu_tau~ nu_tau   (1 entries)
+  Z0 => K- K+ pi- pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi- pi- pi+ pi+ pi0 nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => pi+ pi0 gamma gamma nu_tau~ nu_tau nu_mu~ mu-   (1 entries)
+  Z0 => gamma gamma nu_tau~ nu_tau nu_mu mu+ nu_e~ e-   (1 entries)
+  Z0 => K- pi- pi+ pi+ pi0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- K+ K_S0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- K+ pi- pi- pi+ pi+ pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K+ K_S0 pi- pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- pi+ K_L0 pi0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K+ K_S0 pi- pi- pi+ nu_tau~ nu_tau   (1 entries)
+  Z0 => pi+ K_L0 pi0 gamma nu_tau~ nu_tau nu_e~ e-   (1 entries)
+  Z0 => K- K_L0 nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K- K+ pi- gamma nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K_S0 K_S0 pi- pi+ nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi- pi+ pi0 pi0 nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K- pi- pi- pi+ pi+ pi+ pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- K+ pi- pi+ pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K- gamma nu_tau~ nu_tau nu_mu mu+   (1 entries)
+  Z0 => K+ K_L0 nu_tau~ nu_tau nu_e~ e-   (1 entries)
+  Z0 => K+ pi- pi- pi- pi+ pi+ pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => K_S0 pi- gamma nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K_S0 pi+ K_L0 nu_tau~ nu_tau nu_e~ e-   (1 entries)
+  Z0 => pi- pi- pi- pi+ pi+ nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => K- K_L0 pi0 nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => pi- pi+ pi0 gamma nu_tau~ nu_tau   (1 entries)
+  Z0 => pi- pi+ pi+ pi0 pi0 pi0 nu_tau~ nu_tau nu_mu~ mu-   (1 entries)
+  Z0 => K- pi- pi+ pi+ K_L0 pi0 pi0 nu_tau~ nu_tau   (1 entries)
+  Z0 => pi+ K_L0 K_L0 nu_tau~ nu_tau nu_mu~ mu-   (1 entries)
+  Z0 => K- gamma nu_tau~ nu_tau nu_e e+   (1 entries)
+  Z0 => pi- pi- pi+ pi+ pi0 pi0 gamma nu_tau~ nu_tau   (1 entries)
+  Z0 => K+ pi- K_L0 nu_tau~ nu_tau   (1 entries)
+-------------END OF MC-TESTER RUN-------------------
+Total: 236 channels found, 10000 events analyzed
+
+ Total entries: 10000
+
+---------------------------- Tauola Log Summary ------------------------------
+ Debug:   	(OFF)		10000	
+ Info:    			10	
+ Warnings:			0	
+ Errors:  			0	
+-----------------------------------
+ Normal decays:                        10000
+------------------------------------------------------------------------------
+
+
+
+ ***************************************************************************
+ *                         *****TAUOLA LIBRARY: VERSION 2.7 ******         *
+ *                         ***********August   1995***************         *
+ *                         **AUTHORS: S.JADACH, Z.WAS*************         *
+ *                         **R. DECKER, M. JEZABEK, J.H.KUEHN*****         *
+ *                         **AVAILABLE FROM: WASM AT CERNVM ******         *
+ *                         ***** PUBLISHED IN COMP. PHYS. COMM.***         *
+ *                          Physics initialization by CLEO collab          *
+ *                          see Alain Weinstein www home page:             *
+ *                         http://www.cithep.caltech.edu/~ajw/             *
+ *                         /korb_doc.html#files                            *
+ *                         *******CERN TH-6793 NOVEMBER  1992*****         *
+ *                         **5 or more pi dec.: precision limited          *
+ *                         ****DEKAY ROUTINE: INITIALIZATION******         *
+ *                   0     JAK1   = DECAY MODE TAU+                        *
+ *                   0     JAK2   = DECAY MODE TAU-                        *
+ ***************************************************************************
+
+  RANMAR INITIALIZED:   54217137           0         0
+
+ ***************************************************************************
+
+  KORB: rho/rhop -> pi-pi0 mixing:
+  KORB: rho   =  0.7699000      0.1512000    
+  KORB: rhop  =   1.370000      0.5100000     -0.1100000    
+  KORB: K*/K*prime -> Kpi mixing:
+  KORB: kstp  =   1.700000      0.2350000     -3.7999999E-02
+  KORB: a1/a1prime -> 3pi, KKpi mixing:
+  KORB: a1    =   1.275000      0.7000000    
+  KORB: a1prim=   1.461000      0.2500000       0.000000    
+  KORB: K1A/K1B -> Kpipi mixing:
+  KORB: K1A   =   1.270000      9.0000004E-02   1.000000    
+  KORB: K1B   =   1.402000      0.1740000      0.8000000    
+  KORB: rho/rhop/rhopp -> 4pi mixing:
+  KORB: rho   =  0.7699000      0.1512000    
+  KORB: rhopp =   1.465000      0.3100000     -0.1100000    
+  KORB: rhoppp=   1.700000      0.2350000     -0.1100000    
+  KORB: 3PI-PI0 PARAMS:   0.000000      0.1242000      0.1604000      0.2711000      0.4443000    
+  KORB: PI-3PI0 PARAMS:   0.000000       1.000000    
+  In F3pi: add (rho-pi S-wave) + (rhop-pi S-wave) +
+               (rho-pi D-wave) + (rhop-pi D-wave) +
+    (f2 pi D-wave) + (sigmapi S-wave) + (f0pi S-wave)

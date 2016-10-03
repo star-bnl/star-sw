@@ -1,0 +1,7 @@
+#-----
+CLEO: HEPEVT clean  tauola-dir
+	@echo Preparing CLEO version of tauola in ../tauola
+	@( rm -f standalone-F/*.f )
+#     fill directory prod of CLEO version
+	@( $(CPP) $(CPPFLAGS) -DCLEO    formf.F prod/formf.f)
+	@( $(CPP) $(CPPFLAGS) -DCLEO    tauola.F prod/tauola.f)

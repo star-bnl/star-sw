@@ -1,0 +1,16 @@
+#!/bin/csh
+
+setenv TAUOLALOCATION "@with_tauola@"
+setenv HEPMCLOCATION "@with_hepmc@"
+setenv PYTHIALOCATION "@with_pythia8@"
+setenv MCTESTERLOCATION "@with_mc_tester@"
+setenv PYTHIA8DATA "@pythia8data@"
+
+set ROOTLIB=`root-config --libdir`
+
+# Examples have these paths hardcoded during compilation
+# Nonetheless, this is line might be useful for any other programs
+# that user might want to compile
+if (! $?LD_LIBRARY_PATH) setenv LD_LIBRARY_PATH ""
+
+setenv LD_LIBRARY_PATH "${TAUOLALOCATION}/lib:${PREFIX}/lib:${HEPMCLOCATION}/lib:${PYTHIALOCATION}/lib/archive:${MCTESTERLOCATION}/lib:${ROOTLIB}:${LD_LIBRARY_PATH}"

@@ -1,0 +1,8 @@
+- Photos and Tauola have their own copies of random number generators,
+  which are placed in include files of this directory.
+- To change it is enough to replace the
+      photos-random.h
+      tauola-random.h 
+  with the files including the appropriate new (interfacing) subroutines of
+  random  generators of the user choice or including empty file if 
+  the generators of the same name reside elsewhere.

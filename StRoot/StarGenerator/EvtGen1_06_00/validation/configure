@@ -1,0 +1,83 @@
+#! /bin/bash
+
+#Package-specific:>
+
+# === Default values of input parameters ====
+ROOTSYS=
+COMPMODE=OPT        # Default: compiler optimization mode
+
+#<
+
+#--------------------------------------------------------------
+
+check_arguments () {
+  for arg in $* ; do
+    if   [ "x$arg" = "x--enable-debug" ] ; then
+      COMPMODE=DBG
+    elif [ "x$arg" = "x--help" ] ; then
+      echo -e \
+      "\nUsage: ./configure [options] , where options are:\n\n"\
+      "--help                            : prints this help\n"\
+      "--rootdir=[full directory path]   : specifies location of ROOT base directory (ROOTSYS)\n"\
+      "--enable-debug                    : turns on debugging flags\n"
+      exit
+    else
+      if [ "x${arg}" = "x${arg/=/}" ] ; then
+        echo "${arg}: wrong option. Ignored." >&2
+      else
+        option=${arg/=*/}
+        value=${arg/*=/}
+	if [ "x${option}" = "x--rootdir" ] ; then
+	    ROOTSYS=${value}
+	else
+	  echo "${arg}: wrong option. Ignored." >&2
+	fi
+      fi
+    fi
+  done
+  return
+}
+		
+#--------------------------------------------------------
+
+set_rootvars() {
+
+    # Check that the ROOTSYS variable is set
+    if [ -z ${ROOTSYS} ] ; then
+	ROOTSYS=`root-config --prefix`
+    fi
+
+    echo "ROOTSYS set to ${ROOTSYS}"
+
+    ROOTCFLAGS=`${ROOTSYS}/bin/root-config --cflags`
+    ROOTLIBS=`${ROOTSYS}/bin/root-config --libs`
+    ROOTGLIBS=`${ROOTSYS}/bin/root-config --glibs`
+
+}
+
+#--------------------------------------------------------
+
+check_arguments $* 
+set_rootvars
+
+echo  "Compilation mode is ${COMPMODE}"
+
+echo -n "Creating extraConfig.mk ... "
+
+rm -f extraConfig.mk 
+
+cat > extraConfig.mk << EOT
+
+# Set ROOT environment variables
+ROOTSYS = ${ROOTSYS}
+ROOTCFLAGS = ${ROOTCFLAGS}
+ROOTLIBS = ${ROOTLIBS}
+ROOTGLIBS = ${ROOTGLIBS}
+#<
+EOT
+
+echo " done"
+
+echo -e  "\n\nType 'make' to build everything or 'make help' to list build targets.\n\n"
+
+exit

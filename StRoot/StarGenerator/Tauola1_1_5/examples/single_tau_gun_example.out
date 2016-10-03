@@ -1,0 +1,472 @@
+NOTE: This example output was created with command:
+
+  ./single_tau_gun_example.exe >single_tau_gun_example.out 2>&1
+
+Additional output for this example is stored in: single_tau_gun_example_out.txt
+
+
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.165      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change:  8 May 2012  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 09 Dec 2013 at 01:09:19    |  | 
+ |  |                                                                              |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      phone: + 46 - 46 - 222 48 16; e-mail: torbjorn@thep.lu.se               |  | 
+ |  |   Stefan Ask;  Department of Physics, University of Cambridge,               |  | 
+ |  |      Cavendish Laboratory, JJ Thomson Ave., Cambridge CB3 0HE, UK;           |  | 
+ |  |      phone: + 41 - 22 - 767 6707; e-mail: Stefan.Ask@cern.ch                 |  | 
+ |  |   Richard Corke;  Department of Astronomy and Theoretical Physics,           |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: richard.corke@thep.lu.se                                        |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      phone: + 1 - 630 - 840 - 2556; e-mail: mrenna@fnal.gov                  |  | 
+ |  |   Stefan Prestel;  Department of Astronomy and Theoretical Physics,          |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      phone: + 46 - 46 - 222 06 64; e-mail: stefan.prestel@thep.lu.se         |  | 
+ |  |   Peter Skands;  Theoretical Physics, CERN, CH-1211 Geneva 23, Switzerland;  |  | 
+ |  |      phone: + 41 - 22 - 767 2447; e-mail: peter.skands@cern.ch               |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is the 'Brief Introduction to PYTHIA 8.1',      |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, Comput. Phys. Comm. 178 (2008) 85   |  | 
+ |  |   [arXiv:0710.3820]                                                          |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]. |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/~torbjorn/Pythia.html                                |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2012 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10313
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10323
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10333
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide e- with e+ at a CM energy of 9.200e+01 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | f fbar -> gamma*/Z0                            221 |   1.659e-05 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Flag + Mode + Parm + Word Settings (changes only)  ----------------------------------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | BeamRemnants:reconnectRange                   |                  1.50000 |     10.00000         0.0    10.00000 | 
+ | Beams:eCM                                     |                 92.00000 |    14000.000    10.00000             | 
+ | Beams:idA                                     |                       11 |         2212                         | 
+ | Beams:idB                                     |                      -11 |         2212                         | 
+ | MultipartonInteractions:alphaSvalue           |                  0.13500 |      0.12700   0.0600000     0.25000 | 
+ | MultipartonInteractions:bProfile              |                        3 |            1           0           4 | 
+ | MultipartonInteractions:ecmPow                |                  0.19000 |      0.24000         0.0     0.50000 | 
+ | MultipartonInteractions:expPow                |                  2.00000 |      1.00000     0.40000    10.00000 | 
+ | MultipartonInteractions:pT0Ref                |                  2.08500 |      2.15000     0.50000    10.00000 | 
+ | PDF:pSet                                      |                        8 |            2           1          12 | 
+ | SigmaDiffractive:dampen                       |                       on |          off                         | 
+ | SigmaDiffractive:maxAX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXB                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaProcess:alphaSvalue                      |                  0.13500 |      0.12650   0.0600000     0.25000 | 
+ | SpaceShower:rapidityOrder                     |                       on |          off                         | 
+ | WeakSingleBoson:ffbar2gmZ                     |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word Settings  ---------------------------------------------------------* 
+
+ --------  PYTHIA Particle Data Table (changed only)  ------------------------------------------------------------------------------
+ 
+      id   name            antiName         spn chg col      m0        mWidth      mMin       mMax       tau0    res dec ext vis wid
+             no onMode   bRatio   meMode     products 
+
+      15  tau-             tau+               2  -3   0    1.77699    0.00000    0.00000    0.00000  8.71100e-02   0   0   0   1   0
+              0     1   0.1089240 1521       16     -211 
+              1     1   0.0068850 1521       16     -321 
+              2     1   0.1783450 1531       16       11      -12 
+              3     1   0.1735450 1531       16       13      -14 
+              4     1   0.2548900 1532       16      111     -211 
+              5     1   0.0015130 1532       16      311     -321 
+              6     1   0.0002630 1532       16      221     -321 
+              7     1   0.0089570 1533       16     -211     -311 
+              8     1   0.0044910 1533       16      111     -321 
+              9     1   0.0923700 1541       16      111      111     -211 
+             10     1   0.0898130 1541       16     -211     -211      211 
+             11     1   0.0444350 1551       16      111     -211     -211      211 
+             12     1   0.0103130 1551       16      111      111      111     -211 
+             13     1   0.0037570    0       16      111     -211     -311 
+             14     1   0.0032920    0       16     -211      211     -321 
+             15     1   0.0005550    0       16      111      111     -321 
+             16     1   0.0015190    0       16     -211     -321      321 
+             17     1   0.0015180    0       16      111      311     -321 
+             18     1   0.0010870    0       16      130     -211      310 
+             19     1   0.0002350    0       16      130      130     -211 
+             20     1   0.0002350    0       16     -211      310      310 
+             21     1   0.0017620    0       16       22      111     -211 
+             22     1   0.0049350    0       16      111      111     -211     -211      211 
+             23     1   0.0017440    0       16      111     -211      221 
+             24     1   0.0009570    0       16      111      111      111      111     -211 
+             25     1   0.0008340    0       16     -211     -211     -211      211      211 
+             26     1   0.0002250    0       16     -211     -211      211      221 
+             27     1   0.0001450    0       16      111      111     -211      221 
+             28     1   0.0001350    0       16      111      111     -211      223 
+             29     1   0.0001180    0       16     -211     -211      211      223 
+             30     1   0.0004000    0       16      223     -321 
+             31     1   0.0003970    0       16      111      111      111     -321 
+             32     1   0.0003070    0       16      111     -211      211     -321 
+             33     1   0.0002800    0       16      221     -323 
+             34     1   0.0002380    0       16      111      111     -211     -311 
+             35     1   0.0002250    0       16     -211     -211      211     -311 
+             36     1   0.0002970    0       16      111     -211     -311      311 
+             37     1   0.0000590    0       16      111     -211     -321      321 
+
+      23  Z0                                  3   0   0   91.18760    2.50687   10.00000    0.00000  0.00000e+00   1   1   0   0   0
+              0     0   0.1541199    0        1       -1 
+              1     0   0.1195484    0        2       -2 
+              2     0   0.1541093    0        3       -3 
+              3     0   0.1193873    0        4       -4 
+              4     0   0.1523969    0        5       -5 
+              5     0   0.0335122    0       11      -11 
+              6     0   0.0666593    0       12      -12 
+              7     0   0.0335119    0       13      -13 
+              8     0   0.0666593    0       14      -14 
+              9     1   0.0334362    0       15      -15 
+             10     0   0.0666593    0       16      -16 
+
+ --------  End PYTHIA Particle Data Table  -----------------------------------------------------------------------------------------
+
+
+ *************************************
+ *     TAUOLA C++ Interface v1.1.4   *
+ *-----------------------------------*
+ *                                   *
+ *   (c) Nadia    Davidson,   (1,2)  *
+ *       Gizo     Nanava,     (3)    *
+ *       Tomasz   Przedzinski,(4)    *
+ *       Elzbieta Richter-Was,(2,4)  *
+ *       Zbigniew Was         (2,5)  *
+ *                                   *
+ *  1) Unimelb, Melbourne, Australia *
+ *  2)     INP, Krakow, Poland       *
+ *  3) University Bonn, Germany      *
+ *  4)      UJ, Krakow, Poland       *
+ *  5)    CERN, Geneva, Switzerland  *
+ *************************************
+Reading SANC input files.
+File 'table1-1.txt'  missing... skipped.
+File 'table2-2.txt'  missing... skipped.
+File 'table11-11.txt' missing... skipped.
+
+#########################################################################################
+Tauola++ parameters set at initialization
+(this check-method can be used at any moment of program execution).
+Parameters meaning, defaults, and allowed ranges are explained in program documentation 
+http://www.ph.unimelb.edu.au/~ndavidson/tauola/Tauola_interface_design.pdf 
+
+-----------------------------------------------------------
+
+variables used mainly  in C++ interface:  
+
+Tau mass:                                     1.776999950409
+Tau lifetime:                                 0.087110000000
+Tau PDG id:                                   15
+
+Decay of eta, K0s, pi on/off:                 0,0,0
+
+Length units:                                 MM
+Momentum units:                               GEV
+Momentum conservation threshold (for checks): 0.100000000000
+
+Higgs (scalar-pseudoscalar) PDG id:           35
+Higgs (scalar-pseudoscalar) mixing angle:     0.785398163397
+
+
+Switches used in spin correlation methods on/off for:
+GAMMA,Z0,HIGGS,HIGGS_H,HIGGS_A,HIGGS_PLUS,HIGGS_MINUS,W_PLUS,W_MINUS: 1,1,1,1,1,1,1,1,1
+
+-----------------------------------------------------------
+
+variables used in tau decays : 
+
+-----------------------------------------------------------
+
+tau+ decay mode:                                               3
+tau- decay mode:                                               3
+
+a1     relative branching ratio pi- pi- pi+ / pi- pi pi0:      0.500000000000
+K0     relative attribute K0_L / K0_S:                         0.500000000000
+K0_bar relative attribute K0_L / K0_S:                         0.500000000000
+Kstar  relative branching ratio K0 pi- /K- pi0 :               0.666700005531
+
+QED radiation in leptonic decays on/off:                       1
+QED radiation in leptonic decays minimal photon energy cutoff: 0.001000000000
+
+#########################################################################################
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =     11, pz =  4.600e+01, e =  4.600e+01, m =  5.110e-04.
+ Beam B: id =    -11, pz = -4.600e+01, e =  4.600e+01, m =  5.110e-04.
+
+ In 1: id =   11, x =  9.974e-01, pdf =  1.568e+01 at Q2 =  8.442e+03.
+ In 2: id =  -11, x =  1.000e+00, pdf =  2.821e+06 at same Q2.
+
+ Subprocess f fbar -> gamma*/Z0 with code 221 is 2 -> 1.
+ It has sHat =  8.442e+03.
+     alphaEM =  7.818e-03,  alphaS =  1.348e-01    at Q2 =  8.442e+03.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  9.200e+01, ISR =  9.200e+01, FSR =  9.200e+01.
+ Number of MPI =     1, ISR =     1, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0     3     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0     4     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     1     0     5     0     0     0      0.000      0.000     45.881     45.881      0.000
+     4       -11   (e+)               -21     2     0     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     6     7     0     0      0.000      0.000     -0.119     91.881     91.881
+     6        15   tau-                23     5     0     0     0     0     0    -23.389    -26.535    -29.321     45.978      1.777
+     7       -15   tau+                23     5     0     0     0     0     0     23.389     26.535     29.202     45.903      1.777
+                                   Charge sum:  0.000           Momentum sum:      0.000      0.000     -0.119     91.881     91.881
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000     92.000     92.000
+     1        11   (e-)               -12     0     0    10     0     0     0      0.000      0.000     46.000     46.000      0.001
+     2       -11   (e+)               -12     0     0    11     0     0     0      0.000      0.000    -46.000     46.000      0.001
+     3        11   (e-)               -21     6     0     5     0     0     0      0.000      0.000     45.881     45.881      0.000
+     4       -11   (e+)               -21     7     7     5     0     0     0      0.000      0.000    -46.000     46.000      0.000
+     5        23   (Z0)               -22     3     4     8     8     0     0      0.000      0.000     -0.119     91.881     91.881
+     6        11   (e-)               -41    10    10     9     3     0     0     -0.000      0.000     46.000     46.000      0.000
+     7       -11   (e+)               -42    11    11     4     4     0     0     -0.000      0.000    -46.000     46.000      0.000
+     8        23   (Z0)               -44     5     5    12    12     0     0      0.035     -0.022     -0.111     91.881     91.881
+     9        22   (gamma)            -43     6     0    13    13     0     0     -0.035      0.022      0.111      0.119      0.000
+    10        11   (e-)               -61     1     0     6     6     0     0      0.000      0.000     46.000     46.000      0.000
+    11       -11   (e+)               -61     2     0     7     7     0     0      0.000     -0.000    -46.000     46.000      0.000
+    12        23   (Z0)               -62     8     8    16    17     0     0      0.035     -0.022     -0.111     91.881     91.881
+    13        22   gamma               62     9     9     0     0     0     0     -0.035      0.022      0.111      0.119      0.000
+    14        22   gamma               63     1     0     0     0     0     0      0.000      0.000      0.000      0.000      0.000
+    15        22   gamma               63     2     0     0     0     0     0      0.000      0.000     -0.000      0.000      0.000
+    16        15   tau-                23    12     0     0     0     0     0    -23.371    -26.546    -29.317     45.973      1.777
+    17       -15   tau+                23    12     0     0     0     0     0     23.407     26.523     29.206     45.908      1.777
+                                   Charge sum:  0.000           Momentum sum:     -0.000      0.000      0.000     92.000     92.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -3.55271e-15 0 0 92
+
+Vector Sum: -0.000131654 -0.000149535 -0.000165148 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -8.88178e-16 0 1.33227e-15 92
+
+Vector Sum: 3.8257e-05 0.000255818 -1.16757e-05 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 0 0 92
+
+Vector Sum: -0.000143578 -0.000134042 0.000168711 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 3.55271e-15 -7.10543e-15 0 92
+
+Vector Sum: 0.000104841 0.000228449 5.30397e-05 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 0 0 92
+
+Vector Sum: 8.73255e-05 5.49566e-05 0.000237485 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 -1.77636e-15 -3.55271e-15 92
+
+Vector Sum: -0.000211511 -7.3971e-05 0.000123731 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 -8.88178e-16 -1.42109e-14 92
+
+Vector Sum: 0.000126244 2.96091e-05 0.000221124 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 1.77636e-15 0 92
+
+Vector Sum: 0.000188584 7.79171e-05 -0.000158475 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 4.44089e-16 0 0 92
+
+Vector Sum: -1.66747e-05 0.000197157 0.000166973 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 0 0 92
+
+Vector Sum: 0.000228892 -1.9554e-05 0.000119461 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 7.10543e-15 0 -7.10543e-15 92
+
+Vector Sum: -0.000134583 -9.62399e-05 0.000199167 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -1.66533e-16 0 0 92
+
+Vector Sum: -7.01383e-07 -7.83751e-05 0.000246561 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 1.42109e-14 -1.06581e-14 -7.10543e-15 92
+
+Vector Sum: 0.000221696 -9.7968e-05 -9.10936e-05 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -3.55271e-15 0 0 92
+
+Vector Sum: -9.39642e-05 -0.000111918 -0.000213514 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 0 -1.33227e-15 92
+
+Vector Sum: 0.00024218 -8.76109e-05 -2.27338e-05 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 7.10543e-15 2.66454e-15 92
+
+Vector Sum: -0.000156887 -0.000201083 -4.45187e-05 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 0 -3.55271e-15 7.10543e-15 92
+
+Vector Sum: 6.27511e-05 -0.00012089 0.00022021 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -7.10543e-15 2.66454e-15 1.77636e-14 92
+
+Vector Sum: 0.000221688 -4.41035e-05 -0.000119695 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: -8.88178e-16 0 0 92
+
+Vector Sum: 3.46098e-05 0.000142799 0.000213047 92.0003
+                                          
+Momentum conservation chceck BEFORE/AFTER Tauola
+
+Vector Sum: 3.55271e-15 -1.77636e-15 0 92
+
+Vector Sum: -6.13301e-05 7.56708e-05 0.000235672 92.0003
+
+ Pythia::next(): 1000 events have been generated 
+
+ Pythia::next(): 2000 events have been generated 
+
+ Pythia::next(): 3000 events have been generated 
+
+ Pythia::next(): 4000 events have been generated 
+
+ Pythia::next(): 5000 events have been generated 
+
+ Pythia::next(): 6000 events have been generated 
+
+ Pythia::next(): 7000 events have been generated 
+
+ Pythia::next(): 8000 events have been generated 
+
+ Pythia::next(): 9000 events have been generated 
+0.49912
+
+
+
+ ***************************************************************************
+ *                         *****TAUOLA LIBRARY: VERSION 2.7 ******         *
+ *                         ***********August   1995***************         *
+ *                         **AUTHORS: S.JADACH, Z.WAS*************         *
+ *                         **R. DECKER, M. JEZABEK, J.H.KUEHN*****         *
+ *                         **AVAILABLE FROM: WASM AT CERNVM ******         *
+ *                         ***** PUBLISHED IN COMP. PHYS. COMM.***         *
+ *                          Physics initialization by CLEO collab          *
+ *                          see Alain Weinstein www home page:             *
+ *                         http://www.cithep.caltech.edu/~ajw/             *
+ *                         /korb_doc.html#files                            *
+ *                         *******CERN TH-6793 NOVEMBER  1992*****         *
+ *                         **5 or more pi dec.: precision limited          *
+ *                         ****DEKAY ROUTINE: INITIALIZATION******         *
+ *                   3     JAK1   = DECAY MODE TAU+                        *
+ *                   3     JAK2   = DECAY MODE TAU-                        *
+ ***************************************************************************
+
+  RANMAR INITIALIZED:   54217137           0         0
+
+ ***************************************************************************
+
+  KORB: rho/rhop -> pi-pi0 mixing:
+  KORB: rho   =  0.7699000      0.1512000    
+  KORB: rhop  =   1.370000      0.5100000     -0.1100000    
+  KORB: K*/K*prime -> Kpi mixing:
+  KORB: kstp  =   1.700000      0.2350000     -3.7999999E-02
+  KORB: a1/a1prime -> 3pi, KKpi mixing:
+  KORB: a1    =   1.275000      0.7000000    
+  KORB: a1prim=   1.461000      0.2500000       0.000000    
+  KORB: K1A/K1B -> Kpipi mixing:
+  KORB: K1A   =   1.270000      9.0000004E-02   1.000000    
+  KORB: K1B   =   1.402000      0.1740000      0.8000000    
+  KORB: rho/rhop/rhopp -> 4pi mixing:
+  KORB: rho   =  0.7699000      0.1512000    
+  KORB: rhopp =   1.465000      0.3100000     -0.1100000    
+  KORB: rhoppp=   1.700000      0.2350000     -0.1100000    
+  KORB: 3PI-PI0 PARAMS:   0.000000      0.1242000      0.1604000      0.2711000      0.4443000    
+  KORB: PI-3PI0 PARAMS:   0.000000       1.000000    
+  In F3pi: add (rho-pi S-wave) + (rhop-pi S-wave) +
+               (rho-pi D-wave) + (rhop-pi D-wave) +
+    (f2 pi D-wave) + (sigmapi S-wave) + (f0pi S-wave)

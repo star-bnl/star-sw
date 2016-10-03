@@ -516,7 +516,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
 {
   TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
   TString parTitle[nHistoPartParam];
-  TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R"};
+  TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R", "Armenteros"};
   TString parTitle2D[nHistoPartParam2D];
   for(int iParam=0; iParam<nHistoPartParam; iParam++)
   {
@@ -655,6 +655,13 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                       nBins[13],xMin[13],xMax[13]);
     histoParameters2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
     histoParameters2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+    
+    //create armenteros plot
+    histoParameters2D[iPart][2] = new TH2F(parName2D[2].Data(),parTitle2D[2].Data(),
+                                           100, -1.f, 1.f,
+                                           100,  0.f, 0.3f);
+    histoParameters2D[iPart][2]->GetXaxis()->SetTitle("#alpha (p_{L}^{+}-p_{L}^{-})/(p_{L}^{+}+p_{L}^{-})");
+    histoParameters2D[iPart][2]->GetYaxis()->SetTitle("q_{t} [GeV/c]");
   }
 }
 

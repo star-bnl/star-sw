@@ -1,0 +1,49 @@
+      COMPLEX*16 FUNCTION D040(Q2,P2,MW2,MT2)
+*
+* This is D0(0,0,0,0,Q2,P2;MW2,0,MW2,MT2)
+*
+      IMPLICIT NONE
+      REAL*8 Q2,P2
+      COMPLEX*16 MW2,MT2,SQRT,XSPENZ
+      COMPLEX*16 SQW,SQB,X1,X2,X3,X4,X1B,X2B
+      COMPLEX*16 Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8,Y9,Y10,Y11,Y12,Y13,Y14,Y15,Y16
+*
+      SQW=SQRT(1D0+4D0*MW2/Q2)
+      SQB=SQRT(1D0+4D0*MW2/Q2*P2*(MT2+P2-MW2)/(MT2+P2)**2)
+      X1 =1D0/2D0*(1D0-SQW)
+      X2 =1D0/2D0*(1D0+SQW)
+      X3 =1D0/(1D0-MW2/MT2)
+      X4 =1D0/(1D0-MW2/(MT2+P2))
+      X1B=X4/2D0*(1D0-SQB)
+      X2B=X4/2D0*(1D0+SQB)
+*
+      Y1 =X1/X1B
+      Y3 =X2/X1B
+      Y5 =X4/X1B
+      Y7 =X3/X1B
+      Y9 =X1/X2B
+      Y11=X2/X2B
+      Y13=X4/X2B
+      Y15=X3/X2B
+      Y2 =(X1-1D0)/(X1B-1D0)
+      Y4 =(X2-1D0)/(X1B-1D0)
+      Y6 =(X4-1D0)/(X1B-1D0)
+      Y8 =(X3-1D0)/(X1B-1D0)
+      Y10=(X1-1D0)/(X2B-1D0)
+      Y12=(X2-1D0)/(X2B-1D0)
+      Y14=(X4-1D0)/(X2B-1D0)
+      Y16=(X3-1D0)/(X2B-1D0)
+*
+      D040=1D0/(Q2*(MT2+P2)*SQB)*(
+     &     +XSPENZ(1D0/(1D0-Y1 ))-XSPENZ(1D0/(1D0-Y2 ))
+     &     +XSPENZ(1D0/(1D0-Y3 ))-XSPENZ(1D0/(1D0-Y4 ))
+     &     +XSPENZ(1D0/(1D0-Y5 ))-XSPENZ(1D0/(1D0-Y6 ))
+     &     -XSPENZ(1D0/(1D0-Y7 ))+XSPENZ(1D0/(1D0-Y8 ))
+     &     -XSPENZ(1D0/(1D0-Y9 ))+XSPENZ(1D0/(1D0-Y10))
+     &     -XSPENZ(1D0/(1D0-Y11))+XSPENZ(1D0/(1D0-Y12))
+     &     -XSPENZ(1D0/(1D0-Y13))+XSPENZ(1D0/(1D0-Y14))
+     &     +XSPENZ(1D0/(1D0-Y15))-XSPENZ(1D0/(1D0-Y16))
+     &                           )
+*
+      RETURN
+      END

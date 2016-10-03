@@ -20,7 +20,7 @@ class Sensor {
   // Add a component
   void AddComponent(ComponentBase* comp);
   unsigned int GetNumberOfComponents() const { return m_components.size(); }
-  virtual ComponentBase* GetComponent(const unsigned int componentNumber);
+  ComponentBase* GetComponent(const unsigned int componentNumber);
 
   // Add an electrode
   void AddElectrode(ComponentBase* comp, const std::string& label);

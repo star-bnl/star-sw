@@ -1,6 +1,11 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.18 2015/10/12 20:46:58 jwebb Exp $
+  /* $Id: g2t_track.idl,v 1.20 2016/09/18 22:37:52 fisyak Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.20  2016/09/18 22:37:52  fisyak
+     pack no. of real TPC hits
+
+     Revision 1.19  2016/09/18 22:35:56  fisyak
+
      Revision 1.18  2015/10/12 20:46:58  jwebb
      Hit definition and starsim to root interface for FTS.
 

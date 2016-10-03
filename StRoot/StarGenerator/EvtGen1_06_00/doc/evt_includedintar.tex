@@ -1,0 +1,165 @@
+\section{EvtGen distribution}
+\label{sect:tarfile}
+\index{EvtGen.tar}
+\index{DECAY.DEC}
+\index{evt.pdl}
+\index{Makefile}
+
+For distribution of the EvtGen source outside of the BaBar experiment
+a tar file, EvtGen.tar, containing the complete source, is
+available. This file can be obtained from
+\begin{verbatim}
+http://www.slac.stanford.edu/~lange/EvtGen 
+\end{verbatim}
+Here you will find the versions that are available and short descriptions
+of modifications and improvements as well as known problems.  
+
+There are a handful of files other than the source files
+included in the {\tt EvtGen.tar} file.  The functionality
+of the  {\tt evt.pdl}, {\tt DECAY.DEC}, 
+and {\tt Makefile}
+files is described below.  Additionally, a {\tt test} 
+directory is included that provides several diagnostic
+tests of the EvtGen library.
+
+{\tt evt.pdl} is needed at runtime by EvtGen, as
+it contains the list of particles and particle
+properties to be used.  This table is fully described in
+Section~\ref{sect:pdttable}.  Similarly, {\tt DECAY.DEC}
+contains the default list of decay channels, including
+branching ratios, as 
+described in Section~\ref{sect:decaytable}.
+
+The {\tt Makefile} is responsible for building the EvtGen library
+as well as test executables.  The unpacking of EvtGen.tar 
+and the use of the {\tt Makefile} are described in
+Section~\ref{sect:gettingstarted}.
+
+The directory {\tt test} contains the files necesary to
+perform several tests of the EvtGen code, 
+as detailed in Section~\ref{sect:gettingstarted}.
+
+\subsection{Get started with EvtGen}
+\label{sect:examples}
+\label{sect:gettingstarted}
+\index{Examples}
+\index{Getting started with EvtGen}
+
+After unpacking the {\tt EvtGen.tar} file, 
+it is quite simple to get started with EvtGen.  This
+section describes the process of compiling and
+linking the code and running several simple tests.  Sample output
+of these tests are shown.  Manipulating the output
+of EvtGen using user decay files is also explained.
+
+First, several envirnment variables are needed to setup
+the external packages.  The list below gives the envvar
+and an example setting:
+\begin{enumerate}
+\item CERN\_ROOT = /cern/pro
+\item ROOT\_SYS = /home/lange/root
+\item  CLHEP\_BASE\_DIR = /home/lange
+(CLHEP in /home/lange/CLHEP and CLHEP libs in /home/lange/lib)
+\end{enumerate}
+
+To properly set up the {\tt Makefile}, type {\tt configure}.
+The {\tt configure} script will ask several questions,
+and then build the {\tt Makefile}.  The output of the configure
+script will look something like the following:
+\begin{verbatim}
+lange@EvtGen>./configure
+Welcome to configure for EvtGen
+Deleting config.mk
+This machine is running: Linux
+Linux is supported.
+Enter Name of c++ compiler (ie c++,cxx,CC, etc)
+gcc-3.2.1
+Will use gcc-3.2.1 for compilation of C++ code
+Enter name of fortran comiler
+f77
+Will use f77 for compilation of fortran code
+The EvtGen package uses photos and pythia from cernlib: Please set CERN_ROOT if not already
+The EvtGen package uses root for histograming. Please set ROOTSYS if not already
+The EvtGen package relies on CLHEP. Please set CLHEP_BASE_DIR if not already
+Finding compiler includes
+
+The gcc-3.2.1 compiler includes are
+-Iignoring -Inonexistent -Idirectory -I"/usr/local/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include/c++" -Iignoring -Inonexistent -Idirectory -I"/usr/local/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include/c++/i686-pc-linux-gnu" -Iignoring -Inonexistent -Idirectory -I"/usr/local/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include/c++/backward" -Iignoring -Inonexistent -Idirectory -I"/usr/local/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include" -Iignoring -Inonexistent -Idirectory -I"/usr/local/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/../../../../i686-pc-linux-gnu/include" -Iignoring -Inonexistent -Idirectory -I"/afs/slac.stanford.edu/package/gcc/gcc-3.2/3.2.1/i386_linux24/i686-pc-linux-gnu/include" -I/afs/slac.stanford.edu/package/gcc/gcc-3.2/3.2.1/i386_linux24/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include/c++ -I/afs/slac.stanford.edu/package/gcc/gcc-3.2/3.2.1/i386_linux24/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include/c++/i686-pc-linux-gnu -I/afs/slac.stanford.edu/package/gcc/gcc-3.2/3.2.1/i386_linux24/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include/c++/backward -I/usr/local/include -I/afs/slac.stanford.edu/package/gcc/gcc-3.2/3.2.1/i386_linux24/include -I/afs/slac.stanford.edu/package/gcc/gcc-3.2/3.2.1/i386_linux24/lib/gcc-lib/i686-pc-linux-gnu/3.2.1/include -I/usr/include
+The default gcc-3.2.1 options are 
+-I. -DEVTSTANDALONE
+Enter any other options that you would like
+to use in compilation.  Examples -g -pg -o4 etc
+The following options will be used by default
+-I. -DEVTSTANDALONE
+The default link options are  
+for the test program.
+Please enter any others that you would like to use
+
+Done. Type gmake lib then gmake bin
+\end{verbatim}
+
+The {\tt configure} script builds a file
+called {\tt config.mk} that is included by the {\tt Makefile}.
+
+To build the EvtGen libary simply type {\tt gmake} in
+the {\tt EvtGen} directory.  This should compile each
+{\tt .cc} file and make a library called {\tt libEvtGen.a}.  If
+this fails to compile on your platform, please contact the
+authors for help.  
+
+To compile EvtGen with no changes, the
+JETSET~\cite{jetset} 
+and PHOTOS~\cite{Was92} packages from CERNLIB are needed, as well
+as the CLHEP~\cite{clhep} and ROOT~\cite{root} packages.  
+A version of {\tt lucomp.F} is included that defines 
+additional particles used by EvtGen. 
+The
+dependence on ROOT is solely for the histograming 
+performed in the {\tt testEvtGen} test program.  If you do not \
+need this feature it is easy to eliminate this dependence. 
+
+The most recent version has been tested using gcc-3.2.1, CERNLIB 2000,
+CLHEP 1.8.0.0, and ROOT 3.01.02.  The only change from the
+default installations is that a softlink to libCLHEP.a was
+created to libCLHEP-g++.a.  The need for this change can be eliminated by
+changing the {\tt Makefile} in EvtGen.
+
+If the library was built successfully, type {\tt gmake bin}
+in order to build a sample executable (called {\tt testEvtGen}).  With
+this executable, several tests of the EvtGen library may
+be performed to check that the code is working properly.  To 
+do these type
+\begin{verbatim}
+cd test
+../testEvtGen test1 20000
+../testEvtGen ddalitz 20000
+\end{verbatim}
+The {\tt test} directory should now contain {\tt test1.root} and
+{\tt ddalitz.root}, each of which are ROOT files containing
+several histograms.  Figures~\ref{fig:test1} and~\ref{fig:ddalitz}
+show some of these histograms.  These Figures can be 
+reproduced using {\tt test1-root.script} and
+{\tt ddalitz-root.script}.
+
+\begin{figure}
+\epsfig{figure=elep1.eps,width=\linewidth}
+\caption{Histogram number 3 in {\tt test1.root} for 1000 events shows
+the lepton energy in the $B\rightarrow D^{*}\ell\nu$ decay.}
+\label{fig:test1}
+\end{figure}
+
+\begin{figure}
+\epsfig{figure=ddalitz1.eps,width=\linewidth}
+\caption{Histogram number 1 in {\tt ddalitz.root} for 20000 event shows
+the dalitz plot for the $D\rightarrow K\pi\pi$ decay.}
+\label{fig:ddalitz}
+\end{figure}
+
+
+
+
+
+
+
+
+ 

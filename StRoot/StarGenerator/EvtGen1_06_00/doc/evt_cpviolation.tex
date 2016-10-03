@@ -1,0 +1,399 @@
+
+
+\section{CP Violation and Mixing}
+\label{sect:cpviolation}
+\index{CP violation}
+
+This section discusses how CP violation and mixing work
+in the generator. These two topics are closely related, since
+a large fraction of CP violating decays occurs via mixing. Exactly what is 
+the best way of introducing these two effects into EvtGen is still not clear; 
+there are different ways of generating CP violating decays depending on what 
+one is interested in.  For example, one might want to generate a sample of events with 
+$B\rightarrow a_1^+ \pi^-$, and the $B$'s which tag the flavor of this $B$ 
+(e.g., via semileptonic decays) are all $B^0$'s.  On the
+other hand, one might want to generate a sample that has the 
+correct mixture of $B^0$ and $\bar B^0$ tags, as determined by the decay 
+dynamics.  From the point of view of implementation these two situations are 
+fairly different, and at the moment we are still working on choosing 
+a consistent way of dealing with them.
+
+This section starts out describing how mixing works, and
+then proceeds to describe how CP violation is introduced.  Examples
+will be provided. CP violating decays are
+among the most complicated things this generator does, and 
+various ways in which one might get the generation of CP
+violating decays wrong will be pointed out.
+
+\subsection{Mixing in the $B^0\bar B^0$ System.}
+
+As is well know, when $\Upsilon(4S)$ decays into the $B^0\bar B^0$ system, 
+the $B$'s are produced in a coherent state.  This implies that  
+when one of the $B$'s decays, and its flavor is determined, the other
+$B$ is known to be in a pure state of the opposite flavor.
+This state then evolves (oscillates) independently, with the oscillation frequency
+given by $\Delta m /2$, ($\Delta m$ being $m_{2} - m_{1}$, the mass difference between the two $B$ mass 
+eigenstates).  Assuming $|B_{0}^{\rm phys}(t = 0)\rangle = |B^{0}\rangle$, its time evolution is given by: 
+\begin{equation}
+|B_{\rm phys}^{0}(t)\rangle = e^{-\Gamma t/2}e^{i\overline{m} t}\,\left[ |B^0\rangle\,\cos\left(\frac{\Delta m t}{2}\right) + i\frac{q}{p}|\bar B^0\rangle\,\sin\left(\frac{\Delta m t}{2}\right)\right],
+\end{equation}
+where $\overline{m} \equiv (m_{1} + m_{2})/2$, $q = e^{i\phi_{M}}/\sqrt{2}$, and $p = e^{-i\phi_{M}}/\sqrt{2}$ ($\phi_{M}$ is the mixing angle).  Time $t$ in this formula is the time between the two $B$ decays.
+
+By projecting $|B_{0}^{\rm phys}(t)\rangle$ into a pure $B^0$
+or $\bar B^0$ state, one can obtain the amplitudes for the $B$ to decay with
+a given flavor.  In turn, squaring them gives the probabilities:
+\begin{eqnarray}
+P(B_{\rm phys}^{0}\rightarrow B^0) & = & \frac{1}{2} e^{-\Gamma t} (1+\cos(\Delta m t))\\
+P(B_{\rm phys}^{0}\rightarrow \bar B^0) & = & \frac{1}{2} e^{-\Gamma t} (1-\cos(\Delta m t))\\
+\end{eqnarray}
+
+Integrating these over all times, one obtains the total rates:
+\begin{eqnarray}
+P(B_{\rm phys}^{0}\rightarrow B^0)  & = & \frac{x_{d}^2}{2\,(1 + x_{d}^{2})}\\
+P(B_{\rm phys}^{0}\rightarrow \bar B^0)  & = & \frac{2 + x_{d}^2}{2\,(1 + x_{d}^{2})}\\
+\end{eqnarray}
+where $x_d \equiv \frac{\Delta m}{\Gamma}$.
+
+Considering in a similar way the time evolution of the coherently produced state ($\Psi(t = 0) = \frac{1}{\sqrt{2}}\,\left [ |B^{0} \overline{B}^{0} \rangle - |\overline{B}^{0} B^{0} \rangle \right ]$ ), one can obtain the ratio:
+\begin{equation}
+{ N(\Upsilon(4S)\rightarrow B^0B^0)+N(\Upsilon(4S)\rightarrow\bar B^0\bar B^0)
+  \over N(\Upsilon(4S)\rightarrow B^0\bar B^0)}= \frac{x_{d}^{2}}{2 + \,x_{d}^{2}}.
+\end{equation}
+
+Currently, mixing is implemented in two decay models: 
+$\tt VSS\_MIX$ and $\tt VSS\_BMIX$.  These models both take the mass
+difference to be a parameter and use the width assigned in the particle
+properties table, i.e., from the evt.pdl file in the BaBar environment.
+These models differ in the number of parameters that
+the user must supply. The $\tt VSS\_MIX$ model requires that the branching
+fractions into mixed and unmixed final states be set by hand, and does not
+require that they be consistent with the mass difference and lifetime.
+The $\tt VSS_BMIX$ model calculates the branching fractions automatically
+and is therefore safer and easier to use. One can use this model as follows:
+\begin{verbatim}
+Decay Upsilon(4S)
+0.5  B+       B-        VSS;
+0.5  B0       anti-B0   VSS_BMIX;
+Enddecay
+\end{verbatim}
+Both models give identical results when the $\tt VSS\_MIX$ branching
+fractions are set correctly.
+
+
+\subsection{Mixing and Non-zero Lifetime Differences.}
+
+{\it This section should probably be merged with the previous but 
+is currently written separately, mostly due to historical reasons, as
+this is only needed for $B_s$ mixing, which was added later.}
+
+In this section $B^0$ and $\bar B^0$ will generically denote any
+neutral meson flavor eigenstate. These states are not eigenstates
+of the full hamiltonian and hence do not have a definite mass or
+lifetime. The states that are eigenstates of the hamiltonian are
+\begin{eqnarray}
+|B_L\rangle & = & p|B^0\rangle +q|\bar B^0\rangle, \\
+|B_H\rangle & = & p|B^0\rangle -q|\bar B^0\rangle.
+\end{eqnarray}
+The states $B_L$ and $B_H$ have masses, $m_L$ and $m_H$, and widths, $\Gamma_L$
+and $\Gamma_H$, respectively such that 
+\begin{equation}
+|B_{L,H}(t)\rangle=e^{-(\Gamma_{L,T}/2+im_{L,T})t}|B_{L,H}\rangle
+\end{equation}
+where $B_{L,H}(t)$ is the state after evolving the state $B_{L,H}$ for
+a time $t$.
+
+This allows us to evaluate several matrix elements that are useful for
+calculating the mixing rates
+\begin{eqnarray}
+\langle B^0|B^0(t)\rangle & = & {1\over 2p}(\langle B^0|B_L(t)\rangle
+                                           +\langle B^0|B_H(t)\rangle)\nonumber\\
+                          & = & {1\over 2}(e^{-(\Gamma_L/2+im_L)t}
+                                          +e^{-(\Gamma_H/2+im_H)t}),\\
+\langle \bar B^0|B^0(t)\rangle & = & {1\over 2p}(\langle \bar B^0|B_L(t)\rangle
+                                           +\langle \bar B^0|B_H(t)\rangle)\nonumber\\
+                          & = & {q\over 2p}(e^{-(\Gamma_L/2+im_L)t}
+                                          -e^{-(\Gamma_H/2+im_H)t}),\\
+\langle B^0|\bar B^0(t)\rangle & = & {1\over 2q}(\langle B^0|B_L(t)\rangle
+                                           -\langle B^0|B_H(t)\rangle)\nonumber\\
+                          & = & {p\over 2q}(e^{-(\Gamma_L/2+im_L)t}
+                                          -e^{-(\Gamma_H/2+im_H)t}),\\
+\langle \bar B^0|\bar B^0(t)\rangle & = & {1\over 2q}(\langle \bar B^0|B_L(t)\rangle
+                                           +\langle \bar B^0|B_H(t)\rangle)\nonumber\\
+                          & = & {1\over 2}(e^{-(\Gamma_L/2+im_L)t}
+                                          +e^{-(\Gamma_H/2+im_H)t}).
+\end{eqnarray}
+
+Now it is straight forward to calculate the mixing rate. Let $\chi$ 
+define the probability that a meson produced, at $t=0$, as a $B^0$ will
+decay as a $\bar B^0$. It is now easy to see that 
+\begin{eqnarray}
+\chi & = &{\int_0^\infty |\langle \bar B^0|B^0(t)\rangle|^2dt \over
+\int_0^\infty |\langle \bar B^0|B^0(t)\rangle|^2dt +
+\int_0^\infty |\langle B^0| B^0(t)\rangle|^2dt }\nonumber\\
+  & = & { x^2+y^2 \over x^2+y^2+\vert {p\over q} \vert^2(2+x^2-y^2)} 
+\end{eqnarray}
+where 
+\begin{equation}
+x\equiv {\Delta m \over \Gamma},\qquad y\equiv {\Delta\Gamma\over \Gamma}
+\end{equation}
+and
+\begin{equation}
+\Gamma\equiv {\Gamma_L+\Gamma_H \over 2},\qquad
+\Delta\Gamma \equiv \Gamma_H-\Gamma_L,\qquad
+\Delta m \equiv m_H-m_L.
+\end{equation}
+Similarly the probability that that a meson produced, at $t=0$ 
+as a $\bar B^0$ will decay as a $B^0$ is given by
+\begin{eqnarray}
+\bar \chi & = &{\int_0^\infty |\langle B^0|\bar B^0(t)\rangle|^2dt \over
+\int_0^\infty |\langle B^0|\bar B^0(t)\rangle|^2dt +
+\int_0^\infty |\langle \bar B^0| \bar B^0(t)\rangle|^2dt }\nonumber\\
+  & = & { x^2+y^2 \over x^2+y^2+\vert {q\over p} \vert^2(2+x^2-y^2)}.
+\end{eqnarray}
+In the limit of $|p/q|=1$ and $y=0$ we have 
+\begin{equation}
+P_{\pm}(t)=\chi =\bar\chi={x^2\over 2(1+x^2)}
+\end{equation}
+as expected.
+The time distribution, arbitrary normalization, is given by
+\begin{equation}
+e^{-\Gamma_L t}(1+e^{\Delta\Gamma t}\pm 2e^{\Delta\Gamma t/2}\cos\Delta m t)
+\end{equation}
+The minus sign corresponds to the case of mixing, and the plus sign
+to the case of no mixing.
+
+
+\subsection{CP-violation.}
+
+The ``first generation'' of models which were implemented in EvtGen
+to deal with CP violation did not solve all the problems that are 
+involved in simulating the physics of the $B\bar B$ system. To illustrate how 
+these models work, let us consider the following example (the decay 
+$B\rightarrow \pi^+\pi^-$):
+\begin{verbatim}
+Alias MYB B0
+#
+Decay Upsilon(4S)
+0.70   MYB B0      VSS;
+0.30   MYB B0B     VSS;
+Enddecay
+#
+Decay MYB
+1.0   pi+ pi-     SSS_CP alpha dm CP |A| arg(A) |Abar| arg(Abar);
+Enddecay
+End
+\end{verbatim}
+
+The model used in this example is {\tt SSS\_CP}.  Its first argument is {\tt alpha}, is the
+relevant CKM angle (in this case it is $\alpha$); the second argument {\tt dm} is
+the mass difference of the two $B$ mass eigenstates; the third
+argument, {\tt CP}, specifies the CP of the final state, and is either $+1$ or $-1$.
+The latter argument could in principle be determined from the particle properties, but at 
+the moment EvtGen does not include the C and P quantum numbers in its particle properties
+list (this should be fixed). The last 4 arguments are the (complex) amplitudes for 
+$B^0$ and $\bar B^0$ to produce the final state.
+
+In this example the $\Upsilon(4S)$ decays with unequal
+probabilities to ``MYB'' and $B^0$  and to ``MYB'' and  $\bar B^0$. The 
+$B^0$ and $\bar B^0$ simply decay as a $B^0$ and a $\bar B^0$,
+respectively, according to the generic decay table.  The interesting
+thing is how ``MYB'' decays.  In the {\tt SSS\_CP} model, ``MYB'' will produce a
+$\pi^+ \pi^-$ final state, while the other $B$ will provide
+a tag of the flavor that is listed in the decay of the $\Upsilon(4S)$ ($B^0$ in 70\% 
+of the cases, and $\bar B^0$ in 30\% of the cases).  Therefore, in this example there will
+be some number of $B^0$ tags and some number of $\bar B^0$ tags. 
+  
+If one would like to get a sample of events with only $B^0$ tags, 
+one could do it in the following way:
+\begin{verbatim}
+Alias MYB B0
+#
+Decay Upsilon(4S)
+1.00  MYB B0      VSS;
+Enddecay
+#
+Decay MYB
+1.0   pi+ pi-     SSS_CP dm alpha CP |A| arg(A) |Abar| arg(Abar);
+Enddecay
+End
+\end{verbatim}
+
+Here, the only available tag (as specified by the $\Upsilon(4S)$ branching fraction) is $B^{0}$.
+
+When the $\Upsilon(4S)$ is decayed and the two $B$'s are produced,
+they are assigned lifetimes which are sampled from a pure exponential
+distribution, with a mean of the average lifetime specified
+in the particle properties list. (If the decay model is one that
+includes the effects of mixing, the time distribution is no longer
+a pure exponential; see the previous section.  However, as will be
+evident below, it doesn't matter what time distribution is used in
+the decay of the $\Upsilon(4S)$.)  Since the lifetime distributions
+of both the $B$ that decays to the CP channel and the tag $B$ are
+no longer exponential, the {\tt SSS\_CP} model has to regenerate 
+lifetimes of {\it both} $B$'s. However, the model does not change what
+tag one of the $B$ provides. This is important, because it means that this model
+cannot enforce the right fraction of $B^0$ and $\bar B^0$ tags.  {\bf The only way to control this is through the decay table}.
+
+The {\tt SSS\_CP} model handles decays to a pair of scalar particles.
+Of these, the most important one is probably $B \rightarrow \pi\pi$, but the model also 
+works for any other decay with two scalars in the final state, e.g., $K_s\eta'$.
+Other models which are implemented in a similar way are {\tt SVS\_CP} and {\tt STS\_CP},
+which handle the decays to a scalar and a vector and to a scalar and a 
+tensor, respectively. There is also a model for two vectors
+in the final state: it is called {\tt SVV\_CP}. One complication with this
+model is that there are three partial waves that contribute to the 
+rate with different CP. 
+
+All of these models have one feature in common: they generate the $B$ tags with the relative
+fractions specified in the decay table. It seems logical that the next step in expanding 
+the functionality of the generator should be implementing some way to generate the right 
+fraction of $B^0$ and $\bar B^0$ tags according to the amplitudes that are specified for a 
+particular decay channel.  Indeed, this would be a very natural thing to do, because given 
+the amplitudes, the relative fraction of $B^0$ and $\bar B^0$ tags can be determined.  A new class of models which have been recently put into EvtGen does have this feature.  These new models are particularly important for decays into final states that are not
+CP eigenstates, for example $B\rightarrow a_1^+\pi^-$, or decays with direct CP violation (e.g., due to the presence of penguins).
+
+Let us consider in more detail what the problem is.  The time-dependent CP-asymmetry for
+the decay $B \rightarrow f$, where $f$ is a CP eigenstate, is defined as:
+\begin{equation}
+A_f(t) = \frac{\Gamma(B^{0}(t) \rightarrow f) - \Gamma(\overline{B}^{0}(t) \rightarrow f)}{\Gamma(B^{0}(t) \rightarrow f) + \Gamma(\overline{B}^{0}(t) \rightarrow f)}
+\end{equation}
+If $|A(B^{0} \rightarrow f)|$ = $|A(\overline{B}^{0} \rightarrow f)|$, then the integrated 
+asymmetry $\int_{-\infty}^{+\infty}A_f(t)dt = 0$, and the relative fraction of $B^{0}$ ($\bar B^0$) tags is known (1/2).  However, if $|A(B^{0} \rightarrow f)| \neq |A(\overline{B}^{0} \rightarrow f)|$ (which can happen, e.g., because of penguin pollution), $\int_{-\infty}^{+\infty}A_f(t)dt \neq 0$, so the fraction of tags must be somehow determined.
+
+
+One way to get the correct fraction of tags is to use integrated rates.  For example, for decays into a CP-eigenstate it can be defined as:
+\begin{equation}
+fr \equiv \frac{\int_{-\infty}^{\infty}\Gamma(\overline{B}(t)^{0} \rightarrow f)dt}{\int_{-\infty}^{\infty}\left[\Gamma(B^{0}(t) \rightarrow f) + \Gamma(\overline{B}^{0}(t) \rightarrow f)\right]dt} 
+\end{equation}
+so that
+\begin{equation}
+fr = \frac{|\overline{A}_{f}|^2 \left(1 + |\overline{r}_{f}|^2 + \frac{(1 - |\overline{r}_{f}|^2)}{1+x_{d}^2} \right)}{|\overline{A}_{f}|^2 \left(1 + |\overline{r}_{f}|^2 + \frac{(1 - |\overline{r}_{f}|^2)}{1+x_{d}^2} \right) + |{A}_{f}|^2 \left(1 + |r_{f}|^2 + \frac{(1 - |r_{f}|^2)}{1+x_{d}^2} \right)},
+\end{equation}
+where $x_{d} \equiv \frac{\Delta m}{\Gamma}$, $r_{f} = e^{2i\,\phi_{M}}\,\frac{\overline{A}}{A}$, and $\overline{r}_{f} = \frac{1}{r_{f}}$.
+
+Two functions in the new version of EvtOtherB return this fraction (fractB0CP for decays into a CP eigenstate and fractB0nonCP for decays into non-CP eigenstates).  However, analytical calculations of the integrals can be done only in the simplest cases.  For example, for the $B \rightarrow \rho \pi$ decay one would have to integrate over the Dalitz plot as well as over time to get the total rates, which is very hard to do!  A better solution is to use the so-called acceptance-rejection method, which is effectively equivalent to numerical integration.  This method has been used in the ``second generation'' models which introduce direct CP-violation into EvtGen.
+
+  The new models that are available are: {\tt SSS\_CP\_PNG} for the $B \rightarrow \pi^{+} \pi^{-}$ decay with penguin contributions; {\tt BTO2PI\_CP\_ISO} for the three isospin-related $B\rightarrow \pi \pi$ modes; {\tt BTOKPI\_CP\_ISO} for the four isospin-related $B \rightarrow K \pi$ modes; and {\tt SVS\_CP\_ISO} for the five isospin-related generic $scalar \rightarrow (pseudo)scalar + vector$ modes.  There is another decay model for the latter case, which also returns the correct fraction of $B^0$ ($\bar B^0$) tags.  It is called {\tt SVS\_NONCPEIGEN}.  Here is an example of how this model can be used for the $B \rightarrow a_1 \pi$ decay:
+\begin{verbatim}
+Alias MYB B0
+Decay Upsilon(4S)
+1.000 MYB anti-B0                         VSS;
+Enddecay
+Decay MYB
+1.000 a_1-  pi+          SVS_NONCPEIGEN 1.22 0.51e12 0.0 
+                                                       1.0 0.0 3.0 0.1 
+                                                       3.0 0.1 1.0 0.0;
+Enddecay
+End
+\end{verbatim}
+
+The first parameter of this model is the corresponding CKM angle (in this case, it is $\alpha$); the second parameter is $\Delta m$; the third parameter is the ``flip'' which determines the fraction of ``MYB'' $\rightarrow f$ to ``MYB'' $\rightarrow \overline{f}$ decays, where the state specified in the decay table is considered the ``$f$'' state.  If the flip is set to 0, ``MYB'' always decays into the $f$ state.  The next four parameters are the absolute values and phases for the amplitudes $B^{0} \rightarrow f$ and $\bar B^{0} \rightarrow f$, respectively, and the last four parameters are those for the amplitudes $B^{0} \rightarrow \overline{f}$ and $\overline{B}^{0} \rightarrow \overline{f}$.
+
+It is important not to confuse the ``flip'' parameter with the number of tags.  For example, one would like to generate 10,000 $B\overline{B}$ events with the flip parameter set to 0.5.  This means that one would get 5,000 ``MYB'' $\rightarrow f$ decays and 5,000 ``MYB'' $\rightarrow \overline{f}$ decays, but within each 5,000 event sample the number of $B^{0}$ and $\bar B^{0}$ tags is determined by the amplitudes specified in the decay file! 
+
+As before, ``MYB'' in this example decays into a CP-mode, while the other B provides a tag.  However, the model itself generates the correct fraction of $B^{0}$ ($\bar B^{0}$) tags, which is determined from the last eight parameters (the amplitudes), and is independent of the $\Upsilon(4S)$ branching fractions.
+
+
+
+\subsection{Special CP models}
+
+ The models described above are meant to be generic models that can
+be applied to different decays with appropriate arguments. All of the
+above models are two body decays. There is, however, many other decays
+that are not two body decays and these can not be treated quite as
+simply since there will in general be interference between various
+resonances. As an example consider the decay $B\rightarrow \pi^+\pi^-\pi^0$
+which is dominated by the $\rho(770)$ resonances.
+
+ To handle the $B\rightarrow 3\pi$ and the $B\rightarrow 4\pi$
+decays two special models have been written. These models are 
+called {\tt BTO3PI\_CP} and {\tt BTO4PI\_CP}. The second
+of model {\tt BTO4PI\_CP} needs more work interms of understanding the
+conventions of the phases between the resonances that contributes.
+
+\newpage
+
+\subsection{Unified implementation of CP-violating and mixing}
+
+This section describes a {\it proposal} for how to unify and 
+simplify the simulation of CP-violating decays and mixing in EvtGen, this 
+should allow writing models that works independently of
+how the neutral $B$ meson is produced, i.e. in a coherent pair in an
+$\Upsilon(4S)$ decay or incoherently e.g. in a $p\bar p$ collision.
+
+\subsubsection{CP violation}
+
+The decays that we are considering here are 
+common final states to a neutral $B$ meson and its antiparticle,
+e.g. $B\to J/\psi K_S$
+or $B\to J/\psi K^*$. At the $\Upsilon(4S)$ in the absence of
+direct CP violation these decays can be simplified as we can make the 
+assumption that you have an equal number of $B^0$ and $\bar B^0$
+tags, or equivalent that there is no time integrated asymmetry.
+However, we want to write the code such that no assumptions are
+made about the numbers of $B^0$ and $\bar B^0$ tags.
+For $B$ mesons that are produced incoherently we always have to
+consider the asymmetries in the rates for an initial $B^0$ or
+$\bar B^0$. 
+
+To allow generating these asymmetries correctly these models
+will be allowed to modify the flavor of the $B$ meson that is decayed.
+For the $\Upsilon(4S)$ this means changing the the flavor of 'the
+other' $B$ meson in the $\Upsilon(4S)$ decay, the tag $B$. 
+For incoherent produced $B$
+mesons this means that if a specific flavor is given to 
+EvtGen it can return a decay of the opposite flavor. If
+e.g. EvtGen is given a $B^{**}+$ to decay and it decays it to
+$B^0\pi^+$ the decay of the $B^0$ might decide to flip the 
+flavor of the decay chain to allow generating the right 
+time integrated asymmetry. This means that after EvtGen is
+done the code that called EvtGen will get back a $B^{**}-$
+and needs to be prepared to handle this, e.g. by applying CP
+to the decay chain that produced the $B^{**}+$. Also note the
+meaning of branching fractions in the decay table, for modes
+that are common to a $B$ and its anti-particle, the $\bar B$
+the above implies that the branching fraction listed for the
+$B$ and the $\bar B$ are the average branching fractions.
+
+Practically, this is implemented in the {\tt EvtCPUtil}
+class, which will handle the cases of coherent and incoherently
+produced $B$ mesons.
+
+How is this different from the current implementation, V00-09-38?
+Not very much, there are already some models, e.g. the 
+{\tt SVS\_NONCPEIGEN}
+that has the full functionality that allows for direct CP violation 
+and will generate the right mixture of $B$ and $\bar B$ tags.
+All CP models should convert to this more general model. For 
+applying this to $B$ mesons that are produced incoherent, i.e.
+with a definite flavor, we need to modify the {\tt EvtCPUtil::otherB()}
+method to allow the change of the flavor.
+
+\subsubsection{Mixing}
+
+In the $\Upsilon(4S)$ system mixing is handled by the decay of the
+$\Upsilon(4S)$ meson via models such as {\tt VSS\_BMIX}. This 
+implementation seems sufficient at this point. Note that we
+are not considering the case of the $\Upsilon(5S)$ at this point.
+
+For incoherently produced neutral $B$ mesons, $B^0$ or $B_s$, we assume that
+the flavor is tagged and mixing will be generated by adding a 
+decay like $B^0\to \bar B^0$ where the mixed particle have 
+zero lifetime. Models that simulate CP violation, or in general
+models that handle decays common to the $B$ and the $\bar B$ 
+decay will remove any mixing, this is done in {\tt EvtCPUtil}. 
+(Models that do not make any assumption about
+the flavor of the $B$ should probably be using a 'neutral $B$' particle
+instead of a specific flavor, but at BABAR we have not implemented 
+this as it would be very confusing at this point to a lot of
+analysis code that uses Monte Carlo truth.)
+
+This means that models that simulates CP-violating decays should not
+need to turn of mixing, it will practically be ignored. 
+
+The mixing of incoherently produced  $B$ mesons is not done in a 
+model, this causes some problems as it is hard to control the
+mixing, e.g., turning it of or modifying the parameters. We need to
+invent a way to control this.
+
+

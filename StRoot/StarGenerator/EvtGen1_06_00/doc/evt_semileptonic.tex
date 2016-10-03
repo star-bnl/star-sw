@@ -1,0 +1,444 @@
+\section{Semileptonic decays in EvtGen}
+\label{semileptonic}
+\index{semileptonic decays}
+
+\label{Semileptonic decays}
+\subsection{Introduction}
+We summarize the treatment of semileptonic decays in
+EvtGen.  A framework is setup such that the implementation of
+a model for semileptonic form factors requires only the 
+coding of the form factors themselves.  Currently, we consider
+semileptonic decays from pseudoscalar mesons into 
+pseudoscalar, vector, or tensor meson daughters.
+In section~\ref{sec:conventions} we define the
+conventions used in the implementation of semileptonic
+decays.  Section~\ref{sec:framework} describes the framework
+from which semileptonic form factor models can be built.  An
+example of such a model is given in section~\ref{sec:examples}.
+Finally, we list the form factor models implemented in EvtGen
+in section~\ref{sec:models}.
+
+\subsection{Semileptonic conventions}
+\label{sec:conventions}
+\index{Semileptonic decay conventions}
+We have tried to follow standard descriptions of semileptonic
+form factors in EvtGen.  
+For decays of 
+pseudoscalar mesons to pseudoscalar daughters, we describe the
+form factors as
+\begin{eqnarray}
+<S(k) \vert V_{\mu} \vert P(p) > & = &\biggl \{ (p+k)_{\mu} - 
+{{m_P^2 - m_S^2} \over {q^2}} q_{\mu} \biggr \} f_+(q^2) \\
+&+& 
+\biggl \{  {{m_P^2 - m_S^2} \over {q^2}} q_{\mu} \biggr \} f_0(q^2) 
+\nonumber
+\end{eqnarray}
+$P$ denotes the parent (pseudoscalar) meson ($B$, $D$ or $B_s$) and 
+$S$ denotes a pseudoscalar daughter ($D$, $K$, or $\pi$).  In this
+form, we have the constraint $f_+(0) = f_0(0)$. 
+
+\noindent
+For decays to vector mesons, we use the form
+\begin{eqnarray}
+<V(k) \vert (V-A)_{\mu} \vert P(p) > & = & 
+ \epsilon^*_{\mu} (m_P+m_V) {\rm A}_1(q^2)
+- (p+k)_{\mu} ( \epsilon^* p) { { {\rm A}_2(q^2)} \over {(m_P + m_V)}} \\
+&-& q_{\mu} ( \epsilon^* p) { {2 m_V} \over {q^2}} \bigl ({\rm A}_3(q^2)
+- i{\rm A}_0(q^2) \bigr ) \nonumber
+\\
+&+&\epsilon_{\mu \nu \rho \sigma} \epsilon^{* \nu} p^{\rho} k^{\sigma}
+{ {2 {\rm V}(q^2)} \over { m_P + m_V} } \nonumber
+\end{eqnarray}
+Where $V$ denotes a vector daughter meson ($D^*$, $K^*$ or $\rho$)
+and ${\rm A}_3$ is defined as 
+\begin{equation}
+{\rm A}_3(q^2) = {{m_P+ m_V} \over {2 m_V}} {\rm A}_1(q^2) -
+{{m_P- m_V} \over {2 m_V}} {\rm A}_2(q^2) 
+\end{equation}
+where ${\rm A}_0 (0) = {\rm A}_3(0)$. \nonumber
+
+
+\noindent For semileptonic decays to tensor mesons ($D_2^*$), to
+be denoted as $T$, we use the form
+\begin{eqnarray}
+<T(k) \vert (V-A)_{\mu} \vert P(p) > &=& ih(q^2) \epsilon_{\mu \nu \lambda \rho}
+\epsilon^{* \nu \alpha} p_{\alpha} (p+k)^{\lambda} (p-k)^{\rho} -
+k(q^2) \epsilon^{*}_{\mu \nu} p^{\nu} \\
+& + &b_+(q^2) \epsilon^*_{\alpha \beta} p^{\alpha} p^{\beta} (p+k)_{\mu} -
+b_-(q^2) \epsilon^*_{\alpha \beta} p^{\alpha} p^{\beta} (p-k)_{\mu} 
+\nonumber
+\end{eqnarray}
+
+\subsection{Semileptonic framework}
+\label{sec:framework}
+There are two abstract classes responsible for the semileptonic decay
+framework.  The first of these is 
+{\tt EvtSemiLeptonicFF}, which 
+provides the framework for the calculations of form factors.  There
+are three member functions:
+\index{{\tt EvtSemiLeptonicFF}}
+\begin{itemize}
+\item \begin{verbatim} virtual void getscalarff( int parent, int daught,
+                       double t, double mass, double *fpf,
+                       double *fmf ) 
+\end{verbatim}
+\item \begin{verbatim}  virtual void getvectorff( int parent, int daught,
+                       double t, double mass, double *a1f,
+                       double *a2f, double *vf, double *a0f ) 
+\end{verbatim}
+\item \begin{verbatim}  virtual void gettensorff( int parent, int daught,
+                       double t, double mass, double *hf,
+                       double *kf, double *bpf, double *bmf ) 
+\end{verbatim}
+\end{itemize}
+\noindent All form factors models should include a class 
+derived from {\tt EvtSemiLeptonicFF},  which
+will implement the relevant member functions of
+{\tt EvtSemiLeptonicFF}. 
+
+\noindent These form factor implementations are used by classes
+derived from the abstract class {\tt EvtSemiLeptonicAmp},
+which contains the member function:
+\index{{\it EvtSemiLeptonicAmp}}
+\begin{itemize}
+\item \begin{verbatim}   virtual void CalcAmp( EvtParticle *parent,
+            EvtSemiLeptonicFF *FormFactors  ) 
+\end{verbatim}
+\end{itemize}
+Classes to calculate the amplitude for semileptonic pseudoscalar to
+pseudoscalar, pseudoscalar to vector, and 
+pseudoscalar to tensor decays are 
+{\tt EvtSemiLeptonicScalarAmp},
+{\tt EvtSemiLeptonicVectorAmp}, and
+{\tt EvtSemiLeptonicTensorAmp}, 
+respectively.  These routines are passed form factors which
+must follow the conventions described in section~\ref{sec:conventions}.
+An example of how to use this framework is presented in 
+section~\ref{sec:examples}.
+ 
+\subsection{Examples}
+\label{sec:examples}
+\index{EvtHQET}
+Above we have defined the conventions followed in the standard
+semileptonic framework of EvtGen.  Here we show how new
+form factor models can be easily implemented.  We take as an
+example a heavy quark effictive theory model of 
+$B \rightarrow D^* \ell \nu$ form factors, where $\ell$ is
+either an electron or muon.  In this decay we can write the
+form factors as:
+\begin{equation}
+A_1 = {{h_{A_1}(w)} \over {R^*}} \biggl ( 1 - { {q^2} \over {(M_B + M_{D^*})^2}}
+\biggr )
+\end{equation}
+\begin{equation}
+V = R_1 {{h_{A_1}(w)} \over {R^*}}
+\end{equation}
+\begin{equation}
+A_2 = R_2 {{h_{A_1}(w)} \over {R^*}}
+\end{equation}
+\noindent where
+\begin{equation}
+h_{A_1}(w) = h_{A_1}(1) \biggl (1 - \rho_{A_1}^2(w-1) \biggr ),
+\end{equation}
+\begin{equation}
+R^* = { {2.0 (M_B M_{D^*})^{1/2}} \over {(M_B+M_{D^*})}},
+\end{equation} 
+\noindent and
+\begin{equation}
+w = { {M_B^2 + M_{D^*}^2 -q^2} \over { 2 M_B M_{D^*}} }
+\end{equation}
+\noindent To implement a decay model using these form factors
+we must write two classes
+\begin{itemize} 
+\item
+\begin{verbatim}
+class EvtHQETFF : public EvtSemiLeptonicFF {
+
+public:
+  EvtHQETFF(double hqetrho2, double hqetr1, double hqetr2);
+
+  void getvectorff( int parent, int daught,
+                       double t, double mass, double *a1f,
+                       double *a2f, double *vf, double *a0f );
+
+private:
+  double r1;
+  double rho2;
+  double r2;
+};
+\end{verbatim}
+\item
+\begin{verbatim}
+class EvtHQET:public  EvtDecayTBase<EvtHQET>  {
+
+public:
+
+  static void getName(char *name,int &narg);
+
+  void Decay(EvtParticle *p);
+  void InitProbMax();
+  void Init();
+
+private:
+  EvtSemiLeptonicFF *hqetffmodel;
+  EvtSemiLeptonicAmp *calcamp;
+};
+\end{verbatim}
+\end{itemize}
+\noindent This class is to implement $B \rightarrow D^* \ell \nu$
+decays, so only the vector form factor routine must be
+provided.  The constuctor allows R1, R2 and $\rho^2$ to
+be passed in as a run time arguement.  We will discuss this
+point more below.  The implementation of {\tt EvtHQETFF} is
+quite simple:
+\begin{verbatim}
+EvtHQETFF::EvtHQETFF(double hqetrho2, double hqetr1, double hqetr2) {
+
+  rho2 = hqetrho2;
+  r1 = hqetr1;
+  r2 = hqetr2;
+  return;
+}
+
+void EvtHQETFF::getvectorff( int parent, int daught,
+                       double t, double mass, double *a1f,
+                             double *a2f, double *vf, double *a0f ){
+
+
+  double mb=EvtPDL::nom_mass(parent);
+  double w = ((mb*mb)+(mass*mass)-t)/(2.0*mb*mass);
+
+// Form factors have a general form, with parameters passed in
+// from the arguements.
+
+  double rstar = ( 2.0*sqrt(mb*mass))/(mb+mass);
+  double ha1 = 1-rho2*(w-1);
+
+  *a1f = (1.0 - (t/((mb+mass)*(mb+mass))))*ha1;
+  *a1f = (*a1f)/rstar;
+  *a2f = (r2/rstar)*ha1;
+  *vf = (r1/rstar)*ha1;
+  *a0f = 0.0;
+
+  return;
+ }
+\end{verbatim}
+The {\tt getvectorff} routine takes the parent meson,
+daughter vector meson, $q^2$ ({\tt t}), and the daughter meson
+mass.  The form factors $A_1$, $A_2$, $V$ and $A_0$ are
+returned.
+
+\noindent The {\tt EvtHQET} class is also quite easy to
+implement.  As with other classes which handle decay
+models, it is derived from {\tt EvtDecayAmp}, which
+is described elsewhere.  The class
+should provide a {\tt Decay} routine as well as 
+{\tt getName}, {\tt Init}, {\tt clone} 
+and {\tt InitProbMax} routines.  Additionally,
+the form factor model and amplitude calculation 
+implementations are handled as memeber data.  The
+{\tt EvtHQET} implementation is:
+\begin{verbatim}
+void EvtHQET::getName(char *model_name,int &narg){
+
+  strcpy(model_name,"HQET");
+}
+
+EvtDecayBase* EvtHQET::clone(){
+
+  return new EvtHQET;
+
+}
+
+
+void EvtHQET::Decay( EvtParticle *p ){
+
+  p->init_daughters(ndaug,daug);
+  calcamp->CalcAmp(p,hqetffmodel);
+}
+
+void EvtHQET::InitProbMax() {
+
+  SetProbMax(20000.0);
+}
+
+void EvtHQET::Init(){
+
+  if ( ndaug!=3 ) {
+     report(ERROR,"EvtGen") << "Wrong number of daughters in EvtHQET.cc\n";
+  }
+
+  hqetffmodel = new EvtHQETFF(args[0],args[1],args[2]);
+  calcamp = new EvtSemiLeptonicVectorAmp;
+}
+\end{verbatim}
+This class would be virtually unchanged for different
+form factor models.  In {\tt Decay}, after initialization
+of the daughter particles, {\tt CalcAmp} (in this case
+from {\tt EvtSemiLeptonicVectorAmp} is called.  If the
+standard form factor parameterizations are used, this
+routine does not need to be rewriten.  The {\tt Init}
+function is responsible for two things.  First the correct
+form factor model must be initialized.  As {\tt EvtHQETFF}
+takes arguements, these must be passed into
+the constructor.  The arguements are otherwise private to the
+{\tt EvtHQET} model.  Second, the {\tt CalcAmp} function
+must be properly initialized such that the amplitude
+is calculated for vector daughter mesons.  For models with form
+factors for daughter mesons of different spins, the meson
+spin ({\tt EvtPDL::spin(daug[0])} should be used to decide 
+how to initialize {\tt calcamp}.
+
+\noindent With the existing framework, the implementation of
+new form factor models should be quite simple.  The majority of
+the work is in the coding of the form factors themselves
+
+\subsection{Available models}
+\label{sec:models}
+\noindent There are several semileptonic form factor models
+implemented within EvtGen and the {\tt EvtSemiLeptonicAmp} 
+framework.  In this section we describe the basic features of
+each, including the modes available in each model and what
+arguements must be passed in.  This is by no means a complete
+list of all possible semileptonic models, and the authors would
+welcome any additional form factor models implemented.
+
+\subsubsection{EvtSLPole}
+\label{sect:EvtSLPole}
+\index{EvtSLPole}
+\begin{itemize} 
+\item A general pole form is implemented for each form factor, using
+the form
+\begin{equation}
+F = { {F(0)} \over { (1.0 + a { {q^2} \over {M^2} } + b { {q^4} \over {M^4} })^p}}
+\end{equation}
+where $M$ is the mass of the parent meson. 
+\item Leptons available: $e$, $\mu$, and $\tau$.
+\item Arguements: For each form factor there are four arguements, $F(0)$,
+$a$, $b$, and $p$.  Note that $p$ can be a non-integer.  
+\begin{itemize}
+\item For scalar daughters the arguements should be ordered
+as \\
+$F(0)_{f_+}~ a_{f_+}~ b_{f_+}~ p_{f_+}~ F(0)_{f_0}~ a_{f_0}~ b_{f_0}p_{f_0}$.
+\item For vector daughters the arguements should be ordered
+as \\
+$F(0)_{A_1}~ a_{A_1}~ b_{A_1}~p_{A_1}~F(0)_{A_2}~ a_{A_2}~ b_{A_2}~p_{A_2}~
+F(0)_{V}~ a_{V}~ b_{V}~ p_{V}~
+F(0)_{A_0}~ a_{A_0}~ b_{A_0}~p_{A_0}$
+\item For tensor daughters the arguements should be ordered
+as  \\ 
+$F(0)_{k}~ a_{k}~ b_{k}~p_{k}~F(0)_{h}~ a_{h}~ b_{h}~p_{h}~F(0)_{b_+}~ a_{b_+}~ b_{b_+}~
+p_{b_+}~F(0)_{b_-}~ a_{b_-}~ b_{b_-}~p_{b_-}$
+\end{itemize}
+\item In DECAY.DEC
+\begin{verbatim}
+0.0210   D+     e-   anti-nu_e          SLPOLE .... arguements;
+\end{verbatim}
+\end{itemize}
+
+\subsubsection{EvtISGW2}
+\index{EvtISGW2}
+\index{ISGW2}
+\begin{itemize}
+\item Implementation of form factors defined from
+Scora and Isgur~\cite{Scora95}.
+\item Leptons available: $e$, $\mu$, and $\tau$.
+\item Arguements: None
+\item In DECAY.DEC
+\begin{verbatim}
+0.0210   D+     e-   anti-nu_e          ISGW2;
+\end{verbatim}
+\end{itemize}
+\noindent We have implemented decays of $B$,$D$,$D_s$, and $B_s$
+mesons as described by Scora and Isgur.
+
+
+\subsubsection{EvtISGW}
+\begin{itemize}
+\item Implementation of form factors defined from
+Isgur, Scora, Grinstein, and Wise~\cite{Isgur89a}.
+\item Leptons available: $e$ and $\mu$ only.
+\item Arguements: None
+\item In DECAY.DEC
+\begin{verbatim}
+0.0210   D+     e-   anti-nu_e          ISGW;
+\end{verbatim}
+\end{itemize}
+%\noindent Refer to Tables~\ref{table:bdecays} to~\ref{table:ddecays}
+%for a list of
+%available decays.
+
+\subsubsection{EvtHQET}
+\index{EvtHQET}
+\begin{itemize}
+\item Simple implementation of form factors within
+HQET using a linear form for $\rho^2$.  This model is described
+in more detail above. 
+\item Leptons available: $e$ and $\mu$ only.
+\item Arguements:$\rho^2$, $R1$, and $R2$. 
+\item In DECAY.DEC
+\begin{verbatim}
+0.050   D*+     e-   anti-nu_e          HQET 0.92 1.18 0.72;
+\end{verbatim}
+\end{itemize}
+\noindent This model is most useful for the decay $B \rightarrow D^* \ell \nu$,
+however no assumptions are made about either the parent meson or the
+daughter meson.  Any pseudoscalar semileptonic decay to a vector meson
+could be modeled using these form factors.
+
+%\begin{table}
+%\begin{center}
+%\begin{tabular}{|c|c|c|c|} \hline
+%Decay                                           & ISGW2 & ISGW & HQET \\ \hline \hline
+%$B \rightarrow D \ell \nu$                      & Y     & Y    &       \\
+%$B \rightarrow D^* \ell \nu$                    & Y     & Y    & Y    \\
+%$B \rightarrow D_1 \ell \nu$                    & Y     & Y    &      \\
+%$B \rightarrow D_0^* \ell \nu$                  & Y     & Y    &      \\
+%$B \rightarrow D_1^{\prime} \ell \nu$           & Y     & Y    &      \\
+%$B \rightarrow D_2^* \ell \nu$                  & Y     & Y    &      \\
+%$B \rightarrow D({\rm 2S}) \ell \nu$            & Y     & Y    &      \\
+%$B \rightarrow D^*({\rm 2S}) \ell \nu$          & Y     & Y    &      \\
+%$B \rightarrow \pi \ell \nu$                    & Y     & Y    &      \\
+%$B \rightarrow \eta^{(\prime)} \ell \nu$        & Y     & Y    &      \\
+%$B \rightarrow \rho (\omega) \ell \nu$          & Y     & Y    &      \\
+%$B \rightarrow a_0 (f_0^{(\prime)})\ell \nu$    & Y     & Y    &      \\
+%$B \rightarrow a_1 (f_1^{(\prime)})\ell \nu$    & Y     & Y    &      \\
+%$B \rightarrow a_2 (f_2^{(\prime)})\ell \nu$    & Y     & Y    &      \\
+%$B \rightarrow b_1 (h_1^{(\prime)}) \ell \nu$   & Y     & Y    &      \\
+%$B \rightarrow \pi({\rm2S}) (\eta) \ell \nu$    & Y     & Y    &      \\
+%$B \rightarrow \rho({\rm2S}) (\omega) \ell \nu$ & Y     & Y    &      \\ \hline
+%\end{tabular}
+%\end{center}
+%\caption{List of available $B$ semileptonic decays for
+%each form factor model currently implemented in EvtGen.  Isospin
+%partners are usually implied.  Some models may not include
+%form factors to properly handle decays to $\tau$ leptons.  
+%An ``Y'' is given to a decay if that model was implemented with
+%that particular decay in mind.  For example the HQET model is
+%meant primarily for $B \rightarrow D^* \ell \nu$, however any
+%pseudoscalar decay to a vector meson could be handled with the
+%proper constants passed in from DECAY.DEC.}
+%\label{table:bdecays} 
+%\end{table}
+
+
+
+%\begin{table}
+%\begin{center}
+%\begin{tabular}{|c|c|c|c|} \hline
+%Decay                                           & ISGW2 & ISGW & HQET \\ \hline \hline
+%\end{tabular}
+%\end{center}
+%\caption{List of available $D$ semileptonic decays for
+%each form factor model currently implemented in EvtGen.  Isospin
+%partners are usually implied.}
+%\label{table:ddecays} 
+%\end{table}
+
+
+
+
+
+
+
+

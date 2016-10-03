@@ -1,0 +1,49 @@
+ADAPTING EXAMPLES TO DIFFERENT PYTHIA VERSIONS
+-------------------------------------------------------------------------------
+
+Currently this directory and 'testing' subdirecotry are adapted to pythia8.2
+In order to use it with older pythia versions:
+
+-------------------------------------------------------------------------------
+0) Configuration
+-------------------------------------------------------------------------------
+
+NOTE: We are assuming the default configuration scripts are used. Changes
+      to LCG scripts are analogous but nonetheless require different procedure.
+
+- Use ./configure without providing pythia8 path (but provide all other paths)
+- Files: make.inc ../configure.paths.sh (and .csh) will have
+  empty PYTHIALOCATION variable. Provide this path by hand in both files.
+- In ../configure.paths.sh (or .csh) provide PYTHIA8DATA location as:
+
+  in .sh:  export PYTHIA8DATA=$PYTHIALOCATION/xmldoc
+  in .csh: setenv PYTHIA8DATA "${PYTHIALOCATION}/xmldoc"
+
+- source ../configure.paths.sh (or .csh)
+
+-------------------------------------------------------------------------------
+1) Adapting to pythia 8.180-8.185
+-------------------------------------------------------------------------------
+In code, replace:                     with:
+
+#include "Pythia8Plugins/HepMC2.h"    #include "Pythia8/Pythia8ToHepMC.h"
+pythia.stat()                         pythia.statistics()
+
+In Makefile locate the three different variants of PYTHIA_LIBS variable.
+Select 2nd one instead of the 3rd one.
+
+-------------------------------------------------------------------------------
+2) Adapting to older pythia 8.1 versions
+-------------------------------------------------------------------------------
+In code, replace:                     with:
+
+#include "Pythia8/Pythia.h"           #include "Pythia.h"
+#include "Pythia8Plugins/HepMC2.h"    #include "HepMCInterface.h"
+HepMC::Pythia8ToHepMC ToHepMC;        HepMC::I_Pythia8 ToHepMC;
+pythia.stat()                         pythia.statistics()
+
+In Makefile locate the three different variants of PYTHIA_LIBS variable.
+Select 1st one instead of the 3rd one.
+
+--
+Last updated: 24 Mar 2015

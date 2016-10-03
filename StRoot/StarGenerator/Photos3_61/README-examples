@@ -1,0 +1,153 @@
+-----------------------------------------------------------------------
+NOTE: INSTRUCTIONS PROVIDED IN THIS README ARE SIMPLIFIED INSTRUCTIONS
+      TAKEN FROM APPENDIX B OF THE PAPER. PLEASE REFER TO THE PAPER
+      FOR DETAILS OUTSIDE OF THIS README.
+-----------------------------------------------------------------------
+
+---------------
+1. COMPILATION
+---------------
+
+In order to compile PHOTOS without dependencies on any external libraries,
+from PHOTOS directory execute:
+
+./configure --without-hepmc
+make
+
+It is, however, recommended to provide path to HepMC package as this
+is the most common use of the package:
+
+./configure --with-hepmc=<PATH_TO_HEPMC>
+
+   -----
+   HEPMC
+   -----
+
+   Direct link to HepMC v2.06.09:
+
+   http://lcgapp.cern.ch/project/simu/HepMC/download/HepMC-2.06.09.tar.gz
+
+   HepMC can be compiled by executing (for example):
+
+   ./configure --with-momentum=GEV --with-length=CM --prefix=<YOUR_INSTALL_DIR>
+   make install
+
+------------------
+2. BASIC EXAMPLES
+------------------
+
+Directory 'examples' contains sample output files from all of the examples.
+To run the most basic examples, enter PHOTOS/examples directory and
+execute:
+
+./configure
+make
+
+This will build all available examples. In case of above instructions,
+this will build 'photos_hepevt_example.exe' which takes a second to run
+and if HepMC path was provided 'photos_standalone_example.exe' will be
+available, which takes about 4 minutes to run.
+
+--------------------
+3. PYTHIA8 EXAMPLES
+--------------------
+
+Providing path to pythia8 allows to compile 'single_photos_gun_example.exe'
+as well as 'photosLCG_pythia_example.exe' used by GENSER (Generator Service
+Project for LHC Computing Grid) to validate PHOTOS. These examples require
+pythia8.201
+
+   -------
+   pythia8
+   -------
+
+   Direct link to pythia v8.201:
+
+   http://home.thep.lu.se/~torbjorn/pythia8/pythia8201.tgz
+
+   Compile by executing:
+
+   ./configure
+   make
+
+   (can take few minutes to compile)
+
+After building pythia8, go to PHOTOS/examples and execute:
+
+./confugire --with-pythia8=<YOUR_PATH_TO_PYTHIA8>
+make
+
+source ../configure.paths.sh
+
+This last step is needed to set environment variable PYTHIA8DATA.
+Without it, pythia8 examples will quickly end with an error: Aborted from PYTHIA
+
+Pythia examples take less than 4 minutes to complete.
+
+---------------------
+4. MC-TESTER EXAMPLE
+---------------------
+
+Providing paths both to pythia8 and MC-TESTER allows to compile an additional
+example, 'photos_pythia_example.exe'. It also allows to run most of the tests
+located in 'examples/testing'.
+
+   ---------
+   MC-TESTER
+   ---------
+
+   Direct link to MC-TESTER v1.25:
+
+   http://mc-tester.web.cern.ch/MC-TESTER/MC-TESTER-1.25.0.tar.gz
+
+   Compile by executing:
+
+   ./configure --with-HepMC=<PATH_TO_HEPMC>
+   make
+
+After following steps in point 3 and building MC-TESTER, go to PHOTOS/examples and execute:
+
+./confugire --with-pythia8=<YOUR_PATH_TO_PYTHIA8> --with-mc-tester=<YOUR_PATH_TO_MC_TESTER>
+make
+source ../configure.paths.sh
+
+This example takes less than a minute to complete. Time to run tests in 'examples/testing'
+directory vary, depending on the statistics used, from a minute to hours.
+
+------------------
+5. TAUOLA EXAMPLE
+------------------
+
+Lastly, Tauola++ can be added to compile 'tauola_photos_pythia_example.exe' as well
+as rest of the tests in 'examples/testing' directory.
+
+   --------
+   Tauola++
+   --------
+
+   Direct link to Tauola++ v1.1.5:
+
+   https://tauolapp.web.cern.ch/tauolapp/resources/TAUOLA.1.1.5/TAUOLA.1.1.5.tar.gz
+
+   Compile by executing:
+
+   ./configure --with-hepmc=<PATH_TO_HEPMC>
+   make
+
+After following steps in points 3 and 4 and building Tauola++, go to PHOTOS/examples and execute:
+
+./confugire --with-pythia8=<YOUR_PATH_TO_PYTHIA8> --with-mc-tester=<YOUR_PATH_TO_MC_TESTER> --with-tauola=<YOUR_PATH_TO_TAUOLA>
+make            
+source ../configure.paths.sh
+
+This example takes about 2 minutes to complete.
+
+NOTE: depending on your configuration of pythia8 and Tauola, you may need to increase maximum
+      interference weight of Photos by adding:
+
+      Photos::maxWtInterference(3);
+
+      After line:
+
+      Photos::initialize();
+

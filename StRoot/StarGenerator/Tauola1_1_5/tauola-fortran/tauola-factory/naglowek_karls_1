@@ -1,0 +1,30 @@
+#if defined (ALEPH)
+C=============================================================
+#endif
+      SUBROUTINE JAKER(JAK)
+C     *********************
+C
+C **********************************************************************
+C                                                                      *
+#if defined (ALEPH)
+C           *********TAUOLA LIBRARY: VERSION 2.7 ********              *
+C           ****** + Karlsruhe 4Pions decay model *****              *
+C           **************DECEMBER 1993******************              *
+#else
+C           *********TAUOLA LIBRARY: VERSION 2.7 ********              *
+C           ****** + Karlsruhe 4Pions decay model *****              *
+C           **************August   1995******************              *
+#endif
+C           **      AUTHORS: S.JADACH, Z.WAS        *****              *
+C           **  R. DECKER, M. JEZABEK, J.H.KUEHN,   *****              *
+C           ********AVAILABLE FROM: WASM AT CERNVM ******              *
+C           *******PUBLISHED IN COMP. PHYS. COMM.********              *
+C           *** PREPRINT CERN-TH-5856 SEPTEMBER 1990 ****              *
+C           *** PREPRINT CERN-TH-6195 OCTOBER   1991 ****              *
+C           *** PREPRINT CERN-TH-6793 NOVEMBER  1992 ****              *
+C **********************************************************************
+C
+
+
+
+

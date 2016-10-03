@@ -1,0 +1,2 @@
+	@( cp curr_karls.f ../tauola/.)
+	@( cp curr_extracted.f ../tauola/.)

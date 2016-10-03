@@ -1,0 +1,12 @@
+        cp ./makefile_0.55           ./prod/makefile
+	cat ./makefile_0.56       >> ./prod/makefile
+	cat ./stand_label         >> ./prod/makefile
+	cat ./makefile_1.1        >> ./prod/makefile
+	cat ./makefile_add_stand  >> ./prod/makefile
+	cat ./makefile_2.15       >> ./prod/makefile
+	cat ./makefile_2.16       >> ./prod/makefile
+	cat ./stand_label         >> ./prod/makefile
+	cat ./makefile_2.25       >> ./prod/makefile
+	cat ./makefile_2.26       >> ./prod/makefile
+	cat ./stand_label         >> ./prod/makefile
+	cat ./makefile_2.3        >> ./prod/makefile  

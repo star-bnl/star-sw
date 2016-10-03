@@ -164,7 +164,17 @@ MakeChairOptionalInstance2(tpcCorrection,St_TpcrChargeC,Calibrations/tpc/TpcrCha
 #include "St_TpcTanLC.h"
 MakeChairInstance2(tpcCorrection,St_TpcTanLC,Calibrations/tpc/TpcTanL);
 #include "St_TpcCurrentCorrectionC.h"
-MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
+//MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
+ClassImp(St_TpcCurrentCorrectionC);
+St_TpcCurrentCorrectionC *St_TpcCurrentCorrectionC::fgInstance = 0;
+St_TpcCurrentCorrectionC *St_TpcCurrentCorrectionC::instance() {
+  if (fgInstance) return fgInstance;
+  St_tpcCorrection *table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcCurrentCorrectionX");
+  if (! table)      table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcCurrentCorrection");
+  assert(table);	  DEBUGTABLE(tpcCorrection);	
+  fgInstance = new St_TpcCurrentCorrectionC(table);
+  return fgInstance;
+}
 #include "St_TpcZDCC.h"
 MakeChairInstance2(tpcCorrection,St_TpcZDCC,Calibrations/tpc/TpcZDC);
 #include "St_TpcSpaceChargeC.h"
@@ -880,6 +890,11 @@ MakeChairInstance2(Survey,StSsdOnGlobal,Geometry/ssd/SsdOnGlobal);
 MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
+#include "StSstSurveyC.h"
+MakeChairInstance2(Survey,StSstOnGlobal,Geometry/sst/SstOnGlobal);
+MakeChairInstance2(Survey,StSstSectorsOnGlobal,Geometry/sst/SstSectorsOnGlobal);
+MakeChairInstance2(Survey,StSstLaddersOnSectors,Geometry/sst/SstLaddersOnSectors);
+MakeChairInstance2(Survey,StSstWafersOnLadders,Geometry/sst/SstWafersOnLadders);
 #include "StTpcSurveyC.h"
 MakeChairAltInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));

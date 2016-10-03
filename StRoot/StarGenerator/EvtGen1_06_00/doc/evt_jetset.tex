@@ -1,0 +1,36 @@
+\section{Interface to JetSet}
+\label{sect:jetsetinterface}
+\index{jetset interface}
+\index{JETSET}
+\index{EvtStringParticle}
+
+The {\tt JETSET} and {\tt JSCONT} models provides interface to JetSet.
+The {\tt JSCONT} model is specialized for producing $q\bar q$ jets
+from an $e^+e^-$ interaction. The {\tt JETSET} model is a generic interface
+to use JetSet for decaying particles. 
+
+When JetSet is asked to decay a particle it uses a decay table that has
+been build from the EvtGen decay table, DECAY.DEC. Entries in the decay
+table that uses the {\tt JETSET} model is copied into a JetSet format
+decay table. This decay table is read by JetSet after EvtGen is done
+reading the decay tables, including user decay tables. (This file is
+currently called jet.d and is left after the jobs is finished in the 
+current directory.) The decay table for JetSet is constructed from the 
+list of daughters that were listed in the EvtGen decay table and the
+model is taken as the argument to the {\tt JETSET} model.
+
+To implement the partons that jetset generates a new particle in EvtGen was
+created to hold the list of partons. This class is called EvtStringParticle,
+the name is taken from the idea in JetSet that these partons form a string.
+The EvtStringParticle is derived from EvtParticle, and addes member data to
+store the four momenta and ids of the partons. 
+
+\index{alias}
+The functionality of aliases in EvtGen and the {\tt JETSET} model don't work
+well together. The implementation of aliases in EvtGen creates a new decay
+table for the aliased particle. However, JetSet don't have the functionality
+to allow two, or more, different decay tables for the same particle. Hence,
+EvtGen will not allow you to decay a particle that is an alias using the 
+{\tt JETSET} model. 
+
+

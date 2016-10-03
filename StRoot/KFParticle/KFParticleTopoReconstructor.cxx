@@ -581,22 +581,46 @@ struct ParticleInfo
   float fMassDistance;
 };
 
+bool UseParticleInCompetition(int PDG)
+{
+  bool use = (PDG == 310) ||         //K0
+             (PDG == 22) ||          //gamma
+             (PDG == 111) ||         //pi0
+             (abs(PDG) == 3122) ||   //Lambda
+             (abs(PDG) == 3312) ||   //Xi
+             (abs(PDG) == 3334) ||   //Omega
+             (abs(PDG) == 3003) ||   //LambdaN
+             (abs(PDG) == 3103) ||   //LambdaNN
+             (abs(PDG) == 3004) ||   //H3L
+             (abs(PDG) == 3005) ||   //H4L
+             (abs(PDG) == 3006) ||   //He4L
+             (abs(PDG) == 3007) ||   //He5L
+             (abs(PDG) == 3203) ||   //LLn
+             (abs(PDG) == 3008) ||   //H4LL
+             (abs(PDG) == 3009) ||   //H4LL
+             (abs(PDG) == 3010) ||   //H5LL
+             (abs(PDG) == 3011);     //He6LL
+  return use;
+}
+
 void KFParticleTopoReconstructor::SelectParticleCandidates()
 {
   std::vector<ParticleInfo> particleInfo;
   std::vector<bool> isUsed(fParticles.size());
   std::vector<bool> deleteCandidate(fParticles.size());
+  std::vector<int>  bestMother(fParticles.size());
   
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {
     isUsed[iParticle] = false;
-    deleteCandidate[iParticle] = false;    
+    deleteCandidate[iParticle] = false; 
+    bestMother[iParticle] = -1;
   }
 
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {
     KFParticle tmp = fParticles[iParticle];
-    if(!(abs(fParticles[iParticle].GetPDG()) == 310 || abs(fParticles[iParticle].GetPDG()) == 3122)) continue;
+    if(!UseParticleInCompetition(fParticles[iParticle].GetPDG())) continue;
     tmp.SetProductionVertex(GetPrimVertex());
     if(tmp.Chi2()/tmp.NDF()>3)
       deleteCandidate[iParticle] = true;
@@ -606,7 +630,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {
     if(deleteCandidate[iParticle]) continue;
-    if(!(abs(fParticles[iParticle].GetPDG()) == 310 || abs(fParticles[iParticle].GetPDG()) == 3122)) continue;
+    if(!UseParticleInCompetition(fParticles[iParticle].GetPDG())) continue;
     
     float mass, massSigma;
     fParticles[iParticle].GetMass(mass, massSigma);
@@ -620,7 +644,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
     for(unsigned int jParticle=iParticle+1; jParticle<fParticles.size(); jParticle++)
     {
       if(deleteCandidate[jParticle]) continue;
-      if(!(abs(fParticles[jParticle].GetPDG()) == 310 || abs(fParticles[jParticle].GetPDG()) == 3122)) continue;
+      if(!UseParticleInCompetition(fParticles[jParticle].GetPDG())) continue;
       
       fParticles[jParticle].GetMass(mass, massSigma);
       KFParticleDatabase::Instance()->GetMotherMass(fParticles[jParticle].GetPDG(), massPDG, massPDGSigma);
@@ -650,10 +674,16 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 //         }
           
         if(dm1 < dm2)
+        {
           deleteCandidate[jParticle] = true;
+          bestMother[fParticles[iParticle].DaughterIds()[0]] = iParticle;
+          bestMother[fParticles[iParticle].DaughterIds()[1]] = iParticle;
+        }
         else
         {
           deleteCandidate[iParticle] = true;
+          bestMother[fParticles[iParticle].DaughterIds()[0]] = jParticle;
+          bestMother[fParticles[iParticle].DaughterIds()[1]] = jParticle;
           break;
         }
       }
@@ -816,6 +846,18 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 //     else
 //       deleteCandidate[index] = true;
 //   }
+  
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    if(deleteCandidate[iParticle]) continue;
+    
+    for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+      if(bestMother[fParticles[iParticle].DaughterIds()[iDaughter]] != iParticle && bestMother[fParticles[iParticle].DaughterIds()[iDaughter]] > -1)
+      {
+        deleteCandidate[iParticle] = true;
+        break;
+      }
+  }
   
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
     if(deleteCandidate[iParticle])

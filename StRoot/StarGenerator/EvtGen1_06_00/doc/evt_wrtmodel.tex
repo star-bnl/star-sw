@@ -1,0 +1,496 @@
+\section{Decay models}
+\label{sect:newmodel}
+
+\subsection{Introduction to decay models}
+
+{\it Anders put text here...}
+%EvtGen is 
+%organized as a framework in which decays are added as
+%modules, as known as models. 
+%This section explains the process of writing 
+%modules for new decay processes.
+
+Each decay model is a class that is derived from the
+base class {\tt EvtDecayBase}, as shown in Figure~\ref{fig:decaybase}. 
+Models may handle many different
+decays, or might be specialized for one special decay. 
+An example of a model that can handle many different decays
+is the {\tt VSS} model, which decays a vector meson
+to a pair of scalar particles. For example, the decays
+$D^*\rightarrow D\pi$ and 
+$\rho\rightarrow \pi\pi$ are handled by this model. 
+An example of a highly specialized model is
+{\tt BTO4PICP}, which describes
+the decay $B\rightarrow \pi^+\pi^-\pi^+\pi^-$.
+
+\begin{figure}
+\begin{center}
+\epsfig{figure=evtdecaybase.eps,height=3in}
+\caption{Diagram of the {\tt EvtDecayBase} class and
+classes derived from it.  {\tt EvtDecayAmp},
+{\tt EvtDecayTBaseProb}, and {\tt EvtDecayIncoherent} are
+templated classes that are used by modules that compute
+the full decay amplitude, that compute the decay probability, 
+and those that return unpolarized daughters, respectively.}
+\label{fig:decaybase}
+\end{center}
+\end{figure}
+
+\subsection{Creating new decay models}
+
+To simplify the writing of decay models there are three different classes that
+are derived from {\tt EvtDecayBase}. These are {\tt EvtDecayAmp},
+{\tt EvtDecayProb}, and {\tt EvtDecayIncoherent}. When
+writing decay models it is most convenient to derive from one of
+these classes. These classes have slightly different interfaces depending
+on what information the decay model provides. Some models will provide the 
+complete amplitude information where as other models might provide 
+just a probability or a set of four-vectors. Models that 
+don't provide the full set of amplitudes will of course not
+be able to simulate the complete angular distributions. Below, a short
+description is given to explain when you want to use each of these
+classes as the base class for your decay model.
+\begin{itemize}
+\item {\tt EvtDecayAmp} allows you to specify the complete amplitudes
+      and hence do a complete simulation of the angular distributions. 
+\item {\tt EvtDecayProb} allows you to calculate a probability for
+      the decay. This probability is then used in the accept-reject method.
+      Any spin information is lost, all produced particles are unpolarized
+      and uncorrelated.
+\item {\tt EvtDecayIncoherent} just accepts the four vectors as
+      generated. This is most useful when interfacing to another 
+      generator, e.g. JetSet.
+      Any spin information is lost, all produced particles are unpolarized
+      and uncorrelated.
+
+\end{itemize}
+
+\subsection{Example: EvtVSS model}
+In writing a decay model there are five member functions that
+need to be implemented.  To illustrate this, we show the
+{\tt EvtVSS} model as an example.  
+
+{\footnotesize
+\begin{verbatim}
+//--------------------------------------------------------------------------
+//
+// Environment:
+//      This software is part of the EvtGen package developed jointly
+//      for the BaBar and CLEO collaborations.  If you use all or part
+//      of it, please give an appropriate acknowledgement.
+//
+// Copyright Information:
+//      Copyright (C) 1998      Caltech, UCSB
+//
+// Module: EvtGen/EvtVSS.hh
+//
+// Description:
+//
+// Modification history:
+//
+//    DJL/RYD     August 11, 1998         Module created
+//
+//------------------------------------------------------------------------
+
+#ifndef EVTVSS_HH
+#define EVTVSS_HH
+
+#include "EvtGen/EvtDecayAmp.hh"
+#include "EvtGen/EvtParticle.hh"
+
+class EvtVSS:public  EvtDecayAmp  {
+
+public:
+  EvtVSS() {}
+  virtual ~EvtVSS();
+
+  EvtDecayBase* clone();
+  void getName(EvtString& name);
+
+  void init();
+  void initProbMax();
+  void decay(EvtParticle *p); 
+};
+
+#endif
+\end{verbatim}
+}
+
+The constructor and destructor in this example are emtpy.  
+The virtual destructor must be implemented in the {.cc} file, and
+is not shown.
+
+The simplest method to implement is the {\tt clone()}
+method, which is used to create an instance of a model each time
+the it is used in the decay table. 
+This is done using the prototype
+pattern~\cite{Gangof4}.
+The implementation of the {\tt clone()} method in the {\tt EvtVSS} module
+is
+
+\begin{footnotesize}
+\begin{verbatim}
+EvtDecayBase* EvtVSS::clone(){
+  return new EvtVSS;
+}
+\end{verbatim}
+\end{footnotesize}
+
+The {\tt getName} method specifies the name of the module, and 
+is used when parsing the decay table.  The {\tt EvtReadDecay}
+class searches for a match between the models in the decay
+table and the names stored by each implemented module
+using the {\tt getName} function.  For the {\tt EvtVSS}
+class, the implementation of {\tt getName} is 
+
+\begin{footnotesize}
+\begin{verbatim}
+void EvtVSS::getName(EvtString& model_name){
+  model_name="VSS"; 
+}
+\end{verbatim}
+\end{footnotesize}
+
+The {\tt initProbMax} member function
+sets the maximum probability that can be obtained by the 
+model in any decay. This maximum probability is used by the EvtGen
+framework in its decision to keep or reject a 
+decay based on the decay amplitude
+or probability computed by the model.  The maximum
+probability should be chosen such that it is truely
+a maximum.  However, the larger the maximum probability
+as compared to the true maximum,
+the less efficient the model will be.
+During the generation
+of events, if the calculated probability is greater than the
+maximum probability, a warning is printed.  
+
+When particles of finite width are present in the decay tree, it may be
+difficult to efficiently set the maximum probability, as the true
+maximum may depend on the mass of
+the wide particle.  When this is the case, the model will still give
+correct output. However it will be very inefficient 
+and may get into semi-infinite loops for extreme mass
+configurations.
+Care should be taken in the implementation
+of decay amplitudes so that this is not the case.  
+
+The maximum probability is set
+by calling {\tt setProbMax(prbmax)} method, which is a 
+member function of {\tt EvtDecayBase}.  
+\begin{footnotesize}
+\begin{verbatim}
+void EvtVSS::initProbMax() {
+   setProbMax(1.0);
+}      
+\end{verbatim}
+\end{footnotesize}
+
+Models that can handle many different decays may have different 
+maximal probabilities depending on what initial and final
+state is being generated. To accomadate such models,
+the parent and daughter 
+information ({\tt ndaug, parent, narg, daug, args} from
+the {\tt EvtDecayBase} base class) can be accessed to
+calculate the maximum probabilites.
+
+During development of a model it is often convenient not to 
+implement the {\tt initProbMax} function. If this
+function is not implemented, a default maximum probability is
+found by calling the model 500 times and using
+the largest value of the probability in these 500 tries.
+For a production Monte Carlo, this is not an acceptable way of
+determining the maximum probability, as during the first
+call to the model, random numbers will
+be used when performing the 500 iterations.  This way, the
+output of the Monte Carlo will depend on the starting 
+event, not just the random number seed.  
+There is a strict requirement on EvtGen that 
+given the random number seed at the
+start of the event the same decay must be obtained independently
+of previous events.
+
+The {\tt init} method is a generic
+initialization function that will be called once for each occurance
+of the decay model in the decay file. 
+The {\tt init} function allows modules to precompute quantities, for example
+to process the arguments of the
+model into a more convenient form.  For many of the models
+currently implemented, the {\tt init} function is used
+to check consistency between the number of arguments
+in the decay table and that expected by the model. The 
+{\tt init} method for the {\tt EvtVSS} class
+is shown below.
+
+\begin{footnotesize}
+\begin{verbatim}
+void EvtVSS::Init(){
+
+  // check that there are 0 arguments
+
+  if (getNArg()!=0) {
+
+    report(ERROR,"EvtGen") << "EvtVSS generator expected "
+                           << " 0 arguments but found:"<<getNArg()<<endl;
+    report(ERROR,"EvtGen") << "Will terminate execution!"<<endl;
+    ::abort();
+
+  }
+  if ( getNDaug()!=2) {
+    report(INFO,"EvtGen") << getNDaug() <<" "<<EvtPDL::name(getDaug(0))<<endl;
+    report(ERROR,"EvtGen") << "EvtVSS generator expected "
+                           << " a 2 daughters, found:"<<
+                           getNDaug()<<endl;
+    report(ERROR,"EvtGen") << "Will terminate execution!"<<endl;
+    ::abort();
+  }
+    
+  EvtSpinType::spintype parenttype = EvtPDL::getSpinType(getParentId());
+  EvtSpinType::spintype d1type=EvtPDL::getSpinType(getDaug(0));
+  EvtSpinType::spintype d2type=EvtPDL::getSpinType(getDaug(1));
+
+  if ( parenttype != EvtSpinType::VECTOR ) {
+    report(ERROR,"EvtGen") << "EvtVSS generator expected "
+                           << " a VECTOR parent, found:"<<
+                           EvtPDL::name(getParentId())<<endl;
+    report(ERROR,"EvtGen") << "Will terminate execution!"<<endl;
+    ::abort();
+  }
+  if ( d1type != EvtSpinType::SCALAR ) {
+    report(ERROR,"EvtGen") << "EvtVSS generator expected "
+                           << " a SCALAR 1st daughter, found:"<<
+                           EvtPDL::name(getDaug(0))<<endl;
+    report(ERROR,"EvtGen") << "Will terminate execution!"<<endl;
+    ::abort();
+  }
+  if ( d2type != EvtSpinType::SCALAR ) {
+    report(ERROR,"EvtGen") << "EvtVSS generator expected "
+                           << " a SCALAR 2nd daughter, found:"<<
+                           EvtPDL::name(getDaug(1))<<endl;
+    report(ERROR,"EvtGen") << "Will terminate execution!"<<endl;
+    ::abort();
+  }
+
+
+}
+\end{verbatim}
+\end{footnotesize}
+
+Finally, we describe the {\tt decay} member function. This method
+does the actual work of decaying the particle,
+including the generation of kinematics as well as 
+the amplitude or probability 
+calculation.  For the {\tt EvtVSS} class, the amplitude for
+the decay of a vector particle into two scalar particles
+can be written as
+\begin{equation}
+A=\varepsilon_{\mu}v^{\mu},
+\label{eq:vssamp}
+\end{equation}
+where $\varepsilon_{\mu}$ is the polarization vector for the 
+vector particle and $v$ is the four velocity of the first
+scalar particle.  This amplitude is implemented as
+
+\begin{footnotesize}
+\begin{verbatim}
+void EvtVSS::Decay( EvtParticle *p){
+
+  p->initializePhaseSpace(getNDaug(),getDaugs());
+
+  EvtVector4R pdaug = p->getDaug(0)->getP4();
+  
+  double norm=1.0/pdaug.d3mag();
+
+  vertex(0,norm*pdaug*(p->eps(0)));
+  vertex(1,norm*pdaug*(p->eps(1)));
+  vertex(2,norm*pdaug*(p->eps(2)));
+
+  return;
+}
+\end{verbatim}
+\end{footnotesize}
+
+The argument of the {\tt decay}
+member function is a pointer to the particle that should be
+decayed. The first thing that is done is to create the
+the daughter particles and to
+link these particles onto the decay tree. 
+This is done by the {\tt EvtParticle::initializePhaseSpace} 
+member function.
+The arguments to this method are the number and list of 
+daughters, as specified in the decay table.
+The {\tt initializePhaseSpace} function 
+generates kinematics according to phase space.
+
+For models that use the class {\tt EvtDecayAmp},
+an amplitude for every possible set of set states
+should be computed.  For {\tt EvtVSS}, these
+amplitudes are calculated
+according to Eq.~\ref{eq:vssamp}. These amplitudes are
+then saved using the {\tt vertex} member
+function.  The first argument is the index of the 
+basis vector used to compute the amplitude.
+The {\tt EvtDecayAmp} header file shows how this syntax
+generatizes when more than one nontrival spin is invovled
+(as is the case for $B \rightarrow D^* \ell \nu$, for example).
+\begin{footnotesize}
+\begin{verbatim}
+void vertex(int i1, const EvtComplex& amp)
+void vertex(int i1, int i2, const EvtComplex& amp)
+void vertex(int i1, int i2, int i3, const EvtComplex& amp)
+\end{verbatim}
+\end{footnotesize}
+
+After computing the amplitude, the {\tt decay} function 
+returns and the amplitudes are used in an 
+accept-reject test. If failed, the {\tt decay} method is 
+called once more and a new kinematic configuration is generated 
+and new amplitudes are calculated.
+
+\subsection{Example: EvtPi0Dalitz}
+
+For models which derive from {\tt EvtDecayProb} or
+{\tt EvtDecayIncoherent} classes, the {\tt decay} function
+is slightly different.  As an example of a model
+derived from the {\tt EvtDecayProb} class, we show
+the {\tt PI0DALITZ} model:
+ 
+\begin{footnotesize}
+\begin{verbatim}
+//--------------------------------------------------------------------------
+//
+// Environment:
+//      This software is part of the EvtGen package developed jointly
+//      for the BaBar and CLEO collaborations.  If you use all or part
+//      of it, please give an appropriate acknowledgement.
+//
+// Copyright Information:
+//      Copyright (C) 1998      Caltech, UCSB
+//
+// Module: EvtPi0Dalitz.cc
+//
+// Description: pi0 -> e+ e- gamma 
+//
+// Modification history:
+//
+//    DJL/RYD    June 30, 1998          Module created
+//
+//------------------------------------------------------------------------
+//
+#include <fstream.h>
+#include <stdio.h>
+#include "EvtGen/EvtString.hh"
+#include "EvtGen/EvtGenKine.hh"
+#include "EvtGen/EvtParticle.hh"
+#include "EvtGen/EvtPDL.hh"
+#include "EvtGen/EvtReport.hh"
+#include "EvtGen/EvtPi0Dalitz.hh"
+#include "EvtGen/EvtVector4C.hh"
+#include "EvtGen/EvtDiracSpinor.hh"
+
+
+//code left out
+
+void EvtPi0Dalitz::decay( EvtParticle *p){
+
+  EvtParticle *ep, *em, *gamma;
+  
+  p->makeDaughters(getNDaug(),getDaugs());
+  ep=p->getDaug(0);
+  em=p->getDaug(1);
+  gamma=p->getDaug(2);
+
+ 
+
+  double mass[3];
+   
+  double m = p->mass();
+ 
+  findMasses( p, getNDaug(), getDaugs(), mass );
+
+  EvtVector4R p4[3];
+
+  setWeight(EvtGenKine::PhaseSpacePole
+           (m,mass[0],mass[1],mass[2],0.00000002,p4));
+
+  ep->init( getDaug(0), p4[0] );
+  em->init( getDaug(1), p4[1]);
+  gamma->init( getDaug(2), p4[2]);
+
+  //ep em invariant mass^2
+  double m2=(p4[0]+p4[1]).mass2();
+  EvtVector4R q=p4[0]+p4[1];
+  //Just use the prob summed over spins...
+
+  EvtTensor4C w,v;
+
+  v=2.0*(p4[2]*q)*directProd(q,p4[2]) 
+    - (p4[2]*q)*(p4[2]*q)*EvtTensor4C::g()
+    -m2*directProd(p4[2],p4[2]);
+ 
+  w=4.0*( directProd(p4[0],p4[1]) + directProd(p4[1],p4[0])
+	   -EvtTensor4C::g()*(p4[0]*p4[1]-p4[0].mass2()));
+
+  double prob=(real(cont(v,w)))/(m2*m2);
+  prob *=(1.0/( (0.768*0.768-m2)*(0.768*0.768-m2)
+           +0.768*0.768*0.151*0.151));
+
+  setProb(prob);
+
+  return;
+}
+}
+\end{verbatim}
+\end{footnotesize}
+
+Instead of the {\tt vertex} function in {\tt EvtVSS},
+the $\pi^0$ Dalitz model returns a single probabiltiy
+using the {\tt setProb} member function.  
+
+Finally we show the implementation of the {\tt decay}
+member function in the {\tt PHSP} model, which derives
+from the {\tt EvtDecayIncoherent} class.
+\begin{footnotesize}
+\begin{verbatim}
+void EvtPhsp::Decay( EvtParticle *p ){
+
+  p->initializePhaseSpace(ndaug,daug);
+  return ;
+}
+
+\end{verbatim}
+\end{footnotesize}
+
+In this case, the {\tt decay} function must only
+initialize the daughters and add them to the
+particle tree.
+
+In order to write new decay models, it is also 
+necessary to know some of the syntax for 
+finding momenta and spin basis vector information
+for a given particle.  This is discussed in Section~\ref{sec:classes}.
+
+\subsection{Model parameters}
+\label{sect:modelparameters}
+
+In Section~\ref{sect:decaytable} the feature of parameters
+for a model was introduced. In particular, 
+{\tt JetSetPar} is an example of the mechanism 
+that allows any model to set parameters.
+To make use of this, the 
+methods
+\begin{verbatim}
+EvtString commandName();
+void command(EvtString cmd);
+\end{verbatim}
+must be implemented within the model.
+The {\tt commandName} method returns a string that contains the identifier
+to be searched for in the decay table. In the case of the
+JetSet model, this was {\tt JetSetPar}. It is encouraged that this
+string start with the model name, such that it is obvious 
+to which model the parameter belongs. When the decay table
+is parsed, the method {\tt command} is called
+with the string found in the decay table as the argument.
+This function is invoked on the prototype object. Thus,
+any data that is obtained through this mechanism should be stored
+in a static variable such that it is common to all instances of the model.

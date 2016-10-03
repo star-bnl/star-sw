@@ -1,0 +1,16 @@
+#----
+ALEPH: HEPEVT  clean  tauola-dir
+	@echo Preparing ALEPH version of tauola in ../tauola
+	@( rm -f standalone-F/*.f )
+#     fill directory prod of ALEPH version
+	@$(CPP) $(CPPFLAGS) -DALEPH   formf.F prod/formf.f
+	@$(CPP) $(CPPFLAGS) -DALEPH   tauola.F prod/tauola.f
+	@( cp  makefile.cpc prod/makefile) 
+	@( cp  makefile.templ.cpc prod/makefile.templ) 
+#     create interfaces 
+	@( $(CPP) $(CPPFLAGS) -DALEPH    tauface-KK-F/Tauface.F tauface-KK-F/Tauface.f)
+	@( $(CPP) $(CPPFLAGS) -DALEPH  standalone-F/taumain.F standalone-F/taumain.f)
+	@( $(CPP) $(CPPFLAGS) -DALEPH  jetset-F/tauola_photos_ini.F jetset-F/tauola_photos_ini.f)
+	@( $(CPP) $(CPPFLAGS) -DALEPH  jetset-F/tauface-jetset.F jetset-F/tauface-jetset.f) 
+#     fill true (external) ../tauola directory 
+	@( cp prod/*.f ../tauola/.)

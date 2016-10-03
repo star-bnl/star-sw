@@ -1,0 +1,201 @@
+C ----------------------------------------------------------------------
+c SUBROUTINE JAKER,
+C CHOOSES DECAY MODE ACCORDING TO LIST OF BRANCHING RATIOS
+C JAK=1 ELECTRON MODE
+C JAK=2 MUON MODE
+C JAK=3 PION MODE
+C JAK=4 RHO  MODE
+C JAK=5 A1   MODE
+C JAK=6 K    MODE
+C JAK=7 K*   MODE
+#if defined (ALEPH)
+C JAK=8-13 npi modes
+C JAK=14-19 KKpi & Kpipi modes
+C JAK=20-21 eta pi pi; gamma pi pi modes
+#else
+C JAK=8 nPI  MODE
+#endif
+C
+C     called by : DEXAY
+C ----------------------------------------------------------------------
+      COMMON / TAUBRA / GAMPRT(30),JLIST(30),NCHAN
+#if defined (ALEPH)
+#else
+C      REAL   CUMUL(20)
+#endif
+      REAL   CUMUL(30),RRR(1)
+C
+      IF(NCHAN.LE.0.OR.NCHAN.GT.30) GOTO 902
+      CALL RANMAR(RRR,1)
+      SUM=0
+      DO 20 I=1,NCHAN
+      SUM=SUM+GAMPRT(I)
+  20  CUMUL(I)=SUM
+      DO 25 I=NCHAN,1,-1
+      IF(RRR(1).LT.CUMUL(I)/CUMUL(NCHAN)) JI=I
+  25  CONTINUE
+      JAK=JLIST(JI)
+      RETURN
+ 902  PRINT 9020
+ 9020 FORMAT(' ----- JAKER: WRONG NCHAN')
+      STOP
+      END
+      SUBROUTINE DEKAY(KTO,HX)
+C     ***********************
+C THIS DEKAY IS IN SPIRIT OF THE 'DECAY' WHICH
+C WAS INCLUDED IN KORAL-B PROGRAM, COMP. PHYS. COMMUN.
+C VOL. 36 (1985) 191, SEE COMMENTS  ON GENERAL PHILOSOPHY THERE.
+C KTO=0 INITIALISATION (OBLIGATORY)
+C KTO=1,11 DENOTES TAU+ AND KTO=2,12 TAU-
+C DEKAY(1,H) AND DEKAY(2,H) IS CALLED INTERNALLY BY MC GENERATOR.
+C H DENOTES THE POLARIMETRIC VECTOR, USED BY THE HOST PROGRAM FOR
+C CALCULATION OF THE SPIN WEIGHT.
+C USER MAY OPTIONALLY CALL DEKAY(11,H) DEKAY(12,H) IN ORDER
+C TO TRANSFORM DECAY PRODUCTS TO CMS AND WRITE LUND RECORD IN /LUJETS/.
+C KTO=100, PRINT FINAL REPORT  (OPTIONAL).
+C DECAY MODES:
+C JAK=1 ELECTRON DECAY
+C JAK=2 MU  DECAY
+C JAK=3 PI  DECAY
+C JAK=4 RHO DECAY
+C JAK=5 A1  DECAY
+C JAK=6 K   DECAY
+C JAK=7 K*  DECAY
+#if defined (ALEPH)
+C JAK= 8-13 npi modes
+C JAK=14-19 KKpi & Kpipi modes
+C JAK=20-21 eta pi pi; gamma pi pi modes
+C JAK=0 INCLUSIVE:  JAK=1-21
+#else
+C JAK=8 NPI DECAY
+C JAK=0 INCLUSIVE:  JAK=1,2,3,4,5,6,7,8
+#endif
+      REAL  H(4)
+      REAL*8 HX(4)
+      COMMON / JAKI   /  JAK1,JAK2,JAKP,JAKM,KTOM
+#if defined (ALEPH)
+      COMMON / IDFC  / IDFF
+#else
+      COMMON / IDFC  / IDF
+#endif
+      COMMON /TAUPOS/ NP1,NP2                
+      COMMON / TAUBMC / GAMPMC(30),GAMPER(30),NEVDEC(30)
+      REAL*4            GAMPMC    ,GAMPER
+      PARAMETER (NMODE=15,NM1=0,NM2=1,NM3=8,NM4=2,NM5=1,NM6=3)
+#if defined (ALEPH)
+      COMMON / TAUDCD /IDFFIN(9,NMODE),MULPIK(NMODE)
+#else
+      COMMON / TAUDCD /IDFFIN(9,NMODE),MULPIK(NMODE)
+#endif
+     &                ,NAMES
+      CHARACTER NAMES(NMODE)*31
+      COMMON / INOUT / INUT,IOUT
+      REAL  PDUM1(4),PDUM2(4),PDUM3(4),PDUM4(4),PDUM5(4),HDUM(4)
+      REAL  PDUMX(4,9)
+      DATA IWARM/0/
+      KTOM=KTO
+#if defined (ALEPH)
+      IDF =IDFF
+#endif
+      IF(KTO.EQ.-1) THEN
+C     ==================
+C       INITIALISATION OR REINITIALISATION
+C       first or second tau positions in HEPEVT as in KORALB/Z
+        NP1=3
+        NP2=4
+        KTOM=1
+        IF (IWARM.EQ.1) X=5/(IWARM-1)
+        IWARM=1
+        WRITE(IOUT,7001) JAK1,JAK2
+        NEVTOT=0
+        NEV1=0
+        NEV2=0
+        IF(JAK1.NE.-1.OR.JAK2.NE.-1) THEN
+          CALL DADMEL(-1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DADMMU(-1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DADMPI(-1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DADMRO(-1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4)
+          CALL DADMAA(-1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5,JDUM)
+          CALL DADMKK(-1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DADMKS(-1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,JDUM)
+          CALL DADNEW(-1,IDUM,HDUM,PDUM1,PDUM2,PDUMX,JDUM)
+        ENDIF
+        DO 21 I=1,30
+        NEVDEC(I)=0
+        GAMPMC(I)=0
+ 21     GAMPER(I)=0
+      ELSEIF(KTO.EQ.1) THEN
+C     =====================
+C DECAY OF TAU+ IN THE TAU REST FRAME
+        NEVTOT=NEVTOT+1
+        IF(IWARM.EQ.0) GOTO 902
+        ISGN= IDF/IABS(IDF)
+#if defined (CePeCe)
+#elif defined (ALEPH)
+#else
+C AJWMOD to change BRs depending on sign:
+        CALL TAURDF(KTO)
+#endif
+        CALL DEKAY1(0,H,ISGN)
+      ELSEIF(KTO.EQ.2) THEN
+C     =================================
+C DECAY OF TAU- IN THE TAU REST FRAME
+        NEVTOT=NEVTOT+1
+        IF(IWARM.EQ.0) GOTO 902
+        ISGN=-IDF/IABS(IDF)
+#if defined (CePeCe)
+#elif defined (ALEPH)
+#else
+C AJWMOD to change BRs depending on sign:
+        CALL TAURDF(KTO)
+#endif
+        CALL DEKAY2(0,H,ISGN)
+      ELSEIF(KTO.EQ.11) THEN
+C     ======================
+C REST OF DECAY PROCEDURE FOR ACCEPTED TAU+ DECAY
+        NEV1=NEV1+1
+        ISGN= IDF/IABS(IDF)
+        CALL DEKAY1(1,H,ISGN)
+      ELSEIF(KTO.EQ.12) THEN
+C     ======================
+C REST OF DECAY PROCEDURE FOR ACCEPTED TAU- DECAY
+        NEV2=NEV2+1
+        ISGN=-IDF/IABS(IDF)
+        CALL DEKAY2(1,H,ISGN)
+      ELSEIF(KTO.EQ.100) THEN
+C     =======================
+        IF(JAK1.NE.-1.OR.JAK2.NE.-1) THEN
+          CALL DADMEL( 1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DADMMU( 1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5)
+          CALL DADMPI( 1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DADMRO( 1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4)
+          CALL DADMAA( 1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,PDUM5,JDUM)
+          CALL DADMKK( 1,IDUM,PDUM,PDUM1,PDUM2)
+          CALL DADMKS( 1,IDUM,HDUM,PDUM1,PDUM2,PDUM3,PDUM4,JDUM)
+          CALL DADNEW( 1,IDUM,HDUM,PDUM1,PDUM2,PDUMX,JDUM)
+          WRITE(IOUT,7010) NEV1,NEV2,NEVTOT
+          WRITE(IOUT,7011) (NEVDEC(I),GAMPMC(I),GAMPER(I),I= 1,7)
+          WRITE(IOUT,7012) 
+     $         (NEVDEC(I),GAMPMC(I),GAMPER(I),NAMES(I-7),I=8,7+NMODE)
+          WRITE(IOUT,7013) 
+        ENDIF
+      ELSE
+C     ====
+        GOTO 910
+      ENDIF
+C     =====
+        DO 78 K=1,4
+ 78     HX(K)=H(K)
+      RETURN
+ 7001 FORMAT(///1X,15(5H*****)
+#if defined (ALEPH)
+     $ /,' *',     25X,'*****TAUOLA LIBRARY: VERSION 2.7 ******',9X,1H*,
+     $ /,' *',     25X,'*DEC 1993; ALEPH fixes introd. dec 98 *',9X,1H*,
+     $ /,' *',     25X,'**AUTHORS: S.JADACH, Z.WAS*************',9X,1H*,
+     $ /,' *',     25X,'**R. DECKER, M. JEZABEK, J.H.KUEHN*****',9X,1H*,
+     $ /,' *',     25X,'***** PUBLISHED IN COMP. PHYS. COMM.***',9X,1H*,
+     $ /,' *',     25X,'Physics initialization by ALEPH collab ',9X,1H*,
+     $ /,' *',     25X,'it is suggested to use this version    ',9X,1H*,
+     $ /,' *',     25X,' with the help of the collab. advice   ',9X,1H*,
+     $ /,' *',     25X,'*******CERN TH-6793 NOVEMBER  1992*****',9X,1H*,
+     $ /,' *',     25X,'**5 or more pi dec.: precision limited ',9X,1H*,

@@ -1,0 +1,55 @@
+Date: Thu, 24 Feb 2000 15:50:46 -0500 (EST)
+From: Sherry Towers <smjt@hep.upenn.edu>
+To: johann.kuehn@physik.uni-karlsruhe.de, stanislaw.jadach@ifj.edu.pl,
+    was@vsk01.ifj.edu.pl, Zbigniew.Was@cern.ch, Sherry.Towers@cern.ch
+Cc: Sherry Towers <smjt@higgs.hep.upenn.edu>
+Subject: Tauola modelling of tau->nu(Kpipi)- decays...
+
+Hello,
+ 
+I am a research associate working with the
+OPAL collaboration with the High Energy
+Physics group at Carleton University.  I was
+responsible for the OPAL analysis of three
+prong tau decays with charged kaons, described
+in hep-ex/9908013.
+ 
+A crucial aspect of the analysis was the
+modifications I made to TAUOLA to take into
+account the severe phase-space restrictions inherent
+in decay modes like K1(1270)->rho(770)K.  Taking
+into account the phase space restrictions shifts the
+mean of K1(1270) peak down in the Kpipi invariant mass
+spectrum, and also shifts the mean of the rho(770) peak
+in the pipi mass spectrum.  Confusion has arisen in
+past analyses (for example, DELPHI's preliminary analysis
+of the tau->nu K-pi-pi+ state, presented at TAU 96), when it 
+was noticed that the Kpipi invariant mass spectrum 
+appeared consistent with K1(1270)
+dominance, but that the peak in the pipi invariant mass 
+spectrum lay below the naively expected mass of 770 MeV.
+
+I have set up a web page at 
+   http://www.physics.carleton.ca/~smjt/res.html
+which describes the ansatz used to take the
+phase space restrictions into account, and also
+the modifications made to TAUOLA in the OPAL
+analysis.
+
+I would imagine that the the large tau samples 
+expected to be collected in the near future by 
+the various B factory experiments will require 
+more accurate modelling of the tau->nu(Kpipi)- final
+states than what is currently available.  Thus
+I thought that, before I move on from my position at
+Carleton, I should contact you, and let you know
+what modifications were made in the OPAL analysis.
+ 
+I hope this saves you (or someone else) a little work.
+ 
+Best regards,
+ 
+Sherry Towers
+
+Related files:
+new.f           diff.ps          res.ps  

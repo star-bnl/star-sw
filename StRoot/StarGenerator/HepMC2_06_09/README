@@ -1,0 +1,29 @@
+
+
+	HepMC - a C++ Event Record for Monte Carlo Generators
+
+Authors: Matt Dobbs, University of Victoria and Jorgen Beck Hansen, CERN
+Additional Authors: Lynn Garren, Fermilab
+
+Refer to: 
+  https://savannah.cern.ch/projects/hepmc/ for online documentation.
+and:
+  M. Dobbs and J.B. Hansen, 
+  "The HepMC C++ Monte Carlo Event Record for High Energy Physics", 
+  Computer Physics Communications, Vol. 134 (2001) 41-46, [ATL-SOFT-2000-001].
+
+ Copyright (C) 2000 by Matt Dobbs, University of Victoria
+                       and Jorgen Beck Hansen, CERN
+
+ The HepMC Event Record Package is the intellectual property of
+ the package authors. Anyone may copy and distribute this package
+ freely.
+
+        *****************************************************
+
+2002-01-23 HepMC was developed on Linux with gcc.
+        Thanks to the work of Witold Pokorski and Pere Mato, 
+        it now compiles and runs on Windows with Microsoft Visual C++. 
+	
+        *****************************************************
+

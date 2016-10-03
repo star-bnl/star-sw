@@ -1,0 +1,37 @@
+Tauola C++ Interface - Examples
+-------------------------------
+
+1)
+To compile:
+-  "./configure"
+-  "make"
+
+2)
+Examples require more software than interface itself:
+
+./configure --with-hepmc=<path>          - provides path for HepMC
+./configure --with-tauola=<path>         - provides path for Tauola++
+./configure --with-pythia8=<path>        - provides path for Pythia8
+./configure --with-mc-Tester=<path>      - provides path for MC-Tester
+
+To use MC-Tester, ROOT must be installed and
+its path provided via PATH variable.
+
+To use examples with HepMC Tauola++ must be compiled with HepMC as well.
+Otherwise examples will fail during compilation.
+
+3)
+If afs paths was used during interface compilation,
+all these paths are set alredy and 
+can not be changed.
+
+4)
+Examples require:
+taumain_hepevt_example.exe     - does not require any new libraries
+taumain_standalone_example.exe - require HepMC
+single_tau_gun_example.exe     - require HepMC, Pythia8
+taumain_pythia_example.exe     - require HepMC, Pythia8, ROOT and MC-Tester
+
+
+
+Last Modified: T. Przedzinski, 28 Nov. 2011

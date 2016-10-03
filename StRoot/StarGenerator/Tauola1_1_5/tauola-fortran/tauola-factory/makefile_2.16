@@ -1,0 +1,7 @@
+	@( cp  makefile.cleo ../tauola/makefile) 
+	@( cp  makefile.templ.cleo ../tauola/makefile.templ) 
+	@( cp  standalone-F/taumain.f ../tauola/demo-standalone/taumain.f )    
+	@( cp  tauface-KK-F/Tauface.f ../tauola/demo-KK-face )
+	@(cp jetset-F/tauola_photos_ini.f ../tauola/demo-jetset/tauola_photos_ini.f)
+	@(cp jetset-F/tauface-jetset.f ../tauola/demo-jetset/tauface-jetset.f)
+	@echo "CLEO" > ../tauola/version

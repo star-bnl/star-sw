@@ -1,0 +1,7 @@
+to use new updates with Z polarization active:
+
+- hepevt common block 4kD must be taken
+
+It can be executed automatically from tauola-F directory by command:
+
+make pythia

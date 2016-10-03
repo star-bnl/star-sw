@@ -1,0 +1,253 @@
+
+\section{Algorithm}
+\label{sect:algorithm}
+\index{algorithm}
+
+
+To illustrate how the event selection algorithm works
+consider the decay 
+$B\rightarrow D^{*} \tau \bar\nu$,
+$D^* \rightarrow D\pi$, and $\tau \to \pi \nu$.
+The general case is a straight forward generalization of 
+this example. The decay amplitude can be written as
+\def\AmpB{A^{B\rightarrow D^*\tau\nu}_{\lambda_{D^*}\lambda_{\tau}}}
+\def\AmpDstar{A^{D^*\rightarrow D\pi}_{\lambda_{D^*}}}
+\def\Amptau{A^{\tau\rightarrow \pi\nu}_{\lambda_{\tau}}}
+\begin{equation}
+A=\sum_{\lambda_{D^*}\lambda_{\tau}}\AmpB
+\times \AmpDstar
+\times \Amptau,
+\label{Eq:ampeq}
+\end{equation}
+where $\lambda^{\phantom '}_{D^*}$ and $\lambda^{\phantom '}_{\tau}$ label the states of spin degrees of freedom of the
+$D^{*}$ and the $\tau$, respectively. Thus, 
+$\AmpB$ represents the decay amplitude for $B \to D^* \tau \nu$
+for the six different combinations of $D^*$ and
+$\tau$ states. 
+
+A possible implementation of Eq.~\ref{Eq:ampeq} is to generate kinematics according to phase
+space for the entire decay chain and to calculate the probability,
+the amplitude squared, which is 
+used in an accept-reject algorithm.  This approach has two serious
+limitations.  First, the maximum probability of the decay chain
+must be known.  This is logicistally difficult given the large
+number of potential decay chains in $B$ decays.  Second, for long
+decay chains the accept-reject algorithm can be very inefficient as
+the entire chain must be regenerated if the event is rejected. 
+We have implemented an algorithm that generates a decay chain as a 
+sequence of sub-decays, thus avoiding both of these limitations.
+
+First the decay of the $B$ is considered. Kinematics are generated
+according to phase space and the probability is calculated
+\begin{equation}
+P_B=\sum_{\lambda^{\phantom '}_{D^*}\lambda^{\phantom '}_{\tau}}|\AmpB|^2.
+\end{equation}
+The kinematics are regenerated until the event 
+passes an accept-reject algorithm based on $P_B$. 
+After decaying the $B$ we form the spin density matrix
+\begin{equation}
+\rho^{D^*}_{\lambda^{\phantom '}_{D^*}\lambda^{'}_{D^*}}=\sum_{\lambda^{\phantom '}_{\tau}}\AmpB
+[{A^{B\rightarrow D^*\tau\nu}_{\lambda^{'}_{D^*}\lambda^{\phantom '}_{\tau}}}]^*,
+\end{equation}
+which describes a $D^*$ from the $B \to D^* \tau \nu$ decay after summing over
+the degrees of freedom for the $\tau$.
+To generate the $D^* \to D \pi$ decay, proceed as with the $B$,
+including also $\rho^{D^*}$
+\begin{equation}
+P_{D^*}=
+{{1} \over {{\rm Tr}\,\rho^{D^*}}} 
+\sum_{\lambda^{\phantom '}_{D^*} \lambda^{'}_{D^*}}
+\rho^{D^*}_{\lambda^{\phantom '}_{D^*}\lambda^{'}_{D^*}} 
+\AmpDstar
+[{A^{D^*\rightarrow D\pi}_{\lambda^{'}_{D^*}}}]^*,
+\label{Eq:probdstar}
+\end{equation}
+where the scale factor, $1/{\rm Tr}\,\rho^{D^*}$, 
+is proportional to the decay rate, and does not affect the 
+angular distributions.  This scale factor makes
+the maximum decay probability of each sub-decay 
+independent of the full decay chain.
+
+Finally, we decay the $\tau$. We form the density matrix
+\begin{equation}
+\tilde\rho^{D^*}_{\lambda^{\phantom '}_{D^*}\lambda^{'}_{D^*}}=\AmpDstar
+[{A^{D^*\rightarrow D\pi}_{\lambda^{'}_{D^*}}}]^*,
+\end{equation}
+which encapsulates the information about the $D^*$ decay
+needed to properly decay the $\tau$ with the full correlations between
+all kinematic variables in the decay. 
+Using the $\tilde\rho^{D^*}$ matrix we calculate the spin density
+matrix of the $\tau$
+\begin{equation}
+\rho^{\tau}_{\lambda^{\phantom '}_{\tau}\lambda^{'}_{\tau}}=\sum_{\lambda^{\phantom '}_{D^*}\lambda^{'}_{D^*}}
+\tilde\rho^{D^*}_{\lambda^{\phantom '}_{D^*}\lambda^{'}_{D^*}}
+\AmpB[{A^{B\rightarrow D^*\tau\nu}_{\lambda^{'}_{D^*}\lambda^{'}_{\tau}}}]^*.
+\end{equation}
+As in the other decays, kinematics are generated according to phase space
+and the accept-reject is based on the probability calculated 
+as in Eq.~\ref{Eq:probdstar}, replacing $D^*$ with $\tau$.
+
+
+The algorithm was illustrated above using an example which should 
+convey the idea. In general consider the decay
+\begin{equation}
+A\rightarrow B_1B_2...B_N
+\end{equation}
+where the amplitudes are denoted by
+\begin{equation}
+A^{A\rightarrow B_1B_2...B_N}_{\lambda_A\lambda_{B_1}\lambda_{B_2}...\lambda_{B_N}}.
+\end{equation}
+The probability for, $P_A$, for this decay is given by
+\begin{equation}
+P_A=\sum_{\lambda_A\lambda'_{A}\lambda_{B_1}...\lambda_{B_N}}
+	\rho^{A}_{\lambda_A\lambda'_{A}}
+	A^{A\rightarrow B_1B_2...B_N}_{\lambda_A\lambda_{B_1}\lambda_{B_2}...\lambda_{B_N}}
+[A^{A\rightarrow B_1B_2...B_N}_{\lambda'_{A}\lambda_{B_1}\lambda_{B_2}...\lambda_{B_N}}]^*  .
+\end{equation}
+The forward spin-density matrix $\rho^{B_i}$, given that $B_j$, $j<i$,
+have been decayed and have backward spin-density matrices $\hat\rho^{B_j},$
+is given by
+\begin{equation}
+\rho^{B_i}_{\lambda_{B_i}\lambda'_{B_i}}=
+	\sum_{\lambda_A\lambda'_{A}
+	\lambda_{B_1}...\lambda_{B_N} \atop
+	\lambda'_{B_1}...\lambda'_{B_{i-1}}}
+	\rho^{A}_{\lambda_A\lambda'_{A}}
+	\hat\rho^{B_1}_{\lambda_{B_1}\lambda'_{B_1}}...
+	\hat\rho^{B_{i-1}}_{\lambda_{B_{i-1}}\lambda'_{B_{i-1}}}
+	A^{A\rightarrow B_1B_2...B_N}_{\lambda_A\lambda_{B_1}\lambda_{B_2}...\lambda_{B_N}}
+[A^{A\rightarrow B_1B_2...B_N}_{\lambda'_{A}\lambda'_{B_1}...\lambda'_{B_{i}}\lambda_{B_{i+1}}...\lambda_{B_N}}]^*.
+\end{equation}
+After all $B_i$ are decays the backward spin-density matrix is given by
+\begin{equation}
+\hat\rho^{A}_{\lambda_{A}\lambda'_{A}}=
+	\sum_{\lambda_{B_1}...\lambda_{B_N} \atop
+	\lambda'_{B_1}...\lambda'_{B_{N}}}
+	\hat\rho^{B_1}_{\lambda_{B_1}\lambda'_{B_1}}...
+	\hat\rho^{B_{N}}_{\lambda_{B_{N}}\lambda'_{B_N}}
+	A^{A\rightarrow B_1B_2...B_N}_{\lambda_A\lambda_{B_1}\lambda_{B_2}...\lambda_{B_N}}
+[A^{A\rightarrow B_1B_2...B_N}_{\lambda'_{A}\lambda'_{B_1}...\lambda'_{B_N}}]^*.
+\end{equation}
+
+
+
+
+%To illustrate how the event selection algorithm works we will first
+%consider an example of the decay 
+%\begin{equation}
+%B\rightarrow D^{*}(\rightarrow D\pi)\tau(\rightarrow \pi\nu)\bar\nu.
+%\end{equation}
+%The amplitude for this decay can be written as
+%\def\AmpB{A^{B\rightarrow D^*\tau\nu}_{\lambda_{D^*}\lambda_{\tau}}}
+%\def\AmpDstar{A^{D^*\rightarrow D\pi}_{\lambda_{D^*}}}
+%\def\Amptau{A^{\tau\rightarrow \pi\nu}_{\lambda_{\tau}}}
+%\begin{equation}
+%A=\sum_{\lambda_{D^*}\lambda_{\tau}}\AmpB
+%\times \AmpDstar
+%\times \Amptau
+%\label{Eq:ampeq}
+%\end{equation}
+%Where $\lambda_{D^*}$ and $\lambda_{\tau}$ labels the states of the
+%$D^{*}$ and the $\tau$, respectively, so that 
+%\begin{equation}
+%\AmpB
+%\end{equation}
+%is 6 different amplitudes for the different combinations of $D^*$
+%$\tau$ states. (Note here that the neutrino is treated as a
+%particle with only one state, all neutrinos are assumed to be
+%left-handed and anti neutrinos to be right-handed.)
+%Similarly, 
+%\begin{equation}
+%\AmpDstar\ {\rm and}\ \Amptau
+%\end{equation}
+%are the amplitudes for a decay of a $D^{*}\rightarrow D\pi$ and
+%$\tau\rightarrow\pi\nu$ respectively.%
+%
+%The scheme that was originally implemented in EvtGen was to generate 
+%kinematics according to phasespace for the whole decay chain and then calculate that
+%amplitude for the whole decay chain according to Eq.~\ref{Eq:ampeq}.
+%This amplitude was squared to obtain the probability and the event was
+%accepted or rejected based on this probability. This approach works, but has
+%two serious flaws. First, when doing the acceptance rejection you need to know 
+%the maximum probability, this gets very hard to keep track of since the 
+%number of decay chains get very large. Secondly, as the decay chains get long
+%the efficiency for the acceptance rejection gets low and the time for
+%generating events long.
+%
+%The source of both these problems are that the decays are treated as a chain
+%and all three decays in the example above are generated at once, in one
+%acceptance rejection. We would like to change the algorithm such that it
+%generates the decay as a sequence of sub-decay. In the example considered
+%here the decay $B\rightarrow D^*\tau\nu$ would be done first, then the
+%decay $D^*\rightarrow D \pi$ is done. This decay will need to incorporate 
+%information about how $D^*$ was produced in the $B$ decay. Further, when
+%the $\tau$ is decayed it also has to incorporate the information from the
+%decay of the $D^*$ as well so that correlations between all kinematic
+%variables are correctly generated. This is described bellow for the 
+%example considered in this section.
+%
+%First the decay of the $B$ is considered, kinematics for the decay is generated
+%according to phasespace and the and the probability is then calculated as
+%\begin{equation}
+%P_B=\sum_{\lambda_{D^*}\lambda_{\tau}}|\AmpB|^2.
+%\end{equation}
+%Acceptance-rejection is done on the the probability $P_B$ until an event is
+%accepted. After decaying the $B$ we now form the spin-density matrix for the
+%decay of the $D^*$, in the code this spin-density matrix is refered to as the
+%forward spin-density matrix. This matrix is defined by
+%\begin{equation}
+%\rho^{D^*}_{\lambda_{D^*}\lambda'_{D^*}}=\sum_{\lambda_{\tau}}\AmpB
+%{A^{B\rightarrow D^*\tau\nu}_{\lambda'_{D^*}\lambda_{\tau}}}^*
+%\end{equation}
+%The interpretation of this is that here we have summed incoherently over the
+%states of the tau. This means that the spin density matrix $\rho^{D^*}$ 
+%describes a $D^*$ in this decay that you have after summing over
+%the degrees of freedom for the tau.
+%
+%This spin density matrix, $\rho^{D^*}$ is now used to calculate the
+%probability for the $D^*$ decay, again kinematics is generated according to
+%phases pace and the probability is used to accept or reject events based
+%on 
+%\begin{equation}
+%P_{D^*}=\rho^{D^*}_{\lambda_{D^*}\lambda'_{D^*}}\AmpDstar
+%{A^{D^*\rightarrow D\pi}_{\lambda'_{D^*}}}^*
+%\end{equation}
+%
+%Now we need to decay the $D^*$; to do this we form the density matrix
+%\begin{equation}
+%\tilde\rho^{D^*}_{\lambda_{D^*}\lambda'_{D^*}}=\AmpDstar
+%{A^{D^*\rightarrow D\pi}_{\lambda'_{D^*}}}^*
+%\end{equation}
+%This matrix encapsulates the information about the $D^*$ decay that is
+%needed to properly decay the $\tau$ with the full correlations between
+%all kinematic variables in the decay. Since this matrix
+%is passed ``back'' to the decay of the $B$ from the decay of the
+%$D^*$ this matrix is called the backward spin-density matrix in the code.
+%
+%Using the $\tilde\rho^{D^*}$ matrix we can now calculate the forward spin density
+%matrix of the $\tau$
+%\begin{equation}
+%\rho^{\tau}_{\lambda_{\tau}\lambda'_{\tau}}=\sum_{\lambda_{D^*}\lambda'_{D^*}}
+%\tilde\rho^{D^*}_{\lambda_{D^*}\lambda'_{D^*}}
+%\AmpB{A^{B\rightarrow D^*\tau\nu}_{\lambda'_{D^*}\lambda'_{\tau}}}^*
+%\end{equation}
+%Note that this spin density matrix for the decay of the $\tau$ includes the 
+%information about how the $D^*$ decayed through the $\tilde\rho^{D^*}$
+%matrix.
+%Now, as in the other decays, we generate kinematics according to phase space
+%and accepts or rejects based on the probability calculated according to
+%\begin{equation}
+%P_{\tau}=\sum_{\lambda_{\tau}\lambda'_{\tau}}\rho^{\tau}_{\lambda_{\tau}\lambda'_{\tau}}
+%\Amptau{A^{\tau\rightarrow \pi\nu}_{\lambda'_{\tau}}}^*
+%\end{equation}
+%
+%This algorithm is implemented in the code and it solves two major problems
+%that the original versions of EvtGen had. The algorithm was illustrated above
+%using an example which should convey the idea. I will try to write up the
+%algorithm more formally at some point but the notation for describing it is so awkward.%
+
+
+
+
+
+

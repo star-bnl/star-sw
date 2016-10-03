@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.50 2014/01/15 22:00:04 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.51 2016/09/18 23:00:49 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -445,10 +445,10 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
 	  mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
       }
       if (dedxPidTraits->method() == kOtherMethodIdentifier)  {
-	  mProbPidTraits.setdNdxFit( dedxPidTraits->mean() ); 
-	  mProbPidTraits.setdNdxErrorFit( dedxPidTraits->errorOnMean() ); 
-	  mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
-	  mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
+         mProbPidTraits.setdNdxFit( dedxPidTraits->mean() ); 
+         mProbPidTraits.setdNdxErrorFit( dedxPidTraits->errorOnMean() ); 
+         mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
+         mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
       }
   }
   if (StMuDebug::level()>=3) {
@@ -724,6 +724,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.51  2016/09/18 23:00:49  fisyak
+ * Add dNdx
+ *
  * Revision 1.50  2014/01/15 22:00:04  fisyak
  * Add method to calculate dE/dx pulls for I70 and Ifit
  *

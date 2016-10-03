@@ -1,0 +1,23 @@
+In the universal interface of tauola there is a check to eliminate search 
+for the tau-leptons in so called,  "history" part of the record.
+This is performed with the help of subroutine PHYFIX.
+
+There are 3 versions of this routine here. 
+ phyfix.general  in case when there is no need no possibility to check history
+ phyfix.lujets   in case when lujets common block is used by JETSET or PYTHIA.
+                 (variables single precision dimensions 4000)
+ phyfix.pyjets   in case when pyjets common block is used by PYTHIA.
+                 (variables double precision dimensions 4000)
+
+The actually used is phyfix.h. You must copy the one you need to this file.
+In some cases you will need to re-edit it by hand. Eg. if in your version of 
+Pythia dimension is 10000.
+
+As default we give a version  phyfix.general which does not calculate
+history position at all. It can be used with any generator, but you may 
+encounter difficulties if the history part of the event was looked.
+
+We recommend to take the appropriate version. In case of host MC
+differant than JETSET/PYTHIA we recommend to provide routine 
+able to define the end of the history part of HEPEVT record (if existing).
+

@@ -1,0 +1,41 @@
+      conhc  = 0.389379323d+9
+      alphai = 137.03599911d0
+      alphas = 0.1176d0
+      gf     = 1.16637d-5
+      wz     = 2.4952d0
+      ww     = 2.124d0
+      wh     = 1d-3
+      wtp    = 1.551d0
+      cf     = 4d0/3
+
+      mh  = 115d0
+      mw  = 80.425d0
+      mz  = 91.1876d0
+      ma  = 0d0
+      mv  = 91.1876d0
+
+      rmf1( 1) = 1d-10
+      rmf1( 2) = 0.51099892d-3
+      rmf1( 3) = 1d-10
+      rmf1( 4) = 0.105658369d0
+      rmf1( 5) = 1d-10
+      rmf1( 6) = 1.77699d0
+      rmf1( 7) = 0.066d0
+      rmf1( 8) = 0.066d0
+      rmf1( 9) = 1.2d0
+      rmf1(10) = 0.150d0
+      rmf1(11) = 178d0
+      rmf1(12) = 4.3d0
+
+      men = rmf1( 1)
+      mel = rmf1( 2)
+      mup = rmf1( 7)
+      mdn = rmf1( 8)
+      mmn = rmf1( 3)
+      mmo = rmf1( 4)
+      mch = rmf1( 9)
+      mst = rmf1(10)
+      mtn = rmf1( 5)
+      mta = rmf1( 6)
+      mtp = rmf1(11)
+      mbt = rmf1(12)

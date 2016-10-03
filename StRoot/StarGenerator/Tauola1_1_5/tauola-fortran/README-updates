@@ -1,0 +1,217 @@
+June 04 2000
+tez ciekawostka
+tauface-jetset.F:  non-automatic definition of the common block. Corrected.
+
+Corrections thanks to J. Holt for sign of costhe introduced.
+
+Corrections thanks to J. Holt for search outside the HEPEVT matrices introduced.
+
+Change of input parameters for cpp : -traditional 
+
+
+Dec 11 2000
+
+PHOTOS:
+
+Emission from quarks introduced as option special function
+C--   can be executed after calling PHOINI
+C--   blocks emission from quarks if parameter is 1 (enables if 2), physical treatment
+C--   will be 3, option 2 is not realistic and for tests only, 
+      IDUM= IPHQRK(1)   ! default is 1
+
+PHOTOS:
+
+Emission in decay of pi0  to gamma e+ e- blocked, other blocking entries are easy 
+to place also
+C--   can be executed after calling PHOINI
+C--   blocks emission in  pi0 to gamma e+ e- if parameter is 1 (enables if 2)
+      IDUM= IPHEKL(1)   ! default is 1 
+
+
+
+Jan 2001
+
+
+Interface to Pythia available. It can be activated by command 
+             make pythia
+of  directory tauola-F
+at present it works automaitically for HEPEVT dimension 2000 double precision.
+
+May .. 2001 
+   Bug in the sigh of cos_theta for tau polarization was corrected.
+This was not made public until Aug 25 2001 (or even later) 
+
+
+Aug 20  2001
+
+To add Novosibirsk parametrization to any versions of TAUOLA available till today
+special directory tauola-factory was added. 
+In every version cleo aleph cpc parametrization of the form-factors for 
+pi+pi+pi-pi0 and pi+3pi0 can be replaced with the ones based on Novosibirsk data
+and parametrization.
+
+Before calling make cpc (cleo aleph) in directory tauola-F   (see documentation)
+command ./glue in directory 
+  tauola-factory 
+should be executed.
+
+Aug 25  2001
+
+The spin effects in states of tau+ tau- produced from eplicit or imlicit 
+Z/gamma states were upgraded up to nearly KORALZ standards. Photons can 
+be merged either with beams OR with taus.
+
+Bug was fixed, in previous versions photons were wrongly asociated with other
+beams. This was leading to not very significant miscalcuation of cos_theta
+(for function calculating tau polarization).
+
+Feb 2002
+
+  Interface for full spin treatment in Higgs boson decay (scalar or 
+  pseudoscalar) is added, it does not change mode of the program use.
+
+  Some minor bug fixing was introduced. 
+
+  Patch for HEPEVT, alowing program to run properly when second 
+  daughter pointer of tau mother is undefined was added. 
+
+Feb 26 2002
+
+=======================================================================
+=   NEW VERSION OF THE PACKAGE                                        =
+=======================================================================
+
+
+Mar 10, 2002 
+
+Thanks to Caterine Biscarat and Tania Moulik for tests and 
+suggestions. Further improvement of the universal interface 
+in cases  like: H --> ZZ, Z --> tau tau Z, or production
+of heavy boson pairs will be introduced in future versions 
+only. There are many possibilities and physics precision 
+goals are probably not so great. Dominant spin effects are 
+anyway in. 
+
+Dec 21, 2002, 
+Thanks to tests necessary for future developments numerically 
+minor bug was found, see pi+pi+pi-pi0-fix.ps.gz for details. 
+
+Jan 21, 2003, 
+we have found some problems in Novosibirsk parametrization. 
+We work on this point now. Done at unspecified time. 
+
+Feb 10, 2003, 
+the points discussed under dates Jan 21, 2003, and Dec 21, 2002, 
+are partially solved (still no updates on 
+control outputs etc.) you need to replace sub-directory
+TAUOLA/tauola-factory with the content of tauola-factory.tgz 
+file. Later you have to execute (in sub-directory 
+TAUOLA/tauola-factory ) ./glue standard command. 
+
+
+
+Apr 02 2003   
+Update of PHOTOS weight in W decays as described in 
+CERN-TH/2003-075 are introduced, also correction
+in default of a key for bremsstrahlung in pi0 decays
+was corrected.
+
+Corrections of Jan 21, 2003, Dec 21, 2002, fully integrated.
+All demo outputs for all TAUOLA versions are reproduced on RH 7.3.1
+CERN distribution.
+
+Corrections of universal interface in case of taus having taus
+as mothers are not installed yet, may be other solutions
+outside the interface would be better. 
+
+Apr 07 2003
+Comment printouts added to PHOTOS,
+Corrections to TAUOLA universal interface necessary to run for some
+options of PYTHIA not yet added. The same is true for use of interface 
+with  HERWIG. This items are expected to be updated by summer LHC
+MC workshop.
+
+Apr 07 2003
+=======================================================================
+=   NEW VERSION OF THE PACKAGE                                        =
+======================================================================
+June 25,2003 
+New version of tauface-jetset.F
+which work with all versions of PYTHIA ways of filling HEPEVT common block 
+(as well as with HERWIG way). It survived tests by users, special thanks to 
+Borut Kersevan and also S. Slabospitsky. 
+
+July 28,2003 
+extensions for the Higgs boson decay, see preprint CERN-TH/2003-166 for details.  
+
+Nov 24 2003
+All corrections updates and new features as in preprint 
+P. Golonka et al CERN-TH 2003-287 hep-ph/0312240 are included.
+
+Jan 25 2004
+Consistency checks on outputs etc completed.
+
+Jan 27 2004
+=======================================================================
+=   NEW VERSION OF THE PACKAGE                                        =
+=======================================================================
+
+
+
+
+Oct 08 2004
+
+PHOTOS:
+
+
+
+With the extension of PHOTOS to new functionalities the following changes 
+in input parameters were introduced and initialization is hard coded as usual 
+in routine PHOCIN: 
+1) ITRE=.FALSE. Third/fourth order - triple (or quatric) photon switch, see 
+   dipswitch IFOUR=(.TRUE.).AND.(ITRE) in routine PHTYPE 
+2) IEXP=.FALSE. to activate option with multiple photon emission. This option 
+   will set: 
+           CALL PHCORK(5) ! see below for definition. 
+   In case of exponentiation this option is a default because in most cases 
+   it is necessary. 
+           XPHCUT=0.000 000 1 
+           EXPEPS=1D-4 
+3) see photos-F/numericalStability.html for more details.
+
+TAUOLA:
+  New version of the generating package created, called TAUOLA-BBB
+it operates exactly as TAUOLA-F and is prepared for managing new versions:
+ authors, BaBar and Belle
+
+Oct 10 2004
+=======================================================================
+=   NEW VERSION OF THE PACKAGE                                        =
+=======================================================================
+
+# Feb 26, 2005 Version 2.13 with better interference, which now work in every channel is ready. 
+Documentation is in hep-ph/0506026 and file with the code is: photos.F . This version with some tests 
+completed just recently, is still not integrated with the rest of the distribution package, demo outputs 
+etc have to be re-run. At present one has to copy photos.F-260205 file into directory TAUOLA/photos-F 
+of The Package with older distribution files.
+
+
+# Aug 24, 2005 We continued testsof PHOTOS, and version 2.14 with just single patch with respect to 2.13 
+introduced:  photos.F . This version is with lots of tests completed, but is still not integrated with the 
+rest of the distribution package, demo outputs etc have to be re-run, we plan upgrade of TAUOLA before end 
+of holidays. At present one has to copy photos.F file into directory TAUOLA/photos-F of  The Package with 
+older distribution files.
+
+September 22 2005
+
+directory tauola-BBB updated with semi-realistic currents for 5pi final states. (TAUOLA v. 2.9)
+Photos 2.14 integrated into package.
+Interface enriched with possible decays into eta K0_S and PI0 ...  (INTERFACE v. 1.21)
+
+
+April 24 2009
+
+Minor updates to make package working with gfortran. The main changes were in universal interface.
+Mismatches of variable types between calling and defining routines were fixed. That was not a problem 
+for g77. No physics updates were included. Further changes are expected once C++ interfaces are ready.
+Also experience with gfortran should be consolidated by that time.

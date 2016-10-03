@@ -1,0 +1,969 @@
+\section{Classes}
+\index{classes}
+\label{sec:classes}
+This section describes the classes in the EvtGen package,
+except for the classes are models; these are described 
+separately in Appendix~\ref{sect:models}.
+
+
+\subsection{EvtAmp}
+\index{EvtAmp}
+\index{classes!EvtAmp}
+
+This class keeps track of the amplitudes computed by the decay models. It provides 
+member functions to calculate spin-density matrices from the amplitudes,
+as described in section~\ref{sect:algorithm}.
+The only member functions that a user writing decay models should 
+need to use are the {\tt vertex} functions that allow you to
+set the amplitudes that are calculated in a decay model
+
+\begin{itemize}
+\item {\tt void vertex(const EvtComplex\& amp)}\\
+      Sets the amplitude in a decay where all particles, both
+      in the initial and final state, have only one spin degree of 
+      freedom.
+
+\item {\tt void vertex(int i1, const EvtComplex\& amp)}\\
+      Sets the amplitude when one particle has more than
+      one spin degree of freedom.
+
+\item {\tt void vertex(int i1, int i2, const EvtComplex\& amp)}\\
+      Sets the amplitudes in a decay with two particles having
+      non-trivial spin.
+
+\item {\tt void vertex(int i1, int i2, int i3, const EvtComplex\& amp)}\\
+      Sets the amplitudes in a decay with three particles having
+      non-trivial spin.
+
+\item {\it there is also a general case -- Need to fix and document}
+\end{itemize}
+
+The other functions are for internal use only. Some of the core
+functionality of EvtGen is implemented in these functions
+that perform the low level manipulation of the amplitudes and spin-density matrices.
+
+\begin{itemize}
+\item {\tt EvtAmp()}\\
+      Default constructor.
+\item {\tt void init(EvtId p,int ndaug,EvtId *daug)}\\
+      Initializes amplitude for the particles specified.
+\item {\tt void setNDaug(int n)}\\
+      Sets the number of daughters.
+\item {\tt void setNState(int parent\_states,int *daug\_states)}\\
+      Sets the number of spin states each particle has. 
+\item {\tt void setAmp(int *ind,const EvtComplex\& amp)}\\
+      Sets an amplitude.
+\item {\tt const EvtComplex\& getAmp(int *ind)const}\\
+      Returns an amplitude.
+\item {\tt EvtSpinDensity getSpinDensity()}\\ 
+      Returns spin density matrix for the parent.
+\item {\tt EvtSpinDensity contract(int i,const EvtAmp\& a)}\\
+      Contracts  amplitude to calculate spin-density matrix.
+\item {\tt EvtAmp contract(int i, const EvtSpinDensity\& rho)}\\
+      Contracts amplitude with spin-density matrix to calculate new 
+      amplitude.
+\item {\tt EvtSpinDensity getForwardSpinDensity(EvtSpinDensity *rho\_list,int k)}\\
+      Calculates forward spin-density matrix for one of the daughters.
+\item {\tt EvtSpinDensity getBackwardSpinDensity(EvtSpinDensity *rho\_list)}\\
+      Contracts amplitudes to calculate the backward spin-density matrix
+      for the parent.
+\end{itemize}
+
+\subsection{EvtCPUtil}
+\index{EvtCPUtil}
+\index{classes!EvtCPUtil}
+{\it Update with Anders fixes the code to be more general}
+
+This class contains some utilities that are useful for 
+generating $CP$-violating decays from the $\Upsilon(4S)$ system.
+In particular, it contains the two methods
+\begin{itemize}
+\item {\tt static void OtherB(EvtParticle *p, double \&t, EvtId \&otherb)}\\
+      Particle {\tt p} is a $B$ meson from an $\Upsilon(4S)$ decay. 
+      {\tt otherb} is the flavor that you want the other $B$ to have.
+      When this function is invoked, flavor of the other $B$ is changed,
+      such that it becomes of type {\tt otherb}. The lifetime of the
+      other $B$ meson is returned in {\tt t}.
+\item {\tt static void OtherB(EvtParticle *p, double \&t, EvtId \&otherb,\\
+ double probB0)}\\
+      Similar to the function above, except that a probability is supplied
+      for how ofthe th other $B$ should be a $B^0$.
+\end{itemize}
+
+
+\subsection{EvtComplex}
+\index{EvtComplex}
+\index{classes!EvtComplex}
+
+Using the implementation of complex numbers provided by the compiler
+has caused constant problems with porting EvtGen to different
+platforms, as these implementations do not generally conform to
+a uniform standard. Therefore, we have implemented the {\tt EvtComplex} 
+class. This implemention is not complete.
+
+{\it David should add the currently implemented function.}
+
+
+\subsection{EvtConst}
+\index{EvtConst}
+\index{classes!EvtConst}
+\index{constants}
+
+This class defines useful constants. 
+\begin{verbatim}
+const double EvtConst::pi           =  3.141592653589793238;
+const double EvtConst::twoPi        =  2*pi;
+const double EvtConst::radToDegrees =  180./pi;
+ 
+const double EvtConst::c            =  2.99792458E11; // mm/sec
+\end{verbatim}
+
+
+%% stopped here Jul 31 2001
+\subsection{EvtDecayBase}
+\index{EvtDecayBase}
+\index{classes!EvtDecayBase}
+
+This class is the base class for decay models and contains the interface
+for the decay models to the framework. The most important member
+function is {\tt decay(EvtParticle *)}, which performs the actual 
+decay of the particle. 
+Before explaining the purpose of other
+member function, recall that for each entry in the decay table
+an instance of the decay model class is created. 
+
+\index{EvtDecayAmp}
+\index{classes!EvtDecayAmp}
+\index{EvtDecayIncoherent}
+\index{classes!EvtDecayIncoherent}
+\index{EvtDecayProb}
+\index{classes!EvtDecayProb}
+
+There are three classes that derive from {\tt EvtDecayBase};
+{\tt EvtDecayAmp}, {\tt EvtDecayProb}, 
+and {\tt EvtDecayIncoherent}. These classes proved slightly
+different interfaces for writing decay models, as discussed in 
+detail in Section~\ref{sect:newmodel}
+
+The {\tt EvtDecayBase} class provides the following
+member fuctions:
+
+\begin{itemize}
+\item {\tt virtual void getName(EvtString\& name)=0}\\
+      This function must be implemented each decay model.
+      {\tt getName} returns the name of the model, to be used 
+      in the decay table.
+
+\item {\tt virtual EvtDecayBase* clone()=0}\\
+      This is a pure virtual function, has to be implemented
+      in the decay model, it returns a new instance of the 
+      derived class.
+
+\item {\tt virtual void Decay(EvtParticle *p)=0}\\
+      This method implements the actual decay.  Each
+      decay model should implement this function.
+
+\item {\tt virtual void makeDecay(EvtParticle *p)=0}\\
+      Implemented in the {\tt EvtDecayAmp}, {\tt EvtDecayProb}, 
+      and {\tt EvtDecayIncoherent} classes. Implements
+      the accept reject as appropriate for the type of
+      decay model. In the {\tt EvtDecayAmp} implementation,
+      the decay probability is computed from amplitudes, which 
+      are set by the decay models.
+
+\item {\tt void disableCheckQ()}\\
+      By default, EvtGen checks each decay for charge conservation.
+      Sometimes this is not appropriate, for example with the 
+      {\tt SINGLE} model, which generates single particles.
+      If {\tt disableCheckQ()} is called in the {\tt init()}
+      member function, this check will not be performed.
+
+\item {\tt void init()}\\
+      If the model to be implemented has any data members that must be 
+      initialized this should be done in the call to the {\tt init} 
+      member function. 
+      An example of such initialization might be to process the arguments 
+      into some more convienient form.
+
+\item {\tt void initProbMax()}\\
+      {\tt initProbMax} is intended for a special kind of initialization, 
+      namely of the maximum probability that can be obtained in the 
+      decay. This is used by the acceptance rejection method to generate 
+      the correct distributions. Note that the call to {\tt initProbMax()} 
+      is done after the call to {\tt init()}, which means that in 
+      {\tt initProbmax()} you have access to anything calcualted in 
+      {\tt init()}.  The maximum probability is set via the 
+      {\tt setProbMax(double )} member function.
+\end{itemize}
+
+
+\subsection{EvtDiracSpinor}
+\index{EvtDiracSpinor}
+\index{classes!EvtDiracSpinor}
+
+The EvtDiracSpinor class encapsulates the properties of
+a Dirac spinor. It is used to reperesent spin 1/2 particles.
+EvtDiracSpinor is reperesented as a complex four component 
+spinor using the standard Pauli-Dirac convention for the
+$\gamma$-matrices. The operations that are available on an EvtDiracSpinor 
+are seting the elements of the spinor, retreving an element
+printing out the spinor, taking the complex conjugate, boosting
+the spinor into another Lorentz frame, and evaluating some
+common matrix elements as summarized in Table~\ref{tab:diracspinor_matrix_elements}.
+\begin{table}[htbp]
+\begin{center}
+\begin{tabular}{lll} \hline
+Matrix elemet     &  Function & Return type\\ \hline
+$\langle \bar u \vert \gamma^{\mu}(1-\gamma^5) \vert v \rangle$ & {\tt EvtLeptonVACurrent(u,v)} & {\tt EvtVector4C} \\
+$\langle \bar u \vert \gamma^{\mu} \vert v \rangle$ & {\tt EvtLeptonVCurrent(u,v)} & {\tt EvtVector4C} \\
+$\langle \bar u \vert \gamma^{\mu}\gamma^5 \vert v \rangle$ & {\tt EvtLeptonACurrent(u,v)} & {\tt EvtVector4C} \\
+$\langle \bar u \vert v \rangle$ & {\tt EvtLeptonSCurrent(u,v)} & {\tt EvtComplex} \\
+$\langle \bar u \vert \gamma^5 \vert v \rangle$ & {\tt EvtLeptonPCurrent(u,v)} & {\tt EvtComplex} \\
+$\langle \bar u \vert \sigma^{\mu\nu} \vert v \rangle$ & {\tt EvtLeptonTCurrent(u,v)} & {\tt EvtTensor4C} \\ \hline
+\end{tabular}
+\caption{This table sumarizes the methods in {\tt EvtDiracSpinor} that evaluates special matrix elements.
+\label{tab:diracspinor_matrix_elements}}
+\end{center}
+\end{table}
+
+Also see Section~\ref{sect:EvtGammaMatrix} for operations between Dirac spinors and $\gamma$-matrices.
+
+
+
+
+
+
+\subsection{EvtGammaMatrix}
+\index{EvtGammaMatrix}
+\index{classes!EvtGammaMatrix}
+\label{sect:EvtGammaMatrix}
+
+EvtGammaMatrix is a class for handling 
+complex $4\times 4$ matrices.
+The generic operations that are available are 
+addition (+), subtraction (-),
+and multiplication (*). An EvtGammaMatrix can also
+be multiplied by a complex scalar. 
+Besides these
+generic operations on matrices, there are special 
+operations related to gamma matrices. There are
+static member functions that returns the gamma matrices according
+to the standard Pauli-Dirac representaion.
+Thr {\tt g0()}, {\tt g1()}, {\tt g2()}, {\tt g3()}, {\tt g5()}, 
+and {\tt id()} functions return
+$\gamma^0,\gamma^1,\gamma^2,\gamma^3,\gamma^5$ and the identity matrix,
+respectively. Besides these
+basic functions there are four more specialized functions,
+{\tt va0()}, {\tt va1()}, {\tt va2()}, and {\tt va3()} that are 
+used in the evaluation of the
+weak lepton current. These matrices are given by 
+$\gamma^0\gamma^{\mu}(1-\gamma^5)$, where $\mu=(0,1,2,3)$.
+Similarly, the functions {\tt v0()}, {\tt v1()}, {\tt v2()}, 
+and {\tt v3()} return $\gamma^0\gamma^{\mu}$, where $\mu=(0,1,2,3)$.
+
+There is also an operation (*) defined, which multiplies 
+an EvtGammaMatrix with an EvtDiracSpinor, and returns an
+EvtDiracSpinor. 
+%The operation of multiplying two spinors is
+%also defined and has the meaning of first conjugating the
+%first EvtDiracSpinor before performing the multiplication.
+
+
+\subsection{EvtGen}
+\index{EvtGen}
+\index{classes!EvtGen}
+
+
+This class provides the interface to EvtGen for an external user,
+see Appendix~\ref{sect:interface}.
+
+
+\subsection{EvtGenKine}
+\index{EvtGenKine}
+\index{classes!EvtGenKine}
+\index{kinematics}
+\index{phase space}
+
+EvtGenKine contains tools for generating kinematics such
+as phase space distributions. Currently only two functions are
+implemented
+
+\begin{itemize}
+\item {\tt static double PhaseSpace( int ndaug, double mass[10],}\\
+      {\tt EvtVector4R p4[10], double mp)}\\
+      Generates phase space for a decay with {\tt ndaug} daughters
+      with masses given by {\tt mass} for a parent with mass {\tt mp}.
+      The generated four-vectors are stored in {\tt p4}.
+\item {\tt static double PhaseSpacePole(double M, double m1, double m2,}\\
+      {\tt double m3, double a,EvtVector4R p4[10])}\\
+      Similar to the {\tt PhaseSpace} member function, expect that
+      the kinematics are generated with a $1/m$ pole in the 
+      invariant mass of particle 1 and 2 in a three-body decay, 
+      (for example, $\pi^0\rightarrow e^+e^-\gamma$). $a$ is the 
+      strength of the pole.  This method is designed to speed up
+      the generation of decays with a pole in the decay distribution.
+      The return value of this function is
+      needed to correctly handle the accept-reject algorithm, and 
+      must be passed to the {\tt EvtDecayBase} framework via the
+      {\tt void setWeight(double)} member function.  For example:
+\begin{verbatim}
+    setWeight(EvtGenKine::PhaseSpacePole
+  	    (m,mass[0],mass[1],mass[2],0.00000002,p4));
+\end{verbatim}
+is used in the EvtPi0Dalitz model.
+
+\end{itemize}
+
+\subsection{EvtId}
+\index{EvtId}
+\index{classes!EvtId}
+
+The class {\tt EvtId} is used to identify particles in EvtGen. It 
+is used, e.g.,
+as argument to the {\tt EvtPDL} member functions to look up
+particle properties.
+
+The {\tt EvtId} class provides the following operators (and a copy
+constructor) {\tt operator=}, {\tt operator==} and {\tt operator!=}.
+These are the only operations any user code for implementing
+particle decays should need. 
+
+The {\tt EvtId} class contains two member data: {\tt \_id} and
+{\tt \_alias}. For regular particles, i.e., non aliases these
+are the same; an integer from $0$ to $n-1$ where $n$ is the 
+number of defined particles. These numbers are assigned by {\tt EvtPDL}
+when reading the particle list. When a particle alias is
+created, e.g., {\tt mypi0}, for a {\tt pi0}, a new {\tt EvtId} is created
+with the same {\tt \_id} as the pi0 but with a unique
+{\tt \_alias}. The two comaprison operators, {\tt ==}
+and {\tt !=} compare the {\tt \_id} when determining if two
+particles are the same. Therefore {\tt mypi0} and {\tt pi0} are 
+considered the same particles, when compared using the {\tt ==} 
+operator.
+
+There are two places where aliased particles are treated differently
+than regular particles. The first place is that when decay modes
+are selected the {\tt \_alias} number is used, so that
+so that we allow different decays for an aliased particle and
+its alias. The
+second place where a complication arises is in the definition
+of the charge conjugate of an aliased particle. For regular 
+particles EvtGen uses the stdhep number to find the charge conjugate.
+However, for aliased particles, the charge conjugate must be
+specified by hand. See Section~\ref{sect:evtpdl}
+and~\ref{sect:decaytable}.
+
+
+\subsection{EvtKine}
+\index{EvtKine}
+\index{classes!EvtKine}
+
+This class provides some utility functions for calculating 
+kinematic quantities such as decay angles. See Appendix~\ref{sect:evtutil}.
+
+
+
+\subsection{EvtLineShape}
+\index{EvtLineShape}
+\index{classes!EvtLineShape}
+\index{line shape}
+
+This class contains utilities for simulating line shapes of particles.
+Currently this class only provides the trivial implementation of a
+non-relativistic Breit-Wigner shape.
+
+\begin{itemize}
+\item {\tt static double BreitWigner( double mass,}\\
+      {\tt double width, double min, double max)}
+\end{itemize}
+
+
+\subsection{EvtModel}
+\index{EvtModel}
+\index{classes!EvtModel}
+
+This class handles the registration of decay models.
+
+
+
+\subsection{EvtPDL}
+\label{sect:evtpdl}
+\index{EvtPDL}
+\index{classes!EvtPDL}
+
+The particle information read from the {\tt evt.pdl} file can be
+accessed through member functions of the {\tt EvtPDL} class. The 
+following (static) member functions are available:
+\begin{itemize}
+\item {\tt  static double getNominalMass(EvtId id)}\\
+      Returns the nominal mass.
+\item {\tt static double getMass(EvtId id)}\\
+      Generates a mass according to a simple non-relativistic
+      Breit-Wigner shape.
+\item {\tt static double getMaxMass(EvtId id)}\\
+      The maximal mass that will be generated.
+\item {\tt static double getMinMass(EvtId id)}\\
+      The minimal mass that will be generated.
+\item {\tt static double getWidth(EvtId id)}\\
+      The width of the resonance.
+\item {\tt static double getctau(EvtId id)}\\
+      The lifetime, $c\tau$ (in mm).
+\item {\tt static int getStdHep(EvtId id)}\\
+      The number according to the stdhep numbering scheme.
+\item {\tt static int getLundKC(EvtId id)}\\
+      The compact Lund, kc, number.
+\item {\tt static EvtId evtIdFromStdHep(int stdhep)}\\
+      The {\tt EvtId} given the stdhep number.
+\item {\tt static EvtId chargeConj(EvtId id)}\\
+      The charge conjugate of the particle.
+\item {\tt static int chg3(EvtId id)}\\
+      The charge in units of 1/3 of the positron charge.
+\item {\tt static EvtSpinType::spintype getSpinType(EvtId id)}\\
+      The spin type, i.e., scalar, vector, dirac, neutrino, etc.
+\item {\tt static EvtId getId(const EvtString\& name)}\\
+      Finds the {\tt EvtId} given the name.
+\item {\tt static EvtString name(EvtId id)}\\
+      The particle name.
+\item {\tt static void alias(EvtId num,const EvtString\& newname)}\\
+      Defines a new particle alias.
+\item {\tt static void aliasChgConj(EvtId a,EvtId abar)}\\
+      Defines that two aliases are the charge conjugate of each other.
+\item {\tt static int entries()}\\
+      Number of particles in the list, not including aliases.
+\end{itemize}
+
+Except for the aliases the {\tt EvtPDL} class is quite simple. The use
+of alias has been explained previously in the description of the
+decay tables and in several examples. This class makes use of the 
+{\tt EvtPartProp} class to represent the properties of a single particle.
+
+
+\subsection{EvtPHOTOS}
+\index{EvtPHOTOS}
+\index{classes!EvtPHOTOS}
+
+Provides an interface to the PHOTOS package for generation of 
+final state radiation.
+
+\begin{itemize}
+\item {\tt static void PHOTOS(EvtParticle *p)}
+\end{itemize}
+
+If PHOTOS generates additional photons they are added at the 
+end of the list of particles produced.
+
+\subsection{EvtPartProp}
+\index{EvtPartProp}
+\index{classes!EvtPartProp}
+
+Class to represent the particle properties of a single
+particle. Used by {\tt EvtPDL} to keep the particle
+properties.
+
+\subsection{EvtParticle}
+\index{EvtParticle}
+\index{classes!EvtParticle}
+
+\index{EvtDiracParticle}
+\index{classes!EvtDiracParticle}
+\index{EvtNeutrinoParticle}
+\index{classes!EvtNeutrinoParticle}
+\index{EvtPhotonParticle}
+\index{classes!EvtPhotonParticle}
+\index{EvtScalarParticle}
+\index{classes!EvtScalarParticle}
+\index{EvtStringParticle}
+\index{classes!EvtStringParticle}
+\index{EvtTensorParticle}
+\index{classes!EvtTensorParticle}
+\index{EvtVectorParticle}
+\index{classes!EvtVectorParticle}
+
+
+
+This is the base class for particles. It contains the common
+interface to particles such as
+the four momentum particle number, list of daughters and parent
+etc. The Particle class forms a base class for the different
+type of particles: Scalar, Vector, Tensor, Dirac, Photon,
+and Neutrino, see Figure~\ref{fig:evtparticle}.
+
+\begin{figure}[tb]
+\begin{center}
+\epsfig{figure=evtparticle.eps,height=1.3in}
+\end{center}
+\caption{{\tt EvtParticle} forms the base class for the concrete 
+implementations of the different particle types in EvtGen.}
+\label{fig:evtparticle}
+\end{figure}
+
+The derived classes add a basis for the states used
+to represent the spin degrees of freedom of the particle. For
+example the vector particles ({\tt EvtVectorParticle}) adds three
+complex four-vectors, the massive spin $1/2$ particles 
+({\tt EvtDiracParticle}) adds two Dirac spinors for its basis
+vectors. This data is stored in the derived class as appropriate
+for the particle type. The accessor functions are virtual
+functions in the {\tt EvtParticle} base class. The accessor
+functions for these basis vectors are shown in Table~\ref{tab:accessbasis}.
+The default implementation in {\tt EvtParticle} of these accessor functions
+generates an error message and then aborts the application. The motivation
+for doing this is that you don't have to do a cast to the derived type
+to be able to access the basis vectors. But, yes, this is not very
+good OO practice.
+
+\begin{table}[htbp]
+\begin{center}
+\begin{tabular}{llll} \hline
+Class     &  Type &  Own rest frame   &  Parent frame \\ \hline
+Scalar   &  N/A    &   N/A  &    N/A \\
+Dirac    & {\tt EvtDiracSpinor} & {\tt sp(int i)}   &  {\tt spParent(int i) } \\
+Neutrino & {\tt EvtDiracSpinor} & N/A   &  {\tt spNeutrinoParent() } \\
+Vector   & {\tt EvtVector4C} & {\tt eps(int i)}   &  {\tt epsParent(int i) } \\
+Photon   & {\tt EvtVector4C} & N/A   &  {\tt epsParentPhoton(int i) } \\
+Tensor   & {\tt EvtTensor4} & {\tt epsTensor}  &  {\tt epsTensorParent(int i) } \\ \hline
+\end{tabular}
+\caption{This table shows the accessor functions for the basis
+vectors.
+\label{tab:accessbasis}}
+\end{center}
+\end{table}
+
+The {\tt init(const EvtId id, const EvtVector4R\& p4)} member function sets the
+id and four-momentum of the particle. This function sets up the basis states
+of the particle and is hence implemented in the derived class. Note that,
+in general, to be able to construct the basis vectors both the id and the 
+four-momentum must be know. In the case of a photon, i.e., a massless
+vector meson, the polarization vectors that makes up the basis state,
+$\varepsilon_1$ and $\varepsilon_2$, has to be orthogonal to the momentum,
+i.e. $p\cdot \varepsilon_1=p\cdot \varepsilon_2=0$. For a fermion, represented
+by a Dirac-spinor, the basis vectors needs to know if it is representing
+a particle or an anti-particle.
+
+Given a particle there are two member functions that are useful for 
+creating the daughters. These two functions are:
+\begin{verbatim}	
+void makeDaughters(int ndaug, EvtId *id);
+void initializePhaseSpace(int ndaug, EvtId *id);
+\end{verbatim}
+The first of these two routines creates the particles with the types
+according to the array of {\tt EvtId}'s as specified by {\tt id}. 
+The daughters are added to the parent, i.e., the particle on which
+this member function is invoked, but the momentum of the particle is
+not initialized. The second function, {\tt initializePhaseSpace}, is
+similar except that it generates kinematics according to phase space
+and initializes the daughters with this momentum.
+
+The {\tt Decay()} member function performs the actual decay of the
+particle. The {\tt Decay} member function selects a decay by using
+the class {\tt EvtDecayTable} and then using the {\tt EvtDecayBase}
+decays the particle. This function recursively decays particles until
+all particles are stable.
+
+
+There are various other functions which are useful in {\tt EvtParticle}:
+\begin{itemize}
+\item {\tt  EvtParticle* getDaug(int i)}\\
+      Returns a pointer to the $i$:th daughter of the particle.
+\item {\tt EvtVector4R getP4Lab()}\\
+      Gets the four-vector of the particle in the laboratory frame. With
+      laboratory frame is meant the rest frame in which the root particles
+      momentum is measured.
+\item {\tt EvtVector4R get4Pos()}\\
+      Returns the four-position of the particle in the laboratory frame, again
+      the laboratory frame is defined by the position and momentum of the root
+      particle.
+\item {\tt EvtParticle* getParent()}\\
+      Returns the pointer to the parent particle. If it is the root particle 0 is
+      returned.
+\item {\tt double mass()}\\
+      Returns the mass of the particle.
+\item {\tt EvtId getId()}\\
+      Returns the id of the particle.
+\item {\tt EvtSpinType::spintype getSpinType()}\\
+      Returns the particle type. This is an enum in the {\tt EvtSpinType} class.
+\item {\tt int getSpinStates()}\\
+      Returns the number of spin degrees of freedom. E.g., 1 for a scalar and 3 for
+      a vector.
+\item {\tt EvtVector4R\& getP4()}\\
+      Returns the four-momentum of the particle in it parents rest frame.
+\item {\tt void setP4(const EvtVector4R\& p4) }\\
+      Set the four-momentum of the particle in its parents rest frame. For a 
+      particle that doesn't have a parent its momentum is measured is the laboratory
+      frame.
+\item {\tt int getNDaug()}\\
+      Returns the number of daughters of the particle.
+\item {\tt void printTree()}\\
+      Prints out the decay tree starting from the particle the function is
+      invoked on.
+\item {\tt void printParticle ()}\\
+      Prints detailed information about the particle, this include what type it
+      is and its momentum.
+\item {\tt void setLifetime(double tau)}\\
+      Sets the lifetime of the particle to {\tt tau}, measured in mm/c.
+\item {\tt void setLifetime()}\\
+      Generates a lifetime of the particle according to a pure exponential with mean
+      according to {\tt EvtPDT} for the id of the particle.
+\item {\tt double getLifetime()}\\
+      Returns the lifetime of the particle.
+\item {\tt void setDiagonalSpinDensity()}\\
+      Initializes the particle with a diagonal spin density matrix. This function
+      is typically invoked on the initial particle before it is decayed.
+\item {\tt void setVectorSpinDensity()}\\
+      Initializes a vector particle with the appropriate spin density matrix for
+      the production of the vector particle in an $e^+e^-$ interaction.
+\item {\tt void setSpinDensity(const EvtSpinDensity\& rho)}\\
+      Initializes the particle with the spin density matrix {\tt rho}.
+\end{itemize}
+
+Besides these functions there are a few more. These are either considered obsolete
+and will eventually be removed or should be made private as they are really
+only helper functions.
+
+\subsection{EvtParticleDecay}
+\index{EvtParticleDecay}
+\index{classes!EvtParticleDecay}
+
+Stores information for one particle decay. This class is not used yet.
+
+
+\subsection{EvtParticleDecayList}
+\index{EvtParticleDecayList}
+\index{classes!EvtParticleDecayList}
+
+Stores the list of decays of one particle. This class is not used yet
+
+\subsection{EvtParticleNum}
+\index{EvtParticleNum}
+\index{classes!EvtParticleNum}
+
+Defines {\tt EvtID} for all particles.
+
+\subsection{EvtParser}
+\index{EvtParser}
+\index{classes!EvtParser}
+
+Used by {\tt EvtDecayTable} to read the decay table. Comments are 
+removed and each token togheter with the current line number is put into
+a list which is used when building the decay table.
+
+
+
+\subsection{EvtRandom}
+\index{EvtRandom}
+\index{classes!EvtRandom}
+\index{random numbers}
+
+EvtRandom provides the interface for random numbers that are used in
+the EvtGen package. We still need to specify the initialization of this
+class. The interface is some what clumsy.
+
+\begin{itemize}
+\item {\tt static double Flat( double min, double max ) }\\
+      Generate pseudo random nmber between {\tt min} and {\tt max}.
+\item {\tt static double Flat( double max ) }\\
+      Generate pseudo random nmber between 0 and {\tt max}.
+\item {\tt static double Flat( ) }\\
+      Generate pseudo random nmber between 0 and 1.
+\item {\tt static double random() }\\
+      Generate pseudo random nmber between 0 and 1.
+\item {\tt static RandFcnD\& ranFcnD() }\\
+      Return reference to random function.
+\item {\tt static RandFcnF\& ranFcnF() }\\
+      Return reference to random function.
+\item {\tt static HepRandomEngine** ranEngine() }\
+      Return the HepRandomEngine.
+\item {\tt static void setRandFcnD(RandFcnD\& arandfcnd) }\\
+      Use a random function that is a static function returning
+      a double precision number.
+\item {\tt static void setRandFcnF(RandFcnF\& arandfcnf) }\\
+      Use a random function that is a static function returning
+      a double single number.
+\item {\tt static void setRandEngine(HepRandomEngine\& aHepRandomEngine) }\\
+      Use a CLHEP random engine.
+\end{itemize}
+
+\subsection{EvtReadDecay}
+\index{EvtReadDecay}
+\index{classes!EvtReadDecay}
+
+This is a real mess! But it's purpose is to read in the decay
+table. 
+
+\subsection{EvtReport}
+\index{EvtReport}
+\index{classes!EvtReport}
+
+Utility to print out mesages from EvtGen.
+
+\subsection{EvtResonance}
+\index{EvtResonance}
+\index{classes!EvtResonance}
+
+The EvtResonance class allows one to handle resonances as a single
+structure.  It is currently implemented for decays with three 
+daughter particles.  An EvtResonance object is constructed using the 
+four momenta of the parent, the four momenta of the two daughters
+which constitute a resonance, and the parameters describing the 
+resonance: amplitude c, phase angle $\theta$, width $\Gamma$, Breit-Wigner 
+mass $m_{BW}$, and spin.  The spin can be 0, 1, 2, or 3 (as of 09/07/97, 
+it has only been tested for spin 0 and 1, however).  The member function 
+resAmpl() returns the complex amplitude for the resonance calculated 
+according to the following formula:
+\begin{equation}
+c_{k}e^{i\theta_{k}}F_{k}^{BW}(x,y)D_{k}^{ang}(x,y)
+\end{equation}
+where x and y are the invariant masses of the two particle combinations, 
+$F_{k}^{BW}$ is a normalized Breit-Wigner function, and 
+$D_{k}^{ang}$ describes the angular distribution for the kth resonance.
+
+More precisely, for spin 0 the (non-relativistic) amplitude is:
+\begin{equation}
+c\,e^{i\theta}\sqrt{\Gamma\over 2\pi}\,\left(\frac{1}{(m_{12}-m_{BW})-\frac{i\Gamma}{2}}\right)
+\end{equation}      
+
+For spin 1 the amplitude is:
+\begin{equation}
+c\,e^{i\theta}\sqrt{\Gamma\over 2\pi}\,\left(\frac{cos\phi_{3}}{(m_{12}-m_{BW})-\frac{i\Gamma}{2}}\right)
+\end{equation}      
+
+For spin 2:
+\begin{equation}
+c\,e^{i\theta}\sqrt{\Gamma\over 2\pi}\,\left(\frac{\frac{3}{2}cos^{2}\phi_{3}-\frac{1}{2}}{(m_{12}-m_{BW})-\frac{i\Gamma}{2}}\right)
+\end{equation}      
+
+For spin 3:
+\begin{equation}
+c\,e^{i\theta}\sqrt{\Gamma\over 2\pi}\,\left(\frac{\frac{5}{2}cos^{3}\phi_{3}-\frac{3}{2}cos\phi_{3}}{(m_{12}-m_{BW})-\frac{i\Gamma}{2}}\right)
+\end{equation}      
+where m12 is the invariant mass of particles 1 and 2, $cos\phi_{3}$ is the 
+cosine of the angle 3 makes with 2 in the rest frame of 12 (cosine of the
+angle 3 makes with 1 in the rest frame of 12 is, obviously, $-cos\phi_{3}$).  
+
+Note that if two of the three daughters (for example 2 and 3) are identical, 
+one has to take into account the contributions from two possible combinations 
+12 and 13, with corresponding signs for the cosines (for spin 1 and higher), and a normalization factor of 1/2.   
+
+Another member function, relBrWig( int ), returns the relativistic Breit-Wigner amplitude for the $K^{*} \pi$ (in which case the integer argument should be equal to 1) or $K \rho$ (in which case the argument should be $\neq$ 1) resonances.  More precisely, for a P-wave decay of a scalar meson (which I'll denote $S$), the amplitudes are given by:
+\begin{equation}
+BW(m_{ij}^2) = \frac{\sqrt{\Gamma_{0}} \,M}{(m_{R}^2 - m_{ij}^2) - i \Gamma m_{R}}
+\end{equation}
+where the matrix element M is:
+\begin{equation}
+M = (P_{S} - P_{k})^{\mu}(g^{\mu \nu} - P_{ij}^{\mu}P_{ij}^{\nu}/m_{R}^2)(P_{i}^2 - P_{j}^2)
+\end{equation}
+\begin{equation}
+|M|^2 = (m_{ik}^2 - m_{jk}^2 - (m_{S}^2 - m_{k}^2)(m_{i}^2 - m_{j}^2)/m_{R}^2)\frac{1 + (Rp_{jR})^2}{1 + (Rp_{j})^2}
+\end{equation}
+\begin{equation}
+\Gamma = \Gamma_{0}\frac{m_{R}}{m_{ij}}\left(\frac{p_{j}}{p_{jR}}\right)^3\frac{1 + (Rp_{jR})^2}{1 + (Rp_{j})^2}
+\end{equation}
+
+Here,  $m_{R}$ and $\Gamma_{0}$ are the mass and width of the $m_{ij}^2$ resonance; $m_{S}$, $m_{i}$, $m_{j}$, $m_{k}$ are the masses of the parent and of the $i^{th}$, $j^{th}$, $k^{th}$ particles, respectively; $p_{j}$ is the magnitude of the 3-momentum of the $j^{th}$ particle in the $i-j$ rest frame, and $p_{jR}$ is the same when $m_{ij}^2 = m_{R}^2$.  The value of $R$ for the ``centrifugal barrier penetration factor'' is taken to be 2 fm for the $K^{*}$ and 5 fm for the $\rho$.
+
+
+\subsection{EvtSecondary}
+\index{EvtSecondary}
+\index{classes!EvtSecondary}
+
+Allows EvtGen not to write secondary particles to StdHep. This
+class will most likely be removed.
+
+\subsection{EvtSpinDensity}
+\index{EvtSpinDensity}
+\index{classes!EvtSpinDensity}
+\index{spin-density}
+
+This class represents spin-density matrices of
+arbitrary dimensions. (Well, this is not quite true, at the 
+moment it is limited to dimension 5 which is the number of 
+degrees of freedom of a spin 2 particle.) 
+Functions are provided to manipulate the components of the
+spin density matrix as well as to  
+calculate probabilites.
+
+
+\subsection{EvtSpinType}
+\index{EvtSpinType}
+\index{classes!EvtSpinType}
+
+Defines the folowing enum for the different particle types
+that EvtGen handles.
+
+\begin{verbatim}
+enum spintype { SCALAR,VECTOR,TENSOR,DIRAC,PHOTON,NEUTRINO,STRING };
+\end{verbatim}
+
+
+\subsection{EvtStdHep}
+\index{EvtStdHep}
+\index{classes!EvtStdHep}
+\index{stdhep}
+
+This class flattens out the EvtGen decay tree that is used
+internaly to represent the particles and stores the 
+particles in a structure that is parallel to StdHep.
+
+
+\subsection{EvtString}
+\index{EvtString}
+\index{classes!EvtString}
+\index{string}
+
+This class is used by EvtGen to represent character strings. It does
+not provide a full interface for what you might need to do with 
+strings. But the following is available, other things can be added 
+if need arise.
+
+\begin{itemize}
+\item {\tt EvtString()}\\ 
+      Default constructor.
+\item {\tt EvtString(const char* cptr)}\\ 
+      Constructor from char*.
+\item {\tt EvtString(const EvtString\& string)}\\
+      Copy constructor. 
+\item {\tt friend ostream\& operator<<(ostream\& s, const EvtString\& str)  }\\
+      Print out string. 
+\item {\tt friend istream\& operator>>(istream\& s, EvtString\& str)}\\ 
+      Read in string.
+\item {\tt virtual ~EvtString()}\\
+      Virtual destructor. 
+\item {\tt EvtString operator=(const EvtString\& string)}\\ 
+      Assignment operator. 
+\item {\tt int operator==(const EvtString\& string) const}\\ 
+      Equal operator between two strings.
+\item {\tt int operator!=(const EvtString\& string) const}\\
+      Not equal operator between two strings. 
+\item {\tt int operator==(const char* string)}\\
+      Equal operator between EvtString and char *. 
+\item {\tt int operator!=(const char* string)}\\ 
+      Not equal operator between EvtString and char *. 
+\item {\tt char* value() const}\\ 
+      Return pointer to a char*.
+\end{itemize}
+
+\subsection{EvtSymTable}
+\index{EvtSymTable}
+\index{classes!EvtSymTable}
+
+Variables that are defined using a ``Define'' statement in the 
+decay table are stored in this class. Member functions allow 
+storing new symbols, querring about the existence of variables
+and looking up their values. This is only used from the 
+{\tt EvtDecayTable} class when reading the decay table.
+
+
+\subsection{EvtTemplateDummy}
+\index{EvtTemplateDummy}
+\index{classes!EvtTemplateDummy}
+
+This class was introduced just such that the EvtGen package
+made use of templates, this should be removed.
+
+\subsection{EvtTensor3C}
+\index{EvtTensor3C}
+\index{classes!EvtTensor3C}
+
+Complex rank 2 tensors in 3 dimensions. 
+
+
+\subsection{EvtTensor4C}
+\index{EvtTensor4C}
+\index{classes!EvtTensor4C}
+
+This class encapsulates the properties of second
+rank complex tensors. A tensor is reperesented as a $4\times 4$
+matrix of complex elements. As in the reperesentation of 4-vectors
+the tensor elements stored reperesents the
+tensor $T^{\mu\nu}$, i.e., the tensor with raised 
+indices. The components of a tensor can be manipulated 
+using the {\tt set}, {\tt setdiag}, and {\tt get} member 
+functions. {\tt setdiag} sets
+the diagonal elements while all other elements are initialized to zero.
+If {\tt g} is of type {\tt EvtTensor4C} tensor 
+{\tt g.setdiag(1.0,-1.0,-1.0,-1.0)} will set {\tt g} to the metric tensor. 
+The member function {\tt trace()} calculates the trace, $T^{\mu}_{\ \mu}$.
+The operators {\tt +} and {\tt -} are defined to be addition and
+subtraction of tensors. The operator {\tt *} is defined between a 
+complex number and a tensor and is a scalar multiplication.
+
+A tensor can also be constructed from two four vectors, either
+EvtVector4C or EvtVector4R, using the direct product function. 
+{\tt T=directProd(k,p)} has components $T^{\mu\nu}=k^{\mu}p^{\nu}$. 
+The {\tt dual} function performs a contraction with the 
+totaly anti symmetric tensor $\epsilon^{\mu\nu\alpha\beta}$, 
+{\tt F=dual(T)} has components 
+$F^{\mu\nu}=\epsilon^{\mu\nu\alpha\beta}T_{\alpha\beta}$.
+The sign convention is $\epsilon_{0123}=+1$. {\tt conj()} takes the
+complex conjugate of a tensor by conjugating each individual element.
+
+A tensor can also be obtained by contracting two tensors, e.g., 
+$G^{\alpha\beta}=T^{\alpha\mu}F^{\beta}_{\ \mu}$, this is
+expressed by {\tt G=cont22(T,F)}. The numbers 22 means that it was the
+second two indices that was contracted. A tensor can also be 
+contracted with a vector. This operation creates a new vector,
+e.g., {\tt p=T.cont1(k)}, where {\tt cont1} means that the first index 
+of the tensor is contracted with k, $p^{\mu}=T^{\nu\mu}k_{\nu}$.
+
+As special tensors that are defined is the metric tensor, 
+$g={\rm diag}(1,-1,-1,-1)$, which is accessed through the static
+member function {\tt EvtTensor4C::g()}.
+
+The member function {\tt boost(e,px,py,pz)} boost a tensor to the restframe
+given by $(e,p_x,p_y,p_z)$.
+
+
+
+\subsection{EvtVector3C}
+\index{EvtVector3C}
+\index{classes!EvtVector3C}
+
+Complex three-vectors.
+
+\subsection{EvtVector3R}
+\index{EvtVector3R}
+\index{classes!EvtVector3R}
+
+Real three-vectors.
+
+
+\subsection{EvtVector4C}
+\index{EvtVector4C}
+\index{classes!EvtVector4C}
+
+This is a class for reperesenting complex four-vectors. Examples 
+of complex four vectors are polarization vectors, $\varepsilon$
+and currents, e.g., $L^{\mu}$.
+
+\subsection{EvtVector4R}
+\index{EvtVector4R}
+\index{classes!EvtVector4R}
+
+This is a class for representing real four vectors. Examples 
+of real four vectors are four momenta and space-time positions.
+
+The operators =, +, -, +=, -= are supported with the obvious meaning,
+also multiplication and divison by real numbers are available. 
+
+The quantity $p^{\mu}p_{\mu}$ can be evaluated using the {\tt mass2()}
+member function and $\sqrt{p^{\mu}p_{\mu}}$, the mass, is given
+by {\tt mass()}. The member function {\tt d3mag()} evaluates the
+magnitude of the spatial components, i.e., the three momentum.
+
+Components of a four-vector can be manipulated with the 
+{\tt set(int i, double d)} member function which sets component
+{\tt i} of the vector to {\tt d}. The components are labeled
+from 0 to 3. O is the time component and 1 through 3 are
+the space components. To set all components at once the 
+{\tt set(double t, double x, double y, double z)} memeber function
+can be used. {\tt get(int i)} accesses the {\tt i}:th component of
+the vector.
+
+The {\tt EvtVector4R boost\_to\_v4(const EvtVector4R\& v2,const EvtVector4R\& vto)}\\ 
+function returns the four vector {\tt v2} boosted to the frame in which a particle
+with momentum {\tt vto} is at rest.
+
+
+
+
+

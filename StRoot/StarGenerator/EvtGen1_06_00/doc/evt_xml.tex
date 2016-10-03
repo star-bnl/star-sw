@@ -1,0 +1,497 @@
+\section{XML Interface}
+\index{xml}
+\label{sec:xml}
+This section describes the XML interface for EvtGen. The XML interface can be used to configure EvtGen at runtime and is designed to replace the old decay file format.
+
+\subsection{alias}
+\index{aliasTag}
+\index{xml!aliasTag}
+Defines an alias for a particle.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt name}\\
+      The name of the alias.
+\item{\tt particle}\\
+      The name of the particle.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<alias name="B+sig" particle"B+"/>
+\end{verbatim}
+}
+
+\subsection{Author}
+\index{authorTag}
+\index{xml!authorTag}
+Ignored by EvtGen.
+\subsubsection*{Attributes}
+This tag has no attributes.
+\subsubsection*{Tags}
+This tag has no tags.
+
+\subsection{channel}
+\index{channelTag}
+\index{xml!channelTag}
+Contains a single decay channel.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt br}\\
+      The branching fraction of this channel.
+\item{\tt daughters}\\
+      A space-separated list of the daughters produced in this channel.
+\item{\tt model}\\
+      The name of the decay model used to model this decay channel.
+\item{\tt params}\\
+      A space-separated list of parameters to configure the decay model.
+\item{\tt photos}\\
+      Turn on PHOTOS for this decay.\\
+      \emph{Default: off}
+\item{\tt verbose}\\
+      Turn on verbose for this decay.\\
+      \emph{Default: off}
+\item{\tt summary}\\
+      Turn on summary for this decay.\\
+      \emph{Default: off}
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<channel br="0.515122645" daughters="B+ B-" model="VSS"/>
+\end{verbatim}
+}
+
+\subsection{chargeConj}
+\index{chargeConjTag}
+\index{xml!chargeConjTag}
+Defines two particle aliases as eachothers charge conjugates.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt particle}\\
+      The name of the first particle.
+\item{\tt conjugate}\\
+      The name of the second particle.\\
+      \emph{Note: The order of these parameters is not important.}
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<chargeConj particle="B+sig" conjugate="B-sig"/>
+\end{verbatim}
+}
+
+\subsection{conjDecay}
+\index{conjDecayTag}
+\index{xml!conjDecayTag}
+Define a particle's decay based on that of its charge conjugate.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt particle}\\
+      The name of the particle to be modified.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<conjDecay particle="tau+"/>
+\end{verbatim}
+}
+
+\subsection{copyDalitz}
+\index{copyDalitzTag}
+\index{xml!copyDalitzTag}
+Defines a new Dalitz decay with the same resonance structure as an existing one.\\
+\emph{Used by EvtGenericDalitz}
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt particle}\\
+      The name of the decaying particle.
+\item{\tt daughters}\\
+      A space-separated list of the daughters produced in this channel.\\
+      \emph{Note: The order of daughters is important.}
+\item{\tt copy}\\
+      The decaying particle in the channel to be copied.
+\item{\tt copyDaughters}\\
+      A space-separated list of the daughters of the channel to be copied.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<copyDalitz particle="D-" daughters="K+ pi- pi-"
+            copy="D+" copyDaughters="K- pi+ pi+"/>
+\end{verbatim}
+}
+
+\subsection{copyDecay}
+\index{copyDecayTag}
+\index{xml!copyDecayTag}
+Copy the definition of one particle's decays to another particle.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt particle}\\
+      The name of the particle to be modified.
+\item{\tt copy}\\
+      The name of the particle to be copied.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<copyDecay particle="B+sig" copy="B+"/>
+\end{verbatim}
+}
+
+\subsection{dalitzDecay}
+\index{dalitzDecayTag}
+\index{xml!dalitzDecayTag}
+Configures the Dalitz decay model for a given decay.\\
+\emph{Used by EvtGenericDalitz}
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt particle}\\
+      The name of the decaying particle.
+\item{\tt daughters}\\
+      A space-separated list of the daughters produced in this channel.
+\item{\tt probMax}\\
+      Must be calibrated for each decay seperately.
+\end{itemize}
+\subsubsection*{Tags}
+resonance.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<dalitzDecay particle="D+" daughters="anti-K0 pi+ pi0" probMax="150.0">
+  <resonance real="-0.268361" imag="-0.913601" shape="NonRes"/>
+  <resonance mag="0.388844" phase="0.00" width="0.1512"
+             mass="0.7699" spin="1" resDaughters="pi+ pi0"
+             shape="RBW" BlattWeisskopfFactorResonance="25.38"/>
+  <resonance mag="0.1940367505" phase="41.201" width="0.0498"
+             mass="0.89159" spin="1" resDaughters="pi0 anti-K0"
+             shape="RBW" BlattWeisskopfFactorResonance="10.15"/>
+</dalitzDecay>
+\end{verbatim}
+}
+
+\subsection{data}
+\index{dataTag}
+\index{xml!dataTag}
+This is the top-level tag that must contain all other tags.
+\subsubsection*{Attributes}
+This tag has no attributes.
+\subsubsection*{Tags}
+alias, Author, chargeConj, copyDalitz, copyDecay, dalitzDecay, decay, define, Details, lineShapePW, modelAlias, particle, photos, pythia6Param, pythiaParam, removeDecay, Title, Version.
+
+\subsection{decay}
+\index{decayTag}
+\index{xml!decayTag}
+Contains the decay information of a single particle.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt name}\\
+      The name of the decaying particle.
+\end{itemize}
+\subsubsection*{Tags}
+channel.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<decay name="Upsilon(4S)">
+  <channel br="0.515122645" daughters="B+ B-" model="VSS"/>
+  <channel br="0.483122645" daughters="B0 anti-B0" model="VSS_BMIX" params="dm"/>
+  <channel br="0.000015583" daughters="e+ e-" model="VLL" photos="true"/>
+  <channel br="0.000015766" daughters="mu+ mu-" model="VLL" photos="true"/>
+  <channel br="0.000015766" daughters="tau+ tau-" model="VLL" photos="true"/>
+  <channel br="0.000084099" daughters="Upsilon(2S) pi+ pi-" model="VVPIPI"/>
+  <channel br="0.000044342" daughters="Upsilon(2S) pi0 pi0" model="VVPIPI"/>
+  <channel br="0.000080123" daughters="Upsilon pi+ pi-" model="VVPIPI"/>
+  <channel br="0.000044342" daughters="Upsilon pi0 pi0" model="VVPIPI"/>
+  <channel br="0.000194392" daughters="Upsilon eta" model="PARTWAVE"
+           params="0.0 0.0 1.0 0.0 0.0 0.0"/>
+  <channel br="0.000092625" daughters="gamma chi_b0(3P)" model="HELAMP"
+           params="1. 0. 1. 0."/>
+  <channel br="0.000138938" daughters="gamma chi_b1(3P)" model="HELAMP"
+           params="1. 0. 1. 0. -1. 0. -1. 0."/>
+  <channel br="0.000129084" daughters="gamma chi_b2(3P)" model="HELAMP"
+           params="2.4494897 0. 1.7320508 0. 1. 0. 1. 0. 1.7320508 0. 2.4494897 0."/>
+  <channel br="0.000002956" daughters="gamma chi_b0(2P)" model="HELAMP"
+           params="1. 0. 1. 0."/>
+  <channel br="0.000007883" daughters="gamma chi_b1(2P)" model="HELAMP"
+           params="1. 0. 1. 0. -1. 0. -1. 0."/>
+  <channel br="0.000011825" daughters="gamma chi_b2(2P)" model="HELAMP"
+           params="2.4494897 0. 1.7320508 0. 1. 0. 1. 0. 1.7320508 0. 2.4494897 0."/>
+  <channel br="0.000837571" daughters="g g g" model="PYTHIA" params="4"/>
+  <channel br="0.000039415" daughters="gamma g g" model="PYTHIA" params="4"/>
+</decay>
+\end{verbatim}
+}
+
+\subsection{define}
+\index{defineTag}
+\index{xml!defineTag}
+Defines a constant.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt name}\\
+      The name of the constant.
+\item{\tt value}\\
+      The numeric value of the constant.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<define name="gamma" value="1.387"/>
+\end{verbatim}
+}
+
+\subsection{Details}
+\index{detailsTag}
+\index{xml!detailsTag}
+Ignored by EvtGen.
+\subsubsection*{Attributes}
+This tag has no attributes.
+\subsubsection*{Tags}
+This tag has no tags.
+
+\subsection{lineShapePW}
+\index{lineShapePWTag}
+\index{xml!lineShapePWTag}
+Define the lowest allowed partial wave for a two body decay.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt parent}\\
+      The name of the decaying particle.
+\item{\tt daug1}\\
+      The name of the first daughter particle.
+\item{\tt daug2}\\
+      The name of the second daughter particle.\\
+      \emph{The order of {\tt daug1} and {\tt daug2} is not important.}
+\item{\tt pw}\\
+      The partial wave spin.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<lineShapePW parent="MyD_1+" daug1="MyD*+" daug2="pi0" pw="2"/>
+\end{verbatim}
+}
+
+\subsection{modelAlias}
+\index{modelAliasTag}
+\index{xml!modelAliasTag}
+Defines an alias for a model.\\
+\emph{Useful for models which are used frequently with the same parameters.}
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt name}\\
+      The name of the alias.
+\item{\tt model}\\
+      The name of the model that this alias is for.
+\item{\tt params}\\
+      The parameters to be passed to the model when using this alias.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<modelAlias name="MYPARTWAVE" model="PARTWAVE" params="0.0 0.0 1.0 0.0 0.0 0.0"/>
+\end{verbatim}
+}
+
+\subsection{particle}
+\index{particleTag}
+\index{xml!particleTag}
+Contains modifications to a defined particle.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt name}\\
+      The name of the particle to be modified.
+\item{\tt mass}\\
+      The mass of the particle.
+\item{\tt width}\\
+      The width of the particle.
+\item{\tt massMax, massMin}\\
+      The maximum and minimum allowed masses for the particle.
+\item{\tt includeBirthFactor, includeDecayFactor}\\
+      Whether birth and decay factors should be included for the particle.
+\item{\tt lineShape}\\
+      Takes the values RELBW, NONRELBW, FLAT, MANYDELTAFUNC.
+\item{\tt blattWeisskopfFactor}\\
+      The BlattWeisskopf factor associated with the particle.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<particle name="Myf_0" mass="0.980" width="0.092" massMin="0"/>
+\end{verbatim}
+}
+
+\subsection{photos}
+\index{photosTag}
+\index{xml!photosTag}
+Configure PHOTOS.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt usage}\\
+      Configure usage of PHOTOS. Takes the values always or never.\\
+      \emph{Overrides the {\tt photos} parameter of the channel tag when set.}
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<photos usage="always"/>
+\end{verbatim}
+}
+
+\subsection{pythiaParam}
+\index{pythiaParamTag}
+\index{xml!pythiaParamTag}
+Configure PYTHIA.
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt generator}\\
+      The generator this should be applied to. Takes the values generic, alias or both.
+\item{\tt module}\\
+      The name of the PYTHIA8 module.
+\item{\tt param}\\
+      The name of the PYTHIA8 parameter.
+\item{\tt value}\\
+      The value to give the parameter.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<pythiaParam generator="BOTH" module="ParticleDecays" param="multIncrease" value="10"/>
+\end{verbatim}
+}
+
+\subsection{pythia6Param}
+\index{pythia6ParamTag}
+\index{xml!pythia6ParamTag}
+Configure PYTHIA.\\
+\emph{Apply PYTHIA6 configuration to PYTHIA8}
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt generator}\\
+      The generator this should be applied to. Takes the values generic, alias or both.
+\item{\tt module}\\
+      The name of the PYTHIA6 module.
+\item{\tt param}\\
+      The number of the PYTHIA6 parameter.
+\item{\tt value}\\
+      The value to give the parameter.
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<pythia6Param generator="GENERIC" module="MSTJ" param="26" value="0"/>
+\end{verbatim}
+}
+
+\subsection{removeDecay}
+\index{removeDecayTag}
+\index{xml!removeDecayTag}
+Remove a decay channel from the decay of a particle.\\
+\emph{Used in conjunction with copyDecay}
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt particle}\\
+      The name of the decaying particle.
+\end{itemize}
+\subsubsection*{Tags}
+channel.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<removeDecay particle="myPhi">
+  <channel daughters="K+ K-"/>
+</removeDecay>
+\end{verbatim}
+}
+
+\subsection{resonance}
+\index{resonanceTag}
+\index{xml!resonanceTag}
+Contains a single resonance that contributes to a Dalitz decay.\\
+\emph{Used by EvtGenericDalitz}
+\subsubsection*{Attributes}
+\begin{itemize}
+\item{\tt mag, phase}\\
+      The magnitude and phase of the resonance.\\
+      \emph{Defaults: 1, 0}
+\item{\tt real, imag}\\
+      The real and imaginary components of the resonances amplitude.\\
+      \emph{Overridden by \tt mag, phase}
+\item{\tt ampFactorReal, ampFactorImag}\\
+      Further multiplicative factor for the amplitude.\\
+      \emph{Defaults: 1, 0}
+\item{\tt particle}\\
+      The name of the resonant particle to obtain mass, spin and width from.\\
+      \emph{Overridden by \tt mass, spin, width}
+\item{\tt mass, spin, width}\\
+      The mass, spin and width of the resonant particle.
+\item{\tt shape}\\
+      The shape of the resonance.\\
+      \emph{Can take the values: NBW, RBW, RBW\_CLEO\_ZEMACH, NonRes, Flatte.}
+\item{\tt BlattWeisskopfFactorParent, BlattWeisskopfFactorResonance}\\
+      The BlattWeisskopf factors associated with the parent and the resonance.\\
+      \emph{Defaults: 0.0, 1.5}
+\item{\tt resDaughters}\\
+      A space-separated list of the daughters produced by the resonance.
+\item{\tt daughterPair}\\
+      The pair of daughters associated with the resonance 1=AB, 2=BC, 3=CA.\\
+      \emph{Overridden by \tt resDaughters}
+\item{\tt normalise}\\
+      If multiple daughter pairs match the {\tt resDaughters} string then their amplitudes will be normalised unless this is turned off.\\
+      \emph{Default: on}
+\end{itemize}
+\subsubsection*{Tags}
+This tag has no tags.
+\subsubsection*{Example}
+{\footnotesize
+\begin{verbatim}
+<resonance mag="0.96" phase="150.1" width="0.109"
+           mass="1.4324" spin="2" resDaughters="pi+ K-"
+           shape="RBW_CLEO_ZEMACH" BlattWeisskopfFactorParent="5.0"/>
+\end{verbatim}
+}
+
+\subsection{Title}
+\index{titleTag}
+\index{xml!titleTag}
+Ignored by EvtGen.
+\subsubsection*{Attributes}
+This tag has no attributes.
+\subsubsection*{Tags}
+This tag has no tags.
+
+\subsection{Version}
+\index{versionTag}
+\index{xml!versionTag}
+Ignored by EvtGen.
+\subsubsection*{Attributes}
+This tag has no attributes.
+\subsubsection*{Tags}
+This tag has no tags.

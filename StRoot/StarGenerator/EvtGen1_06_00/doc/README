@@ -1,0 +1,61 @@
+
+ README file for documentation of EvtGen.
+
+To generate the guide.ps run "do_latex" it runs the set of commands needed 
+to produce the postscript file.
+
+Alternatively in the BaBar srt structure you can do "gmake EvtGen.guide"
+which puts the output (guide.ps as well as HTML) in doc/guide/EvtGen/.
+
+ The EvtGen documentation is keept in the doc subdirectory 
+of the EvtGen package.
+ 
+ It is a latex document consisting of the following files:
+
+  guide.tex              Main tex file.
+
+  guide.bib              The bibliography.
+
+  do_latex               script to generate the guide.ps file.
+
+  evt_algorithm.tex      Describes the algorithm.
+
+  evt_classes.tex        Description of classes.
+
+  evt_conventions.tex    Physics conventions.
+
+  evt_cpviolation.tex    Describes how CP violation and mixing is
+                         implemented.
+
+  evt_decayamp.tex       Describes how to write down decay amplitudes.
+
+  evt_decaytable.tex     Describes how the decay table in EvtGen works.
+
+  evt_examples.tex       Gives examples of how to run EvtGen.
+
+  evt_finalstaterad.tex  How PHOTOS is used for generation of final state radiation.     
+
+  evt_helamp.tex         Definition of how helicity amplitudes are used.
+
+  evt_intro.tex          The introduction.
+
+  evt_jetset.tex         Defines the jetset interface.
+
+  evt_macro.tex          Contains some definitions that are
+                         used throughout the document.
+
+  evt_models.tex         Description of the available decay models.
+
+  evt_monitoring.tex     Describes switches that can be turned on to get a summary
+                         of how the generator worked.
+
+  evt_util.tex           Describes various utility functions.
+
+  evt_wrtmodel.tex       Describes how to implement a decay model.
+
+
+Report problems to ryd@hep.caltech.edu
+
+
+
+

@@ -1,0 +1,8 @@
+run:
+	cd prod; sh go
+	@echo " make a choice:           "
+	@echo " diff prod/tauola.cpc.binp   prod/tauola.output "
+	@echo " diff prod/tauola.aleph.binp prod/tauola.output "
+	@echo " diff prod/tauola.cleo.binp  prod/tauola.output "
+
+

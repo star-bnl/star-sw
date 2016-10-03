@@ -1,0 +1,31 @@
+########################################################
+#          Do not edit Makefiles by hand!!!            #
+#                                                      #
+# Makefile system is created from template files       #
+#      makefile.templ                                  #
+#  by executing:                                       #
+#           make makflag                               #
+#  in directory /ffbench under KK                      #
+#  Please, edit Makefile in this directory instead.    #
+#  Changes will be automatically propagated.           #
+#                                                      #
+########################################################  
+LOCAL_LIB   =  glib.a 
+LIB_OBJECTS =  formf.o tauola.o 
+##############   What has to be built
+all:	$(LOCAL_LIB) 
+FFLAGS =  <FFLAGS>
+F77 = f77
+AR = ar
+RANLIB = ranlib
+LD = $(F77)
+############################
+############################
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+$(LOCAL_LIB): $(LIB_OBJECTS)
+	$(AR) rv  $(LOCAL_LIB) $(LIB_OBJECTS)
+	$(RANLIB) $(LOCAL_LIB)
+clean:
+	rm -f *.o; rm -f *.a; rm -f *~ 
+#######################################################
