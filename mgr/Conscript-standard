@@ -128,7 +128,7 @@ my $CPPPATH = $env1->{CPPPATH};#
 if ($pkg eq "RTS") {
   if ($STAR_SYS =~ /darwin/) {}
   else {
-    $CPPFLAGS .= ' -D__LARGEFILE64_SOURCE';
+    $CPPFLAGS .= ' -D_LARGEFILE64_SOURCE'; # __USE_LARGEFILE64
   }
   $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER '
     .  '-DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
@@ -141,16 +141,17 @@ if ($pkg eq "RTS") {
 	  .  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" 
 	      .  $main::PATH_SEPARATOR . $CPPPATH;
-  my @srcs = ();
+#  my @srcs = ();
 #  print "srcL : @srcL\n";
 #  print "RTS skip /^src\/(DAQ_LEGACY|EVP_READER|RTS_READER)/\n";
-  foreach my $s (@srcL) {
-    next if $s =~ /^src\/(DAQ_LEGACY|EVP_READER|RTS_READER)/;
-    push @srcs, $s;
-  }
+#  Have been cleaned from CVSROOT
+#  foreach my $s (@srcL) {
+#    next if $s =~ /^src\/(DAQ_LEGACY|EVP_READER|RTS_READER)/;
+#    push @srcs, $s;
+#  }
 #  print "srcs : @srcs\n";
 #  @srcL = @srcs;
-  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilitieswith gcc482
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilities with gcc482
     $envNoDeb = $env->clone('DEBUG' => $NOOPTIMIZED);
     for ($i = 0; $i < $#srcL; $i++) {
       if ($srcL[$i] =~ /FtfUtilities\.cxx/) {
@@ -199,14 +200,15 @@ if ( $pkg eq "OnlinePlots") {
   $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
 }
 if ( $pkg eq "Jevp") {
-  $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPlot"
-    .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPresenter"
-      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpServer"
-	.   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpData"
-	  .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
-	    .   $main::PATH_SEPARATOR .  $CPPPATH;
-  $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
-}
+    $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPlot"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpPresenter"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpServer"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpData"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
+	      .   $main::PATH_SEPARATOR .  $CPPPATH;
+    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+} 
 if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
@@ -301,67 +303,67 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$agml_cmd = $env->{ENV}->{STAR}."/mgr/agmlParser.py";
       }
       foreach $xml (@xmlGeo){
-	if ( $xml =~ /StarVMC\/Geometry\// ){
-	  $agL   = $xml; $agL =~ s/$Dir//; $agL =~ s/^\///; 	    print "xml = $xml Dir = $Dir => $agL\n" if $param::debug; 
-	  $agD   = File::Basename::basename($xml);
-	  $agM   = $agD; $agM =~ s/\.xml//;
-	  $agX   = $agM.".cxx";
-	  $agH   = $agM.".h";
-	  $agE   = $agM."G.age";
-	  print "\tDEBUG $agX $agH $agE $agM agL = $agL $xml\n" if $param::debug;
-	  # generally enable all warnings for now
-	  $env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
-	  #	    Depends $env [$agE], ("$agL", "#$agml_cmd");
-	  if ( $agL =~ m/Compat/ ){
-	    if (-r $xml) {
-	      sub xmlscan {
-#		print "xmlscan: @_\n";
-		my $file = $_[0];
-		open (SCAN, $file) or die "Can't open $file";
-		my $line;
-		my @includes = ();
-		my $skip = 0;
-		while ($line = <SCAN>) {
-		  if ($line =~ /-->/) {$skip = 0;}
-		  if ($line =~ /<!--/) {$sip = 1;}
-		  next if $skip;
-		  #		    print "============SCAN: $line $_\n";
-		  next if ($line !~ /Import file/);
-		  my @words = split('"',$line);
-		  $line = $words[1];
-		  #	  print "============SCAN: $line $_";
-		  next if (! $line);
-		  push(@includes, "#" . $line);
-#		  print "============SCAN: @includes\n";
-		} 
-		close(SCAN);
-		@includes
-	      };
-#	      print "xml = $xml\n";
-	      my @includes = xmlscan($xml);
-#	      print "includes : @includes\n";
-	      Depends $env [$agE], (@includes);
-	    }
-	  } else {
-	    #	      Depends $env [$agX, $agH, $agE], ("$agL", "#$agml_cmd");
-	    # Depends $env --> some rule to build extra dict on the fly
-	    Command $env [$agX, $agH], ("$agL"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
-	    push @srcX, $agX;
-	    push @h_filesX, $agH;
+	$agL   = $xml; $agL =~ s/$Dir//; $agL =~ s/^\///; 	    print "xml = $xml Dir = $Dir => $agL\n" if $param::debug; 
+	$agD   = File::Basename::basename($xml);
+	$agM   = $agD; $agM =~ s/\.xml//;
+	$agX   = $agM.".cxx";
+	$agH   = $agM.".h";
+	$agE   = $agM."G.age";
+	print "\tDEBUG $agX $agH $agE $agM agL = $agL $xml\n" if $param::debug;
+	# generally enable all warnings for now
+	$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
+	#	    Depends $env [$agE], ("$agL", "#$agml_cmd");
+	if ( $agL =~ m/Compat/ ){
+	  if (-r $xml) {
+#	    print "==========================================\n";
+	    sub xmlscan {
+	      #		print "xmlscan: @_\n";
+	      my $file = $_[0];
+	      open (SCAN, $file) or die "Can't open $file";
+	      my $line;
+	      my @includes = ();
+	      my $skip = 0;
+	      while ($line = <SCAN>) {
+		if ($line =~ /-->/) {$skip = 0;}
+		if ($line =~ /<!--/) {$sip = 1;}
+		next if $skip;
+		#		    print "============SCAN: $line $_\n";
+		next if ($line !~ /Import file/);
+		my @words = split('"',$line);
+		$line = $words[1];
+		#	  print "============SCAN: $line $_";
+		next if (! $line);
+		push(@includes, "#" . $line);
+		#		  print "============SCAN: @includes\n";
+	      } 
+	      close(SCAN);
+	      @includes
+	    };
+	    my @includes = xmlscan($xml);
+	    print "xml = $xml\tincludes : @includes\n" if $param::debug;
+	    Depends $env [$agE], (@includes);
 	  }
-	  Command $env [$agE], ("$agL"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
-	  push @srcE, $agE;
-	}
+	} else {
+	# Depends $env --> some rule to build extra dict on the fly
+	  Command $env [$agX, $agH], ("$agL"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+	push @srcX, $agX;
+	push @h_filesX, $agH;
       }
-      my $xgeometry = "xgeometry" . "." . $env1->{SUFSOLIB};
-      Depends $env1 [$xgeometry], qw(#pams/geometry/geometry/geometry.g);
-      LinkedModule $env1 $xgeometry, @srcE;
-      Install $env1 $LIB, $xgeometry;
-      $lib = $LIB . "/lib" . $xgeometry;
-      InstallAs $env1 $lib, $xgeometry;
-      
+      Command $env [$agE], ("$agL"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+      push @srcE, $agE;
     }
+    my $xgeometry = "xgeometry" . "." . $env1->{SUFSOLIB};
+#    Depends $env1 [$xgeometry], qw(#pams/geometry/geometry/geometry.g);
+    if (-r "StarVMC/xgeometry/xgeometry.age") {
+      InstallAs $env1 "xgeometry.age", "#StarVMC/xgeometry/xgeometry.age";
+      push @srcE, "xgeometry.age";
+    }
+    LinkedModule $env1 $xgeometry, @srcE;
+    Install $env1 $LIB, $xgeometry;
+    $lib = $LIB . "/lib" . $xgeometry;
+    InstallAs $env1 $lib, $xgeometry;
   }
+}
   # <-- end generating geometries
   foreach my $Rep(@Repo) {
     my $RepDir = $Rep . "/" . $Dir;
@@ -409,7 +411,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my @dep = ($uilocal, @uih);
     if ($qt4) {
       my $out = "$dirbase". "ui_". $stem . ".h"; 
-      print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
+      print "Qt4: out : $out ==> $uilocal\n" if $param::debug ;
       Depends $env [$out], ($uilocal);
       Command $env [$out], ($uilocal), qq(cd %1:d; $uic %1:f -o %>:f );
       push @QtDefs, $out;    print "Qt4/QtDefs from $ui -> $out\n"; # if $param::debug;
@@ -533,6 +535,108 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 	#print "DEBUG ".join(" ",@srcL)."\n";
 
+    } elsif ( $pkg =~ m/^EvtGen/ and $Dir =~ m/StarGenerator/ ){
+        # Append EvtGen include path and define version
+        #print "***** DEBUG ****\n";
+        $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Pythia8_1_86/include";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Photos3_61/include";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include";
+        $CXXFLAGS .= "-DEVTGEN_EXTERNAL=1 -DEVTGEN_PYTHIA=1 -DEVTGEN_PHOTOS=1 -DEVTGEN_TAUOLA=1 -DEvtGen_version=\\\"$pkg\\\" ";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, validation
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/test/ ||
+                     $s =~ m/validation/      );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
+    } elsif ( $pkg =~ m/^HepMC/ and $Dir =~ m/StarGenerator/ ){
+        # Append HepMC include path and define version
+        #print "***** DEBUG ****\n";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CXXFLAGS .= " -Dmomentum=GEV -Dlength=MM -DHepMC_version=\\\"$pkg\\\" ";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, examples
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/test/ ||
+                     $s =~ m/examples/      );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
+    } elsif ( $pkg =~ m/^Photos/ and $Dir =~ m/StarGenerator/ ){
+        # Append Photos include path and define version
+        #print "***** DEBUG ****\n";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/eventRecordInterfaces";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/photos-C";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/photosCInterfaces";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/src/utilities";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+        $CXXFLAGS .= " -DPhotos_version=\\\"$pkg\\\" ";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, examples
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/examples/      );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
+    } elsif ( $pkg =~ m/^Tauola/ and $Dir =~ m/StarGenerator/ ){
+        # Append Tauola include path and define version
+        #print "***** DEBUG ****\n";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include/Tauola";
+        $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
+        #$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
+        $CXXFLAGS .= " -DTauola_version=\\\"$pkg\\\" ";
+        $CPPFLAGS .= " -x c++";
+        print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+        # Do not compile test, examples
+        @src = ();
+        foreach my $s (@srcL) {
+            next if ($s =~ m/SANC/ ||
+                     $s =~ m/tauola-fortran\/glibk/ ||
+                     $s =~ m/tauola-fortran\/jetset/ ||
+                     $s =~ m/tauola-fortran\/jetset2/ ||
+                     $s =~ m/tauola-fortran\/tauola-F/ ||
+                     $s =~ m/tauola-fortran\/photos-F/ ||
+                     $s =~ m/tauola-fortran\/demo-factory/ ||
+                     $s =~ m/tauola-fortran\/tauola-factory/ ||
+                     $s =~ m/tauola-fortran\/tauola-BBB/ ||
+                     #$s =~ m/src/ ||
+                     $s =~ m/TauSpinner/ ||
+                     $s =~ m/examples/     );
+            #print "Including $s\n";
+            push(@src,$s);
+        }
+        @srcL = @src;
+
+        #print "DEBUG ".join(" ",@srcL)."\n";
+
+
 
   } elsif ( $pkg =~ m/^StHbtMaker$/ ) {
     $CPPPATH = "#" . $Dir;
@@ -541,7 +645,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir;
     }
     if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
-    $CPPPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{OPTSTAR}."/include";
+#    $CPPPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{OPTSTAR}."/include";
     print "CPPPATH = $CPPPATH\n" if $param::debug;
     # According to description, all client requirering this
     # should be added here.
@@ -598,8 +702,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     }
     if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
     print "CPPPATH = $CPPPATH\n" if $param::debug;
-  } elsif ( $pkg =~ m/^StJetFinder$/ ){
-    $CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+#  } elsif ( $pkg =~ m/^StJetFinder$/ ){
+#    $CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
   } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
     $LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
     $SO_PKG = "";
@@ -1576,7 +1680,7 @@ if ( $#src > -1 ) {
       #      print "$#src => @src \n";
       #      print "$#PlainObj => @PlainObj \n";
     }
-    if ($SO_PKG) {
+    if ($SO_PKG and $SO_PKG !~ /xgeometry/) {
 	#    print "LinkedModule  $SO_PKG, @src\n";
 	LinkedModule $env2 $SO_PKG, @src;
 	#    print "Install $LIB,         $SO_PKG\n";

@@ -24,7 +24,7 @@
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 10;
+const Int_t NMasses = 11;
 const Double_t Masses[NMasses] = {0.93827231,
 				  0.493677,
 				  0.13956995,
@@ -35,10 +35,11 @@ const Double_t Masses[NMasses] = {0.93827231,
 				  2.80923, //GEANT3
 				  3.727417, //GEANT3
 				  0.13956995,
+				  0.93827231*6.94/1.008
 };
-const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi"};
-const Int_t NF = 4;  //         0       1    2     3     4      5   6     7
+const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2, 9};
+const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li"};
+const Int_t NF = 4;  //          0    1     2   3    4     5   6     7        8      -2        9
 const Char_t *FNames[8] = {"Girrf","Sirrf","Bz","B70","B60","B70M","dNdx","BzM"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
@@ -52,7 +53,7 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -69,7 +70,7 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -86,7 +87,7 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -103,7 +104,7 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
   Double_t charge = 1.;
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
-    charge = 2;
+    charge = par[1];
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
@@ -118,11 +119,8 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
   Double_t dx2 = 1;
-  if (par[1] > 1.0) {
-    charge = 2;
-    poverm *= charge;
-    dx2 = TMath::Log2(5.);
-  }
+  if (par[1] > 1.0) charge = par[1];
+  poverm *= charge;
   return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
 #ifndef __CINT__
@@ -176,10 +174,9 @@ Double_t aleph70(Double_t *x,Double_t *par) {
   Double_t mass = Masses[hyp];
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
-  if (h > 6) {
-    charge = 2;
-    poverm *= charge;
-  }
+  if (h > 6 && h > 9) charge = 2;
+  else if (h == 10)   charge = 3;
+  poverm *= charge;
   Double_t bg = poverm;
   /* 
      W.Blum, L. Rolandi "Particle Detection with Drift Chambers", page 246, eq. (9.5)
@@ -225,7 +222,7 @@ void bichselG10(const Char_t *type="Bz") {
     else if (Type.Contains("N",TString::kIgnoreCase))    f = 6;
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
-    cout << "Make " << FunName << endl;
+    cout << "Make " << h << "\t" << FunName << endl;
     Double_t xmin = -1;
     //    if (h == 0 || h >= 5) xmin = -0.75;
     if (h == 4) xmin = -0.70;
@@ -240,9 +237,10 @@ void bichselG10(const Char_t *type="Bz") {
       return;
     }
     if (h == 9) func->SetParameter(0,-Masses[h]);
-    else       func->SetParameter(0,Masses[h]);
+    else        func->SetParameter(0,Masses[h]);
     func->SetParameter(1,1.);
     if (h >= 7 && h < 9) func->SetParameter(1,2.);
+    if (h == 10) func->SetParameter(1,3.);
     Int_t color = h+1;
     if (color > 8) color -= 8;
     //    if (color > 7) color++;

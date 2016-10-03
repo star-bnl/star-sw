@@ -148,7 +148,7 @@ bool MediumGaAs::ElectronTownsend(const double ex, const double ey,
                                   double& alpha) {
 
   alpha = 0.;
-  if (m_hasElectronTownsend) {
+  if (!tabElectronTownsend.empty()) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }

@@ -97,6 +97,11 @@ inline double RndmPolya(const double theta) {
     }
   }
 }
+
+double RndmLandau();
+double RndmVavilov(const double rkappa, const double beta2);
+double RndmHeedWF(const double w, const double f);
+
 }
 
 #endif

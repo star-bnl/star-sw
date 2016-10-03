@@ -387,12 +387,9 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
             return false;
           }
 
-          eFields.resize(eFieldRes);
-          m_nEfields = eFieldRes;
-          bFields.resize(bFieldRes);
-          m_nBfields = bFieldRes;
-          bAngles.resize(angRes);
-          m_nAngles = angRes;
+          m_eFields.resize(eFieldRes);
+          m_bFields.resize(bFieldRes);
+          m_bAngles.resize(angRes);
 
           // Fill in the excitation/ionisation structs
           // Excitation
@@ -413,12 +410,12 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
         } else if (strcmp(token, "E") == 0) {
           token = strtok(NULL, " :,%");
           if (strcmp(token, "fields") == 0) {
-            for (int i = 0; i < eFieldRes; ++i) gasfile >> eFields[i];
+            for (int i = 0; i < eFieldRes; ++i) gasfile >> m_eFields[i];
           }
         } else if (strcmp(token, "E-B") == 0) {
           token = strtok(NULL, " :,%");
           if (strcmp(token, "angles") == 0) {
-            for (int i = 0; i < angRes; ++i) gasfile >> bAngles[i];
+            for (int i = 0; i < angRes; ++i) gasfile >> m_bAngles[i];
           }
         } else if (strcmp(token, "B") == 0) {
           token = strtok(NULL, " :,%");
@@ -427,7 +424,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
             for (int i = 0; i < bFieldRes; i++) {
               // B fields are stored in hGauss (to be checked!).
               gasfile >> bstore;
-              bFields[i] = bstore / 100.;
+              m_bFields[i] = bstore / 100.;
             }
           }
         } else if (strcmp(token, "Mixture") == 0) {
@@ -523,11 +520,9 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
     tabElectronDiffLong.clear();
   }
   if (gasBits[3] == 'T') {
-    m_hasElectronTownsend = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronTownsend, -30.);
     InitParamArrays(eFieldRes, bFieldRes, angRes, m_tabTownsendNoPenning, -30.);
   } else {
-    m_hasElectronTownsend = false;
     tabElectronTownsend.clear();
     m_tabTownsendNoPenning.clear();
   }
@@ -706,7 +701,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
           if (m_hasElectronDiffTrans) tabElectronDiffTrans[j][k][i] = dt;
           // Townsend and attachment coefficient
           gasfile >> alpha >> alpha0 >> eta;
-          if (m_hasElectronTownsend) {
+          if (!tabElectronTownsend.empty()) {
             tabElectronTownsend[j][k][i] = alpha;
             m_tabTownsendNoPenning[j][k][i] = alpha0;
           }
@@ -764,7 +759,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
       if (m_hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
       // Townsend and attachment coefficients
       gasfile >> alpha >> waste >> alpha0 >> eta >> waste;
-      if (m_hasElectronTownsend) {
+      if (!tabElectronTownsend.empty()) {
         tabElectronTownsend[0][0][i] = alpha;
         m_tabTownsendNoPenning[0][0][i] = alpha0;
       }
@@ -901,7 +896,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
 
   // Multiply the E/p values by the pressure.
   for (int i = eFieldRes; i--;) {
-    eFields[i] *= m_pressureTable;
+    m_eFields[i] *= m_pressureTable;
   }
   // Scale the parameters.
   const double sqrtPressure = sqrt(m_pressureTable);
@@ -920,7 +915,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
             tabElectronDiffTens[l][j][k][i] /= m_pressureTable;
           }
         }
-        if (m_hasElectronTownsend) {
+        if (!tabElectronTownsend.empty()) {
           tabElectronTownsend[j][k][i] += logPressure;
         }
         if (m_hasElectronAttachment) {
@@ -1017,9 +1012,9 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
     }
   }
 
-  const int eFieldRes = m_nEfields;
-  const int bFieldRes = m_nBfields;
-  const int angRes = m_nAngles;
+  const unsigned int eFieldRes = m_eFields.size();
+  const unsigned int bFieldRes = m_bFields.size();
+  const unsigned int angRes = m_bAngles.size();
 
   if (m_debug) {
     std::cout << m_className << "::WriteGasFile:\n";
@@ -1040,7 +1035,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
   if (m_hasElectronVelocityE) gasBits[0] = 'T';
   if (m_hasIonMobility) gasBits[1] = 'T';
   if (m_hasElectronDiffLong) gasBits[2] = 'T';
-  if (m_hasElectronTownsend) gasBits[3] = 'T';
+  if (!tabElectronTownsend.empty()) gasBits[3] = 'T';
   // Custer size distribution; skippped
   if (m_hasElectronAttachment) gasBits[5] = 'T';
   // Lorentz angle; skipped
@@ -1097,24 +1092,24 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           << std::setw(9) << m_ionisationList.size() << "\n";
   outFile << " E fields   \n";
   outFile << std::scientific << std::setw(15) << std::setprecision(8);
-  for (int i = 0; i < eFieldRes; i++) {
+  for (unsigned int i = 0; i < eFieldRes; ++i) {
     // List 5 values, then new line.
-    outFile << std::setw(15) << eFields[i] / m_pressure;
+    outFile << std::setw(15) << m_eFields[i] / m_pressure;
     if ((i + 1) % 5 == 0) outFile << "\n";
   }
   if (eFieldRes % 5 != 0) outFile << "\n";
   outFile << " E-B angles \n";
-  for (int i = 0; i < angRes; i++) {
+  for (unsigned int i = 0; i < angRes; ++i) {
     // List 5 values, then new line.
-    outFile << std::setw(15) << bAngles[i];
+    outFile << std::setw(15) << m_bAngles[i];
     if ((i + 1) % 5 == 0) outFile << "\n";
   }
   if (angRes % 5 != 0) outFile << "\n";
   outFile << " B fields   \n";
-  for (int i = 0; i < bFieldRes; i++) {
+  for (unsigned int i = 0; i < bFieldRes; ++i) {
     // List 5 values, then new line.
     // B fields are stored in hGauss (to be checked!).
-    outFile << std::setw(15) << bFields[i] * 100.;
+    outFile << std::setw(15) << m_bFields[i] * 100.;
     if ((i + 1) % 5 == 0) outFile << "\n";
   }
   if (bFieldRes % 5 != 0) outFile << "\n";
@@ -1145,9 +1140,9 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
 
   outFile << " The gas tables follow:\n";
   int cnt = 0;
-  for (int i = 0; i < eFieldRes; i++) {
-    for (int j = 0; j < angRes; j++) {
-      for (int k = 0; k < bFieldRes; k++) {
+  for (unsigned int i = 0; i < eFieldRes; ++i) {
+    for (unsigned int j = 0; j < angRes; ++j) {
+      for (unsigned int k = 0; k < bFieldRes; ++k) {
         double ve = 0., vb = 0., vexb = 0.;
         if (m_hasElectronVelocityE) ve = tabElectronVelocityE[j][k][i];
         if (m_hasElectronVelocityB) vb = tabElectronVelocityB[j][k][i];
@@ -1162,7 +1157,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         dl *= sqrtPressure;
         dt *= sqrtPressure;
         double alpha = -30., alpha0 = -30., eta = -30.;
-        if (m_hasElectronTownsend) {
+        if (!tabElectronTownsend.empty()) {
           alpha = tabElectronTownsend[j][k][i];
           alpha0 = m_tabTownsendNoPenning[j][k][i];
           alpha -= logPressure;
@@ -1438,30 +1433,30 @@ void MediumGas::PrintGas() {
   std::cout << "    Gas file:\n";
   std::cout << "      Pressure:    " << m_pressureTable << " Torr\n";
   std::cout << "      Temperature: " << m_temperatureTable << " K\n";
-  if (m_nEfields > 1) {
-    std::cout << "    Electric field range:  " << eFields[0] << " - "
-              << eFields[m_nEfields - 1] << " V/cm in " << m_nEfields - 1
+  if (m_eFields.size() > 1) {
+    std::cout << "    Electric field range:  " << m_eFields[0] << " - "
+              << m_eFields.back() << " V/cm in " << m_eFields.size() - 1
               << " steps.\n";
-  } else if (m_nEfields == 1) {
-    std::cout << "    Electric field:        " << eFields[0] << " V/cm\n";
+  } else if (m_eFields.size() == 1) {
+    std::cout << "    Electric field:        " << m_eFields[0] << " V/cm\n";
   } else {
     std::cout << "    Electric field range: not set\n";
   }
-  if (m_nBfields > 1) {
-    std::cout << "    Magnetic field range:  " << bFields[0] << " - "
-              << bFields[m_nBfields - 1] << " T in " << m_nBfields - 1
+  if (m_bFields.size() > 1) {
+    std::cout << "    Magnetic field range:  " << m_bFields[0] << " - "
+              << m_bFields.back() << " T in " << m_bFields.size() - 1
               << " steps.\n";
-  } else if (m_nBfields == 1) {
-    std::cout << "    Magnetic field:        " << bFields[0] << "\n";
+  } else if (m_bFields.size() == 1) {
+    std::cout << "    Magnetic field:        " << m_bFields[0] << "\n";
   } else {
     std::cout << "    Magnetic field range: not set\n";
   }
-  if (m_nAngles > 1) {
-    std::cout << "    Angular range:         " << bAngles[0] << " - "
-              << bAngles[m_nAngles - 1] << " in " << m_nAngles - 1 
+  if (m_bAngles.size() > 1) {
+    std::cout << "    Angular range:         " << m_bAngles[0] << " - "
+              << m_bAngles.back() << " in " << m_bAngles.size() - 1 
               << " steps.\n";
-  } else if (m_nAngles == 1) {
-    std::cout << "    Angle between E and B: " << bAngles[0] << "\n";
+  } else if (m_bAngles.size() == 1) {
+    std::cout << "    Angle between E and B: " << m_bAngles[0] << "\n";
   } else {
     std::cout << "    Angular range: not set\n";
   }
@@ -1527,7 +1522,7 @@ void MediumGas::PrintGas() {
       std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << m_intpDiffusion << "\n";
   }
-  if (m_hasElectronTownsend) {
+  if (!tabElectronTownsend.empty()) {
     std::cout << "      Townsend coefficient\n";
     std::cout << "        Low field extrapolation:  ";
     if (m_extrLowTownsend == 0)
@@ -1617,7 +1612,7 @@ void MediumGas::PrintGas() {
   }
   if (!m_hasElectronVelocityE && !m_hasElectronVelocityB &&
       !m_hasElectronVelocityExB && !m_hasElectronDiffLong &&
-      !m_hasElectronDiffTrans && !m_hasElectronDiffTens && !m_hasElectronTownsend &&
+      !m_hasElectronDiffTrans && !m_hasElectronDiffTens && tabElectronTownsend.empty() &&
       !m_hasElectronAttachment && !m_hasExcRates && !m_hasIonRates) {
     std::cout << "      none\n";
   }

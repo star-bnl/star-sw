@@ -131,6 +131,9 @@ switch ( $STAR_HOST_SYS )
 #     exit 1
     setenv EXTRA_FLAGS " --cflags=-std=c++0x"
  endsw  
+#setenv libdir \$\(LD_LIBRARY_PATH\)
+#setenv macrodir \$HOME/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/embedding:\$\(STAR\)/StRoot/macros:\$\(STAR\)/StRoot/macros/graphics:\$\(STAR\)/StRoot/macros/analysis:\$\(STAR\)/StRoot/macros/test:\$\(STAR\)/StRoot/macros/examples:\$\(STAR\)/StRoot/macros/html:\$\(STAR\)/StRoot/macros/qa:\$\(STAR\)/StRoot/macros/embedding:\$\(ROOTSYS\)/macros:\$\(ROOTSYS\)/tutorials
+#setenv plugindir \$STAR/plugins
 ./configure $ARCH --build=debug\
     --build=$ROOTBUILD \
     --with-thread-libdir=/usr/lib \
@@ -148,3 +151,6 @@ switch ( $STAR_HOST_SYS )
     --disable-qt --disable-qtgsi \
     $ENABLE_CXX11 $EXTRA_FLAGS
 #    --with-xrootd=$OPTSTAR \
+#unsetenv libdir 
+#unsetenv macrodir
+#unsetenv plugindir
