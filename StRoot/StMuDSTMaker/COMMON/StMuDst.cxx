@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.64 2014/06/25 01:26:39 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.66 2016/10/01 21:23:25 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -55,25 +55,23 @@ TClonesArray** StMuDst::strangeArrays= 0;
 #endif
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
-TClonesArray** StMuDst::mcArrays= 0;
-TClonesArray** StMuDst::emcArrays    = 0;
-TClonesArray** StMuDst::fmsArrays    = 0;
-TClonesArray** StMuDst::pmdArrays    = 0;
-TClonesArray** StMuDst::tofArrays    = 0;
-TClonesArray** StMuDst::btofArrays    = 0;   /// dongx
-TClonesArray** StMuDst::mtdArrays    = 0;   
-TClonesArray** StMuDst::fgtArrays    = 0;
+TClonesArray** StMuDst::mcArrays             = 0;
+TClonesArray** StMuDst::emcArrays            = 0;
+TClonesArray** StMuDst::fmsArrays            = 0;
+TClonesArray** StMuDst::pmdArrays            = 0;
+TClonesArray** StMuDst::tofArrays            = 0;
+TClonesArray** StMuDst::btofArrays           = 0;   /// dongx
+TClonesArray** StMuDst::mtdArrays            = 0;
+TClonesArray** StMuDst::fgtArrays            = 0;
 TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
 StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
 StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
 TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
 StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
-StEmcCollection *StMuDst::mEmcCollection = 0;
-StFmsCollection *StMuDst::mFmsCollection = 0;
-TClonesArray** StMuDst::eztArrays    = 0;
+StEmcCollection *StMuDst::mEmcCollection     = 0;
+StFmsCollection *StMuDst::mFmsCollection     = 0;
+TClonesArray** StMuDst::eztArrays            = 0;
 
-Int_t StMuDst::mCurrVertexId = 0;
-TObjArray* StMuDst::mCurrPrimaryTracks  = 0;
 Int_t StMuDst::MinNoTpcMcHits = 15;
 Int_t StMuDst::MinNoTpcRcHits = 15;
 StMuDst *StMuDst::fgMuDst = 0;
@@ -112,6 +110,8 @@ map<Int_t,Int_t>                            StMuDst::IdPrVx2IndxMap;
 map<Int_t,Int_t>                            StMuDst::IdKFTk2IndxMap;
 map<Int_t,Int_t>                            StMuDst::IdKFVx2IndxMap;
 ClassImp(StMuDst);
+Int_t StMuDst::mCurrVertexId                 = -2;
+TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -1589,6 +1589,12 @@ map<Int_t,Int_t> &StMuDst::IdKFVx2Indx() {
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.66  2016/10/01 21:23:25  jdb
+ * Changed default vertex index to -2. Recently changed it to -1 which caused unintended segfault since -1 is used as a special case value in other parts of the code.
+ *
+ * Revision 1.65  2016/09/30 01:06:40  jdb
+ * initialize mCurrVertexId to -1 (was 0) so that when it is set the first time it will always cause the needed function call to collectVertexTracks().
+ *
  * Revision 1.64  2014/06/25 01:26:39  jdb
  * Updated StMuDst::setMtdArray() and reset the MTD header. Needed for Run12 UU data where only the muMtdCollection is available.
  *
