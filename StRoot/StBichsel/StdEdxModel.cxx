@@ -150,12 +150,12 @@ StdEdxModel::~StdEdxModel() {
 //____________________________________________________________________________
 Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
 #ifndef __HEED_MODEL__
-  // most probable log(dE) versys log10(n_P) and sigma
+  // most probable log(dE) versus log10(n_P) and sigma
   Double_t n_PL10   = x[0];
   if (n_PL10 > 4) n_PL10 = mnPL10max;
   if (n_PL10 < 0.7) n_PL10 = mnPL10min;
 #else /* __HEED_MODEL__ */
-  // most probable log(dE) versys log(n_P) and sigma
+  // most probable log(dE) versus log(n_P) and sigma
   Double_t n_PL   = x[0];
   if (n_PL > mnPLmax) n_PL = mnPLmax;
   if (n_PL < mnPLmin) n_PL = mnPLmin;
