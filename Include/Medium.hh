@@ -14,7 +14,7 @@ class Medium {
   // Constructor
   Medium();
   // Destructor
-  virtual ~Medium() {}
+  virtual ~Medium();
 
   // Return the id number of the class instance
   int GetId() const { return m_id; }

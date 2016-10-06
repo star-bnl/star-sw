@@ -86,6 +86,8 @@ Medium::Medium()
   SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
 }
 
+Medium::~Medium() {}
+
 void Medium::SetTemperature(const double t) {
 
   if (t <= 0.) {
@@ -207,10 +209,11 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
   if (e * b > 0.) {
     const double eb = fabs(ex * bx + ey * by + ez * bz);
     if (eb > 0.2 * e * b) {
+      const double ebxy = ex * by - ey * bx;
+      const double ebxz = ex * bz - ez * bx;
+      const double ebzy = ez * by - ey * bz;
       ebang = asin(std::min(
-          1., sqrt(pow(ex * by - ey * bx, 2) + pow(ex * bz - ez * bx, 2) +
-                   pow(ez * by - ey * bz, 2)) /
-                  (e * b)));
+          1., sqrt(ebxy * ebxy + ebxz * ebxz + ebzy * ebzy) / (e * b)));
     } else {
       ebang = acos(std::min(1., eb / (e * b)));
     }

@@ -23,8 +23,8 @@ class ViewCell {
   void SetComponent(ComponentAnalyticField* comp);
 
   // Set area to be plotted
-  void SetArea(const double& xmin, const double& ymin, const double& zmin, 
-               const double& xmax, const double& ymax, const double& zmax);
+  void SetArea(const double xmin, const double ymin, const double zmin, 
+               const double xmax, const double ymax, const double zmax);
   void SetArea();
 
   void Plot2d();
@@ -63,12 +63,12 @@ class ViewCell {
   TGeoManager* m_geoManager;
 
   bool Plot(const bool use3d);
-  void PlotWire(const double& x, const double& y, const double& d, 
-                const int& type);
-  void PlotLine(const double& x0, const double& y0, 
-                const double& x1, const double& y1);
-  void PlotTube(const double& x0, const double& y0, const double& r, 
-                const int& n);
+  void PlotWire(const double x, const double y, const double d, 
+                const int type);
+  void PlotLine(const double x0, const double y0, 
+                const double x1, const double y1);
+  void PlotTube(const double x0, const double y0, const double r, 
+                const int n);
 
   void Reset();
 

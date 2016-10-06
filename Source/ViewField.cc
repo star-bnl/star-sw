@@ -235,6 +235,7 @@ void ViewField::PlotContour(const std::string& option) {
     m_fPot->SetTitle("Contours of the electric field (z-component)");
   }
   m_fPot->Draw("CONT4Z");
+  gPad->SetRightMargin(0.15);
   m_canvas->Update();
 }
 

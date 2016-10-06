@@ -13,8 +13,8 @@ class Solid {
   // Destructor
   virtual ~Solid() {}
 
-  virtual bool IsInside(const double& x, const double& y, 
-                        const double& z) const = 0;
+  virtual bool IsInside(const double x, const double y, 
+                        const double z) const = 0;
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                               double& xmax, double& ymax, double& zmax) const = 0;
   // Solid type
