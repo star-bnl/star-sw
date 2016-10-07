@@ -100,7 +100,8 @@ class Sensor {
   bool ConvoluteSignal();
   bool IntegrateSignal();
   void SetNoiseFunction(double (*f)(double t));
-  void AddNoise();
+  void AddNoise(const bool total = true, const bool electron = false, 
+                const bool ion = false);
   bool ComputeThresholdCrossings(const double thr, const std::string& label,
                                  int& n);
   unsigned int GetNumberOfThresholdCrossings() const { 

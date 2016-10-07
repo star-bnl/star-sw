@@ -7,8 +7,8 @@
 
 namespace Garfield {
 
-SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
-                   const double& lx, const double& ly, const double& lz)
+SolidBox::SolidBox(const double cx, const double cy, const double cz,
+                   const double lx, const double ly, const double lz)
     : Solid(),
       m_cX(cx), m_cY(cy), m_cZ(cz),
       m_lX(lx), m_lY(ly), m_lZ(lz),
@@ -22,9 +22,9 @@ SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
   std::cout << "    " << cz - lz << " < z [cm] < " << cz + lz << "\n";
 }
 
-SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
-                   const double& lx, const double& ly, const double& lz,
-                   const double& dx, const double& dy, const double& dz)
+SolidBox::SolidBox(const double cx, const double cy, const double cz,
+                   const double lx, const double ly, const double lz,
+                   const double dx, const double dy, const double dz)
     : Solid(),
       m_cX(cx), m_cY(cy), m_cZ(cz),
       m_lX(lx), m_lY(ly), m_lZ(lz),
@@ -59,8 +59,8 @@ SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
   }
 }
 
-bool SolidBox::IsInside(const double& x, const double& y, 
-                        const double& z) const {
+bool SolidBox::IsInside(const double x, const double y, 
+                        const double z) const {
 
   // Transform the point to local coordinates
   const double dx = x - m_cX;
@@ -138,7 +138,7 @@ bool SolidBox::GetOrientation(double& ctheta, double& stheta, double& cphi,
   return true;
 }
 
-void SolidBox::SetHalfLengthX(const double& lx) {
+void SolidBox::SetHalfLengthX(const double lx) {
 
   if (lx > 0.) {
     m_lX = lx;
@@ -148,7 +148,7 @@ void SolidBox::SetHalfLengthX(const double& lx) {
   }
 }
 
-void SolidBox::SetHalfLengthY(const double& ly) {
+void SolidBox::SetHalfLengthY(const double ly) {
 
   if (ly > 0.) {
     m_lY = ly;
@@ -158,7 +158,7 @@ void SolidBox::SetHalfLengthY(const double& ly) {
   }
 }
 
-void SolidBox::SetHalfLengthZ(const double& lz) {
+void SolidBox::SetHalfLengthZ(const double lz) {
 
   if (lz > 0.) {
     m_lZ = lz;

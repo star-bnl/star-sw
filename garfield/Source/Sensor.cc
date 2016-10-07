@@ -796,7 +796,7 @@ void Sensor::SetNoiseFunction(double (*f)(double t)) {
   m_hasNoiseFunction = true;
 }
 
-void Sensor::AddNoise() {
+void Sensor::AddNoise(const bool total, const bool electron, const bool ion) {
 
   if (!m_hasNoiseFunction) {
     std::cerr << m_className << "::AddNoise:\n";

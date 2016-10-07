@@ -62,10 +62,10 @@ void ViewCell::SetCanvas(TCanvas* c) {
   m_hasExternalCanvas = true;
 }
 
-void ViewCell::SetArea(const double& xmin, const double& ymin, 
-                       const double& zmin, 
-                       const double& xmax, const double& ymax, 
-                       const double& zmax) {
+void ViewCell::SetArea(const double xmin, const double ymin, 
+                       const double zmin, 
+                       const double xmax, const double ymax, 
+                       const double zmax) {
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
@@ -329,8 +329,8 @@ bool ViewCell::Plot(const bool use3d) {
   return true;
 }
 
-void ViewCell::PlotWire(const double& x, const double& y, const double& d,
-                        const int& type) {
+void ViewCell::PlotWire(const double x, const double y, const double d,
+                        const int type) {
 
   if (m_useWireMarker) {
     int markerStyle = 1;
@@ -354,15 +354,15 @@ void ViewCell::PlotWire(const double& x, const double& y, const double& d,
   circle->Draw("");
 }
 
-void ViewCell::PlotLine(const double& x0, const double& y0, 
-                        const double& x1, const double& y1) {
+void ViewCell::PlotLine(const double x0, const double y0, 
+                        const double x1, const double y1) {
 
   TLine* line = new TLine(x0, y0, x1, y1);
   line->Draw("");
 }
 
-void ViewCell::PlotTube(const double& x0, const double& y0, const double& r,
-                        const int& n) {
+void ViewCell::PlotTube(const double x0, const double y0, const double r,
+                        const int n) {
 
   if (n <= 0) {
     TEllipse* circle = new TEllipse(x0, y0, r);

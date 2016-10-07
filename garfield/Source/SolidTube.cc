@@ -7,8 +7,8 @@
 
 namespace Garfield {
 
-SolidTube::SolidTube(const double& cx, const double& cy, const double& cz,
-                     const double& rmin, const double& rmax, const double& lz)
+SolidTube::SolidTube(const double cx, const double cy, const double cz,
+                     const double rmin, const double rmax, const double lz)
     : Solid(),
       m_cX(cx), m_cY(cy), m_cZ(cz),
       m_rMin(rmin), m_rMax(rmax),
@@ -17,9 +17,9 @@ SolidTube::SolidTube(const double& cx, const double& cy, const double& cz,
       m_cPhi(1.), m_sPhi(0.),
       m_cTheta(1.), m_sTheta(0.) {}
 
-SolidTube::SolidTube(const double& cx, const double& cy, const double& cz,
-                     const double& rmin, const double& rmax, const double& lz,
-                     const double& dx, const double& dy, const double& dz)
+SolidTube::SolidTube(const double cx, const double cy, const double cz,
+                     const double rmin, const double rmax, const double lz,
+                     const double dx, const double dy, const double dz)
     : Solid(),
       m_cX(cx), m_cY(cy), m_cZ(cz),
       m_rMin(rmin), m_rMax(rmax),
@@ -55,7 +55,7 @@ SolidTube::SolidTube(const double& cx, const double& cy, const double& cz,
   }
 }
 
-bool SolidTube::IsInside(const double& x, const double& y, const double& z) const {
+bool SolidTube::IsInside(const double x, const double y, const double z) const {
 
   // Transform the point to local coordinates
   const double dx = x - m_cX;
@@ -141,7 +141,7 @@ bool SolidTube::GetOrientation(double& ctheta, double& stheta, double& cphi,
   return true;
 }
 
-void SolidTube::SetInnerRadius(const double& rmin) {
+void SolidTube::SetInnerRadius(const double rmin) {
 
   if (rmin <= 0.) {
     std::cerr << "SolidTube::SetInnerRadius:\n";
@@ -156,7 +156,7 @@ void SolidTube::SetInnerRadius(const double& rmin) {
   m_rMin = rmin;
 }
 
-void SolidTube::SetOuterRadius(const double& rmax) {
+void SolidTube::SetOuterRadius(const double rmax) {
 
   if (rmax <= 0.) {
     std::cerr << "SolidTube::SetOuterRadius:\n";
@@ -171,7 +171,7 @@ void SolidTube::SetOuterRadius(const double& rmax) {
   m_rMax = rmax;
 }
 
-void SolidTube::SetHalfLengthZ(const double& lz) {
+void SolidTube::SetHalfLengthZ(const double lz) {
 
   if (lz <= 0.) {
     std::cerr << "SolidTube::SetHalfLengthZ:\n";
