@@ -295,26 +295,28 @@ so we keep it here for source compatibility
 #define TRGDET_BBC 1
 #define TRGDET_VPD 2
 #define TRGDET_TOF 3
-#define TRGDET_ETOF 4
+#define TRGDET_EPD 4
 #define TRGDET_MTD 5
 #define TRGDET_BEMC 6
 #define TRGDET_EEMC 7
 #define TRGDET_PP2PP 8
 #define TRGDET_FMS 9
 #define TRGDET_FPS 10
+#define TRGDET_FCAL 11
 
 extern inline int getTrgDetBit(char *str) {
     if(strcmp(str, "zdc")==0) return TRGDET_ZDC;
     if(strcmp(str, "bbc")==0) return TRGDET_BBC;
     if(strcmp(str, "vpd")==0) return TRGDET_VPD;
     if(strcmp(str, "tof")==0) return TRGDET_TOF;
-    if(strcmp(str, "etof")==0) return TRGDET_ETOF;
+    if(strcmp(str, "epd")==0) return TRGDET_EPD;
     if(strcmp(str, "mtd")==0) return TRGDET_MTD;
     if(strcmp(str, "bemc")==0) return TRGDET_BEMC;
     if(strcmp(str, "eemc")==0) return TRGDET_EEMC;
     if(strcmp(str, "pp2pp")==0) return TRGDET_PP2PP;
     if(strcmp(str, "fms")==0) return TRGDET_FMS;
     if(strcmp(str, "fps")==0) return TRGDET_FPS;
+    if(strcmp(str, "fcal")==0) return TRGDET_FCAL;
     return -1;
 }
 
@@ -324,13 +326,14 @@ extern inline char *getTrgDetBitName(int x) {
     case TRGDET_BBC: return "bbc";
     case TRGDET_VPD: return "vpd";
     case TRGDET_TOF: return "tof";
-    case TRGDET_ETOF: return "etof";
+    case TRGDET_EPD: return "epd";
     case TRGDET_MTD: return "mtd";
     case TRGDET_BEMC: return "bemc";
     case TRGDET_EEMC: return "eemc";
     case TRGDET_PP2PP: return "pp2pp";
     case TRGDET_FMS: return "fms";
     case TRGDET_FPS: return "fps";
+    case TRGDET_FCAL: return "fcal";
     }
     return NULL;
 }
