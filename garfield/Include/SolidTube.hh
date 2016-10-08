@@ -11,15 +11,15 @@ class SolidTube : public Solid {
 
  public:
   // Constructors
-  SolidTube(const double& cx, const double& cy, const double& cz,
-            const double& rmin, const double& rmax, const double& lz);
-  SolidTube(const double& cx, const double& cy, const double& cz,
-            const double& rmin, const double& rmax, const double& lz,
-            const double& dx, const double& dy, const double& dz);
+  SolidTube(const double cx, const double cy, const double cz,
+            const double rmin, const double rmax, const double lz);
+  SolidTube(const double cx, const double cy, const double cz,
+            const double rmin, const double rmax, const double lz,
+            const double dx, const double dy, const double dz);
   // Destructor
   ~SolidTube() {}
 
-  virtual bool IsInside(const double& x, const double& y, const double& z) const;
+  virtual bool IsInside(const double x, const double y, const double z) const;
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin, 
                               double& xmax, double& ymax, double& zmax) const;
   virtual bool IsTube() const { return true; }
@@ -29,9 +29,9 @@ class SolidTube : public Solid {
   virtual bool GetOrientation(double& ctheta, double& stheta, double& cphi,
                               double& sphi) const;
 
-  void SetInnerRadius(const double& rmin);
-  void SetOuterRadius(const double& rmax);
-  void SetHalfLengthZ(const double& lz);
+  void SetInnerRadius(const double rmin);
+  void SetOuterRadius(const double rmax);
+  void SetHalfLengthZ(const double lz);
 
  private:
   // Center of the tube

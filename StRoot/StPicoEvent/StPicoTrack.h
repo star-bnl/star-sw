@@ -36,7 +36,8 @@ public:
   StThreeVectorF gMom(StThreeVectorF const& pVtx, float B) const;
   /// origin at DCA to StPicoEvent::mPrimaryVertex
   StThreeVectorF const& origin() const;
-  StThreeVectorF const& dca() const;
+  /// dca point to StPicoEvent::mPrimaryVertex in global coordinates
+  StThreeVectorF const& dcaPoint() const;
   Short_t charge() const;
   Int_t   nHitsFit() const;
   Int_t   nHitsMax() const;
@@ -112,7 +113,7 @@ inline Float_t StPicoTrack::gPtot() const { return mGMomentum.mag(); }
 inline StThreeVectorF const& StPicoTrack::pMom() const { return mPMomentum; }
 inline StThreeVectorF const& StPicoTrack::gMom() const { return mGMomentum; }
 inline StThreeVectorF const& StPicoTrack::origin() const { return mOrigin; }
-inline StThreeVectorF const& StPicoTrack::dca() const { return mOrigin; }
+inline StThreeVectorF const& StPicoTrack::dcaPoint() const { return mOrigin; }
 inline Short_t StPicoTrack::charge() const { return static_cast<Short_t>(mCharge); }
 inline Int_t   StPicoTrack::nHitsFit() const { return (mNHitsFit > 0) ? (Int_t)mNHitsFit : (Int_t)(-1 * mNHitsFit); }
 inline Int_t   StPicoTrack::nHitsMax() const { return mNHitsMax; }

@@ -11,12 +11,12 @@ class SolidSphere : public Solid {
 
  public:
   // Constructors
-  SolidSphere(const double& cx, const double& cy, const double& cz,
-              const double& rmin, const double& rmax);
+  SolidSphere(const double cx, const double cy, const double cz,
+              const double rmin, const double rmax);
   // Destructor
   ~SolidSphere() {}
 
-  virtual bool IsInside(const double& x, const double& y, const double& z) const;
+  virtual bool IsInside(const double x, const double y, const double z) const;
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin, 
                               double& xmax, double& ymax, double& zmax) const;
   virtual bool IsSphere() const { return true; }
@@ -26,8 +26,8 @@ class SolidSphere : public Solid {
   virtual bool GetOrientation(double& ctheta, double& stheta, double& cphi,
                               double& sphi) const;
 
-  void SetInnerRadius(const double& rmin);
-  void SetOuterRadius(const double& rmax);
+  void SetInnerRadius(const double rmin);
+  void SetOuterRadius(const double rmax);
 
  private:
   // Center of the sphere 

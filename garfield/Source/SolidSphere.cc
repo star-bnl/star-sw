@@ -7,13 +7,14 @@
 
 namespace Garfield {
 
-SolidSphere::SolidSphere(const double& cx, const double& cy, const double& cz,
-                         const double& rmin, const double& rmax)
+SolidSphere::SolidSphere(const double cx, const double cy, const double cz,
+                         const double rmin, const double rmax)
     : Solid(),
       m_cX(cx), m_cY(cy), m_cZ(cz),
       m_rMin(rmin), m_rMax(rmax) {}
 
-bool SolidSphere::IsInside(const double& x, const double& y, const double& z) const {
+bool SolidSphere::IsInside(const double x, const double y, 
+                           const double z) const {
 
   // Transform the point to local coordinates
   const double dx = x - m_cX;
@@ -85,7 +86,7 @@ bool SolidSphere::GetOrientation(double& ctheta, double& stheta, double& cphi,
   return true;
 }
 
-void SolidSphere::SetInnerRadius(const double& rmin) {
+void SolidSphere::SetInnerRadius(const double rmin) {
 
   if (rmin <= 0.) {
     std::cerr << "SolidSphere::SetInnerRadius:\n";
@@ -100,7 +101,7 @@ void SolidSphere::SetInnerRadius(const double& rmin) {
   m_rMin = rmin;
 }
 
-void SolidSphere::SetOuterRadius(const double& rmax) {
+void SolidSphere::SetOuterRadius(const double rmax) {
 
   if (rmax <= 0.) {
     std::cerr << "SolidSphere::SetOuterRadius:\n";
