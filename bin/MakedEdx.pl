@@ -1595,7 +1595,8 @@ my @badruns = qw(
 #$hist = "RunXVIAuAu200p109"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/28/16 check with .DEV2 wrt MySQL 
 #$hist = "RunXVI211"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/*_production2*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/03/16 check dev AuAu200 + dAu200
 #$hist = "RunXVI212"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/*_production2*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/05/16 correct AuAu200p2 SecRow
-$hist = "RunXVI213"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/*_production2*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/06/16 test with dev
+#$hist = "RunXVI213"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/*_production2*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/06/16 test with dev
+$hist = "RunXVI214"; $NEvents = 500; $disk = "data*/"; $RECO = "reco/*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/09/2016 step back to 1.2 TpcAdcCorrectionB.y2016.C 
 # /star/data09/reco/AuAu200_production2_2016/ReversedFullField/P16ig_dEdx_HFT/
 # 
 my $prod = $hist; #$Production;
