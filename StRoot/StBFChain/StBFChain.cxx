@@ -44,6 +44,7 @@
 TableImpl(Bfc);
 ClassImp(StBFChain);
 static Int_t NoMakersWithInput = 0; // no. of makers which have time stamp 
+static TString Dirs[10] = {""};
 //_____________________________________________________________________________
 // Hack constructor.
 /*!
@@ -260,9 +261,13 @@ Int_t StBFChain::Instantiate()
 	if (! dbMk) {
 	  TString MySQLDb("MySQL:StarDb");
 	  TString MainCintDb("$STAR/StarDb");
-	  TString MainCintDbObj("$STAR/.$STAR_HOST_SYS/obj/StarDb");
+	  TString Obj("obj");
+	  if (TString(gSystem->Getenv("NODEBUG")) != "") Obj = "OBJ";
+	  TString MainCintDbObj("$STAR/.$STAR_HOST_SYS/"); MainCintDbObj += Obj; MainCintDbObj += "/StarDb";
+	  if (! gSystem->AccessPathName(MainCintDbObj)) MainCintDbObj = "";
 	  TString MyCintDb("$PWD/StarDb");
-	  TString MyCintDbObj("$PWD/.$STAR_HOST_SYS/obj/StarDb");
+	  TString MyCintDbObj("$PWD/.$STAR_HOST_SYS/"); MyCintDbObj += Obj; MyCintDbObj += "/StarDb";
+	  if (! gSystem->AccessPathName(MyCintDbObj)) MyCintDbObj = "";
 	  if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
 	  // Removed twice already and put back (start to be a bit boring)
 	  // DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
@@ -270,7 +275,6 @@ Int_t StBFChain::Instantiate()
 	  if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
 	  if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
 	  
-	  TString Dirs[10];
 	  Int_t j;
 	  for (j = 0; j < 10; j++) Dirs[j] = "";
 	  j = 0;
@@ -1716,7 +1720,19 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
   if      (GetOption("Agi"))    mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
-  else if (GetOption("AgML")  ) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+  else if (GetOption("AgML")  ) {
+    Int_t ok = -1;
+    for (Int_t i = 0; i < 10; i++) {
+      if (Dirs[i] == "") continue;
+      TString ddir = Dirs[i]; ddir += "/"; ddir = "AgMLGeometry";
+      if (gSystem->AccessPathName(ddir)) {
+	mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+	ok = i;
+	break;
+      }
+    }
+    if (ok == -1) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
+  }
   else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeo");
   else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
