@@ -11,6 +11,7 @@
 #include "TSystem.h"
 #include "TMath.h"
 #include "TFile.h"
+#include "StMessMgr.h"
 #else
 #define BIT(n)       (1 << (n))
 #endif
@@ -762,12 +763,16 @@ TGeoManager  * StiVMCToolKit::GetVMC() {
    */
   gGeo = gGeoManager;
   if (gGeo) return gGeo;
-  cout << "StiVMCToolKit::GetVMC() -I- Get VMC geometry" <<endl;
+  LOG_INFO << "StiVMCToolKit::GetVMC() Get VMC geometry" <<endm;
   if (StMaker::GetChain()) {
     StMaker::GetChain()->GetDataBase("VmcGeometry");
+    if (! gGeoManager) {
+      LOG_WARN << "StiVMCToolKit::GetVMC() Can't get VMC geometry, try AgiGeometry" <<endm;
+      StMaker::GetChain()->GetDataBase("AgiGeometry");
+    }
   }
   if (! gGeoManager) 
-    cout << "StiVMCToolKit::GetVMC() -E- Can't get VMC geometry" <<endl;
+    LOG_ERROR << "StiVMCToolKit::GetVMC() Can't get VMC geometry" <<endm;
   gGeo = gGeoManager;
 #endif
   return gGeo;
@@ -821,11 +826,11 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   Double_t local[3] = {0,0,0};
   TGeoShape *shapeT = volT->GetShape();
   if (Debug()) {
-    cout << "StiVMCToolKit::Alignment -I node\t" << nodeT->GetName() 
-	 << "\tvolume\t" << volT->GetName() << "\t:" << volT->GetTitle() << endl;
-    cout << "\tshape\t" << shapeT->GetName() << "\tmaterial\t" <<  volT->GetMaterial()->GetName();
-    if (newshape) cout  << "\tnewshape\t" << newshape->GetName();
-    cout << endl;
+    LOG_INFO << "StiVMCToolKit::Alignment node\t" << nodeT->GetName() 
+	 << "\tvolume\t" << volT->GetName() << "\t:" << volT->GetTitle() << endm;
+    LOG_INFO << "\tshape\t" << shapeT->GetName() << "\tmaterial\t" <<  volT->GetMaterial()->GetName();
+    if (newshape) LOG_INFO  << "\tnewshape\t" << newshape->GetName();
+    LOG_INFO << endm;
   }
   if (shapeT->TestShapeBit(TGeoShape::kGeoPcon) || shapeT->TestShapeBit(TGeoShape::kGeoPgon)) {
     TGeoPcon *pcon = (TGeoPcon *) shapeT;
@@ -911,7 +916,7 @@ TGeoPhysicalNode *StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const Char
 //________________________________________________________________________________
 void StiVMCToolKit::MakeVolume(TGeoPhysicalNode *nodeP) {
   if (Debug()) {
-    cout << "StiVMCToolKit::MakeVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;
+    LOG_INFO << "StiVMCToolKit::MakeVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endm;
     TGeoVolume   *volP   = nodeP->GetVolume();
     TGeoMaterial *matP   = volP->GetMaterial(); matP->Print("");
     TGeoShape    *shapeP = nodeP->GetShape(); cout << "New Shape\t"; PrintShape(shapeP);
