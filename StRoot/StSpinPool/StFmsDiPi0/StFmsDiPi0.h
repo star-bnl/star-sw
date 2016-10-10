@@ -3,8 +3,11 @@
 //
 //   This is FMS di-pi0 analysis
 // 
-//  $Id: StFmsDiPi0.h,v 1.2 2016/06/08 16:28:09 akio Exp $
+//  $Id: StFmsDiPi0.h,v 1.3 2016/10/10 19:17:40 akio Exp $
 //  $Log: StFmsDiPi0.h,v $
+//  Revision 1.3  2016/10/10 19:17:40  akio
+//  *** empty log message ***
+//
 //  Revision 1.2  2016/06/08 16:28:09  akio
 //  *** empty log message ***
 //
@@ -23,6 +26,10 @@
 #define STAR_StFmsDiPi0_HH
 
 #include "StMaker.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TTree.h"
+#include "TChain.h"
 
 class StFmsDbMaker;
 class StFmsCollection;
@@ -36,6 +43,10 @@ public:
     Int_t Finish();
 
     void setFileName(char* file){mFilename=file;} 
+    void setTreeFileName(char* file){mTreeFilename=file;} 
+    void setWriteTree(int v=1) {mWriteTree=v;}
+    void setReadTree(TChain* c) {mReadTree=1; mChain=c;}
+
     void setPythia(int v=1) {mPythia=v;}
 
 private:
@@ -47,12 +58,25 @@ private:
     int mPythia=0;
     void readPythia();
     
-    enum {kNPtBin=6,kNCut=15};
+    enum {kNPtBin=6,kNCut=18};
     Int_t ptbin(float pt);
 
     TH1F* mBC=0;
     TH1F* mBBC=0;
+    TH1F* mBBCAG=0;
+    TH1F* mBBCM=0;
+    TH1F* mBBCMAG=0;
+    TH1F* mTOF=0;
+    TH1F* mTOFAG=0;
+    TH2F* mBBCTOF=0;
+    TH2F* mBBCMTOF=0;
+    TH2F* mBBCBBCM=0;
+    TH2F* mTOFTOF=0;
+
     TH1F* mM0[kNPtBin][kNCut+1];
+    TH1F* mPhi0[kNPtBin][kNCut+1];
+    TH2F* mEtaPhi0[kNPtBin][kNCut+1];
+
     TH1F* mM1[kNPtBin][kNPtBin][kNCut+1];
     TH1F* mM2[kNPtBin][kNPtBin][kNCut+1];
     TH1F* mZ1[kNPtBin][kNPtBin][kNCut+1];
@@ -66,9 +90,19 @@ private:
     TH1F* mPhi1[kNPtBin][kNPtBin][kNCut+1];
     TH1F* mPhi2[kNPtBin][kNPtBin][kNCut+1];
     TH1F* mDphi[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mBbce[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mTofm[kNPtBin][kNPtBin][kNCut+1];
+    TH2F* mPhi1Dphi[kNPtBin][kNPtBin][kNCut+1];
+
+    char* mTreeFilename=0;
+    int mWriteTree=0;
+    int mReadTree=0;
+    TFile* mTreeFile=0;
+    TTree* mTree=0;
+    TTree* mChain=0;
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.2 2016/06/08 16:28:09 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.3 2016/10/10 19:17:40 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsDiPi0,0);
 };

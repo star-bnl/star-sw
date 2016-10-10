@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="pAu1" inputOrder="runnumber" splitBy="runnumber" maxFilesPerProcess="1" filesPerHour="5" simulateSubmission="false"> 
+  <Generator>
+    <Location>./scheduler/</Location>
+  </Generator>
+  <command>
+    stardev
+    mkdir -p $SUBMITTINGDIRECTORY/log/pAu1/condor 
+    ln -s $SUBMITTINGDIRECTORY/.$STAR_HOST_SYS
+    /bin/ln -s .sl64_gcc482  ./.sl64_gcc447
+    setenv RUNNUM `echo $INPUTFILE0 | sed 's|.*_\([0-9]*\)_.*_\([0-9]*\).MuDst.root|\1.\2|'`_$JOBINDEX
+    echo RUNNUM = $RUNNUM
+    ln -s $FILELIST $RUNNUM.list
+    ln -s $FILELIST $SUBMITTINGDIRECTORY/scheduler/$RUNNUM.list
+    root4star -q -b runMudst.C\(\"$RUNNUM.list\",-1,-2,\".\",4,1,0\) &gt; &amp; $RUNNUM.log
+    /bin/rm $SUBMITTINGDIRECTORY/log/pAu1/$RUNNUM.log
+    /bin/rm $SUBMITTINGDIRECTORY/log/pAu1/$RUNNUM.log.gz
+    gzip -c $RUNNUM.log > $SUBMITTINGDIRECTORY/log/pAu1/$RUNNUM.log.gz
+    /bin/rm $RUNNUM.log
+  </command>
+  <stdout URL="file:/star/u/akio/fms2015/log/pAu1/condor/$JOBID.log" />
+  <stderr URL="file:/star/u/akio/fms2015/log/pAu1/condor/$JOBID.err" />
+  <!--  <input URL="catalog:star.bnl.gov?production=P15il,filetype=daq_reco_mudst,filename~st_fms,trgsetupname=production_pAu200_2015||production_fms_pAu200_2015" nFiles="all" /> -->
+  <input URL="catalog:star.bnl.gov?production=P15il,filetype=daq_reco_mudst,storage!~HPSS,filename~st_fms,trgsetupname=production_pAu200_2015||production_fms_pAu200_2015,runnumber&lt;16141049" nFiles="all" />
+  <!-- <input URL="catalog:star.bnl.gov?production=P15il,filetype=daq_reco_mudst,filename~st_fms,trgsetupname=production_pAu200_2015||production_fms_pAu200_2015,runnumber&gt;16142024" nFiles="all" /> -->
+  <output fromScratch="*.root" toURL="file:/star/u/akio/fms2015/hist_pAu1/" />
+  <SandBox>
+    <Package> 
+      <File>file:runMudst.C</File> 
+      <File>file:load.C</File> 
+    </Package>
+  </SandBox>
+</job>
