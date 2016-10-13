@@ -60,7 +60,10 @@
  }
 * - - - - - - - - - - - - - energy correction - - - - - - - - - -
  If LKDETM>0 & Id0>0
- {  if (sleng==0)  Gold=GeKin
+ {  if (sleng==0) {
+      if ( Gekin > 0) { Gold=GeKin}
+      else            { Gold = dEstep}	
+    }
     If Istop>0 & 2<=Ipart & Ipart<=3 & NGKINE<2 & LVSIMU(id0)>0
     {  Mec=0;  Do i=1,Nmec { If (Lmec(i)==30 | Lmec(i)==11) Mec=Lmec(i) }
        If (Ipart==3 & NGKINE==0 & Mec==30) dEstep=Gold
