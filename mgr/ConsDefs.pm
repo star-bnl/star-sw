@@ -224,7 +224,7 @@
     $AGETOFLAGS    = "-V 1";
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
-
+    $LIBG2C  = "";
     if ( $G77 eq "gfortran" ){
 	# JL: For gfortran version <  4.3, -lg2c may still be needed for ensuring 
 	#   symbol resolve but this is a messy hack and should likely be avoided.
