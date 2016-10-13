@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.25 2016/04/05 12:46:02 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.26 2016/10/13 19:40:19 kunsu Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.26  2016/10/13 19:40:19  kunsu
+# adapted to the new PDSF star-submit with array support
+#
 # Revision 1.25  2016/04/05 12:46:02  zhux
 # update to gcc482 at PDSF
 #
@@ -300,12 +303,20 @@ print OUT "\n";
 print OUT "<command>\n";
 
 #----------------------------------------------------------------------------------------------------
+# Setup the log files
+#----------------------------------------------------------------------------------------------------
+print OUT "<!-- Set Log file -->\n";
+print OUT "setenv LOGFILE $tempLogDirectory/$jobIdXml.log\n";
+print OUT "touch \${LOGFILE}\n";
+print OUT "\n";
+
+#----------------------------------------------------------------------------------------------------
 # Setup the permissions for directories
 #----------------------------------------------------------------------------------------------------
 print OUT "<!-- Setup permissions -->\n";
-print OUT "umask 2\n";
-print OUT "chgrp starprod .\n";
-print OUT "chmod g+s .\n";
+print OUT "umask 2 &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "chgrp starprod . &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "chmod g+s . &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -313,7 +324,7 @@ print OUT "\n";
 #----------------------------------------------------------------------------------------------------
 printDebug("Add: starver $library ...");
 print OUT "<!-- Load library -->\n";
-print OUT "starver $library\n";
+print OUT "starver $library &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -321,19 +332,19 @@ print OUT "\n";
 #----------------------------------------------------------------------------------------------------
 printDebug("Set tags file directory: $tagsDirectory ...");
 print OUT "<!-- Set tags file directory -->\n";
-print OUT "setenv EMBEDTAGDIR $tagsDirectory\n";
+print OUT "setenv EMBEDTAGDIR $tagsDirectory &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 # Added 'perl' command in front of scripts in order to be able to run in sl53
 printDebug("Set year and day ...");
 print OUT "<!-- Set year and day from filename -->\n";
-print OUT "setenv EMYEAR `perl $getYearDayFromFile -y $fileBaseNameXml`\n";
-print OUT "setenv EMDAY `perl $getYearDayFromFile -d $fileBaseNameXml`\n";
+print OUT "setenv EMYEAR `perl $getYearDayFromFile -y $fileBaseNameXml` &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "setenv EMDAY `perl $getYearDayFromFile -d $fileBaseNameXml` &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 printDebug("Set log files area ...");
 print OUT "<!-- Set log files area -->\n";
-print OUT "setenv EMLOGS $EMLOGS\n";
+print OUT "setenv EMLOGS $EMLOGS &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 #printDebug("Set HPSS outputs/LOG path ...");
@@ -346,24 +357,24 @@ print OUT "<!-- Set output directory path -->\n";
 if ( $ptbin == 1 ){
 	my $outputDirectoryPt = getOutputDirectoryPt($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library, $ptmin, $ptmax);
 	my $listDirectoryPt   = getListDirectoryPt($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library, $ptmin, $ptmax);
-	print OUT "setenv EMOUTPUT $outputDirectoryPt\n";
-	print OUT "setenv EMLIST $listDirectoryPt\n";
+	print OUT "setenv EMOUTPUT $outputDirectoryPt &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "setenv EMLIST $listDirectoryPt &gt;&gt;&amp; \${LOGFILE}\n";
 }
  else {
 	my $outputDirectory = getOutputDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
 	my $listDirectory   = getListDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
-	print OUT "setenv EMOUTPUT $outputDirectory\n";
-	print OUT "setenv EMLIST $listDirectory\n";
+	print OUT "setenv EMOUTPUT $outputDirectory &gt;&gt;&amp; \${LOGFILE}\n";
+	print OUT "setenv EMLIST $listDirectory &gt;&gt;&amp; \${LOGFILE}\n";
  }
 print OUT "\n";
 
 print OUT "\n";
 print OUT "<!-- Print out EMYEAR and EMDAY and EMLOGS -->\n";
-print OUT "echo EMYEAR   : \$EMYEAR\n";
-print OUT "echo EMDAY    : \$EMDAY\n";
-print OUT "echo EMLOGS   : \$EMLOGS\n";
-print OUT "echo EMOUTPUT : \$EMOUTPUT\n";
-print OUT "echo EMLIST   : \$EMLIST\n";
+print OUT "echo EMYEAR   : \$EMYEAR &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "echo EMDAY    : \$EMDAY &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "echo EMLOGS   : \$EMLOGS &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "echo EMOUTPUT : \$EMOUTPUT &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "echo EMLIST   : \$EMLIST &gt;&gt;&amp; \${LOGFILE}\n";
 #print OUT "echo EMHPSS : \$EMHPSS\n";
 print OUT "\n";
 print OUT "<!-- Start job -->\n";
@@ -419,9 +430,9 @@ if ( @triggerId ){
 $execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, "\$INPUTFILE0", $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
     $pid, $multiplicity, $triggerString, $prodName, $ptOption, $simulatorMode, $fzdFile) ;
 
-print OUT "echo 'Executing $execute_bfcMixer ...'\n";
+print OUT "echo 'Executing $execute_bfcMixer ...' &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
-print OUT "root4star -b &lt;&lt;EOF\n";
+print OUT "root4star -b &gt;&gt;&amp; \${LOGFILE} &lt;&lt;EOF\n";
 
 # Put Trigger id's 
 print OUT getTriggerVector(0, $triggerString, @triggerId) ;
@@ -430,8 +441,8 @@ print OUT "  .L $bfcMixer\n";
 print OUT "  $execute_bfcMixer\n";
 print OUT "  .q\n";
 print OUT "EOF\n";
-print OUT "chmod g+w *.root\n";
-print OUT "ls -la .\n";
+print OUT "chmod g+w *.root &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "ls -la . &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -439,10 +450,10 @@ print OUT "\n\n";
 #----------------------------------------------------------------------------------------------------
 print OUT "<!-- Make output and list directory (if they don't exist) -->\n";
 print OUT "if ( ! -f \$EMOUTPUT ) then \n";
-print OUT "  mkdir -pv \$EMOUTPUT\n";
+print OUT "  mkdir -pv \$EMOUTPUT &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "endif\n";
 print OUT "if ( ! -f \$EMLIST ) then \n";
-print OUT "  mkdir -pv \$EMLIST\n";
+print OUT "  mkdir -pv \$EMLIST &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "endif\n";
 print OUT "\n\n";
 
@@ -459,12 +470,13 @@ printDebug("Set errfilename: $errFileName ...");
 #print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog $errFileName\n";
 print OUT "<!-- Move LOG files and csh to eliza disk, remove list files -->\n";
 print OUT "cp -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
-print OUT "cp -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
-print OUT "chmod g+w \$EMOUTPUT/$logFileName \$EMOUTPUT/$errFileName\n";
+#print OUT "cp -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
+print OUT "chmod g+w \$EMOUTPUT/$logFileName\n";
 print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log\n";
-print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog\n";
+print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.oldlog\n";
+print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.oldelog\n";
 print OUT "gzip -f " . "\$EMOUTPUT/$logFileName\n";
-print OUT "gzip -f " . "\$EMOUTPUT/$errFileName\n";
+#print OUT "gzip -f " . "\$EMOUTPUT/$errFileName\n";
 print OUT "cp -v $generatorDir/sched\$JOBID.csh \$EMLIST/\n";
 print OUT "chmod g+w \$EMLIST/sched\$JOBID.csh \n";
 print OUT "rm -v $generatorDir/sched\$JOBID.csh\n";
@@ -516,8 +528,8 @@ print OUT "<output fromScratch=\"*.root\" toURL=\"\$EMOUTPUT/\"/>\n";
 if ( $simulatorMode == 1 ) { print OUT "<output fromScratch=\"*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
 print OUT "\n";
 print OUT "<!-- Define locations of log/elog files -->\n";
-print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.log\"/>\n";
-print OUT "<stderr URL=\"file:$tempLogDirectory/$jobIdXml.elog\"/>\n";
+print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.oldlog\"/>\n";
+print OUT "<stderr URL=\"file:$tempLogDirectory/$jobIdXml.oldelog\"/>\n";
 print OUT "\n";
 print OUT "<!-- Input daq files -->\n";
 print OUT "<input URL=\"file:$daqsDirectory/st*\"/>\n";
