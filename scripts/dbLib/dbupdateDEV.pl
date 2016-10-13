@@ -27,7 +27,7 @@ $JobQAT = "newJobsQA";
 
 my $TOP_DIRD = "/star/rcf/test/dev/";
 
-my @dir_year = ("year_2000", "year_2001", "year_2003", "year_2004", "year_2005", "year_2006", "year_2007", "year_2008","year_2009", "year_2010", "year_2011", "year_2012", "year_2013", "year_2014", "year2015", "2016");
+my @dir_year = ("year_2000", "year_2001", "year_2003", "year_2004", "year_2005", "year_2006", "year_2007", "year_2008","year_2009", "year_2010", "year_2011", "year_2012", "year_2013", "year_2014", "year_2015", "year_2016");
 my @node_dir = ("daq_sl302.ittf", "daq_sl302.ittf_opt" ,"trs_sl302.ittf", "trs_sl302.ittf_opt","simu","daq_sl302.stica", "daq_sl302.stica_opt" );
 
 
@@ -665,7 +665,6 @@ my $pyear = 0;
       $testJobStFiles[$nJobStFiles] = $fObjAdr;
       $nJobStFiles++;
 
-
       foreach my $eachOldJob (@old_jobs) {
           $pvjbId = ($$eachOldJob)->oldjbId;
           $pvpath = ($$eachOldJob)->oldpath;
@@ -675,6 +674,7 @@ my $pyear = 0;
           $pfullName = $pvpath . "/" . $pvfile;
         
 #       if( ($fullname eq $pfullName) and ($pvavail eq "Y") ) {
+
 
         if( $pfullName eq $fullname ) {
         $flagHash{$fullname} = 0;
@@ -814,14 +814,11 @@ my $pyear = 0;
 
     &fillJSTable();
 
-#     if($mpath =~ /AuAu200_production_2016/) {
+    if($mpath =~ /AuAu200_production_2016/) {
 
-#       print "Fillin QA table  ", $mpath, "\n";
-#    next if ($mpath =~ /nohft/);
-#  print "Avg #MtdHits = ",  $avgMtdHits,"   ", "Avg #PxlHits = ", $avgPxlHits,"   ", "Avg #IstHits = ", $avgIstHits,"   ", "Avg #SsdHits = ", $avgSstHits,"\n";
-#    &fillQATable();
-#   }
+    &fillQATable();
 
+    }
 
         foreach my $nOldJob (@old_jobs) {
           $pvjbId = ($$nOldJob)->oldjbId;
