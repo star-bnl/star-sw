@@ -441,6 +441,7 @@ Int_t StBFChain::Instantiate()
 	  GetOption("gstar")       || 
 	  GetOption("PrepEmbed")   || 
 	  GetOption("mtin")        ||
+	  GetOption("mickey")      ||
 	  CintF != "") {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
@@ -449,6 +450,7 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("fzout"))     mk->SetAttr("fzout",1);
 	if (GetOption("beamLine"))  mk->SetAttr("beamLine",1);
 	if (GetOption("Wenu"))      mk->SetAttr("Wenu",1);
+	if (GetOption("mickey"))    mk->SetAttr("Mickey",1);
 	if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
       } else mk->SetActive(kFALSE);
       if (! mk) goto Error;
