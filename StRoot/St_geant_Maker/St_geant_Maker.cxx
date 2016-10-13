@@ -876,7 +876,14 @@ Int_t St_geant_Maker::Init(){
 	command.ReplaceAll(".L ",".U ");
 	gInterpreter->ProcessLine(command,&ee);
 	assert(!ee);
-      }	
+      } else {
+	if (IAttr("Mickey")) {
+	  TString kuip("user/input please mickey.mouse");	
+	  if (Debug()) LOG_INFO << "St_geant_Maker::Init kuip " << kuip.Data() << endm;
+	  Do(kuip.Data()); 
+	}
+      }
+      
       Do("mode g2tm prin 1;");
       //  Do("next;");
       //  Do("dcut cave z 1 10 10 0.03 0.03;");
