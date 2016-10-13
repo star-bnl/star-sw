@@ -2013,10 +2013,10 @@ iShape = kTrd1;
             <Medium name="TPAD_p10" isvol="1" stemax="2.5*tprs_width" deemax="0.00175367" stmin="0.0249056" />
             <Shape type="bbox" dz="0" dx="0" dy="0"  />
             
-            <Cut name="CUTGAM" value="1e-4"  />
-            <Cut name="CUTELE" value="1e-4"  />
-            <Cut name="DCUTE" value="1e-4"  />
-            <Cut name="DCUTM" value="1e-4"  />
+            <Cut name="CUTGAM" value="1e-5"  />
+            <Cut name="CUTELE" value="1e-5"  />
+            <Cut name="DCUTE" value="1e-5"  />
+            <Cut name="DCUTM" value="1e-5"  />
 <!--            <Par name="STRA" value="1."  /> -->
 
 
@@ -2035,7 +2035,7 @@ iShape = kTrd1;
                  <Hit meas="lptot" nbits="18"  min="-3" max="2" />
                  <Hit meas="sleng" bins="0.1"  min="0"  max="800" />
                  <Hit meas="tof"   nbits="16"  min="0"  max="TPCG_tofmax" />
-                 <Hit meas="lgam"  nbits="16"  min="-2" max="+6" />
+                 <Hit meas="lgam"  nbits="16"  min="-4" max="+6" />
                  <Hit meas="step"  nbits="11"  min="0"  max="10" />
                  <Hit meas="user"  nbits="21"  min="-0.01" max="0.01" />
 

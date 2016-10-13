@@ -1719,16 +1719,16 @@ block TPAD is a real padrow with dimensions defined at positioning time
       material p10
       material sensitive_gas  ISVOL=1  stemax=2.5*tprs_width
       SHAPE    BOX   dx=0   dy=0   dz=0
-      Call     GSTPAR(ag_imed,'CUTGAM',1e-4)
-      Call     GSTPAR(ag_imed,'CUTELE',1e-4)
-      Call     GSTPAR(ag_imed,'DCUTE', 1e-4)
-      Call     GSTPAR(ag_imed,'DCUTM', 1e-4)
+      Call     GSTPAR(ag_imed,'CUTGAM',1e-5)
+      Call     GSTPAR(ag_imed,'CUTELE',1e-5)
+      Call     GSTPAR(ag_imed,'DCUTE',1e-5)
+      Call     GSTPAR(ag_imed,'DCUTM',1e-5)
 *     Call     GSTPAR(ag_imed,'STRA',1.)
 *
 *     The following is the corrected hits definition: 25-dec-98 (PN)
       HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10: cy:10: cz:10:,
                      LPtot:18:(-3,2)      Sleng:.1:(0,800),
-                     ToF:16:(0,1.e-6)     LGAM:16:(-2,6),
+                     ToF:16:(0,1.e-6)     LGAM:16:(-4,6),
                      Step:11:(0,10)       USER:21:(-.01,.01)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
