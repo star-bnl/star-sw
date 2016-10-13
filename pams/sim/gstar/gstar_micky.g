@@ -39,6 +39,7 @@ Created August,14 1997
           do i=1,miky_np { if(miky_slope(i)>0) miky_slope(i)=1./miky_slope(i);}
     endif
 *
+#if 0
     Check Iprin>1
 
     <w> warm,warn;
@@ -49,6 +50,7 @@ Created August,14 1997
        <w> miky_code(i),miky_mult(i),1./miky_slope(i),miky_dy(i)
            (F15.0,3F15.3)
     enddo 
+#endif
     end
 *
 *
@@ -59,15 +61,20 @@ Created August,14 1997
     Integer   LENOCC,Ip,Ivert,I,Ipart,Mult,Ier,Nu,ItrTyp,Itr,Iprin
     Real      RNDM,GAMMA2,Zero(4)/0,0,0,0/,UB(100),PLAB(3),
               Amass,Charge,Tlife,a,b,pt,y,phi,dummy
+#if 1
+    Real      cosl, pmom, ekin 
+#endif
     Character Cname*20
     gamma2(dummy)=-alog(Rndm(1)*Rndm(2))
 *
     Iprin=ISLFLAG('MICK','PRIN')
+#if 0
     Check Iprin>=0
 
     prin1; (' *** generating an event with mickey-mouse generator ***')
+#endif
     USE /DETM/MICK/MIKY
-
+#if 0
     Call AgSVERT(Zero,0,0,Ub,0,Ivert)
 
     do Ip=1,nint(miky_NP)
@@ -97,6 +104,33 @@ Created August,14 1997
          }
        enddo
     enddo
+#else 
+    ip = 0
+    ipart = 3 
+    ekin = 5.89e-6 
+    Call  GFPART (Ipart,Cname,ItrTyp,Amass,Charge,Tlife,Ub,Nu)	
+    pmom = sqrt((ekin + Amass)**2 - Amass**2)	
+    do i = 1, 10000
+      if (ip > 10) goto :ok:	
+      Zero(1) = -200 + 400*Rndm(1)	
+      Zero(2) = -200 + 400*Rndm(1)	
+      Zero(3) = -200 + 400*Rndm(1)	
+      dummy = sqrt(Zero(1)**2 + Zero(2)**2)
+      if (dummy < 60 .or. dummy > 180) goto :err:
+      phi     = TwoPi*Rndm(1)
+      cosl    = -1. + 2*Rndm(1)
+      pLab(3) = pmom*cosl
+      pT      = sqrt(pmom**2 - pLab(3)**2)
+      pLab(1) = pt*cos(phi)
+      pLab(2) = pt*sin(phi)
+      ip = ip + 1
+      Call gSVERT(Zero,0,0,Ub,0,Ivert)     	
+      CALL GSKINE(Plab,Ipart,Ivert,Ub,0,Itr)
+:err:
+    enddo	
+:ok:
+* 
+#endif
 * 
 END
 *
