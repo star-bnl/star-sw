@@ -57,7 +57,15 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
     for (Int_t i = 0; i < 32; i++)
     {
       Int_t type = (i / 4) % 2;
-      if (year < 2016)
+      if (year == 2016)
+      {
+        for (int im = 0; im < kNQTboard; im++)
+        {
+          if (type == 0) mtdQTadc[im][i - i / 4 * 2] = trigger->mtdQtAtCh(im + 1, i, 0);
+          else        mtdQTtac[im][i - i / 4 * 2 - 2] = trigger->mtdQtAtCh(im + 1, i, 0);
+        }
+      }
+      else
       {
         if (type == 1)
         {
@@ -74,14 +82,6 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
           mtdQTadc[3][i - i / 4 * 2] = trigger->mtd4AtAddress(i, 0);
         }
       }
-      else
-      {
-        for (int im = 0; im < kNQTboard; im++)
-        {
-          if (type == 0) mtdQTadc[im][i - i / 4 * 2] = trigger->mtdQtAtCh(im + 1, i, 0);
-          else        mtdQTtac[im][i - i / 4 * 2 - 2] = trigger->mtdQtAtCh(im + 1, i, 0);
-        }
-      }
     }
 
     Int_t j[2], a[2];
@@ -89,7 +89,11 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
     {
       for (int i = 0; i < 8; i++)
       {
-        if (year >= 2016 && i % 2 == 0) continue; // moniter channel
+        if (year == 2016 && i % 2 == 0) // moniter channel only used for Run16
+	{
+	  mQTtacSum[im][i] = 0;
+	  continue; 
+	}
 
         // Apply slewing correction
         for (int k = 0; k < 2; k++)
@@ -114,17 +118,22 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
             j[k] += QTSlewCorr[im][i * 2 + k][slew_bin];
         }
 
-        if (j[0] < mtd_qt_tac_min || j[0] > mtd_qt_tac_max ||
-            j[1] < mtd_qt_tac_min || j[1] > mtd_qt_tac_max ||
-            TMath::Abs(j[0] - j[1]) > mtd_qt_tac_diff_range_abs)
+        if (j[0] <= mtd_qt_tac_min || j[0] >= mtd_qt_tac_max ||
+            j[1] <= mtd_qt_tac_min || j[1] >= mtd_qt_tac_max ||
+            TMath::Abs(j[0] - j[1]) >= mtd_qt_tac_diff_range_abs) // no "equal" in online algorithm
         {
           mQTtacSum[im][i] = 0;
           continue;
         }
-        else
-        {
-          mQTtacSum[im][i] = j[0] + j[1];
-        }
+
+	// Apply position correction 	
+	int module = QTtoModule[im][i];
+ 	if(module<0)
+ 	{
+	  mQTtacSum[im][i] = 0;
+	  continue;
+	}
+ 	mQTtacSum[im][i] = UShort_t( j[0] + j[1] + abs(module-3)*1./8 * (j[0]-j[1]) );
       }
     }
 
@@ -132,8 +141,8 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
     for (Int_t i = 0; i < kNQTboard; i++)
     {
       int idx = 0;
-      if (year < 2016) idx = i * 3;
-      else          idx = i / 2 * 3 + i % 2 * 16;
+      if(year==2016) idx = i / 2 * 3 + i % 2 * 16;
+      else           idx = i * 3;
       mMT101Tac[i][0] = (trigger->mtdDsmAtCh(idx, 0)) + ((trigger->mtdDsmAtCh(idx + 1, 0) & 0x3) << 8);
       mMT101Id[i][0]  = (trigger->mtdDsmAtCh(idx + 1, 0) & 0xc) >> 2;
       mMT101Tac[i][1] = (trigger->mtdDsmAtCh(idx + 1, 0) >> 4) + ((trigger->mtdDsmAtCh(idx + 2, 0) & 0x3f) << 4);
@@ -143,24 +152,24 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
     // TF201
     UInt_t decision = trigger->dsmTF201Ch(0);
     UInt_t decision2 = 0;
-    if (year >= 2016) decision2 = trigger->dsmTF201Ch(6);
+    if (year == 2016) decision2 = trigger->dsmTF201Ch(6);
     mTF201TriggerBit = 0;
 
     for (Int_t i = 0; i < 4; i++)
     {
       for (Int_t j = 0; j < 2; j++)
       {
-        if (year < 2016)
-        {
-          int qt = i;
-          mTF201TriggerBit |= ((decision >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
-        }
-        else
+        if(year==2016)
         {
           int qt = i * 2;
           mTF201TriggerBit |= ((decision >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
           qt = i * 2 + 1;
           mTF201TriggerBit |= ((decision2 >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
+        }
+	else
+        {
+          int qt = i;
+          mTF201TriggerBit |= ((decision >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
         }
       }
     }

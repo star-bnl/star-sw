@@ -349,7 +349,7 @@ Bool_t StPicoDstMaker::initMtd(Int_t const runnumber)
       }
     }
   }
-  if (year >= 2016)
+  if (year == 2016)
   {
     dataset = GetDataBase("Calibrations/mtd/mtdQTSlewingCorrPart2");
     if (dataset)
