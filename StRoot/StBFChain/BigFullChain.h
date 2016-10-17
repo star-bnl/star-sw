@@ -81,7 +81,7 @@ Bfc_st BFC[] = { // standard chains
   {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
-  {"AgML"        ,""  ,"","-Agi,-VmcGeo","",""                      //StarAgmlLib,Geometry,StarGeometry
+  {"AgML"        ,""  ,"","","",""                      //StarAgmlLib,Geometry,StarGeometry
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #endif /* __AgMLonFly__ */
   {"Agi" ,"" ,"","-VmcGeo,-AgML","","","Alias VmcGeometry to AgiGeometry (gstar original geometry)",kFALSE},

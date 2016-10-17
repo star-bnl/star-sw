@@ -20,6 +20,8 @@
 #include "TTree.h"
 #include "TEnv.h"
 #include "TObjectTable.h"
+#include "TDirIter.h"
+#include "BigFullChain.h" /* To check syntax */
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -1723,17 +1725,23 @@ void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
   if      (GetOption("Agi"))    mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   else if (GetOption("AgML")  ) {
+#ifndef __AgMLonFly__
+    // Requires root-files generated
     Int_t ok = -1;
     for (Int_t i = 0; i < 10; i++) {
       if (Dirs[i] == "") continue;
-      TString ddir = Dirs[i]; ddir += "/"; ddir = "AgMLGeometry";
-      if (gSystem->AccessPathName(ddir)) {
+      TString ddir = Dirs[i]; ddir += "/"; ddir = "AgMLGeometry/*.root";
+      TDirIter iter(ddir);
+      if (iter.NoFiles()) {
 	mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
 	ok = i;
 	break;
       }
     }
     if (ok == -1) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
+#else /* __AgMLonFly__ */
+    mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+#endif
   }
   else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeo");
   else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
