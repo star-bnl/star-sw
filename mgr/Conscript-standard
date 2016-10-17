@@ -75,7 +75,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
   $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
 }
 
-$env1 = $env->clone('Package'  => $pkg);
+$env1 = $env->clone('Package'  => $pkg, 'LIBPATH' => $LIBPATH);
 my $DEBUG   = $env1->{DEBUG};
 my $FDEBUG  = $env1->{FDEBUG};
 my $NOOPTIMIZED = $DEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
@@ -89,9 +89,12 @@ my $FCPATH  = $env1->{FCPATH};
 my $FEXTEND = $env1->{FEXTEND};
 my $FPPFLAGS= $env1->{FPPFLAGS};
 my $FCCOM   = $env1->{FCCOM};
-my $LIBS    = $env1->{LIBS};
+my $LIBS    = $env1->{LIBS}; #  print "LIBS  = $LIBS ========================================\n";
+my $LDIRS   = $ebv1->{_LDIRS};#  print "LDIRS = $LDIRS, LIB = $LIB  ========================================\n";
 my $SOFLAGS = $env1->{SOFLAGS};
 my $LIBPATH = $env1->{LIBPATH};
+if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR;}
+$LIBPATH   .= $LIB;
 my $STIC    = $env1->{STIC};
 my $LD      = $env1->{LD};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
@@ -217,6 +220,7 @@ if ( $pkg eq "GeoTestMaker") {
 #}
 
 if ($pkg eq "StDAQMaker") {
+  Depends $env [$SO_PKG], [($LIB . "/libStDaqLib.so", $LIB . "/libRTS.so")];
   $LIBS = "-lStDaqLib -lRTS";
 }
 if ( $pkg eq "StVecBosAna") {
@@ -234,33 +238,15 @@ my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath
 #+
 # some compiler specific treatments below, global or conditional
 #-
-if( $FC eq 'pgf77'){
-  if ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/) {
-    $FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
-    $FFLAGS   = $env1->{G77FLAGS};
-    $FEXTEND  = $env1->{G77EXTEND};
-  }
+if ( $DirPath =~ /pams/ and
+     ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)){
+  $FCCOM    = $env1->{FCviaAGETOFCOM};
+#  $FEXTEND  = "";
 }
-if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
-    if ( $DirPath =~ /pams/ and
-	 ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)){
-	$FCCOM    = $env1->{FCviaAGETOFCOM};
-    }
-    # If fortran, grab the -lg2c or -lgfortran for linking
-    if ( $DirPath =~ /StarVMC/ ){
-	#print "\tAppending ".$env1->{FLIBS}." to LIBS=$LIBS\n";
-	$LIBS .= " " . $env1->{FLIBS};
-    }
-  
-    ## this is done not only for stand-alone library purpose but for backward
-    ## compatibility of root4star linked with -lg2c rather than gfortran (hence
-    ## libs would not work as symbol would fail to resolve)
-    #if ( $FC eq 'gfortran' && (grep(/.F$/,@srcL) || grep(/.g$/,@srcL)) ){
-    #	print "\tFound .F or .g in sources and adding [".
-    #	    $env1->{FLIBS}."] to $pkg\n" ; # if $param::debug;
-    #	$SOFLAGS .= " " . $env1->{FLIBS};
-    #	#print "\tFinal SOFLAGS are $SOFLAGS\n";
-    #}
+# If fortran, grab the -lg2c or -lgfortran for linking
+if ( $DirPath =~ /StarVMC/ ){
+  #print "\tAppending ".$env1->{FLIBS}." to LIBS=$LIBS\n";
+  $LIBS .= " " . $env1->{FLIBS};
 }
 
 #+
@@ -820,7 +806,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$EXTRA_CPPFLAGS .= $env1->{Packages}->{XML}->{CPP};
       }
     }
-    if ($pkg eq 'StTpcDb') {$LIBS .=  " -lStarMagField";}
+    if ($pkg eq 'StTpcDb') {
+#      Depends $env [$SO_PKG], [($LIB . "/libStarMagField.so")];
+      $LIBS .=  " -lStarMagField";
+    }
     print "EXPANDING CPPPATH = $CPPPATH\n" if $param::debug;
   } elsif ( $Dir =~ m/StarVMC/ and $pkg =~ m/StiVMC/) {
     $CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
@@ -834,7 +823,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #    print "CPPPATH => $CPPPATH\n";
 #    $CPPPATH .= $main::PATH_SEPARATOR .  $INCLUDE . "/Vc";
 #    $CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DVC_NO_XGETBV -Wno-pragmas -Wno-parentheses" . $SSE_FLAGS;#  -msse -msse2
-    $CXXFLAGS .= " -W -Wall -Wswitch -Wformat -Wchar-subscripts -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DVC_NO_XGETBV -Wno-pragmas -Wno-parentheses" . $SSE_FLAGS;#  -msse -msse2
+    $CXXFLAGS .= " -W -Wall -Wswitch -Wformat -Wchar-subscripts -Wmultichar -Wtrigraphs -Wpointer-arith -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DVC_NO_XGETBV -Wno-parentheses" . $SSE_FLAGS;#  -msse -msse2
+    if ($CXX !~ "^ic") {
+      $CXXFLAGS .= " -Wcast-align -Wno-pragmas";
+    }
     $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
     #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
     #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
@@ -867,7 +859,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       #    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
       #    print "CPPPATH => $CPPPATH\n";
 #      my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
-      my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+##      my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE -W -Wall -Wswitch -Wformat -Wchar-subscripts";
       # $extraCXXFLAGS .= " -DVC_IMPL=SSE";
       #	$extraCXXFLAGS .= " -msse -msse2 -msse3 -mssse3 -msse4.1 -ltr";
       # $extraCXXFLAGS .= " -DUSE_TBB "; # uncomment if you do want to use TBB
@@ -875,15 +867,20 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       # $extraCXXFLAGS .= " -DMAIN_DRAW -DDRAW";
       # $extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE -USTAR_STANDALONE -DKFPARTICLE"; # uncomment me to run CATracker performance (same for Sti lib)
       
-      $extraCXXFLAGS .= " -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
-      $extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1" . $SSE_FLAGS;#  -msse -msse2
+##      $extraCXXFLAGS .= " -Wmultichar -Wtrigraphs -Wno-unused-function";
+#      $extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1" . $SSE_FLAGS;#  -msse -msse2
+##      $extraCXXFLAGS .= " -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1" . $SSE_FLAGS;#  -msse -msse2
+##      if ($CXX !~ "^ic") {
+##	$$extraCXXFLAGS .= " -Wcast-align -Wno-pragmas -Wpointer-arith-Wreturn-type";
+##     }
+      $extraCXXFLAGS = "-DNODEBUG -DNVALGRIND ";
       if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
 #      if ( $pkg =~ m/^TPCCATrackerPerformance$/ ) {
 #	$CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/../KFParticle";
 #	$extraCXXFLAGS .= " -DKFPARTICLE";
 #      }
       $extraCXXFLAGS .= " -DNODEBUG";
-      $extraCXXFLAGS .= "  -Wno-pragmas -Wno-parentheses"; # new flags
+      $extraCXXFLAGS .= "  -Wno-parentheses"; # new flags
       $CXXFLAGS .= $extraCXXFLAGS;
       $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
       
@@ -893,6 +890,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       
     # stand - alone in .DEV2 only
     if ($env->{STAR_VERSION} eq '.DEV2') {
+      Depends $env [$SO_PKG], [($LIB . "/libTPCCATracker.so")];
       my $libs = "-lTPCCATracker " . $LIBS . $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
       $envTPCCA = $env->clone('Package' => $pkg,
 			      'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
@@ -918,18 +916,18 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
     #    print "CPPPATH => $CPPPATH\n";
 #    my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
-    my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+    my $extraCXXFLAGS = " -DNVALGRIND -DSTAR_STANDALONE";# -W -Wall -Wswitch -Wformat -Wchar-subscripts";
     # $extraCXXFLAGS .= " -DVC_IMPL=SSE";
     # $extraCXXFLAGS .= " -msse -msse2 -msse3 -mssse3 -msse4.1 -ltr";
     # $extraCXXFLAGS .= " -DUSE_TBB "; # uncomment if you do want to use TBB
     # $extraCXXFLAGS .= " -DMAIN_DRAW -DDRAW3"; # uncomment for use TPCCATracker event display
     # $extraCXXFLAGS .= " -DMAIN_DRAW -DDRAW";
     # $extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE -USTAR_STANDALONE -DKFPARTICLE"; # uncomment me to run CATracker perfomance (same for Sti lib)
-    $extraCXXFLAGS .= " -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
-    $extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DTBB_DO_SSERT=1" . $SSE_FLAGS;#  -msse -msse2
+#    $extraCXXFLAGS .= " -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
+#    $extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -Wshadow -fno-threadsafe-statics -DTBB_DO_SSERT=1" . $SSE_FLAGS;#  -msse -msse2
     if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
     $extraCXXFLAGS .= " -DNODEBUG";
-    $extraCXXFLAGS .= "  -Wno-pragmas -Wno-parentheses"; # new flags
+#    $extraCXXFLAGS .= "  -Wno-pragmas -Wno-parentheses"; # new flags
     $CXXFLAGS .= $extraCXXFLAGS;
     $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
     $LIBS = "-lVc";
@@ -1112,13 +1110,14 @@ TDataSet *CreateTable() {
 	    }
 	    my $geom_h = $geom . ".h";
 	    #	  my $rz = lc($geom . ".rz");
-	    my $rz = $geom . ".rz";
+#	    my $rz = $geom . ".rz";
 	    my $geometry = "Geometry." . $geom . ".C";
 #	    my $HALL = "HALL." . $geom . ".root";
 	    my $hall = "HALL." . $geom . ".root";
 	    if ($STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/) {# platform with no root4star
 	      # rz - files
-	      my $glob = ".sl*/obj/StarDb/AgiGeometry/" . $rz;
+#	      my $glob = ".sl*/obj/StarDb/AgiGeometry/" . $rz;
+	      my $glob = ".sl*/obj/StarDb/AgiGeometry/" .$geom_h ;
 	      my @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
 	      my $dir;
 	      foreach $dir (@dirs) {
@@ -1127,7 +1126,8 @@ TDataSet *CreateTable() {
 		if ($dir) {
 		  my $file = "#" . $dir;
 		  #		print "$rz $file\n";
-		  Command $env1 [$rz], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+#		  Command $env1 [$rz], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		  Command $env1 [$geom_h], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
 		  last;
 		}
 	      }
@@ -1164,23 +1164,29 @@ TDataSet *CreateTable() {
 	      #	    print "key = $key, geom = $geom, xgeomList{$geom} = $xgeomList{$geom}\n";
 	      Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
 	      if (! $xgeomList{$geom}) {
-		Depends $env1 [$rz,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
+#		Depends $env1 [$rz,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
+		Depends $env1 [$geom_h,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 		Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
-		Command $env1 [$rz,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
+#		Command $env1 [$rz,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
+#		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
+		Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
+		  qq (root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null; mv $geom_h $geometry $hall %>:d); #   mv geom.rz %>:f;
 		#		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv %>:f $geometry %>:d); #   mv geom.rz %>:f;
 		#		qq (root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null; mv %>:f %>; ); #  mv geom.rz %>:f;
 		#		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null;); #  mv geom.rz %>:f;
 	      } else{
-		Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
-		Command $env1 [$rz,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
-		  #		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
+#		Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
+		Depends $env1 [$geom_h], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
+#		Command $env1 [$rz,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
+#		  #		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
+#		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
+		Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
+		  qq (root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null; mv $geom_h $geometry $hall %>:d); #   mv geom.rz %>:f;
 	      }
 	    }
-	    my $g2root = "g2Root";
-	    Depends $env1 [$geom_h], ($rz, $BIN . "/" . $g2root);
-	    Command $env1 [$geom_h], ($rz), qq ( cd %>:d; $g2root %<:f %>:f >& /dev/null);
+# 	    my $g2root = "g2Root";
+# 	    Depends $env1 [$geom_h], ($rz, $BIN . "/" . $g2root);
+# 	    Command $env1 [$geom_h], ($rz), qq ( cd %>:d; $g2root %<:f %>:f >& /dev/null);
 	    if ($geomlist) { $geomlist .= "|";}
 	    $geomlist .= $geom;
 	  }
@@ -1723,6 +1729,7 @@ if ( $#src > -1 ) {
       my @programs = glob "./StRoot/RTS/src/RTS_EXAMPLE/*.C"; #("RTS_EX/Reader","EVP_READER/special","RTS_EXAMPLE/daqFileChopper");
       foreach my $progD (@programs) {
 	my $prog = File::Basename::basename($progD,".C");
+	Depends      $envRTS $prog, $LIB . "/libRTS.so";
 	Program      $envRTS $prog, ("src/RTS_EXAMPLE/" . $prog . ".C");
 	Install $envRTS $BIN, $prog;
       }
@@ -1744,6 +1751,7 @@ if ( $#src > -1 ) {
 			   'FDEBUG'   => $FDEBUG
 			  );
       script::Keep $prog;
+      Depends      $envP $prog, $LIB . "/libMillepedeII.so";
       Program      $envP $prog, ("pede.f90");
       Install $envP $BIN, $prog;
     }

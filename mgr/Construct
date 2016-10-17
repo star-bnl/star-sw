@@ -162,8 +162,8 @@ if ( !$param::quiet ) {
 		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries SO SOFLAGS br 
 		 LIBG2C LIBSTDC br
 		 ROOTLIBS br
-		);
-  my $tab = "";
+		); 
+  my $tab = ""; 
   foreach my $p ( @list ) {
     if ($p eq 'br') {print "\n"; $tab = "";}
     else {
@@ -278,7 +278,7 @@ if ($STAR_HOST_SYS =~ /darwin/ or ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} =
 #if (! -r "StarVMC/minicern/lnxgs/rdmin.F") {
 #  push @item, "minicern";
 #}
-if ($STAR_HOST_SYS =~ /darwin/) {
+if ($STAR_HOST_SYS =~ /darwin/ or $STAR_HOST_SYS =~ /icc/) {
   push @items, "GeoTestMaker"; # if no QT |StStarLogger
   push @items, "Pythia6"; # problem with pythia6_common_address.c
   push @items, "StarLight"; # problem with capital and low case letter in file names
@@ -302,8 +302,12 @@ if ($STAR_HOST_SYS =~ /darwin/) {
   push @items, "StarGenerator";
   push @items, "StJetMaker";
 }
+if ($STAR_HOST_SYS =~ /icc/) {
+   push @items, "StMCAsymMaker";
+}
       my $libv = $env->{ENV}->{ROOTSYS} . "/lib/libVc.a";
-if (! -r $libv) {
+      my $libv2 = $env->{ENV}->{OPTSTAR} . "/lib/libVc.a";
+if (! -r $libv && ! -r $libv2) {
   push @items, "StHLTCAMaker";
   push @items, "KFParticle";
   push @items, "TPCCATracker";
@@ -408,7 +412,7 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		   );# print "sysdirlist = @sysdirlist\n";
 #if ($STAR_HOST_SYS !~ /sl64/) {
 if (-r "StarDb/AgiGeometry" ) {push @sysdirlist, "StarDb/AgiGeometry";}
-if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
+#if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
 #}
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
@@ -455,7 +459,9 @@ if (($STAR_HOST_SYS !~ /darwin/) || # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $S
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @packages, "garfield";
 }
+if ($STAR_HOST_SYS !~ /icc/) {
 push @packages, "MillepedeII";
+}
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
