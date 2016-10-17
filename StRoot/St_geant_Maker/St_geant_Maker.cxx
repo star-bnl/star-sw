@@ -621,7 +621,8 @@
 #define    csaddr	 F77_NAME(csaddr,CSADDR)
 #define    csjcal	 F77_NAME(csjcal,CSJCAL)
 #define    g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
-#define    g2r_get_sys F77_NAME(g2r_get_sys,G2R_GET_SYS)
+#define    toroot        F77_NAME(toroot,TOROOT)
+#define    g2r_get_sys  F77_NAME(g2r_get_sys,G2R_GET_SYS)
 #define    gfrotm	 F77_NAME(gfrotm,GFROTM)
 #define    gfxzrm	 F77_NAME(gfxzrm,GFXZRM)
 #define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
@@ -654,6 +655,7 @@ R__EXTERN "C" {
 			       ...);         /* other narg arguments       */
   
   Int_t type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
+  void type_of_call toroot (DEFCHARD DEFCHARL);
   void type_of_call g2r_get_sys (DEFCHARD, DEFCHARD, int&, int& DEFCHARL DEFCHARL);
   void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
   void type_of_call gfxzrm   (Int_t &NLEV_0,Float_t &X,Float_t &Y,Float_t &Z,
@@ -2106,6 +2108,10 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
 //_____________________________________________________________________________
 Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
   return g2t_volume_id(PASSCHARD(name),numbv PASSCHARL(name));
+}
+//_____________________________________________________________________________
+void St_geant_Maker::g2Root(const Char_t *name){
+  return toroot(PASSCHARD(name) PASSCHARL(name));
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos

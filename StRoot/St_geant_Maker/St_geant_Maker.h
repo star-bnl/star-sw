@@ -170,6 +170,7 @@ protected:
    TGeoVolume* GetTopGeoVolume() {return fTopGeoVolume;}
    static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
 			    Int_t &k, Char_t *iq);
+   static void g2Root(const Char_t *fname  = 0);
    virtual void     Geometry();
    virtual Int_t    Agstroot();
    virtual Int_t    AgstHits();
