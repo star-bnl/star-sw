@@ -428,7 +428,120 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       mTpcT->Fill();
     }
   }
-#if 0
+#if 1
+  // non matched hits
+  if (rcHits) {
+    UInt_t numberOfSectors = rcHits->numberOfSectors();
+    for (UInt_t i = 0; i< numberOfSectors; i++) {
+      StTpcSectorHitCollection* sectorCollection = rcHits->sector(i);
+      if (sectorCollection) {
+	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+	for (int j = 0; j< numberOfPadrows; j++) {
+	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	  if (rowCollection) {
+	    StSPtrVecTpcHit &hits = rowCollection->hits();
+	    UInt_t NoHits = hits.size();
+	    if (NoHits) {
+	      for (UInt_t k = 0; k < NoHits; k++) {
+		StTpcHit *rHit = static_cast<StTpcHit *> (hits[k]);
+		if (! rHit) continue;
+		if ( rHit->usedInFit() ) continue;
+		Int_t sector = rHit->sector();
+		Int_t row    = rHit->padrow();
+		StTpcLocalSectorDirection  dirLS(0.,1.,0.,sector,row);
+		transform(dirLS,dirLSA);
+		transform(dirLSA,dirL);
+		transform(dirL,dirG);
+		StThreeVectorD normal(dirG.position().x(),dirG.position().y(),dirG.position().z());
+		Double_t y = transform.yFromRow(row);
+		StTpcLocalSectorCoordinate  lsCoord(0., y, 10.,sector,row);
+		transform(lsCoord,lsCoordA);
+		transform(lsCoordA, gCoord);
+		transform(dirG,dirL,sector,row);
+		transform(dirL,dirLSA);
+		transform(dirLSA,dirLS);
+		// Track prediction 
+		fCluster->Clear();
+		fCluster->SetEventNo(GetEventNumber());
+		fCluster->AddRcHit(rHit);
+		fCluster->SetDriftVelocities(gStTpcDb->DriftVelocity(1),gStTpcDb->DriftVelocity(13));
+		fCluster->SetFrequency(gStTpcDb->Electronics()->samplingFrequency());
+		fCluster->SetNofPV(rEvent->numberOfPrimaryVertices());
+		fCluster->SetNoTracksAtBestPV(NoTracks);
+		if (tpcRawData) {
+		  Int_t kPadMin = rHit->minPad();
+		  Int_t kPadMax = rHit->maxPad();
+		  Int_t kTbMin  = rHit->minTmbk();
+		  Int_t kTbMax  = rHit->maxTmbk();
+		  if (kTbMax - rHit->timeBucket() >= 15) kTbMax += 10;
+		  Int_t nPixels = 0;
+		  if (tpcRawData) nPixels = tpcRawData->getVecOfPixels(Pixels,sector,row, kPadMin, kPadMax, kTbMin, kTbMax);
+		  if (! nPixels) continue;
+		  Int_t AdcSum = 0;
+		  Int_t Id = rHit->idTruth();
+		  for (Int_t k = 0; k < nPixels; k++) {
+		    if (Pixels[k].idTruth() == Id) {
+		      fCluster->AddPixel(&Pixels[k]);
+		      AdcSum += Pixels[k].adc();
+		    }
+		  }
+		  if (Debug() > 1) cout << "\taccepted\t" <<  AdcSum << "\t" 
+					<< kPadMin << "/" << kPadMax << " "
+					<< (Int_t) rHit->minPad() << "/" << (Int_t) rHit->maxPad()
+					<< "\t" << kTbMin << "/" << kTbMax << " "
+					<< rHit->minTmbk() << "/" << rHit->maxTmbk()
+					<< endl;
+		  fCluster->SetAdcSum(AdcSum);
+		  TClonesArray *pixels = fCluster->Pixels();
+		  Int_t N = pixels->GetEntriesFast();
+		  if (N > 0) { // add projections 
+		    Double_t *SumOverPadsD = new Double_t[kTbMax-kTbMin+1];
+		    memset (SumOverPadsD, 0, (kTbMax-kTbMin+1)*sizeof(Double_t));
+		    Double_t *SumOverTBinD = new Double_t[kPadMax-kPadMin+1];
+		    memset (SumOverTBinD, 0, (kPadMax-kPadMin+1)*sizeof(Double_t));
+		    for (Int_t k = 0; k < N; k++) {
+		      StTpcPixel *S = (StTpcPixel *) pixels->At(k);// cout << *S << endl;
+		      Int_t pad = S->pad();
+		      Int_t tbin = S->timebin();
+		      SumOverPadsD[tbin-kTbMin] += S->adc();
+		      SumOverTBinD[pad-kPadMin] += S->adc();
+		    }
+		    for (Int_t pad = kPadMin; pad <= kPadMax; pad++) {
+		      if (SumOverTBinD[pad-kPadMin] > 0) {
+			StTpcPixel pixelT(1,sector,row,pad,1024,(UShort_t) SumOverTBinD[pad-kPadMin],Id);
+			fCluster->AddPixel(&pixelT);
+		      }
+		    }
+		    delete [] SumOverTBinD;
+		    for (Int_t tbin = kTbMin; tbin <= kTbMax; tbin++) {
+		      if (SumOverPadsD[tbin-kTbMin] > 0) {
+			StTpcPixel pixelT(1,sector,row,255,tbin,(UShort_t) SumOverPadsD[tbin-kTbMin],Id);
+			fCluster->AddPixel(&pixelT);
+		      }
+		    }
+		    delete [] SumOverPadsD;
+		  }
+		}
+		if (theHitMap) {
+		  if (rHit->TestBit(StMcHit::kMatched)) {
+		    pair<rcTpcHitMapIter,rcTpcHitMapIter>
+		      recBounds = theHitMap->equal_range(rHit);
+		    for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
+		      const StMcTpcHit *mHit = dynamic_cast<const StMcTpcHit *> ((*it2).second);
+		      assert ( mHit);
+		      if (mHit->isDet()) continue;
+		      fCluster->AddMcHit(mHit);
+		    }
+		  }
+		}
+		mTpcT->Fill();
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
   if (mcHits) {
     for (Int_t sector=0;
 	 sector<(Int_t) mcHits->numberOfSectors(); sector++) {

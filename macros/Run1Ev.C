@@ -8,26 +8,26 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl; 
       return;
     }
-    St_geant_Maker * geant = (  St_geant_Maker * ) chain->Maker("geant");
+    //    St_geant_Maker * geant = (  St_geant_Maker * ) chain->Maker("geant");
 #if 0
-    geant->SetAttr("phys_off",1);
+    St_geant_Maker::instance()->SetAttr("phys_off",1);
 #endif
-    //    geant->InitRun(1);
+    //    St_geant_Maker::instance()->InitRun(1);
 #if 0
-    geant->Do("subevent 0;");
+    St_geant_Maker::instance()->Do("subevent 0;");
 #endif
     //                         NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //                         gkine 1  2    25     25  0.1   0.1      0       0   10    10
     //                         gkine 1  6    25     25  0.0   0.0      0       0  100   100
     TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
     cout << "Set kine : " << kine.Data() << endl;
-    geant->Do(kine.Data());
-    //    geant->Do("gspread 100. 100. 0.");
-    //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-    //      Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
-    //      Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
-    geant->Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
-    geant->Do("physi");
+    St_geant_Maker::instance()->Do(kine.Data());
+    //    St_geant_Maker::instance()->Do("gspread 100. 100. 0.");
+    //                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+    //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
+    //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
+    St_geant_Maker::instance()->Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
+    St_geant_Maker::instance()->Do("physi");
 
     /*
      * AGUSER/MODE Detector [ Flag Value ]
@@ -54,17 +54,17 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
      
      To change default values use GSFLAG command.  */
 #if 0
-    geant->Do("mode  svtt simu 2");
-    geant->Do("mode  tpce simu 2");
-    geant->Do("mode  ftpc simu 2");
-    geant->Do("detp  trac DCAY 210 210 0.1 0.01");
-    geant->Do("mode  g2tm prin 1;");
+    St_geant_Maker::instance()->Do("mode  svtt simu 2");
+    St_geant_Maker::instance()->Do("mode  tpce simu 2");
+    St_geant_Maker::instance()->Do("mode  ftpc simu 2");
+    St_geant_Maker::instance()->Do("detp  trac DCAY 210 210 0.1 0.01");
+    St_geant_Maker::instance()->Do("mode  g2tm prin 1;");
 #endif
 #if 1
-    geant->Do("debug on");
-    geant->Do("swit 1 2");
-    geant->Do("swit 2 2");
-    geant->SetDebug(1);
+    St_geant_Maker::instance()->Do("debug on");
+    St_geant_Maker::instance()->Do("swit 1 2");
+    St_geant_Maker::instance()->Do("swit 2 2");
+    St_geant_Maker::instance()->SetDebug(1);
 #endif
 #if 1
     // Old Sti

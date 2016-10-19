@@ -81,7 +81,7 @@ Bfc_st BFC[] = { // standard chains
   {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
-  {"AgML"        ,""  ,"","-Agi,-VmcGeo","",""                      //StarAgmlLib,Geometry,StarGeometry
+  {"AgML"        ,""  ,"","","",""                      //StarAgmlLib,Geometry,StarGeometry
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #endif /* __AgMLonFly__ */
   {"Agi" ,"" ,"","-VmcGeo,-AgML","","","Alias VmcGeometry to AgiGeometry (gstar original geometry)",kFALSE},
@@ -220,8 +220,13 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2015","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2015,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
    ,                                                                                      "","","",kFALSE},
+#if 0
   {"MC.2016","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2016,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
+   ,                                                                                      "","","",kFALSE},
+#endif
+  {"MC.2016","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2016,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,Agi"
    ,                                                                                      "","","",kFALSE},
   {"MC.devT","","","TpcRS,TpxClu,devT,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
@@ -1368,6 +1373,8 @@ Bfc_st BFC[] = { // standard chains
   // for simulation on fly Event time stamp is set outside of the simulation makers
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
+  {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
+   ,                                                               "gstar","Mickey Mouse generator",kFALSE},
   {"StarGenerator","","","","","libMathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase"
    ,                                                                                "StarGenerator",kFALSE}, 
   {"pythia"      ,"" ,"","PythiaPP200,-fzin","", ""                             ,"set pythia pp200",kFALSE},

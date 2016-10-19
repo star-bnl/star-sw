@@ -33,7 +33,7 @@
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StCoordinates.hh" 
 #include "StDbUtilities/StMagUtilities.h"
-#include "StDaqLib/TPC/trans_table.hh"
+//#include "StDaqLib/TPC/trans_table.hh"
 #include "StDetectorDbMaker/St_tpcAltroParamsC.h"
 #include "StDetectorDbMaker/St_asic_thresholdsC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
@@ -557,12 +557,10 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   // constants
 #ifdef __DEBUG__
-  Int_t Ndebug = 0; // debug printout depth
   static Int_t iBreak = 0;
   static Int_t selectedSector = -1;
   static Int_t selectedRow = -1;
   if (Debug()%10) {
-    if (Debug()%10 > 1) Ndebug = 10;
     gBenchmark->Reset();
     gBenchmark->Start("TpcRS");
     LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
@@ -933,11 +931,24 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t betaGamma = TMath::Sqrt(gamma*gamma - 1.);
 	StThreeVectorD       pxyzG(tpc_hitC->p[0],tpc_hitC->p[1],tpc_hitC->p[2]);
 	Double_t bg = 0;
-	if (mass > 0) bg = pxyzG.mag()/mass;
+	static const Double_t m_e = .51099907e-3;
+	Double_t eKin = -1;
+	if (mass > 0) {
+	  bg = pxyzG.mag()/mass;
+	  // special case stopped electrons
+          if (tpc_hitC->ds < 0.0050 && tpc_hitC->de < 0) {
+	    Int_t Id         = tpc_hitC->track_p;
+	    Int_t ipart      = tpc_track[Id-1].ge_pid;
+	    if (ipart == 3) {
+	      eKin = -tpc_hitC->de;
+	      gamma = eKin/m_e + 1;
+              bg = TMath::Sqrt(gamma*gamma - 1.);
+	    }
+	  }
+	}
 	if (bg > betaGamma) betaGamma = bg;
 	Double_t bg2 = betaGamma*betaGamma;
 	gamma = TMath::Sqrt(bg2 + 1.);
-	static const Double_t m_e = .51099907e-3;
 	Double_t Tmax; 
 	if (mass < 2*m_e) {
 	  if (charge > 0) Tmax =     m_e*(gamma - 1);
@@ -989,21 +1000,32 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t tbksdE[kTimeBacketMax]; memset (tbksdE,  0, sizeof(tbksdE));
 	Float_t dEr = 0;
 	TArrayF rs(10); 
+	static Double_t cLog10 = TMath::Log(10.);
+
 	do {// Clusters
 	  Float_t dS = 0;
 	  Float_t dE = 0;
-	  if (charge) {
-	    dS = - TMath::Log(gRandom->Rndm())/NP;
-	    static Double_t cLog10 = TMath::Log(10.);
-	    if (mdNdEL10) dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
-	    else          dE = St_TpcResponseSimulatorC::instance()->W()*
-	      gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
+	  if (eKin >= 0.0) {
+	    if (eKin == 0.0) break;
+	    gamma = eKin/m_e + 1;
+	    bg = TMath::Sqrt(gamma*gamma - 1.);
+	    Tmax = 0.5*m_e*(gamma - 1);
+	    if (Tmax <= St_TpcResponseSimulatorC::instance()->W()/2*eV) break;
+	    NP = GetNoPrimaryClusters(betaGamma,charge); 
+	    dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
+	  } else {
+	    if (charge) {
+	      dS = - TMath::Log(gRandom->Rndm())/NP;
+	      if (mdNdEL10) dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
+	      else          dE = St_TpcResponseSimulatorC::instance()->W()*
+		gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
+	    }
+	    else { // charge == 0 geantino
+	      // for Laserino assume dE/dx = 25 keV/cm;
+	      dE = 10; // eV
+	      dS = dE*eV/(TMath::Abs(mLaserScale*tpc_hitC->de/tpc_hitC->ds));
+	    }	  
 	  }
-	  else { // charge == 0 geantino
-	    // for Laserino assume dE/dx = 25 keV/cm;
-	    dE = 10; // eV
-	    dS = dE*eV/(TMath::Abs(mLaserScale*tpc_hitC->de/tpc_hitC->ds));
-	  }	  
 #ifdef __DEBUG__
 	  if (Debug() > 12) { 	
 	    LOG_INFO << "s_low/s_upper/dSD\t" << s_low << "/\t" << s_upper << "\t" << dS <<  endm;
@@ -1011,6 +1033,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
 	  Double_t E = dE*eV;
 	  if (dE < St_TpcResponseSimulatorC::instance()->W()/2 || E > Tmax) continue;
+	  if (eKin > 0) {
+	    if (eKin >= E) {eKin -= E;}
+            else {E = eKin; eKin = 0; dE = E/eV;}
+	  }
 	  dESum += dE;
 	  dSSum += dS;
 	  nP++;

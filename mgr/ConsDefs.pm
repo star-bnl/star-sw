@@ -658,17 +658,6 @@
  } else {
    print "Could not find xml libs\n" if (! $param::quiet);
  }
- #Vc check SSE support
- my $cmd = "touch /tmp/temp_gccflags.c; $CXX -E -dM -o - /tmp/temp_gccflags.c | grep -q SSE";
- my $VcCPPFLAGS = "";# -DVC_IMPL=SSE";
- # if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
- #   $VcCPPFLAGS = " -DVC_IMPL=Scalar";
- # } else {# check Vc from ROOT
- # }
- if (-r "/tmp/temp_gccflags.c") {`rm /tmp/temp_gccflags.c`;}
- #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
-# $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
- 
  $CXXCOM = 
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
  # print "CXXCOM : $CXXCOM\n";
@@ -894,9 +883,6 @@
 					   'LIBDIR'=> $LoggerLIBDIR,
 					   'LIBS'  => $LoggerLIBS
 					  },
-			      'Vc' => {
-				       'CPP'   => $VcCPPFLAGS
-				      },
 			     }
 	      );
  

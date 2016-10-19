@@ -20,6 +20,8 @@
 #include "TTree.h"
 #include "TEnv.h"
 #include "TObjectTable.h"
+#include "TDirIter.h"
+#include "BigFullChain.h" /* To check syntax */
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -441,6 +443,7 @@ Int_t StBFChain::Instantiate()
 	  GetOption("gstar")       || 
 	  GetOption("PrepEmbed")   || 
 	  GetOption("mtin")        ||
+	  GetOption("mickey")      ||
 	  CintF != "") {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
@@ -449,6 +452,7 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("fzout"))     mk->SetAttr("fzout",1);
 	if (GetOption("beamLine"))  mk->SetAttr("beamLine",1);
 	if (GetOption("Wenu"))      mk->SetAttr("Wenu",1);
+	if (GetOption("mickey"))    mk->SetAttr("Mickey",1);
 	if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
       } else mk->SetActive(kFALSE);
       if (! mk) goto Error;
@@ -1721,17 +1725,23 @@ void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
   if      (GetOption("Agi"))    mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   else if (GetOption("AgML")  ) {
+#ifndef __AgMLonFly__
+    // Requires root-files generated
     Int_t ok = -1;
     for (Int_t i = 0; i < 10; i++) {
       if (Dirs[i] == "") continue;
-      TString ddir = Dirs[i]; ddir += "/"; ddir = "AgMLGeometry";
-      if (gSystem->AccessPathName(ddir)) {
+      TString ddir = Dirs[i]; ddir += "/"; ddir = "AgMLGeometry/*.root";
+      TDirIter iter(ddir);
+      if (iter.NoFiles()) {
 	mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
 	ok = i;
 	break;
       }
     }
     if (ok == -1) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
+#else /* __AgMLonFly__ */
+    mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+#endif
   }
   else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeo");
   else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
