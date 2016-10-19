@@ -36,36 +36,24 @@ foreach my $dir (@dirs) {
     push @src, $dir . "/" . $s;
   }
 }
-my @DepsL = map {$LIB . "/lib" . $_ . ".so"} qw(QtRoot QtGed  RQTGL QtRootGui QtImage QGLViewer);
-my @DepsL1 = map {$LIB . "/lib" . $_ . ".so.1"} qw(QtRoot QtGed  RQTGL QtRootGui QtImage QGLViewer);
-my @DepsI = map {$INCLUDE .  "/TQt" . $_ . ".h"} 
+my @DepsL  = map {$LIB . "/lib" . $_ . ".so"}   qw(GQt QtGed QtImage QtRootGui QtRoot QtThread RQTGL);
+my @DepsL1 = map {$LIB . "/lib" . $_ . ".so.1"} qw(GQt QtGed QtImage QtRootGui QtRoot QtThread RQTGL);
+my @DepsI  = map {$INCLUDE .  "/TQ" . $_ . ".h"} 
   qw(
-Application        Condition            GuiFactory          ObjectListItem       RootSlot
-ArrowEditor        ContextMenuImp       Gui                 Pad2Html             RootViewer3D
-AxisEditor         ControlBarImp        IconBrowserImp      PadEditor            StyleComboBox
-BrowserImp         CustomizeCanvasMenu  Image               PadFont              SymbolCodec
-Brush              Emitter              InspectImp          PaletteEditor        TabValidator
-Canvas2Html        Event                LineEditor          PatternSelectButton  TextEditor
-CanvasImp          EventQueue           LockGuard           PatternSelect        ThreadFactory
-CanvasPainter      FloatSlider          Lock                Pen                  ThreadImp
-CanvasWidget       FloatSpinBox         LockWidget          PixmapBox            Timer
-ClientFilter       GedAttFrame          MarkerEditor        RConfig              ToolBar
-ClientGuard        GedEditor            Marker              RootAction           UpdateViewFlag
-ClientWidget       GedFrames            MarkerSelectButton  RootApplication      Util
-ColorPickerHelper  GLIncludes           MarkerSelect        RootBrowserAction    Widget
-ColorSelectButton  GLViewerImp          MmlTextProxy        RootBrowserImp       ZoomPadWidget
-ColorSelect        GLViewerWidget       Mutex               RootCommandCombo
-CommandPlugin      GraphEditor          ObjectDialog        RootGuiFactory
+      GLKernel        tCanvasWidget         tEvent           tIconBrowserImp      tObjectDialog         tRootBrowserAction  tToolBar
+      GLViewerImp     tClientFilter         tEventQueue      tImage               tObjectListItem       tRootBrowserImp     tUpdateViewFlag
+      GsiRootCanvas   tClientGuard          tFloatSlider     tInspectImp          tPad2Html             tRootCommandCombo   tUtil
+      MimeTypes       tClientWidget         tFloatSpinBox    tLineEditor          tPadEditor            tRootGuiFactory     tWidget
+      PadOpenGLView   tColorPickerHelper    tGedAttFrame     tLockGuard           tPadFont              tRootSlot           tZoomPadWidget
+      tApplication    tColorSelectButton    tGedEditor       tLock                tPaletteEditor        tRootViewer3D       UserEvent
+      tArrowEditor    tColorSelect          tGedFrames       tLockWidget          tPatternSelectButton  tStyleComboBox      VirtualGL
+      tAxisEditor     tCommandPlugin        tGLIncludes      tMarkerEditor        tPatternSelect        tSymbolCodec
+      tBrowserImp     tCondition            tGLViewerImp     tMarker              tPen                  tTabValidator
+      tBrush          tContextMenuImp       tGLViewerWidget  tMarkerSelectButton  tPixmapBox            tTextEditor
+      tCanvas2Html    tControlBarImp        tGraphEditor     tMarkerSelect        tRConfig              tThreadFactory
+      tCanvasImp      tCustomizeCanvasMenu  tGuiFactory      tMmlTextProxy        tRootAction           tThreadImp
+      tCanvasPainter  tEmitter              tGui             tMutex               tRootApplication      tTimer
    );
-
-push @DepsI, $INCLUDE .  "/TBrowserCustom.h";
-push @DepsI, $INCLUDE .  "/TCanvasImp.interface.h";
-push @DepsI, $INCLUDE .  "/TCanvasImp.interface.h";
-push @DepsI, $INCLUDE .  "/TEmbeddedPad.h";
-#push @DepsI, $INCLUDE .  "/TG3Application.h";
-push @DepsI, $INCLUDE .  "/TQGsiRootCanvas.h";
-
-#TBrowserCustom Application AxisEditor BrowserImp Brush  Canvas2Html   CanvasImp    TCanvasImp.interface  TEmbeddedPad   TQGsiRootCanvas
 my $DEBUG = "";
 if ($STAR_HOST_SYS =~ /darwin/) {
 #  $DEBUG .= " -spec macx-g++ ";
