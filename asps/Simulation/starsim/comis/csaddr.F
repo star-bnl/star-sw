@@ -23,16 +23,23 @@
 ******************************************************************************
 #if !defined(CERNLIB_COMISF)
 ******************************************************************************
+#ifdef CERNLIB_QMLXIA64
+      integer*8 FUNCTION  CSADDR (CHNAME)
+      integer*8 I, IADGP, CS_GET_FUNC, CSITGP
+#else
       FUNCTION  CSADDR (CHNAME)
+      INTEGER          CSADDR,CSLTGP,CSITGP,IPVS
+#endif
 *
 *    returns the memory address of a comis-routine
 ******************************************************************************
       CHARACTER*(*)    CHNAME
-      INTEGER          CSADDR,CSLTGP,CSITGP
       CHARACTER*80     NAME
 #include "comis/cstab.inc"
 #if defined(CERNLIB_SHL)
+#ifndef CERNLIB_QMLXIA64
       INTEGER          CS_GET_FUNC
+#endif
       COMMON /CSDEBUG/ ICSDEBUG
 *
       NAME = CHNAME

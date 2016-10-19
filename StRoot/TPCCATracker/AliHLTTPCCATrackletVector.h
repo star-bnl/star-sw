@@ -23,91 +23,114 @@
 
 #include "debug.h"
 
+#ifndef NVALGRIND
+#include <valgrind/memcheck.h>
+#endif
+
 class AliHLTTPCCATrackletVector
 {
   public:
     AliHLTTPCCATrackletVector();
 
-    ushort_m IsValid() const { return fNHits > ushort_v( Vc::Zero ); }
+    uint_m IsValid() const { return fNHits > uint_v( Vc::Zero ); }
 
-    ushort_v NHits() const    { return fNHits;    }
-    ushort_v FirstRow() const { return fFirstRow; }
-    ushort_v LastRow() const  { return fLastRow;  }
+    uint_v NHits() const    { return fNHits;    }
+    uint_v FirstRow() const { return fFirstRow; }
+    uint_v LastRow() const  { return fLastRow;  }
     const AliHLTTPCCATrackParamVector &Param() const { return fParam; }
 
-    unsigned short HitIndexAtRow( int rowIndex, int trackIndex ) const {
+    unsigned int HitIndexAtRow( int rowIndex, int trackIndex ) const {
       return fRowHits[rowIndex][trackIndex];
     }
-    ushort_v HitIndexAtRow( int rowIndex ) const { return ushort_v( fRowHits[rowIndex] ); }
+    uint_v HitIndexAtRow( int rowIndex ) const { return uint_v( &fRowHits[rowIndex][0] ); }
     /*
-    ushort_v HitIndexAtRows( const ushort_v &rowIndex ) const {
-      return ushort_v( &fRowHits[0], rowIndex * ushort_v::Size + ushort_v( Vc::IndexesFromZero ) );
+    uint_v HitIndexAtRows( const uint_v &rowIndex ) const {
+      return uint_v( &fRowHits[0], rowIndex * uint_v::Size + uint_v( Vc::IndexesFromZero ) );
     }
-    ushort_v HitIndexAtRows( const ushort_v &rowIndex, const ushort_m &mask ) const {
-      return ushort_v( &fRowHits[0], rowIndex * ushort_v::Size + ushort_v( Vc::IndexesFromZero ), mask );
+    uint_v HitIndexAtRows( const uint_v &rowIndex, const uint_m &mask ) const {
+      return uint_v( &fRowHits[0], rowIndex * uint_v::Size + uint_v( Vc::IndexesFromZero ), mask );
     }
     */
 
-    void SetNHits   ( const ushort_v &x ) { fNHits    = x; }
-    void SetFirstRow( const ushort_v &x ) { fFirstRow = x; }
-    void SetLastRow ( const ushort_v &x ) { fLastRow  = x; }
+    void SetNHits   ( const uint_v &x ) { fNHits    = x; }
+    void SetFirstRow( const uint_v &x ) { fFirstRow = x; }
+    void SetLastRow ( const uint_v &x ) { fLastRow  = x; }
     void SetParam   ( const TrackParamVector &x ) { fParam = x; }
 
-    void SetRowHits( int rowIndex, const ushort_v &trackIndex, const ushort_v &hitIndex );
-    void SetRowHits( const ushort_v &rowIndex, const ushort_v &trackIndex, const ushort_v &hitIndex );
-    void SetRowHits( int rowIndex, const ushort_v &trackIndex, const ushort_v &hitIndex, const short_m &mask );
-    void SetRowHits( const ushort_v &rowIndex, const ushort_v &trackIndex, const ushort_v &hitIndex, const short_m &mask );
+    void SetRowHits( int rowIndex, const uint_v &trackIndex, const uint_v &hitIndex );
+    void SetRowHits( const uint_v &rowIndex, const uint_v &trackIndex, const uint_v &hitIndex );
+    void SetRowHits( int rowIndex, const uint_v &trackIndex, const uint_v &hitIndex, const int_m &mask );
+    void SetRowHits( const uint_v &rowIndex, const uint_v &trackIndex, const uint_v &hitIndex, const int_m &mask );
 
-    void AddHitIds( const ushort_v &rowIndexes, const ushort_v &hitIndexes, const ushort_m &mask );
+    void AddHitIds( const uint_v &rowIndexes, const uint_v &hitIndexes, const uint_m &mask );
 
-    int MaxNRows() const { return fRowHits.Size(); }
+    int MaxNRows() const { return fRowHits.size(); }
   private:
-    ushort_v fNHits;      // N hits
-    ushort_v fFirstRow;   // first TPC row
-    ushort_v fLastRow;    // last TPC row
+    uint_v fNHits;      // N hits
+    uint_v fFirstRow;   // first TPC row
+    uint_v fLastRow;    // last TPC row
     TrackParamVector fParam;   // tracklet parameters
-    AliHLTFixedArray<ushort_v::Memory, AliHLTArraySize<AliHLTTPCCAParameters::MaxNumberOfRows8> > fRowHits; // hit index for each TPC row
+    Vc::array< Vc::array<unsigned int, uint_v::Size>, AliHLTTPCCAParameters::MaxNumberOfRows8 > fRowHits; // hit index for each TPC row
 };
 
-inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const ushort_v &trackIndex,
-    const ushort_v &hitIndex )
+inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const uint_v &trackIndex,
+    const uint_v &hitIndex )
 {
-  assert( trackIndex[0] + ushort_v( Vc::IndexesFromZero ) == trackIndex );
-  assert( ( trackIndex[0] % ushort_v::Size ) == 0 );
+#ifdef __ASSERT_YF__
+  assert( trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex );
+  assert( ( trackIndex[0] % uint_v::Size ) == 0 );
+#endif
   UNUSED_PARAM1( trackIndex );
-  hitIndex.store( fRowHits[rowIndex] );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
+  hitIndex.store( &fRowHits[rowIndex][0] );
+  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
 }
 
-inline void AliHLTTPCCATrackletVector::SetRowHits( const ushort_v &rowIndexes, const ushort_v &trackIndex,
-    const ushort_v &hitIndex )
+inline void AliHLTTPCCATrackletVector::SetRowHits( const uint_v &rowIndexes, const uint_v &trackIndex,
+    const uint_v &hitIndex )
 {
-  assert( trackIndex[0] + ushort_v( Vc::IndexesFromZero ) == trackIndex );
-  assert( ( trackIndex[0] % ushort_v::Size ) == 0 );
+#ifdef __ASSERT_YF__
+  assert( trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex );
+  assert( ( trackIndex[0] % uint_v::Size ) == 0 );
+#endif
   UNUSED_PARAM1( trackIndex );
-  hitIndex.scatter( fRowHits[0], rowIndexes * ushort_v::Size + ushort_v( Vc::IndexesFromZero ) );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+  hitIndex.scatter( &fRowHits[0][0], rowIndexes * uint_v(uint_v::Size) + uint_v( Vc::IndexesFromZero ) );
 }
 
-inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const ushort_v &trackIndex,
-    const ushort_v &hitIndex, const short_m &mask )
+inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const uint_v &trackIndex,
+    const uint_v &hitIndex, const int_m &mask )
 {
-  assert( trackIndex[0] + ushort_v( Vc::IndexesFromZero ) == trackIndex );
-  assert( ( trackIndex[0] % ushort_v::Size ) == 0 );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( trackIndex );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
+#ifdef __ASSERT_YF__
+  assert( trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex );
+  assert( ( trackIndex[0] % uint_v::Size ) == 0 );
+#endif
   UNUSED_PARAM1( trackIndex );
   assert( &fRowHits[0] != 0 );
-  debugF() << "TrackletVector::SetRowHits " << rowIndex << " old: ";
-  debugF() << ushort_v( fRowHits[rowIndex] );
-  debugF() << " new: " << hitIndex << mask;
-  hitIndex.store( fRowHits[rowIndex], mask );
-  debugF() << " done: " << ushort_v( fRowHits[rowIndex] ) << std::endl;
+  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
+//   debugF() << "TrackletVector::SetRowHits " << rowIndex << " old: ";
+//   debugF() << uint_v( fRowHits[rowIndex] );
+//   debugF() << " new: " << hitIndex << mask;
+  hitIndex.store( &fRowHits[rowIndex][0], static_cast<uint_m>(mask) );
+//   debugF() << " done: " << uint_v( fRowHits[rowIndex] ) << std::endl;
+  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
 }
 
-inline void AliHLTTPCCATrackletVector::SetRowHits( const ushort_v &rowIndexes, const ushort_v &trackIndex,
-    const ushort_v &hitIndex, const short_m &mask )
+inline void AliHLTTPCCATrackletVector::SetRowHits( const uint_v &rowIndexes, const uint_v &trackIndex,
+    const uint_v &hitIndex, const int_m &mask )
 {
-  assert( trackIndex[0] + ushort_v( Vc::IndexesFromZero ) == trackIndex );
-  assert( ( trackIndex[0] % ushort_v::Size ) == 0 );
+#ifdef __ASSERT_YF__
+  assert( trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex );
+  assert( ( trackIndex[0] % uint_v::Size ) == 0 );
+#endif
   UNUSED_PARAM1( trackIndex );
-  hitIndex.scatter( fRowHits[0], rowIndexes * ushort_v::Size + ushort_v( Vc::IndexesFromZero ), mask );
+  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+  hitIndex.scatter( &fRowHits[0][0], rowIndexes * uint_v(uint_v::Size) + uint_v( Vc::IndexesFromZero ), static_cast<uint_m>(mask) );
 }
 
 typedef AliHLTTPCCATrackletVector TrackletVector;

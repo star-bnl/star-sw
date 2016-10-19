@@ -37,6 +37,7 @@ foreach my $dir (@dirs) {
   }
 }
 my @DepsL = map {$LIB . "/lib" . $_ . ".so"} qw(QtRoot QtGed  RQTGL QtRootGui QtImage QGLViewer);
+my @DepsL1 = map {$LIB . "/lib" . $_ . ".so.1"} qw(QtRoot QtGed  RQTGL QtRootGui QtImage QGLViewer);
 my @DepsI = map {$INCLUDE .  "/TQt" . $_ . ".h"} 
   qw(
 Application        Condition            GuiFactory          ObjectListItem       RootSlot
@@ -71,8 +72,11 @@ if ($STAR_HOST_SYS =~ /darwin/) {
 #  $DEBUG .= " -spec macx-xcode ";
 #  $DEBUG .= " -spec macx-llvm ";
 } else {
-  if ($STAR_HOST_SYS !~ /x86/) {
-    $DEBUG .= " -spec linux-g++-32";
+  if ($STAR_HOST_SYS =~ /icc/) {
+    if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-icc-32";}
+    else                         {$DEBUG .= " -spec linux-icc-64";}
+  } else {# gcc
+    if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-g++-32";}
   }
 }
 $DEBUG .= " CONFIG+=debug" if $env->{DEBUG} !~ /-O/;
@@ -90,7 +94,10 @@ if ($qt4) {
 } else {
   Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir; qmake $DEBUG);
 }
-Command $env2 [(@DepsL, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
+Command $env2 [(@DepsL1, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
+foreach my $lib (@DepsL) {
+  InstallAs $env2 $LIB . "/" . $lib, $lib . ".1";
+}
 # Command $env2 ["Makefile"], qw(qtExamples/qtExamples.pro), qq(cd $obj_dir; qmake $DEBUG; make);
 #________________________________________
 sub find_q{  @main::search_files   = ();

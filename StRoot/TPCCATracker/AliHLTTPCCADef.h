@@ -17,10 +17,11 @@
 
 #include <Vc/Vc>
 #include <Vc/limits>
+#include <Vc/array>
+#include <Vc/vector>
 
 using ::Vc::double_v;
 using ::Vc::float_v;
-using ::Vc::sfloat_v;
 using ::Vc::int_v;
 using ::Vc::uint_v;
 using ::Vc::short_v;
@@ -28,7 +29,6 @@ using ::Vc::ushort_v;
 using ::Vc::VectorAlignment;
 using ::Vc::double_m;
 using ::Vc::float_m;
-using ::Vc::sfloat_m;
 using ::Vc::int_m;
 using ::Vc::uint_m;
 using ::Vc::short_m;
@@ -38,9 +38,9 @@ using ::Vc::asin;
 using ::Vc::round;
 using ::Vc::isfinite;
 
-static inline ushort_m validHitIndexes( const ushort_v &v )
+static inline uint_m validHitIndexes( const uint_v &v )
 {
-  return static_cast<short_v>( v ) >= short_v( Vc::Zero );
+  return static_cast<int_v>( v ) >= int_v( Vc::Zero );
 }
 	
 #ifdef USE_TBB
@@ -50,6 +50,25 @@ static inline ushort_m validHitIndexes( const ushort_v &v )
 //   }
 // }
 #endif //USE_TBB
+
+// ---------
+
+#ifdef NVALGRIND
+#define VALGRIND_CHECK_VALUE_IS_DEFINED( mask )
+#define VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( v, k )
+#define VALGRIND_CHECK_MEM_IS_DEFINED( v, k );
+#define VALGRIND_CHECK_MEM_IS_ADDRESSABLE( v, k );
+#else // NVALGRIND
+#include <valgrind/memcheck.h>
+#define VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( v, k ) \
+{ \
+  __typeof__( v + v ) tmp( v ); \
+  tmp.setZero( !k ); \
+  VALGRIND_CHECK_VALUE_IS_DEFINED( tmp ); \
+}
+#endif // NVALGRIND
+
+// --------
 
 
 #if defined(HLTCA_STANDALONE)

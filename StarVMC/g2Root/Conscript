@@ -17,8 +17,8 @@ my $FCPATH = $env->{FCPATH};
 my $FFLAGS = $env->{FFLAGS};         #print "FFLAGS = $FFLAGS\n";
 my $FPPFLAGS = $env->{FPPFLAGS};
 my $CPPFLAGS = $env->{CPPFLAGS};
-my $CXXFLAGS = $env->{CXXFLAGS};
-my $FLIBS = $env->{FLIBS};           #print "FLIBS = $FLIBS\n";
+my $CXXFLAGS = `root-config --auxcflags`; chomp($CXXFLAGS);# $env->{CXXFLAGS};
+my $FLIBS = $env->{FLIBS}; #          print "FLIBS = $FLIBS =========================\n";
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
 my $CLIBS = $env->{CLIBS};           #print "CLIBS = $CLIBS\n";
@@ -42,10 +42,13 @@ if ($FC eq 'pgf77') {
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
 }
-my $LD        = $env->{LD}; #!
-#if ($LD eq 'g++') {
-#  $LD = "gcc";
-#}
+if ($LD eq 'g++') {
+  $LD = $FC;
+  $CLIBS .= " -lstdc++";
+} elsif ($LD eq 'icpc') {
+  $LD = $FC;
+  $CLIBS .= " " . $FLIBS . " -lstdc++";
+}
 #if ($STAR_SYS !~ /x8664/ and ($LD eq $env->{CC} or $LD eq $env->{CXX})) {$LD = $FC;}
 #if ($LD eq $env->{CC} or $LD eq $env->{CXX}) {$LD = $FC;}
 #if ($LD eq 'gcc') {$LDFLAGS = "-Wl,-Bstatic";}
@@ -66,7 +69,7 @@ my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
       if (! ($env->{CXX_MAJOR} > 4 or $env->{CXX_MAJOR} == 4 and $env-{CXX_MINOR} >= 6)) {$CXXFLAGS .= " -fno-exceptions";}
 
 $env2 = $env->clone('FC'           => $FC,
-		    'LD'           => $FC,
+		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,
 		    'FPPFLAGS'     => '',
 		    'FFLAGS'       => $LDFLAGS,

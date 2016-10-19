@@ -18,7 +18,9 @@ export CVSCOSRC
 export PATH
 
 # Delete old Makefiles and create the top level Makefile with imake
-
+if [ ! -d $CERN_ROOT/build ]; then
+  mkdir $CERN_ROOT/build
+fi
 cd $CERN_ROOT/build
 find . -type f -name Makefile -exec rm {} \;
 $CVSCOSRC/config/imake_boot

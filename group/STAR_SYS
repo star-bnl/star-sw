@@ -127,7 +127,7 @@ endif
 	    default:
         endsw
     endif
-
+    if ($?DECHO) echo "rhflavor ${rhflavor}, rhmajor = ${rhmajor}, redhat = ${redhat}"
     if ( "$redhat" != "") then
 	# Note:
 	#    always assume the compiler is in the path
@@ -143,7 +143,12 @@ endif
 	    #rm  /tmp/icc_version;`
 	    set test=`which icc | $GREP "not found"`
 	    if ( "$test" == "") then
-		set vers =  `$STARCMPL -v >&/tmp/icc_version$$ ; $AWK '{print $2}' /tmp/icc_version$$ | /bin/sed "s/\.//" && /bin/rm  /tmp/icc_version$$;`
+		set vers =  `$STARCMPL -v >&/tmp/icc_version$$ ; $AWK '{print $3}' /tmp/icc_version$$ | /bin/sed "s/\.//g" && /bin/rm  /tmp/icc_version$$;`
+		echo "$vers" | grep 'license'
+                if ($? == "0") then
+		   echo "icc is not supported on this machine"
+                   set vers = 1700
+                endif
 	    endif
 	    setenv STARCMPLC "icc"
 	    breaksw
@@ -165,8 +170,9 @@ endif
 		setenv STARCMPLC "gcc"
 	    endif
        endsw
+    if ($?DECHO) echo "rhflavor ${rhflavor}, rhmajor = ${rhmajor}, redhat = ${redhat}"
        setenv xSTARCMPL "$STARCMPL$vers"
-#       echo "$STARCMPL = > $STARCMPL => $vers"
+       if ($?DECHO) echo "$STARCMPL = > $STARCMPL => $vers"
        # The below was made to exclude 7.2 Redhat using i386_linux24
        # and other un-predicted flavor of it. The introduction of
        # SL and RHE lead to simply it. There may be a need to also
@@ -180,14 +186,15 @@ endif
 		    breaksw
 		case "x86*":
 		case "amd64*":
+#		echo "${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}"
 		    if ( $USE_64BITS == 1 ) then
-			setenv STAR_HOST_SYS $rhflavor${redhat}_x8664_${STARCMPLC}${vers}
+			setenv STAR_HOST_SYS ${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}
 		    else
-			setenv STAR_HOST_SYS $rhflavor${redhat}_${STARCMPLC}${vers}
+			setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
 		    endif
 		    breaksw
 		default:
-		    setenv STAR_HOST_SYS $rhflavor${redhat}_${STARCMPLC}${vers}
+		    setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
 	    endsw
 	endif
 #	echo "STAR_HOST_SYS => $STAR_HOST_SYS"
@@ -202,7 +209,7 @@ endif
 # trick to handle non STAR nodes
 if ("${STAR_SYS}" == "sl64_gcc447"      ) setenv STAR_HOST_SYS sl64_gcc482
 if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
-
+if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
 
 #  $Log: STAR_SYS,v $
 #  Revision 1.56  2016/04/28 14:44:25  jeromel

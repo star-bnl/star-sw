@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGrid.cxx,v 1.1 2016/02/05 23:27:27 fisyak Exp $
+// $Id: AliHLTTPCCAGrid.cxx,v 1.2 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -63,8 +63,8 @@ void AliHLTTPCCAGrid::Create( float yMin, float yMax, float zMin, float zMax, fl
   fZMinOverStep = zMin * fStepZInv;
 
 //   std::cout << "fYMinOverStep " << yMax * fStepYInv - fYMinOverStep  << "fZMinOverStep " << zMax * fStepZInv - fZMinOverStep   << std::endl;
-  fNy = static_cast<unsigned short>( yMax * fStepYInv - fYMinOverStep + 1.f );
-  fNz = static_cast<unsigned short>( zMax * fStepZInv - fZMinOverStep + 1.f );
+  fNy = static_cast<unsigned int>( yMax * fStepYInv - fYMinOverStep + 1.f );
+  fNz = static_cast<unsigned int>( zMax * fStepZInv - fZMinOverStep + 1.f );
 
 //   std::cout << "fNy " << fNy  << "fNz " << fNz   << std::endl;
   fN = fNy * fNz;

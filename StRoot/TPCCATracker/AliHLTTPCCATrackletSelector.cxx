@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.2 2016/07/15 14:43:33 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.6 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -44,122 +44,97 @@ using std::endl;
 
 void AliHLTTPCCATrackletSelector::run()
 {
-  fTracks.resize( fTrackletVectors.Size() * ushort_v::Size * AliHLTTPCCAParameters::MaxNumberOfRows8 / AliHLTTPCCAParameters::MinimumHitsForTrack ); // should be less, the factor is for safety, since the tracks can be broken into pieces
+  fTracks.resize( fTrackletVectors.Size() * uint_v::Size * AliHLTTPCCAParameters::MaxNumberOfRows8 / AliHLTTPCCAParameters::MinimumHitsForTrack ); // should be less, the factor is for safety, since the tracks can be broken into pieces
 #ifdef USE_TBB
   tbb::atomic<int> numberOfTracks;
-  tbb::atomic<int> numberOfHits;
+  tbb::fatomic<int> NHitsTotal;
 #else //USE_TBB
   int numberOfTracks;
-  int numberOfHits;
+  int NHitsTotal;
 #endif //USE_TBB
 
-  numberOfTracks = -1;
-  std::stack<AliHLTTPCCATrack *> recycleBin;
+  numberOfTracks = 0;
+  NHitsTotal = 0;
 
-  numberOfHits = 0;
+  const int NTracklets = fTracker.NTracklets();
+  for ( int iTrackletV = 0; iTrackletV * int_v::Size < NTracklets; ++iTrackletV ) {
+    const TrackletVector &tracklet = fTrackletVectors[iTrackletV];
+    const uint_v trackIndexes = uint_v( Vc::IndexesFromZero ) + uint_v(iTrackletV * int_v::Size);
 
-  const int fNTracklets = fTracker.NTracklets();
-  debugTS() << "run TrackletSelector on " << fNTracklets << " tracklets" << endl;
-  for ( int itr = 0; itr * short_v::Size < fNTracklets; ++itr ) {
-    const ushort_v trackIndexes = ushort_v( Vc::IndexesFromZero ) + itr * short_v::Size;
-    // Tracklets that will be examined
-    const TrackletVector &tracklet = fTrackletVectors[itr];
-    debugTS() << "process " << trackIndexes << "\n" << tracklet.Param() << endl;;
+    const uint_v &NTrackletHits = tracklet.NHits();
+    const uint_m &validTracklets = trackIndexes < NTracklets && NTrackletHits >= uint_v(AliHLTTPCCAParameters::MinimumHitsForTracklet);
 
-    // the Tracklet says it contains so many hits
-    const ushort_v &tNHits = tracklet.NHits();
+    const float_v kMaximumSharedPerHits = 1.f / AliHLTTPCCAParameters::MinimumHitsPerShared;
 
-    // useless Tracklet...
-    const ushort_m &valid = trackIndexes < fNTracklets && tNHits > 0;
+    const uint_v &firstRow = tracklet.FirstRow();
+    const uint_v &lastRow  = tracklet.LastRow();
 
-    const sfloat_v kMaximumSharedPerHits = 1.f / AliHLTTPCCAParameters::MinimumHitsPerShared;
+    uint_v nTrackHits( Vc::Zero );
 
-    const ushort_v &firstRow = tracklet.FirstRow();
-    const ushort_v &lastRow  = tracklet.LastRow();
+    const uint_v &weight = SliceData::CalculateHitWeight( NTrackletHits, trackIndexes );
 
-    ushort_v tNHitsNew( Vc::Zero );
-
-    const ushort_v &weight = SliceData::CalculateHitWeight( tNHits, trackIndexes );
-
-    debugTS() << "tNHits: " << tNHits << ", valid: " << valid << ", firstRow: " << firstRow << ", lastRow: " << lastRow << ", weight: " << weight << endl;
-
-    Track *tracks[short_v::Size];
+    Track *trackCandidates[int_v::Size];
+    for(int iV=0; iV<uint_v::Size; iV++)
     {
-      int i = 0;
-      // XXX lock
-      for ( ; !recycleBin.empty() && i < short_v::Size; ++i ) {
-        tracks[i] = recycleBin.top();
-        recycleBin.pop();
-        tracks[i]->fParam = TrackParam( tracklet.Param(), i );
-      }
-      // XXX unlock
-      for ( ; i < short_v::Size; ++i ) {
-        tracks[i] = new Track;
-        fTracks[++numberOfTracks] = tracks[i];
-        tracks[i]->fParam = TrackParam( tracklet.Param(), i );
-      }
+      if(!validTracklets[iV]) continue;
+//    foreach_bit ( int iV, validTracklets ) {
+      trackCandidates[iV] = new Track;
     }
 
-    //const int nRows = fTracker.Param().NRows(); // number of rows (Tracker global)
-    ushort_v gap( Vc::Zero ); // count how many rows are missing a hit
-    ushort_v nShared( Vc::Zero );
-    const ushort_v &invalidMarker = std::numeric_limits<ushort_v>::max();
-    for ( int rowIndex = firstRow.min(); rowIndex <= lastRow.max(); ++rowIndex ) {
+    uint_v gap( Vc::Zero ); // count how many rows are missing a hit
+    uint_v nShared( Vc::Zero );
+    for ( unsigned int rowIndex = firstRow.min(); rowIndex <= lastRow.max(); ++rowIndex ) {
       ++gap;
-      const ushort_v &hitIndexes = tracklet.HitIndexAtRow( rowIndex ); // hit index for the current row
-      debugTS() << hitIndexes << invalidMarker << validHitIndexes( hitIndexes ) << endl;
-      const ushort_m &validHits = valid && validHitIndexes( hitIndexes );
-      //cerr << rowIndex << hitIndexes << weight << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << endl;
-      const ushort_m own = fData.TakeOwnHits( fData.Row( rowIndex ), hitIndexes, validHits, weight );
-      //cerr << own << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << endl;
-      //const ushort_m &own = fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) == weight;
-      const ushort_m &sharedOK = nShared < static_cast<ushort_v>( static_cast<sfloat_v>( tNHitsNew ) * kMaximumSharedPerHits );
-      const ushort_m &outHit = validHits && ( own || sharedOK );
-#ifndef NODEBUG
-      const ushort_m &invalidTrack = !( own || sharedOK );
-//      std::cout << invalidTrack << "       "<< outHit <<"            "<<firstRow.min()<<"  "<<lastRow.max()<<"         "<< firstRow<<"  "<<lastRow<<std::endl;
-      if ( !invalidTrack.isEmpty() ) {
-        debugTS() << "invalidTrack at row " << rowIndex << ": " << invalidTrack
-          << ", own: " << own
-          << ", sharedOK: " << sharedOK
-          << endl;
-        debugTS() << "weight reference: " << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << validHits << endl;
-      }
-#endif
-      for ( int i = 0; i < short_v::Size; ++i ) {
-        if ( outHit[i] ) {
-          assert( hitIndexes[i] < fData.Row( rowIndex ).NHits() );
-          tracks[i]->fHitIdArray[tracks[i]->fNumberOfHits++].Set( rowIndex, hitIndexes[i] );
-        } else if ( static_cast<int>(gap[i]) > static_cast<int>(AliHLTTPCCAParameters::MaximumRowGap) ) {
-          if ( tracks[i]->fNumberOfHits >= AliHLTTPCCAParameters::MinimumHitsForTrack ) {
-            numberOfHits += tracks[i]->fNumberOfHits;
-            tracks[i] = new Track;
-            fTracks[++numberOfTracks] = tracks[i];
-          } else {
-            tracks[i]->fNumberOfHits = 0;
-          }
-        }
-      }
-      gap.setZero( outHit );
-      ++tNHitsNew( outHit );
-      tNHitsNew.setZero( gap > ushort_v(AliHLTTPCCAParameters::MaximumRowGap) );
-      ++nShared( !own && outHit );
+      const uint_v &hitIndexes = tracklet.HitIndexAtRow( rowIndex ); // hit index for the current row
+      const uint_m &validHits = validTracklets && validHitIndexes( hitIndexes );
+      const uint_m &ownHitsMask = fData.TakeOwnHits( fData.Row( rowIndex ), hitIndexes, validHits, weight );
+      const uint_m &canShareHitMask = nShared < static_cast<uint_v>( static_cast<float_v>( nTrackHits ) * kMaximumSharedPerHits );
+      const uint_m &saveHitMask = validHits && ( ownHitsMask || canShareHitMask );
+      const uint_m &bigGapMask = gap > static_cast<unsigned int>(AliHLTTPCCAParameters::MaximumRowGap);
+      const uint_m &brokenTrackMask = bigGapMask && (nTrackHits >= static_cast<unsigned int>(AliHLTTPCCAParameters::MinimumHitsForTrack));
+      for(int iV=0; iV<uint_v::Size; iV++)
+      {
+        if(!validTracklets[iV]) continue;
+//       foreach_bit ( int iV, validTracklets ) {
+        if ( saveHitMask[iV] ) {
+          assert( hitIndexes[iV] < fData.Row( rowIndex ).NHits() );
+          trackCandidates[iV]->fHitIdArray[nTrackHits[iV]].Set( rowIndex, hitIndexes[iV] );
+        } 
+        else if ( brokenTrackMask[iV] ) { // save part of the track and create new track from the rest
+          NHitsTotal += nTrackHits[iV];
+
+          fTracks[numberOfTracks] = trackCandidates[iV];
+          fTracks[numberOfTracks]->fNumberOfHits = nTrackHits[iV];
+          fTracks[numberOfTracks]->fParam = TrackParam( tracklet.Param(), iV );
+          numberOfTracks++;
+        
+          trackCandidates[iV] = new Track;
+        } // if save
+      } // for i
+      nTrackHits( saveHitMask )++;
+      nTrackHits.setZero( bigGapMask && !saveHitMask );
+      nShared( saveHitMask && !ownHitsMask  )++;
+      gap.setZero( saveHitMask || brokenTrackMask );
     }
 
-    for ( int i = 0; i < short_v::Size; ++i ) {
-      if ( tracks[i]->fNumberOfHits < ushort_v(AliHLTTPCCAParameters::MinimumHitsForTrack) ) {
-        tracks[i]->fNumberOfHits = 0;
-        // XXX lock
-        recycleBin.push( tracks[i] );
-        // XXX unlock
+    for(int iV=0; iV<uint_v::Size; iV++)
+    {
+      if(!validTracklets[iV]) continue;
+//     foreach_bit ( int iV, validTracklets ) {
+      if ( nTrackHits[iV] >= static_cast<unsigned int>(AliHLTTPCCAParameters::MinimumHitsForTrack) ) {
+        NHitsTotal += nTrackHits[iV];
+        
+        fTracks[numberOfTracks] = trackCandidates[iV];
+        fTracks[numberOfTracks]->fNumberOfHits = nTrackHits[iV];
+        fTracks[numberOfTracks]->fParam = TrackParam( tracklet.Param(), iV );
+        numberOfTracks++;
       } else {
-        numberOfHits += tracks[i]->fNumberOfHits;
+        delete trackCandidates[iV];
       }
     }
 
-    //debugTS() << "NTracks: " << fTracker.NTracks() << ", NTrackHits: " << fTracker.NTrackHits() << endl;
-  }
-  fNumberOfHits = numberOfHits;
-  fTracks.resize( numberOfTracks + 1, 0 );
-  fNumberOfTracks = numberOfTracks + 1 - recycleBin.size();
+  } // for iTrackletV
+  fNumberOfHits = NHitsTotal;
+  fTracks.resize( numberOfTracks );
+  fNumberOfTracks = numberOfTracks;
 }

@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.3 2016/07/15 14:43:33 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.6 2012/08/13 19:35:06 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -54,16 +54,12 @@ AliHLTTPCCATracker::AliHLTTPCCATracker()
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     fParam(),
     fClusterData( 0 ),
-    fData(),
     fHitMemory( 0 ),
     fHitMemorySize( 0 ),
     fTrackMemory( 0 ),
     fTrackMemorySize( 0 ),
     fTrackletStartHits( 0 ),
     fNTracklets( 0 ),
-    fTrackletVectors(),
-    fNumberOfTracks(0),
-    fTracks(0),
     fNTrackHits( 0 ),
     fOutput( 0 )
 {
@@ -104,9 +100,9 @@ void AliHLTTPCCATracker::StartEvent()
 void  AliHLTTPCCATracker::SetupCommonMemory()
 {
 //   std::cout << " SetupCommonMemory0 " << std::endl; //iklm debug
-  if (fHitMemory) delete[] fHitMemory;
-//   std::cout << " SetupCommonMemory1 " << std::endl; //iklm debug
-  fHitMemory = 0;
+//   if (fHitMemory) delete[] fHitMemory;
+// //   std::cout << " SetupCommonMemory1 " << std::endl; //iklm debug
+//   fHitMemory = 0;
   if (fTrackMemory) delete[] fTrackMemory;
 //   std::cout << " SetupCommonMemory2 " << std::endl; //iklm debug
   fTrackMemory = 0;
@@ -117,25 +113,27 @@ void  AliHLTTPCCATracker::SetupCommonMemory()
 
 void AliHLTTPCCATracker::RecalculateHitsSize( int MaxNHits )
 {
-  fHitMemorySize = 0;
-  fHitMemorySize += RequiredMemory( fTrackletStartHits, MaxNHits );
+//   fHitMemorySize = 0;
+//   fHitMemorySize += RequiredMemory( fTrackletStartHits, MaxNHits );
 }
 
 void  AliHLTTPCCATracker::SetPointersHits( int MaxNHits )
 {
-  assert( fHitMemory );
-  assert( fHitMemorySize > 0 );
+//   assert( fHitMemory );
+//   assert( fHitMemorySize > 0 );
 
   // set all pointers to the event memory
 
-  char *mem = fHitMemory;
+//   char *mem = fHitMemory;
 
   // extra arrays for tpc clusters
 
-  AssignMemory( fTrackletStartHits, mem, MaxNHits );
+  fTrackletStartHits.resize(MaxNHits);
+  //AssignMemory( fTrackletStartHits, mem, MaxNHits );
+  
 
   // arrays for track hits
-  assert( fHitMemorySize >= mem - fHitMemory );
+//   assert( fHitMemorySize >= mem - fHitMemory );
 }
 
 void AliHLTTPCCATracker::RecalculateTrackMemorySize( int MaxNTracks, int MaxNHits )
@@ -180,7 +178,7 @@ void AliHLTTPCCATracker::ReadEvent( AliHLTTPCCAClusterData *clusterData )
 //   std::cout << " cat2 " << std::endl; //iklm debug
   {
     RecalculateHitsSize( fData.NumberOfHits() ); // to calculate the size
-    fHitMemory = new char[fHitMemorySize + 1600];
+//     fHitMemory = new char[fHitMemorySize + 1600];
     SetPointersHits( fData.NumberOfHits() ); // set pointers for hits
     fNTracklets = 0;
   }
@@ -224,12 +222,7 @@ void AliHLTTPCCATracker::WriteOutput()
   for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
     // if (!fTracks[trackIndex]) continue;
     const Track &track = *fTracks[trackIndex];
-    const short numberOfHits = track.NumberOfHits();
-    if ( numberOfHits <= 0 ) {
-      // might happen. See TrackletSelector.
-      if (fTracks[trackIndex]) delete fTracks[trackIndex];
-      continue;
-    }
+    const int numberOfHits = track.NumberOfHits();
 
     {
       AliHLTTPCCASliceTrack out;
@@ -244,20 +237,25 @@ void AliHLTTPCCATracker::WriteOutput()
 
     for ( int hitIdIndex = 0; hitIdIndex < numberOfHits; ++hitIdIndex ) {
       const HitId &hitId = track.HitId( hitIdIndex );
-      const short rowIndex = hitId.RowIndex();
-      const unsigned short hitIndex = hitId.HitIndex();
+      const int rowIndex = hitId.RowIndex();
+      const unsigned int hitIndex = hitId.HitIndex();
       const AliHLTTPCCARow &row = fData.Row( rowIndex );
 
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
+      VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
 
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );
       const float origZ = fClusterData->Z( inpIdtot );
 
       const DataCompressor::RowCluster rc( rowIndex, inpId );
-      unsigned short hPackedYZ = 0;
+      unsigned int hPackedYZ = 0;
       UChar_t hPackedAmp = 0;
       float2 hUnpackedYZ;
       hUnpackedYZ.x = origY;

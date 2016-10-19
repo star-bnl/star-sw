@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCADisplay.cxx,v 1.3 2013/11/21 13:07:28 mzyzak Exp $
+// $Id: AliHLTTPCCADisplay.cxx,v 1.5 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -105,8 +105,8 @@ AliHLTTPCCADisplay::AliHLTTPCCADisplay() : fYX( 0 ), fZX( 0 ), fAsk( 1 ), fSlice
 AliHLTTPCCADisplay::~AliHLTTPCCADisplay()
 {
   // destructor
-  if (fYX) delete fYX;
-  if (fZX) delete fZX;
+//  if (fYX) delete fYX;
+//  if (fZX) delete fZX;
 }
 
 void AliHLTTPCCADisplay::Init()
@@ -652,16 +652,25 @@ void AliHLTTPCCADisplay::DrawSliceHit( int iRow, int iHit, int color, Size_t wid
   const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
   // float x = fSlice->Data().RowX( iRow );
   float x = fSlice->Data().HitDataXS( row, iHit );
-  float y = fSlice->Data().HitDataYS( row, iHit );
-  float z = fSlice->Data().HitDataZS( row, iHit );
-
+  float y = fSlice->Data().HitPDataYS( row, iHit );
+  float z = fSlice->Data().HitPDataZS( row, iHit );
+  
+  if ( fGB ) { // it looks like we have problem in HitDataXS functions above, so read coordinates from the other place
+    int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
+    const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
+    x = h.X();
+    y = h.Y();
+    z = h.Z();
+  }
+  
   SetSliceTransform( fSlice );
 
   if ( color < 0 ) {
     if ( fPerf && fGB ) {
       int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
       const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
-      int lab = fPerf->HitLabel( h.ID() ).fLab[0];
+      int lab = -1;
+      if ( fPerf->HitLabelSize() > 0 ) lab = fPerf->HitLabel( h.ID() ).fLab[0];
       color = GetColor( lab + 1 );
       if ( lab >= 0 ) {
         const AliHLTTPCCAMCTrack &mc = fPerf->MCTrack( lab );
@@ -678,7 +687,8 @@ void AliHLTTPCCADisplay::DrawSliceHit( int iRow, int iHit, int color, Size_t wid
   fYX->cd();
   fMarker.DrawMarker( vx, vy );
   fZX->cd();
-  fMarker.DrawMarker( fabs(z), vy );
+//  fMarker.DrawMarker( fabs(z), vy );
+  fMarker.DrawMarker( z, vy );
 }
 
 void AliHLTTPCCADisplay::DrawSliceHits( int color, Size_t width )
@@ -735,7 +745,7 @@ void AliHLTTPCCADisplay::DrawSliceLink( int iRow, int iHit, int colorUp, int col
     fYX->cd();
     fLine.DrawLine( vx + offsetUp, vy, vx1 + offsetUp, vy1 );
     fZX->cd();
-    fLine.DrawLine( -h.Z() + offsetUp, vy, -h1.Z() + offsetUp, vy1 );
+    fLine.DrawLine( h.Z() + offsetUp, vy, h1.Z() + offsetUp, vy1 );
   }
   if ( iDn >= 0 ) {
     if ( fSlice->Data().HitLinkUpDataS( rowDn, iDn ) == iHit ) {
@@ -752,7 +762,7 @@ void AliHLTTPCCADisplay::DrawSliceLink( int iRow, int iHit, int colorUp, int col
     fYX->cd();
     fLine.DrawLine( vx + offsetDn, vy, vx1 + offsetDn, vy1 );
     fZX->cd();
-    fLine.DrawLine( -h.Z() + offsetDn, vy, -h1.Z() + offsetDn, vy1 );
+    fLine.DrawLine( h.Z() + offsetDn, vy, h1.Z() + offsetDn, vy1 );
   }
 }
 

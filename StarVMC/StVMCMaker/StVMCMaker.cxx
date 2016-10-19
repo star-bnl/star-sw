@@ -144,6 +144,10 @@ Int_t StVMCMaker::Init() {
 Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager) {
     TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry/Geometry");
+    if (! geom) {
+      LOG_WARN << "StVMCMaker::InitRun: Can't get VMC geometry, try AgiGeometry" <<endm;
+      geom = (TObjectSet *) GetDataBase("AgiGeometry/Geometry");
+    }
     assert(geom);
   }
   if (!fVolume) {

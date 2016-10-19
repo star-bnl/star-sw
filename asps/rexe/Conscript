@@ -20,7 +20,7 @@ my $CPPFLAGS = $env->{CPPFLAGS};
 my $FLIBS = $env->{FLIBS};
 my $LD = $env->{LD};
 my $LDFLAGS = $env->{LDFLAGS};
-my $LIBS = "";#$env->{LIBS};
+my $LIBS = $env->{LIBS};
 my $Libraries = $env->{Libraries};
 my $FC        = $env->{FC};
 my $PGI       = $env->{ENV}->{PGI};
@@ -53,17 +53,15 @@ if ($FC =~ /pgf77/) {
 #  $LIBS .= $env->{LDNONE};
 #}
 
-$FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL ".
-  "-DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
+$FPPFLAGS .= " -D__ROOT__"; # -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
 #  $CPPFLAGS  = "-pthread -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
-  $CPPFLAGS  = "-D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
-  "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
+$CPPFLAGS .= "-D__ROOT__"; # -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " . "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($FC =~ /g77/ || $FC =~ /gfortran/) {
     $CPPFLAGS .= " -DPrivateMalloc";
 }
 
 print "build $pkg with cons\n";
-my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
+my $LIBPATH = $LIB .$main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
 $LIBS .= " " . $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 # print "========== LIBPATH = $LIBPATH\n";
@@ -72,9 +70,9 @@ if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 my $FEXTEND   = $env->{FEXTEND};
 my $OSTYPE    = $ENV{OSTYPE};
 #print "**** DEBUG $OSTYPE\n";
-if ( $OSTYPE =~ m/^linux/i ) {    # simplify this
-    $FPPFLAGS .= " -DCERNLIB_LINUX";
-}
+#if ( $OSTYPE =~ m/^linux/i ) {    # simplify this
+#    $FPPFLAGS .= " -DCERNLIB_LINUX";
+#}
 if ($FC =~ /^pgf/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
@@ -86,6 +84,9 @@ $LIBS  .= " " . $env->{CERNLIBS};
 $LIBS  .= " " . $env->{Packages}->{MYSQL}->{LIBS};
 #$LIBS  .= $env->{LDNONE};
 $LIBS  .= " " . $FLIBS . " " . $env->{CLIBS};#   " " . $env->{SYSLIBS} ;
+if ($FC eq 'gfortran') {
+  $LIBS .= " -lgfortran";
+}
 if ($STAR_SYS =~ /^sun4x_5.$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
     $LIBS .= " -lCstd";
@@ -181,7 +182,10 @@ if ($#src > -1) {
   script::Keep $pkg;
   Depends $env2 $pkg, $BIN . "/agetof";
   Depends $env2 $pkg, $BIN . "/stic";
-  Program      $env2 $pkg, @src;
+  Depends $env2 $pkg, $LIB . "/libstarsim.a";
+  Depends $env2 $pgm, $LIB . "/libgeant321.a"; 
+  Depends $env2 $pgm, $LIB . "/libgcalor.a";
+  Program $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
   if ($STAR_SYS !~ /darwin/) {
     InstallAs $env2 $BIN . "/Root.exe", $pkg;

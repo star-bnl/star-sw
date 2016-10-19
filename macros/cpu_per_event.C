@@ -1,21 +1,20 @@
-// /* 
-// cd ~/work/Nightlies/
-// #foreach log (`ls -1d .DEV2/Sti/year_201*/*/*.log`)
-// foreach log (`ls -1d gcc*/*/*/*/*.log`)
-//   set d = `dirname ${log}`;
-//   cd ${d}
-//   if ( -r cpu_per_event) rm cpu_per_event
-//     grep 'Done with Event' *.log |  grep -v 'no. 1/' | awk  'BEGIN {n=0;j = 0;}{j++; n += $17;} END {if (j > 0) print "\tCPU/event = "n/j "(sec) \tfor "j" events"; else print "Failed";}' | tee cpu_per_event
-//   cd -;
-// end
-// egrep '(CPU|Failed)' gcc*/*/*/*/cpu_per_event | tee cpu_per_event.data
-//    root.exe cpu_per_event.root cpu_per_event.C+
-// ================================================================================
-// grep CPU gcc*/*/*/*/cpu_per_event | tee cpu_per_event.data
-// awk -F\/ '{print $3"|\t"$4"|\t"$2"|\t"$1"|\t"$6}' cpu_per_event.data | sed -e 's/event =//' -e 's/(sec) for /\//' -e 's/ events//' -e 's/\.DEV2.//' -e 's/x8664/-m64/' -e 's/NODEBUG/-O/' -e 's/_vfppvd/v/' | sort | tee cpu_per_event.data.sorted
+/* 
+cd ~/work/Nightlies/
+foreach log (`ls -1d gcc*\/*\/*\/*\/*.log`)
+  set d = `dirname ${log}`;
+  cd ${d}; pwd;
+  if ( -r cpu_per_event) rm cpu_per_event
+  grep 'Done with Event' *.log |  grep -v 'no. 1/' | awk  'BEGIN {n=0;j = 0;}{j++; n += $17;} END {if (j > 0) print "\tCPU/event = "n/j "(sec) \tfor "j" events"; else print "Failed";}' | tee cpu_per_event
+  cd -;
+end
+egrep '(CPU|Failed)' gcc*\/*\/*\/*\/cpu_per_event | tee cpu_per_event.data
+   root.exe cpu_per_event.root cpu_per_event.C+
+================================================================================
+grep CPU gcc*\/*\/*\/*\/cpu_per_event | tee cpu_per_event.data
+awk -F\/ '{print $3"|\t"$4"|\t"$2"|\t"$1"|\t"$6}' cpu_per_event.data | sed -e 's/event =//' -e 's/(sec) for /\//' -e 's/ events//' -e 's/\.DEV2.//' -e 's/x8664/-m64/' -e 's/NODEBUG/-O/' -e 's/_vfppvd/v/' | sort | tee cpu_per_event.data.sorted
 
 
-// */
+*/
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -59,7 +58,7 @@ Int_t iucomp(const TString &Line, const Char_t *comps[], Int_t no) {
 }
 //________________________________________________________________________________
 void cpu_per_event(const Char_t *FileName="./cpu_per_event.data") {
-  enum {kRecos = 3, kRuns = 77, kLastRuns = 19, kVersions = 1, kComps = 4, kOpts = 4, kDeb = 2, kBits = 2};
+  enum {kRecos = 4, kRuns = 78, kLastRuns = 19, kVersions = 1, kComps = 4, kDeb = 2, kBits = 2, kOpts = kDeb*kBits};
   const Char_t *runs[kRuns]  = {
 "year_2000/MC.stan", //
 "year_2000/RC.centr", //
@@ -138,16 +137,17 @@ void cpu_per_event(const Char_t *FileName="./cpu_per_event.data") {
 "year_2015/RC.pp200long", //
 "year_2015/RC.pp200long.NoHFT", //
 "year_2016/RC.AuAu200.y2016", //
+"undef"
   };
-  const Char_t *recos[kRecos]  = {"Sti","StiCA","StiCAKF"};
-  const Char_t *recosS[kRecos] = {"Sti","CA","KFV"};
+  const Char_t *recos[kRecos]  = {"Sti","StiCA","StiCAKF","undef"};
+  const Char_t *recosS[kRecos] = {"Sti","CA","KFV","udef"};
   const Char_t *versions[kVersions]  = {".DEV2"};// ,"eval","devC","TFG16a","TFG16b"};
   const Char_t *comps[kComps] = {"gcc482","gcc492","gcc521","gcc620"};
   const Char_t *opts[kOpts]  = {"","NODEBUG","x8664","NODEBUG.x8664"}; // [kOpts] => [kBits][kDeb], kBits = 0 -> -m32, = 1 -> -m64; kDeb = 0 -> -g; kDeb = 1 => -O2;
   const Char_t *debs[kDeb] = {"-g","-O2"};
   const Char_t *bits[kBits] = {"-m32","-m64"};
-  Double_t CPU[kComps][kBits][kDeb][kVersions][kRecos][kRuns] = {-1};
-  TString  Lines[kComps][kBits][kDeb][kVersions][kRecos][kRuns];
+  Double_t CPU[kRuns][kComps][kBits][kDeb][kVersions][kRecos] = {-1};
+  TString  Lines[kRuns][kComps][kBits][kDeb][kVersions][kRecos];
   FILE *fp = fopen(FileName,"r");
   if (! fp) {
     cout << "Can't open" << FileName << endl;
@@ -170,10 +170,10 @@ void cpu_per_event(const Char_t *FileName="./cpu_per_event.data") {
 #endif
     BP.comp    = iucomp(Line, comps, kComps);
     BP.version = 0; // iucomp(Line, versions, kVersions);
-    if      (Line.Contains(recos[2])) BP.reco = 2;
-    else if (Line.Contains(recos[1])) BP.reco = 1;
-    else                              BP.reco = 0;
+    BP.reco = iucomp(Line, recos, kRecos);
+    if (BP.reco < 0)  BP.reco = kRecos-1;
     BP.run     = iucomp(Line, runs, kRuns);
+
     BP.opt     = 0; // 
     if      (Line.Contains(opts[3])) BP.opt = 3;
     else if (Line.Contains(opts[2])) BP.opt = 2;
@@ -192,17 +192,17 @@ void cpu_per_event(const Char_t *FileName="./cpu_per_event.data") {
 	cout << "wrong indexes comp = " << BP.comp << " opt = " <<  BP.opt << " version = " << BP.version << " reco = " <<  BP.reco << " run = " <<  BP.run << endl;
 	continue;
       }
-      if (CPU[BP.comp][BP.bits][BP.deb][BP.version][BP.reco][BP.run] > 0) {
-	cout << "old Line:" << Lines[BP.comp][BP.bits][BP.deb][BP.version][BP.reco][BP.run].Data() << endl;
+      if (CPU[BP.run][BP.comp][BP.bits][BP.deb][BP.version][BP.reco] > 0) {
+	cout << "old Line:" << Lines[BP.run][BP.comp][BP.bits][BP.deb][BP.version][BP.reco].Data() << endl;
 	cout << "new Line:" << Line.Data() << endl;
-	cout << "CPU[" << BP.comp << "][" << BP.opt << "][" << BP.version<< "][" << BP.reco << "][" << BP.run << "] = " << CPU[BP.comp][BP.bits][BP.deb][BP.version][BP.reco][BP.run] << " new value = " << BP.CPU << endl;
+	cout << "CPU[" << BP.comp << "][" << BP.opt << "][" << BP.version<< "][" << BP.reco << "][" << BP.run << "] = " << CPU[BP.run][BP.comp][BP.bits][BP.deb][BP.version][BP.reco] << " new value = " << BP.CPU << endl;
 	continue;
       }
-      CPU[BP.comp][BP.bits][BP.deb][BP.version][BP.reco][BP.run] = BP.CPU;
-      Lines[BP.comp][BP.bits][BP.deb][BP.version][BP.reco][BP.run] = Line;
+      CPU[BP.run][BP.comp][BP.bits][BP.deb][BP.version][BP.reco] = BP.CPU;
+      Lines[BP.run][BP.comp][BP.bits][BP.deb][BP.version][BP.reco] = Line;
 #ifdef __DEBUG__
       cout << "n = " << n << "\tCPU = " << BP.CPU << "\tnoEvents = " << BP.noEvents << endl;
-      cout << "CPU[" << BP.comp << "][" <<BP.opt << "][" <<BP.version << "][" <<BP.run << "] = " << CPU[BP.comp][BP.bits][BP.deb][BP.version][BP.reco][BP.run] << endl;
+      cout << "CPU[" << BP.comp << "][" <<BP.opt << "][" <<BP.version << "][" <<BP.run << "] = " << CPU[BP.run][BP.comp][BP.bits][BP.deb][BP.version][BP.reco] << endl;
 #endif
     } 
     FitP->Fill((Float_t *) &BP.run);

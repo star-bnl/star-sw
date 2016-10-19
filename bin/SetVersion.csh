@@ -49,6 +49,9 @@ switch ($case)
   case "*TFG16b*": 
     setenv STAR_LEVEL DEV2/TFG16b; 
   breaksw
+  case "*TFG16d*": 
+    setenv STAR_LEVEL TFG16d; 
+  breaksw
   case "*devC*":   
     setenv STAR_LEVEL DEV2/devC
     breaksw

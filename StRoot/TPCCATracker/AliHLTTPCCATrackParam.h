@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParam.h,v 1.1 2016/02/05 23:27:29 fisyak Exp $
+// $Id: AliHLTTPCCATrackParam.h,v 1.5 2011/05/20 16:28:05 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -17,7 +17,7 @@
 #include "AliHLTTPCCADef.h"
 
 class AliHLTTPCCATrackLinearisation;
-#if 0
+
 namespace std
 {
   template<typename T> struct char_traits;
@@ -26,7 +26,7 @@ namespace std
   template<typename _CharT, typename _Traits> class basic_ostream;
   typedef basic_ostream<char, char_traits<char> > ostream;
 } // namespace std
-#endif
+
 /**
  * @class AliHLTTPCCATrackParam
  *
@@ -205,9 +205,13 @@ class AliHLTTPCCATrackParam
 inline void AliHLTTPCCATrackParam::RotateXY( float alpha, float &x, float &y, float &sin ) const
 {
   //* Rotate the coordinate system in XY on the angle alpha
+  float cA = 1;
+  float sA = 0;
 
-  const float cA = CAMath::Cos( alpha );
-  const float sA = CAMath::Sin( alpha );
+  if ( fabs(alpha) > 1e-7 ) {
+    cA = CAMath::Cos( alpha );
+    sA = CAMath::Sin( alpha );
+  }
 
   x = ( X()*cA +  Y()*sA );
   y = ( -X()*sA +  Y()*cA );

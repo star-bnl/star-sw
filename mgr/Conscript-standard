@@ -74,7 +74,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
   $PKG = $pkg;
   $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
 }
-
+my $LIBPATH = $LIB .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/lib";
 $env1 = $env->clone('Package'  => $pkg, 'LIBPATH' => $LIBPATH);
 my $DEBUG   = $env1->{DEBUG};
 my $FDEBUG  = $env1->{FDEBUG};

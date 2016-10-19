@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.3 2016/06/21 03:39:54 smirnovd Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.13 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -60,82 +60,27 @@ using std::endl;
 
 /*struct AliHLTTPCCAMerger::AliHLTTPCCATrackMemory
 {
-  short_v fHitIndex; // index of the current hit
-  ushort_v fNHits; // n track hits
+  int_v fHitIndex; // index of the current hit
+  uint_v fNHits; // n track hits
   TrackParamVector fInnerParam;
   TrackParamVector fOuterParam;
 };
 
 struct AliHLTTPCCAMerger::AliHLTTPCCAHitMemory
 {
-  sfloat_v *XData;         // packed x coordinate of the given (global) hit index
-  sfloat_v *YData;         // packed y coordinate of the given (global) hit index
-  sfloat_v *ZData;         // packed z coordinate of the given (global) hit index
+  float_v *XData;         // packed x coordinate of the given (global) hit index
+  float_v *YData;         // packed y coordinate of the given (global) hit index
+  float_v *ZData;         // packed z coordinate of the given (global) hit index
 
-  ushort_v *ISector;            // sector number
-  ushort_v *IRow;              // row number
+  uint_v *ISector;            // sector number
+  uint_v *IRow;              // row number
 
-  ushort_v *IClu;
+  uint_v *IClu;
 
-  unsigned short FirstSectorHit[fgkNSlices];
+  unsigned int FirstSectorHit[fgkNSlices];
 };*/
 
 int AliHLTTPCCAMerger::fgDoNotMergeBorders = 0;
-
-class AliHLTTPCCAMerger::AliHLTTPCCASliceTrackInfo
-{
-   public:
-    const AliHLTTPCCATrackParam &InnerParam() const { return fInnerParam;      }
-    const AliHLTTPCCATrackParam &OuterParam() const { return fOuterParam;      }
-    float InnerAlpha() const { return fInnerAlpha;      }
-    float OuterAlpha() const { return fOuterAlpha;      }
-    unsigned short   NClusters() const { return fNClusters;       } 
-    int   FirstClusterRef() const { return fFirstClusterRef; }
-    int   PrevNeighbour()  const { return fPrevNeighbour;   }
-    int   NextNeighbour()  const { return fNextNeighbour;   }
-    unsigned char   SlicePrevNeighbour() const { return fSlicePrevNeighbour;   }
-    unsigned char   SliceNextNeighbour() const { return fSliceNextNeighbour;   }
-    bool  Used()                            const { return fUsed;            }
-
-    void SetInnerParam( const AliHLTTPCCATrackParam &v ) { fInnerParam = v;      }
-    void SetOuterParam( const AliHLTTPCCATrackParam &v ) { fOuterParam = v;      }
-    void SetInnerAlpha( float v )                      { fInnerAlpha = v;      }
-    void SetOuterAlpha( float v )                      { fOuterAlpha = v;      }
-    void SetNClusters ( unsigned short v )                        { fNClusters = v;       }
-    void SetFirstClusterRef( int v )                   { fFirstClusterRef = v; }
-    void SetPrevNeighbour( int v )                     { fPrevNeighbour = v;   }
-    void SetNextNeighbour( int v )                     { fNextNeighbour = v;   }
-    void SetSlicePrevNeighbour( unsigned char v )                     { fSlicePrevNeighbour = v;   }
-    void SetSliceNextNeighbour( unsigned char v )                     { fSliceNextNeighbour = v;   }
-    void SetUsed( bool v )                             { fUsed = v;            }
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-    int orig_track_id;
-    unsigned char fSlice;
-    int number;
-#endif // DO_TPCCATRACKER_EFF_PERFORMANCE
-
-   public:
-
-    float ChiPrev; //characteristic of the link quality to the inner neighbour (for overlaped tracks it is chi2, for not overlaped - distance between tracks)
-    float ChiNext; //characteristic of the link quality to the outer neighbour
-    unsigned char fInnerRow; // number of the inner row of the track
-    unsigned char fOuterRow; // number of the outer row of the track
-
-   private:
-
-    AliHLTTPCCATrackParam fInnerParam; // Parameters of the track at the inner point
-    AliHLTTPCCATrackParam fOuterParam; // Parameters of the track at the outer point
-    float fInnerAlpha;               // The angle of the sector, where inner parameters are
-    float fOuterAlpha;               // The angle of the sector, where outers parameters are
-    unsigned short fNClusters;  //Clusters number of the track
-    int fFirstClusterRef;  // index of the first track cluster in the global cluster array (AliHLTTPCCAMerger::fClusterInfos)
-    int fPrevNeighbour; // The number of the inner (previous) neighbour in the tracks array (AliHLTTPCCAMerger::fTrackInfos)
-    int fNextNeighbour; // The number of the outer (previous) neighbour in the tracks array (AliHLTTPCCAMerger::fTrackInfos)
-    unsigned char fSlicePrevNeighbour; // The number of the sector, which contains inner neighbour
-    unsigned char fSliceNextNeighbour; // The number of the sector, which contains outer neighbour
-    bool fUsed;            // is the slice track already merged (=1 -> merged, 0 -> not merged)
-};
-
 
 AliHLTTPCCAMerger::AliHLTTPCCAMerger()
     :
@@ -178,7 +123,7 @@ const AliHLTTPCCAMerger &AliHLTTPCCAMerger::operator=(const AliHLTTPCCAMerger&) 
 AliHLTTPCCAMerger::~AliHLTTPCCAMerger()
 {
   //* destructor
-  if ( fTrackInfos ) delete[] fTrackInfos;
+    //yf?  if ( fTrackInfos ) delete[] fTrackInfos;
   if ( fClusterInfos ) delete[] fClusterInfos;
   if ( fOutput ) delete[] ( ( char* )( fOutput ) );
 }
@@ -227,12 +172,14 @@ void AliHLTTPCCAMerger::Reconstruct()
 				   AliHLTTPCCAPerformance::Instance().GetMCPoints());
   ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->FillMC();
 #endif //DO_MERGER_PERF
-  
+
+#ifndef DO_NOT_MERGE
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
 
 // 2) merge nonoverlaping tracks
+  FindNeighbourTracks(1);
   Merging(1);
 
 #ifdef USE_TIMERS
@@ -242,13 +189,24 @@ void AliHLTTPCCAMerger::Reconstruct()
 // 3) merge overlaping tracks, store the tracks to the global tracker
   timer.Start();
 #endif // USE_TIMERS
-  
+
+  FindNeighbourTracks(0);
   Merging(0);
   
 #ifdef USE_TIMERS
   timer.Stop();
   fTimers[2] = timer.RealTime();
 #endif // USE_TIMERS
+#else // DO_NOT_MERGE  // just to save tracks in output format
+#ifdef USE_TIMERS
+  timer.Start();
+#endif // USE_TIMERS
+  Merging(0);
+#ifdef USE_TIMERS
+  timer.Stop();
+  fTimers[1] = timer.RealTime();
+#endif // USE_TIMERS
+#endif // DO_NOT_MERGE
 }
 
 void AliHLTTPCCAMerger::UnpackSlices()
@@ -274,9 +232,8 @@ void AliHLTTPCCAMerger::UnpackSlices()
   {
  //   if ( nTracksTotal > fMaxTrackInfos || ( fMaxTrackInfos > 100 && nTracksTotal < 0.5*fMaxTrackInfos ) )
     {
-      if ( fTrackInfos ) delete[] fTrackInfos;
       fMaxTrackInfos = ( int ) ( nTracksTotal );
-      fTrackInfos = new AliHLTTPCCASliceTrackInfo[fMaxTrackInfos];
+      fTrackInfos.resize(fMaxTrackInfos);
     }
 
 //    if ( nTrackClustersTotal > fMaxClusterInfos || ( fMaxClusterInfos > 1000 && nTrackClustersTotal < 0.5*fMaxClusterInfos ) ) 
@@ -287,48 +244,14 @@ void AliHLTTPCCAMerger::UnpackSlices()
     }
 
     if ( fOutput ) delete[] ( ( char* )( fOutput ) );
-    int size = AliHLTTPCCAMergerOutput::EstimateSize( nTracksTotal, nTrackClustersTotal );
+    int size = fOutput->EstimateSize( nTracksTotal, nTrackClustersTotal );
     fOutput = ( AliHLTTPCCAMergerOutput* )( new float2[size/sizeof( float2 )+1] );
   }
-
-///FOR SIMD start
-/*  if ( fHitMemory.XData ) delete[] fHitMemory.XData;
-  fHitMemory.XData = new float[nTracksTotal];
-  if ( fHitMemory.YData ) delete[] fHitMemory.YData;
-  fHitMemory.YData = new float[nTracksTotal];
-  if ( fHitMemory.ZData ) delete[] fHitMemory.ZData;
-  fHitMemory.ZData = new float[nTracksTotal];
-
-  if ( fHitMemory.ISector ) delete[] fHitMemory.ISector;
-  fHitMemory.ISector = new unsigned char[nTracksTotal];
-  if ( fHitMemory.IRow ) delete[] fHitMemory.IRow;
-  fHitMemory.IRow = new unsigned char[nTracksTotal];
-  if ( fHitMemory.IClu ) delete[] fHitMemory.IClu;
-  fHitMemory.IClu = new short[nTracksTotal];
-
-  for ( int iSec = 0; iSec < fgkNSlices; iSec++ ) {
-    if(iSec == 0) fHitMemory.FirstSectorHit[iSec] = 0;
-    if(iSec >  0) fHitMemory.FirstSectorHit[iSec] = fkSlices[iSec-1]->NTrackClusters();
-    const AliHLTTPCCASliceOutput &slice = *( fkSlices[iSlice] );
-
-    for(int iHit=0; iHit < fkSlices[iSec-1]->NTrackClusters(); iHit++)
-    {
-      fHitMemory.ISector = iSec;
-      fHitMemory.IRow    = slice.ClusterIDrc( iHit ).Row();
-      fHitMemory.IClu    = slice.ClusterIDrc( iHit ).Cluster();
-      const float2 &yz = slice.ClusterUnpackedYZ(iHit);
-      fHitMemory.XData = slice.ClusterUnpackedX(iHit);
-      fHitMemory.YData = yz.x;
-      fHitMemory.ZData = yz.y;
-    }
-  }*/
-///FOR SIMD end
 
   // unpack track and cluster information
 
   int nTracksCurrent = 0;
   int nClustersCurrent = 0;
-    // TODO !t0.NDF()
   for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
 
     fSliceTrackInfoStart[ iSlice ] = nTracksCurrent;
@@ -338,20 +261,19 @@ void AliHLTTPCCAMerger::UnpackSlices()
 
     const AliHLTTPCCASliceOutput &slice = *( fkSlices[iSlice] );
 
-    for ( int itr = 0; itr < slice.NTracks(); itr += ushort_v::Size ) {
+    for ( int itr = 0; itr < slice.NTracks(); itr += uint_v::Size ) {
 
-      int nTracksVector = ushort_v::Size;
-      if(slice.NTracks() - itr < ushort_v::Size )
+      int nTracksVector = uint_v::Size;
+      if(slice.NTracks() - itr < uint_v::Size )
         nTracksVector = slice.NTracks() - itr;
 
-      sfloat_v::Memory startAlpha;
-      sfloat_v::Memory endAlpha;
+      float_v startAlpha;
+      float_v endAlpha;
 
-      int hits[1000][ushort_v::Size];
-      ushort_v::Memory nHits;
-      AliHLTTPCCATrackParam startPoint[ushort_v::Size];
-      AliHLTTPCCATrackParam endPoint[ushort_v::Size];
-      unsigned short nCluNew = 0;
+      int hits[1000][uint_v::Size];
+      uint_v nHits;
+      const AliHLTTPCCATrackParam *pStartPoint[uint_v::Size] = {0};
+      unsigned int nCluNew = 0;
 
       for(int iV=0; iV < nTracksVector; iV++)
       {
@@ -375,17 +297,16 @@ void AliHLTTPCCAMerger::UnpackSlices()
         }
         nCluNew += nHits[iV];
 
-        startPoint[iV] = sTrack.Param();
-        endPoint[iV]   = startPoint[iV];
+        pStartPoint[iV] = &sTrack.Param();
         startAlpha[iV] = slices[iSlice]->Param().Alpha();
         endAlpha[iV]   = startAlpha[iV];
       }
 
-//when we turn off the extrapolation step in the tracklet constructor, we have parameters in the last point, not in the first!
-//that's why the fitting direction should be changed
-      sfloat_m fitted = sfloat_m(true);
-      fitted &= static_cast<sfloat_m>(static_cast<ushort_v>(nHits) >= 3);
-      //?      assert( fitted );
+        //when we turn off the extrapolation step in the tracklet constructor, we have parameters in the last point, not in the first!
+        //that's why the fitting direction should be changed
+      float_m fitted = float_m(true);
+      fitted &= static_cast<float_m>(static_cast<uint_v>(nHits) >= 3);
+      const uint_v NAllHits(nHits);
 //#define DISABLE_HIT_SEARCH
 #ifdef DISABLE_HIT_SEARCH
 //TODO correct code
@@ -397,63 +318,44 @@ void AliHLTTPCCAMerger::UnpackSlices()
       }
       fitted &= FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, nTracksVector, 0 );
 #else
+      fitted &= static_cast<float_m>( uint_v( Vc::IndexesFromZero ) < nTracksVector );
 // refit the track
-      AliHLTTPCCATrackParamVector vStartPoint;
+
+        // start from startPoint
       AliHLTTPCCATrackParamVector vEndPoint;
-      ConvertTrackParamToVector(startPoint,vStartPoint,nTracksVector);
-      sfloat_v vStartAlpha(Vc::Zero);
-      vStartAlpha.load(startAlpha);
-      sfloat_v vEndAlpha(Vc::Zero);
+      ConvertPTrackParamToVector(pStartPoint,vEndPoint,nTracksVector); // save as end because it will be fitted
+      float_v vEndAlpha(Vc::Zero);
+      vEndAlpha = startAlpha;
 
-      fitted &= static_cast<sfloat_m>( ushort_v( Vc::IndexesFromZero ) < nTracksVector );
+      uint_v firstHits(Vc::Zero);
+        // refit in the forward direction: going from the first hit to the last, mask "fitted" marks with 0 tracks, which are not fitted correctly
+      fitted &= FitTrack( vEndPoint,   vEndAlpha,   hits, firstHits, nHits, nTracksVector, fitted, 0 );
+        // if chi2 per degree of freedom > 3. sigma - mark track with 0
+      fitted &= vEndPoint.Chi2()  < 9.f*static_cast<float_v>(vEndPoint.NDF());
 
-      ushort_v firstHits(Vc::Zero);
-
-      vEndPoint = vStartPoint;
-      vEndAlpha = vStartAlpha;
-//refit in the forward direction: going from the first hit to the last, mask "fitted" marks with 0 tracks, which are not fitted correctly
-      fitted &= FitTrack( vEndPoint, vEndAlpha, hits, firstHits, nHits, nTracksVector,fitted, 0 );
-// if chi2 per degree of freedom > 3. sigma - mark track with 0
-      fitted &= vEndPoint.Chi2()/static_cast<sfloat_v>(vEndPoint.NDF()) < 9.f;
-
-      vStartPoint = vEndPoint;
-      vStartAlpha = vEndAlpha;
-//refit in the backward direction: going from the last hit to the first
-      fitted &= FitTrack( vStartPoint, vStartAlpha, hits, firstHits, nHits, nTracksVector,fitted, 1 );
-// if chi2 per degree of freedom > 3. sigma - mark track with 0
-      fitted &= vStartPoint.Chi2()/static_cast<sfloat_v>(vStartPoint.NDF()) < 9.f;
-
-      for(int iV=0; iV < nTracksVector; iV++)
-      {
-        if ( !fitted[iV] ) continue;
-        startPoint[iV] = AliHLTTPCCATrackParam( vStartPoint, iV );
-        endPoint[iV] = AliHLTTPCCATrackParam( vEndPoint, iV );
-      }
-      vStartAlpha.store(&(startAlpha[0])); // work around .store(startAlpha)
-      vEndAlpha.store(&(endAlpha[0]));
+      AliHLTTPCCATrackParamVector vStartPoint(vEndPoint);
+      float_v vStartAlpha(vEndAlpha);
+        // refit in the backward direction: going from the last hit to the first
+      fitted &= FitTrack( vStartPoint, vStartAlpha, hits, firstHits, nHits, nTracksVector, fitted, 1 );
+        // if chi2 per degree of freedom > 3. sigma - mark track with 0
+      fitted &= vStartPoint.Chi2() < 9.f*static_cast<float_v>(vStartPoint.NDF());
 #endif
-      for(int iV=0; iV < nTracksVector; iV++)
+//      fitted &= static_cast<uint_v>(nHits) >= NAllHits * AliHLTTPCCAParameters::MinTrackPurity; // bad cat. dependence on MC definitions
+
+      for(int iV=0; iV<float_v::Size; iV++)
       {
-        const AliHLTTPCCASliceTrack &sTrack = slice.Track( itr + iV );
-        if ( !(fitted[iV]) ) continue;
-        if ( nHits[iV] < AliHLTTPCCAParameters::MinTrackPurity*sTrack.NClusters() ) continue;
-// if the track fitted correctly store the track
+        if(!fitted[iV]) continue;
+//       foreach_bit(int iV, fitted)
+//       {
+          // if the track fitted correctly store the track
         AliHLTTPCCASliceTrackInfo &track = fTrackInfos[nTracksCurrent];
         
-        track.SetInnerParam( startPoint[iV] );
-        track.SetInnerAlpha( startAlpha[iV] );
-        track.SetOuterParam( endPoint[iV] );
-        track.SetOuterAlpha( endAlpha[iV] );
+        track.SetInnerParam( AliHLTTPCCATrackParam( vStartPoint, iV ) );
+        track.SetInnerAlpha( vStartAlpha[iV] );
+        track.SetOuterParam( AliHLTTPCCATrackParam( vEndPoint,   iV ) );
+        track.SetOuterAlpha( vEndAlpha[iV] );
         track.SetFirstClusterRef( nClustersCurrent );
         track.SetNClusters( nHits[iV] );
-        track.SetPrevNeighbour( -1 );
-        track.SetNextNeighbour( -1 );
-        track.SetSlicePrevNeighbour( -1 );
-        track.SetSliceNextNeighbour( -1 );
-        track.ChiPrev = 10000000;
-        track.ChiNext = 10000000;
-        track.SetUsed( 0 );
-///mvz start
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
         track.orig_track_id = itr+iV;
         track.fSlice = iSlice;
@@ -461,8 +363,8 @@ void AliHLTTPCCAMerger::UnpackSlices()
 #endif // DO_TPCCATRACKER_EFF_PERFORMANCE
         track.fInnerRow = (fClusterInfos[hits[0][iV]]).IRow();
         track.fOuterRow = (fClusterInfos[hits[nHits[iV]-1][iV]]).IRow();
-///mvz end
-        for ( int i = 0; i < nHits[iV]; i++ )
+
+        for ( unsigned int i = 0; i < nHits[iV]; i++ )
           fClusterInfos[nClustersCurrent + i] = fClusterInfos[hits[i][iV]];
         nTracksCurrent++;
         fSliceNTrackInfos[ iSlice ]++;
@@ -482,13 +384,12 @@ void AliHLTTPCCAMerger::UnpackSlices()
     }
     NTracksPrev = nTracksCurrent;
 #endif // DO_TPCCATRACKER_EFF_PERFORMANCE
-    //std::cout<<"Unpack slice "<<iSlice<<": ntracks "<<slice.NTracks()<<"/"<<fSliceNTrackInfos[iSlice]<<std::endl;
   }
 }
 
-sfloat_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, sfloat_v &Alpha0V,
-                                      int hits[2000][ushort_v::Size], ushort_v &firstHits,ushort_v::Memory &NTrackHits,
-                                      int &nTracksV, sfloat_m active0, bool dir )
+float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Alpha0V,
+                                      int hits[2000][uint_v::Size], uint_v &firstHits,uint_v &NTrackHits,
+                                      int &nTracksV, float_m active0, bool dir )
 {
   // Fit the track
 /*#ifdef MAIN_DRAW
@@ -498,306 +399,121 @@ sfloat_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, sfloat_v &
 #endif*/
   AliHLTTPCCATrackParamVector::AliHLTTPCCATrackFitParam fitPar;
 
-  AliHLTTPCCATrackLinearisationVector l( t );
-
-  bool first = 1;
+  AliHLTTPCCATrackLinearisationVector linearization( t );
 
   t.CalculateFitParameters( fitPar );
 
-  int hitsNew[AliHLTTPCCAParameters::MaxNumberOfRows8*4][ushort_v::Size]; // 4 - reserve for several turn
-  ushort_v::Memory nHitsNew;
-  for(int iV=0; iV<ushort_v::Size; iV++)
-    nHitsNew[iV] = 0;
+  const int MaxNHits = 4*AliHLTTPCCAParameters::MaxNumberOfRows8; // koeff 4 reserves place for several turn
+  int hitsNew[MaxNHits][uint_v::Size];
+  uint_v nHitsNew(Vc::Zero);
 
-  ushort_v nHits(NTrackHits);
-  nHits.setZero(static_cast<ushort_m>(!active0));
+  uint_v nHits(NTrackHits);
+  nHits.setZero(static_cast<uint_m>(!active0));
 
   int nHitsMax = nHits.max();
 
-  sfloat_m active = active0; // stop on a hit if this hit can't be added
-  for ( unsigned short ihit = 0; ihit < nHitsMax; ihit++ ) {
-
-    active &= static_cast<sfloat_m>( ihit < nHits );
-    if(active.isEmpty()) continue;
-    sfloat_v::Memory xH, yH, zH, sliceAlpha;
-    ushort_v::Memory Row;
+    // pack hits
+  float_v xVs[MaxNHits];
+  float_v yVs[MaxNHits];
+  float_v zVs[MaxNHits];
+  float_v sliceAlphaVs[MaxNHits];
+  uint_v RowVs[MaxNHits];
+  
+  for ( int ihit = 0; ihit < nHitsMax; ihit++ ) {
+    const float_m &active = static_cast<float_m>( ihit < nHits ) && active0;
 
     for(int iV=0; iV < nTracksV; iV++)
     {
-      if( !(active[iV]) ) continue;
-      if( ihit > NTrackHits[iV] - 1) continue;
-      const int jhit = dir ? ( NTrackHits[iV] - 1 - ihit ) : ihit;
-      AliHLTTPCCAClusterInfo &h = fClusterInfos[hits[static_cast <unsigned short>(firstHits[iV]) + jhit][iV]];
-      sliceAlpha[iV] =  slices[h.ISlice()]->Param().Alpha();
-      xH[iV] = h.X();
-      yH[iV] = h.Y();
-      zH[iV] = h.Z();
-      Row[iV] = h.IRow();
+      if( !active[iV] ) continue;
+
+      const unsigned int& jhit = HitIndex( firstHits, uint_v(NTrackHits), dir, iV, ihit );
+      const AliHLTTPCCAClusterInfo &h = fClusterInfos[hits[jhit][iV]];
+      sliceAlphaVs[ihit][iV] =  slices[h.ISlice()]->Param().Alpha();
+      xVs[ihit][iV] = h.X();
+      yVs[ihit][iV] = h.Y();
+      zVs[ihit][iV] = h.Z();
+      RowVs[ihit][iV] = h.IRow();
     }
+  }
 
-    const sfloat_v xV(xH);
-    const sfloat_v yV(yH);
-    const sfloat_v zV(zH);
-    const sfloat_v sliceAlphaV(sliceAlpha);
-    const ushort_v RowV(Row);
+    // fit
+  bool first = true;
+  float_m active = active0; // stop on a hit if this hit can't be added
+  for ( int ihit = 0; ihit < nHitsMax; ihit++ ) {
+    active &= static_cast<float_m>( ihit < nHits );
+    
+    if(active.isEmpty()) continue;
 
-    const sfloat_m savedActive = active;
-    const sfloat_v rotateA = sliceAlphaV - Alpha0V;
-    const sfloat_m &rotated = t.Rotate( rotateA, l, .999f, active);
-    active &= rotated;
-    const sfloat_v xLast = t.X();
+    const float_v& xV = xVs[ihit];
+    const float_v& yV = yVs[ihit];
+    const float_v& zV = zVs[ihit];
+    const float_v& sliceAlphaV = sliceAlphaVs[ihit];
+    const uint_v& RowV = RowVs[ihit];
+
+    const float_m savedActive = active;
+    const float_v rotateA = sliceAlphaV - Alpha0V;
+    float_m rotated(active);
+    if( ISUNLIKELY( !(!CAMath::IsZero(rotateA) && active).isEmpty() ) ) { // track crosses a sector border very rarely
+      rotated = t.Rotate( rotateA, linearization, .999f, active);
+      active &= rotated;
+    }
+    const float_v xLast = t.X();
 
     Alpha0V(active) = sliceAlphaV;
     
-    const sfloat_m &transported = t.TransportToXWithMaterial( xV, l, fitPar, fSliceParam.cBz( ), 0.999f, active);
+    const float_m &transported = t.TransportToXWithMaterial( xV, linearization, fitPar, fSliceParam.cBz( ), 0.999f, active);
     active &= transported;
 
     if ( first ) {
-      t.SetCov( 0, 10.f, active );
-      t.SetCov( 1,  0.f, active );
-      t.SetCov( 2, 10.f, active );
-      t.SetCov( 3,  0.f, active );
-      t.SetCov( 4,  0.f, active );
-      t.SetCov( 5,  1.f, active );
-      t.SetCov( 6,  0.f, active );
-      t.SetCov( 7,  0.f, active );
-      t.SetCov( 8,  0.f, active );
-      t.SetCov( 9,  1.f, active );
-      t.SetCov( 10,  0.f, active );
-      t.SetCov( 11,  0.f, active );
-      t.SetCov( 12,  0.f, active );
-      t.SetCov( 13,  0.f, active );
-      t.SetCov( 14,  10.f, active );
-      t.SetChi2( 0.f, active);
-      t.SetNDF( short_v(-5), static_cast<short_m>(active) );
+      t.InitCovMatrixAndChi2AndNDF( active );
       t.CalculateFitParameters( fitPar );
+      first = false;
     }
 
-    sfloat_v err2Y, err2Z;
-
+    float_v err2Y, err2Z;
     fSliceParam.GetClusterErrors2( RowV, t, &err2Y, &err2Z );
-    const sfloat_m &filtered = t.FilterWithMaterial(yV, zV, err2Y, err2Z, 0.999f,active);
+    const float_m &filtered = t.FilterWithMaterial(yV, zV, err2Y, err2Z, 0.999f, active);
 
-    const sfloat_m broken = savedActive && (!rotated || !transported || !filtered);
+    const float_m broken = savedActive && (!rotated || !transported || !filtered);
     if ( !broken.isEmpty() ) {
-      t.TransportToXWithMaterial( xLast, l, fitPar, fSliceParam.cBz( ), 0.999f, transported && !filtered ); // transport back if hit can't be added. TODO with out material
-      t.Rotate( -rotateA, l, .999f, rotated && !transported );
-  }
+      t.TransportToXWithMaterial( xLast, linearization, fitPar, fSliceParam.cBz( ), 0.999f, transported && !filtered ); // transport back if hit can't be added. TODO with out material
+      t.Rotate( -rotateA, linearization, .999f, rotated && (!transported || !filtered) );
+    }
 
     active &= filtered;
-    if(active.isEmpty()) continue;
 
-    first = 0;
-    for(int iV=0; iV < nTracksV; iV++)
-    {
+    for(int iV=0; iV < nTracksV; iV++) {
       if( !(active[iV]) ) continue;
-      const int jhit = dir ? ( NTrackHits[iV] - 1 - ihit ) : ihit;
-      hitsNew[nHitsNew[iV]][iV] = hits[static_cast <unsigned short>(firstHits[iV]) + jhit][iV];
-      nHitsNew[iV]++;
+
+      const unsigned int& jhit = HitIndex( firstHits, uint_v(NTrackHits), dir, iV, ihit );
+      hitsNew[nHitsNew[iV]][iV] = hits[jhit][iV];
     }
+    nHitsNew(uint_m(active))++;
   }
-  t.SetQPt( sfloat_v(1.e-8f), CAMath::Abs( t.QPt() ) < 1.e-8f );
+  
+  float_m ok = active0 && float_m(uint_v(nHitsNew) >= 3) && t.IsNotDiverged();
 
-  sfloat_m ok = active0 && ushort_v(nHitsNew) >= 3;
+  t.SetQPt( float_v(1.e-8f), CAMath::Abs( t.QPt() ) < 1.e-8f );
+  t.NormilizeSignCosPhi( linearization, ok );
 
-// if track has infinite partameters or covariances, or negative diagonal elements of Cov. matrix, mark it as fitted uncorrectly
-  const sfloat_v *c = t.Cov();
-  for ( unsigned char i = 0; i < 15; i++ ) ok &= CAMath::Finite( c[i] );
-  for ( unsigned char i = 0; i <  5; i++ ) ok &= CAMath::Finite( t.Par()[i] );
-///  ok = ok && ( t.GetX() > 50 ); //this check is wrong! X could be < 50, when a sector is rotated!
-  ok &= (c[0] > Vc::Zero) && (c[2] > Vc::Zero) && (c[5] > Vc::Zero) && (c[9] > Vc::Zero) && (c[14] > Vc::Zero);
-//  ok &= (c[0] < 5.) && (c[2] < 5.) && (c[5] < 2.) && (c[9] < 2.) && (c[14] < 2.);
-  ok &= CAMath::Abs( t.SinPhi() ) < .999f;
-
-  t.SetSignCosPhi( sfloat_v(1.f),  ok && static_cast<sfloat_m>(l.CosPhi() >= Vc::Zero) );
-  t.SetSignCosPhi( sfloat_v(-1.f), ok && static_cast<sfloat_m>(l.CosPhi() < Vc::Zero) );
-
-  for(int iV=0; iV < nTracksV; iV++)
-  {
+  NTrackHits = nHitsNew;
+  for(int iV=0; iV < nTracksV; iV++) {
     if ( !ok[iV] ) continue;
-    NTrackHits[iV] = nHitsNew[iV];
+    
     for ( unsigned char i = 0; i < NTrackHits[iV]; i++ ) {
-      hits[static_cast <unsigned short>(firstHits[iV]) + (dir ?( NTrackHits[iV]-1-i ) :i)][iV] = hitsNew[i][iV];
+      const unsigned int &jhit = HitIndex( firstHits, uint_v(NTrackHits), dir, iV, i );
+      hits[jhit][iV] = hitsNew[i][iV];
     }
   }
 
   return ok;
 }
 
-void AliHLTTPCCAMerger::InvertCholetsky(float a[15])
-{
-  float d[5], uud, u[5][5];
-  for(int i=0; i<5; i++) 
-  {
-    d[i]=0.f;
-    for(int j=0; j<5; j++) 
-      u[i][j]=0.;
-  }
-
-  for(int i=0; i<5; i++)
-  {
-    uud=0.;
-    for(int j=0; j<i; j++) 
-      uud += u[j][i]*u[j][i]*d[j];
-    uud = a[i*(i+3)/2] - uud;
-
-    if(fabs(uud)<1.e-12) uud = 1.e-12;
-    d[i] = uud/fabs(uud);
-    u[i][i] = sqrt(fabs(uud));
-
-    for(int j=i+1; j<5; j++) 
-    {
-      uud = 0.;
-      for(int k=0; k<i; k++)
-        uud += u[k][i]*u[k][j]*d[k];
-      uud = a[j*(j+1)/2+i] - uud;
-      u[i][j] = d[i]/u[i][i]*uud;
-    }
-  }
-
-  float u1[5];
-
-  for(int i=0; i<5; i++)
-  {
-    u1[i] = u[i][i];
-    u[i][i] = 1.f/u[i][i];
-  }
-  for(int i=0; i<4; i++)
-  {
-    u[i][i+1] = - u[i][i+1]*u[i][i]*u[i+1][i+1];
-  }
-  for(int i=0; i<3; i++)
-  {
-    u[i][i+2] = u[i][i+1]*u1[i+1]*u[i+1][i+2]-u[i][i+2]*u[i][i]*u[i+2][i+2];
-  }
-  for(int i=0; i<2; i++)
-  {
-    u[i][i+3] = u[i][i+2]*u1[i+2]*u[i+2][i+3] - u[i][i+3]*u[i][i]*u[i+3][i+3];
-    u[i][i+3] -= u[i][i+1]*u1[i+1]*(u[i+1][i+2]*u1[i+2]*u[i+2][i+3] - u[i+1][i+3]);
-  }
-  u[0][4] = u[0][2]*u1[2]*u[2][4] - u[0][4]*u[0][0]*u[4][4];
-  u[0][4] += u[0][1]*u1[1]*(u[1][4] - u[1][3]*u1[3]*u[3][4] - u[1][2]*u1[2]*u[2][4]);
-  u[0][4] += u[3][4]*u1[3]*(u[0][3] - u1[2]*u[2][3]*(u[0][2] - u[0][1]*u1[1]*u[1][2]));
-
-  for(int i=0; i<5; i++)
-    a[i+10] = u[i][4]*d[4]*u[4][4];
-  for(int i=0; i<4; i++)
-    a[i+6] = u[i][3]*u[3][3]*d[3] + u[i][4]*u[3][4]*d[4];
-  for(int i=0; i<3; i++)
-    a[i+3] = u[i][2]*u[2][2]*d[2] + u[i][3]*u[2][3]*d[3] + u[i][4]*u[2][4]*d[4];
-  for(int i=0; i<2; i++)
-    a[i+1] = u[i][1]*u[1][1]*d[1] + u[i][2]*u[1][2]*d[2] + u[i][3]*u[1][3]*d[3] + u[i][4]*u[1][4]*d[4];
-  a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2] + u[0][3]*u[0][3]*d[3] + u[0][4]*u[0][4]*d[4];
-}
-
-void AliHLTTPCCAMerger::MultiplySS(float const C[15], float const V[15], float K[5][5])
-{
-//multiply 2 symmetric matricies
-  K[0][0] = C[0]*V[ 0] + C[1]*V[ 1] + C[3]*V[ 3] + C[6]*V[ 6] + C[10]*V[10];
-  K[0][1] = C[0]*V[ 1] + C[1]*V[ 2] + C[3]*V[ 4] + C[6]*V[ 7] + C[10]*V[11];
-  K[0][2] = C[0]*V[ 3] + C[1]*V[ 4] + C[3]*V[ 5] + C[6]*V[ 8] + C[10]*V[12];
-  K[0][3] = C[0]*V[ 6] + C[1]*V[ 7] + C[3]*V[ 8] + C[6]*V[ 9] + C[10]*V[13];
-  K[0][4] = C[0]*V[10] + C[1]*V[11] + C[3]*V[12] + C[6]*V[13] + C[10]*V[14];
-
-  K[1][0] = C[1]*V[ 0] + C[2]*V[ 1] + C[4]*V[ 3] + C[7]*V[ 6] + C[11]*V[10];
-  K[1][1] = C[1]*V[ 1] + C[2]*V[ 2] + C[4]*V[ 4] + C[7]*V[ 7] + C[11]*V[11];
-  K[1][2] = C[1]*V[ 3] + C[2]*V[ 4] + C[4]*V[ 5] + C[7]*V[ 8] + C[11]*V[12];
-  K[1][3] = C[1]*V[ 6] + C[2]*V[ 7] + C[4]*V[ 8] + C[7]*V[ 9] + C[11]*V[13];
-  K[1][4] = C[1]*V[10] + C[2]*V[11] + C[4]*V[12] + C[7]*V[13] + C[11]*V[14];
-
-  K[2][0] = C[3]*V[ 0] + C[4]*V[ 1] + C[5]*V[ 3] + C[8]*V[ 6] + C[12]*V[10];
-  K[2][1] = C[3]*V[ 1] + C[4]*V[ 2] + C[5]*V[ 4] + C[8]*V[ 7] + C[12]*V[11];
-  K[2][2] = C[3]*V[ 3] + C[4]*V[ 4] + C[5]*V[ 5] + C[8]*V[ 8] + C[12]*V[12];
-  K[2][3] = C[3]*V[ 6] + C[4]*V[ 7] + C[5]*V[ 8] + C[8]*V[ 9] + C[12]*V[13];
-  K[2][4] = C[3]*V[10] + C[4]*V[11] + C[5]*V[12] + C[8]*V[13] + C[12]*V[14];
-
-  K[3][0] = C[6]*V[ 0] + C[7]*V[ 1] + C[8]*V[ 3] + C[9]*V[ 6] + C[13]*V[10];
-  K[3][1] = C[6]*V[ 1] + C[7]*V[ 2] + C[8]*V[ 4] + C[9]*V[ 7] + C[13]*V[11];
-  K[3][2] = C[6]*V[ 3] + C[7]*V[ 4] + C[8]*V[ 5] + C[9]*V[ 8] + C[13]*V[12];
-  K[3][3] = C[6]*V[ 6] + C[7]*V[ 7] + C[8]*V[ 8] + C[9]*V[ 9] + C[13]*V[13];
-  K[3][4] = C[6]*V[10] + C[7]*V[11] + C[8]*V[12] + C[9]*V[13] + C[13]*V[14];
-
-  K[4][0] = C[10]*V[ 0] + C[11]*V[ 1] + C[12]*V[ 3] + C[13]*V[ 6] + C[14]*V[10];
-  K[4][1] = C[10]*V[ 1] + C[11]*V[ 2] + C[12]*V[ 4] + C[13]*V[ 7] + C[14]*V[11];
-  K[4][2] = C[10]*V[ 3] + C[11]*V[ 4] + C[12]*V[ 5] + C[13]*V[ 8] + C[14]*V[12];
-  K[4][3] = C[10]*V[ 6] + C[11]*V[ 7] + C[12]*V[ 8] + C[13]*V[ 9] + C[14]*V[13];
-  K[4][4] = C[10]*V[10] + C[11]*V[11] + C[12]*V[12] + C[13]*V[13] + C[14]*V[14];
-}
-
-void AliHLTTPCCAMerger::MultiplyMS(float const C[5][5], float const V[15], float K[15])
-{
-//multiply symmetric and nonsymmetric matricies
-  K[0] = C[0][0]*V[0] + C[0][1]*V[1] + C[0][2]*V[3] + C[0][3]*V[6] + C[0][4]*V[10];
-
-  K[1] = C[1][0]*V[0] + C[1][1]*V[1] + C[1][2]*V[3] + C[1][3]*V[6] + C[1][4]*V[10];
-  K[2] = C[1][0]*V[1] + C[1][1]*V[2] + C[1][2]*V[4] + C[1][3]*V[7] + C[1][4]*V[11];
-
-  K[3] = C[2][0]*V[0] + C[2][1]*V[1] + C[2][2]*V[3] + C[2][3]*V[6] + C[2][4]*V[10];
-  K[4] = C[2][0]*V[1] + C[2][1]*V[2] + C[2][2]*V[4] + C[2][3]*V[7] + C[2][4]*V[11];
-  K[5] = C[2][0]*V[3] + C[2][1]*V[4] + C[2][2]*V[5] + C[2][3]*V[8] + C[2][4]*V[12];
-
-  K[6] = C[3][0]*V[0] + C[3][1]*V[1] + C[3][2]*V[3] + C[3][3]*V[6] + C[3][4]*V[10];
-  K[7] = C[3][0]*V[1] + C[3][1]*V[2] + C[3][2]*V[4] + C[3][3]*V[7] + C[3][4]*V[11];
-  K[8] = C[3][0]*V[3] + C[3][1]*V[4] + C[3][2]*V[5] + C[3][3]*V[8] + C[3][4]*V[12];
-  K[9] = C[3][0]*V[6] + C[3][1]*V[7] + C[3][2]*V[8] + C[3][3]*V[9] + C[3][4]*V[13];
-
-  K[10] = C[4][0]*V[ 0] + C[4][1]*V[ 1] + C[4][2]*V[ 3] + C[4][3]*V[ 6] + C[4][4]*V[10];
-  K[11] = C[4][0]*V[ 1] + C[4][1]*V[ 2] + C[4][2]*V[ 4] + C[4][3]*V[ 7] + C[4][4]*V[11];
-  K[12] = C[4][0]*V[ 3] + C[4][1]*V[ 4] + C[4][2]*V[ 5] + C[4][3]*V[ 8] + C[4][4]*V[12];
-  K[13] = C[4][0]*V[ 6] + C[4][1]*V[ 7] + C[4][2]*V[ 8] + C[4][3]*V[ 9] + C[4][4]*V[13];
-  K[14] = C[4][0]*V[10] + C[4][1]*V[11] + C[4][2]*V[12] + C[4][3]*V[13] + C[4][4]*V[14];
-}
-
-void AliHLTTPCCAMerger::MultiplySR(float const C[15], float const r_in[5], float r_out[5])
-{
-//multiply vector and symmetric matrix
-  r_out[0] = r_in[0]*C[ 0] + r_in[1]*C[ 1] + r_in[2]*C[ 3] +r_in[3]*C[ 6] + r_in[4]*C[10];
-  r_out[1] = r_in[0]*C[ 1] + r_in[1]*C[ 2] + r_in[2]*C[ 4] +r_in[3]*C[ 7] + r_in[4]*C[11];
-  r_out[2] = r_in[0]*C[ 3] + r_in[1]*C[ 4] + r_in[2]*C[ 5] +r_in[3]*C[ 8] + r_in[4]*C[12];
-  r_out[3] = r_in[0]*C[ 6] + r_in[1]*C[ 7] + r_in[2]*C[ 8] +r_in[3]*C[ 9] + r_in[4]*C[13];
-  r_out[4] = r_in[0]*C[10] + r_in[1]*C[11] + r_in[2]*C[12] +r_in[3]*C[13] + r_in[4]*C[14];
-}
-
-void AliHLTTPCCAMerger::FilterTracks(float const r[5], float const C[15], float const m[5], float const V[15], float R[5], float W[15], float &chi2)
-{
-  float S[15];
-  for(int i=0; i<15; i++)
-  {
-    W[i] = C[i];
-    S[i] = C[i] + V[i];
-  }
-  for(int i=0; i<5; i++)
-    R[i] = r[i];
-
-  InvertCholetsky(S);
-  
-  float K[5][5];
-  MultiplySS(C,S,K);
-  float dzeta[5];
-  for(int i=0; i<5; i++) dzeta[i] = m[i] - r[i];
-  float KC[15];
-  MultiplyMS(K,C,KC);
-  for(int i=0; i< 15; i++)
-    W[i] -= KC[i];
-
-  float kd;
-  for(int i=0; i<5; i++)
-  {
-    kd = 0.f;
-    for(int j=0; j<5; j++)
-      kd += K[i][j]*dzeta[j];
-    R[i] += kd;
-  }
-  float S_dzeta[5];
-  MultiplySR(S, dzeta, S_dzeta);
-  chi2 = dzeta[0]*S_dzeta[0] + dzeta[1]*S_dzeta[1] + dzeta[2]*S_dzeta[2] + dzeta[3]*S_dzeta[3] + dzeta[4]*S_dzeta[4];
-}
-
-void AliHLTTPCCAMerger::MakeBorderTracks(AliHLTTPCCABorderTrack B[], unsigned short &nB, unsigned char &iSlice)
+void AliHLTTPCCAMerger::MakeBorderTracks( AliHLTTPCCABorderTrack B[], unsigned int &nB, unsigned char &iSlice)
 {
   //* prepare slice tracks for merging with next/previous/same sector
 
-  for ( unsigned short itr = 0; itr < fSliceNTrackInfos[iSlice]; itr++ ) 
+  for ( int itr = 0; itr < fSliceNTrackInfos[iSlice]; itr++ ) 
   {
     const AliHLTTPCCASliceTrackInfo &track = fTrackInfos[ fSliceTrackInfoStart[iSlice] + itr ];
 
@@ -817,57 +533,194 @@ void AliHLTTPCCAMerger::MakeBorderTracks(AliHLTTPCCABorderTrack B[], unsigned sh
     nB++;
   }
 }
-///      SCALAR CODE at revision 10272!
-// #define BACK_ORDER_FOR_0 // little bit faster without it. (but why?)
-void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, int iSlice1, AliHLTTPCCABorderTrack B2[], int N2, int iSlice2, int number,unsigned short FirstTrIR[],unsigned short LastTrIR[])
+
+void AliHLTTPCCAMerger::CheckTracksMatch( int number,
+const AliHLTTPCCATrackParamVector &InParT1, const AliHLTTPCCATrackParamVector &OutParT1, const float_v &InAlphaT1, const float_v &OutAlphaT1,
+const AliHLTTPCCATrackParamVector &InParT2, const AliHLTTPCCATrackParamVector &OutParT2, const float_v &InAlphaT2, const float_v &OutAlphaT2,
+const float_v dxArr[4], const float_v dyArr[4], const float_v &sinS1_E2v, const float_v &sinS2_E1v,
+float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active )
+{
+  const float_v k1   = InParT1.QPt() * fSliceParam.cBz();
+  const float_v dx_1 = -dxArr[2];
+  const float_v t_sin1 = k1 * dx_1 + sinS1_E2v;
+    // check, whether inner parameters of both tracks in the pair could be transported to the outer parameters of the other track in the pair
+  const float_v k2   = InParT2.QPt() * fSliceParam.cBz();
+  const float_v dx_2 = -dxArr[3];
+  const float_v t_sin2 = k2 * dx_2 + sinS2_E1v;
+  active &= CAMath::Abs(t_sin1) <= 0.999f && CAMath::Abs(t_sin2) <= 0.999f;
+  if(active.isEmpty()) return;
+  
+  const float_v dzArr[4] = { OutParT1.Z() - OutParT2.Z(),
+                             InParT1.Z()  - InParT2.Z() ,
+                             InParT1.Z()  - OutParT2.Z(),
+                             OutParT1.Z() - InParT2.Z()  };
+  
+  const float_v dr2Arr[4] = { dxArr[0]*dxArr[0] + dyArr[0]*dyArr[0] + dzArr[0]*dzArr[0],   // OO
+                              dxArr[1]*dxArr[1] + dyArr[1]*dyArr[1] + dzArr[1]*dzArr[1],   // II
+                              dxArr[2]*dxArr[2] + dyArr[2]*dyArr[2] + dzArr[2]*dzArr[2],   // IO
+                              dxArr[3]*dxArr[3] + dyArr[3]*dyArr[3] + dzArr[3]*dzArr[3] }; // OI
+
+  int_v idMin01(Vc::Zero), idMin23(2);
+  float_v min01 = dr2Arr[0], min23 = dr2Arr[2];
+  const float_m &mask1lt0 = dr2Arr[1] < min01;
+  const float_m &mask3lt2 = dr2Arr[3] < min23;
+  min01  (                    mask1lt0  ) = dr2Arr[1]; 
+  idMin01( static_cast<int_m>(mask1lt0) ) = 1;
+  min23  (                    mask3lt2  ) = dr2Arr[3];
+  idMin23( static_cast<int_m>(mask3lt2) ) = 3;
+
+  float_v dr2(min23);
+  int_v idMin(idMin23);
+  
+  if(number == 0) {
+    const int_m &mask01lt23 = static_cast<int_m>(min23 > min01);
+    idMin(mask01lt23) = idMin01;
+    dr2(float_m(mask01lt23)) = min01;
+  }
+
+  active &= float_m(idMin != 2) || float_m(number != 1); // distanse in rows between inner1 and outer2 is maximum, it can't beminimum in dr unless tracks have completely different slopes
+  
+    // check distance between tracks
+  minL2v = dr2;
+  active &= (minL2v < bestChi2) || float_m(number != 1); // chi2 cut == dr2 only for number == 1
+
+    // check dx
+  float_v dx(Vc::Zero);
+  const float_m &IsIdMin0 = active && static_cast<float_m>(idMin == 0);
+  const float_m &IsIdMin1 = active && static_cast<float_m>(idMin == 1);
+  const float_m &IsIdMin2 = active && static_cast<float_m>(idMin == 2);
+  const float_m &IsIdMin3 = active && static_cast<float_m>(idMin == 3);
+  dx( IsIdMin0 ) = dxArr[0];
+  dx( IsIdMin1 ) = dxArr[1];
+  dx( IsIdMin2 ) = dxArr[2];
+  dx( IsIdMin3 ) = dxArr[3];
+
+    // on the first iteration we process only overlaped tracks on second - only nonoverlaped TODO: understand how it works for already merged tracks and for tracks from different sectors
+  active &= (CAMath::Abs(dx) < 0.1f) ||
+    ( (dx > 0.f) && float_m(number == 1) || 
+      (dx < 0.f) && float_m(number == 0)    );
+    // active &= 
+    //   ( (dx >= -0.1f) && float_m(number == 1) || 
+    //     (dx <  -0.1f) && float_m(number == 0)    );
+
+  if(active.isEmpty()) return;
+    
+    // collect parameters for min distance
+  AliHLTTPCCATrackParamVector Thelp, Thelp1;
+  float_v a1(Vc::Zero);
+  float_v a2(Vc::Zero);
+
+  if(number == 0) {
+    if ( !IsIdMin0.isEmpty() ) {
+      Thelp.SetTrackParam(OutParT1, IsIdMin0 );
+      Thelp1.SetTrackParam(OutParT2, IsIdMin0 );
+      a1( IsIdMin0 ) = OutAlphaT1;
+      a2( IsIdMin0 ) = OutAlphaT2;
+    }
+    if ( !IsIdMin1.isEmpty() ) {
+      Thelp.SetTrackParam(InParT1, IsIdMin1 );
+      Thelp1.SetTrackParam(InParT2, IsIdMin1 );
+      a1( IsIdMin1 ) = InAlphaT1;
+      a2( IsIdMin1 ) = InAlphaT2;
+    }
+    if ( !IsIdMin2.isEmpty() ) {
+      Thelp.SetTrackParam(InParT1, IsIdMin2 );
+      Thelp1.SetTrackParam(OutParT2, IsIdMin2 );
+      a1( IsIdMin2 ) = InAlphaT1;
+      a2( IsIdMin2 ) = OutAlphaT2;
+    }
+  }
+  if ( !IsIdMin3.isEmpty() ) {
+    Thelp.SetTrackParam(OutParT1, IsIdMin3 );
+    Thelp1.SetTrackParam(InParT2, IsIdMin3 );
+    a1( IsIdMin3 ) = OutAlphaT1;
+    a2( IsIdMin3 ) = InAlphaT2;
+  }
+
+    // rotate track parameters to the same coordinate system
+  if ( !( CAMath::Abs( a2 - a1 ) > 1e-7f && active ).isEmpty() )
+    active &= Thelp.Rotate( a2 - a1 , 0.999f, active);
+  
+    // transport tracks to the middle point by X coordinate
+  const float_v &ToX = 0.5f * (Thelp.X() + Thelp1.X());
+  active &= Thelp.TransportToX( ToX, float_v(fSliceParam.cBz()), 0.999f, active);
+  if(active.isEmpty()) return;
+  active &= Thelp1.TransportToX( ToX, float_v(fSliceParam.cBz()), 0.999f, active);
+          
+    // if tracks are too far one from each other after propagation - they could not be neighbours
+  active &= CAMath::Abs(Thelp1.Y() - Thelp.Y()) <= 10.f;
+  active &= CAMath::Abs(Thelp1.Z() - Thelp.Z()) <= 10.f;
+  active &= CAMath::Abs(Thelp1.SinPhi() - Thelp.SinPhi()) <= 0.15f;
+  if(active.isEmpty()) return;
+          
+    // merge parameters and calculate chi2
+  float_v C[15], r[5], chi2(Vc::Zero);
+  FilterTracks(Thelp.GetPar(), Thelp.GetCov(), Thelp1.GetPar(), Thelp1.GetCov(), r, C, chi2, active);
+          
+    // if after merging parameters are infinite, or diagonal elements of cov. matrix are negative - tracks could not be neighbours
+  for ( int i = 0; i < 15; i++ ) active &= CAMath::Finite( C[i] );
+  for ( int i = 0; i < 5; i++ ) active &= CAMath::Finite( r[i] );
+  active &= ( C[0] > 0 ) && ( C[2] > 0 ) && ( C[5] > 0 ) && ( C[9] > 0 ) && ( C[14] > 0 );
+        
+    // if obtained chi2 value is too high - tracks could not be neighbours
+  active &= (chi2 <= 100.f) && float_m(number == 1) || (chi2 <= 300.f) && float_m(number == 0);
+  active &= (chi2 < bestChi2) || float_m(number != 0); // for number == 0
+        
+  min_chi2(active) = minL2v; // use minL2v with number == 1
+  min_chi2(active && float_m(number == 0) ) = chi2;
+}
+
+void AliHLTTPCCAMerger::FindMinMaxIndex( int N2, const unsigned int FirstTrIR[], const unsigned int LastTrIR[], int minIRow, int maxIRow, int &min, int &max )
+{
+    // find min index
+  min = -1;
+  for(; minIRow < fSliceParam.NRows(); minIRow++)
+    if (LastTrIR[minIRow] != 50000) {
+      min = LastTrIR[minIRow];
+      break;
+    }
+    // find max index
+  max = N2;
+  for(; maxIRow >= minIRow; maxIRow--)
+    if(FirstTrIR[maxIRow] != 50000) {
+      max = FirstTrIR[maxIRow];
+      break;
+    }
+}
+
+//#define BACK_ORDER_FOR_0 // little bit faster without it. (but why?)
+void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, unsigned int iSlice1, AliHLTTPCCABorderTrack B2[], int N2, unsigned int iSlice2, int number, const unsigned int FirstTrIR[], const unsigned int LastTrIR[] )
 {
 // The function creates links to the inner and outer neighbours
 
-//if(number == 0) return;
   const float factor2k = 64.f;
-
-  sfloat_v dr_min2_localv(10000000.f);
-// Find firts and last row for the nighbours finding. All tracks are sorted by the inner row.
   for ( int i1 = 0; i1 < N1; i1++ ) {
-
+  
     AliHLTTPCCABorderTrack &b1 = B1[i1];
+    
+      // Find firts and last row for the nighbours finding. All tracks are sorted by the inner row.
 
     int lastIRow = fSliceParam.NRows()-1; // row to end finding of a clone
     int firstIRow = 0;
-    int dir = -1; // direction from a start to an end row.
+    int dir = -1; // how track2 index is changed from a start to an end row.
     int ifirst2 = -1;
     int ilast2 = N2;
     
     if(number == 1) { // find tracks with <= 1 common rows.
-      dir = -1; // Tracks2 sorted in order of decrease innerRow. For number==1 we'll go in the upper dir, so indices will decrease
+      dir = -1; // Tracks2 sorted in order of decrease innerRow. For number==1 we'll go in the upper dir, so track indices will decrease
       
       firstIRow = b1.OuterRow() + 0; // row to begin finding of clone
-      lastIRow = b1.OuterRow() + 11; // TODO choose parameter // todo parameters
+      lastIRow = b1.OuterRow() + AliHLTTPCCAParameters::MaximumRowGapBetweenClones;
       lastIRow = (lastIRow < fSliceParam.NRows()) ? lastIRow : fSliceParam.NRows()-1;
-      
-        // find start index
-      ifirst2 = -1;
-      for(; firstIRow < fSliceParam.NRows(); firstIRow++)
-        if (LastTrIR[firstIRow] != 50000) {
-          ifirst2 = LastTrIR[firstIRow];
-          break;
-        }
-        // find end index
-      ilast2 = N2;
-      for(; lastIRow >= firstIRow; lastIRow--)
-        if(FirstTrIR[lastIRow] != 50000) {
-          ilast2 = FirstTrIR[lastIRow];
-          break;
-        }
-      
-    // std::cout << b1.OuterRow() << " " << firstIRow <<  " " << lastIRow <<  " " << ifirst2 << " " << ilast2 << std::endl; // dbg
+
+      FindMinMaxIndex( N2, FirstTrIR, LastTrIR, firstIRow, lastIRow, ifirst2, ilast2 );
     }
     else if(number == 0) { // find tracks with >= 2 common rows.
 #ifdef BACK_ORDER_FOR_0
       dir = 1; // Tracks2 sorted in order of decrease innerRow. For number==0 we'll go in the down dir, so indices will increase
             
       firstIRow = b1.OuterRow() - 1; // row to begin finding of a clone
-      lastIRow = b1.OuterRow() - 7; // TODO choose parameter // todo parameters
+      lastIRow = b1.OuterRow() - AliHLTTPCCAParameters::MaximumRowGapBetweenOverlapingClones;
       if ( firstIRow < 0 ) {
         firstIRow = 0;
         lastIRow = 0;
@@ -876,25 +729,12 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
         lastIRow = 0;
       }
 
-        // find start index
-      ifirst2 = N2;
-      for(; firstIRow >= 0; firstIRow--)
-        if (FirstTrIR[firstIRow] != 50000) {
-          ifirst2 = FirstTrIR[firstIRow];
-          break;
-        }
-        // find end index
-      ilast2 = -1;
-      for(; lastIRow <= firstIRow; lastIRow++)
-        if(LastTrIR[lastIRow] != 50000) {
-          ilast2 = LastTrIR[lastIRow];
-          break;
-        }
+      FindMinMaxIndex( N2, FirstTrIR, LastTrIR, lastIRow, firstIRow, ilast2, ifirst2 );
 #else // BACK_ORDER_FOR_0
       dir = -1;
       
-      firstIRow = b1.OuterRow() - 7; // row to begin finding of a clone
-      lastIRow = b1.OuterRow() - 1; // TODO choose parameter // todo parameters
+      firstIRow = b1.OuterRow() - AliHLTTPCCAParameters::MaximumRowGapBetweenOverlapingClones; // row to begin finding of a clone
+      lastIRow = b1.OuterRow() - 1;
       if ( lastIRow < 0 ) {
         firstIRow = 0;
         lastIRow = 0;
@@ -902,366 +742,296 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
       else if ( firstIRow < 0 ){
         firstIRow = 0;
       }
-      
-        // find start index
-      ifirst2 = -1;
-      for(; firstIRow < fSliceParam.NRows(); firstIRow++)
-        if (LastTrIR[firstIRow] != 50000) {
-          ifirst2 = LastTrIR[firstIRow];
-          break;
-        }
-        // find end index
-      ilast2 = N2;
-      for(; lastIRow >= firstIRow; lastIRow--)
-        if(FirstTrIR[lastIRow] != 50000) {
-          ilast2 = FirstTrIR[lastIRow];
-          break;
-        }
+
+      FindMinMaxIndex( N2, FirstTrIR, LastTrIR, firstIRow, lastIRow, ifirst2, ilast2 );
 #endif // BACK_ORDER_FOR_0
     }
 
-//std::cout << ifirst2 << "  " << N2 << "  " << N1 << std::endl;
-//    ifirst2 = (iSlice1 != iSlice2) ? 0 : i1+1;
-
-    // rarely changed parameters
+    if (dir*ifirst2 > dir*ilast2) continue;
+    
+      // rarely changed parameters
     const AliHLTTPCCASliceTrackInfo *Tt1 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
-    const float k1   = Tt1->InnerParam().QPt() * fSliceParam.cBz();
 
-    sfloat_v maxLv(1e10f);
-    sfloat_v maxL2v(1e10f);
+    int bestI2 = -1; // index of second tracksegment, which corresponds to minMinLv and bestChi2
+    float bestChi2( std::max( Tt1->ChiNext, Tt1->ChiPrev ) );
+    bool bestIsNext(1e10f);
+    float_v minL2v(1e10f);
 
     float Tt2OuterAlpha=0;
     float Tt2InnerAlpha=0;
     float xE1_E2=0, xS1_S2=0, xS1_E2=0;
     float yE1_E2=0, yS1_S2=0, yS1_E2=0;
-    float sinE1_E2=0, sinS1_S2=0, sinS1_E2=0;
+    float sinS1_E2=0;
 
-    if (dir*ifirst2 <= dir*ilast2) {
+    if( !((number == 1) && (iSlice1 == iSlice2)) ) {       // rotate coordinates to the same coordinate system
       Tt2OuterAlpha = fTrackInfos[fSliceTrackInfoStart[iSlice2] + B2[ifirst2].TrackID() ].OuterAlpha();
       Tt2InnerAlpha = fTrackInfos[fSliceTrackInfoStart[iSlice2] + B2[ifirst2].TrackID() ].InnerAlpha();
-// rotate coordinates to the same coordinate system
-      Tt1->OuterParam().RotateXY(Tt2OuterAlpha - Tt1->OuterAlpha(),xE1_E2,yE1_E2,sinE1_E2);
-      Tt1->InnerParam().RotateXY(Tt2InnerAlpha - Tt1->InnerAlpha(),xS1_S2,yS1_S2,sinS1_S2);
+
+      if (number == 0) {
+        float tmp;
+        Tt1->OuterParam().RotateXY(Tt2OuterAlpha - Tt1->OuterAlpha(),xE1_E2,yE1_E2,tmp);
+        Tt1->InnerParam().RotateXY(Tt2InnerAlpha - Tt1->InnerAlpha(),xS1_S2,yS1_S2,tmp);
+      }
       Tt1->InnerParam().RotateXY(Tt2OuterAlpha - Tt1->InnerAlpha(),xS1_E2,yS1_E2,sinS1_E2);
     }
-// Convert data of the first track to the SIMD vectors. 
-    sfloat_v xE1_E2v(xE1_E2), xS1_S2v(xS1_S2), xS1_E2v(xS1_E2);
-    sfloat_v yE1_E2v(yE1_E2), yS1_S2v(yS1_S2), yS1_E2v(yS1_E2);
-    sfloat_v sinE1_E2v(sinE1_E2), sinS1_S2v(sinS1_S2), sinS1_E2v(sinS1_E2);
-    sfloat_v vTt2OuterAlpha(Tt2OuterAlpha), vTt2InnerAlpha(Tt2InnerAlpha);
-    int nVecElements = 0;
+    else {
+      xE1_E2 = Tt1->OuterParam().X(); yE1_E2 = Tt1->OuterParam().Y();
+      xS1_S2 = Tt1->InnerParam().X(); yS1_S2 = Tt1->InnerParam().Y();
+      xS1_E2 = Tt1->InnerParam().X(); yS1_E2 = Tt1->InnerParam().Y(); sinS1_E2 = Tt1->InnerParam().SinPhi();
+    }
+    
+      // Convert data of the first track to the SIMD vectors. 
+    float_v xE1_E2v(xE1_E2), xS1_S2v(xS1_S2), xS1_E2v(xS1_E2);
+    float_v yE1_E2v(yE1_E2), yS1_S2v(yS1_S2), yS1_E2v(yS1_E2);
+    float_v sinS1_E2v(sinS1_E2);
+    float_v vTt2OuterAlpha(Tt2OuterAlpha), vTt2InnerAlpha(Tt2InnerAlpha);
 
-    ushort_v::Memory b2index;
+    uint_v b2index;
 
-    AliHLTTPCCATrackParamVector OutParT1,OutParT2,InParT1,InParT2;
-    sfloat_v OutAlphaT1( Tt1->OuterAlpha() ), OutAlphaT2, InAlphaT1( Tt1->InnerAlpha() ),InAlphaT2;
-    AliHLTTPCCATrackParam T2OuterParamMemory[ushort_v::Size],T2InnerParamMemory[ushort_v::Size];
-    sfloat_v::Memory T2InnerAlphaMemory,T2OuterAlphaMemory;
+    AliHLTTPCCATrackParamVector OutParT1( Tt1->OuterParam() ), OutParT2,
+                                InParT1(  Tt1->InnerParam() ), InParT2;
+    float_v OutAlphaT1( Tt1->OuterAlpha() ), OutAlphaT2,
+            InAlphaT1( Tt1->InnerAlpha() ),  InAlphaT2;
+    const AliHLTTPCCATrackParam *T2OuterParamMemory[uint_v::Size] = {0},
+                                *T2InnerParamMemory[uint_v::Size] = {0};
+    float_v T2InnerAlphaMemory,T2OuterAlphaMemory;
 
-    OutParT1.SetX( sfloat_v( Tt1->OuterParam().X() ) );
-    OutParT1.SetSignCosPhi(sfloat_v( Tt1->OuterParam().SignCosPhi() ));
-    for(int iP=0; iP<5; iP++) { OutParT1.SetPar(iP,sfloat_v( Tt1->OuterParam().Par()[iP] )); }
-    for(int iC=0; iC<15; iC++){ OutParT1.SetCov(iC,sfloat_v( Tt1->OuterParam().Cov()[iC] )); }
-    OutParT1.SetChi2(sfloat_v( Tt1->OuterParam().Chi2() ));
-    OutParT1.SetNDF( Tt1->OuterParam().NDF() );
+    for ( int i2 = ifirst2; ; ) {
+      int nVecElements = 0;
+      for( ; nVecElements < uint_v::Size && dir*i2 <= dir*ilast2; i2 += dir ) {
 
-    InParT1.SetX(sfloat_v( Tt1->InnerParam().X() ));
-    InParT1.SetSignCosPhi(sfloat_v( Tt1->InnerParam().SignCosPhi() ));
-    for(int iP=0; iP<5; iP++) { InParT1.SetPar(iP,sfloat_v( Tt1->InnerParam().Par()[iP] )); }
-    for(int iC=0; iC<15; iC++){ InParT1.SetCov(iC,sfloat_v( Tt1->InnerParam().Cov()[iC] )); }
-    InParT1.SetChi2(sfloat_v( Tt1->InnerParam().Chi2() ));
-    InParT1.SetNDF(Tt1->InnerParam().NDF());
+        const AliHLTTPCCABorderTrack &b2 = B2[i2];
+      
+          // if dz/ds or q/pt of the tracks differs more, than by several sigmas (now 8 is used) - they are not neighbours
+        float db2 = b1.b() - b2.b();
+        db2 *= db2;
+        const float ddb2 = b1.bErr2() + b2.bErr2();
+        float dp2 = b1.p() - b2.p();
+        dp2 *= dp2;
+        const float ddp2 = b1.pErr2() + b2.pErr2();
+        if( db2 > factor2k * ddb2 || dp2 > factor2k * ddp2 ||
+            ( iSlice1 == iSlice2 && b1.TrackID() == b2.TrackID() ) )  // the track could not be itselfs neighbour
+          continue;
 
-    const sfloat_v &yE1v = OutParT1.Y();
-    const sfloat_v &xE1v = OutParT1.X();
+        const AliHLTTPCCASliceTrackInfo *Tt2 = &fTrackInfos[ fSliceTrackInfoStart[iSlice2] + b2.TrackID() ];
 
-    for ( int i2 = ifirst2;  dir*i2 <= dir*ilast2; i2 += dir ) {
+        if( (Tt1->NextNeighbour() == b2.TrackID() && Tt1->SliceNextNeighbour() == iSlice2) ||
+            (Tt1->PrevNeighbour() == b2.TrackID() && Tt1->SlicePrevNeighbour() == iSlice2) )
+          continue;  // the tracks are already matched
+        
+        if ( number == 0 ) { // reconstruct only parallel tracks, created because of clusters spliting
+          const float &z1I = Tt1->InnerParam().Z();
+          const float &z1O = Tt1->OuterParam().Z();
+          const float &z2I = Tt2->InnerParam().Z();
+          const float &z2O = Tt2->OuterParam().Z();
 
-      AliHLTTPCCABorderTrack &b2 = B2[i2];
-      bool Continue = 0;
-// if dz/ds of the tracks differs more, than by several sigmas (now 8 is used) - they are not neighbours
-      float db2 = (b1.b()) - (b2.b());
-      db2 *= db2;
-      const float ddb2 = b1.bErr2() + b2.bErr2();
-      if( db2 > factor2k * ddb2 )
-      {
-        if(dir*i2 < dir*ilast2) continue;
-        else Continue = 1;
-      }
-// if q/pt of the tracks differs more, than by several sigmas (now 8 is used) - they are not neighbours
-      float dp2 = (b1.p()) - (b2.p());
-      dp2 *= dp2;
-      const float ddp2 = b1.pErr2() + b2.pErr2();
-      if( dp2 > factor2k * ddp2 )
-      {
-        if(dir*i2 < dir*ilast2) continue;
-        else Continue = 1;
-      }
-// the track could not be itselfs neighbour
-      if( ISUNLIKELY( iSlice1 == iSlice2 && b1.TrackID() == b2.TrackID() ) )
-      {
-        if(dir*i2 < dir*ilast2) continue;
-        else Continue = 1;
-      }
+          float dzArr[4] = { z1O - z2O,
+                                   z1I - z2I,
+                                   z1I - z2O,
+                                   z1O - z2I };
 
-      AliHLTTPCCASliceTrackInfo *Tt2 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2.TrackID() ];
+          for( int k = 0; k < 4; k++ )
+            if( CAMath::Abs(dzArr[k]) < 1.f ) dzArr[k] = 0.f; // indistinguishable
 
-      if(!Continue){
-// store tracks, which passed previous cuts
-        T2InnerParamMemory[nVecElements] = Tt2->InnerParam();
-        T2OuterParamMemory[nVecElements] = Tt2->OuterParam();
+            // tracks has to be overlaped in z. I.e. at least one edge of one track is inside of other track
+          if( !(dzArr[0]*dzArr[3] <= 0 || dzArr[1]*dzArr[2] <= 0 || dzArr[1]*dzArr[3] <= 0) ) continue;
+
+          const float &r1I = b1.InnerRow();
+          const float &r1O = b1.OuterRow();
+          const float &r2I = b2.InnerRow();
+          const float &r2O = b2.OuterRow();
+          const float drArr[4] = { r1O - r2O,
+                                   r1I - r2I,
+                                   r1I - r2O,
+                                   r1O - r2I };
+            // tracks has to be parallel
+          if( !(drArr[0]*dzArr[0] >= 0 &&
+                drArr[1]*dzArr[1] >= 0 &&
+                drArr[2]*dzArr[2] >= 0 &&
+                drArr[3]*dzArr[3] >= 0) ) continue;
+        }
+
+          // store tracks, which passed previous cuts
+        T2InnerParamMemory[nVecElements] = &Tt2->InnerParam();
+        T2OuterParamMemory[nVecElements] = &Tt2->OuterParam();
         T2InnerAlphaMemory[nVecElements] = Tt2->InnerAlpha();
         T2OuterAlphaMemory[nVecElements] = Tt2->OuterAlpha();
         b2index[nVecElements] = i2;
         nVecElements++;
       }
-      if(nVecElements == ushort_v::Size || (dir*i2 == dir*ilast2 && nVecElements > 0))
-      {
-// convert parameters to SIMD vectors for the array of second tracks
-        sfloat_m active = static_cast<sfloat_m>( ushort_v( Vc::IndexesFromZero ) < nVecElements );
-//std::cout << "1  "<<active<<std::endl;
-        ConvertTrackParamToVector(T2InnerParamMemory,InParT2,nVecElements);
-        ConvertTrackParamToVector(T2OuterParamMemory,OutParT2,nVecElements);
+      if (nVecElements == 0) break;
 
-        OutAlphaT2.load(T2OuterAlphaMemory);
-        InAlphaT2.load(T2InnerAlphaMemory);
+        // convert parameters to SIMD vectors for the array of second tracks
+      ConvertPTrackParamToVector(T2InnerParamMemory,InParT2,nVecElements);
+      ConvertPTrackParamToVector(T2OuterParamMemory,OutParT2,nVecElements);
 
-        const sfloat_v &yE2v = OutParT2.Y();
-        const sfloat_v &yS2v = InParT2.Y();
+      OutAlphaT2 = (T2OuterAlphaMemory);
+      InAlphaT2 = (T2InnerAlphaMemory);
 
-        const sfloat_v &xE2v = OutParT2.X();
-        const sfloat_v &xS2v = InParT2.X();
+      float_m active = static_cast<float_m>( uint_v( Vc::IndexesFromZero ) < nVecElements );
 
-        sfloat_v xS2_E1v(Vc::Zero);
-        sfloat_v yS2_E1v(Vc::Zero);
-        sfloat_v sinS2_E1v(Vc::Zero);
-        InParT2.RotateXY(OutAlphaT1 - InAlphaT2,xS2_E1v,yS2_E1v,sinS2_E1v);
+      const float_v &yE1v = OutParT1.Y();
+      const float_v &xE1v = OutParT1.X();
 
-        const sfloat_m &rotate = active && (CAMath::Abs(vTt2OuterAlpha - OutAlphaT2) > 0.01f || CAMath::Abs(vTt2InnerAlpha - InAlphaT2)>0.01f);
+      const float_v &yE2v = OutParT2.Y();
+      const float_v &yS2v = InParT2.Y();
 
-        if(!(rotate.isEmpty()))
+      const float_v &xE2v = OutParT2.X();
+      const float_v &xS2v = InParT2.X();
+      
+      float_v xS2_E1v(Vc::Zero);
+      float_v yS2_E1v(Vc::Zero);
+      float_v sinS2_E1v(Vc::Zero);
+
+      if( !((number == 1) && (iSlice1 == iSlice2)) ) {
+        InParT2.RotateXY(OutAlphaT1 - InAlphaT2,xS2_E1v,yS2_E1v,sinS2_E1v,active);
+
+        const float_m &rotate = active && (CAMath::Abs(vTt2OuterAlpha - OutAlphaT2) > 0.01f || CAMath::Abs(vTt2InnerAlpha - InAlphaT2) > 0.01f );
+
+        if( ISUNLIKELY(!(rotate.isEmpty())) ) // ISUNLIKELY is crussial, 3 times speed up!
         {// recalculate values if they could change
           vTt2OuterAlpha(rotate) = OutAlphaT2;
           vTt2InnerAlpha(rotate) = InAlphaT2;
 
-          OutParT1.RotateXY(vTt2OuterAlpha - OutAlphaT1,xE1_E2v,yE1_E2v,sinE1_E2v,rotate);
-          InParT1.RotateXY(vTt2InnerAlpha - InAlphaT1,xS1_S2v,yS1_S2v,sinS1_S2v,rotate);
-          InParT1.RotateXY(vTt2OuterAlpha - InAlphaT1,xS1_E2v,yS1_E2v,sinS1_E2v,rotate);
+          if (number == 0) {
+            float_v tmp;
+            OutParT1.RotateXY( vTt2OuterAlpha - OutAlphaT1, xE1_E2v, yE1_E2v, tmp,       rotate);
+            InParT1.RotateXY(  vTt2InnerAlpha - InAlphaT1,  xS1_S2v, yS1_S2v, tmp,       rotate);
+          }
+          InParT1.RotateXY(  vTt2OuterAlpha - InAlphaT1,  xS1_E2v, yS1_E2v, sinS1_E2v, rotate);
         }
-
-        const sfloat_v dxArr[4] = {(xE1_E2v - xE2v),
-                                   (xS1_S2v - xS2v), 
-                                   (xS1_E2v - xE2v), 
-                                   (xS2_E1v - xE1v)};
-        const sfloat_v dyArr[4] = {(yE1_E2v - yE2v), 
-                                   (yS1_S2v - yS2v), 
-                                   (yS1_E2v - yE2v), 
-                                   (yS2_E1v - yE1v)};
-
-        for(int iCycl=0; iCycl<1; iCycl++)
-        {
-          const sfloat_v dx_1 = xE2v - xS1_E2v;
-          const sfloat_v t_sin1 = k1 * dx_1 + sinS1_E2v;
-// check, whether inner parameters of both tracks in the pair could be transported to the outer parameters of the other track in the pair
-          const sfloat_v k2   = InParT2.QPt() * fSliceParam.cBz();
-          const sfloat_v dx_2 = xE1v - xS2_E1v;
-          const sfloat_v t_sin2 = k2 * dx_2 + sinS2_E1v;
-          active &= CAMath::Abs( t_sin1 ) <= 0.999f && CAMath::Abs(t_sin2) <= 0.999f;
-          if(active.isEmpty()) continue;
-// find the closest pair of the tracks parameters and store them to Thelp and Thelp1
-          const sfloat_v dxyArr[4] = {dxArr[0]*dxArr[0] + dyArr[0]*dyArr[0],
-                                      dxArr[1]*dxArr[1] + dyArr[1]*dyArr[1], 
-                                      dxArr[2]*dxArr[2] + dyArr[2]*dyArr[2], 
-                                      dxArr[3]*dxArr[3] + dyArr[3]*dyArr[3]};
-
-          short_v idx(Vc::Zero), idx_temp1(Vc::Zero), idx_temp2((short int)2);
-          sfloat_v dx = CAMath::Abs(dxyArr[0]);
-          sfloat_v dx_temp1 = CAMath::Abs(dxyArr[0]), dx_temp2 = CAMath::Abs(dxyArr[2]);
-          const sfloat_m &tmp1mask = dxyArr[1] < dx_temp1;
-          const sfloat_m &tmp2mask = dxyArr[3] < dx_temp2;
-          dx_temp1(tmp1mask) = dxyArr[1]; 
-          idx_temp1(static_cast<short_m>(tmp1mask)) = 1;
-          dx_temp2(tmp2mask) = dxyArr[3];
-          idx_temp2(static_cast<short_m>(tmp2mask)) = 3;
-
-          if(number == 1) 
-            { dx = dx_temp2; idx = idx_temp2; }
-          else if (number == 0)
-          {
-            const sfloat_m &Isdx2 = dx_temp2 < dx_temp1;
-            const short_m &Isdx2_short = static_cast<short_m>(Isdx2);
-
-            dx(Isdx2) = dx_temp2;
-            idx(Isdx2_short) = idx_temp2;
-            dx(!Isdx2) = dx_temp1;
-            idx(!Isdx2_short) = idx_temp1;
-          }
-
-          AliHLTTPCCATrackParamVector Thelp, Thelp1;
-          sfloat_v a1(Vc::Zero);
-          sfloat_v a2(Vc::Zero);
-
-          if(number == 0)
-          {
-            const sfloat_m &IsIdx0 = active && CAMath::Abs(static_cast<sfloat_v>(idx) - 0.f) < 0.1f;
-            const sfloat_m &IsIdx1 = active && CAMath::Abs(static_cast<sfloat_v>(idx) - 1.f) < 0.1f;
-            Thelp.SetTrackParam(OutParT1, IsIdx0 );
-            Thelp1.SetTrackParam(OutParT2, IsIdx0 );
-            a1( IsIdx0 ) = OutAlphaT1;
-            a2( IsIdx0 ) = OutAlphaT2;
-            dx( IsIdx0 ) = dxArr[0];
-            Thelp.SetTrackParam(InParT1, IsIdx1 );
-            Thelp1.SetTrackParam(InParT2, IsIdx1 );
-            a1( IsIdx1 ) = InAlphaT1;
-            a2( IsIdx1 ) = InAlphaT2;
-            dx( IsIdx1 ) = dxArr[1];
-          }
-          const sfloat_m &IsIdx2 = active && CAMath::Abs(static_cast<sfloat_v>(idx) - 2.f) < 0.1f;
-          const sfloat_m &IsIdx3 = active && CAMath::Abs(static_cast<sfloat_v>(idx) - 3.f) < 0.1f;
-          Thelp.SetTrackParam(InParT1, IsIdx2 );
-          Thelp1.SetTrackParam(OutParT2, IsIdx2 );
-          a1( IsIdx2 ) = InAlphaT1;
-          a2( IsIdx2 ) = OutAlphaT2;
-          dx( IsIdx2 ) = dxArr[2];
-
-          Thelp.SetTrackParam(OutParT1, IsIdx3 );
-          Thelp1.SetTrackParam(InParT2, IsIdx3 );
-          a1( IsIdx3 ) = OutAlphaT1;
-          a2( IsIdx3 ) = InAlphaT2;
-          dx( IsIdx3 ) = dxArr[3];
- // on the first iteration we process only overlaped tracks
-          if(number == 1)  active &= (CAMath::Abs(dx)<0.1f || dx > 0.f);
-// on second - only nonoverlaped
-          if(number == 0)  active &= (CAMath::Abs(dx)<0.1f || dx < 0.f);
-          if(active.isEmpty()) continue;
-// rotate track parameters to the same coordinate system
-          active &= Thelp.Rotate( a2 - a1 , 0.999f, active);
-          if(active.isEmpty()) continue;
-// calculate distance between tracks
-          dr_min2_localv = (Thelp.Y()-Thelp1.Y())*(Thelp.Y()-Thelp1.Y()) + (Thelp.Z()-Thelp1.Z())*(Thelp.Z()-Thelp1.Z()) + dx*dx;
-
-          if ( number == 1 ) active &= (dr_min2_localv <= maxLv*maxLv);
-          if(active.isEmpty()) continue;
-          maxL2v(active) = dr_min2_localv; // save dist^2 for lastIRow calculation
-// transport tracks to the middle point by X coordinate
-          const sfloat_v &ToX = 0.5f * (Thelp.X() + Thelp1.X());
-          active &= Thelp.TransportToX( ToX, sfloat_v(fSliceParam.cBz()), 0.999f, active);
-          if(active.isEmpty()) continue;
-          active &= Thelp1.TransportToX( ToX, sfloat_v(fSliceParam.cBz()), 0.999f, active);
-          if(active.isEmpty()) continue;
-// if tracks are too far one from each other after propagation - they could not be neighbours
-          active &= CAMath::Abs(Thelp1.Y() - Thelp.Y()) <= 10.f;
-          active &= CAMath::Abs(Thelp1.Z() - Thelp.Z()) <= 10.f;
-          active &= CAMath::Abs(Thelp1.SinPhi() - Thelp.SinPhi()) <= 0.15f;
-          if(active.isEmpty()) continue;
-// merge parameters and calculate chi2
-          sfloat_v C[15], r[5], chi2(Vc::Zero);
-          FilterTracks(Thelp.GetPar(), Thelp.GetCov(), Thelp1.GetPar(), Thelp1.GetCov(), r, C, chi2, active);
-// if after merging parameters are infinite, or diagonal elements of cov. matrix are negative - tracks could not be neighbours
-          for ( int i = 0; i < 15; i++ ) active &= CAMath::Finite( C[i] );
-          for ( int i = 0; i < 5; i++ ) active &= CAMath::Finite( r[i] );
-          active &= ( C[0] > 0 ) && ( C[2] > 0 ) && ( C[5] > 0 ) && ( C[9] > 0 ) && ( C[14] > 0 );
-// if obtained chi2 value is too high - tracks could not be neighbours
-          if(number == 1) active &= (chi2<=100.f);
-          if(number == 0) {
-            active &= (chi2<=300.f);
-            dr_min2_localv(active) = chi2;
-          }
-          if(active.isEmpty()) continue;
-
-          for(int iV=0; iV < nVecElements; iV++)
-          {
-// determine, whether neighbour is inner or outer
-            if(!active[iV]) continue;
-            AliHLTTPCCASliceTrackInfo *T1, *T2;
-            int NextNew, SliceNextNew, PrevNew, SlicePrevNew;
-
-            bool IsNext = (b1.InnerRow() < B2[b2index[iV]].InnerRow()) ||
-                          (b1.InnerRow() == B2[b2index[iV]].InnerRow() && 
-                           b1.OuterRow() < B2[b2index[iV]].OuterRow()) ||
-                          (b1.InnerRow() == B2[b2index[iV]].InnerRow() && 
-                           b1.OuterRow() == B2[b2index[iV]].OuterRow() && 
-                           b1.TrackID() < B2[b2index[iV]].TrackID());
-            if(IsNext)
-            {
-              T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
-              T2 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + B2[b2index[iV]].TrackID() ];
-
-              NextNew = B2[b2index[iV]].TrackID();
-              SliceNextNew = iSlice2;
-              PrevNew = b1.TrackID();
-              SlicePrevNew = iSlice1;
-            }
-            else
-            {
-              T2 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID()  ];
-              T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + B2[b2index[iV]].TrackID()  ];
-
-              NextNew = b1.TrackID();
-              SliceNextNew = iSlice1;
-              PrevNew = B2[b2index[iV]].TrackID();
-              SlicePrevNew = iSlice2;
-            }
-// if current neighbour is better, then previus one - make a reference to it
-            if(T1->ChiNext > dr_min2_localv[iV] && T2->ChiPrev > dr_min2_localv[iV]) // clone was found
-            {
-              // reestimate end row and index
-              maxLv = sqrt(maxL2v[iV]);
-              if (number == 1) {
-                // find end row
-                const float x0 = fSliceParam.RowX(b1.OuterRow());
-                for (; fSliceParam.RowX(lastIRow) - x0 > maxLv[iV]; lastIRow--);
-                  // find end index
-                for(; lastIRow >= firstIRow; lastIRow--)
-                  if(FirstTrIR[lastIRow] != 50000) {
-                  ilast2 = FirstTrIR[lastIRow];
-                  break;
-                }
-              }
-#ifdef BACK_ORDER_FOR_0
-              else if (number == 0) {
-                  // find end row
-                const float x0 = fSliceParam.RowX(b1.OuterRow());
-                for (; x0 - fSliceParam.RowX(lastIRow) > maxL; lastIRow++);
-                  // find end index
-                for(; lastIRow <= firstIRow; lastIRow++)
-                  if(LastTrIR[lastIRow] != 50000) {
-       //           ilast2 = LastTrIR[lastIRow];
-                  break;
-                }
-              }
-       // std::cout << b1.OuterRow() << " " << lastIRow << " " << sqrt(maxL) << " " << ifirst2 << " " << ilast2 << std::endl; // dbg
-#endif
-              if(T1->NextNeighbour() > -1)
-              {
-                AliHLTTPCCASliceTrackInfo *T3 = &fTrackInfos[fSliceTrackInfoStart[T1->SliceNextNeighbour()] + T1->NextNeighbour() ];
-                T3->SetPrevNeighbour(-2); // mark that T3 lose best neighbour (so there can be other neighbour for T3)
-                T3->ChiPrev = 10000000;
-              }
-              if(T2->PrevNeighbour() > -1)
-              {
-                AliHLTTPCCASliceTrackInfo *T3 = &fTrackInfos[fSliceTrackInfoStart[T2->SlicePrevNeighbour()] + T2->PrevNeighbour() ];
-                T3->SetNextNeighbour(-2);
-                T3->ChiNext = 10000000;
-              }
-              T1->SetNextNeighbour( NextNew );
-              T1->SetSliceNextNeighbour( SliceNextNew );
-              T1->ChiNext = dr_min2_localv[iV];
-
-              T2->SetPrevNeighbour( PrevNew );
-              T2->SetSlicePrevNeighbour( SlicePrevNew );
-              T2->ChiPrev = dr_min2_localv[iV];
-            }
-          }
-        }
-        nVecElements = 0;
       }
-    }
-  }
-  
+      else {
+        xS2_E1v = InParT2.X(); yS2_E1v = InParT2.Y(); sinS2_E1v = InParT2.SinPhi();
+      }
+
+      const float_v dxArr[4] = { (xE1_E2v - xE2v),
+                                 (xS1_S2v - xS2v), 
+                                 (xS1_E2v - xE2v), 
+                                 (xS2_E1v - xE1v) };
+      const float_v dyArr[4] = { (yE1_E2v - yE2v), 
+                                 (yS1_S2v - yS2v), 
+                                 (yS1_E2v - yE2v), 
+                                 (yS2_E1v - yE1v) };
+
+      float_v min_chi2(1e10f);
+      CheckTracksMatch( number,
+      InParT1, OutParT1, InAlphaT1, OutAlphaT1,
+      InParT2, OutParT2, InAlphaT2, OutAlphaT2,
+      dxArr, dyArr, sinS1_E2v, sinS2_E1v,
+      minL2v, bestChi2, min_chi2, active );
+
+      if(active.isEmpty()) continue;
+
+      for(int iV=0; iV < nVecElements; iV++) { // foreach_bit( int iV, active )  is slower since mostly nVecElements < 4
+        if(!active[iV]) continue;
+          // determine, whether neighbour is inner or outer
+          
+        const AliHLTTPCCABorderTrack &b2iV = B2[b2index[iV]];
+          
+        bool IsNext =
+          ( b1.InnerRow() < b2iV.InnerRow()     ) ||
+          ( b1.InnerRow() == b2iV.InnerRow() && 
+            b1.OuterRow() < b2iV.OuterRow()     ) ||
+          ( b1.InnerRow() == b2iV.InnerRow() && 
+            b1.OuterRow() == b2iV.OuterRow() && 
+            b1.TrackID() < b2iV.TrackID()       );
+
+        AliHLTTPCCASliceTrackInfo *T1, *T2;
+        if(IsNext) {
+          T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
+          T2 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2iV.TrackID() ];
+        }
+        else {
+          T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2iV.TrackID()  ];
+          T2 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID()  ];
+        }
+
+          // if current neighbour is better than previus one - save it
+        if(T1->ChiNext > min_chi2[iV] && T2->ChiPrev > min_chi2[iV]) // clone was found
+        {
+            // reestimate end row and index
+          if (number == 1) {
+              // find end row
+            const float x0 = fSliceParam.RowX(b1.OuterRow());
+            for (; fSliceParam.RowX(lastIRow) - x0 > sqrt(minL2v[iV]); lastIRow--);
+              // find end index
+            for(; lastIRow >= firstIRow; lastIRow--)
+              if(FirstTrIR[lastIRow] != 50000) {
+                ilast2 = FirstTrIR[lastIRow];
+                break;
+              }
+          }
+#ifdef BACK_ORDER_FOR_0
+          else if (number == 0) {
+              // find end row
+            const float x0 = fSliceParam.RowX(b1.OuterRow());
+            for (; x0 - fSliceParam.RowX(lastIRow) > sqrt(minL2v[iV]); lastIRow++);
+              // find end index
+            for(; lastIRow <= firstIRow; lastIRow++)
+              if(LastTrIR[lastIRow] != 50000) {
+                  //           ilast2 = LastTrIR[lastIRow];
+                break;
+              }
+          }
+#endif
+
+          bestI2 = b2index[iV];
+          bestChi2 = min_chi2[iV];
+          bestIsNext = IsNext;
+        }
+      } // for iV
+    } // for i2
+
+    if (bestI2 >= 0) {
+      const AliHLTTPCCABorderTrack &b2iV = B2[bestI2];
+
+      AliHLTTPCCASliceTrackInfo *T1, *T2;
+      int NextNew, SliceNextNew, PrevNew, SlicePrevNew;
+
+      if(bestIsNext) {
+        T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
+        T2 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2iV.TrackID() ];
+
+        NextNew = b2iV.TrackID();
+        SliceNextNew = iSlice2;
+        PrevNew = b1.TrackID();
+        SlicePrevNew = iSlice1;
+      }
+      else {
+        T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2iV.TrackID()  ];
+        T2 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID()  ];
+        
+        NextNew = b1.TrackID();
+        SliceNextNew = iSlice1;
+        PrevNew = b2iV.TrackID();
+        SlicePrevNew = iSlice2;
+      }
+
+      { // mark neighbours
+        if(T1->NextNeighbour() > -1) {
+          AliHLTTPCCASliceTrackInfo *T3 = &fTrackInfos[fSliceTrackInfoStart[T1->SliceNextNeighbour()] + T1->NextNeighbour() ];
+          T3->SetPrevNeighbour(-2); // mark that T3 lose best neighbour (so there can be other neighbour for T3)
+          T3->ChiPrev = 1e10f;
+        }
+        if(T2->PrevNeighbour() > -1) {
+          AliHLTTPCCASliceTrackInfo *T3 = &fTrackInfos[fSliceTrackInfoStart[T2->SlicePrevNeighbour()] + T2->PrevNeighbour() ];
+          T3->SetNextNeighbour(-2);
+          T3->ChiNext = 1e10f;
+        }
+        T1->SetNextNeighbour( NextNew );
+        T1->SetSliceNextNeighbour( SliceNextNew );
+        T1->ChiNext = bestChi2;
+
+        T2->SetPrevNeighbour( PrevNew );
+        T2->SetSlicePrevNeighbour( SlicePrevNew );
+        T2->ChiPrev = bestChi2;
+      }
+    } // if bestI2
+  } // for i1
 }
 
-void AliHLTTPCCAMerger::Merging(int number)
+void AliHLTTPCCAMerger::FindNeighbourTracks(int number)
 {
 #ifdef USE_TIMERS
   Stopwatch timer;
@@ -1276,28 +1046,21 @@ void AliHLTTPCCAMerger::Merging(int number)
 
   // for each slice set number of the next neighbouring slice
   int nextSlice[fgkNSlices], oppSlice[fgkNSlices/2];
-  // int prevSlice[fgkNSlices];
 
-  int mid = fgkNSlices / 2 - 1 ;
-  int last = fgkNSlices - 1 ;
+  const unsigned int mid = fgkNSlices / 2 - 1 ;
+  const unsigned int last = fgkNSlices - 1 ;
 
   for ( int iSlice = 0; iSlice < fgkNSlices/2; iSlice++ ) {
     nextSlice[iSlice] = iSlice + 1;
-//     prevSlice[iSlice] = iSlice - 1;
     oppSlice [iSlice] = 22 - iSlice;
     if(iSlice == 11) oppSlice[iSlice]=23;
   }
 
   for ( int iSlice = fgkNSlices/2; iSlice < fgkNSlices; iSlice++ ) {
     nextSlice[iSlice] = iSlice - 1;
-//     prevSlice[iSlice] = iSlice + 1;
   }
 
-  if ( mid < 0 ) mid = 0; // to avoid compiler warning
-  if ( last < 0 ) last = 0; //
   nextSlice[ mid ] = 0;
-//   prevSlice[ 0 ] = mid;
-//   prevSlice[ last ] = fgkNSlices / 2;
   nextSlice[ fgkNSlices/2 ] = last;
 
   int maxNSliceTracks = 0;
@@ -1307,76 +1070,74 @@ void AliHLTTPCCAMerger::Merging(int number)
 
   AliHLTTPCCABorderTrack *bCurrIR = new AliHLTTPCCABorderTrack[maxNSliceTracks*fgkNSlices];
   AliHLTTPCCABorderTrack *bCurrOR = new AliHLTTPCCABorderTrack[maxNSliceTracks*fgkNSlices];
-  unsigned short FirstTrIR[fgkNSlices][AliHLTTPCCAParameters::MaxNumberOfRows8]; // index of the first track on row
-  unsigned short LastTrIR[fgkNSlices][AliHLTTPCCAParameters::MaxNumberOfRows8];
+  unsigned int FirstTrIR[fgkNSlices][AliHLTTPCCAParameters::MaxNumberOfRows8]; // index of the first track on row
+  unsigned int LastTrIR[fgkNSlices][AliHLTTPCCAParameters::MaxNumberOfRows8];
 
-  unsigned short nCurr[fgkNSlices];
+    // init arrays with out of range number - 50000
+  std::fill(&(FirstTrIR[0][0]), &(FirstTrIR[0][0]) + fgkNSlices*AliHLTTPCCAParameters::MaxNumberOfRows8, 50000);
+  std::fill(&(LastTrIR[0][0]),  &(LastTrIR[0][0])  + fgkNSlices*AliHLTTPCCAParameters::MaxNumberOfRows8, 50000);
+  
+  unsigned int nCurr[fgkNSlices];
   for(unsigned char iSl=0; iSl<fgkNSlices; iSl++)
   {
-    for(unsigned char iRow=0; iRow<fSliceParam.NRows(); iRow++)
-    {
-      FirstTrIR[iSl][iRow] = 50000;
-      LastTrIR[iSl][iRow]  = 50000;
-    }
-    
+
     nCurr[iSl] = 0;
-// make border tracks for each sector, sort them by inner row
-    MakeBorderTracks(bCurrIR + maxNSliceTracks*iSl, nCurr[iSl], iSl);
-    std::sort(bCurrIR+maxNSliceTracks*iSl, bCurrIR+maxNSliceTracks*iSl+nCurr[iSl], CompareInnerRow);
+      // make border tracks for each sector, sort them by inner row
+    AliHLTTPCCABorderTrack * const bCurrSliceIR = bCurrIR + maxNSliceTracks*iSl;
+    AliHLTTPCCABorderTrack * const bCurrSliceOR = bCurrOR + maxNSliceTracks*iSl;
+    MakeBorderTracks(bCurrSliceIR, nCurr[iSl], iSl);
+    std::sort(bCurrSliceIR, bCurrSliceIR + nCurr[iSl], CompareInnerRow); // sort such that innerRow decrease
 
-    for(unsigned short itr=0; itr < nCurr[iSl]; itr++)
-      bCurrOR[itr + maxNSliceTracks*iSl] = bCurrIR[itr + maxNSliceTracks*iSl];
-   // std::sort(bCurrOR+maxNSliceTracks*iSl, bCurrOR+maxNSliceTracks*iSl+nCurr[iSl], CompareOuterRow);
+    for(unsigned int itr=0; itr < nCurr[iSl]; itr++)
+      bCurrSliceOR[itr] = bCurrSliceIR[itr];
+      // std::sort(bCurrOR+maxNSliceTracks*iSl, bCurrOR+maxNSliceTracks*iSl+nCurr[iSl], CompareOuterRow);
 
-     // save track indices range for each row
+      // save track indices range for each row
     if(nCurr[iSl] > 0)
     {
-      unsigned char curRow = bCurrIR[maxNSliceTracks*iSl].InnerRow();
+      unsigned char curRow = bCurrSliceIR[0].InnerRow();
       FirstTrIR[iSl][curRow] = 0;
-      for(unsigned short itr = 1; itr < nCurr[iSl]; itr++)
+      for(unsigned int itr = 1; itr < nCurr[iSl]; itr++)
       {
-        if( bCurrIR[maxNSliceTracks*iSl+itr].InnerRow() < curRow )
+        if( bCurrSliceIR[itr].InnerRow() < curRow )
         {
-          // for (int iR = bCurrIR[maxNSliceTracks*iSl+itr].InnerRow() + 1; iR < curRow; iR++) // check for a jump
-          //   FirstTrIR[iSl][iR] = FirstTrIR[iSl][curRow];
+            // for (int iR = bCurrIR[maxNSliceTracks*iSl+itr].InnerRow() + 1; iR < curRow; iR++) // check for a jump
+            //   FirstTrIR[iSl][iR] = FirstTrIR[iSl][curRow];
           LastTrIR[iSl][curRow] = itr - 1;
-          curRow = bCurrIR[maxNSliceTracks*iSl + itr].InnerRow();
+          curRow = bCurrSliceIR[itr].InnerRow();
           FirstTrIR[iSl][curRow] = itr;
         }
       }
       LastTrIR[iSl][curRow] = nCurr[iSl] - 1;
-      // for(unsigned char iRow=0; iRow<AliHLTTPCCAParameters::NumberOfRows; iRow++) { // dbg
-      //   std::cout << int(iSl) << " " << int(iRow) << " " << FirstTrIR[iSl][iRow] << " " << LastTrIR[iSl][iRow] << std::endl;
-      //   if (FirstTrIR[iSl][iRow] != 50000 ) std::cout <<  bCurrIR[maxNSliceTracks*iSl+FirstTrIR[iSl][iRow]].InnerRow() << std::endl;
-      //   if (LastTrIR[iSl][iRow] != 50000 ) std::cout <<   bCurrIR[maxNSliceTracks*iSl+LastTrIR[iSl][iRow]].InnerRow() << std::endl;
-      // }
     }
-// create links to neighbour tracks clones in the same sector
-    MergeBorderTracks(bCurrOR + maxNSliceTracks*iSl, nCurr[iSl], iSl,
-                      bCurrIR + maxNSliceTracks*iSl, nCurr[iSl], iSl,
-                      number, FirstTrIR[iSl], LastTrIR[iSl]);
+
+      // create links to neighbour tracks clones in the same sector
+    MergeBorderTracks( bCurrSliceOR, nCurr[iSl], iSl,
+                       bCurrSliceIR, nCurr[iSl], iSl,
+                       number, FirstTrIR[iSl], LastTrIR[iSl] );
   }
-  
+
+  if (number == 1) // with number == 0 only parallel tracks are merged, they should be at the same sector
   if (! fgDoNotMergeBorders )
     for(int iSl=0; iSl<fgkNSlices; iSl++)
     {
-        //  create links to neighbour tracks in the neighbour sector in the same xy-plane
+        //  create links to neighbour tracks in the next sector in the same xy-plane
       MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
-      bCurrIR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
-      number, FirstTrIR[nextSlice[iSl]], LastTrIR[nextSlice[iSl]] ); // merge upper edges
+                         bCurrIR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
+                         number, FirstTrIR[nextSlice[iSl]], LastTrIR[nextSlice[iSl]] ); // merge upper edges
       MergeBorderTracks( bCurrOR+maxNSliceTracks*nextSlice[iSl], nCurr[nextSlice[iSl]], nextSlice[iSl],
-      bCurrIR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
-      number, FirstTrIR[iSl],            LastTrIR[iSl] );            // merge lower edges
+                         bCurrIR+maxNSliceTracks*iSl,            nCurr[iSl],            iSl,
+                         number, FirstTrIR[iSl],            LastTrIR[iSl] );            // merge lower edges
 
       if(iSl < fgkNSlices / 2)
       {
           //  create links to neighbour tracks with the oposit sector (in z direction)
-        MergeBorderTracks(bCurrOR+maxNSliceTracks*iSl, nCurr[iSl], iSl, 
-        bCurrIR+maxNSliceTracks*oppSlice[iSl], nCurr[oppSlice[iSl]], oppSlice[iSl],
-        number, FirstTrIR[oppSlice[iSl]], LastTrIR[oppSlice[iSl]]);
-        MergeBorderTracks(bCurrOR+maxNSliceTracks*oppSlice[iSl], nCurr[oppSlice[iSl]], oppSlice[iSl], 
-        bCurrIR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
-        number, FirstTrIR[iSl],           LastTrIR[iSl]);
+        MergeBorderTracks( bCurrOR+maxNSliceTracks*iSl, nCurr[iSl], iSl, 
+                           bCurrIR+maxNSliceTracks*oppSlice[iSl], nCurr[oppSlice[iSl]], oppSlice[iSl],
+                           number, FirstTrIR[oppSlice[iSl]], LastTrIR[oppSlice[iSl]] );
+        MergeBorderTracks( bCurrOR+maxNSliceTracks*oppSlice[iSl], nCurr[oppSlice[iSl]], oppSlice[iSl], 
+                           bCurrIR+maxNSliceTracks*iSl, nCurr[iSl], iSl,
+                           number, FirstTrIR[iSl],           LastTrIR[iSl] );
       }
     }
 
@@ -1386,6 +1147,13 @@ void AliHLTTPCCAMerger::Merging(int number)
 #ifdef USE_TIMERS
   timer.Stop();
   fTimers[3+(1-number)] = timer.RealTime();
+#endif // USE_TIMERS
+}
+
+void AliHLTTPCCAMerger::Merging(int number)
+{
+#ifdef USE_TIMERS
+  Stopwatch timer;
   timer.Start();
 #endif // USE_TIMERS
   
@@ -1404,13 +1172,11 @@ void AliHLTTPCCAMerger::Merging(int number)
   }
 
   AliHLTTPCCAClusterInfo *tmpH = new AliHLTTPCCAClusterInfo[fMaxClusterInfos];
-  AliHLTTPCCASliceTrackInfo *tmpT = new AliHLTTPCCASliceTrackInfo[fMaxTrackInfos];
+  Vc::vector<AliHLTTPCCASliceTrackInfo> tmpT(fMaxTrackInfos);
   int nEndTracks = 0; // n tracks after merging.
   int tmpSliceTrackInfoStart[fgkNSlices];
 
-  int nTrNew[fgkNSlices];
-
-  for(int iSlice=0; iSlice < fgkNSlices; iSlice++) nTrNew[iSlice]=0;
+  int nTrNew[fgkNSlices] = {0};
 
   int nH = 0;
 
@@ -1422,425 +1188,281 @@ void AliHLTTPCCAMerger::Merging(int number)
     tmpSliceTrackInfoStart[iSlice] = nEndTracks;
     assert( iSlice == 0 || nEndTracks == tmpSliceTrackInfoStart[iSlice-1] + nTrNew[iSlice-1] );
 
-    AliHLTTPCCASliceTrackInfo *vTrackOld[short_v::Size];
-    AliHLTTPCCATrackParam StartPoint[short_v::Size];
-    AliHLTTPCCATrackParam EndPoint[short_v::Size];
-    sfloat_v::Memory StartAlpha, EndAlpha;
-    int nVecElements = 0;
+    const AliHLTTPCCATrackParam *pStartPoint[int_v::Size] = {0};
+    const AliHLTTPCCATrackParam *pEndPoint[int_v::Size] = {0};
+    float_v StartAlpha, EndAlpha;
 
-    sfloat_v vStartAlpha(Vc::Zero);
-    sfloat_v vEndAlpha(Vc::Zero);
+    float_v vStartAlpha(Vc::Zero);
+    float_v vEndAlpha(Vc::Zero);
     AliHLTTPCCATrackParamVector vStartPoint;
     AliHLTTPCCATrackParamVector vEndPoint;
 
-    AliHLTTPCCASliceTrackInfo *TInfos[10000];
-    bool IsSorted[10000];
-// Resort tracks.
-    int nSorted = 0;
-// First write tracks, which has inner (previous) neighbour
-    for(int i=0; i< fSliceNTrackInfos[iSlice]; i++)
-    {
-      IsSorted[i] = 0;
-      TInfos[i] = 0;
-      AliHLTTPCCASliceTrackInfo *tr = fTrackInfos + fSliceTrackInfoStart[iSlice] + i;
-      if(tr->PrevNeighbour() > -1)
-      {
-        TInfos[nSorted] = tr;
-        IsSorted[i] = 1;
-        nSorted++;
+
+     // -- Resort tracks to proceed faster
+    vector<unsigned int> firstInChainIndex(fSliceNTrackInfos[iSlice]);
+    int nChains = 0;
+
+      // store tracks, which are not merged. And save indexes of the most previous(inner) merged tracks
+   for(int iT=0; iT< fSliceNTrackInfos[iSlice]; iT++) {
+     const int index = fSliceTrackInfoStart[iSlice] + iT;
+     const AliHLTTPCCASliceTrackInfo& tr = fTrackInfos[index];
+
+     if(tr.PrevNeighbour() < 0 && tr.NextNeighbour() >= 0) {
+       firstInChainIndex[nChains++] = index;
+       continue;
+     }
+     
+     if(tr.PrevNeighbour() >= 0 || tr.NextNeighbour() >= 0) continue;
+      
+      const unsigned int NHits = tr.NClusters();
+
+        // on the final stage stor data to the global tracker
+      if(number == 0) {
+        outTracks[nOutTracks].AssignTrack(tr, nOutTrackClusters);
+
+        for ( unsigned int i = 0; i < NHits; i++ ) {
+          AliHLTTPCCAClusterInfo &clu = fClusterInfos[tr.FirstClusterRef()+i];
+          outClusterIDsrc[nOutTrackClusters+i] =
+            DataCompressor::SliceRowCluster( clu.ISlice(), clu.IRow(), clu.IClu() );
+        }
+        nOutTracks++;
+        nOutTrackClusters += NHits;
       }
-    }
-// Then - tracks without any neighbours
-    for(int i=0; i< fSliceNTrackInfos[iSlice]; i++)
-    {
-      AliHLTTPCCASliceTrackInfo *tr = fTrackInfos + fSliceTrackInfoStart[iSlice] + i;
-      if(tr->PrevNeighbour() < 0 && tr->NextNeighbour() < 0 && !IsSorted[i])
+        // else restore tracks, obtained after merging
+      if(number == 1)
       {
-        TInfos[nSorted] = tr;
-        IsSorted[i] = 1;
-        nSorted++;
+        AliHLTTPCCASliceTrackInfo &track = tmpT[nEndTracks];
+
+        track = tr;
+
+        track.SetFirstClusterRef( nH );
+        track.ChiPrev = 1e10f;
+        track.ChiNext = 1e10f;
+
+        for( unsigned int iClu=0; iClu < NHits; iClu++) tmpH[nH + iClu] = fClusterInfos[tr.FirstClusterRef()+iClu];
+        nH += NHits;
       }
-    }
-// Then - tracks with outetr (next) neighbours only
-    for(int i=0; i< fSliceNTrackInfos[iSlice]; i++)
-    {
-      AliHLTTPCCASliceTrackInfo *tr = fTrackInfos + fSliceTrackInfoStart[iSlice] + i;
-      if(!IsSorted[i])
-      {
-        TInfos[nSorted] = tr;
-        IsSorted[i] = 1;
-        nSorted++;
-      }
-    }
 
-    for ( int itr = 0; itr < fSliceNTrackInfos[iSlice]; itr++ ) {
+      nTrNew[iSlice]++;
+      nEndTracks++;
+    } // if no merged
+    
+    for ( int itr = 0; ; ) {
 
-      AliHLTTPCCASliceTrackInfo &trackOld = *TInfos[itr];
+        // pack data
+      int nVecElements = 0;
+      uint_v iIndexes(Vc::Zero);
+      for ( ; nVecElements < uint_v::Size && itr < nChains; itr++ ) {
+        const unsigned int sI = firstInChainIndex[itr];
+        AliHLTTPCCASliceTrackInfo& trackOld = fTrackInfos[sI];
+        
+          // If track is already used or has previous neighbours - do not use it
+        if ( trackOld.Used() ) continue;
 
-      bool Continue = 0;
-// If track is already used or has previous neighbours - do not use it
-      if ( trackOld.Used() ) Continue = 1;
-      if ( trackOld.PrevNeighbour() > -1 ) Continue = 1;
-
-      if(!Continue){
-// Store selected tracks
-        vTrackOld[nVecElements] = &trackOld;
-        StartPoint[nVecElements] = trackOld.InnerParam();
-        EndPoint[nVecElements] = trackOld.OuterParam();
+          // Store selected track
+        pStartPoint[nVecElements] = &trackOld.InnerParam();
+        pEndPoint[nVecElements] = &trackOld.OuterParam();
         StartAlpha[nVecElements] = trackOld.InnerAlpha();
         EndAlpha[nVecElements] = trackOld.OuterAlpha();
+        iIndexes[nVecElements] = sI;
         nVecElements++;
       }
-      if((nVecElements == short_v::Size) || (itr == fSliceNTrackInfos[iSlice]-1))
+      if (nVecElements == 0) break;
+      
+        // Convert their parameters to SIMD vectors
+      float_m active = static_cast<float_m>( int_v( Vc::IndexesFromZero ) < nVecElements );
+
+      int hits[2000][uint_v::Size];
+      uint_v firstHit(1000u);
+
+      ConvertPTrackParamToVector(pStartPoint,vStartPoint,nVecElements);
+      ConvertPTrackParamToVector(pEndPoint,vEndPoint,nVecElements);
+      vStartAlpha = (StartAlpha);
+      vEndAlpha = (EndAlpha);
+
+      const float_m &invert1 = active && (vEndPoint.X() < vStartPoint.X());
+      if( ISUNLIKELY(!(invert1.isEmpty())) )
       {
-// Convert their parameters to SIMD vectors
-        ushort_m active_short = ushort_v( Vc::IndexesFromZero ) < nVecElements;
-        sfloat_m active = static_cast<sfloat_m>( active_short );
-
-        int hits[2000][ushort_v::Size];
-        ushort_v::Memory nHits;
-        ushort_v firstHit = (unsigned short int)1000;
-        ushort_v::Memory SliceNextNeighbour;
-        short_v::Memory NextNeighbour;
-        ushort_v jSlice(iSlice);
-        short_v jtr = (short int) -1;
-        ushort_v vNHits(Vc::Zero);
-
-        short_v vNextNeighbour;
-        ushort_v vSliceNextNeighbour;
-
-        ConvertTrackParamToVector(StartPoint,vStartPoint,nVecElements);
-        ConvertTrackParamToVector(EndPoint,vEndPoint,nVecElements);
-        vStartAlpha.load(StartAlpha);
-        vEndAlpha.load(EndAlpha);
-
-        const sfloat_m &invert1 = active && (vEndPoint.X() < vStartPoint.X());
-        if( !(invert1.isEmpty()))
-        {
-          AliHLTTPCCATrackParamVector helpPoint = vEndPoint;
-          vEndPoint.SetTrackParam(vStartPoint, invert1);
-          vStartPoint.SetTrackParam(helpPoint, invert1);
-          sfloat_v helpAlpha = vEndAlpha;
-          vEndAlpha(invert1) = vStartAlpha;
-          vStartAlpha(invert1) = helpAlpha;
-        }
-
-        for(int iV=0; iV<ushort_v::Size; iV++)
-        {
-          if(!active[iV]) continue;
-          vTrackOld[iV]->SetUsed( 1 ); // ste track as used
-
-          for ( int jhit = 0; jhit < vTrackOld[iV]->NClusters(); jhit++ ) {
-            int id = vTrackOld[iV]->FirstClusterRef() + jhit;
-            hits[static_cast <unsigned short>(firstHit[iV])+jhit][iV] = id;
-          }
-          nHits[iV] = vTrackOld[iV]->NClusters();
-          NextNeighbour[iV] = vTrackOld[iV]->NextNeighbour(); // obtaine the outer neighbour index
-          SliceNextNeighbour[iV] = vTrackOld[iV]->SliceNextNeighbour();
-        }
-        vNHits.load(nHits);
-        vNextNeighbour.load(NextNeighbour);
-        vSliceNextNeighbour.load(SliceNextNeighbour);
-
-        const sfloat_m &isMerged = active && (static_cast<sfloat_v>(vNextNeighbour) > -1);
-        sfloat_m IsNeighbour = isMerged;
-
-        if(!(isMerged.isEmpty()))
-        {
-          jtr(static_cast<short_m>(isMerged)) = vNextNeighbour;
-          jSlice(static_cast<ushort_m>(isMerged)) = vSliceNextNeighbour;
-        }
-
-        while ( !(IsNeighbour.isEmpty()) ) // while there are still outer neighbours
-        {
-          AliHLTTPCCATrackParam InnerParam[short_v::Size];
-          AliHLTTPCCATrackParam OuterParam[short_v::Size];
-          sfloat_v::Memory InnerAlpha;
-          sfloat_v::Memory OuterAlpha;
-          AliHLTTPCCATrackParamVector vInnerParam;
-          AliHLTTPCCATrackParamVector vOuterParam;
-          sfloat_v vInnerAlpha(Vc::Zero);
-          sfloat_v vOuterAlpha(Vc::Zero);
-
-          ushort_v::Memory NClusters;
-          ushort_v vNClusters;
-
-          ushort_v::Memory SegmSliceNextNeighbour;
-          short_v::Memory SegmNextNeighbour;
-          short_v vSegmNextNeighbour;
-          ushort_v  vSegmSliceNextNeighbour;
-
-          AliHLTTPCCASliceTrackInfo *segment[ushort_v::Size];
-          short_v::Memory Used;
-          short_v vsUsed;
-          short_m vUsed(false);
-// take the next neighbour
-          for(int iV=0; iV<ushort_v::Size; iV++)
-          {
-            if(!IsNeighbour[iV]) continue;
-            segment[iV] = &fTrackInfos[fSliceTrackInfoStart[jSlice[iV]] + jtr[iV]];
-            InnerParam[iV] = segment[iV]->InnerParam();
-            OuterParam[iV] = segment[iV]->OuterParam();
-            InnerAlpha[iV] = segment[iV]->InnerAlpha();
-            OuterAlpha[iV] = segment[iV]->OuterAlpha();
-            Used[iV] = segment[iV]->Used();
-            NClusters[iV] = segment[iV]->NClusters();
-            SegmNextNeighbour[iV] = segment[iV]->NextNeighbour();
-            SegmSliceNextNeighbour[iV] = segment[iV]->SliceNextNeighbour();
-          }
-          vsUsed.load(Used);
-          vNClusters.load(NClusters);
-          vUsed = vsUsed > 0;
-          vSegmNextNeighbour.load(SegmNextNeighbour);
-          vSegmSliceNextNeighbour.load(SegmSliceNextNeighbour);
-
-          IsNeighbour &= !(static_cast<sfloat_m>(vUsed));
-          if ( IsNeighbour.isEmpty() ) break;
-
-          ConvertTrackParamToVector(InnerParam,vInnerParam,nVecElements);
-          ConvertTrackParamToVector(OuterParam,vOuterParam,nVecElements);
-          vInnerAlpha.load(InnerAlpha);
-          vOuterAlpha.load(OuterAlpha);
-
-          for(int iV=0; iV<ushort_v::Size; iV++)
-          {
-            if(!IsNeighbour[iV]) continue;
-            segment[iV]->SetUsed( 1 );
-          }
-          sfloat_m dir(false);
-          ushort_v startHit = firstHit + vNHits;
-          const sfloat_v d00 = vStartPoint.GetDistXZ2( vInnerParam );
-          const sfloat_v d01 = vStartPoint.GetDistXZ2( vOuterParam );
-          const sfloat_v d10 = vEndPoint.GetDistXZ2( vInnerParam );
-          const sfloat_v d11 = vEndPoint.GetDistXZ2( vOuterParam );
-          const sfloat_v dz00 = abs( vStartPoint.Z() - vInnerParam.Z() );
-          const sfloat_v dz01 = abs( vStartPoint.Z() - vOuterParam.Z() );
-          const sfloat_v dz10 = abs( vEndPoint.Z() - vInnerParam.Z() );
-          const sfloat_v dz11 = abs( vEndPoint.Z() - vOuterParam.Z() );
-
-          const sfloat_m &case1 = IsNeighbour &&
-            (d00 <= d01 && d00 <= d10 && d00 <= d11) &&
-            (dz11 >= dz00 && dz11 >= dz01 && dz11 >= dz10 );
-              /*                  0----1
-               * connection like : \
-               *                    0------1
-               */
-          const sfloat_m &case2 = IsNeighbour &&
-            (d01 < d00 && d01 <= d10 && d01 <= d11) &&
-            (dz10 > dz00 && dz10 >= dz01 && dz10 >= dz11 );
-              /*                       0----1
-               * connection like :      \
-               *                    0----1
-               */
-          const sfloat_m &case3 = IsNeighbour &&
-            (d10 < d00 && d10 <= d01 && d10 <= d11) &&
-            (dz01 > dz00 && dz01 >= dz10 && dz01 >= dz11 );
-              /*                   0---1
-               * connection like :    /
-               *                     0-------1
-               */
-          const sfloat_m &case4 = IsNeighbour &&
-            (d11 < d00 && d11 <= d10 && d10 <= d01) &&
-            (dz00 > dz01 && dz00 >= dz10 && dz00 > dz11);
-              /*                      0--1
-               * connection like :        \
-               *                    0------1
-               */
-          IsNeighbour &= case1 || case2 || case3 || case4;
-          
-          if(!(case1.isEmpty()))
-          {
-            vStartPoint.SetTrackParam( vOuterParam, case1);
-            vStartAlpha(case1) = vOuterAlpha;
-            firstHit(static_cast<ushort_m>(case1)) -= vNClusters;
-            startHit(static_cast<ushort_m>(case1)) = firstHit;
-          }
-          if(!(case2.isEmpty()))
-          {
-            vStartPoint.SetTrackParam( vInnerParam, case2);
-            vStartAlpha(case2) = vInnerAlpha;
-            firstHit(static_cast<ushort_m>(case2)) -= vNClusters;
-            startHit(static_cast<ushort_m>(case2)) = firstHit;
-          }
-          if(!(case3.isEmpty()))
-          {
-            vEndPoint.SetTrackParam( vOuterParam, case3);
-            vEndAlpha(case3) = vOuterAlpha;
-          }
-          if(!(case4.isEmpty()))
-          {
-            vEndPoint.SetTrackParam( vInnerParam, case4);
-            vEndAlpha(case4) = vInnerAlpha;
-          }
-
-          const sfloat_m &m1 = IsNeighbour && (vEndPoint.X() < vOuterParam.X());
-          vEndPoint.SetTrackParam( vOuterParam, m1);
-          vEndAlpha(m1) = vOuterAlpha;
-
-          const sfloat_m &m2 = IsNeighbour && (vEndPoint.X() < vInnerParam.X());
-          vEndPoint.SetTrackParam( vInnerParam, m2);
-          vEndAlpha(m2) = vInnerAlpha;
-
-          const sfloat_m &m3 = IsNeighbour && (vStartPoint.X() > vInnerParam.X());
-          vStartPoint.SetTrackParam( vInnerParam, m3 );
-          vStartAlpha(m3) = vInnerAlpha;
-
-          const sfloat_m &m4 = IsNeighbour && (vStartPoint.X() > vOuterParam.X());
-          vStartPoint.SetTrackParam( vOuterParam, m4 );
-          vStartAlpha(m4) = vOuterAlpha;
-
-          const sfloat_m dir_float = (case1 || case4);
-          dir = dir_float;
-// add hits of the neighbour
-          for(int iV=0; iV<ushort_v::Size; iV++)
-          {
-            if(!IsNeighbour[iV]) continue;
-            for ( int jhit = 0; jhit < segment[iV]->NClusters(); jhit++ ) {
-              int id = segment[iV]->FirstClusterRef() + jhit;
-              hits[static_cast <unsigned short>(startHit[iV])+( dir[iV] ?( static_cast <unsigned short>(vNClusters[iV])-1-jhit ) :jhit )][iV] = id;
-            }
-          }
-          vNHits(static_cast<ushort_m>(IsNeighbour)) += vNClusters;
-          
-          jtr = -1;
-          IsNeighbour &= (static_cast<sfloat_v>(vSegmNextNeighbour) > -1);
-          if(!(IsNeighbour.isEmpty()))
-          {
-            jtr(static_cast<ushort_m>(IsNeighbour)) = vSegmNextNeighbour;
-            jSlice(static_cast<short_m>(IsNeighbour)) = vSegmSliceNextNeighbour;
-          }
-        }
-
-        for(int iV=0; iV<ushort_v::Size; iV++)
-        {
-          if(!active[iV]) continue;
-          if ( vEndPoint.X()[iV] < vStartPoint.X()[iV] ) { // swap
-            for ( int i = 0; i < vNHits[iV]; i++ ) hits[i][iV] = hits[firstHit[iV]+vNHits[iV]-1-i][iV];
-            firstHit[iV] = 0;
-          }
-        }
-
-        const sfloat_m &invert2 = isMerged && (vEndPoint.X() < vStartPoint.X());
-        if( !(invert2.isEmpty()))
-        {
-          AliHLTTPCCATrackParamVector helpPoint = vEndPoint;
-          vEndPoint.SetTrackParam(vStartPoint, invert2);
-          vStartPoint.SetTrackParam(helpPoint, invert2);
-          sfloat_v helpAlpha = vEndAlpha;
-          vEndAlpha(invert2) = vStartAlpha;
-          vStartAlpha(invert2) = helpAlpha;
-        }
-
-        sfloat_m fitted = isMerged;
-// Refit tracks, which have been merged.
-        vNHits.store(nHits);
-        AliHLTTPCCATrackParamVector vHelpEndPoint = vStartPoint;
-        sfloat_v vHelpEndAlpha = vStartAlpha;
-        fitted &= FitTrack( vHelpEndPoint, vHelpEndAlpha, hits, firstHit, nHits, nVecElements,fitted, 0 );
-        AliHLTTPCCATrackParamVector vHelpStartPoint = vHelpEndPoint;
-        sfloat_v vHelpStartAlpha = vHelpEndAlpha;
-        fitted &= FitTrack( vHelpStartPoint, vHelpStartAlpha, hits, firstHit, nHits, nVecElements,fitted, 1 );
-        vNHits.load(nHits);
-        active &= (!isMerged);
-        active |= fitted;
-
-        for(int iV=0; iV < ushort_v::Size; iV++)
-        {
-          if ( !active[iV] ) continue;
-          if ( fitted[iV] ) { // merged
-            StartPoint[iV] = AliHLTTPCCATrackParam( vHelpStartPoint, iV );
-            EndPoint[iV] = AliHLTTPCCATrackParam( vHelpEndPoint, iV );
-          }
-          else { // not merged
-            StartPoint[iV] = AliHLTTPCCATrackParam( vStartPoint, iV );
-            EndPoint[iV] = AliHLTTPCCATrackParam( vEndPoint, iV );
-          }
-        }
-        vHelpStartAlpha.store(&(StartAlpha[0]), active && fitted ); // work around for Vc-0.99.71
-        vHelpEndAlpha.store(&(EndAlpha[0]), active && fitted );
-        vStartAlpha.store(&(StartAlpha[0]), active && !fitted );
-        vEndAlpha.store(&(EndAlpha[0]), active && !fitted );
-        
-        for(int iV=0; iV<ushort_v::Size; iV++)
-        {
-          if ( !active[iV] ) continue;
-          int h[1000];
-          for(int iClu = 0; iClu < vNHits[iV]; iClu++) h[iClu] = hits[iClu + firstHit[iV]][iV];
-          int *usedHits = h; // get begin of array
-// If track has been merged, resort hits, rid of double hits.
-          if (isMerged[iV]) {
-            //std::sort( usedHits, usedHits + vNHits[iV], TrackHitsCompare(fClusterInfos) ); // sort hits by X (iRow) // TODO normal sort
-              // rid of double hits
-            int ihit2 = 0; // ihit in the output array
-            for(int ihit = 1; ihit < vNHits[iV]; ihit++)
-            {
-              if( ISUNLIKELY(usedHits[ihit2] == usedHits[ihit]) ) continue;
-              ++ihit2;
-              if( ISUNLIKELY(     ihit2  != ihit      ) )
-                usedHits[ihit2] = usedHits[ihit];
-            }
-            nHits[iV] = ihit2+1;
-          }
-// on the final stage stor data to the global tracker
-          if(number == 0)
-          {
-            AliHLTTPCCAMergedTrack &mergedTrack = outTracks[nOutTracks];
-            mergedTrack.SetNClusters( nHits[iV] );
-            mergedTrack.SetFirstClusterRef( nOutTrackClusters );
-            mergedTrack.SetInnerParam( StartPoint[iV] );
-            mergedTrack.SetInnerAlpha( StartAlpha[iV] );
-            mergedTrack.SetOuterParam( EndPoint[iV] );
-            mergedTrack.SetOuterAlpha( EndAlpha[iV] );
-
-            for ( int i = 0; i < nHits[iV]; i++ ) {
-              AliHLTTPCCAClusterInfo &clu = fClusterInfos[usedHits[i]];
-              outClusterIDsrc[nOutTrackClusters+i] =
-                DataCompressor::SliceRowCluster( clu.ISlice(), clu.IRow(), clu.IClu() );
-            }
-            nOutTracks++;
-            nOutTrackClusters += nHits[iV];
-          }
-// else restore tracks, obtained after merging
-          if(number == 1)
-          {
-            AliHLTTPCCASliceTrackInfo &track = tmpT[nEndTracks];
-
-            track = *vTrackOld[iV];
-
-            track.SetFirstClusterRef(nH);
-            track.SetNClusters(nHits[iV]);
-            track.SetUsed(0);
-            track.SetPrevNeighbour(-1);
-            track.SetNextNeighbour(-1);
-            track.SetSlicePrevNeighbour(-1);
-            track.SetSliceNextNeighbour(-1);
-            track.ChiPrev = 10000000;
-            track.ChiNext = 10000000;
-            track.SetInnerParam( StartPoint[iV] );
-            track.SetInnerAlpha( StartAlpha[iV] );
-            track.SetOuterParam( EndPoint[iV] );
-            track.SetOuterAlpha( EndAlpha[iV] );
-
-            track.fInnerRow = (fClusterInfos[usedHits[0]]).IRow();
-            track.fOuterRow = (fClusterInfos[usedHits[nHits[iV]-1]]).IRow();
-
-            for(int iClu=0; iClu < nHits[iV]; iClu++) tmpH[nH + iClu] = fClusterInfos[usedHits[iClu]];
-            nH += nHits[iV];
-          }
-
-          nTrNew[iSlice]++;
-          nEndTracks++;
-        }
-
-        nVecElements = 0;
+        AliHLTTPCCATrackParamVector helpPoint = vEndPoint;
+        vEndPoint.SetTrackParam(vStartPoint, invert1);
+        vStartPoint.SetTrackParam(helpPoint, invert1);
+        float_v helpAlpha = vEndAlpha;
+        vEndAlpha(invert1) = vStartAlpha;
+        vStartAlpha(invert1) = helpAlpha;
       }
-    }
-  }
+
+      const int_m &activeI = static_cast<int_m>(active);
+      const uint_m &activeU = static_cast<uint_m>(active);
+      //int_v(Vc::One).scatter( fTrackInfos, &AliHLTTPCCASliceTrackInfo::fUsed, iIndexes, activeI ); // set track as used
+      for(int iV=0; iV<int_v::Size; iV++)
+      {
+        if(!activeI[iV]) continue;
+        fTrackInfos[int(iIndexes[iV])].fUsed = 1;
+      }
+//       uint_v vNHits(fTrackInfos, &AliHLTTPCCASliceTrackInfo::fNClusters         , iIndexes, activeU );
+//       vNHits(!active) = Vc::Zero;
+      uint_v vNHits(Vc::Zero);
+      vNHits(uint_m(activeU)) = fTrackInfos[iIndexes][&AliHLTTPCCASliceTrackInfo::fNClusters];
+
+      //const int_v vFirstClusterRef(fTrackInfos, &AliHLTTPCCASliceTrackInfo::fFirstClusterRef   , iIndexes, activeI );
+      int_v vFirstClusterRef(Vc::Zero);
+      vFirstClusterRef(activeI) = fTrackInfos[iIndexes][&AliHLTTPCCASliceTrackInfo::fFirstClusterRef];
+      
+      for ( unsigned int jhit = 0; jhit < vNHits.max(); jhit++ ) {
+        const int_m mask = int_m(active) && int_m(jhit < vNHits);
+        int_v id = vFirstClusterRef + static_cast<int>(jhit);
+        for(int iV=0; iV<int_v::Size; iV++)
+        {
+          if(!mask[iV]) continue;
+//         foreach_bit( int iV, mask ) {
+          hits[static_cast <unsigned int>(firstHit[iV])+jhit][iV] = id[iV];
+        }
+//        id.scatter( hits, static_cast<uint_v>(firstHit + static_cast<unsigned int>(jhit)), mask );
+      }
+      
+      uint_v jIndexes = iIndexes;
+      float_m isNeighbour = active;
+      while (1) // while there are still outer neighbours
+      {
+        const int_m &isNeighbourI = static_cast<int_m>(isNeighbour);
+        const uint_m &isNeighbourU = static_cast<uint_m>(isNeighbour);
+//         int_v vNextNeighbour(       fTrackInfos, &AliHLTTPCCASliceTrackInfo::fNextNeighbour     , jIndexes, isNeighbourI );
+//         uint_v vSliceNextNeighbour( fTrackInfos, &AliHLTTPCCASliceTrackInfo::fSliceNextNeighbour, jIndexes, isNeighbourU );
+        int_v vNextNeighbour(Vc::Zero);
+        vNextNeighbour(isNeighbourI) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fNextNeighbour];
+        uint_v vSliceNextNeighbour(Vc::Zero);
+        vSliceNextNeighbour(isNeighbourU) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fSliceNextNeighbour];
+        
+        isNeighbour &= (static_cast<float_v>(vNextNeighbour) > -1);
+        if (isNeighbour.isEmpty()) break;
+        
+          // take the next neighbour
+        const int_m &isNeighbourI0 = static_cast<int_m>(isNeighbour);
+        jIndexes = int_v(fSliceTrackInfoStart, vSliceNextNeighbour, isNeighbourI0) + vNextNeighbour;
+//         const int_v vUsed( fTrackInfos, &AliHLTTPCCASliceTrackInfo::fUsed, jIndexes, isNeighbourI0 );
+        int_v vUsed(Vc::Zero);
+        vUsed(isNeighbourI0) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fUsed];
+        isNeighbour &= !static_cast<float_m>(vUsed > 0);
+        
+        if ( isNeighbour.isEmpty() ) break;
+        
+        isNeighbour &= AddNeighbour( jIndexes, nVecElements, isNeighbour,
+                                     hits, firstHit, vStartPoint, vEndPoint, vStartAlpha, vEndAlpha, vNHits );
+      } // while isNeighbour
+  
+      const float_m &swap = active && (vEndPoint.X() < vStartPoint.X());
+      if( !(swap.isEmpty())) {
+        for(int iV=0; iV<float_v::Size; iV++)
+        {
+          if(!swap[iV]) continue;
+//         foreach_bit(int iV, swap) {
+          for ( unsigned int i = 0; i < vNHits[iV]; i++ ) hits[i][iV] = hits[firstHit[iV]+vNHits[iV]-1-i][iV];
+        }
+        firstHit(uint_m(swap)) = uint_v(Vc::Zero);
+ 
+        AliHLTTPCCATrackParamVector helpPoint = vEndPoint;
+        vEndPoint.SetTrackParam(vStartPoint, swap);
+        vStartPoint.SetTrackParam(helpPoint, swap);
+        float_v helpAlpha = vEndAlpha;
+        vEndAlpha(swap) = vStartAlpha;
+        vStartAlpha(swap) = helpAlpha;
+      }
+
+        // Refit tracks, which have been merged.
+      uint_v nHits = vNHits;
+      AliHLTTPCCATrackParamVector vHelpEndPoint = vStartPoint;
+      float_v vHelpEndAlpha = vStartAlpha;
+      active &= FitTrack( vHelpEndPoint, vHelpEndAlpha, hits, firstHit, nHits, nVecElements,active, 0 );
+      AliHLTTPCCATrackParamVector vHelpStartPoint = vHelpEndPoint;
+      float_v vHelpStartAlpha = vHelpEndAlpha;
+      active &= FitTrack( vHelpStartPoint, vHelpStartAlpha, hits, firstHit, nHits, nVecElements,active, 1 );
+      vNHits = nHits;
+
+        // store tracks
+      for(int iV=0; iV<float_v::Size; iV++)
+      {
+        if(!active[iV]) continue;
+//       foreach_bit(int iV, active) {
+ 
+        int h[1000];
+        for( unsigned int iClu = 0; iClu < vNHits[iV]; iClu++)
+          h[iClu] = hits[iClu + firstHit[iV]][iV];
+        
+        int *usedHits = h; // get begin of array
+          // If track has been merged, resort hits, rid of double hits.
+          //std::sort( usedHits, usedHits + vNHits[iV], TrackHitsCompare(fClusterInfos) ); // sort hits by X (iRow) // TODO normal sort
+        
+          // rid of double hits
+        unsigned int ihit2 = 0; // ihit in the output array
+        for( unsigned int ihit = 1; ihit < vNHits[iV]; ihit++)
+        {
+          if( ISUNLIKELY(usedHits[ihit2] == usedHits[ihit]) ) continue;
+          ++ihit2;
+          if( ISUNLIKELY(     ihit2  != ihit      ) )
+            usedHits[ihit2] = usedHits[ihit];
+        }
+        nHits[iV] = ihit2+1;
+
+          // on the final stage stor data to the global tracker
+        if(number == 0)
+        {
+          AliHLTTPCCAMergedTrack &mergedTrack = outTracks[nOutTracks];
+          mergedTrack.SetNClusters( nHits[iV] );
+          mergedTrack.SetFirstClusterRef( nOutTrackClusters );
+          mergedTrack.SetInnerParam( AliHLTTPCCATrackParam( vHelpStartPoint, iV ) );
+          mergedTrack.SetInnerAlpha( vHelpStartAlpha[iV] );
+          mergedTrack.SetOuterParam( AliHLTTPCCATrackParam( vHelpEndPoint, iV ) );
+          mergedTrack.SetOuterAlpha( vHelpEndAlpha[iV] );
+
+          for ( unsigned int i = 0; i < nHits[iV]; i++ ) {
+            AliHLTTPCCAClusterInfo &clu = fClusterInfos[usedHits[i]];
+            outClusterIDsrc[nOutTrackClusters+i] =
+              DataCompressor::SliceRowCluster( clu.ISlice(), clu.IRow(), clu.IClu() );
+          }
+          nOutTracks++;
+          nOutTrackClusters += nHits[iV];
+        }
+          // else restore tracks, obtained after merging
+        if(number == 1)
+        {
+          AliHLTTPCCASliceTrackInfo &track = tmpT[nEndTracks];
+
+          track = fTrackInfos[int(iIndexes[iV])];//*vTrackOld[iV];
+
+          track.SetFirstClusterRef( nH );
+          track.SetNClusters( nHits[iV] );
+          track.SetUsed(0);
+          track.SetPrevNeighbour(-1);
+          track.SetNextNeighbour(-1);
+          track.SetSlicePrevNeighbour(-1);
+          track.SetSliceNextNeighbour(-1);
+          track.ChiPrev = 10000000;
+          track.ChiNext = 10000000;
+
+          track.SetInnerParam( AliHLTTPCCATrackParam( vHelpStartPoint, iV ) );
+          track.SetInnerAlpha( vHelpStartAlpha[iV] );
+          track.SetOuterParam( AliHLTTPCCATrackParam( vHelpEndPoint, iV ) );
+          track.SetOuterAlpha( vHelpEndAlpha[iV] );
+
+          track.fInnerRow = (fClusterInfos[usedHits[0]]).IRow();
+          track.fOuterRow = (fClusterInfos[usedHits[nHits[iV]-1]]).IRow();
+
+          for( unsigned int iClu=0; iClu < nHits[iV]; iClu++)
+            tmpH[nH + iClu] = fClusterInfos[usedHits[iClu]];
+          
+          nH += nHits[iV];
+        }
+
+        nTrNew[iSlice]++;
+        nEndTracks++;
+      } // for iV
+
+    } // for itr
+  } // for iSlice
 
   if (fClusterInfos) delete[] fClusterInfos;
   fClusterInfos = tmpH;
 
-  if (fClusterInfos) delete[] fTrackInfos;
   fTrackInfos = tmpT;
   for(int iSlice=0; iSlice < fgkNSlices; iSlice++ )
   {
@@ -1870,4 +1492,153 @@ void AliHLTTPCCAMerger::Merging(int number)
   timer.Stop();
   fTimers[5+(1-number)] = timer.RealTime();
 #endif // USE_TIMERS 
+}
+
+float_m AliHLTTPCCAMerger::AddNeighbour( const uint_v& jIndexes, const int& nVecElements, const float_m& isNeighbour,
+int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vStartPoint, AliHLTTPCCATrackParamVector& vEndPoint, float_v& vStartAlpha, float_v& vEndAlpha, uint_v& vNHits )
+{
+  float_m mask = isNeighbour;
+
+  const int_m &maskI = static_cast<int_m>(mask);
+  const uint_m &maskU = static_cast<uint_m>(mask);
+//   uint_v jNHits(
+//     fTrackInfos, &AliHLTTPCCASliceTrackInfo::fNClusters         , jIndexes, maskU );
+//   jNHits(!mask) = Vc::Zero;
+//   const float_v vInnerAlpha(
+//     fTrackInfos, &AliHLTTPCCASliceTrackInfo::fInnerAlpha        , jIndexes, mask );
+//   const float_v vOuterAlpha(
+//     fTrackInfos, &AliHLTTPCCASliceTrackInfo::fOuterAlpha        , jIndexes, mask );
+  uint_v jNHits(Vc::Zero);
+  jNHits(maskU) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fNClusters];
+  float_v vInnerAlpha(Vc::Zero);
+  vInnerAlpha(mask) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fInnerAlpha];
+  float_v vOuterAlpha(Vc::Zero);
+  vOuterAlpha(mask) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fOuterAlpha];
+  
+  AliHLTTPCCATrackParamVector vInnerParam;
+  AliHLTTPCCATrackParamVector vOuterParam;
+
+  const AliHLTTPCCATrackParam *pInnerParam[int_v::Size] = {0};
+  const AliHLTTPCCATrackParam *pOuterParam[int_v::Size] = {0};
+  for(int iV=0; iV<float_v::Size; iV++)
+  {
+    if(!mask[iV]) continue;
+//   foreach_bit(int iV, mask) {
+    AliHLTTPCCASliceTrackInfo &segment = fTrackInfos[jIndexes[iV]];
+    pInnerParam[iV] = &segment.InnerParam();
+    pOuterParam[iV] = &segment.OuterParam();
+    
+    fTrackInfos[jIndexes[iV]].fUsed = 1;
+  }
+  ConvertPTrackParamToVector(pInnerParam,vInnerParam,nVecElements);
+  ConvertPTrackParamToVector(pOuterParam,vOuterParam,nVecElements);
+
+//   int_v(Vc::One).scatter(fTrackInfos, &AliHLTTPCCASliceTrackInfo::fUsed, jIndexes, maskI );
+  float_m dir(false);
+  uint_v startHit = firstHit + vNHits;
+  const float_v d00 = vStartPoint.GetDistXZ2( vInnerParam );
+  const float_v d01 = vStartPoint.GetDistXZ2( vOuterParam );
+  const float_v d10 = vEndPoint.GetDistXZ2( vInnerParam );
+  const float_v d11 = vEndPoint.GetDistXZ2( vOuterParam );
+  const float_v dz00 = CAMath::Abs( vStartPoint.Z() - vInnerParam.Z() );
+  const float_v dz01 = CAMath::Abs( vStartPoint.Z() - vOuterParam.Z() );
+  const float_v dz10 = CAMath::Abs( vEndPoint.Z() - vInnerParam.Z() );
+  const float_v dz11 = CAMath::Abs( vEndPoint.Z() - vOuterParam.Z() );
+
+  const float_m &case1 = mask &&
+    (d00 <= d01 && d00 <= d10 && d00 <= d11) &&
+    (dz11 >= dz00 && dz11 >= dz01 && dz11 >= dz10 );
+    /*                  0----1
+     * connection like : \
+     *                    0------1
+     */
+  const float_m &case2 = mask &&
+    (d01 < d00 && d01 <= d10 && d01 <= d11) &&
+    (dz10 > dz00 && dz10 >= dz01 && dz10 >= dz11 );
+    /*                       0----1
+     * connection like :      \
+     *                    0----1
+     */
+  const float_m &case3 = mask &&
+    (d10 < d00 && d10 <= d01 && d10 <= d11) &&
+    (dz01 > dz00 && dz01 >= dz10 && dz01 >= dz11 );
+    /*                   0---1
+     * connection like :    /
+     *                     0-------1
+     */
+  const float_m &case4 = mask &&
+    (d11 < d00 && d11 <= d10 && d10 <= d01) &&
+    (dz00 > dz01 && dz00 >= dz10 && dz00 > dz11);
+    /*                      0--1
+     * connection like :        \
+     *                    0------1
+     */
+  mask &= case1 || case2 || case3 || case4;
+          
+  if(!(case1.isEmpty()))
+  {
+    vStartPoint.SetTrackParam( vOuterParam, case1);
+    vStartAlpha(case1) = vOuterAlpha;
+    firstHit(static_cast<uint_m>(case1)) -= jNHits;
+    startHit(static_cast<uint_m>(case1)) = firstHit;
+  }
+  if(!(case2.isEmpty()))
+  {
+    vStartPoint.SetTrackParam( vInnerParam, case2);
+    vStartAlpha(case2) = vInnerAlpha;
+    firstHit(static_cast<uint_m>(case2)) -= jNHits;
+    startHit(static_cast<uint_m>(case2)) = firstHit;
+  }
+  if(!(case3.isEmpty()))
+  {
+    vEndPoint.SetTrackParam( vOuterParam, case3);
+    vEndAlpha(case3) = vOuterAlpha;
+  }
+  if(!(case4.isEmpty()))
+  {
+    vEndPoint.SetTrackParam( vInnerParam, case4);
+    vEndAlpha(case4) = vInnerAlpha;
+  }
+
+  const float_m &m1 = mask && (vEndPoint.X() < vOuterParam.X());
+  vEndPoint.SetTrackParam( vOuterParam, m1);
+  vEndAlpha(m1) = vOuterAlpha;
+
+  const float_m &m2 = mask && (vEndPoint.X() < vInnerParam.X());
+  vEndPoint.SetTrackParam( vInnerParam, m2);
+  vEndAlpha(m2) = vInnerAlpha;
+
+  const float_m &m3 = mask && (vStartPoint.X() > vInnerParam.X());
+  vStartPoint.SetTrackParam( vInnerParam, m3 );
+  vStartAlpha(m3) = vInnerAlpha;
+
+  const float_m &m4 = mask && (vStartPoint.X() > vOuterParam.X());
+  vStartPoint.SetTrackParam( vOuterParam, m4 );
+  vStartAlpha(m4) = vOuterAlpha;
+
+  const float_m dir_float = (case1 || case4);
+  dir = dir_float;
+    // add hits of the neighbour
+//   const int_v jFirstClusterRef(fTrackInfos, &AliHLTTPCCASliceTrackInfo::fFirstClusterRef   , jIndexes, mask );
+  int_v jFirstClusterRef(Vc::Zero);
+  jFirstClusterRef(int_m(mask)) = fTrackInfos[jIndexes][&AliHLTTPCCASliceTrackInfo::fFirstClusterRef];
+  
+  for(int iV=0; iV<float_v::Size; iV++)
+  {
+    if(!mask[iV]) continue;
+//   foreach_bit(int iV, mask) { // faster outside
+    for ( unsigned int jhit = 0; jhit < jNHits[iV]; jhit++ ) {
+      const int& id = jFirstClusterRef[iV] + jhit;
+      const unsigned int& index = HitIndex( startHit, jNHits, dir[iV], iV, jhit );
+      hits[index][iV] = id;
+        //hits[static_cast <unsigned int>(startHit[iV])+( dir[iV] ?( static_cast <unsigned int>(jNHits[iV])-1-jhit ) :jhit )][iV] = id;
+    }
+  }
+    // for ( unsigned int jhit = 0; jhit < jNHits.max(); jhit++ ) {
+    //   const int_m mask = mask && jhit < jNHits;
+    //   int_v id = jFirstClusterRef + static_cast<int>(jhit);
+    //   foreach_bit( int iV, mask ) {
+    //     hits[static_cast <unsigned int>(startHit[iV])+( dir[iV] ?( static_cast <unsigned int>(jNHits[iV])-1-jhit ) :jhit )][iV] = id[iV]; }}
+  vNHits(static_cast<uint_m>(mask)) += jNHits;
+  return mask;
 }

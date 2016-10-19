@@ -84,12 +84,13 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   
   d->fNTracklets = 0;
 
-  if ( d->fData.NumberOfHits() < 1 ) {
+  if ( d->fData.NumberOfHits() <= 0 ) {
     d->RecalculateTrackMemorySize( 1, 1 );
     d->fTrackMemory = new char[d->fTrackMemorySize + 1600]; // TODO rid of 1600
     d->SetPointersTracks( 1, 1 ); // set pointers for tracks
     d->fOutput->SetNTracks( 0 );
     d->fOutput->SetNTrackClusters( 0 );
+    d->fTracks.resize(0);
     return 0;
   }
 
@@ -111,48 +112,53 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
     const unsigned numberOfHits = row.NHits();
-    for ( unsigned int i = 0; i < numberOfHits; i += short_v::Size ) {
-      const ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + i;
-      const short_m validHitsMask = (hitIndexes < numberOfHits);
-      const short_v isUsed = short_v( d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes), validHitsMask);
-       ASSERT( ((isUsed == short_v( Vc::Zero )) && validHitsMask) == validHitsMask,
+    for ( unsigned int i = 0; i < numberOfHits; i += int_v::Size ) {
+      const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
+      const int_m validHitsMask = (hitIndexes < numberOfHits);
+      const int_v isUsed = int_v( d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes), validHitsMask);
+       ASSERT( ((isUsed == int_v( Vc::Zero )) && validHitsMask) == validHitsMask,
               isUsed << validHitsMask);
     }
   }
 #endif // NDEBUG
   
   for (int iter = 0; iter < 2; iter++) {
+
 #ifdef USE_TIMERS
     timer.Start();
     tsc.Start();
 #endif // USE_TIMERS
+      // clean unused hits
+    for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
+      d->fData.CleanUsedHits( rowIndex, iter == 0 );
+    }
     
     // unset all unused links
-  const short_v minusOne(-1);
+  const int_v minusOne(-1);
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
     const unsigned numberOfHits = row.NHits();
-    for ( unsigned int i = 0; i < numberOfHits; i += short_v::Size ) {
-      const ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + i;
-      const short_m validHitsMask = (hitIndexes < numberOfHits)
-        && ( short_v( d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+    for ( unsigned int i = 0; i < numberOfHits; i += int_v::Size ) {
+      const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
+      const int_m validHitsMask = (hitIndexes < numberOfHits)
+        && ( int_v( d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) );
       d->fData.SetHitLinkUpData  ( row, hitIndexes, minusOne, validHitsMask );
       d->fData.SetHitLinkDownData( row, hitIndexes, minusOne, validHitsMask );
 //      d->fData.SetHitLinkUpData  ( row, i, minusOne );
 //      d->fData.SetHitLinkDownData( row, i, minusOne );
     }
   }
-
+  
 #ifndef NDEBUG
  // check of isUsed
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
     const unsigned numberOfHits = row.NHits();
-    for ( unsigned int i = 0; i < numberOfHits; i += short_v::Size ) {
-      const ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + i;
-      const short_m validHitsMask = (hitIndexes < numberOfHits);
-      const short_v isUsed = short_v( d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes), validHitsMask);
-       ASSERT( ((isUsed >= short_v( Vc::Zero )) && (isUsed <= short_v( 1 )) && validHitsMask) == validHitsMask,
+    for ( unsigned int i = 0; i < numberOfHits; i += int_v::Size ) {
+      const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
+      const int_m validHitsMask = (hitIndexes < numberOfHits);
+      const int_v isUsed = int_v( d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes), validHitsMask);
+       ASSERT( ((isUsed >= int_v( Vc::Zero )) && (isUsed <= int_v( 1 )) && validHitsMask) == validHitsMask,
               isUsed << validHitsMask);
     }
   }
@@ -197,7 +203,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
         linksFStream << rowIndex << ": ";
         const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
         for ( int hitIndex = 0; hitIndex < row.NHits(); ++hitIndex ) {
-          const int hitIndexB = hitIndex % short_v::Size;
+          const int hitIndexB = hitIndex % int_v::Size;
           const int hitIndexA = hitIndex - hitIndexB;
           linksFStream << std::setw( 8 ) << d->fData.HitLinkUpData( row, hitIndexA )[hitIndexB]
                        << std::setw( 4 ) << d->fData.HitLinkDownData( row, hitIndexA )[hitIndexB];
@@ -239,13 +245,13 @@ int AliHLTTPCCATracker::Reconstructor::execute()
         if (rowIndex + rowStep < NRows) NRowUpHits = d->fData.Row( rowIndex + rowStep ).NHits();
         int NRowDnHits = 0;
         if (rowIndex - rowStep >= 0)    NRowDnHits = d->fData.Row( rowIndex - rowStep ).NHits();
-        for ( int i = 0; i < NRowHits; i += short_v::Size ) {
-          const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + i;
-          short_m validHitsMask = hitIndexes < NRowHits;
-            // validHitsMask &= ( short_v(d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+        for ( int i = 0; i < NRowHits; i += int_v::Size ) {
+          const int_v hitIndexes = int_v( Vc::IndexesFromZero ) + i;
+          int_m validHitsMask = hitIndexes < NRowHits;
+            // validHitsMask &= ( int_v(d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) );
 
-          short_v up = short_v(d->fData.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
-          short_v dn = short_v(d->fData.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+          int_v up = int_v(d->fData.HitLinkUpData( row ), static_cast<uint_v>(hitIndexes), validHitsMask );
+          int_v dn = int_v(d->fData.HitLinkDownData( row ), static_cast<uint_v>(hitIndexes), validHitsMask );
           ASSERT ( (validHitsMask && (up >= -1 ) && (up < NRowUpHits )) == validHitsMask,
           " validHitsMask= " << validHitsMask <<  " up= "  << up
           << " iter= " << iter << " row= " << rowIndex << " NRowUpHits= " << NRowUpHits );
@@ -296,7 +302,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
         linksFStream << rowIndex << ": ";
         const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
         for ( int hitIndex = 0; hitIndex < row.NHits(); ++hitIndex ) {
-          const int hitIndexB = hitIndex % short_v::Size;
+          const int hitIndexB = hitIndex % int_v::Size;
           const int hitIndexA = hitIndex - hitIndexB;
           linksFStream << std::setw( 8 ) << d->fData.HitLinkUpData( row, hitIndexA )[hitIndexB]
                        << std::setw( 4 ) << d->fData.HitLinkDownData( row, hitIndexA )[hitIndexB];
@@ -326,13 +332,13 @@ int AliHLTTPCCATracker::Reconstructor::execute()
         if (rowIndex + rowStep < NRows) NRowUpHits = d->fData.Row( rowIndex + rowStep ).NHits();
         int NRowDnHits = 0;
         if (rowIndex - rowStep >= 0)    NRowDnHits = d->fData.Row( rowIndex - rowStep ).NHits();
-        for ( int i = 0; i < NRowHits; i += short_v::Size ) {
-          const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + i;
-          short_m validHitsMask = hitIndexes < NRowHits;
-            // validHitsMask &= ( short_v(d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+        for ( int i = 0; i < NRowHits; i += int_v::Size ) {
+          const int_v hitIndexes = int_v( Vc::IndexesFromZero ) + i;
+          int_m validHitsMask = hitIndexes < NRowHits;
+            // validHitsMask &= ( int_v(d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) );
 
-          short_v up = short_v(d->fData.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
-          short_v dn = short_v(d->fData.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+          int_v up = int_v(d->fData.HitLinkUpData( row ), static_cast<uint_v>(hitIndexes), validHitsMask );
+          int_v dn = int_v(d->fData.HitLinkDownData( row ), static_cast<uint_v>(hitIndexes), validHitsMask );
           ASSERT ( (validHitsMask && (up >= -1 ) && (up < NRowUpHits )) == validHitsMask,
           " validHitsMask= " << validHitsMask <<  " up= "  << up
           << " iter= " << iter << " row= " << rowIndex << " NRowUpHits= " << NRowUpHits );
@@ -355,7 +361,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     timer.Stop();
     d->fTimers[3] += timer.RealTime();
 #endif // USE_TIMERS
-    
+
   } // iterations
 #ifdef DUMP_LINKS
   if ( linksFStream.is_open() ) {
@@ -374,20 +380,20 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   const AliHLTTPCCARow &firstRow = d->fData.Row( 0 );
   const int rowStep = AliHLTTPCCAParameters::RowStep;
   const AliHLTTPCCARow &lastRow  = d->fData.Row( d->fParam.NRows() - 1 );
-  for ( int hitIndex = 0; hitIndex < firstRow.NHits(); hitIndex += short_v::Size ) {
+  for ( int hitIndex = 0; hitIndex < firstRow.NHits(); hitIndex += int_v::Size ) {
     assert( d->fData.HitLinkUpData  ( firstRow, hitIndex ) == -1 );
     assert( d->fData.HitLinkDownData( firstRow, hitIndex ) == -1 );
   }
   for ( int rowIndex = 1; rowIndex < d->Param().NRows() - rowStep; ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
-    const short_v nHitsUp = d->fData.Row( rowIndex + rowStep ).NHits();
-    const short_v nHitsDown = d->fData.Row( rowIndex - rowStep ).NHits();
-    for ( int hitIndex = 0; hitIndex < row.NHits(); hitIndex += short_v::Size ) {
+    const int_v nHitsUp = d->fData.Row( rowIndex + rowStep ).NHits();
+    const int_v nHitsDown = d->fData.Row( rowIndex - rowStep ).NHits();
+    for ( int hitIndex = 0; hitIndex < row.NHits(); hitIndex += int_v::Size ) {
       assert( d->fData.HitLinkUpData  ( row, hitIndex ) < nHitsUp );
       assert( d->fData.HitLinkDownData( row, hitIndex ) < nHitsDown );
     }
   }
-  for ( int hitIndex = 0; hitIndex < lastRow.NHits(); hitIndex += short_v::Size ) {
+  for ( int hitIndex = 0; hitIndex < lastRow.NHits(); hitIndex += int_v::Size ) {
     assert( d->fData.HitLinkUpData  ( lastRow, hitIndex ) == -1 );
     assert( d->fData.HitLinkDownData( lastRow, hitIndex ) == -1 );
   }
@@ -399,17 +405,17 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
     const unsigned numberOfHits = row.NHits();
-    for ( unsigned int i = 0; i < numberOfHits; i += short_v::Size ) {
-      const ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + i;
-      const short_m validHitsMask = (hitIndexes < numberOfHits);
-      const short_v isUsed = short_v( d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes), validHitsMask);
-       ASSERT( ((isUsed >= short_v( Vc::Zero )) && (isUsed <= short_v( 1 )) && validHitsMask) == validHitsMask,
+    for ( unsigned int i = 0; i < numberOfHits; i += int_v::Size ) {
+      const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
+      const int_m validHitsMask = (hitIndexes < numberOfHits);
+      const int_v isUsed = int_v( d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes), validHitsMask);
+       ASSERT( ((isUsed >= int_v( Vc::Zero )) && (isUsed <= int_v( 1 )) && validHitsMask) == validHitsMask,
               isUsed << validHitsMask);
     }
   }
 #endif // NDEBUG
   
-  d->fTrackletVectors.Resize( ( d->fNTracklets + short_v::Size - 1 ) / short_v::Size);
+  d->fTrackletVectors.Resize( ( d->fNTracklets + int_v::Size - 1 ) / int_v::Size);
   
 #ifdef USE_TIMERS
   timer.Start();
@@ -423,11 +429,11 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
     const unsigned numberOfHits = row.NHits();
-    for ( unsigned int i = 0; i < numberOfHits; i += short_v::Size ) {
-      const ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + i;
-      const short_m validHitsMask = (hitIndexes < numberOfHits);
-      const short_v isUsed = short_v( d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes), validHitsMask);
-      ASSERT( ((isUsed >= short_v( Vc::Zero )) && (isUsed <= short_v( 3 )) && validHitsMask) == validHitsMask,
+    for ( unsigned int i = 0; i < numberOfHits; i += int_v::Size ) {
+      const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
+      const int_m validHitsMask = (hitIndexes < numberOfHits);
+      const int_v isUsed = int_v( d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes), validHitsMask);
+      ASSERT( ((isUsed >= int_v( Vc::Zero )) && (isUsed <= int_v( 3 )) && validHitsMask) == validHitsMask,
       isUsed << validHitsMask);
     }
   }
@@ -449,7 +455,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
       TrackletList sortedTracklets;
       for ( int i = 0; i < d->fTrackletVectors.Size(); ++i ) {
         const TrackletVector &tv = d->fTrackletVectors[i];
-        for ( int j = 0; j < ushort_v::Size; ++j ) {
+        for ( int j = 0; j < uint_v::Size; ++j ) {
           if ( tv.NHits()[j] > 0 ) {
             sortedTracklets.push_back( AliHLTTPCCATracklet( tv, j ) );
           }

@@ -72,19 +72,27 @@
  $STICFLAGS     = "";
  $AGETOF        = "agetof";
  $AGETOFLAGS    = "-V 1";
- $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
- chomp($LIBSTDC);
- $LIBG2C        = "";
  
  $CXX_VERSION  = `$CXX -dumpversion`;
  chomp($CXX_VERSION);
  ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
  my $cxx_version = $CXX_MAJOR . ".". $CXX_MINOR;
- my $cxxflags     = `root-config --auxcflags`; chomp($cxxflags); $CXXFLAGS  =~ s/-I.*//;# print "cxxflags = $cxxflags\n";
- my @words     = split(' ',$cxxflags);
- $CXXFLAGS     = ""; #$LDFLAGS;
- $CFLAGS       = ""; #$LDFLAGS;
- $FFLAGS      = $LDFLAGS;
+ my $CXXFLAGS     = `root-config --auxcflags`; chomp($CXXFLAGS); #$CXXFLAGS  =~ s/-I.*//; 
+# print "CXXFLAGS = $CXXFLAGS\n";
+ $CXXFLAGS    .= " -fPIC"; #$LDFLAGS;
+ $CFLAGS       = $CXXFLAGS;
+ my @words     = split(' ',$CFLAGS);# print "words = @words\n";
+ my $cflags    = "";
+ foreach my $w (@words) {
+   next if ($w =~ /c++/);
+   if ($cflags) {$cflags .= " ";}
+   $cflags   .= $w;
+ }
+ $CFLAGS = $cflags;
+ $FFLAGS       = $CFLAGS;
+ $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
+ chomp($LIBSTDC);
+ $LIBG2C        = "";
  
  $LIBS          = "";
  $Libraries     = "";
@@ -108,6 +116,7 @@
  $FINK_CXXFLAGS= "";
  $FINK_CFLAGS= "";
  $FINK_LDFLAGS = "";
+ $CERNLIB_FPPFLAGS = "-DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG -DCERNLIB_HADRON -DCERNLIB_COMIS -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";# -DCERNLIB_GCALOR;
  my $LLIB = "lib";
  if (! $USE_64BITS and $STAR_HOST_SYS =~ /darwin/) { $USE_64BITS = "yes";}
  if (  $USE_64BITS) { $LLIB = "lib64";}
@@ -116,65 +125,57 @@
 #    $CFLAGS   .= " -m64";
 #    $FFLAGS   .= " -m64";
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_QMLXIA64 -DCERNLIB_LXIA64";
-   $CERNLIB_CPPFLAGS .= " -DCERNLIB_QMLXIA64 -DCERNLIB_LXIA64";
  } else {
 #    $CXXFLAGS .= " -m32";
 #    $CFLAGS   .= " -m32";
-   $FFLAGS   .= " -m32";
+#   $FFLAGS   .= " -m32";
  }
  # Vc: gcc :  -Wno-unused-function  -Wno-parentheses  -Wno-strict-aliasing -Wno-uninitialized 
  if ($CXX eq "g++" or $CXX eq "gcc") {
-   $CXXFLAGS .= " -fPIC -pipe -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics -msse -mfpmath=sse";# -msse -msse2 -msse3 -msse4.1 -mssse3";# $XMACHOPT 
-   $CFLAGS   .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse";# -msse -msse2 -msse3 -msse4.1 -mssse3";
-#   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -W -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3 -fno-second-underscore -fno-automatic";
-#   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3";
-   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -mfpmath=sse";
-#   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3";
-   #       $CXXFLAGS .= " -fPIC -pipe -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics -msse -mfpmath=sse -msse2";# $XMACHOPT 
-   #       $CFLAGS   .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse -msse2";
-   #       $FFLAGS  .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse -msse2 -fno-second-underscore -fno-automatic";
+    $CXXFLAGS .= " -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics";
+    $CFLAGS   .= " -Wall -Wcast-align";
+    $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -W -Wsurprising -Wcast-align";
+# #   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3";
+#    $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -mfpmath=sse";
+# #   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3";
+#    #       $CXXFLAGS .= " -fPIC -pipe -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics -msse -mfpmath=sse -msse2";# $XMACHOPT 
+#    #       $CFLAGS   .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse -msse2";
+#    #       $FFLAGS  .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse -msse2 -fno-second-underscore -fno-automatic";
    $FEXTEND = "-ffixed-line-length-132";
-   if ($FC eq 'gfortran') {
-     $CERNLIB_FPPFLAGS .= " -DCERNLIB_GFORTRAN";
-     $FLIBS            .= " -lgfortran";
-   }
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
-   $CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
    
  } else {
    if ($CXX eq "icc" or $CXX eq "icpc") {
-     $CXXFLAGS .= " -fPIC -wd1476 -Iinclude  -axAVX -m32 -wd1572 -wd279";
-     $CFLAGS   .= " -fPIC -wd1476 -Iinclude  -axAVX -m32 -wd1572 -wd279";
-     $GFLAGS    = $FFLAGS;
-     $FFLAGS   .= " -fPIC -Iinclude  -axAVX";
+     $CXXFLAGS .= " -wd1476 -wd1572 -wd279";
+     $CFLAGS   .= " -wd1476 -wd1572 -wd279";
      $SOFLAGS      .= " -shared -u*";
      if ($FC eq 'ifort') {# To use cernlib done with gfortran
        $FEXTEND = "-132";
-       $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
-       $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libquadmath.a`; chomp($FLIBS);
-       $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
-#       print "FLIBS = $FLIBS ==========================\n";
      }
    }
    $LIBG2C  = `$CC $CFLAGS  -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
    chomp($LIBG2C);
  }
- foreach my $w (@words) {
-   if ($w =~ /^-I/) {next;}
-   if ($CXXFLAGS) {$CXXFLAGS .= " ";}
-   $CXXFLAGS .= $w;
-   if ($w =~ /\+\+/) {next;}
-   if ($CFLAGS) {$CFLAGS .= " ";}
-   $CFLAGS .= $w;
+ if ($FC eq 'gfortran' or $FC eq 'ifort') {
+   $GFLAGS    = $FFLAGS;
+   $GFLAGS   =~ s/-axAVX//;
+#   print "GFLAGS = $GFLAGS, FLIBS = $FLIBS ==========================\n";
+   $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
+   $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libquadmath.a`; chomp($FLIBS);
+   $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
  }
  if ($STAR_HOST_SYS !~ /darwin/ ) {
-   $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-   $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+   $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX";
+ } else {
+   $CERNLIB_FPPFLAGS .= " -Dunix=unix -D__DARWIN__";
  }
- $CERNLIB_FPPFLAGS = "-DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC ".
- "-DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON -DCERNLIB_COMIS";# -DCERNLIB_GCALOR;
  $CERNLIB_CPPFLAGS = $FPPFLAGS;
+ if ( $FC eq "gfortran" ){
+   # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
+   $CERNLIB_FPPFLAGS .= " -DCERNLIB_GFORTRAN";
+ }
  
+
  #     print "CXX = $CXX, CXXFLAGS = $CXXFLAGS, CC = $CC, CFLAGS = $CFLAGS\n";
  # print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
  # print "CC = $CC CXX = $CXX FC = $FC LD = $LD\n";
@@ -333,11 +334,6 @@
    $FLIBS      .= " " . `$FC $FFLAGS  -print-file-name=libgfortran.dylib`; chomp($FLIBS);
    $FLIBS      .= " " . `$FC $FFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
    $FPP = $FC . " -E -P"; 
-   $CERNLIB_FPPFLAGS .= " -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC ". 
-     "-Dunix=unix -D__DARWIN__";
-   $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC ".
-     "-DCERNLIB_MACOSX -Dunix=unix -D__DARWIN__";
-   #      $OSFID .= " __linux";
  }
 
  $SYSLIBS   .= $threadlib;
@@ -346,8 +342,8 @@
  # remove duplicates options coming from ROOTCFLAGS - used block to be sure
  # vars are gone when we go out of scope
  {
-   my(@ARGS)  =($CFLAGS ,$CXXFLAGS,$FFLAGS);    # to clean for duplicates / restore below in the same order
-   my(@LABELS)=("CFLAGS","CXXFLAGS","FFLAGS");   # labels should also relate to @ARGS order - for printing
+   my(@ARGS)  =($CFLAGS ,$CXXFLAGS,$FFLAGS,$CERNLIB_FPPFLAGS,$CERNLIB_CPPFLAGS);    # to clean for duplicates / restore below in the same order
+   my(@LABELS)=("CFLAGS","CXXFLAGS","FFLAGS","CERNLIB_FPPFLAGS","CERNLIB_CPPFLAGS");   # labels should also relate to @ARGS order - for printing
    for ($i =0 ; $i <= $#ARGS ; $i++){
      my $Arg =  $ARGS[$i]; 
      my(@CmpArgs)=split(" ",$Arg);
@@ -365,18 +361,10 @@
      }
    }
    # restore  
-   ($CFLAGS,$CXXFLAGS,$FFLAGS) = @ARGS;        # <--- same order than above
+   ($CFLAGS,$CXXFLAGS,$FFLAGS,$CERNLIB_FPPFLAGS,$CERNLIB_CPPFLAGS) = @ARGS;        # <--- same order than above
  }
- 
- 
- 
- #    $OSFID .= " " . $STAR_SYS; $OSFCFID .= " " . $STAR_SYS;
- #    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
- #    $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;
- 
  $OSFID    .= " __ROOT__";
  $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
- $CFLAGS   .= " -D" . join ( " -D", split ( " ", $OSFID ) );
  
  if ($OSFCFID) {
    $FPPFLAGS  .= " -D" . join ( " -D", split ( " ", $OSFCFID ) );
@@ -679,7 +667,7 @@
  # }
  if (-r "/tmp/temp_gccflags.c") {`rm /tmp/temp_gccflags.c`;}
  #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
- $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
+# $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
  
  $CXXCOM = 
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
@@ -714,9 +702,9 @@
 	       'CPPPATH'        => $CPPPATH,
 	       'EXTRA_CPPPATH'  => $EXTRA_CPPPATH,
 	       'CERNLIB_FPPFLAGS'  => $CERNLIB_FPPFLAGS,
+	       'CERNLIB_CPPFLAGS'  => $CERNLIB_CPPFLAGS,
 	       'CPPFLAGS'       => $CPPFLAGS,
 	       'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
-	       'CERNLIB_CPPFLAGS'  => $CERNLIB_CPPFLAGS,
 	       'ROOTLIBS'       => $ROOTLIBS,
 	       'DEBUG'          => $DEBUG,
 	       'GPROF'          => $GPROF,
@@ -785,7 +773,7 @@
 	       'LINKMODULECOM'  => $MAKELIB,
 	       'AR'             => $AR,
 	       'ARFLAGS'        => $ARFLAGS,
-	       'ARCOM'          => $ARCOM,
+#	       'ARCOM'          => $ARCOM,
 	       'RANLIB'         => 'ranlib',
 	       'AS'             => 'as',
 	       'ASFLAGS'        => '',

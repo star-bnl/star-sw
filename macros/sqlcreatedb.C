@@ -10,8 +10,8 @@ void createdb()
    
    // open connection to MySQL server on localhost
    //   TSQLServer *db = TSQLServer::Connect("mysql://localhost/test", "nobody", "");
-   TSQLServer *db = TSQLServer::Connect("mysql://db1.usatlas.bnl.gov/Production", "atlas", "insider");
-   
+   //   TSQLServer *db = TSQLServer::Connect("mysql://db1.usatlas.bnl.gov/Production", "atlas", "insider");
+   TSQLServer *db = TSQLServer::Connect("mysql://l403.l4.bnl.local:3306/test","fisyak","");
    TSQLResult *res;
 
    // create new table (delete old one first if exists)
@@ -25,6 +25,6 @@ void createdb()
 }
 void sqlcreatedb() {
   gSystem->Load("libmysqlclient"); 
-  gSystem->Load("libMySQL.so"); 
+  gSystem->Load("libRMySQL.so"); 
   createdb();
 }

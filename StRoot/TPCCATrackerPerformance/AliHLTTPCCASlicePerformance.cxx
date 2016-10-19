@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.3 2013/11/21 13:07:28 mzyzak Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.14 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -157,6 +157,10 @@ void AliHLTTPCCASlicePerformance::CheckMCTracks()
       if ( mc.P() >= AliHLTTPCCAParameters::RefThreshold ) {
         mc.SetSet( 2 );
         mcTrackData.SetSet( 2 );
+        if ( mc.NMCRows() >= fTracker->Slice(fISlice).Param().NRows() ) {
+          mc.SetSet( 3 );
+          mcTrackData.SetSet( 3 );
+        }
       } // ref
       else{
         mc.SetSet( 1 );
@@ -280,8 +284,12 @@ void AliHLTTPCCASlicePerformance::EfficiencyPerformance( )
       if ( mc.GetSet() == 1){
         fEff.Inc(reco,clones,"extra");
       }
-      else{
+      else if ( mc.GetSet() == 2 ) {
         fEff.Inc(reco,clones,"ref");
+      }
+      else {
+        fEff.Inc(reco,clones,"ref");
+        fEff.Inc(reco,clones,"long_ref");
       }
     }
   } // for iMCTr
@@ -345,23 +353,23 @@ void AliHLTTPCCASlicePerformance::FillHistos()
     const double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
     const double chi2 = param.Chi2() / nHits;
     if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
-      GetHisto("ghostsLength")->Fill( nHits );
-      GetHisto("ghostsRMom")->Fill( p );
-      GetHisto("ghostsLengthAndRMom")->Fill( nHits , p ); // TODO add same for other perfs
-      GetHisto("ghostsLengthAndChi2")->Fill( nHits , chi2 );
+      GetHisto(kghostsLength)->Fill( nHits );
+      GetHisto(kghostsRMom)->Fill( p );
+      GetHisto(kghostsLengthAndRMom)->Fill( nHits , p ); // TODO add same for other perfs
+      GetHisto(kghostsLengthAndChi2)->Fill( nHits , chi2 );
 
-      GetHisto("ghostsChi2")->Fill( chi2 );
+      GetHisto(kghostsChi2)->Fill( chi2 );
     }
     else {
       const double pMC = mcTr.P();    
-      GetHisto("recosLength")->Fill( nHits );
-      GetHisto("recosRMom")->Fill( p );
-      GetHisto("recosMCMom")->Fill( pMC );
-      GetHisto("recosLengthAndRMom")->Fill( nHits , p );
-      GetHisto("recosLengthAndMCMom")->Fill( nHits , pMC );
-      GetHisto("recosLengthAndChi2")->Fill( nHits , chi2 );
+      GetHisto(krecosLength)->Fill( nHits );
+      GetHisto(krecosRMom)->Fill( p );
+      GetHisto(krecosMCMom)->Fill( pMC );
+      GetHisto(krecosLengthAndRMom)->Fill( nHits , p );
+      GetHisto(krecosLengthAndMCMom)->Fill( nHits , pMC );
+      GetHisto(krecosLengthAndChi2)->Fill( nHits , chi2 );
       
-      GetHisto("recosChi2")->Fill( chi2 );
+      GetHisto(krecosChi2)->Fill( chi2 );
     }
   }
   
@@ -493,19 +501,19 @@ void AliHLTTPCCASlicePerformance::FillHistos()
 //       AliHLTTPCCATrackParam p1 = t.EndPoint();
 
         
-      GetHisto("resY")->Fill( p.GetY() - mcY );
-      GetHisto("resZ")->Fill( p.GetZ() - mcZ );
-      GetHisto("resSinPhi")->Fill( p.GetSinPhi() - mcSinPhi );
-      GetHisto("resDzDs")->Fill( p.GetDzDs() - mcDzDs );
+      GetHisto(kresY)->Fill( p.GetY() - mcY );
+      GetHisto(kresZ)->Fill( p.GetZ() - mcZ );
+      GetHisto(kresSinPhi)->Fill( p.GetSinPhi() - mcSinPhi );
+      GetHisto(kresDzDs)->Fill( p.GetDzDs() - mcDzDs );
       if(CAMath::Abs(qPt) > 1.e-8){
-        GetHisto("resPt")->Fill( (pt - mcPt)/mcPt );
+        GetHisto(kresPt)->Fill( (pt - mcPt)/mcPt );
       }
 //        cout << qPt << "  "<< mcQPt << endl;
-      if ( p.GetErr2Y() > 0 ) GetHisto("pullY")->Fill( ( p.GetY() - mcY ) / TMath::Sqrt( p.GetErr2Y() ) );
-      if ( p.GetErr2Z() > 0 ) GetHisto("pullZ")->Fill( ( p.GetZ() - mcZ ) / TMath::Sqrt( p.GetErr2Z() ) );
-      if ( p.GetErr2SinPhi() > 0 ) GetHisto("pullSinPhi")->Fill( ( p.GetSinPhi() - mcSinPhi ) / TMath::Sqrt( p.GetErr2SinPhi() ) );
-      if ( p.GetErr2DzDs() > 0 ) GetHisto("pullDzDs")->Fill( ( p.DzDs() - mcDzDs ) / TMath::Sqrt( p.GetErr2DzDs() ) );
-      if(CAMath::Abs(qPt) > 1.e-7 && p.GetErr2QPt()>0 ) GetHisto("pullQPt")->Fill( (qPt - mcQPt)/TMath::Sqrt(p.GetErr2QPt()) );
+      if ( p.GetErr2Y() > 0 ) GetHisto(kpullY)->Fill( ( p.GetY() - mcY ) / TMath::Sqrt( p.GetErr2Y() ) );
+      if ( p.GetErr2Z() > 0 ) GetHisto(kpullZ)->Fill( ( p.GetZ() - mcZ ) / TMath::Sqrt( p.GetErr2Z() ) );
+      if ( p.GetErr2SinPhi() > 0 ) GetHisto(kpullSinPhi)->Fill( ( p.GetSinPhi() - mcSinPhi ) / TMath::Sqrt( p.GetErr2SinPhi() ) );
+      if ( p.GetErr2DzDs() > 0 ) GetHisto(kpullDzDs)->Fill( ( p.DzDs() - mcDzDs ) / TMath::Sqrt( p.GetErr2DzDs() ) );
+      if(CAMath::Abs(qPt) > 1.e-7 && p.GetErr2QPt()>0 ) GetHisto(kpullQPt)->Fill( (qPt - mcQPt)/TMath::Sqrt(p.GetErr2QPt()) );
 
       break;
     }
@@ -552,21 +560,21 @@ void AliHLTTPCCASlicePerformance::FillHistos()
 
       const AliHLTTPCCALocalMCPoint& point = points[MCindex];
       
-      GetHisto("resXHit")->Fill( hit.X() - point.X() );
-      GetHisto("resYHit")->Fill( hit.Y() - point.Y() );
-      GetHisto("resZHit")->Fill( hit.Z() - point.Z() );
-      GetHisto("resXHitVsZ")->Fill( hit.Z(), hit.X() - point.X() );
-      GetHisto("resYHitVsZ")->Fill( hit.Z(), hit.Y() - point.Y() );
-      GetHisto("resZHitVsZ")->Fill( hit.Z(), hit.Z() - point.Z() );
-      GetHisto("resXHitVsX")->Fill( hit.X(), hit.X() - point.X() );
-      GetHisto("resYHitVsX")->Fill( hit.X(), hit.Y() - point.Y() );
-      GetHisto("resZHitVsX")->Fill( hit.X(), hit.Z() - point.Z() );
-      GetHisto("resXHitVsIS")->Fill( fISlice, hit.X() - point.X() );
-      GetHisto("resYHitVsIS")->Fill( fISlice, hit.Y() - point.Y() );
-      GetHisto("resZHitVsIS")->Fill( fISlice, hit.Z() - point.Z() );
+      GetHisto(kresXHit)->Fill( hit.X() - point.X() );
+      GetHisto(kresYHit)->Fill( hit.Y() - point.Y() );
+      GetHisto(kresZHit)->Fill( hit.Z() - point.Z() );
+      GetHisto(kresXHitVsZ)->Fill( hit.Z(), hit.X() - point.X() );
+      GetHisto(kresYHitVsZ)->Fill( hit.Z(), hit.Y() - point.Y() );
+      GetHisto(kresZHitVsZ)->Fill( hit.Z(), hit.Z() - point.Z() );
+      GetHisto(kresXHitVsX)->Fill( hit.X(), hit.X() - point.X() );
+      GetHisto(kresYHitVsX)->Fill( hit.X(), hit.Y() - point.Y() );
+      GetHisto(kresZHitVsX)->Fill( hit.X(), hit.Z() - point.Z() );
+      GetHisto(kresXHitVsIS)->Fill( fISlice, hit.X() - point.X() );
+      GetHisto(kresYHitVsIS)->Fill( fISlice, hit.Y() - point.Y() );
+      GetHisto(kresZHitVsIS)->Fill( fISlice, hit.Z() - point.Z() );
 
-      GetHisto("xMCPoint")->Fill( point.X() );
-      GetHisto("rMCPoint")->Fill( sqrt(point.Y()*point.Y() + point.X()*point.X()) );
+      GetHisto(kxMCPoint)->Fill( point.X() );
+      GetHisto(krMCPoint)->Fill( sqrt(point.Y()*point.Y() + point.X()*point.X()) );
 
       
 
@@ -577,17 +585,17 @@ void AliHLTTPCCASlicePerformance::FillHistos()
       float mcEz = point.Pz();
       float mcEt = TMath::Sqrt( mcEx * mcEx + mcEy * mcEy );
       
-      sfloat_v Err2Y = 0.f, Err2Z = 0.f;
+      float_v Err2Y = 0.f, Err2Z = 0.f;
       const AliHLTTPCCAParam par;
       TrackParamVector t;
       t.SetZ( point.Z() );
       t.SetSinPhi(mcEy / mcEt);
       t.SetDzDs(mcEz / mcEt);
-      par.GetClusterErrors2(ushort_v(hit.IRow()), t, &Err2Y, &Err2Z );
+      par.GetClusterErrors2(uint_v(hit.IRow()), t, &Err2Y, &Err2Z );
 
-      // GetHisto("pullXHit")->Fill( hit.X() - point.X() );
-      GetHisto("pullYHit")->Fill( (hit.Y() - point.Y())/sqrt(Err2Y[0]) );
-      GetHisto("pullZHit")->Fill( (hit.Z() - point.Z())/sqrt(Err2Z[0]) );
+      // GetHisto(kpullXHit)->Fill( hit.X() - point.X() );
+      GetHisto(kpullYHit)->Fill( (hit.Y() - point.Y())/sqrt(Err2Y[0]) );
+      GetHisto(kpullZHit)->Fill( (hit.Z() - point.Z())/sqrt(Err2Z[0]) );
       
       
 

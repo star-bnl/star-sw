@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.3 2013/11/21 13:07:28 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.15 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -155,7 +155,7 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
 
 #if KFPARTICLE
   if ( GetSubPerformance("Topo Performance") )
-    dynamic_cast<KFTopoPerformance*>(GetSubPerformance("Topo Performance"))->SetNewEvent2(fTopoReconstructor);
+    dynamic_cast<KFTopoPerformance*>(GetSubPerformance("Topo Performance"))->SetTopoReconstructor(fTopoReconstructor);
 #endif // KFPARTICLE
 
 #ifndef HLTCA_STANDALONE
@@ -202,10 +202,6 @@ void AliHLTTPCCAPerformance::WriteDir2Current( TObject *obj )
 
 void AliHLTTPCCAPerformance::WriteHistos()
 {
-#if KFPARTICLE
-  if ( GetSubPerformance("Topo Performance") )
-    dynamic_cast<KFTopoPerformance*>(GetSubPerformance("Topo Performance"))->AddV0Histos();
-#endif // KFPARTICLE
   if(fOutputFile) WriteDir2Current(fOutputFile);
 }
 #endif // HLTCA_STANDALONE
@@ -336,14 +332,14 @@ void AliHLTTPCCAPerformance::SetRecoData(vector<int> &mcIndexes )
   mcData.resize(fMCTracks.Size());  
   recoData.resize(mcIndexes.size());
   
-  for(int iTr=0; iTr<mcIndexes.size(); iTr++)
+  for(unsigned int iTr=0; iTr<mcIndexes.size(); iTr++)
   {
     recoData[iTr].SetMCTrack(mcIndexes[iTr], 1., 0);
     if( mcIndexes[iTr] >=0 )
       mcData[ mcIndexes[iTr] ].AddReconstructed();
   }
 }
-
+  
 void AliHLTTPCCAPerformance::SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints)
 {
   const int N = mcPoints.size();
@@ -508,7 +504,7 @@ void AliHLTTPCCAPerformance::ShiftHitsToMC(){
       double mcEz = point.Pz();
       double mcEt = TMath::Sqrt( mcEx * mcEx + mcEy * mcEy );
       
-      sfloat_v Err2Y = 0.f, Err2Z = 0.f;
+      float_v Err2Y = 0.f, Err2Z = 0.f;
       //float Err2Y = 0, Err2Z = 0;
       const AliHLTTPCCAParam par;
       TrackParamVector t;
@@ -517,7 +513,7 @@ void AliHLTTPCCAPerformance::ShiftHitsToMC(){
       t.SetSinPhi(ty);
       float tz = mcEz / mcEt;
       t.SetDzDs(tz);
-      par.GetClusterErrors2(ushort_v(hit.IRow()), t, &Err2Y, &Err2Z );
+      par.GetClusterErrors2(uint_v(hit.IRow()), t, &Err2Y, &Err2Z );
       // par.GetClusterErrors2((hit.IRow()), t, Err2Y, Err2Z );
       
         // fix hits
@@ -558,7 +554,7 @@ void AliHLTTPCCAPerformance::ResimulateHits(){
     double mcEz = mcP.Pz();
     double mcEt = TMath::Sqrt( mcEx * mcEx + mcEy * mcEy );
       
-    sfloat_v Err2Y = 0.f, Err2Z = 0.f;
+    float_v Err2Y = 0.f, Err2Z = 0.f;
       //float Err2Y = 0, Err2Z = 0;
     const AliHLTTPCCAParam par;
     TrackParamVector t;
@@ -567,7 +563,7 @@ void AliHLTTPCCAPerformance::ResimulateHits(){
     t.SetSinPhi(ty);
     float tz = mcEz / mcEt;
     t.SetDzDs(tz);
-    par.GetClusterErrors2(ushort_v(hit.IRow()), t, &Err2Y, &Err2Z );
+    par.GetClusterErrors2(uint_v(hit.IRow()), t, &Err2Y, &Err2Z );
       // par.GetClusterErrors2((hit.IRow()), t, Err2Y, Err2Z );
       
       // fix hits

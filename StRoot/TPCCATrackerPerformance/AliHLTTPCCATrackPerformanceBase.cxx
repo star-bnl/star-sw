@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackPerformanceBase.cxx,v 1.3 2013/11/21 13:07:29 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.11 2010/08/26 15:05:50 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -373,29 +373,29 @@ void AliHLTTPCCATrackPerformanceBase::FillHistos()
 
      double PhiMC = TMath::RadToDeg()*TMath::ATan2(mcTr.Py(),mcTr.Px());
 
-      GetHisto("recosEffVsMCMom")   ->Fill( mcTr.P(),     mcD.IsReconstructed() );
-      GetHisto("recosEffVsMCNHits") ->Fill( mcTr.NHits(), mcD.IsReconstructed() );
-      GetHisto("recosEffVsMCPtAll") ->Fill( mcTr.Pt(),    mcD.IsReconstructed() );
-      GetHisto("recosEffVsMCPhiAll")->Fill( PhiMC,    mcD.IsReconstructed() );
-      GetHisto("recosEffVsNMCTracks")->Fill( Multiplicity,    mcD.IsReconstructed() );
+      GetHisto(krecosEffVsMCMom)   ->Fill( mcTr.P(),     mcD.IsReconstructed() );
+      GetHisto(krecosEffVsMCNHits) ->Fill( mcTr.NHits(), mcD.IsReconstructed() );
+      GetHisto(krecosEffVsMCPtAll) ->Fill( mcTr.Pt(),    mcD.IsReconstructed() );
+      GetHisto(krecosEffVsMCPhiAll)->Fill( PhiMC,    mcD.IsReconstructed() );
+      GetHisto(krecosEffVsNMCTracks)->Fill( Multiplicity,    mcD.IsReconstructed() );
   
       if(mcTr.MotherId() == -1) {
         //all reconstructed primary tracks
-        GetHisto("recosEffVsMCMomPrim") ->Fill( mcTr.P(),  mcD.IsReconstructed() );
-        GetHisto("recosEffVsMCPtPrim")  ->Fill( mcTr.Pt(), mcD.IsReconstructed() );
-        GetHisto("recosEffVsMCPhiPrim") ->Fill( PhiMC, mcD.IsReconstructed() );
+        GetHisto(krecosEffVsMCMomPrim) ->Fill( mcTr.P(),  mcD.IsReconstructed() );
+        GetHisto(krecosEffVsMCPtPrim)  ->Fill( mcTr.Pt(), mcD.IsReconstructed() );
+        GetHisto(krecosEffVsMCPhiPrim) ->Fill( PhiMC, mcD.IsReconstructed() );
         if(mcTr.Set() == 2) {
           //reconstructed reference primary tracks
-          GetHisto("recosEffVsMCMomRefPrim") ->Fill( mcTr.P(),  mcD.IsReconstructed() );
-          GetHisto("recosEffVsMCPtRefPrim")  ->Fill( mcTr.Pt(), mcD.IsReconstructed() );
-          GetHisto("recosEffVsMCPhiRefPrim") ->Fill( PhiMC, mcD.IsReconstructed() );
+          GetHisto(krecosEffVsMCMomRefPrim) ->Fill( mcTr.P(),  mcD.IsReconstructed() );
+          GetHisto(krecosEffVsMCPtRefPrim)  ->Fill( mcTr.Pt(), mcD.IsReconstructed() );
+          GetHisto(krecosEffVsMCPhiRefPrim) ->Fill( PhiMC, mcD.IsReconstructed() );
         }
       }
       else if(mcTr.MotherId() > -1) {
         //reconstructed secondary tracks
-        GetHisto("recosEffVsMCMomSec") ->Fill( mcTr.P(),  mcD.IsReconstructed() );
-        GetHisto("recosEffVsMCPtSec")  ->Fill( mcTr.Pt(), mcD.IsReconstructed() );
-        GetHisto("recosEffVsMCPhiSec") ->Fill( PhiMC, mcD.IsReconstructed() );
+        GetHisto(krecosEffVsMCMomSec) ->Fill( mcTr.P(),  mcD.IsReconstructed() );
+        GetHisto(krecosEffVsMCPtSec)  ->Fill( mcTr.Pt(), mcD.IsReconstructed() );
+        GetHisto(krecosEffVsMCPhiSec) ->Fill( PhiMC, mcD.IsReconstructed() );
       }
     }
   }

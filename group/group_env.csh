@@ -290,9 +290,9 @@ endif
 #    endif
 #endif
 
-#if ( $?OPTSTAR ) then
-#    if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
-#    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
+if ( $?OPTSTAR ) then
+    if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
+    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
 #
 #    if ( -e ${OPTSTAR}/${STAR_HOST_SYS} ) then
 #	# Redhat > 7.3  transition ; adding one level
@@ -301,7 +301,7 @@ endif
 #    if ( -e ${xoptstar}/${STAR_HOST_SYS} ) then
 #	setenv XOPTSTAR  ${xoptstar}/${STAR_HOST_SYS}
 #    endif
-#endif
+endif
 
 
 # Display the messages here now
