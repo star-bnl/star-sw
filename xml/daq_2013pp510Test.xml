@@ -35,8 +35,8 @@
   if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
   echo "Output MuDst file : $muFile" 
   echo $0 &gt; ${logFile}
-  root4star -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
-#  root.exe -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
+#  root4star -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
+  root.exe -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
   if (-r  ${SUBMITTINGDIRECTORY}/${blaFile}) rm ${SUBMITTINGDIRECTORY}/${blaFile};
   echo $0 &gt;&gt; ${logFile}
 #  mv ${logFile} ${muFile} ${SUBMITTINGDIRECTORY}
