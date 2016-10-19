@@ -146,9 +146,20 @@
    
  } else {
    if ($CXX eq "icc" or $CXX eq "icpc") {
-     $CXXFLAGS .= " -wd1476 -wd1572 -wd279";
-     $CFLAGS   .= " -wd1476 -wd1572 -wd279";
      $SOFLAGS      .= " -shared -u*";
+     if ($USE_64BITS){
+       $LDFLAGS  .= " -m64";
+       $SOFLAGS  .= " -m64";
+       $CXXFLAGS .= " -m64";
+       $CFLAGS   .= " -m64";
+       $FFLAGS   .= " -m64";
+     } else {
+       $LDFLAGS  .= " -m32";
+       $SOFLAGS  .= " -m32";
+       $CXXFLAGS .= " -m32";
+       $CFLAGS   .= " -m32";
+       $FFLAGS   .= " -m32";
+     }
      if ($FC eq 'ifort') {# To use cernlib done with gfortran
        $FEXTEND = "-132";
      }
