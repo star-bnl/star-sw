@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.17 2016/10/19 14:54:35 jwebb Exp $
+* $Id: xgeometry.age,v 1.18 2016/10/20 14:13:50 jwebb Exp $
 
 
 
@@ -2492,6 +2492,8 @@ If LL>0
   Case y2016   { y2016 : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
   Case y2016a  { y2016 : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
 
+  Case y2017   { y2017 : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
+
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
 
@@ -4598,8 +4600,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.17 2016/10/19 14:54:35 jwebb Exp $
+* $Id: xgeometry.age,v 1.18 2016/10/20 14:13:50 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.18  2016/10/20 14:13:50  jwebb
+* Define y2017 rough cut geometry.
+*
 * Revision 1.17  2016/10/19 14:54:35  jwebb
 * Restored missing y2016a case statement (bug 3253).  Removed early 'return' from y2014-y2015 geometries (separate issue).
 *
