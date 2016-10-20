@@ -153,11 +153,11 @@ void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
   gSystem->Load( "libKinematics.so");
   gSystem->Load( "xgeometry.so"     );
 
-  gSystem->Load(".sl64_gcc482/lib/libHepMC2_06_09.so");
-  gSystem->Load(".sl64_gcc482/lib/libPythia8_1_86.so");
-  gSystem->Load(".sl64_gcc482/lib/libPhotos3_61.so");
-  gSystem->Load(".sl64_gcc482/lib/libTauola1_1_5.so");
-  gSystem->Load(".sl64_gcc482/lib/libEvtGen1_06_00.so");
+  gSystem->Load("libHepMC2_06_09.so");
+  gSystem->Load("libPythia8_1_86.so");
+  gSystem->Load("libPhotos3_61.so");
+  gSystem->Load("libTauola1_1_5.so");
+  gSystem->Load("libEvtGen1_06_00.so");
 
   // force gstar load/call
   gSystem->Load( "gstar.so" );
