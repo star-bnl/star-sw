@@ -36,6 +36,25 @@
     <Construct sys="phmd" config="PHMDof" simu="1" />
 </Geometry>
 
+  <!-- y2017 series geometry tags -->
+  <Geometry tag="y2017"  check="false" comment="Y2017 rough cut geometry">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+  </Geometry>
+
   <!-- y2016 series geometry tags -->
   <Geometry tag="y2016"  check="false" comment="Y2016 rough cut geometry">
 
