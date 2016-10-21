@@ -76,7 +76,7 @@ public:
 	unsigned int getLabels(std::vector<unsigned int> &aLabelList);
 	unsigned int getLabels(std::vector<std::vector<unsigned int> > &aLabelList);
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
-			std::string optionList = "");
+			std::string optionList = "", unsigned int aLabel = 0);
 	void milleOut(MilleBinary &aMille);
 	void printTrajectory(unsigned int level = 0);
 	void printPoints(unsigned int level = 0);
@@ -93,6 +93,7 @@ private:
 	unsigned int numLocals; ///< Total number of (additional) local parameters
 	unsigned int numMeasurements; ///< Total number of measurements
 	unsigned int externalPoint; ///< Label of external point (or 0)
+	unsigned int skippedMeasLabel; ///< Label of point with measurements skipped in fit (for unbiased residuals) (or 0)
 	bool constructOK; ///< Trajectory has been successfully constructed (ready for fit/output)
 	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
 	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit
@@ -123,7 +124,7 @@ private:
 	void buildLinearEquationSystem();
 	void predict();
 	double downWeight(unsigned int aMethod);
-	void getResAndErr(unsigned int aData, double &aResidual,
+	void getResAndErr(unsigned int aData, bool used, double &aResidual,
 			double &aMeadsError, double &aResError, double &aDownWeight);
 };
 }

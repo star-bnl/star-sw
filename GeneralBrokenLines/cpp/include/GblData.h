@@ -47,14 +47,23 @@ typedef ROOT::Math::SMatrix<double, 5, 5> SMatrix55;
 //! Namespace for the general broken lines package
 namespace gbl {
 
+enum dataBlockType {
+	None,
+	InternalMeasurement,
+	InternalKink,
+	ExternalSeed,
+	ExternalMeasurement
+};
+
 /// Data (block) for independent scalar measurement
 /**
- * Data (block) containing value, precision and derivatives for measurements and kinks.
+ * Data (block) containing value, precision and derivatives for measurements, kinks and seeds.
  * Created from attributes of GblPoints, used to construct linear equation system for track fit.
  */
 class GblData {
 public:
-	GblData(unsigned int aLabel, double aMeas, double aPrec);
+	GblData(unsigned int aLabel, dataBlockType aType, double aMeas,
+			double aPrec);
 	virtual ~GblData();
 	void addDerivatives(unsigned int iRow,
 			const std::vector<unsigned int> &labDer, const SMatrix55 &matDer,
@@ -71,6 +80,8 @@ public:
 	double setDownWeighting(unsigned int aMethod);
 	double getChi2() const;
 	void printData() const;
+	unsigned int getLabel() const;
+	dataBlockType getType() const;
 	void getLocalData(double &aValue, double &aWeight,
 			std::vector<unsigned int>* &indLocal,
 			std::vector<double>* &derLocal);
@@ -83,7 +94,8 @@ public:
 			std::vector<double>* &derLocal);
 
 private:
-	unsigned int theLabel; ///< Label (of measurements point)
+	unsigned int theLabel; ///< Label (of corresponding point)
+	dataBlockType theType; ///< Type (None, InternalMeasurement, InternalKink, ExternalSeed, ExternalMeasurement)
 	double theValue; ///< Value (residual)
 	double thePrecision; ///< Precision (1/sigma**2)
 	double theDownWeight; ///< Down-weighting factor (0-1)

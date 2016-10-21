@@ -302,12 +302,15 @@ class GblData(object):
   ## Create new data.
   #  
   #  @param aLabel label of corresponding point; int
+  #  @param aType  type of data; int
   #  @param aValue value; float
   #  @param aPrec precision; float
   #
-  def __init__(self, aLabel=0, aValue=0., aPrec=0.):
+  def __init__(self, aLabel=0, aType=0, aValue=0., aPrec=0.):
     ## label of corresponding point; int
     self.__label = aLabel
+    ## type of data (0: none, 1: internal measurement, 2: internal kink, 3: external seed, 4: external measurement); int
+    self.__type = aType
     ## value (residual or kink); float
     self.__value = aValue
     ## precision (diagonal element of inverse covariance matrix); float
@@ -423,6 +426,20 @@ class GblData(object):
     Chi2 = (self.__value - self.__prediction) ** 2 * self.__precision * self.__downWeight
     return Chi2
   
+  ## Get Label.
+  #
+  #  @return label; int   
+  #
+  def getLabel(self):
+    return self.__label
+
+  ## Get type.
+  #
+  #  @return type; int   
+  #
+  def getType(self):
+    return self.__type
+      
   ## Get data for residual (and errors).
   #  
   #  @return data components; list 
@@ -462,7 +479,7 @@ class GblData(object):
 
   ## Print data.      
   def printData(self):
-    print " measurement at label ", self.__label, ": ", self.__value, self.__precision
+    print " measurement at label ", self.__label, " with type ", self.__type, " : ", self.__value, self.__precision
     print " param ", self.__parameters
     print " deriv ", self.__derivatives
     print " global labels ", self.__globalLabels
@@ -476,7 +493,7 @@ class GblData(object):
 #  
 #  For a track with an initial trajectory from a prefit of the
 #  (2D, 4D or 5D) measurements (internal seed) or an external 
-#  prediction(external seed) the description of multiple scattering
+#  prediction (external seed) the description of multiple scattering
 #  is added by offsets in a local system. Along the initial
 #  trajectory points are defined with can describe a measurement
 #  or a (thin) scatterer or both. The refit provides corrections
@@ -484,6 +501,8 @@ class GblData(object):
 #  corresponding covariance matrix at any of those points.
 #  Non-diagonal covariance matrices will be diagonalized internally.
 #  Outliers can be down-weighted by use of M-estimators.
+#  At one point the measurements can be omitted from the refit
+#  to calculate unbiased residuals.
 #
 #  A position measurement is in a plane defined by two directions.
 #  Along one direction the measurement precision may be zero,
@@ -506,6 +525,9 @@ class GblData(object):
 #  matrices of track parameters in homogeneous magnetic fields
 #  A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698.
 #  
+#  The source code is available at the DESY SVN server, see:
+#  https://www.wiki.terascale.de/index.php/GeneralBrokenLines
+#
 #  \section seq_sec Calling sequence:
 #    -# Create trajectory:\n
 #            <tt>traj = \ref gblfit.GblTrajectory "GblTrajectory()" </tt>
@@ -523,7 +545,7 @@ class GblData(object):
 #            <tt>label = traj.addPoint(point)</tt>
 #    -# Optionally add external seed:\n
 #            <tt>traj.addExternalSeed(..)</tt>
-#    -# Fit trajectory, bet Chi2, Ndf (and weight lost by M-estimators):\n
+#    -# Fit trajectory (potentially several times with different options), get Chi2, Ndf (and weight lost by M-estimators):\n
 #            <tt>[..] = traj.fit()</tt>
 #    -# For any point on inital trajectory
 #        - Get corrections and covariance matrix for track parameters:\n
@@ -537,7 +559,8 @@ class GblData(object):
 #            
 #  Alternatively trajectories can by read from MP binary files and fitted. 
 #  As the points on the initial trajectory are not stored in this files results at
-#  points (corrections, covariance matrix) are not available.
+#  points (corrections, covariance matrix) are not available and omission of
+#  measurements from a point is not possible.
 #  
 #  \section ref_sec References:  
 #    - V. Blobel, C. Kleinwort, F. Meier,
@@ -581,6 +604,8 @@ class GblTrajectory(object):
     self.__measDataIndex = []
     ## mapping points to data blocks from scatterers; list(int)
     self.__scatDataIndex = []
+    ## label of point with measurements skipped in fit (for unbiased residuals)
+    self.__skippedMeasLabel = 0
     
   ## Add point to trajectory. Points have to be ordered in arc length.
   #  
@@ -838,15 +863,19 @@ class GblTrajectory(object):
   ## Get residual and errors from data block.
   #  
   #  @param aData  data block
+  #  @param used    flag for usage of data block in fit; bool
   #  @return residual, error of measurement and residual and down-weighting factor; list
   #
-  def __getResAndErr(self, aData):
+  def __getResAndErr(self, aData, used=True):
     aResidual, aMeasVar, aDownWeight, indLocal, derLocal = self.__data[aData].getResidual()
     aVec = np.array(derLocal)  # compressed vector
     aMat = self.__matrix.getBlockMatrix(indLocal)  # compressed matrix     
     aFitVar = np.dot(aVec, np.dot(aMat, aVec.T))  # variance from track fit
     aMeasError = math.sqrt(aMeasVar)  # error of measurement
-    aResError = math.sqrt(aMeasVar - aFitVar) if aFitVar < aMeasVar else 0.  # error of residual
+    if used:
+      aResError = math.sqrt(aMeasVar - aFitVar) if aFitVar < aMeasVar else 0.  # error of biased residual
+    else:
+      aResError = math.sqrt(aMeasVar + aFitVar)  # error of unbiased residual
     return aResidual, aMeasError, aResError, aDownWeight 
   
   ## Get results (corrections, covarinace matrix) at point in forward or backward direction.
@@ -887,7 +916,7 @@ class GblTrajectory(object):
     aResErr = np.empty(numData)
     aDownWeight = np.empty(numData)
     for i in range(numData):
-      aResiduals[i], aMeasErr[i], aResErr[i], aDownWeight[i] = self.__getResAndErr(firstData + i)
+      aResiduals[i], aMeasErr[i], aResErr[i], aDownWeight[i] = self.__getResAndErr(firstData + i, (aLabel <> self.__skippedMeasLabel))
     return numData, aResiduals, aMeasErr, aResErr, aDownWeight
  
   ## Get residuals at point from scatterer.
@@ -921,9 +950,10 @@ class GblTrajectory(object):
   ## Perform fit of trajectory.
   #  
   #  @param optionList M-estimators to be used (one iteration per character); string
+  #  @param aLabel label of point where to skip measurements (for unbiased residuals)
   #  @return Chi2, Ndf, loss of weight from fit ([0., -1, 0.] if fit failed); list
   #
-  def fit(self, optionList=""):
+  def fit(self, optionList="", aLabel=0):
 
     ## Define offsets from list of points.
     def defineOffsets():
@@ -987,7 +1017,7 @@ class GblTrajectory(object):
           matPDer = matDer if matP is None else np.dot(matP, matDer)
           for i in range(measDim):
             if (aPrec[i] > 0.):
-              aData = GblData(nLabel, aMeas[i], aPrec[i])
+              aData = GblData(nLabel, 1, aMeas[i], aPrec[i])
               aData.addDerivatives(i, labDer, matPDer, localDer, \
                                    globalLab, globalDer)
               self.__data.append(aData)
@@ -1004,7 +1034,7 @@ class GblTrajectory(object):
           matTDer = matDer if matT is None else np.dot(matT, matDer)
           for i in aDim:
             if (aPrec[i] > 0.):
-              aData = GblData(nLabel, aMeas[i], aPrec[i])
+              aData = GblData(nLabel, 2, aMeas[i], aPrec[i])
               aData.addDerivatives(i, labDer, matTDer)
               self.__data.append(aData)
         self.__scatDataIndex.append(len(self.__data))
@@ -1020,7 +1050,7 @@ class GblTrajectory(object):
             externalDerivatives = []
             for j in range(len(externalIndex)):
               externalDerivatives.append(aMatrix[i, j])
-            aData = GblData(self.__externalPoint, 0., eigenVal[i])
+            aData = GblData(self.__externalPoint, 3, 0., eigenVal[i])
             aData.addExtDerivatives(externalIndex, externalDerivatives)
             self.__data.append(aData)
         self.__measDataIndex.append(len(self.__data))
@@ -1030,7 +1060,10 @@ class GblTrajectory(object):
       nBorder = self.__numCurvature + self.__numLocals
       self.__matrix = BorderedBandMatrix(self.__numParameters, nBorder)
       self.__vector = np.zeros(self.__numParameters)
-      for aData in self.__data: 
+      for aData in self.__data:
+        # skipped (internal) measurement?
+        if aData.getLabel() == self.__skippedMeasLabel and aData.getType() == 1:
+          continue 
         index, aVector, aMatrix = aData.getMatrices()
         for i in range(len(index)):
           self.__vector[ index[i] - 1 ] += aVector[0, i]  # update vector
@@ -1056,6 +1089,10 @@ class GblTrajectory(object):
       defineOffsets()    
       calcJacobians()                      
       prepare()
+
+    # skip measurements from point?
+    self.__skippedMeasLabel = aLabel
+
     buildLinearEquationSystem()  # create linear equations system from data
 #
     try:
@@ -1074,10 +1111,14 @@ class GblTrajectory(object):
         except ValueError:
           pass                  
              
-      Ndf = len(self.__data) - self.__numParameters 
+      Ndf = -self.__numParameters 
       Chi2 = 0.
       for aData in self.__data: 
+        # skipped (internal) measurement?
+        if aData.getLabel() == self.__skippedMeasLabel and aData.getType() == 1:
+          continue 
         Chi2 += aData.getChi2()
+        Ndf += 1
       Chi2 /= [1.0, 0.8737, 0.9326, 0.8228 ][aMethod]  
       return Chi2, Ndf, lostWeight
     
