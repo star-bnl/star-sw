@@ -616,7 +616,7 @@ my $pyear = 0;
                        $fullyear,$mo,$dy,$hr,$min);    
 
 #           if( $ltime > 2400 && $ltime < 518400 ){         
-          if( $ltime > 1200 and $size > 1000 ) { 
+          if( $ltime > 600 and $size > 1000 ) { 
 #   print "Log time: ", $ltime, "\n";
    print $fullname, "\n";
       
@@ -665,6 +665,7 @@ my $pyear = 0;
       $testJobStFiles[$nJobStFiles] = $fObjAdr;
       $nJobStFiles++;
 
+
       foreach my $eachOldJob (@old_jobs) {
           $pvjbId = ($$eachOldJob)->oldjbId;
           $pvpath = ($$eachOldJob)->oldpath;
@@ -708,6 +709,8 @@ my $pyear = 0;
 
    }else{
    }  
+###
+
    }else{
      next;
    }
@@ -814,11 +817,6 @@ my $pyear = 0;
 
     &fillJSTable();
 
-    if($mpath =~ /AuAu200_production_2016/) {
-
-    &fillQATable();
-
-    }
 
         foreach my $nOldJob (@old_jobs) {
           $pvjbId = ($$nOldJob)->oldjbId;

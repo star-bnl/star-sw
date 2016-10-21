@@ -1,4 +1,4 @@
-void loadAgML( const char* name="y2009a", const char* export=0 )
+void loadAgML( const char* name=0, const char* export=0 )
 {
   gROOT->LoadMacro("bfc.C");
   bfc(0,"agml nodefault mysql");

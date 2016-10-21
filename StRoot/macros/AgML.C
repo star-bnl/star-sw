@@ -6,7 +6,7 @@ void AgML(const Char_t *tag="y2013_2", const Char_t *geom="") {
     exit(1);
   }
   if (Geom == "") Geom = Tag;
-#if 0
+#if 1
   gSystem->Load("St_base");
   if (gSystem->Load("liblog4cxx.so") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
     cout << " + liblog4cxx.so";
@@ -26,7 +26,7 @@ void AgML(const Char_t *tag="y2013_2", const Char_t *geom="") {
   build -> ConstructGeometry ( Geom.Data() );            
 
 #else
-  gROOT->LoadMacro("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C");
+  gROOT->LoadMacro("./StarVMC/Geometry/macros/loadStarGeometry.C");
   loadStarGeometry(geom);
 #endif
   gGeoManager->CloseGeometry();

@@ -65,6 +65,7 @@
 #set dirlist = /opt/gcc/4.8.2/lib/gcc/x86_64-redhat-linux7E/4.8.2/32
 #set dirlist = `gfortran -print-search-dirs | grep libraries | awk -F= '{print $2}' | sed -e 's/:/ /g'`
 set dirlist = `echo ${STAR_LIB}`;# ${STAR}/.${STAR_HOST_SYS}/lib`
+set dirlist = `echo ${STAR_OBJ}/StarVMC/Geometry`;# ${STAR}/.${STAR_HOST_SYS}/lib`
 #set dirlist = /usr/lib
 foreach p ($dirlist) 
     set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 

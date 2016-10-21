@@ -2602,7 +2602,7 @@ REPLACE [exe dev15b;] with ["Y2014 first cut geometry";
     exe HCALv1;      "Naked HCAL";
 ]
 
-REPLACE [exe dev2017;] with ["Y2017 development tag";
+REPLACE [exe y2017;] with ["Y2017 first cut geometry";
 
     exe TPCE31;      "agstar version of yf model with reduced Rmax";
     exe BTOFv8;      "time of flight";
@@ -2632,7 +2632,9 @@ REPLACE [exe dev2017;] with ["Y2017 development tag";
     exe HCALv1;      "HCAL prototype";
 
 ];    
-
+REPLACE [exe dev2017;] with ["Y2017 development tag";
+    exe 	y2017; 
+];
 REPLACE [exe dev2018;] with ["Y2018 development tag";
 
     exe TPCE31;      "agstar version of yf model with reduced Rmax";
@@ -3683,8 +3685,11 @@ If LL>0
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
 
+  Case y2017  { y2017 : y2017 baseline, is y2012 plus FMS preshower;
+                  Geom = 'y2017   '; exe y2017; }
+
   Case dev2017  { dev2017 : y2017 baseline, is y2012 plus FMS preshower;
-                  Geom = 'dev2018   '; exe dev2018; }
+                  Geom = 'dev2017   '; exe dev2017; }
 
   Case dev2018  { dev2018 : y2018 baseline, is y2012 plus FMS preshower;
                   Geom = 'dev2018   '; exe dev2018; }
