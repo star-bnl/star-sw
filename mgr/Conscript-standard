@@ -227,7 +227,7 @@ if ( $pkg eq "StVecBosAna") {
 my ($i, $obj);
 my $LIBPKG = "";
 
-my @g77pkgs = qw(geometry gen sim tls minicern geant3);
+my @g77pkgs = qw(geometry gen);# sim tls minicern geant3);
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
 
 
