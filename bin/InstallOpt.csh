@@ -28,7 +28,7 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 
-foreach pkg ( apr-1.5.1 apr-util-1.5.3 apache-log4cxx-0.10.0.CVS Python-2.7.12 pyparsing-1.5.7 fastjet-3.0.3 fftw-3.3.5) #  gsl-2.1 
+foreach pkg ( apr-1.5.1 apr-util-1.5.3 apache-log4cxx-0.10.0.CVS fastjet-3.0.3 fftw-3.3.5 gsl-2.1) #   Python-2.7.12 pyparsing-1.5.7 gsl  gsl-2.1 
     cd ~/sources/.${STAR_HOST_SYS}
     if (! -r ${pkg}.Done) then
        if (! -r ${pkg}) then

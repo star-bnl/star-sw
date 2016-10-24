@@ -3,7 +3,7 @@
 
 use strict;
 use Getopt::Long qw(GetOptions);
-use lib "/afs/rhic.bnl.gov/star/users/fisyak/bin/lib";
+#use lib "~fisyak/bin/lib";
 use File::DirSync;
 
 my $usage   = undef;

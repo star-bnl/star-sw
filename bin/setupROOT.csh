@@ -150,7 +150,6 @@ switch ( $STAR_HOST_SYS )
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
      breaksw
      case *x8664*icc*:
-     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-axAVX  --cflags=-axAVX" # May generate AVX,SSE4.2, SSE4.1, SSSE3, SSE3, SSE2, and SSE 
      case *icc*:
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-axAVX  --cflags=-axAVX" # May generate AVX,SSE4.2, SSE4.1, SSSE3, SSE3, SSE2, and SSE 
      breaksw
@@ -178,6 +177,7 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
     --with-llvm-config=$ROOTSYS/../../../.sl64_gcc447/tools \
     --with-f77=$F77 \
     --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
+    --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
     --all \
     --disable-python \
     $DISABLE \
