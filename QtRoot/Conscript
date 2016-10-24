@@ -5,7 +5,7 @@ Import qw ( env INCLUDE LIB BIN BUILD OBJ);
 ( my $mylib = $LIB ) =~ s/\#//g;
 
 $build =~ s/\\/\//g;   #     print "------------- > OBJ = $OBJ  LIB=$mylib build = $build \n"; 
-(my $sysdir = $build ) =~ s/\/obj//i;
+(my $sysdir = $build ) =~ s/\/obj//i; $sysdir =~ s/\/OBJ//i;
 #print "PWD === $ENV{PWD}\n"; die;
 $env->{ENV}->{QTROOTSYSDIR} = $ENV{PWD} . "/" . $sysdir;# print "QTROOTSYSDIR = $env->{ENV}->{QTROOTSYSDIR}\n";
 $env->{ENV}->{QTROOTSYSDIR_LIB} =  basename($mylib);
@@ -13,9 +13,9 @@ $env->{ENV}->{QTDIR} = $env->{Packages}->{QT}->{DIR};
 $env->{ENV}->{IVROOT} = $env->{Packages}->{COIN3D}->{DIR}; # print "IvRoot = $env->{ENV}->{IVROOT}";
 my $STAR_HOST_SYS = $env->{ENV}->{STAR_HOST_SYS};
 my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
-my $DirPath = DirPath '.';                             #  print "DirPath = $DirPath\n";
-( my $obj_dir = $DirPath ) =~ s/\\/\//g;               #  print "obj_dir = $obj_dir\n";
-( my $Dir = $obj_dir ) =~ s/$build\///g;               #  print "Dir = $Dir\n";
+my $DirPath = DirPath '.';                               print "DirPath = $DirPath\n";
+( my $obj_dir = $DirPath ) =~ s/\\/\//g;                 print "obj_dir = $obj_dir\n";
+( my $Dir = $obj_dir ) =~ s/$build\///g;                 print "Dir = $Dir\n";
 my $PKGT = "QtRoot";
 
 # Import from ENV variables
@@ -25,19 +25,15 @@ printf( "Run Conscript          in %-30s  for %-20s\n", $Dir,$PKGT );
 
 my @src = ();
 my @dirs = qw(qt qtgui qtimage qtgl qtExamples qtroot qtthread);
-if ($qt4)  {
-  push @dirs, "qt4ged";
-} else {
-  push @dirs, "qtged";
-}
+push @dirs, "qt4ged";
 foreach my $dir (@dirs) {
   my @srcL = find_q($Dir . "/" . $dir); #print "dir = $dir ==> @srcL\n";
   foreach my $s (@srcL) {
     push @src, $dir . "/" . $s;
   }
 }
-my @DepsL  = map {$LIB . "/lib" . $_ . ".so"}   qw(GQt QtGed QtImage QtRootGui QtRoot QtThread RQTGL);
-my @DepsL1 = map {$LIB . "/lib" . $_ . ".so.1"} qw(GQt QtGed QtImage QtRootGui QtRoot QtThread RQTGL);
+my @DepsL  = map {$LIB . "/lib" . $_ . ".so"}   qw(GQt QtGed QtImage QtRootGui QtRoot QtThread); #  RQTGL
+my @DepsL1 = map {$LIB . "/lib" . $_ . ".so.1"} qw(GQt QtGed QtImage QtRootGui QtRoot QtThread); #  RQTGL
 my @DepsI  = map {$INCLUDE .  "/TQ" . $_ . ".h"} 
   qw(
       GLKernel        tCanvasWidget         tEvent           tIconBrowserImp      tObjectDialog         tRootBrowserAction  tToolBar
@@ -77,15 +73,15 @@ else       {$PATH .=       $env->{Packages}->{QT}->{BINDIR};}
 $ENV{PATH} = $PATH;
 $env2 = $env->clone();
 $env2->{ENV}->{PATH} = $PATH;
-if ($qt4) {
   Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir;qmake PREFIX=$env->{ENV}->{QTROOTSYSDIR} $DEBUG);
-} else {
-  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir; qmake $DEBUG);
-}
 Command $env2 [(@DepsL1, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
-foreach my $lib (@DepsL) {
-  InstallAs $env2 $LIB . "/" . $lib, $lib . ".1";
-}
+#Command $env2 [(@DepsL1, @DepsI)], (Makefile), qq(cd $obj_dir;make;make install);
+#Command $env2 [@DepsI], (Makefile, @src), qq(cd $obj_dir;make;make install);
+#print "DepsL = @DepsL \nDEPSL1 = @DepsL1\n";
+# foreach my $l (qw(GQt QtGed QtImage QtRootGui QtRoot QtThread)) {#  RQTGL
+#   my $lib = "lib" . $l . ".so";
+#   InstallAs $env2 $LIB . "/" . $lib, $lib . ".1";
+# }
 # Command $env2 ["Makefile"], qw(qtExamples/qtExamples.pro), qq(cd $obj_dir; qmake $DEBUG; make);
 #________________________________________
 sub find_q{  @main::search_files   = ();
