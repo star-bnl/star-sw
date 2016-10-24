@@ -183,8 +183,8 @@ if ($#src > -1) {
   Depends $env2 $pkg, $BIN . "/agetof";
   Depends $env2 $pkg, $BIN . "/stic";
   Depends $env2 $pkg, $LIB . "/libstarsim.a";
-  Depends $env2 $pgm, $LIB . "/libgeant321.a"; 
-  Depends $env2 $pgm, $LIB . "/libgcalor.a";
+  Depends $env2 $pkg, $LIB . "/libgeant321.a"; 
+  Depends $env2 $pkg, $LIB . "/libgcalor.a";
   Program $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
   if ($STAR_SYS !~ /darwin/) {
