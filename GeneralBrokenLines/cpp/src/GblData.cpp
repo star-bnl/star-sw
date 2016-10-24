@@ -35,11 +35,13 @@ namespace gbl {
 /// Create data block.
 /**
  * \param [in] aLabel Label of corresponding point
+ * \param [in] aType Type of (scalar) measurement
  * \param [in] aValue Value of (scalar) measurement
  * \param [in] aPrec Precision of (scalar) measurement
  */
-GblData::GblData(unsigned int aLabel, double aValue, double aPrec) :
-		theLabel(aLabel), theValue(aValue), thePrecision(aPrec), theDownWeight(
+GblData::GblData(unsigned int aLabel, dataBlockType aType, double aValue,
+		double aPrec) :
+		theLabel(aLabel), theType(aType), theValue(aValue), thePrecision(aPrec), theDownWeight(
 				1.), thePrediction(0.), theParameters(), theDerivatives(), globalLabels(), globalDerivatives() {
 
 }
@@ -200,8 +202,8 @@ double GblData::getChi2() const {
 /// Print data block.
 void GblData::printData() const {
 
-	std::cout << " measurement at label " << theLabel << ": " << theValue
-			<< ", " << thePrecision << std::endl;
+	std::cout << " measurement at label " << theLabel << " of type " << theType
+			<< ": " << theValue << ", " << thePrecision << std::endl;
 	std::cout << "  param " << theParameters.size() << ":";
 	for (unsigned int i = 0; i < theParameters.size(); ++i) {
 		std::cout << " " << theParameters[i];
@@ -212,6 +214,22 @@ void GblData::printData() const {
 		std::cout << " " << theDerivatives[i];
 	}
 	std::cout << std::endl;
+}
+
+/// Get label.
+/**
+ * \return label of corresponding point
+ */
+unsigned int GblData::getLabel() const {
+	return theLabel;
+}
+
+/// Get type.
+/**
+ * \return type
+ */
+dataBlockType GblData::getType() const {
+	return theType;
 }
 
 /// Get Data for local fit.

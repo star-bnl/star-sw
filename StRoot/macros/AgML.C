@@ -26,7 +26,7 @@ void AgML(const Char_t *tag="y2013_2", const Char_t *geom="") {
   build -> ConstructGeometry ( Geom.Data() );            
 
 #else
-  gROOT->LoadMacro("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C");
+  gROOT->LoadMacro("./StarVMC/Geometry/macros/loadStarGeometry.C");
   loadStarGeometry(geom);
 #endif
   gGeoManager->CloseGeometry();

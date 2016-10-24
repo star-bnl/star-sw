@@ -58,7 +58,7 @@ def example1():
 
   nTry = 1000  #: number of tries
   nLayer = 5  #: number of detector layers
-  print " Gbltst $Rev: 116 $ ", nTry, nLayer
+  print " Gbltst $Rev: 124 $ ", nTry, nLayer
   start = time.clock()
 # track direction
   sinLambda = 0.3
@@ -177,12 +177,13 @@ def example1():
 # add external seed
     if locSeed is not None:    
       traj.addExternalSeed(seedLabel, locSeed)
-# dump trajectory
-#    traj.dump()
   
 # fit trajectory
     Chi2, Ndf, Lost = traj.fit()
     print " Record, Chi2, Ndf, Lost", iTry, Chi2, Ndf, Lost
+# dump trajectory
+    #traj.printPoints()
+    #traj.printData()
 # write to MP binary file    
 #    traj.milleOut(binaryFile)
 # sum up    

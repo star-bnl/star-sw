@@ -44,6 +44,8 @@
  *  Non-diagonal covariance matrices of
  *  measurements will be diagonalized internally.
  *  Outliers can be down-weighted by use of M-estimators.
+ *  At one point the measurements can be omitted from the refit
+ *  to calculate unbiased residuals.
  *
  *  A position measurement is in a plane defined by two directions.
  *  Along one direction the measurement precision may be zero,
@@ -76,6 +78,9 @@
  *  matrices of track parameters in homogeneous magnetic fields
  *  A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698.
  *
+ *  The source code is available at the DESY SVN server, see:
+ *  https://www.wiki.terascale.de/index.php/GeneralBrokenLines
+ *
  *  \section call_sec Calling sequence
  *
  *    -# Create list of points on initial trajectory:\n
@@ -95,8 +100,8 @@
  *    -# Optionally with external seed:\n
  *            <tt>traj = gbl::GblTrajectory (list,seed)</tt>
  *    -# Optionally check validity of trajectory:\n
- *            <tt>if (not traj.isValid()) .. //abort</tt>
- *    -# Fit trajectory, return error code,
+ *            <tt>if (!traj.isValid()) .. //abort</tt>
+ *    -# Fit trajectory (potentially several times with different options), return error code,
  *       get Chi2, Ndf (and weight lost by M-estimators):\n
  *            <tt>ierr = traj.fit(..)</tt>
  *    -# For any point on initial trajectory:
@@ -148,7 +153,8 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		bool flagCurv, bool flagU1dir, bool flagU2dir) :
 		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
 				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
-				0), numMeasurements(0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+				0), numMeasurements(0), externalPoint(0), skippedMeasLabel(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
@@ -177,7 +183,8 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		bool flagU1dir, bool flagU2dir) :
 		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
 				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
-				0), numMeasurements(0), externalPoint(aLabel), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
+				0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(
+				0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
 				aSeed), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
@@ -199,7 +206,7 @@ GblTrajectory::GblTrajectory(
 		const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+				0), externalPoint(0), skippedMeasLabel(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
 		thePoints.push_back(aPointsAndTransList[iTraj].first);
@@ -227,7 +234,7 @@ GblTrajectory::GblTrajectory(
 		const TVectorD &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(
+				0), externalPoint(0), skippedMeasLabel(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(
 				extDerivatives), externalMeasurements(extMeasurements), externalPrecisions(
 				extPrecisions) {
 
@@ -257,7 +264,7 @@ GblTrajectory::GblTrajectory(
 		const TMatrixDSym &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
+				0), externalPoint(0), skippedMeasLabel(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
 
 	// diagonalize external measurement
 	TMatrixDSymEigen extEigen(extPrecisions);
@@ -668,8 +675,8 @@ unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
 	unsigned int firstData = measDataIndex[aLabel - 1]; // first data block with measurement
 	numData = measDataIndex[aLabel] - firstData; // number of data blocks
 	for (unsigned int i = 0; i < numData; ++i) {
-		getResAndErr(firstData + i, aResiduals[i], aMeasErrors[i],
-				aResErrors[i], aDownWeights[i]);
+		getResAndErr(firstData + i, (aLabel != skippedMeasLabel), aResiduals[i],
+				aMeasErrors[i], aResErrors[i], aDownWeights[i]);
 	}
 	return 0;
 }
@@ -697,7 +704,7 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
 	unsigned int firstData = scatDataIndex[aLabel - 1]; // first data block with scatterer
 	numData = scatDataIndex[aLabel] - firstData; // number of data blocks
 	for (unsigned int i = 0; i < numData; ++i) {
-		getResAndErr(firstData + i, aResiduals[i], aMeasErrors[i],
+		getResAndErr(firstData + i, true, aResiduals[i], aMeasErrors[i],
 				aResErrors[i], aDownWeights[i]);
 	}
 	return 0;
@@ -748,13 +755,15 @@ unsigned int GblTrajectory::getLabels(
  * Get residual, error of measurement and residual and down-weighting
  * factor for (single) data block
  * \param [in]  aData Label of data block
+ * \param [in]  used  Flag for usage of data block in fit
  * \param [out] aResidual Measurement-Prediction
  * \param [out] aMeasError Error of Measurement
  * \param [out] aResError Error of Residual (including correlations from track fit)
  * \param [out] aDownWeight Down-Weighting factor
  */
-void GblTrajectory::getResAndErr(unsigned int aData, double &aResidual,
-		double &aMeasError, double &aResError, double &aDownWeight) {
+void GblTrajectory::getResAndErr(unsigned int aData, bool used,
+		double &aResidual, double &aMeasError, double &aResError,
+		double &aDownWeight) {
 
 	double aMeasVar;
 	std::vector<unsigned int>* indLocal;
@@ -769,7 +778,10 @@ void GblTrajectory::getResAndErr(unsigned int aData, double &aResidual,
 	TMatrixDSym aMat = theMatrix.getBlockMatrix(*indLocal); // compressed (covariance) matrix
 	double aFitVar = aMat.Similarity(aVec); // variance from track fit
 	aMeasError = sqrt(aMeasVar); // error of measurement
-	aResError = (aFitVar < aMeasVar ? sqrt(aMeasVar - aFitVar) : 0.); // error of residual
+	if (used)
+		aResError = (aFitVar < aMeasVar ? sqrt(aMeasVar - aFitVar) : 0.); // error of (biased) residual
+	else
+		aResError = sqrt(aMeasVar + aFitVar); // error of (unbiased) residual
 }
 
 /// Build linear equation system from data (blocks).
@@ -782,6 +794,10 @@ void GblTrajectory::buildLinearEquationSystem() {
 	std::vector<double>* derLocal;
 	std::vector<GblData>::iterator itData;
 	for (itData = theData.begin(); itData < theData.end(); ++itData) {
+		// skipped (internal) measurement ?
+		if (itData->getLabel() == skippedMeasLabel
+				&& itData->getType() == InternalMeasurement)
+			continue;
 		itData->getLocalData(aValue, aWeight, indLocal, derLocal);
 		for (unsigned int j = 0; j < indLocal->size(); ++j) {
 			theVector((*indLocal)[j] - 1) += (*derLocal)[j] * aWeight * aValue;
@@ -890,7 +906,8 @@ void GblTrajectory::prepare() {
 				}
 				for (unsigned int i = iOff; i < 5; ++i) {
 					if (aPrec(i) > 0.) {
-						GblData aData(nLabel, aMeas(i), aPrec(i));
+						GblData aData(nLabel, InternalMeasurement, aMeas(i),
+								aPrec(i));
 						aData.addDerivatives(i, labDer, matPDer, iOff, localDer,
 								globalLab, globalDer, numLocals, transDer);
 						theData.push_back(aData);
@@ -950,7 +967,8 @@ void GblTrajectory::prepare() {
 				for (unsigned int i = 0; i < nDim; ++i) {
 					unsigned int iDim = theDimension[i];
 					if (aPrec(iDim) > 0.) {
-						GblData aData(nLabel, aMeas(iDim), aPrec(iDim));
+						GblData aData(nLabel, InternalKink, aMeas(iDim),
+								aPrec(iDim));
 						aData.addDerivatives(iDim, labDer, matTDer, numLocals,
 								transDer);
 						theData.push_back(aData);
@@ -978,7 +996,7 @@ void GblTrajectory::prepare() {
 				for (int j = 0; j < externalSeed.GetNcols(); ++j) {
 					externalSeedDerivatives[j] = vecEigen(i, j);
 				}
-				GblData aData(externalPoint, 0., valEigen(i));
+				GblData aData(externalPoint, ExternalSeed, 0., valEigen(i));
 				aData.addDerivatives(externalSeedIndex,
 						externalSeedDerivatives);
 				theData.push_back(aData);
@@ -997,7 +1015,7 @@ void GblTrajectory::prepare() {
 				index[iCol] = iCol + 1;
 				derivatives[iCol] = externalDerivatives(iExt, iCol);
 			}
-			GblData aData(1U, externalMeasurements(iExt),
+			GblData aData(1U, ExternalMeasurement, externalMeasurements(iExt),
 					externalPrecisions(iExt));
 			aData.addDerivatives(index, derivatives);
 			theData.push_back(aData);
@@ -1038,10 +1056,11 @@ double GblTrajectory::downWeight(unsigned int aMethod) {
  * \param [out] lostWeight Sum of weights lost due to down-weighting
  * \param [in] optionList Iterations for down-weighting
  * (One character per iteration: t,h,c (or T,H,C) for Tukey, Huber or Cauchy function)
+ * \param [in] aLabel Label of point where to skip measurements (for unbiased residuals)
  * \return Error code (non zero value indicates failure of fit)
  */
 unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
-		std::string optionList) {
+		std::string optionList, unsigned int aLabel) {
 	const double normChi2[4] = { 1.0, 0.8737, 0.9326, 0.8228 };
 	const std::string methodList = "TtHhCc";
 
@@ -1052,6 +1071,7 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 		return 10;
 
 	unsigned int aMethod = 0;
+	skippedMeasLabel = aLabel;
 
 	buildLinearEquationSystem();
 	lostWeight = 0.;
@@ -1072,10 +1092,15 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 				predict();
 			}
 		}
-		Ndf = theData.size() - numParameters;
+		Ndf = -numParameters;
 		Chi2 = 0.;
 		for (unsigned int i = 0; i < theData.size(); ++i) {
+			// skipped (internal) measurement ?
+			if (theData[i].getLabel() == skippedMeasLabel
+					&& theData[i].getType() == InternalMeasurement)
+				continue;
 			Chi2 += theData[i].getChi2();
+			Ndf++;
 		}
 		Chi2 /= normChi2[aMethod];
 		fitOK = true;

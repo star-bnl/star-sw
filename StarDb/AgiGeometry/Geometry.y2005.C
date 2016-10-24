@@ -1,0 +1,1 @@
+../../.sl68_gcc492/obj/StarDb/AgiGeometry/Geometry.y2005.C
