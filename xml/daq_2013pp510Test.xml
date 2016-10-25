@@ -3,14 +3,6 @@
 <job maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-#  cd $SCRATCH
-#   pwd
-#  setenv STARFPE NO
-#  setenv NODEBUG yes
-#  setup  gcc492
-#  setup  32b
-#  starver DEV2/TFG16a
-  source ~/bin/SetVersion.csh
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
      set evtsFile =  $INPUTFILE0
@@ -24,7 +16,6 @@
 #  else
 #    exit 1;
 #  endif
-  echo "${evtsFile}"
   set filel    = `basename $evtsFile .daq`_${f}_${l}
   set output  = ${filel}.event.root
   if (! -r ${evtsFile}) exit 1;
@@ -33,9 +24,12 @@
   set muFile = ${filel}.MuDst.root
   set blaFile = ${filel}.bla.root
   if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
-  echo "Output MuDst file : $muFile" 
+#  setenv DECHO yes 
   echo $0 &gt; ${logFile}
-#  root4star -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
+  echo "${evtsFile}" &gt;&gt;&amp; ${logFile}
+  source ~/bin/SetVersion.csh &gt;&gt;&amp; ${logFile}
+  echo "Output MuDst file : $muFile" &gt;&gt;&amp; ${logFile}
+# for icc:  root4star -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
   root.exe -q -b -x 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
   if (-r  ${SUBMITTINGDIRECTORY}/${blaFile}) rm ${SUBMITTINGDIRECTORY}/${blaFile};
   echo $0 &gt;&gt; ${logFile}
@@ -44,7 +38,7 @@
     <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
-        <stdout URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/daq2013$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/daq2013$JOBID.err" />
 <input URL="file:/star/u/fisyak/work/daq/2013/083B/*.daq" />
 </job>
