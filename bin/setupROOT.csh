@@ -137,6 +137,8 @@ endsw
     setenv ENABLE_CXX11 ""
     setenv EXTRA_FLAGS ""
 switch ( $STAR_HOST_SYS )  
+    case *gcc6*:
+    case *gcc5*:
     case *gcc492*:
      setenv ENABLE_CXX11 "--enable-cxx14"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
