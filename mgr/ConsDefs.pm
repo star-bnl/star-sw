@@ -80,6 +80,7 @@
  my $CXXFLAGS     = `root-config --auxcflags`; chomp($CXXFLAGS); #$CXXFLAGS  =~ s/-I.*//; 
 # print "CXXFLAGS = $CXXFLAGS\n";
  $CXXFLAGS    .= " -fPIC"; #$LDFLAGS;
+# $CXXFLAGS    .= " -Wall -Wextra -Wno-long-long  -Wabi"; # garfield
  $CFLAGS       = $CXXFLAGS;
  my @words     = split(' ',$CFLAGS);# print "words = @words\n";
  my $cflags    = "";
@@ -134,13 +135,8 @@
  if ($CXX eq "g++" or $CXX eq "gcc") {
     $CXXFLAGS .= " -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics";
     $CFLAGS   .= " -Wall -Wcast-align";
-    $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -W -Wsurprising -Wcast-align";
-# #   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3";
-#    $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -mfpmath=sse";
-# #   $FFLAGS   .= " -fPIC -pipe -std=legacy -fno-second-underscore -Waliasing -Wampersand -Wintrinsics-std -Wintrinsic-shadow -Wsurprising -Wcast-align -msse -msse2 -msse3 -msse4.1 -mssse3";
-#    #       $CXXFLAGS .= " -fPIC -pipe -Wall -Woverloaded-virtual -Wcast-align -fno-threadsafe-statics -msse -mfpmath=sse -msse2";# $XMACHOPT 
-#    #       $CFLAGS   .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse -msse2";
-#    #       $FFLAGS  .= " -fPIC -pipe -Wall -Wcast-align -msse -mfpmath=sse -msse2 -fno-second-underscore -fno-automatic";
+    $FFLAGS   .= " -fPIC -pipe";
+    $FFLAGS   .= " -std=legacy -fno-second-underscore -fno-automatic -Waliasing -Wampersand -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wsurprising -Wcast-align"; # -Wline-truncation  -W
    $FEXTEND = "-ffixed-line-length-132";
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
    
@@ -167,13 +163,18 @@
    $LIBG2C  = `$CC $CFLAGS  -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
    chomp($LIBG2C);
  }
- if ($FC eq 'gfortran' or $FC eq 'ifort') {
+ if    ($FC eq 'gfortran') {
+   $FLIBS = $FLIBS      .= " -lgfortran";
+ } elsif ( $FC eq 'ifort') {
+   my $lib = `which $FC`; chomp($lib);
+   $FLIBS      .= " -lifcore -lifport";
    $GFLAGS    = $FFLAGS;
    $GFLAGS   =~ s/-axAVX//;
 #   print "GFLAGS = $GFLAGS, FLIBS = $FLIBS ==========================\n";
-   $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
-   $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libquadmath.a`; chomp($FLIBS);
-   $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
+    $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
+    $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libquadmath.a`; chomp($FLIBS);
+    $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
+#   print "FLIBS = $FLIBS ================================================================================\n";
  }
  if ($STAR_HOST_SYS !~ /darwin/ ) {
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX";
@@ -387,6 +388,9 @@
  if ($CPPPATH) {$CPPPATH .= $main::PATH_SEPARATOR;}
  $CPPPATH .= "#".  $main::PATH_SEPARATOR . "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE;# . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
  $CPPPATH .= $main::PATH_SEPARATOR . $XOPTSTAR . "/include";
+ if ($XOPTSTAR ne $OPTSTAR) {
+   $CPPPATH .= $main::PATH_SEPARATOR . $OPTSTAR . "/include";
+ }
  $CPPPATH .= $main::PATH_SEPARATOR . $ROOTSRC;
  #    $CPPPATH .= $main::PATH_SEPARATOR ."#";# . $CERNINO;
  
@@ -439,31 +443,9 @@
 		  $MYSQL . " ".
 		  "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
 		  "mysql_config");
- # } else {
- #	($MYSQLCONFIG,$mysqlconf) =
- #	    script::find_lib($MYSQL . " ".
- #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
- #			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
- #			     "mysql_config");
- # } 
- 
- 
  # Associate the proper lib with where the inc was found
  my ($mysqllibdir)=$MYSQLINCDIR;
  $mysqllibdir =~ s/include/$LLIB/;# print "mysqllibdir => $mysqllibdir =========\n";
- 
- # print "DEBUG :: $mysqllibdir\n";
- # Note - there is a trick here - the first element uses mysqllibdir
- #        which is dreived from where the INC is found hence subject to 
- #        USE_LOCAL_MYSQL switch. This may not have been obvious.
- # my ($MYSQLLIBDIR,$MYSQLLIB) =
- #  script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
- #                   $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
- #                   "libmysqlclient");
- #			 # "libmysqlclient_r libmysqlclient");
- # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
- 
- # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
  if ( $mysqlconf ){
    $mysqlconf = "$MYSQLCONFIG/$mysqlconf";# print "mysqlconf = $mysqlconf\n";
    # if ( 1==1 ){
@@ -483,34 +465,12 @@
      }
      last;
    }
-   
    # here is a check for libmysqlclient
-   
-   
-   # die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
-   
-   # mysqlconf returns (on SL5, 64 bits)
-   #  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
-   # } else {
-   #    $MYSQLLIB .= " -L/usr/$LLIB";
-   #    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-   #    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-   #    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-   #    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
-   #    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
-   #    $MYSQLLIB .= " -lz";
-   #    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
-   # }
  } else {
    die "No mysql_config found\n";
  }
  print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
  if ! $param::quiet;
- 
- # die "\n";
- 
- 
- 
  # QT
  if ( defined($QTDIR) && -d $QTDIR) {
    $QT_VERSION = 3;
@@ -560,16 +520,7 @@
      print "Use QTLIBDIR = $QTLIBDIR \tQTINCDIR = $QTINCDIR \tQTFLAGS = $QTFLAGS \tQTLIBS = $QTLIBS\n"
        if $QTLIBDIR && ! $param::quiet;
    }
-   
    # Coin3D - WHAT??! JL 2009
-   # if ( !defined($IVROOT)) {
-   #    if ($QT_VERSION==4) {
-   #	$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package
-   #    } else {
-   #	$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
-   #    }
-   #    print "*** ATTENTION *** IVROOT $IVROOT\n";
-   # }
    if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
    if ( defined($IVROOT) &&  -d $IVROOT) {
      # This is an initial logic relying on IVROOT to be defined
@@ -583,7 +534,6 @@
        $COIN3DFLAGS  = ""; # "-DR__QT";#-DQT_THREAD_SUPPORT";
        $COIN3DLIBS   = "-lCoin -lSmallChange -lSoQt -lsimage";
      }
-     
    } else {
      # try finding it in $XOPTSTAR
      my($coin);
@@ -597,7 +547,6 @@
        chomp($COIN3DLIBS   = `$coin --libs`);
      }
    }
-   
    if ( ! $param::quiet){
      if (defined($COIN3DLIBDIR)){
        print "Use COIN3DLIBDIR = $COIN3DLIBDIR \tCOIN3DINCDIR = $COIN3DINCDIR \tCOIN3DFLAGS = $COIN3DFLAGS \tCOIN3DLIBS = $COIN3DLIBS\n";
@@ -606,11 +555,8 @@
      }
    }
  }
- #    die;
- 
  # Logger
  $LoggerDir = $XOPTSTAR . "/include/log4cxx";
- 
  if (-d $LoggerDir) {
    $LoggerINCDIR = $XOPTSTAR . "/include";
    $LoggerLIBDIR = $XOPTSTAR . "/lib";
@@ -632,7 +578,6 @@
    $XMLINCDIR =~ s/-I//;
    my $XML  = `$xml --libs`; # die "$XML\n";
    my(@libs)= split(" ", $XML);
-   
    $XMLLIBDIR = shift(@libs);
    if ($XMLLIBDIR =~ /-L/){
      $XMLLIBDIR =~ s/-L//;
@@ -643,15 +588,6 @@
      # and fix -L / should work for both 32 and 64
      $XMLLIBDIR = "/usr/$LLIB";
    }
-   
-   
-   # ($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
-   # if ($XMLLIBDIR =~ /-L/){
-   #    $XMLLIBDIR =~ s/-L//;
-   # } else {
-   #    # may not have any -L
-   #    if ($XMLLIBS
-   # }
    
    my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
    my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
@@ -681,19 +617,20 @@
  "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
  my $FCCOM_noExt = 
  "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
+ my $FCCOM_noExt = 
+ "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
  my $F90COM = 
  "cd %<:d; %FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %<:f %Fout%>:f;";
- my $FCviaAGETOFCOM
- = " test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
- . " test -f %>:b.for && rm %>:b.for; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.for;";
- $FCviaAGETOFCOM .= " if [ -f %>:b.for ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.for %Fout%>;";
- $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
-# $FCviaAGETOFCOM .= " else ". $FCCOM_noExt . " fi";
+  my $FCviaAGETOFCOM
+  = " test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
+  . "cd %>:d; test -f %>:F.for && rm %>:F.for; %AGETOF %AGETOFLAGS -V f %<:F.g -o %>:F.for; cd -;";
+  $FCviaAGETOFCOM .= " if [ -f %>:b.for ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.for %Fout%>;";
+  $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
  
- my $AGETOFCOM  = "test -f %>:b.F && /bin/rm %>:b.F;";
- $AGETOFCOM .= "%AGETOF %AGETOFLAGS %< -o %>:b.F &&";
- $AGETOFCOM .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
- $AGETOFCOM .= " %>:b.F %Fout%>";
+  my $AGETOFCOM  = "cd %>:d; test -f %>:F.F && /bin/rm %>:F.F;";
+  $AGETOFCOM .= "%AGETOF %AGETOFLAGS %<:f -o %>:F.F && cd - &&";
+  $AGETOFCOM .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
+  $AGETOFCOM .= " %>:b.F %Fout%>";
  
  my @params = (
 	       'Package'        => 'None',
@@ -773,7 +710,6 @@
 	       'LINKMODULECOM'  => $MAKELIB,
 	       'AR'             => $AR,
 	       'ARFLAGS'        => $ARFLAGS,
-#	       'ARCOM'          => $ARCOM,
 	       'RANLIB'         => 'ranlib',
 	       'AS'             => 'as',
 	       'ASFLAGS'        => '',
