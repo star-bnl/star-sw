@@ -53,6 +53,7 @@ switch ($pkg)
 	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS /opt/star`
         setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star ^/usr/lib`
       endif
+      setup $xSTARCMPL
       source $GROUP_DIR/STAR_SYS
 #      setenv CERN /cern64
       setup cern
@@ -71,7 +72,6 @@ switch ($pkg)
 #      if ($?QTDIR) setenv QTDIR $OPTSTAR/qt4
 #      setenv PATH $QTDIR/bin:$PATH
 #      setenv LD_LIBRARY_PATH $QTDIR/lib:$LD_LIBRARY_PATH
-      setup $xSTARCMPL
        source ${GROUP_DIR}/.starver $STAR_LEVEL
      breaksw
 
@@ -80,6 +80,7 @@ switch ($pkg)
       setenv USE_64BITS 0
       unsetenv OPTSTAR
       unsetenv XOPTSTAR
+      setup $xSTARCMPL
       if (-x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS /opt/star`
         setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star ^/usr/lib64`
@@ -311,7 +312,7 @@ switch ($pkg)
 	source $GROUP_DIR/intelcc.csh
 	if ( $?DECHO ) echo "setup icc 1: PATH = $PATH"
 	if ( $?DECHO ) echo "setup icc 1: LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
-	setenv STARCMPL "icc";  source ${GROUP_DIR}/.starver $STAR_LEVEL
+	setenv STARCMPL "icc";  setenv xSTARCMPL "icc"; source ${GROUP_DIR}/.starver $STAR_LEVEL
 	if ( $?DECHO ) echo "setup icc 2: PATH = $PATH"
 	if ( $?DECHO ) echo "setup icc 2: LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
 	breaksw
@@ -322,7 +323,8 @@ switch ($pkg)
 	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 /opt/rh/devtoolset`
 	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 /opt/rh/devtoolset`
       endif
-      setenv STARCMPL "gcc";
+      setenv  STARCMPL "gcc"
+      setenv xSTARCMPL $pkg; # "gcc";
       if ($?QTDIR)    unsetenv QTDIR
       if ($?OPTSTAR)  unsetenv OPTSTAR
       if ($?XOPTSTAR) unsetenv XOPTSTAR

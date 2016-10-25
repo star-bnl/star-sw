@@ -47,7 +47,3 @@ if ( -d "$pathtointel" ) then
     set platform = linux
     source $pathtointel/bin/compilervars.csh $arch
 endif
-#    setenv PATH ${pathtointel}/bin:${PATH}
-if ( $?DECHO ) then
-   echo "$self :: Done [$seticc]"
-endif
