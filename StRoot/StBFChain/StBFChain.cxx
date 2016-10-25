@@ -1513,7 +1513,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
 	}
-	//	SetOption("pgf77","Default,-TGiant3");
 	SetOption("mysql","Default,-TGiant3");
 	SetOption("minicern","Default,-TGiant3");
       }
