@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.18 2016/10/20 14:13:50 jwebb Exp $
+* $Id: xgeometry.age,v 1.19 2016/10/25 15:14:44 jwebb Exp $
 
 
 
@@ -4580,6 +4580,8 @@ c  ==
 c  == Save configuration data used in reconstruction
 c  ==
 c  ==================================================================================================
+
+
    Fill GDAT                     ! GEANT run data
       mfscale=magfield/5.0       ! magnetic field scale (nominal)
       gtag={geom(1:4),geom(5:8)} ! geometry tag
@@ -4600,8 +4602,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.18 2016/10/20 14:13:50 jwebb Exp $
+* $Id: xgeometry.age,v 1.19 2016/10/25 15:14:44 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.19  2016/10/25 15:14:44  jwebb
+* Default geometry in loadAgML.kumac changed to y2017 for no particular reason.
+*
 * Revision 1.18  2016/10/20 14:13:50  jwebb
 * Define y2017 rough cut geometry.
 *
