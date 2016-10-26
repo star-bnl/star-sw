@@ -24,7 +24,8 @@
     <var name="ChkvSim"   />
     <var name="PbPlate"   />    
     <var name="FmsNorthX" />
-    <var name="FmsSouthX" />    
+    <var name="FmsSouthX" />
+    <var name="Atten" />    
   </Structure>
         
   <Structure name="FPOS"  >
@@ -194,6 +195,7 @@
   <Fill name="FMCG" comment="Fpd Calorimeter basic data"  >
     <var name="Version" value="8.0" comment=" Geometry version  "  />
     <var name="ChkvSim" value="0" comment=" = 0 dE, = 1 Cherenkov simulation for PbG "  />
+    <var name="Atten" value="0.0" comment="default, no attenuation, 1 = attenuation" />
     <var name="PbPlate" value="0" comment=" =0 no plate, =1 with plate "  />
     <var name="FmsNorthX" value="-0.3" comment="Default x-position" />
     <var name="FmsSouthX" value="+0.3" comment="Default x-position" />
@@ -566,8 +568,6 @@
 	<Else  >
 	  <Create    block="FTOW"  />
 	  <Placement block="FTOW" y="y1" x="x1" z="z1"   />
-
-
 	  x1=x1+widx 
 	</Else>
 	</If>
@@ -625,34 +625,27 @@
       z1 = -FBXD_Depth/2.0 + FBXD_ZOffset + ztot 
       <Do var="i" from="1" to="FBXD_NYL"  >
 	x1=x0             
-	<Do var="j" from="1" to="FBXD_NXL"  >
-	  <If expr="j.lt.9.and.i.gt.9.and.i.lt.26"  >
-	    x1=x1+widx  
-	    <Elif expr="(i+j).ge.45"  >
+      <Do var="j" from="1" to="FBXD_NXL"  >
+      <If expr="j.lt.9.and.i.gt.9.and.i.lt.26"  >
+	      x1=x1+widx  
+      <Elif expr="(i+j).ge.45"  >
 	      <Create block="FALU"  />
-	      <Placement y="y1" x="x1" z="z1" block="FALU"  >
-	      </Placement>
-
+	      <Placement y="y1" x="x1" z="z1" block="FALU"  />	
 	      x1=x1+widx      
-	      <Elif expr="(j-i).ge.10"  >
-		x1=x1+widx             
-	      </Elif>
+      <Elif expr="(j-i).ge.10"  >
+              x1=x1+widx             
+      </Elif>
+      <Else  >
+	      <Create block="FLXF"  />
+	      <Placement y="y1" x="x1" z="z1" block="FLXF" />
+	      x1=x1+widx 
+      </Else>
+      </Elif>
+      </If>
 
-	      <Else  >
-		<Create block="FLXF"  />
-		<Placement y="y1" x="x1" z="z1" block="FLXF"  >
-		</Placement>
+      </Do>
 
-		x1=x1+widx 
-	      </Else>
-
-	    </Elif>
-
-	  </If>
-
-	</Do>
-
-	y1=y1-wid            
+      y1=y1-wid            
       </Do>
 
     </If>
@@ -666,7 +659,10 @@
       basewidth=1.0
 
       <Create    block="FBAS" />
-      <Placement block="FBAS" y="-(FBXD_NXL*wid+basewidth/2.0)" x="FPOS_X" z="-FBXD_Depth/2.0+BZOffSet+INSE_Depth/2.0"/>
+      <Placement block="FBAS" 
+		 z="-FBXD_Depth/2.0+BZOffSet+INSE_Depth/2.0"
+		 y="-(FBXD_NXL*wid+basewidth/2.0)" 
+		 x="FPOS_X"  />
 
     </If>
 
@@ -786,7 +782,7 @@
     </If>
 
     <Create block="FLGR"  />
-    <Placement z="+FLGG_AlThick/2.0" block="FLGR"  >
+      <Placement z="+FLGG_AlThick/2.0" block="FLGR"  >
     </Placement>
 
   </Block>
@@ -802,9 +798,12 @@
 
     <Medium name="leadglass" isvol="1 "  />
     <Attribute for="FLGR" seen="1" colo="4"  />
-    <Shape type="BOX" dz="FLGG_depth/2.0" dx="FLGG_Width/2.0" dy="FLGG_Width/2.0"  />
+    <Shape type="BOX" dz="FLGG_depth/2.0" 
+                      dx="FLGG_Width/2.0" 
+                      dy="FLGG_Width/2.0"  />
 
     <Instrument block="FLGR">
+      <Hit meas="flgr" nbits="0" min="0" max="250" />
       <Hit meas="elos" nbits="0" min="0" max="250" />
     </Instrument>
 
@@ -827,6 +826,7 @@
     <Attribute for="FLXF" seen="1" colo="4"  />
     <Shape type="BOX" dz="FLGG_depth/2.0" dx="FLGG_Width/2.0" dy="FLGG_Width/2.0"  />
     <Instrument block="FLXF">
+      <Hit meas="flxf" nbits="0" min="0" max="250" />
       <Hit meas="elos" nbits="0" min="0" max="250" />
     </Instrument>
   </Block>
@@ -1610,6 +1610,83 @@
   
 </Module>
 
+<Export language="Mortran">
+  subroutine fmsdigitizationmodule(JJ,HIT)
+
++CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTMED,GCTRAK,GCKINE,GCSETS,AGCSTEP,GCVOLU.
+
+  Integer JJ
+  Real HIT,att,dzhit,zback,lamb
+  Real zcenter, box(3), foo(3), dx, dy, dz, z
+  Equivalence (box(1),dx)
+  Equivalence (box(2),dy)
+  Equivalence (box(3),dz)
+  Integer :: npar, natt, istat
+  Real depth
+  LOGICAL isSet /.false./
+  LOGICAL doAttenuation /.false./
+  character*4 name
+
+  Structure FMCG { version, chkvsim, pbplane, fmsnx, fmssx, atten }
+
+  ENTRY FLGR HIT (jj,hit) """Entry point for FLGR hits"""
+  IF (isSet.eqv..FALSE.) THEN
+  lamb   = 0.04             ! attenuation = exp(-lamb * (zback-zhit))
+  isSet  = .true.
+  ENDIF
+
+  ENTRY FLXF HIT (jj,hit) """Entry point for FLXF hits"""
+  IF (isSet.eqv..FALSE.) THEN
+  lamb   = 0.03
+  isSEt  = .true.
+  ENDIF
+
+  att = 1.0
+
+  !
+  ! Check whether to run attenuation or not
+  !
+  USE /DETM/FPDM/FMCG stat=istat
+  IF (istat.gt.0.) {
+
+    IF (fmcg_atten=1.0) {
+
+      ! This is the center of the detector
+      zcenter = gtran(3,NLEVEL)
+
+      ! Obtain dimensions of the detector (assumes a box)
+      ! dz is the half width of the box
+      call gfpara(names(nlevel),number(nlevel),1,npar,natt,box,foo)
+
+      ! Compute the front of the detector
+      zback = zcenter + dz
+
+      ! Distance from back of detector to hit
+      dzhit = zback - VECT(3) 
+      IF (dzhit.gt.0) THEN """ Rare -1E-3cm hit positions """
+         ! Calculate attenuation
+         att=exp(-lamb * dzhit)
+      ELSE
+          att=1.0
+      ENDIF
+    }
+
+  }
+
+  ! reset
+  isSet = .false.
+
+  ! Attenuated energy loss
+  hit = deStep * att
+
+  z = vect(3)
+  call uhtoc(NAMES(NLEVEL),4,name,4)
+  !write (*,*) name, 'z=',z, 'dz=',dzhit,'step=',step,'dE=',deStep, 'alpha=',att
+
+  return
+  end 
+
+</Export>   
 
 </Document>
 
