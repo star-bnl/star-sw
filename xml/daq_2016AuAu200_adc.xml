@@ -23,10 +23,16 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b -x 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+root.exe -q -b -x 'bfc.C(1000,"P2016,TpxRaw,TpxClu2D,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
+<!--
 <input URL="file:/star/data03/daq/2016/125/17125034/st_physics_adc_17125034_raw*.daq" />
 <input URL="file:/star/data03/daq/2016/126/17126033/st_physics_adc_17126033_raw*.daq" />
+-->
+<input URL="file:/net/l404/data/fisyak/daq/2016/125/17125034/st_physics_adc_17125034_raw*.daq" />
+<input URL="file:/net/l404/data/fisyak/daq/2016/126/17126033/st_physics_adc_17126033_raw*.daq" />
 </job>
