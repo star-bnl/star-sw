@@ -1,4 +1,4 @@
-MACRO geom tag=y2015a 
+MACRO geom tag=y2017
 DETP GEOM [tag]
 GEXE $STAR_LIB/StarAgmlUtil.so
 library=.$ENV(STAR_HOST_SYS)/lib
