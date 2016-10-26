@@ -290,9 +290,9 @@ endif
 #    endif
 #endif
 
-if ( $?OPTSTAR ) then
-    if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
-    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
+#if ( $?OPTSTAR ) then
+#    if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
+#    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
 #
 #    if ( -e ${OPTSTAR}/${STAR_HOST_SYS} ) then
 #	# Redhat > 7.3  transition ; adding one level
@@ -301,7 +301,7 @@ if ( $?OPTSTAR ) then
 #    if ( -e ${xoptstar}/${STAR_HOST_SYS} ) then
 #	setenv XOPTSTAR  ${xoptstar}/${STAR_HOST_SYS}
 #    endif
-endif
+#endif
 
 
 # Display the messages here now
@@ -596,10 +596,10 @@ endif
 if ( $?DECHO ) echo "$self :: Paths alteration for STAR_MGR, STAR_SCRIPTS STAR_CGI etc ... begins"
 if ( -x ${GROUP_DIR}/dropit) then
     setenv GROUPPATH `${GROUP_DIR}/dropit -p ${GROUP_DIR} -p mgr -p ${STAR_MGR}  -p mgr/bin -p ${STAR_MGR}/bin -p ${STAR_SCRIPTS} -p ${STAR_CGI} -p ${MY_BIN} -p ${STAR_BIN} -p ${STAF}/mgr -p ${STAF_BIN}`
-    setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p $PATH`
+    setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p $PATH`
 else
     setenv GROUPPATH ${GROUP_DIR}:mgr:${STAR_MGR}:mgr/bin:${STAR_MGR}/bin:${STAR_SCRIPTS}:${STAR_CGI}:${MY_BIN}:${STAR_BIN}:${STAF}/mgr:${STAF_BIN}
-    setenv PATH  ${XOPTSTAR}/bin:${OPTSTAR}/bin:$PATH
+    setenv PATH  ${XOPTSTAR}/bin:$PATH
 endif
 
 # test return value of PTEST from dropit
@@ -636,7 +636,7 @@ if ( -x ${GROUP_DIR}/dropit) then
   setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "${LD_LIBRARY_PATH}" $STAR_PATH`
   if ($?SHLIB_PATH == 1)      setenv SHLIB_PATH      `${GROUP_DIR}/dropit -p ${SHLIB_PATH} $STAR_PATH`
 
-  setenv PATH `${GROUP_DIR}/dropit -p ${GROUPPATH} -p /usr/afsws/bin -p /usr/afsws/etc -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p /usr/sue/bin -p /usr/local/bin -p ${PATH}`
+  setenv PATH `${GROUP_DIR}/dropit -p ${GROUPPATH} -p /usr/afsws/bin -p /usr/afsws/etc -p ${XOPTSTAR}/bin -p /usr/sue/bin -p /usr/local/bin -p ${PATH}`
 else
   if ( $?DECHO ) echo "$self ::  ${GROUP_DIR}/dropit is not -x"
 endif
@@ -658,7 +658,7 @@ endif
 if ( $?DECHO ) echo "$self :: OS Specific tasks. Our OS=$STAR_SYS"
 switch ($STAR_SYS)
     case "rs_aix*":
-        if ( -x ${GROUP_DIR}/dropit) setenv MANPATH `${GROUP_DIR}/dropit -p {$MANPATH} -p ^/usr/share/man`
+        if ( -x ${GROUP_DIR}/dropit) setenv MANPATH `${GROUP_DIR}/dropit -p {$MANPATH} -p /usr/share/man`
         breaksw
     case "alpha_osf32c":
 	breaksw
@@ -965,7 +965,7 @@ if ( -x ${GROUP_DIR}/dropit) then
 	setenv PATH  `${GROUP_DIR}/dropit cern`
 	setenv PATH `${GROUP_DIR}/dropit -p ${PATH} -p ${CERN_ROOT}/bin`
     endif
-    setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p ${PATH}`
+    setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${PATH}`
     switch ($STAR_SYS)
 	case "hp_ux102":
 	#  ====================
@@ -993,7 +993,7 @@ if ( -x ${GROUP_DIR}/dropit) then
 	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH"`
 	breaksw
     endsw
-    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH ^/usr/lib"`
+    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH /usr/lib"`
     if ($USE_64BITS) then 
 	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib64/mysql
     else                  

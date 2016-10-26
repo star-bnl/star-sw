@@ -1,6 +1,11 @@
 #!/bin/csh
 # Set up STAR enviroment
-setenv STAR_LEVEL $1
+set i = `echo $1 | awk '{printf("%1.1s\n",$1)}'`
+if ("$i" == "9" || "$i" == "0") then
+  setenv STAR_LEVEL SL$1
+else
+  setenv STAR_LEVEL $1
+endif
 if ( -e $GROUP_DIR/group_env.csh ) then
         source $GROUP_DIR/group_env.csh
 	if ( $?prompt ) then
