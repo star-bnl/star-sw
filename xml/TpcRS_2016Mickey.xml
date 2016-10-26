@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+  starver .DEV2 
+  set file = $INPUTFILE0;
+  set rung = `echo $file | awk -F\: '{print $2}'`
+  echo "${file}"
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'TpcRS.C(1000,"MC.2016,TpcRS,StiCA,KFVertex,Mickey,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:Rung.pl 50" />
+</job>
+
