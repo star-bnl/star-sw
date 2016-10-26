@@ -753,9 +753,9 @@ MakeChairOptionalInstance(trigPrescales,RunLog/onl/trigPrescales);
 #include "St_L0TriggerInfoC.h"
 MakeChairInstance(L0TriggerInfo,RunLog/onl/L0TriggerInfo);
 #include "St_trigL3ExpandedC.h"
-MakeChairInstance(trigL3Expanded,RunLog/onl/trigL3Expanded);
+MakeChairOptionalInstance(trigL3Expanded,RunLog/onl/trigL3Expanded);
 #include "St_dsmPrescalesC.h"
-MakeChairInstance(dsmPrescales,RunLog/onl/dsmPrescales);
+MakeChairOptionalInstance(dsmPrescales,RunLog/onl/dsmPrescales);
 #include "St_additionalTriggerIDC.h"
 MakeChairOptionalInstance(additionalTriggerID,RunLog/onl/additionalTriggerID);
 #include "StDetectorDbTriggerID.h"
