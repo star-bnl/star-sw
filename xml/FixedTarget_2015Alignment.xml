@@ -28,8 +28,8 @@ foreach input (`cat $FILELIST`)
   root4star -q -b 'bfc.C('${f}','${l}',"B2015,in,Tpx,CMuDst,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,-evout,NoHistos,noTags,noRunco,BAna,analysis,Alignment","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
 end
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/Cosmics$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/Cosmics$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Cosmics$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Cosmics$JOBID.err" />
 <input URL="file:/star/data03/daq/2015/140/16140*/st_physics_1*.daq" />
 <input URL="file:/star/data03/daq/2015/169/1616907?/st_physics_1*.daq" />
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.11 2010/08/26 15:05:50 ikulakov Exp $
+// $Id: AliHLTTPCPerformanceBase.cxx,v 1.3 2013/11/21 13:07:29 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -117,12 +117,18 @@ void AliHLTTPCPerformanceBase::EfficiencyPerformance() // TODO add common parts 
 }
 
 #ifndef HLTCA_STANDALONE
-TH1 *AliHLTTPCPerformanceBase::GetHisto( int iHisto )
+TH1 *AliHLTTPCPerformanceBase::GetHisto(const char* name)
 {
-  
-//   assert ( (iHisto != NHisto) || (string("") == string(" wrong histo name ")) );
-  if ( (iHisto >= NHisto) || (iHisto<0) ){
-    cout << "ERROR: wrong histo number: " << iHisto << endl;
+  int iHisto;
+  for (iHisto = 0; iHisto < NHisto; iHisto++){
+    if (string(fHistosInfo[iHisto].name) == string(name)){
+      break;
+    };
+  }
+
+  assert ( (iHisto != NHisto) || (string("") == string(" wrong histo name ")) );
+  if (iHisto == NHisto){
+    cout << "ERROR: wrong histo name: " << name << endl;
     exit(1);
   }
   

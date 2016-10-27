@@ -25,7 +25,7 @@ class StHltTriggerReasonCapable : public StObject {
 public:
     StHltTriggerReasonCapable();
     ~StHltTriggerReasonCapable();
-    Double_t dummy;
+    
     ClassDef(StHltTriggerReasonCapable,1)
 };
 

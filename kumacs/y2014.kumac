@@ -1,6 +1,5 @@
 macro y2014
 *  starsim -w 1 -b y2014.kumac
-	
   DETP geom y2014c  
 *  DETP geom y2014
 * field=-5  hadr_off=1
@@ -96,13 +95,4 @@ exec xcut
 exec rcut
 exec zcut
 exec zcut2
-return
-**** track ******
-macro track
-debug on
-swit 1 2
-swit 2 2
-*swit 3 1
-gkine 1 6 1 1 0.5 0.5 0 0 -10 10
-trig
 return

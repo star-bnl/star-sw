@@ -7,8 +7,8 @@
   set logFile  = ${JOBID}B.log
   root.exe -q -b ' bfc.C(99999999,"in,gmtAligner,tpcDb,corrX,analysis,mysql,nodefault","@'${FILELIST}'",0,"'${JOBID}'.root")' &gt;&amp;  ${logFile}
 	</command>
-	<stdout URL="file:/star/u/fisyak/prodlog/GmtAligner$JOBID.log" />
-	<stderr URL="file:/star/u/fisyak/prodlog/GmtAligner$JOBID.err" />
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/GmtAligner$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/GmtAligner$JOBID.err" />
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample.pl" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2015/GMT2/*event.root" /> -->

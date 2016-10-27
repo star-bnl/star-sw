@@ -19,8 +19,8 @@
   echo "fitter $fitter"
   root4star -q -b 'bfc.C(100,"RC.y2011,dbV20111124,in,ReadAll,'${fitter}',NoHistos,NoRunco","'${evtsFile}'")' &gt;&amp;  ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/data01/pwg/wanghui6/my_iTPX/new/HIJING/*.10.nt" /> -->
 <!-- <input URL="file:/star/data01/pwg/wanghui6/my_iTPX/new/HIJING/*.nt" /> -->
 <input URL="file:/star/simu/fisyak/KFVertex/2011/KFV4/*event.root" />

@@ -13,7 +13,7 @@
   set logFile  = ${file}B.log
   root.exe -q -b 'bfc.C(999999,"P2011a,BEmcChkStat,btof,StiCA,KFVertex,-l3onl,-fpd,-ftpc,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,","'${evtsFile}'","")' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/u/fisyak/prodlog/2011AuAu19$JOBID.log" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/2011AuAu19$JOBID.log" />
 <input URL="file:/star/data03/daq/2011/11*/*/st_physics_*.daq" />
 
 </job>

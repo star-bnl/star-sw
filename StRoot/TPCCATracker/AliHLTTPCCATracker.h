@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCATracker.h,v 1.3 2012/08/20 14:12:59 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATracker.h,v 1.2 2016/07/15 14:43:33 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -70,8 +70,8 @@ class AliHLTTPCCATracker
     void WriteOutput();
 
     void GetErrors2( int iRow,  const AliHLTTPCCATrackParam &t, float *Err2Y, float *Err2Z ) const;
-    void GetErrors2( int iRow,  const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const;
-    void GetErrors2( const uint_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const;
+    void GetErrors2( int iRow,  const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const;
+    void GetErrors2( const ushort_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const;
 
     void RecalculateHitsSize( int MaxNHits );
     void SetPointersHits( int MaxNHits );
@@ -95,8 +95,7 @@ class AliHLTTPCCATracker
     void SetNTracklets(int nTrlets) { fNTracklets = nTrlets; }
 
     const AliHLTTPCCAStartHitId &TrackletStartHit( int i ) const { return fTrackletStartHits[i]; }
-    Vc::vector<AliHLTTPCCAStartHitId>& TrackletStartHits() { return fTrackletStartHits; }
-    const Vc::vector<AliHLTTPCCAStartHitId>& TrackletStartHits() const { return fTrackletStartHits; }
+    AliHLTTPCCAStartHitId *TrackletStartHits() const { return fTrackletStartHits; }
 
     size_t NTracks() const { return fTracks.size(); }
     const std::vector<AliHLTTPCCATrack *> &Tracks() const { return fTracks; }
@@ -134,7 +133,7 @@ class AliHLTTPCCATracker
     int   fTrackMemorySize; // size of the event memory [bytes]
 
 
-    Vc::vector<AliHLTTPCCAStartHitId> fTrackletStartHits;   // start hits for the tracklets
+    AliHLTTPCCAStartHitId *fTrackletStartHits;   // start hits for the tracklets
 
     int fNTracklets;     // number of tracklets
     AliHLTResizableArray<TrackletVector> fTrackletVectors; // tracklet data
@@ -154,7 +153,7 @@ class AliHLTTPCCATracker
     AliHLTTPCCATracker &operator=( const AliHLTTPCCATracker& );
 };
 
-inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
+inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
@@ -162,7 +161,7 @@ inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackPara
 
   fParam.GetClusterErrors2( iRow, t, Err2Y, Err2Z );
 }
-inline void AliHLTTPCCATracker::GetErrors2( const uint_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
+inline void AliHLTTPCCATracker::GetErrors2( const ushort_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
@@ -172,20 +171,17 @@ inline void AliHLTTPCCATracker::GetErrors2( const uint_v &rowIndexes, const AliH
 }
 ///mvz start 20.01.2010
 /*
-inline void AliHLTTPCCATracker::GetErrors2( int iRow, const float_v &z, const float_v &sinPhi,
-    const float_v &DzDs, float_v *Err2Y, float_v *Err2Z ) const
+inline void AliHLTTPCCATracker::GetErrors2( int iRow, const sfloat_v &z, const sfloat_v &sinPhi,
+    const sfloat_v &DzDs, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
   //
 
-  VALGRIND_CHECK_VALUE_IS_DEFINED( z );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( DzDs );
-
   fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
 }
-inline void AliHLTTPCCATracker::GetErrors2( const uint_v &iRow, const float_v &z, const float_v &sinPhi,
-    const float_v &DzDs, float_v *Err2Y, float_v *Err2Z ) const {
+inline void AliHLTTPCCATracker::GetErrors2( const ushort_v &iRow, const sfloat_v &z, const sfloat_v &sinPhi,
+    const sfloat_v &DzDs, sfloat_v *Err2Y, sfloat_v *Err2Z ) const {
   fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
 }*/
 ///mvz end 20.01.2010

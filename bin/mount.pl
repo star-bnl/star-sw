@@ -9,13 +9,10 @@ if ($#ARGV != 0) {
 } else {
   $mount = $ARGV[0];
 }
-if    ($mount eq 'u'  ) { $DISK = "/direct/star+u"; $disk = "/direct/star/u";}
-elsif ($mount eq 'tpc') { $DISK = "/direct/star+subsys+tpc"; $disk = "/direct/star/subsys/tpc";}
-elsif ($mount eq 'bnl') { $DISK = "/gpfs01/star/i_bnl"; $disk = "/direct/star/institutions/bnl";}
-elsif ($mount eq 'gpfs01') { $DISK = "/direct/gpfs01"; $disk = "/direct/gpfs01";}
-elsif ($mount eq 'gpfs02') { $DISK = "/direct/gpfs02"; $disk = "/direct/gpfs02";}
-elsif ($mount eq 'gpfs03') { $DISK = "/direct/gpfs03"; $disk = "/direct/gpfs03";}
-elsif ($mount eq 'gpfs04') { $DISK = "/direct/gpfs04"; $disk = "/direct/gpfs04";}
+if    ($mount eq 'u'  ) { $DISK = "/direct/star+u"; $disk = "/tmp/fisyak/star/u";}
+elsif ($mount eq 'tpc') { $DISK = "/direct/star+subsys+tpc"; $disk = "/tmp/fisyak/star/subsys/tpc";}
+elsif ($mount eq 'bnl') { $DISK = "/gpfs01/star/i_bnl"; $disk = "/tmp/fisyak/star/institutions/bnl";}
+elsif ($mount eq 'gpfs01') { $DISK = "/direct/gpfs01"; $disk = "/tmp/fisyak/gpfs01";}
 else {
   die "Non valid option";
 }

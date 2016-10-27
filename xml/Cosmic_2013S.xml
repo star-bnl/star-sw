@@ -24,8 +24,8 @@
 #  root4star -q -b 'bfc.C('${f}','${l}',"pp2013x,UseXgeom,VFMinuit,Corr4,alignment,NoHistos,noRunco,noTags,dEdx","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
   root4star -q -b 'bfc.C('${f}','${l}',"B2013x,BAna,trgd,UseXgeom,ZDCvtx,NosvtIT,NossdIT,btof,mtdDat,analysis,VFMinuit,Corr4,alignment,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 	</command>
-	<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-	<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="command:GetCosmicsDaq.pl" /> -->
 <!-- <input URL="file:/star/data03/daq/2013/*/*/st_cosmic_14*.daq"/> -->
 <!-- <input URL="file:/star/data03/daq/2013/086/14086031/st_cosmic_14086031*.daq"/>  -->

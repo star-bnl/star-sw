@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAHitArea.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAHitArea.h,v 1.1 2016/02/05 23:27:28 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -28,31 +28,29 @@ class AliHLTTPCCAHitArea
   public:
     struct NeighbourData
     {
-      uint_m fValid;
-      uint_v fLinks;
-      float_v fY, fZ;
+      short_m fValid;
+      short_v fLinks;
+      sfloat_v fY, fZ;
     };
 
-    AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTTPCCASliceData &slice, const float_v &y, const float_v &z, float dy, float dz, int_m mask );
+    AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTTPCCASliceData &slice, const sfloat_v &y, const sfloat_v &z, float dy, float dz, short_m mask );
 
     /**
      * look up the next hit in the requested area.
      * Sets h to the coordinates and returns the index for the hit data
      */
-    uint_m GetNext( NeighbourData *data = 0 );
+    ushort_m GetNext( NeighbourData *data );
 
-    uint_v NHits(); // can be called only before GetNext
-  
   protected:
     const AliHLTTPCCARow &fRow;
     const AliHLTTPCCASliceData &fSlice;
 
-    uint_v fBZmax;   // maximal Z bin index
-    uint_v fBDY;     // Y distance of bin indexes
-    uint_v fIndYmin; // minimum index for
-    uint_v fIz;      // current Z bin index (incremented while iterating)
-    uint_v fHitYlst; //
-    uint_v fIh;      // hit index iterating inside the bins
+    ushort_v fBZmax;   // maximal Z bin index
+    ushort_v fBDY;     // Y distance of bin indexes
+    ushort_v fIndYmin; // minimum index for
+    ushort_v fIz;      // current Z bin index (incremented while iterating)
+    ushort_v fHitYlst; //
+    ushort_v fIh;      // hit index iterating inside the bins
     int fNy;      // Number of bins in Y direction
 };
 

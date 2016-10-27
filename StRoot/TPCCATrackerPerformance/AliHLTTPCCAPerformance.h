@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.9 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.4 2016/02/05 23:28:28 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -14,7 +14,7 @@
 #include "AliHLTTPCPerformanceBase.h"
 
 // #include "AliHLTTPCCADef.h"
-#include "AliHLTArray.h"
+  //#include "AliHLTArray.h"
 #include "AliHLTTPCCAMCTrack.h"
 #include "AliHLTTPCCAMCPoint.h"
 
@@ -64,7 +64,6 @@ class AliHLTTPCCAPerformance
     /// functional is needed by DRAW option. TODO: clean up
   const AliHLTTPCCAMCTrack &MCTrack(int i) const { return fMCTracks[i]; }
   const AliHLTTPCCAHitLabel &HitLabel(int i) const { return fHitLabels[i]; }
-  int HitLabelSize() { return fHitLabels.Size(); }
   const AliHLTTPCCAGBTracker *GetTracker(){ return fTracker; };
     
 

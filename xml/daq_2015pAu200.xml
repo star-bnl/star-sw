@@ -24,8 +24,8 @@
 #  root.exe -q -b 'bfc.C(100,"B2015,gmt,Alignment,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlRaw, pxlCluster, pxlHit, istRaw, istCluster, istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
   root.exe -q -b 'bfc.C(10000,"B2015,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlHit,istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/da2015$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2015$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/da2015$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2015$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2015/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2015.pl" /> -->

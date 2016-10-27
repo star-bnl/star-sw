@@ -35,7 +35,6 @@ class StTofHitMaker:public StRTSBaseMaker
       void fillStEvent();     //! ship collection to StEvent
       /// TOF Raw hits info. struct
       ///----------------------------------------------------
-public:	
       struct TofRawHit {
         unsigned short fiberid;           /// 0 1 2,3
         unsigned short trayID;            /// 1,2,......,120,for tray, 121, 122 for upvpd
@@ -44,7 +43,6 @@ public:
         unsigned int   timestamp;         /// data word before unpack
         unsigned int   triggertimestamp;  /// trigger word before unpack
      };
-private:
      vector<TofRawHit> TofLeadingHits;
      vector<TofRawHit> TofTrailingHits;
 

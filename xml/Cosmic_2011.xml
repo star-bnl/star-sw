@@ -31,7 +31,7 @@
 #P2011a pmdReco btof mtdDat BEmcChkStat -evout Corr4 OSpaceZ2 OGridLeak3D -hitfilt
   root4star -q -b 'bfc.C('${f}','${l}',"P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Sti,-evout,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 	</command>
-	<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-	<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <input URL="command:Get2011RFF_FF_Daq.pl" />
 </job>

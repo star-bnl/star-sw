@@ -8,8 +8,8 @@
          if (-r ${rootf}) exit 0;
          root.exe -q -b  'dEdx.C(50000,"'${INPUTFILE0}'","'${rootf}'",2)'  &gt;&amp; ${log}
 </command>
-<stdout URL="file:/star/u/fisyak/prodlog/dEdx_sched$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/dEdx_sched$JOBID.err" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/dEdx_sched$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/dEdx_sched$JOBID.err" />
 
 <!-- #You can find files from the Au + Au  FXT run here: 
 <input URL="file:/star/data01/pwg/kmeehan/AuAuProd/4_5GeV/mudsts/fullDataFiles/eventFiles/*event.root" />

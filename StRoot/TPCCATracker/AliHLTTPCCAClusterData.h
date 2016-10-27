@@ -21,8 +21,8 @@
 #ifndef CLUSTERDATA_H
 #define CLUSTERDATA_H
 
-#include "AliHLTTPCCAGBHit.h"
 #include <vector>
+#include "AliHLTTPCCAGBHit.h"
 #include "AliHLTArray.h"
 
 #include "AliHLTTPCCAParameters.h"

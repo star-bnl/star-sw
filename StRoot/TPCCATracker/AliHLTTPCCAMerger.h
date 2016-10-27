@@ -25,7 +25,6 @@ class AliHLTTPCCASliceTrack;
 class AliHLTTPCCASliceOutput;
 class AliHLTTPCCAMergedTrack;
 class AliHLTTPCCAMergerOutput;
-class AliHLTTPCCATracker;
 
 /**
  * @class AliHLTTPCCAMerger
@@ -35,6 +34,14 @@ class AliHLTTPCCATracker;
 class AliHLTTPCCAClusterInfo;
 class AliHLTTPCCAMerger
 {
+    // public:
+    //   class AliHLTTPCCAClusterInfo;
+ private:
+//  struct AliHLTTPCCATrackMemory;
+//  struct AliHLTTPCCAHitMemory;
+
+  class AliHLTTPCCASliceTrackInfo;
+
   class AliHLTTPCCABorderTrack
   {
    public:
@@ -44,11 +51,11 @@ class AliHLTTPCCAMerger
     float bErr2()   const{ return fbErr2;    }
     float p()       const{ return fp;        }
     float pErr2()   const{ return fpErr2;    }
-    unsigned int InnerRow() const {return fInnerRow;}
-    unsigned int OuterRow() const {return fOuterRow;}
+    unsigned short InnerRow() const {return fInnerRow;}
+    unsigned short OuterRow() const {return fOuterRow;}
 
-    void SetInnerRow(unsigned int v) {fInnerRow = v;}
-    void SetOuterRow(unsigned int v) {fOuterRow = v;}
+    void SetInnerRow(unsigned short v) {fInnerRow = v;}
+    void SetOuterRow(unsigned short v) {fOuterRow = v;}
     void SetTrackID ( int v )   { fTrackID   = v; }
     void Setb       (float v)   { fb         = v; }
     void SetbErr2   (float v)   { fbErr2     = v; }
@@ -61,69 +68,54 @@ class AliHLTTPCCAMerger
     float fp;
     float fpErr2;
     int   fTrackID;              // track index
-    unsigned int fInnerRow;
-    unsigned int fOuterRow;
+    unsigned short fInnerRow;
+    unsigned short fOuterRow;
   };
 
  public:
-  class AliHLTTPCCASliceTrackInfo;
 
   AliHLTTPCCAMerger();
   ~AliHLTTPCCAMerger();
-  
-  AliHLTTPCCAMerger( const AliHLTTPCCAMerger& );
-  const AliHLTTPCCAMerger &operator=( const AliHLTTPCCAMerger& ) const;
+
+  void SetSliceParam( const AliHLTTPCCAParam &v ) { fSliceParam = v; }
 
   void Clear();
-
-    // accsessors
-  void SetSliceParam( const AliHLTTPCCAParam &v ) { fSliceParam = v; }
   void SetSliceData( int index, const AliHLTTPCCASliceOutput *SliceData );
-  void SetSlices ( int i, AliHLTTPCCATracker *sl );
-  static void SetDoNotMergeBorders(int i = 0) {fgDoNotMergeBorders = i;}
-
+  void Reconstruct();
   const AliHLTTPCCAMergerOutput * Output() const { return fOutput; }
+
+//  bool FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
+//  AliHLTTPCCATrackParam t0, float Alpha0, int hits[], int &NHits,  bool dir = 0 );
+
+  void SetSlices ( int i, AliHLTTPCCATracker *sl );
+
+  static void SetDoNotMergeBorders(int i = 0) {fgDoNotMergeBorders = i;}
   
   int NTimers() { return fNTimers; }
   float Timer( int i ) { return fTimers[i]; };
-
-    // process
-  void UnpackSlices();
-  void Reconstruct();
  private:
-  void FindNeighbourTracks(int number=0);
-  void Merging(int number=0);
-  float_m AddNeighbour( const uint_v& jIndexes, const int& nVecElements, const float_m& isNeighbour,
-  int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vStartPoint, AliHLTTPCCATrackParamVector& vEndPoint, float_v& vStartAlpha, float_v& vEndAlpha, uint_v& vNHits );
-  
-  void MakeBorderTracks( AliHLTTPCCABorderTrack B[], unsigned int &nB, unsigned char &iSlice );
- 
-  void MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, unsigned int iSlice1, AliHLTTPCCABorderTrack B2[], int N2, unsigned int iSlice2, int number,
-                            const unsigned int FirstTrIR[], const unsigned int LastTrIR[]);
-  void FindMinMaxIndex( int N2, const unsigned int FirstTrIR[], const unsigned int LastTrIR[], int minIRow, int maxIRow, int &min, int &max );
-  void CheckTracksMatch( int number,
-  const AliHLTTPCCATrackParamVector &InParT1, const AliHLTTPCCATrackParamVector &OutParT1, const float_v &OutAlphaT1, const float_v &InAlphaT1,
-  const AliHLTTPCCATrackParamVector &InParT2, const AliHLTTPCCATrackParamVector &OutParT2, const float_v &OutAlphaT2, const float_v &InAlphaT2,
-  const float_v dxArr[4], const float_v dyArr[4], const float_v &sinS1_E2v, const float_v &sinS2_E1v,
-  float_v &minL2v, const float &bestChi2, float_v& min_chi2, float_m& active );
 
-    // helping functions
-  void ConvertPTrackParamToVector( const AliHLTTPCCATrackParam *t0[uint_v::Size], AliHLTTPCCATrackParamVector &t, const int &nTracksV);
+  void ConvertTrackParamToVector( AliHLTTPCCATrackParam t0[ushort_v::Size], AliHLTTPCCATrackParamVector &t, int &nTracksV);
 
-  float_m FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Alpha0V,
-                     int hits[2000][uint_v::Size], uint_v &firstHits, uint_v &NTrackHits,
-                     int &nTracksV, float_m active0 = float_m(true), bool dir = 1 );
-  
-  unsigned int HitIndex( const uint_v& firstHits, const uint_v& nHits, bool dir, int iV, unsigned int i ) { // vectorized is slower
-    return static_cast<unsigned int>(firstHits[iV]) + static_cast<unsigned int>(dir ? ( nHits[iV] - 1 - i ) : i);
-  }
+  sfloat_m FitTrack( AliHLTTPCCATrackParamVector &t, sfloat_v &Alpha0V,
+                     int hits[2000][ushort_v::Size], ushort_v &firstHits, ushort_v::Memory &NTrackHits,
+                     int &nTracksV, sfloat_m active0 = sfloat_m(true), bool dir = 1 );
 
-  void InvertCholetsky(float_v a[15]);
-  void MultiplySS(const float_v C[15], const float_v V[15], float_v K[5][5]);
-  void MultiplyMS(const float_v C[5][5], const float_v V[15], float_v K[15]);
-  void MultiplySR(const float_v C[15], const float_v r_in[5], float_v r_out[5]);
-  void FilterTracks(const float_v r[5], const float_v C[15], const  float_v m[5], const float_v V[15],
-                    float_v R[5],       float_v W[15],       float_v &chi2, const float_m &mask = float_m( true ));
+  AliHLTTPCCAMerger( const AliHLTTPCCAMerger& );
+  const AliHLTTPCCAMerger &operator=( const AliHLTTPCCAMerger& ) const;
+
+  void InvertCholetsky(float a[15]);
+  void MultiplySS(float const C[15], float const V[15], float K[5][5]);
+  void MultiplyMS(float const C[5][5], float const V[15], float K[15]);
+  void MultiplySR(float const C[15], float const r_in[5], float r_out[5]);
+  void FilterTracks(float const r[5], float const C[15], float const m[5], float const V[15], float R[5], float W[15], float &chi2);
+
+  void InvertCholetsky(sfloat_v a[15]);
+  void MultiplySS(sfloat_v const C[15], sfloat_v const V[15], sfloat_v K[5][5]);
+  void MultiplyMS(sfloat_v const C[5][5], sfloat_v const V[15], sfloat_v K[15]);
+  void MultiplySR(sfloat_v const C[15], sfloat_v const r_in[5], sfloat_v r_out[5]);
+  void FilterTracks(sfloat_v const r[5], sfloat_v const C[15], sfloat_v const m[5], sfloat_v const V[15],
+                    sfloat_v R[5], sfloat_v W[15], sfloat_v &chi2, const sfloat_m &mask = sfloat_m( true ));
 
   static bool CompareInnerRow (const AliHLTTPCCABorderTrack &b1, const AliHLTTPCCABorderTrack &b2) {
     return (b1.InnerRow() > b2.InnerRow()) || ( (b1.InnerRow() == b2.InnerRow()) && (b1.b() > b2.b()) ) ;
@@ -132,6 +124,12 @@ class AliHLTTPCCAMerger
     return (b1.OuterRow() < b2.OuterRow())/* || ( (b1.OuterRow() == b2.OuterRow()) && (b1.b() > b2.b()) )*/ ;
   }
 
+  void UnpackSlices();
+  void Merging(int number=0);
+
+  void MakeBorderTracks(AliHLTTPCCABorderTrack B[], unsigned short &nB, unsigned char &iSlice );
+  void MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, int iSlice1, AliHLTTPCCABorderTrack B2[], int N2, int iSlice2, int number,
+                            unsigned short FirstTrIR[], unsigned short LastTrIR[]);
 
   static const int fgkNSlices = AliHLTTPCCAParameters::NumberOfSlices;       //* N slices
   static       int fgDoNotMergeBorders;
@@ -142,7 +140,7 @@ class AliHLTTPCCAMerger
   AliHLTTPCCAClusterInfo *fClusterInfos;  //* information about track clusters
 
   int fMaxTrackInfos;  //* booked size of fTrackInfos array
-  Vc::vector<AliHLTTPCCASliceTrackInfo> fTrackInfos; //* additional information for slice tracks
+  AliHLTTPCCASliceTrackInfo *fTrackInfos; //* additional information for slice tracks
   int fSliceTrackInfoStart[fgkNSlices];   //* slice starting index in fTrackInfos array;
   int fSliceNTrackInfos[fgkNSlices];      //* N of slice track infos in fTrackInfos array;
 
@@ -154,98 +152,45 @@ class AliHLTTPCCAMerger
 //  AliHLTTPCCAHitMemory fHitMemory;
 };
 
-class AliHLTTPCCAMerger::AliHLTTPCCASliceTrackInfo
-{
- public:
-  AliHLTTPCCASliceTrackInfo():
-    ChiPrev(1e10f),ChiNext(1e10f),fInnerRow(-1),fOuterRow(-1),
-    fInnerAlpha(0.f),fOuterAlpha(0.f),fNClusters(0),
-    fPrevNeighbour(-1),fNextNeighbour(-1),fSlicePrevNeighbour(-1),fSliceNextNeighbour(-1),fUsed(false),
-    fInnerParam(),fOuterParam(){}
-  
-    const AliHLTTPCCATrackParam &InnerParam() const { return fInnerParam;      }
-    const AliHLTTPCCATrackParam &OuterParam() const { return fOuterParam;      }
-    float InnerAlpha() const { return fInnerAlpha;      }
-    float OuterAlpha() const { return fOuterAlpha;      }
-    unsigned int   NClusters() const { return fNClusters;       } 
-    int   FirstClusterRef() const { return fFirstClusterRef; }
-    int   PrevNeighbour()  const { return fPrevNeighbour;   }
-    int   NextNeighbour()  const { return fNextNeighbour;   }
-    unsigned int SlicePrevNeighbour() const { return fSlicePrevNeighbour;   }
-    unsigned int SliceNextNeighbour() const { return fSliceNextNeighbour;   }
-    int Used()                        const { return fUsed;            }
-
-    void SetInnerParam( const AliHLTTPCCATrackParam &v ) { fInnerParam = v;      }
-    void SetOuterParam( const AliHLTTPCCATrackParam &v ) { fOuterParam = v;      }
-    void SetInnerAlpha( float v )                      { fInnerAlpha = v;      }
-    void SetOuterAlpha( float v )                      { fOuterAlpha = v;      }
-    void SetNClusters ( unsigned int v )                        { fNClusters = v;       }
-    void SetFirstClusterRef( int v )                   { fFirstClusterRef = v; }
-    void SetPrevNeighbour( int v )                     { fPrevNeighbour = v;   }
-    void SetNextNeighbour( int v )                     { fNextNeighbour = v;   }
-    void SetSlicePrevNeighbour( unsigned char v )                     { fSlicePrevNeighbour = v;   }
-    void SetSliceNextNeighbour( unsigned char v )                     { fSliceNextNeighbour = v;   }
-    void SetUsed( bool v )                             { fUsed = v;            }
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-    int orig_track_id;
-    unsigned char fSlice;
-    int number;
-#endif // DO_TPCCATRACKER_EFF_PERFORMANCE
-
-   public:
-
-    float ChiPrev; //characteristic of the link quality to the inner neighbour (for overlaped tracks it is chi2, for not overlaped - distance between tracks)
-    float ChiNext; //characteristic of the link quality to the outer neighbour
-    unsigned char fInnerRow; // number of the inner row of the track
-    unsigned char fOuterRow; // number of the outer row of the track
-
-    float fInnerAlpha;               // The angle of the sector, where inner parameters are
-    float fOuterAlpha;               // The angle of the sector, where outers parameters are
-    unsigned int fNClusters;  //Clusters number of the track
-    int fFirstClusterRef;  // index of the first track cluster in the global cluster array (AliHLTTPCCAMerger::fClusterInfos)
-    int fPrevNeighbour; // The number of the inner (previous) neighbour in the tracks array (AliHLTTPCCAMerger::fTrackInfos)
-    int fNextNeighbour; // The number of the outer (previous) neighbour in the tracks array (AliHLTTPCCAMerger::fTrackInfos)
-    unsigned int fSlicePrevNeighbour; // The number of the sector, which contains inner neighbour
-    unsigned int fSliceNextNeighbour; // The number of the sector, which contains outer neighbour
-    int fUsed;            // is the slice track already merged (=1 -> merged, 0 -> not merged)
- private:
-
-    AliHLTTPCCATrackParam fInnerParam; // Parameters of the track at the inner point
-    AliHLTTPCCATrackParam fOuterParam; // Parameters of the track at the outer point
-};
-
-
 #include "AliHLTTPCCATrackParamVector.h"
 
-inline void AliHLTTPCCAMerger::ConvertPTrackParamToVector( const AliHLTTPCCATrackParam *t0[uint_v::Size], AliHLTTPCCATrackParamVector &t, const int &nTracksV)
+inline void AliHLTTPCCAMerger::ConvertTrackParamToVector( AliHLTTPCCATrackParam t0[ushort_v::Size], AliHLTTPCCATrackParamVector &t, int &nTracksV)
 {
-  float_v tmpFloat;
-  int_v tmpShort;
+  sfloat_v tmpVec;
+  short_v tmpVecShort;
+  sfloat_v::Memory tmpFloat;
+  short_v::Memory tmpShort;
 
-  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->X();
-  t.SetX(tmpFloat);
-  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->SignCosPhi();
-  t.SetSignCosPhi(tmpFloat);
+  for(int iV=0; iV < nTracksV; iV++) tmpFloat[iV] = t0[iV].X();
+  tmpVec.load( tmpFloat );
+  t.SetX(tmpVec);
+  for(int iV=0; iV < nTracksV; iV++) tmpFloat[iV] = t0[iV].SignCosPhi();
+  tmpVec.load( tmpFloat );
+  t.SetSignCosPhi(tmpVec);
 
   for(int iP=0; iP<5; iP++)
   {
-    for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Par()[iP];
-    t.SetPar(iP,tmpFloat);
+    for(int iV=0; iV < nTracksV; iV++) tmpFloat[iV] = t0[iV].Par()[iP];
+    tmpVec.load( tmpFloat );
+    t.SetPar(iP,tmpVec);
   }
   for(int iC=0; iC<15; iC++)
   {
-    for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Cov()[iC];
-    t.SetCov(iC,tmpFloat);
+    for(int iV=0; iV < nTracksV; iV++) tmpFloat[iV] = t0[iV].Cov()[iC];
+    tmpVec.load( tmpFloat );
+    t.SetCov(iC,tmpVec);
   }
-  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Chi2();
-  t.SetChi2(tmpFloat);
-  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpShort[iV] = t0[iV]->NDF();
-  t.SetNDF(tmpShort);
+  for(int iV=0; iV < nTracksV; iV++) tmpFloat[iV] = t0[iV].Chi2();
+  tmpVec.load( tmpFloat );
+  t.SetChi2(tmpVec);
+  for(int iV=0; iV < nTracksV; iV++) tmpShort[iV] = t0[iV].NDF();
+  tmpVecShort.load( tmpShort );
+  t.SetNDF(tmpVecShort);
 }
 
-inline void AliHLTTPCCAMerger::InvertCholetsky(float_v a[15])
+inline void AliHLTTPCCAMerger::InvertCholetsky(sfloat_v a[15])
 {
-  float_v d[5], uud, u[5][5];
+  sfloat_v d[5], uud, u[5][5];
   for(int i=0; i<5; i++) 
   {
     d[i]=0.f;
@@ -259,7 +204,7 @@ inline void AliHLTTPCCAMerger::InvertCholetsky(float_v a[15])
     for(int j=0; j<i; j++) 
       uud += u[j][i]*u[j][i]*d[j];
     uud = a[i*(i+3)/2] - uud;
-    float_m small_val = CAMath::Abs(uud)<1.e-12f;
+    sfloat_m small_val = CAMath::Abs(uud)<1.e-12f;
     uud(small_val) = 1.e-12f;
     d[i] = uud/CAMath::Abs(uud);
     u[i][i] = sqrt(CAMath::Abs(uud));
@@ -274,7 +219,7 @@ inline void AliHLTTPCCAMerger::InvertCholetsky(float_v a[15])
     }
   }
 
-  float_v u1[5];
+  sfloat_v u1[5];
 
   for(int i=0; i<5; i++)
   {
@@ -309,7 +254,7 @@ inline void AliHLTTPCCAMerger::InvertCholetsky(float_v a[15])
   a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2] + u[0][3]*u[0][3]*d[3] + u[0][4]*u[0][4]*d[4];
 }
 
-inline void AliHLTTPCCAMerger::MultiplySS(const float_v C[15], const float_v V[15], float_v K[5][5])
+inline void AliHLTTPCCAMerger::MultiplySS(sfloat_v const C[15], sfloat_v const V[15], sfloat_v K[5][5])
 {
   K[0][0] = C[0]*V[ 0] + C[1]*V[ 1] + C[3]*V[ 3] + C[6]*V[ 6] + C[10]*V[10];
   K[0][1] = C[0]*V[ 1] + C[1]*V[ 2] + C[3]*V[ 4] + C[6]*V[ 7] + C[10]*V[11];
@@ -342,7 +287,7 @@ inline void AliHLTTPCCAMerger::MultiplySS(const float_v C[15], const float_v V[1
   K[4][4] = C[10]*V[10] + C[11]*V[11] + C[12]*V[12] + C[13]*V[13] + C[14]*V[14];
 }
 
-inline void AliHLTTPCCAMerger::MultiplyMS(const float_v C[5][5], const float_v V[15], float_v K[15])
+inline void AliHLTTPCCAMerger::MultiplyMS(sfloat_v const C[5][5], sfloat_v const V[15], sfloat_v K[15])
 {
   K[0] = C[0][0]*V[0] + C[0][1]*V[1] + C[0][2]*V[3] + C[0][3]*V[6] + C[0][4]*V[10];
 
@@ -365,7 +310,7 @@ inline void AliHLTTPCCAMerger::MultiplyMS(const float_v C[5][5], const float_v V
   K[14] = C[4][0]*V[10] + C[4][1]*V[11] + C[4][2]*V[12] + C[4][3]*V[13] + C[4][4]*V[14];
 }
 
-inline void AliHLTTPCCAMerger::MultiplySR(const float_v C[15], const float_v r_in[5], float_v r_out[5])
+inline void AliHLTTPCCAMerger::MultiplySR(sfloat_v const C[15], sfloat_v const r_in[5], sfloat_v r_out[5])
 {
   r_out[0] = r_in[0]*C[ 0] + r_in[1]*C[ 1] + r_in[2]*C[ 3] +r_in[3]*C[ 6] + r_in[4]*C[10];
   r_out[1] = r_in[0]*C[ 1] + r_in[1]*C[ 2] + r_in[2]*C[ 4] +r_in[3]*C[ 7] + r_in[4]*C[11];
@@ -374,11 +319,11 @@ inline void AliHLTTPCCAMerger::MultiplySR(const float_v C[15], const float_v r_i
   r_out[4] = r_in[0]*C[10] + r_in[1]*C[11] + r_in[2]*C[12] +r_in[3]*C[13] + r_in[4]*C[14];
 }
 
-inline void AliHLTTPCCAMerger::FilterTracks(const float_v r[5], const float_v C[15],
-                                            const float_v m[5], const float_v V[15],
-                                            float_v R[5], float_v W[15], float_v &chi2, const float_m &mask)
+inline void AliHLTTPCCAMerger::FilterTracks(sfloat_v const r[5], sfloat_v const C[15],
+                                            sfloat_v const m[5], sfloat_v const V[15],
+                                            sfloat_v R[5], sfloat_v W[15], sfloat_v &chi2, const sfloat_m &mask)
 {
-  float_v S[15];
+  sfloat_v S[15];
   for(int i=0; i<15; i++)
   {
     W[i] = C[i];
@@ -389,16 +334,16 @@ inline void AliHLTTPCCAMerger::FilterTracks(const float_v r[5], const float_v C[
 
   InvertCholetsky(S);
   
-  float_v K[5][5];
+  sfloat_v K[5][5];
   MultiplySS(C,S,K);
-  float_v dzeta[5];
+  sfloat_v dzeta[5];
   for(int i=0; i<5; i++) dzeta[i] = m[i] - r[i];
-  float_v KC[15];
+  sfloat_v KC[15];
   MultiplyMS(K,C,KC);
   for(int i=0; i< 15; i++)
     W[i](mask) -= KC[i];
 
-  float_v kd(Vc::Zero);
+  sfloat_v kd(Vc::Zero);
   for(int i=0; i<5; i++)
   {
     kd = 0.f;
@@ -406,11 +351,10 @@ inline void AliHLTTPCCAMerger::FilterTracks(const float_v r[5], const float_v C[
       kd += K[i][j]*dzeta[j];
     R[i](mask) += kd;
   }
-  float_v S_dzeta[5];
+  sfloat_v S_dzeta[5];
   MultiplySR(S, dzeta, S_dzeta);
   chi2(mask) = dzeta[0]*S_dzeta[0] + dzeta[1]*S_dzeta[1] + dzeta[2]*S_dzeta[2] + dzeta[3]*S_dzeta[3] + dzeta[4]*S_dzeta[4];
 }
-
 
 class AliHLTTPCCAClusterInfo
 {

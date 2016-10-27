@@ -27,10 +27,10 @@
 class AliHLTTPCCAStartHitId: public AliHLTTPCCAHitId
 {
  public:
-  inline void Set( unsigned int row, unsigned int hit, unsigned int length ) { fRow = row; fHit = hit; fLength = length; }
-  inline int RowIndex() const { return fRow; }
-  inline unsigned int HitIndex() const { return fHit; }
-  inline unsigned int Length() const { return fLength; }
+  inline void Set( unsigned short row, unsigned short hit, unsigned short length ) { fRow = row; fHit = hit; fLength = length; }
+  inline short RowIndex() const { return fRow; }
+  inline unsigned short HitIndex() const { return fHit; }
+  inline unsigned short Length() const { return fLength; }
   
   inline bool operator<( const AliHLTTPCCAStartHitId &rhs ) const {
     const int rowStep = AliHLTTPCCAParameters::RowStep;
@@ -51,7 +51,7 @@ class AliHLTTPCCAStartHitId: public AliHLTTPCCAHitId
     return lR || (eR && lL); 
   }
   
-  unsigned int fLength; // length of chain
+  unsigned short fLength; // length of chain
 };
 
 #endif // ALIHLTTPCCASTARTHITID_H

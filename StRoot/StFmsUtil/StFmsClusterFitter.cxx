@@ -57,8 +57,8 @@
 
 namespace {
 const Int_t kMaxNPhotons = 7;  // Maximum number of photons that can be fitted
-std::array<double, 7> fitParameters; // yf{ {SS_C, SS_A1, SS_A2, SS_A3,
-  //                                      SS_B1, SS_B2, SS_B3} };
+std::array<double, 7> fitParameters{ {SS_C, SS_A1, SS_A2, SS_A3,
+                                      SS_B1, SS_B2, SS_B3} };
 TF2 showerShapeFitFunction("showerShapeFitFunction",
                        &FMSCluster::StFmsClusterFitter::energyDepositionInTower,
                       -25.0, 25.0, -25.0, 25.0, fitParameters.size());

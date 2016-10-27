@@ -30,7 +30,7 @@ class AliHLTTPCCASliceOutput
 {
   public:
 
-    inline AliHLTTPCCASliceOutput() {}
+    inline AliHLTTPCCASliceOutput(): fNTracks( 0 ), fNTrackClusters( 0 ), fTracks( 0 ), fClusterIDrc( 0 ), fClusterPackedYZ( 0 ), fClusterUnpackedYZ( 0 ), fClusterUnpackedX( 0 ), fClusterPackedAmp( 0 ) {}
     int NTracks()                    const { return fNTracks;              }
     int NTrackClusters()             const { return fNTrackClusters;       }
 

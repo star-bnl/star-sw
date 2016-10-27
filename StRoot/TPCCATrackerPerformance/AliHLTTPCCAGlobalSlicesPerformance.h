@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.h,v 1.4 2010/08/17 15:47:13 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.h,v 1.3 2013/11/21 13:07:28 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *

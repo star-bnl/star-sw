@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TStopwatch.h,v 1.2 2008/02/25 13:53:06 ppost Exp $
+// @(#)root/base:$Name:  $:$Id: Stopwatch.h,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
 // Author: Fons Rademakers   11/10/95
 
 /*************************************************************************
@@ -82,7 +82,9 @@ static __int64 gTicksQPC = -1; // < 0 means "not yet initialized"
 #endif
 
 
-inline Stopwatch::Stopwatch()
+inline Stopwatch::Stopwatch():
+ fStartRealTime(0), fStopRealTime(0), fStartCpuTime(0), fStopCpuTime(0),
+ fTotalCpuTime(0), fTotalRealTime(0), fState(kUndefined), fCounter(0)
 {
    // Create a stopwatch and start it.
 

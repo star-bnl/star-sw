@@ -38,7 +38,7 @@
     <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
-        <stdout URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.err" />
 <input URL="command:daq_2013pp510W.pl" />
 </job>

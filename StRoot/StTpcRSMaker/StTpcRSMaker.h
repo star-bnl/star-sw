@@ -22,7 +22,6 @@ using namespace units;
 #include "StTpcDb/StTpcDb.h"
 #include "StMagF.h"
 #include "TArrayF.h"
-class StTpcdEdxCorrection;
 class Altro;
 class StTpcdEdxCorrection;
 struct SignalSum_t {

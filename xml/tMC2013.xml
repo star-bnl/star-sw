@@ -52,8 +52,8 @@
   root4star -q -b 'bfc.C(9999,"fzin,-in,y2013_1x,sdt20130317.070000,tpcRS,TpxClu,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',pp2013a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/*.event.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root" /> -->

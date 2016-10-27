@@ -1,6 +1,6 @@
 <StDbServer>
 <server> dbexport </server>
-<host> l409.l4.bnl.local </host>
+<host> dbx.star.bnl.gov </host>
 <port> 3316 </port>
 <socket> /tmp/mysql.3316.sock </socket>
 </StDbServer>

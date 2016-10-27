@@ -62,15 +62,15 @@ my $CPPPATH = $env->{CPPPATH};
 my $pkg  = "starsim"; 
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
-my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};# print "LIBPKG = $LIBPKG =========\n";
+my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};
 $FCPATH  = "#asps/Simulation/starsim/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
 $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 $FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 #$FPPFLAGS .= " -D__ROOT_ -DCERNLIB_TYPE -DCERNLIB_UNIX " .
 $FPPFLAGS .= " " .
-#  "-DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL " .
-#  "-DCERNLIB_NONEWL -DCERNLIB_HIGZ  -DCERNLIB_CG  " .
+  "-DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL " .
+  "-DCERNLIB_NONEWL -DCERNLIB_HIGZ  -DCERNLIB_CG  " .
   "-DCERNLIB_HADRON -DCERNLIB_GCALOR";
 $FPPFLAGS .= " -DCPP_TITLE_CH=\"'" . $pkg . "'\"";
 $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
@@ -81,7 +81,6 @@ $CPPPATH  = "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
-$CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{ROOT}->{INCDIR};
 $CPPFLAGS  .= " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 my $DEBUG = $env->{DEBUG}; $DEBUG = "-g";
 my $FDEBUG = $env->{FDEBUG}; $FDEBUG = $DEBUG;
@@ -99,7 +98,7 @@ if ($STAR_SYS =~ /x8664/ || $STAR_SYS =~ /darwin/) {
 
 if ($FC =~ /pgf77/) { 
   $FC       = $env->{G77}; 
-#  print "set FC => $FC ==============================\n" if $param::debug;
+  print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
 }
@@ -108,7 +107,6 @@ if (($FC =~ /g77/ || $FC =~ /gfortran/) && ! $PGI) {
     $CPPFLAGS .= " -DWithoutPGI";
 }
 if ($FC =~ /gfortran/) {$FPPFLAGS .= " -DGFORTRAN";}
-$FPPFLAGS .= " -D__TPCREFSYS__"; # generate TpcRefSys in g2root
 # print "DEBUG --> $FC $CPPFLAGS\n";
 $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
@@ -127,13 +125,6 @@ $env2 = $env->clone('FC'           => $FC,
 my @src  = find_sources($Dir);
 my $pwd = Cwd::cwd();# print "pwd = $pwd  Dir => $Dir\n";
 my @sources = ();
-my $FFLAGS_NoSTATICS = $FFLAGS; 
-#print "FFLAGS           = $FFLAGS\n";
-#print "FFLAGS_NoSTATICS =  $FFLAGS_NoSTATICS\n";
-$FFLAGS_NoSTATICS =~ s| \-fno\-automatic| \-frecursive|;
-#print "FFLAGS_NoSTATICS =  $FFLAGS_NoSTATICS\n";
-$env3 = $env2->clone('FFLAGS'       => $FFLAGS_NoSTATICS);
-#print "new FFLAGS = env3 : $env3->{FFLAGS} ==================\n";
 foreach my $s (@src) {
   my @list = glob "$Dir/$s"; #print "$s => list = @list\n";
   foreach my $ss (@list) {
@@ -143,31 +134,34 @@ foreach my $s (@src) {
     next if ($ss =~ /deccc\/traceqc\.c/);
     next if ($ss =~ /deccc\/mykuip\.c/);
     next if ($ss =~ /atmain\/traceq\.age/);
+#    next if ($ss =~ /atmain\/etime\.F/   && $FC !~ /g77/ && $FC !~ /gfortran/);
     next if ($ss =~ /deccc\/idisp\.c/    && $FC !~ /g77/ && $FC !~ /gfortran/);
+#    next if ($ss =~ /atmain\/dblib\.cxx/    && ($FC eq /g77/ or $FC eq /gfortran/));
     next if ($ss =~ /atmain\/agxinit\.cdf/);
     next if ($ss =~ /atmain\/guinti\.cdf/);
     next if ($ss =~ /atmain\/sterror\.age/);
     next if ($ss =~ /deccc\/fputools\.c/ && $FC !~ /g77/ && $FC !~ /gfortran/);
     next if ($ss =~ /deccc\/ctype\.c/ and $STAR_SYS !~ /^rh9/);
+#    next if $ss =~ /comis\/csallo\.c/ and $STAR_SYS !~ /^sl/;
+#    next if $ss =~ /comis\/mdext\.F/ and $STAR_SYS !~ /^sl/;
+#    next if $ss =~ /comis\/mhloc\.F/ and $STAR_SYS !~ /^sl/;
     next if ($ss =~ /deccc\/cs_dlfcn\.c/ and $STAR_SYS =~ /darwin/);
-    my $s = $ss;
-#    print "ss = $ss\n";
-    if ( $ss =~ /g2Root/ and $FFLAGS ne $FFLAGS_NoSTATICS) {# allow recursion for g2Root
-      my @objfiles = Objects $env3 ($ss);
-#      print "$ss => $objfiles[0] ===============================\n";
-      $s =  $objfiles[0]; 
-     } else {
-       my @objfiles = Objects $env2 ($ss);
-       $s =  $objfiles[0]; 
-    }
-#    print "s = $s ===================\n";
-    push @sources, $s; 
+#    next if ($ss =~ /comis/ and $ss !~ /csjcal1s/ and ($STAR_SYS =~ /darwin/ or $STAR_SYS =~ /x8664/));
+    push @sources, $ss; 
   }
 }
+# print "DEBUG ".join(" ",@sources)."\n";
 if ($#sources > -1) {
-#print "DEBUG ".join(" ",@sources)."\n";
-  Library      $env2 $LIBPKG, @sources;  
-  Install $env2 $LIB, $LIBPKG;
+  if ($STAR_SYS !~ /alpha/) {
+    Library      $env2 $LIBPKG, @sources;  
+    Install $env2 $LIB, $LIBPKG;
+  } else {
+    my @objfiles = Objects $env2  @sources;
+    # print "+++++++++++  $STAR_SYS ********* @objfiles \n";
+    Command $env2 ("input_object.list"), @objfiles, qq([perl] open(F, ">%>"); print F "%<"; close(F); 1);
+    Command $env2 ($LIBPKG), ("input_object.list"), qq(%ARCOM);
+    Install $env2 $LIB, $LIBPKG;
+  }
 }  
 
 my @starsim = qw(acmain.cxx deccc/traceqc.c atmain/traceq.age atmain/sterror.age deccc/mykuip.c);# deccc/idisp.c);
@@ -180,10 +174,9 @@ if ($LD =~ /g++/ && $FC !~ m/gfortran/) {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
 # if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
-
 my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
-$LIBPATH    .= $LIB;
+
 my $LIBS    = $env->{LIBS};
 $LIBS .= $env->{LDALL};
 if ($LD =~ 'clang')  {
@@ -212,9 +205,6 @@ $envP = $env2->clone('LDFLAGS'   => $LDFLAGS,
 		     'FEXTEND'      => "",
 		     'Libraries' => $Libraries
 		    );
-Depends      $envP $pgm, $LIB . "/libgeant321.a";
-Depends      $envP $pgm, $LIB . "/libgcalor.a";
-Depends      $envP $pgm, $LIB . "/libstarsim.a";
 Program      $envP $pgm, @starsim;
 my $d = $Dir . "/";
 my @list = glob $d . "atlsim.*";# print "Dir  = $Dir; list = @list\n";
