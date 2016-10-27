@@ -35,6 +35,6 @@ end
 <!-- <input URL="command:EandBSample.pl" /> -->
 <input URL="command:EandBSample2014.pl" />
 <!-- <input URL="file:/gpfs/scratch/users/fisyak/Cosmics/2014/*event.root" /> -->
-<stdout URL="file:/star/u/fisyak/prodlog/EandB$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/EandB$JOBID.err" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/EandB$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/EandB$JOBID.err" />
 </job>

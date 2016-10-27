@@ -19,7 +19,7 @@ foreach input (`cat $FILELIST`)
 end
 
 	</command>
-	<stdout URL="file:/star/u/fisyak/prodlog/TpcAligner_2015$JOBID.log" />
-	<stderr URL="file:/star/u/fisyak/prodlog/TpcAligner_2015$JOBID.err" />
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcAligner_2015$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcAligner_2015$JOBID.err" />
 <input URL="command:EandBSample2015.pl" />
 </job>

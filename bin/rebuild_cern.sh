@@ -5,7 +5,7 @@
 # e.g. for the build tools and alternative compilers.
 
 ##CERN_LEVEL=`gunzip -c src_Imakefile.tar.gz | tar tf - | awk -F/ '{print $1}'`
-CERN_LEVEL=2006b
+CERN_LEVEL=2006
 CERN=`pwd`
 CERN_ROOT=$CERN/$CERN_LEVEL
 CVSCOSRC=$CERN/$CERN_LEVEL/src
@@ -18,33 +18,29 @@ export CVSCOSRC
 export PATH
 
 # Delete old Makefiles and create the top level Makefile with imake
-if [ ! -d $CERN_ROOT/build ]; then
-  mkdir $CERN_ROOT/build
-fi
+
 cd $CERN_ROOT/build
 find . -type f -name Makefile -exec rm {} \;
 $CVSCOSRC/config/imake_boot
 
 # Install kuipc and the scripts (cernlib, paw and gxint) in $CERN_ROOT/bin
-if [ ! -d log ]; then 
-    mkdir log
-fi
-make bin/kuipc > log/kuipc 2>&1
-make scripts/Makefile
+
+gmake bin/kuipc > log/kuipc 2>&1
+gmake scripts/Makefile
 cd scripts
-make install.bin > ../log/scripts 2>&1
+gmake install.bin > ../log/scripts 2>&1
 
 # Install the libraries
 
 cd $CERN_ROOT/build
-make > log/make.`date +%m%d` 2>&1
+gmake > log/make.`date +%m%d` 2>&1
 
 # test packlib and mathlib
 
 cd $CERN_ROOT/build/packlib
-make test > ../log/t_packlib.`date +%m%d` 2>&1
+gmake test > ../log/t_packlib.`date +%m%d` 2>&1
 cd $CERN_ROOT/build/mathlib
-make test > ../log/t_mathlib.`date +%m%d` 2>&1
+gmake test > ../log/t_mathlib.`date +%m%d` 2>&1
 
 
 

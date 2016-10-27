@@ -48,7 +48,7 @@ if ($makeList) {
     print "string:$test$extra:$DIR:$f:$NoEvents\n";
   }
 } else {
-  my $file = "/star/u/fisyak/bin/Nightlies.list";
+  my $file = "/afs/rhic.bnl.gov/star/users/fisyak/bin/Nightlies.list";
   open(In, $file) or die "Can't open $file";
   while ( my $it = <In>) {
     if ($noMC and $it =~ /MC/) {next;}

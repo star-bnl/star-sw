@@ -32,8 +32,8 @@
 #  set tagFile = ${filel}.root          #,Corr4,OSpaceZ2,OGridLeak3D,sdt20110401.060500
   root4star -q -b 'bfc.C('${f}','${l}',"RC.pp.y2011.VFPPV'${fitter}',StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/data03/daq/2011/108/13108073/st_physics_13108073*.daq" /> -->
 <input URL="command:daq_y2011pp500.pl" />
 <!-- <input URL="file:/star/simu/simu/gstardata/Simu2011/rcf12010/out/rcf12010_1499_10evts_Wplus_enu.fzd" /> -->

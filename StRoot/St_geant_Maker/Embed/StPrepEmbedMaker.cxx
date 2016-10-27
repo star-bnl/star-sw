@@ -292,7 +292,7 @@ Int_t StPrepEmbedMaker::Make()
   }
 
   // Extract info for mult for this event
-  const Int_t numberOfPrimaryTracks = (Int_t) (mMoreTree ? mMoreTree->GetV1()[0] : mTree->GetV1()[0]);
+  const Int_t numberOfPrimaryTracks = (Int_t) mMoreTree ? mMoreTree->GetV1()[0] : mTree->GetV1()[0];
   const Int_t npart = getMultiplicity( *EvtHddr, numberOfPrimaryTracks ) ;
 
   nFound = (Int_t) mTree->Draw("primaryVertexX:primaryVertexY:primaryVertexZ:TriggerId",

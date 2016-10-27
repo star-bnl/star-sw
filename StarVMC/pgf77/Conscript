@@ -1,0 +1,84 @@
+#!/usr/bin/env perl
+Import qw ( env INCLUDE LIB BIN BUILD OBJ);
+(my $build = $OBJ) =~ s/\#//g;
+$build =~ s/\\/\//g;
+(my $obj_dir = DirPath '.') =~ s/\\/\//g;
+(my $Dir = $obj_dir) =~ s/$build\///g;
+my $ObjDir = "#" . $obj_dir; 
+my $STAR_SYS = $env->{ENV}->{STAR_SYS};
+my $pkg = "pgf77VMC";
+my $SO_PKG = "lib" . $pkg . ".so";
+my $FC = $env->{FC};
+my @pgflibs = ();
+my $ok = 0;
+if ($FC eq 'ifort' or $FC eq 'ifc') {
+  my $lib = `which $FC`; chomp($lib);
+  $lib =~ s|bin/ifort|lib|;
+  @pgflibs = map $lib . "/" . $_, qw(libifcore.a libifcoremt.a libifport.a);# print "pgflibs @pgflibs\n";
+#  @pgflibs = ("/usr/intel80/ifc/lib/libifcore.a","/usr/intel80/ifc/lib/libifcoremt.a");
+  Command $env [ $SO_PKG ], @pgflibs, qq(cd $obj_dir; ar -x %1; ar -x %2; ar -x %3; rm for_main.o; %SO %SOFLAGS %SoOUT%>:f *.o;);
+  $ok = 1;
+} elsif ($FC eq 'pgf77') {
+  @pgflibs = ($env->{ENV}->{PGILIB} . "/libpgftnrtl.a",
+		 $env->{ENV}->{PGILIB} . "/libpgc.a",
+		 $env->{ENV}->{PGILIB} . "/libpgnod_prof.a");
+  Command $env [ $SO_PKG ], @pgflibs, qq(cd $obj_dir; ar -x %1; ar -x %2; ar -x %3; %SO %SOFLAGS %SoOUT%>:f *.o;);
+  $ok = 1;
+} elsif ($FC eq 'g77' or $FC eq 'gfortran') {
+  my $CPPFLAGS = $env->{CPPFLAGS};
+  $CPPFLAGS .= " -DWithoutPGI";
+  $env2 = $env->clone('CPPFLAGS'     => $CPPFLAGS);
+  LinkedModule $env2 $SO_PKG, qw(idisp.c);
+  $ok = 1;
+#} elsif ($FC eq 'gfortran') {
+#  my $libgfortran = `$FC -print-file-name=libgfortran.a`; chomp($libgfortran); print "libgfortran $libgfortran\n";
+##  my $libgfortranbegin = `$FC -print-file-name=libgfortranbegin.a`; chomp($libgfortranbegin); print "libgfortranbegin $libgfortranbegin\n";
+# # @pgflibs = ($libgfortran, $libgfortranbegin);
+# # Command $env [ $SO_PKG ], @pgflibs, qq(cd $obj_dir; ar -x %1; ar -x %2; %SO %SOFLAGS %SoOUT%>:f *.o;);
+#   Command $env [ $SO_PKG ], ($libgfortran), qq(
+#cd $obj_dir; 
+#ar -x %1; 
+#rm _*.o abort.o access.o all*.o any*.o arg*.o associated.o backtrace.o chdir.o chmod.o clock.o close.o;
+#rm compile_options.o count_*.o cpu_*.o cshift*.o ctime.o
+#rm -f c99_functions.o;
+#rm -f exponent_r16.o;
+#rm -f fraction_r16.o;
+#rm -f in_pack_c16.o;
+#rm -f in_unpack_c16.o;
+#rm -f matmul_c16.o;
+#rm -f matmul_r16.o;
+#rm -f maxloc0_16_r16.o;
+#rm -f maxloc0_4_r16.o;
+#rm -f maxloc0_8_r16.o;
+#rm -f maxloc1_16_r16.o;
+#rm -f maxloc1_4_r16.o;
+#rm -f maxloc1_8_r16.o;
+#rm -f maxval_r16.o;
+#rm -f minloc0_16_r16.o;
+#rm -f minloc0_4_r16.o;
+#rm -f minloc0_8_r16.o;
+#rm -f minloc1_16_r16.o;
+#rm -f minloc1_4_r16.o;
+#rm -f minloc1_8_r16.o;
+#rm -f minval_r16.o;
+#rm -f nearest_r16.o;
+#rm -f pow_c16_i16.o;
+#rm -f pow_c16_i4.o;
+#rm -f pow_c16_i8.o;
+#rm -f pow_r16_i16.o;
+#rm -f pow_r16_i8.o;
+#rm -f product_c16.o;
+#rm -f product_r16.o;
+#rm -f reshape_c16.o;
+#rm -f reshape_r16.o;
+#rm -f rrspacing_r16.o;
+#rm -f set_exponent_r16.o;
+#rm -f spacing_r16.o;
+#rm -f sum_c16.o;
+#rm -f sum_r16.o;
+#rm -f transpose_c16.o;
+#rm -f transpose_r16.o;
+# %SO %SOFLAGS %SoOUT%>:f *.o;);
+#  $ok = 1;
+}
+if ($ok) {Install $env $LIB, $SO_PKG;}

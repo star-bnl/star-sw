@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job  name="TpcRSClu" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/TpcRSClu$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/TpcRSClu$JOBID.err" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcRSClu$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcRSClu$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setenv STARFPE NO

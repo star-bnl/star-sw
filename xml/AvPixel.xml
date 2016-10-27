@@ -1,6 +1,6 @@
 <job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/Av$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/Av$JOBID.err" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Av$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Av$JOBID.err" />
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  

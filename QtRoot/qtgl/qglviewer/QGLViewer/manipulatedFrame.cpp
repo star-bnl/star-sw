@@ -51,7 +51,7 @@ ManipulatedFrame::ManipulatedFrame()
   setWheelSensitivity(1.0f);
 
   isSpinning_ = false;
-  previousConstraint_ = 0; //false;
+  previousConstraint_ = false;
 
   connect(&spinningTimer_, SIGNAL(timeout()), SLOT(spinUpdate()));
 }

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.8 2012/08/13 19:35:05 fisyak Exp $
+// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.3 2013/11/21 13:07:28 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -185,7 +185,7 @@ void AliHLTTPCCASliceLinksPerformance::CollectTracks()
   nRecoTracks = sliceTracker->NTracklets();
 
   const SliceData &data = sliceTracker->Data();
-  const Vc::vector<AliHLTTPCCAStartHitId>& startHits = sliceTracker->TrackletStartHits();
+  AliHLTTPCCAStartHitId *startHits = sliceTracker->TrackletStartHits();
    
   for (int iTr = 0; iTr < nRecoTracks; iTr++) {
     PerfoTrack recoTrack;
@@ -289,13 +289,13 @@ void AliHLTTPCCASliceLinksPerformance::FillHistos()
     const int NHits = fRecoTracks[iRTr].hits.size();
     
     if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
-      GetHisto(kghostsLength)->Fill( NHits );
+      GetHisto("ghostsLength")->Fill( NHits );
     }
     else {
       AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[ recoD.GetMCTrackId() ];
-      GetHisto(krecosLength)->Fill( NHits );
-      GetHisto(krecosMCMom)->Fill( mcTr.P() );
-      GetHisto(krecosLengthAndMCMom)->Fill( NHits , mcTr.P() );
+      GetHisto("recosLength")->Fill( NHits );
+      GetHisto("recosMCMom")->Fill( mcTr.P() );
+      GetHisto("recosLengthAndMCMom")->Fill( NHits , mcTr.P() );
     }
   }
 } // void AliHLTTPCCASliceLinksPerformance::FillHistos()

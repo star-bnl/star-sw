@@ -22,7 +22,7 @@
   set  out = ${base}.event.root
   root4star -q -b 'bfc.C(9999,"MC.2015,StiCA,KFVertex,-evout,-geantout,NosstIT,-SstIT,-SstDb,NoHistos,noTags,noRunco,HijingAuAuFixedTarget19,rung.'${rung}'","","'${out}'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <input URL="command:RunId.pl 1 100" />
 </job>

@@ -82,7 +82,7 @@ class StFgtStatusMaker : public StMaker {
    // Get CVS
    virtual const char *GetCVS() const;
 
-// protected:
+ protected:
    // for the ped maker
    std::string mPedMkrName;
    StFgtPedMaker *mPedMkr;

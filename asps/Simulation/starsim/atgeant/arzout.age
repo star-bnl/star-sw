@@ -56,9 +56,8 @@
 
   istat=IQ(Lo); status=' '; IC=0;
   call RZCDIR( Cold,    'R')
-#ifndef __NON_ELASTIC_ZEBRA__
   call RZCDIR('//RZDOC',' ')
-#endif /* ! __NON_ELASTIC_ZEBRA__ */
+
 * look for the previous definition, see that it is readable
 * and test thet the output bank was not lost due to garbage collection
 * CD - read the highest cycle, return data + cycle info

@@ -24,9 +24,9 @@
 class AliHLTTPCCAHitId
 {
   public:
-    inline void Set( unsigned int row, unsigned int hit ) { fRow = row; fHit = hit; }
-    inline int RowIndex() const { return fRow; }
-    inline unsigned int HitIndex() const { return fHit; }
+    inline void Set( unsigned short row, unsigned short hit ) { fRow = row; fHit = hit; }
+    inline short RowIndex() const { return fRow; }
+    inline unsigned short HitIndex() const { return fHit; }
 
     inline bool operator<( const AliHLTTPCCAHitId &rhs ) const {
       const int rowStep = AliHLTTPCCAParameters::RowStep;
@@ -40,8 +40,8 @@ class AliHLTTPCCAHitId
       }
     }
 
-    int fRow;
-    unsigned int fHit; // index of hit in row array. Use data.ClusterDataIndex( row, iHit ) in order to obtain index in the slice array.
+    short fRow;
+    unsigned short fHit; // index of hit in row array. Use data.ClusterDataIndex( row, iHit ) in order to obtain index in the slice array.
 };
 
 typedef AliHLTTPCCAHitId HitId;

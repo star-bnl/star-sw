@@ -27,15 +27,15 @@ class AliHLTTPCCATrackletConstructor {
   struct TrackMemory;
  private:
     // add one hit from chain to track
-  void FitTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex, TrackletVector &trackletVector );
+  void FitTracklet( TrackMemory &r, const int rowIndex, const ushort_v trackIndex, TrackletVector &trackletVector );
     // find nearest hit on row and set it as currentHit (see TrackMemory)
   void FindNextHit( TrackMemory &r, const AliHLTTPCCARow &row,
-                    float_v &dy_best, float_v &dz_best, int_m &active);
+                    sfloat_v::Memory &dy_best, sfloat_v::Memory &dz_best, short_m &active);
     // extrapolate on row and try to find hit belonged to track
-  int_m ExtrapolateTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex, TrackletVector &trackletVector, const bool dir, const int_m &mask );
+  short_m ExtrapolateTracklet( TrackMemory &r, const int rowIndex, const ushort_v trackIndex, TrackletVector &trackletVector, const bool dir, const short_m &mask );
 
     // performs both: fitTraclet & Extrapolation
-  int_m ExtendTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex, TrackletVector &trackletVector, const bool dir, const int_m &mask ); 
+  short_m ExtendTracklet( TrackMemory &r, const int rowIndex, const ushort_v trackIndex, TrackletVector &trackletVector, const bool dir, const short_m &mask ); 
 
   Tracker &fTracker;
   AliHLTArray<TrackletVector> fTrackletVectors;

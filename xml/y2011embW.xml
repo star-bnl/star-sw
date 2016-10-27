@@ -37,7 +37,7 @@
   echo "fitter $fitter"
   root4star -q -b 'bfcMixer_W.C('${f}','${l}',"'${fitter}'","'${evtsFile}'","'$output'",'${runG}',"y2011b")'  &gt;&amp;  ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <input URL="command:SplitJobs2011.pl" />
 </job>

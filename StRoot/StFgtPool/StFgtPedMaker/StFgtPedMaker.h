@@ -78,7 +78,7 @@ class StFgtPedMaker : public StMaker {
    // Get CVS
    virtual const char *GetCVS() const;
 
-// protected:
+ protected:
    // mask for which time bins to save
    Short_t mTimeBinMask;
 

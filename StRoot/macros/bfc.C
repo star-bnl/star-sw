@@ -76,7 +76,20 @@ void Load(const Char_t *options)
   cout << "Load system libraries\t";
   int nodefault = TString(options).Contains("nodefault",TString::kIgnoreCase);
 
+
   if ( TString(gProgName)!="root4star") { // ! root4star
+    if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
+      const Char_t *pgf77 = "libpgf77VMC";
+      if (gSystem->DynamicPathName(pgf77,kTRUE) ) {
+	gSystem->Load(pgf77); cout << " " << pgf77 << " + ";
+      }
+    }
+#if 0
+    if (!nodefault || TString(options).Contains("cern" ,TString::kIgnoreCase)) {
+        gSystem->Load("libStarMiniCern"); 
+        cout << "libStarMiniCern" ;
+    }
+#endif
     if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR

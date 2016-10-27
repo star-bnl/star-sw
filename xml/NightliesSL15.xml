@@ -29,7 +29,7 @@
   if (! $?)  set exec = "root.exe"
   ${exec} -q -b -x 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/u/fisyak/prodlog/Nightlies_sched$JOBID.log" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Nightlies_sched$JOBID.log" />
 <input URL="command:Nightlies.pl" />
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->

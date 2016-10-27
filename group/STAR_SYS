@@ -10,6 +10,44 @@ if ( $?self ) then
     set STAR_SYS_pself=${self}
 endif
 set self="STAR_SYS"
+
+#
+# Get it through the AFS fs sysname command which may
+# be set by the administrator.
+#
+if (-e /usr/arla/bin/fs) then
+    if ( $?DECHO ) echo "$self :: Using /usr/arla/bin/fs"
+  setenv STAR_SYS `/usr/arla/bin/fs sysname | $AWK -F\' '{print $2}'`
+else
+  if (-e /usr/afsws/bin/fs)  then
+    if ( $?DECHO ) echo "$self :: Using /usr/afsws/bin/fs"
+    setenv STAR_SYS `/usr/afsws/bin/fs sysname | $AWK -F\' '{print $2}'`
+  else
+    if ( -e /usr/bin/fs ) then
+	if ( $?DECHO ) echo "$self :: Using /usr/bin/fs"
+	setenv STAR_SYS `/usr/bin/fs sysname | $AWK -F\' '{print $2}'`
+    else
+	# attempt some cygwin stuff
+	if ( -e /cygdrive/c/PROGRA~1/IBM/AFS/Client/Program/fs) then
+	    if ( $?DECHO ) echo "$self :: Using cygwin AFS client IBM/AFS/Client/Program/fs"
+	    setenv STAR_SYS `/cygdrive/c/PROGRA~1/IBM/AFS/Client/Program/fs sysname | $AWK -F\' '{print $2}'`
+	else
+	    # no /bin/sys anywhere (Linux, Solaris, Digital)
+	    if (-e /bin/sys) then
+		if ( $?DECHO ) echo "$self :: Using /bin/sys"
+		setenv STAR_SYS `/bin/sys`
+	    else
+		if ( $?DECHO ) echo "$self :: Will use /usr/bin/sys if found"
+		if (-e /usr/bin/sys) setenv STAR_SYS `/usr/bin/sys`
+	    endif
+	endif
+      endif
+    endif
+  endif
+endif
+
+if ( $?DECHO ) echo "$self :: STAR_SYS is now $STAR_SYS"
+
 #
 # Sort it out otherwise via uname command
 #
@@ -18,6 +56,9 @@ if ( "${STAR_SYS}" == "") then
     set mach_os = `uname -sr | sed -e 's/ //g' -e 's/\.//g' -e 's/(.*//'`
 
     switch ($mach_os)
+     case "Linux222":
+	setenv STAR_SYS i386_redhat51
+	breaksw
      case "Linux*":
 	#setnenv STAR_SYS i386_redhat61
 	# Creating a sys name like <architecture>_<sysname><sysversion>
@@ -88,6 +129,32 @@ endif
 
 
 # Linux hacks
+if ("${STAR_SYS}" == "i386_linux22" || "${STAR_SYS}" == "i386_linux2") then
+    # Old scheme pre 2003 and pre kernel 2.4
+    set redhat = "6.1";
+    setenv STAR_SYS i386_redhat61
+    if (-f /etc/redhat-release) set redhat = `$AWK '{print $5}' /etc/redhat-release`
+    if ("$redhat" == "6.0") setenv STAR_SYS "i386_redhat60"
+    if ("$redhat" == "6.1") setenv STAR_SYS "i386_redhat61"
+    if ("$redhat" == "6.2") setenv STAR_SYS "i386_redhat61"
+
+    # This is part of the old scheme
+    if ("$STAR_SYS" == "i386_linux61"|| "$STAR_SYS" == "i386_linux6") setenv STAR_SYS "i386_redhat61"
+    if ("$STAR_SYS" == "i386_linux22"|| "$STAR_SYS" == "i386_redhat50" || \
+	"$STAR_SYS" == "i386_linux2" || "$STAR_SYS" == "i386_linux3") setenv STAR_SYS "i386_redhat51"
+
+    #
+    # Compiler hacks : for egcs.
+    # Env variables have to be defined prior to this script.
+    #
+    if ($?EGCS_ON  == 1 && "${STAR_SYS}" == "i386_redhat51") setenv STAR_HOST_SYS i386_redhat51egcs
+    if ($?EGCS_ON  == 1 && "${STAR_SYS}" == "i386_redhat60") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?EGCS_ON  == 1 && "${STAR_SYS}" == "i386_redhat61") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?USE_EGCS == 1 && "${STAR_SYS}" == "i386_redhat51") setenv STAR_HOST_SYS i386_redhat51egcs
+    if ($?USE_EGCS == 1 && "${STAR_SYS}" == "i386_redhat60") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?USE_EGCS == 1 && "${STAR_SYS}" == "i386_redhat61") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?USE_KCC  == 1 && "${STAR_SYS}" == "i386_redhat60") setenv STAR_HOST_SYS i386_redhat60kcc
+else
     #
     # Upper version of Linux drastic change in scheme J.Lauret 2003.
     # Will need to find a more permanent solution for the above ...
@@ -121,11 +188,10 @@ endif
                 set rhflavor = `uname -s | tr '[A-Z]' '[a-z]'`
                 set redhat = `uname -r | $AWK -F- '{print $1}' | sed -e 's/\.//g'`
 		set rhmajor = 0
-		setenv STAR_SYS ${rhflavor}${redhat}
 	    default:
         endsw
     endif
-    if ($?DECHO) echo "rhflavor ${rhflavor}, rhmajor = ${rhmajor}, redhat = ${redhat}"
+
     if ( "$redhat" != "") then
 	# Note:
 	#    always assume the compiler is in the path
@@ -139,22 +205,15 @@ endif
 	    #set vers = `icc -V -dryrun > & /tmp/icc_version; \
 	    #awk '{ if (NR==1) print $8 }' /tmp/icc_version | awk -F\. '{print $1$2}'; \
 	    #rm  /tmp/icc_version;`
-#	    set test=`which icc | $GREP "not found"`
-#	    if ( "$test" == "") then
-#		set vers =  `$STARCMPL -v >&/tmp/icc_version$$ ; $AWK '{print $3}' /tmp/icc_version$$ | /bin/sed "s/\.//g" && /bin/rm  /tmp/icc_version$$;`
-#		echo "$vers" | grep 'license'
-#                if ($? == "0") then
-#		   echo "icc is not supported on this machine"
-#                   set vers = 1700
-#                endif
-#	    endif
-	    set vers = 1700
+	    set test=`which icc | $GREP "not found"`
+	    if ( "$test" == "") then
+		set vers =  `$STARCMPL -v >&/tmp/icc_version$$ ; $AWK '{print $2}' /tmp/icc_version$$ | /bin/sed "s/\.//" && /bin/rm  /tmp/icc_version$$;`
+	    endif
 	    setenv STARCMPLC "icc"
 	    breaksw
 
 	 default:
 	    if ( $?DECHO ) echo "$self :: case default with $STARCMPL"
-	    if ( $?DECHO ) echo "$self :: PATH = $PATH <<<<<<<<<<<<<<<<<<"
 	    if ("$STARCMPL" == "") then
 		# verify the compiler actually exists
 		set test=`which gcc | $GREP "not found"`
@@ -169,9 +228,8 @@ endif
 		setenv STARCMPLC "gcc"
 	    endif
        endsw
-    if ($?DECHO) echo "rhflavor ${rhflavor}, rhmajor = ${rhmajor}, redhat = ${redhat}"
        setenv xSTARCMPL "$STARCMPL$vers"
-       if ($?DECHO) echo "$STARCMPL = > $STARCMPL => $vers"
+#       echo "$STARCMPL = > $STARCMPL => $vers"
        # The below was made to exclude 7.2 Redhat using i386_linux24
        # and other un-predicted flavor of it. The introduction of
        # SL and RHE lead to simply it. There may be a need to also
@@ -185,20 +243,20 @@ endif
 		    breaksw
 		case "x86*":
 		case "amd64*":
-#		echo "${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}"
 		    if ( $USE_64BITS == 1 ) then
-			setenv STAR_HOST_SYS ${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}
+			setenv STAR_HOST_SYS $rhflavor${redhat}_x8664_${STARCMPLC}${vers}
 		    else
-			setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
+			setenv STAR_HOST_SYS $rhflavor${redhat}_${STARCMPLC}${vers}
 		    endif
 		    breaksw
 		default:
-		    setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
+		    setenv STAR_HOST_SYS $rhflavor${redhat}_${STARCMPLC}${vers}
 	    endsw
 	endif
 #	echo "STAR_HOST_SYS => $STAR_HOST_SYS"
     endif
    endif
+endif
 
 # restore if previously defined
 if ( $?STAR_SYS_pself ) then
@@ -208,7 +266,7 @@ endif
 # trick to handle non STAR nodes
 if ("${STAR_SYS}" == "sl64_gcc447"      ) setenv STAR_HOST_SYS sl64_gcc482
 if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
-if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
+
 
 #  $Log: STAR_SYS,v $
 #  Revision 1.56  2016/04/28 14:44:25  jeromel

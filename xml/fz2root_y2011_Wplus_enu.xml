@@ -14,8 +14,8 @@
   if ( -r $logFile) exit 0;
   root4star -q -b 'fz2root.C(9999,"'${evtsFile}'")' &gt;&amp; ${logFile}
 	</command>
-	<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-	<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="catalog:star.bnl.gov?production=P07ic,trgsetupname=cuProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="10" /> -->
 <!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="10" /> -->
 <!-- <input URL="catalog:star.bnl.gov?production=P10ij,collision=auau200,filetype=daq_reco_mudst,tpx=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="100" /> -->

@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.8 2012/08/14 16:30:42 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.2 2016/07/15 14:43:33 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -63,19 +63,19 @@ enum Stage_t {
 };
 
 struct AliHLTTPCCATrackletConstructor::TrackMemory {
-  int_v fStartRow;  // min row index with only the fitted part
-  uint_v fEndRow;    // max row index with only the fitted part
-  int_v fFirstRow;  // min row index with the extrapolated parts
-  uint_v fLastRow;   // max row index with the extrapolated parts
-  int_v fCurrentHitIndex; // indef of the current hit (for chain-fit stage it is next candidate to filtrate, for extra stage it is last filtered hit)
-  int_v fStage; // reco stage
-  uint_v fNHits; // n track hits
-  int_v fRemainingGap; // n missed hits during search
-  float_v fLastY; // Y of the last fitted cluster
-  float_v fLastZ; // Z of the last fitted cluster
+  short_v fStartRow;  // min row index with only the fitted part
+  ushort_v fEndRow;    // max row index with only the fitted part
+  short_v fFirstRow;  // min row index with the extrapolated parts
+  ushort_v fLastRow;   // max row index with the extrapolated parts
+  short_v fCurrentHitIndex; // indef of the current hit (for chain-fit stage it is next candidate to filtrate, for extra stage it is last filtered hit)
+  short_v fStage; // reco stage
+  ushort_v fNHits; // n track hits
+  short_v fRemainingGap; // n missed hits during search
+  sfloat_v fLastY; // Y of the last fitted cluster
+  sfloat_v fLastZ; // Z of the last fitted cluster
   TrackParamVector fParam;
-  uint_m fIsFragile; // is extrapolation and finding of additional hits needed
-  // uint_m fIsOnChain;
+  ushort_m fIsFragile; // is extrapolation and finding of additional hits needed
+  // ushort_m fIsOnChain;
   
   inline TrackMemory()
     : fStartRow( Vc::Zero ),
@@ -89,10 +89,10 @@ struct AliHLTTPCCATrackletConstructor::TrackMemory {
     // fIsOnChain( Vc::Zero )
   {}
 
-  int_m IsInvalid() {
+  short_m IsInvalid() {
     return fNHits < 3 ||
-           static_cast<int_m>( CAMath::Abs( fParam.SinPhi() ) > .999f  ||
-           fParam.Chi2() >= float_v(15.f)*static_cast<float_v>(fParam.NDF()) );
+           static_cast<short_m>( CAMath::Abs( fParam.SinPhi() ) > .999f  ||
+           fParam.Chi2() >= sfloat_v(15.f)*static_cast<sfloat_v>(fParam.NDF()) );
   }
 
   std::ostream &operator<<( std::ostream &out ) {
@@ -120,7 +120,7 @@ class InitTracklets
   public:
     InitTracklets( AliHLTTPCCATrackletConstructor::TrackMemory &_r, SliceData &data,
         const Tracker &tracker,
-        TrackletVector &trackletVector, const uint_v &_trackIndex )
+        TrackletVector &trackletVector, const ushort_v &_trackIndex )
       : r( _r ), fData( data ), fTracker( tracker ),
       fTrackletVector( trackletVector ), trackIndex( _trackIndex ) {}
 
@@ -131,22 +131,22 @@ class InitTracklets
     SliceData &fData;
     const Tracker &fTracker;
     TrackletVector &fTrackletVector;
-    const uint_v &trackIndex;
+    const ushort_v &trackIndex;
 };
 
 /**
  * Fit tracklet to the string of hits connected by links
  */
 void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowIndex,
-    const uint_v trackIndex, TrackletVector &trackletVector )
+    const ushort_v trackIndex, TrackletVector &trackletVector )
 {
   const AliHLTTPCCARow &row = fData.Row( rowIndex );
 
-  const int_m active = r.fStage == FitLinkedHits; // active chains (ones, which contains no fitted hits).
+  const short_m active = r.fStage == FitLinkedHits; // active chains (ones, which contains no fitted hits).
   
   assert( AliHLTTPCCAParameters::RowStep == 1 );
   // if (rowStep == 2){
-  //   active = active && ( r.fStartRow & int_v( Vc::One ) ) == ( rowIndex & 1 );
+  //   active = active && ( r.fStartRow & short_v( Vc::One ) ) == ( rowIndex & 1 );
   // }
   
   debugF() << "FitTracklet(" << rowIndex << ") stage: " << r.fStage << " r.fStartRow: " << r.fStartRow << " active: " << active << endl;
@@ -158,87 +158,59 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
   ASSERT( active == ( active && r.fCurrentHitIndex < row.NHits() ),
     active << r.fCurrentHitIndex << row.NHits() );
 
-  const uint_v oldHitIndex = static_cast<uint_v>( r.fCurrentHitIndex );
-  // fData.SetHitAsUsedInTrack( fData.Row( rowIndex - 1 ), static_cast<uint_v>( r.fCurrentHitIndex ), active ); // TODO mark first hit
-  
-#ifndef NVALGRIND
-  VALGRIND_CHECK_VALUE_IS_DEFINED( active );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( oldHitIndex );
-  for ( int i = 0; i < oldHitIndex.Size; ++i ) {
-    if ( active[i] ) {
-      debugF() << rowIndex << " - " << i << " - " << oldHitIndex[i] << endl;
-      VALGRIND_CHECK_VALUE_IS_DEFINED( fData.HitLinkUpData( row )[oldHitIndex[i]] );
-    }
-  }
-#endif
+  const ushort_v oldHitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
+  // fData.SetHitAsUsedInTrack( fData.Row( rowIndex - 1 ), static_cast<ushort_v>( r.fCurrentHitIndex ), active ); // TODO mark first hit
 
 
-  // const int_v aaaaaItIsNotUsedButDoHelpsALotToSpeedUpAaaaaa = int_v(fData.HitDataIsUsed( row ), Vc::IndexesFromZero, int_m(Vc::Zero)); // TODO understand
-  const int_v isUsed(fData.HitDataIsUsed( row ), static_cast<uint_v>(oldHitIndex), active);
-  const int_m fitMask = active && ( (isUsed != int_v(2)) && (isUsed != int_v(3)) ); // mask to add a new hit. // don't take hits from other tracks. In order to reduce calculations.
+  // const short_v aaaaaItIsNotUsedButDoHelpsALotToSpeedUpAaaaaa = short_v(fData.HitDataIsUsed( row ), Vc::IndexesFromZero, short_m(Vc::Zero)); // TODO understand
+  const short_v isUsed(fData.HitDataIsUsed( row ), static_cast<ushort_v>(oldHitIndex), active);
+  const short_m fitMask = active && ( (isUsed != short_v(2)) && (isUsed != short_v(3)) ); // mask to add a new hit. // don't take hits from other tracks. In order to reduce calculations.
 
-  const float_v x = fData.RowX( rowIndex ); // convert to float_v once now
-  const float_v y = fData.HitPDataY( row , oldHitIndex, float_m(fitMask));
-  const float_v z = fData.HitPDataZ( row , oldHitIndex, float_m(fitMask));
-  VALGRIND_CHECK_VALUE_IS_DEFINED( x );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( y );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( z );
+  const sfloat_v x = fData.RowX( rowIndex ); // convert to sfloat_v once now
+  const sfloat_v y( fData.HitDataY( row ), oldHitIndex, fitMask);
+  const sfloat_v z( fData.HitDataZ( row ), oldHitIndex, fitMask);
 
   debugF() << "x, y, z: " << x << y << z << endl;
 
-  float_m activeF( static_cast<float_m>( fitMask ) ); // create float_v mask
+  sfloat_m activeF( static_cast<sfloat_m>( fitMask ) ); // create float_v mask
     // correct SinPhi if it is necessary
     // calculate displacement to previous hit
-  const float_v dx = x - r.fParam.X();
-  VALGRIND_CHECK_VALUE_IS_DEFINED( dx );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( r.fLastY );
-  const float_v dy = y - r.fLastY;
-  VALGRIND_CHECK_VALUE_IS_DEFINED( dy );
-  const float_v dz = z - r.fLastZ;
+  const sfloat_v dx = x - r.fParam.X();
+  const sfloat_v dy = y - r.fLastY;
+  const sfloat_v dz = z - r.fLastZ;
   debugF() << "dx, dy, dz: " << dx << dy << dz << endl;
   r.fLastY( activeF ) = y;
   r.fLastZ( activeF ) = z;
 
-  float_v err2Y, err2Z;
-  float_v sinPhi = r.fParam.GetSinPhi();
-  VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
+  sfloat_v err2Y, err2Z;
+  sfloat_v sinPhi = r.fParam.GetSinPhi();
 
 
-  const float_m fragile =
-      static_cast<float_m>( r.fNHits < uint_v(AliHLTTPCCAParameters::MinimumHitsForFragileTracklet) ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
-  VALGRIND_CHECK_VALUE_IS_DEFINED( fragile );
+  const sfloat_m fragile =
+      static_cast<sfloat_m>( r.fNHits < ushort_v(AliHLTTPCCAParameters::MinimumHitsForFragileTracklet) ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
   sinPhi( fragile ) = dy * CAMath::RSqrt( dx * dx + dy * dy );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
 
 
   assert( ( x == 0 && activeF ).isEmpty() );
   
   activeF = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), -1.f, activeF );
-  
-  VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
-  
-  
 
-
-  VALGRIND_CHECK_VALUE_IS_DEFINED( active );
   if ( !activeF.isEmpty() )
   {
     fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
-    const int_m hitAdded = static_cast<int_m>( r.fParam.Filter( activeF, y, z, err2Y, err2Z, .99f ) );
-    VALGRIND_CHECK_VALUE_IS_DEFINED( hitAdded );
-    trackletVector.SetRowHits( rowIndex, trackIndex, static_cast<uint_v>(r.fCurrentHitIndex), hitAdded );
-    ++r.fNHits( static_cast<uint_m>(hitAdded) );
+    const short_m hitAdded = static_cast<short_m>( r.fParam.Filter( activeF, y, z, err2Y, err2Z, .99f ) );
+    trackletVector.SetRowHits( rowIndex, trackIndex, static_cast<ushort_v>(r.fCurrentHitIndex), hitAdded );
+    ++r.fNHits( static_cast<ushort_m>(hitAdded) );
     r.fEndRow( hitAdded ) = rowIndex;
       
-    ASSERT( ( (row.NHits() > static_cast<uint_v>(oldHitIndex) ) && hitAdded ) == hitAdded,
-      row.NHits() << static_cast<uint_v>(oldHitIndex) << hitAdded );
-    fData.SetHitAsUsedInTrackFit( row, static_cast<uint_v>( oldHitIndex ), hitAdded );
+    ASSERT( ( (row.NHits() > static_cast<ushort_v>(oldHitIndex) ) && hitAdded ) == hitAdded,
+      row.NHits() << static_cast<ushort_v>(oldHitIndex) << hitAdded );
+    fData.SetHitAsUsedInTrackFit( row, static_cast<ushort_v>( oldHitIndex ), hitAdded );
   }
   
-  r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<uint_v>( oldHitIndex ), active ); // set to next linked hit
+  r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<ushort_v>( oldHitIndex ), active ); // set to next linked hit
 
-  VALGRIND_CHECK_VALUE_IS_DEFINED( r.fCurrentHitIndex );
-  const int_m fittingDone = r.fCurrentHitIndex < 0 && active;
+  const short_m fittingDone = r.fCurrentHitIndex < 0 && active;
   debugF() << "fittingDone = " << fittingDone << endl;
 //  if ( ISUNLIKELY( !fittingDone.isEmpty() ) ) {
   ++r.fStage( fittingDone ); // goes to ExtrapolateUp if fitting is done (no other hit linked)
@@ -246,7 +218,7 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
   debugF() << "hits: " << r.fNHits << ", sinphi: " << r.fParam.SinPhi() << endl;
   
 
-  const int_m invalidTracklet = r.IsInvalid() && fittingDone;
+  const short_m invalidTracklet = r.IsInvalid() && fittingDone;
   
   r.fNHits.setZero( invalidTracklet );
   r.fStage( invalidTracklet || (fittingDone && !r.fIsFragile) ) = DoneStage;
@@ -256,18 +228,17 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
 } // FitTracklet
 
 void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTPCCARow &row,
-                                                  float_v &dy_best, float_v &dz_best, int_m &active)
+                                                  sfloat_v::Memory &dy_best, sfloat_v::Memory &dz_best, short_m &active)
 { 
-  const float_v fY = r.fParam.Y();
-  const float_v fZ = r.fParam.Z();
-  const uint_v fIndYmin = row.Grid().GetBinBounded( fY - AliHLTTPCCAParameters::MinCellSize*.5f, fZ - AliHLTTPCCAParameters::MinCellSize*.5f );
+  const sfloat_v fY = r.fParam.Y();
+  const sfloat_v fZ = r.fParam.Z();
+  const ushort_v fIndYmin = row.Grid().GetBinBounded( fY - AliHLTTPCCAParameters::MinCellSize*.5f, fZ - AliHLTTPCCAParameters::MinCellSize*.5f );
 
-  int_v fHitIndexes(-1);
+  short_v::Memory fHitIndexes;
+  for(int iv=0; iv<short_v::Size; iv++)
+    fHitIndexes[iv] = -1; // not member
 
-  for(int trackletIndex =0; trackletIndex<int_v::Size; trackletIndex++)
-  {
-    if(!active[trackletIndex]) continue;
-//   foreach_bit( int trackletIndex, active ) {
+  foreach_bit( int trackletIndex, active ) {
     float minRadius2 = std::numeric_limits<float>::max();
 
     const float y = fY[trackletIndex];
@@ -278,13 +249,13 @@ void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTP
       const int end = fData.FirstHitInBin( row, indYmin + 2 );
       for ( int hitIndex = fData.FirstHitInBin( row, indYmin ); hitIndex < end; hitIndex += float_v::Size ) {
         float_v yz; 
-	yz = fData.HitPDataY( row, hitIndex );
+	yz.load( fData.HitDataY( row ) + hitIndex, Vc::Unaligned);
         const float_v dy = yz - y;
-	yz = fData.HitPDataZ( row, hitIndex );
+	yz.load( fData.HitDataZ( row ) + hitIndex, Vc::Unaligned);
 //        const float_v dz = float_v::loadUnaligned( fData.HitDataZ( row ) + hitIndex ) - z;
         const float_v dz = yz - z;
         float_v radius2 = std::numeric_limits<float_v>::max();
-        radius2( float_m(uint_v( Vc::IndexesFromZero ) + uint_v(hitIndex) < uint_v(end)) ) = dy * dy + dz * dz; // XXX Manhattan distance
+        radius2( uint_v( Vc::IndexesFromZero ) + hitIndex < end ) = dy * dy + dz * dz; // XXX Manhattan distance
 //         std::cout << y << " dy = "  << dy << std::endl  <<
 //             z << " dz = "  << dz << std::endl  <<
 //             "  Manhattan distance = " << radius2 << std::endl;
@@ -303,15 +274,15 @@ void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTP
       const int nY = row.Grid().Ny();
       const int end = fData.FirstHitInBin( row, indYmin + nY + 2 );
       for ( int hitIndex = fData.FirstHitInBin( row, indYmin + nY ); hitIndex < end; hitIndex += float_v::Size ) {
-        float_v yz;
-        yz = fData.HitPDataY( row, hitIndex );
+        float_v yz; 
+	yz.load( fData.HitDataY( row ) + hitIndex, Vc::Unaligned );
         const float_v dy = yz - y;
-	yz = fData.HitPDataZ( row, hitIndex );
+	yz.load( fData.HitDataZ( row ) + hitIndex, Vc::Unaligned );
         const float_v dz = yz - z;
 //        const float_v dy = float_v::loadUnaligned( fData.HitDataY( row ) + hitIndex ) - y;
 //        const float_v dz = float_v::loadUnaligned( fData.HitDataZ( row ) + hitIndex ) - z;
         float_v radius2 = std::numeric_limits<float_v>::max();
-        radius2( float_m(uint_v( Vc::IndexesFromZero ) + uint_v(hitIndex) < uint_v(end)) ) = dy * dy + dz * dz; // XXX Manhattan distance
+        radius2( uint_v( Vc::IndexesFromZero ) + hitIndex < end ) = dy * dy + dz * dz; // XXX Manhattan distance
         const float min = radius2.min();
         if ( min < minRadius2 ) {
           minRadius2 = min;
@@ -325,65 +296,57 @@ void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTP
     }
   }
 
-  r.fCurrentHitIndex( active ) = fHitIndexes;
-//  r.fCurrentHitIndex( static_cast<int_m>( row.NHits() <= 0 ) ) = -1; // sometimes row.NHits() == 0 but firstHitInBin != 0 CHECKME. But same checked in Extend\ExtrapolateTracklet
-  active &= (r.fCurrentHitIndex != int_v(-1));
+  r.fCurrentHitIndex( active ) = static_cast<short_v>( fHitIndexes );
+//  r.fCurrentHitIndex( static_cast<short_m>( row.NHits() <= 0 ) ) = -1; // sometimes row.NHits() == 0 but firstHitInBin != 0 CHECKME. But same checked in Extend\ExtrapolateTracklet
+  active &= (r.fCurrentHitIndex != short_v(-1));
 } // FindNextHit
 
 /**
  * Now that we have a tracklet try to find more hits that would fit with this tracklet
  */
-int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex,
-   TrackletVector &trackletVector, const bool dir, const int_m &mask )
+short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const int rowIndex, const ushort_v trackIndex,
+   TrackletVector &trackletVector, const bool dir, const short_m &mask )
 {
   //assert( active == ( active && ( r.fStage == ExtrapolateUp || r.fStage == ExtrapolateDown ) ) );
   // reconstruction of tracklets, tracklets update step
   
   const AliHLTTPCCARow &row = fData.Row( rowIndex );
 
-  int_m active = mask;
+  short_m active = mask;
   --r.fRemainingGap( active );
-#ifdef __ASSERT_YF__
   assert( r.fRemainingGap >= 0 || !active );
-#endif
   debugF() << "ExtrapolateTracklet(" << rowIndex << ") fRemainingGap: " << r.fRemainingGap << endl;
 
   
-  const float_v x = fData.RowX( rowIndex );
+  const sfloat_v x = fData.RowX( rowIndex );
 
 //     // correct SinPhi if it is necessary
 //     // calculate displacement to previous hit
-//   const float_v dx = x - r.fParam.X();
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( dx );
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( r.fLastY );
-//   const float_v dy = y - r.fLastY;
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( dy );
-//   const float_v dz = z - r.fLastZ;
+//   const sfloat_v dx = x - r.fParam.X();
+//   const sfloat_v dy = y - r.fLastY;
+//   const sfloat_v dz = z - r.fLastZ;
 //   debugF() << "dx, dy, dz: " << dx << dy << dz << endl;
 //   r.fLastY( activeF ) = y;
 //   r.fLastZ( activeF ) = z;
 // 
-//   float_v err2Y, err2Z;
-//  float_v sinPhi = r.fParam.GetSinPhi();
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
+//   sfloat_v err2Y, err2Z;
+//  sfloat_v sinPhi = r.fParam.GetSinPhi();
 // 
-//   const float_v ri = float_v( Vc::One ) / CAMath::Sqrt( dx * dx + dy * dy ); // RSqrt
-//  const float_m fragile =
-//      static_cast<float_m>( r.fNHits < AliHLTTPCCAParameters::MinimumHitsForFragileTracklet ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( fragile );
+//   const sfloat_v ri = sfloat_v( Vc::One ) / CAMath::Sqrt( dx * dx + dy * dy ); // RSqrt
+//  const sfloat_m fragile =
+//      static_cast<sfloat_m>( r.fNHits < AliHLTTPCCAParameters::MinimumHitsForFragileTracklet ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
 //   sinPhi( fragile ) = dy * ri;
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
 
   
-  float_m activeF( active ); // get float mask
+  sfloat_m activeF( active ); // get float mask
   assert( ( x == 0 && activeF ).isEmpty() );
 
-//   float_m transport = r.fParam.TransportToXWithMaterial( x,  fTracker.Param().Bz(), .99f );
-//   float_m transport = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), .99f, activeF );
-  float_m transport = r.fParam.TransportToX( x, r.fParam.SinPhi(), fTracker.Param().cBz(), .99f, activeF );
+//   sfloat_m transport = r.fParam.TransportToXWithMaterial( x,  fTracker.Param().Bz(), .99f );
+//   sfloat_m transport = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), .99f, activeF );
+  sfloat_m transport = r.fParam.TransportToX( x, r.fParam.SinPhi(), fTracker.Param().cBz(), .99f, activeF );
   activeF &= transport;
 
-  active = static_cast<int_m>( activeF );
+  active = static_cast<short_m>( activeF );
 
   if ( row.NHits() < 1 || active.isEmpty() ) {
     ++r.fStage( r.fRemainingGap == 0 && mask ); // go to WaitingForExtrapolateDown or DoneStage if the gap got too big
@@ -391,11 +354,9 @@ int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const
     debugF() << "r.fStage: " << r.fStage << " after ExtrapolateTracklet found empty row and fRemainingGap == " << r.fRemainingGap << endl;
 #endif
     // no hits in this row, skip (don't do this before TransportToX)
-#ifdef __ASSERT_YF__
     ASSERT( r.fRemainingGap >= 0,
       r.fRemainingGap );
-#endif
-    return int_m( Vc::Zero );
+    return short_m( Vc::Zero );
   }
 
   //std::cout << std::setw( 4 ) << rowIndex << ": " << active << endl;
@@ -403,28 +364,28 @@ int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const
     // find next hit
 
 
-  int_m linkMask = active; linkMask &= int_m(Vc::Zero);
+  short_m linkMask = active; linkMask &= short_m(Vc::Zero);
   // if ( dir == 1 ) {
   //   if ( rowIndex-1 >= 0 ) {
   //     linkMask &= r.fLastRow == rowIndex-1; // check only hits on previous row. Others can't have link on current row.
   //     const AliHLTTPCCARow &prevRow = fData.Row( rowIndex-1 );
-  //     r.fCurrentHitIndex.gather( fData.HitLinkUpData( prevRow ), static_cast<uint_v>( r.fCurrentHitIndex ), linkMask ); // set to next linked hit
+  //     r.fCurrentHitIndex.gather( fData.HitLinkUpData( prevRow ), static_cast<ushort_v>( r.fCurrentHitIndex ), linkMask ); // set to next linked hit
   //   }
-  //   else linkMask &= int_m(Vc::Zero);
+  //   else linkMask &= short_m(Vc::Zero);
   // }
   // else {
   //   if( rowIndex+1 < fTracker.Param().NRows() ) {
   //     linkMask &= r.fFirstRow == rowIndex+1;
   //     const AliHLTTPCCARow &prevRow = fData.Row( rowIndex+1 );
-  //     r.fCurrentHitIndex.gather( fData.HitLinkDownData( prevRow ), static_cast<uint_v>( r.fCurrentHitIndex ), linkMask );
+  //     r.fCurrentHitIndex.gather( fData.HitLinkDownData( prevRow ), static_cast<ushort_v>( r.fCurrentHitIndex ), linkMask );
   //   }
-  //   else linkMask &= int_m(Vc::Zero);
+  //   else linkMask &= short_m(Vc::Zero);
   // }
   // linkMask &= (r.fCurrentHitIndex != -1);
 
   
-  // float_v y( fData.HitDataY( row ), static_cast<uint_v>( r.fCurrentHitIndex ), linkMask );
-  // float_v z( fData.HitDataZ( row ), static_cast<uint_v>( r.fCurrentHitIndex ), linkMask );
+  // sfloat_v y( fData.HitDataY( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), linkMask );
+  // sfloat_v z( fData.HitDataZ( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), linkMask );
 
   // foreach_bit( int trackletIndex, linkMask ) { // TODO optimize
   //   const float yT = r.fParam.Y()[trackletIndex];
@@ -434,13 +395,14 @@ int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const
   // }
   
     // try to find hit by trying all closed hits
-  float_v dy_tmp(Vc::Zero), dz_tmp(Vc::Zero);
-  int_m findMask  = active && !linkMask;
+  sfloat_v::Memory dy_tmp; dy_tmp = sfloat_v(Vc::Zero); // initialize to avoid arithmetic exception.
+  sfloat_v::Memory dz_tmp; dz_tmp = sfloat_v(Vc::Zero); // initialize to avoid arithmetic exception.
+  short_m findMask  = active && !linkMask;
   
   FindNextHit(r, row, dy_tmp, dz_tmp, findMask);
 
-  const float_v dy = dy_tmp;
-  const float_v dz = dz_tmp;
+  const sfloat_v dy( dy_tmp );
+  const sfloat_v dz( dz_tmp );
   active = linkMask || findMask;
     
   // XXX use this branch? with 8 or 16 tracklets extrapolated at the same time this might be an
@@ -449,52 +411,52 @@ int_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, const
 //X     return;
 //X   }
   
-    // const int_v isUsed(fData.HitDataIsUsed( row ), static_cast<uint_v>(r.fCurrentHitIndex), active);
-    // active &= (isUsed != int_v( 2 )) && (isUsed != int_v( 1 )); // don't take hits from other chains. In order to reduce calculations.
-    // active &= (isUsed != int_v( 2 ));
+    // const short_v isUsed(fData.HitDataIsUsed( row ), static_cast<ushort_v>(r.fCurrentHitIndex), active);
+    // active &= (isUsed != short_v( 2 )) && (isUsed != short_v( 1 )); // don't take hits from other chains. In order to reduce calculations.
+    // active &= (isUsed != short_v( 2 ));
 
     // check if found hit is acceptable
-  float_v err2Y(Vc::Zero), err2Z(Vc::Zero);
+  sfloat_v err2Y, err2Z;
   fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
 
-  const float_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
-  const float_v two( 2.f );
+  const sfloat_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
+  const sfloat_v two( 2.f );
 
-  const float_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
-  const float_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
+  const sfloat_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
+  const sfloat_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
 
-  activeF = static_cast<float_m>( active );
+  activeF = static_cast<sfloat_m>( active );
   debugF() << "activeF: " << activeF;
   activeF &= dy * dy <= sy2 && dz * dz <= sz2;
   debugF() << " -> " << activeF;
 
   
-  float_m filtred = r.fParam.FilterDelta( activeF, dy, dz, err2Y, err2Z, .99f );
+  sfloat_m filtred = r.fParam.FilterDelta( activeF, dy, dz, err2Y, err2Z, .99f );
   activeF &= filtred;
-  // r.fCurrentHitIndex( static_cast<int_m>(!activeF) && active ) = -1; // delete indexes of noaccepted hits
+  // r.fCurrentHitIndex( static_cast<short_m>(!activeF) && active ) = -1; // delete indexes of noaccepted hits
   debugF() << " -> " << activeF;
-  active = static_cast<int_m>( activeF );
+  active = static_cast<short_m>( activeF );
   debugF() << " -> " << active << endl;
 
   debugF() << "SetRowHits( " << rowIndex << ", " << r.fCurrentHitIndex << ", " << active << ")" << endl;
 
   ASSERT( ( (row.NHits() > r.fCurrentHitIndex) && active) == active,
           row.NHits() << r.fCurrentHitIndex << active );
-  fData.SetHitAsUsedInTrackExtend( row, static_cast<uint_v>(r.fCurrentHitIndex), active );
+  fData.SetHitAsUsedInTrackExtend( row, static_cast<ushort_v>(r.fCurrentHitIndex), active );
   
-  trackletVector.SetRowHits( rowIndex, trackIndex,  static_cast<uint_v>(r.fCurrentHitIndex), active );
-  ++r.fNHits( static_cast<uint_m>(active) );
+  trackletVector.SetRowHits( rowIndex, trackIndex,  static_cast<ushort_v>(r.fCurrentHitIndex), active );
+  ++r.fNHits( static_cast<ushort_m>(active) );
   r.fRemainingGap( active ) = AliHLTTPCCAParameters::MaximumExtrapolationRowGap;
   ++r.fStage( r.fRemainingGap == 0 && mask ); // go to WaitingForExtrapolateDown or DoneStage if the gap got too big
 //  r.fStage( r.fNHits > 10 && mask ) = DoneStage; // don't need long tracklets. merger will do work.
  
-  r.fLastRow(  active && int_m( dir) ) = rowIndex;
-  r.fFirstRow( active && int_m(!dir) ) = rowIndex;
+  r.fLastRow(  active && short_m( dir) ) = rowIndex;
+  r.fFirstRow( active && short_m(!dir) ) = rowIndex;
   return active;
 } // ExtrapolateTracklet
 
-int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex,
-   TrackletVector &trackletVector, const bool dir, const int_m &mask )
+short_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int rowIndex, const ushort_v trackIndex,
+   TrackletVector &trackletVector, const bool dir, const short_m &mask )
 {
   
   //assert( activeExtraMask == ( activeExtraMask && ( r.fStage == ExtrapolateUp || r.fStage == ExtrapolateDown ) ) );
@@ -502,8 +464,8 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
   assert( AliHLTTPCCAParameters::RowStep == 1 );
 
   
-  int_m activeExtraMask = mask;
-  const int_m activeFitMask = (r.fStage == FitLinkedHits); // active chains (ones, which contains no fitted hits).
+  short_m activeExtraMask = mask;
+  const short_m activeFitMask = (r.fStage == FitLinkedHits); // active chains (ones, which contains no fitted hits).
   
   const AliHLTTPCCARow &row = fData.Row( rowIndex );
     
@@ -515,7 +477,7 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
   assert( (activeFitMask && activeExtraMask).isEmpty() );
 
   
-  const uint_v oldHitIndex = static_cast<uint_v>( r.fCurrentHitIndex );
+  const ushort_v oldHitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
 
 
     
@@ -525,44 +487,43 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
   
   // -- TRANSPORT --
 
-  const float_v x = fData.RowX( rowIndex );
+  const sfloat_v x = fData.RowX( rowIndex );
 
-  // const int_v aaaaaItIsNotUsedButDoesHelpALotToSpeedUpAaaaaa = int_v(fData.HitDataIsUsed( row ), Vc::IndexesFromZero, int_m(Vc::Zero)); // todo understand. Here it takes a lot of time...
-  const int_v isUsed(fData.HitDataIsUsed( row ), static_cast<uint_v>(oldHitIndex), activeFitMask); // Here it takes a lot of time...
-  const int_m fitMask = activeFitMask && (isUsed != int_v(2)) && (isUsed != int_v(3)) && (r.fCurrentHitIndex >= 0); // mask to add a new hit. // don't take hits from other tracks. In order to reduce calculations.
+  // const short_v aaaaaItIsNotUsedButDoesHelpALotToSpeedUpAaaaaa = short_v(fData.HitDataIsUsed( row ), Vc::IndexesFromZero, short_m(Vc::Zero)); // todo understand. Here it takes a lot of time...
+  const short_v isUsed(fData.HitDataIsUsed( row ), static_cast<ushort_v>(oldHitIndex), activeFitMask); // Here it takes a lot of time...
+  const short_m fitMask = activeFitMask && (isUsed != short_v(2)) && (isUsed != short_v(3)); // mask to add a new hit. // don't take hits from other tracks. In order to reduce calculations.
 
-  float_m activeFitMaskF( static_cast<float_m>( fitMask ) ); // create float_v mask
-  float_m activeExtraMaskF( static_cast<float_m>(activeExtraMask) );
-#ifdef __ASSERT_YF__	   
+  sfloat_m activeFitMaskF( static_cast<sfloat_m>( fitMask ) ); // create float_v mask
+  sfloat_m activeExtraMaskF( static_cast<sfloat_m>(activeExtraMask) );
+    
   assert( row.NHits() > oldHitIndex || !fitMask );
-#endif
-  float_v y = fData.HitPDataY( row, oldHitIndex, activeFitMaskF );
-  float_v z = fData.HitPDataZ( row, oldHitIndex, activeFitMaskF );
+  sfloat_v y( fData.HitDataY( row ), oldHitIndex, activeFitMaskF);
+  sfloat_v z( fData.HitDataZ( row ), oldHitIndex, activeFitMaskF);
 
   
-  const float_v dx = x - r.fParam.X();
+  const sfloat_v dx = x - r.fParam.X();
 
-  float_v dy = y - r.fLastY;
-  float_v dz = z - r.fLastZ;
+  sfloat_v dy = y - r.fLastY;
+  sfloat_v dz = z - r.fLastZ;
   r.fLastY( activeFitMaskF ) = y;
   r.fLastZ( activeFitMaskF ) = z;
   
-  float_v sinPhi = r.fParam.GetSinPhi();
+  sfloat_v sinPhi = r.fParam.GetSinPhi();
 
-  const float_m fragile = activeFitMaskF &&
-      ( static_cast<float_m>( r.fNHits < uint_v(AliHLTTPCCAParameters::MinimumHitsForFragileTracklet) ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f );
+  const sfloat_m fragile = activeFitMaskF &&
+      ( static_cast<sfloat_m>( r.fNHits < ushort_v(AliHLTTPCCAParameters::MinimumHitsForFragileTracklet) ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f );
   sinPhi( fragile ) = dy * CAMath::RSqrt( dx * dx + dy * dy );
   
-  float_v maxSinPhi = .99f;
+  sfloat_v maxSinPhi = .99f;
   maxSinPhi( activeFitMaskF ) = -1.f;
 
   
-//   float_m transport = r.fParam.TransportToXWithMaterial( x,  fTracker.Param().Bz(), .99f );
-//   float_m transport = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), .99f, activeExtraMaskF );
+//   sfloat_m transport = r.fParam.TransportToXWithMaterial( x,  fTracker.Param().Bz(), .99f );
+//   sfloat_m transport = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), .99f, activeExtraMaskF );
   
   assert( ( (x == 0) && (activeExtraMaskF || activeFitMaskF) ).isEmpty() );
 
-  float_m transport = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), maxSinPhi, activeExtraMaskF || activeFitMaskF );
+  sfloat_m transport = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), maxSinPhi, activeExtraMaskF || activeFitMaskF );
   activeExtraMaskF &= transport;
   activeFitMaskF &= transport;
 
@@ -576,76 +537,76 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
 #endif
     
       // end with chain fit
-    r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<uint_v>( oldHitIndex ), activeFitMask ); // prepare new hit for fit // TODO 2 dir??
+    r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<ushort_v>( oldHitIndex ), activeFitMask ); // prepare new hit for fit // TODO 2 dir??
     
-    const int_m fittingDone = r.fCurrentHitIndex < 0 && activeFitMask;
+    const short_m fittingDone = r.fCurrentHitIndex < 0 && activeFitMask;
     ++r.fStage( fittingDone ); // goes to ExtrapolateUp if fitting is done (no other hit linked)
     r.fLastRow( fittingDone ) = rowIndex;
 
-    const int_m invalidTracklet = r.IsInvalid() && fittingDone;
+    const short_m invalidTracklet = r.IsInvalid() && fittingDone;
     r.fNHits.setZero( invalidTracklet );
     r.fStage( invalidTracklet || (fittingDone && !r.fIsFragile) ) = DoneStage;
     
-    return int_m( Vc::Zero );
+    return short_m( Vc::Zero );
   }
 
   // -- FIND A NEXT HIT --
 
   
-  activeExtraMask = static_cast<int_m>( activeExtraMaskF );
+  activeExtraMask = static_cast<short_m>( activeExtraMaskF );
 
     // try find hit by using links
-  int_m linkMask = int_m(Vc::Zero);//activeExtraMask && r.fIsOnChain; - // use links during extrapolation is turned off
+  short_m linkMask = short_m(Vc::Zero);//activeExtraMask && r.fIsOnChain; - // use links during extrapolation is turned off
   // if ( !linkMask.isEmpty() ) {
   // if ( dir == 1 ) {
   //   if ( rowIndex-1 >= 0 ) {
   //     linkMask &= r.fLastRow == rowIndex-1; // check only hits on previous row. Others can't have link on current row.
   //     const AliHLTTPCCARow &prevRow = fData.Row( rowIndex-1 );
-  //     r.fCurrentHitIndex.gather( fData.HitLinkUpData( prevRow ), static_cast<uint_v>( r.fCurrentHitIndex ), linkMask ); // set to next linked hit
+  //     r.fCurrentHitIndex.gather( fData.HitLinkUpData( prevRow ), static_cast<ushort_v>( r.fCurrentHitIndex ), linkMask ); // set to next linked hit
   //   }
-  //   else linkMask &= int_m(Vc::Zero);
+  //   else linkMask &= short_m(Vc::Zero);
   // }
   // else {
   //   if( rowIndex+1 < fTracker.Param().NRows() ) {
   //     linkMask &= r.fFirstRow == rowIndex+1;
   //     const AliHLTTPCCARow &prevRow = fData.Row( rowIndex+1 );
-  //     r.fCurrentHitIndex.gather( fData.HitLinkDownData( prevRow ), static_cast<uint_v>( r.fCurrentHitIndex ), linkMask );
+  //     r.fCurrentHitIndex.gather( fData.HitLinkDownData( prevRow ), static_cast<ushort_v>( r.fCurrentHitIndex ), linkMask );
   //   }
-  //   else linkMask &= int_m(Vc::Zero);
+  //   else linkMask &= short_m(Vc::Zero);
   // }
   // r.fIsOnChain &= (r.fCurrentHitIndex != -1); // chain is ended
   // linkMask &= (r.fCurrentHitIndex != -1);
 
-  // assert( row.NHits() > static_cast<uint_v>( r.fCurrentHitIndex ) || !linkMask );
-  // y.gather( fData.HitDataY( row ), static_cast<uint_v>( r.fCurrentHitIndex ), static_cast<float_m>(linkMask) );
-  // z.gather( fData.HitDataZ( row ), static_cast<uint_v>( r.fCurrentHitIndex ), static_cast<float_m>(linkMask) );
+  // assert( row.NHits() > static_cast<ushort_v>( r.fCurrentHitIndex ) || !linkMask );
+  // y.gather( fData.HitDataY( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), static_cast<sfloat_m>(linkMask) );
+  // z.gather( fData.HitDataZ( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), static_cast<sfloat_m>(linkMask) );
   // }
   
   dy = y - r.fParam.Y();
   dz = z - r.fParam.Z();
 
     // try to find hit by trying all closed hits
-  float_v  dy_tmp(Vc::Zero), dz_tmp(Vc::Zero);
-  int_m findMask  = activeExtraMask && !linkMask; // try to find only if there is no chain
+  sfloat_v::Memory dy_tmp, dz_tmp;
+  short_m findMask  = activeExtraMask && !linkMask; // try to find only if there is no chain
   if ( !findMask.isEmpty() ) {
-    // const int_v prev(r.fCurrentHitIndex); // TODO oldHI
+    // const short_v prev(r.fCurrentHitIndex); // TODO oldHI
 
     FindNextHit(r, row, dy_tmp, dz_tmp, findMask);
 
     // if (dir == 1) {
-    //   const int_v prev2( fData.HitLinkDownData( row ), static_cast<uint_v>( r.fCurrentHitIndex ), findMask );
+    //   const short_v prev2( fData.HitLinkDownData( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), findMask );
     //   r.fIsOnChain = prev == prev2 && findMask;
     // }
     // else {
-    //   const int_v prev2( fData.HitLinkUpData( row ), static_cast<uint_v>( r.fCurrentHitIndex ), findMask );
+    //   const short_v prev2( fData.HitLinkUpData( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), findMask );
     //   r.fIsOnChain = prev == prev2 && findMask;
     // }
   }
   activeExtraMask = linkMask || findMask;
-  activeExtraMaskF = static_cast<float_m>( activeExtraMask );
+  activeExtraMaskF = static_cast<sfloat_m>( activeExtraMask );
   
-  dy( static_cast<float_m>( findMask ) ) = dy_tmp;
-  dz( static_cast<float_m>( findMask ) ) = dz_tmp;
+  dy( static_cast<sfloat_m>( findMask ) ) = sfloat_v( dy_tmp );
+  dz( static_cast<sfloat_m>( findMask ) ) = sfloat_v( dz_tmp );
 
   // XXX use this branch? with 8 or 16 tracklets extrapolated at the same time this might be an
   // unlikely return? Also see above.
@@ -653,117 +614,101 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
 //X     return;
 //X   }
   
-//    const int_v isUsed2(fData.HitDataIsUsed( row ), static_cast<uint_v>(r.fCurrentHitIndex), activeExtraMask);
-//    activeExtraMask &= (isUsed2 != int_v( 2 )) && (isUsed2 != int_v( 1 )); // don't take hits from other chains. In order to reduce calculations.
-//    activeExtraMask &= (isUsed2 != int_v( 2 ));
+//    const short_v isUsed2(fData.HitDataIsUsed( row ), static_cast<ushort_v>(r.fCurrentHitIndex), activeExtraMask);
+//    activeExtraMask &= (isUsed2 != short_v( 2 )) && (isUsed2 != short_v( 1 )); // don't take hits from other chains. In order to reduce calculations.
+//    activeExtraMask &= (isUsed2 != short_v( 2 ));
 
     // check if found hit is acceptable
-  float_v err2Y, err2Z;
+  sfloat_v err2Y, err2Z;
   fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
 
-  const float_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
-  const float_v two( 2.f );
+  const sfloat_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
+  const sfloat_v two( 2.f );
 
-  const float_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
-  const float_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
+  const sfloat_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
+  const sfloat_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
 
 
   activeExtraMaskF &= dy * dy <= sy2 && dz * dz <= sz2;
 
-  activeFitMaskF &= (dy * dy <= sy2 && dz * dz <= sz2) || float_m(r.fNHits < uint_v(3)); // very strong cut for ghosts.
+  activeFitMaskF &= (dy * dy <= sy2 && dz * dz <= sz2) || (r.fNHits < 3); // very strong cut for ghosts.
 
  
     // -- FILTER THE NEXT HIT --
   
-  const float_m filtred = r.fParam.FilterDelta( activeExtraMaskF || activeFitMaskF, dy, dz, err2Y, err2Z, .99f );
+  const sfloat_m filtred = r.fParam.FilterDelta( activeExtraMaskF || activeFitMaskF, dy, dz, err2Y, err2Z, .99f );
   activeExtraMaskF &= filtred;
-  activeExtraMask = static_cast<int_m>( activeExtraMaskF );
+  activeExtraMask = static_cast<short_m>( activeExtraMaskF );
   activeFitMaskF &= filtred;
-  const int_m hitAdded = static_cast<int_m>( activeFitMaskF );
+  const short_m hitAdded = static_cast<short_m>( activeFitMaskF );
 
   
     // -- SAVE THE NEXT HIT --
 
   
-  trackletVector.SetRowHits( rowIndex, trackIndex,  static_cast<uint_v>(r.fCurrentHitIndex), activeExtraMask || hitAdded );
+  trackletVector.SetRowHits( rowIndex, trackIndex,  static_cast<ushort_v>(r.fCurrentHitIndex), activeExtraMask || hitAdded );
   
-  r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<uint_v>( oldHitIndex ), uint_m(activeFitMask) ); // prepare new hit for fit
+  r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<ushort_v>( oldHitIndex ), activeFitMask ); // prepare new hit for fit
   
 
   ASSERT( ( (row.NHits() > r.fCurrentHitIndex) && activeExtraMask) == activeExtraMask,
           row.NHits() << r.fCurrentHitIndex << activeExtraMask );
-  fData.SetHitAsUsedInTrackExtend( row, static_cast<uint_v>( r.fCurrentHitIndex ), activeExtraMask ); // TODO 1 function
-  fData.SetHitAsUsedInTrackFit(    row, static_cast<uint_v>( oldHitIndex ),        hitAdded );
+  fData.SetHitAsUsedInTrackExtend( row, static_cast<ushort_v>( r.fCurrentHitIndex ), activeExtraMask ); // TODO 1 function
+  fData.SetHitAsUsedInTrackFit(    row, static_cast<ushort_v>( oldHitIndex ),        hitAdded );
   
-  ++r.fNHits( static_cast<uint_m>( activeExtraMask || hitAdded ) );
+  ++r.fNHits( static_cast<ushort_m>( activeExtraMask || hitAdded ) );
   r.fRemainingGap( activeExtraMask ) = AliHLTTPCCAParameters::MaximumExtrapolationRowGap;
 
     // -- MOVE TO NEXT STAGE --
   
   ++r.fStage( (r.fRemainingGap == 0) && mask ); // go to WaitingForExtrapolateDown or DoneStage if the gap got too big TODO not active
-#ifdef __ASSERT_YF__
   ASSERT( r.fRemainingGap >= 0,
     r.fRemainingGap << mask << activeExtraMask );
-#endif
 //  r.fStage( r.fNHits > 10 && mask ) = DoneStage; // don't need long tracklets. merdger will do work.
   
-  const int_m fittingDone = r.fCurrentHitIndex < 0 && activeFitMask;
+  const short_m fittingDone = r.fCurrentHitIndex < 0 && activeFitMask;
   ++r.fStage( fittingDone ); // goes to ExtrapolateUp if fitting is done (no other hit linked)
   r.fLastRow( fittingDone ) = rowIndex;
 
-  const int_m invalidTracklet = r.IsInvalid() && fittingDone;
+  const short_m invalidTracklet = r.IsInvalid() && fittingDone;
   r.fNHits.setZero( invalidTracklet );
   r.fStage( invalidTracklet || (fittingDone && !r.fIsFragile) ) = DoneStage; // TODO unmark used hits
   
   r.fEndRow( hitAdded ) = rowIndex;
 
-  r.fLastRow(  activeExtraMask && int_m( dir) ) = rowIndex;
-  r.fFirstRow( activeExtraMask && int_m(!dir) ) = rowIndex;
+  r.fLastRow(  activeExtraMask && short_m( dir) ) = rowIndex;
+  r.fFirstRow( activeExtraMask && short_m(!dir) ) = rowIndex;
   return activeExtraMask;
 } // ExtendTracklet
 
 
 void AliHLTTPCCATrackletConstructor::run()
 {
-  
-#ifndef NVALGRIND
-  for ( int i = 0; i < fTracker.Param().NRows(); ++i ) {
-    const AliHLTTPCCARow &row = fData.Row( i );
-    for ( int hit = 0; hit < row.NHits(); ++hit ) {
-      debugF() << i << ", " << hit << endl;
-      const int tmp = fData.HitLinkUpDataS( row, hit );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( tmp );
-    }
-  }
-#endif
-  assert( *fTracker.NTracklets() < 32768 );
-  const int nTracks = *fTracker.NTracklets();
 
-  for ( int trackIteration = 0; trackIteration * uint_v::Size < nTracks; ++trackIteration ) {
-    const uint_v trackIndex( uint_v( Vc::IndexesFromZero ) + uint_v(trackIteration * uint_v::Size) );
-    const uint_m active = trackIndex < nTracks;
+  assert( *fTracker.NTracklets() < 32768 );
+  const short nTracks = *fTracker.NTracklets();
+
+  for ( int trackIteration = 0; trackIteration * ushort_v::Size < nTracks; ++trackIteration ) {
+    const ushort_v trackIndex( ushort_v( Vc::IndexesFromZero ) + trackIteration * ushort_v::Size );
+    const ushort_m active = trackIndex < nTracks;
     TrackMemory r;
 
       //std::cout << "----------------------------------------------------" << endl;
     r.fStage( !active ) = NullStage;
 
       // if rowStep = 2 TrackletStartHits need to be sorted such that all even start rows come first. The odd start rows - last.
-//   r.fStartRow.gather( fTracker.TrackletStartHits(), reinterpret_cast<int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fRow ), trackIndex, active );
-    r.fStartRow(active) = fTracker.TrackletStartHits()[trackIndex][reinterpret_cast<int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fRow )];
-//    r.fCurrentHitIndex.gather( fTracker.TrackletStartHits(), reinterpret_cast<int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fHit ), trackIndex, active );
-    r.fCurrentHitIndex(active) = fTracker.TrackletStartHits()[trackIndex][reinterpret_cast<int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fHit )];
-    r.fEndRow = static_cast<uint_v>( r.fStartRow );
-    r.fLastRow = static_cast<uint_v>( r.fStartRow );
-    r.fStartRow( !active ) = std::numeric_limits<int_v>::max();
+    r.fStartRow.gather( fTracker.TrackletStartHits(), reinterpret_cast<short AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fRow ), trackIndex, active );
+    r.fCurrentHitIndex.gather( fTracker.TrackletStartHits(), reinterpret_cast<short int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fHit ), trackIndex, active );
+    r.fEndRow = static_cast<ushort_v>( r.fStartRow );
+    r.fLastRow = static_cast<ushort_v>( r.fStartRow );
+    r.fStartRow( !active ) = std::numeric_limits<short_v>::max();
     r.fFirstRow = r.fStartRow;
-//     uint_v length( fTracker.TrackletStartHits(), reinterpret_cast<unsigned int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fLength ), trackIndex, active );
-    uint_v length(Vc::Zero);
-    length(uint_m(active)) = fTracker.TrackletStartHits()[trackIndex][reinterpret_cast<int AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fLength )];
-    const uint_v MaxNHitsForFragileTracklet(6);
+    ushort_v length( fTracker.TrackletStartHits(), reinterpret_cast<unsigned short AliHLTTPCCAStartHitId::*>( &AliHLTTPCCAStartHitId::fLength ), trackIndex, active );
+    const ushort_v MaxNHitsForFragileTracklet(6);
     r.fIsFragile = (length < MaxNHitsForFragileTracklet); // TODO parameter // TODO 5 is optimum for globalEff+timeSliceTracker. But one should take into account merger
 
-    const float_v zero( Vc::Zero );
-    const float_v one( Vc::One );
+    const sfloat_v zero( Vc::Zero );
+    const sfloat_v one( Vc::One );
     r.fParam.SetSinPhi(  zero );
     r.fParam.SetDzDs(    zero );
     r.fParam.SetQPt(     zero );
@@ -786,7 +731,7 @@ void AliHLTTPCCATrackletConstructor::run()
     r.fParam.SetCov( 13, zero );
     r.fParam.SetCov( 14, 10.f );
 
-      //     const int_m evenRows = ( r.fStartRow & int_v( Vc::One ) ) > int_v( Vc::Zero );
+      //     const short_m evenRows = ( r.fStartRow & short_v( Vc::One ) ) > short_v( Vc::Zero );
       // 
       //     // fStartRow should be sorted, with the one exception of odd/even boundary
       //     if ( r.fStartRow != r.fStartRow.sorted() ) {
@@ -807,7 +752,7 @@ void AliHLTTPCCATrackletConstructor::run()
     const int rowStep = AliHLTTPCCAParameters::RowStep;
     { // fit and extrapolate upwards
       int rowIndex = r.fStartRow.min() + rowStep*2;
-      const int_v activationRow = r.fStartRow + rowStep*2;
+      const short_v activationRow = r.fStartRow + rowStep*2;
       debugF() << "============================================= Start Fitting Upwards =============================================" << endl;
       // TODO think about getting parameters of all tracks (fragile and !fragile) in the same point (begin or end of track). Needed by Merger
 // #define DISABLE_HIT_SEARCH
@@ -823,15 +768,15 @@ void AliHLTTPCCATrackletConstructor::run()
       }
 
 
-      const int_m ready = r.fStage <= DoneStage;
-      const float_v x( fData.RowX(), float_v::IndexType( r.fEndRow ) );
-//      const float_v x( fData.RowX(), float_v::IndexType( r.fStartRow ) );
-      debugF() << x << float_v::IndexType( r.fEndRow ) << float_v( fData.RowX(), float_v::IndexType( Vc::IndexesFromZero ) ) << endl;
-      assert( ( x == 0 && static_cast<float_m>( ready ) ).isEmpty() );
-      //assert ( ( (r.fParam.X() == x) && static_cast<float_m>( ready )) == static_cast<float_m>( ready ));
+      const short_m ready = r.fStage <= DoneStage;
+      const sfloat_v x( fData.RowX(), sfloat_v::IndexType( r.fEndRow ) );
+//      const sfloat_v x( fData.RowX(), sfloat_v::IndexType( r.fStartRow ) );
+      debugF() << x << sfloat_v::IndexType( r.fEndRow ) << sfloat_v( fData.RowX(), sfloat_v::IndexType( Vc::IndexesFromZero ) ) << endl;
+      assert( ( x == 0 && static_cast<sfloat_m>( ready ) ).isEmpty() );
+      //assert ( ( (r.fParam.X() == x) && static_cast<sfloat_m>( ready )) == static_cast<sfloat_m>( ready ));
 
-      const int_m transported = static_cast<int_m>( r.fParam.TransportToX(
-                                                           x, fTracker.Param().cBz(), .999f, static_cast<float_m>( ready ) ) );
+      const short_m transported = static_cast<short_m>( r.fParam.TransportToX(
+                                                           x, fTracker.Param().cBz(), .999f, static_cast<sfloat_m>( ready ) ) );
       
       debugF() << "============================================= Stop Fitting Upwards ==============================================" << endl;
 #ifdef MAIN_DRAW
@@ -855,7 +800,7 @@ void AliHLTTPCCATrackletConstructor::run()
         
         r.fStage( rowIndex == activationRow ) = FitLinkedHits; // goes to FitLinkedHits on activation row
                 
-        ExtendTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], 1, int_m(Vc::Zero) );
+        ExtendTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], 1, short_m(Vc::Zero) );
         // FitTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration] );
         ++rowIndex;
       }
@@ -863,9 +808,7 @@ void AliHLTTPCCATrackletConstructor::run()
       debugF() << "========================================== Start Extrapolating Upwards ==========================================" << endl;
 
         // some chains are fitted, some - are extrapolated
-#ifdef __ASSERT_YF__	   
       assert( r.fRemainingGap >= 0 );
-#endif
       //while ( rowIndex < fTracker.Param().NRows() && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
       while ( rowIndex < fTracker.Param().NRows() && !( r.fStage <= ExtrapolateUp ).isEmpty() ) {
 #ifdef USE_COUNTERS
@@ -873,7 +816,7 @@ void AliHLTTPCCATrackletConstructor::run()
 #endif // USE_COUNTERS
 
         r.fStage( rowIndex == activationRow ) = FitLinkedHits; // goes to FitLinkedHits on activation row
-        const int_m toExtrapolate = (r.fStage == ExtrapolateUp);
+        const short_m toExtrapolate = (r.fStage == ExtrapolateUp);
         ExtendTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], 1, toExtrapolate );
         ++rowIndex;
       }
@@ -881,18 +824,14 @@ void AliHLTTPCCATrackletConstructor::run()
       debugF() << "============================================= Stop Fitting Upwards ==============================================" << endl;
 
         // end extrapolate chains
-      int_m mask;
-#ifdef __ASSERT_YF__	   
+      short_m mask;
       assert( r.fRemainingGap >= 0 );
-#endif
       while ( rowIndex < fTracker.Param().NRows() && !( mask = r.fStage == ExtrapolateUp ).isEmpty() ) {
 #ifdef USE_COUNTERS
         counters[3]++;
 #endif // USE_COUNTERS
 
-#ifdef __ASSERT_YF__	   
         assert ( r.fStage != FitLinkedHits );
-#endif
         ExtrapolateTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], 1, mask );
         ++rowIndex;
       }
@@ -903,25 +842,22 @@ void AliHLTTPCCATrackletConstructor::run()
     { // extrapolate downwards
       r.fRemainingGap = AliHLTTPCCAParameters::MaximumExtrapolationRowGap; // allow full gaps again
       ++r.fStage( r.fStage == ExtrapolateUp ); // FitLinkedHits/ExtrapolateUp went so high that no gap put the tracklet into WaitingForExtrapolateDown
-      const int_m ready = r.fStage == WaitingForExtrapolateDown;
+      const short_m ready = r.fStage == WaitingForExtrapolateDown;
       debugF() << "ready to extrapolate downwards: " << ready << endl;
       ++r.fStage( ready ); // the wait is over
 
       if(1){ // set track parameters to x of end row of the fitting stage
-        //const float_v x( fData.RowX(), float_v::IndexType( r.fEndRow ) );
-        const float_v x( fData.RowX(), float_v::IndexType( r.fStartRow ), static_cast<float_m>(ready));
-        debugF() << x << float_v::IndexType( r.fEndRow ) << float_v( fData.RowX(), float_v::IndexType( Vc::IndexesFromZero ) ) << endl;
-        assert( ( x == 0 && static_cast<float_m>( ready ) ).isEmpty() );
-        const int_m transported = static_cast<int_m>( r.fParam.TransportToX(
-                                                            x, fTracker.Param().cBz(), .999f, static_cast<float_m>( ready ) ) );
+        //const sfloat_v x( fData.RowX(), sfloat_v::IndexType( r.fEndRow ) );
+        const sfloat_v x( fData.RowX(), sfloat_v::IndexType( r.fStartRow ), static_cast<sfloat_m>(ready));
+        debugF() << x << sfloat_v::IndexType( r.fEndRow ) << sfloat_v( fData.RowX(), sfloat_v::IndexType( Vc::IndexesFromZero ) ) << endl;
+        assert( ( x == 0 && static_cast<sfloat_m>( ready ) ).isEmpty() );
+        const short_m transported = static_cast<short_m>( r.fParam.TransportToX(
+                                                            x, fTracker.Param().cBz(), .999f, static_cast<sfloat_m>( ready ) ) );
         ++r.fStage( !transported ); // all those where transportation failed go to DoneStage
       }
 #ifdef MAIN_DRAW
       if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 ) {
-        for(int ii=0; ii<int_v::Size; ii++)
-        {
-          if(!(r.fStage[ii] < DoneStage)) continue;
-//         foreach_bit( int ii, r.fStage < DoneStage ) {
+        foreach_bit( int ii, r.fStage < DoneStage ) {
           TrackParam t( r.fParam, ii );
           AliHLTTPCCADisplay::Instance().ClearView();
           AliHLTTPCCADisplay::Instance().DrawSlice( &fTracker, 0 );
@@ -933,12 +869,12 @@ void AliHLTTPCCATrackletConstructor::run()
 #endif
       debugF() << "========================================= Start Extrapolating Downwards =========================================" << endl;
       // int rowIndex = r.fEndRow.max() - 1;
-      int_v tmpRow(r.fStartRow); // take only one hit from fitted chain
+      short_v tmpRow(r.fStartRow); // take only one hit from fitted chain
       tmpRow(!active) = fTracker.Param().NRows()-1;
       int rowIndex = tmpRow.max();
         // int rowIndex = r.fLastRow.max() - 1;
         // extrapolate along fitted chains
-      int_m mask; 
+      short_m mask; 
       const int minMaskedExtrRow = r.fStartRow.min();
       while ( rowIndex >= minMaskedExtrRow && !( mask = r.fStage == ExtrapolateDown ).isEmpty() ) {
 #ifdef USE_COUNTERS
@@ -946,7 +882,7 @@ void AliHLTTPCCATrackletConstructor::run()
 #endif // USE_COUNTERS
         // mask &= rowIndex < r.fEndRow;
        mask &= rowIndex < r.fStartRow + 1;
-       mask &= ( ( rowIndex - r.fStartRow ) & int_v( std::numeric_limits<int_v::EntryType>::min() + 1 ) ) != int_v( Vc::Zero ); // CHECKME why do we need this?
+       mask &= ( ( rowIndex - r.fStartRow ) & short_v( std::numeric_limits<short_v::EntryType>::min() + 1 ) ) != short_v( Vc::Zero ); // CHECKME why do we need this?
        ExtrapolateTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], 0, mask );
        --rowIndex;
       }
@@ -961,10 +897,7 @@ void AliHLTTPCCATrackletConstructor::run()
       r.fFirstRow = CAMath::Min( r.fFirstRow, r.fStartRow );
 #ifdef MAIN_DRAW
       if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 ) {
-        for(int ii=0; ii<int_v::Size; ii++)
-        {
-          if(!(r.fStage[ii] < NullStage)) continue;
-//         foreach_bit( int ii, r.fStage < NullStage ) {
+        foreach_bit( int ii, r.fStage < NullStage ) {
           TrackParam t( r.fParam, ii );
           AliHLTTPCCADisplay::Instance().ClearView();
           AliHLTTPCCADisplay::Instance().DrawSlice( &fTracker, 0 );
@@ -987,7 +920,7 @@ void AliHLTTPCCATrackletConstructor::run()
     std::cout << "Counters= " << counters[0] << " " << counters[1] << " " << counters[2] << " " << counters[3] << " " << counters[4] << " " << counters[5] << std::endl;
 #endif // USE_COUNTERS
        
-    float_m trackletOkF( r.fNHits >= uint_v(AliHLTTPCCAParameters::MinimumHitsForTracklet) );
+    sfloat_m trackletOkF( r.fNHits >= ushort_v(AliHLTTPCCAParameters::MinimumHitsForTracklet) );
     for ( int i = 0; i < 15; ++i ) {
       trackletOkF &= CAMath::Finite( r.fParam.Cov()[i] );
     }
@@ -1002,13 +935,13 @@ void AliHLTTPCCATrackletConstructor::run()
 
 
         // there must be errors and they must be positive or this track is garbage
-      && r.fParam.Err2QPt()    > float_v(Vc::Zero);
-    trackletOkF &= r.fParam.Err2Y()      > float_v(Vc::Zero) && r.fParam.Err2Z()      > float_v(Vc::Zero);
-    trackletOkF &= r.fParam.Err2SinPhi() > float_v(Vc::Zero) && r.fParam.Err2DzDs()   > float_v(Vc::Zero);
-//    trackletOkF &= ( r.fParam.Chi2()/static_cast<float_v>(r.fParam.NDF()) < 25.f ); // TODO 
+      && r.fParam.Err2QPt()    > Vc::Zero;
+    trackletOkF &= r.fParam.Err2Y()      > Vc::Zero && r.fParam.Err2Z()      > Vc::Zero;
+    trackletOkF &= r.fParam.Err2SinPhi() > Vc::Zero && r.fParam.Err2DzDs()   > Vc::Zero;
+//    trackletOkF &= ( r.fParam.Chi2()/static_cast<sfloat_v>(r.fParam.NDF()) < 25.f ); // TODO 
     debugF() << r.fParam << "-> trackletOk: " << trackletOkF << endl;
 
-    const int_m trackletOk( trackletOkF );
+    const short_m trackletOk( trackletOkF );
     r.fNHits.setZero( !trackletOk );
 
       //////////////////////////////////////////////////////////////////////
@@ -1021,10 +954,7 @@ void AliHLTTPCCATrackletConstructor::run()
     if ( !( r.fNHits > 0 ).isEmpty() ) {
 #ifdef MAIN_DRAW
       if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 ) {
-        for(int ii=0; ii<int_v::Size; ii++)
-        {
-          if(!(r.fStage[ii] < DoneStage)) continue;
-//         foreach_bit( int ii, r.fStage < DoneStage ) {
+        foreach_bit( int ii, r.fStage < DoneStage ) {
           TrackParam t( r.fParam, ii );
           AliHLTTPCCADisplay::Instance().ClearView();
           AliHLTTPCCADisplay::Instance().DrawSlice( &fTracker, 0 );
@@ -1035,12 +965,12 @@ void AliHLTTPCCATrackletConstructor::run()
       }
 #endif
         // start and end rows of the tracklet
-      tracklet.SetFirstRow( static_cast<uint_v>( r.fFirstRow ) );
+      tracklet.SetFirstRow( static_cast<ushort_v>( r.fFirstRow ) );
       tracklet.SetLastRow( r.fLastRow );
 
         ///mvz start 25.01.2010
-      const float_m MinQPt = CAMath::Abs(r.fParam.QPt()) < AliHLTTPCCAParameters::MinimumQPt;
-      float_v NewQPt = r.fParam.QPt();
+      const sfloat_m MinQPt = CAMath::Abs(r.fParam.QPt()) < AliHLTTPCCAParameters::MinimumQPt;
+      sfloat_v NewQPt = r.fParam.QPt();
       NewQPt(MinQPt) = AliHLTTPCCAParameters::MinimumQPt;
       r.fParam.SetQPt(NewQPt);
         //      r.fParam.SetQPt( CAMath::Max( AliHLTTPCCAParameters::MinimumQPt, r.fParam.QPt() ) );
@@ -1049,10 +979,10 @@ void AliHLTTPCCATrackletConstructor::run()
 
       debugTS() << r.fFirstRow << r.fLastRow << endl;
       debugTS() << "set hit weigths from row " << r.fFirstRow.min() << " until row " << r.fLastRow.max() << endl;
-      const uint_v &weight = SliceData::CalculateHitWeight( r.fNHits, trackIndex );
+      const ushort_v &weight = SliceData::CalculateHitWeight( r.fNHits, trackIndex );
         // for all rows where we have a hit let the fTracker know what weight our hits have
-      for ( unsigned int rowIndex = r.fFirstRow.min(); rowIndex <= r.fLastRow.max(); ++rowIndex ) {
-        const uint_v &hitIndex = tracklet.HitIndexAtRow( rowIndex );
+      for ( int rowIndex = r.fFirstRow.min(); rowIndex <= r.fLastRow.max(); ++rowIndex ) {
+        const ushort_v &hitIndex = tracklet.HitIndexAtRow( rowIndex );
         debugTS() << "MaximizeHitWeight at " << rowIndex << hitIndex << " with " << weight << endl;
         fData.MaximizeHitWeight( fData.Row( rowIndex ), hitIndex, weight );
       }
@@ -1070,23 +1000,22 @@ void InitTracklets::operator()( int rowIndex )
   const int rowStep = AliHLTTPCCAParameters::RowStep;
   assert( rowIndex < fTracker.Param().NRows() - rowStep );
     // the first hit is a special case (easy)
-  int_m mask = rowIndex == r.fStartRow;
-  float_m maskF( mask );
+  const ushort_m &mask = rowIndex == r.fStartRow;
+  const sfloat_m maskF( mask );
   {
     const AliHLTTPCCARow &row = fData.Row( rowIndex );
-    VALGRIND_CHECK_MEM_IS_ADDRESSABLE( &row, sizeof( AliHLTTPCCARow ) );
-    const float_v x = fData.RowX( rowIndex );
-    const uint_v &hitIndex = static_cast<uint_v>( r.fCurrentHitIndex );
-    const float_v y = fData.HitPDataY( row, hitIndex, maskF );
-    const float_v z = fData.HitPDataZ( row, hitIndex, maskF );
+    const sfloat_v x = fData.RowX( rowIndex );
+    const ushort_v &hitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
+    const sfloat_v y( fData.HitDataY( row ), hitIndex, mask );
+    const sfloat_v z( fData.HitDataZ( row ), hitIndex, mask );
     r.fParam.SetX( x, maskF );
     r.fParam.SetY( y, maskF );
     r.fParam.SetZ( z, maskF );
     fTrackletVector.SetRowHits( rowIndex, trackIndex, hitIndex, mask );
 
       // mark first hit as used
-    const int_v isUsed(fData.HitDataIsUsed( row ), static_cast<uint_v>( r.fCurrentHitIndex ), mask);
-    fData.SetHitAsUsedInTrackFit( row, static_cast<uint_v>( r.fCurrentHitIndex ), mask && ( isUsed == int_v(1) ) );
+    const short_v isUsed(fData.HitDataIsUsed( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), mask);
+    fData.SetHitAsUsedInTrackFit( row, static_cast<ushort_v>( r.fCurrentHitIndex ), static_cast<short_m>(mask) && ( isUsed == short_v(1) ) );
 
     r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), hitIndex, mask ); // set to next linked hit
     // the first hit in the Tracklet is guaranteed to have a link up, since StartHitsFinder
@@ -1094,23 +1023,21 @@ void InitTracklets::operator()( int rowIndex )
     assert( ( r.fCurrentHitIndex >= 0 && mask ) == mask );
   }
 
-  mask &= (r.fCurrentHitIndex >= 0);
-  maskF &= static_cast<float_m>(r.fCurrentHitIndex >= 0);
   rowIndex += rowStep;
   {
     const AliHLTTPCCARow &row = fData.Row( rowIndex );
-    const float_v x = fData.RowX( rowIndex );
-    const uint_v &hitIndex = static_cast<uint_v>( r.fCurrentHitIndex );
-    const float_v y = fData.HitPDataY( row, hitIndex, maskF );
-    const float_v z = fData.HitPDataZ( row, hitIndex, maskF );
-    const float_v &dx = x - r.fParam.X();
-    const float_v &dy = y - r.fParam.Y();
-    const float_v &dz = z - r.fParam.Z();
-    const float_v &ri = float_v( Vc::One ) * CAMath::RSqrt( dx * dx + dy * dy );
-    const float_v &sinPhi = dy * ri;
+    const sfloat_v x = fData.RowX( rowIndex );
+    const ushort_v &hitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
+    const sfloat_v y( fData.HitDataY( row ), hitIndex, mask);
+    const sfloat_v z( fData.HitDataZ( row ), hitIndex, mask);
+    const sfloat_v &dx = x - r.fParam.X();
+    const sfloat_v &dy = y - r.fParam.Y();
+    const sfloat_v &dz = z - r.fParam.Z();
+    const sfloat_v &ri = sfloat_v( Vc::One ) * CAMath::RSqrt( dx * dx + dy * dy );
+    const sfloat_v &sinPhi = dy * ri;
     r.fParam.SetSinPhi( sinPhi,  maskF );
     r.fParam.SetDzDs  ( dz * ri, maskF );
-    float_v err2Y, err2Z;
+    sfloat_v err2Y, err2Z;
 ///mvz start 20.01.2010
 //    fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
     fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
@@ -1118,13 +1045,13 @@ void InitTracklets::operator()( int rowIndex )
     r.fParam.SetCov( 0, err2Y, maskF );
     r.fParam.SetCov( 2, err2Z, maskF );
 
-    const float_m transported = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), -1.f, maskF );
+    const sfloat_m transported = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), -1.f, maskF );
     // assert( transported == maskF );
 ///mvz start 20.01.2010
 //    fTracker.GetErrors2( rowIndex, r.fParam.GetZ(), sinPhi, r.fParam.GetDzDs(), &err2Y, &err2Z );
     fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
 ///mvz end 20.01.2010
-    const int_m hitAdded( r.fParam.Filter( maskF, y, z, err2Y, err2Z, .99f ) );
+    const short_m hitAdded( r.fParam.Filter( maskF, y, z, err2Y, err2Z, .99f ) );
     // assert( hitAdded == mask );
     UNUSED_PARAM2( transported, hitAdded );
     fTrackletVector.SetRowHits( rowIndex, trackIndex, hitIndex, mask );
@@ -1133,8 +1060,8 @@ void InitTracklets::operator()( int rowIndex )
     r.fLastZ( maskF ) = z;
     
       // mark 2-nd hit as used
-    const int_v isUsed(fData.HitDataIsUsed( row ), static_cast<uint_v>( r.fCurrentHitIndex ), mask);
-    fData.SetHitAsUsedInTrackFit( row, static_cast<uint_v>( r.fCurrentHitIndex ), static_cast<int_m>(mask) && ( isUsed == int_v(1) ) );
+    const short_v isUsed(fData.HitDataIsUsed( row ), static_cast<ushort_v>( r.fCurrentHitIndex ), mask);
+    fData.SetHitAsUsedInTrackFit( row, static_cast<ushort_v>( r.fCurrentHitIndex ), static_cast<short_m>(mask) && ( isUsed == short_v(1) ) );
     
     r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), hitIndex, mask ); // set to next linked hit
 

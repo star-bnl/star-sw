@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackPerformanceBase.h,v 1.10 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCATrackPerformanceBase.h,v 1.3 2013/11/21 13:07:29 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -77,34 +77,6 @@ class AliHLTTPCCATrackPerformanceBase: public AliHLTTPCPerformanceBase
     NRecoTracksProfiles = 14,
     NRecoTracks2DHisto = 3
   };
-  
-  //Histos names. Should be consistent with the list in constructor
-  enum{
-    kresY, kresZ, kresSinPhi, kresDzDs, kresPt, 
-    kpullY, kpullZ, kpullSinPhi, kpullDzDs, kpullQPt,
-    
-    kresXHit, kresYHit, kresZHit, kpullYHit, kpullZHit, 
-    
-    kxMCPoint, krMCPoint, 
-    
-    kresXHitVsZ, kresYHitVsZ, kresZHitVsZ, kresXHitVsX, kresYHitVsX, 
-    kresZHitVsX, kresXHitVsIS, kresYHitVsIS, kresZHitVsIS,
-
-    kpurity, kmcTrackNRecoHits, knHitsOverNMCPointsVsRow, knHitsOverNMCPointsVsMCMom, 
-    knHitsOverNMCPointsVsMCDzDs, knHitsOverNMCPointsVsNMCTracks, knMCPointsVsMCMom,
-    
-    kghostsLength, kghostsRMom, kghostsRPt, kghostsChi2, kghostsProb,
-    kghostsLengthAndRMom, kghostsLengthAndChi2,
-
-    krecosLength, krecosRMom, krecosMCMom, krecosRPt, krecosMCPt, 
-    krecosChi2, krecosProb, knHitsRecoTOverNHitsMCT, krecosEffVsMCNHits, 
-    krecosEffVsMCMom, krecosEffVsMCMomPrim, krecosEffVsMCMomRefPrim,
-    krecosEffVsMCMomSec, krecosEffVsMCPtAll, krecosEffVsMCPtPrim,  
-    krecosEffVsMCPtRefPrim, krecosEffVsMCPtSec, krecosEffVsMCPhiAll, krecosEffVsMCPhiPrim, 
-    krecosEffVsMCPhiRefPrim, krecosEffVsMCPhiSec, krecosEffVsNMCTracks, 
-    krecosLengthAndRMom, krecosLengthAndMCMom, krecosLengthAndChi2
-  };
-
 #endif
 };
 
