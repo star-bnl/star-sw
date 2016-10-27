@@ -29,7 +29,7 @@ public:
 
 private:
 protected:
-
+public:
   struct Trigger_t {
     int    pdgid;
     double ptmn;
@@ -52,6 +52,7 @@ protected:
     {
     };
   };
+protected:
   vector<Trigger_t> mTriggers;
 
 

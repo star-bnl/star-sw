@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAParam.h,v 1.1 2016/02/05 23:27:28 fisyak Exp $
+// @(#) $Id: AliHLTTPCCAParam.h,v 1.4 2011/10/01 00:23:44 perev Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -17,7 +17,7 @@
 #include <cstdio>
 #include <vector>
 using std::vector;
-#if 0
+
 namespace std
 {
   template<typename T> struct char_traits;
@@ -26,7 +26,7 @@ namespace std
   template<typename _CharT, typename _Traits> class basic_ostream;
   typedef basic_ostream<char, char_traits<char> > ostream;
 } // namespace std
-#endif
+
 /**
  * @class ALIHLTTPCCAParam
  * parameters of the AliHLTTPCCATracker, including geometry information
@@ -58,7 +58,7 @@ class AliHLTTPCCAParam
 
     int ISlice() const { return fISlice;}
     int NRows() const { return fNRows; }
-    int NRows8() const { return fNRows + sfloat_v::Size - (fNRows-1)%sfloat_v::Size - 1;} // NRows8 % sfloat_v::Size == 0 && NRows + sfloat_v::Size > NRows8 >= NRows
+    int NRows8() const { return fNRows + float_v::Size - (fNRows-1)%float_v::Size - 1;} // NRows8 % float_v::Size == 0 && NRows + float_v::Size > NRows8 >= NRows
 //
     int NInnerRows() const { return fNInnerRows; }
   
@@ -118,15 +118,15 @@ class AliHLTTPCCAParam
 ///mvz start 20.01.2010
 /*    void GetClusterErrors2( int iRow, float z, float sinPhi, float cosPhi, float DzDs, float &Err2Y, float &Err2Z ) const;
 
-    void GetClusterErrors2( int iRow, sfloat_v z, sfloat_v sinPhi, sfloat_v DzDs, sfloat_v &Err2Y, sfloat_v &Err2Z ) const;
-    void GetClusterErrors2( ushort_v rowIndexes, sfloat_v z, sfloat_v sinPhi, sfloat_v DzDs, sfloat_v &Err2Y, sfloat_v &Err2Z ) const;*/
+    void GetClusterErrors2( int iRow, float_v z, float_v sinPhi, float_v DzDs, float_v &Err2Y, float_v &Err2Z ) const;
+    void GetClusterErrors2( uint_v rowIndexes, float_v z, float_v sinPhi, float_v DzDs, float_v &Err2Y, float_v &Err2Z ) const;*/
 
     void GetClusterErrors2( int iRow, const AliHLTTPCCATrackParam &t, float &Err2Y, float &Err2Z ) const;
-    void GetClusterErrors2( ushort_v rowIndexes, const sfloat_v &X, const sfloat_v &Y, sfloat_v &Z, sfloat_v &Err2Y, sfloat_v &Err2Z ) const;
+    void GetClusterErrors2( uint_v rowIndexes, const float_v &X, const float_v &Y, float_v &Z, float_v &Err2Y, float_v &Err2Z ) const;
 ///mvz end 20.01.2010
 
-    void GetClusterErrors2( int iRow, const TrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const;
-    void GetClusterErrors2( ushort_v rowIndexes, const TrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const;
+    void GetClusterErrors2( int iRow, const TrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const;
+    void GetClusterErrors2( uint_v rowIndexes, const TrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const;
 
     void SetParamS0Par( int i, int j, int k, float val ) {
       fParamS0Par[i][j][k] = val;
@@ -134,16 +134,16 @@ class AliHLTTPCCAParam
 
     float GetBz() const { return fBz;}
     float GetBz( float x, float y, float z ) const;
-    sfloat_v GetBz( sfloat_v x, sfloat_v y, sfloat_v z ) const;
+    float_v GetBz( float_v x, float_v y, float_v z ) const;
     float GetBz( const AliHLTTPCCATrackParam &t ) const;
-    sfloat_v GetBz( const AliHLTTPCCATrackParamVector &t ) const;
+    float_v GetBz( const AliHLTTPCCATrackParamVector &t ) const;
 
     void StoreToFile( FILE *f ) const;
     void RestoreFromFile( FILE *f );
 
   protected:
     float GetClusterError2( int yz, int type, float z, float angle ) const;
-    sfloat_v GetClusterError2( int yz, int type, sfloat_v z, sfloat_v angle ) const;
+    float_v GetClusterError2( int yz, int type, float_v z, float_v angle ) const;
 
     int fISlice; // slice number
     int fNRows; // number of rows
@@ -181,8 +181,8 @@ class AliHLTTPCCAParam
       }
       return type;
     }
-    inline ushort_v errorType( short_v row ) const {
-      ushort_v type( 14 );
+    inline uint_v errorType( int_v row ) const {
+      uint_v type( 14 );
     type.makeZero( row < fInnerRows );
       type( row > 126 ) = 7;
       return type;
@@ -193,8 +193,8 @@ class AliHLTTPCCAParam
       type = ( row < fNInnerRows ? 0 : 1 );
       return type;
     }
-    inline ushort_v errorType( short_v row ) const {
-      ushort_v type( 7 );
+    inline uint_v errorType( int_v row ) const {
+      uint_v type( 7 );
       type.setZero( row < fNInnerRows );
       //type( row > 126 ) = 7;
       return type;
@@ -214,10 +214,10 @@ inline float AliHLTTPCCAParam::GetBz( float x, float y, float z ) const
   return ( c[0] + c[1]*z  + c[2]*r  + c[3]*z*z + c[4]*z*r + c[5]*r2 );
 }
 
-inline sfloat_v AliHLTTPCCAParam::GetBz( sfloat_v x, sfloat_v y, sfloat_v z ) const
+inline float_v AliHLTTPCCAParam::GetBz( float_v x, float_v y, float_v z ) const
 {
-  sfloat_v r2 = x * x + y * y;
-  sfloat_v r  = CAMath::Sqrt( r2 );
+  float_v r2 = x * x + y * y;
+  float_v r  = CAMath::Sqrt( r2 );
   const float *c = fPolinomialFieldBz;
   return ( c[0] + c[1]*z  + c[2]*r  + c[3]*z*z + c[4]*z*r + c[5]*r2 );
 }
@@ -227,34 +227,34 @@ inline float AliHLTTPCCAParam::GetBz( const AliHLTTPCCATrackParam &t ) const
   return GetBz( t.X(), t.Y(), t.Z() );
 }
 
-inline sfloat_v AliHLTTPCCAParam::GetBz( const AliHLTTPCCATrackParamVector &t ) const
+inline float_v AliHLTTPCCAParam::GetBz( const AliHLTTPCCATrackParamVector &t ) const
 {
   return GetBz( t.X(), t.Y(), t.Z() );
 }
 
 ///mvz start 20.01.2010
 /*
-inline sfloat_v AliHLTTPCCAParam::GetClusterError2( int yz, int type, sfloat_v z, sfloat_v angle ) const
+inline float_v AliHLTTPCCAParam::GetClusterError2( int yz, int type, float_v z, float_v angle ) const
 {
   // recalculate the cluster error wih respect to the track slope
-  const sfloat_v angle2 = angle * angle;
+  const float_v angle2 = angle * angle;
   const float *c = fParamS0Par[yz][type];
-  const sfloat_v v = c[0] + z * ( c[1] + c[3] * z ) + angle2 * ( c[2] + angle2 * c[4] + c[5] * z );
+  const float_v v = c[0] + z * ( c[1] + c[3] * z ) + angle2 * ( c[2] + angle2 * c[4] + c[5] * z );
   return CAMath::Abs( v );
 }
 
-inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
+inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
   //
 
-  const sfloat_v &z = CAMath::Abs( ( 250.f - 0.275f ) - CAMath::Abs( t.Z() ) );
+  const float_v &z = CAMath::Abs( ( 250.f - 0.275f ) - CAMath::Abs( t.Z() ) );
   const int type = errorType( iRow );
-  const sfloat_v &sinPhi = t.SinPhi();
-  const sfloat_v &cosPhiInv = t.SignCosPhi() / CAMath::Sqrt( sfloat_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
-  const sfloat_v &angleY = sinPhi * cosPhiInv;
-  const sfloat_v &angleZ = t.DzDs() * cosPhiInv; // SG was bug???
+  const float_v &sinPhi = t.SinPhi();
+  const float_v &cosPhiInv = t.SignCosPhi() / CAMath::Sqrt( float_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
+  const float_v &angleY = sinPhi * cosPhiInv;
+  const float_v &angleZ = t.DzDs() * cosPhiInv; // SG was bug???
 
   debugF() << "GetClusterErrors2 y,z angles: " << angleY << angleZ << std::endl;
 
@@ -262,7 +262,7 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVecto
   *Err2Z = GetClusterError2( 1, type, z, angleZ );
 }
 
-inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, sfloat_v z, sfloat_v sinPhi, sfloat_v DzDs, sfloat_v &Err2Y, sfloat_v &Err2Z ) const
+inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, float_v z, float_v sinPhi, float_v DzDs, float_v &Err2Y, float_v &Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
@@ -270,9 +270,9 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, sfloat_v z, sfloat_v 
 
   z = CAMath::Abs( ( 250.f - 0.275f ) - CAMath::Abs( z ) );
   const int type = errorType( iRow );
-  const sfloat_v cosPhiInv = sfloat_v( Vc::One ) / CAMath::Sqrt( sfloat_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
-  sfloat_v angleY = sinPhi * cosPhiInv;
-  sfloat_v angleZ = DzDs * cosPhiInv; // SG was bug???
+  const float_v cosPhiInv = float_v( Vc::One ) / CAMath::Sqrt( float_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
+  float_v angleY = sinPhi * cosPhiInv;
+  float_v angleZ = DzDs * cosPhiInv; // SG was bug???
 
   debugF() << "GetClusterErrors2 y,z angles: " << angleY << angleZ << std::endl;
 
@@ -280,76 +280,76 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, sfloat_v z, sfloat_v 
   Err2Z = GetClusterError2( 1, type, z, angleZ );
 }
 
-inline void AliHLTTPCCAParam::GetClusterErrors2( ushort_v rowIndexes, const TrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
+inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {
-  const sfloat_v &z = CAMath::Abs( ( 250.f - 0.275f ) - CAMath::Abs( t.Z() ) );
-  const ushort_v type = errorType( static_cast<short_v>( rowIndexes ) );
-  const sfloat_v &sinPhi = t.SinPhi();
-  const sfloat_v &cosPhiInv = t.SignCosPhi() / CAMath::Sqrt( sfloat_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
-  const sfloat_v &angleY = sinPhi * cosPhiInv;
-  const sfloat_v &angleZ = t.DzDs() * cosPhiInv; // SG was bug???
+  const float_v &z = CAMath::Abs( ( 250.f - 0.275f ) - CAMath::Abs( t.Z() ) );
+  const uint_v type = errorType( static_cast<int_v>( rowIndexes ) );
+  const float_v &sinPhi = t.SinPhi();
+  const float_v &cosPhiInv = t.SignCosPhi() / CAMath::Sqrt( float_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
+  const float_v &angleY = sinPhi * cosPhiInv;
+  const float_v &angleZ = t.DzDs() * cosPhiInv; // SG was bug???
 
-  const sfloat_v angleY2 = angleY * angleY;
+  const float_v angleY2 = angleY * angleY;
   const float *c = &fParamS0Par[0][0][0];
-  sfloat_v v( c, type );
-  v += z * ( sfloat_v( c + 1, type ) + sfloat_v( c + 3, type ) * z );
-  v += angleY2 * ( sfloat_v( c + 2, type ) + angleY2 * sfloat_v( c + 4, type ) + sfloat_v( c + 5, type ) * z );
+  float_v v( c, type );
+  v += z * ( float_v( c + 1, type ) + float_v( c + 3, type ) * z );
+  v += angleY2 * ( float_v( c + 2, type ) + angleY2 * float_v( c + 4, type ) + float_v( c + 5, type ) * z );
   *Err2Y = CAMath::Abs( v );
 
-  const sfloat_v angleZ2 = angleZ * angleZ;
+  const float_v angleZ2 = angleZ * angleZ;
   c = &fParamS0Par[1][0][0];
   v.gather( c, type );
-  v += z * ( sfloat_v( c + 1, type ) + sfloat_v( c + 3, type ) * z );
-  v += angleZ2 * ( sfloat_v( c + 2, type ) + angleZ2 * sfloat_v( c + 4, type ) + sfloat_v( c + 5, type ) * z );
+  v += z * ( float_v( c + 1, type ) + float_v( c + 3, type ) * z );
+  v += angleZ2 * ( float_v( c + 2, type ) + angleZ2 * float_v( c + 4, type ) + float_v( c + 5, type ) * z );
   *Err2Z = CAMath::Abs( v );
 }
 
-inline void AliHLTTPCCAParam::GetClusterErrors2( ushort_v rowIndexes, sfloat_v z, sfloat_v sinPhi, sfloat_v DzDs, sfloat_v &Err2Y, sfloat_v &Err2Z ) const
+inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, float_v z, float_v sinPhi, float_v DzDs, float_v &Err2Y, float_v &Err2Z ) const
 {
   z = CAMath::Abs( ( 250.f - 0.275f ) - CAMath::Abs( z ) );
-  const ushort_v type = errorType( static_cast<short_v>( rowIndexes ) );
-  const sfloat_v cosPhiInv = sfloat_v( Vc::One ) / CAMath::Sqrt( sfloat_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
-  sfloat_v angleY = sinPhi * cosPhiInv;
-  sfloat_v angleZ = DzDs * cosPhiInv; // SG was bug???
+  const uint_v type = errorType( static_cast<int_v>( rowIndexes ) );
+  const float_v cosPhiInv = float_v( Vc::One ) / CAMath::Sqrt( float_v( Vc::One ) - sinPhi * sinPhi ); // RSqrt
+  float_v angleY = sinPhi * cosPhiInv;
+  float_v angleZ = DzDs * cosPhiInv; // SG was bug???
 
-  const sfloat_v angleY2 = angleY * angleY;
+  const float_v angleY2 = angleY * angleY;
   const float *c = &fParamS0Par[0][0][0];
-  sfloat_v v( c, type );
-  v += z * ( sfloat_v( c + 1, type ) + sfloat_v( c + 3, type ) * z );
-  v += angleY2 * ( sfloat_v( c + 2, type ) + angleY2 * sfloat_v( c + 4, type ) + sfloat_v( c + 5, type ) * z );
+  float_v v( c, type );
+  v += z * ( float_v( c + 1, type ) + float_v( c + 3, type ) * z );
+  v += angleY2 * ( float_v( c + 2, type ) + angleY2 * float_v( c + 4, type ) + float_v( c + 5, type ) * z );
   Err2Y = CAMath::Abs( v );
 
-  const sfloat_v angleZ2 = angleZ * angleZ;
+  const float_v angleZ2 = angleZ * angleZ;
   c = &fParamS0Par[1][0][0];
   v.gather( c, type );
-  v += z * ( sfloat_v( c + 1, type ) + sfloat_v( c + 3, type ) * z );
-  v += angleZ2 * ( sfloat_v( c + 2, type ) + angleZ2 * sfloat_v( c + 4, type ) + sfloat_v( c + 5, type ) * z );
+  v += z * ( float_v( c + 1, type ) + float_v( c + 3, type ) * z );
+  v += angleZ2 * ( float_v( c + 2, type ) + angleZ2 * float_v( c + 4, type ) + float_v( c + 5, type ) * z );
   Err2Z = CAMath::Abs( v );
 }
 */
-inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
+inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {
-  const sfloat_v one = sfloat_v(Vc::One);
-  const sfloat_v zero = sfloat_v(Vc::Zero);
-  sfloat_v z = t.Z();
+  const float_v one = float_v(Vc::One);
+  const float_v zero = float_v(Vc::Zero);
+  float_v z = t.Z();
   const int type = errorType( iRow );
   z = (200.f - CAMath::Abs(z)) * 0.01f;
   z(z < zero) = zero;
 
-  sfloat_v sin2Phi = t.GetSinPhi()*t.GetSinPhi();
-  sfloat_v cos2Phi = (one - sin2Phi);
+  float_v sin2Phi = t.GetSinPhi()*t.GetSinPhi();
+  float_v cos2Phi = (one - sin2Phi);
   cos2Phi(cos2Phi < 0.0001f) = 0.0001f;
-  sfloat_v tg2Phi = sin2Phi/cos2Phi;
+  float_v tg2Phi = sin2Phi/cos2Phi;
 
-  sfloat_v tg2Lambda = t.DzDs()*t.DzDs();
+  float_v tg2Lambda = t.DzDs()*t.DzDs();
 
   const float *c = fParamS0Par[0][type];
-  sfloat_v v = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
-  sfloat_v w = c[3] + c[4]*z*(one + tg2Lambda) + c[5]*tg2Lambda;
+  float_v v = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
+  float_v w = c[3] + c[4]*z*(one + tg2Lambda) + c[5]*tg2Lambda;
   v(v>one) = one;
   w(w>one) = one;
 
-  const sfloat_v errmin=1e-6f;
+  const float_v errmin=1e-6f;
   v(v<errmin) = errmin;
   w(w<errmin) = errmin;
 
@@ -357,67 +357,67 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVecto
   *Err2Z = CAMath::Abs( w );
 }
 
-inline void AliHLTTPCCAParam::GetClusterErrors2( ushort_v rowIndexes, const TrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
+inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {
-  const sfloat_v one = sfloat_v(Vc::One);
-  const sfloat_v zero = sfloat_v(Vc::Zero);
-  sfloat_v z = t.Z();
+  const float_v one = float_v(Vc::One);
+  const float_v zero = float_v(Vc::Zero);
+  float_v z = t.Z();
   z = (200.f - CAMath::Abs(z)) * 0.01f;
   z(z < zero) = zero;
 
-  const ushort_v type = errorType( static_cast<short_v>( rowIndexes ) );
+  const uint_v type = errorType( static_cast<int_v>( rowIndexes ) );
 
-  sfloat_v sin2Phi = t.GetSinPhi()*t.GetSinPhi();
-  sfloat_v cos2Phi = (one - sin2Phi);
+  float_v sin2Phi = t.GetSinPhi()*t.GetSinPhi();
+  float_v cos2Phi = (one - sin2Phi);
   cos2Phi(cos2Phi < 0.0001f) = 0.0001f;
-  sfloat_v tg2Phi = sin2Phi/cos2Phi;
+  float_v tg2Phi = sin2Phi/cos2Phi;
 
-  sfloat_v tg2Lambda = t.DzDs()*t.DzDs();
+  float_v tg2Lambda = t.DzDs()*t.DzDs();
 
   const float *c = &fParamS0Par[0][0][0];
-  const sfloat_v errmin=1e-6f;
-  sfloat_v v( c, type );
-  v += z * sfloat_v( c + 1, type )/cos2Phi +  sfloat_v( c + 2, type ) *tg2Phi;
+  const float_v errmin=1e-6f;
+  float_v v( c, type );
+  v += z * float_v( c + 1, type )/cos2Phi +  float_v( c + 2, type ) *tg2Phi;
   v(v>one) = one;
   v(v<errmin) = errmin;
   *Err2Y = CAMath::Abs( v );
 
   v.gather( c+3, type );
-  v += z * sfloat_v( c + 4, type )*(one + tg2Lambda) + sfloat_v( c + 5, type )*tg2Lambda;
+  v += z * float_v( c + 4, type )*(one + tg2Lambda) + float_v( c + 5, type )*tg2Lambda;
   v(v>one) = one;
   v(v<errmin) = errmin;
   *Err2Z = CAMath::Abs( v );
 }
 
-// inline void AliHLTTPCCAParam::GetClusterErrors2( ushort_v rowIndexes, const sfloat_v &X, const sfloat_v &Y, sfloat_v &Z, sfloat_v &Err2Y, sfloat_v &Err2Z ) const
+// inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const float_v &X, const float_v &Y, float_v &Z, float_v &Err2Y, float_v &Err2Z ) const
 // {
-//   const sfloat_v one = sfloat_v(Vc::One);
-//   const sfloat_v zero = sfloat_v(Vc::Zero);
-//   sfloat_v z = Z;
+//   const float_v one = float_v(Vc::One);
+//   const float_v zero = float_v(Vc::Zero);
+//   float_v z = Z;
 //   z = (200.f - CAMath::Abs(z)) * 0.01f;
 //   z(z < zero) = zero;
 
-//   const ushort_v type = errorType( static_cast<short_v>( rowIndexes ) );
+//   const uint_v type = errorType( static_cast<int_v>( rowIndexes ) );
 
-//   sfloat_v tg2Phi = Y/X;
+//   float_v tg2Phi = Y/X;
 //   tg2Phi = tg2Phi*tg2Phi;
-//   sfloat_v cos2Phi = one / (one + tg2Phi);
+//   float_v cos2Phi = one / (one + tg2Phi);
 //   if (cos2Phi<0.0001f) cos2Phi=0.0001f;
 
-//   sfloat_v s2 = X*X+Y*Y;
-//   sfloat_v tg2Lambda = s2/(Z*Z);
-// //  sfloat_v tg2Lambda = one/t.DzDs();
+//   float_v s2 = X*X+Y*Y;
+//   float_v tg2Lambda = s2/(Z*Z);
+// //  float_v tg2Lambda = one/t.DzDs();
 
 //   const float *c = &fParamS0Par[0][0][0];
-//   const sfloat_v errmin=1e-6f;
-//   sfloat_v v( c, type );
-//   v += z * sfloat_v( c + 1, type )/cos2Phi +  sfloat_v( c + 2, type ) *tg2Phi;
+//   const float_v errmin=1e-6f;
+//   float_v v( c, type );
+//   v += z * float_v( c + 1, type )/cos2Phi +  float_v( c + 2, type ) *tg2Phi;
 //   v(v>one) = one;
 //   v(v<errmin) = errmin;
 //   Err2Y = CAMath::Abs( v );
 
 //   v.gather( c+3, type );
-//   v += z * sfloat_v( c + 4, type )*(one + tg2Lambda) + sfloat_v( c + 5, type )*tg2Lambda;
+//   v += z * float_v( c + 4, type )*(one + tg2Lambda) + float_v( c + 5, type )*tg2Lambda;
 //   v(v>one) = one;
 //   v(v<errmin) = errmin;
 //   Err2Z = CAMath::Abs( v );

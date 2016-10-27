@@ -69,7 +69,7 @@ namespace AliHLTTPCCAParameters
      */
       //    NumberOfInnerRows = 13-1, // delete iRow = 12
     
-    MaxNumberOfRows8 = 112, // this should be divideable by sfloat_v::Size = 8, (16 for Xeon Phi)
+    MaxNumberOfRows8 = 112, // this should be divideable by float_v::Size = 8, (16 for Xeon Phi)
 
     /**
      * The number of slices in the TPC.
@@ -84,8 +84,20 @@ namespace AliHLTTPCCAParameters
       /**
        * Number of cells in grid will be GridCreationCoeff*NHitsOnRow
        */
-    GridCreationCoeff = 2    
+    GridCreationCoeff = 2,    
 
+    /**
+     * When non-overlaped tracks are merged allow gaps of
+     * this size
+     */
+    MaximumRowGapBetweenClones = 11,
+
+    /**
+     * When overlaped tracks are merged allow gaps of
+     * this size
+     */
+    MaximumRowGapBetweenOverlapingClones = 7
+    
   };
 
     /**
@@ -131,7 +143,7 @@ namespace AliHLTTPCCAParameters
    * The minimum for q/Pt that TrackletConstructor ensures at the end.
    */
 #ifndef __CINT__
-  static const sfloat_v MinimumQPt = 1.e-8f;
+  static const float_v MinimumQPt = 1.e-8f;
 #else
   static const float    MinimumQPt = 1.e-8f;
 #endif

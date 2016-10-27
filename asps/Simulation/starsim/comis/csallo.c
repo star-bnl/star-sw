@@ -77,13 +77,13 @@ int type_of_call csallo_(lenb)
  int *lenb;
 {
 
-#ifdef __NON_ELASTIC_ZEBRA__
+#ifdef CERNLIB_QMLXIA64
   long lpntr;
 #else
   unsigned long lpntr;
 #endif
   int pntr; 
-#ifdef __NON_ELASTIC_ZEBRA__
+#ifdef CERNLIB_QMLXIA64
   lpntr= (long)( malloc(*lenb) );
   pntr=lpntr - iqpntr;
 #else
@@ -91,7 +91,7 @@ int type_of_call csallo_(lenb)
   pntr=(lpntr - iqpntr);
 #endif
   assert((lpntr - iqpntr)==pntr);
-#ifndef __NON_ELASTIC_ZEBRA__
+#ifndef CERNLIB_QMLXIA64
   pntr/=sizeof(int);  /*  yf 092404   */
 #endif
   return pntr;

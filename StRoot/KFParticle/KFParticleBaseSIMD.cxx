@@ -149,11 +149,12 @@ float_m KFParticleBaseSIMD::GetEta( float_v &eta, float_v &error )  const
   float_v a = p + pz;
   float_v b = p - pz;
   eta = BIG;
+  //#ifdef __YF_BUG__ /* missing Vc_1::SSE::c_log<float>::data */
   float_v c = 0.f;
   c(b > LocalSmall) = (a/b);
   float_v logc = 0.5f*KFPMath::Log(c);
   eta(LocalSmall<abs(c)) = logc;
-
+  //#endif
   float_v h3 = -px*pz;
   float_v h4 = -py*pz;  
   float_v pt4 = pt2*pt2;

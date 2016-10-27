@@ -17,7 +17,7 @@ void AgML(const Char_t *tag="y2013_2", const Char_t *geom="") {
   gSystem->Load("StarAgmlUtil");
   gSystem->Load("StarAgmlLib");
   //  gSystem->Load("StarGeometry");
-  gSystem->Load("Geometry");
+  gSystem->Load("libGeometry");
   gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros -I$STAR/StRoot -Igeom -I$STAR/StarVMC -I$STAR/StarVMC/Geometry/macros ");
   gErrorIgnoreLevel=9999;                        // Silence ROOT warnings for now
   gGeoManager = new TGeoManager(Geom.Data(),Form("%s/AgML",Geom.Data()));

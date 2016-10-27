@@ -11,7 +11,7 @@
   set logFile  = ${file}B.log
   root.exe -q -b TpcRS.C\(9999,\"P2005b\",\"${evtsFile}\",\"\"\) &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<stdout URL="file:/star/u/fisyak/prodlog/sched$JOBID.log" />
 <input URL="file:/star/data03/daq/2005/083/st_physics_adc_*.daq" />
 
 </job>

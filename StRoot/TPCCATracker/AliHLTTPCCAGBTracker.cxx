@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.1 2016/02/05 23:27:27 fisyak Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.12 2010/09/01 10:38:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -334,18 +334,28 @@ void AliHLTTPCCAGBTracker::FindTracks()
 #if 0
 #ifndef NDEBUG
   {
-    int iHit = 0;
+    int iFirstHit = 0;
     for ( int i = 0; i < fNTracks; i++ ) {
       const AliHLTTPCCAGBTrack &t = fTracks[i];
       
-      const AliHLTTPCCAGBHit &hF = fHits[fTrackHits[iHit]];
-      const AliHLTTPCCAGBHit &hL = fHits[fTrackHits[iHit + t.NHits() - 1]];
+      const AliHLTTPCCAGBHit &hF = fHits[fTrackHits[iFirstHit]];
+      const AliHLTTPCCAGBHit &hL = fHits[fTrackHits[iFirstHit + t.NHits() - 1]];
       assert ( t.NHits() >= 3 );
 
-      ASSERT( CAMath::Abs( t.InnerParam().X() - hF.X() ) < .01,  "Track " << i << ": " << t.InnerParam().X() << " == " << hF.X() );
-      ASSERT( CAMath::Abs( t.OuterParam().X() - hL.X() ) < .01,  "Track " << i << ": " << t.OuterParam().X() << " == " << hL.X() );
+      bool firstXOk = CAMath::Abs( t.InnerParam().X() - hF.X() ) < .01;
+      bool lastXOk  = CAMath::Abs( t.OuterParam().X() - hL.X() ) < .01;
+
+      if ( !( firstXOk && lastXOk ) ) {
+        cout << " ( ihit x z ) " << endl;
+        for( int ih = iFirstHit; ih < iFirstHit + t.NHits(); ih++ ) {
+          cout << "( " << ih-iFirstHit << " " << fHits[fTrackHits[ih]].X() << " " << fHits[fTrackHits[ih]].Z() << " ) " << endl;
+        }
+      }
+
+      ASSERT( firstXOk,  "Track " << i << ": InnerParam " << t.InnerParam().X() << " != x " << hF.X() );
+      ASSERT( lastXOk,   "Track " << i << ": OuterParam " << t.OuterParam().X() << " != x " << hL.X() );
       
-      iHit += t.NHits();
+      iFirstHit += t.NHits();
     }
   }
 #endif

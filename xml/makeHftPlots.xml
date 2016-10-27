@@ -15,8 +15,8 @@
   if ( -r $logFile) exit 0;
   root.exe -q -b 'makeHftPlots.C("'${fileb}'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/HftPlot$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/HftPlot$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/HftPlot$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/HftPlot$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2014.pl" /> -->

@@ -4238,7 +4238,7 @@ sub copy {
     # Use Perl standard library module for file copying, which handles
     # binary copies. <schwarze@isa.de> 1998-06-18
     if (! File::Copy::copy($sp, $tp)) {
-	warn qq($0: can\'t install "$sp" to "$tp" ($!)\n); #'
+#yf 	warn qq($0: can\'t install "$sp" to "$tp" ($!)\n); #'
 	return undef;
     }
     # The file has been created, so try both the chmod and utime,
@@ -4631,14 +4631,14 @@ sub srcsig {
 	close(FILE);
 	unpack("H*", $md5->digest());
     } else {
-	if ($param::quiet < 1){
-	    print  
-		"***************************************************************\n",
-		" WARNING from $0 \n",
-		"   [$path] found as an include dependency but is also a directory.\n",
-		"   Until renamed, the include-dependency will not be checked.\n",
-		"***************************************************************\n";
-	}
+# 	if ($param::quiet < 1){
+# 	    print  
+# 		"***************************************************************\n",
+# 		" WARNING from $0 \n",
+# 		"   [$path] found as an include dependency but is also a directory.\n",
+# 		"   Until renamed, the include-dependency will not be checked.\n",
+# 		"***************************************************************\n";
+# 	}
     }
 }
 

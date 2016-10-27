@@ -31,7 +31,7 @@
   root4star -q -b 'bfcV0.C('$f','$l',"MC.2014,PythiaPP200HFT,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <input URL="command:flux.pl" />
 </job>

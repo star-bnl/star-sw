@@ -18,8 +18,8 @@
   if ( -r $output) exit 0;
   root4star -q -b 'bfc.C('${f}','${l}',"P2010a,pmdReco,btof,BEmcChkStat,Corr4,alignment,NoHistos,noRunco,noTags,-hitfilt","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 	</command>
-	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+	<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/data03/daq/2010/159/*/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2010/159/*/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2010/*/*/st_tofcosmic_1*.daq" /> -->
