@@ -19,6 +19,6 @@
 ]>
 <Scatalog version="1.0.1">
                <Server scope="Analysis" accessMode="read">
-                            <Host name="l409.l4.bnl.local" port="3316" machinePower="1.0" />
+                           <Host name="l409.l4.bnl.local" port="3316" machinePower="1.0" />
                 </Server> 
 </Scatalog>
