@@ -6,7 +6,7 @@ else
 endif
  echo "case = $case";
 setenv STARFPE NO
-echo $case | grep NODEBUG
+echo $case | egrep -i '(NODEBUG|opt)' 
 if (! $?) then
   setenv NODEBUG yes
 else
@@ -19,20 +19,23 @@ else
   setenv USE_64BITS 0
 endif
 switch ($case) 
-  case "*482*" : 
+  case "*gcc482*" : 
     setup gcc482   
   breaksw
-  case "*492*" : 
+  case "*gcc492*" : 
     setup gcc492 
   breaksw
-  case "*520*" : 
+  case "*gcc520*" : 
     setup gcc520 
   breaksw
-  case "*521*" : 
+  case "*gcc521*" : 
     setup gcc521 
   breaksw
-  case "*620*" : 
+  case "*gcc620*" : 
     setup gcc620 
+  breaksw
+  case "*icc*" : 
+    setup icc
   breaksw
 endsw
 
@@ -48,6 +51,15 @@ switch ($case)
   breaksw
   case "*TFG16b*": 
     setenv STAR_LEVEL DEV2/TFG16b; 
+  breaksw
+  case "*TFG16d*": 
+    setenv STAR_LEVEL TFG16d; 
+  breaksw
+  case "*TFG16e*": 
+    setenv STAR_LEVEL TFG16e; 
+  breaksw
+  case "*TFG16f*": 
+    setenv STAR_LEVEL TFG16f; 
   breaksw
   case "*devC*":   
     setenv STAR_LEVEL DEV2/devC
@@ -71,3 +83,5 @@ setenv test "DEBUG"
 if ($?NODEBUG) setenv test "NODEBUG"
 echo "STAR = $STAR, $test";
 which gcc
+STAR_LEVELS
+
