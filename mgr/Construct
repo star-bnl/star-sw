@@ -204,6 +204,7 @@ if ($STAR_HOST_SYS =~ /darwin/ or ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} =
   push @items, "St_geom_Maker";
 }
 
+push @items, "StVecBosAna"; # missing boost/program_options/options_description.hpp
 if ($STAR_HOST_SYS =~ /darwin/ or $STAR_HOST_SYS =~ /icc/) {
   push @items, "GeoTestMaker"; # if no QT |StStarLogger
   push @items, "Pythia6"; # problem with pythia6_common_address.c
@@ -213,7 +214,6 @@ if ($STAR_HOST_SYS =~ /darwin/ or $STAR_HOST_SYS =~ /icc/) {
   push @items, "StEEmcIUPi0";
   push @items, "StHLTCAMaker";
   push @items, "StMaxStripPi0";
-  push @items, "StVecBosAna";
   push @items, "StarGenerator";
   push @items, "StJetMaker";
 }
