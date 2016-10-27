@@ -1140,7 +1140,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
   // Check possible Generator files
   if (Check) {
     gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
-    abort(); //assert(1);
+    assert(1);
   }
   return 0;
 }
@@ -1341,7 +1341,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	}
       }
       gMessMgr->QAInfo() << " Invalid Option " << Tag.Data() << ". !! ABORT !! " << endm;
-      abort(); //assert(1);
+      assert(1);
       return;
     }
   }
