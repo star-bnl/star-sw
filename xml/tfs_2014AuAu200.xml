@@ -13,8 +13,8 @@
     root4star -q -b 'bfc.C(20,"HijingAuAu200,'rung.${rung}',MC.y2014,TpcFastSim,-evout,-hitfilt,Alignment,noTags,noRunco,NoHistos,geantout,StiCA,KFVertex","","'${filef}'.root")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/tfs2014$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/tfs2014$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/tfs2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/tfs2014$JOBID.err" />
 <!-- <input URL="file:/star/institutions/bnl/fisyak/Generators/AuAu200/*.nt" /> -->
 <input URL="command:TpcRS_Hijing.pl" />
 </job>

@@ -49,8 +49,8 @@
 # daq_2014_AuAu200Z2 for TpcRS
 root.exe -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2014.pl" /> -->

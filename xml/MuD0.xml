@@ -14,7 +14,7 @@
     <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
-        <stdout URL="file:/star/u/fisyak/prodlog/PicoDST$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/PicoDST$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/PicoDST$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/PicoDST$JOBID.err" />
 <input URL="command:MuDST.pl" />
 </job>

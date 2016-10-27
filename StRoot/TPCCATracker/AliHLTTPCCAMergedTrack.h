@@ -10,7 +10,6 @@
 #ifndef ALIHLTTPCCAMERGEDTRACK_H
 #define ALIHLTTPCCAMERGEDTRACK_H
 
-#include "AliHLTTPCCAMerger.h"
 #include "AliHLTTPCCATrackParam.h"
 
 /**
@@ -43,15 +42,7 @@ class AliHLTTPCCAMergedTrack
     void SetOuterParam( const AliHLTTPCCATrackParam &v ) { fOuterParam = v;      }
     void SetInnerAlpha( float v )                       { fInnerAlpha = v;      }
     void SetOuterAlpha( float v )                       { fOuterAlpha = v;      }
-    void AssignTrack( const AliHLTTPCCAMerger::AliHLTTPCCASliceTrackInfo& t, int firstClusterRef  ) {
-      fInnerParam = t.InnerParam();
-      fOuterParam = t.OuterParam();
-      fInnerAlpha = t.InnerAlpha();
-      fOuterAlpha = t.OuterAlpha();
-      fFirstClusterRef = firstClusterRef;
-      fNClusters = t.NClusters();
-    }
-  
+
   private:
 
     AliHLTTPCCATrackParam fInnerParam; //* fitted track parameters at the TPC inner radius

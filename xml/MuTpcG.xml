@@ -14,8 +14,8 @@
   if ( -r $logFile) exit 0;
   root.exe -q -b lMuDst.C 'MuTpcG.C+('$l',"'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/MuTpcG$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/MuTpcG$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/MuTpcG$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/MuTpcG$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2014.pl" /> -->

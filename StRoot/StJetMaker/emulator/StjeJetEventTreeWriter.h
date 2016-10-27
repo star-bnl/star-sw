@@ -45,7 +45,7 @@ public:
   void fillJetTreeHeader(int iAnalyzer);
   void fillJetTree(int iAnalyzer, int iVertex);
 
-//private:
+private:
 
   void fillJetTreeForOneVertex(StJetEvent* jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker, int iVertex);
   StJetCandidate* fillJet(StJetEvent* jetEvent, StJetVertex* jetVertex, StProtoJet& protojet);

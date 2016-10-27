@@ -33,8 +33,8 @@ foreach input (`cat $FILELIST`)
 end
 
 	</command>
-	<stdout URL="file:/star/u/fisyak/prodlog/TpcAligner_2014$JOBID.log" />
-	<stderr URL="file:/star/u/fisyak/prodlog/TpcAligner_2014$JOBID.err" />
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcAligner_2014$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcAligner_2014$JOBID.err" />
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
 <!-- <input URL="command:EandBSample2014M.pl" /> -->
 <input URL="command:EandBSample2014.pl" />

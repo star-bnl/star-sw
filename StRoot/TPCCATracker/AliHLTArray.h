@@ -239,11 +239,7 @@ namespace AliHLTInternal
   {
       friend class ArrayBase<T, 2>;
     public:
-      ArrayBase() : 
-#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
-	ArrayBoundsCheck(), 
-#endif
-	fData( 0 ), fSize(0) {} // XXX really shouldn't be done. But -Weffc++ wants it so
+      ArrayBase() : ArrayBoundsCheck(), fData( 0 ), fSize(0) {} // XXX really shouldn't be done. But -Weffc++ wants it so
       ArrayBase( const ArrayBase &rhs ) : ArrayBoundsCheck( rhs ), fData( rhs.fData ), fSize( rhs.fSize ) {} // XXX
       ArrayBase &operator=( const ArrayBase &rhs ) { ArrayBoundsCheck::operator=( rhs ); fData = rhs.fData; fSize = rhs.fSize; return *this; } // XXX
       typedef typename ReturnTypeHelper<T>::Type R;

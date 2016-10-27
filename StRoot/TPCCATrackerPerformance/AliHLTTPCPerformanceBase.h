@@ -12,7 +12,7 @@
 
 #include "AliHLTTPCCounters.h"
 
-#include "AliHLTArray.h"
+#include "TPCCATracker/AliHLTArray.h"
 #include "AliHLTTPCCAMCTrack.h"
 #include "AliHLTTPCCAMCPoint.h"
 #include <fstream>
@@ -46,12 +46,6 @@ struct AliHLTTPCCAHitLabel {
   { return in >> hl.fLab[0] >> hl.fLab[1] >> hl.fLab[2];}
 };
 
-namespace // copy of same function in CADef.h. To remove warnings
-{
-  template<typename T1, typename T2>
-  void UNUSED_PARAM2_( const T1 &, const T2 & ) {}
-}
-
 /**
  * @class AliHLTTPCPerformanceBase
  */
@@ -75,7 +69,7 @@ class AliHLTTPCPerformanceBase
 
 #ifndef HLTCA_STANDALONE
     /// Histograms
-  virtual void CreateHistos(string histoDir = "", TFile* outFile = 0){ UNUSED_PARAM2_(histoDir, outFile); };
+  virtual void CreateHistos(string histoDir = "", TFile* outFile = 0){ /*UNUSED_PARAM2(histoDir, outFile);*/ };
     
   bool IsHistoCreated() { return fIsHistoCreated; }
   void SetHistoCreated(bool v = 1) { fIsHistoCreated = v; }
@@ -94,7 +88,7 @@ class AliHLTTPCPerformanceBase
 
 #ifndef HLTCA_STANDALONE
   virtual void FillHistos(){};
-  TH1 *GetHisto(int iHisto);
+  TH1 *GetHisto(const char* name);
 #endif
   
     // Check if MC track is reconstructable. Calculate set of MC track. Etc.

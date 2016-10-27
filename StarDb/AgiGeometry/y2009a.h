@@ -1,1 +1,0 @@
-../../.sl68_gcc492/obj/StarDb/AgiGeometry/y2009a.h

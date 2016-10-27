@@ -33,8 +33,8 @@
   root4star -q -b 'bfc.C('${f}','${l}',"RC.pp.y2013,'${side}',KFVertex,-beamline,StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root4star -q -b 'bfc.C('${f}','${l}',"pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr6,'${side}',KFVertex,-beamline,StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/data03/daq/2012/108/13108073/st_physics_13108073*.daq" /> -->
 <input URL="command:daq_2013pp510LowLum.pl" />
 <!-- <input URL="file:/star/simu/simu/gstardata/Simu2012/rcf12010/out/rcf12010_1499_10evts_Wplus_enu.fzd" /> -->

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAOutTrack.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAOutTrack.h,v 1.1 2016/02/05 23:27:28 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -11,7 +11,7 @@
 #define ALIHLTTPCCAOUTTRACK_H
 
 #include "AliHLTTPCCATrackParam.h"
-
+#if 0
 namespace std
 {
   template<typename T> struct char_traits;
@@ -20,7 +20,7 @@ namespace std
   template<typename _CharT, typename _Traits> class basic_ostream;
   typedef basic_ostream<char, char_traits<char> > ostream;
 } // namespace std
-
+#endif
 /**
  * @class AliHLTTPCCAOutTrack
  * AliHLTTPCCAOutTrack class is used to store the final

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job  name="Pileup" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/Pileup$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/Pileup$JOBID.err" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Pileup$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Pileup$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
 #  setenv NODEBUG yes

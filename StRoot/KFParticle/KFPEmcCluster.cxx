@@ -90,7 +90,6 @@ void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& t
     float_v& vec = reinterpret_cast<float_v&>(fC[iC][iElement]);
     vec.gather(&(track.fC[iC][0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
-#ifdef __YF_BUG__
   {
     int iElement=0;
     for(iElement=0; iElement<nIndexes-float_vLen; iElement += float_vLen)
@@ -103,7 +102,6 @@ void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& t
     int_v& vec = reinterpret_cast<int_v&>(fId[iElement]);
     vec.gather(&(track.fId[0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
-#endif
 }
 
 void KFPEmcCluster::PrintTrack(int n)

@@ -19,8 +19,8 @@
 AliHLTTPCCATrackletVector::AliHLTTPCCATrackletVector()
     : fNHits( Vc::Zero ), fFirstRow( Vc::Zero ), fLastRow( Vc::Zero )
 {
-  const uint_v x = std::numeric_limits<uint_v>::max();
-  for ( int i = 0; i < fRowHits.size(); ++i ) {
-    reinterpret_cast<uint_v&>(fRowHits[i]) = x;
+  const ushort_v x = std::numeric_limits<ushort_v>::max();
+  for ( int i = 0; i < fRowHits.Size(); ++i ) {
+    fRowHits[i] = x;
   }
 }

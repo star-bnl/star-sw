@@ -12,7 +12,7 @@
   set logFile  = ${file}B.log
   root4star -q -b 'TpcRS.C(999999,"pp2012b,Tree,-evout,-l3onl,-emcDY2,-fpd,-ftpc,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,","'${evtsFile}'","")' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/u/fisyak/prodlog/sched$JOBID.log" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
 <input URL="file:/star/data03/daq/2012/065/*/st_physics_adc_*.daq" />
 
 </job>

@@ -26,11 +26,10 @@ struct AliHLTTPCEfficiencies: public TEfficiencies
 {
   AliHLTTPCEfficiencies():TEfficiencies(){
 
-    AddCounter("long_ref"      ,"LongRef   efficiency");
+    AddCounter("total"          ,"Allset    efficiency");
     AddCounter("ref"           ,"Refset    efficiency");
-    AddCounter("total"         ,"Allset    efficiency");
-    AddCounter("extra"         ,"Extra     efficiency");
-    AddCounter("rest"          ,"Rest      efficiency");
+    AddCounter("extra"           ,"Extra     efficiency");
+    AddCounter("rest"           ,"Rest      efficiency");
 //     AddCounter("ref_prim"      ,"RefPrim   efficiency");
 //     AddCounter("ref_sec"       ,"RefSec    efficiency");
 //     AddCounter("extra_prim"      ,"ExtraPrim efficiency");
@@ -126,10 +125,10 @@ class AliHLTTPCCAPerformanceRecoTrackData{
       nHits = nHits_;
     }
 
-    int GetMCTrackId() const { return mcTrackId; }
-    float GetPurity() const { return purity; }
-    bool  IsGhost( float minPurity = 0) const  { return (mcTrackId == -1) || (purity < minPurity); }
-    bool  IsReco( float minPurity = 0, int minNHits = 0) const { return (mcTrackId != -1) && (purity >= minPurity) && (nHits >= minNHits); }  
+    int GetMCTrackId(){ return mcTrackId; }
+    float GetPurity(){ return purity; }
+    bool  IsGhost( float minPurity = 0)  { return (mcTrackId == -1) || (purity < minPurity); }
+    bool  IsReco( float minPurity = 0, int minNHits = 0)  { return (mcTrackId != -1) && (purity >= minPurity) && (nHits >= minNHits); }  
 
     void Print(){ cout << "Track: " << mcTrackId << " Purity: " << purity << endl; }
   private:

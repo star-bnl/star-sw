@@ -39,9 +39,7 @@ const Double_t keV    = 0.001 * MeV;
 #define dup _dup_
 
 #define tanf _tanf_
-#ifdef _fpos_
 #define fpos _fpos_
-#endif
 //
 // Implement some bitwise functions from fortran land
 //

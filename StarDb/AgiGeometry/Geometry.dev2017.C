@@ -1,1 +1,0 @@
-../../.sl68_gcc492/obj/StarDb/AgiGeometry/Geometry.dev2017.C

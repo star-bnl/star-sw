@@ -30,7 +30,7 @@
 # P15ic "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt"
   root4star -q -b 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/da2014$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/da2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.err" />
 <input URL="command:daq_2014.pl" />
 </job>

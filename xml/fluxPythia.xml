@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job  name="Flux" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/Flux$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/Flux$JOBID.err" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
 #if pp500 pp200

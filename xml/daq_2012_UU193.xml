@@ -27,7 +27,7 @@
 #    mv *.log *.root  ${SUBMITTINGDIRECTORY}  
   endif
 </command>
-<stdout URL="file:/star/u/fisyak/prodlog/sched$JOBID.log" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
 <!-- <input URL="file:/star/data03/daq/2012/122/13122001/st_physics_adc_*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2012/1*/*/st_physics_*_raw_1010005.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2012/11*/*/st_physics_*_raw_1010001.daq" /> -->
