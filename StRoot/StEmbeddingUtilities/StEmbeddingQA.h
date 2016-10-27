@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.11 2012/03/05 10:32:29 cpowell Exp $
+ * $Id: StEmbeddingQA.h,v 1.12 2016/10/27 15:50:06 zhux Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.12  2016/10/27 15:50:06  zhux
+ * added an option to set the maximum pT cut, by Zachariah Miller
+ *
  * Revision 1.11  2012/03/05 10:32:29  cpowell
  * Functions added to cut on refMult
  *
@@ -119,10 +122,14 @@ class StEmbeddingQA {
     /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void setRapidityCut(const Float_t ycut) ;
 
+    /// Set Maximum Range of pT histograms; binning = 10*ptmax
+    void setPtMax(Float_t ptmax) ; 
+
   private:
     const Int_t mYear ;               /// Year
     const TString mProduction ;       /// Production
     const Bool_t mIsSimulation ;      /// kTRUE : embedding QA,  kFALSE : real data QA
+    Float_t mPtMax ;                  /// Sets maximum ptRange of Histograms
 
     void clear() ; /// Clear all histograms
 
