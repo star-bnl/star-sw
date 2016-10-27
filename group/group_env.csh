@@ -543,39 +543,7 @@ if ( -f $STAR/mgr/ROOT_LEVEL && -f $STAR/mgr/CERN_LEVEL ) then
   endif
 
 else
- # this block should really not be expanded - use the
- # method above instead to change version so we do not
- # have to maintain this long list of switch statements  
- if ( $?DECHO) echo "$self :: We will use old logic of hard-coding LEVEL to a specific SL"
- switch ( $STAR_VERSION )
-
-  case SL98l:
-    setenv ROOT_LEVEL 2.20
-    breaksw
-
-  case SL99a:
-  case SL99b:
-  case SL99c:
-    setenv ROOT_LEVEL 2.21
-    setenv CERN_LEVEL 99
-    breaksw
-
-  case SL99d:
-  case SL99e:
-    setenv ROOT_LEVEL 2.21.08
-    setenv CERN_LEVEL 99
-    breaksw
-
-  case SL99f:
-  case SL99g:
-    setenv ROOT_LEVEL 2.22
-    setenv CERN_LEVEL 99
-    breaksw
-
-  default:
-    setenv ROOT_LEVEL 5.12.00
-
-  endsw
+    echo "CERN_LEVEL and ROOT_LEVEL has not been set. ABORT."
 endif
 
 if ($ECHO) echo   "Setting up ROOT_LEVEL= ${ROOT_LEVEL}"
@@ -597,11 +565,13 @@ if ( $?DECHO ) echo "$self :: Paths alteration for STAR_MGR, STAR_SCRIPTS STAR_C
 if ( -x ${GROUP_DIR}/dropit) then
     setenv GROUPPATH `${GROUP_DIR}/dropit -p ${GROUP_DIR} -p mgr -p ${STAR_MGR}  -p mgr/bin -p ${STAR_MGR}/bin -p ${STAR_SCRIPTS} -p ${STAR_CGI} -p ${MY_BIN} -p ${STAR_BIN} -p ${STAF}/mgr -p ${STAF_BIN}`
     setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p $PATH`
+    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/lib -p ${OPTSTAR}/lib -p $LD_LIBRARY_PATH`
 else
     setenv GROUPPATH ${GROUP_DIR}:mgr:${STAR_MGR}:mgr/bin:${STAR_MGR}/bin:${STAR_SCRIPTS}:${STAR_CGI}:${MY_BIN}:${STAR_BIN}:${STAF}/mgr:${STAF_BIN}
     setenv PATH  ${XOPTSTAR}/bin:${OPTSTAR}/bin:$PATH
+    setenv LD_LIBRARY_PATH ${XOPTSTAR}/lib:${OPTSTAR}/lib:${LD_LIBRARY_PATH}
 endif
-
+ 
 # test return value of PTEST from dropit
 if ( $?DECHO && $?DUMPENV ) then
     if ( -e /tmp/dropit.$USER ) then
@@ -637,6 +607,7 @@ if ( -x ${GROUP_DIR}/dropit) then
   if ($?SHLIB_PATH == 1)      setenv SHLIB_PATH      `${GROUP_DIR}/dropit -p ${SHLIB_PATH} $STAR_PATH`
 
   setenv PATH `${GROUP_DIR}/dropit -p ${GROUPPATH} -p /usr/afsws/bin -p /usr/afsws/etc -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p /usr/sue/bin -p /usr/local/bin -p ${PATH}`
+  setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/lib -p ${OPTSTAR}/lib -p $LD_LIBRARY_PATH`
 else
   if ( $?DECHO ) echo "$self ::  ${GROUP_DIR}/dropit is not -x"
 endif
@@ -966,33 +937,11 @@ if ( -x ${GROUP_DIR}/dropit) then
 	setenv PATH `${GROUP_DIR}/dropit -p ${PATH} -p ${CERN_ROOT}/bin`
     endif
     setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p ${PATH}`
-    switch ($STAR_SYS)
-	case "hp_ux102":
-	#  ====================
-	setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} -p ${XOPTSTAR}/lib`
-	if ( -d ${XOPTSTAR}/lib/mysql ) then
-	    setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} -p ${XOPTSTAR}/lib/mysql`
-	endif
-	setenv SHLIB_PATH `${GROUP_DIR}/dropit -p "$SHLIB_PATH"`
-	breaksw
-
-    default:
-	#  ====================
-	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${XOPTSTAR}/lib`
-	# Note from 2011/10 - Unofrtunately, MySQL has not been there for a while
-	if ( -d ${XOPTSTAR}/lib/mysql ) then
-	    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${XOPTSTAR}/lib/mysql`
-
-	# ... but in the default system path - changing this may chang previous 
-	# behavior however
-	#else if ( -d /usr/lib64/mysql && $USE_64BITS == 1 ) then
-	#    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p /usr/lib64/mysql`
-	#else if ( -d /usr/lib/mysql && $USE_64BITS == 0 ) then
-	#    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p /usr/lib/mysql `
-	endif
-	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH"`
-	breaksw
-    endsw
+    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/lib -p ${OPTSTAR}/lib -p $LD_LIBRARY_PATH`
+# Note from 2011/10 - Unofrtunately, MySQL has not been there for a while
+    if ( -d ${XOPTSTAR}/lib/mysql ) then
+      setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${XOPTSTAR}/lib/mysql`
+    endif
     setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH ^/usr/lib"`
     if ($USE_64BITS) then 
 	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib64/mysql
@@ -1002,18 +951,6 @@ if ( -x ${GROUP_DIR}/dropit) then
     setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH}`
     setenv PATH `${GROUP_DIR}/dropit -p ${PATH} GROUPPATH`
 endif
-
-
-
-
-
-
-
-
-
-
-
-
 #
 # Display this message as it is likely the environment is
 # screwed up if this happens.
