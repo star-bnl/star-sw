@@ -8,7 +8,7 @@
      set evtsFile =  $INPUTFILE0
      set f  = 1
      set l  = 5000
-     set chain = "DbV20140222,pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3,-hitfilt"
+     set chain = "DbV20140222,pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt"
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
 #    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
 #    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
