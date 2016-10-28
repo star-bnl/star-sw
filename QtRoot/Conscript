@@ -5,7 +5,7 @@ Import qw ( env INCLUDE LIB BIN BUILD OBJ);
 ( my $mylib = $LIB ) =~ s/\#//g;
 
 $build =~ s/\\/\//g;   #     print "------------- > OBJ = $OBJ  LIB=$mylib build = $build \n"; 
-(my $sysdir = $build ) =~ s/\/obj//i;
+(my $sysdir = $build ) =~ s/\/obj//i; $sysdir =~ s/\/OBJ//i;
 #print "PWD === $ENV{PWD}\n"; die;
 $env->{ENV}->{QTROOTSYSDIR} = $ENV{PWD} . "/" . $sysdir;# print "QTROOTSYSDIR = $env->{ENV}->{QTROOTSYSDIR}\n";
 $env->{ENV}->{QTROOTSYSDIR_LIB} =  basename($mylib);
@@ -13,9 +13,9 @@ $env->{ENV}->{QTDIR} = $env->{Packages}->{QT}->{DIR};
 $env->{ENV}->{IVROOT} = $env->{Packages}->{COIN3D}->{DIR}; # print "IvRoot = $env->{ENV}->{IVROOT}";
 my $STAR_HOST_SYS = $env->{ENV}->{STAR_HOST_SYS};
 my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
-my $DirPath = DirPath '.';                             #  print "DirPath = $DirPath\n";
-( my $obj_dir = $DirPath ) =~ s/\\/\//g;               #  print "obj_dir = $obj_dir\n";
-( my $Dir = $obj_dir ) =~ s/$build\///g;               #  print "Dir = $Dir\n";
+my $DirPath = DirPath '.';                               print "DirPath = $DirPath\n";
+( my $obj_dir = $DirPath ) =~ s/\\/\//g;                 print "obj_dir = $obj_dir\n";
+( my $Dir = $obj_dir ) =~ s/$build\///g;                 print "Dir = $Dir\n";
 my $PKGT = "QtRoot";
 
 # Import from ENV variables
@@ -25,54 +25,42 @@ printf( "Run Conscript          in %-30s  for %-20s\n", $Dir,$PKGT );
 
 my @src = ();
 my @dirs = qw(qt qtgui qtimage qtgl qtExamples qtroot qtthread);
-if ($qt4)  {
-  push @dirs, "qt4ged";
-} else {
-  push @dirs, "qtged";
-}
+push @dirs, "qt4ged";
 foreach my $dir (@dirs) {
   my @srcL = find_q($Dir . "/" . $dir); #print "dir = $dir ==> @srcL\n";
   foreach my $s (@srcL) {
     push @src, $dir . "/" . $s;
   }
 }
-my @DepsL = map {$LIB . "/lib" . $_ . ".so"} qw(QtRoot QtGed  RQTGL QtRootGui QtImage QGLViewer);
-my @DepsI = map {$INCLUDE .  "/TQt" . $_ . ".h"} 
+my @DepsL  = map {$LIB . "/lib" . $_ . ".so"}   qw(GQt QtGed QtImage QtRootGui QtRoot QtThread); #  RQTGL
+my @DepsL1 = map {$LIB . "/lib" . $_ . ".so.1"} qw(GQt QtGed QtImage QtRootGui QtRoot QtThread); #  RQTGL
+my @DepsI  = map {$INCLUDE .  "/TQ" . $_ . ".h"} 
   qw(
-Application        Condition            GuiFactory          ObjectListItem       RootSlot
-ArrowEditor        ContextMenuImp       Gui                 Pad2Html             RootViewer3D
-AxisEditor         ControlBarImp        IconBrowserImp      PadEditor            StyleComboBox
-BrowserImp         CustomizeCanvasMenu  Image               PadFont              SymbolCodec
-Brush              Emitter              InspectImp          PaletteEditor        TabValidator
-Canvas2Html        Event                LineEditor          PatternSelectButton  TextEditor
-CanvasImp          EventQueue           LockGuard           PatternSelect        ThreadFactory
-CanvasPainter      FloatSlider          Lock                Pen                  ThreadImp
-CanvasWidget       FloatSpinBox         LockWidget          PixmapBox            Timer
-ClientFilter       GedAttFrame          MarkerEditor        RConfig              ToolBar
-ClientGuard        GedEditor            Marker              RootAction           UpdateViewFlag
-ClientWidget       GedFrames            MarkerSelectButton  RootApplication      Util
-ColorPickerHelper  GLIncludes           MarkerSelect        RootBrowserAction    Widget
-ColorSelectButton  GLViewerImp          MmlTextProxy        RootBrowserImp       ZoomPadWidget
-ColorSelect        GLViewerWidget       Mutex               RootCommandCombo
-CommandPlugin      GraphEditor          ObjectDialog        RootGuiFactory
+      GLKernel        tCanvasWidget         tEvent           tIconBrowserImp      tObjectDialog         tRootBrowserAction  tToolBar
+      GLViewerImp     tClientFilter         tEventQueue      tImage               tObjectListItem       tRootBrowserImp     tUpdateViewFlag
+      GsiRootCanvas   tClientGuard          tFloatSlider     tInspectImp          tPad2Html             tRootCommandCombo   tUtil
+      MimeTypes       tClientWidget         tFloatSpinBox    tLineEditor          tPadEditor            tRootGuiFactory     tWidget
+      PadOpenGLView   tColorPickerHelper    tGedAttFrame     tLockGuard           tPadFont              tRootSlot           tZoomPadWidget
+      tApplication    tColorSelectButton    tGedEditor       tLock                tPaletteEditor        tRootViewer3D       UserEvent
+      tArrowEditor    tColorSelect          tGedFrames       tLockWidget          tPatternSelectButton  tStyleComboBox      VirtualGL
+      tAxisEditor     tCommandPlugin        tGLIncludes      tMarkerEditor        tPatternSelect        tSymbolCodec
+      tBrowserImp     tCondition            tGLViewerImp     tMarker              tPen                  tTabValidator
+      tBrush          tContextMenuImp       tGLViewerWidget  tMarkerSelectButton  tPixmapBox            tTextEditor
+      tCanvas2Html    tControlBarImp        tGraphEditor     tMarkerSelect        tRConfig              tThreadFactory
+      tCanvasImp      tCustomizeCanvasMenu  tGuiFactory      tMmlTextProxy        tRootAction           tThreadImp
+      tCanvasPainter  tEmitter              tGui             tMutex               tRootApplication      tTimer
    );
-
-push @DepsI, $INCLUDE .  "/TBrowserCustom.h";
-push @DepsI, $INCLUDE .  "/TCanvasImp.interface.h";
-push @DepsI, $INCLUDE .  "/TCanvasImp.interface.h";
-push @DepsI, $INCLUDE .  "/TEmbeddedPad.h";
-#push @DepsI, $INCLUDE .  "/TG3Application.h";
-push @DepsI, $INCLUDE .  "/TQGsiRootCanvas.h";
-
-#TBrowserCustom Application AxisEditor BrowserImp Brush  Canvas2Html   CanvasImp    TCanvasImp.interface  TEmbeddedPad   TQGsiRootCanvas
 my $DEBUG = "";
 if ($STAR_HOST_SYS =~ /darwin/) {
 #  $DEBUG .= " -spec macx-g++ ";
 #  $DEBUG .= " -spec macx-xcode ";
 #  $DEBUG .= " -spec macx-llvm ";
 } else {
-  if ($STAR_HOST_SYS !~ /x86/) {
-    $DEBUG .= " -spec linux-g++-32";
+  if ($STAR_HOST_SYS =~ /icc/) {
+    if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-icc-32";}
+    else                         {$DEBUG .= " -spec linux-icc-64";}
+  } else {# gcc
+    if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-g++-32";}
   }
 }
 $DEBUG .= " CONFIG+=debug" if $env->{DEBUG} !~ /-O/;
@@ -85,12 +73,15 @@ else       {$PATH .=       $env->{Packages}->{QT}->{BINDIR};}
 $ENV{PATH} = $PATH;
 $env2 = $env->clone();
 $env2->{ENV}->{PATH} = $PATH;
-if ($qt4) {
   Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir;qmake PREFIX=$env->{ENV}->{QTROOTSYSDIR} $DEBUG);
-} else {
-  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir; qmake $DEBUG);
-}
-Command $env2 [(@DepsL, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
+Command $env2 [(@DepsL1, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
+#Command $env2 [(@DepsL1, @DepsI)], (Makefile), qq(cd $obj_dir;make;make install);
+#Command $env2 [@DepsI], (Makefile, @src), qq(cd $obj_dir;make;make install);
+#print "DepsL = @DepsL \nDEPSL1 = @DepsL1\n";
+# foreach my $l (qw(GQt QtGed QtImage QtRootGui QtRoot QtThread)) {#  RQTGL
+#   my $lib = "lib" . $l . ".so";
+#   InstallAs $env2 $LIB . "/" . $lib, $lib . ".1";
+# }
 # Command $env2 ["Makefile"], qw(qtExamples/qtExamples.pro), qq(cd $obj_dir; qmake $DEBUG; make);
 #________________________________________
 sub find_q{  @main::search_files   = ();

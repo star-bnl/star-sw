@@ -59,6 +59,10 @@ namespace CAMath
   template<typename T> static T ATan2( const T &y, const T &x ) { return atan2( y, x ); }
   template<typename T> static T ASin( const T &x ) { return asin( x ); }
 
+  
+  static bool IsZero( const float& x )   { return std::abs(x) < std::numeric_limits<float>::epsilon(); }
+  static float_m IsZero( const float_v& x ) { return std::abs(x) < std::numeric_limits<float_v>::epsilon(); }
+
   float Tan( float x );
   float Copysign( float x, float y );
   static inline float TwoPi() { return 6.283185307179586f; }

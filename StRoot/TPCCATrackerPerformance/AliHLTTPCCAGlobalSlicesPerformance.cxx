@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.3 2013/11/21 13:07:28 mzyzak Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.7 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -156,8 +156,12 @@ void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
       if ( mc.GetSet() == 1){
         fEff.Inc(reco,clones,"extra");
       }
-      else{
+      else if ( mc.GetSet() == 2 ) {
         fEff.Inc(reco,clones,"ref");
+      }
+      else {
+        fEff.Inc(reco,clones,"ref");
+        fEff.Inc(reco,clones,"long_ref");
       }
     }
   } // for iMCTr

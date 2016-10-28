@@ -26,7 +26,7 @@
 #include "debug.h"
 
 AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTTPCCASliceData &slice,
-    const sfloat_v &y, const sfloat_v &z, float dy, float dz, short_m mask )
+    const float_v &y, const float_v &z, float dy, float dz, int_m mask )
   : fRow( row ), fSlice( slice ),
   fHitYlst( Vc::Zero ),
   fIh( Vc::Zero ),
@@ -34,12 +34,12 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
 {
   const AliHLTTPCCAGrid &grid = fRow.Grid();
 
-  const sfloat_v minZ = z - dz;
-  const sfloat_v maxZ = z + dz;
-  const sfloat_v minY = y - dy;
-  const sfloat_v maxY = y + dy;
+  const float_v minZ = z - dz;
+  const float_v maxZ = z + dz;
+  const float_v minY = y - dy;
+  const float_v maxY = y + dy;
 
-  ushort_v bYmin, bZmin, bYmax; // boundary bin indexes
+  uint_v bYmin, bZmin, bYmax; // boundary bin indexes
   grid.GetBinBounded( minY, minZ, &bYmin, &bZmin );
   grid.GetBinBounded( maxY, maxZ, &bYmax, &fBZmax );
 
@@ -50,7 +50,7 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
 
   fIz = bZmin;
 
-  const short_m invalidMask = !mask;
+  const int_m invalidMask = !mask;
   if ( !invalidMask.isEmpty() ) {
     debugS() << "not all parts of the HitArea are valid: " << mask << std::endl;
 
@@ -59,14 +59,13 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
     fIndYmin.setZero( invalidMask );
     fIz.setZero( invalidMask );
 
-    // for given fIz (which is min atm.) get
-    fIh.gather( fSlice.FirstHitInBin( fRow ), fIndYmin, mask ); // first and
-    fHitYlst.gather( fSlice.FirstHitInBin( fRow ), fIndYmin + fBDY, mask ); // last hit index in the bin
+      // for given fIz (which is min atm.) get
+    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, mask ); // first and
+    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, mask ); // last hit index in the bin
   } else {
-    fIh = fSlice.FirstHitInBin( fRow, fIndYmin );
-    fHitYlst = fSlice.FirstHitInBin( fRow, fIndYmin + fBDY );
+    fIh = fSlice.FirstUnusedHitInBin( fRow, fIndYmin );
+    fHitYlst = fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY );
   }
-  assert( fHitYlst <= fRow.NHits() || invalidMask );
 
   debugS() << "HitArea created:\n"
     << "bYmin:    " << bYmin << "\n"
@@ -79,68 +78,78 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
     << "fHitYlst: " << fHitYlst << "\n"
     << "fIh:      " << fIh << "\n"
     << "fNy:      " << fNy << std::endl;
+  
+#ifdef __ASSERT_YF__
+  ASSERT( fHitYlst <= fRow.NUnusedHits() || invalidMask, fHitYlst << " <= " << fRow.NUnusedHits() );
+#endif
 }
 
-ushort_m AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
+uint_m AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 {
   // get next hit index
-  ushort_m yIndexOutOfRange = fIh >= fHitYlst;     // current y is not in the area
-  ushort_m nextZIndexOutOfRange = fIz >= fBZmax;   // there isn't any new z-line
-  if ( yIndexOutOfRange && nextZIndexOutOfRange ) { // all iterators are over the end
-    return ushort_m(false);
+
+  uint_m yIndexOutOfRange = fIh >= fHitYlst;     // current y is not in the area
+  uint_m nextZIndexOutOfRange = fIz >= fBZmax;   // there isn't any new z-line
+
+  if ( yIndexOutOfRange.isFull() && nextZIndexOutOfRange.isFull() ) { // all iterators are over the end
+    if (data)
+      data->fValid = uint_m(false);
+    return uint_m(false);
   }
-  
-  ushort_m isUsed = static_cast<ushort_m>( short_v(fSlice.HitDataIsUsed( fRow ), fIh) != short_v( Vc::Zero ) );
 
+    // at least one entry in the vector has (fIh >= fHitYlst && fIz < fBZmax)
+  uint_m needNextZ = yIndexOutOfRange && !nextZIndexOutOfRange;
 
-  // at least one entry in the vector has (fIh >= fHitYlst && fIz < fBZmax)
-  ushort_m needNextZ = yIndexOutOfRange && !nextZIndexOutOfRange;
-  ushort_m needNextHit = (isUsed || yIndexOutOfRange) && !nextZIndexOutOfRange;
-
-  debugS() << "fIh >= fHitYlst: " <<  yIndexOutOfRange << " fIz >= fBZmax: " << nextZIndexOutOfRange << " -> " << needNextZ << std::endl;
-
-  // skip as long as fIh is outside of the interesting bin y-index
-  while ( !needNextHit.isEmpty() ) {
+    // skip as long as fIh is outside of the interesting bin y-index
+  while ( !needNextZ.isEmpty() ) {
     
-    ++fIh( needNextHit );
-      // if ( !needNextZ.isEmpty() ) { // slower
-    ++fIz( needNextZ );   // get new z-line
+    ++fIz( needNextZ );
     nextZIndexOutOfRange = fIz >= fBZmax;
     
       // get next hit
     fIndYmin( needNextZ ) += fNy;
-    fIh.gather( fSlice.FirstHitInBin( fRow ), fIndYmin, needNextZ ); // get first hit in cell, if z-line is new
-    fHitYlst.gather( fSlice.FirstHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
-      // }
-    isUsed = static_cast<ushort_m>( short_v(fSlice.HitDataIsUsed( fRow ), fIh) != short_v( Vc::Zero ) );
-        
-    assert( fHitYlst <= fRow.NHits() || !needNextZ );
+    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, needNextZ ); // get first hit in cell, if z-line is new
+    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
+#ifdef __ASSERT_YF__
+    assert( fHitYlst <= fRow.NUnusedHits() || !needNextZ );
+#endif    
     yIndexOutOfRange = fIh >= fHitYlst;
 
     needNextZ = yIndexOutOfRange && !nextZIndexOutOfRange;
-    // needNextHit = (isUsed && !yIndexOutOfRange) || (!isUsed && needNextZ); // slower
-    needNextHit = (isUsed || yIndexOutOfRange)  && !nextZIndexOutOfRange;     // incorrect
-    debugS() << "fIh >= fHitYlst: " <<  yIndexOutOfRange << " fIz >= fBZmax: " << nextZIndexOutOfRange << " -> " << needNextZ << std::endl;
   }
 
-  data->fValid = !yIndexOutOfRange && !isUsed;
-  const sfloat_m valid( data->fValid );
+  if (data) {
+    data->fValid = !yIndexOutOfRange;
+    const float_m valid( data->fValid );
 
-  data->fY.setZero();
-  data->fY.gather( fSlice.HitDataY( fRow ), fIh, valid );
-  data->fZ.setZero();
-  data->fZ.gather( fSlice.HitDataZ( fRow ), fIh, valid );
-
-  data->fLinks = fIh.staticCast<short_v>();
-
+    data->fY = fSlice.UnusedHitPDataY( fRow, fIh, valid );
+    data->fZ = fSlice.UnusedHitPDataZ( fRow, fIh, valid );
+    data->fLinks = fIh;
+  }
+  
   ++fIh;
 
-  debugS() << "HitArea found next. New state:\n"
-    << "fIndYmin: " << fIndYmin << "\n"
-    << "fIz:      " << fIz << "\n"
-    << "fHitYlst: " << fHitYlst << "\n"
-    << "fIh:      " << fIh << std::endl;
+  return !yIndexOutOfRange;
+}
 
+uint_v AliHLTTPCCAHitArea::NHits()
+{ // suppose we didn't call GetNextHit yet!
+  uint_v nHits(Vc::Zero);
+  uint_v iz = fIz;
+  uint_v indYmin = fIndYmin;
+  uint_v ih = fIh;
+  uint_v hitYlst = fHitYlst;
+  uint_m needNextZ = iz < fBZmax;
+  nHits += hitYlst - ih;
+  while ( !needNextZ.isEmpty() ) {
+    ++iz( needNextZ );   // get new z-line
+    indYmin( needNextZ ) += fNy;
+    ih.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin, needNextZ ); // get first hit in cell, if z-line is new
+    hitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin + fBDY, needNextZ );
+    nHits( needNextZ ) += hitYlst - ih;
+    
+    needNextZ = iz < fBZmax;
+  }
 
-  return data->fValid;
+  return nHits;
 }

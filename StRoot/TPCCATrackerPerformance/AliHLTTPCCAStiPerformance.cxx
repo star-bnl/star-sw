@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.3 2013/11/21 13:07:29 mzyzak Exp $
+// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.14 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -94,6 +94,10 @@ void AliHLTTPCCAStiPerformance::CheckMCTracks()
       if ( mc.P() >= AliHLTTPCCAParameters::RefThreshold ) {
         mc.SetSet( 2 );
         mcTrackData.SetSet( 2 );
+        if ( mc.NMCRows() >= fTracker->Slice(0).Param().NRows() ) {
+          mc.SetSet( 3 );
+          mcTrackData.SetSet( 3 );
+        }
       }
       else{
         mc.SetSet( 1 );
@@ -175,8 +179,12 @@ void AliHLTTPCCAStiPerformance::EfficiencyPerformance( )
       if ( mc.GetSet() == 1){
         fEff.Inc(reco,clones,"extra");
       }
-      else{
+      else if ( mc.GetSet() == 2 ) {
         fEff.Inc(reco,clones,"ref");
+      }
+      else {
+        fEff.Inc(reco,clones,"ref");
+        fEff.Inc(reco,clones,"long_ref");
       }
     }
   } // for iMCTr
@@ -201,26 +209,23 @@ void AliHLTTPCCAStiPerformance::FillHistos()
       //     fNVsMom->Fill( param.GetY());
       //     fLengthVsMom->Fill( param.GetY(), t.NHits());
     if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
-      GetHisto("ghostsLength")->Fill( recoTr.NHits() );
-      GetHisto("ghostsRMom")->Fill( RecoMom );
-      GetHisto("ghostsMCMom")->Fill( mcTr.P() );
-      GetHisto("ghostsRPt")->Fill( RecoPt );
-      GetHisto("ghostsMCPt")->Fill( mcTr.Pt() );
-      GetHisto("ghostsLengthAndMCMom")->Fill( recoTr.NHits() , mcTr.P() );
-      GetHisto("ghostsLengthAndRMom")->Fill( recoTr.NHits() , RecoMom );
-      GetHisto("ghostsChi2")->Fill( recoTr.InnerParam().GetChi2() );
-      GetHisto("ghostsProb")->Fill( TMath::Prob(recoTr.InnerParam().GetChi2(),recoTr.InnerParam().GetNDF()));
+      GetHisto(kghostsLength)->Fill( recoTr.NHits() );
+      GetHisto(kghostsRMom)->Fill( RecoMom );
+      GetHisto(kghostsRPt)->Fill( RecoPt );
+      GetHisto(kghostsLengthAndRMom)->Fill( recoTr.NHits() , RecoMom );
+      GetHisto(kghostsChi2)->Fill( recoTr.InnerParam().GetChi2() );
+      GetHisto(kghostsProb)->Fill( TMath::Prob(recoTr.InnerParam().GetChi2(),recoTr.InnerParam().GetNDF()));
     }
     else {
-      GetHisto("recosLength")->Fill( recoTr.NHits() );
-      GetHisto("recosRMom")->Fill( RecoMom );
-      GetHisto("recosMCMom")->Fill( mcTr.P() );
-      GetHisto("recosRPt")->Fill( RecoPt );
-      GetHisto("recosMCPt")->Fill( mcTr.Pt() );
-      GetHisto("recosLengthAndMCMom")->Fill( recoTr.NHits() , mcTr.P() );
-      GetHisto("recosLengthAndRMom")->Fill( recoTr.NHits() , RecoMom );
-      GetHisto("recosChi2")->Fill( recoTr.InnerParam().GetChi2() );
-      GetHisto("recosProb")->Fill( TMath::Prob(recoTr.InnerParam().GetChi2(),recoTr.InnerParam().GetNDF()));
+      GetHisto(krecosLength)->Fill( recoTr.NHits() );
+      GetHisto(krecosRMom)->Fill( RecoMom );
+      GetHisto(krecosMCMom)->Fill( mcTr.P() );
+      GetHisto(krecosRPt)->Fill( RecoPt );
+      GetHisto(krecosMCPt)->Fill( mcTr.Pt() );
+      GetHisto(krecosLengthAndMCMom)->Fill( recoTr.NHits() , mcTr.P() );
+      GetHisto(krecosLengthAndRMom)->Fill( recoTr.NHits() , RecoMom );
+      GetHisto(krecosChi2)->Fill( recoTr.InnerParam().GetChi2() );
+      GetHisto(krecosProb)->Fill( TMath::Prob(recoTr.InnerParam().GetChi2(),recoTr.InnerParam().GetNDF()));
     }
   }
 
@@ -311,19 +316,19 @@ void AliHLTTPCCAStiPerformance::FillHistos()
         if ( mcPt < 0.010 ) break;
 //        if ( TMath::Abs( qPt ) > 1.e-4 ) pt = 1. / TMath::Abs( qPt );
 
-        GetHisto("resY")->Fill( p.GetY() - mcY );
-        GetHisto("resZ")->Fill( p.GetZ() - mcZ );
-        GetHisto("resSinPhi")->Fill( p.GetSinPhi() - mcSinPhi );
-        GetHisto("resDzDs")->Fill( p.GetDzDs() - mcDzDs );
+        GetHisto(kresY)->Fill( p.GetY() - mcY );
+        GetHisto(kresZ)->Fill( p.GetZ() - mcZ );
+        GetHisto(kresSinPhi)->Fill( p.GetSinPhi() - mcSinPhi );
+        GetHisto(kresDzDs)->Fill( p.GetDzDs() - mcDzDs );
         if(CAMath::Abs(qPt) > 1.e-8){
-          GetHisto("resPt")->Fill( (pt - mcPt)/mcPt );
+          GetHisto(kresPt)->Fill( (pt - mcPt)/mcPt );
         }
-        if ( p.GetErr2Y() > 0 ) GetHisto("pullY")->Fill( ( p.GetY() - mcY ) / TMath::Sqrt( p.GetErr2Y() ) );
-        if ( p.GetErr2Z() > 0 ) GetHisto("pullZ")->Fill( ( p.GetZ() - mcZ ) / TMath::Sqrt( p.GetErr2Z() ) );
+        if ( p.GetErr2Y() > 0 ) GetHisto(kpullY)->Fill( ( p.GetY() - mcY ) / TMath::Sqrt( p.GetErr2Y() ) );
+        if ( p.GetErr2Z() > 0 ) GetHisto(kpullZ)->Fill( ( p.GetZ() - mcZ ) / TMath::Sqrt( p.GetErr2Z() ) );
 
-        if ( p.GetErr2SinPhi() > 0 ) GetHisto("pullSinPhi")->Fill( ( p.GetSinPhi() - mcSinPhi ) / TMath::Sqrt( p.GetErr2SinPhi() ) );
-        if ( p.GetErr2DzDs() > 0 ) GetHisto("pullDzDs")->Fill( ( p.DzDs() - mcDzDs ) / TMath::Sqrt( p.GetErr2DzDs() ) );
-        if(CAMath::Abs(qPt) > 1.e-7 && p.GetErr2QPt()>0 ) GetHisto("pullQPt")->Fill( (qPt - mcQPt)/TMath::Sqrt(p.GetErr2QPt()) );
+        if ( p.GetErr2SinPhi() > 0 ) GetHisto(kpullSinPhi)->Fill( ( p.GetSinPhi() - mcSinPhi ) / TMath::Sqrt( p.GetErr2SinPhi() ) );
+        if ( p.GetErr2DzDs() > 0 ) GetHisto(kpullDzDs)->Fill( ( p.DzDs() - mcDzDs ) / TMath::Sqrt( p.GetErr2DzDs() ) );
+        if(CAMath::Abs(qPt) > 1.e-7 && p.GetErr2QPt()>0 ) GetHisto(kpullQPt)->Fill( (qPt - mcQPt)/TMath::Sqrt(p.GetErr2QPt()) );
 
         break;
       }

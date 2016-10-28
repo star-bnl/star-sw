@@ -46,8 +46,8 @@
     root4star -q -b 'bfcMixer_Pythia_pileup.C('${f}','${l}',"'${fitter}'","'${evtsFile}'","'$output'",'${runG}',"y2012b")'  &gt;&amp;  ${logFile}
   endif
       </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/data03/daq/2012/108/13108073/st_physics_13108073*.daq" /> -->
 <!-- <input URL="command:daq_y2012pp500.pl" /> -->
 <!-- <input URL="file:/star/simu/simu/gstardata/Simu2012/rcf12010/out/rcf12010_1499_10evts_Wplus_enu.fzd" /> -->

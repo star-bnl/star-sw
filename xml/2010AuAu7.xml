@@ -24,8 +24,8 @@
   if (-r $muFile) exit 0;
   root.exe -q -b 'bfc.C('${f}','${l}',"RC.y2010,StiCA,KFVertex,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <input URL="file:/gpfs/scratch/users/fisyak/daq/2010/*/*/*.daq" />
 </job>

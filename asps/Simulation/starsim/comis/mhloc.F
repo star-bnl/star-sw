@@ -34,7 +34,7 @@ C      COMMON/MDPOOL/IQ(6)
       INTEGER CSALLO
       L=N*4
       IM=CSALLO(L)
-#ifdef __NON_ELASTIC_ZEBRA__
+#ifdef CERNLIB_QMLXIA64
       MHLOC=IM/4+1
 #else 
       MHLOC=IM+1

@@ -10,8 +10,8 @@
 #  root.exe -q -b -x 'LoopOverLaserTrees.C+("st_laser_*'$run'*.laser.root","'$output'")' &gt;&amp; ${logFile}
   root.exe -q -b -x 'bfc.C(-1,"lana,nodefault")' 'LanaTrees.C+("'${dir}'/*'${run}'*.laser.root","'${output}'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Cosmics$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Cosmics$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/Cosmics$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/Cosmics$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
 <input URL="command:LoopOverLaserTrees.pl" />

@@ -27,6 +27,6 @@ root4star -q -b 'bfc.C(0,"gstar,rung.'${rung}',FieldOn,TpcRS,TpxClu2D,EandBDir,y
   endif
 </command>
 <input URL="command:gamma.pl" />
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/gamma$JOBID.log" />
-<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/gamma$JOBID.err" />
+<stdout URL="file:/star/u/fisyak/prodlog/gamma$JOBID.log" />
+<stderr URL="file:/star/u/fisyak/prodlog/gamma$JOBID.err" />
 </job>

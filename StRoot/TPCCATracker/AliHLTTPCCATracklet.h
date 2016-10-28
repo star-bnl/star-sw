@@ -46,18 +46,18 @@ class AliHLTTPCCATracklet
     int  FirstRow()             const { return fFirstRow;   }
     int  LastRow()              const { return fLastRow;    }
     const AliHLTTPCCATrackParam &Param() const { return fParam;      }
-    short  RowHit( int i )   const { return fRowHits[i];    }
+    int  RowHit( int i )   const { return fRowHits[i];    }
 
     void SetNHits( int v )               {  fNHits = v;      }
     void SetFirstRow( int v )            {  fFirstRow = v;   }
     void SetLastRow( int v )             {  fLastRow = v;    }
     void SetParam( const AliHLTTPCCATrackParam &v ) { fParam = v;      }
-    void SetRowHit( int irow, short ih )  { fRowHits[irow] = ih;    }
+    void SetRowHit( int irow, int ih )  { fRowHits[irow] = ih;    }
 
     void ClearRowHits() {
-      const short_v zero( Vc::Zero );
-      STATIC_ASSERT( AliHLTTPCCAParameters::MaxNumberOfRows8 % short_v::Size == 0, Size_of_fRowHits_array_needs_to_be_a_multiple_of_short_v__Size );
-      for ( int i = 0; i < AliHLTTPCCAParameters::MaxNumberOfRows8; i += short_v::Size ) {
+      const int_v zero( Vc::Zero );
+      STATIC_ASSERT( AliHLTTPCCAParameters::MaxNumberOfRows8 % int_v::Size == 0, Size_of_fRowHits_array_needs_to_be_a_multiple_of_int_v__Size );
+      for ( int i = 0; i < AliHLTTPCCAParameters::MaxNumberOfRows8; i += int_v::Size ) {
         zero.store( &fRowHits[i] );
       }
     }
@@ -68,7 +68,7 @@ class AliHLTTPCCATracklet
     int fFirstRow;              // first TPC row
     int fLastRow;               // last TPC row
     AliHLTTPCCATrackParam fParam; // tracklet parameters
-    AliHLTFixedArray<short, AliHLTArraySize<AliHLTTPCCAParameters::MaxNumberOfRows8>, VectorAlignment> fRowHits; // hit index for each TPC row
+    AliHLTFixedArray<int, AliHLTArraySize<AliHLTTPCCAParameters::MaxNumberOfRows8>, VectorAlignment> fRowHits; // hit index for each TPC row
 };
 
 #endif

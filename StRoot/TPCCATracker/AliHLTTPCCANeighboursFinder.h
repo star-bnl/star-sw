@@ -8,6 +8,9 @@
 
 #include "AliHLTTPCCATracker.h"
 #include "AliHLTTPCCAHitArea.h"
+#include <iostream>
+using std::cout;
+using std::endl;
 
 #ifdef USE_TBB
 #include <tbb/blocked_range.h>
@@ -56,9 +59,9 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
   const AliHLTTPCCARow &rowDn = fData.Row( rowIndex - rowStep );
 
   
-  const int numberOfHits = row.NHits();
-  const int numberOfHitsUp = rowUp.NHits();
-  const int numberOfHitsDown = rowDn.NHits();
+  const int numberOfHits = row.NUnusedHits();
+  const int numberOfHitsUp = rowUp.NUnusedHits();
+  const int numberOfHitsDown = rowDn.NUnusedHits();
   if ( numberOfHits == 0 ) {
     debugS() << "no hits in this row" << std::endl;
     return;
@@ -78,7 +81,6 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
   const float DnDx = xDn - x;
   const float UpTx = xUp / x;
   const float DnTx = xDn / x;
-//   std::cout << UpDx << " " << DnDx << std::endl;
   
   // UpTx/DnTx is used to move the HitArea such that central events are preferred (i.e. vertices
   // coming from y = 0, z = 0).
@@ -103,7 +105,6 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
    * The constant ( dx1^2 + dx2^2 ) is multiplied into the chi2Cut
    */
 
-//   static const float kAreaSize = 1.f;
   static const float kAreaSizeY = AliHLTTPCCAParameters::NeighbourAreaSizeTgY[fIter];
   static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[fIter];
   static const int kMaxN = 20; // TODO minimaze
@@ -114,42 +115,37 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
   curv2Cut *= curv2Cut;
   const float UpErr2 = (rowIndex - rowStep < AliHLTTPCCAParameters::NumberOfInnerRows) ? 0.06*0.06 : 0.12*0.12,
               DnErr2 = (rowIndex + rowStep < AliHLTTPCCAParameters::NumberOfInnerRows) ? 0.06*0.06 : 0.12*0.12;
-
-//  std::cout << UpDx << " " <<  DnDx << std::endl;
-//  std::cout << "before " << 4.f * ( UpDx * UpDx + DnDx * DnDx ) << " now: " << 1/4.f * ( UpDx * DnDx * ( UpDx - DnDx ) ) * ( UpDx * DnDx * ( UpDx - DnDx ) ) << std::endl;
 #else // USE_CURV_CUT  
   const float chi2Cut = AliHLTTPCCAParameters::NeighbourChiCut[fIter]*AliHLTTPCCAParameters::NeighbourChiCut[fIter] * 4.f * ( UpDx * UpDx + DnDx * DnDx );
 #endif // USE_CURV_CUT  
-  // some step sizes on the current row. the ushorts in hits multiplied with the step size give
+  // some step sizes on the current row. the uints in hits multiplied with the step size give
   // the offset on the grid
 
   typedef HitArea::NeighbourData NeighbourData;
 
-  STATIC_ASSERT( short_v::Size % float_v::Size == 0, Short_Vector_Size_is_not_a_multiple_of_Float_Vector_Size );
-  for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += short_v::Size ) {
+    // #ifdef DRAW
+    // #define DRAW_NEIGHBOURSFINDING
+    // #endif
+  
+  STATIC_ASSERT( int_v::Size % float_v::Size == 0, Short_Vector_Size_is_not_a_multiple_of_Float_Vector_Size );
 
-// #ifdef DRAW
-// #define DRAW_NEIGHBOURSFINDING
-// #endif
+  for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
+
 #ifdef DRAW_NEIGHBOURSFINDING
-    sfloat_v neighUpY[kMaxN];
-    sfloat_v neighUpZ[kMaxN];
+    float_v neighUpY[kMaxN];
+    float_v neighUpZ[kMaxN];
 #endif      
 
-    ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + hitIndex;
-    const short_m &validHitsMask = hitIndexes < numberOfHits;
+    uint_v hitIndexes( uint_v(Vc::IndexesFromZero) + hitIndex ); 
+    const int_m &validHitsMask = hitIndexes < numberOfHits;
     
-    // if the rows above and below both have hits (because if they don't, we don't need to
-    // bother to search for a path)
-
-
+      // WARNING: there is very similar code above.
     // coordinates of the hit in the current row
-    //ik 04/17/14    sfloat_v y, z, yUp, zUp, yDn, zDn;
-    sfloat_v y(Vc::Zero), z(Vc::Zero), yUp(Vc::Zero), zUp(Vc::Zero), yDn(Vc::Zero), zDn(Vc::Zero); 
-    // y = fData.HitDataY( row, hitIndexes, static_cast<sfloat_m>(validHitsMask) );
-    // z = fData.HitDataZ( row, hitIndexes, static_cast<sfloat_m>(validHitsMask) );
-    y = fData.HitDataY( row, hitIndex );
-    z = fData.HitDataZ( row, hitIndex );
+    float_v y(Vc::Zero), z(Vc::Zero), yUp(Vc::Zero), zUp(Vc::Zero), yDn(Vc::Zero), zDn(Vc::Zero);
+    
+    y = fData.UnusedHitPDataY( row, hitIndexes, static_cast<float_m>(validHitsMask) );
+    z = fData.UnusedHitPDataZ( row, hitIndexes, static_cast<float_m>(validHitsMask) );
+    
 #ifdef DRAW_NEIGHBOURSFINDING
     std::cout << " centr y = " << y << " centr z = " << z << std::endl;
 #endif
@@ -159,24 +155,20 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     zDn = z * DnTx;
 
 #ifdef USE_CURV_CUT
-    const sfloat_v UpDy = yUp - y,
+    const float_v UpDy = yUp - y,
        DnDy = yDn - y;
-    const sfloat_v UpR2 = UpDy*UpDy + UpDx*UpDx,
+    const float_v UpR2 = UpDy*UpDy + UpDx*UpDx,
       DnR2 = DnDy*DnDy + DnDx*DnDx;
-    sfloat_v chi2Cut = curv2Cut + (UpErr2/UpR2 + DnErr2/DnR2)*(UpDx*DnDx)*(UpDx*DnDx); // additional error in dSlopes TODO Take into account z. TODO Use more precise error estimation // TODO change name // TODO optimize
-    // std::cout << rowIndex << " " << curv2Cut << UpErr2/UpR2*(UpDx*DnDx)*(UpDx*DnDx) << DnErr2/DnR2*(UpDx*DnDx)*(UpDx*DnDx) << std::endl;
-    // std::cout << UpErr2 << " " << DnErr2 << " " << UpDy << " " << DnDy << " " << UpR2 << " " << DnR2 << std::endl;
+    float_v chi2Cut = curv2Cut + (UpErr2/UpR2 + DnErr2/DnR2)*(UpDx*DnDx)*(UpDx*DnDx); // additional error in dSlopes TODO Take into account z. TODO Use more precise error estimation // TODO change name // TODO optimize
 #endif //  USE_CURV_CUT
 
       // find all neighbours in upper area (kMaxN at max)
     HitArea areaUp( rowUp, fData, yUp, zUp, UpDx*kAreaSizeY, UpDx*kAreaSizeZ, validHitsMask );
 
-    ushort_v maxUpperNeighbourIndex = ushort_v(Vc::Zero);
+    uint_v maxUpperNeighbourIndex = uint_v(Vc::Zero);
     int upperNeighbourIndex = 0;
     NeighbourData neighUp[kMaxN];
     while ( !( areaUp.GetNext( &neighUp[upperNeighbourIndex] ) ).isEmpty() ) {
-      assert( neighUp[upperNeighbourIndex].fLinks < rowUp.NHits() || !neighUp[upperNeighbourIndex].fValid );
-      debugS() << neighUp[upperNeighbourIndex];
 
 #ifdef DRAW_NEIGHBOURSFINDING
       neighUpY[upperNeighbourIndex] = neighUp[upperNeighbourIndex].fY;
@@ -184,11 +176,10 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
 #endif      
       neighUp[upperNeighbourIndex].fY = DnDx * ( neighUp[upperNeighbourIndex].fY - y );
       neighUp[upperNeighbourIndex].fZ = DnDx * ( neighUp[upperNeighbourIndex].fZ - z );
-      
+
       maxUpperNeighbourIndex(neighUp[upperNeighbourIndex].fValid)++;
       ++upperNeighbourIndex;
 
-      //assert( (upperNeighbourIndex < kMaxN) || ("" == " too small array ") );
       if ( ISUNLIKELY(upperNeighbourIndex >= kMaxN) ){
         // std::cout << "W AliHLTTPCCANeighboursFinder: Warning: Too many neighbours, some of them won't be considered \ Too small array. " << std::endl;
         break;
@@ -198,42 +189,43 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     int nNeighDn = 0;
     if ( upperNeighbourIndex <= 0 ) continue;// only if there are hits in the upper area
      
-    short_v bestDn(-1);
-    short_v bestUp(-1);
-    sfloat_v bestD = chi2Cut; // d must be smaller than chi2Cut to be considered at all
+    int_v bestDn(-1);
+    int_v bestUp(-1);
+    float_v bestD = chi2Cut; // d must be smaller than chi2Cut to be considered at all
     NeighbourData neighDn;
-
+    
       // iterate over all hits in lower area
-    ushort_m nextMask;
+    uint_m nextMask;
     HitArea areaDn( rowDn, fData, yDn, zDn, -DnDx*kAreaSizeY, -DnDx*kAreaSizeZ, validHitsMask );
     while ( !( nextMask = areaDn.GetNext( &neighDn ) ).isEmpty() ) {
-        // for (int i0 = 0; i0 < downNeighbourIndex; i0++) {
-        //   NeighbourData &neighDn = neighDown[i0];
-        
-      if ( ISUNLIKELY( ((Vc::Zero < maxUpperNeighbourIndex) && neighDn.fValid).isEmpty() ) ) continue; // no both neighbours
-        
-      assert( neighDn.fLinks < rowDn.NHits() || !neighDn.fValid );
-      debugS() << neighDn;
 
+      if ( ISUNLIKELY( ((uint_v(Vc::Zero) < maxUpperNeighbourIndex) && neighDn.fValid).isEmpty() ) ) continue; // no both neighbours
+#ifdef __ASSERT_YF__      
+      assert( neighDn.fLinks < rowDn.NUnusedHits() || !neighDn.fValid );
+#endif
       nNeighDn++;
 #ifdef DRAW_NEIGHBOURSFINDING
-      sfloat_v neighDnY = neighDn.fY;
-      sfloat_v neighDnZ = neighDn.fZ;
+      float_v neighDnY = neighDn.fY;
+      float_v neighDnZ = neighDn.fZ;
 #endif        
         // store distance from (y,z) times UpDx
       neighDn.fY = UpDx * ( neighDn.fY - y );
       neighDn.fZ = UpDx * ( neighDn.fZ - z );
 
-      short_m dnMask( Vc::Zero ); // mask for appropriate neibours-pairs
+      int_m dnMask( Vc::Zero ); // mask for appropriate neibours-pairs
 
         // iterate over the upper hits we found before and find the one with lowest curvature
         // (change of slope)
 
-        // for ( int i = 0; !( (ushort_v(i) < maxUpperNeighbourIndex) && nextMask).isEmpty(); ++i ) { // slower
-      for ( int i = 0; i < upperNeighbourIndex; ++i ) {
-        sfloat_m masksf( neighDn.fValid & neighUp[i].fValid ); // only store links for actually useful data.
-        const sfloat_v dy = neighDn.fY - neighUp[i].fY;
-        const sfloat_v dz = neighDn.fZ - neighUp[i].fZ;
+      uint_v curMaxUpperNeighbourIndex = maxUpperNeighbourIndex;
+      curMaxUpperNeighbourIndex(!neighDn.fValid) = 0;
+      const int maxMaxUpperNeighbourIndex = curMaxUpperNeighbourIndex.max();
+        // for ( int i = 0; !( (uint_v(i) < maxUpperNeighbourIndex) && nextMask).isEmpty(); ++i ) { // slower
+      for ( int i = 0; i < maxMaxUpperNeighbourIndex; ++i ) {
+        float_m masksf( neighDn.fValid & neighUp[i].fValid ); // only store links for actually useful data.
+        
+        const float_v dy = neighDn.fY - neighUp[i].fY;
+        const float_v dz = neighDn.fZ - neighUp[i].fZ;
 #ifdef DRAW_NEIGHBOURSFINDING
         AliHLTTPCCADisplay::Instance().ClearView();
         AliHLTTPCCADisplay::Instance().SetSliceView();
@@ -245,31 +237,27 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
         AliHLTTPCCADisplay::Instance().DrawSliceHits(-1, 0.5);
         AliHLTTPCCADisplay::Instance().Ask();
 #endif
-        const sfloat_v d = dy * dy + dz * dz;
+        const float_v d = dy * dy + dz * dz;
         masksf &= d < bestD;
         bestD( masksf ) = d;
-        const short_m masks( masksf );
+        const int_m masks( masksf );
         dnMask |= masks;
-        bestUp( masks ) = neighUp[i].fLinks;
+        bestUp( masks ) = static_cast<int_v>(neighUp[i].fLinks);
         debugS() << "best up: " << masks << " " << bestUp << std::endl;
       }
-      bestDn( dnMask ) = neighDn.fLinks;
+      bestDn( dnMask ) = static_cast<int_v>(neighDn.fLinks);
       debugS() << "best down: " << dnMask << " " << bestDn << std::endl;
     }
-      // sfloat_m mask_out = bestD < chi2Cut; sfloat_v bestD_out = -1; bestD_out(mask_out) = bestD; std::cout << "-" << bestD_out << chi2Cut<< std::endl; // dbg
-
-      //debugS() << "Links for row " << rowIndex << ", hit " << hitIndex << ": " << bestUp << " " << bestDn << std::endl;
-
+#ifdef __ASSERT_YF__
     assert( bestD < chi2Cut || ( bestUp == -1 && bestDn == -1 ) );
-
+#endif
     debugS() << "Set Link Data: Up = " << bestUp << ", Down = " << bestDn << std::endl;
 
       // store the link indexes we found
-    const short_m nonUsedMask = validHitsMask && ( short_v(fData.HitDataIsUsed( row ), hitIndexes) == short_v( Vc::Zero ) );
-    assert( ((bestUp >= -1) && (bestUp < rowUp.NHits()) && nonUsedMask) == nonUsedMask );
-    assert( ((bestDn >= -1) && (bestDn < rowDn.NHits()) && nonUsedMask) == nonUsedMask );
-    fData.SetHitLinkUpData( row, hitIndexes, bestUp, nonUsedMask);
-    fData.SetHitLinkDownData( row, hitIndexes, bestDn, nonUsedMask);
+    assert( ((bestUp >= -1) && (bestUp < rowUp.NUnusedHits()) && validHitsMask) == validHitsMask );
+    assert( ((bestDn >= -1) && (bestDn < rowDn.NUnusedHits()) && validHitsMask) == validHitsMask );
+    fData.SetUnusedHitLinkUpData( row, rowUp, hitIndexes, bestUp, validHitsMask);
+    fData.SetUnusedHitLinkDownData( row, rowDn, hitIndexes, bestDn, validHitsMask);
 
 // #ifdef DRAW TODO uncomment and fix problem with DRAW_EVERY_LINK
 //     if ( DRAW_EVERY_LINK ) {

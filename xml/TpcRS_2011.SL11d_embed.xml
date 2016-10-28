@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  

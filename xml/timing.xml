@@ -30,7 +30,7 @@
 #  ${exec} -q -b 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
  ${exec} -q -b 'bfc.C(100,"P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D","/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq")' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
 <!-- <input URL="command:Nightlies.pl" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->

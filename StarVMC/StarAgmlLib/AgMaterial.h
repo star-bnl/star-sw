@@ -97,13 +97,13 @@ class AgMaterial : public TNamed, public AgParameterList<double>
   // Components
   std::vector< TString >  mC;
   std::vector< Double_t > mA, mZ, mW;
-
+public:	
   struct MyComponent {
 	  Double_t a;
 	  Double_t z;
 	  Double_t w;
   };
-
+protected:
   std::map< TString, MyComponent > mComponentTable; // Table storing already defined components
 
   static std::map< TString, AgMaterial * > mMaterialTable; // List of existing materials  

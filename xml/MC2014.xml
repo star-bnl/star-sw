@@ -54,8 +54,8 @@
 #  root4star -q -b 'bfc.C(9999,"in'${fitter}',P2014a,IdealHFT,bbcSim,btofsim,pxlFastSim,istSim,btofMatch,btofCalib,emcY2,EEfs,mtdSim,mtdMatch,BEmcChkStat,pxlHit,istHit,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,ReadAll,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/pileup_eval_Oct05/*.event.root" /> -->
 <!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/pileup_eval_Oct05/rcf15005_999_10evts.event.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/MC.DEV2/*event.root" /> -->

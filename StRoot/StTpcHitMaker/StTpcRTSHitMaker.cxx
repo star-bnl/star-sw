@@ -35,6 +35,7 @@
 #  include "DAQ_READER/daq_dta.h"
 #  include "DAQ_READER/daqReader.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
+#include "TBenchmark.h"
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -157,6 +158,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Make() {
+  gBenchmark->Reset();
+  gBenchmark->Start("StTpcRTSHitMaker::Make");
   static  Short_t ADCs[__MaxNumberOfTimeBins__];
   static UShort_t IDTs[__MaxNumberOfTimeBins__];
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
@@ -215,7 +218,9 @@ Int_t StTpcRTSHitMaker::Make() {
 	  }
 	}
 	if (l > 0) {
+	  gBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
 	  dta->finalize(l,sec,row,pad);
+	  gBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
 	  NoAdcs += l;
 	}
       }
@@ -393,5 +398,8 @@ Int_t StTpcRTSHitMaker::Make() {
     return kStSkip;
   }
   if (! IAttr("NoTpxAfterBurner")) StTpcHitMaker::AfterBurner(hitCollection);
+  gBenchmark->Stop("StTpcRTSHitMaker::Make");
+  gBenchmark->Show("StTpcRTSHitMaker::Make");
+  gBenchmark->Show("StTpcRTSHitMaker::Make::finalize");
   return kStOK;
 }

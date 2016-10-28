@@ -4,12 +4,82 @@
 #include "g2t_emc.inc"
 #include "genhit.h"
 #include "atlsim/gentit.inc"
-+cde,gcunit.
 
       INTEGER   G2T_HCA,G2R_GET_HIT,Iprin/0/,Idigi,i,isys, khit
       logical   Local/.true./
 *
       CHARACTER *4 myhit/'HCAL'/
+*
+#ifndef CERNLIB_GFORTRAN
+      G2T_HCA=STAFCV_OK
+      if (g2t_emc_hit_h.maxlen.le.0) return
+
+      i=0
+      g2t_emc_hit_h.nok = 0
+      
+      DO isys=1,7               ! """ Loop over all sensitive fibers """ 
+* " STAR implementation HcalGeo, HcalGeo1 "
+         IF (isys .eq. 1)  call G2R_GET_SYS ('HCAL','HCEL',Iprin,Idigi) 
+         IF (isys .eq. 2)  call G2R_GET_SYS ('HCAL','HCES',Iprin,Idigi) 
+         IF (isys .eq. 3)  call G2R_GET_SYS ('HCAL','FPSC',Iprin,Idigi) 
+
+* " Test beam implementation, HcalGeoF "
+         IF (isys .eq. 4)  call G2R_GET_SYS ('HCAL','BBCF',Iprin,Idigi) ! Front scint paddle 
+         IF (isys .eq. 5)  call G2R_GET_SYS ('HCAL','BBCB',Iprin,Idigi) ! Back scint paddle 
+         if (isys .eq. 6)  call G2R_GET_SYS ('HCAL','LEDG',Iprin,Idigi) ! Lead glass
+         
+* "For Preshower HcalGeo"
+         if (isys .eq. 7)  call G2R_GET_SYS ('HCAL','HSTP',Iprin,Idigi)  !  preshower 
+
+         if (Iprin.lt.0) then 
+            cycle               ! " Next iteration of the loop "
+         endif
+         Local  = Idigi.ge.2
+         
+         Do While (G2R_GET_HIT('hca') .eq. 0)
+            i=i+1
+            g2t_emc_hit_h.nok            = i
+            g2t_emc_hit(i).id            = i
+            g2t_emc_hit(i).de            = 0 ! Use attenuated hcal value
+            g2t_emc_hit(i).track_p       = trac
+            g2t_emc_hit(i).volume_id     = volume
+            g2t_emc_hit(i).x             = xx(1) 
+            g2t_emc_hit(i).y             = xx(2)
+            g2t_emc_hit(i).z             = xx(3)
+            
+            if (isys .lt. 3) then ! """Attenuated hit for HCA"""
+               do khit=1,15
+                  IF (chit(khit) .eq. myhit) then
+                     g2t_emc_hit(i).de = hits(khit); 
+                     exit       ! goto 5020 !break;
+                  endif
+               enddo
+            endif
+
+            if (isys .eq. 3) then ! """Unattenuated hit for preshower"""
+               g2t_emc_hit(i).de = elos
+            endif
+            
+            if (isys .eq. 4 ) then ! """Scintillator paddle """
+               g2t_emc_hit(i).de = elos
+            endif
+            
+            if (isys .eq. 5 ) then ! """Scintillator paddle """
+               g2t_emc_hit(i).de = elos
+            endif
+            
+            if (isys .eq. 6 ) then ! """Unattenuated hit for pbglass"""
+               g2t_emc_hit(i).de = elos
+            endif
+            
+            if (isys .eq. 7 ) then ! """2014 preshower"""
+               g2t_emc_hit(i).de = hits(khit); 
+            endif
+            g2t_track(trac).hit_hca_p    = i
+            g2t_track(trac).n_hca_hit    = g2t_track(trac).n_hca_hit + 1
+         enddo 
+      enddo    
+#else /* CERNLIB_GFORTRAN */
 *
       G2T_HCA=STAFCV_OK
       if (g2t_emc_hit_h.maxlen.le.0) return
@@ -90,6 +160,7 @@
          enddo """Loop over hits"""
 
       enddo """Loop over fiber types"""
-
-      RETURN
+#endif /* ! CERNLIB_GFORTRAN */
+      return
       END
+

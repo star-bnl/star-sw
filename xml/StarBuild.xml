@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job name="Build" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+  cd ${SUBMITTINGDIRECTORY}  
+  echo ${INPUTFILE0}
+  source ~/bin/SetVersion.csh ${INPUTFILE0}
+  cd $STAR
+  cons -k  &gt;&amp; ${SUBMITTINGDIRECTORY}/${INPUTFILE0}.log
+</command>
+<stdout URL="file:/star/u/fisyak/prodlog/Build_sched$JOBID.log" />
+<input URL="command:BuildList.pl" />
+</job>

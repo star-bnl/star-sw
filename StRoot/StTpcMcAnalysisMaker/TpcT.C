@@ -37,6 +37,7 @@
 #include "TTreeIter.h"
 #include "TDirectory.h"
 #include "TROOT.h"
+#include "TEnv.h"
 #include "TChain.h"
 #include "TFile.h"
 #include "TVector3.h"
@@ -51,6 +52,7 @@
 #include "TPrincipal.h"
 #endif
 #include "StCloseFileOnTerminate.h"
+#include "TVector3.h"
 #define __TEST__
 #ifdef __TEST__
 #include "TMDFParameters.h"
@@ -74,7 +76,7 @@ static const Double_t K3OP = 0.55;    // K3 from E.Mathieson, Fig. 5.3b (pads) f
 static const Double_t K3IR = 0.89;    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 0.5
 static const Double_t K3OR = 0.61;    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 1.0
 static const Double_t tau     = 71e-9; // from pulser fit
-//static const Double_t pShaper = 5.15;  //     -"-         ?
+//static const Double_t pShaper = 5.15;  //    
 static const Double_t FWHM = 2.827;  //     FWHM = sqrt(p)*tau*(2*TMath::Sqrt(2*TMath::Log(2.)));
 // inner  FWHM = 2.827; tau = 0.5545
 // outer  FWHM = 3.038; tau = 0.5533
@@ -1061,7 +1063,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   fOut->Write();
 }
 //________________________________________________________________________________
-void TpcTAdcTz(const Char_t *files="*.root", const Char_t *Out = "") { // replace Z => tZ
+void TpcTAdcTanL(const Char_t *files="*.root", const Char_t *Out = "") {
   TDirIter Dir(files);
   Char_t *file = 0;
   Char_t *file1 = 0;
@@ -1091,35 +1093,46 @@ void TpcTAdcTz(const Char_t *files="*.root", const Char_t *Out = "") { // replac
   TString output(Out);
   if (output == "") {
     output = file1;
-    output.ReplaceAll(".root",".ADCtZ.root");
+    output.ReplaceAll(".root",".ADCTanL3D.root");
   }
   cout << "Output for " << output << endl;
   const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
   const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
   const Int_t&       fAdcSum                                  = iter("fAdcSum");
-  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
+//  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
   const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
   const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
   const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
   const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
+  const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
+  const Float_t*&    fMcHit_mLocalMomentum_mX2                = iter("fMcHit.mLocalMomentum.mX2");
+  const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
   //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
   const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+//   const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
+//   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
+//   const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
+//   const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
   if (! fOut) fOut = new TFile(output,"recreate");
   fOut->cd();
 #if 0
   TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
 #endif
-  TProfile2D *inout[4];
-  inout[0] = new TProfile2D("inner","log(simulated ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[1] = new TProfile2D("outer","log(simulated ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[2] = new TProfile2D("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
-  inout[3] = new TProfile2D("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
-			    70,3.,10.,210,-210,210,"");
+  TH3F *inout[6];
+  inout[0] = new TH3F("inner","log(simulated ADC) versus log(recon. ADC) and TanL",
+		            80,3.5,7.5,80,-2,2,80,3.5,7.5);
+  inout[1] = new TH3F("outer","log(simulated ADC) versus log(recon. ADC) and TanL",
+			    80,3.5,7.5,80,-2,2,80,3.5,7.5);
+  inout[2] = new TH3F("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and TanL",
+			    80,3.5,7.5,80,-2,2,100,-2.,2.);
+  inout[3] = new TH3F("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and TanL",
+		            80,3.5,7.5,80,-2,2,100,-2.,2.);
+  inout[4] = new TH3F("innerA","(simulated ADC)/(recon. ADC) versus log(recon. ADC) and TanL",
+			    80,3.5,7.5,80,-2,2,100,0.1,10.1);
+  inout[5] = new TH3F("outerA","(simulated ADC)/(recon. ADC) versus log(recon. ADC) and TanL",
+		            80,3.5,7.5,80,-2,2,100,0.1,10.1);
   Double_t dsCut[2] = {1., 2.};
   while (iter.Next()) {
     if (fNoRcHit != 1) continue;
@@ -1135,8 +1148,11 @@ void TpcTAdcTz(const Char_t *files="*.root", const Char_t *Out = "") { // replac
       if (fMcHit_mAdc[k] <= 0) continue;
       Double_t ratio = fMcHit_mAdc[k]/fAdcSum;
       if (ratio < 0.1 || ratio > 10) continue;
-      inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k]));
-      inout[io+2]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
+      TVector3 pxyzL(fMcHit_mLocalMomentum_mX1[k],fMcHit_mLocalMomentum_mX2[k],fMcHit_mLocalMomentum_mX3[k]);
+      Double_t TanL = pxyzL.z()/pxyzL.Perp();
+      inout[io]->Fill(TMath::Log(fAdcSum),TanL, TMath::Log(fMcHit_mAdc[k]));
+      inout[io+2]->Fill(TMath::Log(fAdcSum),TanL, TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
+      inout[io+4]->Fill(TMath::Log(fAdcSum),TanL, fMcHit_mAdc[k]/fAdcSum);
     }
   }
   fOut->Write();
@@ -1611,6 +1627,45 @@ Double_t fun2r(Double_t *x, Double_t *par) {
   return fun2(x,par) - x[0];
 }
 //________________________________________________________________________________
+Double_t fun2TanL(Double_t *x, Double_t *par) {
+  /*
+    innerM
+    FCN=49665 FROM MINOS     STATUS=UNCHANGED       0 CALLS         387 TOTAL
+    EDM=3.82662e-11    STRATEGY= 1      ERROR MATRIX ACCURATE 
+    EXT PARAMETER                                   STEP         FIRST   
+    NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+    1  offset       6.51171e+01   9.45741e-02  -5.95917e-05   1.25163e-04
+    2  z            3.50041e-01   5.17444e-03   6.60756e-06   8.73189e-03
+    3  zxAdcL      -8.60050e-02   9.37586e-04  -1.19618e-06   5.04555e-02
+    4  adcL         1.11909e+00   1.87552e-04   2.80116e-08   2.56762e-01
+    5  adcL2       -1.31037e-02   2.45839e-05   2.45839e-05   1.88516e+00
+    6  adcL3        0.00000e+00     fixed    
+    
+    f2->SetParameters(6.52745e+01,  3.29340e-01, -8.19982e-02,  1.11882e+00, -1.30767e-02,  0.00000e+00)
+    //                    9.54303e-02,  5.28211e-03,  9.59268e-04,  1.90611e-04,  2.50096e-05,   fixed    
+    .L TpcT.C+
+    TF2 *f2 = new TF2("f2",fun2,3.5,8.5,-210,210, 6);
+    f2->SetParameters(6.52745e+01,  3.29340e-01, -8.19982e-02,  1.11882e+00, -1.30767e-02,  0.00000e+00)
+    f2->SetParNames("offset","z","zxAdcL","adcL","adcL2","adcL3");
+    f2->FixParameter(5,0);
+    innerM->Fit("f2","er");
+    innerM->Draw("colz");
+    f2->Draw("cont1 same");
+  */
+  Double_t adcL   = x[0];
+  Double_t TanL      = x[1];
+  Double_t offset = par[0] + TanL*par[1] + TanL*TanL*par[2];
+  Double_t adc    = adcL*(par[3] + adcL*par[4]) + par[5];
+  Double_t adcS   = offset + TMath::Exp(adc);
+  Double_t result = 0;
+  if (adcS > 0) result = TMath::Log(adcS);
+  return result;
+}
+//________________________________________________________________________________
+Double_t fun2TanLr(Double_t *x, Double_t *par) {
+  return fun2TanL(x,par) - x[0];
+}
+//________________________________________________________________________________
 Double_t fun1(Double_t *x, Double_t *par) {
   /*
     Int_t i;
@@ -1705,6 +1760,47 @@ TProfile2D *CleanAdc(const Char_t *name) {
   return histM;
 }
 //________________________________________________________________________________
+TH2D *CleanAdcTanL(const Char_t *name) {
+  TH2D *hist0 = (TH2D *) gDirectory->Get(Form("%s_0",name)); 
+  TH2D *hist1 = (TH2D *) gDirectory->Get(Form("%s_1",name));
+  TH2D *histChi2 = (TH2D *) gDirectory->Get(Form("%s_chi2",name));
+  if (! hist0 || ! hist1) return 0;
+  TH2D *histM = new TH2D(*hist1);
+  histM->SetName(Form("%sM",hist1->GetName()));
+  histM->SetXTitle("log(ADC)");
+  histM->SetYTitle("TanL");
+  Int_t nx = histM->GetNbinsX();
+  Int_t ny = histM->GetNbinsY();
+#if 1
+  TNtuple *FitP = new TNtuple(Form("FitP%s",name),"Fit results","x:y:entries:mean:rms:chi2");
+#endif
+  Float_t xx[6];
+  TAxis *ax = histM->GetXaxis();
+  TAxis *ay = histM->GetYaxis();
+  for (Int_t i = 1; i <= nx; i++) {
+    xx[0] = ax->GetBinCenter(i);
+    for (Int_t j = 1; j <= ny; j++) {
+      Int_t bin = histM->GetBin(i,j);
+      xx[1] = ay->GetBinCenter(j);
+      xx[2] = hist0->GetBinContent(bin);
+      xx[3] = histM->GetBinContent(bin);
+      xx[4] = histM->GetBinError(bin);
+      xx[5] = histChi2->GetBinContent(bin);
+      Double_t er = histM->GetBinError(bin);
+      if (xx[5] <= 0 || xx[5] > 1e3 || xx[4] <= 0 || xx[4] > 1e-2) {
+	histM->SetBinContent(bin,0.);
+	histM->SetBinContent(bin,0.);
+	histM->SetBinError(bin,0.);
+	continue;
+      }
+#if 1
+      FitP->Fill(xx);
+#endif
+    }
+  }
+  return histM;
+}
+//________________________________________________________________________________
 void AdcCorrections() {
   /*
 root.exe [7] AdcCorrections()
@@ -1777,6 +1873,7 @@ Outer
       f2->ReleaseParameter(1);
       //      f2->SetParLimits(1,0,100);
       f2->ReleaseParameter(2);
+      f2->ReleaseParameter(3);
       f2->ReleaseParameter(4);
       cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;
       histM->Fit(f2,"er");
@@ -1807,6 +1904,184 @@ Outer
 	else            h->Draw("same");
 	f1->Draw("same");
 	leg->AddEntry(h,Form("z = %5.2f",params[6]));
+      }
+      leg->Draw();
+    }
+  }
+}
+//________________________________________________________________________________
+void AdcTanLCorr() {
+  gErrorIgnoreLevel = kWarning;
+//   gErrorIgnoreLevel = kUnset;
+//   gEnv->SetValue("Root.ErrorIgnoreLevel","Error");
+  /*
+root.exe [7] AdcCorrections()
+Fit inner_1     Fitted value of par[1]=Mean
+ FCN=7.2094e+08 FROM MINOS     STATUS=SUCCESSFUL     91 CALLS         759 TOTAL
+                     EDM=0.000310164    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       4.05717e+01   1.93499e-02   7.16491e-04   5.26955e-02
+   2  TanL        -4.84176e+00   6.42140e-03  -9.97344e-06   4.17837e-03
+   3  TanL2       -3.28316e+00   7.74073e-03   7.01116e-05  -5.50722e-02
+   4  adcL         9.11602e-01   1.18326e-04  -4.69585e-06  -9.41891e+01
+   5  adcL2        1.95102e-02   1.84353e-05   1.84353e-05   2.87544e+02
+   6  scale        0.00000e+00     fixed    
+Fit inner_1     Fitted value of par[1]=Mean
+ FCN=7.22207e+08 FROM MINOS     STATUS=SUCCESSFUL     41 CALLS         484 TOTAL
+                     EDM=6.64135e-05    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       2.13253e+01   8.63843e-03   1.56752e-06   1.73014e-01
+   2  TanL        -2.13806e+00   1.11460e-02  -1.21040e-06   3.21148e-01
+   3  TanL2       -5.21898e+00   7.50896e-03   2.16791e-07   3.21272e-01
+   4  adcL         1.03620e+00   7.61855e-06  -2.13774e-09   7.09069e+02
+   5  adcL*TanL   -1.72565e-03   6.45844e-06   6.45844e-06  -3.65653e+02
+   6  scale        0.00000e+00     fixed    
+Fit inner_1     Fitted value of par[1]=Mean
+ FCN=7.22207e+08 FROM MINOS     STATUS=SUCCESSFUL     41 CALLS         484 TOTAL
+                     EDM=6.64135e-05    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       2.13253e+01   8.63843e-03   1.56752e-06   1.73014e-01
+   2  TanL        -2.13806e+00   1.11460e-02  -1.21040e-06   3.21148e-01
+   3  TanL2       -5.21898e+00   7.50896e-03   2.16791e-07   3.21272e-01
+   4  adcL         1.03620e+00   7.61855e-06  -2.13774e-09   7.09069e+02
+   5  adcL*TanL   -1.72565e-03   6.45844e-06   6.45844e-06  -3.65653e+02
+   6  scale        0.00000e+00     fixed    
+
+Fit outer_1     Fitted value of par[1]=Mean
+ FCN=8.82867e+06 FROM MINOS     STATUS=SUCCESSFUL     59 CALLS         454 TOTAL
+                     EDM=8.33252e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       4.83688e+01   1.69548e-02   8.54696e-05  -2.08540e-03
+   2  TanL         4.32759e-01   4.85120e-03   7.84576e-07  -3.37512e-03
+   3  TanL2       -9.72259e-01   7.14205e-03  -1.34789e-06  -3.88144e-03
+   4  adcL         1.09610e+00   6.90480e-05  -3.81436e-07  -1.41069e+01
+   5  adcL2       -4.63183e-03   1.09202e-05   1.09202e-05   9.77266e-01
+   6  scale        0.00000e+00     fixed    
+Fit outer_1     Fitted value of par[1]=Mean
+ FCN=8.98762e+06 FROM MINOS     STATUS=SUCCESSFUL     37 CALLS         373 TOTAL
+                     EDM=1.25763e-08    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       5.49308e+01   7.00704e-03   0.00000e+00   3.54884e-03
+   2  TanL         1.74267e+00   1.01646e-02  -0.00000e+00   1.58443e-02
+   3  TanL2       -9.75320e-01   7.19182e-03   0.00000e+00  -6.95996e-04
+   4  adcL         1.06678e+00   4.28333e-06  -0.00000e+00   4.12940e+01
+   5  adcL*TanL   -6.67268e-04   4.79170e-06   4.79170e-06   3.19173e+01
+   6  scale        0.00000e+00     fixed    
+Fit outer_1     Fitted value of par[1]=Mean
+ FCN=8.98762e+06 FROM MINOS     STATUS=SUCCESSFUL     37 CALLS         373 TOTAL
+                     EDM=1.25763e-08    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       5.49308e+01   7.00704e-03   0.00000e+00   3.54884e-03
+   2  TanL         1.74267e+00   1.01646e-02  -0.00000e+00   1.58443e-02
+   3  TanL2       -9.75320e-01   7.19182e-03   0.00000e+00  -6.95996e-04
+   4  adcL         1.06678e+00   4.28333e-06  -0.00000e+00   4.12940e+01
+   5  adcL*TanL   -6.67268e-04   4.79170e-06   4.79170e-06   3.19173e+01
+   6  scale        0.00000e+00     fixed    
+Fit inner_1M    Fitted value of par[1]=Mean
+ FCN=3.93849e+06 FROM MINOS     STATUS=SUCCESSFUL     48 CALLS         413 TOTAL
+                     EDM=1.864e-08    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       4.05726e+01   1.87947e-02  -3.67582e-06  -1.28651e-02
+   2  TanL        -4.85202e+00   6.43032e-03   1.87191e-07   1.13007e-03
+   3  TanL2       -3.34378e+00   7.74795e-03   7.56135e-07  -3.54797e-03
+   4  adcL         9.11394e-01   1.13553e-04   1.26756e-09  -6.31966e+00
+   5  adcL2        1.95543e-02   1.76810e-05   1.76810e-05   3.08120e-01
+   6  scale        0.00000e+00     fixed    
+Fit outer_1M    Fitted value of par[1]=Mean
+ FCN=2.43991e+06 FROM MINOS     STATUS=SUCCESSFUL     36 CALLS         390 TOTAL
+                     EDM=4.17739e-07    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       4.85458e+01   1.69780e-02  -2.84895e-06   3.22771e-05
+   2  TanL         4.27749e-01   4.85463e-03  -1.06636e-06  -8.05680e-06
+   3  TanL2       -9.91017e-01   7.16082e-03   1.75979e-06   1.13187e-05
+   4  adcL         1.09529e+00   6.91235e-05   1.21961e-09   4.34624e-02
+   5  adcL2       -4.50258e-03   1.09296e-05   1.09296e-05  -1.57765e+01
+   6  scale        0.00000e+00     fixed    
+  */
+  const Char_t *histNames[4] = {"inner","outer","innerR","outerR"};
+  const Char_t *parNames[7] = {"offset","TanL","TanL2","adcL","adcL2","scale"};
+  TF2 *f2;
+  TF1 *f1;
+  TCanvas *c1, *c2;
+  for (Int_t k = 0; k < 1; k++) {
+    if (k == 0) {
+      f2 = new TF2("f2",fun2TanL,3.5,8.5,-2,2, 6);
+      c1 = new TCanvas("c1","Adc Corrections");
+      c2 = new TCanvas("c2","Adc Corrections Projections");
+    }
+    else {
+      f2 = new TF2("f2r",fun2TanLr,3.5,8.5,-2,2, 6);
+      c1 = new TCanvas("c1r","Relative Adc Corrections");
+      c2 = new TCanvas("c2r","Relative Adc Corrections Projections");
+    }
+    f2->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5]);
+    c1->Divide(2,1);
+    c2->Divide(2,1);
+    for (Int_t i = 0; i < 2; i++) {
+      TH3F *hist = (TH3F *) gDirectory->Get(histNames[2*k+i]);
+      if (! hist) continue;
+      if (k == 0) hist->SetMinimum(3);
+      else        hist->SetMinimum(-0.5);
+      //    Int_t nx = hist->GetNbinsX();
+      Int_t ny = hist->GetNbinsY();
+      //      TProfile2D *histM = (TProfile2D *) gDirectory->Get(Form("%sM",histNames[i]));
+      //      if (! histM) histM = CleanAdcTanL(histNames[i]);
+      hist->FitSlicesZ();
+      TH2D *histm = (TH2D *) gDirectory->Get(Form("%s_1",histNames[2*k+i]));
+      if (! histm) continue;
+      TH2D *histM = CleanAdcTanL(hist->GetName());
+      c1->cd(i+1);
+      f2->SetParameters(6.52745e+01,  0, 0,  1.11882e+00, -1.30767e-02,  0.00000e+00);
+      f2->FixParameter(1,0);
+      f2->FixParameter(2,0);
+      f2->FixParameter(3,1);
+      f2->FixParameter(4,0);
+      f2->FixParameter(5,0);
+      cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;
+      histM->Fit(f2,"er");
+      f2->ReleaseParameter(1);
+      //      f2->SetParLimits(1,0,100);
+      f2->ReleaseParameter(2);
+      f2->ReleaseParameter(3);
+      f2->ReleaseParameter(4);
+      cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;
+      histM->Fit(f2,"er");
+      histM->Draw("colz");
+      f2->Draw("cont1 same");
+      c2->cd(i+1);
+      TLegend *leg = new TLegend(0.6,0.1,0.9,0.4);
+      TAxis *y = histM->GetYaxis();
+      Double_t params[7];
+      f2->GetParameters(params);
+      Int_t color = 0;
+      for (Int_t j = 12; j <= ny-12; j += 10) {
+	TH1D *h = histM->ProjectionX(Form("%sj%i",histM->GetName(),j),j,j);  
+	if (h->GetEntries() < 100) continue;
+	params[6] = y->GetBinCenter(j); 
+	h->SetTitle(Form("%s at TanL = %5.2f",histM->GetTitle(),params[6]));
+	cout << h->GetTitle() << endl;
+	color++;
+	h->SetMarkerStyle(20);
+	h->SetMarkerColor(color);
+	h->SetStats(0); 
+	if (k == 0)  f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1,3,9,7);
+	else         f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1r,3,9,7);
+	f1->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5],parNames[6]);
+	f1->SetParameters(params); 
+	f1->SetLineColor(color);
+	h->GetListOfFunctions()->Add(f1);
+	if (color == 1) h->Draw();
+	else            h->Draw("same");
+	f1->Draw("same");
+	leg->AddEntry(h,Form("TanL = %5.2f",params[6]));
       }
       leg->Draw();
     }

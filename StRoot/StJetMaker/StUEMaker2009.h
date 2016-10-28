@@ -48,7 +48,7 @@ StJetMaker2009 *mJetMaker;
 StJetSkimEventMaker *mSkimMaker;
 
 
-private:
+//private:
   StJetCandidate* findLeadingJet(StJetVertex *vertex);
   // void AddRegion(StJetCandidate *leadingjet, StjTrackList trackList, StUeEvent *event);
   // void addJet(const StProtoJet& protojet, StJetEvent* event, StJetVertex* vertex);

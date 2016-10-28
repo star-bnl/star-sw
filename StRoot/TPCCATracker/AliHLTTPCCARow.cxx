@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCARow.cxx,v 1.1 2016/02/05 23:27:28 fisyak Exp $
+// @(#) $Id: AliHLTTPCCARow.cxx,v 1.2 2012/08/13 19:35:05 fisyak Exp $
 //***************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -44,9 +44,11 @@ void AliHLTTPCCARow::StoreToFile( FILE *f, const char *startPointer ) const
   BinaryStoreWrite( fLinkUpData, startPointer, f );
   BinaryStoreWrite( fLinkDownData, startPointer, f );
 
-  BinaryStoreWrite( fHitDataY, startPointer, f );
-  BinaryStoreWrite( fHitDataZ, startPointer, f );
-
+  // BinaryStoreWrite( fHitDataY, startPointer, f );
+  // BinaryStoreWrite( fHitDataZ, startPointer, f );
+  BinaryStoreWrite( fHitPDataY, startPointer, f );
+  BinaryStoreWrite( fHitPDataZ, startPointer, f );
+  
   BinaryStoreWrite( fClusterDataIndex, startPointer, f );
 
   BinaryStoreWrite( fHitWeights, startPointer, f );
@@ -65,9 +67,11 @@ void AliHLTTPCCARow::RestoreFromFile( FILE *f, char *startPtr )
   BinaryStoreRead( fLinkUpData, startPtr, f );
   BinaryStoreRead( fLinkDownData, startPtr, f );
 
-  BinaryStoreRead( fHitDataY, startPtr, f );
-  BinaryStoreRead( fHitDataZ, startPtr, f );
-
+  // BinaryStoreRead( fHitDataY, startPtr, f );
+  // BinaryStoreRead( fHitDataZ, startPtr, f );
+  BinaryStoreRead( fHitPDataY, startPtr, f );
+  BinaryStoreRead( fHitPDataZ, startPtr, f );
+  
   BinaryStoreRead( fClusterDataIndex, startPtr, f );
 
   BinaryStoreRead( fHitWeights, startPtr, f );
