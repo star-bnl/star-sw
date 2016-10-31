@@ -3,8 +3,14 @@ if ("$OPTSTAR" == "$XOPTSTAR") then
   if (! -d $XOPTSTAR) mkdir -p $XOPTSTAR
 endif
 setenv FORCE_32BITS FALSE
+setenv CC  "gcc"
+setenv CXX "g++"
+setenv F77 "gfortran"
 switch (${STAR_HOST_SYS})
   case "*x8664*":
+        setenv CC       "gcc -m64"
+        setenv CXX      "g++ -m64"
+        setenv F77      "gfortran -m64"
 	setenv CFLAGS   "-m64 -fPIC"
 	setenv CXXFLAGS "-m64 -fPIC"
 	setenv LDFLAGS  "-m64"
@@ -13,6 +19,9 @@ switch (${STAR_HOST_SYS})
      breaksw
   default:
         setenv FORCE_32BITS TRUE
+        setenv CC       "gcc -m32"
+        setenv CXX      "g++ -m32"
+        setenv F77      "gfortran -m32"
 	setenv CFLAGS   "-m32 -fPIC"
 	setenv CXXFLAGS "-m32 -fPIC"
 	setenv LDFLAGS  "-m32"
@@ -20,6 +29,9 @@ switch (${STAR_HOST_SYS})
         setenv arch     "i386"
      breaksw
 endsw
+setenv PERL_EXT_CFLAGS   "$CFLAGS"
+setenv PERL_EXT_CPPFLAGS "$CXXFLAGS"
+
 switch (${STAR_HOST_SYS})
   case "*icc*"
         setenv CC  icc
@@ -31,8 +43,8 @@ switch (${STAR_HOST_SYS})
         setenv F77 gfortran
         setenv FC gfortran
 endsw
-# texinfo-6.3
-foreach pkg ( apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5   gsl) #  xrootd-4.4.1  Python-2.7.12 pyparsing-1.5.7 gsl  gsl-2.1 
+# 
+foreach pkg ( apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   xrootd-4.4.1  Python-2.7.12 pyparsing-1.5.7 ) #gsl  gsl-2.1 
     cd ~/sources/.${STAR_HOST_SYS}
     if ( -r ${pkg}.Done) continue
     if (! -r ${pkg}) then
@@ -46,77 +58,76 @@ foreach pkg ( apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 
             break;
           endif
         endif
+      else 
+        mkdir ${pkg}
       endif
-    else 
-      mkdir ${pkg}
     endif
-    echo "cd $pkg"
     cd ${pkg}
     switch ($pkg)
       case "xrootd-4.4.1":
-          cmake ../../${pkg} -DCMAKE_FORCE_32BITS=${FORCE_32BITS} -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} -DENABLE_PERL=FALSE
+# has problem with gcc 4.8.2
+          cmake ../../${pkg} -DCMAKE_FORCE_32BITS=${FORCE_32BITS} -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} -DENABLE_PERL=FALSE -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_SHARED_LINKER_FLAGS=$LDFLAGS
+	  make 
+          if ( $?) break;
 	  make install
-      if (! $?) then 
+          if ( $?) break;
           touch ../${pkg}.Done
-      else
-          exit 1;
-      endif
       case "apr-util*":
           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR
           make install
-     if (! $?) then 
+          if ( $?) break;
           touch ../${pkg}.Done
-     else
-          exit 1;
-     endif
           breaksw
       case "apache-log4cxx-0.10.0.CVS":
-           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR
+           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR --disable-libtool
 	   make clean
            make
+          if ( $?) break;
            make install
-     if (! $?) then 
+          if ( $?) break;
           touch ../${pkg}.Done
-     else
-          exit 1;
-     endif
           breaksw
       case "pyparsing-1.5.7":
           ${XOPTSTAR}/bin/python setup.py install
-     if (! $? ) then 
+	  if ( $?) break;
           touch ../${pkg}.Done
-     else
-          exit 1;
-     endif
           breaksw
      case "gsl":
-	setenv PREFIX $XOPTSTAR
-	libtoolize --force
-	aclocal
-	autoheader
-	automake --force-missing --add-missing
-	autoconf
+#	setenv PREFIX $XOPTSTAR
+#	libtoolize --force
+#	aclocal
+#	autoheader
+#	automake --force-missing --add-missing
+#	autoconf
+      sh -x ./autogen.sh
+#      if (! -r ./doc/version.texi) then
+#    echo "set UPDATED $(date +'%d %B %Y')" > doc/version.texi 
+#    echo "set UPDATED-MONTH $(date +'%B %Y')" >> doc/version.texi 
+#    echo "set EDITION $(PACKAGE_VERSION)" >> doc/version.texi 
+#    echo "set VERSION $(PACKAGE_VERSION)" >> doc/version.texi       
+#      endif
       case "gsl*":
 #          ./configure -arch "$arch" --prefix=PREFIX=$XOPTSTAR
-          ./configure --prefix=$XOPTSTAR
+          ./configure --prefix=$XOPTSTAR --enable-maintainer-mode
           make
+	  if ( $?) break;
           make install
-     if (! $?) then 
+	  if ( $?) break;
           touch ../${pkg}.Done
-     else
-          exit 1;
-     endif
           breaksw
+      case "texinfo*":
+          ./configure --prefix=$XOPTSTAR --disable-rpath --enable-maintainer-mode
+           make
+	  if ( $?) break;
+           make install
+	  if ( $?) break;
+          touch ../${pkg}.Done
+           breaksw
       case "apr-1.5.1":
-          breaksw
       default:
           ./configure --prefix=$XOPTSTAR
           make install
-     if (! $?) then 
           touch ../${pkg}.Done
-     else
-          exit 1;
-     endif
           breaksw
      endsw
   endif 

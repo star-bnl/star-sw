@@ -14,8 +14,9 @@ endif
 #setenv VENUS $XOPTSTAR
 #if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd/xrootd-3.2.7) source $ROOTSYS/bin/setxrd.csh  /opt/xrootd/xrootd-3.2.7
 #if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  /opt/xrootd
-if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  $ROOTSYS
-if (-r $XOPTSTAR/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  $XOPTSTAR
+#if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  $ROOTSYS
+#if (-r $XOPTSTAR/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  $XOPTSTAR
+if (-r ./bin/setxrd.csh && -d $XOPTSTAR) source ./bin/setxrd.csh  $XOPTSTAR
 setenv CERN_ROOT_Local $CERN_ROOT
 setenv SHIFTLIB "" #"-lshift"
 setenv SHIFTLIBDIR ""#$CERN/../usr.local/lib
