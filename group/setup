@@ -410,7 +410,7 @@ switch ($pkg)
 	    setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/bin:$PATH
 	    if (! $USE_64BITS) then
 		setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
-		setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#		setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
 	    else
 		setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
 	    endif
@@ -426,7 +426,14 @@ switch ($pkg)
 	    else
 		setenv LD_LIBRARY_PATH /opt/gcc/5.2.0/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
 	    endif
-          endif
+        else 
+          if (-r /star/u/kehw/software/gcc/5.2.0 ) then
+	    setenv PATH /star/u/kehw/software/binutils/bin:/star/u/kehw/software/gcc/5.2.0/bin:$PATH
+	    if (! $USE_64BITS) then
+		setenv LD_LIBRARY_PATH /star/u/kehw/software/binutils/lib:/star/u/kehw/software/gcc/5.2.0/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+	    else
+		setenv LD_LIBRARY_PATH /star/u/kehw/software/binutils/lib:/star/u/kehw/software/gcc/5.2.0/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+	    endif
         endif
 	breaksw
 	case "gcc521":

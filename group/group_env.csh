@@ -79,20 +79,16 @@ if ( $?DECHO) echo "$self :: Executing STAR_SYS"
 source ${GROUP_DIR}/STAR_SYS;#  echo "STAR_HOST_SYS = $STAR_HOST_SYS"
 
 # Define /opt/star (or equivalent)
-#if ( ! $?OPTSTAR) then
-   if (-d /opt/star) then 
-     setenv OPTSTAR /opt/star
-   else 
-    setenv OPTSTAR $AFS_RHIC/opt/star
+    if (-r ${STAR_ROOT}/opt/star) then
+      setenv OPTSTAR ${STAR_ROOT}/opt/star
+    else 
+      if (-r /opt/star) then 
+        setenv OPTSTAR /opt/star
+      endif
    endif
    setenv XOPTSTAR ${OPTSTAR}
-   if (-d ${OPTSTAR}/${STAR_HOST_SYS}) then 
+   if (-r ${OPTSTAR}/${STAR_HOST_SYS}) then 
      setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
-   else                                
-     if (-d /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/${STAR_HOST_SYS}) then
-       setenv XOPTSTAR /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/${STAR_HOST_SYS}
-       setenv  OPTSTAR  ${XOPTSTAR}
-     endif
    endif
 #endif
 # X indicates points to the AFS reference
