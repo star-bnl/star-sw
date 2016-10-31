@@ -8,7 +8,8 @@ void doEmbeddingQAMaker(
     const Bool_t isSimulation = kTRUE,
     const Float_t vzCut = 30.0, 
     const Int_t refMultMinCut = 0,
-    const Int_t refMultMaxCut = 1000
+    const Int_t refMultMaxCut = 1000,
+    const Float_t ptMaxCut = 10.
 ){
   const TString data = (isSimulation) ? "minimc tree" : "real data" ;
   const TString title = "Embedding QA from " + data ;
@@ -33,7 +34,7 @@ void doEmbeddingQAMaker(
   //
   const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 //  utility->setPtMinCut(0.1);
-//  utility->setPtMaxCut(10.0);
+  utility->setPtMaxCut(ptMaxCut);
 //  utility->setEtaCut(1.5);
 //  utility->setNHitCut(10);
 //  utility->setNHitToNPossCut(0.51);
@@ -52,6 +53,7 @@ void doEmbeddingQAMaker(
   maker->setZVertexCut(vzCut);
 	maker->setRefMultMinCut(refMultMinCut);
 	maker->setRefMultMaxCut(refMultMaxCut);
+	maker->setPtMax(ptMaxCut);
 
   /// Set rapidity cut (default is 10). 
   // Uncomment next line and put the rapidity cut if you want to make the rapidity cut
