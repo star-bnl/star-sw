@@ -359,9 +359,9 @@ if (($STAR_HOST_SYS !~ /darwin/) || # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $S
 if ($STAR_HOST_SYS !~ /darwin/ and $STAR_HOST_SYS !~ /icc/ ) {
   push @packages, "garfield";
 }
-if ($STAR_HOST_SYS !~ /icc/) {
-push @packages, "MillepedeII";
-}
+#if ($STAR_HOST_SYS !~ /icc/) {
+#push @packages, "MillepedeII";
+#}
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
