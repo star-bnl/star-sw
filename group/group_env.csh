@@ -496,8 +496,8 @@ setenv STAR_PAMS $STAR/pams;            if ($ECHO) echo   "Setting up STAR_PAMS 
 if ( -e ${STAR_ROOT}/data ) then
 setenv STAR_DATA ${STAR_ROOT}/data;     if ($ECHO) echo   "Setting up STAR_DATA = ${STAR_DATA}"
 endif
-if ( -e $STAR_PATH/repository ) then
-setenv CVSROOT   $STAR_PATH/repository; if ($ECHO) echo   "Setting up CVSROOT   = ${CVSROOT}"
+if ( -e /afs/rhic.bnl.gov/star/packages/repository ) then
+setenv CVSROOT   /afs/rhic.bnl.gov/star/packages/repository; if ($ECHO) echo   "Setting up CVSROOT   = ${CVSROOT}"
 endif
 
 
