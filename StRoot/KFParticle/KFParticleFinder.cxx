@@ -989,6 +989,9 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
 
               active[0] &= int_m(closeDaughters);
               active[1] &= int_m(closeDaughters);
+              
+              if(iTC==0) 
+                nPDGPos = 1;
 
               for(int iPDGPos=0; iPDGPos<nPDGPos; iPDGPos++)
               {
@@ -1001,7 +1004,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                 if(!fMixedEventAnalysis)
                 {
                   if(iTC==0)
-                    motherPDG(                (abs(trackPdgPos[iPDGPos])==   11) || int_m(abs(trackPdgNeg) ==   11) || isSecondary) =    22; //gamma -> e+ e-
+                    motherPDG( (abs(trackPdgPos[iPDGPos]) == 11) || int_m(abs(trackPdgNeg) == 11) || isSecondary ) = 22; //gamma -> e+ e-
                   else if(iTC==1)
                     motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])== 13 || abs(trackPdgPos[iPDGPos])==19)
                                            && (int_m(abs(trackPdgNeg) == 13) || int_m(abs(trackPdgNeg) == 19)) ) =   200113; //rho -> mu+ mu-
