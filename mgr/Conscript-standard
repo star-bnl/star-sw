@@ -200,12 +200,12 @@ if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
 
-if ($pkg eq "StDAQMaker") {
-  Depends $env1 $pkg, $LIB . "/StDaqLib.so";
-  Depends $env1 $pkg, $LIB . "/libStDaqLib.so";
-  Depends $env1 $pkg, $LIB . "/libRTS.so";
-  $LIBS = "-lStDaqLib -lRTS";
-}
+#if ($pkg eq "StDAQMaker") {
+#  Depends $env1 $pkg, $LIB . "/StDaqLib.so";
+#  Depends $env1 $pkg, $LIB . "/libStDaqLib.so";
+#  Depends $env1 $pkg, $LIB . "/libRTS.so";
+#  $LIBS = "-lStDaqLib -lRTS";
+#}
 if ( $pkg eq "StVecBosAna") {
   $EXTRA_CPPFLAGS .= " -IStRoot/StVecBosAna/utils";
 }
@@ -468,11 +468,11 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   # Append pythia 8 include path and define version
   $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include"; 
   $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include/Pythia8";
-  if ($CXXCOM =~ /gccfilt/) {
-    $CXXFLAGS .= ' -DPythia8_version=\\\\\"' . $pkg . '\\\\\" ';
-  } else {
+#  if ($CXXCOM =~ /gccfilt/) {
+#    $CXXFLAGS .= ' -DPythia8_version=\\\\\"' . $pkg . '\\\\\" ';
+#  } else {
     $CXXFLAGS .= " -DPythia8_version=\\\"$pkg\\\" ";
-  }
+#  }
   # Do not compile hepmc support, rootexamples
   @src = ();
   foreach my $s (@srcL) {
@@ -484,13 +484,17 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   @srcL = @src;
 } elsif ( $pkg =~ m/^EvtGen/ and $Dir =~ m/StarGenerator/ ){
   # Append EvtGen include path and define version
+  # Set pythia 8 version here
+  my $py8ver = "Pythia8_1_86";
   $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
   $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
   $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
-  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Pythia8_1_86/include";
+#  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Pythia8_1_86/include";
+  $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/${py8ver}/include";
   $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Photos3_61/include";
   $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include";
   $CXXFLAGS .= "-DEVTGEN_EXTERNAL=1 -DEVTGEN_PYTHIA=1 -DEVTGEN_PHOTOS=1 -DEVTGEN_TAUOLA=1 -DEvtGen_version=\\\"$pkg\\\" ";
+  $CXXFLAGS .= " -DPythia8_version=\\\"$py8ver\\\" ";
   print "CPPPATH = $CPPPATH\n" if $param::debug;
   # Do not compile test, validation
   @src = ();
