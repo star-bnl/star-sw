@@ -19,9 +19,11 @@ if ($#argv == 0 || $#argv > 3 || "$1" == "help" || "$1" == "-h") then
 
 
    Grid|OSG                         Setup Grid environment
+   geant4        {version}          load Geant4 env
    root|ROOT     {version}          load or change root version
    cern|CERN     {version} {InstallRoot} 
                                     Re-define CERN related ENV variables
+				    
 
    parasoft|PARASOFT|insure|ISURE   load the Insure++ toolkit environment
    gcc           {version}          set environment to use gcc (or alternative version)
@@ -188,6 +190,26 @@ switch ($pkg)
         endif
 	breaksw
 
+
+    # Geant4 - check first
+    case "geant4":
+       if ( $version != 0 ) then
+	    set v =".$version"
+       else
+	    set v = ""
+       endif
+       if ( -e ${OPTSTAR}/geant4$v ) then
+	    setenv G4PATH ${OPTSTAR}/geant4$v
+	    if ( -e $G4PATH/bin/geant4.csh ) then
+		setenv G4BIN ${G4PATH}/bin
+		(cd $G4PATH/bin/ && source geant4.csh)
+	    else
+		if ( $?DECHO ) echo "Geant4 setup script was not found"
+	    endif
+       else
+	    if ( $?DECHO ) echo "Geant4 version $version is not installed"
+       endif
+       breaksw
 
 
     # Root setup
