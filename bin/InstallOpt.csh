@@ -44,7 +44,7 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-foreach pkg ( apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   xrootd-4.4.1  Python-2.7.12 pyparsing-1.5.7 ) #gsl  gsl-2.1 
+foreach pkg ( apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.4.1) #gsl  gsl-2.1 
     cd ~/sources/.${STAR_HOST_SYS}
     if ( -r ${pkg}.Done) continue
     if (! -r ${pkg}) then
