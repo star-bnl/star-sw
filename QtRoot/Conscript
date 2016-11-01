@@ -13,9 +13,9 @@ $env->{ENV}->{QTDIR} = $env->{Packages}->{QT}->{DIR};
 $env->{ENV}->{IVROOT} = $env->{Packages}->{COIN3D}->{DIR}; # print "IvRoot = $env->{ENV}->{IVROOT}";
 my $STAR_HOST_SYS = $env->{ENV}->{STAR_HOST_SYS};
 my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
-my $DirPath = DirPath '.';                               print "DirPath = $DirPath\n";
-( my $obj_dir = $DirPath ) =~ s/\\/\//g;                 print "obj_dir = $obj_dir\n";
-( my $Dir = $obj_dir ) =~ s/$build\///g;                 print "Dir = $Dir\n";
+my $DirPath = DirPath '.';                               #print "DirPath = $DirPath\n";
+( my $obj_dir = $DirPath ) =~ s/\\/\//g;                 #print "obj_dir = $obj_dir\n";
+( my $Dir = $obj_dir ) =~ s/$build\///g;                 #print "Dir = $Dir\n";
 my $PKGT = "QtRoot";
 
 # Import from ENV variables
