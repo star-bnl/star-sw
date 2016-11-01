@@ -82,7 +82,7 @@ my $FPPFLAGS= $env->{FPPFLAGS};
 my $FCCOM   = $env->{FCCOM};
 my $AGETOFCOM   = $env->{AGETOFCOM};
 my $LIBS    = $env->{LIBS}; #  print "LIBS  = $LIBS ========================================\n";
-my $LDIRS   = $ebv1->{_LDIRS};#  print "LDIRS = $LDIRS, LIB = $LIB  ========================================\n";
+my $LDIRS   = $env->{_LDIRS};#  print "LDIRS = $LDIRS, LIB = $LIB  ========================================\n";
 my $SOFLAGS = $env->{SOFLAGS};
 my $STIC    = $env->{STIC};
 my $LD      = $env->{LD};
@@ -989,11 +989,11 @@ TDataSet *CreateTable() {
 	      Depends $env1 [$geom_h,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 	      Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
 	      Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		qq (root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null; mv $geom_h $geometry $hall %>:d); #   mv geom.rz %>:f;
+		qq (cd  %>:d; root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
 	    } else{
 	      Depends $env1 [$geom_h], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
 	      Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
-		qq (root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null; mv $geom_h $geometry $hall %>:d); #   mv geom.rz %>:f;
+		qq (cd  %>:d; root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
 	    }
 	  }
 	  if ($geomlist) { $geomlist .= "|";}
