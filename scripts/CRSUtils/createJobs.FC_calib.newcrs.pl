@@ -7,8 +7,8 @@
 # createJobs.FC_calib.newcrs.pl  
 # L.Didenko
 # script to create jobfiles to processed with calibration productions for some sybsystem.
-# Script requires 5  arguments: production Series, chain name, subsystem calib tag,
-# stream name ('all' if no selection), filename with list of runnumbers
+# Script requires 4  arguments: production tag, chain name, list of files, subsystem calib tag.
+# 
 # 
 # 
 ##################################################################################################
@@ -33,18 +33,17 @@ my $debugOn=0;
 my $prodPeriod = $ARGV[0]; 
 my $trig; 
 my $chName = $ARGV[1];
-my $tgcalib = $ARGV[2];
-my $ftype = $ARGV[3];
-my $fileName = $ARGV[4];
-my $datDisk = "/star/data+15-16";
+my $fileName = $ARGV[2];
+my $tgcalib = $ARGV[3];
+my $datDisk = "/star/data+19-21";
 
-my @runSet = (); 
+my @fileSet = (); 
 
  my $listName = "/star/u/starreco/".$fileName;
 
  open (RUNLIST, $listName ) or die "cannot open $listName: $!\n";
 
- @runSet = <RUNLIST>;
+ @fileSet = <RUNLIST>;
 
 ###Set directories to be created for jobfiles
 
@@ -70,12 +69,10 @@ my $JOB_DIR =  "/star/u/starreco/" . $prodPeriod ."/requests/daq";;
  my $mlogFile = "n/a";
  my $mlogDir = "n/a";
  my $mjobSt = "n/a";
- my $mNev  = 0;
  my $mchName = "n/a";
  my $strName;
  my $hpssSt = 'n/a';
  my $outSt = 'n/a';
-# my $tgcalib = "TOF/dEdx";
 
 
 #############################################################################
@@ -133,6 +130,7 @@ if ( $user eq ""){
 
 my $nfiles = 0;
 my $mrunId;
+my $clfile;
 my @jobs_set = ();
 my $fileSeq;
 my $field;
@@ -140,28 +138,23 @@ my @prt = ();
 my @prts = ();
 my $jpath;
 my $jfile;
-my $flname;
 my $chain;
 my $jbset;
 
- for ($ii=0; $ii< scalar(@runSet); $ii++)  {
+ for ($ii=0; $ii< scalar(@fileSet); $ii++)  {
 
-   chop  $runSet[$ii];
-   print $runSet[$ii], "\n";
+   chop  $fileSet[$ii];
+   print $fileSet[$ii], "\n";
 
  @jobs_set = ();
  $nfiles = 0;
- $mrunId = $runSet[$ii];
+ $clfile = $fileSet[$ii];
 
- if( $ftype eq "all") {
 
-  $fileC->set_context("runnumber=$runSet[$ii]","filetype=online_daq","sanity=1","storage=HPSS","limit=0");
-   }else{
+  $fileC->set_context("filename=$fileSet[$ii]","filetype=online_daq","sanity=1","storage=HPSS");
 
-  $fileC->set_context("runnumber=$runSet[$ii]","filetype=online_daq","filename~$ftype","sanity=1","storage=HPSS","limit=0");
-   }
 
-  @jobs_set = $fileC->run_query("trgsetupname","path","filename","runnumber","fileseq","magscale");
+  @jobs_set = $fileC->run_query("trgsetupname","path","runnumber","fileseq","magscale");
 
     $fileC->clear_context();
 
@@ -172,20 +165,20 @@ my $jbset;
     @prt = ();
     @prt = split("::",$jobline);
 
+     
+    $mflname = $clfile;
     $trig = $prt[0];
     $jpath  = $prt[1];
-    $flname = $prt[2];
+    $mrunId = $prt[2];
     $fileSeq = $prt[3];
-    $mrunId = $prt[4];
-    $field = $prt[5];
-    $jfile = $flname;
+    $field = $prt[4];
+    $jfile = $clfile;
     $jfile =~ s/.daq//g;
     @prts = ();
     @prts = split ("_",$jfile);
     $strName = $prts[1];
 
-    $mprodSr = $prodPeriod; 
-    $mflName = $flname;       
+    $mprodSr = $prodPeriod;       
     $mlogFile = $jfile . ".log";
     $mlogDir = $JOB_LOG;
     $mjobSt = "n/a";
@@ -308,6 +301,11 @@ my $jbset;
        print JOB_FILE "type = HPSS\n";
        print JOB_FILE "file = $hpss_dst_file2\n";
        print JOB_FILE "               \n";
+       print JOB_FILE "[output-3]\n";
+       print JOB_FILE "path = $hpss_dst_dir\n";
+       print JOB_FILE "type = HPSS\n";
+       print JOB_FILE "file = $hpss_dst_file3\n";
+       print JOB_FILE "               \n";
        print JOB_FILE "[exec-0]\n";
        print JOB_FILE "args = $execargs\n";
        print JOB_FILE "gzip_output = True\n";
@@ -317,7 +315,7 @@ my $jbset;
        print JOB_FILE "              \n";
        print JOB_FILE "[main]\n";
        print JOB_FILE "num_inputs = 1\n";
-       print JOB_FILE "num_outputs = 3\n";
+       print JOB_FILE "num_outputs = 4\n";
        print JOB_FILE "auto_remove = true\n";
        print JOB_FILE "              \n";
        print JOB_FILE "[input-0]\n";

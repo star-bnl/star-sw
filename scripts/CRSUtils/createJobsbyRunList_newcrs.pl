@@ -28,7 +28,7 @@ $dbuser="starreco";
 $dbpass="";
 $dbname="operation";
 
-$JobStatusT = "JobStatus2015";
+$JobStatusT = "JobStatus2016";
 $ProdOptionsT = "ProdOptions";
 
 my $prodPeriod = $ARGV[0]; 
@@ -36,7 +36,7 @@ my $chName = $ARGV[1];
 my $fileName = $ARGV[2]; 
 my $ftype = $ARGV[3];
 
-my $datDisk = "/star/data+25-98";             
+my $datDisk = "/star/data+24-96";             
 my $trig;
 
 my $listName = "/star/u/starreco/".$fileName;
@@ -152,7 +152,7 @@ my @flsplit = ();
  
   if( $ftype eq "all") {
 
-  $fileC->set_context("runnumber=$runList[$ii]","filetype=online_daq","sanity=1","storage=HPSS","limit=0" );
+  $fileC->set_context("runnumber=$runList[$ii]","filetype=online_daq","sanity=1","storage=HPSS","limit=0");
    }else{
   
   $fileC->set_context("runnumber=$runList[$ii]","filetype=online_daq","filename~$ftype","sanity=1","storage=HPSS","limit=0" );
@@ -280,7 +280,7 @@ my @flsplit = ();
 
    my $exArg = "4,".$jlibVer ."," .$dataDisk . ",-1," . $fchain;
   
-    my $jb_new = $JobDir . "/jobfiles/" . $trig."_".$pts[0]."_".$pts[1]."_".$gfile;
+    my $jb_new = $JobDir."/jobfiles/".$trig."_".$pts[0]."_".$pts[1]."_".$gfile;
 
       my $hpss_raw_dir  = $TOPHPSS_SINK . "/" . $Jsetr;
       my $hpss_raw_file = $inFile;
@@ -288,8 +288,8 @@ my @flsplit = ();
       my $hpss_dst_file0 = $gfile . ".MuDst.root";
       my $hpss_dst_file1 = $gfile . ".hist.root";
       my $hpss_dst_file2 = $gfile . ".tags.root";
-      my $hpss_dst_file3 = $gfile . ".event.root";
-#      my $hpss_dst_file4 = $gfile . ".runco.root";    
+      my $hpss_dst_file3 = $gfile . ".picoDst.root";
+      my $hpss_dst_file4 = $gfile . ".event.root";
       my $executable     = "/afs/rhic.bnl.gov/star/packages/scripts/bfcca";
       my $execargs = $exArg;
          $execargs =~ s/,/ /g;
@@ -315,6 +315,11 @@ my @flsplit = ();
        print JOB_FILE "type = HPSS\n";
        print JOB_FILE "file = $hpss_dst_file2\n";
        print JOB_FILE "               \n"; 
+       print JOB_FILE "[output-3]\n";
+       print JOB_FILE "path = $hpss_dst_dir\n";
+       print JOB_FILE "type = HPSS\n";
+       print JOB_FILE "file = $hpss_dst_file3\n";
+       print JOB_FILE "               \n";
        print JOB_FILE "[exec-0]\n";
        print JOB_FILE "args = $execargs\n";
        print JOB_FILE "gzip_output = True\n";
@@ -324,7 +329,7 @@ my @flsplit = ();
        print JOB_FILE "              \n"; 
        print JOB_FILE "[main]\n";
        print JOB_FILE "num_inputs = 1\n";
-       print JOB_FILE "num_outputs = 3\n";
+       print JOB_FILE "num_outputs = 4\n";
        print JOB_FILE "queue = default\n";
        print JOB_FILE "              \n"; 
        print JOB_FILE "[input-0]\n";
