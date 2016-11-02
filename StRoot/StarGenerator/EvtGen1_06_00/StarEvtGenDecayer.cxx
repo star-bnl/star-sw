@@ -17,6 +17,7 @@
 #include "TParticle.h"
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
+#include "TSystem.h"
 #include "StMessMgr.h"
 #include <iostream>
 
@@ -39,7 +40,20 @@ StarEvtGenDecayer::StarEvtGenDecayer(EvtGen* evtGen): mEvtGen(evtGen), mEvtGenRa
     std::list<EvtDecayBase*> extraModels = genList.getListOfModels();
     
     // the hardcoded paths are temporary
-    mEvtGen = new EvtGen("StRoot/StarGenerator/EvtGen1_06_00/DECAY.DEC","StRoot/StarGenerator/EvtGen1_06_00/evt.pdl", (EvtRandomEngine*)mEvtGenRandomEngine,radCorrEngine, &extraModels);
+    TString decay = "StRoot/StarGenerator/EvtGen1_06_00/DECAY.DEC";
+    TString evt   = "StRoot/StarGenerator/EvtGen1_06_00/evt.pdl";
+
+    ifstream in(decay);
+    if (!in.good()) { 
+      decay = "$(STAR)/"+decay;  decay = gSystem->ExpandPathName( decay.Data() );
+      evt   = "$(STAR)/"+evt;    evt   = gSystem->ExpandPathName( evt.Data()   );
+    }
+
+    mEvtGen = new EvtGen( decay, 
+			  evt,
+			  (EvtRandomEngine*)mEvtGenRandomEngine,
+			  radCorrEngine, 
+			  &extraModels);
     
     //theEvent=new EvtHepMCEvent();
 }
