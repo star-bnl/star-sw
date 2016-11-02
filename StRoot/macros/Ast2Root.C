@@ -2,7 +2,7 @@
 void Ast2Root(const Char_t *vers="y2016a", const Char_t *geom = "useXgeom") {
   gROOT->LoadMacro("bfc.C");
   //  TString cmd("bfc(0,\"gstar,useXgeom,nodefault,");
-  TString cmd("bfc(0,\"gstar,nodefault,UseXgeom,");
+  TString cmd("bfc(0,\"gstar,nodefault,");
   cmd += vers;
   cmd += ",";
   cmd += geom;
@@ -11,7 +11,8 @@ void Ast2Root(const Char_t *vers="y2016a", const Char_t *geom = "useXgeom") {
   gInterpreter->ProcessLine(cmd.Data());
   St_geant_Maker *geant = (St_geant_Maker *) chain->Maker("geant");
   if (! geant) return;
-  chain->Make();
+  //  chain->Make();
+  geant->InitRun(1);
 #if 0  
   TString rzFile(vers);
   rzFile += ".rz";
