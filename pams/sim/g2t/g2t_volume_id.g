@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.80 2015/10/12 20:46:57 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.81 2016/11/03 13:49:01 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.81  2016/11/03 13:49:01  jwebb
+* Integrate EPD into framework.
+*
 * Revision 1.80  2015/10/12 20:46:57  jwebb
 * Hit definition and starsim to root interface for FTS.
 *
@@ -1014,12 +1017,17 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *******************************************************************************************
 ** 27                                                                            Jason Webb
-
       ELSE IF (CSYS=='fts') THEN
          
            "Disk number is 1st entry in numbv"
            volume_id = numbv(1)
-      
+*******************************************************************************************
+** 28                                                                           Jason Webb
+      ELSE IF (CSYS=='epd') THEN
+         
+           "East / west is first in numbv, paddle number is second"           
+           volume_id = 100*numbv(1) + numbv(2)
+            
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
