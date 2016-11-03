@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.19 2016/10/25 15:14:44 jwebb Exp $
+* $Id: xgeometry.age,v 1.20 2016/11/03 13:49:01 jwebb Exp $
 
 
 
@@ -2494,6 +2494,11 @@ If LL>0
 
   Case y2017   { y2017 : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
 
+
+  Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
+  Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
+
+
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
 
@@ -4602,8 +4607,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.19 2016/10/25 15:14:44 jwebb Exp $
+* $Id: xgeometry.age,v 1.20 2016/11/03 13:49:01 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.20  2016/11/03 13:49:01  jwebb
+* Integrate EPD into framework.
+*
 * Revision 1.19  2016/10/25 15:14:44  jwebb
 * Default geometry in loadAgML.kumac changed to y2017 for no particular reason.
 *

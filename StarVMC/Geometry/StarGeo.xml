@@ -2,6 +2,17 @@
 
   <StarGeometry default="y2016" >
 
+  <!-- Quick test geometry for EPD development -->
+  <Geometry tag="epdwest" check="false" comment="EPD on west side of STAR, nothing else">
+    <Construct sys="cave" config="CAVEon" simu="1" />
+    <Construct sys="epdm" config="EPDMwest" simu="1" />
+  </Geometry>
+  <!-- Quick test geometry for EPD development -->
+  <Geometry tag="epdtest" check="false" comment="EPD on both sides of STAR, nothing else">
+    <Construct sys="cave" config="CAVEon" simu="1" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+  </Geometry>
+
   <!-- Just the CAVE and upstream area -->
   <Geometry tag="blackhole" check="false" comment="All detectors off">
     <Construct sys="cave" config="CAVEon" simu="1" />
