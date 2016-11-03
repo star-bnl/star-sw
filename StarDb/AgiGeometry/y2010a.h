@@ -1,1 +1,1 @@
-../../.sl68_gcc492/obj/StarDb/AgiGeometry/y2010a.h
+../../.sl64_gcc492/obj/StarDb/AgiGeometry/y2010a.h

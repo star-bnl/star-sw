@@ -1,1 +1,1 @@
-../../.sl68_gcc492/obj/StarDb/AgiGeometry/eStar2.h
+../../.sl64_gcc492/obj/StarDb/AgiGeometry/eStar2.h
