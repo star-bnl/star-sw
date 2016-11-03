@@ -74,7 +74,7 @@
 #define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
 #define TCD_MTD_QT      9	//0x13, trigger-only; unused
-#define TCD_FCS        10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+#define TCD_RHICF       10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -83,7 +83,7 @@
 #define TCD_CTB         16	//0x1A, trigger-only; unused
 #define TCD_BTOW        17      //0x1B
 #define TCD_ETOF        18      //0x1C; Sep 16: was SST; was FTPC; gone in Sep '11
-#define TCD_RHICF       19      //0x1D; Sep 16: was PXL; was PMD; gone in Sep '11
+#define TCD_FCS         19      //0x1D; Sep 16: was PXL; was PMD; gone in Sep '11
 #define TCD_GMT         20      //0x1E; WAS: empty, Nov, 2008
 #define TCD_VPD		21      //0x1F trigger-only; unused
 
@@ -99,7 +99,7 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 #define RHICF_GRP	8
-#define FCS_GRP        9
+#define FCS_GRP         9
 //#define xxx_GRP		10	// unused
 //#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
@@ -320,7 +320,7 @@ extern inline int getTrgDetBit(char *str) {
     return -1;
 }
 
-extern inline char *getTrgDetBitName(int x) {
+extern inline const char *getTrgDetBitName(int x) {
     switch(x) {
     case TRGDET_ZDC: return "zdc";
     case TRGDET_BBC: return "bbc";
@@ -694,8 +694,6 @@ extern inline const char *rts2name(int rts_id)
 		return "IST" ;
 	case SST_SYSTEM :
 		return "SST" ;
-//	case RPII_SYSTEM :
-//		return "RPII" ;
 	case GMT_SYSTEM :
 		return "GMT" ;
 	case L4_SYSTEM :
@@ -762,8 +760,6 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "ist" ;
 	case SST_SYSTEM :
 		return "sst" ;
-//	case RPII_SYSTEM :
-//		return "rpii" ;
 	case GMT_SYSTEM :
 		return "gmt" ;
 	case L4_SYSTEM :
@@ -818,7 +814,6 @@ extern inline int rts2det(int ix)
 	case MTD_ID :
 	case IST_ID :
 	case SST_ID :
-//	case RPII_ID :
 	case GMT_ID :
 	case FPS_ID:
 	case ETOF_ID:
@@ -855,16 +850,16 @@ extern inline int rts2tcd(int rts)
 		TCD_BSMD,	//18
 		TCD_ESMD,	//19
 		TCD_TPX,	//20
-		TCD_RHICF,	//21 PXL
+		-1,		//21 PXL
 		TCD_MTD,	//22 MTD
-		TCD_FCS,	//23 IST
-		TCD_ETOF,	//24 SST
-		-1,		//25 
+		-1,		//23 IST
+		-1,		//24 SST
+		TCD_ETOF,	//25 
 		TCD_GMT,	//26 GMT
 		-1,		//27
 		-1,		//28
-		-1,		//29
-		-1,		//30
+		TCD_RHICF,	//29
+		TCD_FCS,	//30
 		-1,		//31
 	} ;
 
@@ -888,7 +883,7 @@ extern inline int tcd2rts(int tcd)
         -1,		//7 BBC
         ETOW_SYSTEM,	//8
         -1,		//9 ; used for MTD_QT, was SSD?
-        FCS_SYSTEM,	//10 ; moved from FGT; moved from FPD
+        RHICF_SYSTEM,	//10 ; moved from FGT; moved from FPD
         TOF_SYSTEM,	//11
         PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
         MTD_SYSTEM,	//13 was EMPTY in FY10, MTD in FY11
@@ -897,7 +892,7 @@ extern inline int tcd2rts(int tcd)
         -1,		//16 CTB aka ZDC
         BTOW_SYSTEM,	//17
         ETOF_SYSTEM,	//18
-        RHICF_SYSTEM,	//19
+        FCS_SYSTEM,	//19
         GMT_SYSTEM,	//20 GMT; EMPTY until Aug 11; TPC was here... removed Sep 08
         -1,		//21 VPD
         -1,		//22
