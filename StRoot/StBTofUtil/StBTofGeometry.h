@@ -347,7 +347,7 @@ class StBTofGeometry : public TNamed {
    void          SetAlignFile(const Char_t *infile="") { mAlignFile = infile; }
 
    void          Init(StMaker *maker, TVolume *starHall);
-   void          Init();
+   void          Init() {}
    void          InitFromStar(TVolume *starHall);
 
    Bool_t  IsInitDone() const { return mInitFlag; }
