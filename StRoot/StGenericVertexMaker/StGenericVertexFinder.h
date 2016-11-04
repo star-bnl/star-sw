@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.39 2016/08/18 17:46:14 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.40 2016/11/04 20:24:00 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -63,12 +63,13 @@ class StGenericVertexFinder {
   void                   FillStEvent(StEvent*);
   virtual void SetVertexPosition(double x,double y,double z){assert(0);}
   virtual int            IsFixed() const        {return 0;}
+
  protected: //................................
 
   StGenericVertexFinder(VertexFit_t fitMode=VertexFit_t::Unspecified);
 
  private:
-  vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
+  std::vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
 
   virtual void           UseVertexConstraint()=0;
 

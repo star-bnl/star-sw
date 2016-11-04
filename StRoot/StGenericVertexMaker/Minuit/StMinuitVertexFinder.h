@@ -88,12 +88,13 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.21 2016/08/18 17:46:13 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.22 2016/11/04 20:24:00 smirnovd Exp $
  *
  */
 
 
 #include <vector>
+
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
 #include "StGenericVertexFinder.h"
@@ -171,11 +172,11 @@ private:
 
     Float_t                mSeedZ[maxSeed];
     Int_t                  mBemcHit[120][20][2];  // modules, eta, sub
-    static vector<StPhysicalHelixD> mHelices;
-    static vector<UShort_t>         mHelixFlags;
-    static vector<Double_t>         mSigma;
-    static vector<Double_t>         mZImpact;
-    //static vector<Bool_t>         mCTB;
+    static std::vector<StPhysicalHelixD> mHelices;
+    static std::vector<UShort_t>         mHelixFlags;
+    static std::vector<Double_t>         mSigma;
+    static std::vector<Double_t>         mZImpact;
+    //static std::vector<Bool_t>         mCTB;
     static Bool_t                   requireCTB;
     static Int_t                    nCTBHits;
     static Double_t                 mWidthScale;
