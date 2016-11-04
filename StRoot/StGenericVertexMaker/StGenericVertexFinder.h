@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.40 2016/11/04 20:24:00 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.41 2016/11/04 20:24:07 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -68,12 +68,6 @@ class StGenericVertexFinder {
 
   StGenericVertexFinder(VertexFit_t fitMode=VertexFit_t::Unspecified);
 
- private:
-  std::vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
-
-  virtual void           UseVertexConstraint()=0;
-
- protected: //................................
   StPrimaryVertexOrder   mVertexOrderMethod; // will default to 0 i.e. orderByNumberOfDaughters
   bool                   mVertexConstrain;   // Use vertex constraint from db
   int                    mMode;              // used for any Finder behavior change
@@ -120,6 +114,11 @@ class StGenericVertexFinder {
   /// All measured parameters of the beamline. Updated whenever
   /// UseVertexConstraint(const vertexSeed_st&) is called
   static vertexSeed_st  sBeamline;
+
+ private:
+  std::vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
+
+  virtual void           UseVertexConstraint()=0;
 };
 
 #endif
