@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.41 2016/11/04 20:23:51 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.42 2016/11/04 20:24:00 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -22,10 +22,10 @@
 #include "StDcaGeometry.h"
 #include "St_VertexCutsC.h"
 #include "StMaker.h"
-vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
-vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
-vector<Double_t >          StMinuitVertexFinder::mSigma;
-vector<Double_t >          StMinuitVertexFinder::mZImpact;
+std::vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
+std::vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
+std::vector<Double_t >          StMinuitVertexFinder::mSigma;
+std::vector<Double_t >          StMinuitVertexFinder::mZImpact;
 Double_t                   StMinuitVertexFinder::mWidthScale = 0.1; // 1./TMath::Sqrt(5.);
 Bool_t                     StMinuitVertexFinder::requireCTB;
 Int_t                      StMinuitVertexFinder::nCTBHits;
@@ -392,7 +392,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     // get CTB info
     StCtbTriggerDetector* ctbDet = 0;
-    vector<ctbHit> ctbHits;
+    std::vector<ctbHit> ctbHits;
 
     StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
     mCTBSum = 0;
@@ -429,8 +429,6 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     fillBemcHits(event);
 
-    Bool_t ctb_match;
-
     Int_t n_ctb_match_tot = 0;
     Int_t n_bemc_match_tot = 0;
     Int_t n_cross_tot = 0;
@@ -453,7 +451,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 
       Bool_t shouldHitCTB = kFALSE;
       Double_t etaInCTBFrame = -999;
-      ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
+      bool ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
       if (ctb_match) {
         mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
         n_ctb_match_tot++;
@@ -694,8 +692,11 @@ StMinuitVertexFinder::fit(StEvent* event)
       mean_dip /= n_trk_vtx;
 
       if (mDebugLevel) {
-	LOG_INFO << "check n_trk_vtx " << n_trk_vtx << ", found " << n_ctb_match << " ctb matches, " << n_bemc_match << " bemc matches, " << n_cross << " tracks crossing central membrane" << endm; 
-	LOG_INFO << "mean dip " << mean_dip << endm;
+	LOG_INFO << "check n_trk_vtx " << n_trk_vtx << ", found "
+	         << n_ctb_match << " ctb matches, "
+		 << n_bemc_match << " bemc matches, "
+		 << n_cross << " tracks crossing central membrane\n"
+	         << "mean dip " << mean_dip << endm;
       }
       primV.setNumMatchesWithCTB(n_ctb_match);      
       primV.setNumMatchesWithBEMC(n_bemc_match);

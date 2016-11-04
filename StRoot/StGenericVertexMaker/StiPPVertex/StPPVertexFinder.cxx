@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.61 2016/11/04 20:23:51 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.62 2016/11/04 20:24:00 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -534,7 +534,8 @@ StPPVertexFinder::fit(StEvent* event) {
     //  t.print();
   }
 
-  LOG_INFO << Form("PPV:: # of input track          = %d\n", ntrk[0])
+  LOG_INFO << "\n"
+           << Form("PPV:: # of input track          = %d\n", ntrk[0])
            << Form("PPV:: dropped due to flag       = %d\n", ntrk[1])
            << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
            << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
@@ -590,8 +591,10 @@ StPPVertexFinder::fit(StEvent* event) {
     if(! findVertexZ(V)) break;
   
     bool trigV = evalVertexZ(V);   // V.print();
+
     //bump up rank of 2+ track all vertices 
     if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
+
     if(!trigV) {
       if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
       /*  preserve this unqalified vertex for Akio 
@@ -1377,7 +1380,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   const float zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
 
   //generate bitt pattern for TPC nodes with hits 
-  vector<int> hitPatt;
+  std::vector<int> hitPatt;
   int nPos=0,nFit=0;
   int in=0;
   float lastRxy=9999;
