@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.42 2016/11/04 20:24:00 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.43 2016/11/04 20:24:18 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -338,35 +338,30 @@ void StMinuitVertexFinder::calculateRanks() {
       LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
     }
     Float_t rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
-    if (rank_avg_dip < -5)
-      rank_avg_dip = -5;
 
     Float_t rank_bemc = 0;
     if (n_bemc_expected >= 1) { 
       //Float_t sigma = 0.12*n_bemc_match_tot;
       Float_t sigma = 0.5*sqrt(n_bemc_expected);
-      if ( sigma < 0.75 ) { // limit sigma to avoid large weights 
-	// at small multiplicity
-	sigma = 0.75;
-      }
+
+      // limit sigma to avoid large weights at small multiplicity
+      sigma = ( sigma < 0.75 ? 0.75 : sigma);
+
       rank_bemc = (primV->numMatchesWithBEMC() - n_bemc_expected)/sigma;
       if (mUseOldBEMCRank)
         rank_bemc += 0.5; // distribution is asymmetric; add 0.5 
     }
-    if (rank_bemc < -5)
-      rank_bemc = -5;
-    if (rank_bemc > 1)
-      rank_bemc = 1;
     
     Float_t rank_cross = 0;
     if ( n_cross_expected >= 1 ) {
       Float_t sigma=1.1*sqrt(n_cross_expected);
       rank_cross = (primV->numTracksCrossingCentralMembrane() - n_cross_expected)/sigma;
     }
-    if (rank_cross < -5)
-      rank_cross = -5;
-    if (rank_cross > 1)
-      rank_cross = 1;
+
+    // Handle possible overflows
+    rank_avg_dip = ( rank_avg_dip < -5 ? -5 : rank_avg_dip );
+    rank_bemc    = ( rank_bemc    < -5 ? -5 : (rank_bemc  > 1 ? 1 : rank_bemc) );
+    rank_cross   = ( rank_cross   < -5 ? -5 : (rank_cross > 1 ? 1 : rank_cross) );
 
     if (mDebugLevel) {
       LOG_INFO << "rankings: " << rank_avg_dip << " " << rank_bemc << " " << rank_cross << endm;
