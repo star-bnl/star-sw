@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.25 2016/11/04 20:24:00 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.26 2016/11/04 20:24:13 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -83,7 +83,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
   float  mCut_oneTrackPT; // threshold for storing one track vertices
-  int    mBeamLineTracks; // activates writing them out + lot of QA histos, 
+  bool   mStudyBeamLineTracks; // activates writing them out + lot of QA histos, 
                           // use  BFC option: VtxSeedCalG to enable it, expert only
 
   // util
