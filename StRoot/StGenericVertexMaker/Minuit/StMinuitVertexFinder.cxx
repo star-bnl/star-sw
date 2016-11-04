@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.40 2016/08/18 17:46:13 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.41 2016/11/04 20:23:51 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -435,10 +435,9 @@ StMinuitVertexFinder::fit(StEvent* event)
     Int_t n_bemc_match_tot = 0;
     Int_t n_cross_tot = 0;
 
-    StSPtrVecTrackNode& nodes = event->trackNodes();
-    UInt_t Nnodes = nodes.size();
-    for (UInt_t k = 0; k < Nnodes; k++) {
-      StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
+    for (const StTrackNode* stTrack : event->trackNodes())
+    {
+      StGlobalTrack* g = ( StGlobalTrack*) stTrack->track(global);
       if (!accept(g)) continue;
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;

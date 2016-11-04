@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.60 2016/09/06 20:03:14 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.61 2016/11/04 20:23:51 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -626,10 +626,10 @@ StPPVertexFinder::fit(StEvent* event) {
   printInfo();
   
   hA[4]->Fill(mVertexData.size());
-  uint i;
-  for(i=0;i<mVertexData.size();i++) {
-    VertexData *V=&mVertexData[i];
-    hA[3]->Fill(V->r.z());
+
+  for (const VertexData &V : mVertexData)
+  {
+    hA[3]->Fill(V.r.z());
   }
   
   if(mVertexData.size()<=0) {
@@ -950,16 +950,16 @@ StPPVertexFinder::exportVertices(){
     assert(mVertexFitMode == VertexFit_t::Beamline1D ||
            mVertexFitMode == VertexFit_t::Beamline3D);
   }
-  uint i;
-  for(i=0;i<mVertexData.size();i++) {
-    VertexData *V=&mVertexData[i];
-    StThreeVectorD r(V->r.x(),V->r.y(),V->r.z());
+
+  for (const VertexData &V : mVertexData)
+  {
+    StThreeVectorD r(V.r.x(),V.r.y(),V.r.z());
 
     Float_t cov[6];
     memset(cov,0,sizeof(cov)); 
-    cov[0]=V->er.x()*V->er.x(); 
-    cov[2]=V->er.y()*V->er.y(); 
-    cov[5]=V->er.z()*V->er.z();  // [5] is correct,JB 
+    cov[0]=V.er.x()*V.er.x();
+    cov[2]=V.er.y()*V.er.y();
+    cov[5]=V.er.z()*V.er.z();  // [5] is correct,JB
 
     StPrimaryVertex primV;
     primV.setPosition(r);
@@ -968,14 +968,14 @@ StPPVertexFinder::exportVertices(){
     if(mUseCtb)  primV.setVertexFinderId(ppvVertexFinder);
     else         primV.setVertexFinderId(ppvNoCtbVertexFinder); 
 
-    primV.setNumTracksUsedInFinder(V->nUsedTrack);
-    primV.setNumMatchesWithBTOF(V->nBtof);  // dongx
-    primV.setNumMatchesWithCTB(V->nCtb);
-    primV.setNumMatchesWithBEMC(V->nBemc);
-    primV.setNumMatchesWithEEMC(V->nEemc);
-    primV.setNumTracksCrossingCentralMembrane(V->nTpc);
-    primV.setSumOfTrackPt(V->gPtSum);
-    primV.setRanking(V->Lmax);
+    primV.setNumTracksUsedInFinder(V.nUsedTrack);
+    primV.setNumMatchesWithBTOF(V.nBtof);  // dongx
+    primV.setNumMatchesWithCTB(V.nCtb);
+    primV.setNumMatchesWithBEMC(V.nBemc);
+    primV.setNumMatchesWithEEMC(V.nEemc);
+    primV.setNumTracksCrossingCentralMembrane(V.nTpc);
+    primV.setSumOfTrackPt(V.gPtSum);
+    primV.setRanking(V.Lmax);
     primV.setFlag(1); //??? is it a right value?
   
     //..... add vertex to the list
