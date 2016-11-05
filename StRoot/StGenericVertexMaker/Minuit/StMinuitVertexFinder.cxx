@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.40 2016/08/18 17:46:13 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.43 2016/11/04 20:24:18 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -22,10 +22,10 @@
 #include "StDcaGeometry.h"
 #include "St_VertexCutsC.h"
 #include "StMaker.h"
-vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
-vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
-vector<Double_t >          StMinuitVertexFinder::mSigma;
-vector<Double_t >          StMinuitVertexFinder::mZImpact;
+std::vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
+std::vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
+std::vector<Double_t >          StMinuitVertexFinder::mSigma;
+std::vector<Double_t >          StMinuitVertexFinder::mZImpact;
 Double_t                   StMinuitVertexFinder::mWidthScale = 0.1; // 1./TMath::Sqrt(5.);
 Bool_t                     StMinuitVertexFinder::requireCTB;
 Int_t                      StMinuitVertexFinder::nCTBHits;
@@ -338,35 +338,30 @@ void StMinuitVertexFinder::calculateRanks() {
       LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
     }
     Float_t rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
-    if (rank_avg_dip < -5)
-      rank_avg_dip = -5;
 
     Float_t rank_bemc = 0;
     if (n_bemc_expected >= 1) { 
       //Float_t sigma = 0.12*n_bemc_match_tot;
       Float_t sigma = 0.5*sqrt(n_bemc_expected);
-      if ( sigma < 0.75 ) { // limit sigma to avoid large weights 
-	// at small multiplicity
-	sigma = 0.75;
-      }
+
+      // limit sigma to avoid large weights at small multiplicity
+      sigma = ( sigma < 0.75 ? 0.75 : sigma);
+
       rank_bemc = (primV->numMatchesWithBEMC() - n_bemc_expected)/sigma;
       if (mUseOldBEMCRank)
         rank_bemc += 0.5; // distribution is asymmetric; add 0.5 
     }
-    if (rank_bemc < -5)
-      rank_bemc = -5;
-    if (rank_bemc > 1)
-      rank_bemc = 1;
     
     Float_t rank_cross = 0;
     if ( n_cross_expected >= 1 ) {
       Float_t sigma=1.1*sqrt(n_cross_expected);
       rank_cross = (primV->numTracksCrossingCentralMembrane() - n_cross_expected)/sigma;
     }
-    if (rank_cross < -5)
-      rank_cross = -5;
-    if (rank_cross > 1)
-      rank_cross = 1;
+
+    // Handle possible overflows
+    rank_avg_dip = ( rank_avg_dip < -5 ? -5 : rank_avg_dip );
+    rank_bemc    = ( rank_bemc    < -5 ? -5 : (rank_bemc  > 1 ? 1 : rank_bemc) );
+    rank_cross   = ( rank_cross   < -5 ? -5 : (rank_cross > 1 ? 1 : rank_cross) );
 
     if (mDebugLevel) {
       LOG_INFO << "rankings: " << rank_avg_dip << " " << rank_bemc << " " << rank_cross << endm;
@@ -392,7 +387,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     // get CTB info
     StCtbTriggerDetector* ctbDet = 0;
-    vector<ctbHit> ctbHits;
+    std::vector<ctbHit> ctbHits;
 
     StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
     mCTBSum = 0;
@@ -429,16 +424,13 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     fillBemcHits(event);
 
-    Bool_t ctb_match;
-
     Int_t n_ctb_match_tot = 0;
     Int_t n_bemc_match_tot = 0;
     Int_t n_cross_tot = 0;
 
-    StSPtrVecTrackNode& nodes = event->trackNodes();
-    UInt_t Nnodes = nodes.size();
-    for (UInt_t k = 0; k < Nnodes; k++) {
-      StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
+    for (const StTrackNode* stTrack : event->trackNodes())
+    {
+      StGlobalTrack* g = ( StGlobalTrack*) stTrack->track(global);
       if (!accept(g)) continue;
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
@@ -454,7 +446,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 
       Bool_t shouldHitCTB = kFALSE;
       Double_t etaInCTBFrame = -999;
-      ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
+      bool ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
       if (ctb_match) {
         mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
         n_ctb_match_tot++;
@@ -695,8 +687,11 @@ StMinuitVertexFinder::fit(StEvent* event)
       mean_dip /= n_trk_vtx;
 
       if (mDebugLevel) {
-	LOG_INFO << "check n_trk_vtx " << n_trk_vtx << ", found " << n_ctb_match << " ctb matches, " << n_bemc_match << " bemc matches, " << n_cross << " tracks crossing central membrane" << endm; 
-	LOG_INFO << "mean dip " << mean_dip << endm;
+	LOG_INFO << "check n_trk_vtx " << n_trk_vtx << ", found "
+	         << n_ctb_match << " ctb matches, "
+		 << n_bemc_match << " bemc matches, "
+		 << n_cross << " tracks crossing central membrane\n"
+	         << "mean dip " << mean_dip << endm;
       }
       primV.setNumMatchesWithCTB(n_ctb_match);      
       primV.setNumMatchesWithBEMC(n_bemc_match);

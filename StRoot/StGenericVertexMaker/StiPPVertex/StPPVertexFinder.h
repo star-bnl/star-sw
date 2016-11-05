@@ -3,12 +3,15 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.24 2016/08/18 17:46:14 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.26 2016/11/04 20:24:13 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
 #include <sys/types.h>
 #endif
+
+#include <vector>
+
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 
 #include "StPhysicalHelixD.hh" // dongx
@@ -50,8 +53,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool isPostCrossingTrack(const StiKalmanTrack* track);
 
   /// A container with pre-selected tracks to be used in seed finding
-  vector<TrackData>  mTrackData;
-  vector<VertexData> mVertexData;
+  std::vector<TrackData>  mTrackData;
+  std::vector<VertexData> mVertexData;
   Vertex3D *vertex3D; // for stand alone 3D vertex reco
   bool buildLikelihoodZ();
   bool findVertexZ(VertexData &);
@@ -80,7 +83,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
   float  mCut_oneTrackPT; // threshold for storing one track vertices
-  int    mBeamLineTracks; // activates writing them out + lot of QA histos, 
+  bool   mStudyBeamLineTracks; // activates writing them out + lot of QA histos, 
                           // use  BFC option: VtxSeedCalG to enable it, expert only
 
   // util
