@@ -160,8 +160,6 @@ public:
   virtual void clear();
   //Sort all of the hits in the container.
   virtual void sortHits();
-  //Ignore hits marked as used (std::stable_partition)
-  void partitionUsedHits();
   void setMaxTimes(int nTimes);
   vector<StiHit*> & getHits();
   vector<StiHit*> & getHits(Filter<StiHit> & filter);

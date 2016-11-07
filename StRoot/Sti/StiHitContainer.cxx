@@ -291,18 +291,6 @@ void StiHitContainer::sortHits()
 }
 
 //________________________________________________________________________________
-void StiHitContainer::partitionUsedHits()
-{
-    for (HitMapToVectorAndEndType::iterator it=_map.begin(); it!=_map.end(); ++it)
-      {
-      vector<StiHit*>& tempvec = (*it).second.hits();
-      vector<StiHit*>::iterator where =
-        stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
-      (*it).second.setEnd(where);
-    }
-}
-
-//________________________________________________________________________________
 ostream& operator<<(ostream& os, const vector<StiHit*>& vec)
 {
     for (vector<StiHit*>::const_iterator vit=vec.begin(); vit!=vec.end(); vit++) {
