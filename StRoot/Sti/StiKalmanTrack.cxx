@@ -1,11 +1,19 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.145 2016/07/08 16:16:55 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.145 2016/07/08 16:16:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.146 2016/11/07 22:42:13 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.146 2016/11/07 22:42:13 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.146  2016/11/07 22:42:13  perev
+ * 1. Workaround for the bug in CA #3233 moved into StiCA
+ * 2. Bug #3231, Layer radius replaced by Normal one
+ * 3. Workaround for bug #3232 modified. Now node parameters for the case
+ *    wrong ones from CA recalculated for both, first and last node.
+ *    This must help to refit().
+ * 4. Simplified code in refitL()
+ *
  * Revision 2.145  2016/07/08 16:16:55  perev
  * It is workaround for bug in CA (#3230). CA sometimes gives the same hit twice
  * Here I test all hits to be in decreasing order of x() (local x).
@@ -565,11 +573,7 @@
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StiHitContainer.h"
 #include "StiUtilities/StiDebug.h"
-#if ROOT_VERSION_CODE < 331013
-#include "TCL.h"
-#else
 #include "TCernLib.h"
-#endif
 #include "StMessMgr.h"
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -688,21 +692,18 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
   StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
   const StiDetector* detectorOld = 0;
   StiHit *hit_Old = 0;
-  double xOld = 1e33;
+
   for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
     StiHit *hit = hits[ihit];
-//		It is workaround of bug in CA (VP)
-    if (xOld <= hits[ihit]->x()) continue;
-    xOld = hits[ihit]->x();
 
     detector = hit->detector();
     assert(detector);
     // look for gaps in hit list
     if (hit_Old && detector->getGroupId() == kTpcId) {
-      Double_t R_hit = detector->getPlacement()->getLayerRadius();
+      Double_t R_hit = detector->getPlacement()->getNormalRadius();
       Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
       detectorOld = hit_Old->detector();
-      Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+      Double_t R_hit_OLD = detectorOld->getPlacement()->getNormalRadius();
       if (_debug && detectorOld == detector) {
 	cout << "The same detector for hit " << ihit << endl;
 	cout << "hit     \t" << *hit << endl;
@@ -717,7 +718,7 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
 	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
 	    if (d == detector) break;
 	    detectorOld = d;
-	    R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+	    R_hit_OLD = detectorOld->getPlacement()->getNormalRadius();
 	    if (detectorOld->isActive()) {
 	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
 	      nI->initialize(d);
@@ -733,23 +734,13 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     detectorOld = (StiDetector*) detector;
     hit_Old = hit;
   }  
-  if (!firstPars){approx(0,10); return 0;}
+  if (!firstPars)	{approx(); return 0;}
+  else 			{firstNode->fitPars() = *firstPars;}
 
+  if (firstErrs)	{firstNode->fitErrs() = *firstErrs;}
+  if (lastPars)		{lastNode ->fitPars() = *lastPars ;}
+  if (lastErrs)		{lastNode->fitErrs()  = *lastErrs ;}
 
-  if (firstPars){
-    firstNode->fitPars() = *firstPars;
-  }
-  if (firstErrs){ 
-    firstNode->fitErrs() = *firstErrs;
-      //    firstNode->resetError();
-  }
-  if (lastPars){
-    lastNode ->fitPars() = *lastPars;
-  }
-  if (lastErrs){ 
-    lastNode->fitErrs() = *lastErrs;
-      //    firstNode->resetError();
-  }
   return 0;  
 }
 
@@ -1644,11 +1635,11 @@ static int nCall=0;nCall++;
 
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
-  int iNode=0, status = 0,isStarted=0,restIsWrong=0;
+  int iNode=0, status = 0,isStarted=0;
+  sTNH.setDir(1);
   for (source=rbegin();source!=rend();source++) {
     iNode++;
     targetNode = &(*source);
-    if (restIsWrong) { targetNode->setInvalid(); continue;}
 
     if (!isStarted) {
       if (!targetNode->getHit()) 	targetNode->setInvalid();		
@@ -1658,16 +1649,16 @@ static int nCall=0;nCall++;
     isStarted++;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (status) continue;
     if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
 
-    pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
+    pNode = 0; iNode=0;isStarted=0;
+  sTNH.setDir(0);
   for (source=begin();source!=end();source++) {
     iNode++;
     targetNode = &(*source);
-    if (restIsWrong) { targetNode->setInvalid(); continue;}
     if (!isStarted) {
       if (!targetNode->getHit()) 	targetNode->setInvalid();		
       if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
@@ -1676,7 +1667,7 @@ static int nCall=0;nCall++;
     isStarted++;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (status) 			continue;
     if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
@@ -1936,24 +1927,18 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
 //_____________________________________________________________________________
 void StiKalmanTrack::test(const char *txt) const
 {
-static const char *tit[]={".???",".pla",".cyl",".sec",".dca",".vtx"};
 
-
-  StiKTNIterator it;
-  for (it=begin();it!=end();it++)  {
+  for (auto it=begin();it!=end();it++)  {
     StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) continue;
-    if (node->getCyy()>1) continue;
-    int shapeCode=0;
     const StiDetector *det = node->getDetector();
-    if  (det) { shapeCode = det->getShape()->getShapeCode();}
-    else      { shapeCode = (node->isDca())? 4:5           ;}
-    TString tsY(txt); tsY+=".YY";tsY+=tit[shapeCode];
-    TString tsZ(txt); tsZ+=".ZZ";tsZ+=tit[shapeCode];
-
-
-    StiDebug::Count(tsY.Data(),sqrt(node->getCyy()));
-    StiDebug::Count(tsZ.Data(),sqrt(node->getCzz()));
+    if  (!det) continue;
+    const auto &P = node->fitPars();
+    double tst = P[0]*P._cosCA+P[1]*P._sinCA;
+    if (tst>=0) continue;
+    tst /= sqrt(P[0]*P[0]+P[1]*P[1]);
+//    assert (tst>=-1e-5);
+StiDebug::Count("OverKill",tst);
   }
 }
 
