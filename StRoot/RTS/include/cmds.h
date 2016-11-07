@@ -169,14 +169,24 @@
 #define DET_EVB_SEND_DONE		0x9D	// to myself
 #define DET_SL3_SEND_DONE		0x9E	// to myself
 
-#define L4_STARTEVENT                  0xa0
-#define L4_EVENTDECISION                   0xa1
-#define L4_CFGDONE                     0xa2
-#define L4_RUNSTARTDONE                0xa3
-#define L4_RUNSTOPDONE                 0xa4
-#define L4_SHIPEVENT                   0xa5
-#define L4_SHIPEVENTDONE               0xa6
-#define L4_EVP_DONE                    0xa7
+//#define L4_STARTEVENT                  0xa0
+//#define L4_EVENTDECISION               0xa1
+
+#define L4_INIT                        0xa0
+#define L4_INIT_DONE                   0xa1
+#define L4_SIMU                        0xa2
+#define L4_SIMU_DONE                   0xa3
+#define L4_FINISH                      0xa4
+#define L4_FINISH_DONE                 0xa5
+#define L4_DECIDE                      0xa6
+#define L4_DECIDE_DONE                 0xa7
+
+#define L4_CFGDONE                     0xa8
+#define L4_RUNSTARTDONE                0xa9
+#define L4_RUNSTOPDONE                 0xaa
+#define L4_SHIPEVENT                   0xab
+#define L4_SHIPEVENTDONE               0xac
+#define L4_EVP_DONE                    0xad
 
 
 // SL3
