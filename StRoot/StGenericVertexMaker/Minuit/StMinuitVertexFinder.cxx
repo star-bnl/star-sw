@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.45 2016/11/07 21:19:22 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.46 2016/11/07 21:19:27 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -408,15 +408,10 @@ StMinuitVertexFinder::fit(StEvent* event)
       }
     }
 
-    //
-    //  Loop all global tracks (TPC) and store the
-    //  refering helices and their estimated DCA
-    //  resolution in vectors.
-    //  Quality cuts are applied (see accept()).
-    //  The helices and the sigma are used in
-    //  fcn to calculate the fit potential which
-    //  gets minimized by Minuit.
-    //
+    // Loop over all global tracks (TPC) and store the refering helices and
+    // their estimated DCA resolution in vectors. Quality cuts are applied (see
+    // StMinuitVertexFinder::accept()). The helices and the sigma are used in
+    // fcn to calculate the fit potential which gets minimized by Minuit.
     sDCAs().clear();
     mHelices.clear();
     mHelixFlags.clear();
@@ -467,9 +462,8 @@ StMinuitVertexFinder::fit(StEvent* event)
     if (mDebugLevel) {
       LOG_INFO << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endm; 
     }
-    //
-    //  In case there are no tracks left we better quit
-    //
+
+    // In case there are no tracks left we better quit
     if (mHelices.empty()) {
 	LOG_WARN << "StMinuitVertexFinder::fit: no tracks to fit." << endm;
 	mStatusMin = -1;
@@ -481,26 +475,20 @@ StMinuitVertexFinder::fit(StEvent* event)
     // Set some global pars
     if (mRequireCTB) requireCTB = kTRUE;
     
-    //
-    //  Reset and clear Minuit parameters
-    // mStatusMin
+    // Reset and clear Minuit parameters mStatusMin
     mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
     
+    // Set parameters and start values. We do constrain the parameters since it
+    // harms the fit quality (see Minuit documentation).
     //
-    //  Set parameters and start values. We do
-    //  constrain the parameters since it harms
-    //  the fit quality (see Minuit documentation).
-    //
-    // Initialize the seed with a z value which is not one of the discrete 
-    // values which it can tend to, implies zero not allowed.
-    // Also need different initialization when vertex constraint.
+    // Initialize the seed with a z value which is not one of the discrete
+    // values which it can tend to, implies zero not allowed. Also need
+    // different initialization when vertex constraint.
 
     static Double_t step[3] = {0.03, 0.03, 0.03};
 
-    //
-    //  Scan z to find best seed for the actual fit.
-    //  Skip this step if an external seed is given.
-    //
+    // Scan z to find best seed for the actual fit.
+    // Skip this step if an external seed is given.
     if (!mExternalSeedPresent) {
       findSeeds();
     }
@@ -512,9 +500,8 @@ StMinuitVertexFinder::fit(StEvent* event)
     Double_t seed_z = -999;
     Double_t chisquare = 0;
     for (Int_t iSeed = 0; iSeed < mNSeed; iSeed++) {
-      //
-      //  Reset and clear Minuit parameters
-      //  mStatusMin
+
+      // Reset and clear Minuit parameters mStatusMin
       mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
 
       seed_z= mSeedZ[iSeed]; 

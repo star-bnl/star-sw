@@ -367,5 +367,3 @@ void StGenericVertexMaker::MakeEvalNtuple(){ // only for Minuit vertex finder
        primV->numberOfDaughters(), nCtb, gx, gy, gz);
   }
 }
-
-//____________________________________________________________________________
