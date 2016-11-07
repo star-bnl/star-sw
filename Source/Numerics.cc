@@ -768,10 +768,13 @@ double Divdif(const std::vector<double>& f, const std::vector<double>& a,
   return sum;
 }
 
-bool Boxin3(std::vector<std::vector<std::vector<double> > >& value,
-            std::vector<double>& xAxis, std::vector<double>& yAxis,
-            std::vector<double>& zAxis, int nx, int ny, int nz, double xx,
-            double yy, double zz, double& f, int iOrder) {
+bool Boxin3(const std::vector<std::vector<std::vector<double> > >& value,
+            const std::vector<double>& xAxis, 
+            const std::vector<double>& yAxis,
+            const std::vector<double>& zAxis, 
+            const int nx, const int ny, const int nz, 
+            const double xx, const double yy, const double zz, 
+            double& f, const int iOrder) {
 
   // std::cout << nx << ", " << ny << ", " << nz << "\n";
   //-----------------------------------------------------------------------
@@ -817,7 +820,7 @@ bool Boxin3(std::vector<std::vector<std::vector<double> > >& value,
     iX0 = iNode;
     iX1 = iNode;
     // Establish the shape functions.
-    fX[0] = 0.;
+    fX[0] = 1.;
     fX[1] = 0.;
     fX[2] = 0.;
     fX[3] = 0.;
