@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.63 2016/11/04 20:24:13 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.64 2016/11/07 21:19:13 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -69,7 +69,6 @@
 //==========================================================
 
 StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode) {
-  LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
   mTotEve              = 0;
   HList=0;
