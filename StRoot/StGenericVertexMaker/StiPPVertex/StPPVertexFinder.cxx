@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.66 2016/11/07 21:19:27 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.67 2016/11/07 21:19:35 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -798,11 +798,7 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 
   V.nUsedTrack = n1;  
 
-  bool validVertex = (V.nAnyMatch >= mMinMatchTr);
-
-  if ((mAlgoSwitches & kSwitchOneHighPT) && ( nHiPt>0)) {
-    validVertex |= 1;
-  }
+  bool validVertex = (V.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
 
   if (!validVertex) { // discrad vertex
     //no match tracks in this vertex, tag vertex ID in tracks differently
