@@ -48,9 +48,9 @@ public:
 void reset(){mPP.reset();mPE.reset();mMtx.reset();}
 void unset(){;}
 public:
-  StiNodePars mPP; 
+  StiNodePars mPP; 	//Predicted params
   StiNodeMtx  mMtx;
-  StiNodeErrs mPE;
+  StiNodeErrs mPE;	//Predicted params errs
 };
 
 class StiNodeInf {
@@ -371,17 +371,6 @@ struct StreamX
     cout <<node.getX()<<endl;
   }
 };
-
-///Calculate and returns pathlength within detector volume
-///associated with this node. Returns 0 if no detector is 
-///associated.
-inline double StiKalmanTrackNode::pathlength() const
-{
-  const StiDetector * det = getDetector();
-  if (!det) return 0.; 
-  double thickness = det->getShape()->getThickness();
-  return (thickness*::sqrt(1.+mFP.tanl()*mFP.tanl())) / mFP._cosCA;
-}
 
 ///Return the radiation length (in cm) of the 
 ///the detector volume at this node.
