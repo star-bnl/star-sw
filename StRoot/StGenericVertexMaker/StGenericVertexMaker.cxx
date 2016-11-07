@@ -111,9 +111,12 @@ Int_t StGenericVertexMaker::Init()
 
   Bool_t isMinuit=kFALSE;
 
-  if ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3")){ // 3 versions of Minuit for ranking modes
+  if ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3")) // 3 versions of Minuit for ranking modes
+  {
     LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
+
     theFinder= new StMinuitVertexFinder(vertexFitMode);
+
     if (IAttr("VFMinuit") ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
     if (IAttr("VFMinuit3") ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
     if (minTracks > 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
@@ -127,18 +130,23 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
-  } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) { // 2 version of PPV w/ & w/o CTB
-      LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
+  } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) // 2 version of PPV w/ & w/o CTB
+  {
+    LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
     LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
-      theFinder= new StPPVertexFinder(vertexFitMode);
+
+    theFinder= new StPPVertexFinder(vertexFitMode);
+
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
     }
+
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
            ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
       LOG_INFO << "StGenericVertexMaker::Init: uses StvPPVertex finder(StEvent based)"<<  endm;
       LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
+
       theFinder= new StEvPPV::StPPVertexFinder();
       useBTOF = (IAttr("VFPPVEvNoBTof"))? 0:1;
 
@@ -154,6 +162,7 @@ Int_t StGenericVertexMaker::Init()
 
   } else {
     LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
+
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
     theFinder= new StMinuitVertexFinder();
@@ -172,8 +181,9 @@ Int_t StGenericVertexMaker::Init()
   } else {
     assert(!eval); // current implementation support only Minuit Vertex finder, JB 
   }
- 
-  if (eval) mEvalNtuple = new TNtuple("results","results","thX:thY:thZ:thStat:goodGlob:evX:evY:evZ:evStat:nPrim:nCTB:geantX:geantY:geantZ");
+
+  if (eval)
+    mEvalNtuple = new TNtuple("results", "results", "thX:thY:thZ:thStat:goodGlob:evX:evY:evZ:evStat:nPrim:nCTB:geantX:geantY:geantZ");
 
   theFinder->Init();
   return StMaker::Init();
@@ -340,15 +350,21 @@ void StGenericVertexMaker::MakeEvalNtuple(){ // only for Minuit vertex finder
   int nCtb= ((StMinuitVertexFinder*)theFinder)->NCtbMatches(); 
   int stat= ((StMinuitVertexFinder*)theFinder)->statusMin();
   
-  if(!primV) {
+  if (!primV) {
     LOG_INFO <<"primaryVertex()=NULL"<<endm;
     // why would one access x,y,z of the vertex if it is not found, Jan ???
     float x=999,y=999,z=999;
     mEvalNtuple->Fill(x,y,z,stat,mEvent->summary()->numberOfGoodTracks(),-999.,-999.,-999.,-999.,-999.,nCtb,gx,gy,gz);
-    }
-  else {
-     LOG_INFO << Form("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters())<<endm;
-     mEvalNtuple->Fill(primV->position().x(),primV->position().y(),primV->position().z(),stat               ,mEvent->summary()->numberOfGoodTracks(),primV->position().x(),primV->position().y(),primV->position().z(),primV->flag(),primV->numberOfDaughters(), nCtb,gx,gy,gz);
+  } else
+  {
+     LOG_INFO << Form("primaryVertex()= %f, %f %f, nTracks=%d\n",
+       primV->position().x(), primV->position().y(), primV->position().z(),
+       primV->numberOfDaughters()) << endm;
+
+     mEvalNtuple->Fill(primV->position().x(), primV->position().y(), primV->position().z(),
+       stat, mEvent->summary()->numberOfGoodTracks(),
+       primV->position().x(), primV->position().y(), primV->position().z(), primV->flag(),
+       primV->numberOfDaughters(), nCtb, gx, gy, gz);
   }
 }
 

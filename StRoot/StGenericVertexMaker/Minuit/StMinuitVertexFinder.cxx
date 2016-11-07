@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.44 2016/11/07 21:19:13 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.45 2016/11/07 21:19:22 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -167,7 +167,7 @@ Int_t StMinuitVertexFinder::findSeeds() {
             }
 	    seed_z = meanZ/nTrkZ;
 	    mSeedZ[mNSeed] = seed_z;
-	    mNSeed ++;
+	    mNSeed++;
 	  }
 	}
 	else {
@@ -336,6 +336,7 @@ void StMinuitVertexFinder::calculateRanks() {
     if (mDebugLevel) {
       LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
     }
+
     Float_t rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
 
     Float_t rank_bemc = 0;
@@ -372,6 +373,7 @@ void StMinuitVertexFinder::calculateRanks() {
       primV->setRanking(rank_cross+rank_bemc+rank_avg_dip-3); 
     else
       primV->setRanking(rank_cross+rank_bemc+rank_avg_dip); 
+
     if (primV->ranking() > mBestRank) {
       mBestRank = primV->ranking();
       mBestVtx = primV;
@@ -473,6 +475,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mStatusMin = -1;
 	return 0;
     }
+
     LOG_INFO << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
     // Set some global pars
@@ -537,8 +540,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       Int_t n_trk_vtx = 0;
       Int_t n_helix = mHelices.size();
       do {  
-	// For most vertices one pass is fine, but multiple passes 
-	// can be done
+	// For most vertices one pass is fine, but multiple passes can be done
 	n_trk_vtx = 0;
 	for (Int_t i=0; i < n_helix; i++) {
 	  if (fabs(mZImpact[i]-seed_z) < mDcaZMax) {
@@ -561,10 +563,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
 	done = 1;
 
-	//
-	//  Check fit result
-	//
-
+	// Check fit result
 	if (mStatusMin) {
 	  LOG_WARN << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
 	  done = 0; // refit
@@ -814,6 +813,7 @@ StMinuitVertexFinder::printInfo(ostream& os) const
     os << "final potential width scale .... " << mWidthScale << endl;
 }
 
+
 void StMinuitVertexFinder::UseVertexConstraint() {
 
   // Historically, this method was designed for a 1D fit with beamline
@@ -828,27 +828,28 @@ void StMinuitVertexFinder::UseVertexConstraint() {
   StThreeVectorD origin(mX0,mY0,0.0);
   Double_t pt  = 88889999;   
   Double_t nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
-    if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
-      nxy=mdxdz=1.e-5; 
-    }
-    Double_t p0=pt/nxy;  
-    Double_t px   = p0*mdxdz;
-    Double_t py   = p0*mdydz;
-    Double_t pz   = p0; // approximation: nx,ny<<0
-    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-    delete mBeamHelix;
-    mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
-    //re-initilize minuit for 1D fitting
-    mMinuit = new TMinuit(1);         
-    mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
-    mMinuit->SetPrintLevel(1);
-    mMinuit->SetMaxIterations(1000);
-    mExternalSeedPresent = kFALSE;
+  if(nxy<1.e-5){ // beam line _MUST_ be tilted
+    LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
+    nxy=mdxdz=1.e-5;
+  }
 
+  Double_t p0=pt/nxy;
+  Double_t px   = p0*mdxdz;
+  Double_t py   = p0*mdydz;
+  Double_t pz   = p0; // approximation: nx,ny<<0
+  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+  delete mBeamHelix;
+  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
+  //re-initilize minuit for 1D fitting
+  mMinuit = new TMinuit(1);
+  mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
+  mMinuit->SetPrintLevel(-1);
+  mMinuit->SetMaxIterations(1000);
+  mExternalSeedPresent = kFALSE;
 }
+
 
 Int_t  StMinuitVertexFinder::NCtbMatches() { 
   return nCTBHits;

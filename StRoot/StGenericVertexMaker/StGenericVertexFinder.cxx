@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.34 2016/09/06 20:02:55 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.35 2016/11/07 21:19:22 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -41,6 +41,8 @@ StGenericVertexFinder::StGenericVertexFinder(VertexFit_t fitMode) :
   mUseCtb =0;            	// default use ctb = false
   mVertexOrderMethod = orderByNumberOfDaughters;
 }
+
+
 //______________________________________________________________________________
 StGenericVertexFinder::~StGenericVertexFinder()
 {
@@ -230,7 +232,7 @@ StThreeVectorD StGenericVertexFinder::CalcVertexSeed(const StDcaList &trackDcas)
 
    if (trackDcas.size() == 0) {
       LOG_WARN << "StGenericVertexFinder::CalcVertexSeed: Empty container with track DCAs. "
-	          "Returning default seed: StThreeVectorD(0, 0, 0)" << endm;
+                  "Returning default seed: StThreeVectorD(0, 0, 0)" << endm;
       return vertexSeed;
    }
 
