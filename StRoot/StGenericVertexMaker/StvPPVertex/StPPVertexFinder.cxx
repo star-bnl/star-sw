@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.5 2016/08/18 17:46:15 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.6 2016/11/07 21:19:14 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -77,8 +77,6 @@ namespace StEvPPV {
 //==========================================================
 StPPVertexFinder::StPPVertexFinder() 
 {
-  LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
-
   mTotEve              = 0;
   HList=0;
   mToolkit =0;
@@ -1215,6 +1213,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.6  2016/11/07 21:19:14  smirnovd
+ * Moved log print statements out of constructors
+ *
  * Revision 1.5  2016/08/18 17:46:15  smirnovd
  * Squashed commit of the following refactoring changes:
  *

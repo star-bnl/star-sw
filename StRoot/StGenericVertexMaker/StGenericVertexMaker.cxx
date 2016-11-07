@@ -112,6 +112,7 @@ Int_t StGenericVertexMaker::Init()
   Bool_t isMinuit=kFALSE;
 
   if ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3")){ // 3 versions of Minuit for ranking modes
+    LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
     theFinder= new StMinuitVertexFinder(vertexFitMode);
     if (IAttr("VFMinuit") ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
     if (IAttr("VFMinuit3") ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
@@ -128,6 +129,7 @@ Int_t StGenericVertexMaker::Init()
 
   } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) { // 2 version of PPV w/ & w/o CTB
       LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
+    LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
       theFinder= new StPPVertexFinder(vertexFitMode);
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
@@ -136,6 +138,7 @@ Int_t StGenericVertexMaker::Init()
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
            ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
       LOG_INFO << "StGenericVertexMaker::Init: uses StvPPVertex finder(StEvent based)"<<  endm;
+      LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
       theFinder= new StEvPPV::StPPVertexFinder();
       useBTOF = (IAttr("VFPPVEvNoBTof"))? 0:1;
 
@@ -150,6 +153,7 @@ Int_t StGenericVertexMaker::Init()
       }
 
   } else {
+    LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
     theFinder= new StMinuitVertexFinder();
