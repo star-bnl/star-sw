@@ -47,23 +47,25 @@ using namespace units;
 
 ClassImp(StGenericVertexMaker)
 //___________________________________________________________
-StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
+StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
+  useITTF(true),
+  useBeamline(false),
+  calibBeamline(false),
+  useCTB(false),
+  usePCT(false),
+  useBTOF(false),
+  eval(false),
+  externalFindUse(true),
+  minTracks(0),
+  mEvalNtuple(nullptr),
+  mEvent(nullptr),
+  primV(nullptr),
+  theFinder(nullptr),
+  nEvTotal(0),
+  nEvGood(0)
 {
-  useITTF=kTRUE;
-  useBeamline = kFALSE;
-  calibBeamline = kFALSE;
-  useCTB = kFALSE;
-  usePCT = kFALSE;
-  useBTOF = kFALSE;
-  eval = kFALSE;
-  nEvTotal=nEvGood=0;
-  externalFindUse=kTRUE; ///Default means that no finding actually done
-  mEvalNtuple = 0;
-  mEvent = 0;
-  primV = 0;
-  theFinder = 0;
-  minTracks = 0;
 }
+
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
 {
