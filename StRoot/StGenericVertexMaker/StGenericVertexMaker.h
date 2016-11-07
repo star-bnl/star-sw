@@ -5,7 +5,7 @@
  * Maker for minuit based vertex finder
  * Lee Barnby - modification, becomes StGenericVertexMaker
  *
- * $Id: StGenericVertexMaker.h,v 1.18 2016/04/28 18:17:38 smirnovd Exp $
+ * $Id: StGenericVertexMaker.h,v 1.19 2016/11/07 21:19:42 smirnovd Exp $
  *
  */
 
@@ -33,7 +33,9 @@ class StGenericVertexMaker : public StMaker
   Bool_t  usePCT;
   Bool_t  useBTOF;
   Bool_t  eval;
-  Bool_t  externalFindUse; /// Finder will by called externally (by StiMaker)
+  /// Finder will by called externally (by StiMaker). If set to true no finding
+  /// actually done
+  Bool_t  externalFindUse;
   Int_t   minTracks;
 
   TNtuple *mEvalNtuple;    /// Ntuple for evaluation purposes
@@ -72,7 +74,7 @@ class StGenericVertexMaker : public StMaker
   void DoNotUsePCT()            {SetAttr("PCT"            , kFALSE);}
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.18 2016/04/28 18:17:38 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.19 2016/11/07 21:19:42 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StGenericVertexMaker, 0)   //StAF chain virtual base class for Makers
 };
