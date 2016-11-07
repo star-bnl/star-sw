@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.231 2016/06/30 18:49:41 perev Exp $
+// $Id: StiMaker.cxx,v 1.232 2016/11/07 20:51:43 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -136,8 +136,6 @@ static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
 
 void CountHits();
-
-
 ClassImp(StiMaker)
 
 //_____________________________________________________________________________
@@ -459,6 +457,7 @@ Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
   _tracker->reset();    // get the rest
   _tracker->findTracks();    // get the rest
+  if (mMaxTimes>1) CleanGlobalTracks();
   FinishTracks(0);
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
   if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
@@ -600,6 +599,69 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
+//________________________________________________________________________________
+static Bool_t TrackCompareStatus(const StiTrack *a, const StiTrack *b)
+{
+  int nA = a->getFitPointCount();
+  int nB = b->getFitPointCount();
+  if (nA!=nB) return (nA > nB);
+  return (a->getChi2()<b->getChi2());
+}
+//_____________________________________________________________________________
+int StiMaker::CleanGlobalTracks()
+{
+  for (int iTk=0; iTk< (int)_trackContainer->size(); iTk++) 
+  {
+    auto* kTrack = static_cast<StiKalmanTrack*>((*_trackContainer)[iTk]);
+    kTrack->reserveHits(0);
+  }
+  sort(_trackContainer->begin(), _trackContainer->end(),TrackCompareStatus );
+
+  for (int iTk=0; iTk<(int) _trackContainer->size(); iTk++) 
+  {
+    auto* kTrack = (StiKalmanTrack*)((*_trackContainer)[iTk]);
+    StiKalmanTrackNode *node = 0;
+    int nHits=0,nNits=0;
+    for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
+    {
+      node = &(*nodeIt);
+      StiHit *hit = node->getHit(); if (!hit) 		continue;
+      if (hit->timesUsed()) { nNits++; node->setHit(0);}
+      else                  { nHits++;}
+    }
+    if (nNits) {
+      if (nHits<5) 
+	{ kTrack->setFlag(-1); continue; }
+      int ans = kTrack->refit();
+      if (ans || kTrack->getFitPointCount()<5) 
+	{ kTrack->setFlag(-1); continue; }
+    }
+    kTrack->reserveHits();
+  }
+  int jTk=0;
+  for (int iTk=0; iTk< (int)_trackContainer->size(); iTk++) 
+  {
+    auto* kTrack = ((*_trackContainer)[iTk]);
+    if (kTrack->getFlag()<0) continue;
+    if (jTk!=iTk)(*_trackContainer)[jTk]=(*_trackContainer)[iTk];
+    jTk++;
+  }
+  _trackContainer->resize(jTk);
+
+
+  for (int iTk=0; iTk<(int) _trackContainer->size(); iTk++) 
+  {
+    auto* kTrack = (StiKalmanTrack*)((*_trackContainer)[iTk]);
+    StiKalmanTrackNode *node = 0;
+    for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
+    {
+      node = &(*nodeIt);
+      StiHit *hit = node->getHit(); if (!hit) 		continue;
+      assert(hit->timesUsed());
+    }
+  }
+  return _trackContainer->size();
+}
 //_____________________________________________________________________________
 void StiMaker::FinishTracks (int gloPri) 
 {
@@ -651,8 +713,12 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.231 2016/06/30 18:49:41 perev Exp $
+// $Id: StiMaker.cxx,v 1.232 2016/11/07 20:51:43 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.232  2016/11/07 20:51:43  perev
+// CleanGlobalTracks() added. This method provides cleanen reused hits in the style of CA.
+// Thic call is triggered by nMaxTimes attribute, which allows reuse hits nMaxTimes times.
+//
 // Revision 1.231  2016/06/30 18:49:41  perev
 // 1. include StiCADefaultToolkit.h removed. No such file anymore
 // 2. local function CountHits() added for print only
