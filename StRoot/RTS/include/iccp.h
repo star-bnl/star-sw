@@ -358,6 +358,13 @@ struct ic_l4_startevent {
     int evbidx;
 };
 
+struct ic_l4_internal {
+    int cmd;
+    int buff_id;
+    int idx;
+};
+
+/*
 struct ic_l4_event {
     uint l2trg_lo;
     uint l2trg_hi;
@@ -371,7 +378,7 @@ struct ic_l4_event {
     int evbidx;
     int writeTracks;
 };
-
+*/
 
 // Payloads for the l4 taping commands
 struct ic_l4_evt_descriptor {
@@ -645,8 +652,9 @@ union ic_load
 
   ic_eth_announce                  eth_announce;
  
-  ic_l4_startevent                 l4_startevent;
-    ic_l4_event l4_event;
+    ic_l4_internal                 l4_internal;
+    ic_l4_startevent                 l4_startevent;
+    //ic_l4_event l4_event;
     ic_l4_evt_descriptor l4_evt_descriptor;
 
 

@@ -947,7 +947,7 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << ESMD_SYSTEM) ;
 	}
 	if(grp & (1 << TPX_GRP)) {
-	  ret |= (1 << TPX_SYSTEM);
+	  ret |= (1 << TPX_SYSTEM) | (1<<TPX_SYSTEM);
 	}
 	if(grp & (1 << RHICF_GRP)) {
 	  ret |= (1 << RHICF_SYSTEM);
@@ -995,6 +995,8 @@ extern inline int rts2grp(int rts)
 		return RHICF_GRP;
 	case FCS_ID :
 		return FCS_GRP ;
+        case TPC_ID:                    // Shares the TPC TCD...
+	        return TPX_GRP;
 	default:
 		return 31 ;	// this is an ERROR since groups < 16
    }
