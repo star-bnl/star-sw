@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.64 2016/11/07 21:19:13 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.65 2016/11/07 21:19:22 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -129,12 +129,16 @@ StPPVertexFinder::Init() {
    
   HList=new TObjArray(0);   
   initHisto();
+
   LOG_INFO << "initiated histos" << endm;
+
   if (mUseBtof)
     btofList->initHisto( HList); // dongx
+
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
+
   LOG_INFO << "Finished Init" << endm;
 }
 
@@ -287,8 +291,8 @@ StPPVertexFinder::initHisto() {
 
   hACorr=new TH2F("BTOFvsBEMC","BTOF vs BEMC", 5,-2.5,2.5,5,-2.5,2.5);
 
-  int i;
-  for(i=0;i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
+  for (int i=0; i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
+
   HList->Add(hACorr);
 }
 
@@ -310,8 +314,6 @@ StPPVertexFinder::Clear(){
   hL->Reset();
   hM->Reset();
   hW->Reset();
-
-
 }
 
 
@@ -1069,7 +1071,7 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
   LOG_INFO << "#e @OuterMostNode g x:"<< ouNode->x_g()<<" y:"<< ouNode->y_g()<<" z:"<< ouNode->z_g()<<" Eta="<<ouNode->getEta()<<" |P|="<<ouNode->getP() << endm;
 
- in=0;
+  in=0;
   for (it=track->begin();it!=track->end();it++,in++) {
     // if(in>=2 && in<nn-5) continue; // print only ends of the track
     StiKalmanTrackNode& ktn = (*it);
