@@ -128,7 +128,7 @@ TrackData::updateAnyMatch(bool match, bool veto, int & mXXX){
     anyVeto=false;
     mXXX=1;
     //  } else if(veto && (!anyMatch) ) {
-  } else if(veto && (!match) ) { // dongx
+  } else if(veto && (!match) ) {
     anyVeto=true;
     mXXX=-1;
   } else {

@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.26 2016/11/04 20:24:13 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.27 2016/11/07 21:19:27 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -14,7 +14,7 @@
 
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 
-#include "StPhysicalHelixD.hh" // dongx
+#include "StPhysicalHelixD.hh"
 class StiKalmanTrack;
 class TrackData;
 class VertexData;
@@ -45,7 +45,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
 
   enum {mxH=32};
   bool examinTrackDca(const StiKalmanTrack*, TrackData &t);
-  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);  // dongx
+  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);
   void matchTrack2CTB(const StiKalmanTrack*, TrackData &t);
   void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t, float z);
   void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
@@ -68,31 +68,31 @@ class StPPVertexFinder: public StGenericVertexFinder {
   enum {kSwitchOneHighPT=1}; 
 
   // params
-  double mMinTrkPt;       //~ pT=0.16(GeV/c) == R=2 (m )in 2001
-  double mMaxTrkDcaRxy;   //DCA to nominal beam line for each track
-  float  mMaxZradius;     // used in matching: tracks to zVertex
-  int    mMinMatchTr;     // for valid vertex
-  float  mMaxZrange;      // cut off for tracks Z_DCA
-  float  mDyBtof;         // BTOF delta y cut - dongx
-  float  mMinZBtof;       // BTOF local z min cut - dongx
-  float  mMaxZBtof;       // BTOF local z max cut - dongx
-  float  mMinAdcBemc;     // BEMC towers with MIP response
-  float  mMinAdcEemc;     // EEMC towers with MIP response
-  float  mMinFitPfrac;    // nFit/nPossible
-  bool   mFitPossWeighting; // Use nFit/nPossible in track weighting (ranking)
-  bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
-  int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
-  float  mCut_oneTrackPT; // threshold for storing one track vertices
-  bool   mStudyBeamLineTracks; // activates writing them out + lot of QA histos, 
-                          // use  BFC option: VtxSeedCalG to enable it, expert only
+  double mMinTrkPt;            ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
+  double mMaxTrkDcaRxy;        ///< DCA to nominal beam line for each track
+  float  mMaxZradius;          ///<  used in matching: tracks to zVertex
+  int    mMinMatchTr;          ///<  for valid vertex
+  float  mMaxZrange;           ///<  cut off for tracks Z_DCA
+  float  mDyBtof;              ///<  BTOF delta y cut
+  float  mMinZBtof;            ///<  BTOF local z min cut
+  float  mMaxZBtof;            ///<  BTOF local z max cut
+  float  mMinAdcBemc;          ///<  BEMC towers with MIP response
+  float  mMinAdcEemc;          ///<  EEMC towers with MIP response
+  float  mMinFitPfrac;         ///<  nFit/nPossible
+  bool   mFitPossWeighting;    ///< Use nFit/nPossible in track weighting (ranking)
+  bool   mDropPostCrossingTrack;  ///< enable/disable post crossing tarck rejection
+  int    mStoreUnqualifiedVertex; ///< set the max # of vertices, sorted by rank
+  float  mCut_oneTrackPT;         ///< threshold for storing one track vertices
+  bool   mStudyBeamLineTracks; ///< activates writing them out + lot of QA histos,
+                               ///< use  BFC option: VtxSeedCalG to enable it, expert only
 
   // util
   StiToolkit     *mToolkit;
-  BtofHitList    *btofList;  // dongx
+  BtofHitList    *btofList;
   CtbHitList     *ctbList;
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
-  StBTofGeometry *btofGeom;  // dongx btofGeometry
+  StBTofGeometry *btofGeom;
   StEEmcDb       *eeDb;
   EEmcGeomSimple *geomE;
   
