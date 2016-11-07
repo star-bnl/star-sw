@@ -16,6 +16,15 @@ VertexData::VertexData() {
 }
 
 
+VertexData::VertexData(const TVector3& position) :
+  id(0),
+  r(position), er(),
+  nUsedTrack(0), Lmax(0), gPtSum(0),
+  nBtof(0),  nCtb(0),  nBemc(0),  nEemc(0),  nTpc(0),  nAnyMatch(0),
+  nBtofV(0), nCtbV(0), nBemcV(0), nEemcV(0), nTpcV(0), nAnyVeto(0)
+{
+}
+
 //==========================================================
 //==========================================================
 void VertexData::print(ostream& os) const { // does not work ??
