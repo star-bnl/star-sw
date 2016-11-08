@@ -6,11 +6,8 @@
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
-#if ROOT_VERSION_CODE < 331013
-#include "TCL.h"
-#else
+#include "TSystem.h"
 #include "TCernLib.h"
-#endif
 
 //#define __CHECKIT__ // Enable unused paramter and error checks
 
@@ -20,12 +17,15 @@
 #define sinX(a) StiTrackNode::sinX(a)
 static const double kMaxEta = 1.5;
 static const double kMaxCur = 0.2;
+static const double kMaxSin = 0.99;
+static const double kMinCos = sqrt(1.-kMaxSin*kMaxSin);
 
 static const double DY=0.9,DZ=0.9,DEta=0.1,DPti=3,DTan=0.1;
 static const double MAXSTEP[]={0,DY,DZ,DEta,DPti,DTan};
 static const double ERROR_FACTOR = 2.;
 int StiTrackNodeHelper::_debug = 0;
 int StiTrackNodeHelper::mgCutStep=0;
+
 //______________________________________________________________________________
 int errTest(StiNodePars &predP,StiNodeErrs &predE,
             const StiHit *hit,StiHitErrs &hitErr,
@@ -101,9 +101,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   int ierr = 0;
   alpha = mTargetNode->_alpha - mParentNode->_alpha;
   ca=1;sa=0;
-#ifdef __CHECKIT__
-  parPars.check("1propagatePars");
-#endif
   rotPars = parPars;
   if (fabs(alpha) > 1.e-6) { //rotation part
 
@@ -129,17 +126,51 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   
 //  	Propagation 
   x1 = rotPars.x();
-  x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
+  int kase =  (mDetector) ? mDetector->getShape()->getShapeCode():0;
+  switch (kase) {
+    case 0: x2 = mHitPars[0]; break;
+    case 1: x2 = mDetector->getPlacement()->getNormalRadius(); break;    
+    case 2: {
+    
+      double out[2][3];
+      double rxy = mDetector->getPlacement()->getNormalRadius();
+      if (rotPars.P[0]*rotPars._cosCA+rotPars.P[1]*rotPars._sinCA<0)
+        { x2 = rxy; break;}
+      double rxy2P = rotPars.rxy2();
+      int outside = (rxy2P>rxy*rxy);
+      int nSol = StiTrackNode::cylCross(rotPars.P,&rotPars._cosCA,rotPars.curv(),rxy,mDir,out);
+      double *ou = out[0];
+      if (nSol==2) {
+         int kaze = outside + 2*mDir;
+	 switch (kaze) {
+	  case 0: return 2;    
+          case 1: ou = out[1]; break;
+          case 2: ou = out[1]; break;
+	  case 3: return 3;
+          default: assert(0);
+      } }
+
+      x2 = ou[0];
+      break;
+    }
+    default: assert(0 && "wrong shape code");
+  }
+
   dx = x2-x1;
   if (fabs(dx)<1e-5) { proPars = rotPars; return 0;}
   rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
-  if (fabs(sinCA2) > 0.99) return 2;
+  if (fabs(sinCA2) > kMaxSin)  {
+    sinCA2 = (sinCA2<0) ? -kMaxSin:kMaxSin;
+    dsin = sinCA2-rotPars._sinCA;
+    dx = (fabs(rho)>1e-5)? dsin/rho:0;
+    x2 = x1 + dx;
+  }
   cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
-  dy = dx*(sumSin/sumCos);
+  dy = (fabs(sumCos)>1e-5) ? dx*(sumSin/sumCos):0;
   y2 = rotPars.y()+dy;
   dl0 = rotPars._cosCA*dx+rotPars._sinCA*dy;
   sind = dl0*rho;
@@ -149,7 +180,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
     dl = atan2(sind,cosd)/rho;
   }
-
   proPars.x() = x2;
   proPars.y() = y2;
   proPars.z() = rotPars.z() + dl*rotPars.tanl();
@@ -235,7 +265,6 @@ int StiTrackNodeHelper::propagateMtx()
 //______________________________________________________________________________
 int StiTrackNodeHelper::propagateError()
 {
-static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs = mFitdParentErrs;
   StiTrackNode::errPropag6(mPredErrs.G(),mMtx.A,kNPars);
   int force = fabs(dl)> StiNodeErrs::kBigLen;
@@ -252,9 +281,6 @@ static int nCall = 0; nCall++; StiDebug::Break(nCall);
 //______________________________________________________________________________
 int StiTrackNodeHelper::makeFit(int smooth)
 {
-static int nCall=0;
-nCall++;
-StiDebug::Break(nCall);
   int ierr=0;
   mState = 0;
   mChi2 = 1e13;
@@ -370,8 +396,6 @@ StiDebug::Break(nCall);
 //______________________________________________________________________________
 int StiTrackNodeHelper::join()
 {
-static int nCall=0;nCall++;
-StiDebug::Break(nCall);
 
   enum {kOLdValid=1,kNewFitd=2,kJoiUnFit=4};
 //  if (!mParentNode) return 0;
@@ -380,15 +404,8 @@ StiDebug::Break(nCall);
   int ierr = 0;
   double chi2;		
     
-  StiDebug::Break(mTargetNode->mId);
   int kase = mTargetNode->isValid();
   if (mState==StiTrackNode::kTNFitEnd) kase |=kNewFitd;
-static int oldJoinPrim = StiDebug::iFlag("StiOldJoinPrim");
-if (!oldJoinPrim) {
-  if (mTargetNode==mVertexNode) kase = kNewFitd; //ignore old info for primVtx
-						 //Hack to accoont specific 
-						 //fit to primVtx
-}
   do {
     switch(kase) {
       case 0:					// Old invalid & New UnFitd
@@ -667,14 +684,11 @@ int StiTrackNodeHelper::save()
 //______________________________________________________________________________
 int StiTrackNodeHelper::propagateMCS()
 {  
-static int nCall = 0; nCall++;
-StiDebug::Break(nCall);
-static const int keepElossBug = StiDebug::iFlag("keepElossBug");
   mMcs.reset();
   if (!mDetector) 			return 0;
   mMcs._ptinCorr =  0;
   if (fabs(mBestPars.ptin())<=1e-3)	return 0;
-  double pt     = 1./(fabs(mBestPars.ptin())+1e-11);//???2
+  double pt     = 1./(fabs(mBestPars.ptin())+1e-6);
 assert(pt<1e3);
   double relRadThickness;
   // Half path length in previous node
@@ -683,7 +697,8 @@ assert(pt<1e3);
   // Half path length in this node
   pL3=0.5*pathIn(mDetector,&mBestPars);
   // Gap path length
-  pL2= fabs(dl);
+  double t = mBestPars.tanl();
+  pL2= fabs(dl*sqrt(1+t*t));
   double x0p = 1e11,x0Gas=1e11,x0=1e11;
   dx = mBestPars.x() - mBestParentRotPars.x();
   double tanl   = mBestPars.tanl();
@@ -693,84 +708,6 @@ assert(pt<1e3);
   double m2     = m*m;
   double e2     = p2+m2;
   double beta2  = p2/e2;
-if (keepElossBug) {	//Old Eloss bug prezerved
-
-  d1    = mParentNode->getDensity();
-  x0p   = mParentNode->getX0();
-  d3    = mDetector->getMaterial()->getDensity();
-  x0    = mDetector->getMaterial()->getX0();
-
-  if (pL2> (pL1+pL3)) {
-
-      pL2=pL2-pL1-pL3;
-      if (dx>0)  {
-	x0Gas = mDetector->getGas()->getX0();
-	d2    = mDetector->getGas()->getDensity();
-      } else {
-	x0Gas = mParentNode->getGasX0(); 
-	d2    = mParentNode->getGasDensity();
-      }
-
-      relRadThickness = 0.;
-      dxEloss = 0;
-
-      if (x0p>0.) {
-	 relRadThickness += pL1/x0p;
-	 dxEloss += d1*pL1;
-      }
-      if (x0Gas>0.) {
-	relRadThickness += pL2/x0Gas;
-	dxEloss += d2*pL2;
-      }
-      if (x0>0.){ 
-	relRadThickness += pL3/x0;
-	dxEloss += d3*pL3;
-      }
-    } else { //  pL2<=(pL1+pL3)
-      pL2 = 0;
-      relRadThickness = 0.; 
-      dxEloss = 0;
-      if (x0p>0.) {
-	relRadThickness += pL1/x0p;
-	dxEloss += d1*pL1;
-      }
-      if (x0>0.){
-	relRadThickness += pL3/x0;
-	dxEloss += d3*pL3;
-      }
-    }
-  double theta2 = StiKalmanTrackNode::mcs2(relRadThickness,beta2,p2);
-  double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
-  double f = mHitsErrFactor; 
-  mMcs._cEE = cos2Li 		*theta2*f;
-  mMcs._cPP = tanl*tanl*pti*pti	*theta2*f;
-  mMcs._cTP = pti*tanl*cos2Li	*theta2*f;
-  mMcs._cTT = cos2Li*cos2Li	*theta2*f;
-
-  double dE=0;
-  double sign = (dx>0)? 1:-1;
-
-//  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-  StiElossCalculator * calculator = mDetector->getMaterial()->getElossCalculator();
-assert(calculator);
-  double eloss = calculator->calculate(1.,m, beta2);
-  dE = sign*dxEloss*eloss;
-//		save detLoss and gasLoss for investigation only
-//  mTargetNode->setELoss(2*sign*d3*eloss,sign*d2*eloss);
-
-
-
-  mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
-if (fabs(mMcs._ptinCorr)>1e-4) {
-
-
-}   
-
-
-  if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
-
-} else { // ELoss bug fixed =====================================================================
-
 
   const StiMaterial 		*curMat = mDetector->getMaterial();
   const StiElossCalculator	*curLos = curMat->getElossCalculator();
@@ -813,9 +750,9 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
   mMcs._cPP = tanl*tanl*pti*pti	*theta2*f;
   mMcs._cTP = pti*tanl*cos2Li	*theta2*f;
   mMcs._cTT = cos2Li*cos2Li	*theta2*f;
-assert(mMcs._cPP>0);
-assert(mMcs._cTT>0);
-assert(mMcs._cEE>0);
+assert(mMcs._cPP>=0);
+assert(mMcs._cTT>=0);
+assert(mMcs._cEE>=0);
 
 
   int sign = ( dx>=0)? 1:-1;
@@ -833,7 +770,7 @@ assert(mMcs._cEE>0);
 
   mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
   if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
-}
+
 
 
   return 0;
@@ -931,8 +868,6 @@ double StiTrackNodeHelper::recvChi2()
   double chi2 = joinTwo(3,mHitPars    ,    myHrr.G()
                        ,3,mJoinPars.P,mJoinErrs.G()
 		         ,recovPars.P,recovErrs.G());
-  if (fabs(recovPars.y()-mHitPars[1])>10) StiDebug::Break(-1);
-  if (fabs(recovPars.z()-mHitPars[2])>10) StiDebug::Break(-1);
 
   mUnTouch.set(recovPars,recovErrs);
   return -chi2; //account that result is negative
@@ -967,10 +902,8 @@ int StiTrackNodeHelper::setHitErrs()
 //______________________________________________________________________________
 int StiTrackNodeHelper::updateNode() 
 {
-static int nCall=0; nCall++;
   mState = StiTrackNode::kTNFitBeg;
   double r00,r01,r11;
-  StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
     mHitPars[0] = mPredPars.x();
     double chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs,&mFitdPars,&mFitdErrs);
@@ -1030,8 +963,6 @@ static int nCall=0; nCall++;
     mFitdPars._cosCA = ::sqrt((1.-mFitdPars._sinCA)*(1.+mFitdPars._sinCA)); 
     if (!mDetector) 
       assert(fabs(mFitdPars.y()-mHitPars[1])>1e-10 ||  fabs(mHitPars[0])<4);
-//??    cutStep(&mFitdPars,&mPredPars);
-//??    cutStep(&mFitdPars,&mBestPars);
     assert(mFitdPars.x()>0);
     if (mFitdPars.check()) return -11;
   // update error matrix
@@ -1150,7 +1081,13 @@ double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
   double thickness = det->getShape()->getThickness();
   double t = pars->tanl();
   double c = fabs(pars->_cosCA);
-  return (thickness*::sqrt(1.+t*t)) / c;
+  if (det->getShape()->getShapeCode()!=kPlanar) {
+    double CA = pars->eta()-atan2(pars->y(),pars->x());
+    c = cos(CA);
+  }
+  if (fabs(c)<kMinCos) return 0.;
+//  if (fabs(c)<kMinCos) c=kMinCos;
+  return (thickness*::sqrt(1.+t*t)) / fabs(c);
 }
 //______________________________________________________________________________
 int StiTrackNodeHelper::getHitErrors(const StiHit *hit,const StiNodePars *pars,StiHitErrs *hrr)
