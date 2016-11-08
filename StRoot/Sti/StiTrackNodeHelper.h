@@ -53,7 +53,7 @@ public:
   StiKalmanTrackNode *getFlipFlop() 	const 	{return mFlipFlopNode;}
   StiKalmanTrackNode *getVertexNode()	const 	{return mVertexNode;}
   int                 getUsed()     	const	{return mUsed;}
-
+  void                setDir(int dir) { mDir = dir;};
 static int isCutStep()				{return mgCutStep;}
 private:
   void reset();
@@ -101,6 +101,7 @@ double mHitsErrFactor;
 double mParentHz;
 double mTargetHz;
 int    mIter;				//current iter number
+int    mDir;				//current iter number
 StiKalmanTrackNode *mWorstNode;		//node with the worst Chi2
 StiKalmanTrackNode *mFlipFlopNode;	//node with the worst flip/flop ratio
 StiKalmanTrackNode *mVertexNode;	//vertex node
