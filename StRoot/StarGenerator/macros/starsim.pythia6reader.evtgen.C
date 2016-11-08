@@ -51,10 +51,13 @@ void trig( Int_t n=0 )
   for ( Int_t i=0; i<n+1; i++ ) {
     chain->Clear();
     chain->Make();
+    // Print event generator
+    cout << "_____________________________________________________________________" << endl;
+    //    _primary -> event() -> Print();
+    //    command("gprint kine");
+    //    command("gprint vert");
+    cout << "_____________________________________________________________________" << endl;
 
-    command("gprint kine");
-    command("gprint vert");
-    _primary -> event() -> Print();
 
   }
 }
@@ -100,44 +103,7 @@ void Pythia6( TString filename )
   eventreader->SetInputFile( filename, "genevents", "primaryEvent" );
   _primary->AddGenerator( eventreader );
   
-  /*
-  //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
-  gSystem->Load( "libPythia6_4_28.so");
-  //  gSystem->Load( "StarPythia6.so"   );
 
-  StarPythia6 *pythia6 = new StarPythia6("pythia6");
-  if ( mode=="pp:W" )
-  {
-    pythia6->SetFrame("CMS", 510.0 );
-    pythia6->SetBlue("proton");
-    pythia6->SetYell("proton");
-    if ( tune ) pythia6->PyTune( tune );
-
-    // Setup pythia process
-    PySubs_t &pysubs = pythia6->pysubs();
-    pysubs.msel = 12;
-    pysubs.ckin(3)=4.0;
-
-  }
-  if ( mode == "pp:minbias" )
-  {
-    pythia6->SetFrame("CMS", 510.0 );
-    pythia6->SetBlue("proton");
-    pythia6->SetYell("proton");
-    if ( tune ) pythia6->PyTune( tune );
-  }
-  if ( mode == "ep" )
-  {
-    Double_t pblue[]={0.,0.,30.0};
-    Double_t pyell[]={0.,0.,-320.0};
-    pythia6->SetFrame("3MOM", pblue, pyell );
-    pythia6->SetBlue("e-");
-    pythia6->SetYell("proton");
-    if ( tune ) pythia6->PyTune( tune );
-  }
-    
-  _primary->AddGenerator(pythia6);
-  */
 }
 
 //_____________________________________________________________________________
@@ -145,7 +111,7 @@ void reader( int nevents, int index, int rng )
 {
   starsim( nevents, index, rng );
 }
-void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
+void starsim( Int_t nevents=10, Int_t Index = 0, Int_t rngSeed=4321 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -206,21 +172,54 @@ void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
   // Setup decay manager
   //
   StarDecayManager   *decayMgr = AgUDecay::Manager();
-  /*
-  StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
-  decayMgr->AddDecayer( 0, decayPy8 ); // Handle any decay requested
-  decayPy8->SetDebug(1);
-  decayPy8->Set("WeakSingleBoson:all = on");
-  */
+
+  //
+  // Output a decay table for taus which specifies Tauola as the decay model
+  //
+  {
+    ofstream out("TAUS.DEC");
+    const char* cmds[] = {
+      "Decay tau-",      // 1
+      "1.0 TAUOLA 0;",   // 2
+      "Enddecay",        // 3
+      "CDecay tau+",     // 4
+      "End"              // 5
+    };
+    for ( int i=0;i<5;i++ ) 
+      {
+	out << cmds[i] << endl;
+      }
+  }
+ 
+  //
+  // Setup EvtGen to decay most particles in STAR
+  //
   StarEvtGenDecayer *decayEvt = new StarEvtGenDecayer();
-  //decayEvt->SetDecayTable("StRoot/StSimulationMaker/Decay_Table/Jpsi.DEC");
+  decayEvt->SetDecayTable("TAUS.DEC");
   decayMgr->AddDecayer( 0, decayEvt ); // Handle any decay requested
-  decayEvt->SetDebug(1);
+  decayEvt->SetDebug(0);
+
+
+  //
+  // Setup pythia8 to decay W+ and W- (and possibly others...)
+  //
+  StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
+  decayMgr->AddDecayer( +24, decayPy8 );
+  decayMgr->AddDecayer( -24, decayPy8 );
+  decayPy8->SetDebug(1);
+
+
+  // Allow W to e+ nu or e- nu only
+  decayPy8->Set("24:onMode = 0");
+  decayPy8->Set("24:onIfAny = 11 -11");
+
     
   //
   // Initialize primary event generator and all sub makers
   //
   _primary -> Init();
+
+  //return;
 
   //
   // Setup geometry and set starsim to use agusread for input
