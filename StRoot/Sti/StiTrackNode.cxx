@@ -97,7 +97,7 @@ int StiHitContino::getNHits() const
 { int n=0; for(int i=0;i<kMaxSize;i++) {if (mHits[i]) n++;}; return n;}	
 //______________________________________________________________________________
 int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double Rho
-                          ,const double r    ,int dir,            double out[2][3])
+                          ,const double rp   ,int dir,            double out[2][3])
 {
 //Circles crossing
 //==========================================================
@@ -131,9 +131,9 @@ int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double R
 // 
 static int nCall=0;nCall++;
 StiDebug::Break(nCall);
-
+ double r = rp;
  int sRho = (Rho<0) ? -1:1;
- double aRho = fabs(Rho), rr=r*r,d=0;
+ double aRho = fabs(Rho), d=0;
 
 //TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
 // static TVector3  C, Cd, Cn, N;
@@ -149,11 +149,15 @@ StiDebug::Break(nCall);
 
  double LLmRR = XX*aRho+2*XN*sRho;
  double LL = LLmRR*aRho+1; L = sqrt(LL);
- d = (rr*aRho+LLmRR)/(2*L);
-
- double p = ((r-d)*(r+d));
- if (p<=0) return 0;
- p = sqrt(p);
+ d = (r*r*aRho+LLmRR)/(2*L);
+ double P = ((r-d)*(r+d));
+ if (P<=0) { 
+   P = 0; 
+   r = fabs(LLmRR/(L+1)); 
+   d = (r*r*aRho+LLmRR)/(2*L); 
+ } else {
+   P = sqrt(P);
+ }
 
  C[0] = Xp[0]*aRho+N[0]*sRho;
  C[1] = Xp[1]*aRho+N[1]*sRho;
@@ -172,10 +176,10 @@ StiDebug::Break(nCall);
  //   Out[ix] = Cd*d + Cn*p; p = -p;
  // }
  double Out[2][2];
- Out[0][0] = Cd[0]*d + Cn[0]*p;
- Out[0][1] = Cd[1]*d + Cn[1]*p;
- Out[1][0] = Cd[0]*d - Cn[0]*p;
- Out[1][1] = Cd[1]*d - Cn[1]*p;
+ Out[0][0] = Cd[0]*d + Cn[0]*P;
+ Out[0][1] = Cd[1]*d + Cn[1]*P;
+ Out[1][0] = Cd[0]*d - Cn[0]*P;
+ Out[1][1] = Cd[1]*d - Cn[1]*P;
 
  // static TVector3 tmp;
  double tmp[2];
@@ -197,23 +201,26 @@ for (int ix = 0;ix<2; ix++) {
   out[ix][0] = Out[ix][0];
   out[ix][1] = Out[ix][1];
 }
-  if (fabs(out[0][2])>fabs(out[1][2])) { 	//wrong order
-    for (int j=0;j<3;j++)  { 
-      double t=out[0][j]; 
-      out[0][j] = out[1][j]; 
-      out[1][j] = t; 
+  if ((out[0][2])>out[1][2]) { 	//wrong order
+    for (int j=0;j<3;j++)    { 
+      double t=out[0][j]; out[0][j] = out[1][j]; out[1][j] = t; 
   } }
 
-//   for (int i=0;i<2;i++) {
+
+#if 0
+   TVector3 tC(C[0],C[1],0.); 
+   for (int i=0;i<2;i++) {
 // //  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
-//   double dif = (Out[i]*aRho-C).Mag()-1.;
+   TVector3 Out(out[i][0],out[i][1],0.);
+   double dif = (Out*aRho-tC).Mag()-1.;
 // //  printf("SolAcc=%g\n",dif);
-//   assert(fabs(dif)<1e3);
-//   dif = (Out[i]).Mag()/r-1;
+   assert(fabs(dif)<1e-5);
+   dif = Out.Mag()/r-1;
 // //  printf("SolAcc=%g\n",dif);
-//   assert(fabs(dif)<1e3);
-//   }
-  return 2;
+   assert(fabs(dif)<1e-5);
+   }
+#endif
+  return (P)? 2:0;
 }
 
 
