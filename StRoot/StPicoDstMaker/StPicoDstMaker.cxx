@@ -260,9 +260,9 @@ Int_t StPicoDstMaker::InitRun(Int_t const runnumber)
 //_____________________________________________________________________________
 Bool_t StPicoDstMaker::initMtd(Int_t const runnumber)
 {
-  // Dec. 1st is the assumed to the start a new running year
+  // Oct. 1st (approx. 273rd day) is the start of a new running year
   int year = runnumber / 1e6 + 1999;
-  if ((runnumber % 1000) / 1000 > 334) year += 1;
+  if ((runnumber % 1000000) / 1000 >= 273) year += 1;
   LOG_INFO << "Run = " << runnumber << " year = " << year << endm;
 
   // obtain maps from DB

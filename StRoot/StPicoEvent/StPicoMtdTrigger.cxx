@@ -34,7 +34,8 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
   // RHIC year
   const int runnumber = muDst.event()->runNumber();
   int year = runnumber / 1e6 + 1999;
-  if ((runnumber % 1000) / 1000 > 334) year += 1;
+  // Oct. 1st (approx. 273rd day) is the start of a new running year
+  if ((runnumber % 1000000) / 1000 >= 273) year += 1;
 
   // Trigger data
   UShort_t mtd_qt_tac_min = 100;
