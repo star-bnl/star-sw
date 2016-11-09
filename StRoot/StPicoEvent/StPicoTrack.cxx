@@ -27,7 +27,8 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
 {
   if (!gTrk || gTrk->type() != global || (pTrk && (pTrk->type() != primary || pTrk->id() != gTrk->id())))
   {
-    LOG_WARN << " Bad StPicoTrack constructor ...... Check!" << endm;
+    LOG_WARN << "Invalid arguments passed to StPicoTrack constructor. Object is default initialized" << endm;
+
     return;
   }
 
