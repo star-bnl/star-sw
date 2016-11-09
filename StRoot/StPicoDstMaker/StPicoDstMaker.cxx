@@ -701,22 +701,11 @@ bool StPicoDstMaker::getBEMC(StMuTrack* t, int* id, int* adc, float* ene, float*
 {
   *id = -1;
   *adc = 0;
-  for (int i = 0; i < 5; ++i)
-  {
-    ene[i] = 0.;
-  }
-  for (int i = 0; i < 4; ++i)
-  {
-    d[i] = 1.e9;
-  }
-  for (int i = 0; i < 2; ++i)
-  {
-    nep[i] = 0;
-  }
-  for (int i = 0; i < 3; ++i)
-  {
-    towid[i] = -1;
-  }
+
+  std::fill(ene, ene+5, 0.);
+  std::fill(d, d+4, 1.e9);
+  std::fill(nep, nep+2, 0);
+  std::fill(towid, towid+3, -1);
 
   if (!mEmcCollection)
   {
