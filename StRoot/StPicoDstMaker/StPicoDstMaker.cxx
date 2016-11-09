@@ -1107,6 +1107,19 @@ void StPicoDstMaker::fillMtdHits()
   }
 }
 
+
+/**
+ * Selects a primary vertex from `muDst` vertex collection according to the
+ * vertex selection mode `mVtxMode` specified by the user. The mode must be
+ * set with StMaker::SetAttr("PicoVtxMode", "your_desired_vtx_mode") as by
+ * default the selection mode is `PicoVtxMode::NotSet`.
+ *
+ * Returns `true` if the user has specified a valid vertex selection mode and
+ * a valid vertex satisfying the corresponding predefined conditions is found in
+ * the muDst vertex collection.
+ *
+ * Returns `false` otherwise.
+ */
 bool StPicoDstMaker::selectVertex()
 {
   StMuPrimaryVertex* selectedVertex = nullptr;

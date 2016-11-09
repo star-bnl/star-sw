@@ -112,6 +112,9 @@ protected:
   */
   bool getBEMC(StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
   int  setVtxModeAttr();
+
+  /// Selects a primary vertex from `muDst` vertex collection according to the
+  /// vertex selection mode `mVtxMode` specified by the user.
   bool selectVertex();
 
   StMuDst*   mMuDst;
