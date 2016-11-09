@@ -33,18 +33,24 @@
 typedef struct {
     char           name[3];                     /* Contains  EVD */
     char           TrgDataFmtVer;               /* Exception for use by DAQ (LS byte of FORMAT_VERSION) */
+    
     int            length;                      /* Byte count of data that follows */
+
     unsigned int   bunchXing_hi;
+
     unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
+
     unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
     unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
     unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
+   
     unsigned short TrgToken;                    /* from Fifo 2 */
     unsigned short addBits;                     /* used by trigger/daq: bit 5=Force store; bit 6=L2.5 abort; bit 7=1 is fake data */
+  
     unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
     unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
+    
     unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
-
 
 #ifndef __linux
     unsigned int tcuCtrBunch;
@@ -55,7 +61,7 @@ typedef struct {
 	    unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
 	};
 	struct {
-	    unsigned short trgDetMask;                  // After 11/8/16
+	    unsigned short trgDetMask;                   // After 11/8/16
 	    unsigned short tcuCtrBunch_hi;               // After 11/8/16
 	};
 	unsigned int tcuCtrBunch;
