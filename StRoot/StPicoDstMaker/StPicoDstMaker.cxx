@@ -1109,12 +1109,13 @@ void StPicoDstMaker::fillMtdHits()
 
 bool StPicoDstMaker::selectVertex()
 {
-  mMuDst->setVertexIndex(-2);
+  StMuPrimaryVertex* selectedVertex = nullptr;
 
   if (mVtxMode == PicoVtxMode::Default)
   {
     // choose the default vertex, i.e. the first vertex
     mMuDst->setVertexIndex(0);
+    selectedVertex = mMuDst->primaryVertex();
   }
   else if (mVtxMode == PicoVtxMode::Vpd)
   {
@@ -1132,6 +1133,7 @@ bool StPicoDstMaker::selectVertex()
         if (fabs(vzVpd - vtx->position().z()) < 3.)
         {
           mMuDst->setVertexIndex(iVtx);
+          selectedVertex = mMuDst->primaryVertex();
           break;
         }
       }
@@ -1141,9 +1143,8 @@ bool StPicoDstMaker::selectVertex()
   else // default case
   {
     LOG_ERROR << "Pico Vtx Mode not set!" << endm;
-    return false;
   }
 
   // Retrun false if selected vertex is not valid
-  return (mMuDst->currentVertexIndex() !=-2 && mMuDst->primaryVertex())? true : false;
+  return selectedVertex ? true : false;
 }
