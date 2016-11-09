@@ -193,12 +193,12 @@ Int_t StPicoDstMaker::Init()
         }
       }
 
-      if (mInputFileName.Length()==0) {
-//		No input file
+      if (mInputFileName.Length() == 0) {
+        // No input file
         mOutputFileName = GetChainOpt()->GetFileOut();
         mOutputFileName.ReplaceAll(".root", ".picoDst.root");
       } else {
-      
+
         mInputFileName = mInputFileName(mInputFileName.Index("st_"), mInputFileName.Length());
         mOutputFileName = mInputFileName;
         mOutputFileName.ReplaceAll("MuDst.root", "picoDst.root");
@@ -565,7 +565,7 @@ Int_t StPicoDstMaker::MakeRead()
 //_____________________________________________________________________________
 Int_t StPicoDstMaker::MakeWrite()
 {
-  WhiteBoard  ("muDst", &mMuDst);
+  WhiteBoard("muDst", &mMuDst);
 
   if (!mMuDst)
   {
