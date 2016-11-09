@@ -32,8 +32,8 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
     return;
   }
 
-  mId        = (UShort_t)gTrk->id();
-  mChi2      = (gTrk->chi2() * 1000. > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(gTrk->chi2() * 1000.));
+  mId   = (UShort_t)gTrk->id();
+  mChi2 = (gTrk->chi2() * 1000. > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(gTrk->chi2() * 1000.));
 
   if (pTrk)
   {

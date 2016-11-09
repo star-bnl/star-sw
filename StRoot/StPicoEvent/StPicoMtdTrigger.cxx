@@ -91,10 +91,10 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
       for (int i = 0; i < 8; i++)
       {
         if (year == 2016 && i % 2 == 0) // moniter channel only used for Run16
-	{
-	  mQTtacSum[im][i] = 0;
-	  continue; 
-	}
+        {
+          mQTtacSum[im][i] = 0;
+          continue;
+        }
 
         // Apply slewing correction
         for (int k = 0; k < 2; k++)
@@ -127,14 +127,14 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
           continue;
         }
 
-	// Apply position correction 	
-	int module = QTtoModule[im][i];
- 	if(module<0)
- 	{
-	  mQTtacSum[im][i] = 0;
-	  continue;
-	}
- 	mQTtacSum[im][i] = UShort_t( j[0] + j[1] + abs(module-3)*1./8 * (j[0]-j[1]) );
+        // Apply position correction
+        int module = QTtoModule[im][i];
+        if(module<0)
+        {
+          mQTtacSum[im][i] = 0;
+          continue;
+        }
+        mQTtacSum[im][i] = UShort_t( j[0] + j[1] + abs(module-3)*1./8 * (j[0]-j[1]) );
       }
     }
 
@@ -160,14 +160,14 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
     {
       for (Int_t j = 0; j < 2; j++)
       {
-        if(year==2016)
+        if (year == 2016)
         {
           int qt = i * 2;
           mTF201TriggerBit |= ((decision >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
           qt = i * 2 + 1;
           mTF201TriggerBit |= ((decision2 >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
         }
-	else
+        else
         {
           int qt = i;
           mTF201TriggerBit |= ((decision >> (i * 2 + j + 4)) & 0x1) << (qt * 2 + j);
