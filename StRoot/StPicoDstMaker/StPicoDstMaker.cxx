@@ -239,6 +239,13 @@ int StPicoDstMaker::setVtxModeAttr()
     LOG_INFO << " PicoVtxVpd is being used " << endm;
     return kStOK;
   }
+  else if (strcmp(SAttr("PicoVtxMode"), "PicoVtxVpdOrDefault") == 0)
+  {
+    setVtxMode(PicoVtxMode::VpdOrDefault);
+    LOG_INFO << " PicoVtxVpdOrDefault is being used " << endm;
+    return kStOK;
+  }
+
 
   return kStErr;
 }
@@ -1130,8 +1137,13 @@ bool StPicoDstMaker::selectVertex()
     mMuDst->setVertexIndex(0);
     selectedVertex = mMuDst->primaryVertex();
   }
-  else if (mVtxMode == PicoVtxMode::Vpd)
+  else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)
   {
+    if(mVtxMode == PicoVtxMode::VpdOrDefault)
+    {
+      mMuDst->setVertexIndex(0);
+    }
+
     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
 
     if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
@@ -1151,7 +1163,6 @@ bool StPicoDstMaker::selectVertex()
         }
       }
     }
-
   }
   else // default case
   {
