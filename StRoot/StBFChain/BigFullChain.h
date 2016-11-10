@@ -1269,9 +1269,10 @@ Bfc_st BFC[] = { // standard chains
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Geometry+Mag","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"pgf77"       ,"" ,"","",""                                                ,"pgf77VMC","Fortran",kFALSE},
+  {"pgf77"       ,"" ,"","",""                                                       ,"","OBSOLETE",kFALSE},
   {"rootcern"    ,"" ,"","geant3",""                                   ,"","ROOT minicern OBSOLETE",kFALSE},
   {"minicern"    ,"" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
+  {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
   {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom,libVMC,libgeant3", "VMC geant3",kFALSE},
@@ -1401,10 +1402,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                     "trigger analysis for Year 2001-2005 data",kFALSE},
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-  //  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker"
-  //   ,                                                                     "<Early StEvent creation>",kFALSE},
-  {"MakeEvent","0Event","","StEvent,detDb","StEventMaker","StTpcDb,StEventMaker"
-     ,                                                                     "<Early StEvent creation>",kFALSE},
+  {"MakeEvent","0Event","","StEvent,detDb","StEventMaker","StEventMaker","<Early StEvent creation>",kFALSE},
   {"LaserAvEv"          ,"","",""             ,"StLaserAvEventMaker","StLaserAvEventMaker","Hejrad",kFALSE},
   {"LaserAvCl"          ,"","",""               ,"StLaserAvClusterMaker","StLaserAvClusterMaker","",kFALSE},
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
@@ -1686,9 +1684,9 @@ Bfc_st BFC[] = { // standard chains
   {"HLTCA"    ,""  ,"","",                     "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
-  {"Stv"     ,"Stv","","geant3vmc,-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T",    "StvMaker",
-   "libHist,libHistPainter,GeoTestMaker,StvUtil,Stv,StvMaker"
-   ,                                                                                          "Stv",kFALSE},
+  {"Stv"     ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,","StvMaker"
+   ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker,StEventUtilities"
+   ",-StiLibs,-StiLibsHft"                                                                   ,"Stv",kFALSE},
   {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
   {"StiVMC"   ,"StiVMC","","-Sti,SCL,stu,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
    ,                                                       "StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
