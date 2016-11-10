@@ -26,8 +26,10 @@ static const Char_t *TitlePiDtype[NoPiDs] = {"dEdxPiD", "ToFPiD"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};	  
 static const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
 					 "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
+#if 0
 static const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar"
 					 "e+","p"   ,"K+","pi+","mu+","d"   ,"t"   ,"He3"    ,"alpha"};
+#endif
 static const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417,
 				       0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 static const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
@@ -36,12 +38,14 @@ static const Int_t PiDHyp[NHYPS]     = {kPidElectron, kPidProton, kPidKaon, kPid
 					kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha};
 static const Int_t PiDpm[NHYPS]      = {kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative,
 					kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive};
+#if 0
 static const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
 static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN70B","muN70B","deuteronN70B","tritonN70B","He3N70B","alphaN70B",
 				    "eP70B","protonP70B","kaonP70B","piP70B","muP70B","deuteronP70B","tritonP70B","He3P70B","alphaP70B"};
 static const Char_t *HistNameP[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","He3PzB","alphaPzB"};
+#endif
 static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
@@ -298,7 +302,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	    for (Int_t i = i1; i < kTotalQAll; i++) {
 	      if (gp == kGlobal && plotVar[i].GlobalOnly <  0) continue;
 	      if (gp == kPrimary && plotVar[i].GlobalOnly == 0) continue;
-	      if (fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name)) continue;
+	      if ((fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name))) continue;
 	      if (! x) {// No.Hits
 		if (i == kTotalQA) continue;
 		fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
@@ -533,7 +537,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
   // =============  Build map between  Rc and Mc vertices 
   //  multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
   // Loop over Mc Tracks
-  for (Int_t m = 0; m < muDst->numberOfMcTracks(); m++) {
+  for (UInt_t m = 0; m < muDst->numberOfMcTracks(); m++) {
     StMuMcTrack *mcTrack = muDst->MCtrack(m);
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
@@ -678,7 +682,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	// ToF
 	const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
 	Float_t pathLength = btofPid.pathLength();
-	Float_t timeOfFlight = btofPid.timeOfFlight();
+	//	Float_t timeOfFlight = btofPid.timeOfFlight();
 	Float_t beta = btofPid.beta();
 	
 	//	const StThreeVectorF &pVx  = Track->momentum();
@@ -715,7 +719,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     }
   }
   // check for ghost
-  for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
+  for (UInt_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
     StMuTrack *gTrack = muDst->globalTracks(kg);
     if ( ! muDst->Accept(gTrack)) continue;
     if ( gTrack->idTruth()) continue;
@@ -723,13 +727,13 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     if (gTrack->charge() < 0) pm = kNegative;
     fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
   }
-  for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
+  for (UInt_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
     StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
     if (Vtx->idTruth() != 1) continue;
-    for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       if (! pTrack) continue;
-      if (pTrack->vertexIndex() != l) continue;
+      if (pTrack->vertexIndex() != (Int_t) l) continue;
       if (! muDst->Accept(pTrack)) continue;
       if ( pTrack->idTruth()) {
 	if (pTrack->idParentVx() == 1) continue;
@@ -746,9 +750,9 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   StMuDst::instance()->printKFTracks();
   //  return;
   static Int_t nTracksAll = 0;
-  static Int_t nTracksGhost = 0;
+  //  static Int_t nTracksGhost = 0;
   static Int_t nStiVertex = 0;
-  static Int_t nKFVertex = 0;
+  //  static Int_t nKFVertex = 0;
   Int_t NoMuMcVertices = StMuDst::instance()->numberOfMcVertices(); //if (_debugAsk) cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices << std::endl;
   Int_t NoMuMcTracks = StMuDst::instance()->numberOfMcTracks();
   if (! NoMuMcVertices || ! NoMuMcTracks) {
@@ -797,7 +801,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     UShort_t noTracks = Vtx->noTracks();
     primVtx_tmp.SetNContributors(noTracks);
     primVtx_tmp.SetChi2(Vtx->chiSquared());
-    PrimVertex[l] = KFVertex(primVtx_tmp);
+    PrimVertex[0] = KFVertex(primVtx_tmp);
     Int_t idd = Vtx->idTruth();
     // Check Mc
     if (idd > 0 && idd <= NoMuMcVertices) {
@@ -859,40 +863,63 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     trackIdMap[gTrack->id()] = nPartSaved;
     trackIdMap2[nPartSaved] = gTrack->id();
     
+    bool isSecondary = true;
     const StMuTrack *primTrack = gTrack->primaryTrack();
-    if(primTrack)      {
+    if(primTrack)
+    {
       const int iPV = primTrack->vertexIndex(); 
-      vector<int> &tracksPV = PrimTracks[iPV];
-      tracksPV.push_back(nPartSaved);
-      if ( iPV==bestPV ) 	  {
-	KFParticle particle(track, pdg);
-	particle.SetId(kg);
-	particles[nPartSaved] = particle;
-	mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-	if(mcIndexes[nPartSaved] > -1)	      {
-	  particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
-	  mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
-	}	    else {
-	  particlesPdg[nPartSaved] = -1;
-	}
-	nPartSaved++;
+      //continue;
+        //if ((iPV!=bestPV)) continue;
+      {
+        vector<int> &tracksPV = PrimTracks[iPV];
+        tracksPV.push_back(nPartSaved);
       }
-    } else {
+        
+      if ( iPV==bestPV )
+      {
+        KFParticle particle(track, pdg);
+        particle.SetId(kg);
+        
+        particles[nPartSaved] = particle;
+        mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+        
+        if(mcIndexes[nPartSaved] > -1)
+        {
+          particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
+          mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+        }
+        else
+        {
+          particlesPdg[nPartSaved] = -1;
+        }
+        nPartSaved++;
+        isSecondary = false;
+      }
+    }
+    
+    if(isSecondary)
+    {
       int pdg[3] = {211, 2212, -11};
-      if(q<0) 	  {
-	pdg[0] = -211;
-	pdg[1] = -2212;
-	pdg[2] = 11;
+      if(q<0)
+      {
+        pdg[0] = -211;
+        pdg[1] = -2212;
+        pdg[2] = 11;
       }
-      for(int iHypo=0; iHypo<3; iHypo++)	  {
-	KFParticle particle(track, pdg[iHypo]);
-	particle.SetId(kg);
-	particles[nPartSaved] = particle;
-	mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-	if(mcIndexes[nPartSaved] > -1)
-	  mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
-	particlesPdg[nPartSaved] = pdg[iHypo];
-	nPartSaved++;
+      
+      for(int iHypo=0; iHypo<1; iHypo++)
+      {
+        KFParticle particle(track, pdg[iHypo]);
+        particle.SetId(kg);
+        
+        particles[nPartSaved] = particle;
+        mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+        
+        if(mcIndexes[nPartSaved] > -1)
+          mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+
+        particlesPdg[nPartSaved] = pdg[iHypo];
+        nPartSaved++;
       }
     }
   }
@@ -910,70 +937,72 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 #endif  
   mStKFParticleInterface->SetParticles(particles);
   mStKFParticleInterface->SetParticlesPdg(particlesPdg);
-  
-  
-  mStKFParticleInterface->InitParticles();
-  if(NoStVertices>0)
+  mStKFParticleInterface->CleanPV();
+  if(NoPrimaryVertices>0)
+  {
+    for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
     {
-      for(int iPV=0; iPV<NoStVertices; iPV++)
-	{
-	  if (iPV==bestPV)
-	    mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]); // <<<<<<<<<<<
-	}
+      if (iPV==bestPV)
+        mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]);
     }
+  }
   else
-    {
-      KFPVertex primVtx_tmp;
-      primVtx_tmp.SetXYZ(0, 0, 0);
-      primVtx_tmp.SetCovarianceMatrix( 0, 0, 0, 0, 0, 0 );
-      primVtx_tmp.SetNContributors(0);
-      primVtx_tmp.SetChi2(-100);
-      
-      vector<int> tracks;
-      KFVertex pv(primVtx_tmp);
-      mStKFParticleInterface->AddPV(pv, tracks);
-    }
+  {
+    KFPVertex primVtx_tmp;
+    primVtx_tmp.SetXYZ(0, 0, 0);
+    primVtx_tmp.SetCovarianceMatrix( 0, 0, 0, 0, 0, 0 );
+    primVtx_tmp.SetNContributors(0);
+    primVtx_tmp.SetChi2(-100);
+
+    vector<int> tracks;
+    KFVertex pv(primVtx_tmp);
+    mStKFParticleInterface->AddPV(pv, tracks);
+  }
+  mStKFParticleInterface->InitParticles();
+  
 #if 0 /* Maksym reconstruction */
   mStKFParticleInterface->ReconstructParticles();
 #else
-  for(int iPart=0; iPart<particles.size(); iPart++)
-    {
-      particles[iPart].SetId(iPart);
-      particles[iPart].AddDaughterId(iPart);
-      mStKFParticleInterface->AddParticle(particles[iPart]);
-    }
+//   for(int iPart=0; iPart<particles.size(); iPart++)
+//   {
+//     particles[iPart].SetId(iPart);
+//     particles[iPart].AddDaughterId(iPart);
+//     mStKFParticleInterface->AddParticle(particles[iPart]);
+//   }
   
   for (Int_t l = 0; l < NoKFVertices; l++)
-    {
-      KFVertex *vx = StMuDst::instance()->KFvertex(l);
-      if (! vx) continue;
-      //if( vx->GetNDF() != 1 ) continue;
-      
-      KFParticle particle = *vx;
-      
-      if(particle.NDaughters() != 2) continue;
-      if(particle.DaughterIds()[0] >= particles.size() || particle.DaughterIds()[1] >= particles.size() ) 
-        continue;
-      
-      vector<int> newIds;
-      newIds.push_back( trackIdMap[particle.DaughterIds()[0]]);
-      newIds.push_back( trackIdMap[particle.DaughterIds()[1]]);
-      
-      particle.CleanDaughtersId();
-      particle.AddDaughterId(newIds[0]);
-      particle.AddDaughterId(newIds[1]);
-      
+  {
+    KFVertex *vx = StMuDst::instance()->KFvertex(l);
+    if (! vx) continue;
+//     if( vx->GetNDF() < 0 ) continue;
+    if( vx->NDaughters() == 0 ) continue;
+    
+    KFParticle particle = *vx;
+    
+//     if(particle.NDaughters() != 2) continue;
+//     if(particle.DaughterIds()[0] >= particles.size() || particle.DaughterIds()[1] >= particles.size() ) 
+//       continue;
+    
+//     vector<int> newIds;
+//     newIds.push_back( trackIdMap[particle.DaughterIds()[0]]);
+//     newIds.push_back( trackIdMap[particle.DaughterIds()[1]]);
+//     
+//     particle.CleanDaughtersId();
+//     particle.AddDaughterId(newIds[0]);
+//     particle.AddDaughterId(newIds[1]);
+    
+    if(vx->GetNDF() <= 1)
       mStKFParticleInterface->AddParticle(particle);
-      if(vx->GetNDF() > 2)
-        mStKFParticleInterface->AddCandidate(particle, 0);
-      else if(vx->GetNDF() > 1)
-        mStKFParticleInterface->AddCandidate(particle, 0);
-    }
+    if(vx->GetNDF() > 2)
+      mStKFParticleInterface->AddCandidate(particle, 0);
+    else if(vx->GetNDF() > 1)
+      mStKFParticleInterface->AddCandidate(particle, 0);
+  }
 #endif
   
   mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
   mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
-  Int_t nevent = 1000000;
+  Int_t nevent = 1;
   mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
   mStKFParticlePerformanceInterface->PerformanceAnalysis();
 #if 0  
@@ -1339,8 +1368,8 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
   }
 }
 //_____________________________________________________________________________
-Int_t StMuMcAnalysisMaker::Draw(){
-  if (! Check()) return kStOk;
+void StMuMcAnalysisMaker::Draw(Option_t */* option */){
+  if (! Check()) return;
   TString Out("indexMc.html");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   BeginHtml();
@@ -1360,7 +1389,6 @@ Int_t StMuMcAnalysisMaker::Draw(){
   out << "<H1>2. Vertices</H1>" << endl;
   Chapter = "2.1"; // nPng = 0;
   EndHtml();
-  return kStOK;
 }
 //________________________________________________________________________________
 TString StMuMcAnalysisMaker::DirPath(const TH1 * hist) {
@@ -1535,7 +1563,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
 	    else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
 	    heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
-	    heff[l]->SetYTitle(Form("%s (%)",eff[i]));
+	    heff[l]->SetYTitle(Form("%s (%%)",eff[i].Title));
 	    heff[l]->SetStats(0);
 	    heff[l]->SetMarkerColor(l+1);
 	    heff[l]->SetLineColor(l+1);

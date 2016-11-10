@@ -76,7 +76,7 @@ StKFVertexMaker::StKFVertexMaker(const Char_t *name) : StMaker(name),
 						     fParticles(0), fVertices(0),
 						     fPass(0), fNzBins(2500),  fNPasses(2), fSpectrum(0), fzWindow(2), 
 						     fTempLog(2), fminBrent(0), func(0),
-						     mBeamLine(kFALSE), fVertexZPlot(0), fStack(0), fc1(0) , pEvent(0), mStKFParticleInterface(0)
+						     fVertexZPlot(0), fStack(0), mBeamLine(kFALSE), fc1(0) , pEvent(0), mStKFParticleInterface(0)
 {
   Int_t npeaks = 250;
   Double_t zmin = -250;
@@ -432,13 +432,13 @@ Int_t StKFVertexMaker::Make() {
   }
   StKFVertex::ResetTotalNoVertices();
   // add Fixed Primary vertex if any
-  Bool_t FixedPrimaryVertex = kFALSE;
+  //  Bool_t FixedPrimaryVertex = kFALSE;
   if (StiToolkit::instance()->getVertexFinder() && (IAttr("VFFV") || IAttr("VFMCE"))) {
     StiToolkit::instance()->getVertexFinder()->fit(pEvent);
-    FixedPrimaryVertex = kTRUE;
+    //    FixedPrimaryVertex = kTRUE;
     const std::vector<StiHit*> *vertexes = StiToolkit::instance()->getVertexFinder()->result();
     if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
-    UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+    Int_t NoPV = pEvent->numberOfPrimaryVertices();
     for (Int_t ipv = 0; ipv < NoPV; ipv++) {
       StPrimaryVertex *Vp = pEvent->primaryVertex(ipv);
       if (Vp && ! Vp->key()) {
@@ -476,7 +476,7 @@ Int_t StKFVertexMaker::Make() {
   ClearParentIDs();
   fgcVertices->UniqueTracks2VertexAssociation();
   
-#ifdef  __V0__ */
+#ifdef  __V0__
 #ifdef  __UseMakeV0__
   // Loop for V0
   UInt_t NoPV = pEvent->numberOfPrimaryVertices();
@@ -541,14 +541,14 @@ Int_t StKFVertexMaker::MakeParticles() {
 }
 //________________________________________________________________________________
 Bool_t StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
-  Int_t NoTracks = 0;
-  if (KVx) NoTracks = KVx->NDaughters();
-  if (NoTracks <= 1 ||
-      KVx->GetCovariance(0) < 0 ||
-      KVx->GetCovariance(2) < 0 ||
-      KVx->GetCovariance(5) < 0) {
-    return kFALSE;
-  }
+  //  UInt_t NoTracks = 0;
+  //  if (KVx) NoTracks = KVx->NDaughters();
+//   if (NoTracks <= 1 ||
+//       KVx->GetCovariance(0) < 0 ||
+//       KVx->GetCovariance(2) < 0 ||
+//       KVx->GetCovariance(5) < 0) {
+//     return kFALSE;
+//   }
   StThreeVectorF XVertex(&KVx->X());
   primV->setKey(KVx->Id());
   primV->setPosition(XVertex);
@@ -567,7 +567,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
   KFVertex V(*Vtx->parentMF()->kfParticle());
   PrPP(MakeV0,V);
   StTrackNode* trackNode = Vtx->parentMF()->node();
-  Int_t NoTracks =  Vtx->numberOfDaughters();
+  UInt_t NoTracks =  Vtx->numberOfDaughters();
   if (NoTracks != 2) return kFALSE;
   if (V.GetQ() != 0) return kFALSE;
   enum {NoV0types = 4};   // gamma  K0s Lambda, LambdaBar
@@ -654,7 +654,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     }
     trackNode->addTrack(V0track);
     UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-    for (Int_t ipv = 0; ipv <= NoPV; ipv++) {
+    for (UInt_t ipv = 0; ipv <= NoPV; ipv++) {
       StPrimaryVertex *Vp = 0; 
       if (ipv > 0) {
 	Vp = pEvent->primaryVertex(ipv-1);
@@ -827,7 +827,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
       }
     }
     Int_t kg = gTrack->key();
-    if (kg < 0 || kg >= noGlob) continue;
+    if (kg < 0 || kg >= (Int_t) noGlob) continue;
     KFParticle *partDCA = (KFParticle *) fParticles->UncheckedAt(kg);
     if (! partDCA) continue;
     //    if (Debug() > 2 &&partDCA ) cout << "O" << i << "\t" << *partDCA << endl;
@@ -837,10 +837,10 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     track = *kfpT;
     track.SetNDF(1);
     track.SetID(kg);
-    Int_t q   = 1;
+    //    Int_t q   = 1;
     Int_t pdg = 211;
     if (track.Charge() < 0) {
-      q = -1;
+      //      q = -1;
       pdg = -211;
     } 
     if (pTrack) {
@@ -883,11 +883,11 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   }
   Double_t bField = pEvent->runInfo()->magneticField();
   mStKFParticleInterface->SetField(bField);
-  Int_t pdgM[4] = { 310, 3122, -3122, 22};
-  Int_t pdgP[4] = { 211, 2212,   211,-11};
-  Int_t pdgN[4] = {-211, -211, -2212, 11};
+  //  Int_t pdgM[2] = { 310, -3122 };
+  Int_t pdgP[2] = { 211,   211 };
+  Int_t pdgN[2] = {-211, -2212 };
   Int_t NP = particles.size();
-  for (Int_t iV0T = 0; iV0T < 4; iV0T++) {// K0, Lambda, AntiLambda, gamma
+  for (Int_t iV0T = 0; iV0T < 1; iV0T++) {// K0, Lambda, AntiLambda, gamma
     vector<int> particlesPdg(NP);
     for (Int_t p = 0; p < NP; p++) {
       if (particles[p].GetQ() > 0) particles[p].SetPDG(pdgP[iV0T]);
@@ -899,7 +899,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     mStKFParticleInterface->SetParticlesPdg(particlesPdg);
     mStKFParticleInterface->InitParticles();
     mStKFParticleInterface->CleanPV(); // because commented fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
-    for (Int_t l = 0; l < noPV; l++) {
+    for (UInt_t l = 0; l < noPV; l++) {
       mStKFParticleInterface->AddPV(*PrimVertex[l]); // , PrimTracks[l]);
     }
     mStKFParticleInterface->ReconstructParticles();
@@ -924,13 +924,14 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	  for (Int_t i = 0; i < NV0; i++) {
 	    KFParticle V0 = (*V0List)[i];
 	    // Ignore anything which is not K0s, Lambda, AnitLambda and gamma.
-	    if (V0.NDaughters() != 2) continue;
-	    if (V0.GetPDG() != pdgM[iV0T]) continue;
+// 	    if (V0.NDaughters() < 2) continue;
+// 	    if (V0.GetPDG() != pdgM[iV0T]) continue;
 	    PrPP(ParticleFinder,V0);
-	    Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
-	    if (prob < fgProbCut) continue;
+	    //	    Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
+// 	    if (prob < fgProbCut) continue;
 	    // Reset to initial track Ids
 	    //	    ResetDaughterIds((KFParticle *) &V0, particles);
+
 	    if (k > 1) {
 	      // Set parent
 	      ((KFParticle *) &V0)->SetParentID(PrimVertex[iPV]->Id());
@@ -943,7 +944,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	      StKFVertex *vtx = new StKFVertex(V0);
 	      fgcVertices->AddVertex(vtx);
 	      PrPP(ParticleFinder,*vtx);
-	      V0.SetId(vtx->Id());
+// 	      V0.SetId(vtx->Id());
 	      KVx = (KFParticle *) &vtx->Vertex();
 	      V0TrackIdss2KVx[key2] = KVx;
 	      for (Int_t s = 0; s < 2; s++) {
@@ -958,7 +959,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	      PrPP(ParticleFinder,*vtx);
 	    }
 	    PrPP2(ParticleFinder,*KVx);
-	    V0.SetId(KVx->Id());
+// 	    V0.SetId(KVx->Id());
 	    V0.SetIdTruth(KVx->IdTruth(), KVx->QaTruth());
 	    V0.SetIdParentMcVx(KVx->IdParentMcVx());
 	    StPrimaryVertex *stVtx = KVx2StPrimVxMap[KVx];
@@ -991,7 +992,6 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	      }
 	    }
 	    PrPP(ParticleFinder,*stVtx);
-
 	    // Store V0
 	    StV0Vertex *V0Vx = new StV0Vertex(); 
 	    if ( ! FillVertex(&V0, V0Vx)) {SafeDelete(V0Vx); continue;}
@@ -1180,13 +1180,13 @@ StKFVerticesCollection *StKFVertexMaker::PrimaryVertexSeeds(Int_t *Parents) {
 }
 //________________________________________________________________________________
 void StKFVertexMaker::ReFitToVertex() {
-  Int_t NoVertices = fgcVertices->Vertices()->GetSize();
+  //  UInt_t NoVertices = fgcVertices->Vertices()->GetSize();
   for (Int_t l = fgcVertices->Vertices()->GetSize() - 1; l >= 0; l--) {
     StPrimaryVertex *primV = 0;
     StKFVertex *V = (StKFVertex *) fgcVertices->Vertices()->At(l);
     if (! V) continue;
-    Bool_t ok = kTRUE;
-    Int_t NoTracks = V->NoTracks();
+    //    Bool_t ok = kTRUE;
+    UInt_t NoTracks = V->NoTracks();
     KFVertex     &KVx = V->Vertex();
     // Store vertex
     primV = new StPrimaryVertex;
@@ -1220,8 +1220,8 @@ void StKFVertexMaker::ReFitToVertex() {
       Ids[itk] = kg;
       itk++;
     }
-    TMath::Sort(NoTracks,Ids,indexes,0);
-    for (Int_t i = 0; i < NoTracks; i++) {
+    TMath::Sort((Int_t) NoTracks,Ids,indexes,0);
+    for (UInt_t i = 0; i < NoTracks; i++) {
       Int_t itk = indexes[i];
       StKFTrack*   track = tracks[itk];
       if (! track) continue;
@@ -1252,7 +1252,7 @@ void StKFVertexMaker::ReFitToVertex() {
     if (beam ) primV->setBeamConstrained();
     //..... add vertex to the list
     UInt_t NoPrTracks = 0;
-    for (Int_t i = 0; i < NoTracks; i++) {if (pTracks[i]) NoPrTracks++;}
+    for (UInt_t i = 0; i < NoTracks; i++) {if (pTracks[i]) NoPrTracks++;}
     UInt_t NoPrTracksB = NoPrTracks;
 #ifdef  __UseMakeV0__
     if (beam) NoPrTracksB++;
@@ -1316,7 +1316,7 @@ void StKFVertexMaker::ResetDaughterIds(KFParticle *particle, vector<KFParticle> 
   UInt_t NO = particles.size();
   Int_t  ID = -1;
   for (UInt_t i = 0; i < N; i++) {
-    Int_t j = OldDaughterIds[i];
+    UInt_t j = OldDaughterIds[i];
     if (j < NO) ID = particles[j].DaughterIds()[0];
     else        ID = j;
     particle->AddDaughterId(ID);

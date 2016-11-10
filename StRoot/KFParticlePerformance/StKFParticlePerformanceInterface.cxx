@@ -29,7 +29,7 @@ StKFParticlePerformanceInterface::~StKFParticlePerformanceInterface()
 {
   if(fKFTopoPerformance)
   {
-#if 0
+#if 1
     TDirectory *curr = TDirectory::CurrentDirectory();
     TFile *currentFile = TFile::CurrentFile();
     if (currentFile && currentFile->IsWritable()) {
@@ -68,7 +68,7 @@ void StKFParticlePerformanceInterface::PerformanceAnalysis()
     fKFTopoPerformance->FillHistos();
   }
 }
-#if 0
+#if 1
 void StKFParticlePerformanceInterface::WriteHistosCurFile( TObject *obj ){
   
   if( !obj->IsFolder() ) obj->Write();

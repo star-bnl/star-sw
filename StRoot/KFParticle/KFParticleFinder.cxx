@@ -145,11 +145,11 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
         KFParticle tmp(kfTrack, pdg);
         tmp.SetPDG(pdg);
         tmp.SetId(Particles.size());
-#if 0 /* yf don't touch Id */
+	//#if 0 /* yf don't touch Id */
         vRTracks[iV].SetId(Particles.size(),iTr);
         if(vRTracks[iV+4].Size() > 0)
           vRTracks[iV+4].SetId(Particles.size(),iTr);
-#endif
+	//#endif
         tmp.AddDaughterId( kfTrack.Id() );
 #ifdef NonhomogeneousField
         for(int iF=0; iF<10; iF++)
@@ -597,9 +597,9 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
 
     mother.GetMass(mass, errMass);
     saveMother = saveParticle;
-#ifdef __CUT_MASS__
+    //#ifdef __CUT_MASS__
     saveMother &= (abs(mass - massMotherPDG)/massMotherPDGSigma) < secCuts[0];
-#endif
+    //#endif
     saveMother &= ((ldlMin > secCuts[2]) && !isGamma) || isGamma;
     saveMother &= (isK0 || isLambda || isGamma);
   }
