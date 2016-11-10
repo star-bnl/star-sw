@@ -222,6 +222,7 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
     //		End DCA node
     track->reduce();
     nTAdd++;
+    track->test();
     track->setFlag(1);
     _trackContainer->push_back(track);
     track->setId(_trackContainer->size());
@@ -270,14 +271,11 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
         nTOK++;
         int nHits = track->getFitPointCount(kTpcId);
         if (nHits>=15) nTok++;
-	StiDebug::Count("extendSeedsNHits",nHits);
 	assert(track->getChi2()<1000);
       }
       if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
     } 
     Info("extendSeeds:","Pass_%d NSeeds=%d NTraks=%d",isf,nTtot,nTok);
-    TString ts("ExendSeeds_Pass#"); ts+=isf;
-    StiDebug::Count(ts.Data(),nTtot,nTok);
   }
   Info("extendSeeds","nTTot = %d nTOK = %d\n",nTTot,nTOK);
 
@@ -448,15 +446,8 @@ static const StiKalmanTrackFinderParameters *tfp = StiKalmanTrackFinderParameter
                                                        return  1;
 }
 
-
-
-
-
-
-
-
 //______________________________________________________________________________
-bool StiKalmanTrackFinder::find(StiTrack * t, int direction,double rmin) // throws runtime_error, logic_error
+bool StiKalmanTrackFinder::find(StiTrack * t, int direction,double rmin) 
 {
 static int nCall=0; nCall++;
   gLevelOfFind = 0;
@@ -600,6 +591,7 @@ assert(direction || leadNode==track->getLastNode());
 	continue; //  missed, will try the next available volume on this layer
       }
       testNode.setDetector(tDet);
+      foundInDetLoop = 2016;
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
       double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
@@ -636,13 +628,6 @@ assert(direction || leadNode==track->getLastNode());
 
       int nHits = hitCont.getNHits();
 
-if (nHits)
-{
-StiDebug::Count("HitCand:Rxy",testNode.getRxy(),nHits);
-StiDebug::Count("HitCand",nHits);
-
-
-}       
       testNode.setHitCand(nHits);
       if (direction) {
         nHits=1;
@@ -720,13 +705,9 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
       node->incContigNullCount();
       node->setContigHitCount();
       qa.addNit();
-      if (node->getNullCount()>maxNullCount)                   qa.setQA(-3);
-      if (node->getContigNullCount()>maxContiguousNullCount)   qa.setQA(-3);
-  }//node->getHit()
-
-//  double xg = node->x_g();
-//  double yg = node->y_g();
-//VP??  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
+      if (node->getNullCount()>maxNullCount) 			qa.setQA(-3);
+      if (node->getContigNullCount()>maxContiguousNullCount)	qa.setQA(-3);
+  }
 
 }
 
