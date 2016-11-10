@@ -68,7 +68,7 @@ StKFVertex::StKFVertex(const StKFVertex& vtx) {
 }
 //________________________________________________________________________________
 void StKFVertex::ResetParticles() {
-  Int_t N = NoTracks();
+  //  UInt_t N = NoTracks();
   TIter next(&fKFTracks,kIterBackward);
   StKFTrack *Track = 0;
   while ((Track = (StKFTrack *) next())) {
@@ -86,7 +86,7 @@ Bool_t StKFVertex::Fit() {
   // Clean up
   ResetParticles();
   CheckBeamConstraint();
-  Int_t N = NoTracks();
+  UInt_t N = NoTracks();
   if (N < 2) {
     if (Debug()) {
       Print("StKFVertex::Fit fails, N < 2 ");
@@ -284,7 +284,7 @@ void StKFVertex::PrintW(Option_t *option) const {
 }
 //________________________________________________________________________________
 void StKFVertex::CheckBeamConstraint() {
-  Int_t N = NoTracks();
+  //  Int_t N = NoTracks();
   StKFTrack*  tbeam = 0;
   //  if (_debug > 0)  PrintW("CheckBeamConstraint");
   TIter next(&fKFTracks,kIterForward);

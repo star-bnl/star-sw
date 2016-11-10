@@ -202,7 +202,7 @@ Double_t StKFVerticesCollection::UpdateWeights() {
   std::vector<const KFParticle *>::iterator iter;
   TIter nextL(&fVertices,kIterBackward);
   StKFVertex *vtxl = 0;
-  Int_t k = 0;
+  //  Int_t k = 0;
   while ((vtxl = (StKFVertex *)  nextL())) {
     if (StKFVertex::Debug() > 1) vtxl->PrintW("Original Weights ");
     // recalculate weights
