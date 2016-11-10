@@ -1,6 +1,6 @@
 #!/usr/bin/env perl -d
 Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
-( my $build = $OBJ ) =~ s/\#//g;
+( my $build = $OBJ ) =~ s/\#//g;                        #  print "CWD = $CWD\n";
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
 # print "MAIN = $MAIN\n";
 my $DirPath = DirPath '.';                              # print "DirPath = $DirPath\n";
@@ -82,6 +82,7 @@ my $FEXTEND = $env->{FEXTEND};
 my $FPPFLAGS= $env->{FPPFLAGS};
 my $FCCOM   = $env->{FCCOM};
 my $AGETOFCOM   = $env->{AGETOFCOM};
+my $AGETOFLAGS   = $env->{AGETOFLAGS};
 my $LIBS    = $env->{LIBS}; #  print "LIBS  = $LIBS ========================================\n";
 my $LDIRS   = $env->{_LDIRS};#  print "LDIRS = $LDIRS, LIB = $LIB  ========================================\n";
 my $SOFLAGS = $env->{SOFLAGS};
@@ -199,8 +200,15 @@ my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath
 #-
 if ( $FC ne 'ifort' and ($DirPath =~ /pams/ and
 			 (#$DirPath =~ /$g77pkgs/ or 
-			  $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/))){
+			  $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/) or $DirPath =~ /StarVMCApplication/)){
   $FCCOM    = $env1->{FCviaAGETOFCOM};
+  if ($DirPath =~ /StarVMCApplication/) {
+    $FCCOM    = "test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;";
+    $FCCOM   .= "cd %>:d; test -f %>:F.for && /bin/rm %>:F.for;";
+    $FCCOM   .= "%AGETOF %AGETOFLAGS %<:F.g -o %>:F.for && cd - &&";
+    $FCCOM   .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
+    $FCCOM   .= " %>:b.for %Fout%>";
+  }
 }
 # If fortran, grab the -lg2c or -lgfortran for linking
 if ( $DirPath =~ /StarVMC/ ){
@@ -992,17 +1000,21 @@ TDataSet *CreateTable() {
 	      }
 	    }
 	  } else {
-	    my $root4star = $BIN . "/" . "root4star";
+	    my $bin = $BIN; $bin =~ s|#||;
+	    my $root4star = $CWD . "/" . $bin . "/" . "root4star";
+	    if (! -x $root4star) {
+	      $root4star = $env->{ENV}->{STAR} . "/" . $bin . "/" . "root4star";
+	    }
 	    Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
 	    if (! $xgeomList{$geom}) {
 	      Depends $env1 [$geom_h,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 	      Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
 	      Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		qq (cd  %>:d; root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
+		qq (cd  %>:d; $root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' > /dev/null 2>&1;); #   mv geom.rz %>:f;
 	    } else{
 	      Depends $env1 [$geom_h], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
 	      Command $env1 [$geom_h,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
-		qq (cd  %>:d; root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
+		qq (cd  %>:d; $root4star -q -b 'Ast2Root.C("$geom","UseXgeom")' > /dev/null 2>&1;); #   mv geom.rz %>:f;
 	    }
 	  }
 	  if ($geomlist) { $geomlist .= "|";}
@@ -1051,6 +1063,7 @@ $env2 = $env1->clone('Package'  => $pkg,
 		     'CPPFLAGS' => $CPPFLAGS,
 		     'FCCOM'    => $FCCOM,
 		     'AGETOFCOM'=> $AGETOFCOM,
+		     'AGETOFLAGS'=> $AGETOFLAGS,
 		     'LIBS'     => $LIBS,
 		     'SOFLAGS'  => $SOFLAGS,
 		     'LIBPATH'  => $libpath,

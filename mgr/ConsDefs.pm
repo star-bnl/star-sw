@@ -397,7 +397,7 @@
  my $pwd = cwd();
  my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";
  if ($PATH !~ /$STAR_BIN/) {$PATH = $STAR_BIN . ":" . $PATH;}
- $PATH = $path2bin .":". $PATH;  #print "PATH = $PATH\n";
+ $PATH = $path2bin .":". $PATH;  # print "PATH = $PATH\n";
  $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERNINO . $main::PATH_SEPARATOR . "#";
  
  
