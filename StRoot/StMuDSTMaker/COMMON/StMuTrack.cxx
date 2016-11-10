@@ -691,7 +691,7 @@ Bool_t StMuTrack::matchBEMC() const {
 	return false;
 }
 //________________________________________________________________________________
-Double_t StMuTrack::dEdxPull(Double_t mass, Bool_t fit, Int_t charge) const {
+Double_t StMuTrack::dEdxPull(Double_t mass, UChar_t fit, Int_t charge) const {
   Double_t z = -999.;
   if (probPidTraits().dEdxTrackLength() > 0 ) {
     const StMuHelix &mh = muHelix();

@@ -89,15 +89,19 @@ class StMuTrack : public TObject {
     Double_t nSigmaPion()      const {return unPack(mNSigmaPion,     __SIGMA_SCALE__);} ///< Returns Craig's distance to the calculated dE/dx band for pions in units of sigma.
     Double_t nSigmaKaon()      const {return unPack(mNSigmaKaon,     __SIGMA_SCALE__);} ///< Returns Craig's distance to the calculated dE/dx band for kaons in units of sigma.
     Double_t nSigmaProton()    const {return unPack(mNSigmaProton,   __SIGMA_SCALE__);} ///< Returns Craig's distance to the calculated dE/dx band for protons in units of sigma.
-    Double_t dEdxPull(Double_t mass, Bool_t fit = kFALSE, Int_t charge=1) const;
+    Double_t dEdxPull(Double_t mass, UChar_t fit = 0, Int_t charge=1) const;
     Double_t dEdxPullElectronI70() const {return dEdxPull(0.51099907e-3);}
     Double_t dEdxPullPionI70()     const {return dEdxPull(0.13956995);}
     Double_t dEdxPullKaonI70()     const {return dEdxPull(0.493677);}
     Double_t dEdxPullProtonI70()   const {return dEdxPull(0.93827231);}
-    Double_t dEdxPullElectronFit() const {return dEdxPull(0.51099907e-3,kTRUE);}
-    Double_t dEdxPullPionFit()     const {return dEdxPull(0.13956995,kTRUE);}
-    Double_t dEdxPullKaonFit()     const {return dEdxPull(0.493677,kTRUE);}
-    Double_t dEdxPullProtonFit()   const {return dEdxPull(0.93827231,kTRUE);}
+    Double_t dEdxPullElectronFit() const {return dEdxPull(0.51099907e-3,1);}
+    Double_t dEdxPullPionFit()     const {return dEdxPull(0.13956995,1);}
+    Double_t dEdxPullKaonFit()     const {return dEdxPull(0.493677,1);}
+    Double_t dEdxPullProtonFit()   const {return dEdxPull(0.93827231,1);}
+    Double_t dEdxPullElectrondNdx()const {return dEdxPull(0.51099907e-3,2);}
+    Double_t dEdxPullPiondNdx()    const {return dEdxPull(0.13956995,2);}
+    Double_t dEdxPullKaondNdx()    const {return dEdxPull(0.493677,2);}
+    Double_t dEdxPullProtondNdx()  const {return dEdxPull(0.93827231,2);}
     Double_t nSigmaElectron70()    const {return dEdxPullElectronI70() ;} 
     Double_t nSigmaPion70()        const {return dEdxPullPionI70()     ;}    
     Double_t nSigmaKaon70()        const {return dEdxPullKaonI70()     ;}         
@@ -106,6 +110,10 @@ class StMuTrack : public TObject {
     Double_t nSigmaPionFit()       const {return dEdxPullPionFit()     ;}         
     Double_t nSigmaKaonFit()       const {return dEdxPullKaonFit()     ;}         
     Double_t nSigmaProtonFit()     const {return dEdxPullProtonFit()   ;}         
+    Double_t nSigmaElectrondNdx()  const {return dEdxPullElectrondNdx();}         
+    Double_t nSigmaPiondNdx()      const {return dEdxPullPiondNdx()    ;}         
+    Double_t nSigmaKaondNdx()      const {return dEdxPullKaondNdx()    ;}         
+    Double_t nSigmaProtondNdx()    const {return dEdxPullProtondNdx()  ;}         
     Double_t dEdx()                const {return mdEdx;}    ///< Returns measured dE/dx value.
     Double_t chi2()                const {return mChiSqXY;} ///< Returns chi2 of fit.       
     Double_t chi2prob()            const {return mChiSqZ;}  ///< Returns probability of fit.
