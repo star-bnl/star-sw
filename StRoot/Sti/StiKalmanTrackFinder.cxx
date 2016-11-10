@@ -502,6 +502,7 @@ assert(direction || leadNode==track->getLastNode());
     for ( ; (!direction)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer); ++sector)
     {
        StiDetector * detector = (*sector)->getData();
+       if (detector == leadDet) continue;
        double angle  = detector->getPlacement()->getLayerAngle();
        double radius = detector->getPlacement()->getLayerRadius();
        if (radius < qa.rmin()) {gLevelOfFind--; qa.setQA(-4);return;}
