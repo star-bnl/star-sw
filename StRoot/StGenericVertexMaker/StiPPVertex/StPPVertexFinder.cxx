@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.63 2016/11/04 20:24:13 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.67 2016/11/07 21:19:35 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -55,13 +55,13 @@
 #include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
 #include <StEEmcUtil/EEmcGeom/EEmcGeomSimple.h>
 
-#include "BtofHitList.h" // dongx
+#include "BtofHitList.h"
 #include "CtbHitList.h"
 #include "BemcHitList.h"
 #include "EemcHitList.h"
 
 #include "StEmcCollection.h"
-#include "StBTofCollection.h" // dongx
+#include "StBTofCollection.h"
 #include "StBTofUtil/StBTofGeometry.h"
 #include "TObjectSet.h"
 
@@ -69,7 +69,6 @@
 //==========================================================
 
 StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode) {
-  LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
   mTotEve              = 0;
   HList=0;
@@ -130,12 +129,16 @@ StPPVertexFinder::Init() {
    
   HList=new TObjArray(0);   
   initHisto();
+
   LOG_INFO << "initiated histos" << endm;
+
   if (mUseBtof)
-    btofList->initHisto( HList); // dongx
+    btofList->initHisto( HList);
+
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
+
   LOG_INFO << "Finished Init" << endm;
 }
 
@@ -148,7 +151,7 @@ StPPVertexFinder::InitRun(int runnumber){
   int dateY=mydb->GetDateTime().GetYear();
   
   if(mIsMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
- // Initialize BTOF geometry - dongx
+ // Initialize BTOF geometry
   if (mUseBtof){ // only add btof if it is required
     btofGeom = 0;
     TObjectSet *geom = (TObjectSet *) mydb->GetDataSet("btofGeometry");
@@ -190,7 +193,7 @@ StPPVertexFinder::InitRun(int runnumber){
   mMaxZrange    = 200;  // to accept Z_DCA of a track           
   mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
   mMinZBtof     = -3.0; //
-  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
+  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
@@ -215,7 +218,7 @@ StPPVertexFinder::InitRun(int runnumber){
     mMinAdcBemc   = 8;    // BTOW used calibration of maxt Et @ ~60Gev 
   }
   if (mUseBtof)
-    btofList->initRun(); // dongx
+    btofList->initRun();
   ctbList->initRun(); 
   bemcList->initRun();
   eemcList->initRun();
@@ -288,8 +291,8 @@ StPPVertexFinder::initHisto() {
 
   hACorr=new TH2F("BTOFvsBEMC","BTOF vs BEMC", 5,-2.5,2.5,5,-2.5,2.5);
 
-  int i;
-  for(i=0;i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
+  for (int i=0; i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
+
   HList->Add(hACorr);
 }
 
@@ -299,7 +302,7 @@ void
 StPPVertexFinder::Clear(){
   LOG_DEBUG << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
-  btofList->clear();  // dongx
+  btofList->clear();
   ctbList->clear();
   bemcList->clear();
   eemcList->clear();
@@ -311,8 +314,6 @@ StPPVertexFinder::Clear(){
   hL->Reset();
   hM->Reset();
   hW->Reset();
-
-
 }
 
 
@@ -344,7 +345,7 @@ StPPVertexFinder::printInfo(ostream& os) const
       <<
       Form("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",
 	   k,t.zDca,t.ezDca,t.gPt,t.vertexID)
-      << Form("    Btof %3d,%d,%d",t.btofBin,btofList->getFired(t.btofBin),btofList->getTrack(t.btofBin))   // dongx
+      << Form("    Btof %3d,%d,%d",t.btofBin,btofList->getFired(t.btofBin),btofList->getTrack(t.btofBin))
       << Form("    CTB  %3d,%d,%d",t.ctbBin,ctbList->getFired(t.ctbBin),ctbList->getTrack(t.ctbBin))
       << Form("    Bemc %3d,%d,%d",t.bemcBin,bemcList->getFired(t.bemcBin),bemcList->getTrack(t.bemcBin))
       << Form("    Eemc %3d,%d,%d",t.eemcBin,eemcList->getFired(t.eemcBin),eemcList->getTrack(t.eemcBin))
@@ -422,7 +423,7 @@ StPPVertexFinder::fit(StEvent* event) {
    return 0;
   }
 
- // get BTOF info - dongx
+ // get BTOF info
 
   if(mUseBtof) {
     StBTofCollection *btofColl = (StBTofCollection*)mEvent->btofCollection();
@@ -522,13 +523,13 @@ StPPVertexFinder::fit(StEvent* event) {
 
     hA[5]->Fill(t.rxyDca);
 
-    if( t.mBtof>0 ) kBtof++;   // dongx
+    if( t.mBtof>0 ) kBtof++;
     if( t.mCtb>0 )  kCtb++;   
     if( t.mBemc>0)  kBemc++;   
     if( t.mEemc>0)  kEemc++;
     if( t.mTpc>0 )  kTpc++;
  
-    if(t.mBtof>0 || t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ; // dongx
+    if(t.mBtof>0 || t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ;
 
     hACorr->Fill(t.mBtof, t.mBemc);
     //  t.print();
@@ -549,8 +550,8 @@ StPPVertexFinder::fit(StEvent* event) {
   }
 
  if(mUseBtof) {
-    btofList->print(); // dongx
-    btofList->doHisto(); // dongx
+    btofList->print();
+    btofList->doHisto();
   }
 
   bemcList->print();
@@ -665,7 +666,9 @@ StPPVertexFinder::buildLikelihoodZ(){
   
   // Loop over pre-selected tracks only
   for (const TrackData &t : mTrackData) {
-    if(t.vertexID!=0) continue; // track already used
+    // Skip tracks already assigned to a vertex
+    if(t.vertexID!=0) continue;
+
     if(t.anyMatch) n1++;
     //  t.print();
     float z0   = t.zDca;  // z coordinate at DCA
@@ -777,7 +780,7 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
     if(  t.mTpc>0)       V.nTpc++;
     else if (  t.mTpc<0) V.nTpcV++;
 
-    if(  t.mBtof>0)       V.nBtof++;  // dongx
+    if(  t.mBtof>0)       V.nBtof++;
     else if (  t.mBtof<0) V.nBtofV++;
 
     if(  t.mCtb>0)       V.nCtb++;
@@ -795,11 +798,7 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 
   V.nUsedTrack = n1;  
 
-  bool validVertex = (V.nAnyMatch >= mMinMatchTr);
-
-  if ((mAlgoSwitches & kSwitchOneHighPT) && ( nHiPt>0)) {
-    validVertex |= 1;
-  }
+  bool validVertex = (V.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
 
   if (!validVertex) { // discrad vertex
     //no match tracks in this vertex, tag vertex ID in tracks differently
@@ -819,7 +818,8 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 
 /**
  * Creates DCA states for selected tracks (mTrackData) and fills the static
- * container sDCAs
+ * container sDCAs. The tracks in mTrackData must be already associated with
+ * a corresponding vertex, i.e. we check that track.vertexID == vertex.id
  *
  * \author Dmitri Smirnov, BNL
  * \date April, 2016
@@ -972,7 +972,7 @@ StPPVertexFinder::exportVertices(){
     else         primV.setVertexFinderId(ppvNoCtbVertexFinder); 
 
     primV.setNumTracksUsedInFinder(V.nUsedTrack);
-    primV.setNumMatchesWithBTOF(V.nBtof);  // dongx
+    primV.setNumMatchesWithBTOF(V.nBtof);
     primV.setNumMatchesWithCTB(V.nCtb);
     primV.setNumMatchesWithBEMC(V.nBemc);
     primV.setNumMatchesWithEEMC(V.nEemc);
@@ -1038,8 +1038,8 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   float zL=999, zH=-999;
   for (it=track->begin();it!=track->end();it++,in++) {
     StiKalmanTrackNode& ktn = (*it);
-    if(!ktn.isValid()) continue; // from Victor
-    if(ktn.getHit() && ktn.getChi2() >1000) continue; // from Victor
+    if(!ktn.isValid()) continue;
+    if(ktn.getHit() && ktn.getChi2() >1000) continue;
     const StiDetector * det=ktn.getDetector();
     assert(!(ktn.x()) || det);
     float rxy=ktn.getX();
@@ -1070,12 +1070,12 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
   LOG_INFO << "#e @OuterMostNode g x:"<< ouNode->x_g()<<" y:"<< ouNode->y_g()<<" z:"<< ouNode->z_g()<<" Eta="<<ouNode->getEta()<<" |P|="<<ouNode->getP() << endm;
 
- in=0;
+  in=0;
   for (it=track->begin();it!=track->end();it++,in++) {
     // if(in>=2 && in<nn-5) continue; // print only ends of the track
     StiKalmanTrackNode& ktn = (*it);
-    if(!ktn.isValid()) continue; // from Victor
-    if(ktn.getHit() && ktn.getChi2() >1000) continue; // from Victor
+    if(!ktn.isValid()) continue;
+    if(ktn.getHit() && ktn.getChi2() >1000) continue;
     float sy=sqrt(ktn.getCyy());
     float sz=sqrt(ktn.getCzz());
     const StiDetector * det=ktn.getDetector();
@@ -1390,8 +1390,8 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   StiKTNBidirectionalIterator it;
   for (it=track->begin();it!=track->end();it++) {
     StiKalmanTrackNode* ktnp=& (*it);
-    if(!ktnp->isValid()) continue; // from Victor
-    //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // from Victor ---> those track need to be counted as npossiblehit, commented out
+    if(!ktnp->isValid()) continue;
+    //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // ---> those track need to be counted as npossiblehit, commented out
     float rxy=rxyG(ktnp); //ktn.getX();
     float z=zG(ktnp);  //ktn.z_g();
     if(rxy<RxyMin) continue;
@@ -1444,6 +1444,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 //==========================================================
 //==========================================================
 
+/**
+ * Identifies tracks coming from post bunch crossing collisions.
+ */
 bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
   const float RxyMin=59, RxyMax=199, zMax=200;
   const float zMembraneDepth=1.0; 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.43 2016/11/04 20:24:18 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.46 2016/11/07 21:19:27 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -47,7 +47,6 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 
 StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode)
 {
-  LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
   
   mMinuit = new TMinuit(3);         
@@ -168,7 +167,7 @@ Int_t StMinuitVertexFinder::findSeeds() {
             }
 	    seed_z = meanZ/nTrkZ;
 	    mSeedZ[mNSeed] = seed_z;
-	    mNSeed ++;
+	    mNSeed++;
 	  }
 	}
 	else {
@@ -337,6 +336,7 @@ void StMinuitVertexFinder::calculateRanks() {
     if (mDebugLevel) {
       LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
     }
+
     Float_t rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
 
     Float_t rank_bemc = 0;
@@ -373,6 +373,7 @@ void StMinuitVertexFinder::calculateRanks() {
       primV->setRanking(rank_cross+rank_bemc+rank_avg_dip-3); 
     else
       primV->setRanking(rank_cross+rank_bemc+rank_avg_dip); 
+
     if (primV->ranking() > mBestRank) {
       mBestRank = primV->ranking();
       mBestVtx = primV;
@@ -407,15 +408,10 @@ StMinuitVertexFinder::fit(StEvent* event)
       }
     }
 
-    //
-    //  Loop all global tracks (TPC) and store the
-    //  refering helices and their estimated DCA
-    //  resolution in vectors.
-    //  Quality cuts are applied (see accept()).
-    //  The helices and the sigma are used in
-    //  fcn to calculate the fit potential which
-    //  gets minimized by Minuit.
-    //
+    // Loop over all global tracks (TPC) and store the refering helices and
+    // their estimated DCA resolution in vectors. Quality cuts are applied (see
+    // StMinuitVertexFinder::accept()). The helices and the sigma are used in
+    // fcn to calculate the fit potential which gets minimized by Minuit.
     sDCAs().clear();
     mHelices.clear();
     mHelixFlags.clear();
@@ -466,39 +462,33 @@ StMinuitVertexFinder::fit(StEvent* event)
     if (mDebugLevel) {
       LOG_INFO << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endm; 
     }
-    //
-    //  In case there are no tracks left we better quit
-    //
+
+    // In case there are no tracks left we better quit
     if (mHelices.empty()) {
 	LOG_WARN << "StMinuitVertexFinder::fit: no tracks to fit." << endm;
 	mStatusMin = -1;
 	return 0;
     }
+
     LOG_INFO << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
     // Set some global pars
     if (mRequireCTB) requireCTB = kTRUE;
     
-    //
-    //  Reset and clear Minuit parameters
-    // mStatusMin
+    // Reset and clear Minuit parameters mStatusMin
     mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
     
+    // Set parameters and start values. We do constrain the parameters since it
+    // harms the fit quality (see Minuit documentation).
     //
-    //  Set parameters and start values. We do
-    //  constrain the parameters since it harms
-    //  the fit quality (see Minuit documentation).
-    //
-    // Initialize the seed with a z value which is not one of the discrete 
-    // values which it can tend to, implies zero not allowed.
-    // Also need different initialization when vertex constraint.
+    // Initialize the seed with a z value which is not one of the discrete
+    // values which it can tend to, implies zero not allowed. Also need
+    // different initialization when vertex constraint.
 
     static Double_t step[3] = {0.03, 0.03, 0.03};
 
-    //
-    //  Scan z to find best seed for the actual fit.
-    //  Skip this step if an external seed is given.
-    //
+    // Scan z to find best seed for the actual fit.
+    // Skip this step if an external seed is given.
     if (!mExternalSeedPresent) {
       findSeeds();
     }
@@ -510,9 +500,8 @@ StMinuitVertexFinder::fit(StEvent* event)
     Double_t seed_z = -999;
     Double_t chisquare = 0;
     for (Int_t iSeed = 0; iSeed < mNSeed; iSeed++) {
-      //
-      //  Reset and clear Minuit parameters
-      //  mStatusMin
+
+      // Reset and clear Minuit parameters mStatusMin
       mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
 
       seed_z= mSeedZ[iSeed]; 
@@ -538,8 +527,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       Int_t n_trk_vtx = 0;
       Int_t n_helix = mHelices.size();
       do {  
-	// For most vertices one pass is fine, but multiple passes 
-	// can be done
+	// For most vertices one pass is fine, but multiple passes can be done
 	n_trk_vtx = 0;
 	for (Int_t i=0; i < n_helix; i++) {
 	  if (fabs(mZImpact[i]-seed_z) < mDcaZMax) {
@@ -562,10 +550,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
 	done = 1;
 
-	//
-	//  Check fit result
-	//
-
+	// Check fit result
 	if (mStatusMin) {
 	  LOG_WARN << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
 	  done = 0; // refit
@@ -815,6 +800,7 @@ StMinuitVertexFinder::printInfo(ostream& os) const
     os << "final potential width scale .... " << mWidthScale << endl;
 }
 
+
 void StMinuitVertexFinder::UseVertexConstraint() {
 
   // Historically, this method was designed for a 1D fit with beamline
@@ -829,27 +815,28 @@ void StMinuitVertexFinder::UseVertexConstraint() {
   StThreeVectorD origin(mX0,mY0,0.0);
   Double_t pt  = 88889999;   
   Double_t nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
-    if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
-      nxy=mdxdz=1.e-5; 
-    }
-    Double_t p0=pt/nxy;  
-    Double_t px   = p0*mdxdz;
-    Double_t py   = p0*mdydz;
-    Double_t pz   = p0; // approximation: nx,ny<<0
-    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-    delete mBeamHelix;
-    mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
-    //re-initilize minuit for 1D fitting
-    mMinuit = new TMinuit(1);         
-    mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
-    mMinuit->SetPrintLevel(1);
-    mMinuit->SetMaxIterations(1000);
-    mExternalSeedPresent = kFALSE;
+  if(nxy<1.e-5){ // beam line _MUST_ be tilted
+    LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
+    nxy=mdxdz=1.e-5;
+  }
 
+  Double_t p0=pt/nxy;
+  Double_t px   = p0*mdxdz;
+  Double_t py   = p0*mdydz;
+  Double_t pz   = p0; // approximation: nx,ny<<0
+  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+  delete mBeamHelix;
+  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
+  //re-initilize minuit for 1D fitting
+  mMinuit = new TMinuit(1);
+  mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
+  mMinuit->SetPrintLevel(-1);
+  mMinuit->SetMaxIterations(1000);
+  mExternalSeedPresent = kFALSE;
 }
+
 
 Int_t  StMinuitVertexFinder::NCtbMatches() { 
   return nCTBHits;

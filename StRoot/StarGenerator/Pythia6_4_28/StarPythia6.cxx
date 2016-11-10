@@ -245,3 +245,15 @@ StarGenStats StarPythia6::Stats()
   // Return a copy of the class we just created
   return stats;
 }
+
+void StarPythia6::SetDecayFlag ( const int kf, const int flagw ) 
+{
+  int kc = PyComp( kf );
+  if ( kc ) {
+    pydat3().mdcy(kc,1)=0;
+  }
+  else {
+    LOG_WARN << "Incorrect kf = " << kf << endm;
+  }
+
+}

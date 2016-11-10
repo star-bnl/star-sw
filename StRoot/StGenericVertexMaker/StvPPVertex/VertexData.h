@@ -1,7 +1,7 @@
 #ifndef VertexData_h
 #define VertexData_h
 /*********************************************************************
- * $Id: VertexData.h,v 1.1 2013/08/16 22:19:56 perev Exp $
+ * $Id: VertexData.h,v 1.2 2016/11/07 21:19:28 smirnovd Exp $
  *********************************************************************
  * full description of found vertex
  */
@@ -16,8 +16,8 @@ class VertexData {
   int nUsedTrack; // # of tracks used to identify the vertex
   float Lmax; // maximum of the likelhood function.
   float gPtSum; // total tranverse momentum of used tracks.
-  int nBtof,nCtb,nBemc,nEemc,nTpc,nAnyMatch; // number of matched tracks - dongx
-  int nBtofV,nCtbV,nBemcV,nEemcV,nTpcV,nAnyVeto; // number of vetoed tracks - dongx
+  int nBtof,nCtb,nBemc,nEemc,nTpc,nAnyMatch; // number of matched tracks
+  int nBtofV,nCtbV,nBemcV,nEemcV,nTpcV,nAnyVeto; // number of vetoed tracks
   
   // methods
   VertexData();
@@ -29,6 +29,11 @@ class VertexData {
 
 /*
  * $Log: VertexData.h,v $
+ * Revision 1.2  2016/11/07 21:19:28  smirnovd
+ * Added and reworded some doxygen and other comments
+ *
+ * Also cleaned up not-so-useful comments
+ *
  * Revision 1.1  2013/08/16 22:19:56  perev
  * PPV with only StEvent dependency
  *

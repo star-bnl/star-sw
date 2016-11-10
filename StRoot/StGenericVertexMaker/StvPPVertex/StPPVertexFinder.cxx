@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.5 2016/08/18 17:46:15 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.7 2016/11/07 21:19:28 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -53,13 +53,13 @@
 #include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
-#include "BtofHitList.h" // dongx
+#include "BtofHitList.h"
 #include "CtbHitList.h"
 #include "BemcHitList.h"
 #include "EemcHitList.h"
 
 #include "StEmcCollection.h"
-#include "StBTofCollection.h" // dongx
+#include "StBTofCollection.h"
 #include "StBTofUtil/StBTofGeometry.h"
 #include "TObjectSet.h"
 
@@ -78,8 +78,6 @@ namespace StEvPPV {
 //==========================================================
 StPPVertexFinder::StPPVertexFinder() 
 {
-  LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
-
   mTotEve              = 0;
   HList=0;
   mToolkit =0;
@@ -142,7 +140,7 @@ void StPPVertexFinder::Init()
   initHisto();
   LOG_INFO << "initiated histos" << endm;
   if (mUseBtof)
-    btofList->initHisto( HList); // dongx
+    btofList->initHisto( HList);
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
@@ -158,7 +156,7 @@ void StPPVertexFinder::InitRun(int runnumber)
   int dateY=mydb->GetDateTime().GetYear();
   
   if(mIsMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
- // Initialize BTOF geometry - dongx
+ // Initialize BTOF geometry
   if (mUseBtof){ // only add btof if it is required
     btofGeom = 0;
     TObjectSet *geom = (TObjectSet *) mydb->GetDataSet("btofGeometry");
@@ -200,7 +198,7 @@ void StPPVertexFinder::InitRun(int runnumber)
   mMaxZrange    = 200;  // to accept Z_DCA of a track           
   mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
   mMinZBtof     = -3.0; //
-  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
+  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
@@ -221,7 +219,7 @@ void StPPVertexFinder::InitRun(int runnumber)
     mMinAdcBemc   = 8;    // BTOW used calibration of maxt Et @ ~60Gev 
   }
   if (mUseBtof)
-    btofList->initRun(); // dongx
+    btofList->initRun();
   ctbList->initRun(); 
   bemcList->initRun();
   eemcList->initRun();
@@ -305,7 +303,7 @@ void StPPVertexFinder::Clear()
 {
   LOG_DEBUG << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
-  btofList->clear();  // dongx
+  btofList->clear();
   ctbList->clear();
   bemcList->clear();
   eemcList->clear();
@@ -329,7 +327,7 @@ StPPVertexFinder::~StPPVertexFinder()
   //x delete mTrackData;
   //x delete mVertexData;
   delete geomE;
-  //yf  if(btofGeom) delete btofGeom; // dongx 
+  //yf  if(btofGeom) delete btofGeom;
 }
 
 //======================================================
@@ -355,7 +353,7 @@ void StPPVertexFinder::printInfo(ostream& os) const
       <<
       Form("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",
 	   k,t->zDca,t->ezDca,t->gPt,t->vertexID) 
-      << Form("    Btof %3d,%d,%d",t->btofBin,btofList->getFired(t->btofBin),btofList->getTrack(t->btofBin))   // dongx
+      << Form("    Btof %3d,%d,%d",t->btofBin,btofList->getFired(t->btofBin),btofList->getTrack(t->btofBin))
       << Form("    CTB  %3d,%d,%d",t->ctbBin,ctbList->getFired(t->ctbBin),ctbList->getTrack(t->ctbBin))
       << Form("    Bemc %3d,%d,%d",t->bemcBin,bemcList->getFired(t->bemcBin),bemcList->getTrack(t->bemcBin))
       << Form("    Eemc %3d,%d,%d",t->eemcBin,eemcList->getFired(t->eemcBin),bemcList->getTrack(t->bemcBin))
@@ -431,7 +429,7 @@ assert(event);
    return 0;
   }
 
- // get BTOF info - dongx
+ // get BTOF info
 
   if(mUseBtof) {
     StBTofCollection *btofColl = (StBTofCollection*)event->btofCollection();
@@ -532,13 +530,13 @@ assert(event);
 
     hA[5]->Fill(t.rxyDca);
 
-    if( t.mBtof>0 ) kBtof++;   // dongx
+    if( t.mBtof>0 ) kBtof++;
     if( t.mCtb>0 )  kCtb++;   
     if( t.mBemc>0)  kBemc++;   
     if( t.mEemc>0)  kEemc++;
     if( t.mTpc>0 )  kTpc++;
  
-    if(t.mBtof>0 || t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ; // dongx
+    if(t.mBtof>0 || t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ;
 
     hACorr->Fill(t.mBtof, t.mBemc);
     //  t.print();
@@ -558,8 +556,8 @@ assert(event);
   }
 
  if(mUseBtof) {
-    btofList->print(); // dongx
-    btofList->doHisto(); // dongx
+    btofList->print();
+    btofList->doHisto();
   }
 
   bemcList->print();
@@ -773,7 +771,7 @@ bool StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
     if(  t->mTpc>0)       V.nTpc++;
     else if (  t->mTpc<0) V.nTpcV++;
 
-    if(  t->mBtof>0)       V.nBtof++;  // dongx
+    if(  t->mBtof>0)       V.nBtof++;
     else if (  t->mBtof<0) V.nBtofV++;
 
     if(  t->mCtb>0)       V.nCtb++;
@@ -839,7 +837,7 @@ void StPPVertexFinder::exportVertices(){
     else         primV.setVertexFinderId(ppvNoCtbVertexFinder); 
 
     primV.setNumTracksUsedInFinder(V->nUsedTrack);
-    primV.setNumMatchesWithBTOF(V->nBtof);  // dongx
+    primV.setNumMatchesWithBTOF(V->nBtof);
     primV.setNumMatchesWithCTB(V->nCtb);
     primV.setNumMatchesWithBEMC(V->nBemc);
     primV.setNumMatchesWithEEMC(V->nEemc);
@@ -1216,6 +1214,14 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.7  2016/11/07 21:19:28  smirnovd
+ * Added and reworded some doxygen and other comments
+ *
+ * Also cleaned up not-so-useful comments
+ *
+ * Revision 1.6  2016/11/07 21:19:14  smirnovd
+ * Moved log print statements out of constructors
+ *
  * Revision 1.5  2016/08/18 17:46:15  smirnovd
  * Squashed commit of the following refactoring changes:
  *

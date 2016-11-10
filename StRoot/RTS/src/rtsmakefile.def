@@ -134,7 +134,7 @@ ifndef RTS_DIR_PATH
 RTS_DIR_PATH=../../../../StRoot/RTS
 endif
 
-INCLUDES =  -I. -I.. -I$(RTS_DIR_PATH)/include -I$(RTS_DIR_PATH)/trg/include -I$(RTS_DIR_PATH)/src
+INCLUDES =  -I. -I.. -I$(RTS_DIR_PATH)/include -I$(RTS_DIR_PATH)/trg/include -I$(RTS_DIR_PATH)/src -I../../trg/include
 
 # List misc. defaults assuming the target system is the
 # same as the local system. Can be overriden later.
