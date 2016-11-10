@@ -34,7 +34,7 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
 {
   
   //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
-  gSystem->Load( "libPythia6_4_23.so");
+  gSystem->Load( "libPythia6_4_28.so");
 
   StarPythia6 *pythia6 = new StarPythia6("pythia6");
   if ( mode=="pp:W" )
@@ -52,6 +52,18 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
     // Setup other common block variables / array elements
     float& ckin3 = pysubs.ckin(3); 
     ckin3 = 4.0;
+
+    //
+    // Set particles to be stable so that the decay manager
+    // can handle them in the starsim phase
+    //
+    pythia6 -> SetDecayFlag( +24, 0 ); // W+
+    pythia6 -> SetDecayFlag( -24, 0 ); // W-
+    pythia6 -> SetDecayFlag( +23, 0 ); // Z0
+    pythia6 -> SetDecayFlag( -23, 0 ); // Z0
+    pythia6 -> SetDecayFlag( +15, 0 ); // tau+
+    pythia6 -> SetDecayFlag( -15, 0 ); // tau-
+    
 
   }
   if ( mode == "pp:minbias" )
@@ -76,7 +88,7 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=1, UInt_t rngSeed = 12345 )
+void starsim( Int_t nevents=1000, UInt_t rngSeed = 12345 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -126,7 +138,7 @@ void starsim( Int_t nevents=1, UInt_t rngSeed = 12345 )
   //                    ptmin  ptmax
   _primary->SetPtRange  (1.0E9,  -1.0);         // GeV
   //                    etamin etamax
-  _primary->SetEtaRange ( -3.0, +3.0 );
+  _primary->SetEtaRange ( -5.0, +5.0 );
   //                    phimin phimax
   _primary->SetPhiRange ( 0., TMath::TwoPi() );
   

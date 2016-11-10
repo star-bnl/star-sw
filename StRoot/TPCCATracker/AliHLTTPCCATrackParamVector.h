@@ -339,9 +339,8 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
     << "\n  " << err2Y
     << "\n  " << err2Z
     << "\n):" << std::endl;
-#ifdef __ASSERT_YF__
-  assert( err2Y > 0.f || !mask );
-  assert( err2Z > 0.f || !mask );
+  assert( (err2Y > 0.f || !mask).isFull() );
+  assert( (err2Z > 0.f || !mask).isFull() );
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( dy, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( dz, mask );
@@ -352,7 +351,6 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
   err2Z.setZero( !mask );
 #endif
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
-#endif
   //* Add the y,z measurement with the Kalman filter
 
   const float_v c00 = fC[ 0];
@@ -414,7 +412,7 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
   const float_v &sinPhi = fP[2] + k20 * z0  ;
   debugKF() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << std::endl;
 
-  assert( maxSinPhi > 0.f );
+  assert( float_m(maxSinPhi > 0.f).isFull() );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( sinPhi, mask );
   const float_m &success = mask && err2Y >= 1.e-8f && err2Z >= 1.e-8f && CAMath::Abs( sinPhi ) < maxSinPhi;
   VALGRIND_CHECK_VALUE_IS_DEFINED( success );
@@ -459,9 +457,8 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
     << "\n  " << err2Y
     << "\n  " << err2Z
     << "\n):" << std::endl;
-#ifdef __ASSERT_YF__
-  assert( err2Y > 0.f || !mask );
-  assert( err2Z > 0.f || !mask );
+  assert( (err2Y > 0.f || !mask).isFull() );
+  assert( (err2Z > 0.f || !mask).isFull() );
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( y, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( z, mask );
@@ -472,7 +469,6 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
   err2Z.setZero( !mask );
 #endif
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
-#endif
   //* Add the y,z measurement with the Kalman filter
 
   const float_v c00 = fC[ 0];
@@ -534,7 +530,7 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
   const float_v &sinPhi = fP[2] + k20 * z0  ;
   debugKF() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << std::endl;
 
-  assert( maxSinPhi > 0.f );
+  assert( float_m(maxSinPhi > 0.f).isFull() );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( sinPhi, mask );
   const float_m &success = mask && err2Y >= 1.e-8f && err2Z >= 1.e-8f && CAMath::Abs( sinPhi ) < maxSinPhi;
   VALGRIND_CHECK_VALUE_IS_DEFINED( success );

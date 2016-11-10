@@ -445,7 +445,7 @@ StEventMaker::makeEvent()
 	    }
 // We need to make a copy of the nominal to avoid problems in delete??
 	    if (triggerIdColl->nominal()) triggerIdColl->setNominal(new StTriggerId(*(triggerIdColl->nominal())));
-	    if (StTpcDb::instance()) {
+	    if (gStTpcDb) {
 	      Int_t TriggerId = -1; // Unknown
 	      if (triggerIdColl) {
 		static Int_t goodIds[5] = {9200,9201,310811,310812,310813};
@@ -457,7 +457,7 @@ StEventMaker::makeEvent()
 		  }
 		}
 	      }
-	      StTpcDb::instance()->SetTriggerId(TriggerId);
+	      gStTpcDb->SetTriggerId(TriggerId);
 	      if (! TriggerId && IAttr("laserIT")) return kStSkip;
 	    }
 

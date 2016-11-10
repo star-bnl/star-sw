@@ -72,7 +72,8 @@ Int_t AgUDecay::operator()()
   int np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
 
   // Flag deselected particles
-  vector<int> flags(np);
+  //vector<int> flags(np); // this causes a mystery crash when flags dtor is called
+  int flags[np];
 
   //  mArray -> Print();
 

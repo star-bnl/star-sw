@@ -63,7 +63,7 @@ Vertex3D::clearTracks(){
 void Vertex3D::addTrack(TrackData* trk)
 {
   if(isValid()) return; // block adding new track after 1st vertex is found
-  if(  !trk->mTpc && !trk->mBtof && !trk->mCtb && !trk->mBemc && trk->mEemc ) return;  // dongx
+  if(  !trk->mTpc && !trk->mBtof && !trk->mCtb && !trk->mBemc && trk->mEemc ) return;
   hA[0]->Fill(3);
   // track is matched to any fast detector
 

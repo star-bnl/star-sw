@@ -20,7 +20,11 @@ public:
 };
 
 //..................................................................................................
-StarPythia8Decayer::StarPythia8Decayer( Pythia8::Pythia *_pythia ) : mPythia(_pythia), mOwner(false), mDebug(0)
+StarPythia8Decayer::StarPythia8Decayer( Pythia8::Pythia *_pythia ) : 
+  mPythia(_pythia), 
+  mOwner(false), 
+  mDebug(0),
+  mRootS(510.0)
 {
 
   if ( mPythia ) return; // If provided, we expect pythia to be correctly initialized
@@ -47,7 +51,7 @@ StarPythia8Decayer::StarPythia8Decayer( Pythia8::Pythia *_pythia ) : mPythia(_py
 void StarPythia8Decayer::Init()
 {
 
-
+  mPythia->init( 2112, 2112, mRootS );
       
 }
 //..................................................................................................

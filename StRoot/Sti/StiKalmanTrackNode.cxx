@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.173 2016/07/08 16:11:32 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.174 2016/11/07 23:58:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.174  2016/11/07 23:58:03  perev
+ * More accurate tracking when in refit track sometimes missed the vollume.
+ * It is related to bug #3243
+ *
  * Revision 2.173  2016/07/08 16:11:32  perev
  * Method print enhancened
  *
@@ -1048,10 +1052,10 @@ StiDebug::Break(nCall);
   int position = 0;
   setState(pNode);
   setDetector(tDet);
+  if (mFP._cosCA <-1e-5) return -1; 
   if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
 
   StiPlacement * place = tDet->getPlacement();
-//double nLayerRadius  = place->getLayerRadius ();
   double nNormalRadius = place->getNormalRadius();
 
   StiShape * sh = tDet->getShape();
@@ -1071,11 +1075,23 @@ StiDebug::Break(nCall);
   case kDisk:  							
   case kCylindrical: endVal = nNormalRadius;
     {
-      double xy[2][3];
-      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),endVal,dir,xy);
+      double out[2][3];
+      double rxy = nNormalRadius;
+      double rxy2P = mFP.rxy2();
+      int outside = (rxy2P>rxy*rxy);
+      int nSol = StiTrackNode::cylCross(mFP.P,&mFP._cosCA,mFP.curv(),rxy,dir,out);
+      if (!nSol) 			return -11;
+      double *ou = out[0];
+      if (nSol==2) {
+         int kaze = outside + 2*dir;
+	 switch (kaze) {
+	  case 0: break;    
+          case 1: ou = out[1]; break;
+          case 2: ou = out[1]; break;
+	  case 3: return -99;
+      } }
 
-      if (!position) 			return -11;
-      dAlpha = atan2(xy[0][1],xy[0][0]);
+      dAlpha = atan2(ou[1],ou[0]);
       position = rotate(dAlpha);
       if (position) 			return -11;
     }
@@ -1087,6 +1103,7 @@ StiDebug::Break(nCall);
 
   if (position) return position;
   assert(mFP.x() > 0.);
+  if (mFP[0]*mFP._cosCA+mFP[1]*mFP._sinCA<0) return kEnded;
   propagateError();
   if (debug() & 8) { PrintpT("E");}
 
@@ -1789,7 +1806,7 @@ assert(mFE.zign()>0); ///???
   <li>Avoid undue rotations as they are CPU intensive...</li>
   </ol>
 */
-int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
+int StiKalmanTrackNode::rotate (double alpha) 
 {
   mMtx().A[0][0]=0;
   if (fabs(alpha)<1.e-6) return 0;
@@ -2511,3 +2528,19 @@ double StiKalmanTrackNode::evaluateChi2Info(const StiHit * hit) const
   return cc;
 }
 
+//________________________________________________________________________________
+///Calculate and returns pathlength within detector volume
+///associated with this node. Returns 0 if no detector is 
+///associated.
+double StiKalmanTrackNode::StiKalmanTrackNode::pathlength() const
+{
+  const StiDetector * det = getDetector();
+  if (!det) return 0.; 
+  double c = mFP._cosCA;
+  if (det->getShape()->getShapeCode()!=kPlanar) {
+    double CA = mFP.eta()-atan2(mFP.y(),mFP.x());
+    c = cos(CA);
+  }
+  double thickness = det->getShape()->getThickness();
+  return (thickness*::sqrt(1.+mFP.tanl()*mFP.tanl())) / fabs(c);
+}

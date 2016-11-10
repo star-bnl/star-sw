@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.638 2016/09/26 17:15:26 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.639 2016/11/08 20:39:07 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -531,10 +531,13 @@ Int_t StBFChain::Instantiate()
 
       // back to the HFT sub-system
       if (GetOption("NoPxlIT")) {
+	mk->SetAttr("usePxl"	 ,kTRUE);
 	mk->SetAttr("usePixel"	 ,kTRUE);
       } else {
         if (GetOption("PixelIT") || GetOption("PxlIT") ){
+	  mk->SetAttr("usePxl"     ,kTRUE);
 	  mk->SetAttr("usePixel"	 ,kTRUE);
+	  mk->SetAttr("activePxl"  ,kTRUE);
 	  mk->SetAttr("activePixel",kTRUE);
         }
       }
@@ -585,10 +588,10 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, 1);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, 1);
       if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, 1);
-      if (GetOption("VFPPVEv"  ) ) {
+      if ((GetOption("VFPPV") && GetOption("Stv")) || GetOption("VFPPVEv") ) {
         gSystem->Load("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , 1);
-      }
+      } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
       if (GetOption("VFPPVEvNoBtof")){
         gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", 1);

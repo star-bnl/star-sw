@@ -533,9 +533,7 @@ int_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const int 
 
   float_m activeFitMaskF( static_cast<float_m>( fitMask ) ); // create float_v mask
   float_m activeExtraMaskF( static_cast<float_m>(activeExtraMask) );
-#ifdef __ASSERT_YF__	   
-  assert( row.NHits() > oldHitIndex || !fitMask );
-#endif
+  assert( (row.NHits() > oldHitIndex || !fitMask).isFull() );
   float_v y = fData.HitPDataY( row, oldHitIndex, activeFitMaskF );
   float_v z = fData.HitPDataZ( row, oldHitIndex, activeFitMaskF );
 

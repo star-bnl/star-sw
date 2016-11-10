@@ -8,10 +8,10 @@ class StiMcsErrs {
 public:
 void reset()		{memset(this,0,sizeof(*this));}
 public:
-double cEE ;		//add err to <eta*eta> eta crossing angle
-double cPP;    	//add err to <ptin*ptin>
-double cTP;    	//add err to <tanL*ptin>
-double cTT;    	//add err to <tanL*tanL>
+double _cEE ;		//add err to <eta*eta> eta crossing angle
+double _cPP;    	//add err to <ptin*ptin>
+double _cTP;    	//add err to <tanL*ptin>
+double _cTT;    	//add err to <tanL*tanL>
 double _ptinCorr;	//ptin correction factor -1
 };
 
@@ -53,7 +53,7 @@ public:
   StiKalmanTrackNode *getFlipFlop() 	const 	{return mFlipFlopNode;}
   StiKalmanTrackNode *getVertexNode()	const 	{return mVertexNode;}
   int                 getUsed()     	const	{return mUsed;}
-
+  void                setDir(int dir) { mDir = dir;};
 static int isCutStep()				{return mgCutStep;}
 private:
   void reset();
@@ -101,6 +101,7 @@ double mHitsErrFactor;
 double mParentHz;
 double mTargetHz;
 int    mIter;				//current iter number
+int    mDir;				//current iter number
 StiKalmanTrackNode *mWorstNode;		//node with the worst Chi2
 StiKalmanTrackNode *mFlipFlopNode;	//node with the worst flip/flop ratio
 StiKalmanTrackNode *mVertexNode;	//vertex node

@@ -200,9 +200,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     while ( !( nextMask = areaDn.GetNext( &neighDn ) ).isEmpty() ) {
 
       if ( ISUNLIKELY( ((uint_v(Vc::Zero) < maxUpperNeighbourIndex) && neighDn.fValid).isEmpty() ) ) continue; // no both neighbours
-#ifdef __ASSERT_YF__      
-      assert( neighDn.fLinks < rowDn.NUnusedHits() || !neighDn.fValid );
-#endif
+      assert( (neighDn.fLinks < rowDn.NUnusedHits() || !neighDn.fValid).isFull() );
       nNeighDn++;
 #ifdef DRAW_NEIGHBOURSFINDING
       float_v neighDnY = neighDn.fY;
@@ -248,9 +246,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       bestDn( dnMask ) = static_cast<int_v>(neighDn.fLinks);
       debugS() << "best down: " << dnMask << " " << bestDn << std::endl;
     }
-#ifdef __ASSERT_YF__
-    assert( bestD < chi2Cut || ( bestUp == -1 && bestDn == -1 ) );
-#endif
+    assert( (bestD < chi2Cut || float_m( bestUp == -1 && bestDn == -1 )).isFull() );
     debugS() << "Set Link Data: Up = " << bestUp << ", Down = " << bestDn << std::endl;
 
       // store the link indexes we found

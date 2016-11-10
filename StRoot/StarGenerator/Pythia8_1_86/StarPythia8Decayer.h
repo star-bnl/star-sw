@@ -38,6 +38,9 @@ public:
   /// Modify pythia8 behavior
   void Set( const Char_t *cmd ){ mPythia->readString(cmd); }
 
+  /// Set root s
+  void SetRootS( double rs ){ mRootS = rs; }
+
   /// Class constructor
   StarPythia8Decayer( Pythia8::Pythia *pythia = 0 );
 
@@ -50,6 +53,7 @@ protected:
   Pythia8::Pythia *mPythia;
   Bool_t           mOwner;
   Int_t            mDebug;
+  double           mRootS;
 
   ClassDef(StarPythia8Decayer,1);
 };

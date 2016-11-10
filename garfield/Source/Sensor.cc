@@ -565,7 +565,7 @@ void Sensor::SetTimeWindow(const double tstart, const double tstep,
 double Sensor::GetElectronSignal(const std::string& label, 
                                  const unsigned int bin) {
 
-  if (m_nEvents <= 0) return 0.;
+  if (m_nEvents == 0) return 0.;
   if (bin >= m_nTimeBins) return 0.;
   double sig = 0.;
   const unsigned int nElectrodes = m_electrodes.size();
@@ -584,7 +584,7 @@ double Sensor::GetElectronSignal(const std::string& label,
 
 double Sensor::GetIonSignal(const std::string& label, const unsigned int bin) {
 
-  if (m_nEvents <= 0) return 0.;
+  if (m_nEvents == 0) return 0.;
   if (bin >= m_nTimeBins) return 0.;
   double sig = 0.;
   const unsigned int nElectrodes = m_electrodes.size();
@@ -602,7 +602,7 @@ double Sensor::GetIonSignal(const std::string& label, const unsigned int bin) {
 
 double Sensor::GetSignal(const std::string& label, const unsigned int bin) {
 
-  if (m_nEvents <= 0) return 0.;
+  if (m_nEvents == 0) return 0.;
   if (bin >= m_nTimeBins) return 0.;
   double sig = 0.;
   const unsigned int nElectrodes = m_electrodes.size();
@@ -620,7 +620,7 @@ double Sensor::GetSignal(const std::string& label, const unsigned int bin) {
 
 double Sensor::GetInducedCharge(const std::string& label) {
 
-  if (m_nEvents <= 0) return 0.;
+  if (m_nEvents == 0) return 0.;
   double charge = 0.;
   const unsigned int nElectrodes = m_electrodes.size();
   for (unsigned int i = 0; i < nElectrodes; ++i) {
@@ -709,7 +709,7 @@ bool Sensor::ConvoluteSignal() {
     std::cerr << "    No transfer function available.\n";
     return false;
   }
-  if (m_nEvents <= 0) {
+  if (m_nEvents == 0) {
     std::cerr << m_className << "::ConvoluteSignal:\n";
     std::cerr << "    No signals present.\n";
     return false;
@@ -762,7 +762,7 @@ bool Sensor::ConvoluteSignal() {
 
 bool Sensor::IntegrateSignal() {
 
-  if (m_nEvents <= 0) {
+  if (m_nEvents == 0) {
     std::cerr << m_className << "::IntegrateSignal:\n";
     std::cerr << "    No signals present.\n";
     return false;
@@ -803,18 +803,16 @@ void Sensor::AddNoise(const bool total, const bool electron, const bool ion) {
     std::cerr << "    Noise function is not defined.\n";
     return;
   }
-  if (m_nEvents <= 0) m_nEvents = 1;
+  if (m_nEvents == 0) m_nEvents = 1;
 
   const unsigned int nElectrodes = m_electrodes.size();
   for (unsigned int i = 0; i < nElectrodes; ++i) {
     for (unsigned int j = 0; j < m_nTimeBins; ++j) {
       const double t = m_tStart + (j + 0.5) * m_tStep;
-      m_electrodes[i].signal[j] += m_fNoise(t);
-      // Adding noise to both channels might be wrong,
-      // maybe an extended option
-      // where to add noise would be an idea?
-      m_electrodes[i].electronsignal[j] += m_fNoise(t);
-      m_electrodes[i].ionsignal[j] += m_fNoise(t);
+      const double noise = m_fNoise(t);
+      if (total) m_electrodes[i].signal[j] += noise;
+      if (electron) m_electrodes[i].electronsignal[j] += noise;
+      if (ion) m_electrodes[i].ionsignal[j] += noise;
     }
   }
 }
@@ -829,7 +827,7 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
   // Set the interpolation order.
   int iOrder = 1;
 
-  if (m_nEvents <= 0) {
+  if (m_nEvents == 0) {
     std::cerr << m_className << "::ComputeThresholdCrossings:\n";
     std::cerr << "    No signals present.\n";
     return false;

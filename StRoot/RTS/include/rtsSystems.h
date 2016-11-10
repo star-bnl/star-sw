@@ -74,7 +74,7 @@
 #define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
 #define TCD_MTD_QT      9	//0x13, trigger-only; unused
-#define TCD_ETOF        10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+#define TCD_RHICF       10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -82,7 +82,7 @@
 #define TCD_BSMD        15      //0x19
 #define TCD_CTB         16	//0x1A, trigger-only; unused
 #define TCD_BTOW        17      //0x1B
-#define TCD_RHICF       18      //0x1C; Sep 16: was SST; was FTPC; gone in Sep '11
+#define TCD_ETOF        18      //0x1C; Sep 16: was SST; was FTPC; gone in Sep '11
 #define TCD_FCS         19      //0x1D; Sep 16: was PXL; was PMD; gone in Sep '11
 #define TCD_GMT         20      //0x1E; WAS: empty, Nov, 2008
 #define TCD_VPD		21      //0x1F trigger-only; unused
@@ -90,7 +90,7 @@
 
 
 // FY17 Group definitions
-#define RHICF_GRP	0
+#define ETOF_GRP	0
 #define PP_GRP	        1
 #define ETOW_GRP	2   
 #define BTOW_GRP	3
@@ -99,7 +99,7 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 #define FCS_GRP		8
-#define ETOF_GRP        9
+#define RHICF_GRP        9
 //#define xxx_GRP		10	// unused
 //#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
@@ -883,7 +883,7 @@ extern inline int tcd2rts(int tcd)
         -1,		//7 BBC
         ETOW_SYSTEM,	//8 was IST
         -1,		//9 ; used for MTD_QT, was SSD?
-        ETOF_SYSTEM,	//10 ; moved from FGT; moved from FPD
+        RHICF_SYSTEM,	//10 was IST; moved from FGT; moved from FPD
         TOF_SYSTEM,	//11
         PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
         MTD_SYSTEM,	//13 was EMPTY in FY10, MTD in FY11
@@ -891,7 +891,7 @@ extern inline int tcd2rts(int tcd)
         BSMD_SYSTEM,	//15
         -1,		//16 CTB aka ZDC
         BTOW_SYSTEM,	//17
-        RHICF_SYSTEM,	//18 was SST
+        ETOF_SYSTEM,	//18 was SST
         FCS_SYSTEM,	//19 was PXL
         GMT_SYSTEM,	//20 GMT; EMPTY until Aug 11; TPC was here... removed Sep 08
         -1,		//21 VPD
@@ -947,7 +947,7 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << ESMD_SYSTEM) ;
 	}
 	if(grp & (1 << TPX_GRP)) {
-	  ret |= (1 << TPX_SYSTEM);
+	  ret |= (1 << TPX_SYSTEM) | (1<<TPX_SYSTEM);
 	}
 	if(grp & (1 << RHICF_GRP)) {
 	  ret |= (1 << RHICF_SYSTEM);
@@ -995,6 +995,8 @@ extern inline int rts2grp(int rts)
 		return RHICF_GRP;
 	case FCS_ID :
 		return FCS_GRP ;
+        case TPC_ID:                    // Shares the TPC TCD...
+	        return TPX_GRP;
 	default:
 		return 31 ;	// this is an ERROR since groups < 16
    }
