@@ -302,7 +302,7 @@ class Lxgbx {
 
 	pay->evp = l2h32(evpAssign(l2trg_lo, l2trg_hi));
 	pay->L3summary[3] = pay->evp;
-    
+
 #ifdef __vxworks
 	struct timespec tm;
 	clock_gettime(CLOCK_REALTIME, &tm);
