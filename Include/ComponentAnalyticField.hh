@@ -101,7 +101,7 @@ class ComponentAnalyticField : public ComponentBase {
   // D2   round tubes with axial periodicity
   // D3   polygonal tubes without axial periodicity
 
-  void AddReadout(const std::string label);
+  void AddReadout(const std::string& label);
 
   void EnableChargeCheck() { m_chargeCheck = true; }
   void DisableChargeCheck() { m_chargeCheck = false; }
@@ -165,8 +165,8 @@ class ComponentAnalyticField : public ComponentBase {
   int mxmin, mxmax, mymin, mymax;
   int mfexp;
 
-  int nReadout;
-  std::vector<std::string> readout;
+  // int nReadout;
+  std::vector<std::string> m_readout;
 
   // Wires
   int nWires;
@@ -190,7 +190,7 @@ class ComponentAnalyticField : public ComponentBase {
     // nTrap*radius of wire.
     int nTrap;
   };
-  std::vector<wire> w;
+  std::vector<wire> m_w;
 
   // Stretching weight
   std::vector<double> weight;
@@ -290,14 +290,13 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<std::vector<double> > m_qplane;
 
   // Point charges
-  int n3d;
   struct charge3d {
     double x, y, z;
     double e;
   };
-  std::vector<charge3d> ch3d;
-  int nTermBessel;
-  int nTermPoly;
+  std::vector<charge3d> m_ch3d;
+  unsigned int m_nTermBessel;
+  unsigned int m_nTermPoly;
 
   // Gravity
   double down[3];
