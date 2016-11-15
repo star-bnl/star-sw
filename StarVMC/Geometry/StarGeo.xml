@@ -12,6 +12,67 @@
     <Construct sys="cave" config="CAVEon" simu="1" />
     <Construct sys="epdm" config="EPDMon" simu="1" />
   </Geometry>
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="ftsver1" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv1" />
+  
+  </Geometry>
+ <Geometry tag="ftsver2" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv2" />
+  
+  </Geometry>
+ <Geometry tag="ftsver3" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv3" />
+  
+  </Geometry>
 
   <!-- Just the CAVE and upstream area -->
   <Geometry tag="blackhole" check="false" comment="All detectors off">
