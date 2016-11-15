@@ -14,10 +14,37 @@
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
     </Setup> 
+
     <Setup  name   = "FTSDv0"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
+
+    </Setup> 
+
+    <Setup  name   = "FTSDv1"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="1.0" />
+
+    </Setup> 
+    <Setup  name   = "FTSDv2"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="2.0" />
+
+    </Setup> 
+    <Setup  name   = "FTSDv3"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="1.0" />
+
     </Setup> 
 
   </Detector> 
