@@ -34,8 +34,9 @@ class ComponentAnalyticField : public ComponentBase {
   bool GetBoundingBox(double& x0, double& y0, double& z0, double& x1,
                       double& y1, double& z1);
 
-  bool IsWireCrossed(double x0, double y0, double z0, double x1, double y1,
-                     double z1, double& xc, double& yc, double& zc);
+  bool IsWireCrossed(const double x0, const double y0, const double z0, 
+                     const double x1, const double y1, const double z1,
+                     double& xc, double& yc, double& zc);
 
   bool IsInTrapRadius(const double q0, const double x0, const double y0,
                       const double z0, double& xw, double& yx, double& rw);
@@ -77,7 +78,7 @@ class ComponentAnalyticField : public ComponentBase {
   void AddCharge(const double x, const double y, const double z,
                  const double q);
   void ClearCharges();
-  void PrintCharges();
+  void PrintCharges() const;
 
   std::string GetCellType() {
     if (!m_cellset) {
@@ -108,17 +109,19 @@ class ComponentAnalyticField : public ComponentBase {
   void EnableChargeCheck() { m_chargeCheck = true; }
   void DisableChargeCheck() { m_chargeCheck = false; }
 
-  int GetNumberOfWires() { return nWires; }
-  bool GetWire(const int i, double& x, double& y, double& diameter,
+  unsigned int GetNumberOfWires() const { return m_nWires; }
+  bool GetWire(const unsigned int i, double& x, double& y, double& diameter,
                double& voltage, std::string& label, double& length,
-               double& charge, int& ntrap);
+               double& charge, int& ntrap) const;
 
-  int GetNumberOfPlanesX();
-  int GetNumberOfPlanesY();
-  bool GetPlaneX(const int i, double& x, double& voltage, std::string& label);
-  bool GetPlaneY(const int i, double& y, double& voltage, std::string& label);
+  unsigned int GetNumberOfPlanesX() const;
+  unsigned int GetNumberOfPlanesY() const;
+  bool GetPlaneX(const unsigned int i, double& x, double& voltage, 
+                 std::string& label) const;
+  bool GetPlaneY(const unsigned int i, double& y, double& voltage, 
+                 std::string& label) const;
 
-  bool GetTube(double& r, double& voltage, int& nEdges, std::string& label);
+  bool GetTube(double& r, double& voltage, int& nEdges, std::string& label) const;
 
   enum Cell {
     A00,
@@ -143,7 +146,7 @@ class ComponentAnalyticField : public ComponentBase {
   bool m_cellset;
   bool m_sigset;
 
-  bool polar;
+  bool m_polar;
 
   // Cell type (as string and number)
   std::string m_scellType;
@@ -172,7 +175,7 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<std::string> m_readout;
 
   // Wires
-  int nWires;
+  unsigned int m_nWires;
   struct wire {
     // Location
     double x;
@@ -214,7 +217,7 @@ class ComponentAnalyticField : public ComponentBase {
   // Parameters for C type cells
   int mode;
   std::complex<double> m_zmult;
-  double m_p1, m_p2, c1;
+  double m_p1, m_p2, m_c1;
   // Parameters for D3 type cells
   // Conformal mapping in polygons
   std::vector<std::complex<double> > wmap;
@@ -224,18 +227,18 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<std::vector<double> > m_cc2;
 
   // Reference potential
-  double v0;
-  double corvta, corvtb, corvtc;
+  double m_v0;
+  double m_corvta, m_corvtb, m_corvtc;
 
   // Planes
   // Existence
   bool m_ynplan[4];
-  bool ynplax, ynplay;
+  bool m_ynplax, m_ynplay;
   // Coordinates
-  double coplan[4];
-  double coplax, coplay;
+  double m_coplan[4];
+  double m_coplax, m_coplay;
   // Voltages
-  double vtplan[4];
+  double m_vtplan[4];
 
   struct strip {
     // Label
@@ -347,29 +350,29 @@ class ComponentAnalyticField : public ComponentBase {
   int Field(const double xin, const double yin, const double zin, double& ex,
             double& ey, double& ez, double& volt, const bool opt);
   void FieldA00(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldB1X(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldB1Y(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldB2X(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldB2Y(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldC10(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldC2X(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldC2Y(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldC30(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldD10(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldD20(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
   void FieldD30(const double xpos, const double ypos, double& ex, double& ey,
-                double& volt, const bool opt);
+                double& volt, const bool opt) const;
 
   // Field due to point charges
   void Field3dA00(const double x, const double y, const double z, double& ex,
@@ -383,50 +386,55 @@ class ComponentAnalyticField : public ComponentBase {
   // Evaluation of the weighting field
   bool Wfield(const double xpos, const double ypos, const double zpos,
               double& ex, double& ey, double& ez, double& volt, const int isw,
-              const bool opt);
+              const bool opt) const;
   void WfieldWireA00(const double xpos, const double ypos, double& ex,
                      double& ey, double& volt, const int mx, const int my,
-                     const int sw, const bool opt);
+                     const int sw, const bool opt) const;
   void WfieldWireB2X(const double xpos, const double ypos, double& ex,
                      double& ey, double& volt, const int my, const int sw,
-                     const bool opt);
+                     const bool opt) const;
   void WfieldWireB2Y(const double xpos, const double ypos, double& ex,
                      double& ey, double& volt, const int mx, const int sw,
-                     const bool opt);
+                     const bool opt) const;
   void WfieldWireC2X(const double xpos, const double ypos, double& ex,
-                     double& ey, double& volt, const int sw, const bool opt);
+                     double& ey, double& volt, const int sw, 
+                     const bool opt) const;
   void WfieldWireC2Y(const double xpos, const double ypos, double& ex,
-                     double& ey, double& volt, const int sw, const bool opt);
+                     double& ey, double& volt, const int sw, 
+                     const bool opt) const;
   void WfieldWireC30(const double xpos, const double ypos, double& ex,
-                     double& ey, double& volt, const int sw, const bool opt);
+                     double& ey, double& volt, const int sw, 
+                     const bool opt) const;
   void WfieldWireD10(const double xpos, const double ypos, double& ex,
-                     double& ey, double& volt, const int sw, const bool opt);
+                     double& ey, double& volt, const int sw, 
+                     const bool opt) const;
   void WfieldWireD30(const double xpos, const double ypos, double& ex,
-                     double& ey, double& volt, const int sw, const bool opt);
+                     double& ey, double& volt, const int sw, 
+                     const bool opt) const;
   void WfieldPlaneA00(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int mx, const int my,
-                      const int iplane, const bool opt);
+                      const int iplane, const bool opt) const;
   void WfieldPlaneB2X(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int my, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldPlaneB2Y(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int mx, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldPlaneC2X(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldPlaneC2Y(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldPlaneC30(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldPlaneD10(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldPlaneD30(const double xpos, const double ypos, double& ex,
                       double& ey, double& volt, const int iplane,
-                      const bool opt);
+                      const bool opt) const;
   void WfieldStripZ(const double xpos, const double ypos, double& ex,
                     double& ey, double& volt, const int ip, const int is,
                     const bool opt) const;
@@ -438,18 +446,20 @@ class ComponentAnalyticField : public ComponentBase {
                    const int ip, const int is, const bool opt) const;
 
   // Auxiliary functions for C type cells
-  double Ph2(const double xpos, const double ypos);
-  double Ph2Lim(const double radius) {
+  double Ph2(const double xpos, const double ypos) const;
+  double Ph2Lim(const double radius) const {
     return -log(abs(m_zmult) * radius * (1. - 3. * m_p1 + 5. * m_p2));
   }
-  void E2Sum(const double xpos, const double ypos, double& ex, double& ey);
+  void E2Sum(const double xpos, const double ypos, 
+             double& ex, double& ey) const;
 
   // Mapping function for D30 type cells
   void ConformalMap(const std::complex<double>& z, std::complex<double>& ww,
-                    std::complex<double>& wd);
+                    std::complex<double>& wd) const;
   void InitializeCoefficientTables();
 
-  bool InTube(const double x0, const double y0, const double a, const int n);
+  bool InTube(const double x0, const double y0, const double a, 
+              const int n) const;
 
   // Transformation between cartesian and polar coordinates
   void Cartesian2Polar(const double x0, const double y0, double& r,
@@ -463,8 +473,8 @@ class ComponentAnalyticField : public ComponentBase {
     theta = 180. * atan2(y0, x0) / Pi;
   }
 
-  void Polar2Cartesian(const double r, const double theta, double& x0,
-                       double& y0) {
+  void Polar2Cartesian(const double r, const double theta, 
+                       double& x0, double& y0) const {
 
     x0 = r * cos(Pi * theta / 180.);
     y0 = r * sin(Pi * theta / 180.);
@@ -473,7 +483,7 @@ class ComponentAnalyticField : public ComponentBase {
   // Transformation (r, theta) to (rho, phi) via the map
   // (r, theta) = (exp(rho), 180 * phi / Pi).
   void RTheta2RhoPhi(const double rho, const double phi, double& r,
-                     double& theta) {
+                     double& theta) const {
 
     r = exp(rho);
     theta = 180. * phi / Pi;
