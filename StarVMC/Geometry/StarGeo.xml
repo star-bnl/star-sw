@@ -16,7 +16,7 @@
   <Geometry tag="ftsver1" comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" />
-    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPE12" simu="1" />
     <Construct sys="upst" config="UPSTon" />
     <Construct sys="tpce" config="TPCE31" />
@@ -36,7 +36,7 @@
  <Geometry tag="ftsver2" comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" />
-    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPE12" simu="1" />
     <Construct sys="upst" config="UPSTon" />
     <Construct sys="tpce" config="TPCE31" />
@@ -56,7 +56,7 @@
  <Geometry tag="ftsver3" comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" />
-    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="idsm" config="IDSM14" />
     <Construct sys="pipe" config="PIPE12" simu="1" />
     <Construct sys="upst" config="UPSTon" />
     <Construct sys="tpce" config="TPCE31" />

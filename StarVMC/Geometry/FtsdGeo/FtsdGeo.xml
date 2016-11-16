@@ -58,7 +58,7 @@
   <!--                                                                        Setup default main configuration structure -->
   <Fill name="MAIN" comment="Select configuration" >
     <var name="version" value="3.0" comment="selector" />
-    <var name="useids"  value="0.0" comment="defines placement 0=in cave, 1=in idsm" />
+    <var name="useids"  value="1.0" comment="defines placement 0=in cave, 1=in idsm" />
   </Fill>
   <Use struct="MAIN" />
 
