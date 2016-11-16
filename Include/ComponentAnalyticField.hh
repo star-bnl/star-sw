@@ -37,34 +37,36 @@ class ComponentAnalyticField : public ComponentBase {
   bool IsWireCrossed(double x0, double y0, double z0, double x1, double y1,
                      double z1, double& xc, double& yc, double& zc);
 
-  bool IsInTrapRadius(const double q0, const double x0, const double y0, 
+  bool IsInTrapRadius(const double q0, const double x0, const double y0,
                       const double z0, double& xw, double& yx, double& rw);
 
   // Add a wire at (x, y) .
   void AddWire(const double x, const double y, const double diameter,
-               const double voltage, const std::string label,
+               const double voltage, const std::string& label,
                const double length = 100., const double tension = 50.,
                const double rho = 19.3, const int ntrap = 5);
   // Add a tube.
   void AddTube(const double radius, const double voltage, const int nEdges,
-               const std::string label);
+               const std::string& label);
   // Add a plane at constant x
-  void AddPlaneX(const double x, const double voltage, const std::string label);
+  void AddPlaneX(const double x, const double voltage,
+                 const std::string& label);
   // Add a plane at constant y
-  void AddPlaneY(const double y, const double voltage, const std::string label);
+  void AddPlaneY(const double y, const double voltage,
+                 const std::string& label);
 
   void AddStripOnPlaneX(const char direction, const double x, const double smin,
-                        const double smax, const std::string label,
+                        const double smax, const std::string& label,
                         const double gap = -1.);
   void AddStripOnPlaneY(const char direction, const double y, const double smin,
-                        const double smax, const std::string label,
+                        const double smax, const std::string& label,
                         const double gap = -1.);
   void AddPixelOnPlaneX(const double x, const double ymin, const double ymax,
-                        const double zmin, const double zmax, const std::string label,
-			const double gap = -1.);
+                        const double zmin, const double zmax,
+                        const std::string& label, const double gap = -1.);
   void AddPixelOnPlaneY(const double y, const double xmin, const double xmax,
-                        const double zmin, const double zmax, const std::string label,
-			const double gap = -1.);
+                        const double zmin, const double zmax,
+                        const std::string& label, const double gap = -1.);
 
   // Set the periodic length [cm] in x/y direction
   void SetPeriodicityX(const double s);
@@ -77,11 +79,11 @@ class ComponentAnalyticField : public ComponentBase {
   void ClearCharges();
   void PrintCharges();
 
-  std::string GetCellType() { 
+  std::string GetCellType() {
     if (!m_cellset) {
       if (CellCheck()) CellType();
     }
-    return m_scellType; 
+    return m_scellType;
   }
   // Cells are classified according to the number
   // and orientation of planes, the presence of
@@ -134,6 +136,7 @@ class ComponentAnalyticField : public ComponentBase {
     D40,
     Unknown
   };
+
  private:
   bool m_chargeCheck;
 
@@ -226,7 +229,7 @@ class ComponentAnalyticField : public ComponentBase {
 
   // Planes
   // Existence
-  bool ynplan[4];
+  bool m_ynplan[4];
   bool ynplax, ynplay;
   // Coordinates
   double coplan[4];
@@ -264,13 +267,10 @@ class ComponentAnalyticField : public ComponentBase {
     double ewxcor;
     double ewycor;
     // x/y strips
-    int nStrips1;
     std::vector<strip> strips1;
     // z strips
-    int nStrips2;
     std::vector<strip> strips2;
     // Pixels
-    int nPixels;
     std::vector<pixel> pixels;
   };
 
@@ -429,13 +429,13 @@ class ComponentAnalyticField : public ComponentBase {
                       const bool opt);
   void WfieldStripZ(const double xpos, const double ypos, double& ex,
                     double& ey, double& volt, const int ip, const int is,
-                    const bool opt);
+                    const bool opt) const;
   void WfieldStripXy(const double xpos, const double ypos, const double zpos,
                      double& ex, double& ey, double& ez, double& volt,
-                     const int ip, const int is, const bool opt);
+                     const int ip, const int is, const bool opt) const;
   void WfieldPixel(const double xpos, const double ypos, const double zpos,
                    double& ex, double& ey, double& ez, double& volt,
-                   const int ip, const int is, const bool opt);
+                   const int ip, const int is, const bool opt) const;
 
   // Auxiliary functions for C type cells
   double Ph2(const double xpos, const double ypos);
@@ -445,7 +445,7 @@ class ComponentAnalyticField : public ComponentBase {
   void E2Sum(const double xpos, const double ypos, double& ex, double& ey);
 
   // Mapping function for D30 type cells
-  void ConformalMap(std::complex<double> z, std::complex<double>& ww,
+  void ConformalMap(const std::complex<double>& z, std::complex<double>& ww,
                     std::complex<double>& wd);
   void InitializeCoefficientTables();
 
