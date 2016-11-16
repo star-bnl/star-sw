@@ -15,6 +15,7 @@
 
   <Structure name="MAIN" comment="Main configuration control structure, selects version at run time">
     <var name="version" type="float" />
+    <var name="useids"  type="float" />
   </Structure>
 
   <Structure name="FDSK" comment="Description of each disk">
@@ -57,6 +58,7 @@
   <!--                                                                        Setup default main configuration structure -->
   <Fill name="MAIN" comment="Select configuration" >
     <var name="version" value="3.0" comment="selector" />
+    <var name="useids"  value="1.0" comment="defines placement 0=in cave, 1=in idsm" />
   </Fill>
   <Use struct="MAIN" />
 
@@ -331,7 +333,12 @@
   zcenter = zmin + (zmax-zmin) / 2.0
 
   <Create    block="FTSM" />
-  <Placement block="FTSM" in="IDSM" konly="MANY"
+  <Placement block="FTSM" in="IDSM" konly="MANY"      if="MAIN_useids.eq.1.0"
+	     x="xcenter"
+	     y="ycenter"
+	     z="zcenter" />
+
+  <Placement block="FTSM" in="CAVE" konly="MANY"      
 	     x="xcenter"
 	     y="ycenter"
 	     z="zcenter" />
