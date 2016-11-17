@@ -73,7 +73,10 @@ public:
     Float_t x_g() const {return _xg;}
     Float_t y_g() const {return _yg;}
     Float_t z_g() const {return _zg;}
-    
+    ///Return the rxy.
+    float   rxy() const {return sqrt(_xg*_xg+_yg*_yg);}
+
+
     ///Return components of the error matrix.
     Float_t sxx() const {return msxx;}
     Float_t syy() const {return msyy;}
