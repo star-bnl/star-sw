@@ -19,7 +19,7 @@
       <Init struct="BBCG" var="version" value="2.0" />
 
     </Setup> 
- 
+  
   </Detector> 
    
 </Document>

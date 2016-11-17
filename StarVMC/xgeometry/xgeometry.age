@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.21 2016/11/16 14:50:42 jwebb Exp $
+* $Id: xgeometry.age,v 1.22 2016/11/17 23:40:48 jwebb Exp $
 
 
 
@@ -2497,6 +2497,10 @@ If LL>0
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
   Case ftsver3  { y2017 : y2017 baseline w/ ids and fts v3;     Geom = 'ftsver3   '; call geom_ftsver3;}
+  Case ftsver4  { y2017 : y2017 baseline w/ ids and fts v4;     Geom = 'ftsver4   '; call geom_ftsver4;}
+
+  Case ftsref1  { y2017 : y2017 baseline w/ ids and fts r1;     Geom = 'ftsref1   '; call geom_ftsref1;}
+  Case ftsref2  { y2017 : y2017 baseline w/ ids and fts r2;     Geom = 'ftsref2   '; call geom_ftsref2;}
 
 
   Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
@@ -4611,8 +4615,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.21 2016/11/16 14:50:42 jwebb Exp $
+* $Id: xgeometry.age,v 1.22 2016/11/17 23:40:48 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.22  2016/11/17 23:40:48  jwebb
+* FTS Reference 1 and 2
+*
 * Revision 1.21  2016/11/16 14:50:42  jwebb
 * Enable FTS versions 1-3 in starsim.
 *

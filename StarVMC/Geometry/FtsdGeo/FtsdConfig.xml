@@ -47,6 +47,49 @@
 
     </Setup> 
 
+    <Setup  name   = "FTSDv4"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="4.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+
+    </Setup> 
+
+    <Setup  name   = "FTSDv5"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr1"
+	    comment= "FTS Geometry Reference 1"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,0,0,0, 1,1,1,1,1,1}" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr2"
+	    comment= "FTS Geometry Reference 1"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{1,0,1,0,0,0, 1,1,1,1,1,1}" />
+
+    </Setup>  
+
+
   </Detector> 
   
   
