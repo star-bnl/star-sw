@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.67 2016/11/07 21:19:35 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.68 2016/11/17 04:34:44 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1041,6 +1041,7 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
     if(!ktn.isValid()) continue;
     if(ktn.getHit() && ktn.getChi2() >1000) continue;
     const StiDetector * det=ktn.getDetector();
+    if (!(!(ktn.x()) || det)) continue; //Unexpected node(VP)
     assert(!(ktn.x()) || det);
     float rxy=ktn.getX();
     bool actv= !det || det->isActive(ktn.getY(), ktn.getZ());
@@ -1079,6 +1080,7 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
     float sy=sqrt(ktn.getCyy());
     float sz=sqrt(ktn.getCzz());
     const StiDetector * det=ktn.getDetector();
+    if (!((!(ktn.x()) || det))) continue;
     assert(!(ktn.x()) || det);
 
     LOG_INFO << "#e in="<<in<<" |P|="<<ktn.getP()<<" Local: x="<<ktn.getX()<<" y="<<ktn.getY()<<" +/- "<<sy<<" z="<<ktn.getZ()<<" +/- "<<sz;
@@ -1418,6 +1420,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
       lastZ=z;
     }
     const StiDetector * det=ktnp->getDetector();
+    if (!(!(ktnp->x()) || det)) continue; //avoid assert temporarily(VP)
     assert(!(ktnp->x()) || det);
     bool active=!det || det->isActive(yL(ktnp), zL(ktnp));
     int hit=ktnp->getHit()?1:0;
