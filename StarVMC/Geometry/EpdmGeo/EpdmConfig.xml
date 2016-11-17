@@ -11,7 +11,10 @@
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "EpdmGeo0" 
 	    onoff  = "on"
-	    />
+	    >
+       <Init struct="EPDG" var="active" value="{0,1}" />
+
+    </Setup>
 
      <Setup  name   = "EPDMwest"
 	    comment= "Default configuration for the Beam Beam counter"
