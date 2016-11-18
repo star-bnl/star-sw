@@ -74,7 +74,7 @@
 
       <Init struct="MAIN" var="version" value="5.0" />
       <Init struct="MAIN" var="useids"  value="0.0" />
-      <Init struct="MAIN" var="active"  value="{1,1,1,0,0,0, 1,1,1,1,1,1}" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,1, 1,1,1,1,1,1}" />
 
     </Setup>  
 
