@@ -522,7 +522,7 @@
       <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
     </Fill>
     <!--                                                                                     Geometric paramters for disk s -->
-    zdisk = 400.0; <!-- place outside magnet -->
+    zdisk = 470.0; <!-- place outside magnet -->
     ndisk = ndisk + 1
     <Fill name="FDSK" comment="First disk">
       <var name="version"   value="1.0"    comment="disk version" />
@@ -538,7 +538,7 @@
       <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
     </Fill>
 
-    zdisk = 404.0; <!-- second 4 cm separation -->
+    zdisk = 474.0; <!-- second 4 cm separation -->
     ndisk = ndisk + 1
     <Fill name="FDSK" comment="First disk">
       <var name="version"   value="1.0"    comment="disk version" />
