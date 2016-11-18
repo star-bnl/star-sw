@@ -61,13 +61,13 @@
   
   <Fill name="ESPD" comment="EPD sensitive paddle config">
     <var name="version" value="1.0" comment="east side" />
-    <var name="active"  value="{0,0,0,1, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0}" comment="1=on 0=off" />
+    <var name="active"  value="{1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1}" comment="1=on 0=off" />
     <var name="halfWidthZ" value="0.25" comment="no clue" />
     <var name="halfWidthPhi" value="9.0" comment="18 degree paddle x20 = 360 degrees" />
   </Fill>
   <Fill name="ESPD" comment="EPD sensitive paddle config">
     <var name="version" value="2.0" comment="west side" />
-    <var name="active"  value="{0,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,0}" comment="1=on 0=off" />
+    <var name="active"  value="{1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1}" comment="1=on 0=off" />
     <var name="halfWidthZ" value="0.25" comment="no clue" />
     <var name="halfWidthPhi" value="9.0" comment="18 degree paddle x20 = 360 degrees" />
   </Fill>

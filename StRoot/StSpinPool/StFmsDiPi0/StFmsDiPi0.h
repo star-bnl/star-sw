@@ -3,8 +3,11 @@
 //
 //   This is FMS di-pi0 analysis
 // 
-//  $Id: StFmsDiPi0.h,v 1.3 2016/10/10 19:17:40 akio Exp $
+//  $Id: StFmsDiPi0.h,v 1.4 2016/11/17 18:57:23 akio Exp $
 //  $Log: StFmsDiPi0.h,v $
+//  Revision 1.4  2016/11/17 18:57:23  akio
+//  Many updates
+//
 //  Revision 1.3  2016/10/10 19:17:40  akio
 //  *** empty log message ***
 //
@@ -46,6 +49,7 @@ public:
     void setTreeFileName(char* file){mTreeFilename=file;} 
     void setWriteTree(int v=1) {mWriteTree=v;}
     void setReadTree(TChain* c) {mReadTree=1; mChain=c;}
+    void setBBCCut(float v1, float v2, float v3, float v4){mBBCCut1=v1;  mBBCCut2=v2;  mBBCCut3=v3;  mBBCCut4=v4;}
 
     void setPythia(int v=1) {mPythia=v;}
 
@@ -60,6 +64,11 @@ private:
     
     enum {kNPtBin=6,kNCut=18};
     Int_t ptbin(float pt);
+
+    Int_t mBBCCut1=0;
+    Int_t mBBCCut2=0;
+    Int_t mBBCCut3=0;
+    Int_t mBBCCut4=0;
 
     TH1F* mBC=0;
     TH1F* mBBC=0;
@@ -102,7 +111,7 @@ private:
     TTree* mChain=0;
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.3 2016/10/10 19:17:40 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.4 2016/11/17 18:57:23 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsDiPi0,0);
 };

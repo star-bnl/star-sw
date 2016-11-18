@@ -206,15 +206,6 @@ int main(int argc, char *argv[])
 
 		if(print_det[0]) {
 		  if(strcmp(print_det, "tinfo") == 0) {		    
-		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x\n",
-			   evp->seq,
-			   evp->token,
-			   evp->detectors,
-			   evp->daqbits64_l1,
-			   evp->daqbits64_l2,
-			   evp->daqbits64,
-			   evp->evpgroups,
-			   evp->flags);
 
 		    tinfo_doer(evp, "tinfo");
 		  }
@@ -1548,39 +1539,63 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 
 static int tinfo_doer(daqReader *rdr, const char *do_print)
 {
-  int found = 0;
+    int found = 0;
 
-  daq_dta *dd = rdr->det("trg")->get("raw") ;
-  if(dd) {
-    if(dd->iterate()) {
-      found = 1;
+    daq_dta *dd = rdr->det("trg")->get("raw") ;
+    if(dd) {
+	if(dd->iterate()) {
+	    found = 1;
 
-//      int sz = dd->get_size_t();
-      TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
+	    //      int sz = dd->get_size_t();
+	    TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
 
-//      EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
-      TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
-      L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
+	    EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
 
-      printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
-      printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
-      for(int i=0;i<64;i++) {
-	printf("L2Result[%d]=0x%x\n",i,swap32(trgSum->L2Result[i]));
-      }
-      for(int i=0;i<8;i++) {
-	printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
-      }
-      printf("ids: ");
-      for(int i=0;i<64;i++) {
-	  if(rdr->daqbits64 & (1ll << i)) {
-	      printf("{%d}",rdr->getOfflineId(i));
-	  }
-      }
-      printf("\n");
+	    int trgDetMask = swap16(evtDesc->trgDetMask);
+      
+	    int pre = swap16(evtDesc->npre);
+	    int post = swap16(evtDesc->npost);
+	    int res1 = swap16(evtDesc->res1);
+      
+	    int trgCrateMask =  (res1 & 0xfff0) << 20 | (post & 0xfff0) << 8 | (pre & 0xfff0) >> 4;
+      
+            printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x\n",
+		   rdr->seq,
+		   rdr->token,
+		   rdr->detectors,
+		   rdr->daqbits64_l1,
+		   rdr->daqbits64_l2,
+		   rdr->daqbits64,
+		   rdr->evpgroups,
+		   rdr->flags,
+		   trgDetMask,
+		   trgCrateMask);
+
+	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
+	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
+
+	    printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
+	    printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
+	    for(int i=0;i<64;i++) {
+		printf("L2Result[%d]=0x%x\n",i,swap32(trgSum->L2Result[i]));
+	    }
+	    for(int i=0;i<8;i++) {
+		printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
+	    }
+	    printf("ids: ");
+	    for(int i=0;i<64;i++) {
+		if(rdr->daqbits64 & (1ll << i)) {
+		    printf("{%d}",rdr->getOfflineId(i));
+		}
+	    }
+	    printf("\n");
+
+
+      
+	}
     }
-  }
   
-  return found;
+    return found;
 }
 
 

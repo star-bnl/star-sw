@@ -191,26 +191,26 @@ if ($?STAR_LEVEL == 0) setenv STAR_LEVEL pro
 if ( $?DECHO) echo "$self :: Setting STAR_VERSION"
 
 setenv STAR_VERSION ${STAR_LEVEL}
-if ($STAR_LEVEL  == "old" || $STAR_LEVEL  == "pro" || $STAR_LEVEL  == "new" || $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev") then
-  # i.e. replace with link value instead
-  if ( $?DECHO ) echo "$self :: Will test -e $STAR_PATH/${STAR_LEVEL}"
-  # exit
-
-  if( -e $STAR_PATH/${STAR_LEVEL}) then
-    # be carefull, it may not be "seen" as a soft link
-    # at all ... Some AFS client do not show the link.
-    # No even speaking of absolute path ...
-    if ( $?DECHO ) echo "$self :: Will ls -ld $STAR_PATH/${STAR_LEVEL}"
-    set a = `ls -ld $STAR_PATH/${STAR_LEVEL}`
-    set b = `ls -ld $STAR_PATH/${STAR_LEVEL} | cut -f2 -d">"`
-    if ( $?DECHO ) echo "$self :: Checked $a $b"
-    if ( "$a" != "$b") then
-	setenv STAR_VERSION $b
-    else
-	setenv STAR_VERSION $STAR_LEVEL
-    endif
-  endif
-endif
+#if ($STAR_LEVEL  == "old" || $STAR_LEVEL  == "pro" || $STAR_LEVEL  == "new" || $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev") then
+#  # i.e. replace with link value instead
+#  if ( $?DECHO ) echo "$self :: Will test -e $STAR_PATH/${STAR_LEVEL}"
+#  # exit
+#
+#  if( -e $STAR_PATH/${STAR_LEVEL}) then
+#    # be carefull, it may not be "seen" as a soft link
+#    # at all ... Some AFS client do not show the link.
+#    # No even speaking of absolute path ...
+#    if ( $?DECHO ) echo "$self :: Will ls -ld $STAR_PATH/${STAR_LEVEL}"
+#    set a = `ls -ld $STAR_PATH/${STAR_LEVEL}`
+#    set b = `ls -ld $STAR_PATH/${STAR_LEVEL} | cut -f2 -d">"`
+#    if ( $?DECHO ) echo "$self :: Checked $a $b"
+#    if ( "$a" != "$b") then
+#	setenv STAR_VERSION $b
+#    else
+#	setenv STAR_VERSION $STAR_LEVEL
+#    endif
+#  endif
+#endif
   if ( $?DECHO ) echo "$self :: Will test -e $STAR_PATH/${STAR_LEVEL}"
 
 

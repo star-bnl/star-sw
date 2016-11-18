@@ -1,8 +1,11 @@
 // \class StFmsDiPi0
 // \author Akio Ogawa
 //
-//  $Id: StFmsDiPi0.cxx,v 1.3 2016/10/10 19:17:40 akio Exp $
+//  $Id: StFmsDiPi0.cxx,v 1.4 2016/11/17 18:57:23 akio Exp $
 //  $Log: StFmsDiPi0.cxx,v $
+//  Revision 1.4  2016/11/17 18:57:23  akio
+//  Many updates
+//
 //  Revision 1.3  2016/10/10 19:17:40  akio
 //  *** empty log message ***
 //
@@ -55,10 +58,6 @@ const float ZggCut=0.7;
 const float MassCut0=0.07;
 const float MassCut1=0.2;
 const float MassCut2=0.35;
-const float BBCCut1= 3000.0;
-const float BBCCut2=20000.0;
-const float BBCCut3=30000.0;
-const float BBCCut4=40000.0;
 
 static const int NTRG=12;  //123=FMS-sm-bs123,456=FMS-lg-bs123,7=FMS-DiBS,8910=FMS-JP012,11=FMS-DiJP,13=LED                              
 static const char *CTRG[NTRG] = {"SmBS1","SmBS2","SmBS3","LgBS1",
@@ -234,6 +233,7 @@ Int_t StFmsDiPi0::Make(){
     int ag=0, bbcEsum=0, zdce=0, bbcmult=0, tofmul1=0, tofmul2=0, bsTrg=0, bsSTrg=0, bsLTrg=0, jetTrg=0, doubleTrg=0;
     int bunch=-1, trigger=-1;
     
+    //LOG_INFO << "BBCCuts = " << mBBCCut1 <<" " << mBBCCut2 <<" "<< mBBCCut3 <<" "<< mBBCCut4 <<" "<<endm;
     if(mPythia==1){
 	bsTrg=1;
     }else{
@@ -442,11 +442,11 @@ Int_t StFmsDiPi0::Make(){
 			cut1[1]=1;
 			if(exclusive1==1){
 			    cut1[2]=1;
-			    if     (bbcEsum<BBCCut1) {cut1[3]=1;}
-			    else if(bbcEsum<BBCCut2) {cut1[4]=1;}
-			    else if(bbcEsum<BBCCut3) {cut1[5]=1;}
-			    else if(bbcEsum<BBCCut4) {cut1[15]=1;}
-			    else                     {cut1[16]=1;}
+			    if     (bbcEsum<mBBCCut1) {cut1[3]=1;}
+			    else if(bbcEsum<mBBCCut2) {cut1[4]=1;}
+			    else if(bbcEsum<mBBCCut3) {cut1[5]=1;}
+			    else if(bbcEsum<mBBCCut4) {cut1[15]=1;}
+			    else                      {cut1[16]=1;}
 			}
 		    }
 		}
@@ -514,11 +514,11 @@ Int_t StFmsDiPi0::Make(){
 			    cut2[1]=1;
 			    if(exc1==1){
 				cut2[2]=1;
-				if     (bbcEsum<BBCCut1) {cut2[3]=1;}
-				else if(bbcEsum<BBCCut2) {cut2[4]=1;}
-				else if(bbcEsum<BBCCut3) {cut2[5]=1;}
-				else if(bbcEsum<BBCCut4) {cut2[15]=1;}
-				else                     {cut2[16]=1;}
+				if     (bbcEsum<mBBCCut1) {cut2[3]=1;}
+				else if(bbcEsum<mBBCCut2) {cut2[4]=1;}
+				else if(bbcEsum<mBBCCut3) {cut2[5]=1;}
+				else if(bbcEsum<mBBCCut4) {cut2[15]=1;}
+				else                      {cut2[16]=1;}
 			    }
 			}
 		    }
