@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.19 2016/06/08 19:58:03 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.20 2016/11/21 16:51:20 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.20  2016/11/21 16:51:20  akio
+ * Avoiding crash when FPS DB is not there
+ *
  * Revision 1.19  2016/06/08 19:58:03  akio
  * Applying Coverity report
  *
@@ -1035,12 +1038,12 @@ void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
 
 }
 
-inline Int_t StFmsDbMaker::fpsNQuad()     {return mFpsConstant->nQuad;}
-inline Int_t StFmsDbMaker::fpsNLayer()    {return mFpsConstant->nLayer;}
-inline Int_t StFmsDbMaker::fpsMaxSlat()   {return mFpsConstant->maxSlat;}
-inline Int_t StFmsDbMaker::fpsMaxQTaddr() {return mFpsConstant->maxQTaddr;}
-inline Int_t StFmsDbMaker::fpsMaxQTch()   {return mFpsConstant->maxQTch;}
-inline Int_t StFmsDbMaker::fpsMaxSlatId() {return mMaxSlatId;}
+inline Int_t StFmsDbMaker::fpsNQuad()     {if(mFpsConstant) {return mFpsConstant->nQuad;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsNLayer()    {if(mFpsConstant) {return mFpsConstant->nLayer;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxSlat()   {if(mFpsConstant) {return mFpsConstant->maxSlat;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxQTaddr() {if(mFpsConstant) {return mFpsConstant->maxQTaddr;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxQTch()   {if(mFpsConstant) {return mFpsConstant->maxQTch;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpsNSlat(int quad, int layer) {
   if(quad>0 && quad<fpsNQuad() && layer>0 && layer<fpsNLayer()) return mFpsChannelGeometry[quad-1][layer-1].nslat;
