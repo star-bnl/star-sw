@@ -324,7 +324,7 @@ C
          nr4 = nrr
          if (nr3 > 0) nr4 = nr3
          write(line,995)cblank(1:nlevel),pname(1:np),mother(1:nmother),
-     +      rname(1:nr4),astring(1:nci), creals(1:ncr), 
+     +      gname(1:nr4),astring(1:nci), creals(1:ncr), 
      +      pname(1:np), rname(1:nrr)
  995    format(a,'TGeoVolume *',a,' = ',a,'->Divide("',a,'",',a,a,'); '
      + ,a,'->SetTitle("',a,'");')
