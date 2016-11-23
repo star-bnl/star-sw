@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.19 2016/06/08 19:58:03 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.21 2016/11/22 18:23:32 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,12 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.21  2016/11/22 18:23:32  akio
+ * added getLorentzVector to take into account beamline angles/offsets for pt calc
+ *
+ * Revision 1.20  2016/11/21 16:51:20  akio
+ * Avoiding crash when FPS DB is not there
+ *
  * Revision 1.19  2016/06/08 19:58:03  akio
  * Applying Coverity report
  *
@@ -83,6 +89,7 @@
 #include "tables/St_fpsMap_Table.h"
 #include "tables/St_fpsGain_Table.h"
 #include "tables/St_fpsStatus_Table.h"
+#include "tables/St_vertexSeed_Table.h"
 
 #include "getCellPosition2015pp.h"
 #include "getCellPosition2015pA.h"
@@ -1035,12 +1042,12 @@ void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
 
 }
 
-inline Int_t StFmsDbMaker::fpsNQuad()     {return mFpsConstant->nQuad;}
-inline Int_t StFmsDbMaker::fpsNLayer()    {return mFpsConstant->nLayer;}
-inline Int_t StFmsDbMaker::fpsMaxSlat()   {return mFpsConstant->maxSlat;}
-inline Int_t StFmsDbMaker::fpsMaxQTaddr() {return mFpsConstant->maxQTaddr;}
-inline Int_t StFmsDbMaker::fpsMaxQTch()   {return mFpsConstant->maxQTch;}
-inline Int_t StFmsDbMaker::fpsMaxSlatId() {return mMaxSlatId;}
+inline Int_t StFmsDbMaker::fpsNQuad()     {if(mFpsConstant) {return mFpsConstant->nQuad;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsNLayer()    {if(mFpsConstant) {return mFpsConstant->nLayer;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxSlat()   {if(mFpsConstant) {return mFpsConstant->maxSlat;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxQTaddr() {if(mFpsConstant) {return mFpsConstant->maxQTaddr;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxQTch()   {if(mFpsConstant) {return mFpsConstant->maxQTch;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpsNSlat(int quad, int layer) {
   if(quad>0 && quad<fpsNQuad() && layer>0 && layer<fpsNLayer()) return mFpsChannelGeometry[quad-1][layer-1].nslat;
@@ -1328,3 +1335,43 @@ Float_t StFmsDbMaker::distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge
     return -1.0;
 }
 
+StLorentzVectorF StFmsDbMaker::getLorentzVector(const StThreeVectorF& xyz, Float_t energy){
+    // Calculate a 4 momentum from a direction/momentum vector and energy assuming zero mass i.e. E =p
+    // Taking into account beamline offsets and angles from DB
+    TDataSet* dbDataSet = GetChain()->GetDataBase("Calibrations/rhic/vertexSeed");
+    if(dbDataSet){
+	vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
+	if(vSeed){    
+	    double Vx    = vSeed->x0;
+	    double Vy    = vSeed->y0;
+	    double Vdxdz = vSeed->dxdz;
+	    double Vdydz = vSeed->dydz;
+	    //Vdxdz = -0.01;
+	    //Vdydz = -0.01;
+	    double thetaX = TMath::ATan( Vdxdz );
+	    double thetaY = TMath::ATan( Vdydz );
+	    StThreeVectorF xyznew(xyz.x()-Vx,xyz.y()-Vy,xyz.z());
+	    xyznew.rotateX(+thetaY); 
+	    xyznew.rotateY(-thetaX);
+	    /*
+	    if(1){
+		LOG_INFO << Form("vx=%6.3f vy=%6.3f dxdz=%8.5f dydz=%8.5f",Vx,Vy,Vdxdz,Vdydz) <<endm;
+		LOG_INFO << Form("old px=%6.3f py=%6.3f pz=%6.3f",xyz.x(),xyz.y(),xyz.z()) <<endm;
+		LOG_INFO << Form("new px=%6.3f py=%6.3f pz=%6.3f",xyznew.x(),xyznew.y(),xyznew.z()) <<endm;
+	    }
+	    
+	    //With both dxdz=dydz=-0.01, positive x/y should get larger since beamline is pointing negative x/y at +z
+	    //  StFmsPointMaker:INFO  - vx= 0.096 vy=-0.272 dxdz=-0.01000 dydz=-0.01000
+	    //  StFmsPointMaker:INFO  - old px=26.820 py=61.350 pz=733.800
+	    //  StFmsPointMaker:INFO  - new px=34.054 py=68.957 pz=732.843
+	    //So... rotateX(+thetaY); and rotateY(-thetaX) is correct!?!
+
+	    */
+	    StThreeVectorF mom3 = xyznew.unit() * energy;
+	    return StLorentzVectorF(mom3, energy);
+	}
+    }    
+    //no beamline from DB. Just assume no offsets/angles
+    StThreeVectorF mom3 = xyz.unit() * energy;  // Momentum vector with m = 0                                                                                 
+    return StLorentzVectorF(mom3, energy);
+}

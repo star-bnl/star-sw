@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.13 2016/06/08 19:58:03 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.14 2016/11/22 18:23:32 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.14  2016/11/22 18:23:32  akio
+ * added getLorentzVector to take into account beamline angles/offsets for pt calc
+ *
  * Revision 1.13  2016/06/08 19:58:03  akio
  * Applying Coverity report
  *
@@ -52,6 +55,7 @@
 #include "StMaker.h"
 #endif
 #include "StThreeVectorF.hh"
+#include "StLorentzVectorF.hh"
 #include "StRoot/StFmsUtil/StFmsDbConfig.h"
 
 struct fmsDetectorPosition_st;
@@ -131,7 +135,8 @@ class StFmsDbMaker : public StMaker {
   StThreeVectorF getStarXYZ(Int_t detectorId,Int_t ch);                     //! get the STAR frame cooridnates for center of the cell
   Float_t getPhi(Int_t detectorId,Float_t FmsX, Float_t FmsY);              //! get the STAR frame phi angle from from local X/Y [cm]
   Float_t getEta(Int_t detectorId,Float_t FmsX, Float_t FmsY, Float_t Vertex); //! get the STAR frame pseudo rapidity from the vertex from local X/Y [cm]
-  
+  StLorentzVectorF getLorentzVector(const StThreeVectorF& xyz, Float_t energy); //! get 4 vector assuing m=0 and taking beamline from DB
+
   // Distance(unit is incell space) from edge for given local X/Y [cm] for fiducial volume cut                        
   // return negative distance if inside, positive outside
   // edge: 0=well inside (more than 1 cell)

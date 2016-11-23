@@ -464,8 +464,7 @@ static int nCall = 0; nCall++;
 //______________________________________________________________________________
 int StvKNSeedSelector::Zelect()
 {
-
-
+return 0;
 }
 #if 1
 #include "TSystem.h"
