@@ -231,7 +231,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2017","","","TpcRS,TpxClu,y2017,useXgeom,FieldOn,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devT","","","TpcRS,TpxClu,devT,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devT","","","TpcRS,TpxClu,dev2019,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.devTA","","","TpcRS,TpxClu,devTA,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
