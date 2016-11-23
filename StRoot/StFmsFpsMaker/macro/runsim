@@ -1,0 +1,39 @@
+#!/bin/csh 
+set nev=$1
+set run=$2
+set particle=$3
+set outdir=$4
+
+echo particle=$particle nev=$nev run=$run outdir=$outdir
+
+#stardev
+set dir=$cwd
+set sys=$STAR_HOST_SYS
+set tmpdir=/tmp/akio/fms2015
+
+if ( ! -e $tmpdir ) then
+  mkdir -p $tmpdir
+endif
+cd $tmpdir
+
+if ( ! -e .$sys ) then
+  ln -s $dir/.$sys 
+endif
+
+if ( ! -e runSimFlat.C) then
+  ln -s $dir/runSimFlat.C
+endif
+
+if ( ! -e FmsGain.txt) then
+  ln -s $dir/FmsGain.txt 
+endif
+
+echo root4star -b -q 'runSimFlat.C('$nev','$run',"'$particle'")'
+root4star -b -q 'runSimFlat.C('$nev','$run',"'$particle'")'
+
+set fzd=test_{$particle}_run$run.fzd
+echo moving $tmpdir/$fzd to $dir/$outdir/
+ls -ltra 
+/bin/mv $fzd $dir/$outdir/
+/bin/rm test_{$particle}_run$run.*
+

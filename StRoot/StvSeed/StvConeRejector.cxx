@@ -61,7 +61,7 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
 
     mDir[0]= mPos[0]*norQ;
     mDir[1]= mPos[1]*norQ;
-    mDir[2]= mPos[2]*norQ -kZRange*(norR-norL);
+    mDir[2]= mPos[2]*norQ +kZRange*(norR-norL);
     norQ = 1./sqrt(mDir[0]*mDir[0]+mDir[1]*mDir[1]+mDir[2]*mDir[2]);
     for (int i=0;i<3;i++) {mDir[i]*=(-norQ);}
     mThet = (mR2 -(kZRange*kZRange))*norL*norR;

@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.10 2016/06/07 15:51:43 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.11 2016/11/22 18:24:34 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.11  2016/11/22 18:24:34  akio
+// Using StFmsDbMaker::getLorentzVector for correct momentum calcuration based on beamline angles/offsets
+//
 // Revision 1.10  2016/06/07 15:51:43  akio
 // Making code better based on Coverity reports
 //
@@ -65,10 +68,10 @@
 namespace {
   // Calculate a 4 momentum from a direction/momentum vector and energy
   // assuming zero mass i.e. E = p
-  StLorentzVectorF compute4Momentum(const StThreeVectorF& xyz, Float_t energy) {
-    StThreeVectorF mom3 = xyz.unit() * energy;  // Momentum vector with m = 0
-    return StLorentzVectorF(mom3, energy);
-  }
+    StLorentzVectorF compute4Momentum(const StThreeVectorF& xyz, Float_t energy) {
+	StThreeVectorF mom3 = xyz.unit() * energy;  // Momentum vector with m = 0
+	return StLorentzVectorF(mom3, energy);
+    }
 }  // unnamed namespace
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
@@ -233,7 +236,8 @@ bool StFmsPointMaker::processTowerCluster(
   cluster->setId(200*(det-kFmsNorthLargeDetId) + mFmsCollection->numberOfPoints());
   // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(det,cluster->x(),cluster->y());
-  cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
+  //cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
+  cluster->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,cluster->energy()));
   // Save photons reconstructed from this cluster
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
       StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
@@ -286,7 +290,7 @@ StFmsPoint* StFmsPointMaker::makeFmsPoint(
   // Convert to global STAR coordinates for StFmsPoint  
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZ(det,x,y);
   point->setXYZ(xyz);  //This is in STAR global coordinate
-  point->setFourMomentum(compute4Momentum(xyz, point->energy()));
+  point->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,point->energy()));
   return point;
 }
 
@@ -394,7 +398,8 @@ Int_t StFmsPointMaker::readMuDst(){
       StFmsCluster* c = fmscol->clusters()[i];
       if(c){
 	  StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(c->detectorId(),c->x(),c->y());
-	  c->setFourMomentum(compute4Momentum(xyz, c->energy()));
+	  //c->setFourMomentum(compute4Momentum(xyz, c->energy()));
+	  c->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,c->energy()));
       }
   }
   for (unsigned i(0); i < fmscol->numberOfPoints(); ++i) {
@@ -402,7 +407,8 @@ Int_t StFmsPointMaker::readMuDst(){
     if(p){
       StThreeVectorF xyz  = mFmsDbMaker->getStarXYZ(p->detectorId(),p->x(),p->y());
       p->setXYZ(xyz);
-      p->setFourMomentum(compute4Momentum(xyz, p->energy()));
+      //p->setFourMomentum(compute4Momentum(xyz, p->energy()));
+      p->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,p->energy()));
     }
   }
   fmscol->sortPointsByET();

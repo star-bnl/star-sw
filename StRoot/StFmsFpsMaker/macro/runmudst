@@ -1,0 +1,53 @@
+#!/bin/csh 
+set indir=$1
+set file=$2
+set ifile=$3
+set nev=$4
+set outdir=$5
+set merge=$6
+set readmudst=$7
+
+echo file=$indir/$file ifile=$ifile nev=$nev outdir=$outdir merge=$merge readmudst=$readmudst
+
+#stardev
+set dir=$cwd
+set sys=$STAR_HOST_SYS
+set tmpdir=/tmp/akio/fms2015_$outdir
+
+if ( ! -e $outdir) then
+  mkdir $outdir
+endif
+
+if ( ! -e $tmpdir ) then
+  mkdir -p $tmpdir
+endif
+cd $tmpdir
+
+if ( ! -e .$sys ) then
+  ln -s $dir/.$sys 
+endif
+
+if ( ! -e runMudst.C) then
+  ln -s $dir/runMudst.C
+endif
+
+#if ( ! -e FmsGain.txt) then
+#  ln -s $dir/FmsGain.txt 
+#endif
+
+if ( ! -e fmsrecpar.txt) then
+  ln -s $dir/fmsrecpar.txt 
+endif
+
+if ( ! -e load.C) then
+  ln -s $dir/load.C
+endif
+
+if ( ! -e $file ) then
+  /bin/cp $indir/$file .
+endif
+
+root4star -b -q 'runMudst.C("'$file'",'$ifile','$nev',"'$outdir'",'$merge','$readmudst')'
+
+set histfile=`echo $file | sed s/MuDst/$ifile.fmsfps/g`;
+cp $histfile $dir/$outdir/
