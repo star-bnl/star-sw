@@ -28,6 +28,10 @@ librhicf.a : $(OBJS)
 
 daq_rhicf.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_rhicf.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_rhicf.o: ../../../../StRoot/RTS/include/daqFormats.h
+daq_rhicf.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
+daq_rhicf.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
+daq_rhicf.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_rhicf.o: ../SFS/sfs_index.h
 daq_rhicf.o: ../SFS/fs_index.h
 daq_rhicf.o: ../SFS/sfs_base.h
