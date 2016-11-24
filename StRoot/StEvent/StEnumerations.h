@@ -270,7 +270,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
-		           kGmtId       = kGmtIdentifier,
+		   kGmtId       = kGmtIdentifier,
                    kMaxDetectorId = 40};
 
 /*!
