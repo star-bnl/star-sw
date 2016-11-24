@@ -173,9 +173,13 @@
 * Attempt to merge all correction together (PN)
 *
 ********************************************************************
-      function g2t_volume_id(Csys,numbv)
-
+#ifndef __G2T_VERSION__
+      integer function g2t_volume_id(Csys,numbv)
  Replace [;ASSERT(#) ! #;] with [;if (.not.#1) { stop 'g2t_volume_id.g: line __LINE__' };];
+#else /* __G2T_VERSION__ */
+      real function g2t_version(Csys)
+#endif /* __G2T_VERSION__ */
+
 
 
 *
@@ -185,10 +189,13 @@
 *              CALB_Nmodule(1) and (2), not on RICH presence !     *
 ********************************************************************
       implicit none
-      integer  g2t_volume_id
-+CDE,gcunit.
+#include "geant321/gcunit.inc"
 * 
+#ifndef __G2T_VERSION__
       Character*3      Csys
+#else /* __G2T_VERSION__ */
+      Character*(*)    Csys
+#endif /* __G2T_VERSION__ */
       Integer          NUMBV(15)
       Integer          i,iWheel,zsubsect,zsublayer,eemc_depth
       Integer          sector_hash(6,2) / 4, 5, 6, 7, 8, 9, 
@@ -261,14 +268,21 @@
 
       logical    first/.true./
       logical    printOnce/.true./
+#ifdef  __STAR_VMC__
+      external getValue
+      real getValue
+#endif /* __STAR_VMC__ */
+      save
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
       if (First) then
           first=.false.
+#ifndef  __STAR_VMC__
           call RBPUSHD
-
+#endif /* ! __STAR_VMC__ */
 *         in simulations done in MDC1 (1998) btog_posit1 was not saved
           btog_posit1 = {32,33}
+#ifndef  __STAR_VMC__
           USE  /DETM/SVTT/SVTG  stat=isvt
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
@@ -283,6 +297,53 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/MUTD/MTDG  stat=imtd
 
           call RBPOPD
+#else /* __STAR_VMC__ */
+      isvt     = getValue('isvt')
+      itpc     = getValue('itpc')
+      ibtf     = getValue('ibtf')
+      ical     = getValue('ical')
+      ivpd     = getValue('ivpd')
+      ieem     = getValue('ieem')
+      istb     = getValue('istb')
+      ifpd     = getValue('ifpd')
+      ifms     = getValue('ifms')
+      ifsc     = getValue('ifsc')
+      imtd     = getValue('imtd')
+      svtg_version      =       getValue('svtg_version')
+      tpcg_version      =       getValue('tpcg_version')
+      tpcg_tpadconfig   =       getValue('tpcg_tpadconfig')
+      vpdg_version      =       getValue('vpdg_version')
+      btog_version      =       getValue('btog_version')
+      btog_choice       =       getValue('btog_choice')
+      btog_posit1(1)    =       getValue('btog_posit1(1)')
+      btog_posit1(2)    =       getValue('btog_posit1(2)')
+      btog_posit2       =       getValue('btog_posit2')
+      btog_posit3       =       getValue('btog_posit3')
+      btog_version      =       getValue('btog_version')
+      calg_version      =       getValue('calg_version')
+      calg_nmodule(1)   =       getValue('calg_nmodule(1)')
+      calg_nmodule(2)   =       getValue('calg_nmodule(2)')
+      calg_netaT        =       getValue('calg_netaT')
+      calg_maxmodule    =       getValue('calg_maxmodule')
+      calg_nsub         =       getValue('calg_nsub')
+      calg_netasmdp     =       getValue('calg_netasmdp')
+      calg_nphistr      =       getValue('calg_nphistr')
+      calg_netfirst     =       getValue('calg_netfirst')
+      calg_netsecon     =       getValue('calg_netsecon')
+      emcg_version      =       getValue('emcg_version')
+      emcg_onoff        =       getValue('emcg_onoff')
+      emcg_fillmode     =       getValue('emcg_fillmode')
+      ismg_layer        =       getValue('ismg_layer')
+      ismg_rin          =       getValue('ismg_rin')
+      ismg_rout         =       getValue('ismg_rout')
+      ismg_totallength  =       getValue('ismg_totallength')
+      ismg_code         =       getValue('ismg_code')
+      fmcg_version      =       getValue('fmcg_version')
+      fpdg_version      =       getValue('fpdg_version')
+      fscg_version      =       getValue('fscg_version')
+      mtdg_version      =       getValue('mtdg_version')
+        
+#endif /* ! __STAR_VMC__ */
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ivpd>=0) print *,'              : VPD version =',vpdg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
@@ -294,6 +355,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+#ifndef __G2T_VERSION__
 
 
           """ Intialize TPADs based on TPC version """
@@ -302,7 +364,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           npada = 0
           if (TPCG_tpadconfig>0 "Inner TPC upgrade 40 pads") {
             npadi = 40 "inner"
-          endif
+          }
 	  if (npadi .gt. 0) then 
 	    npada = npadi + npado
             nbpads = npadi  "inner" + npado "outer" + 4 "edge/fake"
@@ -674,7 +736,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * PN, MAX:
 *      OnOff    = (0..3)  -  East-West config:  0-none,            1 - west,     2-east,   3-both
 *      FillMode = (1..3)  -  Sectors fill mode: 1- one 3rd filled, 2 - one half, 3 - full
+#else /* __G2T_VERSION__ */
+      endif	
+#endif /* __G2T_VERSION__ */
 *
+#ifndef __G2T_VERSION__
  
 	if (cd=='ESCI') then
 
@@ -1032,7 +1098,54 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
     g2t_volume_id = volume_id
+#else /* __G2T_VERSION__ */
+      g2t_version = 0
+      if (csys == 'isvt')            g2t_version = isvt
+      if (csys == 'itpc')            g2t_version = itpc
+      if (csys == 'ibtf')            g2t_version = ibtf
+      if (csys == 'ical')            g2t_version = ical
+      if (csys == 'ivpd')            g2t_version = ivpd
+      if (csys == 'ieem')            g2t_version = ieem
+      if (csys == 'istb')            g2t_version = istb
+      if (csys == 'ifpd')            g2t_version = ifpd
+      if (csys == 'ifms')            g2t_version = ifms
+      if (csys == 'ifsc')            g2t_version = ifsc
+      if (csys == 'imtd')            g2t_version = imtd
 
+      if (csys == 'svtg_version')    g2t_version = svtg_version
+      if (csys == 'tpcg_version')    g2t_version = tpcg_version
+      if (csys == 'tpcg_tpadconfig') g2t_version = tpcg_tpadconfig
+      if (csys == 'vpdg_version')    g2t_version = vpdg_version
+      if (csys == 'btog_version')    g2t_version = btog_version
+      if (csys == 'btog_choice')     g2t_version = btog_choice
+      if (csys == 'btog_posit1(1)')  g2t_version = btog_posit1(1)
+      if (csys == 'btog_posit1(2)')  g2t_version = btog_posit1(2)
+      if (csys == 'btog_posit2')     g2t_version = btog_posit2
+      if (csys == 'btog_posit3')     g2t_version = btog_posit3
+      if (csys == 'btog_version')    g2t_version = btog_version
+      if (csys == 'calg_version')    g2t_version = calg_version
+      if (csys == 'calg_nmodule(1)') g2t_version = calg_nmodule(1)
+      if (csys == 'calg_nmodule(2)') g2t_version = calg_nmodule(2)
+      if (csys == 'calg_netaT')      g2t_version = calg_netaT
+      if (csys == 'calg_maxmodule')  g2t_version = calg_maxmodule
+      if (csys == 'calg_nsub')       g2t_version = calg_nsub
+      if (csys == 'calg_netasmdp')   g2t_version = calg_netasmdp
+      if (csys == 'calg_nphistr')    g2t_version = calg_nphistr
+      if (csys == 'calg_netfirst')   g2t_version = calg_netfirst
+      if (csys == 'calg_netsecon')   g2t_version = calg_netsecon
+      if (csys == 'emcg_version')    g2t_version = emcg_version
+      if (csys == 'emcg_onoff')      g2t_version = emcg_onoff
+      if (csys == 'emcg_fillmode')   g2t_version = emcg_fillmode
+      if (csys == 'emcg_version')    g2t_version = emcg_version
+      if (csys == 'ismg_layer')      g2t_version = ismg_layer
+      if (csys == 'ismg_rin')        g2t_version = ismg_rin
+      if (csys == 'ismg_rout')       g2t_version = ismg_rout
+      if (csys == 'ismg_totallength')g2t_version = ismg_totallength
+      if (csys == 'ismg_code')       g2t_version = ismg_code
 
-    end
-      
+      if (csys == 'fmcg_version')    g2t_version = fmcg_version
+      if (csys == 'fpdg_version')    g2t_version = fpdg_version
+      if (csys == 'fscg_version')    g2t_version = fscg_version
+      if (csys == 'mtdg_version')    g2t_version = mtdg_version
+#endif /* __G2T_VERSION__ */
+      end      

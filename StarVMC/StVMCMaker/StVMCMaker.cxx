@@ -73,29 +73,44 @@ StVMCMaker::Init()
    ->                        fMcHits->Init(); // hit description
    ->    gMC->BuildPhysics(); 
 ----------------
+StVMCMaker::InitRun()
+----------------
+   ->    StarVMCApplication::InitMC
+   ->      TGeant3::Init
+   ->        StarVMCApplication::InitGeometry
+   ->          StarMCHits::Init
+   ->            StarVMCDetectorSet::instance
+   ->              StarVMCDetectorSet::StarVMCDetectorSet
+   ->                StarVMCDetectorSet::Init
+   ->                  StarVMCDetectorSet::MakeDetectorDescriptors
+   ->                    StarVMCDetectorSet::LoopOverTgeo
+----------------
 StVMCMaker::Make
 ----------------
-   appl->RunMC(1);
-   ->    gMC->ProcessRun(1)
-   ->                  appl->BeginEvent();
-   ->                  ProcessEvent();
-   ->                    Gtrigi();
-   ->                    Gtrigc();
-   ->                    Gtrig();
-   ->                      appl->GeneratePrimaries();             // gukine
+   StarVMCApplication::RunMC(1);
+   ->    TGeant3::ProcessRun(1)
+   ->                  StarVMCApplication::BeginEvent();
+   ->                  TGeant3::ProcessEvent();
+   ->                    TGeant3::Gtrigi();
+   ->                    TGeant3::Gtrigc();
+   ->                    TGeant3::Gtrig();
+   ->                      StarVMCApplication::GeneratePrimaries();             // gukine
    ->                      gtreveroot();
-   ->                               appl->Field(xdouble,bdouble); // gufld
-   ->                               appl->PreTrack();
-   ->                               g3track();
-   ->                                   appl->Stepping();         // gustep
-   ->                                       hits->Step();
-   ->                                         fill fHit
-   ->                                         FillG2Table();
+   ->                        gutrack();
+   ->                               StarVMCApplication::Field(xdouble,bdouble); // gufld
+   ->                               StarVMCApplication::PreTrack();
+   ->                          g3track();
+   ->                            gustep();
+   ->                                   StarVMCApplication::Stepping();         // gustep
+   ->                                       StarMCHits::Step();
+   ->                                         StarMCHits::FillG2Table();
+   ->                                           StarVMCDetector::GetVolumeId();
+   ->                                              StarVMCDetector::GetNumbv  
    ->                                            fCurrentDetector->GetChair()->Fill(fHit);
    ->                                                   G2TBook[Track]Hit();
    ->                                                   G2TFill[Track]Hit();
-   ->                               appl->PostTrack();
-   ->                  appl->FinishEvent();
+   ->                               StarVMCApplication::PostTrack();
+   ->                  StarVMCApplication::FinishEvent();
    ->                      hits->FinishEvent(); // fill run,event,track tables
 */
 

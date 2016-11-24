@@ -16,6 +16,7 @@ if ($?INPUTFILE8) csh -x $INPUTFILE8
 if ($?INPUTFILE9) csh -x $INPUTFILE9
 -->
          </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/sched$JOBID.log" />
+<!-- <stdout URL="file:/star/u/fisyak/prodlog/sched$JOBID.log" /> -->
+<stdout URL="file:./sched$JOBID.log" />
 <input URL="command:lscsh" />
 </job>
