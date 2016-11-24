@@ -200,9 +200,9 @@ my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath
 #-
 if ( $FC ne 'ifort' and ($DirPath =~ /pams/ and
 			 (#$DirPath =~ /$g77pkgs/ or 
-			  $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/) or $DirPath =~ /StarVMCApplication/)){
+			  $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/) or $DirPath =~ /StarVMCApplication/ or  $DirPath =~ /St_geant_Maker/)){
   $FCCOM    = $env1->{FCviaAGETOFCOM};
-  if ($DirPath =~ /StarVMCApplication/) {
+  if ($DirPath =~ /StarVMCApplication/ or $DirPath =~ /St_geant_Maker/) {
     $FCCOM    = "test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;";
     $FCCOM   .= "cd %>:d; test -f %>:F.for && /bin/rm %>:F.for;";
     $FCCOM   .= "%AGETOF %AGETOFLAGS %<:F.g -o %>:F.for && cd - &&";
