@@ -4,11 +4,13 @@
 
 #include <rtsLog.h>
 #include <rtsSystems.h>
+#include <daqFormats.h>
 
 #include <SFS/sfs_index.h>
 
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
+
 
 #include "daq_rhicf.h"
 
@@ -123,6 +125,11 @@ daq_dta *daq_rhicf::handle_raw(int sec, int rdo)
 	LOG(DBG,"sfs read succeeded") ;
 
 	//I need to skip the 40 byte bankHeader!
+	{
+	daq_trg_word trg ;
+	int ret = get_l2(ptr,size*4,&trg,1) ;
+	LOG(NOTE,"get_l2 returns %d: %d %d %d",ret,trg.trg,trg.daq,trg.t) ;
+	}
 	size -= 40 ;	//bank header
 
 	raw->create(size,"rhicf_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
@@ -157,6 +164,20 @@ int daq_rhicf::get_token(char *addr, int words)
 	return trg[0].t ;
 }
 
+
+
+/*
+	Trigger info is in the bank header crc field as
+
+	0-3	trg_cmd
+	4-7	daq_cmd
+	8-19	token
+	20	star_trigger flag
+	21	star_trgx flag
+	22	star_trg4 flag
+	23	star_busy flag
+*/
+
 // knows how to get a/the L2 command out of the event...
 int daq_rhicf::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 {
@@ -166,14 +187,16 @@ int daq_rhicf::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	static int token ;
 
 	//LOG(TERR,"get_l2") ;
+	struct bankHeader *bh ;
 
-	token++ ;
-	if(token==0) token = 1 ;
-	else if(token>=4096) token = 1 ;
+	bh = (bankHeader *)addr ;
 
-	trg[0].t = token ;
-	trg[0].trg = 4 ;
-	trg[0].daq = 0 ;
+	LOG(NOTE,"Token %d, CRC word 0x%08X, format number 0x%08X",bh->token,bh->crc,bh->format_number) ;
+
+	trg[0].t = bh->crc & 0xFFF ;
+	trg[0].trg = (bh->crc>>16)&0xF ;
+	trg[0].daq = (bh->crc>>12)&0xF ;
+
 	t_cou++ ;
 
 	if(err) {
