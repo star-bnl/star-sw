@@ -1,3 +1,5 @@
 *  starsim -w 1 -b y2005.kumac
-detp geom y2005
-gexec $STAR_LIB/geometry.so
+detp geom y2005h
+  gexec $STAR_LIB/StarMagFieldNoDict.so
+  gexec $STAR_LIB/StarAgmlUtil.so	
+gexec $STAR_LIB/xgeometry.so

@@ -1,0 +1,97 @@
+macro y2017
+*  starsim -w 1 -b y2017.kumac
+  DETP geom y2017  
+#  DETP geom y2017
+* field=-5  hadr_off=1
+  gexec $STAR_LIB/StarMagFieldNoDict.so
+  gexec $STAR_LIB/xgeometry.so
+  gclos all
+  grap/opt grid
+  graphics/set *                   | Reset picture dimensions
+  graphics/set hwid 6              | Width of histogram lines
+  graphics/set bwid 6              | Width of box lines
+  graphics/set pwid 12              | Width of picture lines
+  graphics/set fwid 6              | Width of fit lines
+  satt * seen 1
+return
+macro ycut
+************  Y ************
+ next
+ for/file 67 y2017C-y.eps
+ meta 67 -113
+  title_g 'STAR Wide Angle Hall (y2017)  y-cut = 0'
+  null -2000 2000 -1500 1500
+  atitle 'Z (cm)' 'X (cm)'
+  dcut hall y 0 0 0 1 1
+  close 67
+return
+macro ycutFarAway
+************  Y ************
+  next
+ for/file 67 y2017C-yFarAway.eps
+ meta 67 -113
+  title_g 'STAR Wide Angle Hall (y2017)  y-cut = -390 cm'
+  null -2000 2000 -1500 1500
+  atitle 'Z (cm)' 'X (cm)'
+  dcut hall y -390 0 0 1 1
+  close 67
+return
+macro xcut
+************  X ************
+  next
+  for/file 67 y2017-x.eps
+  meta 67 -113
+  title_g 'STAR Wide Angle Hall (y2017)  x-cut'
+  null 0 400 0 400
+  atitle 'Z (cm)' 'Y (cm)'
+  dcut hall x 0 0 0 1 1
+  close 67
+return
+macro rcut
+************  X ************
+  next
+ for/file 67 y2017-r.eps
+ meta 67 -113
+  title_g 'STAR Wide Angle Hall (y2017)  x-cut = 1 cm'
+  null -2000 2000 0 1500
+* atitle 'Z (cm)' 'R (cm)'
+  dcut hall x 1 0 0 1 1
+ close 67
+return
+macro zcut 
+************  Z ************
+  next
+ for/file 67 y2017-z.eps
+ meta 67 -113
+  title_g 'STAR Wide Angle Hall (y2017)  z-cut = 1 cm'
+  null -600 600 -600 600
+  atitle 'X (cm)' 'Y (cm)'
+  dcut hall z 1 0 0 1 1
+ close 67
+return
+macro zcut2 
+************  Z ************
+  next
+ for/file 67 y2017-z2.eps
+ meta 67 -113
+  title_g 'STAR Wide Angle Hall (y2017)  z-cut = 53 cm'
+  null -600 600 -600 600
+  atitle 'X (cm)' 'Y (cm)'
+  dcut hall z 53 0 0 1 1
+ close 67
+*null -1000 1000 -1000 1000   
+*dcut hall z 0 0 0 1 1
+*null -30 30 260 300   
+*dcut mcse x -10 0 0 1 1
+*null 0 500 -10 10 
+*dcut hall x 0 0 0 1 1
+return
+******** plots ******
+macro plots
+exec ycut
+exec ycutFarAway
+exec xcut
+exec rcut
+exec zcut
+exec zcut2
+return

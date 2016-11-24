@@ -5,21 +5,30 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // This basic chair provides the custom methods for all hits
 ///////////////////////////////////////////////////////////////////////////////////
-//#include "tables/St_g2t_hits_Table.h"
-#include "tables/St_g2t_ctf_hit_Table.h"
-#include "tables/St_g2t_emc_hit_Table.h"
-#include "tables/St_g2t_fgt_hit_Table.h"
-#include "tables/St_g2t_ftp_hit_Table.h"
-#include "tables/St_g2t_gem_hit_Table.h"
-#include "tables/St_g2t_ist_hit_Table.h"
-#include "tables/St_g2t_mwc_hit_Table.h"
-#include "tables/St_g2t_pix_hit_Table.h"
-#include "tables/St_g2t_pmd_hit_Table.h"
-#include "tables/St_g2t_rch_hit_Table.h"
-#include "tables/St_g2t_ssd_hit_Table.h"
-#include "tables/St_g2t_svt_hit_Table.h"
-#include "tables/St_g2t_tpc_hit_Table.h"
-#include "tables/St_g2t_vpd_hit_Table.h"
+
+#include "tables/St_g2t_hits_Table.h"
+#include "tables/St_g2t_ctf_hit_Table.h"  /* Done */
+#include "tables/St_g2t_emc_hit_Table.h"  /* Done */
+#include "tables/St_g2t_epd_hit_Table.h"
+#include "tables/St_g2t_etr_hit_Table.h"
+#include "tables/St_g2t_fgt_hit_Table.h"  /* Done */
+#include "tables/St_g2t_fst_hit_Table.h"
+#include "tables/St_g2t_ftp_hit_Table.h"  /* Done */
+#include "tables/St_g2t_fts_hit_Table.h"
+#include "tables/St_g2t_gem_hit_Table.h"  /* Done */
+#include "tables/St_g2t_hpd_hit_Table.h"
+#include "tables/St_g2t_igt_hit_Table.h"
+#include "tables/St_g2t_ist_hit_Table.h"  /* Done */
+#include "tables/St_g2t_mtd_hit_Table.h"
+#include "tables/St_g2t_mwc_hit_Table.h"  /* Done */
+#include "tables/St_g2t_pix_hit_Table.h"  /* Done */
+#include "tables/St_g2t_pmd_hit_Table.h"  /* Done */
+#include "tables/St_g2t_rch_hit_Table.h"  /* Done */
+#include "tables/St_g2t_ssd_hit_Table.h"  /* Done */
+#include "tables/St_g2t_svt_hit_Table.h"  /* Done */
+#include "tables/St_g2t_tpc_hit_Table.h"  /* Done */
+#include "tables/St_g2t_vpd_hit_Table.h"  /* Done */
+
 #include "StarHitVector.h"
 class St_g2t_Chair : public TChair {
  public:
@@ -46,6 +55,14 @@ class St_g2t_Chair : public TChair {
  protected:
   static  Int_t           fDebug;
   ClassDef(St_g2t_Chair,1)
+};
+class St_g2t_hitsC : public St_g2t_Chair	{    
+ public: 
+  St_g2t_hitsC(TTable *table=0): St_g2t_Chair(table) {}
+  virtual ~St_g2t_hitsC() {}
+  virtual void    Fill(GHit_t &vect); 
+  ClassDefChair(St_g2t_hits,g2t_hits_st)
+  ClassDef(St_g2t_hitsC,1)
 };
 class St_g2t_ctf_hitC : public St_g2t_Chair	{    
  public: 

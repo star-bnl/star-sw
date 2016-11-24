@@ -216,7 +216,7 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
       }
       TGeoRCExtension *ext = new TGeoRCExtension(det);
       vol->SetUserExtension(ext);
-      cout << "Create TGeoExtension for volume" << vol->GetName() 
+      cout << "Create TGeoExtension for volume " << vol->GetName() 
 	   << " with detector " << det->GetName() << endl;
     }
     TObjString *objs;

@@ -7,6 +7,16 @@
 #include "TMath.h"
 #include "TClass.h"
 #include "TROOT.h"
+#include "TCallf77.h"
+#include "TEnv.h"
+//______________________________________________________________________
+extern "C"
+{
+  Int_t type_of_call g2t_volume_id_(DEFCHARD, Int_t * DEFCHARL); 
+  Int_t type_of_call StarVMCDetector::g2t_volume_id(const Char_t *det, Int_t *numbv) 
+  {return g2t_volume_id_(PASSCHARD(det), numbv PASSCHARL(det));}
+  Float_t type_of_call getvalue_(const Char_t *parN) { TString par(parN,sizeof(parN)); return gEnv->GetValue(par, 0.);}
+}
 ClassImp(StarVMCDetector);
 //________________________________________________________________________________
 StarVMCDetector::StarVMCDetector(const Char_t *name) : TDataSet(name), fId(kUnknownId), 
@@ -199,6 +209,7 @@ void StarVMCDetector::SetNVmax(Int_t N, Int_t *array) {
 }
 //________________________________________________________________________________
 Int_t StarVMCDetector::GetVolumeIdFromNubv(Int_t *numbv) {
+#if 0
   Int_t N = fNVmax.GetSize();  
   Int_t VolumeID = 0;
   switch (fId) {
@@ -210,7 +221,12 @@ Int_t StarVMCDetector::GetVolumeIdFromNubv(Int_t *numbv) {
   for (Int_t n = 0; n < N; n++) {
     VolumeID += fN10[n]*numbv[n];
   }
+  Int_t volume_id = g2t_volume_id(Detectors[fK].Csys, numbv);
+  assert(VolumeID == volume_id);
   return VolumeID;
+#else
+  return g2t_volume_id(Detectors[fK].Csys, numbv);
+#endif
 }
 //________________________________________________________________________________
 void StarVMCDetector::GetNumbvFromVolueId(Int_t VolumeID, Int_t *numbv) {
@@ -227,6 +243,7 @@ void StarVMCDetector::GetNumbvFromVolueId(Int_t VolumeID, Int_t *numbv) {
     }
   }
 }
+#if 0
 //________________________________________________________________________________
 Int_t StarVMCDetector::TpcVolumeId(Int_t N, Int_t *Numbv) {
   // HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[146]
@@ -419,7 +436,6 @@ Int_t StarVMCDetector::CtbVolumeId(Int_t N, Int_t *Numbv) {
   Int_t VolumeId = 1000*Numbv[0]+100*Numbv[2]+Numbv[1];
   return VolumeId;
 }
-#if 0
 //________________________________________________________________________________
 Int_t StarVMCDetector::EmcVolumeId(Int_t N, Int_t *Numbv) {// barrel calorimeter
   Int_t VolumeId = 0;
@@ -491,7 +507,6 @@ Int_t StarVMCDetector::SmdVolumeId(Int_t N, Int_t *Numbv) {
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   return VolumeId;
 }
-#endif
 //________________________________________________________________________________
 Int_t StarVMCDetector::EemVolumeId(Int_t N, Int_t *Numbv) {
   //	if (cd=='ESCI') {
@@ -639,7 +654,6 @@ Int_t StarVMCDetector::VpdVolumeId(Int_t N, Int_t *Numbv) {
   VolumeId  =  1000*rileft + 100*innout + sector;
   return VolumeId;
 }
-#if 0
 //________________________________________________________________________________
 Int_t StarVMCDetector::RchVolumeId(Int_t N, Int_t *Numbv) {
   Int_t VolumeId = 0;
@@ -655,7 +669,6 @@ Int_t StarVMCDetector::RchVolumeId(Int_t N, Int_t *Numbv) {
 //         VolumeId = Numbv[0] + Is*1000
   return VolumeId;
 } 
-#endif
 //________________________________________________________________________________
 Int_t StarVMCDetector::ZdcVolumeId(Int_t N, Int_t *Numbv) { 
   Int_t VolumeId = 0;
@@ -816,7 +829,6 @@ Int_t StarVMCDetector::EtrVolumeId(Int_t N, Int_t *Numbv) {
   //    ('Numbv =',I4,2X,I4,' sector=',I4,' layer=',I4,' section=',I4,' vid=', I7);
   return VolumeId;
 }
-#if 0
 //________________________________________________________________________________
 Int_t StarVMCDetector::SvtVolumeId(Int_t N, Int_t *Numbv) {
   Int_t VolumeId = 0;

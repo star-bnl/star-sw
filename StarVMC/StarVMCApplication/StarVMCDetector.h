@@ -52,8 +52,10 @@ class StarVMCDetector : public TDataSet {
      // set function from a generic C++ callable object 
      fFunctor = ROOT::Math::ParamFunctor(f); 
    } 
-   Int_t g2t_volume_id(Int_t *numbv) {(Int_t) fFunctor((Double_t*) numbv, 0);}
+   static Int_t g2t_volume_id(Int_t *numbv) {(Int_t) fFunctor((Double_t*) numbv, 0);}
 #endif
+   static Int_t g2t_volume_id(const Char_t *detN, Int_t *numbv);
+#if 0
    Int_t TpcVolumeId(Int_t N, Int_t *Nubv);
    Int_t SvtVolumeId(Int_t N, Int_t *Numbv);
    Int_t SsdVolumeId(Int_t N, Int_t *Numbv);
@@ -65,9 +67,7 @@ class StarVMCDetector : public TDataSet {
    Int_t EsmVolumeId(Int_t N, Int_t *Numbv);
    Int_t FtpVolumeId(Int_t N, Int_t *Numbv);
    Int_t VpdVolumeId(Int_t N, Int_t *Numbv);
-#if 0
    Int_t RchVolumeId(Int_t N, Int_t *Numbv);
-#endif
    Int_t ZdcVolumeId(Int_t N, Int_t *Numbv);
    Int_t PmdVolumeId(Int_t N, Int_t *Numbv);
    Int_t BbcVolumeId(Int_t N, Int_t *Numbv);
@@ -80,6 +80,7 @@ class StarVMCDetector : public TDataSet {
    Int_t FscVolumeId(Int_t N, Int_t *Numbv);
    Int_t MtdVolumeId(Int_t N, Int_t *Numbv);
    Int_t EtrVolumeId(Int_t N, Int_t *Numbv);
+#endif
  private:
   
   StDetectorId fId;
