@@ -6,7 +6,7 @@
 // This basic chair provides the custom methods for all hits
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "tables/St_g2t_hits_Table.h"
+#include "tables/St_g2t_hits_Table.h"     /* Done */
 #include "tables/St_g2t_ctf_hit_Table.h"  /* Done */
 #include "tables/St_g2t_emc_hit_Table.h"  /* Done */
 #include "tables/St_g2t_epd_hit_Table.h"
@@ -36,19 +36,19 @@ class St_g2t_Chair : public TChair {
   virtual ~St_g2t_Chair(){}
   virtual void    SetTable   (TTable *table) {fTable = table;}
   virtual Int_t   DetectorId (Int_t /* i */)                const  {return -1;};
-  virtual Int_t   Sector     (Int_t /* i */)		      const  {return -1;};
+  virtual Int_t   Sector     (Int_t /* i */)		    const  {return -1;};
   virtual Int_t   PadRow     (Int_t /* i */)                const  {return -1;};
   virtual Int_t   TrackId    (Int_t /* i */)                const  {return -1;};
-  virtual Int_t   HitPosition(Int_t /* i */)     	      const  {return -1;};
+  virtual Int_t   HitPosition(Int_t /* i */)     	    const  {return -1;};
   virtual Float_t GetX       (Int_t /* i */)                const  {return -999999;};
   virtual Float_t GetY       (Int_t /* i */)                const  {return -999999;};
   virtual Float_t GetZ       (Int_t /* i */)                const  {return -999999;};
-  virtual void    SetX       (Float_t /* x */,Int_t /* i */)     {assert(0);};
-  virtual void    SetY       (Float_t /* y */,Int_t /* i */)     {assert(0);};
-  virtual void    SetZ       (Float_t /* z */,Int_t /* i */)     {assert(0);};
+  virtual void    SetX       (Float_t /* x */,Int_t /* i */)       {assert(0);};
+  virtual void    SetY       (Float_t /* y */,Int_t /* i */)       {assert(0);};
+  virtual void    SetZ       (Float_t /* z */,Int_t /* i */)       {assert(0);};
   virtual Float_t GetXError  (Int_t /* i */)                const  {return -999999;};
-  virtual Float_t GetYError  (Int_t /* i */)       	      const  {return -999999;};
-  virtual Float_t GetZError  (Int_t /* i */)       	      const  {return -999999;};
+  virtual Float_t GetYError  (Int_t /* i */)       	    const  {return -999999;};
+  virtual Float_t GetZError  (Int_t /* i */)                const  {return -999999;};
   virtual void    Fill(GHit_t &/* vect */) {}
   static  void    SetDebug(Int_t m=0) {fDebug = m;}
   static  Int_t   Debug() {return fDebug;}

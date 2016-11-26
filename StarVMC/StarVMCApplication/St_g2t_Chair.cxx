@@ -64,7 +64,7 @@ void St_g2t_## A ##_hitC::Fill(GHit_t &vect) {	\
   if (Debug()) table->Print(nok-1,2);		\
 }
 //________________________________________________________________________________
-//void St_g2t_hitsC::Fill(GHit_t &vect) {}
+void St_g2t_hitsC::Fill(GHit_t &vect) {}
 //________________________________________________________________________________
 void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(ctf);
