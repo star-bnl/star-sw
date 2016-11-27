@@ -81,7 +81,6 @@ class ViewDrift {
   // View
   TView* m_view;
 
-  unsigned int m_nDriftLines;
   struct driftLine {
     std::vector<marker> vect;
     int n;  // what kind of particle?
@@ -89,7 +88,6 @@ class ViewDrift {
   std::vector<driftLine> m_driftLines;
   std::vector<TPolyLine3D*> m_driftLinePlots;
 
-  unsigned int m_nTracks;
   struct track {
     std::vector<marker> vect;
   };
@@ -97,13 +95,10 @@ class ViewDrift {
   std::vector<TPolyMarker3D*> m_trackPlots;
   std::vector<TPolyLine3D*> m_trackLinePlots;
 
-  unsigned int m_nExcMarkers;
   std::vector<marker> m_excMarkers;
   TPolyMarker3D* m_excPlot;
-  unsigned int m_nIonMarkers;
   std::vector<marker> m_ionMarkers;
   TPolyMarker3D* m_ionPlot;
-  unsigned int m_nAttMarkers;
   std::vector<marker> m_attMarkers;
   TPolyMarker3D* m_attPlot;
 

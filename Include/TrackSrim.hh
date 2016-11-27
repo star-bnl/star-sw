@@ -13,16 +13,10 @@ class TrackSrim : public Track {
   // Destructor
   ~TrackSrim() {}
 
-  void SetWorkFunction(const double w) {
-    m_work = w;
-    m_workset = true;
-  }
+  void SetWorkFunction(const double w) { m_work = w; }
   double GetWorkFunction() const { return m_work; }
 
-  void SetFanoFactor(const double f) {
-    m_fano = f;
-    m_fanoset = true;
-  }
+  void SetFanoFactor(const double f) { m_fano = f; }
   double GetFanoFactor() const { return m_fano; }
 
   void SetDensity(const double density) { m_density = density; }
@@ -34,26 +28,19 @@ class TrackSrim : public Track {
   }
   double GetCharge() const { return m_q; }
 
-  void SetMass(const double m) {
-    m_mass = m;
-    m_massset = true;
-  }
+  void SetMass(const double m) { m_mass = m; }
   double GetMass() const { return m_mass; }
 
   void SetAtomicMassNumbers(const double a, const double z) {
     m_a = a;
     m_z = z;
-    m_azset = true;
   }
   void GetAtomicMassMumbers(double& a, double& z) const {
     a = m_a;
     z = m_z;
   }
 
-  void SetInitialEnergy(const double e) {
-    m_initialenergy = e;
-    m_energyset = true;
-  }
+  void SetInitialEnergy(const double e) { m_initialenergy = e; }
   double GetInitialEnergy() const { return m_initialenergy; }
 
   void SetModel(const int m) { m_model = m; }
@@ -115,14 +102,6 @@ class TrackSrim : public Track {
   bool m_massset;
   /// Charge gas been defined
   bool m_chargeset;
-  /// Energy has been defined
-  bool m_energyset;
-  /// Work function defined
-  bool m_workset;
-  /// Fano factor defined
-  bool m_fanoset;
-  /// A and Z have been defined
-  bool m_azset;
   /// Produce debugging output
   bool m_debug;
   /// Density [g/cm3]
@@ -136,7 +115,8 @@ class TrackSrim : public Track {
   /// Mass of ion [MeV]
   double m_mass;
   /// A and Z of the gas
-  double m_a, m_z;
+  double m_a;
+  double m_z;
   /// Initial energy of ion
   double m_initialenergy;
   /// Starting position
@@ -164,7 +144,7 @@ class TrackSrim : public Track {
   ///                    3 = Gaussian, 4 = Combined)
   unsigned int m_model;
   /// Targeted cluster size
-  unsigned int m_nsize;
+  int m_nsize;
   struct cluster {
     double x, y, z,  // Cluster locations
         ec,          // Energy spent to make the clusterec

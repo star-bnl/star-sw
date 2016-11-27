@@ -21,13 +21,8 @@ ViewDrift::ViewDrift()
       m_yMax(1.),
       m_zMax(1.),
       m_view(NULL),
-      m_nDriftLines(0),
-      m_nTracks(0),
-      m_nExcMarkers(0),
       m_excPlot(NULL),
-      m_nIonMarkers(0),
       m_ionPlot(NULL),
-      m_nAttMarkers(0),
       m_attPlot(NULL),
       m_markerSizeCluster(1.),
       m_markerSizeCollision(1.) {
@@ -81,12 +76,8 @@ void ViewDrift::SetArea(const double& xmin, const double& ymin,
 void ViewDrift::Clear() {
 
   m_driftLines.clear();
-  m_nDriftLines = 0;
-
   m_tracks.clear();
-  m_nTracks = 0;
 
-  m_nExcMarkers = m_nIonMarkers = m_nAttMarkers = 0;
   m_excMarkers.clear();
   m_ionMarkers.clear();
   m_attMarkers.clear();
@@ -163,8 +154,7 @@ void ViewDrift::NewElectronDriftLine(const unsigned int np, int& id,
   d.n = col;
   m_driftLines.push_back(d);
   // Return the index of this drift line.
-  id = m_nDriftLines;
-  ++m_nDriftLines;
+  id = m_driftLines.size() - 1;
 }
 
 void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
@@ -188,8 +178,7 @@ void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
   d.n = col;
   m_driftLines.push_back(d);
   // Return the index of this drift line.
-  id = m_nDriftLines;
-  ++m_nDriftLines;
+  id = m_driftLines.size() - 1;
 }
 
 void ViewDrift::NewIonDriftLine(const unsigned int np, int& id, const double x0,
@@ -212,8 +201,7 @@ void ViewDrift::NewIonDriftLine(const unsigned int np, int& id, const double x0,
   d.n = col;
   m_driftLines.push_back(d);
   // Return the index of this drift line.
-  id = m_nDriftLines;
-  ++m_nDriftLines;
+  id = m_driftLines.size() - 1;
 }
 
 void ViewDrift::NewPhotonTrack(const double x0, const double y0,
@@ -227,7 +215,6 @@ void ViewDrift::NewPhotonTrack(const double x0, const double y0,
   p.SetLineStyle(7);
   p.SetNextPoint(x0, y0, z0);
   p.SetNextPoint(x1, y1, z1);
-  ++m_nDriftLines;
 }
 
 void ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
@@ -248,15 +235,14 @@ void ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
   newTrack.vect[0].z = z0;
   m_tracks.push_back(newTrack);
   // Return the index of this drift line.
-  id = m_nTracks;
-  ++m_nTracks;
+  id = m_tracks.size() - 1;
 }
 
 void ViewDrift::SetDriftLinePoint(const unsigned int iL, const unsigned int iP,
                                   const double x, const double y,
                                   const double z) {
 
-  if (iL >= m_nDriftLines) {
+  if (iL >= m_driftLines.size()) {
     std::cerr << m_className << "::SetDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
@@ -269,7 +255,7 @@ void ViewDrift::SetDriftLinePoint(const unsigned int iL, const unsigned int iP,
 void ViewDrift::AddDriftLinePoint(const unsigned int iL, const double x,
                                   const double y, const double z) {
 
-  if (iL >= m_nDriftLines) {
+  if (iL >= m_driftLines.size()) {
     std::cerr << m_className << "::AddDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
@@ -284,7 +270,7 @@ void ViewDrift::AddDriftLinePoint(const unsigned int iL, const double x,
 void ViewDrift::SetTrackPoint(const unsigned int iL, const unsigned int iP,
                               const double x, const double y, const double z) {
 
-  if (iL >= m_nTracks) {
+  if (iL >= m_tracks.size()) {
     std::cerr << m_className << "::SetTrackPoint:\n";
     std::cerr << "    Track index " << iL << " is out of range.\n";
     return;
@@ -297,7 +283,7 @@ void ViewDrift::SetTrackPoint(const unsigned int iL, const unsigned int iP,
 void ViewDrift::AddTrackPoint(const unsigned int iL, const double x,
                               const double y, const double z) {
 
-  if (iL >= m_nTracks) {
+  if (iL >= m_tracks.size()) {
     std::cerr << m_className << "::AddTrackPoint:\n";
     std::cerr << "    Track index " << iL << " is out of range.\n";
     return;
@@ -317,7 +303,6 @@ void ViewDrift::AddExcitationMarker(const double x, const double y,
   newMarker.y = y;
   newMarker.z = z;
   m_excMarkers.push_back(newMarker);
-  ++m_nExcMarkers;
 }
 
 void ViewDrift::AddIonisationMarker(const double x, const double y,
@@ -328,7 +313,6 @@ void ViewDrift::AddIonisationMarker(const double x, const double y,
   newMarker.y = y;
   newMarker.z = z;
   m_ionMarkers.push_back(newMarker);
-  ++m_nIonMarkers;
 }
 
 void ViewDrift::AddAttachmentMarker(const double x, const double y,
@@ -339,7 +323,6 @@ void ViewDrift::AddAttachmentMarker(const double x, const double y,
   newMarker.y = y;
   newMarker.z = z;
   m_attMarkers.push_back(newMarker);
-  ++m_nAttMarkers;
 }
 
 void ViewDrift::Plot(const bool twod, const bool axis) {
@@ -363,7 +346,8 @@ void ViewDrift::Plot2d(const bool axis) {
   m_canvas->cd();
   m_canvas->Update();
 
-  for (unsigned int i = 0; i < m_nDriftLines; ++i) {
+  const unsigned int nDriftLines = m_driftLines.size();
+  for (unsigned int i = 0; i < nDriftLines; ++i) {
     const unsigned int nPoints = m_driftLines[i].vect.size();
     TGraph t(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
@@ -387,7 +371,8 @@ void ViewDrift::Plot2d(const bool axis) {
   }
 
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
-  for (unsigned int i = 0; i < m_nTracks; ++i) {
+  const unsigned int nTracks = m_tracks.size();
+  for (unsigned int i = 0; i < nTracks; ++i) {
     const unsigned int nPoints = m_tracks[i].vect.size();
     TGraph t(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
@@ -399,7 +384,7 @@ void ViewDrift::Plot2d(const bool axis) {
       t.GetXaxis()->SetLimits(m_xMin, m_xMax);
       t.GetHistogram()->SetMaximum(m_yMax);
       t.GetHistogram()->SetMinimum(m_yMin);
-      if (axis && m_nDriftLines == 0) {
+      if (axis && m_driftLines.empty()) {
         t.DrawClone("ALsame");
       } else {
         t.DrawClone("Lsame");
@@ -432,7 +417,8 @@ void ViewDrift::Plot3d(const bool axis) {
     }
   }
 
-  for (unsigned int i = 0; i < m_nDriftLines; ++i) {
+  const unsigned int nDriftLines = m_driftLines.size();
+  for (unsigned int i = 0; i < nDriftLines; ++i) {
     const unsigned int nPoints = m_driftLines[i].vect.size();
     TPolyLine3D* t = new TPolyLine3D(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
@@ -444,7 +430,8 @@ void ViewDrift::Plot3d(const bool axis) {
     t->Draw("same");
   }
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
-  for (unsigned int i = 0; i < m_nTracks; ++i) {
+  const unsigned int nTracks = m_tracks.size();
+  for (unsigned int i = 0; i < nTracks; ++i) {
     const unsigned int nPoints = m_tracks[i].vect.size();
     TPolyMarker3D* t = new TPolyMarker3D(nPoints);
     TPolyLine3D* l = new TPolyLine3D(nPoints);
@@ -468,12 +455,13 @@ void ViewDrift::Plot3d(const bool axis) {
     delete m_excPlot;
     m_excPlot = NULL;
   }
-  if (m_nExcMarkers > 0) {
-    m_excPlot = new TPolyMarker3D(m_nExcMarkers);
+  if (!m_excMarkers.empty()) {
+    const unsigned int nExcMarkers = m_excMarkers.size();
+    m_excPlot = new TPolyMarker3D(nExcMarkers);
     m_excPlot->SetMarkerColor(plottingEngine.GetRootColorLine2());
     m_excPlot->SetMarkerStyle(20);
     m_excPlot->SetMarkerSize(m_markerSizeCollision);
-    for (unsigned int i = 0; i < m_nExcMarkers; ++i) {
+    for (unsigned int i = 0; i < nExcMarkers; ++i) {
       m_excPlot->SetNextPoint(m_excMarkers[i].x, m_excMarkers[i].y,
                               m_excMarkers[i].z);
     }
@@ -483,12 +471,13 @@ void ViewDrift::Plot3d(const bool axis) {
     delete m_ionPlot;
     m_ionPlot = NULL;
   }
-  if (m_nIonMarkers > 0) {
-    m_ionPlot = new TPolyMarker3D(m_nIonMarkers);
+  if (!m_ionMarkers.empty()) {
+    const unsigned int nIonMarkers = m_ionMarkers.size();
+    m_ionPlot = new TPolyMarker3D(nIonMarkers);
     m_ionPlot->SetMarkerColor(plottingEngine.GetRootColorIon());
     m_ionPlot->SetMarkerStyle(20);
     m_ionPlot->SetMarkerSize(m_markerSizeCollision);
-    for (unsigned int i = 0; i < m_nIonMarkers; ++i) {
+    for (unsigned int i = 0; i < nIonMarkers; ++i) {
       m_ionPlot->SetNextPoint(m_ionMarkers[i].x, m_ionMarkers[i].y,
                               m_ionMarkers[i].z);
     }
@@ -498,12 +487,13 @@ void ViewDrift::Plot3d(const bool axis) {
     delete m_attPlot;
     m_attPlot = NULL;
   }
-  if (m_nAttMarkers > 0) {
-    m_attPlot = new TPolyMarker3D(m_nAttMarkers);
+  if (!m_attMarkers.empty()) {
+    const unsigned int nAttMarkers = m_attMarkers.size();
+    m_attPlot = new TPolyMarker3D(nAttMarkers);
     m_attPlot->SetMarkerColor(plottingEngine.GetRootColorLine1());
     m_attPlot->SetMarkerStyle(20);
     m_attPlot->SetMarkerSize(m_markerSizeCollision);
-    for (unsigned int i = 0; i < m_nAttMarkers; ++i) {
+    for (unsigned int i = 0; i < nAttMarkers; ++i) {
       m_attPlot->SetNextPoint(m_attMarkers[i].x, m_attMarkers[i].y,
                               m_attMarkers[i].z);
     }
