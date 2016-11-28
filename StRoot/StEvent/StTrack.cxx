@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.45 2015/05/13 17:06:14 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.46 2016/11/28 21:00:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.46  2016/11/28 21:00:24  ullrich
+ * Added StExtGeometry features.
+ *
  * Revision 2.45  2015/05/13 17:06:14  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -158,9 +161,10 @@
 #include "StThreeVectorD.hh"
 #include "StHit.h"
 #include "StG2TrackVertexMap.h"
+#include "StExtGeometry.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.45 2015/05/13 17:06:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.46 2016/11/28 21:00:24 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -605,4 +609,11 @@ ostream&  operator<<(ostream& os,  const StTrack& track) {
     os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
     os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
     return os;
+}
+//________________________________________________________________________________
+void StTrack::addExtGeometry(StExtGeometry *exg) 
+{
+   StExtGeometry ** kexg = &mExtGeometry;
+   for (; *kexg; kexg = &((*kexg)->mNext)) {}
+   *kexg = exg;
 }
