@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.52 2015/07/31 21:32:58 jwebb Exp $
+* $Id: gstar_part.g,v 1.53 2016/11/28 21:52:43 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.53  2016/11/28 21:52:43  jwebb
+* Add psi(2s) --> mu+mu- with 100% branching ratio.
+*
 * Revision 1.52  2015/07/31 21:32:58  jwebb
 * Attempt to propagate a PDG id for antideuteron.
 *
@@ -379,6 +382,10 @@ MODULE gstar_part Is the STAR Particle Database
   Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,  TrkTyp=4,
                       mass=3.68609 charge=0 tlife=hbar/2380.0,
                       pdg=100443 bratio={ 1, } mode={ 0203, }
+
+  Particle psi2s_mu   "Psi(2S)-->mu+mu-" code=169,  TrkTyp=4,
+                      mass=3.68609 charge=0 tlife=hbar/2380.0,
+                      pdg=200443 bratio={ 1, } mode={ 0605, }
 
 ************************************************************************************ 
 
