@@ -165,7 +165,6 @@ static const StvConst *myConst = StvConst::Inst();
 static       StvToolkit *kit      = StvToolkit::Inst();
 static       StvFitter  *fitt     = StvFitter::Inst();
 
-StvDebug::Break(nCall);
 StvNodePars par[2];
 StvFitErrs  err[2];
 int mySkip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
@@ -219,7 +218,6 @@ StvFitDers derivFit;
 
 //+++++++++++++++++++++++++++++++++++++
     nTally++;
-    StvDebug::Break(nTally);
     idive = mDive->Dive();
 //+++++++++++++++++++++++++++++++++++++
     if (idive & StvDiver::kDiveBreak) 		break;
@@ -253,8 +251,8 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     if (!idir)  {mCurrTrak->push_front(curNode);innNode=curNode;outNode=preNode;}
     else        {mCurrTrak->push_back(curNode);innNode=preNode;outNode=curNode;}
     if (outNode){}
-    nNode++;		// assert(nNode<200);
-    if (nNode>200) { //Something very wrong
+    nNode++;		
+    if (nNode>256) { //Something very wrong
       Error("FindTrack","Too many nodes =200 Skip track");
       return 0;
     }
@@ -312,7 +310,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<3)) {		//Hit accepted
         mHitCounter->AddHit();
-	nHits++;nTotHits++;assert(nHits<=100);
+	nHits++;nTotHits++;assert(nHits<256);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
         par[0]=par[1];
@@ -454,7 +452,6 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     node->SetHit(hit);    
     node->SetXi2(bestXi2,0);
     goodCount++;
-StvDebug::Count("PrimGoodQua",track->GetQua());
     if (track->GetCharge()>0) { plus++; } else { minus++; }
 
   }//End track loop 
