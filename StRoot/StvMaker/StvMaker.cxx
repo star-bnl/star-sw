@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.52 2015/12/12 00:56:12 perev Exp $
+// $Id: StvMaker.cxx,v 1.53 2016/11/28 01:37:46 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -314,9 +314,9 @@ static int initialized = 0;
 //		Choose seed finders
   assert(gSystem->Load("StvSeed.so")>=0);
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
-  for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
+  for (int jreg=0;jreg<1; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
-//    mHitLoader[jreg] = new StvFtsHitLoader;
+//??    mHitLoader[jreg] = new StvFtsHitLoader;
     mSeedFinders[jreg] = new StvSeedFinders;
     if (IAttr("useEventFiller")) 
       mEventFiller[jreg]= new StvStEventFiller;
@@ -355,6 +355,7 @@ static int initialized = 0;
 
 
   for (int reg = 0;reg<2;reg++) {
+    if (!mHitLoader[reg]) 		continue; 	
     if (mHitLoader[reg]->NumDetectors()) continue; 	// used
     delete mHitLoader[reg];    mHitLoader[reg]   =0;
     delete mSeedFinders[reg];  mSeedFinders[reg] =0;
@@ -365,6 +366,7 @@ static int initialized = 0;
   for (int reg = 0;reg<2;reg++) {
     if (!mHitLoader[reg]) continue;		// not used
     const auto *par = kons->At(reg);
+    if (!par) continue;
     mSeedFinders [reg]->SetCons(par);
     mEventFiller [reg]->SetCons(par);
     mTrackFinder [reg]->SetCons(par);
