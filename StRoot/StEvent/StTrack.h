@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.36 2015/10/09 17:46:15 ullrich Exp $
+ * $Id: StTrack.h,v 2.37 2016/11/28 21:00:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.37  2016/11/28 21:00:24  ullrich
+ * Added StExtGeometry features.
+ *
  * Revision 2.36  2015/10/09 17:46:15  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -180,6 +183,7 @@ ostream&  operator<<(ostream& os,  const StTrack& t);
 class StParticleDefinition;
 class StVertex;
 class StTrackGeometry;
+class StExtGeometry;
 class StTrackDetectorInfo;
 class StTrackPidTraits;
 class StTrackNode;
@@ -208,6 +212,8 @@ public:
     const StTrackGeometry*         geometry() const;
     StTrackGeometry*               outerGeometry();
     const StTrackGeometry*         outerGeometry() const;
+    StExtGeometry*                 extGeometry()	 {return mExtGeometry;}
+    const StExtGeometry*           extGeometry()   const {return mExtGeometry;}
     StTrackDetectorInfo*           detectorInfo();
     const StTrackDetectorInfo*     detectorInfo() const;
     StTrackFitTraits&              fitTraits();
@@ -269,6 +275,7 @@ public:
     void         setTopologyMap(const StTrackTopologyMap&);
     void         setGeometry(StTrackGeometry*);
     void         setOuterGeometry(StTrackGeometry*);
+    void         addExtGeometry(StExtGeometry* extGeo);
     void         setFitTraits(const StTrackFitTraits&);
     void         addPidTraits(StTrackPidTraits*);
     void         setDetectorInfo(StTrackDetectorInfo*);
@@ -311,6 +318,7 @@ protected:
     Float_t                 mLength;
     StTrackGeometry         *mGeometry;
     StTrackGeometry         *mOuterGeometry;
+    StExtGeometry           *mExtGeometry;
     Int_t                   mIdTruth; // MC track id
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
@@ -330,6 +338,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,10)
+    ClassDef(StTrack,11)
 };
 #endif
