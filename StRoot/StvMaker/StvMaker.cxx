@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.53 2016/11/28 01:37:46 perev Exp $
+// $Id: StvMaker.cxx,v 1.54 2016/11/29 17:12:35 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -68,13 +68,13 @@ More detailed: 				<br>
 #include "StvUtil/StvPullEvent.h"
 #include "Stv/StvDiver.h"
 #include "StvHitLoader.h"
-#include "StvFtsHitLoader.h"
+//#include "StvFtsHitLoader.h"
+//#include "StvUtil/StvFtsHitErrCalculator.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvSeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StvUtil/StvHitErrCalculator.h"
-#include "StvUtil/StvFtsHitErrCalculator.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
@@ -242,6 +242,7 @@ Int_t StvMaker::InitDetectors()
     Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
   }
 
+#ifdef kFtsIdentifier
   if (IAttr("activeFTS")) {    // FTS error calculator
     mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
@@ -250,6 +251,7 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kFtsId,hec,0);
     Info("Init","%s: %d Hitplanes", "FtsHitErrs", nHP);
   }
+#endif
 
 //		In case of fithiterr utility working, selects special hits to speedup
   if (mFETracks) mHitLoader[0]->SetHitSelector();
@@ -276,8 +278,9 @@ static int initialized = 0;
   TString geoName(gGeoManager->GetName()); geoName.ToLower();
 
 //		Activate detectors
+#ifdef kFtsIdentifier
   if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
-                            SetAttr("activeTpc",0);}
+#endif                            SetAttr("activeTpc",0);}
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
