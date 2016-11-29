@@ -1,10 +1,11 @@
-// $Id: StvFtsHitLoader.cxx,v 1.1 2015/12/12 00:51:31 perev Exp $
+// $Id: StvFtsHitLoader.cxx.C,v 1.1 2016/11/29 16:58:51 perev Exp $
 /*!
 \author V Perev 2015  
 
 A StvFtsHitLoader loads  Stv hits using StFtsHits.
 </ul>
  */
+#include "StEvent/StEnumerations.h"
 #include "StvFtsHitLoader.h"
 #include "StEvent/StFtsHit.h"
 #include "Stv/StvHit.h"
@@ -18,6 +19,8 @@ ClassImp(StvFtsHitLoader)
 int StvFtsHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure
                                ,StvHit *stvHit)
 {
+   int num = 0;
+#ifdef kFtsIdentifier
 static StvToolkit  *kit = StvToolkit::Inst();
    auto detId = stHit->detector();
    if (detId != kFtsId) return StvHitLoader::MakeStvHit(stHit,upath,sure,stvHit);
@@ -33,7 +36,6 @@ static StvToolkit  *kit = StvToolkit::Inst();
    double stp = dRxy/nStp;
    double r = Rxy+0.5*(-dRxy+stp);
    StFtsHit hit(*(StFtsHit*)stHit);
-   int num = 0;
    for (int iStp=0;iStp<nStp;iStp++,r+=stp) {
      StThreeVectorF v3(fx[0]*(r/Rxy),fx[1]*(r/Rxy),fx[2]); 
      hit.setPosition(v3);
@@ -52,5 +54,6 @@ static StvToolkit  *kit = StvToolkit::Inst();
      TCL::ucopy(gMtx,e,3); e[3]=0; e[4]= 0; 
      e[5] = dRdPdZ[2]*dRdPdZ[2];
    }  
+#endif
    return num;
 }
