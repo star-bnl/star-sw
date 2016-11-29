@@ -149,6 +149,11 @@ $(OBJDIR)/TrackElectron.o: \
 	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/TrackSrim.o: \
+	$(SRCDIR)/TrackSrim.cc $(INCDIR)/TrackSrim.hh \
+	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc 
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/ComponentBase.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh \
@@ -201,6 +206,11 @@ $(OBJDIR)/ComponentElmer.o: \
 	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/ComponentComsol.o: \
+	$(SRCDIR)/ComponentComsol.cc $(INCDIR)/ComponentComsol.hh \
+	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/ComponentTcad2d.o: \
 	$(SRCDIR)/ComponentTcad2d.cc $(INCDIR)/ComponentTcad2d.hh \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
@@ -328,7 +338,7 @@ $(OBJDIR)/SolidSphere.o: \
 $(OBJDIR)/Random.o: \
 	$(SRCDIR)/Random.cc $(INCDIR)/Random.hh
 	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
+	@$(CXX) $(CFLAGS) $< -o $@  
 $(OBJDIR)/RandomEngineGSL.o: \
 	$(SRCDIR)/RandomEngineGSL.cc $(INCDIR)/RandomEngineGSL.hh
 	$(CXX) $(CFLAGS) $< -o $@

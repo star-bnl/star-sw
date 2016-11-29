@@ -10,14 +10,14 @@
 namespace Garfield {
 
 GeometryRoot::GeometryRoot() 
-    : m_geoManager(NULL), m_nMaterials(0), m_debug(false) {
+    : m_geoManager(NULL), m_debug(false) {
 
   m_className = "GeometryRoot";
 }
 
 void GeometryRoot::SetGeometry(TGeoManager* geoman) {
 
-  if (geoman == NULL) {
+  if (!geoman) {
     std::cerr << "GeometryRoot::SetGeometry:\n";
     std::cerr << "    Pointer to TGeoManager is null.\n";
     return;
@@ -25,7 +25,6 @@ void GeometryRoot::SetGeometry(TGeoManager* geoman) {
 
   m_geoManager = geoman;
   m_materials.clear();
-  m_nMaterials = 0;
 }
 
 Medium* GeometryRoot::GetMedium(const double x, const double y, 
@@ -37,7 +36,8 @@ Medium* GeometryRoot::GetMedium(const double x, const double y,
   TGeoNode* cnode = m_geoManager->GetCurrentNode();
   std::string name(cnode->GetMedium()->GetMaterial()->GetName());
 
-  for (int i = m_nMaterials; i--;) {
+  const unsigned int nMaterials = m_materials.size();
+  for (unsigned int i = 0; i < nMaterials; ++i) {
     if (m_materials[i].name == name) {
       return m_materials[i].medium;
     }
@@ -45,7 +45,7 @@ Medium* GeometryRoot::GetMedium(const double x, const double y,
   return NULL;
 }
 
-int GeometryRoot::GetNumberOfMaterials() {
+unsigned int GeometryRoot::GetNumberOfMaterials() {
 
   if (!m_geoManager) {
     std::cerr << "GeometryRoot::GetNumberOfMaterials:\n";
@@ -57,7 +57,7 @@ int GeometryRoot::GetNumberOfMaterials() {
   return m_geoManager->GetListOfMaterials()->GetEntries();
 }
 
-TGeoMaterial* GeometryRoot::GetMaterial(const int i) {
+TGeoMaterial* GeometryRoot::GetMaterial(const unsigned int i) {
 
   if (!m_geoManager) {
     std::cerr << "GeometryRoot::GetMaterial:\n";
@@ -81,7 +81,7 @@ TGeoMaterial* GeometryRoot::GetMaterial(const char* name) {
   return m_geoManager->GetMaterial(name);
 }
 
-void GeometryRoot::SetMedium(const int imat, Medium* med) {
+void GeometryRoot::SetMedium(const unsigned int imat, Medium* med) {
 
   if (!m_geoManager) {
     std::cerr << "GeometryRoot::SetMedium:\n";
@@ -107,15 +107,15 @@ void GeometryRoot::SetMedium(const int imat, Medium* med) {
   std::string name(mat->GetName());
   bool isNew = true;
   // Check if this material has already been associated with a medium
-  for (int i = m_nMaterials; i--;) {
-    if (name == m_materials[i].name) {
-      std::cout << "GeometryRoot::SetMedium:\n";
-      std::cout << "    Current association of material " << name
-                << " with medium " << med->GetName() << " is overwritten.\n";
-      m_materials[i].medium = med;
-      isNew = false;
-      break;
-    }
+  const unsigned int nMaterials = m_materials.size();
+  for (unsigned int i = 0; i < nMaterials; ++i) {
+    if (name != m_materials[i].name) continue;
+    std::cout << "GeometryRoot::SetMedium:\n";
+    std::cout << "    Current association of material " << name
+              << " with medium " << med->GetName() << " is overwritten.\n";
+    m_materials[i].medium = med;
+    isNew = false;
+    break;
   }
 
   if (isNew) {
@@ -123,7 +123,6 @@ void GeometryRoot::SetMedium(const int imat, Medium* med) {
     newMaterial.name = name;
     newMaterial.medium = med;
     m_materials.push_back(newMaterial);
-    ++m_nMaterials;
   }
 
   // Check if material properties match

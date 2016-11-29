@@ -28,12 +28,12 @@ class GeometryRoot : public GeometryBase {
                     const double z) const;
 
   // Get the number of materials defined in the ROOT geometry
-  int GetNumberOfMaterials();
+  unsigned int GetNumberOfMaterials();
   // Get pointer to ROOT material with given index/name
-  TGeoMaterial* GetMaterial(const int i);
+  TGeoMaterial* GetMaterial(const unsigned int i);
   TGeoMaterial* GetMaterial(const char* name);
   // Associate ROOT material with Garfield medium
-  void SetMedium(const int imat, Medium* med);
+  void SetMedium(const unsigned int imat, Medium* med);
   void SetMedium(const char* mat, Medium* med);
 
   bool IsInside(const double x, const double y, const double z) const {
@@ -58,7 +58,6 @@ class GeometryRoot : public GeometryBase {
   TGeoManager* m_geoManager;
 
   // List of ROOT materials associated to Garfield media
-  int m_nMaterials;
   struct material {
     std::string name;
     Medium* medium;

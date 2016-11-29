@@ -12,6 +12,9 @@ static const double TwoPi = 2. * Pi;
 static const double HalfPi = 0.5 * Pi;
 static const double Pi2 = Pi * Pi;
 
+// Euler-Mascheroni constant
+static const double Gamma = 0.577215664901532861;
+
 static const double CLog2 = 0.693147180559945309417;
 static const double Sqrt2 = 1.4142135623730950488016887242097;
 

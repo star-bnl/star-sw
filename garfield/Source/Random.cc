@@ -434,7 +434,7 @@ double RndmVavilov(const double rkappa, const double beta2) {
       dsigm[j + 1 - 1] = dsigm[1 - 1] * dsigm[j - 1];
       alfa[j + 1 - 1] = (fninv[j - 1] - beta2 * fninv[j + 1 - 1]) * drk[j - 1];
     }
-    hc[0] = log(rkappa) + beta2 + 0.42278434;
+    hc[0] = log(rkappa) + beta2 + 1. - Gamma;
     hc[1] = dsigm[1 - 1];
     hc[2] = alfa[3 - 1] * dsigm[3 - 1];
     hc[3] = (3 * alfa[2 - 1] * alfa[2 - 1] + alfa[4 - 1]) * dsigm[4 - 1] - 3;
