@@ -3,7 +3,6 @@
 #include <math.h>
 #include <assert.h>
 #include "StEvent/StEnumerations.h"
-#ifdef kFtsIdentifier
 #include "StvFtsHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
 #include "StThreeVectorF.hh"
@@ -112,5 +111,4 @@ int StvFtsHitErrCalculator::CalcDcaErrs(const StvHit *hit,double hRr[3])
 
    return ians;
 }
-#endif  // kFtsIdentifier
 
