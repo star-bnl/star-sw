@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.42 2016/11/28 01:38:51 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.43 2016/11/29 17:13:20 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.43  2016/11/29 17:13:20  perev
+ * HideFts
+ *
  * Revision 1.42  2016/11/28 01:38:51  perev
  * Change max hits 1000>256 (loopers)
  *
@@ -1253,7 +1256,10 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
 	  for (Int_t i = 0; i < Nhits; i++) {
 	    const StHit *hit = hits[i];
 	    if (hit->position().z() > 150.0 
-	      ||hit->detector()==kFtsId)
+#ifdef kFtsIdentifier
+	      ||hit->detector()==kFtsId
+#endif
+               )
 	    {
 	      gTrack->setFlag((((flag/100)*100)+11)); // +x11 
 	      return;
