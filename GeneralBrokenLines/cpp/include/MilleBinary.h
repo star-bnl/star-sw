@@ -70,9 +70,8 @@ public:
 	MilleBinary(const std::string fileName = "milleBinaryISN.dat",
 			bool doublePrec = false, unsigned int aSize = 2000);
 	virtual ~MilleBinary();
-	void addData(double aMeas, double aPrec,
-			const std::vector<unsigned int> &indLocal,
-			const std::vector<double> &derLocal,
+	void addData(double aMeas, double aPrec, unsigned int numLocal,
+			unsigned int* indLocal, double* derLocal,
 			const std::vector<int> &labGlobal,
 			const std::vector<double> &derGlobal);
 	void writeRecord();

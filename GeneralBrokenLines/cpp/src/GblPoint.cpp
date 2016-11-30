@@ -346,6 +346,22 @@ const TMatrixD& GblPoint::getGlobalDerivatives() const {
 	return globalDerivatives;
 }
 
+/// Retrieve global derivatives from a point for a single row.
+/**
+ * \param [in] aRow  Row number
+ * \param [out] aLabels Global labels
+ * \param [out] aDerivatives  Global derivatives
+ */
+void GblPoint::getGlobalLabelsAndDerivatives(unsigned int aRow,
+		std::vector<int> &aLabels, std::vector<double> &aDerivatives) const {
+	aLabels.resize(globalDerivatives.GetNcols());
+	aDerivatives.resize(globalDerivatives.GetNcols());
+	for (int i = 0; i < globalDerivatives.GetNcols(); ++i) {
+		aLabels[i] = globalLabels[i];
+		aDerivatives[i] = globalDerivatives(aRow, i);
+	}
+}
+
 /// Define label of point (by GBLTrajectory constructor)
 /**
  * \param [in] aLabel Label identifying point

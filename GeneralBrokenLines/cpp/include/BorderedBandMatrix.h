@@ -5,7 +5,6 @@
  *      Author: kleinwrt
  */
 
-
 /** \file
  *  BorderedBandMatrix definition.
  *
@@ -84,10 +83,10 @@ public:
 			unsigned int nBand = 5);
 	void solveAndInvertBorderedBand(const VVector &aRightHandSide,
 			VVector &aSolution);
-	void addBlockMatrix(double aWeight,
-			const std::vector<unsigned int>* anIndex,
-			const std::vector<double>* aVector);
-	TMatrixDSym getBlockMatrix(const std::vector<unsigned int> anIndex) const;
+	void addBlockMatrix(double aWeight, unsigned int aSize,
+			unsigned int* anIndex, double* aVector);
+	TMatrixDSym getBlockMatrix(const std::vector<unsigned int> &anIndex) const;
+	TMatrixDSym getBlockMatrix(unsigned int aSize, unsigned int* anIndex) const;
 	void printMatrix() const;
 
 private:

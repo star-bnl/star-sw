@@ -153,8 +153,8 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		bool flagCurv, bool flagU1dir, bool flagU2dir) :
 		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
 				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
-				0), numMeasurements(0), externalPoint(0), skippedMeasLabel(0), theDimension(
-				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+				0), numMeasurements(0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(
+				0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
@@ -184,7 +184,7 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
 				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
 				0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(
-				0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
+				0), maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
 				aSeed), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
@@ -206,7 +206,8 @@ GblTrajectory::GblTrajectory(
 		const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), skippedMeasLabel(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
 		thePoints.push_back(aPointsAndTransList[iTraj].first);
@@ -234,7 +235,8 @@ GblTrajectory::GblTrajectory(
 		const TVectorD &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), skippedMeasLabel(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(
+				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(
 				extDerivatives), externalMeasurements(extMeasurements), externalPrecisions(
 				extPrecisions) {
 
@@ -264,7 +266,8 @@ GblTrajectory::GblTrajectory(
 		const TMatrixDSym &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), skippedMeasLabel(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
+				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
 
 	// diagonalize external measurement
 	TMatrixDSymEigen extEigen(extPrecisions);
@@ -337,6 +340,7 @@ void GblTrajectory::construct() {
 				<< std::endl;
 		return;
 	}
+
 	constructOK = true;
 	// number of fit parameters
 	numParameters = (numOffsets - 2 * numInnerTrans) * theDimension.size()
@@ -766,16 +770,16 @@ void GblTrajectory::getResAndErr(unsigned int aData, bool used,
 		double &aDownWeight) {
 
 	double aMeasVar;
-	std::vector<unsigned int>* indLocal;
-	std::vector<double>* derLocal;
-	theData[aData].getResidual(aResidual, aMeasVar, aDownWeight, indLocal,
-			derLocal);
-	unsigned int nParBrl = (*indLocal).size();
-	TVectorD aVec(nParBrl); // compressed vector of derivatives
-	for (unsigned int j = 0; j < nParBrl; ++j) {
-		aVec[j] = (*derLocal)[j];
+	unsigned int numLocal;
+	unsigned int* indLocal;
+	double* derLocal;
+	theData[aData].getResidual(aResidual, aMeasVar, aDownWeight, numLocal,
+			indLocal, derLocal);
+	TVectorD aVec(numLocal); // compressed vector of derivatives
+	for (unsigned int j = 0; j < numLocal; ++j) {
+		aVec[j] = derLocal[j];
 	}
-	TMatrixDSym aMat = theMatrix.getBlockMatrix(*indLocal); // compressed (covariance) matrix
+	TMatrixDSym aMat = theMatrix.getBlockMatrix(numLocal, indLocal); // compressed (covariance) matrix
 	double aFitVar = aMat.Similarity(aVec); // variance from track fit
 	aMeasError = sqrt(aMeasVar); // error of measurement
 	if (used)
@@ -790,19 +794,22 @@ void GblTrajectory::buildLinearEquationSystem() {
 	theVector.resize(numParameters);
 	theMatrix.resize(numParameters, nBorder);
 	double aValue, aWeight;
-	std::vector<unsigned int>* indLocal;
-	std::vector<double>* derLocal;
+	unsigned int* indLocal;
+	double* derLocal;
+	unsigned int numLocal;
+
 	std::vector<GblData>::iterator itData;
 	for (itData = theData.begin(); itData < theData.end(); ++itData) {
 		// skipped (internal) measurement ?
 		if (itData->getLabel() == skippedMeasLabel
 				&& itData->getType() == InternalMeasurement)
 			continue;
-		itData->getLocalData(aValue, aWeight, indLocal, derLocal);
-		for (unsigned int j = 0; j < indLocal->size(); ++j) {
-			theVector((*indLocal)[j] - 1) += (*derLocal)[j] * aWeight * aValue;
+		itData->getLocalData(aValue, aWeight, numLocal, indLocal, derLocal);
+		for (unsigned int j = 0; j < numLocal; ++j) {
+			theVector(indLocal[j] - 1) += derLocal[j] * aWeight * aValue;
 		}
-		theMatrix.addBlockMatrix(aWeight, indLocal, derLocal);
+		theMatrix.addBlockMatrix(aWeight, numLocal, indLocal, derLocal);
+
 	}
 }
 
@@ -857,8 +864,8 @@ void GblTrajectory::prepare() {
 			unsigned int measDim = itPoint->hasMeasurement();
 			if (measDim) {
 				const TMatrixD localDer = itPoint->getLocalDerivatives();
-				const std::vector<int> globalLab = itPoint->getGlobalLabels();
-				const TMatrixD globalDer = itPoint->getGlobalDerivatives();
+				maxNumGlobals = std::max(maxNumGlobals,
+						itPoint->getNumGlobals());
 				TMatrixD transDer;
 				itPoint->getMeasurement(matP, aMeas, aPrec);
 				unsigned int iOff = 5 - measDim; // first active component
@@ -907,9 +914,10 @@ void GblTrajectory::prepare() {
 				for (unsigned int i = iOff; i < 5; ++i) {
 					if (aPrec(i) > 0.) {
 						GblData aData(nLabel, InternalMeasurement, aMeas(i),
-								aPrec(i));
+								aPrec(i), iTraj,
+								itPoint - thePoints[iTraj].begin());
 						aData.addDerivatives(i, labDer, matPDer, iOff, localDer,
-								globalLab, globalDer, numLocals, transDer);
+								numLocals, transDer);
 						theData.push_back(aData);
 						nData++;
 					}
@@ -968,7 +976,8 @@ void GblTrajectory::prepare() {
 					unsigned int iDim = theDimension[i];
 					if (aPrec(iDim) > 0.) {
 						GblData aData(nLabel, InternalKink, aMeas(iDim),
-								aPrec(iDim));
+								aPrec(iDim), iTraj,
+								itPoint - thePoints[iTraj].begin());
 						aData.addDerivatives(iDim, labDer, matTDer, numLocals,
 								transDer);
 						theData.push_back(aData);
@@ -1116,21 +1125,29 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 void GblTrajectory::milleOut(MilleBinary &aMille) {
 	double aValue;
 	double aErr;
-	std::vector<unsigned int>* indLocal;
-	std::vector<double>* derLocal;
-	std::vector<int>* labGlobal;
-	std::vector<double>* derGlobal;
+	unsigned int aTraj;
+	unsigned int aPoint;
+	unsigned int aRow;
+	unsigned int numLocal;
+	unsigned int* labLocal;
+	double* derLocal;
+	std::vector<int> labGlobal;
+	std::vector<double> derGlobal;
 
 	if (not constructOK)
 		return;
 
 //   data: measurements, kinks and external seed
+	labGlobal.reserve(maxNumGlobals);
+	derGlobal.reserve(maxNumGlobals);
 	std::vector<GblData>::iterator itData;
 	for (itData = theData.begin(); itData != theData.end(); ++itData) {
-		itData->getAllData(aValue, aErr, indLocal, derLocal, labGlobal,
+		itData->getAllData(aValue, aErr, numLocal, labLocal, derLocal, aTraj,
+				aPoint, aRow);
+		thePoints[aTraj][aPoint].getGlobalLabelsAndDerivatives(aRow, labGlobal,
 				derGlobal);
-		aMille.addData(aValue, aErr, *indLocal, *derLocal, *labGlobal,
-				*derGlobal);
+		aMille.addData(aValue, aErr, numLocal, labLocal, derLocal, labGlobal,
+				derGlobal);
 	}
 	aMille.writeRecord();
 }

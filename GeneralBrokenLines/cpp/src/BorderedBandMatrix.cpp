@@ -62,27 +62,26 @@ void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,
  * to bordered band matrix:
  * BBmatrix(anIndex(i),anIndex(j)) += aVector(i) * aWeight * aVector(j).
  * \param aWeight [in] Weight
- * \param anIndex [in] List of rows/colums to be used
+ * \param aSize [in]   Size of block matrix
+ * \param anIndex [in] Array of rows/colums to be used
  * \param aVector [in] Vector
  */
-void BorderedBandMatrix::addBlockMatrix(double aWeight,
-		const std::vector<unsigned int>* anIndex,
-		const std::vector<double>* aVector) {
+void BorderedBandMatrix::addBlockMatrix(double aWeight, unsigned int aSize,
+		unsigned int* anIndex, double* aVector) {
 	int nBorder = numBorder;
-	for (unsigned int i = 0; i < anIndex->size(); ++i) {
-		int iIndex = (*anIndex)[i] - 1; // anIndex has to be sorted
+	for (unsigned int i = 0; i < aSize; ++i) {
+		int iIndex = anIndex[i] - 1; // anIndex has to be sorted
 		for (unsigned int j = 0; j <= i; ++j) {
-			int jIndex = (*anIndex)[j] - 1;
+			int jIndex = anIndex[j] - 1;
 			if (iIndex < nBorder) {
-				theBorder(iIndex, jIndex) += (*aVector)[i] * aWeight
-						* (*aVector)[j];
+				theBorder(iIndex, jIndex) += aVector[i] * aWeight * aVector[j];
 			} else if (jIndex < nBorder) {
-				theMixed(jIndex, iIndex - nBorder) += (*aVector)[i] * aWeight
-						* (*aVector)[j];
+				theMixed(jIndex, iIndex - nBorder) += aVector[i] * aWeight
+						* aVector[j];
 			} else {
 				unsigned int nBand = iIndex - jIndex;
-				theBand(nBand, jIndex - nBorder) += (*aVector)[i] * aWeight
-						* (*aVector)[j];
+				theBand(nBand, jIndex - nBorder) += aVector[i] * aWeight
+						* aVector[j];
 				numBand = std::max(numBand, nBand); // update band width
 			}
 		}
@@ -95,11 +94,40 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
  * \param anIndex [in] List of rows/colums to be used
  */
 TMatrixDSym BorderedBandMatrix::getBlockMatrix(
-		const std::vector<unsigned int> anIndex) const {
+		const std::vector<unsigned int> &anIndex) const {
 
 	TMatrixDSym aMatrix(anIndex.size());
 	int nBorder = numBorder;
 	for (unsigned int i = 0; i < anIndex.size(); ++i) {
+		int iIndex = anIndex[i] - 1; // anIndex has to be sorted
+		for (unsigned int j = 0; j <= i; ++j) {
+			int jIndex = anIndex[j] - 1;
+			if (iIndex < nBorder) {
+				aMatrix(i, j) = theBorder(iIndex, jIndex); // border part of inverse
+			} else if (jIndex < nBorder) {
+				aMatrix(i, j) = -theMixed(jIndex, iIndex - nBorder); // mixed part of inverse
+			} else {
+				unsigned int nBand = iIndex - jIndex;
+				aMatrix(i, j) = theBand(nBand, jIndex - nBorder); // band part of inverse
+			}
+			aMatrix(j, i) = aMatrix(i, j);
+		}
+	}
+	return aMatrix;
+}
+
+/// Retrieve symmetric block matrix.
+/**
+ * Get (compressed) block from bordered band matrix: aMatrix(i,j) = BBmatrix(anIndex(i),anIndex(j)).
+ * \param aSize [in] Matrix size
+ * \param anIndex [in] Array of rows/colums to be used
+ */
+TMatrixDSym BorderedBandMatrix::getBlockMatrix(unsigned int aSize,
+		unsigned int* anIndex) const {
+
+	TMatrixDSym aMatrix(aSize);
+	int nBorder = numBorder;
+	for (unsigned int i = 0; i < aSize; ++i) {
 		int iIndex = anIndex[i] - 1; // anIndex has to be sorted
 		for (unsigned int j = 0; j <= i; ++j) {
 			int jIndex = anIndex[j] - 1;

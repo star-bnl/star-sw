@@ -94,6 +94,7 @@ private:
 	unsigned int numMeasurements; ///< Total number of measurements
 	unsigned int externalPoint; ///< Label of external point (or 0)
 	unsigned int skippedMeasLabel; ///< Label of point with measurements skipped in fit (for unbiased residuals) (or 0)
+	unsigned int maxNumGlobals; ///< Max. number of global labels/derivatives per point
 	bool constructOK; ///< Trajectory has been successfully constructed (ready for fit/output)
 	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
 	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit

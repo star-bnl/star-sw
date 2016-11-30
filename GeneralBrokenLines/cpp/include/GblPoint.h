@@ -97,6 +97,7 @@ public:
 	unsigned int getNumGlobals() const;
 	std::vector<int> getGlobalLabels() const;
 	const TMatrixD& getGlobalDerivatives() const;
+    void getGlobalLabelsAndDerivatives(unsigned int aRow, std::vector<int> &aLabels, std::vector<double> &aDerivatives) const;
 	void setLabel(unsigned int aLabel);
 	unsigned int getLabel() const;
 	void setOffset(int anOffset);
