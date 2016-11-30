@@ -1,1 +1,27 @@
-../../.sl64_gcc492/obj/StarDb/AgiGeometry/Geometry.devTD.C
+#include "CreateGeometry.h"
+TDataSet *CreateTable() {
+  gEnv->SetValue("tpcg_version",5);
+  gEnv->SetValue("tpcg_tpadconfig",4);
+  gEnv->SetValue("btog_version",6);
+  gEnv->SetValue("btog_choice",13);
+  gEnv->SetValue("btog_posit1(1)",32);
+  gEnv->SetValue("btog_posit1(2)",33);
+  gEnv->SetValue("btog_posit2",23);
+  gEnv->SetValue("btog_posit3",33);
+  gEnv->SetValue("btog_version",6);
+  gEnv->SetValue("calg_version",3);
+  gEnv->SetValue("calg_nmodule(1)",60);
+  gEnv->SetValue("calg_nmodule(2)",60);
+  gEnv->SetValue("calg_netaT",20);
+  gEnv->SetValue("calg_maxmodule",60);
+  gEnv->SetValue("calg_nsub",2);
+  gEnv->SetValue("calg_netasmdp",10);
+  gEnv->SetValue("calg_nphistr",15);
+  gEnv->SetValue("calg_netfirst",75);
+  gEnv->SetValue("calg_netsecon",75);
+  gEnv->SetValue("emcg_version",6.1);
+  gEnv->SetValue("emcg_onoff",1);
+  gEnv->SetValue("emcg_fillmode",3);
+  gEnv->SetValue("mtdg_version",1);
+  return CreateGeometry("devTD");
+}
