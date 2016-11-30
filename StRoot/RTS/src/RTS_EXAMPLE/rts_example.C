@@ -1826,12 +1826,6 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 		while(dd->iterate()) {	//per xing and per RDO
 			adc_found |= 1 << (dd->sec - 1) ;	//sector mask
 
-			u_int ev_ch = 0 ;	//count of channels
-
-			
-			fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
-
-
 
 			fps_adc_t *a = (fps_adc_t *)dd->Void ;
 
@@ -1844,16 +1838,8 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 					sum += a[i].adc ;
 				}
 				
-				printf("FPS sector %d: xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",dd->sec,(char)dd->row,dd->rdo,dd->ncontent,occ,sum) ;
+				printf("FPS sector %d: xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",dd->sec,(char)dd->pad,dd->row,dd->ncontent,occ,sum) ;
 		
-				int xing = (char)dd->row ;
-
-				//int ix = xing + 10 ;
-
-				//if(ix>=0 && ix<21) tot_charge[ix] += sum ;
-
-				if(xing==0) ev_ch += dd->ncontent;;
-
 			}
 
 
@@ -1866,8 +1852,16 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 			}
 		
 
+
+
+		}
+
+		if(adc_found) {
 			// moved it to the end, when I know the channel count
 			if(do_print) {
+
+				fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
+
 				//time of arrival of the STP command
 				double stp = ((double) hdr->tick) * 1024.0 ;	//in clocks
 
@@ -1884,11 +1878,13 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 				just_readout /= cpu_clock ;
 				just_readout *= 1000000.0 ;
 
-				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), ch count  %u\n",
-				       dd->sec,stp, readout, readout-stp, readout-just_readout, ev_ch) ;
+				u_int rcc_tick = hdr->reserved[1] ;
+
+				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), RCC tick %u\n",
+				       dd->sec,stp, readout, readout-stp, readout-just_readout, rcc_tick) ;
 			}
-
-
+			
+			
 		}
 
 	}
@@ -1917,8 +1913,8 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 	char fstr[256] ;
 	fstr[0] = 0 ;
 
-	if(adc_found | 1) strcat(fstr,"FPS-ADC ") ;
-	if(adc_found | 2) strcat(fstr,"FPOST-ADC ") ;
+	if(adc_found & 1) strcat(fstr,"FPS-ADC ") ;
+	if(adc_found & 2) strcat(fstr,"FPOST-ADC ") ;
 
 	if(pedrms_found) strcat(fstr,"PEDRMS ") ;
 
