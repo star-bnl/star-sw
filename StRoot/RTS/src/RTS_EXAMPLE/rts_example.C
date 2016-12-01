@@ -121,11 +121,13 @@ int main(int argc, char *argv[])
 	class daqReader *evp = 0 ;			// tha main guy
 
 	if(optind >= argc) {	// no arguments -- NFS
-		LOG(INFO,"Using direct access via NFS directory %s",mountpoint) ;
+
 
 		evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
 
 		evp->setEvpDisk((char *)mountpoint);
+
+		LOG(INFO,"Using direct access via NFS directory %s to host %s",mountpoint,evp->EVP_HOSTNAME) ;
 
 		optind = argc - 1 ;	//hack up 1 loop
 
