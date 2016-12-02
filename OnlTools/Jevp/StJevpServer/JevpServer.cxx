@@ -37,7 +37,7 @@
 #include "Jevp/StJevpBuilders/daqBuilder.h"
 #include "Jevp/StJevpBuilders/eemcBuilder.h"
 #include "Jevp/StJevpBuilders/bemcBuilder.h"
-#include "Jevp/StJevpBuilders/fpdBuilder.h"
+//#include "Jevp/StJevpBuilders/fpdBuilder.h"
 #include "Jevp/StJevpBuilders/hltBuilder.h"
 #include "Jevp/StJevpBuilders/l3Builder.h"
 #include "Jevp/StJevpBuilders/tofBuilder.h"
@@ -45,14 +45,14 @@
 #include "Jevp/StJevpBuilders/tpxBuilder.h"
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
-#include "Jevp/StJevpBuilders/fgtBuilder.h"
+//#include "Jevp/StJevpBuilders/fgtBuilder.h"
 #include "Jevp/StJevpBuilders/vpdBuilder.h"
 #include "Jevp/StJevpBuilders/fmsBuilder.h"
 #include "Jevp/StJevpBuilders/gmtBuilder.h"
 #include "Jevp/StJevpBuilders/l4Builder.h"
-#include "Jevp/StJevpBuilders/pxlBuilder.h"
-#include "Jevp/StJevpBuilders/istBuilder.h"
-#include "Jevp/StJevpBuilders/ssdBuilder.h"
+//#include "Jevp/StJevpBuilders/pxlBuilder.h"
+//#include "Jevp/StJevpBuilders/istBuilder.h"
+//#include "Jevp/StJevpBuilders/ssdBuilder.h"
 #include "Jevp/StJevpBuilders/ppBuilder.h"
 #include "Jevp/StJevpBuilders/fpsBuilder.h"
 
@@ -653,7 +653,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new daqBuilder(this));
 	builders.Add(new bemcBuilder(this));
 	builders.Add(new eemcBuilder(this));
-	builders.Add(new fpdBuilder(this));
+	//builders.Add(new fpdBuilder(this));
 	builders.Add(new hltBuilder(this));
 	builders.Add(new l3Builder(this));
 	builders.Add(new tofBuilder(this));
@@ -661,14 +661,14 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new tpxBuilder(this));
 	builders.Add(new trgBuilder(this));
 	builders.Add(new upcBuilder(this));
-	builders.Add(new fgtBuilder(this));
+	//builders.Add(new fgtBuilder(this));
 	builders.Add(new vpdBuilder(this));
 	builders.Add(new fmsBuilder(this));
 	builders.Add(new fpsBuilder(this));
 	builders.Add(new gmtBuilder(this));
-	builders.Add(new pxlBuilder(this));
-	builders.Add(new istBuilder(this));
-	builders.Add(new ssdBuilder(this));
+	//builders.Add(new pxlBuilder(this));
+	//builders.Add(new istBuilder(this));
+	//builders.Add(new ssdBuilder(this));
 	builders.Add(new ppBuilder(this));
     }
     else {
