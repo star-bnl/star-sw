@@ -8,7 +8,7 @@ class StvHit;
 class StvFtsHitErrCalculator : public StvHitErrCalculator {
 
 public:	
-  StvFtsHitErrCalculator(const char *name="FtsHitErr"):StvHitErrCalculator(name,2){};
+  StvFtsHitErrCalculator(const char *name="FtsHitErrs"):StvHitErrCalculator(name,2){};
 int CalcDcaErrs(const StvHit* hit,double hRR[3]);
 int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
