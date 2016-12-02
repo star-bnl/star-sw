@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.29 2015/12/12 00:50:15 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.30 2016/12/02 02:19:15 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -32,6 +32,7 @@ Main tasks:
 #include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
 #include "StvStEventHitSelector.h"
+#include "Stv/StvToolkit.h"
 ClassImp(StvHitLoader)
 //_____________________________________________________________________________
 StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
@@ -130,7 +131,7 @@ if (myGraph) { //create canvas
     if (nSel> 0 && (!stHit->TestBit(StvStEventHitSelector::kMarked))) 	continue; // ignore not selected hit
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
     mDetId = did;
-    int sure;
+    int sure=0;
     int nStvHits = MakeStvHit(stHit,mHitIter->UPath(),sure);
 //     if (!sure && stvHit) { //Non reliable hit
 //       double rxy = sqrt(pow(stvHit->x()[0],2)+pow(stvHit->x()[1],2));
@@ -148,13 +149,30 @@ if (myGraph) { //create canvas
 }
 
 //_____________________________________________________________________________
-int StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure, StvHit *stvHit)
+int StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure)
 {
 static StTGeoProxy *tgh = StTGeoProxy::Inst();
 static StvToolkit  *kit = StvToolkit::Inst();
    assert(stHit);
-   if (!stvHit) stvHit = kit->GetHit();
+   StvHit *stvHit = 0;
    StDetectorId did = stHit->detector();
+   do {	//May be errors exists
+     if (did==kTpcId) 		break;
+     StMatrixF errF = stHit->covariantMatrix();
+     if (errF[0][0]<1e-8)	break;
+     stvHit = kit->GetHitRr();
+     float *e = stvHit->errMtx();
+     for (int i=0,li=0;i< 3;li+=++i) {
+     for (int j=0;j<=i;j++) { e[li+j] = errF[i][j];}}
+     assert(e[0]>1e-8 && e[0]<10);
+     assert(e[0]*e[2]>e[1]*e[1] );
+     assert(e[2]>1e-8 && e[2]<10);
+     assert(e[2]*e[5]>e[4]*e[4] );
+     assert(e[5]>1e-8 && e[5]<10);
+   } while(0);
+
+   if (!stvHit) stvHit = kit->GetHit();
+
    int idTru   = stHit->idTruth(); 
    
    UInt_t hard = stHit->hardwarePosition();
@@ -169,7 +187,14 @@ static StvToolkit  *kit = StvToolkit::Inst();
      enum {zPrompt = 205,rMiddle=0};
      hard <<=1; hard |= (fabs(xyz[2]) > zPrompt);
      if (xyz[0]*xyz[0]+xyz[1]*xyz[1] >rMiddle*rMiddle) seed = 1;
-   }
+   } else {
+//		the hits outside and with small mag field not for seed
+     const float* x = stvHit->x();
+     if (fabs(x[2])>250) {
+       static StvToolkit *tk = StvToolkit::Inst();
+       if (tk->GetHA(x)<1./1000) seed = 0;
+   } }
+   
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
    
    const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
