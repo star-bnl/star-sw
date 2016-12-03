@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2016.cxx,v 2.5 2016/09/14 15:11:37 ullrich Exp $
+ * $Id: StTriggerData2016.cxx,v 2.6 2016/12/03 15:27:23 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2016.cxx,v $
+ * Revision 2.6  2016/12/03 15:27:23  ullrich
+ * Various small changes by Akio.
+ *
  * Revision 2.5  2016/09/14 15:11:37  ullrich
  * Added missing check for validity of mBBC[buffer]
  *
@@ -212,12 +215,12 @@ unsigned int StTriggerData2016::actionWord() const
 
 unsigned int StTriggerData2016::numberOfPreXing() const
 {
-	return EvtDesc->npre;
+	return EvtDesc->npre & 0xf;
 }
 
 unsigned int StTriggerData2016::numberOfPostXing() const
 {
-	return EvtDesc->npost;
+	return EvtDesc->npost & 0xf;
 }
 
 unsigned short StTriggerData2016::busyStatus() const
