@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.12 2015/11/06 16:45:09 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.13 2016/11/29 19:09:30 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -129,7 +129,7 @@ static myMap gMyMod[] = {
 {kFmsId       		,""	},
 {kRpsId       		,""	},
 {kMtdId       		,"MMBL"	},
-#if 0
+#ifdef kFtsIdentifier
 {kFtsId       		,"FTSM"	},
 #endif
 {0,0				}};
@@ -1596,6 +1596,7 @@ int  StTGeoHitShape::Outside(double z,double rxy) const
    if (z<fZMin) 		return  1;
    if (z>fZMax) 		return  2;
    if (rxy>fRMinMax && rxy<fRMaxMin ) 	return 0;
+return 3;//??????????????????????????????????????????????????????????
    int jj = (int)(z-fZMin)/fZStp;
    if (jj<   0) jj=0;
    if (jj>=kNZ) jj=kNZ-1;

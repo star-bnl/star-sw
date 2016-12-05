@@ -170,12 +170,13 @@ void StvToolkit::Reset()
   if (mSeedFinders)  	mSeedFinders->Reset();
   if (mTrakFinder)  	mTrakFinder->Reset();
 
-}//______________________________________________________________________________
+}
+//______________________________________________________________________________
 double StvToolkit::GetHz(const double *x) const
 {
   static const Double_t EC = 2.99792458e-4;
    double h[3];
-   StarMagField::Instance()->BField((x),h);
+   StarMagField::Instance()->BField(x,h);
    h[2] = EC*h[2];
    if (fabs(h[2]) < 3e-33) h[2]=3e-33;
    return h[2];
@@ -184,6 +185,20 @@ double StvToolkit::GetHz(const double *x) const
 double StvToolkit::GetHz(const float *x) const
 { double xx[3]={x[0],x[1],x[2]};
   return GetHz(xx);
+}
+//______________________________________________________________________________
+double StvToolkit::GetHA(const double *x) const
+{
+  static const Double_t EC = 2.99792458e-4;
+   double h[3];
+   StarMagField::Instance()->BField(x,h);
+   double ha = (fabs(h[0])+fabs(h[1])+fabs(h[2]))*EC;
+   return ha;
+}
+//______________________________________________________________________________
+double StvToolkit::GetHA(const float *x) const
+{ double xx[3]={x[0],x[1],x[2]};
+  return GetHA(xx);
 }
 //______________________________________________________________________________
 int StvToolkit::Alive(void *obj)

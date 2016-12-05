@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StExtGeometry.cxx,v 1.1 2016/05/20 18:40:41 perev Exp $
+ * $Id: StExtGeometry.cxx,v 2.1 2016/11/28 20:58:30 ullrich Exp $
  *
- * Author: Victor Perevoztchikov, Apr 2016
+ * Author: Victor Perevoztchikov, November 2016
  ***************************************************************************
  *
  * Description:
@@ -10,10 +10,9 @@
  ***************************************************************************
  *
  * $Log: StExtGeometry.cxx,v $
- * Revision 1.1  2016/05/20 18:40:41  perev
- * Xtended tracks maker added
- *
+ * Revision 2.1  2016/11/28 20:58:30  ullrich
  * Initial Revision.
+ *
  *
  **************************************************************************/
 #include <stdlib.h>
@@ -21,15 +20,16 @@
 #include <assert.h>
 #include "StExtGeometry.h"
 #include "TCernLib.h"
+
 ClassImp(StExtGeometry)
     
-static const char rcsid[] = "$Id: StExtGeometry.cxx,v 1.1 2016/05/20 18:40:41 perev Exp $";
+static const char rcsid[] = "$Id: StExtGeometry.cxx,v 2.1 2016/11/28 20:58:30 ullrich Exp $";
 
 //_____________________________________________________________________________
 StExtGeometry::StExtGeometry(const char *name)
 {
     memset(mName,0,mEnd-mName+1);
-    set(name);
+    setName(name);
 }
 
 //_____________________________________________________________________________
@@ -52,7 +52,7 @@ StThreeVectorF StExtGeometry::momentum() const
     return StThreeVectorF(x,y,z);
 }
 //_____________________________________________________________________________
-void StExtGeometry::set(const char *name)
+void StExtGeometry::setName(const char *name)
 {
     assert(strlen(name)<=3);
     strcpy(mName,name);

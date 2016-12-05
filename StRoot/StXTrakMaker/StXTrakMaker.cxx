@@ -164,7 +164,7 @@ Int_t StXTrakMaker::Make()
       lenInnHlx = fabs(HLX.Path(0.,0.));
 
       StExtGeometry *xg = new StExtGeometry;
-      xg->set(found.Data());
+      xg->setName(found.Data());
       double pars[6];
       pars[StExtGeometry::kPhi ] = atan2(pos[1],pos[0]);
       pars[StExtGeometry::kZ   ] = pos[21];

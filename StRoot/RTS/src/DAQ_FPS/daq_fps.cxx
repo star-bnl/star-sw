@@ -107,7 +107,7 @@ daq_dta *daq_fps::handle_adc(int sec)
 
 	for(int s=s_start;s<=s_stop;s++) {
 
-		raw_d = handle_raw(sec) ;
+		raw_d = handle_raw(s) ;
 		if(raw_d==0) continue ;
 		if(raw_d->iterate() == 0) continue ;
 
@@ -120,7 +120,7 @@ daq_dta *daq_fps::handle_adc(int sec)
 		int tb_cou = hdr->pre_post_cou ;
 		int qt_cou = hdr->qt_cou ;
 
-		//LOG(TERR,"tb %d, qt %d, hdr ver 0x%08X",tb_cou,qt_cou,hdr->ver) ;
+		//LOG(TERR,"token %d, pre/post %d, qt %d, hdr ver 0x%08X",hdr->stp_data[0],tb_cou,qt_cou,hdr->ver) ;
 
 		//note that this gets overriden sector by sector and can thus
 		//potentially only show data from the 2nd (last) sector!
@@ -133,7 +133,7 @@ daq_dta *daq_fps::handle_adc(int sec)
 
 	
 		for(int tb=0;tb<tb_cou;tb++) {
-			int rel_xing = *d32++ ;
+			int rel_xing = *d32++ ;	//first is the relative Xing as a signed number!
 
 			//LOG(TERR,"Rel xing %d",rel_xing) ;
 		
@@ -141,7 +141,7 @@ daq_dta *daq_fps::handle_adc(int sec)
 				int qt = *d32++ ;
 				int chs = *d32++ ;
 	
-			//LOG(TERR,"qt %d, chs %d",qt,chs) ;
+				//LOG(TERR,"qt %d, chs %d",qt,chs) ;
 
 				if(chs==0) continue ;
 

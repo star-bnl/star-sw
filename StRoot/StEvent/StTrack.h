@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.36 2015/10/09 17:46:15 ullrich Exp $
+ * $Id: StTrack.h,v 2.37 2016/11/28 21:00:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.37  2016/11/28 21:00:24  ullrich
+ * Added StExtGeometry features.
+ *
  * Revision 2.36  2015/10/09 17:46:15  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -213,7 +216,7 @@ public:
     const StTrackGeometry*         geometry() const;
     StTrackGeometry*               outerGeometry();
     const StTrackGeometry*         outerGeometry() const;
-    StExtGeometry*                 extGeometry()        {return mExtGeometry;}
+    StExtGeometry*                 extGeometry()	 {return mExtGeometry;}
     const StExtGeometry*           extGeometry()   const {return mExtGeometry;}
     StTrackDetectorInfo*           detectorInfo();
     const StTrackDetectorInfo*     detectorInfo() const;

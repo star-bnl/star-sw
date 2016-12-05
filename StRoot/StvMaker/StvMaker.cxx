@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.52 2015/12/12 00:56:12 perev Exp $
+// $Id: StvMaker.cxx,v 1.54 2016/11/29 17:12:35 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -68,13 +68,13 @@ More detailed: 				<br>
 #include "StvUtil/StvPullEvent.h"
 #include "Stv/StvDiver.h"
 #include "StvHitLoader.h"
-#include "StvFtsHitLoader.h"
+//#include "StvFtsHitLoader.h"
+//#include "StvUtil/StvFtsHitErrCalculator.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvSeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StvUtil/StvHitErrCalculator.h"
-#include "StvUtil/StvFtsHitErrCalculator.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
@@ -241,7 +241,8 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kPxlId,hec,0);
     Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
   }
-#if 0
+
+#ifdef kFtsIdentifier
   if (IAttr("activeFTS")) {    // FTS error calculator
     mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
@@ -277,10 +278,9 @@ static int initialized = 0;
   TString geoName(gGeoManager->GetName()); geoName.ToLower();
 
 //		Activate detectors
-#if 0
+#ifdef kFtsIdentifier
   if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
-                            SetAttr("activeTpc",0);}
-#endif
+#endif                            SetAttr("activeTpc",0);}
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
@@ -317,9 +317,9 @@ static int initialized = 0;
 //		Choose seed finders
   assert(gSystem->Load("StvSeed.so")>=0);
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
-  for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
+  for (int jreg=0;jreg<1; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
-//    mHitLoader[jreg] = new StvFtsHitLoader;
+//??    mHitLoader[jreg] = new StvFtsHitLoader;
     mSeedFinders[jreg] = new StvSeedFinders;
     if (IAttr("useEventFiller")) 
       mEventFiller[jreg]= new StvStEventFiller;
@@ -358,6 +358,7 @@ static int initialized = 0;
 
 
   for (int reg = 0;reg<2;reg++) {
+    if (!mHitLoader[reg]) 		continue; 	
     if (mHitLoader[reg]->NumDetectors()) continue; 	// used
     delete mHitLoader[reg];    mHitLoader[reg]   =0;
     delete mSeedFinders[reg];  mSeedFinders[reg] =0;
@@ -368,6 +369,7 @@ static int initialized = 0;
   for (int reg = 0;reg<2;reg++) {
     if (!mHitLoader[reg]) continue;		// not used
     const auto *par = kons->At(reg);
+    if (!par) continue;
     mSeedFinders [reg]->SetCons(par);
     mEventFiller [reg]->SetCons(par);
     mTrackFinder [reg]->SetCons(par);

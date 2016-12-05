@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.27 2016/07/29 15:38:51 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.28 2016/11/28 21:52:43 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.28  2016/11/28 21:52:43  jwebb
+ * Add psi(2s) --> mu+mu- with 100% branching ratio.
+ *
  * Revision 1.27  2016/07/29 15:38:51  jwebb
  * Fixed error in G3ID to PDGid mapping.
  *
@@ -291,7 +294,8 @@ StParticleTable::StParticleTable()
     /// Quarkonia in dielectron channel
 
        Geant2Pdg( 160,    443, JPsi );     // JPsi
-       Geant2Pdg( 167, 100443, Psi2c );    // Psi'
+       Geant2Pdg( 167, 100443, Psi2c );    // Psi' --> e+e-
+       Geant2Pdg( 169, 200443, Psi2c );    // Psi' --> mu+mu-
     
        Geant2Pdg( 161,    553, Upsilon1S); // Upsilon(1S)
        Geant2Pdg( 162, 100553, Upsilon2S); // Upsilon(2S)

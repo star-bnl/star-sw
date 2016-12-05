@@ -1623,7 +1623,9 @@ Bfc_st BFC[] = { // standard chains
   {"fpsDat"     ,"","", "StEvent,fmsdb",
    "StFpsRawHitMaker","StFpsRawHitMaker","Fill FPS struct",                                         kFALSE},
   {"fmsPoint"   ,"","", "event,fmsDb",
-   "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters",                                         kFALSE},
+   "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points",                              kFALSE},
+  {"fmsfps"   ,"","", "event,fmsDb",
+   "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
   // FGT
