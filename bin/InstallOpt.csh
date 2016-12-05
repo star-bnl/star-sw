@@ -52,10 +52,19 @@ foreach pkg ( apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 
         if (-r ~/sources/${pkg}) then
           dirsync  ~/sources/${pkg} ${pkg}
         else 
-          if (-r ~/sources/${pkg}.tar) then
+          if (-r ~/sources/${pkg}.tar.gz) then
+            gunzip ~/sources/${pkg}.tar.gz
             tar xf ~/sources/${pkg}.tar
           else
-            break;
+            if (-r ~/sources/${pkg}.tar) then
+              tar xf ~/sources/${pkg}.tar
+            else
+              if (-r ~/sources/${pkg}.tz) then
+                tar xfz ~/sources/${pkg}.tz
+              else
+                break;
+              endif
+            endif
           endif
         endif
       else 
