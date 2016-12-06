@@ -269,10 +269,7 @@ Int_t StGenericVertexMaker::Finish()
 Bool_t StGenericVertexMaker::DoFit(){
   StThreeVectorD myvertex;
 
-  StEvent *event = (StEvent *) GetInputDS("StEvent");
-  assert(event);
-
-  if (theFinder->fit(event)) {
+  if (theFinder->fit(mEvent)) {
     theFinder->printInfo();
   }  else {
     LOG_ERROR << "StGenericVertexMaker::DoFit: vertex fit failed, no vertex." << endm;
