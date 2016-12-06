@@ -267,7 +267,6 @@ Int_t StGenericVertexMaker::Finish()
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 Bool_t StGenericVertexMaker::DoFit(){
-  StThreeVectorD myvertex;
 
   if (theFinder->fit(mEvent)) {
     theFinder->printInfo();
