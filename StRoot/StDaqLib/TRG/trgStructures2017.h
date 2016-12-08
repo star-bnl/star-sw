@@ -18,7 +18,7 @@
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
 ******************************************************************************/
-#define y17FORMAT_VERSION        0x15113044      /* Format: yymmddvv */
+#define y17FORMAT_VERSION        0x16120844      /* Format: yymmddvv */
 #define y17MAX_TRG_BLK_SIZE          122896      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define y17MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
