@@ -143,8 +143,7 @@ static int nCall=0; nCall++;
   if (fXi2[1]>kBAD_XI2) return 0; 	//Xi2 too bad, no updates
   fHelix.MakeErrs();
   l = fHelix.Path(dBeg); 
-  l*= (nNode+1.)/(nNode-1.);
-  fHelix.Move(l);
+  l-= 0.1; fHelix.Move(l);
 
   return &fHelix;
 }    
