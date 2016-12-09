@@ -146,6 +146,20 @@ static int nCall = 0; nCall++;
 std::vector<TObject*> mySeedObjs;
 
   StvHit *fstHit,*selHit=0; 
+
+#if 0
+  if (*f1stHitMapIter == f1stHitMap->begin()) { //print all seed hitss at the begining
+  int nnn=0;
+  for (auto it = f1stHitMap->begin(); it!=f1stHitMap->end(); ++it) {
+    nnn++;
+    auto *hit = (*it).second;
+    printf("%d  *** StvDefaultSeedFinder::NextSeed %g %g %g  ***\n",nnn
+      ,hit->x()[0],hit->x()[1],hit->x()[2]);
+    StvDebug::Count("ZSeeds",hit->x()[2]);
+  } }  
+#endif
+
+
   int nTally = 0; 
   while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
@@ -204,12 +218,26 @@ std::vector<TObject*> mySeedObjs;
     }// end NextHit loop
 //		If no hits found, go to next 1st hit
     if ((int)fSeedHits.size()<=1) {mNDejavu = 99; continue;}
-
-//	If too short seed go to next 1st hit
     if ((int)fSeedHits.size() < fMinHits) continue;
 
 
     const THelixTrack *hel = Approx();
+
+#if 0
+  if (hel) { //print all seed hits 
+  for (int it = 0;it<(int)fSeedHits.size(); ++it) {
+    auto *hit = fSeedHits[it];
+    printf("%d  *** StvDefaultSeedFinder::NextSeed %g %g %g  %s ***\n",it
+      ,hit->x()[0],hit->x()[1],hit->x()[2]
+      ,hit->detector()->GetName());
+  } }  
+
+
+#endif
+
+
+
+
     if (hel) { fNSeeds[0]++;;return hel;}		//Good boy
  //		Bad seed
     fNUsed[0] -= fSeedHits.size();
@@ -295,7 +323,7 @@ assert(fabs(Dot(mDir,mDir)-1)<1e-5);
   mRxy = sqrt(mRxy2);
   mDelta = SEED_ERR(mRxy);
   mLen= mLayer*kLenFakt/(fabs(Dot(mHitDir,mDir))+1e-10);
-  if (mLen>100) mLen = 100;
+  if (mLen>300) mLen = 300;
   UpdateLims();
 
 }   
