@@ -91,6 +91,8 @@ StvNodeFactory  *mNodeFactory;
 StvTrackFactory *mTrackFactory;
 StvELossTrakFactory *mELossTrakFactory;
 StvVertexFactory    *mVertexFactory;
+// Mag field 
+mutable double mX[3],mH[3];
 char            mEnd[1];
 
 protected:
