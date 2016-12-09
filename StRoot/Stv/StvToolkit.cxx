@@ -18,7 +18,7 @@ class StvHitFactory  		: public StvFactory<StvHit ,StvHit > 		{public:};
 class StvHitRrFactory  		: public StvFactory<StvHitRr ,StvHit > 		{public:};
 class StvNodeFactory 		: public StvFactory<StvNode,StvNode> 		{public:};
 class StvTrackFactory		: public StvFactory<StvTrack,StvTrack> 		{public:};
-class StvELossTrakFactory	: public StvFactory<StvELossTrak,StvELossTrak> {public:};
+class StvELossTrakFactory	: public StvFactory<StvELossTrak,StvELossTrak>  {public:};
 class StvVertexFactory   	: public StvFactory<StvVertex ,StvVertex > 	{public:};
 
 
@@ -30,6 +30,7 @@ StvToolkit::StvToolkit()
   assert(!mgInstance);
   mgInstance = this;
   memset(mBeg,0,mEnd-mBeg+1);
+  mX[0] = -999999;
   mTraks = new StvTracks;
 }
 
@@ -56,7 +57,7 @@ StvHit *StvToolkit::GetHitRr()
 {
   if (!mHitRrFactory) {
     mHitRrFactory = (StvHitRrFactory*)StvHitRrFactory::myInstance();
-    mHitRrFactory->setMaxIncrementCount(40000);
+    mHitRrFactory->setMaxIncrementCount(4000000);
     mHitRrFactory->setFastDelete();
   }
   return mHitRrFactory->getInstance();	
@@ -175,11 +176,18 @@ void StvToolkit::Reset()
 double StvToolkit::GetHz(const double *x) const
 {
   static const Double_t EC = 2.99792458e-4;
-   double h[3];
-   StarMagField::Instance()->BField(x,h);
-   h[2] = EC*h[2];
-   if (fabs(h[2]) < 3e-33) h[2]=3e-33;
-   return h[2];
+  do {
+    if (fabs(x[0]-mX[0])>1e-3) break;
+    if (fabs(x[1]-mX[1])>1e-3) break;
+    if (fabs(x[2]-mX[2])>1e-3) break;
+    return mH[2];
+  }while(0);
+   memcpy(mX,x,sizeof(mX));
+
+   StarMagField::Instance()->BField(mX,mH);
+   mH[0]*= EC;mH[1]*= EC;mH[2]*= EC;
+   if (fabs(mH[2]) < 3e-33) mH[2]=3e-33;
+   return mH[2];
 }
 //______________________________________________________________________________
 double StvToolkit::GetHz(const float *x) const
