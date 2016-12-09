@@ -860,13 +860,14 @@ int StEventHitIter::AddDetector(StDetectorId detId)
    case kPxlId: Add(new StPxlHitIter()) ;break;
    case kIstId: Add(new StIstHitIter()) ;break; 
      /* case kFgtId: n.b. This will be removing the RnD version of the FGT */ 
-   case kFmsId: 
-     Add(new StRnDHitIter(detId));break;
+   case kFmsId: Add(new StRnDHitIter(detId));break;
      
    case kTofId: Add(new StTofHitIter()) ;break;
    case kEtrId: Add(new StEtrHitIter()) ;break;
    case kFgtId: Add(new StFgtHitIter()) ;break;
-       
+#ifdef kFtsIdentifierFt
+   case kFtsId: Add(new StRnDHitIter(detId));break;
+#endif       
      
    default: printf("StEventHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
      assert(0 && "No iterator for detectorId");
