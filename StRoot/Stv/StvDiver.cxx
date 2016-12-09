@@ -111,7 +111,6 @@ static StvToolkit* kit = StvToolkit::Inst();
   TRandom *myRandom = gRandom;
   gRandom = gMyRandom;
 
-  mFld->SetHz(mInpPars->_hz);	//Set initial value of mag field
   assert(fabs(mInpPars->_hz)<0.01);
   mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);
   mELoss->Reset(mDir);
@@ -125,16 +124,16 @@ static StvToolkit* kit = StvToolkit::Inst();
     TVirtualMC::GetMC()->ProcessEvent();
     myExit = mSteps->GetExit();
     if (myExit & StvDiver::kDiveBreak) break;
-
-    TVector3 pos = mSteps->CurrentPosition().Vect();
-    TVector3 mom = mSteps->CurrentMomentum().Vect();
-    mOutPars->_x = pos.X();
-    mOutPars->_y = pos.Y();
-    mOutPars->_z = pos.Z();
+    double pos[4];
+    mSteps->CurrentPosition().GetXYZT(pos);
+    auto &mom = mSteps->CurrentMomentum();
+    mOutPars->_x = pos[0];
+    mOutPars->_y = pos[1];
+    mOutPars->_z = pos[2];
     mOutPars->_psi = mom.Phi();
     mOutPars->_ptin = -mSteps->Charge()/mom.Pt();
     mOutPars->_tanl = mom[2]*fabs(mOutPars->_ptin);
-    mOutPars->_hz   = mFld->GetHz();
+    mOutPars->_hz   = mFld->GetHz(pos);
     mOutPars->ready(); 
     mOutErrs->Set(mHelix,mOutPars->_hz);
     assert(mOutErrs->mPP>0);
@@ -620,22 +619,30 @@ ClassImp(StvMCField)
 //_____________________________________________________________________________
 StvMCField::StvMCField() 
 {
+  mX[2] = 3e33;
   mH[2] = 3e33;
   mFild =  StarMagField::Instance();
 }
 //_____________________________________________________________________________
 int StvMCField::FunDD(const double *x,double *b) 
 {     
-static const Double_t EC = 2.99792458e-4;
-  mFild->BField(x,b); 
-  for (int i=0;i<3;i++){mH[i] = b[i]*EC;}
+  do {
+    if (fabs(x[2]-mX[2])>0.01) break;
+    if (fabs(x[1]-mX[1])>0.01) break;
+    if (fabs(x[0]-mX[0])>0.01) break;
+    if (b) memcpy(b,mH,sizeof(mH));
+    return 0;
+  } while(0);
+  memcpy(mX,x,sizeof(mX));
+  mFild->BField(mX,mH); 
   if (fabs(mH[2]) < 1e-5) mH[2]=1e-5;
+  if (b) memcpy(b,mH,sizeof(mH));
   return 0;
 }
 //_____________________________________________________________________________
 double StvMCField::GetHz(const double *x) 
 {     
-   double B[3];
-   FunDD(x,B);
-   return mH[2];
+static const Double_t EC = 2.99792458e-4;
+   FunDD(x,0);
+   return mH[2]*EC;
 }   
