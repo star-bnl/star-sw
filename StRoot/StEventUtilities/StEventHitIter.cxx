@@ -865,7 +865,7 @@ int StEventHitIter::AddDetector(StDetectorId detId)
    case kTofId: Add(new StTofHitIter()) ;break;
    case kEtrId: Add(new StEtrHitIter()) ;break;
    case kFgtId: Add(new StFgtHitIter()) ;break;
-#ifdef kFtsIdentifierFt
+#ifdef kFtsIdentifier
    case kFtsId: Add(new StRnDHitIter(detId));break;
 #endif       
      
