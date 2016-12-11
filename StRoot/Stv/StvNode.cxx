@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.37 2015/10/30 18:24:38 perev Exp $
+ * $Id: StvNode.cxx,v 1.38 2016/12/09 21:21:41 perev Exp $
  *
  * /author Victor Perev
  */
@@ -79,7 +79,7 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "X Y Z Pt H R E Ep L Ps Tl P[ E[ Pa ";
+static const char *txt = "X Y Z Pt Cu H R E Ep L Ps Tl P[ E[ Pa ";
 static const char *hhh = "x y z r e ";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);myOpt+=" ";
@@ -103,10 +103,8 @@ static const char *hhh = "x y z r e ";
   printf("\t%s=%g","Xi2",GetXi2(djr));
   int iopt=0;
   const char *myopt = myOpt.Data(); char*e;
-  int seekSpace = 0;
   for (int i=0;txt[i];i++) {
-    if (txt[i]==' ') {seekSpace=0; continue;}
-    seekSpace = 1;
+    if (txt[i]==' ') continue;
     int nc = 2; if (txt[i+1]=='[') nc = 4;
     TString ts(txt+i,nc);
     err[0]=-999;val=-999;
@@ -122,6 +120,7 @@ static const char *hhh = "x y z r e ";
       else if (ts=="Ps")        {val = fp._psi ;}
       else if (ts=="Tl")        {val = fp._tanl ;}
       else if (ts=="Pt")        {val = fp.getPt() ;}
+      else if (ts=="Cu")        {val = fp._curv;}
       else if (ts=="E ")        {err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
       else if (ts=="Ep")        {err[0] = sqrt(pe.mHH); err[1] = sqrt(pe.mZZ);}
       else if (ts=="L ")        {val = GetLen();}
@@ -138,15 +137,16 @@ static const char *hhh = "x y z r e ";
   }//end for i
 
   if (hit) {
-    for (int i=0;hit && hhh[i];i++) {
+    printf(" hit(%p) ",(void*)hit);
+    for (int i=0; hhh[i];i++) {
        err[0]=-999;val=-999;
       if (hhh[i]==' ') continue;
       if ((iopt=myOpt.Index(TString(hhh+i,2)))<0) continue;
       if (hhh[i+1]==' ')        {//Single letter request 
         if (hhh[i]=='r')        { val = hit->getRxy();}
         else if (hhh[i]=='e')   {err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
-      else                      {val = hit->x()[i];} 
-      if (TMath::Abs(val+999)>1e-6)    {printf("\th%c=%g",hhh[i],val);}
+      else                      {val = hit->x()[i/2];} 
+      if (fabs(val+999)>1e-6)   {printf("\th%c=%g",hhh[i],val);}
       if (err[0]>-999)          {printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
       } else if (txt[i+1]=='[') {// now print by index
 

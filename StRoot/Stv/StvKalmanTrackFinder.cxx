@@ -198,7 +198,7 @@ mHitCounter->Clear();
   }
   fitt->Set(par, err, par+1,err+1);
   mHitter->Reset();
-StvFitDers derivFit;
+  StvFitDers derivFit;
   mDive->Reset();
 //		We need here to find a hit and calulate errs. No Dca yet
   mDive->SetOpt(StvDiver::kTargHit | StvDiver::kDoErrs);

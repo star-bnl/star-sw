@@ -67,7 +67,7 @@ public:
     ///Return components of the error matrix.
     virtual const float *errMtx() const {return 0;}
     virtual       float *errMtx()   	{return 0;}
-                  double err2() const;
+    virtual       double err2() const;
     ///Return a const pointer to the StHitPlane object from which the hit
     ///arose.
     const StHitPlane* detector() const	{return mDetector;}
@@ -131,6 +131,7 @@ public:
 
     const float *errMtx() const   {return mErr;}
           float *errMtx()         {return mErr;}
+    virtual double err2() const   {return mErr[0]+mErr[2];}
 
 protected:
     float mErr[6];			//error matrix

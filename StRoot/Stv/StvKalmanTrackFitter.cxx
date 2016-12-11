@@ -310,7 +310,10 @@ StvDebug::Break(nCall);
   if (innNode){}; if (outNode){};
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
-
+  
+  double saveCurv = node->mFP[lane]._curv;
+  node->mFP[lane]._curv = (2*saveCurv+preNode->mFP[lane]._curv)/3;
+  
 double dS=0;
 if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
 {
@@ -395,6 +398,9 @@ assert(nowErrs.mHH>0);
 assert(preErrs.mZZ>0);
   innNode->SetDer(derFit,lane);
   } 
+
+  node->mFP[lane]._curv = saveCurv;
+
   return 0;
   
 }

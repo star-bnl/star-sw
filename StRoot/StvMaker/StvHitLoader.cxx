@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.30 2016/12/02 02:19:15 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.31 2016/12/09 21:03:43 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -17,6 +17,8 @@ Main tasks:
 #include <math.h>
 #include <string>
 #include "TGeoManager.h"
+#include "TCernLib.h"
+#include "StEvent/StRnDHit.h"	//???TempoHack???
 #include "StvHitLoader.h"
 #include "StvStEventHitSelector.h"
 #include "Stv/StvHit.h"
@@ -24,8 +26,6 @@ Main tasks:
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StEvent.h"
 #include "StHit.h"
-#include "StIstHit.h"	////????
-#include "StPxlHit.h"	////????
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StEventHitIter.h"
 #include "StvUtil/StvDebug.h"
@@ -34,6 +34,9 @@ Main tasks:
 #include "StvStEventHitSelector.h"
 #include "Stv/StvToolkit.h"
 ClassImp(StvHitLoader)
+
+StMatrixF  Hack1to6(const StHit *stHit);
+
 //_____________________________________________________________________________
 StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
 
@@ -158,17 +161,35 @@ static StvToolkit  *kit = StvToolkit::Inst();
    StDetectorId did = stHit->detector();
    do {	//May be errors exists
      if (did==kTpcId) 		break;
-     StMatrixF errF = stHit->covariantMatrix();
+     StMatrixF errF(3,3);
+     do {
+#ifdef kFtsIdentifier
+       if (did != kFtsId) 	break;
+#endif
+       int layer = ((StRnDHit*)stHit)->layer();
+       if (layer>6)		break;
+       errF = Hack1to6(stHit);
+     } while(0);
+     if (errF[0][0]<=0) {
+       errF = stHit->covariantMatrix();
+     }
+#ifdef kFtsIdentifier
+     assert(did!=kFtsId || errF[0][0]>1e-8);
+#endif
      if (errF[0][0]<1e-8)	break;
+     assert(fabs(errF[0][1]-errF[1][0])<1e-8);
+     assert(fabs(errF[0][2]-errF[2][0])<1e-8);
+     assert(fabs(errF[1][2]-errF[2][1])<1e-8);
      stvHit = kit->GetHitRr();
      float *e = stvHit->errMtx();
      for (int i=0,li=0;i< 3;li+=++i) {
      for (int j=0;j<=i;j++) { e[li+j] = errF[i][j];}}
-     assert(e[0]>1e-8 && e[0]<10);
-     assert(e[0]*e[2]>e[1]*e[1] );
-     assert(e[2]>1e-8 && e[2]<10);
-     assert(e[2]*e[5]>e[4]*e[4] );
-     assert(e[5]>1e-8 && e[5]<10);
+     assert(e[0]>1e-8 && e[0]<64);
+     assert(e[0]*e[2]> e[1]*e[1] );
+     assert(e[2]>1e-8 && e[2]<64);
+     assert(e[2]*e[5]>=e[4]*e[4] );
+     assert(e[5]>= 0  && e[5]<64);
+     assert(e[0]*e[5]>=e[3]*e[3] );
    } while(0);
 
    if (!stvHit) stvHit = kit->GetHit();
@@ -190,6 +211,7 @@ static StvToolkit  *kit = StvToolkit::Inst();
    } else {
 //		the hits outside and with small mag field not for seed
      const float* x = stvHit->x();
+     assert(fabs(x[0])+fabs(x[1])>1);
      if (fabs(x[2])>250) {
        static StvToolkit *tk = StvToolkit::Inst();
        if (tk->GetHA(x)<1./1000) seed = 0;
@@ -215,6 +237,15 @@ static StvToolkit  *kit = StvToolkit::Inst();
      assert(fabs(dang)<31);
    }
    stvHit->set(hp);
+#if 0
+static int nnn=0;nnn++;
+printf("%d  *** StvHitLoader::MakeStvHit %g %g %g  ***\n",nnn
+      ,stvHit->x()[0],stvHit->x()[1],stvHit->x()[2]);
+StvDebug::Count("ZHits",stvHit->x()[2]);
+StvDebug::Count("XYHits",stvHit->x()[1],stvHit->x()[1]);
+StvDebug::Count("ZXHits",stvHit->x()[2],stvHit->x()[0]);
+StvDebug::Count("ZYHits",stvHit->x()[2],stvHit->x()[1]);
+#endif
    return 1;
 }
 
@@ -265,8 +296,32 @@ int StvHitLoader::TpcHitTest(const StHit *stHit)
   }
   return isdet;
 }
-    
-    
-    
-  
-  
+//_____________________________________________________________________________
+StMatrixF  Hack1to6(const StHit *stHit)
+{
+//  X = R*cos(Fi), Y=R*sin(Fi), Z = z   
+//   dX/dR  = (    cos(Fi)  ,sin(Fi),0)
+//   dX/dFi = (-R*sin(Fi), R*cos(Fi),0)
+//   dX/dZ  = (         0,         0,1)
+
+  auto  hiPos = stHit->position();   
+  auto  hiErr = stHit->positionError();   
+  double Rxy = sqrt(hiPos[0]*hiPos[0]+hiPos[1]*hiPos[1]);
+  double cosFi = hiPos[0]/Rxy;   
+  double sinFi = hiPos[1]/Rxy;   
+  double T[3][3] = {{cosFi,-Rxy*sinFi,0}
+                   ,{sinFi, Rxy*cosFi,0}
+                   ,{    0,         0,1}};
+  double Ginp[6] = { hiErr[0]*hiErr[0]
+                   ,                0,hiErr[1]*hiErr[1]
+		   ,                0,                0,hiErr[2]*hiErr[2]};
+  double Gout[6];		   
+		   
+  TCL::trasat(T[0],Ginp,Gout,3,3);
+  StMatrixF mtxF(3,3);
+
+  for (int i=0,li=0;i< 3;li+=++i) {
+     for (int j=0;j<=i;j++) {mtxF[i][j] = Gout[li+j]; mtxF[j][i] = mtxF[i][j];}}
+     
+  return mtxF;
+}

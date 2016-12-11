@@ -167,11 +167,9 @@ class StvMCField :  public GCall  {
   StvMCField();
  ~StvMCField() {}
   virtual int FunDD(const double *x,double *b);
-  double GetHz() const 		{return mH[2];}
   double GetHz(const double X[3]);		
-  void   SetHz(double hz) 	{mH[0]=0; mH[1]=0; mH[2]=hz;}
  protected:
- double mH[3];
+ double mH[3],mX[3];
  StarMagField *mFild; // 
 
   ClassDef(StvMCField,0)    //

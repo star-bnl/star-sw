@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.54 2016/11/29 17:12:35 perev Exp $
+// $Id: StvMaker.cxx,v 1.55 2016/12/09 21:02:25 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -246,8 +246,7 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeFTS")) {    // FTS error calculator
     mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
-    StvHitErrCalculator *hec = new StvFtsHitErrCalculator(myName);
-//vp    StvHitErrCalculator *hec = new StvHitRrCalculator(myName);
+    auto *hec = (StvHitErrCalculator*)gROOT->ProcessLineFast("new StvFtsHitErrCalculator()");
     Int_t nHP = tgh->SetHitErrCalc(kFtsId,hec,0);
     Info("Init","%s: %d Hitplanes", "FtsHitErrs", nHP);
   }
@@ -279,8 +278,12 @@ static int initialized = 0;
 
 //		Activate detectors
 #ifdef kFtsIdentifier
-  if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
-#endif                            SetAttr("activeTpc",0);}
+  if (IAttr("activeFts")) { int nakt = tgh->SetActive(kFtsId               );
+                            assert(nakt);
+			    SetAttr("activeTpc",0);
+			    tgh->ls("SscA");
+			  }
+#endif
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
@@ -317,9 +320,8 @@ static int initialized = 0;
 //		Choose seed finders
   assert(gSystem->Load("StvSeed.so")>=0);
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
-  for (int jreg=0;jreg<1; jreg++) {	//0=midEta,1=forwardEta
+  for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
-//??    mHitLoader[jreg] = new StvFtsHitLoader;
     mSeedFinders[jreg] = new StvSeedFinders;
     if (IAttr("useEventFiller")) 
       mEventFiller[jreg]= new StvStEventFiller;
