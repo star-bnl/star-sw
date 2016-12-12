@@ -45,7 +45,6 @@ using namespace units;
 #endif
 
 
-ClassImp(StGenericVertexMaker)
 //___________________________________________________________
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
   useITTF(true),

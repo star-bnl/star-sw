@@ -46,7 +46,6 @@ const double pionToMuonQ= 0.030;
 const int MAXNUMOFTRACKS= 10000;
 const int SIZETRKIDCHECK= 1000;
 
-ClassImp(StKinkMaker)
 
 //=======================================================================
   StKinkMaker::StKinkMaker(const char *name):StMaker(name),m_tkfpar(0)

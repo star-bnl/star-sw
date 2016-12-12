@@ -31,7 +31,6 @@ static const int BLOCK=1024;
 
 StV0FinderMaker* StV0FinderMaker::mInstance = 0;
 
-ClassImp(StV0FinderMaker)
  
 //_____________________________________________________________________________
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
@@ -832,8 +831,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.35 2015/07/20 18:03:15 genevb Exp $
+// $Id: StV0FinderMaker.cxx,v 1.36 2016/12/12 17:18:04 smirnovd Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.36  2016/12/12 17:18:04  smirnovd
+// Removed outdated ClassImp ROOT macro
+//
 // Revision 1.35  2015/07/20 18:03:15  genevb
 // isnan => std::isnan
 //
