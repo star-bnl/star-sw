@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.9 2009/01/26 15:11:05 fisyak Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.10 2016/12/12 17:18:04 smirnovd Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.10  2016/12/12 17:18:04  smirnovd
+ * Removed outdated ClassImp ROOT macro
+ *
  * Revision 1.9  2009/01/26 15:11:05  fisyak
  * Clean up access to Calibrations/trg/ZdcCalPars table
  *
@@ -56,9 +59,8 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.9 2009/01/26 15:11:05 fisyak Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.10 2016/12/12 17:18:04 smirnovd Exp $";
 
-ClassImp(StZdcVertexMaker)
 
 //_________________________________________________
 StZdcVertexMaker::StZdcVertexMaker(const char *name, const char *title):StMaker(name,title)

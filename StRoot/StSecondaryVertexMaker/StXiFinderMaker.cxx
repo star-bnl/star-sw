@@ -22,7 +22,6 @@
 
 StSPtrVecXiVertex* vecXi=0;
 
-ClassImp(StXiFinderMaker)
 
 
 //_____________________________________________________________________________
@@ -653,8 +652,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.23 2008/04/03 19:58:36 fisyak Exp $
+// $Id: StXiFinderMaker.cxx,v 1.24 2016/12/12 17:18:04 smirnovd Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.24  2016/12/12 17:18:04  smirnovd
+// Removed outdated ClassImp ROOT macro
+//
 // Revision 1.23  2008/04/03 19:58:36  fisyak
 // move parameters initialization from Init into InitRun
 //
