@@ -293,19 +293,6 @@ Int_t StGenericVertexMaker::Make()
     DoFit();
   }
 
-//   //For testing purposes
-//   theFinder->DoNotUseITTF();
-//   if (theFinder->fit(mEvent)) theFinder->printInfo();
-//   if (theFinder->status()!=-1) theFinder->FillStEvent(mEvent);
-
-//   theFinder->DoUseITTF();
-//   if (theFinder->fit(mEvent)) theFinder->printInfo();
-//   if (theFinder->status()!=-1) {
-//     theFinder->FillStEvent(mEvent);
-//     nEvGood++;
-//   }
-
-
   if (eval)MakeEvalNtuple();
 
   if(!externalFindUse){

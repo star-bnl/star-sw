@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.27 2016/11/07 21:19:27 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.28 2016/12/12 17:17:07 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -97,8 +97,6 @@ class StPPVertexFinder: public StGenericVertexFinder {
   EEmcGeomSimple *geomE;
   
   void dumpKalmanNodes(const StiKalmanTrack *track);
-  //  void plotVertex(VertexData *);
-  //  void plotTracksDca();
   void initHisto();
 
   virtual void  UseVertexConstraint() {}
