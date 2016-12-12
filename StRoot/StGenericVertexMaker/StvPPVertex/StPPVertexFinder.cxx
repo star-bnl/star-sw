@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.8 2016/12/12 16:42:30 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.9 2016/12/12 17:17:00 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -15,7 +15,6 @@
 #include "TH2.h"
 #include "TFile.h"
 #include "TLine.h"
-#include "TCanvas.h" //tmp
 
 #include "math_constants.h"
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
@@ -1178,6 +1177,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.9  2016/12/12 17:17:00  smirnovd
+ * Removed unused #include "TCanvas.h"
+ *
  * Revision 1.8  2016/12/12 16:42:30  smirnovd
  * Removed special treatment for MC data in PPV vertex finder
  *
