@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.75 2016/12/12 18:44:13 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.76 2016/12/12 18:44:21 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -347,8 +347,6 @@ StPPVertexFinder::printInfo(ostream& os) const
   for (const VertexData &v : mVertexData)
     v.print(os);
 
-  float zGeant=999;
-  
   LOG_DEBUG<< Form("---- end of PPVertex Info\n")<<endm;
 
 }

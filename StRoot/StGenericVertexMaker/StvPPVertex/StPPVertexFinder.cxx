@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.9 2016/12/12 17:17:00 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.10 2016/12/12 18:44:21 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -358,7 +358,6 @@ void StPPVertexFinder::printInfo(ostream& os) const
     const VertexData *V=& mVertexData[i];
     V->print(os);
   }
-  float zGeant=999;
   
   LOG_DEBUG<< Form("---- end of PPVertex Info\n")<<endm;
 
@@ -1177,6 +1176,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.10  2016/12/12 18:44:21  smirnovd
+ * Removed unused local variable
+ *
  * Revision 1.9  2016/12/12 17:17:00  smirnovd
  * Removed unused #include "TCanvas.h"
  *
