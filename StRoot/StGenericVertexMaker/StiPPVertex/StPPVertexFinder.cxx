@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.73 2016/12/12 17:18:14 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.74 2016/12/12 17:18:21 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -246,7 +246,6 @@ StPPVertexFinder::InitRun(int runnumber){
 //==========================================================
 void 
 StPPVertexFinder::initHisto() {
-  assert(HList);
   hA[0]=new TH1F("ppvStat","event types; 1=inp, 2=trg, 3=-, 4=w/trk, 5=anyMch, 6=Bmch 7=Emch 8=anyV, 9=mulV",10,0.5,10.5);
   hA[1]=new TH1F("ch1","chi2/Dof, ppv pool tracks",100,0,10);
   hA[2]=new TH1F("nP","No. of fit points, ppv pool tracks",30,-.5,59.5);
@@ -407,12 +406,10 @@ StPPVertexFinder::fit(StEvent* event) {
   if(emcC==0) {
     LOG_WARN <<"no emcCollection , continue THE SAME eve"<<endm;
   } else {
-    assert(emcC);
     StEmcDetector* btow = emcC->detector( kBarrelEmcTowerId); 
     if(btow==0) {
       LOG_WARN <<"no BEMC in emcColl , continue THE SAME eve"<<endm;
     } else {
-      assert(btow);
       bemcList->build(btow, mMinAdcBemc);
     }
     
@@ -420,7 +417,6 @@ StPPVertexFinder::fit(StEvent* event) {
     if(etow==0) {
       LOG_WARN <<"no EEMC in emcColl , continue THE SAME eve"<<endm;
     } else {
-      assert(etow);
       eemcList->build(etow, mMinAdcEemc);
     }
   }
