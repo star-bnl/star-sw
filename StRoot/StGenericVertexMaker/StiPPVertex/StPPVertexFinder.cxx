@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.72 2016/12/12 17:17:07 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.73 2016/12/12 17:18:14 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -10,11 +10,7 @@
  ************************************************************/
    
 #include <StMessMgr.h>
-#include <TGraphErrors.h>
-#include <TF1.h>
-#include <TH2.h>
 #include <TFile.h>
-#include <TLine.h>
 #include "TMinuit.h"
 
 #include <math_constants.h>

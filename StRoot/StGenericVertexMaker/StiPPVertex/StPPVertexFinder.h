@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.28 2016/12/12 17:17:07 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.29 2016/12/12 17:18:14 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -18,7 +18,6 @@
 class StiKalmanTrack;
 class TrackData;
 class VertexData;
-class TGraphErrors;
 class StEvent; 
 class StiToolkit;
 class StEEmcDb;
