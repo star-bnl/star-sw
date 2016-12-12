@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.70 2016/12/12 16:42:30 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.71 2016/12/12 17:16:59 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -15,7 +15,6 @@
 #include <TH2.h>
 #include <TFile.h>
 #include <TLine.h>
-#include <TCanvas.h> //tmp
 #include "TMinuit.h"
 
 #include <math_constants.h>
