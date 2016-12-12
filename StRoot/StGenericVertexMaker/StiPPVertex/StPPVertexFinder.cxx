@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.74 2016/12/12 17:18:21 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.75 2016/12/12 18:44:13 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -10,8 +10,14 @@
  ************************************************************/
    
 #include <StMessMgr.h>
-#include <TFile.h>
+
+#include "TFile.h"
+#include "TH1D.h"
+#include "TH1F.h"
+#include "TH2F.h"
 #include "TMinuit.h"
+#include "TObjArray.h"
+#include "TObjectSet.h"
 
 #include <math_constants.h>
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
@@ -58,7 +64,6 @@
 #include "StEmcCollection.h"
 #include "StBTofCollection.h"
 #include "StBTofUtil/StBTofGeometry.h"
-#include "TObjectSet.h"
 
 //==========================================================
 //==========================================================
