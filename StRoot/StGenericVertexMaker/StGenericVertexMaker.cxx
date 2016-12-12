@@ -140,9 +140,6 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StPPVertexFinder(vertexFitMode);
 
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
-    if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
-      ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
-    }
 
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
            ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
