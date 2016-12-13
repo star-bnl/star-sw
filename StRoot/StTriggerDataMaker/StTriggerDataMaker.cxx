@@ -21,6 +21,8 @@
 #include "StEvent/StTriggerData2013.h"
 #include "StDaqLib/TRG/trgStructures2016.h"
 #include "StEvent/StTriggerData2016.h"
+#include "StDaqLib/TRG/trgStructures2017.h"
+#include "StEvent/StTriggerData2017.h"
 #include "TFile.h"
 #include "TH1.h"
 
@@ -51,6 +53,7 @@ Int_t StTriggerDataMaker::Make()
   const TriggerDataBlk2012 *trgdata2012=0;
   const TriggerDataBlk2013 *trgdata2013=0;
   const TriggerDataBlk2016 *trgdata2016=0;
+  const TriggerDataBlk2017 *trgdata2017=0;
 
   St_DataSet* daqReaderDS = GetDataSet("StDAQReader");
   if (!daqReaderDS) return kStWarn;
@@ -122,6 +125,11 @@ Int_t StTriggerDataMaker::Make()
 	  year=2016;
 	  trgdata2016 = (TriggerDataBlk2016*)data;
 	  AddData(new TObjectSet("StTriggerData",new StTriggerData2016(trgdata2016,run,1,mDebug),kTRUE));	
+	  break;	
+	case 0x44:
+	  year=2017;
+	  trgdata2017 = (TriggerDataBlk2017*)data;
+	  AddData(new TObjectSet("StTriggerData",new StTriggerData2017(trgdata2017,run,1,mDebug),kTRUE));	
 	  break;	
 	default:
 	  LOG_INFO << "StTriggerDataMaker Make() found new data but with unknown version = " << version << endm;
