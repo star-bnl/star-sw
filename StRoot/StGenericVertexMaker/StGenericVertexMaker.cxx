@@ -41,7 +41,6 @@ using namespace units;
 #endif
 
 
-ClassImp(StGenericVertexMaker)
 //___________________________________________________________
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
   useITTF(true),
@@ -136,9 +135,6 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StPPVertexFinder(vertexFitMode);
 
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
-    if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
-      ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
-    }
 
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
            ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
@@ -291,19 +287,6 @@ Int_t StGenericVertexMaker::Make()
   if(!externalFindUse){
     DoFit();
   }
-
-//   //For testing purposes
-//   theFinder->DoNotUseITTF();
-//   if (theFinder->fit(mEvent)) theFinder->printInfo();
-//   if (theFinder->status()!=-1) theFinder->FillStEvent(mEvent);
-
-//   theFinder->DoUseITTF();
-//   if (theFinder->fit(mEvent)) theFinder->printInfo();
-//   if (theFinder->status()!=-1) {
-//     theFinder->FillStEvent(mEvent);
-//     nEvGood++;
-//   }
-
 
   if (eval)MakeEvalNtuple();
 

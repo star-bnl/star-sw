@@ -18,7 +18,6 @@ using namespace units;
 #endif
 
 
-ClassImp(StKinkLocalTrack)
 StKinkLocalTrack::StKinkLocalTrack()
 {
   mEndRadius2D = 0.;

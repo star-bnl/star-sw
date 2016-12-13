@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.7 2016/11/07 21:19:28 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.10 2016/12/12 18:44:21 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -15,7 +15,6 @@
 #include "TH2.h"
 #include "TFile.h"
 #include "TLine.h"
-#include "TCanvas.h" //tmp
 
 #include "math_constants.h"
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
@@ -83,7 +82,6 @@ StPPVertexFinder::StPPVertexFinder()
   mToolkit =0;
   memset(hA,0,sizeof(hA));
 
-  setMC(false);                      	// default = real Data
   UseCTB(false);                      	// default CTB is off
   UseBTOF(false);                      	// default BTOF is off
   setDropPostCrossingTrack(true);    	// default PCT rejection on
@@ -155,7 +153,6 @@ void StPPVertexFinder::InitRun(int runnumber)
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
   int dateY=mydb->GetDateTime().GetYear();
   
-  if(mIsMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
  // Initialize BTOF geometry
   if (mUseBtof){ // only add btof if it is required
     btofGeom = 0;
@@ -177,7 +174,11 @@ void StPPVertexFinder::InitRun(int runnumber)
   }
 
   //.. set various params 
-  if (!mIsMC && runnumber < 13000000) {
+  // It is not clear why one would hard code cuts for any specific run or
+  // a period since they can be set in the database. Here we'll assume that for
+  // Runs 5 to 12 the PPV cuts are optimized and there is no need to access the
+  // values from the database.
+  if (runnumber >= 6000000 && runnumber < 13000000) {
     // old defaults, pre-Run12
     // (important if we want to reprocess old data with different cuts!)
     LOG_INFO << "PPV InitRun() using old, hardwired cuts" << endm;
@@ -202,16 +203,6 @@ void StPPVertexFinder::InitRun(int runnumber)
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
-  if(mIsMC) {
-    LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
-    // simu prior to 2008 
-    mMinAdcBemc =7; //ideal BTOW gain 60 GeV ET @ 3500 ADC 
-    // in late 2008 Matt uploaded ideal (aka sim) gians matching endcap
-    if(dateY>=2008)  mMinAdcBemc =8; //ideal BTOW gain 60 GeV ET @ 4076 ADC
-
-    if(dateY>2006)  LOG_WARN <<
-	  "PPV InitRun() , M-C time stamp differs from 2005,\n BTOW status tables questionable,\n PPV results qauestionable, \n\n  F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!  \n \n chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n"<<endm; 
-  }
 
   if(dateY<2006) {
     mMinAdcBemc   = 15;   // BTOW used calibration of maxt Et @ ~27Gev 
@@ -246,7 +237,6 @@ void StPPVertexFinder::InitRun(int runnumber)
     <<"\n Min/Max Z position for BTOF hit = " << mMinZBtof<<" "<<mMaxZBtof   
     <<"\n MinAdcBemc for MIP = " << mMinAdcBemc
     <<"\n MinAdcEemc for MIP = " << mMinAdcEemc
-    <<"\n bool    mIsMC = " << mIsMC
     <<"\n bool  useCtb = " << mUseCtb
     <<"\n bool useBtof = " << mUseBtof
     <<"\n bool nFit/nPoss weighting = " << mFitPossWeighting
@@ -369,29 +359,7 @@ void StPPVertexFinder::printInfo(ostream& os) const
     const VertexData *V=& mVertexData[i];
     V->print(os);
   }
-  float zGeant=999;
   
-  if(mIsMC) {
-    // get geant vertex
-    St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
-    assert(gds);
-    St_g2t_vertex  *g2t_ver=( St_g2t_vertex *)gds->Find("g2t_vertex");
-    if(g2t_ver) {
-      // --------------  A C C E S S    G E A N T   V E R T E X  (for histo)
-      g2t_vertex_st *GVER= g2t_ver->GetTable();
-      zGeant=GVER->ge_x[2];
-      printf("#GVER z=%.1f x=%.1f y=%.1f  nEve=%d nV=%d ",zGeant,GVER->ge_x[0],GVER->ge_x[1],mTotEve,mVertexData.size());  
-    }
-  }
-  
-  if(mIsMC) {
-    for(i=0;i<mTrackData.size();i++) {
-      const TrackData *t=&mTrackData[i];
-      if(t->vertexID<=0) continue; // skip not used or pileup vertex 
-      hA[12]->Fill(zGeant-t->zDca);
-    }
-  }
-   
   LOG_DEBUG<< Form("---- end of PPVertex Info\n")<<endm;
 
 }
@@ -442,13 +410,8 @@ assert(event);
 
   // get CTB info, does not  work for embeding 
   if(mUseCtb) {// CTB could be off since 2006 
-    if(mIsMC){
-      St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
-      ctbList->buildFromMC(gds);  // use M-C
-    }  else {
-      StTriggerData *trgD=event->triggerData ();
-      ctbList->buildFromData(trgD); // use real data
-    }
+    StTriggerData *trgD=event->triggerData ();
+    ctbList->buildFromData(trgD); // use real data
   }
 
   
@@ -1214,6 +1177,20 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.10  2016/12/12 18:44:21  smirnovd
+ * Removed unused local variable
+ *
+ * Revision 1.9  2016/12/12 17:17:00  smirnovd
+ * Removed unused #include "TCanvas.h"
+ *
+ * Revision 1.8  2016/12/12 16:42:30  smirnovd
+ * Removed special treatment for MC data in PPV vertex finder
+ *
+ * Removed mIsMC flag in order to treat the simulated and real data in the same
+ * manner during vertex reconstruction. The flag caused confusion rather than being
+ * helpful in any way for the main VF task. As an additional benefit the users will
+ * not have to worry about setting the flag when running on simulated data.
+ *
  * Revision 1.7  2016/11/07 21:19:28  smirnovd
  * Added and reworded some doxygen and other comments
  *
