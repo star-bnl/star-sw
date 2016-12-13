@@ -9,6 +9,11 @@
 #include "TROOT.h"
 #include "TCallf77.h"
 #include "TEnv.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 //______________________________________________________________________
 extern "C"
 {
@@ -225,7 +230,10 @@ Int_t StarVMCDetector::GetVolumeIdFromNubv(Int_t *numbv) {
   assert(VolumeID == volume_id);
   return VolumeID;
 #else
-  return g2t_volume_id(Detectors[fK].Csys, numbv);
+  Int_t nbv[15] = {0};
+  Int_t N = fNVmax.GetSize();  
+  TCL::ucopy(numbv,nbv,N);
+  return g2t_volume_id(Detectors[fK].Csys, nbv);
 #endif
 }
 //________________________________________________________________________________

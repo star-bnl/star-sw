@@ -42,7 +42,6 @@
       Call ASLDETN('TRAC',Idet);      If (Idet>0) ISIMU=LVSIMU(Idet)
    }
 *
-   If (Idebug>0) Call GDEBUG                     ! for graphics only
    CALL AgGSTEP(IRET)                            ! standard hit processing
    if (ipart == 48)            Call AgSMATER     ! geantino run
 *
@@ -74,6 +73,7 @@
     NDONE=0
 
 *
+    call gdebug
  END
 
 
