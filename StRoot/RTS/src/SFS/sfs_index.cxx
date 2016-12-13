@@ -908,13 +908,12 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
 int sfs_index::mountNextDir()
 {
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-
- 
   singleDirOffset = nextSingleDirOffset;
-  long long int offset = wfile.lseek(singleDirOffset,SEEK_SET);
-  
+  //long long int offset = wfile.lseek(singleDirOffset,SEEK_SET);
+  wfile.lseek(singleDirOffset,SEEK_SET);
 #else
-  int offset = wfile.lseek(0,SEEK_CUR);
+  //int offset = wfile.lseek(0,SEEK_CUR);
+  wfile.lseek(0,SEEK_CUR);
   //singleDirOffset = nextSingleDirOffset;
 #endif
 

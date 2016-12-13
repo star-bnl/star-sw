@@ -692,7 +692,7 @@ int putConfigFile(STAR_CFG *cfg, char *filename);
 //struct TrgCfg;
 struct TrgPS;
 
-char *confNum2String(int conf_num);
+char *confNum2String(UINT32 conf_num);
 int string2ConfNum(char *str);
 UINT32 getCrateMask4TrgDet(int det);
 int getConfNumForNode(int node);
