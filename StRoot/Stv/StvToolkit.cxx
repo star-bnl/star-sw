@@ -147,6 +147,7 @@ void StvToolkit::Clear(const char*)
   if (mELossTrakFactory) mELossTrakFactory->clear();
   if (mNodeFactory) 	mNodeFactory->clear();
   if (mHitFactory)  	mHitFactory->clear();
+  if (mHitRrFactory)  	mHiRrFactory->clear();
   if (mVertexFactory)   mVertexFactory->clear();
   StvTrack::mgId=0;
 }
