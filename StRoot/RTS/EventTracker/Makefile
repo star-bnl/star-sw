@@ -58,7 +58,7 @@ libEventTracker.a: $(EVENT_TRACKER_OBJS) $(DAQREADER_OBJS)
 	$(RTS_AR)
 
 eventTracker: eventTracker.o libEventTracker.a $(VOBJS)
-	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+	$(LINK.o) -o $@ $(LDLIBS) -Wno-write-strings -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 
 
