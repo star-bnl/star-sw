@@ -547,6 +547,18 @@ struct ic_spool_free_disk
   int seq;
 };
 
+struct TokenManagerIccpPayload {
+    int sz;
+    int rtsMask;     // only used for TRG node.
+    int detLocalId;  // ID passed to and from dets...
+};
+
+struct TokenManagerResults {
+    int TknMgrEventNumber;
+    int evbNodeIdx;
+    int detLocalId;  // ID passed to and from dets...
+};
+
 //-----======------||||||------~~~~~~-----======------||||||------~~~~~~
 union ic_load
 {
@@ -657,7 +669,8 @@ union ic_load
     //ic_l4_event l4_event;
     ic_l4_evt_descriptor l4_evt_descriptor;
 
-
+    TokenManagerResults tokenManagerResults;
+    TokenManagerIccpPayload tokenManagerIccpPayload;
   
 #endif /* NOT_DAQ */
   //  ic_qdsend_announce_chunk         qdsend_announce_chunk;
