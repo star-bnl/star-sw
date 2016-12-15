@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.cxx,v 2.1 2016/12/08 18:58:28 ullrich Exp $
+ * $Id: StTriggerData2017.cxx,v 2.2 2016/12/15 16:30:07 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.cxx,v $
+ * Revision 2.2  2016/12/15 16:30:07  ullrich
+ * Updates from Jeff.
+ *
  * Revision 2.1  2016/12/08 18:58:28  ullrich
  * Initial Revision.
  *
@@ -201,7 +204,7 @@ unsigned int StTriggerData2017::token() const
 
 unsigned int StTriggerData2017::triggerWord() const
 {
-    return EvtDesc->TriggerWord;
+    return 0;
 }
 
 unsigned int StTriggerData2017::actionWord() const
@@ -252,6 +255,21 @@ unsigned short StTriggerData2017::bcData(int channel) const
     return L1_DSM->BCdata[channel];
 }
 
+unsigned short StTriggerData2017::getTrgDetMask() const
+{
+    return EvtDesc->trgDetMask;
+}
+
+unsigned int StTriggerData2017::getTrgCrateMask() const
+{
+    unsigned int p = EvtDesc->npost & 0xfff0;
+    unsigned int r = EvtDesc->res1  & 0x0ff0;
+    return 
+	(   ((EvtDesc->npre  & 0xfff0) >>  4) 
+	  + (p <<  8)
+	  + (r << 20) );
+}
+
 unsigned short StTriggerData2017::lastDSM(int channel) const
 {
     return L1_DSM->lastDSM[channel];
@@ -265,10 +283,8 @@ unsigned short StTriggerData2017::tcuBits() const
 
 unsigned int StTriggerData2017::tcuCounter() const
 {
-    unsigned int p = EvtDesc->physicsWord;
-    unsigned int t = EvtDesc->TriggerWord;
-    //        return (p<<16) + t;
-    return (t<<16) + p;
+    unsigned int hi = EvtDesc->tcuCtrBunch_hi;
+    return (hi << 16) + EvtDesc->DSMAddress;
 }
 
 unsigned int StTriggerData2017::rccCounter(int crate) const
