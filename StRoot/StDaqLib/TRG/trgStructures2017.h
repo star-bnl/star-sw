@@ -74,18 +74,9 @@ typedef struct {
   unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
   unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
 
-    //#ifndef __linux
-    //unsigned int tcuCtrBunch;
-    //#else
-    //union {
-    //	struct { 
-    unsigned short physicsWord;                 /* trgDetMask */
-    unsigned short TriggerWord;                 /* tcuCtrBunch_hi */
-    //	};
-    //	unsigned int tcuCtrBunch;
-    //};
-    //#endif
-    
+  unsigned short trgDetMask;                  /* was physicsWord */
+  unsigned short tcuCtrBunch_hi;              /* was TriggerWord */
+
   unsigned short DSMAddress;                  /* from Fifo 10 (Fifo 6 Mk1 TCU) */
   unsigned short TCU_Mark;                    /* TCU_Mark Mk1=1 Mk2=2 */
   unsigned short npre;                        /* (crate_mask & 0xfff) << 4 | npre  */
