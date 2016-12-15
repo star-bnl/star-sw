@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.h,v 2.1 2016/12/08 18:58:29 ullrich Exp $
+ * $Id: StTriggerData2017.h,v 2.2 2016/12/15 16:30:08 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.h,v $
+ * Revision 2.2  2016/12/15 16:30:08  ullrich
+ * Updates from Jeff.
+ *
  * Revision 2.1  2016/12/08 18:58:29  ullrich
  * Initial Revision.
  *
@@ -49,7 +52,10 @@ public:
     unsigned short dsmAddress() const;
     unsigned short mAddBits() const;
     unsigned short bcData(int channel) const;
-    
+
+    unsigned short getTrgDetMask() const;
+    unsigned int   getTrgCrateMask() const;
+
     // L2 offsets
     int  L2ResultsOffset(StL2AlgorithmId id) const;  
     bool isL2Triggered(StL2TriggerResultType id) const;

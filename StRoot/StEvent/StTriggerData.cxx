@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.25 2016/06/07 15:51:34 akio Exp $
+ * $Id: StTriggerData.cxx,v 2.26 2016/12/15 16:30:06 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.26  2016/12/15 16:30:06  ullrich
+ * Updates from Jeff.
+ *
  * Revision 2.25  2016/06/07 15:51:34  akio
  * Making code better based on Coverity reports
  *
@@ -88,7 +91,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.25 2016/06/07 15:51:34 akio Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.26 2016/12/15 16:30:06 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -175,6 +178,8 @@ unsigned short StTriggerData::trgToken() const {return 0;}
 unsigned short StTriggerData::dsmAddress() const {return 0;}
 unsigned short StTriggerData::mAddBits() const {return 0;}
 unsigned short StTriggerData::bcData(int address) const {return 0;}
+unsigned short StTriggerData::getTrgDetMask() const {return 0;}
+unsigned int   StTriggerData::getTrgCrateMask() const {return 0;}
 unsigned short StTriggerData::busyStatus() const {return 0;}
 unsigned int StTriggerData::tcuCounter() const {return 0;}
 unsigned int StTriggerData::rccCounter(int crate) const {return 0;}
