@@ -31,12 +31,12 @@ const StvKonst_st *StvConst::At(int idx) const
 {
   if (!mFw) {
     mFw = new StvKonst_st;
-    *mFw = *((StvKonst_st*)this);
+    *mFw = *this;
     memcpy(&mFw->mMinHits,&mFw->mMinHitsFw,
           (char*)&mFw->mMinHitsFw-(char*)&mFw->mMinHits);
   }
   switch(idx) {
-    case 0: return ((StvKonst_st*)this);
+    case 0: return this;
     case 1: return mFw;
     default: assert(0 && "Wring index in StvConst::At(indedx)");
   }
