@@ -3,7 +3,6 @@
 #include "StvConst.h"
 
 #include "Stv/StvHitCounter.h"
-StvHitCounter *StvHitCounter::mgStvHitCounter=0;
 
 //_____________________________________________________________________________
 StvHitCounter::StvHitCounter()		
@@ -14,22 +13,16 @@ StvHitCounter::StvHitCounter()
 //  mMinContHits=2;	//Min length of good hit sequence
 //  mMaxContNits=13;	//Max length of acceptable non hit sequence
 //  mMaxTotNits	=15;	//Max number of acceptable non hits
-const StvConst *kons = StvConst::Inst();
-
- mMinTotHits  = kons->mMinTotHits;	
- mMinGoodHits = kons->mMinGoodHits;	
- mMinContHits = kons->mMinContHits;	
- mMaxContNits = kons->mMaxContNits;	
- mMaxTotNits  = kons->mMaxTotNits;	
 }
 //_____________________________________________________________________________
 void StvHitCounter::SetCons(const StvKonst_st* kons)
 {
- mMinTotHits  = kons->mMinTotHits;	
- mMinGoodHits = kons->mMinGoodHits;	
- mMinContHits = kons->mMinContHits;	
- mMaxContNits = kons->mMaxContNits;	
- mMaxTotNits  = kons->mMaxTotNits;	
+ mKons = kons;
+ mMinTotHits  = mKons->mMinTotHits;	
+ mMinGoodHits = mKons->mMinGoodHits;	
+ mMinContHits = mKons->mMinContHits;	
+ mMaxContNits = mKons->mMaxContNits;	
+ mMaxTotNits  = mKons->mMaxTotNits;	
 }
 //_____________________________________________________________________________
 int StvHitCounter::MaxNitSeq() const
