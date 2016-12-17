@@ -9,11 +9,12 @@ class StvTrack;
 class StvNode;
 class THelixTrack;
 class THelixFitter;
-
+class StvKonst_st;
 class StvKalmanTrackFitter : public StvTrackFitter
 {
 public:
   StvKalmanTrackFitter();
+  void SetCons(const StvKonst_st* kons);
   virtual ~StvKalmanTrackFitter(){;}	
   virtual  int Refit(StvTrack *trak,int dir,int lane,int mode=1);
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
@@ -29,6 +30,7 @@ public:
 
 protected:
 char mBeg[1];
+const StvKonst_st *mKons;
 THelixFitter *mHelx;
 char mEnd[1];
 
