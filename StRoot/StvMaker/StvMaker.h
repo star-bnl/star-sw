@@ -41,7 +41,7 @@ class StvMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.6 2015/11/11 02:03:12 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.7 2016/12/17 00:16:02 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
 
@@ -54,6 +54,7 @@ private:
     StvSeedFinders      *mSeedFinders[2];
     StvEventFiller      *mEventFiller[2];
     StvTrackFinder      *mTrackFinder[2];
+    StvTrackFitter      *mTrackFitter[2];
     StvVertexFinder     *mVertexFinder[2];
     TFile               *mPullFile;
     StvPullEvent        *mPullEvent;
