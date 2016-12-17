@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.55 2016/12/09 21:02:25 perev Exp $
+// $Id: StvMaker.cxx,v 1.56 2016/12/17 00:19:31 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -58,6 +58,7 @@ More detailed: 				<br>
 #include "TGeoManager.h"
 #include "StDetectorId.h"
 #include "StEvent.h"
+#include "StEnumerations.h"
 #include "StChainOpt.h"
 #include "StvMaker.h"
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
@@ -88,8 +89,7 @@ More detailed: 				<br>
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum {kMidEta=1,kForwEta=2};
 
-ClassImp(StvMaker)
-  
+ClassImp(StvMaker)  
 //_____________________________________________________________________________
 StvMaker::StvMaker(const char *name) : StMaker(name)
 
@@ -241,9 +241,11 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kPxlId,hec,0);
     Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
   }
-
+#ifndef kFtsIdentifier
+#error
+#endif
 #ifdef kFtsIdentifier
-  if (IAttr("activeFTS")) {    // FTS error calculator
+  if (IAttr("activeFts")) {    // FTS error calculator
     mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
     auto *hec = (StvHitErrCalculator*)gROOT->ProcessLineFast("new StvFtsHitErrCalculator()");
@@ -263,7 +265,6 @@ Int_t StvMaker::InitRun(int run)
 {
 static int initialized = 0;
   if (initialized) return 0;
-  static const StvConst  *kons = new StvConst();
 
 // 		Geometry via DBMaker
   TDataSet *myGeo = GetDataBase("VmcGeometry"); if (myGeo){};
@@ -327,8 +328,8 @@ static int initialized = 0;
       mEventFiller[jreg]= new StvStEventFiller;
     if (IAttr("useVertexFinder")) 
       mVertexFinder[jreg] = new StvStarVertexFinder("GenericVertex");
-
     mTrackFinder[jreg] = new StvKalmanTrackFinder;
+    mTrackFitter[jreg] = new StvKalmanTrackFitter;
     int iRefit = IAttr("Refit");
     mTrackFinder[jreg]->SetRefit(iRefit);
 
@@ -340,13 +341,15 @@ static int initialized = 0;
     const char *seedNick[]={"CA"                 ,"Default"                 ,"KN"                 ,0};
     const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
 
+
     for (int idx=0;idx<=tokens->GetLast();idx++) {
     TString &chunk = ((TObjString*)tokens->At(idx))->String();
       for (int nick=0;seedNick[nick];nick++) {
 	if (chunk.CompareTo(seedNick[nick],TString::kIgnoreCase)!=0) continue;
 	if (nick==0) {
           assert(gSystem->Load("Vc.so")>=0);
-          assert(gSystem->Load("TPCCATracker.so")	>=0);}
+          assert(gSystem->Load("TPCCATracker.so")	>=0);
+	}
 	StvSeedFinder *mySeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
 	assert(mySeedFinder && !seedErr);
         mSeedFinders[jreg]->Add(mySeedFinder);
@@ -366,22 +369,13 @@ static int initialized = 0;
     delete mSeedFinders[reg];  mSeedFinders[reg] =0;
     delete mEventFiller[reg];  mEventFiller[reg] =0;
     delete mTrackFinder[reg];  mTrackFinder[reg] =0;
+    delete mTrackFitter[reg];  mTrackFitter[reg] =0;
     delete mVertexFinder[reg]; mVertexFinder[reg]=0;
   }   
-  for (int reg = 0;reg<2;reg++) {
-    if (!mHitLoader[reg]) continue;		// not used
-    const auto *par = kons->At(reg);
-    if (!par) continue;
-    mSeedFinders [reg]->SetCons(par);
-    mEventFiller [reg]->SetCons(par);
-    mTrackFinder [reg]->SetCons(par);
-    mVertexFinder[reg]->SetCons(par);
-  }
   
   InitPulls();
 
   new StvFitter();
-  new StvKalmanTrackFitter();
        
   return StMaker::InitRun(run);
 }
@@ -389,6 +383,7 @@ static int initialized = 0;
 //_____________________________________________________________________________
 Int_t StvMaker::Make()
 {
+static const StvConst *kons = new StvConst();
 static StvToolkit* kit = StvToolkit::Inst();
   cout <<"StvMaker::Make() -I- Starting on new event"<<endl;
 
@@ -398,6 +393,14 @@ static StvToolkit* kit = StvToolkit::Inst();
 
   for (int reg=0;reg<2;reg++) { //Loop over eta regions
     if (!mHitLoader[reg]) continue;
+    const auto *par = kons->At(reg);
+    mSeedFinders [reg]->SetCons(par);
+    mEventFiller [reg]->SetCons(par);
+    mTrackFitter [reg]->SetCons(par);
+    mTrackFinder [reg]->SetCons(par);
+    mTrackFinder [reg]->SetFitter(mTrackFitter[reg]);
+    mVertexFinder[reg]->SetCons(par);
+
     mHitLoader[reg]->LoadHits(event);
     kit->SetSeedFinders(mSeedFinders[reg] );
     kit->Reset();
