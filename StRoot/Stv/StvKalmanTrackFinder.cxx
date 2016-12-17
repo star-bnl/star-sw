@@ -39,14 +39,7 @@ typedef StvNodeMap::iterator 		StvNodeMapIter ;
 StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name)
 {
   memset(mBeg,0,mEnd-mBeg+1);
-  mDive = new StvDiver("KalmanTrackFinder");
-  mDive->Init();
-  double rMax,zMin,zMax;
-  StTGeoProxy::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
-  if (zMax < -zMin) zMax = -zMin;
-  mDive->SetRZmax(rMax,zMax);
-  mKons = StvConst::Inst();
-  mDive->SetRZmax(mKons->mRxyMax,mKons->mZMax);
+  mDive = StvDiver::Inst();
   mHitter = new StvHitter();
   mHitCounter = new StvHitCounter();
  }  
@@ -62,8 +55,13 @@ void StvKalmanTrackFinder::Reset()
 //_____________________________________________________________________________
 void StvKalmanTrackFinder::SetCons(const StvKonst_st* k)
 {
-mKons = k;
-mHitCounter->SetCons(k);
+  mKons = k;
+  double rMax,zMin,zMax;
+  StTGeoProxy::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
+  if (zMax < -zMin) zMax = -zMin;
+  mDive->SetRZmax(rMax,zMax);
+  mHitCounter->SetCons(mKons);
+  mDive->SetRZmax(mKons->mRxyMax,mKons->mZMax);
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindTracks()
@@ -161,10 +159,8 @@ int StvKalmanTrackFinder::FindTrack(int idir)
 
 static int nCall=0; nCall++;
 static int nTally=0; 
-static const StvConst *myConst = StvConst::Inst();
-static       StvToolkit *kit      = StvToolkit::Inst();
-static       StvFitter  *fitt     = StvFitter::Inst();
-
+static StvToolkit *kit = StvToolkit::Inst();
+static StvFitter *fitt = StvFitter::Inst();
 StvNodePars par[2];
 StvFitErrs  err[2];
 int mySkip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
@@ -189,12 +185,12 @@ mHitCounter->Clear();
   }
 
 //  	Skip too big curvature or pti
-  if (fabs(par[0]._curv)>myConst->mMaxCurv)	return 0;	
-  if (fabs(par[0]._ptin)>myConst->mMaxPti)	return 0;	
+  if (fabs(par[0]._curv)>mKons->mMaxCurv)	return 0;	
+  if (fabs(par[0]._ptin)>mKons->mMaxPti)	return 0;	
 
 //  	skip P too small
   { double t = par[0]._tanl, pti = par[0]._ptin;	
-    if ((t*t+1.)< myConst->mMinP2*pti*pti)	return 0;
+    if ((t*t+1.)< mKons->mMinP2*pti*pti)	return 0;
   }
   fitt->Set(par, err, par+1,err+1);
   mHitter->Reset();
@@ -227,16 +223,16 @@ mHitCounter->Clear();
     totLen+=deltaL;
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
 		// Stop tracking when too big Z or Rxy
-    if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
-    if (par[0].getRxy()  > myConst->mRxyMax) 	break;
-    if (fabs(par[0]._curv)>myConst->mMaxCurv)	break;	
-    if (fabs(par[0]._ptin)>myConst->mMaxPti)	break;	
+    if (fabs(par[0]._z)  > mKons->mZMax  ) 	break;
+    if (par[0].getRxy()  > mKons->mRxyMax) 	break;
+    if (fabs(par[0]._curv)>mKons->mMaxCurv)	break;	
+    if (fabs(par[0]._ptin)>mKons->mMaxPti)	break;	
 
     		
     const StvHits *localHits = 0; 
     if (idive & StvDiver::kDiveHits) {
-static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
-                     ,myConst->mMaxWindow,myConst->mMaxWindow};   
+    float gate[4]={mKons->mCoeWindow,mKons->mCoeWindow
+                     ,mKons->mMaxWindow,mKons->mMaxWindow};   
       localHits = mHitter->GetHits(par,err,gate); 
     }
 
@@ -286,7 +282,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     fitt->Prep();
     double  minXi2[2]={1e11,1e11},myXi2;
     StvHit *minHit[2]={0};
-    minXi2[0] = myConst->mXi2Hit,myXi2=3e33; 
+    minXi2[0] = mKons->mXi2Hit,myXi2=3e33; 
     int minIdx = -1;
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
@@ -370,7 +366,6 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 StvNode *StvKalmanTrackFinder::MakeDcaNode(StvTrack *tk)
 {
-//static double kOneMEV = 1e-3;
 static StvToolkit *kit = StvToolkit::Inst();
 
   StvNode *start = tk->front();
@@ -416,9 +411,7 @@ static StvToolkit *kit = StvToolkit::Inst();
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindPrimaries(const StvHits &vtxs)	
 {
-static const StvConst *myConst =   StvConst::Inst();
 static     StvToolkit *kit     = StvToolkit::Inst();
-static     StvTrackFitter *tkf = StvTrackFitter::Inst();
 
   StvTracks &traks = kit->GetTracks();
   int goodCount= 0, plus=0, minus=0;
@@ -428,14 +421,14 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
   for (StvTrackIter it=traks.begin(); it!=traks.end() ;++it) {
     StvTrack *track = *it;  nTracks++;
     double dca00 = track->ToBeam();
-    if (dca00 > myConst->mDca2dZeroXY) {
+    if (dca00 > mKons->mDca2dZeroXY) {
       continue;
     }
-    int bestVertex=-1; double bestXi2 = myConst->mXi2Vtx;
+    int bestVertex=-1; double bestXi2 = mKons->mXi2Vtx;
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StvHit *vertex = vtxs[iVertex];
-      if (tkf->Fit(track,vertex,0)) 		continue;
-      double Xi2 = tkf->GetXi2();
+      if (mTrackFitter->Fit(track,vertex,0)) 		continue;
+      double Xi2 = mTrackFitter->GetXi2();
       if (Xi2>=bestXi2) 			continue;
 // 		Found better Xi2
       bestXi2 = Xi2; bestVertex=iVertex;
@@ -445,7 +438,7 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     StvNode *node = kit->GetNode();
     StvHit *hit = vtxs[bestVertex];
     hit->addCount();
-    tkf->Fit(track,hit,node);
+    mTrackFitter->Fit(track,hit,node);
     track->push_front(node);
     track->SetPrimary(bestVertex+1);
     node->SetType(StvNode::kPrimNode);    
@@ -461,11 +454,10 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
 int StvKalmanTrackFinder::Refit(int idir)
 {
 static int nCall=0;nCall++;
-static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const double kEps = 1.e-2,kEPS=1e-1;
 
   int ans=0,anz=0,lane = 1;
-  int& nHits = tkf->NHits();
+  int& nHits = mTrackFitter->NHits();
   nHits = mCurrTrak->GetNHits();
   int nBegHits = nHits;
   int nRepair =(nHits-5)*0.1;
@@ -476,16 +468,16 @@ static const double kEps = 1.e-2,kEPS=1e-1;
     int converged = 0;
     for (int refIt=0; refIt<10; refIt++)  	{	//Fit iters
       nIters++;
-      ans = tkf->Refit(mCurrTrak,idir,lane,1);
+      ans = mTrackFitter->Refit(mCurrTrak,idir,lane,1);
 //    ==================================
-      nHits=tkf->NHits();
+      nHits=mTrackFitter->NHits();
       if (nHits < mKons->mMinHits) break;
       if (ans>0) break;			//Very bad
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
-      anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
+      anz = mTrackFitter->Refit(mCurrTrak,1-idir,1-lane,1); 
 //        ==========================================
-      nHits=tkf->NHits();
+      nHits=mTrackFitter->NHits();
       if (nHits < mKons->mMinHits) break;
       if (anz>0) break;	
 

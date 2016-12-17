@@ -18,6 +18,7 @@
 #include "Stv/StvStl.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
+#include "Stv/StvConst.h"
 ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 
@@ -36,6 +37,11 @@ void StvKalmanTrackFitter::Clear(const char*)
  StvTrackFitter::Clear("");
 }
 //_____________________________________________________________________________
+void StvKalmanTrackFitter::SetCons(const StvKonst_st *kons)
+{
+  mKons = kons;
+}
+//_____________________________________________________________________________
 int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 {
 ///	refit or smouthe track, using the previous Kalman.
@@ -47,7 +53,6 @@ int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 static int nCall=0; nCall++;
 
 static StvFitter *fitt = StvFitter::Inst();
-static const StvConst  *kons = StvConst::Inst();
 
 //term	LEFT here: Curren Kalman chain of fits from left to rite
 //	Rite here: Previous Kalman chain, allready fitted, in different direction.
@@ -186,8 +191,8 @@ StvDebug::Break(nQQQQ);//???????????
 	node->SetXi2(myXi2,lane);
         if (iFailed == StvFitter::kBigErrs) iFailed = 0;
 	if (iFailed ) nErr+=1; 			//Fit is bad yet
-	if (myXi2> kons->mXi2Hit) nErr+=10; //Fit is bad yet
-        if ( myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
+	if (myXi2> mKons->mXi2Hit) nErr+=10; //Fit is bad yet
+        if ( myXi2> mKons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
             if (--mNHits <3) 			return 1;
             node->SetHit(0); hit = 0; nFitLeft--;
 //		No hit anymore. Fit = Prediction		
@@ -246,10 +251,10 @@ StvDebug::Break(nQQQQ);//???????????
 //      ==============================================
 	node->SetXi2(myXi2/5*2,3);
 	if (iFailed 		 ) 	nErr+=1000;
-	if (myXi2 > kons->mXi2Joi) 	nErr+=10000;
+	if (myXi2 > mKons->mXi2Joi) 	nErr+=10000;
 	iFailed = fitt->Update();
 	if (iFailed) 			nErr+=100000;
-        if (myXi2 > kons->mXi2Joi*kXtendFactor || iFailed>0) { //Joining is impossible. Stop joining
+        if (myXi2 > mKons->mXi2Joi*kXtendFactor || iFailed>0) { //Joining is impossible. Stop joining
           mode = 0;	//No more joinings
           node->SetFit(node->mFP[lane],node->mFE[lane],2); 
           break;
@@ -272,8 +277,8 @@ StvDebug::Break(nQQQQ);//???????????
         if (iFailed== StvFitter::kBigErrs) iFailed=0;
 	node->SetXi2(myXi2,2);
 	if (iFailed		) nErr+=1000000; //Fit is bad yet
-	if (myXi2> kons->mXi2Hit) nErr+=10000000; //Fit is bad yet
-        if (myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
+	if (myXi2> mKons->mXi2Hit) nErr+=10000000; //Fit is bad yet
+        if (myXi2> mKons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
           node->SetHit(0); hit = 0; nFitLeft--; mNHits--;
 //		No hit anymore. Fit = Prediction		
           node->SetFit(myPars,myErrs,2); 
@@ -409,8 +414,6 @@ int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *no
 {
 static int nCall = 0; nCall++;
 static       StvToolkit *kit     = StvToolkit::Inst();
-// static const StvConst *myConst =   StvConst::Inst();
-// static const double dca3dVertex = myConst->mDca3dVertex;
 static StvFitter *fitt = StvFitter::Inst();
 enum {kDeltaZ = 100};//??????
 
@@ -595,7 +598,6 @@ int StvKalmanTrackFitter::Check(const StvNodePars &parA,const StvFitErrs &errA,
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Clean(StvTrack *trak)
 {
-static const StvConst  *kons = StvConst::Inst();
   int nErr = 0;
 
   for (StvNodeIter it=trak->begin();it!=trak->end();++it) 
@@ -605,9 +607,9 @@ static const StvConst  *kons = StvConst::Inst();
     StvHit *hit = node->GetHit();
     if (!hit) continue;
     const StvNodePars &np = node->GetFP();
-    if (fabs(np._ptin)    > kons->mMaxPti) 	fail+= 1;
-    if (fabs(np._curv)    > kons->mMaxCurv) 	fail+= 2;
-    if ( np.diff(hit->x())> kons->mMaxRes) 	fail+= 4;
+    if (fabs(np._ptin)    > mKons->mMaxPti) 	fail+= 1;
+    if (fabs(np._curv)    > mKons->mMaxCurv) 	fail+= 2;
+    if ( np.diff(hit->x())> mKons->mMaxRes) 	fail+= 4;
     if (!fail) continue;   
     node->SetXi2(3e33);node->SetHit(0); nErr++;
   }
