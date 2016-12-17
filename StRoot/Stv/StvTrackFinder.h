@@ -11,6 +11,7 @@ class StvDraw;
 class StvPoints;
 class StvHits;
 class StvKonst_st;
+class StvTrackFitter;
 class StvTrackFinder : public TNamed
 {
 public:
@@ -21,6 +22,7 @@ public:
   virtual void      Reset()				=0;
   virtual void      Clear(const char *opt="");
   virtual void      SetCons(const StvKonst_st*)=0;
+  virtual void      SetFitter(StvTrackFitter *fitter){mTrackFitter = fitter;}
           void      AddPoint(const double pt[3]);
           void      AddHits(const double pt[3]);
           void      Show();
@@ -31,8 +33,8 @@ public:
 protected:
 static StvDraw *NewDraw();
 protected:
+StvTrackFitter *mTrackFitter;
 int  mRefit; 	//refit flag
-
 int fDoShow;
 StvDraw *fDraw;
 StvPoints fShowTrak;
