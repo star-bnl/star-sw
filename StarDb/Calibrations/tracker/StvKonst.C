@@ -16,8 +16,6 @@ memset(&row,0,tableSet->GetRowSize());
   row.mXi2Vtx = ROOT::Math::chisquared_quantile_c(myProb,2);		//Xi2 to accept vertex
   row.mXi2Joi = ROOT::Math::chisquared_quantile_c(myProb,5)*myFaktor;	//Xi2 in Refit join left & right subtrack
   row.mXi2Hlx = row.mXi2Hit*9;  //Xi2 in Helix, .
-  row.mRxyMax = 207;		//Max radius for tracking
-  row.mZMax   = 220;		//Max Z      for tracking
   row.mDca2dZeroXY = 6.;	//max 2d dca to X=Y=0  for primary track
   row.mDca3dVertex = 3.;	//max 3d dca to vertex for primary track
   row.mMaxCurv     = 0.2;	//Maximal allowed curvature(5cm radius)
@@ -37,10 +35,13 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMinContHits=3;       	/*Min length of good hit sequence*/
   row.mMaxContNits=11;      	/*Max length of acceptable non hit sequence*/
   row.mMaxTotNits =20;      	/*Max number of acceptable non hits*/
+
+  row.mRxyMax = 207;		//Max radius for tracking
+  row.mZMax   = 220;		//Max Z      for tracking
 //		ForwEta version
-  row.mMinHitsFw = 3;		/*Min number of hits allowed*/
+  row.mMinHitsFw = 4;		/*Min number of hits allowed*/
   row.mNorHitsFw = 5;		/*Normal number of hits allowed*/
-  row.mGoodHitsFw =4;		/*Good number of hits */
+  row.mGoodHitsFw =5;		/*Good number of hits */
 
 //		ForwEta hitCount hitCount hitCount hitCount hitCount 
   row.mMinTotHitsFw =3;       	/*Min number hits for track*/
@@ -48,6 +49,8 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMinContHitsFw=3;       	/*Min length of good hit sequence*/
   row.mMaxContNitsFw=1;      	/*Max length of acceptable non hit sequence*/
   row.mMaxTotNitsFw =2;      	/*Max number of acceptable non hits*/
+  row.mRxyMaxFw = 207;		//Max radius for tracking
+  row.mZMaxFw   = 400;		//Max Z      for tracking
 
 
 tableSet->AddAt(&row);
