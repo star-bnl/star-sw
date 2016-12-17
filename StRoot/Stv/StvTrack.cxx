@@ -9,7 +9,6 @@
 #include "Stv/StvTrack.h"
 #include "Stv/StvDraw.h"
 #include "Stv/StvToolkit.h"
-#include "Stv/StvTrackFitter.h"
 #include "StvUtil/StvKNNUtil.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 int StvTrack::mgId=0;
@@ -254,14 +253,6 @@ static StvToolkit *kit = StvToolkit::Inst();
 	nDel ++; kit->FreeNode(node);
     }
     if (nDel)  { ++it; erase(it,end());}
-}
-//_____________________________________________________________________________
-//_____________________________________________________________________________
-double StvTrack::Approx(int mode)
-{
-static StvTrackFitter *fitt = StvTrackFitter::Inst();
-  fitt->Helix(this,mode);
-  return fitt->GetXi2();
 }
 //_____________________________________________________________________________
 double StvTrack::GetRes() const

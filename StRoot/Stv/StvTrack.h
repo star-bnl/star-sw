@@ -78,7 +78,6 @@ double GetRes() const;		// Average residual
 
    int SetUsed(); 	
 
-  double Approx(int mode=0);
   double ToBeam() const;
   int Check(const char *tit="",int dirs=3) const; 
   void Show() const;  
