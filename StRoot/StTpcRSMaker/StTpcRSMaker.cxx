@@ -65,7 +65,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.71 2016/09/18 22:45:25 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.73 2016/12/19 15:22:39 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -1779,8 +1779,14 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.71 2016/09/18 22:45:25 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.73 2016/12/19 15:22:39 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.73  2016/12/19 15:22:39  fisyak
+// Fix typo
+//
+// Revision 1.72  2016/12/19 15:20:20  fisyak
+// Fix bug 3268: add missing correction for TpcAvgPowerSupply, add treatment for stopping electrons and gammas
+//
 // Revision 1.71  2016/09/18 22:45:25  fisyak
 // Clean up, add Heed model, adjust for new StTpcdEdxCorrections
 //
