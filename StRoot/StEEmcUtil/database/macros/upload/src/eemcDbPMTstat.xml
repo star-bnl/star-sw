@@ -1,8 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPMTstat  <comment>  *    EEMC status of Tower/Strip/Shower </comment>
-  <dbString> name <length> 16000 </length> <comment>  sector/subsector/tower of strip/pre/post/tower  </comment> </dbString> 
-  <dbUShort> stat <length> 1000 </length> <comment>  status  code, see eemcConstDB.hh for definitions  </comment> </dbUShort> 
-  <dbUShort> fail <length> 1000 </length> <comment>  failure code, see eemcConstDB.hh for definitions  </comment> </dbUShort> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>
