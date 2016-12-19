@@ -44,6 +44,7 @@
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcGainCorrectionC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
+#include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
@@ -834,6 +835,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  CdEdx.QSumA = 0;
 	  CdEdx.sector = TrackSegmentHits[iSegHits].Pad.sector(); 
 	  CdEdx.row    = TrackSegmentHits[iSegHits].Pad.row();
+	  CdEdx.channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(CdEdx.row);
+	  CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,CdEdx.row);
+	  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,CdEdx.row);
 	  Double_t              Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(CdEdx.sector,CdEdx.row); // C/cm
 	  CdEdx.pad    = TMath::Nint(TrackSegmentHits[iSegHits].Pad.pad());
 	  CdEdx.edge   = CdEdx.pad;
