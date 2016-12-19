@@ -50,9 +50,10 @@ void MakeV0(Int_t nevents=1000, const Char_t *parn = "K0s", Int_t RunID = 1)
     return;
   }
   TString RootFile = ParName;
+  RootFile += "_"; RootFile += RunID; 
   TString MainFile = RootFile;
   MainFile += ".root";
-  RootFile += "_"; RootFile += RunID; RootFile += ".MuDst.root";
+  RootFile += ".MuDst.root";
   Chain += Form(",rung.%i",RunID);
   chain = bfc(0,Chain.Data(),0,RootFile.Data(),MainFile.Data());
   Double_t pTlow = 0.2;

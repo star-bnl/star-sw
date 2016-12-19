@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.46 2016/06/07 15:51:34 akio Exp $
+ * $Id: StTriggerData.h,v 2.47 2016/12/15 16:30:06 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.47  2016/12/15 16:30:06  ullrich
+ * Updates from Jeff.
+ *
  * Revision 2.46  2016/06/07 15:51:34  akio
  * Making code better based on Coverity reports
  *
@@ -190,6 +193,9 @@ public:
     virtual unsigned short dsmAddress() const;
     virtual unsigned short mAddBits() const;
     virtual unsigned short bcData(int channel) const;
+
+    virtual unsigned short getTrgDetMask() const;
+    virtual unsigned int   getTrgCrateMask() const;
 
     //L2 results offsets 
     virtual int L2ResultsOffset(StL2AlgorithmId id) const;  
