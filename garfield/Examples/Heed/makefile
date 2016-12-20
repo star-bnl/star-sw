@@ -13,8 +13,8 @@ CFLAGS = -Wall -Wextra -Wno-long-long \
 # Debug flags
 #CFLAGS += -g
 
-LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
-LDFLAGS += -L$(LIBDIR) -lGarfield
+LDFLAGS = -L$(LIBDIR) -lGarfield
+LDFLAGS += `root-config --glibs` -lGeom -lgfortran -lm
 #LDFLAGS += -g
 
 edep: edep.C 

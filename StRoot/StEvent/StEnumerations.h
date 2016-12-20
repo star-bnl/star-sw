@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.62 2016/02/25 17:10:20 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.63 2016/12/19 16:11:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.63  2016/12/19 16:11:14  ullrich
+ * Added FPost detector ID and StFpostConstants enums.
+ *
  * Revision 2.62  2016/02/25 17:10:20  ullrich
  * Implemented detector() which is now a pure abstract method in StHit.
  *
@@ -556,7 +559,7 @@ enum StFgtClusterSeedType {
     kFgtKeepStrip
 };
 
-/** FPS/FMS/FHC/FPS detectorId */
+/** FPS/FMS/FHC/FPS/FPost detectorId */
 enum StFmsDetectorId{
     kFpdNorthDetId=0,
     kFpdSouthDetId=1,
@@ -572,7 +575,8 @@ enum StFmsDetectorId{
     kFmsSouthSmallDetId=11,
     kFhcNorthDetId=12,
     kFhcSouthDetId=13,
-    kFpsDetId=14
+    kFpsDetId=14,
+    kFpostDetId=15
 };
 
 /** Categorization of a FMS tower cluster as 1- or 2-photon, or "not sure". */
@@ -590,6 +594,15 @@ enum StFpsConstants {
     kFpsNSlat=21,
     kFpsMaxSlat=252,
     kFpsNCandidate=4
+};
+
+/** FPost basic constants */
+enum StFpostConstants {
+    kFpostNQuad=2,
+    kFpostNLayer=5,
+    kFpostNSlat=43,
+    kFpostMaxSlat=241,
+    kFpostNCandidate=6
 };
 
 /** For more IST related constants see StRoot/StIstUtil/StistConsts.h */
