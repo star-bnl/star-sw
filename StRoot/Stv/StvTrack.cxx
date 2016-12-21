@@ -29,6 +29,7 @@ void StvTrack::reset()
 {
   mId = ++mgId;
   mPrimary=0;
+  memset(mBeg,0,mEnd-mBeg+1);
   clear();
 }
 //______________________________________________________________________________
@@ -97,6 +98,21 @@ int StvTrack::SetUsed()
       node->SetHit(0);	
     }
   }
+  return n;
+}   
+//______________________________________________________________________________
+int StvTrack::SetUnused() 
+{  
+  int n = 0;
+  for (StvNodeConstIter it = begin(); it !=end();++it) {
+    StvNode *node = *it; 
+    StvHit *hit = node->GetHit();
+    if (!hit) 			continue;
+    if (!hit->detector())	continue;
+    hit->setTimesUsed(0);n++;
+    if (node->GetXi2()>1000) node->SetHit(0);	
+  }
+  
   return n;
 }   
 //______________________________________________________________________________
@@ -197,6 +213,12 @@ double StvTrack::GetXi2() const
  
   return (nd>0)? Xi2/nd:0;
 
+}
+//_____________________________________________________________________________
+double StvTrack::GetXi2Aux() const
+{
+  if (!mXi2Aux) mXi2Aux = GetXi2();
+  return mXi2Aux;
 }
 //_____________________________________________________________________________
 double StvTrack::GetXi2P() const
@@ -340,11 +362,28 @@ int StvTrack::GetCharge() const
 //_____________________________________________________________________________
 void StvTrack::Reverse() 
 { reverse(); }
+//______________________________________________________________________________
+double StvTrack::GetXi2W() const
+{
+  if (mXi2W>0) return mXi2W;
+  mXi2W = 0;
+  for (auto it = begin();it != end();++it) 
+  {
+    auto *node = *it; 
+    if (node->GetType()!=StvNode::kRegNode) 	continue;
+    if (!(node->GetHit())) 		 	continue;
+    double Xi2 = node->GetXi2();
+    if ( Xi2>1000) 				continue;
+    if ( Xi2 < mXi2W) 				continue;
+    mXi2W = Xi2;
+  }
+  return  mXi2W;
+}
 //_____________________________________________________________________________
 StvTrack &StvTrack::operator=(const StvTrack &from)
 {
 static StvToolkit *kit = StvToolkit::Inst();
-  for (StvNodeIter it = begin();it != end();++it) 
+  for (auto it = begin();it != end();++it) 
   {
     StvNode *node = *it; kit->FreeNode(node);		
   }
