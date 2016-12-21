@@ -54,7 +54,7 @@ void StvDefaultSeedFinder::Reset()
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
-    if (stiHit->isUsed()) continue;
+    if (stiHit->timesUsed()) continue;
     const float *x = stiHit->x();
     float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
@@ -163,7 +163,7 @@ std::vector<TObject*> mySeedObjs;
   int nTally = 0; 
   while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
-    if (fstHit->isUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
+    if (fstHit->timesUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
       ++(*f1stHitMapIter); mNDejavu = 0; continue;
     }
     fSeedHits.clear();
