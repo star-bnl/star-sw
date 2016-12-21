@@ -32,16 +32,18 @@ class StvMaker : public StMaker
     StvMaker(const char* name = "Stv");
     virtual ~StvMaker();
     virtual void  Clear(const char* opt="");
-    virtual Int_t Init();
-            Int_t InitDetectors();
-            Int_t InitPulls();
-            Int_t FillPulls();
-    virtual Int_t InitRun(int);
-    virtual Int_t Make();
-    virtual Int_t Finish();
+    virtual int Init();
+            int InitDetectors();
+            int InitPulls();
+            int FillPulls();
+    virtual int InitRun(int);
+    virtual int Make();
+    virtual int Finish();
+            int CleanGlobalTracks();
+            int TestGlobalTracks() const;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.7 2016/12/17 00:16:02 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.8 2016/12/21 03:49:45 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
 
@@ -54,11 +56,14 @@ private:
     StvSeedFinders      *mSeedFinders[2];
     StvEventFiller      *mEventFiller[2];
     StvTrackFinder      *mTrackFinder[2];
+    StvTrackFinder      *mCurTrackFinder;
+    StvTrackFitter      *mCurTrackFitter;
     StvTrackFitter      *mTrackFitter[2];
     StvVertexFinder     *mVertexFinder[2];
     TFile               *mPullFile;
     StvPullEvent        *mPullEvent;
     TTree               *mPullTTree;
+    int                  mMaxTimes;	//max times hit reused
     int                  mFETracks;	//max number of track requested if fit hit errs
     int                  mToTracks;	//total tracks created, if > mFETracks, stop
   char mEnd[1];
