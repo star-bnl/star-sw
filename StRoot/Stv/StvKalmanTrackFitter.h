@@ -16,6 +16,7 @@ public:
   StvKalmanTrackFitter();
   void SetCons(const StvKonst_st* kons);
   virtual ~StvKalmanTrackFitter(){;}	
+  virtual  int Refit(StvTrack *trak,int idir);
   virtual  int Refit(StvTrack *trak,int dir,int lane,int mode=1);
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
            int Propagate(StvNode  *node,StvNode *preNode,int dir,int lane);
