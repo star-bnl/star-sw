@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.57 2016/12/21 03:54:58 perev Exp $
+// $Id: StvMaker.cxx,v 1.58 2016/12/21 18:17:52 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -548,7 +548,7 @@ static bool TrackCompareStatus(const StvTrack *a, const StvTrack *b)
   int nA = a->GetNHits();
   int nB = b->GetNHits();
   if (nA!=nB) return (nA > nB);
-  return (a->GetXi2() <b->GetXi2());
+  return (a->GetXi2Aux() <b->GetXi2Aux());
 //  return (a->GetXi2W()<b->GetXi2W());
 }
 //_____________________________________________________________________________
