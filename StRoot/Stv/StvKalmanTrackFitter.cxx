@@ -302,6 +302,64 @@ StvDebug::Break(nQQQQ);//???????????
 
   return -nErr;
 }
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Refit(StvTrack *tk, int idir)
+{
+static int nCall=0;nCall++;
+static const double kEps = 1.e-2,kEPS=1e-1;
+
+  int ans=0,anz=0,lane = 1;
+  int& nHits = NHits();
+  nHits = tk->GetNHits();
+  int nBegHits = nHits;
+  int nRepair =(nHits-5)*0.1;
+  int state = 0;
+  StvNode *tstNode = (idir)? tk->front(): tk->back();
+  int nIters = 0,nDrops=0;
+  for (int repair=0;repair<=nRepair;repair++)  	{ 	//Repair loop
+    int converged = 0;
+    for (int refIt=0; refIt<10; refIt++)  	{	//Fit iters
+      nIters++;
+      ans = Refit(tk,idir,lane,1);
+//    ==================================
+      nHits=NHits();
+      if (nHits < mKons->mMinHits) break;
+      if (ans>0) break;			//Very bad
+      
+      StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
+      anz = Refit(tk,1-idir,1-lane,1); 
+//        ==========================================
+      nHits=NHits();
+      if (nHits < mKons->mMinHits) break;
+      if (anz>0) break;	
+
+      double dif = lstPars.diff(tstNode->GetFP(),tstNode->GetFE());
+      double eps = (ans || anz)? kEPS:kEps;
+      if ( dif < eps) { //Fit converged
+      converged = 1; break; } 
+
+    }// End Fit iters
+    
+    state = (ans!=0) + 10*((anz!=0) + 10*((!converged) 
+          + 10*((tk->GetXi2()>mKons->mXi2Trk)+10*(nHits < mKons->mMinHits))));
+    if (!state) 		break;
+    if (nHits < mKons->mMinHits) 	break;
+    StvNode *badNode=tk->GetNode(StvTrack::kMaxXi2);
+//    StvNode *badNode=tk->GetMaxKnnNode();
+    if (!badNode) 		break;
+    badNode->SetHit(0); nDrops++;
+    nHits--; if (nHits < mKons->mMinHits) { state = 1000000; break;}
+  }//End Repair loop
+
+
+  if (ans<=0) state &= (-2);
+  if (anz<=0) state &= (-4);
+  
+  nHits = tk->GetNHits();
+  nDrops = nBegHits-nHits;
+  return state;
+
+}
 
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
