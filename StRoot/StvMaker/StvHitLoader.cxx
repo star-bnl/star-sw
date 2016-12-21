@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.31 2016/12/09 21:03:43 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.32 2016/12/21 17:09:49 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -43,6 +43,7 @@ StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
 {
   mHitIter = new StEventHitIter();
   mHitSelector = 0; mHitLoadActor = 0; mNDets = 0;
+  memset(mMaxTimes,0,sizeof(mMaxTimes));
 }
 
 //_____________________________________________________________________________
@@ -136,12 +137,15 @@ if (myGraph) { //create canvas
     mDetId = did;
     int sure=0;
     int nStvHits = MakeStvHit(stHit,mHitIter->UPath(),sure);
-//     if (!sure && stvHit) { //Non reliable hit
-//       double rxy = sqrt(pow(stvHit->x()[0],2)+pow(stvHit->x()[1],2));
-//       StvDebug::Count("OrphanHits",stvHit->x()[2],rxy);
+//     if (!sure && mStvHit) { //Non reliable hit
+//       double rxy = sqrt(pow(mStvHit->x()[0],2)+pow(mStvHit->x()[1],2));
+//       StvDebug::Count("OrphanHits",mStvHit->x()[2],rxy);
 //     }
 
-    if (nStvHits) {nHits+=nStvHits;nTotHits+=nStvHits;nGits+=sure;nTotGits+=sure;}  
+    if (nStvHits) {
+      nHits+=nStvHits;nTotHits+=nStvHits;nGits+=sure;nTotGits+=sure;
+      if (mMaxTimes[mDetId]>1) mStvHit->setMaxTimes(mMaxTimes[mDetId]);
+    }  
     else          {nHitz++;nTotHitz++;}
   }
   int nIniHits = tgp->InitHits();
@@ -157,8 +161,15 @@ int StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure)
 static StTGeoProxy *tgh = StTGeoProxy::Inst();
 static StvToolkit  *kit = StvToolkit::Inst();
    assert(stHit);
-   StvHit *stvHit = 0;
-   StDetectorId did = stHit->detector();
+   mStvHit = 0;
+ //  StDetectorId did = stHit->detector();
+   StDetectorId did = mDetId;
+   if (!did) {
+static int knt=0;knt++;
+     printf("StvHitLoader::MakeStvHit(%d) No DETID***\n",knt);
+     return 0;
+   }
+   assert(did);
    do {	//May be errors exists
      if (did==kTpcId) 		break;
      StMatrixF errF(3,3);
@@ -172,12 +183,12 @@ static StvToolkit  *kit = StvToolkit::Inst();
        errF = stHit->covariantMatrix();
      }
      assert(did!=kFtsId || errF[0][0]>1e-8);
-     if (errF[0][0]<1e-8)	break;
+     if (errF[0][0]+errF[1][1]+errF[2][2]<1e-8)	break;
      assert(fabs(errF[0][1]-errF[1][0])<1e-8);
      assert(fabs(errF[0][2]-errF[2][0])<1e-8);
      assert(fabs(errF[1][2]-errF[2][1])<1e-8);
-     stvHit = kit->GetHitRr();
-     float *e = stvHit->errMtx();
+     mStvHit = kit->GetHitRr();
+     float *e = mStvHit->errMtx();
      for (int i=0,li=0;i< 3;li+=++i) {
      for (int j=0;j<=i;j++) { e[li+j] = errF[i][j];}}
      assert(e[0]>1e-8 && e[0]<64);
@@ -188,16 +199,16 @@ static StvToolkit  *kit = StvToolkit::Inst();
      assert(e[0]*e[5]>=e[3]*e[3] );
    } while(0);
 
-   if (!stvHit) stvHit = kit->GetHit();
+   if (!mStvHit) mStvHit= kit->GetHit();
 
    int idTru   = stHit->idTruth(); 
-   
+   if (idTru<0 && idTru>10000) idTru=0;
    UInt_t hard = stHit->hardwarePosition();
    if (!hard) hard = upath;
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
-   stvHit->set(stHit,xyz);
-   stvHit->setIdTru(idTru);
+   mStvHit->set(stHit,xyz);
+   mStvHit->setIdTru(idTru);
    int seed = 1;
    if (did == kTpcId) {	// Special case for TPCHit. Prompt info added
 //   enum {zPrompt = 205,rMiddle=124};
@@ -206,7 +217,7 @@ static StvToolkit  *kit = StvToolkit::Inst();
      if (xyz[0]*xyz[0]+xyz[1]*xyz[1] >rMiddle*rMiddle) seed = 1;
    } else {
 //		the hits outside and with small mag field not for seed
-     const float* x = stvHit->x();
+     const float* x = mStvHit->x();
      assert(fabs(x[0])+fabs(x[1])>1);
      if (fabs(x[2])>250) {
        static StvToolkit *tk = StvToolkit::Inst();
@@ -215,9 +226,9 @@ static StvToolkit  *kit = StvToolkit::Inst();
    
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
    
-   const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
+   const StHitPlane *hp = tgh->AddHit(mStvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
-   if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
+   if (!hp) { StvToolkit::Inst()->FreeHit(mStvHit); mStvHit = 0; return 0;}
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
@@ -232,15 +243,16 @@ static StvToolkit  *kit = StvToolkit::Inst();
      if (fabs(dang)>17) printf("dang = %g\n",dang);
      assert(fabs(dang)<31);
    }
-   stvHit->set(hp);
+   mStvHit->set(hp);
+   
 #if 0
 static int nnn=0;nnn++;
 printf("%d  *** StvHitLoader::MakeStvHit %g %g %g  ***\n",nnn
-      ,stvHit->x()[0],stvHit->x()[1],stvHit->x()[2]);
-StvDebug::Count("ZHits",stvHit->x()[2]);
-StvDebug::Count("XYHits",stvHit->x()[1],stvHit->x()[1]);
-StvDebug::Count("ZXHits",stvHit->x()[2],stvHit->x()[0]);
-StvDebug::Count("ZYHits",stvHit->x()[2],stvHit->x()[1]);
+      ,mStvHit->x()[0],mStvHit->x()[1],mStvHit->x()[2]);
+StvDebug::Count("ZHits",mStvHit->x()[2]);
+StvDebug::Count("XYHits",mStvHit->x()[1],mStvHit->x()[1]);
+StvDebug::Count("ZXHits",mStvHit->x()[2],mStvHit->x()[0]);
+StvDebug::Count("ZYHits",mStvHit->x()[2],mStvHit->x()[1]);
 #endif
    return 1;
 }
@@ -292,6 +304,23 @@ int StvHitLoader::TpcHitTest(const StHit *stHit)
   }
   return isdet;
 }
+//_____________________________________________________________________________
+void  StvHitLoader::SetMaxTimes(int maxTimes,const char *detector)
+{
+  StDetectorId id = kUnknownId;
+  if (detector[0]!='*') {
+    id = detectorIdByName(detector);
+    assert(id); 
+  }
+  SetMaxTimes(maxTimes,id);
+}
+//_____________________________________________________________________________
+void  StvHitLoader::SetMaxTimes(int maxTimes,StDetectorId id)
+{
+  if (id) {mMaxTimes[id] = maxTimes; return; }
+  for (int i=1;i<=kMaxDetectorId;i++) { mMaxTimes[i]=maxTimes;}
+}
+
 //_____________________________________________________________________________
 StMatrixF  Hack1to6(const StHit *stHit)
 {
