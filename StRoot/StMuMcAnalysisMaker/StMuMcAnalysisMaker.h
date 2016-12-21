@@ -142,7 +142,7 @@ class StMuMcAnalysisMaker : public StMaker {
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();
   Bool_t         Check();
-  void           Draw(Option_t *option);
+  Int_t          Draw();
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
   void           DrawEff(Double_t ymax=1.0, Double_t pTmin = -1, Int_t animate=0);
   void           DrawdEdx(Double_t lenMin=40);

@@ -26,10 +26,8 @@ static const Char_t *TitlePiDtype[NoPiDs] = {"dEdxPiD", "ToFPiD"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};	  
 static const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
 					 "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
-#if 0
 static const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar"
 					 "e+","p"   ,"K+","pi+","mu+","d"   ,"t"   ,"He3"    ,"alpha"};
-#endif
 static const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417,
 				       0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 static const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
@@ -38,14 +36,12 @@ static const Int_t PiDHyp[NHYPS]     = {kPidElectron, kPidProton, kPidKaon, kPid
 					kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha};
 static const Int_t PiDpm[NHYPS]      = {kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative,
 					kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive};
-#if 0
 static const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
 static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN70B","muN70B","deuteronN70B","tritonN70B","He3N70B","alphaN70B",
 				    "eP70B","protonP70B","kaonP70B","piP70B","muP70B","deuteronP70B","tritonP70B","He3P70B","alphaP70B"};
 static const Char_t *HistNameP[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","He3PzB","alphaPzB"};
-#endif
 static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
@@ -302,7 +298,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	    for (Int_t i = i1; i < kTotalQAll; i++) {
 	      if (gp == kGlobal && plotVar[i].GlobalOnly <  0) continue;
 	      if (gp == kPrimary && plotVar[i].GlobalOnly == 0) continue;
-	      if ((fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name))) continue;
+	      if (fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name)) continue;
 	      if (! x) {// No.Hits
 		if (i == kTotalQA) continue;
 		fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
@@ -537,7 +533,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
   // =============  Build map between  Rc and Mc vertices 
   //  multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
   // Loop over Mc Tracks
-  for (UInt_t m = 0; m < muDst->numberOfMcTracks(); m++) {
+  for (Int_t m = 0; m < muDst->numberOfMcTracks(); m++) {
     StMuMcTrack *mcTrack = muDst->MCtrack(m);
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
@@ -682,7 +678,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	// ToF
 	const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
 	Float_t pathLength = btofPid.pathLength();
-	//	Float_t timeOfFlight = btofPid.timeOfFlight();
+	Float_t timeOfFlight = btofPid.timeOfFlight();
 	Float_t beta = btofPid.beta();
 	
 	//	const StThreeVectorF &pVx  = Track->momentum();
@@ -719,7 +715,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     }
   }
   // check for ghost
-  for (UInt_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
+  for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
     StMuTrack *gTrack = muDst->globalTracks(kg);
     if ( ! muDst->Accept(gTrack)) continue;
     if ( gTrack->idTruth()) continue;
@@ -727,13 +723,13 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     if (gTrack->charge() < 0) pm = kNegative;
     fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
   }
-  for (UInt_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
+  for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
     StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
     if (Vtx->idTruth() != 1) continue;
-    for (UInt_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
+    for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       if (! pTrack) continue;
-      if (pTrack->vertexIndex() != (Int_t) l) continue;
+      if (pTrack->vertexIndex() != l) continue;
       if (! muDst->Accept(pTrack)) continue;
       if ( pTrack->idTruth()) {
 	if (pTrack->idParentVx() == 1) continue;
@@ -750,9 +746,9 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   StMuDst::instance()->printKFTracks();
   //  return;
   static Int_t nTracksAll = 0;
-  //  static Int_t nTracksGhost = 0;
+  static Int_t nTracksGhost = 0;
   static Int_t nStiVertex = 0;
-  //  static Int_t nKFVertex = 0;
+  static Int_t nKFVertex = 0;
   Int_t NoMuMcVertices = StMuDst::instance()->numberOfMcVertices(); //if (_debugAsk) cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices << std::endl;
   Int_t NoMuMcTracks = StMuDst::instance()->numberOfMcTracks();
   if (! NoMuMcVertices || ! NoMuMcTracks) {
@@ -938,6 +934,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   mStKFParticleInterface->SetParticles(particles);
   mStKFParticleInterface->SetParticlesPdg(particlesPdg);
   mStKFParticleInterface->CleanPV();
+  mStKFParticleInterface->InitParticles();
   if(NoPrimaryVertices>0)
   {
     for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
@@ -958,7 +955,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     KFVertex pv(primVtx_tmp);
     mStKFParticleInterface->AddPV(pv, tracks);
   }
-  mStKFParticleInterface->InitParticles();
+//   mStKFParticleInterface->InitParticles();
   
 #if 0 /* Maksym reconstruction */
   mStKFParticleInterface->ReconstructParticles();
@@ -1002,7 +999,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   
   mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
   mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
-  Int_t nevent = 1;
+  Int_t nevent = 100;
   mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
   mStKFParticlePerformanceInterface->PerformanceAnalysis();
 #if 0  
@@ -1368,8 +1365,8 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
   }
 }
 //_____________________________________________________________________________
-void StMuMcAnalysisMaker::Draw(Option_t */* option */){
-  if (! Check()) return;
+Int_t StMuMcAnalysisMaker::Draw(){
+  if (! Check()) return kStOk;
   TString Out("indexMc.html");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   BeginHtml();
@@ -1389,6 +1386,7 @@ void StMuMcAnalysisMaker::Draw(Option_t */* option */){
   out << "<H1>2. Vertices</H1>" << endl;
   Chapter = "2.1"; // nPng = 0;
   EndHtml();
+  return kStOK;
 }
 //________________________________________________________________________________
 TString StMuMcAnalysisMaker::DirPath(const TH1 * hist) {
@@ -1563,7 +1561,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
 	    else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
 	    heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
-	    heff[l]->SetYTitle(Form("%s (%%)",eff[i].Title));
+	    heff[l]->SetYTitle(Form("%s (%)",eff[i]));
 	    heff[l]->SetStats(0);
 	    heff[l]->SetMarkerColor(l+1);
 	    heff[l]->SetLineColor(l+1);
