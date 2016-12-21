@@ -25,6 +25,7 @@ public:
   virtual void      SetFitter(StvTrackFitter *fitter){mTrackFitter = fitter;}
           void      AddPoint(const double pt[3]);
           void      AddHits(const double pt[3]);
+  virtual StvNode *MakeDcaNode(StvTrack *tk)=0;
           void      Show();
           void      DoShow(int lev);
           int       DoShow() const {return fDoShow;};
