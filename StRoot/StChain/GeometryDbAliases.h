@@ -172,6 +172,13 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   // eStar simulations starting w/ timestamp 12/10/2020
   {"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
   {"dev2020",     20201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref1",     20201210,     2, "ftsref1",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref2",     20201210,     3, "ftsref2",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref3",     20201210,     4, "ftsref3",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref4",     20201210,     5, "ftsref4",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref5",     20201210,     6, "ftsref5",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref6",     20201210,     7, "ftsref6",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref7",     20201210,     8, "ftsref7",  "development geometry for 2020+,AgML,xgeometry"},
 
   {0,                    0,     0,        0,    0}
 };
