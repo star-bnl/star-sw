@@ -67,6 +67,17 @@
 
     </Setup>  
 
+    <Setup  name   = "FTSDr0"
+	    comment= "FTS Geometry Reference 1"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,1, 0,0,0,0,0,0}" />
+
+    </Setup>  
+
     <Setup  name   = "FTSDr1"
 	    comment= "FTS Geometry Reference 1"
 	    module = "FtsdGeo"
@@ -86,6 +97,62 @@
       <Init struct="MAIN" var="version" value="5.0" />
       <Init struct="MAIN" var="useids"  value="0.0" />
       <Init struct="MAIN" var="active"  value="{1,0,1,0,0,0, 1,1,1,1,1,1}" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr3"
+	    comment= "FTS Geometry Reference 3"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="6.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,1, 1,1,1,1,1,1}" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr4"
+	    comment= "FTS Geometry Reference 4"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="6.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{0,1,0,1,0,1, 1,1,0,0,1,1}" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr5"
+	    comment= "FTS Geometry Reference 5"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="6.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{0,1,0,1,0,1, 0,0,1,1,1,1}" />
+
+    </Setup>  
+
+
+    <Setup  name   = "FTSDr6"
+	    comment= "FTS Geometry Reference 6"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="7.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{0,1,0,1,0,1, 0,0,1,1,1,1}" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr7"
+	    comment= "FTS Geometry Reference 6"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="7.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{0,1,0,1,0,1, 0,1,1,1,1,0}" />
 
     </Setup>  
 

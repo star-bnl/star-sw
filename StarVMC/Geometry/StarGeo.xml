@@ -86,6 +86,22 @@
 
   </Geometry>
 
+  <Geometry tag="ftsref0" comment="Forward Tracking reference 1">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr0" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+
+  </Geometry>
+
   <Geometry tag="ftsref1" comment="Forward Tracking reference 1">
 
     <Construct sys="cave" config="CAVE05" />
@@ -98,6 +114,7 @@
     <Construct sys="btof" config="BTOFv8" />
     <Construct sys="mutd" config="MUTD15" />
     <Construct sys="calb" config="CALB02" />
+
 
   </Geometry>
 
@@ -115,6 +132,95 @@
     <Construct sys="calb" config="CALB02" />
 
   </Geometry>
+
+  <Geometry tag="ftsref3" comment="Forward Tracking reference 3">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="scon" config="SCONof" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+    <Construct sys="ftsd" config="FTSDr3" />
+
+  </Geometry>
+
+  <Geometry tag="ftsref4" comment="Forward Tracking reference 4">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="scon" config="SCONof" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+    <Construct sys="ftsd" config="FTSDr4" />
+
+  </Geometry>
+
+
+  <Geometry tag="ftsref5" comment="Forward Tracking reference 3">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="scon" config="SCONof" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+    <Construct sys="ftsd" config="FTSDr5" />
+
+  </Geometry>
+
+
+  <Geometry tag="ftsref6" comment="Forward Tracking reference 3">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="scon" config="SCONof" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+    <Construct sys="ftsd" config="FTSDr6" />
+
+  </Geometry>
+
+
+  <Geometry tag="ftsref7" comment="Forward Tracking reference 3">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="scon" config="SCONof" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="epdm" config="EPDMon" simu="1" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+    <Construct sys="ftsd" config="FTSDr7" />
+
+  </Geometry>
+
 
 
   <!-- Just the CAVE and upstream area -->
