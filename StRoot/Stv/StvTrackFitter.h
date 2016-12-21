@@ -18,6 +18,7 @@ public:
   StvTrackFitter(const char *name);
   virtual ~StvTrackFitter();
   virtual void SetCons(const StvKonst_st*)=0;
+  virtual  int Refit(StvTrack *trak,int dir)=0;
   virtual  int Refit(StvTrack *trak,int dir,int lane, int mode=1)=0;
   virtual void Clear(const char *opt="");	
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)=0;
