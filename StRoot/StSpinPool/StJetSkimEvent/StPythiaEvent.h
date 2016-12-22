@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.14.8.2 2016/04/27 17:47:49 zchang Exp $
+// $Id: StPythiaEvent.h,v 1.14.8.3 2016/12/22 06:32:52 zchang Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.14.8.3  2016/12/22 06:32:52  zchang
+// bug fixing
+//
 // Revision 1.14.8.2  2016/04/27 17:47:49  zchang
 // *** empty log message ***
 //
@@ -270,7 +273,12 @@ inline void StPythiaEvent::Clear(Option_t* option)
     fill(mDF2,mDF2+NPDF,0);
     mF1[0] = 0; mF1[1] = 0;
     mF2[0] = 0; mF2[1] = 0;
-
+    for(int i = 0; i < NUMNNPDF; i++){
+      mDF1NNPDF[i] = 0.;
+      mDF2NNPDF[i] = 0.;
+    } 
+    mF1NNPDF = 0.;
+    mF2NNPDF = 0.;
     if (mParticles) mParticles->Clear(option);
 }
 

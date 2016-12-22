@@ -29,8 +29,9 @@ StNNPDFAsymMaker::~StNNPDFAsymMaker() {
 
 Int_t StNNPDFAsymMaker::Init() {
   struct passwd* pw = getpwnam("zchang");
-  mUnpPdf = new StNNPDF(Form("%s/public/pdfs/NNPDF30_nlo_as_0119", pw->pw_dir), 0);
-  mPolPdf = new StNNPDF(Form("%s/public/pdfs/NNPDFpol11_100.LHgrid", pw->pw_dir));
+  mUnpPdf = new StNNPDF(Form("%s/public/pdfs/NNPDF23_nlo_as_0119", pw->pw_dir), 0);
+  //mPolPdf = new StNNPDF(Form("%s/public/pdfs/NNPDFpol11_100.LHgrid", pw->pw_dir));
+  mPolPdf = new StNNPDF(Form("%s/public/pdfs/NNPDFpol11_100", pw->pw_dir));
 
   //mstw
   mPdfs = new StPDFs;
@@ -41,7 +42,7 @@ Int_t StNNPDFAsymMaker::Init() {
 }
 
 void StNNPDFAsymMaker::Clear(const Option_t* c) {
-  //    mEvent->Clear(c);
+    mEvent->Clear(c);
     StMaker::Clear(c);
 }
 //_____________________________________________________________________________

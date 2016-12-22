@@ -11,7 +11,7 @@ ClassImp(StNNPDFPythiaEventMaker);
 
 void StNNPDFPythiaEventMaker::Clear(Option_t* option)
 {
-  mPythiaEvent->Clear(option);
+  //mPythiaEvent->Clear(option);
 }
 
 int StNNPDFPythiaEventMaker::Init()
