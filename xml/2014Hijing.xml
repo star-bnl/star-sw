@@ -12,7 +12,7 @@
   else
     exit 1;
   endif
-  set file = pythia_R${rung}_${f}_${l}
+  set file = hijing_R${rung}_${f}_${l}
   echo "${file}"
   set logFile  = ${file}B.log
   if ( -r $logFile) exit 0;
@@ -28,10 +28,10 @@
   if (! $?) set fitter = ",VFPPVnoCTB,StiCA";
   echo "fitter $fitter"
   set tagFile = ${file}.root
-  root4star -q -b 'bfcV0.C('$f','$l',"MC.2014,PythiaPP200HFT,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('$f','$l',"MC.2014,HijingAuAu200,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
-<input URL="command:flux.pl" />
+<input URL="command:RunId.pl 1 100" />
 </job>

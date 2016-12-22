@@ -414,4 +414,4 @@ mix = new TGeoMixture("PHMD_AR_CO2",3,  0.184050E-02);mix->SetUniqueID(++imat);
  mix->DefineElement(2,15.999, 8, 0.138); // Oxigen
  mix->DefineElement(3,1.00794,1, 0.017); // Hydrogen
 }
-#endif
+#endif /*  ! __Material__ */

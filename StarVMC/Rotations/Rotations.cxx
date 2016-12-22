@@ -1,45 +1,9 @@
-// $Id: Rotations.h,v 1.8 2009/01/21 23:57:42 fisyak Exp $
-// $Log: Rotations.h,v $
-// Revision 1.8  2009/01/21 23:57:42  fisyak
-// Add dead area accounting strip stereo
-//
-// Revision 1.7  2009/01/16 16:01:14  fisyak
-// Adjust SVT geometry topology for alignment
-//
-// Revision 1.6  2009/01/14 16:31:52  fisyak
-// Freeze conversion from mortran to Cint for SVT
-//
-// Revision 1.5  2008/11/17 14:16:43  fisyak
-// add comments
-//
-// Revision 1.4  2008/09/03 20:44:48  fisyak
-// replace tpc geometry with translate one from mortran, clean ups
-//
-// Revision 1.3  2008/08/27 21:48:12  fisyak
-//
-// Standard Rotations  Master = x + Rotation * Local
-#include "TMath.h"
-#include "TGeoMatrix.h"
-#include "TGeoManager.h"
-#include "Riostream.h"
-struct rotm_t {
-  const Char_t *name;
-  Float_t Thet1,    Phi1,   Thet2,    Phi2,   Thet3,    Phi3;
-  void Print() {std::cout 
-      << name 
-      << "\t" << Thet1 
-      << "\t" <<   Phi1 
-      << "\t" <<  Thet2 
-      << "\t" <<   Phi2 
-      << "\t" <<  Thet3 
-      << "\t" <<   Phi3 
-      << std::endl;}
-  TGeoRotation *GetRotM() {return new TGeoRotation(name,Thet1,Phi1,Thet2,Phi2,Thet3,Phi3);}
-};
+#include "Rotations.h"
+vector<rotm_t> fgRotations;
 //________________________________________________________________________________
-void Rotations() {
+void rotm_t::Rotations() {
   // Name      Thet1    Phi1   Thet2    Phi2   Thet3    Phi3
-  rotm_t rotm[] = {
+  rotm_t rotI[] = {
     {"000D",   90.0,    0.0,   90.0,   90.0,    0.0,    0.0}, // "000D"  (x,y,z) = > ( x, y, z)
     {"XYZD",  -90.0,    0.0,   90.0,   90.0,    0.0,    0.0}, // "XYZD"  (x,y,z) = > (-x, y, z)
     {"XZXD",   90.0,    0.0,  -90.0,   90.0,    0.0,    0.0}, // "XZXD"  (x,y,z) = > ( x,-y, z)
@@ -139,6 +103,7 @@ void Rotations() {
     {"Z5YX",  -90.0,   90.0,   0.0,    0.0,  -90.0,    0.00}, // "Z5YX"  (x,y,z) = > (-z,-x, y)
     {"Z6XY",  -90.0,    0.0, 180.0,    0.0,  -90.0,   90.00}, // "Z6XY"  (x,y,z) = > (-x,-z,-y)
     {"Z7XY",   90.0,    0.0,   0.0,    0.0,  -90.0,   90.00}, // "Z7XY"  (x,y,z) = > ( x,-z, y)
+    {"Z9XY",   90.0,    0.0,   0.0,    0.0,   90.0,  270.00}, // "Z9XY"  (x,y,z) = > ( x, z,-y)
     {"Z8YX",  -90.0,   90.0, 180.0,    0.0,   90.0,    0.00}, // "Z8YX"  (x,y,z) = > ( z,-x,-y)
     {"XXZY",   90.0,    0.0, 180.0,    0.0,   90.0,   90.00}, // "XXZY"  (x,y,z) = > ( x, z,-y)
     {"XZXY",   90.0,  180.0, 180.0,    0.0,   90.0,  -90.00}, // "XZXY"  (x,y,z) = > (-x,-z,-y)
@@ -172,48 +137,86 @@ void Rotations() {
     {"090N",   90.0,  -90.0,  90.0,    0.0,    0.0,    0.00}, // "090N"  (x,y,z) = > ( y,-x, z)
     {"A015",  105.0,    0.0,  90.0,   90.0,   15.0,    0.00}, // "A015"  (x,y,z) = > ( ?, y, ?)
     {"A-15",   75.0,    0.0,  90.0,   90.0,  -15.0,    0.00}  // "A-15"  (x,y,z) = > ( ?, y, ?)
-    //								 "R???"  (x,y,z) = > ( x, y, z)
-    //								 "R??.5" (x,y,z) = > ( ?, ?, z)
-    //								 "R???.5"(x,y,z) = > ( ?, ?, z)
-    //								 "Y???"  (x,y,z) = > ( ?, ?,-z)
-    //								 "???T"  (x,y,z) = > ( ?, ?,-z)
   };
-  Int_t nrotm = sizeof(rotm)/sizeof(rotm_t); std::cout << "Total no. of rotaion matrices  = " << nrotm << std::endl;
-  Int_t i;
-  TGeoRotation *rr = 0;
-  for (i = 0; i < nrotm; i++) {
-    //    rotm[i].Print();
-    rr = rotm[i].GetRotM();
-    if (gGeoManager) rr->RegisterYourself();
-    //    rr->Print();
+  Int_t nrotm = sizeof(rotI)/sizeof(rotm_t); std::cout << "Total no. of rotaion matrices  = " << nrotm << std::endl;
+#if 0
+  for (int i = 0; i < nrotm; i++) {
+    rotm_t &rotm = rotI[i];
+    fgRotations.push_back(rotm);
   }
+#else
+  fgRotations = vector<rotm_t>(rotI,rotI+nrotm);
+#endif
   // Rotations around Z with step 5 degrees "R???"
   Double_t phi;
   for (phi = 0; phi <= 360; phi += 5) {
-    rr = new TGeoRotation(Form("R%03.0f",phi));
-    rr->RotateZ(phi);
-    if (gGeoManager) rr->RegisterYourself();
-    // rr->Print();
+    rotm_t rotm;
+    sprintf(rotm.name,"R%03.0f",phi);
+    rotm.Thet1 = 90;
+    rotm.Phi1  = phi;
+    rotm.Thet2 = 90;
+    rotm.Phi2  = 90 + phi;
+    if (rotm.Phi2 <    0) rotm.Phi2 += 360;
+    if (rotm.Phi2 >= 360) rotm.Phi2 -= 360;
+    rotm.Thet3 = 0.;
+    rotm.Phi3  = 0.;
+    fgRotations.push_back(rotm);
   }
   // Rotations around Z with step 22.5 degrees "R?.?"
   for (phi = 22.5; phi <= 360; phi += 45.) {
-    rr = new TGeoRotation(Form("R%3.1f",phi));
-    rr->RotateZ(phi);
-    if (gGeoManager) rr->RegisterYourself();
-    // rr->Print();
+    rotm_t rotm;
+    sprintf(rotm.name,"R%03.0f",phi);
+    rotm.Thet1 = 90;
+    rotm.Phi1  = phi;
+    rotm.Thet2 = 90;
+    rotm.Phi2  = 90 + phi;
+    if (rotm.Phi2 <    0) rotm.Phi2 += 360;
+    if (rotm.Phi2 >= 360) rotm.Phi2 -= 360;
+    rotm.Thet3 = 0.;
+    rotm.Phi3  = 0.;
+    fgRotations.push_back(rotm);
   }
   // Flip (x,y,z) => ( x,-y,-z) and Rotate around Z with step 30 degrees
   for (phi = 0; phi < 360; phi += 30) {
-    rr = new TGeoRotation(Form("Y%03.0f",phi),   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00);
-    rr->RotateZ(phi);
-    if (gGeoManager) rr->RegisterYourself();
-    // rr->Print();
+    rotm_t rotm;
+    sprintf(rotm.name,"Y%03.0f",phi);
+    rotm.Thet1 = 90;
+    rotm.Phi1  = phi;
+    rotm.Thet2 = 90;
+    rotm.Phi2  = -90 + phi;
+    if (rotm.Phi2 <    0) rotm.Phi2 += 360;
+    if (rotm.Phi2 >= 360) rotm.Phi2 -= 360;
+    rotm.Thet3 = 180.;
+    rotm.Phi3  =   0.;
+    fgRotations.push_back(rotm);
   }
   // Flip (x,y,z) => ( x, y,-z) and Rotate around Z with step 5 degrees
   for (phi = -15; phi <= 360; phi += 5) {
-    rr = new TGeoRotation(Form("%03.0fT",phi),   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00);
-    rr->RotateZ(phi);
-    if (gGeoManager) rr->RegisterYourself();
-    // rr->Print();
+    rotm_t rotm;
+    sprintf(rotm.name,"%03.0fT",phi);
+    rotm.Thet1 = 90;
+    rotm.Phi1  = phi;
+    rotm.Thet2 = 90;
+    rotm.Phi2  = -90 + phi;
+    if (rotm.Phi2 <    0) rotm.Phi2 += 360;
+    if (rotm.Phi2 >= 360) rotm.Phi2 -= 360;
+    rotm.Thet3 = 180.;
+    rotm.Phi3  =   0.;
+    fgRotations.push_back(rotm);
   }
+#ifndef __NO_TGEO__
+  nrotm = fgRotations.size(); std::cout << "Total no. of rotaion matrices  = " << nrotm << std::endl;
+#if 0
+  TGeoRotation *rr = 0;
+  for (int i = 0; i < nrotm; i++) {
+    rotm_t &rotm =  fgRotations[i];
+    rr = rotm.GetRotM();
+    if (gGeoManager) rr->RegisterYourself();
+    if (! rr->IsValid()) {
+      rotm.Print();
+      rr->Print();
+    }
+  }
+#endif
+#endif /* ! __NO_TGEO__ */
 }

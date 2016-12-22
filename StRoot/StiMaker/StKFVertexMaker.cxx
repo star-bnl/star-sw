@@ -819,13 +819,13 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     if (! gTrack) continue;
     StPrimaryTrack  *pTrack = static_cast<StPrimaryTrack *>(node->track(primary));
     Int_t IdV = -1;
-    if (pTrack) {
-      const StVertex *Vtx = pTrack->vertex();
-      if (Vtx) {
-	IdV = Vtx->key();
-	if (primIdMap[IdV] > 0) continue;
-      }
-    }
+//     if (pTrack) {
+//       const StVertex *Vtx = pTrack->vertex();
+//       if (Vtx) {
+// 	IdV = Vtx->key();
+// 	if (primIdMap[IdV] > 0) continue;
+//       }
+//     }
     Int_t kg = gTrack->key();
     if (kg < 0 || kg >= noGlob) continue;
     KFParticle *partDCA = (KFParticle *) fParticles->UncheckedAt(kg);
@@ -843,14 +843,15 @@ Bool_t StKFVertexMaker::ParticleFinder() {
       q = -1;
       pdg = -211;
     } 
-    if (pTrack) {
-      StTrackMassFit *mf = (StTrackMassFit *) pTrack->node()->track(massFitAtVx);
-      assert(mf);
-      KFParticle *particle = mf->kfParticle();
-      track.SetParameters(&particle->Parameter(0));
-      track.SetCovarianceMatrix(&particle->Covariance(0));
-    } 
+//     if (pTrack) {
+//       StTrackMassFit *mf = (StTrackMassFit *) pTrack->node()->track(massFitAtVx);
+//       assert(mf);
+//       KFParticle *particle = mf->kfParticle();
+//       track.SetParameters(&particle->Parameter(0));
+//       track.SetCovarianceMatrix(&particle->Covariance(0));
+//     } 
     KFParticle particle(track, pdg);
+    particle = *partDCA;
     particle.AddDaughterId(kg);
     if (partDCA) {
       particle.SetIdTruth(partDCA->IdTruth(), partDCA->QaTruth());
@@ -899,9 +900,23 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     mStKFParticleInterface->SetParticlesPdg(particlesPdg);
     mStKFParticleInterface->InitParticles();
     mStKFParticleInterface->CleanPV(); // because commented fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
-    for (Int_t l = 0; l < noPV; l++) {
-      mStKFParticleInterface->AddPV(*PrimVertex[l]); // , PrimTracks[l]);
-    }
+//     for (Int_t l = 0; l < noPV; l++) {
+//       mStKFParticleInterface->AddPV(*PrimVertex[l]); // , PrimTracks[l]);
+//     }
+
+    noPV = 1;
+
+    float xPV=0.f, yPV=0.f, zPV=0.f;
+    KFPVertex primVtx_tmp;
+    primVtx_tmp.SetXYZ(xPV, yPV, zPV);
+    primVtx_tmp.SetCovarianceMatrix( 0, 0, 0, 0, 0, 0 );
+    primVtx_tmp.SetNContributors(0);
+    primVtx_tmp.SetChi2(-100);
+
+    vector<int> tracks;
+    KFVertex pv(primVtx_tmp);
+    mStKFParticleInterface->AddPV(pv, tracks);
+
     mStKFParticleInterface->ReconstructParticles();
     const Char_t *Types[5] = {"1C-fit: Intesections", "2C-fit: Mass Fit", 
 			      "2C-fit: Mass Fit", "3C-fit: Fit to Vertex", "4C-fit: Fit to Vertex with mass constrain"};

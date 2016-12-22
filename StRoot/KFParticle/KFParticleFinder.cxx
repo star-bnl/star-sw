@@ -145,11 +145,11 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
         KFParticle tmp(kfTrack, pdg);
         tmp.SetPDG(pdg);
         tmp.SetId(Particles.size());
-	//#if 0 /* yf don't touch Id */
+// #if 0 /* yf don't touch Id */
         vRTracks[iV].SetId(Particles.size(),iTr);
         if(vRTracks[iV+4].Size() > 0)
           vRTracks[iV+4].SetId(Particles.size(),iTr);
-	//#endif
+// #endif
         tmp.AddDaughterId( kfTrack.Id() );
 #ifdef NonhomogeneousField
         for(int iF=0; iF<10; iF++)
@@ -565,20 +565,20 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
     lMin( (l[iP] < lMin) && saveParticle) = l[iP];
     ldlMin( (ldl < ldlMin) && saveParticle) = ldl;
   }
-//   saveParticle &= (float_m(!isPrimary) && ldlMin > ldlCut) || isPrimary;
+  saveParticle &= (float_m(!isPrimary) && ldlMin > ldlCut) || isPrimary;
   saveParticle &= (lMin < 200.f);
 
-  KFParticleSIMD motherTopo;
-    ldlMin = 1.e8f;
-  for(int iP=0; iP<fNPV; iP++)
-  {
-    motherTopo = mother;
-    motherTopo.SetProductionVertex(PrimVtx[iP]);
-    motherTopo.GetDecayLength(l[iP], dl[iP]);
-    float_v ldl = (l[iP]/dl[iP]);
-    ldlMin( (ldl < ldlMin) && saveParticle) = ldl;
-  }
-  saveParticle &= ( (float_m(!isPrimary) && ldlMin > ldlCut) || float_m(isPrimary) );
+//   KFParticleSIMD motherTopo;
+//     ldlMin = 1.e8f;
+//   for(int iP=0; iP<fNPV; iP++)
+//   {
+//     motherTopo = mother;
+//     motherTopo.SetProductionVertex(PrimVtx[iP]);
+//     motherTopo.GetDecayLength(l[iP], dl[iP]);
+//     float_v ldl = (l[iP]/dl[iP]);
+//     ldlMin( (ldl < ldlMin) && saveParticle) = ldl;
+//   }
+//   saveParticle &= ( (float_m(!isPrimary) && ldlMin > ldlCut) || float_m(isPrimary) );
   
 //         if(isPrimary && (float(ldlMin > 3) )) continue;
   saveParticle &= (float_m(!isPrimary) && isParticleFromVertex) || isPrimary;
@@ -597,9 +597,9 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
 
     mother.GetMass(mass, errMass);
     saveMother = saveParticle;
-    //#ifdef __CUT_MASS__
+// #ifdef __CUT_MASS__
     saveMother &= (abs(mass - massMotherPDG)/massMotherPDGSigma) < secCuts[0];
-    //#endif
+// #endif
     saveMother &= ((ldlMin > secCuts[2]) && !isGamma) || isGamma;
     saveMother &= (isK0 || isLambda || isGamma);
   }
@@ -1053,10 +1053,10 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) ==  321) ) =   421; //D0 -> pi+ K-
                 }
                 
-                if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
-                {
-                  active[iPDGPos] &= int_m(chiPrimNeg > fCuts2D[0]) && int_m(chiPrimPos > fCuts2D[0]);
-                }
+//                 if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
+//                 {
+//                   active[iPDGPos] &= int_m(chiPrimNeg > fCuts2D[0]) && int_m(chiPrimPos > fCuts2D[0]);
+//                 }
                 
                 active[iPDGPos] &= (motherPDG != -1);
                 if(active[iPDGPos].isEmpty()) continue;

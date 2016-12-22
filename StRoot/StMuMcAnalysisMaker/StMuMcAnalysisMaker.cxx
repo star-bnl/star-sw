@@ -814,11 +814,20 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   
   Int_t NoGlobalTracks = StMuDst::instance()->numberOfGlobalTracks();
   
-  std::map<int,int> trackIdMap;
-  std::map<int,int> trackIdMap2;
+  //find max global track index
+  int maxGBTrackIndex = -1;
+  for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
+    StMuTrack *gTrack = StMuDst::instance()->globalTracks(kg);
+    if (! gTrack)            continue;
+    
+    int index = gTrack->id();
+    
+    if(index > maxGBTrackIndex)
+      maxGBTrackIndex = index;
+  }
   
   vector<KFParticle> particles(NoGlobalTracks*4);
-  vector<int> mcIndexes(NoGlobalTracks*4);
+  vector<int> mcIndexes(maxGBTrackIndex+1);
   vector<int> particlesPdg(NoGlobalTracks*4);
   int nPartSaved = 0;
   for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
@@ -832,6 +841,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     //       if (  gTrack->nHitsFit() < 10) continue;
     //  if (  gTrack->qaTruth() < 90) return kFALSE;
     
+    const int index = gTrack->id();
     
     Int_t kgc = gTrack->index2Cov();
     if (kgc < 0) continue;
@@ -845,89 +855,74 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     track.SetCovarianceMatrix(CovXyzp);
     track.SetNDF(1);
     //    track.SetChi2(GlobalTracks_mChiSqXY[k]);
-    track.SetID(kg);
+    track.SetID(index);
     Int_t q   = 1;
-    Int_t pdg = 211;
+    Int_t pdg = -1;
     if (dcaG->charge() < 0) {
       q = -1;
-      pdg = -211;
     } 
     track.SetCharge(q);
-    
-    
-    
-    trackIdMap[gTrack->id()] = nPartSaved;
-    trackIdMap2[nPartSaved] = gTrack->id();
-    
+        
     bool isSecondary = true;
     const StMuTrack *primTrack = gTrack->primaryTrack();
-    if(primTrack)
-    {
-      const int iPV = primTrack->vertexIndex(); 
-      //continue;
-        //if ((iPV!=bestPV)) continue;
+//     if(primTrack)
+//     {
+//       const int iPV = primTrack->vertexIndex(); 
+//       //continue;
+//         //if ((iPV!=bestPV)) continue;
+//       {
+//         vector<int> &tracksPV = PrimTracks[iPV];
+//         tracksPV.push_back(nPartSaved);
+//       }
+//         
+//       if ( iPV==bestPV )
+//       {
+//         KFParticle particle(track, pdg);
+//         particle.SetId(index);
+//         
+//         particles[nPartSaved] = particle;
+//         mcIndexes[index] = gTrack->idTruth()-1;
+//         
+//         if(mcIndexes[index] > -1)
+//         {
+//           particlesPdg[nPartSaved] = -1;// mcTracks[mcIndexes[index]].PDG();
+//           mcTracks[mcIndexes[index]].SetReconstructed();
+//         }
+//         else
+//         {
+//           particlesPdg[nPartSaved] = -1;
+//         }
+//         nPartSaved++;
+//         isSecondary = false;
+//       }
+//     }
+//     
+//     if(isSecondary)
+    { 
+      mcIndexes[index] = gTrack->idTruth()-1;
+      
+      if(mcIndexes[index] > -1)
       {
-        vector<int> &tracksPV = PrimTracks[iPV];
-        tracksPV.push_back(nPartSaved);
-      }
-        
-      if ( iPV==bestPV )
-      {
-        KFParticle particle(track, pdg);
-        particle.SetId(kg);
-        
-        particles[nPartSaved] = particle;
-        mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-        
-        if(mcIndexes[nPartSaved] > -1)
-        {
-          particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
-          mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
-        }
-        else
-        {
-          particlesPdg[nPartSaved] = -1;
-        }
-        nPartSaved++;
-        isSecondary = false;
-      }
-    }
-    
-    if(isSecondary)
-    {
-      int pdg[3] = {211, 2212, -11};
-      if(q<0)
-      {
-        pdg[0] = -211;
-        pdg[1] = -2212;
-        pdg[2] = 11;
+        mcTracks[mcIndexes[index]].SetReconstructed();
+//           pdg = mcTracks[mcIndexes[index]].PDG();
       }
       
-      for(int iHypo=0; iHypo<1; iHypo++)
-      {
-        KFParticle particle(track, pdg[iHypo]);
-        particle.SetId(kg);
-        
-        particles[nPartSaved] = particle;
-        mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-        
-        if(mcIndexes[nPartSaved] > -1)
-          mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+      KFParticle particle(track, pdg);
+      particle.SetId(index);
+      particles[nPartSaved] = particle;
 
-        particlesPdg[nPartSaved] = pdg[iHypo];
-        nPartSaved++;
-      }
+      particlesPdg[nPartSaved] = pdg;
+      nPartSaved++;
     }
   }
   
   particles.resize(nPartSaved);
-  mcIndexes.resize(nPartSaved);
   particlesPdg.resize(nPartSaved);
   
   const Double_t field = StMuDst::instance()->event()->magneticField();
   
   mStKFParticleInterface->SetField(field);
-#if 0
+#if 1
   if(NoKFTracks > 0)
     mStKFParticleInterface->SetBeamLine( *(StMuDst::instance()->KFtrack(0)));
 #endif  
@@ -935,18 +930,34 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   mStKFParticleInterface->SetParticlesPdg(particlesPdg);
   mStKFParticleInterface->CleanPV();
   mStKFParticleInterface->InitParticles();
-  if(NoPrimaryVertices>0)
-  {
-    for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
+//   if(NoPrimaryVertices>0)
+//   {
+//     for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
+//     {
+//       std::cout << "iPV " << iPV << " ntracks " << PrimTracks[iPV].size() << std::endl;
+//       if (iPV==bestPV)
+//         mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]);
+//     }
+//     std::cin.get();
+//   }
+//   else
+//   {
+  
+    //find MC PV
+    float xPV=0.f, yPV=0.f, zPV=0.f;
+    for(unsigned int iTr=0; iTr<mcTracks.size(); iTr++)
     {
-      if (iPV==bestPV)
-        mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]);
+      if(mcTracks[iTr].MotherId() < 0)
+      {
+        xPV = mcTracks[iTr].X();
+        yPV = mcTracks[iTr].Y();
+        zPV = mcTracks[iTr].Z();
+        break;
+      }
     }
-  }
-  else
-  {
+  
     KFPVertex primVtx_tmp;
-    primVtx_tmp.SetXYZ(0, 0, 0);
+    primVtx_tmp.SetXYZ(xPV, yPV, zPV);
     primVtx_tmp.SetCovarianceMatrix( 0, 0, 0, 0, 0, 0 );
     primVtx_tmp.SetNContributors(0);
     primVtx_tmp.SetChi2(-100);
@@ -954,7 +965,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     vector<int> tracks;
     KFVertex pv(primVtx_tmp);
     mStKFParticleInterface->AddPV(pv, tracks);
-  }
+//   }
 //   mStKFParticleInterface->InitParticles();
   
 #if 0 /* Maksym reconstruction */
@@ -966,7 +977,6 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 //     particles[iPart].AddDaughterId(iPart);
 //     mStKFParticleInterface->AddParticle(particles[iPart]);
 //   }
-  
   for (Int_t l = 0; l < NoKFVertices; l++)
   {
     KFVertex *vx = StMuDst::instance()->KFvertex(l);
@@ -999,7 +1009,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   
   mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
   mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
-  Int_t nevent = 100;
+  Int_t nevent = 10;
   mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
   mStKFParticlePerformanceInterface->PerformanceAnalysis();
 #if 0  

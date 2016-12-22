@@ -14,7 +14,7 @@
 #include "TGeoVolume.h"
 #include "TObjArray.h"
 #endif
-#include "Rotations.h"
+//#include "Rotations+"
 #include "Material.h"
 #include "Media.h"
 //________________________________________________________________________________
@@ -80,7 +80,8 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
 	 << name << " ! " << endl;
     return geom;
   }
-  Char_t *path  = ".:.$STAR_HOST_SYS/obj/StarDb/AgiGeometry:./StarDb/AgiGeometry:$STAR/.$STAR_HOST_SYS/obj/StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry";
+  gSystem->Load("Rotations");
+  Char_t *path  = ".:$MY_OBJ/StarDb/AgiGeometry:$STAR_OBJ/StarDb/AgiGeometry:$MY_OBJ/StarDb/AgiGeometry/.$STAR_HOST_SYS:$STAR_OBJ/StarDb/AgiGeometry/.$STAR_HOST_SYS:$STAR/StarDb/AgiGeometry";
   TString geomF(name); geomF += ".h";
   Char_t *file = gSystem->Which(path,geomF,kReadPermission);
   if (! file) Fatal("CreateGeometry","File %s has not found in path %s",geomF.Data(),path);
@@ -102,3 +103,4 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
   gGeoManager->CloseGeometry();
   return (TDataSet *) geom;
 }
+#endif /* ! __CreateGeometry__ */

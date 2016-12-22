@@ -77,7 +77,7 @@ $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
 $FPPFLAGS .= " -DCPP_DATE=\"`date +%%y%%m%%d`\"";
 $FPPFLAGS .= " -DCPP_TIME=\"`date +%%H%%M`\"";
 $CPPFLAGS .= " -Df2cFortran";
-$CPPPATH  = "#asps/Simulation/starsim/include";
+$CPPPATH  = "#" . $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
