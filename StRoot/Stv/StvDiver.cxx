@@ -1,4 +1,5 @@
 #include "StvDiver.h"
+#include "TSystem.h"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TVirtualMCStack.h"
@@ -301,6 +302,23 @@ const double Zmax = virtApp->TrackingZmax();
 double prevLen = fPrevLength;
   Case();
 
+static const char *myDebug = gSystem->Getenv("StvDEBUG");
+if (myDebug) {
+   double pos[4],b[3];
+   fCurrentPosition.GetXYZT(pos);
+   fField->FunDD(pos,b); 
+   StvDebug::Count("BZvsZ",pos[2],b[2]);
+   double Br = sqrt(b[0]*b[0]+b[1]*b[1]);
+   double Ba = sqrt(b[2]*b[2]+Br*Br);
+   StvDebug::Count("BRvsZ",pos[2],Br);
+   StvDebug::Count("BAvsZ",pos[2],Ba);
+   StvDebug::Count("TanVsZ",pos[2],Br/b[2]);
+   printf("Fun(%d): Z=%g Hz=%g Hr=%g path = %s\n"
+         ,nCall,pos[2],b[2],Br,gGeoManager->GetPath());
+}
+
+
+
 int meAgain = (fNode==fPrevNode);
 if (meAgain) meAgain = (fPrevPath == tgh->GetPath());
 if (!meAgain) {fPrevNode = fNode; fPrevPath == tgh->GetPath();}
@@ -335,18 +353,17 @@ SWITCH: int myKaze = fKaze;
 //          if (outSide && ((fOpt&(StvDiver::kTarg2D|StvDiver::kTarg3D))==0)) {fKaze=kENDEDtrack;  break;}
          if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
     break;
-    
-    case kCONTINUEtrack:
-    case kIgnore:
-    
-
-    break;
+       
     
     case kOUTtrack:
     case kENDEDtrack:
       fExit=StvDiver::kDiveBreak;
       virtualMC->StopTrack();
       break;
+
+    case kCONTINUEtrack:
+    case kIgnore:
+    break;
 
     case kEXITtrack:
     {
