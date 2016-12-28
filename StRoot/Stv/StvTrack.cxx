@@ -434,9 +434,9 @@ double StvTrack::GetQua() const
     if (!(hit=node->GetHit())) 		 	continue;
     if ( node->GetXi2()>1000) 			continue;
     int idTru = hit->idTru();   
-    if (!idTru)					continue;
     idt.Add(idTru);
   }
+  if (!idt.GetIdTru()) return 0;
   return idt.GetQua();
 
 }
