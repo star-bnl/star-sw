@@ -314,7 +314,7 @@ if (myDebug) {
    StvDebug::Count("BAvsZ",pos[2],Ba);
    StvDebug::Count("TanVsZ",pos[2],Br/b[2]);
    printf("Fun(%d): Z=%g Hz=%g Hr=%g path = %s\n"
-         ,nCall,pos[2],b[2],Br,gGeoManager->GetPath());
+         ,fKount,pos[2],b[2],Br,gGeoManager->GetPath());
 }
 
 
