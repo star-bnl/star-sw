@@ -12,9 +12,15 @@ static  int Break(int kount);
 static  int Break(double x,double y,double z);
 static  int Debug() {return mgDebug;};
 static void SetDebug(int idb) {mgDebug=idb;};
-static void Count(const char *key,double val=0);
+static void Count(const char *key,double val);
+static void Count(const char *key,const char *val);
+static void Count(const char *key,const char *val,double valy);
+static void Count(const char *key,double val,double left,double rite);
 static void Count(const char *key,double valx,double valy);
-static void Sumary();
+static void Count(const char *key,double valx, double valy
+                                 ,double leftx,double ritex
+				 ,double lefty,double ritey);
+static void Sumary(int inPage=4);
 static void Reset();
 static const char *Env(const char *key);
 static        int  Inv(const char *key);

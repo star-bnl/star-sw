@@ -12,6 +12,10 @@
 #include "TSystem.h"
 #include "TString.h"
 #include "StvDebug.h"
+typedef std::map<std::string, int>   myTallyMap_t;
+typedef myTallyMap_t::const_iterator myTallyIter_t;
+static  myTallyMap_t  mgTally;
+
 int StvDebug::mgDebug=1; //0=no debug, 1=Normal, 2=count is on
 int StvDebug::mgRecov=1;
 int StvDebug::mgCheck=1;
@@ -41,71 +45,6 @@ int StvDebug::Break(double x,double y,double z)
   return 1;
 }
 //______________________________________________________________________________ 
-//______________________________________________________________________________ 
-
-class TH2Hack: public TH2F
-{
-public: 
-enum {kBUFF=10000};
-TH2Hack(const char *key);
-int Fill(double x,double y);
-double GetEntries() const;
-void Save();
-private:
-int mEnt;
-double mXLow;
-double mXUpp;
-double mYLow;
-double mYUpp;
-double buf[kBUFF][2];
-};
-
-//______________________________________________________________________________ 
-TH2Hack::TH2Hack(const char *key):TH2F(key,key,100,0,0,100,0,0)
-{
-mEnt= 0;
-mXLow =  3e33;
-mXUpp = -3e33;
-mYLow =  3e33;
-mYUpp = -3e33;
-
-}
-//______________________________________________________________________________ 
-int TH2Hack::Fill(double x,double y)
-{
- mEnt++;
- if (mEnt<kBUFF+1) 	{
-   if (mXLow>x) mXLow=x;
-   if (mYLow>y) mYLow=y;
-   if (mXUpp<x) mXUpp=x;
-   if (mYUpp<y) mYUpp=y;
-   buf[mEnt-1][0]=x; buf[mEnt-1][1]=y; 
-   return 0;
- } else if (mEnt==kBUFF+1) 	{Save();}
- return TH2F::Fill(x,y);
-}
-//______________________________________________________________________________ 
-void TH2Hack::Save()
-{
-  enum {kMORE=2};
-  if(TH2F::GetEntries()) return;
-  double xlow = 0.5*(mXLow+mXUpp) -  0.5*(mXUpp-mXLow)*kMORE;
-  double xupp = 0.5*(mXLow+mXUpp) +  0.5*(mXUpp-mXLow)*kMORE;
-  double ylow = 0.5*(mYLow+mYUpp) -  0.5*(mYUpp-mYLow)*kMORE;
-  double yupp = 0.5*(mYLow+mYUpp) +  0.5*(mYUpp-mYLow)*kMORE;
-
-  GetXaxis()->Set(100,xlow,xupp);
-  GetYaxis()->Set(100,ylow,yupp);
-  for (int l=0;l<mEnt;l++) {TH2F::Fill(buf[l][0],buf[l][1]);}
-  mEnt=kBUFF+2;
-}
-//______________________________________________________________________________ 
-double TH2Hack::GetEntries() const
-{
-  if (mEnt<=kBUFF) ((TH2Hack*)this)->Save();
-  return TH2F::GetEntries();
-}
-//______________________________________________________________________________ 
 void StvDebug::Count(const char *key,double val)
 {
   if (mgDebug<2) return;
@@ -114,15 +53,54 @@ void StvDebug::Count(const char *key,double val)
   h->Fill(val);
 }
 //______________________________________________________________________________ 
-void StvDebug::Count(const char *key,double valx,double valy)
+void StvDebug::Count(const char *key,const char *val)
 {
   if (mgDebug<2) return;
-  TH1 *&h = myDebMap[key];
-  if (!h) { h = new TH2Hack(key);}
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH1F(key,key,0,0.,0.);}
+  h->Fill(val,1.);
+}
+//______________________________________________________________________________ 
+void StvDebug::Count(const char *key,double val,double left,double rite)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH1F(key,key,100,left,rite);}
+  h->Fill(val);
+}
+//______________________________________________________________________________ 
+void StvDebug::Count(const char *key,double valx, double valy
+                                    ,double leftx,double ritex
+				    ,double lefty,double ritey)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,leftx,ritex,100,lefty,ritey);}
   h->Fill(valx,valy);
 }
 //______________________________________________________________________________ 
-void StvDebug::Sumary()
+void StvDebug::Count(const char *key,double valx,double valy)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,0.,0.,100,0,0);}
+  h->Fill(valx,valy);
+}
+//______________________________________________________________________________ 
+void StvDebug::Count(const char *key,const char *valx,double valy)
+{
+  if (mgDebug<2) return;
+  TH2 *&h = (TH2*&)myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,0.,0.,100,0,0);}
+  h->Fill(valx,valy,1.);
+}
+//______________________________________________________________________________ 
+//______________________________________________________________________________ 
+//______________________________________________________________________________ 
+//______________________________________________________________________________ 
+#if 0
+//______________________________________________________________________________ 
+void StvDebug::Sumary(int)
 {
   printf("StvDebug::Sumary()\n");
   TH1 *H[4];
@@ -156,6 +134,60 @@ void StvDebug::Sumary()
   while(!gSystem->ProcessEvents()){}; 
 
 }
+#endif
+#if 1
+//______________________________________________________________________________ 
+void StvDebug::Sumary(int nHist)
+{
+  if (!nHist) nHist=4;
+  printf("StvDebug::Sumary()\n");
+
+  int nH = 0,n=0;
+  for (myTallyIter_t iter = mgTally.begin();iter != mgTally.end();++iter) {
+    int nn = (*iter).second; n++;
+    const char *kto = (*iter).first.c_str();
+    printf("%3d - Tally.%s = %d\n",n,kto,nn);
+  }
+
+
+
+
+  TH1 *H[10];
+  for (int numCha = 0; numCha<2; numCha++) {
+    nH = 0;n=0;
+    for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
+      TH1 *h = (*iter).second; n++;
+      if (!h->IsA()->InheritsFrom("TH1")) continue;
+      if ( h->IsA()->InheritsFrom("TH2")) continue;
+
+      int nEnt = h->GetEntries();
+      if (!nEnt) continue;
+      if ((h->GetXaxis()->GetLabels()==0) != (numCha == 0)) continue;
+      double mean = h->GetMean();
+      double rms  = h->GetRMS();
+      printf("TH1 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+      if (nH==nHist) {Draw(nH,H);nH=0;}
+      if (numCha) h->LabelsOption(">V","X");
+      H[nH++] = h;
+    }
+    if (nH) Draw(nH,H);
+  }
+  for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
+    TH1 *h = (*iter).second; n++;
+    if (!h->IsA()->InheritsFrom("TH2")) continue;
+    int nEnt = h->GetEntries();
+    if (!nEnt) continue;
+    double mean = h->GetMean();
+    double rms  = h->GetRMS();
+    printf("TH2 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+    H[0]=h;Draw(1,H);
+  }
+
+  if (!n) return;
+  while(!gSystem->ProcessEvents()){}; 
+
+}
+#endif
 //______________________________________________________________________________ 
 void StvDebug::Reset()
 {
