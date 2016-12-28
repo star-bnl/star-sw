@@ -179,6 +179,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"ftsref5",     20201210,     6, "ftsref5",  "development geometry for 2020+,AgML,xgeometry"},
   {"ftsref6",     20201210,     7, "ftsref6",  "development geometry for 2020+,AgML,xgeometry"},
   {"ftsref7",     20201210,     8, "ftsref7",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref8",     20201210,     9, "ftsref8",  "development geometry for 2020+,AgML,xgeometry"},
+  {"ftsref9",     20201210,    10, "ftsref9",  "development geometry for 2020+,AgML,xgeometry"},
 
   {0,                    0,     0,        0,    0}
 };
