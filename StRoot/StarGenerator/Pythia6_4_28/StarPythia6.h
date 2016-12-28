@@ -73,6 +73,9 @@ class StarPythia6 : public StarGenerator
   /// Calls the pylist function
   static void PyList( Int_t list );
 
+  static void CloseDecays( int id ){ PyCloseDecays(id); }
+  static void OpenDecay( int id, int idcy, int val ){ PyOpenDecay( id, idcy, val ); } 
+
   /// Set decay status for particle with PDG id kf.  Flag should
   /// be 0 (no decay) or 1 (decay)
   static void SetDecayFlag( const int kf, const int flag );

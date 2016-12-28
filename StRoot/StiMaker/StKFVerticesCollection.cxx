@@ -273,7 +273,7 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
   }
   nextL.Reset();
 #endif
-  // Select the best track to vertex association (no compition between 2-prong vertices)
+  // Select the best track to vertex association (no competition between 2-prong vertices)
   while ((vtxl = (StKFVertex *)  nextL())) {
     // recalculate weights
     TIter nextlT(&vtxl->Tracks(),kIterForward);

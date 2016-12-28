@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
+<!DOCTYPE Scatalog [
+   <!ELEMENT Scatalog (Site*)>
+       <!ATTLIST Scatalog VERSION CDATA #REQUIRED>
+   <!ELEMENT Site (Server+)>
+       <!ATTLIST Site name (BNL | LBL) #REQUIRED>
+       <!ATTLIST Site description CDATA #IMPLIED>
+       <!ATTLIST Site URI CDATA #IMPLIED>
+   <!ELEMENT Server (Host+)>
+       <!ATTLIST Server scope (Master | Admin | User | Production | Analysis) #REQUIRED>
+   <!ELEMENT Host (Access+)>
+       <!ATTLIST Host name CDATA #REQUIRED>
+       <!ATTLIST Host dbType CDATA #IMPLIED>
+       <!ATTLIST Host dbName CDATA #REQUIRED>
+       <!ATTLIST Host port CDATA #IMPLIED>
+   <!ELEMENT Access EMPTY>
+       <!ATTLIST access user CDATA #IMPLIED>
+       <!ATTLIST access pass CDATA #IMPLIED>
+]>
+
+
+
+<Scatalog version="1.0.1">
+                <Server scope="Production" user="starreco,priv2" accessMode="read">
+                       <Host name="db15.star.bnl.gov"  port="3316" machinePower="1.0" />
+                       <Host name="db16.star.bnl.gov"  port="3316" machinePower="1.0" />
+                       <Host name="db17.star.bnl.gov"  port="3316" machinePower="1.0" />
+                       <Host name="db18.star.bnl.gov"  port="3316" machinePower="1.0" />
+                </Server>  
+
+                <Server scope="Analysis" accessMode="read">
+            	   		<Host name="db14.star.bnl.gov"  port="3316" machinePower="2.0" />
+               		    <Host name="db13.star.bnl.gov"  port="3316" machinePower="2.0" />
+                        <Host name="db12.star.bnl.gov"  port="3316" machinePower="2.0" />
+                    	<Host name="db11.star.bnl.gov"  port="3316" />						
+                        <Host name="db01.star.bnl.gov"  port="3316" />
+                        <Host name="db04.star.bnl.gov"  port="3316" />
+                        <Host name="db06.star.bnl.gov"  port="3316" />
+                        <Host name="db07.star.bnl.gov"  port="3316" />
+                        <Host name="db08.star.bnl.gov"  port="3316" />
+                        <Host name="db05.star.bnl.gov"  port="3316" />
+                        <!-- <Host name="db02.star.bnl.gov"  port="3316" /> -->
+                </Server>	
+               <!-- <Server scope="Analysis" user="mriganka,qiuh,xueliang,kxin,wuyf,luoxf,starembd,jiezhao,glma,hzhang,girard" accessMode="read"> //-->
+
+
+<!--
+               <Server scope="Analysis" whenActive="night" accessMode="read">
+               		    <Host name="db12.star.bnl.gov" port="3316" machinePower="1.0" />
+                </Server> 
+-->	
+               <Server scope="Analysis" user="fisyak,perev,balewski,jwebb,pibero,dunlop" accessMode="read">
+          		<Host name="db10.star.bnl.gov" port="3316" machinePower="10.0" />
+                </Server>
+
+
+               <Server scope="Analysis" user="genevb,dunlop" accessMode="read">
+               		<Host name="db10.star.bnl.gov" port="3316" machinePower="5.0" />
+                </Server>	
+
+
+                <Server scope="Analysis" accessMode="write">
+                        <Host name="robinson.star.bnl.gov" port="3306"/>
+                </Server>
+
+                <Server scope="Production" user="starreco" accessMode="write">
+                        <Host name="robinson.star.bnl.gov" port="3306"/>
+                </Server>
+
+</Scatalog>
