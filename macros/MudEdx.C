@@ -229,7 +229,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 			      210,10,220., 500,-1.,4.);
   TH2F *TPointsN   = new TH2F("TPointsN","dNdx(fit)/Pion versus Length in Tpc  for All",
 			      210,10,220., 500,-1.,4.);
-  //#define __40cm__
+#define __40cm__
 #ifdef __40cm__
   TH2F *TdEdxP70    = new TH2F("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
 			       150,-1.,2., 500,0.,2.5);
@@ -408,6 +408,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
     RefMultPos->Fill(RcVx->refMultPos());
     RefMultNeg->Fill(RcVx->refMultNeg());
     Int_t noGoodPrimTracks = 0;
+#ifndef __40cm__
     Bool_t HFTon = kFALSE;
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
       StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
@@ -420,6 +421,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       Double_t R = firstPoint.perp();
       if (R < 40.0) HFTon = kTRUE;
     }    
+#endif
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
       StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
       if (  pTrack->vertexIndex() != 0) continue;
@@ -455,11 +457,12 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       if (phiD < 0) phiD += 360;
       if (Var.eta < 0) phiD -= 360;
       pTPhiPiDL->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
+#ifdef __40cm__
+      if (pTrack->probPidTraits().dEdxTrackLength() < 40) continue;
+#else
       if (! HFTon) {
 	pTPhiPiDLHFToff->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
       }
-#ifdef __40cm__
-      if (pTrack->probPidTraits().dEdxTrackLength() < 40) continue;
 #endif
       cpTh->Fill(Var.cpT);
       Etah->Fill(Var.eta);
@@ -481,12 +484,12 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	bg[l]      = charge*p/Masses[l]; 
 	bgL10[l]   = TMath::Log10(bg[l]);
 	//	zPred[0][l]   = m_Bichsel->I70Trs  (l,bgL10[l]);
-	zPred[0][l]   = 1.e-6*m_Bichsel->GetI70M(bgL10[l]);
+	zPred[0][l]   = TMath::Log(m_Bichsel->GetI70M(bgL10[l]));
 	sPred[0][l]   = m_Bichsel->I70TrsS (l,bgL10[l]);
-	zPred[1][l]   = 1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bgL10[l]));
+	zPred[1][l]   = m_Bichsel->GetMostProbableZ(bgL10[l]);
 	//	zPred[1][l]   = m_Bichsel->IfitTrs (l,bgL10[l]);
 	sPred[1][l]   = m_Bichsel->IfitTrsS(l,bgL10[l]);
-	zPred[2][l]   = StdEdxModel::instance()->dNdx(bgL10[l]);
+	zPred[2][l]   = TMath::Log(StdEdxModel::instance()->dNdx(bgL10[l]));
 	sPred[2][l]   = 0;
       }
       Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
@@ -496,12 +499,14 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       pTPhiPiD->Fill(Var.cpT,phiD);
       pTEtaPiDz->Fill(Var.cpT,Var.eta, Zs[1]);
       pTPhiPiDz->Fill(Var.cpT,phiD, Zs[1]);
+#ifndef __40cm__
       if (! HFTon) {
       pTEtaPiDHFToff->Fill(Var.cpT,Var.eta);
       pTPhiPiDHFToff->Fill(Var.cpT,phiD);
       pTEtaPiDzHFToff->Fill(Var.cpT,Var.eta, Zs[1]);
       pTPhiPiDzHFToff->Fill(Var.cpT,phiD, Zs[1]);
       }
+#endif
       for (Int_t m = 0; m < 3; m++) {// I70 && Fit && dNdx
 	if (sigmas[m] > 0) {
 	  Var.hyp = -1;
