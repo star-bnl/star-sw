@@ -1,0 +1,14 @@
+/*    fpostConstant.idl
+*
+*  Table: fpostConstant
+*
+*       description: //  FPOST constants
+*/ 
+
+struct fpostConstant { 
+  unsigned short nQuad; /* 2 (South/North) */
+  unsigned short nLayer; /* 6 */
+  unsigned short maxSlat; /* 43 */
+  unsigned short maxQTaddr; /* 8 */
+  unsigned short maxQTch; /* 32 */ 
+};  
