@@ -1,8 +1,10 @@
 /*
-  root.exe lMuDst.C MudEdx.C+
+  root.exe 'lMuDst.C(-2,"/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/*.MuDst.root","RMuDst","MuOut.root")' MudEdx.C+
+  root.exe lMuDst.C 'MudEdx.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
   root.exe MudEdx1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
  */
 //#define DEBUG
+//#define __SPARSE__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -30,12 +32,14 @@
 #include "TList.h"
 #include "TPolyMarker.h"
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "BetheBloch.h"
 #include "TDirIter.h"
 #include "TTreeIter.h"
 #include "TRandom.h"
 #include "TFractionFitter.h"
 #include "TLegend.h"
+#include "StBTofHeader.h"
 #include "StMuDSTMaker/COMMON/StMuTimer.h"
 #include "StMuDSTMaker/COMMON/StMuDebug.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -125,11 +129,11 @@ struct Var_t {
   Double_t z;       // log(dE/dx) - log(dE/dx)_predicted_for pion
   Double_t x(Int_t i = 0) const {return *(&refMult+i);}
 };
-enum EBinning {NRefMult = 10, NpT = 100, Neta = 24};
+enum EBinning {NRefMult = 10, NpT = 100, Neta = 24, Nphi = 2*12*6, Nz = 200, NL = 75};
 const static Double_t refmultBins[NRefMult+1] = {0,  180,  290,  390,  475,  555,  630,  705,  780,   850,  3000};
 //const static Double_t refmultBins[NRefMult+1] = { 0, 51, 83 , 111, 137, 161, 185, 207, 230, 254, 495}; //
 
-const static Double_t cpTBins[NpT+1] = {
+const static Float_t cpTBins[NpT+1] = {
   -50.000,-2.183,-1.631,-1.389,-1.242,-1.136,-1.046,-0.974,-0.919,-0.865,
   -0.811,-0.774,-0.742,-0.710,-0.677,-0.645,-0.613,-0.588,-0.569,-0.550,
   -0.531,-0.512,-0.493,-0.473,-0.454,-0.435,-0.416,-0.398,-0.385,-0.373,
@@ -198,7 +202,7 @@ Int_t IndexH(const Char_t *name) {
 }
 //________________________________________________________________________________
 void MudEdx(const Char_t *files ="./*.MuDst.root",
-	     const Char_t *Out = "MudEdx1.root"){
+	    const Char_t *Out = "MudEdx1.root"){
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
   if (!m_Bichsel) {
     gSystem->Load("StBichsel"); 
@@ -207,7 +211,9 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   }
   if (! gRandom) new TRandom();
   TString OutFName(Out);
+#ifdef __SPARSE__
   OutFName.ReplaceAll(".",Form("_Sparse_pT%i_eta%i.dX.Fit.",NpT,Neta));
+#endif /* __SPARSE__ */
   if (fOut) fOut->cd();
   else      fOut = new TFile(OutFName,"RECREATE");
   Int_t      nZBins = 200;
@@ -221,29 +227,43 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 				210,10,220., 500,-1.,4.);
   TH2F *TPointsB   = new TH2F("TPointsB","dEdx(fit)/Pion versus Length in Tpc  for All",
 			      210,10,220., 500,-1.,4.);
+  TH2F *TPointsN   = new TH2F("TPointsN","dNdx(fit)/Pion versus Length in Tpc  for All",
+			      210,10,220., 500,-1.,4.);
+#define __40cm__
+#ifdef __40cm__
   TH2F *TdEdxP70    = new TH2F("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
 			       150,-1.,2., 500,0.,2.5);
   TH2F *TdEdxPF    = new TH2F("TdEdxPF","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
 			      150,-1.,2., 500,0.,2.5);
+  TH2F *TdEdxPN    = new TH2F("TdEdxPN","log10(dN/dx(fit)(1/cm) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
+			      150,-1.,2., 500,0.,2.5);
+#else
+  TH2F *TdEdxP70    = new TH2F("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c))", 
+			       150,-1.,2., 500,0.,2.5);
+  TH2F *TdEdxPF    = new TH2F("TdEdxPF","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/c))", 
+			      150,-1.,2., 500,0.,2.5);
+  TH2F *TdEdxPN    = new TH2F("TdEdxPN","log10(dN/dx(fit)(1/cm) versus log10(p(GeV/c))", 
+			      150,-1.,2., 500,0.,2.5);
+#endif
   TH2F *Pull70 = new TH2F("Pull70","log(I70/I(pi)))/D70  versus track length", 
 			  150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
   TH2F *FitPull= new TH2F("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
+			  150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
+  TH2F *PullN = new TH2F("PullN","log(dN/dx/I(pi)))/DN  versus track length", 
 			  150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
   TString TitleX("z - z_{#pi} versus ");
   for (Int_t i = 0; i < NoDim; i++) {
     if (i) {TitleX += " ";}
     TitleX += NameV[i];
   }
-  THnSparseF  *sZdEdx        = new THnSparseF("sZdEdx", TitleX, NoDim, nBins, 0, 0);
-  fOut->Append(sZdEdx);
-  THnSparseF  *sZdEdxFit     = new THnSparseF("sZdEdxFit", TitleX, NoDim, nBins, 0, 0);
-  fOut->Append(sZdEdxFit);
-  TH2F *TPs[2]        = {TPoints70B, TPointsB};
-  TH2F *Pulls[2]      = {Pull70, FitPull};
-  TH2F *TdEdxs[2]     = {TdEdxP70, TdEdxPF};
-  THnSparseF  *sZs[2] = {sZdEdx, sZdEdxFit};
-  for (Int_t i = 0; i < NoDim; i++) { 
-    for (Int_t m = 0; m < 2; m++) {
+  THnSparseF  *sZs[3] = {0};
+#ifdef __SPARSE__
+  for (Int_t m = 0; m < 3; m++) {
+    if (m == 0) sZs[m] = new THnSparseF("sZdEdx", TitleX, NoDim, nBins, 0, 0);
+    if (m == 1) sZs[m] = new THnSparseF("sZdEdxFit", TitleX, NoDim, nBins, 0, 0);
+    if (m == 2) sZs[m] = new THnSparseF("sZdNdx", TitleX, NoDim, nBins, 0, 0);
+    fOut->Append(sZs[m]);
+    for (Int_t i = 0; i < NoDim; i++) { 
       sZs[m]->GetAxis(i)->SetName(NameV[i]);
       if      (i == 0)  sZs[m]->SetBinEdges(i,refmultBins);
       else if (i == 1)  sZs[m]->SetBinEdges(i,cpTBins);
@@ -257,13 +277,64 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       }
     }
   }
+#endif /* __SPARSE__ */
+  Float_t *etaBins = new Float_t[Neta+1];
+  Float_t *phiBins = new Float_t[Nphi+1];
+  Float_t *zBins   = new Float_t[Nz+1];
+  Float_t *LBins   = new Float_t[NL+1];
+  for (Int_t i = 0; i <= Neta; i++) etaBins[i] = -etaMax + 2*etaMax/Neta*i;
+  for (Int_t i = 0; i <= Nphi; i++) phiBins[i] = -360 + 720./Nphi*i;
+  for (Int_t i = 0; i <= Nz;   i++) zBins[i] = -5 + 10./Nz*i;
+  for (Int_t i = 0; i <= NL;   i++) LBins[i] = 2*i;
+  TH2F *TPs[3]        = {TPoints70B, TPointsB, TPointsN};
+  TH2F *Pulls[3]      = {Pull70, FitPull, PullN};
+  TH2F *TdEdxs[3]     = {TdEdxP70, TdEdxPF, TdEdxPN};
   TH1F *cpTh     = new TH1F("cpTh","q*pT distribution",500,-pTMax,pTMax); 
   TH1F *Etah     = new TH1F("Etah","Eta distribution",100,-5.,5.);
+  TH2F *pTPhiT   = new TH2F("pTPhiT","Phi of Track (-East +West) q*pT for all tracks"
+			    ,NpT,cpTBins,Nphi,phiBins);
+  TH2F *pTPhiD   = new TH2F("pTPhiD","Phi of 1-st hit (-East +West) q*pT for all tracks"
+			    ,NpT,cpTBins,Nphi,phiBins);
   TH2F *pTEta    = new TH2F("pTEta","Eta q*pT for all tracks"
-			    ,NpT,cpTBins,Neta,-etaMax,etaMax);
-  TH2F *pTEtaPiD = new TH2F("pTEtaPiD","Eta versus q*pT for track with TpcLength > 40 cm"
-			    ,NpT,cpTBins,Neta,-etaMax,etaMax);
-
+			    ,NpT,cpTBins,Neta,etaBins);
+#ifdef __40cm__
+  TH2F *pTEtaPiD = new TH2F("pTEtaPiD","Eta versus q*pT for tracks with TpcLength > 40 cm"
+			    ,NpT,cpTBins,Neta,etaBins);
+  TH3F *pTEtaPiDz= new TH3F("pTEtaPiDz","Eta versus q*pT and z (Pion) for tracks with TpcLength > 40 cm"
+			    ,NpT,cpTBins,Neta,etaBins, Nz, zBins);
+  TH2F *pTPhiPiD = new TH2F("pTPhiPiD","Phi of 1-st hit (-East +West) q*pT for tracks with TpcLength > 40 cm"
+			    ,NpT,cpTBins,Nphi,phiBins);
+  TH3F *pTPhiPiDz= new TH3F("pTPhiPiDz","z vs Phi of 1-st hit (-East +West) q*pT and z (Pion) for tracks with TpcLength > 40 cm"
+			    ,NpT,cpTBins,Nphi,phiBins, Nz, zBins);
+  TH3F *pTPhiPiDL= new TH3F("pTPhiPiDL","L vs Phi of 1-st hit (-East +West) q*pT and z (Pion) for tracks with TpcLength > 40 cm"
+			    ,NpT,cpTBins,Nphi,phiBins, NL, LBins);
+#else
+  TH2F *pTEtaPiD = new TH2F("pTEtaPiD","Eta versus q*pT"
+			    ,NpT,cpTBins,Neta,etaBins);
+  TH3F *pTEtaPiDz= new TH3F("pTEtaPiDz","Eta versus q*pT and z (Pion)"
+			    ,NpT,cpTBins,Neta,etaBins, Nz, zBins);
+  TH2F *pTPhiPiD = new TH2F("pTPhiPiD","Phi of 1-st hit (-East +West) q*pT"
+			    ,NpT,cpTBins,Nphi,phiBins);
+  TH3F *pTPhiPiDz= new TH3F("pTPhiPiDz","z vs Phi of 1-st hit (-East +West) q*pT and z (Pion)"
+			    ,NpT,cpTBins,Nphi,phiBins, Nz, zBins);
+  TH3F *pTPhiPiDL= new TH3F("pTPhiPiDL","L vs Phi of 1-st hit (-East +West) q*pT and z (Pion)"
+			    ,NpT,cpTBins,Nphi,phiBins, NL, LBins);
+  TH2F *pTEtaPiDHFToff = new TH2F("pTEtaPiDHFToff","Eta versus q*pT HFToff"
+			    ,NpT,cpTBins,Neta,etaBins);
+  TH3F *pTEtaPiDzHFToff= new TH3F("pTEtaPiDzHFToff","Eta versus q*pT and z (Pion) HFToff"
+			    ,NpT,cpTBins,Neta,etaBins, Nz, zBins);
+  TH2F *pTPhiPiDHFToff = new TH2F("pTPhiPiDHFToff","Phi of 1-st hit (-East +West) q*pT HFToff"
+			    ,NpT,cpTBins,Nphi,phiBins);
+  TH3F *pTPhiPiDzHFToff= new TH3F("pTPhiPiDzHFToff","z vs Phi of 1-st hit (-East +West) q*pT and z (Pion) HFToff"
+			    ,NpT,cpTBins,Nphi,phiBins, Nz, zBins);
+  TH3F *pTPhiPiDLHFToff= new TH3F("pTPhiPiDLHFToff","L vs Phi of 1-st hit (-East +West) q*pT and z (Pion) HFToff"
+			    ,NpT,cpTBins,Nphi,phiBins, NL, LBins);
+#endif
+  TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50); 
+  delete [] etaBins;
+  delete [] phiBins;
+  delete [] zBins;
+  delete [] LBins;
   StMuDebug::setLevel(0);  
   maker = new StMuDstMaker(0,0,"",files,"st:MuDst.root",1e9);   // set up maker in read mode
   //                       0,0                        this mean read mode
@@ -279,6 +350,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
     ,"GlobalTracks"
     ,"CovPrimTrack"
     ,"CovGlobTrack"
+    ,"BTofHeader"
 #if 0
     ,"StStMuMcVertex"
     ,"StStMuMcTrack"
@@ -321,16 +393,42 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
     if (Debug())                                                               {cout << endl;}
     StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(0);
     if (! RcVx) continue; 
+    Double_t zTpc = RcVx->position().z();
+    Double_t VpdZ = -9999;
+    StBTofHeader* BTofHeader = mu->btofHeader();
+    if ( BTofHeader) {
+      UInt_t NoWestHits = BTofHeader->numberOfVpdHits(west);
+      UInt_t NoEastHits = BTofHeader->numberOfVpdHits(east);
+      if ( NoWestHits > 0 &&  NoEastHits > 0) {
+	VpdZ = BTofHeader->vpdVz();
+	zZ->Fill(zTpc,zTpc-VpdZ);
+      }
+    }
     PrimMult->Fill(NoPrimaryTracks);
     RefMultPos->Fill(RcVx->refMultPos());
     RefMultNeg->Fill(RcVx->refMultNeg());
     Int_t noGoodPrimTracks = 0;
+#ifndef __40cm__
+    Bool_t HFTon = kFALSE;
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
       StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
       if (  pTrack->vertexIndex() != 0) continue;
       Int_t kg = pTrack->index2Global();
       if (kg < 0) continue;
       StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
+      if (! gTrack) continue;
+      const StThreeVectorF &firstPoint = gTrack->firstPoint();
+      Double_t R = firstPoint.perp();
+      if (R < 40.0) HFTon = kTRUE;
+    }    
+#endif
+    for (Int_t k = 0; k < NoPrimaryTracks; k++) {
+      StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
+      if (  pTrack->vertexIndex() != 0) continue;
+      Int_t kg = pTrack->index2Global();
+      if (kg < 0) continue;
+      StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
+      if (! gTrack) continue;
 #ifdef DEBUG
       cout << k << "\tNHits " << (int) pTrack->nHits()
 	   << "\tNHitsDedx " << (int) pTrack->nHitsDedx()
@@ -344,53 +442,90 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       Var.refMult = NoPrimaryTracks;
       Float_t charge = 1;
       if (pTrack->muHelix().q() < 0) charge = -1; 
-      Var.cpT = charge*pTrack->pt();
+      const StMuHelix &OuterHelix = gTrack->muOuterHelix();
+      StPhysicalHelixD helix = OuterHelix.helix();
+      const StThreeVectorF &pOut = OuterHelix.p();
+      Double_t cpT = gTrack->charge()*pOut.perp();
+      //      Double_t cpT = charge*pTrack->pt();
+      Var.cpT = cpT;
       Var.eta = pTrack->eta();
+      Double_t phi = TMath::RadToDeg()*pTrack->phi();
+      if (phi < 0) phi += 360;
+      if (Var.eta < 0) phi -= 360;
+      const StThreeVectorF &firstPoint = gTrack->firstPoint();
+      Double_t phiD = TMath::RadToDeg()*firstPoint.phi();
+      if (phiD < 0) phiD += 360;
+      if (Var.eta < 0) phiD -= 360;
+      pTPhiPiDL->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
+#ifdef __40cm__
+      if (pTrack->probPidTraits().dEdxTrackLength() < 40) continue;
+#else
+      if (! HFTon) {
+	pTPhiPiDLHFToff->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
+      }
+#endif
       cpTh->Fill(Var.cpT);
       Etah->Fill(Var.eta);
       pTEta->Fill(Var.cpT,Var.eta);
+      pTPhiT->Fill(Var.cpT,phi);
+      pTPhiD->Fill(Var.cpT,phiD);
       Double_t bg[KPidParticles];
       Double_t bgL10[KPidParticles];
-      Double_t zPred[2][KPidParticles];
-      Double_t sPred[2][KPidParticles]; // errors versus bg10
-      Double_t dEdx[2] = {1e6*pTrack->probPidTraits().dEdxTruncated(), 1e6*pTrack->probPidTraits().dEdxFit()};
+      Double_t zPred[3][KPidParticles];
+      Double_t sPred[3][KPidParticles]; // errors versus bg10
+      Double_t dEdx[3] = {1e6*pTrack->probPidTraits().dEdxTruncated(), 1e6*pTrack->probPidTraits().dEdxFit(), pTrack->probPidTraits().dNdxFit()};
       if (dEdx[0] <= 0 || dEdx[1] <= 0) continue;
-      Double_t dEdxL[2]   = {TMath::Log(dEdx[0]), TMath::Log(dEdx[1])};
-      Double_t dEdxL10[2] = {TMath::Log10(dEdx[0]), TMath::Log10(dEdx[1])};
-      Double_t p = gTrack->pt()*TMath::CosH(gTrack->eta());
+      Double_t dEdxL[3]   = {TMath::Log(dEdx[0]), TMath::Log(dEdx[1]), dEdx[2] > 0 ? TMath::Log(dEdx[2]):0};
+      Double_t dEdxL10[3] = {TMath::Log10(dEdx[0]), TMath::Log10(dEdx[1]), dEdx[2] > 0 ? TMath::Log10(dEdx[2]):0};
+      Double_t p = pOut.mag(); // gTrack->pt()*TMath::CosH(gTrack->eta());
       for (Int_t l = 0; l < KPidParticles; l++) {
 	charge = 1;
 	if (l >= kPidHe3) charge = 2;
 	bg[l]      = charge*p/Masses[l]; 
 	bgL10[l]   = TMath::Log10(bg[l]);
-	zPred[0][l]   = m_Bichsel->I70Trs  (l,bgL10[l]);
+	//	zPred[0][l]   = m_Bichsel->I70Trs  (l,bgL10[l]);
+	zPred[0][l]   = TMath::Log(m_Bichsel->GetI70M(bgL10[l]));
 	sPred[0][l]   = m_Bichsel->I70TrsS (l,bgL10[l]);
-	zPred[1][l]   = m_Bichsel->IfitTrs (l,bgL10[l]);
+	zPred[1][l]   = m_Bichsel->GetMostProbableZ(bgL10[l]);
+	//	zPred[1][l]   = m_Bichsel->IfitTrs (l,bgL10[l]);
 	sPred[1][l]   = m_Bichsel->IfitTrsS(l,bgL10[l]);
+	zPred[2][l]   = TMath::Log(StdEdxModel::instance()->dNdx(bgL10[l]));
+	sPred[2][l]   = 0;
       }
-      Double_t Zs[2] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion]};
-      Double_t sigmas[2] = {pTrack->probPidTraits().dEdxErrorTruncated(), pTrack->probPidTraits().dEdxErrorFit()};
-      Double_t sigmasBG[2] = {sigmas[0]*sPred[0][kPidPion], sigmas[1]*sPred[1][kPidPion]};
-      TPs[0]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[0]);
-      TPs[1]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[1]);
-      if (sigmas[0] > 0) Pulls[0]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[0]/sigmasBG[0]);
-      if (sigmas[1] > 0) Pulls[1]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[1]/sigmasBG[1]);
-      if (pTrack->probPidTraits().dEdxTrackLength() < 40) continue;
-      TdEdxs[0]->Fill(TMath::Log10(p), dEdxL10[0]);
-      TdEdxs[1]->Fill(TMath::Log10(p), dEdxL10[1]);
+      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
+      Double_t sigmas[3] = {pTrack->probPidTraits().dEdxErrorTruncated(), pTrack->probPidTraits().dEdxErrorFit(), pTrack->probPidTraits().dNdxErrorFit()};
+      Double_t sigmasBG[3] = {sigmas[0]*sPred[0][kPidPion], sigmas[1]*sPred[1][kPidPion],  sigmas[2]*sPred[2][kPidPion]};
       pTEtaPiD->Fill(Var.cpT,Var.eta);
-      for (Int_t m = 0; m < 2; m++) {// I70 && Fit
-	Var.hyp = -1;
-	Var.z = Zs[m];
-	sZs[m]->Fill(&Var.refMult);
-	for (Int_t l = 0; l < KPidParticles; l++) {
-	  Var.hyp = l;
-	  Double_t zDif = zPred[m][l]-zPred[m][kPidPion];
-	  Double_t sigma = sigmas[m]*sPred[m][l];
-	  for (Int_t i = 0; i < 100; i++) {
-	    Double_t zMC = gRandom->Gaus(zDif,sigma); Var.z = zMC;
-	    sZs[m]->Fill(&Var.refMult);
+      pTPhiPiD->Fill(Var.cpT,phiD);
+      pTEtaPiDz->Fill(Var.cpT,Var.eta, Zs[1]);
+      pTPhiPiDz->Fill(Var.cpT,phiD, Zs[1]);
+#ifndef __40cm__
+      if (! HFTon) {
+      pTEtaPiDHFToff->Fill(Var.cpT,Var.eta);
+      pTPhiPiDHFToff->Fill(Var.cpT,phiD);
+      pTEtaPiDzHFToff->Fill(Var.cpT,Var.eta, Zs[1]);
+      pTPhiPiDzHFToff->Fill(Var.cpT,phiD, Zs[1]);
+      }
+#endif
+      for (Int_t m = 0; m < 3; m++) {// I70 && Fit && dNdx
+	if (sigmas[m] > 0) {
+	  Var.hyp = -1;
+	  Var.z = Zs[m];
+	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
+	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmasBG[m]);
+	  TdEdxs[m]->Fill(TMath::Log10(p), dEdxL10[m]);
+#ifdef __SPARSE__
+	  sZs[m]->Fill(&Var.refMult);
+	  for (Int_t l = 0; l < KPidParticles; l++) {
+	    Var.hyp = l;
+	    Double_t zDif = zPred[m][l]-zPred[m][kPidPion];
+	    Double_t sigma = sigmas[m]*sPred[m][l];
+	    for (Int_t i = 0; i < 100; i++) {
+	      Double_t zMC = gRandom->Gaus(zDif,sigma); Var.z = zMC;
+	      sZs[m]->Fill(&Var.refMult);
+	    }
 	  }
+#endif /* __SPARSE__ */
 	}
       }
       noGoodPrimTracks++;
@@ -401,6 +536,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   //    iter.Reset(); //ready for next loop                                 
   if (fOut) fOut->Write();
 }
+#if 0
 //________________________________________________________________________________
 Double_t MuFcn(Double_t *x, Double_t *p) {
   if (! fFitResults) return 0;
@@ -760,3 +896,4 @@ void Fraction(const Char_t *name = "sZdEdx", // "sZdEdxFit"
   } // c - loop
   FitP->Write();
 }
+#endif

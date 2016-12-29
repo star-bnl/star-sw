@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
+<!DOCTYPE SCATALOG [
+   <!ELEMENT SCATALOG (SITE*)>
+       <!ATTLIST SCATALOG VERSION CDATA #REQUIRED>
+   <!ELEMENT SITE (SERVER+)>
+       <!ATTLIST SITE name (BNL | LBL) #REQUIRED>
+       <!ATTLIST SITE description CDATA #IMPLIED>
+       <!ATTLIST SITE URI CDATA #IMPLIED>
+   <!ELEMENT SERVER (HOST+)>
+       <!ATTLIST SERVER SCOPE (Master | Admin | User) #REQUIRED>
+   <!ELEMENT HOST (ACCESS+)>
+       <!ATTLIST HOST NAME CDATA #REQUIRED>
+       <!ATTLIST HOST DBTYPE CDATA #IMPLIED>
+       <!ATTLIST HOST DBNAME CDATA #REQUIRED>
+       <!ATTLIST HOST PORT CDATA #IMPLIED>
+   <!ELEMENT ACCESS EMPTY>
+       <!ATTLIST ACCESS USER CDATA #IMPLIED>
+       <!ATTLIST ACCESS PASS CDATA #IMPLIED>
+]>
+
+
+
+<SCATALOG VERSION="1.0.1">
+	<SITE name="BNL">
+		<SERVER SCOPE="Admin">
+			<HOST NAME="fc1.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
+				<ACCESS USER="FC_admin" PASS=""/>
+			</HOST>
+		</SERVER>
+		<SERVER SCOPE="User">
+			<HOST NAME="fc2.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
+				<ACCESS USER="FC_user" PASS="FCatalog"/>
+                        </HOST>
+			<HOST NAME="fc4.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
+				<ACCESS USER="FC_user" PASS="FCatalog"/>
+			</HOST>
+		</SERVER>
+	</SITE>
+</SCATALOG>
