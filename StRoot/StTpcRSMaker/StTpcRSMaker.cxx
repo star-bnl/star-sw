@@ -59,13 +59,14 @@
 #include "tables/St_g2t_vertex_Table.h" 
 //#define ElectronHack
 //#define Old_dNdx_Table
+#define __STOPPED_ELECTRONS__
 #define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.73 2016/12/19 15:22:39 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.74 2016/12/29 16:30:56 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -937,6 +938,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t bg = 0;
 	static const Double_t m_e = .51099907e-3;
 	Double_t eKin = -1;
+#ifdef __STOPPED_ELECTRONS__
 	if (mass > 0) {
 	  bg = pxyzG.mag()/mass;
 	  // special case stopped electrons
@@ -950,6 +952,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    }
 	  }
 	}
+#else /* ! __STOPPED_ELECTRONS__ */
+	if (mass > 0) bg = pxyzG.mag()/mass;
+#endif /* __STOPPED_ELECTRONS__ */
 	if (bg > betaGamma) betaGamma = bg;
 	Double_t bg2 = betaGamma*betaGamma;
 	gamma = TMath::Sqrt(bg2 + 1.);
@@ -1779,8 +1784,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.73 2016/12/19 15:22:39 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.74 2016/12/29 16:30:56 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.74  2016/12/29 16:30:56  fisyak
+// make switch to account __STOPPED_ELECTRONS__
+//
 // Revision 1.73  2016/12/19 15:22:39  fisyak
 // Fix typo
 //
