@@ -9,6 +9,9 @@
 #include "DSMLayer_E101_2009.hh"
 #include "DSMLayer_EM201_2009.hh"
 
+#include "y2013/DSMAlgo_EM201_2013.hh"
+#include "y2013/DSMAlgo_EM201_2013_a.hh"
+
 DSMLayer_EM201_2009::DSMLayer_EM201_2009() : DSMLayer<TriggerDataBlk>(1)
 {
   front().name = "EM201";
@@ -29,4 +32,22 @@ void DSMLayer_EM201_2009::write(DSMLayer<TriggerDataBlk>& layer)
 void DSMLayer_EM201_2009::run()
 {
   DSMAlgo_EM201_2009()(front());
+}
+void DSMLayer_EM201_2009::run(int runnumber)
+{
+  int yrs = 2000 + runnumber/1000000 - 1;
+  printf("EM201: yrs = %d\n", yrs);
+  if(yrs == 2009 || yrs == 2010 || yrs == 2011 || yrs == 2012 || (yrs == 2013 && runnumber < 14081067))
+    {
+      printf("EM201: 2009 DSM Algorithm...\n");
+      DSMAlgo_EM201_2009()(front());
+    }else if(yrs == 2013 && runnumber < 14084042)
+    {
+      printf("EM201: 2013 DSM Algorithm A...\n");
+      DSMAlgo_EM201_2013_a()(front());
+    }else if((yrs == 2013 && runnumber >= 14084042) || yrs > 2013)
+    {
+      printf("EM201: 2013 DSM Algorithm\n");
+      DSMAlgo_EM201_2013()(front());
+   }
 }

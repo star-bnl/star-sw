@@ -171,6 +171,10 @@ private:
   void get2008pp_DSMLayer2();
   void get2009_DSMLayer0();
   void get2009_DSMLayer1();
+  
+  // mod by Danny
+  void get2013_DSMLayer0(Int_t runnumber);
+  void get2013_DSMLayer1(Int_t runnumber);
 
   //#define DEBUG			// Comment out to switch off debugging
 
