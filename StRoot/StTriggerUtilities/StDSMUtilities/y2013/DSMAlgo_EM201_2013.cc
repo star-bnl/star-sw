@@ -1,13 +1,7 @@
-//
-// Pibero Djawotho <pibero@comp.tamu.edu>
-// Texas A&M University Cyclotron Institute
-// 7 Jan 2009
-//
+#include "../DSM.hh"
+#include "DSMAlgo_EM201_2013.hh"
 
-#include "DSM.hh"
-#include "DSMAlgo_EM201_2009.hh"
-
-int DSMAlgo_EM201_2009::ajpBarrel(const DSM& dsm, int offset) const
+int DSMAlgo_EM201_2013::ajpBarrel(DSM& dsm, int offset) const
 {
   int jpBits[6];
 
@@ -16,10 +10,10 @@ int DSMAlgo_EM201_2009::ajpBarrel(const DSM& dsm, int offset) const
   for (int ch = 0; ch < 6; ++ch)
     {
       jpBits[ch] = dsm.channels[ch] >> offset & 0x3;
-//      printf("The channel %d jp bit is %d\n", ch, jpBits[ch]); //Test by Z. Chang
+      //      printf("The channel %d jp bit is %d\n", ch, jpBits[ch]); //Test by Z. Chang
     }
   const int R3 = dsm.registers[3];
-//  printf("R3 is %d out of %d\n", R3,dsm.registers[3]);
+  //  printf("R3 is %d out of %d\n", R3,dsm.registers[3]);
 
   return (((jpBits[0] > R3) && (jpBits[1] > R3)) ||
 	  ((jpBits[1] > R3) && (jpBits[2] > R3)) ||
@@ -28,8 +22,8 @@ int DSMAlgo_EM201_2009::ajpBarrel(const DSM& dsm, int offset) const
 	  ((jpBits[4] > R3) && (jpBits[5] > R3)) ||
 	  ((jpBits[5] > R3) && (jpBits[0] > R3)));
 }
-
-int DSMAlgo_EM201_2009::ajpEndcap(const DSM& dsm) const
+/*
+int DSMAlgo_EM201_2013::ajpEndcap(const DSM& dsm) const
 {
   int jpBits[6];
   const int R3 = dsm.registers[3];
@@ -53,9 +47,10 @@ int DSMAlgo_EM201_2009::ajpEndcap(const DSM& dsm) const
 	  ((jpBits[4] > R3) && (jpBits[5] > R3)) ||
 	  ((jpBits[5] > R3) && (jpBits[0] > R3)));
 }
-
-void DSMAlgo_EM201_2009::operator()(DSM& dsm)
+*/
+void DSMAlgo_EM201_2013::operator()(DSM& dsm)
 {
+  
   // INPUT:
 
   // EM201 - ch0 - BEMC BC101 - 10' - JP0 & JP6 (West & East)
@@ -98,7 +93,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   // R0: Hybrid jet patch threshold-0
   // R1: Hybrid jet patch threshold-1
   // R2: Hybrid jet patch threshold-2
-
+  // R3: AJP-th-Sel (2)
   // ACTION:
 
   // Complete hybrid jet patches using partial jet patch ID from EEMC
@@ -124,9 +119,12 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   // Combine (OR) the HT bits from the six BEMC layer 1 DSM's
 
   int htBitsBarrel = 0;
-
-  for (int ch = 0; ch < 6; ++ch)
-    htBitsBarrel |= dsm.channels[ch] >> 12 & 0xf;
+  //0x3 for combined HT bits
+  for (int ch = 0; ch < 6; ++ch){
+    int packedHT  = dsm.channels[ch] >> 12 & 0x3;
+    int unpackedHT = dsm.channels[ch] >> 14 & 0x1;
+    htBitsBarrel |= ((1 << packedHT) - 1) | (unpackedHT << 3);
+  }
 
   // Combine (OR) the HT bits from the two EEMC layer 1 DSM's
 
@@ -150,22 +148,23 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   }
 
   int bjp1 = jpBitsBarrel > 1;
-  int bjp2 = jpBitsBarrel > 2;
+//  int bjp2 = jpBitsBarrel > 2;
 
   int jpBitsEndcap = 0;
 
   for (int ch = 6; ch < 8; ++ch) {
-    int jpa = dsm.channels[ch]      & 0x3;
-    int jpb = dsm.channels[ch] >> 2 & 0x3;
-    int jpc = dsm.channels[ch] >> 4 & 0x3;
-
-    if (jpa > jpBitsEndcap) jpBitsEndcap = jpa;
-    if (jpb > jpBitsEndcap) jpBitsEndcap = jpb;
-    if (jpc > jpBitsEndcap) jpBitsEndcap = jpc;
+    int jpabc = dsm.channels[ch]      & 0x3;
+    //    int jpa = dsm.channels[ch]      & 0x3;
+    //    int jpb = dsm.channels[ch] >> 2 & 0x3;
+    //    int jpc = dsm.channels[ch] >> 4 & 0x3;
+    if (jpabc > jpBitsEndcap) jpBitsEndcap = jpabc;
+    //    if (jpa > jpBitsEndcap) jpBitsEndcap = jpa;
+    //    if (jpb > jpBitsEndcap) jpBitsEndcap = jpb;
+    //    if (jpc > jpBitsEndcap) jpBitsEndcap = jpc;
   }
 
   int ejp1 = jpBitsEndcap > 1;
-  int ejp2 = jpBitsEndcap > 2;
+//  int ejp2 = jpBitsEndcap > 2;
 
   // Compare the two completed hybrid jet patches to three thresholds
   // and combine (OR) the results with the BEMC-only and EEMC-only bits
@@ -184,12 +183,27 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
 
   // Adjacent jet patch logic
 
+  //printf("R3 = %d\n", dsm.registers[3]);
   int ajpx = ajpBarrel(dsm, 0);
   int ajpy = ajpBarrel(dsm, 2);
   int ajpz = ajpBarrel(dsm, 4);
   int bajp = ajpx || ajpy || ajpz;
-  int eajp = ajpEndcap(dsm);
-  int  ajp = bajp || eajp;
+
+  int dijet0 = Dijet(dsm, 0);
+
+  printf("dijet0 = %d\n", dijet0);
+
+  int dijet1 = Dijet(dsm, 1);
+
+  printf("dijet1 = %d\n", dijet1);
+
+  int edijet = EndDijet(dsm, 0);
+  printf("edijet = %d\n", edijet);
+
+  int daq10k = 0;
+  //No endcap ajp in 2013
+  //  int eajp = ajpEndcap(dsm);
+  //  int  ajp = bajp || eajp;
 
   // OUTPUT (16):
 
@@ -197,13 +211,13 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   // (4:5) Endcap HT bits (2)
   // (6) JP1, unified over the BEMC+EEMC (1)
   // (7) JP2, unified over the BEMC+EEMC (1)
-  // (8) BJP1 for the 18 BEMC-only patches (1)
-  // (9) BJP2 for the 18 BEMC-only patches (1)
-  // (10) EJP1 for the 6 EEMC-only patches (1)
-  // (11) EJP2 for the 6 EEMC-only patches (1)
-  // (12) AJP for BEMC and EEMC but NOT the boundary (1)
-  // (13) BAJP for the BEMC-only patches (1)
-  // (14) EAJP for the EEMC-only patches (1)
+  // (8) BJP1, for the 18 BEMC-only patches (1)
+  // (9) EEMC-dijet, EEMC-only JP0-based dijet trigger bit (1)
+  // (10) EJP1, for the 6 EEMC-only patches (1)
+  // (11) JP1-dijet, JP1-based dijet trigger bit (1)
+  // (12) JP0-dijet, JP0-based dijet trigger bit (1)
+  // (13) BAJP, for the BEMC-only patches (1)
+  // (14) DAQ10k, DAQ10k trigger bit (1)
   // (15) JP0, unified over the BEMC+EEMC (1)
 
   int out = 0;
@@ -213,12 +227,12 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   out |= jp1  << 6;
   out |= jp2  << 7;
   out |= bjp1 << 8;
-  out |= bjp2 << 9;
+  out |= edijet << 9;
   out |= ejp1 << 10;
-  out |= ejp2 << 11;
-  out |= ajp  << 12;
+  out |= dijet1 << 11;
+  out |= dijet0  << 12;
   out |= bajp << 13;
-  out |= eajp << 14;
+  out |= daq10k << 14;
   out |= jp0  << 15;
 
   dsm.output = out;
@@ -227,4 +241,68 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
 
   dsm.info[0] = jpSum1;
   dsm.info[1] = jpSum2;
+
+//  return 0;
+}
+int DSMAlgo_EM201_2013::Dijet(DSM &dsm, int jpTH = 0) const
+{
+  // Search for BEMC JP0 & JP1 di-jet signature
+
+  int eemcDijetBits[6];
+
+  eemcDijetBits[0] = dsm.channels[7] >> 2 & 1; // EE102 10 o'clock
+  eemcDijetBits[1] = dsm.channels[7] >> 3 & 1; // EE102 12 o'clock
+  eemcDijetBits[2] = dsm.channels[7] >> 4 & 1; // EE102  2 o'clock
+  eemcDijetBits[3] = dsm.channels[6] >> 2 & 1; // EE101  4 o'clock
+  eemcDijetBits[4] = dsm.channels[6] >> 3 & 1; // EE101  6 o'clock
+  eemcDijetBits[5] = dsm.channels[6] >> 4 & 1; // EE101  8 o'clock
+
+  int dijet = 0;
+  //  int dijet1 = 0;
+
+  for (int ch = 0; ch < 6; ++ch) {
+    int jpx = dsm.channels[ch] >> 0 & 0x3;
+    int jpy = dsm.channels[ch] >> 2 & 0x3;
+    int jpz = dsm.channels[ch] >> 4 & 0x3;
+
+    int bemcDijet2 = dsm.channels[(ch+2)%6] >> 15 & 1;
+    int bemcDijet3 = dsm.channels[(ch+3)%6] >> 15 & 1;
+    int bemcDijet4 = dsm.channels[(ch+4)%6] >> 15 & 1;
+
+    int eemcDijet2 = eemcDijetBits[(ch+2)%6];
+    int eemcDijet3 = eemcDijetBits[(ch+3)%6];
+    int eemcDijet4 = eemcDijetBits[(ch+4)%6];
+
+    int bjp = jpx > jpTH || jpy > jpTH || jpz > jpTH;
+    //    int bjp = jpx > 1 || jpy > 1 || jpz > 1;
+
+    int bemcDijet = bemcDijet2 || bemcDijet3 || bemcDijet4;
+    int eemcDijet = eemcDijet2 || eemcDijet3 || eemcDijet4;
+
+    dijet |= bjp && (bemcDijet || eemcDijet);
+    //    dijet1 |= bjp1 && (bemcDijet || eemcDijet);
+  }
+  return dijet;
+}
+int DSMAlgo_EM201_2013::EndDijet(DSM &dsm, int jpTH = 0) const
+{
+  // Search for JP0 EEMC di-jet signature
+  int eemcDijetBits[6];
+
+  eemcDijetBits[0] = dsm.channels[7] >> 2 & 1; // EE102 10 o'clock
+  eemcDijetBits[1] = dsm.channels[7] >> 3 & 1; // EE102 12 o'clock
+  eemcDijetBits[2] = dsm.channels[7] >> 4 & 1; // EE102  2 o'clock
+  eemcDijetBits[3] = dsm.channels[6] >> 2 & 1; // EE101  4 o'clock
+  eemcDijetBits[4] = dsm.channels[6] >> 3 & 1; // EE101  6 o'clock
+  eemcDijetBits[5] = dsm.channels[6] >> 4 & 1; // EE101  8 o'clock
+
+  int ee101_jp0 = dsm.channels[6] & 3; // 4, 6 and 8 o'clock
+  int ee102_jp0 = dsm.channels[7] & 3; // 10, 12 and 2 o'clock
+
+  int ee101_dijet = ee101_jp0 && (eemcDijetBits[0] || eemcDijetBits[1] || eemcDijetBits[2]);
+  int ee102_dijet = ee102_jp0 && (eemcDijetBits[3] || eemcDijetBits[4] || eemcDijetBits[5]);
+
+  int eemc_dijet = ee101_dijet || ee102_dijet;
+
+  return eemc_dijet;
 }

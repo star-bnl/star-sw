@@ -1448,7 +1448,7 @@ Bfc_st BFC[] = { // standard chains
   {"fcf"      ,"","","-tcl,tpcX",       "","","WARNING *** Option is OBSOLETE *** use tpcX instead",kFALSE},
   {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,tpc_T,StEvent,rts,detDb"
    ,                  "StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
-
+  {"NoAnnotateCL","","","",                             "","","switch off Tonko Cluster Annotation",kFALSE},
 
 
   {"TpxPulser","TpxPulser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX pulser analysis"
@@ -1725,6 +1725,7 @@ Bfc_st BFC[] = { // standard chains
 #endif
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
    ,                                                                 "Bichsel method used for dEdx",kFALSE},
+  {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
 
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti

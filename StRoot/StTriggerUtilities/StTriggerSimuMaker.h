@@ -51,9 +51,11 @@ private:
   StVirtualTriggerSimu* mSimulators[numSimulators];
 
   /// Used to overwrite thresholds from the database
-  int mBarrelJetPatchTh[3];
+  //int mBarrelJetPatchTh[3];
+  int mBarrelJetPatchTh[4];
   int mBarrelHighTowerTh[4];
-  int mEndcapJetPatchTh[3];
+  //int mEndcapJetPatchTh[3];
+  int mEndcapJetPatchTh[4];
   int mEndcapHighTowerTh[2];
   int mOverlapJetPatchTh[3];
   void overwrite2009DsmRegisters();
@@ -125,14 +127,20 @@ public:
   void useOfflineDB() { mUseOfflineDB = 1; }
 
 
+  //virtual const char *GetCVS() const
+  //{static const char cvs[]="Tag $Name:  $ $Id: StTriggerSimuMaker.h,v 1.34 2017/01/02 15:31:39 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.33 2016/03/18 22:49:38 zchang Exp $
+// $Id: StTriggerSimuMaker.h,v 1.34 2017/01/02 15:31:39 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.34  2017/01/02 15:31:39  rfatemi
+// Updated by Danny OLVITT for 2013 dijet analysiss
+//
 // Revision 1.33  2016/03/18 22:49:38  zchang
 // updating trigger simulator for run12 analysis
 //
