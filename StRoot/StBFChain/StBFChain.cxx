@@ -21,6 +21,7 @@
 #include "TEnv.h"
 #include "TObjectTable.h"
 #include "TDirIter.h"
+#include "StdEdxY2Maker/StdEdxY2Maker.h"
 #include "BigFullChain.h" /* To check syntax */
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
@@ -800,6 +801,16 @@ Int_t StBFChain::Instantiate()
 	GetOption("EmbeddingShortCut"))  {
       mk->SetAttr("EmbeddingShortCut", 1);
       mk->PrintAttr();
+    }
+    if (maker == "StdEdxY2Maker" && GetOption("dEdxCalib")) {
+      Int_t Mode = 0;
+      SETBIT(Mode,StdEdxY2Maker::kCalibration);
+      SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
+      SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
+      SETBIT(Mode,StdEdxY2Maker::kPadSelection);
+      SETBIT(Mode,StdEdxY2Maker::kAlignment);
+      LOG_INFO << " set dEdxY2 Mode " << Mode << " =======================================" << endm;
+      mk->SetMode(Mode); 
     }
 #if 0
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){

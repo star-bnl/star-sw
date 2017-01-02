@@ -1725,6 +1725,7 @@ Bfc_st BFC[] = { // standard chains
 #endif
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
    ,                                                                 "Bichsel method used for dEdx",kFALSE},
+  {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
 
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
