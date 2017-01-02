@@ -10,6 +10,11 @@
 #include "DSMAlgo_BE003_2009.hh"
 #include "DSMLayer_B001_2009.hh"
 
+#include "y2013/DSMAlgo_BW001_2013.hh"
+#include "y2013/DSMAlgo_BW003_2013.hh"
+#include "y2013/DSMAlgo_BE001_2013.hh"
+#include "y2013/DSMAlgo_BE003_2013.hh"
+
 DSMLayer_B001_2009::DSMLayer_B001_2009() : DSMLayer<TriggerDataBlk>(30)
 {
   // West
@@ -127,4 +132,55 @@ void DSMLayer_B001_2009::run()
     DSMAlgo_BE001_2009()((*this)[dsm++]); // BE004/BE009/BE014
     DSMAlgo_BE001_2009()((*this)[dsm++]); // BE005/BE010/BE015
   }
+}
+
+void DSMLayer_B001_2009::run(int runnumber)
+{
+  int yrs = 2000 + runnumber/1000000 - 1;
+  printf("B001: yrs = %d\n", yrs);
+  int dsm = 0;
+
+  if(yrs ==  2009 || yrs == 2010 || yrs == 2011 || yrs == 2012 || (yrs == 2013 && runnumber < 14081067))
+  {
+	printf("B001: 2009 DSM Algorithm...\n");
+    // West
+    while (dsm < 15) {
+      DSMAlgo_BW001_2009()((*this)[dsm++]); // BW001/BW006/BW011
+      DSMAlgo_BW001_2009()((*this)[dsm++]); // BW002/BW007/BW012
+      DSMAlgo_BW003_2009()((*this)[dsm++]); // BW003/BW008/BW013
+      DSMAlgo_BW001_2009()((*this)[dsm++]); // BW004/BW009/BW014
+      DSMAlgo_BW001_2009()((*this)[dsm++]); // BW005/BW010/BW015
+    }
+    
+    // East
+    
+    while (dsm < 30) {
+      DSMAlgo_BE001_2009()((*this)[dsm++]); // BE001/BE006/BE011
+      DSMAlgo_BE001_2009()((*this)[dsm++]); // BE002/BE007/BE012
+      DSMAlgo_BE003_2009()((*this)[dsm++]); // BE003/BE008/BE013
+      DSMAlgo_BE001_2009()((*this)[dsm++]); // BE004/BE009/BE014
+      DSMAlgo_BE001_2009()((*this)[dsm++]); // BE005/BE010/BE015
+    }
+  }else if((yrs == 2013 && runnumber >= 14081067) || yrs > 2013)
+    {
+	printf("B001: 2013 DSM Algorithm...\n");
+      // West
+      while (dsm < 15) {
+	DSMAlgo_BW001_2013()((*this)[dsm++]); // BW001/BW006/BW011
+	DSMAlgo_BW001_2013()((*this)[dsm++]); // BW002/BW007/BW012
+	DSMAlgo_BW003_2013()((*this)[dsm++]); // BW003/BW008/BW013
+	DSMAlgo_BW001_2013()((*this)[dsm++]); // BW004/BW009/BW014
+	DSMAlgo_BW001_2013()((*this)[dsm++]); // BW005/BW010/BW015
+      }
+      
+      // East
+      
+      while (dsm < 30) {
+	DSMAlgo_BE001_2013()((*this)[dsm++]); // BE001/BE006/BE011
+	DSMAlgo_BE001_2013()((*this)[dsm++]); // BE002/BE007/BE012
+	DSMAlgo_BE003_2013()((*this)[dsm++]); // BE003/BE008/BE013
+	DSMAlgo_BE001_2013()((*this)[dsm++]); // BE004/BE009/BE014
+	DSMAlgo_BE001_2013()((*this)[dsm++]); // BE005/BE010/BE015
+      }
+    }
 }

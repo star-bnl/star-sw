@@ -193,8 +193,10 @@ StEemcTriggerSimu::InitRun(int runnumber){
   fill(highTowerMask,highTowerMask+90,1); // all channels good
   fill(patchSumMask,patchSumMask+90,1); // all channels good
 
-  EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
-  EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
+  // Mod by Danny
+  // Turning on Pibero's run 9 EEMC mask
+  //EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
+  //EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
 
   switch (mPedMode) {
   case kOnline:
@@ -418,6 +420,14 @@ StEemcTriggerSimu::Make(){
   else if( mYear >= 2009 ){
     get2009_DSMLayer0();
     get2009_DSMLayer1();
+  }
+  // #### modified end ####  
+
+  // #### modified by Danny ####
+  Int_t runnumber = StMaker::GetChain()->GetRunNumber();
+  if( mYear >= 2013 ){
+    get2013_DSMLayer0(runnumber);
+    get2013_DSMLayer1(runnumber);
   }
   // #### modified end ####  
 
@@ -758,6 +768,38 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 // #### modified end ####
 
 //==================================================
+// #### modified by Danny ####
+
+void
+StEemcTriggerSimu::get2013_DSMLayer0(Int_t runnumber){
+  for( size_t dsm = 0; dsm < mE001->size(); dsm++ ){
+    TString line = (*mE001)[dsm].name + ": ";
+    for( int ch = 0; ch < 10; ch++ ){
+      Int_t tpid = dsm * 10 + ch;
+      (*mE001)[dsm].channels[ch] = feeTPTreeADC->TP(tpid)->getOut12bit();
+      line += Form("%04x ",(*mE001)[dsm].channels[ch]);
+    }
+    LOG_DEBUG << line << endm;
+  }
+  
+  mE001->run(runnumber);
+}
+
+void
+StEemcTriggerSimu::get2013_DSMLayer1(Int_t runnumber){
+  mE001->write(*mE101);
+
+  for (size_t dsm = 0; dsm < mE101->size(); ++dsm) {
+    TString line = (*mE101)[dsm].name + ": ";
+    for (int ch = 0; ch < 8; ++ch) line += Form("%04x ",(*mE101)[dsm].channels[ch]);
+    LOG_DEBUG << line << endm;
+  }
+
+  mE101->run(runnumber);
+}
+
+// #### modified end ####
+
 //==================================================
 
 int StEemcTriggerSimu::endcapJetPatchTh(int i) const { return mE101->getRegister(i); }
@@ -795,6 +837,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.50  2017/01/02 15:31:56  rfatemi
+// Updated by Danny OLVITT for 2013 dijet analysiss
+//
 // Revision 1.49  2012/08/27 17:16:41  pibero
 // Add logging of EEMC gains from DB
 //
