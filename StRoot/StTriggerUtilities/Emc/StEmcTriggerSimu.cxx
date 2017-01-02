@@ -52,7 +52,7 @@ void StEmcTriggerSimu::InitRun(int runNumber)
 
 void StEmcTriggerSimu::Make()
 {
-  if (mYear >= 2009) {
+  if (mYear >= 2009 && mYear < 2013) {
     if (mBemc) mBemc->get2009_DSMLayer1_Result()->write(*mEM201);
     if (mEemc) mEemc->get2009_DSMLayer1_Result()->write(*mEM201);
 
@@ -85,6 +85,43 @@ void StEmcTriggerSimu::Make()
       }
     LOG_INFO << Form("TCU: 0x%04x",mTcu->input() & 0xffff) << endm; //changed this line to LOG_INFO -- zchang
   }
+
+  // 2013 change
+  if (mYear == 2013) {
+    if (mBemc) mBemc->get2009_DSMLayer1_Result()->write(*mEM201);
+    if (mEemc) mEemc->get2009_DSMLayer1_Result()->write(*mEM201);
+
+    TString EM201String = "EM201: ";
+    for (int ch = 0; ch < 8; ++ch) EM201String += Form("%04x ",(*mEM201)[0].channels[ch]);
+    LOG_DEBUG << EM201String << endm;
+
+    Int_t runnumber = StMaker::GetChain()->GetRunNumber();
+    //cout << "Danny Test: " << runnumber << endl;
+    mEM201->run(runnumber);
+
+
+    LOG_INFO << Form("EM201: BHT0=%d BHT1=%d BHT2=%d BHT3=%d EHT0=%d EHT1=%d JP1=%d JP2=%d BJP1=%d EEMCdijet=%d EJP1=%d JP1dijet=%d JP0dijet=%d BAJP=%d DAQ10k=%d JP0=%d",
+		     BHT0(),BHT1(),BHT2(),BHT3(),EHT0(),EHT1(),JP1(),JP2(),BJP1(),EEMCdijet(),EJP1(),JP1dijet(),JP0dijet(),BAJP(),DAQ10k(),JP0()) << endm;
+
+    //for year 2009 set EM201 to LD301 then to TCU
+    if(mYear == 2009)
+      {
+	mEM201->write(*mLD301);
+
+	TString LD301String = "LD301: ";
+
+	for (int ch = 0; ch < 8; ++ch) LD301String += Form("%04x ",(*mLD301)[0].channels[ch]);
+	LOG_DEBUG << LD301String << endm; //changed this line LOG_INFO
+
+	mLD301->run();
+
+        mTcu->setInput((*mLD301)[0].output); //Run9 TCU setup
+      }else if(mYear > 2010)
+      {
+	mTcu->setInput((*mEM201)[0].output); //Run11 and Run12 TCU EM201 part -- zchang
+      }
+    LOG_INFO << Form("TCU: %04x",mTcu->input() & 0xffff) << endm; //changed this line to LOG_INFO -- zchang
+  }
 }
 
 bool StEmcTriggerSimu::isTrigger(int trigId)
@@ -99,8 +136,8 @@ set<int> StEmcTriggerSimu::triggerIds() const
 
 StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
 {
-  return isTrigger(trigId) ? kYes : kNo;
-}
+  return isTrigger(trigId) ? kYes : kNo;}
+
 void StEmcTriggerSimu::defineTrigger(TriggerDefinition& trigdef)
 {
   // Run11 and Run12 move EM201 output(onbit1 higher 16 bits) to onbits -- zchang

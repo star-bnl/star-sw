@@ -8,6 +8,9 @@
 #include "DSMAlgo_EE002_2009.hh"
 #include "DSMLayer_E001_2009.hh"
 
+#include "y2013/DSMAlgo_EE001_2013.hh"
+#include "y2013/DSMAlgo_EE002_2013.hh"
+
 DSMLayer_E001_2009::DSMLayer_E001_2009() : DSMLayer<TriggerDataBlk>(9)
 {
   for (size_t dsm = 0; dsm < size(); ++dsm)
@@ -70,4 +73,34 @@ void DSMLayer_E001_2009::run()
   DSMAlgo_EE001_2009()((*this)[6]); // EE007
   DSMAlgo_EE002_2009()((*this)[7]); // EE008
   DSMAlgo_EE001_2009()((*this)[8]); // EE009
+}
+void DSMLayer_E001_2009::run(int runnumber)
+{
+  int yrs = 2000 + runnumber/1000000 - 1;
+  printf("E001: yrs = %d\n", yrs);
+  if(yrs == 2009 || yrs == 2010 || yrs == 2011 || yrs == 2012 || (yrs == 2013 && runnumber < 14081067))
+    {
+      printf("E001 2009 DSM Algorithm...\n");
+      DSMAlgo_EE001_2009()((*this)[0]); // EE001
+      DSMAlgo_EE002_2009()((*this)[1]); // EE002
+      DSMAlgo_EE001_2009()((*this)[2]); // EE003
+      DSMAlgo_EE001_2009()((*this)[3]); // EE004
+      DSMAlgo_EE002_2009()((*this)[4]); // EE005
+      DSMAlgo_EE001_2009()((*this)[5]); // EE006
+      DSMAlgo_EE001_2009()((*this)[6]); // EE007
+      DSMAlgo_EE002_2009()((*this)[7]); // EE008
+      DSMAlgo_EE001_2009()((*this)[8]); // EE009
+    }else if((yrs == 2013 && runnumber >= 14081067) || yrs > 2013)
+    {
+      printf("E001 2013 DSM Algorithm...\n");
+      DSMAlgo_EE001_2013()((*this)[0]); // EE001
+      DSMAlgo_EE002_2013()((*this)[1]); // EE002
+      DSMAlgo_EE001_2013()((*this)[2]); // EE003
+      DSMAlgo_EE001_2013()((*this)[3]); // EE004
+      DSMAlgo_EE002_2013()((*this)[4]); // EE005
+      DSMAlgo_EE001_2013()((*this)[5]); // EE006
+      DSMAlgo_EE001_2013()((*this)[6]); // EE007
+      DSMAlgo_EE002_2013()((*this)[7]); // EE008
+      DSMAlgo_EE001_2013()((*this)[8]); // EE009
+    }
 }
