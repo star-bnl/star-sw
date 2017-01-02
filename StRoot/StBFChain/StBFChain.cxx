@@ -751,6 +751,9 @@ Int_t StBFChain::Instantiate()
     if (GetOption("NoTpxAfterBurner") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) {
       mk->SetAttr("NoTpxAfterBurner", 1);
     }
+    if (maker == "StTpcHitMaker"  && GetOption("NoAnnotateCL")) {
+      mk->SetAttr("UseTonkoClusterAnnotation", 0);
+    }
     if (maker == "StTpcDbMaker"){
       //      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
