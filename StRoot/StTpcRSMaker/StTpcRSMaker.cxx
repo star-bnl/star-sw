@@ -836,10 +836,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  CdEdx.QSumA = 0;
 	  CdEdx.sector = TrackSegmentHits[iSegHits].Pad.sector(); 
 	  CdEdx.row    = TrackSegmentHits[iSegHits].Pad.row();
-	  CdEdx.channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(CdEdx.row);
-	  CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,CdEdx.row);
-	  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,CdEdx.row);
-	  Double_t              Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(CdEdx.sector,CdEdx.row); // C/cm
 	  CdEdx.pad    = TMath::Nint(TrackSegmentHits[iSegHits].Pad.pad());
 	  CdEdx.edge   = CdEdx.pad;
 	  if (CdEdx.edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
@@ -870,10 +866,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  CdEdx.xyzD[2] = TrackSegmentHits[nSegHits].dirLS.position().z();
 	  CdEdx.ZdriftDistance = CdEdx.xyzD[2];
 	  CdEdx.zG      = CdEdx.xyz[2];
-	  CdEdx.Qcm     = 1e6*Qcm; // uC/cm
-	  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
 	  if (St_trigDetSumsC::instance())	CdEdx.Zdc     = St_trigDetSumsC::instance()->zdcX();
-	  
 	  CdEdx.ZdriftDistance = TrackSegmentHits[iSegHits].coorLS.position().z(); // drift length
 	  St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
 	  if (tpcGas)

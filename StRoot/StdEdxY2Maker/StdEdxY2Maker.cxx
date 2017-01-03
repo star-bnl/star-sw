@@ -263,29 +263,6 @@ Int_t StdEdxY2Maker::Make(){
     LOG_INFO << "StdEdxY2Maker: no StEvent " << endm;
     return kStOK;        // if no event, we're done
   }
-  if (! St_trigDetSumsC::GetInstance()) {
-    StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
-  }
-  if ( ! St_trigDetSumsC::instance() ) {LOG_ERROR << "StdEdxY2Maker:: Cannot find trigDetSums" << endm;}
-  else {
-    if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StdEdxY2Maker:: trigDetSums has not data" << endm;}
-    else {
-      UInt_t date = GetDateTime().Convert();
-      if (date < St_trigDetSumsC::instance()->timeOffset()) {
-	LOG_ERROR << "StdEdxY2Maker:: Illegal time for scalers = " 
-			  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
-			  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << GetRunNumber() << endm;
-      }
-    }
-  }
-#if 0
-  // Check that we have valid time for Power Suppliers
-  if (St_TpcAvgPowerSupplyC::instance()->run() > 0 && ((UInt_t )St_TpcAvgPowerSupplyC::instance()->stop_time()) < GetDateTime().Convert()) {
-    LOG_ERROR <<  "StdEdxY2Maker:: Illegal TpcAvgPowerSupply time = " <<  St_TpcAvgPowerSupplyC::instance()->stop_time() 
-	      << " < event time = " << GetDateTime().Convert() << "\t" << GetDateTime().AsString() << endm;
-    return kStErr;
-  }
-#endif
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
   const StBTofCollection* tof = pEvent->btofCollection();
@@ -600,11 +577,6 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].QSumA = 0;
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
-	CdEdx[NdEdx].channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row);
-	CdEdx[NdEdx].Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
-	CdEdx[NdEdx].Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
-	Double_t    Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
-	CdEdx[NdEdx].Qcm     = 1e6*Qcm; // uC/cm
 	CdEdx[NdEdx].pad    = Pad.pad();
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
