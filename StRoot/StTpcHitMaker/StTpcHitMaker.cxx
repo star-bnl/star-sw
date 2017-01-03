@@ -271,7 +271,7 @@ StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMo
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
-  SetAttr("UseTonkoClusterAnnotation",0);
+  SetAttr("UseTonkoClusterAnnotation",1);
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {

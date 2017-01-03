@@ -363,7 +363,6 @@ int StiTrackNodeHelper::makeFit(int smooth)
     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
-    if (debug() & 8) {cout << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
     if (!ians) 	break;
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
@@ -1051,8 +1050,12 @@ if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
       return -14;
     }  
   } //EndIf Not a primary	  
-  if (debug()) StiKalmanTrackNode::comment += Form(" chi2 = %6.2f",mChi2);
-  if (mTargetNode && debug()) {
+  if (mTargetNode && debug() & 8) {
+    if (mTargetNode->getDetector()) 
+      StiKalmanTrackNode::ResetComment(::Form("%40s ",mTargetNode->getDetector()->getName().c_str()));
+    else
+      StiKalmanTrackNode::ResetComment("Vx                            ");
+    StiKalmanTrackNode::comment += Form(" chi2 = %6.2f",mChi2);
     mTargetNode->PrintpT("U");
   }
   mState = StiTrackNode::kTNFitEnd;

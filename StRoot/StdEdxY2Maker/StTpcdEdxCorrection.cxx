@@ -34,6 +34,10 @@
 #include "StDetectorDbMaker/St_TpcLengthCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDF.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
+#include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
@@ -135,6 +139,35 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Int_t channel           = CdEdx.channel;
   Double_t dx     	  = CdEdx.dx;    
   if (dE <= 0 || dx <= 0) return 3;
+  CdEdx.channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row);
+  CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
+  Double_t    Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
+  CdEdx.Qcm     = 1e6*Qcm; // uC/cm
+  if (! St_trigDetSumsC::GetInstance()) {
+    StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
+  }
+  if ( ! St_trigDetSumsC::instance() ) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Cannot find trigDetSums" << endm;}
+  else {
+    if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection trigDetSums has not data" << endm;}
+    else {
+      UInt_t date = StMaker::GetChain()->GetDateTime().Convert();
+      if (date < St_trigDetSumsC::instance()->timeOffset()) {
+	LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Illegal time for scalers = " 
+			  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
+			  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << StMaker::GetChain()->GetRunNumber() << endm;
+      }
+    }
+  }
+#if 0
+  // Check that we have valid time for Power Suppliers
+  if (St_TpcAvgPowerSupplyC::instance()->run() > 0 && ((UInt_t )St_TpcAvgPowerSupplyC::instance()->stop_time()) < GetDateTime().Convert()) {
+    LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply time = " <<  St_TpcAvgPowerSupplyC::instance()->stop_time() 
+	      << " < event time = " << GetDateTime().Convert() << "\t" << GetDateTime().AsString() << endm;
+    return kStErr;
+  }
+#endif
+  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
   if (row <= mNumberOfInnerRows) kTpcOutIn = kTpcInner;

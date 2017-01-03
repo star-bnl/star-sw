@@ -749,10 +749,8 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
                                         const StMaker *dowMk) const 
 {
   bool lookupHall   = !strcmp(logInput,"HALL");
-  bool lookupGeoDir = !strcmp(logInput,"GeometryDirectory");
-
   TDataSet *ds = 0;
-  if ( !(lookupHall || lookupGeoDir) ) {
+  if ( !lookupHall) {
      ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
   } else {
      if (lookupHall) {
@@ -770,42 +768,9 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
               }
               // Add "hall" into ".const" area of this maker
               ((St_geant_Maker *)this)->AddConst(fVolume);
-              if (Debug()) fVolume->ls(3);
+              if (Debug() > 1) fVolume->ls(3);
            }
         }
-    } else if (lookupGeoDir) {
-        if (!fGeoDirectory) {
-           TString file("pams/geometry");
-           // Check the local path first
-           TFileSet *geoDir = new TFileSet(file.Data());
-           if (!geoDir->FindByName("geometry.g")) {
-              // Try the global one
-              delete geoDir;
-              TString starRoot = "$STAR/" + file;
-              geoDir = new TFileSet(starRoot.Data());
-              if (!geoDir->FindByName("geometry.g")) {
-                  LOG_DEBUG << "NO STAR geometry source directory has been found" << endm;
-                  delete geoDir; geoDir = 0;
-              } else {
-                 TString star("$STAR/pams");
-                 gSystem->ExpandPathName(star);
-                 geoDir->SetTitle(star.Data()); 
-              }
-           } else {
-             TString wd = gSystem->WorkingDirectory();
-             wd += "/pams";
-             geoDir->SetTitle(wd.Data()); 
-           }
-           if (geoDir) {
-              ((St_geant_Maker *)this)->fGeoDirectory = geoDir;              
-               TDataSet *container = new TDataSet("GeometryDirectory");
-               container->Add(geoDir);
-               ds = fGeoDirectory;
-              ((St_geant_Maker *)this)->AddConst(container);
-              if (Debug()) fGeoDirectory->ls(3);
-           }
-        }
-        ds = fGeoDirectory;
      }
   }
   return ds;  

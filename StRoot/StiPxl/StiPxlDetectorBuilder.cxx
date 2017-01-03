@@ -107,8 +107,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    {
       for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
-         std::ostringstream geoPath;
-         geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
+	std::ostringstream geoPath, geoName;
+         geoName << "PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
+         geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/" << geoName.str().c_str(); 
 
          bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
@@ -144,7 +145,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          // Split the ladder in two halves
          for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
             // Create new Sti shape based on the sensor geometry
-            std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
+            std::string halfLadderName(geoName.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
             double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 

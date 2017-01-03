@@ -73,9 +73,9 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw
       else  {
 	if (debug()) {
 	  if (targetDet) 
-	    targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
+	    targetNode->ResetComment(::Form("%40s start refit",targetDet->getName().c_str()));
 	  else 
-	    targetNode->ResetComment(::Form("%30s start refit","Vertex"));
+	    targetNode->ResetComment(::Form("%40s start refit","Vertex"));
 	  targetNode->PrintpT("S");}
 //        pNode = targetNode;		continue;
         pNode = targetNode;		
@@ -95,7 +95,7 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw
         if (status) 			{nerr++; break;}
         tryNode.setChi2(chi2);
 	{ //continue block
-	  if (debug()) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
+	  if (debug()) { StiKalmanTrackNode::PrintStep();}
 	}//end continue block
 
         *targetNode=tryNode;

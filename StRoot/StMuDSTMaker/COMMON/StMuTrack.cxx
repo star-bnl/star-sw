@@ -237,8 +237,10 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
 
   if ( track->outerGeometry() ) 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
+#ifdef  __kfpAtFirstHit__
   if (track->kfpTrackAtFirstHit()) mkfpTrackAtFirstHit = *(track->kfpTrackAtFirstHit());
   if (track->kfpTrackAtLastHit() ) mkfpTrackAtLastHit  = *(track->kfpTrackAtLastHit());
+#endif
 }
 
 UShort_t StMuTrack::nHitsPoss() const {

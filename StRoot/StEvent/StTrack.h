@@ -181,7 +181,9 @@
 #include "StTrackTopologyMap.h"
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
+#ifdef  __kfpAtFirstHit__
 #include "KFPTrack.h"
+#endif
 class StTrack;
 ostream&  operator<<(ostream& os,  const StTrack& t);
 
@@ -251,11 +253,12 @@ public:
     bool       isRejected()              const {return testBit(kRejectedTrack);}
     bool       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
     bool       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
+#if __kfpAtFirstHit__
     KFPTrack       *kfpTrackAtFirstHit()       {return mKFPTrackAtFirstHit;}
     const KFPTrack *kfpTrackAtFirstHit() const {return mKFPTrackAtFirstHit;}
     KFPTrack       *kfpTrackAtLastHit()        {return mKFPTrackAtLastHit;}
     const KFPTrack *kfpTrackAtLastHit() const  {return mKFPTrackAtLastHit;}
-
+#endif
     virtual void setCtbMatched()           {setBit(kCtbMatched);}
     virtual void setToFMatched()  	   {setBit(kToFMatched);}   
     virtual void setBToFMatched()  	   {setBit(kToFMatched);}   
@@ -308,9 +311,10 @@ public:
     Int_t        testBits(UInt_t f) const { return (Int_t) (mFlagExtension & f); }
     void         invertBit(UInt_t f) { mFlagExtension ^= f; }
     virtual void Print(Option_t *option="") const {cout << option << (*this) << endl; }
+#ifdef  __kfpAtFirstHit__
     void         setKFPTrackatFirstHit(KFPTrack *t) {mKFPTrackAtFirstHit = t;}
     void         setKFPTrackatLastHit (KFPTrack *t) {mKFPTrackAtLastHit  = t;}
-    
+#endif    
 protected:
     void         setNumberOfPossiblePoints(UShort_t); // obsolete
     Char_t                  mBeg[1]; //!
@@ -336,8 +340,10 @@ protected:
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
     StVertex               *mEndVertex;
+#ifdef  __kfpAtFirstHit__
     KFPTrack               *mKFPTrackAtFirstHit;
     KFPTrack               *mKFPTrackAtLastHit;
+#endif
     Char_t                  mEnd[1]; //!
     StTrackTopologyMap      mTopologyMap;
     StTrackFitTraits        mFitTraits;
@@ -357,6 +363,6 @@ protected:
     
     StSPtrVecTrackPidTraits mPidTraitsVec;
     
-    ClassDef(StTrack,13)
+    ClassDef(StTrack,14)
 };
 #endif

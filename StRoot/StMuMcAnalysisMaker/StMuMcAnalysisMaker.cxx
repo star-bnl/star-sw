@@ -782,6 +782,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   
   for (Int_t l = 0; l < NoStVertices; l++) {//NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
+    if (! Vtx) continue;
     //       Vtx->Print();
     if (bestRank < Vtx->ranking()) {
       bestRank = Vtx->ranking();

@@ -24,7 +24,7 @@ void bfc (const Int_t Last,
 class StBFChain;
 #endif
 //________________________________________________________________________________
-void MakeV0(Int_t nevents=1000, const Char_t *parn = "K0s", Int_t RunID = 1)
+void MakeV0(Int_t nevents=1, const Char_t *parn = "StK0s", Int_t RunID = 1)
 {
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
