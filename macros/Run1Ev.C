@@ -66,14 +66,6 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     St_geant_Maker::instance()->Do("swit 2 2");
     St_geant_Maker::instance()->SetDebug(1);
 #endif
-#if 1
-    // Old Sti
-    StiKalmanTrackNode::setDebug(8+32+16);
-    StiKalmanTrackFinder::setDebug(2);
-    StiKalmanTrackFitter::setDebug(1);
-    StiKalmanTrack::setDebug(2);
-    StiTrackNodeHelper::setDebug(8);
-#endif
   } else {
     StVMCMaker *geant = chain->Maker("geant");
     geant->SetDebug(1);
@@ -120,6 +112,14 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 #else
 #endif
   }
+#if 1
+  // Old Sti
+  StiKalmanTrackNode::setDebug(8+32+16);
+  StiKalmanTrackFinder::setDebug(2);
+  StiKalmanTrackFitter::setDebug(1);
+  StiKalmanTrack::setDebug(2);
+  StiTrackNodeHelper::setDebug(8);
+#endif
 #if 0
   if (chain->Maker("svt_hits")) chain->Maker("svt_hits")->SetDebug(2);
   if (chain->Maker("SsdFastSim")) chain->Maker("SsdFastSim")->SetDebug(2);

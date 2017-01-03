@@ -8,18 +8,21 @@
 #  exit 0;
 #}
 my $field = "ReversedFullField";
-my $Field = $ARGV[0];
-print "$Field\n";
-if    ($Field eq "FF") {$field = "FullField";}
-elsif ($Field eq "RF") {$field = "ReversedFullField";}
-#elsif ($Field eq "ZF") {$field = "FieldOff"; }
-#print "$Field => $field\n";
+if ($#ARGV >= 0) {
+  my $Field = $ARGV[0];
+  print "$Field\n";
+  if    ($Field eq "FF") {$field = "FullField";}
+  elsif ($Field eq "RF") {$field = "ReversedFullField";}
+  #elsif ($Field eq "ZF") {$field = "FieldOff"; }
+  #print "$Field => $field\n";
+}
 #if ($field eq "") {die "$Field has not defined";}
 #my
 # $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=" . $field . ",filetype=online_daq,filename~st,trgsetupname=CosmicLocalClock,tpx=1,gmt=1,sanity=1,runnumber>17000000' -limit 0"; 
 # $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=" . $field . ",filetype=online_daq,filename~adc,trgsetupname=AuAu_200_production_2016,tpx=1,gmt=1,sanity=1,runnumber>17000000' -limit 0"; 
- $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=" . $field . ",filetype=online_daq,filename~adc,trgsetupname=low_lumi_AuAu2016,tpx=1,gmt=1,sanity=1,runnumber>17000000' -limit 0"; 
-print "$cmd\n";
+# $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=" . $field . ",filetype=online_daq,filename~adc,trgsetupname=low_lumi_AuAu2016,tpx=1,gmt=1,sanity=1,runnumber>17000000' -limit 0"; 
+ $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=" . $field . ",filetype=online_daq,filename~st_physics_adc,tpx=1,gmt=1,sanity=1,runnumber=17126051' -limit 0"; 
+#print "$cmd\n";
 my @list = `$cmd`;
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'magscale=ReversedFullField,filetype=online_daq,filename~st_gmt,trgsetupname=CosmicLocalClock,tpx=1,gmt=1,sanity=1,events>10000' -limit 50`;
 
