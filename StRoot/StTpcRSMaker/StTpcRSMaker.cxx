@@ -104,7 +104,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   NoOfInnerRows(-1),
   NoOfPads(182),
   NoOfTimeBins(__MaxNumberOfTimeBins__),
-  mCutEle(1e-4)
+  mCutEle(1e-5)
 {
   memset(beg, 0, end-beg+1);
   m_Mode = 0;
