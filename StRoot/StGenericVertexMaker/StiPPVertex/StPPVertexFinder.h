@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.30 2017/01/03 22:17:12 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.31 2017/01/03 22:17:18 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -15,6 +15,11 @@
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 
 #include "StPhysicalHelixD.hh"
+
+class TH1F;
+class TH2F;
+class TH1D;
+
 class StiKalmanTrack;
 class TrackData;
 class VertexData;
@@ -92,7 +97,6 @@ class StPPVertexFinder: public StGenericVertexFinder {
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
   StBTofGeometry *btofGeom;
-  StEEmcDb       *eeDb;
   EEmcGeomSimple *geomE;
   
   void dumpKalmanNodes(const StiKalmanTrack *track);
