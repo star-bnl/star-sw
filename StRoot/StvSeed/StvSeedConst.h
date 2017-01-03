@@ -12,7 +12,7 @@
 //#define KNNGONE 1
 
 
-enum ESeeds {kMinHits=5,kMaxHits = 10,kZRange=230};
+enum ESeeds {kMinHits=5,kMaxHits = 10,kZRange=200};
 #define kMinErr  (1e-2)
 #define kMaxErr  (3e-1)
 #define kRelErr  (1e-3)
