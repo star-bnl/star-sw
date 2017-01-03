@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.78 2017/01/03 22:17:24 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.79 2017/01/03 22:17:36 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -931,7 +931,7 @@ StPPVertexFinder::exportVertices(){
     primV.setFlag(1); //??? is it a right value?
   
     //..... add vertex to the list
-    addVertex(&primV);
+    addVertex(primV);
   }
   LOG_DEBUG << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
 }
