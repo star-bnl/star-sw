@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.29 2016/12/12 17:18:14 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.30 2017/01/03 22:17:12 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -101,9 +101,9 @@ class StPPVertexFinder: public StGenericVertexFinder {
   virtual void  UseVertexConstraint() {}
   
 public:
-  void UsePCT(bool x=true)			{setDropPostCrossingTrack(!x);}
+  virtual void UsePCT(bool x=true)			{setDropPostCrossingTrack(!x);}
   void setDropPostCrossingTrack(bool x=true)	{mDropPostCrossingTrack=x;}
-  void Finish();
+  virtual void Finish();
 
   TH1F *hA[mxH];
   TH2F *hACorr;
@@ -114,7 +114,7 @@ public:
 
   // mandatory implementations
   virtual  ~StPPVertexFinder();
-  int       fit(StEvent*);        
+  virtual int       fit(StEvent*);        
   void      printInfo(ostream& = cout) const;
  
   // over-written method
