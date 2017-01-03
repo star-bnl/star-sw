@@ -420,6 +420,7 @@ StvNode *StvTrack::GetMaxKnnNode()
   return node;
 }
 #include "StarRoot/TIdTruUtil.h"
+#include "StEvent/StRnDHit.h"
 //_____________________________________________________________________________
 double StvTrack::GetQua() const
 {
@@ -434,6 +435,17 @@ double StvTrack::GetQua() const
     if (!(hit=node->GetHit())) 		 	continue;
     if ( node->GetXi2()>1000) 			continue;
     int idTru = hit->idTru();   
+#ifdef kFtsIdentifier
+    if (!idTru && hit->detectorId()==kFtsId) {
+      auto *rndHit = (StRnDHit*)hit->stHit();
+      int id0 = rndHit->extraByte0();
+      int id1 = rndHit->extraByte1();
+      assert (id0 && id1);
+      idt.Add(id0,50);
+      idt.Add(id1,50);
+      continue;
+    }       
+#endif
     idt.Add(idTru);
   }
   if (!idt.GetIdTru()) return 0;
