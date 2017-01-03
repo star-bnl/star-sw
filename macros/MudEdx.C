@@ -230,7 +230,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   TH2F *TPointsN   = new TH2F("TPointsN","dNdx(fit)/Pion versus Length in Tpc  for All",
 			      210,10,220., 500,-1.,4.);
   TH2F *TdEdxP70    = new TH2F("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c))", 
-			       150,-1.,2., 500,0.,2.5);
+			       150,-1.,2., 500,-1.,4.);
   TH2F *TdEdxP7040cm    = new TH2F("TdEdxP7040cm","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
 			       150,-1.,2., 500,0.,2.5);
   TH2F *TdEdxPF    = new TH2F("TdEdxPF","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/c))", 
@@ -481,7 +481,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	zPred[1][l]   = m_Bichsel->GetMostProbableZ(bgL10[l]);
 	//	zPred[1][l]   = m_Bichsel->IfitTrs (l,bgL10[l]);
 	sPred[1][l]   = m_Bichsel->IfitTrsS(l,bgL10[l]);
-	zPred[2][l]   = TMath::Log(StdEdxModel::instance()->dNdx(bgL10[l]));
+	zPred[2][l]   = TMath::Log(StdEdxModel::instance()->dNdx(bg[l]));
 	sPred[2][l]   = 1;
       }
       //      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
