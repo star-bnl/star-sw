@@ -160,7 +160,7 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
   }
   double qua = idu.GetQua()*100;
   if (!idu.GetIdTru()) qua=0;
-  StvDebug::Count("SeedAllQua",idu.GetQua()*100);
+  StvDebug::Count("SeedAllQua",qua);
   if (!tk) { //
   StvDebug::Count("SeedBadXi2:Xi2E",fXi2[1],fXi2[0]);
   StvDebug::Count("SeedBadQua",qua);
@@ -169,8 +169,9 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
   StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
   
   StvDebug::Count("SeedGooQua",qua);
-  StvDebug::Count("GlobGooQua",tk->GetQua()*100);
-  StvDebug::Count("GlobGooQua::SeedGooQua",tk->GetQua()*100,qua);
+  double tqua = tk->GetQua()*100;
+  StvDebug::Count("GlobGooQua",tqua);
+  StvDebug::Count("GlobGooQua::SeedGooQua",qua,tqua);
   const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
   double P[3];
   node->GetFP().getMom(P);
