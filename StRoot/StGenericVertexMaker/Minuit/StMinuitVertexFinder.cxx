@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.46 2016/11/07 21:19:27 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.47 2017/01/03 22:17:04 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -368,8 +368,7 @@ void StMinuitVertexFinder::calculateRanks() {
     }
 
     //Give split vertices a lower rank...   	
-    if (mLowerSplitVtxRank &&
-        (mCTBSum > ((6000.0*(float)primV->numTracksUsedInFinder()/80)+2000)))
+    if (mLowerSplitVtxRank && mCTBSum > 6000.0*primV->numTracksUsedInFinder()/80. + 2000)
       primV->setRanking(rank_cross+rank_bemc+rank_avg_dip-3); 
     else
       primV->setRanking(rank_cross+rank_bemc+rank_avg_dip); 
