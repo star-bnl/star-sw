@@ -38,7 +38,7 @@ public:
     void addSimuTrigger(int trigId) {mSimuTrigIds.push_back(trigId);}
 
     const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.8 2014/08/06 11:43:22 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.9 2017/01/02 15:33:26 rfatemi Exp $ built " __DATE__ " " __TIME__; return cvs;}
     	
 protected:
     StMuDstMaker*   muDstMaker;         //!
