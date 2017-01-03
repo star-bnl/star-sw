@@ -52,7 +52,7 @@ using namespace TMVA;
 ClassImp(StKFVertexMaker);
 #ifdef StTrackMassFit_hh
 #define __V0__
-//#define __UseMakeV0__
+#define __UseMakeV0__
 #endif
 StKFVerticesCollection *StKFVertexMaker::fgcVertices = 0;
 #define PrP(A,B)                    {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
@@ -76,7 +76,7 @@ StKFVertexMaker::StKFVertexMaker(const Char_t *name) : StMaker(name),
 						     fParticles(0), fVertices(0),
 						     fPass(0), fNzBins(2500),  fNPasses(2), fSpectrum(0), fzWindow(2), 
 						     fTempLog(2), fminBrent(0), func(0),
-						     mBeamLine(kFALSE), fVertexZPlot(0), fStack(0), fc1(0) , pEvent(0), mStKFParticleInterface(0)
+						     fVertexZPlot(0), fStack(0), mBeamLine(kFALSE), fc1(0) , pEvent(0), mStKFParticleInterface(0)
 {
   Int_t npeaks = 250;
   Double_t zmin = -250;
@@ -432,14 +432,12 @@ Int_t StKFVertexMaker::Make() {
   }
   StKFVertex::ResetTotalNoVertices();
   // add Fixed Primary vertex if any
-  Bool_t FixedPrimaryVertex = kFALSE;
   if (StiToolkit::instance()->getVertexFinder() && (IAttr("VFFV") || IAttr("VFMCE"))) {
     StiToolkit::instance()->getVertexFinder()->fit(pEvent);
-    FixedPrimaryVertex = kTRUE;
     const std::vector<StiHit*> *vertexes = StiToolkit::instance()->getVertexFinder()->result();
     if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
     UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-    for (Int_t ipv = 0; ipv < NoPV; ipv++) {
+    for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
       StPrimaryVertex *Vp = pEvent->primaryVertex(ipv);
       if (Vp && ! Vp->key()) {
 	Vp->setKey(ipv+1);
@@ -476,11 +474,11 @@ Int_t StKFVertexMaker::Make() {
   ClearParentIDs();
   fgcVertices->UniqueTracks2VertexAssociation();
   
-#ifdef  __V0__ */
+#ifdef  __V0__
 #ifdef  __UseMakeV0__
   // Loop for V0
   UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-  for (Int_t ipv = 0; ipv < NoPV; ipv++) {
+  for (UInt_t ipv = 0; ipv < NoPV; ipv++) {
     StPrimaryVertex *V0 = pEvent->primaryVertex(ipv);
     if (! V0) continue;
     UInt_t NoTracks = V0->numberOfDaughters();
@@ -541,14 +539,6 @@ Int_t StKFVertexMaker::MakeParticles() {
 }
 //________________________________________________________________________________
 Bool_t StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
-  Int_t NoTracks = 0;
-  if (KVx) NoTracks = KVx->NDaughters();
-//   if (NoTracks <= 1 ||
-//       KVx->GetCovariance(0) < 0 ||
-//       KVx->GetCovariance(2) < 0 ||
-//       KVx->GetCovariance(5) < 0) {
-//     return kFALSE;
-//   }
   StThreeVectorF XVertex(&KVx->X());
   primV->setKey(KVx->Id());
   primV->setPosition(XVertex);
@@ -654,7 +644,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     }
     trackNode->addTrack(V0track);
     UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-    for (Int_t ipv = 0; ipv <= NoPV; ipv++) {
+    for (UInt_t ipv = 0; ipv <= NoPV; ipv++) {
       StPrimaryVertex *Vp = 0; 
       if (ipv > 0) {
 	Vp = pEvent->primaryVertex(ipv-1);
@@ -810,14 +800,14 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   // Extract list non asigned global tracks for 4 mass hypothesises (?)  
   StSPtrVecTrackNode& trackNodes = pEvent->trackNodes();
   UInt_t nTracks = trackNodes.size();
-  UInt_t noGlob = fParticles->GetEntries();
+  Int_t noGlob = (Int_t) fParticles->GetEntries();
   vector< vector<int> > PrimTracks(noPV);
   for (UInt_t i = 0; i < nTracks; i++) {
     StTrackNode *node = trackNodes[i]; 
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     if (! gTrack) continue;
-    StPrimaryTrack  *pTrack = static_cast<StPrimaryTrack *>(node->track(primary));
+    //    StPrimaryTrack  *pTrack = static_cast<StPrimaryTrack *>(node->track(primary));
     Int_t IdV = -1;
 //     if (pTrack) {
 //       const StVertex *Vtx = pTrack->vertex();
@@ -832,15 +822,16 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     if (! partDCA) continue;
     //    if (Debug() > 2 &&partDCA ) cout << "O" << i << "\t" << *partDCA << endl;
     static KFPTrack track;
+#ifdef  __kfpAtFirstHit__
     KFPTrack *kfpT = gTrack->kfpTrackAtFirstHit();
     if (! kfpT) continue;
     track = *kfpT;
     track.SetNDF(1);
     track.SetID(kg);
-    Int_t q   = 1;
+    //    Int_t q   = 1;
     Int_t pdg = 211;
     if (track.Charge() < 0) {
-      q = -1;
+      //      q = -1;
       pdg = -211;
     } 
 //     if (pTrack) {
@@ -851,7 +842,9 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 //       track.SetCovarianceMatrix(&particle->Covariance(0));
 //     } 
     KFParticle particle(track, pdg);
-    particle = *partDCA;
+#else
+    KFParticle particle(*partDCA);
+#endif
     particle.AddDaughterId(kg);
     if (partDCA) {
       particle.SetIdTruth(partDCA->IdTruth(), partDCA->QaTruth());
@@ -884,7 +877,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   }
   Double_t bField = pEvent->runInfo()->magneticField();
   mStKFParticleInterface->SetField(bField);
-  Int_t pdgM[2] = { 310, -3122 };
+  //  Int_t pdgM[2] = { 310, -3122 };
   Int_t pdgP[2] = { 211,   211 };
   Int_t pdgN[2] = {-211, -2212 };
   Int_t NP = particles.size();
@@ -942,7 +935,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 // 	    if (V0.NDaughters() < 2) continue;
 // 	    if (V0.GetPDG() != pdgM[iV0T]) continue;
 	    PrPP(ParticleFinder,V0);
-	    Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
+	    //	    Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
 // 	    if (prob < fgProbCut) continue;
 	    // Reset to initial track Ids
 	    //	    ResetDaughterIds((KFParticle *) &V0, particles);
@@ -1195,12 +1188,12 @@ StKFVerticesCollection *StKFVertexMaker::PrimaryVertexSeeds(Int_t *Parents) {
 }
 //________________________________________________________________________________
 void StKFVertexMaker::ReFitToVertex() {
-  Int_t NoVertices = fgcVertices->Vertices()->GetSize();
+  //  Int_t NoVertices = fgcVertices->Vertices()->GetSize();
   for (Int_t l = fgcVertices->Vertices()->GetSize() - 1; l >= 0; l--) {
     StPrimaryVertex *primV = 0;
     StKFVertex *V = (StKFVertex *) fgcVertices->Vertices()->At(l);
     if (! V) continue;
-    Bool_t ok = kTRUE;
+    //    Bool_t ok = kTRUE;
     Int_t NoTracks = V->NoTracks();
     KFVertex     &KVx = V->Vertex();
     // Store vertex
@@ -1277,7 +1270,7 @@ void StKFVertexMaker::ReFitToVertex() {
     if (NoPrTracksB <= 2) 
 #endif
       {
-      for (UInt_t i = 0; i < NoTracks; i++) {
+      for (Int_t i = 0; i < NoTracks; i++) {
 	StPrimaryTrack *t = pTracks[i];
 	if (! t) continue;
 	StTrackNode *n = t->node();
@@ -1298,7 +1291,7 @@ void StKFVertexMaker::ReFitToVertex() {
       TrackNodeMap[kgp] = nodepf;
       StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
       trNodeVec.push_back(nodepf);
-      for (UInt_t i = 0; i < NoTracks; i++) {
+      for (Int_t i = 0; i < NoTracks; i++) {
 	if (! tracks[i]) continue;
 	if (! nodes[i]) continue;
 	StPrimaryTrack *t = pTracks[i];
@@ -1331,7 +1324,7 @@ void StKFVertexMaker::ResetDaughterIds(KFParticle *particle, vector<KFParticle> 
   UInt_t NO = particles.size();
   Int_t  ID = -1;
   for (UInt_t i = 0; i < N; i++) {
-    Int_t j = OldDaughterIds[i];
+    UInt_t j = (UInt_t) OldDaughterIds[i];
     if (j < NO) ID = particles[j].DaughterIds()[0];
     else        ID = j;
     particle->AddDaughterId(ID);

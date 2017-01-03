@@ -1017,6 +1017,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     gTrack->setOuterGeometry(geometry);
   else
     gTrack->setGeometry(geometry);
+#ifdef  __kfpAtFirstHit__
   Double_t xyzp[6], CovXyzp[21];
   node->getXYZ(xyzp,CovXyzp);
   KFPTrack *KFPTrackAtHit = new KFPTrack();
@@ -1026,6 +1027,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
   KFPTrackAtHit->SetCovarianceMatrix(CovXyzp);
   if (outer) gTrack->setKFPTrackatLastHit(KFPTrackAtHit);
   else       gTrack->setKFPTrackatFirstHit(KFPTrackAtHit);
+#endif
   return;
 }
 
