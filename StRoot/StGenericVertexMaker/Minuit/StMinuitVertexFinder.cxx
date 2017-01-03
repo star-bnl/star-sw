@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.47 2017/01/03 22:17:04 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.48 2017/01/03 22:17:36 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -684,7 +684,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       primV.setSumOfTrackPt(sum_pt);
 
       //..... add vertex to the list
-      addVertex(&primV);
+      addVertex(primV);
 
       old_vtx_z = XVertex.z();
     }
