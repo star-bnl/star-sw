@@ -1713,11 +1713,7 @@ int StiKalmanTrack::refit()
   }
 
   if (fail) setFlag(-1);
-#ifdef DO_TPCCATRACKER
-  return errType;
-#else /* !DO_TPCCATRACKER */
   return fail;
-#endif /* DO_TPCCATRACKER */
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 

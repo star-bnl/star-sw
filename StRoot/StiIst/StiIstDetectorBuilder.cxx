@@ -108,8 +108,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kIstNumLadders; ++iLadder)
    {
-      std::ostringstream geoPath;
-      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
+     std::ostringstream geoPath, geoName;
+     geoName << "IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
+     geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/" << geoName.str().c_str();
 
       bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
@@ -146,7 +147,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++)
       {
          // Create new Sti shape based on the sensor geometry
-         std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
+         std::string halfLadderName(geoName.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
 
          // IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
          double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
@@ -225,7 +226,8 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    {
       std::ostringstream geoPath, ssPfx;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
-      ssPfx   << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/";
+      //      ssPfx   << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/";
+      ssPfx   << "IBAM_" << iLadder << "/";
 
       // Save first part of geoPath to reuse in new detector names
       std::string pfx(ssPfx.str());

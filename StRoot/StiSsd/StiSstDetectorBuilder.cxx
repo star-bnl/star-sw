@@ -104,8 +104,9 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
    {
-      std::ostringstream geoPath;
-      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
+     std::ostringstream geoPath, geoName;
+      geoName << "SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
+      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/" << geoName.str().c_str();
 
       bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
@@ -140,7 +141,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       // XXX:ds: Need to verify the constant for sensor spacing
       double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
-      StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
+      StiShape *stiShape = new StiPlanarShape(geoName.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
 
       StiPlacement *pPlacement= new StiPlacement(sensorMatrix);
 
@@ -149,7 +150,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       StiIsActiveFunctor* isActive = _active ? new StiSsdIsActiveFunctor :
          static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
+      stiDetector->setProperties(geoName.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiSstHitErrorCalculator::instance());
 
       add(stiRow, iLadder-1, stiDetector);
@@ -224,7 +225,8 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
    StiMaterial* sfmoRghtOutMaterial = new StiMaterial("SFMO_RGHT_OUT", 7.53069, 15.0682, 0.2273420, 25831.5);
 
    // Define a prefix for detector name for consistency with automatic TGeo to Sti conversion
-   std::string pfx("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/");
+   //   std::string pfx("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/");
+   std::string pfx("");
 
    StiDetector* stiDetector = getDetectorFactory()->getInstance();
    stiDetector->setProperties(pfx+"SFMO_CNTR_INN", new StiNeverActiveFunctor, sfmoCntrInnShape, sfmoCntrInnPlacement, getGasMat(), sfmoCntrInnMaterial);

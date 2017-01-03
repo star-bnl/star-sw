@@ -308,6 +308,11 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
   StiDetector *pDetector = getDetectorFactory()->getInstance();
   TString nameP(nodeP->GetName());
   nameP.ReplaceAll("HALL_1/CAVE_1/","");
+  nameP.ReplaceAll("TpcRefSys_1/","");
+  nameP.ReplaceAll("IDSM_1/","");
+  nameP.ReplaceAll("PXMO_1/","");
+  nameP.ReplaceAll("IBMO_1/","");
+  nameP.ReplaceAll("TPCE_1/","");
   nameP.Strip(); // GVB: Do not truncate the name: it needs to be unique
   pDetector->setName(nameP.Data());
   pDetector->setIsActive(new StiNeverActiveFunctor);

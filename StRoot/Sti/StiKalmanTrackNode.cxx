@@ -1053,7 +1053,7 @@ StiDebug::Break(nCall);
   setState(pNode);
   setDetector(tDet);
   if (mFP._cosCA <-1e-5) return -1; 
-  if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
+  if (debug()) ResetComment(::Form("%40s ",tDet->getName().c_str()));
 
   StiPlacement * place = tDet->getPlacement();
   double nNormalRadius = place->getNormalRadius();
@@ -1154,7 +1154,7 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
   setState(parentNode);
   if (debug()) {
     if (parentNode->getDetector()) 
-      ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
+      ResetComment(::Form("%40s ",parentNode->getDetector()->getName().c_str()));
     else ResetComment("Unknown Detector");
   }
   if (propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
@@ -1174,7 +1174,7 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 {
   int position = 0;
   setState(pNode);
-  if (debug()) ResetComment(::Form("%30s ",pNode->getDetector()->getName().c_str()));
+  if (debug()) ResetComment(::Form("%40s ",pNode->getDetector()->getName().c_str()));
   position = propagate(radius,kCylindrical,dir);
   if (position<0) return position;
   propagateError();
@@ -2268,7 +2268,7 @@ void   StiKalmanTrackNode::PrintpT(const Char_t *opt) const {
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
-  LOG_INFO << comment << "\t" << commentdEdx << endm;
+  LOG_INFO << comment.Data() << "\t" << commentdEdx.Data() << endm;
   ResetComment();
 }
 //________________________________________________________________________________
