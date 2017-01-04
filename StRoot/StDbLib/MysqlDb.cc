@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.71 2015/07/10 18:58:57 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.72 2017/01/04 19:10:09 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.72  2017/01/04 19:10:09  dmitry
+ * New compiler does not allow me do delete non-modifiable string via pointer. That is unfair! :)
+ *
  * Revision 1.71  2015/07/10 18:58:57  dmitry
  * fixing warning - MYSQL_RES pointer is not supposed to be deleted by client in destructor
  *
@@ -475,7 +478,6 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 	m_Mgr.init();
 
   if(aUser){
-   if(mdbuser) delete [] mdbuser;
    mdbuser  = new char[strlen(aUser)+1];   strcpy(mdbuser,aUser);
    }
   if(aPasswd){
