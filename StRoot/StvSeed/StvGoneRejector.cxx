@@ -6,7 +6,7 @@
 #include "TVector3.h"
 #include "StvGoneRejector.h"
 #include "StvSeedConst.h"
-
+#include "StvUtil/StvDebug.h"
 
 enum {kFstAng=88,kMinLen=20,kMaxLen=50,kDivLen=3};
 //enum {kFstAng=88,kMinLen=9,kMaxLen=30,kDivLen=3};
@@ -259,8 +259,10 @@ assert(Vn.Mag2()>=0.999);
 int StvGoneRejector::Reject(const float x[3]) const
 {
 //  if (Dis2(x,mPos)>mOutRad2) return 66;
-  for (int ipl=0;ipl<kNPonts;ipl++) {
+  for (int ipl=0;ipl<kNPonts;ipl++) 
+  {
     const float *p = mPlane[ipl];
+    if (Dot(p,x)-p[3]>mErr) StvDebug::Count("KNNRej",10+ipl);
     if (Dot(p,x)-p[3]>mErr) return 77;
   }
   return 0;

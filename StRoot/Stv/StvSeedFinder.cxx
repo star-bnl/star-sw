@@ -14,8 +14,8 @@
 #include "Stv/StvConst.h"
 
 //Constants for THelixFitter (Approx)
-static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
-                  , kBAD_XI2    = 25		// max Xi2 (with errs)
+static const double kBAD_XI2cm2 = 0.9*0.9	// max Xi2 in cm**2 without errs
+                  , kBAD_XI2    = 50		// max Xi2 (with errs)
                   , kBAD_RHO=0.1		// max curvature
                   , kMIN_Rxy=50;		// minimal radius for seed hits
 
@@ -158,16 +158,20 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
     auto *hit = fSeedHits[ih];
     idu.Add(hit->idTru());
   }
-  StvDebug::Count("SeedAllQua",idu.GetQua()*100);
+  double qua = idu.GetQua()*100;
+  if (!idu.GetIdTru()) qua=0;
+  StvDebug::Count("SeedAllQua",qua);
   if (!tk) { //
   StvDebug::Count("SeedBadXi2:Xi2E",fXi2[1],fXi2[0]);
   StvDebug::Count("SeedBadQua",idu.GetQua()*100);
 
   } else {
   StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
-  StvDebug::Count("SeedGooQua",idu.GetQua()*100);
-  StvDebug::Count("GlobGooQua",tk->GetQua()*100);
-  StvDebug::Count("GlobGooQua::SeedGooQua",tk->GetQua()*100,idu.GetQua()*100);
+  
+  StvDebug::Count("SeedGooQua",qua);
+  double tqua = tk->GetQua()*100;
+  StvDebug::Count("GlobGooQua",tqua);
+  StvDebug::Count("GlobGooQua::SeedGooQua",qua,tqua);
   const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
   double P[3];
   node->GetFP().getMom(P);
