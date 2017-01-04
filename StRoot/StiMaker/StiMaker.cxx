@@ -181,7 +181,8 @@ StiMaker::StiMaker(const Char_t *name) :
   SetAttr("useVertexFinder"     ,kTRUE);
   SetAttr("Alignment"           ,kFALSE);
   SetAttr("Cosmics"             ,kFALSE);
-  if (strstr(gSystem->Getenv("STAR"),".DEV"))
+  if (  strstr(gSystem->Getenv("STAR"),".DEV") &&
+      ! strstr(gSystem->Getenv("STAR"),".DEV2") )
      SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
 }
 
