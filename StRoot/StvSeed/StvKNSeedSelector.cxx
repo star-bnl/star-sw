@@ -148,6 +148,7 @@ void StvKNSeedSelector::Insert( int iA,int iB,float dis)
 StvKNSeedSelector::StvKNSeedSelector()
 { 
   mStartHit = 0;
+  mAux.reserve(100);
 }
 //_____________________________________________________________________________
 /// Reset first hit position
@@ -169,6 +170,11 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
   mMinIdx = -1;
   mStartRad = sqrt(Sq(mStartPos[0])+Sq(mStartPos[1]));
   mErr = SEED_ERR(mStartRad)*kErrFact;
+  if (mStartRad > 0.5*fabs(mStartPos[2])) {
+    mIx=0;mIy=1;mIz=2;
+  } else {
+    mIx=2;mIy=1;mIz=0;
+  }
   Zer(mAveDir);  
 }
 //_____________________________________________________________________________
@@ -188,10 +194,10 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit,const void *voidDe
   for (int i=0;i<3;i++) {myDir[i] = pos[i]-mStartPos[i];nor+= myDir[i]*myDir[i];}
   nor = sqrt(nor);
   for (int i=0;i<3;i++) {myDir[i]/=nor;}
-  aux.mPhi = atan2(myDir[1],myDir[0]);
-  aux.mCosThe = sqrt((1-myDir[2])*(1+myDir[2]));
+  aux.mPhi = atan2(myDir[mIy],myDir[mIx]);
+  aux.mCosThe = sqrt((1-myDir[mIz])*(1+myDir[mIz]));
   if (aux.mCosThe<=1e-10) { mAux.resize(last); return;}
-  aux.mThe = asin(myDir[2]);
+  aux.mThe = asin(myDir[mIz]);
   aux.mLen = nor;aux.mSel = 0;
 #ifdef KNNMAP1
   float iThe = floor(aux.mThe/kStpTheDiv)*kStpTheDiv;
@@ -423,7 +429,6 @@ void StvKNSeedSelector::Update(int ia,int ib)
 double StvKNSeedSelector::Width() 
 {
 static int nCall = 0; nCall++;
-  if (fabs(mAveDir[2])>=1.)	return 1e10;
   if (mMapLen.size()<3) 	return 1e11;
 
   TVector3 myX(mAveDir),myZ(myX.Orthogonal()),myY(myZ.Cross(myX));		
