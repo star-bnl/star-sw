@@ -51,12 +51,11 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
 
   // printf("patt size=%d, jz0=%d\n",hit.size(),jz0);
 
-  int nPatt[2];
+  int nPatt[2]{};
   int i;
   bool vetoL=false, vetoR=false, matchL=false, matchR=false;
 
   // Scan Left end for missing hits
-  memset(nPatt,0,sizeof(nPatt));
   for(i=0;i<(int)hit.size();i++) {
     // printf("i=%d hit=%d\n",i,hit[i]);
     nPatt[hit[i]]++;
