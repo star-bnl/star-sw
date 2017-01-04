@@ -14,8 +14,8 @@
 #include "Stv/StvConst.h"
 
 //Constants for THelixFitter (Approx)
-static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
-                  , kBAD_XI2    = 25		// max Xi2 (with errs)
+static const double kBAD_XI2cm2 = 0.9*0.9	// max Xi2 in cm**2 without errs
+                  , kBAD_XI2    = 50		// max Xi2 (with errs)
                   , kBAD_RHO=0.1		// max curvature
                   , kMIN_Rxy=50;		// minimal radius for seed hits
 
