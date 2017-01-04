@@ -13,21 +13,22 @@ class TrackSrim : public Track {
   // Destructor
   ~TrackSrim() {}
 
+  // Set/get the W value [eV].
   void SetWorkFunction(const double w) { m_work = w; }
   double GetWorkFunction() const { return m_work; }
-
+  // Set/get the Fano factor.
   void SetFanoFactor(const double f) { m_fano = f; }
   double GetFanoFactor() const { return m_fano; }
-
+  // Set/get the density [g/cm3] of the target medium.
   void SetDensity(const double density) { m_density = density; }
   double GetDensity() const { return m_density; }
-
+  // Set/get the charge of the projectile.
   void SetCharge(const double q) {
     m_q = q;
     m_chargeset = true;
   }
   double GetCharge() const { return m_q; }
-
+  // Set/get the mass [eV/c2] of the projectile.
   void SetMass(const double m) { m_mass = m; }
   double GetMass() const { return m_mass; }
 
@@ -39,7 +40,7 @@ class TrackSrim : public Track {
     a = m_a;
     z = m_z;
   }
-
+  // Set/get the initial energy [eV] of the projectile.
   void SetInitialEnergy(const double e) { m_initialenergy = e; }
   double GetInitialEnergy() const { return m_initialenergy; }
 
@@ -69,15 +70,8 @@ class TrackSrim : public Track {
   void PlotEnergyLoss();
   void PlotRange();
   void PlotStraggling();
-  double DedxEM(const double e) const;
-  double DedxHD(const double e) const;
-  void PreciseLoss(const double step, const double estart, double& deem,
-                   double& dehd) const;
-  bool EstimateRange(const double ekin, const double step, double& stpmax);
-  bool SmallestStep(double ekin, double de, double step, double& stpmin);
 
   bool Generate();
-  double RndmEnergyLoss(const double ekin, const double de, const double step);
 
   bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                   int& n, double& e, double& extra);
@@ -151,7 +145,16 @@ class TrackSrim : public Track {
         kinetic;     // Ion energy when cluster was created
     int electrons;   // Number of electrons in this cluster
   };
-  std::vector<cluster> clusters;
+  std::vector<cluster> m_clusters;
+
+  double DedxEM(const double e) const;
+  double DedxHD(const double e) const;
+  bool PreciseLoss(const double step, const double estart, double& deem,
+                   double& dehd) const;
+  bool EstimateRange(const double ekin, const double step, double& stpmax);
+  bool SmallestStep(double ekin, double de, double step, double& stpmin);
+
+  double RndmEnergyLoss(const double ekin, const double de, const double step);
 };
 }
 
