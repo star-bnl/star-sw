@@ -129,22 +129,22 @@ struct Var_t {
   Double_t z;       // log(dE/dx) - log(dE/dx)_predicted_for pion
   Double_t x(Int_t i = 0) const {return *(&refMult+i);}
 };
-enum EBinning {NRefMult = 10, NpT = 100, Neta = 24, Nphi = 2*12*6, Nz = 200, NL = 75};
+enum EBinning {NRefMult = 10, NpT = 101, Neta = 24, Nphi = 720, Nz = 200, NL = 75};
 const static Double_t refmultBins[NRefMult+1] = {0,  180,  290,  390,  475,  555,  630,  705,  780,   850,  3000};
 //const static Double_t refmultBins[NRefMult+1] = { 0, 51, 83 , 111, 137, 161, 185, 207, 230, 254, 495}; //
 
 const static Float_t cpTBins[NpT+1] = {
-  -50.000,-2.183,-1.631,-1.389,-1.242,-1.136,-1.046,-0.974,-0.919,-0.865,
-  -0.811,-0.774,-0.742,-0.710,-0.677,-0.645,-0.613,-0.588,-0.569,-0.550,
-  -0.531,-0.512,-0.493,-0.473,-0.454,-0.435,-0.416,-0.398,-0.385,-0.373,
-  -0.361,-0.348,-0.336,-0.323,-0.311,-0.298,-0.286,-0.273,-0.261,-0.248,
-  -0.236,-0.224,-0.211,-0.197,-0.166,-0.136,-0.105,-0.075,-0.045,-0.014,
-  0.016, 0.047, 0.079, 0.110, 0.141, 0.172, 0.201, 0.214, 0.226, 0.239,
-  0.251, 0.263, 0.276, 0.288, 0.301, 0.313, 0.326, 0.338, 0.351, 0.363,
-  0.375, 0.388, 0.401, 0.419, 0.438, 0.457, 0.476, 0.494, 0.513, 0.532,
-  0.550, 0.569, 0.588, 0.611, 0.642, 0.673, 0.704, 0.736, 0.767, 0.798,
-  0.848, 0.899, 0.951, 1.003, 1.087, 1.171, 1.288, 1.438, 1.685, 2.238,
-  50.000};
+ -50.00,-1.79,-1.52,-1.35,-1.24,-1.15,-1.08,-1.01,-0.96,-0.92,
+  -0.88,-0.84,-0.80,-0.77,-0.74,-0.72,-0.69,-0.67,-0.64,-0.61,
+  -0.59,-0.58,-0.56,-0.54,-0.53,-0.51,-0.49,-0.47,-0.46,-0.44,
+  -0.42,-0.41,-0.39,-0.38,-0.36,-0.35,-0.34,-0.32,-0.31,-0.30,
+  -0.28,-0.27,-0.25,-0.24,-0.23,-0.21,-0.20,-0.15,-0.10,-0.05,
+  0.00, 0.05, 0.11, 0.16, 0.20, 0.22, 0.23, 0.24, 0.26, 0.27,
+  0.29, 0.30, 0.31, 0.33, 0.34, 0.36, 0.37, 0.38, 0.40, 0.41,
+  0.43, 0.45, 0.46, 0.48, 0.50, 0.51, 0.53, 0.55, 0.56, 0.58,
+  0.60, 0.62, 0.64, 0.67, 0.69, 0.72, 0.75, 0.77, 0.80, 0.83,
+  0.87, 0.92, 0.96, 1.00, 1.06, 1.13, 1.19, 1.29, 1.40, 1.57,
+  1.86,50.00};
 
 enum EVar {
   //  kCharge,
@@ -279,7 +279,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   Float_t *zBins   = new Float_t[Nz+1];
   Float_t *LBins   = new Float_t[NL+1];
   for (Int_t i = 0; i <= Neta; i++) etaBins[i] = -etaMax + 2*etaMax/Neta*i;
-  for (Int_t i = 0; i <= Nphi; i++) phiBins[i] = -360 + 720./Nphi*i;
+  for (Int_t i = 0; i <= Nphi; i++) phiBins[i] = -360.5 + (720./Nphi)*i;
   for (Int_t i = 0; i <= Nz;   i++) zBins[i] = -5 + 10./Nz*i;
   for (Int_t i = 0; i <= NL;   i++) LBins[i] = 2*i;
   TH2F *TPs[3]        = {TPoints70, TPointsF, TPointsN};
@@ -448,8 +448,8 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       Double_t phi = TMath::RadToDeg()*pTrack->phi();
       if (phi < 0) phi += 360;
       if (Var.eta < 0) phi -= 360;
-      const StThreeVectorF &firstPoint = gTrack->firstPoint();
-      Double_t phiD = TMath::RadToDeg()*firstPoint.phi();
+      const StThreeVectorF &lastPoint = gTrack->lastPoint();
+      Double_t phiD = TMath::RadToDeg()*lastPoint.phi();
       if (phiD < 0) phiD += 360;
       if (Var.eta < 0) phiD -= 360;
       pTPhiPiDL->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());

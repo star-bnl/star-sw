@@ -51,8 +51,8 @@ foreach my $key (sort keys %$def) {
   push @tags, $t;
 }
 my $tags = join '|', @tags;
-print "found $#tags : @tags   ==> $tags\n";
-if ($#tags < 0) {die "No tags found";}
+print "found tags = $#tags : @tags   ==> $tags\n";
+#if ($#tags < 0) {die "No tags found";}
 my $glob = $ARG{files}; print "glob = $glob\n"; 
 my $FilesPerJob = $ARG{FilesPerJob}; print "FilesPerJob = $FilesPerJob\n";
 my $Out = $ARG{Out}; print "Out = $Out\n";
