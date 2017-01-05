@@ -148,6 +148,7 @@ void StvKNSeedSelector::Insert( int iA,int iB,float dis)
 StvKNSeedSelector::StvKNSeedSelector()
 { 
   mStartHit = 0;
+  mAux.reserve(100);
 }
 //_____________________________________________________________________________
 /// Reset first hit position
@@ -169,6 +170,11 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
   mMinIdx = -1;
   mStartRad = sqrt(Sq(mStartPos[0])+Sq(mStartPos[1]));
   mErr = SEED_ERR(mStartRad)*kErrFact;
+  if (mStartRad > 0.5*fabs(mStartPos[2])) {
+    mIx=0;mIy=1;mIz=2;
+  } else {
+    mIx=2;mIy=1;mIz=0;
+  }
   Zer(mAveDir);  
 }
 //_____________________________________________________________________________
@@ -178,6 +184,7 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
 
 void  StvKNSeedSelector::Add(const float pos[3],void *voidHit,const void *voidDet)
 {
+
   int last = mAux.size();
   mAux.resize(last+1);
   auto &aux = mAux.back(); 
@@ -187,10 +194,10 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit,const void *voidDe
   for (int i=0;i<3;i++) {myDir[i] = pos[i]-mStartPos[i];nor+= myDir[i]*myDir[i];}
   nor = sqrt(nor);
   for (int i=0;i<3;i++) {myDir[i]/=nor;}
-  aux.mPhi = atan2(myDir[1],myDir[0]);
-  aux.mCosThe = sqrt((1-myDir[2])*(1+myDir[2]));
-  if (aux.mCosThe<=1e-6) { mAux.resize(last); return;}
-  aux.mThe = asin(myDir[2]);
+  aux.mPhi = atan2(myDir[mIy],myDir[mIx]);
+  aux.mCosThe = sqrt((1-myDir[mIz])*(1+myDir[mIz]));
+  if (aux.mCosThe<=1e-10) { mAux.resize(last); return;}
+  aux.mThe = asin(myDir[mIz]);
   aux.mLen = nor;aux.mSel = 0;
 #ifdef KNNMAP1
   float iThe = floor(aux.mThe/kStpTheDiv)*kStpTheDiv;
@@ -343,31 +350,8 @@ static int nCall=0; nCall++;
   while (1) {
     mSel.clear();
     mMapLen.clear();
-//    int n = mAux.size();
-// #ifdef KNNMAP0
-// const char *tit = "RelinkTimeMap0";
-// #endif
-// #ifdef KNNMAP1
-// const char *tit = "RelinkTimeMap1";
-// #endif
-// 
-// #ifdef KNNMAP2
-// const char *tit = "RelinkTimeMap2";
-// #endif
-// 
-// 
-// SW.Start();
-// for (int jk=0;jk<100;jk++) {
-// for (int i=0;i<n;i++) {
-//     mAux[i].mDist[0]=1e11; mAux[i].mDist[1]=1e11; mAux[i].mDist[2]=1e11; mAux[i].mDist[3]=1e11;
-//     mAux[i].mNbor[0]=  -1; mAux[i].mNbor[1]=  -1; mAux[i].mNbor[2]=  -1; mAux[i].mNbor[3]=  -1;
-// }
-// 
-     Relink();
-// }
-// SW.Stop();
-// 
-// StvDebug::Count(tit,mAux.size(),SW.CpuTime());
+ 
+    Relink();
     if (mMinIdx<0) return 0;
 
   ///		define the best direction
@@ -378,8 +362,16 @@ static int nCall=0; nCall++;
     mNHits=0; 
     Pass(mMinIdx,mKNNDist*kDisRatio);
     double wid = Width();
+    if (wid>90) return 0;
+if ((mKNNDist*wid > kMinDis)) {
+      StvDebug::Count("BadDistWid",sqrt(mKNNDist*wid));	
+      StvDebug::Count("BadDist_vs_Wid",sqrt(wid),sqrt(mKNNDist));	
+} 
     if (mKNNDist*wid > kMinDis) return 0;	
- 	 
+{
+      StvDebug::Count("GooDistWid",sqrt(mKNNDist*wid));	
+      StvDebug::Count("GooDist_vs_Wid",sqrt(wid),sqrt(mKNNDist));	
+} 	 
     const void *hpPre = 0;
     mSel.push_back(mStartHit); 	 
     std::map<float,int>::iterator myIt;
@@ -427,8 +419,8 @@ void StvKNSeedSelector::Update(int ia,int ib)
   float *bDir = mAux[ib].mDir;
 
   double dis = Ang(aDir,bDir);
-//if (dis>kMaxDis) return;
-  if (dis>mKNNDist) return;
+  if (dis>kMaxDis) return;
+//  if (dis>mKNNDist) return;
   Insert(ia,ib,dis);
   Insert(ib,ia,dis);
 }  
@@ -437,8 +429,7 @@ void StvKNSeedSelector::Update(int ia,int ib)
 double StvKNSeedSelector::Width() 
 {
 static int nCall = 0; nCall++;
-  if (fabs(mAveDir[2])>=0.99)	return 101;
-  if (mMapLen.size()<3) 	return 102;
+  if (mMapLen.size()<3) 	return 1e11;
 
   TVector3 myX(mAveDir),myZ(myX.Orthogonal()),myY(myZ.Cross(myX));		
   double G[3]={0},uv[2]={0};

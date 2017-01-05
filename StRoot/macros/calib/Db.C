@@ -7,28 +7,9 @@ void Load() {
   if (gClassTable->GetID("StDbManager") < 0) {
     gROOT->LoadMacro("bfc.C");
     //    bfc(-1,"tpcDb,detDb,CorrX,nodefault");
-    bfc(-2,"tpcDb,detDb,mysql,nodefault,CorrX");
-    //   bfc(-2,"tpcDb,detDb,mysql,nodefault,Corr4,DbV20140905");
+    bfc(-1,"tpcDb,detDb,mysql,nodefault,CorrX"); // ,dbV20151120");
+    dbMk = (St_db_Maker *) chain->Maker("db");
   }    
-//   gROOT->ProcessLine("typedef trgTimeOffset_st              trgTimeOffsetB_st;");
-//   gROOT->ProcessLine("typedef St_trgTimeOffset              St_trgTimeOffsetB_;");
-  // dbMk = new St_db_Maker("db","MySQL:StarDb");
-  dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
-  //  dbMk->SetFlavor("sim","WaferOnLadder");
-  //  dbMk->SetDebug(2);
-  //  dbMk->SetFlavor("laserDV","tpcDriftVelocity");
-  //  dbMk->SetFlavor("ofl+laserDV","tpcDriftVelocity");
-  //  dbMk->SetFlavor("NewlaserDV","tpcDriftVelocity");
-  //  dbMk->SetFlavor("ofl+sim");
-  //   dbMk->SetFlavor("simu","svtWafersPosition"); 
-  //   dbMk->SetFlavor("sim","tpcGlobalPosition");
-  //   dbMk->SetFlavor("sim","tpcSectorPosition");
-  //   dbMk->SetFlavor("sim","tpcISTimeOffsets");
-  //   dbMk->SetFlavor("sim","tpcOSTimeOffsets");
-  //  dbMk->SetFlavor("sim","starClockOnl");
-  //  dbMk->SetFlavor("ofl+laserDV","tpcDriftVelocity");
-  //  dbMk->SetMaxEntryTime(20060620,0);
-  //  dbMk->SetMaxEntryTime(20080410,0);
 }
 //________________________________________________________________________________
 //void Db(const Char_t *tabNam  = "Calibrations/tpc/noiseElim", 

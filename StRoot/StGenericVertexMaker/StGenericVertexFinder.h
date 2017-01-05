@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.44 2016/12/12 16:42:30 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.45 2017/01/03 22:17:36 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -38,7 +38,7 @@ public:
   virtual int            fit(StEvent*)=0;                     // fit the vertex
 
   StPrimaryVertex*       getVertex(int idx) const;
-  void                   addVertex(StPrimaryVertex*);
+  void                   addVertex(const StPrimaryVertex& vtx);
   int                    size() const;
           void           UseVertexConstraint(const vertexSeed_st& beamline);
           void           NoVertexConstraint();

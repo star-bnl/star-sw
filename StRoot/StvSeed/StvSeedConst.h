@@ -5,14 +5,14 @@
 #ifndef StvSeedConst_HH
 #define StvSeedConst_HH
 
-#define KNNMAP0 1
-//#define KNNMAP1 1
+//#define KNNMAP0 1
+#define KNNMAP1 1
 //#define KNNMAP2 1
 
 //#define KNNGONE 1
 
 
-enum ESeeds {kMinHits=5,kMaxHits = 10,kZRange=230};
+enum ESeeds {kMinHits=5,kMaxHits = 10,kZRange=200};
 #define kMinErr  (1e-2)
 #define kMaxErr  (3e-1)
 #define kRelErr  (1e-3)

@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.29 2016/12/12 17:18:14 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.31 2017/01/03 22:17:18 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -15,6 +15,11 @@
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 
 #include "StPhysicalHelixD.hh"
+
+class TH1F;
+class TH2F;
+class TH1D;
+
 class StiKalmanTrack;
 class TrackData;
 class VertexData;
@@ -92,7 +97,6 @@ class StPPVertexFinder: public StGenericVertexFinder {
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
   StBTofGeometry *btofGeom;
-  StEEmcDb       *eeDb;
   EEmcGeomSimple *geomE;
   
   void dumpKalmanNodes(const StiKalmanTrack *track);
@@ -101,9 +105,9 @@ class StPPVertexFinder: public StGenericVertexFinder {
   virtual void  UseVertexConstraint() {}
   
 public:
-  void UsePCT(bool x=true)			{setDropPostCrossingTrack(!x);}
+  virtual void UsePCT(bool x=true)			{setDropPostCrossingTrack(!x);}
   void setDropPostCrossingTrack(bool x=true)	{mDropPostCrossingTrack=x;}
-  void Finish();
+  virtual void Finish();
 
   TH1F *hA[mxH];
   TH2F *hACorr;
@@ -114,7 +118,7 @@ public:
 
   // mandatory implementations
   virtual  ~StPPVertexFinder();
-  int       fit(StEvent*);        
+  virtual int       fit(StEvent*);        
   void      printInfo(ostream& = cout) const;
  
   // over-written method

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.76 2016/12/12 18:44:21 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.79 2017/01/03 22:17:36 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -118,7 +118,7 @@ StPPVertexFinder::Init() {
   
 
   // access EEMC-DB
-  eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"); 
+  StEEmcDb *eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb");
   assert(eeDb); // eemcDB must be in the chain, fix it,JB
   LOG_INFO << "eeDb done" <<endm;
   geomE= new EEmcGeomSimple();
@@ -376,9 +376,7 @@ StPPVertexFinder::fit(StEvent* event) {
   eveID=event->id();
   LOG_INFO << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
 
-  TString tt="Vertex likelyhood, eveID=";
-  tt+=eveID;
-  hL->SetTitle(tt);
+  hL->SetTitle( "Vertex likelyhood, eveID=" + TString(eveID) );
 
   hA[0]->Fill(2);
 
@@ -912,8 +910,8 @@ StPPVertexFinder::exportVertices(){
   {
     StThreeVectorD r(V.r.x(),V.r.y(),V.r.z());
 
-    Float_t cov[6];
-    memset(cov,0,sizeof(cov)); 
+    float cov[6]{};
+
     cov[0]=V.er.x()*V.er.x();
     cov[2]=V.er.y()*V.er.y();
     cov[5]=V.er.z()*V.er.z();  // [5] is correct,JB
@@ -921,10 +919,7 @@ StPPVertexFinder::exportVertices(){
     StPrimaryVertex primV;
     primV.setPosition(r);
     primV.setCovariantMatrix(cov); 
-
-    if(mUseCtb)  primV.setVertexFinderId(ppvVertexFinder);
-    else         primV.setVertexFinderId(ppvNoCtbVertexFinder); 
-
+    primV.setVertexFinderId(mUseCtb ? ppvVertexFinder : ppvNoCtbVertexFinder);
     primV.setNumTracksUsedInFinder(V.nUsedTrack);
     primV.setNumMatchesWithBTOF(V.nBtof);
     primV.setNumMatchesWithCTB(V.nCtb);
@@ -936,7 +931,7 @@ StPPVertexFinder::exportVertices(){
     primV.setFlag(1); //??? is it a right value?
   
     //..... add vertex to the list
-    addVertex(&primV);
+    addVertex(primV);
   }
   LOG_DEBUG << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
 }
@@ -1216,7 +1211,6 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
   
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
 
-  float path=-1;
   //alternative helix extrapolation:
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
   ou.rotateZ(ouNode->getAlpha());
@@ -1227,7 +1221,8 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
 		       ouNode->getHelicity());
   pairD  d2;
   d2 = hlx.pathLength(Rxy);
-  path=d2.second;
+  float path = d2.second;
+
   if(d2.first>=0 || d2.second<=0) {
     LOG_DEBUG <<Form("WARN MatchTrk , unexpected solution for track crossing BEMC Cyl\n")<<
       Form(" d2.firts=%f, second=%f, try first\n", d2.first, d2.second)<<endm;
@@ -1393,23 +1388,27 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
     StiKalmanTrackNode* ktnp=& (*it);
     if(!ktnp->isValid() || ktnp->getChi2()>1000 ) continue;
     StiHit* stihit=ktnp->getHit();
-    if(stihit){
-      StHit* sthit=(StHit*)stihit->stHit();
-      if(sthit){
-	if(sthit->detector()==kTpcId){
-	  StTpcHit* hit=(StTpcHit*) sthit;
-	  float r=hit->position().perp();
-	  if (r < RxyMin) continue;
-	  if (r > RxyMax) continue;
-	  float z=hit->position().z();
-	  if (fabs(z) > zMax) continue;
-	  if ((z < -zMembraneDepth && hit->sector() <= 12) ||
-	      (z >  zMembraneDepth && hit->sector() >  12)) {
-	    nWrongZHit++;
-	    if(nWrongZHit>=nWrongZHitCut) {return true;}
-	  }	
-	}
-      }
+
+    if (!stihit) continue;
+
+    StHit* sthit=(StHit*)stihit->stHit();
+
+    if (!sthit) continue;
+    if (sthit->detector() != kTpcId) continue;
+
+    StTpcHit* hit=(StTpcHit*) sthit;
+    float r=hit->position().perp();
+    if (r < RxyMin) continue;
+    if (r > RxyMax) continue;
+
+    float z=hit->position().z();
+    if (fabs(z) > zMax) continue;
+
+    if ((z < -zMembraneDepth && hit->sector() <= 12) ||
+        (z >  zMembraneDepth && hit->sector() >  12))
+    {
+      nWrongZHit++;
+      if (nWrongZHit >= nWrongZHitCut) {return true;}
     }
   }
   return false;

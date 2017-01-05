@@ -40,7 +40,7 @@ StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
 #ifndef KNNGONE
   fMultiHits	= new StMultiKeyMap(3);
 #else
-  fMultiHits	= new StMultiKeyMap(5);
+  fMultiHits	= new StMultiKeyMap(3);
 #endif
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
@@ -115,13 +115,14 @@ static int nCall=0; nCall++;
       StvHit *nexHit = (StvHit*)node->GetObj();
 
       if (nexHit->isUsed()) 		continue;
-      if (nexHit->detector()==fstHp)		continue;
+      if (nexHit->detector()==fstHp)	continue;
       const float *f = nexHit->x();
       float myRxy2 = f[0]*f[0]+f[1]*f[1];
-      if (myRxy2 >=1.2*fstRxy2)  	continue;
+//??      if (myRxy2 >=1.2*fstRxy2)  	continue;
 
       nTotHits++;
       int ans = mRej.Reject(nexHit->x());
+      if (ans) StvDebug::Count("KNNRej",10+ans);
       if (ans) continue;
       nAccHits++;
 
@@ -131,10 +132,13 @@ static int nCall=0; nCall++;
     if (nAccHits<fMinHits) 	continue;
 
     int nHits = mSel.Select();
+StvDebug::Count("KNNHits",nHits);
+    if (nHits < fMinHits) 	StvDebug::Count("KNNRej",1);
     if (nHits < fMinHits) 	continue;
     fSeedHits.clear();
     fSeedHits+=mSel.Get();
     const THelixTrack *hel =  Approx();
+if (!hel) StvDebug::Count("KNNRej",2);
     if (hel)  return hel;	//Good boy
   }// end 1st hit loop
   return 0;

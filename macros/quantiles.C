@@ -1,13 +1,15 @@
-void quantiles(TH1 *h, Int_t nq = 100, Int_t opt=0) {
+void quantiles(TH1 *h, Int_t nq = 101, Int_t opt=0) {
   if (! h) return;
   if (opt == 0) {
     TH1F *hh = new TH1F(*(TH1F *) h);
     hh->SetName(Form("Qua_%s",h->GetName()));
     h = hh;
+#if 0
     Int_t nx = h->GetNbinsX();
     for (Int_t i = 0; i <= nx; i++) {
       h->SetBinContent(i,h->GetBinContent(i)*h->GetBinCenter(i));
     }
+#endif
   }
   // demo for quantiles
   Double_t *xq = new Double_t[nq+2];  // position where to compute the quantiles in [0,1]

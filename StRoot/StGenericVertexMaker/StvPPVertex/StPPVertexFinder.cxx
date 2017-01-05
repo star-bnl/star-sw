@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.10 2016/12/12 18:44:21 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.11 2017/01/03 22:17:37 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -810,7 +810,7 @@ void StPPVertexFinder::exportVertices(){
     primV.setFlag(1); //??? is it a right value?
   
     //..... add vertex to the list
-    addVertex(&primV);
+    addVertex(primV);
   }
   LOG_DEBUG << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
 }
@@ -1177,6 +1177,11 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.11  2017/01/03 22:17:37  smirnovd
+ * [Stylistic] Changed public addVertex() to accept references
+ *
+ * Avoid unnecessary gymnastics with pointers
+ *
  * Revision 1.10  2016/12/12 18:44:21  smirnovd
  * Removed unused local variable
  *

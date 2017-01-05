@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.38 2016/12/12 17:18:14 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.39 2017/01/03 22:17:36 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -76,9 +76,9 @@ StGenericVertexFinder::FillStEvent(StEvent* event){
 
 }
 //______________________________________________________________________________
-void StGenericVertexFinder::addVertex(StPrimaryVertex* vtx)
+void StGenericVertexFinder::addVertex(const StPrimaryVertex& vtx)
 {
-  mVertexList.push_back(*vtx);
+  mVertexList.push_back(vtx);
 }
 //______________________________________________________________________________
 void StGenericVertexFinder::UsePCT(bool usePCT)

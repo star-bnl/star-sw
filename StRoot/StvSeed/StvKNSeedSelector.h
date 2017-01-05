@@ -71,6 +71,9 @@ float mMaxAccu;	//Max accumulated angle between hit & bestHit in Pass()
 float mMaxNear;	//Max angle between hits in Pass()
 float mErr;	//Estimated space error
 int   mNHits;	//number of selected hits
+int   mIx;	//index of X in array,=0 in med eta =2 in forward eta
+int   mIy;	//index of Y in array,=1 always 
+int   mIz;	//index of Z in array,=2 in med eta =0 in forward eta
 VoidVec mSel;
 std::vector<StvKNAux> mAux;
 std::map<float,int> mMapLen;

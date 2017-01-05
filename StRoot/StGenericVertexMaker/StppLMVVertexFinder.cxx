@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.28 2016/08/18 17:46:14 smirnovd Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.29 2017/01/03 22:17:36 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -87,7 +87,7 @@ StppLMVVertexFinder::addFakeVerex(float z){
   primV.setFlag(1); 
   primV.setRanking(444);
   //..... add vertex to the list
-  addVertex(&primV);
+  addVertex(primV);
 }
 
 //==========================================================
@@ -549,7 +549,7 @@ StppLMVVertexFinder::ppLMV5() {
   primV.setRanking(555);
 
   //..... add vertex to the list
-  addVertex(&primV);
+  addVertex(primV);
 
 #if 0
   /*
@@ -606,6 +606,11 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.29  2017/01/03 22:17:36  smirnovd
+ * [Stylistic] Changed public addVertex() to accept references
+ *
+ * Avoid unnecessary gymnastics with pointers
+ *
  * Revision 1.28  2016/08/18 17:46:14  smirnovd
  * Squashed commit of the following refactoring changes:
  *
