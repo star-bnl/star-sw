@@ -35,7 +35,7 @@ endif
 #CC       := /usr/local/bin/gcc
 #CXX      := /usr/local/bin/g++
 CC       := gcc
-CXX      := g++
+CXX      := g++ -std=c++11 -DNoXmlTreeReader
 
 ifeq (SunOS,$(SYSTYPE))
 
