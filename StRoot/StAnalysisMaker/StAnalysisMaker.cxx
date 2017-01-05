@@ -260,8 +260,8 @@ void StAnalysisMaker::PrintVertex(Int_t ivx) {
   cout << "Event: Run "<< pEvent->runId() << " Event No: " << pEvent->id() << endl;
   UInt_t NpVX = pEvent->numberOfPrimaryVertices();
   if (NpVX) {
-    for (Int_t i = 0; i < NpVX; i++) {
-      if (ivx >= 0 && i != ivx) continue;
+    for (UInt_t i = 0; i < NpVX; i++) {
+      if (ivx >= 0 && i != (UInt_t) ivx) continue;
       const StPrimaryVertex *vx = pEvent->primaryVertex(i);
       vx->Print(Form("Vertex: %3i ",i));
       UInt_t nDaughters = vx->numberOfDaughters();
