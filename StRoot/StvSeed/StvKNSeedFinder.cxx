@@ -98,13 +98,11 @@ static int nCall=0; nCall++;
     if (fstHit->timesUsed()) 		continue;
     fSeedHits.clear();
     const float *fstPos = fstHit->x();
-    float fstRxy2 = fstPos[0]*fstPos[0]+fstPos[1]*fstPos[1];
-    float fstRxy = sqrt(fstRxy2);
     const StHitPlane *fstHp = fstHit->detector();
     mRej.Reset(fstPos);
     mRej.Prepare();
     fMultiIter->Set(fMultiHits->GetTop(),mRej.mLim[0],mRej.mLim[1]);
-    mSel.Reset(fstHit->x(),fstHit);
+    mSel.Reset(fstHit->x(),&(mRej.GetDir()),fstHit);
     nTotHits=0;nAccHits=0;
 
 //		Add all near hits 
@@ -115,10 +113,6 @@ static int nCall=0; nCall++;
 
       if (nexHit->isUsed()) 		continue;
       if (nexHit->detector()==fstHp)	continue;
-      const float *f = nexHit->x();
-      float myRxy2 = f[0]*f[0]+f[1]*f[1];
-//??      if (myRxy2 >=1.2*fstRxy2)  	continue;
-
       nTotHits++;
       int ans = mRej.Reject(nexHit->x());
       if (ans) StvDebug::Count("KNNRej",10+ans);
