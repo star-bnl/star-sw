@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.58 2014/07/08 09:50:43 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.59 2017/01/06 22:30:45 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.59  2017/01/06 22:30:45  genevb
+ * Introduce FullGridLeak distortion correction
+ *
  * Revision 1.58  2014/07/08 09:50:43  fisyak
  * Fix old correction with 2D and 3D mag.field
  *
@@ -203,7 +206,8 @@ enum   DistortSelect
   k3DGridLeak        = 0x8000,   // Bit 16
   kGGVoltError       = 0x10000,  // Bit 17
   kSectorAlign       = 0x20000,  // Bit 18
-  kDisableTwistClock = 0x40000   // Bit 19
+  kDisableTwistClock = 0x40000,  // Bit 19
+  kFullGridLeak      = 0x80000   // Bit 20
 } ;
 enum   CorrectSelect
 {
@@ -250,7 +254,7 @@ class StMagUtilities {
 
   virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
-  virtual void    GetTPCVoltages ()   ;
+  virtual void    GetTPCVoltages ( Int_t mode )   ;
   virtual void    GetSpaceCharge ()   ;
   virtual void    GetSpaceChargeR2 () ;  
   virtual void    GetShortedRing ()   ;  
@@ -341,7 +345,7 @@ class StMagUtilities {
   Double_t OuterGridLeakStrength      ; // Relative strength of the Outer grid leak
   Double_t OuterGridLeakRadius        ; // Location (in local Y coordinates) of the Outer grid leak 
   Double_t OuterGridLeakWidth         ; // Half-width of the Outer grid leak.  Must be larger than life for numerical reasons.
-  Float_t  GLWeights[25]              ; // GridLeak weights per sector.  24 sectors. Note: slot 0 is not used!!
+  Float_t  GLWeights[96]              ; // GridLeak weights per sector.  24 sectors x 3 locations
   Int_t    ShortTableRows             ; // Number of rows in the Shorted Ring Table
   Int_t    Side[10]                   ; // Location of Short   E=0 /   W=1
   Int_t    Cage[10]                   ; // Location of Short IFC=0 / OFC=1
@@ -401,6 +405,7 @@ class StMagUtilities {
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    Undo3DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoFullGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoGGVoltErrorDistortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
