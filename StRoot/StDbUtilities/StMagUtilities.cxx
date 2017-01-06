@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.107 2016/05/13 06:02:51 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.108 2017/01/06 22:31:24 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.108  2017/01/06 22:31:24  genevb
+ * Introduce FullGridLeak distortion correction, speed tweek to Poisson3DRelaxation
+ *
  * Revision 1.107  2016/05/13 06:02:51  genevb
  * Compile and Coverity warnings, one typo in Radius calc, very minor optimizations
  *
@@ -379,7 +382,9 @@ enum   DistortSelect                                                  <br>
   kGridLeak          = 0x4000,   // Bit 15                            <br>
   k3DGridLeak        = 0x8000,   // Bit 16                            <br>
   kGGVoltError       = 0x10000,  // Bit 17                            <br>
-  kSectorAlign       = 0x20000   // Bit 18                            <br>
+  kSectorAlign       = 0x20000,  // Bit 18                            <br>
+  kDisableTwistClock = 0x40000,  // Bit 19                            <br>
+  kFullGridLeak      = 0x80000   // Bit 20                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -426,6 +431,34 @@ TNtuple *StMagUtilities::fgDoDistortion = 0;
 TNtuple *StMagUtilities::fgUnDoDistortion = 0;
 static const size_t threeFloats = 3 * sizeof(Float_t);
 
+// Parameters derived from GARFIELD simulations of the GridLeaks performed by Irakli Chakaberia:
+//   https://drupal.star.bnl.gov/STAR/node/36657
+// Standard operation has been 1100 V and 1390 V for inner and outer respectively in recent Runs.
+// -23.38+exp(0.004751*1390) = 714.6 +/- 18.8 outer-outer
+// -16.68+exp(0.004731*1390) = 701.0 +/- 18.8 inner of outer sector
+// -21.76+exp(0.005123*1100) = 258.4 +/-  8.4 outer of inner sector
+// -42.15+exp(0.005345*1100) = 315.5 +/-  8.4 inner-inner
+// The GL_q functions deliver a total charge (not charge density) out of each charge sheet over a
+// Cartesian area (i.e. a fixed extent in distance along the pad rows that does not grow with radius)
+// The GL_rho functions convert the total charge to a charge density
+const Float_t GL_charge_y_lo[4] {52.04,121.80-0.85,121.80     ,191.49} ;
+const Float_t GL_charge_y_hi[4] {52.85,121.80     ,121.80+0.99,192.53} ;
+Float_t GL_q_inner_of_innerSec(Float_t voltage=1100.0) { return -42.15 + TMath::Exp(0.005345 * voltage); }
+Float_t GL_q_outer_of_innerSec(Float_t voltage=1100.0) { return -21.76 + TMath::Exp(0.005123 * voltage); }
+Float_t GL_q_inner_of_outerSec(Float_t voltage=1390.0) { return -16.68 + TMath::Exp(0.004731 * voltage); }
+Float_t GL_q_outer_of_outerSec(Float_t voltage=1390.0) { return -23.38 + TMath::Exp(0.004751 * voltage); }
+Float_t GL_rho_inner_of_innerSec(Float_t voltage=1100.0)
+  { return GL_q_inner_of_innerSec(voltage) / (GL_charge_y_hi[0]- GL_charge_y_lo[0]) ; }
+Float_t GL_rho_outer_of_innerSec(Float_t voltage=1100.0)
+  { return GL_q_outer_of_innerSec(voltage) / (GL_charge_y_hi[1]- GL_charge_y_lo[1]) ; }
+Float_t GL_rho_inner_of_outerSec(Float_t voltage=1390.0)
+  { return GL_q_inner_of_outerSec(voltage) / (GL_charge_y_hi[2]- GL_charge_y_lo[2]) ; }
+Float_t GL_rho_outer_of_outerSec(Float_t voltage=1390.0)
+  { return GL_q_outer_of_outerSec(voltage) / (GL_charge_y_hi[3]- GL_charge_y_lo[3]) ; }
+
+double SpaceChargeRadialDependence(double Radius) {
+  return ( 3191./(Radius*Radius) + 122.5/Radius - 0.395 ) / 15823. ;
+}
 
 //________________________________________
 
@@ -459,7 +492,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
   fgInstance = this;
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
-  GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
+  GetTPCVoltages( mode );    // Get the TPC Voltages from the DB
   GetHVPlanes()         ;    // Get the parameters that describe the HV plane errors (after GetTPCVoltages!)
   GetOmegaTau ()        ;    // Get Omega Tau parameters
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
@@ -563,38 +596,50 @@ void StMagUtilities::GetE()
   } 
 }
 
-void StMagUtilities::GetTPCVoltages ()  
+void StMagUtilities::GetTPCVoltages (Int_t mode)  
 { 
   fTpcVolts      =  StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
   CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
   GG             =  fTpcVolts->getGGVoltage() ; 
   GetE() ;
   St_tpcAnodeHVavgC* anodeVolts = St_tpcAnodeHVavgC::instance() ;
-  // Placeholder: InnerCoef and OuterCoef need to be calibrated
-  //for (Int_t i = 1 ; i < 25; i++ ) {
-  //  GLWeights[i] = InnerCoef * TMath::Exp(anodeVolts->voltagePadrow(i,INNER)) +
-  //                 OuterCoef * TMath::Exp(anodeVolts->voltagePadrow(i,INNER+1));
-  //}
-  // For now, a bit complicated, but assign 1 to those with most common
-  //   voltages, and -1 ("unknown") otherwise
-  double maxInner = 1170;
-  double maxOuter = 1390;
-  double stepsInner = 35;
-  double stepsOuter = 45;
-  TH1I innerVs("innerVs","innerVs",5,maxInner-3.5*stepsInner,maxInner+1.5*stepsInner);
-  TH1I outerVs("outerVs","outerVs",5,maxOuter-3.5*stepsOuter,maxOuter+1.5*stepsOuter);
-  for (Int_t i = 1 ; i < 25; i++ ) {
-    innerVs.Fill(anodeVolts->voltagePadrow(i,INNER));
-    outerVs.Fill(anodeVolts->voltagePadrow(i,INNER+1));
+  if (mode & k3DGridLeak) {
+    // For now, a bit complicated, but assign 1 to those with most common
+    //   voltages, and -1 ("unknown") otherwise
+    double maxInner = 1170;
+    double maxOuter = 1390;
+    double stepsInner = 35;
+    double stepsOuter = 45;
+    TH1I innerVs("innerVs","innerVs",5,maxInner-3.5*stepsInner,maxInner+1.5*stepsInner);
+    TH1I outerVs("outerVs","outerVs",5,maxOuter-3.5*stepsOuter,maxOuter+1.5*stepsOuter);
+    for (Int_t i = 1 ; i < 25; i++ ) {
+      innerVs.Fill(anodeVolts->voltagePadrow(i,INNER));
+      outerVs.Fill(anodeVolts->voltagePadrow(i,INNER+1));
+    }
+    double cmnInner = innerVs.GetBinCenter(innerVs.GetMaximumBin());
+    double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
+    cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
+    for (Int_t i = 1 ; i < 25; i++ ) {
+      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER) - cmnInner) < stepsInner/2. ) &&
+                       ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+    }
+  } else if (mode & kFullGridLeak) {
+
+    // Scale charge densities so that total charge, in cylindrical units, of middle
+    // sheet is the same as it used to be: rho * area ~ rho * Delta(r^2)
+    float norm = ( 122.595*122.595 - 121.0*121.0 ) /
+                 ( GL_rho_outer_of_innerSec() *
+                     (GL_charge_y_hi[1]*GL_charge_y_hi[1] - GL_charge_y_lo[1]*GL_charge_y_lo[1]) +
+                   GL_rho_inner_of_outerSec() *
+                     (GL_charge_y_hi[2]*GL_charge_y_hi[2] - GL_charge_y_lo[2]*GL_charge_y_lo[2]) ) ;
+
+    for (Int_t i = 0 ; i < 24; i++ ) {
+      GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
+      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,INNER  )) * norm ;
+      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,INNER+1)) * norm ;
+      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,TPCROWS)) * norm ;
+    }
   }
-  double cmnInner = innerVs.GetBinCenter(innerVs.GetMaximumBin());
-  double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
-  cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
-  for (Int_t i = 1 ; i < 25; i++ ) {
-    GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER) - cmnInner) < stepsInner/2. ) &&
-                     ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
-  }
-  
   
 }
 
@@ -917,7 +962,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
     mDistortionMode &= ~(mDistortionMode & kFast2DBMap);
   }
   if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
-                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign ))) 
+                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign | kFullGridLeak))) 
     {
        mDistortionMode |= kPadrow13 ;
        if (! (mDistortionMode & kDisableTwistClock)) {
@@ -948,6 +993,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
   if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
   if ( mDistortionMode & kSectorAlign )   printf (" + SectorAlign") ;
+  if ( mDistortionMode & kFullGridLeak )  printf (" + FullGridLeak") ;
   if ( ! StTpcDb::IsOldScheme())          printf (" + New TPC Alignment schema") ;
   usingCartesian = kTRUE; // default
 
@@ -1007,7 +1053,16 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::OuterGridLeak =  " << OuterGridLeakStrength << " " << OuterGridLeakRadius << " " << OuterGridLeakWidth << endl;
   cout << "StMagUtilities::deltaVGG      =  " << deltaVGGEast << " V (east) : " << deltaVGGWest << " V (west)" << endl;
   cout << "StMagUtilities::GLWeights     =  " ;
-  for ( Int_t i = 1 ; i < 25 ; i++ ) cout << GLWeights[i] << " " ; cout << endl;
+  if (mDistortionMode & k3DGridLeak) {
+    for ( Int_t i = 1 ; i < 25 ; i++ ) cout << GLWeights[i] << " " ;
+    cout << endl;
+  } else if (mDistortionMode & kFullGridLeak) {
+    cout << endl;
+    for ( Int_t i = 0 ; i < 24 ; i++ ) {
+      for ( Int_t j = 0 ; j < 96 ; j+=24 ) cout << std::fixed << "    " << std::setprecision(2) << GLWeights[i+j];
+      cout << endl;
+    }
+  } else cout << "N/A" << endl;
 
   DoOnce = kTRUE;
 
@@ -1171,8 +1226,15 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       memcpy(Xprime1,Xprime2,threeFloats);
   }
 
-  if ((mDistortionMode & kGridLeak) && (mDistortionMode & k3DGridLeak)) {
-      cout << "StMagUtilities ERROR **** Do not use kGridLeak and k3DGridLeak at the same time" << endl ;
+  if (mDistortionMode & kFullGridLeak) { 
+      UndoFullGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
+      memcpy(Xprime1,Xprime2,threeFloats);
+  }
+
+  if (((mDistortionMode/kGridLeak)     & 1) +
+      ((mDistortionMode/k3DGridLeak)   & 1) +
+      ((mDistortionMode/kFullGridLeak) & 1) > 1) {
+      cout << "StMagUtilities ERROR **** Do not use multiple GridLeak modes at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
   }
@@ -1989,7 +2051,8 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      // Next line is for 1/R charge deposition in the TPC; then integrated in Z due to drifting ions
 	      // Charge(i,j) = zterm / ( ( OFCRadius - IFCRadius ) * Radius ) ; 
 	      // Next line is Wiemans fit to the HiJet Charge distribution; then integrated in Z due to drifting ions
-	      Charge(i,j) = zterm * ( 3191/(Radius*Radius) + 122.5/Radius - 0.395 ) / 15823 ;
+	      // Charge(i,j) = zterm * ( 3191/(Radius*Radius) + 122.5/Radius - 0.395 ) / 15823 ;
+	      Charge(i,j) = zterm * SpaceChargeRadialDependence(Radius) ; // currently uses Wieman's fit to HIJET
 	      // Next line can be used in addition to the previus "Wieman" distribution in order to do d-Au assymetric distributions
 	      // JT Test Charge(i,j) *= ( 1.144 + 0.144*zed/TPC_Z0 ) ; // Note that this does the Au splash side ... not the deuteron side
 	      // JT Test - Do not use the previous line for production work.  It is only for testing purposes.
@@ -2636,8 +2699,9 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
        cin  >> anychar ;   // JT test
     */ //End JT test block
 
-    i_one = i_one / 2 ; if ( i_one < 1 ) i_one = 1 ;
-    j_one = j_one / 2 ; if ( j_one < 1 ) j_one = 1 ;
+    // For asymmetric grid sizes, keep them coarse as long as possible to avoid excessive calculations
+    if (i_one > j_one / 2) { i_one = i_one / 2 ; if ( i_one < 1 ) i_one = 1 ; }
+    if (j_one > i_one    ) { j_one = j_one / 2 ; if ( j_one < 1 ) j_one = 1 ; }
 
   }      
 
@@ -2718,7 +2782,6 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   const Float_t  RatioPhi    =  GRIDSIZER*GRIDSIZER / (GRIDSIZEPHI*GRIDSIZEPHI) ;
   const Float_t  RatioZ      =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
 
-
   //Check that the number of ROWS and COLUMNS is suitable for a binary expansion
   if ( !IsPowerOfTwo((ROWS-1))    )
   { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
@@ -2746,9 +2809,9 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   TMatrix *ArrayofSumCharge[1000] ;    // Create temporary arrays to store low resolution charge arrays
   if  ( PHISLICES > 1000 ) { cout << "StMagUtilities::Poisson3D  PHISLICES > 1000 is not allowed (nor wise) " << endl ; exit(1) ; }  
   for ( Int_t i = 0 ; i < PHISLICES ; i++ ) { ArrayofSumCharge[i] = new TMatrix(ROWS,COLUMNS) ; }
-  Float_t OverRelaxers[ITERATIONS];
+  Float_t OverRelaxers[ITERATIONS] ; 
   for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {
-    OverRelaxers[k-1] = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ; // Over-relaxation index, >= 1 but < 2
+    OverRelaxers[k-1] = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ;    // Over-relaxation index, >= 1 but < 2
   }
 
   Float_t coef1[ROWS],coef2[ROWS],coef3[ROWS],coef4[ROWS];
@@ -2766,6 +2829,8 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
     Int_t one__  = i_one*COLUMNS;
     Int_t half__ = one__ / 2;
     Int_t half   = j_one / 2;
+    Bool_t iWillDivide = (i_one > 1 && i_one >= j_one / 2) ;
+    Bool_t jWillDivide = (j_one > 1 && j_one >= i_one / 2) ;
     
     Float_t  tempGRIDSIZER   =  GRIDSIZER  * i_one ;
     Float_t  tempRatioPhi    =  RatioPhi * i_one * i_one ; // Used to be divided by ( m_one * m_one ) when m_one was != 1
@@ -2848,32 +2913,36 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
           }
         }
 
-        if ( k == ITERATIONS && ( i_one > 1 || j_one > 1 ) ) {       // After full solution is achieved, copy low resolution solution into higher res array
+        if ( k == ITERATIONS && ( iWillDivide || jWillDivide ) ) {       // After full solution is achieved, copy low resolution solution into higher res array
           for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
             Int_t i__ = i*COLUMNS;
             for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one ) {
               Int_t i__j = i__ + j;
               
-              if ( i_one > 1 ) {              
-                ArrayV[i__j + half__]            =  ( ArrayV[i__j + one__]        + ArrayV[i__j]        ) / 2 ;
+              if ( iWillDivide ) {
+                ArrayV[i__j + half__]            =  ( ArrayV[i__j + one__]        + ArrayV[i__j]         ) / 2 ;
                 if ( i == i_one )
-                  ArrayV[i__j - half__]          =  ( ArrayV[j]                   + ArrayV[one__ + j]   ) / 2 ;
+                  ArrayV[i__j - half__]          =  ( ArrayV[j]                   + ArrayV[one__ + j]    ) / 2 ;
               }
 
-              if ( j_one > 1 ) {
-                ArrayV[i__j + half]              =  ( ArrayV[i__j + j_one]        + ArrayV[i__j]        ) / 2 ;
+              if ( jWillDivide ) {
+                ArrayV[i__j + half]              =  ( ArrayV[i__j + j_one]        + ArrayV[i__j]         ) / 2 ;
                 if ( j == j_one )
-                  ArrayV[i__j - half]            =  ( ArrayV[i__]                 + ArrayV[i__ + j_one] ) / 2 ;
+                  ArrayV[i__j - half]            =  ( ArrayV[i__]                 + ArrayV[i__ + j_one]  ) / 2 ;
 
-                if ( i_one > 1 ) { // i_one > 1 && j_one > 1
-                  ArrayV[i__j + half__ + half]   = ( ArrayV[i__j + one__ + j_one] + ArrayV[i__j]        ) / 2 ;
+                if ( iWillDivide ) { // i_one > 1 && j_one > 1
+                  ArrayV[i__j + half__ + half]   = ( ArrayV[i__j + one__ + j_one] + ArrayV[i__j]
+                                                   + ArrayV[i__j + one__ ]        + ArrayV[i__j + j_one] ) / 4 ;
                   if ( i == i_one )
-                    ArrayV[i__j - half__ - half] = ( ArrayV[j - j_one]            + ArrayV[one__ + j]   ) / 2 ;
-                  if ( j == j_one )
-                    ArrayV[i__j - half__ - half] = ( ArrayV[i__ - one__]          + ArrayV[i__ + j_one] ) / 2 ;
+                    ArrayV[i__j - half__ - half] = ( ArrayV[j - j_one]            + ArrayV[i__j]
+                                                   + ArrayV[j]                    + ArrayV[i__j - j_one] ) / 4 ;
+                  else if ( j == j_one )
+                    ArrayV[i__j - half__ - half] = ( ArrayV[i__ - one__]          + ArrayV[i__j]
+                                                   + ArrayV[i__]                  + ArrayV[i__j - one__] ) / 4 ;
                   // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
                 }
               }
+
             }
           }
         }
@@ -2881,8 +2950,9 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
       }
     }      
 
-    i_one = i_one / 2 ; if ( i_one < 1 ) i_one = 1 ;
-    j_one = j_one / 2 ; if ( j_one < 1 ) j_one = 1 ;
+    // For asymmetric grid sizes, keep them coarse as long as possible to avoid excessive calculations
+    if (iWillDivide) { i_one = i_one / 2 ; if ( i_one < 1 ) i_one = 1 ; }
+    if (jWillDivide) { j_one = j_one / 2 ; if ( j_one < 1 ) j_one = 1 ; }
 
   }
   
@@ -3488,7 +3558,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
 	   {
 	     xx[j] = xxprime[j];
-	 }
+	   }
        }
        if (mDistortionMode & k3DGridLeak) { 
 	 Undo3DGridLeakDistortion ( xx, xxprime ) ;
@@ -3496,7 +3566,15 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
 	   {
 	     xx[j] = xxprime[j];
-	 }
+	   }
+       }
+       if (mDistortionMode & kFullGridLeak) { 
+	 UndoFullGridLeakDistortion ( xx, xxprime ) ;
+	 InnerOuterRatio = 0.6 ; // JT test.  With the GridLeak, GVB prefers 0.6  (note that order is important in this loop).
+	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
+	   {
+	     xx[j] = xxprime[j];
+	   }
        }
 
        Xtrack[i] = 2*Xtrack[i] - xx[0] ; 
@@ -3666,8 +3744,9 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    }
    Int_t tempDistortionMode = mDistortionMode;
    mDistortionMode = (tempDistortionMode & kSpaceChargeR2);
-   if (tempDistortionMode & k3DGridLeak) mDistortionMode |= k3DGridLeak ;
-   else if (tempDistortionMode & kGridLeak) mDistortionMode |= kGridLeak ;
+        if (tempDistortionMode & kFullGridLeak) mDistortionMode |= kFullGridLeak ;
+   else if (tempDistortionMode & k3DGridLeak  ) mDistortionMode |= k3DGridLeak   ;
+   else if (tempDistortionMode & kGridLeak    ) mDistortionMode |= kGridLeak     ;
  
    Float_t x[3] = { 0, 0, 0 } ;  // Get the B field at the vertex 
    BFieldTpc(x,B) ;
@@ -3755,7 +3834,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        xx[1] = sinPhiMPrime*Xtrack[i] + cosPhiMPrime*Ytrack[i];
        xx[2] = Ztrack[i];
 
-       if (mDistortionMode & (kGridLeak | k3DGridLeak)) {
+       if (mDistortionMode & (kGridLeak | k3DGridLeak | kFullGridLeak)) {
          HitPhi = TMath::ATan2(xx[1],xx[0]) ;
          while ( HitPhi < 0 ) HitPhi += TMath::TwoPi() ;
          while ( HitPhi >= TMath::TwoPi() ) HitPhi -= TMath::TwoPi() ;
@@ -4227,6 +4306,261 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 //________________________________________
 
   
+/// Full GridLeak Distortion Calculation
+/*!
+  Calculate the 3D distortions due to charge leaking out around the edge of all wire grids
+  4 locations per sector, all sectors. Mostly a copy of Undo3DGridLeakDistortion().
+  Original work by Gene Van Buren and Irakli Chakaberia (GARFIELD simulations)
+*/
+void StMagUtilities::UndoFullGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+{ 
+     
+  const Int_t   ORDER       =    1  ;  // Linear interpolation = 1, Quadratic = 2         
+  const Int_t   neR3D       =  132  ;  // Number of rows in the interpolation table for the Electric field
+  const Int_t   ITERATIONS  =   80  ;  // Depends on setting for the OverRelaxation parameter ... check results carefully
+  const Int_t   ROWS        =  513  ;  // ( 2**n + 1 )  eg. 65, 129, 257, 513, 1025   (513 or above for a natural width gap)
+  const Int_t   COLUMNS     =   65  ;  // ( 2**m + 1 )  eg. 65, 129, 257, 513
+  const Int_t   PHISLICES   =  180  ;  // ( 12*(2*n + 1) )  eg. 60, 84, 108 ; Note interaction with "GRIDSIZEPHI"
+                                       //                   avoids phi at sector boundaries
+  const Int_t   PHISLICES1  =  PHISLICES+1   ;  // ( 24*n )  eg. 24, 72, 144 ;
+  const Float_t GRIDSIZEPHI =  TMath::TwoPi() / PHISLICES ;
+  const Float_t GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Float_t GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+
+  static TMatrix *ArrayofArrayV[PHISLICES]   , *ArrayofCharge[PHISLICES]      ; 
+  static TMatrix *ArrayofEroverEzW[PHISLICES], *ArrayofEPhioverEzW[PHISLICES] ; 
+  static TMatrix *ArrayofEroverEzE[PHISLICES], *ArrayofEPhioverEzE[PHISLICES] ; 
+
+  static Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
+
+  static TMatrix *ArrayoftiltEr[PHISLICES1] ;
+  static TMatrix *ArrayoftiltEphi[PHISLICES1] ;
+
+  // Use custom list of radii because we need extra resolution near the edges
+  static Float_t eRadius[neR3D] = {  50.0,   50.5,  51.0,   51.25,  51.5,
+				     51.75,  52.0,  52.25,  52.5,   52.75,
+				     53.0,   53.25, 53.5,   53.75,  54.0,
+				     54.25,  54.75, 55.0,   55.25,  55.5,
+				     56.0,   56.5,  57.0,   58.0,   60.0,
+				     62.0,   66.0,  70.0,   80.0,   90.0,
+				    100.0,  104.0,  106.5,  109.0,  111.5,
+				    114.0,  115.0,  116.0,  117.0,  118.0,
+				    118.5,  118.75, 119.0,  119.25, 119.5,
+				    119.75, 120.0,  120.25, 120.5,  120.75,
+				    121.0,  121.25, 121.5,  121.75, 122.0,
+				    122.25, 122.5,  122.75, 123.0,  123.25,
+				    123.5,  123.75, 124.0,  124.25, 124.5,
+				    124.75, 125.0,  125.25, 125.5,  125.75,
+				    126.0,  126.25, 126.5,  126.75, 127.0,
+				    127.25, 127.5,  128.0,  128.5,  129.0,
+				    129.5,  130.0,  130.5,  131.0,  131.5,
+				    132.0,  133.0,  135.0,  137.5,  140.0,
+				    145.0,  150.0,  160.0,  170.0,  180.0,
+				    184.0,  186.5,  189.0,  190.0,  190.5,
+				    190.75, 191.0,  191.25, 191.5,  191.75,
+				    192.0,  192.25, 192.5,  192.75, 193.0,
+				    193.25, 193.5,  193.75, 194.0,  194.25,
+				    194.5,  194.75, 195.0,  195.25, 195.5,
+				    196.0,  196.25, 196.5,  196.75, 197.0,
+				    197.25, 197.5,  198.0,  198.5,  199.0,
+				    199.5,  200.0 } ; 
+
+  static Float_t Philist [PHISLICES1] ; // Note that there will be rapid changes near 15 degrees on padrow 13
+
+  Float_t  Er_integral, Ephi_integral ;
+  Float_t  r, phi, z ;
+
+  memcpy(Xprime,x,threeFloats) ;
+
+  if ( MiddlGridLeakStrength == 0 ) return ; 
+
+  if ( DoOnce )
+    {
+      cout << "StMagUtilities::UndoFullGrid Please wait for the tables to fill ...  ~5 seconds * PHISLICES" << endl ;
+      Int_t   SeclistW[PHISLICES1] ;
+      Int_t   SeclistE[PHISLICES1] ;
+      Float_t SecPhis [PHISLICES1] ;
+      
+      for ( Int_t i = 0 ; i < ROWS ; i++ ) Rlist[i] = IFCRadius + i*GRIDSIZER ;
+      for ( Int_t j = 0 ; j < COLUMNS ; j++ ) Zedlist[j]  = j * GRIDSIZEZ ;
+      
+      for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
+        {
+          Philist[k] = GRIDSIZEPHI * k ;
+          Int_t k2 = (12*k+PHISLICES/2)/PHISLICES;
+          SeclistW[k] = (14-k2)%12+1;
+          SeclistE[k] = (k2+8)%12+13;
+          SecPhis[k] = GRIDSIZEPHI * (k2*PHISLICES/12-k) ;
+        }
+      
+      for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
+        {
+          ArrayoftiltEr[k]   =  new TMatrix(neR3D,EMap_nZ) ;
+          ArrayoftiltEphi[k] =  new TMatrix(neR3D,EMap_nZ) ;
+        }
+      
+      for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+      {
+        ArrayofArrayV[k]      =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofCharge[k]      =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEroverEzW[k]   =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEPhioverEzW[k] =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEroverEzE[k]   =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEPhioverEzE[k] =  new TMatrix(ROWS,COLUMNS) ;
+      }
+
+      for ( Int_t m = -1; m < 2 ; m+=2 ) // west (m = -1), then east (m = 1)
+        {
+          TMatrix** ArrayofEroverEz   = ( m < 0 ? ArrayofEroverEzW   : ArrayofEroverEzE   ) ;
+          TMatrix** ArrayofEPhioverEz = ( m < 0 ? ArrayofEPhioverEzW : ArrayofEPhioverEzE ) ;
+          Int_t*    Seclist           = ( m < 0 ? SeclistW           : SeclistE           ) ;
+
+          for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+    	    {
+  	      TMatrix &ArrayV    =  *ArrayofArrayV[k] ;
+	      TMatrix &Charge    =  *ArrayofCharge[k] ;
+              Float_t cosPhiK    =  TMath::Cos(SecPhis[k]) ;
+
+	      //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
+              ArrayV.Zero();  // Fill Vmatrix with Boundary Conditions
+              Charge.Zero();
+
+	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) 
+	        { 
+	          Float_t Radius = IFCRadius + i*GRIDSIZER ;
+	          Float_t local_y_hi  = (Radius+GRIDSIZER/2.0) * cosPhiK ;
+	          Float_t local_y_lo  = (Radius-GRIDSIZER/2.0) * cosPhiK ;
+
+		  // Here we are finding rho in the cell of volume V to be (1/V)*Integral(local_rho * dV)
+		  // In the below formulas...
+		  // 'Weight' will be 1/V
+		  // dV will be the volume between 'top' and 'bottom'
+		  // 'SCscale * GLWeights' will be the local_rho
+		  // 'local_charge' will be local_rho*dV
+
+                  // Scale by SpaceCharge at this radius relative to SpaceCharge at GAPRADIUS
+                  // as the electrons that feed GridLeak have the same radial dependence as SpaceCharge
+                  // (Garfield simulations assumed flat radial dependence).
+                  // Note that this dlightly destroys getting the total charge in the middle sheet
+                  // to be equal to that in 3DGridLeak, but this is more accurate.
+	          Float_t SCscale = SpaceChargeRadialDependence(Radius)/SpaceChargeRadialDependence(GAPRADIUS) ;
+
+		  Float_t top = 0, bottom = 0 ;
+                  Float_t local_charge = 0;
+
+                  for (Int_t l = 0; l < 4 ; l++ )
+                    {
+
+                      if (local_y_hi < GL_charge_y_lo[l] || local_y_lo > GL_charge_y_hi[l]) continue;
+                      top    = (local_y_hi > GL_charge_y_hi[l] ? GL_charge_y_hi[l] : local_y_hi);
+                      bottom = (local_y_lo < GL_charge_y_lo[l] ? GL_charge_y_lo[l] : local_y_lo);
+                      local_charge += SCscale * GLWeights[Seclist[k]-1 + l*24] * (top*top - bottom*bottom);
+
+                    }
+
+		  Float_t Weight  =  1.0 / (local_y_hi*local_y_hi - local_y_lo*local_y_lo) ;
+		  // Weight by ratio of volumes for a partially-full cell / full cell (in Cylindrical Coords).
+		  // Note that Poisson's equation is using charge density ... so if rho = 1.0, then volume is what counts.
+ 
+		  const Float_t BackwardsCompatibilityRatio = 3.75 ;      // DB uses different value for legacy reasons
+
+	          for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )    
+		    {
+
+		      Charge(i,j)  =  local_charge * Weight * MiddlGridLeakStrength * BackwardsCompatibilityRatio ;
+
+		    }
+		}
+	    }
+      
+          //Solve Poisson's equation in 3D cylindrical coordinates by relaxation technique
+          //Allow for different size grid spacing in R and Z directions
+
+          Poisson3DRelaxation( ArrayofArrayV, ArrayofCharge, ArrayofEroverEz, ArrayofEPhioverEz, PHISLICES, 
+			       GRIDSIZEPHI, ITERATIONS, 0) ;
+
+	} // m (west/east) loop
+
+      //Interpolate results onto a custom grid which is used just for the grid leak calculation.
+
+      for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
+        {
+          TMatrix &tiltEr   = *ArrayoftiltEr[k] ;
+          TMatrix &tiltEphi = *ArrayoftiltEphi[k] ;
+          phi = Philist[k == PHISLICES ? 0 : k] ;
+          for ( Int_t i = 0 ; i < EMap_nZ ; i++ ) 
+            {
+              z = TMath::Abs(eZList[i]) ;
+              TMatrix** ArrayofEroverEz   = ( eZList[i] > 0 ? ArrayofEroverEzW   : ArrayofEroverEzE   ) ;
+              TMatrix** ArrayofEPhioverEz = ( eZList[i] > 0 ? ArrayofEPhioverEzW : ArrayofEPhioverEzE ) ;
+              for ( Int_t j = 0 ; j < neR3D ; j++ ) 
+                { 
+                  r = eRadius[j] ;
+                  tiltEr(j,i)    = Interpolate3DTable( ORDER,r,z,phi,ROWS,COLUMNS,PHISLICES,Rlist,Zedlist,Philist,ArrayofEroverEz )   ;
+                  tiltEphi(j,i)  = Interpolate3DTable( ORDER,r,z,phi,ROWS,COLUMNS,PHISLICES,Rlist,Zedlist,Philist,ArrayofEPhioverEz ) ;
+                }
+            }
+        }
+
+      for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+	{
+	  ArrayofArrayV[k]     -> Delete() ;
+	  ArrayofCharge[k]     -> Delete() ;
+          ArrayofEroverEzW[k]   -> Delete() ;  
+          ArrayofEPhioverEzW[k] -> Delete() ;  
+          ArrayofEroverEzE[k]   -> Delete() ;  
+          ArrayofEPhioverEzE[k] -> Delete() ;  
+	}
+
+    }
+  
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
+
+  Float_t cos_phi_prime, local_y, r_eff ;
+  cos_phi_prime = TMath::Cos(phi - PiOver6 * ((int) ((phi/PiOver6)+0.5))) ; // cos of local phi within sector
+  
+  r_eff   = r ;                                     // Do not allow calculation to go too near the gap
+  local_y = r * cos_phi_prime ;
+  // Undo3DGridLeak used a margin of WIREGAP(1.595)/2 = 0.7975 cm beyond the edge of the charge sheet
+  // Here we will continue to use the same margin
+  const Float_t margin = 0.7975 ;
+
+  const Float_t middle_of_inner_sheet = 0.5 * (GL_charge_y_lo[0] + GL_charge_y_hi[0]);
+  const Float_t middle_of_outer_sheet = 0.5 * (GL_charge_y_lo[3] + GL_charge_y_hi[3]);
+       if ( local_y > GL_charge_y_lo[0] - margin && local_y < middle_of_inner_sheet) r_eff = (GL_charge_y_lo[0] - margin) / cos_phi_prime;
+  else if ( local_y < GL_charge_y_hi[0] + margin && local_y > middle_of_inner_sheet) r_eff = (GL_charge_y_hi[0] + margin) / cos_phi_prime;
+  else if ( local_y > GL_charge_y_lo[1] - margin && local_y < GL_charge_y_hi[1]    ) r_eff = (GL_charge_y_lo[1] - margin) / cos_phi_prime;
+  else if ( local_y < GL_charge_y_hi[2] + margin && local_y > GL_charge_y_lo[2]    ) r_eff = (GL_charge_y_hi[2] + margin) / cos_phi_prime;
+  else if ( local_y > GL_charge_y_lo[3] - margin && local_y < middle_of_outer_sheet) r_eff = (GL_charge_y_lo[3] - margin) / cos_phi_prime;
+  else if ( local_y < GL_charge_y_hi[3] + margin && local_y > middle_of_outer_sheet) r_eff = (GL_charge_y_hi[3] + margin) / cos_phi_prime;
+
+  Er_integral   = Interpolate3DTable( ORDER, r_eff, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEr )   ;
+  Ephi_integral = Interpolate3DTable( ORDER, r_eff, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
+
+  if (fSpaceChargeR2) GetSpaceChargeR2();           // Get latest spacecharge values from DB 
+
+  // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
+
+  if ( r > 0.0 ) 
+    {
+      Float_t Weight = SpaceChargeR2 ;
+      if ( z < 0 ) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+    }
+
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] ;
+
+}
+
+//________________________________________
+
+  
 /// 3D Sector Alignment Distortion Calculation
 /*!
   Calculate the 3D distortions due to z displacements caused by mis-alignment of the inner and outer sectors.
@@ -4297,6 +4631,9 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
       Int_t   SeclistW[PHISLICES1] ;
       Int_t   SeclistE[PHISLICES1] ;
       Float_t SecPhis [PHISLICES1] ;
+
+      for ( Int_t i = 0 ; i < ROWS ; i++ ) Rlist[i] = IFCRadius + i*GRIDSIZER ;
+      for ( Int_t j = 0 ; j < COLUMNS ; j++ ) Zedlist[j]  = j * GRIDSIZEZ ;
       
       for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
         {
@@ -4336,16 +4673,8 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
               TMatrix &Charge    =  *ArrayofCharge[k] ;
               
               //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
-              for ( Int_t i = 0 ; i < ROWS ; i++ )  
-                {
-                  Rlist[i] = IFCRadius + i*GRIDSIZER ;
-                  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions
-                    {
-                      Zedlist[j]  = j * GRIDSIZEZ ;
-                      ArrayV(i,j) = 0.0 ; 
-                      Charge(i,j) = 0.0 ;
-                    }
-                }      
+              ArrayV.Zero();  // Fill Vmatrix with Boundary Conditions
+              Charge.Zero();
               
               Double_t tanSecPhi = TMath::Tan(SecPhis[k]);
               Double_t cosSecPhi = TMath::Cos(SecPhis[k]);
@@ -4465,7 +4794,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
         } // m (west/east) loop
       
           
-      //Interpolate results onto a custom grid which is used just for the grid leak calculation.
+      //Interpolate results onto a custom grid which is used just for the sector align calculation.
       
       for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
         {
@@ -4503,7 +4832,6 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
   
-  // Assume symmetry in Z when looking up data in tables, below
   Er_integral   = Interpolate3DTable( ORDER, r, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEr )   ;
   Ephi_integral = Interpolate3DTable( ORDER, r, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
   
