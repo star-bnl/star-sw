@@ -4,7 +4,7 @@
 
 #ifndef StvConeRejector_HH
 #define StvConeRejector_HH
-
+#include "StvSeed/StvSeedConst.h"
 
 class StvConeRejector 
 {
@@ -14,6 +14,7 @@ public:
 void Reset(const float pos[3],const float dir[3]=0
           ,float len=0,float theta=0,float err=0);
 void Prepare();
+const Mtx33F_t &GetDir() const { return mDir;}
 
 // 0=accepted
 int  Reject(const float x[3]) const;	
