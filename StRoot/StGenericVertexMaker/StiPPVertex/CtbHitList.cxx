@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <cmath>
-#include <math_constants.h>
 
 #include <StMessMgr.h>
 
@@ -23,7 +22,7 @@ extern void cts_get_ctb_indexes(long, long &, long &);
 //==========================================================
 //==========================================================
 CtbHitList::CtbHitList() :
-  ScintHitList(-C_PI/60.,C_PI/30,60, -1.,0.5,4,(char *) "Ctb",2.,0.5){
+  ScintHitList(-M_PI/60.,M_PI/30,60, -1.,0.5,4,(char *) "Ctb",2.,0.5){
   // CTB clibration: 2 MeV==5 ADC
   mCtbThres_mev=1; //to reject slats with low dE for M-C data
   mCtbThres_ch=2 ;  //to reject slats with low ADC for real data
@@ -35,7 +34,7 @@ CtbHitList::CtbHitList() :
 //==========================================================
 void
 CtbHitList::initRun(float fac){
-  const float  mCtbEtaSeg=0.5,  mCtbPhiSeg=C_PI/30; // NEVER chang this two , JB
+  const float  mCtbEtaSeg=0.5,  mCtbPhiSeg=M_PI/30; // NEVER chang this two , JB
   gMessMgr->Message("","I") <<"  CtbHitList::initRun(), gain change factor="<<fac<<endm;
   mCtbThres_mev*=fac; // tmp to test cuts
   mCtbThres_ch=(int) (fac*mCtbThres_ch);  // tmp to test cuts
@@ -256,7 +255,7 @@ CtbHitList::ctb_get_slat_from_data(int slat, int tray, float & phiRad, float &et
   if ( phi <   0. ) phi += 360 ;
   if ( phi > 360. ) phi -= 360 ;
 
-  phiRad=phi/180*C_PI;
+  phiRad=phi/180*M_PI;
   eta=(1-2*iz)*(1+2*slat)*0.25;
   // printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,phi,eta);
 

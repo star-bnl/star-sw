@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.79 2017/01/03 22:17:36 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.80 2017/01/06 21:01:49 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1189,7 +1189,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
   }
 
   float phi=atan2(posCTB.y(),posCTB.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for CTB slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for CTB slats
   float eta=posCTB.pseudoRapidity();
   if(fabs(eta)<1) hA[10]->Fill(posCTB.z());
 
@@ -1233,7 +1233,7 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
 
 
   float phi=atan2(posCyl.y(),posCyl.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=posCyl.pseudoRapidity();
   
 
@@ -1293,7 +1293,7 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
   }
 
   float phi=atan2(r.y(),r.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=r.pseudoRapidity();
 
   int iBin=eemcList->addTrack(eta,phi);

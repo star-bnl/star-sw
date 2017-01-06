@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.11 2017/01/03 22:17:37 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.12 2017/01/06 21:01:49 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -16,7 +16,6 @@
 #include "TFile.h"
 #include "TLine.h"
 
-#include "math_constants.h"
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
 
 #include "StPPVertexFinder.h"
@@ -985,7 +984,7 @@ void StPPVertexFinder::matchTrack2CTB(const StGlobalTrack* track,TrackData &t)
   // official Sti node extrapolation
 
   float phi=posCTB.phi();
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for CTB slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for CTB slats
   float eta=posCTB.pseudoRapidity();
   //1 cout<<"#e @ctbNode xyz="<<posCTB<<" eta="<<eta<<" phi/deg="<<phi/3.1416*180<<" path/cm="<<path<<endl;
   if(fabs(eta)<1) hA[10]->Fill(posCTB.z());
@@ -1022,7 +1021,7 @@ void StPPVertexFinder::matchTrack2BEMC(const StGlobalTrack* track,TrackData &t, 
 
 
   float phi=posCyl.phi();
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=posCyl.pseudoRapidity();
   
   // cout<<"#e @bemcNode xyz="<<posCyl<<" etaDet="<<eta<<" phi/deg="<<phi/3.1416*180<<" path/cm="<<path<<endl;
@@ -1075,7 +1074,7 @@ void StPPVertexFinder::matchTrack2EEMC(const StGlobalTrack* track,TrackData &t,f
   }
 
   float phi=r.phi();
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=r.pseudoRapidity();
 
   int iBin=eemcList->addTrack(eta,phi);
@@ -1176,6 +1175,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.12  2017/01/06 21:01:49  smirnovd
+ * Use pi constant from standard library, s/C_PI/M_PI/
+ *
  * Revision 1.11  2017/01/03 22:17:37  smirnovd
  * [Stylistic] Changed public addVertex() to accept references
  *

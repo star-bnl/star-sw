@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <cmath>
 #include <sys/types.h>
-#include "math_constants.h"
 
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include <StMessMgr.h>
@@ -22,7 +21,7 @@ extern void cts_get_ctb_indexes(long, long &, long &);
 //==========================================================
 StCtbUtility::StCtbUtility() {
   
-  mCtbEtaSeg=0.5;   mCtbPhiSeg=C_PI/30; // NEVER chang this two , JB
+  mCtbEtaSeg=0.5;   mCtbPhiSeg=M_PI/30; // NEVER chang this two , JB
   
   // parameters
   mCtbThres_mev=1; //to reject slats with low dE for M-C data, CTB clibration: 2 MeV==5 ADC
@@ -54,7 +53,7 @@ void StCtbUtility::ctb_get_slat_from_data(int slat, int tray, float & phiRad, fl
   if ( phi <   0. ) phi += 360 ;
   if ( phi > 360. ) phi -= 360 ;
 
-  phiRad=phi/180*C_PI;
+  phiRad=phi/180*M_PI;
   eta=(1-2*iz)*(1+2*slat)*0.25;
   // printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,phi,eta);
   
