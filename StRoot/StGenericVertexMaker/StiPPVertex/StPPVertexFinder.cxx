@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.80 2017/01/06 21:01:49 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.81 2017/01/06 21:01:58 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -539,8 +539,7 @@ StPPVertexFinder::fit(StEvent* event) {
   int vertexID=0;
   while(1) {
     if(! buildLikelihoodZ() ) break;
-    VertexData V;
-    V.id = ++vertexID;
+    VertexData V(++vertexID);
     if(! findVertexZ(V)) break;
   
     bool trigV = evalVertexZ(V);   // V.print();
