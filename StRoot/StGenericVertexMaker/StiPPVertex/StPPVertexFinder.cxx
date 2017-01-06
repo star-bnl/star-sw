@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.81 2017/01/06 21:01:58 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.82 2017/01/06 21:02:05 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -68,7 +68,9 @@
 //==========================================================
 //==========================================================
 
-StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode) {
+StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode),
+  mDropPostCrossingTrack(true) // default PCT rejection on
+{
 
   mTotEve              = 0;
   HList=0;
@@ -76,7 +78,6 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(
   memset(hA,0,sizeof(hA));
 
   UseCTB(true);                      // default CTB is in the data stream
-  setDropPostCrossingTrack(true);    // default PCT rejection on
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
   mAlgoSwitches=0; // default, as for 2008 pp data production
