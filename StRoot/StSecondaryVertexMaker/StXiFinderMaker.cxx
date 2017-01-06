@@ -16,7 +16,6 @@
 #include "TVector2.h"
 #include "tables/St_exi_exipar_Table.h"
 #include "PhysicalConstants.h"
-#include "math_constants.h"
 #include "phys_constants.h"
 
 
@@ -271,7 +270,7 @@ Bool_t StXiFinderMaker::UseV0() {
       epsOrigin.setY(-1.);
       epsMomentum.setX(-1.);
       epsMomentum.setY(-1.);
-      cstPsi=C_PI;
+      cstPsi=M_PI;
       cstOrigin.setX(2*xPvx.x());
       cstOrigin.setY(2*xPvx.y());
       }
@@ -595,7 +594,7 @@ Bool_t StXiFinderMaker::UseV0() {
               curvature_tmp = TMath::Abs(bcharge_tmp)*C_D_CURVATURE/pt_tmp;
               dip_tmp = atan(pXi.z()/pt_tmp);
               h_tmp = ((bcharge_tmp > 0) ? -1 : 1);
-              phase_tmp = atan2(pXi.y(),pXi.x())-(h_tmp*C_PI_2);
+              phase_tmp = atan2(pXi.y(),pXi.x())-(h_tmp*M_PI_2);
               origin_tmp.setX(xpp.x());
               origin_tmp.setY(xpp.y());
               origin_tmp.setZ(xpp.z());
@@ -652,8 +651,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.24 2016/12/12 17:18:04 smirnovd Exp $
+// $Id: StXiFinderMaker.cxx,v 1.25 2017/01/06 21:01:50 smirnovd Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.25  2017/01/06 21:01:50  smirnovd
+// Use pi constant from standard library, s/C_PI/M_PI/
+//
 // Revision 1.24  2016/12/12 17:18:04  smirnovd
 // Removed outdated ClassImp ROOT macro
 //

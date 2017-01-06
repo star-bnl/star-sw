@@ -3,8 +3,6 @@
 #include <assert.h>
 #include <cmath>
 
-#include "math_constants.h"
-
 #include <StMessMgr.h>
 
 #include "EemcHitList.h" 
@@ -26,7 +24,7 @@
 //==========================================================
 //==========================================================
 EemcHitList::EemcHitList(StEEmcDb* x, uint y, EEmcGeomSimple *z) :
-  ScintHitList(-C_PI/60.,C_PI/30,60, 999,999,8,(char *) "Eemc",4,0.75) {
+  ScintHitList(-M_PI/60.,M_PI/30,60, 999,999,8,(char *) "Eemc",4,0.75) {
   eeDb=x; 
   killStatEEmc=y ;
   geomE=z;
@@ -73,7 +71,7 @@ EemcHitList::initRun(){
 	int isec=x->sec-1, isub=x->sub-'A';
 	float eta=geomE->getEtaMean(ieta);  
 	float phi=geomE->getPhiMean(isec,isub); //   // -pi <= phi < pi
-	if( phi<0) phi+=2*C_PI; // I want phi in [0,2Pi]
+	if( phi<0) phi+=2*M_PI; // I want phi in [0,2Pi]
 
 	//........... convert it to private bins
 	int iEta=etaBin(eta); // unique vertx finder bin numbering
