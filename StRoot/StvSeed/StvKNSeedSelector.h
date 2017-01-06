@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <vector>
 #include <map>
-
+#include "StvSeed/StvSeedConst.h"
 typedef std::multimap <float,int> MyPhiDiv;
 
 typedef std::map <float,MyPhiDiv> MyTheDiv;
@@ -17,12 +17,13 @@ typedef std::map <float,MyPhiDiv> MyTheDiv;
 
 
 typedef std::vector<void*> VoidVec;
-enum {kKNumber=2};
+enum {kKNumber=3};
 
 class StvKNAux {
 public:
-  StvKNAux() 		{ Reset();}
-  void Reset() 		{ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;mNbor[i]=-1;}}
+  StvKNAux(); 	
+  void Reset(); 		
+  int Test(int idx) const;
 public:
   void *mHit;			//void pointer to hit
   const void *mDet;		//void pointer to detector plane
@@ -43,7 +44,8 @@ public:
 
   StvKNSeedSelector();
   virtual ~StvKNSeedSelector(){;}
-     void  Reset(const float startPos[3],void *voidHit);
+virtual int GetIdTru(const void *hit) const;
+     void  Reset(const float startPos[3],const Mtx33F_t *dir,void *voidHit);
      void  Add  (const float      pos[3],void *voidHit, const void *voidDet);
       int  Select();  
       int  Zelect();  
@@ -59,6 +61,7 @@ private:
 const float *Eigen() const {return mEigen;}
 protected:  
  int  mState;		//Status, &1 =narrow trace
+const Mtx33F_t *mDir;
 void *mStartHit;
 float mStartPos[3];
 float mAveDir[3];
@@ -71,15 +74,18 @@ float mMaxAccu;	//Max accumulated angle between hit & bestHit in Pass()
 float mMaxNear;	//Max angle between hits in Pass()
 float mErr;	//Estimated space error
 int   mNHits;	//number of selected hits
-int   mIx;	//index of X in array,=0 in med eta =2 in forward eta
-int   mIy;	//index of Y in array,=1 always 
-int   mIz;	//index of Z in array,=2 in med eta =0 in forward eta
 VoidVec mSel;
 std::vector<StvKNAux> mAux;
 std::map<float,int> mMapLen;
 MyTheDiv mTheDiv;
 };
-
-
-
+inline StvKNAux::StvKNAux()
+{
+  memset(this,0,sizeof(*this));
+  Reset();
+}
+inline void StvKNAux::Reset()
+{
+ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;mNbor[i]=-1;}
+}
 #endif
