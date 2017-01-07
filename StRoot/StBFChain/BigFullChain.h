@@ -1215,6 +1215,7 @@ Bfc_st BFC[] = { // standard chains
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
   {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
   {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
+  {"OGridLeakFull","" ,"","",""                                     ,"","Full Grid Leak correction",kFALSE},
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
   {"AlignSectors",""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},

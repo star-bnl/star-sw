@@ -1,7 +1,7 @@
 #ifndef VertexData_h
 #define VertexData_h
 /*********************************************************************
- * $Id: VertexData.h,v 1.5 2016/11/07 21:19:47 smirnovd Exp $
+ * $Id: VertexData.h,v 1.6 2017/01/06 21:01:58 smirnovd Exp $
  *********************************************************************
  * full description of found vertex
  */
@@ -19,7 +19,7 @@ class VertexData {
   int nBtofV,nCtbV,nBemcV,nEemcV,nTpcV,nAnyVeto; // number of vetoed tracks
   
   // methods
-  VertexData();
+  VertexData(int vertexId=0);
   VertexData(const TVector3& position);
   void print(ostream& os) const;
 };
@@ -28,6 +28,9 @@ class VertexData {
 
 /*
  * $Log: VertexData.h,v $
+ * Revision 1.6  2017/01/06 21:01:58  smirnovd
+ * VertexData: Initialize vertexID in constructor
+ *
  * Revision 1.5  2016/11/07 21:19:47  smirnovd
  * VertexData: Added constructor to build vertex with coordinates
  *

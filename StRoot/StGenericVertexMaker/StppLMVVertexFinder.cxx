@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.29 2017/01/03 22:17:36 smirnovd Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.30 2017/01/06 21:01:48 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -15,7 +15,6 @@
 #include <SystemOfUnits.h>
 #include <StMessMgr.h>
 #include <cmath>
-#include "math_constants.h"
 
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
 #include "StMaker.h"
@@ -49,7 +48,7 @@ StppLMVVertexFinder::Init() {
     mMinMatchTr      = 1;              // minimal # of tracks matched to CTB 
     mBLequivNtr      = 100;            // equivalent # of tracks for BeamLine
     mMatchCtbMax_eta = mCtbEtaSeg/2.+0.02;
-    mMatchCtbMax_phi = mCtbPhiSeg/2.+C_PI*1./180.;
+    mMatchCtbMax_phi = mCtbPhiSeg/2.+M_PI*1./180.;
   } else {
     LOG_INFO << "The  ppLMV5 cuts have been activated" << endm; 
     mMaxTrkDcaRxy    = 2.0;            
@@ -60,7 +59,7 @@ StppLMVVertexFinder::Init() {
     mMinMatchTr      = 2;              
     mBLequivNtr      = 20;             
     mMatchCtbMax_eta = mCtbEtaSeg/2.+0.02;
-    mMatchCtbMax_phi = mCtbPhiSeg/2.+C_PI*0./180.;
+    mMatchCtbMax_phi = mCtbPhiSeg/2.+M_PI*0./180.;
   }
 }
 
@@ -200,7 +199,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
   //tmp - lits all matched tracks
   for( uint j=0;j<mPrimCand.size();j++) {
     StThreeVectorD p=mPrimCand[j].helix.momentum(mBfield*tesla);
-    printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180);    
+    printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/M_PI*180);
   } 
 
   //  ----------  D O   F I N D    V E R T E X
@@ -218,7 +217,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
   for( uint j=0;j<mPrimCand.size();j++) {
     double spath = mPrimCand[j].helix.pathLength( getVertex(0)->position().x(),getVertex(0)->position().y());
     StThreeVectorD p=mPrimCand[j].helix.momentumAt(spath,mBfield*tesla);
-    // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
+    // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/M_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
   }
 	 
   gMessMgr->Message("","I") << "Prim ppLMV Vertex at " << getVertex(0)->position()<<endm;
@@ -364,7 +363,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   // printf(" punch2 x,y,z=%.1f, %.1f, %.1f, Rxy=%.1f\n",posCTB.x(),posCTB.y(),posCTB.z(),xmagn);
   
   float phi=atan2(posCTB.y(),posCTB.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for CTB slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for CTB slats
   
   // printf("posCTB.z()=%f posDCA.z()=%f\n",posCTB.z(),posDCA.z());
 
@@ -373,10 +372,10 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
  
    // match to CTB slats in phi
     float del_phi=phi-mCtbHits[ih].phi;
-    if(del_phi>C_PI) del_phi-=2*C_PI;
-    if(del_phi<-C_PI) del_phi+=2*C_PI;
+    if(del_phi>M_PI) del_phi-=2*M_PI;
+    if(del_phi<-M_PI) del_phi+=2*M_PI;
     //printf("phiRad trk=%f  CTB=%f del=%f\n",phi,mCtbHits[ih].phi,del_phi);
-    //printf("match ih=%d del_phi=%f/deg\n",ih, del_phi/C_PI*180);
+    //printf("match ih=%d del_phi=%f/deg\n",ih, del_phi/M_PI*180);
     if(fabs(del_phi) >mMatchCtbMax_phi) continue;
     
     // match to CTB slats in eta
@@ -385,7 +384,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
     //printf("  match ih=%d del_eta=%f\n",ih, del_eta);
     if(fabs(del_eta) >mMatchCtbMax_eta) continue;
     
-    // printf("  CTB match OK:  del_eta=%.2f, del_phi/deg=%.1f \n", del_eta,del_phi/C_PI*180);
+    // printf("  CTB match OK:  del_eta=%.2f, del_phi/deg=%.1f \n", del_eta,del_phi/M_PI*180);
     sigma=strag;
     n6++;    
     //  printf("add tr %d w/ sigma=%f p/GeV=%f spath/cm=%f nFitP=%d nSVT=%d\n",mPrimCand.size(),sigma,pmom.mag(),spath,nFitP, track->detectorInfo()->numberOfPoints(kSvtId) );
@@ -606,6 +605,9 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.30  2017/01/06 21:01:48  smirnovd
+ * Use pi constant from standard library, s/C_PI/M_PI/
+ *
  * Revision 1.29  2017/01/03 22:17:36  smirnovd
  * [Stylistic] Changed public addVertex() to accept references
  *

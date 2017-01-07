@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.639 2016/11/08 20:39:07 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.640 2017/01/06 22:30:45 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -792,6 +792,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , 1);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , 1);
 	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", 1);
+	if( GetOption("OGridLeakFull")) mk->SetAttr("OGridLeakFull", 1);
 	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , 1);
 	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",1);
       }

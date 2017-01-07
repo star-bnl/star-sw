@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.63 2015/05/21 21:48:22 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.64 2017/01/06 22:30:45 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.64  2017/01/06 22:30:45  genevb
+ * Introduce FullGridLeak distortion correction
+ *
  * Revision 1.63  2015/05/21 21:48:22  fisyak
  * Fix array out of bound, comment out tpcGlobalPosition field dependence
  *
@@ -214,7 +217,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   if (Done) return kStOK;
   Done = kTRUE;
   // Create Needed Tables:    
-  Float_t gFactor = StarMagField::Instance()->GetFactor();
+  //Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
   if         (IAttr("useLDV")) {
     SetFlavor("laserDV","tpcDriftVelocity");
@@ -258,6 +261,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OBMap2d")    ) mask |= ( kFast2DBMap   << 1);
     if( IAttr("OGridLeak")  ) mask |= ( kGridLeak     << 1);
     if( IAttr("OGridLeak3D")) mask |= ( k3DGridLeak   << 1);
+    if( IAttr("OGridLeakFull")) mask |= ( kFullGridLeak   << 1);
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;

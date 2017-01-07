@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.79 2017/01/03 22:17:36 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.82 2017/01/06 21:02:05 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -68,7 +68,9 @@
 //==========================================================
 //==========================================================
 
-StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode) {
+StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode),
+  mDropPostCrossingTrack(true) // default PCT rejection on
+{
 
   mTotEve              = 0;
   HList=0;
@@ -76,7 +78,6 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(
   memset(hA,0,sizeof(hA));
 
   UseCTB(true);                      // default CTB is in the data stream
-  setDropPostCrossingTrack(true);    // default PCT rejection on
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
   mAlgoSwitches=0; // default, as for 2008 pp data production
@@ -539,8 +540,7 @@ StPPVertexFinder::fit(StEvent* event) {
   int vertexID=0;
   while(1) {
     if(! buildLikelihoodZ() ) break;
-    VertexData V;
-    V.id = ++vertexID;
+    VertexData V(++vertexID);
     if(! findVertexZ(V)) break;
   
     bool trigV = evalVertexZ(V);   // V.print();
@@ -1189,7 +1189,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
   }
 
   float phi=atan2(posCTB.y(),posCTB.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for CTB slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for CTB slats
   float eta=posCTB.pseudoRapidity();
   if(fabs(eta)<1) hA[10]->Fill(posCTB.z());
 
@@ -1233,7 +1233,7 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
 
 
   float phi=atan2(posCyl.y(),posCyl.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=posCyl.pseudoRapidity();
   
 
@@ -1293,7 +1293,7 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
   }
 
   float phi=atan2(r.y(),r.x());
-  if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
+  if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=r.pseudoRapidity();
 
   int iBin=eemcList->addTrack(eta,phi);

@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <cmath>
 
-#include <math_constants.h>
 #include <StMessMgr.h>
 
 #include "BemcHitList.h"
@@ -22,7 +21,7 @@ namespace StEvPPV {
 //==========================================================
 //==========================================================
 BemcHitList::BemcHitList() :
-  ScintHitList(0.,C_PI/60,120, -1.,0.05,40,(char *) "Bemc",4,0.75) {
+  ScintHitList(0.,M_PI/60,120, -1.,0.05,40,(char *) "Bemc",4,0.75) {
   myTable = new StBemcTables();
   geomB = StEmcGeom::instance("bemc");
   kSigPed=5.0; 
@@ -63,7 +62,7 @@ BemcHitList::initRun() {
     float eta,phi;
     geomB->getEta(m,e,eta);
     geomB->getPhi(m,s,phi);  // -pi <= phi < pi
-    if( phi<0) phi+=2*C_PI; // I want phi in [0,2Pi]
+    if( phi<0) phi+=2*M_PI; // I want phi in [0,2Pi]
     
     //........... convert it to private bins
     int iEta=etaBin(eta);
@@ -74,7 +73,7 @@ BemcHitList::initRun() {
 
     // if(id<41)
     //       printf("%d %d id=%d m,e,s=%d:%d:%d eta=%.4f phi/deg=%.2f bin %d:%d:%d\n",
-    //		   eta<0 && phi>C_PI,  status, id,m,e,s,eta,phi/C_PI*180,iPhi,iEta,iBin);    
+    //		   eta<0 && phi>M_PI,  status, id,m,e,s,eta,phi/M_PI*180,iPhi,iEta,iBin);    
     assert(mes2bin[m-1][e-1][s-1]==-1); //tmp, to check BTOW code
     mes2bin[m-1][e-1][s-1]=iBin;
 

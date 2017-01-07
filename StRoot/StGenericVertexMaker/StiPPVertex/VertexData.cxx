@@ -7,8 +7,8 @@
 #include "VertexData.h"
 //==========================================================
 //==========================================================
-VertexData::VertexData() {
-  id=0;
+VertexData::VertexData(int vertexId) {
+  id=vertexId;
   r=TVector3(999,999,999);
   gPtSum=0;
   nAnyMatch=nCtb=nBemc=nEemc=nTpc=0;
