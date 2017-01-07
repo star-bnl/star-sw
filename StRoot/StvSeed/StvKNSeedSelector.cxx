@@ -94,6 +94,11 @@ float wt=len*len;
  A[0] += B[0]*wt; A[1] += B[1]*wt; A[2] += B[2]*wt;
 }
 //_____________________________________________________________________________
+static inline void Sub( float A[3],const float B[3],float C[3]) 
+{
+ A[0] = B[0]-C[0]; A[1] = B[1]-C[1]; A[2] = B[2]-C[2];
+}
+//_____________________________________________________________________________
 static inline void Zer( float A[3]) 
 {
  A[0] =0; A[1] = 0; A[2] =0;
@@ -111,35 +116,59 @@ static inline float D0t(const  float A[3],const float B[3])
 {
  return A[0]*B[0]+A[1]*B[1]+A[2]*B[2];
 }
+//_____________________________________________________________________________
+int StvKNAux::Test(int idx) const
+{
+//   void *mHit;			//void pointer to hit
+//   const void *mDet;		//void pointer to detector plane
+//   float mLen;			//distance from the 1st hit
+//   float mDir[3];		//direction from the 1st hit
+//   float mDist[kKNumber];	//sorted angles to nearest hits
+//   float mPhi;
+//   float mThe;
+//   float mCosThe;
+//   int   mNbor[kKNumber];	//indices in Aux array to nearest hits
+//   int   mSel;			//hit selected
 
+  assert(mHit && "Hit is zero");
+  assert(mDet && "Hit is zero");
+  assert(mLen>0 && mLen <1000 && "mLen is wrong");
+  double dot = D0t(mDir,mDir);
+  assert (fabs(dot-1)<1e-4 && "mDir is wrong");
+  for (int i=0;i<kKNumber;i++) { 
+    assert(mNbor[i]!=idx);
+    assert(abs(mNbor[i])<10000 && "Wrong mNbor");
+    assert( mNbor[i]< 0 || (mDist[i]>=0    && mDist[i]< 100 ));
+    assert( mNbor[i]>=0 || (mDist[i]>=1e10 && mDist[i]<=1e11));
+  }
+  assert(mPhi>= -M_PI*2 && mPhi<=M_PI*2  ); 
+  assert(mThe>= -M_PI/2 && mThe<=M_PI/2); 
+  return 0;
+}
 //_____________________________________________________________________________
 void StvKNSeedSelector::Insert( int iA,int iB,float dis) 
 {
    float *a = mAux[iA].mDist;
-   int   *n = mAux[iA].mNbor;
    if (dis >= a[kKNumber-1]) return;
+   int   *n = mAux[iA].mNbor;
    auto *detB = mAux[iB].mDet;
-   int jk = 0,jj=0;
-   for (jk=0;jk<kKNumber;jk++) {
-     if (n[jk]<0) 	break;
-     auto *detJ = mAux[n[jk]].mDet;
-     if (detB != detJ) 	continue;
-     if (dis>a[jk]) 	return;
-     for (jj=jk+1;jj<kKNumber;jj++) {
-       if (n[jj]<0) 	break;
-       n[jj-1]=n[jj]; a[jj-1] = a[jj];
+   for (int jk=0;jk<kKNumber;jk++) {
+     int kase = (dis>a[jk]);
+     if (n[jk]<0){
+       kase|=2;
+     } else {
+       auto *detJ = mAux[n[jk]].mDet;
+       if (detB == detJ) kase|=2;
      }
-     n[jj]=-99; a[jj]=1e11;
+     switch (kase) {
+       case 1: continue;		//Bigger only, goto next
+       case 3: return;			//Bigger & same, Get out
+       case 0: 				//Insert
+               for (int j=kKNumber-2;j>=jk;j--) {a[j+1]=a[j]; n[j+1]=n[j];}		//Insert
+       default: a[jk]=dis; n[jk]=iB; 	//end of list. Replace
+     }  
      break;
    }
-   for (jk=0;jk<kKNumber;jk++) {
-     if (n[jk]<0) 	break;
-     if (dis < a[jk])	break;
-   }
-   if (n[jk]>=0) {
-     for (jj=kKNumber-2; jj>=jk;jj--) 	{a[jj+1] = a[jj]; n[jj+1]=n[jj];}       
-   }
-   a[jk]=dis; n[jk] = iB;
    if (mKNNDist < a[kKNumber-1]) return;
    mKNNDist = a[kKNumber-1];
    mMinIdx = iA;
@@ -155,7 +184,7 @@ StvKNSeedSelector::StvKNSeedSelector()
 /// @param float startPos[3] - position of starting hit
 /// @param void *startHit    - addres of hit. Format of hit is not used there
 
-void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)		
+void StvKNSeedSelector::Reset(const float startPos[3],const Mtx33F_t *dir, void *startHit)		
 {
   mState = 0;
   mAux.clear();
@@ -164,17 +193,13 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
 #ifdef KNNMAP2
   mTheMap.clear();
 #endif
+  mDir = dir;
   mStartHit = startHit;
   memcpy(mStartPos,startPos,sizeof(mStartPos));
   mKNNDist = 1e11;
   mMinIdx = -1;
   mStartRad = sqrt(Sq(mStartPos[0])+Sq(mStartPos[1]));
   mErr = SEED_ERR(mStartRad)*kErrFact;
-  if (mStartRad > 0.5*fabs(mStartPos[2])) {
-    mIx=0;mIy=1;mIz=2;
-  } else {
-    mIx=2;mIy=1;mIz=0;
-  }
   Zer(mAveDir);  
 }
 //_____________________________________________________________________________
@@ -191,13 +216,14 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit,const void *voidDe
   aux.mHit = voidHit; 
   aux.mDet = voidDet; 
   float *myDir=aux.mDir,nor=0;
-  for (int i=0;i<3;i++) {myDir[i] = pos[i]-mStartPos[i];nor+= myDir[i]*myDir[i];}
-  nor = sqrt(nor);
-  for (int i=0;i<3;i++) {myDir[i]/=nor;}
-  aux.mPhi = atan2(myDir[mIy],myDir[mIx]);
-  aux.mCosThe = sqrt((1-myDir[mIz])*(1+myDir[mIz]));
+  Sub(myDir,pos,mStartPos);
+  nor = Nor(myDir);
+  float myD[3];
+  for (int i = 0;i<3;i++) {myD[i] = D0t(myDir,(*mDir)[i]);}
+  aux.mPhi = atan2(myD[1],myD[0]);
+  aux.mCosThe = sqrt((1-myD[2])*(1+myD[2]));
   if (aux.mCosThe<=1e-10) { mAux.resize(last); return;}
-  aux.mThe = asin(myDir[mIz]);
+  aux.mThe = asin(myD[2]);
   aux.mLen = nor;aux.mSel = 0;
 #ifdef KNNMAP1
   float iThe = floor(aux.mThe/kStpTheDiv)*kStpTheDiv;
@@ -231,13 +257,15 @@ void  StvKNSeedSelector::Relink()
   mKNNDist = kMaxDis;
   for (int i1=0;i1<(int)mAux.size();i1++) {
 //    if ( mAux[i1].mSel) continue;
+    assert(fabs(mAux[i1].mThe)<= M_PI  );
+    assert(fabs(mAux[i1].mPhi)<= M_PI*2);
     mAux[i1].Reset();  
     for (int i2=0;i2<i1;i2++) {
 //      if ( mAux[i2].mSel) continue;
       if (fabs(mAux[i1].mThe-mAux[i2].mThe)>mKNNDist)	continue;
       float dang = fabs(mAux[i1].mPhi-mAux[i2].mPhi);
       if (dang > M_PI) dang -= 2*M_PI;
-      if (fabs(dang)*mAux[i1].mCosThe>mKNNDist) 		continue;
+      if (fabs(dang)*mAux[i1].mCosThe>mKNNDist) 	continue;
       Update(i1,i2);
   } }
 }
@@ -350,9 +378,11 @@ static int nCall=0; nCall++;
   while (1) {
     mSel.clear();
     mMapLen.clear();
+    for (int i=0;i<(int)mAux.size();i++) { mAux[i].Test(i); }
  
     Relink();
     if (mMinIdx<0) return 0;
+    for (int i=0;i<(int)mAux.size();i++) { mAux[i].Test(i); }
 
   ///		define the best direction
     memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
@@ -470,8 +500,9 @@ static TCanvas *myCanvas = 0;
 static TGraph  *szGraph  = 0;
 static TGraph  *ptGraph  = 0;
 static TGraph  *slGraph  = 0;
+  int startIdTru = GetIdTru(mStartHit);
   std::vector<double> X[3],Y[3];
-  double reg[2]={999,-999};
+  double reg[2][2]={{999,-999},{999,-999}};
 
   TVector3 mainDir(mStartPos);mainDir*=(-1.);
   mainDir = mainDir.Unit();
@@ -481,15 +512,16 @@ static TGraph  *slGraph  = 0;
   for (int ia =0;ia<nPts;ia++) {
     if (!mAux[ia].mHit) continue;
     TVector3 hit(mAux[ia].mDir);
-    double uu = myY.Dot(hit);
-    double vv = myZ.Dot(hit);
-    double v = asin(vv);      
-    double u = asin(uu/cos(v));
+    double v = mAux[ia].mPhi;      
+    double u = mAux[ia].mThe;
     u=u/M_PI*180;
     v=v/M_PI*180;
-    if (reg[0]>u) reg[0]=u;if (reg[0]>v) reg[0]=v;
-    if (reg[1]<u) reg[1]=u;if (reg[1]<v) reg[1]=v;
-    int k = (mAux[ia].mSel&3); if (k>2) k=2;
+    assert(fabs(u)<360 && fabs(v)<360);
+    if (reg[0][0]>u) reg[0][0]=u;if (reg[0][1]<u) reg[0][1]=u;
+    if (reg[1][0]>v) reg[1][0]=v;if (reg[1][1]<v) reg[1][1]=v;
+    int k = (mAux[ia].mSel&1); 
+    int idt = GetIdTru(mAux[ia].mHit);
+    if (startIdTru && startIdTru == idt) k = 2;
     X[k].push_back(u);Y[k].push_back(v);
   }
 
@@ -500,14 +532,16 @@ static TGraph  *slGraph  = 0;
   delete slGraph; slGraph=0;
 
 //		Define the scene
-  szGraph = new TGraph(2, reg, reg);
+  szGraph = new TGraph(2, reg[0], reg[1]);
   szGraph->SetMarkerColor(kYellow);
+  szGraph->SetMarkerSize(5);
   szGraph->Draw("AP");
-  int color[3]={kGreen,kRed,kBlue};
+  int color[3]={kGreen,kRed,kMagenta};
   for (int k=0;k<3;k++) {
     if (!X[k].size()) continue;
     ptGraph  = new TGraph(X[k].size(), &X[k][0], &Y[k][0]);
     ptGraph->SetMarkerColor(color[k]);
+    ptGraph->SetMarkerSize(1);
     ptGraph->Draw("Same *");
   }
 
@@ -533,3 +567,9 @@ static StvDraw *myDraw = new StvDraw;
 
 }
 #endif //Show
+#include "Stv/StvHit.h"
+//______________________________________________________________________________
+int StvKNSeedSelector::GetIdTru(const void *hit) const
+{
+  return ((StvHit*)hit)->idTru();
+}
