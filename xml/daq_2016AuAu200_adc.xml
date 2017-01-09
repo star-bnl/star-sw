@@ -2,9 +2,9 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-   setenv STARFPE NO
-   setenv NODEBUG yes
-   starver .DEV2
+#   setenv STARFPE NO
+#   setenv NODEBUG yes
+#   starver .DEV2
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -39,7 +39,6 @@ root.exe -x -q -b 'bfc.C(1000,"'${chain}'","'${evtsFile}'","'$output'","'${filel
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
-<input URL="file:/net/l404/data/fisyak/daq/2016/126/*/st_physics_adc_*.daq" />
-<!-- <input URL="file:/star/data03/daq/2016/125/17125034/st_physics_adc_17125034_raw*.daq" />
-<input URL="file:/star/data03/daq/2016/126/17126033/st_physics_adc_17126033_raw*.daq" /> -->
+<input URL="file:/star/data03/daq/2016/125/17125034/st_physics_adc_17125034_raw*.daq" />
+<input URL="file:/star/data03/daq/2016/126/17126033/st_physics_adc_17126033_raw*.daq" />
 </job>

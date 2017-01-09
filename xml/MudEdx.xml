@@ -13,7 +13,9 @@
 	<stdout URL="file:./$JOBID.log" />
 	<stderr URL="file:./$JOBID.err" />
 <!-- <input URL="catalog:star.bnl.gov?production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_MuDst,filename~st_physics,storage=nfs" nFiles="20000" />  -->
-<input URL="catalog:star.bnl.gov?collision=auau200,production=P16id,filetype=daq_reco_mudst,filename~st_physics,runnumber[]15090000-15170999" nFiles="20000" />
+<!-- <input URL="catalog:star.bnl.gov?collision=auau200,production=P16id,filetype=daq_reco_mudst,filename~st_physics,runnumber[]15090000-15170999" nFiles="20000" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P14ii,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,filename~MuDst,tpx=1,sanity=1,trgsetupname~production_15GeV_2014,storage!=HPSS" preferStorage="local" nFiles="all" /> -->
+<input URL="catalog:star.bnl.gov?production=P11id,collision=auau200,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,filename~MuDst,tpx=1,tof=1,sanity=1,trgsetupname~AuAu200_production_2011,storage!=HPSS" preferStorage="local" nFiles="20000" />
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/*.MuDst.root" /> -->
 <!-- <input URL="catalog:star.bnl.gov?trgsetupname=AuHe3_production_2014,production=P15ib,filetype=daq_reco_MuDst,storage=nfs" nFiles="1000" /> -->
 <!-- <input URL="catalog:star.bnl.gov?production=P10ik,trgsetupname=AuAu39_production,filetype=daq_reco_MuDst,tpx=1,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" nFiles="100" /> -->
