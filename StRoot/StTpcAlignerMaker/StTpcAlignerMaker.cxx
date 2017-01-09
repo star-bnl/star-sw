@@ -268,8 +268,6 @@ Int_t StTpcAlignerMaker::Make(){
   Double_t tofMin = 1e9; 
   Double_t tofMax =   0;
   if (btofcol) {
-    Int_t trayMin = 0, trayMax = 0;
-    
     StSPtrVecBTofHit &tofHits = btofcol->tofHits();
     UInt_t nHits = tofHits.size();
     for(UInt_t i=0; i < nHits; i++) {
@@ -278,8 +276,8 @@ Int_t StTpcAlignerMaker::Make(){
       if (!aHit->associatedTrack()) continue;
       if (Debug()%10 > 5) cout << "TofHit : " << i << *aHit << " Tpc sector " << TpcSectorFromBTofTray(aHit->tray()) << endl;
       Double_t time = aHit->leadingEdgeTime();
-      if (time > tofMax) {tofMax = time; trayMax = aHit->tray();}
-      if (time < tofMin) {tofMin = time; trayMin = aHit->tray();}
+      if (time > tofMax) {tofMax = time;}
+      if (time < tofMin) {tofMin = time;}
     }
   }
   StTrackNode *node=0;
@@ -380,14 +378,17 @@ Int_t StTpcAlignerMaker::Make(){
       if (fTpcInOutMatch->NoFitPoints < 10) continue;
       Int_t NhitInSector[24]; memset(NhitInSector,0,sizeof(NhitInSector));
       // Find sector with maximum no. of hits
-      UInt_t sectorWithMaxRowNo = 0;
+      //      UInt_t sectorWithMaxRowNo = 0;
       UInt_t MaxRowNo = 0;
       for (UInt_t j=0; j<hvec.size(); j++) {// hit loop
 	if (! hvec[j]) continue;
 	if (hvec[j]->detector() != kTpcId) continue;
 	StTpcHit *tpcHit = (StTpcHit *) hvec[j];
 	Int_t sector = tpcHit->sector();
-	if (tpcHit->padrow() > MaxRowNo) {MaxRowNo = tpcHit->padrow(); sectorWithMaxRowNo = sector;}
+	if (tpcHit->padrow() > MaxRowNo) {
+	  MaxRowNo = tpcHit->padrow(); 
+	  //	  sectorWithMaxRowNo = sector;
+	}
 	NhitInSector[sector-1]++;
       }	
       Int_t sectorWithMaxNoHits = -1;

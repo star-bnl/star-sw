@@ -4,15 +4,15 @@
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-#  setenv NODEBUG yes
-#  starver .DEV2 
+  setenv NODEBUG yes
+  starver .DEV2 
   set evtsFile = $INPUTFILE0;
   set file     = `basename $evtsFile .MuDst`
   echo "${evtsFile}"
   set logFile  = ${file}B.log
 # daq_2014_AuAu200X
 #    root4star -q -b 'TpcRS.C(4000,"y2014a,TpxClu2D,TpcRS,KFVertex,xgeometry,CorrX","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
-    root4star -q -b 'TpcRS.C(4000,"y2016a,TpcRS,StiCA,KFVertex,xgeometry,CorrX,McTpcAna,TpxClu2D,-evout","'${evtsFile}'","heed,PhysicsOff")' &gt;&amp; ${logFile}
+    root4star -q -b 'TpcRS.C(1000,"y2016a,TpcRS,StiCA,KFVertex,xgeometry,CorrX,McTpcAna,TpxClu2D","'${evtsFile}'","heed,PhysicsOff")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2014_AuAu200Z3/*MuDst.root" />  -->

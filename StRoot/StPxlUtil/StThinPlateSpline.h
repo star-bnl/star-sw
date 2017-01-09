@@ -37,7 +37,7 @@ public:
    StThinPlateSpline(Int_t nMeasurements = 200);
    StThinPlateSpline(Int_t nMeasurements, Double_t *X, Double_t *Y, Double_t *W, Double_t *A);
    StThinPlateSpline(Int_t nMeasurements, Float_t *X, Float_t *Y, Float_t *W, Float_t *A);
-   ~StThinPlateSpline();
+   virtual ~StThinPlateSpline();
    //! fit measurements on a profile with tps to get mX, mY, mW, mA matrix
    void fit(Int_t nMeasurements, Double_t *xMeasurement, Double_t *yMeasurement, Double_t *zMeasurement, Double_t lambda = 0);
    Double_t ur(Double_t r2) const;

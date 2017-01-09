@@ -23,7 +23,7 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-  set Chain = "P2016a,TpxRaw,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,,dEdxCalib,dbV20151120";
+  set Chain = "P2016a,TpxRaw,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,,dEdxCalib,dbV20161116";
   set ddir = `pwd`
   set case = `basename $ddir`; echo "case = $case";
   echo $case | grep D2
