@@ -17,7 +17,7 @@ StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
    // Create Asynch signal handler
   if (! fgCloseFileOnTerminate ) {
      fgCloseFileOnTerminate = new StCloseFileOnTerminate;
-     //     ::Warning("StCloseFileOnTerminate::Instantiate","Asynch signal handler has been created");
+     ::Warning("StCloseFileOnTerminate::Instantiate","Asynch signal handler has been created");
   }
   return *fgCloseFileOnTerminate;
 }

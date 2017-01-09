@@ -18,4 +18,8 @@ enum ESeeds {kMinHits=5,kMaxHits = 10,kZRange=200};
 #define kRelErr  (1e-3)
 #define SEED_ERR(rad) (kMinErr+rad/200*kMaxErr)
 
+typedef float Mtx33F_t[3][3];
+
+
+
 #endif
