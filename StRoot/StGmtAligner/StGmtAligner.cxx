@@ -107,7 +107,7 @@ void StGmtAligner::MakeListOfRotations() {
   if (EventT::RotMatrices()) return;
   THashList *rotMHash = new THashList(100,0);
   EventT::SetRotMatrices(rotMHash);
-  //  THashList *hash = 0;
+  THashList *hash = 0;
   const TGeoHMatrix& tpc2Glob = gStTpcDb->Tpc2GlobalMatrix();
   for(int module=0;module<  kGmtNumModules;module++)    {
     TGeoHMatrix *WL            = new TGeoHMatrix(StGmtOnModule::instance()->GetMatrix(module));

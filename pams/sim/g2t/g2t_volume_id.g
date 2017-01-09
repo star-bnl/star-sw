@@ -319,6 +319,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       btog_posit1(2)    =       getValue('btog_posit1(2)')
       btog_posit2       =       getValue('btog_posit2')
       btog_posit3       =       getValue('btog_posit3')
+      btog_version      =       getValue('btog_version')
       calg_version      =       getValue('calg_version')
       calg_nmodule(1)   =       getValue('calg_nmodule(1)')
       calg_nmodule(2)   =       getValue('calg_nmodule(2)')

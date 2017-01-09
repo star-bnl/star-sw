@@ -739,7 +739,7 @@ Int_t StSvtHitMaker::Finish(){
 }
 
 //________________________________________________________________________
-void StSvtHitMaker::SetFileNames(const char* filen, const char* filec){
+void StSvtHitMaker::SetFileNames(char* filen, char* filec){
   filenameN = filen;
   filenameC = filec;
 }
