@@ -28,14 +28,15 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
 
       INTEGER   It, Iv, Ityp, Npar, Istop, LenT, LenV, LBUF,
      >          Nd, Id, NBytPW, LabelV, LabelT, Label1, IHEAD(1000)
-      Parameter (Lbuf=200,NBytPW=4)
+      integer   maxnum
+      Parameter (Lbuf=200,NBytPW=4,maxnum=1000000)
       INTEGER   NBUF, NtBeam, NtTarg, Ipart, eg_label, Parent, NwHead,
      >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv, Md
       REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
      >          P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
-      Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
+      Integer   NUM(maxnum),ISTAT,IDPDG,MOTH(2),IDAU(2)
       INTEGER             NUMPRIM,NUMFINS
       common /g2tevtcnt/  NUMPRIM,NUMFINS
 
@@ -62,7 +63,7 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
       p_vert_h.nok  = 0
       LabelV        = 0
       Iv            = 0
-      Do Kv = 1,NVERTX
+      Do Kv = 1,min(NVERTX,maxnum)
 
         Call VZERO  (p_vert(Kv),LenV)
         Call GFVERT (Kv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
@@ -74,7 +75,7 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
           Do Jv = 1,Iv
             IF ( p_vert(jv).eg_label.ne.0       .and. 
      >           VDIST(p_vert(jv).ge_x,Vert,3).le.Vcut) then
-               num(min(kv,100000)) = Jv
+               num(min(kv,maxnum)) = Jv
                goto 77
             endif
           enddo  
