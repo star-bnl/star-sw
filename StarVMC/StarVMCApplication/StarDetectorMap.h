@@ -497,8 +497,8 @@ static const StarDetectorMap_t Detectors[] = {
   {kUnknownId            ,"vpd","VRAD","VPDD","g2t_vpd_hit","g2t_vpd_hit","VPDD","vpdd_vpdg",""}, // light-producing layer
   {kUnknownId            ,"bbc","BPOL",""    ,"g2t_ctf_hit","g2t_bbc_hit","BBCM","","StBbcTriggerDetector"}, // active scintillator layer
   {kCtbId     	         ,"ctb","BXSA","BTOF","g2t_ctf_hit","g2t_ctb_hit","BTOF","btof_btog","StCtbTriggerDetector"}, // the active trigger scintillator SLAB for ctb
-  {kTofId     		 ,"tof","BRSG","BTOF","g2t_ctf_hit","g2t_tfr_hit","BTOF","btof_btog","StBTofCollection"}, // the sensitive gas layer in the TOFr module
-  {kTofId     		 ,"tfr","BCSB","BTOF","g2t_ctf_hit","g2t_tof_hit","BTOF","btof_btog","StBTofCollection"}, // the active trigger scintillator SLAB for tof
+  {kTofId     		 ,"tfr","BRSG","BTOF","g2t_ctf_hit","g2t_tfr_hit","BTOF","btof_btog","StBTofCollection"}, // the sensitive gas layer in the TOFr module
+  {kTofId     		 ,"tof","BCSB","BTOF","g2t_ctf_hit","g2t_tof_hit","BTOF","btof_btog","StBTofCollection"}, // the active trigger scintillator SLAB for tof
   {kUnknownId            ,"epd","EPDM","BPOL","g2t_epd_hit","g2t_epd_hit","BPOL",""	    ,""}, // event plane detector mother volume, EPAD ?
   {kFgtId                ,"fgt","FGSC",""    ,"g2t_fgt_hit","g2t_fgt_hit","FGTD",""         ,""},
   {kFgtId                ,"fgt","FGZD",""    ,"g2t_fgt_hit","g2t_fgt_hit","FGTD",""         ,""},
