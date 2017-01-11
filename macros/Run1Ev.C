@@ -17,6 +17,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     St_geant_Maker::instance()->Do("subevent 0;");
 #endif
     //                         NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
+    //                         gkine 1  5     1      1  0.1   0.1      0       0    2     2
     //                         gkine 1  2    25     25  0.1   0.1      0       0   10    10
     //                         gkine 1  6    25     25  0.0   0.0      0       0  100   100
     TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
