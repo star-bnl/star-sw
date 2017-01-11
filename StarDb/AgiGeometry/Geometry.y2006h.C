@@ -1,7 +1,7 @@
 #include "CreateGeometry.h"
 TDataSet *CreateTable() {
   gEnv->SetValue("isvt",3);
-  gEnv->SetValue("itpc",-1);
+  gEnv->SetValue("itpc",4);
   gEnv->SetValue("ibtf",8);
   gEnv->SetValue("ical",12);
   gEnv->SetValue("ivpd",-1);
@@ -11,6 +11,7 @@ TDataSet *CreateTable() {
   gEnv->SetValue("ifsc",-1);
   gEnv->SetValue("imtd",4);
   gEnv->SetValue("svtg_version",2);
+  gEnv->SetValue("tpcg_version",5);
   gEnv->SetValue("btog_version",6);
   gEnv->SetValue("btog_choice",8);
   gEnv->SetValue("btog_posit1(1)",32);

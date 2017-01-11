@@ -11,8 +11,7 @@ TDataSet *CreateTable() {
   gEnv->SetValue("ifsc",-1);
   gEnv->SetValue("imtd",4);
   gEnv->SetValue("svtg_version",2);
-  gEnv->SetValue("tpcg_version",2);
-  gEnv->SetValue("tpcg_tpadconfig",46.107);
+  gEnv->SetValue("tpcg_version",5);
   gEnv->SetValue("btog_version",6);
   gEnv->SetValue("btog_choice",10);
   gEnv->SetValue("btog_posit1(1)",32);

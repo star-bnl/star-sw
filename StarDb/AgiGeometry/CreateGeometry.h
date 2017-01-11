@@ -81,7 +81,16 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
     return geom;
   }
   gSystem->Load("Rotations");
-  Char_t *path  = ".:$MY_OBJ/StarDb/AgiGeometry:$STAR_OBJ/StarDb/AgiGeometry:$MY_OBJ/StarDb/AgiGeometry/.$STAR_HOST_SYS:$STAR_OBJ/StarDb/AgiGeometry/.$STAR_HOST_SYS:$STAR/StarDb/AgiGeometry";
+  TString path(".:");
+  TString STAR(gSystem->Getenv("STAR"));
+  TString STAR_HOST_SYS(gSystem->Getenv("STAR_HOST_SYS"));
+  TString OBJ;
+  if (gSystem->Getenv("NODEBUG")) OBJ = "OBJ";
+  else                            OBJ = "obj";
+  path += "." + STAR_HOST_SYS + "/" + OBJ + "/StarDb/AgiGeometry:";
+  path += STAR + "/." + STAR_HOST_SYS + "/" + OBJ + "/StarDb/AgiGeometry:";
+  path += "./StarDb/AgiGeometry:";
+  path += STAR + "./StarDb/AgiGeometry";
   TString geomF(name); geomF += ".h";
   Char_t *file = gSystem->Which(path,geomF,kReadPermission);
   if (! file) Fatal("CreateGeometry","File %s has not found in path %s",geomF.Data(),path);
