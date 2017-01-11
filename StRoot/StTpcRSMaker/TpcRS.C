@@ -201,7 +201,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
-  if (FileIn == "" && gClassTable->GetID("TGiant3") >= 0) {
+  if (gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
@@ -260,6 +260,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       cout << "Set kinematics: " << Kine.Data() << endl;
       geant->Do(Kine.Data());
     }
+    
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }

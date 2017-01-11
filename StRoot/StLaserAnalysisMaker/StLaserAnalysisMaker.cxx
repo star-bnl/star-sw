@@ -353,8 +353,8 @@ Int_t StLaserAnalysisMaker::Make(){
     Double_t rMax = 0;
     Int_t jmax = -1;
     //    StThreeVectorD *pred = 0;
-    StTpcHit *tpcHit = 0;
-    Int_t sector = -1, s = -1;
+    StTpcHit *tpcHit;
+    Int_t sector, s = -1;
     Int_t bundle = -1;
     Double_t dZ, dZmin  = 9999;
     Int_t b, m;

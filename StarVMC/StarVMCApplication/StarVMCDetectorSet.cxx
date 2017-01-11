@@ -212,9 +212,7 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
       if (! det) {
 	det = new StarVMCDetector(vol->GetName());
 	fDetHash->Add(det);
-#if 0
 	cout << "Create Star VMC detector for " << vol->GetName() << endl;
-#endif
       }
       TGeoRCExtension *ext = new TGeoRCExtension(det);
       vol->SetUserExtension(ext);

@@ -23,19 +23,7 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-  set Chain = "P2016a,TpxRaw,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,,dEdxCalib,dbV20161116";
-  set ddir = `pwd`
-  set case = `basename $ddir`; echo "case = $case";
-  echo $case | grep D2
-  if (! $?) then
-    set chain = "${Chain},TpxClu2D";
-  else
-    set chain = "${Chain},TpxClu";
-  endif
-#root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu2D,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu2D,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-root.exe -x -q -b 'bfc.C(1000,"'${chain}'","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
