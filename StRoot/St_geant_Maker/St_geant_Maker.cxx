@@ -2537,7 +2537,7 @@ void St_geant_Maker::Version(ostream& os) {
     "svtg_version",  
     "tpcg_version", "tpcg_tpadconfig",    
     "vpdg_version",  
-    "btog_version", "btog_choice",     "btog_posit1(1)",   "btog_posit1(2)",   "btog_posit2",     "btog_posit3",     "btog_version",  
+    "btog_version", "btog_choice",     "btog_posit1(1)",   "btog_posit1(2)",   "btog_posit2",     "btog_posit3",
     "calg_version", "calg_nmodule(1)", "calg_nmodule(2)",  
     "calg_netaT",    "calg_maxmodule",  "calg_nsub",       "calg_netasmdp",    "calg_nphistr",    "calg_netfirst",    "calg_netsecon",  
     "emcg_version", "emcg_onoff",     "emcg_fillmode",  
