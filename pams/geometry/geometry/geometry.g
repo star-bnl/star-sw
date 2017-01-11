@@ -5248,24 +5248,10 @@ If LL>0
      call AgDETP new('TPCE');  
 
      if (DensConfig >0) {        Call AgDETP add ('tpcg.gasCorr=',2 ,1);     }
-
-     if (TpceConfig==1) {        CONSTRUCT tpcegeo;}
-
-     if (TpceConfig==2) {        CONSTRUCT tpcegeo1; }
-     if (TpceConfig==3) {        CONSTRUCT tpcegeo2; }
-     if (TpceConfig==4) {
      if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1); }
-                                 CONSTRUCT tpcegeo3
-                        }
-
-
-     IF TpcxConfig==1   {                                                    CONSTRUCT TpcxGeo1;  }
-     IF TpcxConfig==2   {                                                    CONSTRUCT TpcxGeo2;  }
-     IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  CONSTRUCT TpceGeo3a; }
-     IF TpceConfig==51 {         Call AgDETP add('tpcc.version=', 5.1, 1 );  
-                                 Call AgDetp add('tpcg.TpadConfig=',TpadConfig,1);
-                                                                             CONSTRUCT TpceGeo5a; }
-
+	 Call AgDETP add('tpcc.version=', 5.1, 1 );  
+         Call AgDetp add('tpcg.TpadConfig=',TpadConfig,1);
+         CONSTRUCT TpceGeo5a; 
    }
    if (ftpc) then
         if(FtpcConfig==0) {CONSTRUCT ftpcgeo;}
