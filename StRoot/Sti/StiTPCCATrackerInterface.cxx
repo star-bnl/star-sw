@@ -512,9 +512,9 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   J[2] = JI[2]/cos(nodePars.eta()); // eta
   J[3] = JI[3];                    // ptin
   J[4] = JI[4];                    // tanl
-  
     // get cov matrises
   const float *caCov = caPar.GetCov();
+#if 0  
   double nodeCov[15];
   for (int i1 = 0, i = 0; i1 < 5; i1++){
     for (int i2 = 0; i2 <= i1; i2++, i++){
@@ -525,7 +525,7 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   //   cout << "Warrning: Bad CA Cov Matrix." << endl;
   // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
   //   cout << "Warrning: Bad Node Cov Matrix." << endl;
-
+#endif
   double *A = nodeErrs.G();
 /*  for (int i1 = 0, i = 0; i1 < 5; i1++){
     for (int i2 = 0; i2 <= i1; i2++, i++){

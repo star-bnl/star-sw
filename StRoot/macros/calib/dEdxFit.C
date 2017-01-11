@@ -3381,6 +3381,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       }
       fOut->cd();
       proj->Write();
+      SafeDelete(proj);
     }
   }
   fOut->cd();

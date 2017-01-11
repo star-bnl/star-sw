@@ -486,7 +486,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
               if (QAmode) cutshist->Fill(25);
               Float_t emcEta = emcTrkPosition.pseudoRapidity();
               Float_t emcPhi = emcTrkPosition.phi();
-              Int_t m,e,s,id = 0;
+              Int_t m = 0 ,e = 0,s = 0,id = 0;
               emcGeom->getBin(emcPhi,emcEta,m,e,s);
               if (emcGeom->getId(m,e,s,id) == 0) {
                 tower_mod = m;
