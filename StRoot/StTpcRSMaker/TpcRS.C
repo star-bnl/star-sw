@@ -48,7 +48,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     ChainOpt += "bbcSim,btofsim,btofMatch,btofCalib,";
-    ChainOpt += "McTpcAna,";
+    ChainOpt += "EvOut,";
+    //    ChainOpt += "McTpcAna,";
     // ChainOpt += ",tree,";
 #if 1
     if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2" ||
