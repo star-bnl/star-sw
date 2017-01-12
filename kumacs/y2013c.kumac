@@ -5,10 +5,10 @@
 * ycut          y2013-1xC-y.pdf
 * ycutFarAway   y2013-1xC-yFarAway.pdf
 
-macro y2013
+macro y2013c
 *  starsim -w 1 -b y2013.kumac
 *  DETP geom y2013_1x  
-  DETP geom y2013_2d  
+  DETP geom y2013_2b  
 * field=-5  hadr_off=1
   gexec $STAR_LIB/StarMagFieldNoDict.so
   gexec $STAR_LIB/xgeometry.so

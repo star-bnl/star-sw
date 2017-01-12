@@ -5,7 +5,7 @@
 * ycut          y2013-1xC-y.pdf
 * ycutFarAway   y2013-1xC-yFarAway.pdf
 
-macro y2013
+macro y2013d
 *  starsim -w 1 -b y2013.kumac
 *  DETP geom y2013_1x  
   DETP geom y2013_2d  
