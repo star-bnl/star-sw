@@ -679,8 +679,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *	else if(superl<1 .or. superl>CALG_NSub) then            
 *	  print *,'**ERROR at g2t_volume_id: emc superl ',superl
 	else 
-	  volume_id=10000000*rileft+100000*eta+100*phi+
-     +	              +10*phi_sub+superl
+	  volume_id=10000000*rileft+100000*eta+100*phi+10*phi_sub+superl
 	endif
 
       else if (Csys=='smd') then
@@ -726,8 +725,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	else if(forw_back=3.and.strip>calg_NPhistr) then            
 	  print *,'**ERROR at g2t_volume_id: smd strip ',strip, forw_back
 	else 
-          volume_id=100000000*rileft+1000000*eta+1000*phi+
-     +              100*forw_back+strip
+          volume_id=100000000*rileft+1000000*eta+1000*phi+100*forw_back+strip
 	endif
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else if (Csys=='eem') then
