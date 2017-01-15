@@ -64,17 +64,15 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual StarMagField           *GetMagField() const {return fMagField;}
   virtual StarMCStack            *GetStack() const {return fStack;}
     
-  virtual Double_t TrackingRmax() const { return 1.e4; }
-  virtual Double_t TrackingZmax() const { return 1.e5; } 
-  virtual void     SetDebug(Int_t m) {fDebug = m;}
-  virtual Int_t    Debug() {return fDebug;}
-  virtual void     DoMisAlignment(Bool_t m = kFALSE) {fAlignment = m;}
-  static  Int_t    LoopOverTgeo(TGeoNode *nodeT = 0, TString pathT = "");
-  static  void     GeometryDb(TDataSet *Detectors=0);
-#if ROOT_VERSION_CODE >= 333312 // ROOT_VERSION(5,22,0)
-  virtual Bool_t   MisalignGeometry();
-#endif
-  static  TDataSet  *DetectroDescriptors() {return fgDetSets;}
+  virtual Double_t                 TrackingRmax() const { return 1.e4; }		  
+  virtual Double_t 		   TrackingZmax() const { return 1.e5; } 		  
+  virtual void     		   SetDebug(Int_t m) {fDebug = m;}			  
+  virtual Int_t    		   Debug() {return fDebug;}				  
+  virtual void     		   DoMisAlignment(Bool_t m = kFALSE) {fAlignment = m;}	  
+  static  Int_t     		   LoopOverTgeo(TGeoNode *nodeT = 0, TString pathT = "");
+  static  void     		   GeometryDb(TDataSet *Detectors=0);			  
+  virtual Bool_t   		   MisalignGeometry();					  
+  static  TDataSet 		  *DetectroDescriptors() {return fgDetSets;}             
  private:
   // methods
   
@@ -86,6 +84,7 @@ class StarVMCApplication : public TVirtualMCApplication {
   Double_t*                fFieldB;
   Int_t                    fDebug;
   Bool_t                   fAlignment;
+  Bool_t                   fAlignmentDone;
   static  TDataSet        *fgDetSets;
   ClassDef(StarVMCApplication,1)  //Interface to MonteCarlo application
 };

@@ -3,6 +3,7 @@
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
 #include <assert.h>
+#include "StEnumerations.h"
 #include "StarVMCApplication.h"
 #include "StarMCHits.h"
 #include "TGeoManager.h"
@@ -29,13 +30,16 @@
 #include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_Survey_Table.h"
 #include "TBenchmark.h"
+#include "TEnv.h"
 // Alignment
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcGlobalPositionC.h"
 #include "StDetectorDbMaker/St_tpcSectorPositionC.h"
 #include "StDetectorDbMaker/StSsdSurveyC.h"
 #include "StDetectorDbMaker/StSvtSurveyC.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StDetectorDbMaker/StTpcSurveyC.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 
@@ -53,7 +57,8 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
   fMcHits(0),
   fFieldB(0),
   fDebug(0),
-  fAlignment(kFALSE) //(kTRUE)
+  fAlignment(kFALSE), //(kTRUE)
+  fAlignmentDone(kFALSE)
 {
   // Standard constructor
   TString program(gSystem->BaseName(gROOT->GetApplication()->Argv(0)));
@@ -381,92 +386,74 @@ void StarVMCApplication::GeometryDb(TDataSet *Detectors) {
     }
   }
 }
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,22,0)
 //________________________________________________________________________________
 Bool_t StarVMCApplication::MisalignGeometry() {
   if (! fAlignment) {
     cout << "No MisalignGeometry has been applied" << endl;
-    return fAlignment;
-  }
+    return fAlignmentDone;
+  } 
+  // Misalignment introduced after 2013 TPC survey
+  /*
+    HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[73]
+
+1       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/SFMO[1]/SFLM[20]/SFSW[16]/SFSL[1]/SFSD[1]
+2       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/IBMO[1]/IBAM[24]/IBLM[6]/IBSS[1]
+3       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/PXMO[1]/PXLA[10]/LADR[4]/PXSI[10]/PLAC[1]
+5       HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
+6       HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
+7       HALL[1]/CAVE[1]/VPDD[2]/VRNG[1]/VDET[19]/VDTI[1]/VCNV[1]/VRAD[1]
+8       HALL[1]/CAVE[1]/CALB[1]/CHLV[2]/CPHI[60]/CSUP[2]/CSCI[19]
+9       HALL[1]/CAVE[1]/CALB[1]/CHLV[2]/CPHI[60]/CSUP[2]/CSMD[1]/CSDA[4]/CSME[30]/CSHI[2]
+10      HALL[1]/CAVE[1]/ECAL[1]/EAGA[2]/EMSS[1]/ECVO[2]/EMOD[6]/ESEC[3]/EMGT[17]/EPER[5]/ETAR[12]/ESCI[1]
+11      HALL[1]/CAVE[1]/ECAL[1]/EAGA[2]/EMSS[1]/ESHM[1]/ESPL[3]/EXSG[6]/EHMS[288]
+12      HALL[1]/CAVE[1]/BBCM[2]/BBCA[2]/THXM[6]/SHXT[3]/BPOL[1]
+13      HALL[1]/CAVE[1]/ZCAL[2]/QCAL[1]/QDIV[260]/QSCI[1]
+14      HALL[1]/CAVE[1]/MUTD[1]/MTTG[28]/MTRA[5]/MIGS[1]/MIGG[5]
+15      HALL[1]/CAVE[1]/FBOX[4]/FTOW[238]/FWAL[1]/FLGR[1]
+16      HALL[1]/CAVE[1]/FBOX[4]/FTOW[238]/FPCT[1]
+17      HALL[1]/CAVE[1]/FBOX[2]/FSHM[1]/FHMS[100]
+18      HALL[1]/CAVE[1]/FBOX[4]/FLXF[394]
+19      HALL[1]/CAVE[1]/FPRS[1]/FPLY[4]/FPSC[80]
+
+   */
+  Int_t NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   enum EDetector2Align {
-    kTPC, kTpcRefSys, kTPCSector, 
+    kUnknown,
+    kTPC, kTpcRefSys, kTpcHalf, kTpcSecInn, kTpcSecOut, kTpcPad, kTpcLast,
     kSVT, kSvtWhole, kSvtShell, kSvtLadder, kSvtWafer, 
     kSSD, kSsdWhole, kSsdSector, kSsdLadder, kSsdWafer};
   struct listOfDetectorToAlign_t {
     const Char_t *Name; 
     EDetector2Align kDet;
     const Char_t *path;
-    const Char_t *tableName;
     Int_t  Ndim;
     Int_t  NVmax[6];
+    St_SurveyC *chair;
   };
   static const listOfDetectorToAlign_t listOfDet2Align[] = {                                                                
-#if 0
-    {"TpcRefSys-%d",    kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                                                 
-     "tpcGlobalPosition", 1, {1,  0, 0, 0, 0, 0}}, 
-    {"TpcPadPlane-%03d",kTPCSector,"/HALL_1/CAVE_1/TpcRefSys_%d/TPCE_1/TpcSectorWhole_%d/TpcGas_1/TpcPadPlane_%d",
-     "tpcSectorPosition", 3, {1, 24, 2, 0, 0, 0}},
-#endif
-    {"SVTT%d",          kSvtWhole, "/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d",
-     "SvtOnGlobal",       2, {1,  1, 0, 0, 0, 0}},
-    {"ClamShell-%d",    kSvtShell, "/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/ClamShell_%d",                            
-     "ShellOnGlobal",     3, {1,  1, 2, 0, 0, 0}},                   //              L        l          W   
-    {"SvtLadder-%d",    kSvtLadder,"/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/ClamShell_%d/Layer_%d/Ladder_%d",
-     "LadderOnShell",     5, {1,  1, 2, 6,16, 0}}, 
-    {"SvtWafer-%04d",   kSvtWafer, "/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/ClamShell_%d/Layer_%d/Ladder_%d/SLDI_1/svtd_%d",
-     "WaferOnLadder",     6, {1,  1, 2, 6,16, 7}}, 
-    {"SFMO",            kSsdWhole, "/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/SFMO_%d",
-     "SsdOnGlobal",       3, {1,  1, 1, 0, 0, 0}},
-    {"SsdSector-%d",    kSsdSector,"/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/SFMO_%d/SsdSector_%d",
-     "SsdSectorsOnGlobal",4, {1,  1, 1, 4, 0, 0}},
-    {"SsdLadder-%d",    kSsdLadder,"/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/SFMO_%d/SsdSector_%d/SFLM_%d/SFDM_1",
-     "SsdLaddersOnSectors",5, {1,  1, 1, 4,20, 0}},
-    {"SsdWafer-%04d",   kSsdWafer, "/HALL_1/CAVE_1/TpcRefSys_%d/SVTT_%d/SFMO_%d/SsdSector_%d/SFLM_%d/SFDM_1/SFSW_%d",
-     "SsdWafersOnLadders",6, {1,  1, 1, 4,20,16}},
-  };
+    //    HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[73]
+    {"TpcRefSys-%d",    kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                       1, {1,  0, 0, 0, 0, 0}, StTpcPosition::instance()}, 
+    {"TpcHalf-%d",      kTpcHalf  ,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d",         1, {2,  0, 0, 0, 0, 0}, StTpcHalfPosition::instance()}, 
+    {"TpcSecInn-%02d", kTpcSecInn,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d", 2, {2, 12, 0, 0, 0, 0}, StTpcInnerSectorPosition::instance()},
+    {"TpcSecOut-%02d", kTpcSecOut,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d", 2, {2, 12, 0, 0, 0, 0}, StTpcOuterSectorPosition::instance()},
+    {"TpcPad-%02d",        kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",3, {2, 12, 73, 0, 0, 0}, 0}
+   };
   static const Int_t  NoDetectos2Align = sizeof(listOfDet2Align)/sizeof(listOfDetectorToAlign_t);
-  TString path; 
-  TGeoHMatrix *rotm = 0;
-  // TPC subsectors
-  TGeoTranslation T123(0,123,0); T123.SetName("T123"); if (Debug() > 1) T123.Print();
-  TGeoTranslation TIO[2]; 
-  TIO[0].SetName("TI");
-  TIO[1].SetName("TO");
-  TGeoRotation    RIO[2];
-  RIO[0].SetName("RI"); 
-  RIO[1].SetName("RO"); 
-#if 0
-  Double_t offset;
-  Double_t phi;
-#endif
-  TGeoTranslation SvtShift, SvtShiftI;
-  Double_t yWaferAverShift = -9999;
-  //
-  Int_t indx[25];
-  TGeoPhysicalNode *nodeP = 0;
-
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
-    memset(indx, 0, 25*sizeof(Int_t));
+    EDetector2Align kdetIO = kUnknown;
     Int_t Ntot = 1;
     for (Int_t k = 0; k < listOfDet2Align[i].Ndim; k++) Ntot *= listOfDet2Align[i].NVmax[k];
     for (Int_t j = 0; j < Ntot; j++) {
       Int_t ind = j;
+      TArrayI Indx(listOfDet2Align[i].Ndim); Int_t *indx = Indx.GetArray();
       for (Int_t k =  listOfDet2Align[i].Ndim - 1; k >= 0; k--) {
 	indx[k] = ind%listOfDet2Align[i].NVmax[k]+1; ind /= listOfDet2Align[i].NVmax[k];
       }
-      rotm = 0;
-      Int_t Id = -1;
-      Int_t id =  0; // standard numeration
-      Int_t sector = indx[2]; // shell or Tpc sector
-      Int_t layer  = indx[3]; // layer or Ssd Sector
-      Int_t barrel = (layer-1)/2 + 1;
-      Int_t ladder = indx[4];
-      Int_t wafer  = indx[5];
-      THashList *RotList = 0;
-      path = StarVMCDetector::FormPath(listOfDet2Align[i].path,listOfDet2Align[i].Ndim,indx);
+      TString path(StarVMCDetector::FormPath(listOfDet2Align[i].path,listOfDet2Align[i].Ndim,indx));
       if (! gGeoManager->CheckPath(path)) continue;
       TObjArray *objs = gGeoManager->GetListOfPhysicalNodes();
+      TGeoPhysicalNode *nodeP = 0;
       if (objs) nodeP = (TGeoPhysicalNode *) objs->FindObject(path);
       if (nodeP) {
 	if (nodeP->IsAligned()) {
@@ -476,183 +463,72 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       } else {
 	nodeP = gGeoManager->MakePhysicalNode(path);
       }
-      TGeoHMatrix rotL = *(nodeP->GetNode()->GetMatrix()); // ideal matrix
-      TGeoHMatrix rotA;
+      TGeoHMatrix rotL(*(nodeP->GetNode()->GetMatrix())); // ideal matrix before alignment
+      TGeoHMatrix rotA = rotL; // After alignment
+      TGeoHMatrix *rotm = 0;
+      Int_t Id = -1;
+      Int_t half   = -1; // Tpc half
+      Int_t sector = -1; // Tpc sector;
+      Int_t row    = -1; // Tpc pad row
+      Int_t layer  = -1; // layer or Ssd Sector
+      Int_t ladder = -1;
+      Int_t wafer  = -1;
+      St_SurveyC *chair = 0;
+      switch (kDetector) {
       // TPC Reference System
-      if (kDetector == kTpcRefSys) {
-#if 0
-	St_tpcGlobalPositionC *tpcGlobalPosition = St_tpcGlobalPositionC::instance();
-	assert(tpcGlobalPosition);
-	Id = 1;
-	Double_t rad2deg = 180./TMath::Pi();
-	Double_t phi   = 0.0;  //large uncertainty, so set to 0
-	Double_t theta = tpcGlobalPosition->PhiXZ_geom()*rad2deg;
-	Double_t psi   = tpcGlobalPosition->PhiYZ_geom()*rad2deg; 
-	rotA.RotateX(-psi);
-	rotA.RotateY(-theta);
-	rotA.RotateZ(-phi);
-	Double_t transTpcRefSys[3] = {tpcGlobalPosition->LocalxShift(),
-				      tpcGlobalPosition->LocalyShift(),
-				      tpcGlobalPosition->LocalzShift()};
-	rotA.SetTranslation(transTpcRefSys);
+      case kTpcRefSys:
+	Id = j;
+	rotA = listOfDet2Align[i].chair->GetMatrix(0);
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-#endif
-      } 
-      // TPC sub sectors
-      else if (kDetector == kTPCSector) {
-#if 0
-	sector = indx[1];
-	Int_t io     = indx[2];  // Inner Outer subsectors
-	Id = 10*sector + io;
-	Double_t s = -1;
-	if (sector > 12) s = +1;
-	if (io == 1) {
-	  offset = s*St_tpcSectorPositionC::instance()->innerPositionOffsetX(sector-1);
-	  phi    = s*St_tpcSectorPositionC::instance()->innerRotation(sector-1);
+	break;
+      case kTpcHalf: 
+	if (indx[0] == 1) half = west;
+	if (indx[0] == 2) half = east;
+	Id = indx[0]+1;
+	rotA = listOfDet2Align[i].chair->GetMatrix(half);
+	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	break;
+      case kTpcSecInn:
+      case kTpcSecOut:
+	break;
+      case kTpcPad:
+	sector = 12*(indx[0]-1) + indx[1];
+	if (listOfDet2Align[i].Ndim == 3 && listOfDet2Align[i].NVmax[2] == 73) {
+	  if (indx[2] <= 39) row = (indx[2]-1)/3 + 1;
+	  else               row = 14 + (indx[2]-40);
+	  if (row > 45)      row = 45;
 	} else {
-	  offset = s*St_tpcSectorPositionC::instance()->outerPositionOffsetX(sector-1);
-	  phi    = s*St_tpcSectorPositionC::instance()->outerRotation(sector-1);
+	  assert(0);
 	}
-	TIO[io-1].SetTranslation(-offset, -123, 0); if (Debug() > 1) TIO[io-1].Print();
-	RIO[io-1].SetAngles(-phi,0,0);              if (Debug() > 1) RIO[io-1].Print();
-	rotA = T123 * RIO[io-1] * TIO[io-1];
-#endif
-      } else {
-	// SVT and SSD
-	St_SurveyC *survey = St_SurveyC::instance(listOfDet2Align[i].tableName);
-	assert(survey);
-	/* SVT
-	   Id = 0                                for SvtOnGlobal
-	   Id = [0, 1]                           for ShellOnGlobal, 
-	   0 is the x (South) Shell, 1 is the -x (North) Shell"
-	   Id = 1000*barrel + ladder             for LadderOnSurvey
-	   Id = 1000*barrel + ladder             for LadderOnShell
-	   Id = 1000*barrel + 100*wafer + ladder for WaferOnLadder
-	   
-	   SSD
-	   Id = 0                                for SsdOnGlobal
-	   Id = sector [1-4]                     SsdSectorsOnGlobal
-	   Id = 100*sector + ladder              SsdLaddersOnSectors
-	   Id = 7000 + 100*wafer + ladder        SsdWafersOnLadders
-	*/
-	switch (kDetector) { 
-	case kSvtWhole:   Id = id = 0; break;
-	case kSvtShell:   Id = id = sector - 1; break;
-	case kSvtLadder:  Id = id = 1000*barrel + ladder; break;
-	case kSvtWafer:   
-	  Id = 1000*barrel + 100*wafer + ladder; 
-	  id = 1000*layer  + 100*wafer + ladder; 
-	  RotList = gStSvtDbMaker->GetRotations(); break;
-	case kSsdWhole:   Id = id = 0; break;
-	case kSsdSector:  Id = id = layer; break;
-	case kSsdLadder:  Id = id = 100*layer + ladder; break;
-	case kSsdWafer:   Id = id = 7000 + 100*wafer + ladder; RotList =  gStSsdDbMaker->GetRotations(); break;
-	default: Id = id = -1; break;
-	};
-	if (Id < 0) {
-	  cout << "StarVMCApplication::MisalignGeometry unrecognized detector " 
-	       << listOfDet2Align[i].Name << endl;
-	  continue;
-	}
-	Int_t Nrows = survey->getNumRows();
-	Int_t l;
-	for (l = 0; l < Nrows; l++) {
-	  if (Id == survey->Id(l)) break;
-	}
-	if (l >= Nrows) {
-	  cout << "Id = " << Id << " has not been found in " << survey->GetName() << endl;
-	  break;
-	}
-	rotA.SetRotation(survey->r(l));
-	rotA.SetTranslation(survey->t(l));
-	if (kDetector == kSsdWhole) {
-	  St_SurveyC *surv = St_SurveyC::instance("SvtOnGlobal");
-	  TGeoHMatrix rotB;
-	  rotB.SetRotation(surv->r(0));
-	  rotB.SetTranslation(surv->t(0));
-	  TGeoHMatrix rotC = rotB.Inverse();
-	  rotA = rotC * rotA;
-	}
-	if (kDetector == kSvtLadder) {
-	  if (yWaferAverShift < -999) {
-	    St_SurveyC *surw = St_SurveyC::instance("WaferOnLadder");
-	    Int_t N = surw->getNumRows();
-	    Int_t l;
-	    yWaferAverShift = 0;
-	    for (l = 0; l < N; l++) {
-	      yWaferAverShift += surw->t1(l);
-	    }
-	    yWaferAverShift /= N;
-	    // Check that it was used wafer survey (H.Ward) or ideal position
-	    SvtShift = TGeoTranslation(0,yWaferAverShift,23.525);
-	    SvtShiftI = SvtShift.Inverse();
-	  }
-	  TGeoHMatrix LSU;
-	  St_SurveyC *surv = St_SurveyC::instance("LadderOnSurvey");
-	  for (l = 0; l < Nrows; l++) {
-	    if (Id == surv->Id(l)) break;
-	  }
-	  if (l >= Nrows) {
-	    cout << "Id = " << Id << " has not been found in " << surv->GetName() << endl;
-	    break;
-	  }
-	  LSU.SetRotation(surv->r(l));
-	  Double_t tr[3] = {surv->t0(l), surv->t1(l), surv->t2(l)};
-	  LSU.SetTranslation(tr);
-	  rotA = rotA * LSU * SvtShift;
-	}
-	if (kDetector == kSvtWafer) { // <<<<
-	  assert(yWaferAverShift > -999);
-	  rotA = SvtShiftI * rotA;
-	}
-	if (kDetector == kSsdLadder) { // remove (L-1) Matrix to avoid double counting
-	  Int_t l = nodeP->GetLevel() -1 ;
-	  TGeoHMatrix *rotL1 = (TGeoHMatrix *) nodeP->GetNode(l)->GetMatrix();
-	  TGeoHMatrix  rotLI = rotL1->Inverse();
-	  rotA = rotLI * rotA;
-	}
+	if (row <= NoOfInnerRows) chair = StTpcInnerSectorPosition::instance();
+        else                      chair = StTpcOuterSectorPosition::instance();
+	rotA = chair->GetMatrix(sector);
+	rotA.SetName(Form(listOfDet2Align[i].Name,sector,row));
+	break;
+      default:
+	assert(0);
+	break;
       }
-      // Normalize
-      Double_t *r = rotA.GetRotationMatrix();
-      Double_t norm;
-      TVector3 d(r[0],r[3],r[6]); norm = 1/d.Mag(); d *= norm;
-      TVector3 t(r[2],r[5],r[8]); norm = 1/t.Mag(); t *= norm;
-      TVector3 n(r[1],r[4],r[7]);
-      TVector3 c = d.Cross(t);
-      if (c.Dot(n) < 0) c *= -1;
-      Double_t rot[9] = {
-      d[0], c[0], t[0],
-      d[1], c[1], t[1],
-      d[2], c[2], t[2]};
-      rotA.SetRotation(rot);
-      
       if (rotA == rotL) continue;
       rotm = new TGeoHMatrix(rotA);
-      rotm->SetName(Form(listOfDet2Align[i].Name,Id));
+      //      rotm->SetName(Form(listOfDet2Align[i].Name,Id));
       if (Debug() > 1) {
-	cout << "Id : " << id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
+	cout << "Id : " << Id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
 	//	if (Debug() > 1) cout << "Old Local:\t"; nodeP->GetNode()->GetMatrix()->Print();
 	if (Debug() > 2) nodeP->Print();
       }
       nodeP->Align(rotm);
       if (Debug() > 1) {
-	cout << "Id : " << id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
-	if (RotList) {
-	  TGeoHMatrix *comb = (TGeoHMatrix *) RotList->FindObject(Form("R%04i",id));
-	  if (comb) comb->Print();
-	}
-	//	if (Debug() > 1) cout << "New Local:\t"; nodeP->GetNode()->GetMatrix()->Print();
+	cout << "Id : " << Id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
 	if (Debug() > 2) nodeP->Print();
       }
-      continue;
     }
   }
   // Freeze misaligned geometry
   //  gGeoManager->RefreshPhysicalNodes();
-  fAlignment = kTRUE;
-  return fAlignment;
+  fAlignmentDone = kTRUE;
+  return fAlignmentDone;
 }
-#endif
 // $Log: StarVMCApplication.cxx,v $
 // Revision 1.13  2013/12/16 22:58:53  fisyak
 // Add g2t_volume_id
