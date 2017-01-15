@@ -90,7 +90,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 	gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
       StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
       cout << "Set StarMCSimplePrimaryGenerator" << endl;
-      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
+      //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
       //      geant->SetSetAttr("phys_off",kTRUE); // physics off
       geant->SetMode(100); // physics off
       if (gMC && gMC->IsA()->InheritsFrom("TGeant3TGeo")) {

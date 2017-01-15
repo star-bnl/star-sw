@@ -138,6 +138,7 @@ Int_t StVMCMaker::Init() {
   fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
   fgGeant3 = new TGeant3TGeo("C++ Interface to Geant3");//, 1, 200000); 
   gMessMgr->Info() << "StVMCMaker::Init Geant3 has been created." << endm;
+  if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (! IAttr("VMCPassive")) {
     gMessMgr->Info() << "StVMCMaker::InitRun Active mode" << endm; 
     StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();

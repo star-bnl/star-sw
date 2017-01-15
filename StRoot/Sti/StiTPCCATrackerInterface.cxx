@@ -566,14 +566,14 @@ void StiTPCCATrackerInterface::MakeSeeds()
     Seed_t seed;
 
     const int NHits = tr.NHits();
-    float last_x = 1e10; // for check
+    //    float last_x = 1e10; // for check
     for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 
       const int index = fTracker->TrackHit( tr.FirstHitRef() + iHit );
       const int hId   = fTracker->Hit( index ).ID();
 //      if ( last_x == fSeedHits[hId].hit->position() ) continue; // track can have 2 hits on 1 row because of track segments merger.
       seed.vhit.push_back(&(fSeedHits[hId]));
 //      assert( last_x >= fSeedHits[hId].hit->position() ); // should be back order - from outer to inner.
-      last_x = fSeedHits[hId].hit->position();
+//      last_x = fSeedHits[hId].hit->position();
     }
 
     seed.total_hits = seed.vhit.size();

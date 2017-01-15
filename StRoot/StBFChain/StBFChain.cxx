@@ -481,6 +481,9 @@ Int_t StBFChain::Instantiate()
 	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
 	    goto Error;
 	}
+	if (GetOption("VMCAlignment")) {
+	  mk->SetAttr("VMCAlignment",1);
+	}
       }
       if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
     }

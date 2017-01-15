@@ -32,7 +32,7 @@ class St_SurveyC : public TChair {
   void          GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i = 0);
   const Double_t  *Rotation(Int_t i = 0)     const {return &Struct(i)->r00;} 
   const Double_t  *Translation(Int_t i = 0)  const {return &Struct(i)->t0;} 
-  const TGeoHMatrix  &GetMatrix(Int_t i);
+  const TGeoHMatrix  &GetMatrix(Int_t i = 0);
   const TGeoHMatrix  &GetMatrixR(Int_t i); // ignoring rotation alpha and beta
   const Double_t *r(Int_t i = 0)        const {return &Struct(i)->r00;}
   const Double_t *t(Int_t i = 0)        const {return &Struct(i)->t0;}

@@ -6,9 +6,9 @@ struct BPoint_t {
 };
 BPoint_t BPoint;
 //________________________________________________________________________________
-void GainT0(Int_t date = 20130108, Int_t time = 190000) {
+void GainT0(Int_t date = 20140508, Int_t time = 190000) {
   const Char_t *GainName  = "Calibrations/tpc/tpcPadGainT0B";
-  //  gSystem->Load("libmysqlclient.so");
+  gSystem->Load("libmysqlclient.so");
   gROOT->LoadMacro("bfc.C");
   //  TString Chain("in dEdxY2 StEvent debug");
   TString Chain("db,NoDefault");

@@ -505,10 +505,6 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
   int nE2 = nP2*(nP2+1)/2;
   TArrayD ard(nE2*6);
   double *a = ard.GetArray();  
-  double *sumE 		= (a);
-  double *sumEI 	= (a+=nE2);
-  double *e1sumEIe1 	= (a+=nE2);
-  double *subP 		= (a+=nE2);
   double *sumEIsubP	= (a+=nE2);
   double chi2=3e33,p,q;
 
@@ -521,6 +517,10 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
   }}
   if ( choice >0) {t = p2; p2 = p1; p1 = t; t = e2; e2 = e1; e1 = t;}
 #if 0
+  double *sumE 		= (a);
+  double *sumEI 	= (a+=nE2);
+  double *e1sumEIe1 	= (a+=nE2);
+  double *subP 		= (a+=nE2);
   do {//empty loop
 //  	Join errors
     TCL::vadd(e1,e2,sumE,nE1);

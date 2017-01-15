@@ -403,8 +403,6 @@ void StTpcDb::SetTpcRotations() {
 	}
       } else {
 	Id = 10*sector + k;
-	TGeoTranslation TIO; 
-	TGeoRotation    RIO;
 	StBeamDirection part = east;
 	if (sector <= 12) part = west;
 	switch (k) {

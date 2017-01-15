@@ -1140,7 +1140,7 @@ StiDebug::Break(nCall);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
-  
+  if (debug() & 8) { PrintpT("V"); PrintStep();}
   setHit(vertex);
   setDetector(0);
   return true;
@@ -1161,7 +1161,7 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
   
   propagateError();
   if (mFE.zign()<0) return false;
-  if (debug() & 8) { PrintpT("B");}
+  if (debug() & 8) { PrintpT("B"); PrintStep();}
   setHit(0);
   setDetector(0);
   return true;
@@ -1178,7 +1178,7 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
   position = propagate(radius,kCylindrical,dir);
   if (position<0) return position;
   propagateError();
-  if (debug() & 8) { PrintpT("R");}
+  if (debug() & 8) { PrintpT("R"); PrintStep();}
   _detector = 0;
   return position;
 }

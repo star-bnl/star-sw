@@ -659,7 +659,7 @@ assert(direction || leadNode==track->getLastNode());
 	    StiKalmanTrackNode::ResetComment(::Form("%40s ",node->getDetector()->getName().c_str()));
 	  else 
 	    StiKalmanTrackNode::ResetComment("Vx                            ");
-	    StiKalmanTrackNode::PrintStep();
+	  StiKalmanTrackNode::PrintStep();
 	  }
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}

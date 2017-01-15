@@ -581,7 +581,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
 	if (CdEdx[NdEdx].edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
-	  CdEdx[NdEdx].edge += 1 - gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
+	  CdEdx[NdEdx].edge -= 1 + gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
 	CdEdx[NdEdx].Npads  = tpcHit->padsInHit();
 	CdEdx[NdEdx].Ntbins = tpcHit->pixelsInHit();
 	//	CdEdx[NdEdx].dE     = tpcHit->chargeModified();
@@ -895,7 +895,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NumberOfRows,105,0,210);
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
-  //  static Hists3D Edge3("Edge3","log(dEdx/Pion)","row"," Edge",NumberOfRows, 400,-100,100);
+  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NumberOfRows, 400,-100,100);
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NumberOfRows, 100,0,10.);
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
@@ -904,9 +904,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH1F *hdEO = 0, *hdEUO = 0, *hdERO = 0, *hdEPO = 0, *hdETO = 0, *hdESO = 0, *hdEZO = 0, *hdEMO = 0;
   static TH3F *TPoints[6]; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
   static TH2F *Pulls[3] = {0};
+#if 0
   static Hists2D I70("I70");
   static Hists2D fitZ("fitZ");
   static Hists2D fitN("fitN");
+#endif
   const static Int_t Nlog2dx = 80;
   const static Double_t log2dxLow = 0.0, log2dxHigh = 4.0;
   static TH2F *inputTPCGasPressureP = 0, *nitrogenPressureP = 0, *gasPressureDiffP = 0, *inputGasTemperatureP = 0;
@@ -1031,11 +1033,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   
   StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
-  Int_t sCharge = 0;
-  if (gTrack->geometry()->charge() < 0) sCharge = 1;
   StPidStatus PiD(gTrack); 
   if (PiD.PiDStatus < 0) return;
+#if 0
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+  Int_t sCharge = 0;
+  if (gTrack->geometry()->charge() < 0) sCharge = 1;
   Int_t l;
   for (l = kPidElectron; l < KPidParticles; l++) {
     Int_t k = PiD.PiDkeyU3;
@@ -1064,6 +1067,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       }
     }
   }
+#endif
 #if 0
   // Bad dE/dx
   Double_t L10Mult = -1;
@@ -1264,7 +1268,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (TimeC)  {vars[1] = FdEdx[k].dEdxN; TimeC->Fill(vars);}
 	Z3.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistance,Vars);
 	//	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
-	//	Edge3.Fill(FdEdx[k].row,FdEdx[k].edge, Vars);
+	Edge3.Fill(NumberOfRows*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
 	dX3.Fill(FdEdx[k].row,FdEdx[k].dx, Vars);
       }
     }
