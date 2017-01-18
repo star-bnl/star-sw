@@ -35,73 +35,6 @@ enum {
 
 class l4Builder : public JevpBuilder {
 	public:
-
-		/**
-		 * Struct
-		 * @param 
-		 * @return 
-		 * @exception 
-		 * @see 
-		 * @author 
-		 */
-		struct hbt_event_info {
-			int mult;
-			float zvertex;
-			int ntracks; 
-			float track[10000][5];
-		};
-
-		struct eventCut_info {
-			float zvertexMax;   float zvertexMin;
-			float rvertexMax;  	float rvertexMin;
-			float BEMCeastEnergyMax;	float BEMCeastEnergyMin;
-			float BEMCwestEnergyMax;	float BEMCwestEnergyMin;
-			float BEMC_EastWestDiffMax;	float BEMC_EastWestDiffMin;
-			float multMax;      float multMin;
-		};
-
-		struct trackCut_info {
-			int nHitsMin;       int nHitsMax;
-			float dcaMin;       float dcaMax;
-			float ptMin;        float ptMax;
-			float etaMin;       float etaMax;
-			float rapMin;       float rapMax;
-		};
-
-		struct hlt_diPionPair {
-			int dau1NodeSN;
-			int dau2NodeSN;
-			float invariantMass;
-			float pt;
-			float psi;
-			float tanl;
-			float deltphi; // phi difference between two dau tracks
-			//int dau1SelectionBit;
-			//int dau2SelectionBit;
-		};
-
-		struct hlt_diElectronPair {
-			int dau1NodeSN;
-			int dau2NodeSN;
-			float invariantMass;
-			float pt;
-			float psi;
-			float tanl;
-			int dau1SelectionBit;
-			int dau2SelectionBit;
-		};
-
-		// UPC rho bank (pion pair)
-		struct HLT_RHO {
-			unsigned int nRhos;
-			struct hlt_diPionPair PionPair[1000];
-		};
-
-		//struct HLT_MTDDIMU {
-		// unsigned int      nEPairs; 
-		// struct hlt_diElectronPair ePair[1000];
-		// };
-
 		/**
 		 * Plots, Functions, Histograms.
 		 * @param 
@@ -245,7 +178,7 @@ class l4Builder : public JevpBuilder {
 		TH1D *hPrim_Eta;
 		TH2F *hPrim_dEdx;	
 		TH1I *hnhits_UPC;
-		TH1I *hnDedx_UPC; 
+		TH1I *hnDedx_UPC;
 		TH1D *hDcaXy_UPC;
 		TH1D *hDcaZ_UPC;
 		TH1D *hLn_dEdx_UPC;
@@ -405,6 +338,10 @@ class l4Builder : public JevpBuilder {
 		/*   TH2F *hTofprimaryMult; */
 		TH2F *hInverseBeta;
 		TH2F *hMatchId_fiberId;
+		//***********a parallel copy of hMatchId_fiberId""**********
+		TH2F *hMatchId_fiberId_copy;
+		TH2F *hMatchId_fiberId_copy2;
+		//********************************
 		TH2F *hTrayID_TrgTime;
 		TH1D *hchannelID;
 		TH2F *hVzvpd_Vz ;
@@ -466,6 +403,6 @@ class l4Builder : public JevpBuilder {
 		TH1D *hFixedTargetMonitor_VertexZ;
 		TH1D *hFixedTargetMonitor_Prim_Eta;
 		TH1D *hFixedTargetMonitor_Glob_Eta;
-
+		
 		ClassDef(l4Builder, 1);
 };
