@@ -39,6 +39,8 @@
 #include <rtsSystems.h>
 #include <rtsLog.h>
 #include "l4Builder.h"
+#include <omp.h>
+#include <TStopwatch.h>
 
 using namespace std;
 
@@ -363,8 +365,10 @@ void l4Builder::startrun(daqReader *rdr)
 void l4Builder::stoprun(daqReader *rdr)
 {
 
-	//printf("Number of events processed in daq file = %d\n", eventCounter);
-	LOG(WARN, "Number of events processed in daq file = %d\n", eventCounter);
+        LOG(WARN, "Number of events processed in daq file = %d\n", eventCounter);
+	//**********add parallel copy**********
+	hMatchId_fiberId->Add(hMatchId_fiberId_copy);
+	hMatchId_fiberId->Add(hMatchId_fiberId_copy2);
 
 	gStyle->SetOptStat(000000);
 	gStyle->SetStatW(0.13);
@@ -419,7 +423,6 @@ void l4Builder::stoprun(daqReader *rdr)
 	fit->SetParName(0, "Apt");
 	fit->SetParName(1, "Pos");
 	fit->SetParName(2, "Sig");
-	//      fit->SetParameter(0,10000);
 	fit->SetParameter(1, -12.92);
 	fit->SetParameter(2, 0.08);
 	hLn_dEdx->Fit(fit, "EMR");
@@ -428,7 +431,6 @@ void l4Builder::stoprun(daqReader *rdr)
 	fit_UPC->SetParName(0, "Apt");
 	fit_UPC->SetParName(1, "Pos");
 	fit_UPC->SetParName(2, "Sig");
-	//      fit->SetParameter(0,10000);
 	fit_UPC->SetParameter(1, -12.92);
 	fit_UPC->SetParameter(2, 0.08);
 	hLn_dEdx_UPC->Fit(fit_UPC, "EMR");
@@ -445,7 +447,6 @@ void l4Builder::stoprun(daqReader *rdr)
 	hDcaXy->Fit(func, "EMR", "", maxVal - 1.8, maxVal + 1.8);
 
 	double meanpar = func->GetParameter(1);
-	//   double errpar = func->GetParError(1);
 	int maxBin_UPC = hDcaXy_UPC->GetMaximumBin();
 	double maxVal_UPC = -6. + 0.1 * maxBin_UPC;
 	hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
@@ -699,7 +700,6 @@ void l4Builder::event(daqReader *rdr)
 	unsigned int triggerBitHLTGood2 = 0x80000000;
 	unsigned int triggerBitDiElectron2Twr     = 0x00000001; // start to up lower 16 bit.
 	unsigned int triggerBitMTDQuarkonium   =   0x00400000;
-	//cout<<"event begin"<<endl;
 
 	//EXTRACT L4 TRACK INFO FROM DAQ FILE
 	//daq_dta *dd = rdr->det("l3")->get("legacy");
@@ -755,627 +755,774 @@ void l4Builder::event(daqReader *rdr)
 		return;
 	}
 
-	unsigned int decision = hlt_eve->hltDecision;	
+	unsigned int decision = hlt_eve->hltDecision;
 
-	if(!TriggerFilled) {
-		TriggerFilled = true;
+	omp_set_nested(1);
+	omp_set_dynamic(0);
+#pragma omp parallel sections num_threads(19)
+	{
 
-		addServerTags("L4Trigger");
-	}
-	if(decision & triggerBitDiMuon) {
-		hEvtsAccpt->Fill(0.);
-	}
-	if(decision & triggerBitMTDQuarkonium) {
-		hEvtsAccpt->Fill(1.);
-	}
-	if(decision & triggerBitHLTGood2) {
-		hEvtsAccpt->Fill(2.);
-	}
-	if(decision & triggerBitDiElectron) {
-		hEvtsAccpt->Fill(3.);
-	}
-	if(decision & triggerBitDiElectron2Twr) {
-		hEvtsAccpt->Fill(4.);
-	}
-	if(decision & triggerBitHeavyFragment) {
-		hEvtsAccpt->Fill(5.);
-	}
-	hEvtsAccpt->GetXaxis()->SetBinLabel(1, "DiMuon");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(2, "MTDQuarkonium");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(3, "HLTGood2");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(4, "DiElectron");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DIEP2Twr");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment");
-	// fill events
-	if(!EventFilled) {
-		EventFilled = true;
-		addServerTags("L4Event");
-	}
-	float vertX = hlt_eve->vertexX;
-	float vertY = hlt_eve->vertexY;
-	float vertZ = hlt_eve->vertexZ;
-	float vertR = sqrt(vertX * vertX + vertY * vertY);
-	float lmvertX = hlt_eve->lmVertexX;
-	float lmvertY = hlt_eve->lmVertexY;
-	float lmvertZ = hlt_eve->lmVertexZ;
-	float VzVpd =  hlt_eve->vpdVertexZ;
-	innerGainPara = hlt_eve->innerSectorGain;
-	outerGainPara = hlt_eve->outerSectorGain;
-	BeamX = hlt_eve->beamlineX;
-	BeamY = hlt_eve->beamlineY;
-	hVertexX->Fill(vertX);
-	hVertexY->Fill(vertY);
-	hVertexZ->Fill(vertZ);
-	hVertexXY->Fill(vertX, vertY);
-	hVertexR->Fill(vertR);
-	hLm_VertexX->Fill(lmvertX);
-	hLm_VertexY->Fill(lmvertY);
-	hLm_VertexZ->Fill(lmvertZ);
-	hVzvpd_Vz->Fill(VzVpd, lmvertZ);
-	hVzDiff->Fill(VzVpd - lmvertZ);
-
-	if(decision & triggerBitFixedTarget) {
-		hFixedTarget_VertexZ->Fill(vertZ);
-	}
-
-	if(decision & triggerBitFixedTargetMonitor) {
-		hFixedTargetMonitor_VertexZ->Fill(vertZ);
-	}
-
-	if(daqID & upc) {
-		hVertexX_UPC->Fill(vertX);
-		hVertexY_UPC->Fill(vertY);
-		hVertexZ_UPC->Fill(vertZ);
-		hLm_VertexX_UPC->Fill(lmvertX);
-		hLm_VertexY_UPC->Fill(lmvertY);
-		hLm_VertexZ_UPC->Fill(lmvertZ);
-		hVzvpd_Vz_UPC->Fill(VzVpd, lmvertZ);
-		hVzDiff_UPC->Fill(VzVpd - lmvertZ);
-	}
-
-
-
-	// fill ToF hits
-
-	if(!TOFFilled) {
-		TOFFilled = true;
-		addServerTags("L4TOF");
-	}
-
-	for(u_int i = 0; i < hlt_tof->nTofHits; i++) {
-		short trayId   = hlt_tof->tofHit[i].trayId;
-		short channel  = hlt_tof->tofHit[i].channel;
-		float tdc      = hlt_tof->tofHit[i].tdc;
-		//    float tof         = hlt_tof->tofHit[i].tof;
-		float triggertime = hlt_tof->tofHit[i].triggertime;
-		hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
-		hchannelID->Fill(channel);
-	}
-
-	// fill pVPD hit
-	for(u_int i = 0; i < hlt_pvpd->nPvpdHits; i++) {
-		short trayId     = hlt_pvpd->pvpdHit[i].trayId;
-		//        short channel    = hlt_pvpd->pvpdHit[i].channel;
-		float tdc         = hlt_pvpd->pvpdHit[i].tdc;
-		//        float tof         = hlt_pvpd->pvpdHit[i].tof;
-		float triggertime = hlt_pvpd->pvpdHit[i].triggertime;
-		hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
-	}
-
-	// fill EMC
-	if(!EMCFilled) {
-		EMCFilled = true;
-		addServerTags("L4EMC");
-	}
-
-	for(u_int i = 0; i < hlt_emc->nEmcTowers; i++) {
-		//        int adc = hlt_emc->emcTower[i].adc;
-		float energy     = hlt_emc->emcTower[i].energy;
-		float phi   = hlt_emc->emcTower[i].phi;
-		float  eta   = hlt_emc->emcTower[i].eta;
-		//        float  z     = hlt_emc->emcTower[i].z;
-		int softId  = hlt_emc->emcTower[i].softId;
-		int daqId   = hlt_emc->emcTower[i].daqId;
-		hTowerEnergy->Fill(energy);//run
-		hTowerDaqId->Fill(daqId);  //run
-		hTowerSoftId->Fill(softId);  //run
-		hTowerEtaPhi->Fill(phi, eta); //run
-
-		if(daqID & upc) {
-			hTowerEnergy_UPC->Fill(energy);//run
-			hTowerDaqId_UPC->Fill(daqId);  //run
-			hTowerSoftId_UPC->Fill(softId);  //run
-			hTowerEtaPhi_UPC->Fill(phi, eta); //run
-		}
-	}
-
-	// global track
-
-	if(!GlobalTracksFilled) {
-		GlobalTracksFilled = true;
-		addServerTags("L4GlobalTracks");
-	}
-	for(u_int i = 0; i < hlt_gt->nGlobalTracks; i++) {
-		int nHits = hlt_gt->globalTrack[i].nHits;
-		int ndedx = hlt_gt->globalTrack[i].ndedx;
-		hnhits->Fill(nHits);
-		hnDedx->Fill(ndedx);
-
-		if(daqID & upc) {
-			hnhits_UPC->Fill(nHits);
-			hnDedx_UPC->Fill(ndedx);
-		}
-		if(hlt_gt->globalTrack[i].flag < 0.) continue;
-		//          if (hlt_gt->globalTrack[i].q != +1 && hlt_gt->globalTrack[i].q != -1) continue;
-		float pt = hlt_gt->globalTrack[i].pt;
-		float px = cos(hlt_gt->globalTrack[i].psi) * hlt_gt->globalTrack[i].pt;
-		float py = sin(hlt_gt->globalTrack[i].psi) * hlt_gt->globalTrack[i].pt;
-		float pz = hlt_gt->globalTrack[i].tanl * hlt_gt->globalTrack[i].pt;
-		int  q  = hlt_gt->globalTrack[i].q;
-
-		TVector3 mom(px, py, pz);
-		float eta = mom.PseudoRapidity();
-		float phi = mom.Phi();
-		if(phi < 0.0) phi += twopi;
-		float p = mom.Mag();
-		float dedx = hlt_gt->globalTrack[i].dedx;
-
-		hGlob_Eta->Fill(eta);
-		if(nHits >= 25 && fabs(eta) < 1.) {
-			hGlob_Pt->Fill(pt);
-			hGlob_Phi->Fill(phi);
-			if(daqID & upc) {
-				hGlob_Pt_UPC->Fill(pt);
-				hGlob_Phi_UPC->Fill(phi);
-			}
-		}
-
-		if(decision & triggerBitFixedTarget) {
-			hFixedTarget_Glob_Eta->Fill(eta);
-		}
-
-		if(decision & triggerBitFixedTargetMonitor) {
-			hFixedTargetMonitor_Glob_Eta->Fill(eta);
-		}
-		if(nHits >= 20 && ndedx >= 15) {
-			hGlob_dEdx->Fill(p * q, dedx);
-			if(daqID & upc) {
-				hGlob_dEdx_UPC->Fill(p * q, dedx);
-			}
-		}
-		if(nHits >= 20 && ndedx >= 20) {
-			hdEdx->Fill(p * q, dedx); //HeavyFragment Trigger
-			if(daqID & upc) {
-				hdEdx_UPC->Fill(p * q, dedx); // for HF reference
-			}
-		}
-	}
-
-	// primary tracks
-	if(!PrimaryTracksFilled) {
-		PrimaryTracksFilled = true;
-		addServerTags("L4PrimaryTracks");
-	}
-	int count = 0;
-	int count_UPC = 0;
-	for(u_int i = 0; i < hlt_node->nNodes; i++) {
-		int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
-		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
-		int     tofHitSN       = hlt_node->node[i].tofHitSN;
-		hlt_track   GTrack         = hlt_gt->globalTrack[globalTrackSN];
-		double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
-		double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
-		double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
-		double  theSign        = (cross >= 0) ? 1. : -1.;
-		double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
-		double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
-		hDcaXy->Fill(dcaXy);
-		hDcaZ->Fill(dcaZ);
-
-		if(daqID & upc) {
-			hDcaXy_UPC->Fill(dcaXy);
-			hDcaZ_UPC->Fill(dcaZ);
-		}
-		if(primaryTrackSN < 0) continue;
-		count++;
-		if(daqID & upc) count_UPC++;
-		hlt_track PTrack = hlt_pt->primaryTrack[primaryTrackSN];
-		if(PTrack.flag < 0.) continue;
-		//        if (PTrack.q != +1 && PTrack.q != -1) continue;
-
-		int nHits = PTrack.nHits;
-		int ndedx = PTrack.ndedx;
-		int q = PTrack.q;
-		float pt = PTrack.pt;
-		float px = cos(PTrack.psi) * PTrack.pt;
-		float py = sin(PTrack.psi) * PTrack.pt;
-		float pz = PTrack.tanl * PTrack.pt;
-
-		TVector3 mom(px, py, pz);
-		float eta = mom.PseudoRapidity();
-		float phi = mom.Phi();
-		if(phi < 0.0) phi += twopi;
-		float p = mom.Mag();
-		float dedx = PTrack.dedx;
-
-		hPrim_Eta->Fill(eta);
-		if(daqID & upc) hPrim_Eta_UPC->Fill(eta);
-		if(nHits >= 25 && fabs(eta) < 1.) {
-			hPrim_Pt->Fill(pt);
-			hPrim_Phi->Fill(phi);
-			if(daqID & upc) {
-				hPrim_Pt_UPC->Fill(pt);
-				hPrim_Phi_UPC->Fill(phi);
-			}
-		}
-		if(decision & triggerBitFixedTarget) {
-			hFixedTarget_Prim_Eta->Fill(eta);
-		}
-		if(decision & triggerBitFixedTargetMonitor) {
-			hFixedTargetMonitor_Prim_Eta->Fill(eta);
-		}
-		if(nHits >= 20 && ndedx >= 15) {
-			hPrim_dEdx->Fill(p * q, dedx);
-			if(daqID & upc) hPrim_dEdx_UPC->Fill(p * q, dedx);
-		}
-		if(nHits >= 20 && ndedx >= 15 && p >= 0.5 && p <= 0.6) {
-			hLn_dEdx->Fill(log(dedx));
-			if(daqID & upc) hLn_dEdx_UPC->Fill(log(dedx));
-		}
-
-	}
-
-	primaryTracks = count;
-	hglobalMult->Fill(hlt_gt->nGlobalTracks);
-	hprimaryMult->Fill(count);
-	if(daqID & upc) {
-		primaryTracks_UPC = count_UPC;
-		hglobalMult_UPC->Fill(hlt_gt->nGlobalTracks);
-		hprimaryMult_UPC->Fill(count_UPC);
-	}
-	if(decision & triggerBitBesgoodEvents){
-		hBesGoodprimaryMult->Fill(count);
-	}
-	if(decision & triggerBitHLTGood2){
-		hHLTGood2primaryMult->Fill(count);
-	}
-	// fill nodes
-	for(u_int i = 0; i < hlt_node->nNodes; i++) {
-		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
-		int     tofHitSN       = hlt_node->node[i].tofHitSN;
-		int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
-		hlt_track   NTrack         = hlt_pt->primaryTrack[primaryTrackSN];
-		float   px         = NTrack.pt * cos(NTrack.psi);
-		float   py         = NTrack.pt * sin(NTrack.psi);
-		float   pz         = NTrack.tanl * NTrack.pt;
-		float   p          = sqrt(px * px + py * py + pz * pz);
-
-		if(tofHitSN >= 0) {
-			float localY = hlt_node->node[i].localY;
-			float localZ = hlt_node->node[i].localZ;
-			float beta   = hlt_node->node[i].beta;
-			//          float tof    = hlt_node->node[i].tof;
-			int  projChannel = hlt_node->node[i].projChannel;
-			hLocalZ->Fill(localZ);
-			hLocalY->Fill(localY);
-			if(primaryTrackSN >= 0) {
-				hInverseBeta->Fill(p, 1 / beta);
-
-				for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
-					int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
-					int fire_trayId  = hlt_tof->tofHit[j].trayId;
-					if(Proj_trayId == fire_trayId) {
-						hMatchId_fiberId->Fill(projChannel, hlt_tof->tofHit[j].channel);
-						//  hMatchannel3D->Fill(projChannel, hlt_tof->tofHit[j].channel,Proj_trayId);
-					}
-				}
-			}
-		}
-
-		if(emcTowerSN >= 0 && NTrack.nHits > 20 && NTrack.ndedx > 15) {
-			double emcMatchPhiDiff = hlt_node->node[i].emcMatchPhiDiff;
-			double emcMatchZEdge   = hlt_node->node[i].emcMatchZEdge;
-			hMatchPhi_Diff->Fill(emcMatchPhiDiff);
-			if(daqID & upc) hMatchPhi_Diff_UPC->Fill(emcMatchPhiDiff);
-			if(emcMatchZEdge > 0.) {
-				hzEdge->Fill(emcMatchZEdge);
-				if(daqID & upc) hzEdge_UPC->Fill(emcMatchZEdge);
-			}
-		}
-
-	}
-
-	//BesGood
-	if(decision & triggerBitBesgoodEvents) {
-		if(!BESGoodFilled) {
-			BESGoodFilled = true;
-			addServerTags("L4BesGoodEvents");
-		}
-
-		hBesGoodVertexXY->Fill(vertX, vertY);
-		hBesGoodVertexZ->Fill(vertZ);
-		hBesGoodVr->Fill(vertR);
-		hBesGoodVrVsVz->Fill(vertZ,vertR);
-	}
-
-	//HLTGood2
-
-	if(decision & triggerBitHLTGood2) {
-		if(!HLTGood2Filled) {
-			HLTGood2Filled = true;
-			addServerTags("L4HLTGood2");
-		}
-		hHLTGood2VertexXY->Fill(vertX, vertY);
-		hHLTGood2VertexZ->Fill(vertZ);
-		hHLTGood2Vr->Fill(vertR);
-	}
-
-	//BESMonitor
-
-	if(decision & triggerBitBesMonitor) {
-		if(!BESMonitorFilled) {
-			BESMonitorFilled = true;
-			addServerTags("L4BesGoodMonitor");
-		}
-		hBesMonitorVertexXY->Fill(vertX, vertY);
-		hBesMonitorVr->Fill(vertR);
-	}
-
-
-
-	//FixedTarget
-
-	if(decision & triggerBitFixedTarget) {
-		if(!FixedTargetFilled) {
-			FixedTargetFilled = true;
-			addServerTags("L4FixedTarget");
-		}
-		hFixedTargetVertexXY->Fill(vertX, vertY);
-		hFixedTargetVr->Fill(vertR);
-	}
-
-	//FixedTargetMonitor
-
-	if(decision & triggerBitFixedTargetMonitor) {
-		if(!FixedTargetMonitorFilled) {
-			FixedTargetMonitorFilled = true;
-
-			addServerTags("L4FixedTargetMonitor");
-		}
-		hFixedTargetMonitorVertexXY->Fill(vertX, vertY);
-		hFixedTargetMonitorVr->Fill(vertR);
-	}
-
-	if(decision & triggerBitDiElectron) {
-		if(!DiElectronFilled) {
-			DiElectronFilled = true;
-			addServerTags("L4DiElectron");
-		}
-	}
-
-
-	// heavy fragment
-	for(u_int i = 0; i < hlt_hf->nHeavyFragments; i++) {
-		if(!HeavyFragmentFilled) {
-			HeavyFragmentFilled = true;
-			addServerTags("L4HeavyFragment");
-		}
-		int heavyFrag_NodeSN = hlt_hf->heavyFragmentSN[i];
-		int heavyFragmentglobSN  = hlt_node->node[heavyFrag_NodeSN].globalTrackSN;
-		hlt_track HFtrack = hlt_gt->globalTrack[heavyFragmentglobSN];
-		int nHits =  HFtrack.nHits;
-		int ndedx =  HFtrack.ndedx;
-		int q     =  HFtrack.q;
-		float hfpx    = HFtrack.pt * cos(HFtrack.psi);
-		float hfpy    = HFtrack.pt * sin(HFtrack.psi);
-		float hfpz    = HFtrack.pt * HFtrack.tanl;
-		float hfp     = sqrt(hfpx * hfpx + hfpy * hfpy + hfpz * hfpz);
-		float hfdedx  =  HFtrack.dedx;
-
-		if(nHits >= 20 && ndedx >= 15) {
-			hHFM_dEdx->Fill(hfp * q , hfdedx);
-			if(daqID & upc) hHFM_dEdx_UPC->Fill(hfp * q , hfdedx);
-		}
-
-	}
-
-	// di-pion
-	if(decision & triggerBitUPC) {
-
-		if(!UPCFilled) {
-			UPCFilled = true;
-			addServerTags("L4UPC");
-		}
-
-		for(u_int i = 0; i < hlt_dipi->nRhos; i++) {
-			int Daughter1NodeSN = hlt_dipi->PionPair[i].dau1NodeSN;
-			int Daughter2NodeSN = hlt_dipi->PionPair[i].dau2NodeSN;
-			int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-			int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-			int globalTrack1SN  =  hlt_node->node[Daughter1NodeSN].globalTrackSN;
-			int globalTrack2SN  =  hlt_node->node[Daughter2NodeSN].globalTrackSN;
-			hlt_track GTrack1 = hlt_gt->globalTrack[globalTrack1SN];
-			hlt_track GTrack2 = hlt_gt->globalTrack[globalTrack2SN];
-
-			double dcaX1 = GTrack1.r0 * cos(GTrack1.phi0) - hlt_eve->lmVertexX;
-			double dcaY1 = GTrack1.r0 * sin(GTrack1.phi0) - hlt_eve->lmVertexY;
-			//double cross1 = dcaX1 * sin(GTrack1.psi) - dcaY1 * cos(GTrack1.psi);
-			double theSign1 = 1.;
-			double dcaZ1 = GTrack1.z0 - hlt_eve->lmVertexZ;
-			//double dca1 = theSign1 * sqrt(pow(dcaX1, 2) + pow(dcaY1, 2) + pow(dcaZ1, 2));
-
-			double dcaX2 = GTrack2.r0 * cos(GTrack2.phi0) - hlt_eve->lmVertexX;
-			double dcaY2 = GTrack2.r0 * sin(GTrack2.phi0) - hlt_eve->lmVertexY;
-			//double cross2 = dcaX2 * sin(GTrack2.psi) - dcaY2 * cos(GTrack2.psi);
-			double theSign2 = 1.;
-			double dcaZ2 = GTrack2.z0 - hlt_eve->lmVertexZ;
-			//double dca2 = theSign2 * sqrt(pow(dcaX2, 2) + pow(dcaY2, 2) + pow(dcaZ2, 2));
-
-			if(Daughter1TrackSN < 0) continue;
-			hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
-			float Daughter1q     = Daughter1Track.q;
-			if(Daughter2TrackSN < 0.) continue;
-			hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-			float Daughter2q     =  Daughter2Track.q;
-
-			float m = hlt_dipi->PionPair[i].invariantMass;
-			float diffphi = hlt_dipi->PionPair[i].deltphi;
-			hDiPionDeltphi->Fill(diffphi);
-
-			if(Daughter1q * Daughter2q < 0.) hDiPionInvMassFullRange->Fill(m);
-			else hDiPionInvMassFullRangeBG->Fill(m);
-
-		}
-	}
-
-
-	//DiElectron2Twr
-	if(decision & triggerBitDiElectron2Twr) {
-		if(!DiElectron2TwrFilled) {
-			DiElectron2TwrFilled = true;
-			addServerTags("L4DiElectron2Twr");
-		}
-	}
-
-
-
-	// di-muon
-	const int nNodes = hlt_node->nNodes;
-	int global2prim[nNodes];
-	for(int inode = 0; inode<hlt_node->nNodes; inode++)
+#pragma omp section
 	  {
-	    int gTrackSN  = hlt_node->node[inode].globalTrackSN;
-	    int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
-	    global2prim[gTrackSN] = pTrackSN;
+
+	    if(!TriggerFilled) {
+		TriggerFilled = true;
+		addServerTags("L4Trigger");
+	    }
+	    if(decision & triggerBitDiMuon) {
+	      hEvtsAccpt->Fill(0.);
+	    }
+	    if(decision & triggerBitMTDQuarkonium) {
+	      hEvtsAccpt->Fill(1.);
+	    }
+	    if(decision & triggerBitHLTGood2) {
+	      hEvtsAccpt->Fill(2.);
+	    }
+	    if(decision & triggerBitDiElectron) {
+	      hEvtsAccpt->Fill(3.);
+	    }
+	    if(decision & triggerBitDiElectron2Twr) {
+	      hEvtsAccpt->Fill(4.);
+	    }
+	    if(decision & triggerBitHeavyFragment) {
+	      hEvtsAccpt->Fill(5.);
+	    }
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(1, "DiMuon");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(2, "MTDQuarkonium");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(3, "HLTGood2");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(4, "DiElectron");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DIEP2Twr");
+	    hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment");
+	    // fill events
+	    if(!EventFilled) {
+	      EventFilled = true;
+	      addServerTags("L4Event");
+	    }
+	    float vertX = hlt_eve->vertexX;
+	    float vertY = hlt_eve->vertexY;
+	    float vertZ = hlt_eve->vertexZ;
+	    float vertR = sqrt(vertX * vertX + vertY * vertY);
+	    float lmvertX = hlt_eve->lmVertexX;
+	    float lmvertY = hlt_eve->lmVertexY;
+	    float lmvertZ = hlt_eve->lmVertexZ;
+	    float VzVpd =  hlt_eve->vpdVertexZ;
+	    innerGainPara = hlt_eve->innerSectorGain;
+	    outerGainPara = hlt_eve->outerSectorGain;
+	    BeamX = hlt_eve->beamlineX;
+	    BeamY = hlt_eve->beamlineY;
+	    hVertexX->Fill(vertX);
+	    hVertexY->Fill(vertY);
+	    hVertexZ->Fill(vertZ);
+	    hVertexXY->Fill(vertX, vertY);
+	    hVertexR->Fill(vertR);
+	    hLm_VertexX->Fill(lmvertX);
+	    hLm_VertexY->Fill(lmvertY);
+	    hLm_VertexZ->Fill(lmvertZ);
+	    hVzvpd_Vz->Fill(VzVpd, lmvertZ);
+	    hVzDiff->Fill(VzVpd - lmvertZ);
+	    
+	    if(daqID & upc) {
+	      hVertexX_UPC->Fill(vertX);
+	      hVertexY_UPC->Fill(vertY);
+	      hVertexZ_UPC->Fill(vertZ);
+	      hLm_VertexX_UPC->Fill(lmvertX);
+	      hLm_VertexY_UPC->Fill(lmvertY);
+	      hLm_VertexZ_UPC->Fill(lmvertZ);
+	      hVzvpd_Vz_UPC->Fill(VzVpd, lmvertZ);
+	      hVzDiff_UPC->Fill(VzVpd - lmvertZ);
+	    }
+
+	    //BesGood
+	    if(decision & triggerBitBesgoodEvents) {
+	      if(!BESGoodFilled) {
+		BESGoodFilled = true;
+		addServerTags("L4BesGoodEvents");
+	      }
+	      hBesGoodVertexXY->Fill(vertX, vertY);
+	      hBesGoodVertexZ->Fill(vertZ);
+	      hBesGoodVr->Fill(vertR);
+	      hBesGoodVrVsVz->Fill(vertZ,vertR);
+	    }
+	    
+	    //HLTGood2
+	    
+	    if(decision & triggerBitHLTGood2) {
+	      if(!HLTGood2Filled) {
+		HLTGood2Filled = true;
+		addServerTags("L4HLTGood2");
+	      }
+	      hHLTGood2VertexXY->Fill(vertX, vertY);
+	      hHLTGood2VertexZ->Fill(vertZ);
+	      hHLTGood2Vr->Fill(vertR);
+	    }
+	    
+	    //BESMonitor
+	    
+	    if(decision & triggerBitBesMonitor) {
+	      if(!BESMonitorFilled) {
+		BESMonitorFilled = true;
+		addServerTags("L4BesGoodMonitor");
+	      }
+	      hBesMonitorVertexXY->Fill(vertX, vertY);
+	      hBesMonitorVr->Fill(vertR);
+	    }
+	    
+	    //FixedTarget
+	    
+	    if(decision & triggerBitFixedTarget) {
+	      if(!FixedTargetFilled) {
+		FixedTargetFilled = true;
+		addServerTags("L4FixedTarget");
+	      }
+	      hFixedTargetVertexXY->Fill(vertX, vertY);
+	      hFixedTargetVr->Fill(vertR);
+	      hFixedTarget_VertexZ->Fill(vertZ);
+	    }
+	    
+	    //FixedTargetMonitor
+	    
+	    if(decision & triggerBitFixedTargetMonitor) {
+	      if(!FixedTargetMonitorFilled) {
+		FixedTargetMonitorFilled = true;
+		addServerTags("L4FixedTargetMonitor");
+	      }
+	      hFixedTargetMonitorVertexXY->Fill(vertX, vertY);
+	      hFixedTargetMonitorVr->Fill(vertR);
+	      hFixedTargetMonitor_VertexZ->Fill(vertZ);
+	    }
+	    
+	    if(decision & triggerBitDiElectron) {
+	      if(!DiElectronFilled) {
+		DiElectronFilled = true;
+		addServerTags("L4DiElectron");
+	      }
+	    }
+	    
+	    if(!GlobalTracksFilled) {
+	      GlobalTracksFilled = true;
+	      addServerTags("L4GlobalTracks");
+	    }
+	    
+	    if(!TOFFilled) {
+	      TOFFilled = true;
+	      addServerTags("L4TOF");
+	    }
+
+	    if(!EMCFilled) {
+	      EMCFilled = true;
+	      addServerTags("L4EMC");
+	    }
+	    
+	    if(!PrimaryTracksFilled) {
+	      PrimaryTracksFilled = true;
+	      addServerTags("L4PrimaryTracks");
+	    }
+	    
+	    if(!HeavyFragmentFilled) {
+	      HeavyFragmentFilled = true;
+	      addServerTags("L4HeavyFragment");
+	    }
+	    
+	    if(decision & triggerBitDiElectron2Twr) {
+	      if(!DiElectron2TwrFilled) {
+		DiElectron2TwrFilled = true;
+		addServerTags("L4DiElectron2Twr");
+	      }
+	    }
+	    
+	    if(decision & triggerBitUPC) {
+	      if(!UPCFilled) {
+		UPCFilled = true;
+		addServerTags("L4UPC");
+	      }
+	    }
+	    
+	    if(decision & triggerBitDiMuon) {
+	      if(!DiMuonFilled) {
+		DiMuonFilled = true;
+		addServerTags("L4DiMuon");
+	      }
+	    }
+	    
+	    if(decision & triggerBitUPCDiElectron) {
+	      if(!UPCDiElectronFilled) {
+		UPCDiElectronFilled = true;
+		addServerTags("L4UPCDiElectron");
+	      }
+	    }
+	    
 	  }
-	if(decision & triggerBitDiMuon) {
-		if(!DiMuonFilled) {
-			DiMuonFilled = true;
-			addServerTags("L4DiMuon");
+	  
+#pragma omp section
+	  {
+	    // fill ToF hits
+
+	    for(u_int i = 0; i < hlt_tof->nTofHits; i++) {
+	      short trayId   = hlt_tof->tofHit[i].trayId;
+	      short channel  = hlt_tof->tofHit[i].channel;
+	      float tdc      = hlt_tof->tofHit[i].tdc;
+	      float triggertime = hlt_tof->tofHit[i].triggertime;
+	      hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
+	      hchannelID->Fill(channel);
+	    }
+
+	    // fill pVPD hit
+	    
+	    for(u_int i = 0; i < hlt_pvpd->nPvpdHits; i++) {
+	      short trayId      = hlt_pvpd->pvpdHit[i].trayId;
+	      float tdc         = hlt_pvpd->pvpdHit[i].tdc;
+	      float triggertime = hlt_pvpd->pvpdHit[i].triggertime;
+	      hTrayID_TrgTime->Fill(trayId, tdc - triggertime);
+	    }
+	  }
+
+	    
+#pragma omp section
+	  {
+	    // fill EMC
+	    
+	    for(u_int i = 0; i < hlt_emc->nEmcTowers; i++) {
+	      float energy     = hlt_emc->emcTower[i].energy;
+	      float phi   = hlt_emc->emcTower[i].phi;
+	      float  eta   = hlt_emc->emcTower[i].eta;
+	      int softId  = hlt_emc->emcTower[i].softId;
+	      int daqId   = hlt_emc->emcTower[i].daqId;
+	      hTowerEnergy->Fill(energy);//run
+	      hTowerDaqId->Fill(daqId);  //run
+	      hTowerSoftId->Fill(softId);  //run
+	      hTowerEtaPhi->Fill(phi, eta); //run
+	      
+	      if(daqID & upc) {
+		hTowerEnergy_UPC->Fill(energy);//run
+		hTowerDaqId_UPC->Fill(daqId);  //run
+		hTowerSoftId_UPC->Fill(softId);  //run
+		hTowerEtaPhi_UPC->Fill(phi, eta); //run
+	      }
+	    }
+	  }
+	  
+	  
+#pragma omp section
+	  {
+	    // global track
+	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+	      int nHits = hlt_gt->globalTrack[i].nHits;
+	     	      
+	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
+	      float pt = hlt_gt->globalTrack[i].pt;
+	      float pz = hlt_gt->globalTrack[i].tanl * pt;
+	      float p  = TMath::Sqrt(pt*pt+pz*pz);
+	      float eta = 0.0;
+	      if(p==pz&&pz>0) eta = 10e10 ;
+	      if(p==pz&&pz<0) eta = -10e10 ;
+	      eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
+	      
+	      hGlob_Eta->Fill(eta);	      
+
+	      if(nHits >= 25 && fabs(eta) < 1.) {
+		float phi = hlt_gt->globalTrack[i].psi;
+		if(phi < 0.0) phi += twopi;
+		hGlob_Pt->Fill(pt);
+		hGlob_Phi->Fill(phi);
+	      }
+	    }
+	  }
+
+
+#pragma omp section
+	  {
+	    // global track
+	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+	      int nHits = hlt_gt->globalTrack[i].nHits;
+	     	      
+	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
+	      float pt = hlt_gt->globalTrack[i].pt;
+	      float pz = hlt_gt->globalTrack[i].tanl * pt;
+	      float p  = TMath::Sqrt(pt*pt+pz*pz);
+	      float eta = 0.0;
+	      if(p==pz&&pz>0) eta = 10e10 ;
+	      if(p==pz&&pz<0) eta = -10e10 ;
+	      eta = 0.5*TMath::Log((p+pz)/(p-pz)); 
+	      
+	      if(nHits >= 25 && fabs(eta) < 1.) {
+		float phi = hlt_gt->globalTrack[i].psi;
+		if(phi < 0.0) phi += twopi;
+		if(daqID & upc) {
+		  hGlob_Pt_UPC->Fill(pt);
+		  hGlob_Phi_UPC->Fill(phi);
 		}
-		int nMtdHit = hlt_mtd->nMtdHits;
-		vector<int> pMuTrkId;
-		pMuTrkId.clear();
-		for(int i=0; i<nMtdHit; i++)
-		{
-			int backleg  = (int)hlt_mtd->mtdHit[i].backleg;
-			int module   = (int)hlt_mtd->mtdHit[i].tray;
-			int channel  = (int)hlt_mtd->mtdHit[i].channel;
-			int gchannel = (module-1)*12+channel;
-			int gmodule  = (backleg-1)*5+module;
+	      }
 
-			hMtdHitMap->Fill(backleg,gchannel);
+	      if(decision & triggerBitFixedTarget) {
+		hFixedTarget_Glob_Eta->Fill(eta);
+	      }
+	        
+	      if(decision & triggerBitFixedTargetMonitor) {
+		hFixedTargetMonitor_Glob_Eta->Fill(eta);
+	      }
+	    }
+	  }
 
-			int trkid   = (int)hlt_mtd->mtdHit[i].hlt_trackId;
-			if(trkid<0) continue;
-			double deltaz = hlt_mtd->mtdHit[i].delta_z;
-			double deltay = hlt_mtd->mtdHit[i].delta_y;
-			hMtdMatchHitMap->Fill(backleg,gchannel);
-			hMtdDeltaZvsModule->Fill(gmodule,deltaz);
-			hMtdDeltaZ->Fill(deltaz);
-			hMtdDeltaYvsModule->Fill(gmodule,deltay);
-			hMtdDeltaY->Fill(deltay);
-			if(fabs(deltaz)>20)continue;
-			if(fabs(deltay)>20)continue;
 
-			int pTrkId  = global2prim[trkid];
-			if(pTrkId<0) continue;
-			hlt_track pTrack = hlt_pt->primaryTrack[pTrkId];
-			float pt = pTrack.pt;
-			if(pt<1.)continue;
-			if(pTrack.nHits<15)continue;
-			if(pTrack.ndedx<10)continue;
-			float dedx  = pTrack.dedx;
-			float psi  = pTrack.psi;
-			float tanl = pTrack.tanl;
-			float px   = TMath::Cos(psi)*pt;
-			float py   = TMath::Sin(psi)*pt;
-			float pz   = tanl * pt;
-			TVector3 mu(px, py, pz);
-			double mu_dedxPi = getDedx(mu.Mag(), Pi);
-			float mu_nSigmaPi = log(dedx/mu_dedxPi)/A*sqrt(pTrack.ndedx);
-			//if(mu_nSigmaPi<-1.||mu_nSigmaPi>3.)continue;
-			pMuTrkId.push_back(pTrkId);
+#pragma omp section
+	  {
+	 
+	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+	      int nHits = hlt_gt->globalTrack[i].nHits;
+	      int ndedx = hlt_gt->globalTrack[i].ndedx;
+
+	      hnhits->Fill(nHits);
+	      hnDedx->Fill(ndedx);
+	   
+	      if(daqID & upc) {
+		hnhits_UPC->Fill(nHits);
+		hnDedx_UPC->Fill(ndedx);
+	      }
+	      
+	      if(hlt_gt->globalTrack[i].flag < 0.) continue;
+	      
+	      if(nHits >= 20 && ndedx >= 15) {
+		float pt = hlt_gt->globalTrack[i].pt;
+		float pz = hlt_gt->globalTrack[i].tanl * pt;
+		int  q  = hlt_gt->globalTrack[i].q;
+		float p = TMath::Sqrt(pt*pt+pz*pz);
+		float dedx = hlt_gt->globalTrack[i].dedx;
+	
+		hGlob_dEdx->Fill(p * q, dedx);
+		if(daqID & upc) {
+		  hGlob_dEdx_UPC->Fill(p * q, dedx);
 		}
 
-		// J/psi analysis
-		const float muMass = 0.10566;
-		unsigned int npmuon = pMuTrkId.size();
-		for(unsigned int i=0; i<npmuon; i++)
+		if( ndedx >= 20) {
+		  hdEdx->Fill(p * q, dedx); //HeavyFragment Trigger
+		  if(daqID & upc) {
+		    hdEdx_UPC->Fill(p * q, dedx); // for HF reference
+		  }
+		}
+	      }
+	    }
+	  }
+
+
+#pragma omp section
+	  {
+	    // primary tracks
+
+	    double Array_dcaXy[hlt_node->nNodes];
+	    double Array_dcaZ[hlt_node->nNodes];	    
+
+#pragma omp parallel for num_threads(4)
+
+	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+	      int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+	      hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
+	      double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
+	      double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
+	      double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
+	      double  theSign        = (cross >= 0) ? 1. : -1.;
+	      double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
+	      double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
+
+	      Array_dcaXy[i]=dcaXy;
+	      Array_dcaZ[i]=dcaZ;
+	    }
+	    
+	    for(int j = 0; j < hlt_node->nNodes; j++) {
+	      hDcaXy->Fill(Array_dcaXy[j]);
+	      hDcaZ->Fill(Array_dcaZ[j]);
+	      
+	      if(daqID & upc) {
+		hDcaXy_UPC->Fill(Array_dcaXy[j]);
+		hDcaZ_UPC->Fill(Array_dcaZ[j]);
+	      }
+	    }
+	  }
+
+#pragma omp section
+	  {
+	    
+	    int count = 0;
+	    int count_UPC = 0;
+	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
+	      //int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+
+	      if(primaryTrackSN < 0) continue;
+	      count++;
+	      if(daqID & upc) count_UPC++;
+	      hlt_track PTrack = hlt_pt->primaryTrack[primaryTrackSN];
+	      if(PTrack.flag < 0.) continue;
+	     	      
+	      int nHits = PTrack.nHits;
+	      int ndedx = PTrack.ndedx;
+	      int q = PTrack.q;
+	      float pt = PTrack.pt;
+	      float px = cos(PTrack.psi) * PTrack.pt;
+	      float py = sin(PTrack.psi) * PTrack.pt;
+	      float pz = PTrack.tanl * PTrack.pt;	      
+	      
+	      TVector3 mom(px, py, pz);
+	      float eta = mom.PseudoRapidity();
+	      float phi = mom.Phi();
+	      if(phi < 0.0) phi += twopi;
+	      float p = mom.Mag();
+	      float dedx = PTrack.dedx;
+	      
+	      hPrim_Eta->Fill(eta);
+	      if(daqID & upc) hPrim_Eta_UPC->Fill(eta);
+	      if(nHits >= 25 && fabs(eta) < 1.) {
+		hPrim_Pt->Fill(pt);
+		hPrim_Phi->Fill(phi);
+		if(daqID & upc) {
+		  hPrim_Pt_UPC->Fill(pt);
+		  hPrim_Phi_UPC->Fill(phi);
+		}
+	      }
+	      if(decision & triggerBitFixedTarget) {
+		hFixedTarget_Prim_Eta->Fill(eta);
+	      }
+	      if(decision & triggerBitFixedTargetMonitor) {
+		hFixedTargetMonitor_Prim_Eta->Fill(eta);
+	      }
+	      
+	      if(nHits >= 20 && ndedx >= 15) {
+		hPrim_dEdx->Fill(p * q, dedx);
+		if(daqID & upc) hPrim_dEdx_UPC->Fill(p * q, dedx);
+
+		if(p >= 0.5 && p <= 0.6) {
+		  hLn_dEdx->Fill(log(dedx));
+		  if(daqID & upc) hLn_dEdx_UPC->Fill(log(dedx));
+		}
+	      }
+	    }
+	    
+	    primaryTracks = count;
+	    hglobalMult->Fill(hlt_gt->nGlobalTracks);
+	    hprimaryMult->Fill(count);
+	    
+	    if(daqID & upc) {
+	      primaryTracks_UPC = count_UPC;
+	      hglobalMult_UPC->Fill(hlt_gt->nGlobalTracks);
+	      hprimaryMult_UPC->Fill(count_UPC);
+	    }
+	    if(decision & triggerBitBesgoodEvents){
+	      hBesGoodprimaryMult->Fill(count);
+	    }
+	    if(decision & triggerBitHLTGood2){
+	      hHLTGood2primaryMult->Fill(count);
+	    }
+	  }
+
+#pragma omp section
+	  {
+	    // fill nodes
+	    
+	    for(u_int i = 0; i < u_int (hlt_node->nNodes*(1.0/3.0)); i++) {
+	      int  tofHitSN       = hlt_node->node[i].tofHitSN;
+	      
+	      if(tofHitSN >= 0) {
+		int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
+
+		if(primaryTrackSN >= 0) {
+		  int  projChannel = hlt_node->node[i].projChannel;
+		  int  Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
+	
+		  for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+		    int fire_trayId = hlt_tof->tofHit[j].trayId;
+	
+		    if(Proj_trayId == fire_trayId) {
+		      hMatchId_fiberId->Fill(projChannel, hlt_tof->tofHit[j].channel);
+		    }
+		  }
+		}
+	      }
+	    }
+	}
+	  
+#pragma omp section
+	  {
+	    
+	    for(u_int i = u_int (hlt_node->nNodes*(1.0/3.0)); i < u_int (hlt_node->nNodes*(2.0/3.0)); i++) {
+	      int  tofHitSN       = hlt_node->node[i].tofHitSN;
+	      	      
+	      if(tofHitSN >= 0) {
+		int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
+	
+		if(primaryTrackSN >= 0) {
+		  int  projChannel = hlt_node->node[i].projChannel;
+		  int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
+		  
+		  for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+		    int fire_trayId = hlt_tof->tofHit[j].trayId;
+		    if(Proj_trayId == fire_trayId) {
+		      hMatchId_fiberId_copy->Fill(projChannel, hlt_tof->tofHit[j].channel);
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
+
+#pragma omp section
+	  {
+	    for(u_int i = u_int (hlt_node->nNodes*(2.0/3.0)); i < hlt_node->nNodes; i++) {
+	      int  tofHitSN       = hlt_node->node[i].tofHitSN;
+	      
+	      if(tofHitSN >= 0) {
+		int  primaryTrackSN = hlt_node->node[i].primaryTrackSN;	
+	
+		if(primaryTrackSN >= 0) {
+		  int  projChannel = hlt_node->node[i].projChannel;
+		  int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
+		  
+		  for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+		    int fire_trayId = hlt_tof->tofHit[j].trayId;
+		    if(Proj_trayId == fire_trayId) {
+		      hMatchId_fiberId_copy2->Fill(projChannel, hlt_tof->tofHit[j].channel);
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
+	  
+#pragma omp section
+	  {
+
+	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
+	      int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+	      int     tofHitSN       = hlt_node->node[i].tofHitSN;
+	      int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
+	      hlt_track   NTrack         = hlt_pt->primaryTrack[primaryTrackSN];
+              float   pt         = NTrack.pt;
+	      float   pz         = NTrack.tanl * NTrack.pt;
+	      float   p          = sqrt(pt * pt + pz * pz);
+	      
+	      if(tofHitSN >= 0) {
+		float localY = hlt_node->node[i].localY;
+		float localZ = hlt_node->node[i].localZ;
+		float beta   = hlt_node->node[i].beta;
+		hLocalZ->Fill(localZ);
+		hLocalY->Fill(localY);
+		if(primaryTrackSN >= 0) {
+		  hInverseBeta->Fill(p, 1 / beta);
+		}
+	      }
+
+	      if(emcTowerSN >= 0 && NTrack.nHits > 20 && NTrack.ndedx > 15) {
+		double emcMatchPhiDiff = hlt_node->node[i].emcMatchPhiDiff;
+		double emcMatchZEdge   = hlt_node->node[i].emcMatchZEdge;
+		hMatchPhi_Diff->Fill(emcMatchPhiDiff);
+		if(daqID & upc) hMatchPhi_Diff_UPC->Fill(emcMatchPhiDiff);
+		if(emcMatchZEdge > 0.) {
+		  hzEdge->Fill(emcMatchZEdge);
+		  if(daqID & upc) hzEdge_UPC->Fill(emcMatchZEdge);
+		}
+	      }
+	      
+	    }
+	  }
+
+	  
+#pragma omp section
+	  {
+	    
+	    // heavy fragment
+	   
+	    for(u_int i = 0; i < hlt_hf->nHeavyFragments; i++) {
+	      
+	      int heavyFrag_NodeSN = hlt_hf->heavyFragmentSN[i];
+	      int heavyFragmentglobSN  = hlt_node->node[heavyFrag_NodeSN].globalTrackSN;
+	      hlt_track HFtrack = hlt_gt->globalTrack[heavyFragmentglobSN];
+	      int nHits =  HFtrack.nHits;
+	      int ndedx =  HFtrack.ndedx;
+	      int q     =  HFtrack.q;
+	      float hfpx    = HFtrack.pt * cos(HFtrack.psi);
+	      float hfpy    = HFtrack.pt * sin(HFtrack.psi);
+	      float hfpz    = HFtrack.pt * HFtrack.tanl;
+	      float hfp     = sqrt(hfpx * hfpx + hfpy * hfpy + hfpz * hfpz);
+	      float hfdedx  =  HFtrack.dedx;
+	  
+	      if(nHits >= 20 && ndedx >= 15) {
+		hHFM_dEdx->Fill(hfp * q , hfdedx);
+		if(daqID & upc) hHFM_dEdx_UPC->Fill(hfp * q , hfdedx);
+	      }
+	    }
+	  }
+
+
+#pragma omp section
+	  {
+	    // di-pion
+	    if(decision & triggerBitUPC) {
+	      
+	      for(u_int i = 0; i < hlt_dipi->nRhos; i++) {
+		int Daughter1NodeSN = hlt_dipi->PionPair[i].dau1NodeSN;
+		int Daughter2NodeSN = hlt_dipi->PionPair[i].dau2NodeSN;
+		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+	      
+		if(Daughter1TrackSN < 0) continue;
+		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+		float Daughter1q     = Daughter1Track.q;
+		if(Daughter2TrackSN < 0.) continue;
+		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		float Daughter2q     =  Daughter2Track.q;
+		
+		float m = hlt_dipi->PionPair[i].invariantMass;
+		float diffphi = hlt_dipi->PionPair[i].deltphi;
+		hDiPionDeltphi->Fill(diffphi);
+		
+		if(Daughter1q * Daughter2q < 0.) hDiPionInvMassFullRange->Fill(m);
+		else hDiPionInvMassFullRangeBG->Fill(m);
+		
+	      }
+	    }
+	  }
+
+
+#pragma omp section
+	  {
+	    // di-muon
+	    const int nNodes = hlt_node->nNodes;
+	    int global2prim[nNodes];
+	    for(int inode = 0; inode<hlt_node->nNodes; inode++)
+	      {
+		int gTrackSN  = hlt_node->node[inode].globalTrackSN;
+		int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+		global2prim[gTrackSN] = pTrackSN;
+	      }
+	    
+	    if(decision & triggerBitDiMuon) {
+	      int nMtdHit = hlt_mtd->nMtdHits;
+	      vector<int> pMuTrkId;
+	      pMuTrkId.clear();
+	      for(int i=0; i<nMtdHit; i++)
 		{
-			hlt_track ipTrack = hlt_pt->primaryTrack[pMuTrkId[i]];
-			char iq = ipTrack.q;
-			float ipt = ipTrack.pt;
-			float ipsi = ipTrack.psi;
-			float itanl = ipTrack.tanl;
-			float ipx = TMath::Cos(ipsi)*ipt;
-			float ipy = TMath::Sin(ipsi)*ipt;
-			float ipz = itanl * ipt;
-			TLorentzVector imuon;
-			imuon.SetXYZM(ipx,ipy,ipz,muMass);
+		  int backleg  = (int)hlt_mtd->mtdHit[i].backleg;
+		  int module   = (int)hlt_mtd->mtdHit[i].tray;
+		  int channel  = (int)hlt_mtd->mtdHit[i].channel;
+		  int gchannel = (module-1)*12+channel;
+		  int gmodule  = (backleg-1)*5+module;
+		  
+		  hMtdHitMap->Fill(backleg,gchannel);
+		  
+		  int trkid   = (int)hlt_mtd->mtdHit[i].hlt_trackId;
+		  if(trkid<0) continue;
+		  double deltaz = hlt_mtd->mtdHit[i].delta_z;
+		  double deltay = hlt_mtd->mtdHit[i].delta_y;
+		  hMtdMatchHitMap->Fill(backleg,gchannel);
+		  hMtdDeltaZvsModule->Fill(gmodule,deltaz);
+		  hMtdDeltaZ->Fill(deltaz);
+		  hMtdDeltaYvsModule->Fill(gmodule,deltay);
+		  hMtdDeltaY->Fill(deltay);
+		  if(fabs(deltaz)>20)continue;
+		  if(fabs(deltay)>20)continue;
+		  
+		  int pTrkId  = global2prim[trkid];
+		  if(pTrkId<0) continue;
+		  hlt_track pTrack = hlt_pt->primaryTrack[pTrkId];
+		  float pt = pTrack.pt;
+		  if(pt<1.)continue;
+		  if(pTrack.nHits<15)continue;
+		  if(pTrack.ndedx<10)continue;
+		  pMuTrkId.push_back(pTrkId);
+		}
 
-			for(UInt_t j=i+1; j<npmuon; j++)
-			{
-				hlt_track jpTrack = hlt_pt->primaryTrack[pMuTrkId[j]];
-				char jq = jpTrack.q;
-				float jpt = jpTrack.pt;
-
-				double pt_lead = (ipt>jpt) ? ipt : jpt;
-				if(pt_lead<1.5) continue;
-
-				float jpsi = jpTrack.psi;
-				float jtanl = jpTrack.tanl;
-				float jpx = TMath::Cos(jpsi)*jpt;
-				float jpy = TMath::Sin(jpsi)*jpt;
-				float jpz = jtanl * jpt;
-				TLorentzVector jmuon;
-				jmuon.SetXYZM(jpx,jpy,jpz,muMass);
-
-				TLorentzVector muPair = imuon + jmuon;
-				if(iq*jq<0) {
-					hInvMassUS->Fill(muPair.M());
-					hMTDDiMuonJpsiMassUS->Fill(muPair.M());
-					hMTDDiMuonUpsilonMassUS->Fill(muPair.M());
-				}
-				else{
-					hInvMassLS->Fill(muPair.M());
-					hMTDDiMuonJpsiMassLS->Fill(muPair.M());
-					hMTDDiMuonUpsilonMassLS->Fill(muPair.M());
-				}
-			}//j
+	  
+	      // J/psi analysis
+	      const float muMass = 0.10566;
+	      unsigned int npmuon = pMuTrkId.size();
+	      for(unsigned int i=0; i<npmuon; i++)
+		{
+		  hlt_track ipTrack = hlt_pt->primaryTrack[pMuTrkId[i]];
+		  char iq = ipTrack.q;
+		  float ipt = ipTrack.pt;
+		  float ipsi = ipTrack.psi;
+		  float itanl = ipTrack.tanl;
+		  float ipx = TMath::Cos(ipsi)*ipt;
+		  float ipy = TMath::Sin(ipsi)*ipt;
+		  float ipz = itanl * ipt;
+		  TLorentzVector imuon;
+		  imuon.SetXYZM(ipx,ipy,ipz,muMass);
+		  
+		  for(UInt_t j=i+1; j<npmuon; j++)
+		    {
+		      hlt_track jpTrack = hlt_pt->primaryTrack[pMuTrkId[j]];
+		      char jq = jpTrack.q;
+		      float jpt = jpTrack.pt;
+		      
+		      double pt_lead = (ipt>jpt) ? ipt : jpt;
+		      if(pt_lead<1.5) continue;
+		      
+		      float jpsi = jpTrack.psi;
+		      float jtanl = jpTrack.tanl;
+		      float jpx = TMath::Cos(jpsi)*jpt;
+		      float jpy = TMath::Sin(jpsi)*jpt;
+		      float jpz = jtanl * jpt;
+		      TLorentzVector jmuon;
+		      jmuon.SetXYZM(jpx,jpy,jpz,muMass);
+		      
+		      TLorentzVector muPair = imuon + jmuon;
+		      if(iq*jq<0) {
+			hInvMassUS->Fill(muPair.M());
+			hMTDDiMuonJpsiMassUS->Fill(muPair.M());
+			hMTDDiMuonUpsilonMassUS->Fill(muPair.M());
+		      }
+		      else{
+			hInvMassLS->Fill(muPair.M());
+			hMTDDiMuonJpsiMassLS->Fill(muPair.M());
+			hMTDDiMuonUpsilonMassLS->Fill(muPair.M());
+		      }
+		    }//j
 		}//i
+	      
 
-		double jpsi_lowm1=2.7, jpsi_highm1=3.5;
-		int lowbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_lowm1);
-		int highbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_highm1);
+	  
+	      double jpsi_lowm1=2.7, jpsi_highm1=3.5;
+	      int lowbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_lowm1);
+	      int highbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_highm1);
+	      
+	      US12=hMTDDiMuonJpsiMassUS->Integral(lowbin, highbin,"");
+	      tlx12_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US12)));
+	      LS12=hMTDDiMuonJpsiMassLS->Integral(lowbin, highbin,"");
+	      tlx12_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS12)));
+	      tlxmass12->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(jpsi_lowm1), double(jpsi_highm1)) );
+	      
+	      double upsilon_lowm1=9, upsilon_highm1=11;
+	      lowbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_lowm1);
+	      highbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_highm1);
+	      
+	      US13=hMTDDiMuonUpsilonMassUS->Integral(lowbin, highbin,"");
+	      tlx13_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US13)));
+	      LS13=hMTDDiMuonUpsilonMassLS->Integral(lowbin, highbin,"");
+	      tlx13_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS13)));
+	      tlxmass13->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(upsilon_lowm1), double(upsilon_highm1)) );
+	    }//di muon
+	  }
 
-		US12=hMTDDiMuonJpsiMassUS->Integral(lowbin, highbin,"");
-		tlx12_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US12)));
-		LS12=hMTDDiMuonJpsiMassLS->Integral(lowbin, highbin,"");
-		tlx12_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS12)));
-		tlxmass12->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(jpsi_lowm1), double(jpsi_highm1)) );
-
-		double upsilon_lowm1=9, upsilon_highm1=11;
-		lowbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_lowm1);
-		highbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_highm1);
-
-		US13=hMTDDiMuonUpsilonMassUS->Integral(lowbin, highbin,"");
-		tlx13_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US13)));
-		LS13=hMTDDiMuonUpsilonMassLS->Integral(lowbin, highbin,"");
-		tlx13_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS13)));
-		tlxmass13->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(upsilon_lowm1), double(upsilon_highm1)) );
-	}//di muon
-
-	//-----------------------------------------------------------------
-	//if(decision & triggerBitDiMuon) {   need the triggerBitMTDQuarkonium
-	int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
-	for(int i=0; i<nMTDQmPairs; i++){
-
+#pragma omp section
+	  {
+	
+	    const int tmp_nNodes = hlt_node->nNodes;
+	    int tmp_global2prim[tmp_nNodes];
+	    for(int inode = 0; inode<hlt_node->nNodes; inode++)
+	      {
+		int tmp_gTrackSN  = hlt_node->node[inode].globalTrackSN;
+		int tmp_pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+		tmp_global2prim[tmp_gTrackSN] = tmp_pTrackSN;
+	      }
+	    //-----------------------------------------------------------------
+	    //if(decision & triggerBitDiMuon) {   need the triggerBitMTDQuarkonium
+	    int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
+	    for(int i=0; i<nMTDQmPairs; i++){
+	      
 		int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
 		int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
 
-		int pTrackSN1 = global2prim[mgtrkid1];
-		int pTrackSN2 = global2prim[mgtrkid2];
+		int pTrackSN1 = tmp_global2prim[mgtrkid1];
+		int pTrackSN2 = tmp_global2prim[mgtrkid2];
 		if( pTrackSN1<0||pTrackSN2<0 ) continue;
 
 		hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
@@ -1419,19 +1566,10 @@ void l4Builder::event(daqReader *rdr)
 		double mupy2 = mupt2 * sin(muPtrk2.psi);
 		double mupz2 = mupt2 * muPtrk2.tanl;
 
-
-		float mu1_dedx  = muPtrk1.dedx;
 		TVector3 muPMom1(mupx1, mupy1, mupz1);
-		double mu1_dedxPi = getDedx(muPMom1.Mag(), Pi);
-		float mu1_nSigmaPi = log(mu1_dedx/mu1_dedxPi)/A*sqrt(muPtrk1.ndedx);
-		//if(mu1_nSigmaPi<-1.||mu1_nSigmaPi>3.)continue;
 
-		float mu2_dedx  = muPtrk2.dedx;
 		TVector3 muPMom2(mupx2, mupy2, mupz2);
-		double mu2_dedxPi = getDedx(muPMom2.Mag(), Pi);
-		float mu2_nSigmaPi = log(mu2_dedx/mu2_dedxPi)/A*sqrt(muPtrk2.ndedx);
-		//if(mu2_nSigmaPi<-1.||mu2_nSigmaPi>3.)continue;
-
+		
 		TLorentzVector Muon1(0,0,0,0);
 		Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
 		TLorentzVector Muon2(0,0,0,0);
@@ -1440,7 +1578,7 @@ void l4Builder::event(daqReader *rdr)
 		TLorentzVector QmPair = Muon1 + Muon2;
 		double qmMass=QmPair.M();
 		double qmPt=QmPair.Pt();
-
+		
 		if(muPtrk1.q*muPtrk2.q<0){
 
 			hMTDQmInvMassUS->Fill(qmMass);
@@ -1459,431 +1597,395 @@ void l4Builder::event(daqReader *rdr)
 
 			hMTDQmUpsilonMassLS->Fill(qmMass);
 		}
-
-	}
-
-	double lowm1=2.7, highm1=3.5;
-	int lowbin = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm1);
-	int highbin = hMTDQmJpsiMass_ptcut0_US->FindBin(highm1);
-
-	US8=hMTDQmJpsiMass_ptcut0_US->Integral(lowbin, highbin,"");
-	tlx8_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US8)));
-	LS8=hMTDQmJpsiMass_ptcut0_LS->Integral(lowbin, highbin,"");
-	tlx8_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS8)));
-
-	US9=hMTDQmJpsiMass_ptcut2_US->Integral(lowbin, highbin,"");
-	tlx9_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US9)));
-	LS9=hMTDQmJpsiMass_ptcut2_LS->Integral(lowbin, highbin,"");
-	tlx9_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS9)));
-
-	US10=hMTDQmJpsiMass_ptcut4_US->Integral(lowbin, highbin,"");
-	tlx10_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US10)));
-	LS10=hMTDQmJpsiMass_ptcut4_LS->Integral(lowbin, highbin,"");
-	tlx10_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS10)));
-
-	double lowm2=9.0, highm2=11.;
-	int lowbin2 = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm2);
-	int highbin2 = hMTDQmJpsiMass_ptcut0_US->FindBin(highm2);
-
-	US11=hMTDQmUpsilonMassUS->Integral(lowbin2, highbin2,"");
-	tlx11_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US11)));
-	LS11=hMTDQmUpsilonMassLS->Integral(lowbin, highbin,"");
-	tlx11_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS11)));
-
-	//--------------------------------------------------------------------------
-	// upc di-e
-	if(decision & triggerBitUPCDiElectron) {
-		if(!UPCDiElectronFilled) {
-			UPCDiElectronFilled = true;
-			addServerTags("L4UPCDiElectron");
-		}
-
-		for(u_int i = 0; i < hlt_upcdiep->nEPairs; i++) {
-			int Daughter1NodeSN = hlt_upcdiep->ePair[i].dau1NodeSN;
-			int Daughter2NodeSN = hlt_upcdiep->ePair[i].dau2NodeSN;
-			int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-			int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-			int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-			int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-
-			if(Daughter1TrackSN < 0) continue;
-			hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
-
-			float Daughter1beta = -999.;
-			float Daughter1phidiff = -999.;
-			float Daughter1_PE_ratio = -999.;
-			float Daughter1_EP_ratio = -999.;
-
-			float Daughter1q     = Daughter1Track.q;
-			float Daughter1pt    = Daughter1Track.pt;
-			float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-			float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-			float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-			float Daughter1nHits = Daughter1Track.nHits;
-			float Daughter1dedx  = Daughter1Track.dedx;
-			int Daughter1ndedx = Daughter1Track.ndedx;
-
-			TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-			float Daughter1p = Daughter1.Mag();
-
-			double dedx1E = getDedx(Daughter1p, e);
-			float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
-
-			float Daughter1eta = Daughter1.PseudoRapidity();
-			//  if (fabs(Daughter1eta) > 1.) continue;
-			float Daughter1phi = Daughter1.Phi();
-			if(Daughter1phi < 0.) Daughter1phi += twopi;
-
-			hdEdx_P1_UPC->Fill(Daughter1p , Daughter1dedx);
-			if(Daughter1EmcSN >= 0) {
-				float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-				Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-				Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-				hDaughter1P_TowerEnergy_UPC->Fill(Daughter1_EP_ratio);
-			}
-
-			if(Daughter2TrackSN < 0.) continue;
-			hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-			float Daughter2phidiff = -999.;
-			float Daughter2beta = -999.;
-			float Daughter2_PE_ratio = -999.;
-			float Daughter2_EP_ratio = -999.;
-
-			float Daughter2q     =  Daughter2Track.q;
-			float Daughter2pt    =  Daughter2Track.pt;
-			float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-			float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-			float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-			float Daughter2nHits =  Daughter2Track.nHits;
-			float Daughter2dedx  =  Daughter2Track.dedx;
-			int Daughter2ndedx = Daughter2Track.ndedx;
-
-			TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-			float Daughter2p = Daughter2.Mag();
-
-			double dedx2E = getDedx(Daughter2p, e);
-			float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
-
-			float Daughter2eta = Daughter2.PseudoRapidity();
-			//      if (fabs(Daughter2eta) > 1.) continue;
-			float Daughter2phi = Daughter2.Phi();
-			if(Daughter2phi < 0.0) Daughter2phi += twopi;
-			hdEdx_P2_UPC->Fill(Daughter2p , Daughter2dedx);
-			if(Daughter2EmcSN >= 0) {
-				float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-				Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-				Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-				hDaughter2P_TowerEnergy_UPC->Fill(Daughter2_EP_ratio);
-			}
-
-			// j/psi
-			float pt = hlt_upcdiep->ePair[i].pt;
-			float px = cos(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
-			float py = sin(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
-			float pz = hlt_upcdiep->ePair[i].tanl * hlt_upcdiep->ePair[i].pt;
-			float m = hlt_upcdiep->ePair[i].invariantMass;
-
-			if(Daughter1q * Daughter2q < 0.) {
-				hDiElectronInvMassFullRange_UPC->Fill(m);
-			} else {
-				hDiElectronInvMassFullRangeBG_UPC->Fill(m);
-			}
-			TLorentzVector jpsi(0, 0, 0, 0);
-			jpsi.SetXYZM(px, py, pz, m);
-			float rapidity = jpsi.Rapidity();
-			hDiLeptonRapidity_UPC->Fill(rapidity);
-
-		}
-	}
+		
+	    }
+	    
+	    double lowm1=2.7, highm1=3.5;
+	    int lowbin = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm1);
+	    int highbin = hMTDQmJpsiMass_ptcut0_US->FindBin(highm1);
+	    
+	    US8=hMTDQmJpsiMass_ptcut0_US->Integral(lowbin, highbin,"");
+	    tlx8_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US8)));
+	    LS8=hMTDQmJpsiMass_ptcut0_LS->Integral(lowbin, highbin,"");
+	    tlx8_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS8)));
+	    
+	    US9=hMTDQmJpsiMass_ptcut2_US->Integral(lowbin, highbin,"");
+	    tlx9_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US9)));
+	    LS9=hMTDQmJpsiMass_ptcut2_LS->Integral(lowbin, highbin,"");
+	    tlx9_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS9)));
+	    
+	    US10=hMTDQmJpsiMass_ptcut4_US->Integral(lowbin, highbin,"");
+	    tlx10_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US10)));
+	    LS10=hMTDQmJpsiMass_ptcut4_LS->Integral(lowbin, highbin,"");
+	    tlx10_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS10)));
+	    
+	    double lowm2=9.0, highm2=11.;
+	    int lowbin2 = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm2);
+	    int highbin2 = hMTDQmJpsiMass_ptcut0_US->FindBin(highm2);
+	    
+	    US11=hMTDQmUpsilonMassUS->Integral(lowbin2, highbin2,"");
+	    tlx11_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US11)));
+	    LS11=hMTDQmUpsilonMassLS->Integral(lowbin, highbin,"");
+	    tlx11_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS11)));
+	   
+	  }
 
 
-	//di-e2Twr
-
-	for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
-		int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
-		int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
+#pragma omp section
+	  {
+	    // upc di-e
+	    if(decision & triggerBitUPCDiElectron) {
+	      
+	      for(u_int i = 0; i < hlt_upcdiep->nEPairs; i++) {
+		int Daughter1NodeSN = hlt_upcdiep->ePair[i].dau1NodeSN;
+		int Daughter2NodeSN = hlt_upcdiep->ePair[i].dau2NodeSN;
 		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
 		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
 		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
 		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
-		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
-
+		
 		if(Daughter1TrackSN < 0) continue;
 		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
-
-		float Daughter1beta = -999.;
-		float Daughter1phidiff = -999.;
-		float Daughter1_PE_ratio = -999.;
+		
 		float Daughter1_EP_ratio = -999.;
-
+		
 		float Daughter1q     = Daughter1Track.q;
-		float Daughter1pt    = Daughter1Track.pt;
 		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
 		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
 		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-		float Daughter1nHits = Daughter1Track.nHits;
 		float Daughter1dedx  = Daughter1Track.dedx;
-		int Daughter1ndedx = Daughter1Track.ndedx;
-
+			
 		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
 		float Daughter1p = Daughter1.Mag();
-
-		double dedx1E = getDedx(Daughter1p, e);
-		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
-
-		float Daughter1eta = Daughter1.PseudoRapidity();
-		//  if (fabs(Daughter1eta) > 1.) continue;
+		
 		float Daughter1phi = Daughter1.Phi();
 		if(Daughter1phi < 0.) Daughter1phi += twopi;
-		hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
+		
+		hdEdx_P1_UPC->Fill(Daughter1p , Daughter1dedx);
 		if(Daughter1EmcSN >= 0) {
-			float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-			Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-			Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-			hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
-			Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+		  float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+		  Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+		  hDaughter1P_TowerEnergy_UPC->Fill(Daughter1_EP_ratio);
 		}
-		if(Daughter1TofSN >= 0.) {
-			Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
-		}
-
+		
 		if(Daughter2TrackSN < 0.) continue;
 		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-		float Daughter2phidiff = -999.;
-		float Daughter2beta = -999.;
-		float Daughter2_PE_ratio = -999.;
 		float Daughter2_EP_ratio = -999.;
 
 		float Daughter2q     =  Daughter2Track.q;
-		float Daughter2pt    =  Daughter2Track.pt;
 		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
 		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
 		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-		float Daughter2nHits =  Daughter2Track.nHits;
 		float Daughter2dedx  =  Daughter2Track.dedx;
-		int Daughter2ndedx = Daughter2Track.ndedx;
-
+		
 		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
 		float Daughter2p = Daughter2.Mag();
 
-		double dedx2E = getDedx(Daughter2p, e);
-		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
-
-		float Daughter2eta = Daughter2.PseudoRapidity();
-		//    if (fabs(Daughter2eta) > 1.) continue;
 		float Daughter2phi = Daughter2.Phi();
 		if(Daughter2phi < 0.0) Daughter2phi += twopi;
-
-		hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
+		hdEdx_P2_UPC->Fill(Daughter2p , Daughter2dedx);
 		if(Daughter2EmcSN >= 0) {
-			float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-			Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-			Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-			hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
-			Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		  float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+		  Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+		  hDaughter2P_TowerEnergy_UPC->Fill(Daughter2_EP_ratio);
 		}
-		if(Daughter2TofSN >= 0.) {
-			Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
-		}
-
+		
 		// j/psi
-		float pt = hlt_Twrdiep->ePair[i].pt;
-		float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
-		float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
-		float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
-		float m = hlt_Twrdiep->ePair[i].invariantMass;
-
+	
+		float px = cos(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
+		float py = sin(hlt_upcdiep->ePair[i].psi) * hlt_upcdiep->ePair[i].pt;
+		float pz = hlt_upcdiep->ePair[i].tanl * hlt_upcdiep->ePair[i].pt;
+		float m = hlt_upcdiep->ePair[i].invariantMass;
+		
 		if(Daughter1q * Daughter2q < 0.) {
-			hDiElectronInvMassFullRange_Twr->Fill(m);
+		  hDiElectronInvMassFullRange_UPC->Fill(m);
 		} else {
-			hDiElectronInvMassFullRangeBG_Twr->Fill(m);
+		  hDiElectronInvMassFullRangeBG_UPC->Fill(m);
 		}
-
-		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-				Daughter1p > 2.3 && Daughter2p > 1.5 &&
-				Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-				Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-				Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05 &&
-				fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04) {
-			if(Daughter1q * Daughter2q < 0.) {
-				hDiElectronInvMassCut_Twr->Fill(m);
-			} else {
-				hDiElectronInvMassCutBG_Twr->Fill(m);
-			}
-		}
-
-		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-				Daughter1p > 2.3 && Daughter2p > 1.5 &&
-				Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-				Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-				Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
-			if(Daughter1q * Daughter2q < 0.) {
-				hDiElectronInvMassTpxEmc_Twr->Fill(m);
-			} else {
-				hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
-			}
-
-			if(Daughter1TofSN >= 0.) {
-				hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
-			}
-			if(Daughter2TofSN >= 0.) {
-				hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
-			}
-		}
-
 		TLorentzVector jpsi(0, 0, 0, 0);
 		jpsi.SetXYZM(px, py, pz, m);
 		float rapidity = jpsi.Rapidity();
-		hDiLeptonRapidity_Twr->Fill(rapidity);
-	}//nEPair
+		hDiLeptonRapidity_UPC->Fill(rapidity);
+		
+	      }
+	    }
+	  }
+	    //******************************************************
+	   
 
+#pragma omp section
+	  {
+	    //di-e2Twr
+	    
+	    for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
+	      int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
+	      int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
+	      int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+	      int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+	      int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+	      int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+	      int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+	      int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+	      
+	      if(Daughter1TrackSN < 0) continue;
+	      hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 
+	      float Daughter1beta = -999.;
+	      float Daughter1phidiff = -999.;
+	      float Daughter1_PE_ratio = -999.;
+	      float Daughter1_EP_ratio = -999.;
+	      
+	      float Daughter1q     = Daughter1Track.q;
+	      float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+	      float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+	      float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+	      float Daughter1dedx  = Daughter1Track.dedx;
+	      int Daughter1ndedx = Daughter1Track.ndedx;
+	      
+	      TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+	      float Daughter1p = Daughter1.Mag();
+	      
+	      double dedx1E = getDedx(Daughter1p, e);
+	      float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+	      
+	      float Daughter1phi = Daughter1.Phi();
+	      if(Daughter1phi < 0.) Daughter1phi += twopi;
+	      hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
+	      if(Daughter1EmcSN >= 0) {
+		float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+		Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+		Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+		hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
+		Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+	      }
+	      if(Daughter1TofSN >= 0.) {
+		Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
+	      }
 
-	// di-e
-	for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
-		int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
-		int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
-		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
-		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+	      if(Daughter2TrackSN < 0.) continue;
+	      hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+	      float Daughter2phidiff = -999.;
+	      float Daughter2beta = -999.;
+	      float Daughter2_PE_ratio = -999.;
+	      float Daughter2_EP_ratio = -999.;
+	      
+	      float Daughter2q     =  Daughter2Track.q;
+	      float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+	      float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+	      float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+	      float Daughter2dedx  =  Daughter2Track.dedx;
+	      int Daughter2ndedx = Daughter2Track.ndedx;
+	      
+	      TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+	      float Daughter2p = Daughter2.Mag();
+	      
+	      double dedx2E = getDedx(Daughter2p, e);
+	      float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
 
-		if(Daughter1TrackSN < 0) continue;
-		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+	      float Daughter2phi = Daughter2.Phi();
+	      if(Daughter2phi < 0.0) Daughter2phi += twopi;
+	      
+	      hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
+	      if(Daughter2EmcSN >= 0) {
+		float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+		Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+		Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+		hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
+		Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+	      }
+	      if(Daughter2TofSN >= 0.) {
+		Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+	      }
+	      
+	      // j/psi
+	
+	      float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+	      float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+	      float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
+	      float m = hlt_Twrdiep->ePair[i].invariantMass;
+	      
+	      if(Daughter1q * Daughter2q < 0.) {
+		hDiElectronInvMassFullRange_Twr->Fill(m);
+	      } else {
+		hDiElectronInvMassFullRangeBG_Twr->Fill(m);
+	      }
+	      
+	      if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+		 Daughter1p > 2.3 && Daughter2p > 1.5 &&
+		 Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+		 Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+		 Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05){
+		if(Daughter1q * Daughter2q < 0.)
+		  {
+		    hDiElectronInvMassTpxEmc_Twr->Fill(m);
+		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+		      {
+			hDiElectronInvMassCut_Twr->Fill(m);
+		      }
+		  }
+		else
+		  {
+		    hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
+		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+		      {
+			hDiElectronInvMassCutBG_Twr->Fill(m);
+		      } 
+		  }
+		if(Daughter1TofSN >= 0.)
+		  {
+		    hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
+		  }
+		if(Daughter2TofSN >= 0.)
+		  {
+		    hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
+		  }
+	      }
+	    
+	      TLorentzVector jpsi(0, 0, 0, 0);
+	      jpsi.SetXYZM(px, py, pz, m);
+	      float rapidity = jpsi.Rapidity();
+	      hDiLeptonRapidity_Twr->Fill(rapidity);
+	      
+	    }//nEPair
+	  }
 
-		float Daughter1beta = -999.;
-		float Daughter1phidiff = -999.;
-		float Daughter1_PE_ratio = -999.;
-		float Daughter1_EP_ratio = -999.;
+#pragma omp section
+	  {
+	    // di-e
+	    for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
+	      int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
+	      int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
+	      int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+	      int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+	      int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+	      int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+	      int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+	      int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+	      
+	      if(Daughter1TrackSN < 0) continue;
+	      hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 
-		float Daughter1q     = Daughter1Track.q;
-		float Daughter1pt    = Daughter1Track.pt;
-		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-		float Daughter1nHits = Daughter1Track.nHits;
-		float Daughter1dedx  = Daughter1Track.dedx;
-		int Daughter1ndedx = Daughter1Track.ndedx;
-
-		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-		float Daughter1p = Daughter1.Mag();
-
-		double dedx1E = getDedx(Daughter1p, e);
-		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
-
-		float Daughter1eta = Daughter1.PseudoRapidity();
-		//  if (fabs(Daughter1eta) > 1.) continue;
-		float Daughter1phi = Daughter1.Phi();
-		if(Daughter1phi < 0.) Daughter1phi += twopi;
-		hdEdx_P1->Fill(Daughter1p , Daughter1dedx);
-		if(Daughter1EmcSN >= 0) {
-			float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-			Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-			Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-			hDaughter1P_TowerEnergy->Fill(Daughter1_EP_ratio);
-			Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+	      float Daughter1beta = -999.;
+	      float Daughter1phidiff = -999.;
+	      float Daughter1_PE_ratio = -999.;
+	      float Daughter1_EP_ratio = -999.;
+	      
+	      float Daughter1q     = Daughter1Track.q;
+	      float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+	      float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+	      float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+	      float Daughter1dedx  = Daughter1Track.dedx;
+	      int Daughter1ndedx = Daughter1Track.ndedx;
+	      
+	      TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+	      float Daughter1p = Daughter1.Mag();
+	      
+	      double dedx1E = getDedx(Daughter1p, e);
+	      float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+	      
+	      float Daughter1phi = Daughter1.Phi();
+	      if(Daughter1phi < 0.) Daughter1phi += twopi;
+	      hdEdx_P1->Fill(Daughter1p , Daughter1dedx);
+	      if(Daughter1EmcSN >= 0) {
+		float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+		Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+		Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+		hDaughter1P_TowerEnergy->Fill(Daughter1_EP_ratio);
+		Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+	      }
+	      if(Daughter1TofSN >= 0.) {
+		Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
+	      }
+	      
+	      if(Daughter2TrackSN < 0.) continue;
+	      hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+	      float Daughter2phidiff = -999.;
+	      float Daughter2beta = -999.;
+	      float Daughter2_PE_ratio = -999.;
+	      float Daughter2_EP_ratio = -999.;
+	      
+	      float Daughter2q     =  Daughter2Track.q;
+	      float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+	      float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+	      float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+	      float Daughter2dedx  =  Daughter2Track.dedx;
+	      int Daughter2ndedx = Daughter2Track.ndedx;
+	      
+	      TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+	      float Daughter2p = Daughter2.Mag();
+	      
+	      double dedx2E = getDedx(Daughter2p, e);
+	      float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
+	      
+	      float Daughter2phi = Daughter2.Phi();
+	      if(Daughter2phi < 0.0) Daughter2phi += twopi;
+	      
+	      hdEdx_P2->Fill(Daughter2p , Daughter2dedx);
+	      if(Daughter2EmcSN >= 0) {
+		float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+		Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+		Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+		hDaughter2P_TowerEnergy->Fill(Daughter2_EP_ratio);
+		Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
 		}
+	      if(Daughter2TofSN >= 0.) {
+		Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+	      }
+
+	      // j/psi
+	
+	      float px = cos(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
+	      float py = sin(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
+	      float pz = hlt_diep->ePair[i].tanl * hlt_diep->ePair[i].pt;
+	      float m = hlt_diep->ePair[i].invariantMass;
+	      
+	      if(Daughter1q * Daughter2q < 0.) {
+		hDiElectronInvMassFullRange->Fill(m);
+	      }
+	      else {
+		hDiElectronInvMassFullRangeBG->Fill(m);
+	      }
+	      
+	      if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+		 Daughter1p > 2.3 && Daughter2p > 1.5 &&
+		 Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+		 Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+		 Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
+		if(Daughter1q * Daughter2q < 0.)
+		  {
+		    hDiElectronInvMassTpxEmc->Fill(m);
+		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+		      {
+			hDiElectronInvMassCut->Fill(m);
+		      }
+		  }
+		else
+		  {
+		    hDiElectronInvMassTpxEmcBG->Fill(m);
+		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+		      {
+			hDiElectronInvMassCutBG->Fill(m);
+		      }
+		    }
+		
 		if(Daughter1TofSN >= 0.) {
-			Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
-		}
-
-		if(Daughter2TrackSN < 0.) continue;
-		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-		float Daughter2phidiff = -999.;
-		float Daughter2beta = -999.;
-		float Daughter2_PE_ratio = -999.;
-		float Daughter2_EP_ratio = -999.;
-
-		float Daughter2q     =  Daughter2Track.q;
-		float Daughter2pt    =  Daughter2Track.pt;
-		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-		float Daughter2nHits =  Daughter2Track.nHits;
-		float Daughter2dedx  =  Daughter2Track.dedx;
-		int Daughter2ndedx = Daughter2Track.ndedx;
-
-		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-		float Daughter2p = Daughter2.Mag();
-
-		double dedx2E = getDedx(Daughter2p, e);
-		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
-
-		float Daughter2eta = Daughter2.PseudoRapidity();
-		//    if (fabs(Daughter2eta) > 1.) continue;
-		float Daughter2phi = Daughter2.Phi();
-		if(Daughter2phi < 0.0) Daughter2phi += twopi;
-
-		hdEdx_P2->Fill(Daughter2p , Daughter2dedx);
-		if(Daughter2EmcSN >= 0) {
-			float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-			Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-			Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-			hDaughter2P_TowerEnergy->Fill(Daughter2_EP_ratio);
-			Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		  hDaughter1TpxEmcInverseBeta->Fill(1 / Daughter1beta);
 		}
 		if(Daughter2TofSN >= 0.) {
-			Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
-		}
-
-		// j/psi
-		float pt = hlt_diep->ePair[i].pt;
-		float px = cos(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
-		float py = sin(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
-		float pz = hlt_diep->ePair[i].tanl * hlt_diep->ePair[i].pt;
-		float m = hlt_diep->ePair[i].invariantMass;
-
-		if(Daughter1q * Daughter2q < 0.) {
-			hDiElectronInvMassFullRange->Fill(m);
-		} else {
-			hDiElectronInvMassFullRangeBG->Fill(m);
-		}
-
-		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-				Daughter1p > 2.3 && Daughter2p > 1.5 &&
-				Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-				Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-				Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05 &&
-				fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04) {
-			if(Daughter1q * Daughter2q < 0.) {
-				hDiElectronInvMassCut->Fill(m);
-			} else {
-				hDiElectronInvMassCutBG->Fill(m);
-			}
-		}
-
-		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-				Daughter1p > 2.3 && Daughter2p > 1.5 &&
-				Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-				Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-				Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
-			if(Daughter1q * Daughter2q < 0.) {
-				hDiElectronInvMassTpxEmc->Fill(m);
-			} else {
-				hDiElectronInvMassTpxEmcBG->Fill(m);
-			}
-
-			if(Daughter1TofSN >= 0.) {
-				hDaughter1TpxEmcInverseBeta->Fill(1 / Daughter1beta);
-			}
-			if(Daughter2TofSN >= 0.) {
-				hDaughter2TpxEmcInverseBeta->Fill(1 / Daughter2beta);
-			}
-		}
-
-		TLorentzVector jpsi(0, 0, 0, 0);
-		jpsi.SetXYZM(px, py, pz, m);
-		float rapidity = jpsi.Rapidity();
-		hDiLeptonRapidity->Fill(rapidity);
-	}//nEPair
-
-
-
+		  hDaughter2TpxEmcInverseBeta->Fill(1 / Daughter2beta);
+		  }
+	      }
+	      
+	      TLorentzVector jpsi(0, 0, 0, 0);
+	      jpsi.SetXYZM(px, py, pz, m);
+	      float rapidity = jpsi.Rapidity();
+	      hDiLeptonRapidity->Fill(rapidity);
+	    }//nEPair
+	    
+	  }
+	  
+	}
 };
-
 
 
 /**
@@ -2299,6 +2401,10 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hMatchId_fiberId;
 	HltPlots[index]->addHisto(ph);
+
+	hMatchId_fiberId_copy = new TH2F("Tof_matchId_fireId_copy", "Tof_matchId_fireId_copy", 200, 0, 200, 200, 0, 200);
+
+	hMatchId_fiberId_copy2 = new TH2F("Tof_matchId_fireId_copy2", "Tof_matchId_fireId_copy2", 200, 0, 200, 200, 0, 200);
 
 	index++; //34
 	HltPlots[index]->setDrawOpts("colz");
@@ -2732,7 +2838,6 @@ void l4Builder::defineDiPionPlots()
 void l4Builder::defineDiMuonPlots()
 {
 
-
 	index = 0; //0
 	hInvMassLS = new TH1F("hInvMassLS","Invariant mass of di-muon pairs (LS);M_{#mu#mu} (GeV/c)^{2};counts",50,2.5,3.5);
 	ph = new PlotHisto();
@@ -2972,12 +3077,9 @@ void l4Builder::defineDiMuonPlots()
 }
 
 
-
-
-
 void l4Builder::defineHltPlots_UPC()
 {
-	index = 0;//0
+        index = 0;//0
 	hnhits_UPC = new TH1I("nHits_UPC", "nHits_UPC", 50, 0, 50);
 	ph = new PlotHisto();
 	ph->histo = hnhits_UPC;
@@ -3161,6 +3263,7 @@ void l4Builder::defineHltPlots_UPC()
 	ph = new PlotHisto();
 	ph->histo = hdEdx_UPC;
 	HltPlots_UPC[index]->addHisto(ph);
+
 	hHFM_dEdx_UPC = new TH2F("HFM_dEdx_UPC", "HFM_dEdx_UPC", 500, -5, 5, 300, 0, 3.e-5);
 	ph = new PlotHisto();
 	ph->histo = hHFM_dEdx_UPC;
