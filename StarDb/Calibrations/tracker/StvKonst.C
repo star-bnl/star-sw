@@ -41,7 +41,7 @@ memset(&row,0,tableSet->GetRowSize());
   row.mRxyMax = 207;		//Max radius for tracking
   row.mZMax   = 220;		//Max Z      for tracking
 //		ForwEta version
-  row.mMinSeedHitsFw = 3;	/*Min number of seed hits allowed*/
+  row.mMinSeedHitsFw = 4;	/*Min number of seed hits allowed*/
   row.mMaxSeedHitsFw = 6;	/*Max number of seed hits allowed*/
   row.mMinHitsFw = 4;		/*Min number of hits allowed*/
   row.mNorHitsFw = 5;		/*Normal number of hits allowed*/
