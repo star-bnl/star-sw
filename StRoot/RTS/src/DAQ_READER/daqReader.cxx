@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.64 2016/12/13 18:37:43 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.65 2017/01/19 20:08:31 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1894,6 +1894,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     int retries ;
     ic_msg msg ;
 
+    if(evpDesc != -1) close(evpDesc);
 
     evpDesc = -1 ;	// mark as disconnected
 
@@ -1998,9 +1999,9 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       ret = msgNQSend(desc, (char *)m, 120,10) ;
 
       LOG(DBG,"msgNQSend returned %d in %d seconds",ret,time(NULL)-tm,0,0,0) ;
-
+      
       if(ret < 0) {	// communication error
-	return STAT_ERROR ;
+	  return STAT_ERROR ;
       }
       else {	// OK
 	return STAT_OK ;
