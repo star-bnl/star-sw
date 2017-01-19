@@ -23,21 +23,32 @@ ClassImp(StvSeedFinder)
 
 //_____________________________________________________________________________
 StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
-{ fDraw=0;
+{ 
+  fDraw=0;
   fMinHits = 5;
   fMaxHits = 10;
+  fSgn = 1;
+  SetVtx(0);
 }
 //_____________________________________________________________________________
 void StvSeedFinder::SetCons(const StvKonst_st *kons)
 {
-  fMinHits= kons->mMinHits;
-  fMaxHits= kons->mNorHits;
+  fMinHits= kons->mMinSeedHits;
+  fMaxHits= kons->mMaxSeedHits;
 }
 //_____________________________________________________________________________
 void StvSeedFinder::Clear(const char*)
 {
+ SetVtx(0);
  fSeedHits.clear();
  if(fDraw) fDraw->Clear();
+}
+//_____________________________________________________________________________
+void StvSeedFinder::SetVtx(const float vtx[3])
+{
+  if (vtx) { memcpy(fVtx,vtx,sizeof(fVtx)); return; }
+  memset(fVtx,0,sizeof(fVtx));
+  fVtx[2]= 3e33;
 }
 //_____________________________________________________________________________
 void StvSeedFinder::Show()
@@ -101,7 +112,7 @@ static int nCall=0; nCall++;
   const float *fEnd = fSeedHits.back ()->x();
   double r2Beg = fBeg[0]*fBeg[0]+fBeg[1]*fBeg[1];
   double r2End = fEnd[0]*fEnd[0]+fEnd[1]*fEnd[1];
-  if (r2Beg < r2End) return 0;
+  if (fSgn*r2Beg < fSgn*r2End) return 0;
 
   for (int iNode = 0; iNode<nNode;++iNode) {
     const StvHit * hit = fSeedHits[iNode];
@@ -142,9 +153,15 @@ static int nCall=0; nCall++;
   fXi2[1] =fHelix.Fit();
   if (fXi2[1]>kBAD_XI2) return 0; 	//Xi2 too bad, no updates
   fHelix.MakeErrs();
-  l = fHelix.Path(dBeg); 
-  l-= 0.1; fHelix.Move(l);
-
+  if (fSgn>0) {
+    l = fHelix.Path(dBeg); 
+    l-= 0.1; fHelix.Move(l);
+  } else {
+    const double dEnd[3]={fEnd[0],fEnd[1],fEnd[2]};
+    l = fHelix.Path(dEnd); 
+    l+= 0.1; fHelix.Move(l);
+    fHelix.Backward();
+  }
   return &fHelix;
 }    
 #include "StarRoot/TIdTruUtil.h"
@@ -200,6 +217,11 @@ void StvSeedFinders::Reset()
 void StvSeedFinders::SetCons(const StvKonst_st *kons)
 {
   for (int i=0;i<(int)size();i++) {(*this)[i]->SetCons(kons);}
+}
+//_____________________________________________________________________________
+void StvSeedFinders::SetVtx(const float vtx[3])
+{
+  for (int i=0;i<(int)size();i++) {(*this)[i]->SetVtx(vtx);}
 }
  
 //_____________________________________________________________________________
