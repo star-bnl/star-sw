@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.32 2016/12/21 17:09:49 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33 2017/01/19 16:56:01 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -173,9 +173,10 @@ static int knt=0;knt++;
    do {	//May be errors exists
      if (did==kTpcId) 		break;
      StMatrixF errF(3,3);
+     int layer = -1;
      do {
        if (did != kFtsId) 	break;
-       int layer = ((StRnDHit*)stHit)->layer();
+       layer = ((StRnDHit*)stHit)->layer();
        if (layer>6)		break;
        errF = Hack1to6(stHit);
      } while(0);
@@ -188,6 +189,7 @@ static int knt=0;knt++;
      assert(fabs(errF[0][2]-errF[2][0])<1e-8);
      assert(fabs(errF[1][2]-errF[2][1])<1e-8);
      mStvHit = kit->GetHitRr();
+     if (layer>6) mStvHit->SetCombo(1);
      float *e = mStvHit->errMtx();
      for (int i=0,li=0;i< 3;li+=++i) {
      for (int j=0;j<=i;j++) { e[li+j] = errF[i][j];}}
@@ -223,7 +225,7 @@ static int knt=0;knt++;
        static StvToolkit *tk = StvToolkit::Inst();
        if (tk->GetHA(x)<1./1000) seed = 0;
    } }
-   
+//VP   if (mStvHit->IsCombo()) seed = 0;
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
    
    const StHitPlane *hp = tgh->AddHit(mStvHit,mDetId,xyz,hard,seed);
