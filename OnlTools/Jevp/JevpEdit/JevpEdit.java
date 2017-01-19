@@ -895,9 +895,9 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 		    out.printf("<doc>\n");
 		    treedata.child.writeXML(out, 0, false);
 
-		    out.printf("<pallete>\n");
-		    palleteData.child.writeXML(out, 1, true);
-		    out.printf("</pallete>\n");
+		    //out.printf("<pallete>\n");
+		    //palleteData.child.writeXML(out, 1, true);
+		    //out.printf("</pallete>\n");
 
 		    out.printf("</doc>\n");
 		    out.close();
@@ -1328,14 +1328,18 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 
 	    // Load the xml document...
 	    String s;
+	    String pallete_name;
 	    if(args[0].equals("-live")) {
 		s = "/RTScache/conf/jevp/HistoDefs.txt";
+		pallete_name = "/RTScache/conf/jevp/Pallete.txt";
 	    }
 	    else if(args[0].equals("-l4")) {
 		s = "/RTScache/conf/l4jevp/HistoDefs.txt";
+		pallete_name = "/RTScache/conf/l4jevp/Pallete.txt";
 	    }
 	    else {
 		s = args[0];
+		pallete_name = "Pallete.txt";
 	    }
 	    
 	    
@@ -1348,12 +1352,14 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	    DocumentBuilder db = dbf.newDocumentBuilder();
 	    Document doc = db.parse(file);
 	    Node xmlroot = doc.getDocumentElement();
-
 	    // parse it into a JNode...
 	    me.treedata = JNode.createNode(xmlroot);
 	    //   me.treedata.dump();
 
-	    me.palleteData = JNode.createPallete(xmlroot);
+	    DocumentBuilder pdb = dbf.newDocumentBuilder();
+	    Document pdoc = pdb.parse(new File(pallete_name));
+	    Node pxmlroot = pdoc.getDocumentElement();
+	    me.palleteData = JNode.createPallete(pxmlroot);
 
 	    me.init();
 	    me.setVisible(true);
