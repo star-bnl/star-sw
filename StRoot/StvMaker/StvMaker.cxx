@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.58 2016/12/21 18:17:52 perev Exp $
+// $Id: StvMaker.cxx,v 1.59 2017/01/19 16:54:24 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -343,8 +343,8 @@ static int initialized = 0;
     if (!seeds.Length()) seeds = "Default";
     TObjArray *tokens = seeds.Tokenize(" .,");
     int seedErr=0; 
-    const char *seedNick[]={"CA"                 ,"Default"                 ,"KNN"                 ,0};
-    const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
+    const char *seedNick[]={"CA"                 ,"Default"                 ,"KNN"                ,"Fts"                     ,0};
+    const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder","new StvDefaultSeedFinder",0};
 
 
     for (int idx=0;idx<=tokens->GetLast();idx++) {
@@ -356,6 +356,7 @@ static int initialized = 0;
           assert(gSystem->Load("TPCCATracker.so")	>=0);
 	}
 	StvSeedFinder *mySeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+        if (TString(seedNick[nick])=="Fts") mySeedFinder->SetSgn(-1);
 	assert(mySeedFinder && !seedErr);
         mSeedFinders[jreg]->Add(mySeedFinder);
 	Info("InitRun","Added %s seed finder",mySeedFinder->GetName());
@@ -368,16 +369,27 @@ static int initialized = 0;
   InitDetectors();
 
 
-  for (int reg = 0;reg<2;reg++) {
-    if (!mHitLoader[reg]) 		continue; 	
-    if (mHitLoader[reg]->NumDetectors()) continue; 	// used
-    delete mHitLoader[reg];    mHitLoader[reg]   =0;
-    delete mSeedFinders[reg];  mSeedFinders[reg] =0;
-    delete mEventFiller[reg];  mEventFiller[reg] =0;
-    delete mTrackFinder[reg];  mTrackFinder[reg] =0;
-    delete mTrackFitter[reg];  mTrackFitter[reg] =0;
-    delete mVertexFinder[reg]; mVertexFinder[reg]=0;
-  }   
+  int reg = 0;
+  do {
+    if (mHitLoader[reg] && mHitLoader[reg]->NumDetectors()==0) mHitLoader[reg]=0;		; 	
+    if (mHitLoader[reg]) break;
+    mSeedFinders[reg] = 0;
+    mEventFiller[reg] = 0;
+    mTrackFinder[reg] = 0;
+    mTrackFitter[reg] = 0;
+  } while (0);
+
+  reg = 1;
+  do {
+    if (mHitLoader[reg] && mHitLoader[reg]->NumDetectors()==0) mHitLoader[reg]=0;		; 	
+    if (mHitLoader[reg]) break;
+    mSeedFinders[reg] = 0;
+    mEventFiller[reg] = 0;
+    mTrackFinder[reg] = 0;
+    mTrackFitter[reg] = 0;
+    mVertexFinder[reg]= 0;
+  } while(0);
+
   
   InitPulls();
 
@@ -392,30 +404,41 @@ Int_t StvMaker::Make()
 static const StvConst *kons = new StvConst();
 static StvToolkit* kit = StvToolkit::Inst();
   cout <<"StvMaker::Make() -I- Starting on new event"<<endl;
+  int nVtx = 0;
+  const StvHits *vertexes = 0;
 
   StEvent   *event = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
 
   if (!event) return kStWarn;
 
   for (int reg=0;reg<2;reg++) { //Loop over eta regions
-    if (!mHitLoader[reg]) continue;
     const auto *par = kons->At(reg);
-    mSeedFinders [reg]->SetCons(par);
-    mEventFiller [reg]->SetCons(par);
-    mTrackFitter [reg]->SetCons(par);
-    mCurTrackFitter = mTrackFitter[reg];
-    mTrackFinder [reg]->SetCons(par);
-    mCurTrackFinder = mTrackFinder[reg];
-    mCurTrackFinder->SetFitter(mCurTrackFitter);
-    mVertexFinder[reg]->SetCons(par);
+    if (mHitLoader[reg]){
+      mSeedFinders [reg]->SetCons(par);
+      mEventFiller [reg]->SetCons(par);
+      mTrackFitter [reg]->SetCons(par);
+      mCurTrackFitter = mTrackFitter[reg];
+      mTrackFinder [reg]->SetCons(par);
+      mCurTrackFinder = mTrackFinder[reg];
+      mCurTrackFinder->SetFitter(mCurTrackFitter);
+    }
+    if (mVertexFinder[reg]) 
+      mVertexFinder[reg]->SetCons(par);
 
-    mHitLoader[reg]->LoadHits(event);
-    kit->SetSeedFinders(mSeedFinders[reg] );
-    kit->Reset();
-    int nTks = mTrackFinder[reg]->FindTracks();
-    if (mMaxTimes>1) nTks = CleanGlobalTracks();
-    TestGlobalTracks();
-    mToTracks += nTks;
+    if (mHitLoader[reg]) {
+      mHitLoader[reg]->LoadHits(event);
+      kit->SetSeedFinders(mSeedFinders[reg] );
+      kit->Reset();
+      int n = (nVtx)? nVtx:1;
+      for (int i=0;i<n;i++) {
+        const float *V = (nVtx)? (*vertexes)[i]->x():0;
+        mSeedFinders[reg]->SetVtx(V);
+        int nTks = mTrackFinder[reg]->FindTracks();
+        if (mMaxTimes>1) nTks = CleanGlobalTracks();
+        TestGlobalTracks();
+        mToTracks += nTks;
+      }
+    }
     if (mEventFiller[reg]) {
       mEventFiller[reg]->Set(event,&kit->GetTracks());
       mEventFiller[reg]->fillEvent();
@@ -423,14 +446,14 @@ static StvToolkit* kit = StvToolkit::Inst();
 
     do {//pseudo loop
       if (!mVertexFinder[reg]) 	break;
-      int nVtx = mVertexFinder[reg]->Fit(event);
-      if (!nVtx) 			break;
+      nVtx = mVertexFinder[reg]->Fit(event);
+      if (!nVtx) 		break;
       Info("Make","VertexFinder found %d vertices",nVtx);
-      const StvHits &vertexes = mVertexFinder[reg]->Result();
-      if (!vertexes.size()) 	break;       
+      vertexes = &mVertexFinder[reg]->Result();
+      if (!vertexes->size()) 	break;       
   //Set minimal errors
-      for (size_t i=0;i<vertexes.size();i++) {
-	StvHit *vtx=vertexes[i];
+      for (size_t i=0;i<vertexes->size();i++) {
+	StvHit *vtx=(*vertexes)[i];
 	float *vtxErr = vtx->errMtx();
 	if (vtxErr[5]>MIN_VTX_ERR2) continue;
 	memset(vtxErr,0,sizeof(vtxErr[0])*6);
@@ -438,11 +461,14 @@ static StvToolkit* kit = StvToolkit::Inst();
 	vtxErr[2]=MIN_VTX_ERR2;
 	vtxErr[5]=MIN_VTX_ERR2;
       }
-      //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-      mTrackFinder[reg]->FindPrimaries(vertexes);
-      if (mEventFiller[reg]) mEventFiller[reg]->fillEventPrimaries();
     } while(0);
-
+    //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+    if (nVtx) {
+      if (mTrackFinder[reg]) 
+        mTrackFinder[reg]->FindPrimaries(*vertexes);
+      if (mEventFiller[reg]) 
+        mEventFiller[reg]->fillEventPrimaries();
+    }
   }//end regions
   if (mPullTTree) {FillPulls();}
 
