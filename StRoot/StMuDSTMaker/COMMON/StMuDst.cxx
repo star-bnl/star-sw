@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.66 2016/10/01 21:23:25 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.67 2017/01/19 23:03:13 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -707,7 +707,7 @@ StTrackGeometry* StMuDst::trackGeometry(int q, StPhysicalHelixD* h) {
   return model;
 }
 
-StTrack* StMuDst::createStTrack(StMuTrack* track) {
+StTrack* StMuDst::createStTrack(const StMuTrack* track) {
   StTrack* t=0;
   StTrackGeometry *tg;
   if (track->bad()) return 0;
@@ -850,6 +850,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.67  2017/01/19 23:03:13  smirnovd
+ * Promise to not modify original StMuTrack when converting to StTrack
+ *
  * Revision 1.66  2016/10/01 21:23:25  jdb
  * Changed default vertex index to -2. Recently changed it to -1 which caused unintended segfault since -1 is used as a special case value in other parts of the code.
  *
