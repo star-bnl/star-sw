@@ -99,12 +99,12 @@ enum {kRepeatSeedFinder = 2};
 	  if (!mRefit) 				continue;
           if(nFitHits<3)			break;
 //=============================
-	  ans = Refit(1);
+	  if(nFitHits>3)ans = Refit(1);
 //=============================
 	  if (ans) 				break;
           StvTrack refiTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
-          if (nHits<3) 			break;
+          if (nHits<3) 				break;
 //=============================
 	  nAdded = FindTrack(1);
 //=============================
