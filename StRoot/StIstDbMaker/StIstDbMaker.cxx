@@ -51,7 +51,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    // Get IDS positionment relative to TPC
    const St_Survey *st_idsOnTpc = (const St_Survey *) StidsOnTpc::instance()->Table();
    // Get PST positionment relative to IDS
-   const St_Survey *st_pstOnIds = (const St_Survey *) StIstpstOnIds::instance()->Table();
+   const St_Survey *st_pstOnIds = (const St_Survey *) StpstOnIds::instance()->Table();
    // Get IST positionment relative to PST
    const St_Survey *st_istOnPst = (const St_Survey *) StistOnPst::instance()->Table();
    // Get ladder positionments relative to IST

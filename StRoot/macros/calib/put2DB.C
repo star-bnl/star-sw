@@ -41,6 +41,7 @@ void Load() {
 void put2DB(const char* files=
 	    "$STAR/StarDb/Geometry/svt/svtWafersPosition.20050101.000200.C"
 	    /* 
+	      unsetenv DB_SERVER_LOCAL_CONFIG
 	      setenv DB_ACCESS_MODE write # from Michael 02/26/07
               update beginTime if necessary 
               and

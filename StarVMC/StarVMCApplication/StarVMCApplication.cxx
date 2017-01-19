@@ -40,6 +40,9 @@
 #include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
+#include "StDetectorDbMaker/StPxlSurveyC.h"
+#include "StDetectorDbMaker/StIstSurveyC.h"
+#include "StDetectorDbMaker/StSstSurveyC.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 
@@ -394,11 +397,10 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   } 
   // Misalignment introduced after 2013 TPC survey
   /*
-    HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[73]
-
 1       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/SFMO[1]/SFLM[20]/SFSW[16]/SFSL[1]/SFSD[1]
 2       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/IBMO[1]/IBAM[24]/IBLM[6]/IBSS[1]
 3       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/PXMO[1]/PXLA[10]/LADR[4]/PXSI[10]/PLAC[1]
+4       HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[73]
 5       HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
 6       HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
 7       HALL[1]/CAVE[1]/VPDD[2]/VRNG[1]/VDET[19]/VDTI[1]/VCNV[1]/VRAD[1]
@@ -420,28 +422,113 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   enum EDetector2Align {
     kUnknown,
     kTPC, kTpcRefSys, kTpcHalf, kTpcSecInn, kTpcSecOut, kTpcPad, kTpcLast,
-    kSVT, kSvtWhole, kSvtShell, kSvtLadder, kSvtWafer, 
-    kSSD, kSsdWhole, kSsdSector, kSsdLadder, kSsdWafer};
+    kHft, 
+    kPxl, kPxlSector, kPxLadder, kPxlSensor,
+    kIst, kIstLadder, kIstSensor,
+    kSst, kSstLadder, kSstSensor,
+    kTof, kTofTray, kTofModule, kTofCell,
+    kGMT, kGMTModule
+  };
   struct listOfDetectorToAlign_t {
     const Char_t *Name; 
     EDetector2Align kDet;
     const Char_t *path;
     Int_t  Ndim;
-    Int_t  NVmax[6];
+    Int_t  NVmax[3];
     St_SurveyC *chair;
   };
   static const listOfDetectorToAlign_t listOfDet2Align[] = {                                                                
-    //    HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[73]
-    {"TpcRefSys-%d",    kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                       1, {1,  0, 0, 0, 0, 0}, StTpcPosition::instance()}, 
-    {"TpcHalf-%d",      kTpcHalf  ,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d",         1, {2,  0, 0, 0, 0, 0}, StTpcHalfPosition::instance()}, 
-    {"TpcSecInn-%02d", kTpcSecInn,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d", 2, {2, 12, 0, 0, 0, 0}, StTpcInnerSectorPosition::instance()},
-    {"TpcSecOut-%02d", kTpcSecOut,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d", 2, {2, 12, 0, 0, 0, 0}, StTpcOuterSectorPosition::instance()},
-    {"TpcPad-%02d",        kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",3, {2, 12, 73, 0, 0, 0}, 0}
-   };
+    //   /HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV[2]/TPSS[12]/TPAD[73]
+    {"TpcRefSys-%d",   kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                                      1, { 1, 0, 0}, StTpcPosition::instance()}, 	     
+    {"TpcHalf-%d",     kTpcHalf  ,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d",         	       	      1, { 2, 0, 0}, StTpcHalfPosition::instance()}, 	   
+    {"TpcPad-%02d",       kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",	      3, { 2,12,73}, 0}, // StTpcInnerSectorPosition::instance() ||  StTpcOuterSectorPosition::instance()
+#if 1
+    /* Spiros, 01/17/2017
+       pst == ids
+       pst=pixel support tube       PXMO
+       ids= intermediate support    IBMO
+       osc=outer support cylinder   SFMO
++------------------------+
+| Tables_in_Geometry_pxl |
++------------------------+
+| idsOnTpc               | the same as Geometry_ist.idsOnTpc
+| pstOnIds               | Identity
+| pxlHalfOnPxl           | +
+| pxlLadderOnSector      | +
+| pxlOnPst               | +
+| pxlSectorOnHalf        | +
+| pxlSensorOnLadder      | +
+| pxlSensorTps           | +
+| pxlSurvey              | Empty
++------------------------+
+| Tables_in_Geometry_ist |
++------------------------+
+| idsOnTpc               | +
+| istLadderOnIst         | +
+| istOnPst               | +
+| istSensorOnLadder      | +
+| istSurvey              | Empty
+| pstOnIds               | Identity
++------------------------+
+| Tables_in_Geometry_sst |
++------------------------+
+| sstLadderOnSst         | +
+| sstOnOsc               | +
+| sstSensorOnLadder      | +
+| sstWafersPosition      | Empty
++------------------------+
+     */
+    //   /HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA[10]/LADR[4]/PXSI[10]/PLAC_1                                       //  
+    /*
+StPxlConstants.h:const int kNumberOfPxlSectors = 10;
+StPxlConstants.h:const int kNumberOfPxlLaddersPerSector = 4;
+StPxlConstants.h:const int kNumberOfPxlSensorsPerLadder = 10;
+StPxlConstants.h:const int kNumberOfPxlColumnsOnSensor = 960;
+StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
+  StidsOnTpc::instance();
+  StPxlpstOnIds::instance(); // Identity
+  StpxlOnPst::instance();
+  StpxlHalfOnPxl::instance();
+  StpxlSectorOnHalf::instance();
+  StpxlLadderOnSector::instance();
+  StpxlSensorOnLadder::instance();
+     */
+    {"Hft-%d",               kHft,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_%d",                                      1, { 1, 0, 0},  StidsOnTpc::instance()}, //
+    // Sensor -> Ladder -> Sector -> Half -> Pxl -> Pst -> Ids -> Tpc
+    {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                     	     1, { 1, 0, 0}, 0}, // StPxlpstOnIds::instance() * StpxlOnPst::instance()
+    {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                	     1, {10, 0, 0}, 0}, // StpxlHalfOnPxl::instance() * StpxlSectorOnHalf::instance() 
+    {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",        	     2, {10, 4, 0}, StpxlLadderOnSector::instance()}, 
+    {"PxlSensor-%d",   kPxlSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d/PLAC_1", 3, {10, 4,10}, StpxlSensorOnLadder::instance()}, 
+    //   /HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM[24]/IBLM[6]/IBSS_1
+    // Sensor -> Ladder -> Ist -> Pst -> Ids -> Tpc
+    /*
+  StpstOnIds::instance();
+  StistOnPst::instance();
+  StLadderOnIst::instance();
+  StistSensorOnLadder::instance();
+    */
+    {"Ist-%d",               kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",                        1, { 1, 0, 0}, StpstOnIds::instance()},
+    {"IstLadder-%d",   kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",                 1, {24, 0, 0}, StLadderOnIst::instance()},
+    {"IstSensor-%d",   kIstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d/IBSS_1",2, {24, 6, 0}, StistSensorOnLadder::instance()},
+    //   /HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM[20]/SFSW[16]/SFSL_1/SFSD_1
+    // WG = Tpc2Global * SG * LS * WLL;
+    // Sensor ->(WLL==W'L==sensorOnLadder)  Ladder ->(LS=ladderOnIds) Ids -> Osc ->(SG=oscOnGlobal) Global -> Tpc
+    /* Assume Osc == Tpc
+  StsstOnOsc::instance();
+  StsstLadderOnSst::instance();
+  StsstSensorOnLadder::instance();
+    */
+    {"Sst-%d",             kSst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",                      1, { 1, 0, 0}, StsstOnOsc::instance()},
+    {"SstLadder-%d", kSstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",                      1, {20, 0, 0}, StsstLadderOnSst::instance()},
+    {"SstSensor-%d", kSstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d/SFSW_%d/SFSL_1/SFSD_1",2, {20,16, 0}, StsstSensorOnLadder::instance()}
+    //HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
+    //HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
+#endif
+  };
   static const Int_t  NoDetectos2Align = sizeof(listOfDet2Align)/sizeof(listOfDetectorToAlign_t);
+  static Int_t iBreak = 0;
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
-    EDetector2Align kdetIO = kUnknown;
     Int_t Ntot = 1;
     for (Int_t k = 0; k < listOfDet2Align[i].Ndim; k++) Ntot *= listOfDet2Align[i].NVmax[k];
     for (Int_t j = 0; j < Ntot; j++) {
@@ -465,63 +552,124 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       }
       TGeoHMatrix rotL(*(nodeP->GetNode()->GetMatrix())); // ideal matrix before alignment
       TGeoHMatrix rotA = rotL; // After alignment
+      TGeoHMatrix A, B;
       TGeoHMatrix *rotm = 0;
       Int_t Id = -1;
+      Int_t ID = -1;
       Int_t half   = -1; // Tpc half
       Int_t sector = -1; // Tpc sector;
       Int_t row    = -1; // Tpc pad row
-      Int_t layer  = -1; // layer or Ssd Sector
       Int_t ladder = -1;
-      Int_t wafer  = -1;
+      Int_t sensor = -1;
+      Id = Ntot;
       St_SurveyC *chair = 0;
-      switch (kDetector) {
-      // TPC Reference System
-      case kTpcRefSys:
-	Id = j;
-	rotA = listOfDet2Align[i].chair->GetMatrix(0);
+      if (Ntot == 1 && listOfDet2Align[i].chair) { // kTpcRefSys, kHft, kIst, kSst
+	rotA = listOfDet2Align[i].chair->GetMatrix(0) * rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	break;
-      case kTpcHalf: 
-	if (indx[0] == 1) half = west;
-	if (indx[0] == 2) half = east;
-	Id = indx[0]+1;
-	rotA = listOfDet2Align[i].chair->GetMatrix(half);
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	break;
-      case kTpcSecInn:
-      case kTpcSecOut:
-	break;
-      case kTpcPad:
-	sector = 12*(indx[0]-1) + indx[1];
-	if (listOfDet2Align[i].Ndim == 3 && listOfDet2Align[i].NVmax[2] == 73) {
-	  if (indx[2] <= 39) row = (indx[2]-1)/3 + 1;
-	  else               row = 14 + (indx[2]-40);
-	  if (row > 45)      row = 45;
-	} else {
+      } else {
+	switch (kDetector) {
+	case kTpcHalf: 
+	  if (indx[0] == 1) half = west;
+	  if (indx[0] == 2) half = east;
+	  Id = indx[0];
+	  rotA = listOfDet2Align[i].chair->GetMatrix(half) * rotL;
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kTpcPad:
+	  sector = 12*(indx[0]-1) + indx[1];
+	  if (listOfDet2Align[i].Ndim == 3 && listOfDet2Align[i].NVmax[2] == 73) {
+	    if (indx[2] <= 39) row = (indx[2]-1)/3 + 1;
+	    else               row = 14 + (indx[2]-40);
+	    if (row > 45)      row = 45;
+	  } else {
+	    assert(0);
+	  }
+	  if (row <= NoOfInnerRows) chair = StTpcInnerSectorPosition::instance();
+	  else                      chair = StTpcOuterSectorPosition::instance();
+	  rotA = chair->GetMatrix(sector) * rotL;
+	  rotA.SetName(Form(listOfDet2Align[i].Name,sector,row));
+	  break;
+	case kPxl:
+	  A = StPxlpstOnIds::instance()->GetMatrix();
+	  B = StpxlOnPst::instance()->GetMatrix();
+	  rotA = A * B * rotL;
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kPxlSector:
+	  sector = indx[0];
+	  half   = (indx[0]-1)/5;
+	  A = StpxlHalfOnPxl::instance()->GetMatrix(half);
+	  B = StpxlSectorOnHalf::instance()->GetMatrix(sector-1);
+	  rotA =  A * B ;
+	  rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
+	  break;
+	case kPxLadder:
+	  sector = indx[0];
+	  ladder = indx[1];
+	  Id = ladder+4*(sector-1);
+	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1);
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kPxlSensor:
+	  sector = indx[0];
+	  ladder = indx[1];
+	  sensor = indx[2];
+	  Id = sensor + 10*(ladder+4*(sector-1) - 1);
+	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1);
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kIstLadder:
+	  ladder = indx[0];
+	  Id = ladder;
+	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1);
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+    	  break;
+	case kIstSensor:
+	  ladder = indx[0];
+	  Id = ladder;
+	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1);
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kSstLadder:
+	  ladder = indx[0];
+	  Id = ladder;
+	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1);
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kSstSensor:
+	  ladder = indx[0];
+	  sensor = indx[1];
+	  ID     = 7000 + ladder + 100*(sensor - 1);
+	  Id     = sensor + 16*(ladder - 1);
+          assert(ID ==  listOfDet2Align[i].chair->Id(Id));    
+	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1);
+	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	default:
 	  assert(0);
+	  break;
 	}
-	if (row <= NoOfInnerRows) chair = StTpcInnerSectorPosition::instance();
-        else                      chair = StTpcOuterSectorPosition::instance();
-	rotA = chair->GetMatrix(sector);
-	rotA.SetName(Form(listOfDet2Align[i].Name,sector,row));
-	break;
-      default:
-	assert(0);
-	break;
       }
       if (rotA == rotL) continue;
       rotm = new TGeoHMatrix(rotA);
       //      rotm->SetName(Form(listOfDet2Align[i].Name,Id));
-      if (Debug() > 1) {
-	cout << "Id : " << Id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
-	//	if (Debug() > 1) cout << "Old Local:\t"; nodeP->GetNode()->GetMatrix()->Print();
-	if (Debug() > 2) nodeP->Print();
+      if (Debug()) {
+	if (Debug() > 1) {
+	  cout << "Id : " << Id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
+	  //	if (Debug() > 1) cout << "Old Local:\t"; nodeP->GetNode()->GetMatrix()->Print();
+	  if (Debug() > 2) nodeP->Print();
+	}
+	cout << "========================================" << endl;
+	cout << "rotL:"; rotL.Print();
+	cout << "rotm:"; rotm->Print();
+	cout << "========================================" << endl;
       }
       nodeP->Align(rotm);
       if (Debug() > 1) {
 	cout << "Id : " << Id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
 	if (Debug() > 2) nodeP->Print();
       }
+      iBreak++;
     }
   }
   // Freeze misaligned geometry

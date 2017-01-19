@@ -35,12 +35,11 @@
 #include "StSstDbMaker.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
-#include "tables/St_sstWafersPosition_Table.h"
 #include "tables/St_sstConfiguration_Table.h"
 #include "tables/St_sstDimensions_Table.h"
 #include "tables/St_sstMaskChip_Table.h"
 #include "tables/St_sstSlsCtrl_Table.h"
-#include "tables/St_Survey_Table.h"
+#include "StDetectorDbMaker/StSstSurveyC.h"
 #include "TMath.h"
 #include "TVector3.h"
 #include "StTpcDb/StTpcDb.h"
@@ -135,21 +134,21 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
    const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
 
    // SSD
-   St_Survey *sstOnOsc = (St_Survey *) GetDataBase("Geometry/sst/sstOnOsc");  // OSC in IDS
+   St_Survey *sstOnOsc = (St_Survey *) StsstOnOsc::instance()->Table();// GetDataBase("Geometry/sst/sstOnOsc");  // OSC in IDS
 
    if (!sstOnOsc) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstOnOsc' table" << endm;
       return 0;
    }
 
-   St_Survey *sstLadderOnSst = (St_Survey *) GetDataBase("Geometry/sst/sstLadderOnSst");// ladders in the SST sector coordinate systems
+   St_Survey *sstLadderOnSst = (St_Survey *) StsstLadderOnSst::instance()->Table();//GetDataBase("Geometry/sst/sstLadderOnSst");// ladders in the SST sector coordinate systems
 
    if (!sstLadderOnSst) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstLadderOnSst' table" << endm;
       return 0;
    }
 
-   St_Survey *sstSensorOnLadder = (St_Survey *) GetDataBase("Geometry/sst/sstSensorOnLadder");  // wafers in the SST ladder coordinate systems
+   St_Survey *sstSensorOnLadder = (St_Survey *) StsstSensorOnLadder::instance()->Table();//GetDataBase("Geometry/sst/sstSensorOnLadder");  // wafers in the SST ladder coordinate systems
 
    if (!sstSensorOnLadder) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstSensorOnLadder' table" << endm;
