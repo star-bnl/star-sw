@@ -62,6 +62,8 @@ public:
           float getRxy() const {return sqrt(mGlo[0]*mGlo[0]+mGlo[1]*mGlo[1]);}
     ///Return the type of class
     virtual int IsHit() const   		{return 1;}
+            int IsCombo() const   		{return mCombo;}
+           void SetCombo(int combo)    		{mCombo = combo;}
 
     ///Return components of the error matrix.
     virtual const float *errMtx() const {return 0;}
@@ -108,6 +110,7 @@ protected:
     char  mBeg[1];
     unsigned char mMaxTimes;
     unsigned char mTimesUsed;
+    unsigned char mCombo;
     float mGlo[3]; 			//global position
     const void *msthit;
     const StHitPlane *mDetector;
