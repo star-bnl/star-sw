@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.52 2017/01/19 23:03:13 smirnovd Exp $
+ * $Id: StMuDst.h,v 1.53 2017/01/19 23:03:27 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -134,9 +134,9 @@ public:
   /// creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
   StEvent* createStEvent();
   /// helper function to create a StTrackGeometry
-  StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
+  static StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
   /// creates a StTrack from an StMuTrack and return pointer to it
-  StTrack* createStTrack(const StMuTrack*);
+  static StTrack* createStTrack(const StMuTrack*);
   /// dongx
   static void fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
   static void fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TClonesArray* global);
@@ -446,6 +446,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.53  2017/01/19 23:03:27  smirnovd
+ * StMuDst: Make methods static as logic suggests
+ *
  * Revision 1.52  2017/01/19 23:03:13  smirnovd
  * Promise to not modify original StMuTrack when converting to StTrack
  *
