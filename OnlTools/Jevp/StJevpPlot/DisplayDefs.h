@@ -5,6 +5,28 @@
 #include <stdlib.h>
 #include <rtsLog.h>
 
+// The Pallete file is just a separate DisplayDef containing:
+// <doc>
+//    <pallete>
+//        <tab>builder
+//             <histogram>xxxx
+// ....
+//
+// The standard file contains:
+// <doc>
+//    <display_def>name
+//        <tab>
+// ...
+//
+// So effectively, the pallete is just another tag equivalent to display_def
+// with no name
+//
+// The constructor new DisplayFile(1) creates an empty pallete file...
+//
+// The constructor new DisplayFile() creates an empty doc file...
+//  
+
+
 //#include <libxml/xmlreader.h>
 struct _xmlTextReader;
 typedef _xmlTextReader xmlTextReader;
@@ -30,7 +52,6 @@ class DisplayProperty {
 class DisplayNode {
  public:
     DisplayNode *child;
-    //DisplayNode *prev;
     DisplayNode *next;
     DisplayNode *parent;
 
@@ -146,7 +167,7 @@ class DisplayFile {
   int nDisplays() {
     if(!root) return 0;
     if(!root->child) return 0;
-    return root->child->nSiblings()+1;   // Don't include pallete, but do include me...
+    return root->child->nSiblings()+1;   // Include myself
   }
 
   // Interface for usage...

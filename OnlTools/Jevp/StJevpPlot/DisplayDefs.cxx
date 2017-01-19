@@ -270,6 +270,12 @@ void DisplayNode::insertChildAlpha(DisplayNode *node)
 {
     node->parent = this;
 
+    // If no children...
+    if(child == NULL) {
+	child = node;
+	return;
+    }
+
     DisplayNode *curr = child;
     DisplayNode *prev = NULL;
 
@@ -278,7 +284,7 @@ void DisplayNode::insertChildAlpha(DisplayNode *node)
 	    LOG(DBG, "insert before %s", curr->name);
 
 	    if(prev == NULL) {
-		this->child = node;
+		child = node;
 	    }
 	    else {
 		prev->next = node;
@@ -292,19 +298,16 @@ void DisplayNode::insertChildAlpha(DisplayNode *node)
     }
 
     // Insert at end of list...
-    if(curr) {
-	LOG(DBG, "insert after %s", curr->name);
+    if(prev) {
+	LOG(DBG, "insert after %s", prev->name);
+	prev->next = node;
     }
     else {
-	LOG(DBG, "insert as child of %s", name);
+	LOG(CRIT, "Can't happen!");
+	exit(0);
     }
 
-    if(curr) {
-	curr->next = node;
-    }
-    else {
-	this->child = node;
-    }
+
 }
 
 
@@ -797,7 +800,7 @@ u_int DisplayFile::getPenultimateTabIdx(u_int idx) {
 
 DisplayNode *DisplayFile::getTab(u_int combo_index)
 {
-    //LOG("JEFF", "get: %d", combo_index);
+    //LOG(DBG, "get: %d", combo_index);
 
     // "1" == first child...
     //printf("here %p %d\n", displayRoot, combo_index);
@@ -967,7 +970,7 @@ void DisplayFile::updateDisplayRoot() {
 
 DisplayNode *DisplayNode::copyTree(DisplayNode *src, DisplayNode *parent, int requireTags, const char *tags)
 {
-    //LOG("JEFF", "requireTags = %d", requireTags);
+    //LOG(DBG, "requireTags = %d", requireTags);
 
     if(requireTags) {
 	if(!src->matchTags((char *)tags)) {   

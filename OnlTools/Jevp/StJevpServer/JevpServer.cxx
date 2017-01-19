@@ -211,9 +211,8 @@ void JevpServer::main(int argc, char *argv[])
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
 
-  if(serv.justUpdateDisplayPallete == 1) {
-    serv.justUpdatePallete();
-    return;
+  if(serv.justUpdateDisplayPallete == 1) {   // don't have to do anything because write pallete in init()
+      return;    
   }
 
   // Start reader thread
@@ -358,7 +357,6 @@ void JevpServer::parseArgs(int argc, char *argv[])
     log_dest = (char *)"172.16.0.1";
     log_port = 8004;
     log_level = (char *)WARN;
-    makepallete = 0;
 
     rtsLogOutput(log_output);
     rtsLogAddDest(log_dest, log_port);
@@ -400,7 +398,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    i++;
 	    myport = atoi(argv[i]);
 	}
-	else if (strcmp(argv[i], "-justPallette") == 0) {
+	else if (strcmp(argv[i], "-justPallete") == 0) {
 	    justUpdateDisplayPallete = 1;
 	}
 	else if (strcmp(argv[i], "-file")==0) {
@@ -411,7 +409,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    logevent=1;
 	}
 	else if (strcmp(argv[i], "-pallete") == 0) {
-	    makepallete = 1;
+	    log_output = RTS_LOG_STDERR;
+	    justUpdateDisplayPallete = 1;
 	}
 	else if (strcmp(argv[i], "-files") == 0) {
 	    i++;
@@ -554,33 +553,39 @@ void JevpServer::writePalleteFile()
     
     // Create a pallete!
     DisplayFile *pallete_file = new DisplayFile(1);
+    DisplayNode *pallete_node = pallete_file->root->child;
 
-    
+    LOG(DBG, "pallete_node: %s",pallete_node->name);
+
     TListIter next(&builders);
     JevpPlotSet *curr;
     
     next.Reset();
     while((curr = (JevpPlotSet *)next())) {
+
+	LOG(DBG, "Adding builder: %s to pallete", curr->getPlotSetName());
+	
+	DisplayNode *builderNode = new DisplayNode();
+	builderNode->setName(curr->getPlotSetName());
+	builderNode->leaf = 0;
+
+	pallete_node->insertChildAlpha(builderNode);
+	
 	JevpPlot *currplot;
 	TListIter nextplot(&curr->plots);
 	while((currplot = (JevpPlot *)nextplot())) { 
-	    char *builder = currplot->getParent();
-	    char *name = currplot->GetPlotName();
+	    LOG(DBG, "\tAdding plot %s:%s",curr->getPlotSetName(), currplot->GetPlotName());
 	
-	    DisplayNode *builderNode = pallete_file->root->child->findChild(builder);
-	    if(!builderNode) {
-		builderNode = new DisplayNode();
-		builderNode->setName(builder);
-		pallete_file->root->child->insertChildAlpha(builderNode);
-	    }
+	    DisplayNode *histNode = new DisplayNode();
+	    histNode->setName(currplot->GetPlotName());
+	    histNode->leaf = 1;
 
-	    DisplayNode *plotNode = new DisplayNode();
-	    plotNode->setName(name);
-	    plotNode->leaf = 1;
-	    builderNode->insertChildAlpha(plotNode);
+	    builderNode->insertChildAlpha(histNode);
 	}
     }
-    LOG(NOTE, "Writing palleteFile... %s", pallete_fn);
+
+
+    LOG(DBG, "Writing palleteFile... %s", pallete_fn);
     unlink(pallete_fn);
     if(pallete_file->Write(pallete_fn) < 0) {
 	LOG(ERR, "Error writing pallete file %s", pallete_fn);
@@ -594,6 +599,7 @@ void JevpServer::writePalleteFile()
     args[2] = (char *)"Pallete.txt";
     args[3] = NULL;
 
+    LOG(DBG, "archiveHistoDefs with pallete:");
     execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
 }
 
@@ -607,7 +613,6 @@ int JevpServer::updateDisplayDefs()
     displays = new DisplayFile();
     displays->Read(tmp);
 
-
     printf("update DD: %d %d\n", strlen(displays->textBuff), displays->textBuffLen);
     pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
 
@@ -617,6 +622,7 @@ int JevpServer::updateDisplayDefs()
     args[2] = displays_fn;
     args[3] = NULL;
 
+    LOG(DBG, "archiveHistoDefs HistoDefs");
     execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
     return 0;
 }
@@ -690,6 +696,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 
     writePalleteFile();
   
+
+
     debugBuilders(__LINE__);
 
     return 0;
@@ -1073,7 +1081,7 @@ void JevpServer::justUpdatePallete() {
   JevpPlotSet *curr;
   TListIter next(&builders);
 
-  freePallete();
+  DisplayNode *palleteNode = new DisplayNode();
 
   next.Reset();
   while((curr = (JevpPlotSet *)next())) {
@@ -1083,7 +1091,7 @@ void JevpServer::justUpdatePallete() {
     TListIter nextplot(&curr->plots);
     while((currplot = (JevpPlot *)nextplot())) { 
       printf("              : plot = %s\n",currplot->GetPlotName());
-      addToPallete(currplot);
+      addToPallete(palleteNode, currplot);
     }
   }
 
@@ -1141,12 +1149,6 @@ void JevpServer::performStopRun()
 
   LOG(DBG, "fn=%s",fn);
   CP;
-
-
-
- 
-
- 
 
   runStatus.setStatus("stopped");
 }
@@ -1879,31 +1881,15 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
     return WEXITSTATUS(stat);
 }
 
-// DisplayNode *JevpServer::getPalleteNode(DisplayFile *pall)
-// {
-//   if(!displays) return NULL;
-//   if(!displays->root) return NULL;
-//   DisplayNode *palleteNode = displays->root->child;
-  
-//   CP;
-
-//   while(palleteNode) {
-//     if(strcmp(palleteNode->name, "pallete") == 0) {
-//       return palleteNode;
-//     }
-//     palleteNode = palleteNode->next;
-//   }
-//   return NULL;
-// }
 
 // This function actually checks if already in pallete
 // if not, adds....
-void JevpServer::addToPallete(JevpPlot *plot)
+void JevpServer::addToPallete(DisplayNode *palleteNode, JevpPlot *plot)
 {
   char *builder = plot->getParent();
   char *name = plot->GetPlotName();
 
-  DisplayNode *palleteNode; // = pallete->root->child;
+  //DisplayNode *palleteNode; // = pallete->root->child;
   //if(!palleteNode) {
   //  LOG(ERR,
 
@@ -2116,14 +2102,6 @@ void *JEVPSERVERreaderThread(void *)
 	}
 
 	nevts++;
-	if(serv.makepallete) {
-	    if(nevts > 1) {
-		nevts = 0;
-		readerThreadSend(socket, (char *)"stoprun");
-		readerThreadWait(socket);
-		continue;
-	    }
-	}
 
 	LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);
 	readerThreadSend(socket, (char *)"newevent");
