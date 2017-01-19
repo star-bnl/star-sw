@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.49 2014/02/28 05:40:09 jdb Exp $
+ * $Id: StMuTrack.h,v 1.50 2017/01/19 23:03:04 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -147,6 +147,7 @@ class StMuTrack : public TObject {
     Int_t            idTruth() const { return mIdTruth;}
     Int_t            qaTruth() const { return mQuality; }
     Int_t           idParentVx() const {return mIdParentVx;}
+    void            setType(short type) { mType = type;}
     void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void         setIdParentVx(Int_t Id) {mIdParentVx = Id;}
 
@@ -266,6 +267,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.50  2017/01/19 23:03:04  smirnovd
+ * StMuTrack: Let users change track type e.g. global/primary/etc...
+ *
  * Revision 1.49  2014/02/28 05:40:09  jdb
  * jdb StMuTrack: Added setMtdPidTraits, StMuMtdPidTraits: removed mtdHit(), MtdHit(), setMtdHit()
  *
