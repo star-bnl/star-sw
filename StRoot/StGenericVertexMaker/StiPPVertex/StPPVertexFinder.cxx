@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.89 2017/01/20 17:49:20 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.90 2017/01/20 17:49:27 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -438,9 +438,6 @@ StPPVertexFinder::fit(StEvent* event) {
 
   hA[0]->Fill(1);
 
-  StEvent *mEvent = (StEvent *)  StMaker::GetChain()->GetInputDS("StEvent");
-  assert(mEvent); 
-
   mTotEve++;
   eveID=event->id();
   LOG_INFO << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
@@ -457,7 +454,7 @@ StPPVertexFinder::fit(StEvent* event) {
  // get BTOF info
 
   if(mUseBtof) {
-    StBTofCollection *btofColl = (StBTofCollection*)mEvent->btofCollection();
+    StBTofCollection *btofColl = (StBTofCollection*)event->btofCollection();
     if(btofColl==0) {
       LOG_WARN << "no btofCollection , continue THE SAME eve"<<endm;
     } else {
@@ -472,7 +469,7 @@ StPPVertexFinder::fit(StEvent* event) {
   }
 
   
-  StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); 
+  StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
   if(emcC==0) {
     LOG_WARN <<"no emcCollection , continue THE SAME eve"<<endm;
   } else {
