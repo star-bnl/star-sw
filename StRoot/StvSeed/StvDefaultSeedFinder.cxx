@@ -21,7 +21,7 @@
 
 
 void myBreak(int);
-enum {kFstAng=65,kErrFakt=4,kLenFakt=4};
+enum {kFstAng=65,kErrFakt=4,kLenFakt=4,kMaxLen=500};
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.01;
@@ -36,6 +36,7 @@ StvDefaultSeedFinder::StvDefaultSeedFinder(const char *name):StvSeedFinder(name)
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
   f1stHitMapIter= new Stv1stHitMapIter;
+  fSgn = 1;
 }  
 //_____________________________________________________________________________
 void StvDefaultSeedFinder::Clear(const char*)
@@ -57,7 +58,7 @@ void StvDefaultSeedFinder::Reset()
     if (stiHit->timesUsed()) continue;
     const float *x = stiHit->x();
     float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
-    f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
+    f1stHitMap->insert(std::pair<float,StvHit*>(-fSgn*r2, stiHit));
 
     fMultiHits->Add(stiHit,x);
   } 
@@ -130,6 +131,16 @@ inline static void Mul(const float a[3],float scale,float b[3])
   b[0]=a[0]*scale;b[1]=a[1]*scale;b[2]=a[2]*scale;
 }
 //_____________________________________________________________________________
+inline static float Dir(const float a[3],const double b[3],float dir[3])
+{
+
+  dir[0] = a[0];dir[1] = a[1];dir[2] = a[2];
+  if (b[2]<1e11) {dir[0]-=b[0];dir[1]-=b[1];dir[2]-=b[2];}
+  double len = sqrt(dir[0]*dir[0]+dir[1]*dir[1]+dir[2]*dir[2]);
+  dir[0]/=len; dir[1]/=len;dir[2]/=len;
+  return len;
+}
+//_____________________________________________________________________________
 inline static float Impact2(const float dir[3],const float pnt[3])
 {
    float imp[3];
@@ -158,12 +169,12 @@ std::vector<TObject*> mySeedObjs;
     StvDebug::Count("ZSeeds",hit->x()[2]);
   } }  
 #endif
-
+  
 
   int nTally = 0; 
   while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
-    if (fstHit->timesUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
+    if (fstHit->isUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
       ++(*f1stHitMapIter); mNDejavu = 0; continue;
     }
     fSeedHits.clear();
@@ -204,6 +215,7 @@ std::vector<TObject*> mySeedObjs;
 	}
 	if (dejavu) 			continue;
 	int ans = mSel.Reject(nexHit->x(),hpNex);
+StvDebug::Count("Reject",ans);
 	if (ans>0) 			continue;	//hit outside the cone
 
  //			Selecting the best
@@ -217,6 +229,8 @@ std::vector<TObject*> mySeedObjs;
       if (!selHit) 			break; //No more hits 
     }// end NextHit loop
 //		If no hits found, go to next 1st hit
+
+StvDebug::Count("NSeedHits",fSeedHits.size());
     if ((int)fSeedHits.size()<=1) {mNDejavu = 99; continue;}
     if ((int)fSeedHits.size() < fMinHits) continue;
 
@@ -249,7 +263,7 @@ std::vector<TObject*> mySeedObjs;
 //_____________________________________________________________________________
 StvConeSelector::StvConeSelector()
 {
-  memset(mBeg,0,mEnd-mBeg+1);
+  memset(mBeg,0,mEnd-mBeg+1);mSgn=1;
 }
 //_____________________________________________________________________________
 void StvConeSelector::AddHit(const float *x,const float *dir,float layer)
@@ -275,16 +289,13 @@ StvDebug::Break(nCall);
   switch(kase) {
   
     case 0: {
-      
-static int myDir = 0;
-if      ( myDir == 0) { Mul(mX[0]  ,-1./sqrt(Dot(mX[0],mX[0])),mDir);}   
-else if ( myDir == 1) { Mul(mHitDir,-1.                       ,mDir);}
-else                  { mDir[0]= mX[0][0]; mDir[1]= mX[0][1];mDir[2]= mX[0][2]/2;
-                        Mul(mDir   ,-1./sqrt(Dot(mDir ,mDir )),mDir);}
+      float myLen = sqrt(Dot(mX[0],mX[0]));
+      Mul(mX[0]  ,-mSgn/myLen,mDir);  
+
       float sgn = Dot(mHit,mDir);
-      assert(sgn<0);
+      assert(mSgn*sgn<0);
       mS[0]=0;
-      mTan = kFstTan;
+      mTan = (mVtx[2]>1e6)? kFstTan: mErr/myLen;
     }; break;
 
     case 1: {
@@ -323,7 +334,7 @@ assert(fabs(Dot(mDir,mDir)-1)<1e-5);
   mRxy = sqrt(mRxy2);
   mDelta = SEED_ERR(mRxy);
   mLen= mLayer*kLenFakt/(fabs(Dot(mHitDir,mDir))+1e-10);
-  if (mLen>300) mLen = 300;
+  if (mLen>kMaxLen) mLen = kMaxLen;
   UpdateLims();
 
 }   
@@ -469,20 +480,24 @@ static const double kMyMax = 220;
 //_____________________________________________________________________________
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
-   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
+//???   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
 
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
 
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];
-   if (r2xy < (kMinTan*kMinTan)*z2) 	return 3;		
+//??   if (r2xy < (kMinTan*kMinTan)*z2) 	return 3;		
    mHitLen = (r2xy+z2);
    if (mHitLen  < 1e-8) 		return 4;
    mHitPrj = Dot(xx,mDir);
+   if (mHitPrj  < 1e-8) 		return 4;
    if (mHitPrj>mLen) 			return 6;	//Outside of cone along
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
-   float lim = (mErr) + mHitPrj*mTan;
+   float lim = (mErr) + mHitPrj*mTan;//?????
+StvDebug::Count("ImpAll", sqrt(imp));
+StvDebug::Count("ImpRel", sqrt(imp)/lim);
    if (imp > lim*lim)          		return 7;	//Outside of cone aside
+StvDebug::Count("ImpGoo", sqrt(imp));
    int ans = 99;
    if (mHp != hp) { 					//different layers, only prj is important
      if (mHitPrj>mMinPrj) 		return 8;	//more far than best,along
