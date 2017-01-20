@@ -15,9 +15,6 @@ struct StvKonst {
       float     mCoeWindow;		/*Error coeficient for searching window*/
       float     mMaxWindow;		/*Maximal window to search hits*/
 
-      long      mMinSeedHits;		/*Min number of seed hits allowed MidEta*/
-      long      mMaxSeedHits;		/*Max number of seed hits allowed MidEta*/
-
       long      mMinHits;		/*Min number of hits allowed MidEta*/
       long      mNorHits;		/*Normal number of hits allowed MidEta*/
       long      mGoodHits;		/*Min umber of Good hits in track MidEta*/
@@ -29,10 +26,6 @@ struct StvKonst {
       long 	mMaxTotNits;		/*Max number of acceptable non hits*/
       float	mRxyMax;		/*Max radius for tracking*/
       float	mZMax;			/*Max Z      for tracking*/
-
-
-      long      mMinSeedHitsFw;		/*Min number of seed hits allowed MidEta*/
-      long      mMaxSeedHitsFw;		/*Max number of seed hits allowed MidEta*/
 
       long      mMinHitsFw;		/*Min number of hits allowed forwEta*/
       long      mNorHitsFw;		/*Normal number of hits allowed forwEta*/
