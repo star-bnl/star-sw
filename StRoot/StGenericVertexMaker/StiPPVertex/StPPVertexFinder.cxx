@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.87 2017/01/20 17:49:08 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.88 2017/01/20 17:49:14 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -342,10 +342,6 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
       else if(rank>0)  hA[17]->Fill(log(rank));
       else             hA[17]->Fill(log(rank+1e6)-10);
     }
-
-    if (mVertexFitMode == VertexFit_t::Beamline3D) {
-       fitTracksToVertex(V);
-    }
     
     mVertexData.push_back(V);
     if(trigV && mStudyBeamLineTracks) vertex3D->study(V.r,eveID);
@@ -620,6 +616,31 @@ StPPVertexFinder::fit(StEvent* event) {
   if(mVertexData.size()>0)  hA[0]->Fill(8);
   if(mVertexData.size()>1)  hA[0]->Fill(9);
 
+  // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
+  // except when the Beamline1D option is specified. This is done to keep
+  // backward compatible behavior when by default the vertex was placed on the
+  // beamline
+  if (mVertexFitMode == VertexFit_t::Beamline1D)
+  {
+     for (VertexData &vertex : mVertexData) {
+        const double& z = vertex.r.Z();
+        vertex.r.SetXYZ( beamX(z), beamY(z), z);
+     }
+
+  } else
+  {
+     for (VertexData &vertex : mVertexData)
+     {
+        // When fitTracksToVertex fails it returns non-zero value. Just use the
+        // beam equation to set the best guess for vertex position. Works for no
+        // beamline case by setting vertex position to (0,0,0)
+        if ( fitTracksToVertex(vertex) ) {
+           const double& z = vertex.r.Z();
+           vertex.r.SetXYZ( beamX(z), beamY(z), z);
+        }
+     }
+  }
+
   exportVertices();
   printInfo();
   
@@ -738,8 +759,10 @@ StPPVertexFinder::findVertexZ(VertexData &V) {
 
   if (sigZ < 0.1) sigZ = 0.1; // tmp, make it not smaller than the bin size
 
-  // take x,y from beam line equation, TMP
-  V.r  = TVector3(beamX(z0), beamY(z0), z0);
+  // For approximate seed position we use (x,y)=(0,0) because the tracks are
+  // extrapolated to (0,0) anyway. The x and y coordinates can be updated later
+  // in a proper fit.
+  V.r  = TVector3(0, 0, z0);
   V.er = TVector3(0.1, 0.1, sigZ); //tmp
   V.Lmax = Lmax;
 
