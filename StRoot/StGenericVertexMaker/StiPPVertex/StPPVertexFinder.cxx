@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.82 2017/01/06 21:02:05 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.83 2017/01/20 17:48:34 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -282,6 +282,22 @@ StPPVertexFinder::initHisto() {
 
   HList->Add(hACorr);
 }
+
+
+void StPPVertexFinder::findSeeds_TSpectrum()
+{
+   std::vector<double> vertexZs = StGenericVertexFinder::FindSeeds_TSpectrum();
+
+   // Loop over the seeds and associate tracks with it. Then for each seed
+   // create a vertex candidate of VertexData type
+   for (double vertexZ : vertexZs)
+   {
+      VertexData vertex( TVector3(0, 0, vertexZ) );
+      // Need to add a findMatchingTracks(vertex, mTrackData) method...
+      mVertexData.push_back( vertex );
+   }
+}
+
 
 //==========================================================
 //==========================================================

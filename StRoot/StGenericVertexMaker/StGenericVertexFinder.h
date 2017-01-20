@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.45 2017/01/03 22:17:36 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.46 2017/01/20 17:48:33 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -78,6 +78,11 @@ protected:
   int                    mDebugLevel;
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
+
+  /// Searches for vertex candidates and fills private `mVertexData` container
+  /// using the ROOT's TSpectrum peak finder applied to the distribution of
+  /// track DCAs along the `z` axis
+  std::vector<double> FindSeeds_TSpectrum();
 
   /// Returns x coordinate on the beamline (given by sBeamline) corresponding to
   /// the passed value of z.
