@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.46 2017/01/20 17:48:33 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.47 2017/01/20 17:48:43 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -32,6 +32,9 @@ public:
   /// Options used to define the type of vertex fit performed in a concrete
   /// implementation
   enum class VertexFit_t : int { Unspecified, NoBeamline, Beamline1D, Beamline3D };
+
+  /// Options to select vertex seed finder
+  enum class SeedFinder_t : int { Unspecified, MinuitVF, PPVLikelihood, TSpectrum };
 
   // virtual and '=0' ; those MUST be implemented
   virtual ~StGenericVertexFinder();                           // virtual destructor
@@ -66,7 +69,7 @@ public:
 
 protected:
 
-  StGenericVertexFinder(VertexFit_t fitMode=VertexFit_t::Unspecified);
+  StGenericVertexFinder(SeedFinder_t seedFinder=SeedFinder_t::Unspecified, VertexFit_t fitMode=VertexFit_t::Unspecified);
 
   StPrimaryVertexOrder   mVertexOrderMethod; // will default to 0 i.e. orderByNumberOfDaughters
   bool                   mVertexConstrain;   // Use vertex constraint from db
@@ -74,6 +77,9 @@ protected:
 
   /// The type of vertex fit to use in derived concrete implementation
   VertexFit_t            mVertexFitMode;
+
+  /// The type of vertex seed finder to use in derived concrete implementation
+  SeedFinder_t           mSeedFinderType;
 
   int                    mDebugLevel;
   bool                   mUseBtof;           // default use btof = false
