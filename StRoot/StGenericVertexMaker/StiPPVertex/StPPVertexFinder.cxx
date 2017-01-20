@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.85 2017/01/20 17:48:55 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.86 2017/01/20 17:49:01 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -605,7 +605,17 @@ StPPVertexFinder::fit(StEvent* event) {
   //............................................................
   // ...................... search for multiple vertices 
   //............................................................
-  findSeeds_PPVLikelihood();
+  switch (mSeedFinderType)
+  {
+  case SeedFinder_t::TSpectrum:
+    findSeeds_TSpectrum();
+    break;
+
+  case SeedFinder_t::PPVLikelihood:
+  default:
+    findSeeds_PPVLikelihood();
+    break;
+  }
   
   if(mVertexData.size()>0)  hA[0]->Fill(8);
   if(mVertexData.size()>1)  hA[0]->Fill(9);
