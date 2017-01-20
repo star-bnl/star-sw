@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.41 2017/01/20 17:48:43 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.42 2017/01/20 17:48:49 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -34,6 +34,13 @@ StGenericVertexFinder::StDcaList&  StGenericVertexFinder::sDCAs()
 
 /// All measured parameters of the beamline
 vertexSeed_st StGenericVertexFinder::sBeamline;
+
+
+
+StGenericVertexFinder::StGenericVertexFinder() :
+  StGenericVertexFinder(SeedFinder_t::Unspecified, VertexFit_t::Unspecified)
+{
+}
 
 
 //______________________________________________________________________________
