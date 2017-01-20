@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.84 2017/01/20 17:48:43 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.85 2017/01/20 17:48:55 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -300,6 +300,61 @@ void StPPVertexFinder::findSeeds_TSpectrum()
 }
 
 
+/**
+ * Searches for vertex candidates by building a likelihood distribution for
+ * track's DCA z values. The likelihood histogram is filled in
+ * buildLikelihoodZ() using weighted contributions based on the track DCAs'
+ * along the `z` axis. The maximum peak of the likelihood histogram is assumed
+ * to correspond to the best found vertex candidate, aka seed. Once the seed is
+ * identified the tracks are associated with this seed in evalVertexZ(). The
+ * tracks already associated with a vertex are not considered in the next
+ * iteration when a new likelihood histogram is built.
+ */
+void StPPVertexFinder::findSeeds_PPVLikelihood()
+{
+  const float par_rankOffset=1e6; // to separate class of vertices (approximately)
+
+  int nBadVertex=0;
+  int vertexID=0;
+  while(1) {
+    if(! buildLikelihoodZ() ) break;
+    VertexData V(++vertexID);
+    if(! findVertexZ(V)) break;
+  
+    bool trigV = evalVertexZ(V);   // V.print();
+
+    //bump up rank of 2+ track all vertices 
+    if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
+
+    if(!trigV) {
+      if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
+      /*  preserve this unqalified vertex for Akio 
+	  and deposit 1 cent on Jan's bank account (optional) 
+      */
+      nBadVertex++;
+      //bump down rank of sub-prime vertices 
+      V.Lmax-=par_rankOffset; 
+    } 
+    
+    {// ... more rank QA ...
+      float rank=V.Lmax;
+      if(rank>1e6)     hA[17]->Fill(log(rank-1e6)+10);
+      else if(rank>0)  hA[17]->Fill(log(rank));
+      else             hA[17]->Fill(log(rank+1e6)-10);
+    }
+
+    if (mVertexFitMode == VertexFit_t::Beamline3D) {
+       fitTracksToVertex(V);
+    }
+    
+    mVertexData.push_back(V);
+    if(trigV && mStudyBeamLineTracks) vertex3D->study(V.r,eveID);
+  }
+
+  LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found, nBadVertex=" <<nBadVertex<< endm;
+}
+
+
 //==========================================================
 //==========================================================
 void 
@@ -550,47 +605,7 @@ StPPVertexFinder::fit(StEvent* event) {
   //............................................................
   // ...................... search for multiple vertices 
   //............................................................
-
-  const float par_rankOffset=1e6; // to separate class of vertices (approximately)
-
-  int nBadVertex=0;
-  int vertexID=0;
-  while(1) {
-    if(! buildLikelihoodZ() ) break;
-    VertexData V(++vertexID);
-    if(! findVertexZ(V)) break;
-  
-    bool trigV = evalVertexZ(V);   // V.print();
-
-    //bump up rank of 2+ track all vertices 
-    if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
-
-    if(!trigV) {
-      if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
-      /*  preserve this unqalified vertex for Akio 
-	  and deposit 1 cent on Jan's bank account (optional) 
-      */
-      nBadVertex++;
-      //bump down rank of sub-prime vertices 
-      V.Lmax-=par_rankOffset; 
-    } 
-    
-    {// ... more rank QA ...
-      float rank=V.Lmax;
-      if(rank>1e6)     hA[17]->Fill(log(rank-1e6)+10);
-      else if(rank>0)  hA[17]->Fill(log(rank));
-      else             hA[17]->Fill(log(rank+1e6)-10);
-    }
-
-    if (mVertexFitMode == VertexFit_t::Beamline3D) {
-       fitTracksToVertex(V);
-    }
-    
-    mVertexData.push_back(V);
-    if(trigV && mStudyBeamLineTracks) vertex3D->study(V.r,eveID);
-  }
-
-  LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found, nBadVertex=" <<nBadVertex<< endm;
+  findSeeds_PPVLikelihood();
   
   if(mVertexData.size()>0)  hA[0]->Fill(8);
   if(mVertexData.size()>1)  hA[0]->Fill(9);
