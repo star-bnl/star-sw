@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.86 2017/01/20 17:49:01 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.87 2017/01/20 17:49:08 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -863,14 +863,14 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
  * \author Dmitri Smirnov, BNL
  * \date February, 2016
  */
-void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
+int StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 {
    createTrackDcas(vertex);
 
    if (sDCAs().size() == 0) {
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
-      return;
+      return 5;
    }
 
    // Recalculate vertex seed coordinates to be used as initial point in the fit
@@ -915,7 +915,7 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: Fit did not converge. "
 	       << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
-      return;
+      return minuitStatus;
    }
 
    double chisquare, fedm, errdef;
@@ -932,6 +932,8 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 
    vertex.r.SetXYZ(minuit.fU[0], minuit.fU[1], minuit.fU[2]);
    vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
+
+   return 0;
 }
 
  
