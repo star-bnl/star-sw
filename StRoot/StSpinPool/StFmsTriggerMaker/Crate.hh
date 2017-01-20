@@ -36,6 +36,8 @@ static inline unsigned long long bswap_64(unsigned long long x) {
 #include "RTS/trg/include/trgDataDefs.h"
 #include "Board.hh"
 
+#define  FEQ_CONF_NUM       7
+
 using namespace std;
 
 static const char* crateNames[] = { 0, "L1", "BC1", "MXQ", "MIX", "BCW", "BCE", "FEQ", "BBC", "BBQ", "FMS", "QT1", "QT2", "QT3", "QT4" };
