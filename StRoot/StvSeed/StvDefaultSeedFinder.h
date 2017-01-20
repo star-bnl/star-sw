@@ -6,8 +6,6 @@
 #include "Stv/StvSeedFinder.h"
 #include <map>
 #include <vector>
-/// \class StvDefaultSeedFinder
-//#define MultiPhiZMap 1
 enum {kNKeys = 3};
 
 
@@ -28,7 +26,8 @@ void Prepare();
 void Update();
 void AddHit(const float *x,const float *dir,float layer);
 void SetErr(float err) 			{mErr=err;}
-
+void SetSgn(int dir=1) { mSgn = dir; }
+void SetVtx(const float vtx[3]) { memcpy(mVtx,vtx,sizeof(mVtx));}
 
 int  Reject(const float x[3],const void* hp);	// 0  :x accepted
 					// >0 :x rejected
@@ -41,6 +40,7 @@ public:
 char  mBeg[1];
 int   mJst;
 const void* mHp;
+float mVtx[3];
 float mErr;
 float mRxy2;
 float mRxy;
@@ -65,6 +65,7 @@ const float *mHit;
 float mS[100];
 int   mNPnt;
 char  mEnd[1];
+int   mSgn;
 TVector3 mPnt[100];
 };
 
@@ -81,6 +82,8 @@ public:
   void      Print(const char *opt="") const 	{;}
   void      ShowIn();
    int      Reject(const float x[3])		{return mSel.Reject(x,0)>0;}	
+void SetSgn(int dir=1) { fSgn = dir; mSel.SetSgn(dir);}
+void SetVtx(const float vtx[3]) { StvSeedFinder::SetVtx(vtx); mSel.SetVtx(fVtx);}
 
 protected:
 
