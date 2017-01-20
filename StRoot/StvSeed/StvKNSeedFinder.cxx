@@ -37,11 +37,8 @@ enum {kMinRxy = 1};
 StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
 {
   memset(mBeg,0,mEnd-mBeg+1);
-#ifndef KNNGONE
+  mSel.Set(fMinHits);
   fMultiHits	= new StMultiKeyMap(3);
-#else
-  fMultiHits	= new StMultiKeyMap(3);
-#endif
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
   f1stHitMapIter= new Stv1stHitMapIter;
