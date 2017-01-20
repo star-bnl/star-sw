@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.83 2017/01/20 17:48:34 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.84 2017/01/20 17:48:43 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -68,7 +68,8 @@
 //==========================================================
 //==========================================================
 
-StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode),
+StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
+  StGenericVertexFinder(SeedFinder_t::PPVLikelihood, fitMode),
   mDropPostCrossingTrack(true) // default PCT rejection on
 {
 

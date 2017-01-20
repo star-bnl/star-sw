@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.40 2017/01/20 17:48:33 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.41 2017/01/20 17:48:43 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -37,11 +37,12 @@ vertexSeed_st StGenericVertexFinder::sBeamline;
 
 
 //______________________________________________________________________________
-StGenericVertexFinder::StGenericVertexFinder(VertexFit_t fitMode) :
+StGenericVertexFinder::StGenericVertexFinder(SeedFinder_t seedFinder, VertexFit_t fitMode) :
   mVertexOrderMethod(orderByNumberOfDaughters),
   mVertexConstrain(false),
   mMode(0),
   mVertexFitMode(fitMode),
+  mSeedFinderType(seedFinder),
   mDebugLevel(0),
   mUseBtof(false),
   mUseCtb(false)

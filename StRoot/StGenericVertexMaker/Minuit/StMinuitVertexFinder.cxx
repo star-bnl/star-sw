@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.48 2017/01/03 22:17:36 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.49 2017/01/20 17:48:42 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -45,7 +45,8 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 }
 
 
-StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode)
+StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
+  StGenericVertexFinder(SeedFinder_t::MinuitVF, fitMode)
 {
   mBeamHelix =0;
   
