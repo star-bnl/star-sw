@@ -29,6 +29,8 @@ class StvHitLoader : public TNamed
     int   Finish();
     int   AddDetector(StDetectorId did);
     int   NumDetectors() const {return mNDets;};
+    void  SetMaxTimes(int maxTimes,const char *detectcor="*");
+    void  SetMaxTimes(int maxTimes,StDetectorId detiD);
  protected:
 virtual int MakeStvHit(const StHit *stHit,UInt_t upath,int &sure); 
 
@@ -36,9 +38,11 @@ virtual int MakeStvHit(const StHit *stHit,UInt_t upath,int &sure);
  private:
  int             mNDets;
  StDetectorId    mDetId;
+ StvHit         *mStvHit;
  StEventHitIter *mHitIter;
  StvStEventHitSelector *mHitSelector;
  StActorFunctor *mHitLoadActor;
+ int             mMaxTimes[kMaxDetectorId+1];
  ClassDef(StvHitLoader,0)
 };
 

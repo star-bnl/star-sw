@@ -195,6 +195,14 @@ int StvHitRrCalculator::CalcDcaErrs(const StvHit *stvHit,double hRr[3])
    return 0;
 }
 //______________________________________________________________________________
+int StvHitRrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+{
+   assert(hiPos && hiDir && hRr);
+   assert(0 && "Not implemented");
+   return 0;
+}
+
+//______________________________________________________________________________
 int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in local detector system. In this system

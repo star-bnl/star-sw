@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "TString.h"
-#include "TMath.h"
+
 #include "Stv/StvToolkit.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvHit.h"
@@ -131,7 +131,7 @@ static const char *hhh = "x y z r e ";
       if (!cal && val==-999 && err[0]==-999) continue;
       printf("\t%s=",ts.Data());
       if (cal)                  { printf("%s ",cal);}
-      if (TMath::Abs(val+999)>1e-6)    { printf("%g",val);}
+      if (fabs(val+999)>1e-6)   { printf("%g",val);}
       if (err[0]>-999)          { printf("HH(%7.2g) ZZ(%7.2g)",err[0],err[1]);}
     } 
   }//end for i
@@ -187,7 +187,7 @@ void StvNode::UpdateDca()
   const StvNodePars &P = mFP[2];
   double dL = -( P._x*P._cosCA+P._y*P._sinCA)
               /(1+(-P._x*P._sinCA+P._y*P._cosCA)*P._curv);
-    if (TMath::Abs(dL)<1e-6) return;
+    if (fabs(dL)<1e-6) return;
     THelixTrack hlx;            
     mFP[2].get(&hlx);
     mFE[2].Get(&hlx);
@@ -223,7 +223,7 @@ static const double kBigP      =3     	,kSmaDiff=1e-2;
   if (p>kBigP) p=kBigP;
   if (p<kSmaP) p=kSmaP;
   double myP = mELoss->P();
-  if (TMath::Abs(myP-p)<kSmaDiff*p) 		return 0;
+  if (fabs(myP-p)<kSmaDiff*p) 		return 0;
   mELoss->Update(dir,p);	
   return 0;
 }

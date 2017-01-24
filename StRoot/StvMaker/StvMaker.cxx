@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.55 2016/12/09 21:02:25 perev Exp $
+// $Id: StvMaker.cxx,v 1.59 2017/01/19 16:54:24 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -58,6 +58,7 @@ More detailed: 				<br>
 #include "TGeoManager.h"
 #include "StDetectorId.h"
 #include "StEvent.h"
+#include "StEnumerations.h"
 #include "StChainOpt.h"
 #include "StvMaker.h"
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
@@ -75,11 +76,14 @@ More detailed: 				<br>
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StvUtil/StvHitErrCalculator.h"
+#include "StvUtil/StvDebug.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
 #include "StvStarVertexFinder.h"
 #include "StvTpcActive.h"
+#include "Stv/StvTrack.h"
+#include "Stv/StvNode.h"
 #include "StvStEventMaker.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
@@ -88,8 +92,7 @@ More detailed: 				<br>
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum {kMidEta=1,kForwEta=2};
 
-ClassImp(StvMaker)
-  
+ClassImp(StvMaker)  
 //_____________________________________________________________________________
 StvMaker::StvMaker(const char *name) : StMaker(name)
 
@@ -241,9 +244,11 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kPxlId,hec,0);
     Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
   }
-
+#ifndef kFtsIdentifier
+#error
+#endif
 #ifdef kFtsIdentifier
-  if (IAttr("activeFTS")) {    // FTS error calculator
+  if (IAttr("activeFts")) {    // FTS error calculator
     mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
     auto *hec = (StvHitErrCalculator*)gROOT->ProcessLineFast("new StvFtsHitErrCalculator()");
@@ -263,7 +268,6 @@ Int_t StvMaker::InitRun(int run)
 {
 static int initialized = 0;
   if (initialized) return 0;
-  static const StvConst  *kons = new StvConst();
 
 // 		Geometry via DBMaker
   TDataSet *myGeo = GetDataBase("VmcGeometry"); if (myGeo){};
@@ -320,15 +324,17 @@ static int initialized = 0;
 //		Choose seed finders
   assert(gSystem->Load("StvSeed.so")>=0);
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
+  mMaxTimes = IAttr("setMaxTimes");
   for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
+    if (mMaxTimes>1)mHitLoader[jreg]->SetMaxTimes(mMaxTimes);
     mSeedFinders[jreg] = new StvSeedFinders;
     if (IAttr("useEventFiller")) 
       mEventFiller[jreg]= new StvStEventFiller;
     if (IAttr("useVertexFinder")) 
       mVertexFinder[jreg] = new StvStarVertexFinder("GenericVertex");
-
     mTrackFinder[jreg] = new StvKalmanTrackFinder;
+    mTrackFitter[jreg] = new StvKalmanTrackFitter;
     int iRefit = IAttr("Refit");
     mTrackFinder[jreg]->SetRefit(iRefit);
 
@@ -337,8 +343,9 @@ static int initialized = 0;
     if (!seeds.Length()) seeds = "Default";
     TObjArray *tokens = seeds.Tokenize(" .,");
     int seedErr=0; 
-    const char *seedNick[]={"CA"                 ,"Default"                 ,"KN"                 ,0};
-    const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
+    const char *seedNick[]={"CA"                 ,"Default"                 ,"KNN"                ,"Fts"                     ,0};
+    const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder","new StvDefaultSeedFinder",0};
+
 
     for (int idx=0;idx<=tokens->GetLast();idx++) {
     TString &chunk = ((TObjString*)tokens->At(idx))->String();
@@ -346,8 +353,10 @@ static int initialized = 0;
 	if (chunk.CompareTo(seedNick[nick],TString::kIgnoreCase)!=0) continue;
 	if (nick==0) {
           assert(gSystem->Load("Vc.so")>=0);
-          assert(gSystem->Load("TPCCATracker.so")	>=0);}
+          assert(gSystem->Load("TPCCATracker.so")	>=0);
+	}
 	StvSeedFinder *mySeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+        if (TString(seedNick[nick])=="Fts") mySeedFinder->SetSgn(-1);
 	assert(mySeedFinder && !seedErr);
         mSeedFinders[jreg]->Add(mySeedFinder);
 	Info("InitRun","Added %s seed finder",mySeedFinder->GetName());
@@ -355,33 +364,36 @@ static int initialized = 0;
     };
     delete tokens;
   }//end of Eta regions
+   
 
   InitDetectors();
 
 
-  for (int reg = 0;reg<2;reg++) {
-    if (!mHitLoader[reg]) 		continue; 	
-    if (mHitLoader[reg]->NumDetectors()) continue; 	// used
-    delete mHitLoader[reg];    mHitLoader[reg]   =0;
-    delete mSeedFinders[reg];  mSeedFinders[reg] =0;
-    delete mEventFiller[reg];  mEventFiller[reg] =0;
-    delete mTrackFinder[reg];  mTrackFinder[reg] =0;
-    delete mVertexFinder[reg]; mVertexFinder[reg]=0;
-  }   
-  for (int reg = 0;reg<2;reg++) {
-    if (!mHitLoader[reg]) continue;		// not used
-    const auto *par = kons->At(reg);
-    if (!par) continue;
-    mSeedFinders [reg]->SetCons(par);
-    mEventFiller [reg]->SetCons(par);
-    mTrackFinder [reg]->SetCons(par);
-    mVertexFinder[reg]->SetCons(par);
-  }
+  int reg = 0;
+  do {
+    if (mHitLoader[reg] && mHitLoader[reg]->NumDetectors()==0) mHitLoader[reg]=0;		; 	
+    if (mHitLoader[reg]) break;
+    mSeedFinders[reg] = 0;
+    mEventFiller[reg] = 0;
+    mTrackFinder[reg] = 0;
+    mTrackFitter[reg] = 0;
+  } while (0);
+
+  reg = 1;
+  do {
+    if (mHitLoader[reg] && mHitLoader[reg]->NumDetectors()==0) mHitLoader[reg]=0;		; 	
+    if (mHitLoader[reg]) break;
+    mSeedFinders[reg] = 0;
+    mEventFiller[reg] = 0;
+    mTrackFinder[reg] = 0;
+    mTrackFitter[reg] = 0;
+    mVertexFinder[reg]= 0;
+  } while(0);
+
   
   InitPulls();
 
   new StvFitter();
-  new StvKalmanTrackFitter();
        
   return StMaker::InitRun(run);
 }
@@ -389,20 +401,44 @@ static int initialized = 0;
 //_____________________________________________________________________________
 Int_t StvMaker::Make()
 {
+static const StvConst *kons = new StvConst();
 static StvToolkit* kit = StvToolkit::Inst();
   cout <<"StvMaker::Make() -I- Starting on new event"<<endl;
+  int nVtx = 0;
+  const StvHits *vertexes = 0;
 
   StEvent   *event = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
 
   if (!event) return kStWarn;
 
   for (int reg=0;reg<2;reg++) { //Loop over eta regions
-    if (!mHitLoader[reg]) continue;
-    mHitLoader[reg]->LoadHits(event);
-    kit->SetSeedFinders(mSeedFinders[reg] );
-    kit->Reset();
-    int nTks = mTrackFinder[reg]->FindTracks();
-    mToTracks += nTks;
+    const auto *par = kons->At(reg);
+    if (mHitLoader[reg]){
+      mSeedFinders [reg]->SetCons(par);
+      mEventFiller [reg]->SetCons(par);
+      mTrackFitter [reg]->SetCons(par);
+      mCurTrackFitter = mTrackFitter[reg];
+      mTrackFinder [reg]->SetCons(par);
+      mCurTrackFinder = mTrackFinder[reg];
+      mCurTrackFinder->SetFitter(mCurTrackFitter);
+    }
+    if (mVertexFinder[reg]) 
+      mVertexFinder[reg]->SetCons(par);
+
+    if (mHitLoader[reg]) {
+      mHitLoader[reg]->LoadHits(event);
+      kit->SetSeedFinders(mSeedFinders[reg] );
+      kit->Reset();
+      int n = (nVtx)? nVtx:1;
+      for (int i=0;i<n;i++) {
+        const float *V = (nVtx)? (*vertexes)[i]->x():0;
+        mSeedFinders[reg]->SetVtx(V);
+        int nTks = mTrackFinder[reg]->FindTracks();
+        if (mMaxTimes>1) nTks = CleanGlobalTracks();
+        TestGlobalTracks();
+        mToTracks += nTks;
+      }
+    }
     if (mEventFiller[reg]) {
       mEventFiller[reg]->Set(event,&kit->GetTracks());
       mEventFiller[reg]->fillEvent();
@@ -410,14 +446,14 @@ static StvToolkit* kit = StvToolkit::Inst();
 
     do {//pseudo loop
       if (!mVertexFinder[reg]) 	break;
-      int nVtx = mVertexFinder[reg]->Fit(event);
-      if (!nVtx) 			break;
+      nVtx = mVertexFinder[reg]->Fit(event);
+      if (!nVtx) 		break;
       Info("Make","VertexFinder found %d vertices",nVtx);
-      const StvHits &vertexes = mVertexFinder[reg]->Result();
-      if (!vertexes.size()) 	break;       
+      vertexes = &mVertexFinder[reg]->Result();
+      if (!vertexes->size()) 	break;       
   //Set minimal errors
-      for (size_t i=0;i<vertexes.size();i++) {
-	StvHit *vtx=vertexes[i];
+      for (size_t i=0;i<vertexes->size();i++) {
+	StvHit *vtx=(*vertexes)[i];
 	float *vtxErr = vtx->errMtx();
 	if (vtxErr[5]>MIN_VTX_ERR2) continue;
 	memset(vtxErr,0,sizeof(vtxErr[0])*6);
@@ -425,11 +461,14 @@ static StvToolkit* kit = StvToolkit::Inst();
 	vtxErr[2]=MIN_VTX_ERR2;
 	vtxErr[5]=MIN_VTX_ERR2;
       }
-      //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-      mTrackFinder[reg]->FindPrimaries(vertexes);
-      if (mEventFiller[reg]) mEventFiller[reg]->fillEventPrimaries();
     } while(0);
-
+    //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+    if (nVtx) {
+      if (mTrackFinder[reg]) 
+        mTrackFinder[reg]->FindPrimaries(*vertexes);
+      if (mEventFiller[reg]) 
+        mEventFiller[reg]->fillEventPrimaries();
+    }
   }//end regions
   if (mPullTTree) {FillPulls();}
 
@@ -529,4 +568,76 @@ int StvMaker::GeoTest()
  }
 return ierr;
 }
+//________________________________________________________________________________
+static bool TrackCompareStatus(const StvTrack *a, const StvTrack *b)
+{
+  int nA = a->GetNHits();
+  int nB = b->GetNHits();
+  if (nA!=nB) return (nA > nB);
+  return (a->GetXi2Aux() <b->GetXi2Aux());
+//  return (a->GetXi2W()<b->GetXi2W());
+}
+//_____________________________________________________________________________
+int StvMaker::CleanGlobalTracks()
+{
+static StvToolkit *kit = StvToolkit::Inst();
+  StvTracks &trackContainer = kit->GetTracks();
 
+  for (auto it = trackContainer.begin(); it!=trackContainer.end(); ++it) 
+  {
+    auto* kTrack = *it;
+    kTrack->SetUnused();
+  }
+  trackContainer.sort(TrackCompareStatus );
+
+  for (auto it = trackContainer.begin(); it!=trackContainer.end();) 
+  {
+    auto* kTrack =*it;
+    int nHits=0,nNits=0;
+    for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
+    {
+      auto *node = *nodeIt;
+      StvHit *hit = node->GetHit(); if (!hit) 		continue;
+      if (hit->timesUsed()) { nNits++; node->SetHit(0)     ;}
+      else                  { nHits++; hit->setTimesUsed(1);}
+    }
+    if (nHits<4) 			{ it = trackContainer.erase(it); continue; }
+    StvNode *dcaNode = kTrack->GetNode(StvTrack::kDcaPoint);
+    if (dcaNode) {
+       kTrack->remove(dcaNode);
+    }
+
+
+    int ans = mCurTrackFitter->Refit(kTrack,1);
+    if (ans || kTrack->GetNHits()<4)	{ it = trackContainer.erase(it); continue; }
+    mCurTrackFinder->MakeDcaNode(kTrack);
+    ++it;
+  }
+
+  for (auto it = trackContainer.begin(); it!=trackContainer.end(); ++it) 
+  {
+    auto* kTrack = *it;
+    for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
+    {
+      auto *node = *nodeIt;
+      auto *hit = node->GetHit(); if (!hit) continue;
+      assert(hit->timesUsed()==1);
+    }
+  }
+  return trackContainer.size();
+}
+
+//_____________________________________________________________________________
+int StvMaker::TestGlobalTracks() const
+{
+static StvToolkit *kit = StvToolkit::Inst();
+  StvTracks &trackContainer = kit->GetTracks();
+
+  for (auto it = trackContainer.begin(); it!=trackContainer.end(); ++it) 
+  {
+    auto* kTrack = *it;
+    int nHits = kTrack->GetNHits();
+    StvDebug::Count("IdQua_vs_NHits",nHits,kTrack->GetQua()*100);
+  }
+  return 0;
+}

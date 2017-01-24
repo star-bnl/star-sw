@@ -3,7 +3,7 @@
 #include "TNamed.h"
 #include "tables/St_StvKonst_Table.h"
 
-class StvConst : public StvKonst_st
+class StvConst : protected StvKonst_st
 {
 public:	
 StvConst();

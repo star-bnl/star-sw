@@ -26,10 +26,10 @@
 #include "Stv/StvHit.h"
 
 #define ENABLE_VECTORIZATION
-#include "TPCCATracker/AliHLTTPCCAGBHit.h"
-#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
-#include "TPCCATracker/AliHLTTPCCAParam.h"
-#include "TPCCATracker/AliHLTTPCCAGBTracker.h"
+#include "TPCCATracker/code/AliHLTTPCCAGBHit.h"
+#include "TPCCATracker/code/AliHLTTPCCAGBTrack.h"
+#include "TPCCATracker/code/AliHLTTPCCAParam.h"
+#include "TPCCATracker/code/AliHLTTPCCAGBTracker.h"
 
 // 
 // static double innerR[13] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5
