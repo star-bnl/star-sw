@@ -155,7 +155,14 @@ void St_g2t_rch_hitC::Fill(GHit_t &vect) {
   if (Debug()) table->Print(nok-1,2);		\
 }
 //________________________________________________________________________________
-G2TTrackHit(ssd);
+//G2TTrackHit(ssd);
+void St_g2t_ssd_hitC::Fill(GHit_t &vect) {
+  G2TBookTrackHit(ssd);
+  G2TFillTrackHitLocal(ssd);
+  table->AddAt(&g2t_ssd_hit);
+  if (Debug()) table->Print(nok-1,2);		\
+}
+//________________________________________________________________________________
 G2TTrackHit(svt);
 //________________________________________________________________________________
 void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
