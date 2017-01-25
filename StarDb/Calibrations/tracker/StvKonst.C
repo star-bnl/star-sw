@@ -26,6 +26,8 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMaxWindow= 10.;		/*Maximal window to search hits*/
 
 //		MidEta
+  row.mMinSeedHits = 5;		/*Min number of seed hits allowed*/
+  row.mMaxSeedHits =10;		/*Max number of seed hits allowed*/
   row.mMinHits 	= 5;		/*Min number of hits allowed*/
   row.mNorHits 	=10;		/*Normal number of hits allowed*/
   row.mGoodHits =15;		/*Good number of hits */
@@ -39,6 +41,8 @@ memset(&row,0,tableSet->GetRowSize());
   row.mRxyMax = 207;		//Max radius for tracking
   row.mZMax   = 220;		//Max Z      for tracking
 //		ForwEta version
+  row.mMinSeedHitsFw = 4;	/*Min number of seed hits allowed*/
+  row.mMaxSeedHitsFw = 6;	/*Max number of seed hits allowed*/
   row.mMinHitsFw = 4;		/*Min number of hits allowed*/
   row.mNorHitsFw = 5;		/*Normal number of hits allowed*/
   row.mGoodHitsFw =5;		/*Good number of hits */
