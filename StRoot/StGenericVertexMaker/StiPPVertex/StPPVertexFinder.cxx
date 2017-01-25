@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.82 2017/01/06 21:02:05 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.90 2017/01/20 17:49:27 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -68,7 +68,8 @@
 //==========================================================
 //==========================================================
 
-StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode),
+StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
+  StGenericVertexFinder(SeedFinder_t::PPVLikelihood, fitMode),
   mDropPostCrossingTrack(true) // default PCT rejection on
 {
 
@@ -283,6 +284,73 @@ StPPVertexFinder::initHisto() {
   HList->Add(hACorr);
 }
 
+
+void StPPVertexFinder::findSeeds_TSpectrum()
+{
+   std::vector<double> vertexZs = StGenericVertexFinder::FindSeeds_TSpectrum();
+
+   // Loop over the seeds and associate tracks with it. Then for each seed
+   // create a vertex candidate of VertexData type
+   for (double vertexZ : vertexZs)
+   {
+      VertexData vertex( TVector3(0, 0, vertexZ) );
+      // Need to add a findMatchingTracks(vertex, mTrackData) method...
+      mVertexData.push_back( vertex );
+   }
+}
+
+
+/**
+ * Searches for vertex candidates by building a likelihood distribution for
+ * track's DCA z values. The likelihood histogram is filled in
+ * buildLikelihoodZ() using weighted contributions based on the track DCAs'
+ * along the `z` axis. The maximum peak of the likelihood histogram is assumed
+ * to correspond to the best found vertex candidate, aka seed. Once the seed is
+ * identified the tracks are associated with this seed in evalVertexZ(). The
+ * tracks already associated with a vertex are not considered in the next
+ * iteration when a new likelihood histogram is built.
+ */
+void StPPVertexFinder::findSeeds_PPVLikelihood()
+{
+  const float par_rankOffset=1e6; // to separate class of vertices (approximately)
+
+  int nBadVertex=0;
+  int vertexID=0;
+  while(1) {
+    if(! buildLikelihoodZ() ) break;
+    VertexData V(++vertexID);
+    if(! findVertexZ(V)) break;
+  
+    bool trigV = evalVertexZ(V);   // V.print();
+
+    //bump up rank of 2+ track all vertices 
+    if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
+
+    if(!trigV) {
+      if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
+      /*  preserve this unqalified vertex for Akio 
+	  and deposit 1 cent on Jan's bank account (optional) 
+      */
+      nBadVertex++;
+      //bump down rank of sub-prime vertices 
+      V.Lmax-=par_rankOffset; 
+    } 
+    
+    {// ... more rank QA ...
+      float rank=V.Lmax;
+      if(rank>1e6)     hA[17]->Fill(log(rank-1e6)+10);
+      else if(rank>0)  hA[17]->Fill(log(rank));
+      else             hA[17]->Fill(log(rank+1e6)-10);
+    }
+    
+    mVertexData.push_back(V);
+    if(trigV && mStudyBeamLineTracks) vertex3D->study(V.r,eveID);
+  }
+
+  LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found, nBadVertex=" <<nBadVertex<< endm;
+}
+
+
 //==========================================================
 //==========================================================
 void 
@@ -370,9 +438,6 @@ StPPVertexFinder::fit(StEvent* event) {
 
   hA[0]->Fill(1);
 
-  StEvent *mEvent = (StEvent *)  StMaker::GetChain()->GetInputDS("StEvent");
-  assert(mEvent); 
-
   mTotEve++;
   eveID=event->id();
   LOG_INFO << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
@@ -389,7 +454,7 @@ StPPVertexFinder::fit(StEvent* event) {
  // get BTOF info
 
   if(mUseBtof) {
-    StBTofCollection *btofColl = (StBTofCollection*)mEvent->btofCollection();
+    StBTofCollection *btofColl = (StBTofCollection*)event->btofCollection();
     if(btofColl==0) {
       LOG_WARN << "no btofCollection , continue THE SAME eve"<<endm;
     } else {
@@ -404,7 +469,7 @@ StPPVertexFinder::fit(StEvent* event) {
   }
 
   
-  StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); 
+  StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
   if(emcC==0) {
     LOG_WARN <<"no emcCollection , continue THE SAME eve"<<endm;
   } else {
@@ -533,50 +598,45 @@ StPPVertexFinder::fit(StEvent* event) {
   //............................................................
   // ...................... search for multiple vertices 
   //............................................................
+  switch (mSeedFinderType)
+  {
+  case SeedFinder_t::TSpectrum:
+    findSeeds_TSpectrum();
+    break;
 
-  const float par_rankOffset=1e6; // to separate class of vertices (approximately)
-
-  int nBadVertex=0;
-  int vertexID=0;
-  while(1) {
-    if(! buildLikelihoodZ() ) break;
-    VertexData V(++vertexID);
-    if(! findVertexZ(V)) break;
-  
-    bool trigV = evalVertexZ(V);   // V.print();
-
-    //bump up rank of 2+ track all vertices 
-    if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
-
-    if(!trigV) {
-      if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
-      /*  preserve this unqalified vertex for Akio 
-	  and deposit 1 cent on Jan's bank account (optional) 
-      */
-      nBadVertex++;
-      //bump down rank of sub-prime vertices 
-      V.Lmax-=par_rankOffset; 
-    } 
-    
-    {// ... more rank QA ...
-      float rank=V.Lmax;
-      if(rank>1e6)     hA[17]->Fill(log(rank-1e6)+10);
-      else if(rank>0)  hA[17]->Fill(log(rank));
-      else             hA[17]->Fill(log(rank+1e6)-10);
-    }
-
-    if (mVertexFitMode == VertexFit_t::Beamline3D) {
-       fitTracksToVertex(V);
-    }
-    
-    mVertexData.push_back(V);
-    if(trigV && mStudyBeamLineTracks) vertex3D->study(V.r,eveID);
+  case SeedFinder_t::PPVLikelihood:
+  default:
+    findSeeds_PPVLikelihood();
+    break;
   }
-
-  LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found, nBadVertex=" <<nBadVertex<< endm;
   
   if(mVertexData.size()>0)  hA[0]->Fill(8);
   if(mVertexData.size()>1)  hA[0]->Fill(9);
+
+  // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
+  // except when the Beamline1D option is specified. This is done to keep
+  // backward compatible behavior when by default the vertex was placed on the
+  // beamline
+  if (mVertexFitMode == VertexFit_t::Beamline1D)
+  {
+     for (VertexData &vertex : mVertexData) {
+        const double& z = vertex.r.Z();
+        vertex.r.SetXYZ( beamX(z), beamY(z), z);
+     }
+
+  } else
+  {
+     for (VertexData &vertex : mVertexData)
+     {
+        // When fitTracksToVertex fails it returns non-zero value. Just use the
+        // beam equation to set the best guess for vertex position. Works for no
+        // beamline case by setting vertex position to (0,0,0)
+        if ( fitTracksToVertex(vertex) ) {
+           const double& z = vertex.r.Z();
+           vertex.r.SetXYZ( beamX(z), beamY(z), z);
+        }
+     }
+  }
 
   exportVertices();
   printInfo();
@@ -696,8 +756,10 @@ StPPVertexFinder::findVertexZ(VertexData &V) {
 
   if (sigZ < 0.1) sigZ = 0.1; // tmp, make it not smaller than the bin size
 
-  // take x,y from beam line equation, TMP
-  V.r  = TVector3(beamX(z0), beamY(z0), z0);
+  // For approximate seed position we use (x,y)=(0,0) because the tracks are
+  // extrapolated to (0,0) anyway. The x and y coordinates can be updated later
+  // in a proper fit.
+  V.r  = TVector3(0, 0, z0);
   V.er = TVector3(0.1, 0.1, sigZ); //tmp
   V.Lmax = Lmax;
 
@@ -821,14 +883,14 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
  * \author Dmitri Smirnov, BNL
  * \date February, 2016
  */
-void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
+int StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 {
    createTrackDcas(vertex);
 
    if (sDCAs().size() == 0) {
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
-      return;
+      return 5;
    }
 
    // Recalculate vertex seed coordinates to be used as initial point in the fit
@@ -873,7 +935,7 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: Fit did not converge. "
 	       << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
-      return;
+      return minuitStatus;
    }
 
    double chisquare, fedm, errdef;
@@ -890,6 +952,8 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 
    vertex.r.SetXYZ(minuit.fU[0], minuit.fU[1], minuit.fU[2]);
    vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
+
+   return 0;
 }
 
  
@@ -897,14 +961,6 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 //-------------------------------------------------
 void 
 StPPVertexFinder::exportVertices(){
-  if ( mVertexFitMode != VertexFit_t::Beamline1D &&
-       mVertexFitMode != VertexFit_t::Beamline3D )
-  {
-    // code is not ready for reco w/o beamLine
-    LOG_FATAL << "StPPVertexFinder code is not ready for reco w/o beamLine" << endm;
-    assert(mVertexFitMode == VertexFit_t::Beamline1D ||
-           mVertexFitMode == VertexFit_t::Beamline3D);
-  }
 
   for (const VertexData &V : mVertexData)
   {
