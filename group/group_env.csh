@@ -37,6 +37,9 @@ if ( $?self ) then
     set GRPE_pself=${self}
 endif
 set self="group_env"
+if (! $?STAR_LEVEL ) then
+  setenv STAR_LEVEL pro
+endif
 if ( $?DECHO && $?STAR_LEVEL ) then
     # set ECHO = 1
     echo "$self :: Receiving STAR_LEVEL $STAR_LEVEL"
@@ -242,6 +245,7 @@ endif
 # Needs to be here because STAR_SYS will set vars based on the
 # command 'gcc'
 #-
+if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH ""
 if ( $?USE_GCC_DIR ) then
     if ( -x $USE_GCC_DIR/bin/gcc && -d $USE_GCC_DIR/lib ) then
         # do not redefine it if already done to avoid having
