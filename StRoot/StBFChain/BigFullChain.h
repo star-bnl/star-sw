@@ -1,3 +1,4 @@
+
 #ifndef __BigFullChain_h__
 #define __BigFullChain_h__
 #if 0
@@ -1580,7 +1581,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                         "StChain","BTOF Chain",kFALSE},
   {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    ,                                                                               "BTOF hit maker",kFALSE},
-  {"btofSim"    ,"","BTofChain","BTofUtil,UseMCTstart"
+  {"btofSim"    ,"","BTofChain","McEvent,BTofUtil,UseMCTstart"
    ,"StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",                      "BTOF Simulator",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker"   ,"StVpdCalibMaker","VPD calibration",kFALSE},
 
