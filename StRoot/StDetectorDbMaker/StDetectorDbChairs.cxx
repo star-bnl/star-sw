@@ -932,6 +932,20 @@ const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   return *&rot;
 }
 //________________________________________________________________________________
+const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
+  static TGeoHMatrix rot("UnKnown");
+  for (UInt_t i = 0; i < getNumRows(); i++) {
+    if (Id(i) == id) {
+      rot.SetName(Form("%s_%i",Table()->GetName(),id));
+      rot.SetRotation(Rotation(i));
+      rot.SetTranslation(Translation(i));
+      //      Table()->Print(i,1);
+      break;
+    }
+  }
+  return *&rot;
+}
+//________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrixR(Int_t i) {
   static TGeoHMatrix rot;
   Double_t rotations[9] = {
