@@ -23,10 +23,9 @@ int  Skip()   const;
 double Eff()  const;
 int  MaxNitSeq() const;	//Length of longesr Nits sequence
 int  MaxHitSeq() const;	//Length of longesr Hits sequence
-private:
-static StvHitCounter *mgStvHitCounter;
 public:
 char mBeg[1] ;
+const StvKonst_st *mKons;
 int nPossHits;	// Number of possible hits;
 int nTotHits ;	// Total number of hits
 int nGoodHits;  // Number of good hits (hits in sequences > kContHits

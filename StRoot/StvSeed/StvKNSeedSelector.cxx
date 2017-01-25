@@ -112,6 +112,16 @@ static inline double Nor(float A[3])
    return sum;
 }
 //_____________________________________________________________________________
+static inline void Fil(float *A,float F,int nA) 
+{
+   for (int i=0;i<nA;i++) { A[i]=F; }
+}
+//_____________________________________________________________________________
+static inline void Fil(int *A,int F,int nA) 
+{
+   for (int i=0;i<nA;i++) { A[i]=F; }
+}
+//_____________________________________________________________________________
 static inline float D0t(const  float A[3],const float B[3]) 
 {
  return A[0]*B[0]+A[1]*B[1]+A[2]*B[2];
@@ -169,9 +179,11 @@ void StvKNSeedSelector::Insert( int iA,int iB,float dis)
      }  
      break;
    }
-   if (mKNNDist < a[kKNumber-1]) return;
-   mKNNDist = a[kKNumber-1];
-   mMinIdx = iA;
+   for (int jKNN = kKNumber-1; jKNN>=kKNminber; jKNN--) {
+    if (mKNNDist[jKNN] < a[jKNN]) continue;
+    mKNNDist[jKNN] = a[jKNN];
+    mMinIdx[jKNN] = iA;
+  }
 }
 //_____________________________________________________________________________
 StvKNSeedSelector::StvKNSeedSelector()
@@ -196,8 +208,9 @@ void StvKNSeedSelector::Reset(const float startPos[3],const Mtx33F_t *dir, void 
   mDir = dir;
   mStartHit = startHit;
   memcpy(mStartPos,startPos,sizeof(mStartPos));
-  mKNNDist = 1e11;
-  mMinIdx = -1;
+  for (int jk = kKNminber; jk<kKNumber;jk++) {
+    mKNNDist[jk] = 1e11; mMinIdx[jk] = -1;
+  }
   mStartRad = sqrt(Sq(mStartPos[0])+Sq(mStartPos[1]));
   mErr = SEED_ERR(mStartRad)*kErrFact;
   Zer(mAveDir);  
@@ -253,8 +266,8 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit,const void *voidDe
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
-  mMinIdx = -1;
-  mKNNDist = kMaxDis;
+  Fil(mMinIdx ,     -1,kKNumber);
+  Fil(mKNNDist,kMaxDis,kKNumber);
   for (int i1=0;i1<(int)mAux.size();i1++) {
 //    if ( mAux[i1].mSel) continue;
     assert(fabs(mAux[i1].mThe)<= M_PI  );
@@ -262,10 +275,10 @@ void  StvKNSeedSelector::Relink()
     mAux[i1].Reset();  
     for (int i2=0;i2<i1;i2++) {
 //      if ( mAux[i2].mSel) continue;
-      if (fabs(mAux[i1].mThe-mAux[i2].mThe)>mKNNDist)	continue;
+      if (fabs(mAux[i1].mThe-mAux[i2].mThe)>KMaxDis)	continue;
       float dang = fabs(mAux[i1].mPhi-mAux[i2].mPhi);
       if (dang > M_PI) dang -= 2*M_PI;
-      if (fabs(dang)*mAux[i1].mCosThe>mKNNDist) 	continue;
+      if (fabs(dang)*mAux[i1].mCosThe>KMaxDis) 	continue;
       Update(i1,i2);
   } }
 }
@@ -274,8 +287,8 @@ void  StvKNSeedSelector::Relink()
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
-  mMinIdx = -1;
-  mKNNDist = kMaxDis;
+  Fil(mMinIdx ,     -1,kKNumber);
+  Fil(mKNNDist,kMaxDis,kKNumber);
   MyTheDiv::iterator it2The = mTheDiv.begin();
   for (MyTheDiv::iterator it1The = mTheDiv.begin();
        it1The != mTheDiv.end();++it1The) 	//Main loop over theta	
@@ -283,7 +296,7 @@ void  StvKNSeedSelector::Relink()
     float the1 = (*it1The).first;
     for (;it2The!=mTheDiv.end();++it2The) {
       float the2 = (*it2The).first;
-      if (the2>=the1-mKNNDist) break;
+      if (the2>=the1-kMaxDis) break;
     }
     if (it2The==mTheDiv.end()) continue;
 
@@ -317,10 +330,10 @@ void  StvKNSeedSelector::Relink()
           StvKNAux & aux3 = mAux[i3];
 //          if ( aux3.mSel) 	continue;
           if ( aux3.mHit==hit1) continue;
-          if (fabs(aux1.mThe-aux3.mThe) > mKNNDist) 	continue;
+          if (fabs(aux1.mThe-aux3.mThe) > kMaxDis) 	continue;
           float dang = fabs(aux1.mPhi-aux3.mPhi);
           if (dang > M_PI) dang -= 2*M_PI;
-          if (fabs(dang)*aux1.mCosThe>mKNNDist) 		continue;
+          if (fabs(dang)*aux1.mCosThe>kMaxDis) 		continue;
           Update(i1,i3);
 	}//end of it3Phi loop
       }// end of it3The loop
@@ -333,8 +346,8 @@ void  StvKNSeedSelector::Relink()
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
-  mMinIdx = -1;
-  mKNNDist = kMaxDis;
+  Fil(mMinIdx ,     -1,kKNumber);
+  Fil(mKNNDist,kMaxDis,kKNumber);
   auto  it2The = mTheMap.begin();
   for (auto it1The = mTheMap.begin();
        it1The != mTheMap.end();++it1The) 	//Main loop over theta	
@@ -345,8 +358,7 @@ void  StvKNSeedSelector::Relink()
 //    if ( aux1.mSel) 	continue;
     for (;it2The!=mTheMap.end();++it2The) {
       float the2 = (*it2The).first;
-//    if (the2>=the1-kMaxDis) break;
-      if (the2>=the1-mKNNDist) break;
+      if (the2>=the1-kMaxDis) break;
     }
     if (it2The==mTheMap.end()) continue;
     for (auto it3The=it2The;it3The!=mTheMap.end();++it3The) 
@@ -355,14 +367,12 @@ void  StvKNSeedSelector::Relink()
       if (the3>the1) 	break;
       int i3 = (*it3The).second;
       if (i1 == i3) 			continue;
-//    if (fabs(the3-the1)>kMaxDis) 	continue;
-      if (fabs(the3-the1)>mKNNDist) 	continue;
+      if (fabs(the3-the1)>kMaxDis) 	continue;
       auto &aux3 = mAux[i3];
 //      if ( aux3.mSel) 	continue;
       float dang = fabs(aux1.mPhi-aux3.mPhi);
       if (dang > M_PI) dang -= 2*M_PI;
-//    if (fabs(dang)*aux1.mCosThe>kMaxDis) 	continue;
-      if (fabs(dang)*aux1.mCosThe>mKNNDist) 	continue;
+      if (fabs(dang)*aux1.mCosThe>kMaxDis) 	continue;
       Update(i1,i3);
     }// end of it3The loop
 
@@ -384,46 +394,53 @@ static int nCall=0; nCall++;
     if (mMinIdx<0) return 0;
     for (int i=0;i<(int)mAux.size();i++) { mAux[i].Test(i); }
 
-  ///		define the best direction
-    memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
-    assert(fabs(mAveDir[0])+fabs(mAveDir[1])+fabs(mAveDir[2])>0.1);
 
 
-    mNHits=0; 
-    Pass(mMinIdx,mKNNDist*kDisRatio);
-    double wid = Width();
-    if (wid>90) return 0;
-if ((mKNNDist*wid > kMinDis)) {
-      StvDebug::Count("BadDistWid",sqrt(mKNNDist*wid));	
-      StvDebug::Count("BadDist_vs_Wid",sqrt(wid),sqrt(mKNNDist));	
+    for (mIKnn = kKNumber-1;mIKnn>=kKNminber; mIKnn--) 
+    {
+      if (mMinIdx[mIKnn]<0) continue;
+///		define the best direction
+      mMapLen.clear();
+      memcpy(mAveDir,mAux[mMinIdx[mIKnn]].mDir,sizeof(mAveDir));
+      assert(fabs(mAveDir[0])+fabs(mAveDir[1])+fabs(mAveDir[2])>0.1);
+      mNHits=0; 
+      Pass(mMinIdx[mIKnn],mKNNDist[mIKnn]*kDisRatio);
+      double wid = Width();
+      if (wid>90) continue;
+if ((mKNNDist[mIKnn]*wid > kMinDis)) {
+      StvDebug::Count("BadDistWid",sqrt(mKNNDist[mIKnn]*wid));	
+      StvDebug::Count("BadDist_vs_Wid",sqrt(wid),sqrt(mKNNDist[mIKnn]));	
 } 
-    if (mKNNDist*wid > kMinDis) return 0;	
+      if (mKNNDist[mIKnn]*wid > kMinDis) continue;	
 {
-      StvDebug::Count("GooDistWid",sqrt(mKNNDist*wid));	
-      StvDebug::Count("GooDist_vs_Wid",sqrt(wid),sqrt(mKNNDist));	
+      StvDebug::Count("GooDistWid",sqrt(mKNNDist[mIKnn]*wid));	
+      StvDebug::Count("GooDist_vs_Wid",sqrt(wid),sqrt(mKNNDist[mIKnn]));	
 } 	 
-    const void *hpPre = 0;
-    mSel.push_back(mStartHit); 	 
-    std::map<float,int>::iterator myIt;
-    int iPre = 0;
 
-    for (myIt = mMapLen.begin(); myIt !=mMapLen.end(); ++myIt) 
-    { 	 
-      int i = (*myIt).second; 	 
-      const void *hp = ((StvHit*)(mAux[i].mHit))->detector();
-      if (hpPre != hp ) {
-         mSel.push_back(mAux[i].mHit);
-	 iPre = i;hpPre = hp;
-	 continue;
-      }
-      //Hit from the same detector
-      float ang0 =  Ang(mAveDir, mAux[iPre].mDir);   
-      float ang1 =  Ang(mAveDir, mAux[i   ].mDir);   
-      if (ang0<ang1) continue;  //Old friend is better
-      mSel.back() = mAux[i].mHit;
-      iPre = i; hpPre = hp;
-    } 	 
-    return mSel.size();
+      const void *hpPre = 0;
+      mSel.push_back(mStartHit); 	 
+      std::map<float,int>::iterator myIt;
+      int iPre = 0;
+      mSel.clear();
+      for (myIt = mMapLen.begin(); myIt !=mMapLen.end(); ++myIt) 
+      { 	 
+	int i = (*myIt).second; 	 
+	const void *hp = ((StvHit*)(mAux[i].mHit))->detector();
+	if (hpPre != hp ) {
+           mSel.push_back(mAux[i].mHit);
+	   iPre = i;hpPre = hp;
+	   continue;
+	}
+	//Hit from the same detector
+	float ang0 =  Ang(mAveDir, mAux[iPre].mDir);   
+	float ang1 =  Ang(mAveDir, mAux[i   ].mDir);   
+	if (ang0<ang1) continue;  //Old friend is better
+	mSel.back() = mAux[i].mHit;
+	iPre = i; hpPre = hp;
+      } 	 
+      if ((int)mSel.size()<mMinHits) continue;
+      return mSel.size();
+    }
   }//end while
   return 0;
 }
@@ -431,12 +448,12 @@ if ((mKNNDist*wid > kMinDis)) {
 void StvKNSeedSelector::Pass(int iux, double accuAng)
 {
   StvKNAux &aux = mAux[iux];
-  aux.mSel=1; mNHits++;
+  aux.mSel=mIKnn; mNHits++;
   mMapLen[aux.mLen]=iux;
-  for (int ifan=0;ifan<kKNumber;ifan++) {
+  for (int ifan=0;ifan<=mIKnn;ifan++) {
     if (aux.mDist[ifan]>accuAng)	break;	// the rest even bigger
     int idx = aux.mNbor[ifan];
-    if (mAux[idx].mSel) 		continue; 
+    if (mAux[idx].mSel==mIKnn) 		continue; 
     Pass(idx,accuAng);
   }
 }
@@ -482,11 +499,6 @@ static int nCall = 0; nCall++;
 
 }
 
-//______________________________________________________________________________
-int StvKNSeedSelector::Zelect()
-{
-return 0;
-}
 #if 1
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -545,22 +557,6 @@ static TGraph  *slGraph  = 0;
     ptGraph->Draw("Same *");
   }
 
-#if 0
-static StvDraw *myDraw = new StvDraw;
-  myDraw->Clear();
-  myDraw->Hits((const std::vector<StvHit*>&)Get(),kUsedHit);
-
-  std::vector<StvHit*> myUnused;
-  for (int iux=0;iux<(int)mAux.size();iux++) {
-    if (!mAux[iux].mHit) continue;
-    if ( mAux[iux].mSel) continue;
-    myUnused.push_back((StvHit*)mAux[iux].mHit);
-  }
-  myDraw->Hits(myUnused,kUnusedHit);
-
-
-  myDraw->UpdateModified();
-#endif
   myCanvas->Modified();
   myCanvas->Update();
   while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 

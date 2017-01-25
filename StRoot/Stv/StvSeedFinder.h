@@ -36,6 +36,9 @@ public:
   virtual void      Clear(const char* opt="");
   virtual int       Again(int){return 0;}
   virtual void      FeedBack(const StvTrack *tk);
+  virtual void      SetSgn(int sgn=1){fSgn = sgn;}
+  virtual void      SetVtx(const float vtx[3]);
+  virtual  int      IfVtx() const {return fVtx[2]<1e11;}
 
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
@@ -54,10 +57,12 @@ protected:
 protected:
 int fMinHits;		//Min number of hits accepted
 int fMaxHits;		//Max number hits fo seed
+int fSgn;
 StvHits  fSeedHits;
 THelixFitter fHelix;
 StvDraw *fDraw;
-double   fXi2[2];	//Xi2[0] without hit errs,[1] with hit errs
+float fVtx[3];		//Vertex if already known
+double fXi2[2];		//Xi2[0] without hit errs,[1] with hit errs
 ClassDef(StvSeedFinder,0);
 };
 
@@ -67,6 +72,7 @@ class StvSeedFinders : public std::vector<StvSeedFinder*>
   void Reset();
   void Add(StvSeedFinder *sf);
   void SetCons(const StvKonst_st *kons); 
+  void SetVtx(const float vtx[3]);
 };
 
 

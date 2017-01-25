@@ -18,7 +18,7 @@ class StvHitFactory  		: public StvFactory<StvHit ,StvHit > 		{public:};
 class StvHitRrFactory  		: public StvFactory<StvHitRr ,StvHit > 		{public:};
 class StvNodeFactory 		: public StvFactory<StvNode,StvNode> 		{public:};
 class StvTrackFactory		: public StvFactory<StvTrack,StvTrack> 		{public:};
-class StvELossTrakFactory	: public StvFactory<StvELossTrak,StvELossTrak>  {public:};
+class StvELossTrakFactory	: public StvFactory<StvELossTrak,StvELossTrak> {public:};
 class StvVertexFactory   	: public StvFactory<StvVertex ,StvVertex > 	{public:};
 
 
@@ -147,6 +147,7 @@ void StvToolkit::Clear(const char*)
   if (mELossTrakFactory) mELossTrakFactory->clear();
   if (mNodeFactory) 	mNodeFactory->clear();
   if (mHitFactory)  	mHitFactory->clear();
+  if (mHitRrFactory)  	mHitRrFactory->clear();
   if (mVertexFactory)   mVertexFactory->clear();
   StvTrack::mgId=0;
 }

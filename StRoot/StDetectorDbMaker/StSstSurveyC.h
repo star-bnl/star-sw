@@ -3,43 +3,33 @@
 
 #include "St_SurveyC.h"
 
-class StSstOnGlobal : public St_SurveyC {
+class StsstOnOsc : public St_SurveyC {
  public:
-  static StSstOnGlobal* 	instance();
-  StSstOnGlobal(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StSstOnGlobal() {fgInstance = 0;}
+  static StsstOnOsc* 	      instance();
+  StsstOnOsc(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StsstOnOsc() {fgInstance = 0;}
  private:
-  static StSstOnGlobal* fgInstance;
-  ClassDef(StSstOnGlobal,1) //C++ TChair for SstOnGlobal
+  static StsstOnOsc* fgInstance;
+  ClassDef(StsstOnOsc,1) //C++ TChair for sstOnOsc
 };
 
-class StSstSectorsOnGlobal : public St_SurveyC {
+class StsstLadderOnSst : public St_SurveyC {
  public:
-  static StSstSectorsOnGlobal* 	instance();
-  StSstSectorsOnGlobal(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StSstSectorsOnGlobal() {fgInstance = 0;}
+  static StsstLadderOnSst*    instance();
+  StsstLadderOnSst(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StsstLadderOnSst() {fgInstance = 0;}
  private:
-  static StSstSectorsOnGlobal* fgInstance;
-  ClassDef(StSstSectorsOnGlobal,1) //C++ TChair for SstSectorsOnGlobal
+  static StsstLadderOnSst* fgInstance;
+  ClassDef(StsstLadderOnSst,1) //C++ TChair for sstLadderOnSst
 };
-
-class StSstLaddersOnSectors : public St_SurveyC {
+class StsstSensorOnLadder : public St_SurveyC {
  public:
-  static StSstLaddersOnSectors* 	instance();
-  StSstLaddersOnSectors(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StSstLaddersOnSectors() {fgInstance = 0;}
+  static StsstSensorOnLadder* instance();
+  StsstSensorOnLadder(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StsstSensorOnLadder() {fgInstance = 0;}
  private:
-  static StSstLaddersOnSectors* fgInstance;
-  ClassDef(StSstLaddersOnSectors,1) //C++ TChair for SstLaddersOnSectors
-};
-class StSstWafersOnLadders : public St_SurveyC {
- public:
-  static StSstWafersOnLadders* 	instance();
-  StSstWafersOnLadders(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StSstWafersOnLadders() {fgInstance = 0;}
- private:
-  static StSstWafersOnLadders* fgInstance;
-  ClassDef(StSstWafersOnLadders,1) //C++ TChair for SstWafersOnLadders
+  static StsstSensorOnLadder* fgInstance;
+  ClassDef(StsstSensorOnLadder,1) //C++ TChair for sstSensorOnLadder
 };
 
 #endif

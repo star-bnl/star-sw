@@ -42,6 +42,7 @@
 #include <DAQ_SST/daq_sst.h>
 #include <DAQ_FPS/daq_fps.h>
 #include <DAQ_RHICF/daq_rhicf.h>
+#include <DAQ_ETOF/daq_etof.h>
 
 #include <TPC/rowlen.h>
 
@@ -78,12 +79,17 @@ static int pxl_doer(daqReader *rdr, const char *do_print) ;
 static int sst_doer(daqReader *rdr, const char *do_print) ;
 static int fps_doer(daqReader *rdr, const char *do_print) ;
 static int rhicf_doer(daqReader *rdr, const char *do_print) ;
+static int etof_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 static int bad ;
 static int nfs_loops ;
 
 static int run_number ;
+
+
+//trigger related globals
+u_int rcc_timestamp ;
 
 int main(int argc, char *argv[])
 {
@@ -354,6 +360,9 @@ int main(int argc, char *argv[])
 		/*************************** RHICF **************************/
 		rhicf_doer(evp,print_det) ;
 		
+		/*************************** ETOF **************************/
+		etof_doer(evp,print_det) ;
+		
 
 
 
@@ -407,9 +416,20 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 
 
 			u_char *trg_raw = dd->Byte;
+		
+			TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
+
+			EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
+
+			rcc_timestamp = (evtDesc->tcuCtrBunch_hi<<16) | evtDesc->DSMAddress ;
+
 			
+
+
+	
 			if(do_print) {	// I have no clue but let me print first few words...
 
+				printf("EvtDescData %u %u --> %u\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,rcc_timestamp) ;
 
 				// simple start of trig desc; the way it should be...
 				struct simple_desc {
@@ -1573,6 +1593,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   trgDetMask,
 		   trgCrateMask);
 
+		printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
+
 	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
 	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
@@ -1967,3 +1989,40 @@ static int rhicf_doer(daqReader *rdr, const char *do_print)
 	return found ;
 
 }
+
+static int etof_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"etof")) ;	// leave as is...
+	else do_print = 0 ;
+
+	dd = rdr->det("etof")->get("raw") ;
+	
+
+	if(dd) {
+		while(dd->iterate()) {	//per xing and per RDO
+			found = 1 ;
+
+			if(do_print) {
+				printf("ETOF: %d bytes\n",dd->ncontent) ;
+
+				for(int i=0;i<10;i++) {
+					printf("    %d: 0x%08X\n",i,dd->Int32[i]) ;
+				}
+			}
+
+		}
+
+	}
+
+
+	if(found) {
+		LOG(INFO,"ETOF found") ;
+	}
+
+	return found ;
+
+}
+

@@ -61,8 +61,9 @@ public:
     const float *x()     const {return mGlo;}
           float getRxy() const {return sqrt(mGlo[0]*mGlo[0]+mGlo[1]*mGlo[1]);}
     ///Return the type of class
-    virtual const int IsHit() const   		{return 1;}
-        
+    virtual int IsHit() const   		{return 1;}
+            int IsCombo() const   		{return mCombo;}
+           void SetCombo(int combo)    		{mCombo = combo;}
 
     ///Return components of the error matrix.
     virtual const float *errMtx() const {return 0;}
@@ -101,6 +102,7 @@ public:
     void subTimesUsed();
     ///Return a boolean that marks whether or not this hit is assigned to a
     ///track >= than max times.
+    virtual  int timesUsed() const 	{ return mTimesUsed;}
     int  isUsed() const {return mTimesUsed>=mMaxTimes;}
     virtual void reset();
     void unset(){;}
@@ -108,6 +110,7 @@ protected:
     char  mBeg[1];
     unsigned char mMaxTimes;
     unsigned char mTimesUsed;
+    unsigned char mCombo;
     float mGlo[3]; 			//global position
     const void *msthit;
     const StHitPlane *mDetector;
@@ -148,7 +151,7 @@ public:
     ~StvVertex(){;}
     ///Set the position error matrix for the measurement from an float array
     ///object.
-    virtual const int IsHit() const   		{return 0;}
+    virtual int IsHit() const   		{return 0;}
     void reset();
     void set(const float *x,const float *err);
     virtual  int timesUsed() const 	{ return 0;}

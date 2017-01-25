@@ -37,11 +37,8 @@ enum {kMinRxy = 1};
 StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
 {
   memset(mBeg,0,mEnd-mBeg+1);
-#ifndef KNNGONE
+  mSel.Set(fMinHits);
   fMultiHits	= new StMultiKeyMap(3);
-#else
-  fMultiHits	= new StMultiKeyMap(3);
-#endif
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
   f1stHitMapIter= new Stv1stHitMapIter;
@@ -66,7 +63,7 @@ static const float kSqrHlf = sqrt(0.5);
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *hit = (StvHit*)(*hitArr)[iHit];
-    if (hit->isUsed()) continue;
+    if (hit->timesUsed()) continue;
     const float *x = hit->x();
     float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, hit));
@@ -95,11 +92,10 @@ static int nCall=0; nCall++;
 
     fstHit = (*(*f1stHitMapIter)).second;
     assert(fstHit);
-    if (fstHit->isUsed()) 		continue;
+    if (fstHit->timesUsed()) 		continue;
     fSeedHits.clear();
     const float *fstPos = fstHit->x();
     const StHitPlane *fstHp = fstHit->detector();
-    //    float        fstDir[2]={fstPos[0]/fstRxy,fstPos[1]/fstRxy};
     mRej.Reset(fstPos);
     mRej.Prepare();
     fMultiIter->Set(fMultiHits->GetTop(),mRej.mLim[0],mRej.mLim[1]);

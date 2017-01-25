@@ -17,7 +17,7 @@ typedef std::map <float,MyPhiDiv> MyTheDiv;
 
 
 typedef std::vector<void*> VoidVec;
-enum {kKNumber=3};
+enum {kKNumber=5,kKNminber=2};
 
 class StvKNAux {
 public:
@@ -45,10 +45,10 @@ public:
   StvKNSeedSelector();
   virtual ~StvKNSeedSelector(){;}
 virtual int GetIdTru(const void *hit) const;
+     void  Set(int minHits) { mMinHits = minHits;}
      void  Reset(const float startPos[3],const Mtx33F_t *dir,void *voidHit);
      void  Add  (const float      pos[3],void *voidHit, const void *voidDet);
       int  Select();  
-      int  Zelect();  
 const VoidVec &Get() const { return mSel;} 
        int GetNHits() const{ return mSel.size();}
       void Show() const;
@@ -60,14 +60,16 @@ private:
     double Width();
 const float *Eigen() const {return mEigen;}
 protected:  
+ int  mMinHits;
  int  mState;		//Status, &1 =narrow trace
+ int  mIKnn;
 const Mtx33F_t *mDir;
 void *mStartHit;
 float mStartPos[3];
 float mAveDir[3];
 float mStartRad;
-float mKNNDist;	//minimal KN distance
-int   mMinIdx;	//index of aux with minimal KN distance
+float mKNNDist[kKNumber];	//minimal KN distance
+int   mMinIdx [kKNumber];	//index of aux with minimal KN distance
 float mEigen[2];//Eigen numbers of uu,uv,vv matrix in most dense place
 float mMaxSel;	//Max angle deviation between hits
 float mMaxAccu;	//Max accumulated angle between hit & bestHit in Pass()

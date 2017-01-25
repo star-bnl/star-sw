@@ -439,6 +439,7 @@ if ( $?SITE ) then
 	    setenv DB_SERVER_LOCAL_CONFIG ${STAR}/StDb/servers/dbLoadBalancerLocalConfig_${SITE}.xml
 	endif
     #endif
+  if ($ECHO) echo   "Setting up DB_SERVER_LOCAL_CONFIG = ${DB_SERVER_LOCAL_CONFIG}" 
 endif
 
 

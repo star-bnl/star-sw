@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.6 2014/10/06 14:15:07 fisyak Exp $
+# $Id: Construct,v 1.182 2017/01/24 14:14:22 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -203,6 +203,10 @@ if (! -r "$ROOSYS/include/TPythia6.h") {
 if ($STAR_HOST_SYS =~ /darwin/ or ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} >= 8))) {
   push @items, "St_geom_Maker";
 }
+push @items, "Stv";
+push @items, "StvMaker";
+push @items, "StvSeed";
+push @items, "StvUtil";
 
 push @items, "StVecBosAna"; # missing boost/program_options/options_description.hpp
 if ($STAR_HOST_SYS =~ /darwin/ or $STAR_HOST_SYS =~ /icc/) {

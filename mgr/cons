@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.111 2014/07/23 15:36:55 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.112 2017/01/24 14:14:22 fisyak Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";

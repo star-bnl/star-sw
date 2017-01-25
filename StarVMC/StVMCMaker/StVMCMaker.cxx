@@ -158,6 +158,8 @@ Int_t StVMCMaker::Init() {
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
+  if (fInitRun) return kStOK;
+  fInitRun = 1;
   if (! gGeoManager) {
     TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry/Geometry");
     if (! geom) {
@@ -215,10 +217,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   //  fgStarVMCApplication->SetStepping(new StMCSteppingHist("tgeom"));
   //  fgStarVMCApplication->SetStepping(new StMCStepping);
   // The "Init" method in the gMC object causes the geometry to be cosntructed
-  if (! fInitRun) {
-    fgStarVMCApplication->InitMC();
-    fInitRun = 1;
-  }
+  fgStarVMCApplication->InitMC();
   if (Debug()) SetDebug(Debug());
   if (IAttr("phys_off")) {// switch off physics 
     gMessMgr->Info() << "StVMCMaker::InitRun switch off physics" << endm;

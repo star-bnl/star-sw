@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.8 2013/07/02 04:08:09 perev Exp $
+ * $Id: StvPullEvent.h,v 1.9 2016/12/28 16:49:11 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.9  2016/12/28 16:49:11  perev
+ * Global X,Y,Z for hit added
+ *
  * Revision 1.8  2013/07/02 04:08:09  perev
  * add dca00 to pull tree
  *
@@ -145,6 +148,9 @@ float mChi2;
 float mCurv;        		//curvature
 float mPt;        		//pt
 float mCharge;                  //charge (Q)
+float mX;                       //global X
+float mY;                       //global Y
+float mZ;                       //global Z
 //		locals
 //		local Stv frame is a StvTrtack frame
 float lYHit;			// y of  Hit  in local  Stv frame

@@ -65,7 +65,9 @@ double GetQua() const;
   void Reverse();		// Inverese node order. For debug only
 double GetXi2() const;   	// chi2/ndf of fit,        all nodes
 double GetXi2P() const;   	// chi2 of fit to primary vertex
+double GetXi2W() const;   	// chi2 of the worst node
 double GetRes() const;		// Average residual
+double GetXi2Aux() const;   	// chi2/ndf of fit, special version or track ordering       all nodes
 
   void SetFlag(int flag) 	{mFlag = flag;}
    int GetFlag() const   	{return mFlag;}
@@ -77,8 +79,8 @@ double GetRes() const;		// Average residual
   void Print(const char *opt) const;
 
    int SetUsed(); 	
+   int SetUnused(); 	
 
-  double Approx(int mode=0);
   double ToBeam() const;
   int Check(const char *tit="",int dirs=3) const; 
   void Show() const;  
@@ -88,6 +90,8 @@ unsigned char mBeg[1];
 unsigned char mPrimary;
 unsigned char mTypeEnd;	// Type of end tracking. 0=Dca,
           int mFlag;  
+mutable float mXi2W;
+mutable float mXi2Aux;
 unsigned char mEnd[1];
 unsigned int  mId; 
 public:

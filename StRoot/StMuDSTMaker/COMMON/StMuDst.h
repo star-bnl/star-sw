@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.51 2014/05/16 15:06:45 jdb Exp $
+ * $Id: StMuDst.h,v 1.53 2017/01/19 23:03:27 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -141,9 +141,9 @@ public:
   /// creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
   StEvent* createStEvent();
   /// helper function to create a StTrackGeometry
-  StTrackGeometry* trackGeometry(Int_t q, StPhysicalHelixD* h);
+  static StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
   /// creates a StTrack from an StMuTrack and return pointer to it
-  StTrack* createStTrack(StMuTrack*);
+  static StTrack* createStTrack(const StMuTrack*);
   /// dongx
   static void fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
   static void fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TClonesArray* global);
@@ -551,6 +551,12 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.53  2017/01/19 23:03:27  smirnovd
+ * StMuDst: Make methods static as logic suggests
+ *
+ * Revision 1.52  2017/01/19 23:03:13  smirnovd
+ * Promise to not modify original StMuTrack when converting to StTrack
+ *
  * Revision 1.51  2014/05/16 15:06:45  jdb
  * chaned StMuDst{.h,.cxx} to add setMtdArray function
  *

@@ -11,12 +11,14 @@ class StvNode;
 class StvHit;
 class StvNodePars;
 class StvFitErrs;
-
+class StvKonst_st;
 class StvTrackFitter : public TNamed
 {
 public:
   StvTrackFitter(const char *name);
   virtual ~StvTrackFitter();
+  virtual void SetCons(const StvKonst_st*)=0;
+  virtual  int Refit(StvTrack *trak,int dir)=0;
   virtual  int Refit(StvTrack *trak,int dir,int lane, int mode=1)=0;
   virtual void Clear(const char *opt="");	
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)=0;
@@ -32,8 +34,6 @@ public:
            int Failed()  const 			{return mFailed;}     
            int& NHits()   			{return mNHits;}     
  
-static StvTrackFitter *Inst() {return fgInst;}
-
 protected:
 char mBeg[1];
 char mFailed;
@@ -43,8 +43,6 @@ double mXi2;
 double mDca3;
 char mEnd[1];
 private:
-static StvTrackFitter *fgInst;
-
 
 ClassDef(StvTrackFitter,0);
 };

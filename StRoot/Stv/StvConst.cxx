@@ -31,12 +31,13 @@ const StvKonst_st *StvConst::At(int idx) const
 {
   if (!mFw) {
     mFw = new StvKonst_st;
-    *mFw = *((StvKonst_st*)this);
-    memcpy(&mFw->mMinHits,&mFw->mMinHitsFw,
-          (char*)&mFw->mMinHitsFw-(char*)&mFw->mMinHits);
+    *mFw = *this;
+    memcpy(&mFw->mMinSeedHits,&mFw->mMinSeedHitsFw,
+          (char*)&mMinSeedHitsFw-(char*)&mMinSeedHits);
+    assert(mFw->mZMax==mFw->mZMaxFw);
   }
   switch(idx) {
-    case 0: return ((StvKonst_st*)this);
+    case 0: return this;
     case 1: return mFw;
     default: assert(0 && "Wring index in StvConst::At(indedx)");
   }

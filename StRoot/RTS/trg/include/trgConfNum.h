@@ -15,7 +15,7 @@
 #define  MIX_CONF_NUM       4
 #define  BCW_CONF_NUM       5
 #define  BCE_CONF_NUM       6
-#define  FEQ_CONF_NUM       7
+#define  EPQ_CONF_NUM       7
 #define  BBC_CONF_NUM       8
 #define  BBQ_CONF_NUM       9
 #define  FMS_CONF_NUM      10
@@ -23,5 +23,7 @@
 #define  QT2_CONF_NUM      12
 #define  QT3_CONF_NUM      13
 #define  QT4_CONF_NUM      14
+#define  FQ1_CONF_NUM      15
+#define  FQ2_CONF_NUM      16
 
 #endif

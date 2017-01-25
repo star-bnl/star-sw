@@ -20,13 +20,16 @@ class StvNodePars;
 /// \class StvDiver
 class StvDiver : public TNamed
 {
-public:
-enum StvDiverFlags {kDiveOk =0,kDiveHits=1,kDiveDca=2,kDiveBreak=4,kDiveMany=8};
-enum StvDiverOpt   {kTargHit=1,kTarg2D  =2,kTarg3D =4,kDoErrs   =8};
-public:
+protected:
   StvDiver(const char *name="");
   virtual ~StvDiver(){;}
 int  Init();
+public:
+static StvDiver* Inst();
+
+enum StvDiverFlags {kDiveOk =0,kDiveHits=1,kDiveDca=2,kDiveBreak=4,kDiveMany=8};
+enum StvDiverOpt   {kTargHit=1,kTarg2D  =2,kTarg3D =4,kDoErrs   =8};
+public:
 void Reset();
 int  Dive();
 void Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir);
@@ -38,6 +41,8 @@ double GetLength() const;
 void SetRZmax(double rMax,double zMax); 
 
 protected:
+static StvDiver *mgInst;
+
 char mBeg[1];
 int mDir;
 const   StvNodePars    *mInpPars;

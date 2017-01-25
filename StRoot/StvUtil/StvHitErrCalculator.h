@@ -1,5 +1,6 @@
 #ifndef __StvHitErrCalculatorulator_h_
 #define __StvHitErrCalculatorulator_h_
+#include "assert.h"
 #include "TNamed.h"
 class StvHit;
 typedef float Mtx33F_t[3][3];
@@ -49,10 +50,10 @@ ClassDef(StvHitErrCalculator,0)
 class StvHitRrCalculator : public StvHitErrCalculator {
 
 public:	
-  StvHitRrCalculator(const char *name="TpcHitRr"):StvHitErrCalculator(name,0){};
+  StvHitRrCalculator(const char *name="HitRr"):StvHitErrCalculator(name,0){};
 virtual int CalcDcaErrs(const StvHit *stvHit,double hRR[3]);
-virtual int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
-                       {assert(0); return 999;}
+virtual int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]){assert(0); return 999;};
+virtual int CalcDetErrs(const float*, const float (*)[3], double*);                       
 ClassDef(StvHitRrCalculator,0)
 };
 

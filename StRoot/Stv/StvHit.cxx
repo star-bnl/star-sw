@@ -73,8 +73,7 @@ void StvVertex::reset()
  void StvHit::setTimesUsed(int n)
 {
     if (!mDetector) return;
-    assert(!n);
-    assert(!mTimesUsed);
+    mTimesUsed=n;
 }
 //_____________________________________________________________________________
  void StvHit::addTimesUsed()

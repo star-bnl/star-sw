@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.39 2017/01/03 22:17:36 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.42 2017/01/20 17:48:49 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -7,6 +7,12 @@
  * Description: Base class for vertex finders
  *
  ***************************************************************************/
+#include <algorithm>
+#include <cmath>
+
+#include "TH1F.h"
+#include "TSpectrum.h"
+
 #include "StarRoot/TRMatrix.h"
 #include "StarRoot/TRSymMatrix.h"
 #include "StGenericVertexFinder.h"
@@ -32,12 +38,20 @@ StGenericVertexFinder::StDcaList&  StGenericVertexFinder::sDCAs()
 vertexSeed_st StGenericVertexFinder::sBeamline;
 
 
+
+StGenericVertexFinder::StGenericVertexFinder() :
+  StGenericVertexFinder(SeedFinder_t::Unspecified, VertexFit_t::Unspecified)
+{
+}
+
+
 //______________________________________________________________________________
-StGenericVertexFinder::StGenericVertexFinder(VertexFit_t fitMode) :
+StGenericVertexFinder::StGenericVertexFinder(SeedFinder_t seedFinder, VertexFit_t fitMode) :
   mVertexOrderMethod(orderByNumberOfDaughters),
   mVertexConstrain(false),
   mMode(0),
   mVertexFitMode(fitMode),
+  mSeedFinderType(seedFinder),
   mDebugLevel(0),
   mUseBtof(false),
   mUseCtb(false)
@@ -75,6 +89,55 @@ StGenericVertexFinder::FillStEvent(StEvent* event){
     mVertexList.push_back(*(event->primaryVertex(i)));
 
 }
+
+
+/**
+ * Searches for vertex seeds using the ROOT's TSpectrum peak finder applied to
+ * track's DCA z distribution. This method can be transfered to a separate class
+ * complying with a VertexSeedFinder interface (not available as of now).
+ * Returns a vector of peak positions along the `z`. We copy the result to
+ * a vector because TSpectrum::GetPositionX() may return either float* or
+ * double* depending on ROOT version.
+ */
+std::vector<double> StGenericVertexFinder::FindSeeds_TSpectrum()
+{
+   TSpectrum tSpectrum(200);
+
+   TH1F fVtx("fVtx", "z-dca distribution", 2500, -250, 250);
+
+   // The size of window in cm where the probability is averaged
+   static double zWindow = 2;
+
+   for (const StDcaGeometry* trackDca : sDCAs())
+   {
+      double xyzp[6], covXyzp[21];
+
+      trackDca->GetXYZ(xyzp, covXyzp);
+
+      double offset = 0.5 * xyzp[5]/trackDca->pt();
+      double sigmaZ = std::sqrt(covXyzp[5] + offset*offset);
+      sigmaZ += fVtx.GetBinWidth(1);
+
+      // Fill TSpectrum histogram with the average probability of having vertex
+      // at z (bin center) given the tracks DCA Z coordinate (xyzp[2])
+      int bin_first = fVtx.FindBin(xyzp[2] - 5*sigmaZ);
+      int bin_last  = fVtx.FindBin(xyzp[2] + 5*sigmaZ);
+
+      for (int iBin = bin_first; iBin <= bin_last; ++iBin)
+      {
+         double z = fVtx.GetBinCenter(iBin);
+         fVtx.AddBinContent(iBin, (TMath::Erfc((z - xyzp[2] - zWindow)/sigmaZ) - TMath::Erfc((z - xyzp[2] + zWindow)/sigmaZ))/2.);
+      }
+   }
+
+   int npeaks = tSpectrum.Search(&fVtx, 3, "nodraw", std::min(0.1, 5./sDCAs().size()) );
+
+   auto* peaks = tSpectrum.GetPositionX();
+
+   return std::vector<double>(peaks, peaks + npeaks);
+}
+
+
 //______________________________________________________________________________
 void StGenericVertexFinder::addVertex(const StPrimaryVertex& vtx)
 {

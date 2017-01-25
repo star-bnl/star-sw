@@ -8,7 +8,6 @@
 #include "StvFitter.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvHit.h"
-#include "StvConst.h"
 #include "StvUtil/StvDebug.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
