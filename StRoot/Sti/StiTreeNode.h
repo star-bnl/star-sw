@@ -66,6 +66,7 @@ class StiTreeNode
   StiTreeNode *getPrevNode() 	const;
   StiTreeNode *getFirstNode()	const;
   StiTreeNode *getLastNode() 	const;
+         void  remove(StiTreeNode **fstNode,StiTreeNode **lstNode);
  protected:
   StiTreeNode *parent;
   StiTreeNode *children[2];
