@@ -23,7 +23,7 @@
 
 class StVMCMaker : public StMaker {
  public: 
-  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), fInitRun(0), fVolume(0) {}
+  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), fInitRun(0), fVolume(0) {fgGeantMk = this;}
   virtual       ~StVMCMaker() {}
   virtual Int_t  Init();
   virtual Int_t  Make();
@@ -40,6 +40,7 @@ class StVMCMaker : public StMaker {
   const Char_t  *InputFile() const {return fInputFile.Data();}
   static StarVMCApplication* GetStarVMCApplication() {return fgStarVMCApplication;}
   static TGeant3TGeo*        GetGeant3()             {return fgGeant3;}
+  static StVMCMaker *instance() {return fgGeantMk;}
   TDataSet* GetVolume() { return fVolume; }
  private:
   // Private method declaration if any
@@ -49,8 +50,9 @@ class StVMCMaker : public StMaker {
   virtual TDataSet  *FindDataSet (const char* logInput,
 				  const StMaker *uppMk=0,
 				  const StMaker *dowMk=0) const ;
-  static StarVMCApplication* fgStarVMCApplication;
-  static TGeant3TGeo*        fgGeant3;
+  static StarVMCApplication* fgStarVMCApplication; //!
+  static TGeant3TGeo*        fgGeant3; //!
+  static StVMCMaker*         fgGeantMk; //!
   Int_t                      fEventNo;
   Int_t                      fRunNo;
   StEvtHddr                 *fEvtHddr;//! pointer to Event Header

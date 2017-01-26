@@ -60,7 +60,7 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
   fMagField(0),
   fMcHits(0),
   fFieldB(0),
-  fDebug(1),
+  fDebug(0),
   fAlignment(kFALSE), //(kTRUE)
   fAlignmentDone(kFALSE)
 {
@@ -519,10 +519,11 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   StsstOnOsc::instance();
   StsstLadderOnSst::instance();
   StsstSensorOnLadder::instance();
+  HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/SFMO[1]/SFLM[20]/SFSW[16]/SFSL[1]/SFSD[1]
     */
-    {"Sst-%d",             kSst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",        1, { 1, 0, 0}, StsstOnOsc::instance()},
-    {"SstLadder-%d", kSstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",        1, {20, 0, 0}, StsstLadderOnSst::instance()},
-    {"SstSensor-%d", kSstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d/SFSW_%d",2, {20,16, 0}, StsstSensorOnLadder::instance()}
+    {"Sst-%d",             kSst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",               1, { 1, 0, 0}, StsstOnOsc::instance()},
+    {"SstLadder-%d", kSstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d",        1, {20, 0, 0}, StsstLadderOnSst::instance()},
+    {"SstSensor-%d", kSstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d/SFSW_%d",2, {20,16, 0}, StsstSensorOnLadder::instance()}
     //HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
     //HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
 #endif
@@ -545,12 +546,16 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   Double_t rIstWafer[9] = {-1, 0, 0, 0,-1, 0, 0, 0, 1};
   IstWaferH.SetTranslation(tIstWafer);
   IstWaferH.SetRotation(rIstWafer);
-  TGeoHMatrix IstSensorH;
+  //  TGeoHMatrix IstSensorH;
   TGeoHMatrix SstLadderH;
   Double_t tSstLadder[3] = {-2.71769, 22.1338, 0};
-  Double_t rSstLadder[9] = {-0.961262, 0.275637, 0, -0.275637, -0.961262, 0,  0, 0, 1};
+  Double_t rSstLadder[9] = {-0.992546, 0.121869, 0, -0.121869, -0.992546, 0, 0, 0, 1};
+  //                        -0.961262, 0.275637, 0, -0.275637, -0.961262, 0, 0, 0, 1};
   SstLadderH.SetTranslation(tSstLadder);
   SstLadderH.SetRotation(rSstLadder);
+  TGeoRotation SstSensorR;
+  Double_t rSstSensor[9] = {-1, 0, 0, 0, -1, 0, 0, 0, 1};
+  SstSensorR.SetMatrix(rSstSensor);
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
     Int_t Ntot = 1;
@@ -661,27 +666,15 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	  Id = ladder;
 	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1) * IstLadderH;
 	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-#if 0
-	  volume = TGeoVolumeAssembly::MakeAssemblyFromVolume(nodeP->GetVolume());
-	  shape = new TGeoShapeAssembly(volume);
-#endif
     	  break;
 	case kIstWafer:
 	  ladder = indx[0]; // 1-24
 	  sensor = indx[1]; // 1-6
 	  Id = 1000 + sensor + 6*(ladder - 1);
 	  //	  A  = *nodeP->GetNode(level-2)->GetMatrix(); // IBAM_1
-// 	  B  = *nodeP->GetNode(level-1)->GetMatrix(); // IBLM_1
-// 	  C  = *nodeP->GetNode(level)->GetMatrix();   // IBSS_1
-// 	  rotL = B * C;
-	  //	  D  = A * B * C;
-	  //	  D  = B * C;
-	  //	  D  = D.Inverse();
-	  //	  A  = StLadderOnIst::instance()->GetMatrix4Id(ladder);
-	  //	  B  = StistSensorOnLadder::instance()->GetMatrix4Id(Id);
-	  //	  C  = A * B;
-	  //	  rotA = D;     
-	  rotA = IstLadderH.Inverse() * StistSensorOnLadder::instance()->GetMatrix4Id(Id) * IstWaferH;
+	  B = StistSensorOnLadder::instance()->GetMatrix4Id(Id);
+	  assert(TString(B.GetName()) != "UnKnown");
+	  rotA = IstLadderH.Inverse() * B * IstWaferH;
 	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	  break;
 	case kIstSensor:
@@ -693,18 +686,21 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	  break;
 	case kSstLadder:
 	  ladder = indx[0];
-	  Id = ladder;
-	  rotA   = listOfDet2Align[i].chair->GetMatrix(Id-1) * SstLadderH;
+	  Id = 100 + ladder;
+	  B = listOfDet2Align[i].chair->GetMatrix4Id(Id);
+	  assert(TString(B.GetName()) != "UnKnown");
+	  rotA   = B * SstLadderH;
 	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	  break;
 	case kSstSensor:
 	  ladder = indx[0];
 	  sensor = indx[1];
-	  ID     = 7000 + ladder + 100*(sensor - 1);
-	  Id     = sensor + 16*(ladder - 1);
-          assert(ID ==  listOfDet2Align[i].chair->Id(Id));    
-	  rotA   = SstLadderH.Inverse() * listOfDet2Align[i].chair->GetMatrix(Id-1);
-	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  ID     = 7000 + ladder + 100*sensor;
+	  //	  Id     = sensor + 16*(ladder - 1);
+	  B = listOfDet2Align[i].chair->GetMatrix4Id(ID);
+	  assert(TString(B.GetName()) != "UnKnown");
+	  rotA   = SstLadderH.Inverse() * B * SstSensorR;
+	  rotA.SetName(Form(listOfDet2Align[i].Name,ID));
 	  break;
 	default:
 	  assert(0);
