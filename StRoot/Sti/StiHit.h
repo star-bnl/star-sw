@@ -156,6 +156,9 @@ public:
     Float_t  vz() const {return _vz;}
     Float_t  vy() const {return _vy;}
     friend ostream& operator<<(ostream& os, const StiHit& h);
+    int idTruth() const;
+    int qaTruth() const;
+
 protected:
     char  mBeg[1];
     char mMaxTimes;
@@ -178,7 +181,6 @@ protected:
     Float_t _energy;
     // drift velocities cm/mksec( 0 for non driting )
     Float_t _vy, _vz;
-    
     char  mEnd[1];
 public:
     Int_t mCount;
