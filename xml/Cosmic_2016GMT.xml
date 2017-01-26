@@ -25,7 +25,8 @@ foreach input (`cat $FILELIST`)
   if (-r $muFile) exit 0;
   set tFile = ${filel}.root
   if (-r $tFile) exit 0;
-  root4star -q -b 'bfc.C('${f}','${l}',"B2016,in,Tpx,gmt,gmtAligner,gmtCosmics,CMuDst,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,evout,NoHistos,noTags,noRunco,BAna,analysis","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C('${f}','${l}',"B2016,in,Tpx,gmt,gmtAligner,gmtCosmics,CMuDst,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,evout,NoHistos,noTags,noRunco,BAna,analysis","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('${f}','${l}',"p2016a,gmt,gmtAligner,Cosmics,CMuDst,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,-hitfilt,evout,NoHistos,noTags,noRunco,BAna,analysis","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
 end
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/Cosmics$JOBID.log" />
