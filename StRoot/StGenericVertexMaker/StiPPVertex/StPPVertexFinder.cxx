@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.90 2017/01/20 17:49:27 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.91 2017/01/26 22:51:40 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -511,8 +511,7 @@ StPPVertexFinder::fit(StEvent* event) {
     TrackData t;
 
     ntrk[0]++;
-
-    if(stiKalmanTrack->getFlag() != true)        {ntrk[1]++; continue;}
+    if(stiKalmanTrack->getFlag() <0)             {ntrk[1]++; continue;}
     if(stiKalmanTrack->getPt() < mMinTrkPt)      {ntrk[2]++; continue;}
     if(mDropPostCrossingTrack &&
        isPostCrossingTrack(stiKalmanTrack))      {ntrk[3]++; continue;}  // kill if it has hits in wrong z
@@ -1106,12 +1105,9 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack* track, TrackData &t){
   //1 cout <<"#e  track->getPseudoRapidity()="<<track->getPseudoRapidity()<<" track->getFitPointCount()="<<track->getFitPointCount()<<endl;
   
   // .......... test DCA to beam .............
-  StiKalmanTrack track1=*track; // clone track
-  StiKalmanTrackNode* bmNode=track1.extrapolateToBeam();
-  if(bmNode==0)  { 
-    //1 cout<<"#a @beam  DCA NULL"<<endl; 
-    return false ; 
-  }
+  StiKalmanTrackNode * bmNode = track->getInnerMostNode();
+  if (!bmNode) 		return 0;
+  if (!bmNode->isDca()) return 0;
 
   float rxy=rxyG(bmNode);
 
@@ -1134,8 +1130,8 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack* track, TrackData &t){
   StThreeVectorF const globP3 = bmNode->getGlobalMomentumF();
   t.dcaTrack.gP.SetXYZ(globP3.x(),globP3.y(),globP3.z());
   t.dcaTrack.fitErr    = bmNode->fitErrs();
-  t.dcaTrack.gChi2     = track1.getChi2();
-  t.dcaTrack.nFitPoint = track1.getFitPointCount();
+  t.dcaTrack.gChi2     = track->getChi2();
+  t.dcaTrack.nFitPoint = track->getFitPointCount();
 
   return true;
 }
