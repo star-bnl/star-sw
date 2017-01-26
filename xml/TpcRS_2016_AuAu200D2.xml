@@ -12,7 +12,7 @@
   set logFile  = ${file}B.log
 # daq_2014_AuAu200X
 #    root4star -q -b 'TpcRS.C(4000,"y2014a,TpxClu2D,TpcRS,KFVertex,xgeometry,CorrX","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
-    root4star -q -b 'TpcRS.C(101,500,"y2016a,TpcRS,StiCA,KFVertex,xgeometry,CorrX,McTpcAna,TpxClu2D","'${evtsFile}'","heed,PhysicsOff")' &gt;&amp; ${logFile}
+    root4star -q -b 'TpcRS.C(1,1000,"y2016a,TpcRS,StiCA,KFVertex,xgeometry,CorrX,TpxClu2D","'${evtsFile}'","heed,PhysicsOff")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2014_AuAu200Z3/*MuDst.root" />  -->

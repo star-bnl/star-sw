@@ -1,8 +1,15 @@
-setenv AFS_RHIC  /star/subsys/tpc/fisyak/STAR
-setenv STAR_ROOT ${AFS_RHIC}
+if (-d /net/l402/data/fisyak/STAR) then
+  setenv AFS_RHIC  /net/l402/data/fisyak/STAR
+else 
+  if (-d /star/subsys/tpc/fisyak/STAR) then 
+  setenv AFS_RHIC  /star/subsys/tpc/fisyak/STAR
+  else
+  setenv STAR_ROOT ${AFS_RHIC}
+  endif
+endif
 setenv OPTSTAR   ${STAR_ROOT}/opt
 setenv GROUP_DIR /afs/rhic.bnl.gov/star/packages/.DEV2/group
-#source ${GROUP_DIR}/setup    gcc482
+source ${GROUP_DIR}/setup    gcc482
 #source ${GROUP_DIR}/setup    32b
 #setup gcc492
 #setup 32b

@@ -48,12 +48,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     ChainOpt += "bbcSim,btofsim,btofMatch,btofCalib,";
-    ChainOpt += "EvOut,";
+    ChainOpt += "EvOut,-hitfilt,";
     //    ChainOpt += "McTpcAna,";
     // ChainOpt += ",tree,";
 #if 1
     if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2" ||
-	TString(gSystem->Getenv("STAR_VERSION")) == "SL11d_embed") ChainOpt += "NoHistos,NoRunco,noTags,McTpcAna,";
+	TString(gSystem->Getenv("STAR_VERSION")) == "SL11d_embed") ChainOpt += "NoHistos,NoRunco,noTags,";
     else                                                           ChainOpt += "tags,";
 #endif
   }
@@ -177,7 +177,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     SETBIT(mask,StTpcdEdxCorrection::kTpcLast);
     //    SETBIT(Mode,StdEdxY2Maker::kOldClusterFinder); 
     //    SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
-#endif    
     Int_t Mode = 2;
     
     SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
@@ -190,6 +189,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
       dEdx->SetMode(Mode); 
     }
+#endif    
     if (mask) {
       cout << " set dEdxY2 mask " << mask << " =======================================" << endl;
       dEdx->SetMask(mask); 
