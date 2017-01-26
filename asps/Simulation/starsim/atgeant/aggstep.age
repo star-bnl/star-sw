@@ -54,7 +54,7 @@
  If Idebug>0 & LkDETM>0
  {  If (Id>0)  Iprin = max(LVPRIN(Id),Idebug)
     If (Id0>0) Iprin*= max(LVPRIN(Id0),Idebug)
-    If (iw!=NAMES(Nlevel)&Iprin>0 | Nlevel+Iprin>=15)  Call Gdebug
+*yf    If (iw!=NAMES(Nlevel)&Iprin>0 | Nlevel+Iprin>=15)  Call Gdebug
 **  If (iw!=NAMES(Nlevel)&Iprin>0&STEP>0) print *,'InwVol=',InwVol
         iw =NAMES(Nlevel)
  }
