@@ -124,7 +124,8 @@ public:
   /// Get charge of the particle that produced this track
   virtual int     getCharge() const=0;
   /// Get chi2 of this track
-  virtual double  getChi2() const=0;
+  virtual double  getChi2()    const=0;
+  virtual double  getChi2Max() const=0;   // maximal chi2 
   virtual void    setFlag(long v)=0;
   virtual long    getFlag() const=0;
   virtual vector<StiHit*> getHits()=0;
