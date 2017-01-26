@@ -114,9 +114,10 @@ foreach my $rootfile (@rootfiles) {
 	print OUT "#!/bin/tcsh -v\n";
 	print OUT "cd $DIR\n";
 	print OUT "setenv STARFPE NO\n";
-	#      print OUT "setup 64b\n";
+	print OUT "setenv NODEBUG yes\n";
+	print OUT "setup 64b\n";
 	#      print OUT "setup gcc\n";
-	#      print OUT "starver .DEV2\n";
+	print OUT "starver .DEV2\n";
 	my $cmd = "test ! -r " . $newfilew . " && " . $rootcmd;
 	print OUT "$cmd\n";
 	close (OUT);

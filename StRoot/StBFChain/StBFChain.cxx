@@ -1553,11 +1553,13 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-PxlIT","Default,Stv");
       SetOption("-IstIT","Default,Stv");
     }  
+#if 0
     if (TString(SAttr("GeneratorFile")) != "") {
       SetOption("geant","GeneratorFile");
       SetOption("-fzin","GeneratorFile");
       SetOption("-fzinSDT","GeneratorFile");
     }
+#endif
   }
   if (! GetOption("AgML") && ! GetOption("VmcGeo") && ! GetOption("Agi")) SetOption("Agi","Default Geometry");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");

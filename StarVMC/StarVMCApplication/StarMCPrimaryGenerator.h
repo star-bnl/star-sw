@@ -52,8 +52,9 @@ class StarMCPrimaryGenerator : public TObject {
   TVector3 &GetOrigin()                       { return fOrigin;}
   virtual void GeneratePrimaries() {}
   virtual void GeneratePrimaries(const TVector3& /* origin */) {}
+  virtual void Print(Option_t *option="") const;
  protected:
-
+   
   static StarMCPrimaryGenerator *fgInstance;
   TVirtualMCStack  *fStack;    
   Bool_t            fIsRandom;

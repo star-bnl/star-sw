@@ -64,6 +64,7 @@ C.
       CHARACTER*4 DNAME,KCUT(10)
       CHARACTER*20 CHTITL
       LOGICAL NUCRIN
+      integer LOUSAV
       PARAMETER (LOUPHY=10)
 C.
 C.    ------------------------------------------------------------------
@@ -725,4 +726,5 @@ C
      +' information')
 13100 FORMAT(
      +' Cross section calculation concluded successfully')
-  999 END
+  999 LOUT=LOUSAV
+      END

@@ -49,11 +49,18 @@ C.
       CHARACTER*4 DNAME,KCUT(10)
       CHARACTER*20 CHTITL
       LOGICAL NUCRIN
+      integer LOUSAV
+      PARAMETER (LOUPHY=10)
 C.
 C.    ------------------------------------------------------------------
 C.
 C              Write RUN parameters, version numbers and CUTS
 C
+      WRITE(CHMAIL,13000)
+      CALL GMAIL(1,0)
+      OPEN(10,FILE='gphysi.dat')
+      LOUSAV=LOUT
+      LOUT=LOUPHY
       WRITE(CHMAIL,10000)
       CALL GMAIL(0,0)
       WRITE(CHMAIL,10100)
@@ -640,6 +647,11 @@ C
       WRITE(CHMAIL,10400)
       CALL GMAIL(0,2)
 C
+      CLOSE(LOUPHY)
+      LOUT=LOUSAV
+      WRITE(CHMAIL,13100)
+      CALL GMAIL(1,0)
+C
 10000 FORMAT(
      +'1************************************************************')
 10100 FORMAT(
@@ -703,4 +715,10 @@ C
      +' *  IHADR=3 not supported any more. GHEISHA will handle     *')
 12900 FORMAT(
      +' *  hadronic interactions for the above tracking medium     *')
-  999 END
+13000 FORMAT(
+     +' Calculating cross section tables, see gphysi.dat for more',
+     +' information')
+13100 FORMAT(
+     +' Cross section calculation concluded successfully')
+  999 LOUT=LOUSAV
+      END

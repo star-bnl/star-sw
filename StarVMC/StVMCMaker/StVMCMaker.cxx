@@ -133,6 +133,7 @@ ClassImp(StVMCMaker);
 
 StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
 TGeant3TGeo*        StVMCMaker::fgGeant3 = 0;
+StVMCMaker *        StVMCMaker::fgGeantMk = 0;
 //_____________________________________________________________________________
 Int_t StVMCMaker::Init() {
   fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
@@ -218,7 +219,6 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   //  fgStarVMCApplication->SetStepping(new StMCStepping);
   // The "Init" method in the gMC object causes the geometry to be cosntructed
   fgStarVMCApplication->InitMC();
-  if (Debug()) SetDebug(Debug());
   if (IAttr("phys_off")) {// switch off physics 
     gMessMgr->Info() << "StVMCMaker::InitRun switch off physics" << endm;
     gMC->SetProcess("DCAY", 0);
@@ -331,5 +331,5 @@ void StVMCMaker::SetDebug(Int_t l) {
   if (generator) generator->SetDebug(Debug());
   StarMCHits *hits = StarMCHits::instance();
   if (hits) hits->SetDebug(Debug());
-  if (fgStarVMCApplication) fgStarVMCApplication->SetDebug(Debug());
+  //  if (fgStarVMCApplication) fgStarVMCApplication->SetDebug(Debug());
 }
