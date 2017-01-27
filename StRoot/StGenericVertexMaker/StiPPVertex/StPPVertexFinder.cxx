@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.91 2017/01/26 22:51:40 perev Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.92 2017/01/27 20:12:44 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -70,11 +70,11 @@
 
 StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::PPVLikelihood, fitMode),
-  mDropPostCrossingTrack(true) // default PCT rejection on
+  mDropPostCrossingTrack(true), // default PCT rejection on
+  HList()
 {
 
   mTotEve              = 0;
-  HList=0;
   mToolkit =0;
   memset(hA,0,sizeof(hA));
 
@@ -128,17 +128,16 @@ StPPVertexFinder::Init() {
   uint  killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
   eemcList =new EemcHitList(eeDb, killStatEEmc,geomE);
    
-  HList=new TObjArray(0);   
   initHisto();
 
   LOG_INFO << "initiated histos" << endm;
 
   if (mUseBtof)
-    btofList->initHisto( HList);
+    btofList->initHisto( &HList);
 
-  ctbList->initHisto( HList);
-  bemcList->initHisto( HList);
-  eemcList->initHisto( HList);
+  ctbList->initHisto( &HList);
+  bemcList->initHisto( &HList);
+  eemcList->initHisto( &HList);
 
   LOG_INFO << "Finished Init" << endm;
 }
@@ -217,7 +216,7 @@ StPPVertexFinder::InitRun(int runnumber){
     assert(vertex3D==0); // crash means initRun was called twice - not foreseen,Jan B.
     vertex3D=new Vertex3D;
     vertex3D->setCuts(0.8,8.0, 3.3,5); // pT1(GeV), pT2, sigY(cm), nTr
-    vertex3D->initHisto( HList);
+    vertex3D->initHisto( &HList);
     vertex3D->initRun();
   }
 
@@ -279,9 +278,9 @@ StPPVertexFinder::initHisto() {
 
   hACorr=new TH2F("BTOFvsBEMC","BTOF vs BEMC", 5,-2.5,2.5,5,-2.5,2.5);
 
-  for (int i=0; i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
+  for (int i=0; i<mxH; i++) if(hA[i]) HList.Add(hA[i]);
 
-  HList->Add(hACorr);
+  HList.Add(hACorr);
 }
 
 
@@ -1025,9 +1024,9 @@ StPPVertexFinder::saveHisto(TString fname){
   TString outName=fname+".hist.root";
   TFile f( outName,"recreate");
   assert(f.IsOpen());
-  printf("%d histos are written  to '%s' ...\n",HList->GetEntries(),outName.Data());
-  HList->ls();
-  HList->Write();
+  printf("%d histos are written  to '%s' ...\n",HList.GetEntries(),outName.Data());
+  HList.ls();
+  HList.Write();
   f.Close();
 }
 
