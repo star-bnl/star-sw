@@ -103,26 +103,28 @@ int s2did(char *str)
 // comma delimited
 UINT32 str2detmask(const char *str)
 {
-  char s[256];
-  UINT32 mask = 0;
-  int id;
+    char *_strtok_static;
 
-  strcpy(s,str);
-  char *t = strtok(s,",");
+    char s[256];
+    UINT32 mask = 0;
+    int id;
 
-  while(t) {
-    id = s2did(t);
-    if(id >= 0) {
-      mask |= (1<<id);
-    }
-    else {
-      LOG(DBG, "Invalid detector: %s",t,0,0,0,0);
-    }
+    strcpy(s,str);
+    char *t = strtok_r(s,",",&_strtok_static);
+
+    while(t) {
+	id = s2did(t);
+	if(id >= 0) {
+	    mask |= (1<<id);
+	}
+	else {
+	    LOG(DBG, "Invalid detector: %s",t,0,0,0,0);
+	}
    
-    t = strtok(NULL,",");
-  }
+	t = strtok_r(NULL,",",&_strtok_static);
+    }
   
-  return mask;
+    return mask;
 }
 
 // single group
@@ -138,29 +140,30 @@ int s2gid(const char *str)
 // comma delimited
 UINT32 str2evpgroupmask(const char *str)
 {
-  char s[256];
-  UINT32 mask = 0;
-  int id;
+    char *_strtok_static;
+    char s[256];
+    UINT32 mask = 0;
+    int id;
 
-  if(init == 0) initEvpGroups();
+    if(init == 0) initEvpGroups();
 
-  strcpy(s,str);
-  char *t = strtok(s,",");
+    strcpy(s,str);
+    char *t = strtok_r(s,",",&_strtok_static);
 
-  while(t) {
-    id = s2gid(t);
+    while(t) {
+	id = s2gid(t);
 
-    if(id >= 0) {
-      mask |= (1<<id);
-    }
-    else {
-      LOG(ERR, "Invalid evpgroup: %s",t,0,0,0,0);
-    }
+	if(id >= 0) {
+	    mask |= (1<<id);
+	}
+	else {
+	    LOG(ERR, "Invalid evpgroup: %s",t,0,0,0,0);
+	}
    
-    t = strtok(NULL,",");
-  }
+	t = strtok_r(NULL,",",&_strtok_static);
+    }
   
-  return mask;
+    return mask;
 }
 
 #ifdef DEBUG_UTIL
