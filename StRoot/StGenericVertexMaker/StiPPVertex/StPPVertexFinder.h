@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.35 2017/01/20 17:49:08 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.36 2017/01/27 20:12:44 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -120,7 +120,7 @@ public:
   TH2F *hACorr;
   TH1D *hL ;      // likelyhood distribution
   TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
-  TObjArray * HList;
+  TObjArray HList;
   StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::Beamline1D);
 
   // mandatory implementations
