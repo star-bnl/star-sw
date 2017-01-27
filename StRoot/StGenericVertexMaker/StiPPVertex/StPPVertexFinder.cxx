@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.94 2017/01/27 20:12:56 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.95 2017/01/27 20:13:09 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1275,7 +1275,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
 void  
 StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t){
   
-  const float Rxy = 242.; // middle of tower in Rxy
+  const double Rxy = 242.; // middle of tower in Rxy
 
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
 
@@ -1324,9 +1324,9 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t){
 void  
 StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t){
 
-  const float z = 288.; // middle of tower in Z
-  const float minEta=0.7 ;// tmp cut
-  const float maxPath=200 ;// tmp, cut too long extrapolation
+  const double eemc_z_position = 288.; // middle of tower in Z
+  const double minEta=0.7 ;// tmp cut
+  const double maxPath=200 ;// tmp, cut too long extrapolation
 
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
   StiKalmanTrackNode* inNode=track->getInnerMostNode();
@@ -1337,7 +1337,7 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t){
   // droop too steep tracks
   if(track->getPseudoRapidity()<minEta) return;
 
-  StThreeVectorD rSmd=StThreeVectorD(0,0,z); 
+  StThreeVectorD rSmd=StThreeVectorD(0,0,eemc_z_position);
   StThreeVectorD n=StThreeVectorD(0,0,1);
 
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
@@ -1354,16 +1354,16 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t){
   if(path>maxPath) return; // too long extrapolation
 
   StThreeVectorD r = hlx.at(path);
-  float periodL=hlx. period();
+  double periodL=hlx. period();
  
   if(periodL<2*path) {
     LOG_DEBUG <<Form(" Warn, long path fac=%.1f ",path/periodL)<<
       Form("  punchEEMC1 x,y,z=%.1f, %.1f, %.1f path=%.1f period=%.1f\n",r.x(),r.y(),r.z(),path,periodL)<<endm; 
   }
 
-  float phi=atan2(r.y(),r.x());
+  double phi=atan2(r.y(),r.x());
   if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
-  float eta=r.pseudoRapidity();
+  double eta=r.pseudoRapidity();
 
   int iBin=eemcList->addTrack(eta,phi);
   bool  eemcMatch=eemcList->isMatched(iBin);
@@ -1380,15 +1380,15 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t){
 //==========================================================
 bool  
 StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
-  const float RxyMin=59, RxyMax=199, zMax=200;
-  const float zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
+  const double RxyMin=59, RxyMax=199, zMax=200;
+  const double zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
 
   //generate bitt pattern for TPC nodes with hits 
   std::vector<int> hitPatt;
   int nPos=0,nFit=0;
   int in=0;
-  float lastRxy=9999;
-  float lastZ=9999;
+  double lastRxy=9999;
+  double lastZ=9999;
 
   int jz0=0;
   StiKTNBidirectionalIterator it;
@@ -1396,8 +1396,8 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     StiKalmanTrackNode* ktnp=& (*it);
     if(!ktnp->isValid()) continue;
     //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // ---> those track need to be counted as npossiblehit, commented out
-    float rxy=rxyG(ktnp); //ktn.getX();
-    float z=zG(ktnp);  //ktn.z_g();
+    double rxy=rxyG(ktnp); //ktn.getX();
+    double z=zG(ktnp);  //ktn.z_g();
     if(rxy<RxyMin) continue;
     if(rxy>RxyMax) continue;
     if(fabs(z)>zMax) continue;
