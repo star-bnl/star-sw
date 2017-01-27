@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.36 2017/01/27 20:12:44 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.37 2017/01/27 20:12:51 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -59,8 +59,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool examinTrackDca(const StiKalmanTrack*, TrackData &t);
   void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);
   void matchTrack2CTB(const StiKalmanTrack*, TrackData &t);
-  void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t, float z);
-  void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
+  void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t);
+  void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t);
   bool matchTrack2Membrane(const StiKalmanTrack*, TrackData &t);
   bool isPostCrossingTrack(const StiKalmanTrack* track);
 
