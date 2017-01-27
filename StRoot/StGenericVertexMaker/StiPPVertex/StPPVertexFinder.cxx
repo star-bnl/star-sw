@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.92 2017/01/27 20:12:44 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.93 2017/01/27 20:12:51 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -532,8 +532,8 @@ StPPVertexFinder::fit(StEvent* event) {
     // ......... matcho various detectors ....................
     if(mUseBtof) matchTrack2BTOF(stiKalmanTrack, t, btofGeom);  // matching track to btofGeometry
     if(mUseCtb)  matchTrack2CTB(stiKalmanTrack, t);
-    matchTrack2BEMC(stiKalmanTrack, t, 242); // middle of tower in Rxy
-    matchTrack2EEMC(stiKalmanTrack, t, 288); // middle of tower in Z
+    matchTrack2BEMC(stiKalmanTrack, t); // middle of tower in Rxy
+    matchTrack2EEMC(stiKalmanTrack, t); // middle of tower in Z
     //.... all test done on this track .........
     t.mother = stiKalmanTrack;
     mTrackData.push_back(t); 
@@ -1258,8 +1258,10 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
 //==========================================================
 //==========================================================
 void  
-StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, float Rxy){
+StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t){
   
+  const float Rxy = 242.; // middle of tower in Rxy
+
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
 
   //alternative helix extrapolation:
@@ -1305,8 +1307,9 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
 //==========================================================
 //==========================================================
 void  
-StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float z){
-  
+StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t){
+
+  const float z = 288.; // middle of tower in Z
   const float minEta=0.7 ;// tmp cut
   const float maxPath=200 ;// tmp, cut too long extrapolation
 
