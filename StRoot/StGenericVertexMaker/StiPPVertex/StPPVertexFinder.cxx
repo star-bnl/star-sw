@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.93 2017/01/27 20:12:51 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.94 2017/01/27 20:12:56 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -70,23 +70,38 @@
 
 StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::PPVLikelihood, fitMode),
+  mTrackData(), mVertexData(),
+  vertex3D(nullptr),
+  mTotEve(0), eveID(0),
+  mAlgoSwitches(kSwitchOneHighPT),
+  hA{}, hACorr(nullptr), hL(nullptr), hM(nullptr), hW(nullptr),
+  HList(),
+  mMinTrkPt(0.2),
+  mMaxTrkDcaRxy(3.),
+  mMaxZradius(3.),
+  mMinMatchTr(5),
+  mMaxZrange(200.),
+  mDyBtof(1.5),
+  mMinZBtof(-3.),
+  mMaxZBtof(3.),
+  mMinAdcBemc(8),
+  mMinAdcEemc(5),
+  mMinFitPfrac(0.51),
+  mFitPossWeighting(true),
   mDropPostCrossingTrack(true), // default PCT rejection on
-  HList()
+  mStoreUnqualifiedVertex(5),
+  mCut_oneTrackPT(10.),
+  mStudyBeamLineTracks(false),
+  mToolkit(nullptr),
+  btofList(nullptr),
+  ctbList(nullptr),
+  bemcList(new BemcHitList()),
+  eemcList(nullptr),
+  btofGeom(nullptr),
+  geomE(nullptr)
 {
-
-  mTotEve              = 0;
-  mToolkit =0;
-  memset(hA,0,sizeof(hA));
-
   UseCTB(true);                      // default CTB is in the data stream
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
-
-  mAlgoSwitches=0; // default, as for 2008 pp data production
-
-  //........... tune for W-boson reco
-  mAlgoSwitches|=kSwitchOneHighPT;
-  mCut_oneTrackPT=10; // GeV, used only if coresponding algoSwitch switch is ON.
-  mStudyBeamLineTracks = false; // expert only, activation via BFC
 
   // special histogram for finding the vertex, not to be saved
   int nb=5000;
@@ -114,7 +129,6 @@ StPPVertexFinder::Init() {
   assert(mToolkit);          // internal error of Sti
   
   ctbList  = new CtbHitList;
-  bemcList = new BemcHitList;
   btofList = new BtofHitList;
   vertex3D = 0; // default
   
@@ -152,7 +166,6 @@ StPPVertexFinder::InitRun(int runnumber){
   
  // Initialize BTOF geometry
   if (mUseBtof){ // only add btof if it is required
-    btofGeom = 0;
     TObjectSet *geom = (TObjectSet *) mydb->GetDataSet("btofGeometry");
     if (geom)   btofGeom = (StBTofGeometry *) geom->GetObject();
     if (btofGeom) {
@@ -356,10 +369,12 @@ void
 StPPVertexFinder::Clear(){
   LOG_DEBUG << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
-  btofList->clear();
-  ctbList->clear();
+
+  if (btofList) btofList->clear();
+  if (ctbList)  ctbList->clear();
   bemcList->clear();
-  eemcList->clear();
+  if (eemcList) eemcList->clear();
+
   mTrackData.clear();
   mVertexData.clear();
   eveID=-1;
