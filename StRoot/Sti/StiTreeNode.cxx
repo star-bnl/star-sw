@@ -190,10 +190,15 @@ void StiTreeNode::cutTail(int direction)
    direction = (direction)? -1:0;
    remove(direction);
 }
-
-
-
-
+//______________________________________________________________________________
+void  StiTreeNode::remove(StiTreeNode **fstNode,StiTreeNode **lstNode)
+{
+   assert(!children[1]);
+   StiTreeNode **kLeft = (parent     )? &parent->children[0]:fstNode;
+   StiTreeNode **kRite = (children[0])? &children[0]->parent:lstNode;
+   *kLeft = children[0];
+   *kRite = parent;
+}
 
 
 

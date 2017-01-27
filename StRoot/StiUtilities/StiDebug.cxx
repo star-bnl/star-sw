@@ -280,6 +280,14 @@ void StiDebug::Count(const char *key,double valx,double valy)
   h->Fill(valx,valy);
 }
 //______________________________________________________________________________ 
+void StiDebug::Count(const char *key,const char *valx,double valy)
+{
+  if (mgDebug<2) return;
+  TH2 *&h = (TH2*&)myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,0.,0.,100,0,0);}
+  h->Fill(valx,valy,1.);
+}
+//______________________________________________________________________________ 
 void StiDebug::Sumary(int nHist)
 {
   if (!nHist) nHist=4;

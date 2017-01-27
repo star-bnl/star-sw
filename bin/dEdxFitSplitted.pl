@@ -18,7 +18,7 @@ for (my $ix = 1; $ix <= $ARG{nx}; $ix++) {
   $base .= $ARG{Hist} . "_" . $ix;
   my $Script = $base; $Script .= ".csh";# print "Script = $Script\n";
   open(Script,">$Script") or die "Can't open $Script";
-  my $cmd =  "root.exe -q -b -x lBichsel.C $ARG{file} 'dEdxFit.C+(\"$ARG{Hist}\",\"GP\",\"R\",$ix)' >& $base.log";
+  my $cmd =  "setenv STARFPE NO; setenv NODEBUG yes; setup 64b; root.exe -q -b -x lBichsel.C $ARG{file} 'dEdxFit.C+(\"$ARG{Hist}\",\"GP\",\"R\",$ix)' >& $base.log";
 #  print "$cmd\n";
   print Script "$cmd\n";
   close(Script);

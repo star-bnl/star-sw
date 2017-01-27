@@ -1,11 +1,20 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.146 2016/11/07 22:42:13 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.146 2016/11/07 22:42:13 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.147 2017/01/26 21:32:41 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.147 2017/01/26 21:32:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.147  2017/01/26 21:32:41  perev
+ * 1. Method removeNode added. It removes node from the track.
+ *    It becames important for the case with reuse hits when old Dca node
+ *    is not more correct and must be removed and new one created
+ * 2. Method  getChi2Max() added to calculate maximal bad node.
+ *    It could (but not yet used) for filtering with reuse hits ON.
+ * 3. Method idTruth added. It uses idTruth's of hits and calculates
+ *    dominant contrubutor
+ *
  * Revision 2.146  2016/11/07 22:42:13  perev
  * 1. Workaround for the bug in CA #3233 moved into StiCA
  * 2. Bug #3231, Layer radius replaced by Normal one
@@ -789,24 +798,39 @@ double  StiKalmanTrack::getChi2() const
 {
   double fitHits   = 0;
   double trackChi2 = 0;
-  double nodeChi2  = 0;
   double maxChi2   = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
-  double theChi2 = 1.e+60;
-  if (!firstNode) return theChi2;
-  theChi2 = 0;
+  if (!firstNode) return 1.e+60;
   StiKTNIterator it;
-  for (it=begin();it!=end();it++)  {
+  for (it=begin();it!=end();++it)  {
     StiKalmanTrackNode *node = &(*it);
-    if (!node->isValid()) continue;
-    if (!node->getHit() ) continue;
-    nodeChi2 = node->getChi2();
-    if (nodeChi2>maxChi2) continue;
+    if (!node->isValid()) 	continue;
+    if (!node->getHit() ) 	continue;
+    if (!node->getDetector())	continue;
+    double nodeChi2 = node->getChi2();
+    if (nodeChi2>maxChi2) 	continue;
     trackChi2 += nodeChi2;
     ++fitHits;
   }
   return (fitHits>3)?trackChi2/(2.*fitHits-5.):1e30;
 }
-
+//_____________________________________________________________________________
+/// Return the maximal node chi2 
+double  StiKalmanTrack::getChi2Max() const
+{
+  double trackChi2 = 0;
+  double maxChi2   = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
+  if (!firstNode) return 1e11;
+  for (auto it=begin();it!=end();++it)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) 	continue;
+    if (!node->getHit() ) 	continue;
+    if (!node->getDetector())	continue;
+    double nodeChi2 = node->getChi2();
+    if (nodeChi2>maxChi2) 	continue;
+    if (trackChi2<nodeChi2) trackChi2=nodeChi2;
+  }
+  return trackChi2;
+}
 
 /*! 
 	Calculate and return the number of hits on this track. 
@@ -2029,5 +2053,22 @@ void StiKalmanTrack::test(const char *txt) const
 StiDebug::Count("OverKill",tst);
   }
 }
-
-
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+#include "StarRoot/TIdTruUtil.h"
+//_____________________________________________________________________________
+int StiKalmanTrack::idTruth(int *qa) const
+{
+  TIdTruUtil ut;
+  for (auto it=begin();it!=end();it++)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) 	continue;
+    const StiHit *hit = node->getHit();
+    if (!hit) 			continue;
+    if (!node->getDetector())	continue;
+    if ( node->getChi2()>100)	continue;
+    ut.Add(hit->idTruth(),hit->qaTruth());
+  }
+  if (qa) *qa = 100*ut.GetQua();  
+  return ut.GetIdTru();
+}

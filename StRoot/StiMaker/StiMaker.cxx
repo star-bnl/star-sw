@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.232 2016/11/07 20:51:43 perev Exp $
+// $Id: StiMaker.cxx,v 1.233 2017/01/26 21:17:48 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -649,6 +649,7 @@ static Bool_t TrackCompareStatus(const StiTrack *a, const StiTrack *b)
   int nB = b->getFitPointCount();
   if (nA!=nB) return (nA > nB);
   return (a->getChi2()<b->getChi2());
+//return (a->getChi2Max()<b->getChi2Max());
 }
 //_____________________________________________________________________________
 int StiMaker::CleanGlobalTracks()
@@ -665,43 +666,63 @@ int StiMaker::CleanGlobalTracks()
     auto* kTrack = (StiKalmanTrack*)((*_trackContainer)[iTk]);
     StiKalmanTrackNode *node = 0;
     int nHits=0,nNits=0;
-    for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
-    {
-      node = &(*nodeIt);
-      StiHit *hit = node->getHit(); if (!hit) 		continue;
-      if (hit->timesUsed()) { nNits++; node->setHit(0);}
-      else                  { nHits++;}
-    }
-    if (nNits) {
-      if (nHits<5) 
-	{ kTrack->setFlag(-1); continue; }
+    do {//one time loop
+
+      StiKalmanTrackNode *dcaNode=0;
+      for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
+      {
+	node = &(*nodeIt);
+        if (node->isDca()) 		{dcaNode = node;  continue;}
+	StiHit *hit = node->getHit(); 	if (!hit)         continue;
+	if (!node->isValid()) 		{node->setHit(0); continue;}
+	if (node->getChi2()>1e2)	{node->setHit(0); continue;}
+	if (hit->timesUsed()) 		{nNits++; node->setHit(0);}
+	else                  		{ nHits++;}
+      }
+
+      if (!nNits) 				continue;
+      if (nHits<5) { kTrack->setFlag(-1); 	continue; }
+      if (dcaNode) kTrack->removeNode(dcaNode);
+
+  //		Refit track with removed hits
       int ans = kTrack->refit();
       if (ans || kTrack->getFitPointCount()<5) 
-	{ kTrack->setFlag(-1); continue; }
-    }
+	 { kTrack->setFlag(-1); 		continue; }
+
+  //		Make new Dca node
+      StiHit dcaHit; dcaHit.makeDca();
+      StiTrackNode *extenDca = kTrack->extendToVertex(&dcaHit);
+      if (extenDca) kTrack->add(extenDca,kOutsideIn);
+    } while(0);
+
+//	Now mark hits as used
     kTrack->reserveHits();
   }
+//		Compact track container
   int jTk=0;
   for (int iTk=0; iTk< (int)_trackContainer->size(); iTk++) 
   {
     auto* kTrack = ((*_trackContainer)[iTk]);
     if (kTrack->getFlag()<0) continue;
-    if (jTk!=iTk)(*_trackContainer)[jTk]=(*_trackContainer)[iTk];
+    if (jTk!=iTk)(*_trackContainer)[jTk]=kTrack;
     jTk++;
   }
   _trackContainer->resize(jTk);
-
-
+  
   for (int iTk=0; iTk<(int) _trackContainer->size(); iTk++) 
   {
     auto* kTrack = (StiKalmanTrack*)((*_trackContainer)[iTk]);
     StiKalmanTrackNode *node = 0;
+    int nHit = 0,nNode = 0;
     for (auto nodeIt =kTrack->begin();nodeIt!=kTrack->end();nodeIt++) 
     {
       node = &(*nodeIt);
+      nNode++;
       StiHit *hit = node->getHit(); if (!hit) 		continue;
+      nHit++;
       assert(hit->timesUsed());
     }
+  assert(nHit || !nNode);
   }
   return _trackContainer->size();
 }
@@ -748,6 +769,18 @@ void StiMaker::FinishTracks (int gloPri)
 //          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
         }
      }
+     int qa,idt = track->idTruth(&qa);if(idt){};
+     if (!gloPri) {
+       StiDebug::Count("GloIdQa",qa);
+       StiDebug::Count("GloIdQa_vs_nHits",nHits                     ,qa);
+       StiDebug::Count("GloIdQa_vs_Pt"   ,track->getPt()            ,qa);
+       StiDebug::Count("GloIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
+     } else {
+       StiDebug::Count("PriIdQa",qa);
+       StiDebug::Count("PriIdQa_vs_nHits",nHits                     ,qa);
+       StiDebug::Count("PriIdQa_vs_Pt"   ,track->getPt()            ,qa);
+       StiDebug::Count("PriIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
+     }
 //      StiDebug::Count(noNames[gloPri],nNodes );
 //      StiDebug::Count(inNames[gloPri],nInside);
 //      StiDebug::Count(hiNames[gloPri],nHits  );
@@ -756,8 +789,15 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.232 2016/11/07 20:51:43 perev Exp $
+// $Id: StiMaker.cxx,v 1.233 2017/01/26 21:17:48 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.233  2017/01/26 21:17:48  perev
+// In method CleanGlobalTracks
+// 1. for track with reused hits old Dca node removed(not only marked)
+// 2. After Refit, new Dca node created
+//
+// In method FinishTracks some histo created (if debug>2)
+//
 // Revision 1.232  2016/11/07 20:51:43  perev
 // CleanGlobalTracks() added. This method provides cleanen reused hits in the style of CA.
 // Thic call is triggered by nMaxTimes attribute, which allows reuse hits nMaxTimes times.
@@ -1169,6 +1209,7 @@ void StiMaker::FinishTracks (int gloPri)
 // Revision 1.96  2002/06/04 19:45:31  pruneau
 // including changes for inside out tracking
 //
+
 //_____________________________________________________________________________
 void CountHits()
 {

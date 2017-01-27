@@ -93,7 +93,7 @@ void SetHitUnused::operator()(StiTrackNode& node)
 {
     StiHit* hit = node.getHit();
     if(!hit) 			return;
-    if (hit->timesUsed())	hit->subTimesUsed();
+    if (hit->timesUsed())	hit->setTimesUsed(0);
 }
 
 //----------------------- Streamers -------------------------------------------------

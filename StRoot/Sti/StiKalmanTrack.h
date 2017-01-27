@@ -254,6 +254,7 @@ class StiKalmanTrack : public StiTrack
    void  setLastNode (StiKalmanTrackNode *n) { lastNode  = n; };
    void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };   
    void  setFirstLastNode(StiKalmanTrackNode *n);   
+   void  removeNode(StiKalmanTrackNode *n){ n->remove((StiTreeNode**)&firstNode,(StiTreeNode**)&lastNode);}   
    
    
    /// Add a kalman track node to this track as a child to the last node of the track
@@ -271,8 +272,10 @@ class StiKalmanTrack : public StiTrack
    virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
 	 
 
-  int     getCharge()const;   // charge of the particle
-  double  getChi2() const;   // chi2/ndf of fit 
+  double  getMass()  const;   	// mass when pid known
+  int     getCharge()const;   	// charge of the particle
+  double  getChi2()  const;   	// chi2/ndf of fit 
+  double  getChi2Max() const;   // maximal chi2 
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
@@ -296,6 +299,8 @@ class StiKalmanTrack : public StiTrack
   static int  debug() {return _debug;}
   StiKalmanTrack &operator=(const StiKalmanTrack &tk);
   int rejectByHitSet()  const;
+  int idTruth(int *qu=0) const;
+
  void test(const char *txt="")  const;
   
   typedef enum{ // type of return value for the refit() procedure
