@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.95 2017/01/27 20:13:09 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.96 2017/01/27 20:13:16 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -39,17 +39,6 @@
 #include <St_db_Maker/St_db_Maker.h>
 #include <StIOMaker/StIOMaker.h> // to save  local histos 
 #include <StBFChain/StBFChain.h>
-
-#define xL(t)   (t->getX())
-#define yL(t)   (t->getY())
-#define eyL(t)  sqrt(t->getCyy())
-#define zL(t)   (t->getZ())
-#define ezL(t)  sqrt(t->getCzz())
-#define rxyL(t) sqrt(xL(t)*xL(t) + yL(t)*yL(t)) 
-#define xG(t)   (t->x_g())
-#define yG(t)   (t->y_g())
-#define zG(t)   (t->z_g())
-#define rxyG(t) sqrt(xG(t)*xG(t) + yG(t)*yG(t)) 
 
 #include <StEEmcUtil/database/StEEmcDb.h>
 #include <StEEmcUtil/database/EEmcDbItem.h>
@@ -1123,24 +1112,24 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack* track, TrackData &t){
   if (!bmNode) 		return 0;
   if (!bmNode->isDca()) return 0;
 
-  float rxy=rxyG(bmNode);
+  float rxy=sqrt(bmNode->x_g()*bmNode->x_g() + bmNode->y_g()*bmNode->y_g());
 
   //1 cout<<"#e @beam global DCA x:"<< bmNode->x_g()<<" y:"<< bmNode->y_g()<<" z:"<< bmNode->z_g()<<" Rxy="<< rxy <<endl;
   if(rxy>mMaxTrkDcaRxy) return false;
   if( fabs(bmNode->z_g())> mMaxZrange )   return false ; 
  
-  //1 cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<xL(bmNode)<<" y="<<yL(bmNode)<<" +/- "<<eyL(bmNode)<<" z="<<zL(bmNode)<<" +/- "<<ezL(bmNode)<<endl;
+  //1 cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<bmNode->getX()<<" y="<<bmNode->getY()<<" +/- "<<sqrt(bmNode->getCyy())<<" z="<<bmNode->getZ()<<" +/- "<<sqrt(bmNode->getCzz())<<endl;
 
-  t.zDca   = zL(bmNode);
-  t.ezDca  = ezL(bmNode);
+  t.zDca   = bmNode->getZ();
+  t.ezDca  = sqrt(bmNode->getCzz());
   t.rxyDca = rxy;
   t.gPt    = bmNode->getPt();
 
   //...... record more detals for 3D vertex reco
-  t.dcaTrack.R.SetXYZ(xG(bmNode),yG(bmNode),zG(bmNode));
+  t.dcaTrack.R.SetXYZ(bmNode->x_g(),bmNode->y_g(),bmNode->z_g());
   // approximation below: use sigX=sigY, I do not want to deal wih rotations in X-Y plane, Jan B.
-  t.dcaTrack.sigYloc = eyL(bmNode);
-  t.dcaTrack.sigZ    = ezL(bmNode);
+  t.dcaTrack.sigYloc = sqrt(bmNode->getCyy());
+  t.dcaTrack.sigZ    = sqrt(bmNode->getCzz());
   StThreeVectorF const globP3 = bmNode->getGlobalMomentumF();
   t.dcaTrack.gP.SetXYZ(globP3.x(),globP3.y(),globP3.z());
   t.dcaTrack.fitErr    = bmNode->fitErrs();
@@ -1396,8 +1385,8 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     StiKalmanTrackNode* ktnp=& (*it);
     if(!ktnp->isValid()) continue;
     //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // ---> those track need to be counted as npossiblehit, commented out
-    double rxy=rxyG(ktnp); //ktn.getX();
-    double z=zG(ktnp);  //ktn.z_g();
+    double rxy=sqrt(ktnp->x_g()*ktnp->x_g() + ktnp->y_g()*ktnp->y_g()); //ktn.getX();
+    double z=ktnp->z_g();  //ktn.z_g();
     if(rxy<RxyMin) continue;
     if(rxy>RxyMax) continue;
     if(fabs(z)>zMax) continue;
@@ -1421,9 +1410,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     }
     const StiDetector * det=ktnp->getDetector();
     assert(!(ktnp->x()) || det);
-    bool active=!det || det->isActive(yL(ktnp), zL(ktnp));
+    bool active=!det || det->isActive(ktnp->getY(), ktnp->getZ());
     int hit=ktnp->getHit()?1:0;
-    if(active) {
+    if (active) {
       hitPatt.push_back(hit);
       nPos++;
       if(hit && ktnp->getChi2() <=1000 ) nFit++;
