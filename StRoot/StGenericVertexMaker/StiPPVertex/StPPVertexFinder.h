@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.37 2017/01/27 20:12:51 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.38 2017/01/27 20:13:02 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -79,6 +79,12 @@ class StPPVertexFinder: public StGenericVertexFinder {
   uint  mAlgoSwitches; //binary, assign 1bit per change, use enum below
   enum {kSwitchOneHighPT=1}; 
 
+  TH1F *hA[mxH];
+  TH2F *hACorr;
+  TH1D *hL ;      // likelyhood distribution
+  TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
+  TObjArray HList;
+
   // params
   double mMinTrkPt;            ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
   double mMaxTrkDcaRxy;        ///< DCA to nominal beam line for each track
@@ -116,11 +122,6 @@ public:
   virtual void UsePCT(bool x=true) { mDropPostCrossingTrack = !x; }
   virtual void Finish();
 
-  TH1F *hA[mxH];
-  TH2F *hACorr;
-  TH1D *hL ;      // likelyhood distribution
-  TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
-  TObjArray HList;
   StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::Beamline1D);
 
   // mandatory implementations
