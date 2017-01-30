@@ -377,98 +377,99 @@ int docmd(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-  // Parse cmds...
-  char *av[10];
-  int ac = 0;
+    // Parse cmds...
+    char *av[10];
+    int ac = 0;
   
-  rtsLogOutput(2);
-  rtsLogLevel(WARN);
-  strcpy(g_filename, "none");
+    rtsLogOutput(2);
+    rtsLogLevel(WARN);
+    strcpy(g_filename, "none");
 
-  idx = NULL;
+    idx = NULL;
 
-  if(argc > 1) {
-    // Try mounting...
+    if(argc > 1) {
+	// Try mounting...
 #if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-    struct stat64 sstat;    
-    int ret = stat64(argv[1], &sstat);
+	struct stat64 sstat;    
+	int ret = stat64(argv[1], &sstat);
 #else
-    struct stat sstat;    
-    int ret = stat(argv[1], &sstat);
+	struct stat sstat;    
+	int ret = stat(argv[1], &sstat);
 #endif
 
-    if(ret != 0) {
-      printf("No file %s\n",argv[1]);
-      return -1;
-    }
-
-    if(argc == 2) {
-      av[0] = "mount";
-      av[1] = argv[1];
-      ac = 2;
-
-      docmd(ac, av);
-    }
-    else {
-      idx = new sfs_index();
-      int ret = idx->mountSingleDir(argv[1]);
-      if(ret < 0) {
-	printf("Error reading %s\n", argv[1]);
-	return -1;
-      }
-      do {
-
-	if(strcmp(argv[2],"ls") != 0) {  // if not cd to event directory
-	    fs_dir *d = idx->opendir("/");
-	  if(d) {
-	      fs_dirent storage;
-	      fs_dirent *e = idx->readdir(d, &storage);
-	    if(e) idx->cd(e->full_name);
-	    idx->closedir(d);
-	  }
+	if(ret != 0) {
+	    printf("No file %s\n",argv[1]);
+	    return -1;
 	}
+
+	if(argc == 2) {
+	    av[0] = "mount";
+	    av[1] = argv[1];
+	    ac = 2;
+
+	    docmd(ac, av);
+	}
+	else {
+	    idx = new sfs_index();
+	    int ret = idx->mountSingleDir(argv[1]);
+	    if(ret < 0) {
+		printf("Error reading %s\n", argv[1]);
+		return -1;
+	    }
+	    do {
+
+		if(strcmp(argv[2],"ls") != 0) {  // if not cd to event directory
+		    fs_dir *d = idx->opendir("/");
+		    if(d) {
+			fs_dirent storage;
+			fs_dirent *e = idx->readdir(d, &storage);
+			if(e) idx->cd(e->full_name);
+			idx->closedir(d);
+		    }
+		}
 	
-	docmd(argc-2, &argv[2]);
-	ret = idx->mountNextDir();
-	} while(ret > 0);
+		docmd(argc-2, &argv[2]);
+		ret = idx->mountNextDir();
+	    } while(ret > 0);
 
       
-      return 0;
-    } 
-  }
+	    return 0;
+	} 
+    }
     
-  for(;;) {
-    char buff[256];
-    char pwd[100];
+    for(;;) {
+	char *_strtok_static_;
+	char buff[256];
+	char pwd[100];
 
-    if(!idx) {
-      strcpy(pwd, "none");
+	if(!idx) {
+	    strcpy(pwd, "none");
+	}
+	else {
+	    strcpy(pwd, idx->pwd());
+	}
+
+	printf("%s:%s > ", g_filename, pwd);
+
+	fflush(stdout);
+
+	get_line(buff);
+
+	av[0] = strtok_r(buff, " ", &_strtok_static_);
+	if(av[0] == NULL) continue;
+
+	for(ac = 1; ac < 10; ac++) {
+	    av[ac] = strtok_r(NULL, " ", &_strtok_static_);
+	    if(av[ac] == NULL) break;
+	}
+
+	if(strcmp(av[0], "quit") == 0) break;
+
+	docmd(ac, av);
+
     }
-    else {
-      strcpy(pwd, idx->pwd());
-    }
-
-    printf("%s:%s > ", g_filename, pwd);
-
-    fflush(stdout);
-
-    get_line(buff);
-
-    av[0] = strtok(buff, " ");
-    if(av[0] == NULL) continue;
-
-    for(ac = 1; ac < 10; ac++) {
-      av[ac] = strtok(NULL, " ");
-      if(av[ac] == NULL) break;
-    }
-
-    if(strcmp(av[0], "quit") == 0) break;
-
-    docmd(ac, av);
-
-  }
     
-  return 0;
+    return 0;
 }
 
 

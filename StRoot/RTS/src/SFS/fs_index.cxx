@@ -387,14 +387,14 @@ int fs_index::cd(char *name)
   char tokes[256];
   strcpy(tokes,fullpath);
 
-  char *token = strtok(tokes,"/");
+  char *token = strtok_r(tokes,"/", &_strtok_static_);
   fs_inode *node = root;
   
   while(token) {
     fs_inode *newn = find_child(node, token);
     if(!newn) return -1;
     node = newn;
-    token = strtok(NULL, "/");
+    token = strtok_r(NULL, "/", &_strtok_static_);
   }
   
   if(!node->fchild) return -1;
@@ -438,13 +438,13 @@ fs_dirent *fs_index::readdirent(char *dir, fs_dirent *ent)
   strcpy(ent->full_name, fullname);
 
   fs_inode *node = root;
-  char *name = strtok(fullname, "/");
+  char *name = strtok_r(fullname, "/", &_strtok_static_);
 
   while(name) {   
     node = find_child(node, name);
     if(!node) return NULL;
 
-    name = strtok(NULL, "/");
+    name = strtok_r(NULL, "/", &_strtok_static_);
   }
 
 
@@ -477,7 +477,7 @@ fs_dir *fs_index::opendir(char *dir)
 
   fs_inode *node = root;
 
-  char *name = strtok(fullpath, "/");
+  char *name = strtok_r(fullpath, "/", &_strtok_static_);
   while(name) {
 
     //if(debug) printf("opendir name = %s\n",name);
@@ -486,7 +486,7 @@ fs_dir *fs_index::opendir(char *dir)
     node = find_child(node,name);
     if(!node) return NULL;
 
-    name = strtok(NULL, "/");
+    name = strtok_r(NULL, "/", &_strtok_static_);
   }
   
   fs_dir *ret = (fs_dir *)malloc(sizeof(fs_dir));

@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.35 2017/01/20 17:49:08 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.38 2017/01/27 20:13:02 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -59,8 +59,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool examinTrackDca(const StiKalmanTrack*, TrackData &t);
   void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);
   void matchTrack2CTB(const StiKalmanTrack*, TrackData &t);
-  void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t, float z);
-  void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
+  void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t);
+  void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t);
   bool matchTrack2Membrane(const StiKalmanTrack*, TrackData &t);
   bool isPostCrossingTrack(const StiKalmanTrack* track);
 
@@ -78,6 +78,12 @@ class StPPVertexFinder: public StGenericVertexFinder {
   int  eveID;
   uint  mAlgoSwitches; //binary, assign 1bit per change, use enum below
   enum {kSwitchOneHighPT=1}; 
+
+  TH1F *hA[mxH];
+  TH2F *hACorr;
+  TH1D *hL ;      // likelyhood distribution
+  TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
+  TObjArray HList;
 
   // params
   double mMinTrkPt;            ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -116,11 +122,6 @@ public:
   virtual void UsePCT(bool x=true) { mDropPostCrossingTrack = !x; }
   virtual void Finish();
 
-  TH1F *hA[mxH];
-  TH2F *hACorr;
-  TH1D *hL ;      // likelyhood distribution
-  TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
-  TObjArray * HList;
   StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::Beamline1D);
 
   // mandatory implementations

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.91 2017/01/26 22:51:40 perev Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.96 2017/01/27 20:13:16 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -40,17 +40,6 @@
 #include <StIOMaker/StIOMaker.h> // to save  local histos 
 #include <StBFChain/StBFChain.h>
 
-#define xL(t)   (t->getX())
-#define yL(t)   (t->getY())
-#define eyL(t)  sqrt(t->getCyy())
-#define zL(t)   (t->getZ())
-#define ezL(t)  sqrt(t->getCzz())
-#define rxyL(t) sqrt(xL(t)*xL(t) + yL(t)*yL(t)) 
-#define xG(t)   (t->x_g())
-#define yG(t)   (t->y_g())
-#define zG(t)   (t->z_g())
-#define rxyG(t) sqrt(xG(t)*xG(t) + yG(t)*yG(t)) 
-
 #include <StEEmcUtil/database/StEEmcDb.h>
 #include <StEEmcUtil/database/EEmcDbItem.h>
 #include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
@@ -70,23 +59,38 @@
 
 StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::PPVLikelihood, fitMode),
-  mDropPostCrossingTrack(true) // default PCT rejection on
+  mTrackData(), mVertexData(),
+  vertex3D(nullptr),
+  mTotEve(0), eveID(0),
+  mAlgoSwitches(kSwitchOneHighPT),
+  hA{}, hACorr(nullptr), hL(nullptr), hM(nullptr), hW(nullptr),
+  HList(),
+  mMinTrkPt(0.2),
+  mMaxTrkDcaRxy(3.),
+  mMaxZradius(3.),
+  mMinMatchTr(5),
+  mMaxZrange(200.),
+  mDyBtof(1.5),
+  mMinZBtof(-3.),
+  mMaxZBtof(3.),
+  mMinAdcBemc(8),
+  mMinAdcEemc(5),
+  mMinFitPfrac(0.51),
+  mFitPossWeighting(true),
+  mDropPostCrossingTrack(true), // default PCT rejection on
+  mStoreUnqualifiedVertex(5),
+  mCut_oneTrackPT(10.),
+  mStudyBeamLineTracks(false),
+  mToolkit(nullptr),
+  btofList(nullptr),
+  ctbList(nullptr),
+  bemcList(new BemcHitList()),
+  eemcList(nullptr),
+  btofGeom(nullptr),
+  geomE(nullptr)
 {
-
-  mTotEve              = 0;
-  HList=0;
-  mToolkit =0;
-  memset(hA,0,sizeof(hA));
-
   UseCTB(true);                      // default CTB is in the data stream
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
-
-  mAlgoSwitches=0; // default, as for 2008 pp data production
-
-  //........... tune for W-boson reco
-  mAlgoSwitches|=kSwitchOneHighPT;
-  mCut_oneTrackPT=10; // GeV, used only if coresponding algoSwitch switch is ON.
-  mStudyBeamLineTracks = false; // expert only, activation via BFC
 
   // special histogram for finding the vertex, not to be saved
   int nb=5000;
@@ -114,7 +118,6 @@ StPPVertexFinder::Init() {
   assert(mToolkit);          // internal error of Sti
   
   ctbList  = new CtbHitList;
-  bemcList = new BemcHitList;
   btofList = new BtofHitList;
   vertex3D = 0; // default
   
@@ -128,17 +131,16 @@ StPPVertexFinder::Init() {
   uint  killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
   eemcList =new EemcHitList(eeDb, killStatEEmc,geomE);
    
-  HList=new TObjArray(0);   
   initHisto();
 
   LOG_INFO << "initiated histos" << endm;
 
   if (mUseBtof)
-    btofList->initHisto( HList);
+    btofList->initHisto( &HList);
 
-  ctbList->initHisto( HList);
-  bemcList->initHisto( HList);
-  eemcList->initHisto( HList);
+  ctbList->initHisto( &HList);
+  bemcList->initHisto( &HList);
+  eemcList->initHisto( &HList);
 
   LOG_INFO << "Finished Init" << endm;
 }
@@ -153,7 +155,6 @@ StPPVertexFinder::InitRun(int runnumber){
   
  // Initialize BTOF geometry
   if (mUseBtof){ // only add btof if it is required
-    btofGeom = 0;
     TObjectSet *geom = (TObjectSet *) mydb->GetDataSet("btofGeometry");
     if (geom)   btofGeom = (StBTofGeometry *) geom->GetObject();
     if (btofGeom) {
@@ -217,7 +218,7 @@ StPPVertexFinder::InitRun(int runnumber){
     assert(vertex3D==0); // crash means initRun was called twice - not foreseen,Jan B.
     vertex3D=new Vertex3D;
     vertex3D->setCuts(0.8,8.0, 3.3,5); // pT1(GeV), pT2, sigY(cm), nTr
-    vertex3D->initHisto( HList);
+    vertex3D->initHisto( &HList);
     vertex3D->initRun();
   }
 
@@ -279,9 +280,9 @@ StPPVertexFinder::initHisto() {
 
   hACorr=new TH2F("BTOFvsBEMC","BTOF vs BEMC", 5,-2.5,2.5,5,-2.5,2.5);
 
-  for (int i=0; i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
+  for (int i=0; i<mxH; i++) if(hA[i]) HList.Add(hA[i]);
 
-  HList->Add(hACorr);
+  HList.Add(hACorr);
 }
 
 
@@ -357,10 +358,12 @@ void
 StPPVertexFinder::Clear(){
   LOG_DEBUG << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
-  btofList->clear();
-  ctbList->clear();
+
+  if (btofList) btofList->clear();
+  if (ctbList)  ctbList->clear();
   bemcList->clear();
-  eemcList->clear();
+  if (eemcList) eemcList->clear();
+
   mTrackData.clear();
   mVertexData.clear();
   eveID=-1;
@@ -533,8 +536,8 @@ StPPVertexFinder::fit(StEvent* event) {
     // ......... matcho various detectors ....................
     if(mUseBtof) matchTrack2BTOF(stiKalmanTrack, t, btofGeom);  // matching track to btofGeometry
     if(mUseCtb)  matchTrack2CTB(stiKalmanTrack, t);
-    matchTrack2BEMC(stiKalmanTrack, t, 242); // middle of tower in Rxy
-    matchTrack2EEMC(stiKalmanTrack, t, 288); // middle of tower in Z
+    matchTrack2BEMC(stiKalmanTrack, t); // middle of tower in Rxy
+    matchTrack2EEMC(stiKalmanTrack, t); // middle of tower in Z
     //.... all test done on this track .........
     t.mother = stiKalmanTrack;
     mTrackData.push_back(t); 
@@ -1025,9 +1028,9 @@ StPPVertexFinder::saveHisto(TString fname){
   TString outName=fname+".hist.root";
   TFile f( outName,"recreate");
   assert(f.IsOpen());
-  printf("%d histos are written  to '%s' ...\n",HList->GetEntries(),outName.Data());
-  HList->ls();
-  HList->Write();
+  printf("%d histos are written  to '%s' ...\n",HList.GetEntries(),outName.Data());
+  HList.ls();
+  HList.Write();
   f.Close();
 }
 
@@ -1109,24 +1112,24 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack* track, TrackData &t){
   if (!bmNode) 		return 0;
   if (!bmNode->isDca()) return 0;
 
-  float rxy=rxyG(bmNode);
+  float rxy=sqrt(bmNode->x_g()*bmNode->x_g() + bmNode->y_g()*bmNode->y_g());
 
   //1 cout<<"#e @beam global DCA x:"<< bmNode->x_g()<<" y:"<< bmNode->y_g()<<" z:"<< bmNode->z_g()<<" Rxy="<< rxy <<endl;
   if(rxy>mMaxTrkDcaRxy) return false;
   if( fabs(bmNode->z_g())> mMaxZrange )   return false ; 
  
-  //1 cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<xL(bmNode)<<" y="<<yL(bmNode)<<" +/- "<<eyL(bmNode)<<" z="<<zL(bmNode)<<" +/- "<<ezL(bmNode)<<endl;
+  //1 cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<bmNode->getX()<<" y="<<bmNode->getY()<<" +/- "<<sqrt(bmNode->getCyy())<<" z="<<bmNode->getZ()<<" +/- "<<sqrt(bmNode->getCzz())<<endl;
 
-  t.zDca   = zL(bmNode);
-  t.ezDca  = ezL(bmNode);
+  t.zDca   = bmNode->getZ();
+  t.ezDca  = sqrt(bmNode->getCzz());
   t.rxyDca = rxy;
   t.gPt    = bmNode->getPt();
 
   //...... record more detals for 3D vertex reco
-  t.dcaTrack.R.SetXYZ(xG(bmNode),yG(bmNode),zG(bmNode));
+  t.dcaTrack.R.SetXYZ(bmNode->x_g(),bmNode->y_g(),bmNode->z_g());
   // approximation below: use sigX=sigY, I do not want to deal wih rotations in X-Y plane, Jan B.
-  t.dcaTrack.sigYloc = eyL(bmNode);
-  t.dcaTrack.sigZ    = ezL(bmNode);
+  t.dcaTrack.sigYloc = sqrt(bmNode->getCyy());
+  t.dcaTrack.sigZ    = sqrt(bmNode->getCzz());
   StThreeVectorF const globP3 = bmNode->getGlobalMomentumF();
   t.dcaTrack.gP.SetXYZ(globP3.x(),globP3.y(),globP3.z());
   t.dcaTrack.fitErr    = bmNode->fitErrs();
@@ -1259,8 +1262,10 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
 //==========================================================
 //==========================================================
 void  
-StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, float Rxy){
+StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t){
   
+  const double Rxy = 242.; // middle of tower in Rxy
+
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
 
   //alternative helix extrapolation:
@@ -1306,10 +1311,11 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
 //==========================================================
 //==========================================================
 void  
-StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float z){
-  
-  const float minEta=0.7 ;// tmp cut
-  const float maxPath=200 ;// tmp, cut too long extrapolation
+StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t){
+
+  const double eemc_z_position = 288.; // middle of tower in Z
+  const double minEta=0.7 ;// tmp cut
+  const double maxPath=200 ;// tmp, cut too long extrapolation
 
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
   StiKalmanTrackNode* inNode=track->getInnerMostNode();
@@ -1320,7 +1326,7 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
   // droop too steep tracks
   if(track->getPseudoRapidity()<minEta) return;
 
-  StThreeVectorD rSmd=StThreeVectorD(0,0,z); 
+  StThreeVectorD rSmd=StThreeVectorD(0,0,eemc_z_position);
   StThreeVectorD n=StThreeVectorD(0,0,1);
 
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
@@ -1337,16 +1343,16 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
   if(path>maxPath) return; // too long extrapolation
 
   StThreeVectorD r = hlx.at(path);
-  float periodL=hlx. period();
+  double periodL=hlx. period();
  
   if(periodL<2*path) {
     LOG_DEBUG <<Form(" Warn, long path fac=%.1f ",path/periodL)<<
       Form("  punchEEMC1 x,y,z=%.1f, %.1f, %.1f path=%.1f period=%.1f\n",r.x(),r.y(),r.z(),path,periodL)<<endm; 
   }
 
-  float phi=atan2(r.y(),r.x());
+  double phi=atan2(r.y(),r.x());
   if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for Cyl slats
-  float eta=r.pseudoRapidity();
+  double eta=r.pseudoRapidity();
 
   int iBin=eemcList->addTrack(eta,phi);
   bool  eemcMatch=eemcList->isMatched(iBin);
@@ -1363,15 +1369,15 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
 //==========================================================
 bool  
 StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
-  const float RxyMin=59, RxyMax=199, zMax=200;
-  const float zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
+  const double RxyMin=59, RxyMax=199, zMax=200;
+  const double zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
 
   //generate bitt pattern for TPC nodes with hits 
   std::vector<int> hitPatt;
   int nPos=0,nFit=0;
   int in=0;
-  float lastRxy=9999;
-  float lastZ=9999;
+  double lastRxy=9999;
+  double lastZ=9999;
 
   int jz0=0;
   StiKTNBidirectionalIterator it;
@@ -1379,8 +1385,8 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     StiKalmanTrackNode* ktnp=& (*it);
     if(!ktnp->isValid()) continue;
     //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // ---> those track need to be counted as npossiblehit, commented out
-    float rxy=rxyG(ktnp); //ktn.getX();
-    float z=zG(ktnp);  //ktn.z_g();
+    double rxy=sqrt(ktnp->x_g()*ktnp->x_g() + ktnp->y_g()*ktnp->y_g()); //ktn.getX();
+    double z=ktnp->z_g();  //ktn.z_g();
     if(rxy<RxyMin) continue;
     if(rxy>RxyMax) continue;
     if(fabs(z)>zMax) continue;
@@ -1404,9 +1410,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     }
     const StiDetector * det=ktnp->getDetector();
     assert(!(ktnp->x()) || det);
-    bool active=!det || det->isActive(yL(ktnp), zL(ktnp));
+    bool active=!det || det->isActive(ktnp->getY(), ktnp->getZ());
     int hit=ktnp->getHit()?1:0;
-    if(active) {
+    if (active) {
       hitPatt.push_back(hit);
       nPos++;
       if(hit && ktnp->getChi2() <=1000 ) nFit++;

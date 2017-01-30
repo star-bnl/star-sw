@@ -185,6 +185,9 @@ class fs_index {
 
  private:
   fs_dirent _readdirent_static_;
+
+ protected:
+  char *_strtok_static_;
 };
   
   

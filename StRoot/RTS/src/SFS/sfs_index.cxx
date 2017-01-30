@@ -1071,10 +1071,10 @@ void sfs_index::addnode(SFS_ittr *ittr)
   
   strcpy(fullpath, ittr->fullpath);
 
-  next[0] = strtok(&fullpath[1], "/");
+  next[0] = strtok_r(&fullpath[1], "/", &_strtok_static_);
   
   int nn=1;
-  while((next[nn] = strtok(NULL, "/"))) nn++;
+  while((next[nn] = strtok_r(NULL, "/", &_strtok_static_))) nn++;
     
   fs_inode *inode = root;
     
