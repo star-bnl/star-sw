@@ -177,8 +177,8 @@ void bfc(Int_t First, Int_t Last,
   TString tChain(Chain);
   if (tChain == "") {
   if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
-    if ( TString(gProgName) == "root4star") tChain = "MC.2016a,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom";
-    else                                    tChain = "MC.2016a,vmc,20Muons,StiCA,-hitfilt,KFVertex,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,-useXgeom,-geantOut";
+    if ( TString(gProgName) == "root4star") tChain = "MC.2016a,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,useXgeom";
+    else                                    tChain = "MC.2016a,vmc,20Muons,StiCA,-hitfilt,KFVertex,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,StiHftC,-useXgeom,-geantOut";
       //                                             "test.RC.AuAu200.y2016,StiCA,KFVertex";
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
