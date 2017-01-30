@@ -119,6 +119,7 @@ StVMCMaker::Make
 #include "TGeometry.h"
 #include "TGeoManager.h"
 #include "TObjectSet.h"
+#include "TInterpreter.h"
 #include "StVMCMaker.h"
 #include "StChain.h"
 #include "Stiostream.h"
@@ -142,6 +143,23 @@ Int_t StVMCMaker::Init() {
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (! IAttr("VMCPassive")) {
     gMessMgr->Info() << "StVMCMaker::InitRun Active mode" << endm; 
+    TString CintF(SAttr("GeneratorFile"));
+    if (CintF != "") {
+      static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
+      Char_t *file = gSystem->Which(path,CintF,kReadPermission);
+      if (! file) Fatal("StVMCMaker::Init","File %s has not been found in path %s",CintF.Data(),path);
+      else        Warning("StVMCMaker::Init","File %s has been found as %s",CintF.Data(),file);
+      TString command(Form(".L %s",file));
+      TInterpreter::EErrorCode ee;
+      gInterpreter->ProcessLine(command,&ee);
+      assert(!ee);
+      TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
+      assert(!ee);
+      AddConst(d);
+      command.ReplaceAll(".L ",".U ");
+      gInterpreter->ProcessLine(command,&ee);
+      assert(!ee);
+    } 
     StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();
     if (! generator) {
       if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
