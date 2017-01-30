@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.14 2016/11/22 18:23:32 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.15 2017/01/30 17:50:16 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.15  2017/01/30 17:50:16  akio
+ * adding Fpost
+ *
  * Revision 1.14  2016/11/22 18:23:32  akio
  * added getLorentzVector to take into account beamline angles/offsets for pt calc
  *
@@ -67,6 +70,7 @@ struct fmsGain_st;
 struct fmsGainCorrection_st;
 struct fmsTimeDepCorr_st;
 struct fmsRec_st;
+
 struct fpsConstant_st;
 struct fpsChannelGeometry_st;
 struct fpsSlatId_st;
@@ -74,6 +78,14 @@ struct fpsPosition_st;
 struct fpsMap_st;
 struct fpsGain_st;
 struct fpsStatus_st;
+
+struct fpostConstant_st;
+struct fpostChannelGeometry_st;
+struct fpostSlatId_st;
+struct fpostPosition_st;
+struct fpostMap_st;
+struct fpostGain_st;
+struct fpostStatus_st;
 
 class StFmsHit;
 class StFmsPoint;
@@ -107,6 +119,13 @@ class StFmsDbMaker : public StMaker {
   fpsMap_st*              FpsMap();
   fpsGain_st*             FpsGain();
   fpsStatus_st*           FpsStatus();
+  fpostConstant_st*         FpostConstant();
+  fpostChannelGeometry_st** FpostChannelGeometry();
+  fpostSlatId_st*           FpostSlatId();
+  fpostPosition_st*         FpostPosition();
+  fpostMap_st*              FpostMap();
+  fpostGain_st*             FpostGain();
+  fpostStatus_st*           FpostStatus();
 
   //! Utility functions related to FMS ChannelGeometry
   UShort_t maxDetectorId(); //! maximum value of detector Id
@@ -200,6 +219,27 @@ class StFmsDbMaker : public StMaker {
   UShort_t fpsStatus(int quad, int layer, int slat);
   Int_t   fpsSlatIdFromG2t(int g2tvolid);
 
+  //! FPost related
+  Int_t   fpostNQuad();
+  Int_t   fpostNLayer();
+  Int_t   fpostMaxSlat();
+  Int_t   fpostMaxQTaddr();
+  Int_t   fpostMaxQTch();
+  Int_t   fpostMaxSlatId();
+  Int_t   fpostNSlat(int quad, int layer);
+  Int_t   fpostSlatId(int quad, int layer, int slat);
+  void    fpostQLSfromSlatId(int slatid, int* quad, int* layer, int* slat);
+  void    fpostPosition(int slatid, float xyz[3], float dxyz[3], float * angle);
+  void    fpostPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3], float* angle);
+  void    fpostQTMap(int slatid, int* QTaddr, int* QTch);
+  Int_t   fpostSlatidFromQT(int QTaddr, int QTch);
+  void    fpostQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat);
+  Float_t fpostGain(int slatid);
+  Float_t fpostGain(int quad, int layer, int slat);
+  UShort_t fpostStatus(int slatid);
+  UShort_t fpostStatus(int quad, int layer, int slat);
+  Int_t   fpostSlatIdFromG2t(int g2tvolid);
+
   //! text dump for debugging
   void dumpFmsChannelGeometry (const Char_t* filename="dumpFmsChannelGeometry.txt");
   void dumpFmsDetectorPosition(const Char_t* filename="dumpFmsDetectorPosition.txt");
@@ -209,6 +249,7 @@ class StFmsDbMaker : public StMaker {
   void dumpFmsGain            (const Char_t* filename="dumpFmsGain.txt");
   void dumpFmsGainCorrection  (const Char_t* filename="dumpFmsGainCorrection.txt");
   void dumpFmsTimeDepCorr     (const Char_t* filename="dumpFmsTimeDepCorr.txt");
+  void dumpFmsRec             (const Char_t* filename="dumpFmsRec.txt");
   void dumpFpsConstant        (const Char_t* filename="dumpFpsConstant.txt");
   void dumpFpsChannelGeometry (const Char_t* filename="dumpFpsChannelGeometry.txt");
   void dumpFpsSlatId          (const Char_t* filename="dumpSlatId.txt"); 
@@ -216,7 +257,13 @@ class StFmsDbMaker : public StMaker {
   void dumpFpsMap             (const Char_t* filename="dumpFpsMap.txt");
   void dumpFpsGain            (const Char_t* filename="dumpFpsGain.txt");
   void dumpFpsStatus          (const Char_t* filename="dumpFpsStatus.txt");
-  void dumpFmsRec             (const Char_t* filename="dumpFmsRec.txt");
+  void dumpFpostConstant        (const Char_t* filename="dumpFpostConstant.txt");
+  void dumpFpostChannelGeometry (const Char_t* filename="dumpFpostChannelGeometry.txt");
+  void dumpFpostSlatId          (const Char_t* filename="dumpSlatId.txt"); 
+  void dumpFpostPosition        (const Char_t* filename="dumpFpostPosition.txt");
+  void dumpFpostMap             (const Char_t* filename="dumpFpostMap.txt");
+  void dumpFpostGain            (const Char_t* filename="dumpFpostGain.txt");
+  void dumpFpostStatus          (const Char_t* filename="dumpFpostStatus.txt");
 
  private:
   void                  deleteArrays();
@@ -267,7 +314,7 @@ class StFmsDbMaker : public StMaker {
   Int_t                   mReadRecParam=0; //!
 
   fpsConstant_st*         mFpsConstant=0;
-  Int_t                   mMaxSlatId=0;
+  Int_t                   mFpsMaxSlatId=0;
   fpsChannelGeometry_st** mFpsChannelGeometry=0;
   fpsSlatId_st*           mFpsSlatId=0;
   Int_t***                mFpsReverseSlatId=0;
@@ -276,9 +323,20 @@ class StFmsDbMaker : public StMaker {
   Int_t**                 mFpsReverseMap=0;
   fpsGain_st*             mFpsGain=0;
   fpsStatus_st*           mFpsStatus=0;
+
+  fpostConstant_st*         mFpostConstant=0;
+  Int_t                     mFpostMaxSlatId=0;
+  fpostChannelGeometry_st** mFpostChannelGeometry=0;
+  fpostSlatId_st*           mFpostSlatId=0;
+  Int_t***                  mFpostReverseSlatId=0;
+  fpostPosition_st*         mFpostPosition=0;
+  fpostMap_st*              mFpostMap=0;
+  Int_t**                   mFpostReverseMap=0;
+  fpostGain_st*             mFpostGain=0;
+  fpostStatus_st*           mFpostStatus=0;
   
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
-  ClassDef(StFmsDbMaker,2)   //StAF chain virtual base class for Makers
+  ClassDef(StFmsDbMaker,3)   //StAF chain virtual base class for Makers
 };
 
 #endif

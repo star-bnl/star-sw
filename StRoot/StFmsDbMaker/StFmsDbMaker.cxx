@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.21 2016/11/22 18:23:32 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.22 2017/01/30 17:50:16 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.22  2017/01/30 17:50:16  akio
+ * adding Fpost
+ *
  * Revision 1.21  2016/11/22 18:23:32  akio
  * added getLorentzVector to take into account beamline angles/offsets for pt calc
  *
@@ -89,6 +92,13 @@
 #include "tables/St_fpsMap_Table.h"
 #include "tables/St_fpsGain_Table.h"
 #include "tables/St_fpsStatus_Table.h"
+#include "tables/St_fpostConstant_Table.h"
+#include "tables/St_fpostChannelGeometry_Table.h"
+#include "tables/St_fpostSlatId_Table.h"
+#include "tables/St_fpostPosition_Table.h"
+#include "tables/St_fpostMap_Table.h"
+#include "tables/St_fpostGain_Table.h"
+#include "tables/St_fpostStatus_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 
 #include "getCellPosition2015pp.h"
@@ -151,6 +161,13 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   St_fpsMap             *dbFpsMap            =0;   
   St_fpsGain            *dbFpsGain           =0;
   St_fpsStatus          *dbFpsStatus         =0;
+  St_fpostConstant        *dbFpostConstant       =0;
+  St_fpostChannelGeometry *dbFpostChannelGeometry=0;
+  St_fpostSlatId          *dbFpostSlatId         =0;
+  St_fpostPosition        *dbFpostPosition       =0;
+  St_fpostMap             *dbFpostMap            =0;   
+  St_fpostGain            *dbFpostGain           =0;
+  St_fpostStatus          *dbFpostStatus         =0;
 
   dbChannelGeometry   = (St_fmsChannelGeometry*) DBgeom->Find("fmsChannelGeometry");
   dbDetectorPosition  = (St_fmsDetectorPosition*)DBgeom->Find("fmsDetectorPosition");
@@ -169,6 +186,13 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   dbFpsMap            = (St_fpsMap*)             DBFpsGeom->Find("fpsMap");
   dbFpsGain           = (St_fpsGain*)            DBFpsCalibration->Find("fpsGain");
   dbFpsStatus         = (St_fpsStatus*)          DBFpsCalibration->Find("fpsStatus");
+  dbFpostConstant       = (St_fpostConstant*)        DBFpsGeom->Find("fpostConstant");
+  dbFpostChannelGeometry= (St_fpostChannelGeometry*) DBFpsGeom->Find("fpostChannelGeometry");
+  dbFpostSlatId         = (St_fpostSlatId*)          DBFpsGeom->Find("fpostSlatId"); 
+  dbFpostPosition       = (St_fpostPosition*)        DBFpsGeom->Find("fpostPosition");
+  dbFpostMap            = (St_fpostMap*)             DBFpsGeom->Find("fpostMap");
+  dbFpostGain           = (St_fpostGain*)            DBFpsCalibration->Find("fpostGain");
+  dbFpostStatus         = (St_fpostStatus*)          DBFpsCalibration->Find("fpostStatus");
 
   if(!dbChannelGeometry)   {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fms/fmsChannelGeometry"         <<endm; return kStFatal;}
   if(!dbDetectorPosition)  {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fms/fmsDetectorPosition"        <<endm; return kStFatal;}
@@ -188,6 +212,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbFpsMap)            {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsMap"                     <<endm;}
   if(!dbFpsGain)           {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsGain"                 <<endm;}
   if(!dbFpsStatus)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsStatus"               <<endm;}
+
+  if(!dbFpostConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fpost/fpostConstant"                <<endm;}  
+  if(!dbFpostChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fpost/fpostChannelGeometry"         <<endm;}
+  if(!dbFpostSlatId)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fpost/fpostSlatId"                  <<endm;}
+  if(!dbFpostPosition)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fpost/fpostPosition"                <<endm;}
+  if(!dbFpostMap)            {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fpost/fpostMap"                     <<endm;}
+  if(!dbFpostGain)           {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fpost/fpostGain"                 <<endm;}
+  if(!dbFpostStatus)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fpost/fpostStatus"               <<endm;}
 
   //!fmsChannelGeometry
   fmsChannelGeometry_st *tChannelGeometry = 0;
@@ -425,8 +457,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       tFpsConstant = (fpsConstant_st*) dbFpsConstant->GetTable();
       mFpsConstant = new fpsConstant_st;
       memcpy(mFpsConstant,tFpsConstant,sizeof(fpsConstant_st));
-      mMaxSlatId=fpsNQuad()*fpsNLayer()*fpsMaxSlat();
-      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsConstant maxSlatId="<<mMaxSlatId<<endm;
+      mFpsMaxSlatId=fpsNQuad()*fpsNLayer()*fpsMaxSlat();
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsConstant maxSlatId="<<mFpsMaxSlatId<<endm;
   }
       
   int mI=0, mQ = 0, mL=0, mS=0;
@@ -569,6 +601,157 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       }
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpsStatus with max slat Id="<<max<<endm;
   }
+
+  //!fpostConstant
+  if(dbFpostConstant){
+      fpostConstant_st *tFpostConstant = 0;
+      tFpostConstant = (fpostConstant_st*) dbFpostConstant->GetTable();
+      mFpostConstant = new fpostConstant_st;
+      memcpy(mFpostConstant,tFpostConstant,sizeof(fpostConstant_st));
+      mFpostMaxSlatId=fpostNQuad()*fpostNLayer()*fpostMaxSlat();
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpostConstant maxSlatId="<<mFpostMaxSlatId<<endm;
+  }
+      
+  mI=0; mQ=0; mL=0; mS=0;
+  //!fpostChannelGeometry
+  if(dbFpostChannelGeometry){
+      fpostChannelGeometry_st *tFpostChannelGeometry = 0;
+      tFpostChannelGeometry = (fpostChannelGeometry_st*) dbFpostChannelGeometry->GetTable();
+      max = dbFpostChannelGeometry->GetNRows();
+      for(Int_t i=0; i<max; i++){
+	  if(mQ < tFpostChannelGeometry[i].quad)  mQ=tFpostChannelGeometry[i].quad;
+	  if(mL < tFpostChannelGeometry[i].layer) mL=tFpostChannelGeometry[i].layer;
+      }
+      if(mQ>fpostNQuad())  LOG_WARN << "StFmsDbMaker::InitRun - fpostChannelGeometry has more quad than fpostConstant"<<endm;
+      if(mL>fpostNLayer()) LOG_WARN << "StFmsDbMaker::InitRun - fpostChannelGeometry has more layer than fpostConstant"<<endm;
+      mFpostChannelGeometry = new fpostChannelGeometry_st*[fpostNQuad()]();
+      for(int i=0; i<fpostNQuad(); i++) mFpostChannelGeometry[i]= new fpostChannelGeometry_st[fpostNLayer()]();
+      for(Int_t i=0; i<max; i++){ 
+	  memcpy(&mFpostChannelGeometry[tFpostChannelGeometry[i].quad-1][tFpostChannelGeometry[i].layer-1], 
+		 &tFpostChannelGeometry[i], sizeof(fpostChannelGeometry_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpostChannelGeometry with maxQuad="<<mQ<<" and maxLayer="<<mL<<endm;
+  }
+
+  //!fpostSlatId
+  if(dbFpostSlatId){
+      fpostSlatId_st *tFpostSlatId = 0;
+      tFpostSlatId = (fpostSlatId_st*) dbFpostSlatId->GetTable();
+      max = dbFpostSlatId->GetNRows();
+      mI=0; mQ=0; mL=0; mS=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpostSlatId[i].slatid) mI=tFpostSlatId[i].slatid;
+	  if(mQ < tFpostSlatId[i].quad)   mQ=tFpostSlatId[i].quad;
+	  if(mL < tFpostSlatId[i].layer)  mL=tFpostSlatId[i].layer;
+	  if(mS < tFpostSlatId[i].slat)   mS=tFpostSlatId[i].slat;
+      }
+      if(max>fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostSlatId has more row than fpostConstant"<<endm;
+      if(mI>fpostMaxSlatId())  LOG_WARN << "StFmsDbMaker::InitRun - fpostSlatId has more slatId than fpostConstant"<<endm;
+      if(mQ>fpostNQuad())      LOG_WARN << "StFmsDbMaker::InitRun - fpostSlatId has more quad than fpostConstant"<<endm;
+      if(mL>fpostNLayer())     LOG_WARN << "StFmsDbMaker::InitRun - fpostSlatId has more layer than fpostConstant"<<endm;
+      if(mS>fpostMaxSlat())    LOG_WARN << "StFmsDbMaker::InitRun - fpostSlatId has more slat than fpostConstant"<<endm;
+      mFpostSlatId = new fpostSlatId_st[max];
+      mFpostReverseSlatId = new int**[fpostNQuad()]();
+      for(int i=0; i<fpostNQuad(); i++) {
+	  mFpostReverseSlatId[i] = new int*[fpostNLayer()]();
+	  for(int j=0; j<fpostNLayer(); j++) {
+	      mFpostReverseSlatId[i][j] = new int[fpostMaxSlat()]();
+	      for(int k=0; k<fpostMaxSlat(); k++) mFpostReverseSlatId[i][j][k]=-1;
+	  }    
+      }
+      for(Int_t i=0; i<max; i++){ 
+	  memcpy(&mFpostSlatId[tFpostSlatId[i].slatid],&tFpostSlatId[i],sizeof(fpostSlatId_st));
+	  if(tFpostSlatId[i].quad>0 && tFpostSlatId[i].layer>0 && tFpostSlatId[i].slat>0){
+	      mFpostReverseSlatId[tFpostSlatId[i].quad-1][tFpostSlatId[i].layer-1][tFpostSlatId[i].slat-1]=tFpostSlatId[i].slatid;
+	  }
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpostSlatId with max slat Id="<<max<<endm;
+  }
+
+  //!fpostPosition
+  if(dbFpostPosition){
+      fpostPosition_st *tFpostPosition = 0;
+      tFpostPosition = (fpostPosition_st*) dbFpostPosition->GetTable();
+      max = dbFpostPosition->GetNRows();
+      mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpostPosition[i].slatid) mI=tFpostPosition[i].slatid;
+      }
+      if(max>fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostPosition has more row than fpostConstant"<<endm;
+      if( mI>fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostPosition has more slatId than fpostConstant"<<endm;
+      mFpostPosition = new fpostPosition_st[max]();
+      //memset(mFpostPosition,0,sizeof(*mFpostPosition));
+      for(Int_t i=0; i<max; i++){ 
+	  if(tFpostPosition[i].slatid==0 && tFpostPosition[i].xoffset==0.0 && tFpostPosition[i].yoffset==0.0) continue;
+	  memcpy(&mFpostPosition[tFpostPosition[i].slatid],&tFpostPosition[i],sizeof(fpostPosition_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpostPosition with max slat Id="<<max<<endm;
+  }
+
+  //!fpostMap
+  if(dbFpostMap){
+      fpostMap_st *tFpostMap = 0;
+      tFpostMap = (fpostMap_st*) dbFpostMap->GetTable();
+      max = dbFpostMap->GetNRows();
+      if(max>fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostMap has more slatId than fpostConstant"<<endm;
+      int mA = 0, mC=0; mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpostMap[i].slatid) mI=tFpostMap[i].slatid;
+	  if(mA < tFpostMap[i].QTaddr) mA=tFpostMap[i].QTaddr;
+	  if(mC < tFpostMap[i].QTch)   mC=tFpostMap[i].QTch;
+      }
+      if(max>fpostMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpostMap has more row than fpostConstant"<<endm;
+      if(mI >fpostMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpostMap has more slatid than fpostConstant"<<endm;
+      if(mA>=fpostMaxQTaddr()) LOG_WARN << "StFmsDbMaker::InitRun - fpostMap has more QTaddr"<<endm;
+      if(mC>=fpostMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpostMap has more QTch"<<endm;
+      mFpostMap = new fpostMap_st[max];
+      mFpostReverseMap = new int*[fpostMaxQTaddr()]();
+      for(int i=0; i<fpostMaxQTaddr(); i++) mFpostReverseMap[i] = new int[fpostMaxQTch()]();
+      for(Int_t i=0; i<max; i++){ 
+	  memcpy(&mFpostMap[tFpostMap[i].slatid],&tFpostMap[i],sizeof(fpostMap_st));
+	  if(tFpostMap[i].QTaddr>=0 && tFpostMap[i].QTch>=0)
+	      mFpostReverseMap[tFpostMap[i].QTaddr][tFpostMap[i].QTch]=tFpostMap[i].slatid;
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpostMap with max slat Id="<<max<<endm;
+  }
+
+  //!fpostGain
+  if(dbFpostGain){
+      fpostGain_st *tFpostGain = 0;
+      tFpostGain = (fpostGain_st*) dbFpostGain->GetTable();
+      max = dbFpostGain->GetNRows();
+      int mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpostGain[i].slatid) mI=tFpostGain[i].slatid;
+      }
+      if(max>fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostGain has more row than fpostConstant"<<endm;
+      if(mI >fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostGain has more slatId than fpostConstant"<<endm;
+      mFpostGain = new fpostGain_st[max]();
+      //memset(mFpostGain,0,sizeof(*mFpostGain));
+      for(Int_t i=0; i<max; i++){
+	  memcpy(&mFpostGain[tFpostGain[i].slatid],&tFpostGain[i],sizeof(fpostGain_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpostGain with max slat Id="<<max<<endm;
+  }
+
+  //!fpostStatus
+  if(dbFpostStatus){
+      fpostStatus_st *tFpostStatus = 0;
+      tFpostStatus = (fpostStatus_st*) dbFpostStatus->GetTable();
+      max = dbFpostStatus->GetNRows();
+      mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpostStatus[i].slatid) mI=tFpostStatus[i].slatid;
+      }
+      if(max>fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostStatus has more row than fpostConstant"<<endm;
+      if(mI >fpostMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpostStatus has more slatId than fpostConstant"<<endm;
+      mFpostStatus = new fpostStatus_st[max]();
+      //memset(mFpostStatus,0,sizeof(*mFpostStatus));
+      for(Int_t i=0; i<max; i++){
+	  memcpy(&mFpostStatus[tFpostStatus[i].slatid],&tFpostStatus[i],sizeof(fpostStatus_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpostStatus with max slat Id="<<max<<endm;
+  }
   
   //!Debug
   if(mDebug>0){
@@ -587,6 +770,12 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     if(dbFpsMap) dumpFpsMap();        
     if(dbFpsGain) dumpFpsGain();            
     if(dbFpsStatus) dumpFpsStatus();            
+    if(dbFpostChannelGeometry) dumpFpostChannelGeometry(); 
+    if(dbFpostSlatId) dumpFpostSlatId();          
+    if(dbFpostPosition) dumpFpostPosition();        
+    if(dbFpostMap) dumpFpostMap();        
+    if(dbFpostGain) dumpFpostGain();            
+    if(dbFpostStatus) dumpFpostStatus();            
   }
   return kStOK;
 }
@@ -644,6 +833,36 @@ void StFmsDbMaker::deleteArrays(){
     delete [] mFpsChannelGeometry;
   }
   if(mFpsConstant) delete mFpsConstant; //this comes last since some delete above uses this
+  //FPost
+  if(mFpostGain) delete [] mFpostGain;
+  if(mFpostStatus) delete [] mFpostStatus;
+  if(mFpostReverseMap){
+    for(Int_t i=0; i<fpostNQuad(); i++){
+      if(mFpostReverseMap[i]) delete [] mFpostReverseMap[i];
+    }
+    delete [] mFpostReverseMap;
+  }	
+  if(mFpostMap) delete [] mFpostMap;
+  if(mFpostPosition) delete [] mFpostPosition;
+  if(mFpostReverseSlatId){
+    for(Int_t i=0; i<fpostNQuad(); i++){
+      if(mFpostReverseSlatId[i]){
+	for(Int_t j=0; j<fpostNLayer(); j++){
+	  if(mFpostReverseSlatId[i][j]) delete [] mFpostReverseSlatId[i][j];
+	}
+	delete [] mFpostReverseSlatId[i];
+      }
+    }
+    delete [] mFpostReverseSlatId;
+  }
+  if(mFpostSlatId) delete [] mFpostSlatId;
+  if(mFpostChannelGeometry) {
+    for(Int_t d=0; d<fpostNQuad(); d++){
+      if(mFpostChannelGeometry[d]) delete [] mFpostChannelGeometry[d];
+    }
+    delete [] mFpostChannelGeometry;
+  }
+  if(mFpostConstant) delete mFpostConstant; //this comes last since some delete above uses this
 }
 
 //! get coordinates of center of the cell in STAR frame from detectorId/ch
@@ -731,6 +950,12 @@ fpsSlatId_st*           StFmsDbMaker::FpsSlatId()         {return mFpsSlatId;}
 fpsPosition_st*         StFmsDbMaker::FpsPosition()       {return mFpsPosition;}
 fpsMap_st*              StFmsDbMaker::FpsMap()            {return mFpsMap;}
 fpsGain_st*             StFmsDbMaker::FpsGain()           {return mFpsGain;}
+fpostConstant_st*         StFmsDbMaker::FpostConstant()       {return mFpostConstant;}
+fpostChannelGeometry_st** StFmsDbMaker::FpostChannelGeometry(){return mFpostChannelGeometry;}
+fpostSlatId_st*           StFmsDbMaker::FpostSlatId()         {return mFpostSlatId;}
+fpostPosition_st*         StFmsDbMaker::FpostPosition()       {return mFpostPosition;}
+fpostMap_st*              StFmsDbMaker::FpostMap()            {return mFpostMap;}
+fpostGain_st*             StFmsDbMaker::FpostGain()           {return mFpostGain;}
 
 //!ChannelGeometry
 UShort_t StFmsDbMaker::maxDetectorId()             {return mMaxDetectorId;}
@@ -1047,7 +1272,7 @@ inline Int_t StFmsDbMaker::fpsNLayer()    {if(mFpsConstant) {return mFpsConstant
 inline Int_t StFmsDbMaker::fpsMaxSlat()   {if(mFpsConstant) {return mFpsConstant->maxSlat;} else {return 0;}}
 inline Int_t StFmsDbMaker::fpsMaxQTaddr() {if(mFpsConstant) {return mFpsConstant->maxQTaddr;} else {return 0;}}
 inline Int_t StFmsDbMaker::fpsMaxQTch()   {if(mFpsConstant) {return mFpsConstant->maxQTch;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mMaxSlatId;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mFpsMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpsNSlat(int quad, int layer) {
   if(quad>0 && quad<fpsNQuad() && layer>0 && layer<fpsNLayer()) return mFpsChannelGeometry[quad-1][layer-1].nslat;
@@ -1245,6 +1470,218 @@ void StFmsDbMaker::dumpFpsStatus(const Char_t* filename){
       int q,l,s;
       fpsQLSfromSlatId(i,&q,&l,&s);
       int g = fpsStatus(q,l,s);
+      fprintf(fp,"SlatId=%3d Q=%1d L=%1d S=%2d Status=%d\n",
+              i,q,l,s,g);
+    }
+    fclose(fp);
+  }
+}
+
+inline Int_t StFmsDbMaker::fpostNQuad()     {if(mFpostConstant) {return mFpostConstant->nQuad;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpostNLayer()    {if(mFpostConstant) {return mFpostConstant->nLayer;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpostMaxSlat()   {if(mFpostConstant) {return mFpostConstant->maxSlat;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpostMaxQTaddr() {if(mFpostConstant) {return mFpostConstant->maxQTaddr;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpostMaxQTch()   {if(mFpostConstant) {return mFpostConstant->maxQTch;} else {return 0;}}
+inline Int_t StFmsDbMaker::fpostMaxSlatId() {if(mFpostConstant) {return mFpostMaxSlatId;} else {return 0;}}
+
+Int_t StFmsDbMaker::fpostNSlat(int quad, int layer) {
+  if(quad>0 && quad<fpostNQuad() && layer>0 && layer<fpostNLayer()) return mFpostChannelGeometry[quad-1][layer-1].nslat;
+  return 0;
+}
+
+void StFmsDbMaker::fpostQLSfromSlatId(int slatid, int* quad, int* layer, int* slat){
+  if(slatid>=0 && slatid<fpostMaxSlatId()){
+    *quad =mFpostSlatId[slatid].quad;
+    *layer=mFpostSlatId[slatid].layer;
+    *slat =mFpostSlatId[slatid].slat;
+  }else{
+    *quad=0; *layer=0; *slat=0;
+  }
+}
+
+Int_t StFmsDbMaker::fpostSlatId(int quad, int layer, int slat) {
+  if(quad>0 && quad<=fpostNQuad() && layer>0 && layer<=fpostNLayer() && slat>0 && slat<=fpostMaxSlat()){
+    return mFpostReverseSlatId[quad-1][layer-1][slat-1];
+  }
+  return -1;
+}
+
+Int_t StFmsDbMaker::fpostSlatIdFromG2t(int g2tvolid){
+  int q = (g2tvolid/1000)%10;
+  int l = (g2tvolid/100)%10;
+  int s = g2tvolid%100;
+  return fpostSlatId(q,l,s);
+}
+
+void StFmsDbMaker::fpostPosition(int slatid, float xyz[3], float dxyz[3], float *angle){
+    if(slatid>=0 && slatid<fpostMaxSlatId()){
+	xyz[0]=mFpostPosition[slatid].xoffset;
+	xyz[1]=mFpostPosition[slatid].yoffset;
+	xyz[2]=mFpostPosition[slatid].zoffset;
+	dxyz[0]=mFpostPosition[slatid].length;
+	dxyz[1]=mFpostPosition[slatid].width;
+	dxyz[2]=mFpostPosition[slatid].thickness;
+	*angle=mFpostPosition[slatid].angle_xy;
+	return;
+    }
+    memset(xyz,0,sizeof(*xyz)); 
+    memset(dxyz,0,sizeof(*dxyz));
+    *angle=0.0;
+}
+
+inline void StFmsDbMaker::fpostPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3], float* angle){
+  fpostPosition(fpostSlatId(quad,layer,slat),xyz,dxyz,angle);
+}
+
+void StFmsDbMaker::fpostQTMap(int slatid, int* QTaddr, int* QTch){
+  if(slatid>=0 && slatid<fpostMaxSlatId()){
+    *QTaddr=mFpostMap[slatid].QTaddr;
+    *QTch=mFpostMap[slatid].QTch;
+    return;
+  }
+  *QTaddr=-1; 
+  *QTch=-1;
+}
+
+Int_t StFmsDbMaker::fpostSlatidFromQT(int QTaddr, int QTch){
+  if(QTaddr>=0 && QTaddr<fpostMaxQTaddr() && QTch>=0 && QTch<fpostMaxQTch()){
+    return mFpostReverseMap[QTaddr][QTch];
+  }
+  return -1;
+}
+
+inline void StFmsDbMaker::fpostQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat){
+  int slatid=fpostSlatidFromQT(QTaddr,QTch);
+  fpostQLSfromSlatId(slatid,quad,layer,slat);    
+}
+
+Float_t StFmsDbMaker::fpostGain(int slatid){
+  if(slatid>=0 && slatid<fpostMaxSlatId()) return mFpostGain[slatid].MIP;
+  return 0.0;
+}
+
+inline Float_t StFmsDbMaker::fpostGain(int quad, int layer, int slat){
+  return fpostGain(fpostSlatId(quad,layer,slat));
+}
+
+UShort_t StFmsDbMaker::fpostStatus(int slatid){
+  if(slatid>=0 && slatid<fpostMaxSlatId()) return mFpostStatus[slatid].status;
+  return 999;
+}
+
+inline UShort_t StFmsDbMaker::fpostStatus(int quad, int layer, int slat){
+  return fpostStatus(fpostSlatId(quad,layer,slat));
+}
+
+void StFmsDbMaker::dumpFpostConstant(const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){
+    fprintf(fp,"nQuad     = %d\n",fpostNQuad());
+    fprintf(fp,"nLayer    = %d\n",fpostNLayer());
+    fprintf(fp,"maxSlat   = %d\n",fpostMaxSlat());
+    fprintf(fp,"maxQTAddr = %d\n",fpostMaxQTaddr());
+    fprintf(fp,"maxQTch   = %d\n",fpostMaxQTch());
+    fprintf(fp,"maxSlatId = %d\n",fpostMaxSlatId());
+    fclose(fp);
+  }
+}
+
+void StFmsDbMaker::dumpFpostChannelGeometry (const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){
+    for(int q=1; q<=fpostNQuad(); q++){
+      for(int l=1; l<=fpostNLayer(); l++){
+	fprintf(fp,"Q=%1d L=%1d NLayer=%2d\n",q,l,fpostNSlat(q,l));
+      }
+    }
+    fclose(fp);
+  }
+}
+
+void StFmsDbMaker::dumpFpostSlatId (const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){    
+    for(int i=0; i<fpostMaxSlatId(); i++){
+      int q,l,s,id;
+      fpostQLSfromSlatId(i,&q,&l,&s);
+      id=fpostSlatId(q,l,s);
+      fprintf(fp,"SlatId=%3d Q=%1d L=%1d S=%2d Reversemap=%3d\n",i,q,l,s,id);	      
+      if(i!=id) fprintf(fp,"Reversemap did not work!!!\n");
+    }
+    fclose(fp);
+  }
+}
+
+void StFmsDbMaker::dumpFpostPosition(const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){
+    for(int i=0; i<fpostMaxSlatId(); i++){
+      int q,l,s;
+      float x[3],d[3],angle;
+      fpostQLSfromSlatId(i,&q,&l,&s);
+      fpostPosition(q,l,s,x,d,&angle);
+      fprintf(fp,"SlatId=%3d Q=%1d L=%1d S=%2d xyz=%8.3f %8.3f %8.3f dxyz=%8.3f %8.3f %8.3f Angle=%8.3f\n",
+	      i,q,l,s,x[0],x[1],x[2],d[0],d[1],d[2],angle);
+    }
+    fclose(fp);
+  }
+}
+
+void StFmsDbMaker::dumpFpostMap(const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){
+    fprintf(fp,"SlatId ordered\n");
+    for(int i=0; i<fpostMaxSlatId(); i++){
+      int a,c,q,l,s;
+      fpostQTMap(i,&a,&c);
+      fpostQLSFromQT(a,c,&q,&l,&s);
+      int id=fpostSlatId(q,l,s);
+      fprintf(fp,"SlatId=%3d Q=%1d L=%1d S=%2d QTAddr=%2d QTch=%2d\n",
+              i,q,l,s,a,c);      
+      if(id!=i)  fprintf(fp,"Reversemap did not work!!!\n");
+    }
+    fprintf(fp,"QT ordered\n");
+    for(int a=0; a<fpostMaxQTaddr(); a++){
+      for(int c=0; c<fpostMaxQTch(); c++){
+	int q,l,s;
+	fpostQLSFromQT(a,c,&q,&l,&s);
+	int id=fpostSlatId(q,l,s);
+	fprintf(fp,"QTAddr=%2d QTch=%2d SlatId=%3d Q=%1d L=%1d S=%2d\n",
+		a,c,id,q,l,s);
+      }
+    }
+    fclose(fp);
+  }
+}
+
+void StFmsDbMaker::dumpFpostGain(const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){
+    for(int i=0; i<fpostMaxSlatId(); i++){
+      int q,l,s;
+      fpostQLSfromSlatId(i,&q,&l,&s);
+      float g = fpostGain(q,l,s);
+      fprintf(fp,"SlatId=%3d Q=%1d L=%1d S=%2d MIP=%8.3f\n",
+	      i,q,l,s,g);
+    }
+    fclose(fp);
+  }
+}
+
+void StFmsDbMaker::dumpFpostStatus(const Char_t* filename){
+  FILE* fp;
+  LOG_INFO << "Writing "<<filename<<endm;
+  if((fp=fopen(filename,"w"))){
+    for(int i=0; i<fpostMaxSlatId(); i++){
+      int q,l,s;
+      fpostQLSfromSlatId(i,&q,&l,&s);
+      int g = fpostStatus(q,l,s);
       fprintf(fp,"SlatId=%3d Q=%1d L=%1d S=%2d Status=%d\n",
               i,q,l,s,g);
     }

@@ -87,7 +87,7 @@ void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone
 	  while(fscanf(fp,"%d %d %d %f",&rew,&rnstb,&rch,&rcorr) != EOF){
 	      int detid=getDetectorId(rew,rnstb);
 	      int index=idx[detid][rch-1];
-	      //printf("EW=%5d NSTB=%5d CH=%5d Gain=%6.4f | det=%2d idx=%4d\n",rew,rnstb,rch,rcorr,detid,index);	  
+	      printf("EW=%5d NSTB=%5d CH=%5d Gain=%6.4f | det=%2d idx=%4d\n",rew,rnstb,rch,rcorr,detid,index);	  
 	      if(rew==1) continue; //hack! ignore east
 	      if(detid != corr[index].detectorId) printf("ERR DetId %d != %d\n",detid,corr[index].detectorId); 
 	      if(rch   != corr[index].ch)         printf("ERR Ch    %d != %d\n",rch,corr[index].ch);
