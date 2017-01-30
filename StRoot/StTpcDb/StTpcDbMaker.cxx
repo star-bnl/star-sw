@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.64 2017/01/06 22:30:45 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.65 2017/01/30 17:54:18 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.65  2017/01/30 17:54:18  fisyak
+ * Remove dependce on StEvent
+ *
  * Revision 1.64  2017/01/06 22:30:45  genevb
  * Introduce FullGridLeak distortion correction
  *
@@ -204,7 +207,6 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
-#include "StEventTypes.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
