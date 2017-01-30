@@ -133,7 +133,15 @@ void epdBuilder::startrun(daqReader *rdr) {
   LOG("JEFF", "epdBuilder starting run #%d",rdr->run);
   //Read EPD mapping
   FILE *fp = fopen("/evp/a/jevp/client/epd/epdMap.txt","r");
-  if(fp==NULL) LOG("EPD","Mapping file does not exist");
+  if(fp==NULL) {
+      LOG("EPD","Mapping file does not exist");
+      disable_builder = 1;
+      return;
+  }
+  else {
+      disable_builder = 0;
+  }
+
   short ew;
   short pp;
   short tile;
@@ -167,37 +175,38 @@ void epdBuilder::startrun(daqReader *rdr) {
 
 void epdBuilder::event(daqReader *rdr) {
 
+    if(disable_builder) return;
 
-  StTriggerData *trgd = getStTriggerData(rdr);
-  if(!trgd) return;
-
-
-
-  for(int ibrd=0;ibrd<4;ibrd++){
-    for(int ch=0;ch<32;ch++){
-      contents.hQT[ibrd]->Fill(ch, trgd->fmsADC(5,qtbrdaddr[ibrd],ch,0));
-    }
-  }
+    StTriggerData *trgd = getStTriggerData(rdr);
+    if(!trgd) return;
 
 
 
-  for(int ew=0;ew<2;ew++){
-    for(int pp=0;pp<12;pp++){
-      for(int tile=0;tile<31;tile++){
-
-	if( mEPDMap[ew][pp][tile].qt_channel_ADC > -900){
-	  contents.hADC[ew][pp]->Fill(tile, trgd->fmsADC(5,mEPDMap[ew][pp][tile].qt_board_address, mEPDMap[ew][pp][tile].qt_channel_ADC,0) );
+    for(int ibrd=0;ibrd<4;ibrd++){
+	for(int ch=0;ch<32;ch++){
+	    contents.hQT[ibrd]->Fill(ch, trgd->fmsADC(5,qtbrdaddr[ibrd],ch,0));
 	}
-	if( mEPDMap[ew][pp][tile].qt_channel_TAC > -900){
-	  contents.hTAC[ew][pp]->Fill(tile, trgd->fmsADC(5,mEPDMap[ew][pp][tile].qt_board_address, mEPDMap[ew][pp][tile].qt_channel_TAC,0) );
-	}
-      }
     }
-  }
 
 
 
-  if(trgd) delete trgd;
+    for(int ew=0;ew<2;ew++){
+	for(int pp=0;pp<12;pp++){
+	    for(int tile=0;tile<31;tile++){
+
+		if( mEPDMap[ew][pp][tile].qt_channel_ADC > -900){
+		    contents.hADC[ew][pp]->Fill(tile, trgd->fmsADC(5,mEPDMap[ew][pp][tile].qt_board_address, mEPDMap[ew][pp][tile].qt_channel_ADC,0) );
+		}
+		if( mEPDMap[ew][pp][tile].qt_channel_TAC > -900){
+		    contents.hTAC[ew][pp]->Fill(tile, trgd->fmsADC(5,mEPDMap[ew][pp][tile].qt_board_address, mEPDMap[ew][pp][tile].qt_channel_TAC,0) );
+		}
+	    }
+	}
+    }
+
+
+
+    if(trgd) delete trgd;
 }
 
 void epdBuilder::stoprun(daqReader *rdr) {
