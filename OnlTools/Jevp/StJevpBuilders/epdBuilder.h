@@ -27,6 +27,7 @@ class epdBuilder : public JevpBuilder {
     static void main(int argc, char *argv[]);
 
   private:
+    int disable_builder;
 
     union {
       TH1 *array[];

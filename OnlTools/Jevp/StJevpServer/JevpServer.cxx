@@ -55,6 +55,7 @@
 //#include "Jevp/StJevpBuilders/ssdBuilder.h"
 #include "Jevp/StJevpBuilders/ppBuilder.h"
 #include "Jevp/StJevpBuilders/fpsBuilder.h"
+#include "Jevp/StJevpBuilders/epdBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 
@@ -676,6 +677,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	//builders.Add(new istBuilder(this));
 	//builders.Add(new ssdBuilder(this));
 	builders.Add(new ppBuilder(this));
+	builders.Add(new epdBuilder(this));
     }
     else {
 	builders.Add(new trgBuilder(this));

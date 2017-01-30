@@ -21,12 +21,13 @@ system("diff $oldfile $newfile > /dev/null");
 $x = $?;
 
 if($x == 0) {
-    printf "files (old=$oldfile new=$newfile)the same...no archive\n";
+    system("rtsLog -d JEFF -p 8004 -c archiveHistoDefs.pl \"$oldfile == $newfile:  no archive\"");
     exit;
 } 
 
+system("rtsLog -d JEFF -p 8004 -c archiveHistoDefs.pl \"$oldfile != $newfile:  archive\"");
 #printf("archivefile: $archivefile\n");
-printf "files different... archiving to $archivefile\n";
+#printf "files different... archiving to $archivefile\n";
 system("cp $newfile $archivefile");
 
 system("cp $newfile $oldfile");
