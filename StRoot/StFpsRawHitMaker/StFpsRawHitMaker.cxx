@@ -1,8 +1,11 @@
 // \class StFpsRawHitMaker
 // \author Akio Ogawa
 //
-//  $Id: StFpsRawHitMaker.cxx,v 1.3 2017/01/30 17:49:28 akio Exp $
+//  $Id: StFpsRawHitMaker.cxx,v 1.4 2017/01/30 18:10:16 akio Exp $
 //  $Log: StFpsRawHitMaker.cxx,v $
+//  Revision 1.4  2017/01/30 18:10:16  akio
+//  remove LOG_INFO
+//
 //  Revision 1.3  2017/01/30 17:49:28  akio
 //  adding FPost
 //
@@ -80,11 +83,11 @@ Int_t StFpsRawHitMaker::Make(){
  
     // 2017
     int fpsfpost=rts_tbl->Sector();
-    int xing=rts_tbl->Pad();
+    int xing=rts_tbl->Pad();  if(xing>=128) xing-=256;
     int qt=rts_tbl->Row(); 
 
     int ndata=rts_tbl->GetNRows();
-    LOG_INFO << Form("FPS: fps/fpost=%1d xing=%4d QT=%02d NData=%d",fpsfpost,xing,qt,ndata)<<endm;
+    LOG_DEBUG << Form("FPS: fps/fpost=%1d xing=%4d QT=%02d NData=%d",fpsfpost,xing,qt,ndata)<<endm;
     if(mPrePost==0 && xing!=0) continue;  
     for(StRtsTable::iterator it=rts_tbl->begin(); it!=rts_tbl->end(); it++){
       fps_adc_t *a=(fps_adc_t *)*it;
@@ -93,7 +96,7 @@ Int_t StFpsRawHitMaker::Make(){
       int adc=a->adc;
       int tdc=a->tdc;  
       int slatid,q,l,s,det,crate;
-      if(fpsfpost==0){
+      if(fpsfpost==1){
 	  slatid = mFmsDbMaker->fpsSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
 	  mFmsDbMaker->fpsQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
 	  LOG_DEBUG << Form("FPS: xing=%4d QT%02d ch%02d Slaiid=%3d Q%1dL%1dS%02d ADC=%4d TDC=%2d",xing,qt,ch,slatid,q,l,s,adc,tdc)<<endm;
@@ -106,7 +109,7 @@ Int_t StFpsRawHitMaker::Make(){
 	  det=kFpostDetId;
 	  crate=kFpostQtCrate;
       }
-      n[fpsfpost]++;
+      n[fpsfpost-1]++;
       int flag=0;	
       if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
       if(q<1 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
@@ -127,12 +130,12 @@ Int_t StFpsRawHitMaker::Make(){
 	hit->setEnergy(nmip);
 	mFmsCollection->addHit(hit);
 	if(Debug()) hit->print();	 
-	ngood[fpsfpost]++;
+	ngood[fpsfpost-1]++;
       }
     }
   }
   LOG_DEBUG << Form("StFpsRawHitMaker:: FPS   found total %d hits and %d good",n[0],ngood[0]) << endm;
-  LOG_DEBUG << Form("StFpsRawHitMaker:: FPOST found total %d hits and %d good",n[1],ngood[1]) << endm;
+  LOG_DEBUG<< Form("StFpsRawHitMaker:: FPOST found total %d hits and %d good",n[1],ngood[1]) << endm;
   return kStOK;
 }
 
