@@ -1302,7 +1302,7 @@ Bfc_st BFC[] = { // standard chains
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
   {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-  {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,KFParticle","","TpcDb,StEvent"
+  {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,dbUtil,KFParticle","","StTpcDb,StEvent"
    ,                                                                                 "Load StEvent",kFALSE},
   {"PxlUtil"     ,""  ,"","","",                                       "StPxlUtil","Load StPxlUtil",kFALSE},
   {"IstUtil"     ,""  ,"","","",                                       "StIstUtil","Load StIstUtil",kFALSE},
@@ -1367,16 +1367,16 @@ Bfc_st BFC[] = { // standard chains
   // both sst and ssd are in the same SsdX libraries -----------V
   {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
   {"sstDb"      ,"sstDb","","tpcDb,SstUtil","StSstDbMaker","StSsdDbMaker","Load and run SstDbMaker",kFALSE},
-
-  {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
-  {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
-  {"sstCalDb"    ,""     ,"","sstDb"         ,"","","Declare Calibrations/sst as while list member",kFALSE},
-
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb,PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
+
+  {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
+  {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
+  {"sstCalDb"    ,""     ,"","sstDb"         ,"","","Declare Calibrations/sst as while list member",kFALSE},
+
   {"Stu"         ,""  ,"","","",                 "StTpcDb,StEventUtilities","Load StEventUtilities",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1402,8 +1402,7 @@ Bfc_st BFC[] = { // standard chains
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
-  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,StSvtDbMaker,StSsdDbMaker,"
-   "StarVMCApplication",                                                                   "VMC G3",kFALSE},
+  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,StarVMCApplication","VMC G3",kFALSE},
   {"VMCAlignment","","","","","",                                                   "VMC Alignment",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl",       "StVMCMaker","StVMCMaker","VMC Maker in Passive Mode",kFALSE},
@@ -1666,7 +1665,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
   {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd",kFALSE},
-  {"StiSst"   ,"","",""                        ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd(t)",kFALSE},
+  {"StiSst"   ,"","",""                           ,"","StSstUtil,StSstDbMaker,StiSst","Load StiSst",kFALSE},
   {"StiPxl"   ,"","",""                           ,"","StPxlUtil,StPxlDbMaker,StiPxl","Load StiPxl",kFALSE},
   {"StiIst"   ,"","",""                           ,"","StIstUtil,StIstDbMaker,StiIst","Load StiIst",kFALSE},
   {"StiBToF"  ,"","",""                                                ,"",",StiBTof","Load StiIst",kFALSE},
