@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.22 2017/01/30 17:50:16 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.23 2017/01/30 19:47:24 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.23  2017/01/30 19:47:24  akio
+ * fix fps/fpost empty slatid
+ *
  * Revision 1.22  2017/01/30 17:50:16  akio
  * adding Fpost
  *
@@ -555,7 +558,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       if(mC>=fpsMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTch"<<endm;
       mFpsMap = new fpsMap_st[max];
       mFpsReverseMap = new int*[fpsMaxQTaddr()]();
-      for(int i=0; i<fpsMaxQTaddr(); i++) mFpsReverseMap[i] = new int[fpsMaxQTch()]();
+      for(int i=0; i<fpsMaxQTaddr(); i++) {
+	  mFpsReverseMap[i] = new int[fpsMaxQTch()];
+	  for(int j=0; j<fpsMaxQTch(); j++) mFpsReverseMap[i][j]=-1;       
+      }
       for(Int_t i=0; i<max; i++){ 
 	  memcpy(&mFpsMap[tFpsMap[i].slatid],&tFpsMap[i],sizeof(fpsMap_st));
 	  if(tFpsMap[i].QTaddr>=0 && tFpsMap[i].QTch>=0)
@@ -706,7 +712,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       if(mC>=fpostMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpostMap has more QTch"<<endm;
       mFpostMap = new fpostMap_st[max];
       mFpostReverseMap = new int*[fpostMaxQTaddr()]();
-      for(int i=0; i<fpostMaxQTaddr(); i++) mFpostReverseMap[i] = new int[fpostMaxQTch()]();
+      for(int i=0; i<fpostMaxQTaddr(); i++) {
+	  mFpostReverseMap[i] = new int[fpostMaxQTch()];
+	  for(int j=0; j<fpostMaxQTch(); j++) mFpostReverseMap[i][j]=-1;       
+      }
       for(Int_t i=0; i<max; i++){ 
 	  memcpy(&mFpostMap[tFpostMap[i].slatid],&tFpostMap[i],sizeof(fpostMap_st));
 	  if(tFpostMap[i].QTaddr>=0 && tFpostMap[i].QTch>=0)
