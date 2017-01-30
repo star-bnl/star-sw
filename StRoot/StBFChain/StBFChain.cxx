@@ -486,6 +486,8 @@ Int_t StBFChain::Instantiate()
 	}
       }
       if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
+      TString CintF(SAttr("GeneratorFile"));
+      if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
     }
 
     // ---
