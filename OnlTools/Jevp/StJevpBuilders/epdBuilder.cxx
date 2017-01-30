@@ -132,7 +132,9 @@ void epdBuilder::initialize(int argc, char *argv[]) {
 void epdBuilder::startrun(daqReader *rdr) {
   LOG("JEFF", "epdBuilder starting run #%d",rdr->run);
   //Read EPD mapping
-  FILE *fp = fopen("/evp/a/jevp/client/epd/epdMap.txt","r");
+  char fn[256];
+  sprintf(fn, "%s/epd/epdMap.txt",clientdatadir);
+  FILE *fp = fopen(fn,"r");
   if(fp==NULL) {
       LOG("EPD","Mapping file does not exist");
       disable_builder = 1;
