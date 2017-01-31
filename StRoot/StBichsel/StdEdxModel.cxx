@@ -17,7 +17,7 @@
 #include "TRandom.h"
 #include "TMultiDimFit.h"
 #include "StdEdxModel.h"
-#include "StMessMgr.h" 
+//#include "StMessMgr.h" 
 using namespace std;
 ClassImp(StdEdxModel)
 StdEdxModel  *StdEdxModel::fgStdEdxModel = 0;
@@ -53,7 +53,8 @@ StdEdxModel* StdEdxModel::instance() {
 }
 //________________________________________________________________________________
 StdEdxModel::StdEdxModel() {
-  LOG_INFO << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endm;
+  //  LOG_INFO << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endm;
+  cout << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endl;
   if (! fgStdEdxModel) {
     TDirectory *dir = gDirectory;
     fgStdEdxModel = this;
