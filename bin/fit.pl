@@ -104,6 +104,9 @@ foreach my $rootfile (@rootfiles) {
 	if ($sec >= 0) {
 	  $rootcmd .= "\",\"R\"," . $sec . ")'";
 	} else {
+	  if ($hist =~ /Edge/) {
+	    $rootcmd .= ",-1,-1,1,3";
+	  }
 	  $rootcmd .=	"\")'";
 	}
 	$rootcmd .= " >& " . $log;

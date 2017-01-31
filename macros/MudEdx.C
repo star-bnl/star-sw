@@ -2,6 +2,18 @@
   root.exe 'lMuDst.C(-2,"/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/*.MuDst.root","RMuDst","MuOut.root")' MudEdx.C+
   root.exe lMuDst.C 'MudEdx.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
   root.exe MudEdx1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
+
+
+gStyle->SetOptStat(0)
+FitP->Draw("mu:y>>P(720,-360,360,100,-0.1,0.1)","i&&j&&abs(x)<3&&x>0.3","colz")
+FitP->Draw("mu:y>>N(720,-360,360,100,-0.1,0.1)","i&&j&&abs(x)<3&&x<-0.3","colz")
+P->ProfileX()->Draw()
+N->SetMarkerColor(2)
+N->ProfileX()->Draw("same")
+TLegend *l = new TLegend(0.3,0.6,0.5,0.8)
+l->AddEntry(P_pfx,"Positive")
+l->Draw()
+l->AddEntry(N_pfx,"Negative")
  */
 //#define DEBUG
 //#define __SPARSE__

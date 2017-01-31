@@ -12,8 +12,8 @@ my %ARG = (files => '*.root',
            FilesPerJob => '40',
 	   Out => 'hadd',
 	   version => '.DEV2',
-#	   platform => '64b',
-	   platform => '32b',
+	   platform => '64b',
+#	   platform => '32b',
 #	   gcc => 'gcc451',
 	   keep => 'yes',
 	   prefix => '',
@@ -168,9 +168,10 @@ foreach my $key (sort keys %TagList) {
     print "Create $SCRIPT\n";
     print OUT "#!/bin/tcsh -v\n";
     print OUT "cd $DIR\n";
-#    print OUT "setup " . $ARG{platform} . "\n";
+    print OUT "setenv NODEBUG yes\n";
+    print OUT "setup " . $ARG{platform} . "\n";
 #    print OUT "setup " . $ARG{gcc} . "\n";
-#    print OUT "starver " . $ARG{version} . "\n";
+    print OUT "starver " . $ARG{version} . "\n";
     print OUT "$cmd\n";
     if ($ARG{keep} eq 'no') {
       print OUT "if (\$? == 0) rm $list;\n";
