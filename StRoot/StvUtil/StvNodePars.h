@@ -190,6 +190,12 @@ static double EmxSign(int n,const double *S);
 static double EmxSign(int n,const float  *S);
 
 public:	
+//  dH: along ort to dir and in Track/Z plane
+//  dA: delta azimuth angle; 
+//  dP: == d(1./Pt) where Pt is signed as curvature;  
+//  dZ: ort to dH and in plane dH,Zaxis;When lamda=0 it is Zaxis 
+//  dL = dLambda, angle between track and X,Y plane
+
 double
 mHH,
 mHZ, mZZ,
