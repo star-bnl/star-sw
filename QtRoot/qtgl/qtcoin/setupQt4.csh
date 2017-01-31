@@ -1,10 +1,10 @@
-if (-x $GROUP_DIR/dropit) then
+if (-x $GROUP_DIR/dropit && ! $?QTDIR) then
    setenv PATH `dropit qt Qt`
    setenv LD_LIBRARY_PATH `dropit -p $LD_LIBRARY_PATH qt Qt`
-if ( $STAR_HOST_SYS == 'sl44_icc101') then
-setenv QTDIR $ROOTROOT/Qt4/sl44_icc101/Qt-4.4.3
-else
-setenv QTDIR /opt/star/sl44_gcc346/qt4
+#if ( $STAR_HOST_SYS == 'sl44_icc101') then
+#setenv QTDIR $ROOTROOT/Qt4/sl44_icc101/Qt-4.4.3
+#else
+#setenv QTDIR /opt/star/sl44_gcc346/qt4
 #setenv QTDIR $ROOTROOT/Qt4/.sl44_gcc346/4.4.0
 endif
 setenv PATH ${PATH}:${QTDIR}/bin
