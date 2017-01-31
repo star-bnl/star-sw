@@ -869,7 +869,10 @@ if ( $?QTDIR ) then
     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${QTDIR}/lib
     setenv PATH ${QTDIR}/bin:${PATH}
 endif
-
+if (! $?IVROOT && -d $XOPTSTAR/include/Inventor ) setenv IVROOT $XOPTSTAR
+if ($?IVROOT == 0 && $?STAR) then
+   if (-r $STAR/QtRoot/qtgl/qtcoin/setup.csh) source $STAR/QtRoot/qtgl/qtcoin/setup.csh 
+endif
 
 
 # ==================================================================
