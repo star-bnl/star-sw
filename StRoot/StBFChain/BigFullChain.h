@@ -514,7 +514,8 @@ Bfc_st BFC[] = { // standard chains
   {"test.RC.pp200long.NoHFT.y2015","","","RC.pp2015.nohft,-hitfilt,Sti","",""          
    ,                              "/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
   {"test.RC.AuAu200.y2016","","","RC.y2016,-hitfilt,Sti","",""          
-   ,                              "/star/rcf/test/daq/2016/056/st_physics_17056024_raw_1500020.daq",kFALSE}, 
+   ,                              "/star/rcf/test/daq/2016/078/st_physics_17078006_raw_1000030.daq",kFALSE},
+  //   ,                              "/star/rcf/test/daq/2016/056/st_physics_17056024_raw_1500020.daq",kFALSE}, 
   //_________ eval _____________
   {"eval_Sti_auau200.MC.y2007"  ,"","","MC.y2007,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf1296_02_100evts.fzd",kFALSE},

@@ -28,16 +28,15 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		percentMethaneInP percentMethaneInPA percentMethaneInPC
 		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
 		Z3C 
-		dX3C TanL3DC Edge3
+		dX3C TanL3DC Edge3 Edge3C
 	      ); # PressureTC Volt VoltC Z3OC Zdc3C 
   @histRL5 = @histGF;
   @histGP = qw (
 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
-		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
-		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
-		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
-		 PullI70 PullIfit PullNfit
-	      ); 
+	      );
+#		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
+#		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
+#		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
   @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN Edge3N); #Edge3N PressureTN VoltN Zdc3N  Z3ON 
 #  @histXF = @histNF;
 }
@@ -105,7 +104,7 @@ foreach my $rootfile (@rootfiles) {
 	  $rootcmd .= "\",\"R\"," . $sec . ")'";
 	} else {
 	  if ($hist =~ /Edge/) {
-	    $rootcmd .= ",-1,-1,1,3";
+	    $rootcmd .= ",\"R\",-1,-1,1,3";
 	  }
 	  $rootcmd .=	"\")'";
 	}

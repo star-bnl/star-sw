@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "TDatime.h"
 #include "tables/St_tpcCorrection_Table.h"
+#ifndef DEBUGTABLE
 #define DEBUGTABLE(STRUCT)						\
   TDatime t[2];								\
   if (St_db_Maker::GetValidity(table,t) > 0) {				\
@@ -17,6 +18,7 @@
     if (Nrows > 10) Nrows = 10;						\
     if (table->GetRowSize() < 512) table->Print(0,Nrows);		\
   }
+#endif
 #define MakeString(PATH) # PATH
 #define MakeChairInstance(STRUCT,PATH)					\
 ClassImp(St_ ## STRUCT ## C); \

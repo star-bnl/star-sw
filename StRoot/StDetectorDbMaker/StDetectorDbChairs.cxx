@@ -1,8 +1,58 @@
 #include <assert.h>
+#include <string.h>
 #include "StDetectorDbMaker.h"
-#include "StarChairDefs.h"
 #include "TEnv.h"
 #include "St_db_Maker/St_db_Maker.h"
+#if 0
+#include "tables/St_tpcCorrection_Table.h"
+#include "tables/St_tpcSectorT0offset_Table.h"
+#include "tables/St_tofTrayConfig_Table.h"
+#define DEBUGTABLE(STRUCT) PrintTable(#STRUCT,table )
+#define makeString(PATH) # PATH
+#define CHECKTABLE(C_STRUCT) \
+  if (table->InheritsFrom("St_" makeSTRING(C_STRUCT))) {	  \
+    St_ ## C_STRUCT  *t = (St_ ## C_STRUCT  *) table ;	      \
+    ## C_STRUCT ## _st *s = t->GetTable(); Nrows = s->nrows;    \
+    ## C_STRUCT ## _st def = {0};				      \
+    iprt = kFALSE;					      \
+    Int_t shift = 0; \
+    Int_t NrowSize = t->GetRowSize(); \
+    if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;}\
+    if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def->t0[i] = -22.257;} \
+    if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def->entries = 120; for (Int_t i = 0; i < 120; i++) {def->iTray[i] = i+1; def->nModules[i] = 32;} \
+
+    for (Int_t i = 0; i < table->GetNRows(); i++, s++) {	      \
+      if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;}   \
+    }								      \
+  } 
+//___________________Debug Print out  _____________________________________________________________
+void PrintTable(const Char_t *str, TTable *table) {
+  TDatime t[2];
+  Bool_t iprt = kTRUE;
+  if (St_db_Maker::GetValidity(table,t) > 0) {
+    Int_t Nrows = table->GetNRows();
+    LOG_WARN << "St_" << str << "C::instance found table " << table->GetName()
+	     << " with NRows = " << Nrows << " in db" << endm;
+    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+    if (table->InheritsFrom("St_tpcCorrection")) {
+      St_tpcCorrection *t = (St_tpcCorrection *) table;
+      tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
+    if (Nrows > 10) Nrows = 10;
+    CHECKTABLE(tpcCorrection);
+    CHECKTABLE(tpcHVPlanes);
+    CHECKTABLE(Survey);
+    CHECKTABLE(tpcSectorT0offset);
+    CHECKTABLE(tofTrayConfig);
+    if (iprt) {
+      if (table->GetRowSize() < 512) table->Print(0,Nrows);
+    } else {
+      LOG_WARN << "Default table" << endm;
+    }
+  }
+}
+#endif
+#include "StarChairDefs.h"
 static Int_t _debug = 0;
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
