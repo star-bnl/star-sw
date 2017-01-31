@@ -63,8 +63,6 @@ const StvFitPars &operator*(const StvFitDers &t) const;
 const double *Arr()  const 			{return &mH;}
 operator const double *() const			{return &mH;}
 operator       double *() 			{return &mH;}
-//       double &operator[](int i)       		{return (&mH)[i];}
-// const double &operator[](int i) const      	{return (&mH)[i];}
 StvFitPars &operator*=(double f) 
     		{for(int i=0;i<5;i++){(*this)[i]*=f;} return *this;}
 
@@ -146,9 +144,12 @@ public:
 };
 class StvNodeErrs {
 public:	
+StvNodeErrs(){reset();assert(&_cTT-&_cXX+1==21);}
 void reset()				{memset(this,0,sizeof(StvNodeErrs));}
+operator const double *() const { return &_cXX;}
+operator       double *()       { return &_cXX;}
 public:	
-union{double A[1];double _cXX;};
+  double _cXX;
   double _cYX,_cYY;                       
   double _cZX,_cZY, _cZZ;                 
   double _cEX,_cEY, _cEZ, _cEE;           
@@ -204,10 +205,9 @@ class StvHitErrs{
 public:
 StvHitErrs()			 {reset();}
 void reset()			 {memset(this,0,sizeof(*this));}
-StvHitErrs &operator*=(double f) {for (int i=0;i<6;i++){A[i]*=f;};return *this;}
+StvHitErrs &operator*=(double f) {for (int i=0;i<6;i++){(&hXX)[i]*=f;};return *this;}
 void rotate(double angle);
-union{
-  double hXX;		double A[1];};
+  double hXX;		
   double hXY,hYY;                       
   double hXZ,hYZ,hZZ;                 
 };
