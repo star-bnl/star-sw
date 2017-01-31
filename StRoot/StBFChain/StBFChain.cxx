@@ -164,17 +164,10 @@ Int_t StBFChain::Load()
 	      if (Base == libN) {iok = 1; break;}
 	    }
 	    if (iok > 0) continue;
-
-
-	    //LOG_QA  << "Trying to load Library " << libL << endm;
-
-
 	    iok = gSystem->Load(libL);
 	    if (iok < 0)  {
-
 	      LOG_FATAL  << "problem with loading of " << libL.Data() << endm;
 	      LOG_FATAL  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
-
 	      //fBFC[i].Flag = kFALSE;
 	      //status = kStErr;
 	      //assert(iok >= 0); ?? obviously it is so, but not very specific
