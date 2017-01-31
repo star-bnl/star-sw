@@ -12,6 +12,12 @@ void fpsPosition_db(char* opt="", char* year="15sim", char* input="fpsgeom2.txt"
   }else if(yr.Contains("15sim")){
     storeTime="2014-12-10 00:00:00";
     date = 20141210; time = 0;
+  }else if(yr.Contains("17ofl")){
+      storeTime="2016-12-20 00:00:00";
+      date = 20161220; time = 0;
+  }else if(yr.Contains("17sim")){
+      storeTime="2016-12-10 00:00:00";
+      date = 20161210; time = 0;
   }else{
     std::cout << "Please specify valid year tag\n"; exit;
   }
