@@ -9,66 +9,55 @@
 #include <cmath>
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/math/kinem.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
 namespace Heed {
 
-double cos_theta_two_part(double Ep0, double Ep1, double Mp, double Mt) {
+double cos_theta_two_part(const double Ep0, const double Ep1, 
+                          const double Mp, const double Mt) {
   mfunname("double cos_theta_two_part(...)");
 
-  double Mp2 = Mp * Mp * c_squared * c_squared;
-  Mt *= c_squared;
-  double d0 = Ep0 * Ep0 - Mp2;
+  const double Mp2 = Mp * Mp;
+  const double d0 = Ep0 * Ep0 - Mp2;
   check_econd11(d0, <= 0, mcerr);
-  double d1 = Ep1 * Ep1 - Mp2;
+  const double d1 = Ep1 * Ep1 - Mp2;
   check_econd11(d1, <= 0, mcerr);
-  double r = (-2.0 * Ep0 * Mt + 2.0 * Ep0 * Ep1 + 2.0 * Mt * Ep1 - 2.0 * Mp2) /
-             (2.0 * sqrt(d0) * sqrt(d1));
-  return r;
+  return (-Ep0 * Mt + Ep0 * Ep1 + Mt * Ep1 - Mp2) / sqrt(d0 * d1);
 }
 
-void theta_two_part(double Ep0, double Ep1, double Mp, double Mt,
-                    double& theta_p, double& theta_t) {
+void theta_two_part(const double Ep0, const double Ep1, const double Mp, 
+                    const double Mt, double& theta_p, double& theta_t) {
   mfunname("void theta_two_part(...)");
 
-  double Mp2 = Mp * Mp * c_squared * c_squared;
-  Mt *= c_squared;
-  double d0 = Ep0 * Ep0 - Mp2;
+  const double Mp2 = Mp * Mp;
+  const double d0 = Ep0 * Ep0 - Mp2;
   check_econd11(d0, <= 0, mcerr);
-  double d1 = Ep1 * Ep1 - Mp2;
+  const double d1 = Ep1 * Ep1 - Mp2;
   check_econd11(d1, <= 0, mcerr);
-  double ctheta = (-2.0 * Ep0 * Mt + 2.0 * Ep0 * Ep1 + 2.0 * Mt * Ep1 -
-                   2.0 * Mp2) / (2.0 * sqrt(d0) * sqrt(d1));
+  double ctheta = (-Ep0 * Mt + Ep0 * Ep1 + Mt * Ep1 - Mp2) / sqrt(d0 * d1);
   if (ctheta < -1.0) ctheta = -1.0;
   if (ctheta > 1.0) ctheta = 1.0;
   theta_p = acos(ctheta);
-  //Iprintn(mcout, theta_p);
-  if (theta_p == 0.0)
+  if (theta_p == 0.0) {
     theta_t = 0.5 * M_PI;
-  else {
-    double Pp1 = Ep1 * Ep1 - Mp2;
-    check_econd11(Pp1, < 0, mcerr);
-    if (Pp1 != 0.0) {
-      Pp1 = sqrt(Pp1);
-      //Iprintn(mcout, Pp1);
-      double d3 = Ep0 + Mt - Ep1;
-      double dd1 = d3 * d3 - Mt * Mt;
-      check_econd11(dd1, <= 0, mcerr);
-      double dd2 = sqrt(dd1);
-      check_econd11(dd2, <= 0, mcerr);
-      //Iprintn(mcout, dd2);
-      //Iprintn(mcout, sin(theta_p));
-      double stheta_t = -Pp1 * (sin(theta_p) / dd2);
-      //Iprintn(mcout, stheta_t);
-      if (stheta_t < -1.0) stheta_t = -1.0;
-      if (stheta_t > 1.0) stheta_t = 1.0;
-      theta_t = asin(stheta_t);
-      //Iprintn(mcout, theta_t);
-    } else {
-      theta_t = 0.5 * M_PI;
-    }
+    return;
   }
+  double Pp1 = Ep1 * Ep1 - Mp2;
+  check_econd11(Pp1, < 0, mcerr);
+  if (Pp1 == 0.0) {
+    theta_t = 0.5 * M_PI;
+    return;
+  }
+  Pp1 = sqrt(Pp1);
+  const double d3 = Ep0 + Mt - Ep1;
+  const double dd1 = d3 * d3 - Mt * Mt;
+  check_econd11(dd1, <= 0, mcerr);
+  const double dd2 = sqrt(dd1);
+  check_econd11(dd2, <= 0, mcerr);
+  double stheta_t = -Pp1 * (sin(theta_p) / dd2);
+  if (stheta_t < -1.0) stheta_t = -1.0;
+  if (stheta_t > 1.0) stheta_t = 1.0;
+  theta_t = asin(stheta_t);
 }
 
 }

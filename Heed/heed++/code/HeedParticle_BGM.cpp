@@ -173,10 +173,10 @@ void HeedParticle_BGM::physics(void) {
               HeedCluster(transferred_energy[qtransfer - 1], 0, pt, ptloc,
                           prevpos.tid, na, ns));
           vec vel;
-          double Ep0 = mass * c_squared + curr_kin_energy;
-          double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
-          double Mp = mass;
-          double Mt = electron_def.mass;
+          const double Ep0 = mass * c_squared + curr_kin_energy;
+          const double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
+          const double Mp = mass * c_squared;
+          const double Mt = electron_def.mass * c_squared;
           double theta_p, theta_t;
           theta_two_part(Ep0, Ep1, Mp, Mt, theta_p, theta_t);
           vel.random_conic_vec(fabs(theta_t));

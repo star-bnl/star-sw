@@ -3,7 +3,6 @@
 #include "wcpplib/random/pois.h"
 #include "wcpplib/random/rnorm.h"
 #include "wcpplib/random/ranluxint.h"
-#include "wcpplib/stream/prstream.h"
 
 namespace Heed {
 

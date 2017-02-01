@@ -63,7 +63,7 @@ class particle_def : public RegPassivePtr {
   double charge;
   //  The following is not yet used in programs
   int lepton_n;
-  int barion_n;
+  int baryon_n;
   float spin;
   spin_def isospin;
   particle_def(void)
@@ -72,7 +72,7 @@ class particle_def : public RegPassivePtr {
         mass(0),
         charge(0),
         lepton_n(0),
-        barion_n(0),
+        baryon_n(0),
         spin(0),
         isospin(0, 0) {
     particle_def::get_logbook().append(this);
