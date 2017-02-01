@@ -91,9 +91,11 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
   path += STAR + "/." + STAR_HOST_SYS + "/" + OBJ + "/StarDb/AgiGeometry:";
   path += "./StarDb/AgiGeometry:";
   path += STAR + "./StarDb/AgiGeometry";
+  path += "./StarDb/AgiGeometry:";
+  path += STAR + "/StarDb/AgiGeometry";
   TString geomF(name); geomF += ".h";
   Char_t *file = gSystem->Which(path,geomF,kReadPermission);
-  if (! file) Fatal("CreateGeometry","File %s has not found in path %s",geomF.Data(),path);
+  if (! file) Fatal("CreateGeometry","File %s has not found in path %s",geomF.Data(),path.Data());
   else        Warning("CreateGeometry","File %s has been found as %s",geomF.Data(),file);
   TString command = ".L "; command += file;
   gInterpreter->ProcessLine(command);
