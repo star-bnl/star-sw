@@ -67,6 +67,15 @@ StvFitPars &operator*=(double f)
     		{for(int i=0;i<5;i++){(*this)[i]*=f;} return *this;}
 
 public:	
+// Let (Dx,Dy,Dz) vector track direction
+// It could be also represented:
+// (cos(L)*cos(A),cos(L)*sin(A),sin(L))
+
+// mH: movement along (-Dy    ,Dx     ,           0) vector
+// mZ: movement along (-Dx*Dz , -Dz*Dy, Dy*Dy+Dx*Dx)
+// Or mH: along (-cos(A),sin(A),0)
+//    mZ: along (-sin(L)*cos(A),-sin(L)*sin(A), cos(L))
+
 double mH;	// direction perpendicular movement and Z
 double mZ;	// Pseudo Z, direction perpendicular movement & H
 double mA;	// Angle in XY. cos(A),sin(A),T moving direction
