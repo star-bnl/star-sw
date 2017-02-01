@@ -1086,7 +1086,7 @@ void StvFitErrs::Get(const StvNodePars *np,  StvNodeErrs *ne) const
   		   ,{         0,    0,         0,      dTdL,  0}}; //dTan
 
   assert(0);
-  TCL::trasat(T[0],this->Arr(),ne->A,5,6); 
+  TCL::trasat(T[0],this->Arr(),*ne,5,6); 
 
 }
 //______________________________________________________________________________
