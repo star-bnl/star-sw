@@ -688,6 +688,7 @@ StvFitErrs::StvFitErrs(double hh,double hz,double zz)
 {
   memset(this,0,sizeof(*this));
   mHH=hh;mHZ=hz;mZZ=zz;mHz = 3e33;
+  assert(&mPP-&mHH+1==15);
 }
 //______________________________________________________________________________
 double StvFitErrs::Sign() const {return EmxSign(5,Arr());}
