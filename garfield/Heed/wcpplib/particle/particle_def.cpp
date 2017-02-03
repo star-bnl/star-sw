@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
 #include "wcpplib/particle/particle_def.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/stream/prstream.h"
@@ -72,14 +71,14 @@ particle_def user_particle_def("user_particle", "X",
 
 particle_def::particle_def(const String& fname, const String& fnotation,
                            double fmass, double fcharge, int flepton_n,
-                           int fbarion_n, float fspin,
+                           int fbaryon_n, float fspin,
                            const spin_def& fisospin) {
   name = fname;
   notation = fnotation;
   //mcout<<"particle_def::particle_def: name="<<name<<'\n';
   mass = fmass;
   charge = fcharge;
-  barion_n = fbarion_n;
+  baryon_n = fbaryon_n;
   lepton_n = flepton_n;
   spin = fspin;
   isospin = fisospin;
@@ -103,7 +102,7 @@ particle_def::particle_def(const String& fname, const String& fnotation,
 particle_def particle_def::anti_particle(const particle_def& p) {
   String aname = String("anti-") + p.name;
   String anot = String("anti-") + p.notation;
-  return particle_def(aname, anot, p.mass, -p.charge, -p.lepton_n, -p.barion_n,
+  return particle_def(aname, anot, p.mass, -p.charge, -p.lepton_n, -p.baryon_n,
                       -p.spin, p.isospin);
 }
 AbsList<particle_def*>& particle_def::get_logbook(void) {
@@ -134,7 +133,7 @@ void particle_def::print(std::ostream& file, int l) const {
     /*
     file<<name<<" mass="<<mass<<" mass/(GeV/c_squared)="<<mass/(GeV/c_squared)
         <<" charge="<<charge<<" charge/eplus="<<charge/eplus
-        <<" lepton_n="<<lepton_n<<" barion_n="<<barion_n
+        <<" lepton_n="<<lepton_n<<" baryon_n="<<baryon_n
         <<" spin="<<spin<<" isospin="<<isospin<<'\n';
     */
   }
@@ -173,7 +172,7 @@ std::ostream& operator<<(std::ostream& file, const particle_def& f) {
         << " mass/(GeV/c_squared)=" << f.mass / (GeV / c_squared)
         << " charge=" << f.charge << " charge/eplus=" << f.charge / eplus
         << '\n';
-  Ifile << "lepton_n=" << f.lepton_n << " barion_n=" << f.barion_n << '\n';
+  Ifile << "lepton_n=" << f.lepton_n << " baryon_n=" << f.baryon_n << '\n';
   Ifile << "spin=" << f.spin << " isospin=" << f.isospin << '\n';
   return file;
 }

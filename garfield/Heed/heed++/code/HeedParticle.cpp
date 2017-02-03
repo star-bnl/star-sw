@@ -75,7 +75,7 @@ void HeedParticle::physics(void) {
       }
 #else
       if (aetcs->quan[na][ns] > 0.0) {
-        int ierror;
+        int ierror = 0;
         qt = pois(aetcs->quan[na][ns] * currpos.prange / cm, ierror);
         check_econd11a(ierror, == 1,
             " aetcs->quan[na][ns]=" << aetcs->quan[na][ns]
@@ -131,11 +131,10 @@ void HeedParticle::physics(void) {
           m_clusterBank.push_back(HeedCluster(transferred_energy[qtransfer - 1],
                                               0, pt, ptloc, prevpos.tid, na, ns));
 
-          double Ep0 = mass * c_squared + curr_kin_energy;
-          double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
-          double Mp = mass;
-	  if (Ep1 <= Mp * c_squared) continue; // ??
-          double Mt = electron_def.mass;
+          const double Ep0 = mass * c_squared + curr_kin_energy;
+          const double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
+          const double Mp = mass * c_squared;
+          const double Mt = electron_def.mass * c_squared;
           double theta_p, theta_t;
           theta_two_part(Ep0, Ep1, Mp, Mt, theta_p, theta_t);
           vec vel;
