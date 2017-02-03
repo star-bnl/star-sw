@@ -10,33 +10,6 @@ class StDbManager;
 StDbManager* mgr = 0;
 Int_t DT = 0;
 class TDirIter;
-#if 0
-//________________________________________________________________________________
-void Load() {
-  //  gSystem->Load("libTable");
-  gSystem->Load("libStDb_Tables");
-  Char_t *mysql = "libmysqlclient";
-  Char_t *libs[]  = {"", "/usr/mysql/lib/", "/usr/lib/mysql/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
-  //Char_t *libs[]  = {"/usr/lib/", 0};
-  Int_t i = 0;
-  while ((libs[i])) {
-    TString lib(libs[i]);
-    lib += mysql;
-    lib = gSystem->ExpandPathName(lib.Data());
-    if (gSystem->DynamicPathName(lib,kTRUE)) {
-      gSystem->Load(lib.Data()); cout << " + " << lib.Data() << endl;
-      break;
-    }
-    i++;
-  }
-  gSystem->Load("liblog4cxx.so");
-  gSystem->Load("libSt_base");                                        //  TMemStat::PrintMem("load St_base");
-  gSystem->Load("libStStarLogger.so");
-  gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");      //  TMemStat::PrintMem("load StStarLogger");
-  gSystem->Load("StDbLib");
-  
-}
-#endif
 //________________________________________________________________________________
 void put2DB(const char* files=
 	    "$STAR/StarDb/Geometry/svt/svtWafersPosition.20050101.000200.C"
@@ -139,9 +112,12 @@ void put2DB(const char* files=
     Int_t NN = N;
     if (NN > 10) NN = 10;
     //  myTable->Print(0,NN);
+    Int_t Nmax = N;
     if ( myTable->IsA()->InheritsFrom( "St_tpcCorrection" ) ) {
       // enlarge table up to 50 rows
-      const Int_t Nmax = 192; 
+      //      const Int_t Nmax = 192; 
+      Nmax = 50; 
+      if (TName == "TpcCurrentCorrectionX") Nmax = 192;
       if (N > Nmax) {cout << "Table has " << N << " more than " << Nmax << " rows. Possible BUG " << endl; return;}
       myTable->ReAllocate(Nmax);
       tpcCorrection_st row;
@@ -155,76 +131,12 @@ void put2DB(const char* files=
       myTable->Print(0,N+1);
       N = Nmax;
     }
-    if ( myTable->IsA()->InheritsFrom( "St_svtHybridDriftVelocity" ) ) {
-      // enlarge table up to 432 rows
-      const Int_t Nmax = 432; 
-      if (N > Nmax) {cout << "Table has " << N << " more than " << Nmax << " rows. Possible BUG " << endl; return;}
-      myTable->ReAllocate(Nmax);
-      svtHybridDriftVelocity_st row;
-      memset(&row, 0, sizeof(svtHybridDriftVelocity_st));
-      for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
-      svtHybridDriftVelocity_st *r = myTable->GetTable();
-      for (Int_t i = 0; i < N; i++, r++) {
-	r->idx = i+1;
-	r->nrows = N;
-      }
-      myTable->Print(0,N+1);
-      N = Nmax;
-    }
-    Int_t *rowIDs = new Int_t[N];
     Int_t offset = 1; 
     if (N == 1) offset = 0;
     if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
-#ifndef _SvtIndexMap_h
     if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
+    Int_t *rowIDs = new Int_t[N];
     for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
-#else
-    if (TName.Contains("svtWafersPosition")) {
-      offset = 0; // Mike found that for svt offset should be 0
-      St_svtWafersPosition *S = (St_svtWafersPosition *) table;
-      svtWafersPosition_st *s = S->GetTable();
-      for(Int_t ti=0;ti<N;ti++, s++) {
-	Int_t elementID = -1;
-	for (Int_t j = 0; j < N; j++) {
-	  Int_t layer = 2*SvtMap[j].Barrel - 1 + SvtMap[j].Ladder%2; 
-	  Int_t Id = 1000*layer + 100*SvtMap[j].Wafer + SvtMap[j].Ladder;
-	  if (Id != SvtMap[j].Id) {
-	    cout << "Mismatch  for ID " << s->ID 
-		 << " in SvtMap " 
-		 << SvtMap[j].name << "\t" 
-		 << SvtMap[j].Id << "\t" 
-		 << SvtMap[j].Index << "\t" 
-		 << SvtMap[j].elementID << "\t" 
-		 << SvtMap[j].Barrel << "\t" 
-		 << SvtMap[j].Ladder << "\t" 
-		 << SvtMap[j].Wafer << endl;
-	    return;
-	  }
-	  if (Id == s->ID) {
-	    cout << "Found match for ID " << s->ID 
-		 << " in SvtMap " 
-		 << SvtMap[j].name << "\t" 
-		 << SvtMap[j].Id << "\t" 
-		 << SvtMap[j].Index << "\t" 
-		 << SvtMap[j].elementID << "\t" 
-		 << SvtMap[j].Barrel << "\t" 
-		 << SvtMap[j].Ladder << "\t" 
-		 << SvtMap[j].Wafer << endl;
-	    
-	    elementID = SvtMap[j].elementID;
-	    break;
-	  }
-	}
-	if (elementID < 0) {
-	  cout << "Don't find match for ID " << s->ID << endl;
-	  return;
-	}
-	rowIDs[ti]= elementID;
-      }
-    } else {
-      for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
-    }
-#endif 
     Char_t* gstr = (Char_t*) myTable->GetTable();
     dbTable->SetTable(gstr,N,rowIDs);
 #if 1

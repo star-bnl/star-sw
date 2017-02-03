@@ -9,7 +9,4 @@ foreach my $file (@ARGV) {
   print "$cmd\n";
   my $status = system($cmd);
   if ($status) {last;}
-#  $cmd = "mv " . $file . " " . $file . ".HOLD";
-  print "$cmd\n";
-  system($cmd);
 }
