@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
 	int port ;
-	char *dest ;
+	const char *dest ;
 	int i ;
 
 	if(argc == 1) {
