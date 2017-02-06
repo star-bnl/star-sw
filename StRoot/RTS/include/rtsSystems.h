@@ -375,6 +375,8 @@ extern inline const char *getTrgDetBitName(int x) {
 
 #define CONTROLS_INSTANCE	7
 
+#define TPC_GG_INSTANCE		8
+
 //#define BB2_INSTANCE    5
 //#define TM_INSTANCE     GB_INSTANCE
 //#define EVB_INSTANCE    BB_INSTANCE
@@ -484,6 +486,8 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TOKEN_MANAGER_NODE	((DAQ_SYSTEM<<12) | TOKEN_MANAGER_INSTANCE) 
 
 #define TCD_LX_NODE	((DAQ_SYSTEM<<12) | TCD_LX_INSTANCE)
+
+#define TPC_GG_NODE	((DAQ_SYSTEM<<12) | TPC_GG_INSTANCE)
 
 #define CONTROLS_NODE	((DAQ_SYSTEM<<12) | CONTROLS_INSTANCE)
 
