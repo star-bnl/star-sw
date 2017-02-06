@@ -493,4 +493,15 @@ struct rts2013_TmMon {
     u_int evtsEvb[10];   // eventsIn by tmtoken by evb
 };
 
+
+// TPC Gating grid monitoring
+struct ggMonStruct {
+        struct rtsMonHeader m ;
+
+        u_short status[12] ;
+        u_short adc[12][4][3] ;
+        u_short dac[12][4][3] ;
+} ;
+
+
 #endif
