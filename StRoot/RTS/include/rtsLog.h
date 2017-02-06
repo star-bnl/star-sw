@@ -109,7 +109,19 @@ void rtsLogAddJmlFile (char *fname);
                         fprintf(stderr,"" ANSI_RED "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
 		} \
                 else if((*yada == 'C')) { \
-                        fprintf(stderr,"" ANSI_RED "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
+                        fprintf(stderr,"" ANSI_RED "" ANSI_REVERSE "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
+		} \
+                else if((*yada == 'I')) { \
+                        fprintf(stderr,"" ANSI_BLUE "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
+		} \
+                else if((*yada == 'T')) { \
+                        fprintf(stderr,"" ANSI_GREEN "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
+		} \
+                else if((*yada == 'W')) { \
+                        fprintf(stderr,"" ANSI_CYAN "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
+		} \
+                else if((*yada == 'O')) { \
+                        fprintf(stderr,"" ANSI_BLUE "" ANSI_REVERSE "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
 		} \
 	} while(0) \
 
@@ -136,7 +148,7 @@ void rtsLogAddJmlFile (char *fname);
 /* exists in all flavors */
 extern volatile int tonkoLogLevel ;	/* the unfortunte name is due to historic reasons... */
 
-extern int rtsLogAddDest(char *server, int port) ;
+extern int rtsLogAddDest(const char *server, int port) ;
 
 
 INLINE_HACK void rtsLogLevelInt(int level)
@@ -146,7 +158,7 @@ INLINE_HACK void rtsLogLevelInt(int level)
 }
 
 /* let's have a function too... */
-INLINE_HACK void rtsLogLevel(char *level) 
+INLINE_HACK void rtsLogLevel(const char *level) 
 {
 	switch((int) *level) {
 	case 'D' :
