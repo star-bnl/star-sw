@@ -7,29 +7,43 @@ TDataSet *CreateTable() {
   if (!TClass::GetClass("St_tpcPadPlanes")) return 0;
   tpcPadPlanes_st row;
   St_tpcPadPlanes *tableSet = new St_tpcPadPlanes("tpcPadPlanes",1);
-  enum {NinnerRows = 32};
-  Int_t nPadsInner[NinnerRows]  = { 54, 56, 58, 60, 62, 64, 66, 68, 70, 72,
-				    74, 76, 78, 80, 84, 86, 88, 90, 92, 94,
-				    96, 98,100,102,104,106,108,110,112,116,
-				    118,120};
+  /* 
+     Jim Thomas 04/02/15 
+     pads = 2*(row + 24 - Int_t ((row - 1)/7)); // row = 1 - 40;
+
+Pads are spaced 0.5 x 1.6 cm with a 0.5 mm gap.
+Which means the actual copper size of the pad is 0.45 x 1.55 cm.
+
+     Jim Thomas 05/31/16
+     pads = 2*(row + 25 - Int_t ((row - 1)/7)); // row = 1 - 40;
+  */
+  enum {NinnerRows = 40};
+  Int_t nPadsInner[NinnerRows] = { //J.Thomas, 05/31/2016
+    52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
+    70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
+    86, 88, 90, 92, 94, 96, 98, 98,100,102,
+   104,106,108,110,110,112,114,116,118,120};
+//   for (Int_t i = 0; i < NinnerRows; i++) {
+//     Int_t r = i + 1;
+//     nPadsInner[i] = 2*(r + 24 - Int_t ((r - 1)/7));
+//   }
+
   Int_t nPadsOuter[32]  = {    98 ,    100,    102,    104,    106,    106,    108,    110,    112,    112,
 			       114,    116,    118,    120,    122,    122,    124,    126,    128,    128,
 			       130,    132,    134,    136,    138,    138,    140,    142,    144,    144,    
 			       144,    144};
-  Double_t RImin =  56.200;
-  Double_t ROmin = 127.195;
   memset(&row,0,tableSet->GetRowSize());
-  row.innerPadRows	     = NinnerRows; // ;		       
-  //  row.innerPadRows48	     =          8; // ;		       
-  //  row.innerPadRows52	     =          5; // ;		       
-  row.superInnerPadRows	     =          3; // ;		       
+  row.innerPadRows	     = NinnerRows; // 		       
+  row.superInnerPadRows	     =          3; // 		       
   row.innerSectorPadPitch    =       0.50;
-  row.innerSectorPadLength   =       1.95; //  1.15;	       
-  row.innerSectorPadWidth    = row.innerSectorPadPitch - 0.05;
+  row.innerSectorPadLength   =       1.55; //         
+  row.innerSectorPadWidth    = row.innerSectorPadPitch  - 0.05;
   row.innerSectorRowPitch1   = row.innerSectorPadLength + 0.05;  
-  //  row.innerSectorRowPitch2   = row.innerSectorPadLength + 0.05;  
   row.innerSectorEdge	     =     51.905; // ;		       
   row.innerSectorPadPlaneZ   =    209.707; // ;                  
+  Double_t RImax = 118.2 + row.innerSectorRowPitch1/2; // 118.2 + 1.6/2 = 119 cm  JT
+  Double_t RImin = RImax - NinnerRows*row.innerSectorRowPitch1; // 55.8 - 1.6/2 = 55 cm JT
+  Double_t ROmin = 127.195;
   row.firstPadRow	     = RImin + row.innerSectorRowPitch1/2;
   for (Int_t i = 0; i < row.innerPadRows; i++) {
     row.innerPadsPerRow[i]   = nPadsInner[i];
