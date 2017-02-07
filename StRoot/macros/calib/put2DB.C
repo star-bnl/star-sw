@@ -40,14 +40,18 @@ void put2DB(const char* files=
     Int_t d=20000101;
     Int_t t =      0;
     //  sscanf(Time.Data(),"%d",&d);
+    TString flavor("ofl");
     Int_t n = sscanf(Time.Data(),"%d.%d",&d,&t);
     if (n != 2) {
       Char_t tag[10];
       n = sscanf(Time.Data(),"%s",&tag);
       if (n == 1) {
+	TString Tag(tag);
+	if (Tag.BeginsWith("y") || Tag.BeginsWith("dev")) flavor = "sim";
 	d = StMaker::AliasDate(tag);
 	t = StMaker::AliasTime(tag);
-	cout << "n = " << n << " tag: " << tag << " d = " << d << " t = " << t << endl;
+	cout << "n = " << n << " tag: " << tag << " d = " << d << " t = " 
+	     << t << "\tflavor = " << flavor.Data() << endl;
       }
     }
     TDatime Date(d,t); cout << " Date " << Date.GetDate() << "\tTime " << Date.GetTime() << endl;
@@ -105,15 +109,21 @@ void put2DB(const char* files=
     //  mgr->setUser("yuri","c@lib");
     //  mgr->setUser("","");
     StDbConfigNode* node=mgr->initConfig(DB.Data());
+    if (! node) {cout << "Cannot configure node in " << DB.Data() << endl; continue;}
+    cout << " --- Store table " << TName << "\tflavor = " << flavor.Data() << endl;
     dbTable=node->addDbTable(TName.Data());
-    cout << " --- Store table " << TName << endl;
+    if (! dbTable) {cout << "Cannot add table " << TName.Data() << endl; continue;}
+    dbTable->setFlavor(flavor.Data());
     dbTable->checkDescriptor();
     Int_t N = myTable->GetNRows();
     Int_t NN = N;
     if (NN > 10) NN = 10;
-    //  myTable->Print(0,NN);
+    myTable->Print(0,NN);
     Int_t Nmax = N;
-    if ( myTable->IsA()->InheritsFrom( "St_tpcCorrection" ) ) {
+#if 0
+    Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" );
+    if ( ok ) {
+      cout << "==================== St_tpcCorrection ====================" << endl;
       // enlarge table up to 50 rows
       //      const Int_t Nmax = 192; 
       Nmax = 50; 
@@ -131,6 +141,7 @@ void put2DB(const char* files=
       myTable->Print(0,N+1);
       N = Nmax;
     }
+#endif
     Int_t offset = 1; 
     if (N == 1) offset = 0;
     if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
