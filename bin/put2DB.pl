@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 foreach my $file (@ARGV) {
-  if (! -r $file) {
+  if ($file !~ /\*/ && ! -r $file) {
     print "Can't read $file --- skipped\n";
     next;
   }

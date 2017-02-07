@@ -1610,7 +1610,10 @@ my @badruns = qw(
 #/star/data9*/reco/dAu62_production_2016/ReversedFullField/P16ij_TOF_dEdx_HFT/2016/*/*
 #$hist = "RunXVI300"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/23/2017 recheck with calibration from dAu200
 #$hist = "RunXVI301"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/27/2017 update TpcRowQ & TpcSecRowB
-$hist = "RunXVI302"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/27/2017 switch off TpcCurrentCorrectionX, TpcEdge
+#$hist = "RunXVI302"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/27/2017 switch off TpcCurrentCorrectionX, TpcEdge
+#$hist = "RunXVI303"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/03/2017 rerun after fix mess with TpcAdcCorrectionB
+#$hist = "RunXVI304"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/2017 switch off TpcTanL
+$hist = "RunXVI305"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/05/2017 update TpcRowQ & TpcSecRowB
 # /star/data09/reco/AuAu200_production2_2016/ReversedFullField/P16ig_dEdx_HFT/
 # 
 my $prod = $hist; #$Production;
