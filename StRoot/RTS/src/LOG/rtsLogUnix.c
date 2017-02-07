@@ -72,7 +72,7 @@ void rtsLogAddCmd(const char *cmd_in)
 	return ;
 }
 
-int rtsLogAddDest(char *host, int newport)
+int rtsLogAddDest(const char *host, int newport)
 {
 	/* mark as changed by hand */
 	handchange = 1 ;
