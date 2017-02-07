@@ -928,8 +928,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          if(cd=='FLXF') sl=2; 
          if(cd=='FPSC') sl=3; 
 #ifdef  __STAR_VMC__
+	if (sl .le. 0) {
 	write(*,*) 'Wrong sensitive detector in FPD/FMS'
 	return
+        }
 #else /* ! __STAR_VMC__ */
          assert(sl.gt.0)        ! Wrong sensitive detector in FPD/FMS
 #endif /*  __STAR_VMC__ */
@@ -942,8 +944,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if(n1.eq.3 .and. sl.eq.1) nstb=3
           if(n1.eq.4 .and. sl.eq.1) nstb=4 ; 
 #ifdef  __STAR_VMC__
-	write(*,*) 'Wrong nstb in FPD/FMS'
-	return
+	if (nstb.le.0) {
+	  write(*,*) 'Wrong nstb in FPD/FMS'
+	  return
+        }
 #else /* ! __STAR_VMC__ */
 	assert(nstb.gt.0) ! Wrong nstb in FPD/FMS
 #endif /*  __STAR_VMC__ */
