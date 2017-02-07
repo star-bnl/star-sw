@@ -140,7 +140,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"r2014",       20131220,     0, "y2014c",   "y2014c new TPC rows,xgeometry"},
   {"y2015",       20141215,     0, "y2015",    "y2015 first cut geometry, AgML,xgeometry"},
   {"y2015a",      20141215,     1, "y2015a",   "y2015a production geometry, AgML,xgeometry"},
-  {"ry2015",      20141220,     0, "y2015a",   "y2015a production geometry, AgML,xgeometry"},
+  {"r2015",       20141220,     0, "y2015a",   "y2015a production geometry, AgML,xgeometry"},
   {"y2015b",      20141215,     2, "y2015b",   "y2015b production geometry with MTD radii corrections, AgML,xgeometry"},
   {"y2015c",      20141215,     3, "y2015c",   "y2015c production geometry with MTD revised radii corrections, AgML,xgeometry"},
   {"y2015d",      20141215,     4, "y2015d",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
@@ -151,6 +151,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
 
   {"y2017",       20161215,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
+  {"r2017",       20161220,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
  
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},

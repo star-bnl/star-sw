@@ -194,7 +194,7 @@ static void doPs(const Char_t *who,const Char_t *where);
 StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
 						m_Number(0), m_LastRun(-3),
 						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
-						fLogger(0),fLoggerHold(0),m_Mode(0)
+                                                m_Mode(0),fLogger(0),fLoggerHold(0)
 {
    m_Attr=0;
    m_Inputs = 0;
