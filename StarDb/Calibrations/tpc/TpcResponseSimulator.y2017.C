@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2016.C,v 1.1 2016/09/19 12:25:07 fisyak Exp $
-// $Log: TpcResponseSimulator.y2016.C,v $
+// $Id: TpcResponseSimulator.y2017.C,v 1.1 2017/02/07 16:58:37 fisyak Exp $
+// $Log: TpcResponseSimulator.y2017.C,v $
+// Revision 1.1  2017/02/07 16:58:37  fisyak
+// Clean up
+//
 // Revision 1.1  2016/09/19 12:25:07  fisyak
 // Set/ReSet default values
 //
