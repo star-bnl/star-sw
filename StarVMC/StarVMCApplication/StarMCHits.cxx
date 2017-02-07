@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include "Stiostream.h"
 #include "StarVMCApplication.h"
 #include "StarMCHits.h"
@@ -31,12 +32,26 @@
 #include "tables/St_g2t_gepart_Table.h"
 #include "StEnumerations.h"
 #include "TGeoExtension.h"
+#include "TCallf77.h"
 StarMCHits *StarMCHits::fgInstance = 0;
 ClassImp(StarMCHits);
+//______________________________________________________________________
+# define gcohit gcohit_
+extern "C"
+{
+  void type_of_call gcohit(DEFCHARD, Int_t*& DEFCHARL);
+  bool* type_of_call gcaddb(bool *arg);
+  char* type_of_call gcaddc(char *arg);
+  double* type_of_call gcaddd(double *arg);
+  int*  type_of_call gcaddi(int  *arg);
+  float* type_of_call gcaddf(float *arg);
+  int* type_of_call gcaddl(int *arg);
+};
 //________________________________________________________________________________
 StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) : 
   TDataSet(name,title), fCurrentDetector(0), fDebug(0), fSeed(0), fEventNumber(0) { 
   fgInstance = this; fHitHolder = this; 
+  gcohit(PASSCHARD("AGCHITV"),(int*&) fAgchitv  PASSCHARL("AGCHITV"));
 }
 //________________________________________________________________________________
 Int_t StarMCHits::Init() {
@@ -159,6 +174,7 @@ void StarMCHits::Step() {
   fHit.Middle  += fHit.Exit;
   fHit.Middle  *= 0.5;
   if (! fCurrentDetector) return;
+  strncpy(Agchitv()->cd, gGeoManager->GetCurrentVolume()->GetName(), 4);
   FillG2Table();
 }
 //________________________________________________________________________________
