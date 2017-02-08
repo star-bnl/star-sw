@@ -2,6 +2,7 @@
 #include <string.h>
 #include "StDetectorDbMaker.h"
 #include "TEnv.h"
+#include "TF1.h"
 #include "St_db_Maker/St_db_Maker.h"
 #if 0
 #include "tables/St_tpcCorrection_Table.h"
@@ -134,6 +135,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     if (X < cor->min) X = cor->min;
     if (X > cor->max) X = cor->max;
   }
+  static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0;
+  TF1 *f = 0;
   switch (cor->type) {
   case 1: // Tchebyshev [-1,1] 
     T0 = 1;
@@ -175,6 +178,27 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 12: // ADC correction offset + poly for log(ADC) and TanL
     Sum = cor->a[1] + z*cor->a[2] + z*z*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*cor->a[5]) + cor->a[6]);
     Sum *= TMath::Exp(-cor->a[0]);
+    break;
+  case 1000:
+  case 1100:
+  case 1200:
+  case 1300:
+      if (cor->type == 1000) {
+	if (! f1000) f1000 = new TF1("f1000","gaus(9)+pol0(3)"); 
+	f = f1000;
+      } else if (cor->type == 1100) {
+	if (! f1100) f1100 = new TF1("f1100","gaus+pol1(3)"); 
+	f = f1100;
+      } else if (cor->type == 1200) {
+	if (! f1200) f1200 = new TF1("f1200","gaus+pol2(3)"); 
+	f = f1200;
+      } else if (cor->type == 1300) {
+	if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)"); 
+	f = f1300;
+      }
+      assert(f);
+      f->SetParameters(cor->a);
+      Sum = f->Eval(X);
     break;
   default: // polynomials
     Sum = cor->a[N-1];
