@@ -22,14 +22,14 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
   @histGF = qw (SecRow3 SecRow3C 
 		PressureC 
 		Time TimeC
-		Voltage VoltageC Qcm AvCurrent QcmC AvCurrentC
-		ppmOxygenInP  inputGasTemperatureP 
-		flowRateExhaustP flowRateRecirculationP
-		percentMethaneInP percentMethaneInPA percentMethaneInPC
-		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
+		Voltage VoltageC Qcm QcmC AvCurrentC
 		Z3C 
 		dX3C TanL3DC Edge3 Edge3C
 	      ); # PressureTC Volt VoltC Z3OC Zdc3C 
+#		flowRateExhaustP flowRateRecirculationP
+#		ppmOxygenInP  inputGasTemperatureP 
+#		percentMethaneInP percentMethaneInPA percentMethaneInPC
+#		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
   @histRL5 = @histGF;
   @histGP = qw (
 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU

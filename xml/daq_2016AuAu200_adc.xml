@@ -5,13 +5,13 @@
    setenv STARFPE NO
    setenv NODEBUG yes
 #.DEV2
-#   setup 64b
-#   starver .DEV2
+   setup 64b
+   starver .DEV2
 #dev
 #   setup gcc
 #   starver dev
 # SL16j
-   starver SL16j
+#   starver SL16j
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -33,11 +33,11 @@
 #root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # .DEV2
 #root -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#root -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+root -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # dev
 #root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # SL16j
-root4star -q -b 'bfc.C(1000,"DbV20170109,P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root4star -q -b 'bfc.C(1000,"DbV20170109,P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />

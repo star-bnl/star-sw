@@ -1613,7 +1613,8 @@ my @badruns = qw(
 #$hist = "RunXVI302"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/27/2017 switch off TpcCurrentCorrectionX, TpcEdge
 #$hist = "RunXVI303"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/03/2017 rerun after fix mess with TpcAdcCorrectionB
 #$hist = "RunXVI304"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/2017 switch off TpcTanL
-$hist = "RunXVI305"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/05/2017 update TpcRowQ & TpcSecRowB
+#$hist = "RunXVI305"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/05/2017 update TpcRowQ & TpcSecRowB
+$hist = "RunXVI306"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/08/2017 add TpcCurrentCorrectionX & TpcTanL
 # /star/data09/reco/AuAu200_production2_2016/ReversedFullField/P16ig_dEdx_HFT/
 # 
 my $prod = $hist; #$Production;
