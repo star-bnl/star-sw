@@ -42,7 +42,7 @@
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
   mNumberOfRows(-1), mNumberOfInnerRows(-1),
-  m_Debug(debug)
+  m_Debug(debug), f1000(0), f1100(0), f1200(0), f1300(0)
 {
   assert(gStTpcDb);
   mNumberOfInnerRows      = gStTpcDb->PadPlaneGeometry()->numberOfInnerRows();
@@ -127,16 +127,20 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 StTpcdEdxCorrection::~StTpcdEdxCorrection() {
   // Can't delete because the chairs are also used in StTpcRSMaker
   //  for (Int_t k = 0; k < kTpcAllCorrections; k++) SafeDelete(m_Corrections[k].Chair);
+  SafeDelete(f1000);
+  SafeDelete(f1100);
+  SafeDelete(f1200);
+  SafeDelete(f1300);
 }
 //________________________________________________________________________________
 Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) { 
   //  static const Double_t Degree2Rad = TMath::Pi()/180.;
   mdEdx = &CdEdx;
-  Double_t dEU = CdEdx.dE;
+  Double_t dEU = CdEdx.F.dE;
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
-  Double_t dx     	  = CdEdx.dx;    
+  Double_t dx     	  = CdEdx.F.dx;    
   if (dE <= 0 || dx <= 0) return 3;
   Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row); 
   CdEdx.channel = channel;
@@ -271,7 +275,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,xL2); 
 	if (nrows > 2) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
 	if (nrows > 6) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
-	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.dx;
+	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
 	goto ENDL;
       } else if (k == kSpaceCharge) {
 	if (cor[2*kTpcOutIn  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*kTpcOutIn  ].max &&
@@ -301,18 +305,14 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (iok) return iok;
     }
     if (corl->npar%100) dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
-#if 0
-    if (corl->npar%100 
-	&& ! (corl->type == 300 && corl->min >= corl->max && VarXs[k] < corl->min)
-	)  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
-#endif
   ENDL:
     CdEdx.C[k].dE = dE;
     CdEdx.C[k].dx = dx;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.C[k].dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
   }    
-  memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
+  CdEdx.F = CdEdx.C[kTpcLast];
+  //  memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
   return 0;
 }
 //________________________________________________________________________________
@@ -393,10 +393,10 @@ void StTpcdEdxCorrection::Print(Option_t *opt) const {
       Line += Form("\tlog(dE/dx)  %10.5g",mdEdx->C[k].dEdxL);
       Line += "\t"; Line += TString(m_Corrections[k].Name); Line += "\t"; Line +=  TString(m_Corrections[k].Title);
     } else {
-      Line += Form("\tdE %10.5g",mdEdx->dE);
-      Line += Form("\tdx  %10.5g",mdEdx->dx);
-      Line += Form("\tdE/dx  %10.5g",mdEdx->dEdx);
-      Line += Form("\tlog(dE/dx)  %10.5g",mdEdx->dEdxL);
+      Line += Form("\tdE %10.5g",mdEdx->F.dE);
+      Line += Form("\tdx  %10.5g",mdEdx->F.dx);
+      Line += Form("\tdE/dx  %10.5g",mdEdx->F.dEdx);
+      Line += Form("\tlog(dE/dx)  %10.5g",mdEdx->F.dEdxL);
       Line +=  "\tFinal \t "; 
     }
     cout << Line.Data() << endl;

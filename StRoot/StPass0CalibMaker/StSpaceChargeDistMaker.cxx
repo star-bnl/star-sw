@@ -346,9 +346,9 @@ Int_t StSpaceChargeDistMaker::Make() {
               CdEdx.edge   = CdEdx.pad;
               if (CdEdx.edge > 0.5*Npads[j])
                 CdEdx.edge += 1 - Npads[j];
-              CdEdx.dE     = charge;
+              CdEdx.F.dE     = charge;
               CdEdx.adc    = tpcHit->adc();
-              CdEdx.dx     = XWID[j];
+              CdEdx.F.dx     = XWID[j];
               CdEdx.xyz[0] = positionL.x();
               CdEdx.xyz[1] = positionL.y();
               CdEdx.xyz[2] = positionL.z();
@@ -381,11 +381,11 @@ Int_t StSpaceChargeDistMaker::Make() {
                   LOG_WARN << Form("FAULT: %d %d %d %g %d %g %g %g %g %g\n",dedx_status,
                     i+1,j+1,tpcHit->pad(),Npads[j],
                     positionL.x(),positionL.y(),positionL.z(),
-                    charge,CdEdx.dE) << endm;
+                    charge,CdEdx.F.dE) << endm;
                 }
                 continue;
               }
-              charge = CdEdx.dE;
+              charge = CdEdx.F.dE;
 
               Space3ChargePRZ->Fill(positionL.phi(),
                                     positionL.perp(),

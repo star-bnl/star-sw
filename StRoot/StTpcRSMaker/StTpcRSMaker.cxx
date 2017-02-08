@@ -203,6 +203,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
   if (TESTBIT(m_Mode,kDistortion)) {
@@ -840,7 +841,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  CdEdx.edge   = CdEdx.pad;
 	  if (CdEdx.edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
 	  CdEdx.edge += 1 - gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
-	  CdEdx.dE     = 1;
+	  CdEdx.F.dE     = 1;
 #if 0
 	  CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
 	  Int_t p1 = tpcHit->minPad();
@@ -851,7 +852,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  if (TESTBIT(m_Mode, kEmbeddingShortCut) && 
 	      (tpcHit->idTruth() && tpcHit->qaTruth() > 95)) CdEdx.lSimulated = tpcHit->idTruth();
 #endif
-	  CdEdx.dx     = dStep;
+	  CdEdx.F.dx     = dStep;
 	  CdEdx.xyz[0] = TrackSegmentHits[iSegHits].xyzG.position().x();
 	  CdEdx.xyz[1] = TrackSegmentHits[iSegHits].xyzG.position().y();
 	  CdEdx.xyz[2] = TrackSegmentHits[iSegHits].xyzG.position().z();
@@ -872,7 +873,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  if (tpcGas)
 	    CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
 	  if (! m_TpcdEdxCorrection->dEdxCorrection(CdEdx)) {
-	    dEdxCor = CdEdx.dE;
+	    dEdxCor = CdEdx.F.dE;
 	  }
 	  if (dEdxCor <= 0.) continue;
 	}
