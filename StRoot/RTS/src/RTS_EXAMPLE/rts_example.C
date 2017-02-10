@@ -43,6 +43,7 @@
 #include <DAQ_FPS/daq_fps.h>
 #include <DAQ_RHICF/daq_rhicf.h>
 #include <DAQ_ETOF/daq_etof.h>
+#include <DAQ_ITPC/daq_itpc.h>
 
 #include <TPC/rowlen.h>
 
@@ -80,6 +81,7 @@ static int sst_doer(daqReader *rdr, const char *do_print) ;
 static int fps_doer(daqReader *rdr, const char *do_print) ;
 static int rhicf_doer(daqReader *rdr, const char *do_print) ;
 static int etof_doer(daqReader *rdr, const char *do_print) ;
+static int itpc_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 static int bad ;
@@ -362,6 +364,9 @@ int main(int argc, char *argv[])
 		
 		/*************************** ETOF **************************/
 		etof_doer(evp,print_det) ;
+		
+		/*************************** ETOF **************************/
+		itpc_doer(evp,print_det) ;
 		
 
 
@@ -2020,6 +2025,43 @@ static int etof_doer(daqReader *rdr, const char *do_print)
 
 	if(found) {
 		LOG(INFO,"ETOF found") ;
+	}
+
+	return found ;
+
+}
+
+static int itpc_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"itpc")) ;	// leave as is...
+	else do_print = 0 ;
+
+	dd = rdr->det("itpc_pseudo")->get("ifee_raw") ;
+	
+
+	if(dd) {
+		while(dd->iterate()) {	//per xing and per RDO
+			found = 1 ;
+
+			if(do_print) {
+				u_short *d16 = (u_short *)dd->Void ;
+				printf("ITPC: %d bytes\n",dd->ncontent) ;
+
+				for(int i=0;i<10;i++) {
+					printf("    %d: 0x%04X\n",i,d16[i]) ;
+				}
+			}
+
+		}
+
+	}
+
+
+	if(found) {
+		LOG(INFO,"ITPC found") ;
 	}
 
 	return found ;
