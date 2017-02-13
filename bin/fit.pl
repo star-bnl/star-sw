@@ -24,8 +24,8 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		Time TimeC
 		Voltage VoltageC Qcm QcmC AvCurrentC
 		Z3C 
-		dX3C TanL3DC Edge3 Edge3C
-	      ); # PressureTC Volt VoltC Z3OC Zdc3C 
+		dX3C TanL3DC xyPad3C Edge3C
+	      ); # PressureTC Volt VoltC Z3OC Zdc3C Edge3 Edge3C
 #		flowRateExhaustP flowRateRecirculationP
 #		ppmOxygenInP  inputGasTemperatureP 
 #		percentMethaneInP percentMethaneInPA percentMethaneInPC
@@ -37,7 +37,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 #		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
 #		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
 #		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
-  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN Edge3N); #Edge3N PressureTN VoltN Zdc3N  Z3ON 
+  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
 #  @histXF = @histNF;
 }
 print "fit.pl for  @rootfiles \n";
@@ -103,7 +103,7 @@ foreach my $rootfile (@rootfiles) {
 	if ($sec >= 0) {
 	  $rootcmd .= "\",\"R\"," . $sec . ")'";
 	} else {
-	  if ($hist =~ /Edge/) {
+	  if ($hist =~ /Edge/ || $hist =~ /xyPad/) {
 	    $rootcmd .= "\",\"R\",-1,-1,1,3)'";
 	  } else {
 	    $rootcmd .=	"\")'";

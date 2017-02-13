@@ -1,11 +1,7 @@
 *CMZ :          22/01/99  15.54.06  by  Rene Brun
 *-- Author :    Federico Carminati   28/11/98
       SUBROUTINE GCOHIT(CHCOMM,IADD)
-      integer          idigi
-      common /AgCdigi/ idigi(15)
-      Integer          Iprin,Nvb
-      Character*4                   cs,cd
-      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+#include "asps/Simulation/starsim/include/commons/agcrdig.inc"
 *
       CHARACTER *(*) CHCOMM
 #if defined(CERNLIB_DECS) || defined(CERNLIB_LXIA64)
@@ -14,7 +10,7 @@
       INTEGER GCADDB, GCADDI, GCADDF, GCADDL, GCADDC, GCADDD
 #endif
 *
-      IF(CHCOMM.EQ.'AGCDIGI') THEN
+      IF(CHCOMM.EQ.'AGCRDIG') THEN
          IADD=GCADDI(idigi)
       ELSE IF(CHCOMM.EQ.'AGCHITV') THEN
          IADD=GCADDI(Iprin)

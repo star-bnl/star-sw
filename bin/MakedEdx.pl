@@ -1501,7 +1501,9 @@ my @badruns = qw(
 		  17044004 17049028 17050016 17050033 17053020 17053045
 		  17067004 17068037 17097036 17101035 17108013 17123005
 		  17123006 17123035 17128001 17129044 
+		  17152012 17153058 17155032 17159050 17159056 
 		);
+# dAu20-62 bad runs form RunSummary : 17152012 17153058 17155032 17159050 17159056 
 #my  bad Runs from PowerSypply:		  17057012 17060037 17075027 17107055 17109059 
 # new Bad runs  17044012 (20160213/105923 -----   20160213/130532)  previous (20160213/104848 -----   20160213/105923)
 #               17107055 (20160417/25422  -----   20160417/34114)   previous (20160417/24552 -----   20160417/25422) =>)
@@ -1614,7 +1616,13 @@ my @badruns = qw(
 #$hist = "RunXVI303"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/03/2017 rerun after fix mess with TpcAdcCorrectionB
 #$hist = "RunXVI304"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/2017 switch off TpcTanL
 #$hist = "RunXVI305"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/05/2017 update TpcRowQ & TpcSecRowB
-$hist = "RunXVI306"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/08/2017 add TpcCurrentCorrectionX & TpcTanL
+#$hist = "RunXVI306"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/08/2017 add TpcCurrentCorrectionX & TpcTanL
+#$hist = "RunXVI307"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/09/2017  update TpcRowQ & TpcSecRowB
+#$hist = "RunXVI308"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/09/2017  update TpcRowQ & TpcSecRowB
+#$hist = "RunXVI309"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/09/2017  update TpcZCorrectionB, bad runs
+#$hist = "RunXVI310"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/11/2017  restore def. Edge cut, update TpcRowQ & TpcSecRowB
+#$hist = "RunXVI311"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/12/2017 update TpcRowQ & TpcSecRowB, TpcTanL, remove (int) for  pad 
+$hist = "RunXVI312"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/13/2017 update TpcRowQ & TpcSecRowB, TpcTanL, fix xPar
 # /star/data09/reco/AuAu200_production2_2016/ReversedFullField/P16ig_dEdx_HFT/
 # 
 my $prod = $hist; #$Production;

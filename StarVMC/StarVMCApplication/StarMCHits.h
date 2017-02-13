@@ -4,22 +4,19 @@
 #include "St_g2t_Chair.h"
 #include "StarHitVector.h"
 #include "StarVMCDetectorSet.h"
-//----------AGCHDIG atlsim/agchit.inc
-// *  AGCHITL and AGCHITV are communication between AgFHIT0/1/AggetDIG,AgFPATH.
-//       Integer          IWA,   JS,JD,JX,JDX,JXD,JDS,JDU
-//       COMMON /AGCHDIG/ IWA(2),JS,JD,JX,JDX,JXD,JDS,JDU
-//       Integer          Iprin,Iv,Ia,Nv,Mb,Nc1,Nc2,NumMX,Lp
-//       Parameter        (Lp=15)
-//       Real             Org,Fct
-//       Character*4      cs,cd
-//       COMMON /AGCHITV/ Iprin,Iv,Ia,Nv,Mb,Nc1,Nc2,cs,cd,
-//      >                 Org(Lp),Fct(Lp),NumMX(Lp)
-
+/* commons/agcrdig.inc
+      Integer          IWA,   JS,JD,JX,JXD,JDS,JDU
+      COMMON /AGCRDIG/ IWA(2),JS,JD,JX,JXD,JDS,JDU
+      Integer          Iprin,Nvb,Nw,Last,Mb,Nc1,Nc2,Iv,Ia
+      Character*4                                         cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb,Nw,Last,Mb,Nc1,Nc2,Iv,Ia,cs,cd
+*/
 typedef struct {
-  Int_t   Iprin,Iv,Ia,Nv,Mb,Nc1,Nc2;
+  Int_t iwa[2], js,jd,jx,jxd,jds,jdu;
+} Agcrdig_t;
+typedef struct {
+  Int_t Iprin,Nvb,Nw,Last,Mb,Nc1,Nc2,Iv,Ia;
   Char_t  cs[4],cd[4];
-  Float_t Org[15],Fct[15];
-  Int_t   NumMX[15];
 } Agchitv_t;
 class StarMCHits : public TDataSet {
  public:

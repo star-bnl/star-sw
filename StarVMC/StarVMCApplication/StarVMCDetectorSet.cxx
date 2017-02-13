@@ -52,101 +52,9 @@ StarVMCDetectorSet *StarVMCDetectorSet::instance() {
 //________________________________________________________________________________
 Int_t StarVMCDetectorSet::Init() {
   cout << "StarVMCDetectorSet::Init() -I- Get Detectors" <<endl;
-#if 0
-  assert(StMaker::GetChain());
-  TDataSet *set = StMaker::GetChain()->GetDataBase("VmcGeometry");
-  assert(set);
-  fDetectors = 0;
-  TDataSET *fDetectors = set->Find("Index");
-  assert(fDetectors);
-#else
   MakeDetectorDescriptors();
-#endif
   return 0;
 }
-#if 0
-//_____________________________________________________________________________
-void StarVMCDetectorSet::MakeDetectorDescriptors() {
-  TDataSet *set = StMaker::GetChain()->GetDataBase("VmcGeometry");
-  assert(set);
-  fDetectors = set->Find("Index");
-  if (! Detectors) {
-    cout << "No Detectors found in VmcGeometry/Index" << endl;
-  }
-  // Make List of sensitive volumes
-  TObjArray *vols = gGeoManager->GetListOfVolumes();
-  Int_t nvol = vols->GetEntriesFast();
-  Int_t nSensVol = 0;
-  Int_t nsize = 100;
-  TArrayI Indx(nsize); Int_t *indx = Indx.GetArray();
-  for (Int_t i = 0; i < nvol; i++) {
-    TGeoVolume *vol = (TGeoVolume *) vols->At(i);
-    if (! vol) continue;
-    TGeoMedium *med = vol->GetMedium();
-    if (! med) continue;
-    Int_t       isvol = (Int_t) med->GetParam(0);
-    if (! isvol) continue;
-    indx[nSensVol] = i;
-    nSensVol++;
-    if (nSensVol >= nsize) {
-      nsize *= 2;
-      Indx.Set(nsize); 
-      indx = Indx.GetArray();
-    }
-    TString Path(vol->GetName());
-    if (Detectors) {
-      // Check consistency 
-      StarVMCDetector *det = (StarVMCDetector *) Detectors->Find(vol->GetName());
-      if (! det) {
-	cout << "Detector description for " << vol->GetName() << "\t" << vol->GetTitle() << " is missing" << endl;
-      } else {
-	TString FMT = det->GetFMT();
-	cout << "Found path:\t" << Path.Data() << endl;
-	cout << "Set   path:\t" << FMT.Data();
-	if (Path == FMT) cout << " are the same" << endl;
-	else             cout << " are the different" << endl;
-      }
-    }
-    
-  }
-}
-#else
-/*      y2013_2x
-calbgeo CSUP CSDA
-ecalgeo ECSI EHMS
-
-1                 HALL[1]/CAVE[1]/HELC[6]/HELG[1]/HESL[1]
-2.calb CSUP       HALL[1]/CAVE[1]/CALB[1]/CHLV[2]/CPHI[60]/CSUP[2]/CSCI[19]
-3.calb CSDA       HALL[1]/CAVE[1]/CALB[1]/CHLV[2]/CPHI[60]/CSUP[2]/CSMD[1]/CSDA[4]/CSME[30]/CSHI[2]/CSM1[30]/CSM2[30]/CSM3[30]
-4.ecal ESCI       HALL[1]/CAVE[1]/ECAL[1]/EAGA[2]/EMSS[1]/ECVO[2]/EMOD[6]/ESEC[3]/EMGT[17]/EPER[5]/ETAR[12]/ESCI[1]
-5.ecal EHMS       HALL[1]/CAVE[1]/ECAL[1]/EAGA[2]/EMSS[1]/ESHM[1]/ESPL[3]/EXSG[6]/EHMS[288]
-6.bbc             HALL[1]/CAVE[1]/BBCM[2]/BBCA[2]/THXM[6]/SHXT[3]/BPOL[1]
-7.zcal            HALL[1]/CAVE[1]/ZCAL[2]/QCAL[1]/QDIV[260]/QSCI[1]
-8.vpd             HALL[1]/CAVE[1]/VPDD[2]/VRNG[1]/VDET[19]/VDTI[1]/VCNV[1]/VRAD[1]
-9.fpd             HALL[1]/CAVE[1]/FBOX[4]/FTOW[238]/FWAL[1]/FLGR[1] // lead glass detector
-10.fpd            HALL[1]/CAVE[1]/FBOX[4]/FTOW[238]/FPCT[1]        // photocathode
-11.fpd            HALL[1]/CAVE[1]/FBOX[2]/FSHM[1]/FHMS[100]  // sHower Max Strip
-12.fpd            HALL[1]/CAVE[1]/FBOX[4]/FLXF[394] // Lead Glass detector
-13.mtd            HALL[1]/CAVE[1]/MUTD[1]/MTMF[15]/MTTF[1]/MTRA[5]/MIGS[1]/MIGG[5] // a single gas gap
-14.tof            HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
-15.tof ?          HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
-16.tpc            HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[146]
-17.svt  SVTD
-18.ssd  SFSD
-19.rich OQUA, QUAR, rGAP, rCSI, FREO
-20.pxl  PLAC, PDGS
-21.ist  IBSS
-22.mtd  MMRP, MXSA
-23.phd  PDGS
-24.gem  GMDI
-25.ftpc FSEC
-26.fst  FDSW
-27.fpd   FGSC, FGZC, FGZD
-
-HALL[1]/CAVE[1]/CALB[1]/CHLV[2]/CPHI[60]/CSUP[2]/CSCI[19]
-HALL[1]/CAVE[1]/ECAL[1]/EAGA[2]/EMSS[1]/ECVO[2]/EMOD[6]/ESEC[3]/EMGT[17]/EPER[5]/ETAR[12]/ESCI[1]
-
- */
 //________________________________________________________________________________
 Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
   if (! gGeoManager) {
@@ -205,6 +113,7 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
   TGeoMedium     *med = vol->GetMedium();
   Int_t           isvol = 0;
   if (med)        isvol = (Int_t) med->GetParam(0);
+  TString Name(vol->GetName());
   if (NoSensDauthers == 0 && isvol) {
     //      cout << "sens. vol. " << pathT << endl;
     if (! vol->GetUserExtension()) {
@@ -212,16 +121,9 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
       if (! det) {
 	det = new StarVMCDetector(vol->GetName());
 	fDetHash->Add(det);
-#if 0
-	cout << "Create Star VMC detector for " << vol->GetName() << endl;
-#endif
       }
       TGeoRCExtension *ext = new TGeoRCExtension(det);
       vol->SetUserExtension(ext);
-#if 0
-      cout << "Create TGeoExtension for volume " << vol->GetName() 
-	   << " with detector " << det->GetName() << endl;
-#endif
     }
     TObjString *objs;
     static const TString separator("/_");
@@ -317,16 +219,24 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
       }
       Name = path->VName;
     }
-    cout << endl;
-#if 0
-    if (TString(Name) == "FPCT") continue; // ignore fpd
-    if (TString(Name) == "BRSG") continue; // ignore tfr
-#endif
     StarVMCDetector *det = (StarVMCDetector *) fDetHash->FindObject(Name);
     if (!det) {
       cout << "Missing Detector Set for " << Name.Data() << endl;
       continue;
     }
+    if (   Name == "FPCT"
+	   //      || Name == "FPCT"  // ignore fpd
+	   //      || Name == "BRSG" // ignore tfr
+	   ) {
+      cout << "\tIgnore sensitive volume: " << Name.Data() << endl;
+      //      delete fDetHash->Remove(det);
+      TGeoVolume *volT = gGeoManager->GetVolume(Name);
+      if (volT) {
+	volT->SetUserExtension(0);
+      }
+      continue;
+    }
+    cout << endl;
     det->SetFMT(FMT);
     det->SetNVmax(NV,NVMax);
     det->SetNVp10(NV,NVp10);
@@ -334,7 +244,6 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
   }
   fDetHash->Rehash(Nd);
 }
-#endif
 //________________________________________________________________________________
 // $Log: StarVMCDetectorSet.cxx,v $
 // Revision 1.4  2013/12/16 23:00:14  fisyak

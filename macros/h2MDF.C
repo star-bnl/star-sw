@@ -29,7 +29,7 @@ enum EMDFPolyType {
 TMultiDimFit* fit = 0;
 //using namespace std;
 //________________________________________________________________________________
-void h2MDF(const Char_t  *total = "mu", Int_t max=5, Int_t maxTerm = 20){
+void h2MDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20){
   TH2D *total2D = (TH2D *) gDirectory->Get(total);
   if (! total2D) {
     cout << "Histogram  has not been found " << endl;
@@ -48,12 +48,13 @@ void h2MDF(const Char_t  *total = "mu", Int_t max=5, Int_t maxTerm = 20){
   fit->SetMaxPowers(mPowers);
   fit->SetMaxFunctions(1000);
   fit->SetMaxStudy(1000);
+#if 0
   fit->SetMaxTerms(maxTerm);
   fit->SetPowerLimit(max);
   fit->SetMinAngle(10);
   fit->SetMaxAngle(10);
   fit->SetMinRelativeError(.01);
-
+#endif
   // variables to hold the temporary input data 
   Double_t *x = new Double_t[nVars];
   

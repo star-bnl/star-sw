@@ -164,6 +164,7 @@ void RunSummary(const Char_t *files = "*.root") {
     params[1] = Run;
     Int_t p = 2;
     for (Int_t i = 0; i < N; i++) {
+      params[i+2] = 0;
       TH1 *hist = 0;
       TString Name(Histos[i].Name);
       Int_t opt = Histos[i].opt;
@@ -211,27 +212,26 @@ void RunSummary(const Char_t *files = "*.root") {
 	continue;
       }
       if (opt <= 2) {
-	params[p] = 0;
-	params[p] = hist->GetMean(opt);
-	cout << "\t" << Name << "\t" << params[p] << endl;
+	params[i+2] = hist->GetMean(opt);
+	cout << "\t" << Name << "\t" << params[i+2] << endl;
 	p++;
       } else {
 	TF1 *f1 = 0;
-	params[p] = -9999.;
+	params[i+2] = -9999.;
 	if (hist->GetEntries() > 1000) {
 	  f1 = FitGF(hist,"q");
 	}
 	
 	if (f1) {
-	  params[p] = f1->GetParameter(1);
-	  cout << "\t" << Name << "\t" << params[p] << endl;
+	  params[i+2] = f1->GetParameter(1);
+	  cout << "\t" << Name << "\t" << params[i+2] << endl;
 	}
 	p++;
       }
       delete hist;
     }
     delete f;
-    SumT->Fill(&params[0]);
+    SumT->Fill(params);
   }
   fout->cd();
   SumT->Write();

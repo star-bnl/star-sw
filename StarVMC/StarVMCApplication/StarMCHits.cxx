@@ -182,6 +182,7 @@ void StarMCHits::FillG2Table() {
   St_g2t_Chair *chair = fCurrentDetector->GetChair();
   assert(chair);
   fHit.VolumeId = fCurrentDetector->GetVolumeId(gGeoManager->GetPath());
+  if (fHit.VolumeId <= 0) return;
   chair->Fill(fHit);
 }
 //________________________________________________________________________________
