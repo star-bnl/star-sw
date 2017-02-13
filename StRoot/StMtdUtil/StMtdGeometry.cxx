@@ -1,8 +1,13 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.17 2016/08/05 16:12:34 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.18 2017/02/13 02:56:11 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.18  2017/02/13 02:56:11  marr
+ * From 2017, do not move BL 8&24 along y direction by hand since this is already
+ * done in the geometry file. Calibration, production and analysis should use
+ * the new version consistently.
+ *
  * Revision 1.17  2016/08/05 16:12:34  marr
  * Add MTD hit IdTruth to avoid applying dy shift for BL 8 and 24 for MC hits
  *
@@ -370,15 +375,6 @@ Float_t StMtdGeoModule::GetCellZCenter(Int_t iCell){
 Float_t StMtdGeoModule::GetCellLocalYCenter(Int_t iCell, Int_t iBL, Int_t idTruth){
   Float_t cell_width = gMtdCellWidth+gMtdCellGap;
   Float_t y_center = (mModuleIndex<4? 1 : -1) * (iCell-gMtdNCells/2+0.5) * cell_width;
-  
-  if(idTruth==0)
-    {
-      // only needed for real hits
-      // MC hits are produced with ideal geometry
-      if(iBL==8)  y_center -= 3 * cell_width;
-      if(iBL==24) y_center += 2 * cell_width;
-    }
-
   return y_center;
 }
 
