@@ -578,11 +578,11 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
 	CdEdx[NdEdx].pad    = Pad.pad();
-	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
 	if (CdEdx[NdEdx].edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
 	  CdEdx[NdEdx].edge -= 1 + gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
-	CdEdx[NdEdx].xpad = 2*(CdEdx[NdEdx].pad - 0.5 - 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row))/
+	Float_t Npads = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
+	CdEdx[NdEdx].xpad = 2*(CdEdx[NdEdx].pad - 0.5)/Npads - 1.0;
 	  (gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row) + 1);
 	CdEdx[NdEdx].yrow = sector + 0.5*((row <= NumberOfInnerRows) ? 
 					  (row - NumberOfInnerRows - 0.5)/NumberOfInnerRows : 
@@ -906,7 +906,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NumberOfRows,105,0,210);
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
-  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NumberOfRows, 400,-100,100);
+  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NumberOfRows, 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
 #if 0
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NumberOfRows, 100,0,10.);
@@ -1708,7 +1708,6 @@ void StdEdxY2Maker::BadHit(Int_t iFlag, const StThreeVectorF &xyz) {
   if (fZOfBadHits[fNZOfBadHits-1]) fZOfBadHits[fNZOfBadHits-1]->Fill(xyz.z());
   if (fPhiOfBadHits!= 0) fPhiOfBadHits->Fill(TMath::ATan2(xyz.y(),xyz.x()));
 }
-//________________________________________________________________________________
 //________________________________________________________________________________
 Int_t StdEdxY2Maker::Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			       const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
