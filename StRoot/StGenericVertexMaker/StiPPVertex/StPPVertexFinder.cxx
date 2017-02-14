@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.96 2017/01/27 20:13:16 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.97 2017/02/14 22:00:41 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -19,7 +19,6 @@
 #include "TObjArray.h"
 #include "TObjectSet.h"
 
-#include <math_constants.h>
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
 
 #include "StPPVertexFinder.h"
@@ -128,7 +127,7 @@ StPPVertexFinder::Init() {
   LOG_INFO << "eeDb done" <<endm;
   geomE= new EEmcGeomSimple();
   // choose which 'stat' bits are fatal for mip detection
-  uint  killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
+  unsigned int killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
   eemcList =new EemcHitList(eeDb, killStatEEmc,geomE);
    
   initHisto();
@@ -449,10 +448,6 @@ StPPVertexFinder::fit(StEvent* event) {
 
   hA[0]->Fill(2);
 
-  if(mToolkit==0) {    
-   LOG_WARN <<"no Sti tool kit,  PPV is OFF"<<endm;
-   return 0;
-  }
 
  // get BTOF info
 
@@ -522,12 +517,6 @@ StPPVertexFinder::fit(StEvent* event) {
     if(!matchTrack2Membrane(stiKalmanTrack, t))  {ntrk[5]++; continue;}  // kill if nFitP too small
 
     ntrk[6]++;
-
-    //cout << "\n#e gPt="<<stiKalmanTrack->getPt()
-    //     << " gEta="<<stiKalmanTrack->getPseudoRapidity()
-    //     << " nFitP="<<stiKalmanTrack->getFitPointCount() << " of " << stiKalmanTrack->getMaxPointCount()
-    //     << " poolSize="<< mTrackData->size() << "  myW=" << t.weight << endl;
-    //printf(" t.weight AA=%f\n", t.weight);
 
     hA[1]->Fill(stiKalmanTrack->getChi2());
     hA[2]->Fill(stiKalmanTrack->getFitPointCount());
@@ -1004,7 +993,6 @@ StPPVertexFinder::Finish() {
     
     TString tt="ppv";
     if(ioMk) {
-      assert(ioMk);
       const char *fname=ioMk->GetFileName();
       tt=strstr(fname,"st_");
       tt.ReplaceAll(".daq",".ppv");
