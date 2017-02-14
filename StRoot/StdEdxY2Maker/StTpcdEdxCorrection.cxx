@@ -33,12 +33,17 @@
 #include "StDetectorDbMaker/St_TpcZDCC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDF.h"
+#include "StDetectorDbMaker/St_TpcPadCorrectionMDF.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
+#include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
   mNumberOfRows(-1), mNumberOfInnerRows(-1),
-  m_Debug(debug)
+  m_Debug(debug), f1000(0), f1100(0), f1200(0), f1300(0)
 {
   assert(gStTpcDb);
   mNumberOfInnerRows      = gStTpcDb->PadPlaneGeometry()->numberOfInnerRows();
@@ -79,6 +84,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcEffectivedX        ] = dEdxCorrection_t("TpcEffectivedX"      ,"dEdx correction wrt Bichsel parameterization"			,St_TpcEffectivedXC::instance()); 	     
   m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size"						,0);					     
   m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Gain on Zdc CoincidenceRate"				        ,St_TpcZDCC::instance());		     
+  m_Corrections[kTpcPadMDF             ] = dEdxCorrection_t("TpcPadCorrectionMDF" ,"Gain Variation along the anode wire"                                ,St_TpcPadCorrectionMDF::instance());         
   m_Corrections[kTpcLast               ] = dEdxCorrection_t("Final"        	  ,""								        ,0);					     
   m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB"  ,"Variation vs Track length and relative error in Ionization"	,St_TpcLengthCorrectionBC::instance());     
   m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX)> and rel. error in dE/dx" ,St_TpcLengthCorrectionMDF::instance());         
@@ -123,18 +129,52 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 StTpcdEdxCorrection::~StTpcdEdxCorrection() {
   // Can't delete because the chairs are also used in StTpcRSMaker
   //  for (Int_t k = 0; k < kTpcAllCorrections; k++) SafeDelete(m_Corrections[k].Chair);
+  SafeDelete(f1000);
+  SafeDelete(f1100);
+  SafeDelete(f1200);
+  SafeDelete(f1300);
 }
 //________________________________________________________________________________
 Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) { 
   //  static const Double_t Degree2Rad = TMath::Pi()/180.;
   mdEdx = &CdEdx;
-  Double_t dEU = CdEdx.dE;
+  Double_t dEU = CdEdx.F.dE;
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
-  Int_t channel           = CdEdx.channel;
-  Double_t dx     	  = CdEdx.dx;    
+  Double_t dx     	  = CdEdx.F.dx;    
   if (dE <= 0 || dx <= 0) return 3;
+  Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row); 
+  CdEdx.channel = channel;
+  
+  CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
+  Double_t    Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
+  CdEdx.Qcm     = 1e6*Qcm; // uC/cm
+  if (! St_trigDetSumsC::GetInstance()) {
+    StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
+  }
+  if ( ! St_trigDetSumsC::instance() ) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Cannot find trigDetSums" << endm;}
+  else {
+    if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection trigDetSums has not data" << endm;}
+    else {
+      UInt_t date = StMaker::GetChain()->GetDateTime().Convert();
+      if (date < St_trigDetSumsC::instance()->timeOffset()) {
+	LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Illegal time for scalers = " 
+			  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
+			  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << StMaker::GetChain()->GetRunNumber() << endm;
+      }
+    }
+  }
+#if 0
+  // Check that we have valid time for Power Suppliers
+  if (St_TpcAvgPowerSupplyC::instance()->run() > 0 && ((UInt_t )St_TpcAvgPowerSupplyC::instance()->stop_time()) < GetDateTime().Convert()) {
+    LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply time = " <<  St_TpcAvgPowerSupplyC::instance()->stop_time() 
+	      << " < event time = " << GetDateTime().Convert() << "\t" << GetDateTime().AsString() << endm;
+    return kStErr;
+  }
+#endif
+  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
   if (row <= mNumberOfInnerRows) kTpcOutIn = kTpcInner;
@@ -159,9 +199,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
   Double_t adcCF = CdEdx.adc;
-  Int_t l = 0;
-  tpcCorrection_st *cor = 0;
-  tpcCorrection_st *corl = 0;
   Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;
@@ -182,6 +219,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[kPhiDirection]         = (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) ? TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]) : 999.;
   VarXs[kTanL]                  = CdEdx.TanL;     
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
+    Int_t l = 0;
+    tpcCorrection_st *cor = 0;
+    tpcCorrection_st *corl = 0;
     if (k != kAdcCorrection && CdEdx.lSimulated) goto ENDL;
     if (! TESTBIT(m_Mask, k)) goto ENDL;
     if (! m_Corrections[k].Chair) goto ENDL;
@@ -201,6 +241,12 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
       goto ENDL;
     }
+    if (k == kTpcPadMDF) {
+      l = 2*(sector-1);
+      if (row <= mNumberOfInnerRows) l += kTpcOutIn;
+      dE *= TMath::Exp(-((St_TpcPadCorrectionMDF *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
+      goto ENDL;
+    }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
     if (! cor) goto ENDL;
     nrows = cor->nrows;
@@ -209,6 +255,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     else {
       if (nrows == mNumberOfRows) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
+      else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
     }
     corl = cor + l;
     iCut = 0;
@@ -237,7 +284,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,xL2); 
 	if (nrows > 2) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
 	if (nrows > 6) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
-	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.dx;
+	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
 	goto ENDL;
       } else if (k == kSpaceCharge) {
 	if (cor[2*kTpcOutIn  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*kTpcOutIn  ].max &&
@@ -266,19 +313,17 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       }
       if (iok) return iok;
     }
-    if (corl->npar%100) dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
-#if 0
-    if (corl->npar%100 
-	&& ! (corl->type == 300 && corl->min >= corl->max && VarXs[k] < corl->min)
-	)  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
-#endif
+    if (corl->npar%100) {
+      dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+    }
   ENDL:
     CdEdx.C[k].dE = dE;
     CdEdx.C[k].dx = dx;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.C[k].dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
   }    
-  memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
+  CdEdx.F = CdEdx.C[kTpcLast];
+  //  memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
   return 0;
 }
 //________________________________________________________________________________
@@ -359,10 +404,10 @@ void StTpcdEdxCorrection::Print(Option_t *opt) const {
       Line += Form("\tlog(dE/dx)  %10.5g",mdEdx->C[k].dEdxL);
       Line += "\t"; Line += TString(m_Corrections[k].Name); Line += "\t"; Line +=  TString(m_Corrections[k].Title);
     } else {
-      Line += Form("\tdE %10.5g",mdEdx->dE);
-      Line += Form("\tdx  %10.5g",mdEdx->dx);
-      Line += Form("\tdE/dx  %10.5g",mdEdx->dEdx);
-      Line += Form("\tlog(dE/dx)  %10.5g",mdEdx->dEdxL);
+      Line += Form("\tdE %10.5g",mdEdx->F.dE);
+      Line += Form("\tdx  %10.5g",mdEdx->F.dx);
+      Line += Form("\tdE/dx  %10.5g",mdEdx->F.dEdx);
+      Line += Form("\tlog(dE/dx)  %10.5g",mdEdx->F.dEdxL);
       Line +=  "\tFinal \t "; 
     }
     cout << Line.Data() << endl;

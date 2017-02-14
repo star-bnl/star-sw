@@ -1,8 +1,9 @@
-// $Id: StTpcdEdxCorrection.h,v 1.8 2016/09/18 22:40:31 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.9 2017/02/14 23:36:40 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
 #include "TObject.h"
+#include "TF1.h"
 #include "Stiostream.h"
 #include "StDetectorDbMaker/St_tpcCorrectionC.h"
 #include "StDetectorDbMaker/St_tpcGasC.h"
@@ -13,11 +14,11 @@
 //________________________________________________________________________________
 struct dE_t {
  public:
-  Double_t dE;
-  Double_t dx;
-  Double_t dEdx;
-  Double_t dEdxL;
-  Double_t dEdxN;
+  Float_t dE;
+  Float_t dx;
+  Float_t dEdx;
+  Float_t dEdxL;
+  Float_t dEdxN;
 };
 //________________________________________________________________________________
 struct dEdxCorrection_t {
@@ -27,62 +28,10 @@ struct dEdxCorrection_t {
   const Char_t *Title;
   TChair       *Chair;
   Int_t   nrows;
-  Double_t dE;
+  Float_t dE;
 };
 //________________________________________________________________________________
-class dEdxY2_t {
- public:
-  dEdxY2_t() {}
-  virtual ~dEdxY2_t() {}
-  /* U->R->S->P->O->Z->X
-     U->R (TpcAdcCorrection) -> P (tpcPressure) ->
-     S (TpcSecRowB/TpcSecRowC) ->  O (TpcDriftDistOxygen) ->  
-     Z (TpcZCorrection) -> X(TpcdXCorrection) */
-  Char_t   first[1];
-  Int_t    sector;
-  Int_t    row;
-  Int_t    channel;
-  Float_t  pad;
-  Int_t    Npads;
-  Int_t    Ntbins;
-  Double_t ZdriftDistance;     // drift distance
-  Double_t ZdriftDistanceO2;   // ZdriftDistance*ppmOxygenIn
-  Double_t ZdriftDistanceO2W;  // ZdriftDistance*ppmOxygenIn*ppmWaterOut
-  Double_t DeltaZ;             // distance to privious cluster
-  Double_t QRatio;             // Ratio to previous cluster Charge 
-  Double_t QRatioA;            // Ratio to Sum of all previous cluster Charge 
-  Double_t QSumA;              // Sum of all previous cluster Charge 
-  Double_t dxC;                // corrected dx which should be used with FitN
-  Double_t dE;
-  Double_t dx;                 // dx with accounting distortions
-  Double_t dEdx;   // after all corrections
-  Double_t dEdxL;  // log of dEdx
-  Double_t dEdxN;  // normolized to BB
-  Double_t xyz[3];  // local
-  Double_t xyzD[3]; // local direction
-  Double_t edge;    // distance to sector edge
-  Double_t PhiR;    // relative phi
-  Double_t resXYZ[3]; // track SectorLocal residual wrt local track 
-  Double_t Prob; 
-  Double_t zdev; 
-  Double_t zP;      // the most probable value from Bichsel
-  Double_t zG;      // global z oh Hit
-  Double_t sigmaP;  // sigma from Bichsel
-  Double_t dCharge; // d_undershoot_Q/Q = ratio of modified - original charge normalized on original charge
-  Double_t rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
-  Int_t    lSimulated;
-  Double_t Qcm;     // accumulated charge uC/cm
-  Double_t Crow;    // Current per row;
-  Double_t Zdc;     // ZDC rate from trigger
-  Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
-  Double_t adc;     //  adc count from cluster finder
-  Double_t TanL;
-  Double_t Voltage; // Anode Voltage
-  dE_t     C[29]; //! StTpcdEdxCorrection::kTpcAllCorrections
-  Char_t   last[1];
-  void Reset() {memset(first, 0, last - first);}
-}; 
-//________________________________________________________________________________
+class dEdxY2_t;
 class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector : int {kTpcOuter = 0, kTpcInner = 1};
@@ -111,12 +60,13 @@ class StTpcdEdxCorrection : public TObject {
     kTpcEffectivedX        = 21,//X   Effective pad row height
     kTpcPadTBins           = 22,//d  					     
     kTpcZDC                = 23,//   					     
-    kTpcLast               = 24,//                                             
-    kTpcNoAnodeVGainC      = 25,//   					     
-    kTpcLengthCorrection   = 26,//                                             
-    kTpcLengthCorrectionMDF= 27,//   					   
-    kTpcdEdxCor            = 28,//   					   
-    kTpcAllCorrections     = 29 //                                             
+    kTpcPadMDF             = 24, 
+    kTpcLast               = 25,//                                             
+    kTpcNoAnodeVGainC      = 26,//   					     
+    kTpcLengthCorrection   = 27,//                                             
+    kTpcLengthCorrectionMDF= 28,//   					   
+    kTpcdEdxCor            = 29,//   					   
+    kTpcAllCorrections     = 30 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -146,16 +96,71 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *TpcPadTBins()         {return Correction(kTpcPadTBins);}
   Int_t Debug()                            {return m_Debug;}
   Int_t Mask()                             {return m_Mask;}
-  Double_t          Adc2GeV()              {return mAdc2GeV;}
+  Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
  private:
   Int_t                m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
   dEdxY2_t            *mdEdx;
-  Double_t             mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
+  Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                mNumberOfRows;
   Int_t                mNumberOfInnerRows;
   Int_t                m_Debug;                 //!
+  TF1                 *f1000;
+  TF1                 *f1100;
+  TF1                 *f1200;
+  TF1                 *f1300;
 };
+//________________________________________________________________________________
+class dEdxY2_t {
+ public:
+  dEdxY2_t() {}
+  virtual ~dEdxY2_t() {}
+  /* U->R->S->P->O->Z->X
+     U->R (TpcAdcCorrection) -> P (tpcPressure) ->
+     S (TpcSecRowB/TpcSecRowC) ->  O (TpcDriftDistOxygen) ->  
+     Z (TpcZCorrection) -> X(TpcdXCorrection) */
+  Char_t   first[1];
+  Int_t    sector;
+  Int_t    row;
+  Int_t    channel;
+  Float_t  pad;
+  Int_t    Npads;
+  Int_t    Ntbins;
+  Float_t  ZdriftDistance;     // drift distance
+  Float_t  ZdriftDistanceO2;   // ZdriftDistance*ppmOxygenIn
+  Float_t  ZdriftDistanceO2W;  // ZdriftDistance*ppmOxygenIn*ppmWaterOut
+  Float_t  DeltaZ;             // distance to privious cluster
+  Float_t  QRatio;             // Ratio to previous cluster Charge 
+  Float_t  QRatioA;            // Ratio to Sum of all previous cluster Charge 
+  Float_t  QSumA;              // Sum of all previous cluster Charge 
+  Float_t  dxC;                // corrected dx which should be used with FitN
+  Float_t  xyz[3];  // local
+  Float_t  xyzD[3]; // local direction
+  Float_t  edge;    // distance to sector edge
+  Float_t  PhiR;    // relative phi
+  Float_t  resXYZ[3]; // track SectorLocal residual wrt local track 
+  Float_t  Prob; 
+  Float_t  zdev; 
+  Float_t  zP;      // the most probable value from Bichsel
+  Float_t  zG;      // global z oh Hit
+  Float_t  sigmaP;  // sigma from Bichsel
+  Float_t  dCharge; // d_undershoot_Q/Q = ratio of modified - original charge normalized on original charge
+  Float_t  rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
+  Int_t    lSimulated;
+  Float_t  Qcm;     // accumulated charge uC/cm
+  Float_t  Crow;    // Current per row;
+  Float_t  Zdc;     // ZDC rate from trigger
+  Float_t  Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
+  Float_t  adc;     //  adc count from cluster finder
+  Float_t  TanL;
+  Float_t  Voltage; // Anode Voltage
+  Float_t  xpad;    // relative position in pad [-1.0,1.0]
+  Float_t  yrow;    // relative position in row [-0.5,0.0] inner, and [0.0,0.5] outer
+  dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections+1];
+  dE_t     F;     //! 
+  Char_t   last[1];
+  void Reset() {memset(first, 0, last - first);}
+}; 
 #endif
