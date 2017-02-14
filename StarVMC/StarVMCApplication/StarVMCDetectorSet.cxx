@@ -121,9 +121,17 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
       if (! det) {
 	det = new StarVMCDetector(vol->GetName());
 	fDetHash->Add(det);
+	if (              Name == "FPCT" // ignore fpd
+			  //      || Name == "BRSG" // ignore tfr
+			  ) {
+	  cout << "Ignore sensitive volume: " << Name.Data() << endl;
+	  det->SetBit(kInvalidObject);
+	}
       }
-      TGeoRCExtension *ext = new TGeoRCExtension(det);
-      vol->SetUserExtension(ext);
+      if (!det->TestBit(kInvalidObject)) {
+	TGeoRCExtension *ext = new TGeoRCExtension(det);
+	vol->SetUserExtension(ext);
+      }
     }
     TObjString *objs;
     static const TString separator("/_");
@@ -222,18 +230,6 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
     StarVMCDetector *det = (StarVMCDetector *) fDetHash->FindObject(Name);
     if (!det) {
       cout << "Missing Detector Set for " << Name.Data() << endl;
-      continue;
-    }
-    if (   Name == "FPCT"
-	   //      || Name == "FPCT"  // ignore fpd
-	   //      || Name == "BRSG" // ignore tfr
-	   ) {
-      cout << "\tIgnore sensitive volume: " << Name.Data() << endl;
-      //      delete fDetHash->Remove(det);
-      TGeoVolume *volT = gGeoManager->GetVolume(Name);
-      if (volT) {
-	volT->SetUserExtension(0);
-      }
       continue;
     }
     cout << endl;
