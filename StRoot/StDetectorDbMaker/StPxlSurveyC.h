@@ -15,7 +15,7 @@ class StPxlpstOnIds : public St_SurveyC {
 
 class StpxlOnPst : public St_SurveyC {
  public:
-  static StpxlOnPst* 	instance();
+  static StpxlOnPst*     	instance();
   StpxlOnPst(St_Survey *table=0) : St_SurveyC(table) {}
   virtual ~StpxlOnPst() {fgInstance = 0;}
  private:

@@ -1,8 +1,59 @@
 #include <assert.h>
+#include <string.h>
 #include "StDetectorDbMaker.h"
-#include "StarChairDefs.h"
 #include "TEnv.h"
+#include "TF1.h"
 #include "St_db_Maker/St_db_Maker.h"
+#if 0
+#include "tables/St_tpcCorrection_Table.h"
+#include "tables/St_tpcSectorT0offset_Table.h"
+#include "tables/St_tofTrayConfig_Table.h"
+#define DEBUGTABLE(STRUCT) PrintTable(#STRUCT,table )
+#define makeString(PATH) # PATH
+#define CHECKTABLE(C_STRUCT) \
+  if (table->InheritsFrom("St_" makeSTRING(C_STRUCT))) {	  \
+    St_ ## C_STRUCT  *t = (St_ ## C_STRUCT  *) table ;	      \
+    ## C_STRUCT ## _st *s = t->GetTable(); Nrows = s->nrows;    \
+    ## C_STRUCT ## _st def = {0};				      \
+    iprt = kFALSE;					      \
+    Int_t shift = 0; \
+    Int_t NrowSize = t->GetRowSize(); \
+    if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;}\
+    if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def->t0[i] = -22.257;} \
+    if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def->entries = 120; for (Int_t i = 0; i < 120; i++) {def->iTray[i] = i+1; def->nModules[i] = 32;} \
+
+    for (Int_t i = 0; i < table->GetNRows(); i++, s++) {	      \
+      if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;}   \
+    }								      \
+  } 
+//___________________Debug Print out  _____________________________________________________________
+void PrintTable(const Char_t *str, TTable *table) {
+  TDatime t[2];
+  Bool_t iprt = kTRUE;
+  if (St_db_Maker::GetValidity(table,t) > 0) {
+    Int_t Nrows = table->GetNRows();
+    LOG_WARN << "St_" << str << "C::instance found table " << table->GetName()
+	     << " with NRows = " << Nrows << " in db" << endm;
+    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+    if (table->InheritsFrom("St_tpcCorrection")) {
+      St_tpcCorrection *t = (St_tpcCorrection *) table;
+      tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
+    if (Nrows > 10) Nrows = 10;
+    CHECKTABLE(tpcCorrection);
+    CHECKTABLE(tpcHVPlanes);
+    CHECKTABLE(Survey);
+    CHECKTABLE(tpcSectorT0offset);
+    CHECKTABLE(tofTrayConfig);
+    if (iprt) {
+      if (table->GetRowSize() < 512) table->Print(0,Nrows);
+    } else {
+      LOG_WARN << "Default table" << endm;
+    }
+  }
+}
+#endif
+#include "StarChairDefs.h"
 static Int_t _debug = 0;
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
@@ -84,6 +135,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     if (X < cor->min) X = cor->min;
     if (X > cor->max) X = cor->max;
   }
+  static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0;
+  TF1 *f = 0;
   switch (cor->type) {
   case 1: // Tchebyshev [-1,1] 
     T0 = 1;
@@ -125,6 +178,27 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 12: // ADC correction offset + poly for log(ADC) and TanL
     Sum = cor->a[1] + z*cor->a[2] + z*z*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*cor->a[5]) + cor->a[6]);
     Sum *= TMath::Exp(-cor->a[0]);
+    break;
+  case 1000:
+  case 1100:
+  case 1200:
+  case 1300:
+      if (cor->type == 1000) {
+	if (! f1000) f1000 = new TF1("f1000","gaus(9)+pol0(3)"); 
+	f = f1000;
+      } else if (cor->type == 1100) {
+	if (! f1100) f1100 = new TF1("f1100","gaus+pol1(3)"); 
+	f = f1100;
+      } else if (cor->type == 1200) {
+	if (! f1200) f1200 = new TF1("f1200","gaus+pol2(3)"); 
+	f = f1200;
+      } else if (cor->type == 1300) {
+	if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)"); 
+	f = f1300;
+      }
+      assert(f);
+      f->SetParameters(cor->a);
+      Sum = f->Eval(X);
     break;
   default: // polynomials
     Sum = cor->a[N-1];
@@ -187,6 +261,8 @@ MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
 MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
 #include "St_TpcLengthCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
+#include "St_TpcPadCorrectionMDF.h"
+MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDF,Calibrations/tpc/TpcPadCorrectionMDF);
 ClassImp(St_MDFCorrectionC);
 //____________________________________________________________________
 Double_t St_MDFCorrectionC::Eval(Int_t k, const Double_t x0, Double_t x1) const {
@@ -891,10 +967,9 @@ MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
 #include "StSstSurveyC.h"
-MakeChairInstance2(Survey,StSstOnGlobal,Geometry/sst/SstOnGlobal);
-MakeChairInstance2(Survey,StSstSectorsOnGlobal,Geometry/sst/SstSectorsOnGlobal);
-MakeChairInstance2(Survey,StSstLaddersOnSectors,Geometry/sst/SstLaddersOnSectors);
-MakeChairInstance2(Survey,StSstWafersOnLadders,Geometry/sst/SstWafersOnLadders);
+MakeChairInstance2(Survey,StsstOnOsc,Geometry/sst/sstOnOsc);
+MakeChairInstance2(Survey,StsstLadderOnSst,Geometry/sst/sstLadderOnSst);
+MakeChairInstance2(Survey,StsstSensorOnLadder,Geometry/sst/sstSensorOnLadder);
 #include "StTpcSurveyC.h"
 MakeChairAltInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
@@ -908,7 +983,7 @@ MakeChairInstance2(Survey,StGmtOnModule,Geometry/gmt/GmtOnModule);
 //____________________________Geometry/ist____________________________________________________
 #include "StIstSurveyC.h"
 MakeChairInstance2(Survey,StidsOnTpc,Geometry/ist/idsOnTpc);                      
-MakeChairInstance2(Survey,StIstpstOnIds,Geometry/ist/pstOnIds);
+MakeChairInstance2(Survey,StpstOnIds,Geometry/ist/pstOnIds);
 MakeChairInstance2(Survey,StistOnPst,Geometry/ist/istOnPst);
 MakeChairInstance2(Survey,StLadderOnIst,Geometry/ist/istLadderOnIst);
 MakeChairInstance2(Survey,StistSensorOnLadder,Geometry/ist/istSensorOnLadder);
@@ -930,6 +1005,20 @@ const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   rot.SetName(Table()->GetName());
   rot.SetRotation(Rotation(i));
   rot.SetTranslation(Translation(i));
+  return *&rot;
+}
+//________________________________________________________________________________
+const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
+  static TGeoHMatrix rot("UnKnown");
+  for (UInt_t i = 0; i < getNumRows(); i++) {
+    if (Id(i) == id) {
+      rot.SetName(Form("%s_%i",Table()->GetName(),id));
+      rot.SetRotation(Rotation(i));
+      rot.SetTranslation(Translation(i));
+      //      Table()->Print(i,1);
+      break;
+    }
+  }
   return *&rot;
 }
 //________________________________________________________________________________
@@ -984,7 +1073,7 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
   if (Name == "idsOnTpc")               return (St_SurveyC   *) StidsOnTpc::instance();	    
-  if (Name == "istpstOnIds")        	return (St_SurveyC   *) StIstpstOnIds::instance();  	
+  if (Name == "pstOnIds")        	return (St_SurveyC   *) StpstOnIds::instance();  	
   if (Name == "istOnPst")        	return (St_SurveyC   *) StistOnPst::instance();  	
   if (Name == "LadderOnIst")       	return (St_SurveyC   *) StLadderOnIst::instance(); 	
   if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();  	
