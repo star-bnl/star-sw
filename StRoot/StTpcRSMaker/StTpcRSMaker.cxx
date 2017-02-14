@@ -59,14 +59,14 @@
 #include "tables/St_g2t_vertex_Table.h" 
 //#define ElectronHack
 #define Old_dNdx_Table
-//#define __STOPPED_ELECTRONS__
+#define __STOPPED_ELECTRONS__
 #define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.74 2016/12/29 16:30:56 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.75 2017/02/14 23:40:35 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -104,7 +104,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   NoOfInnerRows(-1),
   NoOfPads(182),
   NoOfTimeBins(__MaxNumberOfTimeBins__),
-  mCutEle(1e-4)
+  mCutEle(1e-5)
 {
   memset(beg, 0, end-beg+1);
   m_Mode = 0;
@@ -203,6 +203,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
   if (TESTBIT(m_Mode,kDistortion)) {
@@ -836,15 +837,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  CdEdx.QSumA = 0;
 	  CdEdx.sector = TrackSegmentHits[iSegHits].Pad.sector(); 
 	  CdEdx.row    = TrackSegmentHits[iSegHits].Pad.row();
-	  CdEdx.channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(CdEdx.row);
-	  CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,CdEdx.row);
-	  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,CdEdx.row);
-	  Double_t              Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(CdEdx.sector,CdEdx.row); // C/cm
 	  CdEdx.pad    = TMath::Nint(TrackSegmentHits[iSegHits].Pad.pad());
 	  CdEdx.edge   = CdEdx.pad;
 	  if (CdEdx.edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
 	  CdEdx.edge += 1 - gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
-	  CdEdx.dE     = 1;
+	  CdEdx.F.dE     = 1;
 #if 0
 	  CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
 	  Int_t p1 = tpcHit->minPad();
@@ -855,7 +852,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  if (TESTBIT(m_Mode, kEmbeddingShortCut) && 
 	      (tpcHit->idTruth() && tpcHit->qaTruth() > 95)) CdEdx.lSimulated = tpcHit->idTruth();
 #endif
-	  CdEdx.dx     = dStep;
+	  CdEdx.F.dx     = dStep;
 	  CdEdx.xyz[0] = TrackSegmentHits[iSegHits].xyzG.position().x();
 	  CdEdx.xyz[1] = TrackSegmentHits[iSegHits].xyzG.position().y();
 	  CdEdx.xyz[2] = TrackSegmentHits[iSegHits].xyzG.position().z();
@@ -870,16 +867,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  CdEdx.xyzD[2] = TrackSegmentHits[nSegHits].dirLS.position().z();
 	  CdEdx.ZdriftDistance = CdEdx.xyzD[2];
 	  CdEdx.zG      = CdEdx.xyz[2];
-	  CdEdx.Qcm     = 1e6*Qcm; // uC/cm
-	  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
 	  if (St_trigDetSumsC::instance())	CdEdx.Zdc     = St_trigDetSumsC::instance()->zdcX();
-	  
 	  CdEdx.ZdriftDistance = TrackSegmentHits[iSegHits].coorLS.position().z(); // drift length
 	  St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
 	  if (tpcGas)
 	    CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
 	  if (! m_TpcdEdxCorrection->dEdxCorrection(CdEdx)) {
-	    dEdxCor = CdEdx.dE;
+	    dEdxCor = CdEdx.F.dE;
 	  }
 	  if (dEdxCor <= 0.) continue;
 	}
@@ -1784,8 +1778,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.74 2016/12/29 16:30:56 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.75 2017/02/14 23:40:35 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.75  2017/02/14 23:40:35  fisyak
+// Add new Table to correct dE/dx pad dependence, 2017 dAu20-62 calibration
+//
 // Revision 1.74  2016/12/29 16:30:56  fisyak
 // make switch to account __STOPPED_ELECTRONS__
 //
