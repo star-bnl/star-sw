@@ -486,7 +486,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
               if (QAmode) cutshist->Fill(25);
               Float_t emcEta = emcTrkPosition.pseudoRapidity();
               Float_t emcPhi = emcTrkPosition.phi();
-              Int_t m,e,s,id = 0;
+              Int_t m = 0 ,e = 0,s = 0,id = 0;
               emcGeom->getBin(emcPhi,emcEta,m,e,s);
               if (emcGeom->getId(m,e,s,id) == 0) {
                 tower_mod = m;
@@ -1547,8 +1547,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.64 2015/06/30 21:44:31 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.65 2017/02/14 23:38:38 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.65  2017/02/14 23:38:38  fisyak
+// Adjustment to structure changes in StTpcdEdxCorrection
+//
 // Revision 1.64  2015/06/30 21:44:31  genevb
 // Use an initialization call for StMagUtilities for each event
 //
