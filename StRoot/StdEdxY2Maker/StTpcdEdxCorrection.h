@@ -60,12 +60,13 @@ class StTpcdEdxCorrection : public TObject {
     kTpcEffectivedX        = 21,//X   Effective pad row height
     kTpcPadTBins           = 22,//d  					     
     kTpcZDC                = 23,//   					     
-    kTpcLast               = 24,//                                             
-    kTpcNoAnodeVGainC      = 25,//   					     
-    kTpcLengthCorrection   = 26,//                                             
-    kTpcLengthCorrectionMDF= 27,//   					   
-    kTpcdEdxCor            = 28,//   					   
-    kTpcAllCorrections     = 29 //                                             
+    kTpcPadMDF             = 24, 
+    kTpcLast               = 25,//                                             
+    kTpcNoAnodeVGainC      = 26,//   					     
+    kTpcLengthCorrection   = 27,//                                             
+    kTpcLengthCorrectionMDF= 28,//   					   
+    kTpcdEdxCor            = 29,//   					   
+    kTpcAllCorrections     = 30 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();

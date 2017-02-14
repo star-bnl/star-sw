@@ -33,6 +33,7 @@
 #include "StDetectorDbMaker/St_TpcZDCC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDF.h"
+#include "StDetectorDbMaker/St_TpcPadCorrectionMDF.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
@@ -83,6 +84,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcEffectivedX        ] = dEdxCorrection_t("TpcEffectivedX"      ,"dEdx correction wrt Bichsel parameterization"			,St_TpcEffectivedXC::instance()); 	     
   m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size"						,0);					     
   m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Gain on Zdc CoincidenceRate"				        ,St_TpcZDCC::instance());		     
+  m_Corrections[kTpcPadMDF             ] = dEdxCorrection_t("TpcPadCorrectionMDF" ,"Gain Variation along the anode wire"                                ,St_TpcPadCorrectionMDF::instance());         
   m_Corrections[kTpcLast               ] = dEdxCorrection_t("Final"        	  ,""								        ,0);					     
   m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB"  ,"Variation vs Track length and relative error in Ionization"	,St_TpcLengthCorrectionBC::instance());     
   m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX)> and rel. error in dE/dx" ,St_TpcLengthCorrectionMDF::instance());         
@@ -197,9 +199,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
   Double_t adcCF = CdEdx.adc;
-  Int_t l = 0;
-  tpcCorrection_st *cor = 0;
-  tpcCorrection_st *corl = 0;
   Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;
@@ -220,6 +219,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[kPhiDirection]         = (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) ? TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]) : 999.;
   VarXs[kTanL]                  = CdEdx.TanL;     
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
+    Int_t l = 0;
+    tpcCorrection_st *cor = 0;
+    tpcCorrection_st *corl = 0;
     if (k != kAdcCorrection && CdEdx.lSimulated) goto ENDL;
     if (! TESTBIT(m_Mask, k)) goto ENDL;
     if (! m_Corrections[k].Chair) goto ENDL;
@@ -239,6 +241,12 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
       goto ENDL;
     }
+    if (k == kTpcPadMDF) {
+      l = 2*(sector-1);
+      if (row <= mNumberOfInnerRows) l += kTpcOutIn;
+      dE *= TMath::Exp(-((St_TpcPadCorrectionMDF *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
+      goto ENDL;
+    }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
     if (! cor) goto ENDL;
     nrows = cor->nrows;
@@ -247,6 +255,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     else {
       if (nrows == mNumberOfRows) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
+      else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
     }
     corl = cor + l;
     iCut = 0;
@@ -304,7 +313,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       }
       if (iok) return iok;
     }
-    if (corl->npar%100) dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+    if (corl->npar%100) {
+      dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+    }
   ENDL:
     CdEdx.C[k].dE = dE;
     CdEdx.C[k].dx = dx;

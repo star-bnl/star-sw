@@ -261,6 +261,8 @@ MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
 MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
 #include "St_TpcLengthCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
+#include "St_TpcPadCorrectionMDF.h"
+MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDF,Calibrations/tpc/TpcPadCorrectionMDF);
 ClassImp(St_MDFCorrectionC);
 //____________________________________________________________________
 Double_t St_MDFCorrectionC::Eval(Int_t k, const Double_t x0, Double_t x1) const {
