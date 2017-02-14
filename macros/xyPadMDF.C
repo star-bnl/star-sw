@@ -137,14 +137,12 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
     cout << Form("  row.XMin[%2i] = %10.5g;", i,fit->GetMinVariables()->operator()(i));
     out << Form("  row.XMin[%2i] = %10.5g;", i,fit->GetMinVariables()->operator()(i));
   }
-  cout << endl;
-  out << endl;
+  cout << endl;  out << endl;
   for (i = 0; i < fit->GetNVariables(); i++) {
     cout << Form("  row.XMax[%2i] = %10.5g;", i,fit->GetMaxVariables()->operator()(i));
     out << Form("  row.XMax[%2i] = %10.5g;", i,fit->GetMaxVariables()->operator()(i));
   }
-  cout << endl;
-  out << endl;
+  cout << endl;  out << endl;
   for (i = 0; i < fit->GetNCoefficients(); i++) {
     for (j = 0; j < fit->GetNVariables(); j++) {
       cout << Form("  row.Power[%2i] = %2i;",i * fit->GetNVariables() + j,
@@ -152,8 +150,7 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
       out << Form("  row.Power[%2i] = %2i;",i * fit->GetNVariables() + j,
 		   fit->GetPowers()[fit->GetPowerIndex()[i] * fit->GetNVariables() + j]);
     }
-    cout << endl;
-    out << endl;
+    cout << endl;    out << endl;
   }
   cout << "  row.DMean = \t"          << fit->GetMeanQuantity() << ";" << endl;
   out << "  row.DMean = \t"          << fit->GetMeanQuantity() << ";" << endl;
@@ -162,7 +159,7 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
     out << Form("  row.Coefficients[%2i]    = %15.5g;", i, fit->GetCoefficients()->operator()(i));
     if ((i+1) %2 == 0) {cout << endl; out << endl;}
   }
-  if (fit->GetNCoefficients()%2) cout << endl;
+  if (fit->GetNCoefficients()%2) {cout << endl; out << endl;}
   for (i = 0; i < fit->GetNCoefficients(); i++) {
     cout << Form("  row.CoefficientsRMS[%2i] = %15.5g;", i, fit->GetCoefficientsRMS()->operator()(i));
     out << Form("  row.CoefficientsRMS[%2i] = %15.5g;", i, fit->GetCoefficientsRMS()->operator()(i));
@@ -184,6 +181,7 @@ void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20){
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"St_MDFCorrection\")) return 0;" << endl;
   out << "  MDFCorrection_st row;" << endl;
+  out << "  St_MDFCorrection *tableSet = new St_MDFCorrection(\"TpcPadCorrectionMDF\",48);" << endl;
   for (Int_t sector = 1; sector <= 24; sector++) {
     for (Int_t io = 0; io < 2; io++) {// io == 0 : Outer, io = 1 : Inner
       TH2D *muP = new TH2D(*mu);
