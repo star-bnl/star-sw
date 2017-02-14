@@ -3,13 +3,10 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.13 2016/08/18 17:46:14 smirnovd Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.14 2017/02/14 22:00:41 smirnovd Exp $
  *
  */
 
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 #include <vector>
 #include <StThreeVectorD.hh>
 #include <StPhysicalHelixD.hh>
@@ -48,7 +45,7 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     float  mMatchCtbMax_eta;
     float  mMatchCtbMax_phi;
     float  mDVtxMax;
-    uint   mMinMatchTr; // minimal # of tracks matched to CTB for valid vertex
+    unsigned int   mMinMatchTr; // minimal # of tracks matched to CTB for valid vertex
     float  mMaxZrange;// for tracks used by the vertex finder.
     int    mBLequivNtr;
     int    n1,n2,n3,n4,n5,n6; // private counters
@@ -71,6 +68,19 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.14  2017/02/14 22:00:41  smirnovd
+ * Squashed commit of the following clean-up changes:
+ *
+ * See master branch for details.
+ *
+ * - Remove commented code for debugging
+ * - Removed extra validation; it is done at construction
+ * - No need to include header for apple OS
+ * - Removed pointless assert
+ * - Use standard portable type name
+ * - Remove unused header math_constants.h
+ * - StMinuitVertexFinder: Remove abandoned member function
+ *
  * Revision 1.13  2016/08/18 17:46:14  smirnovd
  * Squashed commit of the following refactoring changes:
  *

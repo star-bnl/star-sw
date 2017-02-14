@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.30 2017/01/06 21:01:48 smirnovd Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.31 2017/02/14 22:00:40 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -177,7 +177,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
   if(mVertexConstrain ) {
 
     float sigMin=100000; // pick large weight for this track 
-    for( uint j=0;j<mPrimCand.size();j++) {
+    for( unsigned int j=0;j<mPrimCand.size();j++) {
       float sig=mPrimCand[j].sigma;
       if(sigMin>sig) sigMin=sig;
     }
@@ -197,7 +197,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
   LOG_DEBUG << "PrimCand  before ppLMV for eveID=" << eveID << "tracks at first point" << endm;
 
   //tmp - lits all matched tracks
-  for( uint j=0;j<mPrimCand.size();j++) {
+  for( unsigned int j=0;j<mPrimCand.size();j++) {
     StThreeVectorD p=mPrimCand[j].helix.momentum(mBfield*tesla);
     printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/M_PI*180);
   } 
@@ -214,7 +214,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
 		   << ", tracks at vertex=" << mPrimCand.size()<<endm;
 
   assert(size());
-  for( uint j=0;j<mPrimCand.size();j++) {
+  for( unsigned int j=0;j<mPrimCand.size();j++) {
     double spath = mPrimCand[j].helix.pathLength( getVertex(0)->position().x(),getVertex(0)->position().y());
     StThreeVectorD p=mPrimCand[j].helix.momentumAt(spath,mBfield*tesla);
     // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/M_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
@@ -278,7 +278,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   sigma=0;
   const double Rctb=213.6; // (cm) radius of the CTB 
-  uint nFitP=0;
+  unsigned int nFitP=0;
 
   if (!track) return false; // it should never happen
   if(!finite(track->geometry()->helix().curvature())){
@@ -367,7 +367,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   
   // printf("posCTB.z()=%f posDCA.z()=%f\n",posCTB.z(),posDCA.z());
 
-  uint ih;
+  unsigned int ih;
   for(ih=0;ih<mCtbHits.size();ih++) {// loop over CTB hits
  
    // match to CTB slats in phi
@@ -404,7 +404,7 @@ StppLMVVertexFinder::ppLMV5() {
   if(mMode == 0) LOG_WARN<<"ppLMV4 cuts have been activated"<<endm; 
 
   int totTr=mPrimCand.size();
-  uint minTr=mMinMatchTr;
+  unsigned int minTr=mMinMatchTr;
   if(mVertexConstrain) minTr++;
   //printf("passed %d tracks match to CTB,  BeamLine=%d\n",totTr,mVertexConstrain );
   LOG_DEBUG << "passed " << totTr << " tracks match to CTB,  BeamLine=" << mVertexConstrain << endm;
@@ -605,6 +605,19 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.31  2017/02/14 22:00:40  smirnovd
+ * Squashed commit of the following clean-up changes:
+ *
+ * See master branch for details.
+ *
+ * - Remove commented code for debugging
+ * - Removed extra validation; it is done at construction
+ * - No need to include header for apple OS
+ * - Removed pointless assert
+ * - Use standard portable type name
+ * - Remove unused header math_constants.h
+ * - StMinuitVertexFinder: Remove abandoned member function
+ *
  * Revision 1.30  2017/01/06 21:01:48  smirnovd
  * Use pi constant from standard library, s/C_PI/M_PI/
  *

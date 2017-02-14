@@ -1,8 +1,5 @@
 #ifndef Vertex3D_h
 #define Vertex3D_h
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 
 #include "TrackData.h"
 using namespace std;  // for vector
@@ -20,7 +17,7 @@ class Vertex3D {
 
   vector<TrackData*> track;
   float cut_pT1,cut_pT2, cut_sigY;
-  uint  cut_numTrack;
+  unsigned int  cut_numTrack;
   int   isFound;
 
  public:

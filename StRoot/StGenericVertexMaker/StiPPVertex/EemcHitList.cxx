@@ -23,7 +23,7 @@
 
 //==========================================================
 //==========================================================
-EemcHitList::EemcHitList(StEEmcDb* x, uint y, EEmcGeomSimple *z) :
+EemcHitList::EemcHitList(StEEmcDb* x, unsigned int y, EEmcGeomSimple *z) :
   ScintHitList(-M_PI/60.,M_PI/30,60, 999,999,8,(char *) "Eemc",4,0.75) {
   eeDb=x; 
   killStatEEmc=y ;
@@ -144,12 +144,12 @@ EemcHitList::~EemcHitList(){
 //==========================================================
 void
 EemcHitList::build ( StEmcDetector*det, float adcMin){
-  for(uint mod=1;mod<=det->numberOfModules();mod++) {
+  for(unsigned int mod=1;mod<=det->numberOfModules();mod++) {
     StEmcModule*     module=det->module(mod);
     //printf("ETOW sector=%d nHit=%d\n",mod,module->numberOfHits());
     StSPtrVecEmcRawHit&     hit=  module->hits();
     int sec=mod; // range 1-12
-    for(uint ih=0;ih<hit.size();ih++){ // over cesctors
+    for(unsigned int ih=0;ih<hit.size();ih++){ // over cesctors
       StEmcRawHit *h=hit[ih];
       char sub='A'+h->sub()-1;// range A-E
       int eta=h->eta();// range 1-12

@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.22 2016/11/04 20:24:00 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.23 2017/02/14 22:00:39 smirnovd Exp $
  *
  */
 
@@ -119,7 +119,6 @@ public:
 
     // Added, not part of base-class  and used by the Minuit vertex finder
     Int_t           NCtbMatches();    // returns the number of tracks matched to CTB                                                               
-    Int_t           NCtbSlats();   // returns the number of CTB slats above threshold
     void            CTBforSeed(){   mRequireCTB = kTRUE;}
     void            NoCTBforSeed(){ mRequireCTB = kFALSE;}
     void            setExternalSeed(const StThreeVectorD&);

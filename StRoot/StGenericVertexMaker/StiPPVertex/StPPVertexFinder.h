@@ -3,12 +3,9 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.38 2017/01/27 20:13:02 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.39 2017/02/14 22:00:41 smirnovd Exp $
  *
  */
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 
 #include <vector>
 
@@ -76,7 +73,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void saveHisto(TString fname);
   int  mTotEve;
   int  eveID;
-  uint  mAlgoSwitches; //binary, assign 1bit per change, use enum below
+  unsigned int  mAlgoSwitches; //binary, assign 1bit per change, use enum below
   enum {kSwitchOneHighPT=1}; 
 
   TH1F *hA[mxH];
