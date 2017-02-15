@@ -43,12 +43,12 @@ if ($out > 1) {
 if($debug) { print("year=$year day=$day submit=$submit\n"); } 
 
 if (-e "$anadir/html")     {} else {`mkdir $anadir/html`;}
-#$today = ` date +%s`;             $today=~s/\n//g;
-#$dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;
-#$itoday = ` date +%j`;            $itoday=~s/\n//g;
-$today = ` date +%s --date='2016/12/31'`;     $today=~s/\n//g;
-$dtoday = ` date +"%Y %b %d %a --date='2016/12/31'`; $dtoday=~s/\n//g;
-$itoday = ` date +%j --date='2016/12/31'`;            $itoday=~s/\n//g;
+$today = ` date +%s`;             $today=~s/\n//g;
+$dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;
+$itoday = ` date +%j`;            $itoday=~s/\n//g;
+#$today = ` date +%s --date='2016/12/31'`;     $today=~s/\n//g;
+#$dtoday = ` date +"%Y %b %d %a" --date='2016/12/31'`; $dtoday=~s/\n//g;
+#$itoday = ` date +%j --date='2016/12/31'`;            $itoday=~s/\n//g;
 if($debug>1) {print "today = $today $dtoday $itoday\n";}
 
 $dstart=`date -d \"UTC 1970-01-01 $start secs\" +"%Y %b %d %a"`;  $dstart=~s/\n//g;
