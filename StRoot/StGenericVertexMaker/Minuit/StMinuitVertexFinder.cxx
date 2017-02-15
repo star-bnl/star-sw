@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.50 2017/02/14 22:00:39 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.51 2017/02/15 15:30:15 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -26,7 +26,6 @@ std::vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 std::vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 std::vector<Double_t >          StMinuitVertexFinder::mSigma;
 std::vector<Double_t >          StMinuitVertexFinder::mZImpact;
-Double_t                   StMinuitVertexFinder::mWidthScale = 0.1; // 1./TMath::Sqrt(5.);
 Bool_t                     StMinuitVertexFinder::requireCTB;
 Int_t                      StMinuitVertexFinder::nCTBHits;
 //==========================================================
@@ -54,19 +53,27 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
 
+  using ObjectiveFunc_t = void (*)(int&, double*, double&, double*, int);
+
+  ObjectiveFunc_t fcn_minuit;
+
   switch (mVertexFitMode)
   {
   case VertexFit_t::Beamline1D:
-     mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
+     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline1D;
      break;
+
   case VertexFit_t::Beamline3D:
-     mMinuit->SetFCN(&StMinuitVertexFinder::Chi2Beamline3D);
+     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline;
      break;
+
   case VertexFit_t::NoBeamline:
   default:
-     mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
+     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAs;
      break;
   }
+
+  mMinuit->SetFCN(fcn_minuit);
 
   mExternalSeedPresent = kFALSE;
   mRequireCTB = kFALSE;
@@ -412,7 +419,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     // their estimated DCA resolution in vectors. Quality cuts are applied (see
     // StMinuitVertexFinder::accept()). The helices and the sigma are used in
     // fcn to calculate the fit potential which gets minimized by Minuit.
-    sDCAs().clear();
+    mDCAs.clear();
     mHelices.clear();
     mHelixFlags.clear();
     mSigma.clear();
@@ -431,7 +438,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
       if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
-      sDCAs().push_back(gDCA);
+      mDCAs.push_back(gDCA);
       // 	  StPhysicalHelixD helix = gDCA->helix(); 
       // 	  mHelices.push_back(helix);
       mHelices.push_back(g->geometry()->helix());
@@ -477,6 +484,9 @@ StMinuitVertexFinder::fit(StEvent* event)
     
     // Reset and clear Minuit parameters mStatusMin
     mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
+
+    // Make sure the global pointer points to valid object so Minuit uses correct data
+    StGenericVertexFinder::sSelf = this;
     
     // Set parameters and start values. We do constrain the parameters since it
     // harms the fit quality (see Minuit documentation).
@@ -701,19 +711,19 @@ StMinuitVertexFinder::fit(StEvent* event)
     return 1;
 } 
 //________________________________________________________________________________
-Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
+double StMinuitVertexFinder::CalcChi2DCAs(const StThreeVectorD &vtx) {
   Double_t f = 0;
   Double_t e;
   nCTBHits = 0;
   if (fabs(vtx.x())> 10) return 1e6;
   if (fabs(vtx.y())> 10) return 1e6;
   if (fabs(vtx.z())>300) return 1e6;
-  for (UInt_t i=0; i<sDCAs().size(); i++) {
+  for (UInt_t i=0; i<mDCAs.size(); i++) {
 
     if ( !(mHelixFlags[i] & kFlagDcaz) || (requireCTB && !(mHelixFlags[i] & kFlagCTBMatch)) )
        continue;
 
-    const StDcaGeometry* gDCA = sDCAs()[i];
+    const StDcaGeometry* gDCA = mDCAs[i];
     if (! gDCA) continue;
     const StPhysicalHelixD helix = gDCA->helix();
     e = helix.distance(vtx, kFALSE);  // false: don't do multiple loops
@@ -723,38 +733,12 @@ Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
     Double_t chi2 = gDCA->thelix().Dca(&(vtx.x()),&err2);
     chi2*=chi2/err2;
     //EndVP
-    Double_t scale = 1./(mWidthScale*mWidthScale);
+    static double scale = 100;
     f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
     //	f -= scale*TMath::Exp(-chi2/scale); // robust potential
     if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
   }
   return f;
-}
-//________________________________________________________________________________
-
-void StMinuitVertexFinder::fcn1D(int& npar, double* gin, double& f, double* par, Int_t iflag)
-{
-    Double_t z = par[0];
-    Double_t x = beamX(z);
-    Double_t y = beamY(z);
-    StThreeVectorD vtx(x,y,z);
-    f = Chi2atVertex(vtx);
-}
-void StMinuitVertexFinder::fcn(int& npar, double* gin, double& f, double* par, Int_t iflag)
-{
-  StThreeVectorD vtx(par);
-  f = Chi2atVertex(vtx);
-}
-
-
-void StMinuitVertexFinder::Chi2Beamline3D(int& npar, double* gin, double& f, double* par, Int_t iflag)
-{
-  StThreeVectorD vtx(par);
-  f = Chi2atVertex(vtx);
-
-  // Add to the chi2 with the beamline
-  static double scale = 1./(mWidthScale*mWidthScale);
-  f += scale*(1. - TMath::Exp(-StGenericVertexFinder::CalcChi2Beamline(vtx)/scale));
 }
 
 
@@ -797,7 +781,6 @@ StMinuitVertexFinder::printInfo(ostream& os) const
       os << "Chisquare .................... " << mBestVtx->chiSquared() << endl;
     }
     os << "min # of fit points for tracks . " << mMinNumberOfFitPointsOnTrack << endl;
-    os << "final potential width scale .... " << mWidthScale << endl;
 }
 
 
@@ -807,10 +790,10 @@ void StMinuitVertexFinder::UseVertexConstraint() {
   // So, we'll keep it this way for backward compatibility
   if (mVertexFitMode != VertexFit_t::Beamline1D) return;
 
-  double mX0 = sBeamline.x0;
-  double mY0 = sBeamline.y0;
-  double mdxdz = sBeamline.dxdz;
-  double mdydz = sBeamline.dydz;
+  double mX0 = mBeamline.x0;
+  double mY0 = mBeamline.y0;
+  double mdxdz = mBeamline.dxdz;
+  double mdydz = mBeamline.dydz;
   LOG_INFO << "StMinuitVertexFinder::Using Constrained Vertex" << endm;
   StThreeVectorD origin(mX0,mY0,0.0);
   Double_t pt  = 88889999;   
@@ -831,7 +814,7 @@ void StMinuitVertexFinder::UseVertexConstraint() {
 
   //re-initilize minuit for 1D fitting
   mMinuit = new TMinuit(1);
-  mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
+  mMinuit->SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline1D);
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
   mExternalSeedPresent = kFALSE;
