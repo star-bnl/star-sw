@@ -4,9 +4,9 @@ cp StRoot/StSpinPool/StRccCounterMonitor/macro/* .
 \rm makeplot
 \rm makepage.pl
 
-sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPoolStRccCounterMonitor/macro/crontab.txt > crontab.txt
-sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPoolStRccCounterMonitor/macro/makeplot > makeplot
-sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPoolStRccCounterMonitor/macro/makepage.pl > makepage.pl
+sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPool/StRccCounterMonitor/macro/crontab.txt > crontab.txt
+sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPool/StRccCounterMonitor/macro/makeplot > makeplot
+sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPool/StRccCounterMonitor/macro/makepage.pl > makepage.pl
 
 chmod +x makeplot
 chmod +x makepage.pl
