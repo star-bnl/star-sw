@@ -802,6 +802,11 @@ struct RHIC_Trigger {
 struct PrescaleReturnInfo {
     float ps[TRIGGERS_MAX];
     float measured_rate[TRIGGERS_MAX];
+
+    float py_ps[TRIGGERS_MAX];
+    float py_desiredRate[TRIGGERS_MAX];
+    float py_scalerRate[TRIGGERS_MAX];
+    float py_predictedRate[TRIGGERS_MAX];
 };
 
 #endif
