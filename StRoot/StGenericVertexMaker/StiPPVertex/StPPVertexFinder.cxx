@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.97 2017/02/14 22:00:41 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.98 2017/02/15 15:30:19 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -822,19 +822,19 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 
 
 /**
- * Creates DCA states for selected tracks (mTrackData) and fills the static
- * container sDCAs. The tracks in mTrackData must be already associated with
+ * Creates DCA states for selected tracks (mTrackData) and fills the member
+ * container mDCAs. The tracks in mTrackData must be already associated with
  * a corresponding vertex, i.e. we check that track.vertexID == vertex.id
  *
  * \author Dmitri Smirnov, BNL
  * \date April, 2016
  */
-void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
+void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
 {
-   // Fill static array of pointers to StDcaGeometry objects for selected tracks
+   // Fill member array of pointers to StDcaGeometry objects for selected tracks
    // in mTrackData corresponding to this vertex. These will be used in static
    // minimization function
-   while (!sDCAs().empty()) delete sDCAs().back(), sDCAs().pop_back();
+   while (!mDCAs.empty()) delete mDCAs.back(), mDCAs.pop_back();
 
 
    for (const TrackData & track : mTrackData)
@@ -860,7 +860,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
 
       StDcaGeometry* dca = new StDcaGeometry();
       dca->set(setp, sete);
-      sDCAs().push_back(dca);
+      mDCAs.push_back(dca);
    }
 }
 
@@ -868,24 +868,24 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
 /**
  * Takes a list of vertex candidates/seeds and updates each vertex position by
  * fitting tracks pointing to it. The fit is performed by minimizing the chi2
- * robust potential. The method uses the base class static container with track
+ * robust potential. The method uses the base class member container with track
  * DCAs as input.
  *
  * \author Dmitri Smirnov, BNL
  * \date February, 2016
  */
-int StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
+int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
 {
    createTrackDcas(vertex);
 
-   if (sDCAs().size() == 0) {
+   if (mDCAs.size() == 0) {
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
       return 5;
    }
 
    // Recalculate vertex seed coordinates to be used as initial point in the fit
-   StThreeVectorD vertexSeed = StGenericVertexFinder::CalcVertexSeed(sDCAs());
+   StThreeVectorD vertexSeed = CalcVertexSeed(mDCAs);
 
    // For fits with beamline force the seed to be on the beamline
    if ( mVertexFitMode == VertexFit_t::Beamline1D ||
@@ -896,6 +896,9 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
    }
 
    static TMinuit minuit(3);
+
+   // Make sure the global pointer points to valid object so Minuit uses correct data
+   StGenericVertexFinder::sSelf = this;
 
    minuit.SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline);
    minuit.SetPrintLevel(-1);

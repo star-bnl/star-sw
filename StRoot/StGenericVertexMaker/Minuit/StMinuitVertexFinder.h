@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.23 2017/02/14 22:00:39 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.24 2017/02/15 15:30:16 smirnovd Exp $
  *
  */
 
@@ -145,10 +145,7 @@ private:
 
     virtual void UseVertexConstraint();
 
-    static void fcn(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
-    static void fcn1D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
-    static void Chi2Beamline3D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t);
-    static Double_t Chi2atVertex(StThreeVectorD &vtx);
+    virtual double CalcChi2DCAs(const StThreeVectorD &vtx);
     
     bool                   mUseITTF;          // Use only tracks with ITTF encoded method
     bool                   mUseOldBEMCRank;   // Use old BEMC rank calculation (Cu+Cu production)
@@ -178,7 +175,6 @@ private:
     //static std::vector<Bool_t>         mCTB;
     static Bool_t                   requireCTB;
     static Int_t                    nCTBHits;
-    static Double_t                 mWidthScale;
     Int_t                    mStatusMin;           // Minuit status flag 
     StThreeVectorD           mExternalSeed;
     Bool_t                   mExternalSeedPresent;
