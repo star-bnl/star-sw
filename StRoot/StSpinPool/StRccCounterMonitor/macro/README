@@ -1,4 +1,4 @@
-This is RCC counter monitor  README
+This is RCC counter monitor README
 
 How to setup:
 
@@ -6,7 +6,7 @@ How to setup:
   klog
   cd <your working dir>
   cvs co StRoot/StSpinPool/StRccCounterMonitor
-  source StRoot/StSpinPoolStRccCounterMonitor/macro/setup
+  source StRoot/StSpinPool/StRccCounterMonitor/macro/setup
  
   mkdir /onlineweb/www/<your web dir>  (ask Jerome)
   ln -s /onlineweb/www/<your web dir> www

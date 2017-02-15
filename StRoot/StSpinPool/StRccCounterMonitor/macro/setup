@@ -1,5 +1,4 @@
-cvs co StRoot/StSpinPool/StRccCounterMonitor
-cp StRoot/StSpinPool/StRccCounterMonitor/macros/* .
+cp StRoot/StSpinPool/StRccCounterMonitor/macro/* .
 
 \rm crontab.txt
 \rm makeplot
