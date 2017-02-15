@@ -605,8 +605,11 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.8 2016/05/11 20:44:52 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.9 2017/02/14 23:38:38 fisyak Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.9  2017/02/14 23:38:38  fisyak
+// Adjustment to structure changes in StTpcdEdxCorrection
+//
 // Revision 1.8  2016/05/11 20:44:52  genevb
 // Initialize vars, cast to double for division
 //

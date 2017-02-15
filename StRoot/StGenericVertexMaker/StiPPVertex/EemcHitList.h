@@ -16,10 +16,10 @@ class EemcHitList : public ScintHitList {
   const Float_t *etaHL; // limits of eta bins
 
   //params
-  uint killStatEEmc;
+  unsigned int killStatEEmc;
  
  public:
- EemcHitList(StEEmcDb* x, uint y, EEmcGeomSimple *z);
+ EemcHitList(StEEmcDb* x, unsigned int y, EEmcGeomSimple *z);
   virtual  ~EemcHitList();
   void clear();
   void initRun();

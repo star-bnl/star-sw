@@ -20,7 +20,7 @@ class Vertex3D {
 
   vector<TrackData*> track;
   float cut_pT1,cut_pT2, cut_sigY;
-  uint  cut_numTrack;
+  unsigned int  cut_numTrack;
   int   isFound;
 
  public:

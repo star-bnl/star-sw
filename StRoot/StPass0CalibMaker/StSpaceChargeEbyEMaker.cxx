@@ -1547,8 +1547,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.64 2015/06/30 21:44:31 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.65 2017/02/14 23:38:38 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.65  2017/02/14 23:38:38  fisyak
+// Adjustment to structure changes in StTpcdEdxCorrection
+//
 // Revision 1.64  2015/06/30 21:44:31  genevb
 // Use an initialization call for StMagUtilities for each event
 //
