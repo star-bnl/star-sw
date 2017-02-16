@@ -7,5 +7,6 @@
 #starver SL15l
 #
 # 7/14/16
-stardev
+#stardev
+starver SL17a
 #echo `STAR_LEVELS`

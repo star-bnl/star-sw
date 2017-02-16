@@ -23,7 +23,7 @@ void PdfFileBuilder::write(char *filename, int displayNumber, int ignoreServerTa
   displays->setDisplay(displays->getDisplayNodeFromIndex(displayNumber));
   displays->updateDisplayRoot();
 
-  LOG("JEFF", "write");
+  LOG(DBG, "write");
   writePdf(filename, 1);
 }
 
@@ -33,16 +33,16 @@ void PdfFileBuilder::writePdf(char *filename, int combo_index)
 
   //displays->displayRoot->dump(0, "dr:");
 
-  LOG("JEFF", "Now write it...");
+  LOG(DBG, "Now write it...");
 
   DisplayNode *root = displays->getTab(combo_index);
 
   if(combo_index == 0) {
-    LOG("JEFF", "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
+    LOG(DBG, "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
     root = displays->displayRoot;
   }
 
-  LOG("JEFF", "writeNodePdf root: %s",filename);
+  LOG(DBG, "writeNodePdf root: %s",filename);
 
   PdfIndex index;
   writeNodePdf(root, &index, NULL, filename, 1);
@@ -66,7 +66,7 @@ void PdfFileBuilder::writePdf(char *filename, int combo_index)
 
 int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
-    LOG("JEFF", "Checking node %s against server tags %s", node->name, serverTags);
+    LOG(DBG, "Checking node %s against server tags %s", node->name, serverTags);
 
     int npages = 0;
 
@@ -102,7 +102,7 @@ int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry
 //
 int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
-  LOG("JEFF", "Write histogram leaves: %s",node->name);
+  LOG(DBG, "Write histogram leaves: %s",node->name);
   
   //if((node->prev != NULL) || (!node->leaf)) {
   //LOG(ERR, "Shouldn't happen: prev=0x%x leaf=%d", node->prev, node->leaf);

@@ -99,6 +99,7 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
     //   Must both be in right thread, and be inside a builder!
     if((mythread != readerTid) && line_builder) {
 	LOG(ERR, "signal in builder: %d", arg);
+	sleep(10);
 	siglongjmp(env,1);
     }
     
@@ -1118,7 +1119,7 @@ void JevpServer::performStopRun()
   
   while((curr = (JevpPlotSet *)next())) {
     CP;
-    LOG("JEFF", "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
+    LOG(DBG, "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
 	curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
     CP;
 

@@ -423,6 +423,7 @@ int DisplayFile::Read(char *fn)
   LOG(DBG, "Read new node");
   root = readNewNode(reader);
 
+  xmlFreeTextReader(reader);
   xmlCleanupParser();
 
   if(root) ret = 0;

@@ -422,6 +422,8 @@ void trgBuilder::fillQtHisto(int conf_num, TriggerDataBlk *trg, TH1D *sz, TH1D *
     QTBlock *qtb = (QTBlock *)(base + swap32(trg->MainX[conf_num].offset));
     int len = swap32(trg->MainX[conf_num].length);
     
+    LOG(DBG, "len=%d",len);
+
     if((len - swap32(qtb->length)) != 12) {
 	LOG(ERR, "Conf num %d not a QT board!");
 	return;
@@ -432,29 +434,31 @@ void trgBuilder::fillQtHisto(int conf_num, TriggerDataBlk *trg, TH1D *sz, TH1D *
     
     // loop over boards
     
-    unsigned int *dword = (unsigned int *)qtb->data;
-    for(;;) {
-	unsigned int x = swap32(*dword);
-	LOG(DBG, "x=0x%x", x);
-	if(x == 0xac10) break;
-
-	int addr = (x>>16) & 0xff;
-	int nlines = x & 0xff;
-	int usec = x & 0xff00;
-	usec >>= 8;
-	usec *= 4;     // Johns error...
-
-	LOG(DBG, "addr=%d nlines=%d usec=%d", addr, nlines, usec);
-
-	info.usec += usec;
-	
-	info.board_occ[addr] = (nlines+1.0) * 4.0;   // maximum of 32 dwords + 1 header word
-	info.board_occ[addr] /= 33.0 * 4.0;
-	
-	while(nlines--) {
+    if(swap32(qtb->length) > 0 ) {
+	unsigned int *dword = (unsigned int *)qtb->data;
+	for(;;) {
+	    unsigned int x = swap32(*dword);
+	    LOG(DBG, "x=0x%x", x);
+	    if(x == 0xac10) break;
+	    
+	    int addr = (x>>16) & 0xff;
+	    int nlines = x & 0xff;
+	    int usec = x & 0xff00;
+	    usec >>= 8;
+	    usec *= 4;     // Johns error...
+	    
+	    LOG(DBG, "addr=%d nlines=%d usec=%d", addr, nlines, usec);
+	    
+	    info.usec += usec;
+	    
+	    info.board_occ[addr] = (nlines+1.0) * 4.0;   // maximum of 32 dwords + 1 header word
+	    info.board_occ[addr] /= 33.0 * 4.0;
+	    
+	    while(nlines--) {
+		dword++;
+	    }
 	    dword++;
 	}
-	dword++;
     }
     
     // Fill histos....
@@ -493,6 +497,7 @@ void trgBuilder::handleQTOccupancyPlots(daqReader *rdr) {
 	    fillQtHisto(BBQ_CONF_NUM, trg, (TH1D *)contents.bbq_sz_h, (TH1D *)contents.bbq_readout_time_h, (TProfile *)contents.bbq_board_occ_h);
 	    LOG(DBG, "EPQ");
 	    fillQtHisto(EPQ_CONF_NUM, trg, (TH1D *)contents.epq_sz_h, (TH1D *)contents.epq_readout_time_h, (TProfile *)contents.epq_board_occ_h);
+	    LOG(DBG, "QTs done");
 	}
     }	    
     LOG(DBG, "And done with handleQTOcc");
@@ -501,14 +506,20 @@ void trgBuilder::handleQTOccupancyPlots(daqReader *rdr) {
 
 void trgBuilder::event(daqReader *rdr)
 {
+    LOG(DBG, "a %d",rdr->seq);
     if(first_event == 0) {
 	addServerTags((char *)"|trg|");
 	first_event = 1;
     }
 
+    LOG(DBG, "a %d",rdr->seq);
     handleQTOccupancyPlots(rdr);
+
+    LOG(DBG, "a %d",rdr->seq);
     StTriggerData *trgd = getStTriggerData(rdr);
     if(!trgd) return;
+
+    LOG(DBG, "a %d",rdr->seq);
 
     // ZDC
     double mZdcTimeDiff = -9999;
@@ -537,6 +548,8 @@ void trgBuilder::event(daqReader *rdr)
     contents.h478_zdc_unatt_east3->Fill(float(trgd->zdcADC(east,3)));
     contents.h479_zdc_unatt_west3->Fill(float(trgd->zdcADC(west,3)));
 
+    LOG(DBG, "a %d",rdr->seq);
+    
 
     // Hardware Sum no longer exists. It is the sum of the attenuated signals...
     // h482_zdc_sum_bbc->Fill(float(trgd->bbcADCSum(east))+float(trgd->bbcADCSum(west)), float(trgd->zdcHardwareSum()));
@@ -561,6 +574,7 @@ void trgBuilder::event(daqReader *rdr)
     if(ispinb &  64)contents.h448_bunch_blue_down->Fill(bunch7bit);  
     if(ispinb & 128)contents.h449_bunch_blue_unpol->Fill(bunch7bit); 
 
+    
     // zdcsmd...
     TH1D *zdcsmd[8];
     zdcsmd[0] = (TH1D*)contents.h329_zdcsmd_w_v_N;
@@ -572,6 +586,7 @@ void trgBuilder::event(daqReader *rdr)
     zdcsmd[6] = (TH1D*)contents.h335_zdcsmd_e_v_A;
     zdcsmd[7] = (TH1D*)contents.h336_zdcsmd_e_h_A;
 
+    
     for(int i=0; i<2; i++){
 	for(int j=0; j<2; j++){
 	    for(int k=1; k<=8; k++){
@@ -585,6 +600,7 @@ void trgBuilder::event(daqReader *rdr)
 	}
     }
 
+    
     // L2
     L2UpsilonResult _L2;
     L2UpsilonResult *mL2 = &_L2;
@@ -598,6 +614,9 @@ void trgBuilder::event(daqReader *rdr)
     //memcpy(mL2, summary+L2RESULTS_2008_OFFSET_UPS, sizeof(L2UpsilonResult));
     memcpy(mL2, summary+8, sizeof(L2UpsilonResult));
     mL2->swap();
+
+
+    
 
     contents.hL2ups_Tag->Fill(mL2->tag);
     contents.hL2ups_Time->Fill(mL2->time);

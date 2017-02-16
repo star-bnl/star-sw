@@ -587,11 +587,11 @@ void JevpPlotSet::Main(int argc, char *argv[])
 			// Here we have some defined format...
 			DisplayFile *displays = new DisplayFile();
 			displays->Read(xml);
-			LOG("JEFF", "pdf writer!");
+			LOG(DBG, "pdf writer!");
 			PdfFileBuilder *pdfwriter = new PdfFileBuilder(displays, NULL, this);
-			LOG("JEFF", "Write");
+			LOG(DBG, "Write");
 			pdfwriter->write(pdf,0);
-			LOG("JEFF", "Done");
+			LOG(DBG, "Done");
 		    }
 		    else {
 			writePdfFile();  // Finish and exit...  
@@ -897,11 +897,11 @@ void JevpPlotSet::addServerTags(char *tags)
     }
   
     if(parent) {
-	LOG("JEFF", "Adding: %s",tmp);
+	LOG(DBG, "Adding: %s",tmp);
 	parent->addServerTags(tmp);
     }
     else {
-	LOG("JEFF", "NO parent");
+	LOG(DBG, "NO parent");
     }
   
     free(tmp);
