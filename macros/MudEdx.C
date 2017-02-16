@@ -376,7 +376,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   Int_t nev = 0;
   TChain *tree = maker->chain();
   Long64_t nentries = tree->GetEntries();
-  Long64_t nevent = 999999;
+  Long64_t nevent = 9999999;
   nevent = TMath::Min(nevent,nentries);
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
   if (nentries <= 0) return;

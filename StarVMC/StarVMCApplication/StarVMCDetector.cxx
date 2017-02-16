@@ -35,7 +35,7 @@ StarVMCDetector::StarVMCDetector(const Char_t *name) : TDataSet(name), fId(kUnkn
 						       fSId(0),  fChair(0) {
   TString Name(GetName());
   for (Int_t i = 0; i < NoDetectors; i++) 
-    if (Name == TString(Detectors[i].det)) {fId = Detectors[i].Id; SetTitle(Detectors[i].G2T_sys); fK = i; break;}
+    if (Name == TString(Detectors[i].det)) {fId = Detectors[i].Id; SetTitle(Detectors[i].Csys); fK = i; break;}
 }
 //________________________________________________________________________________
 StarVMCDetector::~StarVMCDetector() {
