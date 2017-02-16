@@ -1,0 +1,60 @@
+#!/bin/csh 
+
+set run=$1
+set nqa=$2
+
+set anadir=/ldaphome/akio/rcc
+set dir=$run
+@ dir /= 1000
+
+echo makeplot $run anadir=$anadir yearday=$dir nqa=$nqa
+
+stardev
+cd $anadir
+
+if ( ! -e $dir ) then 
+    mkdir $dir
+endif
+if ( ! -e www/$dir ) then 
+    mkdir www/$dir
+endif
+endif
+if ( ! -e $dir/log ) then 
+    mkdir $dir/log
+endif
+if ( ! -e $dir/condor ) then 
+    mkdir $dir/condor
+endif
+if ( -e $dir/log/$run.log ) then 
+    \rm $dir/log/$run.log
+endif
+
+if ( $nqa == "nqa" ) then
+  echo NOQA
+else
+  set nfile=`ls -1 trgdata/run${run}.*.dat | wc -l`
+  if ( $nfile < 11 ) then
+   set nfile = 1
+  else 
+  @ nfile = -$nfile / 10 
+  endif
+  if ( $nfile < -15) then
+   set nfile = -15
+  endif
+  #root4star -b -q TDFReader.C"($run,$nfile)" > /dev/null
+  root4star -b -q TDFReader.C"($run,-999)" > /dev/null
+endif
+
+echo root -b -q makeqaplot.C"($run)"
+root -b -q makeqaplot.C"($run)"
+
+echo root -b -q makeqaplot.C"($run,10000,1)"
+root -b -q makeqaplot.C"($run,10000,1)"
+
+\mv $dir/*${run}*.png www/$dir/	
+\mv $dir/*${run}*.txt www/$dir/	
+\rm www/$dir/*${run}*.tiny.png
+./maketiny.pl www/$dir
+
+#\rm $dir/rccqa.${run}.root
+\rm $dir/run${run}_*.dat

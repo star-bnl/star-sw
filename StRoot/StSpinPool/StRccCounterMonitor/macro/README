@@ -1,0 +1,50 @@
+This is RCC counter monitor README
+
+How to setup:
+
+  ssh -t -A -Y rssh.rhic.bnl.gov -t -A -Y stargw.starp.bnl.gov ssh -A -Y onl0<N>
+  klog
+  cd <your working dir>
+  cvs co StRoot/StSpinPool/StRccCounterMonitor
+  source StRoot/StSpinPool/StRccCounterMonitor/macro/setup
+ 
+  mkdir /onlineweb/www/<your web dir>  (ask Jerome)
+  ln -s /onlineweb/www/<your web dir> www
+  mv links.php www/
+
+  Webpage will be at http://online.star.bnl.gov/<your web dir>
+
+  You may need to adjust in makepage.pl at near top:
+    $year = 17     (for run16)   
+    $start = `date -d "Feb 26 00:00:00" +%s`; $start=~s/\n//g;
+  for new RHIC run.
+
+How to run : 
+  $run and $yearday (.i.e. 14046, or first 5 digit of run#) need to be ones available on /trg/trgdata/
+         
+  runs $yearday                           make runlist for a day, i.e. $yearday/run.txt from DB
+
+  root4star -b -q TDFReader.C"($run)"     read trigger data file and make histo file=$yearday/rccqa.$run.root
+
+  root -b -q makeqaplot.C"($run,0,1)"     read $yearday/rccqa.$run.root and create png files and a text file=$yearday/rcc.$run.txt
+
+  makeplot $run				  run TDFReader.C, makeplot.C
+
+  makepage,pl                just make web page for today (not running qa nor making plots)
+  makepage.pl 0 run          make web page for today, and run makeplot in this process (not on condor) as needed
+  makepage.pl $yearday       make web page for a day
+
+  emacs crontab.txt       edit cron jobb specification: time interval to run "makepage" job
+  cron                    see if crontab is set
+  cron set                setup cron job with crontab.txt. output will be send by email on your account at onlxx
+  cron remove             remove cron job
+
+Files generated:
+   www/index.php              main web page listing days
+   www/<yearday>.php          webpage with plots and links for a day
+   www/<yearday>/*.png        QA plots and results
+
+   <yearday>/run.txt          runlist from DB
+   <yearday>/log/*            log from running QA
+   <yearday>/condor/*         condor files
+   <yearday>/<run>.done       if file exist, it indicated script have done (or is doing) QA, remove this to redo 
