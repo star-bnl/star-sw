@@ -74,6 +74,7 @@ Int_t StFpsRawDaqReader::Init(){
 };
 
 Int_t StFpsRawDaqReader::Make() {
+  enum {kFpsQtCrate=8, kFpostQtCrate=9};
   //Int_t ierr = prepareEnvironment();
   
   mRdr->get(0,EVP_TYPE_ANY);
@@ -96,29 +97,54 @@ Int_t StFpsRawDaqReader::Make() {
   dd = mRdr->det("fps")->get("adc");
   int ndata=0;
   while(dd && dd->iterate()) {
-    int xing=(char)dd->sec;
+
+    // 2015
+    //int xing=(char)dd->sec;
+    //if(xing>=128) xing-=256;
+    //int qt=dd->rdo;
+    //int n=dd->ncontent;
+
+    // 2017
+    int fpsfpost=dd->sec;
+    int xing=(char)dd->pad;
     if(xing>=128) xing-=256;
-    int qt=dd->rdo;
+    int qt=dd->row;
     int n=dd->ncontent;
-    if(Debug()) printf("FPS: xing %2d, QT %d, chs %d\n",xing,qt,n) ;     
+
+    if(Debug()) printf("FPS: fpsfpost %1d xing %2d, QT %d, chs %d\n",fpsfpost,xing,qt,n) ;     
     fps_adc_t *a = (fps_adc_t *) dd->Void ;     
     for(u_int i=0;i<n;i++) {
       ndata++;
       int ch=a[i].ch;
       int adc=a[i].adc;
       int tdc=a[i].tdc;
-      if(Debug()) printf("FPS: xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
-      int slatid = mFmsDbMkr->fpsSlatidFromQT(qt,ch);
-      int q,l,s;
-      mFmsDbMkr->fpsQLSfromSlatId(slatid,&q,&l,&s);
-      int flag=0;
-      if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
-      if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
+      if(Debug()) {
+	if(fpsfpost==0) printf("FPS  : xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
+	if(fpsfpost==1) printf("FPOST: xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
+      }
+      int slatid,q,l,s,flag=0,det,crate;
+      if(fpsfpost==0){	
+	slatid = mFmsDbMkr->fpsSlatidFromQT(qt,ch);
+	mFmsDbMkr->fpsQLSfromSlatId(slatid,&q,&l,&s);
+	if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
+	if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
+	det=kFpsDetId;
+	crate=kFpsQtCrate;
+      }else if(fpsfpost==1){
+	slatid = mFmsDbMkr->fpostSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
+	mFmsDbMkr->fpostQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
+	if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
+	if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
+	det=kFpostDetId;
+	crate=kFpostQtCrate;
+      }else{
+	flag=1;
+      }	    
       if(flag==0){
 	StFmsHit* hit = new StFmsHit();
-	hit->setDetectorId(15);
+	hit->setDetectorId(det);
 	hit->setChannel(slatid);
-	hit->setQtCrate(6);
+	hit->setQtCrate(crate);
 	hit->setQtSlot(qt);
 	hit->setQtChannel(ch);
 	hit->setAdc(adc);
@@ -143,8 +169,11 @@ void StFpsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.3 2015/05/21 18:23:51 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.4 2017/02/16 20:19:25 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.4  2017/02/16 20:19:25  akio
+ * modified for run17
+ *
  * Revision 1.3  2015/05/21 18:23:51  akio
  * *** empty log message ***
  *
