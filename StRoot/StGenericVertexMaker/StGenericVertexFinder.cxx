@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.42 2017/01/20 17:48:49 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.43 2017/02/15 15:30:17 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -26,17 +26,8 @@
 
 // Initialize static variable with default values
 
-/// Pointers to DCA states to be used in a vertex fit
-StGenericVertexFinder::StDcaList&  StGenericVertexFinder::sDCAs()
-{
-   static StDcaList* sDCAs = new StDcaList();
-   return *sDCAs;
-}
-
-
-/// All measured parameters of the beamline
-vertexSeed_st StGenericVertexFinder::sBeamline;
-
+/// By default point to invalid object
+StGenericVertexFinder* StGenericVertexFinder::sSelf = nullptr;
 
 
 StGenericVertexFinder::StGenericVertexFinder() :
@@ -54,7 +45,9 @@ StGenericVertexFinder::StGenericVertexFinder(SeedFinder_t seedFinder, VertexFit_
   mSeedFinderType(seedFinder),
   mDebugLevel(0),
   mUseBtof(false),
-  mUseCtb(false)
+  mUseCtb(false),
+  mBeamline(),
+  mDCAs()
 {
 }
 
@@ -108,7 +101,7 @@ std::vector<double> StGenericVertexFinder::FindSeeds_TSpectrum()
    // The size of window in cm where the probability is averaged
    static double zWindow = 2;
 
-   for (const StDcaGeometry* trackDca : sDCAs())
+   for (const StDcaGeometry* trackDca : mDCAs)
    {
       double xyzp[6], covXyzp[21];
 
@@ -130,7 +123,7 @@ std::vector<double> StGenericVertexFinder::FindSeeds_TSpectrum()
       }
    }
 
-   int npeaks = tSpectrum.Search(&fVtx, 3, "nodraw", std::min(0.1, 5./sDCAs().size()) );
+   int npeaks = tSpectrum.Search(&fVtx, 3, "nodraw", std::min(0.1, 5./mDCAs.size()) );
 
    auto* peaks = tSpectrum.GetPositionX();
 
@@ -174,7 +167,7 @@ double StGenericVertexFinder::CalcChi2DCAs(const StThreeVectorD &point)
    // Initialize f with value for beamline
    double f = 0;
 
-   for (const StDcaGeometry* dca : sDCAs())
+   for (const StDcaGeometry* dca : mDCAs)
    {
       double err2;
       double dist = dca->thelix().Dca( &point.x(), &err2);
@@ -199,7 +192,7 @@ double StGenericVertexFinder::CalcChi2DCAsBeamline(const StThreeVectorD &point)
  * Calculates chi^2 for the beamline and a point (xv, yv, zv) passed as input
  * argument.
  *
- * The beamline parameters are taken from this class static object sBeamline of
+ * The beamline parameters are taken from this class member object mBeamline of
  * vertexSeed_st type which is initialized in UseVertexConstraint().
  *
  * The distance between the beamline and the point is experssed in terms of the
@@ -215,7 +208,7 @@ double StGenericVertexFinder::CalcChi2DCAsBeamline(const StThreeVectorD &point)
 double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
 {
    // Just for shorthand
-   const vertexSeed_st& bl = sBeamline;
+   const vertexSeed_st& bl = mBeamline;
 
    double dx  = point.x() - bl.x0;
    double dy  = point.y() - bl.y0;
@@ -283,7 +276,7 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
 
 
 /**
- * Estimates vertex position from track DCA states in sDCAs.
+ * Estimates vertex position from track DCA states in mDCAs.
  * The beam position is not taken into account.
  *
  * \author Dmitri Smirnov
@@ -333,45 +326,45 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 /**
  * Stores beamline parameters (aka vertexSeed) from DB record in this class
- * static member sBeamline.
+ * member mBeamline.
  */
 void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
 {
-   sBeamline = beamline;
+   mBeamline = beamline;
 
-   LOG_INFO << "BeamLine constraint: weight =  " << sBeamline.weight << "\n"
-            << "x(z) = (" << sBeamline.x0   << " +/- max(0.01, "   << sBeamline.err_x0 << ") ) + "
-            <<        "(" << sBeamline.dxdz << " +/- max(0.0001, " << sBeamline.err_dxdz << ") ) * z\n"
-            << "y(z) = (" << sBeamline.y0   << " +/- max(0.01, "   << sBeamline.err_y0 << ") ) + "
-            <<        "(" << sBeamline.dydz << " +/- max(0.0001, " << sBeamline.err_dydz << ") ) * z"
+   LOG_INFO << "BeamLine constraint: weight =  " << mBeamline.weight << "\n"
+            << "x(z) = (" << mBeamline.x0   << " +/- max(0.01, "   << mBeamline.err_x0 << ") ) + "
+            <<        "(" << mBeamline.dxdz << " +/- max(0.0001, " << mBeamline.err_dxdz << ") ) * z\n"
+            << "y(z) = (" << mBeamline.y0   << " +/- max(0.01, "   << mBeamline.err_y0 << ") ) + "
+            <<        "(" << mBeamline.dydz << " +/- max(0.0001, " << mBeamline.err_dydz << ") ) * z"
             << endm;
 
-   sBeamline.err_x0 = std::max(0.01f, sBeamline.err_x0);
-   sBeamline.err_y0 = std::max(0.01f, sBeamline.err_y0);
+   mBeamline.err_x0 = std::max(0.01f, mBeamline.err_x0);
+   mBeamline.err_y0 = std::max(0.01f, mBeamline.err_y0);
 
    // 0.0001f radians corresponds to a 0.1mm arc at 1m = 1000mm length
-   sBeamline.err_dxdz = std::max(0.0001f, sBeamline.err_dxdz);
-   sBeamline.err_dydz = std::max(0.0001f, sBeamline.err_dydz);
+   mBeamline.err_dxdz = std::max(0.0001f, mBeamline.err_dxdz);
+   mBeamline.err_dydz = std::max(0.0001f, mBeamline.err_dydz);
 
    UseVertexConstraint();
 }
 
 
 /**
- * Returns x coordinate on the beamline (given by sBeamline) corresponding to
+ * Returns x coordinate on the beamline (given by mBeamline) corresponding to
  * the passed value of z.
  */
-double StGenericVertexFinder::beamX(double z)
+double StGenericVertexFinder::beamX(double z) const
 {
-  return sBeamline.x0 + sBeamline.dxdz*z;
+  return mBeamline.x0 + mBeamline.dxdz*z;
 }
 
 
 /**
- * Returns y coordinate on the beamline (given by sBeamline) corresponding to
+ * Returns y coordinate on the beamline (given by mBeamline) corresponding to
  * the passed value of z.
  */
-double StGenericVertexFinder::beamY(double z)
+double StGenericVertexFinder::beamY(double z) const
 {
-  return sBeamline.y0 + sBeamline.dydz*z;
+  return mBeamline.y0 + mBeamline.dydz*z;
 }

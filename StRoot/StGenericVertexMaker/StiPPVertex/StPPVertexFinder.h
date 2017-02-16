@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.39 2017/02/14 22:00:41 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.40 2017/02/15 15:30:19 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -41,11 +41,11 @@ class StPPVertexFinder: public StGenericVertexFinder {
 
   /// Takes a list of vertex candidates/seeds and updates each vertex position
   /// by fitting tracks pointing to it
-  int fitTracksToVertex(VertexData &vertex) const;
+  int fitTracksToVertex(VertexData &vertex);
 
-  /// Creates DCA states for selected tracks (mTrackData) and fills the static
-  /// container sDCAs
-  void createTrackDcas(const VertexData &vertex) const;
+  /// Creates DCA states for selected tracks (mTrackData) and fills the member
+  /// container mDCAs
+  void createTrackDcas(const VertexData &vertex);
 
   /// using the ROOT's TSpectrum peak finder applied to the distribution of
   /// track DCAs along the `z` axis

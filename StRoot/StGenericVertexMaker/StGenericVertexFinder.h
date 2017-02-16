@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.48 2017/01/20 17:48:49 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.49 2017/02/15 15:30:18 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -88,45 +88,62 @@ protected:
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
 
+  /// All measured parameters of the beamline. Updated whenever
+  /// UseVertexConstraint(const vertexSeed_st&) is called
+  vertexSeed_st  mBeamline;
+
+  /// A container with pointers to DCA states to be used in a vertex fit.
+  /// The DCAs are assumed to be calculated w.r.t. the z-axis, i.e. x = y = 0.
+  StDcaList  mDCAs;
+
+  /// Static pointer to this base class allowing access to concrete
+  /// implementations from Minuit minimization function
+  static StGenericVertexFinder* sSelf;
+
   /// Searches for vertex candidates and fills private `mVertexData` container
   /// using the ROOT's TSpectrum peak finder applied to the distribution of
   /// track DCAs along the `z` axis
   std::vector<double> FindSeeds_TSpectrum();
 
-  /// Returns x coordinate on the beamline (given by sBeamline) corresponding to
+  /// Returns x coordinate on the beamline (given by mBeamline) corresponding to
   /// the passed value of z.
-  static double beamX(double z);
+  double beamX(double z) const;
 
-  /// Returns y coordinate on the beamline (given by sBeamline) corresponding to
+  /// Returns y coordinate on the beamline (given by mBeamline) corresponding to
   /// the passed value of z.
-  static double beamY(double z);
+  double beamY(double z) const;
 
   /// Caclulates chi2 for the beamline and a point
-  static double CalcChi2Beamline(const StThreeVectorD& point);
+  double CalcChi2Beamline(const StThreeVectorD& point);
 
   /// Recalculates the vertex position from DCA measurements in the input list
   /// of DCAs
-  static StThreeVectorD CalcVertexSeed(const StDcaList &trackDcas);
+  StThreeVectorD CalcVertexSeed(const StDcaList &trackDcas);
 
-  /// Caclulates total chi2 for the track DCAs stored in sDCAs and a point
-  static double CalcChi2DCAs(const StThreeVectorD &point);
+  /// Caclulates total chi2 for the track DCAs stored in mDCAs and a point
+  virtual double CalcChi2DCAs(const StThreeVectorD &point);
 
-  /// Caclulates total chi2 for the beamline and track DCAs stored in sDCAs and a point
-  static double CalcChi2DCAsBeamline(const StThreeVectorD &point);
+  /// Caclulates total chi2 for the beamline and track DCAs stored in mDCAs and a point
+  double CalcChi2DCAsBeamline(const StThreeVectorD &point);
 
-  /// Just an interface to CalcChi2DCAsBeamline(...)
-  static void fcnCalcChi2DCAsBeamline(int& npar, double* gin, double& f, double* par, int iflag)
+  // A static interface to CalcChi2DCAs(...)
+  static void fcnCalcChi2DCAs(int& npar, double* gin, double& f, double* par, Int_t iflag)
   {
-     f = CalcChi2DCAsBeamline( StThreeVectorD(par) );
+     f = sSelf->CalcChi2DCAs( StThreeVectorD(par) );
   }
 
-  /// A static container with pointers to DCA states to be used in a vertex fit.
-  /// The DCAs are assumed to be calculated w.r.t. the z-axis, i.e. x = y = 0.
-  static StDcaList&  sDCAs();
+  /// A static interface to CalcChi2DCAs(...) with x and y fixed by beamline equation
+  static void fcnCalcChi2DCAsBeamline1D(int& npar, double* gin, double& f, double* par, Int_t iflag)
+  {
+     double z = par[0], x = sSelf->beamX(z), y = sSelf->beamY(z);
+     f = sSelf->CalcChi2DCAs( StThreeVectorD(x, y, z) );
+  }
 
-  /// All measured parameters of the beamline. Updated whenever
-  /// UseVertexConstraint(const vertexSeed_st&) is called
-  static vertexSeed_st  sBeamline;
+  /// A static interface to CalcChi2DCAsBeamline(...)
+  static void fcnCalcChi2DCAsBeamline(int& npar, double* gin, double& f, double* par, int iflag)
+  {
+     f = sSelf->CalcChi2DCAsBeamline( StThreeVectorD(par) );
+  }
 
 private:
 
