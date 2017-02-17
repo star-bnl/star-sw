@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.53 2017/02/17 21:29:39 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.54 2017/02/17 21:29:44 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -88,7 +88,7 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
 StMinuitVertexFinder::~StMinuitVertexFinder()
 {
    LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
-   //delete mMinuit;
+   delete mMinuit; mMinuit = nullptr;
    mHelices.clear();
    mHelixFlags.clear();
    mZImpact.clear();
