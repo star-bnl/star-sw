@@ -325,7 +325,7 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		
 		//LOG(TERR,"Lane %d, hdr %d, d 0x%03X - 0x%04X",l,h,d,d16[i]) ;
 
-		hdr_cou[h]++ ;
+		hdr_cou[h]++ ;	//MUST come last to avoid the spurious, last 0xFFFF datum
 		
 		switch(h) {
 		case 0 :
@@ -412,7 +412,16 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		case 7 :	//lane header 1st word
 			//LOG(TERR,"lane %d, lane_expect %d",l,lane_expect) ;
 
-			if(d16[i]==0xFFFF && (i==(shorts-1))) goto stop;
+			if(d16[i]==0xFD03) {
+				if(i==(shorts-1) || i==(shorts-2)) {
+					hdr_cou[7]-- ;
+					goto stop ;
+				}
+			}
+//			if(d16[i]==0xFFFF && (i==(shorts-1))) {
+//				hdr_cou[7]-- ;	// negate the count
+//				goto stop;
+//			}
 
 			lane_expect = l+1 ;	//next lane
 
@@ -446,6 +455,8 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		case 6 :	//lane header 2nd & 3rd word
 			break ;
 		}
+
+
 
 	}
 
@@ -483,6 +494,11 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 
 	if(fee_err) {
 		LOG(ERR,"Error 0x%08X",fee_err) ;
+		if(fee_err & 0x3000) {
+			for(int i=0;i<8;i++) {
+				LOG(TERR,"Hdr %d: %d",i,hdr_cou[i]) ;
+			}
+		}
 	}
 
 	return 0 ;
