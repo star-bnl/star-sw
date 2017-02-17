@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.54 2017/02/17 21:29:44 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.55 2017/02/17 21:31:36 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -775,23 +775,6 @@ StMinuitVertexFinder::printInfo(ostream& os) const
       os << "Chisquare .................... " << mBestVtx->chiSquared() << endl;
     }
     os << "min # of fit points for tracks . " << mMinNumberOfFitPointsOnTrack << endl;
-}
-
-
-void StMinuitVertexFinder::UseVertexConstraint() {
-
-  // Historically, this method was designed for a 1D fit with beamline
-  // So, we'll keep it this way for backward compatibility
-  if (mVertexFitMode != VertexFit_t::Beamline1D) return;
-
-  LOG_INFO << "StMinuitVertexFinder::Using Constrained Vertex" << endm;
-
-  //re-initilize minuit for 1D fitting
-  mMinuit = new TMinuit(1);
-  mMinuit->SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline1D);
-  mMinuit->SetPrintLevel(-1);
-  mMinuit->SetMaxIterations(1000);
-  mExternalSeedPresent = kFALSE;
 }
 
 
