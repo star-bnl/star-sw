@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <time.h>
+#include <arpa/inet.h>
 
 #include <rtsLog.h>	// for my LOG() call
 #include <rtsSystems.h>
@@ -428,9 +429,9 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 
 			EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
 
-			rcc_timestamp = (evtDesc->tcuCtrBunch_hi<<16) | evtDesc->DSMAddress ;
+			rcc_timestamp = (ntohs(evtDesc->tcuCtrBunch_hi)<<16) | ntohs(evtDesc->DSMAddress) ;
 
-			
+			//LOG(TERR,"0x%X 0x%X 0x%X 0x%X",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,ntohs(evtDesc->tcuCtrBunch_hi),ntohs(evtDesc->DSMAddress)) ;
 
 
 	
@@ -1852,9 +1853,13 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 	else do_print = 0 ;
 
 
-	dd = rdr->det("fps")->get("adc") ;
-	if(dd) {
-		while(dd->iterate()) {	//per xing and per RDO
+	//to be able to get to the meta-data for both "sectors" (aka FPS & FPOST)
+	//I need to make a specific loop!
+	for(int sec=1;sec<=2;sec++) {
+
+		dd = rdr->det("fps")->get("adc",sec) ;
+
+		while(dd && dd->iterate()) {	//per xing and per RDO
 			adc_found |= 1 << (dd->sec - 1) ;	//sector mask
 
 
@@ -1870,26 +1875,9 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 				}
 				
 				printf("FPS sector %d: xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",dd->sec,(char)dd->pad,dd->row,dd->ncontent,occ,sum) ;
-		
-			}
 
 
 
-			for(u_int i=0;i<dd->ncontent;i++) {
-				if(do_print) {
-					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
-					
-				}
-			}
-		
-
-
-
-		}
-
-		if(adc_found) {
-			// moved it to the end, when I know the channel count
-			if(do_print) {
 
 				fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
 
@@ -1911,13 +1899,16 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 				u_int rcc_tick = hdr->reserved[1] ;
 
-				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), RCC tick %u\n",
-				       dd->sec,stp, readout, readout-stp, readout-just_readout, rcc_tick) ;
-			}
-			
-			
-		}
+				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), RCC tick %u, RCC delta %d\n",
+				       dd->sec,stp, readout, readout-stp, readout-just_readout, rcc_tick, rcc_tick-rcc_timestamp) ;
 
+				for(u_int i=0;i<dd->ncontent;i++) {
+					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
+				}				
+		
+			}
+
+		}
 	}
 
 
