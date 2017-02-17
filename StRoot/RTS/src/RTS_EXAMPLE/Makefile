@@ -114,6 +114,7 @@ rts_example.o: ../DAQ_SST/daq_sst.h
 rts_example.o: ../DAQ_FPS/daq_fps.h
 rts_example.o: ../DAQ_RHICF/daq_rhicf.h
 rts_example.o: ../DAQ_ETOF/daq_etof.h
+rts_example.o: ../DAQ_ITPC/daq_itpc.h
 rts_example.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 rts_example.o: ../DAQ_FGT/fgtPed.h
 rts_example.o: ../DAQ_FGT/daq_fgt.h
