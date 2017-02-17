@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.65 2017/01/19 20:08:31 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.66 2017/02/17 09:41:08 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -456,7 +456,7 @@ char *daqReader::get(int num, int type)
 
     if(status == EVP_STAT_EOR) {
 	LOG(DBG, "Status = EOR");
-	    LOG("JEFF", "x");
+//	    LOG("JEFF", "x");
 	return NULL;
     }
 
@@ -1661,7 +1661,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       // not found in DAQ dets, try pseudo dets...
       if(strcasecmp(which,"emc_pseudo")==0) id = -BTOW_ID ;	// by definition...
       if(strcasecmp(which,"hlt")==0) id = -L3_ID ;	// by definition...
-
+      if(strcasecmp(which,"itpc_pseudo")==0) id = -SVT_ID ;	//HACK!!!!
 //      if(strcasecmp(which,"l4")==0) id = -L4_ID ;
 
       if(id < -32) {	// not found even in pseudo

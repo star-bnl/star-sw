@@ -163,12 +163,12 @@ void *daq_dta::request(u_int obj_cou)
 
 void daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
 {
-	if(obj_cou==0) {
-		daq_store_hdr *hdr = (daq_store_hdr *)(store + 1 ) ;
-
-		LOG(WARN,"%s: finalize with obj cou 0?",hdr->describe) ;
-		return ;	// didn't find anything so just do nothing...
-	}
+//	if(obj_cou==0) {
+//		daq_store_hdr *hdr = (daq_store_hdr *)(store + 1 ) ;
+//
+//		LOG(NOTE,"%s: finalize with obj cou 0?",hdr->describe) ;
+//		return ;	// didn't find anything so just do nothing...
+//	}
 
 
 	LOG(DBG,"Finilizing %d objects for sec %d, row %d, pad %d",obj_cou,sec,row,pad) ;
