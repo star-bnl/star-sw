@@ -13,7 +13,7 @@
 
 
 #include "daq_itpc.h"
-
+#include "itpcCore.h"
 
 const char *daq_itpc::help_string = "\
 \n\
@@ -54,7 +54,8 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 	if(caller) caller->insert(this, rts_id) ;
 
 	ifee_raw = new daq_dta ;
-	
+	ifee_sampa = new daq_dta ;
+
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
 }
@@ -87,6 +88,10 @@ daq_dta *daq_itpc::get(const char *bank, int sec, int row, int pad, void *p1, vo
 		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
 		return handle_ifee_raw() ;		// actually sec, rdo; r1 is the number of bytes
 	}
+	else if(strcasecmp(bank,"ifee_sampa")==0) {
+		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
+		return handle_ifee_sampa() ;		// actually sec, rdo; r1 is the number of bytes
+	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
 	}
@@ -116,6 +121,43 @@ daq_dta *daq_itpc::handle_ifee_raw()
 		return 0 ;
 	}
 
+	ifee_raw->create(size,"itpc_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	char *st = (char *) ifee_raw->request(size) ;
+
+	caller->sfs->read(full_name, st, size) ;
+
+	LOG(DBG,"sfs read succeeded") ;
+
+        ifee_raw->finalize(size,1,1,0) ;
+
+	ifee_raw->rewind() ;
+
+	return ifee_raw ;
+
+}
+
+daq_dta *daq_itpc::handle_ifee_sampa()
+{
+	char str[128] ;
+
+	// bring in the bacon from the SFS file....
+	assert(caller) ;
+
+	
+	sprintf(str,"%s/sec01/rb01/fee_raw",sfs_name) ;
+	char *full_name = caller->get_sfs_name(str) ;
+	
+	LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+	if(full_name == 0) return 0 ;
+
+	int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+	LOG(DBG,"Got size %d",size) ;
+	if(size <= 0) {
+		LOG(DBG,"%s: %s: not found in this event",name,str) ;
+		return 0 ;
+	}
+
 	char *ptr = (char *) malloc(size) ;
 	LOG(DBG,"Malloc at %p",ptr) ;
 
@@ -123,20 +165,29 @@ daq_dta *daq_itpc::handle_ifee_raw()
 
 	LOG(DBG,"sfs read succeeded") ;
 
+	ifee_sampa->create(1000,"adc",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
 
-	ifee_raw->create(size,"itpc_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	LOG(NOTE,"Starting fee_scan") ;
 
-	char *st = (char *) ifee_raw->request(size) ;
+	itpc_data_c dta_c ;
+	dta_c.rdo_start(1) ;
 
-	memcpy(st,ptr,size) ;
+	//raw data at "ptr"
+	while(dta_c.fee_scan((u_short *)ptr,size/2)) {
+		daq_adc_tb *at = (daq_adc_tb *) ifee_sampa->request(dta_c.tb_cou) ;
+		for(int i=0;i<dta_c.tb_cou;i++) {
+			at[i].adc = dta_c.at[i].adc ;	
+			at[i].tb = dta_c.at[i].tb ;
+		}
+		ifee_sampa->finalize(dta_c.tb_cou,dta_c.sector,dta_c.fee_id,dta_c.fee_ch) ;
+	}
+
+	dta_c.rdo_zap(dta_c.rdo_p) ;
 	free(ptr) ;
 
+	ifee_sampa->rewind() ;
 
-        ifee_raw->finalize(size,1,1,0) ;
-
-	ifee_raw->rewind() ;
-
-	return ifee_raw ;
+	return ifee_sampa ;
 
 }
 
