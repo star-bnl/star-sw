@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.51 2017/02/15 15:30:15 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.52 2017/02/17 21:29:32 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -8,7 +8,6 @@
  * Description: 
  *
  **************************************************************************/
-#include <assert.h>
 #include "StMinuitVertexFinder.h"
 #include "StEventTypes.h"
 #include "StEnumerations.h"
@@ -24,7 +23,6 @@
 #include "StMaker.h"
 std::vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 std::vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
-std::vector<Double_t >          StMinuitVertexFinder::mSigma;
 std::vector<Double_t >          StMinuitVertexFinder::mZImpact;
 Bool_t                     StMinuitVertexFinder::requireCTB;
 Int_t                      StMinuitVertexFinder::nCTBHits;
@@ -47,8 +45,6 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::MinuitVF, fitMode)
 {
-  mBeamHelix =0;
-  
   mMinuit = new TMinuit(3);         
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
@@ -89,13 +85,11 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
 
 StMinuitVertexFinder::~StMinuitVertexFinder()
 {
-   delete mBeamHelix; mBeamHelix=0;
    LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
    mHelices.clear();
    mHelixFlags.clear();
    mZImpact.clear();
-   mSigma.clear();
 }
 //________________________________________________________________________________
 void StMinuitVertexFinder::InitRun(Int_t runumber) {
@@ -422,7 +416,6 @@ StMinuitVertexFinder::fit(StEvent* event)
     mDCAs.clear();
     mHelices.clear();
     mHelixFlags.clear();
-    mSigma.clear();
     mZImpact.clear();
 
     fillBemcHits(event);
@@ -445,7 +438,6 @@ StMinuitVertexFinder::fit(StEvent* event)
       mHelixFlags.push_back(1);
       Double_t z_lin = gDCA->z();
       mZImpact.push_back(z_lin);
-      mSigma.push_back(-1);
 
       Bool_t shouldHitCTB = kFALSE;
       Double_t etaInCTBFrame = -999;
@@ -790,27 +782,7 @@ void StMinuitVertexFinder::UseVertexConstraint() {
   // So, we'll keep it this way for backward compatibility
   if (mVertexFitMode != VertexFit_t::Beamline1D) return;
 
-  double mX0 = mBeamline.x0;
-  double mY0 = mBeamline.y0;
-  double mdxdz = mBeamline.dxdz;
-  double mdydz = mBeamline.dydz;
   LOG_INFO << "StMinuitVertexFinder::Using Constrained Vertex" << endm;
-  StThreeVectorD origin(mX0,mY0,0.0);
-  Double_t pt  = 88889999;   
-  Double_t nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
-
-  if(nxy<1.e-5){ // beam line _MUST_ be tilted
-    LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
-    nxy=mdxdz=1.e-5;
-  }
-
-  Double_t p0=pt/nxy;
-  Double_t px   = p0*mdxdz;
-  Double_t py   = p0*mdydz;
-  Double_t pz   = p0; // approximation: nx,ny<<0
-  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-  delete mBeamHelix;
-  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
   //re-initilize minuit for 1D fitting
   mMinuit = new TMinuit(1);
