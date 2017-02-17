@@ -10,8 +10,10 @@
 class daq_itpc : public daq_det {
 private:
 	class daq_dta *handle_ifee_raw() ;
+	class daq_dta *handle_ifee_sampa() ;
 
 	class daq_dta *ifee_raw ;
+	class daq_dta *ifee_sampa ;
 
 	static const char *help_string ;
 protected:

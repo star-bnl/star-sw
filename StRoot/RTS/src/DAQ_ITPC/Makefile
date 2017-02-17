@@ -56,8 +56,13 @@ daq_itpc.o: ../../../../StRoot/RTS/include/rts.h
 daq_itpc.o: ../DAQ_READER/daq_dta_structs.h
 daq_itpc.o: daq_itpc.h
 daq_itpc.o: ../DAQ_READER/daq_det.h
+daq_itpc.o: itpcCore.h
+daq_itpc.o: ../DAQ_READER/daq_dta_structs.h
+itpcCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 itpcCore.o: itpc_maps.h
 itpcCore.o: itpc_rowlen.h
 itpcCore.o: itpc_padplane.h
 itpcCore.o: itpcCore.h
+itpcCore.o: ../DAQ_READER/daq_dta_structs.h
 daq_itpc.o: ../DAQ_READER/daq_det.h
+itpcCore.o: ../DAQ_READER/daq_dta_structs.h

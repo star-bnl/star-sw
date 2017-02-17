@@ -740,7 +740,7 @@ struct EthServerName
 // Reads from all.conf
 // returns -1 if no server, 0 if server exists.
 int getEthServer(int node, int task, EthServer *eth);   
-char *ReadAllDotConf(int node, int task, char *param, char *result=(char *)NULL, char *paramfilename="/RTS/conf/handler/all.conf");
+char *ReadAllDotConf(int node, int task, char *param, char *result=(char *)NULL, char *paramfilename=(char *)"/RTS/conf/handler/all.conf");
 int getAllEthServers(EthServerName *list, int max);
 
 ///////////////////////////////////////////////////

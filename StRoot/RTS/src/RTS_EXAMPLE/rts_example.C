@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <time.h>
+#include <arpa/inet.h>
 
 #include <rtsLog.h>	// for my LOG() call
 #include <rtsSystems.h>
@@ -43,7 +44,9 @@
 #include <DAQ_FPS/daq_fps.h>
 #include <DAQ_RHICF/daq_rhicf.h>
 #include <DAQ_ETOF/daq_etof.h>
+
 #include <DAQ_ITPC/daq_itpc.h>
+#include <DAQ_ITPC/itpcCore.h>
 
 #include <TPC/rowlen.h>
 
@@ -426,9 +429,9 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 
 			EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
 
-			rcc_timestamp = (evtDesc->tcuCtrBunch_hi<<16) | evtDesc->DSMAddress ;
+			rcc_timestamp = (ntohs(evtDesc->tcuCtrBunch_hi)<<16) | ntohs(evtDesc->DSMAddress) ;
 
-			
+			//LOG(TERR,"0x%X 0x%X 0x%X 0x%X",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,ntohs(evtDesc->tcuCtrBunch_hi),ntohs(evtDesc->DSMAddress)) ;
 
 
 	
@@ -1850,9 +1853,13 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 	else do_print = 0 ;
 
 
-	dd = rdr->det("fps")->get("adc") ;
-	if(dd) {
-		while(dd->iterate()) {	//per xing and per RDO
+	//to be able to get to the meta-data for both "sectors" (aka FPS & FPOST)
+	//I need to make a specific loop!
+	for(int sec=1;sec<=2;sec++) {
+
+		dd = rdr->det("fps")->get("adc",sec) ;
+
+		while(dd && dd->iterate()) {	//per xing and per RDO
 			adc_found |= 1 << (dd->sec - 1) ;	//sector mask
 
 
@@ -1868,26 +1875,9 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 				}
 				
 				printf("FPS sector %d: xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",dd->sec,(char)dd->pad,dd->row,dd->ncontent,occ,sum) ;
-		
-			}
 
 
 
-			for(u_int i=0;i<dd->ncontent;i++) {
-				if(do_print) {
-					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
-					
-				}
-			}
-		
-
-
-
-		}
-
-		if(adc_found) {
-			// moved it to the end, when I know the channel count
-			if(do_print) {
 
 				fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
 
@@ -1909,13 +1899,16 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 				u_int rcc_tick = hdr->reserved[1] ;
 
-				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), RCC tick %u\n",
-				       dd->sec,stp, readout, readout-stp, readout-just_readout, rcc_tick) ;
-			}
-			
-			
-		}
+				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), RCC tick %u, RCC delta %d\n",
+				       dd->sec,stp, readout, readout-stp, readout-just_readout, rcc_tick, rcc_tick-rcc_timestamp) ;
 
+				for(u_int i=0;i<dd->ncontent;i++) {
+					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
+				}				
+		
+			}
+
+		}
 	}
 
 
@@ -2033,25 +2026,23 @@ static int etof_doer(daqReader *rdr, const char *do_print)
 
 static int itpc_doer(daqReader *rdr, const char *do_print)
 {
-	int found = 0 ;
+	int adc_found = 0 ;
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"itpc")) ;	// leave as is...
 	else do_print = 0 ;
 
-	dd = rdr->det("itpc_pseudo")->get("ifee_raw") ;
+	dd = rdr->det("itpc_pseudo")->get("ifee_sampa") ;
 	
 
 	if(dd) {
 		while(dd->iterate()) {	//per xing and per RDO
-			found = 1 ;
+			adc_found = 1 ;
 
 			if(do_print) {
-				u_short *d16 = (u_short *)dd->Void ;
-				printf("ITPC: %d bytes\n",dd->ncontent) ;
-
-				for(int i=0;i<10;i++) {
-					printf("    %d: 0x%04X\n",i,d16[i]) ;
+				printf("ITPC: sector %2d, FEE %2d, ch %2d: pixels %3d\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				for(u_int i=0;i<dd->ncontent;i++) {
+						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 				}
 			}
 
@@ -2060,11 +2051,11 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	}
 
 
-	if(found) {
+	if(adc_found) {
 		LOG(INFO,"ITPC found") ;
 	}
 
-	return found ;
+	return adc_found ;
 
 }
 
