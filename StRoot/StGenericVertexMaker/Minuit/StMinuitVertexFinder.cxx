@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.52 2017/02/17 21:29:32 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.53 2017/02/17 21:29:39 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -45,18 +45,17 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::MinuitVF, fitMode)
 {
-  mMinuit = new TMinuit(3);         
-  mMinuit->SetPrintLevel(-1);
-  mMinuit->SetMaxIterations(1000);
-
   using ObjectiveFunc_t = void (*)(int&, double*, double&, double*, int);
 
   ObjectiveFunc_t fcn_minuit;
+  // The number of free fit parameters, i.e. vertex position x, y, and z
+  int nFitParams = 3;
 
   switch (mVertexFitMode)
   {
   case VertexFit_t::Beamline1D:
      fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline1D;
+     nFitParams = 1; // Fit for only z coordinate of the vertex
      break;
 
   case VertexFit_t::Beamline3D:
@@ -69,6 +68,9 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
      break;
   }
 
+  mMinuit = new TMinuit(nFitParams);
+  mMinuit->SetPrintLevel(-1);
+  mMinuit->SetMaxIterations(1000);
   mMinuit->SetFCN(fcn_minuit);
 
   mExternalSeedPresent = kFALSE;
