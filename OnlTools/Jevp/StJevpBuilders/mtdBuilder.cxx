@@ -670,30 +670,32 @@ void mtdBuilder::event(daqReader *rdr) {
 //	mtdAtAddress(ich,iprepost=0) -> mxq[iprepost=0][0][ich]			ich=[0,31]
 //	mtdgemAtAddress(ich,iprepost=0) -> mxq[iprepost=0][10][ich]		ich=[0,31]
 
- 	const int nslots 	= 8;
- 	int slots[nslots]	= {0,9,10,11,12,13,14,15};
- 	int mh				= 0;
- 	int kbin;
- 	for (int kslot=0;kslot<nslots;kslot++){
- 		int islot		= slots[kslot];
- 		for (int iaddr=0;iaddr<32;iaddr++){
-		  int val = trgd->mxqAtSlotAddress(iaddr,0,islot);
-		  int kh  = islot*32 + iaddr;
-		  if(val) contents.hMTD_trig2D->Fill(kh,val); 
-		  if(iaddr%4==0 || iaddr%4==1) continue;  // Run16 configuration
-		  if (val){					
-		    contents.hMTD_trig[mh]->Fill(val);
-		    if (isADC[mh]){
-		      kbin	= isADC[mh];
-		      contents.hMTD_trig2D_adc->Fill(kbin,val); 				
-		    } else if (isTAC[mh]){
-		      kbin	= isTAC[mh];
-		      contents.hMTD_trig2D_tac->Fill(kbin,val); 				
-		    } 
-		  }
-		  ++mh;
- 		}
- 	}
+  //const int nslots 	= 8; // Run16 configuration
+  //int slots[nslots]	= {0,9,10,11,12,13,14,15};
+  const int nslots 	= 4;
+  int slots[nslots]	= {0,9,11,13};
+  int mh		= 0;
+  int kbin;
+  for (int kslot=0;kslot<nslots;kslot++){
+    int islot		= slots[kslot];
+    for (int iaddr=0;iaddr<32;iaddr++){
+      int val = trgd->mxqAtSlotAddress(iaddr,0,islot);
+      int kh  = islot*32 + iaddr;
+      if(val) contents.hMTD_trig2D->Fill(kh,val); 
+      //if(iaddr%4==0 || iaddr%4==1) continue;  // Run16 configuration
+      if (val){					
+	contents.hMTD_trig[mh]->Fill(val);
+	if (isADC[mh]){
+	  kbin	= isADC[mh];
+	  contents.hMTD_trig2D_adc->Fill(kbin,val); 				
+	} else if (isTAC[mh]){
+	  kbin	= isTAC[mh];
+	  contents.hMTD_trig2D_tac->Fill(kbin,val); 				
+	} 
+      }
+      ++mh;
+    }
+  }
  
 	
   if(trgd) delete trgd;
@@ -920,8 +922,8 @@ int mtdBuilder::SetMtdQTmap(){
 // 	"18 (0x1c) MT003 QT8D-J8 (ch32) MTD TAC 22-4-J3"
 // 	};
 
-/*
-// Run14
+
+// Run14-15, Run17-
 	const char* MtdQTmap[128] = {
 		"06 (0x10) MT001 QT8A-J1 (ch1) ADC 25-1 (J2)",
 		"06 (0x10) MT001 QT8A-J2 (ch2) ADC 25-1 (J3)",
@@ -1052,8 +1054,8 @@ int mtdBuilder::SetMtdQTmap(){
 		"20 (0x1E) MT004 QT8D-J7 (ch7) TAC 15-4 (J2)",
 		"20 (0x1E) MT004 QT8D-J8 (ch8) TAC 15-4 (J3)"
 	};
-*/
 
+/*
 // Run16
 	const char* MtdQTmap[128] = {
 		"06 (0x10) MT001 QT8A-J3 (ch3) ADC 25-1 (J2)",
@@ -1185,6 +1187,7 @@ int mtdBuilder::SetMtdQTmap(){
 		"21 (0x1F) MT008 QT8D-J7 (ch7) TAC 15-4 (J2)",
 		"21 (0x1F) MT008 QT8D-J8 (ch8) TAC 15-4 (J3)"
 	};
+*/
 	
 	TString QTmap[128];
 	//
