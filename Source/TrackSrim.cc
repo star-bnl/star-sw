@@ -6,13 +6,13 @@
 #include <TGraph.h>
 #include <TH1.h>
 #include <TLegend.h>
-#include <TMath.h>
 
 #include "TrackSrim.hh"
 #include "FundamentalConstants.hh"
 #include "GarfieldConstants.hh"
-#include "Random.hh"
 #include "Numerics.hh"
+#include "Random.hh"
+#include "Sensor.hh"
 
 namespace {
 
@@ -126,12 +126,16 @@ TrackSrim::TrackSrim()
       m_useLongStraggle(true),
       m_trackset(false),
       m_chargeset(false),
+      m_debug(false),
+      m_density(-1.0),
       m_work(-1.),
       m_fano(-1.),
       m_q(0.0),
       m_mass(-1.),
       m_a(-1.), 
       m_z(-1.),
+      m_initialenergy(-1.0),
+      m_maxclusters(-1),
       m_model(4),
       m_nsize(-1) {
   m_className = "TrackSrim";
@@ -176,6 +180,7 @@ void TrackSrim::GetTrack(double& x0, double& y0, double& z0, double& xd,
 }
 
 bool TrackSrim::ReadFile(const std::string& file) {
+  // SRMREA
 
   const std::string hdr = m_className + "::ReadFile:\n    ";
   // Open the material list.
@@ -229,7 +234,8 @@ bool TrackSrim::ReadFile(const std::string& file) {
   token = strtok(NULL, " []=");
   token = strtok(NULL, " []=");
   token = strtok(NULL, " []=");
-  SetMass(std::atof(token) * AtomicMassUnitElectronVolt);  // Convert amu to eV
+  // Set the ion mass (convert amu to eV).
+  SetMass(std::atof(token) * AtomicMassUnitElectronVolt);  
 
   // Find the target density
   if (!fsrim.getline(line, 100, '\n')) {
@@ -556,6 +562,7 @@ double TrackSrim::DedxHD(const double e) const {
 
 bool TrackSrim::PreciseLoss(const double step, const double estart,
                             double& deem, double& dehd) const {
+  // SRMRKS
 
   const std::string hdr = m_className + "::PreciseLoss: ";
   // Debugging
@@ -640,6 +647,7 @@ bool TrackSrim::EstimateRange(const double ekin, const double step,
   // ekin       : Kinetic energy [MeV]
   // step       : Step length as guessed [cm]
   // stpmax     : Maximum step
+  // SRMDEZ
 
   const std::string hdr = m_className + "::EstimateRange: ";
   // Initial estimate
@@ -730,7 +738,24 @@ bool TrackSrim::EstimateRange(const double ekin, const double step,
 
 bool TrackSrim::Generate() {
   // Generates electrons for a SRIM track
+  // SRMGEN
   const std::string hdr = m_className + "::Generate: ";
+
+  // Verify that a sensor has been set
+  if (!m_sensor) {
+    std::cerr << m_className << "::Generate:\n"
+              << "    Sensor is not defined.\n";
+    return false;
+  }
+
+  // Get the bounding box.
+  double xmin = 0., ymin = 0., zmin = 0.;
+  double xmax = 0., ymax = 0., zmax = 0.;
+  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << m_className << "::Generate:\n"
+              << "    Drift area is not set.\n";
+    return false;
+  }
 
   // Header of debugging output.
   if (m_debug) {
@@ -784,7 +809,7 @@ bool TrackSrim::Generate() {
   m_currcluster = 0;
   m_clusters.clear();
 
-  // Target maximum number of clusters
+  // Maximum number of clusters
   const int mxclus = 200;
 
   // Initial situation: starting position
@@ -808,7 +833,8 @@ bool TrackSrim::Generate() {
   double epool = 0.0;
 
   // Loop generating clusters
-  for (unsigned int iter = 0; iter < 100; ++iter) {
+  int iter = 0;
+  while (iter < m_maxclusters || m_maxclusters < 0) {
     // Work out what the energy loss per cm, straggling and projected range are
     // at the start of the step.
     const double dedxem = DedxEM(e) * m_density;
@@ -914,6 +940,26 @@ bool TrackSrim::Generate() {
                 << "Mean loss =   " << deem << " MeV.\n    "
                 << "Actual loss = " << eloss << " MeV.\n";
     }
+
+    // Check that the cluster is in an ionisable medium and within bounding box
+    Medium* medium = NULL;
+    if (!m_sensor->GetMedium(x, y, z, medium)) {
+      std::cerr << m_className << "::Generate:\n";
+      std::cerr << "    No medium at position ("
+		<< x << "," << y << "," << z << "), clustering incomplete.\n";
+      return false;
+    } else if (!medium->IsIonisable()) {
+      std::cerr << "::Generate:\n";
+      std::cerr << "    Medium at ("
+		<< x << "," << y << "," << z << ") is not ionisable, clustering incomplete.\n";
+      return false;
+    } else if (!m_sensor->IsInArea(x, y, z)) {
+      std::cerr << m_className << "::Generate:\n";
+      std::cerr << "    Cluster at ("
+		<< x << "," << y << "," << z << ") outside bounding box, clustering incomplete.\n";
+      return false;
+    }
+
     // Add a cluster.
     cluster newcluster;
     newcluster.x = x;
@@ -927,12 +973,14 @@ bool TrackSrim::Generate() {
       newcluster.electrons = 0.0;
       newcluster.ec = 0.0;
       while (true) {
+	//	if(newcluster.ec < 100) printf("ec = %g\n", newcluster.ec);
         const double ernd1 = RndmHeedWF(m_work, m_fano);
         if (ernd1 > ecl) break;
         newcluster.electrons++;
         newcluster.ec += ernd1;
         ecl -= ernd1;
       }
+      //      printf("ec = %g DONE\n", newcluster.ec);
       if (m_debug)
         std::cout << hdr << "EM + pool: " << 1.e6 * (eloss + epool) 
                   << " eV, W: " << m_work << " eV, E/w: " 
@@ -1017,15 +1065,21 @@ bool TrackSrim::Generate() {
       m_ydir = m_ydir / dnorm;
       m_zdir = m_zdir / dnorm;
     }
+    // Next cluster
+    iter++;
   }
-  // Seems to have worked.
+  if (iter == m_maxclusters) {
+    std::cerr << hdr << "Exceeded maximum number of clusters.\n";
+  }
   return true;
+  // finished generating
 }
 
 bool TrackSrim::SmallestStep(const double ekin, double de, double step,
                              double& stpmin) {
-  // SRMMST - Determines the smallest step size for which there is little
-  //          or no risk of finding negative energy fluctuations.
+  // Determines the smallest step size for which there is little
+  // or no risk of finding negative energy fluctuations.
+  // SRMMST
 
   const std::string hdr = m_className + "::SmallestStep: ";
   const double expmax = 30;
@@ -1301,11 +1355,17 @@ double TrackSrim::RndmEnergyLoss(const double ekin, const double de,
 
 bool TrackSrim::GetCluster(double& xcls, double& ycls, double& zcls,
                            double& tcls, int& n, double& e, double& extra) {
-
+  if (m_debug) {
+    printf("Current cluster: %d, array size: %ld", 
+           m_currcluster, m_clusters.size());
+  }
+  // Stop if we have exhausted the list of clusters.
   if (m_currcluster >= m_clusters.size()) return false;
+
   xcls = m_clusters[m_currcluster].x;
   ycls = m_clusters[m_currcluster].y;
   zcls = m_clusters[m_currcluster].z;
+
   tcls = 0;
   n = m_clusters[m_currcluster].electrons;
   e = m_clusters[m_currcluster].ec;
