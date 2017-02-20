@@ -122,69 +122,69 @@ Int_t StFpsRawDaqReader::Make() {
     }
   }
 
-  dd = mRdr->det("fps")->get("adc");
   int ndata=0;
-  while(dd && dd->iterate()) {
-
-    // 2015
-    //int xing=(char)dd->sec;
-    //if(xing>=128) xing-=256;
-    //int qt=dd->rdo;
-    //int n=dd->ncontent;
-
-    // 2017
-    int fpsfpost=dd->sec;
-    int xing=(char)dd->pad;
-    if(xing>=128) xing-=256;
-    int qt=dd->row;
-    u_int n=dd->ncontent;
-
-    if(Debug()) printf("FPS: fpsfpost %1d xing %2d, QT %d, chs %d\n",fpsfpost,xing,qt,n) ;     
-    fps_adc_t *a = (fps_adc_t *) dd->Void ;     
-    for(u_int i=0;i<n;i++) {
-      ndata++;
-      int ch=a[i].ch;
-      int adc=a[i].adc;
-      int tdc=a[i].tdc;
-      if(Debug()) {
-	if(fpsfpost==1) printf("FPS  : xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
-	if(fpsfpost==2) printf("FPOST: xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
-      }
-      int slatid,q,l,s,flag=0,det,crate;
-      if(fpsfpost==1){	
-	slatid = mFmsDbMkr->fpsSlatidFromQT(qt,ch);
-	mFmsDbMkr->fpsQLSfromSlatId(slatid,&q,&l,&s);
-	if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
-	if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
-	det=kFpsDetId;
-	crate=kFpsQtCrate;
-	mRccFps=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
-      }else if(fpsfpost==2){
-	slatid = mFmsDbMkr->fpostSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
-	mFmsDbMkr->fpostQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
-	if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
-	if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
-	det=kFpostDetId;
-	crate=kFpostQtCrate;
-	mRccFpost=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
-      }else{
-	flag=1;
-      }	    
-      if(flag==0){
-	StFmsHit* hit = new StFmsHit();
-	hit->setDetectorId(det);
-	hit->setChannel(slatid);
-	hit->setQtCrate(crate);
-	hit->setQtSlot(qt);
-	hit->setQtChannel(ch);
-	hit->setAdc(adc);
-	hit->setTdc((char)xing);  //! Hack to keep xing# as tdc for now                                                                                          
-	hit->setEnergy(0.0);
+  for(int fpsfpost=1;fpsfpost<=2;fpsfpost++) {    
+    dd = mRdr->det("fps")->get("adc",fpsfpost) ;
+    while(dd && dd->iterate()) {
+      
+      // 2015
+      //int xing=(char)dd->sec;
+      //if(xing>=128) xing-=256;
+      //int qt=dd->rdo;
+      //int n=dd->ncontent;
+      
+      // 2017
+      //int fpsfpost=dd->sec;
+      int xing=(char)dd->pad;
+      if(xing>=128) xing-=256;
+      int qt=dd->row;
+      u_int n=dd->ncontent;
+      
+      if(Debug()) printf("FPS: fpsfpost %1d xing %2d, QT %d, chs %d\n",fpsfpost,xing,qt,n) ;     
+      fps_adc_t *a = (fps_adc_t *) dd->Void ;     
+      for(u_int i=0;i<n;i++) {
+	ndata++;
+	int ch=a[i].ch;
+	int adc=a[i].adc;
+	int tdc=a[i].tdc;
 	if(Debug()) {
-	  printf("Nhit=%d  : ",mFmsCollectionPtr->numberOfHits());
-	  hit->print();
+	  if(fpsfpost==1) printf("FPS  : xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
+	  if(fpsfpost==2) printf("FPOST: xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
 	}
-	mFmsCollectionPtr->addHit(hit);
+	int slatid,q,l,s,flag=0,det,crate;
+	if(fpsfpost==1){	
+	  slatid = mFmsDbMkr->fpsSlatidFromQT(qt,ch);
+	  mFmsDbMkr->fpsQLSfromSlatId(slatid,&q,&l,&s);
+	  if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
+	  if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
+	  det=kFpsDetId;
+	  crate=kFpsQtCrate;
+	  mRccFps=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+	}else if(fpsfpost==2){
+	  slatid = mFmsDbMkr->fpostSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
+	  mFmsDbMkr->fpostQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
+	  if(slatid<0)          { /* LOG_WARN << "Invalid SlatId = "<<slatid<<endm;*/      flag=1; }
+	  if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
+	  det=kFpostDetId;
+	  crate=kFpostQtCrate;
+	  mRccFpost=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+	}	    
+	if(flag==0){
+	  StFmsHit* hit = new StFmsHit();
+	  hit->setDetectorId(det);
+	  hit->setChannel(slatid);
+	  hit->setQtCrate(crate);
+	  hit->setQtSlot(qt);
+	  hit->setQtChannel(ch);
+	  hit->setAdc(adc);
+	  hit->setTdc((char)xing);  //! Hack to keep xing# as tdc for now                                                                                          
+	  hit->setEnergy(0.0);
+	  if(Debug()) {
+	    printf("Nhit=%d  : ",mFmsCollectionPtr->numberOfHits());
+	    hit->print();
+	  }
+	  mFmsCollectionPtr->addHit(hit);
+	}
       }
     }
   }   
@@ -201,8 +201,11 @@ void StFpsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.6 2017/02/18 18:25:40 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.7 2017/02/20 19:17:16 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.7  2017/02/20 19:17:16  akio
+ * Explicit loop over sector to get meta for both FPS and FPOST
+ *
  * Revision 1.6  2017/02/18 18:25:40  akio
  * adding RCC counter reading from meta
  *
