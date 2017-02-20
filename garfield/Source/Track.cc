@@ -26,7 +26,7 @@ Track::Track()
   SetBetaGamma(3.);
 }
 
-void Track::SetParticle(std::string part) {
+void Track::SetParticle(const std::string& part) {
 
   m_isElectron = false;
   if (part == "electron" || part == "Electron" || part == "e-") {

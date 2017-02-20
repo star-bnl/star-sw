@@ -8,6 +8,7 @@
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/St_base/StMessMgr.h"
+#include "StRoot/StEvent/StTriggerData.h"
 #include "StRoot/StEvent/StFmsCollection.h"
 #include "StRoot/StEvent/StFmsHit.h"
 #include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
@@ -149,6 +150,38 @@ Int_t StFpsQaMaker::Make() {
     }
   }
   //printf("NFMSHIT=%4d NFPSHITTOT=%4d NFPSHIT(xing=0)=%d\n",nhit,nfpsdatatot,nfpsdata); 
+
+  StTriggerData* trg = fpsraw->trgdata();
+  if(trg){
+    unsigned int tcu=trg->tcuCounter();
+    unsigned int rfps=fpsraw->rccFps();
+    unsigned int dfps=rfps-tcu;
+    if(rfps==0){
+      dfps=0;
+    }else if(rfps< tcu){
+      const long long one=1;
+      const long long m=one<<32;
+      long long r=rfps;
+      long long t=tcu;
+      dfps=(unsigned int)(r+m-t);
+    }
+    unsigned int rfpo=fpsraw->rccFpost();
+    unsigned int dfpo=rfpo-tcu;
+    if(rfpo==0){
+      dfpo=0;
+    }else if(rfps < tcu){
+      const long long one=1;
+      const long long m=one<<32;
+      long long r=rfpo;
+      long long t=tcu;
+      dfpo=(unsigned int)(r+m-t);
+    }
+    printf("FPS RCC  =%10d  TCU=%10d  DIFF=%10d     ",rfps,tcu,dfps);
+    printf("FPOST RCC=%10d  TCU=%10d  DIFF=%10d\n",rfpo,tcu,dfpo);
+  }else{
+    printf("No StTriggerData found\n");
+  }
+
   return kStOK;
 };
 
@@ -169,8 +202,11 @@ Int_t StFpsQaMaker::Finish(){
 ClassImp(StFpsQaMaker);
 
 /*
- * $Id: StFpsQaMaker.cxx,v 1.3 2015/05/30 16:08:00 akio Exp $
+ * $Id: StFpsQaMaker.cxx,v 1.4 2017/02/18 18:28:21 akio Exp $
  * $Log: StFpsQaMaker.cxx,v $
+ * Revision 1.4  2017/02/18 18:28:21  akio
+ * adding RCC-TCU check
+ *
  * Revision 1.3  2015/05/30 16:08:00  akio
  * *** empty log message ***
  *

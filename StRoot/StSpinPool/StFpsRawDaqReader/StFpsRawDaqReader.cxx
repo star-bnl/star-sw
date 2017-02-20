@@ -10,6 +10,8 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "RTS/src/DAQ_FPS/daq_fps.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
+#include "StRoot/StEvent/StTriggerData.h"
+#include "StRoot/StEvent/StTriggerData2017.h"
 #include "StRoot/StEvent/StFmsCollection.h"
 #include "StRoot/StEvent/StFmsHit.h"
 #include "RTS/src/DAQ_READER/daqReader.h"
@@ -49,7 +51,6 @@ Int_t StFpsRawDaqReader::prepareEnvironment(){
 
 Int_t StFpsRawDaqReader::Init(){
    GetEvtHddr()->SetEventNumber(1);
-   Int_t ierr = prepareEnvironment();
    LOG_INFO << "Opening "<< mDaqFileName.data() <<endm;
    mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
    if(!mRdr) {
@@ -75,7 +76,8 @@ Int_t StFpsRawDaqReader::Init(){
 
 Int_t StFpsRawDaqReader::Make() {
   enum {kFpsQtCrate=8, kFpostQtCrate=9};
-  //Int_t ierr = prepareEnvironment();
+  
+  prepareEnvironment();
   
   mRdr->get(0,EVP_TYPE_ANY);
   if(mRdr->status == EVP_STAT_EOR) {
@@ -94,6 +96,32 @@ Int_t StFpsRawDaqReader::Make() {
   }
 
   daq_dta *dd = 0;
+  dd = mRdr->det("trg")->get("raw");
+  if(!dd){
+    printf("trg/raw not found\n");
+  }else{
+    while(dd->iterate()) {
+      u_char *trg_raw = dd->Byte;
+      struct simple_desc {
+        short len ;
+        char evt_desc ;
+        char ver ;
+      } *desc ;
+      desc = (simple_desc *) trg_raw ;
+      //printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver,desc->evt_desc,desc->len);                 
+      if(desc->ver==0x44){
+	int mDebug=0;
+        TriggerDataBlk2017* trgdata2017 = (TriggerDataBlk2017*)dd->Byte;  
+	mTrg = (StTriggerData*) new StTriggerData2017(trgdata2017,mRun,1,mDebug);
+        if(Debug()) printf("Creating StTriggerData for ver=0x44 (2017) with run=%d\n",mRun);
+        //AddData(new TObjectSet("StTriggerData",new StTriggerData2017(trgdata2017,mRun,1,mDebug),kTRUE));
+        //printf("Adding dataset StTriggerData for ver=0x44 (2017) with run=%d\n",mRun);
+      }else{
+        printf("Unknown StTriggerData version = %x\n",desc->ver);
+      }
+    }
+  }
+
   dd = mRdr->det("fps")->get("adc");
   int ndata=0;
   while(dd && dd->iterate()) {
@@ -109,7 +137,7 @@ Int_t StFpsRawDaqReader::Make() {
     int xing=(char)dd->pad;
     if(xing>=128) xing-=256;
     int qt=dd->row;
-    int n=dd->ncontent;
+    u_int n=dd->ncontent;
 
     if(Debug()) printf("FPS: fpsfpost %1d xing %2d, QT %d, chs %d\n",fpsfpost,xing,qt,n) ;     
     fps_adc_t *a = (fps_adc_t *) dd->Void ;     
@@ -130,6 +158,7 @@ Int_t StFpsRawDaqReader::Make() {
 	if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
 	det=kFpsDetId;
 	crate=kFpsQtCrate;
+	mRccFps=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
       }else if(fpsfpost==2){
 	slatid = mFmsDbMkr->fpostSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
 	mFmsDbMkr->fpostQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
@@ -137,6 +166,7 @@ Int_t StFpsRawDaqReader::Make() {
 	if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
 	det=kFpostDetId;
 	crate=kFpostQtCrate;
+	mRccFpost=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
       }else{
 	flag=1;
       }	    
@@ -163,14 +193,19 @@ Int_t StFpsRawDaqReader::Make() {
 };
 
 void StFpsRawDaqReader::Clear( Option_t *opts ){
+  StTriggerData2017* d=(StTriggerData2017*)mTrg;
+  delete d;
   if(mFmsCollectionPtr) mFmsCollectionPtr->hits().clear();  
 };
 
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.5 2017/02/16 20:54:27 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.6 2017/02/18 18:25:40 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.6  2017/02/18 18:25:40  akio
+ * adding RCC counter reading from meta
+ *
  * Revision 1.5  2017/02/16 20:54:27  akio
  * fix typo
  *

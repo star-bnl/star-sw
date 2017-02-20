@@ -18,7 +18,7 @@ class TrackElectron : public Track {
   // Destructor
   ~TrackElectron() {}
 
-  void SetParticle(std::string particle);
+  void SetParticle(const std::string& particle);
 
   bool NewTrack(const double x0, const double y0, const double z0,
                 const double t0, const double dx0, const double dy0,

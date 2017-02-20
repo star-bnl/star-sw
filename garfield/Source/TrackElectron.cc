@@ -34,7 +34,7 @@ TrackElectron::TrackElectron()
 
 }
 
-void TrackElectron::SetParticle(std::string particle) {
+void TrackElectron::SetParticle(const std::string& particle) {
 
   if (particle != "electron" && particle != "e" && particle != "e-") {
     std::cerr << m_className << "::SetParticle:\n";

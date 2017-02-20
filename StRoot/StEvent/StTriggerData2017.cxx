@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.cxx,v 2.2 2016/12/15 16:30:07 ullrich Exp $
+ * $Id: StTriggerData2017.cxx,v 2.3 2017/02/20 16:33:37 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.cxx,v $
+ * Revision 2.3  2017/02/20 16:33:37  ullrich
+ * Changed mtdQtAtCh for run17 mapping
+ *
  * Revision 2.2  2016/12/15 16:30:07  ullrich
  * Updates from Jeff.
  *
@@ -1235,7 +1238,8 @@ unsigned short StTriggerData2017::mtdQtAtCh(int qtid, int address, int prepost) 
 { // read all the MTD QTs data, and the range of qtid is 1-8
     int map1[4] = {0, 10, 12, 14};
     int map2[8] = {0,  9, 10, 11, 12, 13, 14, 15};
-    
+    int map3[4] = {0,  9, 11, 13};
+
     int buffer = prepostAddress(prepost);
     if(buffer>=0 && qtid>0 && address>=0 && address<32){
         if(mRun<=12003001){
@@ -1254,9 +1258,13 @@ unsigned short StTriggerData2017::mtdQtAtCh(int qtid, int address, int prepost) 
             if(qtid>4) return 0;
             else return mxq[buffer][map1[qtid-1]][address];
         }
+	else if(mRun<=18001001){
+	    if(qtid>8) return 0;
+	    else return mxq[buffer][map2[qtid-1]][address];
+	}
         else{
-            if(qtid>8) return 0;
-            else return mxq[buffer][map2[qtid-1]][address];
+            if(qtid>4) return 0;
+            else return mxq[buffer][map3[qtid-1]][address];
         }
     }
     

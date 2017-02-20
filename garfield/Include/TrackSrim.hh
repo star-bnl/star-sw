@@ -56,8 +56,11 @@ class TrackSrim : public Track {
   void EnableDebugging() { m_debug = true; }
   void DisableDebugging() { m_debug = false; }
 
-  void SetTargetClusterSize(const unsigned int n) { m_nsize = n; }
-  unsigned int GetTargetClusterSize() const { return m_nsize; }
+  void SetTargetClusterSize(const int n) { m_nsize = n; }
+  int GetTargetClusterSize() const { return m_nsize; }
+
+  void SetClustersMaximum(const int n) { m_maxclusters = n; }
+  int SetClustersMaximum() const { return m_maxclusters; }
 
   void SetTrack(const double x0, const double y0, const double z0,
                 const double xd, const double yd, const double zd,
@@ -92,8 +95,6 @@ class TrackSrim : public Track {
   bool m_useLongStraggle;
   /// Track has been defined
   bool m_trackset;
-  /// Mass has been defined
-  bool m_massset;
   /// Charge gas been defined
   bool m_chargeset;
   /// Produce debugging output
@@ -119,6 +120,8 @@ class TrackSrim : public Track {
   double m_xdir, m_ydir, m_zdir;
   /// Specified track length
   double m_tracklength;
+  // Maximum number of clusters allowed (infinite if 0)
+  int m_maxclusters;
   /// Energy in energy loss table [MeV]
   std::vector<double> m_energy;
   /// EM energy loss [MeV cm2/g]

@@ -13,6 +13,7 @@ class daqReader;
 class StFmsDbMaker;
 
 class StEvent;
+class StTriggerData;
 class StFmsCollection;
 
 class StFpsRawDaqReader : public StMaker {
@@ -26,8 +27,12 @@ class StFpsRawDaqReader : public StMaker {
    virtual Int_t Make();
    virtual void Clear( Option_t *opts = "" );
 
+   void setRun(int v) {mRun=v;}
    virtual Int_t prepareEnvironment();
    unsigned long long trgMask(){return mTrgMask;}
+   unsigned int rccFps(){return mRccFps;}
+   unsigned int rccFpost(){return mRccFpost;}
+   StTriggerData* trgdata(){return mTrg;}
 
    // Get CVS
    virtual const char *GetCVS() const;
@@ -41,7 +46,12 @@ class StFpsRawDaqReader : public StMaker {
    std::string mDaqFileName, mDbMkrName;
    daqReader *mRdr;
    StFmsDbMaker *mFmsDbMkr;
+   unsigned int mRun=0;
+   StTriggerData* mTrg;
+   
    unsigned long long mTrgMask;
+   unsigned int mRccFps;
+   unsigned int mRccFpost;
 
    ClassDef(StFpsRawDaqReader,1);
 };
@@ -49,15 +59,18 @@ class StFpsRawDaqReader : public StMaker {
 // inline functions
 inline void StFpsRawDaqReader::setFilename( std::string filename ){ mDaqFileName = filename; };
 inline const char *StFpsRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.4 2015/08/13 16:45:48 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.5 2017/02/18 18:25:40 akio Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFpsRawDaqReader.h,v 1.4 2015/08/13 16:45:48 jeromel Exp $
+ * $Id: StFpsRawDaqReader.h,v 1.5 2017/02/18 18:25:40 akio Exp $
  * $Log: StFpsRawDaqReader.h,v $
+ * Revision 1.5  2017/02/18 18:25:40  akio
+ * adding RCC counter reading from meta
+ *
  * Revision 1.4  2015/08/13 16:45:48  jeromel
  * Quick fix for spin folks
  *

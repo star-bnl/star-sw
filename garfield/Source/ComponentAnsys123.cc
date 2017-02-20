@@ -40,7 +40,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
 
   // Read the material list.
   m_nMaterials = 0;
-  int il = 0;
+  long il = 0;
   unsigned int icurrmat = 0;
   bool readerror = false;
   while (fmplist.getline(line, size, '\n')) {
@@ -319,6 +319,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
       ok = false;
       break;
     }
+    ++il;
     token = NULL;
     token = strtok(line, " ");
     int in8 = ReadInteger(token, -1, readerror);
