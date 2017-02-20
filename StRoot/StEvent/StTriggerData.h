@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.47 2016/12/15 16:30:06 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.48 2017/02/20 16:32:12 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.48  2017/02/20 16:32:12  ullrich
+ * Added bbcVP101
+ *
  * Revision 2.47  2016/12/15 16:30:06  ullrich
  * Updates from Jeff.
  *
@@ -313,6 +316,7 @@ public:
     virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short vpdTimeDifference() const;
+    virtual unsigned short bbcVP101(int ch, int prepost = 0) const;
 
     //MXQ crate
     virtual unsigned short mxqAtSlotAddress(int address, int prepost=0, int slot=0) const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.26 2016/12/15 16:30:06 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.27 2017/02/20 16:32:12 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.27  2017/02/20 16:32:12  ullrich
+ * Added bbcVP101
+ *
  * Revision 2.26  2016/12/15 16:30:06  ullrich
  * Updates from Jeff.
  *
@@ -91,7 +94,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.26 2016/12/15 16:30:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.27 2017/02/20 16:32:12 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -265,6 +268,7 @@ unsigned short StTriggerData::vpdTDCHighThr(StBeamDirection eastwest, int pmt, i
 unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
+unsigned short StTriggerData::bbcVP101(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::mxqAtSlotAddress(int address, int prepost, int slot) const {return 0;}
 unsigned short StTriggerData::mtdQtAtCh(int qtid, int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
