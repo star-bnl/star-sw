@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPointPair.h,v 2.3 2016/06/07 15:51:34 akio Exp $
+ * $Id: StFmsPointPair.h,v 2.4 2017/02/20 16:32:58 ullrich Exp $
  *
  * Author: Akio Ogawa, Sep 2015
  **************************************************************************
@@ -10,6 +10,9 @@
  **************************************************************************
  *
  * $Log: StFmsPointPair.h,v $
+ * Revision 2.4  2017/02/20 16:32:58  ullrich
+ * Changing F to D for StLorentzVector
+ *
  * Revision 2.3  2016/06/07 15:51:34  akio
  * Making code better based on Coverity reports
  *
@@ -23,8 +26,8 @@
 #ifndef StFmsPointPair_h
 #define StFmsPointPair_h
 
-#include "StLorentzVectorF.hh"
-#include "StThreeVectorF.hh"
+#include "StLorentzVectorD.hh"
+#include "StThreeVectorD.hh"
 #include "StObject.h"
 #include "StEnumerations.h"
 #include "StFmsPoint.h"
@@ -41,7 +44,7 @@ public:
     vector<StFmsPoint*>& points();
     StFmsPoint* point(int v);
   
-    const StLorentzVectorF& fourMomentum() const;
+    const StLorentzVectorD& fourMomentum() const;
     float energy() const;
     float pT() const;
     float eta() const;
@@ -65,7 +68,7 @@ public:
 
 private:
     vector<StFmsPoint*> mPoints;    //!
-    StLorentzVectorF mFourMomentum; //!  
+    StLorentzVectorD mFourMomentum; //!  
     UInt_t  mFpsPid;                //! 
     Float_t mConeRadius[kFmsPointMaxCone]; //! cone radius
     Float_t mConeEnergy[kFmsPointMaxCone]; //! sum of fms hit(cell) energy within a cone
@@ -75,12 +78,12 @@ private:
 
 inline int StFmsPointPair::nPoints() const {return mPoints.size();}
 inline vector<StFmsPoint*>& StFmsPointPair::points() {return mPoints;}
-inline const StLorentzVectorF& StFmsPointPair::fourMomentum() const { return mFourMomentum; }
-inline float StFmsPointPair::energy() const { return mFourMomentum.e(); }
-inline float StFmsPointPair::pT() const { return mFourMomentum.perp(); }
-inline float StFmsPointPair::eta() const { return mFourMomentum.pseudoRapidity(); }
-inline float StFmsPointPair::phi() const { return mFourMomentum.phi(); }
-inline float StFmsPointPair::mass() const { return mFourMomentum.m(); }
+inline const StLorentzVectorD& StFmsPointPair::fourMomentum() const { return mFourMomentum; }
+inline float StFmsPointPair::energy() const { return (float)mFourMomentum.e(); }
+inline float StFmsPointPair::pT() const { return (float)mFourMomentum.perp(); }
+inline float StFmsPointPair::eta() const { return (float)mFourMomentum.pseudoRapidity(); }
+inline float StFmsPointPair::phi() const { return (float)mFourMomentum.phi(); }
+inline float StFmsPointPair::mass() const { return (float)mFourMomentum.m(); }
 inline unsigned int  StFmsPointPair::fpsPid() const { return mFpsPid; }
  
 #endif  // StFmsPointPair_h

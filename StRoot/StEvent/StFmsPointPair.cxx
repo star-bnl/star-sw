@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPointPair.cxx,v 2.2 2015/10/21 14:52:54 ullrich Exp $
+ * $Id: StFmsPointPair.cxx,v 2.3 2017/02/20 16:32:58 ullrich Exp $
  *
  * Author: Akio Ogawa, Sep 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPointPair.cxx,v $
+ * Revision 2.3  2017/02/20 16:32:58  ullrich
+ * Changing F to D for StLorentzVector
+ *
  * Revision 2.2  2015/10/21 14:52:54  ullrich
  * Added methods x() and y()
  *
@@ -23,11 +26,15 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPointPair.cxx,v 2.2 2015/10/21 14:52:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsPointPair.cxx,v 2.3 2017/02/20 16:32:58 ullrich Exp $";
 
 StFmsPointPair::StFmsPointPair() : mFpsPid(0), mConeRadius{0.100, 0.070, 0.030}
 {
     memset(mConeEnergy,0,sizeof(mConeEnergy));
+    mFourMomentum.setPx(0.0);
+    mFourMomentum.setPy(0.0);
+    mFourMomentum.setPz(0.0);
+    mFourMomentum.setE(0.0);
 }
 
 StFmsPointPair::StFmsPointPair(StFmsPoint* p) : StFmsPointPair() {
@@ -43,7 +50,10 @@ StFmsPointPair::~StFmsPointPair() { /* no op */ }
 
 void StFmsPointPair::addPoint(StFmsPoint* p)  {
     mPoints.push_back(p);
-    mFourMomentum = mFourMomentum + p->fourMomentum();
+    mFourMomentum = mFourMomentum + StLorentzVectorD((double)p->fourMomentum().x(),
+						     (double)p->fourMomentum().y(),
+						     (double)p->fourMomentum().z(),
+						     (double)p->fourMomentum().e());
     mFpsPid += (p->fpsPid()/10)*pow(10,nPoints()-1);
 }
 
