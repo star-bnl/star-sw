@@ -9,7 +9,7 @@ class StEmcGeom ;
 class BemcHitList : public ScintHitList {
  private:
   enum {mxm=120,mxe=20,mxs=2};
-  int mes2bin[mxm][mxe][mxs]; // map {m,e,s}--> my bin
+  int mes2bin[mxm][mxe][mxs]; // map module, eta, sub {m,e,s} --> my bin iBin=iPhi+nPhi*iEta;
   StBemcTables *myTable;
   StEmcGeom *geomB;
   // params:

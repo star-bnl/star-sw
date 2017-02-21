@@ -1,7 +1,7 @@
 #ifndef VertexData_h
 #define VertexData_h
 /*********************************************************************
- * $Id: VertexData.h,v 1.6 2017/01/06 21:01:58 smirnovd Exp $
+ * $Id: VertexData.h,v 1.7 2017/02/21 21:34:22 smirnovd Exp $
  *********************************************************************
  * full description of found vertex
  */
@@ -11,6 +11,8 @@
 class VertexData {
  public:
   int id; // vertex ID assigned by PPV
+  bool isTriggered; ///< Indicates whether the vertex potentially belongs to triggered event
+  short mIdTruth;
   TVector3 r,er; // vertex position and its error
   int nUsedTrack; // # of tracks used to identify the vertex
   float Lmax; // maximum of the likelhood function.
@@ -28,6 +30,21 @@ class VertexData {
 
 /*
  * $Log: VertexData.h,v $
+ * Revision 1.7  2017/02/21 21:34:22  smirnovd
+ * Enhanced proxy data structures for track and vertex
+ *
+ * For details see commits on master branch cdc758df..49016672
+ *
+ * - Update comments & doxygen, removed commented code
+ * - TrackDataT: New helper for TrackData to manipulate original mother track
+ * - TrackData: Don't limit track's mother to specific type
+ *   - This proxy track can be created from other than StiKalmanTrack type, e.g.  MuDstTrack
+ * - VertexData: Added member to flag triggered vertex
+ * - TrackData: Added method to calculate chi2 w.r.t. a vertex
+ * - TrackData: Added member pointer to DCA geometry
+ * - TrackData: Added print() method
+ * - TrackData & VertexData: Added fields with simulation data
+ *
  * Revision 1.6  2017/01/06 21:01:58  smirnovd
  * VertexData: Initialize vertexID in constructor
  *

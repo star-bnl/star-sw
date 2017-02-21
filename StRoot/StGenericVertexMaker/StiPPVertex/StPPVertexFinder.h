@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.40 2017/02/15 15:30:19 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.41 2017/02/21 21:34:22 smirnovd Exp $
  *
  */
 
@@ -73,7 +73,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void saveHisto(TString fname);
   int  mTotEve;
   int  eveID;
-  unsigned int  mAlgoSwitches; //binary, assign 1bit per change, use enum below
+  unsigned int  mAlgoSwitches; ///< binary, assign 1bit per change, use enum below
+                               ///< default is 0, as for 2008 pp data production
   enum {kSwitchOneHighPT=1}; 
 
   TH1F *hA[mxH];
@@ -97,9 +98,10 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool   mFitPossWeighting;    ///< Use nFit/nPossible in track weighting (ranking)
   bool   mDropPostCrossingTrack;  ///< enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; ///< set the max # of vertices, sorted by rank
-  float  mCut_oneTrackPT;         ///< threshold for storing one track vertices
-  bool   mStudyBeamLineTracks; ///< activates writing them out + lot of QA histos,
-                               ///< use  BFC option: VtxSeedCalG to enable it, expert only
+  float  mCut_oneTrackPT;         ///< threshold for storing one track vertices.
+                                  ///< In GeV, used only if coresponding algoSwitch switch is ON.
+  bool   mStudyBeamLineTracks;    ///< activates writing them out + lot of QA histos,
+                                  ///< use  BFC option: VtxSeedCalG to enable it, expert only
 
   // util
   StiToolkit     *mToolkit;

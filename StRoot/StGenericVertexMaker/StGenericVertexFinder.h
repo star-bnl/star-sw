@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.49 2017/02/15 15:30:18 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.50 2017/02/21 21:34:21 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -147,7 +147,8 @@ protected:
 
 private:
 
-  std::vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
+  /// Holds all found primary vertices
+  std::vector<StPrimaryVertex> mVertexList;
 
   virtual void  UseVertexConstraint() = 0;
 };
