@@ -305,7 +305,7 @@ class MediumMagboltz : public MediumGas {
   // 3: excitation
   int nPhotonCollisions[nCsTypesGamma];
 
-  bool GetGasNumberMagboltz(const std::string input, int& number) const;
+  bool GetGasNumberMagboltz(const std::string& input, int& number) const;
   bool Mixer(const bool verbose = false);
   void SetupGreenSawada();
   void ComputeAngularCut(double parIn, double& cut, double& parOut);

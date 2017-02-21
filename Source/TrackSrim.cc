@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 #include <fstream>
 
 #include <TCanvas.h>
@@ -121,62 +120,21 @@ void PrintSettings(const std::string& hdr,
 namespace Garfield {
 
 TrackSrim::TrackSrim()
-    : m_precisevavilov(false),
+    : Track(),
+      m_precisevavilov(false),
       m_useTransStraggle(true),
-      m_useLongStraggle(true),
-      m_trackset(false),
+      m_useLongStraggle(false),
       m_chargeset(false),
-      m_debug(false),
       m_density(-1.0),
       m_work(-1.),
       m_fano(-1.),
-      m_q(0.0),
-      m_mass(-1.),
       m_a(-1.), 
       m_z(-1.),
-      m_initialenergy(-1.0),
       m_maxclusters(-1),
       m_model(4),
       m_nsize(-1) {
   m_className = "TrackSrim";
-}
-
-void TrackSrim::SetTrack(const double x0, const double y0, const double z0,
-                         const double xd, const double yd, const double zd,
-                         const double l) {
-  // Transfer the starting point
-  m_xt0 = x0;
-  m_yt0 = y0;
-  m_zt0 = z0;
-
-  // Normalise and store the direction
-  const double normdir = sqrt(xd * xd + yd * yd + zd * zd);
-  if (normdir <= 0) {
-    std::cerr << m_className << "::SetTrack:\n"
-              << "    Track length = 0; no SRIM cluster generation.\n";
-    return;
-  }
-  m_xdir = xd / normdir;
-  m_ydir = yd / normdir;
-  m_zdir = zd / normdir;
-
-  // Transfer the expected length
-  m_tracklength = l;
-
-  // Remember we have set a track
-  m_trackset = true;
-}
-
-void TrackSrim::GetTrack(double& x0, double& y0, double& z0, double& xd,
-                         double& yd, double& zd, double& l) {
-  // Return the track parameters
-  x0 = m_xt0;
-  y0 = m_yt0;
-  z0 = m_zt0;
-  xd = m_xdir;
-  yd = m_ydir;
-  zd = m_zdir;
-  l = m_tracklength;
+  m_mass = -1.;
 }
 
 bool TrackSrim::ReadFile(const std::string& file) {
@@ -197,20 +155,6 @@ bool TrackSrim::ReadFile(const std::string& file) {
   if (m_debug) {
     std::cout << hdr << "SRIM header records from file " << file << "\n";
   }
-  /*
-  std::string line;
-  while (std::getline(fsrim, line)) {
-    ++nread;
-    if (line.find("SRIM version") != std::string::npos) {
-      if (m_debug) std::cout << "\t" << line << "\n";
-    } else if (line.find("Calc. date") != std::string::npos) {
-      if (m_debug) std::cout << "\t" << line << "\n";
-    } else if (line.find("Ion =") != std::string::npos) {
-      break;
-    }
-  }
-  //*/
-  ///*
   const int size = 100;
   char line[size];
   while (fsrim.getline(line, 100, '\n')) {
@@ -223,19 +167,20 @@ bool TrackSrim::ReadFile(const std::string& file) {
       break;
     }
   }
-  //*/
 
   // Identify the ion
   char* token = NULL;
   token = strtok(line, " []=");
   token = strtok(NULL, " []=");
   token = strtok(NULL, " []=");
-  SetCharge(std::atof(token));
+  // Set the ion charge.
+  m_q = std::atof(token);
+  m_chargeset = true;
   token = strtok(NULL, " []=");
   token = strtok(NULL, " []=");
   token = strtok(NULL, " []=");
   // Set the ion mass (convert amu to eV).
-  SetMass(std::atof(token) * AtomicMassUnitElectronVolt);  
+  m_mass = std::atof(token) * AtomicMassUnitElectronVolt;
 
   // Find the target density
   if (!fsrim.getline(line, 100, '\n')) {
@@ -278,7 +223,7 @@ bool TrackSrim::ReadFile(const std::string& file) {
   }
 
   // Read the table line by line
-  m_energy.clear();
+  m_ekin.clear();
   m_emloss.clear();
   m_hdloss.clear();
   m_range.clear();
@@ -290,14 +235,14 @@ bool TrackSrim::ReadFile(const std::string& file) {
     if (strstr(line, "-----------") != NULL) break;
     // Energy
     token = strtok(line, " ");
-    m_energy.push_back(atof(token));
+    m_ekin.push_back(atof(token));
     token = strtok(NULL, " ");
     if (strcmp(token, "eV") == 0) {
-      m_energy[ntable] *= 1.0e-6;
+      m_ekin[ntable] *= 1.0e-6;
     } else if (strcmp(token, "keV") == 0) {
-      m_energy[ntable] *= 1.0e-3;
+      m_ekin[ntable] *= 1.0e-3;
     } else if (strcmp(token, "GeV") == 0) {
-      m_energy[ntable] *= 1.0e3;
+      m_ekin[ntable] *= 1.0e3;
     } else if (strcmp(token, "MeV") != 0) {
       std::cerr << hdr << "Unknown energy unit " << token << "; aborting\n";
       return false;
@@ -387,23 +332,24 @@ bool TrackSrim::ReadFile(const std::string& file) {
 
 void TrackSrim::Print() {
 
-  std::cout << "\nSRIM energy loss table\n\n"
+  std::cout << "TrackSrim::Print:\n    SRIM energy loss table\n\n"
             << "    Energy     EM Loss     HD loss       Range  "
             << "l straggle  t straggle\n"
             << "     [MeV]    [MeV/cm]    [MeV/cm]        [cm] "
             << "      [cm]        [cm]\n\n";
   const unsigned int nPoints = m_emloss.size();
   for (unsigned int i = 0; i < nPoints; ++i) {
-    printf("%10g  %10g  %10g  %10g  %10g  %10g\n", m_energy[i],
+    printf("%10g  %10g  %10g  %10g  %10g  %10g\n", m_ekin[i],
            m_emloss[i] * m_density, m_hdloss[i] * m_density, m_range[i],
            m_longstraggle[i], m_transstraggle[i]);
   }
-  printf("\nWork function:  %g eV\n", m_work);
-  printf("Fano factor:    %g\n", m_fano);
-  printf("Ion charge:     %g\n", m_q);
-  printf("Mass:           %g MeV\n", 1.e-6 * m_mass);
-  printf("Density:        %g g/cm3\n", m_density);
-  printf("A, Z:           %g, %g\n", m_a, m_z);
+  std::cout << "\n";
+  printf("    Work function:  %g eV\n", m_work);
+  printf("    Fano factor:    %g\n", m_fano);
+  printf("    Ion charge:     %g\n", m_q);
+  printf("    Mass:           %g MeV\n", 1.e-6 * m_mass);
+  printf("    Density:        %g g/cm3\n", m_density);
+  printf("    A, Z:           %g, %g\n", m_a, m_z);
 }
 
 void TrackSrim::PlotEnergyLoss() {
@@ -411,12 +357,12 @@ void TrackSrim::PlotEnergyLoss() {
   // Make a graph for the 3 curves to plot
   double xmin = 0., xmax = 0.;
   double ymin = 0., ymax = 0.;
-  const unsigned int nPoints = m_energy.size();
+  const unsigned int nPoints = m_ekin.size();
   TGraph* grem = new TGraph(nPoints);
   TGraph* grhd = new TGraph(nPoints);
   TGraph* grtot = new TGraph(nPoints);
   for (unsigned int i = 0; i < nPoints; ++i) {
-    const double eplot = m_energy[i];
+    const double eplot = m_ekin[i];
     if (eplot < xmin) xmin = eplot;
     if (eplot > xmax) xmax = eplot;
     const double emplot = m_emloss[i] * m_density;
@@ -473,10 +419,10 @@ void TrackSrim::PlotRange() {
   // Make a graph
   double xmin = 0., xmax = 0.;
   double ymin = 0., ymax = 0.;
-  const unsigned int nPoints = m_energy.size();
+  const unsigned int nPoints = m_ekin.size();
   TGraph* grrange = new TGraph(nPoints);
   for (unsigned int i = 0; i < nPoints; ++i) {
-    const double eplot = m_energy[i];
+    const double eplot = m_ekin[i];
     if (eplot < xmin) xmin = eplot;
     if (eplot > xmax) xmax = eplot;
     const double rangeplot = m_range[i];
@@ -504,11 +450,11 @@ void TrackSrim::PlotStraggling() {
   // Make a graph for the 2 curves to plot
   double xmin = 0., xmax = 0.;
   double ymin = 0., ymax = 0.;
-  const unsigned int nPoints = m_energy.size();
+  const unsigned int nPoints = m_ekin.size();
   TGraph* grlong = new TGraph(nPoints);
   TGraph* grtrans = new TGraph(nPoints);
   for (unsigned int i = 0; i < nPoints; ++i) {
-    const double eplot = m_energy[i];
+    const double eplot = m_ekin[i];
     if (eplot < xmin) xmin = eplot;
     if (eplot > xmax) xmax = eplot;
     const double longplot = m_longstraggle[i];
@@ -553,11 +499,11 @@ void TrackSrim::PlotStraggling() {
 }
 
 double TrackSrim::DedxEM(const double e) const {
-  return Interpolate(e, m_energy, m_emloss);
+  return Interpolate(e, m_ekin, m_emloss);
 }
 
 double TrackSrim::DedxHD(const double e) const {
-  return Interpolate(e, m_energy, m_hdloss);
+  return Interpolate(e, m_ekin, m_hdloss);
 }
 
 bool TrackSrim::PreciseLoss(const double step, const double estart,
@@ -736,15 +682,18 @@ bool TrackSrim::EstimateRange(const double ekin, const double step,
   return false;
 }
 
-bool TrackSrim::Generate() {
+
+bool TrackSrim::NewTrack(const double x0, const double y0, const double z0, 
+                         const double t0, const double dx0, const double dy0, 
+                         const double dz0) {
+
   // Generates electrons for a SRIM track
   // SRMGEN
-  const std::string hdr = m_className + "::Generate: ";
+  const std::string hdr = m_className + "::NewTrack: ";
 
-  // Verify that a sensor has been set
+  // Verify that a sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::Generate:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << hdr << "\n    Sensor is not defined.\n";
     return false;
   }
 
@@ -752,81 +701,110 @@ bool TrackSrim::Generate() {
   double xmin = 0., ymin = 0., zmin = 0.;
   double xmax = 0., ymax = 0., zmax = 0.;
   if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << m_className << "::Generate:\n"
-              << "    Drift area is not set.\n";
+    std::cerr << hdr << "\n    Drift area is not set.\n";
+    return false;
+  } else if (x0 < xmin || x0 > xmax || 
+             y0 < ymin || y0 > ymax || z0 < zmin || z0 > zmax) {
+    std::cerr << hdr << "\n    Initial position outside bounding box.\n";
     return false;
   }
+
+  // Make sure the initial position is inside an ionisable medium.
+  Medium* medium = NULL;
+  if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
+    std::cerr << hdr << "\n    No medium at initial position.\n";
+    return false;
+  } else if (!medium->IsIonisable()) {
+    std::cerr << hdr << "\n    Medium at initial position is not ionisable.\n";
+    return false;
+  }
+
+  // Normalise and store the direction.
+  const double normdir = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
+  double xdir = dx0;
+  double ydir = dy0;
+  double zdir = dz0;
+  if (normdir < Small) {
+    if (m_debug) {
+      std::cout << hdr << "\n    Direction vector has zero norm.\n"
+                << "    Initial direction is randomized.\n";
+    }
+    // Null vector. Sample the direction isotropically.
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
+    xdir = cos(phi) * stheta;
+    ydir = sin(phi) * stheta;
+    zdir = ctheta;
+  } else {
+    // Normalise the direction vector.
+    xdir /= normdir;
+    ydir /= normdir;
+    zdir /= normdir;
+  }
+
+  // Make sure all necessary parameters have been set.
+  if (m_mass < Small) {
+    std::cerr << hdr << "\n    Particle mass not set.\n";
+    return false;
+  } else if (!m_chargeset) {
+    std::cerr << hdr << "\n    Particle charge not set.\n";
+    return false;
+  } else if (m_energy < Small) {
+    std::cerr << hdr << "\n    Initial particle energy not set.\n";
+    return false;
+  } else if (m_work < Small) {
+    std::cerr << hdr << "\n    Work function not set.\n";
+    return false;
+  } else if (m_a < Small || m_z < Small) {
+    std::cerr << hdr << "\n    A and/or Z not set.\n";
+    return false;
+  }
+  // Check the initial energy (in MeV).
+  const double ekin0 = 1.e-6 * GetKineticEnergy();
+  if (ekin0 < 1.e-14 * m_mass || ekin0 < 1.e-3 * m_work) {
+    if (m_debug) {
+      std::cout << hdr << "Initial kinetic energy E = " << ekin0
+                << " MeV such that beta2 = 0 or E << W; particle stopped.\n";
+    }
+    return true;
+  }
+
+  // Get an upper limit for the track length.
+  const double tracklength = 10 * Interpolate(ekin0, m_ekin, m_range);
 
   // Header of debugging output.
   if (m_debug) {
-    std::cout << hdr << "\n"
-              << "    Track generation with the following parameters:\n";
-    const unsigned int nTable = m_energy.size();
-    printf("      Table size         %u\n", nTable);
-    printf("      Track length       %g cm\n", m_tracklength);
-    printf("      Particle energy    %g eV\n", m_initialenergy);
-    printf("      Particle mass      %g eV\n", m_mass);
-    printf("      Particle charge    %g\n", m_q);
-    printf("      Work function      %g eV\n", m_work);
-    printf("      Fano factor        %g\n", m_fano);
-    printf("      Long. straggling:  %d\n", m_useLongStraggle);
-    printf("      Trans. straggling: %d\n", m_useTransStraggle);
-    //    printf("Vavilov generator: %d\n",     m_precisevavilov);
-    printf("      Cluster size       %d\n", m_nsize);
-  }
-
-  // Verify that the parameters have been set
-  if (!m_trackset) {
-    std::cerr << hdr << "\n    Track location not set.\n";
-    return false;
-  }
-  if (m_mass < 0.) {
-    std::cerr << hdr << "\n    Particle mass not set.\n";
-    return false;
-  }
-  if (!m_chargeset) {
-    std::cerr << hdr << "\n    Particle charge not set.\n";
-    return false;
-  }
-  if (m_initialenergy < 0.) {
-    std::cerr << hdr << "\n    Initial particle energy not set.\n";
-    return false;
-  }
-  if (m_work < 0.) {
-    std::cerr << hdr << "\n    Work function not set.\n";
-    return false;
-  }
-  if (m_fano < 0.) {
-    std::cerr << hdr << "\n    Fano factor function not set.\n";
-    return false;
-  }
-  if (m_a < 0. || m_z < 0.) {
-    std::cerr << hdr << "\n    A and/or Z not set.\n";
-    return false;
+    std::cout << hdr << "Track generation with the following parameters:\n";
+    const unsigned int nTable = m_ekin.size();
+    printf("      Table size           %u\n", nTable);
+    printf("      Particle kin. energy %g MeV\n", ekin0);
+    printf("      Particle mass        %g MeV\n", 1.e-6 * m_mass);
+    printf("      Particle charge      %g\n", m_q);
+    printf("      Work function        %g eV\n", m_work);
+    if (m_fano > 0.) {
+      printf("      Fano factor          %g\n", m_fano);
+    } else {
+      std::cout << "      Fano factor          Not set\n";
+    } 
+    printf("      Long. straggling:    %d\n", m_useLongStraggle);
+    printf("      Trans. straggling:   %d\n", m_useTransStraggle);
+    // printf("      Vavilov generator:   %d\n", m_precisevavilov);
+    printf("      Cluster size         %d\n", m_nsize);
   }
 
   // Reset the cluster count
   m_currcluster = 0;
   m_clusters.clear();
 
-  // Maximum number of clusters
-  const int mxclus = 200;
 
   // Initial situation: starting position
-  double x = m_xt0;
-  double y = m_yt0;
-  double z = m_zt0;
+  double x = x0;
+  double y = y0;
+  double z = z0;
 
-  // Check the initial energy.
-  if (m_initialenergy < 1.e-20 * m_mass || m_initialenergy < 1.e-9 * m_work) {
-    if (m_debug) {
-      std::cout << hdr << "Initial particle energy E = " << m_initialenergy
-                << " MeV such that beta2 = 0 or E << W; particle stopped.\n";
-    }
-    return true;
-  }
   // Store the energy [MeV].
-  double e = 1.e-6 * m_initialenergy;
+  double e = ekin0;
   // Total distance covered
   double dsum = 0.0;
   // Pool of unused energy
@@ -839,9 +817,9 @@ bool TrackSrim::Generate() {
     // at the start of the step.
     const double dedxem = DedxEM(e) * m_density;
     const double dedxhd = DedxHD(e) * m_density;
-    const double prange = Interpolate(e, m_energy, m_range);
-    double strlon = Interpolate(e, m_energy, m_longstraggle);
-    double strlat = Interpolate(e, m_energy, m_transstraggle);
+    const double prange = Interpolate(e, m_ekin, m_range);
+    double strlon = Interpolate(e, m_ekin, m_longstraggle);
+    double strlat = Interpolate(e, m_ekin, m_transstraggle);
 
     if (!m_useLongStraggle) strlon = 0;
     if (!m_useTransStraggle) strlat = 0;
@@ -856,18 +834,12 @@ bool TrackSrim::Generate() {
     double step;
     if (m_nsize > 0) {
       step = m_nsize * 1.e-6 * m_work / dedxem;
-    } else if (m_nsize < -1.5) {
-      step = m_tracklength;
     } else {
-      step = m_initialenergy / (0.5 * mxclus * 1.e6 * (dedxem + dedxhd));
+      const double ncls = m_maxclusters > 0 ? 0.5 * m_maxclusters : 100;
+      step = ekin0 / (ncls * (dedxem + dedxhd));
     }
     // Truncate if this step exceeds the length.
     bool finish = false;
-    if (dsum + step > m_tracklength) {
-      step = m_tracklength - dsum;
-      finish = true;
-      if (m_debug) std::cout << hdr << "Finish raised. Track length reached.\n";
-    }
     // Make an accurate integration of the energy loss over the step.
     double deem = 0., dehd = 0.;
     PreciseLoss(step, e, deem, dehd);
@@ -882,7 +854,7 @@ bool TrackSrim::Generate() {
       finish = true;
       if (m_debug) std::cout << hdr << "Finish raised. Track length reached.\n";
     } else {
-      stpmax = m_tracklength - dsum;
+      stpmax = tracklength - dsum;
     }
 
     // Ensure that this is larger than the minimum modelable step size.
@@ -917,8 +889,8 @@ bool TrackSrim::Generate() {
       } else {
         eloss = RndmEnergyLoss(e, deem, step);
       }
-      // Draw an actual energy loss for such a step.
     } else {
+      // Draw an actual energy loss for such a step.
       if (m_debug) std::cout << hdr << "Using existing step size.\n";
       eloss = RndmEnergyLoss(e, deem, step);
     }
@@ -944,28 +916,32 @@ bool TrackSrim::Generate() {
     // Check that the cluster is in an ionisable medium and within bounding box
     Medium* medium = NULL;
     if (!m_sensor->GetMedium(x, y, z, medium)) {
-      std::cerr << m_className << "::Generate:\n";
-      std::cerr << "    No medium at position ("
-		<< x << "," << y << "," << z << "), clustering incomplete.\n";
-      return false;
+      if (m_debug) {
+        std::cout << hdr << "No medium at position (" 
+                  << x << "," << y << "," << z << ").\n";
+      }
+      break;
     } else if (!medium->IsIonisable()) {
-      std::cerr << "::Generate:\n";
-      std::cerr << "    Medium at ("
-		<< x << "," << y << "," << z << ") is not ionisable, clustering incomplete.\n";
-      return false;
+      if (m_debug) {
+        std::cout << hdr << "Medium at (" 
+                  << x << "," << y << "," << z << ") is not ionisable.\n";
+      }
+      break;
     } else if (!m_sensor->IsInArea(x, y, z)) {
-      std::cerr << m_className << "::Generate:\n";
-      std::cerr << "    Cluster at ("
-		<< x << "," << y << "," << z << ") outside bounding box, clustering incomplete.\n";
-      return false;
+      if (m_debug) {
+        std::cout << hdr << "Cluster at (" 
+                  << x << "," << y << "," << z << ") outside bounding box.\n";
+      }
+      break;
     }
-
     // Add a cluster.
     cluster newcluster;
     newcluster.x = x;
     newcluster.y = y;
     newcluster.z = z;
-    if (m_fano < 0) {
+    newcluster.t = t0;
+    if (m_fano < Small) {
+      // No fluctuations.
       newcluster.electrons = int((eloss + epool) / (1.e-6 * m_work));
       newcluster.ec = m_work * newcluster.electrons;
     } else {
@@ -973,14 +949,14 @@ bool TrackSrim::Generate() {
       newcluster.electrons = 0.0;
       newcluster.ec = 0.0;
       while (true) {
-	//	if(newcluster.ec < 100) printf("ec = %g\n", newcluster.ec);
+        // if (newcluster.ec < 100) printf("ec = %g\n", newcluster.ec);
         const double ernd1 = RndmHeedWF(m_work, m_fano);
         if (ernd1 > ecl) break;
         newcluster.electrons++;
         newcluster.ec += ernd1;
         ecl -= ernd1;
       }
-      //      printf("ec = %g DONE\n", newcluster.ec);
+      // printf("ec = %g DONE\n", newcluster.ec);
       if (m_debug)
         std::cout << hdr << "EM + pool: " << 1.e6 * (eloss + epool) 
                   << " eV, W: " << m_work << " eV, E/w: " 
@@ -1001,20 +977,12 @@ bool TrackSrim::Generate() {
     // Keep track of the length and energy
     dsum += step;
     e -= eloss + dehd;
-    // Stop if the flag is raised
     if (finish) {
+      // Stop if the flag is raised
       if (m_debug) std::cout << hdr << "Finishing flag raised.\n";
       break;
-      // Stop if the distance has been reached
-    } else if (dsum > m_tracklength) {
-      if (m_debug) std::cout << hdr << "Reached track length.\n";
-      break;
-      // Single cluster
-    } else if (m_nsize < -1.5) {
-      if (m_debug) std::cout << hdr << "Single cluster requested.\n";
-      break;
+    } else if (e < ekin0 * 1.e-9) {
       // No energy left
-    } else if (e < m_initialenergy * 1.e-9) {
       if (m_debug) std::cout << hdr << "Energy exhausted.\n";
       break;
     }
@@ -1027,10 +995,10 @@ bool TrackSrim::Generate() {
                          << sigl << ", " << sigt1 << ", " << sigt2 << "\n";
     // Rotation angles to bring z-axis in line
     double theta, phi;
-    if (m_xdir * m_xdir + m_zdir * m_zdir <= 0) {
-      if (m_ydir < 0) {
+    if (xdir * xdir + zdir * zdir <= 0) {
+      if (ydir < 0) {
         theta = -HalfPi;
-      } else if (m_ydir > 0) {
+      } else if (ydir > 0) {
         theta = +HalfPi;
       } else {
         std::cerr << hdr << "\n    Zero step length; clustering abandoned.\n";
@@ -1038,8 +1006,8 @@ bool TrackSrim::Generate() {
       }
       phi = 0;
     } else {
-      phi = atan2(m_xdir, m_zdir);
-      theta = atan2(m_ydir, sqrt(m_xdir * m_xdir + m_zdir * m_zdir));
+      phi = atan2(xdir, zdir);
+      theta = atan2(ydir, sqrt(xdir * xdir + zdir * zdir));
     }
 
     // Update position
@@ -1047,23 +1015,23 @@ bool TrackSrim::Generate() {
     const double ct = cos(theta);
     const double sp = sin(phi);
     const double st = sin(theta);
-    x += step * m_xdir + cp * sigt1 - sp * st * sigt2 + sp * ct * sigl;
-    y += step * m_ydir + ct * sigt2 + st * sigl;
-    z += step * m_zdir - sp * sigt1 - cp * st * sigt2 + cp * ct * sigl;
+    x += step * xdir + cp * sigt1 - sp * st * sigt2 + sp * ct * sigl;
+    y += step * ydir + ct * sigt2 + st * sigl;
+    z += step * zdir - sp * sigt1 - cp * st * sigt2 + cp * ct * sigl;
 
     // (Do not) update direction
     if (false) {
-      m_xdir = step * m_xdir + cp * sigt1 - sp * st * sigt2 + sp * ct * sigl;
-      m_ydir = step * m_ydir + ct * sigt2 + st * sigl;
-      m_zdir = step * m_zdir - sp * sigt1 - cp * st * sigt2 + cp * ct * sigl;
-      double dnorm = sqrt(m_xdir * m_xdir + m_ydir * m_ydir + m_zdir * m_zdir);
+      xdir = step * xdir + cp * sigt1 - sp * st * sigt2 + sp * ct * sigl;
+      ydir = step * ydir + ct * sigt2 + st * sigl;
+      zdir = step * zdir - sp * sigt1 - cp * st * sigt2 + cp * ct * sigl;
+      double dnorm = sqrt(xdir * xdir + ydir * ydir + zdir * zdir);
       if (dnorm <= 0) {
         std::cerr << hdr << "\n    Zero step length; clustering abandoned.\n";
         return false;
       }
-      m_xdir = m_xdir / dnorm;
-      m_ydir = m_ydir / dnorm;
-      m_zdir = m_zdir / dnorm;
+      xdir = xdir / dnorm;
+      ydir = ydir / dnorm;
+      zdir = zdir / dnorm;
     }
     // Next cluster
     iter++;
@@ -1250,7 +1218,7 @@ bool TrackSrim::SmallestStep(const double ekin, double de, double step,
 }
 
 double TrackSrim::RndmEnergyLoss(const double ekin, const double de,
-                                 const double step) {
+                                 const double step) const {
   //   RNDDE  - Generates a random energy loss.
   //   VARIABLES : EKIN       : Kinetic energy [MeV]
   //            DE         : Mean energy loss over the step [MeV]
@@ -1365,8 +1333,8 @@ bool TrackSrim::GetCluster(double& xcls, double& ycls, double& zcls,
   xcls = m_clusters[m_currcluster].x;
   ycls = m_clusters[m_currcluster].y;
   zcls = m_clusters[m_currcluster].z;
+  tcls = m_clusters[m_currcluster].t;
 
-  tcls = 0;
   n = m_clusters[m_currcluster].electrons;
   e = m_clusters[m_currcluster].ec;
   extra = m_clusters[m_currcluster].kinetic;
@@ -1375,12 +1343,4 @@ bool TrackSrim::GetCluster(double& xcls, double& ycls, double& zcls,
   return true;
 }
 
-// Mandatory due to error in Track.hh
-// TODO: why can't we use this interface?
-bool TrackSrim::NewTrack(const double /*x0*/, const double /*y0*/,
-                         const double /*z0*/, const double /*t0*/,
-                         const double /*dx0*/, const double /*dy0*/,
-                         const double /*dz0*/) {
-  return false;
-}
 }
