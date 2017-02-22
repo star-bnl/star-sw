@@ -12,6 +12,10 @@ target_link_libraries(gasfile Garfield ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRAR
 add_executable(edep Heed/edep.C)
 target_link_libraries(edep Garfield ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 
+#### SRIM                   ############################
+add_executable(srim Srim/srim.C)
+target_link_libraries(srim Garfield ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
+
 #### Geat4GarfieldInterface ############################
 option(G4ANALYSIS_USE "use ROOT" ON)
 SET(CMAKE_MODULE_PATH /afs/cern.ch/sw/lcg/external/geant4/10.1/share/cmake/Modules)
@@ -70,7 +74,7 @@ endforeach()
 endif(Geant4_FOUND)
 #### Install                ############################
 if(Geant4_FOUND)
-INSTALL(TARGETS gasfile edep exampleGeant4Interface DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
+INSTALL(TARGETS gasfile edep srim exampleGeant4Interface DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
 else()
-INSTALL(TARGETS gasfile edep DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
+INSTALL(TARGETS gasfile edep srim DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
 endif(Geant4_FOUND)
