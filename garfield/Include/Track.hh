@@ -35,6 +35,11 @@ class Track {
   double GetMomentum() const { return m_mass * sqrt(m_beta2 / (1. - m_beta2)); }
   double GetKineticEnergy() const { return m_energy - m_mass; }
 
+  /// Get the charge of the projectile.
+  double GetCharge() const { return m_q; }
+  /// Get the mass [eV / c2] of the projectile.
+  double GetMass() const { return m_mass; }
+
   void SetSensor(Sensor* s);
 
   // Calculate a new track starting from (x0, y0, z0) at time t0

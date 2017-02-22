@@ -157,7 +157,7 @@ void HeedPhoton::physics_after_new_speed(void) {
   }
   const long qel = el_energy.get_qel();
   for (long nel = 0; nel < qel; nel++) {
-    vec vel;
+    vec vel = currpos.dir;
     if (nel == 0) {  // assumed it is photoelectron
 #ifdef SFER_PHOTOEL
       if (s_sfer_photoel == 1) {

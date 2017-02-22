@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.98 2017/02/15 15:30:19 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.99 2017/02/21 21:34:22 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -200,8 +200,6 @@ StPPVertexFinder::InitRun(int runnumber){
   mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
-  //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
-
   if(dateY<2006) {
     mMinAdcBemc   = 15;   // BTOW used calibration of maxt Et @ ~27Gev 
   } else {
@@ -221,7 +219,6 @@ StPPVertexFinder::InitRun(int runnumber){
     vertex3D->initRun();
   }
 
-  //gMessMgr->Message("","I") 
   LOG_INFO 
     << "PPV::cuts "
     <<"\n MinNumberOfFitPointsOnTrack = unused"
@@ -586,9 +583,9 @@ StPPVertexFinder::fit(StEvent* event) {
   if(kBemc)  hA[0]->Fill(6);
   if(kEemc)  hA[0]->Fill(7);
 
-  //............................................................
-  // ...................... search for multiple vertices 
-  //............................................................
+  // Select a method to find vertex candidates/seeds. The methods work using the
+  // `mTrackData` and `mDCAs` containers as input whereas the reconstructed
+  // vertices are put in the private container `mVertexData`
   switch (mSeedFinderType)
   {
   case SeedFinder_t::TSpectrum:
@@ -673,7 +670,6 @@ StPPVertexFinder::buildLikelihoodZ(){
     if(t.vertexID!=0) continue;
 
     if(t.anyMatch) n1++;
-    //  t.print();
     float z0   = t.zDca;  // z coordinate at DCA
     float ez   = t.ezDca; // error on z coordinate at DCA
     float ez2  = ez*ez;
@@ -681,7 +677,6 @@ StPPVertexFinder::buildLikelihoodZ(){
     int   j2   = hL->FindBin(z0+mMaxZradius+.1);
     float base = dzMax2/2/ez2;
     float totW = t.weight;
-    //  printf("Z0=%f ez=%f j1=%d j2=%d base=%f gPt/GeV=%.3f ctbW=%.3f\n",z0,ez,j1,j2,base,t.gPt,ctbW);
 
     for (int j=j1; j<=j2; j++) {
       float z  = hL->GetBinCenter(j);
@@ -691,9 +686,7 @@ StPPVertexFinder::buildLikelihoodZ(){
       La[j] += xx*totW;
       Ma[j] += 1.;
       Wa[j] += totW;
-      // printf("z=%f dz=%f  xx=%f\n",z,dz,xx);
     }
-    // break; // tmp , to get only one track
   }
 
  LOG_DEBUG<< Form("PPV::buildLikelihood() %d tracks w/ matched @ Lmax=%f",n1,hL->GetMaximum())<<endm;
@@ -803,9 +796,9 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 
   V.nUsedTrack = n1;  
 
-  bool validVertex = (V.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
+  V.isTriggered = (V.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
 
-  if (!validVertex) { // discrad vertex
+  if (!V.isTriggered) { // discrad vertex
     //no match tracks in this vertex, tag vertex ID in tracks differently
     //V.print(cout);
     LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
@@ -843,7 +836,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
       if (!track.mother) continue;
 
       // This code is adopted from StiStEventFiller::fillDca()
-      StiKalmanTrack tmpTrack = *track.mother;
+      StiKalmanTrack tmpTrack = *track.getMother<StiKalmanTrack>();
       StiKalmanTrackNode *tNode = tmpTrack.extrapolateToBeam();
 
       if (!tNode) continue;
@@ -951,11 +944,12 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
 }
 
  
-//-------------------------------------------------
-//-------------------------------------------------
-void 
-StPPVertexFinder::exportVertices(){
-
+/**
+ * Copies vertices from this finder private container to StEvent's one. No
+ * rejection criteria is applied during the copy.
+ */
+void StPPVertexFinder::exportVertices()
+{
   for (const VertexData &V : mVertexData)
   {
     StThreeVectorD r(V.r.x(),V.r.y(),V.r.z());
@@ -1008,8 +1002,6 @@ StPPVertexFinder::Finish() {
   }
 
   LOG_INFO << "StPPVertexFinder::Finish() done, seen eve=" <<mTotEve<< endm;
-  //  TString fileIn    = ((StBFChain*)StMaker::GetChain())->GetFileIn() ;
-  // LOG_INFO << "in="<<fileIn<< endm;
 }
 
 //-------------------------------------------------
@@ -1094,9 +1086,6 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
 //==========================================================
 bool  
 StPPVertexFinder::examinTrackDca(const StiKalmanTrack* track, TrackData &t){
-
-  //1 StiKalmanTrackNode* inNode=track->getInnerMostNode();
-  //1 cout <<"#e  track->getPseudoRapidity()="<<track->getPseudoRapidity()<<" track->getFitPointCount()="<<track->getFitPointCount()<<endl;
   
   // .......... test DCA to beam .............
   StiKalmanTrackNode * bmNode = track->getInnerMostNode();
@@ -1105,12 +1094,9 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack* track, TrackData &t){
 
   float rxy=sqrt(bmNode->x_g()*bmNode->x_g() + bmNode->y_g()*bmNode->y_g());
 
-  //1 cout<<"#e @beam global DCA x:"<< bmNode->x_g()<<" y:"<< bmNode->y_g()<<" z:"<< bmNode->z_g()<<" Rxy="<< rxy <<endl;
   if(rxy>mMaxTrkDcaRxy) return false;
   if( fabs(bmNode->z_g())> mMaxZrange )   return false ; 
  
-  //1 cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<bmNode->getX()<<" y="<<bmNode->getY()<<" +/- "<<sqrt(bmNode->getCyy())<<" z="<<bmNode->getZ()<<" +/- "<<sqrt(bmNode->getCzz())<<endl;
-
   t.zDca   = bmNode->getZ();
   t.ezDca  = sqrt(bmNode->getCzz());
   t.rxyDca = rxy;
@@ -1421,8 +1407,6 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   return true;
 }
 
-//==========================================================
-//==========================================================
 
 /**
  * Identifies tracks coming from post bunch crossing collisions.

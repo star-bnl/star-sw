@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <StMessMgr.h>
+#include "StEvent/StDcaGeometry.h"
 
 #include "TrackData.h"
 #include "VertexData.h"
@@ -18,6 +19,10 @@ TrackData::TrackData() {
   weight=1;
   zDca=ezDca=rxyDca=0;
   mother=0;
+  dca = nullptr;
+  mIdTruth = 0;
+  mQuality = 0;
+  mIdParentVx = 0;
 }
 
 
@@ -33,6 +38,19 @@ TrackData::matchVertex(VertexData &V, float dzMax) {
      LOG_DEBUG<< Form("PPV::matchTr2Ver VerID=%d  weight=%.2f anyM=%d anyV=%d  m: ctb=%d  bemc=%d eemc=%d tpc=%d dz=%.2f +/- %.2f\n",V.id,weight,anyMatch,anyVeto,mCtb,mBemc,mEemc,mTpc,dz,ezDca)<<endm;
 
   return ret;
+}
+
+
+double TrackData::calcChi2DCA(const VertexData &V) const
+{
+   double err2;
+   double vxyz[3];
+   V.r.GetXYZ(vxyz);
+
+   double dist = dca->thelix().Dca(vxyz, &err2);
+   double chi2 = dist*dist/err2;
+
+   return chi2;
 }
 
 
@@ -143,4 +161,19 @@ TrackData:: getTpcWeight(){
   if(mTpc>0) return Wmatch;  
   if(mTpc<0) return Wveto;
   return Wdunno;
+}
+
+
+void TrackData::print(ostream& os) const
+{
+   os << Form("vertID=%d track@z0=%.2f +/- %.2f gPt=%.3f, rxyDca: %.3f, idTruth: %d, qaTruth: %d, idParentVx: %d",
+	      vertexID, zDca, ezDca, gPt, rxyDca, mIdTruth, mQuality, mIdParentVx);
+
+   if (dca) {
+      os << Form(" dca: (%5.3f, %5.3f, %5.3f) +/- (imp: %5.3f, %5.3f)",
+            dca->origin().x(), dca->origin().y(), dca->origin().z(),
+            std::sqrt( dca->errMatrix()[0] ), std::sqrt( dca->errMatrix()[2] ) );
+   }
+
+   os << endl;
 }

@@ -98,7 +98,7 @@ Int_t StFpsQaMaker::Make() {
   int nfpsdatatot=0;
   int nh[mNQ][mNL]; memset(nh,0,sizeof(nh));
   int nhtot=0;
-  for (unsigned int i=0; i<nhit; i++){
+  for (int i=0; i<nhit; i++){
     int det = hits[i]->detectorId();
     if(det==15){
       nfpsdatatot++;
@@ -138,10 +138,16 @@ Int_t StFpsQaMaker::Make() {
       mNHit[q][l]->Fill(float(nh[q][l]));
     }
   }  
-  //total multiplicity by triggers
+
   mNHitTrg[64]->Fill(float(nhtot));
   unsigned long long one=1;
-  StFpsRawDaqReader* fpsraw=(StFpsRawDaqReader*)GetMaker("fpsRawDaqReader");
+  StFpsRawDaqReader* fpsraw=(StFpsRawDaqReader*)GetMaker("daqReader");
+  if(!fpsraw){
+    LOG_ERROR << "Canot find fpsRawDaqReader" << endm;
+    return 0;
+  }
+
+  //total multiplicity by triggers
   unsigned long long tmask = fpsraw->trgMask();
   for(int t=0; t<mNTRG; t++){
     if(tmask & (one<<t)) {
@@ -202,8 +208,11 @@ Int_t StFpsQaMaker::Finish(){
 ClassImp(StFpsQaMaker);
 
 /*
- * $Id: StFpsQaMaker.cxx,v 1.4 2017/02/18 18:28:21 akio Exp $
+ * $Id: StFpsQaMaker.cxx,v 1.5 2017/02/20 19:18:53 akio Exp $
  * $Log: StFpsQaMaker.cxx,v $
+ * Revision 1.5  2017/02/20 19:18:53  akio
+ * added check if we get StFpsRawDawReader
+ *
  * Revision 1.4  2017/02/18 18:28:21  akio
  * adding RCC-TCU check
  *

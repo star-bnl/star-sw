@@ -1235,7 +1235,7 @@ int MediumMagboltz::GetNumberOfPhotonCollisions(int& nElastic, int& nIonising,
   return nElastic + nIonising + nInelastic;
 }
 
-bool MediumMagboltz::GetGasNumberMagboltz(const std::string input,
+bool MediumMagboltz::GetGasNumberMagboltz(const std::string& input,
                                           int& number) const {
 
   if (input == "") {
