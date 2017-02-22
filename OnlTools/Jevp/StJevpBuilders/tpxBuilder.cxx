@@ -544,14 +544,21 @@ void tpxBuilder::event(daqReader *rdr)
       if(1) {    // inneficient!  write all of them :-)
 	FILE *f = fopen("/RTS/conf/handler/.l4_drift_velocity","w");
 	if(f) {
-	  fprintf(f, "%lf", drift_vel);
-	  fclose(f);
+	    fprintf(f, "%lf", drift_vel);
+	    fclose(f);
 	}
+	else {
+	    LOG(OPER, "Can't access drift velocity file!");
+	}
+
 	f = fopen("/RTS/conf/handler/.l4_drift_velocity_run","w");
 	if(f) {
 	  fprintf(f, "%d", run);
 	  fclose(f);
-	}	
+	}
+	else {
+	    LOG(OPER, "Can't access drift velocity run number file!");
+	}
       }
       
     }
