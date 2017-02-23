@@ -1070,6 +1070,13 @@ Bfc_st BFC[] = { // standard chains
    "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
+  {"B2017"  ,"","","ry2017,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Base chain for run 2017 data (tpc)",kFALSE},
+
+  {"pp2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   ,                      "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
 
   // TEST
   //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
