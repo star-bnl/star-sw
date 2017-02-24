@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.48 2016/05/24 20:26:48 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.49 2017/02/24 18:52:25 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.49  2017/02/24 18:52:25  dmitry
+ * new detector added - EPD
+ *
  * Revision 1.48  2016/05/24 20:26:48  dmitry
  * coverity - unreachable delete loop suppression
  *
@@ -429,6 +432,7 @@ addDbDomain(dbMtd,"mtd");
 addDbDomain(dbIst,"ist"); 
 addDbDomain(dbFps,"fps"); 
 addDbDomain(dbSst,"sst");
+addDbDomain(dbEpd,"epd");
 }
 
 ////////////////////////////////////////////////////////////////
