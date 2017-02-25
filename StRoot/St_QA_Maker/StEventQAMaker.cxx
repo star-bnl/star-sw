@@ -325,8 +325,10 @@ Int_t StEventQAMaker::Make() {
   }  // allTrigs
 
   // some identified StQAHistSetType values
-  if (run_year >=16) {
-    if (realData) histsSet = StQA_run15; // for now, everything from run14 on uses this set
+  if (run_year >=18) {
+    if (realData) histsSet = StQA_run17; // for now, everything from run17 on uses this set
+  } else if (run_year >=16) {
+    if (realData) histsSet = StQA_run15; // for now, everything from run15 on uses this set
   } else if (run_year >=15) {
     if (realData) histsSet = StQA_run14; // for now, everything from run14 on uses this set
   } else if (run_year >=14) {
@@ -370,6 +372,7 @@ Int_t StEventQAMaker::Make() {
       case (StQA_run13):
       case (StQA_run14):
       case (StQA_run15):
+      case (StQA_run17):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -944,7 +947,7 @@ void StEventQAMaker::MakeHistGlob() {
 				       Float_t(detInfo->numberOfPoints()));
       }
 
-      if (histsSet>=StQA_run14) {
+      if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
         // HFT Histograms
         hists->m_global_pxl_hit->Fill(map.numberOfHits(kPxlId));      // number of PIXEL hits per global track
         hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));      // number of IST hits per global track
@@ -964,7 +967,7 @@ void StEventQAMaker::MakeHistGlob() {
   hists->m_globtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
 
   // Normalizations
-  if (histsSet>=StQA_run14) {
+  if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
     Int_t NglobTrk = - hists->m_globtrk_fit_prob->GetEntries();
     hists->m_global_hft_hit->SetBinContent(0,NglobTrk);
     hists->m_global_pxl_hit->SetBinContent(0,NglobTrk);
@@ -1430,7 +1433,7 @@ void StEventQAMaker::MakeHistPrim() {
 					  Float_t(detInfo->numberOfPoints()));
 	}
 
-        if (histsSet>=StQA_run14 ){
+        if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
           // HFT Histograms
           hists->m_primary_pxl_hit->Fill(map.numberOfHits(kPxlId));   // number of PIXEL hits per primary track
           hists->m_primary_ist_hit->Fill(map.numberOfHits(kIstId));   // number of IST hits per primary track
@@ -1471,7 +1474,7 @@ void StEventQAMaker::MakeHistPrim() {
   hists->m_primglob_good->Fill((Float_t)n_prim_good/((Float_t)n_glob_good+1.e-10));
 
   // Normalizations
-  if (histsSet>=StQA_run14) {
+  if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
     Int_t NprimTrk = - hists->m_primglob_fit->GetEntries();
     hists->m_primary_hft_hit->SetBinContent(0,NprimTrk);
     hists->m_primary_pxl_hit->SetBinContent(0,NprimTrk);
@@ -2812,8 +2815,11 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.128 2016/05/13 22:04:49 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.129 2017/02/25 03:24:30 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.129  2017/02/25 03:24:30  genevb
+// Run 17: remove HFT
+//
 // Revision 2.128  2016/05/13 22:04:49  genevb
 // Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
 //
