@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.27 2015/07/17 19:09:03 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.28 2017/02/25 03:24:30 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.28  2017/02/25 03:24:30  genevb
+// Run 17: remove HFT
+//
 // Revision 2.27  2015/07/17 19:09:03  genevb
 // SSD copied for SST, and HFT histogams use SST now too
 //
@@ -103,7 +106,8 @@ enum StQAHistSetType {
   StQA_run12 = 7,
   StQA_run13 = 8,
   StQA_run14 = 9,
-  StQA_run15 = 10
+  StQA_run15 = 10,
+  StQA_run17 = 11
   // when adding more, search for StQAHistSetType for other changes
 };
 
@@ -145,7 +149,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.27 2015/07/17 19:09:03 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.28 2017/02/25 03:24:30 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
