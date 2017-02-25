@@ -84,6 +84,26 @@ Int_t StFpsQaMaker::Init(){
 Int_t StFpsQaMaker::Make() {
   StEvent* eventPtr=0;
   mFmsCollectionPtr=0;
+
+  //Getting StFpsRawDaqReader and TriggerData
+  StFpsRawDaqReader* fpsraw=(StFpsRawDaqReader*)GetMaker("daqReader");
+  if(!fpsraw){
+    LOG_ERROR << "Canot find fpsRawDaqReader" << endm;
+    return 0;
+  }
+  StTriggerData* trg = fpsraw->trgdata();
+  if(!trg){
+    LOG_ERROR << "Canot find Trigger Data" << endm;
+    return 0;
+  }
+  //check if FPS was readout for this event
+  unsigned int detmask=trg->getTrgDetMask();
+  //printf("TrgDetMask = %4x\n",detmask);
+  if(! ((detmask >> 10) & 0x1)){
+    //printf("No FPS/FPOST readout for this event\n");
+    return kStOK;
+  }
+
   eventPtr= (StEvent*)GetInputDS("StEvent");  
   if(!eventPtr) { LOG_INFO << "No StEvent found" << endm;}
   else{ mFmsCollectionPtr=eventPtr->fmsCollection();} 
@@ -139,15 +159,9 @@ Int_t StFpsQaMaker::Make() {
     }
   }  
 
+  //total multiplicity by triggers
   mNHitTrg[64]->Fill(float(nhtot));
   unsigned long long one=1;
-  StFpsRawDaqReader* fpsraw=(StFpsRawDaqReader*)GetMaker("daqReader");
-  if(!fpsraw){
-    LOG_ERROR << "Canot find fpsRawDaqReader" << endm;
-    return 0;
-  }
-
-  //total multiplicity by triggers
   unsigned long long tmask = fpsraw->trgMask();
   for(int t=0; t<mNTRG; t++){
     if(tmask & (one<<t)) {
@@ -157,36 +171,31 @@ Int_t StFpsQaMaker::Make() {
   }
   //printf("NFMSHIT=%4d NFPSHITTOT=%4d NFPSHIT(xing=0)=%d\n",nhit,nfpsdatatot,nfpsdata); 
 
-  StTriggerData* trg = fpsraw->trgdata();
-  if(trg){
-    unsigned int tcu=trg->tcuCounter();
-    unsigned int rfps=fpsraw->rccFps();
-    unsigned int dfps=rfps-tcu;
-    if(rfps==0){
-      dfps=0;
-    }else if(rfps< tcu){
-      const long long one=1;
-      const long long m=one<<32;
-      long long r=rfps;
-      long long t=tcu;
-      dfps=(unsigned int)(r+m-t);
-    }
-    unsigned int rfpo=fpsraw->rccFpost();
-    unsigned int dfpo=rfpo-tcu;
-    if(rfpo==0){
-      dfpo=0;
-    }else if(rfps < tcu){
-      const long long one=1;
-      const long long m=one<<32;
-      long long r=rfpo;
-      long long t=tcu;
-      dfpo=(unsigned int)(r+m-t);
-    }
-    printf("FPS RCC  =%10d  TCU=%10d  DIFF=%10d     ",rfps,tcu,dfps);
-    printf("FPOST RCC=%10d  TCU=%10d  DIFF=%10d\n",rfpo,tcu,dfpo);
-  }else{
-    printf("No StTriggerData found\n");
+  unsigned int tcu=trg->tcuCounter();
+  unsigned int rfps=fpsraw->rccFps();
+  unsigned int dfps=rfps-tcu;
+  if(rfps==0){
+    dfps=0;
+  }else if(rfps< tcu){
+    const long long one=1;
+    const long long m=one<<32;
+    long long r=rfps;
+    long long t=tcu;
+    dfps=(unsigned int)(r+m-t);
   }
+  unsigned int rfpo=fpsraw->rccFpost();
+  unsigned int dfpo=rfpo-tcu;
+  if(rfpo==0){
+    dfpo=0;
+  }else if(rfps < tcu){
+    const long long one=1;
+    const long long m=one<<32;
+    long long r=rfpo;
+    long long t=tcu;
+    dfpo=(unsigned int)(r+m-t);
+  }
+  printf("FPS RCC  =%10d  TCU=%10d  DIFF=%10d     ",rfps,tcu,dfps);
+  printf("FPOST RCC=%10d  TCU=%10d  DIFF=%10d\n",rfpo,tcu,dfpo);
 
   return kStOK;
 };
@@ -208,8 +217,11 @@ Int_t StFpsQaMaker::Finish(){
 ClassImp(StFpsQaMaker);
 
 /*
- * $Id: StFpsQaMaker.cxx,v 1.5 2017/02/20 19:18:53 akio Exp $
+ * $Id: StFpsQaMaker.cxx,v 1.6 2017/02/25 04:43:08 akio Exp $
  * $Log: StFpsQaMaker.cxx,v $
+ * Revision 1.6  2017/02/25 04:43:08  akio
+ * added checking for trgDetMask for sparse readout (skipping event when FPS was NOT readout)
+ *
  * Revision 1.5  2017/02/20 19:18:53  akio
  * added check if we get StFpsRawDawReader
  *
