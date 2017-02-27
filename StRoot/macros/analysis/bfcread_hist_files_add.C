@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.22 2016/06/10 15:51:47 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.23 2017/02/27 21:41:36 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.23  2017/02/27 21:41:36  genevb
+// StEvent.so now depends on StBichsel.so
+//
 // Revision 2.22  2016/06/10 15:51:47  genevb
 // Fix memory leak
 //
@@ -113,6 +116,7 @@ void bfcread_hist_files_add(
   gSystem->Load("libStDb_Tables");
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");
   gSystem->Load("StPmdUtil");

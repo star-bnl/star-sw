@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add.C,v 3.4 2013/03/14 17:28:31 genevb Exp $
+// $Id: bfcread_hist_prefixes_add.C,v 3.5 2017/02/27 21:41:36 genevb Exp $
 // $Log: bfcread_hist_prefixes_add.C,v $
+// Revision 3.5  2017/02/27 21:41:36  genevb
+// StEvent.so now depends on StBichsel.so
+//
 // Revision 3.4  2013/03/14 17:28:31  genevb
 // StTpcDb.so now depends on StEvent.so
 //
@@ -60,6 +63,7 @@ void bfcread_hist_prefixes_add(
   gSystem->Load("libtpc_Tables");
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");
   gSystem->Load("StPmdUtil");
