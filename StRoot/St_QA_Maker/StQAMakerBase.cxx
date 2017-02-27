@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.47 2016/05/13 22:04:49 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.48 2017/02/25 03:24:30 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.48  2017/02/25 03:24:30  genevb
+// Run 17: remove HFT
+//
 // Revision 2.47  2016/05/13 22:04:49  genevb
 // Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
 //
@@ -279,7 +282,7 @@ Int_t StQAMakerBase::Make() {
   // histograms from MTD in StEvent
   if (histsSet>=StQA_run12all) MakeHistMTD(); 
   // histograms from HFT (PXL, IST, SST) in StEvent
-  if (histsSet>=StQA_run14) {
+  if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
     MakeHistHFT(); 
     MakeHistPXL(); 
     MakeHistIST(); 
@@ -338,6 +341,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     // any new StQAHistSetType values
+    case (StQA_run17) :
     case (StQA_run15) :
     case (StQA_run14) :
     case (StQA_run13) :

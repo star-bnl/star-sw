@@ -1117,16 +1117,20 @@ Bfc_st BFC[] = { // standard chains
    "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
+  {"B2017"  ,"","","ry2017,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Base chain for 2017 ITTF (tpc)",kFALSE},
+  {"P2017","" ,"", "B2017,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   ,                                                         "","","Production chain for 2017 data",kFALSE},
 
+  {"pp2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   ,                      "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // TEST
   //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
   // ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
   //{"pp2013X","" ,"",
   // "B2013_X,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
   // "","",                "Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
-
-
-
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},

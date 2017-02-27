@@ -79,7 +79,7 @@ use RunDAQ;
 use CRSQueues;
 
 
-$ThisYear = 2016;                 # Block to consider. Completely artificial
+$ThisYear = 2017;                 # Block to consider. Completely artificial
                                   # and used to preserve older options in if
                                   # block along with current option.
 $HPSS     = 1;                    # turn to 0 for UNIX staging only
@@ -480,7 +480,8 @@ if ( $ThisYear == 2005 ){
 	  $ThisYear == 2013 || 
 	  $ThisYear == 2014 ||
           $ThisYear == 2015 ||
-          $ThisYear == 2016 ) {
+          $ThisYear == 2016 ||  
+          $ThisYear == 2017 ) {
     $TREEMODE= 1;
     $LIB     = "dev";
 
@@ -596,6 +597,9 @@ if ( $ThisYear == 2005 ){
    } elsif ($ThisYear == 2016) {
         $DCHAIN{"AuAu"} = "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 	$DCHAIN{"DAu"} = "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
+
+   } elsif ($ThisYear == 2017) {
+       $DCHAIN{"PPPP"} = "pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } else {
         $DCHAIN{"PPPP"} =
@@ -1991,7 +1995,7 @@ my $NEVT = $MAXEVT!=0?$MAXEVT:$NUMEVT ;
     if( open(FO,">$jfile") ){
 	if($calib ne ""){ 
 
-	    $chain = "LanaDVtpx,ITTF,CorrX,OSpaceZ2,OGridLeak3D";
+	    $chain = "LanaDVtpx,ITTF,StiCA,CorrX,OSpaceZ2,OGridLeak3D";
 	    # ------------------------------------------------------------------
 	    # THIS IS A CALIBRATION PRE-PASS -- IT REQUIRES AN ADDITIONAL INPUT
 	    print FO <<__EOF__;

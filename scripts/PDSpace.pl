@@ -24,8 +24,8 @@ $MAIN  = "/star/data";                                   # default base path
 # An array of disks to add to the $MAIN pattern - entries can also be wildcarded patterns
 # which will be used in a glob() statement or sunngle disk entries
 @ADDD  = (
-          "/star/institutions/*",                        
-          "/star/subsys/*",                              
+          "/star/institutions/*",
+          "/star/subsys/*",
 	  "/star/u",
 	  "/star/simu",
 	  "/star/grid",
@@ -33,12 +33,12 @@ $MAIN  = "/star/data";                                   # default base path
 	  "/star/rcf",
 	  "/star/xrootd",
 	  "/star/starlib",
-          "/gpfs01/star/pwg_tasks" 
+          "/gpfs01/star/pwg_tasks"
           );
 
 # The mechanism below will gradually supplement the ADDD mechanism
 # Format will be disk => group it belongs to. Tis logic is not
-# done/complete or implemented. 
+# done/complete or implemented.
 %DGRP = (
           "/star/u"                => 1,
           "/gpfs01/star/pwg"       => 1,
@@ -59,7 +59,7 @@ $MAIN  = "/star/data";                                   # default base path
 
           "/gpfs01/star/data*"     => 4, # a link reading will be done, duplicate removed
           "/gpfs03/star/data*"     => 4, # a link reading will be done, duplicate removed
-          "/star/data*"            => 4, # so order matters 
+          "/star/data*"            => 4, # so order matters
 
   	  "/star/simu"             => 5,
 	  "/star/grid"             => 5,
@@ -69,7 +69,7 @@ $MAIN  = "/star/data";                                   # default base path
 	  "/star/starlib"          => 5
          );
 
-%TITLES = ( 
+%TITLES = (
             1 => "General space for users",
 	    2 => "Project reserved spaces",
 	    3 => "Institution disk space",
@@ -82,7 +82,7 @@ $MAIN  = "/star/data";                                   # default base path
 # Associative array if aliases - aliases can be used for sorting
 # If an alias also A->B exists as B->, then A is considered merged
 # wih A.
-%ALIAS = (                                               
+%ALIAS = (
           "/star/data01" => "/gpfs01/star/pwg",
           "/star/data02" => "/star/data01   SKIP",      # merged
 
@@ -91,15 +91,15 @@ $MAIN  = "/star/data";                                   # default base path
           "/star/data05" => "/gpfs01/star/scratch",
 
           "/star/data06" => "/gpfs01/star/subsysg",
-          "/star/data07" => "/star/data06 SKIP",        # merged 
+          "/star/data07" => "/star/data06 SKIP",        # merged
 
           "/star/data18" => "/gpfs01/star/data18",      # merged several disks together 2016/01/14
           "/star/data25" => "/gpfs01/star/data19",      # merged 2016/01/11
           "/star/data40" => "/gpfs01/star/data20",      # merged 2016/01/11
-          "/star/data41" => "SKIP",      
+          "/star/data41" => "SKIP",
           "/star/data51" => "SKIP",
           "/star/data52" => "SKIP",
-          "/star/data43" => "/gpfs01/star/data21", 
+          "/star/data43" => "/gpfs01/star/data21",
 
           "/star/rcf"    => "/gpfs01/star/rcf",
           "/star/xrootd" => "/gpfs01/star/XROOTD",
@@ -113,9 +113,10 @@ $MAIN  = "/star/data";                                   # default base path
 # matters (the first encountered will stop parsing). All sizes will be reduced by the
 # replication factor
 %REPLICATION = (
-          "/gpfs01/star/XROOTD" => 1,
-          "/gpfs01/"            => 2,
-          "/gpfs03/"            => 2,
+          "/gpfs01/star/XROOTD" =>  1,
+          "/gpfs01/star/scratch"=>  1,
+          "/gpfs01/"            =>  2,
+          "/gpfs03/"            =>  2,
           );
 
 
@@ -131,7 +132,7 @@ $DINFO = "(check '<A HREF=\"$SpiderControl\">nova</A>' Spiders)"; # Many tools m
 $DINFO =~ s/%%RELP%%/public/;
 
 
-@COLORS = ("#7FFFD4","#40E0D0","#00DEFF","#87CEFA","#CCCCEE","#D8BFD8","#DB7093"); #"#D02090"); 
+@COLORS = ("#7FFFD4","#40E0D0","#00DEFF","#87CEFA","#CCCCEE","#D8BFD8","#DB7093"); #"#D02090");
 
 $RED    = "#B03060";
 
@@ -147,7 +148,7 @@ $UPGO = "<A HREF=\"#TOP\"><IMG ALT=\"[TOP]\"  BORDER=\"0\" SRC=\"/icons/up.gif\"
 my %BREAK;
 $BREAK{"01"}   =  "User Space and Reserved Usage Space Area";
 $BREAK{"06"}   =  "Assigned TEMPORARY space for sub-systems and Core-Activities";
-$BREAK{"23"}   =  "Data Production Disks";
+$BREAK{"19"}   =  "Data Production Disks";
 
 # Addiitonal header based on patterns
 $BHEAD{"inst"} =  "Institution or specialized usage disks";
@@ -220,7 +221,7 @@ foreach $disk (@DISKS){
 	# In principle, hard-coding Business Logic is not the greatest idea
 	# but a transiiton in 2014 made this block likely the esaiest way
 	# to simplify ...
-	if ( $disk !~ /\emn/){ 
+	if ( $disk !~ /\emn/){
 	    my $d="/gpfs01/star/i_$2";
 	    if ( -d $d ){
 		$ALIAS{$disk} = $d; # it is re-used later
@@ -535,7 +536,7 @@ foreach $disk ( sort keys %DINFO){
 	$FCRef = "<A HREF=\"#FCREF\">$FCRef</A>";
     }
 
-    # if a readme exists, shows it 
+    # if a readme exists, shows it
     if ( defined($README{$disk}) ){
 	$dskinfo = $README{$disk}.$items[4];
     } else {

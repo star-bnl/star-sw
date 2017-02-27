@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.76 2016/05/25 03:59:44 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.77 2017/02/25 03:24:30 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.77  2017/02/25 03:24:30  genevb
+// Run 17: remove HFT
+//
 // Revision 2.76  2016/05/25 03:59:44  genevb
 // fix uninit members
 //
@@ -916,7 +919,7 @@ void StQABookHist::BookHist(Int_t hSet){
   if (histsSet==StQA_MC) BookHistEval();
   if (histsSet>=StQA_run8) BookHistTOF();
   if (histsSet>=StQA_run12all) BookHistMTD();
-  if (histsSet>=StQA_run14){
+  if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
     BookHistPXL();
     BookHistIST();
     BookHistHFT();
@@ -1890,7 +1893,7 @@ void StQABookHist::BookHistPoint(){
     m_pnt_svtLaserDiff->Rebin(0,"Laser 1");
     m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
   }
-  if (silHists || histsSet>=StQA_run14) {
+  if (silHists || (histsSet>=StQA_run14 && histsSet<StQA_run17)) {
     m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
     m_pnt_xyS->SetStats(kFALSE);
     m_pnt_xyS->SetXTitle("x [cm]");
@@ -1898,7 +1901,7 @@ void StQABookHist::BookHistPoint(){
 
     // for run >= 14, change the title of the histogram with vertex detector hit distribution in x-y
     // FIXME: move this part to BookHistPoint and pass histsSet there?
-    if (histsSet>=StQA_run14)
+    if (histsSet>=StQA_run14 && histsSet<StQA_run17)
       m_pnt_xyS->SetTitle("PIXEL, IST, SSD: Distribution of hits in XY");
   }
   // Now using polar coords (lego didn't work well because of inner radius and colored zero)
@@ -1939,7 +1942,7 @@ void StQABookHist::BookHistPoint(){
     m_pnt_sizeSSD->SetStats(kFALSE);
     m_pnt_eSSD = QAH::H1F("QaPointESSD","SSD: log10(energy) of hits",90,-5,-2);
   }
-  if (histsSet>=StQA_run14) {
+  if (histsSet>=StQA_run14 && histsSet<StQA_run17) {
     m_pnt_sst     = QAH::H1F("QaPointSst",  "point: # hits sst ",200, 0.,5000.);
     m_pnt_phiSST  = QAH::H1F("QaPointPhiSST","SST: #phi of hits (per event)",36,0,360);
     m_pnt_lwSST   = QAH::H2F("QaPointLWSST","SST: wafer id vs ladder id (per event)",20,0.5,20.5,16,0.5,16.5);
