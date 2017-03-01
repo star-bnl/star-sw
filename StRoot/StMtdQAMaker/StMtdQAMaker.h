@@ -53,6 +53,7 @@ class StMtdQAMaker : public StMaker {
   void     setCosmic(const Bool_t c);
   void     setFillQATree(const Bool_t fill = kFALSE);
   void     setOutTreeFileName(const Char_t *out);
+  void     setVertexMode(const Int_t mode);
   void     setMaxVtxZ(const Double_t max);
   void     setMaxVtxDz(const Double_t max);
   void     setTrackPtLimits(const Double_t min, const Double_t max);
@@ -133,7 +134,6 @@ class StMtdQAMaker : public StMaker {
     // vertex information
     Float_t  vertexX, vertexY, vertexZ;
     Float_t  vpdVz;
-    Float_t  bestVz;
 
     // VPD information
     Int_t  pre;
@@ -151,6 +151,7 @@ class StMtdQAMaker : public StMaker {
 
     // MTD information
     Double_t mtdTriggerTime[2];  // trigger time
+
     //== MTD raw hits
     Int_t    nMtdRawHits;
     Int_t    mtdRawHitFlag[kMaxHits];
@@ -159,6 +160,7 @@ class StMtdQAMaker : public StMaker {
     Int_t    mtdRawHitChan[kMaxHits];     //1-120
     Double_t mtdRawHitTdc[kMaxHits];
     Double_t mtdRawHitTimdDiff[kMaxHits];
+
     //== MTD hits
     Int_t    nMtdHits;
     Bool_t   isGoodMtdHit[kMaxHits];
@@ -172,8 +174,10 @@ class StMtdQAMaker : public StMaker {
     Double_t mtdHitTrigTime[kMaxHits];
     Double_t mtdHitPhi[kMaxHits];
     Double_t mtdHitZ[kMaxHits];
+
     //== matched tracks
     Bool_t   isMatched[kMaxHits];
+    Bool_t   isMatchedPrim[kMaxHits];
     Int_t    nMatchMtdHits;
     Double_t mtdMatchTrkPathLength[kMaxHits];
     Double_t mtdMatchTrkTof[kMaxHits];
@@ -222,6 +226,8 @@ class StMtdQAMaker : public StMaker {
   Bool_t           mIsCosmic;                                  // Flag of cosmic or physics data
   StEvent          *mStEvent;                                  // Pointer to StEvent
   StMuDst          *mMuDst;                                    // Pointer to MuDst event
+  Int_t            mVertexMode;                                // 0 - default; 1 - highest-ranked one close to VPD; 2 - cloest to VPD
+  Int_t            mVertexIndex;                               // Index of selected vertex
   Int_t            mRunId;                                     // Run number
   Int_t            mRunCount;                                  // Keep track of number of runs processed
   StTriggerData    *mTriggerData;                              // Pointer to the trigger data
@@ -308,10 +314,12 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhMtdMatchPhi;                             // Correlation between MTD hit phi and projected phi of matched tracks
   TH2F             *mhMtdMatchDzVsChan;                        // dz vs global channel id
   TH2F             *mhMtdMatchDyVsChan;                        // dy vs global channel id
+  TH2F             *mhMtdMatchDtofVsChan;                      // dTof vs global channel id 
   TH2F             *mhMtdMatchLocalyVsChan;                    // Projected y of matched tracks in local coordinates vs global channel id
   TH2F             *mhMtdMatchLocalzVsChan;                    // Projected z of matched tracks in local coordinates vs global channel id
   TH2F             *mhMtdMatchDzVsPt;                          // dz vs track pt
   TH2F             *mhMtdMatchDyVsPt;                          // dy vs track pt
+  TH2F             *mhMtdMatchDtofVsPt;                        // dTof vs track pt
   TH1F             *mhMtdMatchTrkPt;                           // pt distribution of matched tracks to MTD hits
   TH2F             *mhMtdMatchTrkPhiEta;                       // phi vs eta of matched tracks at primary vertex
   TH2F             *mhMtdMatchTrkDedx;                         // de/dx distribution of matched tracks to MTD hits
@@ -325,10 +333,13 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhTofMthTrkLocaly;                         // Projected y in TOF local coordinate for tracks matched to TOF hits
   TH2F             *mhTofMthTrkLocalz;                         // Projected z in TOF local coordinate for tracks matched to TOF hits
 
-  // global T0 alignment
-  TH2F             *mhMtdDtofVsChannel;                        // dTof of primary tracks vs channel for global alignment
-  TH2F             *mhMtdTofVsChannel;                         // MTD time of primary tracks vs channel
-  TH2F             *mhMtdExpTofVsChannel;                      // TPC time of primary tracks vs channel
+  // check calibration
+  TH2F             *mhPrimDzVsChan;                             // dz vs global channel id (primary track)
+  TH2F             *mhPrimDyVsChan;                             // dy vs global channel id (primary track)
+  TH2F             *mhPrimDtofVsChan;                           // dTof vs global channel id (primary track)
+  TH2F             *mhPrimMtdTofVsChan;                         // MTD time vs global channel id (primary track)
+  TH2F             *mhPrimExpTofVsChan;                         // TPC time vs global channel id (primary track)
+
 
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; 
@@ -344,6 +355,7 @@ inline void StMtdQAMaker::setOutTreeFileName(const Char_t *out)    { mOutTreeFil
 inline void StMtdQAMaker::setPrintMemory(const Bool_t pMem)        { mPrintMemory = pMem;      }
 inline void StMtdQAMaker::setPrintCpu(const Bool_t pCpu)           { mPrintCpu = pCpu;         }
 inline void StMtdQAMaker::setPrintConfig(const Bool_t print)       { mPrintConfig = print;     }
+inline void StMtdQAMaker::setVertexMode(const Int_t mode)          { mVertexMode = mode;       }
 inline void StMtdQAMaker::setMaxVtxZ(const Double_t max)           { mMaxVtxZ = max;           }
 inline void StMtdQAMaker::setMaxVtxDz(const Double_t max)          { mMaxVtxDz = max;          }
 inline void StMtdQAMaker::setTrigTimeCut(const Bool_t cut)         { mTrigTimeCut = cut;       }

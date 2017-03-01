@@ -58,7 +58,7 @@ ClassImp(StMtdQAMaker)
 //_____________________________________________________________________________
 StMtdQAMaker::StMtdQAMaker(const Char_t *name) : 
   StMaker(name),
-  mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mRunId(-1), mRunCount(0), mTriggerData(0),
+  mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mVertexMode(0), mVertexIndex(-1), mRunId(-1), mRunCount(0), mTriggerData(0),
   mMuDstIn(kFALSE), mPrintMemory(kFALSE), mPrintCpu(kFALSE), mPrintConfig(kFALSE),
   mTriggerIDs(0),
   mMaxVtxZ(100.), mMaxVtxDz(5.),
@@ -131,10 +131,12 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mhMtdMatchPhi            = NULL;
   mhMtdMatchDzVsChan       = NULL;
   mhMtdMatchDyVsChan       = NULL;
+  mhMtdMatchDtofVsChan     = NULL;
   mhMtdMatchLocalyVsChan   = NULL;
   mhMtdMatchLocalzVsChan   = NULL;
   mhMtdMatchDzVsPt         = NULL;
   mhMtdMatchDyVsPt         = NULL;
+  mhMtdMatchDtofVsPt       = NULL;
   mhMtdMatchTrkPt          = NULL;
   mhMtdMatchTrkPhiEta      = NULL;
   mhMtdMatchTrkDedx        = NULL;
@@ -148,9 +150,11 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mhTofMthTrkLocaly        = NULL;
   mhTofMthTrkLocalz        = NULL;
 
-  mhMtdDtofVsChannel       = NULL;
-  mhMtdTofVsChannel        = NULL;
-  mhMtdExpTofVsChannel     = NULL;
+  mhPrimDzVsChan           = NULL;
+  mhPrimDyVsChan           = NULL;
+  mhPrimDtofVsChan         = NULL;
+  mhPrimMtdTofVsChan       = NULL;
+  mhPrimExpTofVsChan       = NULL;
 }
  
 //_____________________________________________________________________________
@@ -392,11 +396,7 @@ Int_t StMtdQAMaker::processStEvent()
   mMtdData.vpdVz        = vpdz;
 
   // find the primary vertex that is closest to the VPD vz
-  if(TMath::Abs(mMtdData.vpdVz)>500)
-    {
-      mMtdData.bestVz = mMtdData.vertexZ;
-    }
-  else
+  if(TMath::Abs(mMtdData.vpdVz)<200)
     {
       Int_t nPrim = mStEvent->numberOfPrimaryVertices();
       Double_t min_dz = 999;
@@ -412,10 +412,6 @@ Int_t StMtdQAMaker::processStEvent()
 	      index = i;
 	    }
 	}
-      if(index>-1)
-	mMtdData.bestVz = mStEvent->primaryVertex(index)->position().z();
-      else
-	mMtdData.bestVz = mMtdData.vertexZ;
     }
 
   // MTD trigger time
@@ -667,23 +663,87 @@ Int_t StMtdQAMaker::processMuDst()
     }
   mhEventTrig->Fill(1.5);
 
-  // Cut on vertex z
+  //========== Select vertex ==========
+  mVertexIndex = -1;
+  Int_t nPrim = mMuDst->numberOfPrimaryVertices();
+  if(nPrim == 0) 
+    {
+      LOG_WARN << "No reconstructed vertex in MuDst... " << endm;
+      return kStWarn;
+    }
+
+  // start time & VPD vz
+  StBTofHeader *tofHeader = mMuDst->btofHeader();
+  Double_t tStart = -999;
+  Double_t vpdz   = -999;
+  if(tofHeader)
+    {
+      tStart = tofHeader->tStart();
+      vpdz   = tofHeader->vpdVz();
+    }
+  mMtdData.tofStartTime = tStart;
+  mMtdData.vpdVz        = vpdz;
+
+  Int_t index1 = -1, index2 = -1;
+  if(tofHeader)
+    {
+      // constrain vertex with VPD
+      Double_t min_dz = 999;
+      for(Int_t i=0; i<nPrim; i++)
+	{
+	  StMuPrimaryVertex *vertex = mMuDst->primaryVertex(i);
+	  Double_t dz = TMath::Abs(vertex->position().z()-mMtdData.vpdVz);
+	  if(dz<mMaxVtxDz && index1==-1)
+	    {
+	      index1 = i;
+	    }
+	  if(dz<min_dz)
+	    {
+	      min_dz = dz;
+	      index2 = i;
+	    }
+	}
+      mhVtxIndClosestVsRank->Fill(index2,index1);
+
+      double default_z = mMuDst->primaryVertex(0)->position().z();
+      mhVtxZvsVpdVzDefault->Fill(default_z, mMtdData.vpdVz);
+      mhVtxZDiffDefault->Fill(default_z - mMtdData.vpdVz);
+      if(index2>-1)
+	{
+	  double cloest_z = mMuDst->primaryVertex(index2)->position().z();
+	  mhVtxZvsVpdVzClosest->Fill(cloest_z, mMtdData.vpdVz);
+	  mhVtxZDiffClosest->Fill(cloest_z - mMtdData.vpdVz);
+	}
+    }
+  
+  if(mVertexMode==0) mVertexIndex = 0;
+  else if(mVertexMode==1) mVertexIndex = index1;
+  else if(mVertexMode==2) mVertexIndex = index2;
+  else
+    {
+      LOG_WARN << "No vertex mode is set. Use default vertex!" << endm;
+      mVertexIndex = 0;
+    }
   StMuPrimaryVertex* priVertex = NULL;
   if(!mIsCosmic)
     {
-      priVertex = mMuDst->primaryVertex();
+      if(mVertexMode<0) return kStOK;
+      priVertex = mMuDst->primaryVertex(mVertexMode);
       if(!priVertex) return kStWarn;
       StThreeVectorF verPos = priVertex->position();
       mMtdData.vertexX = verPos.x();
       mMtdData.vertexY = verPos.y();
       mMtdData.vertexZ = verPos.z();
+      if(TMath::Abs(mMtdData.vertexZ)>mMaxVtxZ) return kStOK;
+      if(fabs(mMtdData.vpdVz-mMtdData.vertexZ)>mMaxVtxDz) return kStOK;
     }
   mhEventTrig->Fill(2.5);
   mhVertexZ->Fill(mMtdData.vertexZ);
   mhVertexXY->Fill(mMtdData.vertexX,mMtdData.vertexY);
   mhVertexXZ->Fill(mMtdData.vertexZ,mMtdData.vertexX);
   mhVertexYZ->Fill(mMtdData.vertexZ,mMtdData.vertexY);
-   
+  //====================================
+
   mMtdData.runId   = mMuDst->event()->runId();
   mMtdData.eventId = mMuDst->event()->eventId();
   mRunId = mMtdData.runId;
@@ -701,57 +761,6 @@ Int_t StMtdQAMaker::processMuDst()
     }
   mMtdData.nTrigger = nTrigger;
   mTriggerData = const_cast<StTriggerData*>(mMuDst->event()->triggerData());
-
-  // start time & VPD vz
-  StBTofHeader *tofHeader = mMuDst->btofHeader();
-  Double_t tStart = -999;
-  Double_t vpdz   = -999;
-  if(tofHeader)
-    {
-      tStart = tofHeader->tStart();
-      vpdz   = tofHeader->vpdVz();
-    }
-  mMtdData.tofStartTime = tStart;
-  mMtdData.vpdVz        = vpdz;
-
-  // find the primary vertex that is closest to the VPD vz
-  Int_t nPrim = mMuDst->numberOfPrimaryVertices();
-  Double_t min_dz = 999;
-  Int_t index = -1, index2 = -1;
-  LOG_DEBUG << nPrim << " primary vertices in MuDst" << endm;
-  for(Int_t i=0; i<nPrim; i++)
-    {
-      StMuPrimaryVertex *vertex = mMuDst->primaryVertex(i);
-      Double_t dz = TMath::Abs(vertex->position().z()-mMtdData.vpdVz);
-      if(dz<min_dz)
-	{
-	  min_dz = dz;
-	  index = i;
-	}
-      if(dz<mMaxVtxDz && index2==-1)
-	{
-	  index2 = i;
-	}
-    }
-  if(index>-1)
-    {
-      mMtdData.bestVz = mMuDst->primaryVertex(index)->position().z();
-      mhVtxIndClosestVsRank->Fill(index,index2);
-    }
-  else
-    mMtdData.bestVz = mMtdData.vertexZ;
-
-  mhVtxZvsVpdVzDefault->Fill(mMtdData.vertexZ,mMtdData.vpdVz);
-  mhVtxZDiffDefault->Fill(mMtdData.vertexZ-mMtdData.vpdVz);
-  mhVtxZvsVpdVzClosest->Fill(mMtdData.bestVz,mMtdData.vpdVz);
-  mhVtxZDiffClosest->Fill(mMtdData.bestVz-mMtdData.vpdVz);
-
-  if(!mIsCosmic)
-    {
-      if(mMtdData.vpdVz==-999) return kStWarn;
-      if(TMath::Abs(mMtdData.vertexZ)>mMaxVtxZ) return kStWarn;
-      if(fabs(mMtdData.vpdVz-mMtdData.vertexZ)>mMaxVtxDz) return kStWarn;
-    }
 
   // MTD trigger time
   StMuMtdHeader *muMtdHeader = mMuDst->mtdHeader();
@@ -819,6 +828,7 @@ Int_t StMtdQAMaker::processMuDst()
       Int_t tHub = getMtdHitTHUB(backleg);
       Double_t tDiff = (mMtdData.mtdHitLeTimeWest[i]+mMtdData.mtdHitLeTimeEast[i])/2 - mMtdData.mtdTriggerTime[tHub-1];
       while(tDiff<0) tDiff += 51200;
+      //cout << (mMtdData.mtdHitLeTimeWest[i]+mMtdData.mtdHitLeTimeEast[i])/2 << " - " << mMtdData.mtdTriggerTime[tHub-1] << " = " << tDiff << endl;
       mMtdData.mtdHitTrigTime[i] = tDiff;
       mMtdData.isGoodMtdHit[i] = kTRUE;
       if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
@@ -837,6 +847,10 @@ Int_t StMtdQAMaker::processMuDst()
       const StMuMtdPidTraits mtdPid = gTrack->mtdPidTraits();
       StThreeVectorF projPos = mtdPid.position();
       mMtdData.isMatched[i] = kTRUE;
+      if(gTrack->primaryTrack()->vertexIndex()==mVertexMode) 
+	mMtdData.isMatchedPrim[i] = kTRUE;
+      else                       
+	mMtdData.isMatchedPrim[i] = kFALSE;
       mMtdData.mtdMatchTrkPathLength[i] = mtdPid.pathLength();
       mMtdData.mtdMatchTrkTof[i]        = mtdPid.timeOfFlight();
       mMtdData.mtdMatchTrkExpTof[i]     = mtdPid.expTimeOfFlight();
@@ -922,29 +936,6 @@ Int_t StMtdQAMaker::processMuDst()
     }
   mMtdData.nGoodTrack = goodTrack;
 
-  //====================================
-  //====== global T0 alignment
-  int nPrimary = mMuDst->numberOfPrimaryTracks();
-  for(int i=0; i<nPrimary; i++)
-    {
-      StMuTrack* pTrack = mMuDst->primaryTracks(i);
-      if(!pTrack) continue;
-      if(!isValidTrack(pTrack)) continue;
-
-      /// matched tracks
-      int index = pTrack->index2MtdHit();
-      if(index>-1)  
-	{								
-	  const StMuMtdHit *hit = pTrack->mtdHit();
-	  const StMuMtdPidTraits mtdPid = pTrack->mtdPidTraits();
-	  int gChannel = (hit->backleg()-1)*60 + (hit->module()-1)*12 + hit->cell();
-	  double dtof = mtdPid.timeOfFlight() - mtdPid.expTimeOfFlight();
-	  mhMtdDtofVsChannel->Fill(gChannel, dtof);
-          mhMtdTofVsChannel->Fill(gChannel, mtdPid.timeOfFlight());
-          mhMtdExpTofVsChannel->Fill(gChannel, mtdPid.expTimeOfFlight());
-	}
-    }  
-  //====================================
 
   return kStOK;
 }
@@ -1169,17 +1160,30 @@ void StMtdQAMaker::fillHistos()
       mhMtdHitTotEast   ->Fill(gChan,mMtdData.mtdHitTotEast[i]);
       if(mMtdData.isMatched[i] == 1)
 	{
+	  double dtof = mMtdData.mtdMatchTrkTof[i]-mMtdData.mtdMatchTrkExpTof[i];
+	  double trkPt = mMtdData.mtdMatchTrkPt[i];
 	  mhMtdMatchHitMap         ->Fill(backleg,lChan);
 	  mhMtdMatchPhi            ->Fill(mMtdData.mtdMatchTrkProjPhi[i],mMtdData.mtdHitPhi[i]);
-	  mhMtdMatchTrkPt          ->Fill(mMtdData.mtdMatchTrkPt[i]);
-	  mhMtdMatchDzVsPt         ->Fill(mMtdData.mtdMatchTrkPt[i],mMtdData.mtdMatchTrkDeltaz[i]);
-	  mhMtdMatchDyVsPt         ->Fill(mMtdData.mtdMatchTrkPt[i],mMtdData.mtdMatchTrkDeltay[i]);
+	  mhMtdMatchTrkPt          ->Fill(trkPt);
+	  mhMtdMatchDzVsPt         ->Fill(trkPt,mMtdData.mtdMatchTrkDeltaz[i]);
+	  mhMtdMatchDyVsPt         ->Fill(trkPt,mMtdData.mtdMatchTrkDeltay[i]);
+	  mhMtdMatchDtofVsPt       ->Fill(trkPt,dtof);
 	  mhMtdMatchTrkPhiEta      ->Fill(mMtdData.mtdMatchTrkEta[i],mMtdData.mtdMatchTrkPhi[i]);
-	  mhMtdMatchTrkDedx        ->Fill(mMtdData.mtdMatchTrkPt[i],mMtdData.mtdMatchTrkDedx[i]);
+	  mhMtdMatchTrkDedx        ->Fill(trkPt,mMtdData.mtdMatchTrkDedx[i]);
 	  mhMtdMatchDzVsChan       ->Fill(gChan,mMtdData.mtdMatchTrkDeltaz[i]);
 	  mhMtdMatchDyVsChan       ->Fill(gChan,mMtdData.mtdMatchTrkDeltay[i]);
+	  mhMtdMatchDtofVsChan     ->Fill(gChan,dtof);
 	  mhMtdMatchLocalyVsChan   ->Fill(gChan,mMtdData.mtdMatchTrkLocaly[i]);
 	  mhMtdMatchLocalzVsChan   ->Fill(gChan,mMtdData.mtdMatchTrkLocalz[i]);
+
+	  if(mMtdData.isMatchedPrim[i])
+	    {
+	      mhPrimDzVsChan      ->Fill(gChan, mMtdData.mtdMatchTrkDeltaz[i]);
+	      mhPrimDyVsChan      ->Fill(gChan, mMtdData.mtdMatchTrkDeltay[i]);
+	      mhPrimDtofVsChan    ->Fill(gChan, dtof);
+	      mhPrimMtdTofVsChan  ->Fill(gChan, mMtdData.mtdMatchTrkTof[i]);
+	      mhPrimExpTofVsChan  ->Fill(gChan, mMtdData.mtdMatchTrkExpTof[i]);
+	    }
 
 	  Int_t qt = mModuleToQT[backleg-1][module-1];
 	  Int_t pos = mModuleToQTPos[backleg-1][module-1];
@@ -1474,6 +1478,9 @@ void StMtdQAMaker::bookHistos()
   mhMtdMatchDyVsChan = new TH2F("hMtdMatchDyVsChan","MTD: #Deltay distribution;channel;#Deltay = y_{proj}-y_{hit} (cm)",1801,-0.5,1800.5,101,-101,101);
   AddHist(mhMtdMatchDyVsChan);
 
+  mhMtdMatchDtofVsChan = new TH2F("hMtdMatchDtofVsChan","MTD: #Deltatof distribution;channel;TOF_{measured}-TOF_{expected} (ns)",1801,-0.5,1800.5,200,-10,10);
+  AddHist(mhMtdMatchDtofVsChan);
+
   mhMtdMatchLocalyVsChan = new TH2F("hMtdMatchLocalyVsChan","MTD: local y of matched tracks;channel;y (cm)",1801,-0.5,1800.5,100,-50.5,49.5);
   AddHist(mhMtdMatchLocalyVsChan);
 
@@ -1485,6 +1492,9 @@ void StMtdQAMaker::bookHistos()
 
   mhMtdMatchDyVsPt = new TH2F("hMtdMatchDyVsPt","MTD: #Deltay distribution;p_{T} (GeV/c);#Deltay = y_{proj}-y_{hit} (cm)",100,0,20,101,-101,101);
   AddHist(mhMtdMatchDyVsPt);
+
+  mhMtdMatchDtofVsPt = new TH2F("hMtdMatchDtofVsPt","MTD: #Deltatof distribution;p_{T} (GeV/c);TOF_{measured}-TOF_{expected} (ns)",100,0,20,200,-10,10);
+  AddHist(mhMtdMatchDtofVsPt);
 
   mhMtdMatchTrkPt = new TH1F("hMtdMatchTrkPt","MTD: p_{T} of matched global tracks;p_{T} (GeV/c)",100,0,20);
   AddHist(mhMtdMatchTrkPt);
@@ -1520,15 +1530,21 @@ void StMtdQAMaker::bookHistos()
   mhTofMthTrkLocalz = new TH2F("hTofMthTrkLocalz","TOF match: local z vs module;module;local z (cm)",64,0.5,64.5,100,-5,5);
   AddHist(mhTofMthTrkLocalz);
 
-  //====== global T0 alignment
-  mhMtdDtofVsChannel = new TH2F("hMtdDtofVsChannel","MTD: #Deltatof vs channel of primary tracks;channel;TOF_{measured}-TOF_{expected} (ns)",1800,-0.5,1799.5,500,-10,40);
-  AddHist(mhMtdDtofVsChannel);
+  //====== check calibration
+  mhPrimDzVsChan = new TH2F("hPrimDzVsChan","MTD: #Deltaz vs channel of primary tracks;channel;#Deltaz = z_{proj}-z_{hit} (cm)",1801,-0.5,1800.5,201,-201,201);
+  AddHist(mhPrimDzVsChan);
 
-  mhMtdTofVsChannel = new TH2F("mhMtdTofVsChannel","MTD: MTD time vs channel of primary tracks;channel;TOF_{measured} (ns)",1800,-0.5,1799.5,500,-10,40);
-  AddHist(mhMtdTofVsChannel);
+  mhPrimDyVsChan = new TH2F("hPrimDyVsChan","MTD: #Deltay vs channel of primary tracks;channel;#Deltay = y_{proj}-y_{hit} (cm)",1801,-0.5,1800.5,101,-101,101);
+  AddHist(mhPrimDyVsChan);
 
-  mhMtdExpTofVsChannel = new TH2F("mhMtdExpTofVsChannel","MTD: TPC time vs channel of primary tracks;channel;TOF_{expected} (ns)",1800,-0.5,1799.5,500,-10,40);
-  AddHist(mhMtdExpTofVsChannel);
+  mhPrimDtofVsChan = new TH2F("hPrimDtofVsChan","MTD: #Deltatof vs channel of primary tracks;channel;TOF_{measured}-TOF_{expected} (ns)",1800,-0.5,1799.5,1000,-5,5);
+  AddHist(mhPrimDtofVsChan);
+
+  mhPrimMtdTofVsChan = new TH2F("hPrimMtdTofVsChan","MTD: MTD time vs channel of primary tracks;channel;TOF_{measured} (ns)",1800,-0.5,1799.5,500,-10,40);
+  AddHist(mhPrimMtdTofVsChan);
+
+  mhPrimExpTofVsChan = new TH2F("hPrimExpTofVsChan","MTD: TPC time vs channel of primary tracks;channel;TOF_{expected} (ns)",1800,-0.5,1799.5,500,-10,40);
+  AddHist(mhPrimExpTofVsChan);
 }
 
 //_____________________________________________________________________________
@@ -1556,7 +1572,6 @@ void StMtdQAMaker::bookTree()
   mQATree->Branch("vertexY",           &mMtdData.vertexY,          "vertexY/F");
   mQATree->Branch("vertexZ",           &mMtdData.vertexZ,          "vertexZ/F");
   mQATree->Branch("vpdVz",             &mMtdData.vpdVz,            "vpdVz/F");
-  mQATree->Branch("bestVz",            &mMtdData.bestVz,           "bestVz/F");
 
   // VPD information
   mQATree->Branch("pre",               &mMtdData.pre,               "pre/B");
@@ -1622,6 +1637,7 @@ void StMtdQAMaker::bookTree()
   mQATree->Branch("mtdHitZ",           &mMtdData.mtdHitZ,           "mtdHitZ[nMtdHits]/D");
   // matching
   mQATree->Branch("isMatched",         &mMtdData.isMatched,         "isMatched[nMtdHits]/O");
+  mQATree->Branch("isMatchedPrim",     &mMtdData.isMatchedPrim,     "isMatchedPrim[nMtdHits]/O");
   mQATree->Branch("nMatchMtdHits",     &mMtdData.nMatchMtdHits,     "nMatchMtdHits/I");
   mQATree->Branch("mtdMatchTrkPathLength",&mMtdData.mtdMatchTrkPathLength,"mtdMatchTrkPathLength[nMtdHits]/D");
   mQATree->Branch("mtdMatchTrkExpTof", &mMtdData.mtdMatchTrkExpTof, "mtdMatchTrkExpTof[nMtdHits]/D");
@@ -1912,8 +1928,12 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.14 2016/08/04 21:26:36 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.15 2017/03/01 20:23:59 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.15  2017/03/01 20:23:59  marr
+//// 1) Add option to select different vertex
+//// 2) More QA plots for PID variables
+////
 //// Revision 1.14  2016/08/04 21:26:36  marr
 //// Add histograms for vertex QA, and dTof calibration
 ////
