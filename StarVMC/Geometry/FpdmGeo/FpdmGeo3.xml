@@ -23,7 +23,7 @@
 
             <var name="FmsNorthX" />
             <var name="FmsSouthX" />
-
+	    <var name="Atten" />    
         </Structure>
 
         
@@ -222,7 +222,7 @@
 
             <var name="FmsNorthX" value="-0.3" comment="Default x-position" />
             <var name="FmsSouthX" value="+0.3" comment="Default x-position" />
-
+	    <var name="atten"     value="0.0"  commend="Default 0=attenuation off" />
         </Fill>
 
 	<Use struct="FMCG" select="version" value="8.0" />
