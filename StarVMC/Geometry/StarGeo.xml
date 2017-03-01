@@ -861,6 +861,28 @@
     <Construct sys="mutd" config="MUTD04" simu="1" />
     <Construct sys="phmd" config="PHMD02" simu="1" />
    </Geometry>
+  <Geometry tag="y2011b" check="true" comment="Y2011 production geometry">
+    <Construct sys="cave" config="CAVE04" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="1" />
+    <Construct sys="upst" config="UPSTon" simu="1" />
+    <Construct sys="shld" config="SHLDof" simu="1" />
+    <Construct sys="quad" config="QUADof" simu="1" />
+    <Construct sys="scon" config="SCON14" simu="2" />
+    <Construct sys="tpce" config="TPCE04r" simu="2" />
+    <Construct sys="ftpc" config="FTPC01" simu="2" />
+    <Construct sys="supo" config="SUPO01" simu="2" />
+    <Construct sys="ftro" config="FTRO01" simu="2" />
+    <Construct sys="btof" config="BTOF67" simu="2" />
+    <Construct sys="vpdd" config="VPDD07" simu="1" />
+    <Construct sys="calb" config="CALB02" simu="1" />
+    <Construct sys="ecal" config="ECALv6" simu="1" />
+    <Construct sys="bbcm" config="BBCMon" simu="1" />
+    <Construct sys="fpdm" config="FPDM03at" simu="1" />
+    <Construct sys="zcal" config="ZCALon" simu="1" />
+    <Construct sys="magp" config="MAGPon" simu="1" />
+    <Construct sys="mutd" config="MUTD04" simu="1" />
+    <Construct sys="phmd" config="PHMD02" simu="1" />
+   </Geometry>
 
   <!-- y2010 series geometry tags -->
   <Geometry tag="y2010"  check="true" comment="Y2010 rough cut geometry">
