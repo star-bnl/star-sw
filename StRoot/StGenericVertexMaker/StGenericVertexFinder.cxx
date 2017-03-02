@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.43 2017/02/15 15:30:17 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.44 2017/03/02 19:11:19 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -55,15 +55,14 @@ StGenericVertexFinder::~StGenericVertexFinder()
 {
 }
 
+
 /*!
   Adds the vertex to StEvent (currently as a primary)
   Here we invent our own flag and other data to put in
   In real life we have to get it from somewhere (as done for position)
 */
-//______________________________________________________________________________
-void 
-StGenericVertexFinder::FillStEvent(StEvent* event){
-
+void StGenericVertexFinder::FillStEvent(StEvent* event)
+{
   for(UInt_t i=0;i<mVertexList.size(); i++) {
     //allocates new memory for each vertex
     StPrimaryVertex* primV = new StPrimaryVertex(mVertexList[i]); 
@@ -76,9 +75,9 @@ StGenericVertexFinder::FillStEvent(StEvent* event){
   // (might be undesirable for some debugging)
   // Also could be wrong if StEvent already has vertices for some reason
   mVertexList.clear();
+
   for(UInt_t i=0;i<event->numberOfPrimaryVertices(); i++)
     mVertexList.push_back(*(event->primaryVertex(i)));
-
 }
 
 
@@ -145,14 +144,15 @@ int StGenericVertexFinder::size() const
 {
   return mVertexList.size();
 }
+
+
 //______________________________________________________________________________
 StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 {
    return (idx<(int)mVertexList.size())? (StPrimaryVertex*)(&(mVertexList[idx])) : 0;
 }
 //______________________________________________________________________________
-void
-StGenericVertexFinder::Clear()
+void StGenericVertexFinder::Clear()
 {
   mVertexList.clear();
 }

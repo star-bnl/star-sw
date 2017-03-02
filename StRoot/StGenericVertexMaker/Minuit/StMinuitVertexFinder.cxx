@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.55 2017/02/17 21:31:36 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.56 2017/03/02 19:11:19 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -736,8 +736,7 @@ double StMinuitVertexFinder::CalcChi2DCAs(const StThreeVectorD &vtx) {
 }
 
 
-bool
-StMinuitVertexFinder::accept(StTrack* track) const
+bool StMinuitVertexFinder::accept(StTrack* track) const
 {
     //
     //   Accept only tracks which fulfill certain
