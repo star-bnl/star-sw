@@ -195,15 +195,18 @@ Int_t StFpsRawDaqReader::Make() {
 
 void StFpsRawDaqReader::Clear( Option_t *opts ){
   StTriggerData2017* d=(StTriggerData2017*)mTrg;
-  delete d;
+  if(d) delete d;
   if(mFmsCollectionPtr) mFmsCollectionPtr->hits().clear();  
 };
 
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.8 2017/03/02 23:17:06 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.9 2017/03/02 23:19:02 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.9  2017/03/02 23:19:02  akio
+ * check before deleting mTrg
+ *
  * Revision 1.8  2017/03/02 23:17:06  akio
  * initialize mTrg=0
  *
