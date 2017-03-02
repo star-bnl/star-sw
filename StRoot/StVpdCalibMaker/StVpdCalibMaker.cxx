@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.12 2012/12/14 06:36:05 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.13 2017/03/02 18:26:50 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,13 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.13  2017/03/02 18:26:50  jeromel
+ * Updates to StVpdCalibMaker after review - changes by jdb, nl
+ *
+ *
+ * Revision 1.13  2016/11/14 luttrell
+ * Simulated vpd hits no longer undergo electronics corrections
+ *
  * Revision 1.12  2012/12/14 06:36:05  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -140,6 +147,7 @@ void StVpdCalibMaker::resetVpd()
   memset(mVPDLeTime, 0, sizeof(mVPDLeTime));
   memset(mVPDTot, 0, sizeof(mVPDTot));
   memset(mFlag, 0, sizeof(mFlag));
+  mVPD_qaTruth = vector<Int_t>(2*NVPD,0);
 
   for(int i=0;i<MaxVpdVz;i++) {
     mVPDVtxZ[i] = -9999.;
@@ -152,24 +160,24 @@ void StVpdCalibMaker::resetVpd()
 //____________________________________________________________________________
 Int_t StVpdCalibMaker::Init()
 {
-  resetPars();
-  resetVpd();
+    resetPars();
+    resetVpd();
 
-  // m_Mode can be set by SetMode() method
-  if(m_Mode) {
-//    setHistoFileName("vpdana.root");
-  } else {
-    setHistoFileName("");    
-  }
+    // m_Mode can be set by SetMode() method
+//    if(m_Mode) {
+//    //    setHistoFileName("vpdana.root");
+//    } else {
+//        setHistoFileName("");
+//    }
 
-  if (mHisto){
-    bookHistograms();
-    LOG_INFO << "Histograms are booked" << endm;
-    if (mHistoFileName!="") {
-      LOG_INFO << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
+    if (mHisto){
+        bookHistograms();
+        LOG_INFO << "Histograms are booked" << endm;
+        if (mHistoFileName!="") {
+          LOG_INFO << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
+        }
     }
-  }
-
+    
   //return kStOK;
   return StMaker::Init();
 }
@@ -191,7 +199,6 @@ Int_t StVpdCalibMaker::InitRun(Int_t runnumber)
     return kStWarn;
   }
 
-
 }
 
 //_____________________________________________________________________________
@@ -209,7 +216,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       inData>>nchl;
       inData>>nbin;
       if (nbin>NBinMax) {
-		LOG_ERROR << "nummer of bins (" << nbin << ") out of range ("
+		LOG_ERROR << "number of bins (" << nbin << ") out of range ("
 			  << NBinMax << ") for vpd channel " << i << endm;
 		return kStErr;
       }	
@@ -330,7 +337,7 @@ Int_t StVpdCalibMaker::Make()
   if(!loadOK) return kStWarn;
   if(mHisto&&mhEventCounter) mhEventCounter->Fill(2);
 
-  tsum(mVPDTot, mVPDLeTime);
+  tsum(mVPDTot, mVPDLeTime, mVPD_qaTruth);
   vzVpdFinder();
 
   if(mHisto) fillHistograms();
@@ -372,7 +379,6 @@ Bool_t StVpdCalibMaker::writeVpdData() const
   for(int i=0;i<mNVzVpd;i++) {
     tofHeader->setVpdVz(mVPDVtxZ[i],i);
   }
-
 
     LOG_INFO << "BTofHeader: NWest = " << tofHeader->numberOfVpdHits(west) 
 	     << " NEast = " << tofHeader->numberOfVpdHits(east) << endm;
@@ -418,19 +424,22 @@ Bool_t StVpdCalibMaker::loadVpdData()
       int trayId = aHit->tray();
        if(trayId==WestVpdTrayId || trayId==EastVpdTrayId) {   // VPD this time
         int tubeId = aHit->cell();
-	int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
-	if (indx>=2*NVPD){
-	  LOG_ERROR << "vpd index (" << indx << ") out of range ("
-		    << 2*NVPD << ") for trayId-tubeId " << trayId 
-		    << "-" << tubeId << endm;
-	  return kStErr;
-	}
-        mVPDLeTime[indx] = aHit->leadingEdgeTime();
-        mVPDTot[indx] = aHit->tot();
-      }
+        int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
+        if (indx>=2*NVPD){
+          LOG_ERROR << "vpd index (" << indx << ") out of range ("
+                << 2*NVPD << ") for trayId-tubeId " << trayId 
+                << "-" << tubeId << endm;
+          return kStErr;
+        }
+            mVPDLeTime[indx] = aHit->leadingEdgeTime();
+            mVPDTot[indx] = aHit->tot();
+            mVPD_qaTruth[indx] = aHit->qaTruth();
+          }
     }
 
-  } else {
+  }
+  
+  else {
     StEvent *thisEvent = (StEvent *) GetInputDS("StEvent");
   
     // event selection  // no primary vertex required
@@ -473,6 +482,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
 	}
         mVPDLeTime[indx] = aHit->leadingEdgeTime();
         mVPDTot[indx] = aHit->tot();
+        mVPD_qaTruth[indx] = aHit->qaTruth();
       }
     } // end loop hits
   }
@@ -482,7 +492,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
 
 
 //_____________________________________________________________________________
-void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
+void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time, std::vector<Int_t> qaTruth)
 {
   /// Sum vpd informations
   mTSumEast = 0.;
@@ -494,53 +504,77 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
 
   bool vpdEast=false;
   for(int i=0;i<2*NVPD;i++) {
-    if (i>=NVPD) vpdEast=true;
+        if (i>=NVPD) vpdEast=true;
+      
+        //**************BEGIN SIMULATION CODE BLOCK***************
+        if ( qaTruth[i] > 0 && time[i] != 0.) {
+            LOG_DEBUG << "Simulation" << endm;
+              
+              if (vpdEast){
+                  mNEast++;
+                  mVPDLeTime[i] = time[i];
+                  mTSumEast += mVPDLeTime[i];
+                  mVPDHitPatternEast |= 1<<(i-NVPD);
+                  mFlag[i] = 1;
+              }
+              else {
+                  mNWest++;
+                  mVPDLeTime[i] = time[i];
+                  mTSumWest += mVPDLeTime[i];
+                  mVPDHitPatternWest |= 1<<i;
+                  mFlag[i] = 1;
+              }
+        }
+        //**************END SIMULATION CODE BLOCK*****************
+      
+        else if( time[i]>0. && tot[i]>0. ) {
+          
+            int ibin = -1;
+            for(int j=0;j<NBinMax-1;j++) {
+                if(tot[i]>=mVPDTotEdge[i][j] && tot[i]<mVPDTotEdge[i][j+1]) {
+                  ibin = j;
+                  break;
+                }
+            }
+              if(ibin>=0&&ibin<NBinMax) {
+                    Double_t x1 = mVPDTotEdge[i][ibin];
+                    Double_t x2 = mVPDTotEdge[i][ibin+1];
+                    Double_t y1 = mVPDTotCorr[i][ibin];
+                    Double_t y2 = mVPDTotCorr[i][ibin+1];
+                    Double_t dcorr = y1 + (tot[i]-x1)*(y2-y1)/(x2-x1);
 
-    if( time[i]>0. && tot[i]>0. ) {
-
-      int ibin = -1;
-      for(int j=0;j<NBinMax-1;j++) {
-	if(tot[i]>=mVPDTotEdge[i][j] && tot[i]<mVPDTotEdge[i][j+1]) {
-	  ibin = j;
-	  break;
-	}
-      }
-      if(ibin>=0&&ibin<NBinMax) {
-	Double_t x1 = mVPDTotEdge[i][ibin];
-	Double_t x2 = mVPDTotEdge[i][ibin+1];
-	Double_t y1 = mVPDTotCorr[i][ibin];
-	Double_t y2 = mVPDTotCorr[i][ibin+1];
-	Double_t dcorr = y1 + (tot[i]-x1)*(y2-y1)/(x2-x1);
-
-	if (vpdEast){
-	  mNEast++;
-	  mVPDLeTime[i] = time[i] - dcorr;
-	  mTSumEast += mVPDLeTime[i];
-	  mVPDHitPatternEast |= 1<<(i-NVPD);
-          mFlag[i] = 1;
-	} else {
-	  mNWest++;
-	  mVPDLeTime[i] = time[i] - dcorr;
-	  mTSumWest += mVPDLeTime[i];
-	  mVPDHitPatternWest |= 1<<i;
-          mFlag[i] = 1;
-	}
-
-      } else {
-	if (vpdEast){
-	  LOG_WARN << " Vpd East tube " << i+1-NVPD << " TOT ("<< ibin
-		   << ") out of range (0-"<<NBinMax<<") !" << endm;
-	} else{
-	  LOG_WARN << " Vpd West tube " << i+1 << " TOT ("<< ibin
-		   << ") out of range (0-"<<NBinMax<<") !" << endm;
-	}
-        mVPDLeTime[i] = 0.; // out of range, remove this hit
-      }
-    }
+                    if (vpdEast){
+                      mNEast++;
+                      mVPDLeTime[i] = time[i] - dcorr;
+                      mTSumEast += mVPDLeTime[i];
+                      mVPDHitPatternEast |= 1<<(i-NVPD);
+                          mFlag[i] = 1;
+                    }
+                    else {
+                      mNWest++;
+                      mVPDLeTime[i] = time[i] - dcorr;
+                      mTSumWest += mVPDLeTime[i];
+                      mVPDHitPatternWest |= 1<<i;
+                          mFlag[i] = 1;
+                    }
+              }
+              else {
+                if (vpdEast){
+                  LOG_WARN << " Vpd East tube " << i+1-NVPD << " TOT ("<< ibin
+                       << ") out of range (0-"<<NBinMax<<") !" << endm;
+                }
+                else{
+                  LOG_WARN << " Vpd West tube " << i+1 << " TOT ("<< ibin
+                       << ") out of range (0-"<<NBinMax<<") !" << endm;
+                }
+                    mVPDLeTime[i] = 0.; // out of range, remove this hit
+              }
+        }
+      
+      else LOG_DEBUG << "No hit." << endm;
   }
 
 }
-
 
 //_____________________________________________________________________________
 /// VzFinder from VPD, currently using a simple calculation. Can be improved in the future
@@ -548,11 +582,18 @@ void StVpdCalibMaker::vzVpdFinder()
 {
   for(int i=0;i<2*NVPD;i++){
     // check
-    if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
+      if (mVPD_qaTruth[i] > 0 && mVPDLeTime[i]!=0 && mFlag[i]) { // Check for simulation
+          mTruncation = kFALSE;
+      }
+    else if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
+      
+      LOG_INFO << "mTruncation is set to: " << mTruncation << endm;
+      
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
-      vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);
+      vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);    // Cuts on times with a significant deviation from the average.
       if(fabs(vpdtime)>TDIFFCUT) {
+          LOG_INFO << "Cut out West" << endm;
         mTSumWest -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNWest--;
@@ -561,8 +602,9 @@ void StVpdCalibMaker::vzVpdFinder()
       }
     }
     if(i>=NVPD&&mNEast>1) {  // east VPD
-      vpdtime = (mVPDLeTime[i]*mNEast-mTSumEast)/(mNEast-1);
+      vpdtime = (mVPDLeTime[i]*mNEast-mTSumEast)/(mNEast-1);    // Cuts on times with a significant deviation from the average.
       if(fabs(vpdtime)>TDIFFCUT) {
+          LOG_INFO << "Cut out East" << endm;
         mTSumEast -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNEast--; 
@@ -573,7 +615,8 @@ void StVpdCalibMaker::vzVpdFinder()
   }
 
   // remove slower hit in low energy runs.
-  if(mTruncation) {
+  if(mTruncation ) {
+      LOG_INFO << "Uh-oh, stepped into the truncation block!" << endm;
     Int_t hitIndex[2*NVPD];
     Int_t nTube = NVPD;
     TMath::Sort(nTube, &mVPDLeTime[0], &hitIndex[0]);
@@ -604,6 +647,7 @@ void StVpdCalibMaker::vzVpdFinder()
   // calculate the vertex z from vpd
   if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
     mVPDVtxZ[0] = (mTSumEast/mNEast - mTSumWest/mNWest)/2.*(C_C_LIGHT/1.e9);
+      LOG_INFO << "Vertex is at: " << mVPDVtxZ[0] << endm;
     mNVzVpd++;
   }
 }
@@ -614,6 +658,7 @@ void StVpdCalibMaker::bookHistograms()
 {
   mhEventCounter = new TH1D("eventCounter","eventCounter",20,0,20);
   mhNVpdHits = new TH2D("vpdHits"," west vs east ",20,0.,20.,20,0.,20.);
+  mmVpdVertexHist = new TH1D("mVpdVertexHist","Calculated Vpd Vertices; Position (cm); Counts", 300, -50, 50);
   for(int i=0;i<2*NVPD;i++) {
     //char buf[100];
     TString buf;
@@ -634,6 +679,7 @@ void StVpdCalibMaker::fillHistograms()
 {
   if(!mHisto) return;
   if (mhNVpdHits) mhNVpdHits->Fill(mNEast, mNWest);
+    if (mmVpdVertexHist) mmVpdVertexHist->Fill(mVPDVtxZ[0]);
   if(mNWest>=2) {
     for(int i=0;i<NVPD;i++) {
       if(mVPDLeTime[i]>0.) {
@@ -647,7 +693,7 @@ void StVpdCalibMaker::fillHistograms()
     for(int j=0;j<NVPD;j++) {
       int i = j + NVPD;
       if(mVPDLeTime[i]>0.) {
-        Double_t tdiff = (mNWest*mVPDLeTime[i] - mTSumEast)/(mNEast - 1);
+        Double_t tdiff = (mNEast*mVPDLeTime[i] - mTSumEast)/(mNEast - 1);
         if (mhVpd[i]) mhVpd[i]->Fill(tdiff);
         if (mhVpdAll) mhVpdAll->Fill(tdiff);
       }
@@ -671,6 +717,7 @@ void StVpdCalibMaker::writeHistograms() const
       mhEventCounter->Write();
       mhNVpdHits->Write();
       mhVpdAll->Write();
+        mmVpdVertexHist->Write();
       for(int i=0;i<2*NVPD;i++) {
 	mhVpd[i]->Write();
       }

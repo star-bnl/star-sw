@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.7 2014/08/06 11:43:52 jeromel Exp $
+ * $Id: StVpdCalibMaker.h,v 1.8 2017/03/02 18:26:50 jeromel Exp $
  *
  *******************************************************************/
 /*!
@@ -14,6 +14,9 @@
 /*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.8  2017/03/02 18:26:50  jeromel
+ * Updates to StVpdCalibMaker after review - changes by jdb, nl
+ *
  * Revision 1.7  2014/08/06 11:43:52  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -46,6 +49,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "StMaker.h"
+#include <vector>
 
 class StEvent;
 class StBTofCollection;
@@ -99,7 +103,7 @@ private:
   Int_t initParameters(Int_t runnumber);
 
   /// calibrate the Vpd timing
-  void  tsum(const Double_t *tot, const Double_t *time);
+  void  tsum(const Double_t *tot, const Double_t *time, std::vector<Int_t> qaTruth);
   /// find the Vpd vertex z
   void  vzVpdFinder();
 
@@ -139,6 +143,7 @@ private:
 
   Double_t   mVPDLeTime[2*NVPD];
   Double_t   mVPDTot[2*NVPD];
+  std::vector<Int_t> mVPD_qaTruth;
 
   Int_t      mFlag[2*NVPD];    
   Double_t   mTSumEast;
@@ -162,6 +167,7 @@ private:
   TH1D*    mhVpd[NVPD*2];     //! vpd resolution
   TH1D*    mhVpdAll;
   TH2D*    mhNVpdHits;         //! nhits west vs east
+    TH1D*   mmVpdVertexHist;
 
   Bool_t mInitFromFile;  //! switch for reading from files
   string mCalibFilePvpd; //! filename for pvpd calibration parameters
@@ -169,7 +175,7 @@ private:
   Bool_t mForceTofStart;   //! flag indicating that a user overrides any dbase-based start timing default
 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.7 2014/08/06 11:43:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.8 2017/03/02 18:26:50 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
   ClassDef(StVpdCalibMaker,1)
 };
