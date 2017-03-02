@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.6 2015/07/28 22:49:55 smirnovd Exp $
+ * $Id: StBTofSimMaker.h,v 1.7 2017/03/02 18:25:46 jeromel Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.7  2017/03/02 18:25:46  jeromel
+ * Updates to StBTofSimMaker after review
+ *
  * Revision 1.6  2015/07/28 22:49:55  smirnovd
- * Initialize static constants outside of class definition
+ *  Initialize static constants outside of class definition
  *
  *  C++ forbids initialization of non-integral static const members within the class
  *  definition. The syntax is allowed only for integral type variables.
@@ -41,20 +44,19 @@
 class TH1F;
 class TH2F;
 class TNtuple;
-class TNtuple;
-class TProfile;
 
 class StEvent;
 class StBTofCollection;
 class StTofSimParam;
 class StBTofDaqMap;
 struct g2t_ctf_hit_st;
+class StBTofHeader;
 
 // g2t tables
 #include "tables/St_g2t_ctf_hit_Table.h"
-#include "tables/St_g2t_vpd_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
+#include "StVpdSimMaker/StVpdSimConfig.h"
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcBTofHitCollection.hh"
@@ -66,157 +68,193 @@ using std::vector;
 #endif
 
 class StBTofSimMaker : public StMaker{
-	protected:
+protected:
 
 
-		StTofSimParam*      mSimDb;          //!
-		StBTofDaqMap*       mDaqMap;         //! Tof Daq map
-		StMcBTofHitCollection *mMcBTofHitCollection; //! barrel tof hit
+    StTofSimParam*      mSimDb;          //!<
+    StBTofDaqMap*       mDaqMap;         //!< Tof Daq map
+    StMcBTofHitCollection *mMcBTofHitCollection; //!< barrel tof hit
 
-		St_DataSet        *mGeantData;        //! geant table
-		StEvent           *mEvent;            //!
-		StMcEvent         *mMcEvent;
-		StBTofCollection   *mBTofCollection;   
+    St_DataSet        *mGeantData;        //!< geant table
+    StEvent           *mEvent;
+    StMcEvent         *mMcEvent;
+    StBTofCollection  *mBTofCollection = nullptr;
+    StBTofHeader*     mBTofHeader;
+    StVpdSimConfig*   mVpdSimConfig;
 
-		//define some constants
-		enum {
-			mNTOF = 192,    //! TOF channels per tray
-			mNVPD = 19,     //! VPD tubes per side
-			mNTray = 120,   //! 120 TOF trays
-			mNModule = 32,  //! 32 modules per tray
-			mNCell = 6,     //! 6 cells per module
-			mAMP = 50000,     
-			mADCBINWIDTH = 25,
-			mTDCBINWIDTH = 50
-		};
-		static const float mVHRBIN2PS;    //! Very High resolution mode, ps/bin
-		static const float mHRBIN2PS;     //! High resolution mode, ps/bin
-		static const float mBTofPadWidth; //! Pad Width
+    //define some constants
+    enum {
+        mNTOF = 192,    //!< TOF channels per tray
+        mNTray = 120,   //!< 120 TOF trays
+        mNModule = 32,  //!< 32 modules per tray
+        mNCell = 6,     //!< 6 cells per module
+        mAMP = 50000,     
+        mADCBINWIDTH = 25,
+        mTDCBINWIDTH = 50
+    };
+    static const float mVHRBIN2PS;    //!< Very High resolution mode, ps/bin
+    static const float mHRBIN2PS;     //!< High resolution mode, ps/bin
+    static const float mBTofPadWidth; //!< Pad Width
+    static const bool kSimulation = kFALSE;
+    static const bool kEmbedding = kTRUE;
 
+    bool mVpdSim;         //!< True when StVpdSimMaker has been run. False otherwise (default)
+    bool mIsEmbedding;     //!< True when embedding BTof data. False for pure simulation (default)
+    bool mUseVpdStart;  //!< switch for vpd start
+    bool mCellXtalk;     //!< switch for cell xtalk
+    bool mSlow;           //!< If True, runs the slow Tof Simulation, including CellResponse and CellTimePassTh
+    bool mBookHisto;
+    bool mWriteStEvent;  //!< switch to enable Maker to write out simulated hits to StEvent
 
-		Bool_t mCellXtalk;     //! switch for cell xtalk
-		Bool_t mSlow;
-		Bool_t mBookHisto;
-		Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
+    int     mTofHitFlag[mNTray][mNTOF];   //!< hit flag for tof geant hits
 
-		Int_t     mTofHitFlag[mNTray][mNTOF];   //! hit flag for tof geant hits
-		Int_t   mVpdHitFlag[2*mNVPD];         //! hit flag for vpd geant hits
-
-		struct TrackHit{
-			Int_t          tray;
-			Int_t          module;
-			Int_t          cell;
-			Int_t          trkId;
-			Double_t       dE;
-			Double_t       dQ;
-			Double_t       dQdt[600];//this 600 (nTimebins) comes from the /TofUtil/StTofParam file
-			Double_t       tof;
-			Double_t       s_track;
-			Double_t          t0;              //! t0 (in ps) as the start of this tof hit -- was ns - changed for consistency
-			StThreeVectorF position;
-		};
-
-
-		typedef vector<TrackHit, allocator<TrackHit> > TrackVec;
-		typedef vector<Int_t> IntVec;
-
-
-		string mHistFile;//for QA histograms
-		TH1F* mBetaHist;    //! speed of particles hitting tof
-		TH1F* mPathLHist;    //! speed of particles hitting tof
-		TH1F* mTofHist;    //! total time of flight of partilce
-		TH1F* mRecMass;    //! reconstructed mass of particle
-
-		TH2F* mCellGeant;    //! cellId of geant hit
-		TH1F* mVpdGeant;     //! Vpd tubeId of geant hit
-		TH2F* mNCellGeant;   //! # of cells of geant hit
-		TH2F* mNVpdGeant;    //! # of vpd tubes of geant hit
-		TH1F* mDeGeant;      //! deposited-energy in geant hit
-		TH1F* mTofGeant;     //! tof in geant hit
-
-		TH2F* mCellSeen;     //! cellId after DetectorResponse
-		TH1F* mVpdSeen;      //! Vpd tubeId after DetectorResponse
-		TH2F* mNCellSeen;    //! # of cells after DetectorResponse
-		TH2F* mNVpdSeen;     //! # of vpd tubes after DetectorResponse
-		TH1F* mDeSeen;       //! deposited-energy after DetectorResponse
-		TH1F* mT0Seen;      //! 
-		TH1F* mTofSeen;      //! smeared-tof after DetectorResponse
-		TH1F* mTofResSeen;   //! time resolution after Detector Response
-		TH1F* mVpdResSeen;   //! vpd time resolution after DetectorResponse
-
-		TH2F* mCellReco;     //! cellId after recon
-		TH1F* mVpdReco;      //! Vpd tubeId after recon
-		TH2F* mNCellReco;    //! # of cells after recon
-		TH2F* mNVpdReco;     //! # of vpd tubes after recon
-		TH1F* mTDCReco;      //! TDC recon
-		TH1F* mADCReco;      //! ADC recon -- empty
-		TH1F* mT0Reco;   //! 
-		TH1F* mTofResReco;   //! time resolution after recon
-		TH1F* mVpdResReco;   //! vpd time resolution after recon
-		TH2F* mTACorr;       //! T-A Slewing Correlation
-		TH1F* mModHist;       //! T-A Slewing Correlation
-
-		/// TOFp histograms
-		TH1F* mdE;           //!
-		TH1F* mdS;           //!
-		TH1F* mNumberOfPhotoelectrons;  //!
-		TH1F* mT;            //!
-		TH1F* mTime;         //!
-		TH1F* mTime1;        //!
-		TH1F* mPMlength;     //!
-		TH1F* mAdc;          //!
-		TH1F* mTdc;          //!
-
-		TVolume *starHall;
-
-		Int_t CellResponse(g2t_ctf_hit_st* tof_hit,
-				TrackVec& trackVec);   //! Slow simulation step one
-		Int_t CellTimePassTh(TrackVec& trackVec);        //! Slow simulation step two
-
-		Int_t FastCellResponse(g2t_ctf_hit_st* tof_hit);
-		Int_t VpdResponse(g2t_vpd_hit_st* vpd_hit);
-
-		IntVec    CalcCellId(Int_t volume_id, Float_t ylocal);
-		Int_t CellXtalk(Int_t icell, Float_t ylocal, Float_t& wt, Int_t& icellx);
-		Int_t      storeMcBTofHit(StMcBTofHit *mcCellHit);
-
-		Int_t        fillRaw(void);
-		Int_t        electronicNoise(void);
-		Float_t       slatResponseExp(Float_t&);
-		Double_t GammaRandom();
+    struct TrackHit{
+        int          tray;
+        int          module;
+        int          cell;
+        int          trkId;
+        double       dE;
+        double       dQ;
+        double       dQdt[600];  //!< this 600 (nTimebins) comes from the /TofUtil/StTofParam file
+        double       tof;
+        double       s_track;
+        double          t0;      //!< t0 (in ps) as the start of this tof hit -- was ns - changed for consistency
+        StThreeVectorF position;
+    };
 
 
-		Int_t        fillEvent();
-		Int_t        bookHistograms();
-		Int_t        writeHistograms();
-		Int_t        ResetFlags();
+    typedef vector<TrackHit, allocator<TrackHit> > TrackVec;
+    typedef vector<int> IntVec;
 
 
-	public:
-		StBTofSimMaker(const char *name="TofSim");
+    string mHistoFile;  //!< for QA histograms
+    string mHistoFileName;
+
+    TNtuple* ntuple;
+
+    TH1F* mRawBetaHist; //!<
+    TH1F* mBetaHist;    //!< speed of particles hitting tof
+    TH2F* mRawBetaVsMom;
+    TH2F* mCalcBetaVsMom;
+    TH2F* mBetaVsMom;       //!< 1/beta vs momentum
+
+    TH2F* Electron_BetaVsMom;
+    TH2F* Muon_BetaVsMom;
+    TH2F* Pion_BetaVsMom;
+    TH2F* Kaon_BetaVsMom;
+    TH2F* Proton_BetaVsMom;
+
+    TH1F* mPathLHist;    //!< speed of particles hitting tof
+    TH1F* mRawTofHist;      //!< total time of flight of particle before resolution smearing
+    TH1F* mTofHist;    //!< total time of flight of partilce
+    TH1F* mRecMass;    //!< reconstructed mass of particle
+
+    TH1F* massHist;
+    TH2F* m2VsP;        //!< Mass Squared versus momentum
+    TH1F* mTofCalculated;
+    TH2F* tof_RealVsCalc;
+
+    TH1F* momBinRaw1;
+    TH1F* momBinRaw2;
+    TH1F* momBinRaw3;
+    TH1F* momBinRaw4;
+    TH1F* momBinRaw5;
+    TH1F* momBinRaw6;
+    TH1F* momBinRaw7;
+    TH1F* momBinRaw8;
+    
+    TH1F* momBin1;
+    TH1F* momBin2;
+    TH1F* momBin3;
+    TH1F* momBin4;
+    TH1F* momBin5;
+    TH1F* momBin6;
+    TH1F* momBin7;
+    TH1F* momBin8;
+
+    TH2F* mCellGeant;    //!< cellId of geant hit
+    TH2F* mNCellGeant;   //!< # of cells of geant hit
+    TH1F* mDeGeant;      //!< deposited-energy in geant hit
+    TH1F* mTofGeant;     //!< tof in geant hit
+
+    TH2F* mCellSeen;     //!< cellId after DetectorResponse
+    TH2F* mNCellSeen;    //!< # of cells after DetectorResponse
+    TH1F* mDeSeen;       //!< deposited-energy after DetectorResponse
+    TH1F* mT0Seen;       //!<
+    TH1F* mTofSeen;      //!< smeared-tof after DetectorResponse
+    TH1F* mTofResSeen;   //!< time resolution after Detector Response
+
+    TH2F* mCellReco;     //!< cellId after recon
+    TH2F* mNCellReco;    //!< # of cells after recon
+    TH1F* mTDCReco;      //!< TDC recon
+    TH1F* mADCReco;      //!< ADC recon -- empty
+    TH1F* mT0Reco;   //!< 
+    TH1F* mTofResReco;   //!< time resolution after recon
+    TH2F* mTACorr;       //!< T-A Slewing Correlation
+    TH1F* mModHist;       //!< T-A Slewing Correlation
+
+    /// TOFp histograms
+    TH1F* mdE;           //!<
+    TH1F* mdS;           //!<
+    TH1F* mT;            //!<
+    TH1F* mTime;         //!<
+    TH1F* mTime1;        //!<
+    TH1F* mPMlength;     //!<
+    TH1F* mAdc;          //!<
+    TH1F* mTdc;          //!<
+
+    TVolume *starHall;
+
+    int CellResponse(g2t_ctf_hit_st* tof_hit,
+            TrackVec& trackVec);   //!< Slow simulation step one
+    int CellTimePassTh(TrackVec& trackVec);        //!< Slow simulation step two
+
+    int FastCellResponse(g2t_ctf_hit_st* tof_hit, StBTofCollection* btofColl);
+
+    IntVec    CalcCellId(int volume_id, float ylocal);
+    int CellXtalk(int icell, float ylocal, float& wt, int& icellx);
+    int      storeMcBTofHit(StMcBTofHit *mcCellHit);
+
+    int        fillRaw(void);
+    int        electronicNoise(void);
+    float      slatResponseExp(float&);
+    double GammaRandom();
 
 
-		virtual ~StBTofSimMaker();
+    int        fillEvent();
+    int        bookHistograms();
+    int        ResetFlags();
 
-		void           Reset();
-		virtual Int_t  Init();
-		Int_t          InitRun(Int_t);
-		Int_t          FinishRun(Int_t);
-		virtual Int_t  Make();
-		virtual Int_t  Finish();
 
-		StTofSimParam*    GetSimParam()       const { return mSimDb; }
-		StBTofCollection*  GetBTofCollection()  const { return mBTofCollection; }
-		StMcBTofHitCollection* GetMcBTofHitCollection() const { return mMcBTofHitCollection; }
+public:
+    StBTofSimMaker(const char *name="TofSim");
 
-		void   setCellXtalk(Bool_t val) { mCellXtalk = val; }
-		void   setHistFileName(string s);
-		void   setBookHist(Bool_t val) { mBookHisto = val; }
-		void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
-		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.6 2015/07/28 22:49:55 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    virtual ~StBTofSimMaker();
 
-		ClassDef(StBTofSimMaker,1)
+    void           Reset();
+    virtual int  Init();
+    int          InitRun(int);
+    int          FinishRun(int);
+    virtual int  Make();
+    virtual int  Finish();
+
+    bool  getEmbeddingMode() { return mIsEmbedding; }
+    StTofSimParam*    GetSimParam()       const { return mSimDb; }
+    StBTofCollection*  GetBTofCollection()  const { return mBTofCollection; }
+    StMcBTofHitCollection* GetMcBTofHitCollection() const { return mMcBTofHitCollection; }
+
+    void    setEmbeddingMode(bool mode = kEmbedding) {
+        mIsEmbedding = mode;
+    }
+    void   setCellXtalk(bool val) { mCellXtalk = val; }
+    string   setHistFileName();
+    void   setBookHist(bool val) { mBookHisto = val; }
+    void   writeStEvent(bool val = kTRUE) {mWriteStEvent = val;}
+
+    virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.7 2017/03/02 18:25:46 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+
+    ClassDef(StBTofSimMaker,2)
 };
 #endif
