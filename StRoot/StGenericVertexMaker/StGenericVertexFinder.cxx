@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.45 2017/03/04 04:49:48 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.46 2017/03/04 04:50:20 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -12,6 +12,7 @@
 
 #include "TH1F.h"
 #include "TSpectrum.h"
+#include "TClonesArray.h"
 
 #include "StarRoot/TRMatrix.h"
 #include "StarRoot/TRSymMatrix.h"
@@ -19,7 +20,7 @@
 #include "StMessMgr.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEventTypes.h"
-
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 
 // Initialize static variable with default values
@@ -155,6 +156,22 @@ StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 void StGenericVertexFinder::Clear()
 {
   mVertexList.clear();
+}
+
+
+void StGenericVertexFinder::result(TClonesArray& stMuDstPrimaryVertices)
+{
+  stMuDstPrimaryVertices.Clear();
+
+  int index = 0;
+
+  for (const StPrimaryVertex & stVertex : mVertexList)
+  {
+     // This idiotic conversion is required due to the constructor accepting
+     // reference to pointer
+     const StPrimaryVertex * myStVertex = &stVertex;
+     new(stMuDstPrimaryVertices[index++]) StMuPrimaryVertex( myStVertex);
+  }
 }
 
 

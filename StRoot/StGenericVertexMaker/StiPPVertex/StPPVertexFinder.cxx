@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.101 2017/03/04 04:49:48 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.102 2017/03/04 04:50:20 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -25,7 +25,15 @@
 #include <StEventTypes.h>
 #include "StGenericVertexMaker.h"
 #include "St_VertexCutsC.h"
+#include "StEvent/StDcaGeometry.h"
+#include "StEvent/StEventTypes.h"
+#include "StEvent/StEnumerations.h"
 #include "StEvent/StTrack.h"
+#include "StMuDSTMaker/COMMON/StMuBTofHit.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
+#include "StMuDSTMaker/COMMON/StMuEmcUtil.h"
 
 #include <Sti/StiToolkit.h>
 #include <Sti/StiKalmanTrack.h>
@@ -81,7 +89,8 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   bemcList(new BemcHitList()),
   eemcList(nullptr),
   btofGeom(nullptr),
-  geomE(nullptr)
+  geomE(nullptr),
+  mStMuDst(nullptr)
 {
   mUseCtb = true;                      // default CTB is in the data stream
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
@@ -611,6 +620,131 @@ int StPPVertexFinder::fit(StEvent* event)
 } 
 
 
+int StPPVertexFinder::Fit(const StMuDst& muDst)
+{
+   mTotEve++;
+
+   mStMuDst = &muDst;
+
+   // Similar to fit() we need to populate bemcList
+   StMuEmcCollection *muEmcCollection = muDst.muEmcCollection();
+
+   StMuEmcUtil muEmcUtil;
+
+   StEmcCollection* emcC = muEmcUtil.getEmc(muEmcCollection);
+
+   StEmcDetector* btow = emcC->detector(kBarrelEmcTowerId);
+   bemcList->build(btow, mMinAdcBemc);
+
+   StEmcDetector* etow = emcC->detector(kEndcapEmcTowerId);
+   eemcList->build(etow, mMinAdcEemc);
+
+   // Access btof data from ... branch
+   //TClonesArray* muBTofHits = muDst.btofArray(muBTofHit);
+   //btofList->build(*muBTofHits);
+
+   // Access array of all StDcaGeometry objects (i.e. tracks)
+   TObjArray*    globalTracks  = muDst.globalTracks();
+   TClonesArray* covGlobTracks = muDst.covGlobTrack();
+
+   //int nTracks = 0;
+   std::array<int, 7> ntrk{};
+
+   for (const TObject* obj : *globalTracks)
+   {
+      ntrk[0]++;
+
+      const StMuTrack& stMuTrack = static_cast<const StMuTrack&>(*obj);
+
+      if (stMuTrack.pt() < mMinTrkPt) { ntrk[2]++; continue; }
+
+      // Supposedly equivalent to isPostCrossingTrack()
+      if ( (stMuTrack.flagExtension() & kPostXTrack) != 0 ) { ntrk[3]++; continue; }
+
+      // Supposedly equivalent to DCA check with examinTrackDca()
+      if (stMuTrack.index2Cov() < 0) { ntrk[4]++; continue; }
+
+      StDcaGeometry* dca = static_cast<StDcaGeometry*>(covGlobTracks->At(stMuTrack.index2Cov()));
+
+      if ( std::fabs(dca->z()) > mMaxZrange ) { ntrk[4]++; continue; }
+      if ( std::fabs(dca->impact())  > mMaxTrkDcaRxy) { ntrk[4]++; continue; }
+
+      // Condition similar to one in matchTrack2Membrane
+      double fracFit2PossHits = static_cast<double>(stMuTrack.nHitsFit(kTpcId)) / stMuTrack.nHitsPoss(kTpcId);
+      if (fracFit2PossHits < mMinFitPfrac) { ntrk[5]++; continue; }  // kill if nFitP too small
+
+      ntrk[6]++;
+
+      TrackData trk;
+
+      trk.mother = &stMuTrack;
+      trk.dca    = dca;
+      trk.zDca   = dca->z();
+      trk.ezDca  = std::sqrt(dca->errMatrix()[2]);
+      trk.rxyDca = dca->impact();
+      trk.gPt    = dca->pt();
+      trk.mIdTruth = stMuTrack.idTruth();
+      trk.mQuality = stMuTrack.qaTruth();
+      trk.mIdParentVx = stMuTrack.idParentVx();
+
+      // Modify track weights
+      matchTrack2BEMC(stMuTrack, trk);
+      matchTrack2EEMC(stMuTrack, trk);
+      matchTrack2Membrane(stMuTrack, trk);
+
+      mTrackData.push_back(trk);
+   }
+
+   LOG_INFO << "\n"
+            << Form("PPV:: # of input track          = %d\n", ntrk[0])
+            << Form("PPV:: dropped due to 'dummy'    = %d\n", ntrk[1])
+            << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
+            << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
+            << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
+            << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
+            << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
+
+   //btofList->print();
+   bemcList->print();
+   eemcList->print();
+
+   // Select a method to find vertex candidates/seeds. The methods work using the
+   // `mTrackData` and `mDCAs` containers as input whereas the reconstructed
+   // vertices are put in the private container `mVertexData`
+   switch (mSeedFinderType)
+   {
+   case SeedFinder_t::TSpectrum:
+     findSeeds_TSpectrum();
+     break;
+
+   case SeedFinder_t::PPVLikelihood:
+   default:
+     findSeeds_PPVLikelihood();
+     break;
+   }
+
+   // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
+   // except when the Beamline1D option is specified. This is done to keep
+   // backward compatible behavior when by default the vertex was placed on the
+   // beamline
+   for (VertexData &V : mVertexData)
+   {
+      if (mVertexFitMode == VertexFit_t::Beamline1D)
+      {
+         V.r.SetX( beamX( V.r.Z() ));
+         V.r.SetY( beamY( V.r.Z() ));
+      } else {
+         fitTracksToVertex(V);
+      }
+   }
+
+   exportVertices();
+   printInfo();
+
+   return size();
+}
+
+
 //==========================================================
 //==========================================================
 bool StPPVertexFinder::buildLikelihoodZ()
@@ -788,6 +922,20 @@ bool  StPPVertexFinder::evalVertexZ(VertexData &V) // and tag used tracks
  */
 void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
 {
+   // Consider muDst case
+   if (mStMuDst)
+   {
+      // Just clean the pointers owned by something else
+      mDCAs.clear();
+      
+      for (const TrackData & track : mTrackData) {
+         if (track.vertexID != vertex.id) continue;
+         mDCAs.push_back(track.dca);
+      }
+
+      return;
+   }
+
    // Fill member array of pointers to StDcaGeometry objects for selected tracks
    // in mTrackData corresponding to this vertex. These will be used in static
    // minimization function
@@ -914,7 +1062,7 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
  */
 void StPPVertexFinder::exportVertices()
 {
-  for (const VertexData &V : mVertexData)
+  for (VertexData &V : mVertexData)
   {
     StThreeVectorD r(V.r.x(), V.r.y(), V.r.z());
 
@@ -937,7 +1085,40 @@ void StPPVertexFinder::exportVertices()
     primV.setSumOfTrackPt(V.gPtSum);
     primV.setRanking(V.Lmax);
     primV.setFlag(1); //??? is it a right value?
-  
+
+    if (mStMuDst)
+    {
+       for (TrackData &track : mTrackData)
+       {
+          StThreeVectorF v_position(V.r.x(), V.r.y(), V.r.z());
+          StThreeVectorF dist = v_position - track.dca->origin();
+
+          // Calculate total error as fully correlated between DCA and vertex
+          //float total_err_perp = std::sqrt( V.er.Perp2() + track.dca->errMatrix()[0] ); // fully uncorrelated
+          //float total_err_z    = std::sqrt( V.er.z()*V.er.z() + track.dca->errMatrix()[2] );
+
+          float total_err = V.er.Mag() + std::sqrt(track.dca->errMatrix()[0] + track.dca->errMatrix()[2]);
+
+          bool is_daughter = (track.vertexID == V.id || dist.mag()/total_err < 1);
+
+          if ( !is_daughter ) continue;
+
+          track.vertexID = V.id;
+
+          StMuTrack* stMuTrack = const_cast<StMuTrack*>( track.getMother<StMuTrack>() );
+          stMuTrack->setType(primary);
+
+          StTrack* primTrack = StMuDst::createStTrack(stMuTrack);
+          primV.addDaughter(primTrack);
+       }
+
+       primV.setIdTruth();
+       V.mIdTruth = primV.idTruth();
+
+       while ( !primV.daughters().empty() )
+          delete primV.daughters().back(), primV.daughters().pop_back();
+    }
+
     //..... add vertex to the list
     addVertex(primV);
   }
@@ -1173,8 +1354,6 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* stiTrack,TrackData &track
 //==========================================================
 void StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* stiTrack, TrackData &track)
 {
-  const double Rxy = 242.; // middle of tower in Rxy
-
   StiKalmanTrackNode* ouNode=stiTrack->getOuterMostNode();
 
   //alternative helix extrapolation:
@@ -1185,6 +1364,21 @@ void StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* stiTrack, TrackData
 		       ouNode->getPhase(),
 		       ou,
 		       ouNode->getHelicity());
+
+  matchTrack2BEMC(phys_helix, track);
+}
+
+
+void StPPVertexFinder::matchTrack2BEMC(const StMuTrack& muTrack, TrackData &track)
+{
+   matchTrack2BEMC(muTrack.outerHelix(), track);
+}
+
+
+void StPPVertexFinder::matchTrack2BEMC(const StPhysicalHelixD& phys_helix, TrackData &track)
+{
+  const double Rxy = 242.; // middle of tower in Rxy
+
   pairD  d2;
   d2 = phys_helix.pathLength(Rxy);
   float path = d2.second;
@@ -1218,9 +1412,7 @@ void StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* stiTrack, TrackData
 //==========================================================
 void StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* stiTrack, TrackData &track)
 {
-  const double eemc_z_position = 288.; // middle of tower in Z
   const double minEta=0.7 ;// tmp cut
-  const double maxPath=200 ;// tmp, cut too long extrapolation
 
   StiKalmanTrackNode* ouNode=stiTrack->getOuterMostNode();
   StiKalmanTrackNode* inNode=stiTrack->getInnerMostNode();
@@ -1231,9 +1423,6 @@ void StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* stiTrack, TrackData
   // droop too steep tracks
   if(stiTrack->getPseudoRapidity()<minEta) return;
 
-  StThreeVectorD rSmd=StThreeVectorD(0,0,eemc_z_position);
-  StThreeVectorD n=StThreeVectorD(0,0,1);
-
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
   ou.rotateZ(ouNode->getAlpha());
   StPhysicalHelixD phys_helix(fabs(ouNode->getCurvature()),
@@ -1243,6 +1432,32 @@ void StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* stiTrack, TrackData
    // path length at intersection with plane
    // double       pathLength(const StThreeVectorD& r,
    //                         const StThreeVectorD& n) const;
+
+  matchTrack2EEMC(phys_helix, track);
+}
+
+
+void StPPVertexFinder::matchTrack2EEMC(const StMuTrack& muTrack, TrackData &track)
+{
+   const double minEta = 0.7;
+
+   //direction of extrapolation must be toward West (Z+ axis)
+   if (muTrack.firstPoint().z() > muTrack.lastPoint().z()) return;
+   
+   // drop too steep tracks
+   if(muTrack.eta() < minEta) return;
+
+   matchTrack2EEMC(muTrack.outerHelix(), track);
+}
+
+
+void StPPVertexFinder::matchTrack2EEMC(const StPhysicalHelixD& phys_helix, TrackData &track)
+{
+  const double eemc_z_position = 288.; // middle of tower in Z
+  const double maxPath=200 ;// tmp, cut too long extrapolation
+
+  StThreeVectorD rSmd=StThreeVectorD(0,0,eemc_z_position);
+  StThreeVectorD n=StThreeVectorD(0,0,1);
 
   double path = phys_helix.pathLength(rSmd,n);
   if(path>maxPath) return; // too long extrapolation
@@ -1334,6 +1549,68 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* stiTrack,TrackData &
 
 
   return true;
+}
+
+
+void StPPVertexFinder::matchTrack2Membrane(const StMuTrack& muTrack, TrackData &trk)
+{
+   // Code from matchTrack2Membrane
+   if (mFitPossWeighting) { // introduced in 2012 for pp510 to differentiate between global track quality, together with lowering the overall threshold from 0.7 to 0.51
+      double fracFit2PossHits = static_cast<double>(muTrack.nHitsFit(kTpcId)) / muTrack.nHitsPoss(kTpcId);
+      trk.weight *= fracFit2PossHits;
+   }
+
+   const StThreeVectorF& firstPoint = muTrack.firstPoint();
+   const StThreeVectorF& lastPoint  = muTrack.lastPoint();
+
+   // Require the track to be within TPC volume (approximately)
+   const float RxyMin = 59, RxyMax = 199, zMax = 200;
+
+   bool isTrackInside = firstPoint.perp() < RxyMin || lastPoint.perp() < RxyMin ||
+                        firstPoint.perp() > RxyMax || lastPoint.perp() > RxyMax ||
+                        std::fabs(firstPoint.z()) > zMax ||
+                        std::fabs(lastPoint.z())  > zMax;
+
+   // Require start and end to be on different sides of the z=0 plane
+   bool crossMembrane = firstPoint.z() * lastPoint.z() < 0;
+
+   if ( !isTrackInside || !crossMembrane) return;
+
+   // Find crossing point of the track with z=0 membrane then identify jz0
+   double t = firstPoint.z() / (firstPoint.z() - lastPoint.z());
+
+   double intersect_x = firstPoint.x() + t * (lastPoint.x() - firstPoint.x());
+   double intersect_y = firstPoint.y() + t * (lastPoint.y() - firstPoint.y());
+   //intersect_z = firstPoint.z() + t * (lastPoint.z() - firstPoint.z()); // == 0 (=z)
+
+   double intersect_r = std::sqrt(intersect_x*intersect_x + intersect_y*intersect_y);
+
+   // TPC padrow radii
+   const std::array<double, 45> padrow_radii
+   {
+      60.0,    64.8,    69.6,    74.4,    79.2,    84.0,    88.8,    93.6,    98.8,    104.0,
+      109.2,   114.4,   119.6,   127.195, 129.195, 131.195, 133.195, 135.195, 137.195, 139.195,
+      141.195, 143.195, 145.195, 147.195, 149.195, 151.195, 153.195, 155.195, 157.195, 159.195,
+      161.195, 163.195, 165.195, 167.195, 169.195, 171.195, 173.195, 175.195, 177.195, 179.195,
+      181.195, 183.195, 185.195, 187.195, 189.195
+   };
+
+   std::vector<int> hitPatt;
+   int jz0 = 0;
+
+   for (auto padrow_r : padrow_radii)
+   {
+      int curr_padrow_index = hitPatt.size();
+
+      if (intersect_r > padrow_r)
+         jz0 = curr_padrow_index;
+
+      int hit = muTrack.topologyMap().hasHitInRow(kTpcId, curr_padrow_index+1) ? 1 : 0;
+
+      hitPatt.push_back(hit);
+   }
+
+   trk.scanNodes(hitPatt, jz0); // if central membrane is crossed, scale weight inside
 }
 
 
