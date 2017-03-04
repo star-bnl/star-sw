@@ -16,6 +16,7 @@
 #include "StGenericVertexMaker.h"
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
+#include "StEvent/StPrimaryVertex.h"
 #include "TH2.h"
 #include "TNtuple.h"
 #include "StMessMgr.h"

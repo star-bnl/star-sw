@@ -3,13 +3,15 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.42 2017/03/02 19:11:19 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.43 2017/03/04 04:49:49 smirnovd Exp $
  *
  */
 
 #include <vector>
 
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StiPPVertex/TrackData.h"
+#include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 
 #include "StPhysicalHelixD.hh"
 
@@ -18,8 +20,6 @@ class TH2F;
 class TH1D;
 
 class StiKalmanTrack;
-class TrackData;
-class VertexData;
 class StEvent; 
 class StiToolkit;
 class StEEmcDb;
@@ -72,6 +72,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   std::vector<VertexData> mVertexData;
   int  mTotEve;
   int  eveID;
+  int  nBadVertex;
   unsigned int  mAlgoSwitches; ///< binary, assign 1bit per change, use enum below
                                ///< default is 0, as for 2008 pp data production
   enum {kSwitchOneHighPT=1}; 
@@ -129,7 +130,7 @@ public:
 
   StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::Beamline1D);
 
-  virtual ~StPPVertexFinder();
+  virtual ~StPPVertexFinder() {}
   virtual int fit(StEvent*);
-  void printInfo(ostream& = cout) const;
+  void printInfo(std::ostream& = std::cout) const;
 };

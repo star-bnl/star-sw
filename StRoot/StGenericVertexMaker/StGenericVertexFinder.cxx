@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.44 2017/03/02 19:11:19 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.45 2017/03/04 04:49:48 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -330,7 +330,8 @@ void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
 {
    mBeamline = beamline;
 
-   LOG_INFO << "BeamLine constraint: weight =  " << mBeamline.weight << "\n"
+   LOG_INFO << "BeamLine constraints:\n"
+            << "weight: " << mBeamline.weight << "\n"
             << "x(z) = (" << mBeamline.x0   << " +/- max(0.01, "   << mBeamline.err_x0 << ") ) + "
             <<        "(" << mBeamline.dxdz << " +/- max(0.0001, " << mBeamline.err_dxdz << ") ) * z\n"
             << "y(z) = (" << mBeamline.y0   << " +/- max(0.01, "   << mBeamline.err_y0 << ") ) + "
