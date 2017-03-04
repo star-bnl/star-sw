@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.52 2017/03/04 04:49:48 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.53 2017/03/04 04:50:20 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -20,7 +20,9 @@
 #include "StGenericVertexMaker/VertexFinderOptions.h"
 
 class StEvent;
+class StMuDst;
 class StDcaGeometry;
+class TClonesArray;
 
 
 class StGenericVertexFinder
@@ -64,9 +66,13 @@ public:
   virtual void           Clear();
   const std::vector<StPrimaryVertex> *result() {return &mVertexList;}
 
+  void result(TClonesArray& stMuDstPrimaryVertices);
+
   void                   FillStEvent(StEvent*);
   virtual void SetVertexPosition(double x,double y,double z){assert(0);}
   virtual int            IsFixed() const        {return 0;}
+
+  virtual int            Fit(const StMuDst& muDst) { return -1; }
 
 protected:
 
