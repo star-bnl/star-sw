@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.100 2017/03/02 19:11:19 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.101 2017/03/04 04:49:48 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -23,10 +23,9 @@
 
 #include "StPPVertexFinder.h"
 #include <StEventTypes.h>
-#include "TrackData.h"
-#include "VertexData.h" 
 #include "StGenericVertexMaker.h"
 #include "St_VertexCutsC.h"
+#include "StEvent/StTrack.h"
 
 #include <Sti/StiToolkit.h>
 #include <Sti/StiKalmanTrack.h>
@@ -58,7 +57,7 @@
 StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::PPVLikelihood, fitMode),
   mTrackData(), mVertexData(),
-  mTotEve(0), eveID(0),
+  mTotEve(0), eveID(0), nBadVertex(0),
   mAlgoSwitches(kSwitchOneHighPT),
   hA{}, hACorr(nullptr), hL(nullptr), hM(nullptr), hW(nullptr),
   HList(),
@@ -84,17 +83,17 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   btofGeom(nullptr),
   geomE(nullptr)
 {
-  UseCTB(true);                      // default CTB is in the data stream
+  mUseCtb = true;                      // default CTB is in the data stream
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
   // special histogram for finding the vertex, not to be saved
   int nb=5000;
   float zRange=250;// (cm)
+
   hL=new TH1D("ppvL","Vertex likelyhood; Z /cm",nb,-zRange,zRange);
   // needed only for  better errZ calculation
   hM=new TH1D("ppvM","cumulative track multiplicity; Z /cm",nb,-zRange,zRange);
   hW=new TH1D("ppvW","cumulative track weight; Z /cm",nb,-zRange,zRange);
-
 } 
 
 
@@ -290,7 +289,6 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
 {
   const float par_rankOffset = 1e6; // to separate class of vertices (approximately)
 
-  int nBadVertex=0;
   int vertexID=0;
 
   while(1)
@@ -304,13 +302,12 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
     //bump up rank of 2+ track all vertices 
     if (V.nAnyMatch >= mMinMatchTr) V.Lmax += par_rankOffset;
 
-    if(!trigV) {
-      if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
-      /*  preserve this unqalified vertex for Akio 
-	  and deposit 1 cent on Jan's bank account (optional) 
-      */
+    if (!trigV) {
+      // Ignore this "bad" vertex
+      if (nBadVertex >= mStoreUnqualifiedVertex) continue;
+      // ... or keep it
       nBadVertex++;
-      //bump down rank of sub-prime vertices 
+      // ... and bump down rank of sub-prime vertices 
       V.Lmax -= par_rankOffset; 
     }
 
@@ -323,8 +320,6 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
 
     mVertexData.push_back(V);
   }
-
-  LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found, nBadVertex=" <<nBadVertex<< endm;
 }
 
 
@@ -332,7 +327,10 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
 //==========================================================
 void StPPVertexFinder::Clear()
 {
-  LOG_DEBUG << "PPVertex::Clear nEve="<<mTotEve<<  endm;
+  LOG_INFO << "StPPVertexFinder::Clear(): Finished event " << mTotEve
+           << ": Found " << mVertexData.size()-nBadVertex << " \"good\" and "
+           << nBadVertex << " \"bad\" vertices" << endm;
+
   StGenericVertexFinder::Clear();
 
   if (btofList) btofList->clear();
@@ -343,6 +341,7 @@ void StPPVertexFinder::Clear()
   mTrackData.clear();
   mVertexData.clear();
   eveID = -1;
+  nBadVertex = 0;
 
   // the clear below is not needed but cleans up stale result
   hL->Reset();
@@ -351,19 +350,12 @@ void StPPVertexFinder::Clear()
 }
 
 
-//==========================================================
-//==========================================================
-StPPVertexFinder::~StPPVertexFinder() {
-  delete geomE;
-}
-
 //======================================================
 //======================================================
 void StPPVertexFinder::printInfo(ostream& os) const
 {
-  os << "StPPVertexFinder ver=1 - Fit Statistics:" << endl;
-
-  os << "StPPVertexFinder::result "<<mVertexData.size()<<" vertices found\n" << endl;
+  os << "StPPVertexFinder ver=1 - Fit Statistics:\n"
+     << "StPPVertexFinder::result " << mVertexData.size() << " vertices found" << std::endl;
 
   int nTpcM=0, nTpcV=0;
   int k=0;
