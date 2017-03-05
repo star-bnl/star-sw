@@ -3,7 +3,10 @@
 #include <assert.h>
 #include <cmath>
 
+#include "TObjectSet.h"
+
 #include <StMessMgr.h>
+#include "St_db_Maker/St_db_Maker.h"
 
 #include "BtofHitList.h"
 
@@ -26,7 +29,7 @@ BtofHitList::BtofHitList() :
 //==========================================================
 //==========================================================
 void
-BtofHitList::initRun() {
+BtofHitList::initRun(St_db_Maker* db_maker) {
   LOG_DEBUG <<Form("BtofHitList::initRun() start")<<endm;
   ScintHitList::initRun();
   // clear old lookup table
@@ -37,9 +40,24 @@ BtofHitList::initRun() {
 	tmc2bin[i][j][k]=-1;
 
   // .. grab table
-  StMaker*mk=(StMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
-  assert(mk);
-  myTable->loadTables(mk);
+  myTable->loadTables(db_maker);
+
+  // Initialize BTOF geometry
+  TObjectSet *geom = (TObjectSet *) db_maker->GetDataSet("btofGeometry");
+  if (geom)   geometry = (StBTofGeometry *) geom->GetObject();
+  if (geometry) {
+    LOG_INFO << " Found btofGeometry ... " << endm;
+  } else {
+    geometry = new StBTofGeometry("btofGeometry","btofGeometry in VertexFinder");
+    geom = new TObjectSet("btofGeometry",geometry);
+    LOG_INFO << " Create a new btofGeometry ... " << endm;
+    db_maker->AddConst(geom);
+  } 
+  if(geometry && !geometry->IsInitDone()) {
+    LOG_INFO << " BTofGeometry initialization ... " << endm;
+    TVolume *starHall = (TVolume *)db_maker->GetDataSet("HALL");
+    geometry->Init(db_maker, starHall);
+  }
 
 
   int nB=0; int nA=0;

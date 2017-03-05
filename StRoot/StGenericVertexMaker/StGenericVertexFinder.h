@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.53 2017/03/04 04:50:20 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.54 2017/03/05 21:00:43 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -23,6 +23,7 @@ class StEvent;
 class StMuDst;
 class StDcaGeometry;
 class TClonesArray;
+class St_db_Maker;
 
 
 class StGenericVertexFinder
@@ -62,7 +63,7 @@ public:
           void           SetDebugLevel(Int_t level) {mDebugLevel=level;}
   virtual void           Init(){ /* noop */;}
   virtual void           Finish(){ /* noop */;}
-  virtual void           InitRun  (int runumber){ /* noop */;}
+  virtual void           InitRun(int runumber, const St_db_Maker* db_maker);
   virtual void           Clear();
   const std::vector<StPrimaryVertex> *result() {return &mVertexList;}
 

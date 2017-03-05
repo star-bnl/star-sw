@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.46 2017/03/04 04:50:20 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.47 2017/03/05 21:00:43 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -18,6 +18,7 @@
 #include "StarRoot/TRSymMatrix.h"
 #include "StGenericVertexFinder.h"
 #include "StMessMgr.h"
+#include "St_db_Maker/St_db_Maker.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
@@ -152,6 +153,30 @@ StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 {
    return (idx<(int)mVertexList.size())? (StPrimaryVertex*)(&(mVertexList[idx])) : 0;
 }
+
+
+void StGenericVertexFinder::InitRun(int runumber, const St_db_Maker* db_maker)
+{
+   // Check if all necessary conditions satisfied
+   bool prerequisites = db_maker &&
+      (mVertexFitMode == VertexFit_t::Beamline1D ||
+       mVertexFitMode == VertexFit_t::Beamline3D);
+
+   // Just exit if there is nothing to do
+   if (!prerequisites) return;
+
+   const TDataSet* dbDataSet = const_cast<St_db_Maker*>(db_maker)->GetDataBase("Calibrations/rhic/vertexSeed");
+
+   vertexSeed_st* vSeed = dbDataSet ? static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"))->GetTable() : nullptr;
+
+   if (!vSeed) {
+      LOG_FATAL << "Vertex fit w/ beamline requested but 'Calibrations/rhic/vertexSeed' table not found" << endm;
+   }
+
+   UseVertexConstraint(*vSeed);
+}
+
+
 //______________________________________________________________________________
 void StGenericVertexFinder::Clear()
 {
