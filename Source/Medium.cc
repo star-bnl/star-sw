@@ -720,12 +720,12 @@ bool Medium::GetElectronCollision(const double e, int& type, int& level,
   return false;
 }
 
-bool Medium::GetIonisationProduct(const int i, int& type, double& energy) {
+bool Medium::GetIonisationProduct(const unsigned int /*i*/, 
+                                  int& type, double& energy) {
 
   if (m_debug) {
-    std::cerr << m_className << "::GetIonisationProduct:\n";
-    std::cerr << "    Ionisation product " << i << " requested.\n";
-    std::cerr << "    Not supported. Program bug!\n";
+    std::cerr << m_className << "::GetIonisationProduct:\n"
+              << "    Function is not implemented for this class.\n";
   }
   type = 0;
   energy = 0.;

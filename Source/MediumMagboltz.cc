@@ -35,7 +35,6 @@ MediumMagboltz::MediumMagboltz()
       useDeexcitation(false),
       useRadTrap(true),
       nDeexcitations(0),
-      nIonisationProducts(0),
       nDeexcitationProducts(0),
       useOpalBeaty(true),
       useGreenSawada(false),
@@ -91,7 +90,7 @@ MediumMagboltz::MediumMagboltz()
   for (int i = nCsTypes; i--;) nCollisions[i] = 0;
   for (int i = nCsTypesGamma; i--;) nPhotonCollisions[i] = 0;
 
-  ionProducts.clear();
+  m_ionProducts.clear();
   dxcProducts.clear();
 
   for (unsigned int i = 0; i < m_nMaxGases; ++i) scaleExc[i] = 1.;
@@ -778,17 +777,17 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     }
     if (esec <= 0) esec = Small;
     loss += esec;
-    ionProducts.clear();
+    m_ionProducts.clear();
     // Add the secondary electron.
     ionProd newIonProd;
     newIonProd.type = IonProdTypeElectron;
     newIonProd.energy = esec;
-    ionProducts.push_back(newIonProd);
+    m_ionProducts.push_back(newIonProd);
     // Add the ion.
     newIonProd.type = IonProdTypeIon;
     newIonProd.energy = 0.;
-    ionProducts.push_back(newIonProd);
-    nIonisationProducts = nion = 2;
+    m_ionProducts.push_back(newIonProd);
+    nion = 2;
   } else if (type == ElectronCollisionTypeExcitation) {
     // if (m_gas[igas] == "CH4" && loss * rgas[igas] < 13.35 && e > 12.65) {
     //   if (RndmUniform() < 0.5) {
@@ -912,17 +911,17 @@ bool MediumMagboltz::GetDeexcitationProduct(const int i, double& t, double& s,
   return true;
 }
 
-bool MediumMagboltz::GetIonisationProduct(const int i, int& type,
+bool MediumMagboltz::GetIonisationProduct(const unsigned int i, int& type,
                                           double& energy) {
 
-  if (i < 0 || i >= nIonisationProducts) {
-    std::cerr << m_className << "::GetIonisationProduct:\n";
-    std::cerr << "    Index out of range.\n";
+  if (i >= m_ionProducts.size()) {
+    std::cerr << m_className << "::GetIonisationProduct:\n"
+              << "    Index (" << i << ") out of range.\n";
     return false;
   }
 
-  type = ionProducts[i].type;
-  energy = ionProducts[i].energy;
+  type = m_ionProducts[i].type;
+  energy = m_ionProducts[i].energy;
   return true;
 }
 
