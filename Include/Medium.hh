@@ -19,7 +19,7 @@ class Medium {
   // Return the id number of the class instance
   int GetId() const { return m_id; }
   // Medium name/identifier
-  std::string GetName() const { return m_name; }
+  const std::string& GetName() const { return m_name; }
   virtual bool IsGas() const { return false; }
   virtual bool IsSemiconductor() const { return false; }
 
@@ -111,10 +111,11 @@ class Medium {
                                     double& dz, int& nion, int& ndxc,
                                     int& band);
 
-  virtual int GetNumberOfIonisationProducts() { return 0; }
-  virtual bool GetIonisationProduct(const int i, int& type, double& energy);
+  virtual unsigned int GetNumberOfIonisationProducts() { return 0; }
+  virtual bool GetIonisationProduct(const unsigned int i, 
+                                    int& type, double& energy);
 
-  virtual int GetNumberOfDeexcitationProducts() { return 0; }
+  virtual unsigned int GetNumberOfDeexcitationProducts() { return 0; }
   virtual bool GetDeexcitationProduct(const int i, double& t, double& s,
                                       int& type, double& energy);
 

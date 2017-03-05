@@ -76,21 +76,21 @@ class MediumSilicon : public Medium {
 
   // Microscopic transport properties
   bool SetMaxElectronEnergy(const double e);
-  double GetMaxElectronEnergy() const { return eFinalG; }
+  double GetMaxElectronEnergy() const { return m_eFinalG; }
 
   bool Initialise();
 
   // When enabled, the scattering rates table is written to file
   // when loaded into memory.
-  void EnableScatteringRateOutput() { useCfOutput = true; }
-  void DisableScatteringRateOutput() { useCfOutput = false; }
+  void EnableScatteringRateOutput() { m_useCfOutput = true; }
+  void DisableScatteringRateOutput() { m_useCfOutput = false; }
 
-  void EnableNonParabolicity() { useNonParabolicity = true; }
-  void DisableNonParabolicity() { useNonParabolicity = false; }
-  void EnableFullBandDensityOfStates() { useFullBandDos = true; }
-  void DisableFullBandDensityOfStates() { useFullBandDos = false; }
-  void EnableAnisotropy() { useAnisotropy = true; }
-  void DisableAnisotropy() { useAnisotropy = false; }
+  void EnableNonParabolicity() { m_useNonParabolicity = true; }
+  void DisableNonParabolicity() { m_useNonParabolicity = false; }
+  void EnableFullBandDensityOfStates() { m_useFullBandDos = true; }
+  void DisableFullBandDensityOfStates() { m_useFullBandDos = false; }
+  void EnableAnisotropy() { m_useAnisotropy = true; }
+  void DisableAnisotropy() { m_useAnisotropy = false; }
 
   // Get the electron energy (and its gradient)
   // for a given (crystal) momentum
@@ -109,8 +109,8 @@ class MediumSilicon : public Medium {
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
                             double& dx, double& dy, double& dz, int& nion,
                             int& ndxc, int& band);
-  int GetNumberOfIonisationProducts() { return nIonisationProducts; }
-  bool GetIonisationProduct(const int i, int& type, double& energy);
+  unsigned int GetNumberOfIonisationProducts() { return m_ionProducts.size(); }
+  bool GetIonisationProduct(const unsigned int i, int& type, double& energy);
 
   // Density of states
   double GetConductionBandDensityOfStates(const double e, const int band = 0);
@@ -119,13 +119,13 @@ class MediumSilicon : public Medium {
   // Reset the collision counters
   void ResetCollisionCounters();
   // Get the total number of electron collisions
-  int GetNumberOfElectronCollisions() const;
+  unsigned int GetNumberOfElectronCollisions() const;
   // Get number of scattering rate terms
-  int GetNumberOfLevels();
+  unsigned int GetNumberOfLevels() const;
   // Get number of collisions for a specific level
-  int GetNumberOfElectronCollisions(const int level) const;
+  unsigned int GetNumberOfElectronCollisions(const unsigned int level) const;
 
-  int GetNumberOfElectronBands();
+  unsigned int GetNumberOfElectronBands() const;
   int GetElectronBandPopulation(const int band);
 
   bool GetOpticalDataRange(double& emin, double& emax, 
@@ -161,124 +161,123 @@ class MediumSilicon : public Medium {
 
   // Effective masses
   // X valleys
-  double mLongX, mTransX;
+  double m_mLongX, m_mTransX;
   // L valleys
-  double mLongL, mTransL;
+  double m_mLongL, m_mTransL;
   // Non-parabolicity parameters [1/eV]
-  double alphaX, alphaL;
+  double m_alphaX, m_alphaL;
   // Lattice mobility
-  double eLatticeMobility, hLatticeMobility;
+  double m_eLatticeMobility, m_hLatticeMobility;
   // Low-field mobility
-  double eMobility, hMobility;
+  double m_eMobility, m_hMobility;
   // High-field mobility parameters
-  double eBetaCanali, hBetaCanali;
-  double eBetaCanaliInv, hBetaCanaliInv;
+  double m_eBetaCanali, m_hBetaCanali;
+  double m_eBetaCanaliInv, m_hBetaCanaliInv;
   // Saturation velocity
-  double eSatVel, hSatVel;
+  double m_eSatVel, m_hSatVel;
   // Hall factor
-  double eHallFactor, hHallFactor;
+  double m_eHallFactor, m_hHallFactor;
 
   // Trapping parameters
-  double eTrapCs, hTrapCs;
-  double eTrapDensity, hTrapDensity;
-  double eTrapTime, hTrapTime;
-  int trappingModel;
+  double m_eTrapCs, m_hTrapCs;
+  double m_eTrapDensity, m_hTrapDensity;
+  double m_eTrapTime, m_hTrapTime;
+  int m_trappingModel;
 
   // Impact ionisation parameters
-  double eImpactA0, eImpactA1, eImpactA2;
-  double eImpactB0, eImpactB1, eImpactB2;
-  double hImpactA0, hImpactA1;
-  double hImpactB0, hImpactB1;
+  double m_eImpactA0, m_eImpactA1, m_eImpactA2;
+  double m_eImpactB0, m_eImpactB1, m_eImpactB2;
+  double m_hImpactA0, m_hImpactA1;
+  double m_hImpactB0, m_hImpactB1;
 
   // Models
   bool m_hasUserMobility;
   bool m_hasUserSaturationVelocity;
-  int latticeMobilityModel;
-  int dopingMobilityModel;
-  int saturationVelocityModel;
-  int highFieldMobilityModel;
-  int impactIonisationModel;
+  int m_latticeMobilityModel;
+  int m_dopingMobilityModel;
+  int m_saturationVelocityModel;
+  int m_highFieldMobilityModel;
+  int m_impactIonisationModel;
 
   // Options
-  bool useCfOutput;
-  bool useNonParabolicity;
-  bool useFullBandDos;
-  bool useAnisotropy;
+  bool m_useCfOutput;
+  bool m_useNonParabolicity;
+  bool m_useFullBandDos;
+  bool m_useAnisotropy;
 
   // Energy range of scattering rates
-  double eFinalXL, eStepXL;
-  double eFinalG, eStepG;
-  double eFinalV, eStepV;
+  double m_eFinalXL, m_eStepXL;
+  double m_eFinalG, m_eStepG;
+  double m_eFinalV, m_eStepV;
   static const int nEnergyStepsXL = 2000;
   static const int nEnergyStepsG = 2000;
   static const int nEnergyStepsV = 2000;
 
   // Number of scattering terms
-  int nLevelsX, nLevelsL, nLevelsG;
-  int nLevelsV;
+  int m_nLevelsX, m_nLevelsL, m_nLevelsG;
+  int m_nLevelsV;
   // Number of valleys
-  int nValleysX, nValleysL;
+  int m_nValleysX, m_nValleysL;
   // Energy offset
-  double eMinL, eMinG;
-  int ieMinL, ieMinG;
+  double m_eMinL, m_eMinG;
+  int m_ieMinL, m_ieMinG;
 
   // Electron scattering rates
-  double cfNullElectronsX, cfNullElectronsL, cfNullElectronsG;
-  std::vector<double> cfTotElectronsX;
-  std::vector<double> cfTotElectronsL;
-  std::vector<double> cfTotElectronsG;
-  std::vector<std::vector<double> > cfElectronsX;
-  std::vector<std::vector<double> > cfElectronsL;
-  std::vector<std::vector<double> > cfElectronsG;
-  std::vector<double> energyLossElectronsX;
-  std::vector<double> energyLossElectronsL;
-  std::vector<double> energyLossElectronsG;
+  double m_cfNullElectronsX;
+  double m_cfNullElectronsL;
+  double m_cfNullElectronsG;
+  std::vector<double> m_cfTotElectronsX;
+  std::vector<double> m_cfTotElectronsL;
+  std::vector<double> m_cfTotElectronsG;
+  std::vector<std::vector<double> > m_cfElectronsX;
+  std::vector<std::vector<double> > m_cfElectronsL;
+  std::vector<std::vector<double> > m_cfElectronsG;
+  std::vector<double> m_energyLossElectronsX;
+  std::vector<double> m_energyLossElectronsL;
+  std::vector<double> m_energyLossElectronsG;
   // Cross-section type
-  std::vector<int> scatTypeElectronsX;
-  std::vector<int> scatTypeElectronsL;
-  std::vector<int> scatTypeElectronsG;
+  std::vector<int> m_scatTypeElectronsX;
+  std::vector<int> m_scatTypeElectronsL;
+  std::vector<int> m_scatTypeElectronsG;
 
   // Hole scattering rates
-  double cfNullHoles;
-  std::vector<double> cfTotHoles;
-  std::vector<std::vector<double> > cfHoles;
-  std::vector<double> energyLossHoles;
+  double m_cfNullHoles;
+  std::vector<double> m_cfTotHoles;
+  std::vector<std::vector<double> > m_cfHoles;
+  std::vector<double> m_energyLossHoles;
   // Cross-section type
-  std::vector<int> scatTypeHoles;
+  std::vector<int> m_scatTypeHoles;
 
   // Collision counters
-  int nCollElectronAcoustic, nCollElectronOptical;
-  int nCollElectronIntervalley;
-  int nCollElectronImpurity;
-  int nCollElectronIonisation;
-  std::vector<int> nCollElectronDetailed;
-  std::vector<int> nCollElectronBand;
+  unsigned int m_nCollElectronAcoustic;
+  unsigned int m_nCollElectronOptical;
+  unsigned int m_nCollElectronIntervalley;
+  unsigned int m_nCollElectronImpurity;
+  unsigned int m_nCollElectronIonisation;
+  std::vector<unsigned int> m_nCollElectronDetailed;
+  std::vector<unsigned int> m_nCollElectronBand;
 
-  int nIonisationProducts;
   struct ionProd {
     int type;
     double energy;
   };
-  std::vector<ionProd> ionProducts;
+  std::vector<ionProd> m_ionProducts;
 
   // Density of states tables
-  double eStepDos;
-  int nFbDosEntriesValence;
-  int nFbDosEntriesConduction;
-  std::vector<double> fbDosValence;
-  std::vector<double> fbDosConduction;
-  double fbDosMaxV, fbDosMaxC;
+  double m_eStepDos;
+  std::vector<double> m_fbDosValence;
+  std::vector<double> m_fbDosConduction;
+  double m_fbDosMaxV, m_fbDosMaxC;
 
   // Optical data
-  bool m_hasOpticalData;
-  std::string opticalDataFile;
+  std::string m_opticalDataFile;
   struct opticalData {
     // Energy [eV]
     double energy;
     // Dielectric function
     double eps1, eps2;
   };
-  std::vector<opticalData> opticalDataTable;
+  std::vector<opticalData> m_opticalDataTable;
 
   bool UpdateTransportParameters();
   void UpdateLatticeMobilityMinimos();
@@ -310,7 +309,7 @@ class MediumSilicon : public Medium {
                                                 double& alpha) const;
   bool HoleImpactIonisationGrant(const double e, double& alpha) const;
 
-  bool LoadOpticalData(const std::string filename);
+  bool LoadOpticalData(const std::string& filename);
 
   bool ElectronScatteringRates();
   bool ElectronAcousticScatteringRates();
@@ -328,8 +327,7 @@ class MediumSilicon : public Medium {
   bool HoleOpticalScatteringRates();
   bool HoleIonisationRates();
 
-  //    void ComputeSecondaries(const double e0,
-  //                            double& ee, double& eh);
+  // void ComputeSecondaries(const double e0, double& ee, double& eh);
   void InitialiseDensityOfStates();
 };
 }
