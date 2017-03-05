@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.44 2017/03/04 04:50:21 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.45 2017/03/05 21:00:44 smirnovd Exp $
  *
  */
 
@@ -22,17 +22,16 @@ class TH1D;
 class StiKalmanTrack;
 class StEvent; 
 class StiToolkit;
-class StEEmcDb;
 
 class StMuDst;
-class EEmcGeomSimple;
 class StMuTrack;
-class StBTofGeometry; 
 
+class St_db_Maker;
 class BtofHitList;  
 class CtbHitList;
 class BemcHitList;
 class EemcHitList;
+
 
 class StPPVertexFinder: public StGenericVertexFinder
 {
@@ -56,7 +55,7 @@ class StPPVertexFinder: public StGenericVertexFinder
 
   enum {mxH=32};
   bool examinTrackDca(const StiKalmanTrack*, TrackData &track);
-  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &track, StBTofGeometry *geom);
+  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &track);
   void matchTrack2CTB(const StiKalmanTrack*, TrackData &track);
 
   void matchTrack2EEMC(const StiKalmanTrack*, TrackData &track);
@@ -122,8 +121,6 @@ class StPPVertexFinder: public StGenericVertexFinder
   CtbHitList     *ctbList;
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
-  StBTofGeometry *btofGeom;
-  EEmcGeomSimple *geomE;
 
   const StMuDst* mStMuDst;
   
@@ -137,7 +134,7 @@ public:
   virtual void UsePCT(bool x=true) { mDropPostCrossingTrack = !x; }
   virtual void Finish();
   virtual void Init();
-  virtual void InitRun(int runumber);
+  virtual void InitRun(int runumber, const St_db_Maker* db_maker);
   virtual void Clear(); 
   virtual void CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
 

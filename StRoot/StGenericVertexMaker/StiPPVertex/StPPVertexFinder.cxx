@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.102 2017/03/04 04:50:20 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.103 2017/03/05 21:00:44 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -17,7 +17,6 @@
 #include "TH2F.h"
 #include "TMinuit.h"
 #include "TObjArray.h"
-#include "TObjectSet.h"
 
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
 
@@ -44,11 +43,6 @@
 #include <St_db_Maker/St_db_Maker.h>
 #include <StIOMaker/StIOMaker.h> // to save  local histos 
 #include <StBFChain/StBFChain.h>
-
-#include <StEEmcUtil/database/StEEmcDb.h>
-#include <StEEmcUtil/database/EEmcDbItem.h>
-#include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
-#include <StEEmcUtil/EEmcGeom/EEmcGeomSimple.h>
 
 #include "BtofHitList.h"
 #include "CtbHitList.h"
@@ -87,9 +81,7 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   btofList(nullptr),
   ctbList(nullptr),
   bemcList(new BemcHitList()),
-  eemcList(nullptr),
-  btofGeom(nullptr),
-  geomE(nullptr),
+  eemcList(new EemcHitList()),
   mStMuDst(nullptr)
 {
   mUseCtb = true;                      // default CTB is in the data stream
@@ -120,16 +112,6 @@ void StPPVertexFinder::Init()
   ctbList  = new CtbHitList;
   btofList = new BtofHitList;
   
-
-  // access EEMC-DB
-  StEEmcDb *eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb");
-  assert(eeDb); // eemcDB must be in the chain, fix it,JB
-  LOG_INFO << "eeDb done" <<endm;
-  geomE= new EEmcGeomSimple();
-  // choose which 'stat' bits are fatal for mip detection
-  unsigned int killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
-  eemcList =new EemcHitList(eeDb, killStatEEmc,geomE);
-   
   initHisto();
 
   LOG_INFO << "initiated histos" << endm;
@@ -146,31 +128,14 @@ void StPPVertexFinder::Init()
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::InitRun(int runnumber)
+void StPPVertexFinder::InitRun(int runnumber, const St_db_Maker* db_maker)
 {
+  StGenericVertexFinder::InitRun(runnumber, db_maker);
+
   LOG_INFO << "PPV InitRun() runNo="<<runnumber<<endm;
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
 
   int dateY=mydb->GetDateTime().GetYear();
-  
- // Initialize BTOF geometry
-  if (mUseBtof){ // only add btof if it is required
-    TObjectSet *geom = (TObjectSet *) mydb->GetDataSet("btofGeometry");
-    if (geom)   btofGeom = (StBTofGeometry *) geom->GetObject();
-    if (btofGeom) {
-      LOG_INFO << " Found btofGeometry ... " << endm;
-    } else {
-      btofGeom = new StBTofGeometry("btofGeometry","btofGeometry in VertexFinder");
-      geom = new TObjectSet("btofGeometry",btofGeom);
-      LOG_INFO << " Create a new btofGeometry ... " << endm;
-      mydb->AddConst(geom);
-    } 
-    if(btofGeom && !btofGeom->IsInitDone()) {
-      LOG_INFO << " BTofGeometry initialization ... " << endm;
-      TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
-      btofGeom->Init(mydb, starHall);
-    }
-  }
 
   //.. set various params 
   // It is not clear why one would hard code cuts for any specific run or
@@ -202,12 +167,15 @@ void StPPVertexFinder::InitRun(int runnumber)
     mMinAdcBemc   = 8;    // BTOW used calibration of maxt Et @ ~60Gev 
   }
 
+  // Unfortunately, forced to remove const...
+  St_db_Maker* st_db_maker = const_cast<St_db_Maker*>(db_maker);
+
   if (mUseBtof)
-    btofList->initRun();
+    btofList->initRun(st_db_maker);
 
   ctbList->initRun(); 
-  bemcList->initRun();
-  eemcList->initRun();
+  bemcList->initRun(st_db_maker);
+  eemcList->initRun(st_db_maker);
   
   LOG_INFO 
     << "PPV::cuts "
@@ -345,7 +313,7 @@ void StPPVertexFinder::Clear()
   if (btofList) btofList->clear();
   if (ctbList)  ctbList->clear();
   bemcList->clear();
-  if (eemcList) eemcList->clear();
+  eemcList->clear();
 
   mTrackData.clear();
   mVertexData.clear();
@@ -495,7 +463,7 @@ int StPPVertexFinder::fit(StEvent* event)
     hA[16]->Fill(stiKalmanTrack->getPt());
 
     // ......... matcho various detectors ....................
-    if (mUseBtof) matchTrack2BTOF(stiKalmanTrack, track, btofGeom);  // matching track to btofGeometry
+    if (mUseBtof) matchTrack2BTOF(stiKalmanTrack, track);  // matching track to btofGeometry
     if (mUseCtb)  matchTrack2CTB(stiKalmanTrack, track);
     matchTrack2BEMC(stiKalmanTrack, track);
     matchTrack2EEMC(stiKalmanTrack, track);
@@ -1234,8 +1202,10 @@ bool StPPVertexFinder::examinTrackDca(const StiKalmanTrack* stiTrack, TrackData 
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::matchTrack2BTOF(const StiKalmanTrack* stiTrack, TrackData &track, StBTofGeometry* geom)
+void StPPVertexFinder::matchTrack2BTOF(const StiKalmanTrack* stiTrack, TrackData &track)
 {
+  StBTofGeometry* geom = btofList->Geometry();
+
   StiKalmanTrackNode* ouNode=stiTrack->getOuterMostNode();
 
   StThreeVectorD posTOF;

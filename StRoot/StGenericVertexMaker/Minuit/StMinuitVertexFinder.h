@@ -85,7 +85,7 @@
  * 1D fit and use the beamline constraint to get the x and y positions of the 
  * vertex.
  *
- *  $Id: StMinuitVertexFinder.h,v 1.27 2017/02/21 21:34:21 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.28 2017/03/05 21:00:43 smirnovd Exp $
  *
  */
 
@@ -110,7 +110,7 @@ public:
     virtual        ~StMinuitVertexFinder();
     Int_t           fit(StEvent*);       
     void            printInfo(ostream& = cout) const;
-    virtual void    InitRun  (Int_t runumber);
+    virtual void    InitRun  (Int_t runumber, const St_db_Maker* db_maker);
     void            Clear();
 
 
