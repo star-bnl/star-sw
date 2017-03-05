@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.103 2017/03/05 21:00:44 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.104 2017/03/05 21:00:59 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -84,6 +84,7 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   eemcList(new EemcHitList()),
   mStMuDst(nullptr)
 {
+  mDebugLevel = 1;
   mUseCtb = true;                      // default CTB is in the data stream
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
@@ -109,8 +110,8 @@ void StPPVertexFinder::Init()
   mToolkit = StiToolkit::instance();
   assert(mToolkit);          // internal error of Sti
   
-  ctbList  = new CtbHitList;
-  btofList = new BtofHitList;
+  if (mUseBtof) btofList = new BtofHitList();
+  if (mUseCtb)  ctbList  = new CtbHitList();
   
   initHisto();
 
@@ -133,9 +134,8 @@ void StPPVertexFinder::InitRun(int runnumber, const St_db_Maker* db_maker)
   StGenericVertexFinder::InitRun(runnumber, db_maker);
 
   LOG_INFO << "PPV InitRun() runNo="<<runnumber<<endm;
-  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
 
-  int dateY=mydb->GetDateTime().GetYear();
+  int dateY = db_maker->GetDateTime().GetYear();
 
   //.. set various params 
   // It is not clear why one would hard code cuts for any specific run or
@@ -170,10 +170,9 @@ void StPPVertexFinder::InitRun(int runnumber, const St_db_Maker* db_maker)
   // Unfortunately, forced to remove const...
   St_db_Maker* st_db_maker = const_cast<St_db_Maker*>(db_maker);
 
-  if (mUseBtof)
-    btofList->initRun(st_db_maker);
+  if (mUseBtof) btofList->initRun(st_db_maker);
+  if (mUseCtb)  ctbList->initRun();
 
-  ctbList->initRun(); 
   bemcList->initRun(st_db_maker);
   eemcList->initRun(st_db_maker);
   
@@ -429,7 +428,6 @@ int StPPVertexFinder::fit(StEvent* event)
   StiTrackContainer* stiTracks = mToolkit->getTrackContainer();
    if(stiTracks==0) {
      LOG_WARN <<"no STi tracks , skip eve"<<endm;
-     printInfo();
      return 0 ;
    }
 
@@ -445,7 +443,7 @@ int StPPVertexFinder::fit(StEvent* event)
   {
     const StiKalmanTrack* stiKalmanTrack = static_cast<const StiKalmanTrack*>(stiTrack);
 
-    TrackData track;
+    TrackDataT<StiKalmanTrack> track(*stiKalmanTrack);
 
     ntrk[0]++;
 
@@ -454,7 +452,7 @@ int StPPVertexFinder::fit(StEvent* event)
     if(mDropPostCrossingTrack &&
        isPostCrossingTrack(stiKalmanTrack))          {ntrk[3]++; continue;}  // kill if it has hits in wrong z
     if(!examinTrackDca(stiKalmanTrack, track))       {ntrk[4]++; continue;}  // drop from DCA
-    if(!matchTrack2Membrane(stiKalmanTrack, track))  {ntrk[5]++; continue;}  // kill if nFitP too small
+    if(!matchTrack2Membrane(track))                  {ntrk[5]++; continue;}  // kill if nFitP too small
 
     ntrk[6]++;
 
@@ -469,7 +467,6 @@ int StPPVertexFinder::fit(StEvent* event)
     matchTrack2EEMC(stiKalmanTrack, track);
 
     //.... all test done on this track .........
-    track.mother = stiKalmanTrack;
     mTrackData.push_back(track); 
 
     hA[5]->Fill(track.rxyDca);
@@ -485,14 +482,15 @@ int StPPVertexFinder::fit(StEvent* event)
     hACorr->Fill(track.mBtof, track.mBemc);
   }
 
-  LOG_INFO << "\n"
-           << Form("PPV:: # of input track          = %d\n", ntrk[0])
-           << Form("PPV:: dropped due to flag       = %d\n", ntrk[1])
-           << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
-           << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
-           << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
-           << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
-           << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
+  if (mDebugLevel)
+     LOG_INFO << "\n"
+              << Form("PPV:: # of input track          = %d\n", ntrk[0])
+              << Form("PPV:: dropped due to flag       = %d\n", ntrk[1])
+              << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
+              << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
+              << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
+              << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
+              << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
 
   if(mUseCtb) {
     ctbList ->print();
@@ -518,7 +516,6 @@ int StPPVertexFinder::fit(StEvent* event)
 
   if(nmAny < mMinMatchTr && mStoreUnqualifiedVertex <= 0) {
     LOG_INFO << "StPPVertexFinder::fit() nEve=" << mTotEve << " Quit, to few matched tracks" << endm;
-    printInfo();
     return 0;
   }
 
@@ -527,51 +524,7 @@ int StPPVertexFinder::fit(StEvent* event)
   if(kBemc)  hA[0]->Fill(6);
   if(kEemc)  hA[0]->Fill(7);
 
-  // Select a method to find vertex candidates/seeds. The methods work using the
-  // `mTrackData` and `mDCAs` containers as input whereas the reconstructed
-  // vertices are put in the private container `mVertexData`
-  switch (mSeedFinderType)
-  {
-  case SeedFinder_t::TSpectrum:
-    findSeeds_TSpectrum();
-    break;
-
-  case SeedFinder_t::PPVLikelihood:
-  default:
-    findSeeds_PPVLikelihood();
-    break;
-  }
-  
-  if(mVertexData.size()>0)  hA[0]->Fill(8);
-  if(mVertexData.size()>1)  hA[0]->Fill(9);
-
-  // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
-  // except when the Beamline1D option is specified. This is done to keep
-  // backward compatible behavior when by default the vertex was placed on the
-  // beamline
-  if (mVertexFitMode == VertexFit_t::Beamline1D)
-  {
-     for (VertexData &vertex : mVertexData) {
-        const double& z = vertex.r.Z();
-        vertex.r.SetXYZ( beamX(z), beamY(z), z);
-     }
-
-  } else
-  {
-     for (VertexData &vertex : mVertexData)
-     {
-        // When fitTracksToVertex fails it returns non-zero value. Just use the
-        // beam equation to set the best guess for vertex position. Works for no
-        // beamline case by setting vertex position to (0,0,0)
-        if ( fitTracksToVertex(vertex) ) {
-           const double& z = vertex.r.Z();
-           vertex.r.SetXYZ( beamX(z), beamY(z), z);
-        }
-     }
-  }
-
-  exportVertices();
-  printInfo();
+  seed_fit_export();
   
   hA[4]->Fill(mVertexData.size());
 
@@ -643,9 +596,8 @@ int StPPVertexFinder::Fit(const StMuDst& muDst)
 
       ntrk[6]++;
 
-      TrackData trk;
+      TrackDataT<StMuTrack> trk(stMuTrack);
 
-      trk.mother = &stMuTrack;
       trk.dca    = dca;
       trk.zDca   = dca->z();
       trk.ezDca  = std::sqrt(dca->errMatrix()[2]);
@@ -658,24 +610,33 @@ int StPPVertexFinder::Fit(const StMuDst& muDst)
       // Modify track weights
       matchTrack2BEMC(stMuTrack, trk);
       matchTrack2EEMC(stMuTrack, trk);
-      matchTrack2Membrane(stMuTrack, trk);
+      matchTrack2Membrane(trk);
 
       mTrackData.push_back(trk);
    }
 
-   LOG_INFO << "\n"
-            << Form("PPV:: # of input track          = %d\n", ntrk[0])
-            << Form("PPV:: dropped due to 'dummy'    = %d\n", ntrk[1])
-            << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
-            << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
-            << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
-            << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
-            << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
+   if (mDebugLevel)
+      LOG_INFO << "\n"
+               << Form("PPV:: # of input track          = %d\n", ntrk[0])
+               << Form("PPV:: dropped due to 'dummy'    = %d\n", ntrk[1])
+               << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
+               << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
+               << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
+               << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
+               << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
 
    //btofList->print();
    bemcList->print();
    eemcList->print();
 
+   seed_fit_export();
+
+   return size();
+}
+
+
+void StPPVertexFinder::seed_fit_export()
+{
    // Select a method to find vertex candidates/seeds. The methods work using the
    // `mTrackData` and `mDCAs` containers as input whereas the reconstructed
    // vertices are put in the private container `mVertexData`
@@ -690,26 +651,39 @@ int StPPVertexFinder::Fit(const StMuDst& muDst)
      findSeeds_PPVLikelihood();
      break;
    }
+  
+   if(mVertexData.size()>0)  hA[0]->Fill(8);
+   if(mVertexData.size()>1)  hA[0]->Fill(9);
 
    // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
    // except when the Beamline1D option is specified. This is done to keep
    // backward compatible behavior when by default the vertex was placed on the
    // beamline
-   for (VertexData &V : mVertexData)
+   if (mVertexFitMode == VertexFit_t::Beamline1D)
    {
-      if (mVertexFitMode == VertexFit_t::Beamline1D)
+      for (VertexData &vertex : mVertexData) {
+         const double& z = vertex.r.Z();
+         vertex.r.SetXYZ( beamX(z), beamY(z), z);
+      }
+
+   } else
+   {
+      for (VertexData &vertex : mVertexData)
       {
-         V.r.SetX( beamX( V.r.Z() ));
-         V.r.SetY( beamY( V.r.Z() ));
-      } else {
-         fitTracksToVertex(V);
+         // When fitTracksToVertex fails it returns non-zero value. Just use the
+         // beam equation to set the best guess for vertex position. Works for no
+         // beamline case by setting vertex position to (0,0,0)
+         if ( fitTracksToVertex(vertex) ) {
+            const double& z = vertex.r.Z();
+            vertex.r.SetXYZ( beamX(z), beamY(z), z);
+         }
       }
    }
 
    exportVertices();
-   printInfo();
 
-   return size();
+   if (mDebugLevel)
+      printInfo();
 }
 
 
@@ -1090,7 +1064,6 @@ void StPPVertexFinder::exportVertices()
     //..... add vertex to the list
     addVertex(primV);
   }
-  LOG_DEBUG << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
 }
 
 //-------------------------------------------------
@@ -1458,8 +1431,10 @@ void StPPVertexFinder::matchTrack2EEMC(const StPhysicalHelixD& phys_helix, Track
 
 //==========================================================
 //==========================================================
-bool  
-StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* stiTrack,TrackData &track){
+bool StPPVertexFinder::matchTrack2Membrane(TrackDataT<StiKalmanTrack> &track)
+{
+  const StiKalmanTrack* stiTrack = track.getMother();
+
   const double RxyMin=59, RxyMax=199, zMax=200;
   const double zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
 
@@ -1522,8 +1497,10 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* stiTrack,TrackData &
 }
 
 
-void StPPVertexFinder::matchTrack2Membrane(const StMuTrack& muTrack, TrackData &trk)
+void StPPVertexFinder::matchTrack2Membrane(TrackDataT<StMuTrack> &trk)
 {
+   const StMuTrack& muTrack = *trk.getMother();
+
    // Code from matchTrack2Membrane
    if (mFitPossWeighting) { // introduced in 2012 for pp510 to differentiate between global track quality, together with lowering the overall threshold from 0.7 to 0.51
       double fracFit2PossHits = static_cast<double>(muTrack.nHitsFit(kTpcId)) / muTrack.nHitsPoss(kTpcId);
