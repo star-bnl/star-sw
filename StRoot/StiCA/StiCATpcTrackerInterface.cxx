@@ -335,15 +335,14 @@ void StiCATpcTrackerInterface::MakeSettings()
     SlicePar.SetErrY     (   0.12 ); // 0.06  for Inner                        //TODO initialize from StRoot
     SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner                NodePar->fitPars()        //TODO initialize from StRoot
       //   SlicePar.SetPadPitch (   0.675 );// 0.335 -"-
-#if 0
     if (! StiKalmanTrackNode::IsLaser()) {
-#endif
       float x[3]={0,0,0},b[3];
       StarMagField::Instance()->BField(x,b);
       SlicePar.SetBz       ( - b[2] );   // change sign because change z
-#if 0
-    } else SlicePar.SetBz (0.);
-#endif
+    } else {
+      static const double HZERO=2e-6;
+      SlicePar.SetBz (HZERO);
+    }
     if (sector <= 12) {
       SlicePar.SetZMin     (   0. );                                        //TODO initialize from StRoot
       SlicePar.SetZMax     ( 210. );                                        //TODO initialize from StRoot
@@ -490,18 +489,18 @@ void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
     sa * nodePars.x() + ca * nodePars.y(),
     nodePars.z()
   };
-  double h[3];
-  StarMagField::Instance()->BField( globalXYZ, h );
-  double &h2 = h[2];
+
+  double h2=ZEROHZ;
+  if (! StiKalmanTrackNode::IsLaser()) {
+    double b[3];
+    StarMagField::Instance()->BField(globalXYZ,b);
+    h2 = b[2];
+  } 
+
 #else  // these parameters have been obtained with that MF, so let's use it.
   double h2 = - fTracker->Slice(0).Param().Bz(); // change sign because change z
 #endif // 1
   h2 *= EC;
-#if 0
-  if (fabs(h2) < ZEROHZ || StiKalmanTrackNode::IsLaser()) h2 = 0;
-#else
-  if (fabs(h2) < ZEROHZ) h2 = 0;
-#endif
     // get parameters. continue
   nodePars.hz() = h2;  // Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
   nodePars.ready(); // set cosCA, sinCA & curv
