@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.104 2017/03/05 21:00:59 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.105 2017/03/06 21:41:23 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -110,17 +110,23 @@ void StPPVertexFinder::Init()
   mToolkit = StiToolkit::instance();
   assert(mToolkit);          // internal error of Sti
   
-  if (mUseBtof) btofList = new BtofHitList();
-  if (mUseCtb)  ctbList  = new CtbHitList();
-  
   initHisto();
 
   LOG_INFO << "initiated histos" << endm;
+  
+  // BTOF and/or CTB hits can be requested after the finder is constructed but
+  // before the Init() is called. In this case we need to create the
+  // corresponding hit lists if they are not available
+  if (mUseBtof && !btofList) {
+     btofList = new BtofHitList();
+     btofList->initHisto( &HList);
+  }
 
-  if (mUseBtof)
-    btofList->initHisto( &HList);
+  if (mUseCtb && !ctbList)  {
+     ctbList  = new CtbHitList();
+     ctbList->initHisto(&HList);
+  }
 
-  ctbList->initHisto(&HList);
   bemcList->initHisto(&HList);
   eemcList->initHisto(&HList);
 
