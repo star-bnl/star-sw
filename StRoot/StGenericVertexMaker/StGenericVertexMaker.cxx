@@ -208,7 +208,7 @@ void StGenericVertexMaker::Clear(const char* opt){
  */
 Int_t StGenericVertexMaker::InitRun(int runnumber){
 
-  St_db_Maker *st_db_maker = static_cast<St_db_Maker*>(GetMaker("St_db_Maker"));
+  St_db_Maker *st_db_maker = static_cast<St_db_Maker*>(GetMaker("db"));
   theFinder->InitRun(runnumber, st_db_maker);
 
   return StMaker::InitRun(runnumber);
