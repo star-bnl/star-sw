@@ -34,6 +34,14 @@
 #include "fms_fm103_2015_a.hh"
 #include "l1_fp201_2015_a.hh"
 #include "l1_fp201_2015_b.hh"
+#include "fms_fm001_2017_a.hh"
+#include "fms_fm005_2017_a.hh"
+#include "fms_fm006_2017_a.hh"
+#include "fms_fm101_2017_a.hh"
+#include "fms_fm101_2017_a.hh"
+#include "fms_fm103_2017_a.hh"
+#include "l1_fp201_2017_a.hh"
+#include "l1_fp201_2017_a.hh"
 #include "StFmsTriggerMaker.h"
 
 using namespace std;
@@ -460,7 +468,6 @@ void StFmsTriggerMaker::runFmsLayer0(int t){
     fms_fm006_2011_a(fm012,t);
     break;
   case 2015:
-  default:
     fms_fm001_2015_a(fm001,t,mUseDsmData);
     fms_fm001_2015_a(fm002,t,mUseDsmData);
     fms_fm001_2015_a(fm003,t,mUseDsmData);
@@ -473,6 +480,21 @@ void StFmsTriggerMaker::runFmsLayer0(int t){
     fms_fm006_2015_a(fm010,t,mUseDsmData);
     fms_fm005_2015_a(fm011,t,mUseDsmData);
     fms_fm006_2015_a(fm012,t,mUseDsmData);
+    break;
+  case 2017:
+  default:
+    fms_fm001_2017_a(fm001,t,mUseDsmData);
+    fms_fm001_2017_a(fm002,t,mUseDsmData);
+    fms_fm001_2017_a(fm003,t,mUseDsmData);
+    fms_fm001_2017_a(fm004,t,mUseDsmData);
+    fms_fm005_2017_a(fm005,t,mUseDsmData);
+    fms_fm006_2017_a(fm006,t,mUseDsmData);
+    fms_fm005_2017_a(fm007,t,mUseDsmData);
+    fms_fm006_2017_a(fm008,t,mUseDsmData);
+    fms_fm005_2017_a(fm009,t,mUseDsmData);
+    fms_fm006_2017_a(fm010,t,mUseDsmData);
+    fms_fm005_2017_a(fm011,t,mUseDsmData);
+    fms_fm006_2017_a(fm012,t,mUseDsmData);
     break;
   }
 }
@@ -494,7 +516,6 @@ void StFmsTriggerMaker::runFmsLayer1(int t){
     fms_fm102_2012_a(fm103,t);
     break;
   case 2015:
-  default:
     if(mForceRun<16056024){ 
       fms_fm101_2015_a(fm101,t,mUseDsmData);
       fms_fm101_2015_a(fm102,t,mUseDsmData);
@@ -505,6 +526,13 @@ void StFmsTriggerMaker::runFmsLayer1(int t){
     fms_fm103_2015_a(fm103,t,mUseDsmData);
     fms_fm103_2015_a(fm104,t,mUseDsmData);
     break;
+  case 2017:
+  default:
+    fms_fm101_2017_a(fm101,t,mUseDsmData);
+    fms_fm101_2017_a(fm102,t,mUseDsmData);
+    fms_fm103_2017_a(fm103,t,mUseDsmData);
+    fms_fm103_2017_a(fm104,t,mUseDsmData);
+    break;
   }
 }
 
@@ -514,9 +542,11 @@ void StFmsTriggerMaker::runFpdLayer2(int t){
   case 2012: l1_fp201_2012_b(fp201,t); break;
   case 2013: l1_fp201_2012_b(fp201,t); break;
   case 2015: 
-  default:
     if(mForceRun<16056024)  {l1_fp201_2015_a(fp201,t,mUseDsmData);} 
     else                    {l1_fp201_2015_b(fp201,t,mUseDsmData);}
+    break;
+  case 2017: 
+  default: l1_fp201_2017_a(fp201,t,mUseDsmData);
     break;
   }
 }
@@ -699,8 +729,8 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
     LOG_INFO << Form("DB Year=%d forceYear=%d\n",mDBTime.GetYear(),year) <<endm;
   }
   unsigned int port = 3400+year%100-1; 
-  if(year==2016) {port=3501; host=host2;}
-  if(year>2017) {printf("NO RUN16 DB yet.... Skip for now...\n"); return kStOK; }
+  if(year==2017) {port=3501; host=host2;}
+  if(year>2018) {printf("NO RUN16 DB yet.... Skip for now...\n"); return kStOK; }
   
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;

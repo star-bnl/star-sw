@@ -269,6 +269,21 @@ int StFmsBitCheckMaker::Make(){
   SIM=(StFmsTriggerMaker*)GetMaker("fmstrigger");
   if(!SIM) {printf("No StFmsTriggerMaker found\n"); return kStErr;}
   
+  //unsigned int detmask=td->getTrgDetMask();
+  unsigned int cratemask=td->getTrgCrateMask();
+  //printf("TrgDetMask=%8x TrgCrateMask=%8x\n",detmask,cratemask);
+  //if((cratemask>>FMS_CONF_NUM) & 0x1) printf("FMS ");
+  //if((cratemask>>QT1_CONF_NUM) & 0x1) printf("QT1 ");
+  //if((cratemask>>QT2_CONF_NUM) & 0x1) printf("QT2 ");
+  //if((cratemask>>QT3_CONF_NUM) & 0x1) printf("QT3 ");
+  //if((cratemask>>QT4_CONF_NUM) & 0x1) printf("QT4 ");
+  //printf("\n");
+  if(! (cratemask>>FMS_CONF_NUM) & 0x1) return kStOK;
+  if(! (cratemask>>QT1_CONF_NUM) & 0x1) return kStOK;
+  if(! (cratemask>>QT2_CONF_NUM) & 0x1) return kStOK;
+  if(! (cratemask>>QT3_CONF_NUM) & 0x1) return kStOK;
+  if(! (cratemask>>QT4_CONF_NUM) & 0x1) return kStOK;
+
   static int dbc0 = -999;
   unsigned long long bxinghi,bxing1,bxinglo,bx,bxdiff;
   bxinghi = td->bcData(3);
