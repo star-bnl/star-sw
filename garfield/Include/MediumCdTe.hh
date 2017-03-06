@@ -54,37 +54,36 @@ class MediumCdTe : public Medium {
                              const unsigned int i = 0);
 
  private:
-  // double bandGap;
+  // double m_bandGap;
 
   // Low-field mobility
-  double eMobility, hMobility;
+  double m_eMobility, m_hMobility;
   // Saturation velocity
-  double eSatVel, hSatVel;
+  double m_eSatVel, m_hSatVel;
   // Hall factor
-  double eHallFactor, hHallFactor;
+  double m_eHallFactor, m_hHallFactor;
 
   // Trapping parameters
-  double eTrapCs, hTrapCs;
-  double eTrapDensity, hTrapDensity;
-  double eTrapTime, hTrapTime;
-  int trappingModel;
+  double m_eTrapCs, m_hTrapCs;
+  double m_eTrapDensity, m_hTrapDensity;
+  double m_eTrapTime, m_hTrapTime;
+  unsigned int m_trappingModel;
 
   // Models
   bool m_hasUserMobility;
   bool m_hasUserSaturationVelocity;
 
   // Optical data
-  bool m_hasOpticalData;
-  std::string opticalDataFile;
+  std::string m_opticalDataFile;
   struct opticalData {
     // Energy [eV]
     double energy;
     // Dielectric function
     double eps1, eps2;
   };
-  std::vector<opticalData> opticalDataTable;
+  std::vector<opticalData> m_opticalDataTable;
 
-  bool LoadOpticalData(const std::string filename);
+  bool LoadOpticalData(const std::string& filename);
 };
 }
 

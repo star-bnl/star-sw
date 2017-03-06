@@ -21,7 +21,7 @@ class AvalancheMC {
 
   // Switch on/off drift line plotting
   void EnablePlotting(ViewDrift* view);
-  void DisablePlotting();
+  void DisablePlotting() { m_viewer = NULL; }
 
   // Switch on/off calculation of induced currents (default: disabled)
   void EnableSignalCalculation() { m_useSignal = true; }
@@ -68,7 +68,7 @@ class AvalancheMC {
   void SetCollisionSteps(const int n = 100);
 
   void SetTimeWindow(const double t0, const double t1);
-  void UnsetTimeWindow();
+  void UnsetTimeWindow() { m_hasTimeWindow = false; }
 
   // Treat positive charge carriers as holes or ions (default: ions)
   void SetHoles() { m_useIons = false; }
@@ -89,15 +89,19 @@ class AvalancheMC {
     ni = m_nIons;
   }
 
-  unsigned int GetNumberOfDriftLinePoints() const { return m_nDrift; }
+  unsigned int GetNumberOfDriftLinePoints() const { return m_drift.size(); }
   void GetDriftLinePoint(const unsigned int i, double& x, double& y, double& z,
-                         double& t);
+                         double& t) const;
 
   unsigned int GetNumberOfElectronEndpoints() const {
-    return m_nEndpointsElectrons;
+    return m_endpointsElectrons.size();
   }
-  unsigned int GetNumberOfHoleEndpoints() const { return m_nEndpointsHoles; }
-  unsigned int GetNumberOfIonEndpoints() const { return m_nEndpointsIons; }
+  unsigned int GetNumberOfHoleEndpoints() const { 
+    return m_endpointsHoles.size(); 
+  }
+  unsigned int GetNumberOfIonEndpoints() const { 
+    return m_endpointsIons.size(); 
+  }
 
   void GetElectronEndpoint(const unsigned int i, double& x0, double& y0,
                            double& z0, double& t0, double& x1, double& y1,
@@ -134,22 +138,13 @@ class AvalancheMC {
 
   Sensor* m_sensor;
 
-  unsigned int m_nDrift;
   struct driftPoint {
     // Position
     double x, y, z, t;
-    // Townsend and attachment coefficient
-    double alpha, eta;
     // Number of secondaries produced at this point
     int ne, nh, ni;
   };
   std::vector<driftPoint> m_drift;
-
-  struct avalPoint {
-    double x, y, z, t;
-    int ne, nh, ni;
-  };
-  std::vector<avalPoint> m_aval;
 
   // Step size model
   int m_stepModel;
@@ -169,10 +164,7 @@ class AvalancheMC {
   unsigned int m_nHoles;
   unsigned int m_nIons;
 
-  // Number of endpoints (including captured electrons)
-  unsigned int m_nEndpointsElectrons;
-  unsigned int m_nEndpointsHoles;
-  unsigned int m_nEndpointsIons;
+  // Endpoints (including captured electrons)
   struct endpoint {
     double x0, y0, z0, t0;
     double x1, y1, z1, t1;
@@ -182,7 +174,6 @@ class AvalancheMC {
   std::vector<endpoint> m_endpointsHoles;
   std::vector<endpoint> m_endpointsIons;
 
-  bool m_usePlotting;
   ViewDrift* m_viewer;
 
   bool m_useSignal;
@@ -204,15 +195,41 @@ class AvalancheMC {
 
   bool m_debug;
 
-  // Compute a drift line with starting point (x0, y0, z0)
+  /// Compute a drift line with starting point (x0, y0, z0)
   bool DriftLine(const double x0, const double y0, const double z0,
                  const double t0, const int type, const bool aval = false);
-  bool Avalanche();
-  // Compute effective multiplication and ionisation
-  // for the current drift line
-  bool ComputeAlphaEta(const int q);
-  // Compute the induced signal for the current drift line
+  bool Avalanche(const double x0, const double y0, const double z0,
+                 const double t0, const unsigned int ne, const unsigned int nh,
+                 const unsigned int ni);
+
+  /// Compute electric and magnetic field at a given position.
+  int GetField(const double x, const double y, const double z,
+               double& ex, double& ey, double& ez,
+               double& bx, double& by, double& bz, Medium*& medium);
+  /// Compute the drift velocity.
+  bool GetVelocity(const int type, Medium* medium, 
+                   const double x,const double y, const double z,
+                   const double ex,const double ey, const double ez,
+                   const double bx,const double by, const double bz,
+                   double& vx, double& vy, double& vz);
+  /// Add a diffusion step.
+  bool AddDiffusion(const int type, Medium* medium, const double step,
+                    double& x, double& y, double& z, 
+                    const double vx, const double vy, const double vz,
+                    const double ex, const double ey, const double ez,
+                    const double bx, const double by, const double bz);
+  /// Terminate a drift line close to the boundary.
+  void TerminateLine(double x0, double y0, double z0, double t0,
+                     double& x, double& y, double& z, double& t); 
+  /// Compute multiplication and losses along the current drift line.
+  bool ComputeGainLoss(const int type, int& status);
+  /// Compute Townsend and attachment coefficients along the current drift line.
+  bool ComputeAlphaEta(const int q, std::vector<double>& alphas,
+                       std::vector<double>& etas);
+  bool Equilibrate(std::vector<double>& alphas) const; 
+  /// Compute the induced signal for the current drift line.
   void ComputeSignal(const double q);
+  /// Compute the induced charge for the current drift line.
   void ComputeInducedCharge(const double q);
 };
 }

@@ -82,10 +82,12 @@ class MediumMagboltz : public MediumGas {
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
                             double& dx, double& dy, double& dz, int& nion,
                             int& ndxc, int& band);
-  int GetNumberOfIonisationProducts() { return nIonisationProducts; }
-  bool GetIonisationProduct(const int i, int& type, double& energy);
+  unsigned int GetNumberOfIonisationProducts() { return m_ionProducts.size(); }
+  bool GetIonisationProduct(const unsigned int i, int& type, double& energy);
   void ComputeDeexcitation(int iLevel, int& fLevel);
-  int GetNumberOfDeexcitationProducts() { return nDeexcitationProducts; }
+  unsigned int GetNumberOfDeexcitationProducts() { 
+    return nDeexcitationProducts; 
+  }
   bool GetDeexcitationProduct(const int i, double& t, double& s, int& type,
                               double& energy);
 
@@ -257,12 +259,11 @@ class MediumMagboltz : public MediumGas {
   int iDeexcitation[nMaxLevels];
 
   // List of ionisation products.
-  int nIonisationProducts;
   struct ionProd {
     int type;
     double energy;
   };
-  std::vector<ionProd> ionProducts;
+  std::vector<ionProd> m_ionProducts;
 
   // List of de-excitation products
   int nDeexcitationProducts;

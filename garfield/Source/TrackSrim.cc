@@ -263,6 +263,8 @@ bool TrackSrim::ReadFile(const std::string& file) {
       m_range[ntable] *= 1.0e-4;
     } else if (strcmp(token, "mm") == 0) {
       m_range[ntable] *= 1.0e-1;
+    } else if (strcmp(token, "m") == 0) {
+      m_range[ntable] *= 1.0e2;
     } else if (strcmp(token, "cm") != 0) {
       std::cerr << hdr << "Unknown distance unit " << token << "; aborting\n";
       return false;
