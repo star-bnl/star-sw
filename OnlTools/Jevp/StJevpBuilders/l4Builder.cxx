@@ -759,12 +759,11 @@ void l4Builder::event(daqReader *rdr)
 
 	omp_set_nested(1);
 	omp_set_dynamic(0);
-#pragma omp parallel sections num_threads(19)
+#pragma omp parallel sections num_threads(21)
 	{
 
 #pragma omp section
 	  {
-
 	    if(!TriggerFilled) {
 		TriggerFilled = true;
 		addServerTags("L4Trigger");
@@ -1106,10 +1105,9 @@ void l4Builder::event(daqReader *rdr)
 
 #pragma omp section
 	  {
-	    // primary tracks
-
+	    
 	    double Array_dcaXy[hlt_node->nNodes];
-	    double Array_dcaZ[hlt_node->nNodes];	    
+	    double Array_dcaZ[hlt_node->nNodes];
 
 #pragma omp parallel for num_threads(4)
 
@@ -1138,7 +1136,52 @@ void l4Builder::event(daqReader *rdr)
 	      }
 	    }
 	  }
+	  
+#pragma omp section
+	  {
+	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+	      int     tofHitSN       = hlt_node->node[i].tofHitSN;
+	       if(tofHitSN >= 0) 
+		{
+		  int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+		  //int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+		  hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
+		  double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
+		  double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
+		  double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
+		  double  theSign        = (cross >= 0) ? 1. : -1.;
+		  double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
+		  double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
 
+		  hDcaXy_TofMatch->Fill(dcaXy);
+		  hDcaZ_TofMatch->Fill(dcaZ);
+		}
+	    }
+	  }
+
+
+#pragma omp section
+	  {
+	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+	      int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
+	      if(emcTowerSN >= 0)
+		{
+		  int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
+		  int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
+		  hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
+		  double  dcaX           = GTrack.r0 * cos(GTrack.phi0) - hlt_eve->lmVertexX;
+		  double  dcaY           = GTrack.r0 * sin(GTrack.phi0) - hlt_eve->lmVertexY;
+		  double  cross          = dcaX * sin(GTrack.psi) - dcaY * cos(GTrack.psi);
+		  double  theSign        = (cross >= 0) ? 1. : -1.;
+		  double  dcaXy          = theSign * sqrt(pow(dcaX, 2) + pow(dcaY, 2));
+		  double  dcaZ           = GTrack.z0 - hlt_eve->lmVertexZ;
+		  
+		  hDcaXy_EMCMatch->Fill(dcaXy);
+		  hDcaZ_EMCMatch->Fill(dcaZ);
+		}
+	    }
+	  }
+	  
 #pragma omp section
 	  {
 	    
@@ -2200,6 +2243,30 @@ void l4Builder::defineHltPlots()
 	ph->histo = hDcaZ;
 	HltPlots[index]->addHisto(ph);
 
+	index++;
+	hDcaXy_TofMatch = new TH1D("DcaXy_TofMatch", "DcaXy_TofMatch", 120, -6., 6.);
+	ph = new PlotHisto();
+	ph->histo = hDcaXy_TofMatch;
+	HltPlots[index]->addHisto(ph);
+
+	index++;
+	hDcaZ_TofMatch = new TH1D("DcaZ_TofMatch", "DcaZ_TofMatch", 120, -6., 6.);
+	ph = new PlotHisto();
+	ph->histo = hDcaZ_TofMatch;
+	HltPlots[index]->addHisto(ph);
+
+	index++;
+	hDcaXy_EMCMatch = new TH1D("DcaXy_EMCMatch", "DcaXy_EMCMatch", 120, -6., 6.);
+	ph = new PlotHisto();
+	ph->histo = hDcaXy_EMCMatch;
+	HltPlots[index]->addHisto(ph);
+
+	index++;
+	hDcaZ_EMCMatch = new TH1D("DcaZ_EMCMatch", "DcaZ_EMCMatch", 120, -6., 6.);
+	ph = new PlotHisto();
+	ph->histo = hDcaZ_EMCMatch;
+	HltPlots[index]->addHisto(ph);
+	
 	index++; 
 	hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
 	HltPlots[index]->setDrawOpts("colz");
