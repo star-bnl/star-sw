@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.10 2017/03/02 18:25:46 jeromel Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.11 2017/03/08 23:59:20 jdb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -600,10 +600,10 @@ int StBTofSimMaker::fillEvent()
     if (!mIsEmbedding) {
         //! Fill StBTofHeader --
 
-        StBTofHeader *tofHeader = 0;
+        StBTofHeader *tofHeader = mBTofCollection->tofHeader();
         StBTofHeader aHead;
 
-        if(!mBTofCollection) {
+        if(!tofHeader) {
               LOG_INFO << " No StEvent/btofCollection, creating new... " << endm;
               mBTofCollection->setHeader(new StBTofHeader(aHead));
          }
