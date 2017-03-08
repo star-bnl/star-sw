@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.13 2009/12/09 14:41:30 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.14 2017/03/02 18:28:38 jeromel Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.14  2017/03/02 18:28:38  jeromel
+// No changes, just empty lines cleanup
+//
 // Revision 1.13  2009/12/09 14:41:30  jcs
 // delta_t0 and delta_gas can now both = 0
 // new space point calculation always necessary since reconstruction done with data t0
@@ -84,7 +87,7 @@ StFtpcCalibMaker::StFtpcCalibMaker(const char *name):
 //_____________________________________________________________________________
 
 StFtpcCalibMaker::~StFtpcCalibMaker(){
-  
+
 }
 
 //_____________________________________________________________________________
@@ -92,7 +95,7 @@ StFtpcCalibMaker::~StFtpcCalibMaker(){
 void StFtpcCalibMaker::GetRunInfo(TString filename){
 
   StFtpcLaser *j = new StFtpcLaser();
- 
+
   j->Init(filename);
   j->GetTreeEntry(0);
   LOG_DEBUG<<"StFtpcCalibMaker::GetRunInfo  j->Run.run = "<<j->Run.run<<" j->Run.date = "<<j->Run.date<<" j->Run.time = "<<j->Run.time<<" j->Run.micropertimebin = "<<j->Run.micropertimebin<<" j->Run.normalizedNowPressure = "<<j->Run.normalizedNowPressure <<" j->Run.standardPressure = "<<j->Run.standardPressure<<" j->Run.baseTemperature = "<<j->Run.baseTemperature<<" j->Run.gasTemperatureWest = "<<j->Run.gasTemperatureWest<<" j->Run.gasTemperatureEast = "<<j->Run.gasTemperatureEast<<endm;
@@ -107,7 +110,7 @@ void StFtpcCalibMaker::GetRunInfo(TString filename){
   gasTemperatureEast = j->Run.gasTemperatureEast;
   delete j;  // destructor matches second constructor only
   return;
-  
+
 }
 
 //_____________________________________________________________________________
@@ -157,7 +160,7 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      LOG_INFO << "StFtpcCalibMaker::DbInit - flavor set to ffn10kv"<<endm;
   }
-  
+
   ftpc_db  = GetDataBase("ftpc");
   if (!ftpc_db) {
      LOG_WARN << "StFtpcCalibMaker::DbInit - run parameter database StarDb/ftpc not found"<<endm;
@@ -177,7 +180,7 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   St_DataSetIter dblocal_geometry(ftpc_geometry_db);
-  
+
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
   m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ");
 
@@ -216,7 +219,7 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
 				m_driftfield);
 
   //LOG_DEBUG<<"StFtpcCalibMaker::DbInit - Ftpc db reader created"<<endm;
- 
+
   return kStOK;
 
 }
@@ -272,7 +275,7 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
       if (trafo->calcpadtrans()) {
         LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - calcpadtrans done !"<<endm;
       }
-      else{ 
+      else{
 	LOG_FATAL<<"StFtpcCalibMaker::DoLaserCalib - fatal error in calcpadtrans !"<<endm;
         delete trafo;
         return;
@@ -280,13 +283,13 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   //}
 
   StFtpcLaserCalib *l=new StFtpcLaserCalib(ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,atof(t0),atof(gas),gastemp,trafo,m_magf);
- 
+
   l->Init(filename);
   l->MakeOutput(filename,t0,gas,gastemp);
- 
+
   Int_t maxentries=l->btcluster->GetEntries();
   LOG_INFO<<" "<<endm;
-  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - processing Cluster-on-Track-Tree with "<<maxentries<<" clusters... please be patient"<<endm; 
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - processing Cluster-on-Track-Tree with "<<maxentries<<" clusters... please be patient"<<endm;
   LOG_INFO<<" "<<endm;
 
   for (int k=0;k<=maxentries;k++)
@@ -295,10 +298,10 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
         //LOG_DEBUG<<"StFtpcCalibMaker::DoLaserCalib() - "<<k<<" cluster on tracks processed"<<endm;
       }
       l->GetTreeEntry(k);
-      
+
       //calculate hardware sector
       int hardsec = 6*(int)((l->tcluster.row-1)/2) + l->tcluster.sec;
-      
+
       //LOG_DEBUG<<"StFtpcCalibMaker::DoLaserCalib() -  hardsec "<< hardsec<<endm;
 
       // activate following code line to debug with 2 events
@@ -315,20 +318,20 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
 	      i++;
 	    }
 	  else
-	    { 
+	    {
 	      if (l->laser_straight(l->radius,i)==l->STRAIGHT || l->STRAIGHT==3)
 		if (l->laser_fit(i)==0) {}
-	     
+
 	      i=0;
 	      l->fillarray(l->thit.x,l->thit.y,l->thit.z,l->thit.ex,l->thit.ey,i,hardsec,l->tcluster.padpos,l->tcluster.padpossigma,l->tcluster.sec,l->tcluster.row,l->tcluster.timepos,l->tcluster.padlength,l->tcluster.timelength,l->tcluster.peakheight,l->tcluster.charge);
-	      i++;     
+	      i++;
 	    }
 	}
       else
 	{
 	  if (l->laser_straight(l->radius,i)==l->STRAIGHT || l->STRAIGHT==3)
 	    if (l->laser_fit(i)==0) {}
-	  
+
 	  i=0;
 	  l->fillarray(l->thit.x,l->thit.y,l->thit.z,l->thit.ex,l->thit.ey,i,hardsec,l->tcluster.padpos,l->tcluster.padpossigma,l->tcluster.sec,l->tcluster.row,l->tcluster.timepos,l->tcluster.padlength,l->tcluster.timelength,l->tcluster.peakheight,l->tcluster.charge);
 	  i++;
@@ -337,17 +340,17 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
       neventold=l->tevent.nevent;
       ntracksold=l->tcluster.ntracks;
     }
-  
+
   if (l->laser_straight(l->radius,i)==l->STRAIGHT || l->STRAIGHT==3)
     if (l->laser_fit(i)==0) {}
-  
+
   l->MakePs();
   l->PositionLog();
 
   l->analyse_defl();
 
   delete l;
-  
+
   if (t0!=0)
     delete trafo;
 
@@ -383,7 +386,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
 
       deltap = deltapW;
       LOG_INFO<<"StFtpcCalibMaker::DoT0Calib deltap = deltapW = "<<deltap<<endm;
- 
+
 
       trafo = new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
 
@@ -420,13 +423,13 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
   HistInit(4,filename,t0,gas);
 
   StFtpcLaser *l=new StFtpcLaser();
- 
+
   l->Init(filename);
 
   Int_t maxentries=(int) l->bcluster->GetEntries();
 
   LOG_INFO<<" "<<endm;
-  LOG_INFO<<"StFtpcCalibMaker::DoT0Calib() - processing Cluster-Tree with "<<maxentries<<" clusters... please be patient"<<endm; 
+  LOG_INFO<<"StFtpcCalibMaker::DoT0Calib() - processing Cluster-Tree with "<<maxentries<<" clusters... please be patient"<<endm;
   LOG_INFO<<" "<<endm;
 
   Float_t x,y,rad;//,phi;
@@ -436,7 +439,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
       if (k%(maxentries/10)==0 && k>0) {
          //LOG_DEBUG<<k<<" cluster on tracks processed"<<endm;
       }
-    
+
       l->GetClusterTreeEntry(k);
 
   // new space point calculation always necessary since reconstruction done with data t0
@@ -445,7 +448,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
             trafo->padtrans(l->cluster.row,l->cluster.sec,l->cluster.timepos,l->cluster.padpos,&x,&y);
           else
             trafo2->padtrans(l->cluster.row,l->cluster.sec,l->cluster.timepos,l->cluster.padpos,&x,&y);
-      //} 
+      //}
       //else {
       //     x=l->hit.x;
       //     y=l->hit.y;
@@ -493,7 +496,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
  */
 
 void StFtpcCalibMaker::HistInit(int nradbins,TString fname, char* t0, char* gas)
-{   
+{
 
   TString outname=fname;
   outname +="_";
@@ -501,7 +504,7 @@ void StFtpcCalibMaker::HistInit(int nradbins,TString fname, char* t0, char* gas)
   outname +="_";
   outname +=gas;
   outname +="_t0.root";
-  
+
   // DEBUG :
   //LOG_DEBUG<<" "<<endm;LOG_DEBUG<<"HistInit() ..."<<endm;LOG_DEBUG<<" "<<endm;
 
@@ -549,9 +552,9 @@ void StFtpcCalibMaker::MakeT0Ps(int nradbins,TString psname, char* t0, char* gas
   fps->NewPage();
 
   c1->Divide(2,2);
-   
+
   TLine *inner=new TLine();
-  
+
   c1->cd(1);
   hradwall->Draw();inner=new TLine(7.8,0,7.8,hradwall->GetMaximum());inner->SetLineColor(2);inner->Draw();
   c1->cd(2);
@@ -583,8 +586,8 @@ void StFtpcCalibMaker::MakeT0Ps(int nradbins,TString psname, char* t0, char* gas
   //htimee->DrawCopy();
 
   c1->Update();
-  
+
   fps->Close();
-  
+
   delete c1;
 }
