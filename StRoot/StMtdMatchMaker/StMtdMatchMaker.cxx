@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.37 2017/02/13 02:57:10 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.38 2017/03/08 20:48:54 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,11 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.38  2017/03/08 20:48:54  marr
+ * 1) Add a new data member mYear to indicate run year
+ * 2) Invoke appropriate functions in StMtdGeometry class to calculate local y
+ * to make the class backward compatible
+ *
  * Revision 1.37  2017/02/13 02:57:10  marr
  * From 2017, do not move BL 8&24 along y direction by hand since this is already
  * done in the geometry file. Calibration, production and analysis should use
@@ -252,6 +257,7 @@ StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 	ngTracks = 0;
 	mEvent = NULL;
 	mMuDst = NULL;
+	mYear  = -1;
 	mGeomTag = "";
 
 	fZReso = new TF1("fZReso","sqrt([0]/x/x+[1])",0,100);
@@ -466,6 +472,10 @@ void StMtdMatchMaker::bookHistograms(){
 
 /// InitRun: initialize geometries (retrieve beam line constraint from database)
 Int_t StMtdMatchMaker::InitRun(int runnumber) {
+
+        // Get run year
+        mYear= (Int_t)(runnumber/1000000) + 1999;
+	LOG_INFO << "Run year = " << mYear << endm;
 
 	//=======================================================//
 	//  			MTD Geometry initialization
@@ -1445,9 +1455,12 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 	    Int_t   ibackleg = vbackleg[j];
 	    Int_t   imodule  = vmodule[j];
 	    Int_t   icell    = vcell[j];
+	    Int_t   iidTruth = vidTruth[j];
 
 	    Float_t trkLocalY = vyhit[j];
-	    Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+	    Float_t hitLocalY = -999.;
+	    if(mYear<=2016) hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell,ibackleg,iidTruth);
+	    else            hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
 	    Float_t dy = fabs(trkLocalY-hitLocalY);
 
 	    Float_t trkGlobalZ = vPosition[j].z();
@@ -1624,9 +1637,12 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		  Int_t   ibackleg = vbackleg[ttCandidates[j]];
 		  Int_t   imodule = vmodule[ttCandidates[j]];
 		  Int_t   icell = vcell[ttCandidates[j]];
+		  Int_t   iidTruth = vidTruth[ttCandidates[j]];
 
 		  Float_t trkLocalY = vyhit[ttCandidates[j]];
-		  Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+		  Float_t hitLocalY = -999.;
+		  if(mYear<=2016) hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell,ibackleg,iidTruth);
+		  else            hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
 		  Float_t dy = fabs(trkLocalY-hitLocalY);
 		  
 		  Float_t trkGlobalZ = vPosition[ttCandidates[j]].z();
@@ -1708,7 +1724,10 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		Float_t trkLocalZ  = finalMatchedCellsVec[ii].zhit;
 		Float_t trkGlobalZ = finalMatchedCellsVec[ii].hitPosition.z();
 
-		Float_t hitLocalY = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
+		Int_t   hitIdTruth = finalMatchedCellsVec[ii].idTruth;	  
+		Float_t hitLocalY = -999.;
+		if(mYear<=2016) hitLocalY = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell,backleg,hitIdTruth);
+		else            hitLocalY = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
 		Float_t LeTimeWest = finalMatchedCellsVec[ii].leadingEdgeTime.first;
 		Float_t LeTimeEast = finalMatchedCellsVec[ii].leadingEdgeTime.second;
 		Float_t hitGlobalZ = getMtdHitGlobalZ(LeTimeWest, LeTimeEast, module);
