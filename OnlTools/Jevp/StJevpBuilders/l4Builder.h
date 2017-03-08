@@ -168,6 +168,11 @@ class l4Builder : public JevpBuilder {
 		TH1I *hnDedx; 
 		TH1D *hDcaXy;
 		TH1D *hDcaZ ;
+		TH1D *hDcaXy_TofMatch;
+		TH1D *hDcaZ_TofMatch ;
+		TH1D *hDcaXy_EMCMatch;
+		TH1D *hDcaZ_EMCMatch ;
+
 		TH1D *hLn_dEdx;
 		TH1D *hGlob_Pt;
 		TH1D *hGlob_Phi;
