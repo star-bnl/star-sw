@@ -52,19 +52,22 @@
 #include "StMtdUtil/StMtdGeometry.h"
 #include "StMtdQAMaker.h"
 #include "tables/St_mtdModuleToQTmap_Table.h"
+#include "tables/St_mtdQTSlewingCorr_Table.h"
+#include "tables/St_mtdQTSlewingCorrPart2_Table.h"
 
 ClassImp(StMtdQAMaker)
 
 //_____________________________________________________________________________
 StMtdQAMaker::StMtdQAMaker(const Char_t *name) : 
   StMaker(name),
-  mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mVertexMode(0), mVertexIndex(-1), mRunId(-1), mRunCount(0), mTriggerData(0),
+  mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mVertexMode(0), mVertexIndex(-1), mRunId(-1), mRunYear(-1),
+  mRunCount(0), mTriggerData(0),
   mMuDstIn(kFALSE), mPrintMemory(kFALSE), mPrintCpu(kFALSE), mPrintConfig(kFALSE),
   mTriggerIDs(0),
   mMaxVtxZ(100.), mMaxVtxDz(5.),
   mMinTrkPt(1.), mMaxTrkPt(1e4), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-0.8), mMaxTrkEta(0.8),
   mMinNHitsFit(15), mMinNHitsDedx(10), mMinFitHitsFraction(0.52), mMaxDca(3.), mMinNsigmaPi(-1.), mMaxNsigmaPi(3.),
-  mTrigTimeCut(kFALSE), mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mQATree(NULL)
+  mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mQATree(NULL)
 {
   // default constructor
   mTrigTime[0] = -1;
@@ -211,6 +214,52 @@ Int_t StMtdQAMaker::InitRun(const Int_t runNumber)
 	    mQTtoModule[mModuleToQT[i][j]-1][mModuleToQTPos[i][j]-1] = j + 1;
 	}
     }
+
+  // online slewing correction for QT board
+  memset(mQTSlewBinEdge,-1,sizeof(mQTSlewBinEdge));
+  memset(mQTSlewCorr,-1,sizeof(mQTSlewCorr));
+  LOG_INFO << "Retrieving mtdQTSlewingCorr table from database ..." << endm;
+  dataset = GetDataBase("Calibrations/mtd/mtdQTSlewingCorr");
+  St_mtdQTSlewingCorr *mtdQTSlewingCorr = static_cast<St_mtdQTSlewingCorr*>(dataset->Find("mtdQTSlewingCorr"));
+  if(!mtdQTSlewingCorr)
+    {
+      LOG_ERROR << "No mtdQTSlewingCorr table found in database" << endm;
+      return kStErr;
+    }
+  mtdQTSlewingCorr_st *mtdQTSlewingCorrtable = static_cast<mtdQTSlewingCorr_st*>(mtdQTSlewingCorr->GetTable());
+  for(int j=0; j<4; j++)
+    {
+      for(int i=0; i<16; i++)
+        {
+          for(Int_t k=0; k<8; k++)
+            {
+              Int_t index = j*16*8 + i*8 + k;
+              mQTSlewBinEdge[j][i][k] = (int) mtdQTSlewingCorrtable->slewingBinEdge[index];
+              mQTSlewCorr[j][i][k] = (int) mtdQTSlewingCorrtable->slewingCorr[index];
+            }
+        }
+    }
+
+  dataset = GetDataBase("Calibrations/mtd/mtdQTSlewingCorrPart2");
+  if(dataset)
+    {
+      St_mtdQTSlewingCorrPart2 *mtdQTSlewingCorr2 = static_cast<St_mtdQTSlewingCorrPart2*>(dataset->Find("mtdQTSlewingCorrPart2"));
+      mtdQTSlewingCorrPart2_st *mtdQTSlewingCorrtable2 = static_cast<mtdQTSlewingCorrPart2_st*>(mtdQTSlewingCorr2->GetTable());
+      for(int j=0; j<4; j++)
+        {
+          for(int i=0; i<16; i++)
+            {
+              for(Int_t k=0; k<8; k++)
+                {
+                  Int_t index = j*16*8 + i*8 + k;
+                  mQTSlewBinEdge[j+4][i][k] = (int) mtdQTSlewingCorrtable2->slewingBinEdge[index];
+                  mQTSlewCorr[j+4][i][k] = (int) mtdQTSlewingCorrtable2->slewingCorr[index];
+                }
+            }
+        }
+    }
+  LOG_INFO << "===== End retrieving mtdQTSlewingCorr =====" << endm;
+
   return kStOK;
 }
 
@@ -313,319 +362,6 @@ Int_t StMtdQAMaker::processStEvent()
 {
   // Event statistics
   mhEventTrig->Fill(0.5);
-  mTriggerData = 0;
-
-  StMtdCollection *mtdCollection = mStEvent->mtdCollection();
-  if(!mtdCollection)
-    {
-      LOG_WARN << "No MTD collection is available ..." << endm;
-      return kStErr;
-    }
-
-  // select valid triggers
-  Bool_t isGoodTrigger = kFALSE;
-  Int_t nTrig = mTriggerIDs.size();
-  if(nTrig==0) 
-    {
-      isGoodTrigger = kTRUE;
-    }
-  else
-    {
-      for(Int_t i=0; i<nTrig; i++)
-	{
-	  if(mStEvent->triggerIdCollection()->nominal()->isTrigger(mTriggerIDs[i]))
-	    {
-	      isGoodTrigger = kTRUE;
-	      break;
-	    }
-	}
-    }
-  if(!isGoodTrigger) 
-    {
-      LOG_WARN << "No valid trigger in StEvent ... " << endm;
-      return kStWarn;
-    }
-  mhEventTrig->Fill(1.5);
-
-  // Cut on vertex z
-  StVertex* priVertex = NULL;
-  if(!mIsCosmic)
-    {
-      priVertex = dynamic_cast<StVertex*> (mStEvent->primaryVertex());
-      if(!priVertex) return kStErr;
-      StThreeVectorF verPos = priVertex->position();
-      mhVertexZ->Fill(verPos.z());
-      if(TMath::Abs(verPos.z())>mMaxVtxZ) return kStWarn;
-      mMtdData.vertexX = verPos.x();
-      mMtdData.vertexY = verPos.y();
-      mMtdData.vertexZ = verPos.z();
-    }
-  mhEventTrig->Fill(2.5);  
-
-  mMtdData.runId   = mStEvent->runId();
-  mMtdData.eventId = mStEvent->id();
-
-  // collect trigger information
-  Int_t nTrigger = 0;
-  for(UInt_t i=0; i<mTriggerIDs.size(); i++)
-    {
-      if(mStEvent->triggerIdCollection()->nominal()->isTrigger(mTriggerIDs[i]))
-	{
-	  mMtdData.triggerId[nTrigger] = mTriggerIDs[i];
-	  mhEventTrig->Fill(3.5+i);
-	  nTrigger++;
-	}
-    }
-  mMtdData.nTrigger = nTrigger;
-  mTriggerData = (StTriggerData*)mStEvent->triggerData();
-  
-  // start time & VPD vz
-  Double_t tStart = -999;
-  Double_t vpdz   = -999;
-  StBTofCollection * tofCollection = mStEvent->btofCollection(); 
-  if(tofCollection)
-    {
-      StBTofHeader *tofHeader = tofCollection->tofHeader();
-      if(tofHeader)
-	{
-	  tStart = tofHeader->tStart();
-	  vpdz   = tofHeader->vpdVz();
-	}
-    }
-  mMtdData.tofStartTime = tStart;
-  mMtdData.vpdVz        = vpdz;
-
-  // find the primary vertex that is closest to the VPD vz
-  if(TMath::Abs(mMtdData.vpdVz)<200)
-    {
-      Int_t nPrim = mStEvent->numberOfPrimaryVertices();
-      Double_t min_dz = 999;
-      Int_t index = -1;
-      LOG_DEBUG << nPrim << " primary vertices in StEvent" << endm;
-      for(Int_t i=0; i<nPrim; i++)
-	{
-	  StPrimaryVertex *vertex = mStEvent->primaryVertex(i);
-	  Double_t dz = TMath::Abs(vertex->position().z()-mMtdData.vpdVz);
-	  if(dz<min_dz)
-	    {
-	      min_dz = dz;
-	      index = i;
-	    }
-	}
-    }
-
-  // MTD trigger time
-  StMtdHeader *mtdHeader = mtdCollection->mtdHeader();
-  if(mtdHeader)
-    {
-      mMtdData.mtdTriggerTime[0] = 25.*(mtdHeader->triggerTime(0)&0xfff);
-      mMtdData.mtdTriggerTime[1] = 25.*(mtdHeader->triggerTime(1)&0xfff);
-    }
-  else
-    {
-      mMtdData.mtdTriggerTime[0] = -99999;
-      mMtdData.mtdTriggerTime[1] = -99999;
-    }
-  for(Int_t i=0; i<2; i++)
-    mTrigTime[i] = mMtdData.mtdTriggerTime[i];
-
-  // MTD raw hits
-  StSPtrVecMtdRawHit& mtdRawHits = mtdCollection->mtdRawHits();
-  Int_t nMtdRawHits = mtdRawHits.size();
-  
-  for(Int_t i=0; i<nMtdRawHits; i++)
-    {
-      StMtdRawHit *rawHit = mtdRawHits[i];
-      if(!rawHit) continue;
-      Int_t backleg = rawHit->backleg();
-      if(backleg<1 || backleg>30) continue;
-      mMtdData.mtdRawHitFlag[i]    = rawHit->flag();
-      mMtdData.mtdRawHitBackleg[i] = backleg;
-      mMtdData.mtdRawHitChan[i]    = rawHit->channel();
-      mMtdData.mtdRawHitModule[i]  = (rawHit->channel()-1)/gMtdNChannels+1;
-      mMtdData.mtdRawHitTdc[i]     = rawHit->tdc()*gMtdConvertTdcToNs;
-      Double_t tDiff = mMtdData.mtdRawHitTdc[i] - mMtdData.mtdTriggerTime[rawHit->fiberId()];
-      while(tDiff<0) tDiff += 51200;
-      mMtdData.mtdRawHitTimdDiff[i] = tDiff;
-    }
-  mMtdData.nMtdRawHits = nMtdRawHits;
-
- // Tracks
-  StSPtrVecTrackNode& nodes = mStEvent->trackNodes();
-  Int_t nNodes = nodes.size();
-  for(Int_t i=0; i<nNodes; i++)
-    {
-      StTrack *gTrack = nodes[i]->track(global);
-      if(!gTrack) continue;
-      StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(gTrack);
-      if(!globalTrack) continue;
-      THelixTrack    thelix      =  globalTrack->dcaGeometry()->thelix();
-      const Double_t *pos        = thelix.Pos();
-      StThreeVectorF dcaGlobal   = StThreeVectorF(pos[0],pos[1],pos[2]) - priVertex->position(); 
-      mhTrkDca->Fill( globalTrack->geometry()->momentum().perp(), dcaGlobal.mag());
-    }
-
-  // MTD hits
-  StSPtrVecMtdHit& mtdHits = mtdCollection->mtdHits();
-  Int_t nMtdHits = mtdHits.size();
-  Int_t nMatchMtdHit = 0;
-  static StPionPlus* Pion = StPionPlus::instance();
-  for(Int_t i=0; i<nMtdHits; i++)
-    {
-      StMtdHit *hit = mtdHits[i];
-      if(!hit) continue;
-      Int_t backleg = hit->backleg();
-      if(backleg<1 || backleg>30) continue;
-      mMtdData.mtdHitBackleg[i]    = backleg;
-      mMtdData.mtdHitModule[i]     = hit->module();
-      mMtdData.mtdHitChan[i]       = hit->cell();
-      mMtdData.mtdHitLeTimeWest[i] = hit->leadingEdgeTime().first;
-      mMtdData.mtdHitLeTimeEast[i] = hit->leadingEdgeTime().second;
-      mMtdData.mtdHitTotWest[i]    = hit->tot().first;
-      mMtdData.mtdHitTotEast[i]    = hit->tot().second;
-      mMtdData.mtdHitPhi[i]        = getMtdHitGlobalPhi(hit);
-      mMtdData.mtdHitZ[i]          = getMtdHitGlobalZ(hit);
-      Int_t tHub = getMtdHitTHUB(backleg);
-      Double_t tDiff = (mMtdData.mtdHitLeTimeWest[i]+mMtdData.mtdHitLeTimeEast[i])/2 - mMtdData.mtdTriggerTime[tHub-1];
-      while(tDiff<0) tDiff += 51200;
-      mMtdData.mtdHitTrigTime[i] = tDiff;
-      mMtdData.isGoodMtdHit[i] = kTRUE;
-      if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
-	mMtdData.isGoodMtdHit[i] = kFALSE;
-
-      mMtdData.mtdHitPhi[i]         = getMtdHitGlobalPhi(hit);
-      mMtdData.mtdHitZ[i]           = getMtdHitGlobalZ(hit);
-
-      mMtdData.isMatched[i] = kFALSE;
-      StTrack *gTrack = hit->associatedTrack();
-      if(!gTrack || !isValidTrack(gTrack,priVertex)) continue;
-      mMtdData.isMatched[i] = kTRUE;
-      StThreeVectorF trkMom = gTrack->geometry()->momentum();
-      StSPtrVecTrackPidTraits& traits = gTrack->pidTraits();
-      StMtdPidTraits *mtdPid = 0;
-      for(UInt_t it=0; it<traits.size(); it++)
-	{
-	  if(traits[it]->detector()==kMtdId)
-	    {
-	      mtdPid = dynamic_cast<StMtdPidTraits*>(traits[it]);
-	    }
-	}
-      if(!mtdPid) continue;
-      StThreeVectorF projPos = mtdPid->position();
-      Double_t dedx = -999;
-      StTpcDedxPidAlgorithm pidAlgorithm;
-      const StParticleDefinition *pd = gTrack->pidTraits(pidAlgorithm);
-      if(pd && pidAlgorithm.traits())
-	{
-	  dedx = pidAlgorithm.traits()->mean();
-	}
-      mMtdData.isMatched[i] = 1;
-      mMtdData.mtdMatchTrkPathLength[i] = mtdPid->pathLength();
-      mMtdData.mtdMatchTrkTof[i]        = mtdPid->timeOfFlight();
-      mMtdData.mtdMatchTrkExpTof[i]     = mtdPid->expTimeOfFlight();
-      mMtdData.mtdMatchTrkLocaly[i]     = mtdPid->yLocal();
-      mMtdData.mtdMatchTrkLocalz[i]     = mtdPid->zLocal();
-      mMtdData.mtdMatchTrkDeltay[i]     = mtdPid->deltaY();
-      mMtdData.mtdMatchTrkDeltaz[i]     = mtdPid->deltaZ();
-      mMtdData.mtdMatchTrkProjPhi[i]    = rotatePhi(projPos.phi());
-      mMtdData.mtdMatchTrkProjZ[i]      = projPos.z();
-      mMtdData.mtdMatchTrkPt[i]         = trkMom.perp();
-      mMtdData.mtdMatchTrkEta[i]        = trkMom.pseudoRapidity();
-      mMtdData.mtdMatchTrkPhi[i]        = rotatePhi(trkMom.phi());
-      mMtdData.mtdMatchTrkDedx[i]       = dedx * 1e6;
-      mMtdData.mtdMatchTrkNsigmaPi[i]   = pidAlgorithm.numberOfSigma(Pion);
-      nMatchMtdHit++;
-    }
-  mMtdData.nMtdHits = nMtdHits;
-  mMtdData.nMatchMtdHits = nMatchMtdHit;
-
-  // Tracks
-  Int_t goodTrack = 0;
-  Double_t projPhi = -999, projZ = -999;
-  Int_t backleg = -1, module = -1, cell = -1;
-  StTpcDedxPidAlgorithm pidAlgorithm;
-  for(Int_t i=0; i<nNodes; i++)
-    {
-      StTrack *gTrack = nodes[i]->track(global);
-      if(!gTrack || !isValidTrack(gTrack,priVertex)) continue;
-      StThreeVectorF mom = gTrack->geometry()->momentum();
-      mMtdData.trkPt[goodTrack]           = mom.perp();
-      mMtdData.trkEta[goodTrack]          = mom.pseudoRapidity();
-      mMtdData.trkPhi[goodTrack]          = rotatePhi(mom.phi());
-      const StParticleDefinition *pd      = gTrack->pidTraits(pidAlgorithm);
-      if(!pd) continue;
-      mMtdData.trkNsigmaPi[goodTrack]     = pidAlgorithm.numberOfSigma(Pion);
-
-      // TOF matching
-      StSPtrVecTrackPidTraits& traits = gTrack->pidTraits();
-      mMtdData.isTrkTofMatched[goodTrack]  = kFALSE;
-      if(gTrack->isBToFMatched())
-	{
-	  mMtdData.isTrkTofMatched[goodTrack]  = kTRUE;
-	  for(UInt_t it=0; it<traits.size(); it++)
-	    {
-	      if (traits[it]->detector() == kTofId)
-		{
-		  StBTofPidTraits* tofpid = dynamic_cast<StBTofPidTraits*>(traits[it]);
-		  StBTofHit* tofHit       = tofpid->tofHit();
-		  mMtdData.trkMthTofTray[goodTrack]    = tofHit->tray();
-		  mMtdData.trkMthTofModule[goodTrack]  = tofHit->module();
-		  mMtdData.trkMthTofCell[goodTrack]    = tofHit->cell();
-		  mMtdData.trkMthTofLocaly[goodTrack]  = tofpid->yLocal();
-		  mMtdData.trkMthTofLocalz[goodTrack]  = tofpid->zLocal();
-		  break;
-		}
-	    }	  
-	}
-      
-     // MTD matching
-      mMtdData.isTrkProjected[goodTrack]  = kFALSE;
-      mMtdData.isTrkMtdMatched[goodTrack] = kFALSE;
-      mMtdData.isGoodMthMtdHit[goodTrack] = kFALSE;
-      StPhysicalHelixD gHelix = gTrack->outerGeometry()->helix();
-      if(propagateHelixToMtd(gHelix, projPhi, projZ))
-	{
-	  getMtdPosFromProj(projPhi, projZ, backleg, module, cell);
-	  mMtdData.isTrkProjected[goodTrack]  = kTRUE;
-	  mMtdData.trkProjPhi[goodTrack]      = projPhi;
-	  mMtdData.trkProjZ[goodTrack]        = projZ;
-	  mMtdData.trkProjBackleg[goodTrack]  = backleg;
-	  mMtdData.trkProjModule[goodTrack]   = module;
-	  mMtdData.trkProjChannel[goodTrack]  = cell;
-
-	  backleg = -1, module = -1, cell = -1;
-	  StMtdPidTraits* mtdpid = 0;
-	  for(UInt_t it=0; it<traits.size(); it++)
-	    {
-	      if (traits[it]->detector() == kMtdId)
-		{
-		  mtdpid = dynamic_cast<StMtdPidTraits*>(traits[it]);
-		  break;
-		}
-	    }
-	  if(mtdpid)
-	    {
-	      StMtdHit* hit          = mtdpid->mtdHit();
-	      if(hit)
-		{
-		  backleg                = hit->backleg();
-		  module                 = hit->module();
-		  cell                   = hit->cell();
-		  Int_t tHub = getMtdHitTHUB(backleg);
-		  Double_t tDiff = hit->leadingEdgeTime().first - mMtdData.mtdTriggerTime[tHub-1];
-		  while(tDiff<0) tDiff += 51200;
-		  mMtdData.isGoodMthMtdHit[goodTrack] = kTRUE;
-		  if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
-		    mMtdData.isGoodMthMtdHit[goodTrack] = kFALSE;
-		}
-	    }
-	  mMtdData.trkMthBackleg[goodTrack] = backleg;
-	  mMtdData.trkMthModule[goodTrack]  = module;
-	  mMtdData.trkMthChannel[goodTrack] = cell;
-	}
-      goodTrack++;
-    }
-  mMtdData.nGoodTrack = goodTrack;
   return kStOK;
 }
 
@@ -662,73 +398,91 @@ Int_t StMtdQAMaker::processMuDst()
       return kStWarn;
     }
   mhEventTrig->Fill(1.5);
+  mRunId   = mMuDst->event()->runId();
+  mRunYear = mRunId / 1e6 + 1999;
 
   //========== Select vertex ==========
   mVertexIndex = -1;
   Int_t nPrim = mMuDst->numberOfPrimaryVertices();
-  if(nPrim == 0) 
+  StMuPrimaryVertex* priVertex = NULL;
+  if(mIsCosmic)
     {
-      LOG_WARN << "No reconstructed vertex in MuDst... " << endm;
-      return kStWarn;
-    }
-
-  // start time & VPD vz
-  StBTofHeader *tofHeader = mMuDst->btofHeader();
-  Double_t tStart = -999;
-  Double_t vpdz   = -999;
-  if(tofHeader)
-    {
-      tStart = tofHeader->tStart();
-      vpdz   = tofHeader->vpdVz();
-    }
-  mMtdData.tofStartTime = tStart;
-  mMtdData.vpdVz        = vpdz;
-
-  Int_t index1 = -1, index2 = -1;
-  if(tofHeader)
-    {
-      // constrain vertex with VPD
-      Double_t min_dz = 999;
-      for(Int_t i=0; i<nPrim; i++)
+      if(nPrim>=1) 
 	{
-	  StMuPrimaryVertex *vertex = mMuDst->primaryVertex(i);
-	  Double_t dz = TMath::Abs(vertex->position().z()-mMtdData.vpdVz);
-	  if(dz<mMaxVtxDz && index1==-1)
+	  mVertexIndex = 0;
+	  priVertex = mMuDst->primaryVertex(mVertexIndex);
+	  if(priVertex)
 	    {
-	      index1 = i;
-	    }
-	  if(dz<min_dz)
-	    {
-	      min_dz = dz;
-	      index2 = i;
+	      StThreeVectorF verPos = priVertex->position();
+	      mMtdData.vertexX = verPos.x();
+	      mMtdData.vertexY = verPos.y();
+	      mMtdData.vertexZ = verPos.z();
 	    }
 	}
-      mhVtxIndClosestVsRank->Fill(index2,index1);
-
-      double default_z = mMuDst->primaryVertex(0)->position().z();
-      mhVtxZvsVpdVzDefault->Fill(default_z, mMtdData.vpdVz);
-      mhVtxZDiffDefault->Fill(default_z - mMtdData.vpdVz);
-      if(index2>-1)
-	{
-	  double cloest_z = mMuDst->primaryVertex(index2)->position().z();
-	  mhVtxZvsVpdVzClosest->Fill(cloest_z, mMtdData.vpdVz);
-	  mhVtxZDiffClosest->Fill(cloest_z - mMtdData.vpdVz);
-	}
     }
-  
-  if(mVertexMode==0) mVertexIndex = 0;
-  else if(mVertexMode==1) mVertexIndex = index1;
-  else if(mVertexMode==2) mVertexIndex = index2;
   else
     {
-      LOG_WARN << "No vertex mode is set. Use default vertex!" << endm;
-      mVertexIndex = 0;
-    }
-  StMuPrimaryVertex* priVertex = NULL;
-  if(!mIsCosmic)
-    {
-      if(mVertexMode<0) return kStOK;
-      priVertex = mMuDst->primaryVertex(mVertexMode);
+      if(nPrim == 0) 
+	{
+	  LOG_WARN << "No reconstructed vertex in MuDst... " << endm;
+	  return kStWarn;
+	}
+
+      // start time & VPD vz
+      StBTofHeader *tofHeader = mMuDst->btofHeader();
+      Double_t tStart = -999;
+      Double_t vpdz   = -999;
+      if(tofHeader)
+	{
+	  tStart = tofHeader->tStart();
+	  vpdz   = tofHeader->vpdVz();
+	}
+      mMtdData.tofStartTime = tStart;
+      mMtdData.vpdVz        = vpdz;
+
+      Int_t index1 = -1, index2 = -1;
+      if(tofHeader)
+	{
+	  // constrain vertex with VPD
+	  Double_t min_dz = 999;
+	  for(Int_t i=0; i<nPrim; i++)
+	    {
+	      StMuPrimaryVertex *vertex = mMuDst->primaryVertex(i);
+	      Double_t dz = TMath::Abs(vertex->position().z()-mMtdData.vpdVz);
+	      if(dz<mMaxVtxDz && index1==-1)
+		{
+		  index1 = i;
+		}
+	      if(dz<min_dz)
+		{
+		  min_dz = dz;
+		  index2 = i;
+		}
+	    }
+	  mhVtxIndClosestVsRank->Fill(index2,index1);
+	  
+	  double default_z = mMuDst->primaryVertex(0)->position().z();
+	  mhVtxZvsVpdVzDefault->Fill(default_z, mMtdData.vpdVz);
+	  mhVtxZDiffDefault->Fill(default_z - mMtdData.vpdVz);
+	  if(index2>-1)
+	    {
+	      double cloest_z = mMuDst->primaryVertex(index2)->position().z();
+	      mhVtxZvsVpdVzClosest->Fill(cloest_z, mMtdData.vpdVz);
+	      mhVtxZDiffClosest->Fill(cloest_z - mMtdData.vpdVz);
+	    }
+	}
+      
+      if(mVertexMode==0) mVertexIndex = 0;
+      else if(mVertexMode==1) mVertexIndex = index1;
+      else if(mVertexMode==2) mVertexIndex = index2;
+      else
+	{
+	  LOG_WARN << "No vertex mode is set. Use default vertex!" << endm;
+	  mVertexIndex = 0;
+	}
+
+      if(mVertexIndex<0) return kStOK;
+      priVertex = mMuDst->primaryVertex(mVertexIndex);
       if(!priVertex) return kStWarn;
       StThreeVectorF verPos = priVertex->position();
       mMtdData.vertexX = verPos.x();
@@ -744,9 +498,8 @@ Int_t StMtdQAMaker::processMuDst()
   mhVertexYZ->Fill(mMtdData.vertexZ,mMtdData.vertexY);
   //====================================
 
-  mMtdData.runId   = mMuDst->event()->runId();
+  mMtdData.runId   = mRunId;
   mMtdData.eventId = mMuDst->event()->eventId();
-  mRunId = mMtdData.runId;
 
   // collect trigger information
   Int_t nTrigger = 0;
@@ -830,9 +583,7 @@ Int_t StMtdQAMaker::processMuDst()
       while(tDiff<0) tDiff += 51200;
       //cout << (mMtdData.mtdHitLeTimeWest[i]+mMtdData.mtdHitLeTimeEast[i])/2 << " - " << mMtdData.mtdTriggerTime[tHub-1] << " = " << tDiff << endl;
       mMtdData.mtdHitTrigTime[i] = tDiff;
-      mMtdData.isGoodMtdHit[i] = kTRUE;
-      if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
-	mMtdData.isGoodMtdHit[i] = kFALSE;
+      mMtdData.isGoodMtdHit[i] = kFALSE;
 
       mMtdData.mtdHitPhi[i]        = getMtdHitGlobalPhi(hit);
       mMtdData.mtdHitZ[i]          = getMtdHitGlobalZ(hit);
@@ -847,7 +598,7 @@ Int_t StMtdQAMaker::processMuDst()
       const StMuMtdPidTraits mtdPid = gTrack->mtdPidTraits();
       StThreeVectorF projPos = mtdPid.position();
       mMtdData.isMatched[i] = kTRUE;
-      if(gTrack->primaryTrack()->vertexIndex()==mVertexMode) 
+      if(gTrack->primaryTrack()->vertexIndex()==mVertexIndex) 
 	mMtdData.isMatchedPrim[i] = kTRUE;
       else                       
 	mMtdData.isMatchedPrim[i] = kFALSE;
@@ -965,24 +716,16 @@ void StMtdQAMaker::processTriggerData()
   for(Int_t i=0; i<kMaxMtdQTchan; i++)
     {
       Int_t type = (i/4)%2;
-      if(type==0)
+      for(int im=0; im<kNQTboard; im++)
 	{
-	  mMtdData.mtdQTadc[0][i-i/4*2] = mTriggerData->mtdAtAddress(i,ip);
-	  mMtdData.mtdQTadc[1][i-i/4*2] = mTriggerData->mtdgemAtAddress(i,ip);
-	  mMtdData.mtdQTadc[2][i-i/4*2] = mTriggerData->mtd3AtAddress(i,ip);
-	  mMtdData.mtdQTadc[3][i-i/4*2] = mTriggerData->mtd4AtAddress(i,ip);
-	}
-      else
-	{
-	  mMtdData.mtdQTtac[0][i-i/4*2-2] = mTriggerData->mtdAtAddress(i,ip);
-	  mMtdData.mtdQTtac[1][i-i/4*2-2] = mTriggerData->mtdgemAtAddress(i,ip);
-	  mMtdData.mtdQTtac[2][i-i/4*2-2] = mTriggerData->mtd3AtAddress(i,ip);
-	  mMtdData.mtdQTtac[3][i-i/4*2-2] = mTriggerData->mtd4AtAddress(i,ip);
+	  if(mRunYear!=2016 && im>=4) continue;
+	  if(type==0) mMtdData.mtdQTadc[im][i-i/4*2]   = mTriggerData->mtdQtAtCh(im+1,i,0);
+	  else        mMtdData.mtdQTtac[im][i-i/4*2-2] = mTriggerData->mtdQtAtCh(im+1,i,0);
 	}
     }
 
   // MTD MIX trigger information
-  for(Int_t i=0; i<16; i++)
+  for(Int_t i=0; i<32; i++)
     {
       mMtdData.mixMtdTacSum[i] =  mTriggerData->mtdDsmAtCh(i,ip);
     }						
@@ -1020,24 +763,62 @@ void StMtdQAMaker::fillHistos()
 	  mxq_tacsum_pos[i][j] = -1;
 	}
     }
-  Int_t nMtdHits = mMtdData.nMtdHits;
-  for(Int_t im=0; im<4; im++)
+
+  UShort_t mtd_qt_tac_min = 100;
+  if(mRunId >= 16045067) mtd_qt_tac_min = 80;
+  UShort_t mtd_qt_tac_diff_range_abs = 600;
+  if(mRunYear == 2015) mtd_qt_tac_diff_range_abs = 1023;
+  if(mhEventCuts->GetBinContent(7)==0)
     {
-      for(Int_t i=0; i<kMaxMtdQTchan/2; i++)
+      mhEventCuts->SetBinContent(7,mtd_qt_tac_min);
+      mhEventCuts->SetBinContent(9,mtd_qt_tac_diff_range_abs);
+    }
+
+  Int_t nMtdHits = mMtdData.nMtdHits;
+  Int_t j[2], a[2];
+  for(Int_t im=0; im<kNQTboard; im++)
+    {
+      for(Int_t i=0; i<8; i++)
 	{
-	  if(mMtdData.mtdQTadc[im][i]>100) mhMtdQTadc->Fill(im*16+i+1,mMtdData.mtdQTadc[im][i]);
-	  if(mMtdData.mtdQTtac[im][i]>mtd_qt_tac_min) mhMtdQTAllTac->Fill(im*16+i+1,mMtdData.mtdQTtac[im][i]);
+	  if(mRunYear!=2016 && im>=4)  continue;
+	  if(mRunYear==2016 && i%2==0) continue;
+	  for(Int_t k=0; k<2; k++)
+	    {
+	      j[k] = mMtdData.mtdQTtac[im][i*2+k];
+	      a[k] = mMtdData.mtdQTadc[im][i*2+k];
+	      
+	      int index = 0;
+	      if(mRunYear!=2016) index = im*16 + i*2 + k + 1;
+	      else               index = im*8 + (i/2)*2 + k + 1;
+	      if(a[k]>100) mhMtdQTadc->Fill(index,a[k]);
+	      if(j[k]>mtd_qt_tac_min) mhMtdQTAllTac->Fill(index,j[k]);
 
-	  if(i%2==1) continue;
-	  Int_t bin = im*8+i/2+1;
-	  Double_t j2 = mMtdData.mtdQTtac[im][i];
-	  Double_t j3 = mMtdData.mtdQTtac[im][i+1];
+	      // slewing correction
+	      int slew_bin = -1;
+	      if(a[k]>=0 && a[k]<=mQTSlewBinEdge[im][i*2+k][0]) slew_bin = 0;
+	      else
+		{
+		  for(int l=1; l<8; l++)
+		    {
+		      if(a[k]>mQTSlewBinEdge[im][i*2+k][l-1] && a[k]<=mQTSlewBinEdge[im][i*2+k][l])
+			{
+			  slew_bin = l;
+			  break;
+			}
+		    }
+		}
+	      if(slew_bin>=0)
+		j[k] += mQTSlewCorr[im][i*2+k][slew_bin];
+	    }
 
-	  if(j2<mtd_qt_tac_min || j2>mtd_qt_tac_max || 
-	     j3<mtd_qt_tac_min || j3>mtd_qt_tac_max ||
-	     TMath::Abs(j2-j3)>mtd_qt_tac_diff_range_abs) continue;
+	  if(j[0]<mtd_qt_tac_min || j[0]>mtd_qt_tac_max || 
+	     j[1]<mtd_qt_tac_min || j[1]>mtd_qt_tac_max ||
+	     TMath::Abs(j[0]-j[1])>mtd_qt_tac_diff_range_abs) continue;
 
-	  Double_t sumTac = j2+j3;
+	  // position correction
+	  int module = mQTtoModule[im][i];
+	  Int_t sumTac = int( j[0] + j[1] + abs(module-3)*1./8 * (j[0]-j[1]) );
+
 	  if(maxTac < sumTac)
 	    {
 	      maxm = im;
@@ -1051,17 +832,21 @@ void StMtdQAMaker::fillHistos()
 	      mxq_mtdtacsum[im][0] = sumTac;
 
 	      mxq_tacsum_pos[im][1] = mxq_tacsum_pos[im][0];
-	      mxq_tacsum_pos[im][0] = i/2+1;
+	      mxq_tacsum_pos[im][0] = i+1;
 	    }
 	  else if (mxq_mtdtacsum[im][1] < sumTac)
 	    {
 	      mxq_mtdtacsum[im][1]  = sumTac;
-	      mxq_tacsum_pos[im][1] = i/2+1;
+	      mxq_tacsum_pos[im][1] = i+1;
 	    }
+	  
+	  int bin = 0;
+	  if(mRunYear!=2016) bin = im*8+i+1;
+	  else               bin = im*4+i/2+1;
+	  mhMtdQTJ2J3Diff->Fill(bin,j[1]-j[0]);
+	  mhMtdVpdTacDiffMT001->Fill(bin,sumTac-vpdTacSum);
 
-	  mhMtdQTJ2J3Diff->Fill(bin,j3-j2);
-	  mhMtdVpdTacDiffMT001->Fill(bin,sumTac-vpdTacSum+(j2-j3)*abs(mQTtoModule[im][i/2]-3)*1./8);
-
+	  // find corresponding MTD hits
 	  for(Int_t i=0; i<nMtdHits; i++)
 	    {
 	      Int_t backleg = mMtdData.mtdHitBackleg[i];
@@ -1077,21 +862,38 @@ void StMtdQAMaker::fillHistos()
   
   if(maxm>=0 && maxi>=0)
     {
-      mhMtdQTBestTac->Fill(maxm*16+maxi+1,mMtdData.mtdQTtac[maxm][maxi]);
-      mhMtdQTBestTac->Fill(maxm*16+maxi+2,mMtdData.mtdQTtac[maxm][maxi+1]);
+      if(mRunYear!=2016)
+	{
+	  mhMtdQTBestTac->Fill(maxm*16+maxi*2+1,mMtdData.mtdQTtac[maxm][maxi*2]);
+	  mhMtdQTBestTac->Fill(maxm*16+maxi*2+2,mMtdData.mtdQTtac[maxm][maxi*2+1]);
+	}
+      else
+	{
+	  mhMtdQTBestTac->Fill(maxm*8+(maxi/2)*2+1,mMtdData.mtdQTtac[maxm][maxi*2]);
+	  mhMtdQTBestTac->Fill(maxm*8+(maxi/2)*2+2,mMtdData.mtdQTtac[maxm][maxi*2+1]);
+	}
     }
 
   UShort_t mix_mtdtacsum[kNQTboard][2];
-  for(Int_t i=0; i<kNQTboard; i++)
+  for(Int_t im=0; im<kNQTboard; im++)
     {
-      mix_mtdtacsum[i][0] = (mMtdData.mixMtdTacSum[i*3]) + ((mMtdData.mixMtdTacSum[i*3+1]&0x3)<<8);
-      mix_mtdtacsum[i][1] = (mMtdData.mixMtdTacSum[i*3+1]>>4) + ((mMtdData.mixMtdTacSum[i*3+2]&0x3f)<<4);
+      if(mRunYear!=2016 && im>=4)  continue;
+
+      int idx = 0;
+      if(mRunYear == 2016) idx = im/2*3 + im%2*16;
+      else                 idx = im*3;
+      mix_mtdtacsum[im][0] = (mMtdData.mixMtdTacSum[idx]) + ((mMtdData.mixMtdTacSum[idx+1]&0x3)<<8);
+      mix_mtdtacsum[im][1] = (mMtdData.mixMtdTacSum[idx+1]>>4) + ((mMtdData.mixMtdTacSum[idx+2]&0x3f)<<4);
       for(Int_t j=0; j<2; j++)
 	{
-	  if(mix_mtdtacsum[i][j]>0) 
+	  if(mix_mtdtacsum[im][j]>0) 
 	    {
-	      mhMixMtdTacSumvsMxqMtdTacSum[i][j]->Fill(mxq_mtdtacsum[i][j]/8,mix_mtdtacsum[i][j]);
-	      mhMtdVpdTacDiffMT101->Fill(i*8+mxq_tacsum_pos[i][j],mix_mtdtacsum[i][j]*8-vpdTacSum);
+	      mhMixMtdTacSumvsMxqMtdTacSum[im][j]->Fill(mxq_mtdtacsum[im][j]/8,mix_mtdtacsum[im][j]);
+
+	      int bin = 0;
+	      if(mRunYear!=2016) bin = im*8+mxq_tacsum_pos[im][j];
+	      else               bin = im*4+mxq_tacsum_pos[im][j]/2;
+	      mhMtdVpdTacDiffMT101->Fill(bin,mix_mtdtacsum[im][j]*8-vpdTacSum);
 	    }
 	}
     }
@@ -1269,11 +1071,9 @@ void StMtdQAMaker::bookHistos()
   mhEventCuts->GetXaxis()->SetBinLabel(6,"MinNHitsDedx");
   mhEventCuts->SetBinContent(6,mMinNHitsDedx);
   mhEventCuts->GetXaxis()->SetBinLabel(7,"mtd_qt_tac_min");
-  mhEventCuts->SetBinContent(7,mtd_qt_tac_min);
   mhEventCuts->GetXaxis()->SetBinLabel(8,"mtd_qt_tac_max");
   mhEventCuts->SetBinContent(8,mtd_qt_tac_max);
   mhEventCuts->GetXaxis()->SetBinLabel(9,"mtd_qt_tac_diff_range_abs");
-  mhEventCuts->SetBinContent(9,mtd_qt_tac_diff_range_abs);
   mhEventCuts->GetXaxis()->SetBinLabel(12,"mMaxDca");
   mhEventCuts->SetBinContent(12,mMaxDca);
   mhEventCuts->GetXaxis()->SetBinLabel(13,"mMinNsigmaPi");
@@ -1895,30 +1695,6 @@ Bool_t StMtdQAMaker::isValidTrack(StMuTrack *track) const
 }
 
 //_____________________________________________________________________________
-Bool_t StMtdQAMaker::isMtdHitInTrigWin(StMtdHit *hit) const
-{
-  return isMtdHitInTrigWin( hit->backleg(), hit->module(), hit->leadingEdgeTime().first);
-}
-
-//_____________________________________________________________________________
-Bool_t StMtdQAMaker::isMtdHitInTrigWin(StMuMtdHit *hit) const
-{
-  return isMtdHitInTrigWin( hit->backleg(), hit->module(), hit->leadingEdgeTime().first);
-}
-
-//_____________________________________________________________________________
-Bool_t StMtdQAMaker::isMtdHitInTrigWin(Int_t backleg, const Int_t module, const Double_t leading_time) const
-{
-  Int_t tHub     = getMtdHitTHUB(backleg);
-  Double_t tDiff = leading_time - mTrigTime[tHub-1];
-  while(tDiff<0) tDiff += 51200;
-  if(tDiff > mTrigWinCut_low[backleg-1][module-1] && tDiff < mTrigWinCut_high[backleg-1][module-1])
-    return kTRUE;
-  else
-    return kFALSE;
-}
-
-//_____________________________________________________________________________
 Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 {
   Double_t outPhi = phi;
@@ -1928,8 +1704,15 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.15 2017/03/01 20:23:59 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.16 2017/03/10 20:16:42 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.16  2017/03/10 20:16:42  marr
+//// 1) Remove the function to apply trigger time window cuts since they are applied
+//// already during reconstruction.
+//// 2) Accommodate 8-QT system used in 2016
+//// 3) Remove the implementation for StEvent QA since it is not maintained
+//// 4) Vertex selection for cosmic ray: default one if available
+////
 //// Revision 1.15  2017/03/01 20:23:59  marr
 //// 1) Add option to select different vertex
 //// 2) More QA plots for PID variables
