@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.5 2012/05/21 21:27:45 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.6 2017/03/12 21:28:37 perev Exp $
  *
  ***************************************************************************
  *
@@ -14,6 +14,7 @@
 #include <math.h>
 #include <assert.h>
 #include "TRandomVector.h"
+#include "TCernLib.h"
 ClassImp(TRandomVector)
 //______________________________________________________________________________
 TRandomVector::TRandomVector()
@@ -33,6 +34,19 @@ TRandomVector::TRandomVector(const TVectorD& errDia,UInt_t seed)
   
   RandRotate(mtx);
   assert(! Set(mtx,seed)); 
+
+  for (int i=0;i<fDim;i++){
+    double tol = 0; int iok = 0;
+    for (int j=0;j<fDim;j++){
+      double tol = fabs(errDia[i]-fEigVal[j]*fEigVal[j]);
+      if (tol<1e-6+errDia[i]*1e-4) {iok = 1; break;}
+    }
+    if (iok) continue;
+     errDia.Print("errDia");
+    fEigVal.Print("eigVal");
+    assert(0 && "errDia !=eigVal");
+  }
+
 }
 //_____________________________________________________________________________
 int TRandomVector::Set(const TMatrixDSym& errMtx,UInt_t  seed)
@@ -77,6 +91,66 @@ const TVectorD& TRandomVector::Gaus()
   fResult = fEigMtx*rnd;
   return fResult;
 }
+//_____________________________________________________________________________
+void TRandomVector::RandRotate(TMatrixDSym& errMtx)
+{
+  int nDim = errMtx.GetNrows();
+  int nSiz = nDim*(nDim+1)/2;
+
+  std::vector<double> vA(nSiz),vB(nSiz);;
+  for (int i=0,li=0;i< nDim;li+=++i) {
+    for (int j=0;j<=i;j++) {
+      vA[li+j] = errMtx[i][j];
+  } }
+
+  std::vector<double> vT(nDim*nDim); 
+  memset(&vT[0],0, nDim*nDim*sizeof(vT[0]));
+  for (int i=0;i<nDim;i++) { vT[nDim*i+i] = 1;}
+  
+  double *a = &vA[0],*b=&vB[0];
+  for (int i=0;i<nDim;i++) {
+  for (int j=0;j<i;   j++) {
+     double c = gRandom->Rndm();
+     double s = sqrt((1-c)*(1+c)); 
+     vT[nDim*i+i] = c; vT[nDim*i+j] =  s;
+     vT[nDim*j+j] = c; vT[nDim*j+i] = -s;
+     TCL::trasat(&vT[0],a,b,nDim,nDim);
+     vT[nDim*i+i] = 1; vT[nDim*i+j] = 0;
+     vT[nDim*j+j] = 1; vT[nDim*j+i] = 0;
+     double *tmp = a; a = b; b = tmp;
+  } }
+  for (int i=0,li=0;i< nDim;li+=++i) {
+    for (int j=0;j<=i;j++) {
+      errMtx[i][j] = a[li+j];
+      errMtx[j][i] = a[li+j];
+  } }
+  assert(Sign(errMtx)>0);
+}
+
+//_____________________________________________________________________________
+double TRandomVector::Sign(const TMatrixDSym &Si)
+{
+  int n = Si.GetNrows();
+  TMatrixDSym S(Si);
+  TVectorD coe(n);
+  for (int i=0;i< n;++i) {
+    double qwe = S[i][i];
+    if(qwe<=0) return qwe;
+    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
+    coe[i]=qwe;
+  }
+
+  for (int i=0;i< n;++i) {
+    for (int j=0;j< n;j++) {S[i][j]*=coe[i]*coe[j];}}
+
+  TVectorD EigVal(n);  
+  S.EigenVectors(EigVal);
+
+  double ans = 3e33;
+  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
+  return ans;
+} 
+
 //_____________________________________________________________________________
 void TRandomVector::Test(int nevt)
 {
@@ -124,58 +198,27 @@ Qa/=(n);
 printf("Quality %g < %g < 1\n",Qa,maxQa);
 }
 //_____________________________________________________________________________
-void TRandomVector::RandRotate(TMatrixDSym& errMtx)
+void TRandomVector::TestXi2()
 {
-  int nDim = errMtx.GetNrows();
-  assert(Sign(errMtx)>0);
-  TVectorD dia(nDim);
-  for (int i=0;i<nDim;i++){dia[i]=sqrt(errMtx[i][i]);}
-  for (int i=0;i<nDim;i++){for (int j=0;j<nDim;j++){errMtx[i][j]/=dia[i]*dia[j];}}
+  enum {kNDim = 5, nEv=10000};
+  TVectorD dia(kNDim); 
+  for (int i=0;i<kNDim;i++) { dia[i] = i+gRandom->Rndm();}
+  
+  TRandomVector RV(dia);
+  
+  auto &G = RV.GetMtx();
+  
+  auto GI = G; GI.Invert();
 
-  TMatrixD T(nDim,nDim);for (int i=0;i<nDim;i++){T[i][i]=1.;}
-  for (int ir1=0;ir1<nDim;ir1++) {
-  for (int ir2=0;ir2<ir1 ;ir2++) {
-  for (int ic =0;ic <nDim;ic++ ) {
-    double x = T[ir1][ic];
-    double y = T[ir2][ic];
-    if (fabs(x)+fabs(y)<=0.) continue;
-    double c = gRandom->Rndm();
-    double s = sqrt(fabs(1.-c*c));
-    T[ir1][ic] = x*c + y*s;
-    T[ir2][ic] =-x*s + y*c;
-  }}}
-  errMtx.Similarity(T);
-  for (int i=0;i<nDim;i++){ for (int j=0;j<nDim;j++){errMtx[i][j]*=dia[i]*dia[j];}}
-  assert(Sign(errMtx)>0);
-}
 
-//_____________________________________________________________________________
-double TRandomVector::Sign(const TMatrixDSym &Si)
-{
-  int n = Si.GetNrows();
-  TMatrixDSym S(Si);
-  TVectorD coe(n);
-  for (int i=0;i< n;++i) {
-    double qwe = S[i][i];
-    if(qwe<=0) return qwe;
-    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
-    coe[i]=qwe;
+  double Xi2 = 0;
+  for (int iEv=0;iEv<nEv;iEv++) {
+    auto &v = RV.Gaus();  
+    Xi2 += GI.Similarity(v);
   }
-
-  for (int i=0;i< n;++i) {
-    for (int j=0;j< n;j++) {S[i][j]*=coe[i]*coe[j];}}
-
-  TVectorD EigVal(n);  
-  S.EigenVectors(EigVal);
-
-  double ans = 3e33;
-  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
-  return ans;
-} 
-
-
-
-
+  Xi2/=nEv*kNDim;
+  printf ("TRandomVector::TestXi2(): <Xi2>/Ndf = %g\n",Xi2);
+}
 
 
 
