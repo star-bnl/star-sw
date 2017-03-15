@@ -1,7 +1,7 @@
 #ifndef TrackData_h
 #define TrackData_h
 /***********************************************
- * $Id: TrackData.h,v 1.5 2017/03/02 19:11:19 smirnovd Exp $
+ * $Id: TrackData.h,v 1.6 2017/03/15 22:56:44 smirnovd Exp $
  ******************************************************
  */
 #include <TVector3.h>
@@ -62,7 +62,10 @@ public:
   int bemcBin; // >=0 if track passed through BTOW tower
   int eemcBin; // >=0 if track passed through ETOW tower
   // ........................methods
-  TrackData();
+
+  TrackData() : TrackData(nullptr, nullptr) { }
+
+  TrackData(const void* motherTrack, const StDcaGeometry* motherDca);
 
   template<class OriginalTrack_t>
   const OriginalTrack_t* getMother() const { return static_cast<const OriginalTrack_t*>(mother); }
@@ -94,6 +97,9 @@ public:
 
 /*
  * $Log: TrackData.h,v $
+ * Revision 1.6  2017/03/15 22:56:44  smirnovd
+ * TrackData: Introduce deligating constructor
+ *
  * Revision 1.5  2017/03/02 19:11:19  smirnovd
  * Squashed commit of many assorted changes
  *
