@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.105 2017/03/06 21:41:23 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.106 2017/03/15 22:56:30 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1042,12 +1042,11 @@ void StPPVertexFinder::exportVertices()
           StThreeVectorF dist = v_position - track.dca->origin();
 
           // Calculate total error as fully correlated between DCA and vertex
-          //float total_err_perp = std::sqrt( V.er.Perp2() + track.dca->errMatrix()[0] ); // fully uncorrelated
-          //float total_err_z    = std::sqrt( V.er.z()*V.er.z() + track.dca->errMatrix()[2] );
+          float total_err_perp = std::sqrt( V.er.Perp2() + track.dca->errMatrix()[0] ); // fully uncorrelated
+          float total_err_z    = std::sqrt( V.er.z()*V.er.z() + track.dca->errMatrix()[2] );
 
-          float total_err = V.er.Mag() + std::sqrt(track.dca->errMatrix()[0] + track.dca->errMatrix()[2]);
-
-          bool is_daughter = (track.vertexID == V.id || dist.mag()/total_err < 1);
+          bool is_daughter = (track.vertexID == V.id ||
+                              (std::fabs(dist.perp())/total_err_perp < 3 && std::fabs(dist.z())/total_err_z < 3) );
 
           if ( !is_daughter ) continue;
 
