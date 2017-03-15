@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.107 2017/03/15 22:56:37 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.108 2017/03/15 22:56:55 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -469,8 +469,8 @@ int StPPVertexFinder::fit(StEvent* event)
     // ......... matcho various detectors ....................
     if (mUseBtof) matchTrack2BTOF(stiKalmanTrack, track);  // matching track to btofGeometry
     if (mUseCtb)  matchTrack2CTB(stiKalmanTrack, track);
-    matchTrack2BEMC(stiKalmanTrack, track);
-    matchTrack2EEMC(stiKalmanTrack, track);
+    matchTrack2BEMC(track);
+    matchTrack2EEMC(track);
 
     //.... all test done on this track .........
     mTrackData.push_back(track); 
@@ -598,20 +598,11 @@ int StPPVertexFinder::Fit(const StMuDst& muDst)
 
       ntrk[6]++;
 
-      TrackDataT<StMuTrack> trk(stMuTrack);
-
-      trk.dca    = dca;
-      trk.zDca   = dca->z();
-      trk.ezDca  = std::sqrt(dca->errMatrix()[2]);
-      trk.rxyDca = dca->impact();
-      trk.gPt    = dca->pt();
-      trk.mIdTruth = stMuTrack.idTruth();
-      trk.mQuality = stMuTrack.qaTruth();
-      trk.mIdParentVx = stMuTrack.idParentVx();
+      TrackDataT<StMuTrack> trk(stMuTrack, dca);
 
       // Modify track weights
-      matchTrack2BEMC(stMuTrack, trk);
-      matchTrack2EEMC(stMuTrack, trk);
+      matchTrack2BEMC(trk);
+      matchTrack2EEMC(trk);
       matchTrack2Membrane(trk);
 
       mTrackData.push_back(trk);
@@ -1296,8 +1287,10 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* stiTrack,TrackData &track
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* stiTrack, TrackData &track)
+void StPPVertexFinder::matchTrack2BEMC(TrackDataT<StiKalmanTrack> &track)
 {
+  const StiKalmanTrack* stiTrack = track.getMother();
+
   StiKalmanTrackNode* ouNode=stiTrack->getOuterMostNode();
 
   //alternative helix extrapolation:
@@ -1313,8 +1306,9 @@ void StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* stiTrack, TrackData
 }
 
 
-void StPPVertexFinder::matchTrack2BEMC(const StMuTrack& muTrack, TrackData &track)
+void StPPVertexFinder::matchTrack2BEMC(TrackDataT<StMuTrack> &track)
 {
+   const StMuTrack& muTrack = *track.getMother();
    matchTrack2BEMC(muTrack.outerHelix(), track);
 }
 
@@ -1354,8 +1348,10 @@ void StPPVertexFinder::matchTrack2BEMC(const StPhysicalHelixD& phys_helix, Track
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* stiTrack, TrackData &track)
+void StPPVertexFinder::matchTrack2EEMC(TrackDataT<StiKalmanTrack> &track)
 {
+  const StiKalmanTrack* stiTrack = track.getMother();
+
   const double minEta=0.7 ;// tmp cut
 
   StiKalmanTrackNode* ouNode=stiTrack->getOuterMostNode();
@@ -1381,8 +1377,10 @@ void StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* stiTrack, TrackData
 }
 
 
-void StPPVertexFinder::matchTrack2EEMC(const StMuTrack& muTrack, TrackData &track)
+void StPPVertexFinder::matchTrack2EEMC(TrackDataT<StMuTrack> &track)
 {
+   const StMuTrack& muTrack = *track.getMother();
+
    const double minEta = 0.7;
 
    //direction of extrapolation must be toward West (Z+ axis)
