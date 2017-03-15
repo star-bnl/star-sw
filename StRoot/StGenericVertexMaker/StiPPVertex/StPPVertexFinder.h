@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.46 2017/03/05 21:00:59 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.47 2017/03/15 22:56:55 smirnovd Exp $
  *
  */
 
@@ -58,12 +58,12 @@ class StPPVertexFinder: public StGenericVertexFinder
   void matchTrack2BTOF(const StiKalmanTrack*, TrackData &track);
   void matchTrack2CTB(const StiKalmanTrack*, TrackData &track);
 
-  void matchTrack2EEMC(const StiKalmanTrack*, TrackData &track);
-  void matchTrack2EEMC(const StMuTrack& muTrack, TrackData &track);
+  void matchTrack2EEMC(TrackDataT<StiKalmanTrack> &track);
+  void matchTrack2EEMC(TrackDataT<StMuTrack> &track);
   void matchTrack2EEMC(const StPhysicalHelixD& helix, TrackData &track);
 
-  void matchTrack2BEMC(const StiKalmanTrack*, TrackData &track);
-  void matchTrack2BEMC(const StMuTrack& muTrack, TrackData &track);
+  void matchTrack2BEMC(TrackDataT<StiKalmanTrack> &track);
+  void matchTrack2BEMC(TrackDataT<StMuTrack> &track);
   void matchTrack2BEMC(const StPhysicalHelixD& helix, TrackData &track);
 
   bool matchTrack2Membrane(TrackDataT<StiKalmanTrack> &track);
