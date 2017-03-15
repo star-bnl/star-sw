@@ -5,6 +5,7 @@
 
 #include "TrackData.h"
 #include "VertexData.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 
 
@@ -175,3 +176,21 @@ void TrackData::print(ostream& os) const
 
    os << endl;
 }
+
+
+/** Specialized constructor to create tracks from StMuTrack-s */
+template<>
+TrackDataT<StMuTrack>::TrackDataT(const StMuTrack &motherTrack, const StDcaGeometry* trackDca) :
+  TrackData(&motherTrack, trackDca)
+{
+  mIdTruth    = motherTrack.idTruth();
+  mQuality    = motherTrack.qaTruth();
+  mIdParentVx = motherTrack.idParentVx();
+
+  if (trackDca) {
+    zDca   = trackDca->z();
+    ezDca  = std::sqrt(trackDca->errMatrix()[2]);
+    rxyDca = trackDca->impact();
+    gPt    = trackDca->pt();
+  }
+};
