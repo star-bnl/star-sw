@@ -6,24 +6,22 @@
 #include "TrackData.h"
 #include "VertexData.h"
 
-//==========================================================
-//==========================================================
-TrackData::TrackData() {
-  ctbBin=-1; 
-  bemcBin=-1; 
-  eemcBin=-1; 
-  vertexID=0;
-  gPt=0;
-  anyMatch=anyVeto=false;
-  mBtof=mCtb=mBemc=mEemc=mTpc=0;
-  weight=1;
-  zDca=ezDca=rxyDca=0;
-  mother=0;
-  dca = nullptr;
-  mIdTruth = 0;
-  mQuality = 0;
-  mIdParentVx = 0;
-}
+
+
+TrackData::TrackData(const void* motherTrack, const StDcaGeometry* motherDca) :
+  vertexID(0),
+  mother(motherTrack),
+  dca(motherDca),
+  mIdTruth(0),
+  mQuality(0),
+  mIdParentVx(0),
+  dcaTrack(), zDca(0), ezDca(0), rxyDca(0),
+  gPt(0),
+  mBtof(0), mCtb(0), mBemc(0), mEemc(0), mTpc(0),
+  anyMatch(false), anyVeto(false),
+  weight(1),
+  btofBin(-1), ctbBin(-1), bemcBin(-1), eemcBin(-1)
+{ }
 
 
 //==========================================================
