@@ -7,6 +7,8 @@ TDataSet *CreateTable() {
   gSystem->Load( "StarGeneratorBase" );
   gSystem->Load( "libMathMore"   );  
   gSystem->Load( "libStarLight");
+  gSystem->Load( "gstar" );
+  geantMk->Do("call gstar");
   // Setup RNG seed and map all ROOT TRandom here
   Int_t rngSeed=0;
 #if 0

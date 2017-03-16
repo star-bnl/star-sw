@@ -7,6 +7,8 @@ TDataSet *CreateTable() {
   gSystem->Load( "StarGeneratorBase" );
   gSystem->Load( "libMathMore"   );  
   gSystem->Load( "libHijing1_383");
+  gSystem->Load( "gstar" );
+  geantMk->Do("call gstar");
   StarPrimaryMaker *primary = new StarPrimaryMaker();
   //  primary -> SetFileName( "hijing.starsim.root");
   primary -> SetFileName( "");
@@ -48,7 +50,7 @@ TDataSet *CreateTable() {
   geantMk->Do(Form("GVERTEX %f %f %f",XVERTEX,YVERTEX,ZVERTEX));
   Double_t XSIGMA  =  0.1; 
   Double_t YSIGMA  =  0.1;
-  Double_t ZSIGMA  = 36.680;
+  Double_t ZSIGMA  =  3.0; // 36.680;
   geantMk->Do(Form("GSPREAD %f %f %f",XSIGMA,YSIGMA,ZSIGMA));
   geantMk->Do("gkine -4 0");
   TDataSet *tableSet = new TDataSet("Hijing");

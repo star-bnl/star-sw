@@ -7,6 +7,8 @@ TDataSet *CreateTable() {
   gSystem->Load( "StarGeneratorBase" );
   gSystem->Load( "libMathMore"   );  
   gSystem->Load( "libHijing1_383");
+  gSystem->Load( "gstar" );
+  geantMk->Do("call gstar");
   StarPrimaryMaker *primary = new StarPrimaryMaker();
   //  primary -> SetFileName( "hijing.starsim.root");
   primary -> SetFileName( "");
