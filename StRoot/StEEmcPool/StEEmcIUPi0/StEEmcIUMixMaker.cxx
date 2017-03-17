@@ -325,9 +325,13 @@ void StEEmcIUMixMaker::book()
   
     // 1D QA histograms
   mH1.push_back(new TH1F("triggers","Number of triggers fired",1,0.,1.));
+#if  ROOT_VERSION_CODE < 395523
   mH1[0]->SetBit(TH1::kCanRebin);
+#endif
   mH1.push_back(new TH1F("status","Events processed up to...",1,0.,1.));
+#if  ROOT_VERSION_CODE < 395523
   mH1[1]->SetBit(TH1::kCanRebin);
+#endif
 
   // 2D QA histograms
   mH2.push_back(new TH2F("uvha","<u> vs <v> for higher-energy gamma",288,0.,288.,288,0.,288.)); 

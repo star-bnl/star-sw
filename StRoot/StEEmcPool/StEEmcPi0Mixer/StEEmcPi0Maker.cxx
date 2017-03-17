@@ -77,8 +77,10 @@ Int_t StEEmcPi0Maker::Init()
   hRatio_low = new TH1F("hRatio_low","E_{smd} / E_{towers}",20,0.,0.05);
   hRatio_hi = new TH1F("hRatio_hi","E_{smd} / E_{towers}",20,0.,0.05);
   
-  hEvents = new TH1F("hEvents","event counter",1,0.,1.); hEvents->SetBit(TH1::kCanRebin);
-
+  hEvents = new TH1F("hEvents","event counter",1,0.,1.); 
+#if  ROOT_VERSION_CODE < 395523
+  hEvents->SetBit(TH1::kCanRebin);
+#endif
   //hdEds   = new TH2F("hdEds","smd energy derivative; #frac{1}{E}#frac{dE}{ds}; rel. strip",30,-2.0,1.0,10,-5.,5.);
 
   if ( mFile ) 

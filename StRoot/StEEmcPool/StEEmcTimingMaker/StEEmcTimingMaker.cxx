@@ -175,8 +175,9 @@ Int_t StEEmcTimingMaker::Init()
 {
 
   hCounter=new TH1F("hCounter","Event counter;status",1,0.,1.);
+#if  ROOT_VERSION_CODE < 395523
   hCounter->SetBit(TH1::kCanRebin);
-
+#endif
 #if 1
 
   for ( Int_t icrate=0;icrate<MaxTwCrates;icrate++ )

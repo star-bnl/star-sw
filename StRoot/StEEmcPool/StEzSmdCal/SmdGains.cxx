@@ -169,7 +169,7 @@ void SmdGains:: avrMipNEne( int str1,int ns){
   f->SetLineColor(kRed);
   f->SetLineWidth(1);
   double *par=f->GetParameters();
-  double *epar=f->GetParErrors();
+  const double *epar=f->GetParErrors();
   float   mpv=par[1];
   float   empv=epar[1];
   float rerr=0;
@@ -313,7 +313,7 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
     f->SetLineColor(kRed);
     f->SetLineWidth(1);
     double *par=f->GetParameters();
-    double *epar=f->GetParErrors();
+    const double *epar=f->GetParErrors();
 
     s->sl=par[1];
     s->esl=epar[1];
@@ -384,7 +384,7 @@ void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
 	f->SetLineColor(kRed);
 	f->SetLineWidth(1);
 	double *par=f->GetParameters();
-	double *epar=f->GetParErrors();
+	const double *epar=f->GetParErrors();
 	sl=par[1];
 	esl=epar[1];
       }

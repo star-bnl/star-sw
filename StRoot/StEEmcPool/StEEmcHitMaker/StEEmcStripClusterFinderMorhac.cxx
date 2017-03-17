@@ -66,7 +66,12 @@ Int_t StEEmcStripClusterFinderMorhac_t::find( const ESmdLayer_t& stripArray, StS
       return ierr;
 
    // clear array
-   for( Float_t *p = mStripEnergyArray, *p2 = mSmoothedEnergyArray; p != &mStripEnergyArray[kEEmcNumStrips]; ++p, ++p2 )
+#if  ROOT_VERSION_CODE < 395523
+   Float_t *p = mStripEnergyArray, *p2 = mSmoothedEnergyArray;
+#else
+   Double_t *p = mStripEnergyArray, *p2 = mSmoothedEnergyArray;
+#endif
+   for(; p != &mStripEnergyArray[kEEmcNumStrips]; ++p, ++p2 )
       (*p) = (*p2) = 0;
 
    // copy 
@@ -94,9 +99,12 @@ Int_t StEEmcStripClusterFinderMorhac_t::find( const ESmdLayer_t& stripArray, StS
 
    // smooth, if requested
    if( mNumSmoothIters ){
+#if  ROOT_VERSION_CODE < 395523
       Float_t *fPtr;
+#else
+      Double_t *fPtr;
+#endif
       Double_t *dPtr;
-
       // copy
       for( fPtr = mSmoothedEnergyArray, dPtr = mStripEnergyArrayTemp; fPtr != &mSmoothedEnergyArray[kEEmcNumStrips]; ++fPtr, ++dPtr )
          (*dPtr) = (*fPtr);
@@ -134,7 +142,11 @@ Int_t StEEmcStripClusterFinderMorhac_t::find( const ESmdLayer_t& stripArray, StS
 #endif
    std::vector< Float_t > peakPos;
    if( nPeaks ){
+#if  ROOT_VERSION_CODE < 395523
     Float_t *peakPosRAW = peakFinderPtr->GetPositionX();
+#else
+    Double_t *peakPosRAW = peakFinderPtr->GetPositionX();
+#endif
       peakPos.reserve( nPeaks );
 
       // estimate energy of peak strip and its adjacent neighbors
