@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAddRunInfoMaker.cxx,v 1.2 2003/09/07 03:49:03 perev Exp $
+ * $Id: StAddRunInfoMaker.cxx,v 1.3 2017/03/17 14:40:30 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StAddRunInfoMaker.h"
@@ -23,8 +23,9 @@ StAddRunInfoMaker::~StAddRunInfoMaker() {
 
 int StAddRunInfoMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
   StEvent* event = (StEvent*) GetInputDS("StEvent");
-  StEventInfo* eventInfo = event->info();
-   if ( event ) { 
+
+  if ( event ) { 
+    StEventInfo* eventInfo = event->info();
     // ok, we got the event
     if ( !event->runInfo() ) { // ok, we got no run info, so create, fill and add it
       StRunInfo *pRunInfo = new StRunInfo();
@@ -54,6 +55,9 @@ ClassImp(StAddRunInfoMaker)
 /***************************************************************************
  *
  * $Log: StAddRunInfoMaker.cxx,v $
+ * Revision 1.3  2017/03/17 14:40:30  jeromel
+ * Checking event->info() before if(event) seem like a logic flow issue - fixed
+ *
  * Revision 1.2  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
