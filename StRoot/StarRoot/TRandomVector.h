@@ -30,8 +30,11 @@ static void   RandRotate(TMatrixDSym& errMtx);
 static double Sign(const TMatrixDSym& errMtx);
 
 const TMatrixDSym &GetMtx() const 	{return fErrMtx;}
+const TMatrixD    &GetEig() const 	{return fEigMtx;}
+const TVectorD    &GetLam() const 	{return fEigVal;}
 const TVectorD& Gaus();
 static void Test(int nevt = 10000);
+static void TestXi2();
 
 //		Data members
 private:
