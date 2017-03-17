@@ -12,6 +12,8 @@
   else
     exit 1;
   endif
+  setenv NODEBUG yes
+  starver .DEV2
   set file = hijing_R${rung}_${f}_${l}
   echo "${file}"
   set logFile  = ${file}B.log
@@ -28,10 +30,10 @@
   if (! $?) set fitter = ",VFPPVnoCTB,StiCA";
   echo "fitter $fitter"
   set tagFile = ${file}.root
-  root4star -q -b 'bfc.C('$f','$l',"MC.2014,HijingAuAu200,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('$f','$l',"MC.2014,HijingAuAu200Z6cm,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
-<input URL="command:RunId.pl 1 100" />
+<input URL="command:RunId.pl 101 200" />
 </job>
