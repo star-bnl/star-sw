@@ -32,11 +32,11 @@ switch (${STAR_HOST_SYS})
      breaksw
 endsw
 setenv LDFLAGS `root-config --ldflags` 
-setenv CFLAGS  "`root-config --auxcflags` -fPIC"
+setenv CFLAGS  "`root-config --auxcflags` -fPIC -pthread"
 setenv CXXFLAGS "$CFLAGS"
 setenv FCFLAGS  "$CFLAGS"
 setenv CC  "`root-config --cc`"
-setenv CXX "`root-config --cxx` $LDFLAGS -fPIC"
+setenv CXX "`root-config --cxx` $LDFLAGS -fPIC "
 setenv F77 "`root-config --f77` $LDFLAGS -fPIC"
 setenv PERL_EXT_CFLAGS   "$CFLAGS"
 setenv PERL_EXT_CPPFLAGS "$CXXFLAGS"
@@ -53,8 +53,11 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-foreach pkg (Coin-3.1.3)# apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.4.1) #gsl  gsl-2.1 
+set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.4.1 Coin-3.1.3";
+#if ($#argv != 0) set list = $argv[1];
+foreach pkg ($list) 
     cd ~/sources/.${STAR_HOST_SYS}
+#    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done) continue
     if (! -r ${pkg}) then
       if ($pkg != "xrootd-4.4.1" && $pkg != "Coin-3.1.3") then
@@ -146,7 +149,15 @@ foreach pkg (Coin-3.1.3)# apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fa
            ../../${pkg}/configure --prefix=$XOPTSTAR
 	   make
 	   make install
+           touch ../${pkg}.Done
            breaksw
+      case "Python*":
+          ./configure --prefix=$XOPTSTAR --with-libs='-lpthread'
+# --with-pth  --enable-shared
+	  make -j 4
+          make install
+          touch ../${pkg}.Done
+          breaksw
       case "apr-1.5.1":
       default:
           ./configure --prefix=$XOPTSTAR

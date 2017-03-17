@@ -1,24 +1,8 @@
 TString OnDb(Int_t year = 2014, const Char_t *dataset="Conditions_daq") {
   // https://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map/
   TString database;
-  if      (year == 2016)     {
-#if 1
-    database = "dbbak.starp.bnl.gov:3415";
-#else
-    if (dataset[0] == 'R') database = "onldb2.starp.bnl.gov:3501";
-    else                   database = "onldb2.starp.bnl.gov:3502";
-#endif
-  }
-  else if      (year == 2015)     {
-#if 1
-    database = "dbbak.starp.bnl.gov:3414";
-#else
-    if (dataset[0] == 'R') database = "onldb2.starp.bnl.gov:3501";
-    else                   database = "onldb2.starp.bnl.gov:3502";
-#endif
-  }
-  //  if      (year == 2015)     database = "onldb2.starp.bnl.gov:3502";
-  //  if      (year == 2015)     database = "onldb.starp.bnl.gov:3501";
+  if      (year == 2016)     database = "dbbak.starp.bnl.gov:3415";
+  else if (year == 2015)     database = "dbbak.starp.bnl.gov:3414";
   else if (year == 2014)     database = "dbbak.starp.bnl.gov:3413";
   else if (year == 2013)     database = "dbbak.starp.bnl.gov:3412";
   else if (year == 2012)     database = "dbbak.starp.bnl.gov:3411";
@@ -33,5 +17,9 @@ TString OnDb(Int_t year = 2014, const Char_t *dataset="Conditions_daq") {
   else if (year == 2003)     database = "dbbak.starp.bnl.gov:3402";
   else if (year == 2002)     database = "dbbak.starp.bnl.gov:3401";
   else if (year == 2001)     database = "dbbak.starp.bnl.gov:3400";
+  else {// current Db
+    if (dataset[0] == 'R') database = "onldb2.starp.bnl.gov:3501";
+    else                   database = "onldb2.starp.bnl.gov:3502";
+  }
   return database;
 }

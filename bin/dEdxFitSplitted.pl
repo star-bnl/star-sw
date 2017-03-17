@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 use File::Basename;
-my %ARG = (file => '2014AuAu200P16idK.root',
+my %ARG = (file => 'MudEdx1.root',
            Hist => 'pTPhiPiDz',
            mode => 'GP',
 	   nx   => '100',

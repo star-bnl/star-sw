@@ -67,6 +67,7 @@
 set dirlist = `echo ${STAR_LIB}`;# ${STAR}/.${STAR_HOST_SYS}/lib`
 #set dirlist = `echo ${STAR_OBJ}/StarVMC/Geometry`;# ${STAR}/.${STAR_HOST_SYS}/lib`
 #set dirlist = /usr/lib
+#set dirlist = /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib64
 #set dirlist = /software/intel_17/compilers_and_libraries_2017.0.098/linux/bin/intel64;#/opt/rh/devtoolset-4/root/usr/lib/gcc/x86_64-redhat-linux/5.2.1/
 #set dirlist = $STAR_OBJ/StRoot/KFParticle
 #set  dirlist = /opt/rh/devtoolset-3/root/usr/lib/gcc/x86_64-redhat-linux/4.9.2/32/
@@ -77,7 +78,7 @@ foreach p ($dirlist)
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep -i agchitv
+	nm -p $lib |  grep -i AgCdigi
     end
 end
 #set list = `find .sl64_gcc447/obj/StarVMC/Geometry/ -name "*.o"`

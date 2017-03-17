@@ -1,5 +1,5 @@
 /* 
-   root.exe -b -q  lmysql.C MakeTpcAvgPowerSupply.C+
+   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2017)'
 Test
    root.exe 'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply",20160509,114213)'
 TH2F *voltP = new TH2F("VoltP","Voltage versus sector and row, TpcAvgPowerSupplyC",24,0.5,24.5,45,0.5,45.5);
@@ -292,7 +292,7 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
   return LastRun;
 }
 //________________________________________________________________________________
-void MakeTpcAvgPowerSupply(Int_t year = 2016) {
+void MakeTpcAvgPowerSupply(Int_t year = 2017) {
   TDatime d(10000*(year-1) + 1201,0);
   Int_t u95 = d.Convert();
   TDatime nextyear(10000*(year+1) + 101, 0);

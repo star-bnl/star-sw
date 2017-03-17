@@ -11,6 +11,7 @@ P->ProfileX()->Draw()
 N->SetMarkerColor(2)
 N->ProfileX()->Draw("same")
 TLegend *l = new TLegend(0.3,0.6,0.5,0.8)
+P_pfx->SetXTitle("#Phi(degrees)");
 l->AddEntry(P_pfx,"Positive")
 l->Draw()
 l->AddEntry(N_pfx,"Negative")
