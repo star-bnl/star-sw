@@ -357,10 +357,10 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   mhRunNumber = new TH1D("hRunNumber", "Run id - (Year - 1999)#times10^{6}", 400000, 0, 400000);
   mhEventId->SetXTitle("Event id");
   mhRunNumber->SetXTitle("Run number");
-
+#if  ROOT_VERSION_CODE < 395523
   // Set bit to automatic bin extention
   mhEventId->SetBit(TH1::kCanRebin);
-
+#endif
   utility->setStyle( mhEventId   ) ;
   utility->setStyle( mhRunNumber ) ;
 
