@@ -221,7 +221,9 @@ void StMCSteppingHist::SummArr()
        mh = new MyHolder(ts.Data(),fMedium->GetName());
         for (int i=0;i<2;i++) {
           TH1F *h = new TH1F(ts.Data(), "", 100, 0., 1.);
+#if  ROOT_VERSION_CODE < 395523
           h->SetBit(TH1::kCanRebin);
+#endif
           h->SetDirectory(0);
           mh->fH[i] = h;
         }
