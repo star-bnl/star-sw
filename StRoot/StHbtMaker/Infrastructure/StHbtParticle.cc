@@ -653,6 +653,7 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
     tPoint = hel.at(tLength);
     // Find which sector it is on
     TpcLocalTransform(tPoint,tmpSect[ti],tRow,tU,tPhi);
+#if  ROOT_VERSION_CODE < 395523
     if (TMath::IsNaN(tmpSect[ti])){
       cout <<"***ERROR tmpSect"<< endl; 
     }
@@ -665,6 +666,7 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
     if (TMath::IsNaN(tPhi)){
       cout <<"***ERROR tPhi"<< endl;
     }  
+#endif
     // calculate crossing plane
     tn.setX(cos(tPhi));
     tn.setY(sin(tPhi));       
@@ -680,6 +682,7 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
     tPoint = hel.at(tLength);
     tmpZ[ti] = tPoint.z();
     tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,tmpU[ti],tPhi);
+#if  ROOT_VERSION_CODE < 395523
     if (TMath::IsNaN(tSect)){
       cout <<"***ERROR tSect 2"<< endl; 
     }
@@ -692,6 +695,7 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
     if (TMath::IsNaN(tPhi)){
       cout <<"***ERROR tPhi 2 "<< endl;
     }  
+#endif
     if(tOutOfBound || (tmpSect[ti] == tSect && tRow!=(ti+1))){
       tmpSect[ti]=-2;
       //	  cout << "missed once"<< endl;
@@ -714,12 +718,14 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
 	tmpZ[ti] = tPoint.z();
 	tmpSect[ti] = tSect;
 	tOutOfBound = TpcLocalTransform(tPoint,tSect,tRow,tmpU[ti],tPhi);
+#if  ROOT_VERSION_CODE < 395523
 	if (TMath::IsNaN(tSect)){
 	  cout <<"***ERROR tSect 3"<< endl; 
 	}
 	if (TMath::IsNaN(tRow)){
 	  cout <<"***ERROR tRow 3"<< endl;
 	}
+#endif
 	if (TMath::IsNaN(tmpU[ti])){
 	  cout <<"***ERROR tmpU[ti] 3"<< endl;
 	}
@@ -731,11 +737,13 @@ void StHbtParticle::CalculateTpcExitAndEntrancePoints(StPhysicalHelixD* tHelix,
 	}
       }
     }
+#if  ROOT_VERSION_CODE < 395523
     if (TMath::IsNaN(tmpSect[ti])){
       cout << "*******************ERROR***************************" << endl;
       cout <<"StHbtParticle--Fctn tmpSect=" << tmpSect[ti] << endl;
       cout << "*******************ERROR***************************" << endl;
     }
+#endif
     if (TMath::IsNaN(tmpU[ti])){
       cout << "*******************ERROR***************************" << endl;
       cout <<"StHbtParticle--Fctn tmpU=" << tmpU[ti] << endl;
