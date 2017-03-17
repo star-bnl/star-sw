@@ -30,7 +30,8 @@ my $FLIBS     = $env->{FLIBS};
 $LDFLAGS     .= $env->{LDEXPORT};# . " -pthread";
 #$LIBS        .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
 my $lpath = $LIB; $lpath =~ s/\#//;
-$LIBS        .= $env->{LDALL} . " " . $lpath . "/libstarsim.a " . $env->{LDNONE};
+$LIBS        .= " -lTable -lStarRoot -lSt_base";
+$LIBS        .= $env->{LDALL} . " " . $lpath . "/libstarsim.a " . $lpath . "/libg2t.a " . $lpath . "/libgstar.a ". $lpath . "/libxgeometry.a " . $env->{LDNONE};
 #print "LDALL = env->{LDALL}  ==> LIBS = $LIBS =========================\n";
 if ($FC =~ /pgf77/) {
     if ($PGILIB ne ""){
@@ -52,7 +53,7 @@ if ($FC =~ /pgf77/) {
 #  if ($LD ne 'icc') {$LIBS .= " " . $env->{LIBSTDC}}
 #  $LIBS .= $env->{LDNONE};
 #}
-
+$LIBS        .= " -lStarAgmlUtil";
 $FPPFLAGS .= " -D__ROOT__"; # -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
 #  $CPPFLAGS  = "-pthread -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
 $CPPFLAGS .= "-D__ROOT__"; # -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " . "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
@@ -185,6 +186,10 @@ if ($#src > -1) {
   Depends $env2 $pkg, $LIB . "/libstarsim.a";
   Depends $env2 $pkg, $LIB . "/libgeant321.a"; 
   Depends $env2 $pkg, $LIB . "/libgcalor.a";
+  Depends $env2 $pkg, $LIB . "/libg2t.a";
+  Depends $env2 $pkg, $LIB . "/libgstar.a";
+  Depends $env2 $pkg, $LIB . "/libxgeometry.a";
+  Depends $env2 $pkg, $LIB . "/StarAgmlUtil.so";
   Program $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
   if ($STAR_SYS !~ /darwin/) {
