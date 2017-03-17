@@ -22,7 +22,7 @@
 #include "StSstStripList.hh"
 #include "St_base/Stiostream.h"
 #include <math.h>
-
+using namespace std;
 StSstClusterList::StSstClusterList()
 {
   mListLength   = 0;
