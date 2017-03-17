@@ -438,7 +438,7 @@ switch ($pkg)
 	    endif
           endif
 	endif
-        exit 0;
+#        exit 0;
 	breaksw
 	case "gcc520": # Hongwei private version
 	if (-r /opt/gcc/5.2.0)then
