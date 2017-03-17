@@ -17,7 +17,6 @@ TDataSet *CreateTable() {
   gEnv->SetValue("btog_posit1(1)",32);
   gEnv->SetValue("btog_posit1(2)",33);
   gEnv->SetValue("btog_posit2",23);
-  gEnv->SetValue("btog_version",5);
   gEnv->SetValue("calg_version",3);
   gEnv->SetValue("calg_nmodule(1)",60);
   gEnv->SetValue("calg_nmodule(2)",60);
