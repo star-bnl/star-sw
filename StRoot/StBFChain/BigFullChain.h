@@ -1580,14 +1580,19 @@ Bfc_st BFC[] = { // standard chains
   {"EEmcMixer", "","","",                    "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"eemcA2E","eemcA2E","" ,"db","StEEmcA2EMaker",       "StEEmcA2EMaker","E-EMC ADC to E converter",kFALSE},
   {"eemCl"    ,"eemCl","","db","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
+
   // BTOF related chains
   {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
    ,                                                                         "StChain","BTOF Chain",kFALSE},
   {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    ,                                                                               "BTOF hit maker",kFALSE},
-  {"btofSim"    ,"","BTofChain","McEvent,BTofUtil,UseMCTstart"
-   ,"StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",                      "BTOF Simulator",kFALSE},
+  {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
+   ,                                                                                "Vpd Simulator",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker"   ,"StVpdCalibMaker","VPD calibration",kFALSE},
+  {"btofSim" ,"","BTofChain","BTofUtil,vpdSim"  ,"StBTofSimMaker",
+                       "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
+  {"btofMixer"    ,"","BTofChain","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
+   ,                                                                                   "BTof Mixer",kFALSE},
 
 
   // left MTD chain for sumulation alone here
