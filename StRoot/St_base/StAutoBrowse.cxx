@@ -8,7 +8,9 @@
 #include "TMethod.h"
 #include "TMethodArg.h"
 #include "TDataType.h"
+#if  ROOT_VERSION_CODE < 395523
 #include "Api.h"
+#endif
 #include "TBrowser.h"
 #include "TMemberInspector.h"
 #include "TError.h"
@@ -36,7 +38,7 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, co
   if (*name == '*') name++;
   int ln = strcspn(name,"[ ");
   TString iname(name,ln);
-  
+#if  ROOT_VERSION_CODE < 395523
   G__ClassInfo *classInfo = (G__ClassInfo*) kl->GetClassInfo();  	
   if (!classInfo)		return;
   G__ClassInfo &cl = *classInfo;
@@ -64,15 +66,13 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, co
   if (strcmp(m.Type()->Fullname(),"TObject") && !m.Type()->IsBase("TObject"))
   					return;
   if (mname == "G__virtualinfo")	return;
-
   int  size = sizeof(void*);
+  int nmax = 1;
   if (!(prop&G__BIT_ISPOINTER)) size = m.Type()->Size(); 
 
-  int nmax = 1;
   if (prop & G__BIT_ISARRAY) {
     for (int dim = 0; dim < m.ArrayDim(); dim++) nmax *= m.MaxIndex(dim);
   }
-
   for(int i=0; i<nmax; i++) {
     char *ptr = (char*)addr + i*size;
     TObject *obj = (prop&G__BIT_ISPOINTER) ? *((TObject**)ptr) : (TObject*)ptr;
@@ -98,7 +98,7 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, co
    
     fBrowser->Add(obj,bwname);
   }
-
+#endif
 }    
 
 //______________________________________________________________________________

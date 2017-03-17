@@ -16,7 +16,11 @@
 
 #ifdef __ROOT__
 #include "Rtypes.h"
+#if  ROOT_VERSION_CODE < 395523
 #include "Riosfwd.h"
+#else
+#include <iosfwd>
+#endif
 #endif
 
 #ifndef __CINT__
@@ -106,7 +110,6 @@ class messVec;
 #include <Stsstream.h>
 #include <Stiostream.h>
 #endif
-#include "Riosfwd.h"
 class StMessMgr : public ostrstream {
    friend ostream& operator<<(ostream& ,StMessage*);
    friend ostream& operator++(StMessMgr&);

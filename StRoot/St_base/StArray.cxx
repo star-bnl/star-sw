@@ -3,6 +3,7 @@
 #include "StArray.h"
 #include "TDatime.h"
 #include "TBrowser.h"
+#include "TBuffer.h"
 #include "StMkDeb.h"
 
 enum {kBelongs = BIT(22)};
