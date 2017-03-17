@@ -55,8 +55,9 @@ Int_t nint(Float_t x);
 //
 // Fortran abs is fabs
 //
+#if  ROOT_VERSION_CODE < 395523
 #define abs(x) TMath::Abs(x)
-
+#endif
 // VAX-Fortran (omfg) trig functions taking arguement in degrees
 Double_t tand(Double_t x);
 Double_t cosd(Double_t x);
@@ -67,12 +68,12 @@ template <typename T> T min(const T &a, const T &b ){ return TMath::Min(a,b); }
 #endif
 Int_t mod(const Int_t &a, const Int_t &b);
 Float_t mod(const Float_t &a, const Float_t &b);
-
+#if  ROOT_VERSION_CODE < 395523
 #define cos(x) TMath::Cos( (Double_t) x )
 #define sin(x) TMath::Sin( (Double_t) x )
 #define tan(x) TMath::Tan( (Double_t) x )
 #define exp(x) TMath::Exp( (Double_t) x )
-
+#endif
 // Overload the ^ operator
 
 

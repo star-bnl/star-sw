@@ -1,4 +1,5 @@
 #include "Rotations.h"
+using namespace std;
 vector<rotm_t> fgRotations;
 //________________________________________________________________________________
 void rotm_t::Rotations() {
