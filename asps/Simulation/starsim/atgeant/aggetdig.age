@@ -45,5 +45,10 @@
         { while LQ(Jds)>0 & bin(Q(LQ(Jds)+8))<=IDIG { Jds=LQ(Jds) }}
      }
    END
-
+   integer function idigiF(i)
+   integer            i
+   integer            idigi
+   Common   /AgCdigi/ idigi(15)
+   idigiF = idigi(i)	   
+   end
 

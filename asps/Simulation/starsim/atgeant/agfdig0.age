@@ -128,5 +128,26 @@ Ier=0; last=Nc1+1; JDS=0;
    (' AgFDIG0 FATAL ERROR:',i3,' Probably inconsistent geometry ',2(1x,a4))
    {AgFDIG0,Iv,Ia,nc2}=-1
    END
+   integer function NvbF(i) 
+   integer i
+      Integer          Iprin,Nvb
+      Character*4                   cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+   NvbF = Nvb(i)
+   end
+   Character*4 function cdF(dummy)
+   integer dummy
+      Integer          Iprin,Nvb
+      Character*4                   cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+   cdF = cd
+   end
+   Character*4 function csF(dummy)
+   integer dummy
+      Integer          Iprin,Nvb
+      Character*4                   cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+   csF = cs
+   end
 
 
