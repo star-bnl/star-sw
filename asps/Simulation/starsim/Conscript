@@ -201,6 +201,7 @@ if ($env->{LIBG2C}) {
 $LIBS .= $env->{LDNONE};
 $LIBS .= " -lgeant321";
 $LIBS .= " -lgcalor";
+#$LIBS .= " -lg2t -lgstar";
 my $Libraries = $env->{Libraries};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 $Libraries .= " " . $env->{CERNLIBS} . " " . $env->{Packages}->{MYSQL}->{LIBS} .
@@ -215,6 +216,8 @@ $envP = $env2->clone('LDFLAGS'   => $LDFLAGS,
 Depends      $envP $pgm, $LIB . "/libgeant321.a";
 Depends      $envP $pgm, $LIB . "/libgcalor.a";
 Depends      $envP $pgm, $LIB . "/libstarsim.a";
+#Depends      $envP $pgm, $LIB . "/libg2t.a";
+#Depends      $envP $pgm, $LIB . "/libgstar.a";
 Program      $envP $pgm, @starsim;
 my $d = $Dir . "/";
 my @list = glob $d . "atlsim.*";# print "Dir  = $Dir; list = @list\n";
