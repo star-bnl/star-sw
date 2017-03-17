@@ -29,13 +29,19 @@ extern "C"
 ClassImp(StarVMCDetector);
 //________________________________________________________________________________
 StarVMCDetector::StarVMCDetector(const Char_t *name) : TDataSet(name), fId(kUnknownId), 
-						       fK(0), fFMT(""), 
+						       fK(-1), fFMT(""), 
 						       fNVmax(0), fN10(0), fVolIdoffset(0), 
 						       fIds(0), fSortedId(0),
 						       fSId(0),  fChair(0) {
   TString Name(GetName());
+  SetBit(kInvalidObject);
   for (Int_t i = 0; i < NoDetectors; i++) 
     if (Name == TString(Detectors[i].det)) {fId = Detectors[i].Id; SetTitle(Detectors[i].Csys); fK = i; break;}
+  //  assert(fK >= 0);
+  if (fK >= 0) InvertBit(kInvalidObject);
+  else {
+    cout << "Ignore sensitive volume: " << Name.Data() << endl;
+  }
 }
 //________________________________________________________________________________
 StarVMCDetector::~StarVMCDetector() {

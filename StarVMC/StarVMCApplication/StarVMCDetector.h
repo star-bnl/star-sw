@@ -35,6 +35,7 @@ class StarVMCDetector : public TDataSet {
   Int_t          GetVolumeId(const Char_t *path, Int_t *numbv);
   Int_t          GetVolumeId(Int_t *numbv);
   Int_t          GetElement(Int_t volumeId);
+  const StDetectorId Id() {return fId;}
   void           SetVolIdOffset(Int_t k) {fVolIdoffset = k;}
   const Char_t  *GetPath(Int_t volumeId);
   static const Char_t *FormPath(const Char_t *FMT, Int_t N, Int_t *numbv);
