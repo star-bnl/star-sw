@@ -76,7 +76,8 @@ Int_t StFpsRawDaqReader::Init(){
 
 Int_t StFpsRawDaqReader::Make() {
   enum {kFpsQtCrate=8, kFpostQtCrate=9};
-  
+  mTrg=0;
+
   prepareEnvironment();
   
   mRdr->get(0,EVP_TYPE_ANY);
@@ -194,15 +195,21 @@ Int_t StFpsRawDaqReader::Make() {
 
 void StFpsRawDaqReader::Clear( Option_t *opts ){
   StTriggerData2017* d=(StTriggerData2017*)mTrg;
-  delete d;
+  if(d) delete d;
   if(mFmsCollectionPtr) mFmsCollectionPtr->hits().clear();  
 };
 
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.7 2017/02/20 19:17:16 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.9 2017/03/02 23:19:02 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.9  2017/03/02 23:19:02  akio
+ * check before deleting mTrg
+ *
+ * Revision 1.8  2017/03/02 23:17:06  akio
+ * initialize mTrg=0
+ *
  * Revision 1.7  2017/02/20 19:17:16  akio
  * Explicit loop over sector to get meta for both FPS and FPOST
  *
