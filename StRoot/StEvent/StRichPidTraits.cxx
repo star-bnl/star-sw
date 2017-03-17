@@ -34,6 +34,7 @@
  *
  ***************************************************************************/
 #include "TClass.h"
+#include "TBuffer.h"
 #include "StRichPidTraits.h"
 
 static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.7 2002/02/19 23:21:30 ullrich Exp $";

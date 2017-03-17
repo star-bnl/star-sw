@@ -193,6 +193,7 @@
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
 #include "TBrowser.h"
+#include "TBuffer.h"
 #include "StCalibrationVertex.h"
 #include "StDetectorState.h"
 #include "StEvent.h"

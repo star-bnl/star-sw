@@ -24,6 +24,7 @@
 #include <string.h>
 #include <assert.h>
 #include <iostream>
+#include "TBuffer.h"
 #include "StTriggerData2017.h"
 
 ClassImp(StTriggerData2017)

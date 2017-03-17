@@ -55,6 +55,7 @@
  *
  **************************************************************************/
 #include "TClass.h"
+#include "TBuffer.h"
 #include "TString.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"

@@ -49,6 +49,7 @@
  **************************************************************************/
 #include <Stiostream.h>
 #include "TClass.h"
+#include "TBuffer.h"
 #include "StXiVertex.h"
 #include "StV0Vertex.h"
 #include "StTrack.h"

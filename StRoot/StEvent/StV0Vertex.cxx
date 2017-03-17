@@ -52,6 +52,7 @@
 #include "StTrack.h"
 #include "StTrackGeometry.h"
 #include "TClass.h"
+#include "TBuffer.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;

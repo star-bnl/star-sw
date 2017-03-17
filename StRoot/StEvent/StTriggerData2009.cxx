@@ -116,6 +116,7 @@
 #include <string.h>
 #include <assert.h>
 #include <iostream>
+#include "TBuffer.h"
 #include "StTriggerData2009.h"
 
 ClassImp(StTriggerData2009)

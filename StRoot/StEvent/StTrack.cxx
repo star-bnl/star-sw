@@ -156,6 +156,7 @@
  **************************************************************************/
 #include <map>
 #include "TClass.h"
+#include "TBuffer.h"
 #include "StMath.hh"
 #include "StTrack.h"
 #include "StParticleDefinition.hh"

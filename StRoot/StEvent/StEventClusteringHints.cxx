@@ -123,6 +123,7 @@
  *
  **************************************************************************/
 #include "StEventClusteringHints.h"
+#include "TBuffer.h"
 #include <algorithm>
 
 static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.37 2016/12/08 18:59:31 ullrich Exp $";
