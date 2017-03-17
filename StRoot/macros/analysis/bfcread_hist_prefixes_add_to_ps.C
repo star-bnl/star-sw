@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add_to_ps.C,v 3.5 2014/07/22 20:37:52 genevb Exp $
+// $Id: bfcread_hist_prefixes_add_to_ps.C,v 3.6 2017/02/27 21:41:36 genevb Exp $
 // $Log: bfcread_hist_prefixes_add_to_ps.C,v $
+// Revision 3.6  2017/02/27 21:41:36  genevb
+// StEvent.so now depends on StBichsel.so
+//
 // Revision 3.5  2014/07/22 20:37:52  genevb
 // Remove unnecessary library loads
 //
@@ -95,6 +98,7 @@ void bfcread_hist_prefixes_add_to_ps(
     gSystem->Load("libglobal_Tables");
     gSystem->Load("StUtilities");
     gSystem->Load("StAnalysisUtilities");
+    gSystem->Load("StBichsel");
     gSystem->Load("StEvent");
     gSystem->Load("StTpcDb");
     gSystem->Load("StPmdUtil");
