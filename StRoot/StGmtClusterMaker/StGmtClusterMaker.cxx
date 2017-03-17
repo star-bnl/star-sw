@@ -40,8 +40,11 @@ TF1* StGmtClusterMaker::FindPeaks(TH1F* hist) {
   TF1 back("poly","pol0",CLUS_MIN,CLUS_MAX);
   Double_t par[MAX_PEAKS*3+1];
   spect.Search(hist,3);
-  float* xpeaks=spect.GetPositionX();
-  
+#if  ROOT_VERSION_CODE < 395523
+  Float_t* xpeaks=spect.GetPositionX();
+#else
+  Double_t* xpeaks=spect.GetPositionX();
+#endif
   hist->Fit(&back,"Q");
   UInt_t npx=0;
   UInt_t nfound = spect.GetNPeaks();
