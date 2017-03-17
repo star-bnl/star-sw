@@ -5,6 +5,8 @@
 class StEmcDetector;
 class StBemcTables;
 class StEmcGeom ;
+class St_db_Maker;
+
 
 class BemcHitList : public ScintHitList {
  private:
@@ -19,7 +21,7 @@ class BemcHitList : public ScintHitList {
  BemcHitList();
   virtual  ~BemcHitList();
   void clear();
-  void initRun();
+  void initRun(St_db_Maker* db_maker);
   void build( StEmcDetector*det, float adcMin);
   virtual   int etaBin(float eta);
   virtual float bin2EtaLeft(int iEta);

@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <StMessMgr.h>
+#include "St_db_Maker/St_db_Maker.h"
 
 #include "BemcHitList.h"
 
@@ -34,7 +35,7 @@ BemcHitList::BemcHitList() :
 //==========================================================
 //==========================================================
 void
-BemcHitList::initRun() {
+BemcHitList::initRun(St_db_Maker* db_maker) {
   LOG_DEBUG <<Form("BemcHitList::initRun() start")<<endm;
   ScintHitList::initRun();
   // clear old lookup table
@@ -45,9 +46,7 @@ BemcHitList::initRun() {
 	mes2bin[i][j][k]=-1;
 
   // .. grab table
-  StMaker*mk=(StMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
-  assert(mk);
-  myTable->loadTables(mk  );
+  myTable->loadTables(db_maker);
 
   int nB=0,nA=0;
   int id;

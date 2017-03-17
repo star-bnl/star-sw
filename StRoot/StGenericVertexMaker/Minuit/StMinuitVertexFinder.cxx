@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.55 2017/02/17 21:31:36 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.57 2017/03/05 21:00:42 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -94,7 +94,10 @@ StMinuitVertexFinder::~StMinuitVertexFinder()
    mZImpact.clear();
 }
 //________________________________________________________________________________
-void StMinuitVertexFinder::InitRun(Int_t runumber) {
+void StMinuitVertexFinder::InitRun(Int_t runumber, const St_db_Maker* db_maker)
+{
+  StGenericVertexFinder::InitRun(runumber, db_maker);
+
   St_VertexCutsC *cuts = St_VertexCutsC::instance();
   mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack();
   mDcaZMax                     = cuts->DcaZMax();     // Note: best to use integer numbers
@@ -736,8 +739,7 @@ double StMinuitVertexFinder::CalcChi2DCAs(const StThreeVectorD &vtx) {
 }
 
 
-bool
-StMinuitVertexFinder::accept(StTrack* track) const
+bool StMinuitVertexFinder::accept(StTrack* track) const
 {
     //
     //   Accept only tracks which fulfill certain

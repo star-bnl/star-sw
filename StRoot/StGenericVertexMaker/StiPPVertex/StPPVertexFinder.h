@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.41 2017/02/21 21:34:22 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.47 2017/03/15 22:56:55 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -13,6 +13,8 @@
 #include <vector>
 
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StiPPVertex/TrackData.h"
+#include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 
 #include "StPhysicalHelixD.hh"
 
@@ -21,22 +23,21 @@ class TH2F;
 class TH1D;
 
 class StiKalmanTrack;
-class TrackData;
-class VertexData;
 class StEvent; 
 class StiToolkit;
-class StEEmcDb;
 
-class EEmcGeomSimple;
-class StBTofGeometry; 
+class StMuDst;
+class StMuTrack;
 
+class St_db_Maker;
 class BtofHitList;  
 class CtbHitList;
 class BemcHitList;
 class EemcHitList;
-class Vertex3D;
 
-class StPPVertexFinder: public StGenericVertexFinder {
+
+class StPPVertexFinder: public StGenericVertexFinder
+{
  private:
 
   /// Takes a list of vertex candidates/seeds and updates each vertex position
@@ -56,26 +57,35 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void findSeeds_PPVLikelihood();
 
   enum {mxH=32};
-  bool examinTrackDca(const StiKalmanTrack*, TrackData &t);
-  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);
-  void matchTrack2CTB(const StiKalmanTrack*, TrackData &t);
-  void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t);
-  void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t);
-  bool matchTrack2Membrane(const StiKalmanTrack*, TrackData &t);
-  bool isPostCrossingTrack(const StiKalmanTrack* track);
+  bool examinTrackDca(const StiKalmanTrack*, TrackData &track);
+  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &track);
+  void matchTrack2CTB(const StiKalmanTrack*, TrackData &track);
 
-  /// A container with pre-selected tracks to be used in seed finding
-  std::vector<TrackData>  mTrackData;
-  std::vector<VertexData> mVertexData;
-  Vertex3D *vertex3D; // for stand alone 3D vertex reco
+  void matchTrack2EEMC(TrackDataT<StiKalmanTrack> &track);
+  void matchTrack2EEMC(TrackDataT<StMuTrack> &track);
+  void matchTrack2EEMC(const StPhysicalHelixD& helix, TrackData &track);
+
+  void matchTrack2BEMC(TrackDataT<StiKalmanTrack> &track);
+  void matchTrack2BEMC(TrackDataT<StMuTrack> &track);
+  void matchTrack2BEMC(const StPhysicalHelixD& helix, TrackData &track);
+
+  bool matchTrack2Membrane(TrackDataT<StiKalmanTrack> &track);
+  void matchTrack2Membrane(TrackDataT<StMuTrack> &track);
+
+  bool isPostCrossingTrack(const StiKalmanTrack* stiTrack);
+
   bool buildLikelihoodZ();
   bool findVertexZ(VertexData &);
   bool evalVertexZ(VertexData &);
   void exportVertices(); 
-
   void saveHisto(TString fname);
+
+  /// A container with pre-selected tracks to be used in seed finding
+  std::vector<TrackData>  mTrackData;
+  std::vector<VertexData> mVertexData;
   int  mTotEve;
   int  eveID;
+  int  nBadVertex;
   unsigned int  mAlgoSwitches; ///< binary, assign 1bit per change, use enum below
                                ///< default is 0, as for 2008 pp data production
   enum {kSwitchOneHighPT=1}; 
@@ -87,53 +97,57 @@ class StPPVertexFinder: public StGenericVertexFinder {
   TObjArray HList;
 
   // params
-  double mMinTrkPt;            ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
-  double mMaxTrkDcaRxy;        ///< DCA to nominal beam line for each track
-  float  mMaxZradius;          ///<  used in matching: tracks to zVertex
-  int    mMinMatchTr;          ///<  for valid vertex
-  float  mMaxZrange;           ///<  cut off for tracks Z_DCA
-  float  mDyBtof;              ///<  BTOF delta y cut
-  float  mMinZBtof;            ///<  BTOF local z min cut
-  float  mMaxZBtof;            ///<  BTOF local z max cut
-  float  mMinAdcBemc;          ///<  BEMC towers with MIP response
-  float  mMinAdcEemc;          ///<  EEMC towers with MIP response
-  float  mMinFitPfrac;         ///<  nFit/nPossible
-  bool   mFitPossWeighting;    ///< Use nFit/nPossible in track weighting (ranking)
+  double mMinTrkPt;               ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
+  double mMaxTrkDcaRxy;           ///< DCA to nominal beam line for each track
+  float  mMaxZradius;             ///< used in matching: tracks to zVertex
+  int    mMinMatchTr;             ///< for valid vertex
+  float  mMaxZrange;              ///< cut off for tracks Z_DCA
+  float  mMinZBtof;               ///< BTOF local z min cut
+  float  mMaxZBtof;               ///< BTOF local z max cut
+  float  mMinAdcBemc;             ///< BEMC towers with MIP response
+  float  mMinAdcEemc;             ///< EEMC towers with MIP response
+  float  mMinFitPfrac;            ///< nFit/nPossible
+
+  /// A flag whether to use nFit/nPossible in track weighting (ranking).
+  /// Introduced in 2012 for pp510 to differentiate between global track
+  /// quality, together with lowering the overall threshold from 0.7 to 0.51.
+  /// Set to false prior to 2012, true thereafter
+  bool   mFitPossWeighting;
+
   bool   mDropPostCrossingTrack;  ///< enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; ///< set the max # of vertices, sorted by rank
   float  mCut_oneTrackPT;         ///< threshold for storing one track vertices.
                                   ///< In GeV, used only if coresponding algoSwitch switch is ON.
-  bool   mStudyBeamLineTracks;    ///< activates writing them out + lot of QA histos,
-                                  ///< use  BFC option: VtxSeedCalG to enable it, expert only
 
-  // util
   StiToolkit     *mToolkit;
   BtofHitList    *btofList;
   CtbHitList     *ctbList;
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
-  StBTofGeometry *btofGeom;
-  EEmcGeomSimple *geomE;
+
+  const StMuDst* mStMuDst;
   
-  void dumpKalmanNodes(const StiKalmanTrack *track);
+  void dumpKalmanNodes(const StiKalmanTrack *stiTrack);
   void initHisto();
 
+  /// A helper function to do common processing for StEvent and StMuDst cases
+  void seed_fit_export();
+
   virtual void  UseVertexConstraint() {}
-  
+
 public:
+
   virtual void UsePCT(bool x=true) { mDropPostCrossingTrack = !x; }
   virtual void Finish();
+  virtual void Init();
+  virtual void InitRun(int runumber, const St_db_Maker* db_maker);
+  virtual void Clear(); 
+  virtual void CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
 
   StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::Beamline1D);
 
-  // mandatory implementations
-  virtual  ~StPPVertexFinder();
-  virtual int       fit(StEvent*);        
-  void      printInfo(ostream& = cout) const;
- 
-  // over-written method
-  virtual void  Init();
-  virtual void  InitRun  (int runumber);
-  virtual void  Clear(); 
-  virtual void  CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
+  virtual ~StPPVertexFinder() {}
+  virtual int fit(StEvent*);
+  virtual int Fit(const StMuDst& muDst);
+  void printInfo(std::ostream& = std::cout) const;
 };

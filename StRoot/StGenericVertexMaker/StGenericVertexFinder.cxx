@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.43 2017/02/15 15:30:17 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.47 2017/03/05 21:00:43 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -12,6 +12,7 @@
 
 #include "TH1F.h"
 #include "TSpectrum.h"
+#include "TClonesArray.h"
 
 #include "StarRoot/TRMatrix.h"
 #include "StarRoot/TRSymMatrix.h"
@@ -19,9 +20,10 @@
 #include "StEventTypes.h"
 #include "StPrimaryVertex.h"
 #include "StMessMgr.h"
+#include "St_db_Maker/St_db_Maker.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEventTypes.h"
-
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 
 // Initialize static variable with default values
@@ -57,15 +59,14 @@ StGenericVertexFinder::~StGenericVertexFinder()
 {
 }
 
+
 /*!
   Adds the vertex to StEvent (currently as a primary)
   Here we invent our own flag and other data to put in
   In real life we have to get it from somewhere (as done for position)
 */
-//______________________________________________________________________________
-void 
-StGenericVertexFinder::FillStEvent(StEvent* event){
-
+void StGenericVertexFinder::FillStEvent(StEvent* event)
+{
   for(UInt_t i=0;i<mVertexList.size(); i++) {
     //allocates new memory for each vertex
     StPrimaryVertex* primV = new StPrimaryVertex(mVertexList[i]); 
@@ -78,9 +79,9 @@ StGenericVertexFinder::FillStEvent(StEvent* event){
   // (might be undesirable for some debugging)
   // Also could be wrong if StEvent already has vertices for some reason
   mVertexList.clear();
+
   for(UInt_t i=0;i<event->numberOfPrimaryVertices(); i++)
     mVertexList.push_back(*(event->primaryVertex(i)));
-
 }
 
 
@@ -147,16 +148,57 @@ int StGenericVertexFinder::size() const
 {
   return mVertexList.size();
 }
+
+
 //______________________________________________________________________________
 StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 {
    return (idx<(int)mVertexList.size())? (StPrimaryVertex*)(&(mVertexList[idx])) : 0;
 }
+
+
+void StGenericVertexFinder::InitRun(int runumber, const St_db_Maker* db_maker)
+{
+   // Check if all necessary conditions satisfied
+   bool prerequisites = db_maker &&
+      (mVertexFitMode == VertexFit_t::Beamline1D ||
+       mVertexFitMode == VertexFit_t::Beamline3D);
+
+   // Just exit if there is nothing to do
+   if (!prerequisites) return;
+
+   const TDataSet* dbDataSet = const_cast<St_db_Maker*>(db_maker)->GetDataBase("Calibrations/rhic/vertexSeed");
+
+   vertexSeed_st* vSeed = dbDataSet ? static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"))->GetTable() : nullptr;
+
+   if (!vSeed) {
+      LOG_FATAL << "Vertex fit w/ beamline requested but 'Calibrations/rhic/vertexSeed' table not found" << endm;
+   }
+
+   UseVertexConstraint(*vSeed);
+}
+
+
 //______________________________________________________________________________
-void
-StGenericVertexFinder::Clear()
+void StGenericVertexFinder::Clear()
 {
   mVertexList.clear();
+}
+
+
+void StGenericVertexFinder::result(TClonesArray& stMuDstPrimaryVertices)
+{
+  stMuDstPrimaryVertices.Clear();
+
+  int index = 0;
+
+  for (const StPrimaryVertex & stVertex : mVertexList)
+  {
+     // This idiotic conversion is required due to the constructor accepting
+     // reference to pointer
+     const StPrimaryVertex * myStVertex = &stVertex;
+     new(stMuDstPrimaryVertices[index++]) StMuPrimaryVertex( myStVertex);
+  }
 }
 
 
@@ -332,7 +374,8 @@ void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
 {
    mBeamline = beamline;
 
-   LOG_INFO << "BeamLine constraint: weight =  " << mBeamline.weight << "\n"
+   LOG_INFO << "BeamLine constraints:\n"
+            << "weight: " << mBeamline.weight << "\n"
             << "x(z) = (" << mBeamline.x0   << " +/- max(0.01, "   << mBeamline.err_x0 << ") ) + "
             <<        "(" << mBeamline.dxdz << " +/- max(0.0001, " << mBeamline.err_dxdz << ") ) * z\n"
             << "y(z) = (" << mBeamline.y0   << " +/- max(0.01, "   << mBeamline.err_y0 << ") ) + "

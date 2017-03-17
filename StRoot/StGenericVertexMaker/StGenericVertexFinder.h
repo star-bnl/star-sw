@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.50 2017/02/21 21:34:21 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.54 2017/03/05 21:00:43 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -17,9 +17,13 @@
 //#include "StEventTypes.h"
 #include "StPrimaryVertex.h"
 #include "tables/St_vertexSeed_Table.h"
+#include "StGenericVertexMaker/VertexFinderOptions.h"
 
 class StEvent;
+class StMuDst;
 class StDcaGeometry;
+class TClonesArray;
+class St_db_Maker;
 
 
 class StGenericVertexFinder
@@ -31,10 +35,10 @@ public:
 
   /// Options used to define the type of vertex fit performed in a concrete
   /// implementation
-  enum class VertexFit_t : int { Unspecified, NoBeamline, Beamline1D, Beamline3D };
+  using VertexFit_t = star_vertex::VertexFit_t;
 
   /// Options to select vertex seed finder
-  enum class SeedFinder_t : int { Unspecified, MinuitVF, PPVLikelihood, TSpectrum };
+  using SeedFinder_t = star_vertex::SeedFinder_t;
 
   // virtual and '=0' ; those MUST be implemented
   virtual ~StGenericVertexFinder();                           // virtual destructor
@@ -59,13 +63,17 @@ public:
           void           SetDebugLevel(Int_t level) {mDebugLevel=level;}
   virtual void           Init(){ /* noop */;}
   virtual void           Finish(){ /* noop */;}
-  virtual void           InitRun  (int runumber){ /* noop */;}
+  virtual void           InitRun(int runumber, const St_db_Maker* db_maker);
   virtual void           Clear();
   const std::vector<StPrimaryVertex> *result() {return &mVertexList;}
+
+  void result(TClonesArray& stMuDstPrimaryVertices);
 
   void                   FillStEvent(StEvent*);
   virtual void SetVertexPosition(double x,double y,double z){assert(0);}
   virtual int            IsFixed() const        {return 0;}
+
+  virtual int            Fit(const StMuDst& muDst) { return -1; }
 
 protected:
 
@@ -113,15 +121,15 @@ protected:
   /// the passed value of z.
   double beamY(double z) const;
 
-  /// Caclulates chi2 for the beamline and a point
-  double CalcChi2Beamline(const StThreeVectorD& point);
-
   /// Recalculates the vertex position from DCA measurements in the input list
   /// of DCAs
   StThreeVectorD CalcVertexSeed(const StDcaList &trackDcas);
 
   /// Caclulates total chi2 for the track DCAs stored in mDCAs and a point
   virtual double CalcChi2DCAs(const StThreeVectorD &point);
+
+  /// Caclulates chi2 for the beamline and a point
+  double CalcChi2Beamline(const StThreeVectorD& point);
 
   /// Caclulates total chi2 for the beamline and track DCAs stored in mDCAs and a point
   double CalcChi2DCAsBeamline(const StThreeVectorD &point);

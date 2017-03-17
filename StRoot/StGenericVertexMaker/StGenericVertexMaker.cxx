@@ -16,9 +16,11 @@
 #include "StGenericVertexMaker.h"
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
+#include "StEvent/StPrimaryVertex.h"
 #include "TH2.h"
 #include "TNtuple.h"
 #include "StMessMgr.h"
+#include "St_db_Maker/St_db_Maker.h"
 
 #include "StGenericVertexFinder.h"
 #include "StppLMVVertexFinder.h"
@@ -201,36 +203,10 @@ void StGenericVertexMaker::Clear(const char* opt){
 
  */
 Int_t StGenericVertexMaker::InitRun(int runnumber){
-  theFinder->InitRun(runnumber);
-  if (useBeamline || IAttr("Beamline3D")) {
 
-     // Get Current Beam Line Constraint from database
-     TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
+  St_db_Maker *st_db_maker = static_cast<St_db_Maker*>(GetMaker("db"));
+  theFinder->InitRun(runnumber, st_db_maker);
 
-     if (dbDataSet) {
-       vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
-       if(vSeed==0){
-	 LOG_ERROR << "StGenericVertexMaker -- No 'vertexSeed' table in Database for beamline, makse no sens to proceed, Jan" << endm;
-	 assert(1==2);
-       }
-       
-       
-       double x0 = vSeed->x0;
-       double y0 = vSeed->y0;
-       double dxdz = vSeed->dxdz;
-       double dydz = vSeed->dydz;
-
-       LOG_INFO << "BeamLine Constraint: " << endm;
-       LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
-       LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
-
-       theFinder->UseVertexConstraint(*vSeed);
-
-     } else {
-       LOG_ERROR << "StGenericVertexMaker -- No 'Calibrations/rhic' Database for beamline, makse no sens to proceed, Jan" << endm;
-       assert(1==2);
-     }
-  }
   return StMaker::InitRun(runnumber);
 }
 
@@ -280,7 +256,7 @@ Int_t StGenericVertexMaker::Make()
 {
   nEvTotal++;
   primV  = NULL;
-  mEvent = (StEvent *)GetInputDS("StEvent");
+  mEvent = (StEvent*) GetInputDS("StEvent");
   LOG_DEBUG << "StGenericVertexMaker::Make: StEvent pointer " << mEvent << endm;
   LOG_DEBUG << "StGenericVertexMaker::Make: external find use " << externalFindUse << endm;
 
