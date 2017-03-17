@@ -451,14 +451,14 @@ StEventMaker::makeEvent()
 		static Int_t goodIds[5] = {9200,9201,310811,310812,310813};
 		const StTriggerId *nominal = triggerIdColl->nominal();
 		TriggerId = 0;
-		if (nominal) {
+		if (nominal && nominal->triggerIds().size()) {
 		  for (Int_t i = 0; i < 5; i++) {
 		    if (nominal->isTrigger(goodIds[i])) {TriggerId = goodIds[i]; break;}
 		  }
+		  gStTpcDb->SetTriggerId(TriggerId);
+		  if (! TriggerId && IAttr("laserIT")) return kStSkip;
 		}
 	      }
-	      gStTpcDb->SetTriggerId(TriggerId);
-	      if (! TriggerId && IAttr("laserIT")) return kStSkip;
 	    }
 
             // Allow trigger filtering to skip events
