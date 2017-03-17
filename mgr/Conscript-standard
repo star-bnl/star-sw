@@ -199,8 +199,12 @@ my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath
 # some compiler specific treatments below, global or conditional
 #-
 if ( $FC ne 'ifort' and ($DirPath =~ /pams/ and
-			 (#$DirPath =~ /$g77pkgs/ or 
-			  $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/) or $DirPath =~ /StarVMCApplication/ or  $DirPath =~ /St_geant_Maker/)){
+			 (#$DirPath =~ /$g77pkgs/ or
+			  $DirPath =~ /crs/ or
+			  $DirPath =~ /g2t/ or
+			  $DirPath =~ /hij/) or
+			 $DirPath =~ /StarVMCApplication/ or
+			 $DirPath =~ /St_geant_Maker/)){
   $FCCOM    = $env1->{FCviaAGETOFCOM};
   if ($DirPath =~ /StarVMCApplication/ or $DirPath =~ /St_geant_Maker/) {
     $FCCOM    = "test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;";
@@ -363,6 +367,10 @@ if ( $pkg ne 'sim' and $pkg ne 'gen' ) {
     Install $env1 $LIB, $xgeometry;
     $lib = $LIB . "/lib" . $xgeometry;
     InstallAs $env1 $lib, $xgeometry;
+    $LIBPKG = "libxgeometry." . $env1->{SUFLIB};
+    Library   $env1 $LIBPKG, @srcE;
+    Install $env1 $LIB,    $LIBPKG;
+    $LIBPKG = "";
   }
 }  
 print "idlL at the end = @idlL\n"   if $param::debug;
@@ -648,6 +656,7 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
   $FPPFLAGS = " -DATLAS_UNIX -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
 } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/){# ||  $pkg =~ m/^apythia/ ||  $pkg =~ m/^bpythia/) {
+  $LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
   $SO_MAP  = "";
   $FCPATH  = $INCLUDE;
   $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
@@ -658,6 +667,9 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
 } elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
   $CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
     . $main::PATH_SEPARATOR . $CPPPATH;
+  $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
+  $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+#  print "====================== FPPFLAGS = $FPPFLAGS\n====================== CPPFLAGS = $CPPFLAGS\n";
 } elsif ($pkg eq 'StarMiniCern') {
   $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
@@ -859,9 +871,9 @@ if ( $#idlM > -1 ) {
   $CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . "#";;
   print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
-if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
-  $LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env1->{SUFLIB};
-}
+#if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
+#  $LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env1->{SUFLIB};
+#}
 if ($pkg =~ /^St_base$/) {
   if ( $STAR_SYS =~ /^hp_ux102$/) {
     $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
@@ -1358,6 +1370,7 @@ if ( $#src > -1 ) {
       #      print "$#PlainObj => @PlainObj \n";
     }
     if ($SO_PKG and $SO_PKG !~ /xgeometry/) {
+#      print "====================== FPPFLAGS = $FPPFLAGS\n====================== CPPFLAGS = $CPPFLAGS\n";
       LinkedModule $env2 $SO_PKG, @src;
       Install $env2 $LIB,         $SO_PKG;
       my $lib = $LIB . "/" . $SO_PKG;

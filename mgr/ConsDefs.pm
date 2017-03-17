@@ -38,6 +38,7 @@
  $FC           = `root-config --f77`; chomp($FC);
  $LD           = `root-config  --ld`; chomp($LD);
  $LDFLAGS      = `root-config  --ldflags`; chomp($LDFLAGS); 
+ $LDFLAGS     .= " -rdynamic";
  $SOFLAGS      = $LDFLAGS;
  
  $SOFLAGS  .= " -shared -Wl,-Bdynamic";
