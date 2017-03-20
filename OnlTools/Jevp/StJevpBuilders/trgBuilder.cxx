@@ -445,7 +445,7 @@ void trgBuilder::fillQtHisto(int conf_num, TriggerDataBlk *trg, TH1D *sz, TH1D *
 	    int nlines = x & 0xff;
 	    int usec = x & 0xff00;
 	    usec >>= 8;
-	    usec *= 4;     // Johns error...
+	    //usec *= 4;     // Johns error...
 	    
 	    LOG(DBG, "addr=%d nlines=%d usec=%d", addr, nlines, usec);
 	    
