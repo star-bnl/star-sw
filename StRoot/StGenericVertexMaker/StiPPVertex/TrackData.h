@@ -1,7 +1,7 @@
 #ifndef TrackData_h
 #define TrackData_h
 /***********************************************
- * $Id: TrackData.h,v 1.7 2017/03/15 22:56:50 smirnovd Exp $
+ * $Id: TrackData.h,v 1.8 2017/03/20 22:41:00 smirnovd Exp $
  ******************************************************
  */
 #include <TVector3.h>
@@ -87,8 +87,7 @@ class TrackDataT : public TrackData
 {
 public:
 
-  TrackDataT(const OriginalTrack_t &motherTrack, const StDcaGeometry* trackDca=nullptr) :
-    TrackData(&motherTrack, trackDca) { }
+  TrackDataT(const OriginalTrack_t &motherTrack, const StDcaGeometry* trackDca=nullptr);
 
   const OriginalTrack_t* getMother() const { return static_cast<const OriginalTrack_t*>(mother); }
 };
@@ -98,6 +97,9 @@ public:
 
 /*
  * $Log: TrackData.h,v $
+ * Revision 1.8  2017/03/20 22:41:00  smirnovd
+ * TrackDataT: Removed erroneous inlined definition for constructor
+ *
  * Revision 1.7  2017/03/15 22:56:50  smirnovd
  * TrackDataT: Added specialization for template constructor
  *
