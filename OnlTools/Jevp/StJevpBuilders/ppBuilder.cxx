@@ -272,6 +272,19 @@ void ppBuilder::event(daqReader *rdr)
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) {  return; }
 
+  unsigned short dsm = trgd->lastDSM(0);
+  int it = ((dsm & 0x1000) != 0) ? 1 : 0;
+  int et = ((dsm & 0x0004) != 0) ? 1 : 0;
+
+  //if(rdr->daqbits64 & 0x1) printf("it=%d et=%d trg=0x%llx\n", it, et, rdr->daqbits64 & 0x1);
+ 
+  if(!it && !et) {
+      delete trgd;
+      return;
+  }
+
+  //printf("it=%d et=%d trg=0x%016llx\n", it, et, rdr->daqbits64);
+
   if(trgd){
     int i=0;
     double tac_avr[8];
