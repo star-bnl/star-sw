@@ -124,8 +124,16 @@ Int_t StFpsRawDaqReader::Make() {
   }
 
   int ndata=0;
+  mRccFps=0; mRccFpost=0;
   for(int fpsfpost=1;fpsfpost<=2;fpsfpost++) {    
     dd = mRdr->det("fps")->get("adc",fpsfpost) ;
+    if(dd){
+      if(fpsfpost==1){
+	mRccFps=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+      }else{
+	mRccFpost=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+      }
+    }
     while(dd && dd->iterate()) {
       
       // 2015
@@ -160,7 +168,6 @@ Int_t StFpsRawDaqReader::Make() {
 	  if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
 	  det=kFpsDetId;
 	  crate=kFpsQtCrate;
-	  mRccFps=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
 	}else if(fpsfpost==2){
 	  slatid = mFmsDbMkr->fpostSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
 	  mFmsDbMkr->fpostQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
@@ -168,7 +175,6 @@ Int_t StFpsRawDaqReader::Make() {
 	  if(q<0 || l<1 || s<1) { /* LOG_WARN << Form("Invalid Q/L/S = %d/%d/%d",q,l,s);*/ flag=1; }
 	  det=kFpostDetId;
 	  crate=kFpostQtCrate;
-	  mRccFpost=((fps_evt_hdr_t *)(dd->meta))->reserved[1];
 	}	    
 	if(flag==0){
 	  StFmsHit* hit = new StFmsHit();
@@ -202,8 +208,11 @@ void StFpsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.9 2017/03/02 23:19:02 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.10 2017/03/20 21:05:12 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.10  2017/03/20 21:05:12  akio
+ * Moving accessing RCC counters before hit loop
+ *
  * Revision 1.9  2017/03/02 23:19:02  akio
  * check before deleting mTrg
  *
