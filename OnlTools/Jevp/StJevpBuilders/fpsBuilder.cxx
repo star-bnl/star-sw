@@ -235,6 +235,12 @@ void fpsBuilder::event(daqReader *rdr)
   int n6 = 0;
   for(int fpsfpost=1; fpsfpost<=2; fpsfpost++) {    
     dd = rdr->det("fps")->get("adc",fpsfpost) ;
+    if(fpsfpost==1){
+      fpsrcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+    }else{
+      fporcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+    }
+
     int first = 0;
     int ndata = 0;
     int qt_ch = 0;
@@ -243,12 +249,13 @@ void fpsBuilder::event(daqReader *rdr)
     int slat = 0;
     while(dd && dd->iterate()) {
       int xing=(char)dd->pad;
-      if(xing>=128) xing-=256;
-
-      if(xing!=0) continue;
-
       int qt=dd->row;
       u_int n=dd->ncontent;
+      if(xing>=128) xing-=256;
+      
+      //printf("Fpsfpost=%d xing=%d n=%d\n",fpsfpost,xing,n);
+    
+      if(xing!=0) continue;
       fps_adc_t *a = (fps_adc_t *) dd->Void;
       for(int i=0;i<n;i++) {
 	ndata++;
@@ -257,7 +264,6 @@ void fpsBuilder::event(daqReader *rdr)
 	//int tdc=a[i].tdc;
 	
 	if(fpsfpost==1){
-	  fpsrcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
 	  contents.h13_ch_rdo->Fill(ch, qt);	  
 	  qt_ch = qt*32+ch;	  
 	  // get quadrant, layer, slat from qt_ch
@@ -292,7 +298,6 @@ void fpsBuilder::event(daqReader *rdr)
 	}
 
 	if(fpsfpost==2){
-	  fporcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
 	  contents.hh13_ch_rdo->Fill(ch, qt);	  
 	  qt_ch = qt*32+ch;	  
 
@@ -301,7 +306,7 @@ void fpsBuilder::event(daqReader *rdr)
 	  contents.hh21_ch_adc_full->Fill(qt_ch,adc);
 	  
 	  layer=0;
-	  if     ( qt==0 || qt==1 || qt==2 ){layer=4;}
+	  if     ( qt==0 || qt==1 || qt==2) {layer=4;}
 	  if     ( qt==3 || qt==4 || qt==5) {layer=5;}
 	  if     ( qt==6 || qt==7 )         {layer=6;}
 
@@ -362,8 +367,9 @@ void fpsBuilder::event(daqReader *rdr)
       }
     }
   }
-
-  unsigned int tcu=0, dfps=0, dfpo=0;
+  
+  unsigned int tcu=0;
+  int dfps=0, dfpo=0;
   dd = rdr->det("trg")->get("raw");
   if(dd && dd->iterate() ){
     u_char *trg_raw = dd->Byte;
@@ -386,7 +392,7 @@ void fpsBuilder::event(daqReader *rdr)
       const long long m=one<<32;
       long long r=fpsrcc;
       long long t=tcu;
-      dfps=(unsigned int)(r+m-t);
+      dfps=(int)(r+m-t);
     }
     dfpo=fporcc-tcu;
     if(fporcc==0){
@@ -396,12 +402,12 @@ void fpsBuilder::event(daqReader *rdr)
       const long long m=one<<32;
       long long r=fporcc;
       long long t=tcu;
-      dfpo=(unsigned int)(r+m-t);
+      dfpo=(int)(r+m-t);
     }
   }
   if(dfps!=0) contents.h50_rcc->Fill(dfps);
   if(dfpo!=0) contents.hh50_rcc->Fill(dfpo);
-  //printf("TCU=%10d FPS=%10d FPO=%10d DFPS=%10d DFPO=%10d\n",tcu,fpsrcc,fporcc,dfps,dfpo);
+  //printf("TCU=%10u FPS=%10u FPO=%10u DFPS=%10d DFPO=%10d\n",tcu,fpsrcc,fporcc,dfps,dfpo);
 }
   
 void fpsBuilder::stoprun(daqReader *rdr) {
