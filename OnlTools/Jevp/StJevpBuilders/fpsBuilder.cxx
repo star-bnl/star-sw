@@ -235,13 +235,15 @@ void fpsBuilder::event(daqReader *rdr)
   int n6 = 0;
   for(int fpsfpost=1; fpsfpost<=2; fpsfpost++) {    
     dd = rdr->det("fps")->get("adc",fpsfpost) ;
-    if(fpsfpost==1){
-      fpsrcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
-    }else{
-      fporcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+    if(dd){
+      if(fpsfpost==1){
+	fpsrcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+      }else{
+	fporcc = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+      }
     }
 
-    int first = 0;
+    //int first = 0;
     int ndata = 0;
     int qt_ch = 0;
     int quadrant = 0;
@@ -257,7 +259,7 @@ void fpsBuilder::event(daqReader *rdr)
     
       if(xing!=0) continue;
       fps_adc_t *a = (fps_adc_t *) dd->Void;
-      for(int i=0;i<n;i++) {
+      for(u_int i=0;i<n;i++) {
 	ndata++;
 	int ch=a[i].ch;
 	int adc=a[i].adc;
