@@ -81,7 +81,7 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
   contents.h33_adc1_full->SetLineColor(kBlue);
   contents.h34_adc2_full->SetLineColor(kGreen);
   contents.h35_adc3_full->SetLineColor(kRed);
-  contents.h50_rcc = new TH1F("h50_rcc","RCC; xing", 100, 0, 120000);
+  contents.h50_rcc = new TH1F("h50_rcc","FPSRCC; xing", 100, 0, 120000);
 
   contents.hh10_multi1 = new TH1F("hh10_multi1","channel multiplicity; channel multiplicity",84,0,84);
   contents.hh11_multi2 = new TH1F("hh11_multi2","channel multiplicity; channel multiplicity",84,0,84);
@@ -104,7 +104,7 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
   contents.hh33_adc1_full->SetLineColor(kBlue);
   contents.hh34_adc2_full->SetLineColor(kGreen);
   contents.hh35_adc3_full->SetLineColor(kRed);
-  contents.hh50_rcc = new TH1F("hh50_rcc","RCC; xing", 100, 0, 120000);
+  contents.hh50_rcc = new TH1F("hh50_rcc","FPOSTRCC; xing", 100, 0, 120000);
  
   float xyrange[45];
   for(int i=0; i<23; i++) {
@@ -157,7 +157,7 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h50_rcc);
 
   //FPOST
-  char *cc_title[] = { (char *)"FPO4", (char *)"FPO5", (char *)"FPO6" };
+  char *cc_title[] = { (char *)"FPO1234", (char *)"FPO5", (char *)"FPO6" };
   plots[++n] = new JevpPlot(contents.hh10_multi1);
   plots[n]->addHisto(contents.hh11_multi2);
   plots[n]->addHisto(contents.hh12_multi3);
