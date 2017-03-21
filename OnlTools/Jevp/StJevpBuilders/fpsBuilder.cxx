@@ -83,9 +83,9 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
   contents.h35_adc3_full->SetLineColor(kRed);
   contents.h50_rcc = new TH1F("h50_rcc","FPSRCC; xing", 100, 0, 120000);
 
-  contents.hh10_multi1 = new TH1F("hh10_multi1","channel multiplicity; channel multiplicity",84,0,84);
-  contents.hh11_multi2 = new TH1F("hh11_multi2","channel multiplicity; channel multiplicity",84,0,84);
-  contents.hh12_multi3 = new TH1F("hh12_multi3","channel multiplicity; channel multiplicity",84,0,84);
+  contents.hh10_multi1 = new TH1F("hh10_multi1","channel multiplicity; channel multiplicity",96,0,96);
+  contents.hh11_multi2 = new TH1F("hh11_multi2","channel multiplicity; channel multiplicity",96,0,96);
+  contents.hh12_multi3 = new TH1F("hh12_multi3","channel multiplicity; channel multiplicity",96,0,96);
   contents.hh10_multi1->SetLineColor(kBlue);
   contents.hh11_multi2->SetLineColor(kGreen);
   contents.hh12_multi3->SetLineColor(kRed);
@@ -224,6 +224,25 @@ void fpsBuilder::event(daqReader *rdr)
   }
   contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
 
+  dd = rdr->det("trg")->get("raw");
+  unsigned int tcu=0;
+  if(dd && dd->iterate() ){
+    u_char *trg_raw = dd->Byte;
+    struct simple_desc {
+      short len ;
+      char evt_desc ;
+      char ver ;
+    } *desc ;
+    desc = (simple_desc *) trg_raw ;
+    if(desc->ver==0x44){
+      TriggerDataBlk2017* trgdata2017 = (TriggerDataBlk2017*)dd->Byte;
+      StTriggerData* trg = (StTriggerData*) new StTriggerData2017(trgdata2017,0,1,0);
+      unsigned int detmask=trg->getTrgDetMask();
+      if(! ((detmask >> 10) & 0x1)) return;
+      tcu=trg->tcuCounter();      
+    }
+  }
+  
   vector<int> slats[2][4];
   unsigned int fpsrcc=0;
   unsigned int fporcc=0;
@@ -290,10 +309,14 @@ void fpsBuilder::event(daqReader *rdr)
 	  
 	  contents.h20_ch_adc->Fill(qt_ch,adc);
 	  contents.h21_ch_adc_full->Fill(qt_ch,adc);
+	  	 
+	  if     ( layer==1 && adc>25 ) { n1++; }
+	  else if( layer==2 && adc>25 ) { n2++; }
+	  else if( layer==3 && adc>18 ) { n3++; }
 	  
-	  if( layer==1 ) { n1++; contents.h30_adc1->Fill(adc); contents.h33_adc1_full->Fill(adc); }
-	  if( layer==2 ) { n2++; contents.h31_adc2->Fill(adc); contents.h34_adc2_full->Fill(adc);  }
-	  if( layer==3 ) { n3++; contents.h32_adc3->Fill(adc); contents.h35_adc3_full->Fill(adc);  }
+	  if     ( layer==1 ) { contents.h30_adc1->Fill(adc); contents.h33_adc1_full->Fill(adc); }
+	  else if( layer==2 ) { contents.h31_adc2->Fill(adc); contents.h34_adc2_full->Fill(adc);  }
+	  else if( layer==3 ) { contents.h32_adc3->Fill(adc); contents.h35_adc3_full->Fill(adc);  }
 	  
 	  if( layer<3 && adc>50 )
 	    slats[layer-1][quadrant-1].push_back(slat);
@@ -309,12 +332,18 @@ void fpsBuilder::event(daqReader *rdr)
 	  
 	  layer=0;
 	  if     ( qt==0 || qt==1 || qt==2) {layer=4;}
-	  if     ( qt==3 || qt==4 || qt==5) {layer=5;}
-	  if     ( qt==6 || qt==7 )         {layer=6;}
+	  else if( qt==3 || qt==4 || qt==5) {layer=5;}
+	  else if( qt==6 || qt==7 )         {layer=6;}
 
-	  if( layer==4 ) { n4++; contents.hh30_adc1->Fill(adc); contents.hh33_adc1_full->Fill(adc); }
-	  if( layer==5 ) { n5++; contents.hh31_adc2->Fill(adc); contents.hh34_adc2_full->Fill(adc);  }
-	  if( layer==6 ) { n6++; contents.hh32_adc3->Fill(adc); contents.hh35_adc3_full->Fill(adc);  }
+	  if(adc>50){
+	    if     ( layer==4 ) { n4++; }
+	    else if( layer==5 ) { n5++; }
+	    else if( layer==6 ) { n6++; }
+	  }
+
+	  if     ( layer==4 ) { contents.hh30_adc1->Fill(adc); contents.hh33_adc1_full->Fill(adc); }
+	  else if( layer==5 ) { contents.hh31_adc2->Fill(adc); contents.hh34_adc2_full->Fill(adc);  }
+	  else if( layer==6 ) { contents.hh32_adc3->Fill(adc); contents.hh35_adc3_full->Fill(adc);  }
 	  
 	}
       //   printf("FPS: xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
@@ -370,42 +399,26 @@ void fpsBuilder::event(daqReader *rdr)
     }
   }
   
-  unsigned int tcu=0;
   int dfps=0, dfpo=0;
-  dd = rdr->det("trg")->get("raw");
-  if(dd && dd->iterate() ){
-    u_char *trg_raw = dd->Byte;
-    struct simple_desc {
-      short len ;
-      char evt_desc ;
-      char ver ;
-    } *desc ;
-    desc = (simple_desc *) trg_raw ;
-    if(desc->ver==0x44){
-      TriggerDataBlk2017* trgdata2017 = (TriggerDataBlk2017*)dd->Byte;
-      StTriggerData* trg = (StTriggerData*) new StTriggerData2017(trgdata2017,0,1,0);
-      tcu=trg->tcuCounter();      
-    }
-    dfps=fpsrcc-tcu;
-    if(fpsrcc==0){
-      dfps=0;
-    }else if(fpsrcc< tcu){
-      const long long one=1;
-      const long long m=one<<32;
-      long long r=fpsrcc;
-      long long t=tcu;
-      dfps=(int)(r+m-t);
-    }
-    dfpo=fporcc-tcu;
-    if(fporcc==0){
-      dfpo=0;
-    }else if(fporcc < tcu){
-      const long long one=1;
-      const long long m=one<<32;
-      long long r=fporcc;
-      long long t=tcu;
-      dfpo=(int)(r+m-t);
-    }
+  dfps=fpsrcc-tcu;
+  if(fpsrcc==0){
+    dfps=0;
+  }else if(fpsrcc< tcu){
+    const long long one=1;
+    const long long m=one<<32;
+    long long r=fpsrcc;
+    long long t=tcu;
+    dfps=(int)(r+m-t);
+  }
+  dfpo=fporcc-tcu;
+  if(fporcc==0){
+    dfpo=0;
+  }else if(fporcc < tcu){
+    const long long one=1;
+    const long long m=one<<32;
+    long long r=fporcc;
+    long long t=tcu;
+    dfpo=(int)(r+m-t);
   }
   if(dfps!=0) contents.h50_rcc->Fill(dfps);
   if(dfpo!=0) contents.hh50_rcc->Fill(dfpo);
