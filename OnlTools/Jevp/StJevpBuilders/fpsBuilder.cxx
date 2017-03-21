@@ -155,6 +155,7 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
   }
   plots[++n] = new JevpPlot(contents.h40_hits12);
   plots[++n] = new JevpPlot(contents.h50_rcc);
+  plots[n]->logy = 1;
 
   //FPOST
   char *cc_title[] = { (char *)"FPO1234", (char *)"FPO5", (char *)"FPO6" };
@@ -186,6 +187,7 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
     plots[n]->getHisto(i)->setLegArgs("l");
   }
   plots[++n] = new JevpPlot(contents.hh50_rcc);
+  plots[n]->logy=1;
 
   for(int i=0; i<n; i++)
     plots[i]->optstat = 0;
