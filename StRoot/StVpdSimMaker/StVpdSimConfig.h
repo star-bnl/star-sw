@@ -20,7 +20,7 @@
 using std::string;
 class vpdSimParams_st;
 
-class StVpdSimConfig {
+class StVpdSimConfig : public StMaker {
 public:
 
 		StVpdSimConfig() {}
@@ -83,22 +83,24 @@ public:
 
 	void loadVpdSimParams(const int date = 20160913, const int time = 175725, const char* Default_time = "2016-09-13 17:57:25")
 	{
+    
+        St_db_Maker *dbMk = 0;
 
-		St_db_Maker *dbMk=new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
-		dbMk->SetDebug();
-		dbMk->SetDateTime(date,time); //! event or run start time, set to your liking
-		dbMk->SetFlavor("ofl");
+        TDataSet *DB = GetDataBase("Calibrations/tof/vpdSimParams");
+        if (!DB) {
+            LOG_INFO << "No data set found, creating new St_db_Maker..." << endm;
+            dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
+            dbMk->SetDebug();
+            dbMk->SetDateTime(date,time); //! event or run start time, set to your liking
+            dbMk->SetFlavor("ofl");
+            dbMk->Init();
+            dbMk->Make();
+        }
 
-		dbMk->Init();
-		dbMk->Make();
-
-		TDataSet *DB = 0;
-
-		DB = dbMk->GetInputDB("Calibrations/tof/vpdSimParams");
 		if (!DB) {
 			LOG_WARN << "Failed to connect to Database!" << endm;
             return;
-			}
+        }
 
 		St_vpdSimParams *dataset = 0;
 		dataset = (St_vpdSimParams*) DB->Find("vpdSimParams");
