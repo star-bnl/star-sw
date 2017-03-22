@@ -14,6 +14,7 @@
 #include <DAQ_READER/daq_dta.h>
 
 #include <trgDataDefs.h>
+#include "trgConfNum.h"
 
 // only the detectors we will use need to be included
 // for their structure definitions...
@@ -214,14 +215,15 @@ int main(int argc, char *argv[])
 		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		    date, evp->detectors, evp->status,evp->evpgroups) ;
 
+		//printf("tinfo evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X\n",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
+		//   date, evp->detectors, evp->status,evp->evpgroups) ;
 
 		/***************** let's do simple detectors; the ones which only have legacy *****/
-
+		
 		if(print_det[0]) {
-		  if(strcmp(print_det, "tinfo") == 0) {		    
-
-		    tinfo_doer(evp, "tinfo");
-		  }
+		    if(strcmp(print_det, "tinfo") == 0) {		    
+			tinfo_doer(evp, "tinfo");
+		    }
 		}
 
 		if(print_det[0]) {
@@ -1567,19 +1569,103 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 
 // This is called by tinfo flag:
 
+void QtParse(int conf_num, TriggerDataBlk *trg, int *sz, int *usecs) {
+    *sz = 0;
+    *usecs = 0;
+    if(trg->MainX[conf_num].offset == 0) return;
+
+  
+    char *base = (char *)trg;
+    QTBlock *qtb = (QTBlock *)(base + swap32(trg->MainX[conf_num].offset));
+    int len = swap32(trg->MainX[conf_num].length);
+    *sz = len;
+
+    if((len - swap32(qtb->length)) != 12) {
+	LOG(ERR, "Conf num %d not a QT board!");
+	return;
+    }
+    
+    // loop over boards
+    
+    if(swap32(qtb->length) > 0 ) {
+	unsigned int *dword = (unsigned int *)qtb->data;
+	for(;;) {
+	    unsigned int x = swap32(*dword);
+	    LOG(DBG, "x=0x%x", x);
+	    if(x == 0xac10) break;
+	    
+	    int addr = (x>>16) & 0xff;
+	    int nlines = x & 0xff;
+	    int usec = x & 0xff00;
+	    usec >>= 8;
+	    //usec *= 4;     // Johns error...
+	    
+	    LOG(DBG, "addr=%d nlines=%d usec=%d", addr, nlines, usec);
+	    
+	    *usecs += usec;
+	    	    
+	    while(nlines--) {
+		dword++;
+	    }
+	    dword++;
+	}
+    }
+    
+}
+
 static int tinfo_doer(daqReader *rdr, const char *do_print)
 {
     int found = 0;
+    
+    printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x\n",
+	   rdr->seq,
+	   rdr->token,
+	   rdr->detectors,
+	   rdr->daqbits64_l1,
+	   rdr->daqbits64_l2,
+	   rdr->daqbits64,
+	   rdr->evpgroups,
+	   rdr->flags);
 
     daq_dta *dd = rdr->det("trg")->get("raw") ;
     if(dd) {
 	if(dd->iterate()) {
 	    found = 1;
 
+	    //printf("there\n");
+
 	    //      int sz = dd->get_size_t();
 	    TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
 
+	    int qt1_sz = 0;
+	    int qt1_usec = 0;
+	    int qt2_sz = 0;
+	    int qt2_usec = 0;
+	    int qt3_sz = 0;
+	    int qt3_usec = 0;
+	    int qt4_sz = 0;
+	    int qt4_usec = 0;
+	    
+	    QtParse(QT1_CONF_NUM, trg, &qt1_sz, &qt1_usec);
+	    QtParse(QT2_CONF_NUM, trg, &qt2_sz, &qt2_usec);	   
+	    QtParse(QT3_CONF_NUM, trg, &qt3_sz, &qt3_usec);
+	    QtParse(QT4_CONF_NUM, trg, &qt4_sz, &qt4_usec);
+
+	    int mxq_sz;
+	    int mxq_usec;
+	    int epq_sz;
+	    int epq_usec;
+	    int bbq_sz;
+	    int bbq_usec;
+
+	    QtParse(MXQ_CONF_NUM, trg, &mxq_sz, &mxq_usec);
+	    QtParse(EPQ_CONF_NUM, trg, &epq_sz, &epq_usec);
+	    QtParse(BBQ_CONF_NUM, trg, &bbq_sz, &bbq_usec);
+
+
 	    EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
+
+	    
 
 	    int trgDetMask = swap16(evtDesc->trgDetMask);
       
@@ -1589,7 +1675,69 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
       
 	    int trgCrateMask =  (res1 & 0xfff0) << 20 | (post & 0xfff0) << 8 | (pre & 0xfff0) >> 4;
       
-            printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x\n",
+	    UINT32 bunches_h = swap16(evtDesc->tcuCtrBunch_hi);
+	    UINT32 bunches = swap16(evtDesc->DSMAddress) & 0xffff;
+
+	    bunches |= bunches_h << 16;
+
+	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
+
+	    UINT32 tms[32];
+	    for(int i=0;i<32;i++) {
+		tms[i] = trgSum->LocalClocks[i];
+		if(tms[i]) tms[i] = tms[i] - bunches;
+	    }
+
+	    printf("%d ", rdr->seq);
+	    for(int i=0;i<32;i++) {
+		printf("%u ",tms[i]);
+	    }
+	    printf("CONFNUM_TM\n");
+
+		
+
+	    UINT32 l1_bx = trgSum->LocalClocks[L1_CONF_NUM];
+	    UINT32 mxq_bx = trgSum->LocalClocks[MXQ_CONF_NUM] ;
+	    UINT32 bbq_bx = trgSum->LocalClocks[BBQ_CONF_NUM];
+	    UINT32 epq_bx = trgSum->LocalClocks[EPQ_CONF_NUM];
+
+	    printf("%d %d 0x%llx %d %d %d %d %d %d %d MXSIZE\n",
+		   rdr->seq,
+		   rdr->token,
+		   rdr->daqbits64_l1,
+		   mxq_usec,
+		   bbq_usec,
+		   epq_usec,
+		   mxq_bx,
+		   bbq_bx,
+		   epq_bx,
+		   bunches
+		   );
+	    
+	    printf("%d %d 0x%llx %d %d %d %d %u %u %u %u %u %d %d %d %d--> %x %x %x  QTSIZE\n",
+		   rdr->seq,
+		   rdr->token,
+		   rdr->daqbits64_l1,
+		   qt1_usec,
+		   qt2_usec,
+		   qt3_usec,
+		   qt4_usec,
+		   (UINT32)trgSum->LocalClocks[QT1_CONF_NUM]-bunches,
+		   (UINT32)trgSum->LocalClocks[QT2_CONF_NUM]-bunches,
+		   (UINT32)trgSum->LocalClocks[QT3_CONF_NUM]-bunches,
+		   (UINT32)trgSum->LocalClocks[QT4_CONF_NUM]-bunches,
+		   bunches,
+		   qt1_sz,
+		   qt2_sz,
+		   qt3_sz,
+		   qt4_sz,
+		   (UINT32)trgSum->LocalClocks[QT3_CONF_NUM],
+		   (UINT32)trgSum->LocalClocks[QT4_CONF_NUM],
+		   bunches
+		   );
+
+
+            printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x\n",
 		   rdr->seq,
 		   rdr->token,
 		   rdr->detectors,
@@ -1601,28 +1749,63 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   trgDetMask,
 		   trgCrateMask);
 
-		printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
+	    printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 
-	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
+	    //TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
 	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
-	    printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
-	    printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
-	    for(int i=0;i<64;i++) {
-		printf("L2Result[%d]=0x%x\n",i,swap32(trgSum->L2Result[i]));
-	    }
-	    for(int i=0;i<8;i++) {
-		printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
-	    }
+	    //printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
+	    //printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
+	    //for(int i=0;i<64;i++) {
+	    //printf("L2Result[%d]=0x%x\n",i,swap32(trgSum->L2Result[i]));
+	    //}
+	    //for(int i=0;i<8;i++) {
+	    //		printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
+	    //}
 	    printf("ids: ");
 	    for(int i=0;i<64;i++) {
 		if(rdr->daqbits64 & (1ll << i)) {
 		    printf("{%d}",rdr->getOfflineId(i));
 		}
 	    }
-	    printf("\n");
+	    // printf("\n");
 
-
+	    static char *confnum2str[] = {
+		"rcc",
+		"l1",
+		"bc1",
+		"mxq",
+		"mix",
+		"bcw",
+		"bce",
+		"epq",
+		"bbc",
+		"bbq",
+		"fms",
+		"qt1",
+		"qt2",
+		"qt3",
+		"qt4",
+		NULL,
+		NULL,
+		NULL,NULL,
+		NULL,NULL,NULL };
+	    
+	    printf("   l1=0x%llx   trgDetMask=0%x   trgCrateMask=0x%x\n",rdr->daqbits64_l1,trgDetMask,trgCrateMask);
+	    /*printf("ids: crate %s(0x%x):\toffset=%d\tsize=%d\n", 
+		   "l1",
+		   1<<1,
+		   swap32(trg->L1_DSM_ofl.offset),
+		   swap32(trg->L1_DSM_ofl.length));
+	    */
+	      for(int i=2;i<MAX_OFFLEN-1;i++) {
+		if(confnum2str[i])
+		    printf("ids: crate %s(0x%x):\toffset=%d\tsize=%d\n", 
+			   confnum2str[i],
+			   1<<i,
+			   swap32(trg->MainX[i].offset),
+			   swap32(trg->MainX[i].length));
+			   }
       
 	}
     }
