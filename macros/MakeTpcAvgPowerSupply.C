@@ -1,5 +1,7 @@
 /* 
    root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2017)'
+   put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root'
+   root.exe  'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply")'
 Test
    root.exe 'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply",20160509,114213)'
 TH2F *voltP = new TH2F("VoltP","Voltage versus sector and row, TpcAvgPowerSupplyC",24,0.5,24.5,45,0.5,45.5);
