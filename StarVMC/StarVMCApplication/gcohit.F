@@ -2,6 +2,8 @@
 *-- Author :    Federico Carminati   28/11/98
       SUBROUTINE GCOHIT(CHCOMM,IADD)
 #include "asps/Simulation/starsim/include/commons/agcrdig.inc"
+      integer          idigi
+      common /AgCdigi/ idigi(15)
 *
       CHARACTER *(*) CHCOMM
 #if defined(CERNLIB_DECS) || defined(CERNLIB_LXIA64)
@@ -11,6 +13,8 @@
 #endif
 *
       IF(CHCOMM.EQ.'AGCRDIG') THEN
+         IADD=GCADDI(iwa)
+      ELSE IF(CHCOMM.EQ.'AGCDIGI') THEN
          IADD=GCADDI(idigi)
       ELSE IF(CHCOMM.EQ.'AGCHITV') THEN
          IADD=GCADDI(Iprin)

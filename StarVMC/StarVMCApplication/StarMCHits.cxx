@@ -20,6 +20,8 @@
 #include "TClass.h"
 #include "TROOT.h"
 #include "TRandom.h"
+#include "TGeoPhysicalNode.h"
+#include "TGeoBBox.h"
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "St_g2t_Chair.h"
@@ -37,20 +39,23 @@ StarMCHits *StarMCHits::fgInstance = 0;
 ClassImp(StarMCHits);
 //______________________________________________________________________
 # define gcohit gcohit_
+# define g3birk g3birk_
 extern "C"
 {
-  void type_of_call gcohit(DEFCHARD, Int_t*& DEFCHARL);
-  bool* type_of_call gcaddb(bool *arg);
-  char* type_of_call gcaddc(char *arg);
+  void    type_of_call gcohit(DEFCHARD, Int_t*& DEFCHARL);
+  bool*   type_of_call gcaddb(bool *arg);
+  char*   type_of_call gcaddc(char *arg);
   double* type_of_call gcaddd(double *arg);
-  int*  type_of_call gcaddi(int  *arg);
-  float* type_of_call gcaddf(float *arg);
-  int* type_of_call gcaddl(int *arg);
+  int*    type_of_call gcaddi(int  *arg);
+  float*  type_of_call gcaddf(float *arg);
+  int*    type_of_call gcaddl(int *arg);
+  void    type_of_call g3birk(float *arg);
 };
 //________________________________________________________________________________
 StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) : 
   TDataSet(name,title), fCurrentDetector(0), fDebug(0), fSeed(0), fEventNumber(0) { 
   fgInstance = this; fHitHolder = this; 
+  gcohit(PASSCHARD("AGCDIGI"),(int*&) fAgcdigi  PASSCHARL("AGCDIGI"));
   gcohit(PASSCHARD("AGCHITV"),(int*&) fAgchitv  PASSCHARL("AGCHITV"));
 }
 //________________________________________________________________________________
@@ -64,8 +69,8 @@ void StarMCHits::Step() {
   //  static Int_t Idevt0 = -1;
   static Double_t Gold = 0;
 #if 0
-  if (Debug() && gMC->IsA()->InheritsFrom("TGeant3TGeo")) {
-    TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+  if (Debug() && TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
+    TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
     geant3->Gdebug();
   }
 #endif
@@ -120,34 +125,34 @@ void StarMCHits::Step() {
     }
   }
   if (! fCurrentDetector) return;
-  //  Int_t Idevt =  gMC->CurrentEvent();
-  gMC->TrackPosition(fHit.Current.Global.xyzT);
-  gMC->TrackMomentum(fHit.Current.Global.pxyzE);
+  //  Int_t Idevt =  TVirtualMC::GetMC()->CurrentEvent();
+  TVirtualMC::GetMC()->TrackPosition(fHit.Current.Global.xyzT);
+  TVirtualMC::GetMC()->TrackMomentum(fHit.Current.Global.pxyzE);
   TGeoHMatrix  *matrixC = gGeoManager->GetCurrentMatrix();
   fHit.Current.Global2Local(matrixC);
-  if (gMC->IsTrackEntering()) {
+  if (TVirtualMC::GetMC()->IsTrackEntering()) {
     fHit.Detector= fCurrentDetector;
     fHit.Entry = fHit.Current;
-    fHit.Sleng = gMC->TrackLength();
-    fHit.Charge = (Int_t) gMC->TrackCharge();
-    fHit.Mass = gMC->TrackMass();
-    fHit.AdEstep = fHit.AStep = 0;
+    fHit.Sleng = TVirtualMC::GetMC()->TrackLength();
+    fHit.Charge = (Int_t) TVirtualMC::GetMC()->TrackCharge();
+    fHit.Mass = TVirtualMC::GetMC()->TrackMass();
+    fHit.AdEstep = fHit.AStep = fHit.birk = 0;
     return;
   }
   Double_t GeKin = fHit.Current.Global.pxyzE.E() - fHit.Mass;
-  fHit.Sleng = gMC->TrackLength();
+  fHit.Sleng = TVirtualMC::GetMC()->TrackLength();
   if (fHit.Sleng == 0.) Gold = GeKin;
-  Double_t dEstep = gMC->Edep();
-  Double_t Step = gMC->TrackStep();
-  fHit.iPart = gMC->TrackPid();
+  Float_t dEstep = TVirtualMC::GetMC()->Edep();
+  Float_t Step = TVirtualMC::GetMC()->TrackStep();
+  fHit.iPart = TVirtualMC::GetMC()->TrackPid();
   fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
   // - - - - - - - - - - - - - energy correction - - - - - - - - - -
-  if (gMC->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
+  if (TVirtualMC::GetMC()->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
     TArrayI proc;
-    Int_t Nproc = gMC->StepProcesses(proc);
+    Int_t Nproc = TVirtualMC::GetMC()->StepProcesses(proc);
     Int_t Mec = 0;
     for (Int_t i = 0; i < Nproc; i++) if (proc[i] == kPAnnihilation || proc[i] == kPStop) Mec = proc[i];
-    Int_t Ngkine = gMC->NSecondaries();
+    Int_t Ngkine = TVirtualMC::GetMC()->NSecondaries();
     if (fHit.iPart == kElectron && Ngkine == 0 && Mec == kPStop) dEstep = Gold;
     else {
       if (fHit.iPart == kPositron && Ngkine < 2 && Mec == kPAnnihilation) {
@@ -156,7 +161,7 @@ void StarMCHits::Step() {
 	  TLorentzVector x;
 	  TLorentzVector p;
 	  Int_t IpartSec;
-	  gMC->GetSecondary(0,IpartSec,x,p);
+	  TVirtualMC::GetMC()->GetSecondary(0,IpartSec,x,p);
 	  dEstep -= p.E();
 	}
       }
@@ -167,20 +172,89 @@ void StarMCHits::Step() {
   // - - - - - - - - - - - - - - - sensitive - - - - - - - - - - - - -
   fHit.AdEstep += dEstep;  
   fHit.AStep   += Step;
+  Float_t birk = dEstep;
   if (fHit.AdEstep == 0) return;
-  if (! gMC->IsTrackExiting() && ! gMC->IsTrackStop()) return;
+  g3birk(&birk);
+  fHit.birk    += birk;
+  if (! TVirtualMC::GetMC()->IsTrackExiting() && ! TVirtualMC::GetMC()->IsTrackStop()) return;
   fHit.Exit     = fHit.Current;
   fHit.Middle   = fHit.Entry;
   fHit.Middle  += fHit.Exit;
   fHit.Middle  *= 0.5;
   if (! fCurrentDetector) return;
-  strncpy(Agchitv()->cd, gGeoManager->GetCurrentVolume()->GetName(), 4);
   FillG2Table();
 }
 //________________________________________________________________________________
 void StarMCHits::FillG2Table() {
   St_g2t_Chair *chair = fCurrentDetector->GetChair();
   assert(chair);
+  TGeoVolume *volT = gGeoManager->GetCurrentVolume();
+  strncpy(Agchitv()->cd, volT->GetName(), 4);
+  TString csys(fCurrentDetector->GetTitle());
+  Double_t phi = fHit.Middle.Global.xyzT.Phi();
+  Double_t eta = fHit.Middle.Global.xyzT.Eta();
+  if        (csys ==  "eem") {
+    cout << "eem" << endl;
+  } else if (csys ==  "emc") {
+    static Double_t deta = 1./20;
+    Int_t ieta = TMath::Abs(eta)/deta;// + 1
+    Int_t phi_sub = 0;
+    if (fHit.Middle.Local.xyzT.Y() > 0) phi_sub = 1;
+    Agcdigi()->idigi[0] = ieta;
+    Agcdigi()->idigi[1] = phi_sub;
+  } else if (csys ==  "smd") {
+    static Double_t etaStripPitch1 = 1.54, etaStripPitch2 = 1.96, phiStripPitch = 1.49;
+    TGeoNode *node = gGeoManager->GetCurrentNavigator()->GetCurrentNode();
+    Double_t xyzCSCI[4];
+    fHit.Middle.Local.xyzT.GetXYZT(xyzCSCI);
+    Double_t xyzCSME[3];
+    TGeoMatrix *rot = node->GetMatrix();
+    rot->LocalToMaster(xyzCSCI, xyzCSME);
+    TGeoNode *nodeCSME = gGeoManager->GetCurrentNavigator()->GetMother(1);
+    TGeoNode *nodeCSDA = gGeoManager->GetCurrentNavigator()->GetMother(2);
+    cout << "smd;" << nodeCSDA->GetName() << endl;
+    // type = 1 & 2 : eta strip; type = 3 & 4 : phi strip
+    Int_t type = 0;
+    Int_t n = sscanf(nodeCSDA->GetName(), "CSDA_%i", &type);
+    assert(n == 1);
+    // On wire
+    xyzCSME[0] = 0;
+    Double_t xyzCSDA[3];
+    TGeoMatrix *rot2CSME = nodeCSME->GetMatrix();
+    rot2CSME->LocalToMaster(xyzCSME, xyzCSDA);
+    TGeoVolume *CSDA = nodeCSDA->GetVolume();
+    TGeoBBox *box = dynamic_cast<TGeoBBox*>(CSDA->GetShape());
+    assert(box);
+    Int_t strip = -1;
+    if (type <= 2) {// eta strip
+      Double_t z = xyzCSDA[2] + box->GetDZ();
+      if (type == 1) strip = z/etaStripPitch1;
+      else           strip = z/etaStripPitch2;
+    } else         {// phi strip
+      Double_t y = xyzCSDA[1] + box->GetDY();
+      strip = y/phiStripPitch;
+    }
+#if 0
+    Int_t ieta = 0;
+    if (type == 2 || type == 4) ieta = 1;
+#endif
+    static Double_t deta = 1./10;
+    Int_t ieta = TMath::Abs(eta)/deta;// + 1
+    Int_t phi_sub = 0;
+    if (fHit.Middle.Local.xyzT.Y() > 0) phi_sub = 1;
+    TObjArray *objs = gGeoManager->GetListOfPhysicalNodes();
+    TGeoPhysicalNode *nodeP = 0;
+    TString path(gGeoManager->GetPath());
+    if (objs) nodeP = (TGeoPhysicalNode *) objs->FindObject(path);
+    if (! nodeP) 	nodeP = gGeoManager->MakePhysicalNode(path);
+    Int_t Nlevel = nodeP->GetLevel();
+    TGeoVolume *volCSDA = nodeCSDA->GetVolume();
+    Agcdigi()->idigi[0] = ieta;
+    Agcdigi()->idigi[1] = phi_sub;
+    Agcdigi()->idigi[2] = strip;
+  } else if (csys ==  "fpd") {
+    cout << "fpd" << endl;
+  }
   fHit.VolumeId = fCurrentDetector->GetVolumeId(gGeoManager->GetPath());
   if (fHit.VolumeId <= 0) return;
   chair->Fill(fHit);
@@ -252,7 +326,7 @@ void StarMCHits::FinishEvent() {
     track.id             = it+1;
     track.eg_label       = particle->GetIdGen();
     track.eg_pid         = part->GetPdgCode();
-    track.ge_pid         = gMC->IdFromPDG(track.eg_pid);
+    track.ge_pid         = TVirtualMC::GetMC()->IdFromPDG(track.eg_pid);
     track.start_vertex_p = iv;
     track.p[0]           = part->Px();
     track.p[1]           = part->Py();
@@ -284,8 +358,8 @@ void StarMCHits::Clear(const Option_t* opt) {
 void StarMCHits::SetDebug(Int_t m) {
   if (fDebug == m) return;
   fDebug = m;
-  if (gMC && gMC->IsA()->InheritsFrom("TGeant3TGeo")) {
-    TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+  if (TVirtualMC::GetMC() && TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
+    TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
     Gcflag_t* cflag = geant3->Gcflag();
     cflag->idebug = Debug();
     cflag->idemax = 10000;

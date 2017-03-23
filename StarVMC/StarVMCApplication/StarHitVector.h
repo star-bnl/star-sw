@@ -43,9 +43,10 @@ struct GHit_t {
   Double_t   Sleng;
   Int_t      iPart;
   Int_t      iTrack;
-  Double_t   Mass;
-  Double_t   AStep;
-  Double_t   AdEstep;
+  Float_t    Mass;
+  Float_t    AStep;
+  Float_t    AdEstep;
+  Float_t    birk;
   G3GLPair_t Current;// IsTrackEntering inwvol==1
   G3GLPair_t Entry;  // IsTrackEntering inwvol==1
   G3GLPair_t Exit;   // IsTrackExiting  inwvol==2 IsTrackStop istop==2

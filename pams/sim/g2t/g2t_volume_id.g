@@ -217,19 +217,19 @@
       Integer          n1,n2,ew,nstb,ch,sl,quad,layr,slat
 *
 *    this is an internal agfhit/digi information - need a better access.
-#ifndef __STAR_VMC__
-      external         idigiF
-      integer          idigiF
-      external         NvbF, csF, cdF
-      integer          NvbF
-      Character*4      csF,cdF, cd
-#else /*  __STAR_VMC__ */
+*#ifndef __STAR_VMC__
+*      external         idigiF
+*      integer          idigiF
+*      external         NvbF, csF, cdF
+*      integer          NvbF
+*      Character*4      csF,cdF, cd
+*#else /*  __STAR_VMC__ */
       integer          idigi
       common /AgCdigi/ idigi(15)
       Integer          Iprin,Nvb
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
-#endif /* !  __STAR_VMC__ */
+*#endif /* !  __STAR_VMC__ */
       integer nbpads , maxpads, npadi, npado, npada
       parameter (maxpads=100) "Maximum number of TPADs"
       integer tpads(maxpads) "/ 1, 1, 1, 2, 2, 2, 3, 3, 3, 4,"
@@ -287,7 +287,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           first=.false.
 #ifndef  __STAR_VMC__
           call RBPUSHD
-	  cd = cdF(-1)
+*	  cd = cdF(-1)
 #endif /* ! __STAR_VMC__ */
 *         in simulations done in MDC1 (1998) btog_posit1 was not saved
           btog_posit1 = {32,33}
@@ -437,11 +437,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
       volume_id = 0	
       g2t_volume_id = volume_id
-#ifdef  __STAR_VMC__
+*#ifdef  __STAR_VMC__
       nv        = Nvb(1)
-#else /* !  __STAR_VMC__ */
-      nv        = NvbF(1)  ! number of real volume levels in NUMBV
-#endif /* __STAR_VMC__ */     
+*#else /* !  __STAR_VMC__ */
+*      nv        = NvbF(1)  ! number of real volume levels in NUMBV
+*#endif /* __STAR_VMC__ */     
 *
 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -672,13 +672,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            superl = numbv(2)
         endif
 *
-#ifndef __STAR_VMC__
-        eta=idigiF(1)+1
-        phi_sub=idigiF(2)
-#else /*  __STAR_VMC__ */
+*#ifndef __STAR_VMC__
+*        eta=idigiF(1)+1
+*        phi_sub=idigiF(2)
+*#else /*  __STAR_VMC__ */
         eta=idigi(1)+1
         phi_sub=idigi(2)
-#endif /* !  __STAR_VMC__ */
+*#endif /* !  __STAR_VMC__ */
         If (rileft==1) then
           phi=60-phi+1
           If (phi_sub==0) phi_sub=2
@@ -704,7 +704,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         if (CALG_Nmodule(1)*CALG_Nmodule(2)>0) then
            rileft   =numbv(1)
            phi      =numbv(2)
+#ifndef __STAR_VMC__
            forw_back=numbv(3)
+#else
+           forw_back=numbv(4)
+#endif
         else
            if (CALG_Nmodule(1)>0) then
               rileft=1
@@ -714,13 +718,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            phi      =numbv(1)
            forw_back=numbv(2)
         endif
-#ifndef __STAR_VMC__
-        eta  =idigiF(2)+1
-        strip=idigiF(3)+1
-#else /*  __STAR_VMC__ */
+*#ifndef __STAR_VMC__
+*        eta  =idigicF(2)+1
+*        strip=idigiF(3)+1
+*#else /*  __STAR_VMC__ */
         eta  =idigi(2)+1
         strip=idigi(3)+1
-#endif /* !  __STAR_VMC__ */
+*#endif /* !  __STAR_VMC__ */
         If (forw_back==4) forw_back=3
         If (rileft==1) then
           phi=60-phi+1

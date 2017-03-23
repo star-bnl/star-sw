@@ -98,14 +98,23 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
   St_g2t_emc_hit *table = (St_g2t_emc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   g2t_emc_hit.id            = nok;
-  g2t_emc_hit.de            = vect.AdEstep;
+  g2t_emc_hit.de            = vect.birk;// AdEstep;
   g2t_emc_hit.track_p       = vect.iTrack;
   g2t_emc_hit.volume_id     = vect.VolumeId;
+  g2t_emc_hit.x             = vect.Middle.Global.xyzT.X();
+  g2t_emc_hit.y             = vect.Middle.Global.xyzT.Y();
+  g2t_emc_hit.z             = vect.Middle.Global.xyzT.Z();
   g2t_emc_hit_st *emc = table->GetTable();
   for (Int_t i = 0; i < nok - 1; i++, emc++) {
     if (emc->volume_id == g2t_emc_hit.volume_id &&
 	emc->track_p   == g2t_emc_hit.track_p) {
       emc->de += g2t_emc_hit.de;
+      if (emc->de > 0) {
+	Float_t *xOld = &emc->x;
+	Float_t *xNew = &g2t_emc_hit.x;
+	for (Int_t i = 0; i < 3; i++) 
+	  xNew[i] = ((emc->de - g2t_emc_hit.de)*xNew[i] +  g2t_emc_hit.de*xOld[i])/emc->de;
+      }
       return;
     }
   }

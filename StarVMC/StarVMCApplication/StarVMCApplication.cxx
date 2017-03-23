@@ -81,7 +81,7 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
 StarVMCApplication::~StarVMCApplication() {  // Destructor  
   delete fStack;
   delete fFieldB;
-  SafeDelete(gMC);
+  //  SafeDelete(TVirtualMC::GetMC());
   SafeDelete(fgDetSets);
 }
 //_____________________________________________________________________________
@@ -90,14 +90,14 @@ void StarVMCApplication::InitMC(const char* setup) {  // Initialize MC.
     gROOT->LoadMacro(setup);
     gInterpreter->ProcessLine("Config()");
   }
-  gMC->SetStack(fStack);
-  gMC->Init();
-  gMC->BuildPhysics(); 
+  TVirtualMC::GetMC()->SetStack(fStack);
+  TVirtualMC::GetMC()->Init();
+  TVirtualMC::GetMC()->BuildPhysics(); 
   //  MisalignGeometry(); // Called from Geant3TGeo::FinishGeometry
 }
 //_____________________________________________________________________________
 void StarVMCApplication::RunMC(Int_t nofEvents) {    // MC run.
-  gMC->ProcessRun(nofEvents);
+  TVirtualMC::GetMC()->ProcessRun(nofEvents);
   FinishRun();
 }
 //_____________________________________________________________________________
@@ -105,18 +105,18 @@ void StarVMCApplication::FinishRun() {    // Finish MC run.
 }
 //_____________________________________________________________________________
 void StarVMCApplication::ConstructGeometry() {    // Initialize geometry
-  if (gMC->IsA()->InheritsFrom("TGeant3TGeo")) {
+  if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
     assert(gGeoManager); 
-    gMC->SetRootGeometry();
+    TVirtualMC::GetMC()->SetRootGeometry();
   }
 }
 //_____________________________________________________________________________
 void StarVMCApplication::InitGeometry() {    
-  if (gMC->IsA()->InheritsFrom("TGeant3")) {
+  if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3")) {
     // Set drawing options
   }  
-  if (gMC->IsA()->InheritsFrom("TGeant3TGeo")) {
-    TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+  if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
+    TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
     geant3->Gprint("mate");
     geant3->Gprint("tmed");
   }
@@ -167,7 +167,7 @@ void StarVMCApplication::GeneratePrimaries() {
 		      kPPrimary, ntr, 1., 0);
   }
   Int_t NPrimary = fStack->GetNtrack();
-  if (! NPrimary) gMC->StopRun();
+  if (! NPrimary) TVirtualMC::GetMC()->StopRun();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
@@ -196,7 +196,7 @@ void StarVMCApplication::FinishPrimary() {    // User actions after finishing of
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishEvent() {    // User actions after finishing of an event
-  if (TString(gMC->GetName()) == "TGeant3") {
+  if (TString(TVirtualMC::GetMC()->GetName()) == "TGeant3") {
     // add scale (1.4)
   }  
   fStack->Print();

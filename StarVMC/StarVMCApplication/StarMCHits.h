@@ -10,7 +10,12 @@
       Integer          Iprin,Nvb,Nw,Last,Mb,Nc1,Nc2,Iv,Ia
       Character*4                                         cs,cd
       COMMON /AGCHITV/ Iprin,Nvb,Nw,Last,Mb,Nc1,Nc2,Iv,Ia,cs,cd
+      integer          idigi
+      common /AgCdigi/ idigi(15)
 */
+typedef struct {
+  Int_t idigi[15];
+} Agcdigi_t;
 typedef struct {
   Int_t iwa[2], js,jd,jx,jxd,jds,jdu;
 } Agcrdig_t;
@@ -36,6 +41,7 @@ class StarMCHits : public TDataSet {
   virtual void      	   FillG2Table();							       	    
   virtual void             FinishEvent();
   virtual Int_t            Debug()        { return fDebug;}
+  virtual Agcdigi_t*  Agcdigi()  const {return fAgcdigi;}
   virtual Agchitv_t*  Agchitv()  const {return fAgchitv;}
  private:
   StarMCHits(const Char_t *name="StarMCHits",const Char_t *title="");
@@ -46,6 +52,7 @@ class StarMCHits : public TDataSet {
   Int_t              fDebug;
   UInt_t             fSeed;
   Int_t              fEventNumber;
+  Agcdigi_t *fAgcdigi;          //! AGCDIGI common structure
   Agchitv_t *fAgchitv;          //! AGCHITV common structure
   ClassDef(StarMCHits,1)
 };
