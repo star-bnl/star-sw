@@ -1165,8 +1165,13 @@ StKFVerticesCollection *StKFVertexMaker::PrimaryVertexSeeds(Int_t *Parents) {
   }
   Double_t *zOfPeaks = new Double_t[nfound];
   Int_t npeaks = 0;
+#if  ROOT_VERSION_CODE < 395523
   Float_t *xpeaks = fSpectrum->GetPositionX();
   Float_t xp = 0;
+#else
+  Double_t *xpeaks = fSpectrum->GetPositionX();
+  Double_t xp = 0;
+#endif
   for (Int_t p = 0; p < nfound; p++) {
     xp = xpeaks[p];
     Int_t bin = fVertexZPlot->GetXaxis()->FindBin(xp);
