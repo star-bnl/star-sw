@@ -191,10 +191,9 @@ void StarMCHits::FillG2Table() {
   TGeoVolume *volT = gGeoManager->GetCurrentVolume();
   strncpy(Agchitv()->cd, volT->GetName(), 4);
   TString csys(fCurrentDetector->GetTitle());
-  Double_t phi = fHit.Middle.Global.xyzT.Phi();
   Double_t eta = fHit.Middle.Global.xyzT.Eta();
   if        (csys ==  "eem") {
-    cout << "eem" << endl;
+    //    cout << "eem" << endl;
   } else if (csys ==  "emc") {
     static Double_t deta = 1./20;
     Int_t ieta = TMath::Abs(eta)/deta;// + 1
@@ -212,7 +211,7 @@ void StarMCHits::FillG2Table() {
     rot->LocalToMaster(xyzCSCI, xyzCSME);
     TGeoNode *nodeCSME = gGeoManager->GetCurrentNavigator()->GetMother(1);
     TGeoNode *nodeCSDA = gGeoManager->GetCurrentNavigator()->GetMother(2);
-    cout << "smd;" << nodeCSDA->GetName() << endl;
+    //    cout << "smd;" << nodeCSDA->GetName() << endl;
     // type = 1 & 2 : eta strip; type = 3 & 4 : phi strip
     Int_t type = 0;
     Int_t n = sscanf(nodeCSDA->GetName(), "CSDA_%i", &type);
@@ -247,13 +246,11 @@ void StarMCHits::FillG2Table() {
     TString path(gGeoManager->GetPath());
     if (objs) nodeP = (TGeoPhysicalNode *) objs->FindObject(path);
     if (! nodeP) 	nodeP = gGeoManager->MakePhysicalNode(path);
-    Int_t Nlevel = nodeP->GetLevel();
-    TGeoVolume *volCSDA = nodeCSDA->GetVolume();
     Agcdigi()->idigi[0] = ieta;
     Agcdigi()->idigi[1] = phi_sub;
     Agcdigi()->idigi[2] = strip;
   } else if (csys ==  "fpd") {
-    cout << "fpd" << endl;
+    //    cout << "fpd" << endl;
   }
   fHit.VolumeId = fCurrentDetector->GetVolumeId(gGeoManager->GetPath());
   if (fHit.VolumeId <= 0) return;
