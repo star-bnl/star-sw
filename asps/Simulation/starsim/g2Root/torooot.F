@@ -39,6 +39,10 @@ C
 #else
 #include "geant321/gcbank.inc"
 #include "geant321/gcnum.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcphys.inc"
+      DIMENSION CUTS(10),MECA(5,13)
+      EQUIVALENCE (CUTS(1),CUTGAM),(MECA(1,1),IPAIR)
 #endif
 *
 
@@ -63,6 +67,16 @@ C
       DATA KSHAP/'BRIK','TRD1','TRD2','TRAP','TUBE','TUBS','CONE',
      +           'CONS','SPHE','PARA','PGON','PCON','ELTU','HYPE',
      + 13*'    ','GTRA','CTUB','    '/
+      character*8 KPar(33)
+      data Kpar /
+     +     'CUTGAM','CUTELE','CUTNEU','CUTHAD','CUTMUO',
+     +     'BCUTE' ,'BCUTM' ,'DCUTE' ,'DCUTM' ,'PPCUTM',
+     +     'PAIR'  ,'COMP'  ,'PHOT'  ,'PFIS'  ,'DRAY'  ,
+     +     'ANNI'  ,'BREM'  ,'HADR'  ,'MUNU'  ,'DCAY'  ,
+     +     'LOSS'  ,'MULS'  ,'RAYL'  ,''      ,''      ,
+     +     'GHCOR1','BIRK1' ,'BIRK2' ,'BIRK3' ,''      ,
+     +     'LABS' , 'SYNC' , 'STRA' /
+
 *________________________________________________________________________
 *
 
@@ -192,6 +206,8 @@ C
       write(51,3069)
  3069 format(/,
      +'//-----------List of Tracking Media--------------',/)
+      write(51,3051) 
+ 3051 format('TGeoMedium *med = 0;')
       do 350 itmed=1,ntmed
          jtm=lq(jtmed-itmed)
          if(jtm.eq.0)go to 350
@@ -212,10 +228,30 @@ C
 * 3050    format('TGeoMedium *med',a,' = new TGeoMedium("',a,'",',a,
 *yf     +     ',mat',a,'->GetUniqueID()',a,');')
          write(line,3050) medname(1:ncm),astring2(1:ncmk),creals(1:ncr)
- 3050    format('(new TGeoMedium("',a,'",0',
-     +',GetMat("',a,'")->GetUniqueID()',a,'))->SetUniqueID(++imed);')
+ 3050    format('med = new TGeoMedium("',a,'",0',
+     +',GetMat("',a,'")->GetUniqueID()',a,
+     +'); med->SetUniqueID(++imed);')
          nch = lenocc(line)
          write(51,'(a)')line(1:nch)
+         jtmn = lq(jtm)
+         if (jtmn .ne. 0) then
+            do  349 itpar = 1, 33
+               par = q(jtmn+itpar)
+               if (itpar .le. 10 .and. par .eq. cuts(itpar)) go to  349
+               ipar = par
+               if (itpar .gt. 10 .and. itpar .le. 23 .and. 
+     +              ipar .eq. meca(1,itpar-10)) go to  349
+               if (par .ne. 0) then
+                  line=' '
+                  nch = lenocc(Kpar(itpar));
+                  write (line,3052) Kpar(itpar)(1:nch), par 
+ 3052             format('med->SetParam("',a,'",',g14.6,');') 
+                  nch = lenocc(line)
+                  write(51,'(a)')line(1:nch)
+               endif
+ 349        continue
+         endif
+*yf ================================================================================           
  350  continue
 * Print Rotation matrices
 * =======================
