@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSimMaker.cxx,v 1.1 2017/03/02 18:38:17 jeromel Exp $
+ * $Id: StVpdSimMaker.cxx,v 1.2 2017/03/21 23:43:25 nluttrel Exp $
  *
  * Author: Nickolas Luttrell (Rice University)
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StVpdSimMaker.cxx,v $
+ * Revision 1.2  2017/03/21 23:43:25  nluttrel
+ * Added checks for Mc vertex and tube Id
+ *
  * Revision 1.1  2017/03/02 18:38:17  jeromel
  * First version of Vpd simulations
  *
@@ -174,7 +177,11 @@ int StVpdSimMaker::Make()
         mVz = Vtx.z();       //! VertexZ in cm
         LOG_DEBUG << "The simulated vZ is: " << mVz << endm;
     }
-
+    else {
+        LOG_WARN << "No primary vertex in McEvent! Bailing out ..." << endm;
+        return kStWarn;
+    }
+    
     //! Look for Vpd hits
     St_g2t_vpd_hit* g2t_vpd_hits = 0;
     g2t_vpd_hits = dynamic_cast<St_g2t_vpd_hit*>(mGeantData->Find("g2t_vpd_hit"));
@@ -196,6 +203,11 @@ int StVpdSimMaker::Make()
                 int vId = vpd_hit->volume_id;  //! volume id used the tube index
                 int iTray = vId/1000 + 120;    //! 121: west, 122: east
                 int tubeIndex = (vId % 100)-1; //! index of the tube [0,18]
+                
+                if ( (tubeIndex<0) || (tubeIndex>18) ) { //! Check that tube is within accepted range
+                    LOG_WARN << "Invalid Vpd Tube Id!" << endm;
+                    continue;
+                }
                 
                 /** Check tray number and status flag of the current tube hit
                  * then calculate tof, extract relevant values and append hits

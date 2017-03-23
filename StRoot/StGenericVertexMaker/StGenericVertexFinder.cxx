@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.47 2017/03/05 21:00:43 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.48 2017/03/17 14:37:02 jeromel Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -173,9 +173,9 @@ void StGenericVertexFinder::InitRun(int runumber, const St_db_Maker* db_maker)
 
    if (!vSeed) {
       LOG_FATAL << "Vertex fit w/ beamline requested but 'Calibrations/rhic/vertexSeed' table not found" << endm;
+   } else {
+     UseVertexConstraint(*vSeed);
    }
-
-   UseVertexConstraint(*vSeed);
 }
 
 

@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.23 2017/01/30 19:47:24 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.24 2017/03/18 16:23:15 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.24  2017/03/18 16:23:15  akio
+ * fixes nslat functions
+ *
  * Revision 1.23  2017/01/30 19:47:24  akio
  * fix fps/fpost empty slatid
  *
@@ -773,12 +776,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsGainCorrection();
     if(dbTimeDepCorr) dumpFmsTimeDepCorr();
     dumpFmsRec();
+    if(dbFpsConstant) dumpFpsConstant(); 
     if(dbFpsChannelGeometry) dumpFpsChannelGeometry(); 
     if(dbFpsSlatId) dumpFpsSlatId();          
     if(dbFpsPosition) dumpFpsPosition();        
     if(dbFpsMap) dumpFpsMap();        
     if(dbFpsGain) dumpFpsGain();            
     if(dbFpsStatus) dumpFpsStatus();            
+    if(dbFpostConstant) dumpFpostConstant(); 
     if(dbFpostChannelGeometry) dumpFpostChannelGeometry(); 
     if(dbFpostSlatId) dumpFpostSlatId();          
     if(dbFpostPosition) dumpFpostPosition();        
@@ -1284,7 +1289,7 @@ inline Int_t StFmsDbMaker::fpsMaxQTch()   {if(mFpsConstant) {return mFpsConstant
 inline Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mFpsMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpsNSlat(int quad, int layer) {
-  if(quad>0 && quad<fpsNQuad() && layer>0 && layer<fpsNLayer()) return mFpsChannelGeometry[quad-1][layer-1].nslat;
+  if(quad>0 && quad<=fpsNQuad() && layer>0 && layer<=fpsNLayer()) return mFpsChannelGeometry[quad-1][layer-1].nslat;
   return 0;
 }
 
@@ -1390,7 +1395,7 @@ void StFmsDbMaker::dumpFpsChannelGeometry (const Char_t* filename){
   if((fp=fopen(filename,"w"))){
     for(int q=1; q<=fpsNQuad(); q++){
       for(int l=1; l<=fpsNLayer(); l++){
-	fprintf(fp,"Q=%1d L=%1d NLayer=%2d\n",q,l,fpsNSlat(q,l));
+	fprintf(fp,"Q=%1d L=%1d Nslat=%2d\n",q,l,fpsNSlat(q,l));
       }
     }
     fclose(fp);
@@ -1494,7 +1499,7 @@ inline Int_t StFmsDbMaker::fpostMaxQTch()   {if(mFpostConstant) {return mFpostCo
 inline Int_t StFmsDbMaker::fpostMaxSlatId() {if(mFpostConstant) {return mFpostMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpostNSlat(int quad, int layer) {
-  if(quad>0 && quad<fpostNQuad() && layer>0 && layer<fpostNLayer()) return mFpostChannelGeometry[quad-1][layer-1].nslat;
+  if(quad>0 && quad<=fpostNQuad() && layer>0 && layer<=fpostNLayer()) return mFpostChannelGeometry[quad-1][layer-1].nslat;
   return 0;
 }
 
@@ -1602,7 +1607,7 @@ void StFmsDbMaker::dumpFpostChannelGeometry (const Char_t* filename){
   if((fp=fopen(filename,"w"))){
     for(int q=1; q<=fpostNQuad(); q++){
       for(int l=1; l<=fpostNLayer(); l++){
-	fprintf(fp,"Q=%1d L=%1d NLayer=%2d\n",q,l,fpostNSlat(q,l));
+	fprintf(fp,"Q=%1d L=%1d NSlat=%2d\n",q,l,fpostNSlat(q,l));
       }
     }
     fclose(fp);
