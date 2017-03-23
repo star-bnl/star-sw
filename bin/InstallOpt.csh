@@ -53,7 +53,7 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.4.1 Coin-3.1.3";
+set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.4.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6";
 #if ($#argv != 0) set list = $argv[1];
 foreach pkg ($list) 
     cd ~/sources/.${STAR_HOST_SYS}
