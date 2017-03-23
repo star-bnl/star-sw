@@ -1018,7 +1018,8 @@ public:
                         Int_t& natt, Float_t* par, Float_t* att);
    virtual  void  Gckpar(Int_t ish, Int_t npar, Float_t *par);
    virtual  void  Gckmat(Int_t itmed, char *natmed);
-   virtual  Int_t  Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum);
+   virtual  Int_t Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum);
+   virtual  Int_t Gbirk(Float_t eDep);
    virtual  void  Gsbool(const char* /*onlyVolName*/,
                          const char* /*manyVolName*/) {}
 

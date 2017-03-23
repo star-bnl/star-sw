@@ -640,6 +640,7 @@ Cleanup of code
 # define gckpar   gckpar_
 # define g3ckmat  g3ckmat_
 # define g3lvolu  g3lvolu_
+# define g3birk   g3birk_
 # define geditv   geditv_
 # define mzdrop   mzdrop_
 
@@ -733,6 +734,7 @@ Cleanup of code
 # define gckpar  GCKPAR
 # define gckmat  GCKMAT
 # define glvolu  GLVOLU
+# define gbirk   GBIRK
 # define geditv  GEDITV
 # define mzdrop  MZDROP
 
@@ -942,6 +944,8 @@ extern "C"
 
   void type_of_call g3lvolu(Int_t&, Int_t*, Int_t*, Int_t&);
 
+  void type_of_call g3birk(Float_t&);
+
   void type_of_call g3print(DEFCHARD,const int& DEFCHARL);
 
   void type_of_call dzshow(DEFCHARD,const int&,const int&,DEFCHARD,const int&,
@@ -1031,6 +1035,7 @@ extern "C"
 #  define gtonly gtonly_
 #  define gmedia gmedia_
 #  define glvolu glvolu_
+#  define gbirk  gbirk_
 #  define gtnext gtnext_
 #  define ggperp ggperp_
 
@@ -1076,6 +1081,7 @@ extern "C"
 #  define gtmany GTMANY
 #  define gmedia GMEDIA
 #  define glvolu GLVOLU
+#  define gbirk  GBIRK
 #  define gtnext GTNEXT
 #  define ggperp GGPERP
 
@@ -1105,9 +1111,9 @@ extern "C" type_of_call void gtmany(Int_t&);
 extern "C" type_of_call void gtonly(Int_t&);
 extern "C" type_of_call void gmedia(Float_t*, Int_t&, Int_t&);
 extern "C" type_of_call void glvolu(Int_t &nlev, Int_t *lnam,Int_t *lnum, Int_t &ier);
+extern "C" type_of_call void gbirk(Float_t &eDep);
 extern "C" type_of_call void gtnext();
 extern "C" type_of_call void ggperp(Float_t*, Float_t*, Int_t&);
-
 
 //
 // Geant3 global pointer
@@ -1137,6 +1143,7 @@ void (*fgtmany)(Int_t&) = 0;
 void (*fgtonly)(Int_t&) = 0;
 void (*fgmedia)(Float_t*, Int_t&, Int_t&) = 0;
 void (*fglvolu)(Int_t &nlev, Int_t *lnam,Int_t *lnum, Int_t &ier) = 0;
+void (*fgbirk)(Float_t &eDep) = 0;
 void (*fgtnext)() = 0;
 void (*fggperp)(Float_t*, Float_t*, Int_t&) = 0;
 
@@ -1224,6 +1231,7 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant)
   fgtonly = gtonlyg3;
   fgmedia = g3media;
   fglvolu = g3lvolu;
+  fgbirk  = g3birk;
   fgtnext = g3tnext;
   fggperp = g3gperp;
 
@@ -4709,7 +4717,11 @@ Int_t TGeant3::Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum)
   g3lvolu(nlev, lnam, lnum, ier);
   return ier;
 }
-
+//______________________________________________________________________
+Int_t TGeant3::Gbirk(Float_t eDep) {
+  g3birk(eDep);
+  return 0;
+}
 //______________________________________________________________________
 void TGeant3::Gdelete(Int_t /* iview */)
 {

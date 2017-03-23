@@ -68,7 +68,7 @@ C --- get the values for the BIRK coefficients stored via GSTPAR ---
       JTMN=LQ(JTM)
       IF (JTMN .LE. 0)GO TO 99
       MODEL=Q(JTMN+27)
-      IF(MODEL.GT.2)GO TO 99
+      IF(MODEL.ne.1)GO TO 99
       RKB=Q(JTMN+28)/DENS
       C=Q(JTMN+29)/DENS**2
 C

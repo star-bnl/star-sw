@@ -409,6 +409,7 @@ Cleanup of code
 # define g3smate  g3smate_
 # define g3smixt  g3smixt_
 # define g3stmed  g3stmed_
+# define g3stpar  g3stpar_
 # define g3treve  g3treve_
 # define gtreveroot  gtreveroot_
 # define gcomad gcomad_
@@ -491,6 +492,7 @@ extern "C"
   void type_of_call g3stmed(const Int_t&, DEFCHARD, Int_t &, Int_t &, Int_t &,
 			   Float_t &, Float_t &, Float_t &, Float_t &,
 			   Float_t &, Float_t &, Float_t *, Int_t & DEFCHARL);
+  void type_of_call g3stpar(const Int_t&, DEFCHARD, const Float_t * DEFCHARL);
 
   void type_of_call gcomad(DEFCHARD, Int_t*& DEFCHARL);
 }
@@ -2134,6 +2136,11 @@ void TGeant3TGeo::FinishGeometry()
       Double_t stmin  = med->GetParam(7);
       G3Medium(kmed, med->GetName(), nmat, isvol, ifield, fieldm, tmaxfd,
                stemax,deemax, epsil, stmin);
+       for (Int_t i = 11; i < 44; i++) {
+	Float_t par = med->GetParam(i);
+	if (par) g3stpar(kmed, PASSCHARD(med->ParamName(i)), &par PASSCHARL(med->ParamName(i)));
+      }
+      
       med->SetId(kmed);
     }
     if (gDebug > 0) printf("FinishGeometry, geometry retreived from file, materials/media mapped to G3\n");
