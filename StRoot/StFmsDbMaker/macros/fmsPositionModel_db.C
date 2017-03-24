@@ -18,6 +18,13 @@ void fmsPositionModel_db(char* opt="", char* year="15sim") {
   }else if(yr.Contains("15sim")){
     storeTime="2014-12-10 00:00:00";
     date = 20141215; time = 0;
+  }else if(yr.Contains("17ofl")){
+    storeTime="2016-12-20 00:00:00";
+    date = 20161225; time = 0;
+    model=3;
+  }else if(yr.Contains("17sim")){
+    storeTime="2016-12-10 00:00:00";
+    date = 20161215; time = 0;
   }else{
     std::cout << "Please specify valid year tag\n"; exit;
   }
