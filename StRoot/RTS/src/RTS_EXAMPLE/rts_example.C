@@ -1776,7 +1776,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    }
 	    // printf("\n");
 
-	    static char *confnum2str[] = {
+	    static const char *confnum2str[] = {
 		"rcc",
 		"l1",
 		"bc1",
@@ -2265,6 +2265,11 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 			if(do_print) {
 				printf("FCS: [%d,%d,%d] %d bytes\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				u_short *d16 = (u_short *)dd->Void ;
+
+				for(u_int i=0;i<dd->ncontent/2;i++) {
+					printf(" %5d = 0x%04X [%5u dec]\n",i,d16[i],d16[i]) ;
+				}
 			}
 
 		}
