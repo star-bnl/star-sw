@@ -49,6 +49,8 @@
 #include <DAQ_ITPC/daq_itpc.h>
 #include <DAQ_ITPC/itpcCore.h>
 
+#include <DAQ_FCS/daq_fcs.h>
+
 #include <TPC/rowlen.h>
 
 /* various test routines... typically used by Tonko only */
@@ -86,6 +88,7 @@ static int fps_doer(daqReader *rdr, const char *do_print) ;
 static int rhicf_doer(daqReader *rdr, const char *do_print) ;
 static int etof_doer(daqReader *rdr, const char *do_print) ;
 static int itpc_doer(daqReader *rdr, const char *do_print) ;
+static int fcs_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 static int bad ;
@@ -370,8 +373,11 @@ int main(int argc, char *argv[])
 		/*************************** ETOF **************************/
 		etof_doer(evp,print_det) ;
 		
-		/*************************** ETOF **************************/
+		/*************************** ITPC **************************/
 		itpc_doer(evp,print_det) ;
+
+		/*************************** FCS **************************/
+		fcs_doer(evp,print_det) ;
 		
 
 
@@ -2239,6 +2245,38 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	}
 
 	return adc_found ;
+
+}
+
+static int fcs_doer(daqReader *rdr, const char *do_print)
+{
+	int raw_found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"fcs")) ;	// leave as is...
+	else do_print = 0 ;
+
+	dd = rdr->det("fcs")->get("raw") ;
+	
+
+	if(dd) {
+		while(dd->iterate()) {	//per xing and per RDO
+			raw_found = 1 ;
+
+			if(do_print) {
+				printf("FCS: [%d,%d,%d] %d bytes\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+			}
+
+		}
+
+	}
+
+
+	if(raw_found) {
+		LOG(INFO,"FCS found") ;
+	}
+
+	return raw_found ;
 
 }
 
