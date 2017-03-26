@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.24 2017/03/18 16:23:15 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.25 2017/03/24 16:39:09 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.25  2017/03/24 16:39:09  akio
+ * adding run17 fms positions
+ *
  * Revision 1.24  2017/03/18 16:23:15  akio
  * fixes nslat functions
  *
@@ -109,6 +112,7 @@
 
 #include "getCellPosition2015pp.h"
 #include "getCellPosition2015pA.h"
+#include "getCellPosition2017.h"
 
 #include "StEvent/StFmsHit.h"
 #include "StEvent/StFmsPoint.h"
@@ -929,7 +933,8 @@ StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t F
     float dy = 1.0-(ly-r);
     if(mPositionModel==1)      {getCellPosition2015pp(detectorId-7,r,c,x1,y1,x2,y2,z);}
     else if(mPositionModel==2) {getCellPosition2015pA(detectorId-7,r,c,x1,y1,x2,y2,z);}
-    else { LOG_ERROR << Form("mPositionModel=%d is not valid!",mPositionModel) <<endm;}
+    else if(mPositionModel==3) {getCellPosition2017(detectorId-7,r,c,x1,y1,x2,y2,z);}
+    else                       { LOG_ERROR << Form("mPositionModel=%d is not valid!",mPositionModel) <<endm;}
     x = x1*(1.0-dx) + x2*dx;
     y = y1*(1.0-dy) + y2*dy;
     z = z + 15.0; // Detector front face + ShowerMax depth                                                     

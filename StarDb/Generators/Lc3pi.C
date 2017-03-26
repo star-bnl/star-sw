@@ -10,7 +10,7 @@ TDataSet *CreateTable() {
   Double_t Phihigh= 2*TMath::Pi();
   Double_t Zlow   =  -10; 
   Double_t Zhigh  =   10; 
-  Int_t    Npart  =  20;
+  Int_t    Npart  =    1;
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
     if (gClassTable->GetID("St_geant_Maker") < 0) {
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl; 
