@@ -1227,14 +1227,6 @@ void  TGeant3TGeo::Ggclos()
   fVolNames = 0;
 }
 
-//_____________________________________________________________________________
-void  TGeant3TGeo::Gprint(const char * /*name*/)
-{
-  //
-  // Routine to print data structures
-  // CHNAME   name of a data structure
-  //
-}
 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
