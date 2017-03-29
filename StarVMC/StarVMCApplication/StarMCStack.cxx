@@ -33,7 +33,7 @@ void  StarMCStack::PushTrack(Int_t toBeDone, Int_t parent, Int_t pdg,
 
   StarMCParticle* mother = 0;
   StarMCParticle* particle = 0;
-  Int_t ID = GetNtrack();
+  Int_t ID = GetNtrack();// + 1; //
   if (parent>=0 && toBeDone && mech != kPPrimary) {
     mother = GetParticle(parent);
     ID = mother->GetID();
@@ -131,10 +131,9 @@ StarMCParticle*  StarMCStack::GetParticle(Int_t id) const
 // Returns id-th particle in fParticles.
 // ---
 
-  if (id < 0 || id >= fParticles->GetEntriesFast())
-    Fatal("GetParticle", "Index out of range"); 
+//  if (! fParticles->BoundsOk("StarMCStack::GetParticle",id)) Fatal("GetParticle", "Index out of range"); 
    
-  return (StarMCParticle*)fParticles->At(id);
+  return (StarMCParticle*) fParticles->At(id);
 }
 
 

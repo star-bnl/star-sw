@@ -19,17 +19,17 @@
 #ifndef StarMC_STACK_H
 #define StarMC_STACK_H
 #include <assert.h>
-#include <TParticle.h>
-#include <TObjArray.h>
-#include <TError.h>
-#include <TVirtualMCStack.h>
+#include "TParticle.h"
+#include "TObjArray.h"
+#include "TError.h"
+#include "TVirtualMCStack.h"
 #include "StarMCParticle.h"
 #include <stack>
 
 class StarMCStack : public TVirtualMCStack {
  public:
   StarMCStack(Int_t size = 0) : fParticles(0), fCurrentTrack(-1), fNPrimary(0), fCurrentParticle(0) {
-			if (size > 0) fParticles = new TObjArray(size);}
+    if (size > 0) fParticles = new TObjArray(size, 0 /*1*/);}
   virtual ~StarMCStack() {if (fParticles) fParticles->Delete(); delete fParticles;}
 
   // methods

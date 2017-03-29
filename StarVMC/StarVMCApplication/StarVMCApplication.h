@@ -56,13 +56,13 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual void AddParticles() {}
   virtual void SetPrimaryGenerator(StarMCPrimaryGenerator *m = 0) {
     fPrimaryGenerator = m; 
-    if (fPrimaryGenerator) fPrimaryGenerator->SetStack(fStack);
+    if (fPrimaryGenerator) fPrimaryGenerator->SetStack(fStarMcStack);
   }
   virtual void SetMagField(StarMagField *m = 0) {fMagField = m;}
   virtual void SetStepping(StarMCHits *m = 0) {fMcHits = m;}
   virtual StarMCPrimaryGenerator *GetPrimaryGenerator() const {return fPrimaryGenerator;}
   virtual StarMagField           *GetMagField() const {return fMagField;}
-  virtual StarMCStack            *GetStack() const {return fStack;}
+  virtual StarMCStack            *GetStack() const {return fStarMcStack;}
     
   virtual Double_t                 TrackingRmax() const { return 1.e4; }		  
   virtual Double_t 		   TrackingZmax() const { return 1.e5; } 		  
@@ -77,7 +77,7 @@ class StarVMCApplication : public TVirtualMCApplication {
   // methods
   
   // data members
-  StarMCStack*             fStack;
+  StarMCStack*             fStarMcStack;
   StarMCPrimaryGenerator*  fPrimaryGenerator;
   StarMagField*            fMagField;
   StarMCHits*              fMcHits;
