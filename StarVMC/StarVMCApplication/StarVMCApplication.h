@@ -10,7 +10,7 @@
 #include "TGeoNode.h"
 #include "TVirtualMCApplication.h"
 #include "StarMCPrimaryGenerator.h"
-#include "StarMCStack.h"
+#include "StarStack.h"
 #include "StarMagField.h"
 #include "StarMCHits.h"
 #include "TTable.h"
@@ -56,13 +56,13 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual void AddParticles() {}
   virtual void SetPrimaryGenerator(StarMCPrimaryGenerator *m = 0) {
     fPrimaryGenerator = m; 
-    if (fPrimaryGenerator) fPrimaryGenerator->SetStack(fStarMcStack);
+    if (fPrimaryGenerator) fPrimaryGenerator->SetStack(fStarStack);
   }
   virtual void SetMagField(StarMagField *m = 0) {fMagField = m;}
   virtual void SetStepping(StarMCHits *m = 0) {fMcHits = m;}
   virtual StarMCPrimaryGenerator *GetPrimaryGenerator() const {return fPrimaryGenerator;}
   virtual StarMagField           *GetMagField() const {return fMagField;}
-  virtual StarMCStack            *GetStack() const {return fStarMcStack;}
+  virtual StarStack            *GetStack() const {return fStarStack;}
     
   virtual Double_t                 TrackingRmax() const { return 1.e4; }		  
   virtual Double_t 		   TrackingZmax() const { return 1.e5; } 		  
@@ -77,7 +77,7 @@ class StarVMCApplication : public TVirtualMCApplication {
   // methods
   
   // data members
-  StarMCStack*             fStarMcStack;
+  StarStack*             fStarStack;
   StarMCPrimaryGenerator*  fPrimaryGenerator;
   StarMagField*            fMagField;
   StarMCHits*              fMcHits;

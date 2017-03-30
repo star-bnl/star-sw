@@ -15,5 +15,5 @@ StarMCPrimaryGenerator *StarMCPrimaryGenerator::fgInstance = 0;
 ClassImp(StarMCPrimaryGenerator);
 //________________________________________________________________________________
 void StarMCPrimaryGenerator::Print(Option_t *option) const {
-  if (fStarMcStack) fStarMcStack->Print();
+  if (fStarStack) fStarStack->Print();
 }

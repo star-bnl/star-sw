@@ -19,7 +19,7 @@
 
 class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
  public:
-  StarMCSimplePrimaryGenerator(StarMCStack* stack) : StarMCPrimaryGenerator() { PreSet(); fStarMcStack = stack; }
+  StarMCSimplePrimaryGenerator(StarStack* stack) : StarMCPrimaryGenerator() { PreSet(); fStarStack = stack; }
   StarMCSimplePrimaryGenerator(Int_t    nprim=1,     Int_t    Id=6, 
 			       Double_t pT_min =  0, Double_t pT_max = 10,
 			       Double_t Eta_min=-10, Double_t Eta_max=10, 

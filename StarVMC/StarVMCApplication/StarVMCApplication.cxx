@@ -52,7 +52,7 @@ TDataSet        *StarVMCApplication::fgDetSets = 0;
 //_____________________________________________________________________________
 StarVMCApplication::StarVMCApplication(const char *name, const char *title) : 
   TVirtualMCApplication(name,title),
-  fStarMcStack(0),
+  fStarStack(0),
   fPrimaryGenerator(0),
   fMagField(0),
   fMcHits(0),
@@ -66,7 +66,7 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
   assert (! program.BeginsWith("root4star"));
   if (name) {
     // Create a user stack
-    fStarMcStack = new StarMCStack(100); 
+    fStarStack = new StarStack(100); 
     // Constant magnetic field (in kiloGauss)
     fFieldB = new Double_t[3];
     fFieldB[0] = 0.;
@@ -76,7 +76,7 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
 }
 //_____________________________________________________________________________
 StarVMCApplication::~StarVMCApplication() {  // Destructor  
-  delete fStarMcStack;
+  delete fStarStack;
   delete fFieldB;
   //  SafeDelete(TVirtualMC::GetMC());
   SafeDelete(fgDetSets);
@@ -87,7 +87,7 @@ void StarVMCApplication::InitMC(const char* setup) {  // Initialize MC.
     gROOT->LoadMacro(setup);
     gInterpreter->ProcessLine("Config()");
   }
-  TVirtualMC::GetMC()->SetStack(fStarMcStack);
+  TVirtualMC::GetMC()->SetStack(fStarStack);
   TVirtualMC::GetMC()->Init();
   TVirtualMC::GetMC()->BuildPhysics(); 
   //  MisalignGeometry(); // Called from Geant3TGeo::FinishGeometry
@@ -162,15 +162,15 @@ void StarVMCApplication::GeneratePrimaries() {
     pz = sqrt(e*e - mass*mass); 
     
     // Add particle to stack 
-    fStarMcStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
+    fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
 		      kPPrimary, ntr, 1., 0);
   }
-  Int_t NPrimary = fStarMcStack->GetNtrack();
+  Int_t NPrimary = fStarStack->GetNtrack();
   if (! NPrimary) TVirtualMC::GetMC()->StopRun();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
-  fStarMcStack->Reset();
+  fStarStack->Reset();
   if (fMcHits) fMcHits->Clear();
 }
 //_____________________________________________________________________________
@@ -185,10 +185,13 @@ void StarVMCApplication::Stepping() {    // User actions at each step
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PostTrack() {    // User actions after finishing of each track
+  Fatal("StarVMCApplication::PostTrack","Is not implemented");
+#if 0
   // delete stack only track
-  StarMCParticle *current =  fStarMcStack->GetCurrentParticle();
-  TObjArray *objs = fStarMcStack->GetParticles();
+  TParticle *current =  0; // fStarStack->GetCurrentParticle();
+  TObjArray *objs = fStarStack->GetParticles();
   if (objs->IndexOf(current) < objs->LowerBound()) delete current;
+#endif
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishPrimary() {    // User actions after finishing of a primary track
@@ -198,7 +201,7 @@ void StarVMCApplication::FinishEvent() {    // User actions after finishing of a
   if (TString(TVirtualMC::GetMC()->GetName()) == "TGeant3") {
     // add scale (1.4)
   }  
-  fStarMcStack->Print();
+  fStarStack->Print();
   if (fMcHits) fMcHits->FinishEvent(); // add kine info
 } 
 //_____________________________________________________________________________

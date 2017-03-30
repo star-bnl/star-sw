@@ -27,20 +27,20 @@
 #include "TString.h"
 #include "TMath.h"
 #include "TVector3.h"
-#include "StarMCStack.h"
+#include "StarStack.h"
 #include "TRandom.h"
 #include "TPDGCode.h"
 #include "TDatabasePDG.h"
 
 class StarMCPrimaryGenerator : public TObject {
  public:
-  StarMCPrimaryGenerator(StarMCStack* stack = 0) : TObject(), fStarMcStack(stack), fIsRandom(false), fNofPrimaries(0), 
+  StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
     fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin() {fgInstance = this;}
   virtual ~StarMCPrimaryGenerator() {}
   static StarMCPrimaryGenerator* Instance() {return fgInstance;}
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
   void  SetNofPrimaries(Int_t nofPrimaries)   { fNofPrimaries = nofPrimaries; }
-  void  SetStack(StarMCStack *stack)      { fStarMcStack = stack;}
+  void  SetStack(StarStack *stack)      { fStarStack = stack;}
   void  SetOption(const Char_t *opt)          { fOption = opt;}
   void  SetDebug(Int_t m)                     { fDebug = m;}
   void  SetOrigin(Double_t x, Double_t y, Double_t z) {fOrigin = TVector3(x,y,z);}
@@ -49,7 +49,7 @@ class StarMCPrimaryGenerator : public TObject {
   void  SetSigmasOrigin(const TVector3 &xyz)  { fSigmasOrigin = xyz;}
   Int_t GetNofPrimaries()                     { return fNofPrimaries;}
   const Option_t* GetOption() const           { return fOption.Data();}
-  StarMCStack *GetStack()                 { return fStarMcStack;}
+  StarStack *GetStack()                 { return fStarStack;}
   Int_t Debug()                               { return fDebug;}
   TVector3 &GetOrigin()                       { return fOrigin;}
   TVector3 &GetSigmasOrigin()                 { return fSigmasOrigin;}
@@ -59,7 +59,7 @@ class StarMCPrimaryGenerator : public TObject {
  protected:
    
   static StarMCPrimaryGenerator *fgInstance;
-  StarMCStack       *fStarMcStack;    
+  StarStack       *fStarStack;    
   Bool_t            fIsRandom;
   Int_t             fNofPrimaries;
   TString           fOption;  

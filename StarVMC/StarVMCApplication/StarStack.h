@@ -12,13 +12,12 @@
 class TClonesArray;
 class TFile;
 class TObjArray;
-class TParticle;
 class TString;
 class TTree;
 #include "TClonesArray.h"
 #include "TArrayI.h"
 #include "TVirtualMCStack.h"
-
+#include "TParticle.h"
 enum {kKeepBit=1, kDaughtersBit=2, kDoneBit=4, kTransportBit=BIT(14)};
 
 class StarStack : public TVirtualMCStack
