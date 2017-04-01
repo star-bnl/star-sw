@@ -163,7 +163,7 @@ void StarVMCApplication::GeneratePrimaries() {
     
     // Add particle to stack 
     fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
-		      kPPrimary, ntr, 1., 0);
+		      kPPrimary, ntr, 1., 2);
   }
   Int_t NPrimary = fStarStack->GetNtrack();
   if (! NPrimary) TVirtualMC::GetMC()->StopRun();
@@ -185,8 +185,8 @@ void StarVMCApplication::Stepping() {    // User actions at each step
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PostTrack() {    // User actions after finishing of each track
-  Fatal("StarVMCApplication::PostTrack","Is not implemented");
 #if 0
+  Fatal("StarVMCApplication::PostTrack","Is not implemented");
   // delete stack only track
   TParticle *current =  0; // fStarStack->GetCurrentParticle();
   TObjArray *objs = fStarStack->GetParticles();
@@ -201,7 +201,9 @@ void StarVMCApplication::FinishEvent() {    // User actions after finishing of a
   if (TString(TVirtualMC::GetMC()->GetName()) == "TGeant3") {
     // add scale (1.4)
   }  
-  fStarStack->Print();
+  if (Debug()) {
+    fStarStack->Print();
+  }
   if (fMcHits) fMcHits->FinishEvent(); // add kine info
 } 
 //_____________________________________________________________________________
@@ -763,6 +765,19 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   fAlignmentDone = kTRUE;
   return fAlignmentDone;
 }
+//________________________________________________________________________________
+void StarVMCApplication::SetDebug(Int_t m) {
+  fDebug = m;
+  if (fDebug > 1) {
+    TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+    Gcflag_t* cflag = geant3->Gcflag();
+    cflag->idebug = 1;
+    cflag->idemax = 10000;
+    cflag->iswit[0] = 2;
+    cflag->iswit[1] = 2;
+    cflag->iswit[2] = 2; 
+  }
+}			  
 // $Log: StarVMCApplication.cxx,v $
 // Revision 1.13  2013/12/16 22:58:53  fisyak
 // Add g2t_volume_id

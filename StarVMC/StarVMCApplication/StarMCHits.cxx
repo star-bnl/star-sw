@@ -145,7 +145,7 @@ void StarMCHits::Step() {
   Float_t dEstep = TVirtualMC::GetMC()->Edep();
   Float_t Step = TVirtualMC::GetMC()->TrackStep();
   fHit.iPart = TVirtualMC::GetMC()->TrackPid();
-  //  fHit.iTrack = ((StarStack *)TVirtualMC::GetMC()->GetStack())->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
+  fHit.iTrack = ((StarStack *)TVirtualMC::GetMC()->GetStack())->GetCurrentTrackNumber() + 1; // GetCurrentTrackNumber() + 1 to be consistent with g2t
   // - - - - - - - - - - - - - energy correction - - - - - - - - - -
   if (TVirtualMC::GetMC()->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
     TArrayI proc;
@@ -294,7 +294,7 @@ void StarMCHits::FinishEvent() {
     TParticle  *part = (TParticle*) ((StarStack *) TVirtualMC::GetMC()->GetStack())->Particle(it);
     part->ProductionVertex(newV);
     devV = newV - oldV;
-    if (iv == 0 || devV.Mag() > 1.e-7) {
+    if (iv == 0 || devV.P() > 1.e-7) {// 3D distance
       if (iv > 0) g2t_vertex->AddAt(&vertex);
       memset (&vertex, 0, sizeof(g2t_vertex_st));
       iv++;

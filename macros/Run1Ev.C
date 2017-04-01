@@ -124,13 +124,13 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       gMC->SetCut("TOFMAX", 	1e3);
       gMC->BuildPhysics();
       if (gMC && gMC->IsA()->InheritsFrom("TGeant3TGeo")) {
-        Geant3TGeo *geant3 = (TGeant3TGeo *)gMC;
-        cflag_t* cflag = geant3->Gcflag();
-        flag->idebug = 1;
-        flag->idemax = 10000;
-        flag->iswit[0] = 2;
-        flag->iswit[1] = 2;
-        flag->iswit[2] = 2; 
+        TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+        Gcflag_t* cflag = geant3->Gcflag();
+        cflag->idebug = 1;
+        cflag->idemax = 10000;
+        cflag->iswit[0] = 2;
+        cflag->iswit[1] = 2;
+        cflag->iswit[2] = 2; 
         StGeanePropagator::instance()->SetDebug(1);
       }
     } else {

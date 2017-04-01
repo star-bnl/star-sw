@@ -55,7 +55,7 @@ void StarMCHBPrimaryGenerator::GeneratePrimary(const TVector3& origin) {
  Double_t e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
  // Add particle to stack 
  fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
-                  kPPrimary, ntr, 1., 0);
+                  kPPrimary, ntr, 1., 2);
 #endif
 }
 //_____________________________________________________________________________
@@ -113,7 +113,7 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
 	   " ener         mass      Vxyz[3]                       Vtime\n");
   Int_t NpHEP = 0;
   Int_t NPrim = 0;
-  Int_t IdGen = 0;
+  //  Int_t IdGen = 0;
   particle_st header;
   Int_t   *IdEvHep =   &header.jmohep[0];
   Float_t &Mass    = *(&header.phep[4]);
@@ -158,7 +158,7 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
       }
     } else {
       if (! NPrim && header.isthep > 0) particle->AddAt(&header);
-      if (particle) {particle->AddAt(&event.p.isthep); IdGen = particle->GetNRows();}
+      if (particle) {particle->AddAt(&event.p.isthep); /* IdGen = particle->GetNRows(); */}
       if ( TDatabasePDG::Instance()->GetParticle(event.p.idhep)) {
 	// Add particle to stack 
 	Int_t parent = event.p.jmohep[0] - 1;
@@ -172,7 +172,7 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
 				fOrigin.z()+event.p.vhep[2]/10, 
 				event.p.vhep[3]/ct,//vx, vy, vz, tof, (mm->cm) 
 				polx, poly, polz, 
-				kPPrimary, ntr, 1., IdGen); // mech, &ntr, weight, status
+				kPPrimary, ntr, 1., 2); // mech, &ntr, weight, status
       } else {
 	if (Debug())
 	  cout << "StarMCHBPrimaryGenerator::GeneratePrimaries\t" << event.p.idhep << " is not in TDatabasePDG. skip it." << endl;
@@ -181,7 +181,6 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
       if (event.itrac == -1 || event.itrac == 65535 || NPrim == NpHEP) {fEntry++; break;}
     }
   }
-  
   Int_t NPrimary = fStarStack->GetNtrack();
-  //  fStarStack->SetNprimary(NPrimary);
+  fStarStack->SetNprimaries(NPrimary);
 }

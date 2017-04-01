@@ -56,9 +56,12 @@ if (TClassTable::GetDict("StMaker"))
     
 
     rootlogoff::mk->Finish();
+#if 0
     if (TString(gSystem->Getenv("STAR_VERSION")).BeginsWith(".DEV")
 	&& !gSystem->Getenv("STARNODELETE")) delete rootlogoff::mk;
-    else  printf ("*** Chain not deleted***\n");
+    else  
+#endif
+      printf ("*** Chain not deleted***\n");
   }
 }
 printf("\nThis is the end of ROOT -- Goodbye\n\n");

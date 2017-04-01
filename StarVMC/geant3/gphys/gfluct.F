@@ -1,10 +1,7 @@
 *
-* $Id: gfluct.F,v 1.1.1.3 2009/02/18 20:31:47 fisyak Exp $
+* $Id$
 *
 * $Log: gfluct.F,v $
-* Revision 1.1.1.3  2009/02/18 20:31:47  fisyak
-* *** empty log message ***
-*
 * Revision 1.1.1.1  2002/07/24 15:56:25  rdm
 * initial import into CVS
 *
@@ -21,6 +18,14 @@
 * Geant
 *
 *
+*     gas parameters initialization - for backward compatibility
+      BLOCK DATA PARGSET
+      REAL*4 FPOT,EEND,EEXPO
+      COMMON /GASPAR/ FPOT,EEND,EEXPO
+      DATA FPOT,EEND,EEXPO/20.78E-9,10.E-6,2.2/
+      END
+*
+
 #include "geant321/pilot.h"
 *-- Author :
       SUBROUTINE G3FLUCT(DEMEAN,DE)
@@ -73,14 +78,18 @@ C.
       PARAMETER (ASHMIN=1,ASHMAX=30)
 #endif
 * These parameters are needed by M.Kowalski's fluctuation algorithm
-      PARAMETER (FPOT=20.77E-9, EEND=10E-6, EEXPO=2.2, EEND1=1E-6)
-      PARAMETER (XEXPO=-EEXPO+1, YEXPO=1/XEXPO)
+
+      REAL*4 FPOT,EEND,EEXPO
+      COMMON /GASPAR/ FPOT,EEND,EEXPO
+      EXTERNAL PARGSET
+
+
 * These parameters are needed by M.Kowalski's fluctuation algorithm
       DIMENSION RNDM(2)
-      DE2(DPOT,RAN)=(DPOT**XEXPO*(1-RAN)+EEND**XEXPO*RAN)**YEXPO
+
       FLAND(X) = P1+P6*X+(P2+P3*X)*EXP(P4*X+P5)
-*
-      DE21(DPOT,RAN)=(DPOT**XEXPO*(1-RAN)+EEND1**XEXPO*RAN)**YEXPO
+      XEXPO=-EEXPO+1
+      YEXPO=1/XEXPO
 *
       IF(STEP.LE.0) THEN
          DE=DEMEAN
@@ -92,14 +101,11 @@ C.
          ELSEIF (ILOSS.EQ.5) THEN
 * This is Marek Kowalski's fluctuation algorithm, it works only when
 * the step size has been limited to one ionisation on average
+
+
             CALL GRNDM(RNDM,1)
-            DE=DE2(FPOT,RNDM(1))
 *
-         ELSEIF (ILOSS.EQ.6) THEN
-* This is Marek Kowalski's fluctuation algorithm, it works only when
-* the step size has been limited to one ionisation on average and for Kr only
-            CALL GRNDM(RNDM,1)
-            DE=DE21(FPOT,RNDM(1))
+            DE=(FPOT**XEXPO*(1-RNDM(1))+EEND**XEXPO*RNDM(1))**YEXPO
          ELSE
 *
 * *** mean ionization potential (GeV)
@@ -218,3 +224,4 @@ C.
       ENDIF
 *
       END
+

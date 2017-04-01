@@ -90,17 +90,33 @@ StVMCMaker::Make
    StarVMCApplication::RunMC(1);
    ->    TGeant3::ProcessRun(1)
    ->                  StarVMCApplication::BeginEvent();
+   ->                    StarStack::Reset
+   ->                      StarStack::Clear
    ->                  TGeant3::ProcessEvent();
    ->                    TGeant3::Gtrigi();
    ->                    TGeant3::Gtrigc();
    ->                    TGeant3::Gtrig();
-   ->                      StarVMCApplication::GeneratePrimaries();             // gukine
-   ->                      gtreveroot();
-   ->                        gutrack();
+   ->                     g3trig
+   ->                       TGeant3gu::gukine_()
+   ->                          StarVMCApplication::GeneratePrimaries();  
+   ->                            StarMCSimplePrimaryGenerator::GeneratePrimaries(origin)
+   ->                              StarMCSimplePrimaryGenerator::GeneratePrimary()
+   ->                                StarStack::PushTrack
+   ->                       TGeant3gu::gutrev()
+   ->                         gtreveroot();
+   ->                           TGeant3::rxgtrak();
+   ->                             TVirtualMC::GetMC()->GetStack()->PopNextTrack(mtrack) => StarMCStack::PopNextTrack
+   ->                               StarStack::GetNextParticle()
+   ->                                 StarStack::PopPrimaryForTracking
+   ->                        TGeant3gu::gutrack_()
    ->                               StarVMCApplication::Field(xdouble,bdouble); // gufld
    ->                               StarVMCApplication::PreTrack();
    ->                          g3track();
-   ->                            gustep();
+   ->                            g3hadr()
+   ->                              gdecay();
+   ->                        
+   ->                            TGeant3gu::gustep();
+   ->                                   StarStack::PushTrack
    ->                                   StarVMCApplication::Stepping();         // gustep
    ->                                       StarMCHits::Step();
    ->                                         StarMCHits::FillG2Table();
@@ -120,6 +136,7 @@ StVMCMaker::Make
 #include "TGeoManager.h"
 #include "TObjectSet.h"
 #include "TInterpreter.h"
+#include "TPythia6Decayer.h"
 #include "StVMCMaker.h"
 #include "StChain.h"
 #include "Stiostream.h"
@@ -138,8 +155,12 @@ StVMCMaker *        StVMCMaker::fgGeantMk = 0;
 //_____________________________________________________________________________
 Int_t StVMCMaker::Init() {
   fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
-  fgGeant3 = new TGeant3TGeo("C++ Interface to Geant3");//, 1, 200000); 
+  fgGeant3 = (TGeant3TGeo *) TVirtualMC::GetMC();
+  if (! fgGeant3) {
+    fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
+  }
   gMessMgr->Info() << "StVMCMaker::Init Geant3 has been created." << endm;
+  fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (! IAttr("VMCPassive")) {
     gMessMgr->Info() << "StVMCMaker::InitRun Active mode" << endm; 
@@ -160,13 +181,12 @@ Int_t StVMCMaker::Init() {
       gInterpreter->ProcessLine(command,&ee);
       assert(!ee);
     } 
-    StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();
+    StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
     if (! generator) {
       if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
       //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
       //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
       else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
-      fgStarVMCApplication->SetPrimaryGenerator(generator);
     }
     assert(generator);
     StarMCHits *hits = StarMCHits::instance();
@@ -345,7 +365,7 @@ void StVMCMaker::SetDebug(Int_t l) {
       fgGeant3->SetSWIT(4,0);
     }
   }
-  StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();
+  StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
   if (generator) generator->SetDebug(Debug());
   StarMCHits *hits = StarMCHits::instance();
   if (hits) hits->SetDebug(Debug());
