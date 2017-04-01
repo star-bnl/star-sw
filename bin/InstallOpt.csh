@@ -158,6 +158,14 @@ foreach pkg ($list)
           make install
           touch ../${pkg}.Done
           breaksw
+      case "qt*":
+          ./configure --prefix=$XOPTSTAR -no-glib <<EOF
+o
+yes
+EOF
+          make install
+          touch ../${pkg}.Done
+	  breaksw
       case "apr-1.5.1":
       default:
           ./configure --prefix=$XOPTSTAR
