@@ -68,10 +68,11 @@
 //  is a macro, that's why the ';' is missing.
 //
 ClassImp(StAnalysisMaker);
-
+StAnalysisMaker *StAnalysisMaker::fgMaker = 0;
 /// The constructor. Initialize you data members here.
 StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name)
 {
+  fgMaker = this;
     mEventCounter = 0;
 }
 Int_t StAnalysisMaker::Finish() {

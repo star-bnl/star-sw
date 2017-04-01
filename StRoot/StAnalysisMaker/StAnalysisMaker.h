@@ -113,6 +113,7 @@ public:
   StAnalysisMaker(const Char_t *name="analysis");     // constructor
   ~StAnalysisMaker() {}                               // destructor
   
+  static StAnalysisMaker *instance() {return fgMaker;}
   Int_t  Make();                      // invoked for every event
   Int_t  Finish();                    // called once at the end
   static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
@@ -155,7 +156,7 @@ public:
   //  an 'm'. This makes it easier to read the code later.
   //
   Int_t        mEventCounter;  //!
-  
+  static StAnalysisMaker *fgMaker;
   //
   //  This is needed to make your maker known to root4star.
   //  It must be always the last statement in the class.
