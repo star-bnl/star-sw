@@ -85,7 +85,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
  Double_t e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
  // Add particle to stack 
  fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
-                  kPPrimary, ntr, 1., 0);
+                  kPPrimary, ntr, 1., 2);
 }
 
 //
@@ -99,7 +99,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin)
 // ---
   fOrigin = origin;
   for (Int_t i=0; i<fNofPrimaries; i++) GeneratePrimary();  
-  //  fStarStack->SetNprimary(fNofPrimaries);
+  fStarStack->SetNprimaries(fNofPrimaries);
 }
 
 //_____________________________________________________________________________
