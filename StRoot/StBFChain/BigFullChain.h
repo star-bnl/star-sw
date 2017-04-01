@@ -1289,7 +1289,7 @@ Bfc_st BFC[] = { // standard chains
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
   {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom,libVMC,libgeant3", "VMC geant3",kFALSE},
-  {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
+  {"geant3"   ,"" ,"","geant3vmc","","EG,Pythia6_4_28s,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
@@ -1702,7 +1702,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,tbutil,TMVARank"
    ,                                      "StiMaker","libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"HLTCA"    ,""  ,"","",                     "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
-  {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
+  {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv"     ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker,StEventUtilities"

@@ -145,7 +145,7 @@ void StarMCHits::Step() {
   Float_t dEstep = TVirtualMC::GetMC()->Edep();
   Float_t Step = TVirtualMC::GetMC()->TrackStep();
   fHit.iPart = TVirtualMC::GetMC()->TrackPid();
-  fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
+  //  fHit.iTrack = ((StarStack *)TVirtualMC::GetMC()->GetStack())->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
   // - - - - - - - - - - - - - energy correction - - - - - - - - - -
   if (TVirtualMC::GetMC()->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
     TArrayI proc;
@@ -270,8 +270,8 @@ void StarMCHits::FinishEvent() {
   event.ge_rndm[0]         =        fSeed;//IHEAD(3)
   event.ge_rndm[1]         =            0;//IHEAD(4)
   event.n_run              =            1;
-  event.n_track_eg_fs      = StarVMCApplication::Instance()->GetStack()->GetNtrack();
-  event.n_track_prim       = StarVMCApplication::Instance()->GetStack()->GetNprimary();
+  event.n_track_eg_fs      = TVirtualMC::GetMC()->GetStack()->GetNtrack();
+  event.n_track_prim       = TVirtualMC::GetMC()->GetStack()->GetNprimary();
   event.prim_vertex_p      =            1;
   event.b_impact           =           99;
   event.phi_impact         =          0.5;
@@ -280,19 +280,18 @@ void StarMCHits::FinishEvent() {
   St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
   m_DataSet->Add(g2t_vertex); 
   g2t_vertex_st vertex;
-  Int_t NTracks = StarVMCApplication::Instance()->GetStack()->GetNtrack();
+  Int_t NTracks = TVirtualMC::GetMC()->GetStack()->GetNtrack();
   St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",NTracks);
   m_DataSet->Add(g2t_track);
   g2t_track_st track;
-  StarMCParticle  *particle = 0;   
+  //  TParticle  *particle = 0;   
   Int_t iv = 0;
   TLorentzVector oldV(0,0,0,0);
   TLorentzVector newV(0,0,0,0);
   TLorentzVector devV(0,0,0,0);
-  for (Int_t it = 0; it <NTracks; it++) {
+  for (Int_t it = 0; it < NTracks; it++) {
     memset(&track, 0, sizeof(g2t_track_st));
-    particle = (StarMCParticle*) StarVMCApplication::Instance()->GetStack()->GetParticle(it);
-    TParticle  *part = (TParticle *) particle->GetParticle();
+    TParticle  *part = (TParticle*) ((StarStack *) TVirtualMC::GetMC()->GetStack())->Particle(it);
     part->ProductionVertex(newV);
     devV = newV - oldV;
     if (iv == 0 || devV.Mag() > 1.e-7) {
@@ -321,7 +320,7 @@ void StarMCHits::FinishEvent() {
     }
     vertex.n_daughter++;
     track.id             = it+1;
-    track.eg_label       = particle->GetIdGen();
+    //    track.eg_label       = particle->GetIdGen();
     track.eg_pid         = part->GetPdgCode();
     track.ge_pid         = TVirtualMC::GetMC()->IdFromPDG(track.eg_pid);
     track.start_vertex_p = iv;

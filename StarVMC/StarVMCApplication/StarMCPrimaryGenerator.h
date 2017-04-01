@@ -27,43 +27,46 @@
 #include "TString.h"
 #include "TMath.h"
 #include "TVector3.h"
-#include "StarMCStack.h"
+#include "StarStack.h"
 #include "TRandom.h"
 #include "TPDGCode.h"
 #include "TDatabasePDG.h"
 
 class StarMCPrimaryGenerator : public TObject {
  public:
-  StarMCPrimaryGenerator(TVirtualMCStack* stack = 0) : TObject(), fStack(stack), fIsRandom(false), fNofPrimaries(0), 
-				   fOption(""), fDebug(0), fId(0), fOrigin() {fgInstance = this;}
+  StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
+    fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin() {fgInstance = this;}
   virtual ~StarMCPrimaryGenerator() {}
   static StarMCPrimaryGenerator* Instance() {return fgInstance;}
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
   void  SetNofPrimaries(Int_t nofPrimaries)   { fNofPrimaries = nofPrimaries; }
-  void  SetStack(TVirtualMCStack *stack)      { fStack = stack;}
+  void  SetStack(StarStack *stack)      { fStarStack = stack;}
   void  SetOption(const Char_t *opt)          { fOption = opt;}
   void  SetDebug(Int_t m)                     { fDebug = m;}
   void  SetOrigin(Double_t x, Double_t y, Double_t z) {fOrigin = TVector3(x,y,z);}
   void  SetOrigin(const TVector3 &xyz)        { fOrigin = xyz;}
+  void  SetSigmasOrigin(Double_t sigma_x, Double_t sigma_y, Double_t sigma_z) {fSigmasOrigin = TVector3(sigma_x,sigma_y,sigma_z);}
+  void  SetSigmasOrigin(const TVector3 &xyz)  { fSigmasOrigin = xyz;}
   Int_t GetNofPrimaries()                     { return fNofPrimaries;}
   const Option_t* GetOption() const           { return fOption.Data();}
-  TVirtualMCStack *GetStack()                 { return fStack;}
+  StarStack *GetStack()                 { return fStarStack;}
   Int_t Debug()                               { return fDebug;}
   TVector3 &GetOrigin()                       { return fOrigin;}
+  TVector3 &GetSigmasOrigin()                 { return fSigmasOrigin;}
   virtual void GeneratePrimaries() {}
   virtual void GeneratePrimaries(const TVector3& /* origin */) {}
   virtual void Print(Option_t *option="") const;
  protected:
    
   static StarMCPrimaryGenerator *fgInstance;
-  TVirtualMCStack  *fStack;    
+  StarStack       *fStarStack;    
   Bool_t            fIsRandom;
   Int_t             fNofPrimaries;
   TString           fOption;  
   Int_t             fDebug;
   Int_t             fId;
   TVector3          fOrigin;
-
+  TVector3          fSigmasOrigin;
   ClassDef(StarMCPrimaryGenerator,1)  //StarMCPrimaryGenerator
 };
 #endif //Star_PRIMARY_GENERATOR_H

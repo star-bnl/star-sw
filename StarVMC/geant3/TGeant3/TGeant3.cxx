@@ -1235,6 +1235,23 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant)
   fgtnext = g3tnext;
   fggperp = g3gperp;
 
+    //  Some default settings, if not changed by user
+    if (!TestBit(kTRIG)) SetTRIG(1);       // Number of events to be processed
+    if (!TestBit(kSWIT)) SetSWIT(4, 10);   //
+    if (!TestBit(kDEBU)) SetDEBU(0, 0, 1); //
+    if (!TestBit(kAUTO)) SetAUTO(1);       // Select automatic STMIN etc... 
+                                           // calc. (AUTO 1) or manual (AUTO 0)
+    if (!TestBit(kABAN)) SetABAN(0);       // Restore 3.16 behaviour for 
+                                           // abandoned tracks
+    if (!TestBit(kOPTI)) SetOPTI(2);       // Select optimisation level for 
+                                           // GEANT geometry searches (0,1,2)
+    if (!TestBit(kERAN)) SetERAN(5.e-7);   //
+
+    DefineParticles();
+    fApplication->AddParticles();
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,22,0)
+    fApplication->AddIons();
+#endif
   InitGEANE();
 }
 
@@ -1698,7 +1715,7 @@ void TGeant3::DefineParticles()
   fPDGCode[fNPDGCodes++]=GetSpecialPdg(51); // 51 = FeedbackPhoton
 //
 
-  Gspart(fNG3Particles++, "Lambda_c-", 4, 2.28646, +1., 2.06e-13);
+  Gspart(fNG3Particles++, "Lambda_c+", 4, 2.28646, +1., 2.06e-13);
   // Gspart(fNG3Particles++, "Lambda_c+", 4, 2.28646, +1., 0.200e-12); // G4LambdacPlus
   fPDGCode[fNPDGCodes++]=4122;         //52 = Lambda_c+
 
@@ -1959,9 +1976,25 @@ void TGeant3::DefineParticles()
     mode[0] = 878;
     //    mode[0] = 949;
     Gsdk(ipa, bratio, mode);
-
-
-
+    // extra particles
+    const Char_t *extraPartName[] = {"Sigma*+","Sigma*-"};
+    Int_t Nextra = sizeof(extraPartName)/sizeof(Char_t *);
+    for (Int_t i = 0; i < Nextra; i++) {
+      TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(extraPartName[i]);
+      if (! p) {cout << "Uknown particle " << extraPartName[i] << endl; continue;}
+      Double_t G = p->Width(); // GeV
+      Double_t lifetime = 0;   // second
+      if (G > 0) lifetime = TMath::H()/TMath::Qe()*1e-9/(TMath::TwoPi())*1e-9/G;
+      DefineParticle(p->PdgCode(),p->GetName(), kPTHadron, p->Mass(),p->Charge()/3, lifetime,
+		     *(p->GetTitle()) /*pType*/, G /*width*/, 
+		     p->Spin() /*iSpin*/, p->Parity() /*iParity*/, 0 /*iConjugation*/, 
+                     p->Isospin() /*iIsospin*/, p->I3() /*iIsospinZ*/, 0 /*gParity*/,
+		     0 /*lepton*/, 1 /*baryon*/,
+                     kFALSE /*stable*/, kTRUE /*shortlived*/);
+      //      const TString& /*subType*/,
+      //	Int_t /*antiEncoding*/, Double_t /*magMoment*/,
+      //	Double_t /*excitation*/)
+    }
     AddParticlesToPdgDataBase();
 }
 
@@ -2275,7 +2308,7 @@ TString  TGeant3::ParticleName(Int_t pdg) const
   Gfpart(pdg, name, itrtyp,amass, charge, tlife);
   name[20] = '\0';
 
-  return TString(name);
+  return TString(name).Strip();
 }
 
 //______________________________________________________________________
@@ -4350,8 +4383,8 @@ void  TGeant3::Gspos(const char *name, Int_t nr, const char *mother,
 
   TString only = konly;
   only.ToLower();
-  Bool_t isOnly = kFALSE;
-  if (only.Contains("only")) isOnly = kTRUE;
+//   Bool_t isOnly = kFALSE;
+//   if (only.Contains("only")) isOnly = kTRUE;
   char vname[5];
   Vname(name,vname);
   char vmother[5];
@@ -4376,8 +4409,8 @@ void  TGeant3::G3Gsposp(const char *name, Int_t nr, const char *mother,
   //
   TString only = konly;
   only.ToLower();
-  Bool_t isOnly = kFALSE;
-  if (only.Contains("only")) isOnly = kTRUE;
+//   Bool_t isOnly = kFALSE;
+//   if (only.Contains("only")) isOnly = kTRUE;
   char vname[5];
   Vname(name,vname);
   char vmother[5];
@@ -6422,23 +6455,6 @@ void TGeant3::Init()
     //=================Create Materials and geometry
     //
 
-    //  Some default settings, if not changed by user
-    if (!TestBit(kTRIG)) SetTRIG(1);       // Number of events to be processed
-    if (!TestBit(kSWIT)) SetSWIT(4, 10);   //
-    if (!TestBit(kDEBU)) SetDEBU(0, 0, 1); //
-    if (!TestBit(kAUTO)) SetAUTO(1);       // Select automatic STMIN etc... 
-                                           // calc. (AUTO 1) or manual (AUTO 0)
-    if (!TestBit(kABAN)) SetABAN(0);       // Restore 3.16 behaviour for 
-                                           // abandoned tracks
-    if (!TestBit(kOPTI)) SetOPTI(2);       // Select optimisation level for 
-                                           // GEANT geometry searches (0,1,2)
-    if (!TestBit(kERAN)) SetERAN(5.e-7);   //
-
-    DefineParticles();
-    fApplication->AddParticles();
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,22,0)
-    fApplication->AddIons();
-#endif
     fApplication->ConstructGeometry();
     FinishGeometry();
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,01,1)

@@ -54,7 +54,7 @@ void StarMCHBPrimaryGenerator::GeneratePrimary(const TVector3& origin) {
  Double_t mass = TDatabasePDG::Instance()->GetParticle(fId)->Mass();
  Double_t e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
  // Add particle to stack 
- fStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
+ fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
                   kPPrimary, ntr, 1., 0);
 #endif
 }
@@ -164,15 +164,15 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
 	Int_t parent = event.p.jmohep[0] - 1;
 	toBeDone = 1;
 	if (event.p.isthep >= 2 || event.p.jdahep[0] || event.p.jdahep[1]) toBeDone = 0;
-	((StarMCStack *)fStack)->PushTrack(toBeDone, parent, event.p.idhep, 
-					   event.p.phep[0], event.p.phep[1], 
-					   event.p.phep[2], event.p.phep[3],// px, py, pz, e, 
-					   fOrigin.x()+event.p.vhep[0]/10, 
-					   fOrigin.y()+event.p.vhep[1]/10, 
-					   fOrigin.z()+event.p.vhep[2]/10, 
-					   event.p.vhep[3]/ct,//vx, vy, vz, tof, (mm->cm) 
-					   polx, poly, polz, 
-					   kPPrimary, ntr, 1., IdGen); // mech, &ntr, weight, status
+	fStarStack->PushTrack(toBeDone, parent, event.p.idhep, 
+				event.p.phep[0], event.p.phep[1], 
+				event.p.phep[2], event.p.phep[3],// px, py, pz, e, 
+				fOrigin.x()+event.p.vhep[0]/10, 
+				fOrigin.y()+event.p.vhep[1]/10, 
+				fOrigin.z()+event.p.vhep[2]/10, 
+				event.p.vhep[3]/ct,//vx, vy, vz, tof, (mm->cm) 
+				polx, poly, polz, 
+				kPPrimary, ntr, 1., IdGen); // mech, &ntr, weight, status
       } else {
 	if (Debug())
 	  cout << "StarMCHBPrimaryGenerator::GeneratePrimaries\t" << event.p.idhep << " is not in TDatabasePDG. skip it." << endl;
@@ -182,6 +182,6 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
     }
   }
   
-  Int_t NPrimary = fStack->GetNtrack();
-  ((StarMCStack *)fStack)->SetNprimary(NPrimary);
+  Int_t NPrimary = fStarStack->GetNtrack();
+  //  fStarStack->SetNprimary(NPrimary);
 }

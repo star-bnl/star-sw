@@ -20,6 +20,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     //                         gkine 1  5     1      1  0.1   0.1      0       0    2     2
     //                         gkine 1  2    25     25  0.1   0.1      0       0   10    10
     //                         gkine 1  6    25     25  0.0   0.0      0       0  100   100
+    if (NEvents) {
     TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
     cout << "Set kine : " << kine.Data() << endl;
     St_geant_Maker::instance()->Do(kine.Data());
@@ -27,6 +28,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     //                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
+    }
     St_geant_Maker::instance()->Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
     St_geant_Maker::instance()->Do("DCAY 0");
     St_geant_Maker::instance()->Do("ANNI 0");
@@ -81,6 +83,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     geant->SetDebug(1);
     // geant->SetDebug(2); // Print StarVMCApplication::MisalignGeometry()
     if (StarVMCApplication::Instance()) {
+      if (NEvents) {
       StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
       if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
 	delete gener; gener = 0;
@@ -91,6 +94,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
 	gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
       StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
       cout << "Set StarMCSimplePrimaryGenerator" << endl;
+      }
       //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
       //      geant->SetSetAttr("phys_off",kTRUE); // physics off
       gMC->SetProcess("DCAY", 0);
@@ -120,14 +124,14 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       gMC->SetCut("TOFMAX", 	1e3);
       gMC->BuildPhysics();
       if (gMC && gMC->IsA()->InheritsFrom("TGeant3TGeo")) {
-	TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
-	Gcflag_t* cflag = geant3->Gcflag();
-	cflag->idebug = 1;
-	cflag->idemax = 10000;
-	cflag->iswit[0] = 2;
-	cflag->iswit[1] = 2;
-	cflag->iswit[2] = 2; 
-	StGeanePropagator::instance()->SetDebug(1);
+        Geant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+        cflag_t* cflag = geant3->Gcflag();
+        flag->idebug = 1;
+        flag->idemax = 10000;
+        flag->iswit[0] = 2;
+        flag->iswit[1] = 2;
+        flag->iswit[2] = 2; 
+        StGeanePropagator::instance()->SetDebug(1);
       }
     } else {
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl;
@@ -141,5 +145,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
   StiKalmanTrack::setDebug(2);
   StiTrackNodeHelper::setDebug(8);
 #endif
-  chain->EventLoop(NEvents);
+  if (NEvents) {
+    chain->EventLoop(NEvents);
+  }
 }
