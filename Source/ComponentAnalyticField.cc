@@ -165,12 +165,12 @@ bool ComponentAnalyticField::GetBoundingBox(double& x0, double& y0, double& z0,
   }
   // Otherwise, return the cell dimensions.
   if (!m_cellset) return false;
-  x0 = xmin;
-  y0 = ymin;
-  z0 = zmin;
-  x1 = xmax;
-  y1 = ymax;
-  z1 = zmax;
+  x0 = m_xmin;
+  y0 = m_ymin;
+  z0 = m_zmin;
+  x1 = m_xmax;
+  y1 = m_ymax;
+  z1 = m_zmax;
   return true;
 }
 
@@ -1092,9 +1092,9 @@ void ComponentAnalyticField::CellInit() {
   m_cellType = A00;
 
   // Bounding box and voltage range.
-  xmin = xmax = 0.;
-  ymin = ymax = 0.;
-  zmin = zmax = 0.;
+  m_xmin = m_xmax = 0.;
+  m_ymin = m_ymax = 0.;
+  m_zmin = m_zmax = 0.;
   vmin = vmax = 0.;
 
   // Periodicities
@@ -1630,35 +1630,35 @@ bool ComponentAnalyticField::CellCheck() {
   bool setz = false;
   bool setv = false;
 
-  xmin = xmax = 0.;
-  ymin = ymax = 0.;
-  zmin = zmax = 0.;
+  m_xmin = m_xmax = 0.;
+  m_ymin = m_ymax = 0.;
+  m_zmin = m_zmax = 0.;
   vmin = vmax = 0.;
 
   // Loop over the wires.
   for (int i = m_nWires; i--;) {
     if (setx) {
-      xmin = std::min(xmin, m_w[i].x - m_w[i].d / 2.);
-      xmax = std::max(xmax, m_w[i].x + m_w[i].d / 2.);
+      m_xmin = std::min(m_xmin, m_w[i].x - m_w[i].d / 2.);
+      m_xmax = std::max(m_xmax, m_w[i].x + m_w[i].d / 2.);
     } else {
-      xmin = m_w[i].x - m_w[i].d / 2.;
-      xmax = m_w[i].x + m_w[i].d / 2.;
+      m_xmin = m_w[i].x - m_w[i].d / 2.;
+      m_xmax = m_w[i].x + m_w[i].d / 2.;
       setx = true;
     }
     if (sety) {
-      ymin = std::min(ymin, m_w[i].y - m_w[i].d / 2.);
-      ymax = std::max(ymax, m_w[i].y + m_w[i].d / 2.);
+      m_ymin = std::min(m_ymin, m_w[i].y - m_w[i].d / 2.);
+      m_ymax = std::max(m_ymax, m_w[i].y + m_w[i].d / 2.);
     } else {
-      ymin = m_w[i].y - m_w[i].d / 2.;
-      ymax = m_w[i].y + m_w[i].d / 2.;
+      m_ymin = m_w[i].y - m_w[i].d / 2.;
+      m_ymax = m_w[i].y + m_w[i].d / 2.;
       sety = true;
     }
     if (setz) {
-      zmin = std::min(zmin, -m_w[i].u / 2.);
-      zmax = std::max(zmax, +m_w[i].u / 2.);
+      m_zmin = std::min(m_zmin, -m_w[i].u / 2.);
+      m_zmax = std::max(m_zmax, +m_w[i].u / 2.);
     } else {
-      zmin = -m_w[i].u / 2.;
-      zmax = +m_w[i].u / 2.;
+      m_zmin = -m_w[i].u / 2.;
+      m_zmax = +m_w[i].u / 2.;
       setz = true;
     }
     if (setv) {
@@ -1674,18 +1674,18 @@ bool ComponentAnalyticField::CellCheck() {
     if (!m_ynplan[i]) continue;
     if (i < 2) {
       if (setx) {
-        xmin = std::min(xmin, m_coplan[i]);
-        xmax = std::max(xmax, m_coplan[i]);
+        m_xmin = std::min(m_xmin, m_coplan[i]);
+        m_xmax = std::max(m_xmax, m_coplan[i]);
       } else {
-        xmin = xmax = m_coplan[i];
+        m_xmin = m_xmax = m_coplan[i];
         setx = true;
       }
     } else {
       if (sety) {
-        ymin = std::min(ymin, m_coplan[i]);
-        ymax = std::max(ymax, m_coplan[i]);
+        m_ymin = std::min(m_ymin, m_coplan[i]);
+        m_ymax = std::max(m_ymax, m_coplan[i]);
       } else {
-        ymin = ymax = m_coplan[i];
+        m_ymin = m_ymax = m_coplan[i];
         sety = true;
       }
     }
@@ -1700,11 +1700,11 @@ bool ComponentAnalyticField::CellCheck() {
 
   // Consider the tube.
   if (m_tube) {
-    xmin = -1.1 * m_cotube;
-    xmax = +1.1 * m_cotube;
+    m_xmin = -1.1 * m_cotube;
+    m_xmax = +1.1 * m_cotube;
     setx = true;
-    ymin = -1.1 * m_cotube;
-    ymax = +1.1 * m_cotube;
+    m_ymin = -1.1 * m_cotube;
+    m_ymax = +1.1 * m_cotube;
     sety = true;
     vmin = std::min(vmin, m_vttube);
     vmax = std::max(vmax, m_vttube);
@@ -1712,39 +1712,39 @@ bool ComponentAnalyticField::CellCheck() {
   }
 
   // In case of x-periodicity, XMAX-XMIN should be SX,
-  if (m_perx && m_sx > (xmax - xmin)) {
-    xmin = -m_sx / 2.;
-    xmax = m_sx / 2.;
+  if (m_perx && m_sx > (m_xmax - m_xmin)) {
+    m_xmin = -m_sx / 2.;
+    m_xmax = m_sx / 2.;
     setx = true;
   }
   // in case of y-periodicity, YMAX-YMIN should be SY,
-  if (m_pery && m_sy > (ymax - ymin)) {
-    ymin = -m_sy / 2.;
-    ymax = m_sy / 2.;
+  if (m_pery && m_sy > (m_ymax - m_ymin)) {
+    m_ymin = -m_sy / 2.;
+    m_ymax = m_sy / 2.;
     sety = true;
   }
   // in case the cell is polar, the y range should be < 2 pi.
-  if (m_polar && (ymax - ymin) >= TwoPi) {
-    ymin = -Pi;
-    ymax = +Pi;
+  if (m_polar && (m_ymax - m_ymin) >= TwoPi) {
+    m_ymin = -Pi;
+    m_ymax = +Pi;
     sety = true;
   }
 
   // Fill in missing dimensions.
-  if (setx && xmin != xmax && (ymin == ymax || !sety)) {
-    ymin -= fabs(xmax - xmin) / 2.;
-    ymax += fabs(xmax - xmin) / 2.;
+  if (setx && m_xmin != m_xmax && (m_ymin == m_ymax || !sety)) {
+    m_ymin -= fabs(m_xmax - m_xmin) / 2.;
+    m_ymax += fabs(m_xmax - m_xmin) / 2.;
     sety = true;
   }
-  if (sety && ymin != ymax && (xmin == xmax || !setx)) {
-    xmin -= fabs(ymax - ymin) / 2.;
-    xmax += fabs(ymax - ymin) / 2.;
+  if (sety && m_ymin != m_ymax && (m_xmin == m_xmax || !setx)) {
+    m_xmin -= fabs(m_ymax - m_ymin) / 2.;
+    m_xmax += fabs(m_ymax - m_ymin) / 2.;
     setx = true;
   }
 
   if (!setz) {
-    zmin = -(fabs(xmax - xmin) + fabs(ymax - ymin)) / 4.;
-    zmax = +(fabs(xmax - xmin) + fabs(ymax - ymin)) / 4.;
+    m_zmin = -(fabs(m_xmax - m_xmin) + fabs(m_ymax - m_ymin)) / 4.;
+    m_zmax = +(fabs(m_xmax - m_xmin) + fabs(m_ymax - m_ymin)) / 4.;
     setz = true;
   }
 
@@ -2769,7 +2769,6 @@ bool ComponentAnalyticField::SetupD20() {
   //   (Last changed on 18/ 2/93.)
   //-----------------------------------------------------------------------
 
-  std::complex<double> zj;
   const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (unsigned int i = 0; i < m_nWires; ++i) {
@@ -3349,8 +3348,6 @@ void ComponentAnalyticField::FieldB2Y(const double xpos, const double ypos,
 
   const std::complex<double> icons(0., 1.);
 
-  std::complex<double> zzmirr, zznmirr, ecompl;
-
   // Initialise the electric field and potential.
   ex = ey = 0.;
   volt = m_v0;
@@ -3363,7 +3360,7 @@ void ComponentAnalyticField::FieldB2Y(const double xpos, const double ypos,
     const std::complex<double> zz(xx, yy);
     const std::complex<double> zzneg(xx, yyneg);
     // Calculate the field in case there are no equipotential planes.
-    ecompl = 0.;
+    std::complex<double> ecompl = 0.;
     double r2 = 1.;
     if (fabs(xx) <= 20.) {
       ecompl = icons * b2sin[i] / (sin(icons * zz) * sin(icons * zzneg));
@@ -3755,7 +3752,6 @@ void ComponentAnalyticField::FieldD20(const double xpos, const double ypos,
 
   // Set the complex position coordinates.
   const std::complex<double> zpos = std::complex<double>(xpos, ypos);
-  std::complex<double> wi;
   const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (int i = m_nWires; i--;) {

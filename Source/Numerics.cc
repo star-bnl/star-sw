@@ -719,9 +719,8 @@ double Divdif(const std::vector<double>& f, const std::vector<double>& a,
   int npts = m + 2 - (m % 2);
   int ip = 0;
   int l = 0;
-  int isub;
   do {
-    isub = ix + l;
+    const int isub = ix + l;
     if ((1 > isub) || (isub > n)) {
       // Skip point.
       npts = mplus;
@@ -742,14 +741,14 @@ double Divdif(const std::vector<double>& f, const std::vector<double>& a,
   bool extra = npts != mplus;
   // Replace d by the leading diagonal of a divided-difference table,
   // supplemented by an extra line if EXTRA is True.
-  for (int l = 1; l <= m; l++) {
+  for (l = 1; l <= m; l++) {
     if (extra) {
-      isub = mplus - l;
+      const int isub = mplus - l;
       d[m + 1] = (d[m + 1] - d[m - 1]) / (t[m + 1] - t[isub - 1]);
     }
     int i = mplus;
     for (int j = l; j <= m; j++) {
-      isub = i - l;
+      const int isub = i - l;
       d[i - 1] = (d[i - 1] - d[i - 1 - 1]) / (t[i - 1] - t[isub - 1]);
       i--;
     }
@@ -761,7 +760,7 @@ double Divdif(const std::vector<double>& f, const std::vector<double>& a,
     sum = 0.5 * (sum + d[m + 1]);
   }
   int j = m;
-  for (int l = 1; l <= m; l++) {
+  for (l = 1; l <= m; l++) {
     sum = d[j - 1] + (x - t[j - 1]) * sum;
     j--;
   }

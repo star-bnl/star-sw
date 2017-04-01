@@ -153,9 +153,9 @@ class ComponentAnalyticField : public ComponentBase {
   Cell m_cellType;
 
   // Bounding box
-  double xmin, xmax;
-  double ymin, ymax;
-  double zmin, zmax;
+  double m_xmin, m_xmax;
+  double m_ymin, m_ymax;
+  double m_zmin, m_zmax;
 
   // Voltage range
   double vmin, vmax;

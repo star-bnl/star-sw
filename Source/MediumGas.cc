@@ -1305,8 +1305,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           }
         }
         if (m_hasExcRates && !m_excitationList.empty()) {
-          const unsigned int nexc = m_excitationList.size();
-          for (unsigned int l = 0; l < nexc; ++l) {
+          for (int l = 0; l < nexc; ++l) {
             outFile << std::setw(15);
             outFile << m_tabExcRates[l][j][k][i];
             ++cnt;
@@ -1319,8 +1318,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           }
         }
         if (m_hasIonRates && !m_ionisationList.empty()) {
-          const unsigned int nion = m_ionisationList.size();
-          for (unsigned int l = 0; l < nion; ++l) {
+          for (int l = 0; l < nion; ++l) {
             outFile << std::setw(15);
             outFile << m_tabIonRates[l][j][k][i];
             ++cnt;
