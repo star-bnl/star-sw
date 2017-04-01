@@ -41,7 +41,6 @@ class TG3Application : public TVirtualMCApplication
     virtual Double_t TrackingRmax() const;
     virtual Double_t TrackingZmax() const;
     virtual void Field(const Double_t* x, Double_t* b) const;
-
   private:
     // methods
     void ConstructMaterials();
