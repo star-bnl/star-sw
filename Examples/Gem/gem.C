@@ -93,9 +93,7 @@ int main(int argc, char * argv[]) {
     drift->EnablePlotting(driftView);
   }
 
-  int dummy;
-  std::cin >> dummy;
-  const int nEvents = 100;
+  const int nEvents = 10;
   for (int i = nEvents; i--;) { 
     if (debug || i % 10 == 0) std::cout << i << "/" << nEvents << "\n";
     // Randomize the initial position. 
