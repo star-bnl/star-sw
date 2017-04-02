@@ -2392,7 +2392,8 @@ bool Medium::SetIonMobility(const unsigned int ie, const unsigned int ib,
                             const unsigned int ia, const double mu) {
 
   // Check the index.
-  if (ie >= m_eFields.size() || ib >= m_bFields.size() || ia >= m_bAngles.size()) {
+  if (ie >= m_eFields.size() || ib >= m_bFields.size() || 
+      ia >= m_bAngles.size()) {
     std::cerr << m_className << "::SetIonMobility:\n";
     std::cerr << "    Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
@@ -2442,7 +2443,6 @@ bool Medium::SetIonMobility(const std::vector<double>& efields,
     const double mu = Interpolate1D(e, mobilities, efields, m_intpMobility,
                                     m_extrLowMobility, m_extrHighMobility);
     tabIonMobility[0][0][i] = mu;
-    std::cout << "E = " << e << ", mu = " << mu << "\n";
   }
 
   if (m_map2d) {

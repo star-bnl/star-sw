@@ -62,7 +62,6 @@ int main(int argc, char * argv[]) {
   // Load the ion mobilities.
   const std::string path = getenv("GARFIELD_HOME");
   gas->LoadIonMobility(path + "/Data/IonMobility_Ar+_Ar.txt");
-  
   // Associate the gas with the corresponding field map material. 
   const unsigned int nMaterials = fm->GetNumberOfMaterials();
   for (unsigned int i = 0; i < nMaterials; ++i) {
