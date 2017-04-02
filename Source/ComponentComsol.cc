@@ -1,7 +1,5 @@
 // Copied and modified ComponentAnsys123.cc
 
-#include <stdio.h>
-#include <string.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -16,7 +14,6 @@ namespace Garfield {
 ComponentComsol::ComponentComsol() : ComponentFieldMap() {
 
   m_className = "ComponentComsol";
-  m_ready = false;
 }
 
 ComponentComsol::ComponentComsol(std::string mesh, std::string mplist,
@@ -40,11 +37,17 @@ int readInt(std::string s) {
 
 bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
                                  std::string field) {
+
+  m_ready = false;
+  m_warning = false;
+  m_nWarnings = 0;
+
   double unit = 100.0;  // m
 
   std::string line;
 
   // Open the materials file.
+  materials.clear();
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
@@ -55,7 +58,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
   }
   fmplist >> m_nMaterials;
   for (unsigned int i = 0; i < m_nMaterials; ++i) {
-    material newMaterial;
+    Material newMaterial;
     newMaterial.driftmedium = true;
     newMaterial.medium = nullptr;
     newMaterial.ohm = -1;
@@ -64,7 +67,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
   }
   {
     // add default material
-    material newMaterial;
+    Material newMaterial;
     newMaterial.driftmedium = false;
     newMaterial.medium = nullptr;
     newMaterial.eps = newMaterial.ohm = -1;
@@ -81,6 +84,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
   }
   fmplist.close();
 
+  nodes.clear();
   std::ifstream fmesh;
   fmesh.open(mesh.c_str(), std::ios::in);
   if (fmesh.fail()) {
@@ -102,7 +106,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
   double minx = 1e100, miny = 1e100, minz = 1e100, maxx = -1e100, maxy = -1e100,
          maxz = -1e100;
   for (int i = 0; i < nNodes; ++i) {
-    node newNode;
+    Node newNode;
     fmesh >> newNode.x >> newNode.y >> newNode.z;
     newNode.x *= unit;
     newNode.y *= unit;
@@ -126,7 +130,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
     std::getline(fmesh, line);
   } while (!ends_with(line, "# number of elements"));
   nElements = readInt(line);
-
+  elements.clear();
   std::cout << m_className << "::Initialise:\n";
   std::cout << "    Read " << nElements << " elements from file " << mesh
             << ".\n";
@@ -135,7 +139,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
   // representation
   int perm[10] = {0, 1, 2, 3, 4, 5, 7, 6, 8, 9};
   for (int i = 0; i < nElements; ++i) {
-    element newElement;
+    Element newElement;
     newElement.degenerate = false;
     for (int j = 0; j < 10; ++j) {
       fmesh >> newElement.emap[perm[j]];
@@ -154,7 +158,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
   }
   fmesh.close();
 
-  std::map<node, std::vector<int>, nodeCmp> nodeIdx;
+  std::map<Node, std::vector<int>, nodeCmp> nodeIdx;
   for (int i = 0; i < nNodes; ++i) {
     nodeIdx[nodes[i]].push_back(i);
   }
@@ -192,7 +196,7 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
     }
   }
   for (int i = 0; i < nNodes; ++i) {
-    node tmp;
+    Node tmp;
     ffield >> tmp.x >> tmp.y >> tmp.z >> tmp.v;
     tmp.x *= unit;
     tmp.y *= unit;
@@ -282,7 +286,7 @@ bool ComponentComsol::SetWeightingField(std::string field, std::string label) {
   }
   wfields[iw] = label;
   wfieldsOk[iw] = false;
-  std::map<node, std::vector<int>, nodeCmp> nodeIdx;
+  std::map<Node, std::vector<int>, nodeCmp> nodeIdx;
   for (int i = 0; i < nNodes; ++i) {
     nodeIdx[nodes[i]].push_back(i);
   }
@@ -295,7 +299,7 @@ bool ComponentComsol::SetWeightingField(std::string field, std::string label) {
            "% x                       y                        z               "
            "         V (V)");
   for (int i = 0; i < nNodes; ++i) {
-    node tmp;
+    Node tmp;
     ffield >> tmp.x >> tmp.y >> tmp.z >> tmp.v;
     tmp.x *= unit;
     tmp.y *= unit;
@@ -340,35 +344,28 @@ void ComponentComsol::ElectricField(const double xin, const double yin,
   double x = xin, y = yin, z = zin;
 
   // Map the coordinates onto field map coordinates
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
   // Initial values
   ex = ey = ez = volt = 0.;
   status = 0;
-  m = 0;
+  m = NULL;
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
     status = -10;
-    std::cerr << m_className << "::ElectricField:\n";
-    std::cerr << "    Field map not available for interpolation.\n";
+    PrintNotReady("ElectricField");
     return;
   }
 
-  if (warning) {
-    std::cerr << m_className << "::ElectricField:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("ElectricField");
 
   // Find the element that contains this point
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
-    //    std::cout << "ef @(" << xin << ", " << yin << ", " << zin << ") = not
-    // in mesh" << "\n";
     if (m_debug) {
       std::cout << m_className << "::ElectricField:\n";
       std::cout << "    Point (" << x << ", " << y << ", " << z
@@ -379,100 +376,68 @@ void ComponentComsol::ElectricField(const double xin, const double yin,
   }
 
   if (m_debug) {
-    std::cout << m_className << "::ElectricField:\n";
-    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << " in element " << imap << "\n";
-    std::cout
-        << "      Node             x            y            z            V\n";
-    for (int i = 0; i < 10; i++) {
-      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].z, nodes[elements[imap].emap[i]].v);
-    }
+    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, imap, 10);
   }
 
+  const Element& element = elements[imap];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const Node& n4 = nodes[element.emap[4]];
+  const Node& n5 = nodes[element.emap[5]];
+  const Node& n6 = nodes[element.emap[6]];
+  const Node& n7 = nodes[element.emap[7]];
+  const Node& n8 = nodes[element.emap[8]];
+  const Node& n9 = nodes[element.emap[9]];
   // Tetrahedral field
-  volt = nodes[elements[imap].emap[0]].v * t1 * (2 * t1 - 1) +
-         nodes[elements[imap].emap[1]].v * t2 * (2 * t2 - 1) +
-         nodes[elements[imap].emap[2]].v * t3 * (2 * t3 - 1) +
-         nodes[elements[imap].emap[3]].v * t4 * (2 * t4 - 1) +
-         4 * nodes[elements[imap].emap[4]].v * t1 * t2 +
-         4 * nodes[elements[imap].emap[5]].v * t1 * t3 +
-         4 * nodes[elements[imap].emap[6]].v * t1 * t4 +
-         4 * nodes[elements[imap].emap[7]].v * t2 * t3 +
-         4 * nodes[elements[imap].emap[8]].v * t2 * t4 +
-         4 * nodes[elements[imap].emap[9]].v * t3 * t4;
-  ex = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][1] +
-         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][1] +
-         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][1] +
-         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][1] +
-         nodes[elements[imap].emap[4]].v *
-             (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-         nodes[elements[imap].emap[5]].v *
-             (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-         nodes[elements[imap].emap[6]].v *
-             (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
-         nodes[elements[imap].emap[7]].v *
-             (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
-         nodes[elements[imap].emap[8]].v *
-             (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
-         nodes[elements[imap].emap[9]].v *
-             (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) /
+  volt = n0.v * t1 * (2 * t1 - 1) + n1.v * t2 * (2 * t2 - 1) +
+         n2.v * t3 * (2 * t3 - 1) + n3.v * t4 * (2 * t4 - 1) +
+         4 * n4.v * t1 * t2 + 4 * n5.v * t1 * t3 + 4 * n6.v * t1 * t4 +
+         4 * n7.v * t2 * t3 + 4 * n8.v * t2 * t4 + 4 * n9.v * t3 * t4;
+  ex = -(n0.v * (4 * t1 - 1) * jac[0][1] + n1.v * (4 * t2 - 1) * jac[1][1] +
+         n2.v * (4 * t3 - 1) * jac[2][1] + n3.v * (4 * t4 - 1) * jac[3][1] +
+         n4.v * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+         n5.v * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+         n6.v * (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
+         n7.v * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
+         n8.v * (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
+         n9.v * (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) /
        det;
-  ey = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][2] +
-         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][2] +
-         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][2] +
-         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][2] +
-         nodes[elements[imap].emap[4]].v *
-             (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-         nodes[elements[imap].emap[5]].v *
-             (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-         nodes[elements[imap].emap[6]].v *
-             (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
-         nodes[elements[imap].emap[7]].v *
-             (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
-         nodes[elements[imap].emap[8]].v *
-             (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
-         nodes[elements[imap].emap[9]].v *
-             (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) /
+  ey = -(n0.v * (4 * t1 - 1) * jac[0][2] + n1.v * (4 * t2 - 1) * jac[1][2] +
+         n2.v * (4 * t3 - 1) * jac[2][2] + n3.v * (4 * t4 - 1) * jac[3][2] +
+         n4.v * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+         n5.v * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+         n6.v * (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
+         n7.v * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
+         n8.v * (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
+         n9.v * (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) /
        det;
-  ez = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][3] +
-         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][3] +
-         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][3] +
-         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][3] +
-         nodes[elements[imap].emap[4]].v *
-             (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
-         nodes[elements[imap].emap[5]].v *
-             (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
-         nodes[elements[imap].emap[6]].v *
-             (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
-         nodes[elements[imap].emap[7]].v *
-             (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
-         nodes[elements[imap].emap[8]].v *
-             (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
-         nodes[elements[imap].emap[9]].v *
-             (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) /
+  ez = -(n0.v * (4 * t1 - 1) * jac[0][3] + n1.v * (4 * t2 - 1) * jac[1][3] +
+         n2.v * (4 * t3 - 1) * jac[2][3] + n3.v * (4 * t4 - 1) * jac[3][3] +
+         n4.v * (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
+         n5.v * (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
+         n6.v * (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
+         n7.v * (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
+         n8.v * (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
+         n9.v * (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) /
        det;
 
   // Transform field to global coordinates
-  UnmapFields(ex, ey, ez, x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-              rotation);
+  UnmapFields(ex, ey, ez, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
   //  std::cout << "ef @(" << xin << ", " << yin << ", " << zin << ") = " <<
   // volt << "\n";
 
   // Drift medium?
   if (m_debug) {
     std::cout << m_className << "::ElectricField:\n";
-    std::cout << "    Material " << elements[imap].matmap << ", drift flag "
-              << materials[elements[imap].matmap].driftmedium << "\n";
+    std::cout << "    Material " << element.matmap << ", drift flag "
+              << materials[element.matmap].driftmedium << "\n";
   }
-  m = materials[elements[imap].matmap].medium;
+  m = materials[element.matmap].medium;
   status = -5;
-  if (materials[elements[imap].matmap].driftmedium) {
-    if (m != 0) {
-      if (m->IsDriftable()) status = 0;
-    }
+  if (materials[element.matmap].driftmedium) {
+    if (m && m->IsDriftable()) status = 0;
   }
 }
 
@@ -506,95 +471,72 @@ void ComponentComsol::WeightingField(const double xin, const double yin,
   double x = xin, y = yin, z = zin;
 
   // Map the coordinates onto field map coordinates
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
-  if (warning) {
-    std::cerr << m_className << "::WeightingField:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("WeightingField");
 
   // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
   if (m_debug) {
-    std::cout << m_className << "::WeightingField:\n";
-    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << " in element " << imap << "\n";
-    std::cout
-        << "      Node             x            y            z            V\n";
-    for (int i = 0; i < 10; i++) {
-      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].z,
-             nodes[elements[imap].emap[i]].w[iw]);
-    }
+    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, imap, 10, iw);
   }
 
+  const Element& element = elements[imap];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const Node& n4 = nodes[element.emap[4]];
+  const Node& n5 = nodes[element.emap[5]];
+  const Node& n6 = nodes[element.emap[6]];
+  const Node& n7 = nodes[element.emap[7]];
+  const Node& n8 = nodes[element.emap[8]];
+  const Node& n9 = nodes[element.emap[9]];
   // Tetrahedral field
-  wx = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][1] +
-         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][1] +
-         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][1] +
-         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][1] +
-         nodes[elements[imap].emap[4]].w[iw] *
-             (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-         nodes[elements[imap].emap[5]].w[iw] *
-             (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-         nodes[elements[imap].emap[6]].w[iw] *
-             (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
-         nodes[elements[imap].emap[7]].w[iw] *
-             (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
-         nodes[elements[imap].emap[8]].w[iw] *
-             (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
-         nodes[elements[imap].emap[9]].w[iw] *
-             (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) /
+  wx = -(n0.w[iw] * (4 * t1 - 1) * jac[0][1] +
+         n1.w[iw] * (4 * t2 - 1) * jac[1][1] +
+         n2.w[iw] * (4 * t3 - 1) * jac[2][1] +
+         n3.w[iw] * (4 * t4 - 1) * jac[3][1] +
+         n4.w[iw] * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+         n5.w[iw] * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+         n6.w[iw] * (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
+         n7.w[iw] * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
+         n8.w[iw] * (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
+         n9.w[iw] * (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) /
        det;
 
-  wy = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][2] +
-         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][2] +
-         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][2] +
-         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][2] +
-         nodes[elements[imap].emap[4]].w[iw] *
-             (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-         nodes[elements[imap].emap[5]].w[iw] *
-             (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-         nodes[elements[imap].emap[6]].w[iw] *
-             (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
-         nodes[elements[imap].emap[7]].w[iw] *
-             (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
-         nodes[elements[imap].emap[8]].w[iw] *
-             (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
-         nodes[elements[imap].emap[9]].w[iw] *
-             (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) /
+  wy = -(n0.w[iw] * (4 * t1 - 1) * jac[0][2] +
+         n1.w[iw] * (4 * t2 - 1) * jac[1][2] +
+         n2.w[iw] * (4 * t3 - 1) * jac[2][2] +
+         n3.w[iw] * (4 * t4 - 1) * jac[3][2] +
+         n4.w[iw] * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+         n5.w[iw] * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+         n6.w[iw] * (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
+         n7.w[iw] * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
+         n8.w[iw] * (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
+         n9.w[iw] * (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) /
        det;
 
-  wz = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][3] +
-         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][3] +
-         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][3] +
-         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][3] +
-         nodes[elements[imap].emap[4]].w[iw] *
-             (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
-         nodes[elements[imap].emap[5]].w[iw] *
-             (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
-         nodes[elements[imap].emap[6]].w[iw] *
-             (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
-         nodes[elements[imap].emap[7]].w[iw] *
-             (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
-         nodes[elements[imap].emap[8]].w[iw] *
-             (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
-         nodes[elements[imap].emap[9]].w[iw] *
-             (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) /
+  wz = -(n0.w[iw] * (4 * t1 - 1) * jac[0][3] +
+         n1.w[iw] * (4 * t2 - 1) * jac[1][3] +
+         n2.w[iw] * (4 * t3 - 1) * jac[2][3] +
+         n3.w[iw] * (4 * t4 - 1) * jac[3][3] +
+         n4.w[iw] * (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
+         n5.w[iw] * (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
+         n6.w[iw] * (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
+         n7.w[iw] * (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
+         n8.w[iw] * (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
+         n9.w[iw] * (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) /
        det;
 
   // Transform field to global coordinates
-  UnmapFields(wx, wy, wz, x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-              rotation);
+  UnmapFields(wx, wy, wz, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 }
 
 double ComponentComsol::WeightingPotential(const double xin, const double yin,
@@ -624,46 +566,38 @@ double ComponentComsol::WeightingPotential(const double xin, const double yin,
   double x = xin, y = yin, z = zin;
 
   // Map the coordinates onto field map coordinates.
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
-  if (warning) {
-    std::cerr << m_className << "::WeightingPotential:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("WeightingPotential");
 
   // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
 
   if (m_debug) {
-    std::cout << m_className << "::WeightingPotential:\n";
-    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << " in element " << imap << "\n";
-    std::cout
-        << "      Node             x            y            z            V\n";
-    for (int i = 0; i < 10; i++) {
-      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].z, nodes[elements[imap].emap[i]].v);
-    }
+    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, imap, 10, iw);
   }
 
+  const Element& element = elements[imap];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const Node& n4 = nodes[element.emap[4]];
+  const Node& n5 = nodes[element.emap[5]];
+  const Node& n6 = nodes[element.emap[6]];
+  const Node& n7 = nodes[element.emap[7]];
+  const Node& n8 = nodes[element.emap[8]];
+  const Node& n9 = nodes[element.emap[9]];
   // Tetrahedral field
-  return nodes[elements[imap].emap[0]].w[iw] * t1 * (2 * t1 - 1) +
-         nodes[elements[imap].emap[1]].w[iw] * t2 * (2 * t2 - 1) +
-         nodes[elements[imap].emap[2]].w[iw] * t3 * (2 * t3 - 1) +
-         nodes[elements[imap].emap[3]].w[iw] * t4 * (2 * t4 - 1) +
-         4 * nodes[elements[imap].emap[4]].w[iw] * t1 * t2 +
-         4 * nodes[elements[imap].emap[5]].w[iw] * t1 * t3 +
-         4 * nodes[elements[imap].emap[6]].w[iw] * t1 * t4 +
-         4 * nodes[elements[imap].emap[7]].w[iw] * t2 * t3 +
-         4 * nodes[elements[imap].emap[8]].w[iw] * t2 * t4 +
-         4 * nodes[elements[imap].emap[9]].w[iw] * t3 * t4;
+  return n0.w[iw] * t1 * (2 * t1 - 1) + n1.w[iw] * t2 * (2 * t2 - 1) +
+         n2.w[iw] * t3 * (2 * t3 - 1) + n3.w[iw] * t4 * (2 * t4 - 1) +
+         4 * n4.w[iw] * t1 * t2 + 4 * n5.w[iw] * t1 * t3 +
+         4 * n6.w[iw] * t1 * t4 + 4 * n7.w[iw] * t2 * t3 +
+         4 * n8.w[iw] * t2 * t4 + 4 * n9.w[iw] * t3 * t4;
 }
 
 Medium* ComponentComsol::GetMedium(const double xin, const double yin,
@@ -673,25 +607,20 @@ Medium* ComponentComsol::GetMedium(const double xin, const double yin,
   double x = xin, y = yin, z = zin;
 
   // Map the coordinates onto field map coordinates
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
-    std::cerr << m_className << "::GetMedium:\n";
-    std::cerr << "    Field map not available for interpolation.\n";
+    PrintNotReady("GetMedium");
     return nullptr;
   }
-  if (warning) {
-    std::cerr << m_className << "::GetMedium:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("GetMedium");
 
   // Find the element that contains this point
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (m_debug) {
       std::cout << m_className << "::GetMedium:\n";
@@ -700,7 +629,8 @@ Medium* ComponentComsol::GetMedium(const double xin, const double yin,
     }
     return nullptr;
   }
-  if (elements[imap].matmap >= m_nMaterials) {
+  const Element& element = elements[imap];
+  if (element.matmap >= m_nMaterials) {
     if (m_debug) {
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y
@@ -710,74 +640,56 @@ Medium* ComponentComsol::GetMedium(const double xin, const double yin,
   }
 
   if (m_debug) {
-    std::cout << m_className << "::GetMedium:\n";
-    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << " in element " << imap << "\n";
-    std::cout
-        << "      Node             x            y            z            V\n";
-    for (int ii = 0; ii < 10; ++ii) {
-      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[ii],
-             nodes[elements[imap].emap[ii]].x, nodes[elements[imap].emap[ii]].y,
-             nodes[elements[imap].emap[ii]].z,
-             nodes[elements[imap].emap[ii]].v);
-    }
+    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, imap, 10);
   }
 
-  return materials[elements[imap].matmap].medium;
+  return materials[element.matmap].medium;
 }
 
-double ComponentComsol::GetElementVolume(const int i) {
+double ComponentComsol::GetElementVolume(const unsigned int i) {
 
-  if (i < 0 || i >= nElements) return 0.;
+  if (i >= elements.size()) return 0.;
+  const Element& element = elements[i];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
 
   // Uses formula V = |a (dot) b x c|/6
   // with a => "3", b => "1", c => "2" and origin "0"
   const double vol =
-      fabs((nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) *
-               ((nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y) *
-                    (nodes[elements[i].emap[2]].z -
-                     nodes[elements[i].emap[0]].z) -
-                (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) *
-                    (nodes[elements[i].emap[1]].z -
-                     nodes[elements[i].emap[0]].z)) +
-           (nodes[elements[i].emap[3]].y - nodes[elements[i].emap[0]].y) *
-               ((nodes[elements[i].emap[1]].z - nodes[elements[i].emap[0]].z) *
-                    (nodes[elements[i].emap[2]].x -
-                     nodes[elements[i].emap[0]].x) -
-                (nodes[elements[i].emap[2]].z - nodes[elements[i].emap[0]].z) *
-                    (nodes[elements[i].emap[1]].x -
-                     nodes[elements[i].emap[0]].x)) +
-           (nodes[elements[i].emap[3]].z - nodes[elements[i].emap[0]].z) *
-               ((nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x) *
-                    (nodes[elements[i].emap[2]].y -
-                     nodes[elements[i].emap[0]].y) -
-                (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) *
-                    (nodes[elements[i].emap[1]].y -
-                     nodes[elements[i].emap[0]].y))) /
+      fabs((n3.x - n0.x) *
+               ((n1.y - n0.y) * (n2.z - n0.z) - (n2.y - n0.y) * (n1.z - n0.z)) +
+           (n3.y - n0.y) *
+               ((n1.z - n0.z) * (n2.x - n0.x) - (n2.z - n0.z) * (n1.x - n0.x)) +
+           (n3.z - n0.z) * ((n1.x - n0.x) * (n2.y - n0.y) -
+                            (n3.x - n0.x) * (n1.y - n0.y))) /
       6.;
   return vol;
 }
 
-void ComponentComsol::GetAspectRatio(const int i, double& dmin, double& dmax) {
+void ComponentComsol::GetAspectRatio(const unsigned int i, double& dmin,
+                                     double& dmax) {
 
-  if (i < 0 || i >= nElements) {
+  if (i >= elements.size()) {
     dmin = dmax = 0.;
     return;
   }
 
+  const Element& element = elements[i];
   const int np = 4;
   // Loop over all pairs of vertices.
   for (int j = 0; j < np - 1; ++j) {
+    const Node& nj = nodes[element.emap[j]];
     for (int k = j + 1; k < np; ++k) {
+      const Node& nk = nodes[element.emap[k]];
       // Compute distance.
-      const double dist = sqrt(
-          pow(nodes[elements[i].emap[j]].x - nodes[elements[i].emap[k]].x, 2) +
-          pow(nodes[elements[i].emap[j]].y - nodes[elements[i].emap[k]].y, 2) +
-          pow(nodes[elements[i].emap[j]].z - nodes[elements[i].emap[k]].z, 2));
+      const double dx = nj.x - nk.x;
+      const double dy = nj.y - nk.y;
+      const double dz = nj.z - nk.z;
+      const double dist = sqrt(dx * dx + dy * dy + dz * dz);
       if (k == 1) {
-        dmin = dist;
-        dmax = dist;
+        dmin = dmax = dist;
       } else {
         if (dist < dmin) dmin = dist;
         if (dist > dmax) dmax = dist;

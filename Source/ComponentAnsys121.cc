@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <string.h>
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -12,9 +10,8 @@ namespace Garfield {
 ComponentAnsys121::ComponentAnsys121() : ComponentFieldMap() {
 
   m_className = "ComponentAnsys121";
-  m_ready = false;
   // Default bounding box
-  is3d = false;
+  m_is3d = false;
   zMinBoundingBox = -50;
   zMaxBoundingBox = 50;
 }
@@ -24,6 +21,8 @@ bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
                                    std::string unit) {
 
   m_ready = false;
+  m_warning = false;
+  m_nWarnings = 0;
   // Keep track of the success.
   bool ok = true;
 
@@ -264,7 +263,7 @@ bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
   // Read the element list
   elements.clear();
   nElements = 0;
-  element newElement;
+  Element newElement;
   int ndegenerate = 0;
   int nbackground = 0;
   il = 0;
@@ -361,7 +360,7 @@ bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
     if (in6 > highestnode) highestnode = in6;
     if (in7 > highestnode) highestnode = in7;
     // Skip quadrilaterals which are background.
-    if (deleteBackground && materials[imat - 1].ohm == 0) {
+    if (m_deleteBackground && materials[imat - 1].ohm == 0) {
       nbackground++;
       continue;
     }
@@ -443,7 +442,7 @@ bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
   // Read the node list
   nodes.clear();
   nNodes = 0;
-  node newNode;
+  Node newNode;
   newNode.w.clear();
   il = 0;
   while (fnlist.getline(line, size, '\n')) {
@@ -597,8 +596,7 @@ bool ComponentAnsys121::SetWeightingField(std::string prnsol,
                                           std::string label) {
 
   if (!m_ready) {
-    std::cerr << m_className << "::SetWeightingField:\n";
-    std::cerr << "    No valid field map is present.\n";
+    PrintNotReady("SetWeightingField");
     std::cerr << "    Weighting field cannot be added.\n";
     return false;
   }
@@ -725,28 +723,23 @@ void ComponentAnsys121::ElectricField(const double xin, const double yin,
   double x = xin, y = yin, z = 0.;
 
   // Map the coordinates onto field map coordinates
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
   // Initial values
   ex = ey = ez = volt = 0;
-  m = 0;
+  m = NULL;
   status = 0;
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
     status = -10;
-    std::cerr << m_className << "::ElectricField:\n";
-    std::cerr << "     Field map not available for interpolation.\n";
+    PrintNotReady("ElectricField");
     return;
   }
 
-  if (warning) {
-    std::cerr << m_className << "::ElectricField:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("ElectricField");
 
   if (zin < zMinBoundingBox || zin > zMaxBoundingBox) {
     status = -5;
@@ -755,7 +748,7 @@ void ComponentAnsys121::ElectricField(const double xin, const double yin,
 
   // Find the element that contains this point
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (m_debug) {
       std::cout << m_className << "::ElectricField:\n";
@@ -766,138 +759,92 @@ void ComponentAnsys121::ElectricField(const double xin, const double yin,
   }
 
   if (m_debug) {
-    std::cout << m_className << "::ElectricField:\n";
-    std::cout << "    Global: (" << x << ", " << y << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << ") in element " << imap
-              << " (degenerate: " << elements[imap].degenerate << ")\n";
-    std::cout
-        << "                  Node             x            y            V\n";
-    for (int i = 0; i < 8; i++) {
-      printf("                  %-5d %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].v);
-    }
+    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, imap, 8);
   }
 
+  const Element& element = elements[imap];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const Node& n4 = nodes[element.emap[4]];
+  const Node& n5 = nodes[element.emap[5]];
   // Calculate quadrilateral field, which can degenerate to a triangular field
-  if (elements[imap].degenerate) {
-    volt = nodes[elements[imap].emap[0]].v * t1 * (2 * t1 - 1) +
-           nodes[elements[imap].emap[1]].v * t2 * (2 * t2 - 1) +
-           nodes[elements[imap].emap[2]].v * t3 * (2 * t3 - 1) +
-           4 * nodes[elements[imap].emap[3]].v * t1 * t2 +
-           4 * nodes[elements[imap].emap[4]].v * t1 * t3 +
-           4 * nodes[elements[imap].emap[5]].v * t2 * t3;
-    ex = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][1] +
-           nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][1] +
-           nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][1] +
-           nodes[elements[imap].emap[3]].v *
-               (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-           nodes[elements[imap].emap[4]].v *
-               (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-           nodes[elements[imap].emap[5]].v *
-               (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1])) /
-         det;
-    ey = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][2] +
-           nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][2] +
-           nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][2] +
-           nodes[elements[imap].emap[3]].v *
-               (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-           nodes[elements[imap].emap[4]].v *
-               (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-           nodes[elements[imap].emap[5]].v *
-               (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2])) /
-         det;
+  const double invdet = 1. / det;
+  if (element.degenerate) {
+    volt = n0.v * t1 * (2 * t1 - 1) + n1.v * t2 * (2 * t2 - 1) +
+           n2.v * t3 * (2 * t3 - 1) + 4 * n3.v * t1 * t2 + 4 * n4.v * t1 * t3 +
+           4 * n5.v * t2 * t3;
+    ex = -(n0.v * (4 * t1 - 1) * jac[0][1] + 
+           n1.v * (4 * t2 - 1) * jac[1][1] +
+           n2.v * (4 * t3 - 1) * jac[2][1] +
+           n3.v * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+           n4.v * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+           n5.v * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1])) * invdet;
+    ey = -(n0.v * (4 * t1 - 1) * jac[0][2] + 
+           n1.v * (4 * t2 - 1) * jac[1][2] +
+           n2.v * (4 * t3 - 1) * jac[2][2] +
+           n3.v * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+           n4.v * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+           n5.v * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2])) * invdet;
   } else {
-    volt =
-        -nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * (1 + t1 + t2) /
-            4 -
-        nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * (1 - t1 + t2) /
-            4 -
-        nodes[elements[imap].emap[2]].v * (1 + t1) * (1 + t2) * (1 - t1 - t2) /
-            4 -
-        nodes[elements[imap].emap[3]].v * (1 - t1) * (1 + t2) * (1 + t1 - t2) /
-            4 +
-        nodes[elements[imap].emap[4]].v * (1 - t1) * (1 + t1) * (1 - t2) / 2 +
-        nodes[elements[imap].emap[5]].v * (1 + t1) * (1 + t2) * (1 - t2) / 2 +
-        nodes[elements[imap].emap[6]].v * (1 - t1) * (1 + t1) * (1 + t2) / 2 +
-        nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 - t2) / 2;
-    ex = -(nodes[elements[imap].emap[0]].v *
-               ((1 - t2) * (2 * t1 + t2) * jac[0][0] +
-                (1 - t1) * (t1 + 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[1]].v *
-               ((1 - t2) * (2 * t1 - t2) * jac[0][0] -
-                (1 + t1) * (t1 - 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[2]].v *
-               ((1 + t2) * (2 * t1 + t2) * jac[0][0] +
-                (1 + t1) * (t1 + 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[3]].v *
-               ((1 + t2) * (2 * t1 - t2) * jac[0][0] -
-                (1 - t1) * (t1 - 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[4]].v *
-               (t1 * (t2 - 1) * jac[0][0] +
-                (t1 - 1) * (t1 + 1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[5]].v *
-               ((1 - t2) * (1 + t2) * jac[0][0] / 2 -
-                (1 + t1) * t2 * jac[1][0]) +
-           nodes[elements[imap].emap[6]].v *
-               (-t1 * (1 + t2) * jac[0][0] +
-                (1 - t1) * (1 + t1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[7]].v *
-               ((t2 - 1) * (t2 + 1) * jac[0][0] / 2 +
-                (t1 - 1) * t2 * jac[1][0])) /
-         det;
-    ey = -(nodes[elements[imap].emap[0]].v *
-               ((1 - t2) * (2 * t1 + t2) * jac[0][1] +
-                (1 - t1) * (t1 + 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[1]].v *
-               ((1 - t2) * (2 * t1 - t2) * jac[0][1] -
-                (1 + t1) * (t1 - 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[2]].v *
-               ((1 + t2) * (2 * t1 + t2) * jac[0][1] +
-                (1 + t1) * (t1 + 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[3]].v *
-               ((1 + t2) * (2 * t1 - t2) * jac[0][1] -
-                (1 - t1) * (t1 - 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[4]].v *
-               (t1 * (t2 - 1) * jac[0][1] +
-                (t1 - 1) * (t1 + 1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[5]].v *
-               ((1 - t2) * (1 + t2) * jac[0][1] / 2 -
-                (1 + t1) * t2 * jac[1][1]) +
-           nodes[elements[imap].emap[6]].v *
-               (-t1 * (1 + t2) * jac[0][1] +
-                (1 - t1) * (1 + t1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[7]].v *
-               ((t2 - 1) * (t2 + 1) * jac[0][1] / 2 +
-                (t1 - 1) * t2 * jac[1][1])) /
-         det;
+    const Node& n6 = nodes[element.emap[6]];
+    const Node& n7 = nodes[element.emap[7]];
+    volt = -n0.v * (1 - t1) * (1 - t2) * (1 + t1 + t2) * 0.25 -
+            n1.v * (1 + t1) * (1 - t2) * (1 - t1 + t2) * 0.25 -
+            n2.v * (1 + t1) * (1 + t2) * (1 - t1 - t2) * 0.25 -
+            n3.v * (1 - t1) * (1 + t2) * (1 + t1 - t2) * 0.25 +
+            n4.v * (1 - t1) * (1 + t1) * (1 - t2) * 0.5 +
+            n5.v * (1 + t1) * (1 + t2) * (1 - t2) * 0.5 +
+            n6.v * (1 - t1) * (1 + t1) * (1 + t2) * 0.5 +
+            n7.v * (1 - t1) * (1 + t2) * (1 - t2) * 0.5;
+    ex = -(n0.v * ((1 - t2) * (2 * t1 + t2) * jac[0][0] +
+                   (1 - t1) * (t1 + 2 * t2) * jac[1][0]) * 0.25 +
+           n1.v * ((1 - t2) * (2 * t1 - t2) * jac[0][0] -
+                   (1 + t1) * (t1 - 2 * t2) * jac[1][0]) * 0.25 +
+           n2.v * ((1 + t2) * (2 * t1 + t2) * jac[0][0] +
+                   (1 + t1) * (t1 + 2 * t2) * jac[1][0]) * 0.25 +
+           n3.v * ((1 + t2) * (2 * t1 - t2) * jac[0][0] -
+                   (1 - t1) * (t1 - 2 * t2) * jac[1][0]) * 0.25 +
+           n4.v * (t1 * (t2 - 1) * jac[0][0] +
+                   (t1 - 1) * (t1 + 1) * jac[1][0] * 0.5) +
+           n5.v * ((1 - t2) * (1 + t2) * jac[0][0] * 0.5 -
+                   (1 + t1) * t2 * jac[1][0]) +
+           n6.v * (-t1 * (1 + t2) * jac[0][0] +
+                   (1 - t1) * (1 + t1) * jac[1][0] * 0.5) +
+           n7.v * ((t2 - 1) * (t2 + 1) * jac[0][0] * 0.5 +
+                   (t1 - 1) * t2 * jac[1][0])) * invdet; 
+    ey = -(n0.v * ((1 - t2) * (2 * t1 + t2) * jac[0][1] +
+                   (1 - t1) * (t1 + 2 * t2) * jac[1][1]) * 0.25 +
+           n1.v * ((1 - t2) * (2 * t1 - t2) * jac[0][1] -
+                   (1 + t1) * (t1 - 2 * t2) * jac[1][1]) * 0.25 +
+           n2.v * ((1 + t2) * (2 * t1 + t2) * jac[0][1] +
+                   (1 + t1) * (t1 + 2 * t2) * jac[1][1]) * 0.25 +
+           n3.v * ((1 + t2) * (2 * t1 - t2) * jac[0][1] -
+                   (1 - t1) * (t1 - 2 * t2) * jac[1][1]) * 0.25 +
+           n4.v * (t1 * (t2 - 1) * jac[0][1] +
+                   (t1 - 1) * (t1 + 1) * jac[1][1] * 0.5) +
+           n5.v * ((1 - t2) * (1 + t2) * jac[0][1] * 0.5 -
+                   (1 + t1) * t2 * jac[1][1]) +
+           n6.v * (-t1 * (1 + t2) * jac[0][1] +
+                   (1 - t1) * (1 + t1) * jac[1][1] * 0.5) +
+           n7.v * ((t2 - 1) * (t2 + 1) * jac[0][1] * 0.5 +
+                   (t1 - 1) * t2 * jac[1][1])) * invdet;
   }
 
   // Transform field to global coordinates
-  UnmapFields(ex, ey, ez, x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-              rotation);
+  UnmapFields(ex, ey, ez, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
   // Drift medium?
   if (m_debug) {
     std::cout << m_className << "::ElectricField:\n";
-    std::cout << "    Material " << elements[imap].matmap << ", drift flag "
-              << materials[elements[imap].matmap].driftmedium << ".\n";
+    std::cout << "    Material " << element.matmap << ", drift flag "
+              << materials[element.matmap].driftmedium << ".\n";
   }
-  m = materials[elements[imap].matmap].medium;
+  m = materials[element.matmap].medium;
   status = -5;
-  if (materials[elements[imap].matmap].driftmedium) {
-    if (m != 0) {
-      if (m->IsDriftable()) status = 0;
-    }
+  if (materials[element.matmap].driftmedium) {
+    if (m && m->IsDriftable()) status = 0;
   }
 }
 
@@ -931,123 +878,83 @@ void ComponentAnsys121::WeightingField(const double xin, const double yin,
   double x = xin, y = yin, z = zin;
 
   // Map the coordinates onto field map coordinates
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
-  if (warning) {
-    std::cerr << m_className << "::WeightingField:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("WeightingField");
 
   // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
   if (m_debug) {
-    std::cout << m_className << "::WeightingField:\n";
-    std::cout << "    Global: (" << x << ", " << y << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << ") in element " << imap
-              << " (degenerate: " << elements[imap].degenerate << ")\n";
-    std::cout
-        << "                  Node             x            y            V\n";
-    for (int i = 0; i < 8; i++) {
-      printf("                  %-5d %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].w[iw]);
-    }
+    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, imap, 8, iw);
   }
 
+  const Element& element = elements[imap];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const Node& n4 = nodes[element.emap[4]];
+  const Node& n5 = nodes[element.emap[5]];
   // Calculate quadrilateral field, which can degenerate to a triangular field
+  const double invdet = 1. / det;
   if (elements[imap].degenerate) {
-    wx = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][1] +
-           nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][1] +
-           nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][1] +
-           nodes[elements[imap].emap[3]].w[iw] *
-               (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-           nodes[elements[imap].emap[4]].w[iw] *
-               (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-           nodes[elements[imap].emap[5]].w[iw] *
-               (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1])) /
-         det;
-    wy = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][2] +
-           nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][2] +
-           nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][2] +
-           nodes[elements[imap].emap[3]].w[iw] *
-               (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-           nodes[elements[imap].emap[4]].w[iw] *
-               (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-           nodes[elements[imap].emap[5]].w[iw] *
-               (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2])) /
-         det;
+    wx = -(n0.w[iw] * (4 * t1 - 1) * jac[0][1] +
+           n1.w[iw] * (4 * t2 - 1) * jac[1][1] +
+           n2.w[iw] * (4 * t3 - 1) * jac[2][1] +
+           n3.w[iw] * (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+           n4.w[iw] * (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+           n5.w[iw] * (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1])) * invdet;
+    wy = -(n0.w[iw] * (4 * t1 - 1) * jac[0][2] +
+           n1.w[iw] * (4 * t2 - 1) * jac[1][2] +
+           n2.w[iw] * (4 * t3 - 1) * jac[2][2] +
+           n3.w[iw] * (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+           n4.w[iw] * (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+           n5.w[iw] * (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2])) * invdet;
   } else {
-    wx = -(nodes[elements[imap].emap[0]].w[iw] *
-               ((1 - t2) * (2 * t1 + t2) * jac[0][0] +
-                (1 - t1) * (t1 + 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[1]].w[iw] *
-               ((1 - t2) * (2 * t1 - t2) * jac[0][0] -
-                (1 + t1) * (t1 - 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[2]].w[iw] *
-               ((1 + t2) * (2 * t1 + t2) * jac[0][0] +
-                (1 + t1) * (t1 + 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[3]].w[iw] *
-               ((1 + t2) * (2 * t1 - t2) * jac[0][0] -
-                (1 - t1) * (t1 - 2 * t2) * jac[1][0]) /
-               4 +
-           nodes[elements[imap].emap[4]].w[iw] *
-               (t1 * (t2 - 1) * jac[0][0] +
-                (t1 - 1) * (t1 + 1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[5]].w[iw] *
-               ((1 - t2) * (1 + t2) * jac[0][0] / 2 -
-                (1 + t1) * t2 * jac[1][0]) +
-           nodes[elements[imap].emap[6]].w[iw] *
-               (-t1 * (1 + t2) * jac[0][0] +
-                (1 - t1) * (1 + t1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[7]].w[iw] *
-               ((t2 - 1) * (1 + t2) * jac[0][0] / 2 +
-                (t1 - 1) * t2 * jac[1][0])) /
-         det;
-    wy = -(nodes[elements[imap].emap[0]].w[iw] *
-               ((1 - t2) * (2 * t1 + t2) * jac[0][1] +
-                (1 - t1) * (t1 + 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[1]].w[iw] *
-               ((1 - t2) * (2 * t1 - t2) * jac[0][1] -
-                (1 + t1) * (t1 - 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[2]].w[iw] *
-               ((1 + t2) * (2 * t1 + t2) * jac[0][1] +
-                (1 + t1) * (t1 + 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[3]].w[iw] *
-               ((1 + t2) * (2 * t1 - t2) * jac[0][1] -
-                (1 - t1) * (t1 - 2 * t2) * jac[1][1]) /
-               4 +
-           nodes[elements[imap].emap[4]].w[iw] *
-               (t1 * (t2 - 1) * jac[0][1] +
-                (t1 - 1) * (t1 + 1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[5]].w[iw] *
-               ((1 - t2) * (1 + t2) * jac[0][1] / 2 -
-                (1 + t1) * t2 * jac[1][1]) +
-           nodes[elements[imap].emap[6]].w[iw] *
-               (-t1 * (1 + t2) * jac[0][1] +
-                (1 - t1) * (1 + t1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[7]].w[iw] *
-               ((t2 - 1) * (t2 + 1) * jac[0][1] / 2 +
-                (t1 - 1) * t2 * jac[1][1])) /
-         det;
+    const Node& n6 = nodes[element.emap[6]];
+    const Node& n7 = nodes[element.emap[7]];
+    wx = -(n0.w[iw] * ((1 - t2) * (2 * t1 + t2) * jac[0][0] +
+                       (1 - t1) * (t1 + 2 * t2) * jac[1][0]) * 0.25 +
+           n1.w[iw] * ((1 - t2) * (2 * t1 - t2) * jac[0][0] -
+                       (1 + t1) * (t1 - 2 * t2) * jac[1][0]) * 0.25 +
+           n2.w[iw] * ((1 + t2) * (2 * t1 + t2) * jac[0][0] +
+                       (1 + t1) * (t1 + 2 * t2) * jac[1][0]) * 0.25 +
+           n3.w[iw] * ((1 + t2) * (2 * t1 - t2) * jac[0][0] -
+                       (1 - t1) * (t1 - 2 * t2) * jac[1][0]) * 0.25 +
+           n4.w[iw] * (t1 * (t2 - 1) * jac[0][0] +
+                       (t1 - 1) * (t1 + 1) * jac[1][0] * 0.5) +
+           n5.w[iw] * ((1 - t2) * (1 + t2) * jac[0][0] * 0.5 -
+                       (1 + t1) * t2 * jac[1][0]) +
+           n6.w[iw] * (-t1 * (1 + t2) * jac[0][0] +
+                       (1 - t1) * (1 + t1) * jac[1][0] * 0.5) +
+           n7.w[iw] * ((t2 - 1) * (1 + t2) * jac[0][0] * 0.5 +
+                       (t1 - 1) * t2 * jac[1][0])) * invdet;
+    wy = -(n0.w[iw] * ((1 - t2) * (2 * t1 + t2) * jac[0][1] +
+                       (1 - t1) * (t1 + 2 * t2) * jac[1][1]) * 0.25 +
+           n1.w[iw] * ((1 - t2) * (2 * t1 - t2) * jac[0][1] -
+                       (1 + t1) * (t1 - 2 * t2) * jac[1][1]) * 0.25 +
+           n2.w[iw] * ((1 + t2) * (2 * t1 + t2) * jac[0][1] +
+                       (1 + t1) * (t1 + 2 * t2) * jac[1][1]) * 0.25 +
+           n3.w[iw] * ((1 + t2) * (2 * t1 - t2) * jac[0][1] -
+                       (1 - t1) * (t1 - 2 * t2) * jac[1][1]) * 0.25 +
+           n4.w[iw] * (t1 * (t2 - 1) * jac[0][1] +
+                       (t1 - 1) * (t1 + 1) * jac[1][1] * 0.5) +
+           n5.w[iw] * ((1 - t2) * (1 + t2) * jac[0][1] * 0.5 -
+                       (1 + t1) * t2 * jac[1][1]) +
+           n6.w[iw] * (-t1 * (1 + t2) * jac[0][1] +
+                       (1 - t1) * (1 + t1) * jac[1][1] * 0.5) +
+           n7.w[iw] * ((t2 - 1) * (t2 + 1) * jac[0][1] * 0.5 +
+                       (t1 - 1) * t2 * jac[1][1])) * invdet;
   }
 
   // Transform field to global coordinates
-  UnmapFields(wx, wy, wz, x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-              rotation);
+  UnmapFields(wx, wy, wz, x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 }
 
 double ComponentAnsys121::WeightingPotential(const double xin, const double yin,
@@ -1077,63 +984,46 @@ double ComponentAnsys121::WeightingPotential(const double xin, const double yin,
   double x = xin, y = yin, z = zin;
 
   // Map the coordinates onto field map coordinates.
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
-  if (warning) {
-    std::cerr << m_className << "::WeightingPotential:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("WeightingPotential");
 
   // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   // Check if the point is in the mesh
   if (imap < 0) return 0.;
 
   if (m_debug) {
-    std::cerr << m_className << "::WeightingPotential:\n";
-    std::cout << "    Global: (" << x << ", " << y << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << ") in element " << imap
-              << " (degenerate: " << elements[imap].degenerate << ")\n";
-    std::cout
-        << "                  Node             x            y            V\n";
-    for (int i = 0; i < 8; ++i) {
-      printf("                  %-5d %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].w[iw]);
-    }
+    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, imap, 8, iw);
   }
 
   // Calculate quadrilateral field, which can degenerate to a triangular field
-  if (elements[imap].degenerate) {
-    return nodes[elements[imap].emap[0]].w[iw] * t1 * (2 * t1 - 1) +
-           nodes[elements[imap].emap[1]].w[iw] * t2 * (2 * t2 - 1) +
-           nodes[elements[imap].emap[2]].w[iw] * t3 * (2 * t3 - 1) +
-           4 * nodes[elements[imap].emap[3]].w[iw] * t1 * t2 +
-           4 * nodes[elements[imap].emap[4]].w[iw] * t1 * t3 +
-           4 * nodes[elements[imap].emap[5]].w[iw] * t2 * t3;
+  const Element& element = elements[imap];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const Node& n4 = nodes[element.emap[4]];
+  const Node& n5 = nodes[element.emap[5]];
+  if (element.degenerate) {
+    return n0.w[iw] * t1 * (2 * t1 - 1) + n1.w[iw] * t2 * (2 * t2 - 1) +
+           n2.w[iw] * t3 * (2 * t3 - 1) + 4 * n3.w[iw] * t1 * t2 +
+           4 * n4.w[iw] * t1 * t3 + 4 * n5.w[iw] * t2 * t3;
   }
 
-  return -nodes[elements[imap].emap[0]].w[iw] * (1 - t1) * (1 - t2) *
-             (1 + t1 + t2) / 4 -
-         nodes[elements[imap].emap[1]].w[iw] * (1 + t1) * (1 - t2) *
-             (1 - t1 + t2) / 4 -
-         nodes[elements[imap].emap[2]].w[iw] * (1 + t1) * (1 + t2) *
-             (1 - t1 - t2) / 4 -
-         nodes[elements[imap].emap[3]].w[iw] * (1 - t1) * (1 + t2) *
-             (1 + t1 - t2) / 4 +
-         nodes[elements[imap].emap[4]].w[iw] * (1 - t1) * (1 + t1) * (1 - t2) /
-             2 +
-         nodes[elements[imap].emap[5]].w[iw] * (1 + t1) * (1 + t2) * (1 - t2) /
-             2 +
-         nodes[elements[imap].emap[6]].w[iw] * (1 - t1) * (1 + t1) * (1 + t2) /
-             2 +
-         nodes[elements[imap].emap[7]].w[iw] * (1 - t1) * (1 + t2) * (1 - t2) /
-             2;
+  const Node& n6 = nodes[element.emap[6]];
+  const Node& n7 = nodes[element.emap[7]];
+  return -n0.w[iw] * (1 - t1) * (1 - t2) * (1 + t1 + t2) * 0.25 -
+          n1.w[iw] * (1 + t1) * (1 - t2) * (1 - t1 + t2) * 0.25 -
+          n2.w[iw] * (1 + t1) * (1 + t2) * (1 - t1 - t2) * 0.25 -
+          n3.w[iw] * (1 - t1) * (1 + t2) * (1 + t1 - t2) * 0.25 +
+          n4.w[iw] * (1 - t1) * (1 + t1) * (1 - t2) * 0.5 +
+          n5.w[iw] * (1 + t1) * (1 + t2) * (1 - t2) * 0.5 +
+          n6.w[iw] * (1 - t1) * (1 + t1) * (1 + t2) * 0.5 +
+          n7.w[iw] * (1 - t1) * (1 + t2) * (1 - t2) * 0.5;
 }
 
 Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
@@ -1143,10 +1033,9 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
   double x = xin, y = yin, z = 0.;
 
   // Map the coordinates onto field map coordinates.
-  bool xmirrored, ymirrored, zmirrored;
+  bool xmirr, ymirr, zmirr;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
-                 rotation);
+  MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
   if (zin < zMinBoundingBox || z > zMaxBoundingBox) {
     return NULL;
@@ -1154,18 +1043,14 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
-    std::cerr << m_className << "::GetMedium:\n";
-    std::cerr << "    Field map not available for interpolation.\n";
+    PrintNotReady("GetMedium");
     return NULL;
   }
-  if (warning) {
-    std::cerr << m_className << "::GetMedium:\n";
-    std::cerr << "    Warnings have been issued for this field map.\n";
-  }
+  if (m_warning) PrintWarning("GetMedium");
 
   // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
-  int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
+  const int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (m_debug) {
       std::cerr << m_className << "::GetMedium:\n";
@@ -1173,7 +1058,8 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
     }
     return NULL;
   }
-  if (elements[imap].matmap >= m_nMaterials) {
+  const Element& element = elements[imap];
+  if (element.matmap >= m_nMaterials) {
     if (m_debug) {
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y << ")"
@@ -1183,22 +1069,11 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
   }
 
   if (m_debug) {
-    std::cout << m_className << "::GetMedium:\n";
-    std::cout << "    Global: (" << x << ", " << y << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
-              << ") in element " << imap
-              << " (degenerate: " << elements[imap].degenerate << ")\n";
-    std::cout
-        << "                  Node             x            y            V\n";
-    for (int i = 0; i < 8; i++) {
-      printf("                 %-5d %12g %12g %12g\n", elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].v);
-    }
+    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, imap, 8);
   }
 
   // Assign a medium.
-  return materials[elements[imap].matmap].medium;
+  return materials[element.matmap].medium;
 }
 
 void ComponentAnsys121::SetRangeZ(const double zmin, const double zmax) {
@@ -1218,42 +1093,41 @@ void ComponentAnsys121::UpdatePeriodicity() {
   UpdatePeriodicityCommon();
 }
 
-double ComponentAnsys121::GetElementVolume(const int i) {
+double ComponentAnsys121::GetElementVolume(const unsigned int i) {
 
-  if (i < 0 || i >= nElements) return 0.;
-  const double surf =
-      (fabs((nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x) *
-                (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) -
-            (nodes[elements[i].emap[2]].x - nodes[elements[i].emap[0]].x) *
-                (nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y)) +
-       fabs(
-           (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) *
-               (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) -
-           (nodes[elements[i].emap[2]].x - nodes[elements[i].emap[0]].x) *
-               (nodes[elements[i].emap[3]].y - nodes[elements[i].emap[0]].y))) /
-      2.;
+  if (i >= elements.size()) return 0.;
+  const Element& element = elements[i];
+  const Node& n0 = nodes[element.emap[0]];
+  const Node& n1 = nodes[element.emap[1]];
+  const Node& n2 = nodes[element.emap[2]];
+  const Node& n3 = nodes[element.emap[3]];
+  const double surf = 0.5 *
+      (fabs((n1.x - n0.x) * (n2.y - n0.y) - (n2.x - n0.x) * (n1.y - n0.y)) +
+       fabs((n3.x - n0.x) * (n2.y - n0.y) - (n2.x - n0.x) * (n3.y - n0.y)));
   return surf;
 }
 
-void ComponentAnsys121::GetAspectRatio(const int i, double& dmin,
+void ComponentAnsys121::GetAspectRatio(const unsigned int i, double& dmin,
                                        double& dmax) {
 
-  if (i < 0 || i >= nElements) {
+  if (i >= elements.size()) {
     dmin = dmax = 0.;
     return;
   }
 
+  const Element& element = elements[i];
   const int np = 8;
   // Loop over all pairs of vertices.
   for (int j = 0; j < np - 1; ++j) {
+    const Node& nj = nodes[element.emap[j]];
     for (int k = j + 1; k < np; ++k) {
+      const Node& nk = nodes[element.emap[k]];
       // Compute distance.
-      const double dist = sqrt(
-          pow(nodes[elements[i].emap[j]].x - nodes[elements[i].emap[k]].x, 2) +
-          pow(nodes[elements[i].emap[j]].y - nodes[elements[i].emap[k]].y, 2));
+      const double dx = nj.x - nk.x;
+      const double dy = nj.y - nk.y;
+      const double dist = sqrt(dx * dx + dy * dy);
       if (k == 1) {
-        dmin = dist;
-        dmax = dist;
+        dmin = dmax = dist;
       } else {
         if (dist < dmin) dmin = dist;
         if (dist > dmax) dmax = dist;

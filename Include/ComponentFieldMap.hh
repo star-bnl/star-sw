@@ -52,7 +52,8 @@ class ComponentFieldMap : public ComponentBase {
   unsigned int GetNumberOfMedia() { return m_nMaterials; }
 
   int GetNumberOfElements() const { return nElements; }
-  bool GetElement(const int i, double& vol, double& dmin, double& dmax);
+  bool GetElement(const unsigned int i, double& vol, double& dmin,
+                  double& dmax);
 
   virtual void ElectricField(const double x, const double y, const double z,
                              double& ex, double& ey, double& ez, Medium*& m,
@@ -71,25 +72,30 @@ class ComponentFieldMap : public ComponentBase {
 
   // Options
   void EnableCheckMapIndices() {
-    checkMultipleElement = true;
-    lastElement = -1;
+    m_checkMultipleElement = true;
+    m_lastElement = -1;
   }
-  void DisableCheckMapIndices() { checkMultipleElement = false; }
-  void EnableDeleteBackgroundElements() { deleteBackground = true; }
-  void DisableDeleteBackgroundElements() { deleteBackground = false; }
+  void DisableCheckMapIndices() { m_checkMultipleElement = false; }
+  void EnableDeleteBackgroundElements() { m_deleteBackground = true; }
+  void DisableDeleteBackgroundElements() { m_deleteBackground = false; }
 
-  // Enable/disable the usage of tetrahedral tree for searching the element in mesh
-  void EnableTetrahedralTreeForElementSearch() { useTetrahedralTreeForSearch = true; }
-  void DisableTetrahedralTreeForElementSearch() { useTetrahedralTreeForSearch = false; }
+  // Enable/disable the usage of tetrahedral tree for searching the element in
+  // mesh
+  void EnableTetrahedralTreeForElementSearch() {
+    m_useTetrahedralTree = true;
+  }
+  void DisableTetrahedralTreeForElementSearch() {
+    m_useTetrahedralTree = false;
+  }
 
   friend class ViewFEMesh;
 
  protected:
-  bool is3d;
+  bool m_is3d;
 
   // Elements
   int nElements;
-  struct element {
+  struct Element {
     // Nodes
     int emap[10];
     // Material
@@ -98,14 +104,11 @@ class ComponentFieldMap : public ComponentBase {
     // Bounding box of the element
     double xmin, ymin, zmin, xmax, ymax, zmax;
   };
-  std::vector<element> elements;
-  int lastElement;
-  // Flag to check if bounding boxes of elements are cached 
-  bool cacheElemBoundingBoxes;
+  std::vector<Element> elements;
 
   // Nodes
   int nNodes;
-  struct node {
+  struct Node {
     // Coordinates
     double x, y, z;
     // Potential
@@ -113,11 +116,11 @@ class ComponentFieldMap : public ComponentBase {
     // Weighting potentials
     std::vector<double> w;
   };
-  std::vector<node> nodes;
+  std::vector<Node> nodes;
 
   // Materials
   unsigned int m_nMaterials;
-  struct material {
+  struct Material {
     // Permittivity
     double eps;
     // Resistivity
@@ -126,7 +129,7 @@ class ComponentFieldMap : public ComponentBase {
     // Associated medium
     Medium* medium;
   };
-  std::vector<material> materials;
+  std::vector<Material> materials;
 
   int nWeightingFields;
   std::vector<std::string> wfields;
@@ -150,19 +153,12 @@ class ComponentFieldMap : public ComponentBase {
   double cellsx, cellsy, cellsz;
   double mapnxa, mapnya, mapnza;
 
-  // Options
-  // Delete meshing in conductors
-  bool deleteBackground;
-  // Scan for multiple elements that contain a point
-  bool checkMultipleElement;
+  // Option to delete meshing in conductors
+  bool m_deleteBackground;
 
   // Warnings flag
-  bool warning;
-
-  // Tetrahedral tree
-  TetrahedralTree* tetTree;
-  bool useTetrahedralTreeForSearch;
-  bool isTreeInitialized;
+  bool m_warning;
+  unsigned int m_nWarnings;
 
   // Reset the component
   void Reset() {};
@@ -171,43 +167,6 @@ class ComponentFieldMap : public ComponentBase {
   virtual void UpdatePeriodicity() = 0;
   void UpdatePeriodicity2d();
   void UpdatePeriodicityCommon();
-
-  // Local coordinates
-  // Calculate coordinates for curved quadratic triangles
-  int Coordinates3(double x, double y, double z, double& t1, double& t2,
-                   double& t3, double& t4, double jac[4][4], double& det,
-                   int imap);
-  // Calculate coordinates for linear quadrilaterals
-  int Coordinates4(double x, double y, double z, double& t1, double& t2,
-                   double& t3, double& t4, double jac[4][4], double& det,
-                   int imap);
-  // Calculate coordinates for curved quadratic quadrilaterals
-  int Coordinates5(double x, double y, double z, double& t1, double& t2,
-                   double& t3, double& t4, double jac[4][4], double& det,
-                   int imap);
-  // Calculate coordinates in linear tetrahedra
-  int Coordinates12(double x, double y, double z, double& t1, double& t2,
-                    double& t3, double& t4, int imap);
-  // Calculate coordinates for curved quadratic tetrahedra
-  int Coordinates13(double x, double y, double z, double& t1, double& t2,
-                    double& t3, double& t4, double jac[4][4], double& det,
-                    int imap);
-  // Calculate coordinates for a cube
-  int CoordinatesCube(double x, double y, double z, double& t1, double& t2,
-                      double& t3, TMatrixD*& jac, std::vector<TMatrixD*>& dN,
-                      int imap);
-
-  // Calculate Jacobian for curved quadratic triangles
-  void Jacobian3(int i, double u, double v, double w, double& det,
-                 double jac[4][4]);
-  // Calculate Jacobian for curved quadratic quadrilaterals
-  void Jacobian5(int i, double u, double v, double& det, double jac[4][4]);
-  // Calculate Jacobian for curved quadratic tetrahedra
-  void Jacobian13(int i, double t, double u, double v, double w, double& det,
-                  double jac[4][4]);
-  // Calculate Jacobian for a cube
-  void JacobianCube(int i, double t1, double t2, double t3, TMatrixD*& jac,
-                    std::vector<TMatrixD*>& dN);
 
   // Find the element for a point in curved quadratic quadrilaterals
   int FindElement5(const double x, const double y, const double z, double& t1,
@@ -229,19 +188,92 @@ class ComponentFieldMap : public ComponentBase {
   // Move (ex, ey, ez) to global coordinates
   void UnmapFields(double& ex, double& ey, double& ez, double& xpos,
                    double& ypos, double& zpos, bool& xmirrored, bool& ymirrored,
-                   bool& zmirrored, double& rcoordinate, double& rotation);
+                   bool& zmirrored, double& rcoordinate, double& rotation) const;
 
   int ReadInteger(char* token, int def, bool& error);
   double ReadDouble(char* token, double def, bool& error);
 
-  virtual double GetElementVolume(const int i) = 0;
-  virtual void GetAspectRatio(const int i, double& dmin, double& dmax) = 0;
+  virtual double GetElementVolume(const unsigned int i) = 0;
+  virtual void GetAspectRatio(const unsigned int i, double& dmin,
+                              double& dmax) = 0;
+
+  void PrintWarning(const std::string& header) {
+    if (!m_warning || m_nWarnings > 10) return;
+    std::cerr << m_className << "::" << header << ":\n"
+              << "    Warnings have been issued for this field map.\n";
+    ++m_nWarnings;
+  }
+ void PrintNotReady(const std::string& header) const {
+   std::cerr << m_className << "::" << header << ":\n"
+             << "    Field map not yet initialised.\n";
+  }
+  void PrintElement(const std::string& header, const double x, const double y,
+                    const double z, const double t1, const double t2,
+                    const double t3, const double t4, const unsigned int i,
+                    const unsigned int n, const int iw = -1) const;
+
+ private:
+  // Scan for multiple elements that contain a point
+  bool m_checkMultipleElement;
+
+  // Tetrahedral tree
+  bool m_useTetrahedralTree;
+  bool m_isTreeInitialized;
+  TetrahedralTree* m_tetTree;
+
+  // Flag to check if bounding boxes of elements are cached
+  bool m_cacheElemBoundingBoxes;
+
+  // Keep track of the last element found.
+  int m_lastElement;
+
+  // Calculate local coordinates for curved quadratic triangles
+  int Coordinates3(double x, double y, double z, double& t1, double& t2,
+                   double& t3, double& t4, double jac[4][4], double& det,
+                   const unsigned int imap) const;
+  // Calculate local coordinates for linear quadrilaterals
+  int Coordinates4(const double x, const double y, const double z, double& t1,
+                   double& t2, double& t3, double& t4, double jac[4][4],
+                   double& det, const unsigned int imap) const;
+  // Calculate local coordinates for curved quadratic quadrilaterals
+  int Coordinates5(const double x, const double y, const double z, double& t1,
+                   double& t2, double& t3, double& t4, double jac[4][4],
+                   double& det, const unsigned int imap) const;
+  // Calculate local coordinates in linear tetrahedra
+  int Coordinates12(const double x, const double y, const double z, double& t1,
+                    double& t2, double& t3, double& t4,
+                    const unsigned int imap) const;
+  // Calculate local coordinates for curved quadratic tetrahedra
+  int Coordinates13(const double x, const double y, const double z, double& t1,
+                    double& t2, double& t3, double& t4, double jac[4][4],
+                    double& det, const unsigned int imap) const;
+  // Calculate local coordinates for a cube
+  int CoordinatesCube(const double x, const double y, const double z,
+                      double& t1, double& t2, double& t3, TMatrixD*& jac,
+                      std::vector<TMatrixD*>& dN,
+                      const unsigned int imap) const;
+
+  // Calculate Jacobian for curved quadratic triangles
+  void Jacobian3(const unsigned int i, const double u, const double v,
+                 const double w, double& det, double jac[4][4]) const;
+  // Calculate Jacobian for curved quadratic quadrilaterals
+  void Jacobian5(const unsigned int i, const double u, const double v,
+                 double& det, double jac[4][4]) const;
+  // Calculate Jacobian for curved quadratic tetrahedra
+  void Jacobian13(const unsigned int i, const double t, const double u,
+                  const double v, const double w, double& det,
+                  double jac[4][4]) const;
+  // Calculate Jacobian for a cube
+  void JacobianCube(const unsigned int i, const double t1, const double t2,
+                    const double t3, TMatrixD*& jac,
+                    std::vector<TMatrixD*>& dN) const;
 
   // Calculate the bounding boxes of all elements after initialization
   void CalculateElementBoundingBoxes(void);
 
   // Initialize the tetrahedral tree
   bool InitializeTetrahedralTree(void);
+
 };
 }
 
