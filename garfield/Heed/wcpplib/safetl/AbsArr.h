@@ -2463,13 +2463,13 @@ DynArr<T>& DynArr<T>::operator=(const DynArr<D>& f) {
 #endif
   check();
   f.check();
-  DynLinArr<long> qel = f.get_qel();
-  DynLinArr<long> cum_qel = f.get_cum_qel();
+  DynLinArr<long> fqel = f.get_qel();
+  DynLinArr<long> fcum_qel = f.get_cum_qel();
   // for example, one of its elements.
-  long q = f.get_qel_lin();
+  const long q = f.get_qel_lin();
   T* temp_el = (q > 0) ? (new T[q]) : (T*)NULL;
   for (long n = 0; n < q; n++) temp_el[n] = f.acu_lin(n);
-  pass(q, qel, cum_qel, temp_el);
+  pass(q, fqel, fcum_qel, temp_el);
   return *this;
 }
 

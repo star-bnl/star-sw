@@ -181,8 +181,8 @@ class ComponentCST : public ComponentFieldMap {
  protected:
   // Verify periodicities
   void UpdatePeriodicity();
-  double GetElementVolume(const int i);
-  void GetAspectRatio(const int i, double& dmin, double& dmax);
+  double GetElementVolume(const unsigned int i);
+  void GetAspectRatio(const unsigned int i, double& dmin, double& dmax);
 //  static bool Greater(const double& a, const double& b) {
 //    return (a > b);
 //  };

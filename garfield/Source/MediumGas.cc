@@ -137,8 +137,7 @@ bool MediumGas::SetComposition(const std::string& gas1, const double f1,
   }
 
   // Print the composition.
-  std::cout << m_className << "::SetComposition:\n";
-  std::cout << "    " << m_name;
+  std::cout << m_className << "::SetComposition:\n    " << m_name;
   if (m_nComponents > 1) {
     std::cout << " (" << m_fraction[0] * 100;
     for (unsigned int i = 1; i < m_nComponents; ++i) {
@@ -1305,8 +1304,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           }
         }
         if (m_hasExcRates && !m_excitationList.empty()) {
-          const unsigned int nexc = m_excitationList.size();
-          for (unsigned int l = 0; l < nexc; ++l) {
+          for (int l = 0; l < nexc; ++l) {
             outFile << std::setw(15);
             outFile << m_tabExcRates[l][j][k][i];
             ++cnt;
@@ -1319,8 +1317,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           }
         }
         if (m_hasIonRates && !m_ionisationList.empty()) {
-          const unsigned int nion = m_ionisationList.size();
-          for (unsigned int l = 0; l < nion; ++l) {
+          for (int l = 0; l < nion; ++l) {
             outFile << std::setw(15);
             outFile << m_tabIonRates[l][j][k][i];
             ++cnt;
@@ -1702,9 +1699,8 @@ bool MediumGas::LoadIonMobility(const std::string& filename) {
   infile.open(filename.c_str(), std::ios::in);
   // Make sure the file could actually be opened.
   if (!infile) {
-    std::cerr << m_className << "::LoadIonMobility:\n";
-    std::cerr << "    Error opening file\n";
-    std::cerr << "    " << filename << ".\n";
+    std::cerr << m_className << "::LoadIonMobility:\n"
+              << "    Error opening file " << filename << ".\n";;
     return false;
   }
 
@@ -1712,8 +1708,6 @@ bool MediumGas::LoadIonMobility(const std::string& filename) {
   double lastField = field;
   std::vector<double> efields;
   std::vector<double> mobilities;
-  efields.clear();
-  mobilities.clear();
 
   // Read the file line by line.
   char line[100];
@@ -1735,23 +1729,22 @@ bool MediumGas::LoadIonMobility(const std::string& filename) {
       field = atof(token);
       token = strtok(NULL, " ,\t");
       if (!token) {
-        std::cerr << m_className << "::LoadIonMobility:\n";
-        std::cerr << "    Found E/N but no mobility before the end-of-line\n";
-        std::cerr << "    " << filename << " (line " << i << ").\n";
+        std::cerr << m_className << "::LoadIonMobility:\n"
+                  << "    Found E/N but no mobility before the end-of-line.\n"
+                  << "    Skipping line " << i << ".\n";
         continue;
       }
       mu = atof(token);
     }
     token = strtok(NULL, " ,\t");
     if (token && strcmp(token, "//") != 0) {
-      std::cerr << m_className << "::LoadIonMobility:\n";
-      std::cerr << "    Unexpected non-comment characters after the mobility; "
-                << "    line skipped.\n";
-      std::cerr << "    " << filename << " (line " << i << ").\n";
+      std::cerr << m_className << "::LoadIonMobility:\n"
+                << "    Unexpected non-comment characters after the mobility.\n"
+                << "    Skipping line " << i << ".\n";
       continue;
     }
     if (m_debug) {
-      std::cout << "    E/N = " << field << " Td: mu = " << mu << " cm2/(V.s)\n";
+      std::cout << "    E/N = " << field << " Td: mu = " << mu << " cm2/(Vs)\n";
     }
     // Check if the data has been read correctly.
     if (infile.fail() && !infile.eof()) {

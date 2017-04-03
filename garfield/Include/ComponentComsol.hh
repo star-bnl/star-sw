@@ -46,12 +46,12 @@ class ComponentComsol : public ComponentFieldMap {
   // Verify periodicities
   void UpdatePeriodicity() { UpdatePeriodicityCommon(); }
 
-  double GetElementVolume(const int i);
-  void GetAspectRatio(const int i, double& dmin, double& dmax);
+  double GetElementVolume(const unsigned int i);
+  void GetAspectRatio(const unsigned int i, double& dmin, double& dmax);
 
   struct nodeCmp {
-    bool operator()(const ComponentFieldMap::node& lhs,
-                    const ComponentFieldMap::node& rhs) const {
+    bool operator()(const ComponentFieldMap::Node& lhs,
+                    const ComponentFieldMap::Node& rhs) const {
       double dx = round(lhs.x * 1e6) - round(rhs.x * 1e6);
       double dy = round(lhs.y * 1e6) - round(rhs.y * 1e6);
       double dz = round(lhs.z * 1e6) - round(rhs.z * 1e6);

@@ -45,8 +45,8 @@ class ComponentAnsys123 : public ComponentFieldMap {
   // Verify periodicities
   void UpdatePeriodicity() { UpdatePeriodicityCommon(); }
 
-  double GetElementVolume(const int i);
-  void GetAspectRatio(const int i, double& dmin, double& dmax);
+  double GetElementVolume(const unsigned int i);
+  void GetAspectRatio(const unsigned int i, double& dmin, double& dmax);
 };
 }
 #endif

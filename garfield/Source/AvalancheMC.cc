@@ -967,8 +967,8 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
         // Only one component with active traps and velocity map is assumed to
         // be attached to AvalancheMC.
         const unsigned int nComponents = m_sensor->GetNumberOfComponents();
-        for (unsigned int i = 0; i < nComponents; ++i) {
-          ComponentBase* trapCmp = m_sensor->GetComponent(i);
+        for (unsigned int k = 0; k < nComponents; ++k) {
+          ComponentBase* trapCmp = m_sensor->GetComponent(k);
           if (!trapCmp->IsTrapActive()) continue;
           Medium* trapMed = trapCmp->GetMedium(x, y, z);
           if (type < 0) {

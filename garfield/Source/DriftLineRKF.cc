@@ -1113,8 +1113,8 @@ double DriftLineRKF::IntegrateTownsend(const double xi, const double yi,
     dy = y1 - y0;
     dz = z1 - z0;
     d = sqrt(dx * dx + dy * dy + dz * dz);
-    const double tol = 1.e-6;
-    if (d < tol) {
+    const double told = 1.e-6;
+    if (d < told) {
       // Step length has become very small.
       if (m_debug) {
         std::cout << m_className << "::IntegrateTownsend: Small step.\n";
@@ -1124,7 +1124,7 @@ double DriftLineRKF::IntegrateTownsend(const double xi, const double yi,
       const double dxe = xe - x1;
       const double dye = ye - y1;
       const double dze = ze - z1;
-      const double tol2 = tol * tol;
+      const double tol2 = told * told;
       if (dxe * dxe + dye * dye + dze * dze < tol2) break;
       // Proceed with the next step.
       x0 = x1;
@@ -1144,7 +1144,6 @@ double DriftLineRKF::IntegrateTownsend(const double xi, const double yi,
       std::cerr << "    Invalid end point.\n";
       break;
     }
-    double alpha1 = 0.;
     if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha1)) {
       std::cerr << m_className << "::IntegrateTownsend:\n";
       std::cerr << "    Cannot retrieve Townsend coefficient at end point.\n";

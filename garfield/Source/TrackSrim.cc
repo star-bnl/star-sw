@@ -916,7 +916,6 @@ bool TrackSrim::NewTrack(const double x0, const double y0, const double z0,
     }
 
     // Check that the cluster is in an ionisable medium and within bounding box
-    Medium* medium = NULL;
     if (!m_sensor->GetMedium(x, y, z, medium)) {
       if (m_debug) {
         std::cout << hdr << "No medium at position (" 

@@ -59,6 +59,8 @@ int main(int argc, char * argv[]) {
 
   const int nEvents = 10000;
   track->EnableDebugging();
+  int dummy;
+  std::cin >> dummy;
   for (int i = 0; i < nEvents; ++i) {
     if (i == 1) track->DisableDebugging();
     if (i % 1000 == 0) std::cout << i << "/" << nEvents << "\n";
