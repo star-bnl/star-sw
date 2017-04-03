@@ -1,6 +1,7 @@
 #ifndef G_COMPONENT_FIELD_MAP_H
 #define G_COMPONENT_FIELD_MAP_H
 
+#include <iostream>
 #include "ComponentBase.hh"
 #include "TMatrixD.h"
 #include "TetrahedralTree.hh"
