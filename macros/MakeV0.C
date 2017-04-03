@@ -30,12 +30,6 @@ void MakeV0(Int_t nevents=1, const Char_t *parn = "StK0s", Int_t RunID = 1)
     gSystem->Load("libTable");
   }
   gROOT->LoadMacro("bfc.C");
-  TString Chain("AgML,TpcRS,bbcSim,btofsim,pxlFastSim,istSim,emcY2,eefs,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt"
-		",gstarLib"
-		",NoSvtIt,StiHftC,Idst,BAna,tpcDB,TpcHitMover,btofMatch,btofCalib,tags,emcY2,IdTruth,gstar"
-		",Corr4,OSpaceZ2,OGridLeak3D"
-		",StiCA,beamline,KFVertex,StiHftC,pxlFastSim,ssdfast,useXgeom,VFMCE,noRunco,noHistos,noTags");
-  //		",muMc"); 
   Int_t iD = 0;
   TString ParName(parn);
   Int_t Npart = 10;
@@ -54,6 +48,17 @@ void MakeV0(Int_t nevents=1, const Char_t *parn = "StK0s", Int_t RunID = 1)
   TString MainFile = RootFile;
   MainFile += ".root";
   RootFile += ".MuDst.root";
+  //   TString Chain("AgML,TpcRS,bbcSim,btofsim,pxlFastSim,istSim,emcY2,eefs,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt"
+  // 		",NoSvtIt,StiHftC,Idst,BAna,tpcDB,TpcHitMover,btofMatch,btofCalib,tags,emcY2,IdTruth,gstar"
+  // 		",Corr4,OSpaceZ2,OGridLeak3D"
+  // 		",StiCA,beamline,KFVertex,StiHftC,pxlFastSim,ssdfast,useXgeom,VFMCE,noRunco,noHistos,noTags");
+  //		",muMc"); 
+  TString Chain("MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,VFMCE,noRunco,noHistos,noTags,");
+  if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
+    Chain += ",gstarLib,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
+  } else {
+    Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom"; //VMCAlignment,sdt20160301,
+  }
   Chain += Form(",rung.%i",RunID);
   chain = bfc(0,Chain.Data(),0,RootFile.Data(),MainFile.Data());
   Double_t pTlow = 0.2;
@@ -64,7 +69,22 @@ void MakeV0(Int_t nevents=1, const Char_t *parn = "StK0s", Int_t RunID = 1)
   Double_t Phihigh = 2*TMath::Pi();
   Double_t Zlow = -20;
   Double_t Zhigh = 20;
-  TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
-  St_geant_Maker::instance()->Do(kine.Data());
+  if (gClassTable->GetID("St_geant_Maker") >= 0) {
+    TString  kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
+    St_geant_Maker::instance()->Do(kine.Data());
+  } else {
+    if (StarVMCApplication::Instance()) {
+      StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
+      if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
+	delete gener; gener = 0;
+      }
+      if (! gener) gener =  new 
+	StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
+      else
+	gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
+      StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
+      cout << "Set StarMCSimplePrimaryGenerator" << endl;
+    }
+  }
   chain->EventLoop(nevents);
 }

@@ -1546,7 +1546,6 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                   // Check if this location is inside the drift area.
                   if (!m_sensor->IsInArea(xDxc, yDxc, zDxc)) continue;
                   // Make sure we haven't jumped across a wire.
-                  double xCross, yCross, zCross;
                   if (m_sensor->IsWireCrossed(x, y, z, xDxc, yDxc, zDxc, xCross,
                                             yCross, zCross)) {
                     continue;

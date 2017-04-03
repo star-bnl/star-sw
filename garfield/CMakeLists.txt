@@ -21,9 +21,14 @@ ENDIF(DEFINED ENV{ROOTSYS})
 
 
 FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom Gdml)
-SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
-INCLUDE( MacroCheckPackageLibs )
-INCLUDE( MacroRootDict )
+
+# internal root dictionary building works starting with version 6.02
+IF(ROOT_VERSION VERSION_LESS 6.02)
+    SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
+    INCLUDE( MacroCheckPackageLibs )
+    INCLUDE( MacroRootDict )
+    MESSAGE(STATUS "Using Garfields FindRoot.cmake")
+ENDIF()
 
 # If you cannot create symbolic links turn FALSE the library version
 SET(BUILD_WITH_VERSION_NUMBER TRUE)
@@ -34,7 +39,6 @@ IF(BUILD_WITH_VERSION_NUMBER)
     SET( ${PROJECT_NAME}_VERSION
     ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION} )
     SET( ${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_VERSION} )
-    INCLUDE( MacroCheckPackageVersion )
 ENDIF(BUILD_WITH_VERSION_NUMBER)
 
 ## Add root libs ##
@@ -79,7 +83,7 @@ LIST( REMOVE_ITEM heed_sources Heed/heed++/code/HeedParticle_BGM.c )
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES LANGUAGE CXX)
 
 ## Flags to pass to the compiler #######################
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -fno-common -pg " )
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -fno-common -pg" )
 
 # Add common flags for gfortran and g++
 ADD_DEFINITIONS( "-c" )
@@ -90,7 +94,7 @@ IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
 ELSE()
  ADD_DEFINITIONS( "-O2" )
 ENDIF()
-IF(ROOT_VERSION VERSION_GREATER 6.0)
+IF(ROOT_VERSION VERSION_GREATER 5)
     ADD_DEFINITIONS( "-std=c++0x" )
 ENDIF()
 
@@ -99,11 +103,16 @@ ENDIF()
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES COMPILE_FLAGS "-DNOT_INCLUDE_GASLIB_IN_PACSLIB -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN -DFUNNAMESTACK")
 
 ## create dictionary  ##################################
-LIST( APPEND ROOT_DICT_INCLUDE_DIRS Include Heed)
-SET( ROOT_DICT_CINT_DEFINITIONS "-DHANDLE_DICT_EXCEPTIONS=IGNORED_FOR_CINT" )
-PREPARE_ROOT_DICT_HEADERS( Include )
-GEN_ROOT_DICT_SOURCES( GarfieldDict.cxx )
-LIST( APPEND garfield_sources ${ROOT_DICT_OUTPUT_SOURCES} )
+IF(ROOT_VERSION VERSION_LESS 6.02)
+    LIST( APPEND ROOT_DICT_INCLUDE_DIRS Include Heed)
+    SET( ROOT_DICT_CINT_DEFINITIONS "-DHANDLE_DICT_EXCEPTIONS=IGNORED_FOR_CINT" )
+    PREPARE_ROOT_DICT_HEADERS( Include )
+    GEN_ROOT_DICT_SOURCES( GarfieldDict.cxx )
+    LIST( APPEND garfield_sources ${ROOT_DICT_OUTPUT_SOURCES} )
+ELSE()
+    ROOT_GENERATE_DICTIONARY( GarfieldDict Include/*.hh LINKDEF Include/LinkDef.h OPTIONS "-I${PROJECT_SOURCE_DIR}/Heed")
+    LIST( APPEND garfield_sources GarfieldDict.cxx )
+ENDIF()
 
 ## print information on considered files and the root dictionary include directories
 MESSAGE( STATUS "###########################################################" )
@@ -120,12 +129,12 @@ MESSAGE( STATUS "###########################################################" )
 ## SET output path for libraries 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib/)
 ## SET include directories 
-INCLUDE_DIRECTORIES( ${ROOT_DICT_INCLUDE_DIRS} Heed )
+INCLUDE_DIRECTORIES( Include Heed )
 ## build the library
 ADD_LIBRARY( ${PROJECT_NAME} SHARED
     ${garfield_sources} 
     ${magboltz_sources}
-    ${heed_sources} )
+    ${heed_sources})
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 IF(BUILD_WITH_VERSION_NUMBER)
     SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
@@ -141,6 +150,7 @@ if(WITH_EXAMPLES)
 else()
     MESSAGE(STATUS "Building of examples is switched off.")
 endif()
+
 ## EXPORT PACKAGE INFORMATION ##########################
 export(PACKAGE ${PROJECT_NAME})
 
@@ -167,7 +177,7 @@ INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
         COMPONENT cmakefiles )
 # install pcm file in case of root 6
-IF(ROOT_VERSION VERSION_GREATER 6.0)
+IF(ROOT_VERSION VERSION_GREATER 5)
     INSTALL( FILES ${PROJECT_BINARY_DIR}/rootdict/${PROJECT_NAME}Dict_rdict.pcm 
              DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ 
              COMPONENT dict)
