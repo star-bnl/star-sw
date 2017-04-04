@@ -44,6 +44,7 @@
 #include "StDetectorDbMaker/StPxlSurveyC.h"
 #include "StDetectorDbMaker/StIstSurveyC.h"
 #include "StDetectorDbMaker/StSstSurveyC.h"
+#include "StMessMgr.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 
@@ -778,6 +779,51 @@ void StarVMCApplication::SetDebug(Int_t m) {
     cflag->iswit[2] = 2; 
   }
 }			  
+//________________________________________________________________________________
+void StarVMCApplication::ForceDecay(const Char_t *nameP, 
+				    const Char_t *mode1A, const Char_t *mode1B, const Char_t *mode1C, Float_t branch1,
+				    const Char_t *mode2A, const Char_t *mode2B, const Char_t *mode2C, Float_t branch2,
+				    const Char_t *mode3A, const Char_t *mode3B, const Char_t *mode3C, Float_t branch3) {
+  if (! TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
+    LOG_ERROR << "StarVMCApplication::ForceDecay does not work without TGeant3TGeo" << endm;
+    return;
+  }
+  TGeant3TGeo *g3 = (TGeant3TGeo *)TVirtualMC::GetMC();
+  TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
+  if (! p) return;
+  Int_t pdg = p->PdgCode();
+  if (pdg < 0) return;
+  Int_t iD  = g3->IdFromPDG(pdg);
+  const Char_t *modes[3][3] = {
+    {mode1A, mode1B, mode1C},
+    {mode2A, mode2B, mode2C},
+    {mode3A, mode3B, mode3C}};
+  Float_t branches[3] = {branch1, branch2, branch3};
+  Int_t NB = 0;
+  Float_t total = 0;
+  for (Int_t m = 0; m < 3; m++) {
+    if (branches[m] > 0 && modes[m][0]) {NB++; total += branches[m];}
+  }
+  if (total <= 0) return;
+  Int_t mode[6] = {0};
+  Float_t bratio[6] = {0};
+  for (Int_t m = 0; m < NB; m++) {
+    TString Line;
+    mode[m] = 0;
+    for (Int_t j = 0; j < 3; j++) {
+      p = TDatabasePDG::Instance()->GetParticle(modes[m][j]);
+      if (! p) { LOG_ERROR << "p for " << modes[m][j] << " is not found" << endm; continue;}
+      pdg = p->PdgCode();
+      Line += modes[m][j];
+      Line += " ";
+      Int_t Id = g3->IdFromPDG(pdg);
+      mode[m] = 100*mode[m] + Id;
+    }
+    bratio[m] = 100*branches[m]/total;
+    LOG_INFO << "Force decay of " << nameP << " => " << Line.Data() << endm;
+  }
+  g3->Gsdk(iD, bratio, mode);
+}
 // $Log: StarVMCApplication.cxx,v $
 // Revision 1.13  2013/12/16 22:58:53  fisyak
 // Add g2t_volume_id
