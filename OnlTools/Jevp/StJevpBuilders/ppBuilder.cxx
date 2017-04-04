@@ -199,7 +199,7 @@ void ppBuilder::initialize(int argc, char *argv[]) {
 
   int iNext = 0;
   plots[iNext]=new JevpPlot(contVIP.array[iNext]);
-  plots[iNext] -> getHisto(0)->histo->SetMinimum(10.);
+  plots[iNext] -> getHisto(0)->histo->SetMinimum(2.);
   plots[iNext] -> getHisto(0)->histo->SetLineStyle(1);
   plots[iNext] -> setDrawOpts("COLTEXT");
   iNext++;
