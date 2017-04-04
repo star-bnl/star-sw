@@ -305,8 +305,12 @@ C --- Inelastic cross section ---
                   IF (AIEL(K) .GE. 0.001) CREL=XSECEL/(0.36*AIEL(K)*
      +            CSA(I)**1.17)
                   AITOT=AIEL(K)+AIIN(K)
-                  IF (AITOT .GE. 0.001) CRIN=XSECIN/(AITOT*CSA(I)**
-     +            ALPH)
+                  IF (AITOT .GE. 0.001) then
+       crinL = log(xsecin) - log(aitot) - alph*log(csa(i))
+       crin  = exp(crinL)              
+*yf       CRIN=XSECIN/(AITOT*CSA(I)**
+*yf     +            ALPH)
+                   endif
 C
                ELSEIF (IPART .LT. 15) THEN
 C
@@ -335,11 +339,21 @@ C
                      IF (AIEL(K) .GE. 0.001) CREL=XSPIEL/(0.36* AIEL(K)
      +               *CSA(I)**1.17)
                      AITOT=AIEL(K)+AIIN(K)
-                     IF (AITOT .GE. 0.001) CRIN=XSPIIN/(AITOT*CSA(I)
-     +               **ALPH)
+*yf               IF (AITOT .GE. 0.001) CRIN=XSPIIN/(AITOT*CSA(I)
+*yf     +               **ALPH)
+                  IF (AITOT .GE. 0.001) then
+       crinL = log(xspiin) - log(aitot) - alph*log(csa(i))
+       crin  = exp(crinL)              
+                   endif
                   END IF
                END IF
-               AIIN(K)=CRIN*(AIIN(K)+AIEL(K))*A(K)**ALPH
+*yf               AIIN(K)=CRIN*(AIIN(K)+AIEL(K))*A(K)**ALPH
+               if (crin > 0) then
+                  crinL = log(crin) + log(aiin(k)+aiel(k)) + alph*log(a(k))
+                  AIIN(K) = exp(crinl)
+               else
+                  AIIN(K) = 0
+               endif
                AIEL(K)=CREL*0.36*AIEL(K)*A(K)**1.17
                AIEL(K)=AIEL(K)*PARTEL(IPART)
                AIIN(K)=AIIN(K)*PARTIN(IPART)
