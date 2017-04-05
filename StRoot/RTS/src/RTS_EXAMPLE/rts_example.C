@@ -2256,7 +2256,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"fcs")) ;	// leave as is...
 	else do_print = 0 ;
 
-	dd = rdr->det("fcs")->get("raw") ;
+	dd = rdr->det("fcs")->get("adc") ;
 	
 
 	if(dd) {
@@ -2264,10 +2264,10 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			raw_found = 1 ;
 
 			if(do_print) {
-				printf("FCS: [%d,%d,%d] %d bytes\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				printf("FCS: [%d,%d,%d] %d words\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				u_short *d16 = (u_short *)dd->Void ;
 
-				for(u_int i=0;i<dd->ncontent/2;i++) {
+				for(u_int i=0;i<dd->ncontent;i++) {
 					printf(" %5d = 0x%04X [%5u dec]\n",i,d16[i],d16[i]) ;
 				}
 			}
