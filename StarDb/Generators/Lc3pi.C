@@ -8,8 +8,8 @@ TDataSet *CreateTable() {
   Double_t Yhigh  =   1;
   Double_t Philow =   0;
   Double_t Phihigh= 2*TMath::Pi();
-  Double_t Zlow   =  -10; 
-  Double_t Zhigh  =   10; 
+  Double_t Zlow   =  -6; 
+  Double_t Zhigh  =   6; 
   Int_t    Npart  =    1;
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
     if (gClassTable->GetID("St_geant_Maker") < 0) {
