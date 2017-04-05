@@ -1984,7 +1984,7 @@ void TGeant3::DefineParticles()
       if (! p) {cout << "Uknown particle " << extraPartName[i] << endl; continue;}
       Double_t G = p->Width(); // GeV
       Double_t lifetime = 0;   // second
-      if (G > 0) lifetime = TMath::H()/TMath::Qe()*1e-9/(TMath::TwoPi())*1e-9/G;
+      if (G > 0) lifetime = TMath::H()/(TMath::TwoPi())/(TMath::Qe()*1e9*G);
       DefineParticle(p->PdgCode(),p->GetName(), kPTHadron, p->Mass(),p->Charge()/3, lifetime,
 		     *(p->GetTitle()) /*pType*/, G /*width*/, 
 		     p->Spin() /*iSpin*/, p->Parity() /*iParity*/, 0 /*iConjugation*/, 

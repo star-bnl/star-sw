@@ -217,11 +217,11 @@ void guphad()
 //
       Int_t ihadr = geant3->Gcphys()->ihadr;
       // printf(" iHadr 2 :%i \n ",ihadr);
-      if (ihadr<4){ gpghei();}
-      else if ( ihadr==4 ){ fldist();}
-      else if ( ihadr==5 ){ calsig();}
-      else    { gfmdis();}
-
+      // starsim convention 
+      if      ( ihadr<=3 ){ gpghei();} // geisha
+      else if ( ihadr==4 ){ fldist();} // fluka
+      else if ( ihadr==5 ){ gfmdis();} // fluka+Mikap
+      else if ( ihadr==6 ){ calsig();} // gcalor
 }
 
 //______________________________________________________________________
