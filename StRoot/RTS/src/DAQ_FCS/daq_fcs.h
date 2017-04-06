@@ -38,5 +38,50 @@ public:
 } ;
 
 
+// Helper class for various things (data extraction, pedestal calculation etc)
+class fcs_data_c {
+public:
+	fcs_data_c() {
+		sector = 1 ;
+		rdo = 1 ;
+		ch = -1 ;
+		tb_cou = 0 ;
+	} ;
+
+	~fcs_data_c() {;} ;
+
+	
+	int start(u_short *d16, int shorts) ;
+	int event() ;
+	int accum(int ch, int tb, u_short adc) ;
+
+	u_short *dta_p ;
+	u_short *dta_stop ;
+
+	struct fcs_ped_t {
+		double mean[16] ;
+		double rms[16] ;
+		u_int cou[16] ;
+	} ;
+
+	struct fcs_ped_t ped ;
+	int ped_run ;
+	void ped_start() ;
+	void ped_stop() ;
+
+	//globals
+	u_int run_number ;
+	double fee_currents[16][3] ;
+
+	// temporary storage for 1 channel
+	int sector ;
+	int rdo ;
+	int ch ;
+	int tb_cou ;
+	u_short adc[16*1024] ;
+} ;
+
+
+
 #endif
 

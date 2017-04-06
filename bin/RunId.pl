@@ -5,12 +5,21 @@ if ($#ARGV < 0) {
   print "Usage: $0 no_of_runs\n";
   exit 0;
 }
-my $NF = $ARGV[0];
-my $f1 = 1;
+my $NR = $ARGV[0];
+my $r1 = 1;
 if ($#ARGV >= 1) {
-  $f1 = $ARGV[0];
-  $NF = $ARGV[1];
+  $r1 = $ARGV[0];
+  $NR = $ARGV[1];
 }
-for (my $f = $f1; $f <= $NF; $f++) {
-    print "string:$f:1:100\n";
+my $nevents = 100;
+if ($#ARGV >= 2) {
+  $nevents = $ARGV[2];
+}
+my $name = "Lc3pi";
+if ($#ARGV >= 3) {
+  $name = $ARGV[3];
+}
+
+for (my $r = $r1; $r <= $NR; $r++) {
+    print "string:$r:1:$nevents:$name\n";
 }

@@ -73,6 +73,10 @@ class StarVMCApplication : public TVirtualMCApplication {
   static  void     		   GeometryDb(TDataSet *Detectors=0);			  
   virtual Bool_t   		   MisalignGeometry();					  
   static  TDataSet 		  *DetectroDescriptors() {return fgDetSets;}             
+  void  ForceDecay(const Char_t *nameP, 
+		   const Char_t *mode1A = 0, const Char_t *mode1B = 0, const Char_t *mode1C = 0, Float_t branch1 = 0,
+		   const Char_t *mode2A = 0, const Char_t *mode2B = 0, const Char_t *mode2C = 0, Float_t branch2 = 0,
+		   const Char_t *mode3A = 0, const Char_t *mode3B = 0, const Char_t *mode3C = 0, Float_t branch3 = 0);
  private:
   // methods
   

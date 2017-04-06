@@ -110,6 +110,9 @@ C *** USE LINEAR INTERPOLATION OR EXTRAPOLATION BY Y=RC*X+B ***
       BNVE =LOG(AVNNB(I1))-RCNVE*AVRS(I1)
       AVN  =RCNVE*RS+BNVE
 C
+      avk = min(85., avk)
+      avy = min(85., avy)
+      avn = min(85., avn)
       AVK=EXP(AVK)
       AVY=EXP(AVY)
       AVN=EXP(AVN)
