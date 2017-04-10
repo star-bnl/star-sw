@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -34,10 +34,8 @@
 #include<vector>
 #include<math.h>
 #include<cstdlib>
-#include "TVectorD.h"
-#include "TMatrixD.h"
-#include "TMatrixDSym.h"
 #include "VMatrix.h"
+#include "Eigen/Core"
 
 //! Namespace for the general broken lines package
 namespace gbl {
@@ -83,10 +81,13 @@ public:
 			unsigned int nBand = 5);
 	void solveAndInvertBorderedBand(const VVector &aRightHandSide,
 			VVector &aSolution);
-	void addBlockMatrix(double aWeight, unsigned int aSize,
+	void addBlockMatrix(double aWeight,
+			const std::vector<unsigned int>* anIndex,
+			const std::vector<double>* aVector);
+	void addBlockMatrix(double aWeight, unsigned int nSimple,
 			unsigned int* anIndex, double* aVector);
-	TMatrixDSym getBlockMatrix(const std::vector<unsigned int> &anIndex) const;
-	TMatrixDSym getBlockMatrix(unsigned int aSize, unsigned int* anIndex) const;
+	Eigen::MatrixXd getBlockMatrix(const std::vector<unsigned int> anIndex) const;
+	Eigen::MatrixXd getBlockMatrix(unsigned int aSize, unsigned int* anIndex) const;
 	void printMatrix() const;
 
 private:

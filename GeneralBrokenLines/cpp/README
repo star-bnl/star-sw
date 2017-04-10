@@ -1,8 +1,10 @@
 README: GeneralBrokenLines cmake compilation/installation
-Version 24.September 2012
+Version 10.April 2017
 
 Requirements:
-To build the code, you need to have CMake and root installed on your system.
+To build the code, you need to have CMake and Eigen3 (and optionally root) installed on your system.
+
+The support of root for user input and output is selected in CMakeLists.txt (default: True).
 
 Build procedure:
 If you've already worked with CMake, the following steps should be known. 

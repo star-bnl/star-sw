@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -34,15 +34,10 @@
 #include<vector>
 #include<math.h>
 #include "VMatrix.h"
-#include "TVectorD.h"
-#include "TMatrixD.h"
-#include "TMatrixDSym.h"
 
-#include "Math/SMatrix.h"
-#include "Math/SVector.h"
-typedef ROOT::Math::SMatrix<double, 2, 5> SMatrix25;
-typedef ROOT::Math::SMatrix<double, 2, 7> SMatrix27;
-typedef ROOT::Math::SMatrix<double, 5, 5> SMatrix55;
+#include "Eigen/Core"
+typedef Eigen::Matrix<double, 5, 5> Matrix5d;
+typedef Eigen::Matrix<double, 2, 7> Matrix27d;
 
 //! Namespace for the general broken lines package
 namespace gbl {
@@ -62,12 +57,12 @@ public:
 			double aPrec, unsigned int aTraj = 0, unsigned int aPoint = 0);
 	virtual ~GblData();
 	void addDerivatives(unsigned int iRow,
-			const std::vector<unsigned int> &labDer, const SMatrix55 &matDer,
-			unsigned int iOff, const TMatrixD &derLocal, unsigned int nLocal,
-			const TMatrixD &derTrans);
+			const std::vector<unsigned int> &labDer, const Matrix5d &matDer,
+			unsigned int iOff, const Eigen::MatrixXd &derLocal, unsigned int nLocal,
+			const Eigen::MatrixXd &derTrans);
 	void addDerivatives(unsigned int iRow,
-			const std::vector<unsigned int> &labDer, const SMatrix27 &matDer,
-			unsigned int nLocal, const TMatrixD &derTrans);
+			const std::vector<unsigned int> &labDer, const Matrix27d &matDer,
+			unsigned int nLocal, const Eigen::MatrixXd &derTrans);
 	void addDerivatives(const std::vector<unsigned int> &index,
 			const std::vector<double> &derivatives);
 
@@ -97,7 +92,7 @@ private:
 	double theDownWeight; ///< Down-weighting factor (0-1)
 	double thePrediction; ///< Prediction from fit
 	// standard local parameters (curvature, offsets), fixed size
-	unsigned int theNumLocal; ///< Number of (non zero) simple derivatives (max 7)
+	unsigned int theNumLocal; ///< Number of (non zero) local derivatives (max 7 for kinks)
 	unsigned int theParameters[7]; ///< List of parameters (with non zero derivatives)
 	double theDerivatives[7]; ///< List of derivatives for fit
 	// more local parameters, dynamic size

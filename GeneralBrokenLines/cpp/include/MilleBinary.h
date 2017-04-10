@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -70,10 +70,10 @@ public:
 	MilleBinary(const std::string fileName = "milleBinaryISN.dat",
 			bool doublePrec = false, unsigned int aSize = 2000);
 	virtual ~MilleBinary();
-	void addData(double aMeas, double aPrec, unsigned int numLocal,
-			unsigned int* indLocal, double* derLocal,
-			const std::vector<int> &labGlobal,
-			const std::vector<double> &derGlobal);
+	void addData(double aMeas, double aErr, unsigned int numLocal,
+            unsigned int* indLocal, double* derLocal,
+            const std::vector<int> &labGlobal,
+            const std::vector<double> &derGlobal);
 	void writeRecord();
 
 private:
