@@ -569,7 +569,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
   }
 #endif
-  static Int_t iSec  = 0;
   static StTpcCoordinateTransform transform(gStTpcDb);
   enum {kPadMax = 32, kTimeBacketMax = 64};
   static Double_t XDirectionCouplings[kPadMax];
@@ -624,7 +623,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	assert( iSector > sector );
 	break;
       }
-      if (iSec && iSec != sector) {sortedIndex++; continue;}
 #ifdef __DEBUG__
       if (selectedSector > 0 && iSector != selectedSector) {sortedIndex++; continue;}
       Int_t iRow = volId%100;
@@ -685,10 +683,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Int_t nSegHits = 0;
       Int_t sIndex = sortedIndex;
       Int_t io = -1;
+      if (Debug() > 13) cout << "sortedIndex = " << sortedIndex << "\tno_tpc_hits = " << no_tpc_hits << endl;
       for (nSegHits = 0, sIndex = sortedIndex;  
 	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits - 1; sIndex++) {
 	indx = sorter.GetIndex(sIndex);
 	g2t_tpc_hit_st *tpc_hitC = tpc_hit_begin + indx;
+	if (Debug() > 13) cout << "sIndex = " << sIndex << "\tindx = " << indx << "\ttpc_hitC = " << tpc_hitC << endl;
+	if (! tpc_hitC) {
+	  iBreak++;
+	}
 	if ((tpc_hitC->volume_id%100000)/100 != sector) break;
 	if ( tpc_hitC->track_p               != tpc_hit->track_p) break;
 	if (tpc_hitC->de > 0) {
@@ -969,8 +972,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t tbk0 = TMath::Nint(tbkH + xmin[1]);
 	Double_t OmegaTau =St_TpcResponseSimulatorC::instance()->OmegaTau()*
 	  TrackSegmentHits[iSegHits].BLS.position().z()/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
-	Double_t NP = TMath::Abs(tpc_hitC->de/tpc_hitC->ds)/(St_TpcResponseSimulatorC::instance()->W()*eV*
-							     St_TpcResponseSimulatorC::instance()->Cluster()); // from GEANT
+	Double_t NP = TMath::Abs(tpc_hitC->de)/(St_TpcResponseSimulatorC::instance()->W()*eV*
+						St_TpcResponseSimulatorC::instance()->Cluster()); // from GEANT
     if (ClusterProfile) {
 	checkList[io][6]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),NP);
     }
