@@ -53,6 +53,7 @@ if ($makeList) {
   while ( my $it = <In>) {
     if ($noMC and $it =~ /MC/) {next;}
     my ($string,$test,$DIR,$f,$NoEvents) = split(":",$it);
+    if ($string ne 'string') {next;}
 #    my @words = split(":",$it);
 #    my $log = $words[2] . "/" . $words[3] . ".log";#  print "$log\n";
     my $log = $DIR . "/" . $f . ".log"; 
