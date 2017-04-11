@@ -20,10 +20,11 @@
 #endif
 #include "StarVMCApplication.h"
 #include "TGeant3TGeo.h"
-
+class TTreeIter;
 class StVMCMaker : public StMaker {
  public: 
-  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), fInitRun(0), fVolume(0) {fgGeantMk = this;}
+  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), 
+    fInitRun(0), fVolume(0), fMuDstIter(0) {fgGeantMk = this;}
   virtual       ~StVMCMaker() {}
   virtual Int_t  Init();
   virtual Int_t  Make();
@@ -34,8 +35,9 @@ class StVMCMaker : public StMaker {
   virtual void   SetDateTime(Int_t idat=0,Int_t itim=0);
   virtual void   SetRunNo(Int_t m ) {fRunNo = m < 1 || m >= 1000000 ? 1 : m;}
   virtual Int_t  Skip(Int_t nskip);
-  virtual int    SetInputFile(const Char_t *fileName);
+  virtual Int_t  SetInputFile(const Char_t *fileName);
   virtual void   SetDebug(Int_t l=1);          // *MENU*
+  virtual Int_t  SetVertex();
   //  virtual void   SetInputMode(const Char_t *fileMode) {fInputMode = fileMode;}
   const Char_t  *InputFile() const {return fInputFile.Data();}
   static StarVMCApplication* GetStarVMCApplication() {return fgStarVMCApplication;}
@@ -59,13 +61,14 @@ class StVMCMaker : public StMaker {
   TString                    fInputFile;
   Int_t                      fInitRun;
   TDataSet*                  fVolume;   //!
+  TTreeIter*                 fMuDstIter; //! MuDst to select primary vertex for embedding
  public:
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.1.1.2 2009/04/16 14:12:55 fisyak Exp $ built " __DATE__ " " __TIME__  ; 
+  virtual const Char_t *GetCVS() const {
+    static const Char_t cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.1.1.2 2009/04/16 14:12:55 fisyak Exp $ built " __DATE__ " " __TIME__  ; 
     return cvs;
   }
 
-  ClassDef(StVMCMaker,0)   //StAF chain virtual base class for Makers
+  ClassDef(StVMCMaker,0)   //
 };
 
 #endif
