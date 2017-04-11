@@ -404,10 +404,11 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Make() {
-  Int_t minSector = IAttr("minSector");
-  Int_t maxSector = IAttr("maxSector");
-  Int_t minRow    = IAttr("minRow");
-  Int_t maxRow    = IAttr("maxRow");
+  static Int_t minSector = IAttr("minSector");
+  static Int_t maxSector = IAttr("maxSector");
+  static Int_t minRow    = IAttr("minRow");
+  static Int_t maxRow    = IAttr("maxRow");
+  static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   if (kMode == kTpxAvLaser || kMode == kTpcAvLaser) {
 #ifdef  __TOKENIZED__
     InitializeHistograms(Token());
@@ -974,6 +975,7 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
+  static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   Short_t  ADCs2[512];
   UShort_t IDTs2[512];
   memset(ADCs, 0, sizeof(ADCs));
@@ -1001,7 +1003,8 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
 		 << " already has " << ntbold << " time bins at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
 #endif
 	digitalSector->getTimeAdc(r_old+1,p_old+1,ADCs2,IDTs2);
-	if (IAttr("UseTonkoClusterAnnotation")) {
+	//	if (IAttr("UseTonkoClusterAnnotation")) {
+	if (TonkoAnn) {
 	  for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
 	    if (! ADCs2[i]) continue;
 	    if ((IDTs[i] || IDTs2[i]) && ADCs[i] < ADCs2[i]) IDTs[i] = IDTs2[i];
@@ -1027,7 +1030,8 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       if (adc <= 0) continue;
 #endif
       ADCs[tb] = adc;
-      if (IAttr("UseTonkoClusterAnnotation")) {
+      //      if (IAttr("UseTonkoClusterAnnotation")) {
+      if (TonkoAnn) {
 	IDTs[tb] = 65535;
       }
       some_data++ ;	// I don't know the bytecount but I'll return something...
@@ -1037,6 +1041,7 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
+  static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   if (! fTpc) return 0;
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
@@ -1054,7 +1059,8 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
          for (Int_t i = 0; i < ncounts; i++) {
             Int_t tb = fTpc->timebin[r][p][i];
             ADCs[tb] = log8to10_table[fTpc->adc[r][p][i]]; 
-	    if (IAttr("UseTonkoClusterAnnotation")) {
+	    //	    if (IAttr("UseTonkoClusterAnnotation")) {
+	    if (TonkoAnn) {
 	      IDTs[tb] = 65535;
 	    }
             Total_data++;
