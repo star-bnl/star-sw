@@ -86,8 +86,10 @@ public:
 			const std::vector<double>* aVector);
 	void addBlockMatrix(double aWeight, unsigned int nSimple,
 			unsigned int* anIndex, double* aVector);
-	Eigen::MatrixXd getBlockMatrix(const std::vector<unsigned int> anIndex) const;
-	Eigen::MatrixXd getBlockMatrix(unsigned int aSize, unsigned int* anIndex) const;
+	Eigen::MatrixXd getBlockMatrix(
+			const std::vector<unsigned int> anIndex) const;
+	Eigen::MatrixXd getBlockMatrix(unsigned int aSize,
+			unsigned int* anIndex) const;
 	void printMatrix() const;
 
 private:

@@ -236,7 +236,8 @@ GblTrajectory::GblTrajectory(
  */
 GblTrajectory::GblTrajectory(
 		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList,
-		const Eigen::MatrixXd &extDerivatives, const Eigen::VectorXd &extMeasurements,
+		const Eigen::MatrixXd &extDerivatives,
+		const Eigen::VectorXd &extMeasurements,
 		const Eigen::MatrixXd &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
@@ -805,8 +806,8 @@ void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
  * \param [out] localCov Covariance for local parameters
  * \return error code (non-zero if trajectory not fitted successfully)
  */
-unsigned int GblTrajectory::getResults(int aSignedLabel, Eigen::VectorXd &localPar,
-		Eigen::MatrixXd &localCov) const {
+unsigned int GblTrajectory::getResults(int aSignedLabel,
+		Eigen::VectorXd &localPar, Eigen::MatrixXd &localCov) const {
 	if (not fitOK)
 		return 1;
 	std::pair<std::vector<unsigned int>, MatrixXd> indexAndJacobian =
@@ -837,8 +838,9 @@ unsigned int GblTrajectory::getResults(int aSignedLabel, Eigen::VectorXd &localP
  * \return error code (non-zero if trajectory not fitted successfully)
  */
 unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
-		unsigned int &numData, Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors,
-		Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights) {
+		unsigned int &numData, Eigen::VectorXd &aResiduals,
+		Eigen::VectorXd &aMeasErrors, Eigen::VectorXd &aResErrors,
+		Eigen::VectorXd &aDownWeights) {
 	numData = 0;
 	if (not fitOK)
 		return 1;
@@ -866,8 +868,9 @@ unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
  * \return error code (non-zero if trajectory not fitted successfully)
  */
 unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
-		unsigned int &numData, Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors,
-		Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights) {
+		unsigned int &numData, Eigen::VectorXd &aResiduals,
+		Eigen::VectorXd &aMeasErrors, Eigen::VectorXd &aResErrors,
+		Eigen::VectorXd &aDownWeights) {
 	numData = 0;
 	if (not fitOK)
 		return 1;
@@ -988,7 +991,8 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
  * \param [out] aLabelList List of labels (aLabelList[i] = i+1)
  * \return error code (non-zero if trajectory not valid (constructed successfully))
  */
-unsigned int GblTrajectory::getLabels(std::vector<unsigned int> &aLabelList) const {
+unsigned int GblTrajectory::getLabels(
+		std::vector<unsigned int> &aLabelList) const {
 	if (not constructOK)
 		return 1;
 
@@ -1492,8 +1496,9 @@ void GblTrajectory::printTrajectory(unsigned int level) const {
 void GblTrajectory::printPoints(unsigned int level) const {
 	std::cout << "GblPoints " << std::endl;
 	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
-		for (std::vector<GblPoint>::const_iterator itPoint = thePoints[iTraj].begin();
-				itPoint < thePoints[iTraj].end(); ++itPoint) {
+		for (std::vector<GblPoint>::const_iterator itPoint =
+				thePoints[iTraj].begin(); itPoint < thePoints[iTraj].end();
+				++itPoint) {
 			itPoint->printPoint(level);
 		}
 	}
@@ -1502,7 +1507,8 @@ void GblTrajectory::printPoints(unsigned int level) const {
 /// Print GblData blocks for trajectory
 void GblTrajectory::printData() const {
 	std::cout << "GblData blocks " << std::endl;
-	for (std::vector<GblData>::const_iterator itData = theData.begin(); itData < theData.end(); ++itData) {
+	for (std::vector<GblData>::const_iterator itData = theData.begin();
+			itData < theData.end(); ++itData) {
 		itData->printData();
 	}
 }

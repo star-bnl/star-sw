@@ -71,9 +71,9 @@ public:
 			bool doublePrec = false, unsigned int aSize = 2000);
 	virtual ~MilleBinary();
 	void addData(double aMeas, double aErr, unsigned int numLocal,
-            unsigned int* indLocal, double* derLocal,
-            const std::vector<int> &labGlobal,
-            const std::vector<double> &derGlobal);
+			unsigned int* indLocal, double* derLocal,
+			const std::vector<int> &labGlobal,
+			const std::vector<double> &derGlobal);
 	void writeRecord();
 
 private:

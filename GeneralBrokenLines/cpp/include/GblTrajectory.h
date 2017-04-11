@@ -97,7 +97,8 @@ public:
 			TVectorD &aDownWeights);
 #endif
 	unsigned int getLabels(std::vector<unsigned int> &aLabelList) const;
-	unsigned int getLabels(std::vector<std::vector<unsigned int> > &aLabelList) const;
+	unsigned int getLabels(
+			std::vector<std::vector<unsigned int> > &aLabelList) const;
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "", unsigned int aLabel = 0);
 	void milleOut(MilleBinary &aMille);

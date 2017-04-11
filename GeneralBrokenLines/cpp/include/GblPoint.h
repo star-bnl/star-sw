@@ -87,14 +87,16 @@ public:
 			const TMatrixD &aDerivatives);
 #endif
 	// input via Eigen
-	void addMeasurement(const Eigen::MatrixXd &aProjection, const Eigen::VectorXd &aResiduals,
+	void addMeasurement(const Eigen::MatrixXd &aProjection,
+			const Eigen::VectorXd &aResiduals,
 			const Eigen::MatrixXd &aPrecision, double minPrecision = 0.);
-	void addMeasurement(const Eigen::VectorXd &aResiduals, const Eigen::MatrixXd &aPrecision,
-			double minPrecision = 0.);
-	void addScatterer(const Eigen::Vector2d &aResiduals, const Eigen::MatrixXd &aPrecision);
+	void addMeasurement(const Eigen::VectorXd &aResiduals,
+			const Eigen::MatrixXd &aPrecision, double minPrecision = 0.);
+	void addScatterer(const Eigen::Vector2d &aResiduals,
+			const Eigen::MatrixXd &aPrecision);
 	void addLocals(const Eigen::MatrixXd &aDerivatives);
 	void addGlobals(const std::vector<int> &aLabels,
-				const Eigen::MatrixXd &aDerivatives);
+			const Eigen::MatrixXd &aDerivatives);
 	//
 	unsigned int hasMeasurement() const;
 	double getMeasPrecMin() const;
@@ -102,8 +104,8 @@ public:
 			Vector5d &aPrecision) const;
 	void getMeasTransformation(Eigen::MatrixXd &aTransformation) const;
 	bool hasScatterer() const;
-	void getScatterer(Eigen::Matrix2d &aTransformation, Eigen::Vector2d &aResiduals,
-			Eigen::Vector2d &aPrecision) const;
+	void getScatterer(Eigen::Matrix2d &aTransformation,
+			Eigen::Vector2d &aResiduals, Eigen::Vector2d &aPrecision) const;
 	void getScatTransformation(Eigen::Matrix2d &aTransformation) const;
 	unsigned int getNumLocals() const;
 	const Eigen::MatrixXd& getLocalDerivatives() const;
@@ -115,8 +117,8 @@ public:
 	unsigned int getLabel() const;
 	int getOffset() const;
 	const Matrix5d& getP2pJacobian() const;
-	void getDerivatives(int aDirection, Eigen::Matrix2d &matW, Eigen::Matrix2d &matWJ,
-			Eigen::Vector2d &vecWd) const;
+	void getDerivatives(int aDirection, Eigen::Matrix2d &matW,
+			Eigen::Matrix2d &matWJ, Eigen::Vector2d &vecWd) const;
 	void printPoint(unsigned int level = 0) const;
 
 private:
