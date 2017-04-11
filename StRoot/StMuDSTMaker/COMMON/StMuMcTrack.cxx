@@ -13,8 +13,9 @@ StMuMcTrack::StMuMcTrack() {
   memset(mBeg,0,mEnd-mBeg+1);
 }
 //________________________________________________________________________________
-StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), mId(t.id), mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
-						  mIdVx(t.start_vertex_p), mIdVxEnd(t.stop_vertex_p), mCharge(t.charge), mE(t.e), mEta(t. eta), 
+StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(),mEgLabel(t.eg_label), mPDG(t.eg_pid), mGePid(t.ge_pid),  mId(t.id),
+						  mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
+						  mIdVx(t.start_vertex_p), mIdVxEnd(t.stop_vertex_p), mCharge(t.charge), mE(t.e), mEta(t.eta), 
 						  mPxyz(t.p), mpT(t.pt), mPtot(t.ptot), 
 						  mRapidity(t.rapidity) {
   mHits[kctb] = 0xff & t.n_ctb_hit;  /* Nhits in ctb */
@@ -100,9 +101,13 @@ void StMuMcTrack::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 void StMuMcTrack::FillKFMCTrack(KFMCTrack &mcTrackKF) {
   Float_t q = Charge();
-  Int_t pdgRoot = TDatabasePDG::Instance()->ConvertGeant3ToPdg(GePid());
-  if(pdgRoot == 0 && q>0) pdgRoot = 211;
-  if(pdgRoot == 0 && q<0) pdgRoot = -211;
+  Int_t pdgRoot = Pdg();
+  if (! pdgRoot) {
+    pdgRoot = TDatabasePDG::Instance()->ConvertGeant3ToPdg(GePid());
+    if(pdgRoot == 0 && q>0) pdgRoot = 211;
+    if(pdgRoot == 0 && q<0) pdgRoot = -211;
+    mcTrackKF.SetPDG(pdgRoot);
+  }
   mcTrackKF.SetPDG( pdgRoot );
   Float_t pXYZ[3] = {Pxyz().x(), Pxyz().y(), Pxyz().z()};
   for (Int_t i = 0; i < 3; i++) {
