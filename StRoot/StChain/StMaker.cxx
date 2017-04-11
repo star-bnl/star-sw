@@ -192,9 +192,9 @@ static void doPs(const Char_t *who,const Char_t *where);
 
 //_____________________________________________________________________________
 StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
-						m_Number(0), m_LastRun(-3),
-						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
-                                                m_Mode(0),fLogger(0),fLoggerHold(0)
+						m_Mode(0),m_Number(0), m_LastRun(-3),
+						m_DebugLevel(0),m_MakeReturn(0),
+                                                fStatus(0),fLogger(0),fLoggerHold(0)
 {
    m_Attr=0;
    m_Inputs = 0;
@@ -815,17 +815,18 @@ Int_t StMaker::Finish()
       }
         LOG_QA <<
            Form("QAInfo:Maker %20s::%-20s Ast =%6.2f(%4.1f%%) Cpu =%6.2f(%4.1f%%) "
-             ,maker->ClassName(),maker->GetName()
-             ,maker->RealTime()
-             ,100*maker->RealTime()/totalRealTime
-             ,maker->CpuTime()
-             ,100*maker->CpuTime()/totalCpuTime) << endm;
-
+		,maker->ClassName(),maker->GetName()
+		,maker->RealTime()
+		,100*maker->RealTime()/totalRealTime
+		,maker->CpuTime()
+		,100*maker->CpuTime()/totalCpuTime);// << endm;
+	
       static const Char_t *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
       TString tail("");
       for (Int_t j=0;j<=kStFatal;j++) {
         if (fTallyMaker[j]) tail += Form(" %s=%d",ee[j],fTallyMaker[j]);}
-      if (tail != "") LOG_QA << (const Char_t *) tail << endm;     
+      if (tail != "") LOG_QA << (const Char_t *) tail;// << endm;     
+      LOG_QA << endm;
 #else
      if (fst) {
         fst=0;
