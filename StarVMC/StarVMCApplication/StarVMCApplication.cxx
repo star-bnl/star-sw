@@ -811,8 +811,12 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
     TString Line;
     mode[m] = 0;
     for (Int_t j = 0; j < 3; j++) {
+      if (! modes[m][j]) continue;
       p = TDatabasePDG::Instance()->GetParticle(modes[m][j]);
-      if (! p) { LOG_ERROR << "p for " << modes[m][j] << " is not found" << endm; continue;}
+      if (! p) { 
+	LOG_ERROR << "p for " << modes[m][j] << " is not found" << endm; 
+	continue;
+      }
       pdg = p->PdgCode();
       Line += modes[m][j];
       Line += " ";
