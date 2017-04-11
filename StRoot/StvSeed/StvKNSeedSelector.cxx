@@ -147,7 +147,7 @@ int StvKNAux::Test(int idx) const
   assert (fabs(dot-1)<1e-4 && "mDir is wrong");
   for (int i=0;i<kKNumber;i++) { 
     assert(mNbor[i]!=idx);
-    assert(abs(mNbor[i])<10000 && "Wrong mNbor");
+    assert(abs(mNbor[i])<1000000 && "Wrong mNbor");
     assert( mNbor[i]< 0 || (mDist[i]>=0    && mDist[i]< 100 ));
     assert( mNbor[i]>=0 || (mDist[i]>=1e10 && mDist[i]<=1e11));
   }
