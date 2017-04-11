@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -29,12 +29,12 @@
 
 #include <time.h>
 #include "example1.h"
-#include "TRandom3.h"
 #include "GblTrajectory.h"
 
 using namespace gbl;
+using namespace Eigen;
 
-TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
+Matrix5d gblSimpleJacobian(double ds, double cosl, double bfac) {
 	/// Simple jacobian: quadratic in arc length difference
 	/**
 	 * \param [in] ds    (3D) arc-length
@@ -42,13 +42,36 @@ TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
 	 * \param [in] bfac  Bz*c
 	 * \return jacobian
 	 */
-	TMatrixD jac(5, 5);
-	jac.UnitMatrix();
-	jac[1][0] = -bfac * ds * cosl;
-	jac[3][0] = -0.5 * bfac * ds * ds * cosl;
-	jac[3][1] = ds;
-	jac[4][2] = ds;
+	Matrix5d jac;
+	jac.setIdentity();
+	jac(1, 0) = -bfac * ds * cosl;
+	jac(3, 0) = -0.5 * bfac * ds * ds * cosl;
+	jac(3, 1) = ds;
+	jac(4, 2) = ds;
 	return jac;
+}
+
+double unrm() {
+	///  unit normal distribution, Box-Muller method, polar form
+	static double unrm2 = 0.0;
+	static bool cached = false;
+	if (!cached) {
+		double x, y, r;
+		do {
+			x = 2.0 * rand() / RAND_MAX - 1;
+			y = 2.0 * rand() / RAND_MAX - 1;
+			r = x * x + y * y;
+		} while (r == 0.0 || r > 1.0);
+		// (x,y) in unit circle
+		double d = sqrt(-2.0 * log(r) / r);
+		double unrm1 = x * d;
+		unrm2 = y * d;
+		cached = true;
+		return unrm1;
+	} else {
+		cached = false;
+		return unrm2;
+	}
 }
 
 void example1() {
@@ -74,11 +97,12 @@ void example1() {
 	 */
 
 //MP	MilleBinary mille; // for producing MillePede-II binary file
-	unsigned int nTry = 10000; //: number of tries
+	unsigned int nTry = 1000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
-	std::cout << " Gbltst $Rev: 119 $ " << nTry << ", " << nLayer << std::endl;
+	std::cout << " Gbltst-eigen $Rev: 127 $ " << nTry << ", " << nLayer
+			<< std::endl;
 
-	TRandom *r = new TRandom3();
+	srand(4711);
 
 	clock_t startTime = clock();
 // track direction
@@ -88,45 +112,36 @@ void example1() {
 	double cosPhi = sqrt(1.0 - sinPhi * sinPhi);
 // tDir = (cosLambda * cosPhi, cosLambda * sinPhi, sinLambda)
 // U = Z x T / |Z x T|, V = T x U
-	TMatrixD uvDir(2, 3);
-	uvDir[0][0] = -sinPhi;
-	uvDir[0][1] = cosPhi;
-	uvDir[0][2] = 0.;
-	uvDir[1][0] = -sinLambda * cosPhi;
-	uvDir[1][1] = -sinLambda * sinPhi;
-	uvDir[1][2] = cosLambda;
+	Matrix<double, 2, 3> uvDir;
+	uvDir(0, 0) = -sinPhi;
+	uvDir(0, 1) = cosPhi;
+	uvDir(0, 2) = 0.;
+	uvDir(1, 0) = -sinLambda * cosPhi;
+	uvDir(1, 1) = -sinLambda * sinPhi;
+	uvDir(1, 2) = cosLambda;
 // measurement resolution
-	TVectorD measErr(2);
-	measErr[0] = 0.001;
-	measErr[1] = 0.001;
-	TVectorD measPrec(2); // (independent) precisions
-	measPrec[0] = 1.0 / (measErr[0] * measErr[0]);
-	measPrec[1] = 1.0 / (measErr[1] * measErr[1]);
-	TMatrixDSym measInvCov(2); // inverse covariance matrix
-	measInvCov.Zero();
-	measInvCov[0][0] = measPrec[0];
-	measInvCov[1][1] = measPrec[1];
+	Vector2d measErr;
+	measErr << 0.001, 0.001;
+	Vector2d measPrec; // (independent) precisions
+	measPrec << 1.0 / (measErr(0) * measErr(0)), 1.0 / (measErr(1) * measErr(1));
+	Matrix2d measInvCov; // inverse covariance matrix
+	measInvCov.setZero();
+	measInvCov(0, 0) = measPrec[0];
+	measInvCov(1, 1) = measPrec[1];
 // scattering error
-	TVectorD scatErr(2);
-	scatErr[0] = 0.001;
-	scatErr[1] = 0.001;
-	TVectorD scatPrec(2);
-	scatPrec[0] = 1.0 / (scatErr[0] * scatErr[0]);
-	scatPrec[1] = 1.0 / (scatErr[1] * scatErr[1]);
+	Vector2d scatErr;
+	scatErr << 0.001, 0.001;
+	Vector2d scatPrec;
+	scatPrec << 1.0 / (scatErr(0) * scatErr(0)), 1.0 / (scatErr(1) * scatErr(1));
 // (RMS of) CurviLinear track parameters (Q/P, slopes, offsets)
-	TVectorD clPar(5);
-	TVectorD clErr(5);
-	clErr[0] = 0.001;
-	clErr[1] = -0.1;
-	clErr[2] = 0.2;
-	clErr[3] = -0.15;
-	clErr[4] = 0.25;
-	TMatrixDSym clCov(5), clSeed(5);
-	unsigned int seedLabel = 0;
+	Vector5d clPar;
+	Vector5d clErr;
+	clErr << 0.001, -0.1, 0.2, -0.15, 0.25;
+	Matrix5d clCov, clSeed;
+	unsigned int seedLabel = 99999;
 // additional parameters
-	TVectorD addPar(2);
-	addPar[0] = 0.0025;
-	addPar[1] = -0.005;
+	Vector2d addPar;
+	addPar << 0.0025, -0.005;
 	std::vector<int> globalLabels;
 	globalLabels.push_back(4711);
 	globalLabels.push_back(4712);
@@ -146,21 +161,21 @@ void example1() {
 	for (unsigned int iTry = 1; iTry <= nTry; ++iTry) {
 		// curvilinear track parameters
 		for (unsigned int i = 0; i < 5; ++i) {
-			clPar[i] = clErr[i] * r->Gaus();
+			clPar[i] = clErr[i] * unrm();
 		}
-		clCov.Zero();
+		clCov.setZero();
 		for (unsigned int i = 0; i < 5; ++i) {
-			clCov[i][i] = 1.0 * (clErr[i] * clErr[i]);
+			clCov(i, i) = 1.0 * (clErr[i] * clErr[i]);
 		}
 //		std::cout << " Try " << iTry << ":" << clPar << std::endl;
-		TMatrixD addDer(2, 2);
-		addDer.Zero();
-		addDer[0][0] = 1.;
-		addDer[1][1] = 1.;
+		Matrix2d addDer;
+		addDer.setZero();
+		addDer(0, 0) = 1.;
+		addDer(1, 1) = 1.;
 // arclength
 		double s = 0.;
-		TMatrixD jacPointToPoint(5, 5);
-		jacPointToPoint.UnitMatrix();
+		Matrix5d jacPointToPoint;
+		jacPointToPoint.setIdentity();
 // create list of points
 		std::vector<GblPoint> listOfPoints;
 		listOfPoints.reserve(2 * nLayer);
@@ -170,113 +185,113 @@ void example1() {
 //     measurement directions
 			double sinStereo = (iLayer % 2 == 0) ? 0. : 0.1;
 			double cosStereo = sqrt(1.0 - sinStereo * sinStereo);
-			TMatrixD mDirT(3, 2);
-			mDirT.Zero();
-			mDirT[1][0] = cosStereo;
-			mDirT[2][0] = sinStereo;
-			mDirT[1][1] = -sinStereo;
-			mDirT[2][1] = cosStereo;
+			Matrix<double, 3, 2> mDirT;
+			mDirT.setZero();
+			mDirT(1, 0) = cosStereo;
+			mDirT(2, 0) = sinStereo;
+			mDirT(1, 1) = -sinStereo;
+			mDirT(2, 1) = cosStereo;
 // projection measurement to local (curvilinear uv) directions (duv/dm)
-			TMatrixD proM2l = uvDir * mDirT;
+			Matrix2d proM2l = uvDir * mDirT;
 // projection local (uv) to measurement directions (dm/duv)
-			TMatrixD proL2m = proM2l;
-			proL2m.Invert();
-// point with (independent) measurements (in measurement system)
-			GblPoint point(jacPointToPoint);
-// measurement - prediction in measurement system with error
-			TVectorD meas = proL2m * clPar.GetSub(3, 4);
-//MP			meas += addDer * addPar; // additional parameters
+			Matrix2d proL2m = proM2l.inverse();
+			// point with (independent) measurements (in measurement system)
+			GblPoint pointMeas(jacPointToPoint);
+			// measurement - prediction in measurement system with error
+			Vector2d meas = proL2m * clPar.tail(2);
+			//MP			meas += addDer * addPar; // additional parameters
 			for (unsigned int i = 0; i < 2; ++i) {
-				meas[i] += measErr[i] * r->Gaus();
+				meas[i] += measErr[i] * unrm();
 			}
-			point.addMeasurement(proL2m, meas, measPrec);
+			pointMeas.addMeasurement(proL2m, meas, measPrec);
 			/* point with (correlated) measurements (in local system)
 			 GblPoint point(jacPointToPoint);
 			 // measurement - prediction in local system with error
-			 TVectorD meas(2);
+			 Vector2d meas;
 			 for (unsigned int i = 0; i < 2; ++i) {
-			 meas[i] = measErr[i] * r->Gaus() + addDer(i,0) * 0.0075;
+			 meas[i] = measErr[i] * unrm(); // + addDer(i, 0) * 0.0075;
 			 }
-			 meas = proM2l * meas + clPar.GetSub(3, 4);
-			 TMatrixDSym localInvCov = measInvCov;
-			 localInvCov.SimilarityT(proL2m);
-			 point.addMeasurement(meas, localInvCov);
+			 meas = proM2l * meas + clPar.tail<2>();
+			 Matrix2d localInvCov = proL2m.adjoint() * measInvCov * proL2m;
+			 point.addMeasurement(meas, localInvCov); */
 
-			 // additional local parameters? */
+			// additional local parameters?
 //			point.addLocals(addDer);
 //MP			point.addGlobals(globalLabels, addDer);
 			addDer *= -1.; // Der flips sign every measurement
 // add point to trajectory
-			listOfPoints.push_back(point);
+			listOfPoints.push_back(pointMeas);
 			unsigned int iLabel = listOfPoints.size();
 			if (iLabel == seedLabel) {
-				clSeed = clCov.Invert();
+				clSeed = clCov.inverse();
 			}
 // propagate to scatterer
 			jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac);
+			//jac2 = gblSimpleJacobian2(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
-			clCov = clCov.Similarity(jacPointToPoint);
+			clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
 			s += step;
 			if (iLayer < nLayer - 1) {
-				TVectorD scat(2);
-				scat.Zero();
+				Vector2d scat(0., 0.);
 				// point with scatterer
-				GblPoint point(jacPointToPoint);
-				point.addScatterer(scat, scatPrec);
-				listOfPoints.push_back(point);
+				GblPoint pointScat(jacPointToPoint);
+				pointScat.addScatterer(scat, scatPrec);
+				listOfPoints.push_back(pointScat);
 				iLabel = listOfPoints.size();
 				if (iLabel == seedLabel) {
-					clSeed = clCov.Invert();
+					clSeed = clCov.inverse();
 				}
 				// scatter a little
 				for (unsigned int i = 0; i < 2; ++i) {
-					clPar[i + 1] += scatErr[i] * r->Gaus();
-					clCov[i + 1] += scatErr[i] * scatErr[i];
+					clPar[i + 1] += scatErr[i] * unrm();
+					clCov(i + 1, i + 1) += scatErr[i] * scatErr[i];
 				}
 				// propagate to next measurement layer
 				clPar = jacPointToPoint * clPar;
-				clCov = clCov.Similarity(jacPointToPoint);
+				clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
 				s += step;
 			}
 		}
 //
 		// create trajectory
-		//GblTrajectory traj(listOfPoints);
-		GblTrajectory traj(listOfPoints, seedLabel, clSeed); // with external seed
+		GblTrajectory traj(listOfPoints);
+		//GblTrajectory traj(listOfPoints, seedLabel, clSeed); // with external seed
 		//traj.printPoints();
-		if (not traj.isValid()) {
-			std::cout << " Invalid GblTrajectory -> skip" << std::endl;
-			continue;
-		}
+		/*
+		 if (not traj.isValid()) {
+		 std::cout << " Invalid GblTrajectory -> skip" << std::endl;
+		 continue;
+		 }*/
 // fit trajectory
 		double Chi2;
 		int Ndf;
 		double lostWeight;
 		traj.fit(Chi2, Ndf, lostWeight);
-//		std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
-		/*		 TVectorD aCorrection(5);
-		 TMatrixDSym aCovariance(5);
+		//std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
+		/* look at (track parameter) corrections
+		 VectorXd aCorrection(5);
+		 MatrixXd aCovariance(5, 5);
 		 traj.getResults(1, aCorrection, aCovariance);
-		 std::cout << " cor " << std::endl;
-		 aCorrection.Print();
-		 std::cout << " cov " << std::endl;
-		 aCovariance.Print(); */
-		// look at residuals
-		for (unsigned int label = 1; label <= listOfPoints.size(); ++label) {
-			unsigned int numData = 0;
-			//std::cout << " measResults, label " << label << std::endl;
-			TVectorD residuals(2), measErr(2), resErr(2), downWeights(2);
-			traj.getMeasResults(label, numData, residuals, measErr, resErr,
-					downWeights);
-			//std::cout << " measResults, numData " << numData << std::endl;
-			/* residuals.Print(); measErr.Print(); resErr.Print();
-			 for (unsigned int i = 0; i < numData; ++i) {
-			 std::cout << " measResults " << label << " " << i << " " << residuals[i] << " " << measErr[i] << " " << resErr[i] << std::endl;
-			 } */
-		}
+		 std::cout << " cor " << std::endl << aCorrection << std::endl;
+		 std::cout << " cov " << std::endl << aCovariance << std::endl;
+		 */
+		/* look at residuals
+		 for (unsigned int label = 1; label <= listOfPoints.size(); ++label) {
+		 unsigned int numData = 0;
+		 std::cout << " measResults, label " << label << std::endl;
+		 VectorXd residuals(2), measErr(2), resErr(2), downWeights(2);
+		 traj.getMeasResults(label, numData, residuals, measErr, resErr,
+		 downWeights);
+		 std::cout << " measResults, numData " << numData << std::endl;
+		 for (unsigned int i = 0; i < numData; ++i) {
+		 std::cout << " measResults " << label << " " << i << " "
+		 << residuals[i] << " " << measErr[i] << " " << resErr[i]
+		 << std::endl;
+		 }
+		 } */
 // debug printout
-		//traj.printTrajectory();
-		//traj.printPoints();
+		//traj.printTrajectory(1);
+		//traj.printPoints(1);
 		//traj.printData();
 // write to MP binary file
 //MP		traj.milleOut(mille);
@@ -285,6 +300,7 @@ void example1() {
 		LostSum += lostWeight;
 		numFit++;
 	}
+
 	clock_t endTime = clock();
 	double diff = endTime - startTime;
 	double cps = CLOCKS_PER_SEC;

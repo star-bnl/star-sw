@@ -169,7 +169,7 @@
     return
 :e: print *,' gstar_AgUsOPEN error openning file ',file(1:L)
    end
-
+#if 0
 *************************************************************************
    Subroutine  AgUsRead(ier)
 *                                                                       *
@@ -216,7 +216,7 @@
    call GHeader
 *
    End
- 
+#endif 
 *************************************************************************
    Subroutine    gstar_ReadCNT(Igate)
    implicit      none

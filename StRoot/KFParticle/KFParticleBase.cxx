@@ -608,6 +608,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     float dChi2 = (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
            +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
            +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]; 
+    if (dChi2 > 1e10) return;
 //     if(fNDF > 100 && dChi2 > 9) return;
     
     float K[3][3];

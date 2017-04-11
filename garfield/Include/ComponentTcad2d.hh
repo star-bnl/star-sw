@@ -18,8 +18,13 @@ class ComponentTcad2d : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
                      int& status);
+
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) {
+
+    double v = 0.;
+    ElectricField(x, y, z, ex, ey, ez, v, m, status);
+  }
 
   void WeightingField(const double x, const double y, const double z,
                             double& wx, double& wy, double& wz,
@@ -33,80 +38,87 @@ class ComponentTcad2d : public ComponentBase {
   void SetRangeZ(const double zmin, const double zmax);
 
   // Import mesh and field map from files.
-  bool Initialise(const std::string gridfilename,
-                  const std::string datafilename);
+  bool Initialise(const std::string& gridfilename,
+                  const std::string& datafilename);
 
   // List all currently defined regions.
-  void PrintRegions();
+  void PrintRegions() const;
   // Get the number of regions in the device.
-  int GetNumberOfRegions() const { return nRegions; }
-  void GetRegion(const int i, std::string& name, bool& active);
-  void SetDriftRegion(const int ireg);
-  void UnsetDriftRegion(const int ireg);
+  unsigned int GetNumberOfRegions() const { return m_regions.size(); }
+  void GetRegion(const unsigned int i, std::string& name, bool& active) const;
+  void SetDriftRegion(const unsigned int ireg);
+  void UnsetDriftRegion(const unsigned int ireg);
   // Set/get the medium for a given region.
-  void SetMedium(const int ireg, Medium* m);
-  Medium* GetMedium(const unsigned int& ireg) const;
+  void SetMedium(const unsigned int ireg, Medium* m);
+  Medium* GetMedium(const unsigned int ireg) const;
 
   // Retrieve information about the mesh.
-  int GetNumberOfElements() const { return nElements; }
-  bool GetElement(const int i, double& vol, double& dmin, double& dmax,
-                  int& type);
-  bool GetElement(const int i, double& vol, double& dmin, double& dmax,
+  unsigned int GetNumberOfElements() const { return m_elements.size(); }
+  bool GetElement(const unsigned int i, 
+                  double& vol, double& dmin, double& dmax,
+                  int& type) const;
+  bool GetElement(const unsigned int i, double& vol, double& dmin, double& dmax,
                   int& type, int& node1, int& node2, int& node3, int& node4,
-                  int& reg);
-  int GetNumberOfNodes() const { return nVertices; }
-  bool GetNode(const int i, double& x, double& y, double& v, double& ex,
-               double& ey);
+                  int& reg) const;
+  unsigned int GetNumberOfNodes() const { return m_vertices.size(); }
+  bool GetNode(const unsigned int i, double& x, double& y, double& v, 
+               double& ex, double& ey) const;
 
   // Mobilities
   bool GetMobility(const double x, const double y, const double z, double& emob,
                    double& hmob);
 
   // Velocity field maps
-  void ElectronVelocity(const double xin, const double yin,
-                                    const double zin, double& vx, double& vy,
-                                    double& vz, Medium*& m, int& status);
-  void HoleVelocity(const double xin, const double yin,
-                                    const double zin, double& vx, double& vy,
-                                    double& vz, Medium*& m, int& status);
+  void ElectronVelocity(const double x, const double y, const double z,
+                        double& vx, double& vy, double& vz,
+                        Medium*& m, int& status);
+  void HoleVelocity(const double x, const double y, const double z,
+                    double& vx, double& vy, double& vz,
+                    Medium*& m, int& status);
   // Lifetime field maps
-  bool GetElectronLifetime(const double x, const double y, const double z, double& etau);
-  bool GetHoleLifetime(const double x, const double y, const double z, double& htau);
+  bool GetElectronLifetime(const double x, const double y, const double z, 
+                           double& etau);
+  bool GetHoleLifetime(const double x, const double y, const double z, 
+                       double& htau);
 
   // Trapping 
-  int GetNumberOfDonors(){return nDonor;}
-  int GetNumberOfAcceptors(){return nAcceptor;}
-  bool GetDonorOccupation(const double x, const double y, const double z, const int donorNumber,
-		  double& occupationFraction);
-  bool GetAcceptorOccupation(const double x, const double y, const double z, const int acceptorNumber,
-                   double& occupationFraction);
-  bool SetDonorXsec(const int donorNumber, const double eXsec, const double hXsec);
-  bool SetAcceptorXsec(const int acceptorNumber, const double eXsec, const double hXsec);
-  bool SetDonorConc(const int donorNumber, const double concentration);
-  bool SetAcceptorConc(const int acceptorNumber, const double concentration);
+  int GetNumberOfDonors() { return m_donors.size(); }
+  int GetNumberOfAcceptors() { return m_acceptors.size(); }
+
+  bool GetDonorOccupation(const double x, const double y, const double z, 
+                          const unsigned int donorNumber, 
+                          double& occupationFraction);
+  bool GetAcceptorOccupation(const double x, const double y, const double z, 
+                             const unsigned int acceptorNumber,
+                             double& occupationFraction);
+  bool SetDonor(const unsigned int donorNumber, 
+                const double eXsec, const double hxSec, 
+                const double concentration);
+  bool SetAcceptor(const unsigned int acceptorNumber, 
+                   const double eXsec, const double hxSec, 
+                   const double concentration);
+
   bool ElectronAttachment(const double x, const double y, const double z,
                           double& eta);
   bool HoleAttachment(const double x, const double y, const double z,
-                          double& eta);
+                      double& eta);
 
  private:
   // Max. number of vertices per element
   static const int nMaxVertices = 4;
 
   // Regions
-  int nRegions;
-  struct region {
+  struct Region {
     // Name of region (from Tcad)
     std::string name;
     // Flag indicating if the region is active (i. e. a drift medium)
     bool drift;
     Medium* medium;
   };
-  std::vector<region> regions;
+  std::vector<Region> m_regions;
 
   // Vertices
-  int nVertices;
-  struct vertex {
+  struct Vertex {
     // Coordinates [cm]
     double x, y;
     // Potential [V] and electric field [V / cm]
@@ -121,14 +133,11 @@ class ComponentTcad2d : public ComponentBase {
     // Trap occupations [dimensionless] 
     std::vector<float> donorOcc;
     std::vector<float> acceptorOcc;
-    // Flag indicating if vertex belongs to more than one region
-    bool isShared;
   };
-  std::vector<vertex> vertices;
+  std::vector<Vertex> m_vertices;
 
   // Elements
-  int nElements;
-  struct element {
+  struct Element {
     // Indices of vertices
     int vertex[nMaxVertices];
     // Type of element
@@ -141,65 +150,74 @@ class ComponentTcad2d : public ComponentBase {
     int type;
     // Associated region
     int region;
-    int nNeighbours;
     std::vector<int> neighbours;
+    // Bounding box
+    double xmin, xmax;
+    double ymin, ymax;
   };
-  std::vector<element> elements;
+  std::vector<Element> m_elements;
 
+  struct Defect {
+    // Electron cross-section
+    double xsece;
+    // Hole cross-section
+    double xsech;
+    // Concentration
+    double conc;
+  };
+  std::vector<Defect> m_donors;
+  std::vector<Defect> m_acceptors;
+  
   // Available data.
-  bool hasPotential;
-  bool hasField;
-  bool hasElectronMobility;
-  bool hasHoleMobility;
+  bool m_hasPotential;
+  bool m_hasField;
+  bool m_hasElectronMobility;
+  bool m_hasHoleMobility;
+  bool m_hasElectronVelocity;
+  bool m_hasHoleVelocity; 
+  bool m_hasElectronLifetime;
+  bool m_hasHoleLifetime;
 
-  bool hasElectronVelocity;
-  bool hasHoleVelocity; 
-  bool hasElectronLifetime;
-  bool hasHoleLifetime;
-
-  // Number of available traps
-  int nDonor;
-  int nAcceptor;
-
-  // List of cross-sections and trap concentrations
-  std::vector<double> donorElectronXsec;
-  std::vector<double> donorHoleXsec;
-  std::vector<double> acceptorElectronXsec;
-  std::vector<double> acceptorHoleXsec;
-  std::vector<double> donorConc;
-  std::vector<double> acceptorConc;
-
-  // Are all the crossections and concentrations are valid and set
-  bool validXsec;
-  bool validConc;
+  // Are all the cross-sections and concentrations valid and set.
+  bool m_validTraps;
 
   // Voltage range
-  double pMin, pMax;
+  double m_pMin, m_pMax;
 
   // Bounding box
-  bool hasRangeZ;
-  double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
-  double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+  bool m_hasRangeZ;
+  double m_xMinBB, m_yMinBB, m_zMinBB;
+  double m_xMaxBB, m_yMaxBB, m_zMaxBB;
 
   // Element from the previous call
-  int lastElement;
-  // Shape functions for interpolation
-  // (local coordinates)
-  double w[nMaxVertices];
+  int m_lastElement;
 
   // Reset the component
   void Reset();
   // Periodicities
   void UpdatePeriodicity();
 
-  bool CheckRectangle(const double x, const double y, const int i);
-  bool CheckTriangle(const double x, const double y, const int i);
-  bool CheckLine(const double x, const double y, const int i);
+  // Check whether a point is inside a given element and calculate the  
+  // shape functions if it is.
+  bool CheckElement(const double x, const double y,
+                    const Element& element, double w[nMaxVertices]) const;
+  bool CheckRectangle(const double x, const double y, const Element& element,
+                      double w[nMaxVertices]) const;
+  bool CheckTriangle(const double x, const double y, const Element& element,
+                     double w[nMaxVertices]) const;
+  bool CheckLine(const double x, const double y, const Element& element,
+                 double w[nMaxVertices]) const;
 
-  bool LoadGrid(const std::string gridfilename);
-  bool LoadData(const std::string datafilename);
+  bool LoadGrid(const std::string& gridfilename);
+  bool LoadData(const std::string& datafilename);
+  bool ReadDataset(std::ifstream& datafile, const std::string& dataset);
   void FindNeighbours();
   void Cleanup();
+
+  int FindRegion(const std::string& name) const;
+
+  void MapCoordinates(double& x, double& y, bool& xmirr, bool& ymirr) const;
+  bool CheckTraps() const;
 };
 }
 #endif

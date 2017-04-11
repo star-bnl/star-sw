@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="LcKppi" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+  setenv STARFPE NO
+  starver .DEV2
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set N     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set name  = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    exit 1;
+  endif
+#  set name = "LcKppi";
+  set base = ${name}_${rung};
+  set file = ${base}.MuDst.root
+  set logFile  = ${base}B.log
+  echo "${file}"
+  if ( ! -r ${file}) then
+    root.exe -q -b -x 'MakeLcKppi.C('${N}',"'${name}'",'${rung}')' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:RunId.pl 1 20 100 LcKppi" />
+</job>

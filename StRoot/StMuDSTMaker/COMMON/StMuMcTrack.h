@@ -13,6 +13,7 @@ class StMuMcTrack : public TObject {
   StMuMcTrack();
   virtual ~StMuMcTrack() {}
   Int_t                 GePid()        const {return mGePid;} /* GEANT particle id */	        
+  Int_t                 Pdg()          const {return mPDG;}
   Int_t           	Id()           const {return mId;}    /* primary key */		       
   Bool_t          	IsShower()     const {return mIsShower;} /* 1 if shower track, 0 if not */
   Int_t                 NoHits()       const {Int_t n = No_tpc_hit(); for (Int_t i = ktpc + 1; i < ktpcR; i++) n+= NoHits(i); return n;}
@@ -50,12 +51,15 @@ class StMuMcTrack : public TObject {
   Float_t               pT         ()  const {return mpT;         } /* Transverse momentum */	 	   
   Float_t        	Ptot       ()  const {return mPtot;       } /* Total momentum */	 	   
   Float_t        	Rapidity   ()  const {return mRapidity;   } /* Rapidity */                        
+  void                  SetPdg(Int_t m)      {mPDG = m;}
   virtual void          Print(Option_t* option = "") const;  ///< Print track info
   static Int_t          CorrectGePid(Int_t gePid);
   const Char_t         *GeName();
   void                  FillKFMCTrack(KFMCTrack &mcTrackKF);
  private:
   Char_t         mBeg[1];      //!
+  Int_t          mEgLabel;     /* generator track label (0 if GEANT track) */
+  Int_t          mPDG;         /* PDG,  */
   Int_t          mGePid;       /* GEANT particle id */
   Int_t          mId;          /* primary key */
   Bool_t         mIsShower;    /* 1 if shower track, 0 if not */
@@ -71,7 +75,7 @@ class StMuMcTrack : public TObject {
   Float_t        mRapidity;    /* Rapidity */
   Char_t         mEnd[1];      //!
   StThreeVectorF mPxyz;        /* Momentum */
-  ClassDef(StMuMcTrack,3)
+  ClassDef(StMuMcTrack,4)
 };
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif

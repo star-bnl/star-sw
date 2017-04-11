@@ -53,10 +53,11 @@
         <!-- <param name="StringToCount" value="My string to filter out pattern"/>  -->
 <!--        <param name="StringToCount" value="StageID="/> -->
 <!--        <param name="RepeatMessageQuote" value="0"/> -->
+      <param name="RepeatMessageQuote" value="0"/>
     </filter>
      <filter class="StringMatchFilter">
 <!--  
-       Define the pattern to skip the embedded jiob tracking messages those contain the pattern 
+       Define the pattern to skip the embedded job tracking messages those contain the pattern 
                         "StepEventId" 
 -->
        <param name="StringToMatch" value="StageID=" /> 

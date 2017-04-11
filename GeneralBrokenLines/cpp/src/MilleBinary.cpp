@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -62,7 +62,7 @@ MilleBinary::~MilleBinary() {
 /**
  * \param [in] aMeas Value
  * \param [in] aErr Error
- * \param [out] numLocal Number of local labels/derivatives
+ * \param [in] numLocal Number of local labels/derivatives
  * \param [in] indLocal Array of labels of local parameters
  * \param [in] derLocal Array of derivatives for local parameters
  * \param [in] labGlobal List of labels of global parameters

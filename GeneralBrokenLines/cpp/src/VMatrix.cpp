@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -362,44 +362,44 @@ unsigned int VSymMatrix::invert() {
 
 	unsigned int nrank = 0;
 	for (int i = 1; i <= nSize; ++i) { // start of loop
-		int k = 0;
+		int kp = 0;
 		double vkk = 0.0;
 
-		int j = first;
+		int jp = first;
 		int previous = 0;
 		int last = previous;
 		// look for pivot
-		while (j > 0) {
-			int jj = (j * j + j) / 2 - 1;
-			if (fabs(theVec[jj]) > std::max(fabs(vkk), eps * diag[j - 1])) {
+		while (jp > 0) {
+			int jj = (jp * jp + jp) / 2 - 1;
+			if (fabs(theVec[jj]) > std::max(fabs(vkk), eps * diag[jp - 1])) {
 				vkk = theVec[jj];
-				k = j;
+				kp = jp;
 				last = previous;
 			}
-			previous = j;
-			j = next[j - 1];
+			previous = jp;
+			jp = next[jp - 1];
 		}
 		// pivot found
-		if (k > 0) {
-			int kk = (k * k + k) / 2 - 1;
+		if (kp > 0) {
+			int kk = (kp * kp + kp) / 2 - 1;
 			if (last <= 0) {
-				first = next[k - 1];
+				first = next[kp - 1];
 			} else {
-				next[last - 1] = next[k - 1];
+				next[last - 1] = next[kp - 1];
 			}
-			next[k - 1] = 0; // index is used, reset
+			next[kp - 1] = 0; // index is used, reset
 			nrank++; // increase rank and ...
 
 			vkk = 1.0 / vkk;
 			theVec[kk] = -vkk;
-			int jk = kk - k;
+			int jk = kk - kp;
 			int jl = -1;
 			for (int j = 1; j <= nSize; ++j) { // elimination
-				if (j == k) {
+				if (j == kp) {
 					jk = kk;
 					jl += j;
 				} else {
-					if (j < k) {
+					if (j < kp) {
 						++jk;
 					} else {
 						jk += j - 1;
@@ -407,16 +407,16 @@ unsigned int VSymMatrix::invert() {
 
 					double vjk = theVec[jk];
 					theVec[jk] = vkk * vjk;
-					int lk = kk - k;
-					if (j >= k) {
-						for (int l = 1; l <= k - 1; ++l) {
+					int lk = kk - kp;
+					if (j >= kp) {
+						for (int l = 1; l <= kp - 1; ++l) {
 							++jl;
 							++lk;
 							theVec[jl] -= theVec[lk] * vjk;
 						}
 						++jl;
 						lk = kk;
-						for (int l = k + 1; l <= j; ++l) {
+						for (int l = kp + 1; l <= j; ++l) {
 							++jl;
 							lk += l - 1;
 							theVec[jl] -= theVec[lk] * vjk;

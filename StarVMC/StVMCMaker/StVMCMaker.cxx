@@ -147,6 +147,7 @@ StVMCMaker::Make
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
 #include "StarVMCDetectorSet.h"
+#include "TTreeIter.h"
 ClassImp(StVMCMaker);
 
 StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
@@ -159,11 +160,11 @@ Int_t StVMCMaker::Init() {
   if (! fgGeant3) {
     fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
   }
-  gMessMgr->Info() << "StVMCMaker::Init Geant3 has been created." << endm;
+  LOG_INFO << "StVMCMaker::Init Geant3 has been created." << endm;
   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (! IAttr("VMCPassive")) {
-    gMessMgr->Info() << "StVMCMaker::InitRun Active mode" << endm; 
+    LOG_INFO << "StVMCMaker::InitRun Active mode" << endm; 
     TString CintF(SAttr("GeneratorFile"));
     if (CintF != "") {
       static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
@@ -181,6 +182,21 @@ Int_t StVMCMaker::Init() {
       gInterpreter->ProcessLine(command,&ee);
       assert(!ee);
     } 
+    TString MuDstF(SAttr("MuDstFile"));
+    if (MuDstF != "") {
+      TFile *f = TFile::Open(MuDstF);
+      if (! f) {
+	LOG_ERROR << MuDstF.Data() << " file has not been found" << endm;
+      }
+      TTree *tree = (TTree *) f->Get("MuDst");
+      if (! tree) {
+	LOG_ERROR << "MuDst is not found in " << MuDstF.Data() << endm;
+      } else {
+	fMuDstIter = new TTreeIter();
+	fMuDstIter->AddFile(MuDstF);
+      }
+      SafeDelete(f);
+    }
     StarMCPrimaryGenerator *generator = StarMCPrimaryGenerator::Instance();
     if (! generator) {
       if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
@@ -229,7 +245,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
      ((StVMCMaker *)this)->AddConst(fVolume);
      if (Debug() > 1) fVolume->ls(3);
   }
-  gMessMgr->Info() << "StVMCMaker::InitRun SetMagField set as StarMagField" 
+  LOG_INFO << "StVMCMaker::InitRun SetMagField set as StarMagField" 
 		   << " with Map: " << StarMagField::Instance()->GetMap()
 		   << ",Factor: " << StarMagField::Instance()->GetFactor() 
 		   << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
@@ -237,20 +253,22 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,1)
   fgGeant3->SetMagField(StarMagField::Instance());
 #endif
-  if (IAttr("VMCPassive"))  {gMessMgr->Info() << "StVMCMaker::InitRun Passive   mode" << endm;} 
-  else                      {gMessMgr->Info() << "StVMCMaker::InitRun Active    mode" << endm;
-    if (IAttr("Embedding")) {gMessMgr->Info() << "StVMCMaker::InitRun Embedding mode" << endm;}
+  if (IAttr("VMCPassive"))  {LOG_INFO << "StVMCMaker::InitRun Passive   mode" << endm;} 
+  else                      {LOG_INFO << "StVMCMaker::InitRun Active    mode" << endm;
+    if (IAttr("Embedding")) {LOG_INFO << "StVMCMaker::InitRun Embedding mode" << endm;}
     else {
-      gMessMgr->Info() << "StVMCMaker::InitRun Standalone run" << endm;
+      LOG_INFO << "StVMCMaker::InitRun Standalone run" << endm;
       fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
       if (!fEvtHddr) {                            // Standalone run
 	fEvtHddr = new StEvtHddr(m_ConstSet);
 	SetOutput(fEvtHddr);	                //Declare this "EvtHddr" for output
+	fEvtHddr->SetRunNumber(fRunNo);
+	fEvtHddr->SetEventNumber(0);
+	fEvtHddr->SetEventType("VMC");
+	fEvtHddr->SetProdDateTime();
+      } else {
+	SetAttr("Don'tTouchTimeStamp",1);
       }
-      fEvtHddr->SetRunNumber(fRunNo);
-      fEvtHddr->SetEventNumber(0);
-      fEvtHddr->SetEventType("VMC");
-      fEvtHddr->SetProdDateTime();
     }
   }
   //  fgStarVMCApplication->SetStepping(new StMCSteppingHist("tgeom"));
@@ -258,7 +276,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   // The "Init" method in the gMC object causes the geometry to be cosntructed
   fgStarVMCApplication->InitMC();
   if (IAttr("phys_off")) {// switch off physics 
-    gMessMgr->Info() << "StVMCMaker::InitRun switch off physics" << endm;
+    LOG_INFO << "StVMCMaker::InitRun switch off physics" << endm;
     gMC->SetProcess("DCAY", 0);
     gMC->SetProcess("ANNI", 0);
     gMC->SetProcess("BREM", 0);
@@ -295,7 +313,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
 Int_t StVMCMaker::Make(){
   if (! fInitRun) InitRun(fRunNo);
   fEventNo++;
-  if (fEvtHddr) {
+  if (fEvtHddr && ! IAttr("Don'tTouchTimeStamp")) {
     fEvtHddr->SetRunNumber(fRunNo);
     fEvtHddr->SetEventNumber(fEventNo);
     fEvtHddr->SetEventType("VMC");
@@ -303,9 +321,13 @@ Int_t StVMCMaker::Make(){
     //    SetDateTime();
   }  
   if (! IAttr("VMCPassive")) {// Active  mode 
-    TStopwatch sw;
+    //    TStopwatch sw;
+    if (fMuDstIter) {
+      Int_t ok = SetVertex();
+      if (ok) return ok;
+    }
     fgStarVMCApplication->RunMC(1);
-    if (Debug())   sw.Print();
+    //    if (Debug())   sw.Print();
   }
   return kStOK;
 }
@@ -371,3 +393,196 @@ void StVMCMaker::SetDebug(Int_t l) {
   if (hits) hits->SetDebug(Debug());
   //  if (fgStarVMCApplication) fgStarVMCApplication->SetDebug(Debug());
 }
+//________________________________________________________________________________
+Int_t StVMCMaker::SetVertex() {
+  // Skip event 
+  // 1. if vertexZ is not in the required range
+  // 2. if vr = sqrt{vx^2 + vy^2} is not in the required range
+  static Double_t vzlow = -6, vzhigh = +6;
+  static Double_t vrMax = 1.;
+  static Bool_t mSkipMode = kTRUE;
+  static Bool_t mVpdVzCutMode = kTRUE;
+  static Double_t dzVpdMax = 3;
+  StarMCPrimaryGenerator::Instance()->UnSetVertex();
+  TVector3 V;
+#if 0
+  //  Int_t nFound = mTree->Draw("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks:primaryVertexFlag",
+  Int_t nFound = fMuDstTree->Draw("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks",
+				  Form("MuEvent.mEventInfo.mRunId==%i&&MuEvent.mEventInfo.mId==%i",
+				       fEvtHddr->GetRunNumber(),fEvtHddr->GetEventNumber()),
+				  "goff");
+  if (nFound != 1) {
+    LOG_ERROR << "Run/Event = " << fEvtHddr->GetRunNumber() << "/" << fEvtHddr->GetEventNumber() 
+	      << " has been found in tag file" << nFound << " times" <<  endm;
+    return kStErr;
+  }
+  const Int_t numberOfPrimaryTracks = (Int_t) fMuDstTree->GetV1()[0];
+  LOG_INFO << "Run/Event = " << fEvtHddr->GetRunNumber()
+	   << "/" << fEvtHddr->GetEventNumber() 
+	   << " has been found with MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks = " <<  numberOfPrimaryTracks 
+	   << endm;
+  //	   << " and primaryVertexFlag = " << fMuDstTree->GetV2()[0]  <<  endm; 
+  if (numberOfPrimaryTracks <= 0) // || fMuDstTree->GetV2()[0] )
+    {
+      LOG_ERROR << "reject this event" << endm;
+      return kStErr;
+    }
+  nFound = (Int_t) fMuDstTree->Draw("MuEvent.mEventSummary.mPrimaryVertexPos.mX1:"
+				    "MuEvent.mEventSummary.mPrimaryVertexPos.mX2:"
+				    "MuEvent.mEventSummary.mPrimaryVertexPos.mX3:"
+				    "MuEvent.mEventInfo.mTriggerMask",
+				    Form("MuEvent.mEventInfo.mRunId==%i&&MuEvent.mEventInfo.mId==%i",
+					 fEvtHddr->GetRunNumber(),
+					 fEvtHddr->GetEventNumber()),
+				    "goff");
+  TVector3 V(fMuDstTree->GetV1()[0],fMuDstTree->GetV2()[0],fMuDstTree->GetV3()[0]);
+  if (mSkipMode == kTRUE){
+    const Double_t vr = V.Perp();
+    
+    if (V.Z()<vzlow || V.Z()>vzhigh || vr>=vrMax ){
+      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+        << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+        << "), vr = " << vr
+        << " - out of Vz or Vr range, skipping." << endm;
+      return kStSKIP;
+    }
+    
+    LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+	     << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+	     << "), vr = " << vr
+	     << " - within requested Vz and Vr range !" << endm;
+  }          
+#if 0  
+  // more skipping. cut on trigger id.
+  if (mSkipMode == kTRUE){
+    LOG_INFO << "StPrepEmbedMaker::Event " << fEvtHddr->GetEventNumber()
+	     << " has Triggers: " << endm;
+    for (Int_t iTrg=0 ; iTrg<mSettings->nTriggerId ; iTrg++){
+      LOG_INFO << fMuDstTree->GetV4()[iTrg] << " ";
+    }
+    LOG_INFO << endm;
+    
+    Bool_t fired = kFALSE;
+    for (Int_t iTrg=0 ; iTrg<mSettings->nTriggerId ; iTrg++){
+      for (Int_t iReqTrg=0; iReqTrg<mSettings->NReqTrg ; iReqTrg++) {
+        if (fMuDstTree->GetV4()[iTrg] == mSettings->ReqTrgId[iReqTrg]){
+          LOG_INFO << "StPrepEmbedMaker::Requested trigger " << mSettings->ReqTrgId[iReqTrg] << " is fired!" << endm;
+          fired = kTRUE;
+        }
+      }
+    }
+    
+    if (!fired && mSettings->NReqTrg>0) {
+      LOG_INFO << "StPrepEmbedMaker::No requested triggers are fired in this event, skipping." << endm;
+      return kStSKIP;
+    }
+  }
+#endif
+  // more skipping. cut on VpdVz in btofheader
+  Float_t vpdvz;
+  if(mSkipMode == kTRUE && mVpdVzCutMode == kTRUE)  {
+    nFound = (Int_t) fMuDstTree->Draw("MuEvent.mVpdVz",
+				      Form("MuEvent.mEventInfo.mRunId==%i&&MuEvent.mEventInfo.mId==%i",
+					   fEvtHddr->GetRunNumber(),
+					   fEvtHddr->GetEventNumber()),"goff");
+    if (nFound != 1) {
+      LOG_ERROR << "Run/Event = " << fEvtHddr->GetRunNumber() << "/" << fEvtHddr->GetEventNumber()
+		<< " has been found in moretags file " << nFound << " times" <<  endm;
+      return kStErr;
+    }
+    vpdvz = fMuDstTree->GetV1()[0];
+    LOG_INFO << vpdvz << endm;
+    
+    //cut on events
+    if( TMath::Abs(vpdvz) < 1e-7 ) {
+      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+	       << "), VpdVz = " << vpdvz
+	       << " - VpdVz is too small (i.e. no BTOF in this run), skipping." << endm;
+      return kStSKIP;
+    }
+    if( TMath::Abs(vpdvz) >= 100. ) {
+      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+	       << "), VpdVz = " << vpdvz
+	       << " - VpdVz is too large, skipping." << endm;
+      return kStSKIP;
+    }
+    if( TMath::Abs(V.Z()-vpdvz) > dzVpdMax ) {
+      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+	       << "), VpdVz = " << vpdvz
+	       << " - out of |Vz-VpdVz| range, skipping." << endm;
+      return kStSKIP;
+    }
+  }
+#else
+  static TTreeIter &muDstIter = *fMuDstIter;
+  static const Int_t*&      RunId                = muDstIter("MuEvent.mEventInfo.mRunId");
+  static const Int_t*&      Id                   = muDstIter("MuEvent.mEventInfo.mId");
+  static const Float_t*&    X1                   = muDstIter("PrimaryVertices.mPosition.mX1");
+  static const Float_t*&    X2                   = muDstIter("PrimaryVertices.mPosition.mX2");
+  static const Float_t*&    X3                   = muDstIter("PrimaryVertices.mPosition.mX3");
+  static const Int_t*&      NumberOfGoodPrimaryTracks = muDstIter("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks");
+  //  static const UInt_t*&     TriggerMask          = muDstIter("MuEvent.mEventInfo.mTriggerMask");
+  static const Float_t*&    VpdVz                = muDstIter("MuEvent.mVpdVz");
+  do {
+    if (! muDstIter.Next()) {return kStEOF;}
+    if (RunId[0] != fEvtHddr->GetRunNumber() &&
+	Id[0]    != fEvtHddr->GetEventNumber()) continue;
+    LOG_INFO << "Run/Event = " << fEvtHddr->GetRunNumber() << "/" << fEvtHddr->GetEventNumber() 
+	     << " has been found in MuDst file with " << NumberOfGoodPrimaryTracks[0] << " Number Of GoodPrimary Tracks" <<  endm;
+    if (NumberOfGoodPrimaryTracks[0] <= 0) {
+      LOG_ERROR << "reject this event" << endm;
+      return kStErr;
+    }
+    V = TVector3(X1[0],X2[0],X3[0]);
+    if (mSkipMode == kTRUE){
+      const Double_t vr = V.Perp();
+      
+      if (V.Z()<vzlow || V.Z()>vzhigh || vr>=vrMax ){
+	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+		 << "), vr = " << vr
+		 << " - out of Vz or Vr range, skipping." << endm;
+	return kStSKIP;
+      }
+      
+      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+	       << "), vr = " << vr
+	       << " - within requested Vz and Vr range !" << endm;
+    }        
+    if (mVpdVzCutMode) {
+      Double_t vpdvz =  VpdVz[0];
+      LOG_INFO << "VpdVz = " << vpdvz << endm;
+      //cut on events
+      if( TMath::Abs(vpdvz) < 1e-7 ) {
+	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+		 << "), VpdVz = " << vpdvz
+		 << " - VpdVz is too small (i.e. no BTOF in this run), skipping." << endm;
+	return kStSKIP;
+      }
+      if( TMath::Abs(vpdvz) >= 100. ) {
+	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+		 << "), VpdVz = " << vpdvz
+		 << " - VpdVz is too large, skipping." << endm;
+	return kStSKIP;
+      }
+      if( TMath::Abs(V.Z()-vpdvz) > dzVpdMax ) {
+	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+		 << "), VpdVz = " << vpdvz
+		 << " - out of |Vz-VpdVz| range, skipping." << endm;
+	return kStSKIP;
+      }
+    }
+    StarMCPrimaryGenerator::Instance()->SetVertex(V);
+    return kStOK;
+  } while(1);
+#endif
+  return kStFatal;
+}
+//________________________________________________________________________________

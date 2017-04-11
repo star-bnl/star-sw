@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -35,7 +35,6 @@
 #include "GblPoint.h"
 #include "BorderedBandMatrix.h"
 #include "MilleBinary.h"
-#include "TMatrixDSymEigen.h"
 
 //! Namespace for the general broken lines package
 namespace gbl {
@@ -50,6 +49,18 @@ public:
 	GblTrajectory(const std::vector<GblPoint> &aPointList, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
 	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
+			const Eigen::MatrixXd &aSeed, bool flagCurv = true, bool flagU1dir =
+					true, bool flagU2dir = true);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointaAndTransList);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointaAndTransList,
+			const Eigen::MatrixXd &extDerivatives,
+			const Eigen::VectorXd &extMeasurements,
+			const Eigen::MatrixXd &extPrecisions);
+#ifdef GBL_EIGEN_SUPPORT_ROOT
+	// input from ROOT
+	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
 			const TMatrixDSym &aSeed, bool flagCurv = true, bool flagU1dir =
 					true, bool flagU2dir = true);
 	GblTrajectory(
@@ -62,25 +73,38 @@ public:
 			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList,
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TMatrixDSym &extPrecisions);
+#endif
 	virtual ~GblTrajectory();
 	bool isValid() const;
 	unsigned int getNumPoints() const;
+	unsigned int getResults(int aSignedLabel, Eigen::VectorXd &localPar,
+			Eigen::MatrixXd &localCov) const;
+	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numData,
+			Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors,
+			Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights);
+	unsigned int getScatResults(unsigned int aLabel, unsigned int &numData,
+			Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors,
+			Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights);
+#ifdef GBL_EIGEN_SUPPORT_ROOT
+	// input from ROOT
 	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
 			TMatrixDSym &localCov) const;
-	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numRes,
+	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numData,
 			TVectorD &aResiduals, TVectorD &aMeasErrors, TVectorD &aResErrors,
 			TVectorD &aDownWeights);
-	unsigned int getScatResults(unsigned int aLabel, unsigned int &numRes,
+	unsigned int getScatResults(unsigned int aLabel, unsigned int &numData,
 			TVectorD &aResiduals, TVectorD &aMeasErrors, TVectorD &aResErrors,
 			TVectorD &aDownWeights);
-	unsigned int getLabels(std::vector<unsigned int> &aLabelList);
-	unsigned int getLabels(std::vector<std::vector<unsigned int> > &aLabelList);
+#endif
+	unsigned int getLabels(std::vector<unsigned int> &aLabelList) const;
+	unsigned int getLabels(
+			std::vector<std::vector<unsigned int> > &aLabelList) const;
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "", unsigned int aLabel = 0);
 	void milleOut(MilleBinary &aMille);
-	void printTrajectory(unsigned int level = 0);
-	void printPoints(unsigned int level = 0);
-	void printData();
+	void printTrajectory(unsigned int level = 0) const;
+	void printPoints(unsigned int level = 0) const;
+	void printData() const;
 
 private:
 	unsigned int numAllPoints; ///< Number of all points on trajectory
@@ -102,22 +126,22 @@ private:
 	std::vector<GblData> theData; ///< List of data blocks
 	std::vector<unsigned int> measDataIndex; ///< mapping points to data blocks from measurements
 	std::vector<unsigned int> scatDataIndex; ///< mapping points to data blocks from scatterers
-	TMatrixDSym externalSeed; ///< Precision (inverse covariance matrix) of external seed
-	std::vector<TMatrixD> innerTransformations; ///< Transformations at innermost points of
+	Eigen::MatrixXd externalSeed; ///< Precision (inverse covariance matrix) of external seed
+	std::vector<Eigen::MatrixXd> innerTransformations; ///< Transformations at innermost points of
 	// composed trajectory (from common external parameters)
-	TMatrixD externalDerivatives; // Derivatives for external measurements of composed trajectory
-	TVectorD externalMeasurements; // Residuals for external measurements of composed trajectory
-	TVectorD externalPrecisions; // Precisions for external measurements of composed trajectory
+	Eigen::MatrixXd externalDerivatives; // Derivatives for external measurements of composed trajectory
+	Eigen::VectorXd externalMeasurements; // Residuals for external measurements of composed trajectory
+	Eigen::VectorXd externalPrecisions; // Precisions for external measurements of composed trajectory
 	VVector theVector; ///< Vector of linear equation system
 	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
 
-	std::pair<std::vector<unsigned int>, TMatrixD> getJacobian(
+	std::pair<std::vector<unsigned int>, Eigen::MatrixXd> getJacobian(
 			int aSignedLabel) const;
 	void getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
-			SMatrix55 &aJacobian, const GblPoint &aPoint, unsigned int measDim,
+			Matrix5d &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 			unsigned int nJacobian = 1) const;
 	void getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
-			SMatrix27 &aJacobian, const GblPoint &aPoint) const;
+			Matrix27d &aJacobian, const GblPoint &aPoint) const;
 	void construct();
 	void defineOffsets();
 	void calcJacobians();

@@ -9,7 +9,7 @@ void muMc(Int_t N = 1000000, const Char_t *input = "./*MuDst.root", const Char_t
   gROOT->LoadMacro("lMuDst.C");
   Char_t *file = 0; // gSystem->Which("./",output,kReadPermission);
   if (! file) {
-    lMuDst(N,input,"RMuDst,MuMc,quiet,nodefault",output);
+    lMuDst(N,input,"RMuDst,mysql,MuMc,quiet,nodefault",output);
   } else {
     lMuDst(-1,"","RMuDst,MuMc,nodefault");
     TFile *f = new TFile(file);

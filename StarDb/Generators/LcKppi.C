@@ -39,15 +39,7 @@ TDataSet *CreateTable() {
     if (pdg < 0) return;
     Int_t iD  = g3->IdFromPDG(pdg);
     StarVMCApplication::Instance()->ForceDecay(nameP, 
-					       "Sigma*+", "pi+","pi-", 28.57,
-					       "Sigma*-", "pi+","pi+", 28.57,
-					       "Lambda0","rho0","pi+", 42.86);
-    StarVMCApplication::Instance()->ForceDecay("Sigma*+",
-					       "Lambda0","pi+",0, 1);
-    StarVMCApplication::Instance()->ForceDecay("Sigma*-",
-					       "Lambda0","pi-",0, 1);
-    StarVMCApplication::Instance()->ForceDecay("Lambda0",
-					       "proton","pi-",0, 1);
+					       "K-", "proton","pi+", 100);
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;

@@ -286,6 +286,7 @@ void StarMCHits::FinishEvent() {
   g2t_track_st track;
   //  TParticle  *particle = 0;   
   Int_t iv = 0;
+  Int_t parentOld = -13;
   TLorentzVector oldV(0,0,0,0);
   TLorentzVector newV(0,0,0,0);
   TLorentzVector devV(0,0,0,0);
@@ -294,7 +295,8 @@ void StarMCHits::FinishEvent() {
     TParticle  *part = (TParticle*) ((StarStack *) TVirtualMC::GetMC()->GetStack())->Particle(it);
     part->ProductionVertex(newV);
     devV = newV - oldV;
-    if (iv == 0 || devV.P() > 1.e-7) {// 3D distance
+    Int_t parent = part->GetFirstMother();
+    if (iv == 0 || devV.P() > 1.e-7 || parent != parentOld) {// 3D distance
       if (iv > 0) g2t_vertex->AddAt(&vertex);
       memset (&vertex, 0, sizeof(g2t_vertex_st));
       iv++;
@@ -302,21 +304,25 @@ void StarMCHits::FinishEvent() {
       vertex.event_p      = 0              ;// pointer to event
       vertex.eg_label     = 0              ;// generator label (0 if GEANT)
       vertex.eg_tof       = 0              ;// vertex production time
-      vertex.eg_proc      = 0              ;// event generator mechanism
-      memcpy(vertex.ge_volume,"   ",4);    ;// GEANT volume name
+      vertex.eg_proc      = newV.T()       ;// event generator mechanism
+      memcpy(vertex.ge_volume,"_eg_",4);   ;// GEANT volume name
       vertex.ge_medium    = 0              ;// GEANT Medium
-      vertex.ge_tof       = 0              ;// GEANT vertex production time
       vertex.ge_proc      = 0              ;// GEANT mechanism (0 if eg)
       vertex.ge_x[0]      = newV.X()       ;// GEANT vertex coordinate
       vertex.ge_x[1]      = newV.Y()       ;
       vertex.ge_x[2]      = newV.Z()       ;
-      vertex.ge_tof       = newV.T()       ;
+      vertex.ge_tof       = newV.T()       ;// GEANT vertex production time
       vertex.n_parent     = 0              ;// number of parent tracks
       vertex.parent_p     = 0              ;// first parent track
+      if (parent > -1) {
+	vertex.n_parent     = 1            ;
+	vertex.parent_p     = parent+1     ;
+      }
       vertex.is_itrmd     = 0              ;// flags intermediate vertex
       vertex.next_itrmd_p = 0              ;// next intermedate vertex 
       vertex.next_prim_v_p= 0              ;// next primary vertex
       oldV                = newV;
+      parentOld           = parent;
     }
     vertex.n_daughter++;
     track.id             = it+1;

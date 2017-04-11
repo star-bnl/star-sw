@@ -4,7 +4,8 @@
 
 INCLUDE(CheckCXXCompilerFlag)
 
-SET(COMPILER_FLAGS -Wall -Wextra -Wshadow -Weffc++ -pedantic -Wno-long-long -Wuninitialized )
+# skip -Weffc++ to allow cmake version < 3.1
+SET(COMPILER_FLAGS -Wall -Wextra -Wshadow -pedantic -Wno-long-long -Wuninitialized )
 
 IF( NOT APPLE )
  LIST( APPEND COMPILER_FLAGS -Wl,-no-undefined )
@@ -23,7 +24,8 @@ FOREACH( FLAG ${COMPILER_FLAGS} )
   ENDIF()
 ENDFOREACH()
 
-OPTION( USE_CXX11 "Use CXX Standard 2011" True )
+# skip c++11 to allow cmake version < 3.1
+#OPTION( USE_CXX11 "Use CXX Standard 2011" True )
 IF( USE_CXX11 )
   SET( FLAG "-std=c++11" )
   CHECK_CXX_COMPILER_FLAG( ${FLAG} CXX_FLAG_WORKS_${FLAG} )

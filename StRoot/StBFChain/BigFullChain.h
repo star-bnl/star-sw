@@ -846,11 +846,18 @@ Bfc_st BFC[] = { // standard chains
    ,"Base chain for 2001 (tpc+rhic)"                                                               ,kFALSE},
   {"P2001"       ,""  ,"","B2001,l3onl,Corr2,OSpaceZ","",""
    ,                                                 "Production chain for summer 2001 data (+ l3)",kFALSE},
+#if 1 
   {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,Corr2,OSpaceZ","",""
    ,                                      "Production chain for summer 2001 data (+ ftpc, svt, l3)",kFALSE},
-  // pp Chains
   {"pp2001","","","ppOpt,B2001,-PreVtx,l3onl,tofDat,Corr2"            ,"","" ,"pp 2001 (+ l3, tof)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""        ,"pp 2001 (+ ftpc, svt, l3, tof)",kFALSE},
+#else
+  {"P2001a"      ,""  ,"","B2001,ftpc,l3onl,Corr2,OSpaceZ","",""
+   ,                                   "Production chain for summer 2001 data (+ ftpc, NO svt, l3)",kFALSE},
+  // pp Chains
+  {"pp2001","","","ppOpt,B2001,-PreVtx,l3onl,tofDat,Corr2"            ,"","" ,"pp 2001 (+ l3, tof)",kFALSE},
+  {"pp2001a"     ,""  ,"","pp2001,ftpc","",""                  ,"pp 2001 (+ ftpc, NO svt, l3, tof)",kFALSE},
+#endif
   // Year 3 chains
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout,svtDb","",""
@@ -1470,7 +1477,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                "TPC+TPX pixel dump to NTuple", kFALSE},
   {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent","StTpcHitMaker","StTpcHitMaker"
    ,              "TPC+TPX convert DAQ Tpc Raw Data to TpcRawEvent used by TpcMixer and/or TpxClu", kFALSE},
-  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,-tpx,TpxClu"  ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
+  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,-tpx"  ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf,MakeEvent","StTpcRTSHitMaker"
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},
   {"TpxClu2D"    ,"","","TpxClu","","",                              "RTS(online) 2D-cluster maker",kFALSE},
@@ -1561,8 +1568,9 @@ Bfc_st BFC[] = { // standard chains
   {"ssdAdd"     ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker",             "... SSD merge maker",kFALSE},
   {"ssdE"        ,"","","ssdpre,ssdAdd"                       ,"","","SSD full chain for embedding",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"emcDY2"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
+  {"emcRaw"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
+  {"emcDY2"   ,"emcDY2","","emcRaw,PreEcl,Epc"   ,"","",                "B/E EMC data common maker",kFALSE},
   {"eemcD"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc,-emcDY2,-daq","","" //no  emcAtoE in simulation
    ,                        "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
@@ -1582,37 +1590,38 @@ Bfc_st BFC[] = { // standard chains
   {"eemCl"    ,"eemCl","","db","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
 
   // BTOF related chains
-  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
-   ,                                                                         "StChain","BTOF Chain",kFALSE},
-  {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
+  
+  {"btof"       ,"","","btofDat,vpdCalib,btofMatch,btofCalib"                   ,"","","BTOF Chain",kFALSE},
+  {"BtofDat"   ,"tof_raw","","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    ,                                                                               "BTOF hit maker",kFALSE},
   {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    ,                                                                                "Vpd Simulator",kFALSE},
-  {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker"   ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"btofSim" ,"","BTofChain","BTofUtil,vpdSim"  ,"StBTofSimMaker",
+  {"vpdCalib","","","db,BTofUtil","StVpdCalibMaker"            ,"StVpdCalibMaker","VPD calibration",kFALSE},
+  {"btofSim" ,"","","BTofUtil,vpdSim"  ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
-  {"btofMixer"    ,"","BTofChain","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
+  {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    ,                                                                                   "BTof Mixer",kFALSE},
 
 
   // left MTD chain for sumulation alone here
-  {"mtdSim"    ,"","","","StMtdSimMaker",                   "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
+  {"mtdSim"    ,"","","","StMtdSimMaker,StEvent",                   "StMtdSimMaker","MTD Simulator",kFALSE},
 
 
   // Time Of Flight related options
-  {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
-  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
-  {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
-   "TOF Data base chain",                                                                           kFALSE},
-  {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
+#if 1
+  {"ToF"       ,"","","tofDat,tofrMatch,tofpMatch,tofCalib"                      ,"","","ToF Chain",kFALSE},
+  {"ToFx"      ,"","","tofXDat,tofrMatch,tofCalib"                              ,"","","ToFx Chain",kFALSE},
+#endif
+  {"tofDat"    ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker", "TOF Data base chain", kFALSE},
+  {"tofXDat"   ,"tof_raw","","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
    "TOF hit maker",                                                                                 kFALSE},
-  {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
+  {"tofsim"    ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
    "TOF Simulator, Tof version before y2009",                                                       kFALSE},
-  {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
+  {"tofrMatch" ,"","","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
    "TPC to TOFr track matching",                                                                    kFALSE},
-  {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
+  {"tofpMatch"   ,"","","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
    "TPC to TOFp track matching",                                                                    kFALSE},
-  {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
+  {"tofCalib"   ,"","","db,TofUtil",        "StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
   // Filtering - all filters will have the pattern "FiltXXX"
   {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
    "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",                                   kFALSE},

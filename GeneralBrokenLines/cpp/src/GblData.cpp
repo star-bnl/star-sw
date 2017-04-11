@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -28,6 +28,7 @@
  */
 
 #include "GblData.h"
+using namespace Eigen;
 
 //! Namespace for the general broken lines package
 namespace gbl {
@@ -64,18 +65,18 @@ GblData::~GblData() {
  * \param [in] extDer Derivatives for external Parameters
  */
 void GblData::addDerivatives(unsigned int iRow,
-		const std::vector<unsigned int> &labDer, const SMatrix55 &matDer,
-		unsigned int iOff, const TMatrixD &derLocal, unsigned int extOff,
-		const TMatrixD &extDer) {
+		const std::vector<unsigned int> &labDer, const Matrix5d &matDer,
+		unsigned int iOff, const Eigen::MatrixXd &derLocal, unsigned int extOff,
+		const Eigen::MatrixXd &extDer) {
 
-	unsigned int nParMax = 5 + derLocal.GetNcols() + extDer.GetNcols();
+	unsigned int nParMax = 5 + derLocal.cols() + extDer.cols();
 	theRow = iRow - iOff;
 	if (nParMax > 7) {
 		// dynamic data block size
 		moreParameters.reserve(nParMax); // have to be sorted
 		moreDerivatives.reserve(nParMax);
 
-		for (int i = 0; i < derLocal.GetNcols(); ++i) // local derivatives
+		for (int i = 0; i < derLocal.cols(); ++i) // local derivatives
 				{
 			if (derLocal(iRow - iOff, i)) {
 				moreParameters.push_back(i + 1);
@@ -83,7 +84,7 @@ void GblData::addDerivatives(unsigned int iRow,
 			}
 		}
 
-		for (int i = 0; i < extDer.GetNcols(); ++i) // external derivatives
+		for (int i = 0; i < extDer.cols(); ++i) // external derivatives
 				{
 			if (extDer(iRow - iOff, i)) {
 				moreParameters.push_back(extOff + i + 1);
@@ -99,8 +100,8 @@ void GblData::addDerivatives(unsigned int iRow,
 			}
 		}
 	} else {
-		// simple (static) data block
-		for (int i = 0; i < derLocal.GetNcols(); ++i) // local derivatives
+		// simple (static)  data block
+		for (int i = 0; i < derLocal.cols(); ++i) // local derivatives
 				{
 			if (derLocal(iRow - iOff, i)) {
 				theParameters[theNumLocal] = i + 1;
@@ -109,7 +110,7 @@ void GblData::addDerivatives(unsigned int iRow,
 			}
 		}
 
-		for (int i = 0; i < extDer.GetNcols(); ++i) // external derivatives
+		for (int i = 0; i < extDer.cols(); ++i) // external derivatives
 				{
 			if (extDer(iRow - iOff, i)) {
 				theParameters[theNumLocal] = extOff + i + 1;
@@ -138,17 +139,17 @@ void GblData::addDerivatives(unsigned int iRow,
  * \param [in] extDer Derivatives for external Parameters
  */
 void GblData::addDerivatives(unsigned int iRow,
-		const std::vector<unsigned int> &labDer, const SMatrix27 &matDer,
-		unsigned int extOff, const TMatrixD &extDer) {
+		const std::vector<unsigned int> &labDer, const Matrix27d &matDer,
+		unsigned int extOff, const Eigen::MatrixXd &extDer) {
 
-	unsigned int nParMax = 7 + extDer.GetNcols();
+	unsigned int nParMax = 7 + extDer.cols();
 	theRow = iRow;
 	if (nParMax > 7) {
 		// dynamic data block size
 		moreParameters.reserve(nParMax); // have to be sorted
 		moreDerivatives.reserve(nParMax);
 
-		for (int i = 0; i < extDer.GetNcols(); ++i) // external derivatives
+		for (int i = 0; i < extDer.cols(); ++i) // external derivatives
 				{
 			if (extDer(iRow, i)) {
 				moreParameters.push_back(extOff + i + 1);

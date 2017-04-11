@@ -180,8 +180,9 @@ void bfc(Int_t First, Int_t Last,
   tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
   if ( TString(gProgName) == "root4star") tChain += "gstar,20Muons,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
   //    else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D";
-  //    else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D";
+  //  else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D";
   else                                    tChain += "vmc,Lc3pi,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
+  //  else                                    tChain += "vmc,LcKppi,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
   //                                             "test.RC.AuAu200.y2016,StiCA,KFVertex";
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());

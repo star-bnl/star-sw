@@ -227,17 +227,32 @@ Int_t StBFChain::Instantiate()
     Key.ToLower();
     StMaker *myChain = 0;
     StMaker *mk = 0;
+    Bool_t isInChain = kFALSE;
     // Require only instance for the following named makers
     if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" ||
 	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" || maker == "StSstDbMaker" ||
+	maker == "StPxlDbMaker" || maker == "StIstDbMaker" || maker == "StFmsDbMaker" ||
 	maker == "StDetectorDbMaker" ||
 	maker == "StMagFMaker"    ||
 	maker == "StEEmcDbMaker"  ||
 	maker == "St_geant_Maker" ||
+	maker == "StMcEventMaker" ||
+	maker == "StEventMaker" ||
+	maker == "StBTofHitMaker" ||
+	maker == "StTofMaker" ||
+	maker == "StTofHitMaker" ||
+	maker == "StEmcRawMaker" ||
+	maker == "StPxlRawHitMaker" ||
+	maker == "StIstRawHitMaker" ||
+	maker == "StSstDaqMaker" ||
+	maker == "StSsdDaqMaker" ||
+	maker == "StTriggerDataMaker" ||
+	maker == "StTpcRTSHitMaker" ||
 	maker == "StVMCMaker") {
       mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
-	if (maker == "St_geant_Maker" || maker == "StVMCMaker") {
+	isInChain = kTRUE;
+	if (maker == "St_geant_Maker" || maker == "StVMCMaker" || maker == "StMcEventMaker") {
 	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
 		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one." << endm;
 	  continue;
@@ -903,6 +918,7 @@ Int_t StBFChain::Instantiate()
     }
   Add2Chain:
     if (! mk) continue;
+    if (isInChain) continue;
     if (name == "") strncpy (fBFC[i].Name,(Char_t *) mk->GetName() , sizeof(fBFC[i].Name));
     if (myChain) myChain->AddMaker(mk);
     continue;

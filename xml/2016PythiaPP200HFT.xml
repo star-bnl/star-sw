@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">  -->
+<job maxFilesPerProcess="1"  simulateSubmission ="false" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    exit 1;
+  endif
+#  setenv NODEBUG yes
+#  starver .DEV2
+  set file = hijing_R${rung}_${f}_${l}
+  echo "${file}"
+  set logFile  = ${file}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${file}.MuDst.root
+  if (-r $muFile) exit 0;
+  set  out = ${file}.event.root
+  set  tagFile =  ${file}.root
+  set fitter = ",KFVertex,StiCA"; #,HLTCA"
+  set ddir = `pwd`
+  set case = `basename $ddir`; echo "case = $case";
+  echo $case | grep PPV
+  set fitter = ",StiCA,KFVertex";
+#  if (! $?) set fitter = ",VFPPVnoCTB,Sti";
+#  if (! $?) set fitter = ",VFPPVnoCTB,StiCA";
+  echo "fitter $fitter"
+  set tagFile = ${file}.root
+#  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,CorrX,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,PythiaPP200HFT,Corr4,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  endif
+        </command>
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<input URL="command:RunId.pl 11 301 20" />
+<!-- <input URL="command:RunId.pl 1 50 10" /> -->
+</job>

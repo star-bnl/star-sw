@@ -1,14 +1,14 @@
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_geant_Maker")) return 0;
   StBFChain *chain = (StBFChain *) StMaker::GetChain();
-  St_geant_Maker *geantMk = chain->GetMaker("geant");
+  //  St_geant_Maker *geantMk = chain->GetMaker("geant");
   gSystem->Load( "StarGeneratorUtil" );
   gSystem->Load( "StarGeneratorEvent" );
   gSystem->Load( "StarGeneratorBase" );
   gSystem->Load( "libMathMore"   );  
   gSystem->Load( "libHijing1_383");
-  gSystem->Load( "gstar" );
-  geantMk->Do("call gstar");
+  //  gSystem->Load( "gstar" );
+  St_geant_Maker::instance()->Do("call gstar");
   StarPrimaryMaker *primary = new StarPrimaryMaker();
   //  primary -> SetFileName( "hijing.starsim.root");
   primary -> SetFileName( "");
@@ -46,12 +46,12 @@ TDataSet *CreateTable() {
   Double_t XVERTEX =  0.31;
   Double_t YVERTEX = -0.35;
   Double_t ZVERTEX = -1.40;
-  geantMk->Do(Form("GVERTEX %f %f %f",XVERTEX,YVERTEX,ZVERTEX));
+  St_geant_Maker::instance()->Do(Form("GVERTEX %f %f %f",XVERTEX,YVERTEX,ZVERTEX));
   Double_t XSIGMA  =  0.1; 
   Double_t YSIGMA  =  0.1;
   Double_t ZSIGMA  =  6.0; // 36.680;
-  geantMk->Do(Form("GSPREAD %f %f %f",XSIGMA,YSIGMA,ZSIGMA));
-  geantMk->Do("gkine -4 0");
+  St_geant_Maker::instance()->Do(Form("GSPREAD %f %f %f",XSIGMA,YSIGMA,ZSIGMA));
+  St_geant_Maker::instance()->Do("gkine -4 0");
   TDataSet *tableSet = new TDataSet("Hijing");
   return (TDataSet *)tableSet;
 }

@@ -104,7 +104,8 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin)
 
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
-  
-  fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+  if (! fSetVertex) {
+    fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+  }
   GeneratePrimaries(fOrigin);
 }

@@ -5,22 +5,32 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 PROJECT(GBL)
 
 # project version
-SET( ${PROJECT_NAME}_VERSION_MAJOR 1 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 17 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 1 )
+SET( ${PROJECT_NAME}_VERSION_MAJOR 2 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # make life easier and simply use the ilcsoft default settings
 # load default ilcsoft settings (install prefix, build type, rpath, etc.)
 LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 INCLUDE( ilcsoft_default_settings )
 
-FIND_PACKAGE(ROOT REQUIRED)
+# enable ROOT support
+OPTION( SUPPORT_ROOT "Support ROOT for user I/O" True )
+IF( SUPPORT_ROOT )
+  FIND_PACKAGE(ROOT REQUIRED)
+  ADD_DEFINITIONS(-DGBL_EIGEN_SUPPORT_ROOT)
+ENDIF()
+FIND_PACKAGE(Eigen3 REQUIRED)
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 
 # include directories
-INCLUDE_DIRECTORIES( BEFORE ./include ${ROOT_INCLUDE_DIRS})
+IF( SUPPORT_ROOT )
+  INCLUDE_DIRECTORIES( BEFORE ./include ${ROOT_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} )
+ELSE()
+  INCLUDE_DIRECTORIES( BEFORE ./include ${EIGEN3_INCLUDE_DIR} )
+ENDIF()
 INSTALL( DIRECTORY ./include DESTINATION . PATTERN ".svn" EXCLUDE )
 
 # declare the stupid ROOT library path
