@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.59 2017/01/06 22:30:45 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.60 2017/04/12 19:47:02 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.60  2017/04/12 19:47:02  genevb
+ * Generic SpaceCharge and GridLeak functions independent of specific modes
+ *
  * Revision 1.59  2017/01/06 22:30:45  genevb
  * Introduce FullGridLeak distortion correction
  *
@@ -402,8 +405,10 @@ class StMagUtilities {
   virtual void    UndoMembraneDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoEndcapDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoSpaceChargeR0Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    Undo2DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    Undo3DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoFullGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
