@@ -189,8 +189,10 @@ StSstDaqMaker::StSstDaqMaker(const Char_t *name)
    mRDO=0;
    mEventnumber=0;
    mEventrunumber=0;
+#if 0
    mEventTime=0;
    mPEventTime=0;
+#endif
    mRunNum=0;
    for(int i=0;i<8;i++){
      mAdc[i] = 0;
@@ -442,9 +444,10 @@ void StSstDaqMaker::DecodeRdoData()
    mTrailerData       = 0;
    mTrailerDataLength = 0;
    mRdoFlag           = 1;
+#if 0
    mEventTime         = 0;
    mPEventTime        = 0;
-
+#endif
    for (Int_t f = 0; f < 8; f++) mFiberFlag[f] = 1; //flag=0-->bad, flag=1-->good
 
    if (mRdoDataLength == 0 || !mRdoData) {
@@ -461,10 +464,10 @@ void StSstDaqMaker::DecodeRdoData()
    else {
       LOG_DEBUG << "SST DAQ DATA HEADER_TOKEN correct: 0x" << hex << mRdoData[0] << dec << endm;
    }
-
+#if 0
    mEventTime  = (Float_t)mRdoData[2];
    mPEventTime = (Float_t)mRdoData[4];
-
+#endif
    mHeaderData = mRdoData + index;
 
    if (StMaker::GetDebug()) {
