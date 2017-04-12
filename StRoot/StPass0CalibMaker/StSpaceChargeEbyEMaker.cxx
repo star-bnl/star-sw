@@ -1319,14 +1319,14 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     x1[0] = hp.perp()*TMath::Sin(phi);
     x1[1] = hp.perp()*TMath::Cos(phi);
     x1[2] = hp.z();
-    m_ExB->Undo3DGridLeakDistortion(x1,x2,sec);
+    m_ExB->UndoGridLeakDistortion(x1,x2,sec);
     Double_t dX = x2[0]-x1[0];
     if (TMath::Abs(dX) > 1e-20) {
       // warning: no available GridLeak calculation may lead
       //   to slightly different results
       Eff3 = gsign * ((x2[1]-x1[1])/dX) * TMath::Sin(theta);
       x1[0] = 0;
-      m_ExB->Undo3DGridLeakDistortion(x1,x2,sec);
+      m_ExB->UndoGridLeakDistortion(x1,x2,sec);
       Eff2 = (x2[0]-x1[0])/dX;
     }
 
@@ -1547,8 +1547,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.65 2017/02/14 23:38:38 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.66 2017/04/12 19:47:25 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.66  2017/04/12 19:47:25  genevb
+// Use generic GridLeak function
+//
 // Revision 1.65  2017/02/14 23:38:38  fisyak
 // Adjustment to structure changes in StTpcdEdxCorrection
 //
