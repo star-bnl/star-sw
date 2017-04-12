@@ -163,8 +163,10 @@ private:
    UInt_t  mDataMode[8];// Raw or Compressed data .
    Int_t   mEventnumber;
    Int_t   mEventrunumber;
+#if 0
    Int_t   mEventTime;// Current event RHIC clock
    Int_t   mPEventTime;// Previous event RHIC cloc
+#endif
    Int_t   mCorrectFactor[1920][2]; //chip correction table.
    Int_t   mNoiseCut[1920][2]; //Reject Noise.
    Char_t  mEnd[1]; //!
