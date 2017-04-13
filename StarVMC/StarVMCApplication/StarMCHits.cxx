@@ -261,6 +261,8 @@ void StarMCHits::FinishEvent() {
   static const Double_t pEMax = 1 - 1.e-10;
   TDataSet *m_DataSet = StarMCHits::instance()->GetHitHolder();
   if (! m_DataSet) return;
+  // particle
+  // event
   St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
   m_DataSet->Add(g2t_event);
   g2t_event_st event;
@@ -325,6 +327,7 @@ void StarMCHits::FinishEvent() {
       parentOld           = parent;
     }
     vertex.n_daughter++;
+    // tracks
     track.id             = it+1;
     //    track.eg_label       = particle->GetIdGen();
     track.eg_pid         = part->GetPdgCode();
