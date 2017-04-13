@@ -482,7 +482,7 @@ void StVpdCalibMaker::vzVpdFinder()
       }
     else if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
       
-      LOG_INFO << "mTruncation is set to: " << mTruncation << endm;
+      LOG_DEBUG << "mTruncation is set to: " << mTruncation << endm;
       
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
