@@ -236,7 +236,7 @@ void StEEmcSlowMaker::InitHisto() {
 
 //________________________________________________
 Int_t StEEmcSlowMaker::Make() {
-  Int_t result = StMaker::Make();
+  Int_t result = kStOK;
   mNInpEve++;
   LOG_DEBUG << "iEve " << mNInpEve << ", mSource = " << mSource << endm;
   
