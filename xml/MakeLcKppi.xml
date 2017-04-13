@@ -25,5 +25,5 @@
     root.exe -q -b -x 'MakeLcKppi.C('${N}',"'${name}'",'${rung}')' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 20 100 LcKppi" />
+<input URL="command:RunId.pl 1 200 1000 LcKppi" />
 </job>

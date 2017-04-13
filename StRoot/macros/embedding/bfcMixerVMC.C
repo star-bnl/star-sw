@@ -40,9 +40,9 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   chain2Opt += ",TpcRS,pxlFastSim,istSim,sstfast,bbcSim,btofsim,emcSim"; 
 #ifndef __NO_DAQ_CLUSTERS__
   chain2Opt += ",TpxRaw";
-#endif
-  chain2Opt += ",pxlRaw,istRawHit,sst_daq";
+  chain2Opt += ",pxlHit,istHit,sstHit";
   chain2Opt += ",BtofDat,EmcRaw";
+#endif
   bool useEndcapSlowSim = true;
   if(useEndcapSlowSim) { // turn Endcap slow simu On/Off 
     chain2Opt += ",EEss";
@@ -55,12 +55,19 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   StMaker *geant = chain2->Maker("geant");
   if (! geant) return;
   geant->SetAttr("MuDstFile",MuDstfile);
+#if 0
+  StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
+  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
+#endif
   Chain->cd();
   TString chain3Opt("noInput,-in,NoInput");
   chain3Opt += ",TpcMixer";
 #ifndef __TrackingOnly__
-  chain3Opt += ",BEmcMixer,EEmcMixer,btofMixer";
-#endif
+  chain3Opt += ",BEmcMixer,EEmcMixer";
+#if 0
+  chain3Opt += ",btofMixer"; 
+#endif 
+#endif 
   bfc(-1,chain3Opt);
   chain3 = chain;
   chain3->SetName("Mixer"); 
@@ -73,7 +80,8 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   OutputFileName.Append(".root");
   TString chain4Opt("P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D");
   chain4Opt += ",noInput,-in,useInTracker,MiniMcMk,McAna,GeantOut,-hitfilt,StiCA";
-  chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,evout,fmsdat,StiCA,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
+  chain4Opt += ",TpxClu,NoAnnotateCL,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,evout,fmsdat";
+  chain4Opt += ",StiCA,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
   chain4Opt += ",KFVertex";
   bfc(-1,chain4Opt,0,OutputFileName);
   chain4 = chain;
