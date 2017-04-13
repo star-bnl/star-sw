@@ -295,7 +295,7 @@ int StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 	const int maxClusters=mSimDb->nmaxclus();
 	const int nTimeBins = mSimDb->ndt();
 	double driftVelocity[maxClusters],nElectrons[maxClusters],startPositionOfCluster[maxClusters],sa[maxClusters];
-	double s[maxClusters][nTimeBins];
+	//yf	double s[maxClusters][nTimeBins];
 
 	double chargeDepositedPerTimeBin[nTimeBins];
 	for(int j=0;j<nTimeBins;j++) {chargeDepositedPerTimeBin[j] = 0.0;}
@@ -333,6 +333,7 @@ int StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 		for(int m=0;m<nElectronClusters;m++) {
 			double tx = (startPositionOfCluster[m])/(C_C_LIGHT*1.e-3*nanosecond/millimeter);
 			double t_drift = (gapLength-startPositionOfCluster[m])/driftVelocity[m];
+#if 0
 			if( ts>=t0 + tx  && ts<=t0+ tx+t_drift) {
 				s[m][j]=(exp(alpha*driftVelocity[m]*(ts-t0-tx))-1)*nElectrons[m]*GammaRandom();
 				if(s[m][j]>mSimDb->nmaxe()) { s[m][j] = mSimDb->nmaxe(); }
@@ -340,6 +341,14 @@ int StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 				s[m][j]=0.0;
 			}
 			ytmp1 += kaa*s[m][j];
+#else
+			Double_t s = 0;
+			if( ts>=t0 + tx  && ts<=t0+ tx+t_drift) {
+				s=(exp(alpha*driftVelocity[m]*(ts-t0-tx))-1)*nElectrons[m]*GammaRandom();
+				if(s>mSimDb->nmaxe()) { s = mSimDb->nmaxe(); }
+			}
+			ytmp1 += kaa*s;
+#endif
 		}
 		chargeDepositedPerTimeBin[j] = ytmp1*1.e+12*e_SI;  // pico-Coulomb
 	}
