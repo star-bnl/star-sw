@@ -243,8 +243,13 @@ Int_t StBFChain::Instantiate()
 	maker == "StTofHitMaker" ||
 	maker == "StEmcRawMaker" ||
 	maker == "StPxlRawHitMaker" ||
+	maker == "StPxlClusterMaker" ||
+	maker == "StPxlHitMaker" ||
 	maker == "StIstRawHitMaker" ||
 	maker == "StSstDaqMaker" ||
+	maker == "StSstPointMaker" ||
+	maker == "StIstClusterMaker" ||
+	maker == "StIstHitMaker" ||
 	maker == "StSsdDaqMaker" ||
 	maker == "StTriggerDataMaker" ||
 	maker == "StTpcRTSHitMaker" ||
@@ -471,8 +476,10 @@ Int_t StBFChain::Instantiate()
 	  GetOption("mtin")) {
 	NoMakersWithInput++;
       }
+      if (fRunG > 0) {
+	mk->SetAttr("RunG",fRunG);
+      }
     }
-
     // special maker options
     // m_Mode xyz
     //        x = 1 phys_off                    
@@ -491,6 +498,9 @@ Int_t StBFChain::Instantiate()
 	}
 	if (GetOption("VMCAlignment")) {
 	  mk->SetAttr("VMCAlignment",1);
+	}
+	if (fRunG > 0) {
+	  mk->SetAttr("RunG",fRunG);
 	}
       }
       if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
@@ -1707,9 +1717,6 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
   if (! geantMk || ! geantMk->InheritsFrom("St_geant_Maker")) return;
   SetInput("geant",".make/geant/.data");
   TString GeomVersion("");
-  if (fRunG > 0) {
-    geantMk->SetAttr("RunG",fRunG);
-  }
 #if 0
   if (! (GetOption("fzin") || GetOption("fzinSDT") |! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
     GeomVersion = "y2004x";
