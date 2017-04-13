@@ -160,11 +160,11 @@ Int_t StVMCMaker::Init() {
   if (! fgGeant3) {
     fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
   }
-  LOG_INFO << "StVMCMaker::Init Geant3 has been created." << endm;
+  LOG_INFO << "Init Geant3 has been created." << endm;
   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (! IAttr("VMCPassive")) {
-    LOG_INFO << "StVMCMaker::InitRun Active mode" << endm; 
+    LOG_INFO << "InitRun Active mode" << endm; 
     TString CintF(SAttr("GeneratorFile"));
     if (CintF != "") {
       static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
@@ -209,11 +209,16 @@ Int_t StVMCMaker::Init() {
     hits->SetHitHolder(m_DataSet);
     fgStarVMCApplication->SetStepping(hits);
   }
+  fRndmSaved = gRandom;
+  fRndm = new TRandom3(IAttr("RunG"));
+  LOG_INFO << "Init, Generator type: TRandom3 Seed: " << fRndm->GetSeed() << endm;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (fInitRun) return kStOK;
+  fRndmSaved = gRandom;
+  gRandom =  fRndm; 
   fInitRun = 1;
   if (! gGeoManager) {
     TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry/Geometry");
@@ -307,10 +312,13 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager->IsClosed()) {
     gGeoManager->CloseGeometry();
   }
+  gRandom = fRndmSaved;
   return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::Make(){
+  fRndmSaved = gRandom;
+  gRandom =  fRndm; 
   if (! fInitRun) InitRun(fRunNo);
   fEventNo++;
   if (fEvtHddr && ! IAttr("Don'tTouchTimeStamp")) {
@@ -329,6 +337,7 @@ Int_t StVMCMaker::Make(){
     fgStarVMCApplication->RunMC(1);
     //    if (Debug())   sw.Print();
   }
+  gRandom = fRndmSaved;
   return kStOK;
 }
 //_____________________________________________________________________________
