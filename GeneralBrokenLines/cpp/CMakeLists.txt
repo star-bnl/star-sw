@@ -1,5 +1,5 @@
 # #require a certain version
-CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
 
 # declare the project name
 PROJECT(GBL)
@@ -7,7 +7,7 @@ PROJECT(GBL)
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 2 )
 SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 1 )
 
 # make life easier and simply use the ilcsoft default settings
 # load default ilcsoft settings (install prefix, build type, rpath, etc.)
