@@ -15,10 +15,10 @@ void ltrim(std::string& line) {
 }
 
 }
+
 namespace Garfield {
 
-ComponentTcad2d::ComponentTcad2d()
-    : ComponentBase(),
+ComponentTcad2d::ComponentTcad2d() : ComponentBase(),
       m_hasPotential(false),
       m_hasField(false),
       m_hasElectronMobility(false),
@@ -77,8 +77,7 @@ bool ComponentTcad2d::SetAcceptor(const unsigned int acceptorNumber,
 }
 
 bool ComponentTcad2d::ElectronAttachment(const double x, const double y, 
-                                         const double z, 
-                                         double& eta) {
+                                         const double z, double& eta) {
   eta = 0.;
   if (!m_validTraps) {
     std::cerr << m_className << "::ElectronAttachment:\n"
@@ -87,9 +86,11 @@ bool ComponentTcad2d::ElectronAttachment(const double x, const double y,
   }
 
   if (m_donors.empty() && m_acceptors.empty()) {
-    std::cerr << m_className << "::ElectronAttachment:\n"
-              << "    There are no traps defined.\n";
-    return false;
+    if (m_debug) {
+      std::cerr << m_className << "::ElectronAttachment:\n"
+                << "    There are no traps defined.\n";
+    }
+    return true;
   }
 
   const unsigned int nAcceptors = m_acceptors.size(); 
@@ -110,8 +111,8 @@ bool ComponentTcad2d::ElectronAttachment(const double x, const double y,
 }
 
 bool ComponentTcad2d::HoleAttachment(const double x, const double y, 
-                                     const double z,
-                                     double& eta) {
+                                     const double z, double& eta) {
+
   eta = 0.;
   if (!m_validTraps) {
     std::cerr << m_className << "::HoleAttachment:\n"
@@ -120,9 +121,11 @@ bool ComponentTcad2d::HoleAttachment(const double x, const double y,
   }
 
   if (m_donors.empty() && m_acceptors.empty()) {
-    std::cerr << m_className << "::HoleAttachment:\n"
-              << "    There are no traps defined.\n";
-    return false;
+    if (m_debug) {
+      std::cerr << m_className << "::HoleAttachment:\n"
+                << "    There are no traps defined.\n";
+    }
+    return true;
   }
 
   const unsigned int nAcceptors = m_acceptors.size(); 
@@ -1255,8 +1258,8 @@ void ComponentTcad2d::GetRegion(const unsigned int i,
                                 std::string& name, bool& active) const {
 
   if (i >= m_regions.size()) {
-    std::cerr << m_className << "::GetRegion:\n";
-    std::cerr << "    Region " << i << " does not exist.\n";
+    std::cerr << m_className << "::GetRegion:\n"
+              << "    Region " << i << " does not exist.\n";
     return;
   }
   name = m_regions[i].name;
