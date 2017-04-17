@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.50 2017/01/19 23:03:04 smirnovd Exp $
+ * $Id: StMuTrack.h,v 1.51 2017/04/17 19:19:44 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -53,24 +53,24 @@ class TObjArray;
 
 class StMuTrack : public TObject {
  public:
-  StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1), 
+  StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1),
     mIdTruth(0), mQuality(0), mIdParentVx(0) {/* no-op*/}; ///< default constructor
     StMuTrack(const StEvent*, const StTrack*, const StVertex*, Int_t index2Global=-2, Int_t index2RichSpectra=-2, Bool_t l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
-    short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
+    short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information)
     short flag() const; ///< Returns flag, (see StEvent manual for type information) 
     UInt_t                         flagExtension() const { return mFlagExtension; }
     Int_t   bad () const; // track is bad
-    /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)  
+    /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)
     Int_t index2Global() const;
     Int_t index2Cov() const;
     Int_t index2RichSpectra() const; ///< Returns index of associated rich spectra.
     Int_t index2BTofHit() const; /// dongx
     Int_t index2MtdHit() const; ///
     Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
-	const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
-	const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
-	const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
+    const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
+    const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
+    const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     const StMuBTofHit* tofHit() const;  /// dongx
     const StMuMtdHit* mtdHit() const;  /// Bingchu
     UShort_t nHits() const;     ///< Return total number of hits on track.
@@ -96,19 +96,19 @@ class StMuTrack : public TObject {
     Double_t dEdxPullPionFit()     const {return dEdxPull(0.13956995,kTRUE);}
     Double_t dEdxPullKaonFit()     const {return dEdxPull(0.493677,kTRUE);}
     Double_t dEdxPullProtonFit()   const {return dEdxPull(0.93827231,kTRUE);}
-    Double_t nSigmaElectron70()      const {return dEdxPullElectronI70() ;} 
-    Double_t nSigmaPion70()      	   const {return dEdxPullPionI70()     ;} 
-    Double_t nSigmaKaon70()      	   const {return dEdxPullKaonI70()     ;} 
-    Double_t nSigmaProton70()    	   const {return dEdxPullProtonI70()   ;} 
-    Double_t nSigmaElectronFit() 	   const {return dEdxPullElectronFit() ;} 
-    Double_t nSigmaPionFit()     	   const {return dEdxPullPionFit()     ;} 
-    Double_t nSigmaKaonFit()     	   const {return dEdxPullKaonFit()     ;} 
-    Double_t nSigmaProtonFit()   	   const {return dEdxPullProtonFit()   ;} 
+    Double_t nSigmaElectron70()    const {return dEdxPullElectronI70() ;}
+    Double_t nSigmaPion70()        const {return dEdxPullPionI70()     ;}
+    Double_t nSigmaKaon70()        const {return dEdxPullKaonI70()     ;}
+    Double_t nSigmaProton70()      const {return dEdxPullProtonI70()   ;}
+    Double_t nSigmaElectronFit()   const {return dEdxPullElectronFit() ;}
+    Double_t nSigmaPionFit()       const {return dEdxPullPionFit()     ;}
+    Double_t nSigmaKaonFit()       const {return dEdxPullKaonFit()     ;}
+    Double_t nSigmaProtonFit()     const {return dEdxPullProtonFit()   ;}
     Double_t dEdx() const; ///< Returns measured dE/dx value.
-    Double_t chi2() const;     ///< Returns chi2 of fit.       
+    Double_t chi2() const;     ///< Returns chi2 of fit.
     Double_t chi2prob() const; ///< Returns probability of fit.
-    Double_t chi2xy() const;   ///< Returns chi2 of fit.         ATTENTIONS: does not return xy chi2 (historic)        
-    Double_t chi2z() const;    ///< Returns probability of fit.  ATTENTIONS: does not return z chi2 (historic)        
+    Double_t chi2xy() const;   ///< Returns chi2 of fit.         ATTENTIONS: does not return xy chi2 (historic)
+    Double_t chi2z() const;    ///< Returns probability of fit.  ATTENTIONS: does not return z chi2 (historic)
     Double_t pt() const;   ///< Returns pT at point of dca to primary vertex.
     Double_t phi() const;  ///< Returns phi at point of dca to primary vertex.
     Double_t eta() const;  ///< Returns pseudo rapidity at point of dca to primary vertex.
@@ -267,6 +267,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.51  2017/04/17 19:19:44  smirnovd
+ * [Cosmetic] Whitespace adjustments
+ *
  * Revision 1.50  2017/01/19 23:03:04  smirnovd
  * StMuTrack: Let users change track type e.g. global/primary/etc...
  *
