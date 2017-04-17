@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.11 2013/01/14 23:34:29 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.12 2017/04/17 19:19:43 smirnovd Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -13,36 +13,37 @@
 #include "TString.h"
 ClassImp(StMuPrimaryVertex)
   
-StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex) {
-  mFlag           = vertex->flag();
-  mPosition       = vertex->position();
-  mPosError       = vertex->positionError();
-  mVertexFinderId = vertex->vertexFinderId();
-  mRanking        = vertex->ranking();
-  mNTracksUsed    = vertex->numTracksUsedInFinder();
-  mNBTOFMatch     = vertex->numMatchesWithBTOF();
-  mNCTBMatch      = vertex->numMatchesWithCTB();
-  mNBEMCMatch     = vertex->numMatchesWithBEMC();
-  mNEEMCMatch     = vertex->numMatchesWithEEMC();
+StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex)
+{
+  mFlag                  = vertex->flag();
+  mPosition              = vertex->position();
+  mPosError              = vertex->positionError();
+  mVertexFinderId        = vertex->vertexFinderId();
+  mRanking               = vertex->ranking();
+  mNTracksUsed           = vertex->numTracksUsedInFinder();
+  mNBTOFMatch            = vertex->numMatchesWithBTOF();
+  mNCTBMatch             = vertex->numMatchesWithCTB();
+  mNBEMCMatch            = vertex->numMatchesWithBEMC();
+  mNEEMCMatch            = vertex->numMatchesWithEEMC();
 
-  mNBTOFNotMatch     = vertex->numNotMatchesWithBTOF();
-  mNCTBNotMatch      = vertex->numNotMatchesWithCTB();
-  mNBEMCNotMatch     = vertex->numNotMatchesWithBEMC();
-  mNEEMCNotMatch     = vertex->numNotMatchesWithEEMC();
+  mNBTOFNotMatch         = vertex->numNotMatchesWithBTOF();
+  mNCTBNotMatch          = vertex->numNotMatchesWithCTB();
+  mNBEMCNotMatch         = vertex->numNotMatchesWithBEMC();
+  mNEEMCNotMatch         = vertex->numNotMatchesWithEEMC();
 
   mNCrossCentralMembrane = vertex->numTracksCrossingCentralMembrane();
-  mNTpcWestOnly = vertex->numTracksTpcWestOnly();
-  mNTpcEastOnly = vertex->numTracksTpcEastOnly();
+  mNTpcWestOnly          = vertex->numTracksTpcWestOnly();
+  mNTpcEastOnly          = vertex->numTracksTpcEastOnly();
   mNTracksWithPromptHit  = vertex->numTracksWithPromptHit();
-  mNPostXTracks   = vertex->numPostXTracks();
-  mSumTrackPt     = vertex->sumOfTrackPt();
-  mMeanDip        = vertex->meanDip();
-  mChiSquared     = vertex->chiSquared();
-  mNTracks    = vertex->numberOfDaughters();
-  mRefMultPos = uncorrectedNumberOfPositivePrimaries(vertex);
-  mRefMultNeg = uncorrectedNumberOfNegativePrimaries(vertex); 
-  mRefMultFtpcEast = uncorrectedNumberOfFtpcEastPrimaries(vertex);
-  mRefMultFtpcWest = uncorrectedNumberOfFtpcWestPrimaries(vertex); 
+  mNPostXTracks          = vertex->numPostXTracks();
+  mSumTrackPt            = vertex->sumOfTrackPt();
+  mMeanDip               = vertex->meanDip();
+  mChiSquared            = vertex->chiSquared();
+  mNTracks               = vertex->numberOfDaughters();
+  mRefMultPos            = uncorrectedNumberOfPositivePrimaries(vertex);
+  mRefMultNeg            = uncorrectedNumberOfNegativePrimaries(vertex);
+  mRefMultFtpcEast       = uncorrectedNumberOfFtpcEastPrimaries(vertex);
+  mRefMultFtpcWest       = uncorrectedNumberOfFtpcWestPrimaries(vertex);
 
   mIdTruth  = vertex->idTruth();
   mQuality  = vertex->qaTruth();
@@ -95,6 +96,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 void StMuPrimaryVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuPrimaryVertex.cxx,v $
+// Revision 1.12  2017/04/17 19:19:43  smirnovd
+// [Cosmetic] Whitespace adjustments
+//
 // Revision 1.11  2013/01/14 23:34:29  fisyak
 // Fix print out
 //
