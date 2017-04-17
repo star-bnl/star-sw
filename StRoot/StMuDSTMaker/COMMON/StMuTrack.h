@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.51 2017/04/17 19:19:44 smirnovd Exp $
+ * $Id: StMuTrack.h,v 1.52 2017/04/17 19:19:51 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -68,6 +68,7 @@ class StMuTrack : public TObject {
     Int_t index2BTofHit() const; /// dongx
     Int_t index2MtdHit() const; ///
     Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
+    void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
     const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
     const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
     const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
@@ -201,7 +202,6 @@ protected:
   Int_t         mIdParentVx;
   void setIndex2Global(Int_t i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(Int_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
-  void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
   StThreeVectorF dca(const StThreeVectorF &pos) const; ///< Calculate dca to a given point
   StThreeVectorD dca(const StTrack*, const StVertex *vertex) const; ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
   StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex) const; ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
@@ -267,6 +267,11 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.52  2017/04/17 19:19:51  smirnovd
+ * StMuTrack: Make setVertexIndex() public
+ *
+ * Associated vertex can change when running a vertex finder as an afterburner.
+ *
  * Revision 1.51  2017/04/17 19:19:44  smirnovd
  * [Cosmetic] Whitespace adjustments
  *
