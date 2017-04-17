@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.52 2017/04/17 19:19:43 smirnovd Exp $
+ * $Id: StMuTrack.cxx,v 1.53 2017/04/17 20:41:07 smirnovd Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -531,12 +531,13 @@ ostream&  operator<<(ostream& os, const StMuTrack& v) {
   else                          os << "   ";
   os << Form("id:%5i fl:%5i vx:%3i p:%8.3f %8.3f %8.3f",v.id(),v.flag(),v.vertexIndex(), v.p().x(), v.p().y(), v.p().z());
   os << Form(" q:%2i eta:%6.3f phi:%6.3f pT: %6.3f",v.charge(),v.eta(),v.phi(),v.pt());
-  os << Form(" DCA:%6.3f %6.3f %6.3f",v.dca().x(),v.dca().y(),v.dca().z());
+  os << Form(" DCA [%d]:%6.3f %6.3f %6.3f", v.index2Cov(), v.dca().x(),v.dca().y(),v.dca().z());
   os << Form(" Total hits:%2i fitted:%2i poss:%2i",v.nHits(),v.nHitsFit(),v.nHitsPoss());
   os << Form(" Points F: %6.3f %6.3f %6.3f L: %6.3f %6.3f %6.3f", 
 	     v.firstPoint().x(),v.firstPoint().y(),v.firstPoint().z(),
 	     v.lastPoint().x(),v.lastPoint().y(),v.lastPoint().z());
   os << Form(" idT %4i qa %2i",v.idTruth(), v.qaTruth());
+  os << Form(" idParentVx %d", v.idParentVx());
   return os;
 }
 
@@ -717,6 +718,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.53  2017/04/17 20:41:07  smirnovd
+ * StMuTrack: Add additional info to Print()
+ *
  * Revision 1.52  2017/04/17 19:19:43  smirnovd
  * [Cosmetic] Whitespace adjustments
  *
