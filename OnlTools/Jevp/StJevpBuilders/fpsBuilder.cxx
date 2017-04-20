@@ -240,8 +240,10 @@ void fpsBuilder::event(daqReader *rdr)
       TriggerDataBlk2017* trgdata2017 = (TriggerDataBlk2017*)dd->Byte;
       StTriggerData* trg = (StTriggerData*) new StTriggerData2017(trgdata2017,0,1,0);
       unsigned int detmask=trg->getTrgDetMask();
+      tcu=trg->tcuCounter();    
+      delete trg;
       if(! ((detmask >> 10) & 0x1)) return;
-      tcu=trg->tcuCounter();      
+    
     }
   }
   
