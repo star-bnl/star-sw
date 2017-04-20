@@ -37,6 +37,8 @@ class mtdBuilder : public JevpBuilder {
     struct {
       // MTDhits histogram group
       TH2* hMTD_hitmap2D;
+      TH2* hMTD_hitmap2D_good;
+      TH2* hMTD_timeDiff;
       TH1*** hMTD_hitmap;
 
       // MTDtriggerinfo histogram group

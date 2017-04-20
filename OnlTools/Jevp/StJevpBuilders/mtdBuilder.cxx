@@ -19,10 +19,10 @@
 #include <RTS/include/rtsLog.h>
 
 // Backleg lists
-const int nTray3bl			=  9;
-      int tray3bl[nTray3bl]	= {12,13,14,15,16,17,18,19,20};
-const int nTray5bl			= 21;
-      int tray5bl[nTray5bl]	= {21,22,23,24,25,26,27,28,29,30,1,2,3,4,5,6,7,8,9,10,11};
+const int nTray3bl    		=  10;
+int tray3bl[nTray3bl]	        = {9,12,13,14,15,16,17,18,19,20};
+const int nTray5bl		= 20;
+      int tray5bl[nTray5bl]	= {21,22,23,24,25,26,27,28,29,30,1,2,3,4,5,6,7,8,10,11};
 
 int tray[30]			= {1,2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
 
@@ -32,6 +32,9 @@ const int TrayToRDO[30]     = {2,2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1,
 
 int nGlobalSlot	= nTray3bl*3 + nTray5bl*5;
 int ntray		= nTray3bl   + nTray5bl;
+
+const double trigTimeCut_min[2] = {2750, 2700};
+const double trigTimeCut_max[2] = {2850, 2800};
 
 ClassImp(mtdBuilder);
   
@@ -77,6 +80,20 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   for (int i=0;i<ntray;i++){
 	sprintf(tmpchr, "%d", tray[i]);
   	contents.hMTD_hitmap2D->GetXaxis()->SetBinLabel(i+1,tmpchr);
+  }
+
+  sprintf(tmpchr,"MTD strips vs BL of good hits");
+  contents.hMTD_hitmap2D_good = new TH2F(tmpchr,tmpchr,30,0.5,30.5,120.,0.5,120.5);		// 30 active backlegs
+  for (int i=0;i<ntray;i++){
+	sprintf(tmpchr, "%d", tray[i]);
+  	contents.hMTD_hitmap2D_good->GetXaxis()->SetBinLabel(i+1,tmpchr);
+  }
+
+  sprintf(tmpchr,"MTD trigger time vs BL");
+  contents.hMTD_timeDiff = new TH2F(tmpchr,tmpchr,30,0.5,30.5,500,2500,3000);		// 30 active backlegs
+  for (int i=0;i<ntray;i++){
+	sprintf(tmpchr, "%d", tray[i]);
+  	contents.hMTD_timeDiff->GetXaxis()->SetBinLabel(i+1,tmpchr);
   }
   
   contents.hMTD_hitmap = new TH1 **[nMTDtrays];
@@ -248,6 +265,10 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   
   plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap2D);
 
+  plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap2D_good);
+
+  plots[nhhit++] = new JevpPlot(contents.hMTD_timeDiff);
+
   //
   for (int itray3bl=0; itray3bl<nTray3bl; itray3bl++) {
     int val3tray=tray3bl[itray3bl];
@@ -278,7 +299,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
     addPlot(plots[i]);
 	plots[i]->gridx = 0;
 	plots[i]->gridy = 0;
-    if (i==0){
+    if (i<3){
 		plots[i]->optstat=0;
 	} else {
 		plots[i]->getHisto(0)->histo->SetFillColor(19);
@@ -458,7 +479,9 @@ void mtdBuilder::event(daqReader *rdr) {
   trailinghits.clear();
   int allbunchid[2][30];
   for(int i=0;i<2;i++){ for(int j=0;j<30;j++){ allbunchid[i][j] = -9999; }}
-	
+  int triggerTimeStamp[2];
+  for(int i=0; i<2; i++) { triggerTimeStamp[i] = 0; }
+
   daq_dta *dd = rdr->det("mtd")->get("legacy");
   mtd_t *mtd;
   if (!dd){		//WJL ...pointer to mtd data not found
@@ -498,9 +521,10 @@ void mtdBuilder::event(daqReader *rdr) {
 			if( (dataword&0xF0000000)>>28 == 0x2) {
 			  bunchid=dataword&0xFFF;
 			  allbunchid[halftrayid][trayid-1] = bunchid;
+			  if(triggerTimeStamp[ifib]==0) triggerTimeStamp[ifib] = dataword;
 			  continue;  
 			}
-		
+
 			int edgeid =int( (dataword & 0xf0000000)>>28 );
 			//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
 			if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
@@ -532,6 +556,16 @@ void mtdBuilder::event(daqReader *rdr) {
 //			contents.hMTD_hitmap2D->Fill(trayid,24*(slot-1)+globalstripid);
 			contents.hMTD_hitmap2D->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
 			contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
+
+			// apply rough trigger time window cut to select good MTD hits
+			float timeDiff = time - 25.*(triggerTimeStamp[ifib] & 0xfff);
+			while(timeDiff<0) timeDiff += 51200;
+			contents.hMTD_timeDiff->Fill(HitmapXbyTray[trayid-1], timeDiff);
+			if(timeDiff>trigTimeCut_min[ifib] && timeDiff<trigTimeCut_max[ifib])
+			  {
+			    contents.hMTD_hitmap2D_good->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
+			  }
+
 //			contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
 			int ntrayonbl	= 5;
 			//if (trayid>=12&&trayid<=20) ntrayonbl = 3;
