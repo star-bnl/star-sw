@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.22 2016/11/17 23:40:48 jwebb Exp $
+* $Id: xgeometry.age,v 1.23 2017/04/20 16:59:00 jwebb Exp $
 
 
 
@@ -2386,6 +2386,9 @@ If LL>0
                  Geom = 'Y2011a  ';
                  call geom_y2011a; }
 
+  Case y2011b   { Y2011b: Production quality tag
+                 Geom = 'Y2011b  ';
+                 call geom_y2011b; }
 
 
   Case upgr2012 { y2012 : Y2012 geometry first cut;
@@ -4615,8 +4618,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.22 2016/11/17 23:40:48 jwebb Exp $
+* $Id: xgeometry.age,v 1.23 2017/04/20 16:59:00 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.23  2017/04/20 16:59:00  jwebb
+* Add y2011b case statement.
+*
 * Revision 1.22  2016/11/17 23:40:48  jwebb
 * FTS Reference 1 and 2
 *
