@@ -260,6 +260,8 @@ void ppBuilder::startrun(daqReader *rdr) {
   htime = ctime( (long int*)&rdr->evt_time);
   *(htime+strlen(htime)-1) =0 ;
   LOG("JEFF", "ppBuilder starting run #%d date %s",rdr->run, htime);
+  memset(mEntriesNCH, 0, sizeof(mEntriesNCH));
+  memset(mEntriesSVX, 0, sizeof(mEntriesSVX));
   resetAllPlots();
 }
 
