@@ -28,7 +28,7 @@ $JobQAT = "newJobsQA";
 my $TOP_DIRD = "/star/rcf/test/dev/";
 
 my @dir_year = ("year_2000", "year_2001", "year_2003", "year_2004", "year_2005", "year_2006", "year_2007", "year_2008","year_2009", "year_2010", "year_2011", "year_2012", "year_2013", "year_2014", "year_2015", "year_2016");
-my @node_dir = ("daq_sl302.ittf", "daq_sl302.ittf_opt" ,"trs_sl302.ittf", "trs_sl302.ittf_opt","simu","daq_sl302.stica", "daq_sl302.stica_opt" );
+my @node_dir = ("daq_sl302.ittf", "daq_sl302.ittf_opt" ,"trs_sl302.ittf", "trs_sl302.ittf_opt","simu","daq_sl302.stica", "daq_sl302.stica_opt", "daq_sl302.stihr", "daq_s302.stihr_opt" );
 
 
 my @OUT_DIR0 = ();
@@ -38,6 +38,9 @@ my @OUT_DIR3 = ();
 my @OUT_DIR4 = ();
 my @OUT_DIR5 = ();
 my @OUT_DIR6 = ();
+my @OUT_DIR7 = ();
+my @OUT_DIR8 = ();
+
 my @OUT_DIRB0 = ();
 my @OUT_DIRB1 = ();
 my @OUT_DIRB2 = ();
@@ -45,6 +48,9 @@ my @OUT_DIRB3 = ();
 my @OUT_DIRB4 = ();
 my @OUT_DIRB5 = ();
 my @OUT_DIRB6 = ();
+my @OUT_DIRB7 = ();
+my @OUT_DIRB8 = ();
+
 my @OUT_DIR;
 my @TDIR = ();
 my @BDIR = ();
@@ -107,6 +113,10 @@ my $thistime;
     @OUT_DIR4 = `ls -d $TDIR[4]`;
     @OUT_DIR5 = `ls -d $TDIR[5]`;
     @OUT_DIR6 = `ls -d $TDIR[6]`;
+    @OUT_DIR7 = `ls -d $TDIR[7]`;
+    @OUT_DIR8 = `ls -d $TDIR[8]`;
+
+
 
  $ii = 0;
 
@@ -157,6 +167,20 @@ my $thistime;
       $ii++;
   }
 
+for ($i = 0; $i < scalar(@OUT_DIR7); $i++) {
+    $OUT_DIR[$ii] = $OUT_DIR7[$i];
+    chop $OUT_DIR[$ii];
+    print "Output Dir for $testDay :", $OUT_DIR[$ii],"\n";
+    $ii++;
+}
+
+for ($i = 0; $i < scalar(@OUT_DIR8); $i++) {
+    $OUT_DIR[$ii] = $OUT_DIR8[$i];
+    chop $OUT_DIR[$ii];
+    print "Output Dir for $testDay :", $OUT_DIR[$ii],"\n";
+    $ii++;
+}
+
 
  @BDIR = ();  
 
@@ -173,6 +197,9 @@ my $thistime;
     @OUT_DIRB4 = `ls -d $BDIR[4]`;
     @OUT_DIRB5 = `ls -d $BDIR[5]`;
     @OUT_DIRB6 = `ls -d $BDIR[6]`;
+    @OUT_DIRB7 = `ls -d $BDIR[7]`;
+    @OUT_DIRB8 = `ls -d $BDIR[8]`;
+
 
 
 $ik = $ii;
@@ -225,6 +252,19 @@ $ik = $ii;
       $ik++;
   }
 
+for ($i = 0; $i < scalar(@OUT_DIRB7); $i++) {
+    $OUT_DIR[$ik] = $OUT_DIRB7[$i];
+    chop $OUT_DIR[$ik];
+    print "Output Dir for $beforeDay :", $OUT_DIR[$ik],"\n";
+    $ik++;
+}
+
+for ($i = 0; $i < scalar(@OUT_DIRB8); $i++) {
+    $OUT_DIR[$ik] = $OUT_DIRB8[$i];
+    chop $OUT_DIR[$ik];
+    print "Output Dir for $beforeDay :", $OUT_DIR[$ik],"\n";
+    $ik++;
+}
 
 
 struct FileAttr => {
@@ -1468,7 +1508,7 @@ sub  updateQATable {
 
      $sql="update $JobQAT set ";
      $sql.="avail='$newAvail'";
-     $sql.=" WHERE path = '$pvpath' AND jobID = '$pvjbId' AND avail = 'Y'";   
+     $sql.=" WHERE path = '$pvpath' AND logFile = '$pvfile' AND avail = 'Y'";   
      print "$sql\n" if $debugOn;
      $rv = $dbh->do($sql) || die $dbh->errstr;
 
