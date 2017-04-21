@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.28 2015/03/06 20:02:01 jdb Exp $
+ * $Id: StMuEvent.cxx,v 1.29 2017/04/17 20:40:56 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -230,7 +230,7 @@ UShort_t StMuEvent::refMultFtpcWest(Int_t vtx_id) {
 
 UShort_t StMuEvent::refMultFtpc(Int_t vtx_id) {return refMultFtpcEast(vtx_id)+refMultFtpcWest(vtx_id);}
 
-StThreeVectorF StMuEvent::primaryVertexPosition(Int_t vtx_id) { 
+StThreeVectorF StMuEvent::primaryVertexPosition(int vtx_id) const {
 	StThreeVectorF vz(-999,-999,-999);
   // Check old format (no StMuPrimaryVertex stored)
   if (StMuDst::numberOfPrimaryVertices()==0 && (vtx_id == 0 || vtx_id == -1)){
@@ -243,7 +243,7 @@ StThreeVectorF StMuEvent::primaryVertexPosition(Int_t vtx_id) {
      return StMuDst::primaryVertex(vtx_id)->position();
   return vz;
 }
-StThreeVectorF StMuEvent::primaryVertexErrors(Int_t vtx_id) {
+StThreeVectorF StMuEvent::primaryVertexErrors(int vtx_id) const {
 	StThreeVectorF vz(-999,-999,-999);
   // Check old format (no StMuPrimaryVertex stored)
   if (StMuDst::numberOfPrimaryVertices()==0 && (vtx_id == 0 || vtx_id == -1)){
@@ -314,6 +314,9 @@ Float_t StMuEvent::nearestVertexZ(Int_t vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.29  2017/04/17 20:40:56  smirnovd
+ * StMuEvent: Declare getters const. They don't modify anything
+ *
  * Revision 1.28  2015/03/06 20:02:01  jdb
  * Added 4 UShort_ts to StMuEvent at request of Xin Dong. Change StMuEvent.{h, cxx}
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.34 2015/07/21 22:27:35 jeromel Exp $
+ * $Id: StMuEvent.h,v 1.35 2017/04/17 20:40:56 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -113,9 +113,9 @@ class StMuEvent : public TObject {
   }
 
   ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
-  StThreeVectorF primaryVertexPosition(Int_t vtx_id = -1);
-  StThreeVectorF primaryVertexErrors(Int_t vtx_id = -1);
-  TArrayI& L2Result()                           { return mL2Result; }
+  StThreeVectorF primaryVertexPosition(int vtx_id = -1) const;
+  StThreeVectorF primaryVertexErrors(int vtx_id = -1) const;
+  TArrayI& L2Result(); // Raw L2Result[] array
 
   // Calibrated VPD info from StTofCollection in StEvent
   UInt_t numberOfVpdEastHits()  {  
@@ -197,6 +197,9 @@ class StMuEvent : public TObject {
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.35  2017/04/17 20:40:56  smirnovd
+ * StMuEvent: Declare getters const. They don't modify anything
+ *
  * Revision 1.34  2015/07/21 22:27:35  jeromel
  * Direct use of -D and one misisng NO_STRANGE_MUDST added
  *

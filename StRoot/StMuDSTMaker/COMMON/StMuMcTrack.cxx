@@ -16,8 +16,8 @@ StMuMcTrack::StMuMcTrack() {
 StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(),mEgLabel(t.eg_label), mPDG(t.eg_pid), mGePid(t.ge_pid),  mId(t.id),
 						  mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
 						  mIdVx(t.start_vertex_p), mIdVxEnd(t.stop_vertex_p), mCharge(t.charge), mE(t.e), mEta(t.eta), 
-						  mPxyz(t.p), mpT(t.pt), mPtot(t.ptot), 
-						  mRapidity(t.rapidity) {
+						  mpT(t.pt), mPtot(t.ptot), 
+						  mRapidity(t.rapidity), mPxyz(t.p) {
   mHits[kctb] = 0xff & t.n_ctb_hit;  /* Nhits in ctb */
   mHits[keem] = 0xff & t.n_eem_hit;  /* Nhits in eem (endcap em cal) */
   mHits[kemc] = 0xff & t.n_emc_hit;  /* Nhits in emc */
