@@ -11,8 +11,6 @@ ClassImp(StarPrimaryMaker);
 #include "StarGenerator.h"
 #include "StarCallf77.h" 
 #include <iostream>
-#include "St_geant_Maker/St_geant_Maker.h"
-#include "TGiant3.h"
 #include <map>
 #include "TString.h"
 #include "TSystem.h"
@@ -25,7 +23,6 @@ ClassImp(StarPrimaryMaker);
 
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
-#include "AgStarReader.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
 #include "StarGenerator/FILT/StarFilterMaker.h"
@@ -36,7 +33,7 @@ ClassImp(StarPrimaryMaker);
 
 using namespace std;
 
-StarPrimaryMaker *fgPrimary      = 0;
+StarPrimaryMaker *StarPrimaryMaker::fgStarPrimaryMaker      = 0;
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::StarPrimaryMaker()  : 
   StMaker("PrimaryMaker"),
@@ -54,11 +51,11 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mPrimaryVertex(0,0,0,0),
   mFilter(0),mAccepted(0)
 {
-  assert(fgPrimary == 0); // cannot create more than one primary generator
-  fgPrimary = this;
+  assert(fgStarPrimaryMaker == 0); // cannot create more than one primary generator
+  fgStarPrimaryMaker = this;
 
   mStack = new StarParticleStack();
-  AgStarReader::Instance().SetStack(mStack);
+  //  AgStarReader::Instance().SetStack(mStack);
 #if 0
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
@@ -71,7 +68,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::~StarPrimaryMaker()
 {
-  fgPrimary = 0;       // Cleanup
+  fgStarPrimaryMaker = 0;       // Cleanup
   if ( mStack )        delete mStack;
   if ( mFile )         delete mFile;
   /* deleting mTree and mPrimaryEvent cause seg violation here... why? */
@@ -95,7 +92,7 @@ Int_t StarPrimaryMaker::Init()
   //
   // Initialize all submakers first
   //
-  Int_t result =  StMaker::Init();
+  Int_t result =  kStOK; //StMaker::Init();
 
   //
   // The filter is properly a maker, so initialize it.  Also create accepted event list.
@@ -642,8 +639,7 @@ TLorentzVector StarPrimaryMaker::Vertex()
   x = mVx + xy.X();
   y = mVy + xy.Y();
   z = mVz + StarRandom::Instance().gauss( mSz );
-  Double_t dist = TMath::Sqrt(x*x+y*y+z*z);
-  t = dist / TMath::Ccgs();
+  t = -(z - mVz) / TMath::Ccgs();
 
   return TLorentzVector(x,y,z,t);
 }
