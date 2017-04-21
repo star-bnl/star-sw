@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<stdout URL="file:./$JOBID.log" />
+<stderr URL="file:./$JOBID.err" />
 <command> 
-#  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-#  setenv NODEBUG yes
-#  starver .DEV2 
-#  setup gcc451
-  set file = $INPUTFILE0;
+  set file = `basename ${INPUTFILE0} .event.root`;
   echo "${file}"
   set logFile  = ${file}B.log
-  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
-  if ("$f" == "") then
-    root4star -q -b 'TpcRS.C(100,"y2011,TpcRS,phys_off",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
-  endif
+#  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+#  if ("${f}" == "") then
+    root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
+#  endif
 </command>
-<input URL="command:TpcRS_PartdEdx.pl" />
+<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" />
+<!-- <input URL="file:./../*event.root" /> -->
 </job>

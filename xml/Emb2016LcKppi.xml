@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job  name="Lc3pi" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<job  name="LcKppi" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
 <stdout URL="file:./$JOBID.log" />
 <stderr URL="file:./$JOBID.err" />
 <command> 
@@ -12,12 +12,12 @@
   set base = `basename ${muDst} .MuDst.root`;
   set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
   if (! -r ${daq}) exit 1;
-#  set name = "Lc3pi";
+#  set name = "LcKppi";
   set file = ${base}.MuDst.root
   set logFile  = ${base}B.log
   echo "${file}"
   if ( ! -r ${file}) then
-    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,LcKppi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" />
