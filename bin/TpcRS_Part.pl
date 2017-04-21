@@ -18,9 +18,9 @@ foreach my $part (@particles) {
   my $N =  10;# 00;
   if ($part =~ /MIP/) {$N = 100;}
   for (my $i = $i1; $i <= $N; $i++) {
-    my $log = $part . ":" . $i . "B.log";
+    my $log = $part . "_" . $i . "B.log";
     if (! -r $log) {
-      print "string:$part:$i\n";
+      print "string:$part_$i\n";
     }
 #    last;
   }
