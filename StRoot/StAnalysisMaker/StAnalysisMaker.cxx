@@ -1,6 +1,6 @@
 //
 //  This is a STAR typical comment header. You should modify
-//  it to reflect your changes.
+//  it to reflect your changes.ß
 //  As a minimum it should contain the name of the author, the
 //  date it was written/modified, and a short description of what
 //  the class is meant to do. The cvs strings $X$ (where X=Id, Log)
@@ -68,6 +68,8 @@
 //  is a macro, that's why the ';' is missing.
 //
 ClassImp(StAnalysisMaker);
+Bool_t StAnalysisMaker::mOnlyIdT = kFALSE;
+
 StAnalysisMaker *StAnalysisMaker::fgMaker = 0;
 /// The constructor. Initialize you data members here.
 StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name)
@@ -153,6 +155,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
     if (opt.Contains("v",TString::kIgnoreCase)) {
       for (UInt_t i = 0; i < NpVX; i++) {
 	const StPrimaryVertex *vx = pEvent->primaryVertex(i);
+	if (mOnlyIdT && vx->idTruth() <= 0) continue;
 	vx->Print(Form("Vertex: %3i ",i));
 #ifdef StTrackMassFit_hh
 	const StTrackMassFit *pf = vx->parent();
@@ -163,6 +166,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
 	  for (UInt_t j = 0; j < nDaughters; j++) {
 	    const StTrack* track = vx->daughter(j);
 	    if (! track) continue;
+	    if (mOnlyIdT && track->idTruth() <= 0) continue;
 	    cout << *((const StPrimaryTrack *)track) << endl;
 #ifdef StTrackMassFit_hh
 	    const StVertex*  vxEnd =  track->endVertex();
@@ -174,6 +178,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
 	  for (UInt_t j = 0; j < nMassFits; j++) {
 	    const StTrackMassFit * track = vx->massFit(j);
 	    if (! track) continue;
+	    if (mOnlyIdT && track->idTruth() <= 0) continue;
 	    cout << *track << endl;
 	  }
 #endif
@@ -201,6 +206,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
       for (UInt_t j = 0; j < nentries; j++) {
 	StTrack *track = node->track(j);
 	if (! track) continue;
+	if (mOnlyIdT && track->idTruth() <= 0) continue;
 	if (track->type() == global) {
 	  StGlobalTrack* gTrack = (StGlobalTrack* ) track;
 	  cout << *gTrack << endl;
@@ -221,6 +227,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
       for (UInt_t  i=0; i < nTracks; i++) {
 	node = trackNode[i]; if (!node) continue;
 	StGlobalTrack* gTrack = dynamic_cast<StGlobalTrack*>(node->track(global));
+	if (mOnlyIdT && gTrack->idTruth() <= 0) continue;
 	if (gTrack) cout << *gTrack << endl;
       } 
     }
@@ -238,7 +245,9 @@ void StAnalysisMaker::PrintGlobalTrack(Int_t itk) {
   for (UInt_t i = 0; i < nTracks; i++) {
     node = trackNode[i]; if (!node) continue;
     StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+    if (! gTrack) continue;
     if (itk != 0 && gTrack->key() != itk) continue;
+    if (mOnlyIdT && gTrack->idTruth() <= 0) continue;
     cout << *gTrack << endl;
     if (! gTrack->detectorInfo()) {cout << "=============== detectorInfo is missing" << endl; continue;}
     StPtrVecHit hvec = gTrack->detectorInfo()->hits();
@@ -246,8 +255,10 @@ void StAnalysisMaker::PrintGlobalTrack(Int_t itk) {
       if (hvec[j]->detector() == kTpcId) {
 	StTpcHit *tpcHit = static_cast<StTpcHit *> (hvec[j]);
 	if (! tpcHit) continue;
+	if (mOnlyIdT && tpcHit->idTruth() <= 0) continue;
 	cout << *tpcHit << endl;
       } else {
+	if (mOnlyIdT && hvec[j]->idTruth() <= 0) continue;
 	cout << *hvec[j] << endl;
       }
     }
@@ -264,11 +275,13 @@ void StAnalysisMaker::PrintVertex(Int_t ivx) {
     for (UInt_t i = 0; i < NpVX; i++) {
       if (ivx >= 0 && i != (UInt_t) ivx) continue;
       const StPrimaryVertex *vx = pEvent->primaryVertex(i);
+      if (mOnlyIdT && vx->idTruth() <= 0) continue;
       vx->Print(Form("Vertex: %3i ",i));
       UInt_t nDaughters = vx->numberOfDaughters();
       for (UInt_t j = 0; j < nDaughters; j++) {
 	StPrimaryTrack* pTrack = (StPrimaryTrack*) vx->daughter(j);
 	if (! pTrack) continue;
+	if (mOnlyIdT && pTrack->idTruth() <= 0) continue;
 	cout << *pTrack << endl;
 	if (! pTrack->detectorInfo()) {cout << "=============== detectorInfo is missing" << endl; continue;}
 	StPtrVecHit hvec = pTrack->detectorInfo()->hits();
@@ -276,8 +289,10 @@ void StAnalysisMaker::PrintVertex(Int_t ivx) {
 	  if (hvec[j]->detector() == kTpcId) {
 	    StTpcHit *tpcHit = static_cast<StTpcHit *> (hvec[j]);
 	    if (! tpcHit) continue;
+	    if (mOnlyIdT && tpcHit->idTruth() <= 0) continue;
 	    cout << *tpcHit << endl;
 	  } else {
+	    if (mOnlyIdT && hvec[j]->idTruth() <= 0) continue;
 	    cout << *hvec[j] << endl;
 	  }
 	}
@@ -337,6 +352,8 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 	      TArrayD dT(NoHits);   Double_t *d = dT.GetArray();
 	      for (Long64_t k = 0; k < NoHits; k++) {
 		const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
+		if (mOnlyIdT && tpcHit->idTruth() <= 0) continue;
+		if (IdTruth >= 0 && tpcHit->idTruth() != IdTruth) continue;
 #if 0
 		const StThreeVectorF& xyz = tpcHit->position();
 		d[k] = xyz.z();
@@ -355,6 +372,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 #endif
 		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[l]);
 		if (! tpcHit) continue;
+		if (mOnlyIdT && tpcHit->idTruth() <= 0) continue;
 		if (IdTruth >= 0 && tpcHit->idTruth() != IdTruth) continue;
 		if (! plot) 		tpcHit->Print();
 		else {
@@ -437,7 +455,10 @@ void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod, const Option_t *opt) {
 	  if(module) {
 	    const StSPtrVecEmcRawHit& rawHit=module->hits();
 	    Int_t nhits = (Int_t) rawHit.size();
-	    for(Int_t k = 0; k < nhits; k++) if (rawHit[k]->energy() > 0) cout << DetectorName(id) << "\t" << *rawHit[k] << endl;
+	    for(Int_t k = 0; k < nhits; k++) {
+	      //	      if (mOnlyIdT && rawHit[k]->idTruth() <= 0) continue;
+	      if (rawHit[k]->energy() > 0) cout << DetectorName(id) << "\t" << *rawHit[k] << endl;
+	    }
 	  }
 	}
       }
@@ -448,6 +469,7 @@ void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod, const Option_t *opt) {
 	  if (NoCls) {
 	    const StSPtrVecEmcCluster&       clusters = cl->clusters();
 	    for (Int_t i = 0; i < NoCls; i++) {
+	      if (mOnlyIdT && clusters[i]->idTruth() <= 0) continue;
 	      if (clusters[i]->energy() > 0) cout << DetectorName(id) << "\t" << *clusters[i] << endl;
 	    }
 	  }
@@ -467,6 +489,7 @@ void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod, const Option_t *opt) {
 	else     cout << "Encap";
 	cout << endl;
 	for (Int_t j = 0; j < np; j++) {
+	  if (mOnlyIdT && p[j]->idTruth() <= 0) continue;
 	  cout << *p[j] << endl;
 	}
       }
@@ -508,6 +531,7 @@ void StAnalysisMaker::PrintSvtHits() {
 	      StSvtHit *hit = hits[l];
 	      if (hit) {
 		//		cout << *((StHit *) hit) << endl;
+		if (mOnlyIdT && hit->idTruth() <= 0) continue;
 		TotalNoOfSvtHits++;
 		hit->Print();
 	      }
@@ -548,6 +572,7 @@ void StAnalysisMaker::PrintSsdHits() {
 	for (l = 0; l < NoHits; l++) {
 	  StSsdHit *hit = hits[l];
 	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
 	    hit->Print("");
 	  }
 	}
@@ -584,6 +609,7 @@ void StAnalysisMaker::PrintSstHits() {
 	for (l = 0; l < NoHits; l++) {
 	  StSstHit *hit = hits[l];
 	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
 	    hit->Print("");
 	  }
 	}
@@ -608,6 +634,7 @@ void StAnalysisMaker::PrintGmtHits() {
     for (UInt_t l = 0; l < NoHits; l++) {
       const StGmtHit *hit = hits[l];
       if (hit) {
+	if (mOnlyIdT && hit->idTruth() <= 0) continue;
 	hit->Print("");
       }
     }
@@ -630,6 +657,7 @@ void StAnalysisMaker::PrintToFHits() {
   for(size_t i=0;i<tofHits.size();i++) { //loop on hits in modules
     StBTofHit *aHit = tofHits[i];
     if(!aHit) continue;
+    if (mOnlyIdT && aHit->idTruth() <= 0) continue;
     LOG_QA  << *aHit << endm;
   }  
 }
@@ -654,6 +682,7 @@ void StAnalysisMaker::PrintRnDHits() {
   for (l = 0; l < NoHits; l++) {
     StRnDHit *hit = hits[l];
     if (hit) {
+      if (mOnlyIdT && hit->idTruth() <= 0) continue;
       //		cout << *((StHit *) hit) << endl;
       const StThreeVectorF &P = hit->position();
       printf("l:%2i w:%2i",i+1,k+1);
@@ -1215,6 +1244,230 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   LOG_QA << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << endm;
 }
 //________________________________________________________________________________
+void StAnalysisMaker::PrintPxlHits() {
+  UInt_t i,k,l,m;
+  //  Double_t zPrim = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) return;
+  //  if (pEvent->numberOfPrimaryVertices() != 1) return;
+  StPrimaryVertex *primaryVertex = pEvent->primaryVertex();
+  if ( primaryVertex) {
+    const StThreeVectorF &primXYZ = primaryVertex->position();
+    //  cout << "primaryVertex " << primXYZ << endl;
+    cout << "primaryVertex \t" << primXYZ.x() << "\t" << primXYZ.y() << "\t" << primXYZ.z() << endl;
+  }
+  //  Int_t TotalNoOfPxlHits = 0;
+  StPxlHitCollection* PxlHitCollection = pEvent->pxlHitCollection();
+  if (! PxlHitCollection) { cout << "No PXL Hit Collection" << endl; return;}
+  UInt_t numberOfSectors = PxlHitCollection->numberOfSectors();
+  //  Int_t vers = gClapxlable->GetID("StPxlHit");
+  for ( i = 0; i< numberOfSectors; i++) {
+    StPxlSectorHitCollection* sectorCollection = PxlHitCollection->sector(i);
+    if (sectorCollection) {
+      UInt_t numberOfLadders = sectorCollection->numberOfLadders();
+      for (m = 0; m < numberOfLadders; m++) {
+	StPxlLadderHitCollection* ladderCollection = sectorCollection->ladder(m);
+	UInt_t numberOfSensors = ladderCollection->numberOfSensors();
+	for (k = 0; k < numberOfSensors; k++) {
+	  StPxlSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
+	  StSPtrVecPxlHit &hits = sensorCollection->hits();
+	  UInt_t NoHits = hits.size();
+	  for (l = 0; l < NoHits; l++) {
+	    StPxlHit *hit = hits[l];
+	    if (hit) {
+	      if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	      hit->Print("");
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+void StAnalysisMaker::PrintIstHits() {
+  UInt_t i,k,l;
+  //  Double_t zPrim = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) return;
+  //  if (pEvent->numberOfPrimaryVertices() != 1) return;
+  StPrimaryVertex *primaryVertex = pEvent->primaryVertex();
+  if ( primaryVertex) {
+    const StThreeVectorF &primXYZ = primaryVertex->position();
+    //  cout << "primaryVertex " << primXYZ << endl;
+    cout << "primaryVertex \t" << primXYZ.x() << "\t" << primXYZ.y() << "\t" << primXYZ.z() << endl;
+  }
+  //  Int_t TotalNoOfIstHits = 0;
+  StIstHitCollection* IstHitCollection = pEvent->istHitCollection();
+  if (! IstHitCollection) { cout << "No IST Hit Collection" << endl; return;}
+  for ( i = 0; i< kIstNumLadders; i++) {
+    StIstLadderHitCollection* ladderCollection = IstHitCollection->ladder(i);
+    if (ladderCollection) {
+      for (k = 0; k < kIstNumSensorsPerLadder; k++) {
+	StIstSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
+	StSPtrVecIstHit &hits = sensorCollection->hits();
+	UInt_t NoHits = hits.size();
+	for (l = 0; l < NoHits; l++) {
+	  StIstHit *hit = hits[l];
+	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	    hit->Print("");
+	  }
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+void StAnalysisMaker::Print(Option_t *option) const {
+  TString Option(option);
+  if (Option == "") {
+    cout << "Options: \n"
+	 <<  "\tStEvent\n"
+	 <<  "\tVertex\n"
+	 <<  "\tGlobal\n"
+	 <<  "\tTpcHits\n"
+	 <<  "\tTofHits\n"
+	 <<  "\tSvtHits\n"
+	 <<  "\tSsdHits\n"
+	 <<  "\tSstHits\n"
+	 <<  "\tGmtHits\n"
+	 <<  "\tRnDHits\n"  
+	 <<  "\tEmcHits\n"
+	 <<  "\tPxlHits\n"
+	 <<  "\tIstHits"
+	 << endl;
+  }
+  else if (Option.Contains("Event" ,TString::kIgnoreCase)) PrintStEvent(option); 
+  else if (Option.Contains("Vertex",TString::kIgnoreCase)) PrintVertex(); 
+  else if (Option.Contains("Global",TString::kIgnoreCase)) PrintGlobalTrack(); 
+  else if (Option.Contains("TpcHit",TString::kIgnoreCase)) PrintTpcHits(); 
+  else if (Option.Contains("TofHit",TString::kIgnoreCase)) PrintToFHits(); 
+  else if (Option.Contains("SvtHit",TString::kIgnoreCase)) PrintSvtHits(); 
+  else if (Option.Contains("SsdHit",TString::kIgnoreCase)) PrintSsdHits(); 
+  else if (Option.Contains("SstHit",TString::kIgnoreCase)) PrintSstHits(); 
+  else if (Option.Contains("GmtHit",TString::kIgnoreCase)) PrintGmtHits(); 
+  else if (Option.Contains("RnDHit",TString::kIgnoreCase)) PrintRnDHits(); 
+  else if (Option.Contains("EmcHit",TString::kIgnoreCase)) PrintEmcHits(); 
+  else if (Option.Contains("PxlHit",TString::kIgnoreCase)) PrintPxlHits(); 
+  else if (Option.Contains("IstHit",TString::kIgnoreCase)) PrintIstHits(); 
+}
+//________________________________________________________________________________
+void StAnalysisMaker::DumpHftHits() {
+  struct BPoint_t {
+    Float_t                     det,x,y,z,q,idT,fl,us;
+  };
+  static const Char_t *vname = "det:x:y:z:q:idT:fl:us";
+  static TNtuple *Nt = 0;
+  if (! Nt) {
+    TFile *tf =  StMaker::GetTopChain()->GetTFile();
+    if (tf) {tf->cd(); Nt = new TNtuple("HftHit","HftHit",vname);}
+    else return;
+  }
+  if (! Nt) return;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
+  BPoint_t B;
+  UInt_t i,k,l,m;
+  B.det = 1; // PXL
+  StPxlHitCollection* PxlHitCollection = pEvent->pxlHitCollection();
+  if (! PxlHitCollection) { cout << "No PXL Hit Collection" << endl; return;}
+  UInt_t numberOfSectors = PxlHitCollection->numberOfSectors();
+  //  Int_t vers = gClapxlable->GetID("StPxlHit");
+  for ( i = 0; i< numberOfSectors; i++) {
+    StPxlSectorHitCollection* sectorCollection = PxlHitCollection->sector(i);
+    if (sectorCollection) {
+      UInt_t numberOfLadders = sectorCollection->numberOfLadders();
+      for (m = 0; m < numberOfLadders; m++) {
+	StPxlLadderHitCollection* ladderCollection = sectorCollection->ladder(m);
+	UInt_t numberOfSensors = ladderCollection->numberOfSensors();
+	for (k = 0; k < numberOfSensors; k++) {
+	  StPxlSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
+	  StSPtrVecPxlHit &hits = sensorCollection->hits();
+	  UInt_t NoHits = hits.size();
+	  for (l = 0; l < NoHits; l++) {
+	    StPxlHit *hit = hits[l];
+	    if (hit) {
+	      if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	      //	      hit->Print("");
+	      // det,x,y,z,q,idT,fl,us;
+	      B.x = hit->position().x();
+	      B.y = hit->position().y();
+	      B.z = hit->position().z();
+	      B.idT = hit->idTruth();
+	      B.q   = hit->charge();
+	      B.fl  = hit->flag();
+	      B.us  = hit->usedInFit();
+	      Nt->Fill(&B.det);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  B.det = 2; // IST
+  StIstHitCollection* IstHitCollection = pEvent->istHitCollection();
+  if (! IstHitCollection) { cout << "No IST Hit Collection" << endl; return;}
+  for ( i = 0; i< kIstNumLadders; i++) {
+    StIstLadderHitCollection* ladderCollection = IstHitCollection->ladder(i);
+    if (ladderCollection) {
+      for (k = 0; k < kIstNumSensorsPerLadder; k++) {
+	StIstSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
+	StSPtrVecIstHit &hits = sensorCollection->hits();
+	UInt_t NoHits = hits.size();
+	for (l = 0; l < NoHits; l++) {
+	  StIstHit *hit = hits[l];
+	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	    //	    hit->Print("");
+	      // det,x,y,z,q,idT,fl,us;
+	      B.x = hit->position().x();
+	      B.y = hit->position().y();
+	      B.z = hit->position().z();
+	      B.idT = hit->idTruth();
+	      B.q   = hit->charge();
+	      B.fl  = hit->flag();
+	      B.us  = hit->usedInFit();
+	      Nt->Fill(&B.det);
+	  }
+	}
+      }
+    }
+  }
+  B.det = 3; // SST
+  StSstHitCollection* SstHitCollection = pEvent->sstHitCollection();
+  if (! SstHitCollection) { cout << "No SST Hit Collection" << endl; return;}
+  UInt_t numberOfLadders = SstHitCollection->numberOfLadders();
+  //  Int_t vers = gClassTable->GetID("StSstHit");
+  for ( i = 0; i< numberOfLadders; i++) {
+    StSstLadderHitCollection* ladderCollection = SstHitCollection->ladder(i);
+    if (ladderCollection) {
+      UInt_t numberOfWafers = ladderCollection->numberOfWafers();
+      for (k = 0; k < numberOfWafers; k++) {
+	StSstWaferHitCollection* waferCollection = ladderCollection->wafer(k);
+	StSPtrVecSstHit &hits = waferCollection->hits();
+	UInt_t NoHits = hits.size();
+	for (l = 0; l < NoHits; l++) {
+	  StSstHit *hit = hits[l];
+	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	    //	    hit->Print("");
+	      // det,x,y,z,q,idT,fl,us;
+	      B.x = hit->position().x();
+	      B.y = hit->position().y();
+	      B.z = hit->position().z();
+	      B.idT = hit->idTruth();
+	      B.q   = hit->charge();
+	      B.fl  = hit->flag();
+	      B.us  = hit->usedInFit();
+	      Nt->Fill(&B.det);
+	  }
+	}
+      }
+    }
+  }
+
+}
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
  * Revision 2.24  2015/07/19 23:02:44  fisyak

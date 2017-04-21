@@ -61,7 +61,7 @@
 #endif
 #endif
 
-#if defined(CERNLIB_UNIX) && !defined(CERNLIB_DECS)
+#if defined(CERNLIB_UNIX) && !defined(CERNLIB_DECS) && !defined(CERNLIB_LXIA64)
 #ifndef CERNLIB_USRJMP
 #define CERNLIB_USRJMP
 #endif

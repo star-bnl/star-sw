@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.108 2017/01/06 22:31:24 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.109 2017/04/12 19:47:02 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.109  2017/04/12 19:47:02  genevb
+ * Generic SpaceCharge and GridLeak functions independent of specific modes
+ *
  * Revision 1.108  2017/01/06 22:31:24  genevb
  * Introduce FullGridLeak distortion correction, speed tweek to Poisson3DRelaxation
  *
@@ -1178,10 +1181,12 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       UndoTwistDistortion    ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
   }
+
   if (mDistortionMode & kClock) {
       UndoClockDistortion    ( Xprime1, Xprime2, Sector ) ; 
       memcpy(Xprime1,Xprime2,threeFloats);
   }
+
   if (mDistortionMode & kMembrane) {
       UndoMembraneDistortion ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
@@ -1197,20 +1202,9 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       memcpy(Xprime1,Xprime2,threeFloats);
   }
 
-  if (mDistortionMode & kSpaceCharge) { 
+  if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2)) { 
       UndoSpaceChargeDistortion ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
-  }
-
-  if (mDistortionMode & kSpaceChargeR2) { 
-      UndoSpaceChargeR2Distortion ( Xprime1, Xprime2, Sector ) ;
-      memcpy(Xprime1,Xprime2,threeFloats);
-  }
-
-  if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
-      cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kSpaceChargeR2 at the same time" << endl ;
-      cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
-      exit(1) ;
   }
 
   if (mDistortionMode & kShortedRing) { 
@@ -1218,27 +1212,9 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       memcpy(Xprime1,Xprime2,threeFloats);
   }
 
-  if (mDistortionMode & kGridLeak) { 
+  if (mDistortionMode & (kGridLeak | k3DGridLeak | kFullGridLeak)) { 
       UndoGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
-  }
-
-  if (mDistortionMode & k3DGridLeak) { 
-      Undo3DGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
-      memcpy(Xprime1,Xprime2,threeFloats);
-  }
-
-  if (mDistortionMode & kFullGridLeak) { 
-      UndoFullGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
-      memcpy(Xprime1,Xprime2,threeFloats);
-  }
-
-  if (((mDistortionMode/kGridLeak)     & 1) +
-      ((mDistortionMode/k3DGridLeak)   & 1) +
-      ((mDistortionMode/kFullGridLeak) & 1) > 1) {
-      cout << "StMagUtilities ERROR **** Do not use multiple GridLeak modes at the same time" << endl ;
-      cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
-      exit(1) ;
   }
 
   if (mDistortionMode & kGGVoltError) {
@@ -1900,6 +1876,31 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 //________________________________________
 
 
+/// Space Charge entry function
+/*!
+    Call the appropriate Space Charge function based on distortion mode
+*/
+void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+{
+
+  if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
+      cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kSpaceChargeR2 at the same time" << endl ;
+      cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
+      exit(1) ;
+  }
+
+  if (mDistortionMode & kSpaceCharge) { 
+      UndoSpaceChargeR0Distortion ( x, Xprime, Sector ) ;
+  } else if (mDistortionMode & kSpaceChargeR2) { 
+      UndoSpaceChargeR2Distortion ( x, Xprime, Sector ) ;
+  }
+
+}
+
+
+//________________________________________
+
+
 /// Space Charge Correction 
 /*!
     Space Charge distortion assuming a uniform distribution of charge per unit volume
@@ -1907,7 +1908,7 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
     for legacy reasons.  Electrostatic equations solved by Jamie Dunlop  11/01/2001
     Updated to include linear increase of charge from endcap to CM by Jim Thomas 12/18/2001
 */
-void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+void StMagUtilities::UndoSpaceChargeR0Distortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
   Float_t  Er_integral, Ephi_integral ;
@@ -3173,7 +3174,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
       while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ; 
       Ztrack[index]  =   x[2] - Rotation*DeltaTheta*R0*p[2] / Pt ;
       xx[0] = Xtrack[index] ; xx[1] = Ytrack[index] ; xx[2] = Ztrack[index] ;
-      UndoSpaceChargeDistortion(xx,xxprime) ;
+      UndoSpaceChargeR0Distortion(xx,xxprime) ;
       xx[0] = Xtrack[index] - (xxprime[0]-xx[0]) ; xx[1] = Ytrack[index] - (xxprime[1]-xx[1]) ; xx[2] = Ztrack[index] - (xxprime[2]-xx[2]) ;
       UndoSpaceChargeR2Distortion(xx,xxprime) ;
       Xtrack1[index] = xxprime[0] ; Ytrack1[index] = xxprime[1] ; Ztrack1[index] = xxprime[2] ;
@@ -3223,7 +3224,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
     {  x_new[0] = x[0] ;  x_new[1] = x[1] ;  x_new[2] = x[2] ; } 
   else
     {
-      UndoSpaceChargeDistortion(x,xxprime) ;
+      UndoSpaceChargeR0Distortion(x,xxprime) ;
       xx[0] = x[0] - (xxprime[0]-x[0]) ;  xx[1] = x[1] - (xxprime[1]-x[1]) ;  xx[2] = x[2] - (xxprime[2]-x[2]) ;
       UndoSpaceChargeR2Distortion(xx,x_new) ;
     }
@@ -3545,32 +3546,16 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        Ztrack[i]  =   VertexZ + DeltaTheta*Z_coef ;
        xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
 
-       if (mDistortionMode & kSpaceChargeR2) {    // Daisy Chain all possible distortions and sort on flags
-	 UndoSpaceChargeR2Distortion ( xx, xxprime ) ;
+       if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2)) {    // Daisy Chain all possible distortions and sort on flags
+	 UndoSpaceChargeDistortion ( xx, xxprime ) ;
 	 InnerOuterRatio = 1.3 ;  // JT test.  Without the GridLeak, GVB prefers 1.3  (real world == 0.5)  
 	 for ( unsigned int j = 0 ; j < 3; ++j ) 
 	   {
 	     xx[j] = xxprime[j];
 	   }
        }
-       if (mDistortionMode & kGridLeak) { 
+       if (mDistortionMode & (kGridLeak | k3DGridLeak | kFullGridLeak)) { 
 	 UndoGridLeakDistortion ( xx, xxprime ) ;
-	 InnerOuterRatio = 0.6 ; // JT test.  With the GridLeak, GVB prefers 0.6  (note that order is important in this loop).
-	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
-	   {
-	     xx[j] = xxprime[j];
-	   }
-       }
-       if (mDistortionMode & k3DGridLeak) { 
-	 Undo3DGridLeakDistortion ( xx, xxprime ) ;
-	 InnerOuterRatio = 0.6 ; // JT test.  With the GridLeak, GVB prefers 0.6  (note that order is important in this loop).
-	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
-	   {
-	     xx[j] = xxprime[j];
-	   }
-       }
-       if (mDistortionMode & kFullGridLeak) { 
-	 UndoFullGridLeakDistortion ( xx, xxprime ) ;
 	 InnerOuterRatio = 0.6 ; // JT test.  With the GridLeak, GVB prefers 0.6  (note that order is important in this loop).
 	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
 	   {
@@ -3978,6 +3963,34 @@ Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
 
 //________________________________________
 
+/// Grid Leakage entry function
+/*!
+  Call the appropriate GridLeak function based on distortion mode
+*/
+void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+{ 
+
+  if (((mDistortionMode/kGridLeak)     & 1) +
+      ((mDistortionMode/k3DGridLeak)   & 1) +
+      ((mDistortionMode/kFullGridLeak) & 1) > 1) {
+      cout << "StMagUtilities ERROR **** Do not use multiple GridLeak modes at the same time" << endl ;
+      cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
+      exit(1) ;
+  }
+
+  if (mDistortionMode & kGridLeak) { 
+      Undo2DGridLeakDistortion ( x, Xprime, Sector ) ;
+  } else if (mDistortionMode & k3DGridLeak) { 
+      Undo3DGridLeakDistortion ( x, Xprime, Sector ) ;
+  } else if (mDistortionMode & kFullGridLeak) { 
+      UndoFullGridLeakDistortion ( x, Xprime, Sector ) ;
+  }
+
+}
+
+
+//________________________________________
+
 /// Grid Leakage Calculation
 /*!
   Calculate the distortions due to charge leaking out of the gap between the inner and outer sectors
@@ -3985,7 +3998,7 @@ Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
   Original work by Gene VanBuren, and J. Thomas 
   NOTE: This routine is obsolete: 10/31/2009  Recommend that you use Undo3DGridLeakDistortion, instead.
 */
-void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+void StMagUtilities::Undo2DGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
   const  Int_t     ORDER       =  1   ;  // Linear interpolation = 1, Quadratic = 2         

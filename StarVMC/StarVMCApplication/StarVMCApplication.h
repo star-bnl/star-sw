@@ -39,7 +39,7 @@ class StarVMCApplication : public TVirtualMCApplication {
 
   // methods
   void InitMC(const char *setup=0);
-  void RunMC(Int_t nofEvents);
+  Bool_t RunMC(Int_t nofEvents); // kFALSE if run has been stopped
   void FinishRun();
   
   virtual void ConstructGeometry();

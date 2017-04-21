@@ -84,7 +84,7 @@ class StThinPlateSpline;
  * are represented as:
  *
  * <pre>
- * GlobalXyz = TpcOnGlobal * IdsOnTpc * PxlOnIds * HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
+ * GlobalXyz = TpcOnGlobal * IdsOnTpc * PstOnIds * PxlOnPst * HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
  *
  * numbering :
  * Id  = (sector-1)*40 + (ladder-1)*10 + sensor
@@ -180,7 +180,9 @@ public:
 
 private:
    //! geoHMatrices describing rotation + shift translations between different coordinate systems
+#ifndef __NEW_PXLDB__
    TGeoHMatrix *mGeoHMatrixTpcOnGlobal;
+#endif /* !__NEW_PXLDB__ */
    TGeoHMatrix mGeoHMatrixIdsOnTpc;
    TGeoHMatrix mGeoHMatrixPstOnIds;
    TGeoHMatrix mGeoHMatrixPxlOnPst;

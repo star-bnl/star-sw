@@ -110,6 +110,7 @@ Int_t StEmcSimulatorMaker::Init() {
 
 void StEmcSimulatorMaker::Clear(const char*) {
     mMcEvent = NULL;
+    mEmcCollection = NULL;
 }
 
 Int_t StEmcSimulatorMaker::Make() {
@@ -331,10 +332,10 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 		    break;
             }
 
-            int modHigh = 0;
+	    //            int modHigh = 0;
             float etaHigh = 0;
             mGeom[det - 1]->getId(highHit->module(), highHit->eta(), highHit->sub(), softIds[numCross]);
-            modHigh = highHit->module();
+	    //            modHigh = highHit->module();
             mGeom[det - 1]->getEta(softIds[numCross], etaHigh);
             
             ///////////////////////////////////////////////////////////////////////////////////////

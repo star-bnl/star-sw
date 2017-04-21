@@ -1,22 +1,22 @@
-#ifndef __StarParticleReader_h__
-#define __StarParticleReader_h__
+#ifndef __AgStarReader_h__
+#define __AgStarReader_h__
 
 #include "TObject.h"
-class StarParticleStack;
+#include "StarGenerator/BASE/StarParticleStack.h"
 class StarParticleData;
 
 /**
-   \class StarParticleReader
+   \class AgStarReader
    \author Jason C. Webb
    \brief Pushes particles out from the StarParticleStack to geant3.
    
 */
 
-class StarParticleReader : public TObject
+class AgStarReader : public TObject
 {
  public:
 
-  ~StarParticleReader(){ /* nada */ };
+  ~AgStarReader(){ /* nada */ };
 
   /// Set the particle stack from which we will read events
   /// @param stack The particle stack
@@ -26,7 +26,7 @@ class StarParticleReader : public TObject
   void ReadEvent();
 
   /// Return the single instance of this class
-  static StarParticleReader &Instance();
+  static AgStarReader &Instance();
 
   void SetVert( Float_t *vertex, Int_t ntbeam, Int_t nttarg, Float_t *ubuf, Int_t nu, Int_t &nv );
   void SetKine( Float_t *plab,   Int_t idpart, Int_t nv,     Float_t *ubuf, Int_t nb, Int_t &nt );
@@ -37,13 +37,13 @@ class StarParticleReader : public TObject
   // The particle stack
   StarParticleStack *mStack;
 
-  static StarParticleReader *mInstance;
+  static AgStarReader *mInstance;
   StarParticleData    *mParticleData;
 
-  StarParticleReader();
+  AgStarReader();
 
 
-  ClassDef(StarParticleReader,1);
+  ClassDef(AgStarReader,1);
 
 };
 

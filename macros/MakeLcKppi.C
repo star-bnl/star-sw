@@ -42,6 +42,7 @@ void MakeLcKppi(Int_t nevents=1, const Char_t *parn = "LcKppi",Int_t RunID = 1)
   //		",muMc"); 
   TString Chain("MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,VFMCE,noRunco,noHistos,noTags,");
   Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,sdt20160301,";
+  //  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,";
   Chain += parn;
   Chain += Form(",rung.%i",RunID);
   chain = bfc(0,Chain.Data(),0,RootFile.Data(),MainFile.Data());

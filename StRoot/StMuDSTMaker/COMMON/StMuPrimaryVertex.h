@@ -4,7 +4,7 @@
  * Simple class to store primary vertices. Data members are a mainly a copy of 
  * StPrimaryVertex
  *
- * $Id: StMuPrimaryVertex.h,v 1.9 2012/09/16 21:58:16 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.h,v 1.10 2017/04/17 19:19:43 smirnovd Exp $ 
  */
 
 #include "TObject.h"
@@ -20,7 +20,9 @@ class StMuPrimaryVertex : public TObject {
     mRanking(999),mNTracksUsed(0), mNCTBMatch(0), mNBEMCMatch(0), mNEEMCMatch(0), mNCrossCentralMembrane(0),
     mSumTrackPt(-999),mMeanDip(-999), mChiSquared(9999), mNTracks(0), mNTpcWestOnly(0), mNTpcEastOnly(0), mRefMultNeg(0), mRefMultPos(0), mRefMultFtpcWest(0), 
     mRefMultFtpcEast(0), mIdTruth(0), mQuality(0), mIdParent(0) {}
+
   StMuPrimaryVertex(const StPrimaryVertex*& vertex);
+
   ~StMuPrimaryVertex() {;}
    StVertexId       type()                             const { return mType; }
    Int_t            id()                               const { return mId; }
@@ -124,6 +126,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v);
 #endif
 /*
  * $Log: StMuPrimaryVertex.h,v $
+ * Revision 1.10  2017/04/17 19:19:43  smirnovd
+ * [Cosmetic] Whitespace adjustments
+ *
  * Revision 1.9  2012/09/16 21:58:16  fisyak
  * Make use of Tpc West and East Only no. of tracks
  *

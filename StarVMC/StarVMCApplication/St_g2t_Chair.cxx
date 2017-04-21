@@ -89,7 +89,9 @@ void St_g2t_hitsC::Fill(GHit_t &vect) {}
 void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(ctf);
   g2t_ctf_hit.s_track       = vect.Sleng;	\
-  G2TFillTrackHit(ctf);
+  G2TFillTrackHitLocal(ctf);
+  table->AddAt(&g2t_ctf_hit);
+  if (Debug()) table->Print(nok-1,2);		\
  }
 //________________________________________________________________________________
 void St_g2t_emc_hitC::Fill(GHit_t &vect) {

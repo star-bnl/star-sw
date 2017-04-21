@@ -148,11 +148,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       mk->SetMode(1); 
     }
   }
-#if 0
+#if 1
   StMaker *dEdxY2 = chain->GetMaker("dEdxY2"); 
   if (dEdxY2) {
     StdEdxY2Maker *dEdx = (StdEdxY2Maker *) dEdxY2;
     Int_t mask = 0;
+#if 0
     //     SETBIT(mask,StTpcdEdxCorrection::ktpcPressure); 
     //     SETBIT(mask,StTpcdEdxCorrection::kAdcCorrection); 
     //     SETBIT(mask,StTpcdEdxCorrection::kTpcSecRow); 
@@ -183,11 +184,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //    if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2") 
     SETBIT(Mode,StdEdxY2Maker::kZBGX);
     SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
-    if (Mode) {
-      dEdx->SetDebug(1);
-      cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
-      dEdx->SetMode(Mode); 
-    }
+#endif
     Int_t Mode = 2;
     if (Mode) {
       dEdx->SetDebug(1);

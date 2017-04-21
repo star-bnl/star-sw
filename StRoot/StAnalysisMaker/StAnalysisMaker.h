@@ -116,6 +116,8 @@ public:
   static StAnalysisMaker *instance() {return fgMaker;}
   Int_t  Make();                      // invoked for every event
   Int_t  Finish();                    // called once at the end
+  virtual void        Print(Option_t *option="") const;
+  void                DumpHftHits(); // dump HFT hit into TTree
   static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
   static void PrintStEvent(TString opt="vpgl3");
   static void PrintVertex(Int_t ivx = -1);
@@ -128,6 +130,10 @@ public:
   static void PrintGmtHits();
   static void PrintRnDHits();
   static void PrintEmcHits(Int_t det=-1, Int_t mod=-1, const Option_t *opt = "AdcClustersPoints");
+  static void PrintPxlHits();
+  static void PrintIstHits();
+  static void SetOnlyIdT(Bool_t m = kTRUE) {mOnlyIdT = m;}
+  static Bool_t mOnlyIdT;
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.15 2015/07/19 23:02:44 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;

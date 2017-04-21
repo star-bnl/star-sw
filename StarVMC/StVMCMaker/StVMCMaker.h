@@ -20,11 +20,12 @@
 #endif
 #include "StarVMCApplication.h"
 #include "TGeant3TGeo.h"
+#include "TRandom3.h"
 class TTreeIter;
 class StVMCMaker : public StMaker {
  public: 
   StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), 
-    fInitRun(0), fVolume(0), fMuDstIter(0) {fgGeantMk = this;}
+    fInitRun(0), fVolume(0), fMuDstIter(0), fRndm(0) {fgGeantMk = this;}
   virtual       ~StVMCMaker() {}
   virtual Int_t  Init();
   virtual Int_t  Make();
@@ -62,6 +63,8 @@ class StVMCMaker : public StMaker {
   Int_t                      fInitRun;
   TDataSet*                  fVolume;   //!
   TTreeIter*                 fMuDstIter; //! MuDst to select primary vertex for embedding
+  TRandom3                  *fRndm; //! Private random number generator is any
+  TRandom                   *fRndmSaved; //! public random number
  public:
   virtual const Char_t *GetCVS() const {
     static const Char_t cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.1.1.2 2009/04/16 14:12:55 fisyak Exp $ built " __DATE__ " " __TIME__  ; 

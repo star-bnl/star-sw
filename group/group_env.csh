@@ -996,9 +996,10 @@ if ( $?GRPE_pself ) then
     set self=$GRPE_pself
     unset GRPE_pself
 endif
-if (-r ${HOME}/bin) setenv PATH ${HOME}/bin:${PATH}
+if (-r ${HOME}/bin)                   setenv PATH ${HOME}/bin:${PATH}
 if (-r ${HOME}/bin/.${STAR_HOST_SYS}) setenv PATH ${HOME}/bin/.${STAR_HOST_SYS}:${PATH}
-if (-x ${GROUP_DIR}/dropit) setenv PATH `${GROUP_DIR}/dropit`
+if (-r ${STAR}/scripts/RCF)           setenv PATH ${PATH}:${STAR}/scripts/RCF
+if (-x ${GROUP_DIR}/dropit)           setenv PATH `${GROUP_DIR}/dropit`
 
 #
 # Uncomment to get statistics on version used at

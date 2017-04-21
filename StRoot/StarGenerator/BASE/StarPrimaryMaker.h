@@ -106,7 +106,7 @@ class StarPrimaryMaker : public StMaker
   virtual Int_t Make();
   virtual void  Clear( const Option_t *opts="" );
   virtual Int_t Finish();
-
+  static StarPrimaryMaker *instance() {return fgStarPrimaryMaker;}
   /// Set the filename of the output TTree
   void  SetFileName( const Char_t *name ){ mFileName = name; }
 
@@ -162,7 +162,7 @@ class StarPrimaryMaker : public StMaker
 
   /// Return a pointer to the event
   StarGenEvent *event() { return mPrimaryEvent; }
-
+  StarParticleStack *stack() {return mStack; }
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.8 2015/06/15 13:23:00 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
@@ -221,7 +221,7 @@ class StarPrimaryMaker : public StMaker
 
   StarFilterMaker *mFilter;
   TEventList      *mAccepted; //*< event list containing accepted events
-
+  static StarPrimaryMaker *fgStarPrimaryMaker;				     
   ClassDef(StarPrimaryMaker,1);
 
 };

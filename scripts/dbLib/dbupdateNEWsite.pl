@@ -34,7 +34,7 @@ my $dsite;
 
  $dsite = "rcf";
  $TOP_DIRD = "/star/rcf/test/new/";
-  @node_dir = ("daq_sl302.ittf", "trs_sl302.ittf", "simu", "daq_sl302.ittf_opt", "trs_sl302.ittf_opt", "daq_sl302.stica", "daq_sl302.stica_opt"); 
+  @node_dir = ("daq_sl302.ittf", "trs_sl302.ittf", "simu", "daq_sl302.ittf_opt", "trs_sl302.ittf_opt", "daq_sl302.stica", "daq_sl302.stica_opt", "daq_sl302.stihr", "daq_sl302.stihr_opt",); 
 
  }elsif($SITE eq "rcf_embed" ) {
 
@@ -78,6 +78,9 @@ my @OUT_DIR3 = ();
 my @OUT_DIR4 = ();
 my @OUT_DIR5 = ();
 my @OUT_DIR6 = ();
+my @OUT_DIR7 = ();
+my @OUT_DIR8 = ();
+
 
 my @OUT_DIR = ();
 my @OUTD_DIR = ();
@@ -112,6 +115,9 @@ my $ii = 0;
     @OUT_DIR4 = `ls -d $TDIR[4]`;
     @OUT_DIR5 = `ls -d $TDIR[5]`;
     @OUT_DIR6 = `ls -d $TDIR[6]`;
+    @OUT_DIR7 = `ls -d $TDIR[7]`;
+    @OUT_DIR8 = `ls -d $TDIR[8]`;
+
 
   }elsif($dsite eq "pdsf" or $dsite eq "pdsf_embed") {
 
@@ -166,6 +172,20 @@ my $ii = 0;
      chop $OUT_DIR[$ii]; 
   print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
       $ii++;  
+  }
+
+  for ($i = 0; $i < scalar(@OUT_DIR7); $i++) {
+      $OUT_DIR[$ii] = $OUT_DIR7[$i];
+      chop $OUT_DIR[$ii];
+      print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
+      $ii++;
+  }
+
+  for ($i = 0; $i < scalar(@OUT_DIR8); $i++) {
+      $OUT_DIR[$ii] = $OUT_DIR7[$i];
+      chop $OUT_DIR[$ii];
+      print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
+      $ii++;
   }
 
 } elsif ($dsite eq "pdsf" or $dsite eq "pdsf_embed") {

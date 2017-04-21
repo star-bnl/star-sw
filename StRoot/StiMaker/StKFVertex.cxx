@@ -6,7 +6,7 @@
 #include "TArrayD.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
 #include "StG2TrackVertexMap.h"
-
+#include "TParticlePDG.h"
 #define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()) {cout << "StKFVertex::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;}
@@ -47,7 +47,7 @@ ostream&  operator<<(ostream& os,  const StKFVertex& v) {
   if (kv > 0) {
     os << Form(" Mc/QA/t:%4i/%3i/%6.0f xyz: %8.3f%8.3f%8.3f m:%4i %6s",kv, v.QaTruth(),
 	       v.TimeMc(), v.XyzMc().X(), v.XyzMc().Y(), v.XyzMc().Z(), 
-	       v.NoDaughtersMc(),StKFVertex::StKFVertex::GeNames[v.gePidMc()]);
+	       v.NoDaughtersMc(),(v.GetPDG()) ? TParticlePDG(v.GetPDG()).GetName() : StKFVertex::StKFVertex::GeNames[v.gePidMc()]);
   }
   return os;
 }
@@ -383,11 +383,14 @@ void StKFVertex::SetMc() {
   if (kv >= 0 && kv < NoMuMcVertex) {
     Int_t kvp = mcVtx[kv].parent_p - 1;
     Int_t gePid = 0;
-    if (kvp >= 0 &&  kvp < NoMuMcTracks) gePid = mcTrk[kvp].ge_pid;
+    if (kvp >= 0 &&  kvp < NoMuMcTracks) {
+      gePid = mcTrk[kvp].ge_pid;
+      SetPDG(mcTrk[kvp].eg_pid);
+    }
     fTimeMc = 1e9*mcVtx[kv].ge_tof;
     fXyzMc = TVector3(mcVtx[kv].ge_x);
     fNoDaughtersMc = mcVtx[kv].n_daughter;
-    fgePidMc = StKFTrack::CorrectGePid(gePid);
+    if (! GetPDG()) fgePidMc = StKFTrack::CorrectGePid(gePid);
   }
 }
 //________________________________________________________________________________

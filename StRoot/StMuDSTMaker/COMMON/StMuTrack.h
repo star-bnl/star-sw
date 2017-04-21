@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.50 2017/01/19 23:03:04 smirnovd Exp $
+ * $Id: StMuTrack.h,v 1.52 2017/04/17 19:19:51 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -54,7 +54,7 @@ class TObjArray;
 
 class StMuTrack : public TObject {
  public:
-  StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1), 
+  StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1),
     mIdTruth(0), mQuality(0), mIdParentVx(0) {/* no-op*/}; ///< default constructor
     StMuTrack(const StEvent*, const StTrack*, const StVertex*, Int_t index2Global=-2, Int_t index2RichSpectra=-2, Bool_t l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
     Short_t id()   const {return mId;}   ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
@@ -69,6 +69,7 @@ class StMuTrack : public TObject {
     Int_t index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
     Int_t index2MtdHit()  const {return mIndex2MtdHit;}   ///
     Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
+    void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
     const StMuTrack*     globalTrack()  const {return (mIndex2Global      >= 0) ? (StMuTrack*)StMuDst::array(muGlobal)->At(mIndex2Global) : 0;}
     const StMuTrack*     primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
     const StRichSpectra* richSpectra()  const {return (mIndex2RichSpectra >= 0) ? (StRichSpectra*)StMuDst::array(muRich)->At(mIndex2RichSpectra) : 0;}
@@ -226,7 +227,6 @@ protected:
 #endif
   void setIndex2Global(Int_t i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(Int_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
-  void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
   StThreeVectorF dca(const StThreeVectorF &pos) const; ///< Calculate dca to a given point
   StThreeVectorD dca(const StTrack*, const StVertex *vertex) const; ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
   StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex) const; ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
@@ -246,6 +246,14 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.52  2017/04/17 19:19:51  smirnovd
+ * StMuTrack: Make setVertexIndex() public
+ *
+ * Associated vertex can change when running a vertex finder as an afterburner.
+ *
+ * Revision 1.51  2017/04/17 19:19:44  smirnovd
+ * [Cosmetic] Whitespace adjustments
+ *
  * Revision 1.50  2017/01/19 23:03:04  smirnovd
  * StMuTrack: Let users change track type e.g. global/primary/etc...
  *

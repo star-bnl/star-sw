@@ -45,6 +45,10 @@
 #include "StDetectorDbMaker/StIstSurveyC.h"
 #include "StDetectorDbMaker/StSstSurveyC.h"
 #include "StMessMgr.h"
+#include "StPxlDbMaker/StPxlDb.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StSsdDbMaker/StSstDbMaker.h"
+#include "StSstUtil/StSstBarrel.hh"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 
@@ -94,9 +98,10 @@ void StarVMCApplication::InitMC(const char* setup) {  // Initialize MC.
   //  MisalignGeometry(); // Called from Geant3TGeo::FinishGeometry
 }
 //_____________________________________________________________________________
-void StarVMCApplication::RunMC(Int_t nofEvents) {    // MC run.
-  TVirtualMC::GetMC()->ProcessRun(nofEvents);
-  FinishRun();
+Bool_t StarVMCApplication::RunMC(Int_t nofEvents) {    // MC run.
+  Bool_t ok = TVirtualMC::GetMC()->ProcessRun(nofEvents);
+  if (! ok) FinishRun();
+  return ok;
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishRun() {    // Finish MC run.
@@ -454,6 +459,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
        pst=pixel support tube       PXMO
        ids= intermediate support    IBMO
        osc=outer support cylinder   SFMO
+       
 +------------------------+
 | Tables_in_Geometry_pxl |
 +------------------------+
@@ -498,9 +504,28 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   StpxlSectorOnHalf::instance();
   StpxlLadderOnSector::instance();
   StpxlSensorOnLadder::instance();
+ * GlobalXyz = TpcOnGlobal * IdsOnTpc * PxlOnIds *            HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
+ * GlobalXyz = TpcOnGlobal * IdsOnTpc * PstOnIds * PxlOnPst * HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
+ *                              *           *         *            *                 *                 *
+    Tpc 
+      -> Ids    :IDSM/Hft
+             -> Pst
+                    -> Pxl : 					 
+             	           -> Half				 
+             	                   -> Sector			 
+             	                             -> Ladder		 
+                                                       -> Sensor
+                    -> Ist
+                           -> Ladder
+                                     -> Sensor
+ * numbering :
+ * Id  = (sector-1)*40 + (ladder-1)*10 + sensor
+ * 1<= sector <= 10
+ * 1<= ladder <= 4
+ * 1<= sensor <= 10
      */
     {"Hft-%d",               kHft,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_%d",                              1, { 1, 0, 0},  StidsOnTpc::instance()}, //
-    // Sensor -> Ladder -> Sector -> Half -> Pxl -> Pst -> Ids -> Tpc
+    // Sensor -> Ladder -> Sector -> Half -> Pxl -> Pst? -> Ids -> Tpc
     {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                       1, { 1, 0, 0}, 0}, // StPxlpstOnIds::instance() * StpxlOnPst::instance()
     {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                1, {10, 0, 0}, 0}, // StpxlHalfOnPxl::instance() * StpxlSectorOnHalf::instance() 
     {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",        2, {10, 4, 0}, StpxlLadderOnSector::instance()}, 
@@ -512,8 +537,15 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   StistOnPst::instance();
   StLadderOnIst::instance();
   StistSensorOnLadder::instance();
+ * Naming of rotation matrices:
+ * positionGlobal  = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder * positionOnSensor
+ *                                             *      istOnPst ?    *            *
+ * numbering
+ * Id  = 1000 + (ladder-1)*6 + sensor
+ * 1<= ladder <= 24
+ * 1<= sensor <= 6
     */
-    {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",               1, { 1, 0, 0}, StpstOnIds::instance()},
+    {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",               1, { 1, 0, 0}, 0},// StpstOnIds::instance() * StistOnPst::instance()
     {"IstLadder-%d", kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",        1, {24, 0, 0}, StLadderOnIst::instance()},
     {"IstWafer-%d",   kIstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d",2, {24, 6, 0}, 0}, // StistSensorOnLadder::instance()},
     //    {"IstSensor-%d", kIstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d/IBSS_1",2, {24, 6, 0}, 0}, // StistSensorOnLadder::instance()},
@@ -605,7 +637,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       //      TGeoVolume *motherVV = mother->GetMotherVolume();
       Id = Ntot;
       St_SurveyC *chair = 0;
-      if (Ntot == 1 && listOfDet2Align[i].chair) { // kTpcRefSys, kHft, kIst, kSst
+      if (Ntot == 1 && listOfDet2Align[i].chair) { // kTpcRefSys, kHft, kSst
 	rotA = listOfDet2Align[i].chair->GetMatrix(0) * rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
       } else {
@@ -665,6 +697,11 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	  rotA   = PixelLadderT.Inverse() * listOfDet2Align[i].chair->GetMatrix(Id-1) * PixelSensorT;
 	  //	  rotA.SetDz(rotA.GetTranslation()[2]+4.875);
 	  rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	  break;
+	case kIst:
+          A = StpstOnIds::instance()->GetMatrix(0);
+	  B = StistOnPst::instance()->GetMatrix(0);
+	  rotA = A * B  * rotL;
 	  break;
 	case kIstLadder:
 	  ladder = indx[0];
@@ -730,6 +767,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	cout << "========================================" << endl;
 	Double_t *tran = D.GetTranslation();
 	Double_t *r    = D.GetRotationMatrix();
+	// Check Ideal case
 	NN++;
 	for (Int_t l = 0; l < 3; l++) {
 	  Xyz[l]  += tran[l];
@@ -743,9 +781,53 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       nodeP->Align(rotm, shape);
       if (Debug() > 1) {
 	cout << "Id : " << Id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
-	if (Debug() > 2) nodeP->Print();
+	if (Debug() > 2) {
+	  nodeP->Print();
+#define __CHECK_NODE__
+#ifdef __CHECK_NODE__
+	  Int_t check = 1;
+	  TGeoHMatrix *comb = 0;
+	  StSstBarrel *mySst = 0;
+	  Int_t matIst = -1;
+	  Int_t currLadder = -1;
+	  Int_t currWafId = -1;
+          Int_t currWafNumb = -1;
+	  // Check node
+	  switch (kDetector) {
+	  case kPxlSensor:
+	    comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
+	    break;
+	  case kIstSensor:
+	    matIst = 1000 + (ladder - 1) * kIstNumSensorsPerLadder + sensor;
+	    comb = (TGeoHMatrix *) StIstDb::instance()->getRotations()->FindObject(Form("R%04i", matIst));
+	    break;
+	  case kSstSensor:
+	    currWafId= 100*ladder + sensor;
+	    mySst = gStSstDbMaker->getSst();
+	    currLadder  = mySst->idWaferToLadderNumb(currWafId);
+	    currWafNumb = mySst->idWaferToWafer(currWafId);
+	    comb = mySst->mLadders[currLadder]->mWafers[currWafNumb];
+	    break;
+	  default:
+	    check = 0;
+	    break;
+	  }
+	  if (check && comb) {
+	    cout << "++++++++++++++++++++++++++++++++++ Check Node ++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+	    TGeoHMatrix *nMat = nodeP->GetMatrix();
+	    nMat->Print();
+	    cout << "---------------------------------+ Matrix from Db  ---------------------------------------++" << endl;
+	    comb->Print();
+	    cout << "---------------------------------+ Diff ?     ---------------------------------------------+" << endl;
+	    D = comb->Inverse() * (*nMat);
+	    if (!(D == I)) D.Print();
+	    cout << "++++++++++++++++++++++++++++++++++ Check Node ++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+	  }
+#endif
+#undef __CHECK_NODE__
+	}
+	iBreak++;
       }
-      iBreak++;
     }
     if (NN) {
       for (Int_t l = 0; l < 12; l++) {

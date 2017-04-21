@@ -25,5 +25,5 @@
     root.exe -q -b -x 'MakeLc3pi.C('${N}',"'${name}'",'${rung}')' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 20 1000 Lc3pi" />
+<input URL="command:RunId.pl 1 200 1000 Lc3pi" />
 </job>

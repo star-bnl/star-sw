@@ -2,7 +2,7 @@
 #include "TMath.h"
 #include "TDatabasePDG.h"
 TDataSet *CreateTable() {
-  Double_t pTlow  =   10;
+  Double_t pTlow  =    0;
   Double_t pThigh =   10;
   Double_t Ylow   =  -1; 
   Double_t Yhigh  =   1;
@@ -59,6 +59,6 @@ TDataSet *CreateTable() {
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
-  TDataSet *tableSet = new TDataSet("20muons");
+  TDataSet *tableSet = new TDataSet("Lc3pi");
   return (TDataSet *)tableSet;
 }

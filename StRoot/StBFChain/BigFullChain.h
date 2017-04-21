@@ -1399,7 +1399,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
    ,                                                               "gstar","Mickey Mouse generator",kFALSE},
-  {"StarGenerator","","","","","libMathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase"
+  {"StarGenerator","","","","","MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,AgStar"
    ,                                                                                "StarGenerator",kFALSE}, 
   {"pythia"      ,"" ,"","PythiaPP200,-fzin","", ""                             ,"set pythia pp200",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
@@ -1414,7 +1414,8 @@ Bfc_st BFC[] = { // standard chains
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
-  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,StarVMCApplication","VMC G3",kFALSE},
+  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,MathMore,StarGeneratorUtil"
+   ",MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,StarVMCApplication"  ,"VMC G3",kFALSE},
   {"VMCAlignment","","","","","",                                                   "VMC Alignment",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl",       "StVMCMaker","StVMCMaker","VMC Maker in Passive Mode",kFALSE},
@@ -1528,28 +1529,24 @@ Bfc_st BFC[] = { // standard chains
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
-  {"pxlFastSim" ,"","","McEvent,StEvent,pxlDb","StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
   {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker", "Run PXL raw hit maker",kFALSE},
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
-  {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
+  {"pxlHit"      ,"","","event,pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
+  {"pxlFastSim" ,"","","McEvent,StEvent,pxlDb","StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
-  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker", 
-                                                             "StIstSimMaker", "IST Slow simulator", kFALSE},
-  {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
   {"istRawHit",  "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
   {"istRaw",     "", "", "istRawHit","",         "","WARNING *** Option is OBSOLETE use istRawHit", kFALSE},
+  {"istSim",     "", "", "istFastSim,istDb", "",                          "", "Load StIstSimMaker", kFALSE},
+  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker", 
+                                                             "StIstSimMaker", "IST Slow simulator", kFALSE},
   {"istCluster", "", "", "istRawHit","StIstClusterMaker",  "StIstClusterMaker","IST Cluster maker", kFALSE},
   {"istHit",     "", "", "event,istCluster", "StIstHitMaker",       "StIstHitMaker","IST Hit Maker",kFALSE},
-  {"istSim",     "", "", "istFastSim,istDb", "",                          "", "Load StIstSimMaker", kFALSE},
+  {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat"      ,"","","sst_daq"                             ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"sst_daq","","","sstCalDb,svt_T,-sls,-spa,sstUtil","StSstDaqMaker","StSstDaqMaker","... SSDT Daq",kFALSE},
 
-  {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
-   "... SSD fast simulator"                                                                        ,kFALSE},
-  {"sstfast"     ,"","","sstDb,StMcEvent,StEvent","StSstFastSimMaker","StSstFastSimMaker",
-   "... SST fast simulator"                                                                        ,kFALSE},
   {"ssd"         ,"","","ssdCalDb,sls,spa,sptd"              ,"","","SSD full chain for simulation",kFALSE},
   {"sls","","","McEvent,Simu,svt_T,SvtCL"
    ,                                "St_sls_Maker","StSsdSimulationMaker", "... SSD slow simulator",kFALSE},
@@ -1564,6 +1561,10 @@ Bfc_st BFC[] = { // standard chains
 
   {"sstHit",     "", "", "sst_daq,sptt", "",                          "","SST reconstruction chain",kFALSE},
 
+  {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
+   "... SSD fast simulator"                                                                        ,kFALSE},
+  {"sstfast"     ,"","","sstDb,StMcEvent,StEvent","StSstFastSimMaker","StSstFastSimMaker",
+   "... SST fast simulator"                                                                        ,kFALSE},
   {"ssdpre"      ,"","","ssdEmbed,spa"                    ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd"     ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker",             "... SSD merge maker",kFALSE},
   {"ssdE"        ,"","","ssdpre,ssdAdd"                       ,"","","SSD full chain for embedding",kFALSE},
@@ -1601,12 +1602,8 @@ Bfc_st BFC[] = { // standard chains
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    ,                                                                                   "BTof Mixer",kFALSE},
-
-
   // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","","","StMtdSimMaker,StEvent",                   "StMtdSimMaker","MTD Simulator",kFALSE},
-
-
   // Time Of Flight related options
 #if 1
   {"ToF"       ,"","","tofDat,tofrMatch,tofpMatch,tofCalib"                      ,"","","ToF Chain",kFALSE},

@@ -14,6 +14,7 @@ using namespace std;
 #include "TGiant3.h"
 
 #include "StarGenerator/UTIL/StarParticleData.h"
+#include "StarGenerator/BASE/StarPrimaryMaker.h"
 
 AgStarReader *AgStarReader::mInstance = 0;
 
@@ -53,6 +54,8 @@ AgStarReader &AgStarReader::Instance()
 void AgStarReader::ReadEvent()
 {
   
+  assert(StarPrimaryMaker::instance());
+  mStack = StarPrimaryMaker::instance()->stack();
   TGiant3 *geant3 = St_geant_Maker::instance()->Geant3();
 
   TParticle *part = 0;    // particle 

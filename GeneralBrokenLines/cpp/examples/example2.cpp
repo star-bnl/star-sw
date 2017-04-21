@@ -1,5 +1,5 @@
 /*
- * example3.cpp
+ * example2.cpp
  *
  *  Created on: Aug 24, 2011
  *      Author: kleinwrt
@@ -34,7 +34,7 @@
 using namespace gbl;
 using namespace Eigen;
 
-Matrix5d gblSimpleJacobian3(double ds, double cosl, double bfac) {
+Matrix5d gblSimpleJacobian2(double ds, double cosl, double bfac) {
 	/// Simple jacobian: quadratic in arc length difference
 	/**
 	 * \param [in] ds    (3D) arc-length
@@ -51,7 +51,7 @@ Matrix5d gblSimpleJacobian3(double ds, double cosl, double bfac) {
 	return jac;
 }
 
-double unrm3() {
+double unrm2() {
 	///  unit normal distribution, Box-Muller method, polar form
 	static double unrm2 = 0.0;
 	static bool cached = false;
@@ -74,31 +74,30 @@ double unrm3() {
 	}
 }
 
-void example3() {
+void example2() {
 	/// Simple example.
 	/**
 	 * Create points on initial trajectory, create trajectory from points,
-	 * fit trajectory,
+	 * fit and write trajectory to MP-II binary file,
 	 * get track parameter corrections and covariance matrix at points.
 	 *
 	 * Equidistant measurement layers and thin scatterers, propagation
 	 * with simple jacobian (quadratic in arc length differences).
-	 * Curvilinear system (U,V,T) as local coordinate system.
+	 * Measurement system as local coordinate system.
 	 *
 	 * This example simulates and refits tracks in a system of planar detectors
 	 * with 2D measurements in a constant magnet field in Z direction using
-	 * the curvilinear system as local system and (Q/P, slopes, offsets) as
-	 * local track parameters. The true track parameters are
+	 * measurement system as local system and (Q/P, slopes, offsets) as
+	 * local track parameters. The true (curvilinear) track parameters are
 	 * randomly smeared with respect to a (constant and straight) reference
 	 * trajectory with direction (lambda, phi) and are used (only) for the
 	 * on-the-fly simulation of the measurements and scatterers. The predictions
 	 * from the reference trajectory are therefore always zero and the residuals
 	 * needed (by addMeasurement) are equal to the measurements.
-	 *
-	 * This variant "measures" the scattering (variance) in layer 4 by adding two local
-	 * parameters to describe the multiple scattering angle (without Chi2 bias).
+	 * The scatterers with have non diagonal precision matrices.
 	 */
 
+//MP	MilleBinary mille; // for producing MillePede-II binary file
 	unsigned int nTry = 1000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
 	std::cout << " Gbltst-eigen $Rev: 130 $ " << nTry << ", " << nLayer
@@ -113,6 +112,7 @@ void example3() {
 	double sinPhi = 0.;
 	double cosPhi = sqrt(1.0 - sinPhi * sinPhi);
 // tDir = (cosLambda * cosPhi, cosLambda * sinPhi, sinLambda)
+	double ti = cosLambda * cosPhi; // T*I
 // U = Z x T / |Z x T|, V = T x U
 	Matrix<double, 2, 3> uvDir;
 	uvDir(0, 0) = -sinPhi;
@@ -132,18 +132,13 @@ void example3() {
 	measInvCov(1, 1) = measPrec[1];
 // scattering error
 	Vector2d scatErr;
-	scatErr << 0.003, 0.003;
+	scatErr << 0.001, 0.001;
 	Vector2d scatPrec;
 	scatPrec << 1.0 / (scatErr(0) * scatErr(0)), 1.0 / (scatErr(1) * scatErr(1));
 // (RMS of) CurviLinear track parameters (Q/P, slopes, offsets)
 	Vector5d clPar;
 	Vector5d clErr;
 	clErr << 0.001, -0.1, 0.2, -0.15, 0.25;
-	Matrix5d clCov, clSeed;
-	unsigned int seedLabel = 99999;
-// additional parameters
-	Vector2d scatVar;
-	scatVar << 0., 0.; // measured scattering variance (in layer 4)
 
 	double bfac = 0.2998; // Bz*c for Bz=1
 	double step = 1.5 / cosLambda; // constant steps in RPhi
@@ -156,18 +151,19 @@ void example3() {
 	for (unsigned int iTry = 1; iTry <= nTry; ++iTry) {
 		// curvilinear track parameters
 		for (unsigned int i = 0; i < 5; ++i) {
-			clPar[i] = clErr[i] * unrm3();
-		}
-		clCov.setZero();
-		for (unsigned int i = 0; i < 5; ++i) {
-			clCov(i, i) = 1.0 * (clErr[i] * clErr[i]);
+			clPar[i] = clErr[i] * unrm2();
 		}
 //		std::cout << " Try " << iTry << ":" << clPar << std::endl;
+		Matrix2d addDer;
+		addDer.setZero();
+		addDer(0, 0) = 1.;
+		addDer(1, 1) = 1.;
 // arclength
 		double s = 0.;
-		double sScat = 0.;
 		Matrix5d jacPointToPoint;
 		jacPointToPoint.setIdentity();
+		Matrix5d oldM2c;
+		oldM2c.setIdentity();
 // create list of points
 		std::vector<GblPoint> listOfPoints;
 		listOfPoints.reserve(2 * nLayer);
@@ -183,98 +179,81 @@ void example3() {
 			mDirT(2, 0) = sinStereo;
 			mDirT(1, 1) = -sinStereo;
 			mDirT(2, 1) = cosStereo;
+			double c1 = cosStereo * cosLambda * sinPhi + sinStereo * sinLambda; // T*M1
+			double c2 = -sinStereo * cosLambda * sinPhi + cosStereo * sinLambda; // T*M2
 // projection measurement to local (curvilinear uv) directions (duv/dm)
 			Matrix2d proM2l = uvDir * mDirT;
 // projection local (uv) to measurement directions (dm/duv)
 			Matrix2d proL2m = proM2l.inverse();
+// transformation of track parameters from measurement to curvilinear system
+			Matrix5d meas2crvl;
+			meas2crvl.setZero();
+			meas2crvl(0, 0) = 1.;
+			meas2crvl.block<2, 2>(1, 1) = proM2l * ti;
+			meas2crvl.block<2, 2>(3, 3) = proM2l;
+			Matrix5d crvl2meas = meas2crvl.inverse();
 			// point with (independent) measurements (in measurement system)
-			GblPoint pointMeas(jacPointToPoint);
+			GblPoint pointMeas(crvl2meas * jacPointToPoint * oldM2c);
 			// measurement - prediction in measurement system with error
 			Vector2d meas = proL2m * clPar.tail(2);
 			for (unsigned int i = 0; i < 2; ++i) {
-				meas[i] += measErr[i] * unrm3();
+				meas[i] += measErr[i] * unrm2();
 			}
-			pointMeas.addMeasurement(proL2m, meas, measPrec);
-			/* point with (correlated) measurements (in local system)
-			 GblPoint point(jacPointToPoint);
-			 // measurement - prediction in local system with error
-			 Vector2d meas;
-			 for (unsigned int i = 0; i < 2; ++i) {
-			 meas[i] = measErr[i] * unrm3();
-			 }
-			 meas = proM2l * meas + clPar.tail<2>();
-			 Matrix2d localInvCov = proL2m.adjoint() * measInvCov * proL2m;
-			 point.addMeasurement(meas, localInvCov); */
-
-			// additional local parameters?
-			if (iLayer > 4) {
-				//std::cout << " scat " << sScat << " " << s << std::endl;
-				Matrix2d addDer = proL2m * (s - sScat);
-				pointMeas.addLocals(addDer);
-			}
+			pointMeas.addMeasurement(meas, measPrec);
 
 // add point to trajectory
 			listOfPoints.push_back(pointMeas);
-			unsigned int iLabel = listOfPoints.size();
-			if (iLabel == seedLabel) {
-				clSeed = clCov.inverse();
-			}
+
 // propagate to scatterer
-			jacPointToPoint = gblSimpleJacobian3(step, cosLambda, bfac);
+			jacPointToPoint = gblSimpleJacobian2(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
-			clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
 			s += step;
 			if (iLayer < nLayer - 1) {
 				Vector2d scat(0., 0.);
 				// point with scatterer
-				GblPoint pointScat(jacPointToPoint);
-				if (iLayer != 4) {
-					pointScat.addScatterer(scat, scatPrec);
-				} else {
-					// measure scattering (with 2 local parameters, no scatterer)
-					sScat = s;
-				}
+				GblPoint pointScat(crvl2meas * jacPointToPoint * meas2crvl);
+				// scattering precision (full) matrix
+				Matrix2d scatP;
+				double fac = scatPrec(0) * (1 - c1 * c1 - c2 * c2);
+				scatP(0, 0) = fac * (1 - c1 * c1);
+				scatP(0, 1) = fac * (-c1 * c2);
+				scatP(1, 0) = fac * (-c1 * c2);
+				scatP(1, 1) = fac * (1 - c2 * c2);
+				pointScat.addScatterer(scat, scatP);
 				listOfPoints.push_back(pointScat);
-				iLabel = listOfPoints.size();
-				if (iLabel == seedLabel) {
-					clSeed = clCov.inverse();
-				}
 				// scatter a little
 				for (unsigned int i = 0; i < 2; ++i) {
-					clPar[i + 1] += scatErr[i] * unrm3();
-					clCov(i + 1, i + 1) += scatErr[i] * scatErr[i];
+					clPar[i + 1] += scatErr[i] * unrm2();
 				}
 				// propagate to next measurement layer
 				clPar = jacPointToPoint * clPar;
-				clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
 				s += step;
 			}
+			oldM2c = meas2crvl;
 		}
 //
 		// create trajectory
 		GblTrajectory traj(listOfPoints);
 		//GblTrajectory traj(listOfPoints, seedLabel, clSeed); // with external seed
 		//traj.printPoints();
-
-		if (not traj.isValid()) {
-			std::cout << " Invalid GblTrajectory -> skip" << std::endl;
-			continue;
-		}
+		/*
+		 if (not traj.isValid()) {
+		 std::cout << " Invalid GblTrajectory -> skip" << std::endl;
+		 continue;
+		 }*/
 // fit trajectory
 		double Chi2;
 		int Ndf;
 		double lostWeight;
 		traj.fit(Chi2, Ndf, lostWeight);
-//		std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
-		VectorXd aCorrection(7);
-		MatrixXd aCovariance(7, 7);
-		traj.getResults(10, aCorrection, aCovariance);
-		// measured scattering parameters
-		scatVar(0) += aCorrection(5) * aCorrection(5);
-		scatVar(1) += aCorrection(6) * aCorrection(6);
-		// contribution from fit
-		scatVar(0) -= aCovariance(5, 5);
-		scatVar(1) -= aCovariance(6, 6);
+		//std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
+		/* look at (track parameter) corrections
+		 VectorXd aCorrection(5);
+		 MatrixXd aCovariance(5, 5);
+		 traj.getResults(1, aCorrection, aCovariance);
+		 std::cout << " cor " << std::endl << aCorrection << std::endl;
+		 std::cout << " cov " << std::endl << aCovariance << std::endl;
+		 */
 		/* look at residuals
 		 for (unsigned int label = 1; label <= listOfPoints.size(); ++label) {
 		 unsigned int numData = 0;
@@ -293,6 +272,8 @@ void example3() {
 		//traj.printTrajectory(1);
 		//traj.printPoints(1);
 		//traj.printData();
+// write to MP binary file
+//MP		traj.milleOut(mille);
 		Chi2Sum += Chi2;
 		NdfSum += Ndf;
 		LostSum += lostWeight;
@@ -305,7 +286,5 @@ void example3() {
 	std::cout << " Time elapsed " << diff / cps << " s" << std::endl;
 	std::cout << " Chi2/Ndf = " << Chi2Sum / NdfSum << std::endl;
 	std::cout << " Tracks fitted " << numFit << std::endl;
-	std::cout << " ScatErr4 " << sqrt(scatVar[0] / numFit) << " "
-			<< sqrt(scatVar[1] / numFit) << std::endl;
 }
 

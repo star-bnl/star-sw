@@ -408,7 +408,6 @@ Int_t StTpcHitMaker::Make() {
   static Int_t maxSector = IAttr("maxSector");
   static Int_t minRow    = IAttr("minRow");
   static Int_t maxRow    = IAttr("maxRow");
-  static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   if (kMode == kTpxAvLaser || kMode == kTpcAvLaser) {
 #ifdef  __TOKENIZED__
     InitializeHistograms(Token());

@@ -178,7 +178,7 @@ INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
         COMPONENT cmakefiles )
 # install pcm file in case of root 6
 IF(ROOT_VERSION VERSION_GREATER 5)
-    INSTALL( FILES ${PROJECT_BINARY_DIR}/rootdict/${PROJECT_NAME}Dict_rdict.pcm 
+    INSTALL( FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Dict_rdict.pcm 
              DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ 
              COMPONENT dict)
 ENDIF()   
