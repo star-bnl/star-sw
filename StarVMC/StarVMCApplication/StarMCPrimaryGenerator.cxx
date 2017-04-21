@@ -17,3 +17,7 @@ ClassImp(StarMCPrimaryGenerator);
 void StarMCPrimaryGenerator::Print(Option_t *option) const {
   if (fStarStack) fStarStack->Print();
 }
+//________________________________________________________________________________
+void StarMCPrimaryGenerator::SetStack(StarParticleStack *stack) {
+  if (! stack) return;
+}

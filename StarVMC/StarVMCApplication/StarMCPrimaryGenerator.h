@@ -31,7 +31,7 @@
 #include "TRandom.h"
 #include "TPDGCode.h"
 #include "TDatabasePDG.h"
-
+#include "StarGenerator/BASE/StarParticleStack.h"
 class StarMCPrimaryGenerator : public TObject {
  public:
   StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
@@ -41,6 +41,7 @@ class StarMCPrimaryGenerator : public TObject {
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
   void  SetNofPrimaries(Int_t nofPrimaries)   { fNofPrimaries = nofPrimaries; }
   void  SetStack(StarStack *stack)            { fStarStack = stack;}
+  void  SetStack(StarParticleStack *stack);
   void  SetOption(const Char_t *opt)          { fOption = opt;}
   void  SetDebug(Int_t m)                     { fDebug = m;}
   void  SetOrigin(Double_t x, Double_t y, Double_t z) {fOrigin = TVector3(x,y,z);}
