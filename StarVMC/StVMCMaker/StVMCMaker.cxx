@@ -334,7 +334,11 @@ Int_t StVMCMaker::Make(){
       Int_t ok = SetVertex();
       if (ok) return ok;
     }
-    fgStarVMCApplication->RunMC(1);
+    // Run Generators if any
+    Int_t ok = StMaker::Make();
+    if (ok) return ok;
+    Bool_t runOk = fgStarVMCApplication->RunMC(1);
+    if (! runOk) return kStEOF;
     //    if (Debug())   sw.Print();
   }
   gRandom = fRndmSaved;
