@@ -1,6 +1,6 @@
 //
 //  This is a STAR typical comment header. You should modify
-//  it to reflect your changes.
+//  it to reflect your changes.ß
 //  As a minimum it should contain the name of the author, the
 //  date it was written/modified, and a short description of what
 //  the class is meant to do. The cvs strings $X$ (where X=Id, Log)
@@ -245,6 +245,7 @@ void StAnalysisMaker::PrintGlobalTrack(Int_t itk) {
   for (UInt_t i = 0; i < nTracks; i++) {
     node = trackNode[i]; if (!node) continue;
     StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+    if (! gTrack) continue;
     if (itk != 0 && gTrack->key() != itk) continue;
     if (mOnlyIdT && gTrack->idTruth() <= 0) continue;
     cout << *gTrack << endl;
@@ -1244,7 +1245,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 }
 //________________________________________________________________________________
 void StAnalysisMaker::PrintPxlHits() {
-  UInt_t i,k,l;
+  UInt_t i,k,l,m;
   //  Double_t zPrim = 0;
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) return;
@@ -1264,8 +1265,8 @@ void StAnalysisMaker::PrintPxlHits() {
     StPxlSectorHitCollection* sectorCollection = PxlHitCollection->sector(i);
     if (sectorCollection) {
       UInt_t numberOfLadders = sectorCollection->numberOfLadders();
-      for (l = 0; l < numberOfLadders; l++) {
-	StPxlLadderHitCollection* ladderCollection = sectorCollection->ladder(l);
+      for (m = 0; m < numberOfLadders; m++) {
+	StPxlLadderHitCollection* ladderCollection = sectorCollection->ladder(m);
 	UInt_t numberOfSensors = ladderCollection->numberOfSensors();
 	for (k = 0; k < numberOfSensors; k++) {
 	  StPxlSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
@@ -1350,6 +1351,122 @@ void StAnalysisMaker::Print(Option_t *option) const {
   else if (Option.Contains("EmcHit",TString::kIgnoreCase)) PrintEmcHits(); 
   else if (Option.Contains("PxlHit",TString::kIgnoreCase)) PrintPxlHits(); 
   else if (Option.Contains("IstHit",TString::kIgnoreCase)) PrintIstHits(); 
+}
+//________________________________________________________________________________
+void StAnalysisMaker::DumpHftHits() {
+  struct BPoint_t {
+    Float_t                     det,x,y,z,q,idT,fl,us;
+  };
+  static const Char_t *vname = "det:x:y:z:q:idT:fl:us";
+  static TNtuple *Nt = 0;
+  if (! Nt) {
+    TFile *tf =  StMaker::GetTopChain()->GetTFile();
+    if (tf) {tf->cd(); Nt = new TNtuple("HftHit","HftHit",vname);}
+    else return;
+  }
+  if (! Nt) return;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
+  BPoint_t B;
+  UInt_t i,k,l,m;
+  B.det = 1; // PXL
+  StPxlHitCollection* PxlHitCollection = pEvent->pxlHitCollection();
+  if (! PxlHitCollection) { cout << "No PXL Hit Collection" << endl; return;}
+  UInt_t numberOfSectors = PxlHitCollection->numberOfSectors();
+  //  Int_t vers = gClapxlable->GetID("StPxlHit");
+  for ( i = 0; i< numberOfSectors; i++) {
+    StPxlSectorHitCollection* sectorCollection = PxlHitCollection->sector(i);
+    if (sectorCollection) {
+      UInt_t numberOfLadders = sectorCollection->numberOfLadders();
+      for (m = 0; m < numberOfLadders; m++) {
+	StPxlLadderHitCollection* ladderCollection = sectorCollection->ladder(m);
+	UInt_t numberOfSensors = ladderCollection->numberOfSensors();
+	for (k = 0; k < numberOfSensors; k++) {
+	  StPxlSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
+	  StSPtrVecPxlHit &hits = sensorCollection->hits();
+	  UInt_t NoHits = hits.size();
+	  for (l = 0; l < NoHits; l++) {
+	    StPxlHit *hit = hits[l];
+	    if (hit) {
+	      if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	      //	      hit->Print("");
+	      // det,x,y,z,q,idT,fl,us;
+	      B.x = hit->position().x();
+	      B.y = hit->position().y();
+	      B.z = hit->position().z();
+	      B.idT = hit->idTruth();
+	      B.q   = hit->charge();
+	      B.fl  = hit->flag();
+	      B.us  = hit->usedInFit();
+	      Nt->Fill(&B.det);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  B.det = 2; // IST
+  StIstHitCollection* IstHitCollection = pEvent->istHitCollection();
+  if (! IstHitCollection) { cout << "No IST Hit Collection" << endl; return;}
+  for ( i = 0; i< kIstNumLadders; i++) {
+    StIstLadderHitCollection* ladderCollection = IstHitCollection->ladder(i);
+    if (ladderCollection) {
+      for (k = 0; k < kIstNumSensorsPerLadder; k++) {
+	StIstSensorHitCollection* sensorCollection = ladderCollection->sensor(k);
+	StSPtrVecIstHit &hits = sensorCollection->hits();
+	UInt_t NoHits = hits.size();
+	for (l = 0; l < NoHits; l++) {
+	  StIstHit *hit = hits[l];
+	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	    //	    hit->Print("");
+	      // det,x,y,z,q,idT,fl,us;
+	      B.x = hit->position().x();
+	      B.y = hit->position().y();
+	      B.z = hit->position().z();
+	      B.idT = hit->idTruth();
+	      B.q   = hit->charge();
+	      B.fl  = hit->flag();
+	      B.us  = hit->usedInFit();
+	      Nt->Fill(&B.det);
+	  }
+	}
+      }
+    }
+  }
+  B.det = 3; // SST
+  StSstHitCollection* SstHitCollection = pEvent->sstHitCollection();
+  if (! SstHitCollection) { cout << "No SST Hit Collection" << endl; return;}
+  UInt_t numberOfLadders = SstHitCollection->numberOfLadders();
+  //  Int_t vers = gClassTable->GetID("StSstHit");
+  for ( i = 0; i< numberOfLadders; i++) {
+    StSstLadderHitCollection* ladderCollection = SstHitCollection->ladder(i);
+    if (ladderCollection) {
+      UInt_t numberOfWafers = ladderCollection->numberOfWafers();
+      for (k = 0; k < numberOfWafers; k++) {
+	StSstWaferHitCollection* waferCollection = ladderCollection->wafer(k);
+	StSPtrVecSstHit &hits = waferCollection->hits();
+	UInt_t NoHits = hits.size();
+	for (l = 0; l < NoHits; l++) {
+	  StSstHit *hit = hits[l];
+	  if (hit) {
+	    if (mOnlyIdT && hit->idTruth() <= 0) continue;
+	    //	    hit->Print("");
+	      // det,x,y,z,q,idT,fl,us;
+	      B.x = hit->position().x();
+	      B.y = hit->position().y();
+	      B.z = hit->position().z();
+	      B.idT = hit->idTruth();
+	      B.q   = hit->charge();
+	      B.fl  = hit->flag();
+	      B.us  = hit->usedInFit();
+	      Nt->Fill(&B.det);
+	  }
+	}
+      }
+    }
+  }
+
 }
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
