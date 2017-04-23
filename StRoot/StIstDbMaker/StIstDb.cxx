@@ -42,15 +42,7 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
    mgRotList->SetOwner(kFALSE);
 
    //get TPC positionement relative to STAR
-   if (gStTpcDb && gEnv->GetValue("IdealHFT",0) == 0) {
-      mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
-   }
-   else {
-      if (mGeoHMatrixTpcOnGlobal) delete mGeoHMatrixTpcOnGlobal;
-
-      mGeoHMatrixTpcOnGlobal = new TGeoHMatrix("tpcOnGlobal");
-      LOG_WARN << "No gStTpcDb, use null transformation for tpc on global" << endm;
-   }
+   mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
 
    //obtain IST geomery tables
    Survey_st *idsOnTpc          = tables[0];

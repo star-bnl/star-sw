@@ -95,7 +95,6 @@ class StPxlSimMaker : public StMaker
   virtual Int_t InitRun(Int_t);
 
   void useDIGMAPSSim();
-  void useIdealGeom(bool ideal = true);
   void useDbGeom(bool db = true);
   void useRandomSeed(bool use = true);
 
@@ -118,7 +117,6 @@ private:
   ClassDef(StPxlSimMaker,1)   //StAF chain virtual base class for Makers
 };
 inline void StPxlSimMaker::useDIGMAPSSim() {SetAttr("useDIGMAPSSim",true);}
-inline void StPxlSimMaker::useIdealGeom(bool ideal) { useDbGeom(!ideal); }
 inline void StPxlSimMaker::useDbGeom(bool db) {mUseDbGeom = db;}
 inline void StPxlSimMaker::useRandomSeed(bool use) {mUseRandomSeed = use;}
 #endif

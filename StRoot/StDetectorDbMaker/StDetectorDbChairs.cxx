@@ -3,6 +3,7 @@
 #include "StDetectorDbMaker.h"
 #include "TEnv.h"
 #include "TF1.h"
+#include "TCernLib.h"
 #include "St_db_Maker/St_db_Maker.h"
 #if 0
 #include "tables/St_tpcCorrection_Table.h"
@@ -1000,11 +1001,34 @@ MakeChairInstance(pxlControl,Geometry/pxl/pxlControl);
 #include "St_pxlSensorTpsC.h"
 MakeChairInstance(pxlSensorTps,Geometry/pxl/pxlSensorTps);
 //________________________________________________________________________________
+void St_SurveyC::Normalize(TGeoHMatrix &rot) {
+#if 0
+  Double_t *rA = rot.GetRotationMatrix();
+  Double_t r[9] = {rA[0], rA[3], rA[6],
+		   rA[1], rA[4], rA[7],
+		   rA[2], rA[5], rA[8]};
+  TGeoMatrix::Normalize(&r[0]);
+  TGeoMatrix::Normalize(&r[3]);
+  TGeoMatrix::Normalize(&r[6]);
+  Double_t rB[9] = {r[0], r[3], r[6],
+		    r[1], r[4], r[7],
+		    r[2], r[5], r[8]};
+  rot.SetRotation(rB);
+#else
+  Double_t normfactor = rot.Determinant();
+  if (normfactor <= 1E-10) return;
+  if (TMath::Abs(normfactor)-1 <= 1e-10) return;
+  normfactor = TMath::Power(TMath::Abs(normfactor), -1./3);
+  TCL::vscale(rot.GetRotationMatrix(), normfactor, rot.GetRotationMatrix(), 9);
+#endif
+}
+//________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   static TGeoHMatrix rot;
   rot.SetName(Table()->GetName());
   rot.SetRotation(Rotation(i));
   rot.SetTranslation(Translation(i));
+  Normalize(rot);
   return *&rot;
 }
 //________________________________________________________________________________
@@ -1012,9 +1036,8 @@ const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
   static TGeoHMatrix rot("UnKnown");
   for (UInt_t i = 0; i < getNumRows(); i++) {
     if (Id(i) == id) {
+      rot = GetMatrix(i);
       rot.SetName(Form("%s_%i",Table()->GetName(),id));
-      rot.SetRotation(Rotation(i));
-      rot.SetTranslation(Translation(i));
       //      Table()->Print(i,1);
       break;
     }

@@ -31,7 +31,6 @@ public:
    Int_t InitRun( Int_t runNo);
    /// Selects whether ideal or misalgined geometry is used mBuildIdealGeom kTRUE=ideal,
    /// kFALSE=misaligned
-   void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
 
    virtual const char *GetCVS() const {
       static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.23 2015/08/03 14:26:03 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
@@ -42,7 +41,6 @@ private:
 
    THashList *mIstRot;
    StIstDb   *mIstDb;
-   Bool_t     mBuildIdealGeom; ///< Switch between ideal and misaligned geometries. Default is true (ideal)
    TRandom1   mRandom;
    Double_t   mResXIst1;
    Double_t   mResZIst1;

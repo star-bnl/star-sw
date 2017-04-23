@@ -26,19 +26,6 @@ StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(new StIstDb
 Int_t StIstDbMaker::Init()
 {
    ToWhiteConst("ist_db", mIstDb);
-   const Char_t *TabNames[3] = {
-     //     "idsOnTpc", //set in PxlDb
-     //     "pstOnIds",
-     "istOnPst",
-     "istLadderOnIst",
-     "istSensorOnLadder"};
-   if (gEnv->GetValue("IdealHFT",0) != 0) {
-     for (Int_t i = 0; i < 3; i++) {
-       SetFlavor("sim",TabNames[i]);
-       LOG_INFO << "StIstDbMaker::Init Using \"sim\" flavor for " << TabNames[i] << endm;
-     }
-   }
-
    return kStOk;
 }
 

@@ -83,13 +83,6 @@ Int_t StPxlDbMaker::Init()
 				 "Geometry/pxl/pxlSectorOnHalf",
 				 "Geometry/pxl/pxlLadderOnSector",
 				 "Geometry/pxl/pxlSensorOnLadder"};
-   if (gEnv->GetValue("IdealHFT",0) != 0) {
-     for (Int_t i = 0; i < 7; i++) {
-       SetFlavor("sim",gSystem->BaseName(TableNames[i]));
-       LOG_INFO << "StPxlDbMaker::Init Using \"sim\" flavor for " << gSystem->BaseName(TableNames[i]) << endm;
-     }
-   }
-
    return kStOk;
 }
 
