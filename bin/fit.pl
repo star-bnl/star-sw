@@ -53,6 +53,7 @@ open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
 <job name="dEdxFit" maxFilesPerProcess="1" simulateSubmission="false" fileListSyntax="paths">
 	 <command>
+setup 64b
 setenv NODEBUG yes
 starver .DEV2
 csh -x $INPUTFILE0
