@@ -571,23 +571,37 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   TGeoHMatrix I("Indentity");
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
+#if 1
   TGeoTranslation PixelLadderT(-0.2381, 0.00195, -4.8750);
   TGeoTranslation PixelSensorT(-0.1533, 0.00070, -0.0160);
   TGeoHMatrix IstLadderH;
+#else
+  TGeoTranslation PixelLadderT(0,0,0);
+  TGeoTranslation PixelSensorT(0,0,0);
+  TGeoHMatrix IstLadderH;
+#endif
+#if 0
+  Double_t tIstLadder[3] = {0,0,0};
+  Double_t rIstLadder[9] = {0,0,};
+  Double_t tIstWafer[3] = {0,0,0};
+  Double_t rIstWafer[9] = {-1, 0, 0, 0,-1, 0, 0, 0, 1};
+  Double_t tSstLadder[3] = {0,0,0};
+  Double_t rSstLadder[9] = {-1,0,0, 0,-1,0, 0,0,1};
+#endif
   Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929};
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
+  Double_t tIstWafer[3] = {0.48735, 0, 0};
+  Double_t rIstWafer[9] = {-1, 0, 0, 0,-1, 0, 0, 0, 1};
+  Double_t tSstLadder[3] = {-2.71769, 22.1338, 0};
+  Double_t rSstLadder[9] = {-0.992546, 0.121869, 0, -0.121869, -0.992546, 0, 0, 0, 1};
+  //                        -0.961262, 0.275637, 0, -0.275637, -0.961262, 0, 0, 0, 1};
   IstLadderH.SetTranslation(tIstLadder);
   IstLadderH.SetRotation(rIstLadder);
   TGeoHMatrix IstWaferH;
-  Double_t tIstWafer[3] = {0.48735, 0, 0};
-  Double_t rIstWafer[9] = {-1, 0, 0, 0,-1, 0, 0, 0, 1};
   IstWaferH.SetTranslation(tIstWafer);
   IstWaferH.SetRotation(rIstWafer);
   //  TGeoHMatrix IstSensorH;
   TGeoHMatrix SstLadderH;
-  Double_t tSstLadder[3] = {-2.71769, 22.1338, 0};
-  Double_t rSstLadder[9] = {-0.992546, 0.121869, 0, -0.121869, -0.992546, 0, 0, 0, 1};
-  //                        -0.961262, 0.275637, 0, -0.275637, -0.961262, 0, 0, 0, 1};
   SstLadderH.SetTranslation(tSstLadder);
   SstLadderH.SetRotation(rSstLadder);
   TGeoRotation SstSensorR;
@@ -819,7 +833,8 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	    cout << "---------------------------------+ Matrix from Db  ---------------------------------------++" << endl;
 	    comb->Print();
 	    cout << "---------------------------------+ Diff ?     ---------------------------------------------+" << endl;
-	    D = comb->Inverse() * (*nMat);
+	    TGeoHMatrix combI = comb->Inverse(); combI.Print();
+	    D = combI * (*nMat);
 	    if (!(D == I)) D.Print();
 	    cout << "++++++++++++++++++++++++++++++++++ Check Node ++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 	  }
