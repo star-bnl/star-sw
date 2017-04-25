@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.13 2016/07/01 18:30:52 bouchet Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.14 2017/04/25 00:32:03 perev Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.14  2017/04/25 00:32:03  perev
+ * Int_t ==> UInt_t to avoid wrong cast
+ *
  * Revision 1.13  2016/07/01 18:30:52  bouchet
  * COVERITY : STACK_USE, UNINIT_CTOR fixed
  *
@@ -462,8 +465,8 @@ void StSstDaqMaker::DecodeRdoData()
       LOG_DEBUG << "SST DAQ DATA HEADER_TOKEN correct: 0x" << hex << mRdoData[0] << dec << endm;
    }
 
-   mEventTime  = (Float_t)mRdoData[2];
-   mPEventTime = (Float_t)mRdoData[4];
+   mEventTime  = mRdoData[2];
+   mPEventTime = mRdoData[4];
 
    mHeaderData = mRdoData + index;
 
@@ -671,11 +674,11 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
    Int_t count              = 1;
 
    //initialize St_spa_strip and St_ssdPedStrip table.
-   spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
+   spa_strip = dynamic_cast<St_spa_strip *>( GetData()->Find("spa_strip"));
 
    if (!spa_strip) {
       spa_strip   = new St_spa_strip("spa_strip", vallength);
-      m_DataSet->Add(spa_strip);
+      GetData()->Add(spa_strip);
    }
 
    spa_strip_st   out_strip;
@@ -958,11 +961,11 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    int indexDecodeBadStrip = 0; // used for bad strip table
  
    LOG_DEBUG << "Current Event data length : " << vallength << endm;
-   spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
+   spa_strip = dynamic_cast<St_spa_strip *>( GetData()->Find("spa_strip"));
 
    if (!spa_strip) {
       spa_strip   = new St_spa_strip("spa_strip", vallength);
-      m_DataSet->Add(spa_strip);
+      GetData()->Add(spa_strip);
    }
 
    spa_strip_st  out_strip;
@@ -1331,11 +1334,11 @@ void StSstDaqMaker::FillData(vector<vector<int> > vadc, vector<vector<float> > v
   Int_t   stripindex       = 0;
 
   const Float_t Epsinon    = 0.00001;
-  spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");
+  spa_strip = (St_spa_strip *) GetData()->Find("spa_strip");
 
   if (!spa_strip) {
     spa_strip   = new St_spa_strip("spa_strip", vallength);
-    m_DataSet->Add(spa_strip);
+    GetData()->Add(spa_strip);
   }
 
   spa_strip_st out_strip;
