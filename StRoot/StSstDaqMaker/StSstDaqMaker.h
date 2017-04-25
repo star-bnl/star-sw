@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.10 2016/06/23 20:24:12 bouchet Exp $
+ * $Id: StSstDaqMaker.h,v 1.11 2017/04/25 00:32:03 perev Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.11  2017/04/25 00:32:03  perev
+ * Int_t ==> UInt_t to avoid wrong cast
+ *
  * Revision 1.10  2016/06/23 20:24:12  bouchet
  * sstBadStrips table decoding and use
  *
@@ -99,7 +102,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.10 2016/06/23 20:24:12 bouchet Exp $ built " __DATE__ " " __TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.11 2017/04/25 00:32:03 perev Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
@@ -163,8 +166,8 @@ private:
    UInt_t  mDataMode[8];// Raw or Compressed data .
    Int_t   mEventnumber;
    Int_t   mEventrunumber;
-   Int_t   mEventTime;// Current event RHIC clock
-   Int_t   mPEventTime;// Previous event RHIC cloc
+   UInt_t  mEventTime;// Current event RHIC clock
+   UInt_t  mPEventTime;// Previous event RHIC cloc
    Int_t   mCorrectFactor[1920][2]; //chip correction table.
    Int_t   mNoiseCut[1920][2]; //Reject Noise.
    Char_t  mEnd[1]; //!
