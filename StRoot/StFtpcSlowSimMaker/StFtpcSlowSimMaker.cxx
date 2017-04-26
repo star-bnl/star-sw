@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.38 2013/03/26 15:56:00 genevb Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.39 2017/04/26 19:50:08 perev Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.39  2017/04/26 19:50:08  perev
+// Hide m_DataSet
+//
 // Revision 1.38  2013/03/26 15:56:00  genevb
 // Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
 //
@@ -346,7 +349,7 @@ LOG_INFO << "Event number "<<(int) GetEventNumber()<<endm;
   St_g2t_ftp_hit *g2t_ftp_hit = (St_g2t_ftp_hit *) geant("g2t_ftp_hit");
   if (g2t_vertex && g2t_track && g2t_ftp_hit){
 
-    St_DataSetIter local(m_DataSet); local.Cd("pixels");
+    St_DataSetIter local((GetData())); local.Cd("pixels");
     St_fcl_ftpcndx   *fcl_ftpcndx  = new St_fcl_ftpcndx("fcl_ftpcndx",2);
     local.Add(fcl_ftpcndx);
     St_fcl_ftpcsqndx *fcl_ftpcsqndx = new St_fcl_ftpcsqndx("fcl_ftpcsqndx",500000);
@@ -545,7 +548,7 @@ void StFtpcSlowSimMaker::MakeHistograms() {
    if(Debug()) {LOG_INFO << "*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***" << endm;}
 
    // Create an iterator
-   St_DataSetIter ftpc_raw(m_DataSet);
+   St_DataSetIter ftpc_raw((GetData()));
 
    //Get the tables
    St_fcl_ftpcadc   *adc = 0;
