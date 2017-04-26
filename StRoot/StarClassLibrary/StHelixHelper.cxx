@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelixHelper.cxx,v 1.1 2009/08/04 23:16:51 fine Exp $
+ * $Id: StHelixHelper.cxx,v 1.2 2017/04/26 21:08:28 perev Exp $
  *
  * Author: Valeri Fine, July 2009
  ***************************************************************************/
@@ -119,25 +119,25 @@ Float_t  *StHelixHelper::GetPoints(int &npoints) const
   GetHelix(0); GetHelix(1);
   for (int i=0;i<2;i++) {fTHlx[i] = StHelixHelper::MyHelix(fTHlx[i],fHelx[i]);}
 
-  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
+  len0 = fTHlx[0]->Path(fTHlx[1]->Pos());
   double rho0 = fTHlx[0]->GetRho();
-  double rho1 = fTHlx[1]->GetRho();
-  double drho = (rho1-rho0)/(len0*fTHlx[0]->GetCos());
-  fTHlx[0]->Set(rho0,drho);
-  fTHlx[1]->Set(rho1,drho);
+//  double rho1 = fTHlx[1]->GetRho();
+//   double drho = (rho1-rho0)/(len0*fTHlx[0]->GetCos());
+//   fTHlx[0]->Set(rho0,drho);
+//   fTHlx[1]->Set(rho1,drho);
   fTHlx[1]->Backward();
   npoints  = abs(int(len*fTHlx[0]->GetCos()*rho0*90))+2;   
   double step = 1./(npoints-1);
-  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
-  len1 = fTHlx[1]->Step(fTHlx[0]->GetXYZ());
+  len0 = fTHlx[0]->Path(fTHlx[1]->Pos());
+  len1 = fTHlx[1]->Path(fTHlx[0]->Pos());
   float *arr = new Float_t[npoints*3];
   double xyz[3][3];
   for (int i =0;i<npoints;i++)
   {
      double s0 = i*step;
      double s1 = 1.-s0;
-     fTHlx[0]->Step(s0*len0,xyz[0]);
-     fTHlx[1]->Step(s1*len1,xyz[1]);
+     fTHlx[0]->Eval(s0*len0,xyz[0]);
+     fTHlx[1]->Eval(s1*len1,xyz[1]);
      s0 = s0*s0*s0; s1 = s1*s1*s1;
      double tmp = s0+s1;
      s0 /=tmp;      s1 /=tmp;
