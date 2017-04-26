@@ -20,7 +20,8 @@ foreach my $part (@particles) {
   for (my $i = $i1; $i <= $N; $i++) {
     my $log = $part . "_" . $i . "B.log";
     if (! -r $log) {
-      print "string:$part_$i\n";
+      my $string = "string:" . $part . "_" . $i;
+      print "$string\n";
     }
 #    last;
   }

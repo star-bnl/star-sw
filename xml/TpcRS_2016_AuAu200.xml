@@ -19,5 +19,6 @@
   endif
 </command>
 <!--- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2014_AuAu200Z3/*MuDst.root" />  -->
-<input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2016_AuAu200/*MuDst.root" /> 
+<!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2016_AuAu200/*MuDst.root" />  -->
+<input URL="command:TpcRS_Part.pl" />
 </job>

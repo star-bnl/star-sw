@@ -13,6 +13,6 @@
     root.exe -x -q -b 'dEdx.C(1000000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
 #  endif
 </command>
-<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" />
-<!-- <input URL="file:./../*event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
+<input URL="command:dEdxSample.pl" />
 </job>
