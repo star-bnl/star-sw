@@ -19,7 +19,7 @@ StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCo
 
 StIstClusterMaker::~StIstClusterMaker()
 {
-   delete mIstCollectionPtr;
+//Is deleted as part of structure(VP)   delete mIstCollectionPtr;
    delete mClusterAlgoPtr;
 };
 
@@ -109,6 +109,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.31  2017/04/26 19:54:01  perev
+* Remove crash at the end
+*
 * Revision 1.30  2015/05/20 20:53:53  smirnovd
 * Set default value of unsigned variables in a more explicit way
 *
