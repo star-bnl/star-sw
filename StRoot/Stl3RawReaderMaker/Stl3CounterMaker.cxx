@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.9 2008/01/23 19:10:32 fine Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.10 2017/04/26 21:15:16 perev Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.10  2017/04/26 21:15:16  perev
+//  Hide m_Debug
+//
 //  Revision 1.9  2008/01/23 19:10:32  fine
 //  Fix the lost L3_Reader class definition
 //
@@ -188,7 +191,7 @@ Int_t Stl3CounterMaker::InitTable()
 	mRunNumber = 9999999;
 	cout << "Stl3CounterMaker::InitTable(): Could not extract daq file run/sequence number." << endl;
   }
-  if (m_DebugLevel) cout << "run number: " << mRunNumber << ",  sequence number: " << mDaqFileSequenceNumber << endl;
+  if (Debug()) cout << "run number: " << mRunNumber << ",  sequence number: " << mDaqFileSequenceNumber << endl;
 
 
   // reset database tables
@@ -252,7 +255,7 @@ Int_t Stl3CounterMaker::Make()
 	        mL3On = kTRUE;
 
 		// debug output
-	        if (m_DebugLevel) {
+	        if (Debug()) {
 		      if (ml3reader->getGlobalTrackReader())
 			    cout << ml3reader->getGlobalTrackReader()->getNumberOfTracks()
 				 << " global tracks found.\n";
@@ -320,7 +323,7 @@ Int_t Stl3CounterMaker::GetCounters()
 	if (l3runSummaryTable) {
 	      l3RunSummary_st* data = (l3RunSummary_st* )l3runSummaryTable->GetArray();
 	      mNumberOfGl3Nodes = data->nGl3Nodes;
-	      if (m_DebugLevel) {
+	      if (Debug()) {
 		    cout << "database: runNumber = " << data->runNumber << endl;
 		    cout << "database: nGl3Nodes = " << data->nGl3Nodes << endl;
 	      }
@@ -428,7 +431,7 @@ Int_t Stl3CounterMaker::GetCounters()
   }
 
   // debugging
-  if (m_DebugLevel) {
+  if (Debug()) {
         cout << " Global counters:   nProcessed = " << totalCounter->nProcessed
 	     << ",   nReconstructed = " << totalCounter->nReconstructed << endl;
 	cout << " algId\tnProcessed\tnAccept\tnBuild" << endl;
