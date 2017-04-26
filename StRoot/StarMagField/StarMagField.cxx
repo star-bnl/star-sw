@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.29 2014/07/27 13:21:41 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.30 2017/04/26 21:11:48 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.30  2017/04/26 21:11:48  perev
+ * Add setConstBz
+ *
  * Revision 1.29  2014/07/27 13:21:41  fisyak
  * Add cast for c++11 option
  *
@@ -387,6 +390,9 @@ void StarMagField::SetStarMagFieldRotation(Double_t *r) {
   SetStarMagFieldRotation(rot);
 }
 #endif
+
+bool StarMagField::mConstBz = true; 
+
 //________________________________________________________________________________
 StarMagField::StarMagField ( EBField map, Float_t factor, 
 			     Bool_t lock, Float_t rescale, 
@@ -404,6 +410,7 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
   fBDipole(BDipole), fRmaxDip(RmaxDip), 
   fZminDip(ZminDip), fZmaxDip(ZmaxDip), 
   fLock(lock)
+  //  mConstBz(true)
 {
   if (fgInstance) {
     printf("Cannot initialise twice StarMagField class\n");
@@ -433,6 +440,7 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
 {                          
 
+
   Float_t r, z, Br_value, Bz_value ;
   Float_t phi, Bphi_value,phi1;
   Bphi_value=0;
@@ -442,6 +450,16 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi = atan2( x[1], x[0] ) ;
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+
+
+
+  if ( mConstBz ) 
+    {
+      B[0] = B[1] = B[2] = 0.;
+      if ( abs(z) < 380.0 && r < 300.0 ) B[2] = +5.0;
+      return;
+    }
+
 
 
   Float_t za = fabs(z);
