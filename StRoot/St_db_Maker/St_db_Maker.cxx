@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.137 2015/05/19 20:34:47 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.138 2017/04/26 20:20:24 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.138  2017/04/26 20:20:24  perev
+// Hide m_DataSet
+//
 // Revision 1.137  2015/05/19 20:34:47  perev
 // Remove old commented coded
 //
@@ -1254,7 +1257,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    flaDir = Find(".flavor");
    if (!flaDir)                                 return;
    StValiSet *val;
-   TDataSetIter  valNext(m_ConstSet,999);
+   TDataSetIter  valNext(GetConst(),999);
    while ((val = (StValiSet*)valNext())) {      //DB objects loop
      const char *tabName = val->GetName();
      if (tabName[0] != '.')                     continue;
