@@ -119,10 +119,10 @@ Int_t St_trg_Maker::Make(){
   St_dst_L0_Trigger *dst2 = new St_dst_L0_Trigger("L0_Trigger",1); if(!dst2) return kStWarn; dst2->SetNRows(1);
   St_dst_L1_Trigger *dst3 = new St_dst_L1_Trigger("L1_Trigger",1); if(!dst3) return kStWarn; dst3->SetNRows(1);
   St_dst_L2_Trigger *dst4 = new St_dst_L2_Trigger("L2_Trigger",1); if(!dst4) return kStWarn; dst4->SetNRows(1);
-  m_DataSet->Add(dst1);
-  m_DataSet->Add(dst2);
-  m_DataSet->Add(dst3);
-  m_DataSet->Add(dst4);
+  AddData(dst1);
+  AddData(dst2);
+  AddData(dst3);
+  AddData(dst4);
 
   /////////////////// EXAMPLE:  HOW TO GET THE EEMC DATA /////////////////////////
   // St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
@@ -1084,8 +1084,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.57 2009/01/26 15:14:13 fisyak Exp $
+// $Id: St_trg_Maker.cxx,v 1.58 2017/04/26 21:05:26 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.58  2017/04/26 21:05:26  perev
+// Hide m_DataSet
+//
 // Revision 1.57  2009/01/26 15:14:13  fisyak
 // Comment out mwc
 //
