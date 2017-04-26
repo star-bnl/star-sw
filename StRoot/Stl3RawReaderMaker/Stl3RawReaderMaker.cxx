@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.20 2008/01/23 19:10:33 fine Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.21 2017/04/26 21:15:47 perev Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.21  2017/04/26 21:15:47  perev
+//  Hide m_Debug
+//
 //  Revision 1.20  2008/01/23 19:10:33  fine
 //  Fix the lost L3_Reader class definition
 //
@@ -156,7 +159,7 @@ Int_t Stl3RawReaderMaker::Make()
 	        mL3On = kTRUE;
 
 		// debug output
-	        if (m_DebugLevel) {
+	        if (Debug()) {
 		      int sec = 23;
 		      if (ml3reader->getGlobalTrackReader())
 			    gMessMgr->Info() << ml3reader->getGlobalTrackReader()->getNumberOfTracks()
@@ -266,7 +269,7 @@ Int_t Stl3RawReaderMaker::checkL3Bias()
 	     && ml3reader->getL3_P()->trg_word<0x2000
 	     && algData[i].build==1 ) {
 
-	      if (m_DebugLevel) {
+	      if (Debug()) {
 		    printf("L0 trigger word: %x\n", ml3reader->getL3_P()->trg_word); 
 		    printf("pass-thru algorithm Id: %i\n", algData[i].algId);
 	      }
@@ -348,7 +351,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	if (l3runSummaryTable) {
 	      l3RunSummary_st* data = (l3RunSummary_st* )l3runSummaryTable->GetArray();
 	      mNumberOfGl3Nodes = data->nGl3Nodes;
-	      if (m_DebugLevel) {
+	      if (Debug()) {
 		    gMessMgr->Info() << "database: runNumber = " << data->runNumber << endm;
 		    gMessMgr->Info() << "database: nGl3Nodes = " << data->nGl3Nodes << endm;
 	      }
@@ -471,7 +474,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
         TTable* l3algorithmInfoTable = (TTable* )mDbSet->Find("l3AlgorithmInfo");
 	if (l3algorithmInfoTable) {
 	      dbAlgInfo = (l3AlgorithmInfo_st* )l3algorithmInfoTable->GetArray();
-	      if (m_DebugLevel) {
+	      if (Debug()) {
 		    for (int i=0; i<l3algorithmInfoTable->GetNRows(); i++) {
 		          cout << "  run \tidxAlg\talgId\tpreScale\tpostScale" << endl;
 		          cout << dbAlgInfo[i].runNumber 
@@ -524,7 +527,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	     && algData[i].build==1 ) {
 
 	      passThruId = algData[i].algId;
-	      if (m_DebugLevel) {
+	      if (Debug()) {
 		    cout << "pass-thru algorithm Id: " << passThruId << endl;
 	      }
 
