@@ -336,8 +336,9 @@ Bfc_st BFC[] = { // standard chains
   {"RC.pp2015.nohft","","","pp2015,mtd,btof,BEmcChkStat,pp2pp,fmsDat,fmsPoint,fpsDat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
    ,                                                                                       "","","",kFALSE},
   {"RC.pp2015","","","RC.pp2015.nohft,pxlHit,istHit",                                      "","","",kFALSE},
-  {"RC.y2016","","","P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D"
+  {"RC.y2016.nohft","","","P2016,btof,mtd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D"
    ,                                                                                       "","","",kFALSE},
+  {"RC.y2016","","","RC.y2016.nohft,pxlHit,istHit,sstHit",                                 "","","",kFALSE},
   {"MC nightlies and Eval","--","-----------","------------------------------------------","","","",kFALSE},
   {"test_MC.stan.y2000","","","MC.y2000,Sti,fzin,MiniMcMk","",""
    ,"/star/rcf/simu/cocktail/hadronic/default/standard/year_1h/half_field/hadronic_on/Gstardata/"
@@ -1914,7 +1915,6 @@ Bfc_st BFC[] = { // standard chains
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
   {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"NewTpcAlignment","","",""                           ,"","","Switch on new Tpc Alignment schema",kFALSE},
-  {"IdealHFT"    ,"","",""                                                   ,"","","Use Ideal HFT",kFALSE},
   {"quiet","","","","","",                                                      "make chain quier", kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},

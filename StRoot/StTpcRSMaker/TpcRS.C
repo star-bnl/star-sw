@@ -148,7 +148,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       mk->SetMode(1); 
     }
   }
-#if 1
+#if 0 /* not enough memory for dE/dx plots */
   StMaker *dEdxY2 = chain->GetMaker("dEdxY2"); 
   if (dEdxY2) {
     StdEdxY2Maker *dEdx = (StdEdxY2Maker *) dEdxY2;
@@ -255,7 +255,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	if (Opt.Contains("LamXi2430",TString::kIgnoreCase))     {NTRACK = 50;   ID = 60002;  pTmin = 0.1; pTmax = 10.0;}
 	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
 	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
+	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax =   10.00;
 	TRandom3 R(0);
 	Double_t bgMin10 = TMath::Log10(bgMin);
 	Double_t bgMax10 = TMath::Log10(bgMax);

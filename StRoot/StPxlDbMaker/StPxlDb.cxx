@@ -165,17 +165,10 @@ void StPxlDb::setGeoHMatrices()
                                                  * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
                                                  * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
 #else /* __NEW_PXLDB__ */
-	    if (gEnv->GetValue("IdealHFT",0) == 0) {
-	      mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix()) * 
-		mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
-		* mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
-		* mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
-	    } else {
-	      mGeoHMatrixSensorOnGlobal[i][j][k] = 
-		mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
-		* mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
-		* mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
-	    }
+	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix()) * 
+	      mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
+	      * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
+	      * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
 #endif /* ! __NEW_PXLDB__ */
             mGeoHMatrixSensorOnGlobal[i][j][k].SetName(Form("sensorOnGlobal%03i%03i%03i", i + 1, j + 1, k + 1));
          }

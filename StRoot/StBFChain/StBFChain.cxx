@@ -1501,10 +1501,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
     gMessMgr->QAInfo() << "Set environment to use NewTpcAlignment" << endm;
     gEnv->SetValue("NewTpcAlignment",1);
   }
-  if (GetOption("IdealHFT")) {
-    gMessMgr->QAInfo() << "Set environment to use IdealHFT" << endm;
-    gEnv->SetValue("IdealHFT",1);
-  }
   if (!GetOption("NoDefault")) { // Default
     // Check flags consistency
     if (gClassTable->GetID("TGiant3") >= 0) { // root4star

@@ -293,11 +293,7 @@ Int_t StiMaker::InitDetectors()
   // SSD or SST - they share the db and the kSsdId
   if (IAttr("useSst") && gStSstDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
-#if 0
-    _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst"),StiSstDetectorGroup::kDefault,gEnv->GetValue("IdealHFT",0) != 0));
-#else
     _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst")));
-#endif
     group->setGroupId(kSstId);
   } else if ( IAttr("useSsd") && gStSsdDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
@@ -309,21 +305,13 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-#if 0
-      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),gEnv->GetValue("IdealHFT",0) != 0));
-#else
       _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel")));
-#endif
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:Ist"<<endl;
-#if 0
-      _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),StiIstDetectorGroup::kDefault,gEnv->GetValue("IdealHFT",0) != 0));
-#else
       _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst")));
-#endif
       group->setGroupId(kIstId);
     }
  if (IAttr("useBTof"))

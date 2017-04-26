@@ -180,8 +180,8 @@ void bfc(Int_t First, Int_t Last,
   tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
   //  if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
   if ( TString(gProgName) == "root4star") tChain += "gstar,20Muons,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
-  //    else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
-    else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
+  //  else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
+  else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
   //  else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1"; // Ideal
   // else                                    tChain += "vmc,HijingAuAu200Z6cm,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
   //  else                                    tChain += "vmc,Lc3pi,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";

@@ -20,20 +20,13 @@
 #include "TEnv.h"
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), 
    mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
 {
 }
 
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
-#if 0
-  mBuildIdealGeom = gEnv->GetValue("IdealHFT",0) != 0;
-   if(mBuildIdealGeom)
-   {
-     LOG_INFO << " Ideal geometry requested" << endm;
-   }
-#endif
   return kStOk;
 }
 
@@ -41,17 +34,6 @@ Int_t StIstFastSimMaker::Init() {
 Int_t StIstFastSimMaker::InitRun(int runNo)
 {
    LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
-   if (mBuildIdealGeom && !gGeoManager) {
-
-      GetDataBase("VmcGeometry");
-
-      if (!gGeoManager) {
-         LOG_ERROR << "Init() - "
-                   "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
-                   "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
-         return kFatal;
-      }
-   }
 
    TDataSet *calibDataSet = GetDataBase("Calibrations/tracker");
    St_HitError *istTableSet = (St_HitError *) calibDataSet->Find("ist1HitError");
@@ -77,12 +59,7 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
       return kStFatal;
    }
 
-   if (mBuildIdealGeom) {
-      LOG_DEBUG << " Using ideal geometry" << endm;
-   }
-   else {
-      LOG_DEBUG << " Using geometry tables from the DB." << endm;
-   }
+   LOG_DEBUG << " Using geometry tables from the DB." << endm;
 
    return kStOk;
 }
@@ -139,17 +116,7 @@ Int_t StIstFastSimMaker::Make()
          TGeoHMatrix *combI = NULL;
 
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
-         if (mBuildIdealGeom) {
-            TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-            path += Form("/IBAM_%ld/IBLM_%ld/IBSS_1", mcI->ladder(), mcI->wafer());
-            gGeoManager->RestoreMasterVolume();
-            gGeoManager->CdTop();
-            gGeoManager->cd(path);
-            combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
-         }
-         else { //using mis-aligned gemetry from IST geometry DB tables
             combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));
-         }
 
          //YPWANG: McIstHit stored local position
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};

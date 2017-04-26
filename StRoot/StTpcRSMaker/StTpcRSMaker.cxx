@@ -203,7 +203,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
-    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
+    //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
   if (TESTBIT(m_Mode,kDistortion)) {
