@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.16 2014/06/26 21:50:17 fisyak Exp $
+ * $Id: StarMagField.h,v 1.17 2017/04/26 21:11:25 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.17  2017/04/26 21:11:25  perev
+ * Add setConstBz
+ *
  * Revision 1.16  2014/06/26 21:50:17  fisyak
  * New Tpc Alignment, v632
  *
@@ -141,6 +144,7 @@ class StarMagField
   Float_t  R3DSteel[nRSteel], Z3DSteel[nZSteel], Phi3DSteel[nPhiSteel] ;         
   Float_t  Bz3DSteel[nPhiSteel][nZSteel][nRSteel];
   Float_t  Bx3DSteel[nPhiSteel][nZSteel][nRSteel], By3DSteel[nPhiSteel][nZSteel][nRSteel] ;        
+  static bool     mConstBz;
 
   //added by Lijuan
   Float_t  Br3DSteel[nPhiSteel][nZSteel][nRSteel], Bphi3DSteel[nPhiSteel][nZSteel][nRSteel] ;        
@@ -160,6 +164,8 @@ class StarMagField
 #endif
   }
   static StarMagField *Instance();
+
+  static void setConstBz( bool state ){ mConstBz = state; }
 
   virtual void    BField   ( const Float_t x[], Float_t B[] ) ;
   virtual void    BField   ( const Double_t x[], Double_t B[] ) ;
