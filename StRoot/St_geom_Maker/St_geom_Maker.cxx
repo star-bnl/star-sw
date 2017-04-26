@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.13 2009/01/21 18:58:59 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.14 2017/04/26 21:04:29 perev Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.14  2017/04/26 21:04:29  perev
+// Cleanup
+//
 // Revision 1.13  2009/01/21 18:58:59  fine
 // Draw the TGeoCompoisteShapes
 //
@@ -97,24 +100,18 @@
 ClassImp(St_geom_Maker)
 
 //_____________________________________________________________________________
-St_geom_Maker::St_geom_Maker(const char *name):StMaker(name){
-  
+St_geom_Maker::St_geom_Maker(const char *name):StMaker(name)
+{
 }
 //_____________________________________________________________________________
-St_geom_Maker::~St_geom_Maker(){
-  //yf  if (m_ConstSet) m_ConstSet->Delete();
+St_geom_Maker::~St_geom_Maker()
+{
 }
 //_____________________________________________________________________________
 St_DataSet  *St_geom_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
                                         const StMaker *dowMk) const 
 {
   St_DataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
-  if (!ds && strcmp(logInput,"HALL")==0) { 
-#if 0
-     Init();
-     ds = m_ConstSet->FindByName("HALL");
-#endif
-  }
   return ds;
 }
 //_____________________________________________________________________________
