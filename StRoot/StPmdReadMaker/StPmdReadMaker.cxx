@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.38 2011/08/17 11:45:51 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.39 2017/04/26 19:55:17 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.39  2017/04/26 19:55:17  perev
+ *Hide m_DataSet
+ *
  *Revision 1.38  2011/08/17 11:45:51  rashmi
  *year==12 27GeV  BadChains entered
  *
@@ -510,7 +513,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
   mPmdGeom->readBoardDetail(mRunNumber); //!Read status of the FEE boards to apply proper mapping 
   
   mPmdCollection = new StPmdCollection("PmdCollection");
-  m_DataSet->Add(mPmdCollection);
+  AddData(mPmdCollection);
   StPmdDetector* det0 = mPmdCollection->detector(0); //! Collection for CPV
   StPmdDetector* det1 = mPmdCollection->detector(1); //! Collection for PMD
   //  cout<<"Applymapp: Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
