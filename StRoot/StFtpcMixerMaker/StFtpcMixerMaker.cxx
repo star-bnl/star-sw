@@ -365,7 +365,7 @@ Int_t StFtpcMixerMaker::Make() {
 
   LOG_INFO << "FTPC Embedding done... "<< endm;
 
-  St_DataSetIter local(m_DataSet);
+  St_DataSetIter local((GetData()));
 
   St_fcl_ftpcndx *fcl_ftpcndx_out = new St_fcl_ftpcndx("fcl_ftpcndx", 2);
   local.Add(fcl_ftpcndx_out);
@@ -409,9 +409,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.7 2007/04/28 17:56:11 perev Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.8 2017/04/26 19:48:41 perev Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.8  2017/04/26 19:48:41  perev
+ * Hide m_DataSet
+ *
  * Revision 1.7  2007/04/28 17:56:11  perev
  * Redundant StChain.h removed
  *
