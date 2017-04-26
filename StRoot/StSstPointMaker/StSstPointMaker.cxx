@@ -1,6 +1,9 @@
-//$Id: StSstPointMaker.cxx,v 1.2 2016/05/27 15:20:38 bouchet Exp $
+//$Id: StSstPointMaker.cxx,v 1.3 2017/04/26 20:17:45 perev Exp $
 //
 //$Log: StSstPointMaker.cxx,v $
+//Revision 1.3  2017/04/26 20:17:45  perev
+//Hide m_DataSet
+//
 //Revision 1.2  2016/05/27 15:20:38  bouchet
 //coverity DEAD_CODE fixed ; cleanup cout
 //
@@ -159,10 +162,10 @@ Int_t StSstPointMaker::Make()
   }
 
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
-  m_DataSet->Add(scm_spt); 
+  AddData(scm_spt); 
   
   St_scf_cluster *scf_cluster = new St_scf_cluster("scf_cluster",5000);//09/13
-  m_DataSet->Add(scf_cluster);
+  AddData(scf_cluster);
   
   StEvent *pEvent = (StEvent*) GetInputDS("StEvent");
   //  StSstHitCollection *sstHitCollection;

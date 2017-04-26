@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.18 2009/01/26 15:00:34 fisyak Exp $
+ * $Id: St_spa_Maker.cxx,v 1.19 2017/04/26 20:16:30 perev Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.19  2017/04/26 20:16:30  perev
+ * Hide m_DataSet
+ *
  * Revision 1.18  2009/01/26 15:00:34  fisyak
  * Take care about sector number packed in volume Id
  *
@@ -109,7 +112,7 @@ Int_t St_spa_Maker::Make()
   St_sls_strip *sls_strip = (St_sls_strip *)GetDataSet("sls_strip/.data/sls_strip");
   
   St_spa_strip *spa_strip = new St_spa_strip("spa_strip",40000);
-  m_DataSet->Add(spa_strip);
+  AddData(spa_strip);
   
   //slsCtrl_st      *ctrl     =  m_ctrl->GetTable(); 
 

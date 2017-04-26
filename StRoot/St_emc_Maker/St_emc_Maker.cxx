@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.14 2007/04/28 17:56:05 perev Exp $
+// $Id: St_emc_Maker.cxx,v 1.15 2017/04/26 20:22:16 perev Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.15  2017/04/26 20:22:16  perev
+// Hide m_DataSet
+//
 // Revision 1.14  2007/04/28 17:56:05  perev
 // Redundant StChain.h removed
 //
@@ -97,7 +100,7 @@ Int_t St_emc_Maker::Make(){
     assert(mEmcCalib);
   }
 
-  if (!m_DataSet->GetList()){   //if DataSet is empty, create object and fill it
+  if (!GetData()->GetList()){   //if DataSet is empty, create object and fill it
     //Making Hits
     St_DataSet *emcRaw = GetDataSet("emc_raw/.data"); 
     if(!emcRaw) return kStWarn;
@@ -112,7 +115,7 @@ Int_t St_emc_Maker::Make(){
 	for(int i=4; i<8; i++){if(detname[i]==name){goto SKIP;}} //only barrel for now
 	StEmcHitCollection *hit = new StEmcHitCollection(name);
         hit->setEmcCalib(mEmcCalib);
-        m_DataSet->Add(hit);
+        AddData(hit);
 	if(hit->fill(adc) != kStOK) return kStWarn;
       }
     SKIP:;
@@ -120,13 +123,13 @@ Int_t St_emc_Maker::Make(){
   }
 
   if(m_mode){     // make a copy in STAF table 'emc_hits' for STAF module
-    St_DataSetIter itr(m_DataSet);
+    St_DataSetIter itr(GetData());
     StEmcHitCollection *hit = 0;
     StEmcHitCollection dummy; TString tit = dummy.GetTitle();
     while ((hit = (StEmcHitCollection *)itr())) {
       if(hit->GetTitle() == tit){
 	TString name_hits = "emc_hits_" + TString(hit->GetName());
-        m_DataSet->Add(hit->copyToTable(name_hits));
+        AddData(hit->copyToTable(name_hits));
       }
     }
   }
@@ -138,10 +141,10 @@ Int_t St_emc_Maker::Make(){
 //_____________________________________________________________________________
 void St_emc_Maker::MakeHistograms(){
   //Filling QA Histograms
-  if (m_DataSet) {
+  if (GetData()) {
     Int_t det, i, n, id;
     Float_t eta, phi, ene;
-    St_DataSetIter itr(m_DataSet);
+    St_DataSetIter itr(GetData());
     StEmcHitCollection *hit = 0;
     StEmcHitCollection dummy;
     TString tit = dummy.GetTitle(); 
