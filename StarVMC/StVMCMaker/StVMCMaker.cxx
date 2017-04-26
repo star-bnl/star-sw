@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.11 2009/04/16 14:19:52 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.12 2017/04/26 22:10:42 perev Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.12  2017/04/26 22:10:42  perev
+// Hide m_DataSet
+//
 // Revision 1.11  2009/04/16 14:19:52  fisyak
 // Step back to keep dev alieve
 //
@@ -115,7 +118,7 @@ Int_t StVMCMaker::Init() {
     gMessMgr->Info() << "StVMCMaker::InitRun Active mode" << endm; 
     StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();
     if (! generator) {
-      if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
+      if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,GetData());
       //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
       //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
       else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
@@ -123,7 +126,7 @@ Int_t StVMCMaker::Init() {
     }
     assert(generator);
     StarMCHits *hits = StarMCHits::instance();
-    hits->SetHitHolder(m_DataSet);
+    hits->SetHitHolder(GetData());
     fgStarVMCApplication->SetStepping(hits);
     if ((m_Mode/100)%10 == 1) {// switch off physics 
       gMessMgr->Info() << "StVMCMaker::InitRun switch off physics" << endm;
@@ -192,7 +195,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
       gMessMgr->Info() << "StVMCMaker::InitRun Standalone run" << endm;
       fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
       if (!fEvtHddr) {                            // Standalone run
-	fEvtHddr = new StEvtHddr(m_ConstSet);
+	fEvtHddr = new StEvtHddr(GetConst());
 	SetOutput(fEvtHddr);	                //Declare this "EvtHddr" for output
       }
       fEvtHddr->SetRunNumber(fRunNo);
@@ -274,7 +277,7 @@ int StVMCMaker::SetInputFile(const Char_t *fileName)
 }
 //________________________________________________________________________________
 void StVMCMaker::SetDebug(Int_t l) {
-  m_DebugLevel = l;
+  StMaker::SetDebug(l);
   if (fgGeant3) {
     fgGeant3->Gcflag()->idebug = Debug();
     if (Debug() > 1) {
