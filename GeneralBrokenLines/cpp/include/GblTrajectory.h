@@ -9,6 +9,8 @@
  *  GblTrajectory definition.
  *
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
+ *  \author Gregor Mittag, DESY, 2017 (templates and other optimizations)
+ *
  *
  *  \copyright
  *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
@@ -30,6 +32,7 @@
 #ifndef GBLTRAJECTORY_H_
 #define GBLTRAJECTORY_H_
 
+#include <array>
 #include "GblPoint.h"
 #include "GblData.h"
 #include "GblPoint.h"
@@ -48,29 +51,80 @@ class GblTrajectory {
 public:
 	GblTrajectory(const std::vector<GblPoint> &aPointList, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList);
+
+	/// Create new (simple) trajectory from list of points with external seed.
+	/**
+	 * Curved trajectory in space (default) or without curvature (q/p) or in one
+	 * plane (u-direction) only.
+	 * \tparam Seed   Seed precision matrix
+	 * \param [in] aPointList List of points
+	 * \param [in] aLabel (Signed) label of point for external seed
+	 * (<0: in front, >0: after point, slope changes at scatterer!)
+	 * \param [in] aSeed Precision matrix of external seed
+	 * \param [in] flagCurv Use q/p
+	 * \param [in] flagU1dir Use in u1 direction
+	 * \param [in] flagU2dir Use in u2 direction
+	 */
+	template<typename Seed>
 	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
-			const Eigen::MatrixXd &aSeed, bool flagCurv = true, bool flagU1dir =
-					true, bool flagU2dir = true);
+			const Eigen::MatrixBase<Seed>& aSeed, bool flagCurv = true,
+			bool flagU1dir = true, bool flagU2dir = true);
+
+	/// Create new composed trajectory from list of points and transformations with arbitrary external measurements.
+	/**
+	 * Composed of curved trajectories in space. The precision matrix for the external measurements is specified as matrix.
+	 *
+	 * \tparam Derivatives  External derivatives
+	 * \tparam Measurements   Residuals vector
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
+	 * \param [in] extDerivatives Derivatives of external measurements vs external parameters
+	 * \param [in] extMeasurements External measurements (residuals)
+	 * \param [in] extPrecisions Precision of external measurements (matrix)
+	 */
+	template<typename Derivatives, typename Measurements, typename Precision,
+			typename std::enable_if<(Precision::ColsAtCompileTime != 1)>::type* =
+					nullptr>
 	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointaAndTransList);
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
+			const Eigen::MatrixBase<Derivatives>& extDerivatives,
+			const Eigen::MatrixBase<Measurements>& extMeasurements,
+			const Eigen::MatrixBase<Precision>& extPrecisions);
+
+	/// Create new composed trajectory from list of points and transformations with independent external measurements.
+	/**
+	 * Composed of curved trajectories in space. The (diagonal) precision matrix for the external measurements is specified as vector
+	 * (containing the diagonal).
+	 *
+	 * \tparam Derivatives  External derivatives
+	 * \tparam Measurements   Residuals vector
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
+	 * \param [in] extDerivatives Derivatives of external measurements vs external parameters
+	 * \param [in] extMeasurements External measurements (residuals)
+	 * \param [in] extPrecisions Precision of external measurements (vector with diagonal)
+	 */
+	template<typename Derivatives, typename Measurements, typename Precision,
+			typename std::enable_if<(Precision::ColsAtCompileTime == 1)>::type* =
+					nullptr>
 	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointaAndTransList,
-			const Eigen::MatrixXd &extDerivatives,
-			const Eigen::VectorXd &extMeasurements,
-			const Eigen::MatrixXd &extPrecisions);
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
+			const Eigen::MatrixBase<Derivatives>& extDerivatives,
+			const Eigen::MatrixBase<Measurements>& extMeasurements,
+			const Eigen::MatrixBase<Precision>& extPrecisions);
+
 #ifdef GBL_EIGEN_SUPPORT_ROOT
 	// input from ROOT
 	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
 			const TMatrixDSym &aSeed, bool flagCurv = true, bool flagU1dir =
-					true, bool flagU2dir = true);
-	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList);
-	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList,
+			true, bool flagU2dir = true);
+	GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList);
+	GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TVectorD &extPrecisions);
-	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList,
+	GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TMatrixDSym &extPrecisions);
 #endif
@@ -100,7 +154,7 @@ public:
 	unsigned int getLabels(
 			std::vector<std::vector<unsigned int> > &aLabelList) const;
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
-			std::string optionList = "", unsigned int aLabel = 0);
+			const std::string& optionList = "", unsigned int aLabel = 0);
 	void milleOut(MilleBinary &aMille);
 	void printTrajectory(unsigned int level = 0) const;
 	void printPoints(unsigned int level = 0) const;
@@ -137,10 +191,10 @@ private:
 
 	std::pair<std::vector<unsigned int>, Eigen::MatrixXd> getJacobian(
 			int aSignedLabel) const;
-	void getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
+	void getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
 			Matrix5d &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 			unsigned int nJacobian = 1) const;
-	void getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
+	void getFitToKinkJacobian(std::array<unsigned int, 7>& anIndex,
 			Matrix27d &aJacobian, const GblPoint &aPoint) const;
 	void construct();
 	void defineOffsets();
@@ -152,5 +206,97 @@ private:
 	void getResAndErr(unsigned int aData, bool used, double &aResidual,
 			double &aMeadsError, double &aResError, double &aDownWeight);
 };
+
+template<typename Seed>
+GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
+		unsigned int aLabel, const Eigen::MatrixBase<Seed>& aSeed,
+		bool flagCurv, bool flagU1dir, bool flagU2dir) :
+		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
+				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
+				0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(
+				0), maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
+				aSeed), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+
+	if (flagU1dir)
+		theDimension.push_back(0);
+	if (flagU2dir)
+		theDimension.push_back(1);
+	// simple (single) trajectory
+	thePoints.push_back(aPointList);
+	numPoints.push_back(numAllPoints);
+	construct(); // construct trajectory
+}
+
+template<typename Derivatives, typename Measurements, typename Precision,
+		typename std::enable_if<(Precision::ColsAtCompileTime != 1)>::type*>
+GblTrajectory::GblTrajectory(
+		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
+		const Eigen::MatrixBase<Derivatives>& extDerivatives,
+		const Eigen::MatrixBase<Measurements>& extMeasurements,
+		const Eigen::MatrixBase<Precision>& extPrecisions) :
+		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
+				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
+				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
+
+	static_assert(static_cast<int>(Measurements::ColsAtCompileTime) == 1, "GblTrajectory: cols(Measurements) must be 1 (vector)");
+	static_assert(static_cast<int>(Measurements::RowsAtCompileTime) == static_cast<int>(Derivatives::RowsAtCompileTime), "GblTrajectory: rows(Measurements) and rows(Derivatives) must be equal");
+	static_assert(static_cast<int>(Measurements::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "GblTrajectory: rows(Measurements) and rows(Precision) must be equal");
+	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == static_cast<int>(Precision::ColsAtCompileTime), "GblTrajectory: rows(Precision) and cols(Precision) must be equal");
+	// diagonalize external measurement
+	Eigen::SelfAdjointEigenSolver<typename Precision::PlainObject> extEigen {
+			extPrecisions };
+	// @TODO   if (extEigen.info() != Success) abort();
+	auto extTransformation = extEigen.eigenvectors().transpose();
+	externalDerivatives.resize(extDerivatives.rows(), extDerivatives.cols());
+	externalDerivatives = extTransformation * extDerivatives;
+	externalMeasurements.resize(extMeasurements.size());
+	externalMeasurements = extTransformation * extMeasurements;
+	externalPrecisions.resize(extMeasurements.size());
+	externalPrecisions = extEigen.eigenvalues();
+
+	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
+		thePoints.push_back(aPointsAndTransList[iTraj].first);
+		numPoints.push_back(thePoints.back().size());
+		numAllPoints += numPoints.back();
+		innerTransformations.push_back(aPointsAndTransList[iTraj].second);
+	}
+	theDimension.push_back(0);
+	theDimension.push_back(1);
+	numCurvature = innerTransformations[0].cols();
+	construct(); // construct (composed) trajectory
+}
+
+template<typename Derivatives, typename Measurements, typename Precision,
+		typename std::enable_if<(Precision::ColsAtCompileTime == 1)>::type*>
+GblTrajectory::GblTrajectory(
+		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
+		const Eigen::MatrixBase<Derivatives>& extDerivatives,
+		const Eigen::MatrixBase<Measurements>& extMeasurements,
+		const Eigen::MatrixBase<Precision>& extPrecisions) :
+		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
+				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
+				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
+	static_assert(static_cast<int>(Measurements::ColsAtCompileTime) == 1, "GblTrajectory: cols(Measurements) must be 1 (vector)");
+	static_assert(static_cast<int>(Measurements::RowsAtCompileTime) == static_cast<int>(Derivatives::RowsAtCompileTime), "GblTrajectory: rows(Measurements) and rows(Derivatives) must be equal");
+	static_assert(static_cast<int>(Measurements::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "GblTrajectory: rows(Measurements) and rows(Precision) must be equal");
+
+	externalDerivatives = extDerivatives;
+	externalMeasurements = extMeasurements;
+	externalPrecisions = extPrecisions;
+
+	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
+		thePoints.push_back(aPointsAndTransList[iTraj].first);
+		numPoints.push_back(thePoints.back().size());
+		numAllPoints += numPoints.back();
+		innerTransformations.push_back(aPointsAndTransList[iTraj].second);
+	}
+	theDimension.push_back(0);
+	theDimension.push_back(1);
+	numCurvature = innerTransformations[0].cols();
+	construct(); // construct (composed) trajectory
+}
+
 }
 #endif /* GBLTRAJECTORY_H_ */

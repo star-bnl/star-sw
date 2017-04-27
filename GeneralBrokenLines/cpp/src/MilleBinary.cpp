@@ -38,10 +38,11 @@ namespace gbl {
  * \param [in] doublePrec Flag for storage as double values
  * \param [in] aSize Buffer size
  */
-MilleBinary::MilleBinary(const std::string fileName, bool doublePrec,
+MilleBinary::MilleBinary(const std::string& fileName, bool doublePrec,
 		unsigned int aSize) :
 		binaryFile(fileName.c_str(), std::ios::binary | std::ios::out), intBuffer(), floatBuffer(), doubleBuffer(), doublePrecision(
 				doublePrec) {
+
 	intBuffer.reserve(aSize);
 	intBuffer.push_back(0); // first word is error counter
 	if (doublePrecision) {
@@ -123,7 +124,7 @@ void MilleBinary::writeRecord() {
 				floatBuffer.size() * sizeof(floatBuffer[0]));
 	binaryFile.write(reinterpret_cast<char*>(&intBuffer[0]),
 			intBuffer.size() * sizeof(intBuffer[0]));
-// start with new record
+	// start with new record
 	intBuffer.resize(1);
 	if (doublePrecision)
 		doubleBuffer.resize(1);
