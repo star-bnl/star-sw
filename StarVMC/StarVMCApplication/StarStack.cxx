@@ -223,16 +223,18 @@ void StarStack::PushTrack(Int_t done, Int_t parent, Int_t pdg,
     particle->SetBit(kDoneBit);
   } else {
     particle->SetBit(kTransportBit);
-    Double_t R = particle->R();
-    Double_t Z = particle->Vz();
-    Double_t Ekin = particle->Ek(); 
-    if (R > 180 || TMath::Abs(Z) > 180 || Ekin < 0.010) { // 10 MeV Cut
-      fStack.push(*particle);
-      fParticles.RemoveAt(index);
-      index--;
-      particle = &fStack.top();
-      if (Debug() > 1) {
-	cout << "Push to stack:   ";
+    if (mech != kPPrimary) { // primaries always go to particle list
+      Double_t R = particle->R();
+      Double_t Z = particle->Vz();
+      Double_t Ekin = particle->Ek(); 
+      if (R > 180 || TMath::Abs(Z) > 180 || Ekin < 0.010) { // 10 MeV Cut
+	fStack.push(*particle);
+	fParticles.RemoveAt(index);
+	index--;
+	particle = &fStack.top();
+	if (Debug() > 1) {
+	  cout << "Push to stack:   ";
+	}
       }
     } else {
       fNtrack++;

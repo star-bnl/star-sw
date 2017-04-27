@@ -101,7 +101,8 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       gMC->SetProcess("ANNI", 0);
       gMC->SetProcess("BREM", 0);
       gMC->SetProcess("COMP", 0);
-      gMC->SetProcess("HADR", 0);
+      gMC->SetProcess("HADR", 0);.q
+
       gMC->SetProcess("MUNU", 0);
       gMC->SetProcess("PAIR", 0);
       gMC->SetProcess("PFIS", 0);

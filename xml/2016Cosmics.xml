@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">  -->
+<job maxFilesPerProcess="1"  simulateSubmission ="false" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    exit 1;
+  endif
+#  setenv NODEBUG yes
+#  starver .DEV2
+  set file = cosmics_R${rung}_${f}_${l}
+  echo "${file}"
+  set logFile  = ${file}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${file}.MuDst.root
+  if (-r $muFile) exit 0;
+  set  out = ${file}.event.root
+  set  tagFile =  ${file}.root
+  set fitter = ",KFVertex,StiCA"; #,HLTCA"
+  set ddir = `pwd`
+  set case = `basename $ddir`; echo "case = $case";
+  echo $case | grep PPV
+#  if (! $?) set fitter = ",VFPPVnoCTB,Sti";
+#  if (! $?) set fitter = ",VFPPVnoCTB,StiCA";
+  echo "fitter $fitter"
+  set tagFile = ${file}.root
+# ZF
+#  root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile} 
+# RF
+ root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}  endif
+        </command>
+        <stdout URL="file:./schedd$JOBID.log" />
+        <stderr URL="file:./schedd$JOBID.err" />
+<input URL="command:RunId.pl 1 100 1000" />
+</job>

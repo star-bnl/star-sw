@@ -9,6 +9,8 @@
  *  GblPoint definition.
  *
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
+ *  \author Gregor Mittag, DESY, 2017 (templates and other optimizations)
+ *
  *
  *  \copyright
  *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
@@ -67,6 +69,10 @@ typedef Eigen::Matrix<double, 5, 5> Matrix5d;
 class GblPoint {
 public:
 	GblPoint(const Matrix5d &aJacobian);
+	GblPoint(const GblPoint&) = default;
+	GblPoint& operator=(const GblPoint&) = default;
+	GblPoint(GblPoint&&) = default;
+	GblPoint& operator=(GblPoint&&) = default;
 	virtual ~GblPoint();
 #ifdef GBL_EIGEN_SUPPORT_ROOT
 	// input via ROOT
@@ -87,16 +93,144 @@ public:
 			const TMatrixD &aDerivatives);
 #endif
 	// input via Eigen
-	void addMeasurement(const Eigen::MatrixXd &aProjection,
-			const Eigen::VectorXd &aResiduals,
-			const Eigen::MatrixXd &aPrecision, double minPrecision = 0.);
-	void addMeasurement(const Eigen::VectorXd &aResiduals,
-			const Eigen::MatrixXd &aPrecision, double minPrecision = 0.);
+
+	/// Add a measurement to a point.
+	/**
+	 * Add measurement (in measurement system) with arbitrary precision (inverse covariance) matrix.
+	 * Will be diagonalized.
+	 * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+	 * \tparam Projection  Projection matrix
+	 * \tparam Residuals   Residuals vector
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aProjection Projection from local to measurement system (derivative of measurement vs local parameters)
+	 * \param [in] aResiduals Measurement residuals
+	 * \param [in] aPrecision Measurement precision (matrix)
+	 * \param [in] minPrecision Minimal precision to accept measurement
+	 */
+	template<typename Projection, typename Residuals, typename Precision,
+			typename std::enable_if<(Precision::ColsAtCompileTime != 1)>::type* =
+					nullptr>
+	void addMeasurement(const Eigen::MatrixBase<Projection>& aProjection,
+			const Eigen::MatrixBase<Residuals>& aResiduals,
+			const Eigen::MatrixBase<Precision>& aPrecision,
+			double minPrecision = 0.);
+
+	/// Add a measurement to a point.
+	/**
+	 * Add measurement (in measurement system) with diagonal precision (inverse covariance) matrix.
+	 * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+	 * \tparam Projection  Projection matrix
+	 * \tparam Residuals   Residuals vector
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aProjection Projection from local to measurement system (derivative of measurement vs local parameters)
+	 * \param [in] aResiduals Measurement residuals
+	 * \param [in] aPrecision Measurement precision (vector with diagonal)
+	 * \param [in] minPrecision Minimal precision to accept measurement
+	 */
+	template<typename Projection, typename Residuals, typename Precision,
+			typename std::enable_if<(Precision::ColsAtCompileTime == 1)>::type* =
+					nullptr>
+	void addMeasurement(const Eigen::MatrixBase<Projection>& aProjection,
+			const Eigen::MatrixBase<Residuals>& aResiduals,
+			const Eigen::MatrixBase<Precision>& aPrecision,
+			double minPrecision = 0.);
+
+	/// Add a measurement to a point.
+	/**
+	 * Add measurement in local system with arbitrary precision (inverse covariance) matrix.
+	 * Will be diagonalized.
+	 * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+	 * \tparam Residuals   Residuals vector
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aResiduals Measurement residuals
+	 * \param [in] aPrecision Measurement precision (matrix)
+	 * \param [in] minPrecision Minimal precision to accept measurement
+	 */
+	template<typename Residuals, typename Precision, typename std::enable_if<
+			(Precision::ColsAtCompileTime != 1)>::type* = nullptr>
+	void addMeasurement(const Eigen::MatrixBase<Residuals>& aResiduals,
+			const Eigen::MatrixBase<Precision>& aPrecision,
+			double minPrecision = 0.);
+
+	/// Add a measurement to a point.
+	/**
+	 * Add measurement in local system with diagonal precision (inverse covariance) matrix.
+	 * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+	 * \tparam Residuals   Residuals vector
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aResiduals Measurement residuals
+	 * \param [in] aPrecision Measurement precision (vector with diagonal)
+	 * \param [in] minPrecision Minimal precision to accept measurement
+	 */
+	template<typename Residuals, typename Precision, typename std::enable_if<
+			(Precision::ColsAtCompileTime == 1)>::type* = nullptr>
+	void addMeasurement(const Eigen::MatrixBase<Residuals>& aResiduals,
+			const Eigen::MatrixBase<Precision>& aPrecision,
+			double minPrecision = 0.);
+
+	/// Add a (thin) scatterer to a point.
+	/**
+	 * Add scatterer with arbitrary precision (inverse covariance) matrix.
+	 * Will be diagonalized. Changes local track direction.
+	 *
+	 * The precision matrix for the local slopes is defined by the
+	 * angular scattering error theta_0 and the scalar products c_1, c_2 of the
+	 * offset directions in the local frame with the track direction:
+	 *
+	 *            (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
+	 *       P =  ----------------------- * |                             |
+	 *                theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
+	 *
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aResiduals Scatterer residuals
+	 * \param [in] aPrecision Scatterer precision (full matrix)
+	 */
+	template<typename Precision, typename std::enable_if<
+			(Precision::ColsAtCompileTime == 2)>::type* = nullptr>
 	void addScatterer(const Eigen::Vector2d &aResiduals,
-			const Eigen::MatrixXd &aPrecision);
-	void addLocals(const Eigen::MatrixXd &aDerivatives);
+			const Eigen::MatrixBase<Precision>& aPrecision);
+
+	/// Add a (thin) scatterer to a point.
+	/**
+	 * Add scatterer with diagonal precision (inverse covariance) matrix.
+	 * Changes local track direction.
+	 *
+	 * The precision matrix for the local slopes is defined by the
+	 * angular scattering error theta_0 and the scalar products c_1, c_2 of the
+	 * offset directions in the local frame with the track direction:
+	 *
+	 *            (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
+	 *       P =  ----------------------- * |                             |
+	 *                theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
+	 *
+	 * \tparam Precision   Precision matrix or vector (with diagonal)
+	 * \param [in] aResiduals Scatterer residuals
+	 * \param [in] aPrecision Scatterer precision (vector with diagonal)
+	 */
+	template<typename Precision, typename std::enable_if<
+			(Precision::ColsAtCompileTime == 1)>::type* = nullptr>
+	void addScatterer(const Eigen::Vector2d &aResiduals,
+			const Eigen::MatrixBase<Precision>& aPrecision);
+
+	/// Add local derivatives to a point.
+	/**
+	 * Point needs to have a measurement.
+	 * \tparam Derivative  Derivatives matrix
+	 * \param [in] aDerivatives Local derivatives (matrix)
+	 */
+	template<typename Derivative>
+	void addLocals(const Eigen::MatrixBase<Derivative>& aDerivatives);
+	template<typename Derivative>
+
+	/// Add global derivatives to a point.
+	/**
+	 * Point needs to have a measurement.
+	 * \tparam Derivative  Derivatives matrix
+	 * \param [in] aLabels Global derivatives labels
+	 * \param [in] aDerivatives Global derivatives (matrix)
+	 */
 	void addGlobals(const std::vector<int> &aLabels,
-			const Eigen::MatrixXd &aDerivatives);
+			const Eigen::MatrixBase<Derivative>& aDerivatives);
 	//
 	unsigned int hasMeasurement() const;
 	double getMeasPrecMin() const;
@@ -136,10 +270,12 @@ private:
 	unsigned int measDim; ///< Dimension of measurement (1-5), 0 indicates absence of measurement
 	double measPrecMin; ///< Minimal measurement precision (for usage)
 	Matrix5d measProjection; ///< Projection from measurement to local system
+
 	Vector5d measResiduals; ///< Measurement residuals
 	Vector5d measPrecision; ///< Measurement precision (diagonal of inverse covariance matrix)
 	bool transFlag; ///< Transformation exists?
-	Eigen::MatrixXd measTransformation; ///< Transformation of diagonalization (of meas. precision matrix)
+	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+			Eigen::ColMajor /* default */, 5, 5> measTransformation; ///< Transformation of diagonalization (of meas. precision matrix)
 	bool scatFlag; ///< Scatterer present?
 	Eigen::Matrix2d scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
 	Eigen::Vector2d scatResiduals; ///< Scattering residuals (initial kinks if iterating)
@@ -148,5 +284,135 @@ private:
 	std::vector<int> globalLabels; ///< Labels of global (MP-II) derivatives
 	Eigen::MatrixXd globalDerivatives; ///< Derivatives of measurement vs additional global (MP-II) parameters
 };
+
+template<typename Projection, typename Residuals, typename Precision,
+		typename std::enable_if<(Precision::ColsAtCompileTime != 1)>::type*>
+void GblPoint::addMeasurement(const Eigen::MatrixBase<Projection>& aProjection,
+		const Eigen::MatrixBase<Residuals>& aResiduals,
+		const Eigen::MatrixBase<Precision>& aPrecision, double minPrecision) {
+	static_assert(static_cast<int>(Residuals::ColsAtCompileTime) == 1, "addMeasurement: cols(Residuals) must be 1 (vector)");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) <= 5 or static_cast<int>(Residuals::RowsAtCompileTime) == Eigen::Dynamic, "addMeasurement: rows(Residuals) must be 1-5 or dynamic");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Precision) must be equal");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Projection::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Projection) must be equal");
+	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == static_cast<int>(Precision::ColsAtCompileTime), "addMeasurement: rows(Precision) and cols(Precision) must be equal");
+	static_assert(static_cast<int>(Projection::RowsAtCompileTime) == static_cast<int>(Projection::ColsAtCompileTime), "addMeasurement: rows(Projection) and cols(Projection) must be equal");
+	measDim = aResiduals.rows();
+	measPrecMin = minPrecision;
+	// arbitrary precision matrix
+	Eigen::SelfAdjointEigenSolver<typename Precision::PlainObject> measEigen {
+			aPrecision };
+	measTransformation = measEigen.eigenvectors().transpose();
+	transFlag = true;
+	measResiduals.tail(measDim) = measTransformation * aResiduals;
+	measPrecision.tail(measDim) = measEigen.eigenvalues();
+	measProjection.bottomRightCorner(measDim, measDim) = measTransformation
+			* aProjection;
+}
+
+template<typename Projection, typename Residuals, typename Precision,
+		typename std::enable_if<(Precision::ColsAtCompileTime == 1)>::type*>
+void GblPoint::addMeasurement(const Eigen::MatrixBase<Projection>& aProjection,
+		const Eigen::MatrixBase<Residuals>& aResiduals,
+		const Eigen::MatrixBase<Precision>& aPrecision, double minPrecision) {
+	static_assert(static_cast<int>(Residuals::ColsAtCompileTime) == 1, "addMeasurement: cols(Residuals) must be 1 (vector)");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) <= 5 or static_cast<int>(Residuals::RowsAtCompileTime) == Eigen::Dynamic, "addMeasurement: rows(Residuals) must be 1-5 or dynamic");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Precision) must be equal");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Projection::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Projection) must be equal");
+	static_assert(static_cast<int>(Projection::RowsAtCompileTime) == static_cast<int>(Projection::ColsAtCompileTime), "addMeasurement: rows(Projection) and cols(Projection) must be equal");
+	measDim = aResiduals.rows();
+	measPrecMin = minPrecision;
+	// diagonal precision matrix
+	measResiduals.tail(measDim) = aResiduals;
+	measPrecision.tail(measDim) = aPrecision;
+	measProjection.bottomRightCorner(measDim, measDim) = aProjection;
+}
+
+template<typename Residuals, typename Precision, typename std::enable_if<
+		(Precision::ColsAtCompileTime != 1)>::type*>
+void GblPoint::addMeasurement(const Eigen::MatrixBase<Residuals>& aResiduals,
+		const Eigen::MatrixBase<Precision>& aPrecision, double minPrecision) {
+	static_assert(static_cast<int>(Residuals::ColsAtCompileTime) == 1, "addMeasurement: cols(Residuals) must be 1 (vector)");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) <= 5 or static_cast<int>(Residuals::RowsAtCompileTime) == Eigen::Dynamic, "addMeasurement: rows(Residuals) must be 1-5 or dynamic");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Precision) must be equal");
+	measDim = aResiduals.rows();
+	measPrecMin = minPrecision;
+	// arbitrary precision matrix
+	Eigen::SelfAdjointEigenSolver<typename Precision::PlainObject> measEigen {
+			aPrecision };
+	measTransformation = measEigen.eigenvectors().transpose();
+	transFlag = true;
+	measResiduals.tail(measDim) = measTransformation * aResiduals;
+	measPrecision.tail(measDim) = measEigen.eigenvalues();
+	measProjection.bottomRightCorner(measDim, measDim) = measTransformation;
+}
+
+template<typename Residuals, typename Precision, typename std::enable_if<
+		(Precision::ColsAtCompileTime == 1)>::type*>
+void GblPoint::addMeasurement(const Eigen::MatrixBase<Residuals>& aResiduals,
+		const Eigen::MatrixBase<Precision>& aPrecision, double minPrecision) {
+	static_assert(static_cast<int>(Residuals::ColsAtCompileTime) == 1, "addMeasurement: cols(Residuals) must be 1 (vector)");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) <= 5 or static_cast<int>(Residuals::RowsAtCompileTime) == Eigen::Dynamic, "addMeasurement: rows(Residuals) must be 1-5 or dynamic");
+	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Precision) must be equal");
+	measDim = aResiduals.rows();
+	measPrecMin = minPrecision;
+	// diagonal precision matrix
+	measResiduals.tail(measDim) = aResiduals;
+	measPrecision.tail(measDim) = aPrecision;
+	measProjection.setIdentity();
+}
+
+template<typename Precision, typename std::enable_if<
+		(Precision::ColsAtCompileTime == 2)>::type*>
+void GblPoint::addScatterer(const Eigen::Vector2d &aResiduals,
+		const Eigen::MatrixBase<Precision>& aPrecision) {
+	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == 2 or static_cast<int>(Precision::RowsAtCompileTime) == Eigen::Dynamic, "addScatterer: rows(Precision) must be 2 or dynamic");
+	scatFlag = true;
+	// arbitrary precision matrix
+	Eigen::SelfAdjointEigenSolver<typename Precision::PlainObject> scatEigen {
+			aPrecision };
+	scatTransformation = scatEigen.eigenvectors();
+	scatTransformation.transposeInPlace();
+	scatResiduals = scatTransformation * aResiduals;
+	scatPrecision = scatEigen.eigenvalues();
+}
+
+template<typename Precision, typename std::enable_if<
+		(Precision::ColsAtCompileTime == 1)>::type*>
+void GblPoint::addScatterer(const Eigen::Vector2d &aResiduals,
+		const Eigen::MatrixBase<Precision>& aPrecision) {
+	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == 2 or static_cast<int>(Precision::RowsAtCompileTime) == Eigen::Dynamic, "addScatterer: rows(Precision) must be 2 or dynamic");
+	scatFlag = true;
+	scatResiduals = aResiduals;
+	scatPrecision = aPrecision;
+	scatTransformation.setIdentity();
+}
+
+template<typename Derivative>
+void GblPoint::addLocals(const Eigen::MatrixBase<Derivative>& aDerivatives) {
+	if (measDim) {
+		localDerivatives.resize(aDerivatives.rows(), aDerivatives.cols());
+		if (transFlag) {
+			localDerivatives = measTransformation * aDerivatives;
+		} else {
+			localDerivatives = aDerivatives;
+		}
+	}
+}
+
+template<typename Derivative>
+void GblPoint::addGlobals(const std::vector<int> &aLabels,
+		const Eigen::MatrixBase<Derivative>& aDerivatives) {
+	if (measDim) {
+		globalLabels = aLabels;
+		globalDerivatives.resize(aDerivatives.rows(), aDerivatives.cols());
+		if (transFlag) {
+			globalDerivatives = measTransformation * aDerivatives;
+		} else {
+			globalDerivatives = aDerivatives;
+		}
+
+	}
+}
+
 }
 #endif /* GBLPOINT_H_ */

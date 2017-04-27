@@ -1,4 +1,3 @@
-
 #ifndef __BigFullChain_h__
 #define __BigFullChain_h__
 #if 0
@@ -225,44 +224,44 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
    ,                                                                                      "","","",kFALSE},
 #if 0
-  {"MC.2016","","","TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,y2016,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.2016","","","TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,y2016,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
    ,                                                                                      "","","",kFALSE},
 #endif
-  {"MC.2016","","","y2016,TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.2016","","","y2016,TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,Agi"
    ,                                                                                      "","","",kFALSE},
-  {"MC.2016a","","","y2016a,TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.2016a","","","y2016a,TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,Agi"
    ,                                                                                      "","","",kFALSE},
-  {"MC.2017","","","y2017,TpcRS,TpxClu,useXgeom,FieldOn,NoSsdIt,NoSvtIt,Idst,BAna"
+  {"MC.2017","","","y2017,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devT","","","TpcRS,TpxClu,dev2019,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devT","","","TpcRS,TpxClu,dev2019,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTA","","","TpcRS,TpxClu,devTA,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTA","","","TpcRS,TpxClu,devTA,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTB","","","TpcRS,TpxClu,devTB,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTB","","","TpcRS,TpxClu,devTB,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTC","","","TpcRS,TpxClu,devTC,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTC","","","TpcRS,TpxClu,devTC,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTD","","","TpcRS,TpxClu,devTD,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTD","","","TpcRS,TpxClu,devTD,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTE","","","TpcRS,TpxClu,devTE,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTE","","","TpcRS,TpxClu,devTE,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTF","","","TpcRS,TpxClu,devTF,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTF","","","TpcRS,TpxClu,devTF,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTX","","","TpcRS,TpxClu,devTX,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTX","","","TpcRS,TpxClu,devTX,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.devTY","","","TpcRS,TpxClu,devTY,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.devTY","","","TpcRS,TpxClu,devTY,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},

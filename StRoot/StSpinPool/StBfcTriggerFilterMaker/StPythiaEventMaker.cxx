@@ -43,7 +43,7 @@ int StPythiaEventMaker::Make()
   getPythia();
   getVertex();
   getParticles();
-  getAsymmetries();
+  //getAsymmetries();
 
   if (Debug()) { LOG_DEBUG << *mPythiaEvent << endm; }
 
