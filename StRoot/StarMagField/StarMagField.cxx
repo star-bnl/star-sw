@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.30 2017/04/26 21:11:48 perev Exp $
+ * $Id: StarMagField.cxx,v 1.31 2017/04/28 19:44:35 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.31  2017/04/28 19:44:35  perev
+ * Fix wrong default. Non const field is default
+ *
  * Revision 1.30  2017/04/26 21:11:48  perev
  * Add setConstBz
  *
@@ -391,7 +394,7 @@ void StarMagField::SetStarMagFieldRotation(Double_t *r) {
 }
 #endif
 
-bool StarMagField::mConstBz = true; 
+bool StarMagField::mConstBz = false; 
 
 //________________________________________________________________________________
 StarMagField::StarMagField ( EBField map, Float_t factor, 
@@ -410,7 +413,6 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
   fBDipole(BDipole), fRmaxDip(RmaxDip), 
   fZminDip(ZminDip), fZmaxDip(ZmaxDip), 
   fLock(lock)
-  //  mConstBz(true)
 {
   if (fgInstance) {
     printf("Cannot initialise twice StarMagField class\n");
