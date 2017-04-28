@@ -32,14 +32,15 @@ TDataSet *CreateTable() {
     // Setup an event generator
     //
   } else if (gROOT->GetClass("StVMCMaker")) {
-    StVMCMaker::instance()->cd();
+    //    StVMCMaker::instance()->cd();
     primary = new StarPrimaryMaker();
-    chain->cd();
+    //    chain->cd();
   } else {
     cout << "ILLEGAL Situation: No geant maker found" << endl;
+    //    chain->cd();
     return 0;
   }
-
+  //  primary->cd();
   StarHijing *hijing = new StarHijing("hijing");
   hijing->SetTitle("Hijing 1.383");
   // Setup collision frame, energy and beam species
@@ -64,6 +65,7 @@ TDataSet *CreateTable() {
   // Initialize primary event generator and all sub makers
   //
   primary -> Init();
+  //  chain->cd();
   TDataSet *tableSet = new TDataSet("Hijing");
   return (TDataSet *)tableSet;
 }
