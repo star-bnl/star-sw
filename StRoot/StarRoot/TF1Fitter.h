@@ -26,6 +26,10 @@ TH1 *fTH1;
 double fMean;
 double fSigm;
 
+private:
+
+  typedef Double_t(*DummyFuncPtr_t)(Double_t *, Double_t *) ;
+
 ClassDef(TF1Fitter,0)
 };
 
