@@ -3,7 +3,9 @@
 
 //static Color_t gMyColors[] = {kRed,kBlue,kGreen,kMagenta,kCyan};
 //_____________________________________________________________________________
-TF1Fitter::TF1Fitter(const char *name,int nPars):TF1(name,(void*)0,0,0,nPars) 
+
+
+TF1Fitter::TF1Fitter(const char *name,int nPars):TF1(name, static_cast<DummyFuncPtr_t>(nullptr), 0,0,nPars)
 {
 fMean=0; fSigm=0;fTH1 = 0;
 }
