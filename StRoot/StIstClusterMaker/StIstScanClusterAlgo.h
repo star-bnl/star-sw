@@ -25,7 +25,7 @@ class StIstClusterCollection;
  */
 class StIstScanClusterAlgo : public StIstIClusterAlgo
 {
-
+   ~StIstScanClusterAlgo(){}
 protected:
    enum {kIstScanClusterAlgo = 2};
 
@@ -38,6 +38,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.13  2017/04/26 19:52:50  perev
+* Add destructor
+*
 * Revision 1.12  2014/09/17 20:39:45  smirnovd
 * Squashed commit of the following:
 *

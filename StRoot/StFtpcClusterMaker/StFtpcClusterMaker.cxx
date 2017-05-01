@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.109  2017/04/26 19:47:29  perev
+// Hide m_DataSet
+//
 // Revision 1.108  2013/03/26 15:56:00  genevb
 // Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
 //
@@ -977,7 +980,7 @@ Int_t StFtpcClusterMaker::Make()
   if(num_gpoints>0)
     {
       St_ffs_gepoint *ffs_gepoint = new St_ffs_gepoint("ffs_fgepoint",num_gpoints);
-      m_DataSet->Add(ffs_gepoint);
+      AddData(ffs_gepoint);
       
       ffs_gepoint_st *gpointTable= ffs_gepoint->GetTable();
       

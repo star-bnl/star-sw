@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.29 2007/01/22 19:13:50 kocolosk Exp $
+// $Id: StEpcMaker.cxx,v 1.30 2017/04/26 19:46:07 perev Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.30  2017/04/26 19:46:07  perev
+// Hide m_DataSet
+//
 // Revision 1.29  2007/01/22 19:13:50  kocolosk
 // use STAR logger for all output
 //
@@ -187,8 +190,8 @@ Int_t StEpcMaker::Make()
 
     // ******Creating StPointCollection and calling findPoints
     mPoint = new StPointCollection("point");
-    m_DataSet->Add(mPoint);      // for convinience only
-
+//VP    AddData(mPoint);      // for convinience only
+    AddData(mPoint);
     if(mPoint->makeEmcPoints(mEvent) != 1)
     {
         return kStOk;
