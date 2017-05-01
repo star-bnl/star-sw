@@ -247,7 +247,7 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
 #endif
 
   // Request for a clear message
-  //if(m_DebugLevel > 0)
+  //if(Debug() > 0)
   cout << "St_trg_Maker:: Daq2003 : Event has been accepted" << endl;
   return kStOK;
 }

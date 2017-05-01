@@ -3,7 +3,7 @@
 #include "TFile.h"
 #include "TList.h"
 
-TChain *Chain(const Char_t *TreeName = "T") {
+TChain *Chain(const Char_t *TreeName = "MuDst") {
   TChain *chain = 0;
   TCollection *files = gROOT->GetListOfFiles();
   if (! files) return chain;
@@ -15,12 +15,15 @@ TChain *Chain(const Char_t *TreeName = "T") {
   ULong64_t nEvTot = 0;
   while ( (f = (TFile *) next()) ) {   
     TTree *tree = (TTree *) f->Get(TreeName);
+    cout << "#\t" << NFiles << "\t" << f->GetName();
     if (tree) {
       NFiles++;
       nEvents = tree->GetEntries();
-      cout << "#\t" << NFiles << "\t" << f->GetName() << "\t" << nEvents << endl;
+      cout << "\t" << nEvents << endl;
       nEvTot += nEvents;
       chain->Add(f->GetName());
+    } else {
+      cout << "\tTTree is missing" << endl;
     }
     delete f; 
   }

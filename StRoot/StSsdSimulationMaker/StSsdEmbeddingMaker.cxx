@@ -140,7 +140,7 @@ Int_t StSsdEmbeddingMaker::GetSsdData()
 //____________________________________________________
 Int_t StSsdEmbeddingMaker::AddRawData(){
   mSsdSimuReal = new St_spa_strip("spa_strip",50000);   
-  m_DataSet->Add(mSsdSimuReal);
+  AddData(mSsdSimuReal);
   spa_strip_st out_strip ;
   Int_t idWafSimu         = 0;
   Int_t iWafSimu          = 0;
