@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.6 2016/08/05 18:16:05 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.7 2017/05/01 18:41:10 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -164,7 +164,7 @@ Int_t StXTrakMaker::Make()
       lenInnHlx = fabs(HLX.Path(0.,0.));
 
       StExtGeometry *xg = new StExtGeometry;
-      xg->set(found.Data());
+      xg->setName(found.Data());
       double pars[6];
       pars[StExtGeometry::kPhi ] = atan2(pos[1],pos[0]);
       pars[StExtGeometry::kZ   ] = pos[21];
