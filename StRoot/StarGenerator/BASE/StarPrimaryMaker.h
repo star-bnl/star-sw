@@ -101,12 +101,12 @@ class StarPrimaryMaker : public StMaker
   StarPrimaryMaker();
   ~StarPrimaryMaker();
   
-  virtual Int_t InitRun( Int_t runnumber );
-  virtual Int_t Init();
-  virtual Int_t Make();
-  virtual void  Clear( const Option_t *opts="" );
-  virtual Int_t Finish();
-  static StarPrimaryMaker *instance() {return fgStarPrimaryMaker;}
+  Int_t InitRun( Int_t runnumber );
+  Int_t Init();
+  Int_t Make();
+  void  Clear( const Option_t *opts="" );
+  Int_t Finish();
+  static StarPrimaryMaker *instance();
   /// Set the filename of the output TTree
   void  SetFileName( const Char_t *name ){ mFileName = name; }
 
@@ -221,7 +221,6 @@ class StarPrimaryMaker : public StMaker
 
   StarFilterMaker *mFilter;
   TEventList      *mAccepted; //*< event list containing accepted events
-  static StarPrimaryMaker *fgStarPrimaryMaker;				     
   ClassDef(StarPrimaryMaker,1);
 
 };

@@ -229,6 +229,7 @@ void starsim( const Char_t *basename="rcf14000",
 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "libHijing1_383.so");

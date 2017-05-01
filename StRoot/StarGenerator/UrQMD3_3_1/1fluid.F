@@ -404,13 +404,13 @@ c
       real*8 ptab3(0:200,0:200),ttab3(0:200,0:200)
       real*8 mutab3(0:200,0:200),stab3(0:200,0:200),msttab3(0:200,0:200)
       real*8 mustab3(0:200,0:200),cstab3(0:200,0:200)
-      real*8 chem
       integer eos,stabil,antie
 c
 c  Type declarations for variables used in function entro.
 c
       real*8 e,n,entro,et0,temp
       real*8 de,dn,p1,p2,p3,p4,p13,p24
+      real*8 CHEM
 c      real*8 p12,p34
 c
 c  Common-blocks.
@@ -758,7 +758,7 @@ c     temp = 0d0
 c
 c----------------------------------------------------------------------
 c
-      real*8 function chem(e,n)
+      function chem(e,n)
 C      INCLUDE 'defs.f'
 #include "defs.inc"
 c
@@ -782,7 +782,7 @@ c
 c
 c  Type declarations for variables used in function temp.
 c
-      real*8 e,n,et0,temp
+      real*8 e,n,chem,et0,temp
       real*8 de,dn,p1,p2,p3,p4,p13,p24
 c      real*8 p12,p34
 c

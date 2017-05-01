@@ -111,6 +111,7 @@ void LoadLibraries( const Char_t *chopts = "y2014a geant gstar usexgeom agml " )
 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "StarGeneratorStep.so" );
 

@@ -99,8 +99,8 @@ StarRandom &StarRandom::Instance()
       if ( !gsl_rng_default_seed ) 
 	{
 	  // Setup default seed using current time (ms since epoch) randomized by process ID
-	  long time = gSystem->Now();
-	  long pid  = gSystem->GetPid();
+	  long long time = gSystem->Now();
+	  long long pid  = gSystem->GetPid();
 	  seed( time|(pid<<16) );
 	}
       else 

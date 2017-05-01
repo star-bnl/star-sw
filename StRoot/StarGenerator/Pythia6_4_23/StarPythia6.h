@@ -20,9 +20,11 @@
   PySubs_t &pysubs = starpythia6->pysubs();
   pysubs.msel = 1; 
      
-  // Set pi+ (id=106) stable
+  // Set pi0 (id=102), pi+ (id=106) and eta (id=109) stable
   PyDat3_t &pydat3 = starpythia6->pydat3();
+  pydat3.mdcy(102,1) = 0;
   pydat3.mdcy(106,1) = 0;
+  pydat3.mdcy(109,1) = 0;
   \endcode
 
   For more information about pythia 6.4:

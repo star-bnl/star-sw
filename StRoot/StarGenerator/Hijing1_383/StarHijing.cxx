@@ -20,7 +20,6 @@ StMaker *_maker = 0;
 TGenericTable *regtable( const Char_t *type, const Char_t *name, void *address )
 {
   TGenericTable *table = new TGenericTable(type,name);
-  table->SetBit(TTable::kIsNotOwn);
   table->Adopt( 1, address );
   _maker -> AddData( table, ".const" );
   return table;
@@ -114,10 +113,8 @@ Int_t StarHijing::Init()
    *
    **/ 
 #define STABLE(x) ludat3().mdcy( Lucomp( x ), 1 ) = 0
-#if 0
   STABLE( 111 );
   STABLE( 221 );
-#endif
   STABLE( 3122 );
   STABLE( 3212 );
   STABLE( 3112 );
@@ -180,7 +177,7 @@ Int_t StarHijing::Init()
   A["neutron"]  =1;    Z["neutron"]  =0;   type["neutron"]  ="N       ";
   A["deuteron"] =2;    Z["deuteron"] =1;   type["deuteron"] ="A       ";
 
-  hiparnt().ihpr2(12) = 1; // 0=particle decays on 1=off
+  hiparnt().ihpr2(12) = 0; // 0=particle decays on 1=off
 
   string frame = mFrame.Data();
   if(frame =="FIXT") frame="LAB";

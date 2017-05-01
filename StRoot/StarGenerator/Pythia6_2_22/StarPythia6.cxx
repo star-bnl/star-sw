@@ -60,9 +60,9 @@ Int_t StarPythia6::Init()
    *  These particles will be decayed by geant instead of pythia 
    *
    **/
-  //  pydat3().mdcy(102,1)=0; // PI0 111
+  pydat3().mdcy(102,1)=0; // PI0 111
   pydat3().mdcy(106,1)=0; // PI+ 211
-  //  pydat3().mdcy(109,1)=0; // ETA 221
+  pydat3().mdcy(109,1)=0; // ETA 221
   pydat3().mdcy(116,1)=0; // K+ 321
   pydat3().mdcy(112,1)=0; // K_SHORT 310
   pydat3().mdcy(105,1)=0; // K_LONG 130
