@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.13 2007/04/26 04:14:57 perev Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.14 2017/04/26 19:57:00 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -11,6 +11,9 @@
  * filling StPmdCollection    : Dipak
  *
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.14  2017/04/26 19:57:00  perev
+ * Hide m_DataSet
+ *
  * Revision 1.13  2007/04/26 04:14:57  perev
  * Remove StBFChain dependency
  *
@@ -173,7 +176,7 @@ Int_t StPmdSimulatorMaker::makePmdHits()
    *  other makers */
   
   mPmdCollection = new StPmdCollection("PmdCollection");
-  m_DataSet->Add(mPmdCollection);
+  AddData(mPmdCollection);
   StPmdDetector* det0 = mPmdCollection->detector(1); //! Filling detector(1) for 'PMD' Collection
   StPmdDetector* det1 = mPmdCollection->detector(0); //! Filling detector(0) for 'CPV' Collection
   
