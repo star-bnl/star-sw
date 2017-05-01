@@ -23,6 +23,10 @@
 #include "TDirIter.h"
 #include "StdEdxY2Maker/StdEdxY2Maker.h"
 #include "BigFullChain.h" /* To check syntax */
+#if 0
+#include "StarGenerator/BASE/StarPrimaryMaker.h"
+#include "StarGenerator/StarGenEventReader/StarGenEventReader.h"
+#endif
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -147,7 +151,9 @@ Int_t StBFChain::Load()
 	  TString libN(libe->GetString());
 	  if (libN.BeginsWith("lib_")) libN.ReplaceAll("lib_","");
 	  if (libN.BeginsWith("lib"))  libN.ReplaceAll("lib","");
-
+	  if (libN.Contains("St_g2t") && gClassTable->GetID("St_g2t_bbc") >= 0) {
+	    continue;
+	  }
 	  TString libL("");
 	  for (Int_t j = 0; j < 3; j++) {
 	    libL = prefix[j]; libL += libN;
@@ -438,7 +444,21 @@ Int_t StBFChain::Instantiate()
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
       NoMakersWithInput++;
     }
-
+#if 0
+    if (maker == "StarPrimaryMaker") {
+      StarPrimaryMaker *primary = (StarPrimaryMaker *) mk;
+      if (GetOption("genIn") && fInFile != "") {
+	ProcessLine(Form("StarGenEventReader *EvR = new StarGenEventReader();"
+			 "EvR->SetInputFile(\"%s\",\"genevents\",\"primaryEvent\");"
+			 "((StarPrimaryMaker *) %p)->AddGenerator(EvR);", fInFile.Data(), mk));
+	eventreader -> SetInputFile(fInFile.Data(),"genevents","primaryEvent");
+	primary->AddGenerator(eventreader);
+      }
+    }
+#endif
+    if (maker == "StarGenEventReader" &&  fInFile != "") {
+      ProcessLine(Form("((StarGenEventReader *) %p)->SetInputFile(\"%s\",\"genevents\",\"primaryEvent\");", mk, fInFile.Data()));
+    }
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
       if (!GetOption("fzin")  && !GetOption("fzinSDT") &&
@@ -467,7 +487,10 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("beamLine"))  mk->SetAttr("beamLine",1);
 	if (GetOption("Wenu"))      mk->SetAttr("Wenu",1);
 	if (GetOption("mickey"))    mk->SetAttr("Mickey",1);
-	if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
+	if (CintF != "")            mk->SetAttr("GeneratorFile",CintF.Data());
+      } else if (GetOption("Generators")) {
+	// Keep it active
+	//	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"gkine -4 0\")",mk));
       } else mk->SetActive(kFALSE);
       if (! mk) goto Error;
       SetGeantOptions(mk);
@@ -1962,7 +1985,7 @@ void StBFChain::SetTreeOptions()
 //________________________________________________________________________________
 Long_t  StBFChain::ProcessLine(const char *line) {
   if (! line ||  !strlen(line)) return -1;
-  if (Debug()) gMessMgr->QAInfo() << "ProcessLine " << line << endm;
+  if (Debug()) gMessMgr->QAInfo() << "ProcessLine:" << line << endm;
   TInterpreter::EErrorCode error = TInterpreter::kNoError;
   Long_t  res = gInterpreter->ProcessLine(line, &error);
   if (error != TInterpreter::kNoError) {
