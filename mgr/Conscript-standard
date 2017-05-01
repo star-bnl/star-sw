@@ -36,38 +36,6 @@ my @LinkDefs = ();
 my @LinkDefsT = (); # for tables if any
 my @PlainObj = ();
 
-if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
-     ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
-     ($Dir =~ m/StarVMC\/minicern/  || $Dir =~ m/StarGenerator/ )
-   ) {
-  # Added 2003. In Construct, the logic is such
-  # that the Pool directories have their sub-directories
-  # set as targets (n sub-dir => n libraries). That's
-  # fine ... apart from name clash we try to resolve
-  # here.
-  $pkg = $Dir;
-  $pkg =~ s/StRoot\///;
-  if ( $Dir =~ m/StarGenerator/ ){
-    if ( $Dir =~ m/(StarGenerator)(\/)([A-Z]+$)/ ){
-      # camel case
-      $pkg =  $1.substr($3,0,1).lc(substr($3,1,length($3)));
-    } else {
-      # normal case, use subdir name
-      $pkg =~ s/.*StarGenerator\///;
-    }
-  } else {
-    $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
-    $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
-    $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
-    print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
-  }
-  $PKG = $pkg;
-} else {
-  $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
-  $PKG = $pkg;
-  $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
-}
-#print "pkg = $pkg =======\n";
 my $DEBUG   = $env->{DEBUG};
 my $FDEBUG  = $env->{FDEBUG};
 my $NOOPTIMIZED = $DEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
@@ -98,6 +66,39 @@ $LIBPATH   .= $LIB;
 my $LIBPATH = $LIB .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/lib";
 $env1 = $env->clone('Package'  => $pkg, 'LIBPATH' => $LIBPATH);
 
+if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
+     ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
+     ($Dir =~ m/StarVMC\/minicern/  || $Dir =~ m/StarGenerator/ )
+   ) {
+  # Added 2003. In Construct, the logic is such
+  # that the Pool directories have their sub-directories
+  # set as targets (n sub-dir => n libraries). That's
+  # fine ... apart from name clash we try to resolve
+  # here.
+  $pkg = $Dir;
+  $pkg =~ s/StRoot\///;
+  if ( $Dir =~ m/StarGenerator/ ){
+    if ( $Dir =~ m/(StarGenerator)(\/)([A-Z]+$)/ ){
+      # camel case
+      $pkg =  $1.substr($3,0,1).lc(substr($3,1,length($3)));
+    } else {
+      # normal case, use subdir name
+      $pkg =~ s/.*StarGenerator\///;
+    }
+    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator";
+  } else {
+    $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
+    $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
+    $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
+    print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
+  }
+  $PKG = $pkg;
+} else {
+  $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
+  $PKG = $pkg;
+  $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
+}
+#print "pkg = $pkg =======\n";
 if ($pkg eq "RTS") {
   if ($STAR_SYS =~ /darwin/) {}
   else {
@@ -215,7 +216,14 @@ if ( $FC ne 'ifort' and ($DirPath =~ /pams/ and
   }
 }
 # If fortran, grab the -lg2c or -lgfortran for linking
-if ( $DirPath =~ /StarVMC/ ){
+if ( $DirPath =~ /StarVMC/ or
+     $DirPath =~ /Herwig/ or 
+     $DirPath =~ /Hijing/ or
+     $DirPath =~ /Pepsi/ or
+     $DirPath =~ /Pythia6/ or
+     $DirPath =~ /StarLight/ or
+     $DirPath =~ /UrQMD/ or 
+     $DirPath =~ /UTIL/ ){
   $LIBS .= " " . $env1->{FLIBS};
 }
 
@@ -1600,8 +1608,8 @@ if ( $#sourcesT > -1 ) {
   script::Keep $SO_PKGT;
   LinkedModule $env3 $SO_PKGT, @sourcesT;
   Install $env3 $LIB, $SO_PKGT;
-  $lib = $LIB . "/lib" . $SO_PKGT;
-  InstallAs $env3 $lib, $SO_PKGT;
+#  $lib = $LIB . "/lib" . $SO_PKGT;
+#  InstallAs $env3 $lib, $SO_PKGT;
   if ($env3->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAPT and $#LinkDefsT > -1) {
     Command $env3 [ $SO_MAPT ], ($LIB . "/" . $SO_PKGT, @LinkDefsT),
       qq($env3->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %<);
