@@ -1423,7 +1423,7 @@ Bfc_st BFC[] = { // standard chains
   {"Pythia8_1_86", "","Generators","Generators",                   "StarPythia8","Pythia8_1_86","", kFALSE},
   {"StarLight", "","Generators","Generators",                           "StarLight","StarLight","", kFALSE},
   {"StarUrQMD" , "","Generators","Generators",                     "StarStarUrQMD","UrQMD3_3_1","", kFALSE},
-  {"genIn", "GenTreeReader","Generators","Generators"
+  {"genIn", "GenTreeReader","Generators","Generators,AgStar"
    ,                             "StarGenEventReader","StarGenEventReader","Read event from TTree", kFALSE},
   {"GenFILT", "GenFILT","Generators","Generators"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
