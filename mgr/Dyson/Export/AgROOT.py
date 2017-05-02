@@ -636,6 +636,8 @@ class StarGeometry(Handler):
         public:
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
         static TDataSet* Construct( const char* name = "%s" );
+        StarGeometry(){ /* nada */ };
+        virtual ~StarGeometry(){ /* nada */ }
         private:
         protected:
         ClassDef(StarGeometry,1);
@@ -645,6 +647,8 @@ class StarGeometry(Handler):
         class Geometry : public StarGeometry {
         public:
         static TDataSet *ConstructGeometry( const char* name ){ return Construct(name); }
+        Geometry():StarGeometry(){ /* nada */ };
+        virtual ~Geometry(){ /* nada */ }
         ClassDef(Geometry,1);
         };
 #endif        
