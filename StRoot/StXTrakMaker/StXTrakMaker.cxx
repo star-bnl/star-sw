@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.6 2016/08/05 18:16:05 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.7 2017/05/01 18:41:10 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
