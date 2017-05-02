@@ -721,7 +721,8 @@ C
 		   CALL LUEDIT(2)
 		ELSE
 381		   N_ST=N_ST+1
-		   IF(K(N_ST,2).LT.91.OR.K(N_ST,2).GT.93) GO TO  381
+		   IF(N_ST .lt. 9000 .and.
+     +                K(N_ST,2).LT.91.OR.K(N_ST,2).GT.93) GO TO  381
 		   IDSTR=K(N_ST,2)
 		   N_ST=N_ST+1
 		ENDIF
@@ -871,7 +872,7 @@ C
 
 C...Switch off decay of pi0, K0S, Lambda, Sigma+-, Xi0-, Omega-.
 	IF(IHPR2(12).GT.0) THEN
-!	CALL LUGIVE('MDCY(C111,1)=0')
+	CALL LUGIVE('MDCY(C111,1)=0')
 	CALL LUGIVE('MDCY(C310,1)=0')
 	   CALL LUGIVE('MDCY(C411,1)=0;MDCY(C-411,1)=0')
 	   CALL LUGIVE('MDCY(C421,1)=0;MDCY(C-421,1)=0')

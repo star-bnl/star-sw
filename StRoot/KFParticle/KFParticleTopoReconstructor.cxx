@@ -847,7 +847,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 //       deleteCandidate[index] = true;
 //   }
   
-  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  for(int iParticle=0; iParticle<int(fParticles.size()); iParticle++)
   {
     if(deleteCandidate[iParticle]) continue;
     

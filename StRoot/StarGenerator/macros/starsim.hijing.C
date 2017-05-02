@@ -76,7 +76,7 @@ void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar usexgeom agml ";
+    TString simple = "y2012 geantL gstar usexgeom agml ";
     //TString full   = "tpcrs TpxRaw y2010a MakeEvent ITTF NoSvtIt NoSsdIt Idst IAna l0 ftpc Sti Tree logger genvtx tpcDB TpcHitMover TpxClu pmd bbcSim tofsim tags emcY2 EEfs evout IdTruth geantout -dstout big fzin MiniMcMk clearmem";
     //  TString full = "y2012 geant gstar tpcrs genvtx tpcDb tpxclu dedx event sdt20120224 ";
     bfc(0, simple );
@@ -86,6 +86,8 @@ void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+  gSystem->Load( "AgStar.so" );
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "libHijing1_383.so");

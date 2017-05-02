@@ -1,4 +1,4 @@
-#include "StarLightC.h"
+#include "StarLight.h"
 ClassImp(StarLight);
 
 #include "randomgenerator.h"
@@ -23,7 +23,11 @@ extern "C" {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-StarLight::StarLight(const Char_t *name) : StarGenerator(name)
+StarLight::StarLight(const Char_t *name) : StarGenerator(name),
+					   ParametersDouble(),
+					   ParametersInt(),
+					   _parameters(0),
+					   mSTARlight(0)
 {
 
 
@@ -56,9 +60,7 @@ StarLight::StarLight(const Char_t *name) : StarGenerator(name)
    ParametersDouble["BFORD"]       =  9.5;      // I honestly don't know what this does
    ParametersDouble["INT_PT_MAX"]  =  0.24;     // Maxvoid imum pt considered, when interference is turned on
    ParametersInt["INT_PT_N_BINS"]  =  120;      // Number of pt bins when interference is turned on
-//    ParametersInt["RND_SEED"]       =  12345;    // This isn't actually used, but starlight looks for it
-   ParametersInt["RND_SEED"]       =  StarRandom::Instance().flat()*100000; 
-   cout<<" instance of starlight random seed "<< StarRandom::Instance().flat()<<endl;
+   ParametersInt["RND_SEED"]       =  12345;    // This isn't actually used, but starlight looks for it
    ParametersInt["OUTPUT_FORMAT"]  =  0;        // Again, I don't think this is used, but starlight looks for it
   // JFN 9/11/12 5:24pm : check if there is an object in the StarGenerator class which stores pt or eta cuts. If there is, reset the cut parameters right here accordingly.
 
@@ -110,7 +112,7 @@ Int_t StarLight::Init()
   if( mFrame == "CMS" )
   {
     // if mFrame == "CMS" then we get mRootS to work with
-    ParametersDouble["BEAM_GAMMA"] = (mRootS*A[myBlue])/(((Z[myBlue]+Z[myYell])*ProtonMass)+((A[myBlue]-Z[myBlue]+A[myYell]-Z[myYell])*NeutronMass));
+    ParametersDouble["BEAM_GAMMA"] = mRootS/(((Z[myBlue]+Z[myYell])*ProtonMass)+((A[myBlue]-Z[myBlue]+A[myYell]-Z[myYell])*NeutronMass));
   }
   if( (mFrame == "3MOM") || (mFrame == "4MOM") || (mFrame == "5MOM") )
   {
@@ -159,7 +161,7 @@ Int_t StarLight::Generate()
 
   if ( (mBlue == "Au") || (mBlue == "Cu") || (mBlue == "U") )  FillAA( mEvent );
   if ( (mBlue == "proton") && (mYell == "proton") )            FillPP( mEvent );
-  else                                                         FillPP( mEvent );
+  else /* ever make it onto this branch, assert in init        FillPP( mEvent ); */ assert(0);
 
   //
   // Get number of particles

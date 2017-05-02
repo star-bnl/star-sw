@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.163 2016/11/03 13:49:01 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.164 2017/04/26 20:26:56 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.164  2017/04/26 20:26:56  perev
+// Hide m_DataSet
+//
 // Revision 1.163  2016/11/03 13:49:01  jwebb
 // Integrate EPD into framework.
 //
@@ -741,8 +744,28 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
 {
   fgGeantMk = this;
   fgGeom  = new TDataSet("geom");  
-  m_ConstSet->Add(fgGeom);
+  AddConst(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
+  PrintInfo();
+  geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+  assert(geant3);
+  cquest = (Quest_t  *) geant3->Quest();
+  clink  = (Gclink_t *) geant3->Gclink();
+  cflag  = (Gcflag_t *) geant3->Gcflag();
+  cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+  cnum   = (Gcnum_t  *) geant3->Gcnum();
+  z_iq   = (Int_t    *) geant3->Iq();
+  z_lq   = (Int_t    *) geant3->Lq();
+  z_q    = (Float_t  *) geant3->Q();
+  csets  = (Gcsets_t *) geant3->Gcsets();
+  ckine  = (Gckine_t *) geant3->Gckine();
+  cking  = (Gcking_t *) geant3->Gcking();
+  ctrak  = (Gctrak_t *) geant3->Gctrak();
+  cmate  = (Gcmate_t *) geant3->Gcmate();
+  ccuts  = (Gccuts_t *) geant3->Gccuts();
+  cphys  = (Gcphys_t *) geant3->Gcphys();
+  kine_gdat = (Kine_gdat_t *) geant3->Kine_gdat();
+  Do("kuip/s/filecase KEEP");
 }
 //_____________________________________________________________________________
 TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
@@ -778,27 +801,6 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
   // Initialize GEANT
-  if (  geant3) return kStOK;
-  PrintInfo();
-  geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-  assert(geant3);
-  cquest = (Quest_t  *) geant3->Quest();
-  clink  = (Gclink_t *) geant3->Gclink();
-  cflag  = (Gcflag_t *) geant3->Gcflag();
-  cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-  cnum   = (Gcnum_t  *) geant3->Gcnum();
-  z_iq   = (Int_t    *) geant3->Iq();
-  z_lq   = (Int_t    *) geant3->Lq();
-  z_q    = (Float_t  *) geant3->Q();
-  csets  = (Gcsets_t *) geant3->Gcsets();
-  ckine  = (Gckine_t *) geant3->Gckine();
-  cking  = (Gcking_t *) geant3->Gcking();
-  ctrak  = (Gctrak_t *) geant3->Gctrak();
-  cmate  = (Gcmate_t *) geant3->Gcmate();
-  ccuts  = (Gccuts_t *) geant3->Gccuts();
-  cphys  = (Gcphys_t *) geant3->Gcphys();
-  kine_gdat = (Kine_gdat_t *) geant3->Kine_gdat();
-  Do("kuip/s/filecase KEEP");
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
@@ -844,9 +846,11 @@ Int_t St_geant_Maker::Init(){
 	TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
 	assert(!ee);
 	AddConst(d);
+#if 0 /* Don't do this because root will unload shared libraries */
 	command.ReplaceAll(".L ",".U ");
 	gInterpreter->ProcessLine(command,&ee);
 	assert(!ee);
+#endif
       } else {
 	if (IAttr("Mickey")) {
 	  TString kuip("user/input please mickey.mouse");	
@@ -937,7 +941,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
   if (! IAttr("Don'tTouchTimeStamp") && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*) GetTopChain()->GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
-      fEvtHddr = new StEvtHddr(m_ConstSet);
+      fEvtHddr = new StEvtHddr(GetConst());
       fEvtHddr->SetRunNumber(0);                // to have run positive and < 1000000 (to avoid mess with RunLog)
       SetOutput(fEvtHddr);	              //Declare this "EvtHddr" for output
     }
@@ -1079,7 +1083,7 @@ Int_t St_geant_Maker::Make() {
   if (cquest->iquest[0]) {return kStEOF;}
   // prepare an empty g2t_event
   St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
-  m_DataSet->Add(g2t_event);
+  AddData(g2t_event);
   
   Char_t   cgnam[21] = "                   \0";                               
   Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
@@ -1101,7 +1105,7 @@ Int_t St_geant_Maker::Make() {
   }
   if (npart>0) {  
     St_particle  *particle   = new St_particle("particle",npart);
-    m_DataSet->Add(particle);  /*iRes =*/ g2t_particle(particle);
+    AddData(particle);  iRes = g2t_particle(particle);
     //    =======================
     if (Debug() > 1) particle->Print(0,10);
     particle_st *p = particle->GetTable();
@@ -1149,9 +1153,9 @@ Int_t St_geant_Maker::Make() {
   
   if (!cnum->nvertx || !cnum->ntrack) return kStErr;
   St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
-  m_DataSet->Add(g2t_vertex); 
+  AddData(g2t_vertex); 
   St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
-  m_DataSet->Add(g2t_track);
+  AddData(g2t_track);
   
   /*iRes =*/ g2t_get_kine (g2t_vertex,g2t_track);
   if (Debug() > 1) {
@@ -1166,7 +1170,7 @@ Int_t St_geant_Maker::Make() {
 
   if(iRes>=10) { // means there was Pythia information detected in the input, see g2t_get_event code
     St_g2t_pythia *g2t_pythia = new St_g2t_pythia("g2t_pythia",1); // prepare an empty g2t_pythia
-    m_DataSet->Add(g2t_pythia);
+    AddData(g2t_pythia);
     LOG_INFO << "Pythia event header captured" << endm;
     /*iRes =*/ g2t_get_pythia(g2t_pythia);
   }
@@ -1194,7 +1198,7 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("SVTH","SVTD", nhits);
   if (nhits>0) { 
     St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
-    m_DataSet->Add(g2t_svt_hit); 
+    AddData(g2t_svt_hit); 
     
     /*iRes =*/ g2t_svt(g2t_track,g2t_svt_hit); if (Debug() > 1) g2t_svt_hit->Print(0,10);
     //	     ===============================
@@ -1204,7 +1208,7 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("SISH","SFSD", nhits);
   if (nhits>0) { 
     St_g2t_ssd_hit *g2t_ssd_hit = new St_g2t_ssd_hit("g2t_ssd_hit",nhits);
-    m_DataSet->Add(g2t_ssd_hit);
+    AddData(g2t_ssd_hit);
     
     /*iRes =*/ g2t_ssd(g2t_track,g2t_ssd_hit); if (Debug() > 1) g2t_ssd_hit->Print(0,10);
     //	     ===============================
@@ -1216,7 +1220,7 @@ Int_t St_geant_Maker::Make() {
   
   if (nhits>0) { 
     St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
-    m_DataSet->Add(g2t_pix_hit);
+    AddData(g2t_pix_hit);
     
     /*iRes =*/ g2t_pix(g2t_track,g2t_pix_hit); if (Debug() > 1) g2t_pix_hit->Print(0,10);
     //	     ===============================
@@ -1227,7 +1231,7 @@ Int_t St_geant_Maker::Make() {
   
   if (nhits>0) { 
     St_g2t_hpd_hit *g2t_hpd_hit = new St_g2t_hpd_hit("g2t_hpd_hit",nhits);
-    m_DataSet->Add(g2t_hpd_hit);
+    AddData(g2t_hpd_hit);
     
     /*iRes =*/ g2t_hpd(g2t_track,g2t_hpd_hit); if (Debug() > 1) g2t_hpd_hit->Print(0,10);
     //	     ===============================
@@ -1238,7 +1242,7 @@ Int_t St_geant_Maker::Make() {
   
   if (nhits>0) { 
     St_g2t_ist_hit *g2t_ist_hit = new St_g2t_ist_hit("g2t_ist_hit",nhits);
-    m_DataSet->Add(g2t_ist_hit);
+    AddData(g2t_ist_hit);
     
     /*iRes =*/ g2t_ist(g2t_track,g2t_ist_hit); if (Debug() > 1) g2t_ist_hit->Print(0,10);
     //	     ===============================
@@ -1249,7 +1253,7 @@ Int_t St_geant_Maker::Make() {
   
   if (nhits>0) { 
     St_g2t_gem_hit *g2t_gem_hit = new St_g2t_gem_hit("g2t_gem_hit",nhits);
-    m_DataSet->Add(g2t_gem_hit);
+    AddData(g2t_gem_hit);
     
     /*iRes =*/ g2t_gem(g2t_track,g2t_gem_hit); if (Debug() > 1) g2t_gem_hit->Print(0,10);
     //	     ===============================
@@ -1260,7 +1264,7 @@ Int_t St_geant_Maker::Make() {
   
   if (nhits>0) { 
     St_g2t_igt_hit *g2t_igt_hit = new St_g2t_igt_hit("g2t_igt_hit",nhits);
-    m_DataSet->Add(g2t_igt_hit);
+    AddData(g2t_igt_hit);
     
     /*iRes =*/ g2t_igt(g2t_track,g2t_igt_hit); if (Debug() > 1) g2t_igt_hit->Print(0,10);
     //	     ===============================
@@ -1271,7 +1275,7 @@ Int_t St_geant_Maker::Make() {
   
   if (nhits>0) { 
     St_g2t_fst_hit *g2t_fst_hit = new St_g2t_fst_hit("g2t_fst_hit",nhits);
-    m_DataSet->Add(g2t_fst_hit);
+    AddData(g2t_fst_hit);
     
     /*iRes =*/ g2t_fst(g2t_track,g2t_fst_hit); if (Debug() > 1) g2t_fst_hit->Print(0,10);
     //	     ===============================
@@ -1286,7 +1290,7 @@ Int_t St_geant_Maker::Make() {
   nhits+= myNhits;
   if (nhits>0) { 
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
-    m_DataSet->Add(g2t_fgt_hit);
+    AddData(g2t_fgt_hit);
     
     /*iRes =*/ g2t_fgt(g2t_track,g2t_fgt_hit); if (Debug() > 1) g2t_fgt_hit->Print(0,10);
     //	     ===============================
@@ -1295,7 +1299,7 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("TPCH","TPAD", nhits);
   if (nhits>0){ 
     St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
-    m_DataSet->Add(g2t_tpc_hit);
+    AddData(g2t_tpc_hit);
     
     /*iRes =*/ g2t_tpc(g2t_track,g2t_tpc_hit); if (Debug() > 1) g2t_tpc_hit->Print(0,10);
     //	     ==============================
@@ -1306,8 +1310,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("TPCH","TMSE", nhits);
   if (nhits>0) { 
     St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
-    m_DataSet->Add(g2t_mwc_hit);
-    /*iRes =*/ g2t_mwc(g2t_track,g2t_mwc_hit);if (Debug() > 1) g2t_mwc_hit->Print(0,10);
+    AddData(g2t_mwc_hit);
+    iRes = g2t_mwc(g2t_track,g2t_mwc_hit);if (Debug() > 1) g2t_mwc_hit->Print(0,10);
     //	     ==============================
   }
   
@@ -1315,8 +1319,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("FTPH","FSEC", nhits);
   if (nhits>0){
     St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
-    m_DataSet->Add(g2t_ftp_hit);
-    /*iRes =*/ g2t_ftp(g2t_track,g2t_ftp_hit);
+    AddData(g2t_ftp_hit);
+    iRes = g2t_ftp(g2t_track,g2t_ftp_hit);
     //           ===============================
   }
   
@@ -1324,8 +1328,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("BTOH","BXSA", nhits);
   if (nhits>0) { 
     St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
-    m_DataSet->Add(g2t_ctb_hit);
-    /*iRes =*/ g2t_ctb(g2t_track,g2t_ctb_hit); if (Debug() > 1) g2t_ctb_hit->Print(0,10);
+    AddData(g2t_ctb_hit);
+    iRes = g2t_ctb(g2t_track,g2t_ctb_hit); if (Debug() > 1) g2t_ctb_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1333,8 +1337,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("BTOH","BCSB", nhits);
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
-    m_DataSet->Add(g2t_tof_hit);
-    /*iRes =*/ g2t_tof(g2t_track,g2t_tof_hit); if (Debug() > 1) g2t_tof_hit->Print(0,10);
+    AddData(g2t_tof_hit);
+    iRes = g2t_tof(g2t_track,g2t_tof_hit); if (Debug() > 1) g2t_tof_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1342,8 +1346,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("BTOH","BRSG", nhits);
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
-    m_DataSet->Add(g2t_tfr_hit);
-    /*iRes =*/ g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
+    AddData(g2t_tfr_hit);
+    iRes = g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1357,8 +1361,8 @@ Int_t St_geant_Maker::Make() {
   nhits=nhit1+nhit2+nhit3+nhit4;
   if (nhits>0) {
     St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
-    m_DataSet->Add(g2t_rch_hit);
-    /*iRes =*/ g2t_rch(g2t_track,g2t_rch_hit); if (Debug() > 1) g2t_rch_hit->Print(0,10);
+    AddData(g2t_rch_hit);
+    iRes = g2t_rch(g2t_track,g2t_rch_hit); if (Debug() > 1) g2t_rch_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1367,8 +1371,7 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("CALH","CSUP", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
-    m_DataSet->Add(g2t_emc_hit);
-    /*iRes =*/ g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10);
+    AddData(g2t_emc_hit);
     //           ==============================
   }
   
@@ -1376,8 +1379,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("CALH","CSDA", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
-    m_DataSet->Add(g2t_smd_hit);
-    /*iRes =*/ g2t_smd(g2t_track,g2t_smd_hit); if (Debug() > 1) g2t_smd_hit->Print(0,10);
+    AddData(g2t_smd_hit);
+    iRes = g2t_smd(g2t_track,g2t_smd_hit); if (Debug() > 1) g2t_smd_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1388,8 +1391,8 @@ Int_t St_geant_Maker::Make() {
   nhits = nhit1+nhit2+nhit3; 
   if (nhits>0) {
     St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
-    m_DataSet->Add(g2t_eem_hit);
-    /*iRes =*/ g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
+    AddData(g2t_eem_hit);
+    iRes = g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
     //           ==============================
   }
   nhit1 = nhit2 = 0;
@@ -1398,8 +1401,8 @@ Int_t St_geant_Maker::Make() {
   nhits = nhit1+nhit2;
   if (nhits>0) {
     St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
-    m_DataSet->Add(g2t_esm_hit);
-    /*iRes =*/ g2t_esm(g2t_track,g2t_esm_hit); if (Debug() > 1) g2t_esm_hit->Print(0,10);
+    AddData(g2t_esm_hit);
+    iRes = g2t_esm(g2t_track,g2t_esm_hit); if (Debug() > 1) g2t_esm_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1407,8 +1410,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("VPDH","VRAD", nhits);
   if (nhits>0) {
     St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
-    m_DataSet->Add(g2t_vpd_hit);
-    /*iRes =*/ g2t_vpd(g2t_track,g2t_vpd_hit); if (Debug() > 1) g2t_vpd_hit->Print(0,10);
+    AddData(g2t_vpd_hit);
+    iRes = g2t_vpd(g2t_track,g2t_vpd_hit); if (Debug() > 1) g2t_vpd_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1416,8 +1419,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("PHMH","PDGS", nhits);
   if (nhits>0) {
     St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
-    m_DataSet->Add(g2t_pmd_hit);
-    /*iRes =*/ g2t_pmd(g2t_track,g2t_pmd_hit); if (Debug() > 1) g2t_pmd_hit->Print(0,10);
+    AddData(g2t_pmd_hit);
+    iRes = g2t_pmd(g2t_track,g2t_pmd_hit); if (Debug() > 1) g2t_pmd_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1425,8 +1428,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("ZCAH","QSCI", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
-    m_DataSet->Add(g2t_zdc_hit);
-    /*iRes =*/ g2t_zdc(g2t_track,g2t_zdc_hit); if (Debug() > 1) g2t_zdc_hit->Print(0,10);
+    AddData(g2t_zdc_hit);
+    iRes = g2t_zdc(g2t_track,g2t_zdc_hit); if (Debug() > 1) g2t_zdc_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1436,8 +1439,8 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) 
     {
       St_g2t_ctf_hit *g2t_bbc_hit = new St_g2t_ctf_hit("g2t_bbc_hit",nhits);
-      m_DataSet->Add(g2t_bbc_hit);
-      /*iRes =*/ g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
+      AddData(g2t_bbc_hit);
+      iRes = g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
       //           ==============================
     }
 
@@ -1448,8 +1451,8 @@ Int_t St_geant_Maker::Make() {
   nhits = nhit1+nhit2+nhit3;
   if (nhits>0) {
     St_g2t_emc_hit* g2t_fpd_hit = new St_g2t_emc_hit("g2t_fpd_hit",nhits);
-    m_DataSet->Add(g2t_fpd_hit);
-    /*iRes =*/ g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
+    AddData(g2t_fpd_hit);
+    iRes = g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
     //           ==============================
   }
 
@@ -1457,8 +1460,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("FSCH","FSCT", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_fsc_hit = new St_g2t_emc_hit("g2t_fsc_hit",nhits);
-    m_DataSet->Add(g2t_fsc_hit);
-    /*iRes =*/ g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
+    AddData(g2t_fsc_hit);
+    iRes = g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
     //           ==============================
   }
 
@@ -1469,8 +1472,8 @@ Int_t St_geant_Maker::Make() {
   nhits=nhit1+nhit2+nhit3;
   if (nhits>0) {
     St_g2t_mtd_hit *g2t_mtd_hit = new St_g2t_mtd_hit("g2t_mtd_hit",nhits);
-    m_DataSet->Add(g2t_mtd_hit);
-    /*iRes =*/ g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
+    AddData(g2t_mtd_hit);
+    iRes = g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
     //           ==============================
   }
  
@@ -1479,8 +1482,8 @@ Int_t St_geant_Maker::Make() {
   if ( nhits > 0 ) 
     {
       St_g2t_etr_hit *g2t_etr_hit = new St_g2t_etr_hit("g2t_etr_hit",nhits);
-      m_DataSet->Add(g2t_etr_hit);
-      /*iRes =*/ g2t_etr( g2t_track, g2t_etr_hit); 
+      AddData(g2t_etr_hit);
+      iRes = g2t_etr( g2t_track, g2t_etr_hit); 
       if ( Debug() > 1 ) g2t_etr_hit->Print(0,10);
     }
   
@@ -1497,8 +1500,8 @@ Int_t St_geant_Maker::Make() {
   if ( nhits > 0 ) 
   {
     St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
-    m_DataSet->Add(g2t_hca_hit);
-    /*iRes =*/ g2t_hca( g2t_track, g2t_hca_hit);
+    AddData(g2t_hca_hit);
+    iRes = g2t_hca( g2t_track, g2t_hca_hit);
   } 
 
   nhits=0;
@@ -1506,8 +1509,8 @@ Int_t St_geant_Maker::Make() {
   geant3 -> Gfnhit("FTSH","FTSA", nhits); 
   if ( nhits > 0 ) {
     St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
-    m_DataSet->Add(  g2t_fts_hit );
-    /*iRes =*/ g2t_fts( g2t_track, g2t_fts_hit );
+    AddData(  g2t_fts_hit );
+    iRes = g2t_fts( g2t_track, g2t_fts_hit );
   };
 
   nhits=0;
@@ -2617,7 +2620,7 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
       TUnixTime ut(MuEvent_mEventInfo_mTime[0]); ut.GetGTime(id,it);
       fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
       if (!fEvtHddr) {                            // Standalone run
-	fEvtHddr = new StEvtHddr(m_ConstSet);
+	fEvtHddr = new StEvtHddr(GetConst());
 	SetOutput(fEvtHddr);	              //Declare this "EvtHddr" for output
       }
       fEvtHddr->SetDateTime(id,it);

@@ -58,6 +58,7 @@ void reader( Int_t nevents=1, UInt_t rngSeed = 12345 )
  
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
 
   gSystem->Load( "libMathMore.so"   );  

@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.21 2008/05/20 00:44:42 fine Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.22 2017/04/26 20:12:06 perev Exp $
 //
 // $log$
 //
@@ -246,17 +246,17 @@ Int_t StSsdDaqMaker::Make(){
     return kStWarn;
   }
   // creating the spa_strip and spa_ped_strip tables
-  St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");  
+  St_spa_strip *spa_strip = (St_spa_strip *) GetData("spa_strip");  
   if(!spa_strip)
   {
     spa_strip   = new St_spa_strip("spa_strip",100000);
-    m_DataSet->Add(spa_strip);
+    AddData(spa_strip);
   }
-  St_ssdPedStrip *ssdPedStrip = (St_ssdPedStrip *) m_DataSet->Find("ssdPedStrip");
+  St_ssdPedStrip *ssdPedStrip = (St_ssdPedStrip *) GetData("ssdPedStrip");
   if(!ssdPedStrip)
   {
     ssdPedStrip = new St_ssdPedStrip("ssdPedStrip",100000);
-    m_DataSet->Add(ssdPedStrip);
+    AddData(ssdPedStrip);
   }
   spa_strip_st   out_strip;
   ssdPedStrip_st out_ped_strip;

@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.69 2015/08/06 17:46:53 smirnovd Exp $
+// $Id: StSsdPointMaker.cxx,v 1.70 2017/04/26 20:13:03 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.70  2017/04/26 20:13:03  perev
+// Hide m_DataSet
+//
 // Revision 1.69  2015/08/06 17:46:53  smirnovd
 // Removed unused local variables
 //
@@ -462,10 +465,10 @@ Int_t StSsdPointMaker::Make()
   }
   
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
-  m_DataSet->Add(scm_spt); 
+  AddData(scm_spt); 
   
   St_scf_cluster *scf_cluster = new St_scf_cluster("scf_cluster",5000);//09/13
-  m_DataSet->Add(scf_cluster);
+  AddData(scf_cluster);
   
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if(mCurrentEvent) 

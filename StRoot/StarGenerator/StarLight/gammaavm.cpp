@@ -61,9 +61,7 @@ Gammaavectormeson::Gammaavectormeson(inputParameters& input,beamBeamSystem& bbsy
 	_VMpidtest=input.prodParticleType();
 	_VMptmax=input.maxPtInterference();
 	_VMdpt=input.ptBinWidthInterference();
-
-	_randy.SetSeed(input.randomSeed());
-	cout<<" random seed in gammaav instance "<<input.randomSeed()<<endl;
+	//_randy.SetSeed(input.randomSeed());
 	_VMCoherence=input.coherentProduction();
 	_VMCoherenceFactor=input.coherentProduction();//probably not needed
 

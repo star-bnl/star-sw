@@ -81,6 +81,7 @@ void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "StarGeneratorDecay.so" );
   gSystem->Load( "libMathMore.so"   );

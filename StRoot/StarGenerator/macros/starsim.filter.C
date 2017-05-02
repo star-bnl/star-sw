@@ -147,6 +147,7 @@ void starsim( Int_t nevents=1, Double_t ckin3=7.0, Double_t ckin4=-1.0  )
 
   gSystem->Load( "StarGeneratorUtil.so");
   gSystem->Load( "StarGeneratorEvent.so");
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "libMathMore.so"   );  
 

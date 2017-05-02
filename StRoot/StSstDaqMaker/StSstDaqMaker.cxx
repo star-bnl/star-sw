@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.14 2017/04/25 00:32:03 perev Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.15 2017/04/26 14:56:42 perev Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,8 +17,8 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
- * Revision 1.14  2017/04/25 00:32:03  perev
- * Int_t ==> UInt_t to avoid wrong cast
+ * Revision 1.15  2017/04/26 14:56:42  perev
+ * Remove GetData() commited by accidant
  *
  * Revision 1.13  2016/07/01 18:30:52  bouchet
  * COVERITY : STACK_USE, UNINIT_CTOR fixed

@@ -83,10 +83,10 @@ class StarGenerator : public StMaker
   /// 
 
   /// If called, make simply aliases to the Generate() function.
-  virtual Int_t Make() { return Generate(); }
+  Int_t Make() { return Generate(); }
 
   /// Clear the event
-  virtual void Clear( const Option_t *opts="" );
+  void Clear( const Option_t *opts="" );
  
   /// Finalize the event is called after PreGenerate, Generate and PostGenerate
   /// have been called.  It increments the event counter.

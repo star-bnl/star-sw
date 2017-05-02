@@ -86,6 +86,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+  gSystem->Load( "AgStar.so" );
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "StarGeneratorDecay.so" );
   gSystem->Load( "libPythia8_1_62.so");

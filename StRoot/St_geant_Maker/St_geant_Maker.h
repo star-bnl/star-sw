@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.55 2014/08/06 11:43:54 jeromel Exp $
+// $Id: St_geant_Maker.h,v 1.56 2017/04/26 20:23:53 perev Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.56  2017/04/26 20:23:53  perev
+// Remove delete
+//
 // Revision 1.55  2014/08/06 11:43:54  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
@@ -137,7 +140,7 @@ protected:
                   St_geant_Maker(const char *name="geant",
 				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
-   virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
+   virtual Int_t  Finish(){return kStOK;}
    virtual Int_t  Init();
    virtual Int_t  InitRun(Int_t run);
    virtual void   SetDateTime(int idat=0,int itim=0);//
@@ -233,8 +236,8 @@ protected:
    static Bool_t     fInitRunDone; //!
    static Kine_gdat_t *kine_gdat;  //!
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.55 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
-  ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.56 2017/04/26 20:23:53 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.23 2015/08/06 17:46:53 smirnovd Exp $
+ * $Id: St_sls_Maker.cxx,v 1.24 2017/04/26 20:15:49 perev Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.24  2017/04/26 20:15:49  perev
+ * Hide m_DataSet
+ *
  * Revision 1.23  2015/08/06 17:46:53  smirnovd
  * Removed unused local variables
  *
@@ -161,7 +164,7 @@ Int_t St_sls_Maker::Make()
   
   Int_t res = 0;
   St_sls_strip  *sls_strip = new St_sls_strip("sls_strip",40000);
-  m_DataSet->Add(sls_strip);
+  AddData(sls_strip);
   
   TDataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");

@@ -2,7 +2,7 @@
 #define __AgStarReader_h__
 
 #include "TObject.h"
-#include "StarGenerator/BASE/StarParticleStack.h"
+#include "BASE/StarParticleStack.h"
 class StarParticleData;
 
 /**
@@ -26,7 +26,7 @@ class AgStarReader : public TObject
   void ReadEvent();
 
   /// Return the single instance of this class
-  static AgStarReader &Instance();
+  static AgStarReader *Instance();
 
   void SetVert( Float_t *vertex, Int_t ntbeam, Int_t nttarg, Float_t *ubuf, Int_t nu, Int_t &nv );
   void SetKine( Float_t *plab,   Int_t idpart, Int_t nv,     Float_t *ubuf, Int_t nb, Int_t &nt );

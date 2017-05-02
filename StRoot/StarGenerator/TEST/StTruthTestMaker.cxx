@@ -40,10 +40,7 @@ Int_t StTruthTestMaker::Init()
   hMatchedPhi = new TH2F("hMatchedPhi",";#phi thrown;#phi reco",201,-1.005*TMath::Pi(),1.005*TMath::Pi(),201,-1.005*TMath::Pi(),1.005*TMath::Pi());
   hMatchedPt  = new TH2F("hMatchedPt", ";p_{T} thrown;p_{T} reco",200,0.,10.,200,0.,10.);
   hMatchedInv = new TH2F("hMatchedInv",";1/p_{T} thrown;1/p_{T} reco",200,0.,10.,200,0.,10.);
-  hMatchedPID = new TH1F("hMatchedPID","PID of matched particles",2112*2+1.0,-2112.5,+2112.5);
-#if  ROOT_VERSION_CODE < 395523
-  hMatchedPID->SetBit(TH1::kCanRebin);
-#endif
+  hMatchedPID = new TH1F("hMatchedPID","PID of matched particles",2112*2+1.0,-2112.5,+2112.5); hMatchedPID->SetBit(TH1::kCanRebin);
   hMatchedQA  = new TH1F("hMatchedQA", "QA truth of matched tracks",101,-0.5,100.5);
 
   hMatchedEtaRes = new TH1F("hMatchedEtaRes",";#eta resolution",201,-0.2*1.005,0.2*1.005);
@@ -53,10 +50,8 @@ Int_t StTruthTestMaker::Init()
 
   hNumMismatched = new TH1F("hNumMismatched","Number of mismatched tracks / event;N mismatched",11,-0.5,10.5); 
   hPerMismatched = new TH1F("hPerMismatched","Percentage of mismatched globals / event;N mismatched/total",21,-0.025,1.025);
-  hPidMismatched = new TH1F("hPidMismatched","PID of mismatched globals",2112*2+1.0,-2112.5,+2112.5); 
-#if  ROOT_VERSION_CODE < 395523
-  hPidMismatched->SetBit(TH1::kCanRebin);
-#endif
+  hPidMismatched = new TH1F("hPidMismatched","PID of mismatched globals",2112*2+1.0,-2112.5,+2112.5); hPidMismatched->SetBit(TH1::kCanRebin);
+
   TH1           *hList[]={hMatchedEta,  hMatchedPhi,  hMatchedPt,  hMatchedPID,hMatchedEtaRes,   hMatchedPhiRes,   hMatchedPtRes,  hNumMismatched,hPerMismatched,       hPidMismatched,  hMatchedInv,  hMatchedInvRes,   hMatchedQA};
   //  const Char_t *xtitle[]={"#eta thrown","#phi thrown","pt thrown","pid",       "#eta resolution","#phi resolution","pt resolution","N mismatched","fraction mismatched","pid mismatched","1/pt thrown","1/pt resolution","QA truth"};
   //  const Char_t *ytitle[]={"#eta reco",  "#phi reco",  "pt reco",  "",          "",               "",               "",             "",            "",                   "",              "1/pt reco",  "",               "" };

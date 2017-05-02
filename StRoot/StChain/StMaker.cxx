@@ -702,11 +702,19 @@ Int_t StMaker::Init()
       maker->fMemStatMake  = new StMemStat(ts2);
       ts2 = ts1; ts2+="Clear";
       maker->fMemStatClear = new StMemStat(ts2);
-      
+      if (Debug() > 3) {
+	cout << maker->ClassName() << ":Init() *** before Call" << endl;
+	lsMakers(fgTopChain);
+      }
       if ( maker->Init()) {
         LOG_ERROR << "   Maker "<< maker->GetName() << " failed in Init" << endm;
         return kStErr;
       }
+      if (Debug() > 3) {
+	cout << maker->ClassName() << ":Init() *** Done" << endl;
+	lsMakers(fgTopChain);
+      }
+
       maker->StopTimer();
 
 // 		Add the Maker histograms in the Maker histograms list

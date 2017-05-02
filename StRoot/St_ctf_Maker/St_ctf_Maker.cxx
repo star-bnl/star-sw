@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.17 2009/11/10 21:09:59 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.18 2017/04/26 20:19:18 perev Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.18  2017/04/26 20:19:18  perev
+// Hide m_DataSet
+//
 // Revision 1.17  2009/11/10 21:09:59  fisyak
 // pams clean up
 //
@@ -156,10 +159,10 @@ Int_t St_ctf_Maker::Make(){
     St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
     St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
     if (g2t_ctb_hit) {
-      St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat", 240); m_DataSet->Add(ctb_mslat);
-      St_cts_event *ctb_event = new  St_cts_event("ctb_event",   1); m_DataSet->Add(ctb_event);
-      St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",     240); m_DataSet->Add(ctb_raw);
-      St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); m_DataSet->Add(ctb_cor);
+      St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat", 240); AddData(ctb_mslat);
+      St_cts_event *ctb_event = new  St_cts_event("ctb_event",   1); AddData(ctb_event);
+      St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",     240); AddData(ctb_raw);
+      St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); AddData(ctb_cor);
       Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
 			      m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts_ctb,
 			      ctb_event, ctb_mslat, ctb_raw); if(Res_cts_ctb){};
@@ -172,10 +175,10 @@ Int_t St_ctf_Maker::Make(){
 
     St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
     if (g2t_tof_hit) {
-      St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",500); m_DataSet->Add(tof_mslat); //safe factor of 5 for mdc2
-      St_cts_event *tof_event = new  St_cts_event("tof_event",  1); m_DataSet->Add(tof_event);
-      St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",     50); m_DataSet->Add(tof_raw);
-      St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",     50); m_DataSet->Add(tof_cor); 
+      St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",500); AddData(tof_mslat); //safe factor of 5 for mdc2
+      St_cts_event *tof_event = new  St_cts_event("tof_event",  1); AddData(tof_event);
+      St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",     50); AddData(tof_raw);
+      St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",     50); AddData(tof_cor); 
       Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
 			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
 			      tof_event, tof_mslat, tof_raw);if(Res_cts_tof){}
@@ -196,9 +199,9 @@ Int_t St_ctf_Maker::Make(){
       }
       if (g2t_track && tptrack && mctrk && vertex ) {
          St_dst_tof_trk *dst_tof_trk = new St_dst_tof_trk("dst_tof_trk",250); //safe factor of 5 for mdc2
-         m_DataSet->Add(dst_tof_trk);
+         AddData(dst_tof_trk);
          St_dst_tof_evt *dst_tof_evt = new St_dst_tof_evt("dst_tof_evt",1);
-         m_DataSet->Add(dst_tof_evt);
+         AddData(dst_tof_evt);
          Int_t Res_fill_dst_tof = fill_dst_tof(g2t_tof_hit,g2t_track,
 					      tptrack,mctrk,vertex,
 					      m_tof,m_tof_slat,

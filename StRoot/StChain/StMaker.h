@@ -172,6 +172,8 @@ public:
 
    // Get methods
    virtual TDataSet  *GetData(const char *name, const char *dir=".data") const;
+   virtual TDataSet  *GetData()  const {return m_DataSet ;}
+   virtual TDataSet  *GetConst() const {return m_ConstSet;}
    virtual TDataSet  *GetDataSet (const char *logInput) const {return FindDataSet(logInput);}
    virtual TDataSet  *   DataSet (const char *logInput)   const 
                            {return GetDataSet(logInput);};
@@ -246,7 +248,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.100 2014/08/06 11:42:55 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.101 2017/04/26 18:33:12 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -310,8 +312,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.100 2014/08/06 11:42:55 jeromel Exp $
+// $Id: StMaker.h,v 1.101 2017/04/26 18:33:12 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.101  2017/04/26 18:33:12  perev
+// Add GetData() to hide  m_DataSet
+//
 // Revision 1.100  2014/08/06 11:42:55  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //

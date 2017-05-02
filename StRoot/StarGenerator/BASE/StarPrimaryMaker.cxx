@@ -11,6 +11,10 @@ ClassImp(StarPrimaryMaker);
 #include "StarGenerator.h"
 #include "StarCallf77.h" 
 #include <iostream>
+#if 0
+#include "St_geant_Maker/St_geant_Maker.h"
+#include "TGiant3.h"
+#endif
 #include <map>
 #include "TString.h"
 #include "TSystem.h"
@@ -19,10 +23,11 @@ ClassImp(StarPrimaryMaker);
 #include "TFile.h"
 #include "TTree.h"
 #include "TClass.h"
-
+#include "StMessMgr.h"
 
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
+#include "AgStar/AgStarReader.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
 #include "StarGenerator/FILT/StarFilterMaker.h"
@@ -33,7 +38,7 @@ ClassImp(StarPrimaryMaker);
 
 using namespace std;
 
-StarPrimaryMaker *StarPrimaryMaker::fgStarPrimaryMaker      = 0;
+StarPrimaryMaker *fgPrimary      = 0;
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::StarPrimaryMaker()  : 
   StMaker("PrimaryMaker"),
@@ -51,24 +56,29 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mPrimaryVertex(0,0,0,0),
   mFilter(0),mAccepted(0)
 {
-  assert(fgStarPrimaryMaker == 0); // cannot create more than one primary generator
-  fgStarPrimaryMaker = this;
+  assert(fgPrimary == 0); // cannot create more than one primary generator
+  fgPrimary = this;
 
   mStack = new StarParticleStack();
-  //  AgStarReader::Instance().SetStack(mStack);
 #if 0
+  AgStarReader::Instance().SetStack(mStack);
+#endif
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   //  Shunt( &pdb );
-  AddData( &pdb, ".data" );
-#endif
+  //  AddData( &pdb, ".data" );
+
   SetAttr("FilterKeepHeader", int(1) );
 
 }
 // --------------------------------------------------------------------------------------------------------------
+StarPrimaryMaker *StarPrimaryMaker::instance() {
+  return fgPrimary;
+}
+// --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::~StarPrimaryMaker()
 {
-  fgStarPrimaryMaker = 0;       // Cleanup
+  fgPrimary = 0;       // Cleanup
   if ( mStack )        delete mStack;
   if ( mFile )         delete mFile;
   /* deleting mTree and mPrimaryEvent cause seg violation here... why? */
@@ -92,7 +102,7 @@ Int_t StarPrimaryMaker::Init()
   //
   // Initialize all submakers first
   //
-  Int_t result =  kStOK; //StMaker::Init();
+  Int_t result =  StMaker::Init();
 
   //
   // The filter is properly a maker, so initialize it.  Also create accepted event list.
@@ -107,20 +117,19 @@ Int_t StarPrimaryMaker::Init()
   // Intialize the TTree with one event branch for each sub generator
   // and one branch for the primary event
   //
-  mPrimaryEvent = new StarGenEvent("primaryEvent","Primary Event... particle-wise information from all event generators");
-  if (mFileName != "none" ) {
-    if ( mFileName == "" ) {
-      mFileName =   ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
-      mFileName.ReplaceAll(".root",".gener.root");
-    }
-    
-    mFile = TFile::Open( mFileName, "recreate" );
-    if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
-    
-    mTree = new TTree( "genevents", "TTree containing event generator information" );
-
-    mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
+  if ( mFileName == "" ) {
+    mFileName =   ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
+    mFileName.ReplaceAll(".root",".gener.root");
   }
+
+  mFile = TFile::Open( mFileName, "recreate" );
+  if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
+
+  mTree = new TTree( "genevents", "TTree containing event generator information" );
+
+  mPrimaryEvent = new StarGenEvent("primaryEvent","Primary Event... particle-wise information from all event generators");
+  mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
+
   if (mFilter) mFilter->SetEvent(mPrimaryEvent);
 
   TIter Next( GetMakeList() );
@@ -149,7 +158,7 @@ Int_t StarPrimaryMaker::Init()
       // By default, connect generator to output tree.  It the IO mode
       // of the generator has been set, skip this step.
       //
-      if ( generator->IOmode()==0 && mTree) 
+      if ( generator->IOmode()==0 ) 
 	{
 	  generator -> SetOutputTree( mTree );
 	}
@@ -172,7 +181,7 @@ Int_t StarPrimaryMaker::Finish()
     mFilter->Finish();
     
     mAccepted->Print("all");
-    if (mTree) mTree->SetEventList( mAccepted );
+    mTree->SetEventList( mAccepted );
   }
 
   if (mFile) 
@@ -203,7 +212,7 @@ Int_t StarPrimaryMaker::Finish()
 	  if ( mFilter ) stats.nFilterSeen   = mFilter->numberOfEvents();
 	  if ( mFilter ) stats.nFilterAccept = mFilter->acceptedEvents();
 	  stats.Dump();
-	  stats.Write(); // write to file
+	  stats.Write(); // write to fiel
 	}
 
       mFile -> Write();
@@ -263,16 +272,15 @@ Int_t StarPrimaryMaker::Make()
 	//
 	// Fill the TTree
 	//
-	if (mTree) {
-	  mTree->Fill();
-	  
-	  //
-	  // Add the event to the accepted event list
-	  //
-	  if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
-	}
+	mTree->Fill();
 
-	return kStOK;
+	//
+	// Add the event to the accepted event list
+	//
+	if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
+
+	// Break out of loop and accept event.  
+	break;
 	
       }
 
@@ -281,9 +289,7 @@ Int_t StarPrimaryMaker::Make()
     /// Clear the particle information if the KeepAll flag has not been set.
     ///
     if ( IAttr( "FilterKeepAll" ) == 0 ) mPrimaryEvent->Clear("part");
-    if (mTree) {
-      if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
-    }
+    if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
     Clear();
 
     //
@@ -312,7 +318,7 @@ void StarPrimaryMaker::Clear( const Option_t *opts )
 {
   mNumParticles = 0;
   mStack->Clear();
-  if (mPrimaryEvent) mPrimaryEvent->Clear();
+  mPrimaryEvent->Clear();
   StMaker::Clear(opts);
   TIter Next( GetMakeList() );
   StarGenerator *generator = 0;
@@ -325,6 +331,7 @@ void StarPrimaryMaker::Clear( const Option_t *opts )
 // --------------------------------------------------------------------------------------------------------------
 void StarPrimaryMaker::AddGenerator( StarGenerator *gener )
 {
+  LOG_WARN << "Don't use StarPrimaryMaker::AddGenerator" << endm;
   static Int_t id = 0;
   gener->mId = ++id;
   AddMaker(gener);
@@ -660,10 +667,10 @@ void StarPrimaryMaker::BuildTables()
 
   // Create g2t_event and g2t_particle tables for geant maker.  
   St_g2t_event    *g2t_event    = new St_g2t_event( "event", 1 );
-  m_DataSet -> Add( g2t_event );
+  AddData( g2t_event );
   if ( mNumParticles ) {
     St_particle *g2t_particle = new St_particle( "particle", mNumParticles );
-    m_DataSet -> Add( g2t_particle );
+    AddData( g2t_particle );
   }
   // note: m_DataSet owns the new object(s) and is responsible for cleanup
    
