@@ -1427,7 +1427,7 @@ Bfc_st BFC[] = { // standard chains
    ,                             "StarGenEventReader","StarGenEventReader","Read event from TTree", kFALSE},
   {"GenFILT", "GenFILT","Generators","Generators"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
-  {"AgStar","","","Generators"                       ,"","AgStar","Utility to feed St_geant_Maker", kFALSE},
+  {"AgStar","","","Generators,geantL"                ,"","AgStar","Utility to feed St_geant_Maker", kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
