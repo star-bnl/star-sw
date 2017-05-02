@@ -1,9 +1,9 @@
-// $Id: StVMCApplication.h,v 1.3 2011/05/04 17:46:38 perev Exp $
+// $Id: StVMCApplication.h,v 1.4 2017/05/02 19:34:04 perev Exp $
 // Class StVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
 //
-#include "StarVMCApplication.h"
+#include "TVirtualMCApplication.h"
 #ifndef StMC_APPLICATION_H
 #define StMC_APPLICATION_H
 
