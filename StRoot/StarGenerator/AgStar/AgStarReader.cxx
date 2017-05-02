@@ -27,7 +27,7 @@ AgStarReader *AgStarReader::mInstance = 0;
 #define agskine  F77_NAME(agskine, AGSKINE)
 
 extern "C" {
-  void type_of_call agusread() {    AgStarReader::Instance().ReadEvent();  }
+  void type_of_call agusread() {    AgStarReader::Instance()->ReadEvent();  }
   void type_of_call agsvert( Float_t *vertex, Int_t *nb, Int_t *nt, Float_t *ubuf, Int_t *nu, Int_t *nv );
   void type_of_call agskine( Float_t *plab,   Int_t *ip, Int_t *nv, Float_t *ubuf, Int_t *nb, Int_t *nt );
 };
@@ -43,10 +43,10 @@ AgStarReader::AgStarReader() : TObject(), mStack(0), mParticleData(0)
 // ----------------------------------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------------------------------
-AgStarReader &AgStarReader::Instance()
+AgStarReader *AgStarReader::Instance()
 {
   if ( !mInstance ) mInstance = new AgStarReader();
-  return (*mInstance);
+  return mInstance;
 }
 // ----------------------------------------------------------------------------------------------------
 //

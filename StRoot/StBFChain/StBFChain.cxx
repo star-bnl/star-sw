@@ -502,6 +502,9 @@ Int_t StBFChain::Instantiate()
       if (fRunG > 0) {
 	mk->SetAttr("RunG",fRunG);
       }
+      if (GetOption("AgStar")) {
+	ProcessLine("AgStarReader::Instance();");
+      }
     }
     // special maker options
     // m_Mode xyz
