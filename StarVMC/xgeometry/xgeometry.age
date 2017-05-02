@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.22.2.1 2016/12/21 16:13:25 jwebb Exp $
+* $Id: xgeometry.age,v 1.22.2.2 2017/05/02 20:46:11 jwebb Exp $
 
 
 
@@ -2507,6 +2507,14 @@ If LL>0
   Case ftsref5  { y2017 : y2017 baseline w/ ids and fts r5;     Geom = 'ftsref5   '; call geom_ftsref5;}
   Case ftsref6  { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6   '; call geom_ftsref6;}
   Case ftsref7  { y2017 : y2017 baseline w/ ids and fts r7;     Geom = 'ftsref7   '; call geom_ftsref7;}
+  Case ftsref8  { y2017 : y2017 baseline w/ ids and fts r7;     Geom = 'ftsref8   '; call geom_ftsref8;}
+  Case ftsref9  { y2017 : y2017 baseline w/ ids and fts r7;     Geom = 'ftsref9   '; call geom_ftsref9;}
+  Case ftsref6a { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6a  '; call geom_ftsref6a;}
+  Case ftsref6b { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6b  '; call geom_ftsref6b;}
+  Case ftsref6c { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6c  '; call geom_ftsref6c;}
+  Case ftsref6d { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6d  '; call geom_ftsref6d;}
+  Case ftsref6x { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6x  '; call geom_ftsref6x;}
+  Case ftsref6y { y2017 : y2017 baseline w/ ids and fts r6;     Geom = 'ftsref6y  '; call geom_ftsref6y;}
 
 
   Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
@@ -4621,8 +4629,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.22.2.1 2016/12/21 16:13:25 jwebb Exp $
+* $Id: xgeometry.age,v 1.22.2.2 2017/05/02 20:46:11 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.22.2.2  2017/05/02 20:46:11  jwebb
+* Committing 'Take 2' versions of the FTS geometry
+*
 * Revision 1.22.2.1  2016/12/21 16:13:25  jwebb
 * Added ftsref6 and ref7, implementing 4 evenly spaced sTGC wheels
 *
