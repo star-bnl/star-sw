@@ -182,7 +182,7 @@ void StarParticleStack::Print( const Option_t *opts ) const {
   cout << "\tStack size: " << mStackSize  << endl;
   for (Int_t i = 0; i < NoP; i++) {
     const TParticle * part = GetParticle(i);
-    cout << Form("%4i:",i);
+    cout << Form("%4i,%4i:",i,part->GetStatusCode());
     part->Print();
   }  
 }
