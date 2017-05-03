@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.109 2017/05/03 20:14:35 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.110 2017/05/03 20:14:43 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -15,7 +15,6 @@
 #include "TH1D.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TMinuit.h"
 #include "TObjArray.h"
 
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
@@ -936,18 +935,12 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
       vertexSeed.setY( beamY(vertexSeed.z()) );
    }
 
-   static TMinuit minuit(3);
-
    // Make sure the global pointer points to valid object so Minuit uses correct data
    StGenericVertexFinder::sSelf = this;
 
-   minuit.SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline);
-   minuit.SetPrintLevel(-1);
-   minuit.SetMaxIterations(1000);
-
    int minuitStatus;
 
-   minuit.mnexcm("clear", 0, 0, minuitStatus);
+   mMinuit->mnexcm("clear", 0, 0, minuitStatus);
 
    static double step[3] = {0.01, 0.01, 0.01};
 
@@ -959,11 +952,11 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    double y_hi = vertexSeed.y() + mMaxTrkDcaRxy;
    double z_hi = vertexSeed.z() + mMaxZradius;
 
-   minuit.mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
-   minuit.mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
-   minuit.mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   mMinuit->mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
+   mMinuit->mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
+   mMinuit->mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
 
-   minuit.mnexcm("minimize", 0, 0, minuitStatus);
+   mMinuit->mnexcm("minimize", 0, 0, minuitStatus);
 
    // Check fit result
    if (minuitStatus) {
@@ -976,16 +969,16 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    double chisquare, fedm, errdef;
    int npari, nparx;
 
-   minuit.mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
-   minuit.mnhess();
+   mMinuit->mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
+   mMinuit->mnhess();
 
    double emat[9];
    /* 0 1 2
       3 4 5
       6 7 8 */
-   minuit.mnemat(emat, 3);
+   mMinuit->mnemat(emat, 3);
 
-   vertex.r.SetXYZ(minuit.fU[0], minuit.fU[1], minuit.fU[2]);
+   vertex.r.SetXYZ(mMinuit->fU[0], mMinuit->fU[1], mMinuit->fU[2]);
    vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
 
    return 0;
