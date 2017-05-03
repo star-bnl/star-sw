@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.8 2016/06/07 15:51:41 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.9 2017/05/03 15:54:21 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.9  2017/05/03 15:54:21  akio
+// added gain scaling when attenuation was on during geant simulation
+//
 // Revision 1.8  2016/06/07 15:51:41  akio
 // Making code better based on Coverity reports
 //
@@ -43,6 +46,8 @@
 #include "StEvent/StFmsHit.h"
 #include "StFmsDbMaker/StFmsDbMaker.h"
 #include "tables/St_g2t_emc_hit_Table.h"
+#include "tables/St_fpdm_fmcg_Table.h"
+
 
 #include "TRandom2.h"
 
@@ -70,6 +75,24 @@ Int_t StFmsFastSimulatorMaker::Make() {
     event->setFmsCollection(new StFmsCollection);
     LOG_DEBUG << "Creating StFmsCollection" << endm;
   }  // if
+
+  // Check if attenuation was on/off
+  // Get the wrapper to the FMCG table (may need to play with the path...)
+  St_fpdm_fmcg* FMCG = (St_fpdm_fmcg*) GetChain()->  Find("bfc/.make/geant/.const/geom/fpdm_fmcg");
+  // Get the first (only) row of the structure
+  if(FMCG){
+      fpdm_fmcg_st* fmcg = (fpdm_fmcg_st*)FMCG->At(0);
+      if(fmcg){
+	  // Get the attenuation flag
+	  mAttenuation = fmcg->atten;
+	  LOG_DEBUG << "Found St_fpdm_fmcg* at bfc/.make/geant/.const/geom/fpdm_fmcg and atten="<<mAttenuation<<endm;
+      }else{
+	  LOG_INFO << "Fail to get fpdm_fmcg_st" << endm;
+      }
+  }else{
+      LOG_INFO << "Fail to find St_fpdm_fmcg* at bfc/.make/geant/.const/geom/fpdm_fmcg" << endm;
+  }
+
   // Digitize GEANT FPD/FMS hits
   fillStEvent(event);
   if(Debug()) printStEventSummary(event);
@@ -167,8 +190,12 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	  energy = nPixelMod*gainCorrection/mFpsNPhotonPerMIP;
       }
     }
-    // Digitize                                                                                                                                                 
-    adc = static_cast<Int_t>(energy / (gain * gainCorrection) + 0.5);    
+    // Digitize
+    if(mAttenuation==0){
+	adc = static_cast<Int_t>(energy / (gain * gainCorrection) + 0.5);    
+    }else{
+	adc = static_cast<Int_t>(energy / mAttenuationGainScale / (gain * gainCorrection) + 0.5);    
+    }
     // Check for ADC values outside the allowed range and cap.
     adc = std::max(adc, 0);  // Prevent negative ADC
     adc = std::min(adc, 4095);  // Cap maximum ADC = 4,095
