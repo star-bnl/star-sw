@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.47 2017/03/15 22:56:55 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.48 2017/05/03 20:14:35 smirnovd Exp $
  *
  */
 
@@ -141,7 +141,7 @@ public:
   virtual void Clear(); 
   virtual void CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
 
-  StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::Beamline1D);
+  StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::BeamlineNoFit);
 
   virtual ~StPPVertexFinder() {}
   virtual int fit(StEvent*);
