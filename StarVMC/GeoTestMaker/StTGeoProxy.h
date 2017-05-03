@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.8 2015/06/10 22:03:13 perev Exp $
+// $Id: StTGeoProxy.h,v 1.9 2017/05/02 19:35:06 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -269,8 +269,8 @@ public:
         void  Print(const char *tit=0) const;
         void  ls(const char* opt="Mmps")                const;
         void  SetInfo   (StVoluInfo *ext);
-  StVoluInfo *SetActive (const char *voluName,int act=1,StActorFunctor *af=0);
-  StVoluInfo *SetActive (StDetectorId did,int act=1,StActorFunctor *af=0);
+         int  SetActive (const char *voluName,int act=1,StActorFunctor *af=0);
+         int  SetActive (StDetectorId did,int act=1,StActorFunctor *af=0);
 const TGeoVolume *FindModule(const char *patt);
   StVoluInfo *SetFlag   (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act=1);
          StVoluInfo *IsFlag    (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const;

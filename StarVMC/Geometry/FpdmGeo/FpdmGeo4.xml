@@ -1647,7 +1647,7 @@
   ! Check whether to run attenuation or not
   !
   USE /DETM/FPDM/FMCG stat=istat
-  IF (istat.gt.0.) {
+  IF (istat.ge.0.) { "negative indicates failure mode"
 
     IF (fmcg_atten=1.0) {
 

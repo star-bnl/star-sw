@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.13 2016/11/29 19:09:30 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.14 2017/05/02 19:36:28 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -129,6 +129,7 @@ static myMap gMyMod[] = {
 {kFmsId       		,""	},
 {kRpsId       		,""	},
 {kMtdId       		,"MMBL"	},
+{kSstId       		,"SFMO"	},
 #ifdef kFtsIdentifier
 {kFtsId       		,"FTSM"	},
 #endif
@@ -172,6 +173,7 @@ void StTGeoProxy::Init(int mode)
 {
   fMode = mode;
   InitInfo();
+  ls("Sc");
   if (fMode&2) InitHitPlane();
 //  if (fMode&1) InitHitShape();
 }
@@ -264,12 +266,13 @@ StVoluInfo *StTGeoProxy::SetModule (const char *voluName, int akt)
   return info;
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoProxy::SetActive (const char *voluName, int akt,StActorFunctor *af)
+int StTGeoProxy::SetActive (const char *voluName, int akt,StActorFunctor *af)
 {
   StVoluInfo *inf = SetModule(voluName,1);
   if (!inf) return 0;
   inf->SetBit(StVoluInfo::kActive,akt);
-  if (!akt) {inf->SetActiveFunctor(0); return inf;}
+  int n = 1;
+  if (!akt) {inf->SetActiveFunctor(0); return 1;}
   inf->SetActiveFunctor(af);
 
 // 		Now care about all parents. They should be active as well
@@ -281,23 +284,24 @@ StVoluInfo *StTGeoProxy::SetActive (const char *voluName, int akt,StActorFunctor
     const TGeoVolume *myVol ;
     for ( int idx=1; (myVol = it.GetVolu(idx));idx++) {
       if (IsActive(myVol)) continue;
-      SetActive(myVol->GetName(),1,0);
+      n+=SetActive(myVol->GetName(),1,0);
     }
   }  
-  return inf;
+  return 1;
 }
 //_____________________________________________________________________________
-StVoluInfo * StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af)
+int StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af)
 {
   const char *modu = ModName(did);
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
   if (af) af->SetDetId(did);
-  StVoluInfo *vi = SetActive(modu,akt,af); 
-  if (!vi) return 0;
+  int n = SetActive(modu,akt,af); 
+//???  if (n) return 0;
   Long64_t mask = 1; mask = mask<<(int)did;
   if (akt) { fActiveModu |=  mask; }
   else     { fActiveModu &= ~mask; }
-  return vi;
+//???  return n;
+  return 1;
 }
 //_____________________________________________________________________________
 int StTGeoProxy::IsActive (StDetectorId did) const
@@ -749,30 +753,42 @@ void StTGeoProxy::Print(const char *tit) const
 void StTGeoProxy::ls(const char *opt) const
 {
 static int nCall=0;nCall++;
-static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
-  int opta = strstr(opt,"a")!=0;
-  int optm = strstr(opt,"m")!=0;
-  int optM = strstr(opt,"M")!=0;
-  int opts = strstr(opt,"s")!=0;
-  int optp = strstr(opt,"p")!=0;
-
+static const char *types[]={"Dead","MODU","Modu","HitP","Sens","Actv"};
+  int opta = strstr(opt,"a")!=0;	//print all
+  int optm = strstr(opt,"m")!=0;	//module
+  int optM = strstr(opt,"M")!=0;	//MODULE
+  int opts = strstr(opt,"s")!=0;	//senitive
+  int optp = strstr(opt,"p")!=0;	//Hit Plane
+  int optc = strstr(opt,"c")!=0;	//Count summary
+  int optS = strstr(opt,"S")!=0;	//Silent, only summary
+  int optA = strstr(opt,"A")!=0;	//only Active in summary
+  if (optc) opts=1;
+  std::map<std::string, int> myMap;
+  std::string myName;
+  
   StTGeoIter it;
   const TGeoVolume *vol= *it;
   int num=0;
   for (;(vol=*it);++it) {
     if (!it.IsFirst()) continue;
 //    int volId = ::GetVoluId(vol);
-    int jk= (opta)? 0:-1;
+    int jk = 0;
     StHitPlaneInfo *ghp=0;
     do {
       if (optM && IsMODULE   (vol)) 	{jk=1;break;}
       if (optm && IsModule   (vol)) 	{jk=2;break;}
       if (optp && (ghp=IsHitPlane(vol))){jk=3;break;}
-      if (opts && IsSensitive(vol)) 	{jk=4;break;}
+      if (opts && IsSensitive(vol)) 	{jk=4;
+        if (IsActive(vol))               jk=5;break;}
     } while (0);
-    if (jk<0) continue;
+    if (!opta && !jk) continue;
     num++;
-//Break(num);
+    if (optc) {//collect summary
+      myName = vol->GetName();
+      myName+='.'; myName+=types[jk][0];
+      myMap[myName]+=1;
+    }
+    if (optS) continue;
     TString path(it.GetPath());
     const TGeoShape    *sh = vol->GetShape();
     const TGeoMedium *me = vol->GetMedium();
@@ -794,6 +810,19 @@ static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
     
     printf("\n");
   }
+  if (myName.empty()) return; 
+
+  int nTot=0,line=0;
+  printf("lsSummary:\n");
+  for (auto it = myMap.begin(); it !=myMap.end(); ++it) {
+     const char *name = (*it).first.c_str();
+     if (optA && !strstr(name,".A")) continue;
+     int n = (*it).second; nTot+=n;
+     line++;
+     printf("%d - %s \t%d\n",line,name,n);
+  }
+     printf("%s \t%d\n","InTot",nTot);
+
 }
 //_____________________________________________________________________________
 const char *StTGeoProxy::GetPath() const     

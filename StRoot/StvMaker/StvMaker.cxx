@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.59 2017/01/19 16:54:24 perev Exp $
+// $Id: StvMaker.cxx,v 1.60 2017/05/02 20:08:52 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -216,7 +216,6 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeSst")) {    // Sst error calculator
      mHitLoader[0]->AddDetector(kSstId);
 
-//???????????????????????????????????????????????????????????????????????????
   }
   if (IAttr("activeIst")) {    // IST error calculator
     mHitLoader[0]->AddDetector(kIstId);
@@ -291,6 +290,7 @@ static int initialized = 0;
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
+  if (IAttr("activeSst")) { assert(tgh->SetActive(kSstId                   ));}
   if (IAttr("activeIst")) { assert(tgh->SetActive(kIstId                   ));}
   if (IAttr("activePxl")) { assert(tgh->SetActive(kPxlId                   ));}
   if (IAttr("activePixel")){assert(tgh->SetActive(kPxlId                   ));}
@@ -316,7 +316,7 @@ static int initialized = 0;
 
 
   StVMCApplication *app = new StVMCApplication("StVMC", "StVMC application");
-  StvMCInitApp *ini = new StvMCInitApp();
+  StvMCInitApp     *ini = new StvMCInitApp();
   app->SetInit(ini);
   app->Init();
 
