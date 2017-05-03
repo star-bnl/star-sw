@@ -28,7 +28,9 @@ using namespace std;
 class StiElossCalculator
 {
  public:
+  StiElossCalculator(); 
   StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens); 
+  void set(double zOverA, double ionization, double A, double Z, double Dens); 
 
   virtual ~StiElossCalculator();
   double calculate(double charge2, double m, double beta2) const;
