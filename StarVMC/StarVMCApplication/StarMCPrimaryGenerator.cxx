@@ -43,6 +43,7 @@ void StarMCPrimaryGenerator::SetStack(StarParticleStack *stack) {
     if ( part->GetStatusCode() != 1 ) continue;
     IdOld2New[i] = ntr;
     Int_t parent = IdOld2New[part->GetFirstMother()];
+    //    cout << "IdOld2New[" << i << "] = " << IdOld2New[i] << " old " << part->GetFirstMother() << " new " << parent << endl;
   // Load a track on the stack
   //
   // done     0 if the track has to be transported

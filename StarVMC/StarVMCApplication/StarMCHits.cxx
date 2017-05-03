@@ -281,32 +281,39 @@ void StarMCHits::FinishEvent() {
   Int_t NoVertex = 1;
   St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
   m_DataSet->Add(g2t_vertex); 
-  g2t_vertex_st vertex;
   Int_t NTracks = TVirtualMC::GetMC()->GetStack()->GetNtrack();
   St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",NTracks);
   m_DataSet->Add(g2t_track);
   g2t_track_st track;
   //  TParticle  *particle = 0;   
-  Int_t iv = 0;
-  Int_t parentOld = -13;
-  TLorentzVector oldV(0,0,0,0);
   TLorentzVector newV(0,0,0,0);
   TLorentzVector devV(0,0,0,0);
   for (Int_t it = 0; it < NTracks; it++) {
     memset(&track, 0, sizeof(g2t_track_st));
     TParticle  *part = (TParticle*) ((StarStack *) TVirtualMC::GetMC()->GetStack())->Particle(it);
     part->ProductionVertex(newV);
-    devV = newV - oldV;
     Int_t parent = part->GetFirstMother();
-    if (iv == 0 || devV.P() > 1.e-7 || parent != parentOld) {// 3D distance
-      if (iv > 0) g2t_vertex->AddAt(&vertex);
+    Int_t nv = g2t_vertex->GetNRows();
+    Int_t IdV = -1;
+    g2t_vertex_st *vertexCurrent;
+    for (Int_t jv = 0; jv < nv; jv++) {
+      g2t_vertex_st &vertexOld = *(g2t_vertex->GetTable() + jv);
+      if (parent != vertexOld.parent_p-1) continue;
+      TLorentzVector oldV(vertexOld.ge_x[0], vertexOld.ge_x[1], vertexOld.ge_x[2], vertexOld.ge_tof);
+      devV = newV - oldV;
+      if (devV.P() > 10e-4 || TMath::Abs(newV.T() - oldV.T()) > 1e-9) continue;
+      IdV = vertexOld.id;
+      vertexCurrent = &vertexOld;
+    }
+    if (IdV < 0) {
+      g2t_vertex_st vertex;
       memset (&vertex, 0, sizeof(g2t_vertex_st));
-      iv++;
-      vertex.id           = iv             ;// primary key 
+      IdV = nv + 1;
+      vertex.id           = IdV            ;// primary key 
       vertex.event_p      = 0              ;// pointer to event
       vertex.eg_label     = 0              ;// generator label (0 if GEANT)
-      vertex.eg_tof       = 0              ;// vertex production time
-      vertex.eg_proc      = newV.T()       ;// event generator mechanism
+      vertex.eg_tof       = newV.T()       ;// vertex production time
+      vertex.eg_proc      = part->GetUniqueID();// event generator mechanism
       memcpy(vertex.ge_volume,"_eg_",4);   ;// GEANT volume name
       vertex.ge_medium    = 0              ;// GEANT Medium
       vertex.ge_proc      = 0              ;// GEANT mechanism (0 if eg)
@@ -323,16 +330,16 @@ void StarMCHits::FinishEvent() {
       vertex.is_itrmd     = 0              ;// flags intermediate vertex
       vertex.next_itrmd_p = 0              ;// next intermedate vertex 
       vertex.next_prim_v_p= 0              ;// next primary vertex
-      oldV                = newV;
-      parentOld           = parent;
+      g2t_vertex->AddAt(&vertex);
+      vertexCurrent       = g2t_vertex->GetTable() + nv;
     }
-    vertex.n_daughter++;
+    vertexCurrent->n_daughter++;
     // tracks
     track.id             = it+1;
     //    track.eg_label       = particle->GetIdGen();
     track.eg_pid         = part->GetPdgCode();
     track.ge_pid         = TVirtualMC::GetMC()->IdFromPDG(track.eg_pid);
-    track.start_vertex_p = iv;
+    track.start_vertex_p = IdV;
     track.p[0]           = part->Px();
     track.p[1]           = part->Py();
     track.p[2]           = part->Pz();
@@ -348,7 +355,6 @@ void StarMCHits::FinishEvent() {
     track.eta            = TMath::ATanH(ratio);
     g2t_track->AddAt(&track);
   }
-  g2t_vertex->AddAt(&vertex);   
 }
 //________________________________________________________________________________
 void StarMCHits::Clear(const Option_t* opt) {
