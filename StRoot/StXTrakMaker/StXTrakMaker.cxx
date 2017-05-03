@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.7 2017/05/01 18:41:10 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.8 2017/05/03 15:39:25 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -43,7 +43,7 @@ Main tasks:
 #include "TFile.h"
 
 #include "Sti/StiElossCalculator.h"
-#include "StvUtil/StvELossTrak.h"
+//#include "StvUtil/StvELossTrak.h"
 #include "StiUtilities/StiDebug.h"
 #include "StEvent/StEventSummary.h"
 
