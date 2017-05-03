@@ -1399,8 +1399,6 @@ Bfc_st BFC[] = { // standard chains
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
    ,                                                               "gstar","Mickey Mouse generator",kFALSE},
-  {"StarGenerator","","","","","MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,AgStar"
-   ,                                                                                "StarGenerator",kFALSE}, 
   {"pythia"      ,"" ,"","PythiaPP200,-fzin","", ""                             ,"set pythia pp200",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"hijing"      ,"" ,"","AuAu200","", ""                                     ,"set Hijing AuAu200",kFALSE},
@@ -1411,7 +1409,7 @@ Bfc_st BFC[] = { // standard chains
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
    ,                                                             "Prepare kinematics for embedding",kFALSE},
   {"PythiaEmbed","","","pythia,-Simu","","",                     "Prepare kinematics for embedding",kFALSE},
-  {"Generators", "Generators", "","", "StarPrimaryMaker"
+  {"Generators", "Generators", "","sim_T,gen_T", "StarPrimaryMaker"
    ,"VMC,MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase",  "Basic STAR Generators",kFALSE},
   {"Kinematics", "","Generators","Generators",                "StarKinematics","StarKinematics","", kFALSE},
   {"Herwig6", "","Generators","Generators",                        "StarHerwig6","Herwig6_5_20","", kFALSE},
@@ -1423,7 +1421,7 @@ Bfc_st BFC[] = { // standard chains
   {"Pythia8_1_86", "","Generators","Generators",                   "StarPythia8","Pythia8_1_86","", kFALSE},
   {"StarLight", "","Generators","Generators",                           "StarLight","StarLight","", kFALSE},
   {"StarUrQMD" , "","Generators","Generators",                     "StarStarUrQMD","UrQMD3_3_1","", kFALSE},
-  {"genIn", "GenTreeReader","Generators","Generators,AgStar"
+  {"genIn", "GenTreeReader","Generators","Generators"
    ,                             "StarGenEventReader","StarGenEventReader","Read event from TTree", kFALSE},
   {"GenFILT", "GenFILT","Generators","Generators"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
