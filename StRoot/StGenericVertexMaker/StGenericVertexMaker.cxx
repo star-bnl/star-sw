@@ -106,6 +106,8 @@ Int_t StGenericVertexMaker::Init()
   StGenericVertexFinder::VertexFit_t vertexFitMode;
 
   if ( IAttr("beamline") )
+     vertexFitMode = StGenericVertexFinder::VertexFit_t::BeamlineNoFit;
+  else if ( IAttr("beamline1D") )
      vertexFitMode = StGenericVertexFinder::VertexFit_t::Beamline1D;
   else if ( IAttr("beamline3D") )
      vertexFitMode = StGenericVertexFinder::VertexFit_t::Beamline3D;

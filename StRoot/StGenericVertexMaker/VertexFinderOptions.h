@@ -11,7 +11,7 @@ namespace star_vertex {
 /// implementation
 enum class VertexFit_t : int
 {
-   Unspecified, NoBeamline, Beamline1D, Beamline3D
+   Unspecified, NoBeamline, BeamlineNoFit, Beamline1D, Beamline3D
 };
 
 /// Options to select vertex seed finder
@@ -19,6 +19,9 @@ enum class SeedFinder_t : int
 {
    Unspecified, MinuitVF, PPVLikelihood, TSpectrum
 };
+
+
+bool requiresBeamline(VertexFit_t& vertex_fit);
 
 
 std::istream& operator>>(std::istream &in, VertexFit_t &vertex_fit);

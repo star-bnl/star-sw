@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.108 2017/03/15 22:56:55 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.109 2017/05/03 20:14:35 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -648,11 +648,11 @@ void StPPVertexFinder::seed_fit_export()
    if(mVertexData.size()>0)  hA[0]->Fill(8);
    if(mVertexData.size()>1)  hA[0]->Fill(9);
 
-   // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
-   // except when the Beamline1D option is specified. This is done to keep
-   // backward compatible behavior when by default the vertex was placed on the
-   // beamline
-   if (mVertexFitMode == VertexFit_t::Beamline1D)
+   // Refit vertex position for all cases (currently NoBeamline, Beamline1D, and
+   // Beamline3D) except when the BeamlineNoFit option is specified. This is
+   // done to keep backward compatible behavior when by default the vertex was
+   // placed on the beamline
+   if (mVertexFitMode == VertexFit_t::BeamlineNoFit)
    {
       for (VertexData &vertex : mVertexData) {
          const double& z = vertex.r.Z();
@@ -918,6 +918,8 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
 {
    createTrackDcas(vertex);
 
+   bool fitRequiresBeamline = star_vertex::requiresBeamline(mVertexFitMode);
+
    if (mDCAs.size() == 0) {
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
@@ -928,8 +930,7 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    StThreeVectorD vertexSeed = CalcVertexSeed(mDCAs);
 
    // For fits with beamline force the seed to be on the beamline
-   if ( mVertexFitMode == VertexFit_t::Beamline1D ||
-        mVertexFitMode == VertexFit_t::Beamline3D )
+   if ( fitRequiresBeamline )
    {
       vertexSeed.setX( beamX(vertexSeed.z()) );
       vertexSeed.setY( beamY(vertexSeed.z()) );
