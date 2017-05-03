@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.25 2017/03/24 16:39:09 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.26 2017/05/03 17:14:01 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.26  2017/05/03 17:14:01  akio
+ * Adding Sigma and Valley for Fps/Fpost
+ *
  * Revision 1.25  2017/03/24 16:39:09  akio
  * adding run17 fms positions
  *
@@ -1371,6 +1374,24 @@ inline Float_t StFmsDbMaker::fpsGain(int quad, int layer, int slat){
   return fpsGain(fpsSlatId(quad,layer,slat));
 }
 
+Float_t StFmsDbMaker::fpsMipSigma(int slatid){
+  if(slatid>=0 && slatid<fpsMaxSlatId()) return mFpsGain[slatid].Sigma;
+  return 0.0;
+}
+
+inline Float_t StFmsDbMaker::fpsMipSigma(int quad, int layer, int slat){
+  return fpsMipSigma(fpsSlatId(quad,layer,slat));
+}
+
+Float_t StFmsDbMaker::fpsValley(int slatid){
+  if(slatid>=0 && slatid<fpsMaxSlatId()) return mFpsGain[slatid].Valley;
+  return 0.0;
+}
+
+inline Float_t StFmsDbMaker::fpsValley(int quad, int layer, int slat){
+  return fpsValley(fpsSlatId(quad,layer,slat));
+}
+
 UShort_t StFmsDbMaker::fpsStatus(int slatid){
   if(slatid>=0 && slatid<fpsMaxSlatId()) return mFpsStatus[slatid].status;
   return 999;
@@ -1581,6 +1602,24 @@ Float_t StFmsDbMaker::fpostGain(int slatid){
 
 inline Float_t StFmsDbMaker::fpostGain(int quad, int layer, int slat){
   return fpostGain(fpostSlatId(quad,layer,slat));
+}
+
+Float_t StFmsDbMaker::fpostMipSigma(int slatid){
+  if(slatid>=0 && slatid<fpostMaxSlatId()) return mFpostGain[slatid].Sigma;
+  return 0.0;
+}
+
+inline Float_t StFmsDbMaker::fpostMipSigma(int quad, int layer, int slat){
+  return fpostMipSigma(fpostSlatId(quad,layer,slat));
+}
+
+Float_t StFmsDbMaker::fpostValley(int slatid){
+  if(slatid>=0 && slatid<fpostMaxSlatId()) return mFpostGain[slatid].Valley;
+  return 0.0;
+}
+
+inline Float_t StFmsDbMaker::fpostValley(int quad, int layer, int slat){
+  return fpostValley(fpostSlatId(quad,layer,slat));
 }
 
 UShort_t StFmsDbMaker::fpostStatus(int slatid){
