@@ -12,8 +12,9 @@
   else
     exit 1;
   endif
-#  setenv NODEBUG yes
-#  starver .DEV2
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  starver .DEV2
   set file = muons_R${rung}_${f}_${l}
   echo "${file}"
   set logFile  = ${file}B.log
@@ -33,9 +34,11 @@
 # ZF
 #  root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,20MuonsFlatpT3GeV,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile} 
 # RF
- root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,20MuonsFlatpT3GeV,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}  endif
+# root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,20MuonsFlatpT3GeV,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}  endif
+# RF Ideal
+ root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,20MuonsFlatpT3GeV,ReverseField,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}  endif
         </command>
         <stdout URL="file:./schedd$JOBID.log" />
         <stderr URL="file:./schedd$JOBID.err" />
-<input URL="command:RunId.pl 1 100 1000" />
+<input URL="command:RunId.pl 1 500 200" />
 </job>

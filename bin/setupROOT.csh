@@ -178,6 +178,8 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
     --with-gsl-incdir=$GSL_DIR/include \
     --with-gsl-libdir=$GSL_DIR/lib \
     --with-pythia6-libdir=$STAR_LIB \
+    --with-pythia8-libdir=$STAR_LIB \
+    --with-pythia8-incdir=$STAR/pams/gen/pythia8/include \
     --with-llvm-config=$ROOTSYS/../../../.sl64_gcc447/tools \
     --with-f77=$F77 \
     --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
