@@ -660,10 +660,10 @@ void StarPrimaryMaker::BuildTables()
 
   // Create g2t_event and g2t_particle tables for geant maker.  
   St_g2t_event    *g2t_event    = new St_g2t_event( "event", 1 );
-  m_DataSet -> Add( g2t_event );
+  AddData( g2t_event );
   if ( mNumParticles ) {
     St_particle *g2t_particle = new St_particle( "particle", mNumParticles );
-    m_DataSet -> Add( g2t_particle );
+    AddData( g2t_particle );
   }
   // note: m_DataSet owns the new object(s) and is responsible for cleanup
    

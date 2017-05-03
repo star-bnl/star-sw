@@ -1,0 +1,63 @@
+* 28Jul98 K. Turner - separate from bfc_util.kumac
+* 25Aug98 K. Turner - load db libraries & all run/params tables
+* 9Sep98  K. Turner - rmdir run/params/geant: put in unnecessarily by par2mem
+* 11Sep98 K. Turner - take out rmdir run/params/geant - not there anymore
+* 14Oct98 K. Turner - separate par2mem stuff into different kumac
+* ************************************************************
+*************************************************************
+******************************************************************
+*********************************************************************
+**********************************************************************
+**************************************************************************
+
+ macro run domain 
+   
+     
+* LOAD LIBRARIES
+ if $vexist(make_done)=0 then
+   message ' load_libraries: Load domains --> ' [domain]
+   test = [domain]
+   nw = $words([test])
+   do i = 1, [nw]
+     mod = $word([test],[i],1)
+     n = $words([mod],'/') 
+     module = $word([mod],[n],[n],'/')
+     test_done = [module]_done
+     if ($vexist([test_done])=0) then
+       vec/cre [test_done]
+	message ' load_libraries: doing make for domain:' [mod]
+        make [mod]
+        if $iquest(1)<>0 then
+            message "<bfc> Shared libraries have not been loaded : ABend"
+         endif
+     endif
+     if $iquest(1)<>0 then
+       message "<bfc> Shared libraries have not been loaded : ABend"
+     endif
+   enddo
+   vec/cre make_done   
+   vec/input staf_status(1) stafcv_ok
+ endif
+ 
+ 
+ return
+ 
+*********************************************************************
+**********************************************************************
+**********************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
