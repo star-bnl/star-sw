@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRnDHit.cxx,v 2.2 2016/02/25 17:10:20 ullrich Exp $
+ * $Id: StRnDHit.cxx,v 2.3 2017/05/04 01:07:34 perev Exp $
  *
  * Author: Mike Miller and Andrew Rose, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRnDHit.cxx,v $
+ * Revision 2.3  2017/05/04 01:07:34  perev
+ * Own err matrix added
+ *
  * Revision 2.2  2016/02/25 17:10:20  ullrich
  * Implemented detector() which is now a pure abstract method in StHit.
  *
@@ -29,7 +32,21 @@ StMemoryPool StRnDHit::mPool(sizeof(StRnDHit));
   
 StRnDHit::~StRnDHit() { /* noop */ }
 
-StRnDHit::StRnDHit()
+StRnDHit::StRnDHit() :
+  mLayer(-1),
+  mLadder(-1),
+  mWafer(-1),
+  mExtraByte0(-1),
+  mExtraByte1(-1),
+  mKey(-1),
+  mVolumeId(-1),
+  mDouble0(0),
+  mDouble1(0),
+  mDouble2(0),
+  mDouble3(0),
+  mDouble4(0),
+  mDetectorId(kUnknownId),
+  mErrorMatrix{0,0,0, 0,0,0, 0,0,0}
 {
     mLayer = mLadder = mWafer = -1;
     mExtraByte1 = mExtraByte0 = 0;
@@ -37,6 +54,35 @@ StRnDHit::StRnDHit()
     mDouble0 = mDouble1 = mDouble2 = mDouble3 = mDouble4 = 0.;
     mDetectorId = kUnknownId;
 }
+
+void StRnDHit::setErrorMatrix( const float* M )
+{
+  for ( int i=0;i<9;i++ )
+    {
+      mErrorMatrix[i] = M[i];
+    }
+}
+
+StMatrixF StRnDHit::covariantMatrix() const {
+
+  StMatrixF M(3,3);
+
+  M(1,1) = mErrorMatrix[0];
+  M(1,2) = mErrorMatrix[1];
+  M(1,3) = mErrorMatrix[2];
+
+  M(2,1) = mErrorMatrix[3];
+  M(2,2) = mErrorMatrix[4];
+  M(2,3) = mErrorMatrix[5];
+
+  M(3,1) = mErrorMatrix[6];
+  M(3,2) = mErrorMatrix[7];
+  M(3,3) = mErrorMatrix[8];
+
+  return M;
+
+}
+
 
 StRnDHit::StRnDHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
