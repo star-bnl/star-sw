@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.15 2017/01/30 17:50:16 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.16 2017/05/03 17:14:01 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.16  2017/05/03 17:14:01  akio
+ * Adding Sigma and Valley for Fps/Fpost
+ *
  * Revision 1.15  2017/01/30 17:50:16  akio
  * adding Fpost
  *
@@ -215,6 +218,10 @@ class StFmsDbMaker : public StMaker {
   void    fpsQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat);
   Float_t fpsGain(int slatid);
   Float_t fpsGain(int quad, int layer, int slat);
+  Float_t fpsMipSigma(int slatid);
+  Float_t fpsMipSigma(int quad, int layer, int slat);
+  Float_t fpsValley(int slatid);
+  Float_t fpsValley(int quad, int layer, int slat);
   UShort_t fpsStatus(int slatid);
   UShort_t fpsStatus(int quad, int layer, int slat);
   Int_t   fpsSlatIdFromG2t(int g2tvolid);
@@ -236,6 +243,10 @@ class StFmsDbMaker : public StMaker {
   void    fpostQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat);
   Float_t fpostGain(int slatid);
   Float_t fpostGain(int quad, int layer, int slat);
+  Float_t fpostMipSigma(int slatid);
+  Float_t fpostMipSigma(int quad, int layer, int slat);
+  Float_t fpostValley(int slatid);
+  Float_t fpostValley(int quad, int layer, int slat);
   UShort_t fpostStatus(int slatid);
   UShort_t fpostStatus(int quad, int layer, int slat);
   Int_t   fpostSlatIdFromG2t(int g2tvolid);

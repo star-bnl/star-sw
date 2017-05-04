@@ -18,8 +18,8 @@ typedef struct
 
 void fPostMap_db(
         const char* opt   = "",
-        const char* year  = "17sim",
-        const char* input = "fPostMap.txt")
+        const char* year  = "17_2_ofl",
+        const char* input = "fPostMap2.txt")
 {
     // storeTime is beginning time for validity range in case of WRITING DB
     TString option(opt), yr(year), storeTime;
@@ -36,6 +36,12 @@ void fPostMap_db(
     {
         storeTime = "2016-12-20 00:00:01";
         date = 20161220;
+        time = 1;
+    }
+    else if (yr.Contains("17_2_ofl"))
+    {
+        storeTime = "2017-05-03 15:40:00";
+        date = 20170504;
         time = 1;
     }
     else { std::cout << "Please specify valid year tag\n"; exit; }
