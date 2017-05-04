@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.18 2015/10/09 17:46:15 ullrich Exp $
+ * $Id: StVertex.h,v 2.19 2017/05/04 23:52:35 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.19  2017/05/04 23:52:35  smirnovd
+ * StVertex: Convenience setter for covariance matrix from array of doubles
+ *
  * Revision 2.18  2015/10/09 17:46:15  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -102,6 +105,7 @@ public:
 
     virtual void setFlag(int val) { mFlag = val; }
     virtual void setCovariantMatrix(float[6]);
+            void setCovariantMatrix(const double val[6]) { std::copy(val, val+6, mCovariantMatrix); }
     virtual void setChiSquared(float val) { mChiSquared = val; }
     virtual void setProbChiSquared(float val) { mProbChiSquared = val; }
     virtual void setParent(StTrack*);
