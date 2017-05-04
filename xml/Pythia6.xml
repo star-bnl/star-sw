@@ -16,9 +16,9 @@
   set logName  = ${name}_${rung}_${l}B.log
   set generF   = ${name}_${rung}_${l}.gener.root
   if (! -r ${generF} ) then
-    root.exe -q -b -x 'Hijing.C('${l}','${rung}')' &gt;&amp; ${logName}
+    root.exe -q -b -x 'Pythia6.C('${l}','${rung}')' &gt;&amp; ${logName}
   endif
 </command>
-<input URL="command:RunId.pl 1 100 1000 hijingAuAu200" />
+<input URL="command:RunId.pl 1 100 1000 pythia510" />
 </job>
 
