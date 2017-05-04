@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.37 2016/11/28 21:00:24 ullrich Exp $
+ * $Id: StTrack.h,v 2.38 2017/05/04 00:59:36 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -23,7 +23,7 @@
  *    mNumberOfPossiblePointsSvt 
  *    mNumberOfPossiblePointsSsd 
  *    are the ones that count
-  * --------------------------------------------------------------------------
+ * --------------------------------------------------------------------------
  *  The track flag (mFlag accessed via flag() method) definitions with ITTF 
  *  (flag definition in EGR era can be found at
  *   http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.38  2017/05/04 00:59:36  perev
+ * Add Fts
+ *
  * Revision 2.37  2016/11/28 21:00:24  ullrich
  * Added StExtGeometry features.
  *
@@ -314,11 +317,12 @@ protected:
     UChar_t                 mNumberOfPossiblePointsSst;
     UChar_t                 mNumberOfPossiblePointsPxl;
     UChar_t                 mNumberOfPossiblePointsIst;
+    UChar_t                 mNumberOfPossiblePointsFts;
     Float_t                 mImpactParameter;
     Float_t                 mLength;
-    StTrackGeometry         *mGeometry;
-    StTrackGeometry         *mOuterGeometry;
-    StExtGeometry           *mExtGeometry;
+    StTrackGeometry*        mGeometry;
+    StTrackGeometry*        mOuterGeometry;
+    StExtGeometry*          mExtGeometry;
     Int_t                   mIdTruth; // MC track id
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
@@ -338,6 +342,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,11)
+    ClassDef(StTrack,12)
 };
 #endif

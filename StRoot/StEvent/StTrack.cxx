@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.46 2016/11/28 21:00:24 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.47 2017/05/04 01:00:30 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.47  2017/05/04 01:00:30  perev
+ * Add Fts
+ *
  * Revision 2.46  2016/11/28 21:00:24  ullrich
  * Added StExtGeometry features.
  *
@@ -164,7 +167,7 @@
 #include "StExtGeometry.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.46 2016/11/28 21:00:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.47 2017/05/04 01:00:30 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -282,7 +285,8 @@ StTrack::numberOfPossiblePoints() const
     numberOfPossiblePoints(kSsdId) +
     numberOfPossiblePoints(kSstId) +
     numberOfPossiblePoints(kPxlId) +
-    numberOfPossiblePoints(kIstId);
+    numberOfPossiblePoints(kIstId) +
+    numberOfPossiblePoints(kFtsId);
     if (type() == primary || type() == estPrimary) result++;
     return result;
 }
@@ -293,28 +297,22 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
     switch (det) {
         case kFtpcWestId:
             return mNumberOfPossiblePointsFtpcWest;
-            break;
         case kFtpcEastId:
             return mNumberOfPossiblePointsFtpcEast;
-            break;
         case kTpcId:
             return mNumberOfPossiblePointsTpc;
-            break;
         case kSvtId:
             return mNumberOfPossiblePointsSvt;
-            break;
         case kSsdId:
             return mNumberOfPossiblePointsSsd;
-            break;
         case kSstId:
             return mNumberOfPossiblePointsSst;
-            break;
         case kPxlId:
             return mNumberOfPossiblePointsPxl;
-            break;
         case kIstId:
             return mNumberOfPossiblePointsIst;
-            break;
+        case kFtsId:
+            return mNumberOfPossiblePointsFts;
         default:
             return 0;
     }
@@ -442,6 +440,9 @@ StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
             break;
         case kIstId:
             mNumberOfPossiblePointsIst = val;
+            break;
+        case kFtsId:
+            mNumberOfPossiblePointsFts = val;
             break;
         default:
             break;
