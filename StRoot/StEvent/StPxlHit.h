@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.h,v 2.5 2016/02/25 17:10:20 ullrich Exp $
+ * $Id: StPxlHit.h,v 2.6 2017/05/04 00:58:28 perev Exp $
  *
  * Author: S. Margetis, J. Bouchet, Jan 2013
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.h,v $
+ * Revision 2.6  2017/05/04 00:58:28  perev
+ * Cleanup
+ *
  * Revision 2.5  2016/02/25 17:10:20  ullrich
  * Implemented detector() which is now a pure abstract method in StHit.
  *
@@ -55,13 +58,13 @@ public:
     
     StDetectorId detector() const;
     
-    unsigned char sector() const;
-    unsigned char ladder() const;
-    unsigned char sensor() const;
+    unsigned int sector() const;
+    unsigned int ladder() const;
+    unsigned int sensor() const;
     float meanRow() const;
     float meanColumn() const;
-    unsigned char nRawHits() const;
-    unsigned char layer() const ;
+    unsigned int nRawHits() const;
+    unsigned int layer() const ;
     
     float localPosition(unsigned int) const;
     const float* localPosition() const;
@@ -104,13 +107,13 @@ protected:
 
 ostream& operator<<(ostream&, const StPxlHit&);
 
-inline unsigned char StPxlHit::sector() const {return mSector;}
-inline unsigned char StPxlHit::ladder() const {return mLadder;}
-inline unsigned char StPxlHit::sensor() const {return mSensor;}
+inline unsigned int StPxlHit::sector() const {return mSector;}
+inline unsigned int StPxlHit::ladder() const {return mLadder;}
+inline unsigned int StPxlHit::sensor() const {return mSensor;}
 inline float StPxlHit::meanRow() const {return mMeanRow;}
 inline float StPxlHit::meanColumn()  const {return mMeanColumn;}
-inline unsigned char StPxlHit::nRawHits() const {return mNRawHits;}
-inline unsigned char StPxlHit::layer() const {return (mLadder==1)? 1 : 2;}
+inline unsigned int StPxlHit::nRawHits() const {return mNRawHits;}
+inline unsigned int StPxlHit::layer() const {return (mLadder==1)? 1 : 2;}
 inline const Float_t* StPxlHit::localPosition() const { return mLocalPosition; }
 inline void StPxlHit::setLocalY(float y) { mLocalPosition[1] = y; }
 inline void StPxlHit::setSector(unsigned char v) {mSector = v;}
