@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StExtGeometry.h,v 2.1 2016/11/28 20:58:30 ullrich Exp $
+ * $Id: StExtGeometry.h,v 2.2 2017/05/04 00:55:22 perev Exp $
  *
  * Author: Victor Perevoztchikov,  November  2016
  ***************************************************************************
@@ -13,7 +13,7 @@
  *
  ***************************************************************************
  *
- * $Id: StExtGeometry.h,v 2.1 2016/11/28 20:58:30 ullrich Exp $
+ * $Id: StExtGeometry.h,v 2.2 2017/05/04 00:55:22 perev Exp $
  **************************************************************************/
 #ifndef StExtGeometry_hh
 #define StExtGeometry_hh
@@ -71,17 +71,17 @@ public:
         ,kPhiTan, kZTan, kPsiTan, kPtiTan, kTanTan};
     
 protected:
-    char     mName[4];	//Name of external detector
+    char     mName[8];	//Name of external detector
     StExtGeometry *mNext;
     
     Float_t  mRxy;	// XY radius
     Float_t  mPhi;	// Azimutal angle of point
-    Float_t  mZ;    // Z coord of point
+    Float_t  mZ;    	// Z coord of point
     Float_t  mPsi;	// Azimutal angle of track
-    Float_t  mPti;  // signed inverse pt [sign = sign(-qB)
-    Float_t  mTan;  // tangent of lambda(lambda ange bte track & xy plane
-    Float_t  mCurv; // signed curvature [sign = sign(-qB)]
-    Float_t  mLen;  // total length of track to this point
+    Float_t  mPti;  	// signed inverse pt [sign = sign(-qB)
+    Float_t  mTan;  	// tangent of lambda(lambda ange bte track & xy plane
+    Float_t  mCurv; 	// signed curvature [sign = sign(-qB)]
+    Float_t  mLen;  	// total length of track to this point
     
     Float_t  mG[15];	// Error matrix
     char     mEnd[1];	//!

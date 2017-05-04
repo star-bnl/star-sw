@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StExtGeometry.cxx,v 2.1 2016/11/28 20:58:30 ullrich Exp $
+ * $Id: StExtGeometry.cxx,v 2.2 2017/05/04 00:56:43 perev Exp $
  *
  * Author: Victor Perevoztchikov, November 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StExtGeometry.cxx,v $
+ * Revision 2.2  2017/05/04 00:56:43  perev
+ * Increase name to add 0
+ *
  * Revision 2.1  2016/11/28 20:58:30  ullrich
  * Initial Revision.
  *
@@ -23,7 +26,7 @@
 
 ClassImp(StExtGeometry)
     
-static const char rcsid[] = "$Id: StExtGeometry.cxx,v 2.1 2016/11/28 20:58:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StExtGeometry.cxx,v 2.2 2017/05/04 00:56:43 perev Exp $";
 
 //_____________________________________________________________________________
 StExtGeometry::StExtGeometry(const char *name)
@@ -54,8 +57,8 @@ StThreeVectorF StExtGeometry::momentum() const
 //_____________________________________________________________________________
 void StExtGeometry::setName(const char *name)
 {
-    assert(strlen(name)<=3);
-    strcpy(mName,name);
+    int n = strlen(name); if (n>7) n=7;
+    strncpy(mName,name,n);mName[n]=0;
 }
 
 //_____________________________________________________________________________
