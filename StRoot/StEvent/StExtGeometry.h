@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StExtGeometry.h,v 2.2 2017/05/04 00:55:22 perev Exp $
+ * $Id: StExtGeometry.h,v 2.3 2017/05/04 00:56:18 perev Exp $
  *
  * Author: Victor Perevoztchikov,  November  2016
  ***************************************************************************
@@ -13,7 +13,7 @@
  *
  ***************************************************************************
  *
- * $Id: StExtGeometry.h,v 2.2 2017/05/04 00:55:22 perev Exp $
+ * $Id: StExtGeometry.h,v 2.3 2017/05/04 00:56:18 perev Exp $
  **************************************************************************/
 #ifndef StExtGeometry_hh
 #define StExtGeometry_hh
@@ -86,7 +86,7 @@ protected:
     Float_t  mG[15];	// Error matrix
     char     mEnd[1];	//!
     
-    ClassDef(StExtGeometry,1)
+    ClassDef(StExtGeometry,2)
 };
 
 inline const char* StExtGeometry::name() const {return mName;}
