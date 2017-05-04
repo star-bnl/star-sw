@@ -114,6 +114,12 @@
 */
 #define kGmtIdentifier                37
 
+/*
+** Add the FTS tracker
+*/
+#define kFtsIdentifier                38 
+
+
 
 /*
 **  The following are more or less virtual detectors.
@@ -131,9 +137,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.12 2015/12/24 00:14:44 fisyak Exp $
+/* $Id: StDetectorDefinitions.h,v 2.13 2017/05/04 00:52:53 perev Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.13  2017/05/04 00:52:53  perev
+** Fts added
+**
 ** Revision 2.12  2015/12/24 00:14:44  fisyak
 ** Add GMT and SST Id and new dE/dx method
 **

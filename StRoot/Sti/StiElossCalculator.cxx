@@ -11,10 +11,6 @@ static double gsigma2(double ZoverA,double DENS,double CHARGE2
 static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
 
 //______________________________________________________________________________
-StiElossCalculator::StiElossCalculator() 
-    : _zOverA(0), _ionization2(0), _A(0), _Z(0), _Dens(0) 
-{}
-//______________________________________________________________________________
 StiElossCalculator::StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens) 
     : _zOverA(zOverA), _ionization2(ionization*ionization), _A(A), _Z(Z), _Dens(Dens) 
 {
@@ -26,6 +22,14 @@ void StiElossCalculator::set(double zOverA, double ionization, double A, double 
  _zOverA=zOverA; _ionization2=ionization*ionization; _A=A; _Z=Z; _Dens=Dens; 
   assert(_A<=0 || _Z >0);
 }
+//______________________________________________________________________________
+StiElossCalculator::StiElossCalculator() 
+    : _zOverA(0), _ionization2(0), _A(0), _Z(0), _Dens(0) 
+{
+static int nCall=0; nCall++;
+  mId=-nCall;
+}
+//______________________________________________________________________________
 
 /// Energy Loss Calculator Constructor
 ///\param zOverA Ratio of Z to A of the scattering material,

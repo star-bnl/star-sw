@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.57 2017/03/05 21:00:42 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.58 2017/05/03 20:14:42 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -11,7 +11,6 @@
 #include "StMinuitVertexFinder.h"
 #include "StEventTypes.h"
 #include "StEnumerations.h"
-#include "TMinuit.h"
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
 #include "StCtbMatcher.h"
@@ -45,34 +44,6 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::MinuitVF, fitMode)
 {
-  using ObjectiveFunc_t = void (*)(int&, double*, double&, double*, int);
-
-  ObjectiveFunc_t fcn_minuit;
-  // The number of free fit parameters, i.e. vertex position x, y, and z
-  int nFitParams = 3;
-
-  switch (mVertexFitMode)
-  {
-  case VertexFit_t::Beamline1D:
-     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline1D;
-     nFitParams = 1; // Fit for only z coordinate of the vertex
-     break;
-
-  case VertexFit_t::Beamline3D:
-     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline;
-     break;
-
-  case VertexFit_t::NoBeamline:
-  default:
-     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAs;
-     break;
-  }
-
-  mMinuit = new TMinuit(nFitParams);
-  mMinuit->SetPrintLevel(-1);
-  mMinuit->SetMaxIterations(1000);
-  mMinuit->SetFCN(fcn_minuit);
-
   mExternalSeedPresent = kFALSE;
   mRequireCTB = kFALSE;
   requireCTB = kFALSE;
@@ -88,7 +59,6 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
 StMinuitVertexFinder::~StMinuitVertexFinder()
 {
    LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
-   delete mMinuit; mMinuit = nullptr;
    mHelices.clear();
    mHelixFlags.clear();
    mZImpact.clear();

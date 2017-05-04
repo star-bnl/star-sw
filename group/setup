@@ -483,6 +483,16 @@ switch ($pkg)
 	    endif
         endif
 	breaksw
+	case "gcc710": # Hongwei private version
+	if (-r /opt/gcc/7.1.0)then
+	    setenv PATH /opt/gcc/7.1.0/bin:$PATH
+	    if (! $USE_64BITS) then
+		setenv LD_LIBRARY_PATH /opt/gcc/7.1.0/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+	    else
+		setenv LD_LIBRARY_PATH /opt/gcc/7.1.0/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+	    endif
+        endif
+	breaksw
 	case "gcc447":
 	case "gcc":
 	breaksw

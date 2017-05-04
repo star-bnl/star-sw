@@ -60,6 +60,7 @@ void dEdx(Int_t nevents=1000,
   if (RootFile == "") {
     RootFile = gSystem->BaseName(MainFile);
     RootFile.ReplaceAll(".event","");
+    if (RootFile.Contains("gstar")) Chain += ",Simu";
   }
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->GetMaker("dEdxY2"); 

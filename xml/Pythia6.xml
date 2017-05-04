@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="Hijing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  starver .DEV2 
+  set file = $INPUTFILE0;
+  set rung = `echo $file | awk -F\: '{print $1}'`
+  set f    = `echo $file | awk -F\: '{print $2}'`
+  set l    = `echo $file | awk -F\: '{print $3}'`
+  set name = `echo $file | awk -F\: '{print $4}'`
+  echo "${name}"
+  set logName  = ${name}_${rung}_${l}B.log
+  set generF   = ${name}_${rung}_${l}.gener.root
+  if (! -r ${generF} ) then
+    root.exe -q -b -x 'Pythia6.C('${l}','${rung}')' &gt;&amp; ${logName}
+  endif
+</command>
+<input URL="command:RunId.pl 1 100 1000 pythia510" />
+</job>
+

@@ -27,9 +27,7 @@ public:
   /// @param _etamx Maximum eta of particle 
   void AddTrigger( int _pdgid, double _ptmn=0, double _ptmx=-1, double _etamn=-1, double _etamx=1 );
 
-private:
-protected:
-
+ public:
   struct Trigger_t {
     int    pdgid;
     double ptmn;
@@ -52,6 +50,8 @@ protected:
     {
     };
   };
+private:
+protected:
   vector<Trigger_t> mTriggers;
 
 

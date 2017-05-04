@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.7 2017/05/01 18:41:10 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.9 2017/05/04 01:20:46 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -43,14 +43,11 @@ Main tasks:
 #include "TFile.h"
 
 #include "Sti/StiElossCalculator.h"
-#include "StvUtil/StvELossTrak.h"
+//#include "StvUtil/StvELossTrak.h"
 #include "StiUtilities/StiDebug.h"
 #include "StEvent/StEventSummary.h"
 
 ClassImp(StXTrakMaker)
-
-#include <map>
-std::map<TString,int> myMap;
 
 
 //_____________________________________________________________________________
@@ -75,11 +72,6 @@ void StXTrakMaker::Clear(const char*)
 //_____________________________________________________________________________
 Int_t StXTrakMaker::Finish()
 {
-  for (auto myMapIt = myMap.begin();myMapIt!=myMap.end();++myMapIt) {
-    const char *pat = (*myMapIt).first.Data();
-    int num = (*myMapIt).second;
-    printf ("%d  %s\n",num,pat);
-  }
   return StMaker::Finish();
 }
 
@@ -167,7 +159,7 @@ Int_t StXTrakMaker::Make()
       xg->setName(found.Data());
       double pars[6];
       pars[StExtGeometry::kPhi ] = atan2(pos[1],pos[0]);
-      pars[StExtGeometry::kZ   ] = pos[21];
+      pars[StExtGeometry::kZ   ] = pos[2];
       pars[StExtGeometry::kPsi ] = atan2(aux.mMom[1],aux.mMom[0]);
       pars[StExtGeometry::kPti ] = aux.mPti;
       pars[StExtGeometry::kTan ] = atan2(aux.mMom[2],aux.mPt);

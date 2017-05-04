@@ -49,6 +49,7 @@
 #include "StIstDbMaker/StIstDb.h"
 #include "StSsdDbMaker/StSstDbMaker.h"
 #include "StSstUtil/StSstBarrel.hh"
+#include "StarGenerator/BASE/StarPrimaryMaker.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 
@@ -129,9 +130,14 @@ void StarVMCApplication::InitGeometry() {
 }
 //_____________________________________________________________________________
 void StarVMCApplication::GeneratePrimaries() {    
-  if (fPrimaryGenerator) {
+  if (! fPrimaryGenerator) fPrimaryGenerator = new StarMCPrimaryGenerator(fStarStack);
+  if (StarPrimaryMaker::instance()) {
+    // put TParticle from StarParticleStack from StarPrimaryMaker to StarStack
+    fPrimaryGenerator->SetStack(StarPrimaryMaker::instance()->stack());
+  } else {
     fPrimaryGenerator->GeneratePrimaries();
-  }
+  } 
+#if 0
   else {
     // Fill the user stack (derived from TVirtualMCStack) with primary particles.
     // ---
@@ -142,9 +148,7 @@ void StarVMCApplication::GeneratePrimaries() {
     Int_t toBeDone = 1; 
     
     // Particle type
-    //Int_t pdg  = 0;    // geantino
-    Int_t pdg  = kProton;
-    
+    Int_t pdg  = 0;    // geantino
     // Polarization
     Double_t polx = 0.; 
     Double_t poly = 0.; 
@@ -171,6 +175,7 @@ void StarVMCApplication::GeneratePrimaries() {
     fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
 		      kPPrimary, ntr, 1., 2);
   }
+#endif
   Int_t NPrimary = fStarStack->GetNtrack();
   if (! NPrimary) TVirtualMC::GetMC()->StopRun();
 }

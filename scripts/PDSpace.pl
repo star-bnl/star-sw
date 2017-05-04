@@ -45,8 +45,9 @@ $MAIN  = "/star/data";                                   # default base path
           "/gpfs01/star/daq"       => 1,
           "/gpfs01/star/simu"      => 1,
           "/gpfs01/star/scratch"   => 1,
+          "/gpfs01/star/pwg_tasks" => 1,
+          "/gpfs01/star/pwg"       => 1,
 
-          "/gpfs01/star/pwg_tasks" => 2,
           "/star/subsys/*"         => 2,
           "/gpfs01/star/subsys"    => 2,
           "/star/data08"           => 2,
@@ -115,6 +116,7 @@ $MAIN  = "/star/data";                                   # default base path
 %REPLICATION = (
           "/gpfs01/star/XROOTD" =>  1,
           "/gpfs01/star/scratch"=>  1,
+          "/gpfs01/star/pwg"    =>  1,
           "/gpfs01/"            =>  2,
           "/gpfs03/"            =>  2,
           );

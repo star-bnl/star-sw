@@ -33,15 +33,15 @@ void fPostPosition_db(
 	std::cout <<"year = " <<year <<std::endl;
 	if (yr.Contains("17sim"))
 	{
-		storeTime = "2016-12-10 00:00:00";
+		storeTime = "2016-12-10 00:00:01";
 		date = 20161210;
-		time = 0;
+		time = 1;
 	}
 	else if (yr.Contains("17ofl"))
 	{
-		storeTime = "2016-12-20 00:00:00";
+		storeTime = "2016-12-20 00:00:01";
 		date = 20161220;
-		time = 0;
+		time = 1;
 	}
 	else { std::cout << "Please specify valid year tag\n"; exit; }
 	std::cout << "Opt ="         << opt << "\n";

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.63 2016/12/19 16:11:14 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.64 2017/05/04 00:54:13 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.64  2017/05/04 00:54:13  perev
+ * Fts added
+ *
  * Revision 2.63  2016/12/19 16:11:14  ullrich
  * Added FPost detector ID and StFpostConstants enums.
  *
@@ -274,6 +277,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
 		   kGmtId       = kGmtIdentifier,
+		   kFtsId       = kFtsIdentifier,
                    kMaxDetectorId = 40};
 
 /*!

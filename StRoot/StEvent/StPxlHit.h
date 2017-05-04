@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.h,v 2.5 2016/02/25 17:10:20 ullrich Exp $
+ * $Id: StPxlHit.h,v 2.6 2017/05/04 00:58:28 perev Exp $
  *
  * Author: S. Margetis, J. Bouchet, Jan 2013
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.h,v $
+ * Revision 2.6  2017/05/04 00:58:28  perev
+ * Cleanup
+ *
  * Revision 2.5  2016/02/25 17:10:20  ullrich
  * Implemented detector() which is now a pure abstract method in StHit.
  *

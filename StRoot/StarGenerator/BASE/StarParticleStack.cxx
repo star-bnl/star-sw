@@ -1,3 +1,4 @@
+#include "Riostream.h"
 #include "StarParticleStack.h"
 ClassImp(StarParticleStack);
 
@@ -173,3 +174,15 @@ void StarParticleStack::Clear( const Option_t *opts )
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------
+void StarParticleStack::Print( const Option_t *opts ) const {
+  cout << "StarParticleStack Info  ";
+  Int_t NoP = Particles()->GetEntriesFast();
+  cout << "\tTotal number of particles:   " << NoP;  
+  cout << "\tNumber of primary particles: " <<  GetNprimary();
+  cout << "\tStack size: " << mStackSize  << endl;
+  for (Int_t i = 0; i < NoP; i++) {
+    const TParticle * part = GetParticle(i);
+    cout << Form("%4i,%4i:",i,part->GetStatusCode());
+    part->Print();
+  }  
+}

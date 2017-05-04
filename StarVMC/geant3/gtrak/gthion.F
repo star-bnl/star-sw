@@ -68,7 +68,7 @@ C.    ------------------------------------------------------------------
          IKCUT = GEKA*LOG10(CUTPRO) + GEKB
          GKR   = (CUTPRO - ELOW(IKCUT))/(ELOW(IKCUT+1) - ELOW(IKCUT))
          STOPC = (1.-GKR)*Q(JRANG+IKCUT) + GKR*Q(JRANG+IKCUT+1)
-         FACFLU = DME*(Z*DENS/A)
+*yf         FACFLU = DME*(Z*DENS/A)
 C        CHAR23 = ONE/CHARGE**TWOTHR
 C fix for negative charge
          CHAR23 = ONE/(CHARGE*CHARGE)**(1./3.)

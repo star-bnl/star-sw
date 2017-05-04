@@ -1552,6 +1552,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("-fzin","Default,SDT");
 	SetOption("fzinSDT","Default,SDT");
       }
+      if (GetOption("GenIn")) SetOption("AgStar","GenIn,TGiant3");
     } else {                                  // root
       if (GetOption("fzin") || GetOption("fzinSDT")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;

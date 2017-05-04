@@ -136,14 +136,16 @@ void StarGenerator::SetFrame( const Char_t *frame, const Double_t *pb, const Dou
 // ----------------------------------------------------------------------------
 void StarGenerator::SetOutputTree( TTree *tree )
 {
-  mOutputTree = tree;
-  mIOMode = 1;
-  TString bname  = GetName();
-  TString bclass = mEvent->IsA()->GetName();
-  ///   Split level should depend on the class of the branch...
-  ///   It should be split such that user classes have the
-  ///   base class variables revealed.
-  mOutputTree -> Branch( bname, bclass, &mEvent, 64000, 1 );
+  if (tree) {
+    mOutputTree = tree;
+    mIOMode = 1;
+    TString bname  = GetName();
+    TString bclass = mEvent->IsA()->GetName();
+    ///   Split level should depend on the class of the branch...
+      ///   It should be split such that user classes have the
+      ///   base class variables revealed.
+      mOutputTree -> Branch( bname, bclass, &mEvent, 64000, 1 );
+  }
 }
 // ----------------------------------------------------------------------------
 //
@@ -170,20 +172,21 @@ void StarGenerator::SetInputFile( const Char_t *filename, const Char_t *treename
 // ----------------------------------------------------------------------------
 void StarGenerator::SetInputTree( TTree *tree, const Char_t *name )
 {
-  mInputTree = tree;
-  mIOMode = 2;
-  TString bname = mEvent->GetName();  
-  if ( name ) 
-    {
-      bname = name;
-    }
-
-  mInputTree -> SetBranchAddress( bname, &mEvent );
-  //  TBranch *branch = mInputTree->GetBranch( bname );
-  //  branch -> SetAddress( &mEvent );
-
-  LOG_INFO << "Input Tree with " << tree -> GetEntries() << " loaded" << endm;
-  
+  if (tree) {
+    mInputTree = tree;
+    mIOMode = 2;
+    TString bname = mEvent->GetName();  
+    if ( name ) 
+      {
+	bname = name;
+      }
+    
+    mInputTree -> SetBranchAddress( bname, &mEvent );
+    //  TBranch *branch = mInputTree->GetBranch( bname );
+    //  branch -> SetAddress( &mEvent );
+    
+    LOG_INFO << "Input Tree with " << tree -> GetEntries() << " loaded" << endm;
+  }
 }
 // ----------------------------------------------------------------------------
 //

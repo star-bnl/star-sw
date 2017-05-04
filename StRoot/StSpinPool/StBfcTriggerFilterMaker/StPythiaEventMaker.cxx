@@ -61,21 +61,21 @@ int StPythiaEventMaker::Finish()
 
 void StPythiaEventMaker::getEvent()
 {
-//   TDataSet* geant = GetDataSet("geant");
-//   if (geant) {
-//     TDataSetIter iter(geant);
-//     St_g2t_event* eventDescriptor = (St_g2t_event*)iter("g2t_event");
-//     if (eventDescriptor) {
-//       g2t_event_st* eventTable = (g2t_event_st*)eventDescriptor->GetTable();
-//       if (eventTable) {
-// 	mPythiaEvent->setRunId(eventTable->n_run);
-// 	mPythiaEvent->setEventId(eventTable->n_event);
-//       }
-//     }
-//   }
+   TDataSet* geant = GetDataSet("geant");
+   if (geant) {
+     TDataSetIter iter(geant);
+     St_g2t_event* eventDescriptor = (St_g2t_event*)iter("g2t_event");
+     if (eventDescriptor) {
+       g2t_event_st* eventTable = (g2t_event_st*)eventDescriptor->GetTable();
+       if (eventTable) {
+ 	mPythiaEvent->setRunId(eventTable->n_run);
+ 	mPythiaEvent->setEventId(eventTable->n_event);
+       }
+     }
+   }
 
-  mPythiaEvent->setRunId(GetRunNumber());
-  mPythiaEvent->setEventId(GetEventNumber());
+//  mPythiaEvent->setRunId(GetRunNumber());
+//  mPythiaEvent->setEventId(GetEventNumber());
 }
 
 void StPythiaEventMaker::getPythia()

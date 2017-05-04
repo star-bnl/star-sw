@@ -178,9 +178,11 @@ Int_t StVMCMaker::Init() {
       TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
       assert(!ee);
       AddConst(d);
+#if 0 /* Don' do this beacuse root will try to unload shared libraries in the macro */
       command.ReplaceAll(".L ",".U ");
       gInterpreter->ProcessLine(command,&ee);
       assert(!ee);
+#endif
     } 
     TString MuDstF(SAttr("MuDstFile"));
     if (MuDstF != "") {
@@ -212,7 +214,7 @@ Int_t StVMCMaker::Init() {
   fRndmSaved = gRandom;
   fRndm = new TRandom3(IAttr("RunG"));
   LOG_INFO << "Init, Generator type: TRandom3 Seed: " << fRndm->GetSeed() << endm;
-  return StMaker::Init();
+  return kStOK; // StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){

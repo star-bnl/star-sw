@@ -31,7 +31,7 @@ void StG2TrackVertexMap::Reset(St_g2t_track *track, St_g2t_vertex *vertex) {
       Int_t IdVxP = t[IdP].start_vertex_p - 1; assert(IdVxP >= 0 && IdVxP < NV);
       TVector3 Vx2(v[IdVxP].ge_x);
       Vx2 -= Vx1;
-      while ((Vx2.Mag() < 10e-4 && TMath::Abs(tof1-v[IdVxP].ge_tof) < 1e-9)) {
+      if ((Vx2.Mag() < 10e-4 && TMath::Abs(tof1-v[IdVxP].ge_tof) < 1e-9)) {
 	IdV = IdVxP;
 	IdP = v[IdV].parent_p - 1; if (IdP < 0) break;
 	IdVxP = t[IdP].start_vertex_p - 1;  if (IdVxP < 0) break;

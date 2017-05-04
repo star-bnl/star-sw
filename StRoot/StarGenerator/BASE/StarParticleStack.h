@@ -84,10 +84,10 @@ class StarParticleStack : public TVirtualMCStack
 
   /// Retrieve the ith particle in the array
   virtual TParticle *GetParticle( const Int_t i ) const;
-
+  virtual TClonesArray *Particles() const {return mArray;}
   /// Clear the stack
   virtual void Clear( const Option_t *opts="" );
-
+  virtual void Print( const Option_t *opts="" ) const;
  private:
  protected:
 

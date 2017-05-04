@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.108 2017/03/15 22:56:55 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.110 2017/05/03 20:14:43 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -15,7 +15,6 @@
 #include "TH1D.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TMinuit.h"
 #include "TObjArray.h"
 
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
@@ -648,11 +647,11 @@ void StPPVertexFinder::seed_fit_export()
    if(mVertexData.size()>0)  hA[0]->Fill(8);
    if(mVertexData.size()>1)  hA[0]->Fill(9);
 
-   // Refit vertex position for all cases (currently NoBeamline and Beamline3D)
-   // except when the Beamline1D option is specified. This is done to keep
-   // backward compatible behavior when by default the vertex was placed on the
-   // beamline
-   if (mVertexFitMode == VertexFit_t::Beamline1D)
+   // Refit vertex position for all cases (currently NoBeamline, Beamline1D, and
+   // Beamline3D) except when the BeamlineNoFit option is specified. This is
+   // done to keep backward compatible behavior when by default the vertex was
+   // placed on the beamline
+   if (mVertexFitMode == VertexFit_t::BeamlineNoFit)
    {
       for (VertexData &vertex : mVertexData) {
          const double& z = vertex.r.Z();
@@ -918,6 +917,8 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
 {
    createTrackDcas(vertex);
 
+   bool fitRequiresBeamline = star_vertex::requiresBeamline(mVertexFitMode);
+
    if (mDCAs.size() == 0) {
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
@@ -928,25 +929,18 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    StThreeVectorD vertexSeed = CalcVertexSeed(mDCAs);
 
    // For fits with beamline force the seed to be on the beamline
-   if ( mVertexFitMode == VertexFit_t::Beamline1D ||
-        mVertexFitMode == VertexFit_t::Beamline3D )
+   if ( fitRequiresBeamline )
    {
       vertexSeed.setX( beamX(vertexSeed.z()) );
       vertexSeed.setY( beamY(vertexSeed.z()) );
    }
 
-   static TMinuit minuit(3);
-
    // Make sure the global pointer points to valid object so Minuit uses correct data
    StGenericVertexFinder::sSelf = this;
 
-   minuit.SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline);
-   minuit.SetPrintLevel(-1);
-   minuit.SetMaxIterations(1000);
-
    int minuitStatus;
 
-   minuit.mnexcm("clear", 0, 0, minuitStatus);
+   mMinuit->mnexcm("clear", 0, 0, minuitStatus);
 
    static double step[3] = {0.01, 0.01, 0.01};
 
@@ -958,11 +952,11 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    double y_hi = vertexSeed.y() + mMaxTrkDcaRxy;
    double z_hi = vertexSeed.z() + mMaxZradius;
 
-   minuit.mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
-   minuit.mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
-   minuit.mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   mMinuit->mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
+   mMinuit->mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
+   mMinuit->mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
 
-   minuit.mnexcm("minimize", 0, 0, minuitStatus);
+   mMinuit->mnexcm("minimize", 0, 0, minuitStatus);
 
    // Check fit result
    if (minuitStatus) {
@@ -975,16 +969,16 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    double chisquare, fedm, errdef;
    int npari, nparx;
 
-   minuit.mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
-   minuit.mnhess();
+   mMinuit->mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
+   mMinuit->mnhess();
 
    double emat[9];
    /* 0 1 2
       3 4 5
       6 7 8 */
-   minuit.mnemat(emat, 3);
+   mMinuit->mnemat(emat, 3);
 
-   vertex.r.SetXYZ(minuit.fU[0], minuit.fU[1], minuit.fU[2]);
+   vertex.r.SetXYZ(mMinuit->fU[0], mMinuit->fU[1], mMinuit->fU[2]);
    vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
 
    return 0;
