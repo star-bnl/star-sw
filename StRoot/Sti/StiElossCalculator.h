@@ -30,9 +30,8 @@ class StiElossCalculator
  public:
   StiElossCalculator(); 
   StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens); 
-
   virtual ~StiElossCalculator();
-    void set(double zOverA, double ionization, double A, double Z, double Dens); 
+  void set(double zOverA, double ionization, double A, double Z, double Dens); 
   double calculate(double charge2, double m, double beta2) const;
   double calcError(double charge2, double m, double beta2) const;
   double getzOverA() const 	{return _zOverA;}
