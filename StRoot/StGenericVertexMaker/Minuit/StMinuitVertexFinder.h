@@ -85,7 +85,7 @@
  * 1D fit and use the beamline constraint to get the x and y positions of the 
  * vertex.
  *
- *  $Id: StMinuitVertexFinder.h,v 1.28 2017/03/05 21:00:43 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.29 2017/05/03 20:14:42 smirnovd Exp $
  *
  */
 
@@ -174,5 +174,4 @@ private:
     StPrimaryVertex         *mBestVtx;    // pointer to best vertex of this event
     Float_t                  mBestRank;   // store rank of best vertex
     Float_t                  mCTBSum;
-    TMinuit*                 mMinuit;
 };

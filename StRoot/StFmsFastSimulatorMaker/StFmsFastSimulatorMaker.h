@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.6 2015/09/29 16:28:58 akio Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.7 2017/05/03 15:54:21 akio Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
+// Revision 1.7  2017/05/03 15:54:21  akio
+// added gain scaling when attenuation was on during geant simulation
+//
 // Revision 1.6  2015/09/29 16:28:58  akio
 // setFmsZS(int v) and if ADC<v, drop the hit (default=2)
 // adding poisson distribution for FPS, with setFpsNPhotonPerMIP(float v)
@@ -83,6 +86,9 @@ class StFmsFastSimulatorMaker : public StMaker {
   // Setting average # of photon per MIP for FPS
   void  setFpsNPhotonPerMIP(float v) {mFpsNPhotonPerMIP=v;}
 
+  // Setting FMS gain scaling when attenuation is on
+  void  setAttenuationGainScale(float v) {mAttenuationGainScale=v;}
+
   /**
    Standard overload of StMaker::GetCVS()
    */
@@ -139,11 +145,14 @@ class StFmsFastSimulatorMaker : public StMaker {
   Float_t mFpsDEPerMIP;
   Float_t mFpsNPhotonPerMIP;
   
+  Int_t mAttenuation=0;
+  Float_t mAttenuationGainScale=0.35;
+
   ClassDef(StFmsFastSimulatorMaker, 0)
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.6 2015/09/29 16:28:58 akio Exp $ built " __DATE__ " " __TIME__ ;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.7 2017/05/03 15:54:21 akio Exp $ built " __DATE__ " " __TIME__ ;
   return cvs;
 }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.48 2017/03/17 14:37:02 jeromel Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.50 2017/05/03 20:14:42 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -51,12 +51,40 @@ StGenericVertexFinder::StGenericVertexFinder(SeedFinder_t seedFinder, VertexFit_
   mBeamline(),
   mDCAs()
 {
+  using ObjectiveFunc_t = void (*)(int&, double*, double&, double*, int);
+
+  ObjectiveFunc_t fcn_minuit;
+  // The number of free fit parameters, i.e. vertex position x, y, and z
+  int nFitParams = 3;
+
+  switch (mVertexFitMode)
+  {
+  case VertexFit_t::Beamline1D:
+     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline1D;
+     nFitParams = 1; // Fit for only z coordinate of the vertex
+     break;
+
+  case VertexFit_t::Beamline3D:
+     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAsBeamline;
+     break;
+
+  case VertexFit_t::NoBeamline:
+  default:
+     fcn_minuit = &StGenericVertexFinder::fcnCalcChi2DCAs;
+     break;
+  }
+
+  mMinuit = new TMinuit(nFitParams);
+  mMinuit->SetPrintLevel(-1);
+  mMinuit->SetMaxIterations(1000);
+  mMinuit->SetFCN(fcn_minuit);
 }
 
 
 //______________________________________________________________________________
 StGenericVertexFinder::~StGenericVertexFinder()
 {
+  delete mMinuit; mMinuit = nullptr;
 }
 
 
@@ -160,9 +188,7 @@ StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 void StGenericVertexFinder::InitRun(int runumber, const St_db_Maker* db_maker)
 {
    // Check if all necessary conditions satisfied
-   bool prerequisites = db_maker &&
-      (mVertexFitMode == VertexFit_t::Beamline1D ||
-       mVertexFitMode == VertexFit_t::Beamline3D);
+   bool prerequisites = db_maker && star_vertex::requiresBeamline(mVertexFitMode);
 
    // Just exit if there is nothing to do
    if (!prerequisites) return;
