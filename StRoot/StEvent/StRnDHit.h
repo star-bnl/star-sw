@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRnDHit.h,v 2.2 2006/09/27 18:31:43 ullrich Exp $
+ * $Id: StRnDHit.h,v 2.3 2017/05/04 01:06:46 perev Exp $
  *
  * Author: Mike Miller and Andrew Rose, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRnDHit.h,v $
+ * Revision 2.3  2017/05/04 01:06:46  perev
+ * Own err matrix added
+ *
  * Revision 2.2  2006/09/27 18:31:43  ullrich
  * Fixed setDouble() interface. Was sooo wrong.
  *
@@ -39,10 +42,9 @@ public:
     ~StRnDHit();
 
     StDetectorId detector() const;
-    
-    short  layer() const;
-    short  ladder() const;
-    short  wafer() const;
+    unsigned int    layer() const;
+    unsigned int    ladder() const;
+    unsigned int    wafer() const;
     
     int    extraByte0() const;
     int    extraByte1() const;
@@ -71,6 +73,10 @@ public:
     void setDouble2(double);
     void setDouble3(double);
     void setDouble4(double);
+
+  void setErrorMatrix(const float* M);
+
+  StMatrixF       covariantMatrix() const;//{ return mErrMatrix; }
 
     void* operator new(size_t sz,void *p)     { return p;}
     void* operator new(size_t)     { return mPool.alloc(); }
@@ -101,15 +107,17 @@ protected:
     // this has to go once the playing and testing is over.
     // should be hard wired in member function.
     StDetectorId mDetectorId;
+
+  float mErrorMatrix[9];
     
     static StMemoryPool mPool;  //!
     
-    ClassDef(StRnDHit,1)        
+    ClassDef(StRnDHit,2)        
 };
 
-inline short  StRnDHit::layer() const {return mLayer;}
-inline short  StRnDHit::ladder() const {return mLadder;}
-inline short  StRnDHit::wafer() const {return mWafer;}
+inline unsigned int  StRnDHit::layer() const {return mLayer;}
+inline unsigned int  StRnDHit::ladder() const {return mLadder;}
+inline unsigned int  StRnDHit::wafer() const {return mWafer;}
 inline int    StRnDHit::extraByte0() const {return mExtraByte0;}
 inline int    StRnDHit::extraByte1() const {return mExtraByte1;}
 inline int    StRnDHit::key() const {return mKey;}
