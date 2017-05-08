@@ -111,13 +111,14 @@ class Medium {
                                     double& dz, int& nion, int& ndxc,
                                     int& band);
 
-  virtual unsigned int GetNumberOfIonisationProducts() { return 0; }
+  virtual unsigned int GetNumberOfIonisationProducts() const { return 0; }
   virtual bool GetIonisationProduct(const unsigned int i, 
-                                    int& type, double& energy);
+                                    int& type, double& energy) const;
 
-  virtual unsigned int GetNumberOfDeexcitationProducts() { return 0; }
-  virtual bool GetDeexcitationProduct(const int i, double& t, double& s,
-                                      int& type, double& energy);
+  virtual unsigned int GetNumberOfDeexcitationProducts() const { return 0; }
+  virtual bool GetDeexcitationProduct(const unsigned int i, double& t, 
+                                      double& s,
+                                      int& type, double& energy) const;
 
   // Transport parameters for holes
   virtual bool HoleVelocity(const double ex, const double ey, const double ez,
