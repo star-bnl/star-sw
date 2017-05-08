@@ -910,7 +910,6 @@ void StMuDstMaker::openWrite(string fileName) {
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
 
-  TBranch* branch;
   Int_t split = mSplit;
 #if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
   Int_t branchStyle = 1; //new style by default
@@ -931,7 +930,7 @@ void StMuDstMaker::openWrite(string fileName) {
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
-    branch = mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, split);
+    mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, split);
   }
   mCurrentFileName = fileName;
 }
@@ -1538,7 +1537,6 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
   const StTrack *pTrack=0;
   /// do global track
   int index2Global =-1;
-  int index = -1;
   if (! gTCA) return;
   gTrack= dynamic_cast<const StGlobalTrack *>(node->track(global));
   // check that there is KFParticle fit at vertex
@@ -1561,9 +1559,9 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     if (pTCA) {
       if (pTrack && !pTrack->bad())      {
 	if (! KFatVx) 
-	  index = addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
+	  addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
 	else 
-	  index = addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, 0);
+	  addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, 0);
       }
     }
   }
@@ -1586,7 +1584,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
       tr = node->track(j);
       if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
-	index = addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
+	addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
       }
     }
   }

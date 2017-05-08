@@ -313,10 +313,10 @@ void StarMCHits::FinishEvent() {
       vertex.event_p      = 0              ;// pointer to event
       vertex.eg_label     = 0              ;// generator label (0 if GEANT)
       vertex.eg_tof       = newV.T()       ;// vertex production time
-      vertex.eg_proc      = part->GetUniqueID();// event generator mechanism
+      vertex.eg_proc      = 0              ;// event generator mechanism
       memcpy(vertex.ge_volume,"_eg_",4);   ;// GEANT volume name
       vertex.ge_medium    = 0              ;// GEANT Medium
-      vertex.ge_proc      = 0              ;// GEANT mechanism (0 if eg)
+      vertex.ge_proc      = part->GetUniqueID();// GEANT mechanism (0 if eg)
       vertex.ge_x[0]      = newV.X()       ;// GEANT vertex coordinate
       vertex.ge_x[1]      = newV.Y()       ;
       vertex.ge_x[2]      = newV.Z()       ;

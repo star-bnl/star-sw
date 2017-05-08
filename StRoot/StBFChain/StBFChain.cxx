@@ -444,8 +444,8 @@ Int_t StBFChain::Instantiate()
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
       NoMakersWithInput++;
     }
-#if 0
     if (maker == "StarPrimaryMaker") {
+#if 0
       StarPrimaryMaker *primary = (StarPrimaryMaker *) mk;
       if (GetOption("genIn") && fInFile != "") {
 	ProcessLine(Form("StarGenEventReader *EvR = new StarGenEventReader();"
@@ -454,8 +454,9 @@ Int_t StBFChain::Instantiate()
 	eventreader -> SetInputFile(fInFile.Data(),"genevents","primaryEvent");
 	primary->AddGenerator(eventreader);
       }
-    }
 #endif
+      if (GetOption("genIn")) mk->SetAttr("FreezePV", 1);
+    }
     if (maker == "StarGenEventReader" &&  fInFile != "") {
       ProcessLine(Form("((StarGenEventReader *) %p)->SetInputFile(\"%s\",\"genevents\",\"primaryEvent\");", mk, fInFile.Data()));
     }

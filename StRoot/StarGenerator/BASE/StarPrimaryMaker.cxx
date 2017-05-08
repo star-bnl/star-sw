@@ -503,8 +503,11 @@ Int_t StarPrimaryMaker::Finalize()
   //
   // Generate the primary vertex within allowed limits
   //
-  TLorentzVector primary = Vertex(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = Vertex();
-
+  TLorentzVector primary(0,0,0,0);
+  static Bool_t FreezePV = IAttr("FreezePV");
+  if (! FreezePV) {
+    primary = Vertex(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = Vertex();
+  }
   mPrimaryVertex = primary;
 
   //
@@ -518,8 +521,10 @@ Int_t StarPrimaryMaker::Finalize()
 
       // Obtain the vertex for this event.  If the generator is marked as
       // pileup, sample a new vertex.  Otherwise use the primary vertex
-      TLorentzVector vertex = (generator->IsPileup())?	Vertex() : primary;
-
+      TLorentzVector vertex = primary;
+      if (! FreezePV && generator->IsPileup()) {
+	vertex = Vertex();
+      }
       StarGenEvent *event = generator->Event();
       Int_t npart = event->GetNumberOfParticles();
 
