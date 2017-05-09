@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.50 2017/05/03 20:14:42 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.51 2017/05/09 12:29:41 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -183,8 +183,10 @@ StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 }
 
 
-void StGenericVertexFinder::InitRun(int runumber, const St_db_Maker* db_maker)
+void StGenericVertexFinder::InitRun(int run_number, const St_db_Maker* db_maker)
 {
+   LOG_INFO << "StGenericVertexFinder::InitRun(run_number=" << run_number << ")" << endm;
+
    // Check if all necessary conditions satisfied
    bool prerequisites = db_maker && star_vertex::requiresBeamline(mVertexFitMode);
 
