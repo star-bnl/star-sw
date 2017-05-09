@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.55 2017/05/03 20:14:43 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.56 2017/05/09 12:29:41 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -65,7 +65,7 @@ public:
           void           SetDebugLevel(Int_t level) {mDebugLevel=level;}
   virtual void           Init(){ /* noop */;}
   virtual void           Finish(){ /* noop */;}
-  virtual void           InitRun(int runumber, const St_db_Maker* db_maker);
+  virtual void           InitRun(int run_number, const St_db_Maker* db_maker);
   virtual void           Clear();
   const std::vector<StPrimaryVertex> *result() {return &mVertexList;}
 
@@ -75,7 +75,7 @@ public:
   virtual void SetVertexPosition(double x,double y,double z){assert(0);}
   virtual int            IsFixed() const        {return 0;}
 
-  virtual int            Fit(const StMuDst& muDst) { return -1; }
+  virtual int            fit(const StMuDst& muDst) { return -1; }
 
 protected:
 

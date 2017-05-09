@@ -1,7 +1,7 @@
 #ifndef TrackData_h
 #define TrackData_h
 /***********************************************
- * $Id: TrackData.h,v 1.10 2017/05/03 20:14:27 smirnovd Exp $
+ * $Id: TrackData.h,v 1.11 2017/05/09 12:29:41 smirnovd Exp $
  ******************************************************
  */
 #include <TVector3.h>
@@ -29,8 +29,8 @@ public:
   int nFitPoint; 
 
   void print() {
-     printf("#track@DCA(0,0) R/cm=[%5.2f %5.2f %.1f], errYloc=%.2fcm , errZ=%.1fcm,  glob P=[%6.2f %6.2f %6.1f]GeV/c, PT=%.2f\n",R.x(),R.y(),R.z(),sigYloc, sigZ,gP.x(),gP.y(),gP.z(), gP.Pt() );
-     printf("   chi2=%f, nFitP=%d,  fitErr: cXX=%f cYX=%f cYY=%f cZX=%f cZY=%f cZZ=%f\n",gChi2, nFitPoint,fitErr._cXX,fitErr._cYX,fitErr._cYY,fitErr._cZX,fitErr._cZY,fitErr._cZZ);
+    printf("#track@DCA(0,0) R/cm=[%5.2f %5.2f %.1f], errYloc=%.2fcm , errZ=%.1fcm,  glob P=[%6.2f %6.2f %6.1f]GeV/c, PT=%.2f\n",R.x(),R.y(),R.z(),sigYloc, sigZ,gP.x(),gP.y(),gP.z(), gP.Pt() );
+    printf("   chi2=%f, nFitP=%d,  fitErr: cXX=%f cYX=%f cYY=%f cZX=%f cZY=%f cZZ=%f\n",gChi2, nFitPoint,fitErr._cXX,fitErr._cYX,fitErr._cYY,fitErr._cZX,fitErr._cZY,fitErr._cZZ);
   }
 
 };
@@ -40,10 +40,12 @@ class TrackData
 {
 public:
 
-  int vertexID; /* >0 if assigned to a good vertex; 
-		   =0 free, not used for any vertex
-		*/
-  const void* mother; // original track
+  /// > 0 if assigned to a good vertex;
+  /// = 0 free, not used for any vertex
+  int vertexID;
+
+  /// Pointer to original track
+  const void* mother;
 
   const StDcaGeometry* dca;
 
@@ -104,6 +106,22 @@ TrackDataT<StMuTrack>::TrackDataT(const StMuTrack &motherTrack, const StDcaGeome
 
 /*
  * $Log: TrackData.h,v $
+ * Revision 1.11  2017/05/09 12:29:41  smirnovd
+ * [Cosmetic] Squashed commit of the following:
+ *
+ * - StPPVertexFinder: Variables renamed for readability
+ *    - s/trk/track/
+ *    - s/V/vertex/
+ *    - s/{nmAny,n1}/nTracksMatchingAnyFastDetector/
+ * - VertexData: Changed print out format
+ * - Removed some not very helpful debug output
+ * - Whitespace and other minor adjustments
+ * - Updated doxygen, whitespace, resolved ambiguity
+ *    - std::fabs, std::sqrt
+ *    - StPPVertexFinder: s/trk/track/
+ * - StGenericVertexFinder: Minor changes in InitRun()
+ * - StGenericVertexFinder::Fit(...) -> fit(...)
+ *
  * Revision 1.10  2017/05/03 20:14:27  smirnovd
  * Added overlooked TrackDataT<StMuTrack> constructor definition
  *

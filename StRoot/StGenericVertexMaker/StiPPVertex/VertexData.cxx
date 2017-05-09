@@ -32,9 +32,7 @@ VertexData::VertexData(const TVector3& position) :
 //==========================================================
 //==========================================================
 void VertexData::print(ostream& os) const { // does not work ??
-  os << " Vertex ID="<<id<< " isTriggered: " << isTriggered << " nUsedTrack="<<nUsedTrack<<" gPtSum="<< gPtSum<<" Lmax="<< Lmax << " idTruth: " << mIdTruth;
-  os << " match: any="<<nAnyMatch<<"-"<<nAnyVeto<<" CTB="<<nCtb<<"-"<<nCtbV<<" BEMC="<<nBemc<<"-"<<nBemcV<<" EEMC="<<nEemc<<"-"<<nEemcV<<" TPC="<<nTpc<<"-"<<nTpcV << endl;
-  os << " Vx = " << r.x() << " +/- " << er.x() << endl;
-  os << " Vy = " << r.y() << " +/- " << er.y() << endl;
-  os << " Vz = " << r.z() << " +/- " << er.z() << endl;
+  os << " Vertex ID="<<id<< " isTriggered: " << isTriggered << " nUsedTrack="<<nUsedTrack<<" gPtSum="<< gPtSum<<" Lmax="<< Lmax << " idTruth: " << mIdTruth
+     << " match: any="<<nAnyMatch<<"-"<<nAnyVeto<<" CTB="<<nCtb<<"-"<<nCtbV<<" BEMC="<<nBemc<<"-"<<nBemcV<<" EEMC="<<nEemc<<"-"<<nEemcV<<" TPC="<<nTpc<<"-"<<nTpcV << "\n"
+     << Form(" xyz: (%5.3f, %5.3f, %5.3f) +/- (%5.3f, %5.3f, %5.3f)\n", r.x(), r.y(), r.z(), er.x(), er.y(), er.z() );
 }

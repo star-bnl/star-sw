@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.58 2017/05/03 20:14:42 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.59 2017/05/09 12:29:40 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -45,10 +45,10 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
   StGenericVertexFinder(SeedFinder_t::MinuitVF, fitMode)
 {
   mExternalSeedPresent = kFALSE;
-  mRequireCTB = kFALSE;
-  requireCTB = kFALSE;
-  mUseITTF   = kFALSE;
-  mUseOldBEMCRank = kFALSE;
+  mRequireCTB        = kFALSE;
+  requireCTB         = kFALSE;
+  mUseITTF           = kFALSE;
+  mUseOldBEMCRank    = kFALSE;
   mLowerSplitVtxRank = kFALSE;
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
   mMinTrack  = -1;
@@ -64,9 +64,9 @@ StMinuitVertexFinder::~StMinuitVertexFinder()
    mZImpact.clear();
 }
 //________________________________________________________________________________
-void StMinuitVertexFinder::InitRun(Int_t runumber, const St_db_Maker* db_maker)
+void StMinuitVertexFinder::InitRun(int run_number, const St_db_Maker* db_maker)
 {
-  StGenericVertexFinder::InitRun(runumber, db_maker);
+  StGenericVertexFinder::InitRun(run_number, db_maker);
 
   St_VertexCutsC *cuts = St_VertexCutsC::instance();
   mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack();
@@ -357,8 +357,8 @@ void StMinuitVertexFinder::calculateRanks() {
   }
 }
 
-int
-StMinuitVertexFinder::fit(StEvent* event)
+
+int StMinuitVertexFinder::fit(StEvent* event)
 {
     setFlagBase();
 
@@ -476,6 +476,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     Float_t old_vtx_z = -999;
     Double_t seed_z = -999;
     Double_t chisquare = 0;
+
     for (Int_t iSeed = 0; iSeed < mNSeed; iSeed++) {
 
       // Reset and clear Minuit parameters mStatusMin
@@ -493,8 +494,8 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mMinuit->mnparm(0, "z", seed_z, step[2], 0, 0, mStatusMin);
       }
       else {
-	mMinuit->mnparm(0, "x", 0, step[0], 0, 0, mStatusMin);
-	mMinuit->mnparm(1, "y", 0, step[1], 0, 0, mStatusMin);
+	mMinuit->mnparm(0, "x",      0, step[0], 0, 0, mStatusMin);
+	mMinuit->mnparm(1, "y",      0, step[1], 0, 0, mStatusMin);
 	mMinuit->mnparm(2, "z", seed_z, step[2], 0, 0, mStatusMin);
       }
 
@@ -676,7 +677,9 @@ StMinuitVertexFinder::fit(StEvent* event)
     requireCTB = kFALSE;
 
     return 1;
-} 
+}
+
+
 //________________________________________________________________________________
 double StMinuitVertexFinder::CalcChi2DCAs(const StThreeVectorD &vtx) {
   Double_t f = 0;
@@ -709,33 +712,29 @@ double StMinuitVertexFinder::CalcChi2DCAs(const StThreeVectorD &vtx) {
 }
 
 
+/**
+ * Accept only tracks which fulfill certain quality criteria.
+ */
 bool StMinuitVertexFinder::accept(StTrack* track) const
 {
-    //
-    //   Accept only tracks which fulfill certain
-    //   quality criteria.
-    //
-
-    return (track &&
-	    track->flag() >= 0 &&
-	    track->fitTraits().numberOfFitPoints() >= mMinNumberOfFitPointsOnTrack &&
-	    !track->topologyMap().trackFtpc() &&
-	    finite(track->length()) &&  //LSB another temporary check
-	    track->geometry()->helix().valid());
+  return (track &&
+          track->flag() >= 0 &&
+          track->fitTraits().numberOfFitPoints() >= mMinNumberOfFitPointsOnTrack &&
+          !track->topologyMap().trackFtpc() &&
+          finite(track->length()) &&  //LSB another temporary check
+          track->geometry()->helix().valid());
 }
 
 
 /// Use mMinuit print level 
-void
-StMinuitVertexFinder::setPrintLevel(Int_t level) 
+void StMinuitVertexFinder::setPrintLevel(Int_t level) 
 {
   mMinuit->SetPrintLevel(level);
 }
 
-void
-StMinuitVertexFinder::printInfo(ostream& os) const
-{
 
+void StMinuitVertexFinder::printInfo(ostream& os) const
+{
     os << "StMinuitVertexFinder - Statistics:" << endl;
     os << "Number of vertices found ......." << size() << endl;
     os << "Rank of best vertex ............" << mBestRank << endl;
