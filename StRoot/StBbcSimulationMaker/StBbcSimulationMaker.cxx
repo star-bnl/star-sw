@@ -24,42 +24,42 @@ TRandom BbcRndm = TRandom(0);
 
 ClassImp(StBbcSimulationMaker)
 
-  const float BbcTimingRMS = 900.E-12; /*! BBC timing resolution in seconds
+static const Float_t BbcTimingRMS = 900.E-12; /*! BBC timing resolution in seconds
 for a single MIP according to the
 <a href="http://connery.star.bnl.gov/protected/highpt/jacobs/BBC_proposal3.ps">
 Proposal </a>.					*/
 
 
 
-const u_short NPMTsmall1 = 16;
-const u_short NPMTlarge1 = 8;
-const u_short NPMT1 = NPMTsmall1+NPMTlarge1;//# of PMTs on one side (East/West)
-const u_short NPMT2 = 2*NPMT1; // ditto on both sides
-const float dE1MIPper_gcm2 = 1.95E-3;  // in GeV/(g/cm**2), for polystyrene
-const float PolystereneDensity = 1.032;   // in g/cm**3
-const float TyleThickness = 1.; // in cm
-const float dE_1MIP = dE1MIPper_gcm2*PolystereneDensity*TyleThickness;
-const float NPhotoelectrons_1MIP = 15.; 
-const float pC_per_Photoelectron = 0.3;
-const short NADCbins = 256; /* bins are numbered from 0 to 255 */
-const short NTDCbins = 256; /* ditto */
-const float pC_perADCbin = 0.25; /* Central trigger barrel 
+static const UShort_t NPMTsmall1 = 16;
+static const UShort_t NPMTlarge1 = 8;
+static const UShort_t NPMT1 = NPMTsmall1+NPMTlarge1;//# of PMTs on one side (East/West)
+static const UShort_t NPMT2 = 2*NPMT1; // ditto on both sides
+static const Float_t dE1MIPper_gcm2 = 1.95E-3;  // in GeV/(g/cm**2), for polystyrene
+static const Float_t PolystereneDensity = 1.032;   // in g/cm**3
+static const Float_t TyleThickness = 1.; // in cm
+static const Float_t dE_1MIP = dE1MIPper_gcm2*PolystereneDensity*TyleThickness;
+static const Float_t NPhotoelectrons_1MIP = 15.; 
+static const Float_t pC_per_Photoelectron = 0.3;
+static const Short_t NADCbins = 256; /* bins are numbered from 0 to 255 */
+static const Short_t NTDCbins = 256; /* ditto */
+static const Float_t pC_perADCbin = 0.25; /* Central trigger barrel 
 				   Digitizer Boards (CDB) have such 
 				   conversion gain (see STAR NIM) */
-const float ADC0 = 0.;  /* beginning of ADC range */
-const float s_perTDCbin = .1E-9; /* so that 25.6 ns is full range (guess) */
-const float TDC0 = 0.;  /* beginning of TDC range */
-const float OuterFactor = 0.8; /* larger scintillators of the outer ring
+static const Float_t ADC0 = 0.;  /* beginning of ADC range */
+static const Float_t s_perTDCbin = .1E-9; /* so that 25.6 ns is full range (guess) */
+static const Float_t TDC0 = 0.;  /* beginning of TDC range */
+static const Float_t OuterFactor = 0.8; /* larger scintillators of the outer ring
 				  have less light output by this factor, 
 				  compared with the inner ring, per
 				  equal ionization */
-const float SinglePhotoElectronResolution = 0.3; // according to Les Bland
+static const Float_t SinglePhotoElectronResolution = 0.3; // according to Les Bland
 /* Numbering: the real PMT numbering (used in the map) starts from 1.
 ALL OTHERS start from 0 !
  */
 //____________________________________________________________________________
 
-bool IsSmall(short iPMT)
+bool IsSmall(Short_t iPMT)
 {
   /// true for inner annulus (small tiles)
   if ( 0<=iPMT && iPMT<NPMTsmall1) return 1;
@@ -75,33 +75,34 @@ class BbcTOF
 in the end generates response based on that + noise.
 */
 private:
-  vector<float> Times;
-
+   //  vector<float> Times;
+  Float_t Times[NPMT2];
 public: 
-  BbcTOF():Times(vector<float>(NPMT2)){};  // NPMT1 !
+  //  BbcTOF():Times(vector<float>(NPMT2)){};  // NPMT1 !
+  BbcTOF() {memset(Times, 0, sizeof(Times));}
   ~BbcTOF(){};
-  void AddTOF(u_short ipmt, float time)
+  void AddTOF(UShort_t ipmt, Float_t time)
   {
     /*! for the TOF, take the smallest one among the PMT's tiles; 
       add resolution error 
      */
     if (Times[ipmt]==0 || Times[ipmt]>time) {Times[ipmt]=time;}
   }
-  float GetTOF(u_short ipmt)  
+  Float_t GetTOF(UShort_t ipmt)  
   {
     /// returns TOF in s
 
-    float tof = 0;
+    Float_t tof = 0;
     if (Times[ipmt]!=0.){ tof = Times[ipmt]+BbcRndm.Gaus(0.,BbcTimingRMS); }
     return tof;
   }
-  short GetTDC(u_short ipmt)
+  Short_t GetTDC(UShort_t ipmt)
   { 
     /// returns digitized (TAC) TOF
-    float T = this->GetTOF(ipmt);
+    Float_t T = this->GetTOF(ipmt);
 
     if (T<TDC0) {return 0;}
-    short N = (short)((T-TDC0)/s_perTDCbin);
+    Short_t N = (short)((T-TDC0)/s_perTDCbin);
     if (N>=NTDCbins) {return NTDCbins-1;}
     return N;
   }
@@ -116,33 +117,34 @@ by incrementing values of a vector; when that is finished, it returns
 the response based on that + noise.
    */
 private:
-  vector<float> dE;
-
+  //  vector<float> dE;
+  Float_t dE[NPMT2];
 public:
-  BbcDE():dE(vector<float>(NPMT2)){};
+  //  BbcDE():dE(vector<float>(NPMT2)){};
+  BbcDE() {memset(dE, 0, sizeof(dE));}
   ~BbcDE(){};
-  void AddDE(u_short ipmt, float de)
+  void AddDE(UShort_t ipmt, Float_t de)
   {
     if (!IsSmall(ipmt)) {de *= OuterFactor;}
     dE[ipmt] += de;
   }
-  float GetDE(u_short ipmt)
+  Float_t GetDE(UShort_t ipmt)
   {
     /// returns DE in pC of PMT signal
 
-    float PoissonMean = dE[ipmt]/dE_1MIP*NPhotoelectrons_1MIP;
-    short NPhotoelectrons = BbcRndm.Poisson(PoissonMean);
-    float Q = pC_per_Photoelectron*
+    Float_t PoissonMean = dE[ipmt]/dE_1MIP*NPhotoelectrons_1MIP;
+    Short_t NPhotoelectrons = BbcRndm.Poisson(PoissonMean);
+    Float_t Q = pC_per_Photoelectron*
       (1+BbcRndm.Gaus(0.,SinglePhotoElectronResolution))*
        NPhotoelectrons;
     return Q;
   }
-  short GetADC(u_short ipmt)
+  Short_t GetADC(UShort_t ipmt)
   {
     /// returns digitized (ADC) amplitude
-    float A = this->GetDE(ipmt);
+    Float_t A = this->GetDE(ipmt);
     if (A<ADC0) {return 0;}
-    short N = (short)((A-ADC0)/pC_perADCbin);
+    Short_t N = (short)((A-ADC0)/pC_perADCbin);
     if (N>=NADCbins) {return NADCbins-1;}
     return N;
   }
@@ -207,11 +209,11 @@ STAR.
   */
   //   BBC tile           BBC PMT number      Comments/description
   // --------           --------------      --------------------
-  for (short iew=1; iew<=2; iew++)
+  for (Short_t iew=1; iew<=2; iew++)
     {
-      short EW = iew*1000; // for VID
-      //      short EWshift = (iew-1)*NPMT1; if Akio numbered from West
-      short EWshift = (2-iew)*NPMT1; // for PMT
+      Short_t EW = iew*1000; // for VID
+      //      Short_t EWshift = (iew-1)*NPMT1; if Akio numbered from West
+      Short_t EWshift = (2-iew)*NPMT1; // for PMT
       /*!
 PMT numbering: Akio Ogawa numbers channels in the data structure starting
  from East.
@@ -337,11 +339,11 @@ Int_t StBbcSimulationMaker::Make()
      g2t_vertex_st     *gver = 0;
      if (g2t_ver) gver = g2t_ver->GetTable();
      
-     short nBBChits = g2t_bbc_hit->GetNRows();
+     Short_t nBBChits = g2t_bbc_hit->GetNRows();
      BbcTOF TOFdata;
      BbcDE DEdata;
      g2t_ctf_hit_st *bbc_hit = g2t_bbc_hit->GetTable();
-     for (short iBBChit=0; iBBChit<nBBChits; iBBChit++)
+     for (Short_t iBBChit=0; iBBChit<nBBChits; iBBChit++)
      {
        Int_t Id         = bbc_hit[iBBChit].track_p;
        Int_t id3 = 0;
@@ -349,11 +351,11 @@ Int_t StBbcSimulationMaker::Make()
        Double_t tof = 0;
        if (gver) tof = gver[id3-1].ge_tof;
        //       if (TMath::Abs(tof) > 50e-9) continue; // 50 ns cut
-       float De = bbc_hit[iBBChit].de;
-       float TOF = tof + bbc_hit[iBBChit].tof;
-       short Vid =  bbc_hit[iBBChit].volume_id;
+       Float_t De = bbc_hit[iBBChit].de;
+       Float_t TOF = tof + bbc_hit[iBBChit].tof;
+       Short_t Vid =  bbc_hit[iBBChit].volume_id;
 
-       short PMTid = Geant2PMT[Vid];
+       Short_t PMTid = Geant2PMT[Vid];
        if (PMTid == 0) {
 	 LOG_ERROR << "Cannot find a  PMTid in Geant2PMT for Vid = " << Vid << endm;
 	 continue;
@@ -372,12 +374,12 @@ Int_t StBbcSimulationMaker::Make()
      StBbcTriggerDetector& myBbc = myTrig->bbc();
 
 
-     for (u_short iPMT = 0; iPMT<NPMT2; iPMT++)
+     for (UShort_t iPMT = 0; iPMT<NPMT2; iPMT++)
        {	  
-	  short ADC = DEdata.GetADC(iPMT);
+	  Short_t ADC = DEdata.GetADC(iPMT);
 #ifdef BbcSimQa
 	  //	  QaBbcPmtAdc->Fill(iPMT,ADC);
-	  short Vid = PMT2Geant[iPMT+1];
+	  Short_t Vid = PMT2Geant[iPMT+1];
 
 	  if (Vid<2000) {QaBbcWestVid->Fill(ADC);}
 	  if (Vid>2000) {QaBbcEastVid->Fill(ADC);}
@@ -389,7 +391,7 @@ Int_t StBbcSimulationMaker::Make()
 	  myBbc.setAdc(iPMT, ADC);
 	  if (IsSmall(iPMT))
 	    {
-	      short TDC = TOFdata.GetTDC(iPMT);
+	      Short_t TDC = TOFdata.GetTDC(iPMT);
 	      myBbc.setTdc(iPMT, TDC);
 	    }
 	}
