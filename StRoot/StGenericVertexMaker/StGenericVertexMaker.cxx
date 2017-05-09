@@ -66,10 +66,9 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
 {
-
   SafeDelete(theFinder);
-
 }
+
 
 /*!
   The Init() method instantiates the VertexFinder() method.

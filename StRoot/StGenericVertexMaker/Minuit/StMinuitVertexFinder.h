@@ -85,7 +85,7 @@
  * 1D fit and use the beamline constraint to get the x and y positions of the 
  * vertex.
  *
- *  $Id: StMinuitVertexFinder.h,v 1.29 2017/05/03 20:14:42 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.30 2017/05/09 12:29:40 smirnovd Exp $
  *
  */
 
@@ -104,13 +104,14 @@ class TMinuit;
 class StMinuitVertexFinder: public StGenericVertexFinder
 {
 public:
+
     StMinuitVertexFinder(VertexFit_t fitMode=VertexFit_t::NoBeamline);
 
     // mandatory implementations
     virtual        ~StMinuitVertexFinder();
     Int_t           fit(StEvent*);       
     void            printInfo(ostream& = cout) const;
-    virtual void    InitRun  (Int_t runumber, const St_db_Maker* db_maker);
+    virtual void    InitRun(int run_number, const St_db_Maker* db_maker);
     void            Clear();
 
 
@@ -131,6 +132,7 @@ public:
     void            SetMinimumTracks(Int_t n) {mMinTrack = n;}
 
 private:
+
     enum  {kFlagDcaz = 1, kFlagCTBMatch = 2, kFlagBEMCMatch = 4, kFlagCrossMembrane = 8};
 
     bool    accept(StTrack*) const;   // track filter

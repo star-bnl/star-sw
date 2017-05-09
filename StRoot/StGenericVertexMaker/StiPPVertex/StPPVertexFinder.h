@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.48 2017/05/03 20:14:35 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.49 2017/05/09 12:29:41 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -27,7 +27,6 @@ class StEvent;
 class StiToolkit;
 
 class StMuDst;
-class StMuTrack;
 
 class St_db_Maker;
 class BtofHitList;  
@@ -125,6 +124,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
 
+  /// A pointer to muDST event
   const StMuDst* mStMuDst;
   
   void dumpKalmanNodes(const StiKalmanTrack *stiTrack);
@@ -140,7 +140,7 @@ public:
   virtual void UsePCT(bool x=true) { mDropPostCrossingTrack = !x; }
   virtual void Finish();
   virtual void Init();
-  virtual void InitRun(int runumber, const St_db_Maker* db_maker);
+  virtual void InitRun(int run_number, const St_db_Maker* db_maker);
   virtual void Clear(); 
   virtual void CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
 
@@ -148,6 +148,6 @@ public:
 
   virtual ~StPPVertexFinder() {}
   virtual int fit(StEvent*);
-  virtual int Fit(const StMuDst& muDst);
+  virtual int fit(const StMuDst& muDst);
   void printInfo(std::ostream& = std::cout) const;
 };
