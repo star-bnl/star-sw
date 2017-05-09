@@ -13,6 +13,9 @@
 #include "KFPTrack.h"
 #include "StKFParticleInterface.h"
 #include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
+StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
+static Int_t iBreak = 0;
+//#define __PLOT_VERTEX__
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
@@ -26,8 +29,11 @@ static const Char_t *TitlePiDtype[NoPiDs] = {"dEdxPiD", "ToFPiD"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};	  
 static const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
 					 "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
+#if 0
 static const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar"
 					 "e+","p"   ,"K+","pi+","mu+","d"   ,"t"   ,"He3"    ,"alpha"};
+
+#endif
 static const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417,
 				       0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 static const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
@@ -36,12 +42,14 @@ static const Int_t PiDHyp[NHYPS]     = {kPidElectron, kPidProton, kPidKaon, kPid
 					kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha};
 static const Int_t PiDpm[NHYPS]      = {kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative,
 					kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive};
+#if 0
 static const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
 static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN70B","muN70B","deuteronN70B","tritonN70B","He3N70B","alphaN70B",
 				    "eP70B","protonP70B","kaonP70B","piP70B","muP70B","deuteronP70B","tritonP70B","He3P70B","alphaP70B"};
 static const Char_t *HistNameP[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","He3PzB","alphaPzB"};
+#endif
 static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
@@ -54,6 +62,7 @@ static TString SubSection;
 //________________________________________________________________________________
 StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name) {
   memset(mBeg,0,mEnd-mBeg+1);
+  fgStMuMcAnalysisMaker = this;
 }
 //________________________________________________________________________________
 StMuMcAnalysisMaker::~StMuMcAnalysisMaker() {
@@ -118,7 +127,9 @@ Int_t StMuMcAnalysisMaker::Init(){
   if (f) {
     f->cd();
     BookTrackPlots();
+#ifdef __PLOT_VERTEX__
     BookVertexPlots();
+#endif /* __PLOT_VERTEX__ */
   }
   return kStOK;
 }
@@ -298,7 +309,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	    for (Int_t i = i1; i < kTotalQAll; i++) {
 	      if (gp == kGlobal && plotVar[i].GlobalOnly <  0) continue;
 	      if (gp == kPrimary && plotVar[i].GlobalOnly == 0) continue;
-	      if (fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name)) continue;
+	      if ((fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name))) continue;
 	      if (! x) {// No.Hits
 		if (i == kTotalQA) continue;
 		fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
@@ -521,7 +532,9 @@ Int_t StMuMcAnalysisMaker::Make(){
       muDst->printMcTracks();
     }
   FillTrackPlots();
+#ifdef __PLOT_VERTEX__
   FillVertexPlots();
+#endif /* __PLOT_VERTEX__ */
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -533,7 +546,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
   // =============  Build map between  Rc and Mc vertices 
   //  multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
   // Loop over Mc Tracks
-  for (Int_t m = 0; m < muDst->numberOfMcTracks(); m++) {
+  for (UInt_t m = 0; m < muDst->numberOfMcTracks(); m++) {
     StMuMcTrack *mcTrack = muDst->MCtrack(m);
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
@@ -678,7 +691,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	// ToF
 	const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
 	Float_t pathLength = btofPid.pathLength();
-	Float_t timeOfFlight = btofPid.timeOfFlight();
+	//	Float_t timeOfFlight = btofPid.timeOfFlight();
 	Float_t beta = btofPid.beta();
 	
 	//	const StThreeVectorF &pVx  = Track->momentum();
@@ -715,7 +728,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     }
   }
   // check for ghost
-  for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
+  for (UInt_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
     StMuTrack *gTrack = muDst->globalTracks(kg);
     if ( ! muDst->Accept(gTrack)) continue;
     if ( gTrack->idTruth()) continue;
@@ -723,13 +736,13 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     if (gTrack->charge() < 0) pm = kNegative;
     fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
   }
-  for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
+  for (UInt_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
     StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
     if (Vtx->idTruth() != 1) continue;
-    for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       if (! pTrack) continue;
-      if (pTrack->vertexIndex() != l) continue;
+      if (pTrack->vertexIndex() != (Int_t) l) continue;
       if (! muDst->Accept(pTrack)) continue;
       if ( pTrack->idTruth()) {
 	if (pTrack->idParentVx() == 1) continue;
@@ -746,9 +759,9 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   StMuDst::instance()->printKFTracks();
   //  return;
   static Int_t nTracksAll = 0;
-  static Int_t nTracksGhost = 0;
+  //  static Int_t nTracksGhost = 0;
   static Int_t nStiVertex = 0;
-  static Int_t nKFVertex = 0;
+  //  static Int_t nKFVertex = 0;
   Int_t NoMuMcVertices = StMuDst::instance()->numberOfMcVertices(); //if (_debugAsk) cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices << std::endl;
   Int_t NoMuMcTracks = StMuDst::instance()->numberOfMcTracks();
   if (! NoMuMcVertices || ! NoMuMcTracks) {
@@ -778,7 +791,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   vector< vector<int> > PrimTracks(NoPrimaryVertices);
   
   float bestRank=-1000000;
-  int bestPV=-1;
+  //  int bestPV=-1;
   
   for (Int_t l = 0; l < NoStVertices; l++) {//NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
@@ -786,7 +799,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     //       Vtx->Print();
     if (bestRank < Vtx->ranking()) {
       bestRank = Vtx->ranking();
-      bestPV = l;
+      //      bestPV = l;
     }
     //convert StMuPrimaryVertex to KFVertex
     KFPVertex primVtx_tmp;
@@ -864,8 +877,8 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     } 
     track.SetCharge(q);
         
-    bool isSecondary = true;
-    const StMuTrack *primTrack = gTrack->primaryTrack();
+    //    bool isSecondary = true;
+    //    const StMuTrack *primTrack = gTrack->primaryTrack();
 //     if(primTrack)
 //     {
 //       const int iPV = primTrack->vertexIndex(); 
@@ -1207,6 +1220,8 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   pngName.ReplaceAll("<","lt");
   pngName.ReplaceAll(">","gt");
   pngName.ReplaceAll(".","_");
+  pngName.ReplaceAll("+","_");
+  pngName.ReplaceAll("-","_");
   pngName.ReplaceAll("/","_");
   pngName.ReplaceAll("^","_");
   pngName.ReplaceAll("__","_");
@@ -1217,8 +1232,16 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   TVirtualX::Instance()->WritePixmap(c->GetCanvasID(),-1,-1,(Char_t *)pngName.Data());
   nPng++;
   cout << "Draw #\t" << nPng << "\t" << pngName << endl;
+  if (pngName.Contains("dEdxPiD_kaon") ||
+      pngName.Contains("dEdxPiD_muon") ||
+      pngName.Contains("dEdxPiD_pion")) {
+    iBreak++;
+  }
   TString FigNo; /* (SubSection); FigNo += ".";*/ 
   FigNo += nPng;
+#if 1
+  out << "\'" << pngName.Data() << "\'," << endl;
+#else
   Bool_t commentIt = kFALSE;
   if (pngName.Contains("_EtapT_ChiSqXY_yx_pfx.png") ||
       pngName.Contains("_EtapT_Phi_zx_1.png") ||
@@ -1239,6 +1262,7 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   out << "<td></a><img src=\"StiCA/" << pngName.Data() << "\" alt=\"\" width=\"400\" border=\"0\"></td>" << endl;
   out << "</tr>" << endl;
   if (commentIt) out << "-->" << endl;
+#endif
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t amax) {
@@ -1376,26 +1400,37 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
   }
 }
 //_____________________________________________________________________________
-Int_t StMuMcAnalysisMaker::Draw(){
+Int_t StMuMcAnalysisMaker::DrawAll(){
   if (! Check()) return kStOk;
-  TString Out("indexMc.html");
+  TString Out("indexMc.php");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   BeginHtml();
   out << "<H1>1. Tracks</H1>" << endl;
   Chapter = "1.1"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". Quality of reconstructed tracks with respect to MC.</H2>" << endl;
+  BeginTable();
   DrawQA();
+  EndTable();
   Chapter = "1.2"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". Track reconstuction efficiencies.</H2>" << endl;
+  BeginTable();
   DrawEff();
+  EndTable();
   Chapter = "1.3"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". TPC dE/dx PiD.</H2>" << endl;
+  BeginTable();
   DrawdEdx();
+  EndTable();
   Chapter = "1.4"; // nPng = 0;
   out << "<H2>" << Chapter.Data() << ". ToF PiD</H2>" << endl;
+  BeginTable();
   DrawToF();
+  EndTable();
   out << "<H1>2. Vertices</H1>" << endl;
   Chapter = "2.1"; // nPng = 0;
+  out << "<H2>" << Chapter.Data() << ". Primary Vertices</H2>" << endl;
+  BeginTable();
+  EndTable();
   EndHtml();
   return kStOK;
 }
@@ -1572,7 +1607,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
 	    else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
 	    heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
-	    heff[l]->SetYTitle(Form("%s (%)",eff[i]));
+	    heff[l]->SetYTitle(Form("%s (%%)",eff[i].Title));
 	    heff[l]->SetStats(0);
 	    heff[l]->SetMarkerColor(l+1);
 	    heff[l]->SetLineColor(l+1);
@@ -1738,12 +1773,17 @@ void StMuMcAnalysisMaker::BeginHtml() {
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::BeginTable() {
   out << "    <table width=\"90%\" border=\"1\" cellspacing=\"2\" cellpadding=\"0\">" << endl;
-  out << "        <tr>" << endl;
-  out << "          <td>Sti</td><td>StiCA</td>" << endl;
-  out << "        </tr>" << endl;
+  out << "<hline>" << endl; 
+  out << "      <?php" << endl;
+  out << "$figs = array(" << endl;
+//   out << "        <tr>" << endl;
+//   out << "          <td>Sti</td><td>StiCA</td>" << endl;
+//   out << "        </tr>" << endl;
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::EndTable() {
+  out << ");" << endl;
+  out << "        ?>" << endl;
   out << "</table>"  << endl;
 }
 //________________________________________________________________________________
