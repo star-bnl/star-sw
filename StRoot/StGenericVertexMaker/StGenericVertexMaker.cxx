@@ -51,7 +51,6 @@ using namespace units;
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
   useITTF(true),
   useBeamline(false),
-  calibBeamline(false),
   useCTB(false),
   usePCT(false),
   useBTOF(false),
@@ -94,7 +93,6 @@ Int_t StGenericVertexMaker::Init()
   // setup params
   useITTF       = IAttr("ITTF");
   useBeamline   = IAttr("beamLine");
-  calibBeamline = IAttr("calibBeamline");
   useCTB        = IAttr("CTB");
   usePCT        = IAttr("PCT");
   useBTOF       = IAttr("BTOF");
@@ -173,8 +171,6 @@ Int_t StGenericVertexMaker::Init()
 
   theFinder->UsePCT(usePCT);
   theFinder->UseBTOF(useBTOF);
-
-  if (calibBeamline) theFinder->CalibBeamLine();
 
   if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
     if (useITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();

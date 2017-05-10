@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.111 2017/05/09 12:29:41 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.112 2017/05/10 23:16:42 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -365,12 +365,6 @@ void StPPVertexFinder::printInfo(ostream& os) const
     vertex.print(os);
 }
 
-//======================================================
-//======================================================
-void StPPVertexFinder::CalibBeamLine(){
-  LOG_INFO << "StPPVertexFinder::CalibBeamLine: activated saving high quality prim tracks for 3D fit of the beamLine"<<endm;
-}
-
 
 //==========================================================
 //==========================================================
@@ -517,18 +511,17 @@ int StPPVertexFinder::fit(StEvent* event)
            << nTracksMatchingAnyFastDetector << " traks with good DCA, matching: BTOF="
            << kBtof << " CTB=" << kCtb << " BEMC=" << kBemc << " EEMC=" << kEemc << endm;
 
-
-  if(nTracksMatchingAnyFastDetector < mMinMatchTr && mStoreUnqualifiedVertex <= 0) {
+  if (nTracksMatchingAnyFastDetector >= mMinMatchTr || mStoreUnqualifiedVertex > 0)
+  {
+    seed_fit_export();
+  } else {
     LOG_INFO << "StPPVertexFinder::fit() nEve=" << mTotEve << " Quit, to few matched tracks" << endm;
-    return 0;
   }
 
   hA[0]->Fill(5);
 
   if(kBemc)  hA[0]->Fill(6);
   if(kEemc)  hA[0]->Fill(7);
-
-  seed_fit_export();
   
   hA[4]->Fill(mVertexData.size());
 
@@ -790,7 +783,7 @@ bool StPPVertexFinder::findVertexZ(VertexData &vertex)
 bool  StPPVertexFinder::evalVertexZ(VertexData &vertex) // and tag used tracks
 {
   // returns true if vertex is accepted accepted
-  int n1=0, nHiPt=0;
+  int nHiPt=0;
   
   for (TrackData &track : mTrackData)
   {
@@ -802,9 +795,9 @@ bool  StPPVertexFinder::evalVertexZ(VertexData &vertex) // and tag used tracks
     if ( !track.matchVertex(vertex, mMaxZradius) ) continue;
 
     // Otherwise, this track belongs to this vertex
-    n1++;
     track.vertexID  = vertex.id;
     vertex.gPtSum  += track.gPt;
+    vertex.nUsedTrack++;
 
     if( track.gPt>mCut_oneTrackPT && ( track.mBemc>0|| track.mEemc>0) ) nHiPt++;
 
@@ -826,8 +819,6 @@ bool  StPPVertexFinder::evalVertexZ(VertexData &vertex) // and tag used tracks
     if( track.anyMatch)     vertex.nAnyMatch++;
     else if (track.anyVeto) vertex.nAnyVeto++;
   } 
-
-  vertex.nUsedTrack = n1;
 
   vertex.isTriggered = (vertex.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
   if (!vertex.isTriggered) { // discrad vertex
