@@ -721,7 +721,7 @@ bool Medium::GetElectronCollision(const double e, int& type, int& level,
 }
 
 bool Medium::GetIonisationProduct(const unsigned int /*i*/, 
-                                  int& type, double& energy) {
+                                  int& type, double& energy) const {
 
   if (m_debug) {
     std::cerr << m_className << "::GetIonisationProduct:\n"
@@ -732,13 +732,13 @@ bool Medium::GetIonisationProduct(const unsigned int /*i*/,
   return false;
 }
 
-bool Medium::GetDeexcitationProduct(const int i, double& t, double& s,
-                                    int& type, double& energy) {
+bool Medium::GetDeexcitationProduct(const unsigned int i, double& t, double& s,
+                                    int& type, double& energy) const {
 
   if (m_debug) {
-    std::cerr << m_className << "::GetDeexcitationProduct:\n";
-    std::cerr << "    Deexcitation product " << i << " requested.\n";
-    std::cerr << "    Not supported. Program bug!\n";
+    std::cerr << m_className << "::GetDeexcitationProduct:\n"
+              << "    Deexcitation product " << i << " requested.\n"
+              << "    Not supported. Program bug!\n";
   }
   t = s = energy = 0.;
   type = 0;
