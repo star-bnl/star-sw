@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.114 2017/05/12 18:37:36 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.115 2017/05/12 18:37:51 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -582,16 +582,13 @@ void StPPVertexFinder::seed_fit_export()
    }
    else
    {
-      for (VertexData &vertex : mVertexData)
-      {
-         // When fitTracksToVertex fails it returns non-zero value. Just use the
-         // beam equation to set the best guess for vertex position. Works for no
-         // beamline case by setting vertex position to (0,0,0)
-         if ( fitTracksToVertex(vertex) ) {
-            const double& z = vertex.r.Z();
-            vertex.r.SetXYZ( beamX(z), beamY(z), z);
-         }
-      }
+      size_t n_seeds = mVertexData.size();
+
+      auto cannot_fit = [this] (VertexData &vertex) { return fitTracksToVertex(vertex) != 0; };
+      mVertexData.erase( std::remove_if(mVertexData.begin(), mVertexData.end(), cannot_fit), mVertexData.end() );
+      // Update the "bad" vertex counter as some vertices could have been
+      // removed in the previous step
+      nBadVertex -= n_seeds - mVertexData.size();
    }
 
    exportVertices();
@@ -787,7 +784,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
       mDCAs.clear();
       
       for (const TrackData & track : mTrackData) {
-         if (track.vertexID != vertex.id) continue;
+         if ( std::fabs(track.vertexID) != vertex.id) continue;
          mDCAs.push_back(track.dca);
       }
 
@@ -802,7 +799,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
 
    for (const TrackData & track : mTrackData)
    {
-      if (track.vertexID != vertex.id) continue;
+      if ( std::fabs(track.vertexID) != vertex.id) continue;
       if (!track.mother) continue;
 
       // This code is adopted from StiStEventFiller::fillDca()
@@ -847,9 +844,13 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
 
    bool fitRequiresBeamline = star_vertex::requiresBeamline(mVertexFitMode);
 
-   if (mDCAs.size() == 0) {
-      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
-               << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
+   bool prerequisites = mDCAs.size() > 1 || (mDCAs.size() > 0 && fitRequiresBeamline);
+
+   if ( !prerequisites )
+   {
+      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least two tracks required "
+               << "OR one with beam line. This vertex (id = " << vertex.id
+               << ") coordinates will not be updated" << endm;
       return 5;
    }
 
@@ -880,9 +881,14 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    double y_hi = vertexSeed.y() + mMaxTrkDcaRxy;
    double z_hi = vertexSeed.z() + mMaxZradius;
 
-   mMinuit->mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
-   mMinuit->mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
-   mMinuit->mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   if (mVertexFitMode == VertexFit_t::Beamline1D)
+   {
+      mMinuit->mnparm(0, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   } else {
+      mMinuit->mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
+      mMinuit->mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
+      mMinuit->mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   }
 
    mMinuit->mnexcm("minimize", 0, 0, minuitStatus);
 
@@ -891,7 +897,16 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: Fit did not converge. "
                << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
-      return minuitStatus;
+
+      // The fit has failed but let's keep the vertex anyway. For cases with
+      // beam line we put the vertex on the beam line
+      if ( fitRequiresBeamline ) {
+         const double& z = vertex.r.Z();
+         vertex.r.SetXYZ( beamX(z), beamY(z), z);
+         vertex.er.SetXYZ( mBeamline.err_x0, mBeamline.err_y0, vertex.er.Z());
+      }
+      // Return 0 (=success) in order to keep the vertex
+      return 0;
    }
 
    double chisquare, fedm, errdef;
@@ -900,14 +915,22 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    mMinuit->mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
    mMinuit->mnhess();
 
+   // The default dimension 9=3*3 should work for 1D case (npar = 1) as well
    double emat[9];
    /* 0 1 2
       3 4 5
       6 7 8 */
    mMinuit->mnemat(emat, 3);
 
-   vertex.r.SetXYZ(mMinuit->fU[0], mMinuit->fU[1], mMinuit->fU[2]);
-   vertex.er.SetXYZ( std::sqrt(emat[0]), std::sqrt(emat[4]), std::sqrt(emat[8]) );
+   if (mVertexFitMode == VertexFit_t::Beamline1D)
+   {
+      const double& z = mMinuit->fU[0];
+      vertex.r.SetXYZ( beamX(z), beamY(z), z);
+      vertex.er.SetXYZ( mBeamline.err_x0, mBeamline.err_y0, std::sqrt(emat[0]) );
+   } else {
+      vertex.r.SetXYZ(mMinuit->fU[0], mMinuit->fU[1], mMinuit->fU[2]);
+      vertex.er.SetXYZ( std::sqrt(emat[0]), std::sqrt(emat[4]), std::sqrt(emat[8]) );
+   }
 
    return 0;
 }
