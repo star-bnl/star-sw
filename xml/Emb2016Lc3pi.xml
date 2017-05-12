@@ -17,7 +17,7 @@
   set logFile  = ${base}B.log
   echo "${file}"
   if ( ! -r ${file}) then
-    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" />

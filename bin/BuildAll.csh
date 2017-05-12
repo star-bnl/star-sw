@@ -9,7 +9,7 @@ foreach gcc (gcc gcc492)
       endif
       setup ${gcc}
       setup ${bit}
-      time cons -k >& build.${gcc}.${opt}.${bit}.log &
+      time cons -k >& build.${gcc}.${opt}.${bit}.`date +%Y%m%d%y:%H%M`.log &
     end
   end
 end

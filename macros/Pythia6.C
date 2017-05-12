@@ -4,7 +4,7 @@ void Pythia6(Int_t NoEvents = 1000, Int_t runG = 1, const Char_t *frame = "CMS",
   TString Chain("Pythia6_4_28,nodefault");
   bfc(-1,Chain,0,0,0);
   StarPrimaryMaker *primary = (StarPrimaryMaker *) chain->Maker("Generators");
-  primary -> SetFileName( Form("pythia6_%s_%s%_i_%i_%i.gener.root",aIn,bIn,(Int_t) rootS,runG,NoEvents));
+  primary -> SetFileName( Form("pythia6_%s_%s_%i_%i_%i.gener.root",aIn,bIn,(Int_t) rootS,runG,NoEvents));
   StarPythia6 *pythia6 = (StarPythia6 *) chain->Maker("Pythia6");
   pythia6->SetTitle("Pythia6");
 

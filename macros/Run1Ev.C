@@ -1,6 +1,6 @@
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
 	    Double_t pTlow=1,Double_t pThigh=1,
-	    Double_t Ylow=0.1, Double_t Yhigh=0.1,
+	    Double_t Ylow=-3.1, Double_t Yhigh=-3.1,
 	    Double_t Philow=1.0, Double_t Phihigh=1.0,
 	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1) {
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
@@ -101,8 +101,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       gMC->SetProcess("ANNI", 0);
       gMC->SetProcess("BREM", 0);
       gMC->SetProcess("COMP", 0);
-      gMC->SetProcess("HADR", 0);.q
-
+      gMC->SetProcess("HADR", 0);
       gMC->SetProcess("MUNU", 0);
       gMC->SetProcess("PAIR", 0);
       gMC->SetProcess("PFIS", 0);
