@@ -536,7 +536,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         innour    = numbv(4)
         volume_id = 1000*rileft+100*innout+10*innour+sector
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      else if (Csys=='tof') then
+      else if (Csys=='tof' .or. CSYS=='gem') THEN
+*******************************************************************************************
+** 29               
+           volume_id = 100*numbv(1) + numbv(2)
 *4*                                             Frank Geurts
         If (btog_version==1) then
            rileft     = numbv(1)
@@ -787,13 +790,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             zsublayer = numbv(4+shift)                        ! EMGT (no readout)
             phi       = numbv(5+shift)                        ! EPER (5 fingers)
             eta       = numbv(6+shift)                        ! ETAR (radial division)
-
+#ifndef __STAR_VMC__
 * we signal this once
             if(printOnce) then
-               if (6+shift != nv) print *,' G2T_VOL_ID: new inconsistency in ECAL
+               if (6+shift != nv) print *,' G2T_VOL_ID: new inconsistency in ECAL ! check nv 
                printOnce=.false.
             endif
-
+#endif /* !  __STAR_VMC__ */
             eemc_depth = zsubsect + 3*(section-1)
 
             volume_id = 100000*rileft + 1000*(5*(phi_30d-1)+phi) + 10*eta + eemc_depth
@@ -1129,7 +1132,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          
            "East / west is first in numbv, paddle number is second"           
            volume_id = 100*numbv(1) + numbv(2)
-            
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
