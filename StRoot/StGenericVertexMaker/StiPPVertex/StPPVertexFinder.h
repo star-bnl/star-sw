@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.51 2017/05/12 18:37:24 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.52 2017/05/12 18:37:36 smirnovd Exp $
  *
  */
 
@@ -91,6 +91,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   TH1D *hL ;      // likelyhood distribution
   TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
   TObjArray HList;
+  std::array<int, 7> ntrk;
 
   // params
   double mMinTrkPt;               ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -145,5 +146,5 @@ public:
   virtual ~StPPVertexFinder() {}
   virtual int fit(StEvent*);
   virtual int fit(const StMuDst& muDst);
-  void printInfo(std::ostream& = std::cout) const;
+  void printInfo(std::ostream& os = std::cout) const;
 };
