@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.13 2017/02/14 22:00:41 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.14 2017/05/10 23:16:42 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -361,14 +361,6 @@ void StPPVertexFinder::printInfo(ostream& os) const
   
   LOG_DEBUG<< Form("---- end of PPVertex Info\n")<<endm;
 
-}
-
-//======================================================
-//======================================================
-void StPPVertexFinder::CalibBeamLine()
-{
-  LOG_INFO << "StPPVertexFinder::CalibBeamLine: activated saving high quality prim tracks for 3D fit of the beamLine"<<endm;
-  mBeamLineTracks=1; 
 }
 
 
@@ -1176,6 +1168,18 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.14  2017/05/10 23:16:42  smirnovd
+ * Some minor refactoring changes:
+ *
+ * See commits 6fb592df..07da3bdf on master branch
+ *
+ * StPPVertexFinder: Get rid of a temporary variable
+ *
+ * StPPVertexFinder: Get rid of extra return
+ * Zero vertices returned for unqualified event anyway
+ *
+ * StGenericVertexFinder: Removed deprecated CalibBeamLine()
+ *
  * Revision 1.13  2017/02/14 22:00:41  smirnovd
  * Squashed commit of the following clean-up changes:
  *
