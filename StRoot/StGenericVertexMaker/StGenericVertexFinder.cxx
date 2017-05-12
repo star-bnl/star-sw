@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.52 2017/05/09 12:30:09 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.53 2017/05/12 18:37:23 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -16,11 +16,11 @@
 
 #include "StarRoot/TRMatrix.h"
 #include "StarRoot/TRSymMatrix.h"
-#include "StGenericVertexFinder.h"
-#include "StMessMgr.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StEvent/StDcaGeometry.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 

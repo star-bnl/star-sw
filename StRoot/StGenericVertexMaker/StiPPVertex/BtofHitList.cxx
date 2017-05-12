@@ -5,15 +5,15 @@
 
 #include "TObjectSet.h"
 
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "BtofHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/BtofHitList.h"
 
-#include "StMaker.h"
+#include "StChain/StMaker.h"
 #include "StBTofUtil/StBTofGeometry.h"
 #include "StBTofUtil/StBTofTables.h"
-#include "StBTofCollection.h"
+#include "StEvent/StBTofCollection.h"
 
 
 //==========================================================

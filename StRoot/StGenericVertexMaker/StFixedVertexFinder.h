@@ -3,7 +3,7 @@
  *  \author Lee Barnby (University of Birmingham) May 2006.
  *  \brief StGenericVertexFinder implementation for fixing vertex.
  *
- *  $Id: StFixedVertexFinder.h,v 1.5 2016/08/18 17:46:14 smirnovd Exp $
+ *  $Id: StFixedVertexFinder.h,v 1.6 2017/05/12 18:37:23 smirnovd Exp $
  *
  *  Modified J.Lauret for MC vertex
  *
@@ -24,7 +24,7 @@
 #define STAR_StFixedVertexFinder
 
 
-#include "StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
 
 class StEvent;
 
@@ -59,6 +59,12 @@ private:
 /***************************************************************************
 *
 * $Log: StFixedVertexFinder.h,v $
+* Revision 1.6  2017/05/12 18:37:23  smirnovd
+* Cosmetic changes
+*
+* Removed log messages from source files
+* Prefixed included headers with paths to respective modules
+*
 * Revision 1.5  2016/08/18 17:46:14  smirnovd
 * Squashed commit of the following refactoring changes:
 *

@@ -1,7 +1,7 @@
 #ifndef CtbHitList_h
 #define CtbHitList_h
 
-#include "ScintHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 class StTriggerData;
 class TDataSet;
 class CtbHitList : public ScintHitList {

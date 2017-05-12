@@ -13,18 +13,18 @@
 #include <strings.h>
 #include <math.h>
 
-#include "StGenericVertexMaker.h"
-#include "St_DataSetIter.h"
-#include "StEventTypes.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "Star2Root/St_DataSetIter.h"
+#include "StEvent/StEventTypes.h"
 #include "StEvent/StPrimaryVertex.h"
 #include "TH2.h"
 #include "TNtuple.h"
-#include "StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "StGenericVertexFinder.h"
-#include "StppLMVVertexFinder.h"
-#include "StFixedVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StppLMVVertexFinder.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -38,10 +38,10 @@
 #include "tables/St_vertexSeed_Table.h" //
 
 // for Helix model
-#include "StarCallf77.h"
+#include "St_base/StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
-#include "SystemOfUnits.h"
+#include "StarClassLibrary/SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
