@@ -1240,7 +1240,8 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   TString FigNo; /* (SubSection); FigNo += ".";*/ 
   FigNo += nPng;
 #if 1
-  out << "\'" << pngName.Data() << "\'," << endl;
+  if (nPng != 1) out << ",";
+  out << "\'" << pngName.Data() << "\'" << endl;
 #else
   Bool_t commentIt = kFALSE;
   if (pngName.Contains("_EtapT_ChiSqXY_yx_pfx.png") ||
@@ -1406,31 +1407,21 @@ Int_t StMuMcAnalysisMaker::DrawAll(){
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   BeginHtml();
   out << "<H1>1. Tracks</H1>" << endl;
-  Chapter = "1.1"; // nPng = 0;
+  Chapter = "1.1"; 
   out << "<H2>" << Chapter.Data() << ". Quality of reconstructed tracks with respect to MC.</H2>" << endl;
-  BeginTable();
   DrawQA();
-  EndTable();
-  Chapter = "1.2"; // nPng = 0;
+  Chapter = "1.2"; 
   out << "<H2>" << Chapter.Data() << ". Track reconstuction efficiencies.</H2>" << endl;
-  BeginTable();
   DrawEff();
-  EndTable();
-  Chapter = "1.3"; // nPng = 0;
+  Chapter = "1.3"; 
   out << "<H2>" << Chapter.Data() << ". TPC dE/dx PiD.</H2>" << endl;
-  BeginTable();
   DrawdEdx();
-  EndTable();
-  Chapter = "1.4"; // nPng = 0;
+  Chapter = "1.4"; 
   out << "<H2>" << Chapter.Data() << ". ToF PiD</H2>" << endl;
-  BeginTable();
   DrawToF();
-  EndTable();
   out << "<H1>2. Vertices</H1>" << endl;
-  Chapter = "2.1"; // nPng = 0;
+  Chapter = "2.1"; 
   out << "<H2>" << Chapter.Data() << ". Primary Vertices</H2>" << endl;
-  BeginTable();
-  EndTable();
   EndHtml();
   return kStOK;
 }
@@ -1483,7 +1474,7 @@ void StMuMcAnalysisMaker::DrawQA(Int_t gp, Int_t pp, Int_t xx, Int_t ii) {// ver
 	subsection++;
 	SubSection = Section; SubSection += "."; SubSection += subsection;
 	out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-	BeginTable();
+	BeginTable(SubSection);
 	for (Int_t i = i1; i <= i2; i++) {
 	  h3s[0] = fHistsT[k][type][particle][kPositive][x][i];
 	  h3s[1] = fHistsT[k][type][particle][kNegative][x][i];
@@ -1553,7 +1544,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	subsection++;
 	SubSection = Section; SubSection += "."; SubSection += subsection;
 	out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-	BeginTable();
+	BeginTable(SubSection);
 	for (Int_t p = 0; p < 3; p++) { // projections
 	  TString Name(eff[i].Name);
 	  TString Title(eff[i].Title);
@@ -1698,7 +1689,7 @@ void StMuMcAnalysisMaker::DrawdEdx(Double_t lenMin) {
       subsection++;
       SubSection = Section; SubSection += "."; SubSection += subsection;
       out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-      BeginTable();
+      BeginTable(SubSection);
       for (Int_t var = 0; var < NdEdxPiD; var++) {
 	TH3F *h3s[2] = {LdEdx[gp][hyp][0][var], LdEdx[gp][hyp][1][var]};
 	if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
@@ -1729,7 +1720,7 @@ void StMuMcAnalysisMaker::DrawToF() {
       subsection++;
       SubSection = Section; SubSection += "."; SubSection += subsection;
       out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-      BeginTable();
+      BeginTable(SubSection);
       for (Int_t var = 0; var < NToFPiD; var++) {
 	TH3F *h3s[2] = {LToF[gp][hyp][0][var], LToF[gp][hyp][1][var]};
 	if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
@@ -1745,46 +1736,78 @@ void StMuMcAnalysisMaker::DrawToF() {
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::BeginHtml() {
-  out << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" << endl;
-  out << "<html> " << endl;
-  out << "  <head>" << endl;
-  out << "    <title>Reconstruction versus Simulation</title>" << endl;
-  out << "  </head>" << endl;
-  out << "  <body>" << endl;
-  out << "    <h1>Reconstruction versus Simulation</h1>" << endl;
-  out << "    <h2>Legend</h2>" << endl;
-  out << "<p>The plots are designed to answer on the following questions:" << endl;
-  out << "  <ul>" << endl;
-  out << "      <li> What tracks (globals and primaries) can be considered as \"good\" ones depending on total no. of fit points and no. of bad hits ? </li>" << endl;
-  out << "      <li> What is the track parameters and their errors dependence on the track kinematics (&phi;, &eta;, 1/pT) ? </li>" << endl;
-  out << "      <li> What is the track paramerer pulls dependence on above kinematics ? </li>" << endl;
-  out << "      <li> What is the track reconstruction efficiencies for : </li>" << endl;
-  out << "      <ul>" << endl;
-  out << "           <li> Geometrical acceptance (MC only), </li>" << endl;
-  out << "           <li> Reconstruction effiency for track with only match between MC and RC </li>" << endl;
-  out << "           <li> Clones, for multiple (>1) match between single MC track to RC one, </li>" << endl;
-  out << "           <li> Lost tracks, MC tracks which have no RC partner. </li>" << endl;
-  out << "           <li> Ghost tracks, RC tracks which have no MC partner. </li>" << endl;
-  out << "      </ul> " << endl;
-  out << "      <li> Color scheme: <font color=black>&nbsp;&bull; Positive</font> and <font color=red>&nbsp;&bull; Negative</font> Tracks. </li>" << endl;
-  out << "      <li> Results of Gauss fit for slices are presented as &bull; for &mu; and as  box for &sigma;.  </li>" << endl;
-  out << "  </ul>" << endl;
+  out << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+"<html> \n"
+"  <head>\n"
+"    <title>Reconstruction versus Simulation</title>\n"
+"  </head>\n"
+"  <body>\n"
+"    <h1>Reconstruction versus Simulation</h1>\n"
+"    <h2>Legend</h2>\n"
+"<p>The plots are designed to answer on the following questions:\n"
+"  <ul>\n"
+"      <li> What tracks (globals and primaries) can be considered as \"good\" ones depending on total no. of fit points and no. of bad hits ? </li>\n"
+"      <li> What is the track parameters and their errors dependence on the track kinematics (&phi;, &eta;, 1/pT) ? </li>\n"
+"      <li> What is the track paramerer pulls dependence on above kinematics ? </li>\n"
+"      <li> What is the track reconstruction efficiencies for : </li>\n"
+"      <ul>\n"
+"           <li> Geometrical acceptance (MC only), </li>\n"
+"           <li> Reconstruction effiency for track with only match between MC and RC </li>\n"
+"           <li> Clones, for multiple (>1) match between single MC track to RC one, </li>\n"
+"           <li> Lost tracks, MC tracks which have no RC partner. </li>\n"
+"           <li> Ghost tracks, RC tracks which have no MC partner. </li>\n"
+"      </ul> \n"
+"      <li> Color scheme: <font color=black>&nbsp;&bull; Positive</font> and <font color=red>&nbsp;&bull; Negative</font> Tracks. </li>\n"
+"      <li> Results of Gauss fit for slices are presented as &bull; for &mu; and as  box for &sigma;.  </li>\n"
+"  </ul>\n"
+"<hr>\n"
+"      <?php\n"
+"$DD = 'Hijing.AuAu200.';\n"
+"$dirs = array(\n"
+"	      'G3E',\n"
+"	      'VMCE',\n"
+"	      'VMCE-bbc'\n"
+"	      );\n"
+"$figNo = 0;\n"
+"function build_table($section,$figNo,$DD,$dirs,$figs) {\n"
+"  // start table\n"
+"  $html = '<table width=\"90%\" border=\"1\" cellspacing=\"2\" cellpadding=\"0\">';\n"
+"  // header row\n"
+"  $html .= '<tr>';\n"
+"  foreach($dirs as $dir) {\n"
+"    $html .= '<th>' . $dir . '</th>';\n"
+"  }\n"
+"  $html .= '</tr>';\n"
+"  // data rows\n"
+"  foreach( $figs as $fig) {\n"
+"    $figNo++;\n"
+"    $html .= '<tr>';\n"
+"    $dirNo = 0;\n"
+"    foreach($dirs as $dir) {\n"
+"      $dirNo++;\n"
+"      if ($dirNo == 1) {\n"
+"	$html .= '<td><a name=\"' . $section . 'Fig.' . $figNo. '\">Fig.' . $figNo . '</a>';\n"
+"      } else {\n"
+"	$html .= '<td>';\n"
+"      }\n"
+"      $html .= '<img src=\"' . $DD . $dir .'/' . $fig . '\" alt=\"\" width=\"400\" border=\"0\"></td>';\n"
+"    }\n"
+"    $html .= '</tr>';\n"
+"  }\n"
+"  // finish table and return it\n"
+"  $html .= '</table>';\n"
+"  return $html;\n"
+"}\n"
+"?>" << endl; 
 }  
 //________________________________________________________________________________
-void StMuMcAnalysisMaker::BeginTable() {
-  out << "    <table width=\"90%\" border=\"1\" cellspacing=\"2\" cellpadding=\"0\">" << endl;
-  out << "<hline>" << endl; 
-  out << "      <?php" << endl;
-  out << "$figs = array(" << endl;
-//   out << "        <tr>" << endl;
-//   out << "          <td>Sti</td><td>StiCA</td>" << endl;
-//   out << "        </tr>" << endl;
+void StMuMcAnalysisMaker::BeginTable(TString &section) {
+  nPng = 0;
+  out << "<?php echo build_table($figNo,$DD,$dirs,array(" << endl;
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::EndTable() {
-  out << ");" << endl;
-  out << "        ?>" << endl;
-  out << "</table>"  << endl;
+  out << ")); ?>" << endl;
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::EndHtml() {

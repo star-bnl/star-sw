@@ -155,10 +155,10 @@ class StMuMcAnalysisMaker : public StMaker {
   static         TH3F *GetdEdxHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var);
   static         TH3F *GetToFHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var);
   static         TString DirPath(const TH1* hist);
-  static         TString&FormName(const TH1 *hist);  
+  static         TString &FormName(const TH1 *hist);  
   static void    BeginHtml();
   static void    EndHtml();
-  static void    BeginTable();
+  static void    BeginTable(TString &section);
   static void    EndTable();
   static void    SetGEANTLabels(TAxis *x);
   static void    PrintMem(const Char_t *opt = "");
