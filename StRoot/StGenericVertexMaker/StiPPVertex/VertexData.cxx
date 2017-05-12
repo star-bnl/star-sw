@@ -2,9 +2,9 @@
 #include <cmath>
 #include "math_constants.h"
 
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 
-#include "VertexData.h"
+#include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 //==========================================================
 //==========================================================
 VertexData::VertexData(int vertexId) {

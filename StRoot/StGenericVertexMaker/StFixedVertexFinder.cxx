@@ -1,20 +1,20 @@
 /*
  *  StFixedVertexFinder.cxx
- *  $Id: StFixedVertexFinder.cxx,v 1.6 2017/01/03 22:17:36 smirnovd Exp $
+ *  $Id: StFixedVertexFinder.cxx,v 1.7 2017/05/12 18:37:23 smirnovd Exp $
  *
  *  Author Lee Barnby (University of Birmingham) May 2006.
  *
  */
 
-#include <StEventTypes.h>
-#include <StEnumerations.h>
-#include <StMessMgr.h>
+#include <StEvent/StEventTypes.h>
+#include <StEvent/StEnumerations.h>
+#include <St_base/StMessMgr.h>
 
 
-#include "StFixedVertexFinder.h"
-#include "StMcEvent.hh"
-#include "StMcVertex.hh"
-#include "StMaker.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
+#include "StMcEvent/StMcEvent.hh"
+#include "StMcEvent/StMcVertex.hh"
+#include "StChain/StMaker.h"
 
 
 StFixedVertexFinder::StFixedVertexFinder(){
@@ -84,6 +84,12 @@ void StFixedVertexFinder::SetVertexPosition(double x, double y, double z){
 
 /*
  * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.7  2017/05/12 18:37:23  smirnovd
+ * Cosmetic changes
+ *
+ * Removed log messages from source files
+ * Prefixed included headers with paths to respective modules
+ *
  * Revision 1.6  2017/01/03 22:17:36  smirnovd
  * [Stylistic] Changed public addVertex() to accept references
  *

@@ -1,7 +1,7 @@
 #ifndef BemcHitList_h
 #define BemcHitList_h
 
-#include "ScintHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 class StEmcDetector;
 class StBemcTables;
 class StEmcGeom ;

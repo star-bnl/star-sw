@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.50 2017/05/10 23:16:42 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.51 2017/05/12 18:37:24 smirnovd Exp $
  *
  */
 
@@ -13,7 +13,7 @@
 #include "StGenericVertexMaker/StiPPVertex/TrackData.h"
 #include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 
-#include "StPhysicalHelixD.hh"
+#include "StarClassLibrary/StPhysicalHelixD.hh"
 
 class TH1F;
 class TH2F;

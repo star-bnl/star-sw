@@ -1,7 +1,7 @@
 #ifndef Vertex3D_h
 #define Vertex3D_h
 
-#include "TrackData.h"
+#include "StGenericVertexMaker/StiPPVertex/TrackData.h"
 using namespace std;  // for vector
 
 class TH1;
