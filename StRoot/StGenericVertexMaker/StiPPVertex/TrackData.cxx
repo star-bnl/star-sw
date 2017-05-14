@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <cmath>
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 #include "StEvent/StDcaGeometry.h"
 
-#include "TrackData.h"
-#include "VertexData.h"
+#include "StGenericVertexMaker/StiPPVertex/TrackData.h"
+#include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 

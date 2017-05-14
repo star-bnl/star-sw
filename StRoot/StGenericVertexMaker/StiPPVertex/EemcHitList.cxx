@@ -3,20 +3,20 @@
 #include <assert.h>
 #include <cmath>
 
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "EemcHitList.h" 
+#include "StGenericVertexMaker/StiPPVertex/EemcHitList.h"
 
-#include "StMaker.h"
+#include "StChain/StMaker.h"
 #include "StEEmcUtil/database/StEEmcDb.h"
 #include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 
-#include "StEmcDetector.h"
-#include "StEmcModule.h"
-#include "StEmcRawHit.h"
+#include "StEvent/StEmcDetector.h"
+#include "StEvent/StEmcModule.h"
+#include "StEvent/StEmcRawHit.h"
 
 
 //Z=270, 288,306 cm 

@@ -1498,7 +1498,7 @@ bool ComponentTcad2d::ReadDataset(std::ifstream& datafile,
 
   enum DataSet {
     ElectrostaticPotential,
-    ElectricField,
+    EField,
     eDriftVelocity,
     hDriftVelocity,
     eMobility,
@@ -1513,7 +1513,7 @@ bool ComponentTcad2d::ReadDataset(std::ifstream& datafile,
   if (dataset == "ElectrostaticPotential") {
     ds = ElectrostaticPotential;
   } else if (dataset == "ElectricField") {
-    ds = ElectricField;
+    ds = EField;
   } else if (dataset == "eDriftVelocity") {
     ds = eDriftVelocity;
   } else if (dataset == "hDriftVelocity") {
@@ -1539,7 +1539,7 @@ bool ComponentTcad2d::ReadDataset(std::ifstream& datafile,
   } 
 
   bool isVector = false;
-  if (ds == ElectricField || 
+  if (ds == EField || 
       ds == eDriftVelocity || ds == hDriftVelocity) {
     isVector = true;
   }
@@ -1633,7 +1633,7 @@ bool ComponentTcad2d::ReadDataset(std::ifstream& datafile,
       case ElectrostaticPotential:
         m_vertices[ivertex].p = val1;
         break;
-      case ElectricField:
+      case EField:
         m_vertices[ivertex].ex = val1;
         m_vertices[ivertex].ey = val2;
         break;
