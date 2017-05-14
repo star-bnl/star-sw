@@ -261,44 +261,44 @@ void StPxlDb::Print(Option_t *opt) const
 {
    LOG_INFO << "Print all StPxlDb matrices:" << endm;
 #ifndef __NEW_PXLDB__
-   mGeoHMatrixTpcOnGlobal->Print();
+   geoHMatrixTpcOnGlobal()->Print();
 #else /* __NEW_PXLDB__ */
    gStTpcDb->Tpc2GlobalMatrix().Print();
 #endif /* !__NEW_PXLDB__ */
-   mGeoHMatrixIdsOnTpc.Print();
-   mGeoHMatrixPstOnIds.Print();
-   mGeoHMatrixPxlOnPst.Print();
+   geoHMatrixIdsOnTpc()->Print();
+   geoHMatrixPstOnIds()->Print();
+   geoHMatrixPxlOnPst()->Print();
 
    LOG_INFO << "geoHMatrix pxl half on pxl: " << endm;
    for (int i = 0; i < 2; i++) {
-      mGeoHMatrixHalfOnPxl[i].Print();
+     geoHMatrixHalfOnPxl(i+1)->Print();
    }
 
    LOG_INFO << "geoHMatrix pxl sector on half: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++) {
-      mGeoHMatrixSectorOnHalf[i].Print();
-      TGeoHMatrix sectorOnPxl = mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i];
-      sectorOnPxl.SetName(Form("sectorOnPxl%02i%03i",i/5,i));
-      sectorOnPxl.Print();
+     geoHMatrixSectorOnHalf(i+1)->Print();
+     TGeoHMatrix sectorOnPxl = (*geoHMatrixHalfOnPxl(i / 5 + 1)) * (*geoHMatrixSectorOnHalf(i+1));
+     sectorOnPxl.SetName(Form("sectorOnPxl%02i%03i",i/5,i));
+     sectorOnPxl.Print();
    }
 
    LOG_INFO << "geoHMatrix pxl ladder on sector: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++) {
-         mGeoHMatrixLadderOnSector[i][j].Print();
+	geoHMatrixLadderOnSector(i+1,j+1)->Print();
       }
 
    LOG_INFO << "geoHMatrix pxl sensor on ladder: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
-            mGeoHMatrixSensorOnLadder[i][j][k].Print();
+	   geoHMatrixSensorOnLadder(i+1,j+1,k+1)->Print();
          }
-
+   
    LOG_INFO << "geoHMatrix pxl sensor on global: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
-      for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
-         for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
-            mGeoHMatrixSensorOnGlobal[i][j][k].Print();
-         }
+     for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
+       for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
+	 geoHMatrixSensorOnGlobal(i+1,j+1,k+1)->Print();
+       }
 }
