@@ -145,7 +145,7 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
     if (istat >= 10) {
       if (ipdg > 999990) {
 	if (ipdg == 999999) {
-	  for (Int_t i = 0; i < 4; i++) IdEvHep[i] = (int) Pxyz[i]; Mass = Pxyz[4];
+	  for (Int_t i = 0; i < 4; i++) {IdEvHep[i] = (int) Pxyz[i]; Mass = Pxyz[4];}
 	  NpHEP=ip;
 	} else {
 	  if ( ipdg == 999998) {for (Int_t i = 0; i < 4; i++) Hpar[i] = Pxyz[i];}

@@ -35,7 +35,7 @@ void StarMCPrimaryGenerator::SetStack(StarParticleStack *stack) {
   //  Int_t itrk = -1;
   Int_t ntr  =  0;
   Int_t nop  = stack->Particles()->GetEntriesFast();
-  map<Int_t,Int_t> IdOld2New;
+  std::map<Int_t,Int_t> IdOld2New;
   for (Int_t i = 0; i < nop; i++) {
     //  while ((part = stack->PopNextTrack(itrk))) {
     IdOld2New[i] = -1;
