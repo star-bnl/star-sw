@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.h,v 2.2 2016/12/15 16:30:08 ullrich Exp $
+ * $Id: StTriggerData2017.h,v 2.3 2017/05/13 00:59:54 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.h,v $
+ * Revision 2.3  2017/05/13 00:59:54  ullrich
+ * Added bbcBB101() and bbcBB102().
+ *
  * Revision 2.2  2016/12/15 16:30:08  ullrich
  * Updates from Jeff.
  *
@@ -107,6 +110,8 @@ public:
     unsigned short bbcTacSum() const;
     unsigned short bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcTimeDifferenceLarge() const;
+    unsigned short bbcBB101(int ch, int prepost=0) const;
+    unsigned short bbcBB102(int ch, int prepost=0) const;
     
     // FPD
     unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
