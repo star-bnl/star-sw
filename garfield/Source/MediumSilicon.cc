@@ -1296,7 +1296,7 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
 }
 
 bool MediumSilicon::GetIonisationProduct(const unsigned int i, int& type,
-                                         double& energy) {
+                                         double& energy) const {
 
   if (i >= m_ionProducts.size()) {
     std::cerr << m_className << "::GetIonisationProduct:\n"

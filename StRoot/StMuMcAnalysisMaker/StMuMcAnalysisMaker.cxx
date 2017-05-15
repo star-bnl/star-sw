@@ -13,6 +13,9 @@
 #include "KFPTrack.h"
 #include "StKFParticleInterface.h"
 #include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
+StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
+static Int_t iBreak = 0;
+//#define __PLOT_VERTEX__
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
@@ -26,8 +29,11 @@ static const Char_t *TitlePiDtype[NoPiDs] = {"dEdxPiD", "ToFPiD"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};	  
 static const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
 					 "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
+#if 0
 static const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar"
 					 "e+","p"   ,"K+","pi+","mu+","d"   ,"t"   ,"He3"    ,"alpha"};
+
+#endif
 static const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417,
 				       0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 static const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
@@ -36,12 +42,14 @@ static const Int_t PiDHyp[NHYPS]     = {kPidElectron, kPidProton, kPidKaon, kPid
 					kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha};
 static const Int_t PiDpm[NHYPS]      = {kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative,
 					kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive};
+#if 0
 static const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
 static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN70B","muN70B","deuteronN70B","tritonN70B","He3N70B","alphaN70B",
 				    "eP70B","protonP70B","kaonP70B","piP70B","muP70B","deuteronP70B","tritonP70B","He3P70B","alphaP70B"};
 static const Char_t *HistNameP[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","He3PzB","alphaPzB"};
+#endif
 static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
@@ -54,6 +62,7 @@ static TString SubSection;
 //________________________________________________________________________________
 StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name) {
   memset(mBeg,0,mEnd-mBeg+1);
+  fgStMuMcAnalysisMaker = this;
 }
 //________________________________________________________________________________
 StMuMcAnalysisMaker::~StMuMcAnalysisMaker() {
@@ -118,7 +127,9 @@ Int_t StMuMcAnalysisMaker::Init(){
   if (f) {
     f->cd();
     BookTrackPlots();
+#ifdef __PLOT_VERTEX__
     BookVertexPlots();
+#endif /* __PLOT_VERTEX__ */
   }
   return kStOK;
 }
@@ -298,7 +309,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	    for (Int_t i = i1; i < kTotalQAll; i++) {
 	      if (gp == kGlobal && plotVar[i].GlobalOnly <  0) continue;
 	      if (gp == kPrimary && plotVar[i].GlobalOnly == 0) continue;
-	      if (fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name)) continue;
+	      if ((fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name))) continue;
 	      if (! x) {// No.Hits
 		if (i == kTotalQA) continue;
 		fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
@@ -521,7 +532,9 @@ Int_t StMuMcAnalysisMaker::Make(){
       muDst->printMcTracks();
     }
   FillTrackPlots();
+#ifdef __PLOT_VERTEX__
   FillVertexPlots();
+#endif /* __PLOT_VERTEX__ */
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -533,7 +546,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
   // =============  Build map between  Rc and Mc vertices 
   //  multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
   // Loop over Mc Tracks
-  for (Int_t m = 0; m < muDst->numberOfMcTracks(); m++) {
+  for (UInt_t m = 0; m < muDst->numberOfMcTracks(); m++) {
     StMuMcTrack *mcTrack = muDst->MCtrack(m);
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
@@ -678,7 +691,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	// ToF
 	const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
 	Float_t pathLength = btofPid.pathLength();
-	Float_t timeOfFlight = btofPid.timeOfFlight();
+	//	Float_t timeOfFlight = btofPid.timeOfFlight();
 	Float_t beta = btofPid.beta();
 	
 	//	const StThreeVectorF &pVx  = Track->momentum();
@@ -715,7 +728,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     }
   }
   // check for ghost
-  for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
+  for (UInt_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
     StMuTrack *gTrack = muDst->globalTracks(kg);
     if ( ! muDst->Accept(gTrack)) continue;
     if ( gTrack->idTruth()) continue;
@@ -723,13 +736,13 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     if (gTrack->charge() < 0) pm = kNegative;
     fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
   }
-  for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
+  for (UInt_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
     StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
     if (Vtx->idTruth() != 1) continue;
-    for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       if (! pTrack) continue;
-      if (pTrack->vertexIndex() != l) continue;
+      if (pTrack->vertexIndex() != (Int_t) l) continue;
       if (! muDst->Accept(pTrack)) continue;
       if ( pTrack->idTruth()) {
 	if (pTrack->idParentVx() == 1) continue;
@@ -746,9 +759,9 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   StMuDst::instance()->printKFTracks();
   //  return;
   static Int_t nTracksAll = 0;
-  static Int_t nTracksGhost = 0;
+  //  static Int_t nTracksGhost = 0;
   static Int_t nStiVertex = 0;
-  static Int_t nKFVertex = 0;
+  //  static Int_t nKFVertex = 0;
   Int_t NoMuMcVertices = StMuDst::instance()->numberOfMcVertices(); //if (_debugAsk) cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices << std::endl;
   Int_t NoMuMcTracks = StMuDst::instance()->numberOfMcTracks();
   if (! NoMuMcVertices || ! NoMuMcTracks) {
@@ -778,7 +791,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   vector< vector<int> > PrimTracks(NoPrimaryVertices);
   
   float bestRank=-1000000;
-  int bestPV=-1;
+  //  int bestPV=-1;
   
   for (Int_t l = 0; l < NoStVertices; l++) {//NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
@@ -786,7 +799,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     //       Vtx->Print();
     if (bestRank < Vtx->ranking()) {
       bestRank = Vtx->ranking();
-      bestPV = l;
+      //      bestPV = l;
     }
     //convert StMuPrimaryVertex to KFVertex
     KFPVertex primVtx_tmp;
@@ -864,8 +877,8 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     } 
     track.SetCharge(q);
         
-    bool isSecondary = true;
-    const StMuTrack *primTrack = gTrack->primaryTrack();
+    //    bool isSecondary = true;
+    //    const StMuTrack *primTrack = gTrack->primaryTrack();
 //     if(primTrack)
 //     {
 //       const int iPV = primTrack->vertexIndex(); 
@@ -1207,6 +1220,8 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   pngName.ReplaceAll("<","lt");
   pngName.ReplaceAll(">","gt");
   pngName.ReplaceAll(".","_");
+  pngName.ReplaceAll("+","_");
+  pngName.ReplaceAll("-","_");
   pngName.ReplaceAll("/","_");
   pngName.ReplaceAll("^","_");
   pngName.ReplaceAll("__","_");
@@ -1217,8 +1232,17 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   TVirtualX::Instance()->WritePixmap(c->GetCanvasID(),-1,-1,(Char_t *)pngName.Data());
   nPng++;
   cout << "Draw #\t" << nPng << "\t" << pngName << endl;
+  if (pngName.Contains("dEdxPiD_kaon") ||
+      pngName.Contains("dEdxPiD_muon") ||
+      pngName.Contains("dEdxPiD_pion")) {
+    iBreak++;
+  }
   TString FigNo; /* (SubSection); FigNo += ".";*/ 
   FigNo += nPng;
+#if 1
+  if (nPng != 1) out << ",";
+  out << "\'" << pngName.Data() << "\'" << endl;
+#else
   Bool_t commentIt = kFALSE;
   if (pngName.Contains("_EtapT_ChiSqXY_yx_pfx.png") ||
       pngName.Contains("_EtapT_Phi_zx_1.png") ||
@@ -1239,6 +1263,7 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   out << "<td></a><img src=\"StiCA/" << pngName.Data() << "\" alt=\"\" width=\"400\" border=\"0\"></td>" << endl;
   out << "</tr>" << endl;
   if (commentIt) out << "-->" << endl;
+#endif
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t amax) {
@@ -1376,26 +1401,27 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
   }
 }
 //_____________________________________________________________________________
-Int_t StMuMcAnalysisMaker::Draw(){
+Int_t StMuMcAnalysisMaker::DrawAll(){
   if (! Check()) return kStOk;
-  TString Out("indexMc.html");
+  TString Out("indexMc.php");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   BeginHtml();
   out << "<H1>1. Tracks</H1>" << endl;
-  Chapter = "1.1"; // nPng = 0;
+  Chapter = "1.1"; 
   out << "<H2>" << Chapter.Data() << ". Quality of reconstructed tracks with respect to MC.</H2>" << endl;
   DrawQA();
-  Chapter = "1.2"; // nPng = 0;
+  Chapter = "1.2"; 
   out << "<H2>" << Chapter.Data() << ". Track reconstuction efficiencies.</H2>" << endl;
   DrawEff();
-  Chapter = "1.3"; // nPng = 0;
+  Chapter = "1.3"; 
   out << "<H2>" << Chapter.Data() << ". TPC dE/dx PiD.</H2>" << endl;
   DrawdEdx();
-  Chapter = "1.4"; // nPng = 0;
+  Chapter = "1.4"; 
   out << "<H2>" << Chapter.Data() << ". ToF PiD</H2>" << endl;
   DrawToF();
   out << "<H1>2. Vertices</H1>" << endl;
-  Chapter = "2.1"; // nPng = 0;
+  Chapter = "2.1"; 
+  out << "<H2>" << Chapter.Data() << ". Primary Vertices</H2>" << endl;
   EndHtml();
   return kStOK;
 }
@@ -1448,7 +1474,7 @@ void StMuMcAnalysisMaker::DrawQA(Int_t gp, Int_t pp, Int_t xx, Int_t ii) {// ver
 	subsection++;
 	SubSection = Section; SubSection += "."; SubSection += subsection;
 	out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-	BeginTable();
+	BeginTable(SubSection);
 	for (Int_t i = i1; i <= i2; i++) {
 	  h3s[0] = fHistsT[k][type][particle][kPositive][x][i];
 	  h3s[1] = fHistsT[k][type][particle][kNegative][x][i];
@@ -1518,7 +1544,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	subsection++;
 	SubSection = Section; SubSection += "."; SubSection += subsection;
 	out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-	BeginTable();
+	BeginTable(SubSection);
 	for (Int_t p = 0; p < 3; p++) { // projections
 	  TString Name(eff[i].Name);
 	  TString Title(eff[i].Title);
@@ -1572,7 +1598,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
 	    else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
 	    heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
-	    heff[l]->SetYTitle(Form("%s (%)",eff[i]));
+	    heff[l]->SetYTitle(Form("%s (%%)",eff[i].Title));
 	    heff[l]->SetStats(0);
 	    heff[l]->SetMarkerColor(l+1);
 	    heff[l]->SetLineColor(l+1);
@@ -1663,7 +1689,7 @@ void StMuMcAnalysisMaker::DrawdEdx(Double_t lenMin) {
       subsection++;
       SubSection = Section; SubSection += "."; SubSection += subsection;
       out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-      BeginTable();
+      BeginTable(SubSection);
       for (Int_t var = 0; var < NdEdxPiD; var++) {
 	TH3F *h3s[2] = {LdEdx[gp][hyp][0][var], LdEdx[gp][hyp][1][var]};
 	if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
@@ -1694,7 +1720,7 @@ void StMuMcAnalysisMaker::DrawToF() {
       subsection++;
       SubSection = Section; SubSection += "."; SubSection += subsection;
       out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-      BeginTable();
+      BeginTable(SubSection);
       for (Int_t var = 0; var < NToFPiD; var++) {
 	TH3F *h3s[2] = {LToF[gp][hyp][0][var], LToF[gp][hyp][1][var]};
 	if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
@@ -1710,41 +1736,78 @@ void StMuMcAnalysisMaker::DrawToF() {
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::BeginHtml() {
-  out << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" << endl;
-  out << "<html> " << endl;
-  out << "  <head>" << endl;
-  out << "    <title>Reconstruction versus Simulation</title>" << endl;
-  out << "  </head>" << endl;
-  out << "  <body>" << endl;
-  out << "    <h1>Reconstruction versus Simulation</h1>" << endl;
-  out << "    <h2>Legend</h2>" << endl;
-  out << "<p>The plots are designed to answer on the following questions:" << endl;
-  out << "  <ul>" << endl;
-  out << "      <li> What tracks (globals and primaries) can be considered as \"good\" ones depending on total no. of fit points and no. of bad hits ? </li>" << endl;
-  out << "      <li> What is the track parameters and their errors dependence on the track kinematics (&phi;, &eta;, 1/pT) ? </li>" << endl;
-  out << "      <li> What is the track paramerer pulls dependence on above kinematics ? </li>" << endl;
-  out << "      <li> What is the track reconstruction efficiencies for : </li>" << endl;
-  out << "      <ul>" << endl;
-  out << "           <li> Geometrical acceptance (MC only), </li>" << endl;
-  out << "           <li> Reconstruction effiency for track with only match between MC and RC </li>" << endl;
-  out << "           <li> Clones, for multiple (>1) match between single MC track to RC one, </li>" << endl;
-  out << "           <li> Lost tracks, MC tracks which have no RC partner. </li>" << endl;
-  out << "           <li> Ghost tracks, RC tracks which have no MC partner. </li>" << endl;
-  out << "      </ul> " << endl;
-  out << "      <li> Color scheme: <font color=black>&nbsp;&bull; Positive</font> and <font color=red>&nbsp;&bull; Negative</font> Tracks. </li>" << endl;
-  out << "      <li> Results of Gauss fit for slices are presented as &bull; for &mu; and as  box for &sigma;.  </li>" << endl;
-  out << "  </ul>" << endl;
+  out << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+"<html> \n"
+"  <head>\n"
+"    <title>Reconstruction versus Simulation</title>\n"
+"  </head>\n"
+"  <body>\n"
+"    <h1>Reconstruction versus Simulation</h1>\n"
+"    <h2>Legend</h2>\n"
+"<p>The plots are designed to answer on the following questions:\n"
+"  <ul>\n"
+"      <li> What tracks (globals and primaries) can be considered as \"good\" ones depending on total no. of fit points and no. of bad hits ? </li>\n"
+"      <li> What is the track parameters and their errors dependence on the track kinematics (&phi;, &eta;, 1/pT) ? </li>\n"
+"      <li> What is the track paramerer pulls dependence on above kinematics ? </li>\n"
+"      <li> What is the track reconstruction efficiencies for : </li>\n"
+"      <ul>\n"
+"           <li> Geometrical acceptance (MC only), </li>\n"
+"           <li> Reconstruction effiency for track with only match between MC and RC </li>\n"
+"           <li> Clones, for multiple (>1) match between single MC track to RC one, </li>\n"
+"           <li> Lost tracks, MC tracks which have no RC partner. </li>\n"
+"           <li> Ghost tracks, RC tracks which have no MC partner. </li>\n"
+"      </ul> \n"
+"      <li> Color scheme: <font color=black>&nbsp;&bull; Positive</font> and <font color=red>&nbsp;&bull; Negative</font> Tracks. </li>\n"
+"      <li> Results of Gauss fit for slices are presented as &bull; for &mu; and as  box for &sigma;.  </li>\n"
+"  </ul>\n"
+"<hr>\n"
+"      <?php\n"
+"$DD = 'Hijing.AuAu200.';\n"
+"$dirs = array(\n"
+"	      'G3E',\n"
+"	      'VMCE',\n"
+"	      'VMCE-bbc'\n"
+"	      );\n"
+"$figNo = 0;\n"
+"function build_table($section,$figNo,$DD,$dirs,$figs) {\n"
+"  // start table\n"
+"  $html = '<table width=\"90%\" border=\"1\" cellspacing=\"2\" cellpadding=\"0\">';\n"
+"  // header row\n"
+"  $html .= '<tr>';\n"
+"  foreach($dirs as $dir) {\n"
+"    $html .= '<th>' . $dir . '</th>';\n"
+"  }\n"
+"  $html .= '</tr>';\n"
+"  // data rows\n"
+"  foreach( $figs as $fig) {\n"
+"    $figNo++;\n"
+"    $html .= '<tr>';\n"
+"    $dirNo = 0;\n"
+"    foreach($dirs as $dir) {\n"
+"      $dirNo++;\n"
+"      if ($dirNo == 1) {\n"
+"	$html .= '<td><a name=\"' . $section . 'Fig.' . $figNo. '\">Fig.' . $figNo . '</a>';\n"
+"      } else {\n"
+"	$html .= '<td>';\n"
+"      }\n"
+"      $html .= '<img src=\"' . $DD . $dir .'/' . $fig . '\" alt=\"\" width=\"400\" border=\"0\"></td>';\n"
+"    }\n"
+"    $html .= '</tr>';\n"
+"  }\n"
+"  // finish table and return it\n"
+"  $html .= '</table>';\n"
+"  return $html;\n"
+"}\n"
+"?>" << endl; 
 }  
 //________________________________________________________________________________
-void StMuMcAnalysisMaker::BeginTable() {
-  out << "    <table width=\"90%\" border=\"1\" cellspacing=\"2\" cellpadding=\"0\">" << endl;
-  out << "        <tr>" << endl;
-  out << "          <td>Sti</td><td>StiCA</td>" << endl;
-  out << "        </tr>" << endl;
+void StMuMcAnalysisMaker::BeginTable(TString &section) {
+  nPng = 0;
+  out << "<?php echo build_table($figNo,$DD,$dirs,array(" << endl;
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::EndTable() {
-  out << "</table>"  << endl;
+  out << ")); ?>" << endl;
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::EndHtml() {

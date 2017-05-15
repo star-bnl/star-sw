@@ -5,15 +5,15 @@
 
 #include "TObjectSet.h"
 
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "BtofHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/BtofHitList.h"
 
-#include "StMaker.h"
+#include "StChain/StMaker.h"
 #include "StBTofUtil/StBTofGeometry.h"
 #include "StBTofUtil/StBTofTables.h"
-#include "StBTofCollection.h"
+#include "StEvent/StBTofCollection.h"
 
 
 //==========================================================
@@ -21,7 +21,8 @@
 BtofHitList::BtofHitList() :
   // phi, 60 bins
   // eta, 32*2 bins not with the same width, so eta0,deta are really not used
-  ScintHitList(0.,M_PI/60,60, -0.9,0.028125,64,"Btof",4,0.75) {
+  ScintHitList(0.,M_PI/60,60, -0.9,0.028125,64,"Btof",4,0.75)
+{
   myTable = new StBTofTables();
 }
 

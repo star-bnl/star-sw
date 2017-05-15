@@ -1,14 +1,14 @@
 #ifndef StCtbUtility_h
 #define StCtbUtility_h
 /*********************************************************************
- * $Id: StCtbUtility.h,v 1.3 2005/03/11 22:23:53 balewski Exp $
+ * $Id: StCtbUtility.h,v 1.4 2017/05/12 18:37:23 smirnovd Exp $
  *********************************************************************
  * utility function for CTB, used by the vertex finder(s)
  */
 
 #include <vector>
-#include <StObject.h> // just to make 'vector' working, JB
-#include "St_DataSet.h"
+#include <St_base/StObject.h> // just to make 'vector' working, JB
+#include "Star2Root/St_DataSet.h"
 class StTriggerData;
 
 class StCtbUtility {
@@ -47,6 +47,12 @@ class StCtbUtility {
 
 /*
  * $Log: StCtbUtility.h,v $
+ * Revision 1.4  2017/05/12 18:37:23  smirnovd
+ * Cosmetic changes
+ *
+ * Removed log messages from source files
+ * Prefixed included headers with paths to respective modules
+ *
  * Revision 1.3  2005/03/11 22:23:53  balewski
  * towards PPV
  *

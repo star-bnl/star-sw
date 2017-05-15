@@ -1,7 +1,9 @@
 #include <assert.h>
+#include "Riostream.h"
 #include "StG2TrackVertexMap.h"
 #include "TVector3.h"
 StG2TrackVertexMap *StG2TrackVertexMap::fgInstance = 0;
+static Int_t _debug = 0;
 //________________________________________________________________________________
 StG2TrackVertexMap *StG2TrackVertexMap::instance(St_g2t_track *track, St_g2t_vertex *vertex) {
   if (! fgInstance) {fgInstance = new StG2TrackVertexMap(track,vertex); }
@@ -31,7 +33,7 @@ void StG2TrackVertexMap::Reset(St_g2t_track *track, St_g2t_vertex *vertex) {
       Int_t IdVxP = t[IdP].start_vertex_p - 1; assert(IdVxP >= 0 && IdVxP < NV);
       TVector3 Vx2(v[IdVxP].ge_x);
       Vx2 -= Vx1;
-      if ((Vx2.Mag() < 10e-4 && TMath::Abs(tof1-v[IdVxP].ge_tof) < 1e-9)) {
+      while ((IdVxP > 0 && IdV != IdVxP && Vx2.Mag() < 10e-4 && TMath::Abs(tof1-v[IdVxP].ge_tof) < 1e-9)) {
 	IdV = IdVxP;
 	IdP = v[IdV].parent_p - 1; if (IdP < 0) break;
 	IdVxP = t[IdP].start_vertex_p - 1;  if (IdVxP < 0) break;
@@ -44,4 +46,30 @@ void StG2TrackVertexMap::Reset(St_g2t_track *track, St_g2t_vertex *vertex) {
   for (Int_t i = 0; i < NV; i++) {
     fVertex2ParentTrack[v[i].id] = v[i].parent_p;
   }
+  if (_debug) {
+    Print();
+  }
+}
+//________________________________________________________________________________
+void StG2TrackVertexMap::Print(Option_t *option) const {
+  cout << "StG2TrackVertexMap:";
+  if (fVertex) cout << " No.g2tVertices = " << fVertex->GetNRows();
+  if (fTrack)  cout << " No.g2tTracks = " << fTrack->GetNRows();
+  cout << endl;
+  cout << "Track to Vertex map" << endl;
+  Int_t t = 0;
+  for (auto x : fTrack2Vertex) {
+    if (t > 0 && t%5 == 0) cout << endl;
+    cout << "V[" << x.first << "] = " << x.second << "\t" << IdVertex(x.first) << "\t";
+    t++;
+  }
+  cout << endl;
+  cout << "Vertex to Parent track map" << endl;
+  t = 0;
+  for (auto x : fVertex2ParentTrack) {
+    if (t > 0 && t%5 == 0) cout << endl;
+    cout << "T[" << x.first << "] = " << x.second << "\t" << IdParentTrack(x.first) << "\t";
+    t++;
+  }
+  cout << endl;
 }

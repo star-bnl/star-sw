@@ -25,9 +25,11 @@ void Db(const Char_t *tabNam  =
   Int_t T = time;
   if (D <= 0) {
     TDatime dt;
+    Int_t i = dt.Convert(kTRUE); // to GMT
+    dt.Set(i);
     D = dt.GetDate();
     T = dt.GetTime();
-    cout << "Set Date " << D << " Time " << T << endl;
+    cout << "Set GMT Date " << D << " Time " << T << endl;
   }
   dbMk->SetDateTime(D,T); 
   TString TabNam(tabNam);

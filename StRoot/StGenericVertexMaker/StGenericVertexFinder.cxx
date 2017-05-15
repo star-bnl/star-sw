@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.50 2017/05/03 20:14:42 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.53 2017/05/12 18:37:23 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -16,13 +16,11 @@
 
 #include "StarRoot/TRMatrix.h"
 #include "StarRoot/TRSymMatrix.h"
-#include "StGenericVertexFinder.h"
-#include "StEventTypes.h"
-#include "StPrimaryVertex.h"
-#include "StMessMgr.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StEvent/StDcaGeometry.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 
@@ -99,9 +97,10 @@ void StGenericVertexFinder::FillStEvent(StEvent* event)
     //allocates new memory for each vertex
     StPrimaryVertex* primV = new StPrimaryVertex(mVertexList[i]); 
     event->addPrimaryVertex(primV,mVertexOrderMethod);
-    LOG_INFO << "StGenericVertexFinder::FillStEvent: Added " <<i+1 
-		     <<" primary vertex (" << mVertexOrderMethod << ")" << endm;
   }
+
+  LOG_INFO << "StGenericVertexFinder::FillStEvent: Added " << mVertexList.size()
+           <<" primary vertices using ordering method: " << mVertexOrderMethod << endm;
 
   // Use StEvent's ordering
   // (might be undesirable for some debugging)
@@ -185,8 +184,10 @@ StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 }
 
 
-void StGenericVertexFinder::InitRun(int runumber, const St_db_Maker* db_maker)
+void StGenericVertexFinder::InitRun(int run_number, const St_db_Maker* db_maker)
 {
+   LOG_INFO << "StGenericVertexFinder::InitRun(run_number=" << run_number << ")" << endm;
+
    // Check if all necessary conditions satisfied
    bool prerequisites = db_maker && star_vertex::requiresBeamline(mVertexFitMode);
 

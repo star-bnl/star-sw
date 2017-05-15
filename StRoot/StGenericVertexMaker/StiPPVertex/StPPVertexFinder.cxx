@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.110 2017/05/03 20:14:43 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.115 2017/05/12 18:37:51 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -9,7 +9,7 @@
  *
  ************************************************************/
    
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 
 #include "TFile.h"
 #include "TH1D.h"
@@ -19,10 +19,9 @@
 
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
 
-#include "StPPVertexFinder.h"
-#include <StEventTypes.h>
-#include "StGenericVertexMaker.h"
-#include "St_VertexCutsC.h"
+#include "StGenericVertexMaker/StiPPVertex/StPPVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StGenericVertexMaker/Minuit/St_VertexCutsC.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StEnumerations.h"
@@ -43,13 +42,13 @@
 #include <StIOMaker/StIOMaker.h> // to save  local histos 
 #include <StBFChain/StBFChain.h>
 
-#include "BtofHitList.h"
-#include "CtbHitList.h"
-#include "BemcHitList.h"
-#include "EemcHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/BtofHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/CtbHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/BemcHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/EemcHitList.h"
 
-#include "StEmcCollection.h"
-#include "StBTofCollection.h"
+#include "StEvent/StEmcCollection.h"
+#include "StEvent/StBTofCollection.h"
 #include "StBTofUtil/StBTofGeometry.h"
 
 //==========================================================
@@ -62,6 +61,7 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   mAlgoSwitches(kSwitchOneHighPT),
   hA{}, hACorr(nullptr), hL(nullptr), hM(nullptr), hW(nullptr),
   HList(),
+  ntrk{},
   mMinTrkPt(0.2),
   mMaxTrkDcaRxy(3.),
   mMaxZradius(3.),
@@ -88,13 +88,13 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
   // special histogram for finding the vertex, not to be saved
-  int nb=5000;
-  float zRange=250;// (cm)
+  int   nb = 5000;
+  float zRange = 250; // (cm)
 
-  hL=new TH1D("ppvL","Vertex likelyhood; Z /cm",nb,-zRange,zRange);
+  hL = new TH1D("ppvL", "Vertex likelyhood; Z /cm", nb, -zRange, zRange);
   // needed only for  better errZ calculation
-  hM=new TH1D("ppvM","cumulative track multiplicity; Z /cm",nb,-zRange,zRange);
-  hW=new TH1D("ppvW","cumulative track weight; Z /cm",nb,-zRange,zRange);
+  hM = new TH1D("ppvM", "cumulative track multiplicity; Z /cm", nb, -zRange, zRange);
+  hW = new TH1D("ppvW", "cumulative track weight; Z /cm", nb, -zRange, zRange);
 } 
 
 
@@ -109,36 +109,25 @@ void StPPVertexFinder::Init()
   mToolkit = StiToolkit::instance();
   assert(mToolkit);          // internal error of Sti
   
-  initHisto();
-
-  LOG_INFO << "initiated histos" << endm;
-  
   // BTOF and/or CTB hits can be requested after the finder is constructed but
   // before the Init() is called. In this case we need to create the
   // corresponding hit lists if they are not available
   if (mUseBtof && !btofList) {
      btofList = new BtofHitList();
-     btofList->initHisto( &HList);
   }
 
   if (mUseCtb && !ctbList)  {
      ctbList  = new CtbHitList();
-     ctbList->initHisto(&HList);
   }
-
-  bemcList->initHisto(&HList);
-  eemcList->initHisto(&HList);
 
   LOG_INFO << "Finished Init" << endm;
 }
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::InitRun(int runnumber, const St_db_Maker* db_maker)
+void StPPVertexFinder::InitRun(int run_number, const St_db_Maker* db_maker)
 {
-  StGenericVertexFinder::InitRun(runnumber, db_maker);
-
-  LOG_INFO << "PPV InitRun() runNo="<<runnumber<<endm;
+  StGenericVertexFinder::InitRun(run_number, db_maker);
 
   int dateY = db_maker->GetDateTime().GetYear();
 
@@ -147,7 +136,7 @@ void StPPVertexFinder::InitRun(int runnumber, const St_db_Maker* db_maker)
   // a period since they can be set in the database. Here we'll assume that for
   // Runs 5 to 12 the PPV cuts are optimized and there is no need to access the
   // values from the database.
-  if (runnumber >= 6000000 && runnumber < 13000000) {
+  if (run_number >= 6000000 && run_number < 13000000) {
     // old defaults, pre-Run12
     // (important if we want to reprocess old data with different cuts!)
     LOG_INFO << "PPV InitRun() using old, hardwired cuts" << endm;
@@ -180,35 +169,32 @@ void StPPVertexFinder::InitRun(int runnumber, const St_db_Maker* db_maker)
 
   bemcList->initRun(st_db_maker);
   eemcList->initRun(st_db_maker);
-  
-  LOG_INFO 
-    << "PPV::cuts "
-    <<"\n MinNumberOfFitPointsOnTrack = unused"
-    <<"\n MinFitPfrac=nFit/nPos  = " << mMinFitPfrac 
-    <<"\n MaxTrkDcaRxy/cm= " << mMaxTrkDcaRxy
-    <<"\n MinTrkPt GeV/c = " << mMinTrkPt
-    <<"\n MinMatchTr of prim tracks = " << mMinMatchTr
-    <<"\n MaxZrange (cm)for glob tracks = " << mMaxZrange
-    <<"\n MaxZradius (cm) for prim tracks &Likelihood  = " << mMaxZradius
-    <<"\n Min/Max Z position for BTOF hit = " << mMinZBtof<<" "<<mMaxZBtof   
-    <<"\n MinAdcBemc for MIP = " << mMinAdcBemc
-    <<"\n MinAdcEemc for MIP = " << mMinAdcEemc
-    <<"\n bool  useCtb = " << mUseCtb
-    <<"\n bool useBtof = " << mUseBtof
-    <<"\n bool nFit/nPoss weighting = " << mFitPossWeighting
-    <<"\n bool DropPostCrossingTrack = " << mDropPostCrossingTrack
-    <<"\n Store # of UnqualifiedVertex = " << mStoreUnqualifiedVertex
-    <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT) <<
-               " oneTrack-vertex if track PT/GeV>"<< mCut_oneTrackPT 
-    <<"\n"
-    <<endm; 
+
+  LOG_INFO << "PPV::cuts "
+           << "\n MinNumberOfFitPointsOnTrack = unused"
+           << "\n MinFitPfrac=nFit/nPos  = " << mMinFitPfrac
+           << "\n MaxTrkDcaRxy/cm= " << mMaxTrkDcaRxy
+           << "\n MinTrkPt GeV/c = " << mMinTrkPt
+           << "\n MinMatchTr of prim tracks = " << mMinMatchTr
+           << "\n MaxZrange (cm)for glob tracks = " << mMaxZrange
+           << "\n MaxZradius (cm) for prim tracks &Likelihood  = " << mMaxZradius
+           << "\n Min/Max Z position for BTOF hit = " << mMinZBtof << " " << mMaxZBtof
+           << "\n MinAdcBemc for MIP = " << mMinAdcBemc
+           << "\n MinAdcEemc for MIP = " << mMinAdcEemc
+           << "\n bool  useCtb = " << mUseCtb
+           << "\n bool useBtof = " << mUseBtof
+           << "\n bool nFit/nPoss weighting = " << mFitPossWeighting
+           << "\n bool DropPostCrossingTrack = " << mDropPostCrossingTrack
+           << "\n Store # of UnqualifiedVertex = " << mStoreUnqualifiedVertex
+           << "\n Store=" << (mAlgoSwitches & kSwitchOneHighPT)
+           << " oneTrack-vertex if track PT/GeV>" << mCut_oneTrackPT << endm;
 }
 
 
 //==========================================================
 //==========================================================
-void 
-StPPVertexFinder::initHisto() {
+void StPPVertexFinder::initHisto()
+{
   hA[0]=new TH1F("ppvStat","event types; 1=inp, 2=trg, 3=-, 4=w/trk, 5=anyMch, 6=Bmch 7=Emch 8=anyV, 9=mulV",10,0.5,10.5);
   hA[1]=new TH1F("ch1","chi2/Dof, ppv pool tracks",100,0,10);
   hA[2]=new TH1F("nP","No. of fit points, ppv pool tracks",30,-.5,59.5);
@@ -275,13 +261,15 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
   while(1)
   {
     if ( !buildLikelihoodZ() ) break;
-    VertexData V(++vertexID);
-    if ( !findVertexZ(V) ) break;
 
-    bool trigV = evalVertexZ(V);   // V.print();
+    VertexData vertex(++vertexID);
+
+    if ( !findVertexZ(vertex) ) break;
+
+    bool trigV = evalVertexZ(vertex);   // vertex.print();
 
     //bump up rank of 2+ track all vertices 
-    if (V.nAnyMatch >= mMinMatchTr) V.Lmax += par_rankOffset;
+    if (vertex.nAnyMatch >= mMinMatchTr) vertex.Lmax += par_rankOffset;
 
     if (!trigV) {
       // Ignore this "bad" vertex
@@ -289,17 +277,10 @@ void StPPVertexFinder::findSeeds_PPVLikelihood()
       // ... or keep it
       nBadVertex++;
       // ... and bump down rank of sub-prime vertices 
-      V.Lmax -= par_rankOffset; 
+      vertex.Lmax -= par_rankOffset; 
     }
 
-    {// ... more rank QA ...
-      float rank=V.Lmax;
-      if(rank>1e6)     hA[17]->Fill(log(rank-1e6)+10);
-      else if(rank>0)  hA[17]->Fill(log(rank));
-      else             hA[17]->Fill(log(rank+1e6)-10);
-    }
-
-    mVertexData.push_back(V);
+    mVertexData.push_back(vertex);
   }
 }
 
@@ -324,6 +305,8 @@ void StPPVertexFinder::Clear()
   eveID = -1;
   nBadVertex = 0;
 
+  ntrk.fill(0);
+
   // the clear below is not needed but cleans up stale result
   hL->Reset();
   hM->Reset();
@@ -335,6 +318,22 @@ void StPPVertexFinder::Clear()
 //======================================================
 void StPPVertexFinder::printInfo(ostream& os) const
 {
+  LOG_INFO << "\n"
+           << Form("PPV:: # of input track          = %d\n", ntrk[0])
+           << Form("PPV:: dropped due to flag/dummy = %d\n", ntrk[1])
+           << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
+           << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
+           << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
+           << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
+           << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
+
+  if(mUseBtof) btofList->print();
+  if(mUseCtb)  ctbList->print();
+
+  bemcList->print();
+  eemcList->print();
+
+
   os << "StPPVertexFinder ver=1 - Fit Statistics:\n"
      << "StPPVertexFinder::result " << mVertexData.size() << " vertices found" << std::endl;
 
@@ -343,36 +342,30 @@ void StPPVertexFinder::printInfo(ostream& os) const
   for (const TrackData &track : mTrackData) {
     if(  track.mTpc>0)   nTpcM++;
     else if (  track.mTpc<0) nTpcV++;
-    hA[9]->Fill(track.zDca);
-    hA[14]->Fill(track.ezDca);
     if(track.vertexID<=0) continue; // skip not used or pileup vertex
     k++;
     LOG_DEBUG 
       << Form("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",
-              k,track.zDca,track.ezDca,track.gPt,track.vertexID)
-      << Form("    Btof %3d,%d,%d",track.btofBin,btofList->getFired(track.btofBin),btofList->getTrack(track.btofBin))
-      << Form("    CTB  %3d,%d,%d",track.ctbBin,ctbList->getFired(track.ctbBin),ctbList->getTrack(track.ctbBin))
+              k,track.zDca,track.ezDca,track.gPt,track.vertexID);
+
+    if (mUseBtof) LOG_DEBUG 
+      << Form("    Btof %3d,%d,%d",track.btofBin,btofList->getFired(track.btofBin),btofList->getTrack(track.btofBin));
+
+    if (mUseCtb) LOG_DEBUG 
+      << Form("    CTB  %3d,%d,%d",track.ctbBin,ctbList->getFired(track.ctbBin),ctbList->getTrack(track.ctbBin));
+
+    LOG_DEBUG 
       << Form("    Bemc %3d,%d,%d",track.bemcBin,bemcList->getFired(track.bemcBin),bemcList->getTrack(track.bemcBin))
       << Form("    Eemc %3d,%d,%d",track.eemcBin,eemcList->getFired(track.eemcBin),eemcList->getTrack(track.eemcBin))
       << Form("    TPC %d",track.mTpc)
       <<endm;
   }
-  hA[6]->Fill(nTpcM);
-  hA[7]->Fill(nTpcV);
-  hA[15]->Fill(mTrackData.size());
 
-  LOG_INFO<< Form("PPVend  eveID=%d,  list of found %d vertices from pool of %d tracks\n",eveID,mVertexData.size(),mTrackData.size())<<endm;
+  LOG_INFO << Form("PPVend  eveID=%d,  list of found %d vertices from pool of %d tracks\n",
+                   eveID, mVertexData.size(), mTrackData.size()) << endm;
 
-  for (const VertexData &v : mVertexData)
-    v.print(os);
-
-  LOG_DEBUG<< Form("---- end of PPVertex Info\n")<<endm;
-}
-
-//======================================================
-//======================================================
-void StPPVertexFinder::CalibBeamLine(){
-  LOG_INFO << "StPPVertexFinder::CalibBeamLine: activated saving high quality prim tracks for 3D fit of the beamLine"<<endm;
+  for (const VertexData &vertex : mVertexData)
+    vertex.print(os);
 }
 
 
@@ -380,24 +373,20 @@ void StPPVertexFinder::CalibBeamLine(){
 //==========================================================
 int StPPVertexFinder::fit(StEvent* event)
 {
-  LOG_INFO << "***** START FIT" << endm;
-
-  hA[0]->Fill(1);
-
   mTotEve++;
   eveID=event->id();
-  LOG_INFO << "\n   @@@@@@   PPVertex::Fit START nEve=" << mTotEve << "  eveID=" << eveID << endm;
 
-  hL->SetTitle( "Vertex likelyhood, eveID=" + TString(eveID) );
+  LOG_INFO << "***** START FIT\n"
+           << "   @@@@@@   PPVertex::Fit START nEve=" << mTotEve
+           << "  eveID=" << eveID << endm;
 
-  hA[0]->Fill(2);
-
+  hL->SetTitle("Vertex likelihood, eveID=" + TString(eveID) );
 
   // get BTOF info
   if(mUseBtof) {
     StBTofCollection *btofColl = (StBTofCollection*)event->btofCollection();
     if(btofColl==0) {
-      LOG_WARN << "no btofCollection , continue THE SAME eve"<<endm;
+      LOG_WARN << "no btofCollection, continue THE SAME eve" << endm;
     } else {
       btofList->build(btofColl);
     }
@@ -412,18 +401,18 @@ int StPPVertexFinder::fit(StEvent* event)
 
   StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
   if(emcC==0) {
-    LOG_WARN <<"no emcCollection , continue THE SAME eve"<<endm;
+    LOG_WARN << "No StEmcCollection found, continue with this event" << endm;
   } else {
     StEmcDetector* btow = emcC->detector( kBarrelEmcTowerId); 
     if(btow==0) {
-      LOG_WARN <<"no BEMC in emcColl , continue THE SAME eve"<<endm;
+      LOG_WARN << "No BEMC found in StEmcCollection, continue with this event" << endm;
     } else {
       bemcList->build(btow, mMinAdcBemc);
     }
 
     StEmcDetector* etow = emcC->detector(kEndcapEmcTowerId); 
     if(etow==0) {
-      LOG_WARN <<"no EEMC in emcColl , continue THE SAME eve"<<endm;
+      LOG_WARN << "No EEMC found in StEmcCollection, continue with this event" << endm;
     } else {
       eemcList->build(etow, mMinAdcEemc);
     }
@@ -432,17 +421,13 @@ int StPPVertexFinder::fit(StEvent* event)
   //get the Sti track container...
   StiTrackContainer* stiTracks = mToolkit->getTrackContainer();
    if(stiTracks==0) {
-     LOG_WARN <<"no STi tracks , skip eve"<<endm;
+     LOG_WARN << "No Sti tracks found, skipping this event" << endm;
      return 0 ;
    }
 
-  hA[0]->Fill(4);
-  
   //select reasonable tracks and add them to my list
   int kBtof=0,kCtb=0,kBemc=0, kEemc=0,kTpc=0;
-  int nmAny=0;
-
-  std::array<int, 7> ntrk{};
+  int nTracksMatchingAnyFastDetector=0;
 
   for (const StiTrack* stiTrack : *stiTracks)
   {
@@ -452,29 +437,25 @@ int StPPVertexFinder::fit(StEvent* event)
 
     ntrk[0]++;
 
-    if(stiKalmanTrack->getFlag() <0)                 {ntrk[1]++; continue;}
-    if(stiKalmanTrack->getPt() < mMinTrkPt)          {ntrk[2]++; continue;}
-    if(mDropPostCrossingTrack &&
-       isPostCrossingTrack(stiKalmanTrack))          {ntrk[3]++; continue;}  // kill if it has hits in wrong z
-    if(!examinTrackDca(stiKalmanTrack, track))       {ntrk[4]++; continue;}  // drop from DCA
-    if(!matchTrack2Membrane(track))                  {ntrk[5]++; continue;}  // kill if nFitP too small
+    if (stiKalmanTrack->getFlag() <0)           { ntrk[1]++; continue; }
+    if (stiKalmanTrack->getPt() < mMinTrkPt)    { ntrk[2]++; continue; }
+    if (mDropPostCrossingTrack &&
+        isPostCrossingTrack(stiKalmanTrack))    { ntrk[3]++; continue; }  // kill if it has hits in wrong z
+    if (!examinTrackDca(stiKalmanTrack, track)) { ntrk[4]++; continue; }  // drop from DCA
+    if (!matchTrack2Membrane(track))            { ntrk[5]++; continue; }  // kill if nFitP too small
 
     ntrk[6]++;
 
-    hA[1]->Fill(stiKalmanTrack->getChi2());
-    hA[2]->Fill(stiKalmanTrack->getFitPointCount());
-    hA[16]->Fill(stiKalmanTrack->getPt());
 
-    // ......... matcho various detectors ....................
+    // Match to various detectors
     if (mUseBtof) matchTrack2BTOF(stiKalmanTrack, track);  // matching track to btofGeometry
     if (mUseCtb)  matchTrack2CTB(stiKalmanTrack, track);
     matchTrack2BEMC(track);
     matchTrack2EEMC(track);
 
-    //.... all test done on this track .........
+    // ...all test done on this track
     mTrackData.push_back(track); 
 
-    hA[5]->Fill(track.rxyDca);
 
     if (track.mBtof > 0) kBtof++;
     if (track.mCtb  > 0) kCtb++;
@@ -482,67 +463,27 @@ int StPPVertexFinder::fit(StEvent* event)
     if (track.mEemc > 0) kEemc++;
     if (track.mTpc  > 0) kTpc++;
 
-    if (track.mBtof>0 || track.mCtb>0 || track.mBemc>0 || track.mEemc>0 || track.mTpc>0) nmAny++;
-
-    hACorr->Fill(track.mBtof, track.mBemc);
+    if (track.mBtof>0 || track.mCtb>0 || track.mBemc>0 || track.mEemc>0 || track.mTpc>0)
+       nTracksMatchingAnyFastDetector++;
   }
 
-  if (mDebugLevel)
-     LOG_INFO << "\n"
-              << Form("PPV:: # of input track          = %d\n", ntrk[0])
-              << Form("PPV:: dropped due to flag       = %d\n", ntrk[1])
-              << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
-              << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
-              << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
-              << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
-              << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
-
-  if(mUseCtb) {
-    ctbList ->print();
-    ctbList ->doHisto();
-  }
-
-  if(mUseBtof) {
-    btofList->print();
-    btofList->doHisto();
-  }
-
-  bemcList->print();
-  eemcList->print();
-  LOG_INFO<< Form("PPV::TpcList size=%d nMatched=%d\n\n",mTrackData.size(),kTpc)<<endm;
-
-  bemcList->doHisto();
-  eemcList->doHisto();
-
-  LOG_INFO << "PPV::fit() nEve=" << mTotEve << " , "
-           << nmAny << " traks with good DCA, matching: BTOF="
+  LOG_INFO << Form("PPV::TpcList size=%d nMatched=%d\n\n",mTrackData.size(),kTpc)
+           << "PPV::fit() nEve=" << mTotEve << " , "
+           << nTracksMatchingAnyFastDetector << " traks with good DCA, matching: BTOF="
            << kBtof << " CTB=" << kCtb << " BEMC=" << kBemc << " EEMC=" << kEemc << endm;
 
-
-  if(nmAny < mMinMatchTr && mStoreUnqualifiedVertex <= 0) {
-    LOG_INFO << "StPPVertexFinder::fit() nEve=" << mTotEve << " Quit, to few matched tracks" << endm;
-    return 0;
-  }
-
-  hA[0]->Fill(5);
-
-  if(kBemc)  hA[0]->Fill(6);
-  if(kEemc)  hA[0]->Fill(7);
-
-  seed_fit_export();
-  
-  hA[4]->Fill(mVertexData.size());
-
-  for (const VertexData &V : mVertexData)
+  if (nTracksMatchingAnyFastDetector >= mMinMatchTr || mStoreUnqualifiedVertex > 0)
   {
-    hA[3]->Fill(V.r.z());
+    seed_fit_export();
+  } else {
+    LOG_INFO << "StPPVertexFinder::fit() nEve=" << mTotEve << " Quit, to few matched tracks" << endm;
   }
   
   return size();
 } 
 
 
-int StPPVertexFinder::Fit(const StMuDst& muDst)
+int StPPVertexFinder::fit(const StMuDst& muDst)
 {
    mTotEve++;
 
@@ -569,8 +510,6 @@ int StPPVertexFinder::Fit(const StMuDst& muDst)
    TObjArray*    globalTracks  = muDst.globalTracks();
    TClonesArray* covGlobTracks = muDst.covGlobTrack();
 
-   //int nTracks = 0;
-   std::array<int, 7> ntrk{};
 
    for (const TObject* obj : *globalTracks)
    {
@@ -597,29 +536,15 @@ int StPPVertexFinder::Fit(const StMuDst& muDst)
 
       ntrk[6]++;
 
-      TrackDataT<StMuTrack> trk(stMuTrack, dca);
+      TrackDataT<StMuTrack> track(stMuTrack, dca);
 
       // Modify track weights
-      matchTrack2BEMC(trk);
-      matchTrack2EEMC(trk);
-      matchTrack2Membrane(trk);
+      matchTrack2BEMC(track);
+      matchTrack2EEMC(track);
+      matchTrack2Membrane(track);
 
-      mTrackData.push_back(trk);
+      mTrackData.push_back(track);
    }
-
-   if (mDebugLevel)
-      LOG_INFO << "\n"
-               << Form("PPV:: # of input track          = %d\n", ntrk[0])
-               << Form("PPV:: dropped due to 'dummy'    = %d\n", ntrk[1])
-               << Form("PPV:: dropped due to pt         = %d\n", ntrk[2])
-               << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
-               << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
-               << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
-               << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
-
-   //btofList->print();
-   bemcList->print();
-   eemcList->print();
 
    seed_fit_export();
 
@@ -644,9 +569,6 @@ void StPPVertexFinder::seed_fit_export()
      break;
    }
   
-   if(mVertexData.size()>0)  hA[0]->Fill(8);
-   if(mVertexData.size()>1)  hA[0]->Fill(9);
-
    // Refit vertex position for all cases (currently NoBeamline, Beamline1D, and
    // Beamline3D) except when the BeamlineNoFit option is specified. This is
    // done to keep backward compatible behavior when by default the vertex was
@@ -657,25 +579,21 @@ void StPPVertexFinder::seed_fit_export()
          const double& z = vertex.r.Z();
          vertex.r.SetXYZ( beamX(z), beamY(z), z);
       }
-
-   } else
+   }
+   else
    {
-      for (VertexData &vertex : mVertexData)
-      {
-         // When fitTracksToVertex fails it returns non-zero value. Just use the
-         // beam equation to set the best guess for vertex position. Works for no
-         // beamline case by setting vertex position to (0,0,0)
-         if ( fitTracksToVertex(vertex) ) {
-            const double& z = vertex.r.Z();
-            vertex.r.SetXYZ( beamX(z), beamY(z), z);
-         }
-      }
+      size_t n_seeds = mVertexData.size();
+
+      auto cannot_fit = [this] (VertexData &vertex) { return fitTracksToVertex(vertex) != 0; };
+      mVertexData.erase( std::remove_if(mVertexData.begin(), mVertexData.end(), cannot_fit), mVertexData.end() );
+      // Update the "bad" vertex counter as some vertices could have been
+      // removed in the previous step
+      nBadVertex -= n_seeds - mVertexData.size();
    }
 
    exportVertices();
 
-   if (mDebugLevel)
-      printInfo();
+   if (mDebugLevel) printInfo();
 }
 
 
@@ -687,24 +605,26 @@ bool StPPVertexFinder::buildLikelihoodZ()
   hM->Reset();
   hW->Reset();
 
-  float dzMax2=mMaxZradius*mMaxZradius;
+  float dzMax2 = mMaxZradius*mMaxZradius;
 
   int nt=mTrackData.size();
   LOG_DEBUG<< Form("PPV::buildLikelihood() pool of nTracks=%d",nt)<<endm;
   if(nt<=0) return false;
 
-  int n1=0;
+  int nTracksMatchingAnyFastDetector = 0;
 
-  double *La=hL->GetArray(); // PPV main likelyhood histogram 
-  double *Ma=hM->GetArray(); // track multiplicity  histogram 
-  double *Wa=hW->GetArray(); // track weight histogram 
+  double *La = hL->GetArray(); // PPV main likelihood histogram 
+  double *Ma = hM->GetArray(); // track multiplicity histogram 
+  double *Wa = hW->GetArray(); // track weight histogram 
   
   // Loop over pre-selected tracks only
-  for (const TrackData &track : mTrackData) {
+  for (const TrackData &track : mTrackData)
+  {
     // Skip tracks already assigned to a vertex
-    if(track.vertexID!=0) continue;
+    if (track.vertexID != 0) continue;
 
-    if(track.anyMatch) n1++;
+    if (track.anyMatch) nTracksMatchingAnyFastDetector++;
+
     float z0   = track.zDca;  // z coordinate at DCA
     float ez   = track.ezDca; // error on z coordinate at DCA
     float ez2  = ez*ez;
@@ -713,25 +633,26 @@ bool StPPVertexFinder::buildLikelihoodZ()
     float base = dzMax2/2/ez2;
     float totW = track.weight;
 
-    for (int j=j1; j<=j2; j++) {
+    for (int j=j1; j<=j2; j++)
+    {
       float z  = hL->GetBinCenter(j);
       float dz = z-z0;
       float xx = base - dz*dz/2/ez2;
-      if(xx<=0) continue;
+      if (xx <= 0) continue;
       La[j] += xx*totW;
       Ma[j] += 1.;
       Wa[j] += totW;
     }
   }
 
-  LOG_DEBUG << Form("PPV::buildLikelihood() %d tracks w/ matched @ Lmax=%f", n1, hL->GetMaximum()) << endm;
+  LOG_DEBUG << Form("PPV::buildLikelihood() %d tracks w/ matched @ Lmax=%f", nTracksMatchingAnyFastDetector, hL->GetMaximum()) << endm;
 
-  return (n1>=mMinMatchTr) ||  (mStoreUnqualifiedVertex>0 );
+  return (nTracksMatchingAnyFastDetector >= mMinMatchTr) || (mStoreUnqualifiedVertex > 0);
 }
 
 //==========================================================
 //==========================================================
-bool StPPVertexFinder::findVertexZ(VertexData &V)
+bool StPPVertexFinder::findVertexZ(VertexData &vertex)
 {
   if(hL->GetMaximum()<=0) return false; // no more tracks left
 
@@ -764,84 +685,84 @@ bool StPPVertexFinder::findVertexZ(VertexData &V)
   float zLow  = hL->GetBinCenter(iLow);
   float zHigh = hL->GetBinCenter(iHigh);
 
-  float kSig = sqrt(2*(Lmax-Llow)/avrW);
+  float kSig = std::sqrt(2*(Lmax-Llow)/avrW);
   float sigZ = (zHigh-zLow)/2/kSig;
 
   LOG_DEBUG << Form("PPV:: iLow/iMax/iHigh=%d/%d/%d\n",iLow,iMax,iHigh)
             << Form(" accM=%f  accW=%f  avrW=%f\n",accM,accW,avrW)   
             << Form("  Z low/max/high=%f %f %f, kSig=%f, sig=%f\n",zLow,z0,zHigh,kSig,sigZ)
-            << Form(" found  PPVertex(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",V.id,mTotEve,z0,sigZ)<<endm;
+            << Form(" found  PPVertex(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",vertex.id,mTotEve,z0,sigZ)<<endm;
 
   if (sigZ < 0.1) sigZ = 0.1; // tmp, make it not smaller than the bin size
 
   // For approximate seed position we use (x,y)=(0,0) because the tracks are
   // extrapolated to (0,0) anyway. The x and y coordinates can be updated later
   // in a proper fit.
-  V.r  = TVector3(0, 0, z0);
-  V.er = TVector3(0.1, 0.1, sigZ); //tmp
-  V.Lmax = Lmax;
+  vertex.r  = TVector3(0, 0, z0);
+  vertex.er = TVector3(0.1, 0.1, sigZ);
+  vertex.Lmax = Lmax;
 
   return true;
 }
 
 //==========================================================
 //==========================================================
-bool  StPPVertexFinder::evalVertexZ(VertexData &V) // and tag used tracks
+bool  StPPVertexFinder::evalVertexZ(VertexData &vertex) // and tag used tracks
 {
   // returns true if vertex is accepted accepted
-  LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" start ..."<<endm;
-  int n1=0, nHiPt=0;
+  int nHiPt=0;
   
   for (TrackData &track : mTrackData)
   {
     // Skip tracks already matched to a vertex
     if (track.vertexID != 0) continue;
 
-    // Do not match tracks to vertex V if they are too far in Z
+    // Do not match tracks to vertex if they are too far in Z
     // (i.e. |delta_z| > (mMaxZradius + sigma_z))
-    if ( !track.matchVertex(V, mMaxZradius) ) continue;
+    if ( !track.matchVertex(vertex, mMaxZradius) ) continue;
 
     // Otherwise, this track belongs to this vertex
-    n1++;
-    track.vertexID  = V.id;
-    V.gPtSum   += track.gPt;
+    track.vertexID  = vertex.id;
+    vertex.gPtSum  += track.gPt;
+    vertex.nUsedTrack++;
+
     if( track.gPt>mCut_oneTrackPT && ( track.mBemc>0|| track.mEemc>0) ) nHiPt++;
 
-    if(  track.mTpc>0)       V.nTpc++;
-    else if (  track.mTpc<0) V.nTpcV++;
+    if(  track.mTpc>0)       vertex.nTpc++;
+    else if (  track.mTpc<0) vertex.nTpcV++;
 
-    if(  track.mBtof>0)       V.nBtof++;
-    else if (  track.mBtof<0) V.nBtofV++;
+    if(  track.mBtof>0)       vertex.nBtof++;
+    else if (  track.mBtof<0) vertex.nBtofV++;
 
-    if(  track.mCtb>0)       V.nCtb++;
-    else if (  track.mCtb<0) V.nCtbV++;
+    if(  track.mCtb>0)       vertex.nCtb++;
+    else if (  track.mCtb<0) vertex.nCtbV++;
 
-    if(  track.mBemc>0)       V.nBemc++;
-    else if (  track.mBemc<0) V.nBemcV++;
+    if(  track.mBemc>0)       vertex.nBemc++;
+    else if (  track.mBemc<0) vertex.nBemcV++;
 
-    if(  track.mEemc>0)       V.nEemc++;
-    else if (  track.mEemc<0) V.nEemcV++;
+    if(  track.mEemc>0)       vertex.nEemc++;
+    else if (  track.mEemc<0) vertex.nEemcV++;
 
-    if( track.anyMatch)     V.nAnyMatch++;
-    else if (track.anyVeto) V.nAnyVeto++;
+    if( track.anyMatch)     vertex.nAnyMatch++;
+    else if (track.anyVeto) vertex.nAnyVeto++;
   } 
 
-  V.nUsedTrack = n1;  
-
-  V.isTriggered = (V.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
-
-  if (!V.isTriggered) { // discrad vertex
+  vertex.isTriggered = (vertex.nAnyMatch >= mMinMatchTr) || ( (mAlgoSwitches & kSwitchOneHighPT) && nHiPt>0 );
+  if (!vertex.isTriggered) { // discrad vertex
     //no match tracks in this vertex, tag vertex ID in tracks differently
-    //V.print(cout);
-    LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
+    //vertex.print(cout);
+    LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<vertex.id<<" rejected"<<endm;
     for (TrackData &track : mTrackData) {
-      if(track.vertexID!=V.id) continue;
-      track.vertexID=-V.id;
+      if(track.vertexID!=vertex.id) continue;
+      track.vertexID=-vertex.id;
     }
     return false;
   }
   
-  LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<" accepted, nAnyMatch="<<V.nAnyMatch<<" nAnyVeto="<<V.nAnyVeto<<endm;
+  LOG_INFO << "StPPVertexFinder::evalVertex Vid=" << vertex.id
+           << " accepted, nAnyMatch=" << vertex.nAnyMatch
+           << " nAnyVeto=" << vertex.nAnyVeto << endm;
+
   return true;
 }
 
@@ -863,7 +784,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
       mDCAs.clear();
       
       for (const TrackData & track : mTrackData) {
-         if (track.vertexID != vertex.id) continue;
+         if ( std::fabs(track.vertexID) != vertex.id) continue;
          mDCAs.push_back(track.dca);
       }
 
@@ -878,7 +799,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
 
    for (const TrackData & track : mTrackData)
    {
-      if (track.vertexID != vertex.id) continue;
+      if ( std::fabs(track.vertexID) != vertex.id) continue;
       if (!track.mother) continue;
 
       // This code is adopted from StiStEventFiller::fillDca()
@@ -890,12 +811,16 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
       const StiNodePars &pars = tNode->fitPars();
       const StiNodeErrs &errs = tNode->fitErrs();
       float alfa = tNode->getAlpha();
-      Float_t setp[7] = {(float)pars.y(),    (float)pars.z(),    (float)pars.phi()
-                        ,(float)pars.ptin(), (float)pars.tanl(), (float)pars.curv(), (float)pars.hz()};
-      setp[2]+= alfa;
-      Float_t sete[15];
-      for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
-        for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
+      float setp[7] = {(float)pars.y(),    (float)pars.z(),    (float)pars.phi(),
+                       (float)pars.ptin(), (float)pars.tanl(), (float)pars.curv(), (float)pars.hz()};
+      setp[2] += alfa;
+      float sete[15];
+
+      for (int i=1, li=1, jj=0; i<kNPars; li += ++i) {
+        for (int j=1;j<=i;j++) {
+           sete[jj++] = errs.G()[li+j];
+        }
+      }
 
       StDcaGeometry* dca = new StDcaGeometry();
       dca->set(setp, sete);
@@ -919,9 +844,13 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
 
    bool fitRequiresBeamline = star_vertex::requiresBeamline(mVertexFitMode);
 
-   if (mDCAs.size() == 0) {
-      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
-               << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
+   bool prerequisites = mDCAs.size() > 1 || (mDCAs.size() > 0 && fitRequiresBeamline);
+
+   if ( !prerequisites )
+   {
+      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least two tracks required "
+               << "OR one with beam line. This vertex (id = " << vertex.id
+               << ") coordinates will not be updated" << endm;
       return 5;
    }
 
@@ -952,18 +881,32 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    double y_hi = vertexSeed.y() + mMaxTrkDcaRxy;
    double z_hi = vertexSeed.z() + mMaxZradius;
 
-   mMinuit->mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
-   mMinuit->mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
-   mMinuit->mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   if (mVertexFitMode == VertexFit_t::Beamline1D)
+   {
+      mMinuit->mnparm(0, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   } else {
+      mMinuit->mnparm(0, "x", vertexSeed.x(), step[0], x_lo, x_hi, minuitStatus);
+      mMinuit->mnparm(1, "y", vertexSeed.y(), step[1], y_lo, y_hi, minuitStatus);
+      mMinuit->mnparm(2, "z", vertexSeed.z(), step[2], z_lo, z_hi, minuitStatus);
+   }
 
    mMinuit->mnexcm("minimize", 0, 0, minuitStatus);
 
    // Check fit result
    if (minuitStatus) {
       LOG_WARN << "StPPVertexFinder::fitTracksToVertex: Fit did not converge. "
-	       << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
+               << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
                << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
-      return minuitStatus;
+
+      // The fit has failed but let's keep the vertex anyway. For cases with
+      // beam line we put the vertex on the beam line
+      if ( fitRequiresBeamline ) {
+         const double& z = vertex.r.Z();
+         vertex.r.SetXYZ( beamX(z), beamY(z), z);
+         vertex.er.SetXYZ( mBeamline.err_x0, mBeamline.err_y0, vertex.er.Z());
+      }
+      // Return 0 (=success) in order to keep the vertex
+      return 0;
    }
 
    double chisquare, fedm, errdef;
@@ -972,14 +915,22 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
    mMinuit->mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
    mMinuit->mnhess();
 
+   // The default dimension 9=3*3 should work for 1D case (npar = 1) as well
    double emat[9];
    /* 0 1 2
       3 4 5
       6 7 8 */
    mMinuit->mnemat(emat, 3);
 
-   vertex.r.SetXYZ(mMinuit->fU[0], mMinuit->fU[1], mMinuit->fU[2]);
-   vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
+   if (mVertexFitMode == VertexFit_t::Beamline1D)
+   {
+      const double& z = mMinuit->fU[0];
+      vertex.r.SetXYZ( beamX(z), beamY(z), z);
+      vertex.er.SetXYZ( mBeamline.err_x0, mBeamline.err_y0, std::sqrt(emat[0]) );
+   } else {
+      vertex.r.SetXYZ(mMinuit->fU[0], mMinuit->fU[1], mMinuit->fU[2]);
+      vertex.er.SetXYZ( std::sqrt(emat[0]), std::sqrt(emat[4]), std::sqrt(emat[8]) );
+   }
 
    return 0;
 }
@@ -991,58 +942,60 @@ int StPPVertexFinder::fitTracksToVertex(VertexData &vertex)
  */
 void StPPVertexFinder::exportVertices()
 {
-  for (VertexData &V : mVertexData)
+  for (VertexData &vertex : mVertexData)
   {
-    StThreeVectorD r(V.r.x(), V.r.y(), V.r.z());
+    StThreeVectorD r(vertex.r.x(), vertex.r.y(), vertex.r.z());
 
     float cov[6]{};
 
-    cov[0] = V.er.x() * V.er.x();
-    cov[2] = V.er.y() * V.er.y();
-    cov[5] = V.er.z() * V.er.z();  // [5] is correct,JB
+    cov[0] = vertex.er.x() * vertex.er.x();
+    cov[2] = vertex.er.y() * vertex.er.y();
+    cov[5] = vertex.er.z() * vertex.er.z();  // [5] is correct,JB
 
     StPrimaryVertex primV;
     primV.setPosition(r);
     primV.setCovariantMatrix(cov); 
     primV.setVertexFinderId(mUseCtb ? ppvVertexFinder : ppvNoCtbVertexFinder);
-    primV.setNumTracksUsedInFinder(V.nUsedTrack);
-    primV.setNumMatchesWithBTOF(V.nBtof);
-    primV.setNumMatchesWithCTB(V.nCtb);
-    primV.setNumMatchesWithBEMC(V.nBemc);
-    primV.setNumMatchesWithEEMC(V.nEemc);
-    primV.setNumTracksCrossingCentralMembrane(V.nTpc);
-    primV.setSumOfTrackPt(V.gPtSum);
-    primV.setRanking(V.Lmax);
+    primV.setNumTracksUsedInFinder(vertex.nUsedTrack);
+    primV.setNumMatchesWithBTOF(vertex.nBtof);
+    primV.setNumMatchesWithCTB(vertex.nCtb);
+    primV.setNumMatchesWithBEMC(vertex.nBemc);
+    primV.setNumMatchesWithEEMC(vertex.nEemc);
+    primV.setNumTracksCrossingCentralMembrane(vertex.nTpc);
+    primV.setSumOfTrackPt(vertex.gPtSum);
+    primV.setRanking(vertex.Lmax);
     primV.setFlag(1); //??? is it a right value?
 
     if (mStMuDst)
     {
        for (TrackData &track : mTrackData)
        {
-          StThreeVectorF v_position(V.r.x(), V.r.y(), V.r.z());
+          StThreeVectorF v_position(vertex.r.x(), vertex.r.y(), vertex.r.z());
           StThreeVectorF dist = v_position - track.dca->origin();
 
           // Calculate total error as fully correlated between DCA and vertex
-          float total_err_perp = std::sqrt( V.er.Perp2() + track.dca->errMatrix()[0] ); // fully uncorrelated
-          float total_err_z    = std::sqrt( V.er.z()*V.er.z() + track.dca->errMatrix()[2] );
+          float total_err_perp = std::sqrt( vertex.er.Perp2() + track.dca->errMatrix()[0] ); // fully uncorrelated
+          float total_err_z    = std::sqrt( vertex.er.z()*vertex.er.z() + track.dca->errMatrix()[2] );
 
-          bool is_daughter = (track.vertexID == V.id ||
+          bool is_daughter = (track.vertexID == vertex.id ||
                               (std::fabs(dist.perp())/total_err_perp < 3 && std::fabs(dist.z())/total_err_z < 3) );
 
           if ( !is_daughter ) continue;
 
-          track.vertexID = V.id;
+          track.vertexID = vertex.id;
 
           StMuTrack* stMuTrack = const_cast<StMuTrack*>( track.getMother<StMuTrack>() );
           stMuTrack->setType(primary);
 
+          // Create StTrack from StMuTrack so idTruth can be calculated for this vertex
           StTrack* primTrack = StMuDst::createStTrack(stMuTrack);
           primV.addDaughter(primTrack);
        }
 
        primV.setIdTruth();
-       V.mIdTruth = primV.idTruth();
+       vertex.mIdTruth = primV.idTruth();
 
+       // The daughter StTrack-s are removed at this time because we don't save them
        while ( !primV.daughters().empty() )
           delete primV.daughters().back(), primV.daughters().pop_back();
     }
@@ -1067,7 +1020,6 @@ void StPPVertexFinder::saveHisto(TString fname)
   TFile f(outName, "recreate");
   assert(f.IsOpen());
   printf("%d histos are written  to '%s' ...\n", HList.GetEntries(), outName.Data());
-  HList.ls();
   HList.Write();
   f.Close();
 }
@@ -1120,8 +1072,8 @@ void StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track)
     StiKalmanTrackNode& ktn = (*it);
     if(!ktn.isValid()) continue;
     if(ktn.getHit() && ktn.getChi2() >1000) continue;
-    float sy=sqrt(ktn.getCyy());
-    float sz=sqrt(ktn.getCzz());
+    float sy = std::sqrt(ktn.getCyy());
+    float sz = std::sqrt(ktn.getCzz());
     const StiDetector * det=ktn.getDetector();
     assert(!(ktn.x()) || det);
 
@@ -1145,13 +1097,13 @@ bool StPPVertexFinder::examinTrackDca(const StiKalmanTrack* stiTrack, TrackData 
   if (!bmNode) 		return 0;
   if (!bmNode->isDca()) return 0;
 
-  float rxy=sqrt(bmNode->x_g()*bmNode->x_g() + bmNode->y_g()*bmNode->y_g());
+  float rxy = std::sqrt(bmNode->x_g()*bmNode->x_g() + bmNode->y_g()*bmNode->y_g());
 
   if(rxy>mMaxTrkDcaRxy) return false;
-  if( fabs(bmNode->z_g())> mMaxZrange )   return false ; 
+  if( std::fabs(bmNode->z_g())> mMaxZrange )   return false ; 
  
   track.zDca   = bmNode->getZ();
-  track.ezDca  = sqrt(bmNode->getCzz());
+  track.ezDca  = std::sqrt(bmNode->getCzz());
   track.rxyDca = rxy;
   track.gPt    = bmNode->getPt();
 
@@ -1171,7 +1123,7 @@ void StPPVertexFinder::matchTrack2BTOF(const StiKalmanTrack* stiTrack, TrackData
   // helix extrapolation:
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
   ou.rotateZ(ouNode->getAlpha());
-  StPhysicalHelixD phys_helix(fabs(ouNode->getCurvature()),
+  StPhysicalHelixD phys_helix(std::fabs(ouNode->getCurvature()),
                        ouNode->getDipAngle(),
                        ouNode->getPhase(),
                        ou,
@@ -1232,7 +1184,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* stiTrack,TrackData &track
     StiKalmanTrackNode * inNode = ouNode;
     StThreeVectorD in(inNode->getX(),inNode->getY(),inNode->getZ());
     in.rotateZ(inNode->getAlpha());
-    StPhysicalHelixD phys_helix(fabs(inNode->getCurvature()),
+    StPhysicalHelixD phys_helix(std::fabs(inNode->getCurvature()),
 			 inNode->getDipAngle(),
 			 inNode->getPhase(),
 			 in,
@@ -1266,7 +1218,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* stiTrack,TrackData &track
   float phi=atan2(posCTB.y(),posCTB.x());
   if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for CTB slats
   float eta=posCTB.pseudoRapidity();
-  if(fabs(eta)<1) hA[10]->Fill(posCTB.z());
+  if(std::fabs(eta)<1) hA[10]->Fill(posCTB.z());
 
   int iBin=ctbList->addTrack(eta,phi);
   
@@ -1290,7 +1242,7 @@ void StPPVertexFinder::matchTrack2BEMC(TrackDataT<StiKalmanTrack> &track)
   //alternative helix extrapolation:
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
   ou.rotateZ(ouNode->getAlpha());
-  StPhysicalHelixD phys_helix(fabs(ouNode->getCurvature()),
+  StPhysicalHelixD phys_helix(std::fabs(ouNode->getCurvature()),
 		       ouNode->getDipAngle(),
 		       ouNode->getPhase(),
 		       ou,
@@ -1327,8 +1279,6 @@ void StPPVertexFinder::matchTrack2BEMC(const StPhysicalHelixD& phys_helix, Track
   if (phi < 0) phi += 2*M_PI; // now phi is [0,2Pi] as for Cyl slats
   float eta = posCyl.pseudoRapidity();
 
-  if(fabs(eta)<1) hA[11]->Fill(posCyl.z());
-  
   int   iBin      = bemcList->addTrack(eta, phi);
   bool  bemcMatch = bemcList->isMatched(iBin);
   bool  bemcVeto  = bemcList->isVetoed(iBin);
@@ -1359,7 +1309,7 @@ void StPPVertexFinder::matchTrack2EEMC(TrackDataT<StiKalmanTrack> &track)
 
   StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
   ou.rotateZ(ouNode->getAlpha());
-  StPhysicalHelixD phys_helix(fabs(ouNode->getCurvature()),
+  StPhysicalHelixD phys_helix(std::fabs(ouNode->getCurvature()),
 		       ouNode->getDipAngle(),ouNode->getPhase(),
 		       ou,ouNode->getHelicity());
 
@@ -1444,11 +1394,11 @@ bool StPPVertexFinder::matchTrack2Membrane(TrackDataT<StiKalmanTrack> &track)
     StiKalmanTrackNode* ktnp=& (*it);
     if(!ktnp->isValid()) continue;
     //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // ---> those track need to be counted as npossiblehit, commented out
-    double rxy=sqrt(ktnp->x_g()*ktnp->x_g() + ktnp->y_g()*ktnp->y_g()); //ktn.getX();
+    double rxy = std::sqrt(ktnp->x_g()*ktnp->x_g() + ktnp->y_g()*ktnp->y_g()); //ktn.getX();
     double z=ktnp->z_g();  //ktn.z_g();
     if(rxy<RxyMin) continue;
     if(rxy>RxyMax) continue;
-    if(fabs(z)>zMax) continue;
+    if(std::fabs(z)>zMax) continue;
     // .........node is within TPC fiducial volume
     if(lastRxy<=rxy){
       LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack below is out of order and is ignorred in (some) of vertex finder analysis"<<"\n  Z="<<z<<" rXY="<<rxy<<" last_rxy="<<lastRxy<<endm;
@@ -1490,14 +1440,14 @@ bool StPPVertexFinder::matchTrack2Membrane(TrackDataT<StiKalmanTrack> &track)
 }
 
 
-void StPPVertexFinder::matchTrack2Membrane(TrackDataT<StMuTrack> &trk)
+void StPPVertexFinder::matchTrack2Membrane(TrackDataT<StMuTrack> &track)
 {
-   const StMuTrack& muTrack = *trk.getMother();
+   const StMuTrack& muTrack = *track.getMother();
 
    // Code from matchTrack2Membrane
    if (mFitPossWeighting) { // introduced in 2012 for pp510 to differentiate between global track quality, together with lowering the overall threshold from 0.7 to 0.51
       double fracFit2PossHits = static_cast<double>(muTrack.nHitsFit(kTpcId)) / muTrack.nHitsPoss(kTpcId);
-      trk.weight *= fracFit2PossHits;
+      track.weight *= fracFit2PossHits;
    }
 
    const StThreeVectorF& firstPoint = muTrack.firstPoint();
@@ -1550,7 +1500,7 @@ void StPPVertexFinder::matchTrack2Membrane(TrackDataT<StMuTrack> &trk)
       hitPatt.push_back(hit);
    }
 
-   trk.scanNodes(hitPatt, jz0); // if central membrane is crossed, scale weight inside
+   track.scanNodes(hitPatt, jz0); // if central membrane is crossed, scale weight inside
 }
 
 
@@ -1584,7 +1534,7 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* stiTrack)
     if (r > RxyMax) continue;
 
     float z=hit->position().z();
-    if (fabs(z) > zMax) continue;
+    if (std::fabs(z) > zMax) continue;
 
     if ((z < -zMembraneDepth && hit->sector() <= 12) ||
         (z >  zMembraneDepth && hit->sector() >  12))

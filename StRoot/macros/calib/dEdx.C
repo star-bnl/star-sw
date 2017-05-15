@@ -55,13 +55,14 @@ void dEdx(Int_t nevents=1000,
   //  TString Chain("in,dEdxY2,magF,StEvent,AlignSectors,Corr4,OSpaceZ2");
   //  TString Chain("in,dEdxY2,magF,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,Corr4,OSpaceZ2");
   //  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,CMuDst,noHistos,noRunco,NoDefault"); // ,analysis
-  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
+  TString Chain("in,TpcHitMover,simu,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
   TString RootFile(rootFile);
   if (RootFile == "") {
     RootFile = gSystem->BaseName(MainFile);
     RootFile.ReplaceAll(".event","");
-    if (RootFile.Contains("gstar")) Chain += ",Simu";
   }
+  //  if (RootFile.Contains("gstar",TString::IgnoreCase) ||
+  //      RootFile.Contains("hijing",TString::IgnoreCase)) Chain += ",Simu";
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->GetMaker("dEdxY2"); 
   StMaker *tofCalib = chain->Maker("tofCalib");

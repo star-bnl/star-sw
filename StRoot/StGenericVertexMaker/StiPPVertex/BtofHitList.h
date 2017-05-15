@@ -1,7 +1,7 @@
 #ifndef BtofHitList_h
 #define BtofHitList_h
 
-#include "ScintHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 #include <vector>
 
 #ifndef ST_NO_NAMESPACES

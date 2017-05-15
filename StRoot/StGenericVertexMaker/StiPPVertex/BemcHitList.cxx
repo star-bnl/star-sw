@@ -3,18 +3,18 @@
 #include <assert.h>
 #include <cmath>
 
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "BemcHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/BemcHitList.h"
 
-#include "StMaker.h"
+#include "StChain/StMaker.h"
 #include "StEmcRawMaker/StBemcTables.h"
 #include "StEmcRawMaker/defines.h" 
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcDetector.h"
-#include "StEmcModule.h"
-#include "StEmcRawHit.h"
+#include "StEvent/StEmcDetector.h"
+#include "StEvent/StEmcModule.h"
+#include "StEvent/StEmcRawHit.h"
 //Rxy = 222, 242, 262 cm
 
 

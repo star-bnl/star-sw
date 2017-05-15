@@ -980,8 +980,8 @@ StEmcGeom::getGeantGeometryTable()
 	mCalr = 0;
 	mCalg_st = 0;
 	mCalr_st = 0;
-	StMaker maker;
-	mChain = maker.GetChain();
+	//	StMaker maker;
+	mChain = StMaker::GetChain();// maker.GetChain();
 
 	if(mChain) mGeantGeom = mChain->GetDataSet(".const/geom");
 

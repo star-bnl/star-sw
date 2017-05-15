@@ -13,18 +13,18 @@
 #include <strings.h>
 #include <math.h>
 
-#include "StGenericVertexMaker.h"
-#include "St_DataSetIter.h"
-#include "StEventTypes.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "Star2Root/St_DataSetIter.h"
+#include "StEvent/StEventTypes.h"
 #include "StEvent/StPrimaryVertex.h"
 #include "TH2.h"
 #include "TNtuple.h"
-#include "StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "StGenericVertexFinder.h"
-#include "StppLMVVertexFinder.h"
-#include "StFixedVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StGenericVertexMaker/StppLMVVertexFinder.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -37,7 +37,11 @@
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
 #include "tables/St_vertexSeed_Table.h" //
 
-#include "SystemOfUnits.h"
+// for Helix model
+#include "St_base/StarCallf77.h"
+extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
+#define gufld F77_NAME(gufld,GUFLD)
+#include "StarClassLibrary/SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
@@ -47,7 +51,6 @@ using namespace units;
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
   useITTF(true),
   useBeamline(false),
-  calibBeamline(false),
   useCTB(false),
   usePCT(false),
   useBTOF(false),
@@ -66,10 +69,9 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name),
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
 {
-
   SafeDelete(theFinder);
-
 }
+
 
 /*!
   The Init() method instantiates the VertexFinder() method.
@@ -91,18 +93,22 @@ Int_t StGenericVertexMaker::Init()
   // setup params
   useITTF       = IAttr("ITTF");
   useBeamline   = IAttr("beamLine");
-  calibBeamline = IAttr("calibBeamline");
   useCTB        = IAttr("CTB");
   usePCT        = IAttr("PCT");
   useBTOF       = IAttr("BTOF");
   eval          = IAttr("eval");
   minTracks     = IAttr("minTracks");
 
+  bool isMinuit = ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3") );
+  bool isPPV    = ( IAttr("VFPPV") || IAttr("VFPPVnoCTB") || IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof") );
+
   // Recognize different beamline options to be used with some vertex finders
   StGenericVertexFinder::VertexFit_t vertexFitMode;
 
-  if ( IAttr("beamline") )
+  if ( IAttr("beamline") && isPPV)
      vertexFitMode = StGenericVertexFinder::VertexFit_t::BeamlineNoFit;
+  else if ( IAttr("beamline") && isMinuit )
+     vertexFitMode = StGenericVertexFinder::VertexFit_t::Beamline1D;
   else if ( IAttr("beamline1D") )
      vertexFitMode = StGenericVertexFinder::VertexFit_t::Beamline1D;
   else if ( IAttr("beamline3D") )
@@ -110,9 +116,8 @@ Int_t StGenericVertexMaker::Init()
   else
      vertexFitMode = StGenericVertexFinder::VertexFit_t::NoBeamline;
 
-  Bool_t isMinuit=kFALSE;
 
-  if ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3")) // 3 versions of Minuit for ranking modes
+  if ( isMinuit ) // 3 versions of Minuit for ranking modes
   {
     LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
 
@@ -121,7 +126,6 @@ Int_t StGenericVertexMaker::Init()
     if (IAttr("VFMinuit") ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
     if (IAttr("VFMinuit3") ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
     if (minTracks > 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
-    isMinuit=kTRUE;
 
   } else if ( IAttr("VFppLMV")){
     theFinder= new StppLMVVertexFinder();
@@ -170,8 +174,6 @@ Int_t StGenericVertexMaker::Init()
 
   theFinder->UsePCT(usePCT);
   theFinder->UseBTOF(useBTOF);
-
-  if (calibBeamline) theFinder->CalibBeamLine();
 
   if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
     if (useITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();

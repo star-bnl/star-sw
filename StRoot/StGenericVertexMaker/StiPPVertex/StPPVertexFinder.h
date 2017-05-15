@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.48 2017/05/03 20:14:35 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.52 2017/05/12 18:37:36 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -16,7 +16,7 @@
 #include "StGenericVertexMaker/StiPPVertex/TrackData.h"
 #include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 
-#include "StPhysicalHelixD.hh"
+#include "StarClassLibrary/StPhysicalHelixD.hh"
 
 class TH1F;
 class TH2F;
@@ -27,7 +27,6 @@ class StEvent;
 class StiToolkit;
 
 class StMuDst;
-class StMuTrack;
 
 class St_db_Maker;
 class BtofHitList;  
@@ -95,6 +94,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   TH1D *hL ;      // likelyhood distribution
   TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
   TObjArray HList;
+  std::array<int, 7> ntrk;
 
   // params
   double mMinTrkPt;               ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -125,6 +125,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
 
+  /// A pointer to muDST event
   const StMuDst* mStMuDst;
   
   void dumpKalmanNodes(const StiKalmanTrack *stiTrack);
@@ -140,14 +141,13 @@ public:
   virtual void UsePCT(bool x=true) { mDropPostCrossingTrack = !x; }
   virtual void Finish();
   virtual void Init();
-  virtual void InitRun(int runumber, const St_db_Maker* db_maker);
+  virtual void InitRun(int run_number, const St_db_Maker* db_maker);
   virtual void Clear(); 
-  virtual void CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
 
   StPPVertexFinder(VertexFit_t fitMode=VertexFit_t::BeamlineNoFit);
 
   virtual ~StPPVertexFinder() {}
   virtual int fit(StEvent*);
-  virtual int Fit(const StMuDst& muDst);
-  void printInfo(std::ostream& = std::cout) const;
+  virtual int fit(const StMuDst& muDst);
+  void printInfo(std::ostream& os = std::cout) const;
 };

@@ -4,9 +4,9 @@
 
 #include <TH1.h>
 #include <TObjArray.h>
-#include <StMessMgr.h>
+#include <St_base/StMessMgr.h>
 
-#include "ScintHitList.h"
+#include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 
 //==========================================================
 //==========================================================

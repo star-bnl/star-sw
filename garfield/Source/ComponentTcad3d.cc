@@ -761,21 +761,21 @@ bool ComponentTcad3d::ReadDataset(std::ifstream& datafile,
   if (!datafile.is_open()) return false;
   enum DataSet {
     ElectrostaticPotential,
-    ElectricField,
+    EField,
     Unknown
   };
   DataSet ds = Unknown;
   if (dataset == "ElectrostaticPotential") {
     ds = ElectrostaticPotential;
   } else if (dataset == "ElectricField") {
-    ds = ElectricField;
+    ds = EField;
   } else {
     std::cerr << m_className << "::ReadDataset:\n"
               << "    Unexpected dataset " << dataset << ".\n";
     return false;
   }
   bool isVector = false;
-  if (ds == ElectricField) {
+  if (ds == EField) {
     isVector = true;
   }
 
@@ -864,7 +864,7 @@ bool ComponentTcad3d::ReadDataset(std::ifstream& datafile,
       case ElectrostaticPotential:
         m_vertices[ivertex].p = val1;
         break;
-      case ElectricField:
+      case EField:
         m_vertices[ivertex].ex = val1;
         m_vertices[ivertex].ey = val2;
         m_vertices[ivertex].ez = val3;

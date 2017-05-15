@@ -1,9 +1,6 @@
 #ifndef TrackData_h
 #define TrackData_h
-/***********************************************
- * $Id: TrackData.h,v 1.10 2017/05/03 20:14:27 smirnovd Exp $
- ******************************************************
- */
+
 #include <TVector3.h>
 #include <Sti/StiTrackNode.h>
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -29,8 +26,8 @@ public:
   int nFitPoint; 
 
   void print() {
-     printf("#track@DCA(0,0) R/cm=[%5.2f %5.2f %.1f], errYloc=%.2fcm , errZ=%.1fcm,  glob P=[%6.2f %6.2f %6.1f]GeV/c, PT=%.2f\n",R.x(),R.y(),R.z(),sigYloc, sigZ,gP.x(),gP.y(),gP.z(), gP.Pt() );
-     printf("   chi2=%f, nFitP=%d,  fitErr: cXX=%f cYX=%f cYY=%f cZX=%f cZY=%f cZZ=%f\n",gChi2, nFitPoint,fitErr._cXX,fitErr._cYX,fitErr._cYY,fitErr._cZX,fitErr._cZY,fitErr._cZZ);
+    printf("#track@DCA(0,0) R/cm=[%5.2f %5.2f %.1f], errYloc=%.2fcm , errZ=%.1fcm,  glob P=[%6.2f %6.2f %6.1f]GeV/c, PT=%.2f\n",R.x(),R.y(),R.z(),sigYloc, sigZ,gP.x(),gP.y(),gP.z(), gP.Pt() );
+    printf("   chi2=%f, nFitP=%d,  fitErr: cXX=%f cYX=%f cYY=%f cZX=%f cZY=%f cZZ=%f\n",gChi2, nFitPoint,fitErr._cXX,fitErr._cYX,fitErr._cYY,fitErr._cZX,fitErr._cZY,fitErr._cZZ);
   }
 
 };
@@ -40,10 +37,12 @@ class TrackData
 {
 public:
 
-  int vertexID; /* >0 if assigned to a good vertex; 
-		   =0 free, not used for any vertex
-		*/
-  const void* mother; // original track
+  /// > 0 if assigned to a good vertex;
+  /// = 0 free, not used for any vertex
+  int vertexID;
+
+  /// Pointer to original track
+  const void* mother;
 
   const StDcaGeometry* dca;
 
@@ -100,56 +99,3 @@ TrackDataT<StMuTrack>::TrackDataT(const StMuTrack &motherTrack, const StDcaGeome
 
 
 #endif
-
-
-/*
- * $Log: TrackData.h,v $
- * Revision 1.10  2017/05/03 20:14:27  smirnovd
- * Added overlooked TrackDataT<StMuTrack> constructor definition
- *
- * Revision 1.9  2017/03/21 15:15:01  smirnovd
- * Revert "TrackDataT: Removed erroneous inlined definition for constructor"
- *
- * This reverts commit 96e7f20e48eed3c52eb272b27740ff190ce1b9fc.
- *
- * Revision 1.7  2017/03/15 22:56:50  smirnovd
- * TrackDataT: Added specialization for template constructor
- *
- * Revision 1.6  2017/03/15 22:56:44  smirnovd
- * TrackData: Introduce deligating constructor
- *
- * Revision 1.5  2017/03/02 19:11:19  smirnovd
- * Squashed commit of many assorted changes
- *
- * See a704cb55..cb1f57fa on master for details
- *
- * Revision 1.4  2017/02/21 21:34:22  smirnovd
- * Enhanced proxy data structures for track and vertex
- *
- * For details see commits on master branch cdc758df..49016672
- *
- * - Update comments & doxygen, removed commented code
- * - TrackDataT: New helper for TrackData to manipulate original mother track
- * - TrackData: Don't limit track's mother to specific type
- *   - This proxy track can be created from other than StiKalmanTrack type, e.g.  MuDstTrack
- * - VertexData: Added member to flag triggered vertex
- * - TrackData: Added method to calculate chi2 w.r.t. a vertex
- * - TrackData: Added member pointer to DCA geometry
- * - TrackData: Added print() method
- * - TrackData & VertexData: Added fields with simulation data
- *
- * Revision 1.3  2010/09/10 21:08:35  rjreed
- * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
- * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
- *
- * Revision 1.2  2009/07/09 21:29:03  balewski
- * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
- * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c
- *
- * Revision 1.1  2005/07/11 20:38:12  balewski
- * PPV added for real
- *
-
- *
- *
- *********************************************************************/

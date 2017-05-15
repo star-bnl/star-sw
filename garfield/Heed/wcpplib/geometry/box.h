@@ -23,11 +23,10 @@ namespace Heed {
 // center of coordinate system is meant in the center of the box
 class box : public absvol {
  public:
-  vfloat dx, dy, dz;     // lengths of sides
-  vfloat dxh, dyh, dzh;  // half-lengths of sides
-  ulsvolume ulsv;
-  String name;
-
+  vfloat m_dx, m_dy, m_dz;     // lengths of sides
+  vfloat m_dxh, m_dyh, m_dzh;  // half-lengths of sides
+  ulsvolume m_ulsv;
+  String m_name;
 
  public:
   /// Constructors
@@ -84,7 +83,7 @@ class sh_manip_box : virtual public sh_manip_absvol, public box {
   sh_manip_box(const abssyscoor& fcsys, const box& fbx)
       : sh_manip_absvol(fcsys), box(fbx) {}
   macro_copy_header(sh_manip_box);
-  /// Dstructor
+  /// Destructor
   virtual ~sh_manip_box() { ; }
 
   virtual absvol* Gavol(void) const;

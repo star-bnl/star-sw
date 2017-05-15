@@ -109,8 +109,11 @@ class MediumSilicon : public Medium {
   bool GetElectronCollision(const double e, int& type, int& level, double& e1,
                             double& dx, double& dy, double& dz, int& nion,
                             int& ndxc, int& band);
-  unsigned int GetNumberOfIonisationProducts() { return m_ionProducts.size(); }
-  bool GetIonisationProduct(const unsigned int i, int& type, double& energy);
+  unsigned int GetNumberOfIonisationProducts() const { 
+    return m_ionProducts.size(); 
+  }
+  bool GetIonisationProduct(const unsigned int i, int& type, 
+                            double& energy) const;
 
   // Density of states
   double GetConductionBandDensityOfStates(const double e, const int band = 0);
