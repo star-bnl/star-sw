@@ -3,7 +3,7 @@
 # L. Didenko
 #
 # check_daqNFS.pl - script to check availability of daq files on NFS restored with DataCarousel
-# and update status of daq files on DB table jobs_prod_2013. Create new list of files which failed
+# and update status of daq files on DB table jobs_prod_2016. Create new list of files which failed
 # to be restored by DataCarousel in first attempt.
 #
 ###################################################################################################
@@ -20,12 +20,12 @@ $dbuser="starreco";
 $dbpass="";
 $dbname="Embedding_job_stats";
 
-my $JobStatusT = "jobs_prod_2016";
+my $JobStatusT = "jobs_prod_2017";
 
 $fC1 = FileCatalog->new();
 $fC1->connect_as("Admin");
 
-my $nfspath = "/star/data16/GRID/daq/2015/";
+my $nfspath = "/star/data16/GRID/daq/2016/";
 my $nfile = 0;
 my $dbfile = "none";
 my $daqstat;
