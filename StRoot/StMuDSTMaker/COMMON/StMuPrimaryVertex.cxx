@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.12 2017/04/17 19:19:43 smirnovd Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.13 2017/05/17 16:03:04 smirnovd Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -13,7 +13,7 @@
 #include "TString.h"
 ClassImp(StMuPrimaryVertex)
   
-StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex)
+StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex* vertex)
 {
   mFlag                  = vertex->flag();
   mPosition              = vertex->position();
@@ -96,6 +96,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 void StMuPrimaryVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuPrimaryVertex.cxx,v $
+// Revision 1.13  2017/05/17 16:03:04  smirnovd
+// StMuPrimaryVertex: Passing pointer by reference is pointless
+//
 // Revision 1.12  2017/04/17 19:19:43  smirnovd
 // [Cosmetic] Whitespace adjustments
 //
