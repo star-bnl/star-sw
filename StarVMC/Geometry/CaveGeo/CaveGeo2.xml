@@ -282,6 +282,8 @@
     <Create block="WALL"  />
     <Placement y="wall_yy" x="wall_xx" z="wall_zz" block="WALL"  />
     <Placement y="wall_yy" x="wall_xx" z="-wall_zz" block="WALL"  />
+    <Placement y="wall_yy" x="-wall_xx" z="wall_zz" block="WALL"  />
+    <Placement y="wall_yy" x="-wall_xx" z="-wall_zz" block="WALL"  />
 
                 
     wall_dx = 0.5 * shld_xwidth(1) 
