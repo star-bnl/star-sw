@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.cxx,v 2.3 2017/02/20 16:33:37 ullrich Exp $
+ * $Id: StTriggerData2017.cxx,v 2.4 2017/05/13 00:59:54 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.cxx,v $
+ * Revision 2.4  2017/05/13 00:59:54  ullrich
+ * Added bbcBB101() and bbcBB102().
+ *
  * Revision 2.3  2017/02/20 16:33:37  ullrich
  * Changed mtdQtAtCh for run17 mapping
  *
@@ -479,6 +482,31 @@ unsigned short StTriggerData2017::bbcEarliestTDCLarge(StBeamDirection eastwest, 
 unsigned short StTriggerData2017::bbcTimeDifferenceLarge() const
 {
     return L1_DSM->VTX[2]%8192;
+}
+
+
+unsigned short StTriggerData2017::bbcBB101(int ch, int prepost) const 
+{
+    int dsmmap[8] = {3,2,1,0,7,6,5,4};
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0){
+        if (mBBC[buffer]){
+	    if(ch>=0 && ch<=7) return mBBC[buffer]->BBClayer1[dsmmap[ch]];
+	}
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2017::bbcBB102(int ch, int prepost) const 
+{
+    int dsmmap[8] = {3,2,1,0,7,6,5,4};
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0){
+        if (mBBC[buffer]){
+	    if(ch>=0 && ch<=7) return mBBC[buffer]->BBClayer1[dsmmap[ch]+8];
+	}
+    }
+    return 0;
 }
 
 

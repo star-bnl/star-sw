@@ -41,8 +41,8 @@ void MakeLc3pi(Int_t nevents=1, const Char_t *parn = "Lc3pi",Int_t RunID = 1)
   // 		",StiCA,beamline,KFVertex,StiHftC,pxlFastSim,ssdfast,useXgeom,VFMCE,noRunco,noHistos,noTags");
   //		",muMc"); 
   TString Chain("MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,VFMCE,noRunco,noHistos,noTags,");
-  //  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,sdt20160301,";
-  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,";
+  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,sdt20160301,";
+  //  Chain += "vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,VMCAlignment,";
   Chain += parn;
   Chain += Form(",rung.%i",RunID);
   chain = bfc(0,Chain.Data(),0,RootFile.Data(),MainFile.Data());

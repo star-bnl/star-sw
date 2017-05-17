@@ -16,10 +16,10 @@
 
 
 # List of disks will be by numbers
-$MIN   =  1;                                             # 4
-$MAX   =  6;                                             # for testing
-$MAX   = 99;                                             # Upper number ; can be as high
-$MAIN  = "/star/data";                                   # default base path
+$MIN   =   1;                                             # 4
+$MAX   =   6;                                             # for testing
+$MAX   = 100;                                             # Upper number ; can be as high
+$MAIN  = "/star/data";                                    # default base path
 
 # An array of disks to add to the $MAIN pattern - entries can also be wildcarded patterns
 # which will be used in a glob() statement or sunngle disk entries
@@ -94,13 +94,7 @@ $MAIN  = "/star/data";                                   # default base path
           "/star/data06" => "/gpfs01/star/subsysg",
           "/star/data07" => "/star/data06 SKIP",        # merged
 
-          "/star/data18" => "/gpfs01/star/data18",      # merged several disks together 2016/01/14
-          "/star/data25" => "/gpfs01/star/data19",      # merged 2016/01/11
-          "/star/data40" => "/gpfs01/star/data20",      # merged 2016/01/11
-          "/star/data41" => "SKIP",
-          "/star/data51" => "SKIP",
-          "/star/data52" => "SKIP",
-          "/star/data43" => "/gpfs01/star/data21",
+          "/star/data43" => "SKIP",
 
           "/star/rcf"    => "/gpfs01/star/rcf",
           "/star/xrootd" => "/gpfs01/star/XROOTD",
@@ -117,8 +111,8 @@ $MAIN  = "/star/data";                                   # default base path
           "/gpfs01/star/XROOTD" =>  1,
           "/gpfs01/star/scratch"=>  1,
           "/gpfs01/star/pwg"    =>  1,
+          "/gpfs01/star/data"   =>  1,   # this will match any pattern from gpfs01
           "/gpfs01/"            =>  2,
-          "/gpfs03/"            =>  2,
           );
 
 
