@@ -934,7 +934,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       cout << "++++++++++++++++++++++++++++++++++++++++" << endl;
       iBreak++;
     }
-    if (NoPerfMatch) {
+    if (Debug() && NoPerfMatch) {
       cout << "++++++++++++++++++++++++++++++++++ Check Node " <<  listOfDet2Align[i].Name << "\tNo. Perfect Match = " << NoPerfMatch << endl;
       iBreak++;
     }
