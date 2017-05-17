@@ -24,23 +24,14 @@ TDataSet *CreateTable() {
     St_geant_Maker::instance()->Do(Form("GSPREAD %f %f %f",XSIGMA,YSIGMA,ZSIGMA));
     St_geant_Maker::instance()->Do("gkine -4 0");
     gSystem->Load( "AgStar" );
-    primary = new StarPrimaryMaker();
-    //  primary -> SetFileName( "hijing.starsim.root");
-    primary -> SetFileName( "none");
-    chain -> AddBefore( "geant", primary );
-    //
-    // Setup an event generator
-    //
   } else if (gROOT->GetClass("StVMCMaker")) {
-    //    StVMCMaker::instance()->cd();
-    primary = new StarPrimaryMaker();
-    //    chain->cd();
   } else {
     cout << "ILLEGAL Situation: No geant maker found" << endl;
-    //    chain->cd();
     return 0;
   }
-  //  primary->cd();
+  primary = new StarPrimaryMaker();
+  primary -> SetFileName( "none");
+  chain -> AddBefore( "geant", primary );
   StarHijing *hijing = new StarHijing("hijing");
   hijing->SetTitle("Hijing 1.383");
   // Setup collision frame, energy and beam species
