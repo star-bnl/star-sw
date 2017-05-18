@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.27 2017/02/20 16:32:12 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.28 2017/05/18 17:09:43 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.28  2017/05/18 17:09:43  ullrich
+ * Changes to decoding of Qt data.
+ *
  * Revision 2.27  2017/02/20 16:32:12  ullrich
  * Added bbcVP101
  *
@@ -94,7 +97,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.27 2017/02/20 16:32:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.28 2017/05/18 17:09:43 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -155,7 +158,7 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
         else {
             ch = (d & 0xf8000000) >> 27;
             adc[addr][ch] = (unsigned short)  (d & 0x00000fff);
-            tdc[addr][ch] = (unsigned char)  ((d & 0x0001f000) >> 12);
+            tdc[addr][ch] = (unsigned char)  ((d & 0x001f0000) >> 16);
             //printf("i=%3d  crate=%3d  addr=%3d  nline=%3d  ch=%3d  adc=%5d  tdc=%5d\n",i,crate,addr,nline,ch,adc[addr][ch],tdc[addr][ch]);
             //if(adc[addr][ch]==0) printf("ADC = 0  problem : i=%3d  crate=%3d  addr=%3d  nline=%3d  ch=%3d  adc=%5d  tdc=%5d\n",i,crate,addr,nline,ch,adc[addr][ch],tdc[addr][ch]);
             //if(ch<=oldch)      printf("Ch Order problem : i=%3d  crate=%3d  addr=%3d  nline=%3d  ch=%3d  adc=%5d  tdc=%5d\n",i,crate,addr,nline,ch,adc[addr][ch],tdc[addr][ch]);
@@ -257,6 +260,8 @@ unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
 unsigned short StTriggerData::bbcTacSum() const {return 0;}
 unsigned short StTriggerData::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcTimeDifferenceLarge() const {return 0;}
+unsigned short StTriggerData::bbcBB101(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::bbcBB102(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
 unsigned short StTriggerData::nQTdata(int prepost) const {return 0;}
