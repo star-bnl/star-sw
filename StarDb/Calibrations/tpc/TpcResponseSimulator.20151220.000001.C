@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2016.C,v 1.2 2017/05/12 13:52:39 fisyak Exp $
-// $Log: TpcResponseSimulator.y2016.C,v $
+// $Id: TpcResponseSimulator.20151220.000001.C,v 1.1 2017/05/20 00:54:00 fisyak Exp $
+// $Log: TpcResponseSimulator.20151220.000001.C,v $
+// Revision 1.1  2017/05/20 00:54:00  fisyak
+// Add TpcRS calibration for Run XVI
+//
 // Revision 1.2  2017/05/12 13:52:39  fisyak
 // Add default MC version of the correction
 //
