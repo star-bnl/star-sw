@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.48 2017/02/20 16:32:12 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.49 2017/05/18 17:09:43 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.49  2017/05/18 17:09:43  ullrich
+ * Changes to decoding of Qt data.
+ *
  * Revision 2.48  2017/02/20 16:32:12  ullrich
  * Added bbcVP101
  *
@@ -297,6 +300,8 @@ public:
     virtual unsigned short bbcTacSum() const;
     virtual unsigned short bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcTimeDifferenceLarge() const;
+    virtual unsigned short bbcBB101(int ch, int prepost=0) const;
+    virtual unsigned short bbcBB102(int ch, int prepost=0) const;
   
     // FPD  module #: north=0, south=1, top=2, bottom=3, north preshower=4, south preshower=5
     virtual unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
