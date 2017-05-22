@@ -5,7 +5,7 @@ my @TestList = `root.exe -q -b bfc.C | awk -F\: '{print $3}' | egrep test`;
 my $makeList = 0;
 my $NoEvents = 100;
 my $pwd = cwd();
-my $extra = ",picoWrite";
+my $extra = ""; #,picoWrite";
 my $noMC = 0;
 if ($pwd =~ /StiCA/) {$extra .= ",StiCA";}
 if ($pwd =~ /KF/) {$extra .= ",KFVertex";}

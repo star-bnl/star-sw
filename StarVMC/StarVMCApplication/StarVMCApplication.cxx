@@ -53,7 +53,7 @@
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
-
+#define PrPV(B)      if (Debug())                {std::cout << (#B) << " = \t"; (B).Print();} 
 static const TString separator("/_"); 
 TDataSet        *StarVMCApplication::fgDetSets = 0;
 //_____________________________________________________________________________
@@ -700,9 +700,14 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       case kPxlSector:
 	sector = indx[0];
 	half   = (indx[0]-1)/5; 
-	A = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1);
-	B = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector);
-	rotA =  A * B *(*nodeP->GetOriginalMatrix()); // rotL;
+	A = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(A);
+	B = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(B);
+	C = A * B; PrPV(C);
+	SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
+	  * (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
+	C = (*nodeP->GetOriginalMatrix());
+	rotA =  A * B * C; // rotL;
+	D = rotA * SectorOnPxl.Inverse(); PrPV(D);
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	rotLI[sector-1] = rotL.Inverse();
 	break;
@@ -714,8 +719,11 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	//	  A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
 	//	  B = listOfDet2Align[i].chair->GetMatrix4Id(Id);
 	B = StpxlLadderOnSector::instance()->GetMatrix4Id(Id);
+	
 	rotA   = A * B * PixelLadderT;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
+	D = rotA * LadderOnSector.Inverse(); PrPV(D);
 	break;
       case kPxlWafer:
 	rotA = rotL;
@@ -736,6 +744,8 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	//	  rotA   = PixelLadderT.Inverse() * A * PixelSensorT;
 	rotA   = PixelLadderT.Inverse() * A * B;// * PixelSensorT;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
+	D = rotA * SensorOnLadder.Inverse(); PrPV(D);
 	break;
       case kIst:
 	A = StpstOnIds::instance()->GetMatrix(0);
@@ -845,15 +855,15 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	  // Check node
 	  switch (kDetector) {
 	  case kPxlSensor:
-	    Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();
-	    HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());
+	    Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
+	    HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
 	    PxlOnHft = (*StPxlDb::instance()->geoHMatrixPstOnIds()) 
-	      * (*StPxlDb::instance()->geoHMatrixPxlOnPst());
+	      * (*StPxlDb::instance()->geoHMatrixPxlOnPst());	            PrPV(PxlOnHft);
 	    SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
-	      * (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));
-	    LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder);
-	    SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);
-	    SensorOnGlobal = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * SensorOnLadder;
+	      * (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
+	    LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
+	    SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
+	    SensorOnGlobal = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * SensorOnLadder;PrPV(SensorOnGlobal);
 // 	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix())  x
 // 	      * mGeoHMatrixIdsOnTpc                                                         x
 //            * mGeoHMatrixPstOnIds * mGeoHMatrixPxlOnPst                                   x
@@ -867,7 +877,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	    comb = (TGeoHMatrix *) StIstDb::instance()->getRotations()->FindObject(Form("R%04i", matIst));
 	    break;
 	  case kSstSensor:
-	    comb = (TGeoHMatrix *) gStSstDbMaker->getRotations()->FindObject(Form("R%04i", 7000 + 100*sensor + ladder));
+	    comb = (TGeoHMatrix *) StSstDbMaker::instance()->getRotations()->FindObject(Form("R%04i", 7000 + 100*sensor + ladder));
 	    break;
 	  default:
 	    check = 0;
@@ -1006,6 +1016,7 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
   }
   g3->Gsdk(iD, bratio, mode);
 }
+#undef PrPV
 // $Log: StarVMCApplication.cxx,v $
 // Revision 1.13  2013/12/16 22:58:53  fisyak
 // Add g2t_volume_id
