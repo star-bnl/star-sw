@@ -766,7 +766,7 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
          }
 
 	 if( mRunNum >= 14 && mRunNum <=15) {
-	   if (gStSstDbMaker->maskChip(id_side, ladder, wafer[n], strip[n] / 128)) continue;
+	   if (StSstDbMaker::instance()->maskChip(id_side, ladder, wafer[n], strip[n] / 128)) continue;
 	 }
 
          out_strip.id          = count;
@@ -1011,7 +1011,7 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
       }
       //chipMask table      
       if( mRunNum >= 14 && mRunNum <=15) {
-	if (gStSstDbMaker->maskChip(id_side, ladder, wafer, chip)) continue;
+	if (StSstDbMaker::instance()->maskChip(id_side, ladder, wafer, chip)) continue;
       }
 
       if(mRunNum >= 16){
@@ -1369,7 +1369,7 @@ void StSstDaqMaker::FillData(vector<vector<int> > vadc, vector<vector<float> > v
       //---------------
       //hotchip masking
       if( mRunNum >= 14 && mRunNum <=15) {
-	if (gStSstDbMaker->maskChip(id_side, ladder, i, j / 128)) continue;
+	if (StSstDbMaker::instance()->maskChip(id_side, ladder, i, j / 128)) continue;
       }
 
       if (id_side == 0) {

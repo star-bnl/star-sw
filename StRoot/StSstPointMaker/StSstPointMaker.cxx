@@ -100,7 +100,7 @@ Int_t StSstPointMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StSstPointMaker::InitRun(int runumber) {
-  mCtrl = gStSstDbMaker->getSlsCtrl();
+  mCtrl = StSstDbMaker::instance()->getSlsCtrl();
   if(!mCtrl){LOG_ERROR << "InitRun : No access to slsCtrl table" << endm;}
   else  {
     mDynamicControl = new StSstDynamicControl();
@@ -183,7 +183,7 @@ Int_t StSstPointMaker::Make()
   LOG_INFO<<"####     START OF NEW SST POINT MAKER        ####"<<endm;
   LOG_INFO<<"####        SST BARREL INITIALIZATION        ####"<<endm;
   LOG_INFO<<"####          BEGIN INITIALIZATION           ####"<<endm; 
-  StSstBarrel *mySst =gStSstDbMaker->getSst();
+  StSstBarrel *mySst =StSstDbMaker::instance()->getSst();
   mySst->setClusterControl(mClusterControl);
   //The full SST object is built only if we are processing physics data
   if(spa_strip && spa_strip->GetNRows()!=0){

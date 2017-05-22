@@ -10,5 +10,4 @@ void HeedCondElectron::print(std::ostream& file, int l) const {
   Ifile << "HeedCondElectron (l=" << l << ")\n";
   Ifile << "ptloc=" << ptloc << '\n';
 }
-
 }

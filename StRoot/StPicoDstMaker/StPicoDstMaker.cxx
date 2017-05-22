@@ -279,8 +279,7 @@ Bool_t StPicoDstMaker::initMtd()
 
   // obtain maps from DB
   LOG_INFO << "Retrieving mtdModuleToQTmap table from database ..." << endm;
-  TDataSet *dataset = GetDataBase("Geometry/mtd/mtdModuleToQTmap");
-  St_mtdModuleToQTmap *mtdModuleToQTmap = static_cast<St_mtdModuleToQTmap*>(dataset->Find("mtdModuleToQTmap"));
+  St_mtdModuleToQTmap *mtdModuleToQTmap = static_cast<St_mtdModuleToQTmap*>(GetDataBase("Geometry/mtd/mtdModuleToQTmap/mtdModuleToQTmap"));
   if(!mtdModuleToQTmap)
     {
       LOG_ERROR << "No mtdModuleToQTmap table found in database" << endm;

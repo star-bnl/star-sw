@@ -223,6 +223,9 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2015","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2015,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
    ,                                                                                      "","","",kFALSE},
+  {"MC.2015b","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2015b,useXgeom,FieldOn,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFPPVnoCTB,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
+   ,                                                                                      "","","",kFALSE},
 #if 0
   {"MC.2016","","","TpcRS,pxlFastSim,istSim,sstfast,emcY2,EEfs,TpxClu,y2016,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
@@ -1363,7 +1366,7 @@ Bfc_st BFC[] = { // standard chains
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","StarAgmlUtil"
    ,                                                         "suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
-  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,noHistos,noRunco"
+  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"RpicoDST"    ,"PicoDst"  ,"","MuDst,Tree,noHistos,noRunco","StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1430,7 +1433,8 @@ Bfc_st BFC[] = { // standard chains
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,MathMore,StarGeneratorUtil"
-   ",MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,StarVMCApplication"  ,"VMC G3",kFALSE},
+   ",MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,StSsdDbMaker,StIstDbMaker,StPxlDbMaker"
+   ",StarVMCApplication"                                                                  ,"VMC G3",kFALSE},
   {"VMCAlignment","","","","","",                                                   "VMC Alignment",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl",       "StVMCMaker","StVMCMaker","VMC Maker in Passive Mode",kFALSE},
@@ -1759,8 +1763,8 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"BeamBack" ,"","","StEvent",                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
-   ,                                                                 "Bichsel method used for dEdx",kFALSE},
+  {"LdEdxY2"     ,"","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker","Load dEdx Maker",kFALSE},
+  {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
   {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
 
   // Options in need to be done after the tracker

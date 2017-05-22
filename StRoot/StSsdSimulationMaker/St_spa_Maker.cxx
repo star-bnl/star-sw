@@ -95,7 +95,7 @@ Int_t St_spa_Maker::Init(){
 Int_t St_spa_Maker::InitRun(Int_t runnumber){
   m_noise = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
   if (! m_noise) return kStFATAL;
-  m_ctrl = gStSsdDbMaker->GetSlsCtrl();
+  m_ctrl = StSsdDbMaker::instance()->GetSlsCtrl();
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;

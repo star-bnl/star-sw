@@ -23,10 +23,11 @@ private:
    EReturnCodes           mReady; ///< Status code returned by Make(). It is !kStOk if failed to access DB tables
    static THashList      *fRotList;
    map<unsigned int,short> mMapMaskChips; //!
-
+   static StSstDbMaker   *fgStSstDbMaker;
 public:
    StSstDbMaker(const char *name = "SstDb");
    virtual     ~StSstDbMaker();
+   static StSstDbMaker *instance() {return fgStSstDbMaker;}
    virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
    virtual THashList            *getRotations(){return fRotList;}
@@ -46,8 +47,6 @@ public:
    {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.11 2016/05/31 21:51:59 bouchet Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
-// Global pointers:
-R__EXTERN StSstDbMaker *gStSstDbMaker;
 #endif
 
 

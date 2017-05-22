@@ -291,11 +291,11 @@ Int_t StiMaker::InitDetectors()
     }
 
   // SSD or SST - they share the db and the kSsdId
-  if (IAttr("useSst") && gStSstDbMaker){
+  if (IAttr("useSst") && StSstDbMaker::instance()){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
     _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst")));
     group->setGroupId(kSstId);
-  } else if ( IAttr("useSsd") && gStSsdDbMaker){
+  } else if ( IAttr("useSsd") && StSsdDbMaker::instance()){
     cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
     _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd")));
     group->setGroupId(kSsdId);

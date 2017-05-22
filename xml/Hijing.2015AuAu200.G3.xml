@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="Hijing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv NODEBUG yes
+  starver .DEV2 
+  set file = $INPUTFILE0;
+#  set rung = `echo $file | awk -F\: '{print $1}'`
+#  set f    = `echo $file | awk -F\: '{print $2}'`
+#  set l    = `echo $file | awk -F\: '{print $3}'`
+  set name = `basename ${file} .gener.root`;
+  echo "${name}"
+  set logName  = ${name}B.log
+  set generF   = ${name}.MuDst.root
+  if (! -r ${generF} ) then
+#    root4star -q -b -x 'bfc.C(1000,"genIn,simu,MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,CorrX,OSpaceZ2,OGridLeak3D,useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
+# bfc.C(101,200,"DbV20151102,tpcrs,y2015b,MakeEvent,ITTF, NoSsdIt,NoSvtIt, Idst,BAna,l0,Tree,logger,Sti,VFPPVnoCTB,tpcDB,TpcHitMover, TpxClu,bbcSim,btofsim, btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout, big,fzin,McEvOut, MiniMcMk,eemcDb,beamLine,clearmem, sdt20150326.230639", "$filename")
+    root4star -q -b -x 'bfc.C(1000,"genIn,simu,MC.2015b,StiCA,-hitfilt,KFVertex,geantOut,CorrX,OSpaceZ2,OGridLeak3D,useXgeom,NoHistos,noTags,noRunco,sdt20150326.230639","'${file}'")' &gt;&amp; ${logName}
+  endif
+</command>
+<input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_1_1000.gener.root" /> -->
+</job>
+

@@ -59,6 +59,7 @@ using namespace units;
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StPidStatus.h"
+#include "dEdxHist.h"
 #ifdef  __CHECK_LargedEdx__
 #include "tables/St_g2t_track_Table.h" 
 #endif
@@ -131,7 +132,7 @@ Int_t StdEdxY2Maker::Init(){
   gMessMgr->SetLimit("StdEdxY2Maker:: Coordinates",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: Prediction",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: NdEdx",20);
-  gMessMgr->SetLimit("StdEdxY2Maker:: Illegal time for scalers",20);
+  gMessMgr->SetLimit("StTpcdEdxCorrection:: Illegal time for scalers",20);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -792,105 +793,6 @@ void StdEdxY2Maker::SortdEdx() {
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
-  class Hists3D {
-  private:
-    union {TH1 *hists[9]; TH3F *h3;}; // uncorrected
-    TH3F *h3C, *h3N, *h3Ne, *h3Npi, *h3NK, *h3NP, *h3Nd;
-    TProfile2D* pdX;
-  public:
-    Hists3D(const Char_t *Name = "SecRow3", const Char_t *Title = "<log(dEdx/Pion)>",
-	    const Char_t *TitleX = "sector", const Char_t *TitleY = "row",
-	    Int_t nXBins = 24, 
-	    Int_t nYBins = 45,  Double_t ymin = 0, Double_t ymax = -1,
-	    Int_t nZBins = 200, Double_t ZdEdxMin = -5., Double_t ZdEdxMax = 5.,
-	    Double_t xmin = 0, Double_t xmax = -1)
-    {
-      const Char_t *Names[9] = {"","C","N","Ne","Npi","NK","NP","Nd","dX"};
-      const Char_t *Titles[9] = {"uncorrected", "correctred","nP measured","nP for e","nP for pi","nP for K","nP for P","nP for d","dX"};
-      memset(hists, 0, 9*sizeof(TH1*));
-      if (xmin >= xmax) {
-	xmin = 0.5;
-	xmax = nXBins+0.5;
-      }
-      if (ymin >= ymax) {
-	ymin = 0.5;
-	ymax = nYBins+0.5;
-      }
-      for (Int_t j = 0; j < 9; j++) {
-	TString name(Name); 
-	name += Names[j];
-	TString title(Title); 
-	title += "(";  title += Titles[j]; title += ") versus "; title += TitleX; title += " and "; title += TitleY;
-        if (j < 8) {
-	  Int_t    nz   = nZBins; 
-	  Double_t zmin = ZdEdxMin;
-	  Double_t zmax = ZdEdxMax;
-	  if (j > 2) {
-#ifndef __HEED_MODEL__
-	    nz   =  40;
-	    zmin = 1.4;
-	    zmax = 3.4;
-#else /* __HEED_MODEL__ */
-	    nz   =  50;
-	    zmin = 3.0;
-	    zmax = 8.0;
-#endif /* __HEED_MODEL__ */
-	  }
-	  hists[j] = (TH1 *) new TH3F(name,title,
-				      nXBins,xmin, xmax, nYBins,ymin, ymax,nz, zmin, zmax);
-	} else {
-	  hists[j] = (TH1 *) new TProfile2D(name,title,
-					    nXBins,xmin, xmax, nYBins,ymin, ymax, "S");
-	}
-	hists[j]->SetXTitle(TitleX);
-	hists[j]->SetYTitle(TitleY);
-      }
-    }
-    virtual ~Hists3D() {}
-    void    Fill(Double_t x, Double_t y, Double_t *z) {
-      for (Int_t i = 0; i < 9; i++) {
-	if (hists[i]) {
-	  if (i < 8) ((TH3F *) hists[i])->Fill(x,y,z[i]);
-	  else       ((TProfile2D *) hists[i])->Fill(x,y,z[i]);
-	}
-      }
-    }
-  };
-  //________________________________________________________________________________
-  class Hists2D {
-  public:
-    TH2F *dev[KPidParticles][3]; // deviation of measurement from prediction ffitZ[hyp]
-    TH2F *devT[KPidParticles][3]; // deviation of measurement from prediction ffitZ[hyp], unique
-    Hists2D(const Char_t *Name = "fit") {
-      memset(dev, 0, 3*KPidParticles*sizeof(TH2F*));
-      TString nameP;
-      TString title;
-      const Char_t *Charge[3] = {"P","N","A"};
-      const Char_t *ChargeT[3] = {"+","-","All"};
-      for (Int_t hyp=0; hyp<KPidParticles;hyp++) {
-	for (Int_t sCharge = 0; sCharge < 3; sCharge++) {
-	  nameP = Name;
-	  nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
-	  nameP += Charge[sCharge];
-	  nameP.ReplaceAll("-","");
-	  title = Name; title += " - Pred. for ";
-	  title += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
-	  title.ReplaceAll("-","");
-	  title += " "; title += ChargeT[sCharge];
-	  title += " versus log10(p/m)";
-	  dev[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,500,-5,5);
-	  dev[hyp][sCharge]->SetMarkerColor(hyp+2);
-	  dev[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
-	  title += " Unique";
-	  nameP += "T";
-	  devT[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,500,-5,5);
-	  devT[hyp][sCharge]->SetMarkerColor(hyp+2);
-	  devT[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
-	}
-      }
-    }
-    virtual ~Hists2D() {}
-  };
   // Histograms
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
   static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",NumberOfRows,150, 6.84, 6.99);

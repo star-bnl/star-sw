@@ -321,7 +321,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   //    mDbMgr->setVerbose(false);
   
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
-  mode= gStSsdDbMaker->GetMode();
+  mode= StSsdDbMaker::instance()->GetMode();
   LOG_INFO <<"m_Mode = " << mode << endm;
   NEvent         = 0;
   UseCalibration = 1;
@@ -487,7 +487,7 @@ Int_t StSsdPointMaker::Make()
   LOG_INFO<<"####     START OF NEW SSD POINT MAKER        ####"<<endm;
   LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
   LOG_INFO<<"####          BEGIN INITIALIZATION           ####"<<endm; 
-  StSsdBarrel *mySsd =gStSsdDbMaker->GetSsd();
+  StSsdBarrel *mySsd =StSsdDbMaker::instance()->GetSsd();
   mySsd->setClusterControl(mClusterControl);
   //The full SSD object is built only if we are processing physics data
   if((! spa_ped_strip || spa_ped_strip->GetNRows()==0) && (spa_strip->GetNRows()!=0))

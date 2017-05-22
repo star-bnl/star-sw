@@ -74,6 +74,9 @@ class MediumGas : public Medium {
   double ScaleAttachment(const double eta) const {
     return eta * m_pressure / m_pressureTable;
   }
+  double ScaleLorentzAngle(const double lor) const {
+    return lor * m_pressure / m_pressureTable;
+  }
 
   bool GetPhotoabsorptionCrossSection(const double& e, double& sigma,
                                       const unsigned int& i);

@@ -15,7 +15,7 @@ P_pfx->SetXTitle("#Phi(degrees)");
 l->AddEntry(P_pfx,"Positive")
 l->Draw()
 l->AddEntry(N_pfx,"Negative")
- */
+*/
 //#define DEBUG
 //#define __SPARSE__
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -64,6 +64,11 @@ l->AddEntry(N_pfx,"Negative")
 #define ClassStMessMgr
 #define StMessMgr Int_t
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#if 0
+#include "StProbPidTraits.h"
+#endif
+#include "StdEdxY2Maker/dEdxHist.h"
+#include "StdEdxY2Maker/StPidStatus.h"
 #undef  StMessMgr
 #undef ClassStMessMgr
 #else
@@ -95,7 +100,11 @@ class TTreeIter;
 #endif
 #include "Ask.h"
 StMuDstMaker* maker = 0;
+#ifndef DEBUG
 static Int_t _debug = 0;
+#else
+static Int_t _debug = 1;
+#endif
 Bichsel *m_Bichsel = 0;
 #include "Names.h"
 //#include "FitP_t.h"
@@ -135,12 +144,13 @@ TFile *fOut = 0;
 TTree *FitP = 0;
 TCanvas *c1 = 0;
 struct Var_t {
+  Var_t(Double_t r=0, Double_t c=0, Double_t e=0, Double_t h=-99, Double_t zz=-999) : refMult(r), cpT(c), eta(e), hyp(h), z(zz) {}
   Double_t refMult; // == GoodPrimTracks
   Double_t cpT;     // charge*pT
   Double_t eta;
   Double_t hyp;     // hyp = -1 => data else hyp =  [0, KPidParticles]
   Double_t z;       // log(dE/dx) - log(dE/dx)_predicted_for pion
-  Double_t x(Int_t i = 0) const {return *(&refMult+i);}
+  //  Double_t x(Int_t i = 0) const {return *(&refMult+i);}
 };
 enum EBinning {NRefMult = 10, NpT = 101, Neta = 24, Nphi = 720, Nz = 200, NL = 75};
 const static Double_t refmultBins[NRefMult+1] = {0,  180,  290,  390,  475,  555,  630,  705,  780,   850,  3000};
@@ -178,8 +188,8 @@ const static  Double_t pTMaxL = TMath::Log(pTMax/0.1);
 const static  Double_t etaMax = 1.2;
 const static  Char_t *NameV[NoDim] = {"refMult",  "charge*pT", "#eta",               "hyp", "z"};
 const static  Int_t  nBins[NoDim]  = {       10,          NpT,   Neta,     KPidParticles+1,1000};
-const static  Var_t  xMin          = {        0,            0,-etaMax,                -1.5, -3.};
-const static  Var_t  xMax          = {     3000,       pTMaxL, etaMax, KPidParticles - 0.5,  7.};
+const static  Var_t  xMin          = {       0.,           0.,-etaMax,                -1.5, -3.};
+const static  Var_t  xMax          = {    3000.,       pTMaxL, etaMax, KPidParticles - 0.5,  7.};
 FitP_t FitParams;
 
 //ClassImp(FitP_t);
@@ -221,6 +231,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
     gSystem->Load("StBichsel"); 
     gSystem->Load("StarClassLibrary");  
     m_Bichsel = Bichsel::Instance();
+    StdEdxModel::instance();
   }
   if (! gRandom) new TRandom();
   TString OutFName(Out);
@@ -265,8 +276,8 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
     if (i) {TitleX += " ";}
     TitleX += NameV[i];
   }
-  THnSparseF  *sZs[3] = {0};
 #ifdef __SPARSE__
+  THnSparseF  *sZs[3] = {0};
   for (Int_t m = 0; m < 3; m++) {
     if (m == 0) sZs[m] = new THnSparseF("sZdEdx", TitleX, NoDim, nBins, 0, 0);
     if (m == 1) sZs[m] = new THnSparseF("sZdEdxFit", TitleX, NoDim, nBins, 0, 0);
@@ -301,6 +312,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   TH2F *TdEdxs40cm[3] = {TdEdxP7040cm, TdEdxPF40cm, TdEdxPN40cm};
   TH1F *cpTh     = new TH1F("cpTh","q*pT distribution",500,-pTMax,pTMax); 
   TH1F *Etah     = new TH1F("Etah","Eta distribution",100,-5.,5.);
+#ifdef __dEdxPhi__
   TH2F *pTPhiT   = new TH2F("pTPhiT","Phi of Track (-East +West) q*pT for all tracks"
 			    ,NpT,cpTBins,Nphi,phiBins);
   TH2F *pTPhiD   = new TH2F("pTPhiD","Phi of 1-st hit (-East +West) q*pT for all tracks"
@@ -341,11 +353,15 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 			    ,NpT,cpTBins,Nphi,phiBins, Nz, zBins);
   TH3F *pTPhiPiDLHFToff= new TH3F("pTPhiPiDLHFToff","L vs Phi of 1-st hit (-East +West) q*pT and z (Pion) HFToff"
 			    ,NpT,cpTBins,Nphi,phiBins, NL, LBins);
+#endif /* __dEdxPhi__ */
   TH2F *zZ       = new TH2F("zZ","zTpc - zVpd versus zTpc for highest rank vertex", 200, -200, 200, 100, -50, 50); 
   delete [] etaBins;
   delete [] phiBins;
   delete [] zBins;
   delete [] LBins;
+  Hists2D I70("I70");
+  Hists2D fitZ("fitZ");
+  Hists2D fitN("fitN");
   StMuDebug::setLevel(0);  
   maker = new StMuDstMaker(0,0,"",files,"st:MuDst.root",1e9);   // set up maker in read mode
   //                       0,0                        this mean read mode
@@ -371,21 +387,24 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
   };
   Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
   for (Int_t i = 0; i < Nb; i++) maker->SetStatus(ActiveBranches[i],1); // Set Active braches
-  StMuDebug::setLevel(0);  
   //         Now iterations
   Var_t Var;
-  Int_t nev = 0;
   TChain *tree = maker->chain();
   Long64_t nentries = tree->GetEntries();
+  if (nentries <= 0) return;
+#ifdef DEBUG
+  Long64_t nevent = 9;
+#else
   Long64_t nevent = 9999999;
+#endif
   nevent = TMath::Min(nevent,nentries);
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
-  if (nentries <= 0) return;
   tree->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,0)
   tree->SetCacheLearnEntries(1); //one entry is sufficient to learn
   tree->SetCacheEntryRange(0,nevent);
 #endif
+
   for (Long64_t ev = 0; ev < nevent; ev++) {
     if (maker->Make()) break;
     StMuDst* mu = maker->muDst();   // get a pointer to the StMuDst class, the class that points to all the data
@@ -442,15 +461,21 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       cout << k << "\tNHits " << (int) pTrack->nHits()
 	   << "\tNHitsDedx " << (int) pTrack->nHitsDedx()
 	   << "\tpT " << pTrack->pt() << "\tEta " << pTrack->eta() 
-	   << "\tpx " << pTrack->p().x()()
-	   << "\tpy " << pTrack->p().y()()
-	   << "\tpz " << pTrack->p().z()()
-	   << "\tdEdx " << 1e6*pTrack->probPidTraits().dEdxTruncated() << "\tQ " << (int) pTrack->mHelix_mQ() << endl;
+	   << "\tpx " << pTrack->p().x()
+	   << "\tpy " << pTrack->p().y()
+	   << "\tpz " << pTrack->p().z()
+	   << "\tdEdx " << 1e6*pTrack->probPidTraits().dEdxTruncated() << "\tQ " << (int) pTrack->muHelix().q() << endl;
 #endif
+      //#if 0
+      StPidStatus PiD(gTrack); 
+      if (PiD.PiDStatus < 0) continue;
       memset (&Var.refMult, 0, sizeof(Var_t));
       Var.refMult = NoPrimaryTracks;
-      Float_t charge = 1;
-      if (pTrack->muHelix().q() < 0) charge = -1; 
+      Int_t charge = 1;
+      Int_t sCharge = 0;
+      if (pTrack->muHelix().q() < 0) {charge = -1; sCharge = 1;}
+#if 0
+      //      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
       const StMuHelix &OuterHelix = gTrack->muOuterHelix();
       StPhysicalHelixD helix = OuterHelix.helix();
       const StThreeVectorF &pOut = OuterHelix.p();
@@ -465,15 +490,6 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       Double_t phiD = TMath::RadToDeg()*lastPoint.phi();
       if (phiD < 0) phiD += 360;
       if (Var.eta < 0) phiD -= 360;
-      pTPhiPiDL->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
-      if (! HFTon) {
-	pTPhiPiDLHFToff->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
-      }
-      cpTh->Fill(Var.cpT);
-      Etah->Fill(Var.eta);
-      pTEta->Fill(Var.cpT,Var.eta);
-      pTPhiT->Fill(Var.cpT,phi);
-      pTPhiD->Fill(Var.cpT,phiD);
       Double_t bg[KPidParticles];
       Double_t bgL10[KPidParticles];
       Double_t zPred[3][KPidParticles];
@@ -483,6 +499,19 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       Double_t dEdxL[3]   = {TMath::Log(dEdx[0]), TMath::Log(dEdx[1]), dEdx[2] > 0 ? TMath::Log(dEdx[2]):0};
       Double_t dEdxL10[3] = {TMath::Log10(dEdx[0]), TMath::Log10(dEdx[1]), dEdx[2] > 0 ? TMath::Log10(dEdx[2]):0};
       Double_t p = pOut.mag(); // gTrack->pt()*TMath::CosH(gTrack->eta());
+      Double_t sigmas[3] = {pTrack->probPidTraits().dEdxErrorTruncated(), pTrack->probPidTraits().dEdxErrorFit(), pTrack->probPidTraits().dNdxErrorFit()};
+      Double_t nSigmasPi[3] = {0, pTrack->nSigmaPion(), 0};
+      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], sigmas[1]*pTrack->nSigmaPion(), dEdxL[2] - zPred[2][kPidPion]};
+#ifdef __dEdxPhi__
+      pTPhiPiDL->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
+      if (! HFTon) {
+	pTPhiPiDLHFToff->Fill(Var.cpT,phiD, pTrack->probPidTraits().dEdxTrackLength());
+      }
+      cpTh->Fill(Var.cpT);
+      Etah->Fill(Var.eta);
+      pTEta->Fill(Var.cpT,Var.eta);
+      pTPhiT->Fill(Var.cpT,phi);
+      pTPhiD->Fill(Var.cpT,phiD);
       for (Int_t l = 0; l < KPidParticles; l++) {
 	charge = 1;
 	if (l >= kPidHe3) charge = 2;
@@ -497,21 +526,18 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	zPred[2][l]   = TMath::Log(StdEdxModel::instance()->dNdx(bg[l]));
 	sPred[2][l]   = 1;
       }
-      //      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
-      Double_t sigmas[3] = {pTrack->probPidTraits().dEdxErrorTruncated(), pTrack->probPidTraits().dEdxErrorFit(), pTrack->probPidTraits().dNdxErrorFit()};
-      Double_t nSigmasPi[3] = {0, pTrack->nSigmaPion(), 0};
-      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], sigmas[1]*pTrack->nSigmaPion(), dEdxL[2] - zPred[2][kPidPion]};
       pTEtaPiD->Fill(Var.cpT,Var.eta);
       pTPhiPiD->Fill(Var.cpT,phiD);
       pTEtaPiDz->Fill(Var.cpT,Var.eta, Zs[1]);
       pTPhiPiDz->Fill(Var.cpT,phiD, Zs[1]);
       pTPhiPiDsigma->Fill(Var.cpT,phiD, nSigmasPi[1]);
       if (! HFTon) {
-      pTEtaPiDHFToff->Fill(Var.cpT,Var.eta);
-      pTPhiPiDHFToff->Fill(Var.cpT,phiD);
-      pTEtaPiDzHFToff->Fill(Var.cpT,Var.eta, Zs[1]);
-      pTPhiPiDzHFToff->Fill(Var.cpT,phiD, Zs[1]);
+	pTEtaPiDHFToff->Fill(Var.cpT,Var.eta);
+	pTPhiPiDHFToff->Fill(Var.cpT,phiD);
+	pTEtaPiDzHFToff->Fill(Var.cpT,Var.eta, Zs[1]);
+	pTPhiPiDzHFToff->Fill(Var.cpT,phiD, Zs[1]);
       }
+#endif /* __dEdxPhi__ */
       for (Int_t m = 0; m < 3; m++) {// I70 && Fit && dNdx
 	if (sigmas[m] > 0) {
 	  Var.hyp = -1;
@@ -519,6 +545,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
 	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
 	  TdEdxs[m]->Fill(TMath::Log10(p), dEdxL10[m]);
+#ifdef __dEdxPhi__
 	  if (pTrack->probPidTraits().dEdxTrackLength() > 40) {
 	    TdEdxs40cm[m]->Fill(TMath::Log10(p), dEdxL10[m]);
 	    pTEtaPiD40cm->Fill(Var.cpT,Var.eta);
@@ -527,6 +554,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	    pTPhiPiD40cmz->Fill(Var.cpT,phiD, Zs[1]);
 	    pTPhiPiD40cmsigma->Fill(Var.cpT,phiD, nSigmasPi[1]);
 	  }
+#endif /* __dEdxPhi__ */
 #ifdef __SPARSE__
 	  sZs[m]->Fill(&Var.refMult);
 	  for (Int_t l = 0; l < KPidParticles; l++) {
@@ -541,10 +569,45 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 #endif /* __SPARSE__ */
 	}
       }
+#endif
+#if 1
+      for (Int_t l = kPidElectron; l < KPidParticles; l++) {
+	Int_t k = PiD.PiDkeyU3;
+	if (PiD.fI70.fPiD) {
+	  I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
+	  I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devZ[l]);
+	  if (Debug) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  if (k >= 0) {
+	    I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
+	    I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devZ[l]);
+	    if (Debug) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  }
+	}
+	if (PiD.fFit.fPiD) {
+	  fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devF[l]);
+	  fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devF[l]);
+	  if (Debug) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  if (k >= 0) {
+	    fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devF[l]);
+	    fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devF[l]);
+	    if (Debug) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  }
+	}
+	if (PiD.fdNdx.fPiD) {
+	  fitN.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devN[l]);
+	  fitN.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devN[l]);
+	  if (Debug) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  if (k >= 0) {
+	    fitN.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devN[l]);
+	    fitN.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devN[l]);
+	    if (Debug) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  }
+	}
+      }
+#endif
       noGoodPrimTracks++;
     }
     GoodPrimTracks->Fill(noGoodPrimTracks);
-    if (nev % 1000 == 1) cout << "read " << nev << " event so far" << endl;
   }
   //    iter.Reset(); //ready for next loop                                 
   if (fOut) fOut->Write();

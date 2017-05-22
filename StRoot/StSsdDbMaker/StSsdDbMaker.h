@@ -52,10 +52,11 @@ private:
    slsCtrl_st            *m_ctrl;//!
    Int_t                   mode;//!
    static THashList *fRotList;
-
+   static StSsdDbMaker *fgStSsdDbMaker;
 public:
    StSsdDbMaker(const char *name = "SsdDb");
    virtual       ~StSsdDbMaker();
+   static StSsdDbMaker *instance() {return fgStSsdDbMaker;}
    virtual Int_t  Init();
    virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
@@ -68,13 +69,12 @@ public:
    virtual Int_t        GetMode() {return mode;}
    virtual St_ssdWafersPosition *GetssdWafersPos() {return m_positions;}
    virtual St_ssdDimensions     *GetssdDimensions() {return m_dimensions;}
-
+   
    virtual const char *GetCVS() const
    {static const char cvs[] = "Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.11 2014/12/05 21:59:25 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StSsdDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
-R__EXTERN StSsdDbMaker *gStSsdDbMaker;
 #endif
 
 
