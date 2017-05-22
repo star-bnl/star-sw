@@ -55,7 +55,7 @@ public:
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp = 9);
 
-  void setVtxMode(PicoVtxMode);
+  void setVtxMode(const PicoVtxMode vtxMode);
 
 protected:
 
@@ -158,5 +158,5 @@ inline TTree* StPicoDstMaker::tree() { return mTTree; }
 inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
-inline void StPicoDstMaker::setVtxMode(PicoVtxMode const vtxMode) { mVtxMode = vtxMode; }
+inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
 #endif
