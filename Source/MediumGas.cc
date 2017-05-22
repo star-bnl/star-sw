@@ -533,7 +533,13 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
     m_hasElectronAttachment = false;
     tabElectronAttachment.clear();
   }
-  // gasBits[6]: Lorentz angle; skipped
+  if (gasBits[6] == 'T') {
+    m_hasElectronLorentzAngle = true;
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronLorentzAngle, -30.);
+  } else {
+    m_hasElectronLorentzAngle = false;
+    tabElectronLorentzAngle.clear();
+  }
   if (gasBits[7] == 'T') {
     m_hasElectronDiffTrans = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronDiffTrans, 0.);
@@ -712,8 +718,9 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
           // Convert from cm2 / (V us) to cm2 / (V ns)
           mu *= 1.e-3;
           if (m_hasIonMobility) tabIonMobility[j][k][i] = mu;
-          // Lorentz angle (unused)
+          // Lorentz angle
           gasfile >> lor;
+          if (m_hasElectronLorentzAngle) tabElectronLorentzAngle[j][k][i] = lor;
           // Ion dissociation
           gasfile >> diss;
           if (m_hasIonDissociation) tabIonDissociation[j][k][i] = diss;
@@ -769,8 +776,9 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
       gasfile >> mu >> waste;
       mu *= 1.e-3;
       if (m_hasIonMobility) tabIonMobility[0][0][i] = mu;
-      // Lorentz angle (unused)
+      // Lorentz angle
       gasfile >> lor >> waste;
+      if (m_hasElectronLorentzAngle) tabElectronLorentzAngle[0][0][i] = lor;
       // Ion dissociation
       gasfile >> diss >> waste;
       if (m_hasIonDissociation) tabIonDissociation[0][0][i] = diss;
@@ -944,7 +952,10 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
   m_extrHighMobility = hExtrap[6];
   m_extrLowMobility = lExtrap[6];
   m_intpMobility = interpMeth[6];
-  // Index 7, 8: Lorentz angle, transv. diff.
+  m_extrHighLorentzAngle = hExtrap[7];
+  m_extrLowLorentzAngle = lExtrap[7];
+  m_intpLorentzAngle = interpMeth[7];
+  // Index 8: transv. diff.
   m_extrHighDissociation = hExtrap[9];
   m_extrLowDissociation = lExtrap[9];
   m_intpDissociation = interpMeth[9];
@@ -1035,9 +1046,9 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
   if (m_hasIonMobility) gasBits[1] = 'T';
   if (m_hasElectronDiffLong) gasBits[2] = 'T';
   if (!tabElectronTownsend.empty()) gasBits[3] = 'T';
-  // Custer size distribution; skippped
+  // Cluster size distribution; skipped
   if (m_hasElectronAttachment) gasBits[5] = 'T';
-  // Lorentz angle; skipped
+  if (m_hasElectronLorentzAngle) gasBits[6] = 'T';
   if (m_hasElectronDiffTrans) gasBits[7] = 'T';
   if (m_hasElectronVelocityB) gasBits[8] = 'T';
   if (m_hasElectronVelocityExB) gasBits[9] = 'T';
@@ -1173,6 +1184,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         mu *= 1.e3;
         // Lorentz angle
         double lor = 0.;
+        if (m_hasElectronLorentzAngle) lor = tabElectronLorentzAngle[j][k][i];
         // Dissociation coefficient
         double diss = -30.;
         if (m_hasIonDissociation) {
@@ -1355,9 +1367,9 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
   lExtrap[6] = m_extrLowMobility;
   interpMeth[6] = m_intpMobility;
   // Lorentz angle
-  hExtrap[7] = 1;
-  lExtrap[7] = 0;
-  interpMeth[7] = 2;
+  hExtrap[7] = m_extrHighLorentzAngle;
+  lExtrap[7] = m_extrLowLorentzAngle;
+  interpMeth[7] = m_intpLorentzAngle;
   hExtrap[9] = m_extrHighDissociation;
   lExtrap[9] = m_extrLowDissociation;
   interpMeth[9] = m_intpDissociation;
@@ -1563,6 +1575,28 @@ void MediumGas::PrintGas() {
       std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << m_intpAttachment << "\n";
   }
+  if (m_hasElectronLorentzAngle) {
+    std::cout << "      Lorentz Angle\n";
+    std::cout << "        Low field extrapolation:  ";
+    if (m_extrLowLorentzAngle == 0)
+      std::cout << " constant\n";
+    else if (m_extrLowLorentzAngle == 1)
+      std::cout << " linear\n";
+    else if (m_extrLowLorentzAngle == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
+    std::cout << "        High field extrapolation: ";
+    if (m_extrHighLorentzAngle == 0)
+      std::cout << " constant\n";
+    else if (m_extrHighLorentzAngle == 1)
+      std::cout << " linear\n";
+    else if (m_extrHighLorentzAngle == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
+    std::cout << "        Interpolation order: " << m_intpLorentzAngle << "\n";
+  }
   if (m_hasExcRates) {
     std::cout << "      Excitation rates\n";
     std::cout << "        Low field extrapolation:  ";
@@ -1610,7 +1644,7 @@ void MediumGas::PrintGas() {
   if (!m_hasElectronVelocityE && !m_hasElectronVelocityB &&
       !m_hasElectronVelocityExB && !m_hasElectronDiffLong &&
       !m_hasElectronDiffTrans && !m_hasElectronDiffTens && tabElectronTownsend.empty() &&
-      !m_hasElectronAttachment && !m_hasExcRates && !m_hasIonRates) {
+      !m_hasElectronAttachment && !m_hasExcRates && !m_hasIonRates && !m_hasElectronLorentzAngle) {
     std::cout << "      none\n";
   }
 

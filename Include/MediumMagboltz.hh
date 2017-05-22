@@ -125,10 +125,12 @@ class MediumMagboltz : public MediumGas {
 
   void RunMagboltz(const double e, const double b, const double btheta,
                    const int ncoll, bool verbose, double& vx, double& vy,
-                   double& vz, double& dl, double& dt, double& alpha,
-                   double& eta, double& vxerr, double& vyerr, double& vzerr,
-                   double& dlerr, double& dterr, double& alphaerr,
-                   double& etaerr, double& alphatof);
+                   double& vz, double& dl, double& dt, 
+                   double& alpha, double& eta, double& lor,
+                   double& vxerr, double& vyerr, double& vzerr,
+                   double& dlerr, double& dterr, 
+                   double& alphaerr, double& etaerr, double& lorerr,
+                   double& alphatof);
 
   // Generate a new gas table (can later be saved to file)
   void GenerateGasTable(const int numCollisions = 10,

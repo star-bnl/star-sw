@@ -30,7 +30,8 @@ class HeedCondElectron {
   double time;
   // Constructors
   HeedCondElectron() {}
-  HeedCondElectron(point fptloc, double ftime) : ptloc(fptloc), time(ftime) {}
+  HeedCondElectron(const point& fptloc, const double ftime)
+      : ptloc(fptloc), time(ftime) {}
   // Destructor
   virtual ~HeedCondElectron() {}
   virtual void print(std::ostream& file, int l) const;
@@ -39,9 +40,9 @@ class HeedCondElectron {
 class SensitiveVolume {
  public:
   std::vector<HeedCondElectron> conduction_electron_bank;
+  std::vector<HeedCondElectron> conduction_ion_bank;
   SensitiveVolume() {}
 };
-
 }
 
 #endif
