@@ -20,10 +20,12 @@
 //#include "StjTPCRandomMuDst.h"
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
+#include "StjFMSMuDst.h"
 #include "StjMCMuDst.h"
 #include "StjTPCNull.h"
 #include "StjBEMCNull.h"
 #include "StjEEMCNull.h"
+#include "StjFMSNull.h"
 #include "StjAbstractTowerEnergyCorrectionForTracks.h"
 #include "StjeTrackListToStMuTrackFourVecList.h"
 #include "StjeTowerEnergyListToStMuTrackFourVecList.h"
@@ -142,11 +144,20 @@ int StJetMaker2012::Make()
 	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemcEnergyList);
 	}
 
+	// Get FMS towers                                                                                                 
+	StjTowerEnergyList fmsEnergyList;
+
+	if (jetbranch->anapars->useFms) {
+	  StjFMSMuDst fms;
+	  fmsEnergyList = fms.getEnergyList();
+	}
+
 	// Merge BEMC and EEMC towers
 	StjTowerEnergyList energyList;
 
 	copy(bemcEnergyList.begin(),bemcEnergyList.end(),back_inserter(energyList));
 	copy(eemcEnergyList.begin(),eemcEnergyList.end(),back_inserter(energyList));
+	copy(fmsEnergyList.begin(),fmsEnergyList.end(),back_inserter(energyList));
 
 	// Apply hadronic correction to towers
 	energyList = jetbranch->anapars->correctTowerEnergyForTracks()(energyList,trackList);
@@ -220,11 +231,19 @@ int StJetMaker2012::Make()
 	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemcEnergyList);
 	}
 
+	// Get FMS towers                                                                                                 
+	StjTowerEnergyList fmsEnergyList;
+	if (jetbranch->anapars->useFms) {
+	  StjFMSMuDst fms;
+	  fmsEnergyList = fms.getEnergyList();
+	}
+
 	// Merge BEMC and EEMC towers
 	StjTowerEnergyList energyList;
 
 	copy(bemcEnergyList.begin(),bemcEnergyList.end(),back_inserter(energyList));
 	copy(eemcEnergyList.begin(),eemcEnergyList.end(),back_inserter(energyList));
+	copy(fmsEnergyList.begin(),fmsEnergyList.end(),back_inserter(energyList));
 
 	// Convert towers to Lorentz vectors
 	FourList energy4pList = StjeTowerEnergyListToStMuTrackFourVecList()(energyList);
