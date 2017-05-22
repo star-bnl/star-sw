@@ -92,6 +92,11 @@ class Medium {
                                   const double ez, const double bx,
                                   const double by, const double bz,
                                   double& eta);
+  // Lorentz angle
+  virtual bool ElectronLorentzAngle(const double ex, const double ey,
+                                    const double ez, const double bx,
+                                    const double by, const double bz,
+                                    double& lor);
 
   // Microscopic electron transport properties
 
@@ -181,6 +186,9 @@ class Medium {
   bool GetElectronAttachment(const unsigned int ie, 
                              const unsigned int ib, 
                              const unsigned int ia, double& eta);
+  bool GetElectronLorentzAngle(const unsigned int ie, 
+                               const unsigned int ib, 
+                               const unsigned int ia, double& lor);
 
   bool GetHoleVelocityE(const unsigned int ie, const unsigned int ib, 
                         const unsigned int ia, double& v);
@@ -215,6 +223,7 @@ class Medium {
   void ResetElectronDiffusion();
   void ResetElectronTownsend();
   void ResetElectronAttachment();
+  void ResetElectronLorentzAngle();
   void ResetHoleVelocity();
   void ResetHoleDiffusion();
   void ResetHoleTownsend();
@@ -259,6 +268,7 @@ class Medium {
   virtual double ScaleDiffusionTensor(const double d) const { return d; }
   virtual double ScaleTownsend(const double alpha) const { return alpha; }
   virtual double ScaleAttachment(const double eta) const { return eta; }
+  virtual double ScaleLorentzAngle(const double lor) const { return lor; }
   virtual double ScaleDissociation(const double diss) const { return diss; }
 
   // Optical properties
@@ -329,6 +339,7 @@ class Medium {
   bool m_hasElectronVelocityE, m_hasElectronVelocityB, m_hasElectronVelocityExB;
   bool m_hasElectronDiffLong, m_hasElectronDiffTrans, m_hasElectronDiffTens;
   bool m_hasElectronAttachment;
+  bool m_hasElectronLorentzAngle;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
@@ -336,6 +347,7 @@ class Medium {
   std::vector<std::vector<std::vector<double> > > tabElectronDiffTrans;
   std::vector<std::vector<std::vector<double> > > tabElectronTownsend;
   std::vector<std::vector<std::vector<double> > > tabElectronAttachment;
+  std::vector<std::vector<std::vector<double> > > tabElectronLorentzAngle;
 
   std::vector<std::vector<std::vector<std::vector<double> > > >
       tabElectronDiffTens;
@@ -376,6 +388,7 @@ class Medium {
   unsigned int m_extrLowDiffusion, m_extrHighDiffusion;
   unsigned int m_extrLowTownsend, m_extrHighTownsend;
   unsigned int m_extrLowAttachment, m_extrHighAttachment;
+  unsigned int m_extrLowLorentzAngle, m_extrHighLorentzAngle;
   unsigned int m_extrLowMobility, m_extrHighMobility;
   unsigned int m_extrLowDissociation, m_extrHighDissociation;
 
@@ -384,9 +397,13 @@ class Medium {
   unsigned int m_intpDiffusion;
   unsigned int m_intpTownsend;
   unsigned int m_intpAttachment;
+  unsigned int m_intpLorentzAngle;
   unsigned int m_intpMobility;
   unsigned int m_intpDissociation;
 
+  double GetAngle(const double ex, const double ey, const double ez,
+                  const double bx, const double by, const double bz,
+                  const double e, const double b) const;
   double Interpolate1D(const double e, const std::vector<double>& table,
                        const std::vector<double>& fields, 
                        const unsigned int intpMeth,

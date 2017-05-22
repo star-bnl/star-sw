@@ -52,6 +52,8 @@ class ViewMedium {
                               const double a = HalfPi);
   void PlotHoleAttachment(const char xaxis, const double e, const double b,
                           const double a = HalfPi);
+  void PlotElectronLorentzAngle(const char xaxis, const double e, const double b,
+                               const double a = HalfPi);
   void PlotElectronCrossSections();
   double EvaluateFunction(double* pos, double* par);
 
@@ -61,6 +63,7 @@ class ViewMedium {
     ElectronLongitudinalDiffusion,
     ElectronTownsend,
     ElectronAttachment,
+    ElectronLorentzAngle,
     HoleVelocityE = 10,
     HoleTransverseDiffusion,
     HoleLongitudinalDiffusion,

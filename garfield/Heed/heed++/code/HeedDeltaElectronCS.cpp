@@ -272,7 +272,6 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
                  hmd->matter->density() / (gram / cm3) /
                  (hmd->matter->A_mean() / (gram / mole)));
     }
-
   }
 
   //mcout<<"finishing HeedDeltaElectronCS\n";
