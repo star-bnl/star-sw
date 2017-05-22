@@ -109,7 +109,7 @@ void SvtMatchedTree::MakeListOfRotations() {
   THashList *hash = 0;
   for (Int_t i = 0; i < 2; i++) {
     if (i == 0 && gStSvtDbMaker) hash = gStSvtDbMaker->GetRotations();
-    if (i == 1 && gStSsdDbMaker) hash = gStSsdDbMaker->GetRotations();
+    if (i == 1 && StSsdDbMaker::instance()) hash = StSsdDbMaker::instance()->GetRotations();
     if (! hash) continue;
     TIter next(hash);
     TGeoHMatrix *comb;

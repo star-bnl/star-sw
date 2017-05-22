@@ -45,7 +45,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StSstUtil/StSstConsts.h"
 
-StSstDbMaker *gStSstDbMaker = NULL;
+StSstDbMaker *StSstDbMaker::fgStSstDbMaker = 0;
 THashList *StSstDbMaker::fRotList = 0;
 
 ClassImp(StSstDbMaker)
@@ -54,10 +54,10 @@ ClassImp(StSstDbMaker)
     StMaker(name), mySst(0), dimensions(0), config(0), ctrl(0), mode(0),
     mReady(kStErr),m_positions(0)
 {
-  gStSstDbMaker = this;
+  fgStSstDbMaker = this;
 }
 //_____________________________________________________________________________
-StSstDbMaker::~StSstDbMaker() {SafeDelete(mySst); gStSstDbMaker = 0;}
+StSstDbMaker::~StSstDbMaker() {SafeDelete(mySst); fgStSstDbMaker = 0;}
 //_____________________________________________________________________________
 Int_t StSstDbMaker::InitRun(Int_t runNumber)
 {

@@ -65,7 +65,7 @@ Int_t StSstFastSimMaker::InitRun(int RunNo)
     }
   
   //geometry parameters from StSstDbMaker
-  mDimensions = gStSstDbMaker->getSstDimensions();
+  mDimensions = StSstDbMaker::instance()->getSstDimensions();
   if(!mDimensions)
     { 
       LOG_ERROR << "No SST dimensions table" << endm;
@@ -118,7 +118,7 @@ Int_t StSstFastSimMaker::Make()
   }
   g2t_ssd_hit_st *g2t         = g2t_ssd_hit->GetTable();
 
-  StSstBarrel *mySst = gStSstDbMaker->getSst();
+  StSstBarrel *mySst = StSstDbMaker::instance()->getSst();
   int inContainer = 0;
   
   LOG_INFO<<"####      START OF SST FAST SIM MAKER        ####"<<endm;

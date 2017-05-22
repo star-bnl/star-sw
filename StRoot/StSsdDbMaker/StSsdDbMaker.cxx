@@ -54,7 +54,7 @@
 #include "TMath.h"
 #include "TVector3.h"
 #include "StTpcDb/StTpcDb.h"
-StSsdDbMaker *gStSsdDbMaker = NULL;
+StSsdDbMaker *StSsdDbMaker::fgStSsdDbMaker = 0;
 THashList *StSsdDbMaker::fRotList = 0;
 
 ClassImp(StSsdDbMaker)
@@ -62,10 +62,10 @@ ClassImp(StSsdDbMaker)
 StSsdDbMaker::StSsdDbMaker(const char *name) :
    StMaker(name), mySsd(0), m_dimensions(0), m_positions(0), m_config(0), m_ctrl(0)
 {
-   gStSsdDbMaker = this; mode = 0;
+   fgStSsdDbMaker = this; mode = 0;
 }
 //_____________________________________________________________________________
-StSsdDbMaker::~StSsdDbMaker() {SafeDelete(mySsd); gStSsdDbMaker = 0;}
+StSsdDbMaker::~StSsdDbMaker() {SafeDelete(mySsd); fgStSsdDbMaker = 0;}
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::Init()
 {

@@ -56,13 +56,13 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 
    if (!mBuildIdealGeom) {
 
-      if (!gStSstDbMaker) {
+      if (!StSstDbMaker::instance()) {
          LOG_ERROR << "StiSstDetectorBuilder::buildDetectors() - SST geometry was requested from "
             "DB but no StSstDb object found. Check for sstDb option in BFC chain" << endm;
          exit(EXIT_FAILURE);
       }
 
-      mSstDb = (StSstDbMaker*) gStSstDbMaker;
+      mSstDb = (StSstDbMaker*) StSstDbMaker::instance();
       assert(mSstDb);
 
       LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - Will build SST geometry from DB tables" << endm;

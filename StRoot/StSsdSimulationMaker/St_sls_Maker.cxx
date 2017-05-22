@@ -123,11 +123,11 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   assert(StSsdBarrel::Instance());
   LOG_DEBUG << " instance of barrel ... done " << endm;
 
-  m_ctrl       = gStSsdDbMaker->GetSlsCtrl();
+  m_ctrl       = StSsdDbMaker::instance()->GetSlsCtrl();
   m_dimensions = 0;
-  m_dimensions = gStSsdDbMaker->GetssdDimensions();
+  m_dimensions = StSsdDbMaker::instance()->GetssdDimensions();
   m_positions  = 0;
-  m_positions  = gStSsdDbMaker->GetssdWafersPos();
+  m_positions  = StSsdDbMaker::instance()->GetssdWafersPos();
   
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
