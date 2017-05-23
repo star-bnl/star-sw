@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.11 2010/09/08 04:54:29 pibero Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.12 2017/05/23 18:32:15 zchang Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDst.h>
@@ -104,7 +104,7 @@ StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
   ret.runNumber = StMuDst::event()->runId();
   ret.eventId = StMuDst::event()->eventId();
 
-  ret.detectorId = 9;
+  ret.detectorId = kBarrelEmcTowerId;
 
   int towerId;
   StEmcGeom::instance("bemc")->getId(hit.module(), hit.eta(), abs(hit.sub()), towerId);
