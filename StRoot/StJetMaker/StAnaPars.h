@@ -27,6 +27,7 @@ public:
     , useTpc(false)
     , useBemc(false)
     , useEemc(false)
+    , useFms(false)
     , useMonteCarlo(false)
     , randomSelectorProb(1.0)
     , randomSelectorAt(false)
@@ -104,6 +105,7 @@ public:
   bool useTpc;
   bool useBemc;
   bool useEemc;
+  bool useFms;
   bool useMonteCarlo;
   double randomSelectorProb;
   double randomSelectorAt;
