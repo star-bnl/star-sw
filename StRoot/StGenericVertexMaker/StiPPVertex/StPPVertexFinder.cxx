@@ -1,11 +1,17 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.116 2017/05/23 20:15:25 genevb Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.117 2017/05/24 05:02:05 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
  *
  * Description:  does not fear any pileup
+ ************************************************************
+ *
+ * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.117  2017/05/24 05:02:05  genevb
+ * Options for number of unqualified verts to store, and using only BTOF-matched tracks
+ *
  *
  ************************************************************/
    
@@ -76,6 +82,7 @@ StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) :
   mDropPostCrossingTrack(true), // default PCT rejection on
   mStoreUnqualifiedVertex(5),
   mCut_oneTrackPT(10.),
+  mUseBTOFmatchOnly(false),
   mToolkit(nullptr),
   btofList(nullptr),
   ctbList(nullptr),
@@ -324,7 +331,8 @@ void StPPVertexFinder::printInfo(ostream& os) const
            << Form("PPV:: dropped due to PCT check  = %d\n", ntrk[3])
            << Form("PPV:: dropped due to DCA check  = %d\n", ntrk[4])
            << Form("PPV:: dropped due to NHit check = %d\n", ntrk[5])
-           << Form("PPV:: # of track after all cuts = %d",   ntrk[6]) << endm;
+           << Form("PPV:: dropped due to TOF check  = %d\n", ntrk[6])
+           << Form("PPV:: # of track after all cuts = %d",   ntrk[7]) << endm;
 
   if(mUseBtof) btofList->print();
   if(mUseCtb)  ctbList->print();
@@ -444,14 +452,16 @@ int StPPVertexFinder::fit(StEvent* event)
     if (!examinTrackDca(stiKalmanTrack, track)) { ntrk[4]++; continue; }  // drop from DCA
     if (!matchTrack2Membrane(track))            { ntrk[5]++; continue; }  // kill if nFitP too small
 
-    ntrk[6]++;
-
 
     // Match to various detectors
     if (mUseBtof) matchTrack2BTOF(stiKalmanTrack, track);  // matching track to btofGeometry
+    if (mUseBTOFmatchOnly && (track.mBtof == 0)) { ntrk[6]++; continue; }
+
     if (mUseCtb)  matchTrack2CTB(stiKalmanTrack, track);
     matchTrack2BEMC(track);
     matchTrack2EEMC(track);
+
+    ntrk[7]++;
 
     // ...all test done on this track
     mTrackData.push_back(track); 
@@ -534,7 +544,10 @@ int StPPVertexFinder::fit(const StMuDst& muDst)
       double fracFit2PossHits = static_cast<double>(stMuTrack.nHitsFit(kTpcId)) / stMuTrack.nHitsPoss(kTpcId);
       if (fracFit2PossHits < mMinFitPfrac) { ntrk[5]++; continue; }  // kill if nFitP too small
 
-      ntrk[6]++;
+      // Test TOF match if required
+      if (mUseBTOFmatchOnly && (stMuTrack.tofHit() == 0)) { ntrk[6]++; continue; }
+
+      ntrk[7]++;
 
       TrackDataT<StMuTrack> track(stMuTrack, dca);
 
