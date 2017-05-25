@@ -37,6 +37,9 @@
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
 #include "tables/St_vertexSeed_Table.h" //
 
+class StMuDst;
+class TClonesArray;
+
 // for Helix model
 #include "St_base/StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
@@ -143,6 +146,9 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StPPVertexFinder(vertexFitMode);
 
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
+    int vfstore = IAttr("VFstore");
+    if (vfstore > 0)  ((StPPVertexFinder*)theFinder)->SetStoreUnqualifiedVertex(vfstore);
+    if ( IAttr("useBTOFmatchOnly") )  ((StPPVertexFinder*)theFinder)->UseBTOFmatchOnly();
 
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
            ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
@@ -260,6 +266,21 @@ Int_t StGenericVertexMaker::Make()
 {
   nEvTotal++;
   primV  = NULL;
+
+  if (IAttr("useMuDst")) {
+    StMuDst* muDst = 0;
+    TClonesArray* vtxArray = 0;
+    WhiteBoard("muDst",&muDst);
+    WhiteBoard("vtxArray",&vtxArray);
+    if (!(vtxArray && muDst)) {
+      LOG_ERROR << "problems for refitting MuDst" << endm;
+      return kStErr;
+    }
+    theFinder->fit(*muDst);
+    theFinder->result(*vtxArray);
+    return kStOk;
+  }
+
   mEvent = (StEvent*) GetInputDS("StEvent");
   LOG_DEBUG << "StGenericVertexMaker::Make: StEvent pointer " << mEvent << endm;
   LOG_DEBUG << "StGenericVertexMaker::Make: external find use " << externalFindUse << endm;

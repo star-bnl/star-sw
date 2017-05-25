@@ -1,4 +1,4 @@
-void RunJetFinder2012pro(int nevents = 100,
+void RunJetFinder2012pro(int nevents = 1000000,
 const char* indir = "~/2013-08-trgsimu/MuDst/",
 const char* MuDst = "st_physics_13109014_raw_1020001.MuDst.root",
 const char* Jetfile = "st_physics_13109014_raw_1020001.jets.root",
@@ -76,6 +76,10 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
 
    StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
    adc->saveAllStEvent(true);
+
+   StFmsDbMaker* fmsDb = new StFmsDbMaker;
+   StFmsHitMaker* fmshitMk = new StFmsHitMaker();
+   StFmsPointMaker* fmsptMk = new StFmsPointMaker("StFmsPointMaker");
 
    StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
    simuTrig->useOnlineDB();
