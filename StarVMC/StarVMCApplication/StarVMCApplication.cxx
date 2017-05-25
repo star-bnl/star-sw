@@ -581,10 +581,11 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
 #if 1
-  TGeoTranslation PixelLadderT(-0.2381, 0.00195, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
+  //  TGeoTranslation PixelLadderT(-0.2381, 0.00195, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
+  TGeoTranslation PixelLadderT(-0.2381, 0.0, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
   //  TGeoTranslation PixelSensorT(-0.1533, 0.00070, -0.0160);
   //  TGeoTranslation PixelSensorT(0,0.00195,0);
-  TGeoTranslation PixelSensorT(0.4762-0.2381, 0, 9.75-4.8750);
+  TGeoTranslation PixelSensorT(0.2381, 0, 4.875);
 #endif
   Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929};
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
@@ -641,7 +642,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       }
       TGeoHMatrix rotL(*(nodeP->GetNode()->GetMatrix())); // ideal matrix before alignment
       TGeoHMatrix rotA = rotL; // After alignment
-      TGeoHMatrix A, B, C, D, E, AB;
+      TGeoHMatrix A, B, C, D, E, AB, BC;
       TGeoHMatrix *rotm = 0;
       TGeoShapeAssembly *shape = 0;
       //      TGeoVolumeAssembly *volume = 0;
@@ -661,7 +662,8 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       St_SurveyC *chair = 0;
       switch (kDetector) {
       case kTpcRefSys:
-	rotA = StTpcPosition::instance()->GetMatrix() * rotL;
+	Tpc2Global = StTpcPosition::instance()->GetMatrix();
+	rotA = Tpc2Global; //StTpcPosition::instance()->GetMatrix() * rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kTpcHalf: 
@@ -687,14 +689,24 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	rotA = A * rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,sector,row));
 	break;
+	/*
+	  kHft:             : HftOnTpc = StidsOnTpc
+	  PXMO -> kHft      : PxlOnHft = StPxlpstOnIds * StpxlOnPst
+	  PXLA -> kPxlSector: PXLA       
+	  LADR -> kPxLadder : PXLA^-1 * StpxlHalfOnPxl * StpxlSectorOnHalf * StpxlLadderOnSector * PixelLadderT <<<<<<< Add local matrix ?
+	  PXSI -> kPxlWafer : PSXI 
+	  PLAC -> kPxlSensor: (PixleLadderT * PXSI)^-1 * StpxlSensorOnLadder
+	*/
       case kHft:
-	rotA = StidsOnTpc::instance()->GetMatrix(0) * rotL;
+	HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);
+	rotA = HftOnTpc;// * rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kPxl:
 	A = StPxlpstOnIds::instance()->GetMatrix();
 	B = StpxlOnPst::instance()->GetMatrix();
-	rotA = A * B * (*nodeP->GetOriginalMatrix()); //rotL;
+	PxlOnHft = A * B;
+	rotA = PxlOnHft; // A * B;// * (*nodeP->GetOriginalMatrix()); //rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
       case kPxlSector:
@@ -708,9 +720,10 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	half   = (sector-1)/5; 
 	A = *nodeP->GetNode(NLevel-2)->GetMatrix(); PrPV(A); // PXMO
 	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXLA
-	AB = A * B; PrPV(AB);
+        AB = B;//	AB = B.Inverse();// A * B; PrPV(AB);
 	C = *nodeP->GetNode(NLevel)->GetMatrix(); PrPV(C);   // LADR
-	D = AB * C; PrPV(D);
+	BC = B * C; PrPV(BC);
+	//	D = AB * C; PrPV(D);
 	A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
 	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
@@ -720,6 +733,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 // 	rotA = A * LadderOnPxl; PrPV(rotA);
 // 	D = rotA * rotL.Inverse(); PrPV(D);
 	rotA = AB.Inverse() * LadderOnPxl * PixelLadderT;
+//	rotA = BC.Inverse() * LadderOnPxl;
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
       case kPxlWafer:
@@ -736,11 +750,17 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	//	  A = listOfDet2Align[i].chair->GetMatrix4Id(Id);
 	//	  A = listOfDet2Align[i].chair->GetMatrix4Id(Id) * nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
 	A = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
-	B = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
+	//	B = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
+	B = *nodeP->GetNode(NLevel-1)->GetMatrix();
+	C = PixelLadderT * B;
+	D = C.Inverse();
 	//	  rotA = A * nodeP->GetNode(NLevel-2)->GetMatrix()->Inverse() * nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
 	//	  rotA   = PixelLadderT.Inverse() * A * PixelSensorT;
 	//	rotA   = B * A * PixelSensorT;
-	rotA   = B * PixelLadderT.Inverse() * A;// * PixelSensorT;
+	//	rotA   = B * PixelLadderT.Inverse() * A;// * PixelSensorT;
+	//	rotA   =  B * A * PixelSensorT;
+	//	rotA   =  B * A;
+	rotA   =  D * A;
 	//	rotA = A;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
