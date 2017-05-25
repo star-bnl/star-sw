@@ -9,6 +9,7 @@ foreach gcc (gcc gcc492)
       endif
       setup ${gcc}
       setup ${bit}
+      starver ${STAR_LEVEL}
       time cons -k >& build.${gcc}.${opt}.${bit}.`date +%Y%m%d%y:%H%M`.log &
     end
   end

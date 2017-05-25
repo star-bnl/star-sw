@@ -1,6 +1,6 @@
 /*
   root.exe -q -b -x DumpHftHits.C >& DumpHftHits.log &
-  Int_t det = 3; 
+  Int_t det = 1; 
   HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>al(90,-180,180)",Form("det==%i",det),"");
   HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>us(90,-180,180)",Form("det==%i&&us>0",det),"");
   al->Fit("pol0");
