@@ -456,123 +456,23 @@ Bool_t StarVMCApplication::MisalignGeometry() {
     St_SurveyC *chair;
   };
   static const listOfDetectorToAlign_t listOfDet2Align[] = {                                                                
-    //   /HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV[2]/TPSS[12]/TPAD[73]
-    {"TpcRefSys-%d",   kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                                      1, { 1, 0, 0}, 0}, 	     
-    {"TpcHalf-%d",     kTpcHalf  ,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d",         	       	      1, { 2, 0, 0}, 0}, 	   
-    {"TpcPad-%02d",       kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",	      3, { 2,12,73}, 0}, 
-#if 0
-    /* Spiros, 01/17/2017
-       pst == ids
-       pst=pixel support tube       PXMO
-       ids= intermediate support    IBMO
-       osc=outer support cylinder   SFMO
-       
-+------------------------+
-| Tables_in_Geometry_pxl |
-+------------------------+
-| idsOnTpc               | the same as Geometry_ist.idsOnTpc
-| pstOnIds               | Identity
-| pxlHalfOnPxl           | +
-| pxlLadderOnSector      | +
-| pxlOnPst               | +
-| pxlSectorOnHalf        | +
-| pxlSensorOnLadder      | +
-| pxlSensorTps           | +
-| pxlSurvey              | Empty
-+------------------------+
-| Tables_in_Geometry_ist |
-+------------------------+
-| idsOnTpc               | +
-| istLadderOnIst         | +
-| istOnPst               | +
-| istSensorOnLadder      | +
-| istSurvey              | Empty
-| pstOnIds               | Identity
-+------------------------+
-| Tables_in_Geometry_sst |
-+------------------------+
-| sstLadderOnSst         | +
-| sstOnOsc               | +
-| sstSensorOnLadder      | +
-| sstWafersPosition      | Empty
-+------------------------+
-     */
-    //   /HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA[10]/LADR[4]/PXSI[10]/PLAC_1                                       //  
-    /*
-StPxlConstants.h:const int kNumberOfPxlSectors = 10;
-StPxlConstants.h:const int kNumberOfPxlLaddersPerSector = 4;
-StPxlConstants.h:const int kNumberOfPxlSensorsPerLadder = 10;
-StPxlConstants.h:const int kNumberOfPxlColumnsOnSensor = 960;
-StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
-  StidsOnTpc::instance();
-  StPxlpstOnIds::instance(); // Identity
-  StpxlOnPst::instance();
-  StpxlHalfOnPxl::instance();
-  StpxlSectorOnHalf::instance();
-  StpxlLadderOnSector::instance();
-  StpxlSensorOnLadder::instance();
- * GlobalXyz = TpcOnGlobal * IdsOnTpc * PxlOnIds *            HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
- * GlobalXyz = TpcOnGlobal * IdsOnTpc * PstOnIds * PxlOnPst * HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
- *                              *           *         *            *                 *                 *
-    Tpc 
-      -> Ids    :IDSM/Hft
-             -> Pst
-                    -> Pxl : 					 
-             	           -> Half				 
-             	                   -> Sector			 
-             	                             -> Ladder		 
-                                                       -> Sensor
-                    -> Ist
-                           -> Ladder
-                                     -> Sensor
- * numbering :
- * Id  = (sector-1)*40 + (ladder-1)*10 + sensor
- * 1<= sector <= 10
- * 1<= ladder <= 4
- * 1<= sensor <= 10
-     */
-#endif
-    {"Hft-%d",               kHft,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_%d",                              1, { 1, 0, 0}, 0}, //
-    // Sensor -> Ladder -> Sector -> Half -> Pxl -> Pst? -> Ids -> Tpc
-    {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                       1, { 1, 0, 0}, 0}, // StPxlpstOnIds::instance() * StpxlOnPst::instance()
-    {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                1, {10, 0, 0}, 0}, // StpxlHalfOnPxl::instance() * StpxlSectorOnHalf::instance() 
-    {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",        2, {10, 4, 0}, StpxlLadderOnSector::instance()}, 
-    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d",  3, {10, 4,10}, StpxlSensorOnLadder::instance()}, 
-    {"PxlSensor-%d",   kPxlSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d/PLAC_1",3, {10, 4,10}, StpxlSensorOnLadder::instance()}, 
-    //   /HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM[24]/IBLM[6]/IBSS_1
-    // Sensor -> Ladder -> Ist -> Pst -> Ids -> Tpc
-    /*
-  StpstOnIds::instance();
-  StistOnPst::instance();
-  StLadderOnIst::instance();
-  StistSensorOnLadder::instance();
- * Naming of rotation matrices:
- * positionGlobal  = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder * positionOnSensor
- *                                             *      istOnPst ?    *            *
- * numbering
- * Id  = 1000 + (ladder-1)*6 + sensor
- * 1<= ladder <= 24
- * 1<= sensor <= 6
-    */
-    {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",               1, { 1, 0, 0}, 0},// StpstOnIds::instance() * StistOnPst::instance()
-    {"IstLadder-%d", kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",        1, {24, 0, 0}, StLadderOnIst::instance()},
-    {"IstWafer-%d",   kIstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d",2, {24, 6, 0}, 0}, // StistSensorOnLadder::instance()},
-    {"IstSensor-%d", kIstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d/IBSS_1",2, {24, 6, 0}, 0}, // StistSensorOnLadder::instance()},
-    //   /HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM[20]/SFSW[16]/SFSL_1/SFSD_1
-    // WG = Tpc2Global * SG * LS * WLL;
-    // Sensor ->(WLL==W'L==sensorOnLadder)  Ladder ->(LS=ladderOnIds) Ids -> Osc ->(SG=oscOnGlobal) Global -> Tpc
-    /* Assume Osc == Tpc
-  StsstOnOsc::instance();
-  StsstLadderOnSst::instance();
-  StsstSensorOnLadder::instance();
-  HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/SFMO[1]/SFLM[20]/SFSW[16]/SFSL[1]/SFSD[1]
-    */
-    {"Sst-%d",             kSst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",               1, { 1, 0, 0}, 0},
-    {"SstLadder-%d", kSstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d",        1, {20, 0, 0}, 0},
-    {"SstWafer-%d", kSstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d/SFSW_%d",  2, {20,16, 0}, 0},
+    {"TpcRefSys-%d",   kTpcRefSys,"/HALL_1/CAVE_1/TpcRefSys_%d",                                       	 1, { 1, 0, 0}, 0},    
+    {"TpcHalf-%d",     kTpcHalf  ,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d",         	       	       	 1, { 2, 0, 0}, 0},  
+    {"TpcPad-%02d",       kTpcPad,"/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d",	       	 3, { 2,12,73}, 0},
+    {"Hft-%d",               kHft,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_%d",                                	 1, { 1, 0, 0}, 0},
+    {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                        	 1, { 1, 0, 0}, 0},
+    {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                 	 1, {10, 0, 0}, 0},
+    {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",         	 2, {10, 4, 0}, 0},
+    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d",   	 3, {10, 4,10}, 0},
+    {"PxlSensor-%d",kPxlSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d/PLAC_1",3, {10, 4,10}, 0},
+    {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",                             1, { 1, 0, 0}, 0},
+    {"IstLadder-%d", kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",                      1, {24, 0, 0}, 0},
+    {"IstWafer-%d",   kIstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d",              2, {24, 6, 0}, 0},
+    {"IstSensor-%d", kIstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d/IBSS_1",       2, {24, 6, 0}, 0},
+    {"Sst-%d",             kSst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_%d",                             1, { 1, 0, 0}, 0},
+    {"SstLadder-%d", kSstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d",                      1, {20, 0, 0}, 0},
+    {"SstWafer-%d", kSstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d/SFSW_%d",                2, {20,16, 0}, 0},
     {"SstSensor-%d", kSstSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%d/SFSW_%d/SFSL_1/SFSD_1",2, {20,16, 0}, 0}
-    //HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
-    //HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
   };
   static const Int_t  NoDetectos2Align = sizeof(listOfDet2Align)/sizeof(listOfDetectorToAlign_t);
   static Int_t iBreak = 0;
@@ -580,38 +480,26 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
   TGeoHMatrix I("Indentity");
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
-#if 1
-  TGeoTranslation PixelLadderT(-0.2381, 0.00195, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
-  //  TGeoTranslation PixelSensorT(-0.1533, 0.00070, -0.0160);
-  //  TGeoTranslation PixelSensorT(0,0.00195,0);
-  TGeoTranslation PixelSensorT(0,0,0);
-#endif
+  TGeoTranslation PixelLadderT(-0.2381, 0.0, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
   Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929};
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
   TGeoHMatrix IstLadderH;
   IstLadderH.SetTranslation(tIstLadder);
   IstLadderH.SetRotation(rIstLadder);
-  //  Double_t tIstWafer[3] = {0.48735, 0, 0};
   Double_t tIstWafer[3] = {0.487351, 0, 0};
   Double_t rIstWafer[9] = {-1, 0, 0, 0,-1, 0, 0, 0, 1};
   TGeoHMatrix IstWaferH;
   IstWaferH.SetTranslation(tIstWafer);
   IstWaferH.SetRotation(rIstWafer);
-  //  TGeoHMatrix IstSensorH;
   Double_t tSstLadder[3] = {-2.71769, 22.1338, 0};
   Double_t rSstLadder[9] = {-0.992546, 0.121869, 0, -0.121869, -0.992546, 0, 0, 0, 1};
-  //                        -0.961262, 0.275637, 0, -0.275637, -0.961262, 0, 0, 0, 1};
   TGeoHMatrix SstLadderH;
   SstLadderH.SetTranslation(tSstLadder);
   SstLadderH.SetRotation(rSstLadder);
   TGeoHMatrix SstSensorR;
   Double_t rSstSensor[9] = {-1, 0, 0, 0, -1, 0, 0, 0, 1}; 
-//   Double_t rSstSensor[9] = {-0.992546, 0.121869,0,
-// 			    -0.121869,-0.992546,0,
-// 			    0       ,        0,1};   Double_t tSstSensor[3] = {-2.71769, 22.1338, 0};
   SstSensorR.SetRotation(rSstSensor);
-  //  SstSensorR.SetTranslation(tSstSensor);
-  TGeoHMatrix Tpc2Global, HftOnTpc, PxlOnHft, SectorOnPxl, LadderOnSector, SensorOnLadder, SensorOnGlobal;
+  TGeoHMatrix Tpc2Global, HftOnTpc, PxlOnHft, SectorOnPxl, LadderOnSector, LadderOnPxl, SensorOnLadder, SensorOnGlobal;
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
     Int_t NoPerfMatch = 0;
@@ -641,7 +529,7 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       }
       TGeoHMatrix rotL(*(nodeP->GetNode()->GetMatrix())); // ideal matrix before alignment
       TGeoHMatrix rotA = rotL; // After alignment
-      TGeoHMatrix A, B, C, D;
+      TGeoHMatrix A, B, C, D, E, AB, BC;
       TGeoHMatrix *rotm = 0;
       TGeoShapeAssembly *shape = 0;
       //      TGeoVolumeAssembly *volume = 0;
@@ -661,7 +549,8 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       St_SurveyC *chair = 0;
       switch (kDetector) {
       case kTpcRefSys:
-	rotA = StTpcPosition::instance()->GetMatrix() * rotL;
+	Tpc2Global = StTpcPosition::instance()->GetMatrix();
+	rotA = Tpc2Global; 
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kTpcHalf: 
@@ -681,71 +570,63 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	} else {
 	  assert(0);
 	}
-	if (row <= NoOfInnerRows) chair = StTpcInnerSectorPosition::instance(); //  Geometry_tpc.TpcInnerSectorPosition is wrong
+	if (row <= NoOfInnerRows) chair = StTpcInnerSectorPosition::instance();
 	else                      chair = StTpcOuterSectorPosition::instance();
 	A = chair->GetMatrix4Id(sector);
 	rotA = A * rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,sector,row));
 	break;
+	/*
+	  kHft:             : HftOnTpc = StidsOnTpc
+	  PXMO -> kHft      : PxlOnHft = StPxlpstOnIds * StpxlOnPst
+	  PXLA -> kPxlSector: PXLA       
+	  LADR -> kPxLadder : PXLA^-1 * StpxlHalfOnPxl * StpxlSectorOnHalf * StpxlLadderOnSector * PixelLadderT
+	  PXSI -> kPxlWafer : PSXI 
+	  PLAC -> kPxlSensor: (PixleLadderT * PXSI)^-1 * StpxlSensorOnLadder
+	*/
       case kHft:
-	rotA = StidsOnTpc::instance()->GetMatrix(0) * rotL;
+	HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);
+	rotA = HftOnTpc;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kPxl:
 	A = StPxlpstOnIds::instance()->GetMatrix();
 	B = StpxlOnPst::instance()->GetMatrix();
-	rotA = A * B * (*nodeP->GetOriginalMatrix()); //rotL;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	PxlOnHft = A * B;
+	rotA = PxlOnHft;
+	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
       case kPxlSector:
-	sector = indx[0];
-	half   = (indx[0]-1)/5; 
-	A = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(A);
-	B = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(B);
-	C = A * B; PrPV(C);
-	SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
-	  * (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
-	C = (*nodeP->GetOriginalMatrix());
-	rotA =  A * B * C; // rotL;
-	D = rotA * SectorOnPxl.Inverse(); PrPV(D);
-	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
-	rotLI[sector-1] = rotL.Inverse();
+	rotA = rotL;
 	break;
       case kPxLadder:
 	sector = indx[0];
 	ladder = indx[1];
-	Id = ladder+4*(sector-1);
-	A  = rotLI[sector-1]; // * rotL;
-	//	  A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	//	  B = listOfDet2Align[i].chair->GetMatrix4Id(Id);
-	B = StpxlLadderOnSector::instance()->GetMatrix4Id(Id);
-	
-	rotA   = A * B * PixelLadderT;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
-	D = rotA * LadderOnSector.Inverse(); PrPV(D);
+	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
+	half   = (sector-1)/5; 
+	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
+	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
+	E = StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
+ 	LadderOnPxl = B * C * E; PrPV(LadderOnPxl);
+	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXLA
+	rotA = B.Inverse() * LadderOnPxl * PixelLadderT;
+	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
       case kPxlWafer:
 	rotA = rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kPxlSensor:
-	// 	  pathA += "/PLAC_1";
-	// 	  nodeA = gGeoManager->MakePhysicalNode(pathA);
 	sector = indx[0];
 	ladder = indx[1];
 	sensor = indx[2];
 	Id = sensor + 10*(ladder+4*(sector-1) - 1);
-	//	  A = listOfDet2Align[i].chair->GetMatrix4Id(Id);
-	//	  A = listOfDet2Align[i].chair->GetMatrix4Id(Id) * nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	A = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
-	B = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	//	  rotA = A * nodeP->GetNode(NLevel-2)->GetMatrix()->Inverse() * nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	//	  rotA   = PixelLadderT.Inverse() * A * PixelSensorT;
-	rotA   = PixelLadderT.Inverse() * A * B;// * PixelSensorT;
+	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
+	B = *nodeP->GetNode(NLevel-1)->GetMatrix();
+	C = PixelLadderT * B;
+	D = C.Inverse();
+	rotA   =  D * SensorOnLadder;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
-	D = rotA * SensorOnLadder.Inverse(); PrPV(D);
 	break;
       case kIst:
 	A = StpstOnIds::instance()->GetMatrix(0);
@@ -756,7 +637,6 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	ladder = indx[0];
 	Id = ladder;
 	A = StLadderOnIst::instance()->GetMatrix4Id(Id);
-	//	  rotA   = listOfDet2Align[i].chair->GetMatrix4Id(Id) * IstLadderH;
 	rotA   = A * IstLadderH;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
@@ -764,30 +644,23 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	ladder = indx[0]; // 1-24
 	sensor = indx[1]; // 1-6
 	Id = 1000 + sensor + 6*(ladder - 1);
-	//	  A  = *nodeP->GetNode(level-2)->GetMatrix(); // IBAM_1
 	B = StistSensorOnLadder::instance()->GetMatrix4Id(Id) * IstWaferH.Inverse();
-	assert(TString(B.GetName()) != "UnKnown");
-	rotA = IstLadderH.Inverse() * B;// * IstWaferH;
+	rotA = IstLadderH.Inverse() * B;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kIstSensor:
 	ladder = indx[0]; // 1-24
 	sensor = indx[1]; // 1-6
 	Id = 1000 + sensor + 6*(ladder - 1);
-	//	  rotA = IstWaferH.Inverse() * rotL;
-	rotA = rotL; // IstWaferH * rotL;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	rotA = rotL; 
 	break;
       case kSst:
-	rotA = StsstOnOsc::instance()->GetMatrix(0) * rotL;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	rotA = StsstOnOsc::instance()->GetMatrix(0);
 	break;
       case kSstLadder:
 	ladder = indx[0];
 	Id = 100 + ladder;
-	//	  B = listOfDet2Align[i].chair->GetMatrix4Id(Id);
 	B = StsstLadderOnSst::instance()->GetMatrix4Id(Id);
-	assert(TString(B.GetName()) != "UnKnown");
 	rotA   = B * SstLadderH;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
@@ -795,18 +668,12 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
 	ladder = indx[0];
 	sensor = indx[1];
 	ID     = 7000 + ladder + 100*sensor;
-	//	  Id     = sensor + 16*(ladder - 1);
-	//	  B = listOfDet2Align[i].chair->GetMatrix4Id(ID);
 	B = StsstSensorOnLadder::instance()->GetMatrix4Id(ID);
-	assert(TString(B.GetName()) != "UnKnown");
 	rotA   = SstLadderH.Inverse() * B * SstSensorR;
-	//D	  rotA   = B * SstSensorR;
-	//	  rotA   = B;
 	rotA.SetName(Form(listOfDet2Align[i].Name,ID));
 	break;
       case kSstSensor:
 	rotA = rotL;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       default:
 	assert(0);
@@ -815,104 +682,103 @@ StPxlConstants.h:const int kNumberOfPxlRowsOnSensor = 928;
       D = rotA.Inverse() * rotL;
       if (D == I) {NoPerfMatch++;}
       else {
-      rotm = new TGeoHMatrix(rotA);
-      //      rotm->SetName(Form(listOfDet2Align[i].Name,Id));
-      if (Debug()) {
+	rotm = new TGeoHMatrix(rotA);
+	if (Debug()) {
+	  if (Debug() > 1) {
+	    cout << "Id : " << Id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
+	    //	if (Debug() > 1) cout << "Old Local:\t"; nodeP->GetNode()->GetMatrix()->Print();
+	    if (Debug() > 2) nodeP->Print();
+	  }
+	  cout << "========================================" << endl;
+	  cout << "rotL:"; rotL.Print();
+	  cout << "rotm:"; rotm->Print();
+	  cout << "----------------------------------------" << endl;
+	  D.Print();
+	  cout << "========================================" << endl;
+	  Double_t *tran = D.GetTranslation();
+	  Double_t *r    = D.GetRotationMatrix();
+	  // Check Ideal case
+	  NN++;
+	  for (Int_t l = 0; l < 3; l++) {
+	    Xyz[l]  += tran[l];
+	    Xyz2[l] += tran[l]*tran[l];
+	  }
+	  for (Int_t l = 0; l < 9; l++) {
+	    Xyz[l+3]  += r[l];
+	    Xyz2[l+3] += r[l]*r[l];
+	  }
+	}
+	nodeP->Align(rotm, shape);
 	if (Debug() > 1) {
-	  cout << "Id : " << Id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
-	  //	if (Debug() > 1) cout << "Old Local:\t"; nodeP->GetNode()->GetMatrix()->Print();
-	  if (Debug() > 2) nodeP->Print();
-	}
-	cout << "========================================" << endl;
-	cout << "rotL:"; rotL.Print();
-	cout << "rotm:"; rotm->Print();
-	cout << "----------------------------------------" << endl;
-	D.Print();
-	cout << "========================================" << endl;
-	Double_t *tran = D.GetTranslation();
-	Double_t *r    = D.GetRotationMatrix();
-	// Check Ideal case
-	NN++;
-	for (Int_t l = 0; l < 3; l++) {
-	  Xyz[l]  += tran[l];
-	  Xyz2[l] += tran[l]*tran[l];
-	}
-	for (Int_t l = 0; l < 9; l++) {
-	  Xyz[l+3]  += r[l];
-	  Xyz2[l+3] += r[l]*r[l];
-	}
-      }
-      nodeP->Align(rotm, shape);
-      if (Debug() > 1) {
-	cout << "Id : " << Id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
-	if (Debug() > 2) {
-	  nodeP->Print();
+	  cout << "Id : " << Id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
+	  if (Debug() > 2) {
+	    nodeP->Print();
 #define __CHECK_NODE__
 #ifdef __CHECK_NODE__
-	  Int_t check = 1;
-	  TGeoHMatrix *comb = 0;
-	  Int_t matIst = -1;
-	  // Check node
-	  switch (kDetector) {
-	  case kPxlSensor:
-	    Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
-	    HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
-	    PxlOnHft = (*StPxlDb::instance()->geoHMatrixPstOnIds()) 
-	      * (*StPxlDb::instance()->geoHMatrixPxlOnPst());	            PrPV(PxlOnHft);
-	    SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
-	      * (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
-	    LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
-	    SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
-	    SensorOnGlobal = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * SensorOnLadder;PrPV(SensorOnGlobal);
-// 	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix())  x
-// 	      * mGeoHMatrixIdsOnTpc                                                         x
-//            * mGeoHMatrixPstOnIds * mGeoHMatrixPxlOnPst                                   x
-//            * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
-// 	      * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
-	    comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
-	    break;
-	    //	  case kIstWafer:
-	  case kIstSensor:
-	    matIst = 1000 + (ladder - 1) * kIstNumSensorsPerLadder + sensor;
-	    comb = (TGeoHMatrix *) StIstDb::instance()->getRotations()->FindObject(Form("R%04i", matIst));
-	    break;
-	  case kSstSensor:
-	    comb = (TGeoHMatrix *) StSstDbMaker::instance()->getRotations()->FindObject(Form("R%04i", 7000 + 100*sensor + ladder));
-	    break;
-	  default:
-	    check = 0;
-	    break;
-	  }
-	  if (check && comb) {
-	    cout << "++++++++++++++++++++++++++++++++++ Check Node " << endl;
-	    TGeoHMatrix *nMat = nodeP->GetMatrix();
-	    nMat->Print();
-	    cout << "---------------------------------+ Matrix from Db  ---------------------------------------++" << endl;
-	    comb->Print();
-	    cout << "---------------------------------+ Diff ?     ---------------------------------------------+" << endl;
-	    TGeoHMatrix combI = comb->Inverse(); combI.Print();
-	    D = combI * (*nMat);
-	    if (!(D == I)) D.Print();
-	    Double_t *tran = D.GetTranslation();
-	    Double_t *r    = D.GetRotationMatrix();
-	    // Check Ideal case
-	    NNG++;
-	    for (Int_t l = 0; l < 3; l++) {
-	      XyzG[l]  += tran[l];
-	      Xyz2G[l] += tran[l]*tran[l];
+	    Int_t check = 1;
+	    TGeoHMatrix *comb = 0;
+	    Int_t matIst = -1;
+	    // Check node
+	    switch (kDetector) {
+	    case kPxlSensor:
+	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      PxlOnHft = (*StPxlDb::instance()->geoHMatrixPstOnIds()) 
+		* (*StPxlDb::instance()->geoHMatrixPxlOnPst());	            PrPV(PxlOnHft);
+	      SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
+		* (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
+	      LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
+	      SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
+	      SensorOnGlobal = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * SensorOnLadder;PrPV(SensorOnGlobal);
+	      // 	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix())  x
+	      // 	      * mGeoHMatrixIdsOnTpc                                                         x
+	      //            * mGeoHMatrixPstOnIds * mGeoHMatrixPxlOnPst                                   x
+	      //            * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
+	      // 	      * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+	      comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
+	      break;
+	      //	  case kIstWafer:
+	    case kIstSensor:
+	      matIst = 1000 + (ladder - 1) * kIstNumSensorsPerLadder + sensor;
+	      comb = (TGeoHMatrix *) StIstDb::instance()->getRotations()->FindObject(Form("R%04i", matIst));
+	      break;
+	    case kSstSensor:
+	      comb = (TGeoHMatrix *) StSstDbMaker::instance()->getRotations()->FindObject(Form("R%04i", 7000 + 100*sensor + ladder));
+	      break;
+	    default:
+	      check = 0;
+	      break;
 	    }
-	    for (Int_t l = 0; l < 9; l++) {
-	      XyzG[l+3]  += r[l];
-	      Xyz2G[l+3] += r[l]*r[l];
+	    if (check && comb) {
+	      cout << "++++++++++++++++++++++++++++++++++ Check Node " << endl;
+	      TGeoHMatrix *nMat = nodeP->GetMatrix();
+	      nMat->Print();
+	      cout << "---------------------------------+ Matrix from Db  ---------------------------------------++" << endl;
+	      comb->Print();
+	      cout << "---------------------------------+ Diff ?     ---------------------------------------------+" << endl;
+	      TGeoHMatrix combI = comb->Inverse(); combI.Print();
+	      D = combI * (*nMat);
+	      if (!(D == I)) D.Print();
+	      Double_t *tran = D.GetTranslation();
+	      Double_t *r    = D.GetRotationMatrix();
+	      // Check Ideal case
+	      NNG++;
+	      for (Int_t l = 0; l < 3; l++) {
+		XyzG[l]  += tran[l];
+		Xyz2G[l] += tran[l]*tran[l];
+	      }
+	      for (Int_t l = 0; l < 9; l++) {
+		XyzG[l+3]  += r[l];
+		Xyz2G[l+3] += r[l]*r[l];
+	      }
+	      cout << "++++++++++++++++++++++++++++++++++ Check Node ++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 	    }
-	    cout << "++++++++++++++++++++++++++++++++++ Check Node ++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-	  }
 #endif
 #undef __CHECK_NODE__
+	  }
+	  iBreak++;
 	}
-	iBreak++;
       }
-    }
     }
     if (NN) {
       cout << "++++++++++++++++++++++++++++++++++ Check Node " <<  listOfDet2Align[i].Name << endl;

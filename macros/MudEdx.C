@@ -474,7 +474,7 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
       Int_t charge = 1;
       Int_t sCharge = 0;
       if (pTrack->muHelix().q() < 0) {charge = -1; sCharge = 1;}
-#if 0
+#if 1
       //      Double_t Zs[3] = {dEdxL[0] - zPred[0][kPidPion], dEdxL[1] - zPred[1][kPidPion], dEdxL[2] - zPred[2][kPidPion]};
       const StMuHelix &OuterHelix = gTrack->muOuterHelix();
       StPhysicalHelixD helix = OuterHelix.helix();

@@ -1,11 +1,9 @@
 void RunJetFinder2012pro(int nevents = 1000000,
-const char* indir = "~zchang/2013-08-trgsimu/MuDst/",
+const char* indir = "~/2013-08-trgsimu/MuDst/",
 const char* MuDst = "st_physics_13109014_raw_1020001.MuDst.root",
-//const char* outdir ="~/data05/Run12Jets/",
 const char* Jetfile = "st_physics_13109014_raw_1020001.jets.root",
 const char* Uefile = "st_physics_13109014_raw_1020001.ueoc.root",
 const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
-//, bool useL2 = false
 )
 {
   cout<<"MuDst file is "<<MuDst<<endl;
@@ -34,12 +32,6 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
   gSystem->Load("StMCAsymMaker");
   gSystem->Load("StRandomSelector");
   gSystem->Load("libfastjet.so");
-//  gSystem->Load("libCDFConesPlugin.so");
-//  gSystem->Load("libEECambridgePlugin.so");
-//  gSystem->Load("libJadePlugin.so");
-//  gSystem->Load("libNestedDefsPlugin.so");
-//  gSystem->Load("libSISConePlugin.so");
-  gSystem->Load("libfastjet.so");
   gSystem->Load("libsiscone.so");
   gSystem->Load("libsiscone_spherical.so");
   gSystem->Load("libfastjetplugins.so");
@@ -51,6 +43,14 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
   gSystem->Load("StUeEvent");
   gSystem->Load("StJetMaker");
   gSystem->Load("StTriggerFilterMaker");
+
+  //
+  gSystem->Load("libMinuit.so");
+  gSystem->Load("StFmsUtil");
+  gSystem->Load("StFmsDbMaker");
+  gSystem->Load("StFmsHitMaker");
+  gSystem->Load("StFmsPointMaker");
+  gSystem->Load("StFmsQAHistoMaker");
   
    StChain *chain = new StChain;
 
@@ -68,20 +68,6 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
    //AJP
    filterMaker->addTrigger(380404);
    
-   //JP2*L2JetHigh
-   //filterMaker->addTrigger(380405);
-   //BHT2*BJP1
-   //filterMaker->addTrigger(380205);
-   //BHT2*BJP1*L2Bgamma
-   //filterMaker->addTrigger(380208);
-   //EHT0*EJP1*L2Egamma
-   //filterMaker->addTrigger(380304);
-   //BHT3*L2BW
-   //filterMaker->addTrigger(380209);
-   //filterMaker->addTrigger(380219);
-   //EHT1*L2EW
-   //filterMaker->addTrigger(380305);
-   
    St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
 
    StEEmcDbMaker* eemcDb = new StEEmcDbMaker;
@@ -91,22 +77,18 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
    StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
    adc->saveAllStEvent(true);
 
+   StFmsDbMaker* fmsDb = new StFmsDbMaker;
+   StFmsHitMaker* fmshitMk = new StFmsHitMaker();
+   StFmsPointMaker* fmsptMk = new StFmsPointMaker("StFmsPointMaker");
+
    StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
    simuTrig->useOnlineDB();
    simuTrig->setMC(false);
-   simuTrig->askTrigger("JP0");
-   simuTrig->askTrigger("JP1");
-   simuTrig->askTrigger("JP2");
-   simuTrig->askTrigger("AJP");
-//   simuTrig->emc->defineTrigger2012(13,"JP0",380401,0x8000);
-//   simuTrig->emc->defineTrigger2012(14,"JP1",380402,0x0040);
-//   simuTrig->emc->defineTrigger2012(15,"JP2",380403,0x0080);
-//   simuTrig->emc->defineTrigger2012(16,"AJP",380404,0x1000);
 
    simuTrig->useBbc();
    simuTrig->useBemc();
    simuTrig->useEemc();
-   simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
+   simuTrig->bemc->setConfig(StBemcTriggerSimu::kOnline);
 
    StJetMaker2012* jetmaker = new StJetMaker2012;
    jetmaker->setJetFile(Jetfile);
@@ -118,6 +100,7 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
    anapars12->useTpc = true;
    anapars12->useBemc = true;
    anapars12->useEemc = true;
+   anapars12->useFms = false;
 
    // The classes available for correcting tower energy for tracks are:
    // 1. StjTowerEnergyCorrectionForTracksMip
@@ -173,21 +156,13 @@ const char* Skimfile = "st_physics_13109014_raw_1020001.skim.root"
    AntiKtR050Pars->setPtMin(5.0);
    AntiKtR050Pars->setJetArea(JetAreaPars);
 
-   //  jetmaker->addBranch("CdfMidpointR070NHits12",anapars12,CdfMidpointR070Pars);
-   //  jetmaker->addBranch("CdfMidpointR070NHits5",anapars5,CdfMidpointR070Pars);
-   //  jetmaker->addBranch("CdfMidpointR070EMC",anaparsEMC,CdfMidpointR070Pars);
    jetmaker->addBranch("AntiKtR060NHits12",anapars12,AntiKtR060Pars);
-   //  jetmaker->addBranch("AntiKtR060NHits5",anapars5,AntiKtR060Pars);
-   //  jetmaker->addBranch("AntiKtR060EMC",anaparsEMC,AntiKtR060Pars);
    jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars);
-   //  jetmaker->addBranch("AntiKtR050NHits5",anapars5,AntiKtR050Pars);
-   //  jetmaker->addBranch("AntiKtR050EMC",anaparsEMC,AntiKtR050Pars);
    StOffAxisConesPars *off050 = new StOffAxisConesPars(0.5);
    StOffAxisConesPars *off060 = new StOffAxisConesPars(0.6);
    jetmaker->addUeBranch("OffAxisConesR050", off050);
-   jetmaker->addUeBranch("OffAxisConesR060", off060);
-   
-  // Run
+   jetmaker->addUeBranch("OffAxisConesR060", off060); 
+   // Run
    chain->Init();
    chain->EventLoop(nevents);
 }

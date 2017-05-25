@@ -211,6 +211,14 @@
 *                     PC        covPC     PD        covPD,    
          CALL TRSCSD (ERPIN(1), DUM(1),   ERPIN(1), DUM(1),   HI(1),
      +                CHARGE, IERR, SPU, ERPLI(1,1), ERPLI(1,2))
+         IF(IERR.NE.0) THEN 
+*     
+*     *** Tracking error - floating point exception
+*     
+            IERTR=1
+            WRITE (LOUT, 780)
+            GOTO 99
+         ENDIF
          IF (LEONLY) GOTO 35
 * Transforms Parameters and Error Matrix SD => SC
 *                         FROM  SD   VARIABLES (1/P,V',W',V,W)
@@ -219,6 +227,14 @@
 *                     PD        covPD     PC        covPC
          CALL TRSDSC (ERPIN(1), ERRIN(1), DUM(1),   ERRIN(1), HI(1),
      +                CHARGE, IERR, SPU, ERPLI(1,1), ERPLI(1,2))
+         IF(IERR.NE.0) THEN
+*     
+*     *** Tracking error - floating point exception
+*     
+            IERTR=1
+            WRITE (LOUT, 780)
+            GOTO 99
+         ENDIF
          DO 29 I = 1, 5
             DO 28 J = 1, 5
                ASDSC(I,J) = A(I,J) ! SD => SC 

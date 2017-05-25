@@ -1,0 +1,24 @@
+#------------------------------------------------
+# The Virtual Monte Carlo packages
+# Copyright (C) 2014 Ivana Hrivnacova
+# All rights reserved.
+#
+# For the licensing terms see geant4_vmc/LICENSE.
+# Contact: root-vmc@cern.ch
+#-------------------------------------------------
+
+# Configuration file for CMake build for Geant3 with VMC packages.
+#
+# I. Hrivnacova, 13/06/2014
+
+set(PACKAGE_VERSION "@Geant3_VERSION@")
+ 
+# Check whether the requested PACKAGE_FIND_VERSION is compatible
+if("${PACKAGE_VERSION}" VERSION_LESS "${PACKAGE_FIND_VERSION}")
+  set(PACKAGE_VERSION_COMPATIBLE FALSE)
+else()
+  set(PACKAGE_VERSION_COMPATIBLE TRUE)
+  if ("${PACKAGE_VERSION}" VERSION_EQUAL "${PACKAGE_FIND_VERSION}")
+    set(PACKAGE_VERSION_EXACT TRUE)
+  endif()
+endif()

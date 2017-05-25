@@ -1,0 +1,33 @@
+#------------------------------------------------
+# The Virtual Monte Carlo packages
+# Copyright (C) 2014 Ivana Hrivnacova
+# All rights reserved.
+#
+# For the licensing terms see geant4_vmc/LICENSE.
+# Contact: root-vmc@cern.ch
+#-------------------------------------------------
+
+# Configuration file for CMake build for Geant4 VMC packages.
+# It defines the following variables
+#  Geant3_INCLUDE_DIRS      - include directories for Geant4VMC
+#  Geant3_LIBRARIES         - libraries to link against
+#  CMAKE_INSTALL_LIBDIR        - library installation directory
+#
+# I. Hrivnacova, 13/06/2014
+
+# Compute installation prefix relative to this file
+get_filename_component(_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
+get_filename_component(_prefix "${_dir}/../.." ABSOLUTE)
+
+# Import targets
+include("${_prefix}/@CMAKE_INSTALL_LIBDIR@/Geant3-@Geant3_VERSION@/Geant3Targets.cmake")
+ 
+# Import options
+set(CMAKE_INSTALL_LIBDIR @CMAKE_INSTALL_LIBDIR@)
+
+# These are IMPORTED targets created by Geant4VMCTargets.cmake
+set(Geant3_LIBRARIES geant321)
+
+# Set includes
+set(Geant3_INCLUDE_DIRS "${_prefix}/include/TGeant3")
+

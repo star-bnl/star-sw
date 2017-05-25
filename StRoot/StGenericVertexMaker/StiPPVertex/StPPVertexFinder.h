@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.52 2017/05/12 18:37:36 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.53 2017/05/24 05:02:06 genevb Exp $
  *
  */
 #ifdef __APPLE__
@@ -94,7 +94,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   TH1D *hL ;      // likelyhood distribution
   TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
   TObjArray HList;
-  std::array<int, 7> ntrk;
+  std::array<int, 8> ntrk;
 
   // params
   double mMinTrkPt;               ///< ~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -118,6 +118,7 @@ class StPPVertexFinder: public StGenericVertexFinder
   int    mStoreUnqualifiedVertex; ///< set the max # of vertices, sorted by rank
   float  mCut_oneTrackPT;         ///< threshold for storing one track vertices.
                                   ///< In GeV, used only if coresponding algoSwitch switch is ON.
+  bool   mUseBTOFmatchOnly;        ///< enable/disable using only TOF-matched tracks
 
   StiToolkit     *mToolkit;
   BtofHitList    *btofList;
@@ -149,5 +150,7 @@ public:
   virtual ~StPPVertexFinder() {}
   virtual int fit(StEvent*);
   virtual int fit(const StMuDst& muDst);
+  virtual void SetStoreUnqualifiedVertex(int n) { mStoreUnqualifiedVertex = n; }
+  virtual void UseBTOFmatchOnly(bool useBTOFmatchOnly = true) { UseBTOF(); mUseBTOFmatchOnly = useBTOFmatchOnly; }
   void printInfo(std::ostream& os = std::cout) const;
 };

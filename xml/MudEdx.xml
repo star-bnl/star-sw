@@ -10,8 +10,8 @@
          starver .DEV2
          root.exe -q -b lMuDst.C 'MudEdx.C+("'${FILELIST}'","'${JOBID}'.root")'  &gt;&amp; ${JOBID}B.log 
 	</command>
-	<stdout URL="file:./$JOBID.log" />
-	<stderr URL="file:./$JOBID.err" />
+	<stdout URL="file:./sched$JOBID.log" />
+	<stderr URL="file:./sched$JOBID.err" />
 <!--  List of datasets
 grep RetriveNodes /afs/rhic.bnl.gov/star/doc_public/www/comp/prod/localdata/DDdatasets.html | awk -F\? '{print $2}' | awk -F\" '{print $1}' | awk -F\= '{print "production="$3",trgsetupname="$2}' | awk -F\; '{print $1}'
 -->

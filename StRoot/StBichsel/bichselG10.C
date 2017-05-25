@@ -1,3 +1,67 @@
+/*
+  root.exe lBichsel.C bichselG10.C+
+  bichselG10("N");  // dN/dx
+  bichselG10("I70"; // I70
+  bichselG10("Bz"); // Ifit
+  TH1D *pB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70p1"))->GetHistogram();
+  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70#pi1"))->GetHistogram();
+  TH1D *diffB70 = new TH1D(*pB70);
+  diffB70->SetName("diffB70");
+  diffB70->Add(pB70,piB70,1,-1);
+  diffB70->SetLineColor(1);
+  TH1D *pBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bzp1"))->GetHistogram();
+  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bz#pi1"))->GetHistogram();
+  TH1D *diffBz = new TH1D(*pBz);
+  diffBz->SetName("diffBz");
+  diffBz->Add(pBz,piBz,1,-1);
+  diffBz->SetLineColor(2);
+  TH1D *pdNdx  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdxp1"))->GetHistogram();
+  TH1D *pidNdx = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdx#pi1"))->GetHistogram();
+  TH1D *diffdNdx = new TH1D(*pdNdx);
+  diffdNdx->SetName("diffdNdx");
+  diffdNdx->Add(pdNdx,pidNdx,1,-1);
+  diffdNdx->SetLineColor(3);
+  c2 = new TCanvas("c2","c2");
+  diffB70->SetXTitle("log_{10}p")
+  diffB70->SetTitle("z_{p} - z_{#pi}");
+  diffB70->Draw("l");
+  diffBz->Draw("samel");
+  diffdNdx->Draw("samel");
+  TLegend *l = new TLegend(0.6,0.6,0.8,0.8);
+  l->AddEntry(diff70,"I70");
+  l->AddEntry(diffBz,"Ifit");
+  l->AddEntry(diffdNdx,"dNdx");
+
+  TH1D *eB70  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70e1"))->GetHistogram();
+  TH1D *piB70 = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("B70#pi1"))->GetHistogram();
+  TH1D *diffB70 = new TH1D(*eB70);
+  diffB70->SetName("diffB70");
+  diffB70->Add(eB70,piB70,1,-1);
+  diffB70->SetLineColor(1);
+  TH1D *eBz  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bze1"))->GetHistogram();
+  TH1D *piBz = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("Bz#pi1"))->GetHistogram();
+  TH1D *diffBz = new TH1D(*eBz);
+  diffBz->SetName("diffBz");
+  diffBz->Add(eBz,piBz,1,-1);
+  diffBz->SetLineColor(2);
+  TH1D *edNdx  = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdxe1"))->GetHistogram();
+  TH1D *pidNdx = (TH1D *) ((TF1 *) gROOT->GetListOfFunctions()->FindObject("dNdx#pi1"))->GetHistogram();
+  TH1D *diffdNdx = new TH1D(*edNdx);
+  diffdNdx->SetName("diffdNdx");
+  diffdNdx->Add(edNdx,pidNdx,1,-1);
+  diffdNdx->SetLineColor(3);
+  c2 = new TCanvas("c2","c2");
+  diffB70->SetXTitle("log_{10}p")
+  diffB70->SetTitle("z_{e} - z_{#pi}");
+  diffB70->Draw("l");
+  diffBz->Draw("samel");
+  diffdNdx->Draw("samel");
+  TLegend *l = new TLegend(0.6,0.6,0.8,0.8);
+  l->AddEntry(diff70,"I70");
+  l->AddEntry(diffBz,"Ifit");
+  l->AddEntry(diffdNdx,"dNdx");
+
+*/
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
