@@ -165,17 +165,19 @@
    chomp($LIBG2C);
  }
  if    ($FC eq 'gfortran') {
-   $FLIBS = $FLIBS      .= " -lgfortran";
+   $FLIBS .= " -lgfortran";
  } elsif ( $FC eq 'ifort') {
    my $lib = `which $FC`; chomp($lib);
    $FLIBS      .= " -lifcore -lifport";
    $GFLAGS    = $FFLAGS;
    $GFLAGS   =~ s/-axAVX//;
-#   print "GFLAGS = $GFLAGS, FLIBS = $FLIBS ==========================\n";
-    $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
-    $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libquadmath.a`; chomp($FLIBS);
-    $FLIBS      .= " " . `gfortran $GFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
-#   print "FLIBS = $FLIBS ================================================================================\n";
+   #   print "GFLAGS = $GFLAGS, FLIBS = $FLIBS ==========================\n";
+   my @flibs = qw(libgfortran.a libquadmath.a libgfortranbegin.a);
+   foreach my $flib (@flibs) {
+     my $f = `gfortran $GFLAGS -print-file-name=$flib`; chomp($f);
+     if ($f != $flib) {$FLIBS      .= " " . $f;}
+   }
+   #   print "FLIBS = $FLIBS ================================================================================\n";
  }
  if ($STAR_HOST_SYS !~ /darwin/ ) {
    $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX";
@@ -344,8 +346,8 @@
    $OSTHREADLIB = "";
    $SYSLIBS       = "-lm $FINK_LDFLAGS $OSTHREADLIBDIR $OSTHREADLIB -ldl";
    $FFLAGS      .= " -funroll-loops -fomit-frame-pointer -ftree-vectorize";
-   $FLIBS      .= " " . `$FC $FFLAGS  -print-file-name=libgfortran.dylib`; chomp($FLIBS);
-   $FLIBS      .= " " . `$FC $FFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
+#   $FLIBS      .= " " . `$FC $FFLAGS  -print-file-name=libgfortran.dylib`; chomp($FLIBS);
+#   $FLIBS      .= " " . `$FC $FFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
    $FPP = $FC . " -E -P"; 
  }
 
