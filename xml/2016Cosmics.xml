@@ -31,9 +31,9 @@
   echo "fitter $fitter"
   set tagFile = ${file}.root
 # ZF
-  root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile} 
+#  root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile} 
 # RF
-# root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}  endif
+ root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}  endif
 # ZF Ideal 
 #root.exe -q -b -x 'bfc.C('$f','$l',"MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,CosmicRays,FieldOff,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile} 
 # RF Ideal 

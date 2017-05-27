@@ -1231,7 +1231,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* stiTrack,TrackData &track
   float phi=atan2(posCTB.y(),posCTB.x());
   if(phi<0) phi+=2*M_PI;// now phi is [0,2Pi] as for CTB slats
   float eta=posCTB.pseudoRapidity();
-  if(std::fabs(eta)<1) hA[10]->Fill(posCTB.z());
+  //yf  if(std::fabs(eta)<1 && hA[10]) hA[10]->Fill(posCTB.z());
 
   int iBin=ctbList->addTrack(eta,phi);
   

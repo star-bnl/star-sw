@@ -71,7 +71,7 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
     else 
       os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
   }
-  float Mtp[3], MtpErr[3];
+  float Mtp[3] = {0}, MtpErr[3] = {0};
   particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
   particle.GetLifeTime(Mtp[1], MtpErr[1]); if (MtpErr[1] <=   0 || MtpErr[1] > 1e10) MtpErr[1] = -13;
   particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
