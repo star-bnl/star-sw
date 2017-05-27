@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job  name="LcKppi" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:./$JOBID.log" />
-<stderr URL="file:./$JOBID.err" />
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setenv NODEBUG yes

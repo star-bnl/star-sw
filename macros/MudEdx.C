@@ -576,31 +576,31 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	if (PiD.fI70.fPiD) {
 	  I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
 	  I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devZ[l]);
-	  if (Debug) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  if (Debug()) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
 	  if (k >= 0) {
 	    I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
 	    I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devZ[l]);
-	    if (Debug) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	    if (Debug()) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
 	  }
 	}
 	if (PiD.fFit.fPiD) {
 	  fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devF[l]);
 	  fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devF[l]);
-	  if (Debug) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  if (Debug()) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
 	  if (k >= 0) {
 	    fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devF[l]);
 	    fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devF[l]);
-	    if (Debug) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	    if (Debug()) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
 	  }
 	}
 	if (PiD.fdNdx.fPiD) {
 	  fitN.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.devN[l]);
 	  fitN.dev[l][      2]->Fill(PiD.bghyp[l],PiD.devN[l]);
-	  if (Debug) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	  if (Debug()) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
 	  if (k >= 0) {
 	    fitN.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.devN[l]);
 	    fitN.devT[l][      2]->Fill(PiD.bghyp[l],PiD.devN[l]);
-	    if (Debug) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
+	    if (Debug()) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.devZ[l] << endl;
 	  }
 	}
       }

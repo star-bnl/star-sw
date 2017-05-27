@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths"  simulateSubmission="false"> -->
 <!-- <job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="xrootd"> -->
-<job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="paths">
+<job maxFilesPerProcess="1" filesPerHour="100" fileListSyntax="paths">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
          setenv NODEBUG yes
          setenv STARFPE NO
          setup 64b
          starver .DEV2
-         root.exe -q -b lMuDst.C 'MudEdx.C+("'${FILELIST}'","'${JOBID}'.root")'  &gt;&amp; ${JOBID}B.log 
+         set file = `basename ${INPUTFILE0} .MuDst.root`;
+         root.exe -q -b lMuDst.C 'MudEdx.C+("'${INPUTFILE0}'","'${file}'.root")'  &gt;&amp; ${file}B.log 
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
@@ -36,5 +37,6 @@ grep RetriveNodes /afs/rhic.bnl.gov/star/doc_public/www/comp/prod/localdata/DDda
 <!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,sanity=1,filename~physics,storage=NFS" nFiles="all" /> -->
 <!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="all" />  -->   
 <!-- <output fromScratch="*.root" toURL="file:${SUBMITTINGDIRECTORY}/" /> -->
-<input URL="file:/gpfs01/star/scratch/iraklic/AuAu2016/*.MuDst.root" /> 
+<!-- <input URL="file:/gpfs01/star/scratch/iraklic/AuAu2016/*.MuDst.root" />  -->
+<input URL="command:dEdxMuSample.pl" />
 </job>
