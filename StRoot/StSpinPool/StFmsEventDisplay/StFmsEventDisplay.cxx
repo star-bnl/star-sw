@@ -1,8 +1,11 @@
 // \class StFmsEventDisplay
 // \author Akio Ogawa
 //
-//  $Id: StFmsEventDisplay.cxx,v 1.5 2016/06/08 16:31:50 akio Exp $
+//  $Id: StFmsEventDisplay.cxx,v 1.6 2017/05/26 18:55:53 akio Exp $
 //  $Log: StFmsEventDisplay.cxx,v $
+//  Revision 1.6  2017/05/26 18:55:53  akio
+//  added protection for a crash in MC mudst file reading
+//
 //  Revision 1.5  2016/06/08 16:31:50  akio
 //  c++11 style initialization
 //
@@ -103,8 +106,10 @@ Int_t StFmsEventDisplay::Make(){
     int bunch=-1;
     StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
     if(mudst) {
-	bunch = mudst->event()->triggerData()->bunchId7Bit();
-	LOG_INFO << Form("Bunch=%3d from Mudst\n",bunch) << endm;
+	if(mudst->event()->triggerData()){
+	    bunch = mudst->event()->triggerData()->bunchId7Bit();
+	    LOG_INFO << Form("Bunch=%3d from Mudst\n",bunch) << endm;
+	}
     }
 
     StEvent* event = (StEvent*)GetInputDS("StEvent");
