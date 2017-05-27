@@ -147,6 +147,7 @@ unsigned int StiHitContainer::size() const
 
 
 //________________________________________________________________________________
+//________________________________________________________________________________
 vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
   //_key.refangle = layer->getPlacement()->getNormalRefAngle();
