@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.49 2017/05/18 17:09:43 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.50 2017/05/30 15:59:14 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.50  2017/05/30 15:59:14  ullrich
+ * Added bbcTDC5bit() method.
+ *
  * Revision 2.49  2017/05/18 17:09:43  ullrich
  * Changes to decoding of Qt data.
  *
@@ -293,6 +296,7 @@ public:
     // BBC bbcTDC
     virtual unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short bbcTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short bbcTDC5bit(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short bbcADCSum(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;

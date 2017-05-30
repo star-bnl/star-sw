@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.28 2017/05/18 17:09:43 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.29 2017/05/30 15:59:14 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.29  2017/05/30 15:59:14  ullrich
+ * Added bbcTDC5bit() method.
+ *
  * Revision 2.28  2017/05/18 17:09:43  ullrich
  * Changes to decoding of Qt data.
  *
@@ -97,7 +100,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.28 2017/05/18 17:09:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.29 2017/05/30 15:59:14 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -253,6 +256,7 @@ unsigned char  StTriggerData::bemcHighestTowerADC(int prepost) const {return 0;}
 unsigned char  StTriggerData::eemcHighestTowerADC(int prepost) const {return 0;}
 unsigned short StTriggerData::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+unsigned short StTriggerData::bbcTDC5bit(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcADCSum(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
