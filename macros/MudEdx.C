@@ -545,16 +545,16 @@ void MudEdx(const Char_t *files ="./*.MuDst.root",
 	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
 	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
 	  TdEdxs[m]->Fill(TMath::Log10(p), dEdxL10[m]);
-#ifdef __dEdxPhi__
 	  if (pTrack->probPidTraits().dEdxTrackLength() > 40) {
 	    TdEdxs40cm[m]->Fill(TMath::Log10(p), dEdxL10[m]);
+#ifdef __dEdxPhi__
 	    pTEtaPiD40cm->Fill(Var.cpT,Var.eta);
 	    pTPhiPiD40cm->Fill(Var.cpT,phiD);
 	    pTEtaPiD40cmz->Fill(Var.cpT,Var.eta, Zs[1]);
 	    pTPhiPiD40cmz->Fill(Var.cpT,phiD, Zs[1]);
 	    pTPhiPiD40cmsigma->Fill(Var.cpT,phiD, nSigmasPi[1]);
-	  }
 #endif /* __dEdxPhi__ */
+	  }
 #ifdef __SPARSE__
 	  sZs[m]->Fill(&Var.refMult);
 	  for (Int_t l = 0; l < KPidParticles; l++) {
