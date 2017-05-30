@@ -363,18 +363,11 @@ Int_t StdEdxY2Maker::Make(){
 	if (NumberOfRows == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
-#ifdef __OLD_dX_Calculation__	
-	const StThreeVectorD &normal = *mNormal[sector-1][row-1];
-	const StThreeVectorD &middle = *mRowPosition[sector-1][0][row-1];
-	const StThreeVectorD &upper  = *mRowPosition[sector-1][1][row-1];
-	const StThreeVectorD &lower  = *mRowPosition[sector-1][2][row-1];
-#else
 	StThreeVectorD middle = xyz[3];
 	StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
 	StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
 	StThreeVectorD dif = upper - lower;
 	StThreeVectorD normal = dif.unit();
-#endif
 	if (NumberOfRows == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
@@ -388,11 +381,7 @@ Int_t StdEdxY2Maker::Make(){
 	       << "\tat s=\t" << s[0] << "/" << s[1] 
 	       << "\tw = " << w[0] << "/" << w[1] << endl;
 	}
-#ifdef __OLD_dX_Calculation__
-	StThreeVectorD dif = xyz[3] - xyz[0];
-#else
 	dif = xyz[3] - xyz[0];
-#endif
 	if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
 	  continue;
 	}
@@ -405,24 +394,6 @@ Int_t StdEdxY2Maker::Make(){
 	StGlobalDirection  globalDirectionOfTrack(dirG);
 	for (Int_t l = 0; l < 4; l++) {
 	  StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
-#ifdef __OLD_dX_Calculation__
-	  if (Debug() > 2) {
-	    Int_t k = l;
-	    if (l == 3) k = 0;
-	    Double_t D = - (*mRowPosition[sector-1][k][row-1])*normal;
-	    Double_t A = normal*normal;
-	    Double_t delta = (xyz[l]*normal + D)/TMath::Sqrt(A);
-	    if (TMath::Abs(delta) > 1.e-2) {
-	      cout << "Out of Plane by " << delta << "\tPlane " 
-		   << (*mRowPosition[sector-1][k][row-1]) << "\tNormal " << normal << endl;
-	      cout << "Track/hit : " << endl; 
-	      cout << "\txyz[0] " << xyz[0] << "\t s = "     << s[0]     << "/" << s[1]     << endl;
-	      cout << "\txyz[1] " << xyz[1] << "\t s_out = " << s_out[0] << "/" << s_out[1] << endl; 
-	      cout << "\txyz[2] " << xyz[2] << "\t s_in = "  << s_in[0]  << "/" << s_in[1]  <<  endl;
-	      cout << "\txyz[3] " << xyz[3] << endl;
-	    }
-	  }
-#endif
 	  transform(globalOfTrack,localSect[l],sector,row);
 	}
 #ifdef __PROMPT_HITS__
@@ -433,12 +404,6 @@ Int_t StdEdxY2Maker::Make(){
 	  if (sector > 12) iWestEast = 1;
 	  Int_t io = 0;
 	  if (row > NumberOfInnerRows) io = 1;
-#ifdef __OLD_dX_Calculation__
-	  const StThreeVectorD &PromptNormal = *mPromptNormal[iWestEast][io];
-	  const StThreeVectorD &anode = *mPromptPosition[iWestEast][io][0];
-	  const StThreeVectorD &gg    = *mPromptPosition[iWestEast][io][1];
-	  const StThreeVectorD &pads  = *mPromptPosition[iWestEast][io][2];
-#else
 	  static Double_t z[2][3] = { 
 	    // Anodes         GG          Pads
 	    { -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
@@ -460,7 +425,6 @@ Int_t StdEdxY2Maker::Make(){
 	    if (Debug()>1) cout << "mPromptPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
 				<< *PromptPlanes[l]  << endl;
 	  }
-#endif
 	  // check that helix prediction is consistent with measurement
 	  if (Propagate(*((const StThreeVectorD *) &anode),PromptNormal,helixI,helixO,bField,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
 	  if (Debug() > 1) {
@@ -486,23 +450,6 @@ Int_t StdEdxY2Maker::Make(){
 	  StGlobalDirection  globalDirectionOfTrack(dirG);
 	  for (Int_t l = 0; l < 4; l++) {
 	    StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
-#ifdef __OLD_dX_Calculation__
-	    if (Debug() > 2) {
-	      Int_t k = l;
-	      if (l == 3) k = 0;
-	      Double_t D = - (*mRowPosition[sector-1][k][row-1])*PromptNormal;
-	      Double_t A = PromptNormal*PromptNormal;
-	      Double_t delta = (xyz[l]*PromptNormal + D)/TMath::Sqrt(A);
-	      if (TMath::Abs(delta) > 1.e-2) {
-		cout << "Out of Plane by " << delta << "\tPlane " 
-		     << (*mRowPosition[sector-1][k][row-1]) << "\tNormal " << PromptNormal << endl;
-		cout << "Track/hit : " << endl; 
-		cout << "\txyz[0] " << xyz[0] << "\t s = "     << s[0]     << "/" << s[1]     << endl;
-		cout << "\txyz[1] " << xyz[1] << "\t s_out = " << s_out[0] << "/" << s_out[1] << endl; 
-		cout << "\txyz[2] " << xyz[2] << "\t s_in = "  << s_in[0]  << "/" << s_in[1]  <<  endl;
-	      }
-	    }
-#endif
 	    transform(globalOfTrack,localSect[l],sector,row);
 	  }
 	}
@@ -810,9 +757,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
   static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NumberOfRows, 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-#if 0
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NumberOfRows, 100,0,10.);
-#endif
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
 #if 0
@@ -1198,9 +1143,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	//	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
 	Edge3.Fill(NumberOfRows*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
-#if 0
 	dX3.Fill(FdEdx[k].row,FdEdx[k].F.dx, Vars);
-#endif
       }
     }
   }
