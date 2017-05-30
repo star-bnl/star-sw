@@ -9,7 +9,10 @@
          setup 64b
          starver .DEV2
          set file = `basename ${INPUTFILE0} .MuDst.root`;
-         root.exe -q -b lMuDst.C 'MudEdx.C+("'${INPUTFILE0}'","'${file}'.root")'  &gt;&amp; ${file}B.log 
+         set output = ${file}.root
+         if (! -r ${output}) then
+         root.exe -q -b lMuDst.C 'MudEdx.C+("'${INPUTFILE0}'","'${output}'")'  &gt;&amp; ${file}B.log 
+         endif
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
