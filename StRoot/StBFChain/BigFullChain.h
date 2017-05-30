@@ -1401,7 +1401,7 @@ Bfc_st BFC[] = { // standard chains
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
-   ,                                                               "gstar","Mickey Mouse generator",kFALSE},
+   ,                                                                    "","Mickey Mouse generator",kFALSE},
   {"pythia"      ,"" ,"","PythiaPP200,-fzin","", ""                             ,"set pythia pp200",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"hijing"      ,"" ,"","AuAu200","", ""                                     ,"set Hijing AuAu200",kFALSE},
@@ -1429,7 +1429,7 @@ Bfc_st BFC[] = { // standard chains
   {"GenFILT", "GenFILT","Generators","Generators"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
-  {"AgStar","","","Generators,geant"                 ,"","AgStar","Utility to feed St_geant_Maker", kFALSE},
+  {"AgStar","","","Generators,geant,-gstar,-gstarLib","","AgStar","Utility to feed St_geant_Maker", kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,MathMore,StarGeneratorUtil"
