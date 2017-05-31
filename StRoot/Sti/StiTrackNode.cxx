@@ -32,7 +32,17 @@ static const double recvCORRMAX  = 0.99999;
 static const double chekCORRMAX  = 0.99999;
 static double MAXPARS[]={500,500,500,3.15,100,100};
 
-//______________________________________________________________________________
+
+/**
+ * Similar to `TCL::trasat` from the CERN program library this function
+ * implements a matrix product `(T+I)G(T+I)' -> G` where G is a symmetric 6x6
+ * matrix packed in a 21 = 6(6+1)/2 element array, T and T' are a transformation
+ * matrix and its transpose respectively. Unlike `TCL::trasat` this function
+ * assumes that a unit matrix `I` is added to the transformation matrix `T` in
+ * order to avoid calculations with near zero diagonal elements. One can
+ * subtract a unit matrix from `F = T+I` before feeding it to `errPropag6` in
+ * order to get results identical to `TCL::trasat` for the same `T`.
+ */
 void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 {
   enum {NP=6,NE=21};
