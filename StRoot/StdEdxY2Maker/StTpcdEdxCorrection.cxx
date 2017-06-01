@@ -151,6 +151,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
   Double_t    Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
   CdEdx.Qcm     = 1e6*Qcm; // uC/cm
+  UInt_t date = StMaker::GetChain()->GetDateTime().Convert();  // GMT
   if (! St_trigDetSumsC::GetInstance()) {
     StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
   }
@@ -158,20 +159,24 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   else {
     if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection trigDetSums has not data" << endm;}
     else {
-      UInt_t date = StMaker::GetChain()->GetDateTime().Convert();
-      if (date < St_trigDetSumsC::instance()->timeOffset()) {
+      if (date < St_trigDetSumsC::instance()->timeOffset()) { // GMT
 	LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Illegal time for scalers = " 
-			  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
-			  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << StMaker::GetChain()->GetRunNumber() << endm;
+		  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
+		  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << StMaker::GetChain()->GetRunNumber() << endm;
+	St_trigDetSumsC::instance()->Table()->Print(0,10);
       }
     }
   }
-#if 0
+#if 1
   // Check that we have valid time for Power Suppliers
-  if (St_TpcAvgPowerSupplyC::instance()->run() > 0 && ((UInt_t )St_TpcAvgPowerSupplyC::instance()->stop_time()) < GetDateTime().Convert()) {
-    LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply time = " <<  St_TpcAvgPowerSupplyC::instance()->stop_time() 
-	      << " < event time = " << GetDateTime().Convert() << "\t" << GetDateTime().AsString() << endm;
-    return kStErr;
+  if (St_TpcAvgPowerSupplyC::instance()->run() > 0) {
+    TDatime t(St_TpcAvgPowerSupplyC::instance()->stop_time());
+    ULong_t stop_time = t.Convert(kTRUE); // local => GMT
+    if (stop_time < date) {
+      LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply time = " << stop_time << " GMT from local " << t.AsString() 
+		<< " < event time = " << date  << " GMT\t=" << StMaker::GetChain()->GetDateTime().AsString() << endm;
+      return kStErr;
+    }
   }
 #endif
   
