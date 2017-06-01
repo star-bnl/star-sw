@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDcaGeometry.cxx,v 2.11 2013/11/13 21:35:48 fisyak Exp $
+ * $Id: StDcaGeometry.cxx,v 2.12 2017/06/01 23:48:44 smirnovd Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.cxx,v $
+ * Revision 2.12  2017/06/01 23:48:44  smirnovd
+ * [Cosmetic] StDcaGeometry: Whitespace adjustments
+ *
  * Revision 2.11  2013/11/13 21:35:48  fisyak
  * Suppress Warning
  *
@@ -52,7 +55,7 @@
 #include "TMath.h"
 ClassImp(StDcaGeometry)
     
-static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.11 2013/11/13 21:35:48 fisyak Exp $";
+static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.12 2017/06/01 23:48:44 smirnovd Exp $";
 
 StDcaGeometry::StDcaGeometry()
 {
@@ -112,6 +115,7 @@ THelixTrack StDcaGeometry::thelix() const
     double errXY[6],errSZ[6];
     const float *myErr = &mImpImp;
     int jjx=0,jjz=0;
+
     for (int i=0,li=0;i<5; li+=++i) {
         for (int j=0;j<=i;j++)        {
 	  do {// select XY part
@@ -126,15 +130,18 @@ THelixTrack StDcaGeometry::thelix() const
 	      errSZ[jjz++]=myErr[li+j];
 	  }
 	  while(0);
-        } }
-    errXY[3]*=hz();errXY[4]*=hz();errXY[5]*=hz()*hz();
+        }
+    }
+    errXY[3]*=hz();
+    errXY[4]*=hz();
+    errXY[5]*=hz()*hz();
     myHelx.SetEmx(errXY,errSZ);
     return myHelx;
 }
 //________________________________________________________________________________
 ostream&  operator<<(ostream& os, const StDcaGeometry& dca) {
   const Float_t *errMx =  dca.errMatrix();
-  return os << Form("Dca: imp %7.2f +/-%7.2f,Z:%7.2f +/-%7.2f,psi:%7.2f +/-%7.2f,pT/q:%7.2f +/-%6.1f%%,TanL:%8.3f +/-%8.3f",
+  return os << Form("Dca: imp %7.2f +/-%7.2f, Z:%7.2f +/-%7.2f, psi:%7.2f +/-%7.2f, pT/q:%7.2f +/-%6.1f%%, TanL:%8.3f +/-%8.3f",
 		    dca.impact(),    (errMx[0] >= 0)  ? TMath::Sqrt(errMx[0]) : -13,
 		    dca.z(),         (errMx[2] >= 0)  ? TMath::Sqrt(errMx[2]) : -13,
 		    dca.psi(),       (errMx[5] >= 0)  ? TMath::Sqrt(errMx[5]) : -13,
