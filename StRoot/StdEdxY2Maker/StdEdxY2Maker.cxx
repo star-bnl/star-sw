@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.87 2017/02/14 23:36:40 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.88 2017/06/01 22:30:23 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -59,6 +59,7 @@ using namespace units;
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StPidStatus.h"
+#include "dEdxHist.h"
 #ifdef  __CHECK_LargedEdx__
 #include "tables/St_g2t_track_Table.h" 
 #endif
@@ -131,7 +132,7 @@ Int_t StdEdxY2Maker::Init(){
   gMessMgr->SetLimit("StdEdxY2Maker:: Coordinates",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: Prediction",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: NdEdx",20);
-  gMessMgr->SetLimit("StdEdxY2Maker:: Illegal time for scalers",20);
+  gMessMgr->SetLimit("StTpcdEdxCorrection:: Illegal time for scalers",20);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -362,18 +363,11 @@ Int_t StdEdxY2Maker::Make(){
 	if (NumberOfRows == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
-#ifdef __OLD_dX_Calculation__	
-	const StThreeVectorD &normal = *mNormal[sector-1][row-1];
-	const StThreeVectorD &middle = *mRowPosition[sector-1][0][row-1];
-	const StThreeVectorD &upper  = *mRowPosition[sector-1][1][row-1];
-	const StThreeVectorD &lower  = *mRowPosition[sector-1][2][row-1];
-#else
 	StThreeVectorD middle = xyz[3];
 	StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
 	StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
 	StThreeVectorD dif = upper - lower;
 	StThreeVectorD normal = dif.unit();
-#endif
 	if (NumberOfRows == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
@@ -387,11 +381,7 @@ Int_t StdEdxY2Maker::Make(){
 	       << "\tat s=\t" << s[0] << "/" << s[1] 
 	       << "\tw = " << w[0] << "/" << w[1] << endl;
 	}
-#ifdef __OLD_dX_Calculation__
-	StThreeVectorD dif = xyz[3] - xyz[0];
-#else
 	dif = xyz[3] - xyz[0];
-#endif
 	if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
 	  continue;
 	}
@@ -404,24 +394,6 @@ Int_t StdEdxY2Maker::Make(){
 	StGlobalDirection  globalDirectionOfTrack(dirG);
 	for (Int_t l = 0; l < 4; l++) {
 	  StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
-#ifdef __OLD_dX_Calculation__
-	  if (Debug() > 2) {
-	    Int_t k = l;
-	    if (l == 3) k = 0;
-	    Double_t D = - (*mRowPosition[sector-1][k][row-1])*normal;
-	    Double_t A = normal*normal;
-	    Double_t delta = (xyz[l]*normal + D)/TMath::Sqrt(A);
-	    if (TMath::Abs(delta) > 1.e-2) {
-	      cout << "Out of Plane by " << delta << "\tPlane " 
-		   << (*mRowPosition[sector-1][k][row-1]) << "\tNormal " << normal << endl;
-	      cout << "Track/hit : " << endl; 
-	      cout << "\txyz[0] " << xyz[0] << "\t s = "     << s[0]     << "/" << s[1]     << endl;
-	      cout << "\txyz[1] " << xyz[1] << "\t s_out = " << s_out[0] << "/" << s_out[1] << endl; 
-	      cout << "\txyz[2] " << xyz[2] << "\t s_in = "  << s_in[0]  << "/" << s_in[1]  <<  endl;
-	      cout << "\txyz[3] " << xyz[3] << endl;
-	    }
-	  }
-#endif
 	  transform(globalOfTrack,localSect[l],sector,row);
 	}
 #ifdef __PROMPT_HITS__
@@ -432,12 +404,6 @@ Int_t StdEdxY2Maker::Make(){
 	  if (sector > 12) iWestEast = 1;
 	  Int_t io = 0;
 	  if (row > NumberOfInnerRows) io = 1;
-#ifdef __OLD_dX_Calculation__
-	  const StThreeVectorD &PromptNormal = *mPromptNormal[iWestEast][io];
-	  const StThreeVectorD &anode = *mPromptPosition[iWestEast][io][0];
-	  const StThreeVectorD &gg    = *mPromptPosition[iWestEast][io][1];
-	  const StThreeVectorD &pads  = *mPromptPosition[iWestEast][io][2];
-#else
 	  static Double_t z[2][3] = { 
 	    // Anodes         GG          Pads
 	    { -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
@@ -459,7 +425,6 @@ Int_t StdEdxY2Maker::Make(){
 	    if (Debug()>1) cout << "mPromptPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
 				<< *PromptPlanes[l]  << endl;
 	  }
-#endif
 	  // check that helix prediction is consistent with measurement
 	  if (Propagate(*((const StThreeVectorD *) &anode),PromptNormal,helixI,helixO,bField,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
 	  if (Debug() > 1) {
@@ -485,23 +450,6 @@ Int_t StdEdxY2Maker::Make(){
 	  StGlobalDirection  globalDirectionOfTrack(dirG);
 	  for (Int_t l = 0; l < 4; l++) {
 	    StGlobalCoordinate globalOfTrack(xyz[l].x(),xyz[l].y(),xyz[l].z());
-#ifdef __OLD_dX_Calculation__
-	    if (Debug() > 2) {
-	      Int_t k = l;
-	      if (l == 3) k = 0;
-	      Double_t D = - (*mRowPosition[sector-1][k][row-1])*PromptNormal;
-	      Double_t A = PromptNormal*PromptNormal;
-	      Double_t delta = (xyz[l]*PromptNormal + D)/TMath::Sqrt(A);
-	      if (TMath::Abs(delta) > 1.e-2) {
-		cout << "Out of Plane by " << delta << "\tPlane " 
-		     << (*mRowPosition[sector-1][k][row-1]) << "\tNormal " << PromptNormal << endl;
-		cout << "Track/hit : " << endl; 
-		cout << "\txyz[0] " << xyz[0] << "\t s = "     << s[0]     << "/" << s[1]     << endl;
-		cout << "\txyz[1] " << xyz[1] << "\t s_out = " << s_out[0] << "/" << s_out[1] << endl; 
-		cout << "\txyz[2] " << xyz[2] << "\t s_in = "  << s_in[0]  << "/" << s_in[1]  <<  endl;
-	      }
-	    }
-#endif
 	    transform(globalOfTrack,localSect[l],sector,row);
 	  }
 	}
@@ -792,105 +740,6 @@ void StdEdxY2Maker::SortdEdx() {
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
-  class Hists3D {
-  private:
-    union {TH1 *hists[9]; TH3F *h3;}; // uncorrected
-    TH3F *h3C, *h3N, *h3Ne, *h3Npi, *h3NK, *h3NP, *h3Nd;
-    TProfile2D* pdX;
-  public:
-    Hists3D(const Char_t *Name = "SecRow3", const Char_t *Title = "<log(dEdx/Pion)>",
-	    const Char_t *TitleX = "sector", const Char_t *TitleY = "row",
-	    Int_t nXBins = 24, 
-	    Int_t nYBins = 45,  Double_t ymin = 0, Double_t ymax = -1,
-	    Int_t nZBins = 200, Double_t ZdEdxMin = -5., Double_t ZdEdxMax = 5.,
-	    Double_t xmin = 0, Double_t xmax = -1)
-    {
-      const Char_t *Names[9] = {"","C","N","Ne","Npi","NK","NP","Nd","dX"};
-      const Char_t *Titles[9] = {"uncorrected", "correctred","nP measured","nP for e","nP for pi","nP for K","nP for P","nP for d","dX"};
-      memset(hists, 0, 9*sizeof(TH1*));
-      if (xmin >= xmax) {
-	xmin = 0.5;
-	xmax = nXBins+0.5;
-      }
-      if (ymin >= ymax) {
-	ymin = 0.5;
-	ymax = nYBins+0.5;
-      }
-      for (Int_t j = 0; j < 9; j++) {
-	TString name(Name); 
-	name += Names[j];
-	TString title(Title); 
-	title += "(";  title += Titles[j]; title += ") versus "; title += TitleX; title += " and "; title += TitleY;
-        if (j < 8) {
-	  Int_t    nz   = nZBins; 
-	  Double_t zmin = ZdEdxMin;
-	  Double_t zmax = ZdEdxMax;
-	  if (j > 2) {
-#ifndef __HEED_MODEL__
-	    nz   =  40;
-	    zmin = 1.4;
-	    zmax = 3.4;
-#else /* __HEED_MODEL__ */
-	    nz   =  50;
-	    zmin = 3.0;
-	    zmax = 8.0;
-#endif /* __HEED_MODEL__ */
-	  }
-	  hists[j] = (TH1 *) new TH3F(name,title,
-				      nXBins,xmin, xmax, nYBins,ymin, ymax,nz, zmin, zmax);
-	} else {
-	  hists[j] = (TH1 *) new TProfile2D(name,title,
-					    nXBins,xmin, xmax, nYBins,ymin, ymax, "S");
-	}
-	hists[j]->SetXTitle(TitleX);
-	hists[j]->SetYTitle(TitleY);
-      }
-    }
-    virtual ~Hists3D() {}
-    void    Fill(Double_t x, Double_t y, Double_t *z) {
-      for (Int_t i = 0; i < 9; i++) {
-	if (hists[i]) {
-	  if (i < 8) ((TH3F *) hists[i])->Fill(x,y,z[i]);
-	  else       ((TProfile2D *) hists[i])->Fill(x,y,z[i]);
-	}
-      }
-    }
-  };
-  //________________________________________________________________________________
-  class Hists2D {
-  public:
-    TH2F *dev[KPidParticles][3]; // deviation of measurement from prediction ffitZ[hyp]
-    TH2F *devT[KPidParticles][3]; // deviation of measurement from prediction ffitZ[hyp], unique
-    Hists2D(const Char_t *Name = "fit") {
-      memset(dev, 0, 3*KPidParticles*sizeof(TH2F*));
-      TString nameP;
-      TString title;
-      const Char_t *Charge[3] = {"P","N","A"};
-      const Char_t *ChargeT[3] = {"+","-","All"};
-      for (Int_t hyp=0; hyp<KPidParticles;hyp++) {
-	for (Int_t sCharge = 0; sCharge < 3; sCharge++) {
-	  nameP = Name;
-	  nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
-	  nameP += Charge[sCharge];
-	  nameP.ReplaceAll("-","");
-	  title = Name; title += " - Pred. for ";
-	  title += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
-	  title.ReplaceAll("-","");
-	  title += " "; title += ChargeT[sCharge];
-	  title += " versus log10(p/m)";
-	  dev[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,500,-5,5);
-	  dev[hyp][sCharge]->SetMarkerColor(hyp+2);
-	  dev[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
-	  title += " Unique";
-	  nameP += "T";
-	  devT[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,500,-5,5);
-	  devT[hyp][sCharge]->SetMarkerColor(hyp+2);
-	  devT[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
-	}
-      }
-    }
-    virtual ~Hists2D() {}
-  };
   // Histograms
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
   static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",NumberOfRows,150, 6.84, 6.99);
@@ -908,9 +757,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
   static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NumberOfRows, 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-#if 0
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NumberOfRows, 100,0,10.);
-#endif
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
 #if 0
@@ -1296,9 +1143,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	//	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
 	Edge3.Fill(NumberOfRows*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
-#if 0
 	dX3.Fill(FdEdx[k].row,FdEdx[k].F.dx, Vars);
-#endif
       }
     }
   }

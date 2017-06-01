@@ -3,7 +3,8 @@
 #include "StProbPidTraits.h"
 #include "StBTofPidTraits.h"
 #include "StDedxPidTraits.h"
-#include "StGlobalTrack.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+class StGlobalTrack;
 class StdEdxStatus {
  public:
   StdEdxStatus(StDedxPidTraits *pid = 0) : fPiD(pid) {}
@@ -41,10 +42,12 @@ class StToFStatus {
 
 class StPidStatus {
  public:
-  StPidStatus(StGlobalTrack *Track = 0);
+  StPidStatus(StGlobalTrack *gTrack = 0);
+  StPidStatus(StMuTrack *muTrack = 0);
   virtual ~StPidStatus() {}
   void Clear() {memset(mBeg,0,mEnd-mBeg+1);}
   Int_t Status() {return PiDStatus;}
+  void Set();
   StdEdxStatus fI70; //!
   StdEdxStatus fFit; //!
   StdEdxStatus fI70U; //!
@@ -53,7 +56,8 @@ class StPidStatus {
   StdEdxStatus fdNdxU;//!
   StToFStatus  fToF; //!
   Int_t        PiDStatus; //!
-  StGlobalTrack *gTrack; //!
+  //  StGlobalTrack *gTrack; //!
+  StThreeVectorD g3; //!
   Char_t                mBeg[1];                   //!
   StProbPidTraits *fProb; //!
   Double_t devZ[KPidParticles], devZs[KPidParticles];

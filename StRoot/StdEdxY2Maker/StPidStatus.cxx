@@ -1,12 +1,14 @@
 #include "StPidStatus.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
+#include "StGlobalTrack.h"
 #include "StTrackGeometry.h"
 #include "TMath.h"
 //________________________________________________________________________________
-StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
+StPidStatus::StPidStatus(StGlobalTrack *gTrack) : PiDStatus(-1) {// , gTrack(Track) {
   Clear();
   if (! gTrack) return;
+  g3 = gTrack->geometry()->momentum(); // p of global track
   StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
   if (! traits.size()) return;
   for (UInt_t i = 0; i < traits.size(); i++) {
@@ -36,9 +38,44 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
       }
     }
   }
+  Set();
+}
+//________________________________________________________________________________
+StPidStatus::StPidStatus(StMuTrack *muTrack) : PiDStatus(-1) {
+  Clear();
+  if (! muTrack) return;
+  const StMuProbPidTraits &probPidTraits = muTrack->probPidTraits();
+  //  const StMuBTofPidTraits &btofPidTraits = muTrack->btofPidTraits();
+  //  const StMuMtdPidTraits  &mtdPidTraits  = muTrack->mtdPidTraits();
+  g3 = muTrack->p(); // p of global track
+  static StDedxPidTraits pidI70; //!
+  static StDedxPidTraits pidFit; //!
+  static StDedxPidTraits pidI70U; //!
+  static StDedxPidTraits pidFitU; //!
+  static StDedxPidTraits pidNdx; //!
+  static StDedxPidTraits pidNdxU;//!
+  //  static StBTofPidTraits pidToF; //!
+  if (probPidTraits.dEdxTruncated() > 0) {
+    pidI70 = StDedxPidTraits(kTpcId, kTruncatedMeanId, 100*((UShort_t)probPidTraits.dEdxTrackLength()) + muTrack->nHitsDedx(), 
+			     probPidTraits.dEdxTruncated(), probPidTraits.dEdxErrorTruncated());
+    fI70 = StdEdxStatus(&pidI70);
+  } 
+  if (probPidTraits.dEdxFit() > 0) {
+    pidFit = StDedxPidTraits(kTpcId, kLikelihoodFitId, 100*((UShort_t)probPidTraits.dEdxTrackLength()) + muTrack->nHitsDedx(), 
+			     probPidTraits.dEdxFit(), probPidTraits.dEdxErrorFit());
+    fFit = StdEdxStatus(&pidFit);
+  }
+  if (probPidTraits.dNdxFit() > 0) {
+    pidNdx = StDedxPidTraits(kTpcId, kOtherMethodId, 100*((UShort_t)probPidTraits.dEdxTrackLength()) + muTrack->nHitsDedx(), 
+			     probPidTraits.dNdxFit(), probPidTraits.dNdxErrorFit());
+    fdNdx = StdEdxStatus(&pidNdx);
+  }
+  Set();
+}
+//________________________________________________________________________________
+void StPidStatus::Set() {
   if (! fI70.fPiD || ! fFit.fPiD || ! fdNdx.fPiD) return;
   PiDStatus = 0;
-  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Int_t l;
@@ -124,4 +161,3 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
     }
   }
 }
-//________________________________________________________________________________
