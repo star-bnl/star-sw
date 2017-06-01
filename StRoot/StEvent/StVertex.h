@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.19 2017/05/04 23:52:35 smirnovd Exp $
+ * $Id: StVertex.h,v 2.20 2017/06/01 23:46:27 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.20  2017/06/01 23:46:27  smirnovd
+ * StVertex: Convenience getter for covariance matrix as array of doubles
+ *
  * Revision 2.19  2017/05/04 23:52:35  smirnovd
  * StVertex: Convenience setter for covariance matrix from array of doubles
  *
@@ -94,6 +97,7 @@ public:
     float                  chiSquared() const { return mChiSquared; }
     float                  probChiSquared() const { return mProbChiSquared; }
     StMatrixF              covariantMatrix() const;  // overwrite inherited
+    void                   covarianceMatrix(double covM[6]) const { std::copy(mCovariantMatrix, mCovariantMatrix + 6, covM); }
     StThreeVectorF         positionError() const;    // overwrite inherited
     StTrack*               parent()        { return mParent; }
     const StTrack*         parent() const  { return mParent; }
