@@ -97,10 +97,10 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 4.39226e-01 + 2.61137e-01 + 1.90407e-02; //SecRow3CGFdEdx + Hijing.AuAu200.VMCE-bbc2/dEdx/SecRow3CGFdEdx
-  row.SecRowCorIW[1] = row.SecRowCorIE[1] = 1.76094e-02 - 1.30348e-02; //
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.00611e+00 + 1.52493e-01 + 4.52381e-03; //
-  row.SecRowCorOW[1] = row.SecRowCorOE[1] = 1.33791e-03 - 1.33425e-03; //
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 4.39226e-01 + 2.61137e-01 + 1.90407e-02 -9.57455e-02; //pionMIP SecRow3CGFdEdx + Hijing.AuAu200.VMCE-bbc2/dEdx/SecRow3CGFdEdx
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] = 1.76094e-02 - 1.30348e-02 -3.83941e-04; //
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.00611e+00 + 1.52493e-01 + 4.52381e-03-1.39566e-01; //
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] = 1.33791e-03 - 1.33425e-03 + 1.34221e-04; //
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01

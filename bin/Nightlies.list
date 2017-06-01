@@ -27,12 +27,12 @@ string:test_UU200.MC.y2012:year_2012/MC.UU200:rcf12002_1_100evts:100
 string:test_AuAu200.MC.y2014:year_2014/MC.AuAu200:rcf15000_1_100evts:100
 string:test.RC.centr.y2000:year_2000/RC.centr:st_physics_1248022_raw_0001:100
 string:test.RC.minb.y2000:year_2000/RC.minb:st_physics_1229021_raw_0003:100
-string:test.RC.cent.y2001d:year_2001d/RC.cent:st_physics_2327038_raw_0010:100
-string:test.RC.cent.y2001:year_2001/RC.cent:st_physics_2327038_raw_0010:100
-string:test.RC.minb.y2001d:year_2001d/RC.minb:st_physics_2295030_raw_0010:100
-string:test.RC.minb.y2001:year_2001/RC.minb:st_physics_2295030_raw_0010:100
-string:test.RC.pp.y2001d:year_2001d/RC.pp:st_physics_3008016_raw_0001:100
-string:test.RC.pp.y2001:year_2001/RC.pp:st_physics_3008016_raw_0001:100
+#string:test.RC.cent.y2001d:year_2001d/RC.cent:st_physics_2327038_raw_0010:100
+#string:test.RC.cent.y2001:year_2001/RC.cent:st_physics_2327038_raw_0010:100           gave up
+#string:test.RC.minb.y2001d:year_2001d/RC.minb:st_physics_2295030_raw_0010:100
+#string:test.RC.minb.y2001:year_2001/RC.minb:st_physics_2295030_raw_0010:100
+#string:test.RC.pp.y2001d:year_2001d/RC.pp:st_physics_3008016_raw_0001:100
+#string:test.RC.pp.y2001:year_2001/RC.pp:st_physics_3008016_raw_0001:100
 string:test.RC.pp.y2001_vfppvd:year_2001_vfppvd/RC.pp:st_physics_3008016_raw_0001:100
 string:test.RC.dau.y2003:year_2003/RC.dau:st_physics_4041002_raw_0020001:100
 string:test.RC.pp.y2003:year_2003/RC.pp:st_physics_4095050_raw_0010002:100

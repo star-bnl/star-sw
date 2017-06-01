@@ -1,4 +1,4 @@
-
+#include <assert.h>
 #include <bitset>
 #include "TRegexp.h"
 #include "TSystem.h"
@@ -135,6 +135,9 @@ StPicoDstMaker::StPicoDstMaker(int mode, const char* fileName, const char* name)
     }
     mOutputFileName.ReplaceAll("*","");
     mOutputFileName.ReplaceAll("MuDst.root","picoDst.root");
+    mOutputFileName.ReplaceAll("event.root","picoDst.root");
+    mOutputFileName.ReplaceAll("daq","picoDst.root");
+    assert(mOutputFileName != mInputFileName);
   }
   if(mIoMode==ioRead) {
     mInputFileName = fileName;

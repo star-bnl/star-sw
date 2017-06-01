@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.h,v 2.3 2017/05/13 00:59:54 ullrich Exp $
+ * $Id: StTriggerData2017.h,v 2.4 2017/05/30 15:59:14 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.h,v $
+ * Revision 2.4  2017/05/30 15:59:14  ullrich
+ * Added bbcTDC5bit() method.
+ *
  * Revision 2.3  2017/05/13 00:59:54  ullrich
  * Added bbcBB101() and bbcBB102().
  *
@@ -103,6 +106,7 @@ public:
     // BBC
     unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short bbcTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short bbcTDC5bit(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short bbcADCSum(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;

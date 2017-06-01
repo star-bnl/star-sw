@@ -849,17 +849,17 @@ Bfc_st BFC[] = { // standard chains
    ,"Base chain for 2001 (tpc+rhic)"                                                               ,kFALSE},
   {"P2001"       ,""  ,"","B2001,l3onl,Corr2,OSpaceZ","",""
    ,                                                 "Production chain for summer 2001 data (+ l3)",kFALSE},
-#if 1 
+#if 1
   {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,Corr2,OSpaceZ","",""
    ,                                      "Production chain for summer 2001 data (+ ftpc, svt, l3)",kFALSE},
   {"pp2001","","","ppOpt,B2001,-PreVtx,l3onl,tofDat,Corr2"            ,"","" ,"pp 2001 (+ l3, tof)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""        ,"pp 2001 (+ ftpc, svt, l3, tof)",kFALSE},
 #else
-  {"P2001a"      ,""  ,"","B2001,ftpc,l3onl,Corr2,OSpaceZ","",""
-   ,                                   "Production chain for summer 2001 data (+ ftpc, NO svt, l3)",kFALSE},
+  {"P2001a"      ,""  ,"","B2001,l3onl,Corr2,OSpaceZ","",""
+   ,                                  "Production chain for summer 2001 data (No ftpc, NO svt, l3)",kFALSE},
   // pp Chains
   {"pp2001","","","ppOpt,B2001,-PreVtx,l3onl,tofDat,Corr2"            ,"","" ,"pp 2001 (+ l3, tof)",kFALSE},
-  {"pp2001a"     ,""  ,"","pp2001,ftpc","",""                  ,"pp 2001 (+ ftpc, NO svt, l3, tof)",kFALSE},
+  {"pp2001a"     ,""  ,"","pp2001","",""                      ,"pp 2001 (No ftpc, NO svt, l3, tof)",kFALSE},
 #endif
   // Year 3 chains
   // B2003 is a base-chain with tpc only for now

@@ -608,7 +608,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     float dChi2 = (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
            +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
            +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]; 
-    if (dChi2 > 1e10) return;
+    if (dChi2 > 1e9) return;
 //     if(fNDF > 100 && dChi2 > 9) return;
     
     float K[3][3];
@@ -692,7 +692,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
         }
       }
     
-    float M[3][3];
+    double M[3][3];
     for(int i=0; i<3; i++)
       for(int j=0; j<3; j++)
       {
@@ -828,7 +828,7 @@ void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
       }
     }
   
-  float M[3][3];
+  double M[3][3];
   for(int i=0; i<3; i++)
     for(int j=0; j<3; j++)
     {
@@ -1052,7 +1052,7 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
         }
       }
     
-    float M[3][3];
+    double M[3][3];
     for(int i=0; i<3; i++)
       for(int j=0; j<3; j++)
       {
@@ -1194,7 +1194,7 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
       }
     }
   
-  float M[3][3];
+  double M[3][3];
   for(int i=0; i<3; i++)
     for(int j=0; j<3; j++)
     {

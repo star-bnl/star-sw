@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.cxx,v 2.4 2017/05/13 00:59:54 ullrich Exp $
+ * $Id: StTriggerData2017.cxx,v 2.5 2017/05/30 15:59:14 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.cxx,v $
+ * Revision 2.5  2017/05/30 15:59:14  ullrich
+ * Added bbcTDC5bit() method.
+ *
  * Revision 2.4  2017/05/13 00:59:54  ullrich
  * Added bbcBB101() and bbcBB102().
  *
@@ -419,6 +422,21 @@ unsigned short StTriggerData2017::bbcTDC(StBeamDirection eastwest, int pmt, int 
             16,17,18,19,24,25,26,27} };
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]+4];
+    return 0;
+}
+
+unsigned short StTriggerData2017::bbcTDC5bit(StBeamDirection eastwest, int pmt, int prepost) const
+{
+    const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        4, 4, 4, 4, 4, 4, 4, 4},
+        { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            4, 4, 4, 4, 4, 4, 4, 4} };
+    const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+        0, 1, 2, 3, 8, 9,10,11},
+        { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+            16,17,18,19,24,25,26,27} };
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt>=1 && pmt<=24) return tbbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
     return 0;
 }
 
@@ -1222,8 +1240,9 @@ unsigned short StTriggerData2017::fmsADC(int crt, int adr, int ch, int prepost) 
 unsigned short StTriggerData2017::fmsTDC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=0 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
+            case 0: return tbbq[buffer][adr][ch];
             case 1: return tqt1[buffer][adr][ch];
             case 2: return tqt2[buffer][adr][ch];
             case 3: return tqt3[buffer][adr][ch];

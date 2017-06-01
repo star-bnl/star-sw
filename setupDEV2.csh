@@ -10,6 +10,10 @@ endif
 setenv STAR_ROOT ${AFS_RHIC}
 setenv OPTSTAR   ${STAR_ROOT}/opt
 setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
+#unsetenv STAR
+unsetenv GROUP_PATH
+unsetenv STAR_PATH
+source ${GROUP_DIR}/group_env.csh
 source ${GROUP_DIR}/setup    gcc482
 #source ${GROUP_DIR}/setup    32b
 #setup gcc492
