@@ -30,21 +30,6 @@ class StEvent;
 
 class StEmcADCtoEMaker : public StMaker
 {
-protected:
-
-    StEvent*                 mEvent;
-    StBemcData*              mBemcData;
-
-    Bool_t                   mMyStEvent;
-    Bool_t                   mEmbed;
-    Bool_t                   mIsCorrupted;
-    Bool_t                   mTestedCorruption;
-
-    virtual Bool_t            prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
-    virtual Bool_t            makeBemc(); ///< Make the Barrel-EMC detector
-    virtual void              fillHistograms();///<Fill QA histograms*
-    virtual void              testCorruption();///<Test BTOW for corruption
-
 public:
     StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
     virtual                   ~StEmcADCtoEMaker(); ///< StEmcADCtoEMaker destructor
@@ -70,26 +55,23 @@ public:
     /// suppress hits if crate fails corruption check.  Default is true.
     void setCheckCrateHeaderCorruption(StDetectorId det, int flag) { getControlTable()->CheckCrate[det-kBarrelEmcTowerId] = flag; }
     
-    StBemcData*               getBemcData()
+    inline StBemcData*               getBemcData()
     {
         return mBemcData;
     } ///< Return the StBemcData pointer
-    controlADCtoE_st*         getControlTable()
+    inline controlADCtoE_st*         getControlTable()
     {
         return mBemcData->getControlTable();
     } ///< Return Control table (NULL)
     StEmcCollection*          getEmcCollection();  ///< Return emcCollection
-    void                      clearStEventStaf()
-    { /*NOP*/
-    }
     Bool_t                    isCorrupted(); ///< Returns if BTOW is corrupted or not
 
 	void                      setPrint(Bool_t);  ///< Obsolete function; users can control messages with logger config file.
-    void                      setEmbeddingMode(Bool_t a)
+    inline void                      setEmbeddingMode(Bool_t a)
     {
         mEmbed = a;
     } ///< Set embedding mode (default is kFALSE)
-    void                      saveAllStEvent(Bool_t a)
+    inline void                      saveAllStEvent(Bool_t a)
     {
         mBemcData->saveAllStEvent(a);
     } ///< Set to kTRUE if all hits are to be saved on StEvent
@@ -98,9 +80,25 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.53 2014/08/06 11:43:05 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.54 2017/06/02 16:41:57 jlzhang Exp $ built " __DATE__ " " __TIME__ ;
         return cvs;
     }
+
+private:
+
+    StEvent*                 mEvent;
+    StBemcData*              mBemcData;
+
+    Bool_t                   mMyStEvent;
+    Bool_t                   mEmbed;
+    Bool_t                   mIsCorrupted;
+    Bool_t                   mTestedCorruption;
+
+    virtual Bool_t            prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
+    virtual Bool_t            makeBemc(); ///< Make the Barrel-EMC detector
+    virtual void              fillHistograms();///<Fill QA histograms*
+    virtual void              testCorruption();///<Test BTOW for corruption
+
 
     ClassDef(StEmcADCtoEMaker, 3)
 };
