@@ -12,7 +12,7 @@ ClassImp(StBemcData)
 /*
    Default constructor. Set Initial values for some variables
 */
-StBemcData::StBemcData():StBemcRaw()
+StBemcData::StBemcData()
 {
     Int_t   calib[]      = {1, 1, 1, 1, 0, 0, 0, 0};
     Int_t   pedSub[]     = {1, 1, 1, 1, 0, 0, 0, 0};

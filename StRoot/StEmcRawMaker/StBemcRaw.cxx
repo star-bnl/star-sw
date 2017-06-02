@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.39 2010/12/22 22:58:57 stevens4 Exp $
+// $Id: StBemcRaw.cxx,v 1.40 2017/06/02 16:43:06 jlzhang Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.40  2017/06/02 16:43:06  jlzhang
+// peer review for picoDst production
+//
 // Revision 1.39  2010/12/22 22:58:57  stevens4
 // Patch for BSMDE mapping problem in P10ih and P10ij productions (RT #2043)
 //
@@ -154,7 +157,7 @@ ClassImp(StBemcRaw)
 /*
    Default constructor. Set Initial values for some variables
 */
-StBemcRaw::StBemcRaw():TObject()
+StBemcRaw::StBemcRaw()
 {
     mSaveAllStEvent = kFALSE;
     mPsdMapBug = kFALSE;
