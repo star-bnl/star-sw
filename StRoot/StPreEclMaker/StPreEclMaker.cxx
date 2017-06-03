@@ -97,7 +97,9 @@ StEvent* StPreEclMaker::getEvent()
     if(adc)
     {
         emc = (StEmcCollection*)adc->getEmcCollection();
-        adc->clearStEventStaf();
+        // StEmcADCtoEMaker::clearStEventStaf() has been a NO-OP since 2004
+        // and is no longer supported as of 2017-06-02
+        //adc->clearStEventStaf();
         if(emc)
         {
             ev->setEmcCollection(emc);
