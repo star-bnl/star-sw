@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.7 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StDcaGeometry.h,v 2.8 2017/06/01 23:48:44 smirnovd Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.8  2017/06/01 23:48:44  smirnovd
+ * [Cosmetic] StDcaGeometry: Whitespace adjustments
+ *
  * Revision 2.7  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -91,7 +94,7 @@ private:
     
     /// pars errors
     Float_t  mImpImp;
-    Float_t  mZImp, mZZ;
+    Float_t  mZImp,   mZZ;
     Float_t  mPsiImp, mPsiZ, mPsiPsi;
     Float_t  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
     Float_t  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;

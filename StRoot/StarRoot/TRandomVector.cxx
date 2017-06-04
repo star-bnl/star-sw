@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.6 2017/03/12 21:28:37 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.7 2017/06/02 23:45:39 perev Exp $
  *
  ***************************************************************************
  *
@@ -30,23 +30,14 @@ TRandomVector::TRandomVector(const TVectorD& errDia,UInt_t seed)
   fDim = errDia.GetNrows();
   TMatrixDSym mtx(fDim);
   fRandom.SetSeed(seed);
-  for (int i=0;i<fDim;i++){assert(errDia[i]>0); mtx[i][i] = errDia[i];}
-  
+  for (int i=0;i<fDim;i++){mtx[i][i] =i+1;}
   RandRotate(mtx);
+  TVectorD myDia(fDim);
+  for (int i=0;i<fDim;i++) {myDia[i] = sqrt(mtx[i][i]);}
+  for (int i=0;i<fDim;i++) {
+  for (int k=0;k<fDim;k++) {mtx[i][k]*= errDia[i]/myDia[i]*errDia[k]/myDia[k];}}
+
   assert(! Set(mtx,seed)); 
-
-  for (int i=0;i<fDim;i++){
-    double tol = 0; int iok = 0;
-    for (int j=0;j<fDim;j++){
-      double tol = fabs(errDia[i]-fEigVal[j]*fEigVal[j]);
-      if (tol<1e-6+errDia[i]*1e-4) {iok = 1; break;}
-    }
-    if (iok) continue;
-     errDia.Print("errDia");
-    fEigVal.Print("eigVal");
-    assert(0 && "errDia !=eigVal");
-  }
-
 }
 //_____________________________________________________________________________
 int TRandomVector::Set(const TMatrixDSym& errMtx,UInt_t  seed)
@@ -87,7 +78,7 @@ const TVectorD& TRandomVector::Gaus()
 {
   if (!fDim) {Error("Gaus","Not initialised properly");}
   TVectorD rnd(fDim);
-  for (int i=0;i<fDim;i++){ rnd[i]= gRandom->Gaus()*fEigVal[i];};
+  for (int i=0;i<fDim;i++){ rnd[i]= fRandom.Gaus()*fEigVal[i];};
   fResult = fEigMtx*rnd;
   return fResult;
 }
@@ -161,18 +152,11 @@ enum {kMySize=15};
   TVectorD V(kMySize);
   for (int i=0;i<kMySize;i++) {
     V[i] = (i+1)*(1+0.1*gRandom->Rndm());
-    S[i][i] = V[i];
   }
 
-if (nevt>0 ) {
-  RandRotate(S);
-  assert(TRandomVector::Sign(S)>0);
-  RV = new TRandomVector(S);
-} else { //vector case
   RV = new TRandomVector(V);
   S = RV->GetMtx();
-}  
-  nevt = abs(nevt);
+  
 //  S.Print("");
   TVectorD res(kMySize);
   TMatrixD SS(kMySize,kMySize);

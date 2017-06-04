@@ -22,8 +22,8 @@ class TRandomVector: public TObject
 {
 public:
 	TRandomVector();
-	TRandomVector(const TMatrixDSym& errMtx,UInt_t seed = 0);
-	TRandomVector(const TVectorD& diaMtx,UInt_t seed = 0);
+	TRandomVector(const TMatrixDSym& errMtx,UInt_t seed = 1946);
+	TRandomVector(const TVectorD& diaMtx,UInt_t seed = 1946);
        ~TRandomVector(){;}
    int  Set(const TMatrixDSym& errMtx,UInt_t  seed = 65539);
 static void   RandRotate(TMatrixDSym& errMtx);
