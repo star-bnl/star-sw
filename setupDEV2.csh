@@ -13,12 +13,16 @@ setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
 #unsetenv STAR
 unsetenv GROUP_PATH
 unsetenv STAR_PATH
+unsetenv ROOTROOT
+unsetenv ROOTSYS
+unsetenv ROOT_LEVEL
+unsetenv CERN_LEVEL
 source ${GROUP_DIR}/group_env.csh
 source ${GROUP_DIR}/setup    gcc482
 #source ${GROUP_DIR}/setup    32b
 #setup gcc492
 #setup 32b
-source ${GROUP_DIR}/.starver .DEV2
+source ${GROUP_DIR}/.starver ${STAR_LEVEL}
 #setup   64b
 #setup   32b
 #if ($STAR_SYS == "x8664_sl5") 

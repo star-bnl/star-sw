@@ -34,7 +34,7 @@ string:test.RC.minb.y2000:year_2000/RC.minb:st_physics_1229021_raw_0003:100
 #string:test.RC.pp.y2001d:year_2001d/RC.pp:st_physics_3008016_raw_0001:100
 #string:test.RC.pp.y2001:year_2001/RC.pp:st_physics_3008016_raw_0001:100
 string:test.RC.pp.y2001_vfppvd:year_2001_vfppvd/RC.pp:st_physics_3008016_raw_0001:100
-string:test.RC.dau.y2003:year_2003/RC.dau:st_physics_4041002_raw_0020001:100
+#string:test.RC.dau.y2003:year_2003/RC.dau:st_physics_4041002_raw_0020001:100
 string:test.RC.pp.y2003:year_2003/RC.pp:st_physics_4095050_raw_0010002:100
 string:test.RC.auau.lo.y2004:year_2004/RC.auau.lo:st_physics_5044116_raw_3010002:100
 string:test.RC.auau.ph.y2004:year_2004/RC.auau.ph:st_physics_5044102_raw_1010003:100
