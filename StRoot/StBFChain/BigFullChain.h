@@ -1075,7 +1075,10 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2017","" ,"",
    "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
-   ,                      "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   ,                      "","","Production chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   ,                      "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   // TEST
