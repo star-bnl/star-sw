@@ -29,11 +29,11 @@ if ($level >= 305 )  then
     set ROOTBASE = "${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}"
 #echo "rootenv 3 => $PATH"
 
-    if ( ! -e ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/${p}root${x} && $?DECHO )then
+    if ( ! -r ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/${p}root${x} && $?DECHO )then
 	echo "$self :: Did not find ${p}root${x}"
     endif
 
-    if ( ! $?ROOTSYS || ! -e ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/${p}root${x} ) then
+    if (! -r ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/${p}root${x} ) then
 	# We set "a" default
 	setenv ROOTSYS ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/rootdeb
     else
@@ -120,10 +120,10 @@ if ($level >= 404  && $?XROOTDSYS ) then
     # The server will search for $HOME/.xrd/pwdnetrc which may cause some
     # information syncrhonization issues if $HOME and ${XROOTDSYS} are on 
     # different FS.
-    if ( ! -e $HOME/.xrd/pwdnetrc && -e ${XROOTDSYS}/.xrd/pwdnetrc ) then
+    if ( ! -r $HOME/.xrd/pwdnetrc && -r ${XROOTDSYS}/.xrd/pwdnetrc ) then
 	setenv XrdSecPWDALOGFILE ${XROOTDSYS}/.xrd/pwdnetrc
     endif
-    if ( ! -e $HOME/.xrd/pwdsrvpuk && -e ${XROOTDSYS}/.xrd/pwdsrvpuk ) then
+    if ( ! -r $HOME/.xrd/pwdsrvpuk && -r ${XROOTDSYS}/.xrd/pwdsrvpuk ) then
 	setenv XrdSecPWDSRVPUK   ${XROOTDSYS}/.xrd/pwdsrvpuk
     endif
 endif
@@ -131,8 +131,8 @@ endif
 
 # attempt to check qt from ROOT
 #if ( 0 ) then
-#if ( -e ${ROOTSYS}/config.log ) then
-    if ( -e ${OPTSTAR}/qt4 || -e ${OPTSTAR}/qt3 ) then
+#if ( -r ${ROOTSYS}/config.log ) then
+    if ( -r ${OPTSTAR}/qt4 || -r ${OPTSTAR}/qt3 ) then
 	# there is a possibility for an ambiguity to be
 	# resolved
 	# ->> this test is not safe - newer version of root config.log
@@ -154,7 +154,7 @@ endif
 
 	    # Beware that on Linux, the login may default to qt3 with diverse
 	    # naming conventions
-	    if ( -e /etc/profile.d/qt.csh ) then
+	    if ( -r /etc/profile.d/qt.csh ) then
 		set test4=`echo $PATH | $GREP '/qt.*4/'`
 		set test3=`echo $PATH | $GREP '/qt.*3/'`
 
@@ -192,7 +192,7 @@ endif
 
 
 # OpenGL
-if ( -e $ROOTSYS/../Mesa) setenv OPENGL $ROOTSYS/../Mesa
+if ( -r $ROOTSYS/../Mesa) setenv OPENGL $ROOTSYS/../Mesa
 
 # CINT
 if ( -d ${ROOTSYS}/cint/cint ) then

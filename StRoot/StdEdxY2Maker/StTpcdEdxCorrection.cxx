@@ -39,6 +39,7 @@
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "TUnixTime.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
@@ -151,7 +152,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
   Double_t    Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
   CdEdx.Qcm     = 1e6*Qcm; // uC/cm
-  UInt_t date = StMaker::GetChain()->GetDateTime().Convert();  // GMT
+  TUnixTime u(StMaker::GetChain()->GetDateTime(), kTRUE); // GMT
   if (! St_trigDetSumsC::GetInstance()) {
     StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
   }
@@ -159,9 +160,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   else {
     if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection trigDetSums has not data" << endm;}
     else {
-      if (date < St_trigDetSumsC::instance()->timeOffset()) { // GMT
+      TUnixTime u2(St_trigDetSumsC::instance()->timeOffset());
+      if (u() < u2()) { 
 	LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Illegal time for scalers = " 
-		  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
+		  << u2() << "/" << u()
 		  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << StMaker::GetChain()->GetRunNumber() << endm;
 	St_trigDetSumsC::instance()->Table()->Print(0,10);
       }
@@ -170,11 +172,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 #if 1
   // Check that we have valid time for Power Suppliers
   if (St_TpcAvgPowerSupplyC::instance()->run() > 0) {
-    TDatime t(St_TpcAvgPowerSupplyC::instance()->stop_time());
-    ULong_t stop_time = t.Convert(kTRUE); // local => GMT
-    if (stop_time < date) {
-      LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply time = " << stop_time << " GMT from local " << t.AsString() 
-		<< " < event time = " << date  << " GMT\t=" << StMaker::GetChain()->GetDateTime().AsString() << endm;
+    TUnixTime u2(St_trigDetSumsC::instance()->timeOffset()+5*3600); // EDT => GMT
+    if (u2() < u()) {
+      LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply stop time = " << u2() << " GMT from local " << u2.GetGString() 
+		<< " < event time = " << u()  << " GMT\t=" << StMaker::GetChain()->GetDateTime().AsString() << endm;
       return kStErr;
     }
   }

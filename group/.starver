@@ -2,6 +2,12 @@
 # Set up STAR enviroment
 setenv STAR_LEVEL $1
 if ( -e $GROUP_DIR/group_env.csh ) then
+unsetenv GROUP_PATH
+unsetenv STAR_PATH
+unsetenv ROOTROOT
+unsetenv ROOTSYS
+unsetenv ROOT_LEVEL
+unsetenv CERN_LEVEL
         source $GROUP_DIR/group_env.csh
 	if ( $?prompt ) then
 	    if ( ! -e $STAR) then

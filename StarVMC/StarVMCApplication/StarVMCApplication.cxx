@@ -500,6 +500,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   Double_t rSstSensor[9] = {-1, 0, 0, 0, -1, 0, 0, 0, 1}; 
   SstSensorR.SetRotation(rSstSensor);
   TGeoHMatrix Tpc2Global, HftOnTpc, PxlOnHft, SectorOnPxl, LadderOnSector, LadderOnPxl, SensorOnLadder, SensorOnGlobal;
+  TGeoHMatrix temp, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
     Int_t NoPerfMatch = 0;
@@ -655,7 +656,20 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA = rotL; 
 	break;
       case kSst:
-	rotA = StsstOnOsc::instance()->GetMatrix(0);
+	// Xin: tpc2global * sstOnOsc * sstLadderOnSst * sstSensorOnLadder
+	//                   ????????
+	// WG = Tpc2Global * SG       * LS             * WLL
+	// SG = oscOnGlobal
+	// LS = sstLadderOnSst
+	// WLL = sensorOnLadder
+	// 
+	//    0      1           2      3                            4                          5               6     7       8
+	// NL-8     -7          -6     -5                           -4                         -3              -2    -1       0     
+	//                           kHft                         kSst                 kSstLadder kSstWafer           kSstSensor
+	// HALL * CAVE * TpcRefSys * IDSM                       * SFMO *           SFLM          * SFSW  * SFSL * SFSD
+	//              tpc2global * idsOnTpc * idsOnTpc^-1 * sstOnOsc * sstLadderOnSst * H      * H^1                * sstSensorOnLadder
+	A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
+	rotA = A * StsstOnOsc::instance()->GetMatrix(0);
 	break;
       case kSstLadder:
 	ladder = indx[0];
@@ -669,6 +683,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	sensor = indx[1];
 	ID     = 7000 + ladder + 100*sensor;
 	B = StsstSensorOnLadder::instance()->GetMatrix4Id(ID);
+	C = *nodeP->GetNode(NLevel-1)->GetMatrix();
 	rotA   = SstLadderH.Inverse() * B * SstSensorR;
 	rotA.SetName(Form(listOfDet2Align[i].Name,ID));
 	break;
@@ -717,6 +732,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 #ifdef __CHECK_NODE__
 	    Int_t check = 1;
 	    TGeoHMatrix *comb = 0;
+	    TGeoHMatrix temp;
 	    Int_t matIst = -1;
 	    // Check node
 	    switch (kDetector) {
@@ -742,6 +758,30 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	      matIst = 1000 + (ladder - 1) * kIstNumSensorsPerLadder + sensor;
 	      comb = (TGeoHMatrix *) StIstDb::instance()->getRotations()->FindObject(Form("R%04i", matIst));
 	      break;
+	    case kSst:
+	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
+	      temp = Tpc2Global * HftOnTpc * sstOnOsc; temp.SetName("kSst"); PrPV(temp);
+	      comb = &temp;
+	      break;
+	    case kSstLadder:
+	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
+	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(100 + ladder); PrPV(sstLadderOnSst);
+	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst; temp.SetName("kSstLadder"); PrPV(temp);
+	      comb = &temp;
+	      break;
+	    case kSstWafer:
+	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
+	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(ladder); PrPV(sstLadderOnSst);
+	      sstSensorOnLadder = StsstSensorOnLadder::instance()->GetMatrix4Id(7000 + ladder + 100*sensor); PrPV(sstSensorOnLadder);
+	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst * sstSensorOnLadder; temp.SetName("kSstWafer"); PrPV(temp);
+	      comb = &temp;
+	      break;
 	    case kSstSensor:
 	      comb = (TGeoHMatrix *) StSstDbMaker::instance()->getRotations()->FindObject(Form("R%04i", 7000 + 100*sensor + ladder));
 	      break;
@@ -758,7 +798,10 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	      cout << "---------------------------------+ Diff ?     ---------------------------------------------+" << endl;
 	      TGeoHMatrix combI = comb->Inverse(); combI.Print();
 	      D = combI * (*nMat);
-	      if (!(D == I)) D.Print();
+	      if (!(D == I)) {
+		cout << "Node = " << nodeP->GetName() << endl;
+		D.Print();
+	      }
 	      Double_t *tran = D.GetTranslation();
 	      Double_t *r    = D.GetRotationMatrix();
 	      // Check Ideal case
