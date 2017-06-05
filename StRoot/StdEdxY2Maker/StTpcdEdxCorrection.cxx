@@ -156,6 +156,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   if (! St_trigDetSumsC::GetInstance()) {
     StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
   }
+#if 0
   if ( ! St_trigDetSumsC::instance() ) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Cannot find trigDetSums" << endm;}
   else {
     if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection trigDetSums has not data" << endm;}
@@ -180,7 +181,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     }
   }
 #endif
-  
+#endif  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
   if (row <= mNumberOfInnerRows) kTpcOutIn = kTpcInner;
