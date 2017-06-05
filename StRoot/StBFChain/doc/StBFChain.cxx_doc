@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.152 2017/01/07 03:40:46 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.153 2017/02/27 15:03:22 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -969,6 +969,11 @@ Bfc_st BFC[] = {
   {"P2016a","" ,"",
    "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2017" ,"","","ry2017,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   , "Base chain for run 2017 data (tpc)",kFALSE},
+  {"pp2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -2558,6 +2563,11 @@ Bfc_st BFC[] = {
   {"P2016a","" ,"",
    "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2017" ,"","","ry2017,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   , "Base chain for run 2017 data (tpc)",kFALSE},
+  {"pp2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""

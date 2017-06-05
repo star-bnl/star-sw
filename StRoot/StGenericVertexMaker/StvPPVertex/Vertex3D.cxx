@@ -88,7 +88,7 @@ void Vertex3D::addTrack(TrackData* trk)
 void Vertex3D::doExtrapolation()
 { // study track cov matrix for individual tracks using my macro plTrCov.C 
 #if 0 // Looks like this function is doing nothing
-  for(unsigned int i=0;i<track.size();i++) {
+  for(uint i=0;i<track.size();i++) {
      const StiKalmanTrack* tr=track[i]->mother;
      hA[5]->Fill(1);
      if( fabs(tr->getChi2()-1.)>0.8) continue;
@@ -185,7 +185,7 @@ Vertex3D::study(TVector3 r, int eveID){
     //printf("Z0=%f, eveID=%d\n",Z0,eveID);
     float D=2.5; // cm half length of tracklet
     float mxPt=0;
-    for(unsigned int i=0;i<track.size();i++) {
+    for(uint i=0;i<track.size();i++) {
       DcaTrack  tr=track[i]->dcaTrack;
       float sig=tr.sigYloc;
       float x=tr.R.x();
@@ -258,7 +258,7 @@ void Vertex3D::dumpPrimTracks4beamLine(float z0, int eveID)
 {
 if (z0 || eveID) {}
 #if 0
-  for(unsigned int i=0;i<track.size();i++) {
+  for(uint i=0;i<track.size();i++) {
       DcaTrack  tr=track[i]->dcaTrack;
       StiNodeErrs *er=&(tr.fitErr);
       float x=tr.R.x();
@@ -276,7 +276,7 @@ if (z0 || eveID) {}
 //==========================================================
 void
 Vertex3D::trackChi2QA(float z0) {
-  for(unsigned int i=0;i<track.size();i++) {
+  for(uint i=0;i<track.size();i++) {
       DcaTrack  tr=track[i]->dcaTrack;
        float chi2dof=tr.gChi2;
       hA[10]->Fill(chi2dof);

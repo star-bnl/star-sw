@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.50 2017/02/14 22:00:39 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.49 2017/01/20 17:48:42 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -840,4 +840,7 @@ void StMinuitVertexFinder::UseVertexConstraint() {
 
 Int_t  StMinuitVertexFinder::NCtbMatches() { 
   return nCTBHits;
+}
+Int_t  StMinuitVertexFinder::NCtbSlats() { 
+  return -777; // dum result, perhaps not needed at all,JB
 }
