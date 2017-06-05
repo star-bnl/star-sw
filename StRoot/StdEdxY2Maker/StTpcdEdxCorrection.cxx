@@ -156,31 +156,32 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   if (! St_trigDetSumsC::GetInstance()) {
     StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
   }
+#if 0
   if ( ! St_trigDetSumsC::instance() ) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Cannot find trigDetSums" << endm;}
   else {
     if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection trigDetSums has not data" << endm;}
     else {
       TUnixTime u2(St_trigDetSumsC::instance()->timeOffset());
-      if (u() < u2()) { 
+      if (u() + 30 < u2()) { 
 	LOG_ERROR << "StTpcdEdxCorrection::dEdxCorrection Illegal time for scalers = " 
 		  << u2() << "/" << u()
 		  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << StMaker::GetChain()->GetRunNumber() << endm;
-	St_trigDetSumsC::instance()->Table()->Print(0,10);
+	//	St_trigDetSumsC::instance()->Table()->Print(0,10);
       }
     }
   }
-#if 1
+#if 0
   // Check that we have valid time for Power Suppliers
   if (St_TpcAvgPowerSupplyC::instance()->run() > 0) {
     TUnixTime u2(St_trigDetSumsC::instance()->timeOffset()+5*3600); // EDT => GMT
-    if (u2() < u()) {
+    if (u2() < u() + 30) {
       LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply stop time = " << u2() << " GMT from local " << u2.GetGString() 
 		<< " < event time = " << u()  << " GMT\t=" << StMaker::GetChain()->GetDateTime().AsString() << endm;
       return kStErr;
     }
   }
 #endif
-  
+#endif  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
   if (row <= mNumberOfInnerRows) kTpcOutIn = kTpcInner;
