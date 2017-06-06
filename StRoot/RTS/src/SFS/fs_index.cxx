@@ -407,6 +407,7 @@ int fs_index::cd(char *name)
 
 void fs_index::free_inode(fs_inode *inode)
 {
+    //printf("free\n");
   if(inode->fchild) free_inode(inode->fchild);
 
   if(inode->next) free_inode(inode->next);
@@ -547,6 +548,7 @@ fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz, int overh
   fs_inode *fs_index::alloc_inode(char *name, int off, int sz, int overhead)
 #endif
 {
+    //printf("alloc\n");
   n_inodes++;
   fs_inode *n = (fs_inode *)malloc(sizeof(fs_inode));
   if(!n) return NULL ;

@@ -770,6 +770,7 @@ int sfs_index::mountSingleDir(char *fn, int offset)
   LOG(DBG,"the spec is: " __DATE__ ":" __TIME__);
 
   // open file...
+  umount();  // just in case!
   wfile.close();   // just in case!
   wfile.opendisk(fn, O_RDONLY);
   if(wfile.fd < 0) {
