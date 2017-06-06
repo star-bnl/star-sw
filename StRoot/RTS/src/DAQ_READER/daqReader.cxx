@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.66 2017/02/17 09:41:08 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.67 2017/06/06 16:01:10 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -520,6 +520,7 @@ char *daqReader::get(int num, int type)
      
     LOG(DBG, "[%c%c%c%c]",memmap->mem[0],memmap->mem[1],memmap->mem[2],memmap->mem[3]);
 
+    //printf("%p, %d %lld\n",memmap->mem,event_size, evt_offset_in_file);
     ret = sfs->mountSingleDirMem(memmap->mem, event_size, evt_offset_in_file);
 
 
