@@ -157,7 +157,11 @@ class sfs_index : public fs_index {
 
 
   sfs_index();
-  ~sfs_index() { wfile.close(); }
+  virtual ~sfs_index() { 
+      umount();
+      if(singleDirIttr) delete singleDirIttr;
+      wfile.close(); 
+  }
 
   int _create();
   void dump(int) { dump("/",root); };
