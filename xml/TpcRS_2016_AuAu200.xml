@@ -4,8 +4,8 @@
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
-#  setenv NODEBUG yes
-#  starver .DEV2 
+  setenv NODEBUG yes
+  starver .DEV2 
   set evtsFile = $INPUTFILE0;
   set file     = `basename $evtsFile .MuDst`
   echo "${evtsFile}"

@@ -1,4 +1,4 @@
-/* 
+/* FPE_OFF
    root.exe Heed*_G.root lBichsel.C TpcRSdEdx.C+
 */
 #if !defined(__CINT__)
@@ -41,17 +41,20 @@
 #include "TGraphErrors.h"
 #include "TGraph2DErrors.h"
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #endif
-const Int_t NHYP = 14; // 10
-const Char_t *names[14] = {"electron","positron","muon+","muon-","pion+","pion-","kaon+","kaon-","proton","pbar"  ,"deuteron","triton","He3","alpha"};
+const Int_t NHYP = 15; // 10
+const Char_t *names[15] = {"electron","positron","muon+","muon-","pion+","pion-","kaon+","kaon-","proton","pbar"  ,"deuteron","triton","He3","alpha","pionMIP"};
 //const Char_t *names[15] = {"electron","positron","muon","muon","pion+","pion-","kaon","kaon","proton","pbar"  ,"deuteron","triton","He3","alpha","all"};
-const Char_t *namesh[14]= {"eN"      ,"eP"      ,"muP"  ,"muN",  "piP"  ,"piN",  "kaonP","kaonN","protonP","protonN","deuteronP","tritonP","He3P","alphaP"};
-const Double_t masses[14] = {0.51099907e-3,0.51099907e-3,
+const Char_t *namesh[15]= {"eN"      ,"eP"      ,"muP"  ,"muN",  "piP"  ,"piN",  "kaonP","kaonN","protonP","protonN","deuteronP","tritonP","He3P","alphaP","piP"};
+const Double_t masses[15] = {0.51099907e-3,0.51099907e-3,
 			     0.1056584,0.1056584,
 			     0.13956995,0.13956995,
 			     0.493677,0.493677,
 			     0.93827231,0.93827231,
-			     1.875613   ,2.80925  , 2.80923, 3.727417};
+			     1.875613   ,2.80925  , 2.80923, 3.727417,
+			     0.13956995
+};
 const Double_t chargeSQ[14] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4};
 TGraphErrors *graphs[10];
 TGraphErrors *gAll = 0;
@@ -261,21 +264,26 @@ Int_t GetFileList(TFile *files[14]) {
   return NF;
 }
 //________________________________________________________________________________
-void TpcRSdEdx(const Char_t *fopt = "70BT") {
+void TpcRSdEdx(const Char_t *fopt = "I70") {
   Bool_t fI70 = kFALSE;
   TString fOpt(fopt);
-  if (fOpt.Contains("70B")) fI70 = kTRUE;
-  Double_t scales[2] = {-6.75100587779081402e-03,-8.64200502877701150e-03}; // pi70->Interpolate(TMath::Log10(4.)); piz->Interpolate(TMath::Log10(4.));
-  Double_t sigmas[2] = { 7.56777648706270512e-02, 7.46023243878390085e-02}; // pi70S->Interpolate(TMath::Log10(4.)); pizS->Interpolate(TMath::Log10(4.));
+  if (fOpt.Contains("I70")) fI70 = kTRUE;
+  Double_t scales[3] = {0};
+  Double_t sigmas[3] = {0.076};
+  //  Double_t scales[2] = {-6.75100587779081402e-03,-8.64200502877701150e-03}; // pi70->Interpolate(TMath::Log10(4.)); piz->Interpolate(TMath::Log10(4.));
+  //  Double_t sigmas[2] = { 7.56777648706270512e-02, 7.46023243878390085e-02}; // pi70S->Interpolate(TMath::Log10(4.)); pizS->Interpolate(TMath::Log10(4.));
   Double_t scale = fI70 ? scales[0] : scales[1];
   Double_t sigma = fI70 ? sigmas[0] : sigmas[1];
-  
+  TString c1N(fopt); 
+  TString c2N("DeV"); c2N += fopt;
+  TString c3N("sigma"); c3N += fopt;
+
   TFile *files[NHYP];
   Int_t NF = GetFileList(files);
   if (! NF) return;
   TLegend *l = new TLegend(0.5,0.6,0.8,0.9);
-  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-  if (! c1 ) c1 = new TCanvas("c1","c1");
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c1N);
+  if (! c1 ) c1 = new TCanvas(c1N,c1N);
   else       c1->Clear();
   TH1F *hr = c1->DrawFrame(-1,0,6,6);
   hr->SetTitle("TpcRS log(dE/dx) versus log_{ 10} (   #beta #gamma)");
@@ -283,18 +291,18 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
   hr->SetYTitle("log (dE/dx [keV/cm])");  
 
   TLegend *l2 = new TLegend(0.5,0.6,0.8,0.9);
-  TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c2");
-  if (! c2 ) c2 = new TCanvas("c2","c2");
+  TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c2N);
+  if (! c2 ) c2 = new TCanvas(c2N,c2N);
   else       c2->Clear();
   TH1F *hr2 = c2->DrawFrame(-1,-0.2,6,0.2);
-  hr2->SetTitle("Deviation TpcRS log(dE/dx) from Bichsel Prediction versus log_{ 10}(   #beta #gamma)");
+  hr2->SetTitle(Form("Deviation TpcRS log(dE/dx) from %s Prediction versus log_{ 10}(   #beta #gamma)",fopt));
   hr2->SetXTitle("log_{10} ( #beta#gamma  ) ");
-  hr2->SetYTitle("log (dE/dx / Bichsel)");  
+  hr2->SetYTitle("log (dE/dx / Prediction)");  
   TLegend *l3 = new TLegend(0.5,0.6,0.8,0.9);
-  TCanvas *c3 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c3");
-  if (! c3 ) c3 = new TCanvas("c3","c3");
+  TCanvas *c3 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c3N);
+  if (! c3 ) c3 = new TCanvas(c3N,c3N);
   else       c3->Clear();
-  TH1F *hr3 = c3->DrawFrame(-1,0.0,6,1.2);
+  TH1F *hr3 = c3->DrawFrame(-1,0.0,6,1.8);
   hr3->SetTitle(Form("Relative error of dE/dx log_{ 10}(   #beta #gamma) normalized at %5.3f",sigma));
   hr3->SetXTitle("log_{10} ( #beta#gamma  ) ");
   hr3->SetYTitle("#sigma (log (dE/dx))");  
@@ -313,12 +321,12 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
     if (i < NHYP) {
       if (! files[i]) continue;
       files[i]->cd();
-      h2 = (TH2F *) files[i]->Get(Form("%s%s",namesh[i],fopt));
+      h2 = (TH2F *) files[i]->Get(Form("%s%s",fopt,namesh[i]));
       if (! h2) continue;
       if (h2->GetEntries() <100) continue;
       cout << "in file " << files[i]->GetName() << " Found histogram " << h2->GetName() << endl;
       if (i < 10) {
-	TH2F *h2i = (TH2F *) files[i+1]->Get(Form("%s%s",namesh[i+1],fopt));
+	TH2F *h2i = (TH2F *) files[i+1]->Get(Form("%s%s",fopt,namesh[i+1]));
 	if (h2i && h2i->GetEntries() > 100) {
 	  cout << "in file " << files[i+1]->GetName() << "Found histogram " << h2i->GetName() << endl;
 	  h2->Add(h2i); i++; 
@@ -347,7 +355,7 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
     name.ReplaceAll("NzB_1","z");
     name.ReplaceAll("PzB_1","z");
     h1p->SetName(name);
-    h1p->SetTitle(title + " #mu - Bichsel");
+    h1p->SetTitle(title + Form(" #mu - %s",fopt));
     name += "S";
     s1->SetName(name);
     s1->SetTitle(title + " #sigma");
@@ -401,8 +409,9 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
 	  // 	h1->SetBinContent(ix, 0.);
 	  // 	h1->SetBinError(ix, 0.);
 	  //       }
-	  if (fI70) val += TMath::Log(chargeSQ[i]*b->GetI70M(bg10));
-	  else      val += TMath::Log(chargeSQ[i]*TMath::Exp(b->GetMostProbableZ(bg10)));
+	  if      (fOpt.Contains("I70",TString::kIgnoreCase))   val += TMath::Log(chargeSQ[i]*b->GetI70M(bg10));
+	  else if (fOpt.Contains("fitz",TString::kIgnoreCase))  val += TMath::Log(chargeSQ[i]*TMath::Exp(b->GetMostProbableZ(bg10)));
+	  else                                                  val += TMath::Log(chargeSQ[i]*StdEdxModel::instance()->dNdx(TMath::Power(10.,bg10)));
 	  h1->SetBinContent(ix, val);
 	}
 	if (ix < xmin) xmin = ix;
@@ -442,10 +451,13 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
 #else
     c1->cd();
     if (h1) h1->Draw("same");
+    c1->Update();
     c2->cd();
     h1p->Draw("same");
+    c2->Update();
     c3->cd();
     s1->Draw("same");
+    c3->Update();
 #endif
     //    h2->Write();
     if (h1) h1->Write();
@@ -454,3 +466,4 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
     //    h1->Fit(F,"er","same",-1,5);
   }
 }
+

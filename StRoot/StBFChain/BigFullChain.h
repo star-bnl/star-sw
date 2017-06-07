@@ -1767,7 +1767,7 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"BeamBack" ,"","","StEvent",                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
-  {"LdEdxY2"     ,"","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker","Load dEdx Maker",kFALSE},
+  {"LdEdxY2"     ,"","","tpcDb,StEvent",             "","libMinuit,StdEdxY2Maker","Load dEdx Maker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
   {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
 

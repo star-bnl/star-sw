@@ -224,8 +224,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	Int_t    NTRACK = 100;
 	Int_t    ID = 5;
 	Double_t mass = 0.1057;
-	Double_t bgMin  = 1e-2; // 3.5;// 1e2; // 1e-2;
-	Double_t bgMax  = 1e5;  // 1e2;// 1e5;
+	Double_t bgMin  = 1e-1; // 3.5;// 1e2; // 1e-2;
+	Double_t bgMax  = 1e6;  // 1e2;// 1e5;
 	Double_t pTmin = -1;
 	Double_t pTmax = -1;
 	if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 
@@ -255,7 +255,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	if (Opt.Contains("LamXi2430",TString::kIgnoreCase))     {NTRACK = 50;   ID = 60002;  pTmin = 0.1; pTmax = 10.0;}
 	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
 	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax =   10.00;
+	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
 	TRandom3 R(0);
 	Double_t bgMin10 = TMath::Log10(bgMin);
 	Double_t bgMax10 = TMath::Log10(bgMax);

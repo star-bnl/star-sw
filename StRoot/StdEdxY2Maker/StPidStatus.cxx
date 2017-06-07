@@ -83,7 +83,7 @@ void StPidStatus::Set() {
   PredBMN[1] = Pred70BMN[1] = -1;
   for (l = kPidElectron; l < KPidParticles; l++) {
     bgs[l]   = pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[l]->charge())/StProbPidTraits::mPidParticleDefinitions[l]->mass();
-    dNdx[l] = StdEdxModel::instance()->dNdx(bgs[l]);
+    dNdx[l] = StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StdEdxModel::instance()->dNdx(bgs[l]);
     bghyp[l] = TMath::Log10(bgs[l]);
     PredB[l]   = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
       TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l],fFit.fPiD->log2dX())); 
