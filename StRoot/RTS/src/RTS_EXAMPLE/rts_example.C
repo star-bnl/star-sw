@@ -1632,8 +1632,26 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	   rdr->daqbits64,
 	   rdr->evpgroups,
 	   rdr->flags);
+    
+    UINT32 fpre_bx=0;
+    UINT32 fpost_bx=0;
+    UINT32 fpre_sz=0;
+    UINT32 fpost_sz = 0;
+    daq_dta *dd;
+    dd = rdr->det("fps")->get("adc",1);
+    if(dd) {
+	fpre_bx = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+	fpre_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
+    }
+    dd = rdr->det("fps")->get("adc",2);
+    if(dd) {
+	fpost_bx = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+	fpost_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
+    }
+    
 
-    daq_dta *dd = rdr->det("trg")->get("raw") ;
+
+    dd = rdr->det("trg")->get("raw") ;
     if(dd) {
 	if(dd->iterate()) {
 	    found = 1;
@@ -1701,6 +1719,12 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    printf("CONFNUM_TM\n");
 
 		
+	    // Get FPS timing...
+	    if(fpre_bx && fpost_bx) 
+		printf("%d %u %u %u %d %d 0x%llx #FPS seq bx fpre fpost fpresz fpostsz trg\n",
+		       rdr->seq,
+		       bunches, fpre_bx, fpost_bx, fpre_sz, fpost_sz, rdr->daqbits64_l1);
+	    
 
 	    UINT32 l1_bx = trgSum->LocalClocks[L1_CONF_NUM];
 	    UINT32 mxq_bx = trgSum->LocalClocks[MXQ_CONF_NUM] ;

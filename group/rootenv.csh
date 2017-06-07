@@ -204,7 +204,15 @@ endif
 if ( -x ${GROUP_DIR}/dropit && -d ${ROOTSYS}/cint/doc ) then
     setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH} -p ${ROOTSYS}/cint/doc`
 endif
-
+# set PYTHONPATH for gdml
+if ($?PYTHONPATH ) then 
+    setenv PYTHONPATH ${ROOTSYS}/lib:${ROOTROOT}/root/geom/gdml
+else 
+   if (-x ${GROUP_DIR}/dropit && -d ${ROOTROOT}/root/geom/gdml) then
+    setenv PYTHONPATH `${GROUP_DIR}/dropit -p ${PYTHONPATH} ROOTROOT gdml`;
+    setenv PYTHONPATH ${PYTHONPATH}:${ROOTSYS}/lib:${ROOTROOT}/root/geom/gdml
+   endif
+endif
 
 # restore - this in case of a sourcing
 if ( $?pself ) then
