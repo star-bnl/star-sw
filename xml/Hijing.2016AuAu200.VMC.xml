@@ -21,6 +21,7 @@
   endif
 </command>
 <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
+<!-- <input URL="file:/net/l404/data/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_1_1000.gener.root" /> -->
 </job>
 

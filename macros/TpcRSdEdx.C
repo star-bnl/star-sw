@@ -43,8 +43,8 @@
 #include "StBichsel/Bichsel.h"
 #endif
 const Int_t NHYP = 14; // 10
-//const Char_t *names[14] = {"electron","positron","muon+","muon-","pion+","pion-","kaon+","kaon-","proton","pbar"  ,"deuteron","triton","He3","alpha"};
-const Char_t *names[15] = {"electron","positron","muon","muon","pion+","pion-","kaon","kaon","proton","pbar"  ,"deuteron","triton","He3","alpha","all"};
+const Char_t *names[14] = {"electron","positron","muon+","muon-","pion+","pion-","kaon+","kaon-","proton","pbar"  ,"deuteron","triton","He3","alpha"};
+//const Char_t *names[15] = {"electron","positron","muon","muon","pion+","pion-","kaon","kaon","proton","pbar"  ,"deuteron","triton","He3","alpha","all"};
 const Char_t *namesh[14]= {"eN"      ,"eP"      ,"muP"  ,"muN",  "piP"  ,"piN",  "kaonP","kaonN","protonP","protonN","deuteronP","tritonP","He3P","alphaP"};
 const Double_t masses[14] = {0.51099907e-3,0.51099907e-3,
 			     0.1056584,0.1056584,
@@ -308,7 +308,8 @@ void TpcRSdEdx(const Char_t *fopt = "70BT") {
   TFile *fOut = new TFile(Out,"recreate");
   TH2F *all = 0;
   TH2F *h2 = 0;
-  for (Int_t i = 0; i < NHYP+1; i++) {
+  //  for (Int_t i = 0; i < NHYP+1; i++) {
+  for (Int_t i = 0; i < NHYP; i++) {
     if (i < NHYP) {
       if (! files[i]) continue;
       files[i]->cd();

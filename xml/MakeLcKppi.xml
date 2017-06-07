@@ -5,8 +5,8 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
 #  setenv NODEBUG yes
-  setenv STARFPE NO
-  starver .DEV2
+#  setenv STARFPE NO
+#  starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
