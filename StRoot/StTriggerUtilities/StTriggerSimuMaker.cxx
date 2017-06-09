@@ -12,9 +12,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 //<<<<<<< StTriggerSimuMaker.cxx
-// $Id: StTriggerSimuMaker.cxx,v 1.62 2017/01/02 15:31:39 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.63 2017/06/09 20:11:25 zchang Exp $
 //=======
-// $Id: StTriggerSimuMaker.cxx,v 1.62 2017/01/02 15:31:39 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.63 2017/06/09 20:11:25 zchang Exp $
 //>>>>>>> 1.61
 
 // MySQL C API
@@ -396,6 +396,7 @@ bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
       buf >> a;
       for (int i = 0; i < a->GetEntriesFast(); ++i) {
 	StTriggerDefinition* trigdef = dynamic_cast<StTriggerDefinition*>(a->At(i));
+        if(!trigdef) continue;
 	LOG_INFO << setw(20) << trigdef->triggerIndex
 		 << setw(20) << trigdef->name
 		 << setw(20) << trigdef->triggerId
@@ -453,6 +454,7 @@ bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
       buf >> a;
       for (int i = 0; i < a->GetEntriesFast(); ++i) {
 	StTriggerThreshold* trigthr = dynamic_cast<StTriggerThreshold*>(a->At(i));
+        if(!trigthr) continue;
 	LOG_INFO << setw(20) << trigthr->object
 		 << setw(20) << trigthr->index
 		 << setw(20) << trigthr->reg
@@ -859,6 +861,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.63  2017/06/09 20:11:25  zchang
+ * Add pointer guard for trigger definition and trigger threshold tables, the pointers can not be null
+ *
  * Revision 1.62  2017/01/02 15:31:39  rfatemi
  * Updated by Danny OLVITT for 2013 dijet analysiss
  *
