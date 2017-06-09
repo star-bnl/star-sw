@@ -40,9 +40,6 @@ using namespace std;
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StMessMgr.h"
 #include "StTpcHit.h"
-#ifdef DO_TPCCATRACKER
-#include "StiTpcSeedFinder.h"
-#endif /* DO_TPCCATRACKER */
 #define TIME_StiKalmanTrackFinder
 #ifdef TIME_StiKalmanTrackFinder
 #include "Sti/StiTimer.h"
@@ -50,9 +47,6 @@ using namespace std;
 
 #include "StiKalmanTrackFitter.h" // just for err check
 #include "StiTrackFinderFilter.h" // just for err check
-#ifdef DO_TPCCATRACKER
-#include "StiTPCCATrackerInterface.h"
-#endif /* DO_TPCCATRACKER */
 #include "StiHitTest.h"
 
 
@@ -161,33 +155,6 @@ void StiKalmanTrackFinder::findTracks()
 {
   mEventPerm = kMaxEventPerm;
   assert(_trackContainer );
-//   _trackContainer->clear();
-//   if (_trackFilter) _trackFilter->reset();
-#ifdef DO_TPCCATRACKER 
-  StiTPCCATrackerInterface& caTrackerInt = StiTPCCATrackerInterface::Instance();
-  caTrackerInt.SetNewEvent();
-  findTpcTracks(caTrackerInt); // find track starting with TPC (CA seed finder)
-#endif /* DO_TPCCATRACKER */  
-  findAllTracks(); // find track left
-#ifdef DO_TPCCATRACKER 
-  caTrackerInt.SetStiTracks(_trackContainer);
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-  caTrackerInt.RunPerformance();
-#endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
-#endif /* DO_TPCCATRACKER */
-}
-#ifdef DO_TPCCATRACKER
-//________________________________________________________________________________
-void StiKalmanTrackFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
-  StiTpcSeedFinder::findTpcTracks(caTrackerInt);
-}
-#endif /* DO_TPCCATRACKER */
-//________________________________________________________________________________
-void StiKalmanTrackFinder::findAllTracks() {
-  
-  
-//  extendSeeds (0.);
-
 
   extendSeeds (0.);
 }
@@ -200,10 +167,6 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
 
   do { //technical do
     track->setFlag(-1);
-#ifndef DO_TPCCATRACKER
-    status = track->approx(0); // should be filled by track->initialize()
-    if (status) 	{nTSeed++; errType = abs(status)*100 + kApproxFail; break;}
-#endif /* !DO_TPCCATRACKER */
     status = track->fit(kOutsideIn);
     if (status) 	{nTSeed++; errType = abs(status)*100 + kFitFail; break;}
     status = extendTrack(track,rMin); // 0 = OK 
@@ -764,7 +727,7 @@ bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
   double rhsda = fabs(rhsa-_refAngle); if (rhsda>3.1415) rhsda-=3.1415;
   return lhsda<rhsda;
 }
-#ifdef DO_TPCCATRACKER
+//________________________________________________________________________________
 void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack* track) 
 {
      // let's analyse the error
@@ -896,7 +859,8 @@ void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack
        cout << endl;
      }
        break;
-   } // switch
-} // void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack* track)
-#endif /* DO_TPCCATRACKER */
+   } 
+}
+
+
 

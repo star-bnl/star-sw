@@ -5,9 +5,6 @@
 #include "Sti/StiTrackFinder.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#ifdef DO_TPCCATRACKER 
-class StiTPCCATrackerInterface;
-#endif /* DO_TPCCATRACKER */
 class TStopwatch;
 class StiDetector;
 class StiDetectorBuilder;
@@ -43,10 +40,6 @@ public:
   /// Set timing of tracking
           void setTiming();
   /// Find all tracks of the currently loaded event
-#ifdef DO_TPCCATRACKER 
-  virtual void findTpcTracks(StiTPCCATrackerInterface &caTrackerInt); 
-#endif /* DO_TPCCATRACKER */  
-  virtual void findAllTracks(); 
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
           bool find(StiTrack *track, int direction, double rmin=0);
@@ -82,9 +75,7 @@ public:
   static int  debug() {return _debug;}
   static void SetDoAlignment(Bool_t k = kTRUE) {_DoAlignment = k;}
   static Bool_t DoAlignment() {return _DoAlignment;}
-#ifdef DO_TPCCATRACKER
   static void PrintFitStatus(const int status, const StiKalmanTrack* track); // print message according to the status value
-#endif /* DO_TPCCATRACKER */  
   typedef enum{ // type of return value for the Fit() procedure
     kNoErrors = 0,
     kApproxFail,
@@ -96,13 +87,8 @@ public:
   typedef enum{ // type of return value for the extendTrack() procedure
     kExtended,
     kNotExtended,
-#if 0
-    kRefitInFail,
-    kRefitOutFail
-#else
     kNotRefitedIn,
     kNotRefitedOut
-#endif
   } TExtendStatus;
 
   
@@ -132,6 +118,7 @@ private:
     int         mUseComb;	//useComb() saved 
     static int   _debug;
     static Bool_t _DoAlignment;
+    
 };
 
 inline Filter<StiTrack> * StiKalmanTrackFinder::getTrackFilter() 

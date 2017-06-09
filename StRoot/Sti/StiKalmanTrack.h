@@ -240,9 +240,7 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getOuterMostHitNode(int qua=0)  const;
    		/// Accessor method returns the inner most hit node associated with the track.
    StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
-#ifdef DO_TPCCATRACKER
    StiKalmanTrackNode * getInnerMostTPCHitNode(int qua=0)   const;
-#endif /* DO_TPCCATRACKER */
    int                  getNNodes(int qua=0) const;
    int                  releaseHits(double rMin=0,double rMax=50);
    /// Accessor method returns the first node associated with the track.
@@ -263,9 +261,7 @@ class StiKalmanTrack : public StiTrack
 
   /// Convenience method to initialize a track based on seed information 
   int initialize(const vector<StiHit*> &);
-#ifdef DO_TPCCATRACKER
   int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars = 0, StiNodePars *lastPars = 0, StiNodeErrs *firstErrs = 0, StiNodeErrs *lastErrs = 0);
-#endif /* DO_TPCCATRACKER */
 
    virtual vector<StiHit*> getHits();
    virtual vector<const StMeasuredPoint*> stHits() const;

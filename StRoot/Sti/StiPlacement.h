@@ -35,7 +35,9 @@
 
 #ifndef STI_PLACEMENT_H
 #define STI_PLACEMENT_H
-#include "Stiostream.h"
+
+#include <ostream>
+
 #include "TGeoMatrix.h"
 #include "TVector3.h"
 
@@ -95,6 +97,5 @@ protected:
 
 };
 
-ostream& operator<<(ostream& os, const StiPlacement& m);
 
 #endif

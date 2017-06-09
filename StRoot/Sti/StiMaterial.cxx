@@ -7,7 +7,6 @@
 #include <string.h>
 #include <stdexcept>
 #include "Sti/StiMaterial.h"
-#include "TString.h"
 #include "Sti/StiElossCalculator.h"
 
 StiMaterial::StiMaterial(){

@@ -673,7 +673,6 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
-#ifdef DO_TPCCATRACKER
   initialize0(hits);
   
   int ierr = approx(0);
@@ -685,14 +684,12 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 
 int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
 {
-#endif /* DO_TPCCATRACKER */
   //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
-#ifdef DO_TPCCATRACKER
   StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
   const StiDetector* detectorOld = 0;
   StiHit *hit_Old = 0;
@@ -738,18 +735,6 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     detectorOld = (StiDetector*) detector;
     hit_Old = hit;
   }  
-#else  
-  for (UInt_t ihit=0;ihit<nhits;ihit++)
-  {
-    StiHit *hit = hits[ihit];
-    detector = hit->detector();
-    assert(detector);
-    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-    n->initialize(hit);
-    add(n,kOutsideIn);
-  }
-#endif
-#ifdef DO_TPCCATRACKER
   if (firstPars){
     firstNode->fitPars() = *firstPars;
   }
@@ -765,12 +750,6 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
       //    firstNode->resetError();
   }
   return 0;  
-#else /* !DO_TPCCATRACKER */
-  int ierr = approx(0);
-  if (!ierr) return 0;
-  BFactory::Free(this);
-  return 1;  
-#endif /* DO_TPCCATRACKER */
 }
 
 //_____________________________________________________________________________
@@ -1217,7 +1196,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
 }
-#ifdef DO_TPCCATRACKER
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
 {
   if (firstNode==0 || lastNode==0)
@@ -1246,7 +1224,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
   //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");*/
   return 0;
 }
-#endif /* DO_TPCCATRACKER */
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
 {
