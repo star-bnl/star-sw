@@ -55,13 +55,19 @@ const Double_t masses[15] = {0.51099907e-3,0.51099907e-3,
 			     1.875613   ,2.80925  , 2.80923, 3.727417,
 			     0.13956995
 };
-const Double_t chargeSQ[14] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4};
+const Double_t chargeSQ[15] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 1};
 TGraphErrors *graphs[10];
 TGraphErrors *gAll = 0;
 //const Char_t *FMT = "y2011_TpcRS_phys_off_Bichsel_%s.root";
 const Char_t *FMT = "Heed_%s_g.root";
 //const Double_t params[7] = {0.762e-1, 10.632, 0.134e-4 , 1.863,  1.948, masses[2], masses[2]}; // for Aleph formale
 const Double_t params[7] = {0.762e-1, 10.632, 0.134e-4 , 1.863,  1.948/2, masses[2], masses[2]};
+//________________________________________________________________________________
+void SetH(TH1 *h, Int_t marker, Int_t color) {
+  h->SetMarkerStyle(marker);
+  h->SetLineColor(color);
+  h->SetMarkerColor(color);
+}
 //________________________________________________________________________________
 Double_t tmax(Double_t m, Double_t M, Double_t bg) {
   Double_t mOverM = m/M;
@@ -269,7 +275,7 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   TString fOpt(fopt);
   if (fOpt.Contains("I70")) fI70 = kTRUE;
   Double_t scales[3] = {0};
-  Double_t sigmas[3] = {0.076};
+  Double_t sigmas[3] = {0.076, 0.076, 0.076};
   //  Double_t scales[2] = {-6.75100587779081402e-03,-8.64200502877701150e-03}; // pi70->Interpolate(TMath::Log10(4.)); piz->Interpolate(TMath::Log10(4.));
   //  Double_t sigmas[2] = { 7.56777648706270512e-02, 7.46023243878390085e-02}; // pi70S->Interpolate(TMath::Log10(4.)); pizS->Interpolate(TMath::Log10(4.));
   Double_t scale = fI70 ? scales[0] : scales[1];
@@ -281,7 +287,7 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   TFile *files[NHYP];
   Int_t NF = GetFileList(files);
   if (! NF) return;
-  TLegend *l = new TLegend(0.5,0.6,0.8,0.9);
+  TLegend *l1 = new TLegend(0.5,0.6,0.8,0.9);
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c1N);
   if (! c1 ) c1 = new TCanvas(c1N,c1N);
   else       c1->Clear();
@@ -307,10 +313,11 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   hr3->SetXTitle("log_{10} ( #beta#gamma  ) ");
   hr3->SetYTitle("#sigma (log (dE/dx))");  
   Bichsel *b = Bichsel::Instance();
-  c1->cd(); l->Draw();
+  c1->cd(); l1->Draw();
   c2->cd(); l2->Draw();
   c3->cd(); l3->Draw();
   Int_t color = 0;
+  Int_t marker = 19;
   TString Out("McPiD");
   Out += fOpt; Out += ".root";
   TFile *fOut = new TFile(Out,"recreate");
@@ -339,131 +346,93 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
       fOut->cd();
       h2 = all;
     }
+    color++;
+    if (color == 10) color = 30;
+    marker++;
     if (! h2) continue;
     //    h2->FitSlicesY(0,0,-1,10,"qen3s");
     h2->FitSlicesY(0,0,-1,10,"qen5s");
     TH1D *h1p = (TH1D *) gDirectory->Get(Form("%s_1",h2->GetName()));
     if (! h1p) continue;
-    l2->AddEntry(h1p,names[i]);
-    TH1D *s1 = (TH1D *) gDirectory->Get(Form("%s_2",h2->GetName()));
-    l3->AddEntry(s1,names[i]);
+    TH1D *s1p = (TH1D *) gDirectory->Get(Form("%s_2",h2->GetName()));
+    if (! s1p) continue;
     TString name(h1p->GetName());
     TString title(h2->GetTitle());
-    title.ReplaceAll(" Bichsel","");
-    name.ReplaceAll("N70B_1","70");
-    name.ReplaceAll("P70B_1","70");
-    name.ReplaceAll("NzB_1","z");
-    name.ReplaceAll("PzB_1","z");
+    title.ReplaceAll("I70","log(dEdx_{I70} - log)");
+    title.ReplaceAll("fitZ","log(dEdx_{FIT} - log)");
+    title.ReplaceAll("fitN","log(dNdx) -log");
     h1p->SetName(name);
     h1p->SetTitle(title + Form(" #mu - %s",fopt));
     name += "S";
-    s1->SetName(name);
-    s1->SetTitle(title + " #sigma");
-    TH1D *h1 = 0;
+    s1p->SetName(name);
+    s1p->SetTitle(title + " #sigma");
+    TH1D *h1s = 0;
     if (i < NHYP) {
-      h1 = new TH1D(*h1p); h1->SetName(Form("%sp",h1->GetName()));
-      h1->SetTitle(title + " #mu");
+      h1s = new TH1D(*h1p); h1s->SetName(Form("%sp",h1p->GetName()));
+      h1s->Clear();
+      h1s->SetTitle(title + " #mu");
     }
-    color++;
-    if (color < 8) {
-      if (h1) {
-	h1->SetMarkerStyle(20);
-	h1->SetMarkerColor(color);
-	h1->SetLineColor(color);
-      }
-      h1p->SetMarkerStyle(20);
-      h1p->SetMarkerColor(color);
-      h1p->SetLineColor(color);
-      s1->SetMarkerStyle(20);
-      s1->SetMarkerColor(color);
-      s1->SetLineColor(color);
-    } else {
-      if (h1) {
-	h1->SetMarkerStyle(21);
-	h1->SetMarkerColor(color-7);
-	h1->SetLineColor(color-7);
-      }
-      h1p->SetMarkerStyle(21);
-      h1p->SetMarkerColor(color-7);
-      h1p->SetLineColor(color-7);
-      s1->SetMarkerStyle(21);
-      s1->SetMarkerColor(color-7);
-      s1->SetLineColor(color-7);
-    }
-    if (h1p) {
-      Int_t nx = h1p->GetNbinsX();
-      Int_t xmin = 9999;
-      Int_t xmax =-9999;
-      for (Int_t ix = 1; ix <= nx; ix++) {
-	Double_t err = h1p->GetBinError(ix);
-	if (err <= 0. || err > 0.01) continue;
-	Double_t val  = h1p->GetBinContent(ix);
-	if (s1) {
-	  if (s1->GetBinError(ix) > 0.01) continue;
-	}
+    Int_t xmin = 9999;
+    Int_t xmax =-9999;
+    Int_t nx = h1p->GetNbinsX();
+    for (Int_t ix = 1; ix <= nx; ix++) {
+      Double_t err = h1p->GetBinError(ix);
+      if (! TMath::Finite(err)) err = 0;
+      if (err <= 0. || err > 0.01) err = 0;
+      Double_t val  = h1p->GetBinContent(ix);
+      if (! TMath::Finite(val)) val = 0;
+      Double_t sigma = s1p->GetBinContent(ix);
+      if (! TMath::Finite(sigma)) sigma = 0;
+      Double_t sigmaErr = s1p->GetBinError(ix);
+      if (! TMath::Finite(sigmaErr)) sigmaErr = 0;
+      if (sigmaErr < 0 || sigmaErr > 0.01) sigmaErr = 0;
+      if (err <= 0.0 || sigmaErr <= 0) {
+	val = sigma = err = sigmaErr = 0;
+	h1p->SetBinContent(ix,val);
+	h1p->SetBinError(ix,err);
+	s1p->SetBinContent(ix,sigma);
+	s1p->SetBinError(ix,sigmaErr);
+      } else {
 	val -= scale;
 	h1p->SetBinContent(ix,val);
-	if (h1) {
-	  Double_t bg10 = h1->GetXaxis()->GetBinCenter(ix);
-	  //       if (val < 1*err) {
-	  // 	h1->SetBinContent(ix, 0.);
-	  // 	h1->SetBinError(ix, 0.);
-	  //       }
-	  if      (fOpt.Contains("I70",TString::kIgnoreCase))   val += TMath::Log(chargeSQ[i]*b->GetI70M(bg10));
-	  else if (fOpt.Contains("fitz",TString::kIgnoreCase))  val += TMath::Log(chargeSQ[i]*TMath::Exp(b->GetMostProbableZ(bg10)));
-	  else                                                  val += TMath::Log(chargeSQ[i]*StdEdxModel::instance()->dNdx(TMath::Power(10.,bg10)));
-	  h1->SetBinContent(ix, val);
-	}
+	h1p->SetBinError(ix,err);
+	s1p->SetBinContent(ix,sigma);
+	s1p->SetBinError(ix,sigmaErr);
+	Double_t bg10 = h1s->GetXaxis()->GetBinCenter(ix);
+	if      (fOpt.Contains("I70",TString::kIgnoreCase))   val += TMath::Log(chargeSQ[i]*b->GetI70M(bg10));
+	else if (fOpt.Contains("fitz",TString::kIgnoreCase))  val += TMath::Log(chargeSQ[i]*TMath::Exp(b->GetMostProbableZ(bg10)));
+	else                                                  val += TMath::Log(chargeSQ[i]*StdEdxModel::instance()->dNdx(TMath::Power(10.,bg10)));
+	h1s->SetBinContent(ix, val);
+      }
+      if (err > 0 && sigmaErr > 0) {
 	if (ix < xmin) xmin = ix;
 	if (ix > xmax) xmax = ix;
       }
-      h1p->GetXaxis()->SetRange(xmin,xmax);
-      s1->GetXaxis()->SetRange(xmin,xmax);
-      s1->Scale(1./sigma);
-      if (h1) {
-	h1->GetXaxis()->SetRange(xmin,xmax);
-	l->AddEntry(h1,names[i]);
-	h1->SetStats(0);
-#if 0
-	TF1 *A = AlephBetheBloch();
-	if (color < 8) 
-	  A->SetLineColor(color);
-	else 
-	  A->SetLineColor(color-7);
-#endif
-      }
     }
+    h1p->GetXaxis()->SetRange(xmin,xmax);
+    s1p->GetXaxis()->SetRange(xmin,xmax);
+    s1p->Scale(1./sigma);
+    h1s->GetXaxis()->SetRange(xmin,xmax);
+    l1->AddEntry(h1s,names[i]);
+    l2->AddEntry(h1p,names[i]);
+    l3->AddEntry(s1p,names[i]);
+    h1s->SetStats(0);
     fOut->cd();
-#if 0
-    if (h1) {
-      h1->Fit(A,"er","same",xmin,xmax);
-      Double_t ppar[7];
-      A->GetParameters(ppar);
-      cout << Form("/* %10s */ %12.5f, %12.5f,",namesh[i], xmin, xmax);
-      for (Int_t j = 0; j < 6; j++) {cout << Form("%12.5f,",ppar[j]);}
-      cout << endl;
-      //    h1->Draw("same");
-      TH1D *d1 = new TH1D(*h1);
-      d1->SetName(Form("diff_%s",h1->GetName()));
-      d1->Add(A,-1.);
-      d1->Write();
-    }
-#else
     c1->cd();
-    if (h1) h1->Draw("same");
+    SetH(h1s,marker,color);
+    h1s->Draw("same");
     c1->Update();
     c2->cd();
+    SetH(h1p,marker,color);
     h1p->Draw("same");
     c2->Update();
     c3->cd();
-    s1->Draw("same");
+    SetH(s1p,marker,color);
+    s1p->Draw("same");
     c3->Update();
-#endif
-    //    h2->Write();
-    if (h1) h1->Write();
+    h1s->Write();
     h1p->Write();
-    s1->Write();
-    //    h1->Fit(F,"er","same",-1,5);
+    s1p->Write();
   }
 }
 

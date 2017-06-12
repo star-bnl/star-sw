@@ -7,10 +7,11 @@
   setenv NODEBUG yes
   setup 64b
   setenv STARFPE NO
-  starver .DEV2
+#  starver .DEV2
+  starver TFG17e
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
-  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
+  set daq  = `ls -1d /star/data03/daq/2016/*/*/${base}.daq`
   if (! -r ${daq}) exit 1;
 #  set name = "LcKppi";
   set file = ${base}.MuDst.root
@@ -20,5 +21,8 @@
     root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,LcKppi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
+<!--
 <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" />
+-->
+<input URL="file:/star/subsys/tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" />
 </job>
