@@ -68,16 +68,16 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	//contents.vertex_vs_l3_vertex->SetXTitle("L3 Vertex z-Position [cm]");
 	//contents.vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
-	// sprintf(tmp,"vpd_earliestTAC_vs_chan_east");
-	// contents.earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan east", 16, -0.5, 15.5, 256, -1.5, 4094.5);
-	// contents.earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
-	// contents.earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
+	sprintf(tmp,"vpd_earliestTAC_vs_chan_east");
+	contents.earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan east", 16, -0.5, 15.5, 256, -1.5, 4094.5);
+	contents.earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
+	contents.earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
 
 
-	// sprintf(tmp,"vpd_earliestTAC_vs_chan_west");
-	// contents.earliestTAC_vs_westchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan west", 16, -0.5, 15.5, 256, -1.5, 4094.5);
-	// contents.earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
-	// contents.earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
+	sprintf(tmp,"vpd_earliestTAC_vs_chan_west");
+	contents.earliestTAC_vs_westchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan west", 16, -0.5, 15.5, 256, -1.5, 4094.5);
+	contents.earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
+	contents.earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
 	
 
 	// VPD Hi
@@ -111,19 +111,6 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	contents.hi_tac_east_vs_tac_west = new TH2D(tmp,"VPD-mtd TAC East vs. TAC West", 256, -1.5, 4094.5, 256, -1.5, 4094.5);
 	contents.hi_tac_east_vs_tac_west->SetXTitle("TAC West");
 	contents.hi_tac_east_vs_tac_west->SetYTitle("TAC East");
-
-
-	sprintf(tmp,"vtx_east_tacsum_on_vs_off");
-	contents.vtx_east_tacsum_on_vs_off = new TH2D(tmp,"East TAC sum; Online; Offline", 400, -0.5, 4094.5, 2400, -0.5, 4094.5);
-
-	sprintf(tmp,"vtx_west_tacsum_on_vs_off");
-	contents.vtx_west_tacsum_on_vs_off = new TH2D(tmp,"West TAC sum; Online; Offline", 400, -0.5, 4094.5, 2400, -0.5, 4094.5);
-
-	sprintf(tmp,"vtx_east_adcsum_on_vs_off");
-	contents.vtx_east_adcsum_on_vs_off = new TH2D(tmp,"East Adc sum; Online; Offline", 400, -0.5, 4094.5, 2400, -0.5, 4094.5);
-
-	sprintf(tmp,"vtx_west_adcsum_on_vs_off");
-	contents.vtx_west_adcsum_on_vs_off = new TH2D(tmp,"West Adc sum; Online; Offline", 400, -0.5, 4094.5, 2400, -0.5, 4094.5);
 	
 
 
@@ -134,8 +121,8 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	sprintf(tmp1,"VPD-vtx TAC Alignment West; Channel # ; TAC_{ch} - TAC_{ch=%i}", refChannelWest);
 	contents.tac_align_west = new TH2D(tmp,tmp1, 16,-0.5,15.5, 100, -400, 400);
 
-	sprintf(tmp,"vtx_TAC_diff");
-	contents.vtx_TAC_diff = new TH1D( tmp, "TAC Diff; <West> - <East>", 200, -100, 100 );
+	// sprintf(tmp,"vtx_TAC_diff");
+	// contents.vtx_TAC_diff = new TH1D( tmp, "TAC Diff; <West> - <East>", 200, -100, 100 );
 
 
 	//sprintf(tmp,"vpd_hi_vertex_vs_l3_vertex");
@@ -154,25 +141,6 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	contents.hi_earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
 	contents.hi_earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
 
-
-	
-
-	for ( int i = 0; i < 4; i ++ ){
-		sprintf(tmp,"vpd_pulser_west_%i", i+1);
-		sprintf(tmp1,"Pulser West D%i", i+1);
-		int wsize = 550;
-		int minx = /*expected_pulser_means_west[i]*/ - wsize;
-		int maxx = /*expected_pulser_means_west[i]*/ + wsize;
-		contents.pulser_west[i] = new TH1D( tmp, tmp1, wsize*2, minx, maxx );
-
-		sprintf(tmp,"vpd_pulser_east_%i", i+1);
-		sprintf(tmp1,"Pulser East D%i", i+1);
-		wsize = 550;
-		minx = /*expected_pulser_means_east[i]*/ - wsize;
-		maxx = /*expected_pulser_means_east[i]*/ + wsize;
-		contents.pulser_east[i] = new TH1D( tmp, tmp1, wsize*2, minx, maxx );
-
-	}
 	
 	// Add root histograms to Plots
 	int np = sizeof(contents) / sizeof(TH1 *);
@@ -187,8 +155,8 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	plots[++n] = new JevpPlot(contents.tac_align_east);
 	plots[++n] = new JevpPlot(contents.tac_align_west);
 	//plots[++n] = new JevpPlot(contents.vertex_vs_l3_vertex);
-	// plots[++n] = new JevpPlot(contents.earliestTAC_vs_eastchan);
-	// plots[++n] = new JevpPlot(contents.earliestTAC_vs_westchan);  
+	plots[++n] = new JevpPlot(contents.earliestTAC_vs_eastchan);
+	plots[++n] = new JevpPlot(contents.earliestTAC_vs_westchan);  
 	plots[++n] = new JevpPlot(contents.hi_cdb[0]);
 	plots[++n] = new JevpPlot(contents.hi_cdb[1]);
 	plots[++n] = new JevpPlot(contents.hi_cdb[2]);
@@ -197,23 +165,6 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	//plots[++n] = new JevpPlot(contents.hi_vertex_vs_l3_vertex);
 	plots[++n] = new JevpPlot(contents.hi_earliestTAC_vs_eastchan);
 	plots[++n] = new JevpPlot(contents.hi_earliestTAC_vs_westchan);  
-
-	plots[++n] = new JevpPlot( contents.vtx_TAC_diff );
-
-	plots[++n] = new JevpPlot( contents.vtx_east_tacsum_on_vs_off );
-	plots[++n] = new JevpPlot( contents.vtx_west_tacsum_on_vs_off );
-
-	plots[++n] = new JevpPlot( contents.vtx_east_adcsum_on_vs_off );
-	plots[++n] = new JevpPlot( contents.vtx_west_adcsum_on_vs_off );
-
-
-	int iNPulsers = n;
-	for ( int i = 0; i < 4; i ++ ){
-		plots[++n] = new JevpPlot(contents.pulser_west[i]);
-	}
-	for ( int i = 0; i < 4; i ++ ){
-		plots[++n] = new JevpPlot(contents.pulser_east[i]);  
-	}
 
 
 
@@ -224,10 +175,7 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 		
 		contents.array[i]->GetXaxis()->SetLabelSize(0.055);
 		contents.array[i]->GetYaxis()->SetLabelSize(0.045);
-		if ( i > iNPulsers ){
-			contents.array[i]->GetXaxis()->SetLabelSize(0.035);
-		}
-		
+
 		addPlot(plots[i]);
 	}
 }
@@ -271,17 +219,14 @@ void vpdBuilder::event(daqReader *rdr) {
 	int sumTAC[2] = {0, 0};
 	int sumADC[2] = {0, 0};
 	int nHit[2] = {0, 0};
+	int maxTAC[2] = {-1, -1};
+	int earliestChan[2] = { -1, -1 };
 
 	int nlitlo[2]={0};
 
 	for(int side=0;side<2;side++) {   // East or West
 		
 		for(int ich=0;ich<16;ich++){ // Channel
-
-			if ( pulserSwitch && ich == pulserCh( ich ) ) continue;
-			if ( side == 0 && false == eastGoodCh[ ich ] ) continue;
-			if ( side == 1 && false == westGoodCh[ ich ] ) continue;
-
 
 			int adc_lo = trgd->vpdADC( (StBeamDirection)side, ich+1);
 			int tdc_lo = trgd->vpdTDC( (StBeamDirection)side, ich+1);
@@ -291,6 +236,11 @@ void vpdBuilder::event(daqReader *rdr) {
 				sumTAC[ side ] += tdc_corr;
 				sumADC[ side ] += adc_lo;
 				nHit[ side ] += 1;
+				if ( maxTAC[side] < tdc_corr ){
+					earliestChan[side] = ich;
+					maxTAC[side] = tdc_corr;
+				}
+
 			}
 			if ( goodHit( adc_lo, tdc_lo ) ){
 				contents.cdb[2*side+0]->Fill(ich, adc_lo);
@@ -300,6 +250,14 @@ void vpdBuilder::event(daqReader *rdr) {
 	}
 
 	contents.tac_east_vs_tac_west->Fill(sumTAC[0] / (float)nHit[0], sumTAC[1] / (float)nHit[1]);
+
+	if (maxTAC[0]>200){
+			contents.earliestTAC_vs_eastchan->Fill(earliestChan[0],maxTAC[0]);
+	}
+	if (maxTAC[1]>200){
+			contents.earliestTAC_vs_westchan->Fill(earliestChan[1],maxTAC[1]);
+	}
+	
 	
 
 	int On_sumTacEast = trgd->bbcVP101( 5 );
@@ -310,40 +268,40 @@ void vpdBuilder::event(daqReader *rdr) {
 	int On_nHitsWest = (trgd->bbcVP101( 6 )>>12);
 	
 	// contents.vtx_TAC_diff->Fill( (sumTAC[1] / (float)nHit[1]) - (sumTAC[0] / (float)nHit[0]) );
-	if ( On_nHitsWest > 0 && On_nHitsEast > 0 )
-		contents.vtx_TAC_diff->Fill( (On_sumTacWest / On_nHitsWest) - (On_sumTacEast / On_nHitsEast) );
+	// if ( On_nHitsWest > 0 && On_nHitsEast > 0 )
+	// 	contents.vtx_TAC_diff->Fill( (On_sumTacWest / On_nHitsWest) - (On_sumTacEast / On_nHitsEast) );
 
-	contents.vtx_east_tacsum_on_vs_off->Fill( On_sumTacEast, sumTAC[ 0 ] );
-	contents.vtx_west_tacsum_on_vs_off->Fill( On_sumTacWest, sumTAC[ 1 ] );
+	// contents.vtx_east_tacsum_on_vs_off->Fill( On_sumTacEast, sumTAC[ 0 ] );
+	// contents.vtx_west_tacsum_on_vs_off->Fill( On_sumTacWest, sumTAC[ 1 ] );
 
-	if ( sumADC[ 0 ] > 4095 )
-		sumADC[ 0 ] = 4095;
-	if ( sumADC[ 1 ] > 4095 )
-		sumADC[ 1 ] = 4095;
-	contents.vtx_east_adcsum_on_vs_off->Fill( On_sumAdcEast, sumADC[ 0 ] );
-	contents.vtx_west_adcsum_on_vs_off->Fill( On_sumAdcWest, sumADC[ 1 ] );
+	// if ( sumADC[ 0 ] > 4095 )
+	// 	sumADC[ 0 ] = 4095;
+	// if ( sumADC[ 1 ] > 4095 )
+	// 	sumADC[ 1 ] = 4095;
+	// contents.vtx_east_adcsum_on_vs_off->Fill( On_sumAdcEast, sumADC[ 0 ] );
+	// contents.vtx_west_adcsum_on_vs_off->Fill( On_sumAdcWest, sumADC[ 1 ] );
 
 
-	// pulsers
-	for(int ich=0;ich<16;ich++){
-		if ( ich != pulserCh( ich ) ) continue;
-		int adcE = trgd->vpdADC((StBeamDirection)east,ich+1);
-		int tdcE = trgd->vpdTDC((StBeamDirection)east,ich+1);
-		// int tdcE = correctedTAC( trgd, east, ich );
+	// // pulsers
+	// for(int ich=0;ich<16;ich++){
+	// 	if ( ich != pulserCh( ich ) ) continue;
+	// 	int adcE = trgd->vpdADC((StBeamDirection)east,ich+1);
+	// 	int tdcE = trgd->vpdTDC((StBeamDirection)east,ich+1);
+	// 	// int tdcE = correctedTAC( trgd, east, ich );
 
-		int adcW = trgd->vpdADC((StBeamDirection)1,ich+1);
-		int tdcW = trgd->vpdTDC((StBeamDirection)1,ich+1);
-		// int tdcW = correctedTAC( trgd, west, ich );
+	// 	int adcW = trgd->vpdADC((StBeamDirection)1,ich+1);
+	// 	int tdcW = trgd->vpdTDC((StBeamDirection)1,ich+1);
+	// 	// int tdcW = correctedTAC( trgd, west, ich );
 
-		int pindex = ich / 4;
-		contents.pulser_west[pindex]->Fill( tdcW - expected_pulser_means_west[ pindex ] );
-		if ((int)contents.pulser_west[pindex]->GetEntries() % 100 == 0  )
-			contents.pulser_west[pindex]->Fit( "gaus", "QR", "", -25, 25 );
+	// 	int pindex = ich / 4;
+	// 	contents.pulser_west[pindex]->Fill( tdcW - expected_pulser_means_west[ pindex ] );
+	// 	if ((int)contents.pulser_west[pindex]->GetEntries() % 100 == 0  )
+	// 		contents.pulser_west[pindex]->Fit( "gaus", "QR", "", -25, 25 );
 		
-		contents.pulser_east[pindex]->Fill( tdcE - expected_pulser_means_east[ pindex ] );
-		if ((int)contents.pulser_east[pindex]->GetEntries() % 100 == 0  )
-			contents.pulser_east[pindex]->Fit( "gaus", "QR", "", -25, 25 );
-	}
+	// 	contents.pulser_east[pindex]->Fill( tdcE - expected_pulser_means_east[ pindex ] );
+	// 	if ((int)contents.pulser_east[pindex]->GetEntries() % 100 == 0  )
+	// 		contents.pulser_east[pindex]->Fit( "gaus", "QR", "", -25, 25 );
+	// }
 
 	// TAC alignment
 	
