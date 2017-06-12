@@ -75,8 +75,8 @@ class vpdBuilder : public JevpBuilder {
       TH2 *cdb[4];
       TH2 *tac_east_vs_tac_west;
       //   TH2 *vertex_vs_l3_vertex;
-      // TH2 *earliestTAC_vs_eastchan;
-      // TH2 *earliestTAC_vs_westchan;
+      TH2 *earliestTAC_vs_eastchan;
+      TH2 *earliestTAC_vs_westchan;
       
       TH2 *hi_cdb[4];
       TH2 *hi_tac_east_vs_tac_west;
@@ -87,16 +87,16 @@ class vpdBuilder : public JevpBuilder {
       TH2 *tac_align_east;
       TH2 *tac_align_west;
 
-      TH2 *vtx_east_tacsum_on_vs_off;
-      TH2 *vtx_west_tacsum_on_vs_off;
+      // TH2 *vtx_east_tacsum_on_vs_off;
+      // TH2 *vtx_west_tacsum_on_vs_off;
 
-      TH2 *vtx_east_adcsum_on_vs_off;
-      TH2 *vtx_west_adcsum_on_vs_off;
+      // TH2 *vtx_east_adcsum_on_vs_off;
+      // TH2 *vtx_west_adcsum_on_vs_off;
 
-      TH1 *pulser_east[4];
-      TH1 *pulser_west[4];
+      // TH1 *pulser_east[4];
+      // TH1 *pulser_west[4];
 
-      TH1 *vtx_TAC_diff;
+      // TH1 *vtx_TAC_diff;
     };
   } contents;
 
