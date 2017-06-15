@@ -38,11 +38,15 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   fZ_min = Z_min; 
   fZ_max = Z_max; 
   fOption = option; 
-  if (! fOption.CompareTo("G",TString::kIgnoreCase)) {
+  if (fOption.CompareTo("G",TString::kIgnoreCase)) {
     fId = ((TGeant3* ) TVirtualMC::GetMC())->PDGFromId(Id);
   }
-  cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << endl;
-  cout << fpT_min << " <  pT < " << fpT_max << endl;
+  cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << " flat in " << endl;
+  if (! fOption.CompareTo("BL",TString::kIgnoreCase)) {
+    cout << fpT_min << " <  pT < " << fpT_max << endl;
+  } else {
+    cout << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endl;
+  }
   cout << fEta_min  << " < eta < " << fEta_max  << endl;
   cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
   cout << fZ_min  << " < zVer< " << fZ_max  << endl;
@@ -72,16 +76,27 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
  Double_t tof = 0.;
 
  // Energy (in GeV)
- Double_t pT        = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+ Double_t mass      = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
  Double_t eta       = fEta_min + (fEta_max - fEta_min)*gRandom->Rndm();
  Double_t phi       = fPhi_min + (fPhi_max - fPhi_min)*gRandom->Rndm();
+ Double_t pT        = 0;
+ if (fOption.CompareTo("BL",TString::kIgnoreCase)) {
+   Double_t p = -1;
+   while (p <= 0 || p > 100) {
+     Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+     Double_t bg      = TMath::Power(10.,bgL10);
+     p       = mass*bg;
+   }
+   pT               = p/TMath::CosH(eta);
+ } else {
+   pT               = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+ }
  // Particle momentum
  Double_t px, py, pz;
  px = pT*TMath::Cos(phi); 
  py = pT*TMath::Sin(phi);
  pz = pT*TMath::SinH(eta);
  // Double_t kinEnergy = 0.050;  
- Double_t mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
  Double_t e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
  // Add particle to stack 
  fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 

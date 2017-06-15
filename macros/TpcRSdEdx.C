@@ -55,7 +55,7 @@ const Double_t masses[15] = {0.51099907e-3,0.51099907e-3,
 			     1.875613   ,2.80925  , 2.80923, 3.727417,
 			     0.13956995
 };
-const Double_t chargeSQ[15] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 1};
+const Double_t charge[15] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1};
 TGraphErrors *graphs[10];
 TGraphErrors *gAll = 0;
 //const Char_t *FMT = "y2011_TpcRS_phys_off_Bichsel_%s.root";
@@ -291,7 +291,7 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c1N);
   if (! c1 ) c1 = new TCanvas(c1N,c1N);
   else       c1->Clear();
-  TH1F *hr = c1->DrawFrame(-1,0,6,6);
+  TH1F *hr = c1->DrawFrame(-1,1,6,6);
   hr->SetTitle("TpcRS log(dE/dx) versus log_{ 10} (   #beta #gamma)");
   hr->SetXTitle("log_{10} ( #beta#gamma  ) ");
   hr->SetYTitle("log (dE/dx [keV/cm])");  
@@ -308,7 +308,7 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   TCanvas *c3 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c3N);
   if (! c3 ) c3 = new TCanvas(c3N,c3N);
   else       c3->Clear();
-  TH1F *hr3 = c3->DrawFrame(-1,0.0,6,1.8);
+  TH1F *hr3 = c3->DrawFrame(-1,0.2,6,2.);
   hr3->SetTitle(Form("Relative error of dE/dx log_{ 10}(   #beta #gamma) normalized at %5.3f",sigma));
   hr3->SetXTitle("log_{10} ( #beta#gamma  ) ");
   hr3->SetYTitle("#sigma (log (dE/dx))");  
@@ -319,58 +319,63 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   Int_t color = 0;
   Int_t marker = 19;
   TString Out("McPiD");
-  Out += fOpt; Out += ".root";
+  Out += fOpt;
+  Out += ".root";
   TFile *fOut = new TFile(Out,"recreate");
-  TH2F *all = 0;
   TH2F *h2 = 0;
   //  for (Int_t i = 0; i < NHYP+1; i++) {
   for (Int_t i = 0; i < NHYP; i++) {
+    TString name(Form("%s%s",fopt,namesh[i]));
     if (i < NHYP) {
       if (! files[i]) continue;
       files[i]->cd();
-      h2 = (TH2F *) files[i]->Get(Form("%s%s",fopt,namesh[i]));
+      
+      h2 = (TH2F *) files[i]->Get(name);
       if (! h2) continue;
       if (h2->GetEntries() <100) continue;
+      h2->SetDirectory(0);
       cout << "in file " << files[i]->GetName() << " Found histogram " << h2->GetName() << endl;
       if (i < 10) {
 	TH2F *h2i = (TH2F *) files[i+1]->Get(Form("%s%s",fopt,namesh[i+1]));
 	if (h2i && h2i->GetEntries() > 100) {
 	  cout << "in file " << files[i+1]->GetName() << "Found histogram " << h2i->GetName() << endl;
 	  h2->Add(h2i); i++; 
-	  files[i]->cd();
 	}
-	if (! all) {fOut->cd(); all = new TH2F(*h2); all->SetName(Form("allP%s",fopt));}
-	else       {all->Add(h2);}
       }
-    } else {
-      fOut->cd();
-      h2 = all;
-    }
+    } 
     color++;
     if (color == 10) color = 30;
     marker++;
     if (! h2) continue;
+    if (i == NHYP - 1) name += "MIP";
+    h2->SetName(name);
+#if 0
+    h2->SetDirectory(fOut);
+    fOut->cd();
+#endif
     //    h2->FitSlicesY(0,0,-1,10,"qen3s");
     h2->FitSlicesY(0,0,-1,10,"qen5s");
     TH1D *h1p = (TH1D *) gDirectory->Get(Form("%s_1",h2->GetName()));
     if (! h1p) continue;
     TH1D *s1p = (TH1D *) gDirectory->Get(Form("%s_2",h2->GetName()));
     if (! s1p) continue;
-    TString name(h1p->GetName());
+    name = h1p->GetName();
     TString title(h2->GetTitle());
-    title.ReplaceAll("I70","log(dEdx_{I70} - log)");
-    title.ReplaceAll("fitZ","log(dEdx_{FIT} - log)");
+    title.ReplaceAll("I70","log(dEdx_{I70} - log");
+    title.ReplaceAll("fitZ","log(dEdx_{FIT} - log");
     title.ReplaceAll("fitN","log(dNdx) -log");
-    h1p->SetName(name);
-    h1p->SetTitle(title + Form(" #mu - %s",fopt));
-    name += "S";
-    s1p->SetName(name);
-    s1p->SetTitle(title + " #sigma");
+    //    h1p->SetName(name); 
+    h1p->SetTitle(title + Form(" #mu - %s",fopt)); cout << "Set name h1p: " << h1p->GetName() << "\ttitle = " << h1p->GetTitle() << endl;
+    //    name += "S";
+    //    s1p->SetName(name);
+    s1p->SetTitle(title + " #sigma"); cout << "Set name s1p: " << s1p->GetName() << "\ttitle = " << s1p->GetTitle() << endl;
     TH1D *h1s = 0;
     if (i < NHYP) {
-      h1s = new TH1D(*h1p); h1s->SetName(Form("%sp",h1p->GetName()));
+      h1s = new TH1D(*h1p); 
       h1s->Clear();
+      h1s->SetName(Form("%sp",name.Data())); 
       h1s->SetTitle(title + " #mu");
+      cout << "Set name h1s: " << h1s->GetName() << "\ttitle = " << h1s->GetTitle() << endl;
     }
     Int_t xmin = 9999;
     Int_t xmax =-9999;
@@ -399,10 +404,13 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
 	s1p->SetBinContent(ix,sigma);
 	s1p->SetBinError(ix,sigmaErr);
 	Double_t bg10 = h1s->GetXaxis()->GetBinCenter(ix);
-	if      (fOpt.Contains("I70",TString::kIgnoreCase))   val += TMath::Log(chargeSQ[i]*b->GetI70M(bg10));
-	else if (fOpt.Contains("fitz",TString::kIgnoreCase))  val += TMath::Log(chargeSQ[i]*TMath::Exp(b->GetMostProbableZ(bg10)));
-	else                                                  val += TMath::Log(chargeSQ[i]*StdEdxModel::instance()->dNdx(TMath::Power(10.,bg10)));
+	Double_t pred = 0;
+	if      (fOpt.Contains("I70",TString::kIgnoreCase) ) pred = TMath::Log(charge[i]*charge[i]) + TMath::Log(b->GetI70M(bg10, 1.));
+	else if (fOpt.Contains("fitz",TString::kIgnoreCase)) pred = TMath::Log(charge[i]*charge[i]) + b->GetMostProbableZM(bg10);
+	else                                                 pred = TMath::Log(StdEdxModel::instance()->dNdx(TMath::Power(10.,bg10),charge[i]));
+	val += pred;
 	h1s->SetBinContent(ix, val);
+	h1s->SetBinError(ix, err);
       }
       if (err > 0 && sigmaErr > 0) {
 	if (ix < xmin) xmin = ix;
@@ -417,7 +425,6 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
     l2->AddEntry(h1p,names[i]);
     l3->AddEntry(s1p,names[i]);
     h1s->SetStats(0);
-    fOut->cd();
     c1->cd();
     SetH(h1s,marker,color);
     h1s->Draw("same");
@@ -430,9 +437,12 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
     SetH(s1p,marker,color);
     s1p->Draw("same");
     c3->Update();
+    fOut->cd();
+    //    h2->Write();
     h1s->Write();
     h1p->Write();
     s1p->Write();
   }
+  //  delete fOut;
 }
 

@@ -6,15 +6,9 @@
 //=======================================================================
 
 {
-#if 0
   gSystem->ResetSignal(kSigChild,kTRUE);
-#endif
-  // #pragma optimize 0 <-- removed BuTracking 247
-  //  set FloatPointException trap
-  namespace rootlogon {
-    int fpe=0;const char *env=0;
-    const Char_t *path  = ".:~";
-  }
+  int rootlogon_fpe=0;const char *rootlogon_env=0;
+  const Char_t *rootlogon_path  = ".:~";
   // eliminate the need to provide the custom ".rootrc" to activate Qt-layer 
   if (gSystem->Getenv("WITH_QT") && gSystem->Getenv("QTDIR")) 
   {
@@ -22,18 +16,18 @@
       gEnv->SetValue("Gui.Backend","qt");
       gEnv->SetValue("Gui.Factory","qtgui");     
   }
-  rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
+  rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
 #if 1
-  if (! rootlogon::fpe && gClassTable->GetID("TGiant3") < 0) { // ! root4star
-    rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2";
+  if (! rootlogon_fpe && gClassTable->GetID("TGiant3") < 0) { // ! root4star
+    rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2";
   }
 #endif
-  rootlogon::env = gSystem->Getenv("STARFPE");
-  if (rootlogon::env) {
-    if (strcmp(rootlogon::env,"YES")==0) rootlogon::fpe=1;
-    if (strcmp(rootlogon::env,"NO" )==0) rootlogon::fpe=0;
+  rootlogon_env = gSystem->Getenv("STARFPE");
+  if (rootlogon_env) {
+    if (strcmp(rootlogon_env,"YES")==0) rootlogon_fpe=1;
+    if (strcmp(rootlogon_env,"NO" )==0) rootlogon_fpe=0;
   }
-  if (rootlogon::fpe) {
+  if (rootlogon_fpe) {
     gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
     printf("*** Float Point Exception is ON ***\n");
   } else {
@@ -178,7 +172,7 @@
     //    gSystem->AddIncludePath(" -I$ROOTSYS/include");
     gSystem->SetBuildDir(".$STAR_HOST_SYS",kTRUE);
   }
-  Char_t *file = gSystem->Which(rootlogon::path,"rootlogon.C",kReadPermission);
+  Char_t *file = gSystem->Which(rootlogon_path,"rootlogon.C",kReadPermission);
   if (file) {
     cout << "Found local " << file  << endl;
     gROOT->Macro(file);
