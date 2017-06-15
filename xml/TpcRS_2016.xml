@@ -6,6 +6,7 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setenv NODEBUG yes
+  setup 64b
   starver .DEV2 
   set file = $INPUTFILE0;
   set rung = `echo $file | awk -F\_ '{print $2}'`
@@ -13,7 +14,8 @@
   set logFile  = ${file}B.log
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("$f" == "") then
-    root4star -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+#    root4star -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+    root.exe -x  -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>

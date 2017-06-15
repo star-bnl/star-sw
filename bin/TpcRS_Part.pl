@@ -18,8 +18,11 @@ foreach my $part (@particles) {
   my $N =  10;# 00;
   if ($part =~ /MIP/) {$N = 100;}
   for (my $i = $i1; $i <= $N; $i++) {
-    my $log = $part . "_" . $i . "B.log";
-    if (! -r $log) {
+#    my $log = $part . "_" . $i . "B.log";
+#    if (! -r $log) {
+    my $glob = "./*" . $part . "*.MuDst.root";
+    my @list = glob $glob;# print"$glob => @list\n";
+    if ($#list < 0) {
       my $string = "string:" . $part . "_" . $i;
       print "$string\n";
     }
