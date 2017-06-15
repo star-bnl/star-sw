@@ -45,20 +45,20 @@
 ///////////////////////////////////////////////////////////////
 {
 class StMaker;
-namespace rootlogoff {
-::StMaker *mk=0;
-}
-
+// namespace rootlogoff {
+// ::StMaker *mk=0;
+// }
+ StMaker *rootlogoff_mk = 0;
 if (TClassTable::GetDict("StMaker")) 
 {
-  rootlogoff::mk = StMaker::GetChain();
-  if (rootlogoff::mk) {
+  rootlogoff_mk = StMaker::GetChain();
+  if (rootlogoff_mk) {
     
 
-    rootlogoff::mk->Finish();
+    rootlogoff_mk->Finish();
 #if 0
     if (TString(gSystem->Getenv("STAR_VERSION")).BeginsWith(".DEV")
-	&& !gSystem->Getenv("STARNODELETE")) delete rootlogoff::mk;
+	&& !gSystem->Getenv("STARNODELETE")) delete rootlogoff_mk;
     else  
 #endif
       printf ("*** Chain not deleted***\n");

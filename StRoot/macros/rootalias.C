@@ -5,6 +5,7 @@
 #include <string.h>
 #include "TPaveText.h"
 #endif
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
 //______________________________________________________________________________
 void edit(char *file)
 {
@@ -174,5 +175,6 @@ void set(Int_t color=1) {
 }
 //________________________________________________________________________________
 void rset(Int_t color=1) {set(color);}
+#endif
 #endif
 #endif
