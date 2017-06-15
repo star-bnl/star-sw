@@ -3,6 +3,7 @@
 #include "StG2TrackVertexMap.h"
 #include "TVector3.h"
 StG2TrackVertexMap *StG2TrackVertexMap::fgInstance = 0;
+using namespace std;
 static Int_t _debug = 0;
 //________________________________________________________________________________
 StG2TrackVertexMap *StG2TrackVertexMap::instance(St_g2t_track *track, St_g2t_vertex *vertex) {
