@@ -570,7 +570,7 @@ Cleanup of code
 #include "TCallf77.h"
 #include "TVirtualMCDecayer.h"
 #include "TPDGCode.h"
-
+using namespace std;
 #ifndef WIN32
 # define g3zebra  g3zebra_
 # define grfile   grfile_
