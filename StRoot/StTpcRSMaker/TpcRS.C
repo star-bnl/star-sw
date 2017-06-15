@@ -223,6 +223,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       } else if (TString(geant->SAttr("GeneratorFile")) == "") {
 	Int_t    NTRACK = 100;
 	Int_t    ID = 5;
+	Double_t Ylow   =  -1; 
+	Double_t Yhigh  =   1;
+	Double_t Philow =   0;
+	Double_t Phihigh= 2*TMath::Pi();
+	Double_t Zlow   =  -50; 
+	Double_t Zhigh  =   50; 
 	Double_t mass = 0.1057;
 	Double_t bgMin  = 1e-1; // 3.5;// 1e2; // 1e-2;
 	Double_t bgMax  = 1e6;  // 1e2;// 1e5;
@@ -264,6 +270,38 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	geant->Do(Kine.Data());
       }
     }
+  } else { // VMC
+    if (! StVMCMaker::instance()) return 0;
+    if (! StarVMCApplication::Instance()) return 0;
+    StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
+    if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
+      delete gener; gener = 0;
+    }
+    const Char_t *names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
+    Int_t         Ids[15]   = {      5,       6,          3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
+    Int_t    NTRACK = 100;
+    Int_t    ID = 5;
+    Double_t Ylow   =  -1; 
+    Double_t Yhigh  =   1;
+    Double_t Philow =   0;
+    Double_t Phihigh= 2*TMath::Pi();
+    Double_t Zlow   =  -50; 
+    Double_t Zhigh  =   50; 
+    Double_t bgMinL10  = -1; // 3.5;// 1e2; // 1e-2;
+    Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
+    for (Int_t i = 0; i < 15; i++) {
+      if (Opt.Contains(names[i])) {
+	ID = Ids[i];
+	if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
+	break;
+      }
+    }
+    if (! gener) gener =  new 
+      StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
+    else
+      gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
+    StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
+    cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
