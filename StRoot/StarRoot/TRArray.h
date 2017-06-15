@@ -66,43 +66,43 @@ class TRArray : public TArrayD {
   virtual Double_t &operator()(Int_t i)                    {return operator[](i);}
   virtual Double_t operator()(Int_t i) const               {return operator[](i);}
   friend TRArray &operator-=(TRArray &target, Double_t scalar) {
-    for (int i=0; i<target.fN; i++) target.fArray[i] -= scalar; return target;}
+    for (int i=0; i<target.fN; i++) {target.fArray[i] -= scalar;} return target;}
   friend TRArray &operator+=(TRArray &target, Double_t scalar) {
-    for (int i=0; i<target.fN; i++) target.fArray[i] += scalar; return target;
+    for (int i=0; i<target.fN; i++) {target.fArray[i] += scalar;} return target;
   }
   friend Double_t operator*(const TRArray &target, const TRArray &source) {
     assert(target.fN == source.GetSize());
     Double_t sum = 0;
     const Double_t *sArray = source.GetArray();
-    for (int i=0; i<target.fN; i++) sum += target.fArray[i]*sArray[i]; return sum;
+    for (int i=0; i<target.fN; i++) {sum += target.fArray[i]*sArray[i];} return sum;
   }
   friend TRArray &operator*=(TRArray &target, Double_t scalar) {
-    for (int i=0; i<target.fN; i++) target.fArray[i] *= scalar; return target;
+    for (int i=0; i<target.fN; i++) {target.fArray[i] *= scalar;} return target;
   }
   friend TRArray &operator/=(TRArray &target, Double_t scalar) {
-    for (int i=0; i<target.fN; i++) target.fArray[i] /= scalar; return target;
+    for (int i=0; i<target.fN; i++) {target.fArray[i] /= scalar;} return target;
   }
   friend TRArray &operator-=(TRArray &target, const TRArray &A) {
     assert(target.fN == A.GetSize());
     const Double_t *fA  = A.GetArray();
-    for (int i=0; i<target.fN; i++) target.fArray[i] -= fA[i]; 
+    for (int i=0; i<target.fN; i++) {target.fArray[i] -= fA[i];}
     return target;
   }
   friend TRArray &operator+=(TRArray &target, const TRArray &A) {
     assert(target.fN == A.GetSize());
     const Double_t *fA  = A.GetArray();
-    for (int i=0; i<target.fN; i++) target.fArray[i] += fA[i]; 
+    for (int i=0; i<target.fN; i++) {target.fArray[i] += fA[i];}
     return target;
   }
   
   friend Bool_t operator==(TRArray &target, Double_t scalar) {
-    for (int i=0; i<target.fN; i++) if (target.fArray[i] != scalar) return kFALSE; 
+    for (int i=0; i<target.fN; i++) {if (target.fArray[i] != scalar) return kFALSE;}
     return kTRUE;
   }
   friend Bool_t operator==(TRArray &target, const TRArray &A) {
     if (target.fN != A.GetSize()) return kFALSE; 
     const Double_t *fB  = A.GetArray();
-    for (int i=0; i<target.fN; i++) if (target.fArray[i] != fB[i]) return kFALSE; return kTRUE;
+    for (int i=0; i<target.fN; i++) {if (target.fArray[i] != fB[i]) return kFALSE;} return kTRUE;
   }
   friend TRArray operator + (const TRArray &A, const TRArray &B) {TRArray C(A); C += B; return C;}
   friend TRArray operator - (const TRArray &A, const TRArray &B) {TRArray C(A); C -= B; return C;}
