@@ -346,7 +346,6 @@ Int_t StiMaker::InitRun(int run)
 
         _tracker = (StiKalmanTrackFinder *)(_toolkit->getTrackFinder());
         do  {
-#ifdef __MultySeedFinders__
 
           TString seedFinders = SAttr("seedFinders");
 
@@ -375,7 +374,6 @@ Int_t StiMaker::InitRun(int run)
             _tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
             break;
          }
-#endif
 //		Default case, Sti seed finder only               
 	_tracker->addSeedFinder(_toolkit->getTrackSeedFinder());
 

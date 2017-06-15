@@ -109,12 +109,12 @@ class QAFind;
     StiTrackContainer           * _trackContainer;
     std::vector<StiTrackFinder*>  _seedFinders;
     int                           _nPrimTracks;
+    int         mEventPerm;    //Count number of permutations
 private:
         
     double    chi2;
     TStopwatch *mTimg[3]; 	//seeds,traks,prims
     int         mTrackPerm;	//Count number of permutations
-    int         mEventPerm;	//Count number of permutations
     int         mUseComb;	//useComb() saved 
     static int   _debug;
     static Bool_t _DoAlignment;

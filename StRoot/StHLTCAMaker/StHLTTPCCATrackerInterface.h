@@ -1,6 +1,6 @@
 #ifndef __StHLTTPCCATrackerInterface_h__
 #define __StHLTTPCCATrackerInterface_h__
-#include "Sti/StiTPCCATrackerInterface.h"
+#include "StiCA/StiCATpcTrackerInterface.h"
 
 #include <stdio.h>
 
@@ -8,7 +8,7 @@
 
 class online_tracking_TpcHitMap;
 
-class StHLTTPCCATrackerInterface : public StiTPCCATrackerInterface {
+class StHLTTPCCATrackerInterface : public StiCATpcTrackerInterface {
 public:
   // Instance
   static StHLTTPCCATrackerInterface &Instance();

@@ -673,8 +673,21 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
-  initialize0(hits);
-  
+  //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
+  reset();
+  //StiKalmanTrackNode * node  = 0;
+  const StiDetector* detector=0;
+  UInt_t nhits = hits.size();
+  setSeedHitCount(nhits);
+  for (UInt_t ihit=0;ihit<nhits;ihit++)
+  {
+    StiHit *hit = hits[ihit];
+    detector = hit->detector();
+    assert(detector);
+    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+    n->initialize(hit);
+    add(n,kOutsideIn);
+  }
   int ierr = approx(0);
   if (!ierr) return 0;
   BFactory::Free(this);
@@ -735,20 +748,13 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     detectorOld = (StiDetector*) detector;
     hit_Old = hit;
   }  
-  if (firstPars){
-    firstNode->fitPars() = *firstPars;
-  }
-  if (firstErrs){ 
-    firstNode->fitErrs() = *firstErrs;
-      //    firstNode->resetError();
-  }
-  if (lastPars){
-    lastNode ->fitPars() = *lastPars;
-  }
-  if (lastErrs){ 
-    lastNode->fitErrs() = *lastErrs;
-      //    firstNode->resetError();
-  }
+  if (!firstPars)      {approx(); return 0;}
+  else                         {firstNode->fitPars() = *firstPars;}
+
+  if (firstErrs)       {firstNode->fitErrs() = *firstErrs;}
+  if (lastPars)                {lastNode ->fitPars() = *lastPars ;}
+  if (lastErrs)                {lastNode->fitErrs()  = *lastErrs ;}
+
   return 0;  
 }
 
@@ -1621,7 +1627,7 @@ void StiKalmanTrack::removeLastNode()
  */
 int StiKalmanTrack::refit()
 {
-  /*  int errType = kNoErrors; */
+  int errType = kNoErrors;
   
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
   static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
@@ -1639,25 +1645,25 @@ int StiKalmanTrack::refit()
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
-      /* errType = kNoErrors; */
+      errType = kNoErrors;
       sTNH.set(StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10,StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx()*100,errConfidence,iter);
       pPrev = inn->fitPars();
       ePrev = inn->fitErrs(); 
       
       status = refitL();  
-      if (status) 	{fail= 1; /* errType = kRefitFail; */ break;}
+      if (status) 	{fail= 1;  errType = kRefitFail; break;}
       nNEnd = sTNH.getUsed();
-      if ((nNEnd <=3))	{fail= 2; /* errType = kNotEnoughUsed; */ break;}
+      if ((nNEnd <=3))	{fail= 2;  errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
-        inn = getInnerMostNode(3); fail=-1; /* errType = kInNodeNotValid; */ continue;}	
+        inn = getInnerMostNode(3); fail=-1;  errType = kInNodeNotValid; continue;}	
       qA = StiKalmanTrack::diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       static int oldRefit = StiDebug::iFlag("StiOldRefit");
       if (oldRefit) {
-        if (qA>0.5)		{fail=-2; /* errType = kBadQA; */ continue;} 
+        if (qA>0.5)		{fail=-2;  errType = kBadQA;  continue;} 
       } else {
         if (qA <1 && errConfidence>0.1) errConfidence = 0.1;
-        if (qA>0.01)		{fail=-2; /* errType = kBadQA; */ continue;} 
-        if (sTNH.isCutStep())	{fail=-2; /* errType = kBadQA; */ continue;} 
+        if (qA>0.01)		{fail=-2;  errType = kBadQA;  continue;} 
+        if (sTNH.isCutStep())	{fail=-2;  errType = kBadQA;  continue;} 
       }
       double info[2][8];
       sTNH.mCurvQa.getInfo(info[0]);
@@ -1688,17 +1694,17 @@ int StiKalmanTrack::refit()
     //		Test for primary 
   while (!fail && vertexNode) {
     fail = 13;			//prim node invalid
-    /* errType = kVertexNodeInvalid; */
+    errType = kVertexNodeInvalid;
     if (!vertexNode->isValid()) 			break;
     fail = 99;			//prim node Chi2 too big
-    /* errType = kNodeNotValid; */
+    errType = kNodeNotValid;
     if ( vertexNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx())	break;
     fail = 98;			//too many dropped nodes
-    /* errType = kTooManyDroppedNodes; */
+    errType = kTooManyDroppedNodes;
     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
         &&  nNEnd+kHitLoss < nNBeg)			break;
     fail = 0;
-    /* errType = kNoErrors; */
+    errType = kNoErrors;
     break;    
   }
   if (!fail) { //Cleanup. Hits of bad nodes set to zero
@@ -1714,7 +1720,7 @@ int StiKalmanTrack::refit()
   }
 
   if (fail) setFlag(-1);
-  return fail;
+  return errType;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 

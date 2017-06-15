@@ -1,20 +1,10 @@
 #ifndef __StiCATpcTrackerInterface_h__
 #define __StiCATpcTrackerInterface_h__
 #include "StiCATpcSeedFinder.h"
-#define __NEW_TPCCATracker__
-#ifdef __NEW_TPCCATracker__
 #include "TPCCATracker/AliHLTTPCCAGBTracker.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/AliHLTTPCCAGBTracker.h"
-#endif /* __NEW_TPCCATracker__ */
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-#ifdef __NEW_TPCCATracker__
 #include "TPCCATrackerPerformance/AliHLTTPCCAPerformance.h"
 #include "TPCCATrackerPerformance/AliHLTTPCCAMCTrack.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/Performance/AliHLTTPCCAPerformance.h"
-#include "TPCCATracker/Performance/AliHLTTPCCAMCTrack.h"
-#endif /* __NEW_TPCCATracker__ */
 #endif
 
 #include "Sti/StiTrackContainer.h"

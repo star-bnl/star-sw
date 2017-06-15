@@ -55,6 +55,7 @@ enum {kMaxTrackPerm = 10000,kMaxEventPerm=10000000};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
+ostream& operator<<(ostream&, const StiTrack&);
 Bool_t StiKalmanTrackFinder::_DoAlignment = kFALSE;
 std::ostream& operator<<(std::ostream&, const StiTrack&);
 int gLevelOfFind = 0;

@@ -238,7 +238,7 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
   push @items, "FmsPointMaker";
   push @items, "FmsUtil";
 }
-push @items, "StiCA";
+#push @items, "StiCA";
 push @items, "StarVMC/xgeometry";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";

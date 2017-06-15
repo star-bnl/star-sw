@@ -260,8 +260,8 @@ class StiKalmanTrack : public StiTrack
    virtual void add(StiTrackNode * node,int direction,StiTrackNode *near=0);
 
   /// Convenience method to initialize a track based on seed information 
-  int initialize(const vector<StiHit*> &);
-  int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars = 0, StiNodePars *lastPars = 0, StiNodeErrs *firstErrs = 0, StiNodeErrs *lastErrs = 0);
+  virtual int initialize(const vector<StiHit*> &);
+  virtual int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars = 0, StiNodePars *lastPars = 0, StiNodeErrs *firstErrs = 0, StiNodeErrs *lastErrs = 0);
 
    virtual vector<StiHit*> getHits();
    virtual vector<const StMeasuredPoint*> stHits() const;

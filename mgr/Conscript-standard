@@ -780,7 +780,7 @@ if ( $pkg =~ m/^St.*Db/             ||
     $CXXFLAGS .= " -Wno-pragmas";
   }
   $CXXFLAGS .= " -Wno-parentheses"; # new flags needed for Vc
-}  elsif ( $pkg =~ m/^TPCCATracker$/ or $pkg =~ m/^TPCCATrackerPerformance$/ ) {
+}  elsif ( $pkg =~ m/^TPCCATracker$/ or $pkg =~ m/^TPCCATrackerPerformance$/ or $pkg =~ m/StiCA$/) {
   $CPPPATH .=
     $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATrackerPerformance"
       . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker";
@@ -1322,43 +1322,47 @@ if ( $#src > -1 ) {
       $libs .= "." . $env2->{SUFSOLIB};
       Depends $envg [($SO_PKG)], ($LIB . "/libStarMagFieldNoDict.so");# $libs); #print "libs = $libs\n";
     }
-    if ($pkg =~ m/StHLTCAMaker/) {
-      #      $CPPFLAGS .= " -D__NEW_TPCCATracker__";
-    }
-    if ($pkg =~ m/^Sti$/) { #print "check  For use CATracker\n";
-      my $locf = "./StRoot/TPCCATracker";
-      my $libf = $env->{ENV}->{STAR} . "/StRoot/TPCCATracker";
-      my $libv = $env->{ENV}->{ROOTSYS} . "/lib/libVc.a";
-      #      if ( -r $locf) {print "$locf\n";}	
-      #      if ( -r $libf) {print "$libf\n";}	
-      #      if ( -r $libv) {print "$libv\n";}	
-      if ((  -r $locf or -r $libf) and -r $libv ) {
-	$SO_PKG_PLAIN = $pkg . "CA";
-	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
-	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
-	$envCA = $env2->clone('CPPFLAGS' => $CPPFLAGS,
-			      'SUFOBJ'   => "CA.o",
-			      'CXXFLAGS' => $CXXFLAGS . " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION");# . $SSE_FLAGS); # -msse -msse2"
-	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx StiHit.cxx);
-	my $ListCA = join('|',@ListCA);
-	@PlainObj = ();
-	@Obj = ();
-	my @o;
-	foreach my $s (@src) {
-	  $o[0] = $s;
-	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
-	  push  @Obj, $o[0];
-	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
-	  else                  {push @PlainObj, $o[0];}
-	}
-	@src = @Obj;
-	#	print "$#src => @src \n";
-	#	print "$#PlainObj => @PlainObj \n";
-	$envPlain = $env2->clone('LIBPATH'  => $LIB, 
-				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
-	Depends $envPlain $SO_PKG_PLAIN, $LIB . "/libTPCCATracker.so";
-      }
-    }
+#     if ($pkg =~ m/StHLTCAMaker/) {
+#       #      $CPPFLAGS .= " -D__NEW_TPCCATracker__";
+#     }
+#       if ($pkg =~ m/^StiCA$/ ) { 
+# 	$CXXFLAGS .= " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION";
+# 	print "StiCA => CXXFLAGS = $CXXFLAGS\n";
+#       }
+#     if ($pkg =~ m/^Sti$/) { #print "check  For use CATracker\n";
+#       my $locf = "./StRoot/TPCCATracker";
+#       my $libf = $env->{ENV}->{STAR} . "/StRoot/TPCCATracker";
+#       my $libv = $env->{ENV}->{ROOTSYS} . "/lib/libVc.a";
+#       #      if ( -r $locf) {print "$locf\n";}	
+#       #      if ( -r $libf) {print "$libf\n";}	
+#       #      if ( -r $libv) {print "$libv\n";}	
+#       if ((  -r $locf or -r $libf) and -r $libv ) {
+# 	$SO_PKG_PLAIN = $pkg . "CA";
+# 	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+# 	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+# 	$envCA = $env2->clone('CPPFLAGS' => $CPPFLAGS,
+# 			      'SUFOBJ'   => "CA.o",
+# 			      'CXXFLAGS' => $CXXFLAGS . " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION");# . $SSE_FLAGS); # -msse -msse2"
+# 	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx StiHit.cxx);
+# 	my $ListCA = join('|',@ListCA);
+# 	@PlainObj = ();
+# 	@Obj = ();
+# 	my @o;
+# 	foreach my $s (@src) {
+# 	  $o[0] = $s;
+# 	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
+# 	  push  @Obj, $o[0];
+# 	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
+# 	  else                  {push @PlainObj, $o[0];}
+# 	}
+# 	@src = @Obj;
+# 	#	print "$#src => @src \n";
+# 	#	print "$#PlainObj => @PlainObj \n";
+# 	$envPlain = $env2->clone('LIBPATH'  => $LIB, 
+# 				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
+# 	Depends $envPlain $SO_PKG_PLAIN, $LIB . "/libTPCCATracker.so";
+#       }
+#     }
     #________________________________________________________________________________
     if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
       $SO_PKG_PLAIN = $pkg . "NoSti";
@@ -1526,6 +1530,7 @@ if ( $#idlL > -1 ) {
     #    if ($#QtDefs >= 0) {$CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{QTDIR} . "/include";}
     $env3 = $env1->clone('DEBUG'   => $env1->{NOOPT},
 			 'CPPPATH' => $CPPPATH,
+			 'CXXFLAGS' => $CXXFLAGS,
 			 'ObjDir'  => $tobj_dir,
 			 'LIBPATH' => ''
 			);

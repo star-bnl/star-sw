@@ -1417,7 +1417,7 @@ double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
 }
 
 //______________________________________________________________________________
-inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
+double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
 {
   
   double m = delta.perp();

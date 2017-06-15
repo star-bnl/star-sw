@@ -14,7 +14,7 @@
 #include "online_tracking_TpcHitMap.h"
 
 //________________________________________________________________________________
-StHLTTPCCATrackerInterface::StHLTTPCCATrackerInterface() : StiTPCCATrackerInterface() {
+StHLTTPCCATrackerInterface::StHLTTPCCATrackerInterface() : StiCATpcTrackerInterface() {
 #if 0
   char mapName[256];
   const char* hltPara = "HLTConf/HLTparameters"; // file name of the HLTParamaters

@@ -23,7 +23,7 @@
 #include "StHLTCAMaker.h"
 #include "StHLTTPCCATrackerInterface.h"
 #include "Sti/StiHitContainer.h"
-#include "Sti/StiTpcSeedFinder.h"
+#include "StiCA/StiCATpcSeedFinder.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiKalmanTrack.h"
 #include "StEvent/StEvent.h"
@@ -81,7 +81,7 @@ Int_t StHLTCAMaker::Make(){
   caTrackerInt.SetStiTracks(StiToolkit::instance()->getTrackContainer());
   caTrackerInt.RunPerformance();
   Int_t key = 1;
-  sort(seeds.begin(), seeds.end(),StiTpcSeedFinder::SeedsCompareStatus );
+  sort(seeds.begin(), seeds.end(),StiCATpcSeedFinder::SeedsCompareStatus );
   //#define PRINT_SEED_STATISTIC
 #ifdef PRINT_SEED_STATISTIC
   Int_t nSeed = 0;
