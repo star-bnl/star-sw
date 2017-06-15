@@ -38,8 +38,8 @@
 #include "TError.h"
 #include "StarStack.h"
 Int_t StarStack::fgDebug = 0;
-ClassImp(StarStack)
-  
+ClassImp(StarStack);
+using namespace std;  
 //_______________________________________________________________________
   StarStack::StarStack():
     fParticles("TParticle", 1000),
