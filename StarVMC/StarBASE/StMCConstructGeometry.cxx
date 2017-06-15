@@ -48,7 +48,7 @@ int  StMCConstructGeometry::Fun()
       }      
       gSystem->ExpandPathName(ts);
       int fail=gROOT->LoadMacro(ts);
-      if (fail) Printf("operator()","fail=%d path=%s",fail,ts.Data());
+      if (fail) Printf("operator(): fail=%d path=%s",fail,ts.Data());
       assert(fail==0);
       gROOT->ProcessLine("CreateTable()");
     }

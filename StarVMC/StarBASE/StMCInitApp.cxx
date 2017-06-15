@@ -44,7 +44,7 @@ int  StMCInitApp::Fun()
 {
 
   StVMCApplication  *app = (StVMCApplication*)TVirtualMCApplication::Instance();
-  gMC  = new TGeant3TGeo("C++ Interface to Geant3"); 
+  new TGeant3TGeo("C++ Interface to Geant3"); 
   Info("Init","TGeant3TGeo has been created.");
 
   StMCConstructGeometry *geo = new StMCConstructGeometry(app->GetName());
