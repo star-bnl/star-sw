@@ -59,23 +59,27 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   mRefMultNeg = (UShort_t)(ev->refMultNeg());
   mRefMultPos = (UShort_t)(ev->refMultPos());
 
+  {
+  using namespace StPicoUtilities;
   auto custom_refMult = StPicoUtilities::calculateRefMult(muDst);
-  mRefMult2NegEast = custom_refMult["refMult2NegEast"];
-  mRefMult2PosEast = custom_refMult["refMult2PosEast"];
-  mRefMult2NegWest = custom_refMult["refMult2NegWest"];
-  mRefMult2PosWest = custom_refMult["refMult2PosWest"];
-  mRefMult3NegEast = custom_refMult["refMult3NegEast"];
-  mRefMult3PosEast = custom_refMult["refMult3PosEast"];
-  mRefMult3NegWest = custom_refMult["refMult3NegWest"];
-  mRefMult3PosWest = custom_refMult["refMult3PosWest"];
-  mRefMult4NegEast = custom_refMult["refMult4NegEast"];
-  mRefMult4PosEast = custom_refMult["refMult4PosEast"];
-  mRefMult4NegWest = custom_refMult["refMult4NegWest"];
-  mRefMult4PosWest = custom_refMult["refMult4PosWest"];
-  mRefMultHalfNegEast = custom_refMult["refMultHalfNegEast"];
-  mRefMultHalfPosEast = custom_refMult["refMultHalfPosEast"];
-  mRefMultHalfNegWest = custom_refMult["refMultHalfNegWest"];
-  mRefMultHalfPosWest = custom_refMult["refMultHalfPosWest"];
+  mRefMult2NegEast = custom_refMult[RefMult2NegEast];
+  mRefMult2PosEast = custom_refMult[RefMult2PosEast];
+  mRefMult2NegWest = custom_refMult[RefMult2NegWest];
+  mRefMult2PosWest = custom_refMult[RefMult2PosWest];
+  mRefMult3NegEast = custom_refMult[RefMult3NegEast];
+  mRefMult3PosEast = custom_refMult[RefMult3PosEast];
+  mRefMult3NegWest = custom_refMult[RefMult3NegWest];
+  mRefMult3PosWest = custom_refMult[RefMult3PosWest];
+  mRefMult4NegEast = custom_refMult[RefMult4NegEast];
+  mRefMult4PosEast = custom_refMult[RefMult4PosEast];
+  mRefMult4NegWest = custom_refMult[RefMult4NegWest];
+  mRefMult4PosWest = custom_refMult[RefMult4PosWest];
+  mRefMultHalfNegEast = custom_refMult[RefMultHalfNegEast];
+  mRefMultHalfPosEast = custom_refMult[RefMultHalfPosEast];
+  mRefMultHalfNegWest = custom_refMult[RefMultHalfNegWest];
+  mRefMultHalfPosWest = custom_refMult[RefMultHalfPosWest];
+
+  }
 
   mGRefMult = (UShort_t)ev->grefmult();
   mNumberOfGlobalTracks = muDst.numberOfGlobalTracks();
