@@ -315,6 +315,8 @@ class GblData(object):
     self.__value = aValue
     ## precision (diagonal element of inverse covariance matrix); float
     self.__precision = aPrec
+    ## down weighting method; int
+    self.__dwMethod = 0
     ## down weighting factor (M-estimators); float
     self.__downWeight = 1.
     ## prediction (for value from fit); float
@@ -402,10 +404,11 @@ class GblData(object):
   #  @return weight (0..1); float  
   #          
   def setDownWeighting(self, aMethod): 
+    self.__dwMethod = aMethod
     scaledResidual = abs(self.__value - self.__prediction) * math.sqrt(self.__precision)   
     if (aMethod == 1):  # Tukey
       if (scaledResidual < 4.6851):
-        aWeight = (1.0 - 0.045558 * scaledResidual ** 2) ** 2
+        aWeight = (1.0 - (scaledResidual / 4.6851) ** 2) ** 2
       else:
         aWeight = 0.
     elif (aMethod == 2):  # Huber
@@ -419,11 +422,24 @@ class GblData(object):
     return aWeight
 
   ## Calculate Chi2 (contribution) from data.
-  #  
+  # 
+  # For down-weighting with M-estimators the corresponding objective function is used.
+  # 
   #  @return Chi2; float   
   #     
   def getChi2(self):
-    Chi2 = (self.__value - self.__prediction) ** 2 * self.__precision * self.__downWeight
+    scaledResidual = abs(self.__value - self.__prediction) * math.sqrt(self.__precision)
+    Chi2 = scaledResidual ** 2
+    if (self.__dwMethod == 1):  # Tukey
+      if (scaledResidual < 4.6851):
+        Chi2 = 4.6851 ** 2 / 3. * (1. - (1. - (scaledResidual / 4.6851) ** 2) ** 3)
+      else:  
+        Chi2 = 4.6851 ** 2 / 3.
+    elif (self.__dwMethod == 2):  # Huber
+      if (scaledResidual > 1.345):
+        Chi2 = 1.345 * (2.*scaledResidual - 1.345) 
+    elif (self.__dwMethod == 3):  # Cauchy
+      Chi2 = math.log(1. + (scaledResidual / 2.3849) ** 2) * 2.3849 ** 2     
     return Chi2
   
   ## Get Label.

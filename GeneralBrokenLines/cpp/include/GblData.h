@@ -128,6 +128,7 @@ private:
 	double thePrecision; ///< Precision (1/sigma**2)
 	unsigned int theTrajectory; ///< Trajectory number
 	unsigned int thePoint; ///< Point number (on trajectory)
+	unsigned int theDWMethod; ///< Down-weighting method (0: None, 1: Tukey, 2: Huber, 3: Cauchy)
 	double theDownWeight; ///< Down-weighting factor (0-1)
 	double thePrediction; ///< Prediction from fit
 	// standard local parameters (curvature, offsets), fixed size

@@ -58,7 +58,7 @@ def example1():
 
   nTry = 1000  #: number of tries
   nLayer = 5  #: number of detector layers
-  print " Gbltst $Rev: 124 $ ", nTry, nLayer
+  print " Gbltst $Rev: 134 $ ", nTry, nLayer
   start = time.clock()
 # track direction
   sinLambda = 0.3
@@ -73,7 +73,7 @@ def example1():
   measErr = np.array([ 0.001, 0.001])  # 10 mu
   measPrec = 1.0 / measErr ** 2
 # scattering error
-  scatErr = 0.001  # 1 mread
+  scatErr = 0.001  # 1 mrad
 # RMS of CurviLinear track parameters (Q/P, slopes, offsets)
   clErr = np.array([0.001, -0.1, 0.2, -0.15, 0.25])
   # precision matrix for external seed (in local system)
@@ -158,8 +158,9 @@ def example1():
 # point with scatterer
         jac = np.dot(proC2l, np.dot(jacPointToPoint, proL2c))
         point = GblPoint(jac)
-        scatP = local.getScatPrecision(scatErr)
-        point.addScatterer([scat, scatP])
+        if scatErr > 0:
+          scatP = local.getScatPrecision(scatErr)
+          point.addScatterer([scat, scatP])
         iLabel = traj.addPoint(point)
         if iLabel == abs(seedLabel):
           clSeed = np.linalg.inv(clCov)

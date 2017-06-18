@@ -45,7 +45,7 @@ namespace gbl {
 GblData::GblData(unsigned int aLabel, dataBlockType aType, double aValue,
 		double aPrec, unsigned int aTraj, unsigned int aPoint) :
 		theLabel(aLabel), theRow(0), theType(aType), theValue(aValue), thePrecision(
-				aPrec), theTrajectory(aTraj), thePoint(aPoint), theDownWeight(
+				aPrec), theTrajectory(aTraj), thePoint(aPoint), theDWMethod(0), theDownWeight(
 				1.), thePrediction(0.), theNumLocal(0), moreParameters(), moreDerivatives() {
 
 }
@@ -92,6 +92,7 @@ void GblData::setPrediction(const VVector &aVector) {
  */
 double GblData::setDownWeighting(unsigned int aMethod) {
 
+	theDWMethod = aMethod;
 	double aWeight = 1.;
 	double scaledResidual = fabs(theValue - thePrediction) * sqrt(thePrecision);
 	if (aMethod == 1) // Tukey
@@ -117,11 +118,32 @@ double GblData::setDownWeighting(unsigned int aMethod) {
 
 /// Calculate Chi2 contribution.
 /**
+ * For down-weighting with M-estimators the corresponding objective function is used.
+ *
  * \return (down-weighted) Chi2
  */
 double GblData::getChi2() const {
-	double aDiff = theValue - thePrediction;
-	return aDiff * aDiff * thePrecision * theDownWeight;
+	double scaledResidual = fabs(theValue - thePrediction) * sqrt(thePrecision);
+	double chi2 = scaledResidual * scaledResidual;
+	if (theDWMethod == 1) // Tukey
+			{
+		if (scaledResidual < 4.6851) {
+			chi2 = (1.0
+					- pow(1.0 - 0.045558 * scaledResidual * scaledResidual, 3))
+					/ (3. * 0.045558);
+		} else {
+			chi2 = 1.0 / (3. * 0.045558);
+		}
+	} else if (theDWMethod == 2) //Huber
+			{
+		if (scaledResidual >= 1.345) {
+			chi2 = 1.345 * (2. * scaledResidual - 1.345);
+		}
+	} else if (theDWMethod == 3) //Cauchy
+			{
+		chi2 = log(1.0 + (scaledResidual * scaledResidual / 5.6877)) * 5.6877;
+	}
+	return chi2;
 }
 
 /// Print data block.
