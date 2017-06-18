@@ -28,7 +28,7 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
 						Double_t Eta_min, Double_t Eta_max, 
 						Double_t Phi_min, Double_t Phi_max, 
 						Double_t Z_min, Double_t Z_max, const Char_t *option) {
-  fNofPrimaries = nprim; fId = Id;  
+  fNofPrimaries = nprim; 
   fpT_min = pT_min; 
   fpT_max = pT_max; 
   fEta_min = Eta_min; 
@@ -38,11 +38,13 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   fZ_min = Z_min; 
   fZ_max = Z_max; 
   fOption = option; 
-  if (fOption.CompareTo("G",TString::kIgnoreCase)) {
+  if (fOption.Contains("G",TString::kIgnoreCase)) {
     fId = ((TGeant3* ) TVirtualMC::GetMC())->PDGFromId(Id);
+  } else {
+    fId = Id;
   }
   cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << " flat in " << endl;
-  if (! fOption.CompareTo("BL",TString::kIgnoreCase)) {
+  if (! fOption.Contains("BL",TString::kIgnoreCase)) {
     cout << fpT_min << " <  pT < " << fpT_max << endl;
   } else {
     cout << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endl;
