@@ -5,7 +5,7 @@
 #include <string.h>
 #include "TPaveText.h"
 #endif
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+//#if ! ROOT_VERSION_CODE >= 393216 /* ROOT_VERSION(6,0,0) */
 //______________________________________________________________________________
 void edit(char *file)
 {
@@ -113,68 +113,4 @@ void rpwd() {
   cout << "dir \t" << gDirectory->GetName()  << endl;
   //  cout << "dir \t" << gSystem->BaseName(gDirectory->GetName())  << endl;
 }
-#if 0
-#if 0
-//________________________________________________________________________________
-void set(Int_t color=1) {
-  Char_t *histos[] = {"MuDst","FitP","mu","sigma","dEdxP","dEdxS","SumT","TpcResNtuple",0};
-  for (int i = 0; histos[i]; i++) {
-    TObject *obj = gDirectory->Get(histos[i]);
-    if (! obj) continue;
-    if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
-      TH1 *h1 = (TH1*)obj;
-      h1->SetMarkerStyle(20);
-      h1->SetMarkerColor(color);
-      h1->SetLineColor(color);
-      h1->SetLineWidth(2);
-      h1->SetMarkerSize(0.3);
-    }
-    else { 
-      if ( obj->IsA()->InheritsFrom( "TTree" ) ) {
-	TTree *t = (TTree*)obj;
-	t->SetMarkerStyle(20);
-	t->SetMarkerColor(color);
-	t->SetLineColor(color);
-	t->SetLineWidth(2);
-	//	t->SetMarkerSize(0.3);
-      }
-    }
-  }
-}
-#else
-//________________________________________________________________________________
-void set(Int_t color=1) {
-  TIter nextkey( gDirectory->GetListOfKeys() );
-  TKey *key = 0;
-  while ((key = (TKey*) nextkey())) {
-    TObject *obj = key->ReadObj();
-#if 0
-    if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
-      TH1 *h1 = (TH1*)obj;
-      //      cout << "set attributes for " << h1->GetName() << endl;
-      h1->SetMarkerStyle(20);
-      h1->SetMarkerColor(color);
-      h1->SetLineColor(color);
-      h1->SetLineWidth(2);
-      h1->SetMarkerSize(0.3);
-    }
-    else { 
-#endif
-      if ( obj->IsA()->InheritsFrom( "TTree" ) ) {
-	TTree *t = (TTree*)obj;
-	cout << "set attributes for " << t->GetName() << endl;
-	t->SetMarkerStyle(20);
-	t->SetMarkerColor(color);
-	t->SetLineColor(color);
-	t->SetLineWidth(2);
-      }
-#if 0
-    }
-#endif
-  }  
-}
-//________________________________________________________________________________
-void rset(Int_t color=1) {set(color);}
-#endif
-#endif
-#endif
+//#endif
