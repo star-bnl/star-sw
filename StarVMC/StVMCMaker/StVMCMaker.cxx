@@ -281,36 +281,39 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   //  fgStarVMCApplication->SetStepping(new StMCSteppingHist("tgeom"));
   //  fgStarVMCApplication->SetStepping(new StMCStepping);
   // The "Init" method in the gMC object causes the geometry to be cosntructed
-  fgStarVMCApplication->InitMC();
-  if (IAttr("phys_off")) {// switch off physics 
-    LOG_INFO << "StVMCMaker::InitRun switch off physics" << endm;
-    gMC->SetProcess("DCAY", 0);
-    gMC->SetProcess("ANNI", 0);
-    gMC->SetProcess("BREM", 0);
-    gMC->SetProcess("COMP", 0);
-    gMC->SetProcess("HADR", 0);
-    gMC->SetProcess("MUNU", 0);
-    gMC->SetProcess("PAIR", 0);
-    gMC->SetProcess("PFIS", 0);
-    gMC->SetProcess("PHOT", 0);
-    gMC->SetProcess("RAYL", 0);
-    gMC->SetProcess("LOSS", 4); // no fluctuations 
-    //  gMC->SetProcess("LOSS 1"); // with delta electron above dcute
-    gMC->SetProcess("DRAY", 0);
-    gMC->SetProcess("MULS", 0);
-    gMC->SetProcess("STRA", 0);
-    gMC->SetCut("CUTGAM",	1e-3  );
-    gMC->SetCut("CUTELE", 	1e-3  );
-    gMC->SetCut("CUTHAD", 	.001  );
-    gMC->SetCut("CUTNEU", 	.001  );
-    gMC->SetCut("CUTMUO", 	.001  );
-    gMC->SetCut("BCUTE", 	.001  );
-    gMC->SetCut("BCUTM", 	.001  );
-    gMC->SetCut("DCUTE", 	1e-3  );
-    gMC->SetCut("DCUTM", 	.001  );
-    gMC->SetCut("PPCUTM", 	.001  );
-    gMC->SetCut("TOFMAX", 	50.e-6);
+  if (IAttr("phys_off") || IAttr("hadr_off")) {// switch off hadr physics 
+    LOG_INFO << "StVMCMaker::InitRun switch off hadron" << endm;
+    if (IAttr("phys_off")) {
+      LOG_INFO << "StVMCMaker::InitRun switch off decays" << endm;
+      TVirtualMC::GetMC()->SetProcess("DCAY", 0);
+    } else {
+      TVirtualMC::GetMC()->SetProcess("DCAY", 1);
+    }
+    TVirtualMC::GetMC()->SetProcess("ANNI", 0);
+    TVirtualMC::GetMC()->SetProcess("BREM", 0);
+    TVirtualMC::GetMC()->SetProcess("COMP", 0);
+    TVirtualMC::GetMC()->SetProcess("HADR", 0);
+    TVirtualMC::GetMC()->SetProcess("MUNU", 0);
+    TVirtualMC::GetMC()->SetProcess("PAIR", 0);
+    TVirtualMC::GetMC()->SetProcess("PFIS", 0);
+    TVirtualMC::GetMC()->SetProcess("PHOT", 0);
+    TVirtualMC::GetMC()->SetProcess("RAYL", 0);
+    TVirtualMC::GetMC()->SetProcess("DRAY", 1);
+    TVirtualMC::GetMC()->SetProcess("MULS", 1);
+    TVirtualMC::GetMC()->SetProcess("STRA", 0);
+    TVirtualMC::GetMC()->SetCut("CUTGAM",	1e-3  );
+    TVirtualMC::GetMC()->SetCut("CUTELE", 	1e-3  );
+    TVirtualMC::GetMC()->SetCut("CUTHAD", 	.001  );
+    TVirtualMC::GetMC()->SetCut("CUTNEU", 	.001  );
+    TVirtualMC::GetMC()->SetCut("CUTMUO", 	.001  );
+    TVirtualMC::GetMC()->SetCut("BCUTE", 	.001  );
+    TVirtualMC::GetMC()->SetCut("BCUTM", 	.001  );
+    TVirtualMC::GetMC()->SetCut("DCUTE", 	1e-3  );
+    TVirtualMC::GetMC()->SetCut("DCUTM", 	.001  );
+    TVirtualMC::GetMC()->SetCut("PPCUTM", 	.001  );
+    TVirtualMC::GetMC()->SetCut("TOFMAX", 	50.e-6);
   }
+  fgStarVMCApplication->InitMC();
   if (! gGeoManager->IsClosed()) {
     gGeoManager->CloseGeometry();
   }
