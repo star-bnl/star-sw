@@ -371,6 +371,7 @@ void StMuDst::fixTrackIndicesG(Int_t mult) {
 	const Int_t Nvert = primaryVertices()->GetEntriesFast();
 	if(!Nvert) return;
 	Int_t curVer =  currentVertexIndex();
+	if (curVer < 0) curVer = 0;
 	Int_t startpos[Nvert];
 	for(Int_t i=0;i<Nvert;i++) startpos[i]=0;	
 	Int_t tid, pid;

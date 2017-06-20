@@ -188,7 +188,7 @@ UShort_t StMuEvent::refMultPos(Int_t vtx_id) {
      return mRefMultPos;
   if (vtx_id == -1)
      vtx_id = StMuDst::currentVertexIndex();
-  if (StMuDst::primaryVertex(vtx_id))
+  if (vtx_id >= 0 && StMuDst::primaryVertex(vtx_id))
      return StMuDst::primaryVertex(vtx_id)->refMultPos();
   return 0;
 }
@@ -199,7 +199,7 @@ UShort_t StMuEvent::refMultNeg(Int_t vtx_id) {
      return mRefMultNeg;
   if (vtx_id == -1)
      vtx_id = StMuDst::currentVertexIndex();
-  if (StMuDst::primaryVertex(vtx_id))
+  if (vtx_id >= 0 &&StMuDst::primaryVertex(vtx_id))
      return StMuDst::primaryVertex(vtx_id)->refMultNeg();
   return 0;
 }
