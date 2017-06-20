@@ -22,7 +22,7 @@
 #include "TFile.h"
 #include "TString.h"
 #include "TMultiDimFit.h"
-//#define _HEED_MODEL__
+#define _HEED_MODEL__
 class StdEdxModel {
  public: 
   virtual ~StdEdxModel();
