@@ -479,7 +479,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     {"Pad","Pad"},
     {"Time","Time"},
   };
-  for (Int_t io = 0; io < 4; io++) {
+  for (Int_t io = 2; io < 4; io++) {
     for (Int_t pt = 0; pt < 2; pt++) {
       TString Name(InOut[io].Name); Name += PadTime[pt].Name; Name += "Mc";
       TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += "Mc";
