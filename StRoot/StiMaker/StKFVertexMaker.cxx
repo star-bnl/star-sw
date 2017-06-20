@@ -327,6 +327,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   // subtruct track from vertex and refit it
   KFVertex cVert(V->Vertex()); PrPP2(FitTrack2Vertex,cVert); // current vertex
   KFParticle PF(P); PrPP2(FitTrack2Vertex,PF   );
+#if 0 /* Don't substract track from vertex */
   Float_t CovF[6] = {(Float_t ) 16.*cVert.GetCovariance(0,0),
 		     (Float_t ) 16.*cVert.GetCovariance(0,1), (Float_t ) 16.*cVert.GetCovariance(1,1),
 		     (Float_t ) 16.*cVert.GetCovariance(0,2), (Float_t ) 16.*cVert.GetCovariance(1,2), (Float_t ) 16.*cVert.GetCovariance(2,2)};
@@ -334,6 +335,11 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     PF.SubtractFromParticle(cVert); PrPP2(FitTrack2Vertex,cVert);//  PrPP2(FitTrack2Vertex,PF   ); 
     TCL::ucopy(&cVert.Covariance(0), CovF, 6);
   }
+#else
+  Float_t CovF[6] = {(Float_t ) cVert.GetCovariance(0,0),
+		     (Float_t ) cVert.GetCovariance(0,1), (Float_t ) cVert.GetCovariance(1,1),
+		     (Float_t ) cVert.GetCovariance(0,2), (Float_t ) cVert.GetCovariance(1,2), (Float_t ) cVert.GetCovariance(2,2)};
+#endif
   StiHit *Vertex = StiToolkit::instance()->getHitFactory()->getInstance();
   Vertex->setGlobal(0, 0, cVert.X(), cVert.Y(), cVert.Z(), 0);
   Vertex->setError(CovF);
