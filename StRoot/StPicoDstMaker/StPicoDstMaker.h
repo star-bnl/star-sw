@@ -1,187 +1,162 @@
-#ifndef STAR_StPicoDstMaker
-#define STAR_StPicoDstMaker
-#include "StMaker.h"
+#ifndef StPicoDstMaker_h
+#define StPicoDstMaker_h
+
+#include <vector>
+#include <utility>
+
 #include "TClonesArray.h"
+
+#include "StChain/StMaker.h"
+#include "StPicoDstMaker/StPicoArrays.h"
+
 class TFile;
 class TTree;
-class StFile;
 class StMuDst;
-class StMuEvent;
 class StMuTrack;
-class StBTofHeader;
 class StEmcCollection;
 class StEmcPosition;
 class StEmcGeom;
-class StBemcTables;
+class StEmcRawHit;
 class StPicoDst;
 class StPicoEvent;
-class StPicoTrack;
-class StPicoV0;
-class StPicoEmcTrigger;
-class StPicoBTOWHit;
-class StPicoBTofHit;
-class StPicoCut;
 
-#include "StPicoConstants.h"
-#include "StPicoArrays.h"
-#include "StEmcRawHit.h"
-#include <vector>
-#include <utility>
-#include <string>
 
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
 
-class StPicoDstMaker : public StMaker {
- public: 
-   StPicoDstMaker(const char *name="PicoDst");
-   StPicoDstMaker(int mode, const char* fileName="", const char* name="PicoDst"); 
-   virtual ~StPicoDstMaker();
+class StPicoDstMaker : public StMaker
+{
+public:
+  enum PicoIoMode {IoWrite=1, IoRead=2};
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
 
-   virtual Int_t Init();
-   virtual Int_t Make();
-   virtual void  Clear(Option_t *option="");
-   virtual Int_t Finish();
+  StPicoDstMaker(char const* name = "PicoDst");
+  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
+  virtual ~StPicoDstMaker();
 
-   void printArrays();
-   void SetStatus(const char *arrType,int status);
+  virtual Int_t Init();
+  virtual Int_t InitRun(Int_t const runnumber);
+  virtual Int_t Make();
+  virtual void  Clear(Option_t* option = "");
+  virtual Int_t Finish();
 
-   void setRunNumber(Int_t);              
-   void setCreatingPhiWgt(Bool_t);
-   void setProdMode(Int_t);
-   void setEmcMode(const Int_t mode=1); // 0:No EMC, 1:EMC On
-   /// Returns null pointer if no StPicoDst
-   StPicoDst *picoDst();
-   /// In read mode, returns pointer to the chain of .picoDst.root files
-   TChain* chain();
-   /// Returns pointer to the current TTree, the top level io structure
-   TTree* tree();
-        
-   /// Sets the split level for the file and all branches. Please refer to the ROOT manual (http://root.cern.ch) for more info
-   void setSplit(int=99);
-   /// Sets the buffer size for all branches.
-   void setBufferSize(int=65536*4);
-   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
-   void setCompression(int comp=9);
-                          
- protected:
- #define saveDelete(t) { delete t; t=0;}
- 
-   void streamerOff();
-  
-   void openWrite();
-   void write();
-   void closeWrite(); 
-   Int_t openRead();
-   void  read();
-   void setBranchAddresses();
-   void closeRead();
-   void setBranchAddresses(TChain*);
-   void clearIndices();
+  void printArrays();
+  void SetStatus(char const* arrType, int status);
 
-   void buildEmcIndex();
-   void initEmc();
-   void finishEmc();
+  /// Returns null pointer if no StPicoDst
+  StPicoDst* picoDst();
+  /// In read mode, returns pointer to the chain of .picoDst.root files
+  TChain* chain();
+  /// Returns pointer to the current TTree, the top level io structure
+  TTree* tree();
 
-   Bool_t initMtd();
-   
-   void DeclareHistos();
-   void WriteHistos();
-   void FillHistograms(int, float*);
+  /// Sets the split level for the file and all branches. Please refer to the ROOT manual (http://root.cern.ch) for more info
+  void setSplit(int = 99);
+  /// Sets the buffer size for all branches.
+  void setBufferSize(int = 65536 * 4);
+  /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
+  void setCompression(int comp = 9);
 
-   void assignArrays();
-   void clearArrays();
-   void zeroArrays();
-   void createArrays();
-   TClonesArray* clonesArray(TClonesArray*& p, const char* type, int size, int& counter);
+  void setVtxMode(const PicoVtxMode vtxMode);
 
-   Int_t MakeRead();
-   Int_t MakeWrite();
+protected:
 
-   void fillTracks();
-   void fillEvent();
-//   void fillV0();
-   void fillEmcTrigger();
-   void fillMtdTrigger();
-   void fillBTOWHits();
-   void fillBTofHits();
-   void fillMtdHits();
+  void streamerOff();
 
-   Int_t phiBin(int, StMuTrack *, float);
-   void  addPhiWeight(StMuTrack *, float, float*);
-   Int_t centrality(int);   
-   bool getBEMC(StMuTrack *, int*, int*, float*, float*, int*, int*);
-   
-   enum ioMode {ioRead, ioWrite};
-   // production modes for different data sets
-   enum prodMode {minbias, central, ht, minbias2};
-    
-   StMuDst*   mMuDst;
-   StMuEvent* mMuEvent;
-   StBTofHeader*    mBTofHeader;
-   StEmcCollection* mEmcCollection;
-   StEmcPosition*   mEmcPosition;
-   StEmcGeom*       mEmcGeom[4];
-   StEmcRawHit*     mEmcIndex[4800];
-   StPicoDst* mPicoDst;
-   StPicoCut* mPicoCut;
-   Int_t      mCentrality;
-   Float_t    mBField;
+  void openWrite();
+  void write();
+  void closeWrite();
+  Int_t openRead();
+  void  read();
+  void setBranchAddresses();
+  void closeRead();
+  void setBranchAddresses(TChain*);
 
-   Int_t      mIoMode;         //! I/O mode:  0: - read,   1: - write
-   Bool_t     mCreatingPhiWgt; //! creating phi weight files
-   Int_t      mProdMode;       //! prod mode: 0: - mb, 1: - central, 2: - ht, 3: - mb2, mb with phi weight and q-vector calculation, 4: - save only electron or muon candidates
-   Int_t      mEmcMode;        //! EMC ON(=1)/OFF(=0)
+  void buildEmcIndex();
+  void initEmc();
+  void finishEmc();
 
-   TString   mInputFileName;        //! *.list - MuDst or picoDst
-   TString   mOutputFileName;       //! FileName
-   TString   mPhiWgtFileName;       //! phi weight filename
-   TString   mPhiTestFileName;       //! phi weight filename
-   TFile*    mOutputFile;
-   TFile*    mPhiWgtFile;
-   Int_t     mRunNumber;
+  Bool_t initMtd(Int_t const runnumber);
 
-   TChain*   mChain;
-   TTree*    mTTree;
-   
-   int mEventCounter;
-   int mSplit;
-   int mCompression;
-   int mBufferSize;
-   
-   Int_t mIndex2Primary[nTrk];
-   Int_t mMap2Track[nTrk];
+  void clearArrays();
+  void createArrays();
 
-   //
-   TH1D*    mPhiWgtHist[nCen+1][nEW*nDet];
-   static const char* mEW[nEW*nDet]; //!={"EE","EW","WE","WW","FarWest","West","East","FarEast"};
-   Float_t mPhiWeightRead[nCen+1][nEW*nDet*nPhi];
-   Float_t mPhiWeightWrite[nEW*nDet*nPhi];  // phi weight for the current event
+  Int_t MakeRead();
+  Int_t MakeWrite();
 
-   // MTD map from backleg to QT
-  Int_t  mModuleToQT[30][5];     // Map from module to QT board index
-  Int_t  mModuleToQTPos[30][5];  // Map from module to the position on QA board
-         
-   //
-   friend class StPicoDst;
+  void fillTracks();
+  void fillEvent();
+  void fillEmcTrigger();
+  void fillMtdTrigger();
+  void fillBTOWHits();
+  void fillBTofHits();
+  void fillMtdHits();
 
-   TClonesArray*   mPicoAllArrays[__NALLPICOARRAYS__];   
-   TClonesArray**  mPicoArrays;   //[__NPICOARRAYS__]
-   TClonesArray**  mPicoV0Arrays; //[__NPICOV0ARRAYS__]
-   char            mStatusArrays[__NALLPICOARRAYS__];
-   
-   ClassDef(StPicoDstMaker,1)
+ /**
+  * Returns various measurements by the BEMC and BSMD detectors corresponding to
+  * a given global track.
+  *
+  * param[in]   t        A global track
+  * param[out]  id >= 0  Indicates that a BEMC tower matching track t has been found
+  * param[out]  adc      The largest ADC value of a tower in the BEMC cluster matching track t
+  * param[out]  ene[0]   The highest energy tower in the BEMC cluster matching track t
+  * param[out]  ene[1]   The total energy of the BEMC cluster containing the matching tower
+  * param[out]  ene[2]   The energy deposited in the (closest) BEMC tower matching track t
+  * param[out]  ene[3]   The energy deposited in the second closest BEMC tower matching track t
+  * param[out]  ene[4]   The energy deposited in the third closest BEMC tower matching track t
+  * param[out]  d[0]     The distance [cm] along z from the track t projection onto BSMD to the BEMC cluster matching track t
+  * param[out]  d[1]     The distance [rad] along phi similar to d[0]
+  * param[out]  d[2]     The distance [rad] along eta between the track t projection onto BEMC and the matched BEMC tower center
+  * param[out]  d[3]     The distance [rad] along phi similar to d[2]
+  * param[out]  nep[0]   The number of eta strips in the BSMD cluster corresponding to the BEMC cluster matching track t
+  * param[out]  nep[1]   The number of phi strips in the BSMD cluster corresponding to the BEMC cluster matching track t
+  * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
+  */
+  bool getBEMC(StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
+  int  setVtxModeAttr();
+
+  /// Selects a primary vertex from `muDst` vertex collection according to the
+  /// vertex selection mode `mVtxMode` specified by the user.
+  bool selectVertex();
+
+  StMuDst*   mMuDst;
+  StEmcCollection* mEmcCollection;
+  StEmcPosition*   mEmcPosition;
+  StEmcGeom*       mEmcGeom[4];
+  StEmcRawHit*     mEmcIndex[4800];
+  StPicoDst* mPicoDst;
+  Float_t    mBField;
+
+  PicoVtxMode mVtxMode;
+
+  TString   mInputFileName;        //! *.list - MuDst or picoDst
+  TString   mOutputFileName;       //! FileName
+  TFile*    mOutputFile;
+
+  TChain*   mChain;
+  TTree*    mTTree;
+
+  int mEventCounter;
+  int mSplit;
+  int mCompression;
+  int mBufferSize;
+
+  // MTD map from backleg to QT
+  Int_t  mModuleToQT[30][5];        // Map from module to QT board index
+  Int_t  mModuleToQTPos[30][5];     // Map from module to the position on QA board
+  Int_t  mQTtoModule[8][8];         // Map from QT board to module
+  Int_t  mQTSlewBinEdge[8][16][8];  // Bin Edge for QT slewing correction
+  Int_t  mQTSlewCorr[8][16][8];     // QT Slewing correction
+
+  TClonesArray*   mPicoArrays[StPicoArrays::NAllPicoArrays];
+  char            mStatusArrays[StPicoArrays::NAllPicoArrays];
+
+  ClassDef(StPicoDstMaker, 0)
 };
 
 inline StPicoDst* StPicoDstMaker::picoDst() { return mPicoDst; }
 inline TChain* StPicoDstMaker::chain() { return mChain; }
 inline TTree* StPicoDstMaker::tree() { return mTTree; }
-inline void StPicoDstMaker::setSplit(int split) { mSplit = split;}
-inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp;}
+inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
+inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
-inline void StPicoDstMaker::setRunNumber(int run) { mRunNumber = run; }
-inline void StPicoDstMaker::setCreatingPhiWgt(bool val) { mCreatingPhiWgt = val; }
-inline void StPicoDstMaker::setProdMode(int val) { mProdMode = val; }
-inline void StPicoDstMaker::setEmcMode(const Int_t mode) { mEmcMode = mode; }
+inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
 #endif
