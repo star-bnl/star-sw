@@ -29,6 +29,8 @@ class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
   virtual ~StarMCSimplePrimaryGenerator() {}
   
   static StarMCSimplePrimaryGenerator* Instance() {return (StarMCSimplePrimaryGenerator*) StarMCPrimaryGenerator::Instance();}
+  static Double_t Temperature() {return fTemperature;}
+  void static SetTemperature(Double_t T) {fTemperature = T;}
   virtual void GeneratePrimaries();
   virtual void GeneratePrimaries(const TVector3& v);
   virtual void SetGenerator(Int_t nprim=1, Int_t Id=13, 
@@ -40,6 +42,7 @@ class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
   void GeneratePrimary();
   void PreSet();
   Double_t fpT_min, fpT_max, fEta_min, fEta_max, fPhi_min, fPhi_max, fZ_min, fZ_max;
+  static Double_t fTemperature;
   ClassDef(StarMCSimplePrimaryGenerator,1)  //StarMCSimplePrimaryGenerator
 };
 #endif //StarMCSimplePrimaryGenerator_h

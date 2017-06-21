@@ -164,7 +164,29 @@ void StarVMCDetector::GetNumbv(const Char_t *path, Int_t *numbvR) {
 Int_t StarVMCDetector::GetVolumeId(const Char_t *path) {
   Int_t numbv[15];
   GetNumbv(path,numbv);
-  return GetVolumeId(numbv);
+  Int_t g2tVolumeId = GetVolumeId(numbv);
+  return g2tVolumeId;
+}
+//________________________________________________________________________________
+const Char_t *StarVMCDetector::FormPath(Int_t volumeId) {
+  static TString path;
+  path = "UnKnown";
+  Int_t numbv[15] = {0};
+  if (fId == kTpcId) {
+    Int_t sector = (volumeId/100)%100;
+    Int_t row    = volume%100;
+    numbv[0] = (sector <= 12) ? 1 : 2;
+    numbv[1] = (sector-1)%12 + 1;
+    if (fNVmax[3] == 73) {// old TPC
+      if (row <= 13) numbv[2] = 2 + 3*(row -  1);
+      else           numbv[2] = 41 +  (row - 14);
+    } else if (fNVmax[3] == 76) {// new iTPC
+      if (row <= 40) numbv[2] = 1 + row;
+      else           numbv[2] = 2 + row;
+    }
+    path = FormPath(fFMT,numbv);
+  }
+  return path.Data();
 }
 //________________________________________________________________________________
 Int_t StarVMCDetector::GetVolumeId(Int_t *numbv) {

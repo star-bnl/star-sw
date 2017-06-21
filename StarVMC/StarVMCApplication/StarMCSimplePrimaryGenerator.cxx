@@ -2,6 +2,7 @@
 #include "StarMCSimplePrimaryGenerator.h"
 #include "TGeant3.h"
 ClassImp(StarMCSimplePrimaryGenerator);
+Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
 //_____________________________________________________________________________
 StarMCSimplePrimaryGenerator::StarMCSimplePrimaryGenerator(Int_t    nprim,   Int_t    Id, 
 							   Double_t pT_min , Double_t pT_max,
@@ -49,6 +50,9 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else {
     cout << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endl;
   }
+  if (fOption.Contains("mt",TString::kIgnoreCase)) {
+    cout << "Use exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endl;
+  }
   cout << fEta_min  << " < eta < " << fEta_max  << endl;
   cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
   cout << fZ_min  << " < zVer< " << fZ_max  << endl;
@@ -82,7 +86,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
  Double_t eta       = fEta_min + (fEta_max - fEta_min)*gRandom->Rndm();
  Double_t phi       = fPhi_min + (fPhi_max - fPhi_min)*gRandom->Rndm();
  Double_t pT        = 0;
- if (fOption.CompareTo("BL",TString::kIgnoreCase)) {
+ if (fOption.Contains("BL",TString::kIgnoreCase)) {
    Double_t p = -1;
    while (p <= 0 || p > 100) {
      Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
@@ -90,6 +94,12 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
      p       = mass*bg;
    }
    pT               = p/TMath::CosH(eta);
+ } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
+   while (pT < fpT_min || pT > fpT_max) {
+     Double_t mT = mass -Temperature()*TMath::Log(gRandom->Rndm());
+     Double_t pT2 = mT*mT - mass*mass;
+     pT  = TMath::Sqrt(pT2);
+   }
  } else {
    pT               = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
  }

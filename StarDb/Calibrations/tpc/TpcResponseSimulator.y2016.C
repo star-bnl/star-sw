@@ -106,6 +106,9 @@ TDataSet *CreateTable() {
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
+  // SecRow3CGFRunXVI222                    : 2.86501e-01 +  1.04749e-03*y         2.84865e-01
+  // TpcRS_2016NoSDTVMC4/SecRow3CGFpionMIP  : 3.08712e-01                          2.71986e-01
+  // diff 
   const Double_t RowSigmaTrs[4] = {
     9.13675e-02, 0,  // Inner
     6.29849e-02, 0}; // Outer
