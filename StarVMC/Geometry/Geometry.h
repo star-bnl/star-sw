@@ -13,7 +13,6 @@
 class Geom_t : public AgStructure
 {
  public:
-  ClassDef(Geom_t,1);
   Geom_t(): AgStructure("Geom_t","STAR Master Geometry Table")
     {
 
@@ -104,7 +103,6 @@ class Geom_t : public AgStructure
 // ----------------------------------------------------------------------
 class BbcmGeom_t : public AgStructure
 { public:
-  ClassDef(BbcmGeom_t,1);
   BbcmGeom_t(): AgStructure("BbcmGeom_t","STAR Beam Beam Counter Master Geometry Table")
     {
       select="default";
@@ -119,7 +117,6 @@ class BbcmGeom_t : public AgStructure
 
 class CalbGeom_t : public AgStructure
 { public:
-  ClassDef(CalbGeom_t,1);
   CalbGeom_t(): AgStructure("CalbGeom_t","STAR Barrel Master Geometry Table")
     {
       select="default"; module="CalbGeo"; config=-1; emsedit=0;
@@ -140,7 +137,6 @@ class CalbGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class CaveGeom_t : public AgStructure
 { public:
-  ClassDef(CaveGeom_t,1);
   CaveGeom_t(): AgStructure("CaveGeom_t","STAR Cave Master Geometry Table")
     {
       select="default"; module="CaveGeo"; config=-1;
@@ -154,7 +150,6 @@ class CaveGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class EcalGeom_t : public AgStructure
 { public:
-  ClassDef(EcalGeom_t,1);
   EcalGeom_t(): AgStructure("EcalGeom_t","STAR Endcap Master Geometry Table")
     {
       select="default"; module="EcalGeo";     config=-1;     efill=3;     geometry=5;
@@ -169,7 +164,6 @@ class EcalGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class FpdmGeom_t : public AgStructure
 { public:
-  ClassDef(FpdmGeom_t,1);
   FpdmGeom_t(): AgStructure("FpdmGeom_t","STAR Forward Pion Detector / Forward Meson Spectrometer Master Geometry Table")
     {
       select="default"; module="FpdmGeo";     config=-1; 
@@ -183,7 +177,6 @@ class FpdmGeom_t : public AgStructure
 
 class FsceGeom_t : public AgStructure
 { public:
-  ClassDef(FsceGeom_t,1);
   FsceGeom_t(): AgStructure("FsceGeom_t","STAR Forward ??? Calorimeter Master Geometry Table")
     { select="default"; module="-none-"; config=0; }
   ~FsceGeom_t(){ };
@@ -195,7 +188,6 @@ class FsceGeom_t : public AgStructure
 
 class HcalGeom_t : public AgStructure
 { public:
-  ClassDef(HcalGeom_t,1);
   HcalGeom_t(): AgStructure("HcalGeom_t","STAR Forward ??? Calorimeter Master Geometry Table")
     { select="default"; module="-none-"; config=0; }
   ~HcalGeom_t(){ };
@@ -207,7 +199,6 @@ class HcalGeom_t : public AgStructure
 
 class EiddGeom_t : public AgStructure
 { public:
-  ClassDef(EiddGeom_t,1);
   EiddGeom_t(): AgStructure("EiddGeom_t","STAR EAST poletip TRD, TOF and ECAL")
     { select="default"; module="-none-"; config=0; }
   ~EiddGeom_t(){ };
@@ -220,7 +211,6 @@ class EiddGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class FtpcGeom_t : public AgStructure
 { public:
-  ClassDef(FtpcGeom_t,1);
   FtpcGeom_t(): AgStructure("FtpcGeom_t","STAR Forward Time Projection Chamber Master Geometry Table")
     {
       select="default"; module="FtpcGeo";     config=-1;supo=1;
@@ -235,7 +225,6 @@ class FtpcGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class FtsdGeom_t : public AgStructure
 { public:
-  ClassDef(FtsdGeom_t,1);
   FtsdGeom_t(): AgStructure("FtsdGeom_t","STAR Forward Tracking System Master Geometry Table")
     {
       select="default"; module="FtsdGeo";  
@@ -248,7 +237,6 @@ class FtsdGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class MagpGeom_t: public AgStructure
 { public:
-  ClassDef(MagpGeom_t,1);
   MagpGeom_t(): AgStructure("MagpGeom_t","STAR Magnet Master Geometry Table")
     {
       select="default";
@@ -264,7 +252,6 @@ class MagpGeom_t: public AgStructure
 // ----------------------------------------------------------------------
 class MfldGeom_t : public AgStructure
 { public:
-  ClassDef(MfldGeom_t,1);
   MfldGeom_t(): AgStructure("MfldGeom_t","STAR Magnetic Field Master Geometry Table")
     { // Magnetic field is provided somehow through StRoot.  Will need to investigate
       // the details before we implement starmc
@@ -280,7 +267,6 @@ class MfldGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class MutdGeom_t : public AgStructure
 { public:
-  ClassDef(MutdGeom_t,1);
   MutdGeom_t(): AgStructure("MutdGeom_t","STAR Muon Tagging Detector Master Geometry Table")
     {
       select="default"; module="MutdGeo"; config=-1;
@@ -294,7 +280,6 @@ class MutdGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class PhmdGeom_t : public AgStructure
 { public:
-  ClassDef(PhmdGeom_t,1);
   PhmdGeom_t(): AgStructure("PhmdGeom_t","STAR Photon Multiplicity Detector Master Geometry Table")
     {
       select="default"; module="PhmdGeo"; config=-1;
@@ -308,7 +293,6 @@ class PhmdGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class PipeGeom_t : public AgStructure
 { public:
-  ClassDef(PipeGeom_t,1);
   PipeGeom_t(): AgStructure("PipeGeom_t","STAR Beam Pipe Master Geometry Table")
     {
       select="PIPEon"; module="PipeGeo"; config=2; flag=3;
@@ -323,7 +307,6 @@ class PipeGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class PixlGeom_t : public AgStructure
 { public:
-  ClassDef(PixlGeom_t,1);
   PixlGeom_t(): AgStructure("PixlGeom_t","STAR Pixel Detector Master Geometry Table")
     {
       select="default"; module="PixlGeo3"; config=-1; location=1.0; ladrconfig=-1.0; secversion=-1.0;
@@ -340,7 +323,6 @@ class PixlGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class DtubGeom_t : public AgStructure 
 { public:
-  ClassDef(DtubGeom_t,1);
   DtubGeom_t(): AgStructure("DtubGeom_t","STAR Pixel Detector DtubGeo Geometry Table")
     {
       select="default"; module="DtubGeo1"; config=-1; location=1.0;      
@@ -354,7 +336,6 @@ class DtubGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class SconGeom_t : public AgStructure
 { public:
-  ClassDef(SconGeom_t,1);
   SconGeom_t(): AgStructure("SconGeom_t","STAR Support Cone Master Geometry Table")
     {
       select="default"; module="SconGeo"; config=-1;
@@ -368,7 +349,6 @@ class SconGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class SisdGeom_t : public AgStructure
 { public:
-  ClassDef(SisdGeom_t,1);
   SisdGeom_t(): AgStructure("SisdGeom_t","STAR Silcon Strip Detector Master Geometry Table")
     {
       select="default"; module="SisdGeo"; config=-1;
@@ -382,7 +362,6 @@ class SisdGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class SvttGeom_t : public AgStructure
 { public:
-  ClassDef(SvttGeom_t,1);
   SvttGeom_t(): AgStructure("SvttGeom_t","STAR Silcon Vertex Detector Master Geometry Table")
     {
       select="default"; module="SvttGeo11"; config=-1;
@@ -403,7 +382,6 @@ class SvttGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class BtofGeom_t : public AgStructure
 { public:
-  ClassDef(BtofGeom_t,1);
   BtofGeom_t(): AgStructure("BtofGeom_t","STAR Barrel Time Of Flight Master Geometry Table")
     {
       select="default"; module="BtofGeo"; config=-1; itof=0; tofX0 = 0; tofZ0=0;
@@ -420,7 +398,6 @@ class BtofGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class TpceGeom_t : public AgStructure
 { public:
-  ClassDef(TpceGeom_t,1);
   TpceGeom_t(): AgStructure("TpceGeom_t","STAR Time Projection Chamber Master Geometry Table")
     {
       select="default"; module="TpceGeom"; config=-1; dens=-1; rmax=-1; subversion=-1;
@@ -436,7 +413,6 @@ class TpceGeom_t : public AgStructure
 
 class TpcxGeom_t : public AgStructure
 { public:
-  ClassDef(TpcxGeom_t,1);
   TpcxGeom_t(): AgStructure("TpcxGeom_t","STAR Time Projection Chamber Master Geometry Table")
     {
       select="default"; module="TpcxGeom"; config=-1; dens=-1; rmax=-1;
@@ -453,7 +429,6 @@ class TpcxGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class VpddGeom_t : public AgStructure
 { public:
-  ClassDef(VpddGeom_t,1);
   VpddGeom_t(): AgStructure("VpddGeom_t","STAR Vertex Position Detector Master Geometry Table")
     {
       select="default"; module="VpddGeo"; config=-1;
@@ -467,7 +442,6 @@ class VpddGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class UpstGeom_t : public AgStructure
 { public:
-  ClassDef(UpstGeom_t,1);
   UpstGeom_t(): AgStructure("UpstGeom_t","STAR Upstream Master Geometry Table")
     {
       select="UPSTon"; module="UpstGeo"; config=-1;
@@ -481,7 +455,6 @@ class UpstGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class ZcalGeom_t : public AgStructure
 { public:
-  ClassDef(ZcalGeom_t,1);
   ZcalGeom_t(): AgStructure("ZcalGeom_t","STAR Zero Degree Calorimeter Master Geometry Table")
     {
       select="ZCALon"; module="ZcalGeo"; config=-1;
@@ -495,7 +468,6 @@ class ZcalGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class FtroGeom_t : public AgStructure
 { public:
-  ClassDef(FtroGeom_t,1);
   FtroGeom_t(): AgStructure("FtroGeom_t","STAR FTPC Readout Master Geometry Table")
     {
       select="FTROon"; module="FtroGeo"; config=-1;
@@ -509,7 +481,6 @@ class FtroGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class RichGeom_t : public AgStructure
 { public:
-  ClassDef(RichGeom_t,1);
   RichGeom_t(): AgStructure("RichGeom_t","STAR FTPC Readout Master Geometry Table")
     {
       select="RICHon"; module="RichGeo"; config=-1;
@@ -522,7 +493,6 @@ class RichGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class FgtdGeom_t : public AgStructure
 { public:
-  ClassDef(FgtdGeom_t,1);
   FgtdGeom_t(): AgStructure("FgtdGeom_t","STAR FGTD Master Geometry Table")
     {
       select="FGTDon"; module="FgtdGeo2"; config=1;
@@ -534,7 +504,6 @@ class FgtdGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class IdsmGeom_t : public AgStructure
 { public:
-  ClassDef(IdsmGeom_t,1);
   IdsmGeom_t(): AgStructure("IdsmGeom_t","STAR IDSM Master Geometry Table")
     {
       select="IDSMon"; module="IdsmGeo1"; config=1;
@@ -546,7 +515,6 @@ class IdsmGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class IstdGeom_t : public AgStructure
 { public:
-  ClassDef(IstdGeom_t,1);
   IstdGeom_t(): AgStructure("IstdGeom_t","STAR ISTD Master Geometry Table")
     {
       select="ISTDon"; module="IstdGeo"; config=1; 
@@ -558,7 +526,6 @@ class IstdGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class PxstGeom_t : public AgStructure
 { public:
-  ClassDef(PxstGeom_t,1);
   PxstGeom_t(): AgStructure("PxstGeom_t","STAR PXST Master Geometry Table")
     {
       //      select="PXSTon"; module="PxstGeo"; config=1; 
@@ -570,7 +537,6 @@ class PxstGeom_t : public AgStructure
 };
 class PsupGeom_t : public AgStructure
 { public:
-  ClassDef(PsupGeom_t,1);
   PsupGeom_t(): AgStructure("PsupGeom_t","STAR PSUP Master Geometry Table")
     {
       //      select="PSUPon"; module="PsupGeo"; config=1; 
@@ -583,7 +549,6 @@ class PsupGeom_t : public AgStructure
 // ----------------------------------------------------------------------
 class PxldGeom_t : public AgStructure
 { public:
-  ClassDef(PxldGeom_t,1);
   PxldGeom_t(): AgStructure("PxldGeom_t","STAR PXLD Master Geometry Table")
     {
       select="PXLDon"; module="PxldGeo"; config=1;
@@ -682,7 +647,6 @@ class Geometry : public AgModule
  public:
   AgModule *CreateModule( const Char_t *name, const Char_t *top = NULL );
     
-  ClassDef(Geometry,1);
 
 
 

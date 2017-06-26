@@ -46,7 +46,6 @@ class StarTGeoStacker : public StarAgmlStacker
     return cvs;
   }
 
-  ClassDef(StarTGeoStacker,1);  
 
 };
 

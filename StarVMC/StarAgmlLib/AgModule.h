@@ -63,7 +63,6 @@ class AgModule : public AgBlock
     return cvs;
   }
 
-  ClassDef(AgModule,1);
 
 };
 

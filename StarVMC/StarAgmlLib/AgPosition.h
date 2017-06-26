@@ -78,7 +78,6 @@ protected:
   double      mX, mY, mZ;
 
 
-  ClassDef(AgPosition,1);
 };
 
 #endif

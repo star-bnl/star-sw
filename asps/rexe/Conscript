@@ -190,7 +190,9 @@ if ($#src > -1) {
   Depends $env2 $pkg, $LIB . "/libg2t.a";
 #  Depends $env2 $pkg, $LIB . "/libgstar.a";
   Depends $env2 $pkg, $LIB . "/libxgeometry.a";
-  Depends $env2 $pkg, $LIB . "/StarAgmlUtil.so";
+  Depends $env2 $pkg, $LIB . "/libStarAgmlUtil.so";
+  Depends $env2 $pkg, $LIB . "/libStarRoot.so";
+  Depends $env2 $pkg, $LIB . "/libSt_base.so";
   Program $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
   if ($STAR_SYS !~ /darwin/) {

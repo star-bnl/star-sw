@@ -1,5 +1,4 @@
 #include "StarTGeoStacker.h"
-ClassImp(StarTGeoStacker);
 
 //#define __DEBUG_BUILD__
 //#define __DEBUG_PLACE__

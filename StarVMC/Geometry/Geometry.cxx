@@ -16,43 +16,42 @@
 //#include "TGiant3.h"
 
 // ----------------------------------------------------------------------
-ClassImp(Geometry);
 
 // ----------------------------------------------------------------------
-ClassImp(Geom_t);      Geom_t geom;
-ClassImp(BbcmGeom_t);  BbcmGeom_t bbcmGeom;
-ClassImp(CalbGeom_t);  CalbGeom_t calbGeom;
-ClassImp(CaveGeom_t);  CaveGeom_t caveGeom;
-ClassImp(EcalGeom_t);  EcalGeom_t ecalGeom;
-ClassImp(FpdmGeom_t);  FpdmGeom_t fpdmGeom;
-ClassImp(FtpcGeom_t);  FtpcGeom_t ftpcGeom;
-ClassImp(MagpGeom_t);  MagpGeom_t magpGeom;
-ClassImp(MfldGeom_t);  MfldGeom_t mfldGeom;
-ClassImp(MutdGeom_t);  MutdGeom_t mutdGeom;
-ClassImp(PhmdGeom_t);  PhmdGeom_t phmdGeom;
-ClassImp(PipeGeom_t);  PipeGeom_t pipeGeom;
-ClassImp(PixlGeom_t);  PixlGeom_t pixlGeom;
-ClassImp(SconGeom_t);  SconGeom_t sconGeom;
-ClassImp(SisdGeom_t);  SisdGeom_t sisdGeom;
-ClassImp(SvttGeom_t);  SvttGeom_t svttGeom;
-ClassImp(BtofGeom_t);  BtofGeom_t btofGeom;
-ClassImp(TpceGeom_t);  TpceGeom_t tpceGeom;
-ClassImp(VpddGeom_t);  VpddGeom_t vpddGeom;
-ClassImp(UpstGeom_t);  UpstGeom_t upstGeom;
-ClassImp(ZcalGeom_t);  ZcalGeom_t zcalGeom;
-ClassImp(FtroGeom_t);  FtroGeom_t ftroGeom;
-ClassImp(RichGeom_t);  RichGeom_t richGeom;
-ClassImp(FgtdGeom_t);  FgtdGeom_t fgtdGeom;
-ClassImp(IdsmGeom_t);  IdsmGeom_t idsmGeom;
-ClassImp(IstdGeom_t);  IstdGeom_t istdGeom;
-ClassImp(FsceGeom_t);  FsceGeom_t fsceGeom;
-ClassImp(EiddGeom_t);  EiddGeom_t eiddGeom;
-ClassImp(TpcxGeom_t);  TpcxGeom_t tpcxGeom;
+Geom_t geom;
+BbcmGeom_t bbcmGeom;
+CalbGeom_t calbGeom;
+CaveGeom_t caveGeom;
+EcalGeom_t ecalGeom;
+FpdmGeom_t fpdmGeom;
+FtpcGeom_t ftpcGeom;
+MagpGeom_t magpGeom;
+MfldGeom_t mfldGeom;
+MutdGeom_t mutdGeom;
+PhmdGeom_t phmdGeom;
+PipeGeom_t pipeGeom;
+PixlGeom_t pixlGeom;
+SconGeom_t sconGeom;
+SisdGeom_t sisdGeom;
+SvttGeom_t svttGeom;
+BtofGeom_t btofGeom;
+TpceGeom_t tpceGeom;
+VpddGeom_t vpddGeom;
+UpstGeom_t upstGeom;
+ZcalGeom_t zcalGeom;
+FtroGeom_t ftroGeom;
+RichGeom_t richGeom;
+FgtdGeom_t fgtdGeom;
+IdsmGeom_t idsmGeom;
+IstdGeom_t istdGeom;
+FsceGeom_t fsceGeom;
+EiddGeom_t eiddGeom;
+TpcxGeom_t tpcxGeom;
 
-ClassImp(PxstGeom_t);  PxstGeom_t pxstGeom;
-ClassImp(PsupGeom_t);  PsupGeom_t psupGeom;
-ClassImp(DtubGeom_t);  DtubGeom_t dtubGeom;
-ClassImp(HcalGeom_t);  HcalGeom_t hcalGeom;
+PxstGeom_t pxstGeom;
+PsupGeom_t psupGeom;
+DtubGeom_t dtubGeom;
+HcalGeom_t hcalGeom;
 
 #include "ZcalGeo.h"
 #include "VpddGeo.h"
@@ -137,91 +136,8 @@ ClassImp(HcalGeom_t);  HcalGeom_t hcalGeom;
 #include "BtofGeo7.h"
 #include "BtofGeo8.h"
 #include "BbcmGeo.h"
-ClassImp(BBCMGEO::BbcmGeo);
-ClassImp(BTOFGEO1::BtofGeo1);
-ClassImp(BTOFGEO2::BtofGeo2);
-ClassImp(BTOFGEO3::BtofGeo3);
-ClassImp(BTOFGEO4::BtofGeo4);
-ClassImp(BTOFGEO5::BtofGeo5);
-ClassImp(BTOFGEO6::BtofGeo6);
-ClassImp(BTOFGEO7::BtofGeo7);
-ClassImp(BTOFGEO8::BtofGeo8);
-ClassImp(CALBGEO1::CalbGeo1);
-ClassImp(CALBGEO2::CalbGeo2);
-ClassImp(CALBGEO::CalbGeo);
-ClassImp(CAVEGEO2::CaveGeo2);
-ClassImp(CAVEGEO::CaveGeo);
-ClassImp(DTUBGEO1::DtubGeo1);
-ClassImp(HCALGEO1::HcalGeo1);
-ClassImp(ECALGEO6::EcalGeo6);
-ClassImp(ECALGEO::EcalGeo);
-ClassImp(EIDDGEO::EiddGeo);
-ClassImp(FGTDGEO3::FgtdGeo3);
-ClassImp(FGTDGEOV::FgtdGeoV);
-ClassImp(FPDMGEO1::FpdmGeo1);
-ClassImp(FPDMGEO2::FpdmGeo2);
-ClassImp(FPDMGEO3::FpdmGeo3);
-ClassImp(FSCEGEO::FsceGeo);
-ClassImp(FTPCGEO1::FtpcGeo1);
-ClassImp(FTPCGEO::FtpcGeo);
-ClassImp(FTROGEO::FtroGeo);
-ClassImp(IDSMGEO1::IdsmGeo1);
-ClassImp(ISTDGEO0::IstdGeo0);
-ClassImp(MAGPGEO::MagpGeo);
-ClassImp(MUTDGEO2::MutdGeo2);
-ClassImp(MUTDGEO3::MutdGeo3);
-ClassImp(MUTDGEO4::MutdGeo4);
-ClassImp(MUTDGEO::MutdGeo);
-ClassImp(PHMDGEO::PhmdGeo);
-ClassImp(PIPEGEO00::PipeGeo00);
-ClassImp(PIPEGEO1::PipeGeo1);
-ClassImp(PIPEGEO2::PipeGeo2);
-ClassImp(PIPEGEO::PipeGeo);
-ClassImp(PIXLGEO3::PixlGeo3);
-ClassImp(PIXLGEO4::PixlGeo4);
-ClassImp(PIXLGEO5::PixlGeo5);
-ClassImp(PXSTGEO1::PxstGeo1);
-ClassImp(QUADGEO::QuadGeo);
-ClassImp(SCONGEO::SconGeo);
-ClassImp(SHAPGEO::ShapGeo);
-ClassImp(SHLDGEO::ShldGeo);
-ClassImp(SISDGEO1::SisdGeo1);
-ClassImp(SISDGEO2::SisdGeo2);
-ClassImp(SISDGEO3::SisdGeo3);
-ClassImp(SISDGEO4::SisdGeo4);
-ClassImp(SISDGEO5::SisdGeo5);
-ClassImp(SISDGEO6::SisdGeo6);
-ClassImp(SISDGEO7::SisdGeo7);
-ClassImp(SISDGEO::SisdGeo);
-ClassImp(SUPOGEO1::SupoGeo1);
-ClassImp(SUPOGEO::SupoGeo);
-ClassImp(SVTTGEO10::SvttGeo10);
-ClassImp(SVTTGEO11::SvttGeo11);
-ClassImp(SVTTGEO1::SvttGeo1);
-ClassImp(SVTTGEO2::SvttGeo2);
-ClassImp(SVTTGEO3::SvttGeo3);
-ClassImp(SVTTGEO4::SvttGeo4);
-ClassImp(SVTTGEO5::SvttGeo5);
-ClassImp(SVTTGEO6::SvttGeo6);
-ClassImp(SVTTGEO7::SvttGeo7);
-ClassImp(SVTTGEO9::SvttGeo9);
-ClassImp(SVTTGEO::SvttGeo);
-ClassImp(TESTGEO1::TestGeo1);
-ClassImp(TPCEGEO1::TpceGeo1);
-ClassImp(TPCEGEO2::TpceGeo2);
-ClassImp(TPCEGEO3A::TpceGeo3a);
-ClassImp(TPCXGEO1::TpcxGeo1);
-ClassImp(TUTRGEO1::TutrGeo1);
-ClassImp(TUTRGEO2::TutrGeo2);
-ClassImp(TUTRGEO3::TutrGeo3);
-ClassImp(TUTRGEO4::TutrGeo4);
-ClassImp(UPSTGEO::UpstGeo);
-ClassImp(VPDDGEO1::VpddGeo1);
-ClassImp(VPDDGEO2::VpddGeo2);
-ClassImp(VPDDGEO::VpddGeo);
-ClassImp(ZCALGEO::ZcalGeo);
 
-/* ClassImp(FtsdGeom_t); */ FtsdGeom_t ftsdGeom;
+FtsdGeom_t ftsdGeom;
 
 #include "StMessMgr.h"
 

@@ -27,10 +27,10 @@
 //  Frames with object attributes, just like on TAttCanvases.           //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include <assert.h>
 #include "TQtGedAttFrame.h"
 #include "TColor.h"
-#include "TCint.h"
+//#include "TCint.h"
 #include "TCanvas.h"
 #include "TVirtualMutex.h"
 #include "TVirtualPad.h"
@@ -50,7 +50,7 @@
 #    include <QDebug>
 #endif /* QT_VERSION */
 
-#include "Api.h"
+//#include "Api.h"
 #include "TPaveLabel.h"
 #include <snprintf.h>
 #include "TList.h"

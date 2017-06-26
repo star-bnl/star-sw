@@ -129,7 +129,8 @@ static const double kGasThreshold   = 1.e-2*gram/centimeter3;
 #endif /* !__CINT__ */
 inline int dummyPhysicalConstants() 
 {
-return
+  return 0;
+#if 0
 pi
 +halfpi
 +pi2
@@ -164,6 +165,7 @@ pi
 +STP_Temperature
 +STP_Pressure
 +kGasThreshold;
+#endif
 }
 
 

@@ -30,7 +30,7 @@
 
 #include "TQtGedFrames.h"
 #include "TColor.h"
-#include "TCint.h"
+//#include "TCint.h"
 #include "TCanvas.h"
 #include "TVirtualMutex.h"
 #include "TVirtualPad.h"
@@ -63,7 +63,7 @@
 
 #include <qtooltip.h>
 
-#include "Api.h"
+//#include "Api.h"
 #include "TPaveLabel.h"
 #include <snprintf.h>
 

@@ -41,7 +41,9 @@ class QAction;
 class QMouseEvent;
 class QResizeEvent;
 class QPaintEvent;
+#ifndef __CINT__
 class TQCanvasMenu;
+#endif
 class TContextMenu;
 class TControlBar;
 class TCanvas;
@@ -152,7 +154,7 @@ public slots:
 protected:
   ////////////////////////////////////
 #ifndef __CINT__      
-   TQCanvasMenu *fContextMenu;   // Qt Context menu for this canvas
+   TQCanvasMenu *fContextMenu;   //! Qt Context menu for this canvas
 #endif
    Int_t fWid;                   // Windows Id of the Canvas
    Bool_t fNeedResize;           // Resize flag

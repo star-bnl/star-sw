@@ -24,7 +24,7 @@ switch ( $STAR_HOST_SYS )
 endsw 
 cmake -L                                        \
     -DCMAKE_BUILD_TYPE=$ROOTBUILD           \
-    -DCMAKE_INSTALL_PREFIX=$ROOTSYS    \
+    -DCMAKE_INSTALL_PREFIX=$XOPTSTAR    \
     -DCMAKE_C_COMPILER=`root-config --cc`                      \
     -DCMAKE_CXX_COMPILER=`root-config --cxx`                  \
     -DBUILD_TESTING=OFF                          \

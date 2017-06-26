@@ -1,5 +1,4 @@
 #include "AgPlacement.h"
-ClassImp(AgPlacement);
 #include <iostream>
 
 //#define __DEBUG_MATRIX__

@@ -791,27 +791,29 @@ if ( $pkg =~ m/^St.*Db/             ||
   $CXXFLAGS .= $extraCXXFLAGS;
   $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
   $LIBS = "-lVc";
+  $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
   if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
   if ($pkg =~ m/^TPCCATracker$/ and $extraCXXFLAGS =~ /DO_TPCCATRACKER_EFF_PERFORMANCE/) {$LIBS .= " -lTPCCATrackerPerformance";}
   # stand - alone in .DEV2 only
-  if ($env->{STAR_VERSION} eq '.DEV2') {
-    Depends $env [$SO_PKG], [($LIB . "/libTPCCATracker.so")];
-    my $libs = "-lTPCCATracker " . $LIBS . $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
-    $envTPCCA = $env->clone('Package' => $pkg,
-			    'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
-			    'CPPPATH'  => $CPPPATH,
-			    'LIBPATH'  => $LIB . $main::PATH_SEPARATOR .$env->{Packages}->{ROOT}->{LIBDIR},
-			    'LIBS'     => $libs,
-			    'DEBUG'    => $DEBUG
-			   );
-    my @programs = glob($Dir . "/*.C");# print "programs: @programs\n";
-    foreach my $progD (@programs) {
-      my $prog = File::Basename::basename($progD,".C");
-      next if $prog eq 'MakeSettings';
-      Program      $envTPCCA $prog, ($prog . ".C");
-      Install $envTPCCA $BIN, $prog;
-    }
-  }
+#   if ($env->{STAR_VERSION} eq '.DEV2') {
+#     Depends $env [$SO_PKG], [($LIB . "/libTPCCATracker.so")];
+#     my $libs = "-lTPCCATracker " . $LIBS . $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
+#     $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
+#     $envTPCCA = $env->clone('Package' => $pkg,
+# 			    'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
+# 			    'CPPPATH'  => $CPPPATH,
+# 			    'LIBPATH'  => $LIBPATH,
+# 			    'LIBS'     => $libs,
+# 			    'DEBUG'    => $DEBUG
+# 			   );
+#     my @programs = glob($Dir . "/*.C");# print "programs: @programs\n";
+#     foreach my $progD (@programs) {
+#       my $prog = File::Basename::basename($progD,".C");
+#       next if $prog eq 'MakeSettings';
+#       Program      $envTPCCA $prog, ($prog . ".C");
+#       Install $envTPCCA $BIN, $prog;
+#     }
+#   }
 }  elsif ( $pkg =~ m/^KFParticle/) {
   $CPPFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE";
   $CPPPATH .=
@@ -822,6 +824,7 @@ if ( $pkg =~ m/^St.*Db/             ||
   $extraCXXFLAGS .= " -DNODEBUG";
   $CXXFLAGS .= $extraCXXFLAGS;
   $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+  $LIBPATH .=  $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib";
   $LIBS = "-lVc";
 }
 if ( $pkg =~ m/^Sti$/   ) {

@@ -1,7 +1,9 @@
+#include "Riostream.h"
 #include "PVgadgets.h"
 TableImpl(PVgadgets);
 #include "TMVAdata.h"
 ClassImp(TMVAdata);
+using namespace std;
 TMVAdata*     TMVAdata::fgInstance = 0;
 //________________________________________________________________________________
 void TMVAdata::Init() {

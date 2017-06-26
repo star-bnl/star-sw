@@ -98,7 +98,6 @@ protected:
     return cvs;
   }
 
-  ClassDef(AgPlacement,1);
 };
 
 #endif

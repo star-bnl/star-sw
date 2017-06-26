@@ -64,6 +64,8 @@ if ($STAR_HOST_SYS =~ /darwin/) {
   }
 }
 $DEBUG .= " CONFIG+=debug" if $env->{DEBUG} !~ /-O/;
+#$DEBUG .= " " . $env->{CXXFLAGS};
+#$DEBUG =~ s/-pthread//;
 #print "==================== $DEBUG ==========\n";
 my $PATH = $ENV{PATH};
 #print "PATH = $PATH\n";

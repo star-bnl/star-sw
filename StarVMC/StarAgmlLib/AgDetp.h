@@ -17,7 +17,6 @@ class AgDetp : public TNamed
     return cvs;
   }
 
-  ClassDef(AgDetp,1);
 
 };
 
