@@ -77,6 +77,7 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (detector)    {
     Double_t xyzL[3];
     detector->GetMatrix()->MasterToLocal(xyzG, xyzL);
+    //    _M = TRVector(2,&xyzL[1]);
     _M = TRVector(2,&xyzL[1]);
   }  else    {    
     _M = TRVector(3,xyzG);

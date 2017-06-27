@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <algorithm>
+#include "TList.h"
 using std::find_if;
 using std::for_each;
 using std::binary_search;
@@ -191,4 +192,12 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs) {
   double ra = rhs->Key(2);
   if ((la<0) != (ra<0))  { if (la<0) la+=2*M_PI;if (ra<0) ra+=2*M_PI;}
   return (la<ra);
+}
+//________________________________________________________________________________
+void StiDetectorContainer:: Print(Option_t *option) const {
+  TListIter next( _detectorsHash );
+  TObject *o = 0;
+  while ((o = next())) {
+    o->Print();
+  }
 }

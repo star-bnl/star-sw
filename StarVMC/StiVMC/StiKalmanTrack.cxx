@@ -671,7 +671,7 @@ Int_t StiKalmanTrack::Approx(Int_t mode) {
 			 0.0,       0.0,       0.0,   0.0, DY*DY);
     targetNode->Fitted() = FitParameters(FitParameters::kSD, spu, rot, P, C);
 #endif
-    //    targetNode->Fitted().SetBField(h);
+    targetNode->Fitted().SetBField(h);
     PrPP(Approx,targetNode->Fitted());  
   }   
   return 0;
@@ -1496,16 +1496,20 @@ void StiKalmanTrack::Find(Int_t direction
 	if (Debug() > 0) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
       } while(0);
       if (status)  {StiToolkit::instance()->TrackNodeFactory()->free(node); continue;}
-
-      qaTry = qa;
-      NodeQA(node,position,active,qaTry);
-      leadNode->Add(node,direction);
-      if (qaTry.qa>-2) Find(direction,node,qaTry);
-      
-      if (jHit==0) { qaBest=qaTry; continue;}
-      Int_t igor = CompQA(qaBest,qaTry,maxChi2);
-      if (igor<0)  { leadNode->Remove(0);}
-      else         { leadNode->Remove(1);qaBest=qaTry;}
+      if (! leadNode->Parent()) {
+	qaBest = qa;
+	continue;
+      } else {
+	qaTry = qa;
+	NodeQA(node,position,active,qaTry);
+	leadNode->Add(node,direction);
+	if (qaTry.qa>-2) Find(direction,node,qaTry);
+	
+	if (jHit==0) { qaBest=qaTry; continue;}
+	Int_t igor = CompQA(qaBest,qaTry,maxChi2);
+	if (igor<0)  { leadNode->Remove(0);}
+	else         { leadNode->Remove(1);qaBest=qaTry;}
+      }
     }
     qa = qaBest; gLevelOfFind--; return;
   }
@@ -1595,9 +1599,11 @@ Int_t StiKalmanTrack::Smooth(Int_t fitDirection) {
       TRSymMatrix RP(k->Fitted().H(),TRArray::kAxSxAT,C);       PrPP(Smooth,RP);
       k->R() -= RP;                                             PrPP(Smooth,k->R());
       // chi2_s = rT^n_k *(R^n_k)^-1 *r^n_k;
-      TRSymMatrix G(k->R(),TRArray::kInverted);                 PrPP(Smooth,G);
-      k->chi2() = G.Product(k->r(),TRArray::kATxSxA);           PrPP(Smooth,k->chi2());
-      if (k->chi2() > maxChi2) {
+      TRSymMatrix G(k->R(),TRArray::kInvertedA);                PrPP(Smooth,G);
+      k->chi2() = -1;
+      if (G.IsValid())
+	k->chi2() = G.Product(k->r(),TRArray::kATxSxA);           PrPP(Smooth,k->chi2());
+      if (! G.IsValid() || k->chi2() > maxChi2) {
 	// Remove the measurement
 	if (Debug()) {
 	  if (det) k->ResetComment(::Form("%30s rejected",k->Detector()->GetName()));
@@ -1609,25 +1615,27 @@ Int_t StiKalmanTrack::Smooth(Int_t fitDirection) {
 	// GG = (V_k - H_k * C^n_k * HT_k)^-1
 	TRSymMatrix VV(k->V(k->Fitted()));                        PrPP(Smooth,VV);
 	VV -= TRSymMatrix(k->Fitted().H(),TRArray::kAxSxAT,k->Smoothed().C()); PrPP(Smooth,VV);
-	TRSymMatrix GG(VV,TRArray::kInverted);                    PrPP(Smooth,GG);
-	TRMatrix D(k->Smoothed().C(),TRArray::kSxAT,k->Fitted().H());PrPP(Smoth,D);
-	TRMatrix K(D,TRArray::kAxS,GG);                           PrPP(Smoth,K);
-	// x^n*_k = x^n_k - K^n*_k * (m_k - H_k*x^n_k):
-	TRVector r(k->Hit()->Measurement(time));                 PrPP(Smoth,r);
-	r -= TRVector(k->Fitted().H(),TRArray::kAxB,P);   PrPP(Smoth,r);
-	k->Smoothed().P() -= TRVector(K,TRArray::kAxB,r);                    PrPP(Smoth,k->Smoothed().P());
-	r = k->Hit()->Measurement(time);
-	r -= TRVector(k->Fitted().H(),TRArray::kAxB,k->Smoothed().P());PrPP(Smoth,r);
-	Double_t chi2 = GG.Product(r,TRArray::kATxSxA);           PrPP(Smooth,chi2);
-	// C^n*_k = (I + K^n*_k*H_k) * C^n_k = 
-	// = C^n_k + C^n_k * HT_k * GG *H_k * C^n_k = 
-	TRSymMatrix HGH(k->Fitted().H(),TRArray::kATxSxA,GG);PrPP(Smoth,HGH);
-	k->Smoothed().C() += TRSymMatrix(k->Smoothed().C(),TRArray::kRxSxR,HGH);        PrPP(Smoth,k->Smoothed().C());
-	assert(k->Smoothed().C()(0,0) > 0);
-	if (Debug()) {
-	  if (det) k->ResetComment(::Form("%30s accepted",k->Detector()->GetName()));
-	  else     k->ResetComment(::Form("the vertex accepted"));
-	  StiKalmanTrackNode::PrintpT(k->Smoothed(),chi2,"R"); StiKalmanTrackNode::PrintStep();
+	TRSymMatrix GG(VV,TRArray::kInvertedA);                    PrPP(Smooth,GG);
+	if (GG.IsValid()) {
+	  TRMatrix D(k->Smoothed().C(),TRArray::kSxAT,k->Fitted().H());PrPP(Smoth,D);
+	  TRMatrix K(D,TRArray::kAxS,GG);                           PrPP(Smoth,K);
+	  // x^n*_k = x^n_k - K^n*_k * (m_k - H_k*x^n_k):
+	  TRVector r(k->Hit()->Measurement(time));                 PrPP(Smoth,r);
+	  r -= TRVector(k->Fitted().H(),TRArray::kAxB,P);   PrPP(Smoth,r);
+	  k->Smoothed().P() -= TRVector(K,TRArray::kAxB,r);                    PrPP(Smoth,k->Smoothed().P());
+	  r = k->Hit()->Measurement(time);
+	  r -= TRVector(k->Fitted().H(),TRArray::kAxB,k->Smoothed().P());PrPP(Smoth,r);
+	  Double_t chi2 = GG.Product(r,TRArray::kATxSxA);           PrPP(Smooth,chi2);
+	  // C^n*_k = (I + K^n*_k*H_k) * C^n_k = 
+	  // = C^n_k + C^n_k * HT_k * GG *H_k * C^n_k = 
+	  TRSymMatrix HGH(k->Fitted().H(),TRArray::kATxSxA,GG);PrPP(Smoth,HGH);
+	  k->Smoothed().C() += TRSymMatrix(k->Smoothed().C(),TRArray::kRxSxR,HGH);        PrPP(Smoth,k->Smoothed().C());
+	  assert(k->Smoothed().C()(0,0) > 0);
+	  if (Debug()) {
+	    if (det) k->ResetComment(::Form("%30s accepted",k->Detector()->GetName()));
+	    else     k->ResetComment(::Form("the vertex accepted"));
+	    StiKalmanTrackNode::PrintpT(k->Smoothed(),chi2,"R"); StiKalmanTrackNode::PrintStep();
+	  }
 	}
 	k->SetHit(0);
       } else {

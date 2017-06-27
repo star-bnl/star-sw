@@ -683,6 +683,11 @@ void StiKalmanTrackNode::UpdatePrediction(const StiKalmanTrackNode *pNode, TRVec
 //______________________________________________________________________________
 Int_t StiKalmanTrackNode::Propagate(StiKalmanTrackNode *pNode, StiDetector *tDet, Int_t dir, TRVector *refFitPar) {
   Int_t position = 0;
+  if (! Fitted().BField().GetSize()) {
+    Double_t h[3] = {0, 0, 0};
+    StarMagField::Instance()->BField(Fitted().XyzG().GetArray(),h);
+    Fitted().SetBField(h);
+  }
   if (pNode->Detector() == tDet) {PrPP(Propagate,Fitted());
     Predicted() = Fitted();       PrPP(Propagate,Predicted());
     TRMatrix unit(TRArray::kUnit,Fitted().P().GetSize()); 
@@ -703,7 +708,7 @@ Int_t StiKalmanTrackNode::Propagate(StiKalmanTrackNode *pNode, StiDetector *tDet
       return position;
     }
     StiDetector *tDetC = (StiDetector *) StiToolkit::instance()->DetectorContainer()->FindDetector(gGeoManager->GetPath());
-    assert( !tDetC || tDetC == tDet);
+    assert( tDetC || tDetC != tDet);
     if ( tDet) {
       if (Debug()) ResetComment(Form("%30s ",tDet->GetName()));
       LoadPrediction(); PrPP(Propagate,Predicted());
@@ -849,8 +854,11 @@ Double_t StiKalmanTrackNode::EvaluateChi2(const StiHit * hit) {
   //                                   : G_k = (R^k-1_k)^-1
   R() = TRSymMatrix(V(Predicted()));                                  PrPP(EvaluateChi2,R());
   R() += TRSymMatrix(Predicted().H(),TRArray::kAxSxAT,Predicted().C());PrPP(EvaluateChi2,R());
-  TRSymMatrix G(R(),TRArray::kInverted);                   PrPP(EvaluateChi2,G);
-  chi2()         = G.Product(r(),TRArray::kATxSxA);        PrPP(EvaluateChi2,chi2());
+  TRSymMatrix G(R(),TRArray::kInvertedA);                   PrPP(EvaluateChi2,G);
+  chi2() = 1e31;
+  if (G.IsValid()) {
+    chi2()         = G.Product(r(),TRArray::kATxSxA);        PrPP(EvaluateChi2,chi2());
+  }
   if (Debug() & 8) {comment += Form(" chi2 = %6.2f",chi2());}
   return chi2();
 }

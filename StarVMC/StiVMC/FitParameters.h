@@ -1,5 +1,6 @@
 #ifndef __FitParameters_h__
 #define __FitParameters_h__
+//#include <assert.h>
 #include "Stiostream.h"
 #include "TRVector.h"
 #include "TRSymMatrix.h"
@@ -82,8 +83,10 @@ class FitParameters { // base class for fit paramters
   const TGeoHMatrix *Rot()    const {return _rot;}	       
   const TRMatrix     F()      const {return _F;}		       
   TRMatrix          &F()            {return *&_F;}               
-  const TRVector     BField() const {return _BField;}
-  TRVector          &BField()       {return *&_BField;}
+  const TRVector     BField() const {//assert(_BField.GetSize()); 
+    return _BField;}
+  TRVector          &BField()       {//assert(_BField.GetSize()); 
+    return *&_BField;}
   Double_t           Spu()    const {return _spu;}
   Double_t          &Spu()          {return *&_spu;}
   static  eTrParType SetType(Int_t type=0);        

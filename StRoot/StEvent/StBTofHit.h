@@ -71,6 +71,7 @@ public:
     const StThreeVectorF& position() const;
     static Float_t    padWidth()            { return mBTofPadWidth;}
     StDetectorId   detector() const;
+    virtual Int_t volumeID() const {return 0;}
 
 protected:
     UChar_t   mTray;

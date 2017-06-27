@@ -47,7 +47,6 @@ public:
 
     void  setTrkId(Int_t);
     void  setGId(Int_t);
-
 protected:
     Int_t     mTrkId;
     Int_t     mGId;

@@ -49,6 +49,7 @@ public:
     int       tray() const;
     int       channel() const;
     unsigned int   tdc() const;
+    virtual Int_t volumeID() const {return 0;}
 
     void      setFlag(char);
     void      setTray(unsigned char);

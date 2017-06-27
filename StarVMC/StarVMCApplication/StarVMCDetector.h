@@ -35,6 +35,7 @@ class StarVMCDetector : public TDataSet {
   const StDetectorId Id() {return fId;}
   void           SetVolIdOffset(Int_t k) {fVolIdoffset = k;}
   const Char_t  *FormPath(const Char_t *FMT, Int_t *numbvR);
+  const Char_t  *FormPath(Int_t volumeId);
   void           Clear(const Option_t* opt="");
   static  TTable    	  *NewTable(const Char_t *classname, const Char_t *name="", Int_t nrows=100); 
   static  St_g2t_Chair    *NewChair(const Char_t *type, const Char_t *name="");                       
