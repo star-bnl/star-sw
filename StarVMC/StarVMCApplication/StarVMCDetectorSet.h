@@ -4,7 +4,7 @@
 #include "THashList.h"
 #include "TGeoNode.h"
 #include "TString.h"
-
+#include "StarVMCDetector.h"
 class StarVMCDetectorSet : public TDataSet {
  public:
   virtual ~StarVMCDetectorSet() {SafeDelete(fDetHash); SafeDelete(fDetectorDescriptors);}
@@ -13,10 +13,10 @@ class StarVMCDetectorSet : public TDataSet {
   virtual  void                SetDebug(Int_t m=0) {fDebug = m;}
   virtual  THashList          *GetDetectorHash() {return fDetHash;}
   virtual  Int_t               Debug()        { return fDebug;}
-#if 1
+  virtual  
   void                         MakeDetectorDescriptors();
   Int_t                        LoopOverTgeo(TGeoNode *nodeT = 0, TString pathT = "");
-#endif
+  const StarVMCDetector*       GetVMCDetector(StDetectorId Id);
  private:
   StarVMCDetectorSet(const Char_t *name="StarVMCDetectorSet",const Char_t *title="");
   static StarVMCDetectorSet *fgInstance;

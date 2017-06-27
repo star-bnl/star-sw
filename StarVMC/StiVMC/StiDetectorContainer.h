@@ -157,7 +157,8 @@ class StiDetectorContainer : public TNamed {
     endPhi(StiDetectorNode::StiDetectorNodeVector::const_reverse_iterator &radialIterator)  {
     return (*radialIterator)->end();
   }
-  
+  virtual void        Print(Option_t *option="") const;
+
  private:
   Bool_t SetPhi(const StiOrderKey& oldOrder);
   // Utility function for MoveIn(), moveOut() functions

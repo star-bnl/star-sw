@@ -35,6 +35,7 @@ public:
     float triggerTime() const;
     short module() const;
     short cell() const;
+    virtual Int_t volumeID() const {return 0;}
     
     
     void setDirection(StBeamDirection);

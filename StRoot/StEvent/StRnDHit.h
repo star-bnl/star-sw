@@ -50,7 +50,7 @@ public:
     int    extraByte1() const;
     
     int    key() const;
-    int    volumeId() const;
+    int    volumeID() const;
     
     double double0() const;
     double double1() const;
@@ -121,7 +121,7 @@ inline unsigned int  StRnDHit::wafer() const {return mWafer;}
 inline int    StRnDHit::extraByte0() const {return mExtraByte0;}
 inline int    StRnDHit::extraByte1() const {return mExtraByte1;}
 inline int    StRnDHit::key() const {return mKey;}
-inline int    StRnDHit::volumeId() const {return mVolumeId;}
+inline int    StRnDHit::volumeID() const {return mVolumeId;}
 inline double StRnDHit::double0() const {return mDouble0;}
 inline double StRnDHit::double1() const {return mDouble1;}
 inline double StRnDHit::double2() const {return mDouble2;}

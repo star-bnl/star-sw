@@ -235,6 +235,15 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
   fDetHash->Rehash(Nd);
 }
 //________________________________________________________________________________
+const StarVMCDetector* StarVMCDetectorSet::GetVMCDetector(StDetectorId Id) {
+  StarVMCDetector *o = 0;
+  TIter next(fDetHash);
+  while ((o = (StarVMCDetector *) next())) {
+    if (o->Id() == Id) return o;
+  }
+  return o;
+}
+//________________________________________________________________________________
 // $Log: StarVMCDetectorSet.cxx,v $
 // Revision 1.4  2013/12/16 23:00:14  fisyak
 // Add g2t_volume_id

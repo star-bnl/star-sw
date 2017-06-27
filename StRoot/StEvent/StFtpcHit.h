@@ -100,6 +100,7 @@ public:
     void setSigmaTimePosition(float);
  
     StDetectorId   detector() const;
+    virtual Int_t volumeID() const {return 0;}
     
 
 protected:

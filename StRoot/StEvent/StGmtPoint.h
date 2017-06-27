@@ -38,6 +38,7 @@ virtual StDetectorId detector() const           {return kGmtId;}
     
     float getPositionLocalX() const;
     float getPositionLocalY() const;
+    virtual Int_t volumeID() const {return 0;}
     
 protected:
     // data members

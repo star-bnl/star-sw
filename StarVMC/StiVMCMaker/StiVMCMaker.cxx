@@ -120,10 +120,9 @@ SetAttr("noTreeSearch",kFALSE);	// treeSearch default ON
 /// Now minimal possible error is 1 micron
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
-ClassImp(StiVMCMaker)
-  
+ClassImp(StiVMCMaker);
 //_____________________________________________________________________________
-  StiVMCMaker::StiVMCMaker(const Char_t *name) : 
+StiVMCMaker::StiVMCMaker(const Char_t *name) : 
     StMaker(name),
     _Initialized(false),
     _toolkit(0),
@@ -232,8 +231,8 @@ Int_t StiVMCMaker::InitDetectors() {
       }
       if (IAttr("WestOff")) minSector = 13;
       if (IAttr("EastOff")) maxSector = 12;
-      if (IAttr("activeSvt") || 
-	  IAttr("activeSsd") || IAttr("skip1row")) minRow = 2;
+      if ((IAttr("activeSvt")  || 
+	   IAttr("activeSsd")) && IAttr("skip1row")) minRow = 2;
       cout << "StiVMCMaker::InitDetectors() -I- " << detName.Data() 
 	   << "\tuse sectors in range[" << minSector << "," << maxSector
 	   << "] with  rows >= " << minRow << endl;
@@ -253,11 +252,11 @@ Int_t StiVMCMaker::InitDetectors() {
       Int_t sector = 1;
       Int_t row    = 1;
       StiHitErrorCalculator *hitErrorCalculator = 0;
+      Int_t volumeID = -1;
       switch (kId) {
       case kTpcId:
-	sector = fIndx[0];
-	if (sector <= 12) part = 1;
-	else              part = 2;
+	part = fIndx[0];
+	sector = 12*(part - 1) + fIndx[1];
 	row    = fIndx[2];
 	keyA = sector;
 	if (sector < minSector || sector > maxSector) continue;
@@ -266,6 +265,7 @@ Int_t StiVMCMaker::InitDetectors() {
 	if (row<13) hitErrorCalculator = StiTpcInnerHitErrorCalculator::instance();
 	else        hitErrorCalculator = StiTpcOuterHitErrorCalculator::instance();
 	trackingParameters = (StiTrackingParameters *) StiTpcTrackingParameters::instance();
+	volumeID = 100*sector + row;
 	break;
       case kSvtId:
 	sector = fIndx[2];
@@ -287,8 +287,11 @@ Int_t StiVMCMaker::InitDetectors() {
 	hitErrorCalculator = StiIst1HitErrorCalculator::instance();     break;
       default:                                                   	break;
       }
-      
-      fPath = StarVMCDetector::FormPath(fVMCDetector->GetFMT().Data(),fVMCDetector->GetNVL(),fIndx);
+      if (volumeID > 0) {
+	fPath = fVMCDetector->FormPath(volumeID);
+      } else {
+	fPath = StarVMCDetector::FormPath(fVMCDetector->GetFMT().Data(),fVMCDetector->GetNVL(),fIndx);
+      }
       if (! gGeoManager->CheckPath(fPath)) continue;
       fStiDetector = (StiDetector *) fDetectorContainer->FindDetector(fPath);
       if (! fStiDetector) {
@@ -340,6 +343,7 @@ Int_t StiVMCMaker::InitRun(Int_t run)
 void StiVMCMaker::loadTpcHits(StEvent *pEvent) {
   const StTpcHitCollection* tpcHits = pEvent->tpcHitCollection();
   if (!tpcHits) return;
+  if (! tpcHits->numberOfHits()) return;
   StiHit* stiHit;
   UInt_t sec;
   UInt_t noHitsLoaded = 0;
@@ -350,7 +354,6 @@ void StiVMCMaker::loadTpcHits(StEvent *pEvent) {
       cout << "StiVMCMaker::loadTpcHits -W- no hits for sector:"<<sector<<endl;
       break;
     }
-    fIndx[0] = sec;
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sec); // cm/mkmsec
     for (UInt_t padrow = 0; padrow < secHits->numberOfPadrows(); padrow++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
@@ -358,10 +361,8 @@ void StiVMCMaker::loadTpcHits(StEvent *pEvent) {
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
       if (! hitvec.size()) continue;
-      Int_t row = padrow + 1;
-      fIndx[1] = row <= 13 ? 1 : 2; // Inner or Outer
-      fIndx[2] = row;
-      fPath = StarVMCDetector::FormPath(fVMCDetector->GetFMT().Data(),fVMCDetector->GetNVL(),fIndx);
+      Int_t volumeID = StTpcHit::volumeID(sector+1,padrow+1);
+      fPath = fVMCDetector->FormPath(volumeID);
       fStiDetector = (StiDetector *) fDetectorContainer->FindDetector(fPath);
       if (! fStiDetector) continue;
       const_StTpcHitIterator iter;
@@ -382,12 +383,12 @@ void StiVMCMaker::loadTpcHits(StEvent *pEvent) {
         _toolkit->HitContainer()->Add( stiHit );
 	noHitsLoaded++;
 	if (Debug()) {
-	  cout << "add hit S/R =" << sector << "/" << row << " to detector " << *fStiDetector << endl;
+	  cout << "add hit S/R =" << sector << "/" << padrow << " to detector " << *fStiDetector << endl;
 	}
       }
       if (hitTest.width()>0.1) {
 	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
-	       ,hitTest.width(),sector,row);
+	       ,hitTest.width(),sector,padrow);
       }
     }
   }
@@ -489,11 +490,11 @@ void StiVMCMaker::loadSvtHits(StEvent *pEvent) {
   cout <<"StiVMCMaker::loadSvtHits -I- Done"<<endl;
 }
 //_____________________________________________________________________________
-void StiVMCMaker::loadIStHits(StEvent *pEvent) {
-  LOG_INFO << "StiVMCMaker::loadIStHits -I- Started" << endm;
+void StiVMCMaker::loadIstHits(StEvent *pEvent) {
+  LOG_INFO << "StiVMCMaker::loadIstHits -I- Started" << endm;
   StRnDHitCollection *col = pEvent->rndHitCollection();
   if (!col) {
-    LOG_INFO <<"StiVMCMaker::loadIStHits\tERROR:\tcol==0"<<endm;
+    LOG_INFO <<"StiVMCMaker::loadIstHits\tERROR:\tcol==0"<<endm;
     LOG_INFO <<"You must not have pixelFastSim in your chain"<<endm;
     LOG_INFO <<"will return with no action taken"<<endm;
     return;
@@ -514,25 +515,25 @@ void StiVMCMaker::loadIStHits(StEvent *pEvent) {
     //    Int_t layer=hit->layer();
     Int_t ladder=hit->ladder();
     Int_t wafer=hit->wafer();
-    LOG_DEBUG<<"StiVMCMaker::loadIStHits: hit has ladder: "<<ladder<<"; wafer: "<<wafer<<endm;
-    LOG_DEBUG<<"StiVMCMaker::loadIStHits: hit volume id: "<<hit->volumeId()<<endm;
+    LOG_DEBUG<<"StiVMCMaker::loadIstHits: hit has ladder: "<<ladder<<"; wafer: "<<wafer<<endm;
+    LOG_DEBUG<<"StiVMCMaker::loadIstHits: hit volume id: "<<hit->volumeId()<<endm;
     fIndx[0] = ladder;
     fIndx[1] = wafer;
     fPath = StarVMCDetector::FormPath(fVMCDetector->GetFMT().Data(),fVMCDetector->GetNVL(),fIndx);
     if (! gGeoManager->CheckPath(fPath)) continue;
     fStiDetector = (StiDetector *) fDetectorContainer->FindDetector(fPath);
     assert(fStiDetector);
-    cout <<"StiVMCMaker::loadIStHits: add hit to detector:\t"<<fStiDetector->GetName()<<endl;
+    cout <<"StiVMCMaker::loadIstHits: add hit to detector:\t"<<fStiDetector->GetName()<<endl;
     
     StiHit * stiHit = _toolkit->HitFactory()->getInstance();
     if(!stiHit) continue;
     stiHit->Reset();
-    LOG_DEBUG<<"StiVMCMaker::loadIStHits: hit has position ("
+    LOG_DEBUG<<"StiVMCMaker::loadIstHits: hit has position ("
 	     <<hit->position().x()<<","<<hit->position().y()<<","<<hit->position().z()<<")"<<endm;
     stiHit->setGlobal(fStiDetector, hit, hit->position().x(),hit->position().y(),hit->position().z());
     _toolkit->HitContainer()->Add( stiHit );
   }
-  LOG_INFO << "StiVMCMaker::loadIStHits -I- Done" << endm;
+  LOG_INFO << "StiVMCMaker::loadIstHits -I- Done" << endm;
 }
 //_____________________________________________________________________________
 void StiVMCMaker::loadPxlHits(StEvent *pEvent) {
@@ -630,6 +631,34 @@ void StiVMCMaker::loadHits(StEvent* pEvent) {
       continue;
     }
     fStiDetector = 0;  
+    /*
+      StBTofCollection.h
+      StTofCollection.h
+      StEmcClusterCollection.h
+      StEmcCollection.h
+      StEtrHitCollection.h
+      StFgtCollection.h
+      StFgtHitCollection.h
+      StFgtPointCollection.h
+      StFmsCollection.h
+      StFpdCollection.h
+      StFtpcHitCollection.h
+      StGmtCollection.h
+      StGmtHitCollection.h
+      StGmtPointCollection.h
+      StIstHitCollection.h
+      StMtdCollection.h
+      StPhmdClusterCollection.h
+      StPhmdCollection.h
+      StPxlHitCollection.h
+      StRichCollection.h
+      StRnDHitCollection.h
+      StRpsCollection.h
+      StSsdHitCollection.h
+      StSstHitCollection.h
+      StSvtHitCollection.h
+      StTpcHitCollection.h
+     */
     switch (fId) {
     case kSsdId     	       : loadSsdHits(pEvent);                break;
     case kSvtId                : loadSvtHits(pEvent); 		     break;
@@ -637,7 +666,7 @@ void StiVMCMaker::loadHits(StEvent* pEvent) {
     case kTofId     	       : loadTofHits(pEvent); 		     break;
     case kCtbId     	       : loadCtbHits(pEvent); 		     break;
     case kFgtId                : loadFgtHits(pEvent); 		     break;
-    case kIstId                : loadIStHits(pEvent); 		     break;
+    case kIstId                : loadIstHits(pEvent); 		     break;
     case kPxlId                : loadPxlHits(pEvent); 		     break;
     case kPhmdId               : loadPhmdHits(pEvent);		     break;
     case kZdcWestId            : loadZdcHits(pEvent); 		     break;

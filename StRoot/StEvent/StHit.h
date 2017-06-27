@@ -162,6 +162,7 @@ public:
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
 
     virtual StDetectorId   detector() const = 0;
+    virtual Int_t          volumeId() const {return 0;}
     virtual void           Print(Option_t *option="") const;
     
 protected:

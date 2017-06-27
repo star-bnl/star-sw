@@ -35,7 +35,7 @@ class StiVMCMaker : public StMaker {
   virtual void  loadTofHits(StEvent *pEvent);
   virtual void  loadCtbHits(StEvent *pEvent);
   virtual void  loadFgtHits(StEvent *pEvent);
-  virtual void  loadIStHits(StEvent *pEvent);
+  virtual void  loadIstHits(StEvent *pEvent);
   virtual void  loadPxlHits(StEvent *pEvent);
   virtual void  loadPhmdHits(StEvent *pEvent);
   virtual void  loadZdcHits(StEvent *pEvent);

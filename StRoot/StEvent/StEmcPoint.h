@@ -89,6 +89,7 @@ public:
     void  setDeltaV(const float);
     
     StDetectorId detector() const;
+    virtual Int_t volumeID() const {return 0;}
     
     StPtrVecEmcCluster&       cluster(const StDetectorId);
     const StPtrVecEmcCluster& cluster(const StDetectorId) const;

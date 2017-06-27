@@ -7,8 +7,8 @@
   setenv NODEBUG yes
   setup 64b
   setenv STARFPE NO
-#  starver .DEV2
-  starver TFG17e
+  starver .DEV2
+#  starver TFG17e
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
   set daq  = `ls -1d /star/data03/daq/2016/*/*/${base}.daq`
@@ -18,7 +18,8 @@
   set logFile  = ${base}B.log
   echo "${file}"
   if ( ! -r ${file}) then
-    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,LcKppi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,LcKppi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,LcKppimT,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!--

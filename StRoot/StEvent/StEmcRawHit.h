@@ -70,6 +70,7 @@ public:
     unsigned int    calibrationType() const;
     unsigned int    adc() const;
     float           energy() const;
+    virtual Int_t volumeID() const {return 0;}
     
     void setId(StDetectorId, unsigned int, unsigned int, unsigned int);
     void setCalibrationType(const unsigned int);
