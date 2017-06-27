@@ -1,5 +1,5 @@
 #! /usr/bin/env tcsh 
-foreach gcc (gcc482 gcc492 gcc521)
+foreach gcc ( gcc521) #gcc482 gcc492
   foreach opt (debug opt)
     foreach bit (32b 64b)
       if ($opt == "debug") then 
@@ -10,6 +10,8 @@ foreach gcc (gcc482 gcc492 gcc521)
       setup ${gcc}
       setup ${bit}
       starver ${STAR_LEVEL}
+      xtitl
+      echo $STAR_HOST_SYS
       time cons -k >& build.${gcc}.${opt}.${bit}.`date +%Y%m%d%y:%H%M`.log &
     end
   end
