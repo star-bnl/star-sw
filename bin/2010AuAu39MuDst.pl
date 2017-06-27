@@ -1,0 +1,1 @@
+#  get_file_list.pl -delim '/' -keys 'path,filename' -cond 'storage!=hpss,production=P10ik,trgsetupname=AuAu39_production,filetype=daq_reco_MuDst,filename~st_physics,sanity=1,tpx=1,storage=NFS' -limit 0

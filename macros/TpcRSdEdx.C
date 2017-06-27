@@ -291,19 +291,33 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c1N);
   if (! c1 ) c1 = new TCanvas(c1N,c1N);
   else       c1->Clear();
-  TH1F *hr = c1->DrawFrame(-1,1,6,6);
-  hr->SetTitle("TpcRS log(dE/dx) versus log_{ 10} (   #beta #gamma)");
+  TH1F *hr = 0;
+  if (fOpt.Contains("fitN",TString::kIgnoreCase)) {
+    hr = c1->DrawFrame(-1,3,6,6);
+    hr->SetTitle("TpcRS log(dN/dx) versus log_{ 10} (   #beta #gamma)");
+    hr->SetYTitle("log (dN/dx [keV/cm])");  
+  } else {
+    hr = c1->DrawFrame(-1,1,6,6);
+    hr->SetTitle("TpcRS log(dE/dx) versus log_{ 10} (   #beta #gamma)");
+    hr->SetYTitle("log (dE/dx [keV/cm])");  
+  }
   hr->SetXTitle("log_{10} ( #beta#gamma  ) ");
-  hr->SetYTitle("log (dE/dx [keV/cm])");  
 
   TLegend *l2 = new TLegend(0.5,0.6,0.8,0.9);
   TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c2N);
   if (! c2 ) c2 = new TCanvas(c2N,c2N);
   else       c2->Clear();
-  TH1F *hr2 = c2->DrawFrame(-1,-0.2,6,0.2);
-  hr2->SetTitle(Form("Deviation TpcRS log(dE/dx) from %s Prediction versus log_{ 10}(   #beta #gamma)",fopt));
+  TH1F *hr2 = 0;
+  if (fOpt.Contains("fitN",TString::kIgnoreCase)) {
+    h2r = c2->DrawFrame(-1,-0.2,6,0.2);
+    hr2->SetTitle(Form("Deviation TpcRS log(dN/dx) from %s Prediction versus log_{ 10}(   #beta #gamma)",fopt));
+    hr2->SetYTitle("log (dN/dx / Prediction)");  
+  } else {
+    h2r = c2->DrawFrame(-1,-0.2,6,0.2);
+    hr2->SetTitle(Form("Deviation TpcRS log(dE/dx) from %s Prediction versus log_{ 10}(   #beta #gamma)",fopt));
+    hr2->SetYTitle("log (dE/dx / Prediction)");  
+  }
   hr2->SetXTitle("log_{10} ( #beta#gamma  ) ");
-  hr2->SetYTitle("log (dE/dx / Prediction)");  
   TLegend *l3 = new TLegend(0.5,0.6,0.8,0.9);
   TCanvas *c3 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c3N);
   if (! c3 ) c3 = new TCanvas(c3N,c3N);
@@ -321,7 +335,9 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   TString Out("McPiD");
   Out += fOpt;
   Out += ".root";
+#if 0
   TFile *fOut = new TFile(Out,"recreate");
+#endif
   TH2F *h2 = 0;
   //  for (Int_t i = 0; i < NHYP+1; i++) {
   for (Int_t i = 0; i < NHYP; i++) {
@@ -437,11 +453,13 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
     SetH(s1p,marker,color);
     s1p->Draw("same");
     c3->Update();
+#if 0
     fOut->cd();
     //    h2->Write();
     h1s->Write();
     h1p->Write();
     s1p->Write();
+#endif
   }
   //  delete fOut;
 }

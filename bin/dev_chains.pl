@@ -1,5 +1,6 @@
 #! /bin/env perl 
 use File::Basename;
+use File::Find;
 use Cwd;
 my $vers = "";#new";
 my $glob = "";
@@ -24,6 +25,11 @@ my @Files = glob $glob;# print "Files = @Files\n";
 #my @skip = qw( year_1h_central_daq_sl302 year_1h_minbias_daq_sl302 );
 my $ChainDef = "ChainDef.h";
 open(OUTC, ">$ChainDef") or die "Can't open $ChainDef";
+   sub input_file {
+#    print "input_file: $file => $File::Find::name $_ \n";
+    return unless -r $_ && $File::Find::name =~ $input;
+    $file = $File::Find::name;
+  }
 
 foreach my $file (@Files) { 
   print "$file\n";
@@ -117,6 +123,10 @@ foreach my $file (@Files) {
 #   "' . $input . '"
 #   ,                                                                                                kFALSE},
 #';
+      my $file = "";
+  find(\&input_file, qw(/star/rcf/test/daq /star/rcf/test/gstardata /star/rcf/simu));
+  print "$input => $file\n";
+   if (! $file) {die;}
       print OUTC '
   {"'. $chain .'","","","'. $Chain .'","","",
    "' . $input . '"

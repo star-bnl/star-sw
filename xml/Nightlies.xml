@@ -11,23 +11,30 @@
   if (! $?) then
     set chain = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
     set dir   = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
-    set log   = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set file  = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
     set l     = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+    set ref   = `echo $INPUTFILE0 | awk -F\: '{print $5}'`
   else
     exit 1;
   endif
   if (! -d $dir) mkdir -p $dir
   cd $dir;
   source ~/bin/SetVersion.csh
+  set log = $file:t:r;
   set logFile  = ${log}.log
+  set refFile  = ${log}.log.ref
+  if (-r $refFile) then
+    rm $refFile;
+  endif
+  ln -s $ref $refFile; 
   if (-r $logFile) exit 0;
   setenv StarEndMakerShell
   set exec = "root4star"
   echo $chain | grep '\.RC\.'
   if (! $?)  set exec = "root.exe"
-  ${exec} -q -b -x 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
+  ${exec} -q -b -x 'bfc.C('$f','$l',"'$chain',Sti","'$file')' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/u/fisyak/prodlog/Nightlies_sched$JOBID.log" />
+<stdout URL="file:./Nightlies_sched$JOBID.log" />
 <input URL="command:Nightlies.pl" />
 <!-- <input URL="file:/net/l404/data/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->

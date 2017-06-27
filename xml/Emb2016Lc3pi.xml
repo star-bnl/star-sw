@@ -10,15 +10,18 @@
   starver .DEV2
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
-  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
+#  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
+  set daq  = `ls -1d /star/data03/daq/2016/*/*/${base}.daq`
   if (! -r ${daq}) exit 1;
 #  set name = "Lc3pi";
   set file = ${base}.MuDst.root
   set logFile  = ${base}B.log
   echo "${file}"
   if ( ! -r ${file}) then
-    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pimT,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" /> -->
+<input URL="file:/star/subsys/tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" />
 </job>

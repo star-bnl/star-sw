@@ -1,6 +1,7 @@
 #! /usr/bin/env perl
 use File::Basename;
 use Cwd;
+my @TestList = `root.exe -q -b bfc.C | awk -F\: '{print $3}' | egrep test`;
 my $makeList = 0;
 my $NoEvents = 100;
 my $pwd = cwd();
@@ -10,7 +11,6 @@ if ($pwd =~ /StiCA/) {$extra .= ",StiCA";}
 if ($pwd =~ /KF/) {$extra .= ",KFVertex";}
 if ($pwd =~ /x8664/) {$noMC = 1;} #print "noMC = $noMC\n";
 if ($makeList) {
-  my @TestList = `root.exe -q -b bfc.C | awk -F\: '{print $3}' | egrep test`;
   foreach my $line (@TestList) {
     $line =~ s/ //g;
     if ($line =~ /AgML/) { next; }
@@ -52,12 +52,12 @@ if ($makeList) {
   open(In, $file) or die "Can't open $file";
   while ( my $it = <In>) {
     if ($noMC and $it =~ /MC/) {next;}
-    my ($string,$test,$DIR,$f,$NoEvents,$ref) = split(":",$it);
+    my ($string,$test,$DIR,$f,$NoEvents) = split(":",$it);
     if ($string ne 'string') {next;}
 #    my @words = split(":",$it);
 #    my $log = $words[2] . "/" . $words[3] . ".log";#  print "$log\n";
     my $log = $DIR . "/" . $f . ".log"; 
     if (-r $log) {next;}
-    print "$string:$test$extra:$DIR:$f:$NoEvents:$ref\n";
+    print "$string:$test$extra:$DIR:$f:$NoEvents";
   }
 }
