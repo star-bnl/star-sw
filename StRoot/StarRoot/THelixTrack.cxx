@@ -2908,7 +2908,7 @@ void THelixFitter::Test(int kase)
   if (!(kase&12))kase+=4+8;
 //  enum {nPts=20,nHH=8};
   enum {nPts=5,nHH=8};
-  double e[4],x[3],xe[3];    
+  double e[4],x[10],xe[10];    
   double aShift[6];
   aShift[0]=-acos(0.25);
   aShift[1]=-acos(0.50);
@@ -3747,7 +3747,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.77 2015/05/21 23:37:01 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.78 2017/06/27 23:45:39 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3763,6 +3763,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.78  2017/06/27 23:45:39  perev
+ * Coverity
+ *
  * Revision 1.77  2015/05/21 23:37:01  perev
  * CheckCpp fixes. No real bugs
  *
