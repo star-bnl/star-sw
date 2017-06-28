@@ -1,5 +1,6 @@
 // $Id: StarMCSimplePrimaryGenerator.cxx,v 1.1.1.1 2008/12/10 20:45:52 fisyak Exp $
 #include "StarMCSimplePrimaryGenerator.h"
+#include "TF1.h"
 #include "TGeant3.h"
 ClassImp(StarMCSimplePrimaryGenerator);
 Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
@@ -50,8 +51,11 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else {
     cout << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endl;
   }
-  if (fOption.Contains("mt",TString::kIgnoreCase)) {
-    cout << "Use exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endl;
+  if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
+    fTemperature = 0.457;
+    cout << "Use dN/dmT^2 = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endl;
+  } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
+    cout << "Use dN/dmT = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endl;
   }
   cout << fEta_min  << " < eta < " << fEta_max  << endl;
   cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
@@ -61,74 +65,69 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::GeneratePrimary() {     
   // Add one primary particle to the user stack (derived from TVirtualMCStack).
- // Track ID (filled by stack)
- Int_t ntr;
- 
- // Option: to be tracked
- Int_t toBeDone = 1; 
- 
- // Particle type
- Int_t pdg  = fId;
- 
- // Polarization
- Double_t polx = 0.; 
- Double_t poly = 0.; 
- Double_t polz = 0.; 
-
- // Position
- Double_t vx  = fOrigin.X(); 
- Double_t vy  = fOrigin.Y(); 
- Double_t vz =  fOrigin.Z(); 
- Double_t tof = 0.;
-
- // Energy (in GeV)
- Double_t mass      = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
- Double_t eta       = fEta_min + (fEta_max - fEta_min)*gRandom->Rndm();
- Double_t phi       = fPhi_min + (fPhi_max - fPhi_min)*gRandom->Rndm();
- Double_t pT        = 0;
- if (fOption.Contains("BL",TString::kIgnoreCase)) {
-   Double_t p = -1;
-   while (p <= 0 || p > 100) {
-     Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
-     Double_t bg      = TMath::Power(10.,bgL10);
-     p       = mass*bg;
-   }
-   pT               = p/TMath::CosH(eta);
- } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
-   while (pT < fpT_min || pT > fpT_max) {
-     Double_t mT = mass -Temperature()*TMath::Log(gRandom->Rndm());
-     Double_t pT2 = mT*mT - mass*mass;
-     pT  = TMath::Sqrt(pT2);
-   }
- } else {
-   pT               = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
- }
- // Particle momentum
- Double_t px, py, pz;
- px = pT*TMath::Cos(phi); 
- py = pT*TMath::Sin(phi);
- pz = pT*TMath::SinH(eta);
- // Double_t kinEnergy = 0.050;  
- Double_t e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
- // Add particle to stack 
- fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
-                  kPPrimary, ntr, 1., 2);
+  // Track ID (filled by stack)
+  static TF1 *dNdpT = 0; 
+  Int_t ntr;
+  // Option: to be tracked
+  Int_t toBeDone = 1; 
+  // Particle type
+  Int_t pdg  = fId;
+  // Polarization
+  Double_t polx = 0.; 
+  Double_t poly = 0.; 
+  Double_t polz = 0.; 
+  // Position
+  Double_t vx  = fOrigin.X(); 
+  Double_t vy  = fOrigin.Y(); 
+  Double_t vz =  fOrigin.Z(); 
+  Double_t tof = 0.;
+  // Energy (in GeV)
+  Double_t mass      = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+  Double_t eta       = fEta_min + (fEta_max - fEta_min)*gRandom->Rndm();
+  Double_t phi       = fPhi_min + (fPhi_max - fPhi_min)*gRandom->Rndm();
+  Double_t pT        = 0;
+  if (fOption.Contains("BL",TString::kIgnoreCase)) {
+    Double_t p = -1;
+    while (p <= 0 || p > 100) {
+      Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+      Double_t bg      = TMath::Power(10.,bgL10);
+      p       = mass*bg;
+    }
+    pT               = p/TMath::CosH(eta);
+  } else if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
+    if (! dNdpT) {
+      dNdpT = new TF1("dNdpT","x*TMath::Exp(-TMath::Sqrt(x*x+[0]*[0])/[1])", fpT_min,fpT_max);
+      dNdpT->SetParameters(mass,Temperature());
+    }
+    pT = dNdpT->GetRandom();
+  } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
+    while (pT < fpT_min || pT > fpT_max) {
+      Double_t mT = mass -Temperature()*TMath::Log(gRandom->Rndm());
+      Double_t pT2 = mT*mT - mass*mass;
+      pT  = TMath::Sqrt(pT2);
+    }
+  } else {
+    pT               = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+  }
+  // Particle momentum
+  Double_t px, py, pz;
+  px = pT*TMath::Cos(phi); 
+  py = pT*TMath::Sin(phi);
+  pz = pT*TMath::SinH(eta);
+  // Double_t kinEnergy = 0.050;  
+  Double_t e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
+  // Add particle to stack 
+  fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
+			kPPrimary, ntr, 1., 2);
 }
-
-//
-// public methods
-//
-
 //_____________________________________________________________________________
-void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin)
-{    
-// Fill the user stack (derived from TVirtualMCStack) with primary particles.
-// ---
+void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin) {    
+  // Fill the user stack (derived from TVirtualMCStack) with primary particles.
+  // ---
   fOrigin = origin;
   for (Int_t i=0; i<fNofPrimaries; i++) GeneratePrimary();  
   fStarStack->SetNprimaries(fNofPrimaries);
 }
-
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
   if (! fSetVertex) {
