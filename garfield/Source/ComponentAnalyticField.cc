@@ -16,75 +16,6 @@ ComponentAnalyticField::ComponentAnalyticField() {
   CellInit();
 }
 
-void ComponentAnalyticField::ElectricField(const double x, const double y,
-                                           const double z, double& ex,
-                                           double& ey, double& ez, Medium*& m,
-                                           int& status) {
-
-  // Initialize electric field and medium.
-  ex = ey = ez = 0.;
-  m = NULL;
-
-  // Make sure the charges have been calculated.
-  if (!m_cellset) {
-    if (!Prepare()) {
-      status = -11;
-      return;
-    }
-  }
-
-  // Disable calculation of the potential.
-  const bool opt = false;
-  double v = 0.;
-
-  // Calculate the field.
-  status = Field(x, y, z, ex, ey, ez, v, opt);
-
-  // If the field is ok, get the medium.
-  if (status == 0) {
-    m = GetMedium(x, y, z);
-    if (!m) {
-      status = -6;
-    } else if (!m->IsDriftable()) {
-      status = -5;
-    }
-  }
-}
-
-void ComponentAnalyticField::ElectricField(const double x, const double y,
-                                           const double z, double& ex,
-                                           double& ey, double& ez, double& v,
-                                           Medium*& m, int& status) {
-
-  // Initialize electric field and medium.
-  ex = ey = ez = v = 0.;
-  m = NULL;
-
-  // Make sure the charges have been calculated.
-  if (!m_cellset) {
-    if (!Prepare()) {
-      status = -11;
-      return;
-    }
-  }
-
-  // Request calculation of the potential.
-  const bool opt = true;
-
-  // Calculate the field.
-  status = Field(x, y, z, ex, ey, ez, v, opt);
-
-  // If the field is ok, get the medium.
-  if (status == 0) {
-    m = GetMedium(x, y, z);
-    if (!m) {
-      status = -6;
-    } else if (!m->IsDriftable()) {
-      status = -5;
-    }
-  }
-}
-
 bool ComponentAnalyticField::GetVoltageRange(double& pmin, double& pmax) {
 
   // Make sure the cell is prepared.
@@ -100,59 +31,6 @@ bool ComponentAnalyticField::GetVoltageRange(double& pmin, double& pmax) {
   pmin = vmin;
   pmax = vmax;
   return true;
-}
-
-void ComponentAnalyticField::WeightingField(const double x, const double y,
-                                            const double z, double& wx,
-                                            double& wy, double& wz,
-                                            const std::string& label) {
-
-  wx = wy = wz = 0.;
-  // Stop here if there are no weighting fields defined.
-  if (m_readout.empty()) return;
-  // Prepare the weighting fields.
-  if (!m_sigset) {
-    if (!PrepareSignals()) {
-      std::cerr << m_className << "::WeightingField::\n";
-      std::cerr << "    Unable to calculate weighting fields.\n";
-      return;
-    }
-  }
-
-  if (label.empty()) return;
-  std::vector<std::string>::iterator it =
-      std::find(m_readout.begin(), m_readout.end(), label);
-  if (it == m_readout.end()) return;
-  const int index = it - m_readout.begin();
-
-  double volt = 0.;
-  Wfield(x, y, z, wx, wy, wz, volt, index, false);
-}
-
-double ComponentAnalyticField::WeightingPotential(const double x,
-                                                  const double y,
-                                                  const double z,
-                                                  const std::string& label) {
-  double volt = 0.;
-
-  if (m_readout.empty()) return volt;
-  if (!m_sigset) {
-    if (!PrepareSignals()) {
-      std::cerr << m_className << "::WeightingPotential::\n";
-      std::cerr << "    Unable to calculate weighting fields.\n";
-      return volt;
-    }
-  }
-
-  if (label.empty()) return volt;
-  std::vector<std::string>::iterator it =
-      std::find(m_readout.begin(), m_readout.end(), label);
-  if (it == m_readout.end()) return volt;
-  const int index = it - m_readout.begin();
-
-  double wx = 0., wy = 0., wz = 0.;
-  Wfield(x, y, z, wx, wy, wz, volt, index, true);
-  return volt;
 }
 
 bool ComponentAnalyticField::GetBoundingBox(double& x0, double& y0, double& z0,
@@ -403,6 +281,7 @@ void ComponentAnalyticField::AddTube(const double radius, const double voltage,
 
   // Set the tube parameters.
   m_cotube = radius;
+  m_cotube2 = radius * radius;
   m_vttube = voltage;
 
   m_ntube = nEdges;
@@ -901,6 +780,11 @@ int ComponentAnalyticField::Field(const double xin, const double yin,
   // Initialise the field for returns without actual calculations.
   ex = ey = ez = volt = 0.;
 
+  // Make sure the charges have been calculated.
+  if (!m_cellset) {
+    if (!Prepare()) return -11;
+  }
+
   double xpos = xin, ypos = yin;
 
   // In case of periodicity, move the point into the basic cell.
@@ -1168,6 +1052,7 @@ void ComponentAnalyticField::CellInit() {
   m_ntube = 0;
   m_mtube = 1;
   m_cotube = 1.;
+  m_cotube2 = 1.;
   m_vttube = 0.;
 
   // Capacitance matrices
@@ -2738,19 +2623,18 @@ bool ComponentAnalyticField::SetupD10() {
   //   (Last changed on  4/ 9/95.)
   //-----------------------------------------------------------------------
 
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (unsigned int i = 0; i < m_nWires; ++i) {
     // Set the diagonal terms.
     m_a[i][i] = -log(0.5 * m_w[i].d * m_cotube /
-                     (r2 - (m_w[i].x * m_w[i].x + m_w[i].y * m_w[i].y)));
+                     (m_cotube2 - (m_w[i].x * m_w[i].x + m_w[i].y * m_w[i].y)));
     // Set a complex wire-coordinate to make things a little easier.
     std::complex<double> zi(m_w[i].x, m_w[i].y);
     // Loop over all other wires for the off-diagonal elements.
     for (unsigned int j = i + 1; j < m_nWires; ++j) {
       // Set a complex wire-coordinate to make things a little easier.
       std::complex<double> zj(m_w[j].x, m_w[j].y);
-      m_a[i][j] = -log(abs(m_cotube * (zi - zj) / (r2 - conj(zi) * zj)));
+      m_a[i][j] = -log(abs(m_cotube * (zi - zj) / (m_cotube2 - conj(zi) * zj)));
       // Copy this to a[j][i] since the capacitance matrix is symmetric.
       m_a[j][i] = m_a[i][j];
     }
@@ -2769,7 +2653,6 @@ bool ComponentAnalyticField::SetupD20() {
   //   (Last changed on 18/ 2/93.)
   //-----------------------------------------------------------------------
 
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (unsigned int i = 0; i < m_nWires; ++i) {
     // Set a complex wire-coordinate to make things a little easier.
@@ -2788,7 +2671,7 @@ bool ComponentAnalyticField::SetupD20() {
           // Off-diagonal terms.
           std::complex<double> zj(m_w[j].x, m_w[j].y);
           m_a[j][i] = -log(abs((1. / m_cotube) * (zi - zj) /
-                               (1. - conj(zi) * zj / r2)));
+                               (1. - conj(zi) * zj / m_cotube2)));
         }
       }
     } else {
@@ -2806,7 +2689,7 @@ bool ComponentAnalyticField::SetupD20() {
           std::complex<double> zj(m_w[j].x, m_w[j].y);
           m_a[j][i] = -log(abs((1 / pow(m_cotube, m_mtube)) *
                                (pow(zj, m_mtube) - pow(zi, m_mtube)) /
-                               (1. - pow(zj * conj(zi) / r2, m_mtube))));
+                               (1. - pow(zj * conj(zi) / m_cotube2, m_mtube))));
         }
       }
     }
@@ -3715,20 +3598,20 @@ void ComponentAnalyticField::FieldD10(const double xpos, const double ypos,
 
   // Set the complex position coordinates.
   const std::complex<double> zpos = std::complex<double>(xpos, ypos);
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (int i = m_nWires; i--;) {
+    const double q = m_w[i].e;
     // Set the complex version of the wire-coordinate for simplicity.
     const std::complex<double> zi(m_w[i].x, m_w[i].y);
     // Compute the contribution to the potential, if needed.
-    if (opt)
-      volt -=
-          m_w[i].e * log(abs(m_cotube * (zpos - zi) / (r2 - zpos * conj(zi))));
+    if (opt) {
+      volt -= q * log(abs(m_cotube * (zpos - zi) / (m_cotube2 - zpos * conj(zi))));
+    }
     // Compute the contribution to the electric field, always.
     const std::complex<double> wi =
-        1. / conj(zpos - zi) + zi / (r2 - conj(zpos) * zi);
-    ex += m_w[i].e * real(wi);
-    ey += m_w[i].e * imag(wi);
+        1. / conj(zpos - zi) + zi / (m_cotube2 - conj(zpos) * zi);
+    ex += q * real(wi);
+    ey += q * imag(wi);
   }
 }
 
@@ -3752,7 +3635,6 @@ void ComponentAnalyticField::FieldD20(const double xpos, const double ypos,
 
   // Set the complex position coordinates.
   const std::complex<double> zpos = std::complex<double>(xpos, ypos);
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (int i = m_nWires; i--;) {
     // Set the complex version of the wire-coordinate for simplicity.
@@ -3763,7 +3645,7 @@ void ComponentAnalyticField::FieldD20(const double xpos, const double ypos,
       if (opt) {
         volt -= m_w[i].e * log(abs((1. / pow(m_cotube, m_mtube)) *
                                    (pow(zpos, m_mtube) - pow(zi, m_mtube)) /
-                                   (1. - pow(zpos * conj(zi) / r2, m_mtube))));
+                                   (1. - pow(zpos * conj(zi) / m_cotube2, m_mtube))));
       }
       // Compute the contribution to the electric field, always.
       const std::complex<double> wi =
@@ -3777,10 +3659,10 @@ void ComponentAnalyticField::FieldD20(const double xpos, const double ypos,
       // Case of the central wire.
       if (opt) {
         volt -= m_w[i].e * log(abs((1. / m_cotube) * (zpos - zi) /
-                                   (1. - zpos * conj(zi) / r2)));
+                                   (1. - zpos * conj(zi) / m_cotube2)));
       }
       const std::complex<double> wi =
-          1. / conj(zpos - zi) + zi / (r2 - conj(zpos) * zi);
+          1. / conj(zpos - zi) + zi / (m_cotube2 - conj(zpos) * zi);
       // Compute the contribution to the electric field, always.
       ex += m_w[i].e * real(wi);
       ey += m_w[i].e * imag(wi);
@@ -5388,7 +5270,6 @@ bool ComponentAnalyticField::IprD10() {
   //   (Last changed on  2/ 2/93.)
   //-----------------------------------------------------------------------
 
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (unsigned int i = 0; i < m_nWires; ++i) {
     // Set the diagonal terms.
@@ -5403,7 +5284,7 @@ bool ComponentAnalyticField::IprD10() {
       // Set a complex wire-coordinate to make things a little easier.
       std::complex<double> zj(m_w[j].x, m_w[j].y);
       m_sigmat[i][j] =
-          -log(abs((1. / m_cotube) * (zi - zj) / (1. - conj(zi) * zj / r2)));
+          -log(abs((1. / m_cotube) * (zi - zj) / (1. - conj(zi) * zj / m_cotube2)));
       // Copy this to a[j][i] since the capacitance matrix is symmetric.
       m_sigmat[j][i] = m_sigmat[i][j];
     }
@@ -5446,7 +5327,8 @@ bool ComponentAnalyticField::IprD30() {
 bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
                                     const double zpos, double& exsum,
                                     double& eysum, double& ezsum, double& vsum,
-                                    const int isw, const bool opt) const {
+                                    const std::string& label, 
+                                    const bool opt) const {
 
   //-----------------------------------------------------------------------
   //   SIGFLS - Sums the weighting field components at (XPOS,YPOS,ZPOS).
@@ -5457,7 +5339,20 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
   exsum = eysum = ezsum = vsum = 0.;
   double ex = 0., ey = 0., ez = 0.;
   double volt = 0.;
-  if (!m_sigset) return false;
+
+  // Stop here if there are no weighting fields defined.
+  if (m_readout.empty()) return false;
+  if (!m_sigset) {
+    std::cerr << m_className << "::Wfield::\n"
+              << "    No weighting fields available.\n";
+    return false;
+  }
+
+  if (label.empty()) return volt;
+  std::vector<std::string>::const_iterator it =
+      std::find(m_readout.begin(), m_readout.end(), label);
+  if (it == m_readout.end()) return false;
+  const int isw = it - m_readout.begin();
 
   // Loop over the signal layers.
   for (int mx = mxmin; mx <= mxmax; ++mx) {
@@ -6101,7 +5996,6 @@ void ComponentAnalyticField::WfieldWireD10(const double xpos, const double ypos,
   std::complex<double> zpos = std::complex<double>(xpos, ypos);
   std::complex<double> zi;
   std::complex<double> wi;
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (int i = m_nWires; i--;) {
     // Set the complex version of the wire-coordinate for simplicity.
@@ -6109,10 +6003,10 @@ void ComponentAnalyticField::WfieldWireD10(const double xpos, const double ypos,
     // Compute the contribution to the potential, if needed.
     if (opt) {
       volt -= real(m_sigmat[isw][i]) *
-              log(abs(m_cotube * (zpos - zi) / (r2 - zpos * conj(zi))));
+              log(abs(m_cotube * (zpos - zi) / (m_cotube2 - zpos * conj(zi))));
     }
     // Compute the contribution to the electric field.
-    wi = 1. / conj(zpos - zi) + zi / (r2 - conj(zpos) * zi);
+    wi = 1. / conj(zpos - zi) + zi / (m_cotube2 - conj(zpos) * zi);
     ex += real(m_sigmat[isw][i]) * real(wi);
     ey += real(m_sigmat[isw][i]) * imag(wi);
   }
@@ -6641,7 +6535,6 @@ void ComponentAnalyticField::WfieldPlaneD10(const double xpos,
   std::complex<double> zpos = std::complex<double>(xpos, ypos);
   std::complex<double> zi;
   std::complex<double> wi;
-  const double r2 = m_cotube * m_cotube;
   // Loop over all wires.
   for (int i = m_nWires; i--;) {
     // Set the complex version of the wire-coordinate for simplicity.
@@ -6649,10 +6542,10 @@ void ComponentAnalyticField::WfieldPlaneD10(const double xpos,
     // Compute the contribution to the potential, if needed.
     if (opt) {
       volt -= m_qplane[iplane][i] *
-              log(abs(m_cotube * (zpos - zi) / (r2 - zpos * conj(zi))));
+              log(abs(m_cotube * (zpos - zi) / (m_cotube2 - zpos * conj(zi))));
     }
     // Compute the contribution to the electric field.
-    wi = 1. / conj(zpos - zi) + zi / (r2 - conj(zpos) * zi);
+    wi = 1. / conj(zpos - zi) + zi / (m_cotube2 - conj(zpos) * zi);
     ex += m_qplane[iplane][i] * real(wi);
     ey += m_qplane[iplane][i] * imag(wi);
   }
