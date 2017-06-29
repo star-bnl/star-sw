@@ -70,10 +70,10 @@ AvalancheMicroscopic::AvalancheMicroscopic()
 
   m_className = "AvalancheMicroscopic";
 
-  m_stack.reserve(1000);
-  m_endpointsElectrons.reserve(1000);
-  m_endpointsHoles.reserve(1000);
-  m_photons.reserve(100);
+  m_stack.reserve(10000);
+  m_endpointsElectrons.reserve(10000);
+  m_endpointsHoles.reserve(10000);
+  m_photons.reserve(1000);
 
 }
 
@@ -574,21 +574,16 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
 
   // Make sure that the sensor is defined.
   if (!m_sensor) {
-    std::cerr << m_className << "::TransportElectron:\n";
-    std::cerr << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::TransportElectron:\n"
+              << "    Sensor is not defined.\n";
     return false;
   }
 
   // Make sure that the starting point is inside a medium.
   Medium* medium = NULL;
-  if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << m_className << "::TransportElectron:\n";
-    std::cerr << "    No medium at initial position.\n";
-    return false;
-  }
-  if (!medium) {
-    std::cerr << m_className << "::TransportElectron:\n";
-    std::cerr << "    No medium at initial position.\n";
+  if (!m_sensor->GetMedium(x0, y0, z0, medium) || !medium) {
+    std::cerr << m_className << "::TransportElectron:\n"
+              << "    No medium at initial position.\n";
     return false;
   }
 
@@ -689,7 +684,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
   newElectron.xLast = x0;
   newElectron.yLast = y0;
   newElectron.zLast = z0;
-  newElectron.driftLine.clear();
+  newElectron.driftLine.reserve(1000);
   m_stack.push_back(newElectron);
   if (hole) {
     ++m_nHoles;
@@ -738,8 +733,8 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
   bool ok = true;
   while (1) {
     // If the list of electrons/holes is exhausted, we're done.
+    if (m_stack.empty()) break;
     const int nSize = m_stack.size();
-    if (nSize <= 0) break;
     // Loop over all electrons/holes in the avalanche.
     for (int iE = nSize; iE--;) {
       // Get an electron/hole from the stack.
@@ -793,6 +788,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         m_stack[iE].ky = ky;
         m_stack[iE].kz = kz;
         m_stack[iE].status = StatusLeftDriftMedium;
+        // TODO: std::move
         if (hole) {
           m_endpointsHoles.push_back(m_stack[iE]);
         } else {
@@ -1285,10 +1281,10 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         if (m_useSignal) {
           if (hole) {
             m_sensor->AddSignal(+1, t, dt, x + 0.5 * vx * dt, y + 0.5 * vy * dt,
-                              z + 0.5 * vz * dt, vx, vy, vz);
+                                z + 0.5 * vz * dt, vx, vy, vz);
           } else {
             m_sensor->AddSignal(-1, t, dt, x + 0.5 * vx * dt, y + 0.5 * vy * dt,
-                              z + 0.5 * vy * dt, vx, vy, vz);
+                                z + 0.5 * vy * dt, vx, vy, vz);
           }
         }
 

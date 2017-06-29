@@ -18,18 +18,58 @@ class ComponentAnalyticField : public ComponentBase {
   ~ComponentAnalyticField() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) { 
+    
+    m = NULL;
+    // Calculate the field.
+    double v = 0.;
+    status = Field(x, y, z, ex, ey, ez, v, false);
+    // If the field is ok, get the medium.
+    if (status == 0) {
+      m = GetMedium(x, y, z);
+      if (!m) {
+        status = -6;
+      } else if (!m->IsDriftable()) {
+        status = -5;
+      }
+    }
+  }
+
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) {
+    m = NULL;
+    // Calculate the field.
+    status = Field(x, y, z, ex, ey, ez, v, true);
+    // If the field is ok, get the medium.
+    if (status == 0) {
+      m = GetMedium(x, y, z);
+      if (!m) {
+        status = -6;
+      } else if (!m->IsDriftable()) {
+        status = -5;
+      }
+    }
+  }
 
   bool GetVoltageRange(double& pmin, double& pmax);
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label);
+                      const std::string& label) {
+    wx = wy = wz = 0.;
+    double volt = 0.;
+    if (!m_sigset) PrepareSignals();
+    Wfield(x, y, z, wx, wy, wz, volt, label, false);
+  }
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string& label);
+                            const std::string& label) {
+    double wx = 0., wy = 0., wz = 0.;
+    double volt = 0.;
+    if (!m_sigset) PrepareSignals();
+    Wfield(x, y, z, wx, wy, wz, volt, label, true);
+    return volt;
+  }
 
   bool GetBoundingBox(double& x0, double& y0, double& z0, double& x1,
                       double& y1, double& z1);
@@ -283,6 +323,7 @@ class ComponentAnalyticField : public ComponentBase {
   bool m_tube;
   int m_mtube, m_ntube;
   double m_cotube;
+  double m_cotube2;
   double m_vttube;
 
   // Capacitance matrix
@@ -385,8 +426,8 @@ class ComponentAnalyticField : public ComponentBase {
                   double& ey, double& ez, double& volt);
   // Evaluation of the weighting field
   bool Wfield(const double xpos, const double ypos, const double zpos,
-              double& ex, double& ey, double& ez, double& volt, const int isw,
-              const bool opt) const;
+              double& ex, double& ey, double& ez, double& volt, 
+              const std::string& label, const bool opt) const;
   void WfieldWireA00(const double xpos, const double ypos, double& ex,
                      double& ey, double& volt, const int mx, const int my,
                      const int sw, const bool opt) const;
