@@ -25,15 +25,14 @@ void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield,
     return;
   }
 
-  // TODO: check correct dimensions of E and B fields
   if (m_useEfield) {
     double ex = 0., ey = 0., ez = 0.;
     int status = 0;
     Garfield::Medium* m = NULL;
     m_sensor->ElectricField(x, y, z, ex, ey, ez, m, status);
-    efield.x = ex * 1.e-5;
-    efield.y = ey * 1.e-5;
-    efield.z = ez * 1.e-5;
+    efield.x = ex * 1.e-7;
+    efield.y = ey * 1.e-7;
+    efield.z = ez * 1.e-7;
   }
 
   if (m_useBfield) {
