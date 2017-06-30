@@ -242,20 +242,20 @@ public:
     Bool_t       isBemcMatched() 	   const {return testBit(kBemcMatched);}  
     Bool_t       isEemcMatched() 	   const {return testBit(kEemcMatched);}  
 
-    bool       isCtbNotMatched()       const {return testBit(kCtbNotMatched);}
-    bool       isToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
-    bool       isBToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
-    bool       isBemcNotMatched() 	   const {return testBit(kBemcNotMatched);}  
-    bool       isEemcNotMatched() 	   const {return testBit(kEemcNotMatched);}  
+    Bool_t       isCtbNotMatched()         const {return testBit(kCtbNotMatched);}
+    Bool_t       isToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
+    Bool_t       isBToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
+    Bool_t       isBemcNotMatched() 	   const {return testBit(kBemcNotMatched);}  
+    Bool_t       isEemcNotMatched() 	   const {return testBit(kEemcNotMatched);}  
 
-    bool       isDecayTrack()  	   const {return testBit(kDecayTrack);}   
-    bool       isPromptTrack() 	   const {return testBit(kPromptTrack);}       
-    bool       isPostXTrack()            const {return testBit(kPostXTrack);} 
-    bool       isMembraneCrossingTrack() const {return testBit(kXMembrane);} 
-    bool       isShortTrack2EMC()        const {return testBit(kShortTrack2EMC);}
-    bool       isRejected()              const {return testBit(kRejectedTrack);}
-    bool       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
-    bool       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
+    Bool_t       isDecayTrack()  	   const {return testBit(kDecayTrack);}   
+    Bool_t       isPromptTrack() 	   const {return testBit(kPromptTrack);}       
+    Bool_t       isPostXTrack()            const {return testBit(kPostXTrack);} 
+    Bool_t       isMembraneCrossingTrack() const {return testBit(kXMembrane);} 
+    Bool_t       isShortTrack2EMC()        const {return testBit(kShortTrack2EMC);}
+    Bool_t       isRejected()              const {return testBit(kRejectedTrack);}
+    Bool_t       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
+    Bool_t       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
 #if __kfpAtFirstHit__
     KFPTrack       *kfpTrackAtFirstHit()       {return mKFPTrackAtFirstHit;}
     const KFPTrack *kfpTrackAtFirstHit() const {return mKFPTrackAtFirstHit;}
