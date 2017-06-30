@@ -40,7 +40,7 @@ setenv CXX "`root-config --cxx` $LDFLAGS -fPIC "
 setenv F77 "`root-config --f77` $LDFLAGS -fPIC"
 setenv PERL_EXT_CFLAGS   "$CFLAGS"
 setenv PERL_EXT_CPPFLAGS "$CXXFLAGS"
-
+setenv ARCH "`root-config --arch`"
 switch (${STAR_HOST_SYS})
   case "*icc*"
         setenv CC  icc
@@ -53,7 +53,8 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia8226 ";
+#set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226";
+set list = "pythia8226"
 #if ($#argv != 0) set list = $argv[1];
 foreach pkg ($list) 
     cd ~/sources/.${STAR_HOST_SYS}
@@ -100,11 +101,11 @@ foreach pkg ($list)
           touch ../${pkg}.Done
           breaksw
       case "apache-log4cxx-0.10.0.CVS":
-           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR --disable-libtool
-	   make clean
-           make
-          if ( $?) break;
-           make install
+          ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR --disable-libtool
+	  make clean
+          make
+	  if ( $?) break;
+          make install
           if ( $?) break;
           touch ../${pkg}.Done
           breaksw
@@ -166,13 +167,23 @@ EOF
           make install
           touch ../${pkg}.Done
 	  breaksw
+      case "pythia6":
+          csh -x makePythia6.${ARCH}
+          if ( $?) break;
+	  cp libPythia6* ${XOPTSTAR}/lib
+          if ( $?) break;
+          touch ../${pkg}.Done
+          breaksw
       case "pythia8*":
-          ./configure --prefix=$XOPTSTAR --cxx-common=\'$CFLAGS\' 
+          ./configure --prefix=$XOPTSTAR --enable-64bit  --enable-shared #--cxx-common=\'$CFLAGS\' 
+	  make install
+          if ( $?) break;
 	  breaksw
       case "apr-1.5.1":
       default:
           ./configure --prefix=$XOPTSTAR
           make install
+          if ( $?) break;
           touch ../${pkg}.Done
           breaksw
      endsw
