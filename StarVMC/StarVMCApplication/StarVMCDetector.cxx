@@ -167,7 +167,6 @@ Int_t StarVMCDetector::GetVolumeId(const Char_t *path) {
   Int_t g2tVolumeId = GetVolumeId(numbv);
   return g2tVolumeId;
 }
-#if 0
 //________________________________________________________________________________
 const Char_t *StarVMCDetector::FormPath(Int_t volumeId) {
   static TString path;
@@ -192,7 +191,6 @@ const Char_t *StarVMCDetector::FormPath(Int_t volumeId) {
   }
   return path.Data();
 }
-#endif
 //________________________________________________________________________________
 Int_t StarVMCDetector::GetVolumeId(Int_t *numbv) {
   Int_t NIds = fIds.GetSize();
