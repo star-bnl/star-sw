@@ -35,9 +35,9 @@ class AliHLTTPCCAGBHit
     float Y() const { return fY; }
     float Z() const { return fZ; }
 
-    float ErrX() const { return fErrX; }
-    float ErrY() const { return fErrY; }
-    float ErrZ() const { return fErrZ; }
+//     float ErrX() const { return fErrX; }
+//     float ErrY() const { return fErrY; }
+//     float ErrZ() const { return fErrZ; }
     float Amp()  const { return fAmp; }
 
     int ISlice() const { return fISlice; }
