@@ -76,9 +76,9 @@ class AliHLTTPCCAParam
     float RMax() const { return fRMax;}
     float ZMin() const { return fZMin;}
     float ZMax() const { return fZMax;}
-    float ErrZ() const { return fErrZ;}
-    float ErrX() const { return fErrX;}
-    float ErrY() const { return fErrY;}
+//     float ErrZ() const { return fErrZ;}
+//     float ErrX() const { return fErrX;}
+//     float ErrY() const { return fErrY;}
     float Bz() const { return fBz;}
     float cBz() const { return fBz*0.000299792458;}
 
