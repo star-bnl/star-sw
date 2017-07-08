@@ -172,7 +172,7 @@ void StPxlRawHitMaker::decodeSectorData()
 
    for(int i=0; i<32; i++)
       {
-         if(mHeaderData[8] >> i && Debug() > 2)
+         if(mHeaderData[8] & BIT(i) && Debug() > 2)
             {
                LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  deserialization error!" << endm;
             }
@@ -180,7 +180,7 @@ void StPxlRawHitMaker::decodeSectorData()
 
    for(int i=0; i<8; i++)
       {
-         if(mHeaderData[9] >> i && Debug() > 2)
+         if(mHeaderData[9] & BIT(i) && Debug() > 2)
             {
                LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  deserialization error!" << endm;
             }
@@ -198,7 +198,7 @@ void StPxlRawHitMaker::decodeSectorData()
 
    for(int i=0; i<32; i++)
       {
-         if(mHeaderData[10] >> i)
+         if(mHeaderData[10] & BIT(i))
             {
                LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  trailer or event length error!" << endm;
             }
@@ -206,7 +206,7 @@ void StPxlRawHitMaker::decodeSectorData()
 
    for(int i=0; i<8; i++)
       {
-         if(mHeaderData[11] >> i)
+         if(mHeaderData[11] & BIT(i))
             {
                LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  trailer or event length error!" << endm;
             }
