@@ -26,7 +26,7 @@ static const char rcsid[] = "$Id: StTpcSectorHitCollection.cxx,v 2.3 2009/11/23 
 
 ClassImp(StTpcSectorHitCollection)
     
-StTpcPadrowHitCollection* StTpcSectorHitCollection::padrow(unsigned int i)
+StTpcPadrowHitCollection* StTpcSectorHitCollection::padrow(UInt_t i)
 {
     if (i < mNumberOfPadrows)
         return &(mPadrows[i]);
@@ -35,7 +35,7 @@ StTpcPadrowHitCollection* StTpcSectorHitCollection::padrow(unsigned int i)
 }
 
 const StTpcPadrowHitCollection*
-StTpcSectorHitCollection::padrow(unsigned int i) const
+StTpcSectorHitCollection::padrow(UInt_t i) const
 {
     if (i < mNumberOfPadrows)
         return &(mPadrows[i]);
@@ -43,9 +43,9 @@ StTpcSectorHitCollection::padrow(unsigned int i) const
         return 0;
 }
 
-unsigned int StTpcSectorHitCollection::numberOfHits() const
+UInt_t StTpcSectorHitCollection::numberOfHits() const
 {
-    unsigned int sum = 0;
+    UInt_t sum = 0;
     for (int i=0; i < mNumberOfPadrows; i++)
         sum += mPadrows[i].hits().size();
     return sum;

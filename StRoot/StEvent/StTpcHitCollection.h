@@ -38,17 +38,17 @@ class StTpcHit;
 
 class StTpcHitCollection : public StObject {
 public:
-    StTpcHitCollection();
-    ~StTpcHitCollection();
+  StTpcHitCollection() {}
+  ~StTpcHitCollection() {}
     // StTpcHitCollection(const StTpcHitCollection&);            use default
     // StTpcHitCollection& operator=(const StTpcHitCollection&); use default
     
-    bool          addHit(StTpcHit*);
-    unsigned int  numberOfHits() const;
-    unsigned int  numberOfSectors() const {return mNumberOfSectors; }
+    Bool_t         addHit(StTpcHit*);
+    UInt_t         numberOfHits() const;
+    static UInt_t  numberOfSectors() {return mNumberOfSectors; }
     
-    StTpcSectorHitCollection*       sector(unsigned int);
-    const StTpcSectorHitCollection* sector(unsigned int) const;
+    StTpcSectorHitCollection*       sector(UInt_t);
+    const StTpcSectorHitCollection* sector(UInt_t) const;
 
 private:
     enum { mNumberOfSectors = 24 };
