@@ -1309,6 +1309,8 @@ Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) {
   }
   return dcorr;
 }
+#include "St_vpdSimParamsC.h"
+MakeChairInstance(vpdSimParams,Calibrations/tof/vpdSimParams);
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
 MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);

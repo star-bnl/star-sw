@@ -10,7 +10,7 @@ class St_pxlSensorTpsC : public TChair {
   pxlSensorTps_st 	*Struct(Int_t i = 0) 	const {return ((St_pxlSensorTps*) Table())->GetTable()+i;}
   UInt_t     	getNumRows()                	const {return GetNRows();}
   Int_t 	Id(Int_t i = 0) 	const {return Struct(i)->Id;}
-  unsigned short 	nMeasurements(Int_t i = 0) 	const {return Struct(i)->nMeasurements;}
+  UShort_t  	nMeasurements(Int_t i = 0) 	const {return Struct(i)->nMeasurements;}
   Float_t* 	A(Int_t i = 0) 	const {return Struct(i)->A;}
   Float_t* 	X(Int_t i = 0) 	const {return Struct(i)->X;}
   Float_t* 	Y(Int_t i = 0) 	const {return Struct(i)->Y;}
