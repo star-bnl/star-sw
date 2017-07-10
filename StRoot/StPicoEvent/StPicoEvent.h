@@ -10,6 +10,7 @@ class StMuDst;
 class StPicoEvent : public TObject
 {
 public:
+
   StPicoEvent();
   virtual ~StPicoEvent();
   StPicoEvent(StMuDst const& muDst);
@@ -77,13 +78,13 @@ public:
 
   Float_t  ZDCx() const;
   Float_t  BBCx() const;
-  Float_t backgroundRate() const;
-  Float_t bbcBlueBackgroundRate() const;
-  Float_t bbcYellowBackgroundRate() const;
-  Float_t bbcEastRate() const;
-  Float_t bbcWestRate() const;
-  Float_t zdcEastRate() const;
-  Float_t zdcWestRate() const;
+  Float_t  backgroundRate() const;
+  Float_t  bbcBlueBackgroundRate() const;
+  Float_t  bbcYellowBackgroundRate() const;
+  Float_t  bbcEastRate() const;
+  Float_t  bbcWestRate() const;
+  Float_t  zdcEastRate() const;
+  Float_t  zdcWestRate() const;
 
   Float_t  ZdcSumAdcEast() const;
   Float_t  ZdcSumAdcWest() const;
@@ -95,8 +96,8 @@ public:
   UShort_t bbcAdcEast(const Int_t i) const;
   UShort_t bbcAdcWest(const Int_t i) const;
 
-  Int_t   highTowerThreshold(const Int_t i) const;
-  Int_t   jetPatchThreshold(const Int_t i) const;
+  Int_t    highTowerThreshold(const Int_t i) const;
+  Int_t    jetPatchThreshold(const Int_t i) const;
 
   int      year() const;
   int      day() const;
@@ -105,6 +106,7 @@ public:
   void     setJetPatchThreshold(const Int_t i, const Int_t th);
 
 protected:
+
   Int_t    mRunId;
   Int_t    mEventId;
   UShort_t mFillId;
@@ -112,7 +114,7 @@ protected:
 
   StThreeVectorF mPrimaryVertex;
   StThreeVectorF mPrimaryVertexError;
-  Float_t mRanking;
+  Float_t  mRanking;
   UShort_t mNBEMCMatch;
   UShort_t mNBTOFMatch;
 
@@ -149,15 +151,15 @@ protected:
   UShort_t mNTofT0;             // number of T0 particles in BTOF self calibration
   Float_t  mVzVpd;
 
-  UInt_t  mZDCx;
-  UInt_t  mBBCx;
-  Float_t mBackgroundRate;
-  Float_t mBbcBlueBackgroundRate;
-  Float_t mBbcYellowBackgroundRate;
-  Float_t mBbcEastRate;
-  Float_t mBbcWestRate;
-  Float_t mZdcEastRate;
-  Float_t mZdcWestRate;
+  UInt_t   mZDCx;
+  UInt_t   mBBCx;
+  Float_t  mBackgroundRate;
+  Float_t  mBbcBlueBackgroundRate;
+  Float_t  mBbcYellowBackgroundRate;
+  Float_t  mBbcEastRate;
+  Float_t  mBbcWestRate;
+  Float_t  mZdcEastRate;
+  Float_t  mZdcWestRate;
 
   UShort_t mZdcSumAdcEast;
   UShort_t mZdcSumAdcWest;
@@ -171,12 +173,14 @@ protected:
   UShort_t mBbcAdcWest[24];
 
   // Online HT thresholds
-  UChar_t mHighTowerThreshold[4];
+  UChar_t  mHighTowerThreshold[4];
   // Online JP thresholds BEMC only
-  UChar_t mJetPatchThreshold[4];
+  UChar_t  mJetPatchThreshold[4];
 
   ClassDef(StPicoEvent, 1)
 };
+
+
 inline Int_t    StPicoEvent::runId() const { return mRunId; }
 inline Int_t    StPicoEvent::eventId() const { return mEventId; }
 inline Int_t    StPicoEvent::fillId() const { return (Int_t)mFillId; }
@@ -239,13 +243,13 @@ inline Float_t  StPicoEvent::vzVpd() const { return mVzVpd; }
 
 inline Float_t  StPicoEvent::ZDCx() const { return (Float_t)mZDCx; }
 inline Float_t  StPicoEvent::BBCx() const { return (Float_t)mBBCx; }
-inline Float_t StPicoEvent::backgroundRate() const { return mBackgroundRate; }
-inline Float_t StPicoEvent::bbcBlueBackgroundRate() const { return mBbcBlueBackgroundRate; }
-inline Float_t StPicoEvent::bbcYellowBackgroundRate() const { return mBbcYellowBackgroundRate; }
-inline Float_t StPicoEvent::bbcEastRate() const { return mBbcEastRate; }
-inline Float_t StPicoEvent::bbcWestRate() const { return mBbcWestRate; }
-inline Float_t StPicoEvent::zdcEastRate() const { return mZdcEastRate; }
-inline Float_t StPicoEvent::zdcWestRate() const { return mZdcWestRate; }
+inline Float_t  StPicoEvent::backgroundRate() const { return mBackgroundRate; }
+inline Float_t  StPicoEvent::bbcBlueBackgroundRate() const { return mBbcBlueBackgroundRate; }
+inline Float_t  StPicoEvent::bbcYellowBackgroundRate() const { return mBbcYellowBackgroundRate; }
+inline Float_t  StPicoEvent::bbcEastRate() const { return mBbcEastRate; }
+inline Float_t  StPicoEvent::bbcWestRate() const { return mBbcWestRate; }
+inline Float_t  StPicoEvent::zdcEastRate() const { return mZdcEastRate; }
+inline Float_t  StPicoEvent::zdcWestRate() const { return mZdcWestRate; }
 
 inline Float_t  StPicoEvent::ZdcSumAdcEast() const { return (Float_t)mZdcSumAdcEast; }
 inline Float_t  StPicoEvent::ZdcSumAdcWest() const { return (Float_t)mZdcSumAdcWest; }
@@ -257,8 +261,9 @@ inline Float_t  StPicoEvent::ZdcSmdWestVertical(int i) const { return (Float_t)m
 inline UShort_t StPicoEvent::bbcAdcEast(const Int_t i) const { return mBbcAdcEast[i]; }
 inline UShort_t StPicoEvent::bbcAdcWest(const Int_t i) const { return mBbcAdcWest[i]; }
 
-inline Int_t   StPicoEvent::highTowerThreshold(const Int_t i) const { return mHighTowerThreshold[i]; }
-inline void StPicoEvent::setHighTowerThreshold(const Int_t i, const Int_t th) { mHighTowerThreshold[i] = (UChar_t)th; }
-inline Int_t   StPicoEvent::jetPatchThreshold(const Int_t i) const { return mJetPatchThreshold[i]; }
-inline void StPicoEvent::setJetPatchThreshold(const Int_t i, const Int_t th) { mJetPatchThreshold[i] = (UChar_t)th; }
+inline Int_t    StPicoEvent::highTowerThreshold(const Int_t i) const { return mHighTowerThreshold[i]; }
+inline void     StPicoEvent::setHighTowerThreshold(const Int_t i, const Int_t th) { mHighTowerThreshold[i] = (UChar_t)th; }
+inline Int_t    StPicoEvent::jetPatchThreshold(const Int_t i) const { return mJetPatchThreshold[i]; }
+inline void     StPicoEvent::setJetPatchThreshold(const Int_t i, const Int_t th) { mJetPatchThreshold[i] = (UChar_t)th; }
+
 #endif
