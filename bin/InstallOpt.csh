@@ -53,7 +53,7 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-#set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226";
+#set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen3";
 set list = "pythia8226"
 #if ($#argv != 0) set list = $argv[1];
 foreach pkg ($list) 
@@ -61,7 +61,7 @@ foreach pkg ($list)
 #    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done) continue
     if (! -r ${pkg}) then
-      if ($pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3") then
+      if ($pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3" && $pkg != "eigen3") then
         if (-r ~/sources/${pkg}) then
           dirsync  ~/sources/${pkg} ${pkg}
         else 
@@ -178,14 +178,14 @@ EOF
           ./configure --prefix=$XOPTSTAR --enable-64bit  --enable-shared #--cxx-common=\'$CFLAGS\' 
 	  make install
           if ( $?) break;
+          touch ../${pkg}.Done
 	  breaksw
       case "apr-1.5.1":
       default:
           ./configure --prefix=$XOPTSTAR
           make install
           if ( $?) break;
-          touch ../${pkg}.Done
-          breaksw
+          touch ../${pkg}.Done          breaksw
      endsw
   endif 
 end

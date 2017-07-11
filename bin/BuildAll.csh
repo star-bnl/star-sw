@@ -1,5 +1,14 @@
 #! /usr/bin/env tcsh 
-foreach gcc (gcc482 gcc492) # gcc521)
+set list = "";
+switch ($HOSTNAME) 
+  case "*local":
+    set list = "gcc521";
+    breaksw
+  case "*bnl.gov":
+    set list = "gcc482 gcc492";
+    breaksw
+endsw
+foreach gcc (${list})
   foreach opt (debug opt)
     foreach bit (32b 64b)
       if ($opt == "debug") then 
