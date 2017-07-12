@@ -77,7 +77,7 @@
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StPxlUtil/StPxlConstants.h"
 #include "StPxlUtil/StPxlDigiHit.h"
-
+#include "StDetectorDbMaker/St_pxlControlC.h"
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
 
@@ -221,13 +221,18 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                LOG_DEBUG << "key() : " << mcPix->key() - 1 << " idTruth: " << mcPix->parentTrack()->key() << endm;
                LOG_DEBUG << "from StMcPxlHit : x= " << mcPix->position().x() << ";  y= " << mcPix->position().y() << ";  z= " << mcPix->position().z() << endm;
                LOG_DEBUG << "pxlHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << endm;
-
-               pxlHitCol.addHit(tempHit);
-            }
-         }
+	       static Short_t mRowColumnGoodStatus = St_pxlControlC::instance()->rowColumnGoodStatus();
+	       if (mPxlDb->rowStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanRow()) == mRowColumnGoodStatus && 
+		   mPxlDb->columnStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanColumn()) == mRowColumnGoodStatus &&
+		   (!mPxlDb->pixelHot(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanRow(), tempHit->meanColumn()))) {
+		 pxlHitCol.addHit(tempHit);
+	       } else {
+		 delete tempHit;
+	       }
+	    }
+	 }
       }
    }
-
    return kStOK;
 }
 
