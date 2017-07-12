@@ -28,21 +28,22 @@ $dbuser="starreco";
 $dbpass="";
 $dbname="Embedding_job_stats";
 
-my $JobStatusT = "jobs_prod_2016";
+my $JobStatusT = "jobs_prod_2017";
 
-my $nfspath = "/star/data16/GRID/daq/2015/";
+my $nfspath = "/star/data11/GRID/daq/2016/";
 my $daqpat = $nfspath."*.daq";
 my @prdset = ();
 my $nl = 0;
 
 my @daqlist = `ls $daqpat` ;
 
-#my $MAXNUM = 900;
-#my $LIMNUM = 600;
-my $MAXNUM = 500;
-my $LIMNUM = 300;
+my $MAXNUM = 900;
+my $LIMNUM = 600;
+#my $MAXNUM = 500;
+#my $LIMNUM = 300;
 
-my $NNUM = 100;
+#my $NNUM = 100;
+my $NNUM = 400;
 my $SUMNUM = scalar(@daqlist);
 
 print "There are  ", scalar(@daqlist),"  daq files in the ", $nfspath,"  directory", "\n";
@@ -87,6 +88,7 @@ my @fileset = ();
 my @filelist = ();
 my @trigname = ();
 my @daqfile = ();
+my @daqevents = ();
 my $nlist = 0;
 my @prt = ();
 my $myrun;
@@ -146,9 +148,9 @@ my $dcsubm = "/star/u/starreco/runkisti/".$dclog;
 
 # $fC1->set_context("runnumber=$prodrun","filetype=online_daq","filename~st_physics");
 
- $fC1->set_context("runnumber=$prodrun","filetype=online_daq","filename~st_physics","sanity=1","limit=0");
+ $fC1->set_context("runnumber=$prodrun","filetype=online_daq","filename~st_upc","sanity=1","limit=0");
 
- @fileset = $fC1->run_query("trgsetupname","path","filename");
+ @fileset = $fC1->run_query("trgsetupname","path","filename","events");
 
  $fC1->clear_context();
 
@@ -166,12 +168,13 @@ my $dcsubm = "/star/u/starreco/runkisti/".$dclog;
  $trigname[$nlist] = $prt[0];
  $filelist[$nlist] = $prt[1]."/".$prt[2];
  $daqfile[$nlist] = $prt[2];
+ $daqevents[$nlist] = $prt[3];
 
  print CFILE $filelist[$nlist], "\n";
 
 # print  $prodrun,"   ",$filelist[$nlist],"  ", $nlist,"\n";
 
- $sql= "insert into $JobStatusT set datasetName = '$trigname[$nlist]', prodTag = '$prodSer', inputFileName = '$daqfile[$nlist]', carouselSubTime = '$timestamp', inputFileExists = 'no' ";
+ $sql= "insert into $JobStatusT set datasetName = '$trigname[$nlist]', prodTag = '$prodSer', inputFileName = '$daqfile[$nlist]', inputFileEvents = '$daqevents[$nlist]', carouselSubTime = '$timestamp', inputFileExists = 'no' ";
 
  $rv = $dbh->do($sql) || die $rv." ".$dbh->errstr;   
 
@@ -190,7 +193,7 @@ my $dcsubm = "/star/u/starreco/runkisti/".$dclog;
 
 #  if($nlist >= $MAXNUM ) {
 
- if($nlist >= 10 ) {
+ if($nlist >= 300 ) {
 
   close (CFILE);
   goto GO_SUBMIT; 
