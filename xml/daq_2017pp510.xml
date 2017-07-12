@@ -24,9 +24,13 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="file:/star/data03/daq/2017/075/18075078/st_physics_18075078_raw_1500018.daq" />
+<input URL="file:/star/data03/daq/2017/075/*/st_physics_*.daq" />
 </job>

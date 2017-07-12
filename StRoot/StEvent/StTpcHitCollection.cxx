@@ -34,14 +34,10 @@ static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.5 2009/11/23 16:34:
 
 ClassImp(StTpcHitCollection)
 
-StTpcHitCollection::StTpcHitCollection() { /* noop */ }
-
-StTpcHitCollection::~StTpcHitCollection() { /* noop */ }
-    
-bool
+Bool_t
 StTpcHitCollection::addHit(StTpcHit* hit)
 {
-    unsigned int s, r;
+    UInt_t s, r;
     if (hit &&
         (s = hit->sector()-1) < mNumberOfSectors &&
         (r = hit->padrow()-1) < mSectors[s].numberOfPadrows()) {
@@ -51,12 +47,12 @@ StTpcHitCollection::addHit(StTpcHit* hit)
     else
         return kFALSE;
 }
-unsigned int
+UInt_t
 StTpcHitCollection::numberOfHits() const
 {
-    unsigned int sum = 0;
+    UInt_t sum = 0;
     for (int i=0; i<mNumberOfSectors; i++) {
-        for (unsigned int j=0; j<mSectors[i].numberOfPadrows(); j++) {
+        for (UInt_t j=0; j<mSectors[i].numberOfPadrows(); j++) {
             sum += mSectors[i].padrow(j)->hits().size();
         }
     }
@@ -64,7 +60,7 @@ StTpcHitCollection::numberOfHits() const
 }
 
 StTpcSectorHitCollection*
-StTpcHitCollection::sector(unsigned int i)
+StTpcHitCollection::sector(UInt_t i)
 {
     if (i < mNumberOfSectors)
         return &(mSectors[i]);
@@ -73,7 +69,7 @@ StTpcHitCollection::sector(unsigned int i)
 }
 
 const StTpcSectorHitCollection*
-StTpcHitCollection::sector(unsigned int i) const
+StTpcHitCollection::sector(UInt_t i) const
 {
     if (i < mNumberOfSectors)
         return &(mSectors[i]);

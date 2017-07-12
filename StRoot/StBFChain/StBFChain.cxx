@@ -538,7 +538,7 @@ Int_t StBFChain::Instantiate()
     // ---
     //		Sti(ITTF) start
     // ---
-    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker") {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker" || maker == "StxMaker") {
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
@@ -633,7 +633,7 @@ Int_t StBFChain::Instantiate()
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
       if (GetOption("Sti") || GetOption("StiCA") ||
-	  GetOption("Stv") ||
+	  GetOption("Stv") || GetOption("Stx") ||
 	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , 1);
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, 1);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, 1);
@@ -982,6 +982,7 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
+  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stx");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
   SetDbOptions(dbMk);
 
@@ -1027,6 +1028,7 @@ Int_t StBFChain::Init() {
     
     if (GetOption("Sti") || GetOption("StiCA") || 
 	GetOption("Stv") || 
+	GetOption("Stx") || 
 	GetOption("StiVMC") ||GetOption("VMC") || 
 	GetOption("VMCPassive")) {
       const DbAlias_t *DbAlias = GetDbAliases();
@@ -1563,7 +1565,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
-      if (! (GetOption("Stv"))) {
+      if (! (GetOption("Stv") || GetOption("Stx") )) {
 	if (GetOption("gstar") || GetOption("pythia")) {
 	  SetOption("VMC","Default,-TGiant3,gstar");
 	  SetOption("-gstar","Default,-TGiant3");
@@ -1575,7 +1577,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
       SetOption("-UseXgeom","Default,-TGiant3");
-      if (! (GetOption("Stv"))) {
+      if (! (GetOption("Stv") || GetOption("Stx") )) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
 	}
@@ -1584,7 +1586,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("minicern","Default,-TGiant3");
       }
     }
-    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || GetOption("StiVMC"))) {
+    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || 
+				GetOption("Stx") || GetOption("StiVMC"))) {
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
       if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
       else                        SetOption("Sti"  ,"Default,ITTF");

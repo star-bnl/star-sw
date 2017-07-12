@@ -780,7 +780,7 @@ if ( $pkg =~ m/^St.*Db/             ||
     $CXXFLAGS .= " -Wno-pragmas";
   }
   $CXXFLAGS .= " -Wno-parentheses"; # new flags needed for Vc
-}  elsif ( $pkg =~ m/^TPCCATracker$/ or $pkg =~ m/^TPCCATrackerPerformance$/ or $pkg =~ m/StiCA$/) {
+}  elsif ( $pkg eq 'TPCCATracker' or $pkg eq 'TPCCATrackerPerformance' or $pkg eq 'StiCA' or $pkg eq 'StxMaker') {
   $CPPPATH .=
     $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATrackerPerformance"
       . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker";
