@@ -37,13 +37,13 @@ my $nl = 0;
 
 my @daqlist = `ls $daqpat` ;
 
-my $MAXNUM = 900;
+my $MAXNUM = 1000;
 my $LIMNUM = 600;
 #my $MAXNUM = 500;
 #my $LIMNUM = 300;
 
 #my $NNUM = 100;
-my $NNUM = 400;
+my $NNUM = 300;
 my $SUMNUM = scalar(@daqlist);
 
 print "There are  ", scalar(@daqlist),"  daq files in the ", $nfspath,"  directory", "\n";
