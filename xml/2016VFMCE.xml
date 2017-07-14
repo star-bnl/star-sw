@@ -19,13 +19,13 @@
     exit 1;
   endif
   set name = ""
-  foreach name (LcKppimTsq Lc3pimTsq D0KpimTsq D0K0s2pimTsq) 
+  foreach name (LcKppimTsq Lc3pimTsq D0KpimTsq D0K0s2pimTsq DsKKpimTsq) 
     echo $Name | grep $name
     if (! $?) break;
   end
   echo "name = $name";
   if ($name == "") exit 1;
-  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,-geantOut,-evout,VFMCE,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
   echo $Name | grep -i real
   if (! $?) set sdt = ",sdt20160301";
@@ -39,5 +39,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 200 1000" />
+<input URL="command:RunId.pl 1 20 1000" />
 </job>
