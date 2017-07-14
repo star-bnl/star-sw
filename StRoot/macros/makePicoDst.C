@@ -5,20 +5,14 @@
 //
 
 
-
-#include <TSystem>
-
 class StMaker;
 class StChain;
 class StPicoDstMaker;
 class StMuDstMaker;
 
 
-StChain* chain;
-void makePicoDst(const Char_t *inputFile = "root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/AuAu_200_production_low_2014/ReversedFullField/P15ic/2014/140/15140004/st_physics_15140004_raw_1000016.MuDst.root")
+void loadLibs()
 {
-  Int_t nEvents = 1e5;
-
   gSystem->Load("libTable");
   gSystem->Load("libPhysics");
   gSystem->Load("St_base");
@@ -39,6 +33,7 @@ void makePicoDst(const Char_t *inputFile = "root://xrdstar.rcf.bnl.gov:1095//hom
   gSystem->Load("StPreEclMaker");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
+  gSystem->Load("libStarAgmlUtil");
 
   gSystem->Load("StTpcDb");
   gSystem->Load("StMcEvent");
@@ -66,10 +61,29 @@ void makePicoDst(const Char_t *inputFile = "root://xrdstar.rcf.bnl.gov:1095//hom
   gSystem->Load("StMtdMatchMaker");
   gSystem->Load("StMtdCalibMaker");
 
-  gSystem->Load("StPicoEvent");
-  gSystem->Load("StPicoDstMaker");
+  gSystem->Load("libStPicoEvent");
+  gSystem->Load("libStPicoDstMaker");
 
-  chain = new StChain();
+  gSystem->ListLibraries();
+}
+
+
+void loadAgML( const char* name=0 )
+{
+  gROOT->LoadMacro("bfc.C");
+  bfc(0,"agml nodefault mysql");
+
+  AgModule::SetStacker( new StarTGeoStacker() );
+
+  if (name) StarGeometry::Construct(name);
+}
+
+
+void makePicoDst(const Char_t *inputFile, int nEvents = 100000)
+{
+  loadLibs();
+
+  StChain* chain = new StChain();
 
   StMuDstMaker* MuDstMaker = new StMuDstMaker(0, 0, "", inputFile, "MuDst", 100);
   MuDstMaker->SetStatus("*", 0);
@@ -101,7 +115,7 @@ void makePicoDst(const Char_t *inputFile = "root://xrdstar.rcf.bnl.gov:1095//hom
   trigSimu->setMC(false);
   trigSimu->useBemc();
   trigSimu->useEemc();
-  trigSimu->useOnlineDB();
+  trigSimu->useOfflineDB();
   trigSimu->bemc->setConfig(StBemcTriggerSimu::kOffline);
 
   StMagFMaker* magfMk = new StMagFMaker;
@@ -110,10 +124,12 @@ void makePicoDst(const Char_t *inputFile = "root://xrdstar.rcf.bnl.gov:1095//hom
 
   StPicoDstMaker* picoMaker = new StPicoDstMaker(StPicoDstMaker::IoWrite, inputFile, "picoDst");
   picoMaker->setVtxMode((int)(StPicoDstMaker::PicoVtxMode::Default));
-//        picoMaker->SetDebug(1);
 
   chain->Init();
   cout << "chain->Init();" << endl;
+
+  loadAgML("y2017");
+
   int total = 0;
   for (Int_t i = 0; i < nEvents; i++)
   {
@@ -130,7 +146,6 @@ void makePicoDst(const Char_t *inputFile = "root://xrdstar.rcf.bnl.gov:1095//hom
     }
 
     total++;
-
   }
 
   cout << "****************************************** " << endl;
