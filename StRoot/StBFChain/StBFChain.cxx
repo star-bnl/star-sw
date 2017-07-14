@@ -517,6 +517,7 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("VMCPassive",1);
       }
       else {
+	if (GetOption("beamLine")) mk->SetAttr("beamLine",1);
 	if (GetOption("phys_off")) mk->SetAttr("phys_off",1);
 	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",1);
 	if (fInFile != "")  {

@@ -207,6 +207,7 @@ Int_t StVMCMaker::Init() {
       else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
     }
     assert(generator);
+    if (IAttr("beamLine"))  generator->SetBeamLine();
     StarMCHits *hits = StarMCHits::instance();
     hits->SetHitHolder(m_DataSet);
     fgStarVMCApplication->SetStepping(hits);

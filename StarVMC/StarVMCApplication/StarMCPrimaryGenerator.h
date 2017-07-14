@@ -35,7 +35,7 @@
 class StarMCPrimaryGenerator : public TObject {
  public:
   StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
-    fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin(), fSetVertex(kFALSE) {fgInstance = this;}
+    fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin(), fSetVertex(kFALSE), fUseBeamLine(kFALSE)  {fgInstance = this;}
   virtual ~StarMCPrimaryGenerator() {}
   static StarMCPrimaryGenerator* Instance()   { return fgInstance;}
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
@@ -51,6 +51,7 @@ class StarMCPrimaryGenerator : public TObject {
   void  UnSetVertex()                         {fSetVertex = kFALSE;}
   void  SetSigmasOrigin(Double_t sigma_x, Double_t sigma_y, Double_t sigma_z) {fSigmasOrigin = TVector3(sigma_x,sigma_y,sigma_z);}
   void  SetSigmasOrigin(const TVector3 &xyz)  { fSigmasOrigin = xyz;}
+  void  SetBeamLine(Bool_t k = kTRUE) {fUseBeamLine = k;}
   Int_t GetNofPrimaries()                     { return fNofPrimaries;}
   const Option_t* GetOption() const           { return fOption.Data();}
   StarStack *GetStack()                       { return fStarStack;}
@@ -72,6 +73,7 @@ class StarMCPrimaryGenerator : public TObject {
   TVector3          fOrigin;
   TVector3          fSigmasOrigin;
   Bool_t            fSetVertex;
+  Bool_t            fUseBeamLine;
   ClassDef(StarMCPrimaryGenerator,1)  //StarMCPrimaryGenerator
 };
 #endif //Star_PRIMARY_GENERATOR_H

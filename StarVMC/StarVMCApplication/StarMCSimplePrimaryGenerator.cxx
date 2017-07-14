@@ -2,6 +2,7 @@
 #include "StarMCSimplePrimaryGenerator.h"
 #include "TF1.h"
 #include "TGeant3.h"
+#include "StDetectorDbMaker/St_vertexSeedC.h"
 ClassImp(StarMCSimplePrimaryGenerator);
 Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
 //_____________________________________________________________________________
@@ -131,7 +132,22 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin) {
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
   if (! fSetVertex) {
-    fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+    if (fUseBeamLine) {
+      St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+      if (vSeed) {
+	Double_t x0   = vSeed->x0()  ;// Double_t err_x0   = vSeed->err_x0();
+	Double_t y0   = vSeed->y0()  ;// Double_t err_y0   = vSeed->err_y0();
+	Double_t z0   = 0            ;// Double_t err_z0   = 60; 
+	Double_t dxdz = vSeed->dxdz();
+	Double_t dydz = vSeed->dydz(); 
+	Double_t z    = fZ_min + (fZ_max-fZ_min)*gRandom->Rndm();
+	SetOrigin(x0 + dxdz*z, y0 + dydz*z, z);
+      } else {
+	cout << "Warning : Requested Beam Line, but there is no beam line" << endl;
+      }
+    } else {
+      fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+    }
   }
   GeneratePrimaries(fOrigin);
 }
