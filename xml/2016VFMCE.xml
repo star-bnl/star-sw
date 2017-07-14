@@ -25,7 +25,7 @@
   end
   echo "name = $name";
   if ($name == "") exit 1;
-  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
   echo $Name | grep -i real
   if (! $?) set sdt = ",sdt20160301";
