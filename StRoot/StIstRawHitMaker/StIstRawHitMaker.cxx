@@ -59,7 +59,7 @@ Int_t StIstRawHitMaker::Init()
 Int_t StIstRawHitMaker::InitRun(Int_t runnumber)
 {
    Int_t ierr = kStOk;
-
+   mDoEmbedding = IAttr("DoEmbedding");
    TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
    StIstDb *mIstDb = NULL;
 

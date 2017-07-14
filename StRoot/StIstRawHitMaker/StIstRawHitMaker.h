@@ -45,7 +45,7 @@ public:
    void setCmnCut(double cmnCut = 3.)				{ mCmnCut = cmnCut;        }
    /// 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
    void setDataType(int nDataType = 0)				{ mDataType = nDataType;   };
-   void setDoEmbedding(Bool_t doIt) 				{mDoEmbedding = doIt;}
+   //   void setDoEmbedding(Bool_t doIt) 				{mDoEmbedding = doIt;}
    UChar_t getDataType() {return mDataType;} // 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
 
    // Get CVS

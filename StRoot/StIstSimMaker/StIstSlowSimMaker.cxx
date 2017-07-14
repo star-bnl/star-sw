@@ -316,8 +316,8 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 				if(rawHit->getChannelId()>=0) {
 					adcSum += rawHit->getCharge(t);
 				}
-
-				LOG_INFO<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm;
+				if (Debug()) {
+				  LOG_INFO<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm; }
 				Float_t charge = istMChit->dE() * pathLength / pathLengthTotal;
 				if(kIstTimeBinFrac[maxTB]>0) charge *= kIstTimeBinFrac[t]*kIstMPV/kIstTimeBinFrac[maxTB]; //translate energy Int_to ADC with GeV-to-ADC factor
 				if ( charge > adcSum ) {
@@ -326,7 +326,8 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 				adcSum += charge; 
 
 				rawHit->setCharge(adcSum, t);
-				LOG_INFO<<"charge = "<<adcSum<<"\tat TB"<<(Int_t)t<<endm;
+				if (Debug()) {
+				  LOG_INFO<<"charge = "<<adcSum<<"\tat TB"<<(Int_t)t<<endm; }
 			}
 			rawHit->setChannelId( elecId );
 			rawHit->setGeoId( geoId );
