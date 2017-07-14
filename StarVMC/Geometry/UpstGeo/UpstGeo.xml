@@ -10,6 +10,7 @@
         
         <Content  >
             UPST,PUPD,PUPE,PUPF,DXMG,PVAD,PVAE,DCON,PUPG,DVAC,PVAG
+<!--        UPST,PUPD,PUPE,PUPF,DXMG,PVAD,PVAE,DCON,PUPG,DVAC,PVAG,PUMW,PUMP,SHUT -->
         </Content>
         
         <Structure name="PIPU"  >
@@ -36,6 +37,7 @@
             <var name="PGInnR" type="float"  />
             <var name="PGOutR" type="float"  />
             <var name="PGLeng" type="float"  />
+            <var name="PumpdX" type="float"  />
         </Structure>
         
         <varlist type="REAL"  >
@@ -66,6 +68,7 @@
             <var name="PGInnR" value="14.60" comment=" Inner radius of last Pipe "  />
             <var name="PGOutR" value="15.24" comment=" Outer radius of last Pipe "  />
             <var name="PGLeng" value="51.0" comment=" Half length of last pipe "  />
+            <var name="PumpdX" value="25.0" comment="pump cube half size"  />
         </Fill>
         
         <Use struct="PIPU" select="Version" value="1 "  />
@@ -89,6 +92,9 @@
             <Medium name="Standard"  />
             <Attribute for="Upst" seen="0" colo="2"  />
             <Shape type="TUBE" rmax="40.0" rmin="0." dz="pipu_dz_upst"  />
+<!--
+            <Shape type="TUBE" rmax="80.0" rmin="0." dz="pipu_dz_upst" comment="increase r by a factor of 2 for pump" />
+-->
             <Create block="PUPD"  />
             <Placement z="z2" block="PUPD"  >
             </Placement>
@@ -112,9 +118,35 @@
             <Create block="PUPG"  />
             <Placement z="z6+pipu_pgleng" block="PUPG"  >
             </Placement>
-            
+<!--
+            <Create block="PUMW" comment="PUMP with thermo isolation" />
+            <Placement x="pipu_pgoutr+pipu_PumpdX" z="-pipu_dz_upst+pipu_PumpdX" block="PUMW">
+            </Placement>
+            <Create block="SHUT" comment="Shutter" />
+            <Placement y="pipu_pgoutr+10" z="-pipu_dz_upst+pipu_PumpdX" block="SHUT">
+            </Placement>
+-->
         </Block>
-        
+<!--
+        <Block name="PUMW" comment="PUMP with thermo isolation" >
+            <Material name="AL_HONEYCOMB"  />
+            <Attribute for="Upst" seen="0" colo="2"  />
+          <Shape type="BOX" dx="pipu_PumpdX" dy="pipu_PumpdX" dz="pipu_PumpdX" />
+          <Create block="PUMP"  />
+          <Placement z="0" block="PUMP" >
+          </Placement>
+       </Block>
+        <Block name="PUMP" comment="PUMP itself" >
+            <Material name="Iron"  />
+            <Attribute for="Upst" seen="0" colo="2"  />
+          <Shape type="BOX" dx="pipu_PumpdX-10" dy="pipu_PumpdX-10" dz="pipu_PumpdX-10" />
+       </Block>
+        <Block name="SHUT" comment="Shutter" >
+            <Material name="Iron"  />
+            <Attribute for="Upst" seen="0" colo="2"  />
+          <Shape type="BOX" dx="10" dy="10" dz="pipu_PumpdX-10" />
+       </Block>
+-->
         <Block name="PUPD" comment="is the Beam PIPe before the DX magnet"  >
             <Material name="Iron"  />
             <Attribute for="PUPd" seen="1" colo="1"  />

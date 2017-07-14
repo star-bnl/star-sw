@@ -50,7 +50,7 @@ char *cd(char *path=0)
    gSystem->ChangeDirectory(path);
  return pwd();
 }
-#if defined(__CINT__) && defined(__MAKECINT__)
+#if defined(__CINT__) && defined(__MAKECINT__) 
 //______________________________________________________________________________
 void bexec(char *macro)
 {
@@ -68,7 +68,7 @@ void bexec(char *macro)
    bench->Modified(); bench->Update();
 }
 #else
-void bexec(char *macro=0){if (macro);}
+void bexec(char *macro=0){}
 #endif
 #endif
 void rcd(const Char_t *dir = "") {
