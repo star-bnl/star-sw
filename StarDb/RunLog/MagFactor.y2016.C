@@ -9,7 +9,7 @@ MagFactor_st row;
 St_MagFactor *tableSet = new St_MagFactor("MagFactor",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.ScaleFactor	 =         1; // ;
+    row.ScaleFactor	 =        -1.002; // ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
