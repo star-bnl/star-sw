@@ -4,7 +4,6 @@
 // owner:  Yuri Fisyak
 // what it does: opens the ROOT session
 //=======================================================================
-
 {
   gSystem->ResetSignal(kSigChild,kTRUE);
   int rootlogon_fpe=0;const char *rootlogon_env=0;
@@ -94,12 +93,12 @@
   gSystem->Load("libEG.so");
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
+    StCloseFileOnTerminate::Instantiate();
 #if 1
     if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
       gSystem->Load("KFParticle");
     }
 #endif
-    StCloseFileOnTerminate::Instantiate();
   }
   if (strstr(gSystem->GetLibraries(),"libTable")) {
     gROOT->ProcessLine("typedef TCL              StCL;");              

@@ -12,14 +12,14 @@ if( ! $?AFS_RHIC)   setenv AFS_RHIC  /afs/rhic.bnl.gov
 
 # Define DOMAINNAME if does not exists
 if( ! $?DOMAINNAME) then
-    if ( -x "/bin/domainname" ) then
-       setenv DOMAINNAME `/bin/domainname`
+    if ( -x "domainname" ) then
+       setenv DOMAINNAME `domainname`
     else
        # Be aware that NIS/YP could be disabled 
        setenv DOMAINNAME "(none)"
     endif
     if ( "$DOMAINNAME" == "(none)") then 
-       setenv DOMAINNAME `/bin/hostname | /bin/sed 's/^[^\.]*\.//'`
+       setenv DOMAINNAME `hostname | sed 's/^[^\.]*\.//'`
     endif
 endif
 
@@ -43,7 +43,7 @@ switch ($DOMAINNAME)
     # We have it valid for Linux only
     set PP=${AFS_RHIC}/star/Grid/OSG/WNC
     if ( -d $PP ) then
-	if ( `/bin/uname` == "Linux") then
+	if ( `uname` == "Linux") then
 	    setenv WNOSG $PP
 	endif
     endif

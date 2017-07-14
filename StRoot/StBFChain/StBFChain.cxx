@@ -953,6 +953,10 @@ Int_t StBFChain::Instantiate()
       if (FiltTrgFlavor.Length())
         SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
     }
+    if (maker == "StIstRawHitMaker" && GetOption("istEmbed")) {
+      mk->SetAttr("DoEmbedding", 1);
+    }
+
   Add2Chain:
     if (! mk) continue;
     if (isInChain) continue;
