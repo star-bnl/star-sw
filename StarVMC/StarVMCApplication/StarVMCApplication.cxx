@@ -480,7 +480,10 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   TGeoHMatrix I("Indentity");
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
+  // PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
   TGeoTranslation PixelLadderT(-0.2381, 0.0, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
+  // PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
+  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);
   Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929};
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
   TGeoHMatrix IstLadderH;
@@ -591,6 +594,68 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kPxl:
+	/*
+	  TGeoVolume *PXMO = gGeoManager->MakeTube("PXMO",GetMed("PIXL_AIR"),2.1,11,23.26); PXMO->SetTitle("PXMO");
+	  IDSM->AddNode(PXMO,1,gGeoIdentity);
+	  TGeoVolume *PXLA = gGeoManager->MakeTubs("PXLA",GetMed("PIXL_AIR"),2.12,10,23.26,72,132); PXLA->SetTitle("PXLA");
+	  PXMO->AddNodeOverlap(PXLA,1,new TGeoTranslation(0,0.1000000E-04,0));
+	  rot = new TGeoRotation("next",90,36,90,126,0,0);
+	  PXMO->AddNodeOverlap(PXLA,2,new TGeoCombiTrans(-0.5877849E-05,0.8090172E-05,0,rot));
+	  rot = new TGeoRotation("next",90,72,90,162,0,0);
+	  PXMO->AddNodeOverlap(PXLA,3,new TGeoCombiTrans(-0.9510564E-05,0.3090171E-05,0,rot));
+	  rot = new TGeoRotation("next",90,108,90,198,0,0);
+	  PXMO->AddNodeOverlap(PXLA,4,new TGeoCombiTrans(-0.9510564E-05,-0.3090171E-05,0,rot));
+	  rot = new TGeoRotation("next",90,144,90,234,0,0);
+	  PXMO->AddNodeOverlap(PXLA,5,new TGeoCombiTrans(-0.5877853E-05,-0.8090169E-05,0,rot));
+	  PXMO->AddNodeOverlap(PXLA,6,new TGeoCombiTrans(-0.8742278E-12,-0.1000000E-04,0,GetRot("R180")));
+	  rot = new TGeoRotation("next",90,216,90,306,0,0);
+	  PXMO->AddNodeOverlap(PXLA,7,new TGeoCombiTrans(0.5877852E-05,-0.8090170E-05,0,rot));
+	  rot = new TGeoRotation("next",90,252,90,342,0,0);
+	  PXMO->AddNodeOverlap(PXLA,8,new TGeoCombiTrans(0.9510565E-05,-0.3090170E-05,0,rot));
+	  rot = new TGeoRotation("next",90,288,90,18,0,0);
+	  PXMO->AddNodeOverlap(PXLA,9,new TGeoCombiTrans(0.9510565E-05,0.3090169E-05,0,rot));
+	  rot = new TGeoRotation("next",90,324,90,54,0,0);
+	  PXMO->AddNodeOverlap(PXLA,10,new TGeoCombiTrans(0.5877852E-05,0.8090170E-05,0,rot));
+
+	  TGeoVolume *LADR = gGeoManager->MakeBox("LADR",GetMed("PIXL_MEDAIR"),1.245,0.5225000E-01,15.325); LADR->SetTitle("LADR");
+	  rot = new TGeoRotation("next",90,175.437,90,265.437,0,0);
+	  PXLA->AddNode(LADR,1,new TGeoCombiTrans(-0.73444,2.74331,-4.875,rot));
+	  rot = new TGeoRotation("next",90,349.963,90,79.96302,0,0);
+	  PXLA->AddNode(LADR,2,new TGeoCombiTrans(-1.30523,8.1723,-4.875,rot));
+	  rot = new TGeoRotation("next",90,1.963,90,91.963,0,0);
+	  PXLA->AddNode(LADR,3,new TGeoCombiTrans(-2.97583,7.72235,-4.875,rot));
+	  rot = new TGeoRotation("next",90,13.963,90,103.963,0,0);
+	  PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
+
+	  TGeoVolume *PXSI = gGeoManager->MakeBox("PXSI",GetMed("PIXL_SILICON"),1.1365,0.2500000E-02,1.012); PXSI->SetTitle("PXSI");
+	  LADR->AddNode(PXSI, 1,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,-4.222));
+	  LADR->AddNode(PXSI, 2,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,-2.197));
+	  LADR->AddNode(PXSI, 3,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,-0.172));
+	  LADR->AddNode(PXSI, 4,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 1.853));
+	  LADR->AddNode(PXSI, 5,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 3.878));
+	  LADR->AddNode(PXSI, 6,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 5.903));
+	  LADR->AddNode(PXSI, 7,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 7.928));
+	  LADR->AddNode(PXSI, 8,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 9.953));
+	  LADR->AddNode(PXSI, 9,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,11.978));
+	  LADR->AddNode(PXSI,10,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,14.003));
+	  
+	  TGeoVolume *PLAC = gGeoManager->MakeBox("PLAC",GetMed("PIXL_MEDSISENSITIVE"),0.9605,0.8000000E-03,0.9936); PLAC->SetTitle("PLAC");
+	  PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
+	  TGeoVolume *GLUA = gGeoManager->MakeBox("GLUA",GetMed("PIXL_MATADHESIVE"),1.1715,0.2500000E-02,10.1295); GLUA->SetTitle("GLUA");
+	  TGeoVolume *ALCA = gGeoManager->MakeBox("ALCA",GetMed("PIXL_MATALCABLE"),1.23025,0.5500000E-02,15.325); ALCA->SetTitle("ALCA");
+	  TGeoVolume *GLUB = gGeoManager->MakeBox("GLUB",GetMed("PIXL_MATADHESIVE"),1.245,0.2500000E-02,14.95); GLUB->SetTitle("GLUB");
+	  TGeoVolume *CFBK = gGeoManager->MakeBox("CFBK",GetMed("PIXL_CBMIX"),1.245,0.8750000E-02,15.325); CFBK->SetTitle("CFBK");
+	  TGeoVolume *GLUC = gGeoManager->MakeBox("GLUC",GetMed("PIXL_MATADHESIVE"),0.7205,0.5000000E-02,14.95); GLUC->SetTitle("GLUC");
+	  TGeoVolume *DRIV = gGeoManager->MakeBox("DRIV",GetMed("PIXL_MEDFR4"),1.23025,0.2500000E-01,4.55); DRIV->SetTitle("DRIV");
+ 	  
+	  LADR->AddNode(GLUA,1,new TGeoTranslation(0.4850000E-01,-0.6250002E-02,4.8855));
+	  LADR->AddNode(ALCA,1,new TGeoTranslation(0.1475000E-01,-0.1425000E-01,0));
+	  LADR->AddNode(GLUB,1,new TGeoTranslation(0,-0.2225000E-01,0.6500000E-01));
+	  LADR->AddNode(CFBK,1,new TGeoTranslation(0,-0.3350000E-01,0));
+	  LADR->AddNode(GLUC,1,new TGeoTranslation(0.4995,-0.4725000E-01,0.6500000E-01));
+
+	  LADR->AddNode(DRIV,1,new TGeoTranslation(0.1475000E-01,0.2725000E-01,-10.589));
+	 */
 	A = StPxlpstOnIds::instance()->GetMatrix();
 	B = StpxlOnPst::instance()->GetMatrix();
 	PxlOnHft = A * B;
@@ -613,6 +678,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA = B.Inverse() * LadderOnPxl * PixelLadderT;
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
+#if 0
       case kPxlWafer:
 	rotA = rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
@@ -629,6 +695,26 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA   =  D * SensorOnLadder;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
+#else
+      case kPxlWafer:
+	sector = indx[0];
+	ladder = indx[1];
+	sensor = indx[2];
+	Id = sensor + 10*(ladder+4*(sector-1) - 1);
+	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
+	D = PixelLadderT.Inverse();
+	rotA   =  D * SensorOnLadder * PixelSensorT.Inverse();
+	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	break;
+      case kPxlSensor:
+	sector = indx[0];
+	ladder = indx[1];
+	sensor = indx[2];
+	Id = sensor + 10*(ladder+4*(sector-1) - 1);
+	rotA = rotL;
+	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	break;
+#endif
       case kIst:
 	A = StpstOnIds::instance()->GetMatrix(0);
 	B = StistOnPst::instance()->GetMatrix(0);
@@ -869,7 +955,8 @@ void StarVMCApplication::SetDebug(Int_t m) {
   if (fDebug > 1) {
     TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
     Gcflag_t* cflag = geant3->Gcflag();
-    cflag->idebug = 1;
+    cflag->idebug = fDebug;
+    cflag->idemin =     1;
     cflag->idemax = 10000;
     cflag->iswit[0] = 2;
     cflag->iswit[1] = 2;
