@@ -1039,9 +1039,14 @@ const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
       rot = GetMatrix(i);
       rot.SetName(Form("%s_%i",Table()->GetName(),id));
       //      Table()->Print(i,1);
-      break;
+      return *&rot;
     }
   }
+  cout << "St_SurveyC::GetMatrix4Id(" << id << ") entry has not been found" << endl;
+  const TTable *table = Table();
+  Int_t Nrows = table->GetNRows();
+  table->Print(0,Nrows);
+  assert(0);
   return *&rot;
 }
 //________________________________________________________________________________
