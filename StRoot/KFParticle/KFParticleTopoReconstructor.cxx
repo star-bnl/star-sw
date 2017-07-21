@@ -438,7 +438,8 @@ void KFParticleTopoReconstructor::SortTracks()
     {
       int iTrSorted = sortedTracks[iTr].fIndex;
       
-      int q = fTracks[offset[iSet]].Q()[iTrSorted];
+      //int q = fTracks[offset[iSet]].Q()[iTrSorted];
+      int q = fTracks[0].Q()[iTrSorted]; //take the charge at the first point to avoid ambiguities in array size
       if(fTracks[0].PVIndex()[iTrSorted] < 0) //secondary track
       {
 
