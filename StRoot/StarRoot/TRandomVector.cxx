@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.7 2017/06/02 23:45:39 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.8 2017/07/25 20:37:02 perev Exp $
  *
  ***************************************************************************
  *
@@ -38,6 +38,17 @@ TRandomVector::TRandomVector(const TVectorD& errDia,UInt_t seed)
   for (int k=0;k<fDim;k++) {mtx[i][k]*= errDia[i]/myDia[i]*errDia[k]/myDia[k];}}
 
   assert(! Set(mtx,seed)); 
+}
+//_____________________________________________________________________________
+TRandomVector::TRandomVector(int nSide,const double *G,UInt_t seed)
+{ 
+  TMatrixDSym errMtx(nSide);
+  for (int i=0,li=0;i< nSide;li+=++i) {
+  for (int j=0;j<=i; j++)             {
+    errMtx[i][j] = G[li+j];
+    errMtx[j][i] = G[li+j];
+  } }
+  assert(!Set(errMtx,seed));
 }
 //_____________________________________________________________________________
 int TRandomVector::Set(const TMatrixDSym& errMtx,UInt_t  seed)
