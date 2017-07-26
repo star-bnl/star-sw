@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+   setenv STARFPE NO
+   setenv NODEBUG yes
+#.DEV2
+   setup 64b
+   starver .DEV2
+#dev
+#   setup gcc
+#   starver dev
+# SL16j
+#   starver SL16j
+# SL17d
+#   setup gcc
+#   starver SL17d
+#TFG17e
+#   setup 64b
+#   starver TFG17e
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+     set evtsFile = $INPUTFILE0;
+     set f        = 1
+     set l        = 5000000
+#  endif
+  echo "${evtsFile}"
+  set filel    = `basename $evtsFile .daq`
+  set output  = ${filel}.event.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+#root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# .DEV2
+#root -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,McTpcAna","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root -q -b 'bfc.C(1000,"RC.y2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root -q -b 'bfc.C(1000,"RC.y2016.noHFT,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,StiCA,KFVertex,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# dev
+#root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# SL16j
+#root4star -q -b 'bfc.C(1000,"DbV20170109,P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# SL17d
+#root4star -q -b 'bfc.C(1000,"P2016a,StiCA,btof,mtd,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root4star -q -b 'bfc.C(1000,"P2016a,StiCA,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# TFG17e with Tpx clustering
+#root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+        </command>
+<!--
+        <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
+-->
+        <stdout URL="file:./daq2016$JOBID.log" />
+        <stderr URL="file:./daq2016$JOBID.err" />
+<!-- <input URL="file:/star/data03/daq/2016/12*/*/st_physics_adc_*_raw*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2016/126/17126033/st_physics_adc_17126033_raw*.daq" /> -->
+<input URL="file:/net/l404/data/fisyak/daq/2016/126/*/*adc*.daq" />
+</job>
