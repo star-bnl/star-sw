@@ -469,6 +469,7 @@ $obj = $ObjDir;
 print "obj = $obj\n" if $param::debug;
 print "SO_PKG = $SO_PKG\n" if $param::debug;
 $SO_MAP = $PKG . ".map";
+print "SO_MAP = $SO_MAP\n" if $param::debug;
 #+
 # Additional flag treatment for specific makers
 # Search path depth for Makers.
@@ -1388,10 +1389,18 @@ if ( $#src > -1 ) {
 #      print "====================== FPPFLAGS = $FPPFLAGS\n====================== CPPFLAGS = $CPPFLAGS\n";
       LinkedModule $env2 $SO_PKG, @src;
       Install $env2 $LIB,         $SO_PKG;
+#      print "================== SO_MAP = $SO_MAP env2->{Packages}->{ROOT}->{RLIBMAP} = $env2->{Packages}->{ROOT}->{RLIBMAP}\n";
+      if ($env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $#LinkDefs > -1) {
+	Command $env2 [ $SO_MAP ], ($LIB . "/" . $SO_PKG, @LinkDefs),
+	  qq($env2->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %<);
+	Install $env2 $LIB, $SO_MAP;
+      }
       my $lib = $LIB . "/" . $SO_PKG;
       if ($SO_PKG ne $SO_PKG_lib) {
 	$lib = $LIB . "/" . $SO_PKG_lib;
 	InstallAs $env2 $lib, $SO_PKG;
+#	my $so_map = $LIB . "/" . $SO_MAP;
+#	InstallAs $env2 $so_map, $SO_MAP;
       }
     }
     if ($SO_PKG ne $SO_PKG_PLAIN and $#PlainObj > -1) {#print "============================\n";
