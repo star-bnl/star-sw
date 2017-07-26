@@ -395,7 +395,6 @@ if ( ! $?SITE ) then
 	case "rhic.bnl.gov":
 	case "rcf.bnl.gov":
 	case "star.bnl.gov":
-	case "starp.bnl.gov":
 	    setenv SITE "BNL"
 	    breaksw
 
@@ -411,6 +410,7 @@ if ( ! $?SITE ) then
             setenv SITE "KISTI"
             breaksw
 
+	case "starp.bnl.gov":
         case "l4.bnl.local":
             setenv SITE "HLT"
             breaksw

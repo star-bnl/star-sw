@@ -222,7 +222,11 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                LOG_DEBUG << "from StMcPxlHit : x= " << mcPix->position().x() << ";  y= " << mcPix->position().y() << ";  z= " << mcPix->position().z() << endm;
                LOG_DEBUG << "pxlHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << endm;
 	       static Short_t mRowColumnGoodStatus = St_pxlControlC::instance()->rowColumnGoodStatus();
-	       if (mPxlDb->rowStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanRow()) == mRowColumnGoodStatus && 
+	       static Short_t mSensorGoodStatusMin = St_pxlControlC::instance()->sensorGoodStatusMin();
+	       static Short_t mSensorGoodStatusMax = St_pxlControlC::instance()->sensorGoodStatusMax();
+	       if (((mPxlDb->sensorStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor()) >= mSensorGoodStatusMin )  &&
+		    (mPxlDb->sensorStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor()) <= mSensorGoodStatusMax )) &&
+		   mPxlDb->rowStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanRow()) == mRowColumnGoodStatus && 
 		   mPxlDb->columnStatus(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanColumn()) == mRowColumnGoodStatus &&
 		   (!mPxlDb->pixelHot(tempHit->sector(), tempHit->ladder(), tempHit->sensor(), tempHit->meanRow(), tempHit->meanColumn()))) {
 		 pxlHitCol.addHit(tempHit);

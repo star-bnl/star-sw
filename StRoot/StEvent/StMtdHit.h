@@ -47,7 +47,7 @@ public:
     
     int             idTruth() const;
     int             qaTruth() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
 
     void setBackleg(unsigned char);
     void setModule(unsigned char);

@@ -1627,10 +1627,17 @@ my @badruns = qw(
 #$hist = "RunXVI314"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/13/2017 TpcPadCorrectionMDF, fix a bug
 #$hist = "RunXVI315"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/14/2017 TpcLengthCorrectionNDF
 #$hist = "RunXVI316"; $NEvents = 5000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/15/2017 check in dev
-$hist = "TpcRS_2016D1.DEV2D"; $NEvents = 50000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/16/2017 
+#$hist = "TpcRS_2016D1.DEV2D"; $NEvents = 50000; $disk = "data*/"; $RECO = "reco/dAu*_production_2016/ReversedFullField";  $Production = "/P16i*_dEdx*"; $year = "/2016/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/16/2017 
 # /star/data09/reco/AuAu200_production2_2016/ReversedFullField/P16ig_dEdx_HFT/
 # Run XVII
 # Lanny pointed (04/26/17) 18116002-18116006 run can be bad. 
+#/star/data2*/reco/pp500_production_2017/ReversedFullField/P17if_calib/2017/*/*
+#/star/data2*/reco/pp500_production_rhicf_2017/ReversedFullField/P17if_calib/2017/*/*
+#$hist = "RunXVII01"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/21/2017 check the present status of calibration from RunXVI
+#$hist = "RunXVII02"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/21/2017 check the present status of calibration from RunXVI, recheck after fix of StPidStatus
+#$hist = "RunXVII03"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/23/2017 reset all corrections to 0
+#$hist = "RunXVII04"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/24/2017 TpcRowQ/TpcSecRowB
+$hist = "RunXVII05"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/25/2017 tpcPressureB.20170101.000004.C
 # 
 my $prod = $hist; #$Production;
 
@@ -1727,6 +1734,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $dir = File::Basename::dirname($file);
     my $fff = File::Basename::basename($file);
     $fff =~ s/_adc_/_/;
+    $fff =~ s/_mtd_/_/;
     my @words = split '_', $fff; print "fff = $fff => words = @words\n";
     my $Run = $words[2];
 #    if ($Run !~ /$listOfRuns/) {next;}
@@ -1746,6 +1754,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     $ff =~ s|st_fmsslow_||;
     $ff =~ s|st_minbias_||;
     $ff =~ s|st_hlt_||;
+    $ff =~ s|st_mtd_||;
     $ff =~ s|adc_||;
 #    $ff =~ s|_raw_0001||;
     $ff =~ s/\.(dst|event)//g;

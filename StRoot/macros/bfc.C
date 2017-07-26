@@ -188,8 +188,8 @@ void bfc(Int_t First, Int_t Last,
   TString tChain(Chain);
   if (tChain == "") {
   if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
-  // tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
-  tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
+  tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
+  //  tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
   //  tChain += "MC.2016a,Stx,geantOut,";
   // ZF  2016-03-20 05:15:50 2016-03-19 06:00:00
   // RF  sdt20160301

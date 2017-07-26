@@ -663,12 +663,24 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
       case kPxlSector:
+#if 0
 	rotA = rotL;
+#else
+	sector = indx[0];
+	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
+	half   = (sector-1)/5; 
+	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
+	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
+	rotA = B * C * rotL; // BCRotL
+	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
+	rotLI[sector-1] = rotL.Inverse();
+#endif
 	break;
       case kPxLadder:
 	sector = indx[0];
 	ladder = indx[1];
 	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
+#if 0
 	half   = (sector-1)/5; 
 	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
@@ -676,26 +688,12 @@ Bool_t StarVMCApplication::MisalignGeometry() {
  	LadderOnPxl = B * C * E; PrPV(LadderOnPxl);
 	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXLA
 	rotA = B.Inverse() * LadderOnPxl * PixelLadderT;
+#else
+	E = rotLI[sector-1] * StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
+	rotA = E * PixelLadderT;
+#endif
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
-#if 0
-      case kPxlWafer:
-	rotA = rotL;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	break;
-      case kPxlSensor:
-	sector = indx[0];
-	ladder = indx[1];
-	sensor = indx[2];
-	Id = sensor + 10*(ladder+4*(sector-1) - 1);
-	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
-	B = *nodeP->GetNode(NLevel-1)->GetMatrix();
-	C = PixelLadderT * B;
-	D = C.Inverse();
-	rotA   =  D * SensorOnLadder;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	break;
-#else
       case kPxlWafer:
 	sector = indx[0];
 	ladder = indx[1];
@@ -714,7 +712,6 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA = rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
-#endif
       case kIst:
 	A = StpstOnIds::instance()->GetMatrix(0);
 	B = StistOnPst::instance()->GetMatrix(0);
@@ -863,7 +860,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
 	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
-	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(ladder); PrPV(sstLadderOnSst);
+	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(100+ladder); PrPV(sstLadderOnSst);
 	      sstSensorOnLadder = StsstSensorOnLadder::instance()->GetMatrix4Id(7000 + ladder + 100*sensor); PrPV(sstSensorOnLadder);
 	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst * sstSensorOnLadder; temp.SetName("kSstWafer"); PrPV(temp);
 	      comb = &temp;

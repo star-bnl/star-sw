@@ -87,7 +87,7 @@ public:
     int getMaxTimeBin() const;    
     int getSeedType() const;    
     float getEvenOddChargeAsy() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
 
     // modifiers
     void setCentralStripGeoId( int geoId );

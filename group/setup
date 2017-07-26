@@ -494,6 +494,31 @@ switch ($pkg)
         endif
 	breaksw
 	case "gcc447":
+	if ( -x $GROUP_DIR/dropit ) then
+	    setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	    setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+	endif
+	if (-d /opt/gcc/4.4.7/bin) then
+	setenv PATH /opt/gcc/4.4.7/bin:$PATH
+	if (! $USE_64BITS) then
+	    setenv LD_LIBRARY_PATH /opt/gcc/4.4.7/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+	else
+	    setenv LD_LIBRARY_PATH /opt/gcc/4.4.7/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+	endif
+        endif
+	breaksw
+	case "gcc452":
+	if ( -x $GROUP_DIR/dropit ) then
+	    setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	    setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+	endif
+	setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc452/bin:$PATH
+	if (! $USE_64BITS) then
+	    setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc452/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+	else
+	    setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc452/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+	endif
+	breaksw
 	case "gcc":
 	breaksw
 	default:

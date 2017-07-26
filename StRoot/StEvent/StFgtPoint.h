@@ -62,7 +62,7 @@ public:
     ~StFgtPoint();
 
     StDetectorId detector() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
     void setHardwarePosition(short disc, short quad);
 
     // other accessors

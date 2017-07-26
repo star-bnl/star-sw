@@ -43,7 +43,7 @@ public:
     int section() const;        // 0-29
     int sector()  const;        // 0-11
     int layer()   const;        // 0-2
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
 protected:
     ClassDef(StEtrHit,1)
 };

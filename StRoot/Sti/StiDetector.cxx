@@ -196,15 +196,13 @@ do {
    }
  } 
    if (!(mode&4)) return 1;
-     mgIndex = 3;
-     mgValue[1] = shape->getHalfDepth();
-     double z = xl[2]-placement->getZcenter();  
-     mgValue[0] = (fabs(z)-mgValue[1]);
-     if (mgValue[0]>acc)	return 0;
-     
-   return 1;
+   mgIndex = 3;
+   mgValue[1] = shape->getHalfDepth();
+   double z = xl[2]-placement->getZcenter();  
+   mgValue[0] = (fabs(z)-mgValue[1]);
+   if (mgValue[0]>acc)	return 0;
  } while(0);
-  return 0;
+  return 1;
 }
 
 /**

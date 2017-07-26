@@ -50,7 +50,7 @@ public:
     Float_t getErrorSigmaX() const {return mErrSigmaX;}
     Float_t getSigmaY() const {return mSigmaY;}
     Float_t getErrorSigmaY() const {return mErrSigmaY;}
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
 
     // note: no getCharge, as already have charge() defined through parent StHit
 //     Short_t getMaxAdc() const;

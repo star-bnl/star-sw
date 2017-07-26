@@ -41,7 +41,7 @@ public:
     int       backleg() const;
     int       channel() const;
     unsigned int   tdc() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
     
     void      setFlag(char);
     void      setBackleg(unsigned char);

@@ -142,8 +142,7 @@ public:
     UChar_t  maxPad()   const {return TMath::Nint(mMcl_x/64.) + mMaxpad;}
     Short_t  minTmbk()  const {return TMath::Nint(mMcl_t/64.) - mMintmbk;}
     Short_t  maxTmbk()  const {return TMath::Nint(mMcl_t/64.) + mMaxtmbk;}
-    static   Int_t    volumeID(Int_t sector, Int_t padrow) {return 100 * sector + padrow;}
-    virtual  Int_t    volumeID() const {return volumeID(sector(),padrow());}
+    Int_t    volumeID() const {return 100 * sector() + padrow();}
     Short_t  timeBucketsInHit()   const {return maxTmbk() - minTmbk() + 1;} // number of time bucket fired in this hit
     Float_t  timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
     Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}

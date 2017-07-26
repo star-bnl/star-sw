@@ -78,7 +78,7 @@ public:
     const StPtrVecEmcCluster& neighbor() const;
     StPtrVecTrack&            track();
     const StPtrVecTrack&      track() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
     
     void setEta(float);
     void setPhi(float);

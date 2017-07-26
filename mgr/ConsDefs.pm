@@ -16,6 +16,7 @@
  *topmode  = *File::Find::topmode;
  *topnlink = *File::Find::topnlink;
  
+ if ( !$ROOT_LEVEL )   { print "ROOT_LEVEL has to be defined\n"; exit 1;}
  if ( !$ROOTSYS )      { print "ROOT_SYS   has to be defined\n"; exit 1;}
  if ( !$STAR_HOST_SYS) { print "STAR_HOST_SYS   has to be defined\n"; exit 1;}
  if ( !$CERN_ROOT)     { print "CERN_ROOT   has to be defined\n"; exit 1;}
@@ -74,6 +75,15 @@
  $AGETOF        = "agetof";
  $AGETOFLAGS    = "-V 1";
  
+ $KUIP          = $CERN_ROOT . "/bin/kuipc";
+ $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
+ my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
+ if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
+ if ($RLIBMAP) {
+   my ($M,$S,$V) = split('\.',$ROOT_LEVEL);
+   if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
+#   print "ROOT_LEVEL = $ROOT_LEVEL => M,S,V = $M,$S,$V => RLIBMAP = $RLIBMAP ==================================================\n"; 
+ } 
  $CXX_VERSION  = `$CXX -dumpversion`;
  chomp($CXX_VERSION);
  ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;

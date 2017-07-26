@@ -38,7 +38,7 @@ public:
    unsigned char getNRawHitsZ() const;
    unsigned char getNRawHitsRPhi() const;
    float         localPosition(unsigned int ) const;
-   virtual Int_t volumeID() const {return 2000000 + 10000*getLadder() + 100*getSensor();}
+   Int_t volumeID() const {return 2000000 + 10000*getLadder() + 100*getSensor();}
 
    void setMaxTimeBin(unsigned char tb);
    void setChargeErr(float chargeErr);

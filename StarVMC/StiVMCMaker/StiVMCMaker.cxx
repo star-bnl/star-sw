@@ -361,14 +361,14 @@ void StiVMCMaker::loadTpcHits(StEvent *pEvent) {
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
       if (! hitvec.size()) continue;
-      Int_t volumeID = StTpcHit::volumeID(sector+1,padrow+1);
-      fPath = fVMCDetector->FormPath(volumeID);
-      fStiDetector = (StiDetector *) fDetectorContainer->FindDetector(fPath);
-      if (! fStiDetector) continue;
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
-        StTpcHit*hit=*iter;
+        const StTpcHit *hit= (StTpcHit*) *iter;
+	Int_t volumeID = hit->volumeID();
+	fPath = fVMCDetector->FormPath(volumeID);
+	fStiDetector = (StiDetector *) fDetectorContainer->FindDetector(fPath);
+	if (! fStiDetector) continue;
         stiHit = _toolkit->HitFactory()->getInstance();
         assert(stiHit);
         stiHit->Reset();
@@ -516,7 +516,7 @@ void StiVMCMaker::loadIstHits(StEvent *pEvent) {
     Int_t ladder=hit->ladder();
     Int_t wafer=hit->wafer();
     LOG_DEBUG<<"StiVMCMaker::loadIstHits: hit has ladder: "<<ladder<<"; wafer: "<<wafer<<endm;
-    LOG_DEBUG<<"StiVMCMaker::loadIstHits: hit volume id: "<<hit->volumeId()<<endm;
+    LOG_DEBUG<<"StiVMCMaker::loadIstHits: hit volume id: "<<hit->volumeID()<<endm;
     fIndx[0] = ladder;
     fIndx[1] = wafer;
     fPath = StarVMCDetector::FormPath(fVMCDetector->GetFMT().Data(),fVMCDetector->GetNVL(),fIndx);

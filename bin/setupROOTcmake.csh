@@ -13,9 +13,13 @@ setenv PYTHIA8_DIR ${XOPTSTAR}
 setenv CC `which gcc`
 setenv CXX `which g++`
 setenv FC `which gfortran`
+setenv QT_LIBRARY_DIR ${QTDIR}/lib
+setenv QT_INCLUDE_DIR ${QTDIR}/include
+setenv QT_MOC_EXECUTABLE ${QTDIR}/bin/moc
+setenv Qt4 ${QTDIR}
 #cmake cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
 cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug \
--Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=OFF \
+-Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=OFF \
 -Dpython=OFF \
 -Dpythia6=ON  -Dpythia8=ON \
 -DCMAKE_C_COMPILER="${CC}" -DCMAKE_CXX_COMPILER="${CXX}" -DCMAKE_Fortran_COMPILER="${FC}" \

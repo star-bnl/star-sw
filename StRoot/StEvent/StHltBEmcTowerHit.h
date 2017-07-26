@@ -35,7 +35,7 @@ public:
     float z() const;
     float softId() const;
     float daqId() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
     
     StHltTrackNode* trackNode();
     const StHltTrackNode* trackNode() const;

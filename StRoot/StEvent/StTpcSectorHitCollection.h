@@ -51,13 +51,13 @@ public:
     // StTpcSectorHitCollection& operator=(const StTpcSectorHitCollection&); use default
     
     UInt_t        numberOfHits() const;
-    static UInt_t numberOfPadrows() { return mNumberOfPadrows; }
+    UInt_t numberOfPadrows() const { return mNumberOfPadrows; }
     
     StTpcPadrowHitCollection*       padrow(UInt_t);
     const StTpcPadrowHitCollection* padrow(UInt_t) const;
 
 private:
-    enum { mNumberOfPadrows = 72 }; // Keep in mind that it could be changed
+    enum { mNumberOfPadrows = 100 }; // Keep in mind that it could be changed
     StTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
     
     ClassDef(StTpcSectorHitCollection,2)

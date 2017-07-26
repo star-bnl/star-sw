@@ -88,7 +88,7 @@ public:
     void         unSetBit(StRichHitFlag f);
     unsigned int flags() const;
     StDetectorId detector() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
 
 protected:
     StThreeVectorF mLocal;

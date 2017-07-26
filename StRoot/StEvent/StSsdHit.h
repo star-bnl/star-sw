@@ -88,7 +88,7 @@ public:
     void         setLocalPosition(float u, float v, float w = 0);
     void         setADC(int, int);
     int          getADC(unsigned int) const;
-    virtual int  volumeID() const;
+    int          volumeID() const;
     
     StDetectorId detector() const;
     void         Print(const Option_t *option="") const;

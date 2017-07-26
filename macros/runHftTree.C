@@ -1,4 +1,9 @@
-void runHftTree(Int_t N = 10000000, const Char_t *input, const Char_t *output=0) {
+/*
+  root.exe -q -b -x runHftTree.C >& runHftTree.log &
+  root.exe -q -b -x Hft.tree.root makeHftPlots.C >& makeHftPlots.log &
+  root.exe Out.plot.root HFTDraw.C+
+ */
+void runHftTree(Int_t N = 10000000, const Char_t *input="./*event.root", const Char_t *output=0) {
   gROOT->LoadMacro("bfc.C");
   Load();
   TString Input(input);
@@ -9,6 +14,7 @@ void runHftTree(Int_t N = 10000000, const Char_t *input, const Char_t *output=0)
   if (Output == "") {
     Output = Input;
     Output.ReplaceAll("event.root","tree.root");
+    if (Output.Contains("*")) Output = "Hft.tree.root";
     if (Output == Input) {
       cout << "Input = " << Input.Data() << " and Output = " << Output.Data() << " are the same" << endl;
       return;
