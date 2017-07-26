@@ -44,7 +44,8 @@
 #root -q -b 'bfc.C(1000,"RC.y2016.noHFT,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,StiCA,KFVertex,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 # dev
 #root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # SL16j
