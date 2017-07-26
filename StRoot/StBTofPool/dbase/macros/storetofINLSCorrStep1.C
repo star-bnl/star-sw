@@ -3,10 +3,10 @@
 // based on
 //  http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
 //
-// Jing Liu, 02/18/2005 
+// Jing Liu, 02/18/2005
 //
 
- 
+
 // #include "StDbLib/StDbManager.hh"
 // #include "StDbLib/StDbConfigNode.hh"
 // #include "StDbLib/StDbTable.h"
@@ -24,7 +24,7 @@ void storetofINLSCorrStep1(int i1=0, int i2=300)
 
 {
 
-  const Int_t NMAX = 1200;
+  const Int_t NMAX = 1400;
   const Int_t NTDC = 3;  // # of tdcs per board
   const Int_t NCHAN = 8;  // # of channels per tdc
 
@@ -72,7 +72,9 @@ void storetofINLSCorrStep1(int i1=0, int i2=300)
 //  for(int iboard=0;iboard<NMAX;iboard++) {
   for(int iboard=i1;iboard<i2;iboard++) {
 
-    char *dirpfx = "/star/institutions/rice/dongx/Run10/dbase/INL";
+    //char *dirpfx = "/gpfs01/star/scratch/geurts/inl/Run10/dbase/INL";
+    //char *dirpfx = "/gpfs01/star/i_rice/geurts/database/Run13/INL";
+    char *dirpfx = "/gpfs01/star/i_rice/geurts/database/Run15/";
     char fulldir[200];
     char dirname[100];
     char sfx[9][10] = {"",".R",".RC",".RRC",".redo",".n","redo","n",".RRR"};
@@ -112,14 +114,14 @@ void storetofINLSCorrStep1(int i1=0, int i2=300)
 
 	inlcorr[NFILL].tdigId = (Short_t)iboard;
 	inlcorr[NFILL].tdcChanId = (Short_t)(itdc*NCHAN+ichan);
-	
+
 	ifstream infile(filename);
 	if(!infile) {
 	  cout<<"Can not open "<<filename<<" Please check!!!"<<endl;
 	  return -1;
 	}
         cout << " +++ Open file " << filename << " for input " << endl;
-	
+
 	for(int j=0;j<1024;j++) {
 	  float bin, data;
 	  infile >> bin >> data;
@@ -132,7 +134,7 @@ void storetofINLSCorrStep1(int i1=0, int i2=300)
 	  //	  cout<<"readin bin="<<bin<<" ibin="<<j<<" data="<<data<<endl;
 	  hINLSCorr[iboard][itdc][ichan]->SetBinContent(j+1,inlcorr[NFILL].INLCorr[j]);
 	}
-      
+
 	infile.close();
 
 	NFILL++;
@@ -183,7 +185,7 @@ void storetofINLSCorrStep1(int i1=0, int i2=300)
 */
 	index++;
       }
-    }    
+    }
   }
   fout->Close();
 
@@ -199,4 +201,3 @@ void storetofINLSCorrStep1(int i1=0, int i2=300)
       //    return 0;
 */
 }
-
