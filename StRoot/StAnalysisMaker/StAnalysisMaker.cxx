@@ -1355,9 +1355,9 @@ void StAnalysisMaker::Print(Option_t *option) const {
 //________________________________________________________________________________
 void StAnalysisMaker::DumpHftHits() {
   struct BPoint_t {
-    Float_t                     det,x,y,z,q,idT,fl,us,volumeId;
+    Float_t                     det,x,y,z,q,idT,fl,us,volumeID;
   };
-  static const Char_t *vname = "det:x:y:z:q:idT:fl:us:volumeId";
+  static const Char_t *vname = "det:x:y:z:q:idT:fl:us:volumeID";
   static TNtuple *Nt = 0;
   if (! Nt) {
     TFile *tf =  StMaker::GetTopChain()->GetTFile();
@@ -1398,7 +1398,7 @@ void StAnalysisMaker::DumpHftHits() {
 	      B.q   = hit->charge();
 	      B.fl  = hit->flag();
 	      B.us  = hit->usedInFit();
-	      B.volumeId = hit->volumeId();
+	      B.volumeID = hit->volumeID();
 	      Nt->Fill(&B.det);
 	    }
 	  }
@@ -1429,7 +1429,7 @@ void StAnalysisMaker::DumpHftHits() {
 	      B.q   = hit->charge();
 	      B.fl  = hit->flag();
 	      B.us  = hit->usedInFit();
-	      B.us  = hit->usedInFit();
+	      B.volumeID = hit->volumeID();
 	      Nt->Fill(&B.det);
 	  }
 	}
@@ -1462,7 +1462,7 @@ void StAnalysisMaker::DumpHftHits() {
 	      B.q   = hit->charge();
 	      B.fl  = hit->flag();
 	      B.us  = hit->usedInFit();
-	      B.us  = hit->usedInFit();
+	      B.volumeID = hit->volumeID();
 	      Nt->Fill(&B.det);
 	  }
 	}
