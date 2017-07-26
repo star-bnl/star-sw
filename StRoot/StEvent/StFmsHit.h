@@ -37,7 +37,7 @@ public:
     unsigned short adc() const;
     unsigned short tdc() const;
     float          energy() const;
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
     
     void setDetectorId(unsigned short);
     void setChannel(unsigned short);

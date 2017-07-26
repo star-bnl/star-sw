@@ -57,7 +57,7 @@ public:
     void         setLocalPosition(float, float, float);
     void         setADC(unsigned short, unsigned short); 
     int          getADC(unsigned int) const; 
-    virtual int  volumeID() const;
+    int          volumeID() const;
     void         Print(const Option_t *option="") const;
     
     StDetectorId detector() const;

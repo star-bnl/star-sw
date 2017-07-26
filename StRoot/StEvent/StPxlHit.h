@@ -69,7 +69,7 @@ public:
     Float_t meanColumn() const;
     UChar_t nRawHits() const;
     UChar_t layer() const ;
-    virtual Int_t volumeID() const {return 1000000*sector() + 10000*ladder() + 100*sensor();}
+    Int_t volumeID() const {return 1000000*sector() + 10000*ladder() + 100*sensor();}
     
     Float_t localPosition(UInt_t) const;
     const float* localPosition() const;

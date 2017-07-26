@@ -46,7 +46,7 @@ public:
     int             column() const;       // function for col
     float           energy() const;       // function for edep
     int             adc() const;          // function for adc
-    virtual Int_t volumeID() const {return 0;}
+    Int_t volumeID() const {return 0;}
     
     void            setSuperModule(int);
     void            setSubDetector(int);

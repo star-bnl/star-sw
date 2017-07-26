@@ -114,7 +114,7 @@ public:
     void setAnode(float);
     void setTimebucket(float);
     void setLocalPosition(float, float);
-    virtual int volumeID() const;
+    int  volumeID() const;
     void setNumberOfAnodes(unsigned short);
     void setNumberOfPixels(unsigned short);
     void Print(Option_t *option="") const;
