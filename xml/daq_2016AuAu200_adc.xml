@@ -42,9 +42,7 @@
 #root -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #root -q -b 'bfc.C(1000,"RC.y2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #root -q -b 'bfc.C(1000,"RC.y2016.noHFT,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-#root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
-root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # dev
 #root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # SL16j
@@ -55,16 +53,13 @@ root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,s
 # TFG17e with Tpx clustering
 #root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:./sched$JOBID.log" />
-        <stderr URL="file:./sched$JOBID.err" />
 <!--
+        <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
+-->
         <stdout URL="file:./daq2016$JOBID.log" />
         <stderr URL="file:./daq2016$JOBID.err" />
--->
 <!-- <input URL="file:/star/data03/daq/2016/12*/*/st_physics_adc_*_raw*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2016/126/17126033/st_physics_adc_17126033_raw*.daq" /> -->
-<!--
-<input URL="file:/net/l404/data/fisyak/daq/2016/12*/*/*adc*.daq" /> 
---> 
-<input URL="command:daqList.pl" />
+<input URL="file:/net/l404/data/fisyak/daq/2016/126/*/*adc*.daq" />
 </job>

@@ -191,3 +191,5 @@
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20160521.000307.root /star/subsys/tpc/fisyak/Histograms/RunXVI309/SecRow3CGFRunXVI309.root  'MakeTpcSecRowB.C(20160521,309,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20160521.000307.C")' >& MakeTpcSecRowB.20160521,309.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20160521.000309.root /star/subsys/tpc/fisyak/Histograms/RunXVI310/SecRow3CGFRunXVI310.root  'MakeTpcSecRowB.C(20160521,310,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20160521.000309.C")' >& MakeTpcSecRowB.20160521,310.log
 root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20160521.000310.root /star/subsys/tpc/fisyak/Histograms/RunXVI311/SecRow3CGFRunXVI311.root  'MakeTpcSecRowB.C(20160521,311,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20160521.000310.C")' >& MakeTpcSecRowB.20160521,311.log
+# Run XVII
+root.exe -q -b   /star/subsys/tpc/fisyak/Histograms/RunXVII03/SecRow3CGFRunXVII03.root  'MakeTpcSecRowB.C(20170101,3,"TpcSecRowB","$STAR/StarDb/Calibrations/tpc/TpcRowQ.20170101.000000.C")' >& MakeTpcSecRowB.20170101,3.log

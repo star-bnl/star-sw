@@ -5,10 +5,10 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
-  setenv NODEBUG yes
-  setenv STARFPE NO
-  setup 64b
-  starver .DEV2
+#  setenv NODEBUG yes
+#  setenv STARFPE NO
+#  setup 64b
+#  starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -19,13 +19,15 @@
     exit 1;
   endif
   set name = ""
-  foreach name (LcKppimTsq Lc3pimTsq D0KpimTsq D0K0s2pimTsq DsKKpimTsq) 
+  foreach name (LcKppimTsq Lc3pimTsq D0KpimTsq D0K0s2pimTsq DsKKpimTsq 20Muons) 
     echo $Name | grep $name
     if (! $?) break;
   end
   echo "name = $name";
   if ($name == "") exit 1;
-  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  echo $Name | grep 20Muons
+  if (! $?) set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,evout,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
   echo $Name | grep -i real
   if (! $?) set sdt = ",sdt20160301";
@@ -39,5 +41,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 20 1000" />
+<input URL="command:RunId.pl 1 50 200" />
 </job>
