@@ -45,7 +45,7 @@ public:
     
     Bool_t         addHit(StTpcHit*);
     UInt_t         numberOfHits() const;
-    static UInt_t  numberOfSectors() {return mNumberOfSectors; }
+    UInt_t         numberOfSectors() const {return mNumberOfSectors; }
     
     StTpcSectorHitCollection*       sector(UInt_t);
     const StTpcSectorHitCollection* sector(UInt_t) const;
