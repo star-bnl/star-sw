@@ -3,10 +3,10 @@
 // based on
 //  http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
 //
-// Jing Liu, 03/10/2005 
+// Jing Liu, 03/10/2005
 //
 
- 
+
 // #include "StDbLib/StDbManager.hh"
 // #include "StDbLib/StDbConfigNode.hh"
 // #include "StDbLib/StDbTable.h"
@@ -16,7 +16,7 @@
 #include <fstream>
 using namespace std;
 
-void readtofINLSCorr()
+void readtofINLSCorr(string ZReadTime = "2015-12-31 00:00:00")
 {
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
@@ -33,11 +33,10 @@ void readtofINLSCorr()
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = "2011-10-31 00:00:00";
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofinlcorr = configNode->addDbTable("tofINLSCorr");
- 
+
   dbManager->fetchDbTable(tofinlcorr);
 
   cout<<tofinlcorr->getVersion()<<endl;
@@ -47,7 +46,7 @@ void readtofINLSCorr()
 
   tofINLSCorr_st* inlcorr = static_cast<tofINLSCorr_st*>(tofinlcorr->GetTable());
 
-  const Int_t mNTDIGMAX = 1200;
+  const Int_t mNTDIGMAX = 1400; //1200
   const Int_t mNChanOnTDIG = 24;
   const Int_t mNChanMAX = 1024;
   const Int_t mNBoardIdMAX = 4800;
