@@ -21,7 +21,7 @@
   diffdNdx->SetName("diffdNdx");
   diffdNdx->Add(pdNdx,pidNdx,1,-1);
   diffdNdx->SetLineColor(3);
-  c2 = new TCanvas("c2","c2");
+  cppi = new TCanvas("cppi","cppi");
   diffB70->SetXTitle("log_{10}p")
   diffB70->SetTitle("z_{p} - z_{#pi}");
   diffB70->Draw("l");
@@ -50,7 +50,7 @@
   diffdNdx->SetName("diffdNdx");
   diffdNdx->Add(edNdx,pidNdx,1,-1);
   diffdNdx->SetLineColor(3);
-  c2 = new TCanvas("c2","c2");
+  cepi = new TCanvas("cepi","cepi");
   diffB70->SetXTitle("log_{10}p")
   diffB70->SetTitle("z_{e} - z_{#pi}");
   diffB70->Draw("l");
