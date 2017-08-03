@@ -1,5 +1,0 @@
-# $Id $
-# package StAnalysisUtilities
-# author: 
-Library:libStAnalysisUtilities.so:LIBS +=   -lStChain  -lPostscript
-#Library:libStAnalysisUtilities.so:LIBS +=   -lStChain  -lPostscript
