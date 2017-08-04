@@ -13,6 +13,7 @@ VertexData::VertexData(int vertexId) {
   mIdTruth=0;
   r=TVector3(999,999,999);
   gPtSum=0;
+  nUsedTrack=Lmax=nBtof=nBtofV=0;
   nAnyMatch=nCtb=nBemc=nEemc=nTpc=0;
   nAnyVeto=nCtbV=nBemcV=nEemcV=nTpcV=0;
 }
