@@ -1,4 +1,5 @@
 /*
+  root.exe -q -b 'MakeRow.C+(mu)'
   TH1D *h = 0;
   Int_t ch  = 0, sec = 0;
   Int_t i = 8*(sec-1) + ch; h = mu->ProjectionY(Form("bin%i",i), i, i); FitTH1R(h);
@@ -88,7 +89,7 @@ void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
     Line = Form("  row.nrows = %3i;",n); cout << Line.Data() << endl;  out << Line.Data() << endl;
     //    Line = Form("  row.min =  %5.2f;",xmin); cout << Line.Data() << endl;  out << Line.Data() << endl;
     //    Line = Form("  row.max =  %5.2f;",xmax); cout << Line.Data() << endl;  out << Line.Data() << endl;
-    if (f) {
+    if (f && f->GetParameter(1) < 0) {
       Line = Form("  row.npar       =            %2i;",f->GetNpar()); cout << Line.Data() << endl;  out << Line.Data() << endl;
       for (Int_t i = 0; i < f->GetNpar(); i++) {
 	Line = Form("  row.a[%i]       = %13.7g;", i, f->GetParameter(i)); cout << Line.Data() << endl;  out << Line.Data() << endl;

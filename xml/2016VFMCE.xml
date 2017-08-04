@@ -6,7 +6,7 @@
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
 #  setenv NODEBUG yes
-#  setenv STARFPE NO
+  setenv STARFPE NO
 #  setup 64b
 #  starver .DEV2
   echo $INPUTFILE0 | grep ':'
@@ -19,20 +19,21 @@
     exit 1;
   endif
   set name = ""
-  foreach name (LcKppimTsq Lc3pimTsq D0KpimTsq D0K0s2pimTsq DsKKpimTsq 20Muons) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons) 
     echo $Name | grep $name
     if (! $?) break;
   end
   echo "name = $name";
   if ($name == "") exit 1;
-  set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
-  echo $Name | grep 20Muons
-  if (! $?) set chain = "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,evout,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  
+  set chain = "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
+  set VMCE = "";
   echo $Name | grep -i real
   if (! $?) set sdt = ",sdt20160301";
-#  set name = "LcKppi";
-  set Chain = ${chain}${sdt}",Rung."${rung}
+  echo $Name | grep -i 20Muons
+  if ( $? ) set VMCE = ",VMCE";
+  set Chain = ${chain}${VMCE}${sdt}",Rung."${rung}
   set base = ${name}_${rung};
   set file = ${base}.MuDst.root
   set logFile  = ${base}B.log
