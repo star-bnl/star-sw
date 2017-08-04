@@ -35,7 +35,6 @@
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
 // StarClassLibrary
-#include "StTimer.hh"
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -242,14 +241,12 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
-  static  StTimer timer;
   static  StTpcLocalSectorCoordinate        localSect[4];
   static  StTpcPadCoordinate                PadOfTrack, Pad;
   static  StTpcLocalSectorDirection         localDirectionOfTrack;
   static  StThreeVectorD xyz[4];
   static  StThreeVectorD dirG;
   static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], dx;
-  if (Debug()) timer.start();
   enum {kNdEdxMax  = 100};
   static dEdxY2_t CdEdxT[3*kNdEdxMax];//,FdEdxT[kNdEdxMax],dEdxST[kNdEdxMax];
   CdEdx = CdEdxT; 
@@ -716,11 +713,6 @@ Int_t StdEdxY2Maker::Make(){
 		       << "  Event: " << pEvent->id()
 		       << "  # track nodes: "
 		       << pEvent->trackNodes().size() << endm;
-  }
-  if (Debug()) {
-    timer.stop();
-    LOG_QA << "CPU time for StdEdxY2Maker::Make(): "
-		       << timer.elapsedTime() << " sec\n" << endm;
   }
   if (mHitsUsage) mHitsUsage->Fill(TMath::Log10(TotalNoOfTpcHits+1.), TMath::Log10(NoOfTpcHitsUsed+1.));
   return kStOK;
