@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StIstSlowSimMaker.cxx,v 1.1 2016/02/17 14:39:00 jeromel Exp $
+ * $Id: StIstSlowSimMaker.cxx,v 1.2 2017/08/03 04:09:57 huangbc Exp $
  *
  * Author: Leszek Kosarzewski, March 2014
  ****************************************************************************
@@ -297,7 +297,7 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 			findPad(meanPos, meanColumn, meanRow, rPhiPos_mean, zPos_mean);
 
          //Nrow = 64 = kIstNumApvChannels/2, Ncolumn = 12 = kIstNumApvsPerArm/2
-         //One APV reads 64 rows x 2 columns
+         //One APV reads 64 rows x 12 columns
 			Int_t geoId = (ladderId-1)*kIstNumApvChannels*kIstApvsPerLadder+ (sensorId-1)*(kIstNumApvsPerArm/2)*(kIstNumApvChannels/2) + (meanColumn-1)*kIstNumApvChannels/2 + meanRow;
 			Int_t elecId = mMappingGeomVec[geoId-1];
 			LOG_DEBUG << "elecID = " << elecId << "\tgeoId = " << geoId << endm;
@@ -316,8 +316,8 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 				if(rawHit->getChannelId()>=0) {
 					adcSum += rawHit->getCharge(t);
 				}
-				if (Debug()) {
-				  LOG_INFO<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm; }
+
+				LOG_DEBUG<<"dE = "<<1e6*istMChit->dE()<<" keV \tpathLength = "<<pathLength<<"\tpathLengthTotal = "<<pathLengthTotal<<endm;
 				Float_t charge = istMChit->dE() * pathLength / pathLengthTotal;
 				if(kIstTimeBinFrac[maxTB]>0) charge *= kIstTimeBinFrac[t]*kIstMPV/kIstTimeBinFrac[maxTB]; //translate energy Int_to ADC with GeV-to-ADC factor
 				if ( charge > adcSum ) {
@@ -326,8 +326,7 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 				adcSum += charge; 
 
 				rawHit->setCharge(adcSum, t);
-				if (Debug()) {
-				  LOG_INFO<<"charge = "<<adcSum<<"\tat TB"<<(Int_t)t<<endm; }
+				LOG_DEBUG<<"charge = "<<adcSum<<"\tat TB"<<(Int_t)t<<endm;
 			}
 			rawHit->setChannelId( elecId );
 			rawHit->setGeoId( geoId );
@@ -411,11 +410,18 @@ void StIstSlowSimMaker::findPad(const StThreeVectorD hitPos, UShort_t &column, U
 {
 	Double_t rPhiPos   = hitPos.x();
 	Double_t zPos      = hitPos.z();
-   if(rPhiPos<0||zPos<0){
-      LOG_WARN<<"StIstSlowSimMaker::findPad Wrong local position rPhiPos = "<<rPhiPos<<" zPos = "<<zPos<<endm;
+   //allow +/- 0.5 pad at edge
+   if(rPhiPos<-kIstPadPitchRow/2.||rPhiPos>kIstSensorActiveSizeRPhi+kIstPadPitchRow/2.||zPos<-kIstPadPitchColumn/2.||zPos>kIstSensorActiveSizeZ+kIstPadPitchColumn/2.){
+      LOG_ERROR<<"StIstSlowSimMaker::findPad Wrong local position rPhiPos = "<<rPhiPos<<" zPos = "<<zPos<<endm;
+      column = row = rPhiPos_mean = zPos_mean = 65535;
+      return;
    }
 	row     = (UShort_t)floor( rPhiPos/kIstPadPitchRow ) + 1;
+   if(row<1) row = 1;
+   if(row>kIstNumRowsPerSensor) row = kIstNumRowsPerSensor;
 	column  = (UShort_t)floor( zPos/kIstPadPitchColumn ) + 1;
+   if(column<1) column = 1;
+   if(column>kIstNumRowsPerSensor) column = kIstNumColumnsPerSensor;
 	rPhiPos_mean = (row-1) * kIstPadPitchRow + 0.5 * kIstPadPitchRow; //unit: cm
 	zPos_mean    = (column-1) * kIstPadPitchColumn + 0.5 * kIstPadPitchColumn; //unit: cm
 }
