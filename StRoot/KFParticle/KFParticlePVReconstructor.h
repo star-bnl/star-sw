@@ -39,10 +39,10 @@ class KFParticlePVReconstructor{
 
      /// Accessors
   int NPrimaryVertices() { return fPrimVertices.size(); }
-  KFParticle &GetPrimVertex(int iPV=0)   { return fPrimVertices[iPV]; }
-  KFVertex   &GetPrimKFVertex(int iPV=0)   { return fPrimVertices[iPV]; }
+  KFParticle &GetPrimVertex(int iPV=0)   { return fPrimVertices[iPV]; };
+  KFVertex   &GetPrimKFVertex(int iPV=0)   { return fPrimVertices[iPV]; };
   vector<int>& GetPVTrackIndexArray(int iPV=0) { return fClusters[iPV].fTracks; }
-  KFParticle &GetParticle(int i){ assert( i < fNParticles );          return fParticles[i];    }
+  KFParticle &GetParticle(int i){ assert( i < fNParticles );          return fParticles[i];    };
   
   void SetBeamLine(KFParticle& p) { fBeamLine = p; fIsBeamLine = 1; }
   bool IsBeamLine() const { return fIsBeamLine; }
@@ -59,7 +59,6 @@ class KFParticlePVReconstructor{
   KFParticlePVReconstructor(KFParticlePVReconstructor &);
 
   void FindPrimaryClusters( int cutNDF = 1);
-  void FindBestPV();
 
   vector<KFParticle> fParticles; // input particles
   int fNParticles;           // number of input particles

@@ -959,7 +959,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
 //                 
 //                 closeDaughters &= (daughterNeg.GetDistanceFromParticle(daughterPos) < float_v(1.f));
 //               }
-              if(closeDaughters.isEmpty()) continue;
+              if(closeDaughters.isEmpty() && (iTC != 0)) continue;
               
               
               int_v trackPdgPos[2];
@@ -991,7 +991,10 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
               active[1] &= int_m(closeDaughters);
               
               if(iTC==0) 
+              {
                 nPDGPos = 1;
+                active[0] = (negInd < negTracksSize) && (int_v::IndexesFromZero() < int_v(NTracks));
+              }
 
               for(int iPDGPos=0; iPDGPos<nPDGPos; iPDGPos++)
               {
@@ -1106,6 +1109,8 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                   }
                   
                   pvIndexMother[nBufEntry] = isPrimary[iV] ? negPVIndex[iV] : -1;
+                  
+                  if( iTrTypeNeg != iTrTypePos ) pvIndexMother[nBufEntry] = 0;
                   
                   V0PDG[nBufEntry] = motherPDG[iV];
                   
