@@ -1,26 +1,26 @@
 
 PROGRAM = read_table_fgt
 
-INCLUDEDIRS = -I../../ -I/afs/rhic.bnl.gov/star/packages/DEV/.sl53_gcc432/include
+INCLUDEDIRS = -I../../ -I/afs/rhic.bnl.gov/star/packages/DEV/.sl53_gcc432/include `mysql_config --include`
 
-LIBDIRS = -L../../ -L/usr/lib64/mysql
+LIBDIRS = -L../../ 
 
-LIBS = -lmysqlclient \
+LIBS = `mysql_config --libs` \
 	-lxml2 \
 	-lrt \
+	-lpthread \
 	../../StDbLib.a
 
 CXXSOURCES = read_table_fgt.cc
 
 CXXOBJECTS = $(CXXSOURCES:.cpp=.o)  # expands to list of object files
-CXXFLAGS = -g -Wall $(INCLUDEDIRS) -D__STDB_STANDALONE__
-CXX = g++
+CXXFLAGS = -g `mysql_config --cflags` -Wall $(INCLUDEDIRS) -D__STDB_STANDALONE__
+CXX = g++ -std=c++11 -m32
 
 LDFLAGS = $(LIBDIRS) $(LIBS)
 
 
 all: $(PROGRAM)
-
 
 $(PROGRAM): $(CXXOBJECTS)
 	$(CXX) -o $@ $(CXXOBJECTS) $(CXXFLAGS) $(LDFLAGS)
@@ -30,7 +30,7 @@ check:
 	cppcheck --enable=all ./*.cpp 2> check_cpp.log
 
 clean:
-	$(RM) -f $(CXXOBJECTS) $(PROGRAM)
+	$(RM) $(PROGRAM)
 
 run:
 	./$(PROGRAM)
