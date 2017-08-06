@@ -6,6 +6,7 @@
 #include <Stiostream.h>
 #include "TClass.h"
 #include "TROOT.h"
+#include "TEnv.h"
 #include "StMaker.h"
 #include "StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
@@ -187,11 +188,12 @@ Int_t StIOMaker::Make(){
 AGAIN:
     iret = MakeRead();  
     SetNumber(++fNumEvent);
-
+    Bool_t quiet = gEnv->GetValue("quiet", 0);
+    if (! quiet) {
     LOG_QA << "StIOMaker:  Event: " << GetIventNumber()
         << "  Run: " << GetRunNumber() 
         << "  EventId: " << GetEventNumber() <<   endm;
-
+    }
 
     if (fNumEvent > fMaxEvent) iret = kStEOF;
     if (iret != kStEOF) 	return iret;
