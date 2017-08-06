@@ -1,6 +1,6 @@
 <StDbServer>
-<server> offline in online </server>
-<host> onldb2.starp.bnl.gov </host>
-<port> 3601 </port>
+<server> offline db servers for external access </server>
+<host> dbx.star.bnl.gov </host>
+<port> 3316 </port>
 <socket> /tmp/mysql.3316.sock </socket>
 </StDbServer>

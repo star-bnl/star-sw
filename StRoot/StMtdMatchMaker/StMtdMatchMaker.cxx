@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.38 2017/03/08 20:48:54 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.39 2017/07/31 14:19:14 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,10 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.39  2017/07/31 14:19:14  marr
+ * Add protection for BL9, installed in 2017 for test, since the geometry file
+ * does not include this backleg.
+ *
  * Revision 1.38  2017/03/08 20:48:54  marr
  * 1) Add a new data member mYear to indicate run year
  * 2) Invoke appropriate functions in StMtdGeometry class to calculate local y
@@ -1139,7 +1143,17 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 
 	for(unsigned int idaq=0;idaq<daqCellsHitVec.size();idaq++, daqIter++) {
 		mtdCellHitVectorIter proIter = allCellsHitVec.begin();
-		assert(mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module));
+		StMtdGeoModule *geoModule = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module);
+		if(daqIter->backleg==9)
+		  {
+		    if(!geoModule)
+		      {
+			LOG_WARN << "Geometry module not available for BL = " << daqIter->backleg << " Mod = " << daqIter->module << endm;
+			continue;
+		      }
+		  }
+		else
+		  assert(geoModule);
 		for(unsigned int ipro=0;ipro<allCellsHitVec.size();ipro++, proIter++) {
 
 			int daqIndex = (daqIter->module-1)*12 + (daqIter->cell);
@@ -1149,11 +1163,11 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 
 				double stripPhiCen = 0.;
 				int channel = daqIter->cell;
-				stripPhiCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetCellPhiCenter(channel);
+				stripPhiCen = geoModule->GetCellPhiCenter(channel);
 
 				double mLeTimeWest = daqIter->leadingEdgeTime.first;
 				double mLeTimeEast = daqIter->leadingEdgeTime.second;
-				StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
+				StThreeVectorD modCen = geoModule->GetNodePoint();
 				double stripZCen   = modCen.z() - (mLeTimeWest-mLeTimeEast)/2./gMtdCellDriftV*1000.;
 
 				double daqphi = stripPhiCen;
@@ -1186,7 +1200,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				StGlobalTrack *theTrack = dynamic_cast<StGlobalTrack*>(nodes[iNode]->track(global));
 			}
 			*/
-			StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
+			StThreeVectorD modCen = geoModule->GetNodePoint();
 
 			Int_t   ibackleg = daqIter->backleg;
 			Int_t   imodule  = daqIter->module;

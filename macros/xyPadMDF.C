@@ -169,13 +169,13 @@ void xyPadMDF1(const TH2D *total2D, Int_t max=7, Int_t maxTerm = 20){
 #endif
 }
 //____________________________________________________________________________
-void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20){
+void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20, Int_t date = 20170101, Int_t time = 13){
   TH2D *mu = (TH2D *) gDirectory->Get(total);
   if (! mu) {
     cout << "Histogram " << total << " has not been found " << endl;
     return;
   }
-  TString fOut =  "TpcPadCorrectionMDF.20160521.000311.C";
+  TString fOut =  Form("TpcPadCorrectionMDF.%8i.%06i.C",date,time);
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
   out << "TDataSet *CreateTable() {" << endl;
@@ -190,7 +190,7 @@ void xyPadMDF(const Char_t  *total = "mu", Int_t max=7, Int_t maxTerm = 20){
       else    muP->GetXaxis()->SetRange(11+20*(sector-1),20+20*(sector-1)); // Outer
       Int_t idx = io + 2*(sector-1);
       out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
-      out << "  row.nrows = 48; "<< endl;
+      out << "  row.nrows = 48; //" << gDirectory->GetName() << endl;
       out << "  row.idx   = " << Form("%2i", idx+1) << ";" << endl;
       xyPadMDF1(muP, max, maxTerm);
       out << "  tableSet->AddAt(&row," << idx << ");" << endl;

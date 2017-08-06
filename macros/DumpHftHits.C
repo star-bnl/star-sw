@@ -33,3 +33,9 @@ void DumpHftHits(Int_t noEvents = 1000000, const Char_t *InFile = "./*event.root
     StAnalysisMaker::instance()->DumpHftHits();
   }
 }
+#if 0
+Double_t sector(Double_t phi) {
+  Double_t i = (phi - 72)/36 + 1;
+  if (i < 0) i ;
+}
+#endif

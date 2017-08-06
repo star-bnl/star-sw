@@ -265,37 +265,85 @@ MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcL
 #include "St_TpcPadCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDF,Calibrations/tpc/TpcPadCorrectionMDF);
 ClassImp(St_MDFCorrectionC);
+St_MDFCorrectionC *St_MDFCorrectionC::fgMDFCorrectionC = 0;
 //____________________________________________________________________
-Double_t St_MDFCorrectionC::Eval(Int_t k, const Double_t x0, Double_t x1) const {
-  Double_t x[2] = {x0, x1};
-  return Eval(k,x);
+St_MDFCorrectionC::St_MDFCorrectionC(St_MDFCorrection *table) : TChair(table), fFunc(0) {
+  UInt_t N = table->GetNRows(); 
+  fFunc = new TF1*[N]; 
+  memset(fFunc, 0, N*sizeof(TF1*));
 }
 //____________________________________________________________________
-Double_t St_MDFCorrectionC::Eval(Int_t k, const Double_t *x) const {
+St_MDFCorrectionC::~St_MDFCorrectionC() {
+  UInt_t N = Table()->GetNRows(); 
+  for (UInt_t i = 0; i < N; i++) {SafeDelete(fFunc[i]);}
+  delete [] fFunc;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrectionC::MDFunc(Double_t *x, Double_t *p) {
   // Evaluate parameterization at point x. Optional argument coeff is
   // a vector of coefficients for the parameterisation, NCoefficients
   // elements long.
   assert(x);
-  Double_t returnValue = DMean(k);
+  UInt_t k = p[0];
+  assert(k >= 0 && k < fgMDFCorrectionC->getNumRows());
+  Double_t returnValue = fgMDFCorrectionC->DMean(k);
   Double_t term        = 0;
   UChar_t    i, j;
-  for (i = 0; i < NCoefficients(k); i++) {
+  for (i = 0; i < fgMDFCorrectionC->NCoefficients(k); i++) {
     // Evaluate the ith term in the expansion
-    term = Coefficients(k)[i];
-    for (j = 0; j < NVariables(k); j++) {
+    term = fgMDFCorrectionC->Coefficients(k)[i];
+    for (j = 0; j < fgMDFCorrectionC->NVariables(k); j++) {
       // Evaluate the factor (polynomial) in the j-th variable.
-      Int_t    p  =  Powers(k)[i * NVariables(k) + j];
-      Double_t y  =  1 + 2. / (XMax(k)[j] - XMin(k)[j])
-	* (x[j] - XMax(k)[j]);
-      term        *= EvalFactor(k,p,y);
+      Int_t    p  =  fgMDFCorrectionC->Powers(k)[i * fgMDFCorrectionC->NVariables(k) + j];
+      Double_t y  =  1 + 2. / (fgMDFCorrectionC->XMax(k)[j] - fgMDFCorrectionC->XMin(k)[j])
+	* (x[j] - fgMDFCorrectionC->XMax(k)[j]);
+      term        *= fgMDFCorrectionC->EvalFactor(k,p,y);
     }
     // Add this term to the final result
     returnValue += term;
   }
   return returnValue;
 }
+
 //____________________________________________________________________
-Double_t St_MDFCorrectionC::EvalError(Int_t k, const Double_t *x) const {
+Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t x0, Double_t x1) const {
+  Double_t x[2] = {x0, x1};
+  return Eval(k,x);
+}
+//____________________________________________________________________
+Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  if (! fFunc[k]) {
+    fgMDFCorrectionC = (St_MDFCorrectionC *) this;
+    if (NVariables(k) == 1) {
+      fFunc[k] = new TF1(Form("%s_%i",Table()->GetName(),k),St_MDFCorrectionC::MDFunc,
+			 XMin(k)[0],XMax(k)[0],1);
+      fFunc[k]->SetParameter(0,k);
+      fFunc[k]->Save(XMin(k)[0],XMax(k)[0],0,0,0,0);
+    } else if (NVariables(k) == 2) {
+      fFunc[k] = new TF2(Form("%s_%i",Table()->GetName(),k),St_MDFCorrectionC::MDFunc,
+			 XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],1);
+      fFunc[k]->SetParameter(0,k);
+      ((TF2 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],0,0);
+    } else if (NVariables(k) == 3) {
+      fFunc[k] = new TF3(Form("%s_%i",Table()->GetName(),k),St_MDFCorrectionC::MDFunc,
+			 XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2],1);
+      fFunc[k]->SetParameter(0,k);
+      ((TF3 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2]);
+    }
+  }
+  Double_t xx[3];
+  for (Int_t v = 0; v < NVariables(k); v++) {
+    xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMin(k)[v]+0.999*(XMax(k)[v]-XMin(k)[v]), x[v]));
+  }
+  Double_t returnValue = fFunc[k]->GetSave(xx); 
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrectionC::EvalError(Int_t k, Double_t *x) const {
   // Evaluate parameterization error at point x. Optional argument coeff is
   // a vector of coefficients for the parameterisation, NCoefficients(k)
   // elements long.

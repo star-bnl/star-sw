@@ -1486,23 +1486,23 @@ my $NEvents = 100000;
 #$hist = "RunXVIAuAu200p2"; $NEvents = 10000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/22/16 Fix problem with wrong ranking
 #$hist = "RunXVIAuAu200p3"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/22/16 more problem with negative ranking for AuAu
 #$hist = "RunXVIAuAu200p4"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/11/16 overwrite TpcLengthCorrectionB.r2016.C 
-my @badruns = qw( 
-		  17123029 17123029 17123029 17123029 17121005 17119092
-		  17108041 17108024 17107054 17107057 17107052 17105022
-		  17102043 17102016 17100047 17100012 17100011 17100016
-		  17100006 17100007 17100009 17100010 17100005 17099032
-		  17099005 17097039 17097038 17097033 17097034 17097035
-		  17072031 17072022 17067019 17064045 17049068 17050003
-		  17038082 17038082 17038084 17038081 17038081 17058048
-		  17052058 17046012 17039006
-		  17039042 17040050 17040051 17054017 17056007 17057006
-		  17068062 17072041 17104030 17104031 17108048 17110001
-		  17111059 17112041 17115029 17117062
-		  17044004 17049028 17050016 17050033 17053020 17053045
-		  17067004 17068037 17097036 17101035 17108013 17123005
-		  17123006 17123035 17128001 17129044 
-		  17152012 17153058 17155032 17159050 17159056 
-		);
+#my @badruns = qw( 
+#		  17123029 17123029 17123029 17123029 17121005 17119092
+#		  17108041 17108024 17107054 17107057 17107052 17105022
+#		  17102043 17102016 17100047 17100012 17100011 17100016
+#		  17100006 17100007 17100009 17100010 17100005 17099032
+#		  17099005 17097039 17097038 17097033 17097034 17097035
+#		  17072031 17072022 17067019 17064045 17049068 17050003
+#		  17038082 17038082 17038084 17038081 17038081 17058048
+#		  17052058 17046012 17039006
+#		  17039042 17040050 17040051 17054017 17056007 17057006
+#		  17068062 17072041 17104030 17104031 17108048 17110001
+#		  17111059 17112041 17115029 17117062
+#		  17044004 17049028 17050016 17050033 17053020 17053045
+#		  17067004 17068037 17097036 17101035 17108013 17123005
+#		  17123006 17123035 17128001 17129044 
+#		  17152012 17153058 17155032 17159050 17159056 
+#		);
 # dAu20-62 bad runs form RunSummary : 17152012 17153058 17155032 17159050 17159056 
 #my  bad Runs from PowerSypply:		  17057012 17060037 17075027 17107055 17109059 
 # new Bad runs  17044012 (20160213/105923 -----   20160213/130532)  previous (20160213/104848 -----   20160213/105923)
@@ -1637,10 +1637,39 @@ my @badruns = qw(
 #$hist = "RunXVII02"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/21/2017 check the present status of calibration from RunXVI, recheck after fix of StPidStatus
 #$hist = "RunXVII03"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/23/2017 reset all corrections to 0
 #$hist = "RunXVII04"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/24/2017 TpcRowQ/TpcSecRowB
-$hist = "RunXVII05"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/25/2017 tpcPressureB.20170101.000004.C
-# 
-my $prod = $hist; #$Production;
+#$hist = "RunXVII05"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/25/2017 tpcPressureB.20170101.000004.C
+# runs with TpcAvgPower problems
+my @badruns = qw( 
+ 18053100 18053117 18053121 18055034 18055038 18055046 18056020 18056029 18056030 18056031
+ 18056032 18056033 18056037 18056042 18056043 18056046 18056055 18056087 18059024 18059062
+ 18059063 18060106 18060107 18060110 18060112 18060114 18060116 18061092 18062040 18063095
+ 18063097 18063098 18063099 18063101 18065045 18065083 18067092 18071074 18072018 18076006
+ 18077016 18077040 18078066 18080025 18080048 18083041 18084051 18085043 18087037 18089064
+ 18090019 18090023 18090058 18091008 18091018 18091025 18092001 18092004 18092005 18092014
+ 18093005 18094002 18094003 18094006 18094011 18094012 18094015 18094016 18094019 18094035
+ 18094036 18094037 18094061 18094066 18097002 18097004 18097011 18097057 18098034 18099042
+ 18101029 18101035 18104021 18105043 18107042 18108036 18109002 18117021 18118004 18118018
+ 18119018 18121008 18121009 18121017 18121023 18122019 18123025 18127073 18127079 18128055
+ 18131094 18134044 18134045 18134046 18135019 18135020 18135053 18136012 18136013 18147007
+ 18175028 18177045 18177048
+); # short runs 
+# extra entries 
+#beginTime = "2017-03-15 17:39:28" or beginTime = "2017-03-17 17:22:00" or beginTime = "2017-04-06 22:27:11" or beginTime = "2017-04-09 14:07:23" or beginTime = "2017-04-23 20:38:03" or beginTime = "2017-04-28 13:16:48" or beginTime = "2017-05-03 13:47:37" or beginTime = "2017-05-04 19:41:23" or beginTime = "2017-05-09 12:03:54" or beginTime = "2017-05-18 18:41:52" or beginTime = "2017-05-26 11:58:27" or beginTime = "2017-05-30 14:49:42" or beginTime = "2017-06-03 12:51:09"
+#$hist = "RunXVII06"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/27/2017 TpcRowQ.20170101.000005.C & TpcSecRowB.20170101.000005.root
+#$hist = "RunXVII07"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/28/2017 TpcTanL.20170101.000006.C
+#$hist = "RunXVII08"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/28/2017 TpcZCorrectionB.20170101.000007.C
+#$hist = "RunXVII09"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/29/2017 TpcSecRowB.20170101.000008 & TpcRowQ.20170101.000008
+#$hist = "RunXVII10"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/30/2017  TpcRowQ.20170101.000009.C
+#$hist = "RunXVII11"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/30/2017 TpcCurrentCorrectionX.20170101.00010.C
+# pp510  2017-02-23 00:19:42 - 2017-05-30 03:57:46
+# AuAu54 2017-06-02 18:16:34 - 2017-06-21 11:22:30
+# rhicf  2017-06-23 23:48:04 - 2017-06-27 11:45:51 
+#$hist = "RunXVII13"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/31/2017 step back to RunXVII09, split pp510 and rhicf, TpcSecRowB.20170622.000012.root,TpcSecRowB.20170101.000012.root, TpcRowQ.20170622.000012.C, TpcRowQ.20170101.000012.C
+#$hist = "RunXVII14"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/01/2017 xyPad
+#$hist = "RunXVII15"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/02/2017  TpcLengthCorrectionMDF.20170101.000014
+$hist = "RunXVII16"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/06/2017 recheck with nodebug x8664
 
+my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;
 print "prod $prod\n";

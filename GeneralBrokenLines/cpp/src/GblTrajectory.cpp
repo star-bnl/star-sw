@@ -574,7 +574,7 @@ std::pair<std::vector<unsigned int>, MatrixXd> GblTrajectory::getJacobian(
 /// Get (part of) jacobian for transformation from (trajectory) fit to track parameters at point.
 /**
  * Jacobian broken lines (q/p,..,u_i,u_i+1..) to local (q/p,u',u) parameters.
- * \param [out] anIndex List of fit parameters with non zero derivatives
+ * \param [out] anIndex List of fit parameters (zero for zero derivatives)
  * \param [out] aJacobian Corresponding transformation matrix
  * \param [in] aPoint Point to use
  * \param [in] measDim Dimension of 'measurement'
@@ -591,6 +591,8 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
 
 	int nOffset = aPoint.getOffset();
 
+	for (unsigned int i = 0; i < 5; ++i)
+		anIndex[i] = 0;
 	aJacobian.setZero();
 	if (nOffset < 0) // need interpolation
 			{
@@ -672,7 +674,7 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
 /// Get jacobian for transformation from (trajectory) fit to kink parameters at point.
 /**
  * Jacobian broken lines (q/p,..,u_i-1,u_i,u_i+1..) to kink (du') parameters.
- * \param [out] anIndex List of fit parameters with non zero derivatives
+ * \param [out] anIndex List of fit parameters (zero for zero derivatives)
  * \param [out] aJacobian Corresponding transformation matrix
  * \param [in] aPoint Point to use
  */
@@ -685,6 +687,8 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7>& anIndex,
 
 	int nOffset = aPoint.getOffset();
 
+	for (unsigned int i = 0; i < 7; ++i)
+		anIndex[i] = 0;
 	aJacobian.setZero();
 
 	Matrix2d prevW, prevWJ, nextW, nextWJ;
@@ -911,7 +915,8 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
  * \param [out] aLabelList List of labels (aLabelList[i] = i+1)
  * \return error code (non-zero if trajectory not valid (constructed successfully))
  */
-unsigned int GblTrajectory::getLabels(std::vector<unsigned int> &aLabelList) const {
+unsigned int GblTrajectory::getLabels(
+		std::vector<unsigned int> &aLabelList) const {
 	if (not constructOK)
 		return 1;
 

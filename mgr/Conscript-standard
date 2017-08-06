@@ -468,7 +468,7 @@ $SO_PKG_PLAIN_lib = "lib" . $SO_PKG_PLAIN;
 $obj = $ObjDir;
 print "obj = $obj\n" if $param::debug;
 print "SO_PKG = $SO_PKG\n" if $param::debug;
-$SO_MAP = $PKG . ".map";
+#$SO_MAP = $PKG . ".rootmap";
 print "SO_MAP = $SO_MAP\n" if $param::debug;
 #+
 # Additional flag treatment for specific makers
@@ -1535,7 +1535,7 @@ if ( $#idlL > -1 ) {
   if ( $#idlT > -1 ) {
     $PKGT    = "lib" . $pkg . "_Tables";
     $SO_PKGT = $PKGT . "." . $env1->{SUFSOLIB};
-    $SO_MAPT = $PKGT . ".map";
+#    $SO_MAPT = $PKGT . ".rootmap";
     print "SO_PKGT = $SO_PKGT\n" if $param::debug;
     my $LIBPKGT = $PKGT . "." . $env1->{SUFLIB};
     if ( $Dir =~ /StRoot\//  ||  $Dir =~ /OnlTools\//) {
