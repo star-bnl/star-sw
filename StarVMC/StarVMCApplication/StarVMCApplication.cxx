@@ -9,6 +9,7 @@
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
 #include "TGeoPhysicalNode.h"
+#include "TGeoParallelWorld.h"
 #include "TROOT.h"
 #include "TMath.h"
 #if ROOT_VERSION_CODE < 331013
@@ -412,6 +413,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
     cout << "No MisalignGeometry has been applied" << endl;
     return fAlignmentDone;
   } 
+  //  TGeoParallelWorld *pw = 
+  gGeoManager->CreateParallelWorld("priority_sensors");
   //  SetDebug(3);
   // Misalignment introduced after 2013 TPC survey
   /*
@@ -535,7 +538,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       TGeoHMatrix rotA = rotL; // After alignment
       TGeoHMatrix A, B, C, D, E, AB, BC;
       TGeoHMatrix *rotm = 0;
-      TGeoShapeAssembly *shape = 0;
+      //      TGeoShapeAssembly *shape = 0;
       //      TGeoVolumeAssembly *volume = 0;
       Int_t Id = -1;
       Int_t ID = -1;
@@ -663,11 +666,10 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
       case kPxlSector:
-#if 0
+#if 1
 	rotA = rotL;
 #else
 	sector = indx[0];
-	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
 	half   = (sector-1)/5; 
 	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
@@ -680,7 +682,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	sector = indx[0];
 	ladder = indx[1];
 	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
-#if 0
+#if 1
 	half   = (sector-1)/5; 
 	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
@@ -806,7 +808,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	    Xyz2[l+3] += r[l]*r[l];
 	  }
 	}
-	nodeP->Align(rotm, shape);
+	nodeP->Align(rotm);
+	gGeoManager->GetParallelWorld()->AddNode(nodeP->GetName());
 	if (Debug() > 1) {
 	  cout << "Id : " << Id << "\tAfter\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
 	  if (Debug() > 2) {
@@ -941,8 +944,21 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       iBreak++;
     }
   }
+#if 0
+  //  gGeoManager->Voxelize("ALL");
+  const TObjArray *Volumes = gGeoManager->GetListOfVolumes();
+  TIter next(Volumes);
+  TGeoVolume *vol = 0;
+  while ((vol = (TGeoVolume*)next())) {
+    vol->SortNodes();
+    vol->Voxelize("ALL");
+    vol->FindOverlaps();
+   }
   // Freeze misaligned geometry
   //  gGeoManager->RefreshPhysicalNodes();
+#else
+  gGeoManager->GetParallelWorld()->CloseGeometry();
+#endif
   fAlignmentDone = kTRUE;
   return fAlignmentDone;
 }
