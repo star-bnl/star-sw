@@ -195,7 +195,6 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
     // the expected mean for a track for a particle of this mass
     Double_t dedx_expected;
     Double_t dedx_resolution;
-    Double_t momentum;
     Double_t z = -999;
     if (mTraits->mean() > 0) {
       const StGlobalTrack *gTrack = 
