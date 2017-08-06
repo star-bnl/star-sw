@@ -1,6 +1,6 @@
 #!/usr/bin/env perl -d
 Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
-( my $build = $OBJ ) =~ s/\#//g;                        #  print "CWD = $CWD\n";
+( my $build = $OBJ ) =~ s/\#//g;                        # print "CWD = $CWD\n";
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
 # print "MAIN = $MAIN\n";
 my $DirPath = DirPath '.';                              # print "DirPath = $DirPath\n";
@@ -674,7 +674,7 @@ if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
   $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
 } elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
-  $CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
+  $CPPPATH =  $env1->{ENV}->{ROOT} . "/" . $env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
     . $main::PATH_SEPARATOR . $CPPPATH;
   $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
   $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
@@ -1261,8 +1261,22 @@ if ( $#Defs > -1 ) {
   } else {
     $RCINTPL = "RootCint.pl";
   }
-  Command $env2 [@CintFiles], @defs,
-    qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+  if ($env->{ENV}->{ROOT_LEVEL} !~ /^6/) {
+    Command $env2 [@CintFiles], @defs,
+      qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+  } else {
+    my $LLIB = $LIB; $LLIB =~ s/^\#//;
+    my $lib = $LLIB . "/" . $SO_PKG;
+    my $rootmap = $LLIB . "/" . $PKG . ".rootmap";
+    my $cintfile = $build . "/" .  $CintFiles[0];
+    my $pcmfile = $CintFiles[0];
+    $pcmfile =~ s/\.cxx/_rdict\.pcm/; #print "pcmfile = $pcmfile ==================\n";
+#    print "lib = $lib, rootmap = $rootmap, cintfile = $cintfile  ================================================================================\n";
+    push @CintFiles, $pcmfile; #print "CintFiles = @CintFiles\n";
+    Command $env2 [@CintFiles], @defs,
+      qq($RCINTPL $lib $rootmap $pcmfile  "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+    Install $env2 $LIB,    $pcmfile;
+  }
   @LinkDefs = ("LinkDef.h");
   my @objfiles = Objects $envCint ($CintFiles[0]);
   push @src, @objfiles[0];
