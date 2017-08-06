@@ -1666,7 +1666,8 @@ my @badruns = qw(
 # rhicf  2017-06-23 23:48:04 - 2017-06-27 11:45:51 
 #$hist = "RunXVII13"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/31/2017 step back to RunXVII09, split pp510 and rhicf, TpcSecRowB.20170622.000012.root,TpcSecRowB.20170101.000012.root, TpcRowQ.20170622.000012.C, TpcRowQ.20170101.000012.C
 #$hist = "RunXVII14"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/01/2017 xyPad
-$hist = "RunXVII15"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/02/2017  TpcLengthCorrectionMDF.20170101.000014
+#$hist = "RunXVII15"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/02/2017  TpcLengthCorrectionMDF.20170101.000014
+$hist = "RunXVII16"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/06/2017 recheck with nodebug x8664
 
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
@@ -1845,9 +1846,9 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 	print OUT "source $GROUP_DIR/setup gcc;\n";
 	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       }  else {
-#	print OUT "setenv NODEBUG yes\n";
-#        print OUT "source $GROUP_DIR/setup 64b;\n";
-#        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+	print OUT "setenv NODEBUG yes\n";
+        print OUT "source $GROUP_DIR/setup 64b;\n";
+        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       }
 #     print OUT "setenv Calibrations_tpc reconYuri\n";
 #      print OUT " unsetenv Calibrations_tpc\n";
