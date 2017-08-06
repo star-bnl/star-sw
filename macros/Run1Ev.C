@@ -1,7 +1,8 @@
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
 	    Double_t pTlow=100,Double_t pThigh=100,
+	    //	    Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=0.1, Double_t Yhigh=0.1,
-	    //	    Double_t Ylow=-0.1, Double_t Yhigh=-0.1,
+	    //	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
 	    Double_t Philow=2.094, Double_t Phihigh=2.094,
 	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1) {
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star

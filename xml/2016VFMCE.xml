@@ -7,7 +7,7 @@
   set Name = `basename $PWD`
   setenv NODEBUG yes
   setenv STARFPE NO
-#  setup 64b
+  setup 64b
   starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
@@ -25,11 +25,19 @@
   end
   echo "name = $name";
   if ($name == "") exit 1;
-  set chain = "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  
+#  set chain = "MC.2016a,istSlowSim,StiCA,-hitfilt,StiHftC,beamLine,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  set Sti = ",StiCA,KFVertex";
+  echo $Name | grep -i NoSti 
+  if (! $?) set Sti = ",-Sti,nodefault,mysql";
+  set chain = "MC.2016a,istSlowSim"${Sti}",-hitfilt,StiHftC,beamLine,geantOut,evout,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
+  set VMCE = "";
   echo $Name | grep -i real
   if (! $?) set sdt = ",sdt20160301";
-  set Chain = ${chain}${sdt}",Rung."${rung}
+  echo $Name | grep -i 20Muons
+  if ( $? ) set VMCE = ",VFMCE";
+  set Chain = ${chain}${VMCE}${sdt}",Rung."${rung}
   set base = ${name}_${rung};
   set file = ${base}.MuDst.root
   set logFile  = ${base}B.log
