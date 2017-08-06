@@ -221,6 +221,7 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                LOG_DEBUG << "key() : " << mcPix->key() - 1 << " idTruth: " << mcPix->parentTrack()->key() << endm;
                LOG_DEBUG << "from StMcPxlHit : x= " << mcPix->position().x() << ";  y= " << mcPix->position().y() << ";  z= " << mcPix->position().z() << endm;
                LOG_DEBUG << "pxlHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << endm;
+#if 0
 	       static Short_t mRowColumnGoodStatus = St_pxlControlC::instance()->rowColumnGoodStatus();
 	       static Short_t mSensorGoodStatusMin = St_pxlControlC::instance()->sensorGoodStatusMin();
 	       static Short_t mSensorGoodStatusMax = St_pxlControlC::instance()->sensorGoodStatusMax();
@@ -233,6 +234,9 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
 	       } else {
 		 delete tempHit;
 	       }
+#else
+		 pxlHitCol.addHit(tempHit);
+#endif
 	    }
 	 }
       }
