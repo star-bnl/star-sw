@@ -79,8 +79,6 @@
   //    gSystem->Load("libNet.so");
   
   // 	Load StarRoot lib.
-  if (gSystem->DynamicPathName("StarClassLibrary",kTRUE))
-    gSystem->Load("StarClassLibrary");
   //  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
   gSystem->Load("libMatrix.so");
   gSystem->Load("libPhysics.so");
@@ -91,6 +89,8 @@
     gSystem->Load("libTable");
   }
   gSystem->Load("libEG.so");
+  if (gSystem->DynamicPathName("StarClassLibrary",kTRUE))
+    gSystem->Load("StarClassLibrary");
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
     StCloseFileOnTerminate::Instantiate();
