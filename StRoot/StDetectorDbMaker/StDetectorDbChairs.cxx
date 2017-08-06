@@ -337,7 +337,7 @@ Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
   }
   Double_t xx[3];
   for (Int_t v = 0; v < NVariables(k); v++) {
-    xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMax(k)[v], x[v]));
+    xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMin(k)[v]+0.999*(XMax(k)[v]-XMin(k)[v]), x[v]));
   }
   Double_t returnValue = fFunc[k]->GetSave(xx); 
   return returnValue;

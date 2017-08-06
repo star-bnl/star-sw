@@ -123,6 +123,7 @@ void StPidStatus::Set() {
   PiDkeyU   = -1; // only one with devZs<3, 
   PiDkeyU3  = -1; // -"- and devZs > 5 for all others 
   lBest     = -1;
+#if 0
   Int_t lBestToF = -1;
   // use ToF 
   Double_t devZmin = 999;
@@ -138,7 +139,6 @@ void StPidStatus::Set() {
     }
     if (devZmin > 5) {lBestToF = -1;}
   }
-#if 0
   devZmin = 999;
   for (l = kPidElectron; l < KPidParticles; l++) {
     if (devZs[l] < 3.0) PiDStatus |= 1<<l;

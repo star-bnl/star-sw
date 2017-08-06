@@ -584,6 +584,7 @@ Int_t StdEdxY2Maker::Make(){
       if (fTracklengthInTpcTotal) fTracklengthInTpcTotal->Fill(TrackLengthTotal);
       if (fTracklengthInTpc)      fTracklengthInTpc->Fill(TrackLength);
       SortdEdx();
+      if (Debug() > 1) PrintdEdx(2);
       Double_t I70 = 0, D70 = 0;
       Double_t dXavLog2 = 1;
       Double_t SumdEdX = 0;
@@ -1722,7 +1723,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     zFunc[kTpcOuterInner]->SetParameter(0,n_PL);
     Double_t Sigma = TMath::Sqrt(sigma_p[kTpcOuterInner]*sigma_p[kTpcOuterInner] + 1./n_P);
     zFunc[kTpcOuterInner]->SetParameter(1,Sigma);
-    Double_t dE = 1e9*FdEdx[i].dE; // GeV => eV
+    Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
 #endif /* __HEED_MODEL__ */
     Double_t z  = TMath::Log(dE);
 #ifndef __HEED_MODEL__
@@ -1749,7 +1750,7 @@ void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
 #ifndef __HEED_MODEL__
   for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].F.dEdx*1e6/StdEdxModel::instance()->W()/2;
 #else /* __HEED_MODEL__ */
-  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].F. dEdx*1e6/45.44e-3/2; //StdEdxModel::instance()->W()/2;
+  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].F.dEdx*1e6/45.44e-3/2; //StdEdxModel::instance()->W()/2;
 #endif /* __HEED_MODEL__ */
   if (NdEdx>5) {
     dNdx /= NdEdx;
