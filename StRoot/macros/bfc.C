@@ -188,24 +188,18 @@ void bfc(Int_t First, Int_t Last,
   TString tChain(Chain);
   if (tChain == "") {
   if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
-  tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
+  //  tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
+   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D";
+   //   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D";
   //  tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
   //  tChain += "MC.2016a,Stx,geantOut,";
   // ZF  2016-03-20 05:15:50 2016-03-19 06:00:00
   // RF  sdt20160301
   //  if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
   //    if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
-  if ( TString(gProgName) == "root4star") tChain += "gstar,20Muons,CorrX,OSpaceZ2,OGridLeak3D,useXgeom";
-  //  else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
-  else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
-  //else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1"; // Ideal
-  //   else                                    tChain += "vmc,CosmicRays,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
-  //   else                                    tChain += "vmc,20MuonsFlatpT3GeV,Rung.1,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
-  //   else                                    tChain += "vmc,CosmicRays,Rung.1,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom"; //ZF
-  //  else                                    tChain += "vmc,HijingAuAu200Z6cm,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom"; //RF
-  //  else                                    tChain += "vmc,Lc3pi,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
-  //  else                                    tChain += "vmc,LcKppi,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
-  //                                             "test.RC.AuAu200.y2016,StiCA,KFVertex";
+   if ( TString(gProgName) == "root4star") tChain += ",gsta,useXgeom";
+   //   else                                    tChain += ",vmc,VMCAlignment,RunG.1";
+   else                                    tChain += ",vmc,VMCAlignment,sdt20160301,RunG.1";
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
   chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
