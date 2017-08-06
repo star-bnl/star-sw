@@ -283,13 +283,17 @@ Int_t StBFChain::Instantiate()
 	if (! dbMk) {
 	  TString MySQLDb("MySQL:StarDb");
 	  TString MainCintDb("$STAR/StarDb");
+#if 0
 	  TString Obj("obj");
 	  if (TString(gSystem->Getenv("NODEBUG")) != "") Obj = "OBJ";
 	  TString MainCintDbObj("$STAR/.$STAR_HOST_SYS/"); MainCintDbObj += Obj; MainCintDbObj += "/StarDb";
 	  if (! gSystem->AccessPathName(MainCintDbObj)) MainCintDbObj = "";
+#endif
 	  TString MyCintDb("$PWD/StarDb");
+#if 0
 	  TString MyCintDbObj("$PWD/.$STAR_HOST_SYS/"); MyCintDbObj += Obj; MyCintDbObj += "/StarDb";
 	  if (! gSystem->AccessPathName(MyCintDbObj)) MyCintDbObj = "";
+#endif
 	  if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
 	  // Removed twice already and put back (start to be a bit boring)
 	  // DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
@@ -301,10 +305,12 @@ Int_t StBFChain::Instantiate()
 	  for (j = 0; j < 10; j++) Dirs[j] = "";
 	  j = 0;
 	  if (MySQLDb       != "") {Dirs[j] = MySQLDb;    j++;}
-	  if (MainCintDb    != "") {Dirs[j] = MainCintDb; j++;}
-	  if (MyCintDb      != "") {Dirs[j] = MyCintDb;   j++;}
+#if 0
 	  if (MainCintDbObj != "") {Dirs[j] = MainCintDbObj; j++;}
 	  if (MyCintDbObj   != "") {Dirs[j] = MyCintDbObj;   j++;}
+#endif
+	  if (MainCintDb    != "") {Dirs[j] = MainCintDb; j++;}
+	  if (MyCintDb      != "") {Dirs[j] = MyCintDb;   j++;}
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2],Dirs[3],Dirs[4]);
 	  if (!dbMk) goto Error;
 	  
@@ -1586,9 +1592,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
 	}
-	SetOption("pgf77","Default,-TGiant3");
+	//yf	SetOption("pgf77","Default,-TGiant3");
 	SetOption("mysql","Default,-TGiant3");
-	SetOption("minicern","Default,-TGiant3");
+	//yf	SetOption("minicern","Default,-TGiant3");
       }
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || 
