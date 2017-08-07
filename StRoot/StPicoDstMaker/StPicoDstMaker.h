@@ -41,7 +41,9 @@ public:
   virtual Int_t Finish();
 
   void printArrays();
-  void SetStatus(char const* arrType, int status);
+
+  /// Enables or disables branches matching a simple regex pattern in reading mode
+  void SetStatus(char const* branchNameRegex, int enable);
 
   /// Returns null pointer if no StPicoDst
   StPicoDst* picoDst();
@@ -88,7 +90,7 @@ protected:
   void fillEvent();
   void fillEmcTrigger();
   void fillMtdTrigger();
-  void fillBTOWHits();
+  void fillBTowHits();
   void fillBTofHits();
   void fillMtdHits();
 
@@ -112,19 +114,25 @@ protected:
   * param[out]  nep[1]   The number of phi strips in the BSMD cluster corresponding to the BEMC cluster matching track t
   * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
   */
-  bool getBEMC(StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
+  bool getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
   int  setVtxModeAttr();
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
   bool selectVertex();
 
-  StMuDst*   mMuDst;
+  /// A pointer to the main input source containing all muDst `TObjArray`s
+  /// filled from corresponding muDst branches
+  StMuDst*  mMuDst;
+
+  /// A pointer to the main input/outpur picoDst structure containing all `TObjArray`s
+  StPicoDst*  mPicoDst;
+
   StEmcCollection* mEmcCollection;
   StEmcPosition*   mEmcPosition;
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
-  StPicoDst* mPicoDst;
+
   Float_t    mBField;
 
   PicoVtxMode mVtxMode;
@@ -137,9 +145,14 @@ protected:
   TTree*    mTTree;
 
   int mEventCounter;
+
+  /// Parameters to control the storage of picoDst tree in write mode. Have no
+  /// effect when reading .picoDst.root files
+  ///@{
   int mSplit;
   int mCompression;
   int mBufferSize;
+  ///@}
 
   // MTD map from backleg to QT
   Int_t  mModuleToQT[30][5];        // Map from module to QT board index
@@ -157,6 +170,7 @@ protected:
   ClassDef(StPicoDstMaker, 0)
 };
 
+
 inline StPicoDst* StPicoDstMaker::picoDst() { return mPicoDst; }
 inline TChain* StPicoDstMaker::chain() { return mChain; }
 inline TTree* StPicoDstMaker::tree() { return mTTree; }
@@ -164,4 +178,5 @@ inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
+
 #endif

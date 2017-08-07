@@ -25,28 +25,27 @@ StPicoBbcFiller::StPicoBbcFiller(StPicoDst& picoDst, int year) :
 }
 
 
-void StPicoBbcFiller::Fill(const StMuDst& muDst)
+void StPicoBbcFiller::fill(const StMuDst& muDst)
 {
   TClonesArray *mTileCollection = mPicoDst.picoArray(StPicoArrays::BbcTile);
 
-  StMuEvent *Event = muDst.event();
-  StTriggerData *trg = const_cast<StTriggerData *>(Event->triggerData());
+  StMuEvent *event = muDst.event();
+  StTriggerData *trg = const_cast<StTriggerData *>(event->triggerData());
 
-  Short_t ADC, TDC, TAC, ID;
-  Short_t ntiles = 0;
-  Bool_t HasTAC;
-  // BBC tiles
+  int nTiles = 0;
 
+  // Loop over BBC tiles
   for (DetectorSide ew : detectorSides)
   {
     for (Int_t pmt = 0; pmt < 24; pmt++)
     {
-      ADC = trg->bbcADC(eastwestdir(ew), pmt + 1, 0);
-      TAC = trg->bbcTDC(eastwestdir(ew), pmt + 1, 0); // yes I know the method says "TDC" but it's the TAC
-      TDC = trg->bbcTDC5bit(eastwestdir(ew), pmt + 1);
-      ID = ew * (pmt + 1);
-      HasTAC = kTRUE;
-      new((*mTileCollection)[ntiles++]) StPicoBbcTile(ID, ADC, TAC, TDC, HasTAC);
+      int ADC = trg->bbcADC(eastwestdir(ew), pmt + 1, 0);
+      int TAC = trg->bbcTDC(eastwestdir(ew), pmt + 1, 0); // yes I know the method says "TDC" but it's the TAC
+      int TDC = trg->bbcTDC5bit(eastwestdir(ew), pmt + 1);
+      int ID  = ew * (pmt + 1);
+      bool hasTAC = kTRUE;
+
+      new((*mTileCollection)[nTiles++]) StPicoBbcTile(ID, ADC, TAC, TDC, hasTAC);
     }
   }
 

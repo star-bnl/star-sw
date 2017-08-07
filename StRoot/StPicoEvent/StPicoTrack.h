@@ -4,21 +4,25 @@
 #include <cmath>
 
 #include "TObject.h"
-#include "StarClassLibrary/StThreeVectorF.hh"
-#include "StarClassLibrary/StThreeVectorD.hh"
 #include "StarClassLibrary/StPhysicalHelixD.hh"
+#include "StarClassLibrary/StThreeVectorF.hh"
 #include "StarClassLibrary/SystemOfUnits.h"
-#include "StEvent/StDcaGeometry.h"
+
 
 class StMuTrack;
 class StDcaGeometry;
 
+
 class StPicoTrack : public TObject
 {
 public:
+
   StPicoTrack();
+
   /// ctor. Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
-  StPicoTrack(StMuTrack const* globalTrack, StMuTrack const* primaryTrack, double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
+  StPicoTrack(StMuTrack const* globalTrack, StMuTrack const* primaryTrack,
+     double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
+
   virtual ~StPicoTrack() {}
 
   virtual void Print(Char_t const* option = "") const;  ///< Print track info
@@ -158,4 +162,5 @@ inline StPhysicalHelixD StPicoTrack::helix(float const B) const
 {
   return StPhysicalHelixD(mGMomentum, mOrigin, B * kilogauss, static_cast<float>(charge()));
 }
+
 #endif
