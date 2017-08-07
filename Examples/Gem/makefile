@@ -19,6 +19,5 @@ LDFLAGS += -L$(LIBDIR) -lGarfield
 
 gem: gem.C 
 	$(CXX) $(CFLAGS) gem.C
-	$(CXX) -o gem gem.o $(LDFLAGS)
+	$(CXX) `root-config --cflags` -o gem gem.o $(LDFLAGS)
 	rm gem.o
-

@@ -10,7 +10,7 @@ namespace Garfield {
 class SolidBox : public Solid {
 
  public:
-  // Constructors
+  // Constructors from centre and half-widths
   SolidBox(const double cx, const double cy, const double cz, 
            const double lx, const double ly, const double lz);
   SolidBox(const double cx, const double cy, const double cz, 
