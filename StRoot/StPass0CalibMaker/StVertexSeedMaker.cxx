@@ -337,7 +337,7 @@ void StVertexSeedMaker::FindResult(bool checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.62 2016/08/02 21:17:17 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.63 2017/08/07 18:10:57 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -664,6 +664,32 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
   fileList.SetOwner();
   fileList.Sort();
 
+  int aggMode = 0;
+  // 0 : by fill
+  // 1 : all data into one result
+  // 2 : by date (flawed for input files & runs that span dates)
+  // 3 : by file (retains the same number of files)
+
+  // Parse cuts for keywords
+  TString cutsStr = cuts;
+  if (cutsStr.Contains("ALL")) {
+    aggMode = 1;
+    cutsStr.ReplaceAll("ALL&&","");
+    cutsStr.ReplaceAll("&&ALL","");
+    cutsStr.ReplaceAll("ALL","");
+  } else if (cutsStr.Contains("DATE")) {
+    aggMode = 2;
+    cutsStr.ReplaceAll("DATE&&","");
+    cutsStr.ReplaceAll("&&DATE","");
+    cutsStr.ReplaceAll("DATE","");
+  } else if (cutsStr.Contains("FILE")) {
+    aggMode = 3;
+    cutsStr.ReplaceAll("FILE&&","");
+    cutsStr.ReplaceAll("&&FILE","");
+    cutsStr.ReplaceAll("FILE","");
+  }
+  const char* cleanedCuts = cutsStr.Data();
+
   TFile* currentFile=0;
   float* vals=0;
   int nfiles = fileList.GetSize();
@@ -672,16 +698,23 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
     int datef = date;
     int timef = time;
     fileName = fileList.At(filen)->GetName();
-    TString dateTime = fileName;
-    dateTime.Remove(0,dateTime.Last('/') + 1);
-    dateTime.Remove(0,dateTime.First('.') + 1).Remove(15);
-    TString dateStr = dateTime;
-    date = atoi(dateStr.Remove(8).Data());
-    time = atoi(dateTime.Remove(0,9).Remove(6).Data());
-    GetFillDateTime();
-    if ((currentFile) && (fill != fillf)) {
-      LOG_INFO << "Fill number has changed\n"
-        << "  Processing data from previous fill before continuing" << endm;
+    if (aggMode != 1 || date==0) {
+      TString dateTime = fileName;
+      dateTime.Remove(0,dateTime.Last('/') + 1);
+      dateTime.Remove(0,dateTime.First('.') + 1).Remove(15);
+      TString dateStr = dateTime;
+      if (aggMode == 3) GetFillDateTime(); // fill date and time will be overwritten
+      date = atoi(dateStr.Remove(8).Data());
+      time = atoi(dateTime.Remove(0,9).Remove(6).Data());
+      if (aggMode != 3) GetFillDateTime(); // file date and time will be overwritten
+      if (aggMode == 2) time = 0;
+    }
+    if ((currentFile) && (
+         (aggMode == 0 && fill != fillf) ||
+         (aggMode == 2 && date != datef) ||
+         (aggMode == 3) )) {
+      LOG_INFO << "Aggregator has changed\n"
+        << "  Processing data from previous aggregation before continuing" << endm;
       int fillp = fill;
       int datep = date;
       int timep = time;
@@ -707,7 +740,7 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
       LOG_ERROR << "No resNtuple found in " << fileName << endm;
       continue;
     }
-    curNtuple->Draw(">>elistVtxSeed",cuts);
+    curNtuple->Draw(">>elistVtxSeed",cleanedCuts);
     TEventList* elist = static_cast<TEventList*>(gDirectory->Get("elistVtxSeed"));
     int nentries = (elist ? (int) elist->GetN() : 0);
     int nvar = curNtuple->GetNvar();
@@ -777,8 +810,11 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.62 2016/08/02 21:17:17 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.63 2017/08/07 18:10:57 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.63  2017/08/07 18:10:57  genevb
+// Introduce modes for aggregation
+//
 // Revision 1.62  2016/08/02 21:17:17  genevb
 // Added tDay,tFill to resNtuple, and improved C++11 compliance
 //
