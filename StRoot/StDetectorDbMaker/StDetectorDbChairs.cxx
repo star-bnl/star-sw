@@ -318,7 +318,9 @@ Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
   assert(x);
   if (! fFunc[k]) {
     fgMDFCorrectionC = (St_MDFCorrectionC *) this;
-    if (NVariables(k) == 1) {
+    if (NVariables(k) <= 0) {
+      return 0;
+    } else if (NVariables(k) == 1) {
       fFunc[k] = new TF1(Form("%s_%i",Table()->GetName(),k),St_MDFCorrectionC::MDFunc,
 			 XMin(k)[0],XMax(k)[0],1);
       fFunc[k]->SetParameter(0,k);
