@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include <rtsLog.h>
 
@@ -19,10 +20,65 @@ static const u_char tpx_altro_to_j1[2][16] = {
 } ;
 
 
+static struct itpc_to_ifee_table_t {
+	u_char fee_id ;
+	u_char fee_ch ;
+} itpc_to_ifee_table[72+1][182+1] ;
+
 static struct itpc_rowpad_to_id_t {
 	u_char id ;
 	u_char pin ;
 } itpc_rowpad_to_id_s[41][121] ;
+
+
+void itpc_ifee_to_rowpad(int fee_id, int ch, int &row, int &pad)
+{
+	int pin ;
+
+	row = pad = 0 ;
+
+	if((fee_id<1)||(fee_id>55)) return ;
+	if((ch<0)||(ch>63)) return ;
+
+	if(ch > 31) pin = itpc_sampa_to_pin[1][ch-32] ;
+	else pin = itpc_sampa_to_pin[0][ch] ;
+
+	row = itpc_padplane[fee_id][pin].row ;
+	pad = itpc_padplane[fee_id][pin].pad ;
+
+	return ;
+}
+
+void itpc_rowpad_to_ifee(int row, int pad, int &fee_id, int &fee_ch)
+{
+	static int first ;
+
+	if(first == 0) {
+		first = 1 ;
+
+		for(int f=1;f<=55;f++) {
+			for(int c=0;c<64;c++) {
+				int row, pad ;
+
+				itpc_ifee_to_rowpad(f,c,row,pad) ;
+
+				itpc_to_ifee_table[row][pad].fee_id = f ;
+				itpc_to_ifee_table[row][pad].fee_ch = c ;
+			}
+		}
+
+	}
+
+	fee_id = 0  ;
+	fee_ch = 0 ;
+
+	if(row < 1) return ;
+	if(pad < 1) return ;
+
+	fee_id = itpc_to_ifee_table[row][pad].fee_id ;
+	fee_ch = itpc_to_ifee_table[row][pad].fee_ch ;
+
+}
 
 void itpc_sampa_to_rowpad(int id, int sampa, int ch, int &row, int &pad)
 {
@@ -182,8 +238,25 @@ void itpc_data_c::ped_stop()
 	}
 
 
-	LOG(TERR,"Writing out pedestals") ;
-	FILE *of = fopen("/RTScache/pedestals.txt","w") ;
+
+
+	time_t now = time(0) ;
+	struct tm *tm = localtime(&now) ;
+
+	char fname[128] ;
+
+	sprintf(fname,"/RTScache/itpc_pedestals_%d_%d_%d_%d_%d.txt",
+		tm->tm_year+1900,
+		tm->tm_mon+1,
+		tm->tm_mday,
+		tm->tm_hour,
+		tm->tm_min) ;
+
+
+	FILE *of = fopen(fname,"w") ;
+	LOG(TERR,"Writing pedestals to %s",fname) ;
+
+
 	for(int f=0;f<64;f++) {
 	for(int c=0;c<64;c++) {
 		if(ped_p->cou[f][c][0]) ;
