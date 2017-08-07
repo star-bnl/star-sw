@@ -84,6 +84,10 @@ private:
 
 
 extern void itpc_sampa_to_rowpad(int id, int sampa, int ch, int &row, int &pad) ;
+
+extern void itpc_ifee_to_rowpad(int fee_id, int ch, int &row, int &pad) ;
+void itpc_rowpad_to_ifee(int row, int pad, int &fee_id, int &fee_ch);
+
 extern void itpc_rowpad_to_id(int row, int pad, int &id, int &pin)  ;
 extern  int itpc_altro_to_ifee(int altro) ;
 extern void itpc_altro_to_rowpad(int altro, int ch, int odd, int &row, int &pad) ;
