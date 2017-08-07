@@ -199,8 +199,8 @@ void bfc(Int_t First, Int_t Last,
   //else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
   //  else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,beamLine,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
   //  else                                    tChain += "vmc,20Muons,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,RunG.1";
-  else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1"; // Ideal
-  //   else                                    tChain += "vmc,CosmicRays,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
+  //  else                                    tChain += "vmc,20Muons,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,RunG.1"; // Ideal
+  else                                    tChain += "vmc,CosmicRays,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
   //   else                                    tChain += "vmc,20MuonsFlatpT3GeV,Rung.1,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom";
   //   else                                    tChain += "vmc,CosmicRays,Rung.1,VMCAlignment,sdt20160319.060000,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom"; //ZF
   //  else                                    tChain += "vmc,HijingAuAu200Z6cm,Rung.1,VMCAlignment,sdt20160301,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom"; //RF
