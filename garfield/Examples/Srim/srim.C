@@ -73,8 +73,9 @@ void track() {
   // Set the W value and Fano factor of the gas.
   tr->SetWorkFunction(30.0);
   tr->SetFanoFactor(0.3);
-  // Set A and Z of the gas.
-  tr->SetAtomicMassNumbers(44, 22);
+  // Set A and Z of the gas (not sure what's the correct mixing law).
+  const double za = 0.7 * (18. / 40.) + 0.3 * (22. / 44.);
+  tr->SetAtomicMassNumbers(22. / za, 22);
   // Specify how many electrons we want to be grouped to a cluster.
   tr->SetTargetClusterSize(500);
   // tr->SetClustersMaximum(1000);

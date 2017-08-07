@@ -13,12 +13,11 @@ CFLAGS = -Wall -Wextra -Wno-long-long \
 # Debug flags
 # CFLAGS += -g
 
-LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
-LDFLAGS += -L$(LIBDIR) -lGarfield
+LDFLAGS = -L$(LIBDIR) -lGarfield
+LDFLAGS += `root-config --glibs` -lGeom -lgfortran -lm
 # LDFLAGS += -g
 
 gem: gem.C 
 	$(CXX) $(CFLAGS) gem.C
-	$(CXX) -o gem gem.o $(LDFLAGS)
+	$(CXX) `root-config --cflags` -o gem gem.o $(LDFLAGS)
 	rm gem.o
-

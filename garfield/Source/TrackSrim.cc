@@ -265,6 +265,8 @@ bool TrackSrim::ReadFile(const std::string& file) {
       m_range[ntable] *= 1.0e-1;
     } else if (strcmp(token, "m") == 0) {
       m_range[ntable] *= 1.0e2;
+    } else if (strcmp(token, "km") == 0) {
+      m_range[ntable] *= 1.0e5;
     } else if (strcmp(token, "cm") != 0) {
       std::cerr << hdr << "Unknown distance unit " << token << "; aborting\n";
       return false;
@@ -279,6 +281,10 @@ bool TrackSrim::ReadFile(const std::string& file) {
       m_longstraggle[ntable] *= 1.0e-4;
     } else if (strcmp(token, "mm") == 0) {
       m_longstraggle[ntable] *= 1.0e-1;
+    } else if (strcmp(token, "m") == 0) {
+      m_longstraggle[ntable] *= 1.0e2;
+    } else if (strcmp(token, "km") == 0) {
+      m_longstraggle[ntable] *= 1.0e5;
     } else if (strcmp(token, "cm") != 0) {
       std::cerr << hdr << "Unknown distance unit " << token << "; aborting\n";
       return false;
@@ -293,6 +299,10 @@ bool TrackSrim::ReadFile(const std::string& file) {
       m_transstraggle[ntable] *= 1.0e-4;
     } else if (strcmp(token, "mm") == 0) {
       m_transstraggle[ntable] *= 1.0e-1;
+    } else if (strcmp(token, "m") == 0) {
+      m_transstraggle[ntable] *= 1.0e2;
+    } else if (strcmp(token, "km") == 0) {
+      m_transstraggle[ntable] *= 1.0e5;
     } else if (strcmp(token, "cm") != 0) {
       std::cerr << hdr << "Unknown distance unit " << token << "; aborting\n";
       return false;
@@ -560,10 +570,10 @@ bool TrackSrim::PreciseLoss(const double step, const double estart,
       const double hd44 = s * DedxHD(e4 - de43);
       const double de44 = em44 + hd44;
       // Store the energy loss terms (according to rk4)
-      deem += em41 / 6.0 + em42 / 3.0 + em43 / 3.0 + em44 / 6.0;
-      dehd += hd41 / 6.0 + hd42 / 3.0 + hd43 / 3.0 + hd44 / 6.0;
+      deem += (em41 + em44) / 6. + (em42 + em43) / 3.;
+      dehd += (hd41 + hd44) / 6. + (hd42 + hd43) / 3.;
       // Store the new energy computed with rk4
-      e4 -= de41 / 6.0 + de42 / 3.0 + de43 / 3.0 + de44 / 6.0;
+      e4 -= (de41 + de44) / 6. + (de42 + de43) / 3.;
     }
     if (m_debug) {
       std::cout << hdr << "\n    Iteration " << iter << " has " << ndiv 
@@ -612,7 +622,7 @@ bool TrackSrim::EstimateRange(const double ekin, const double step,
     return true;
   }
   // Find a smaller step for which the energy loss is less than EKIN.
-  double st2 = step / 2.;
+  double st2 = 0.5 * step;
   double de2 = de1;
   const unsigned int nMaxIter = 20;
   for (unsigned int iter = 0; iter < nMaxIter; ++iter) {
@@ -624,7 +634,7 @@ bool TrackSrim::EstimateRange(const double ekin, const double step,
     // Not yet below the kinetic energy: new iteration.
     st1 = st2;
     de1 = de2;
-    st2 /= 2.;
+    st2 *= 0.5;
   }
   if (de2 >= ekin) {
     std::cerr << hdr << "\n    Did not find a smaller step in " << nMaxIter 
@@ -1130,14 +1140,14 @@ bool TrackSrim::SmallestStep(const double ekin, double de, double step,
       }
     } else if (m_model == 3) {
       // Gaussian model
-      stpmin = stpnow * 16 * xi * emax * (1 - beta2 / 2) / (denow * denow);
+      stpmin = stpnow * 16 * xi * emax * (1 - 0.5 * beta2) / (denow * denow);
       if (m_debug) {
         std::cout << hdr << "Gaussian distribution is imposed.\n";
         printf("\td_min = %g cm.\n\tsigma/mu_old = %g, sigma/mu_min = %g\n",
-               stpmin, sqrt(xi * emax * (1 - beta2 / 2)) / de,
+               stpmin, sqrt(xi * emax * (1 - 0.5 * beta2)) / de,
                sqrt((fconst * m_q * m_q * m_z * m_density * stpmin /
                      (m_a * beta2)) *
-                    emax * (1 - beta2 / 2)) /
+                    emax * (1 - 0.5 * beta2)) /
                    (stpmin * denow / stpnow));
       }
     } else if (rkappa < 0.05) {
@@ -1179,14 +1189,14 @@ bool TrackSrim::SmallestStep(const double ekin, double de, double step,
       }
     } else {
       // And for large kappa, use the Gaussian values.
-      stpmin = stpnow * 16 * xi * emax * (1 - beta2 / 2) / (denow * denow);
+      stpmin = stpnow * 16 * xi * emax * (1 - 0.5 * beta2) / (denow * denow);
       if (m_debug) {
         std::cout << hdr << "Gaussian distribution automatic.\n";
         printf("\td_min = %g cm.\n\tsigma/mu_old = %g, sigma/mu_min = %g\n",
-               stpmin, sqrt(xi * emax * (1 - beta2 / 2)) / de,
+               stpmin, sqrt(xi * emax * (1 - 0.5 * beta2)) / de,
                sqrt((fconst * m_q * m_q * m_z * m_density * stpmin /
                      (m_a * beta2)) *
-                    emax * (1 - beta2 / 2)) /
+                    emax * (1 - 0.5 * beta2)) /
                    (stpmin * denow / stpnow));
       }
     }
@@ -1286,7 +1296,7 @@ double TrackSrim::RndmEnergyLoss(const double ekin, const double de,
   } else if (m_model == 3) {
     // Gaussian model
     if (m_debug) std::cout << hdr << "Gaussian imposed.\n";
-    rndde += RndmGaussian(0., sqrt(xi * emax * (1 - beta2 / 2)));
+    rndde += RndmGaussian(0., sqrt(xi * emax * (1 - 0.5 * beta2)));
   } else if (rkappa < 0.05) {
     // Combined model: for low kappa, use the landau distribution.
     if (m_debug) std::cout << hdr << "Landau automatic.\n";
@@ -1314,7 +1324,7 @@ double TrackSrim::RndmEnergyLoss(const double ekin, const double de,
   } else {
     // And for large kappa, use the Gaussian values.
     if (m_debug) std::cout << hdr << "Gaussian automatic.\n";
-    rndde = RndmGaussian(de, sqrt(xi * emax * (1 - beta2 / 2)));
+    rndde = RndmGaussian(de, sqrt(xi * emax * (1 - 0.5 * beta2)));
   }
   // Debugging output
   if (m_debug)
