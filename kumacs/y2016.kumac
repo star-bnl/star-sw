@@ -96,3 +96,21 @@ exec rcut
 exec zcut
 exec zcut2
 return
+************  LADR X ************
+macro ladrx
+ next
+ for/file 67 LADR-x.eps
+ meta 67 -113
+ null -16 16 -0.1 0.1
+ dcut ladr x 0 0 0 1 1
+ close 67	
+return
+************  LADR Y ************
+macro ladry
+ next
+ for/file 67 LADR-y.eps
+ meta 67 -113
+ null -16 16 -1.5 1.5
+ dcut ladr y 0 0 0 1 1
+ close 67	
+return
