@@ -146,7 +146,8 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StPPVertexFinder(vertexFitMode);
 
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
-    int vfstore = IAttr("VFstore");
+    int vfstore = IAttr("VFstore")||IAttr(".gopt.VFS");
+    
     if (vfstore > 0)  ((StPPVertexFinder*)theFinder)->SetStoreUnqualifiedVertex(vfstore);
     if ( IAttr("useBTOFmatchOnly") )  ((StPPVertexFinder*)theFinder)->UseBTOFmatchOnly();
 
