@@ -138,18 +138,28 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
-  } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) // 2 version of PPV w/ & w/o CTB
-  {
+  } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) {
+    // 2 version of PPV w/ & w/o CTB
     LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
     LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
     theFinder= new StPPVertexFinder(vertexFitMode);
 
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
-    int vfstore = IAttr("VFstore")||IAttr(".gopt.VFS");
+
+    // Because VFstore is a local optio used by users, make sure it is checked first
+    int vfstore = IAttr("VFstore");                  
+    // ... while the global option would not be used if the local one is used
+    //if (vfstore == 0) vfstore = IAttr(".gopt.VFstore");  <--- this will work whenevr gopt will be amde flexible
     
-    if (vfstore > 0)  ((StPPVertexFinder*)theFinder)->SetStoreUnqualifiedVertex(vfstore);
-    if ( IAttr("useBTOFmatchOnly") )  ((StPPVertexFinder*)theFinder)->UseBTOFmatchOnly();
+    if (vfstore > 0)  {
+      LOG_INFO << "StGenericVertexMaker::Init: Using VFStore depth = " << vfstore << endm;
+      ((StPPVertexFinder*)theFinder)->SetStoreUnqualifiedVertex(vfstore);
+    }
+    if ( IAttr("useBTOFmatchOnly") ){
+      LOG_INFO << "StGenericVertexMaker::Init: UseBTOFmatchOnly option enabled" << endm; 
+      ((StPPVertexFinder*)theFinder)->UseBTOFmatchOnly();
+    }
 
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
            ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
