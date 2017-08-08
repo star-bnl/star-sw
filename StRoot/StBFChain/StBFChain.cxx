@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.641 2017/08/08 17:19:54 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.642 2017/08/08 18:51:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -580,6 +580,9 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
       if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
       if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
+      // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
+      // However, we will change this to a more flexible arbitrarry setting later
+      if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker") {
