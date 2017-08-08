@@ -108,15 +108,20 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
 	std::ostringstream geoPath, geoName;
-         geoName << "PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
+         geoName << "PXLA_" << iSector << "/LADR_" << iLadder << "/LADX_" << iSensor << "/PXSI_1/PLAC_1";
          geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/" << geoName.str().c_str(); 
 
          bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
          if (!isAvail) {
-            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (PXL sensitive) node:"
-		     << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
-            continue;
+	   geoName << "PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
+	   geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/" << geoName.str().c_str(); 
+	   isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
+	   if (!isAvail) {
+	     LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (PXL sensitive) node:"
+		      << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
+	     continue;
+	   }
          }
 	 gGeoManager->cd(geoPath.str().c_str());
          TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
