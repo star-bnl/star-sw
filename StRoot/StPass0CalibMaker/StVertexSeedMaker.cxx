@@ -337,7 +337,7 @@ void StVertexSeedMaker::FindResult(bool checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.62 2016/08/02 21:17:17 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.64 2017/08/08 03:58:20 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -458,25 +458,27 @@ TString StVertexSeedMaker::NameFile(const char* type, const char* prefix, const 
 //_____________________________________________________________________________
 int StVertexSeedMaker::FillAssumed(){
   TDataSet* dbDataSet = GetDataBase("Calibrations/rhic/vertexSeed");
+  memset( a,0,4*sizeof(double));
+  memset(ea,0,4*sizeof(double));
   if (!dbDataSet) {
-    LOG_ERROR << "Could not find Calibrations/rhic/vertexSeed in database" << endm;
-    return kStErr;
+    LOG_WARN << "Could not find Calibrations/rhic/vertexSeed in database" << endm;
+  } else {
+    St_vertexSeed* dbTableC =
+      static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"));
+    if (!dbTableC) {
+      LOG_WARN << "Could not find vertexSeed in database" << endm;
+    } else {
+      vertexSeed_st* dbTable = dbTableC->GetTable();
+       a[0] = dbTable->x0;
+       a[1] = dbTable->dxdz;
+       a[2] = dbTable->y0;
+       a[3] = dbTable->dydz;
+      ea[0] = dbTable->err_x0;
+      ea[1] = dbTable->err_dxdz;
+      ea[2] = dbTable->err_y0;
+      ea[3] = dbTable->err_dydz;
+    }
   }
-  St_vertexSeed* dbTableC =
-    static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"));
-  if (!dbTableC) {
-    LOG_ERROR << "Could not find vertexSeed in database" << endm;
-    return kStErr;
-  }
-  vertexSeed_st* dbTable = dbTableC->GetTable();
-  a[0] = dbTable->x0;
-  a[1] = dbTable->dxdz;
-  a[2] = dbTable->y0;
-  a[3] = dbTable->dydz;
-  ea[0] = dbTable->err_x0;
-  ea[1] = dbTable->err_dxdz;
-  ea[2] = dbTable->err_y0;
-  ea[3] = dbTable->err_dydz;
   LOG_INFO << "Assumed values:"
     << "\n     x0 assumed = " << a[0] << " +/- " << ea[0]
     << "\n   dxdz assumed = " << a[1] << " +/- " << ea[1]
@@ -664,6 +666,35 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
   fileList.SetOwner();
   fileList.Sort();
 
+  int aggMode = 0;
+  // 0 : by fill
+  // 1 : all data into one result
+  // 2 : by date (flawed for input files & runs that span dates)
+  // 3 : by file (retains the same number of files)
+
+  // Parse cuts for keywords
+  TString cutsStr = cuts;
+  if (cutsStr.Contains("ALL")) {
+    aggMode = 1;
+    cutsStr.ReplaceAll("ALL&&","");
+    cutsStr.ReplaceAll("&&ALL","");
+    cutsStr.ReplaceAll("ALL","");
+  } else if (cutsStr.Contains("DATE")) {
+    aggMode = 2;
+    cutsStr.ReplaceAll("DATE&&","");
+    cutsStr.ReplaceAll("&&DATE","");
+    cutsStr.ReplaceAll("DATE","");
+  } else if (cutsStr.Contains("FILE")) {
+    aggMode = 3;
+    cutsStr.ReplaceAll("FILE&&","");
+    cutsStr.ReplaceAll("&&FILE","");
+    cutsStr.ReplaceAll("FILE","");
+  }
+  const char* cleanedCuts = cutsStr.Data();
+
+  // Try to catch stuck values and ignore them
+  static float prevX = -987.0;
+
   TFile* currentFile=0;
   float* vals=0;
   int nfiles = fileList.GetSize();
@@ -672,16 +703,23 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
     int datef = date;
     int timef = time;
     fileName = fileList.At(filen)->GetName();
-    TString dateTime = fileName;
-    dateTime.Remove(0,dateTime.Last('/') + 1);
-    dateTime.Remove(0,dateTime.First('.') + 1).Remove(15);
-    TString dateStr = dateTime;
-    date = atoi(dateStr.Remove(8).Data());
-    time = atoi(dateTime.Remove(0,9).Remove(6).Data());
-    GetFillDateTime();
-    if ((currentFile) && (fill != fillf)) {
-      LOG_INFO << "Fill number has changed\n"
-        << "  Processing data from previous fill before continuing" << endm;
+    if (aggMode != 1 || date==0) {
+      TString dateTime = fileName;
+      dateTime.Remove(0,dateTime.Last('/') + 1);
+      dateTime.Remove(0,dateTime.First('.') + 1).Remove(15);
+      TString dateStr = dateTime;
+      if (aggMode == 3) GetFillDateTime(); // fill date and time will be overwritten
+      date = atoi(dateStr.Remove(8).Data());
+      time = atoi(dateTime.Remove(0,9).Remove(6).Data());
+      if (aggMode != 3) GetFillDateTime(); // file date and time will be overwritten
+      if (aggMode == 2) time = 0;
+    }
+    if ((currentFile) && (
+         (aggMode == 0 && fill != fillf) ||
+         (aggMode == 2 && date != datef) ||
+         (aggMode == 3) )) {
+      LOG_INFO << "Aggregator has changed\n"
+        << "  Processing data from previous aggregation before continuing" << endm;
       int fillp = fill;
       int datep = date;
       int timep = time;
@@ -707,7 +745,7 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
       LOG_ERROR << "No resNtuple found in " << fileName << endm;
       continue;
     }
-    curNtuple->Draw(">>elistVtxSeed",cuts);
+    curNtuple->Draw(">>elistVtxSeed",cleanedCuts);
     TEventList* elist = static_cast<TEventList*>(gDirectory->Get("elistVtxSeed"));
     int nentries = (elist ? (int) elist->GetN() : 0);
     int nvar = curNtuple->GetNvar();
@@ -715,6 +753,8 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
     for (int entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
+      if (vals[1] == prevX) continue; // stuck value!
+      else prevX = vals[1];
       unsigned int tid = (unsigned int) vals[5];
       bool updateForTimeFill = (nvar > 24 && timeFill >=0 &&
                                 vals[24] >= 0 && vals[25] < 0);
@@ -777,8 +817,14 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.62 2016/08/02 21:17:17 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.64 2017/08/08 03:58:20 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.64  2017/08/08 03:58:20  genevb
+// Add vertex-seed-finding with picoDsts
+//
+// Revision 1.63  2017/08/07 18:10:57  genevb
+// Introduce modes for aggregation
+//
 // Revision 1.62  2016/08/02 21:17:17  genevb
 // Added tDay,tFill to resNtuple, and improved C++11 compliance
 //
