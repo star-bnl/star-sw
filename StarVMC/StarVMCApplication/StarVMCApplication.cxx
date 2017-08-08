@@ -466,8 +466,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
     {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                        	 1, { 1, 0, 0}, 0},
     {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                 	 1, {10, 0, 0}, 0},
     {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",         	 2, {10, 4, 0}, 0},
-    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d",   	 3, {10, 4,10}, 0},
-    {"PxlSensor-%d",kPxlSensor,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/PXSI_%d/PLAC_1",3, {10, 4,10}, 0},
+    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_1/LADX_%d/PXSI_%d",   	 3, {10, 4,10}, 0},
+    {"PxlSensor-%d",kPxlSensor, "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_1/LADX_%d/PXSI_%d/PLAC_1",3, {10, 4,10}, 0},
     {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",                             1, { 1, 0, 0}, 0},
     {"IstLadder-%d", kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",                      1, {24, 0, 0}, 0},
     {"IstWafer-%d",   kIstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d",              2, {24, 6, 0}, 0},
@@ -486,7 +486,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   // PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
   TGeoTranslation PixelLadderT(-0.2381, 0.0, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
   // PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
-  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);
+  //  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);
+  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01-4.222);
   Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929};
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
   TGeoHMatrix IstLadderH;
