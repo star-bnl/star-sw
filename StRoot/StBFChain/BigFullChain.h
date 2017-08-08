@@ -1708,9 +1708,9 @@ Bfc_st BFC[] = { // standard chains
   {"mtdCalib"    ,"","","db",                 "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
 
-  {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
+  {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps,picoDst","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
-  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
+  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps,picoDst","StEvtVtxSeedMaker"
    ,                               "StPass0CalibMaker","Performs vertex seed finding using StEvent",kFALSE},
   {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
   {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu","StFtpcSlowSimMaker"
@@ -1749,10 +1749,10 @@ Bfc_st BFC[] = { // standard chains
 
   {"V0svt"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"Xisvt"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"SCEbyE"      ,"scebye","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
-   ,                                                     "Determine EbyE SpaceCharge using StEvent",kFALSE},
-  {"SCScalerCal" ,"scscalercal","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
-   ,                                                                "Calibrate SpaceCharge scalers",kFALSE},
+  {"SCEbyE"      ,"scebye","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
+   ,                    "StMuDSTMaker,StPass0CalibMaker","Determine EbyE SpaceCharge using StEvent",kFALSE},
+  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
+   ,                               "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    ,                                                             "Fill event summary in ITTF Chain",kFALSE},
   {"TpcAligner"    ,"","","Alignment"         ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
