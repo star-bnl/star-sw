@@ -337,7 +337,7 @@ void StVertexSeedMaker::FindResult(bool checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.63 2017/08/07 18:10:57 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.64 2017/08/08 03:58:20 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -458,25 +458,27 @@ TString StVertexSeedMaker::NameFile(const char* type, const char* prefix, const 
 //_____________________________________________________________________________
 int StVertexSeedMaker::FillAssumed(){
   TDataSet* dbDataSet = GetDataBase("Calibrations/rhic/vertexSeed");
+  memset( a,0,4*sizeof(double));
+  memset(ea,0,4*sizeof(double));
   if (!dbDataSet) {
-    LOG_ERROR << "Could not find Calibrations/rhic/vertexSeed in database" << endm;
-    return kStErr;
+    LOG_WARN << "Could not find Calibrations/rhic/vertexSeed in database" << endm;
+  } else {
+    St_vertexSeed* dbTableC =
+      static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"));
+    if (!dbTableC) {
+      LOG_WARN << "Could not find vertexSeed in database" << endm;
+    } else {
+      vertexSeed_st* dbTable = dbTableC->GetTable();
+       a[0] = dbTable->x0;
+       a[1] = dbTable->dxdz;
+       a[2] = dbTable->y0;
+       a[3] = dbTable->dydz;
+      ea[0] = dbTable->err_x0;
+      ea[1] = dbTable->err_dxdz;
+      ea[2] = dbTable->err_y0;
+      ea[3] = dbTable->err_dydz;
+    }
   }
-  St_vertexSeed* dbTableC =
-    static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"));
-  if (!dbTableC) {
-    LOG_ERROR << "Could not find vertexSeed in database" << endm;
-    return kStErr;
-  }
-  vertexSeed_st* dbTable = dbTableC->GetTable();
-  a[0] = dbTable->x0;
-  a[1] = dbTable->dxdz;
-  a[2] = dbTable->y0;
-  a[3] = dbTable->dydz;
-  ea[0] = dbTable->err_x0;
-  ea[1] = dbTable->err_dxdz;
-  ea[2] = dbTable->err_y0;
-  ea[3] = dbTable->err_dydz;
   LOG_INFO << "Assumed values:"
     << "\n     x0 assumed = " << a[0] << " +/- " << ea[0]
     << "\n   dxdz assumed = " << a[1] << " +/- " << ea[1]
@@ -690,6 +692,9 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
   }
   const char* cleanedCuts = cutsStr.Data();
 
+  // Try to catch stuck values and ignore them
+  static float prevX = -987.0;
+
   TFile* currentFile=0;
   float* vals=0;
   int nfiles = fileList.GetSize();
@@ -748,6 +753,8 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
     for (int entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
+      if (vals[1] == prevX) continue; // stuck value!
+      else prevX = vals[1];
       unsigned int tid = (unsigned int) vals[5];
       bool updateForTimeFill = (nvar > 24 && timeFill >=0 &&
                                 vals[24] >= 0 && vals[25] < 0);
@@ -810,8 +817,11 @@ int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.63 2017/08/07 18:10:57 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.64 2017/08/08 03:58:20 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.64  2017/08/08 03:58:20  genevb
+// Add vertex-seed-finding with picoDsts
+//
 // Revision 1.63  2017/08/07 18:10:57  genevb
 // Introduce modes for aggregation
 //
