@@ -14,43 +14,44 @@
 StPicoEpdFiller::StPicoEpdFiller(StPicoDst& picoDst, int year) :
   mPicoDst(picoDst)
 {
-  if (year == 2017)  SetDefaultMapping_30may2017();
+  if (year == 2017)  setDefaultMapping_30may2017();
 }
 
 
-void StPicoEpdFiller::Fill(const StMuDst& muDst)
+void StPicoEpdFiller::fill(const StMuDst& muDst)
 {
   TClonesArray *mTileCollection = mPicoDst.picoArray(StPicoArrays::EpdTile);
 
   StMuEvent *Event = muDst.event();
   StTriggerData *trg = const_cast<StTriggerData *>(Event->triggerData());
 
-  Short_t ADC, TDC, TAC;
-  Short_t ntiles = 0;
-  Bool_t HasTAC;
+  int nTiles = 0;
 
-  // EPD tiles
+  // Loop over EPD tiles
   // here, the "ADC","TDC" and"TAC" can be a little subtle...
-  for (Short_t PP = 3; PP < 6; PP++) { // the "real" position number is this plus 1
-    for (Short_t TT = 0; TT < 31; TT++) {
-      ADC = trg->fmsADC(5, mEPDMap[0][PP][TT].qt_board_address, mEPDMap[0][PP][TT].qt_channel_ADC, 0);
-      TDC = trg->fmsTDC(5, mEPDMap[0][PP][TT].qt_board_address, mEPDMap[0][PP][TT].qt_channel_ADC, 0);
-      HasTAC = (mEPDMap[0][PP][TT].qt_channel_TAC > 0);
+  for (Short_t PP = 3; PP < 6; PP++) // the "real" position number is this plus 1
+  {
+    for (Short_t TT = 0; TT < 31; TT++)
+    {
+      EPDAnalysisMap& epdMap = mEPDMap[0][PP][TT];
 
-      if (HasTAC)
-      {TAC = trg->fmsADC(5, mEPDMap[0][PP][TT].qt_board_address, mEPDMap[0][PP][TT].qt_channel_TAC, 0);}
-      else
-      {TAC = 0;}
+      int ADC = trg->fmsADC(5, epdMap.qt_board_address, epdMap.qt_channel_ADC, 0);
+      int TDC = trg->fmsTDC(5, epdMap.qt_board_address, epdMap.qt_channel_ADC, 0);
+
+      bool hasTAC = (epdMap.qt_channel_TAC > 0);
+
+      int TAC = hasTAC ? trg->fmsADC(5, epdMap.qt_board_address, epdMap.qt_channel_TAC, 0) : 0;
 
       DetectorSide EW = DetectorSide::East; // always East for 2017
       //      cout << "Maker making a PicoTile with PP/TT/ID= " << PP << "/" << TT << "/" <<  ID
       //      	   << "ADC=" << ADC << " TDC=" << TDC << " TAC=" << TAC << endl;
-      new((*mTileCollection)[ntiles++]) StPicoEpdTile(PP, TT, EW, ADC, TAC, TDC, HasTAC);
+      new((*mTileCollection)[nTiles++]) StPicoEpdTile(PP, TT, EW, ADC, TAC, TDC, hasTAC);
     }
   }
 }
 
-void StPicoEpdFiller::SetDefaultMapping_30may2017()
+
+void StPicoEpdFiller::setDefaultMapping_30may2017()
 {
   // until we get the Database integrated _OR_ a standard set of access functions for EPD data in the StTriggerData object,
   // we need a map array relating PP/TT with QT/channel.  Prashanth had been using map.txt files, but this will not work

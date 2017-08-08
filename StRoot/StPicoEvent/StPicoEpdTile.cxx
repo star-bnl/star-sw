@@ -2,7 +2,6 @@
 #include "StPicoEvent/StPicoEpdTile.h"
 
 
-
 StPicoEpdTile::StPicoEpdTile() : mId(0), mQTdata(0)
 {
   /* no-op */
@@ -18,7 +17,6 @@ StPicoEpdTile::StPicoEpdTile(int PP, int TT, DetectorSide EW, int ADC, int TAC, 
 
 void StPicoEpdTile::Print(const Char_t *option) const
 {
-
   /*  --- this below does not compile so I am skipping it.
       Dmitri, could you put it in?  I guess I am missing
       an include.  I must be missing an include file somewhere

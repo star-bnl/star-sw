@@ -1,6 +1,7 @@
 #include "St_base/StMessMgr.h"
 #include "StPicoEvent/StPicoBbcTile.h"
 
+
 StPicoBbcTile::StPicoBbcTile() : mId(0), mQTdata(0)
 {
   /* no-op */
@@ -16,7 +17,6 @@ StPicoBbcTile::StPicoBbcTile(int ID, int ADC, int TAC, int TDC, bool hasTAC) :
 
 void StPicoBbcTile::Print(const Char_t *option) const
 {
-
   /*  --- this below does not compile so I am skipping it.
       Dmitri, could you put it in?  I guess I am missing
       an include.  I must be missing an include file somewhere
