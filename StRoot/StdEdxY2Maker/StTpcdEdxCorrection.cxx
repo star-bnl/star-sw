@@ -321,14 +321,33 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (iok) return iok;
     }
     if (corl->npar%100) {
-      dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+      Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+#if 0
+      if (TMath::IsNaN(dECor)) {
+	static Int_t iBreak = 0;
+	iBreak++;
+      }
+#endif
+      dE *= dECor;
+#if 0
+      if (TMath::IsNaN(dE)) {
+	static Int_t iBreak = 0;
+	iBreak++;
+      }
+#endif
     }
   ENDL:
     CdEdx.C[k].dE = dE;
     CdEdx.C[k].dx = dx;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.C[k].dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
-  }    
+  }   
+#if 0 
+  if (TMath::IsNaN(CdEdx.C[kTpcLast].dE)) {
+    static Int_t iBreak = 0;
+    iBreak++;
+  }
+#endif
   CdEdx.F = CdEdx.C[kTpcLast];
   //  memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
   return 0;

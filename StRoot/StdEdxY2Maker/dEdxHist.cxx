@@ -73,12 +73,12 @@ Hists2D::Hists2D(const Char_t *Name) {
       title.ReplaceAll("-","");
       title += " "; title += ChargeT[sCharge];
       title += " versus log10(p/m)";
-      dev[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,500,-5,5);
+      dev[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,2000,-5,5);
       dev[hyp][sCharge]->SetMarkerColor(hyp+2);
       dev[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
       title += " Unique";
       nameP += "T";
-      devT[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,500,-5,5);
+      devT[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,2000,-5,5);
       devT[hyp][sCharge]->SetMarkerColor(hyp+2);
       devT[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
     }
