@@ -1,7 +1,10 @@
-// $Id: TpcResponseSimulator.y2016.C,v 1.3 2017/08/08 21:37:17 fisyak Exp $
-// $Log: TpcResponseSimulator.y2016.C,v $
-// Revision 1.3  2017/08/08 21:37:17  fisyak
+// $Id: TpcResponseSimulator.20151220.000002.C,v 1.1 2017/08/08 21:37:17 fisyak Exp $
+// $Log: TpcResponseSimulator.20151220.000002.C,v $
+// Revision 1.1  2017/08/08 21:37:17  fisyak
 // The first iteration of dE/dx calibration for Run XVII
+//
+// Revision 1.1  2017/05/20 00:54:00  fisyak
+// Add TpcRS calibration for Run XVI
 //
 // Revision 1.2  2017/05/12 13:52:39  fisyak
 // Add default MC version of the correction
@@ -100,18 +103,15 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 4.39226e-01 + 2.61137e-01 + 1.90407e-02 -9.57455e-02; //pionMIP SecRow3CGFdEdx + Hijing.AuAu200.VMCE-bbc2/dEdx/SecRow3CGFdEdx
-  row.SecRowCorIW[1] = row.SecRowCorIE[1] = 1.76094e-02 - 1.30348e-02 -3.83941e-04; //
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.00611e+00 + 1.52493e-01 + 4.52381e-03-1.39566e-01; //
-  row.SecRowCorOW[1] = row.SecRowCorOE[1] = 1.33791e-03 - 1.33425e-03 + 1.34221e-04; //
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 4.39226e-01 + 2.61137e-01 + 1.90407e-02 + 2.51417e-01 + 4.41076e-02 + 1.57462e-02 -7.23038e-02; //SecRow3CGFdEdx + Hijing.AuAu200.VMCE-bbc2/dEdx/SecRow3CGFdEdx
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] = 1.76094e-02 - 1.30348e-02; //
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.00611e+00 + 1.52493e-01 + 4.52381e-03 -2.04887e-02 -7.84267e-04 + 7.10599e-04-1.08843e-01; //
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] = 1.33791e-03 - 1.33425e-03; //
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
-  // SecRow3CGFRunXVI222                    : 2.86501e-01 +  1.04749e-03*y         2.84865e-01
-  // TpcRS_2016NoSDTVMC4/SecRow3CGFpionMIP  : 3.08712e-01                          2.71986e-01
-  // diff 
   const Double_t RowSigmaTrs[4] = {
     9.13675e-02, 0,  // Inner
     6.29849e-02, 0}; // Outer
