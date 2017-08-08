@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.88 2017/06/01 22:30:23 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.89 2017/08/08 20:27:29 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -35,7 +35,6 @@
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
 // StarClassLibrary
-#include "StTimer.hh"
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -242,14 +241,12 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
-  static  StTimer timer;
   static  StTpcLocalSectorCoordinate        localSect[4];
   static  StTpcPadCoordinate                PadOfTrack, Pad;
   static  StTpcLocalSectorDirection         localDirectionOfTrack;
   static  StThreeVectorD xyz[4];
   static  StThreeVectorD dirG;
   static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], dx;
-  if (Debug()) timer.start();
   enum {kNdEdxMax  = 100};
   static dEdxY2_t CdEdxT[3*kNdEdxMax];//,FdEdxT[kNdEdxMax],dEdxST[kNdEdxMax];
   CdEdx = CdEdxT; 
@@ -587,6 +584,7 @@ Int_t StdEdxY2Maker::Make(){
       if (fTracklengthInTpcTotal) fTracklengthInTpcTotal->Fill(TrackLengthTotal);
       if (fTracklengthInTpc)      fTracklengthInTpc->Fill(TrackLength);
       SortdEdx();
+      if (Debug() > 1) PrintdEdx(2);
       Double_t I70 = 0, D70 = 0;
       Double_t dXavLog2 = 1;
       Double_t SumdEdX = 0;
@@ -716,11 +714,6 @@ Int_t StdEdxY2Maker::Make(){
 		       << "  Event: " << pEvent->id()
 		       << "  # track nodes: "
 		       << pEvent->trackNodes().size() << endm;
-  }
-  if (Debug()) {
-    timer.stop();
-    LOG_QA << "CPU time for StdEdxY2Maker::Make(): "
-		       << timer.elapsedTime() << " sec\n" << endm;
   }
   if (mHitsUsage) mHitsUsage->Fill(TMath::Log10(TotalNoOfTpcHits+1.), TMath::Log10(NoOfTpcHitsUsed+1.));
   return kStOK;
@@ -966,31 +959,31 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     }
   }
 #endif
-  if (PiD.PredBT[kPidPion] <= 0) {
+  if (PiD.fFit.Pred[kPidPion] <= 0) {
     LOG_WARN << "StdEdxY2Maker:: Prediction for p = " 
 			<< pMomentum << " and TrackLength = " << PiD.fFit.TrackLength()
-			<< " is wrong = " << PiD.PredBT[kPidPion] << " <<<<<<<<<<<<<" << endl;
+			<< " is wrong = " << PiD.fFit.Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
     return;
   };
   if (PiD.fFit.fPiD) {
-    TPoints[0]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),TMath::Log(PiD.fFit.I())-TMath::Log(PiD.PredBT[kPidPion]));
-    Pulls[1]->Fill(PiD.fFit.TrackLength(),(TMath::Log(PiD.fFit.I()) - TMath::Log(PiD.PredBT[kPidPion]))/PiD.fFit.D());
+    TPoints[0]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),TMath::Log(PiD.fFit.I())-TMath::Log(PiD.fFit.Pred[kPidPion]));
+    Pulls[1]->Fill(PiD.fFit.TrackLength(),(TMath::Log(PiD.fFit.I()) - TMath::Log(PiD.fFit.Pred[kPidPion]))/PiD.fFit.D());
     if (PiD.fFitU.fPiD) {
-      TPoints[2]->Fill(PiD.fFitU.TrackLength(),PiD.fFitU.log2dX(),TMath::Log(PiD.fFitU.I())-TMath::Log(PiD.PredBT[kPidPion]));
+      TPoints[2]->Fill(PiD.fFitU.TrackLength(),PiD.fFitU.log2dX(),TMath::Log(PiD.fFitU.I())-TMath::Log(PiD.fFit.Pred[kPidPion]));
     }
   }
   if (PiD.fI70.fPiD) {
-    TPoints[1]->Fill(PiD.fI70.TrackLength(),PiD.fI70.log2dX(),TMath::Log(PiD.fI70.I()/PiD.Pred70BT[kPidPion]));
-    Pulls[0]->Fill(PiD.fI70.TrackLength(),TMath::Log(PiD.fI70.I()/PiD.Pred70BT[kPidPion])/PiD.fI70.D());
+    TPoints[1]->Fill(PiD.fI70.TrackLength(),PiD.fI70.log2dX(),TMath::Log(PiD.fI70.I()/PiD.fI70.Pred[kPidPion]));
+    Pulls[0]->Fill(PiD.fI70.TrackLength(),TMath::Log(PiD.fI70.I()/PiD.fI70.Pred[kPidPion])/PiD.fI70.D());
     if (PiD.fI70U.fPiD) {
-      TPoints[3]->Fill(PiD.fI70U.TrackLength(),PiD.fI70U.log2dX(),TMath::Log(PiD.fI70U.I()/PiD.Pred70BT[kPidPion]));
+      TPoints[3]->Fill(PiD.fI70U.TrackLength(),PiD.fI70U.log2dX(),TMath::Log(PiD.fI70U.I()/PiD.fI70.Pred[kPidPion]));
     }
   }
   if (PiD.fdNdx.fPiD) {
-    TPoints[4]->Fill(PiD.fdNdx.TrackLength(),PiD.fdNdx.log2dX(),TMath::Log(PiD.fdNdx.I()/PiD.dNdx[kPidPion]));
-    Pulls[2]->Fill(PiD.fdNdx.TrackLength(),TMath::Log(PiD.fdNdx.I()/PiD.dNdx[kPidPion])/PiD.fdNdx.D());
+    TPoints[4]->Fill(PiD.fdNdx.TrackLength(),PiD.fdNdx.log2dX(),TMath::Log(PiD.fdNdx.I()/PiD.fdNdx.Pred[kPidPion]));
+    Pulls[2]->Fill(PiD.fdNdx.TrackLength(),TMath::Log(PiD.fdNdx.I()/PiD.fdNdx.Pred[kPidPion])/PiD.fdNdx.D());
     if (PiD.fdNdxU.fPiD) {
-      TPoints[5]->Fill(PiD.fdNdxU.TrackLength(),PiD.fdNdxU.log2dX(),TMath::Log(PiD.fdNdxU.I()/PiD.dNdx[kPidPion]));
+      TPoints[5]->Fill(PiD.fdNdxU.TrackLength(),PiD.fdNdxU.log2dX(),TMath::Log(PiD.fdNdxU.I()/PiD.fdNdx.Pred[kPidPion]));
     }
   }
   if (PiD.fFit.TrackLength() > 20) { 
@@ -1068,7 +1061,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (BBCP) BBCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()), FdEdx[k].F.dEdxN);
 	  }
 	}
-	Double_t n_P = FdEdx[k].dxC*PiD.dNdx[kPidPion];
+	Double_t n_P = FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion];
 	Double_t sigma = 1./n_P;
 #ifndef __HEED_MODEL__
 	Double_t dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
@@ -1081,17 +1074,17 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  FdEdx[k].F.dEdxN,
 	  dEN - zdEMVP,
 #ifndef __HEED_MODEL__
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidElectron]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidPion]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidKaon]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidProton]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidDeuteron]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidElectron]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidKaon]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidProton]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidDeuteron]),
 #else /* __HEED_MODEL__ */
-	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidElectron]),
-	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidPion]),
-	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidKaon]),
-	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidProton]),
-	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidDeuteron]),
+	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidElectron]),
+	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion]),
+	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidKaon]),
+	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidProton]),
+	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidDeuteron]),
 #endif /* __HEED_MODEL__ */
 	  FdEdx[k].F.dx
 	};
@@ -1664,13 +1657,13 @@ void StdEdxY2Maker::V0CrossCheck() {
       Int_t m = h[sCharge];
       Double_t bg10 = PiDs[sCharge]->bghyp[m];
       if (PiDs[sCharge]->fI70.fPiD) {
-	Double_t z = TMath::Log(PiDs[sCharge]->fI70.I()/PiDs[sCharge]->Pred70BT[m]);
+	Double_t z = TMath::Log(PiDs[sCharge]->fI70.I()/PiDs[sCharge]->fI70.Pred[m]);
 	hist70B[l[sCharge]][sCharge]->Fill(bg10,z);
 	if (PiDkeyU3 > 0) 
 	  hist70BT[l[sCharge]][sCharge]->Fill(bg10,z);
       }
       if (PiDs[sCharge]->fFit.fPiD) {
-	Double_t z = TMath::Log(PiDs[sCharge]->fFit.I()/PiDs[sCharge]->PredBT[m]);
+	Double_t z = TMath::Log(PiDs[sCharge]->fFit.I()/PiDs[sCharge]->fFit.Pred[m]);
 	histzB[l[sCharge]][sCharge]->Fill(bg10,z);
 	if (PiDkeyU3 > 0) 
 	  histzBT[l[sCharge]][sCharge]->Fill(bg10,z);
@@ -1730,7 +1723,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     zFunc[kTpcOuterInner]->SetParameter(0,n_PL);
     Double_t Sigma = TMath::Sqrt(sigma_p[kTpcOuterInner]*sigma_p[kTpcOuterInner] + 1./n_P);
     zFunc[kTpcOuterInner]->SetParameter(1,Sigma);
-    Double_t dE = 1e9*FdEdx[i].dE; // GeV => eV
+    Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
 #endif /* __HEED_MODEL__ */
     Double_t z  = TMath::Log(dE);
 #ifndef __HEED_MODEL__
@@ -1757,7 +1750,7 @@ void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
 #ifndef __HEED_MODEL__
   for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].F.dEdx*1e6/StdEdxModel::instance()->W()/2;
 #else /* __HEED_MODEL__ */
-  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].F. dEdx*1e6/45.44e-3/2; //StdEdxModel::instance()->W()/2;
+  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].F.dEdx*1e6/45.44e-3/2; //StdEdxModel::instance()->W()/2;
 #endif /* __HEED_MODEL__ */
   if (NdEdx>5) {
     dNdx /= NdEdx;

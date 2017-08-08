@@ -81,39 +81,49 @@ void StPidStatus::Set() {
   Int_t l;
   PredBMN[0] = Pred70BMN[0] =  1;
   PredBMN[1] = Pred70BMN[1] = -1;
+  StdEdxStatus *status[kOtherMethodId2+1] = {0};
+  status[kTruncatedMeanId]         = fI70.fPiD   ? &fI70   : 0;
+  status[kLikelihoodFitId]         = fFit.fPiD   ? &fFit   : 0;
+  status[kEnsembleTruncatedMeanId] = fI70U.fPiD  ? &fI70U  : 0;
+  status[kWeightedTruncatedMeanId] = fFitU.fPiD  ? &fFitU  : 0;
+  status[kOtherMethodId]           = fdNdx.fPiD  ? &fdNdx  : 0;
+  status[kOtherMethodId2]          = fdNdxU.fPiD ? &fdNdxU : 0;
+
   for (l = kPidElectron; l < KPidParticles; l++) {
-    bgs[l]   = pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[l]->charge())/StProbPidTraits::mPidParticleDefinitions[l]->mass();
-    dNdx[l] = StdEdxModel::instance()->dNdx(bgs[l]);
+    Double_t charge = StProbPidTraits::mPidParticleDefinitions[l]->charge();
+    Double_t mass   = StProbPidTraits::mPidParticleDefinitions[l]->mass();
+    bgs[l]   = pMomentum*TMath::Abs(charge)/mass;
     bghyp[l] = TMath::Log10(bgs[l]);
-    PredB[l]   = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l],fFit.fPiD->log2dX())); 
-    PredBT[l]   = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l]));
-    if (PredBT[l] < PredBMN[0]) PredBMN[0] = PredBT[l];
-    if (PredBT[l] > PredBMN[1]) PredBMN[1] = PredBT[l];
-    Pred70B[l] = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      Bichsel::Instance()->GetI70M(bghyp[l],fI70.fPiD->log2dX()); 
-    Pred70BT[l] = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      Bichsel::Instance()->GetI70M(bghyp[l]); 
-    if (Pred70B[l] < Pred70BMN[0]) Pred70BMN[0] = Pred70BT[l];
-    if (Pred70B[l] > Pred70BMN[1]) Pred70BMN[1] = Pred70BT[l];
-    if (fI70.fPiD) {
-      devZ[l]  = TMath::Log(fI70.I()/Pred70BT[l]);
-      devZs[l] = TMath::Abs(devZ[l])/fI70.D();
-    }
-    if (fFit.fPiD) {
-      devF[l]  = TMath::Log(fFit.I()/PredBT[l]);
-      devFs[l] = TMath::Abs(devZ[l])/fI70.D();
-    }
-    if (fdNdx.fPiD) {
-      devN[l]  = TMath::Log(fdNdx.I()/dNdx[l]);
-      devNs[l] = TMath::Abs(devN[l])/fdNdx.D();
+    for (Int_t m = 1; m <= kOtherMethodId2; m++) {
+      if (! status[m]) continue;
+      switch (m) {
+      case kTruncatedMeanId: 
+      case kEnsembleTruncatedMeanId: 
+	status[m]->Pred[l] = 1.e-6*charge*charge*
+	  Bichsel::Instance()->GetI70M(bghyp[l],status[m]->fPiD->log2dX());
+	  break;
+      case kLikelihoodFitId: 
+      case kWeightedTruncatedMeanId:
+	status[m]->Pred[l] = 1.e-6*charge*charge*
+	  TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l],status[m]->fPiD->log2dX())); 
+	break;
+      case kOtherMethodId: 
+      case kOtherMethodId2: 
+	status[m]->Pred[l]  = StdEdxModel::instance()->dNdx(bgs[l], charge);
+	break;
+      default: continue;
+      }
+      status[m]->dev[l] = TMath::Log(status[m]->I()/status[m]->Pred[l]);
+      status[m]->devS[l] = status[m]->dev[l]/status[m]->D();
+      if (status[m]->Pred[l] < PredBMN[0]) PredBMN[0] = status[m]->Pred[l];
+      if (status[m]->Pred[l] > PredBMN[1]) PredBMN[1] = status[m]->Pred[l];
     }
   }
   PiDkey    = -1; // best
   PiDkeyU   = -1; // only one with devZs<3, 
   PiDkeyU3  = -1; // -"- and devZs > 5 for all others 
   lBest     = -1;
+#if 0
   Int_t lBestToF = -1;
   // use ToF 
   Double_t devZmin = 999;
@@ -160,4 +170,5 @@ void StPidStatus::Set() {
       }
     }
   }
+#endif
 }
