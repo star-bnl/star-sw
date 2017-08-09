@@ -13,7 +13,7 @@
 
 
 StPicoEvent::StPicoEvent():
-  mRunId(0), mEventId(0), mFillId(0), mBField(0),
+  mRunId(0), mEventId(0), mFillId(0), mBField(0), mTime(0),
   mPrimaryVertex{ -999., -999., -999.}, mPrimaryVertexError{ -999., -999., -999},
   mRanking(-999), mNBEMCMatch(0), mNBTOFMatch(0),
   mTriggerIds{},
@@ -41,6 +41,8 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   mEventId = ev->eventNumber();
   mFillId = ev->runInfo().beamFillNumber(blue);
   mBField = ev->magneticField();
+
+  mTime=ev->eventInfo().time();
 
   mPrimaryVertex = ev->primaryVertexPosition();
   mPrimaryVertexError = ev->primaryVertexErrors();
