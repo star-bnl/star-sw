@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.9 2015/01/31 03:38:22 perev Exp $
+ * $Id: TAttr.cxx,v 1.10 2017/08/08 19:37:37 perev Exp $
  *
  ***************************************************************************
  *
@@ -63,12 +63,12 @@ int TAttr::SetAttr(const TAttr *att)
    return add;
 }
 //_____________________________________________________________________________
-void TAttr::SetAttr(const char *key, int val)
+void TAttr::SetAttr(const char *key, Long_t val)
 {
    TString ts; ts+=val; SetAttr(key, ts.Data());
 }
 //_____________________________________________________________________________
-void TAttr::SetAttr(const char *key, UInt_t val)
+void TAttr::SetAttr(const char *key, ULong_t val)
 {
    TString ts; ts+=val; return SetAttr(key, ts.Data());
 }
@@ -92,15 +92,15 @@ const char *TAttr::SAttr(const char *key) const
    return (att)? att->GetTitle():"";
 }   
 //_____________________________________________________________________________
-int TAttr::IAttr(const char *key) const
+Long_t TAttr::IAttr(const char *key) const
 {
    const char *val = SAttr(key);
    if (!val || !val[0]) 	return 0;
-   if (isdigit(*val)) return strtoul(val,0,0);
-   return strtol(val,0,0);
+   if (isdigit(*val))return strtol(val,0,10);
+   return strtoul(val,0,10);
 }
 //_____________________________________________________________________________
-UInt_t TAttr::UAttr(const char *key) const
+ULong_t TAttr::UAttr(const char *key) const
 {
    return (UInt_t)IAttr(key);
 }
