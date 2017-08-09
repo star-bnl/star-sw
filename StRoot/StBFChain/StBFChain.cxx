@@ -666,6 +666,9 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", 1);
       if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , 1);
       if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , 1);
+      // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
+      // However, we will change this to a more flexible arbitrarry setting later
+      if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker") {
