@@ -19,6 +19,7 @@ public:
   Int_t    eventId() const;
   Int_t    fillId() const;
   Float_t  bField() const;
+  Int_t    time() const;
 
   StThreeVectorF const& primaryVertex() const;
   StThreeVectorF const& primaryVertexError() const;
@@ -112,6 +113,8 @@ protected:
   UShort_t mFillId;
   Float_t  mBField;
 
+  Int_t    mTime;//To set timestamp for St_db_Maker. This is what StMuDstMaker used to GetEvtHddr()->SetGMTime(cast into unsigned int). Peifeng Liu
+
   StThreeVectorF mPrimaryVertex;
   StThreeVectorF mPrimaryVertexError;
   Float_t  mRanking;
@@ -185,6 +188,7 @@ inline Int_t    StPicoEvent::runId() const { return mRunId; }
 inline Int_t    StPicoEvent::eventId() const { return mEventId; }
 inline Int_t    StPicoEvent::fillId() const { return (Int_t)mFillId; }
 inline Float_t  StPicoEvent::bField() const { return mBField; }
+inline Int_t    StPicoEvent::time() const { return mTime; }
 
 inline StThreeVectorF const & StPicoEvent::primaryVertex() const { return mPrimaryVertex; }
 inline StThreeVectorF const & StPicoEvent::primaryVertexError() const { return mPrimaryVertexError; }

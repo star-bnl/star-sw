@@ -582,6 +582,7 @@ Int_t StPicoDstMaker::MakeRead()
     return kStWarn;
   }
   mChain->GetEntry(mEventCounter++);
+  fillEventHeader();
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -641,6 +642,19 @@ Int_t StPicoDstMaker::MakeWrite()
 
   return kStOK;
 }
+
+void StPicoDstMaker::fillEventHeader() const
+{
+  StPicoEvent* event=StPicoDst::event();
+  if(!event)
+    return;
+
+  StEvtHddr* header=GetEvtHddr();//get or create
+  header->SetRunNumber(event->runId());
+  header->SetEventNumber(event->eventId());
+  header->SetGMTime( (UInt_t) (event->time()) );
+}
+
 //_____________________________________________________________________________
 void StPicoDstMaker::fillTracks()
 {
