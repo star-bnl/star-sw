@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.20151220.000001.C,v 1.1 2017/05/20 00:54:00 fisyak Exp $
-// $Log: TpcResponseSimulator.20151220.000001.C,v $
+// $Id: TpcResponseSimulator.20151220.000002.C,v 1.1 2017/08/08 21:37:17 fisyak Exp $
+// $Log: TpcResponseSimulator.20151220.000002.C,v $
+// Revision 1.1  2017/08/08 21:37:17  fisyak
+// The first iteration of dE/dx calibration for Run XVII
+//
 // Revision 1.1  2017/05/20 00:54:00  fisyak
 // Add TpcRS calibration for Run XVI
 //
