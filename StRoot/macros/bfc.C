@@ -197,7 +197,7 @@ void bfc(Int_t First, Int_t Last,
   // RF  sdt20160301
   //  if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
   //    if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
-   if ( TString(gProgName) == "root4star") tChain += ",gsta,useXgeom";
+   if ( TString(gProgName) == "root4star") tChain += ",gstar,useXgeom";
    //   else                                    tChain += ",vmc,VMCAlignment,RunG.1";
    else                                    tChain += ",vmc,VMCAlignment,sdt20160301,RunG.1";
   }
