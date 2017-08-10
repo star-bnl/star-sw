@@ -1,7 +1,7 @@
 
 PROGRAM = read_table_fgt
 
-INCLUDEDIRS = -I../../ -I/afs/rhic.bnl.gov/star/packages/DEV/.sl53_gcc432/include `mysql_config --include`
+INCLUDEDIRS = -I../../ `mysql_config --include`
 
 LIBDIRS = -L../../ 
 
