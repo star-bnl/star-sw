@@ -27,13 +27,13 @@ public:
 
   virtual void Print(const Char_t *option = "") const;
 
-  bool hasTAC() const;
+  bool hasTac() const;
   int  adc() const;
   int  tac() const;
   int  tdc() const;
   DetectorSide side() const;
 
-  int pmtNumber() const;  // 1...32
+  int pmt() const;  // 1...32
 
 protected:
 
@@ -50,11 +50,11 @@ protected:
 
 inline DetectorSide StPicoBbcTile::side() const { return mId < 0 ? DetectorSide::East : DetectorSide::West;}
 
-inline int  StPicoBbcTile::pmtNumber() const { return std::abs( (int)mId ); }
+inline int  StPicoBbcTile::pmt() const { return std::abs( (int)mId ); }
 
 inline int  StPicoBbcTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoBbcTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoBbcTile::tdc() const { return (mQTdata >> 24) & 0x001F; }
-inline bool StPicoBbcTile::hasTAC() const { return (mQTdata >> 29) & 0x1; }
+inline bool StPicoBbcTile::hasTac() const { return (mQTdata >> 29) & 0x1; }
 
 #endif
