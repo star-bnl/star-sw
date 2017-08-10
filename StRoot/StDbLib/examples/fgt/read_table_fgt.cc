@@ -1,7 +1,7 @@
 #include <ctime>
 #include <iostream>
 
-#include <fgtGain.h>
+#include "fgtGain.h"
 
 #include "StDbManager.hh"
 #include "StDbConfigNode.hh"
