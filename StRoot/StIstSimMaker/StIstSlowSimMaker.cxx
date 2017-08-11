@@ -232,6 +232,7 @@ void StIstSlowSimMaker::generateRawHits(const StMcIstHit *istMChit) const
 	getMCHitRowAndColumn(istMChit, meanColumn, meanRow);
 
 	Double_t dS = istMChit->dS(); //distance traveled in sensor active volume
+	if (dS <= 0) return;
 	StThreeVectorD midPos(istMChit->position().x(),istMChit->position().y(),istMChit->position().z());
 	Double_t mcLocPx = istMChit->localMomentum().x();
 	Double_t mcLocPy = istMChit->localMomentum().y();
