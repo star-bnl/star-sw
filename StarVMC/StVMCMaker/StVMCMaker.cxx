@@ -137,6 +137,7 @@ StVMCMaker::Make
 #include "TObjectSet.h"
 #include "TInterpreter.h"
 #include "TPythia6Decayer.h"
+#include "TPRegexp.h"
 #include "StVMCMaker.h"
 #include "StChain.h"
 #include "Stiostream.h"
@@ -413,135 +414,38 @@ void StVMCMaker::SetDebug(Int_t l) {
   //  if (fgStarVMCApplication) fgStarVMCApplication->SetDebug(Debug());
 }
 //________________________________________________________________________________
+void StVMCMaker::SetGoodTriggers(const Char_t *trigList) {
+  fGoodTiggerIds.clear();
+  TString Trig(trigList);
+  if (Trig == "") return;
+  TObjArray *obj = Trig.Tokenize("[^ ;,:]");
+  Int_t nParsed = obj->GetEntries();
+  for (Int_t k = 0; k < nParsed; k++) {
+    if (obj->At(k)) {
+      LOG_INFO << "Trigger: " << k << "\t" << ((TObjString *) obj->At(k))->GetName() << endm;
+      TString t(((TObjString *) obj->At(k))->GetName());
+      Int_t trig = t.Atoi();
+      if (! trig) continue;
+      fGoodTiggerIds.push_back(trig);
+    }
+  }
+  obj->SetOwner(kFALSE);
+  delete obj;
+}
+//________________________________________________________________________________
 Int_t StVMCMaker::SetVertex() {
-  // Skip event 
-  // 1. if vertexZ is not in the required range
-  // 2. if vr = sqrt{vx^2 + vy^2} is not in the required range
-  static Double_t vzlow = -6, vzhigh = +6;
-  static Double_t vrMax = 1.;
-  static Bool_t mSkipMode = kTRUE;
-  static Bool_t mVpdVzCutMode = kTRUE;
-  static Double_t dzVpdMax = 3;
   StarMCPrimaryGenerator::Instance()->UnSetVertex();
-  TVector3 V;
-#if 0
-  //  Int_t nFound = mTree->Draw("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks:primaryVertexFlag",
-  Int_t nFound = fMuDstTree->Draw("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks",
-				  Form("MuEvent.mEventInfo.mRunId==%i&&MuEvent.mEventInfo.mId==%i",
-				       fEvtHddr->GetRunNumber(),fEvtHddr->GetEventNumber()),
-				  "goff");
-  if (nFound != 1) {
-    LOG_ERROR << "Run/Event = " << fEvtHddr->GetRunNumber() << "/" << fEvtHddr->GetEventNumber() 
-	      << " has been found in tag file" << nFound << " times" <<  endm;
-    return kStErr;
-  }
-  const Int_t numberOfPrimaryTracks = (Int_t) fMuDstTree->GetV1()[0];
-  LOG_INFO << "Run/Event = " << fEvtHddr->GetRunNumber()
-	   << "/" << fEvtHddr->GetEventNumber() 
-	   << " has been found with MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks = " <<  numberOfPrimaryTracks 
-	   << endm;
-  //	   << " and primaryVertexFlag = " << fMuDstTree->GetV2()[0]  <<  endm; 
-  if (numberOfPrimaryTracks <= 0) // || fMuDstTree->GetV2()[0] )
-    {
-      LOG_ERROR << "reject this event" << endm;
-      return kStErr;
-    }
-  nFound = (Int_t) fMuDstTree->Draw("MuEvent.mEventSummary.mPrimaryVertexPos.mX1:"
-				    "MuEvent.mEventSummary.mPrimaryVertexPos.mX2:"
-				    "MuEvent.mEventSummary.mPrimaryVertexPos.mX3:"
-				    "MuEvent.mEventInfo.mTriggerMask",
-				    Form("MuEvent.mEventInfo.mRunId==%i&&MuEvent.mEventInfo.mId==%i",
-					 fEvtHddr->GetRunNumber(),
-					 fEvtHddr->GetEventNumber()),
-				    "goff");
-  TVector3 V(fMuDstTree->GetV1()[0],fMuDstTree->GetV2()[0],fMuDstTree->GetV3()[0]);
-  if (mSkipMode == kTRUE){
-    const Double_t vr = V.Perp();
-    
-    if (V.Z()<vzlow || V.Z()>vzhigh || vr>=vrMax ){
-      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
-        << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
-        << "), vr = " << vr
-        << " - out of Vz or Vr range, skipping." << endm;
-      return kStSKIP;
-    }
-    
-    LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
-	     << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
-	     << "), vr = " << vr
-	     << " - within requested Vz and Vr range !" << endm;
-  }          
-#if 0  
-  // more skipping. cut on trigger id.
-  if (mSkipMode == kTRUE){
-    LOG_INFO << "StPrepEmbedMaker::Event " << fEvtHddr->GetEventNumber()
-	     << " has Triggers: " << endm;
-    for (Int_t iTrg=0 ; iTrg<mSettings->nTriggerId ; iTrg++){
-      LOG_INFO << fMuDstTree->GetV4()[iTrg] << " ";
-    }
-    LOG_INFO << endm;
-    
-    Bool_t fired = kFALSE;
-    for (Int_t iTrg=0 ; iTrg<mSettings->nTriggerId ; iTrg++){
-      for (Int_t iReqTrg=0; iReqTrg<mSettings->NReqTrg ; iReqTrg++) {
-        if (fMuDstTree->GetV4()[iTrg] == mSettings->ReqTrgId[iReqTrg]){
-          LOG_INFO << "StPrepEmbedMaker::Requested trigger " << mSettings->ReqTrgId[iReqTrg] << " is fired!" << endm;
-          fired = kTRUE;
-        }
-      }
-    }
-    
-    if (!fired && mSettings->NReqTrg>0) {
-      LOG_INFO << "StPrepEmbedMaker::No requested triggers are fired in this event, skipping." << endm;
-      return kStSKIP;
-    }
-  }
-#endif
-  // more skipping. cut on VpdVz in btofheader
-  Float_t vpdvz;
-  if(mSkipMode == kTRUE && mVpdVzCutMode == kTRUE)  {
-    nFound = (Int_t) fMuDstTree->Draw("MuEvent.mVpdVz",
-				      Form("MuEvent.mEventInfo.mRunId==%i&&MuEvent.mEventInfo.mId==%i",
-					   fEvtHddr->GetRunNumber(),
-					   fEvtHddr->GetEventNumber()),"goff");
-    if (nFound != 1) {
-      LOG_ERROR << "Run/Event = " << fEvtHddr->GetRunNumber() << "/" << fEvtHddr->GetEventNumber()
-		<< " has been found in moretags file " << nFound << " times" <<  endm;
-      return kStErr;
-    }
-    vpdvz = fMuDstTree->GetV1()[0];
-    LOG_INFO << vpdvz << endm;
-    
-    //cut on events
-    if( TMath::Abs(vpdvz) < 1e-7 ) {
-      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
-	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
-	       << "), VpdVz = " << vpdvz
-	       << " - VpdVz is too small (i.e. no BTOF in this run), skipping." << endm;
-      return kStSKIP;
-    }
-    if( TMath::Abs(vpdvz) >= 100. ) {
-      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
-	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
-	       << "), VpdVz = " << vpdvz
-	       << " - VpdVz is too large, skipping." << endm;
-      return kStSKIP;
-    }
-    if( TMath::Abs(V.Z()-vpdvz) > dzVpdMax ) {
-      LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
-	       << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
-	       << "), VpdVz = " << vpdvz
-	       << " - out of |Vz-VpdVz| range, skipping." << endm;
-      return kStSKIP;
-    }
-  }
-#else
+  TVector3 V, E;
   static TTreeIter &muDstIter = *fMuDstIter;
   static const Int_t*&      RunId                = muDstIter("MuEvent.mEventInfo.mRunId");
   static const Int_t*&      Id                   = muDstIter("MuEvent.mEventInfo.mId");
+  static const UInt_t*&     MuEvent_mTriggerIdCollection_mL1TriggerId_mId = muDstIter("MuEvent.mTriggerIdCollection.mL1TriggerId.mId[64]");
   static const Float_t*&    X1                   = muDstIter("PrimaryVertices.mPosition.mX1");
   static const Float_t*&    X2                   = muDstIter("PrimaryVertices.mPosition.mX2");
   static const Float_t*&    X3                   = muDstIter("PrimaryVertices.mPosition.mX3");
+  static const Float_t*&    E1                   = muDstIter("PrimaryVertices.mPosError.mX1");
+  static const Float_t*&    E2                   = muDstIter("PrimaryVertices.mPosError.mX2");
+  static const Float_t*&    E3                   = muDstIter("PrimaryVertices.mPosError.mX3");
   static const Int_t*&      NumberOfGoodPrimaryTracks = muDstIter("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks");
   //  static const UInt_t*&     TriggerMask          = muDstIter("MuEvent.mEventInfo.mTriggerMask");
   static const Float_t*&    VpdVz                = muDstIter("MuEvent.mVpdVz");
@@ -555,15 +459,46 @@ Int_t StVMCMaker::SetVertex() {
       LOG_ERROR << "reject this event" << endm;
       return kStErr;
     }
+    // Good Trigger if any
+    if (fGoodTiggerIds.size()) {
+      Int_t GoodTrigger = -1;
+      TString AllTrig;
+      for (Int_t k = 0; k < 64; k++) {
+	Int_t trig = MuEvent_mTriggerIdCollection_mL1TriggerId_mId[k];
+	if (! trig) continue;
+	if (AllTrig != "") AllTrig += ":";
+	AllTrig += trig;
+	for (auto x : fGoodTiggerIds) {
+	  if (x == trig) {
+	    GoodTrigger = trig;
+	    break;
+	  }
+	}
+	if (GoodTrigger > 0) break;
+      }
+      if (GoodTrigger < 0) {
+	LOG_INFO << " No Good trigger found in the event among " << AllTrig.Data() << ", skipping." << endm;
+	return kStSKIP;
+      }
+    }
     V = TVector3(X1[0],X2[0],X3[0]);
-    if (mSkipMode == kTRUE){
+    E = TVector3(E1[0],E2[0],E3[0]);
+    if (fSkipMode == kTRUE){
       const Double_t vr = V.Perp();
+      const Double_t er = E.Perp();
       
-      if (V.Z()<vzlow || V.Z()>vzhigh || vr>=vrMax ){
+      if (V.Z()<fvzlow || V.Z()>fvzhigh || vr>=fvrMax ){
 	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
 		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
 		 << "), vr = " << vr
 		 << " - out of Vz or Vr range, skipping." << endm;
+	return kStSKIP;
+      }
+      if (er > fvxSigma) {
+	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+		 << "), transverse position error  = " << er
+		 << " - out of range, skipping." << endm;
 	return kStSKIP;
       }
       
@@ -572,7 +507,7 @@ Int_t StVMCMaker::SetVertex() {
 	       << "), vr = " << vr
 	       << " - within requested Vz and Vr range !" << endm;
     }        
-    if (mVpdVzCutMode) {
+    if (fVpdVzCutMode) {
       Double_t vpdvz =  VpdVz[0];
       LOG_INFO << "VpdVz = " << vpdvz << endm;
       //cut on events
@@ -590,7 +525,14 @@ Int_t StVMCMaker::SetVertex() {
 		 << " - VpdVz is too large, skipping." << endm;
 	return kStSKIP;
       }
-      if( TMath::Abs(V.Z()-vpdvz) > dzVpdMax ) {
+      if( TMath::Abs(V.Z()-vpdvz) > fdzVpdMax ) {
+	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
+		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
+		 << "), VpdVz = " << vpdvz
+		 << " - out of |Vz-VpdVz| range, skipping." << endm;
+	return kStSKIP;
+      }
+      if( TMath::Abs(V.Z()-vpdvz) > fdzVpdMax ) {
 	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
 		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
 		 << "), VpdVz = " << vpdvz
@@ -601,7 +543,6 @@ Int_t StVMCMaker::SetVertex() {
     StarMCPrimaryGenerator::Instance()->SetVertex(V);
     return kStOK;
   } while(1);
-#endif
   return kStFatal;
 }
 //________________________________________________________________________________

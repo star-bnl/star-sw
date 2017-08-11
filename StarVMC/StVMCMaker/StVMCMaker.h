@@ -14,7 +14,7 @@
  * the class description to be present on the this class Web page. 
  *
  */                                                                      
-
+#include <vector>
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -25,7 +25,10 @@ class TTreeIter;
 class StVMCMaker : public StMaker {
  public: 
   StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), 
-    fInitRun(0), fVolume(0), fMuDstIter(0), fRndm(0) {fgGeantMk = this;}
+    fInitRun(0), fVolume(0), fMuDstIter(0), fRndm(0), 
+    fvzlow(-6), fvzhigh(6), fvrMax(1), fvxSigma(0.0050), fdzVpdMax(3), 
+    fSkipMode(kTRUE), fVpdVzCutMode(kTRUE), fGoodTiggerIds()
+    {fgGeantMk = this;}
   virtual       ~StVMCMaker() {}
   virtual Int_t  Init();
   virtual Int_t  Make();
@@ -39,6 +42,13 @@ class StVMCMaker : public StMaker {
   virtual Int_t  SetInputFile(const Char_t *fileName);
   virtual void   SetDebug(Int_t l=1);          // *MENU*
   virtual Int_t  SetVertex();
+  virtual void   SetZminmax(Double_t zmin = -999, Double_t zmax = 999) {fvzlow = zmin; fvzhigh = zmax;}
+  virtual void   SetRmax(Double_t rmax = 1) {fvrMax = rmax;}
+  virtual void   SetVxSigma(Double_t sigma = 0.0050) {fvxSigma = sigma;}
+  virtual void   SetVpddZCut(Double_t dZ = 3) {fdzVpdMax = dZ;}
+  virtual void   SetSkipMode(Bool_t p = kTRUE) {fSkipMode = p;}
+  virtual void   SetVpdCutMode(Bool_t p = kTRUE) {fVpdVzCutMode = p;}
+  virtual void   SetGoodTriggers(const Char_t *trigList=0); 
   //  virtual void   SetInputMode(const Char_t *fileMode) {fInputMode = fileMode;}
   const Char_t  *InputFile() const {return fInputFile.Data();}
   static StarVMCApplication* GetStarVMCApplication() {return fgStarVMCApplication;}
@@ -65,6 +75,10 @@ class StVMCMaker : public StMaker {
   TTreeIter*                 fMuDstIter; //! MuDst to select primary vertex for embedding
   TRandom3                  *fRndm; //! Private random number generator is any
   TRandom                   *fRndmSaved; //! public random number
+  // Event/Primary vertex selection creteria 
+  Double_t fvzlow, fvzhigh, fvrMax, fvxSigma, fdzVpdMax;
+  Bool_t   fSkipMode, fVpdVzCutMode;
+  vector<Int_t>             fGoodTiggerIds;  
  public:
   virtual const Char_t *GetCVS() const {
     static const Char_t cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.1.1.2 2009/04/16 14:12:55 fisyak Exp $ built " __DATE__ " " __TIME__  ; 
