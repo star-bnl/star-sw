@@ -1,5 +1,5 @@
 /* 
-   root.exe -q -b -x 'lMuDst.C(0,"*.MuDst.root")' 'rMuVxEr.C+'
+   root.exe -q -b -x 'lMuDst.C(0,"*.MuDst.root")' rMuVxEr.C+ >& rMuVxEr.log &
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
@@ -103,6 +103,9 @@ void rMuVxEr(Long64_t nevent = 9999999,
   TFile *fOut   = new TFile(outFile,"recreate");
   TH1F *VxZ     = new TH1F("VxZ","Vertex Z",20,-10.,10.);
   TH2F *VxErr   = new TH2F("VxErr","Primary Vertex XY-error",200,0,2000,500,0,0.050);
+  VxErr->SetTitle("Primary vertex #sigma_{X} #oplus #sigma_{Y} versus multiplicity for the higest rank vertex");
+  VxErr->SetYTitle("#sigma_{X} #oplus #sigma_{Y}");
+  VxErr->SetXTitle("No. of track at the Vertex");
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   StMuDebug::setLevel(0);  
   StMuDstMaker* maker = (StMuDstMaker *) chain->Maker("MuDst");
