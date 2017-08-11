@@ -6,6 +6,7 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setenv NODEBUG yes
+  setup 64b
   starver .DEV2 
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
@@ -17,10 +18,13 @@
   set generF   = ${name}.MuDst.root
   if (! -r ${generF} ) then
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
-    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,-bbcSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160504.180732","'${file}'")' &gt;&amp; ${logName}
+#    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,-bbcSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160504.180732","'${file}'")' &gt;&amp; ${logName}
+#    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm","'${file}'")' &gt;&amp; ${logName}
+    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,KFVertex,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm","'${file}'")' &gt;&amp; ${logName}
   endif
 </command>
-<input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
+<input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200//hijingAuAu200_*gener.root" />
 <!-- <input URL="file:/net/l404/data/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_1_1000.gener.root" /> -->
 </job>

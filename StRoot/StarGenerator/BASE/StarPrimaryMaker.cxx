@@ -504,8 +504,10 @@ Int_t StarPrimaryMaker::Finalize()
   // Generate the primary vertex within allowed limits
   //
   TLorentzVector primary(0,0,0,0);
-  static Bool_t FreezePV = IAttr("FreezePV");
-  if (! FreezePV) {
+  //  static Bool_t FreezePV = IAttr("FreezePV");
+  static Bool_t UseGeneratorPV = IAttr("UseGeneratorPV");
+  //  static Bool_t FreezePV = kFALSE;
+  if (! UseGeneratorPV ) {
     primary = Vertex(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = Vertex();
   }
   mPrimaryVertex = primary;
@@ -522,7 +524,7 @@ Int_t StarPrimaryMaker::Finalize()
       // Obtain the vertex for this event.  If the generator is marked as
       // pileup, sample a new vertex.  Otherwise use the primary vertex
       TLorentzVector vertex = primary;
-      if (! FreezePV && generator->IsPileup()) {
+      if (generator->IsPileup()) {
 	vertex = Vertex();
       }
       StarGenEvent *event = generator->Event();
@@ -550,11 +552,16 @@ Int_t StarPrimaryMaker::Finalize()
 	  Double_t pz   = particle->GetPz();
 	  Double_t E    = particle->GetEnergy();
 	  Double_t M    = particle->GetMass();
-	  Double_t vx   = particle->GetVx();
-	  Double_t vy   = particle->GetVy();
-	  Double_t vz   = particle->GetVz();
-	  Double_t vt   = particle->GetTof();
-
+	  Double_t vx   = 0;
+	  Double_t vy   = 0;
+	  Double_t vz   = 0;
+	  Double_t vt   = 0;
+	  if (UseGeneratorPV) {
+	    vx   = particle->GetVx();
+	    vy   = particle->GetVy();
+	    vz   = particle->GetVz();
+	    vt   = particle->GetTof();
+	  }
 	  Double_t polx=0, poly=0, polz=0;
 	  
 	  Int_t    parent  = particle->GetFirstMother();
