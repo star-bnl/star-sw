@@ -37,7 +37,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   Chain->cd();
   //________________________________________________________________________________
   TString chain2Opt(Form("%s,gen_T,geomT,sim_T,CorrX,OSpaceZ2,OGridLeak3D,nodefault,Rung.%i",Opt.Data(),RunG));
-  chain2Opt += ",TpcRS,pxlFastSim,istSim,sstfast,bbcSim,btofsim,emcSim"; 
+  chain2Opt += ",TpcRS,pxlFastSim,istSlowSim,sstfast,bbcSim,btofsim,emcSim"; 
 #ifndef __NO_DAQ_CLUSTERS__
   chain2Opt += ",TpxRaw,NoAnnotateCL";
   chain2Opt += ",pxlHit,istHit,sstHit";
@@ -82,7 +82,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   chain4Opt += ",noInput,-in,useInTracker,MiniMcMk,McAna,GeantOut,-hitfilt,StiCA";
   chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,evout,fmsdat";
   chain4Opt += ",StiCA,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
-  chain4Opt += ",KFVertex";
+  //  chain4Opt += ",KFVertex";
   bfc(-1,chain4Opt,0,OutputFileName);
   chain4 = chain;
   chain4->SetName("RC"); 
@@ -149,8 +149,13 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
 }
 //________________________________________________________________________________
 void bfcMixerVMC(Int_t Last=1, const Char_t *opt = "Vmc,Lc3pi,VMCAlignment",
+#if 0
 		 const Char_t *daqfile="/star/data03/daq/2016/126/17126033/st_physics_adc_17126033_raw_5500003.daq",
 		 const Char_t *MuDstfile="/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/st_physics_adc_17126033_raw_5500003.MuDst.root",
+#else
+		 const Char_t *daqfile="/net/l404/data/fisyak/daq/2016/126/17126033/st_physics_adc_17126033_raw_5500003.daq",
+		 const Char_t *MuDstfile="/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17126033_raw_5500003.MuDst.root",
+#endif
 		 Int_t RunG=0, const Char_t *triggersC = 0) {
   bfcMixerVMC(1,Last,opt,daqfile,MuDstfile,RunG,triggersC);
 }
