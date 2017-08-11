@@ -152,6 +152,7 @@ class StMuTrack : public TObject {
     void setIndex2BTofHit(Int_t i) {mIndex2BTofHit=i;} /// dongx
     void setIndex2MtdHit(Int_t i) {mIndex2MtdHit=i;} /// Bingchu
     void setIndex2Cov(Int_t i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
+#define __kfpAtFirstHit__
 #ifdef  __kfpAtFirstHit__
     void         setKFPTrackatFirstHit(KFPTrack t) {mkfpTrackAtFirstHit = t;}
     void         setKFPTrackatLastHit (KFPTrack t) {mkfpTrackAtLastHit  = t;}
@@ -238,7 +239,11 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
+#ifdef  __kfpAtFirstHit__
+  ClassDef(StMuTrack,19)
+#else
   ClassDef(StMuTrack,18)
+#endif
 };
 ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif

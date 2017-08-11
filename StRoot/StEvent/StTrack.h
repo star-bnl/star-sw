@@ -184,6 +184,8 @@
 #include "StTrackTopologyMap.h"
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
+#include "StTrack.h"
+#define __kfpAtFirstHit__
 #ifdef  __kfpAtFirstHit__
 #include "KFPTrack.h"
 #endif
@@ -256,7 +258,7 @@ public:
     Bool_t       isRejected()              const {return testBit(kRejectedTrack);}
     Bool_t       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
     Bool_t       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
-#if __kfpAtFirstHit__
+#ifdef __kfpAtFirstHit__
     KFPTrack       *kfpTrackAtFirstHit()       {return mKFPTrackAtFirstHit;}
     const KFPTrack *kfpTrackAtFirstHit() const {return mKFPTrackAtFirstHit;}
     KFPTrack       *kfpTrackAtLastHit()        {return mKFPTrackAtLastHit;}
@@ -367,6 +369,10 @@ protected:
     
     StSPtrVecTrackPidTraits mPidTraitsVec;
     
+#ifdef __kfpAtFirstHit__
+    ClassDef(StTrack,16)
+#else
     ClassDef(StTrack,15)
+#endif
 };
 #endif

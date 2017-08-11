@@ -11,6 +11,7 @@
 #include "StThreeVectorF.hh"
 #include "StEnumerations.h"
 #include "TMath.h"
+#include "TArrayF.h"
 class StPrimaryVertex;
 
 class StMuPrimaryVertex : public TObject {
@@ -29,6 +30,7 @@ class StMuPrimaryVertex : public TObject {
    Int_t            flag()                             const { return mFlag; }
    StThreeVectorF   position()                         const { return mPosition; }
    StThreeVectorF   posError()                         const { return mPosError; }
+   TArrayF         &error()                                  { return *&mError; }
    StVertexFinderId vertexFinderId()                   const { return mVertexFinderId; } 
    Float_t          ranking()                          const { return mRanking; }
    UShort_t         nTracksUsed()                      const { return mNTracksUsed; }
@@ -77,6 +79,7 @@ class StMuPrimaryVertex : public TObject {
    Bool_t           isBeamConstrained()                const { return TESTBIT(mFlag,kBEAMConstrVtxId);}
    void             setPosition(const StThreeVectorF &pos)     { mPosition = pos; }
    void             setPosError(const StThreeVectorF &pos_err) { mPosError = pos_err; }
+   void             setError(const TArrayF &err)               { mError = err; }
    void             setType(StVertexId val) { mType = val; }							  
    void             setId(Int_t val) { mId = val; }								  
    void             setFlag(Int_t val) { mFlag = val; }								  
@@ -84,7 +87,7 @@ class StMuPrimaryVertex : public TObject {
    void             setIdParent(Int_t id) {mIdParent = id;}                                                          
    virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
-  ClassDef(StMuPrimaryVertex,9)
+  ClassDef(StMuPrimaryVertex,10)
     
     private:
   StVertexId       mType;
@@ -92,6 +95,7 @@ class StMuPrimaryVertex : public TObject {
   Int_t            mFlag;
   StThreeVectorF   mPosition;
   StThreeVectorF   mPosError;
+  TArrayF          mError;
   StVertexFinderId mVertexFinderId;
   Float_t          mRanking;
   UShort_t         mNTracksUsed;

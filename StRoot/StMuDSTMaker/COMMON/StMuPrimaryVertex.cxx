@@ -19,6 +19,7 @@ StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex* vertex) {
   mFlag           = vertex->flag();
   mPosition       = vertex->position();
   mPosError       = vertex->positionError();
+  mError          = TArrayF(6,vertex->covariance());
   mVertexFinderId = vertex->vertexFinderId();
   mRanking        = vertex->ranking();
   mNTracksUsed    = vertex->numTracksUsedInFinder();
