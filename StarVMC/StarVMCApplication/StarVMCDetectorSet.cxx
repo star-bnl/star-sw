@@ -223,7 +223,7 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
     }
     StarVMCDetector *det = (StarVMCDetector *) fDetHash->FindObject(Name);
     if (!det) {
-      cout << "Missing Detector Set for " << Name.Data() << endl;
+      cout << "\tMissing Detector Set for " << Name.Data() << endl;
       continue;
     }
     cout << endl;
