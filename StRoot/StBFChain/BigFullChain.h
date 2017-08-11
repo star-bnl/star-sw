@@ -1730,11 +1730,10 @@ Bfc_st BFC[] = { // standard chains
 
 
   // Sti/Stv chains
+  {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
+  {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
-  {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
-  {"StiCA"    ,"Sti","","Sti,StiCALib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,tbutil,TMVARank"
-   ,                                      "StiMaker","libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"Stx"    ,"","","-Sti,-StiCA,-Stv","StxMaker","TPCCATracker,StxMaker",  "eXpress reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
