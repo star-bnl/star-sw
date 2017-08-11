@@ -285,8 +285,8 @@ void HftT::Loop(Int_t Nevents) {
   */
   if (fChain == 0) return;  
   struct PlotName_t {
-    Char_t *Name;
-    Char_t *Title;
+    const Char_t *Name;
+    const Char_t *Title;
     Double_t xmax[3]; // pxl ist  ssd 
   };
   static Double_t Du[2] = {3.000, 3.65};
