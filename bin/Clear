@@ -1,0 +1,6 @@
+cpu_per_event.csh | tee cpu_per_event
+root.exe -q -b Recover.C | tee Recover.log
+if (! -d Zombie) mkdir Zombie
+foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
+  set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+end

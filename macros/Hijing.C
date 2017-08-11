@@ -25,6 +25,7 @@ void Hijing(Int_t NoEvents = 1000, Int_t runG = 1, const Char_t *frame = "CMS", 
   StChain *chain = new StChain();
   primary = new StarPrimaryMaker();
   primary -> SetFileName( Form("hijing%s%s%i_%i_%i.gener.root",aIn,bIn,(Int_t) rootS,runG,NoEvents));
+  primary->SetAttr("UseGeneratorPV",1);
   StarHijing *hijing = new StarHijing("hijing");
   hijing->SetTitle("Hijing 1.383");
 

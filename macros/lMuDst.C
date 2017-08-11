@@ -1,5 +1,5 @@
 #include "Riostream.h"
-void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEvent,RMuDst,mysql,tpcDb,magF,nodefault,CorrX",const Char_t *tfile =  0) {
+void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEvent,RMuDst,mysql,tpcDb,magF,nodefault,CorrX,quiet",const Char_t *tfile =  0) {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
