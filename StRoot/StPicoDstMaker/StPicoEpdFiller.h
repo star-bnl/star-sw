@@ -22,14 +22,14 @@ private:
 
   StPicoDst&  mPicoDst;
 
-  struct EPDAnalysisMap
+  struct EpdAnalysisMap
   {
     Short_t qt_board_address; // channel number used in QT board or other physical numbering scheme 0x10...
     Short_t qt_channel_ADC; // QT board channel used 0....31
     Short_t qt_channel_TAC; // QT board channel used 0....31
   };
 
-  EPDAnalysisMap mEPDMap[2][12][31];
+  EpdAnalysisMap mEpdMap[2][12][31];
 
   void setDefaultMapping_30may2017();
 
