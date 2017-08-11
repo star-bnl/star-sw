@@ -26,9 +26,12 @@ int StFixedVertexFinder::fit(StEvent* event)
 {
   StPrimaryVertex  prim;
   StVertexFinderId VFId;
-  Float_t cov[6] = {1e-4,
-		    0, 1e-4,
-		    0, 0, 1e-4}; // All errors are 100 um
+  //  Float_t sigma = 0.0100;  // All errors are 100 um
+  Float_t sigma = 0.00176;  // All errors are 17.6 um
+  
+  Float_t cov[6] = {sigma*sigma,
+		    0, sigma*sigma,
+		    0, 0, sigma*sigma};
 
   if (mMode == 0){
     // Really the default which takes the SetPos() TBI
