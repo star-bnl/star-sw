@@ -347,7 +347,8 @@ Int_t StIstRawHitMaker::Make()
    // In case of pure simulation mode when neither real data hits from DAQ
    // records is available nor embedding is requested fill the output container
    // with simulated hits
-   if(!mDoEmbedding && !nRawAdcFromData) FillRawHitCollectionFromSimData();
+   //   if(!mDoEmbedding && !nRawAdcFromData) 
+   FillRawHitCollectionFromSimData();
 
    return ierr;
 }
