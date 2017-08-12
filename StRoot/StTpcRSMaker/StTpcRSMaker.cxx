@@ -1038,6 +1038,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 #endif
 	  Double_t E = dE*eV;
+	  newPosition += dS;
+	  if (newPosition > s_upper) break;
 	  if (dE < St_TpcResponseSimulatorC::instance()->W()/2 || E > Tmax) continue;
 	  if (eKin > 0) {
 	    if (eKin >= E) {eKin -= E;}
@@ -1046,13 +1048,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  dESum += dE;
 	  dSSum += dS;
 	  nP++;
-	  newPosition += dS;
 #ifdef __DEBUG__
 	  if (Debug() > 12) {
 	    LOG_INFO << "dESum = " << dESum << " /\tdSSum " << dSSum << " /\t newPostion " << newPosition << endm;
 	  }
 #endif
-	  if (newPosition > s_upper) break;
 	  Double_t xRange = 0;
 	  if (dE > ElectronRangeEnergy) xRange = ElectronRange*TMath::Power((dE+dEr)/ElectronRangeEnergy,ElectronRangePower);
 	  Int_t Nt = 0; // HeedCsize(dE, dEr,rs);
