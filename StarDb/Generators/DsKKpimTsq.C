@@ -38,11 +38,16 @@ TDataSet *CreateTable() {
     Int_t pdg = p->PdgCode();
     if (pdg < 0) return;
     Int_t iD  = g3->IdFromPDG(pdg);
+#if 0
     StarVMCApplication::Instance()->ForceDecay(nameP, 
 					       "phi", "pi+",0, 100);
     //					       "K+", "K*bar0",0, 50);
     StarVMCApplication::Instance()->ForceDecay("phi",
 					       "K+","K-",0, 1);
+#else
+    StarVMCApplication::Instance()->ForceDecay(nameP, 
+					       "K+", "K-", "pi+", 100);
+#endif
     //    StarVMCApplication::Instance()->ForceDecay("K*bar0",
     //					       "K-","pi+",0, 1);
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
