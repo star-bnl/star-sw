@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.16 2017/05/03 17:14:01 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.17 2017/08/14 16:08:43 smirnovd Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,11 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.17  2017/08/14 16:08:43  smirnovd
+ * [Cosmetic] Remove StRoot/ from include path
+ *
+ * $STAR/StRoot is already in the default path search
+ *
  * Revision 1.16  2017/05/03 17:14:01  akio
  * Adding Sigma and Valley for Fps/Fpost
  *
@@ -62,7 +67,7 @@
 #endif
 #include "StThreeVectorF.hh"
 #include "StLorentzVectorF.hh"
-#include "StRoot/StFmsUtil/StFmsDbConfig.h"
+#include "StFmsUtil/StFmsDbConfig.h"
 
 struct fmsDetectorPosition_st;
 struct fmsChannelGeometry_st;
