@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsCollection.cxx,v 1.5 2015/11/06 17:47:16 jdb Exp $
+ * $Id: StMuFmsCollection.cxx,v 1.6 2017/08/14 16:22:36 smirnovd Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,29 @@
  ***************************************************************************
  *
  * $Log: StMuFmsCollection.cxx,v $
+ * Revision 1.6  2017/08/14 16:22:36  smirnovd
+ * Recover FMS hits using StTriggerData
+ *
+ * commit 6d7358f4c86a15edd0671326580d291a9843aec9
+ * Date:   Tue Aug 8 23:42:41 2017 -0400
+ *
+ *     StMuFmsUtil: Recover FMS hits using StTriggerData
+ *
+ * commit 556d07cb8fd87cb62e4ac674226423671c94917d
+ * Date:   Tue Aug 8 23:42:34 2017 -0400
+ *
+ *     StMuFmsUtil: Added func to fill StMuFmsCollection with FMS hits from StTriggerData in StMuEvent
+ *
+ * commit c355529c1ee401849b2b81d74df8d452886593d1
+ * Date:   Tue Aug 8 23:42:19 2017 -0400
+ *
+ *     [Cosmetic] Changes in whitespace
+ *
+ * commit 67fdc1b348bebbfbfb137b726ee9c455a7d8be37
+ * Date:   Mon Jun 5 12:00:24 2017 -0400
+ *
+ *     StMuFmsCollection::addHit() Return pointer to just added default FMS hit object
+ *
  * Revision 1.5  2015/11/06 17:47:16  jdb
  * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
  *
@@ -32,7 +55,7 @@
 #include "StMuDSTMaker/COMMON/StMuFmsPoint.h"
  #include "StMuDSTMaker/COMMON/StMuFmsInfo.h"
 
-static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.5 2015/11/06 17:47:16 jdb Exp $";
+static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.6 2017/08/14 16:22:36 smirnovd Exp $";
 
 ClassImp(StMuFmsCollection)
 
@@ -61,11 +84,11 @@ void StMuFmsCollection::init() {
   mInfo = new TClonesArray("StMuFmsInfo", 0);
 }
 
-void StMuFmsCollection::addHit(){
+StMuFmsHit* StMuFmsCollection::addHit(){
   if(!mHits) init();
   int counter = mHits->GetEntriesFast();
-  new ((*mHits)[counter]) StMuFmsHit();
-  return;
+  StMuFmsHit* newFmsHit = new ((*mHits)[counter]) StMuFmsHit();
+  return newFmsHit;
 }
 
 void StMuFmsCollection::addCluster() {
