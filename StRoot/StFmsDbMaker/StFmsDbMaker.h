@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.17 2017/08/14 16:08:43 smirnovd Exp $
+ * $Id: StFmsDbMaker.h,v 1.18 2017/08/14 16:08:55 smirnovd Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,11 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.18  2017/08/14 16:08:55  smirnovd
+ * StFmsDbMaker: Declare member functions const
+ *
+ * These methods don't change the object by design
+ *
  * Revision 1.17  2017/08/14 16:08:43  smirnovd
  * [Cosmetic] Remove StRoot/ from include path
  *
@@ -144,7 +149,7 @@ class StFmsDbMaker : public StMaker {
   Int_t type(Int_t detectorId); //! type of the detector
   Int_t nRow(Int_t detectorId); //! number of rows
   Int_t nColumn(Int_t detectorId); //! number of column
-  UShort_t maxChannel(Int_t detectorId); //! maximum number of channels
+  UShort_t maxChannel(Int_t detectorId) const; //! maximum number of channels
   Int_t getRowNumber(Int_t detectorId, Int_t ch); //! get the row number for the channel
   Int_t getColumnNumber(Int_t detectorId, Int_t ch); //! get the column number for the channel
   Int_t getChannelNumber(Int_t detectorId, Int_t row, Int_t column); //! get the channel number
@@ -180,7 +185,7 @@ class StFmsDbMaker : public StMaker {
   //! fmsMap related
   Int_t maxMap();
   void getMap(Int_t detectorId, Int_t ch, Int_t* qtCrate, Int_t* qtSlot, Int_t* qtChannel);
-  void getReverseMap(Int_t qtCrate, Int_t qtSlot, Int_t qtChannel, Int_t* detectorId, Int_t* ch);
+  void getReverseMap(Int_t qtCrate, Int_t qtSlot, Int_t qtChannel, Int_t* detectorId, Int_t* ch) const;
 
   //! fmsPatchPanelMap related
   Int_t maxModule();
@@ -191,8 +196,8 @@ class StFmsDbMaker : public StMaker {
   //! fmsGain/GainCorrection related
   Int_t maxGain();
   Int_t maxGainCorrection();
-  Float_t getGain(Int_t detectorId, Int_t ch); //! get the gain for the channel
-  Float_t getGainCorrection(Int_t detectorId, Int_t ch); //! get the gain correction for the channel
+  Float_t getGain(Int_t detectorId, Int_t ch) const; //! get the gain for the channel
+  Float_t getGainCorrection(Int_t detectorId, Int_t ch) const; //! get the gain correction for the channel
     
   void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value               
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value

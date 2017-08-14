@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.26 2017/05/03 17:14:01 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.27 2017/08/14 16:08:55 smirnovd Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,11 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.27  2017/08/14 16:08:55  smirnovd
+ * StFmsDbMaker: Declare member functions const
+ *
+ * These methods don't change the object by design
+ *
  * Revision 1.26  2017/05/03 17:14:01  akio
  * Adding Sigma and Valley for Fps/Fpost
  *
@@ -1029,7 +1034,7 @@ Int_t StFmsDbMaker::nColumn(Int_t detectorId){
   }
 }
 
-UShort_t StFmsDbMaker::maxChannel(Int_t detectorId){
+UShort_t StFmsDbMaker::maxChannel(Int_t detectorId) const {
   if(detectorId>=0 && detectorId<=mMaxDetectorId && 
      mChannelGeometry[detectorId].nX>0 && mChannelGeometry[detectorId].nY>0)
     return mChannelGeometry[detectorId].nX*mChannelGeometry[detectorId].nY;
@@ -1091,7 +1096,9 @@ void StFmsDbMaker::getMap(Int_t detectorId, Int_t ch, Int_t* qtCrate, Int_t* qtS
   *qtSlot    = mmMap[detectorId][ch-1].qtSlot;
   *qtChannel = mmMap[detectorId][ch-1].qtChannel;
 }
-void StFmsDbMaker::getReverseMap(Int_t qtCrate, Int_t qtSlot, Int_t qtChannel, Int_t* detectorId, Int_t* ch){
+
+void StFmsDbMaker::getReverseMap(Int_t qtCrate, Int_t qtSlot, Int_t qtChannel, Int_t* detectorId, Int_t* ch) const
+{
   if(qtCrate==0 && qtSlot==0 && qtChannel==0) {
     *detectorId = 0;
     *ch         = 0;
@@ -1110,11 +1117,15 @@ Int_t StFmsDbMaker::maxNS() {return mMaxNS;}
 //!fmsGain/GainCorrection
 Int_t StFmsDbMaker::maxGain() {return mMaxGain;}
 Int_t StFmsDbMaker::maxGainCorrection() {return mMaxGainCorrection;}
-Float_t StFmsDbMaker::getGain(Int_t detectorId, Int_t ch){
+
+Float_t StFmsDbMaker::getGain(Int_t detectorId, Int_t ch) const
+{
   if(detectorId<0 || detectorId>mMaxDetectorId || ch<1 || ch>maxChannel(detectorId) || mmGain[detectorId]==0) return 0;
   return mmGain[detectorId][ch-1].gain;
 }
-Float_t StFmsDbMaker::getGainCorrection(Int_t detectorId, Int_t ch){
+
+Float_t StFmsDbMaker::getGainCorrection(Int_t detectorId, Int_t ch) const
+{
   if(detectorId<0 || detectorId>mMaxDetectorId || ch<1 || ch>maxChannel(detectorId) || mmGainCorrection[detectorId]==0) return 0;
   return mmGainCorrection[detectorId][ch-1].corr;
 }
