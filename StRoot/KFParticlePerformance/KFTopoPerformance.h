@@ -36,6 +36,7 @@ class KFPHistogram;
 class TDirectory;
 class TH1D;
 class TH2D;
+class TH3D;
 class TProfile;
 
 class TFile;
@@ -74,7 +75,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     //     virtual void CreateHistos(string histoDir);
   virtual void FillHistos();
   void FillHistos(const KFPHistogram* histograms);
-  
+  void FillMCHistos();
+
   void AddV0Histos();
   
   void SetTrackMatch(const vector<int>& trackMatch) { fTrackMatch = trackMatch;}
@@ -119,6 +121,7 @@ class KFTopoPerformance: public KFParticlePerformanceBase
                               int iPV,
                               TH1F* histoParameters[4][KFPartEfficiencies::nParticles][nHistoPartParam],
                               TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                              TH3F* histoParameters3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D],
                               TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA] = 0,
@@ -144,6 +147,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   vector<KFPartMatch> RtoMCPVId;
   
   int fPrintEffFrequency;
+  
+  KFPartEfficiencies fPartInfo;
 };
 
 #endif

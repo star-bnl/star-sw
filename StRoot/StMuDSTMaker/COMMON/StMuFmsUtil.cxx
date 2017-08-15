@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsUtil.cxx,v 1.6 2016/06/14 17:11:34 jdb Exp $
+ * $Id: StMuFmsUtil.cxx,v 1.7 2017/08/14 16:22:36 smirnovd Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,29 @@
  ***************************************************************************
  *
  * $Log: StMuFmsUtil.cxx,v $
+ * Revision 1.7  2017/08/14 16:22:36  smirnovd
+ * Recover FMS hits using StTriggerData
+ *
+ * commit 6d7358f4c86a15edd0671326580d291a9843aec9
+ * Date:   Tue Aug 8 23:42:41 2017 -0400
+ *
+ *     StMuFmsUtil: Recover FMS hits using StTriggerData
+ *
+ * commit 556d07cb8fd87cb62e4ac674226423671c94917d
+ * Date:   Tue Aug 8 23:42:34 2017 -0400
+ *
+ *     StMuFmsUtil: Added func to fill StMuFmsCollection with FMS hits from StTriggerData in StMuEvent
+ *
+ * commit c355529c1ee401849b2b81d74df8d452886593d1
+ * Date:   Tue Aug 8 23:42:19 2017 -0400
+ *
+ *     [Cosmetic] Changes in whitespace
+ *
+ * commit 67fdc1b348bebbfbfb137b726ee9c455a7d8be37
+ * Date:   Mon Jun 5 12:00:24 2017 -0400
+ *
+ *     StMuFmsCollection::addHit() Return pointer to just added default FMS hit object
+ *
  * Revision 1.6  2016/06/14 17:11:34  jdb
  * Fixing Coverity Errors:
  * StMuFmsCluster.cxx : UNINIT_CTOR on member mEnergy
@@ -37,9 +60,13 @@
 #include "StMuDSTMaker/COMMON/StMuFmsPoint.h"
 #include "StMuDSTMaker/COMMON/StMuFmsUtil.h"
 #include "StMuDSTMaker/COMMON/StMuFmsCollection.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StEvent/StEvent.h"
 #include "St_base/StMessMgr.h"
 #include "StEvent/StEventTypes.h"
+#include "StEvent/StTriggerData.h"
+#include "StFmsDbMaker/StFmsDbMaker.h"
 
 #include <algorithm>  // For std::find
 #include <iterator>  // For std::distance
@@ -162,6 +189,84 @@ void StMuFmsUtil::fillMuFmsHits(StMuFmsCollection* muFms,
     muFmsHit->setEnergy(ene);
   }
 }
+
+
+
+/**
+ * Creates `StMuFmsHit`s from `StTriggerData` and appends them to
+ * `StMuFmsCollection`. Some of this code is taken from `StFmsHitMaker::Make()`
+ * that implements a similar conversion: `StTriggerData` -> `StFmsCollection`
+ * "Physical" properties of StMuFmsHit such as "energy" etc. will be filled only
+ * if an optional StFmsDbMaker object is provided.
+ */
+void StMuFmsUtil::fillMuFmsHits(StMuFmsCollection& muFmsCollection,
+  const StTriggerData& triggerData, const StFmsDbMaker* fmsDbMaker)
+{
+
+  // Loop over "electronics" channels and extract raw hit data from StTriggerData
+  for(unsigned short crate=1; crate<=4; crate++)
+  {
+    for(unsigned short slot=1; slot<=16; slot++)
+    {
+      for(unsigned short ch=0; ch<32; ch++)
+      {
+        unsigned short adc = triggerData.fmsADC(crate,slot-1,ch);
+        unsigned short tdc = triggerData.fmsTDC(crate,slot-1,ch);
+
+        if (adc <= 0 && tdc <= 0) continue;
+
+        StMuFmsHit* muFmsHit = muFmsCollection.addHit();
+
+        muFmsHit->setQtCrate(crate);
+        muFmsHit->setQtSlot(slot);
+        muFmsHit->setQtChannel(ch);
+        muFmsHit->setAdc(adc);
+        muFmsHit->setTdc(tdc);
+
+        // Can proceed with "physical" quantities only if fmsDbMaker is available
+        if ( !fmsDbMaker ) continue;
+
+        int detectorId, channelId;
+
+        fmsDbMaker->getReverseMap(crate, slot, ch, &detectorId, &channelId);
+
+        // Cannot not proceed with invalid detector and channel IDs
+        if ( detectorId <= 0 && channelId <= 0) continue;
+
+        float g1 = fmsDbMaker->getGain(detectorId, channelId);
+        float g2 = fmsDbMaker->getGainCorrection(detectorId, channelId);
+        float energy  = adc*g1*g2;
+
+        muFmsHit->setDetectorId(detectorId);
+        muFmsHit->setChannel(channelId);
+        muFmsHit->setEnergy(energy);
+      }
+    }
+  }
+}
+
+
+/**
+ * In the provided `muDst` object fills StMuFmsCollection with FMS hits
+ * extracted from the StTriggerData block in the same `muDst`. The action takes
+ * place only if there are no FMS hits in the muDst's StMuFmsCollection thus we
+ * refer to this as "recovery". "Physical" properties of StMuFmsHit such as
+ * "energy" etc. will be filled only if an optional StFmsDbMaker object is
+ * provided.
+ */
+void StMuFmsUtil::recoverMuFmsCollection(StMuDst& muDst, const StFmsDbMaker* fmsDbMaker)
+{
+  StTriggerData* triggerData = (StTriggerData*) muDst.event()->triggerData();
+
+  const TClonesArray* muFmsHits = muDst.muFmsCollection() ? muDst.muFmsCollection()->getHitArray() : nullptr;
+
+  if (triggerData && muFmsHits && muFmsHits->GetEntriesFast() == 0)
+  {
+     fillMuFmsHits(*muDst.muFmsCollection(), *triggerData, fmsDbMaker);
+  }
+}
+
+
 
 void StMuFmsUtil::fillMuFmsClusters(StMuFmsCollection* muFms,
                                     StFmsCollection* fmscol) {

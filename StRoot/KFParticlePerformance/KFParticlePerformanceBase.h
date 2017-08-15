@@ -45,10 +45,12 @@ class TDirectory;
 class TH1;
 class TH1F;
 class TH2F;
+class TH3F;
 class TDirectory;
 
 class KFParticle;
 class TProfile;
+class TProfile2D;
 /**
  * @class KFParticlePerformanceBase
  */
@@ -101,9 +103,9 @@ class KFParticlePerformanceBase
   static const int nDSToParticleQA = 7;
   TH1F *hDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA];
   
-  static const int nHistoPartParam = 17;
-  static const int nParametersSet = 5;
-  TH1F *hPartParam[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam]; // mass, p, pt, Y, decay length, c*tau, chi/ndf, prob, theta, phi, z, multiplicity
+  static const int nHistoPartParam = 18;
+  static const int nParametersSet = 8;
+  TH1F *hPartParam[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam]; // mass, p, pt, rapidity, decay length, c*tau, chi/ndf, prob, theta, phi, X, Y, Z, R, L, L/dL, Mt, multiplicity
   TH1F *hPartParamPrimary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamPrimaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamPrimaryTopo[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
@@ -111,8 +113,8 @@ class KFParticlePerformanceBase
   TH1F *hPartParamSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
 
-  static const int nHistoPartParam2D = 3;
-  TH2F *hPartParam2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r, armenteros
+  static const int nHistoPartParam2D = 4;
+  TH2F *hPartParam2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r, armenteros, y-mt
   TH2F *hPartParam2DPrimary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryTopo[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
@@ -120,9 +122,14 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
 
-  static const int nPartEfficiency = 8; 
-  //1 index - prticle index, 2 - index of efficiency, 3 - hystogram dependency (vs p, pt ..)
-  TProfile* hPartEfficiency[KFPartEfficiencies::nParticles][3][nPartEfficiency]; //vs p, pt, y, z, c*tau, decay length, l, r
+  static const int nHistoPartParam3D = 2;
+  TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; // y-pt-M, y-mt-M
+
+  static const int nPartEfficiency = 9;
+  //1 index - particle index, 2 - index of efficiency, 3 - histogram dependency (vs p, pt ..)
+  TProfile* hPartEfficiency[KFPartEfficiencies::nParticles][3][nPartEfficiency]; //vs p, pt, y, z, c*tau, decay length, l, r, Mt
+  static const int nPartEfficiency2D = 2; 
+  TProfile2D* hPartEfficiency2D[KFPartEfficiencies::nParticles][3][nPartEfficiency2D]; //y-pt, y-mt
   
   static const int nHistosPV = 7;
   TH1F *hPVFitQa[2][nHistosPV];
@@ -157,9 +164,10 @@ class KFParticlePerformanceBase
   KFParticlePerformanceBase(const KFParticlePerformanceBase&);
   
   void CreateFitHistograms(TH1F* histo[nFitQA], int iPart);
-  void CreateEfficiencyHistograms(TProfile* histo[3][nPartEfficiency]);
+  void CreateEfficiencyHistograms(TProfile* histo[3][nPartEfficiency], TProfile2D* histo2[3][nPartEfficiency2D]);
   void CreateParameterHistograms(TH1F* histoParameters[KFPartEfficiencies::nParticles][nHistoPartParam],
-                                 TH2F *histoParameters2D[KFPartEfficiencies::nParticles][nHistoPartParam2D], 
+                                 TH2F *histoParameters2D[KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                                 TH3F *histoParameters3D[KFPartEfficiencies::nParticles][nHistoPartParam3D],
                                  int iPart, bool drawZR = 0);
   void CreateParameterSubfolder(TString folderName, 
                                 TH1F* histoParameters[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam],

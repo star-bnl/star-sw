@@ -2350,39 +2350,59 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
               activeDaughter = /*( (DaughterPDG != -1) || ( (DaughterPVIndex < 0) && (DaughterPDG == -1) ) ) &&*/ (DaughterInd < DaughterTracksSize);
             }
             
-            
             int_v trackPdgMother;
-            int_m active = activeDaughter && (int_v::IndexesFromZero() < int(NTracks));
 
             if(iTC==0)
-              active &= abs(DaughterPDG)==13;
+              activeDaughter &= abs(DaughterPDG)==13;
             if(iTC==1)
-              active &= abs(DaughterPDG)==211;
+              activeDaughter &= abs(DaughterPDG)==211;
             if(iTC==2)
-              active &= abs(DaughterPDG)==321;
+              activeDaughter &= abs(DaughterPDG)==321;
             if(iTC==3)
-              active &= abs(DaughterPDG)==2212;
-            if (active.isEmpty()) continue;
+              activeDaughter &= abs(DaughterPDG)==2212;
+            if (activeDaughter.isEmpty()) continue;
             
             
             for(int iHypothesis=0; iHypothesis<nMotherHypothesis[iTC]; iHypothesis++)
             {
+              int_m active = activeDaughter && (int_v::IndexesFromZero() < int(NTracks));
+              
               MotherTrack.Load(MotherTracks, iTrM, motherPDGHypothesis[iTC][iHypothesis]);
               
               float_v zMother = MotherTrack.Z();
               float_v zCD = ChargedDaughter.Z();
               
+              //daughter particle should start after the last hit of a mother track
               active &= int_m(zCD >= (zMother - float_v(0.5f)));
               if( active.isEmpty() ) continue;
               
               KFParticleSIMD neutralDaughter = MotherTrack;
+              //energy of the mother particle should be greater then of the daughter particle
+              active &= int_m(neutralDaughter.E() > ChargedDaughter.E());
+              if( active.isEmpty() ) continue;
+              
               neutralDaughter.AddDaughterId(motherTrackId);
               neutralDaughter.NDF() = -1;
               neutralDaughter.Chi2() = 0.f;
               neutralDaughter.SubtractDaughter(ChargedDaughter);
               
+              //decay point shoud be between mother and daughter tracks
+              active &= int_m(neutralDaughter.Z() >= zMother - float_v(10.0f));
+              active &= int_m(neutralDaughter.Z() <= zCD + float_v(10.0f));
+              //set cut on chi2 of the fit of the neutral daughter
               active &= int_m(neutralDaughter.NDF() >= int_v(Vc::Zero));
               active &= int_m(neutralDaughter.Chi2()/float_v(neutralDaughter.NDF()) <= fCuts2D[1]);
+              //fit should converge
+              active &= int_m(neutralDaughter.Chi2() >= float_v(Vc::Zero));
+              active &= int_m(neutralDaughter.Chi2() == neutralDaughter.Chi2());
+              if( active.isEmpty() ) continue;
+              
+              //kill particle-candidates produced by clones
+              active &= int_m( neutralDaughter.GetRapidity()<6.f && neutralDaughter.GetRapidity()>0.f);
+              if ((iTC==1 && iHypothesis<4) || iTC==2)
+                active &= int_m( !( (neutralDaughter.GetPt())<0.5f && neutralDaughter.GetRapidity()<0.5f ) );
+              if (iTC==3)
+                active &= int_m( !( (neutralDaughter.GetPt())<0.2f && neutralDaughter.GetRapidity()<1.f ) );
               if( active.isEmpty() ) continue;
               
               KFParticleSIMD neutralDaughterUnconstr = neutralDaughter;
@@ -2392,8 +2412,15 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
               KFParticleSIMD mother;
               mother.Construct(daughters, 2);
               
+              //decay point shoud be between mother and daughter tracks
+              active &= int_m(mother.Z() >= zMother);
+              active &= int_m(mother.Z() <= zCD);
+              //set cut on chi2 of the fit of the mother particle
               active &= int_m(mother.NDF() >= int_v(Vc::Zero));
               active &= int_m(mother.Chi2()/float_v(mother.NDF()) <= fCuts2D[1]);
+              //fit should converge
+              active &= int_m(mother.Chi2() >= float_v(Vc::Zero));
+              active &= int_m(mother.Chi2() == mother.Chi2());
               if( active.isEmpty() ) continue;
 
               for(int iV=0; iV<NTracks; iV++)
