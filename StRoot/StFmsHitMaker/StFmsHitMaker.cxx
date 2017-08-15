@@ -164,9 +164,9 @@ int StFmsHitMaker::Make(){
       mFmsDbMaker->getReverseMap(crt,slot,ch,&d,&c);
       float e=0.0;
       if(d>0 || c>0){
-  float g1=mFmsDbMaker->getGain(d,c);
-  float g2=mFmsDbMaker->getGainCorrection(d,c);
-  e       =adc*g1*g2;
+        float g1=mFmsDbMaker->getGain(d,c);
+        float g2=mFmsDbMaker->getGainCorrection(d,c);
+        e       =adc*g1*g2;
       }
       fmsHit->setDetectorId(d);
       fmsHit->setChannel(c);
