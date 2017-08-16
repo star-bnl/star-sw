@@ -132,9 +132,9 @@ class ComponentCST : public ComponentFieldMap {
     disableFieldComponent[2] = true;
   };
   /**
-   * If you calculate the electric field component in \f[x\f] direction along a line in x direction
+   * If you calculate the electric field component in \f$x\f$ direction along a line in x direction
    * this field component will be constant inside mesh elements (by construction). This can be observed
-   * by plotting \f[E_x\f] in \f[x\f] direction. If you plot \f[E_x\f]  in y direction the field will
+   * by plotting \f$E_x\f$ in \f$x\f$ direction. If you plot \f$E_x\f$  in y direction the field will
    * be smooth (also by construction). Yuri Piadyk proposed also to shape the electric field.
    * This is done as follows. The field component calculated as described above is assumed to appear
    * in the center of the mesh element.
@@ -147,12 +147,12 @@ class ComponentCST : public ComponentFieldMap {
    *
    *  element 1   element 2
    *
-   * Lets consider only the \f[x\f] direction and we want to calculate \[E_x(P)\]. The field in the
-   * center of the element containing \f[P\f] is \f[E_x(M_1) = E_1\]. Without shaping it is \f[E_1\] along the
-   * \f[x\f] direction in everywhere in element 1.
-   * The idea of the shaping is to do a linear interpolation of the \f[E_x\f] between the field \f[E_1\f]
-   * and \f[E_x(M_2)=E_2\f]. This results in a smooth electric field \f[E_x\f] also in \f[x\f] direction.
-   * If P would be left from \f[M_1\f] the field in the left neighboring element would be considered.
+   * Lets consider only the \f$x\f$ direction and we want to calculate \f$E_x(P)\f$. The field in the
+   * center of the element containing \f$P\f$ is \f$E_x(M_1) = E_1\f$. Without shaping it is \f$E_1\f$ along the
+   * \f$x\f$ direction in everywhere in element 1.
+   * The idea of the shaping is to do a linear interpolation of the \f$E_x\f$ between the field \f$E_1\f$
+   * and \f$E_x(M_2)=E_2\f$. This results in a smooth electric field \f$E_x\f$ also in \f$x\f$ direction.
+   * If P would be left from \f$M_1\f$ the field in the left neighboring element would be considered.
    * In addition it is also checked if the material in both elements used for the interpolation is the same.
    * Else no interpolation is done.
    * \remark This shaping gives you a nice and smooth field, but you introduce additional information.
