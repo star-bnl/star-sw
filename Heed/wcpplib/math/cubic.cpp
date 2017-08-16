@@ -20,6 +20,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 const Cubic::double_complex Cubic::iu(0, 1);
 
 void Cubic::find_zero(double_complex& z1, double_complex& z2,
@@ -181,4 +183,6 @@ std::ostream& operator<<(std::ostream& file, const Cubic& f) {
   indn.n -= 2;
 
   return file;
+}
+
 }

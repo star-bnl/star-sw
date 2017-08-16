@@ -15,6 +15,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 class Cubic {
  public:
   typedef std::complex<double> double_complex;
@@ -71,5 +73,6 @@ class Cubic {
 };
 
 std::ostream& operator<<(std::ostream& file, const Cubic& f);
+}
 
 #endif

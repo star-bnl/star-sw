@@ -35,8 +35,8 @@ long last_particle_number;
 
 }
 
-extern trajestep_limit Heed::gtrajlim;
-trajestep_limit Heed::gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
+extern Heed::trajestep_limit Heed::gtrajlim;
+Heed::trajestep_limit Heed::gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
                                0.2 * Heed::rad);
 
 // Actual class implementation

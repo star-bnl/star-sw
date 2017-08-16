@@ -1,7 +1,7 @@
 #ifndef POLLEG_H
 #define POLLEG_H
 /*
-Simple function for Polinomials of Legendre
+Simple function for Legendre polynomials
 Implemented only l = 0,1,2,3,4,5,6
 
 Copyright (c) 2003 I. B. Smirnov
@@ -14,6 +14,10 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
-double polleg(int l, double x);
+namespace Heed {
+
+double polleg(const int l, const double x);
+
+}
 
 #endif
