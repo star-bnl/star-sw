@@ -31,8 +31,8 @@ class mparticle : public gparticle {
   double curr_kin_energy;
   double curr_gamma_1;  // gamma-1
 
-  void check_consistency(void) const;  // checks that kin_energy,
-  // gamma_1, speed, speed_of_light and mass correspond to each other
+  // Check consistency of kin_energy, gamma_1, speed, speed_of_light and mass
+  void check_consistency(void) const;  
 
   virtual void step(void);
 
@@ -71,13 +71,15 @@ class mparticle : public gparticle {
   // mrange - distance at which the force should not change much
   //
   // The dimension of f is [weight] * [lenght] / [time]^2
-  // The dimsnsion of f_perp is [weight] / [time];
+  // The dimension of f_perp is [weight] / [time];
 
   void new_speed(void);
   // Set new speed, direction and time for currpos.
 
+  /// Constructors 
   mparticle(void) : gparticle(), mass(0.0) { ; }
-  mparticle(gparticle const& gp, double fmass);  // dengerous,
+  mparticle(gparticle const& gp, double fmass);  
+  // Dangerous,
   // only not for very fast particles, since gamma-1 is computed from speed.
   mparticle(gparticle const& gp, double fmass, double gamma_1);
   // safe, but only current gamma_1 is given.
