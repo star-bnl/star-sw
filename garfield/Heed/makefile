@@ -434,7 +434,12 @@ $(OBJDIR)/Heed/PhotoAbsCSLib.o: \
 	$(HEEDDIR)/wcpplib/matter/GasLib.h
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
-
+$(OBJDIR)/Heed/HeedFieldMap.o: \
+	$(HEEDDIR)/HeedFieldMap.cpp \
+	$(HEEDDIR)/HeedFieldMap.h \
+	$(INCDIR)/Sensor.hh
+	@echo $@
+	$(CXX) $(CFLAGS) $< -o $@
 showbuild:
 	@echo "ROOTSYS            = $(ROOTSYS)"
 	@echo "STAR_HOST_SYS      = $(STAR_HOST_SYS)"
