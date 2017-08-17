@@ -1457,12 +1457,14 @@ def stripQuotes( value ):
     return value
     
 
-# ====================================================================================================
 class Placement(Handler):
     def __init__(self):
         Handler.__init__(self)
         self.contents = []
-        #self.form=Formatter()
+        #self.misalignments = []
+
+    def addMisalignment(self,m):
+        self.contents.append(m)
 
     def setParent(self,p): self.parent=p
 
@@ -1477,6 +1479,9 @@ class Placement(Handler):
         self.only  = attr.get('konly',None)
         self.copy  = attr.get('ncopy',None)
         self.cond  = attr.get('if',   None)
+        self.matrix= attr.get('matrix', None)
+        self.table = attr.get('table', None)
+        self.row   = attr.get('row', None)
 
         if self.only:
             self.only  = self.only.strip("'")
@@ -1489,7 +1494,7 @@ class Placement(Handler):
         # Conditional placement
         cond   = self.attr.pop('if', None)
         if cond: formatter( 'IF %s {'%cond )
-
+        
         attr = copy.copy(self.attr)
 #       self.agstar_placement(tag) 
 
@@ -1501,6 +1506,9 @@ class Placement(Handler):
         if cond: formatter( '} !//IF %s '%cond )        
 
     def agml_placement(self,tag):
+
+#       print self.attr
+        
         block  = self.attr.pop('block')
         mother = self.attr.pop('in',None)
         copy   = self.attr.pop('ncopy',None)
@@ -1511,6 +1519,13 @@ class Placement(Handler):
         x      = self.attr.pop('x',None)
         y      = self.attr.pop('y',None)
         z      = self.attr.pop('z',None)
+#       matrix = self.attr.pop('matrix',None)
+        table  = self.attr.pop('table',None)
+        row    = self.attr.pop('row','0')
+        opts   = self.attr.pop('opts',None)
+        
+        if table:
+            table = table.split('/')[-1]
 
 
         parlist = []
@@ -1535,23 +1550,51 @@ class Placement(Handler):
             parlist.append( "KONLY" )
 
 
+        #
+        # IF we have a matrix, unpack the elements [likely to have been deprecated]
+        #
+        if matrix:
+            array = parseArray( matrix )
+
+            self.x = '%f'%float( array[0][3] )
+            self.y = '%f'%float( array[1][3] )
+            self.z = '%f'%float( array[2][3] )
+
+            x = self.x
+            y = self.y
+            z = self.z
+
+            out = ''
+            k = 1
+            for i in range(0,3):
+                for j in range(0,3):
+                    out = 'agml_rotm(%i) = %f'%( k, float(array[i][j]) )
+                    formatter( out, cchar="_" )
+                    k   += 1
+            formatter( 'call agml_rotation( agml_rotm )' , cchar='_' )
+
+
+
+                    
 
         #
         # Now create the executive code
         #
-        if x:
-            formatter( "%%x = %s"% tryFloat(self.x), cchar="_" )
+        if x!=None:
+            formatter( "ag_x = %s"% tryFloat(self.x), cchar="_" )
+            formatter( "CALL agml_translate_x( %x )", cchar="_")
             parlist.append( "X" )
-        if y:
-            formatter( "%%y = %s"% tryFloat(self.y), cchar="_" )
+        if y!=None:
+            formatter( "ag_y = %s"% tryFloat(self.y), cchar="_" )
+            formatter( "CALL agml_translate_y( %y )", cchar="_")            
             parlist.append( "Y" )
-        if z:
-            formatter( "%%z = %s"% tryFloat(self.z), cchar="_" )
+        if z!=None:
+            formatter( "ag_z = %s"% tryFloat(self.z), cchar="_" )
+            formatter( "CALL agml_translate_z( %z )", cchar="_")            
             parlist.append( "Z" )
 
         for key in self.attr.keys():
 
-            
             val = self.attr.pop(key,None)
             if val:
                 formatter( "%%%s = %s"%( key, tryFloat(val) ) )
@@ -1572,15 +1615,15 @@ class Placement(Handler):
 
                 if key == 'alphax':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphax = %s'%val )
+                    formatter( 'ag_alphax = %s'%val )
                     formatter( 'CALL agml_rotate_x(%alphax)' )
                 if key == 'alphay':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphay = %s'%val )
+                    formatter( 'ag_alphay = %s'%val )
                     formatter( 'CALL agml_rotate_y(%alphay)' )                    
                 if key == 'alphaz':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphaz = %s'%val )
+                    formatter( 'ag_alphaz = %s'%val )
                     formatter( 'CALL agml_rotate_z(%alphaz)' )                    
 
                 if key == 'ort':
@@ -1615,13 +1658,42 @@ class Placement(Handler):
                 formatter( "CALL agml_set_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
 
 
+            # This is a misalignment table
+            if rotation.__class__ == Misalign:
+
+                opts = rotation.opts
+
+                if opts == None:
+                    formatter( "CALL agml_misalign( '%s', %s );"%( rotation.table, rotation.row ) )
+                elif 'left' in opts:
+                    formatter( "CALL agml_misalign_left( '%s', %s );"%( rotation.table, rotation.row ) )
+                elif 'right' in opts:
+                    formatter( "CALL agml_misalign_right( '%s', %s );"%( rotation.table, rotation.row ) )                    
+
         #
         # Next, any remaining attributes
         #
 
         #
-        # Now get the rotation angles from the matrix and output
+        # ... such as evaluating the db table (NOTE: defunct)
         #
+        if table:
+            #formatter( "CALL agml_get_db_matrix( '%s', %s );"%( table, row ) )
+            formatter( "CALL agml_misalign( '%s', %s );"%( table, row ) )
+        
+            if opts == None:
+                formatter( "CALL agml_misalign( '%s', %s );"%( table, row ) )
+            elif 'left' in opts:
+                formatter( "CALL agml_misalign_left( '%s', %s );"%( table, row ) )
+            elif 'right' in opts:
+                formatter( "CALL agml_misalign_right( '%s', %s );"%( table, row ) )                    
+
+        
+
+        #
+        # Now get the translation / rotation matrix
+        #
+        formatter( "CALL agml_get_translation( %x, %y, %z )" )        
         formatter( "CALL agml_get_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
         parlist.append( 'THETAX' )
         parlist.append( 'PHIX' )
@@ -1630,11 +1702,18 @@ class Placement(Handler):
         parlist.append( 'THETAZ' )
         parlist.append( 'PHIZ' )
 
+
         formatter( "%%parlist = '%s'"%'_'.join(parlist) )
         #
         # And finally invoke AgStar executive action
         #
         formatter( "CALL AxPosition" )
+
+        
+
+            
+
+        
 
     def agstar_placement(self,tag):
 
@@ -1711,7 +1790,6 @@ class Translation(Handler):
         if ( self.z != None ):
             o+='z=%s '%( self.z )
         return o
-
 class Rotation(Handler):
 
     def __init__(self):
@@ -1766,9 +1844,65 @@ class Rotation(Handler):
             if ( val != None ):
                 self.angles[key] = attr.get(key)
         
-        self.parent.add(self)        
+        self.parent.add(self)
+class Misalign(Handler):
 
+    def __init__(self):
+        Handler.__init__(self)
+        self.key = None
+        self.angles = None
+        
+    def setParent(self,p):
+        self.parent = p
 
+    def startElement(self,tag,attr):        
+        self.matrix = attr.pop('matrix',None) # get transformation matrix
+        self.table  = attr.pop('table', None) # alternatively get db table
+        self.row    = attr.pop('row',   '0' ) # ... and row of table
+        self.opts   = attr.pop('opts',  None) # misalignment options
+ 
+        self.parent.addMisalignment( self )
+
+    def output(self):
+        #
+        # IF we have a matrix, unpack the elements and call agml rotation with matrix
+        # NOTE: May need to take care of order of operations!
+        #
+        if self.matrix:
+            array = parseArray( self.matrix )
+
+            self.x = '%f'%float( array[0][3] )
+            self.y = '%f'%float( array[1][3] )
+            self.z = '%f'%float( array[2][3] )
+
+            x = self.x
+            y = self.y
+            z = self.z
+
+            out = ''
+            k = 1
+            for i in range(0,3):
+                for j in range(0,3):
+                    out = 'agml_rotm(%i) = %f'%( k, float(array[i][j]) )
+                    formatter( out, cchar="_" )
+                    k   += 1
+            formatter( 'call agml_rotation( agml_rotm )' , cchar='_' )
+
+        #
+        # IF we have a table, apply it
+        #            
+        if self.table:
+            #formatter( "CALL agml_get_db_matrix( '%s', %s );"%( self.table, self.row ) )
+
+            if self.opts == None:
+                formatter( "CALL agml_misalign( '%s\0', %s );"%( self.table, self.row ) )
+            elif 'left' in self.opts:
+                formatter( "CALL agml_misalign_left( '%s\0', %s );"%( self.table, self.row ) )
+            elif 'right' in self.opts:
+                formatter( "CALL agml_misalign_right( '%s\0', %s );"%( self.table, self.row ) )
+
+    def endElement(self,tag):
+        pass
         
 # ====================================================================================================
 class For(Handler):

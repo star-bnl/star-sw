@@ -864,11 +864,12 @@ class Setup( Handler ):
         self.parent = p
 
     def startElement(self, tag, attr ):
-        self.name    = attr.get('name',    None)
-        self.comment = attr.get('comment', None)
-        self.module  = attr.get('module',  None)
-        self.onoff   = attr.get('onoff',   None)
-        self.topvolume = attr.get('top',   None)
+        self.name      = attr.get('name',    None)
+        self.comment   = attr.get('comment', None)
+        self.module    = attr.get('module',  None)
+        self.onoff     = attr.get('onoff',   None)
+        self.topvolume = attr.get('top',     None)
+        self.verbose   = attr.get('verbose', None);
 
 
     def endElement(self, tag):
@@ -932,12 +933,19 @@ class Setup( Handler ):
         # Add CONSTRUCT
         output = "\n"
         output += "AgModule* %s::%s::construct() {\n"%(nmspc,self.name)
-        output += 'LOG_INFO << "Construct module " << %s::%s::module() << endm;\n'%(nmspc,self.name)
+        output += 'LOG_INFO << "  [AgML2.0] Construct module " << %s::%s::module() << endm;\n'%(nmspc,self.name)
         document.impl( output, unit='global' )
 
         #output = "active=true;\n"
         output  = "AgModule* _module = New();\n"
-        output += "if (_module) _module->ConstructGeometry();\n"
+        output += """
+        if (_module) {
+            int _save = gErrorIgnoreLevel;
+            gErrorIgnoreLevel=kError;
+            _module->ConstructGeometry();
+            gErrorIgnoreLevel=_save;
+        }\n
+        """
 
         if self.topvolume:
             output += 'TGeoVolume* _top = gGeoManager->FindVolumeFast("%s");\n'%self.topvolume
@@ -3001,8 +3009,6 @@ class Create(Handler):
         document.impl( 'Create("%s"); '%(block), unit=current )
         document.impl( '}', unit=current );
 
-
-
 # pads the line with whitespace around specified characters
 def inflate(line,chars='={}+-*/()'):
     output=""
@@ -3013,7 +3019,6 @@ def inflate(line,chars='={}+-*/()'):
             output += c
     return output
         
-
 class Position(Handler):
 # >>>> TODO <<<<
     def __init__(self):
@@ -3095,6 +3100,7 @@ class Create_and_Position(Position):
             output +=" in %s"%self.into
         for i,pos in enumerate(self.pos):
             output += " %s"% pos.strip(',')
+
 class Placement(Handler):
 
     def __init__(self):
@@ -3231,8 +3237,6 @@ class Translation(Handler):
         if ( x ) : document.impl('place.TranslateX(%s);' % replacements(x.lower()) , unit=current )
         if ( y ) : document.impl('place.TranslateY(%s);' % replacements(y.lower()) , unit=current ) 
         if ( z ) : document.impl('place.TranslateZ(%s);' % replacements(z.lower()) , unit=current )        
-
-
 class Rotation(Handler):
 
     def __init__(self):
@@ -3299,8 +3303,25 @@ class Rotation(Handler):
         if ( ortho ):
             document.impl( 'place.Ortho( "%s" ); // ORT=%s'%( ortho, ortho ), unit=current )
             document.impl( '/// Axis substitution: XYZ --> %s'%ortho, unit=current )
-     
+class Misalign(Handler):
 
+    def __init__(self):
+        Handler.__init__(self)
+        
+    def setParent(self,p):
+        self.parent = p
+
+    def startElement(self,tag,attr):        
+        matrix = attr.pop('matrix',None) # get transformation matrix
+        table  = attr.pop('table', None) # alternatively get db table
+        row    = attr.pop('row',    '0') # ... and row of table
+        opts   = attr.pop('opts','+xyzr')
+
+
+        document.impl( 'place.Misalign("%s",%s,"%s");'%(table,row,opts), unit=current )
+     
+    def endElement(self,tag):
+        pass
                
         
 # ----------------------------------------------------------------------------------------------------

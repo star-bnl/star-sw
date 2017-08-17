@@ -131,11 +131,11 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Component' , Language.Component     )
         self.addToken( 'Attribute' , Language.Attribute     )
         self.addToken( 'Create'    , Language.Create        )
-        self.addToken( 'Position'  , Language.Position      )
-
-        self.addToken( 'Placement',  Language.Placement     )
+#       self.addToken( 'Position'  , Language.Position      )
+        self.addToken( 'Placement',   Language.Placement    )
         self.addToken( 'Translation', Language.Translation  )
         self.addToken( 'Rotation',    Language.Rotation     )
+        self.addToken( 'Misalign',    Language.Misalign     ) # AgML 2.0
         
         self.addToken( 'Create_and_Position',
                        Language.Create_and_Position         )

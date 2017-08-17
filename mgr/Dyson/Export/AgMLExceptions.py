@@ -155,11 +155,20 @@ class AgmlMissingAttributeWarning(Warning):
         self.key    = key
 
     def __str__(self):
+
+        key = self.key
+        if key!=str(key):
+            key = ' '.join( self.key )
+
         output = """
         
         --> AgML Warning line %i: %s missinge required attribute %s <--
-        """%(self.locator.getLineNumber(),self.tag,self.key)
+        """%(self.locator.getLineNumber(),self.tag,key)
         return YELLOW(output)
+
+
+
+    
 # ===============================================================================
 class AgmlFillMissingVarError(Exception):
     def __init__(self,struct,varname):
