@@ -28,6 +28,8 @@ It is provided "as is" without express or implied warranty.
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
+namespace Heed {
+
 class Parabol  // a is omited to avoid coincidences with any other libraries
     {
  public:
@@ -87,5 +89,6 @@ class Parabol  // a is omited to avoid coincidences with any other libraries
 };
 
 std::ostream& operator<<(std::ostream& file, const Parabol& f);
+}
 
 #endif

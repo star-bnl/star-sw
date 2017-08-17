@@ -16,6 +16,8 @@ It is provided "as is" without express or implied warranty.
 #include "wcpplib/matrix/multiply.h"
 #include "wcpplib/matrix/inverse.h"
 
+namespace Heed {
+
 Parabol::Parabol(const Parabol& f) { *this = f; }
 
 Parabol::Parabol(double x[3], double y[3]) : s_det(0), s_dxzero(0) {
@@ -291,4 +293,6 @@ std::ostream& operator<<(std::ostream& file, const Parabol& f) {
   if (q > 1) file << ' ' << xz[1];
   file << '\n';
   return file;
+}
+
 }

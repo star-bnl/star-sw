@@ -15,6 +15,8 @@ text appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 class linexi2_coor {
  public:
   long qlr;
@@ -80,4 +82,5 @@ class linexi2B : public linexi2 {
   }
 };
 
+}
 #endif

@@ -29,6 +29,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 class trajestep_limit : public RegPassivePtr {
  public:
   vfloat max_range;  // useful if curvature is varyable.
@@ -131,5 +133,7 @@ class trajestep : public absref {
 
 };
 std::ostream& operator<<(std::ostream& file, const trajestep& f);
+
+}
 
 #endif

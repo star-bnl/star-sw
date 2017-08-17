@@ -6,6 +6,7 @@
 class StPicoBTofHit : public TObject
 {
 public:
+
   StPicoBTofHit();
   StPicoBTofHit(int);
   virtual ~StPicoBTofHit();
@@ -18,6 +19,7 @@ public:
   Int_t   cell() const;
 
 protected:
+
   Short_t mId;     // (tray-1)*192+(module-1)*6+(cell-1):
 
   ClassDef(StPicoBTofHit, 1)

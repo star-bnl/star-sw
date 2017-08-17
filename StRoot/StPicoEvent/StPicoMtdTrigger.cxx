@@ -5,7 +5,6 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuMtdHeader.h"
 #include "St_base/StMessMgr.h"
-#include "StEvent/StEnumerations.h"
 
 #include "StPicoEvent/StPicoMtdTrigger.h"
 

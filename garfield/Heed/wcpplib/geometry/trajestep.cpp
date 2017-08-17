@@ -11,6 +11,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 void trajestep_limit::range(int fs_cf0, vfloat rad, int& fs_cf1,
                             vfloat& mrange) {
   if (mrange < 0 || mrange > max_range) mrange = max_range;
@@ -143,4 +145,6 @@ std::ostream& operator<<(std::ostream& file, const trajestep& f) {
         << "mpoint=" << f.mpoint;
   indn.n -= 2;
   return file;
+}
+
 }

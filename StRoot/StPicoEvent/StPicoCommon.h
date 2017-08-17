@@ -9,6 +9,7 @@ namespace StarPicoDst
 
 
 enum DetectorSide {
+  Undefined = 0,
   East = -1,
   West = 1
 };

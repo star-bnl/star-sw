@@ -1,4 +1,4 @@
-/*!
+/**
  *  \class StPicoMtdHit
  *
  *  \brief Class storing MTD hit information in PicoDst.
@@ -12,20 +12,20 @@
 #include "TObject.h"
 class StMuMtdHit;
 
+
 class StPicoMtdHit : public TObject
 {
 public:
+
   StPicoMtdHit();
 
-  /*!
-   *
+  /**
    *  \brief Main constructor
    *  \param hit Corresponding MTD hit in MuDst
    */
   StPicoMtdHit(StMuMtdHit const* hit);
 
-  /*!
-   *
+  /**
    *  \brief Default destructor
    */
   virtual ~StPicoMtdHit();
@@ -47,8 +47,7 @@ public:
   /// Return cell number (0-11) of the MTD hit
   Int_t  cell()        const;
 
-  /*!
-   *
+  /**
    *  \brief Return trigger flag of the MTD hit.
    *
    *  The returned value indicates the number of MTD
@@ -64,6 +63,7 @@ public:
   std::pair<Float_t, Float_t> tot() const;
 
 protected:
+
   Short_t mgChannel;    ///< mgChannel = (backleg-1) * 60 + (module-1) * 12 + cell
   UChar_t mTriggerFlag; ///< # of hits in the corresponding trigger unit that fired the trigger
   std::pair<Float_t, Float_t>  mLeadingEdgeTime; ///< Leading-edge time for the hit
@@ -71,6 +71,7 @@ protected:
 
   ClassDef(StPicoMtdHit, 1)
 };
+
 inline void StPicoMtdHit::setTriggerFlag(Int_t const flag) { mTriggerFlag = (UChar_t)flag; }
 inline Int_t StPicoMtdHit::gChannel()    const { return (Int_t)mgChannel; }
 inline Int_t StPicoMtdHit::backleg()     const { return (Int_t)mgChannel / 60 + 1; }
@@ -83,4 +84,5 @@ inline std::pair<Float_t, Float_t> StPicoMtdHit::tot() const
 {
   return std::pair<Float_t, Float_t>(mTrailingEdgeTime.first - mLeadingEdgeTime.first, mTrailingEdgeTime.second - mLeadingEdgeTime.second);
 }
+
 #endif
