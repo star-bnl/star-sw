@@ -1,3 +1,12 @@
+/*
+  root.exe 'bfc.C(-1)' 'StiPulls.C+(1e9,"./*tags.root")'
+
+StiPulls->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==27","colz")
+TChain *chain =  Chain.C+("*.tags.root","StiPulls")
+chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==27","colz") // Pxl sigma =  77 um
+chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==28","colz") // Ist sigma = 238 um
+chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==36","colz") // Sst sigma = 990 um
+ */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -206,19 +215,19 @@ void StiTpcPulls() {
 	Double_t *z = &d.dy;
 	Double_t q = 1;
 	if (hit->mCurv < 0) q = -1;
-	Var_t  V = {hit->gZHit, hit->gRHit, row,  q/hit->mPt, hit->lPsi, hit->lDip};
+	Var_t  V = {hit->gZHit, hit->gRHit, (Double_t) row,  q/hit->mPt, hit->lPsi, hit->lDip};
 	Double_t *v = &V.Z;
 	Int_t s = 1;
 	if (q < 0) s = 2;
-	Int_t         i = 0;
-	if (row >  0) i = 1;
-	if (row > 13) i = 2;
+	Int_t         j = 0;
+	if (row >  0) j = 1;
+	if (row > 13) j = 2;
 	for (Int_t t = 0; t < NPL; t++) {
 	  Int_t iz = xyzplots[t].z;
 	  Int_t ix = xyzplots[t].x;
 	  Int_t iy = xyzplots[t].y;
-	  plots[0][l][i][t]->Fill(v[ix],v[iy],z[iz]);
-	  plots[s][l][i][t]->Fill(v[ix],v[iy],z[iz]);
+	  plots[0][l][j][t]->Fill(v[ix],v[iy],z[iz]);
+	  plots[s][l][j][t]->Fill(v[ix],v[iy],z[iz]);
 	  plots[0][l][0][t]->Fill(v[ix],v[iy],z[iz]);
 	  plots[s][l][0][t]->Fill(v[ix],v[iy],z[iz]);
 	}
@@ -242,7 +251,7 @@ void StiTpcPulls() {
 void StiSvtSsd() {
 }
 //________________________________________________________________________________
-void Pulls(Int_t NoEvents = 99999999, const Char_t *files = "MuDst/*.tags.root", Int_t opt=0) {
+void StiPulls(Int_t NoEvents = 99999999, const Char_t *files = "MuDst/*.tags.root", Int_t opt=0) {
   if (gClassTable->GetID("StiPullEvent") < 0) {gSystem->Load("StiUtilities");}
 #if 0
   tree = (TTree *) gDirectory->Get("StiPulls");
@@ -263,7 +272,7 @@ void Pulls(Int_t NoEvents = 99999999, const Char_t *files = "MuDst/*.tags.root",
 	cout << "#\t" << NFiles << "\t" << f->GetName() << "\t" << nEvents << endl;
 	if (nEvents) {
 	  nEvTot += nEvents;
-	  tree->Add(T);
+	  tree->Add(f->GetName());
 	  NFiles++;
 	}
       } else {
@@ -272,7 +281,7 @@ void Pulls(Int_t NoEvents = 99999999, const Char_t *files = "MuDst/*.tags.root",
     } else {
       cout << "Cannot open the file " << file << endl;
     }
-    //    delete f;
+    delete f;
   }
   branch = tree->GetBranch("event");
   if (! branch) return;
@@ -373,7 +382,7 @@ void DrawPulls(const Char_t *histName="lYDifVsZAG", Double_t Ymin = -500, Double
 }
 //________________________________________________________________________________
 void LoopOverPulls(Int_t opt = 0) {
-  Char_t *names[] = {
+  const Char_t *names[] = {
       "lYDifVsZAG",      "lYDifVsZPG",      "lYDifVsZNG",
       "lZDifVsZAG",      "lZDifVsZPG",      "lZDifVsZNG",
       "lYDifVsRAG",      "lYDifVsRPG",      "lYDifVsRNG",
@@ -395,7 +404,7 @@ void LoopOverPulls(Int_t opt = 0) {
     } else {
       Name.ReplaceAll("Dif","Pull");
       Name += "2D";
-      Pulls(Name);
+      DrawPulls(Name);
       c1->SaveAs(".png");
     }
   }

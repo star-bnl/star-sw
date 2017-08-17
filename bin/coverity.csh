@@ -1,3 +1,4 @@
+#!/bin/tcsh
 setenv COVPATH /afs/rhic.bnl.gov/x8664_sl6/app/coverity-7.6.0
 setenv PATH ${COVPATH}/bin:${PATH}
 cov-build --dir ./ cons -k

@@ -8,7 +8,8 @@
   setenv NODEBUG yes
   setup 64b
   setenv STARFPE NO
-  starver TFG17g
+#  starver TFG17g
+  starver .DEV2
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
 #  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
@@ -17,7 +18,7 @@
   if (! -r ${daq}) exit 1;
 #  set name = "Lc3pi";
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons antiprotonmTsq5PerCentZ6cm  KNmTsq5PerCentZ6cm  KPmTsq5PerCentZ6cm  piNmTsq5PerCentZ6cm  piPmTsq5PerCentZ6cm  protonmTsq5PerCentZ6cm ) 
     echo $Name | grep $name
     if (! $?) break;
   end
@@ -26,12 +27,16 @@
   set file = ${base}.MuDst.root
   set logFile  = ${base}B.log
   echo "${file}"
+  setenv StarEndMakerShell
   if ( ! -r ${file}) then
 #    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
-    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" /> -->
-<input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/*.MuDst.root" />
+<!-- <input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/*.MuDst.root" /> -->
+<!-- <input URL="command:MuDstCommand.pl /net/l404/data/fisyak/reco/2016/AuAu200_adc/*.MuDst.root" /> -->
+<input URL="command:MuDstCommand.pl" />
 </job>

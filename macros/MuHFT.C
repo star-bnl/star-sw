@@ -1,5 +1,9 @@
+/*
+  root.exe lMuDst.C 'MuHFT.C+("LcKppimTsq_43.MuDst.root")'
+*/
 //#define DEBUG
 //#define __OLD_DCA__
+#define __ONLY_GLOBAL__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
 #include <stdio.h>
@@ -91,7 +95,7 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const Float_t *&PrimVerSigX                = iter("PrimaryVertices.mPosError.mX1");
   const Float_t *&PrimVerSigY                = iter("PrimaryVertices.mPosError.mX2");
   const Float_t *&PrimVerSigZ                = iter("PrimaryVertices.mPosError.mX3");
-
+  
   const Int_t    &NoTracks                   = iter("PrimaryTracks");
   const Int_t   *&PrimaryTracks_mVertexIndex = iter("PrimaryTracks.mVertexIndex");
   const UChar_t *&mNHitsFitInner             = iter("PrimaryTracks.mNHitsFitInner");
@@ -99,7 +103,7 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const UChar_t *&mNHitsFit                  = iter("PrimaryTracks.mNHitsFit");
   const UShort_t*&   PrimaryVertices_mRefMultNeg              = iter("PrimaryVertices.mRefMultNeg");
   const UShort_t*&   PrimaryVertices_mRefMultPos              = iter("PrimaryVertices.mRefMultPos");
-
+  
   const Float_t *&pT                         = iter("PrimaryTracks.mPt");
   const Float_t *&pX                         = iter("PrimaryTracks.mP.mX1");
   const Float_t *&pY                         = iter("PrimaryTracks.mP.mX2");
@@ -111,13 +115,13 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const   Float_t   *&mSigmaDcaZ             = iter("PrimaryTracks.mSigmaDcaZ");
 #endif
   const Int_t   *&mIndex2Global              = iter("PrimaryTracks.mIndex2Global");
-//   const Float_t*&    mDCA_mX1                   = iter("PrimaryTracks.mDCA.mX1");
-//   const Float_t*&    mDCA_mX2                   = iter("PrimaryTracks.mDCA.mX2");
-//   const Float_t*&    mDCA_mX3                   = iter("PrimaryTracks.mDCA.mX3");
-//   const Float_t*&    mDCAGlobal_mX1             = iter("PrimaryTracks.mDCAGlobal.mX1");
-//   const Float_t*&    mDCAGlobal_mX2             = iter("PrimaryTracks.mDCAGlobal.mX2");
-//   const Float_t*&    mDCAGlobal_mX3             = iter("PrimaryTracks.mDCAGlobal.mX3");
-
+  //   const Float_t*&    mDCA_mX1                   = iter("PrimaryTracks.mDCA.mX1");
+  //   const Float_t*&    mDCA_mX2                   = iter("PrimaryTracks.mDCA.mX2");
+  //   const Float_t*&    mDCA_mX3                   = iter("PrimaryTracks.mDCA.mX3");
+  //   const Float_t*&    mDCAGlobal_mX1             = iter("PrimaryTracks.mDCAGlobal.mX1");
+  //   const Float_t*&    mDCAGlobal_mX2             = iter("PrimaryTracks.mDCAGlobal.mX2");
+  //   const Float_t*&    mDCAGlobal_mX3             = iter("PrimaryTracks.mDCAGlobal.mX3");
+  
   // Global
   const Int_t    &NoTracksGl                   = iter("GlobalTracks");
   const UChar_t *&mNHitsFitInnerGl             = iter("GlobalTracks.mNHitsFitInner");
@@ -169,19 +173,20 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const Float_t*&    GlobalTracks_mLastPoint_mX1               = iter("GlobalTracks.mLastPoint.mX1");
   const Float_t*&    GlobalTracks_mLastPoint_mX2               = iter("GlobalTracks.mLastPoint.mX2");
   const Float_t*&    GlobalTracks_mLastPoint_mX3               = iter("GlobalTracks.mLastPoint.mX3");
-
+  
   TFile *fOut = new TFile(output,"recreate");
   TString zCut(Form(" vs no. of Possible ones for primary tracks with primary vertex |Z| < %f cm", zcut));
   TString Name;
   TString Title;
-  Name = "NoSsdHits"; Title = "No.of fitted SSD hits"; Title += zCut;
-  TH2D *NoSsdHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  Name = "NoSstHits"; Title = "No.of fitted SST hits"; Title += zCut;
+  TH2D *NoSstHits = new TH2D(Name, Title,10,-0.5,9.5,10,-0.5,9.5); 
   Name = "NoPxlHits"; Title = "No.of fitted PXL hits"; Title += zCut;
-  TH2D *NoPxlHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  TH2D *NoPxlHits = new TH2D(Name, Title,10,-0.5,9.5,10,-0.5,9.5); 
   Name = "NoIstHits"; Title = "No.of fitted IST hits"; Title += zCut;
-  TH2D *NoIstHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  TH2D *NoIstHits = new TH2D(Name, Title,10,-0.5,9.5,10,-0.5,9.5); 
   Name = "NoPxlIstHits"; Title = "No.of fitted Pxl and IST hits"; Title += zCut;
-  TH2D *NoPxlIstHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  TH2D *NoPxlIstHits = new TH2D(Name, Title,10,-0.5,9.5,10,-0.5,9.5); 
+#ifndef __ONLY_GLOBAL__
   TH2D *dcaXYInvp[5], *dcaXYInvpT[5];
   TH2D *dcaZInvp[5],   *dcaZInvpT[5];
   TH2D *dcaXYPhi[5], *dcaZPhi[5];
@@ -205,7 +210,7 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
     pullXYInvp[i] = new TH2D(Name,Title,100,0,10, 500, -20., 20.);
     Name = Form("pullXYInvpVx%i",i); Title = "pull XY with Veretex versus 1/p for "; Title += Selection;
     pullXYInvpVx[i] = new TH2D(Name,Title,100,0,10, 500, -20., 20.);
-
+    
     Name = Form("dcaZInvpT%i",i); Title = "dca Z versus 1/pT for "; Title += Selection;
     dcaZInvpT[i] = new TH2D(Name,Title,100,0,10, 500, -1., 1.);
     Name = Form("dcaZInvp%i",i); Title = "dca Z versus 1/p for "; Title += Selection;
@@ -218,8 +223,8 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
     pullZInvp[i] = new TH2D(Name,Title,100,0,10, 500, -20., 20.);
     Name = Form("pullZInvpVx%i",i); Title = "pull Z with Veretex versus 1/p for "; Title += Selection;
     pullZInvpVx[i] = new TH2D(Name,Title,100,0,10, 500, -20., 20.);
-
-
+    
+    
     Name = Form("dcaXYPhi%i",i); Title = "dca XY versus Phi for pT > 1 GeV/c and "; Title += Selection;
     dcaXYPhi[i] = new TH2D(Name,Title,90,-180,180, 500, -1., 1.);
     Name = Form("dcaZPhi%i",i); Title = "dca Z versus Phi for pT > 1 GeV/c and "; Title += Selection;
@@ -245,184 +250,194 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   TH2D *VxSigmaZ = new TH2D("VxSigmaZ","Vertex sigma Z versus log10 no. of good tracks",100,0,5,100,0,0.05);
   TH2D *RefMultZP = new TH2D("RefMultZP","Positive Ref.Mult versus Z",100,-50,50,200,0,2000); 
   TH2D *RefMultZN = new TH2D("RefMultZN","Negative Ref.Mult versus Z",100,-50,50,200,0,2000); 
+#endif /* ! __ONLY_GLOBAL__ */
   //         Now iterations
   while (iter.Next()) {
-    for (Int_t l = 0; l < NoPrimVertex; l++) {
+#ifdef __ONLY_GLOBAL__
+    for (Int_t l = -1; l < 0; l++) { // Only Global tracks
+#else /* ! __ONLY_GLOBAL__ */
+      for (Int_t l = -1; l < NoPrimVertex; l++) {
 #ifdef  DEBUG
-      cout << "Primary l = " << l 
-	   << " x " << PrimVertexX[l] << " +/- " << PrimVerSigX[l]
-	   << " y " << PrimVertexY[l] << " +/- " << PrimVerSigY[l]
-	   << " z " << PrimVertexZ[l] << " +/- " << PrimVerSigZ[l] << endl;
+	cout << "Primary l = " << l 
+	     << " x " << PrimVertexX[l] << " +/- " << PrimVerSigX[l]
+	     << " y " << PrimVertexY[l] << " +/- " << PrimVerSigY[l]
+	     << " z " << PrimVertexZ[l] << " +/- " << PrimVerSigZ[l] << endl;
 #endif
-      RefMultZP->Fill(PrimVertexZ[l],PrimaryVertices_mRefMultPos[l]);
-      RefMultZN->Fill(PrimVertexZ[l],PrimaryVertices_mRefMultNeg[l]);
-      if (TMath::Abs(PrimVertexZ[l]) > zcut ) continue;
-      Double_t vtx[3] = {PrimVertexX[l], PrimVertexY[l], PrimVertexZ[l]};
-      DCAxy->Reset();
-      DCAz->Reset();
-      DCA->Reset();
-      static const Double_t L = 34.42;  // half a IST ladder's length 
-      static const Double_t R = 22.80;
-      Double_t eta_max = - TMath::Log(TMath::Tan(0.5*TMath::ATan2(R, L-PrimVertexZ[l])));
-      Double_t eta_min = - TMath::Log(TMath::Tan(0.5*TMath::ATan2(R,-L-PrimVertexZ[l])));
-      //      if (TMath::Abs(PrimVertexZ[l]) <= 25. ) continue;
-      Int_t noGoodPrimaryTracks = 0;
-      for (Int_t k = 0; k<NoTracks; k++) {
-	//	if(NoTracks <= 10) break;            // more than 10 tracks please
-	if (PrimaryTracks_mVertexIndex[k] != l) continue;
-	if (mNHitsFit[k] < 15) continue;
-	if (pT[k] < 0.1) continue;
-	if (Eta[k] <= eta_min || Eta[k] >= eta_max) continue;
-	noGoodPrimaryTracks++;
-	Int_t NoFIstHits =  (mNHitsFitInner[k] & 0x7);
-	Int_t NoFSsdHits = ((mNHitsFitInner[k] >> 3) & 0x3);
-	Int_t NoFPxlHits = ((mNHitsFitInner[k] >> 5) & 0x7);
-	Int_t NoFPxlIstHits = NoFPxlHits + NoFIstHits;
-
-	Int_t NoPIstHits =  (mNHitsPossInner[k] & 0x7);
-	Int_t NoPSsdHits = ((mNHitsPossInner[k] >> 3) & 0x3);
-	Int_t NoPPxlHits = ((mNHitsPossInner[k] >> 5) & 0x7);
-	Int_t NoPPxlIstHits = NoPPxlHits + NoPIstHits;
-
-	NoPxlHits->Fill(NoPPxlHits,NoFPxlHits);
-	NoPxlHits->Fill(NoPIstHits,NoFIstHits);
-	NoSsdHits->Fill(NoPSsdHits,NoFSsdHits);
-	NoPxlIstHits->Fill(NoPPxlIstHits,NoFPxlIstHits);
-	Double_t phi = 180*Phi[k]/TMath::Pi();
-	Double_t P = sqrt(pZ[k]*pZ[k]+pT[k]*pT[k]);
-	Int_t N = 0;
-	N = NoFPxlIstHits;
-	Int_t kg = mIndex2Global[k];
-	StThreeVectorF primP(pX[k],pY[k],pZ[k]);
+	RefMultZP->Fill(PrimVertexZ[l],PrimaryVertices_mRefMultPos[l]);
+	RefMultZN->Fill(PrimVertexZ[l],PrimaryVertices_mRefMultNeg[l]);
+	if (TMath::Abs(PrimVertexZ[l]) > zcut ) continue;
+	Double_t vtx[3] = {PrimVertexX[l], PrimVertexY[l], PrimVertexZ[l]};
+	DCAxy->Reset();
+	DCAz->Reset();
+	DCA->Reset();
+#endif /* __ONLY_GLOBAL__ */
+	static const Double_t L = 34.42;  // half a IST ladder's length 
+	static const Double_t R = 22.80;
+	Double_t eta_max = - TMath::Log(TMath::Tan(0.5*TMath::ATan2(R, L-PrimVertexZ[l])));
+	Double_t eta_min = - TMath::Log(TMath::Tan(0.5*TMath::ATan2(R,-L-PrimVertexZ[l])));
+	//      if (TMath::Abs(PrimVertexZ[l]) <= 25. ) continue;
+	Int_t noGoodPrimaryTracks = 0;
+	for (Int_t k = 0; k<NoTracks; k++) {
+#ifndef __ONLY_GLOBAL__
+	  //	if(NoTracks <= 10) break;            // more than 10 tracks please
+	  if (PrimaryTracks_mVertexIndex[k] != l) continue;
+	  //	if (mNHitsFit[k] < 15) continue;
+	  if (pT[k] < 0.1) continue;
+	  if (Eta[k] <= eta_min || Eta[k] >= eta_max) continue;
+	  noGoodPrimaryTracks++;
+#endif /* ! __ONLY_GLOBAL__ */
+	  Int_t NoFIstHits =  (mNHitsFitInner[k] & 0x7);
+	  Int_t NoFSstHits = ((mNHitsFitInner[k] >> 3) & 0x3);
+	  Int_t NoFPxlHits = ((mNHitsFitInner[k] >> 5) & 0x7);
+	  Int_t NoFPxlIstHits = NoFPxlHits + NoFIstHits;
+	  
+	  Int_t NoPIstHits =  (mNHitsPossInner[k] & 0x7);
+	  Int_t NoPSstHits = ((mNHitsPossInner[k] >> 3) & 0x3);
+	  Int_t NoPPxlHits = ((mNHitsPossInner[k] >> 5) & 0x7);
+	  Int_t NoPPxlIstHits = NoPPxlHits + NoPIstHits;
+	  
+	  NoPxlHits->Fill(NoPPxlHits,NoFPxlHits);
+	  NoPxlHits->Fill(NoPIstHits,NoFIstHits);
+	  NoSstHits->Fill(NoPSstHits,NoFSstHits);
+	  NoPxlIstHits->Fill(NoPPxlIstHits,NoFPxlIstHits);
+#ifndef __ONLY_GLOBAL__
+	  Double_t phi = 180*Phi[k]/TMath::Pi();
+	  Double_t P = sqrt(pZ[k]*pZ[k]+pT[k]*pT[k]);
+	  Int_t N = 0;
+	  N = NoFPxlIstHits;
+	  Int_t kg = mIndex2Global[k];
+	  StThreeVectorF primP(pX[k],pY[k],pZ[k]);
 #ifdef DEBUG
-	cout << "Primary track k = " << k << " Global track kg = " << kg << endl;
-	cout << "primary track momentum " << primP << endl;
-// 	StThreeVectorF dcaP(mDCAGlobal_mX1[k],mDCAGlobal_mX2[k],mDCAGlobal_mX3[k]);
-// 	StThreeVectorF dcaPG(mDCAGlobal_mX1[k],mDCAGlobal_mX2[k],mDCAGlobal_mX3[k]);
-// 	cout << "dcaP: " << dcaP << "\t dcaPG " << dcaPG << endl;
+	  cout << "Primary track k = " << k << " Global track kg = " << kg << endl;
+	  cout << "primary track momentum " << primP << endl;
+	  // 	StThreeVectorF dcaP(mDCAGlobal_mX1[k],mDCAGlobal_mX2[k],mDCAGlobal_mX3[k]);
+	  // 	StThreeVectorF dcaPG(mDCAGlobal_mX1[k],mDCAGlobal_mX2[k],mDCAGlobal_mX3[k]);
+	  // 	cout << "dcaP: " << dcaP << "\t dcaPG " << dcaPG << endl;
 #endif
-	if (kg < 0 || kg > NoTracksGl) continue;
-	StThreeVectorF globP;
-	globP = StThreeVectorF(pXGl[kg],pYGl[kg],pZGl[kg]);
-// 	StThreeVectorF dcaGG(mDCAGlobal_mX1Gl[kg],mDCAGlobal_mX2Gl[kg],mDCAGlobal_mX3Gl[kg]);
-	StThreeVectorF dcaG(mDCAGlobal_mX1Gl[kg],mDCAGlobal_mX2Gl[kg],mDCAGlobal_mX3Gl[kg]);
+	  if (kg < 0 || kg > NoTracksGl) continue;
+	  StThreeVectorF globP;
+	  globP = StThreeVectorF(pXGl[kg],pYGl[kg],pZGl[kg]);
+	  // 	StThreeVectorF dcaGG(mDCAGlobal_mX1Gl[kg],mDCAGlobal_mX2Gl[kg],mDCAGlobal_mX3Gl[kg]);
+	  StThreeVectorF dcaG(mDCAGlobal_mX1Gl[kg],mDCAGlobal_mX2Gl[kg],mDCAGlobal_mX3Gl[kg]);
 #ifdef DEBUG
-	cout << "global track momentum " << globP
-	     << "\tdcaG: " << dcaG << endl;
+	  cout << "global track momentum " << globP
+	       << "\tdcaG: " << dcaG << endl;
 #endif
 #ifdef 	__OLD_DCA__
-	StThreeVectorF dirG = globP.unit();
-	Double_t cosL = dirG.perp();
-	Double_t tanL = TMath::Tan(TMath::ACos(cosL));
-	Double_t cosP = dirG.x()/cosL;
-	Double_t sinP = dirG.y()/cosL;
-	Double_t dcaXY = sinP * dcaG.x() - cosP * dcaG.y(); // switched sign
-	Double_t dcaZ  = dcaG.z()/(cosL*cosL);
-	Double_t sigmaXY   = mSigmaDcaDGl[kg];
-	Double_t sigmaZ    = mSigmaDcaZGl[kg]/(cosL*cosL); // account bug in StMuTrack
+	  StThreeVectorF dirG = globP.unit();
+	  Double_t cosL = dirG.perp();
+	  Double_t tanL = TMath::Tan(TMath::ACos(cosL));
+	  Double_t cosP = dirG.x()/cosL;
+	  Double_t sinP = dirG.y()/cosL;
+	  Double_t dcaXY = sinP * dcaG.x() - cosP * dcaG.y(); // switched sign
+	  Double_t dcaZ  = dcaG.z()/(cosL*cosL);
+	  Double_t sigmaXY   = mSigmaDcaDGl[kg];
+	  Double_t sigmaZ    = mSigmaDcaZGl[kg]/(cosL*cosL); // account bug in StMuTrack
 #else
-	Int_t kgc = GlobalTracks_mIndex2Cov[kg];
-        static StDcaGeometry dcaGeometry;
-	Float_t pars[6] = {
-	  CovGlobTrack_mImp[kgc],CovGlobTrack_mZ[kgc],CovGlobTrack_mPsi[kgc],
-	  CovGlobTrack_mPti[kgc],CovGlobTrack_mTan[kgc],CovGlobTrack_mCurv[kgc]};
-	Float_t errs[15] = {
-	  CovGlobTrack_mImpImp[kgc],
-	  CovGlobTrack_mZImp[kgc],  CovGlobTrack_mZZ[kgc],
-	  CovGlobTrack_mPsiImp[kgc],CovGlobTrack_mPsiZ[kgc],CovGlobTrack_mPsiPsi[kgc],
-	  CovGlobTrack_mPtiImp[kgc],CovGlobTrack_mPtiZ[kgc],CovGlobTrack_mPtiPsi[kgc],CovGlobTrack_mPtiPti[kgc],
-	  CovGlobTrack_mTanImp[kgc],CovGlobTrack_mTanZ[kgc],CovGlobTrack_mTanPsi[kgc],CovGlobTrack_mTanPti[kgc],CovGlobTrack_mTanTan[kgc]};
-	dcaGeometry.set(pars, errs);
-        THelixTrack     thelix =  dcaGeometry.thelix();
-        thelix.Move(thelix.Path(vtx));
-	Double_t dcaXY = dcaGeometry.impact();
-	Double_t dcaZ  = dcaGeometry.z();
-	Double_t dcaEmx[3];
-	thelix.Dca(vtx,dcaXY,dcaZ,dcaEmx,2);
-	Double_t sigmaXY   = 0;
-	Double_t sigmaZ    = 0;
-        if (dcaEmx[0] > 0) sigmaXY = TMath::Sqrt(dcaEmx[0]);
-        if (dcaEmx[2] > 0) sigmaZ  = TMath::Sqrt(dcaEmx[2]);
+	  Int_t kgc = GlobalTracks_mIndex2Cov[kg];
+	  static StDcaGeometry dcaGeometry;
+	  Float_t pars[6] = {
+	    CovGlobTrack_mImp[kgc],CovGlobTrack_mZ[kgc],CovGlobTrack_mPsi[kgc],
+	    CovGlobTrack_mPti[kgc],CovGlobTrack_mTan[kgc],CovGlobTrack_mCurv[kgc]};
+	  Float_t errs[15] = {
+	    CovGlobTrack_mImpImp[kgc],
+	    CovGlobTrack_mZImp[kgc],  CovGlobTrack_mZZ[kgc],
+	    CovGlobTrack_mPsiImp[kgc],CovGlobTrack_mPsiZ[kgc],CovGlobTrack_mPsiPsi[kgc],
+	    CovGlobTrack_mPtiImp[kgc],CovGlobTrack_mPtiZ[kgc],CovGlobTrack_mPtiPsi[kgc],CovGlobTrack_mPtiPti[kgc],
+	    CovGlobTrack_mTanImp[kgc],CovGlobTrack_mTanZ[kgc],CovGlobTrack_mTanPsi[kgc],CovGlobTrack_mTanPti[kgc],CovGlobTrack_mTanTan[kgc]};
+	  dcaGeometry.set(pars, errs);
+	  THelixTrack     thelix =  dcaGeometry.thelix();
+	  thelix.Move(thelix.Path(vtx));
+	  Double_t dcaXY = dcaGeometry.impact();
+	  Double_t dcaZ  = dcaGeometry.z();
+	  Double_t dcaEmx[3];
+	  thelix.Dca(vtx,dcaXY,dcaZ,dcaEmx,2);
+	  Double_t sigmaXY   = 0;
+	  Double_t sigmaZ    = 0;
+	  if (dcaEmx[0] > 0) sigmaXY = TMath::Sqrt(dcaEmx[0]);
+	  if (dcaEmx[2] > 0) sigmaZ  = TMath::Sqrt(dcaEmx[2]);
 #endif
-	if (sigmaXY <= 0 || sigmaZ > 1 || sigmaZ <= 0 || sigmaZ > 1) {
+	  if (sigmaXY <= 0 || sigmaZ > 1 || sigmaZ <= 0 || sigmaZ > 1) {
 #ifdef DEBUG
-	  cout << "First Point x/y/z = " 
-	       << GlobalTracks_mFirstPoint_mX1[kg] << "/" << GlobalTracks_mFirstPoint_mX2[kg] << "/" << GlobalTracks_mFirstPoint_mX3[kg] << endl;
-	  cout << "Last Point x/y/z = " 
-	       << GlobalTracks_mLastPoint_mX1[kg] << "/" << GlobalTracks_mLastPoint_mX2[kg] << "/" << GlobalTracks_mLastPoint_mX3[kg] << endl;
+	    cout << "First Point x/y/z = " 
+		 << GlobalTracks_mFirstPoint_mX1[kg] << "/" << GlobalTracks_mFirstPoint_mX2[kg] << "/" << GlobalTracks_mFirstPoint_mX3[kg] << endl;
+	    cout << "Last Point x/y/z = " 
+		 << GlobalTracks_mLastPoint_mX1[kg] << "/" << GlobalTracks_mLastPoint_mX2[kg] << "/" << GlobalTracks_mLastPoint_mX3[kg] << endl;
 #endif
-	  continue;
-	}
-	Double_t sigmaXYVx = TMath::Sqrt(sigmaXY* sigmaXY+ 
-					 PrimVerSigX[l]*PrimVerSigX[l] +  
-					 PrimVerSigY[l]*PrimVerSigY[l]);
-	Double_t sigmaZVx  = TMath::Sqrt(sigmaZ*sigmaZ + PrimVerSigZ[l]*PrimVerSigZ[l]);
+	    continue;
+	  }
+	  Double_t sigmaXYVx = TMath::Sqrt(sigmaXY* sigmaXY+ 
+					   PrimVerSigX[l]*PrimVerSigX[l] +  
+					   PrimVerSigY[l]*PrimVerSigY[l]);
+	  Double_t sigmaZVx  = TMath::Sqrt(sigmaZ*sigmaZ + PrimVerSigZ[l]*PrimVerSigZ[l]);
 #ifdef DEBUG
-	cout << "Sigma DCA xy " << sigmaXY << " => " << sigmaXYVx << endl;
-	cout << "Sigma DCA z  " << sigmaZ  << " => " << sigmaZVx << endl;
+	  cout << "Sigma DCA xy " << sigmaXY << " => " << sigmaXYVx << endl;
+	  cout << "Sigma DCA z  " << sigmaZ  << " => " << sigmaZVx << endl;
 #endif
 #ifdef DEBUG
-	cout << "dcaXY: " << dcaXY << "\t dcaZ " << dcaZ << endl;
+	  cout << "dcaXY: " << dcaXY << "\t dcaZ " << dcaZ << endl;
 #endif
-	Double_t pullXY = dcaXY/sigmaXY;
-	Double_t pullZ  = dcaZ /sigmaZ;
-	Double_t pullXYVx = dcaXY/sigmaXYVx;
-	Double_t pullZVx  = dcaZ /sigmaZVx;
-	Double_t pull = TMath::Sqrt(pullXY*pullXY + pullZ*pullZ);
-	if (N > 4) N = 4;
-	dcaXYInvpT[N]->Fill(1./pTGl[kg],dcaXY);
-	dcaXYInvp[N]->Fill(1./P,dcaXY);
-	pullXYInvpT[N]->Fill(1./pTGl[kg],pullXY);
-	pullXYInvpTVx[N]->Fill(1./pTGl[kg],pullXYVx);
-	pullXYInvp[N]->Fill(1./P,pullXY);
-	pullXYInvpVx[N]->Fill(1./P,pullXYVx);
-	dcaZInvpT[N]->Fill(1./pTGl[kg],dcaZ);
-	dcaZInvp[N]->Fill(1./P,dcaZ);
-	pullZInvpT[N]->Fill(1./pTGl[kg],pullZ);
-	pullZInvpTVx[N]->Fill(1./pTGl[kg],pullZVx);
-	pullZInvp[N]->Fill(1./P,pullZ);
-	pullZInvpVx[N]->Fill(1./P,pullZVx);
-	if (pTGl[kg] > 1.) {
-	  dcaXYPhi[N]->Fill(phi,dcaXY);
-	  pullXYPhi[N]->Fill(phi,pullXY);
-	  dcaZPhi[N]->Fill(phi,dcaZ);
-	  pullZPhi[N]->Fill(phi,pullZ);
+	  Double_t pullXY = dcaXY/sigmaXY;
+	  Double_t pullZ  = dcaZ /sigmaZ;
+	  Double_t pullXYVx = dcaXY/sigmaXYVx;
+	  Double_t pullZVx  = dcaZ /sigmaZVx;
+	  Double_t pull = TMath::Sqrt(pullXY*pullXY + pullZ*pullZ);
+	  if (N > 4) N = 4;
+	  dcaXYInvpT[N]->Fill(1./pTGl[kg],dcaXY);
+	  dcaXYInvp[N]->Fill(1./P,dcaXY);
+	  pullXYInvpT[N]->Fill(1./pTGl[kg],pullXY);
+	  pullXYInvpTVx[N]->Fill(1./pTGl[kg],pullXYVx);
+	  pullXYInvp[N]->Fill(1./P,pullXY);
+	  pullXYInvpVx[N]->Fill(1./P,pullXYVx);
+	  dcaZInvpT[N]->Fill(1./pTGl[kg],dcaZ);
+	  dcaZInvp[N]->Fill(1./P,dcaZ);
+	  pullZInvpT[N]->Fill(1./pTGl[kg],pullZ);
+	  pullZInvpTVx[N]->Fill(1./pTGl[kg],pullZVx);
+	  pullZInvp[N]->Fill(1./P,pullZ);
+	  pullZInvpVx[N]->Fill(1./P,pullZVx);
+	  if (pTGl[kg] > 1.) {
+	    dcaXYPhi[N]->Fill(phi,dcaXY);
+	    pullXYPhi[N]->Fill(phi,pullXY);
+	    dcaZPhi[N]->Fill(phi,dcaZ);
+	    pullZPhi[N]->Fill(phi,pullZ);
+	  }
+	  if (N >= 2) {
+	    DCAxy->Fill(TMath::Abs(pullXY));
+	    DCAz->Fill(TMath::Abs(pullZ));
+	    DCA->Fill(pull);
+	  }
 	}
-	if (N >= 2) {
-	  DCAxy->Fill(TMath::Abs(pullXY));
-	  DCAz->Fill(TMath::Abs(pullZ));
-	  DCA->Fill(pull);
-	}
-      }
 #ifdef GLOBAL
-      break;
+	break;
 #endif
-      if (DCA->GetEntries() == 0) continue;
-      Double_t nXY = 0;
-      Double_t nZ  = 0;
-      Double_t n   = 0;
-      for (Int_t i = nBinsDCA; i > 0; i--) {
-	Double_t x =  DCA->GetBinCenter(i);
-	nXY += DCAxy->GetBinContent(i);
-	nZ  += DCAz->GetBinContent(i);
-	n += DCA->GetBinContent(i);
-	if (nXY > 0) {
-	  NvsDCAxy->Fill(nXY,x);
+	if (DCA->GetEntries() == 0) continue;
+	Double_t nXY = 0;
+	Double_t nZ  = 0;
+	Double_t n   = 0;
+	for (Int_t i = nBinsDCA; i > 0; i--) {
+	  Double_t x =  DCA->GetBinCenter(i);
+	  nXY += DCAxy->GetBinContent(i);
+	  nZ  += DCAz->GetBinContent(i);
+	  n += DCA->GetBinContent(i);
+	  if (nXY > 0) {
+	    NvsDCAxy->Fill(nXY,x);
+	  }
+	  if (nZ  > 0) {
+	    NvsDCAz->Fill(nZ,x);
+	  }
+	  if (n   > 0) {
+	    NvsDCA->Fill(n,x);
+	  }
 	}
-	if (nZ  > 0) {
-	  NvsDCAz->Fill(nZ,x);
+	if (noGoodPrimaryTracks) {
+	  VxSigmaX->Fill(TMath::Log10(noGoodPrimaryTracks),PrimVerSigX[l]);
+	  VxSigmaY->Fill(TMath::Log10(noGoodPrimaryTracks),PrimVerSigY[l]);
+	  VxSigmaZ->Fill(TMath::Log10(noGoodPrimaryTracks),PrimVerSigZ[l]);
 	}
-	if (n   > 0) {
-	  NvsDCA->Fill(n,x);
-	}
-      }
-      if (noGoodPrimaryTracks) {
-	VxSigmaX->Fill(TMath::Log10(noGoodPrimaryTracks),PrimVerSigX[l]);
-	VxSigmaY->Fill(TMath::Log10(noGoodPrimaryTracks),PrimVerSigY[l]);
-	VxSigmaZ->Fill(TMath::Log10(noGoodPrimaryTracks),PrimVerSigZ[l]);
+#endif /* ! __ONLY_GLOBAL__ */
       }
     }
   }
   fOut->Write();
-  delete fOut;
+  //  delete fOut;
 }

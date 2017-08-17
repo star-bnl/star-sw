@@ -25,14 +25,12 @@
   end
   echo "name = $name";
   if ($name == "") exit 1;
-  
-#  set chain = "MC.2016a,istSlowSim,StiCA,-hitfilt,StiHftC,beamLine,-geantOut,evout,VFMCE,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
-#  set Sti = ",StiCA,KFVertex";
+  setenv StarEndMakerShell
   set Sti = ",StiCA";
   echo $Name | grep -i NoSti 
   if (! $?) set Sti = ",-Sti,nodefault,mysql";
-#  set chain = "MC.2016a,istSlowSim"${Sti}",-hitfilt,StiHftC,beamLine,geantOut,evout,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
-  set chain = "MC.2016a,istSlowSim"${Sti}",-hitfilt,StiHftC,beamLine,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+#  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,StiHftC,beamLine,-geantOut,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,StiHftC,beamLine,-geantOut,-evout,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
   set VMCE = "";
   echo $Name | grep -i real
@@ -40,12 +38,13 @@
   echo $Name | grep -i 20Muons
   if ( $? ) set VMCE = ",VFMCE";
   set Chain = ${chain}${VMCE}${sdt}",Rung."${rung}
-  set base = ${name}_${rung};
+  set base = ${name}_${rung}_${f}_${N};
   set file = ${base}.MuDst.root
+  set tag  = ${base}.tags.root
   set logFile  = ${base}B.log
   echo "${file}"
   if ( ! -r ${file}) then
-    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <input URL="command:RunId.pl 1 100 500" />

@@ -4,3 +4,7 @@ if (! -d Zombie) mkdir Zombie
 foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
   set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
 end
+root.exe -q -b Chain.C+ | tee Chain.log
+foreach f (`grep missing Chain.log | awk '{print $3}' `)
+  set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+end

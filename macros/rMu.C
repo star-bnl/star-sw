@@ -101,16 +101,20 @@ Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
 void rMu(Long64_t nevent = 9999999,
 	 const  char* outFile="rMu.root") {
   TFile *fOut   = new TFile(outFile,"recreate");
+#ifdef  __PRIMARY_TRACKS__
   TH1F *VxZ     = new TH1F("VxZ","Vertex Z",20,-10.,10.);
   TH2F *EtapT   = new TH2F("EtapT","track #eta versu pT",100,-1,1,100,0.,5.);
-  TH2F *HftHits = new TH2F("HftHist","No. of HFT hits versus no. of TPC hits",32,14.5,46.5,13,-0.5,12.5);
+#endif /*  __PRIMARY_TRACKS__ */
+  TH2F *HftHits = new TH2F("HftHist","No. of HFT hits versus no. of TPC hits",32,14.5,46.5,16,-0.5,15.5);
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   StMuDebug::setLevel(0);  
   StMuDstMaker* maker = (StMuDstMaker *) chain->Maker("MuDst");
   maker->SetStatus("*",0);
   const Char_t *ActiveBranches[] = {"MuEvent"
+#ifdef  __PRIMARY_TRACKS__
 				    ,"PrimaryVertices"
 				    ,"PrimaryTracks"
+#endif
 				    ,"GlobalTracks"
 #if 0
 				    ,"CovGlobTrack"
@@ -139,15 +143,18 @@ void rMu(Long64_t nevent = 9999999,
     // cout << " #" << ev;
     //    Int_t referenceMultiplicity = muEvent->refMult(); // get the reference multiplicity
     // cout << " refMult= "<< referenceMultiplicity;
+#ifdef  __PRIMARY_TRACKS__
     TClonesArray *PrimaryVertices   = mu->primaryVertices(); 
     Int_t NoPrimaryVertices = PrimaryVertices->GetEntriesFast();  // cout << "\tPrimaryVertices " << NoPrimaryVertices;
     TClonesArray *PrimaryTracks    = mu->array(muPrimary);  
     Int_t NoPrimaryTracks = PrimaryTracks->GetEntriesFast();  // cout << "\tPrimaryTracks " << NoPrimaryTracks;
+#endif
     TClonesArray *GlobalTracks     = mu->array(muGlobal);  
     Int_t NoGlobalTracks = GlobalTracks->GetEntriesFast();        if (Debug()) {cout << "\tGlobalTracks " << NoGlobalTracks;}
 #if 0
     TClonesArray *CovGlobTrack     = mu->covGlobTrack();          if (Debug()) {cout << "\tCovGlobTrack " << CovGlobTrack->GetEntriesFast();}
 #endif
+#ifdef __PRIMARY_TRACKS__
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *Vtx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
       if (l) continue;
@@ -170,6 +177,25 @@ void rMu(Long64_t nevent = 9999999,
 	HftHits->Fill(noTpcHits,noHftHits);
       }
     }
+#else /* !  __PRIMARY_TRACKS__ */
+    for (Int_t k = 0; k < NoGlobalTracks; k++) {
+      StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(k);
+      if (! gTrack) continue;
+      if (! gTrack->idTruth()) continue;
+      //      if (! Accept(gTrack)) continue;
+      //	cout << *gTrack << endl;
+      StTrackTopologyMap topologyMap = gTrack->topologyMap();
+      Int_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
+      Int_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
+      Int_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
+      noPxlHits = TMath::Min(3, noPxlHits);
+      noIstHits = TMath::Min(2, noIstHits);
+      noSsdHits = TMath::Min(2, noSsdHits);
+      UInt_t noHftHits = noPxlHits + 3*(noIstHits + 2*noSsdHits);
+      UInt_t noTpcHits = topologyMap.numberOfHits(kTpcId); // 0-45
+      HftHits->Fill(noTpcHits,noHftHits);
+    }
+#endif
   }
   if (fOut) fOut->Write();
 }
