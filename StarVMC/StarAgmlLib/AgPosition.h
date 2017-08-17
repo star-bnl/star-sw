@@ -4,6 +4,15 @@
 #include <StarVMC/StarAgmlUtil/AgTransform.h>
 //#include "AgParameterList.h"
 #include <StarVMC/StarAgmlUtil/AgParameterList.h>
+#include <StarVMC/StarAgmlUtil/AgMLDb.h>
+
+class AgMLDbMatrix : public AgMLDbFunctor
+{
+public:
+  AgMLDbMatrix() { Register(this); }
+  virtual void operator()( const char* name, const int row, double m[4][4] );  
+};
+
 
 #include <TNamed.h>
 
@@ -19,17 +28,18 @@ public:
   /// Apply misalignment parameters from DB table.  The current matrix will
   /// be multiplied by the matrix accessed from the DB.
   /// @param tablename Name of the table in the DB
-  /// @param options Delimited list of options.  "invert" will perform the inverse transformation.
-  bool Misalign( const char* tablename=0, const int rownumber=0, const char* options="" ) { return false; }
+  /// @param options List of options: left, right, print for multiplication on the left
+  ///                or right, and verbose output
+  bool Misalign( const char* tablename=0, const int rownumber=0, const char* options="" );// { return false; }
 
   /// Reset state of transofmation matrix and apply alternate positioning based on DB table.
-  bool Alternate( const char* tablename=0, const int rownumber=0, const char* options="" ){ return false; }
+  //  bool Alternate( const char* tablename=0, const int rownumber=0, const char* options="" ){ return false; }
 
   /// Apply specified matrix as a misalignment.  
-  bool Misalign( const double trn[4][4], const char *options="" );
+  //  bool Misalign( const double trn[4][4], const char *options="" );
 
   /// Reset state of transofrmation matrix and apply the specified matrix instead.
-  bool Alternate( const double trn[4][4], const char* options="" );
+  //  bool Alternate( const double trn[4][4], const char* options="" );
    
   /// Returns a pointer to a new instance of a matrix.  
   TGeoMatrix* matrix(); 
@@ -69,7 +79,13 @@ public:
   };
   
   /// Order of operations
-  void SetOrder( OrderOps_t order ){ mOrderOps = order; }
+  void SetOrder( OrderOps_t order );//{ mOrderOps = order; }
+
+  static void SetReal();
+  static void SetIdeal();
+
+  int NextCopyNumber();
+
 
 private:
 protected:
