@@ -23,7 +23,7 @@ class StPicoBbcTile : public TObject
 public:
 
   StPicoBbcTile();
-  StPicoBbcTile(int ID, int ADC, int TAC, int TDC, bool hasTAC, bool StatusIsGood=kTRUE);
+  StPicoBbcTile(int ID, int ADC, int TAC, int TDC, bool hasTAC, bool statusIsGood = true);
 
   virtual void Print(const Char_t *option = "") const;
 
@@ -35,7 +35,8 @@ public:
 
   int pmt() const;  // 1...32
 
-  bool goodStatus() const;     // false if bad or missing
+  /// false if bad or missing
+  bool isGood() const;
 
 protected:
 
@@ -59,5 +60,5 @@ inline int  StPicoBbcTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoBbcTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoBbcTile::tdc() const { return (mQTdata >> 24) & 0x001F; }
 inline bool StPicoBbcTile::hasTac() const { return (mQTdata >> 29) & 0x1; }
-inline bool StPicoBbcTile::goodStatus() const { return (mQTdata >> 30) & 0x1; }
+inline bool StPicoBbcTile::isGood() const { return (mQTdata >> 30) & 0x1; }
 #endif

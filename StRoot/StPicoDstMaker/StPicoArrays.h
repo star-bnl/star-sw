@@ -1,8 +1,11 @@
 #ifndef StPicoArrays_h
 #define StPicoArrays_h
 
-class StPicoArrays {
-  public:
+
+class StPicoArrays
+{
+public:
+
   StPicoArrays();
 
   // Should be changed to constexpr once ROOT 6 is available at STAR
