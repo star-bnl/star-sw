@@ -23,7 +23,7 @@ class StPicoBbcTile : public TObject
 public:
 
   StPicoBbcTile();
-  StPicoBbcTile(int ID, int ADC, int TAC, int TDC, bool hasTAC);
+  StPicoBbcTile(int ID, int ADC, int TAC, int TDC, bool hasTAC, bool StatusIsGood=kTRUE);
 
   virtual void Print(const Char_t *option = "") const;
 
@@ -35,6 +35,8 @@ public:
 
   int pmt() const;  // 1...32
 
+  bool goodStatus() const;     // false if bad or missing
+
 protected:
 
   /// Phototube #: [1, 32], sign: +/- = West/East
@@ -42,6 +44,7 @@ protected:
 
   /// Packed channel data: bits  0-11 are ADC; bits 12-23 are TAC;
   ///                      bits 24-28 are TDC; bit 29 is noTAC flag
+  ///                      bit 30 is the good/bad (1/0) status flag
   ULong_t mQTdata;
 
   ClassDef(StPicoBbcTile, 1)
@@ -56,5 +59,5 @@ inline int  StPicoBbcTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoBbcTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoBbcTile::tdc() const { return (mQTdata >> 24) & 0x001F; }
 inline bool StPicoBbcTile::hasTac() const { return (mQTdata >> 29) & 0x1; }
-
+inline bool StPicoBbcTile::goodStatus() const { return (mQTdata >> 30) & 0x1; }
 #endif
