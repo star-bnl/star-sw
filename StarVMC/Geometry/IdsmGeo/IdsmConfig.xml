@@ -2,7 +2,8 @@
 <Detector name="IDSM" comment="Inner detector supports">
   <Modules>
     IdsmGeo1,
-    IdsmGeo2
+    IdsmGeo2,
+    IdsmGeo2a
   </Modules>
 
   <Setup name="IDSMof" comment="OFF" module="IdsmGeo1" onoff="off" />
@@ -15,11 +16,11 @@
     <Init struct="idsc" var="version" value ="1" />
   </Setup>
 
-  <Setup name="IDSM02" comment="Inner detector support module" module="IdsmGeo2" onoff="on" >
+  <Setup name="IDSM02" comment="Inner detector support module" module="IdsmGeo2a" onoff="on" >
     <Init struct="idsc" var="version" value ="2" />
   </Setup>
 
-  <Setup name="IDSM14" comment="Inner detector support module" module="IdsmGeo2" onoff="on" >
+  <Setup name="IDSM14" comment="Inner detector support module" module="IdsmGeo2a" onoff="on" >
     <Init struct="idsc" var="version" value ="14" />
   </Setup>
 
