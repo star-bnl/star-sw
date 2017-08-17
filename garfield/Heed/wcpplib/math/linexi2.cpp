@@ -12,6 +12,8 @@ text appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 linexi2_coor::linexi2_coor(const long fqlr, const double* fax)
     : qlr(fqlr), ax(fax) {
   long n;
@@ -99,4 +101,6 @@ linexi2B::linexi2B(const linexi2B& lxB) : linexi2((linexi2&)lxB) {
   for (i = 0; i < qlr; i++)
     for (m = 0; m < qlr; m++)
       B[i][m] = lxB.B[i][m];
+}
+
 }

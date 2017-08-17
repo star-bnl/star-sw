@@ -1,16 +1,13 @@
 #ifndef StPicoDstMaker_h
 #define StPicoDstMaker_h
 
-#include <vector>
-#include <utility>
-
-#include "TClonesArray.h"
-
 #include "StChain/StMaker.h"
 #include "StPicoDstMaker/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoBbcFiller.h"
 #include "StPicoDstMaker/StPicoEpdFiller.h"
 
+class TClonesArray;
+class TChain;
 class TFile;
 class TTree;
 class StMuDst;
@@ -61,7 +58,7 @@ public:
 
   void setVtxMode(const PicoVtxMode vtxMode);
 
-protected:
+private:
 
   void streamerOff();
 
@@ -70,7 +67,6 @@ protected:
   void closeWrite();
   Int_t openRead();
   void  read();
-  void setBranchAddresses();
   void closeRead();
   void setBranchAddresses(TChain*);
 

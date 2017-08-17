@@ -136,7 +136,7 @@ require  Exporter;
 
 
 use vars qw($VERSION);
-$VERSION   =   "V01.400";
+$VERSION   =   "V01.401";
 
 # The hashes that hold a current context
 my %optoperset;
@@ -786,10 +786,11 @@ sub _ReadConfig
 	    my($ref,$server) ;
 	    my($bref);
 	    # intent can be BNL::Admin
+	    &print_debug("_ReadConfig","Parsing intent [$intent]");
 	    if ($intent =~ /::/){
 		($site,$lintent) = split("::",$intent);
 	    } else {
-		$site    = (defined($DSITE)?$DSITE:"");
+		$site    = (defined($DSITE)?$DSITE:($ENV{"SITE"}||""));
 		$lintent = $intent;
 	    }
 	    $FC::INTENT = $lintent;  # save it for later
@@ -810,7 +811,7 @@ sub _ReadConfig
 		&print_debug("_ReadConfig","XML :: Dereferencing full schema");
 		@servers = @{$XMLREF->{SERVER}};
 	    } else {
-		# Starting at 1.0.1 actually, SITE is is optional but
+		# Starting at 1.0.1 actually, SITE is optional but
 		# all defined and stabalized.
 		$bref = $XMLREF->{SITE};
 		foreach my $key (keys %{$XMLREF->{SITE}} ){
