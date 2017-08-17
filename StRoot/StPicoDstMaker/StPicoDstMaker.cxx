@@ -1,8 +1,11 @@
 #include <algorithm>
 #include <unordered_map>
 #include <string>
+#include <vector>
+
 #include "TRegexp.h"
 #include "TChain.h"
+#include "TClonesArray.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TObjectSet.h"
@@ -115,23 +118,8 @@ void StPicoDstMaker::clearArrays()
  */
 void StPicoDstMaker::SetStatus(char const* branchNameRegex, int enable)
 {
-  static char const* specNames[] = {"EventAll", 0};
-  static int const specIndex[] = { 0, StPicoArrays::NAllPicoArrays, -1};
-
   if (strncmp(branchNameRegex, "St", 2) == 0)
     branchNameRegex += 2; //Ignore first "St"
-
-  for (int i = 0; specNames[i]; ++i)
-  {
-    if (strcmp(branchNameRegex, specNames[i])) continue;
-    char* sta = mStatusArrays + specIndex[i];
-    int   num = specIndex[i + 1] - specIndex[i];
-    std::fill_n(sta, num, enable);
-    LOG_INFO << "StPicoDstMaker::SetStatus " << enable << " to " << specNames[i] << endm;
-    if (StMaker::m_Mode == PicoIoMode::IoRead)
-      setBranchAddresses(mChain);
-    return;
-  }
 
   TRegexp re(branchNameRegex, 1);
   for (int i = 0; i < StPicoArrays::NAllPicoArrays; ++i)
@@ -170,7 +158,7 @@ void StPicoDstMaker::setBranchAddresses(TChain* chain)
   mTTree = mChain->GetTree();
 }
 //_____________________________________________________________________________
-void  StPicoDstMaker::streamerOff()
+void StPicoDstMaker::streamerOff()
 {
   // This is to to save space on the file. No need for TObject bits for this structure.
   // see: https://root.cern.ch/doc/master/classTClass.html#a606b0442d6fec4b1cd52f43bca73aa51
@@ -1102,6 +1090,7 @@ void StPicoDstMaker::fillMtdHits()
 
   vector<Int_t> triggerPos;
   vector<Int_t> hitIndex;
+
   for (unsigned int i = 0; i < nHits; ++i)
   {
     StPicoMtdHit* hit = mPicoDst->mtdHit(i);
@@ -1121,7 +1110,7 @@ void StPicoDstMaker::fillMtdHits()
   }
 
   vector<Int_t> hits;
-  hits.clear();
+
   while (triggerPos.size() > 0)
   {
     hits.clear();
@@ -1134,8 +1123,8 @@ void StPicoDstMaker::fillMtdHits()
 
     for (Int_t k = (Int_t)hits.size() - 1; k > -1; k--)
     {
-      StPicoMtdHit* hit = mPicoDst->mtdHit(hitIndex[hits[k]]);
-      hit->setTriggerFlag((Int_t)hits.size());
+      StPicoMtdHit* hit = mPicoDst->mtdHit( hitIndex[hits[k]] );
+      hit->setTriggerFlag( (Int_t)hits.size() );
       triggerPos.erase(triggerPos.begin() + hits[k]);
       hitIndex.erase(hitIndex.begin() + hits[k]);
     }

@@ -2,6 +2,7 @@
 #include "St_base/StMessMgr.h"
 #include "StPicoEvent/StPicoEmcTrigger.h"
 
+
 //----------------------------------------------------------------------------------
 StPicoEmcTrigger::StPicoEmcTrigger(): mFlag(0), mId(0), mAdc(0)
 {

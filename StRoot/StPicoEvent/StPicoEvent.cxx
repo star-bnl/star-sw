@@ -1,13 +1,12 @@
 #include <algorithm>
 #include <limits>
-#include <unordered_map>
-#include <string>
+
+#include "StEvent/StBTofHeader.h"
 #include "StEvent/StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
-#include "StEvent/StBTofHeader.h"
-#include "St_base/StMessMgr.h"
+
 #include "StPicoEvent/StPicoUtilities.h"
 #include "StPicoEvent/StPicoEvent.h"
 
@@ -130,7 +129,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
     UInt_t const pmtId    = i % 24 ;         // pmtId:0-23
 
     if (eastWest == 0) mBbcAdcEast[pmtId] = bbc.adc(i) ;
-    else                mBbcAdcWest[pmtId] = bbc.adc(i) ;
+    else               mBbcAdcWest[pmtId] = bbc.adc(i) ;
   }
 }
 

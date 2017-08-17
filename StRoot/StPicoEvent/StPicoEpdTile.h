@@ -25,7 +25,7 @@ class StPicoEpdTile : public TObject
 public:
 
   StPicoEpdTile();
-  StPicoEpdTile(int positionId, int tileId, DetectorSide EW, int ADC, int TAC, int TDC, bool hasTAC, bool StatusIsGood=kTRUE);
+  StPicoEpdTile(int positionId, int tileId, DetectorSide EW, int ADC, int TAC, int TDC, bool hasTAC, bool statusIsGood = true);
 
   virtual void Print(const Char_t *option = "") const;
 
@@ -39,7 +39,8 @@ public:
   int position() const;     // 1...12
   int tile() const;         // 1...31
 
-  bool goodStatus() const;        // false if tile is bad or missing
+  /// false if tile is bad or missing
+  bool isGood() const;
 
 protected:
 
@@ -66,5 +67,5 @@ inline int  StPicoEpdTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoEpdTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoEpdTile::tdc() const { return (mQTdata >> 24) & 0x001F; }
 inline bool StPicoEpdTile::hasTac() const { return (mQTdata >> 29) & 0x1; }
-inline bool StPicoEpdTile::goodStatus() const { return (mQTdata >> 30) & 0x1; }
+inline bool StPicoEpdTile::isGood() const { return (mQTdata >> 30) & 0x1; }
 #endif
