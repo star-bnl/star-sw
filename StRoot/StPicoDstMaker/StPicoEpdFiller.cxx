@@ -43,8 +43,6 @@ void StPicoEpdFiller::fill(const StMuDst& muDst)
       int TAC = hasTAC ? trg->fmsADC(5, epdMap.qt_board_address, epdMap.qt_channel_TAC, 0) : 0;
 
       DetectorSide EW = DetectorSide::East; // always East for 2017
-      //      cout << "Maker making a PicoTile with positionId/tileId/ID= " << positionId << "/" << tileId << "/" <<  ID
-      //      	   << "ADC=" << ADC << " TDC=" << TDC << " TAC=" << TAC << endl;
       new((*mTileCollection)[nTiles++]) StPicoEpdTile(positionId, tileId, EW, ADC, TAC, TDC, hasTAC);
     }
   }

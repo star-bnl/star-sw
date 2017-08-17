@@ -25,7 +25,7 @@ class StPicoEpdTile : public TObject
 public:
 
   StPicoEpdTile();
-  StPicoEpdTile(int positionId, int tileId, DetectorSide EW, int ADC, int TAC, int TDC, bool hasTAC);
+  StPicoEpdTile(int positionId, int tileId, DetectorSide EW, int ADC, int TAC, int TDC, bool hasTAC, bool StatusIsGood=kTRUE);
 
   virtual void Print(const Char_t *option = "") const;
 
@@ -39,6 +39,8 @@ public:
   int position() const;     // 1...12
   int tile() const;         // 1...31
 
+  bool goodStatus() const;        // false if tile is bad or missing
+
 protected:
 
   /// Packed channel Id: 100*positionId + tileId
@@ -48,6 +50,7 @@ protected:
 
   /// Packed channel data: bits  0-11 are ADC; bits 12-23 are TAC;
   ///                      bits 24-28 are TDC; bit 29 is noTAC flag
+  ///                      bit 30 is the good/bad (1/0) status flag
   ULong_t mQTdata;
 
   ClassDef(StPicoEpdTile, 1)
@@ -63,5 +66,5 @@ inline int  StPicoEpdTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoEpdTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoEpdTile::tdc() const { return (mQTdata >> 24) & 0x001F; }
 inline bool StPicoEpdTile::hasTac() const { return (mQTdata >> 29) & 0x1; }
-
+inline bool StPicoEpdTile::goodStatus() const { return (mQTdata >> 30) & 0x1; }
 #endif
