@@ -1,4 +1,4 @@
-<Document name="fstdgeo.xml">
+<Document  name="fstdgeo.xml">
 <Export language="Mortran">
 <Import file="pams/geometry/fstdgeo/fstdgeo.g" verbatim="true" />
 </Export>
