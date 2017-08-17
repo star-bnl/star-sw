@@ -189,7 +189,7 @@ void bfc(Int_t First, Int_t Last,
   if (tChain == "") {
   if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
   //  tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
-   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D";
+   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,picoWrite";
    //   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D";
   //  tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
   //  tChain += "MC.2016a,Stx,geantOut,";
