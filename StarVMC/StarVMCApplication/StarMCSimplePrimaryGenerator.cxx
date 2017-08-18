@@ -46,7 +46,7 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else {
     fId = Id;
   }
-  cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << " flat in " << endl;
+  cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << " in " << endl;
   if (! fOption.Contains("BL",TString::kIgnoreCase)) {
     cout << fpT_min << " <  pT < " << fpT_max << endl;
   } else {

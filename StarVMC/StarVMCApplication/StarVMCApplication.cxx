@@ -437,7 +437,6 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 17      HALL[1]/CAVE[1]/FBOX[2]/FSHM[1]/FHMS[100]
 18      HALL[1]/CAVE[1]/FBOX[4]/FLXF[394]
 19      HALL[1]/CAVE[1]/FPRS[1]/FPLY[4]/FPSC[80]
-
    */
   Int_t NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   enum EDetector2Align {
@@ -466,8 +465,10 @@ Bool_t StarVMCApplication::MisalignGeometry() {
     {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                        	 1, { 1, 0, 0}, 0},
     {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                 	 1, {10, 0, 0}, 0},
     {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",         	 2, {10, 4, 0}, 0},
-    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_1/LADX_%d/PXSI_%d",   	 3, {10, 4,10}, 0},
-    {"PxlSensor-%d",kPxlSensor, "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_1/LADX_%d/PXSI_%d/PLAC_1",3, {10, 4,10}, 0},
+#if 0
+    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/LADX_%d/PXSI_1",       3, {10, 4,10}, 0},
+#endif
+    {"PxlSensor-%d",kPxlSensor, "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/LADX_%d/PXSI_1/PLAC_1",3, {10, 4,10}, 0},
     {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",                             1, { 1, 0, 0}, 0},
     {"IstLadder-%d", kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",                      1, {24, 0, 0}, 0},
     {"IstWafer-%d",   kIstWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d/IBLM_%d",              2, {24, 6, 0}, 0},
@@ -483,12 +484,11 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   TGeoHMatrix I("Indentity");
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
-  // PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
-  TGeoTranslation PixelLadderT(-0.2381, 0.0, -4.8750); //(0,0,0);// TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);// 
-  // PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
-  //  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);
-  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01-4.222);
-  Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929};
+  TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);//                                       PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
+  TGeoTranslation PixelWaferT(0.8480000E-01 - 0.0163,-0.1250002E-02 + 0.00375 ,0.01604 ); // LADX->AddNode(PXSI,1,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,0));
+  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);//                        PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
+  TGeoTranslation PixelSensorX(0.0163-0.0326, -0.0037+0.00745, -0.01604+0.03208); // Extra ?
+  Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929}; 
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
   TGeoHMatrix IstLadderH;
   IstLadderH.SetTranslation(tIstLadder);
@@ -591,123 +591,72 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	  LADR -> kPxLadder : PXLA^-1 * StpxlHalfOnPxl * StpxlSectorOnHalf * StpxlLadderOnSector * PixelLadderT
 	  PXSI -> kPxlWafer : PSXI 
 	  PLAC -> kPxlSensor: (PixleLadderT * PXSI)^-1 * StpxlSensorOnLadder
+Pxl: SensorOnGlobal[sector]ladder[sensor] = TpcOnGlobal * IdsOnTpc * PstOnIds * PxlOnPst * HalfOnPxl[sector / 5] * SectorOnHalf[sector] * 
+		                             LadderOnSector[sector]ladder * SensorOnLadder[sector]ladder[sensor];
 	*/
-      case kHft:
+      case kHft:  // IDSM
 	HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);
 	rotA = HftOnTpc;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
-      case kPxl:
-	/*
-	  TGeoVolume *PXMO = gGeoManager->MakeTube("PXMO",GetMed("PIXL_AIR"),2.1,11,23.26); PXMO->SetTitle("PXMO");
-	  IDSM->AddNode(PXMO,1,gGeoIdentity);
-	  TGeoVolume *PXLA = gGeoManager->MakeTubs("PXLA",GetMed("PIXL_AIR"),2.12,10,23.26,72,132); PXLA->SetTitle("PXLA");
-	  PXMO->AddNodeOverlap(PXLA,1,new TGeoTranslation(0,0.1000000E-04,0));
-	  rot = new TGeoRotation("next",90,36,90,126,0,0);
-	  PXMO->AddNodeOverlap(PXLA,2,new TGeoCombiTrans(-0.5877849E-05,0.8090172E-05,0,rot));
-	  rot = new TGeoRotation("next",90,72,90,162,0,0);
-	  PXMO->AddNodeOverlap(PXLA,3,new TGeoCombiTrans(-0.9510564E-05,0.3090171E-05,0,rot));
-	  rot = new TGeoRotation("next",90,108,90,198,0,0);
-	  PXMO->AddNodeOverlap(PXLA,4,new TGeoCombiTrans(-0.9510564E-05,-0.3090171E-05,0,rot));
-	  rot = new TGeoRotation("next",90,144,90,234,0,0);
-	  PXMO->AddNodeOverlap(PXLA,5,new TGeoCombiTrans(-0.5877853E-05,-0.8090169E-05,0,rot));
-	  PXMO->AddNodeOverlap(PXLA,6,new TGeoCombiTrans(-0.8742278E-12,-0.1000000E-04,0,GetRot("R180")));
-	  rot = new TGeoRotation("next",90,216,90,306,0,0);
-	  PXMO->AddNodeOverlap(PXLA,7,new TGeoCombiTrans(0.5877852E-05,-0.8090170E-05,0,rot));
-	  rot = new TGeoRotation("next",90,252,90,342,0,0);
-	  PXMO->AddNodeOverlap(PXLA,8,new TGeoCombiTrans(0.9510565E-05,-0.3090170E-05,0,rot));
-	  rot = new TGeoRotation("next",90,288,90,18,0,0);
-	  PXMO->AddNodeOverlap(PXLA,9,new TGeoCombiTrans(0.9510565E-05,0.3090169E-05,0,rot));
-	  rot = new TGeoRotation("next",90,324,90,54,0,0);
-	  PXMO->AddNodeOverlap(PXLA,10,new TGeoCombiTrans(0.5877852E-05,0.8090170E-05,0,rot));
-
-	  TGeoVolume *LADR = gGeoManager->MakeBox("LADR",GetMed("PIXL_MEDAIR"),1.245,0.5225000E-01,15.325); LADR->SetTitle("LADR");
-	  rot = new TGeoRotation("next",90,175.437,90,265.437,0,0);
-	  PXLA->AddNode(LADR,1,new TGeoCombiTrans(-0.73444,2.74331,-4.875,rot));
-	  rot = new TGeoRotation("next",90,349.963,90,79.96302,0,0);
-	  PXLA->AddNode(LADR,2,new TGeoCombiTrans(-1.30523,8.1723,-4.875,rot));
-	  rot = new TGeoRotation("next",90,1.963,90,91.963,0,0);
-	  PXLA->AddNode(LADR,3,new TGeoCombiTrans(-2.97583,7.72235,-4.875,rot));
-	  rot = new TGeoRotation("next",90,13.963,90,103.963,0,0);
-	  PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
-
-	  TGeoVolume *PXSI = gGeoManager->MakeBox("PXSI",GetMed("PIXL_SILICON"),1.1365,0.2500000E-02,1.012); PXSI->SetTitle("PXSI");
-	  LADR->AddNode(PXSI, 1,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,-4.222));
-	  LADR->AddNode(PXSI, 2,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,-2.197));
-	  LADR->AddNode(PXSI, 3,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,-0.172));
-	  LADR->AddNode(PXSI, 4,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 1.853));
-	  LADR->AddNode(PXSI, 5,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 3.878));
-	  LADR->AddNode(PXSI, 6,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 5.903));
-	  LADR->AddNode(PXSI, 7,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 7.928));
-	  LADR->AddNode(PXSI, 8,new TGeoTranslation(0.8480000E-01,-0.1250002E-02, 9.953));
-	  LADR->AddNode(PXSI, 9,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,11.978));
-	  LADR->AddNode(PXSI,10,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,14.003));
-	  
-	  TGeoVolume *PLAC = gGeoManager->MakeBox("PLAC",GetMed("PIXL_MEDSISENSITIVE"),0.9605,0.8000000E-03,0.9936); PLAC->SetTitle("PLAC");
-	  PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
-	  TGeoVolume *GLUA = gGeoManager->MakeBox("GLUA",GetMed("PIXL_MATADHESIVE"),1.1715,0.2500000E-02,10.1295); GLUA->SetTitle("GLUA");
-	  TGeoVolume *ALCA = gGeoManager->MakeBox("ALCA",GetMed("PIXL_MATALCABLE"),1.23025,0.5500000E-02,15.325); ALCA->SetTitle("ALCA");
-	  TGeoVolume *GLUB = gGeoManager->MakeBox("GLUB",GetMed("PIXL_MATADHESIVE"),1.245,0.2500000E-02,14.95); GLUB->SetTitle("GLUB");
-	  TGeoVolume *CFBK = gGeoManager->MakeBox("CFBK",GetMed("PIXL_CBMIX"),1.245,0.8750000E-02,15.325); CFBK->SetTitle("CFBK");
-	  TGeoVolume *GLUC = gGeoManager->MakeBox("GLUC",GetMed("PIXL_MATADHESIVE"),0.7205,0.5000000E-02,14.95); GLUC->SetTitle("GLUC");
-	  TGeoVolume *DRIV = gGeoManager->MakeBox("DRIV",GetMed("PIXL_MEDFR4"),1.23025,0.2500000E-01,4.55); DRIV->SetTitle("DRIV");
- 	  
-	  LADR->AddNode(GLUA,1,new TGeoTranslation(0.4850000E-01,-0.6250002E-02,4.8855));
-	  LADR->AddNode(ALCA,1,new TGeoTranslation(0.1475000E-01,-0.1425000E-01,0));
-	  LADR->AddNode(GLUB,1,new TGeoTranslation(0,-0.2225000E-01,0.6500000E-01));
-	  LADR->AddNode(CFBK,1,new TGeoTranslation(0,-0.3350000E-01,0));
-	  LADR->AddNode(GLUC,1,new TGeoTranslation(0.4995,-0.4725000E-01,0.6500000E-01));
-
-	  LADR->AddNode(DRIV,1,new TGeoTranslation(0.1475000E-01,0.2725000E-01,-10.589));
-	 */
+      case kPxl:  // PXMO
 	A = StPxlpstOnIds::instance()->GetMatrix();
 	B = StpxlOnPst::instance()->GetMatrix();
 	PxlOnHft = A * B;
 	rotA = PxlOnHft;
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
-      case kPxlSector:
-#if 1
+#if 0
+      case kPxlSector: // PXLA
 	rotA = rotL;
-#else
-	sector = indx[0];
-	half   = (sector-1)/5; 
-	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
-	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
-	rotA = B * C * rotL; // BCRotL
-	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
-	rotLI[sector-1] = rotL.Inverse();
-#endif
 	break;
-      case kPxLadder:
+      case kPxLadder: // LADR
 	sector = indx[0];
 	ladder = indx[1];
 	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
-#if 1
 	half   = (sector-1)/5; 
 	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
 	E = StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
  	LadderOnPxl = B * C * E; PrPV(LadderOnPxl);
 	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXLA
-	rotA = B.Inverse() * LadderOnPxl * PixelLadderT;
-#else
-	E = rotLI[sector-1] * StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
-	rotA = E * PixelLadderT;
-#endif
+	rotA = B.Inverse() * LadderOnPxl * PixelLadderT.Inverse();
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
-      case kPxlWafer:
+#else
+      case kPxlSector: // PXLA
+	sector = indx[0];
+	half   = (sector-1)/5; 
+	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
+	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
+	D = rotL;// * PixelLadderT;
+        rotA = B * C * D; PrPV(rotA);	
+	rotLI[sector-1] = D.Inverse();
+	rotA.SetName(Form(listOfDet2Align[i].Name,sector));
+	break;
+      case kPxLadder: // LADR
+	sector = indx[0];
+	ladder = indx[1];
+	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
+	half   = (sector-1)/5; 
+	E = StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
+	rotA = rotLI[sector-1] * E * PixelLadderT; PrPV(rotA);
+	rotA.SetName(Form(listOfDet2Align[i].Name,sector,ladder));
+	break;
+#endif
+#if 0
+      case kPxlWafer: // LADX/PXSI
 	sector = indx[0];
 	ladder = indx[1];
 	sensor = indx[2];
 	Id = sensor + 10*(ladder+4*(sector-1) - 1);
 	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
-	D = PixelLadderT.Inverse();
-	rotA   =  D * SensorOnLadder * PixelSensorT.Inverse();
+	D = PixelLadderT.Inverse(); 
+	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B);
+	rotA   =  D * B.Inverse() * SensorOnLadder * PixelWaferT.Inverse() * PixelSensorT.Inverse() * PixelSensorX;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
-      case kPxlSensor:
+      case kPxlSensor: // PLAC
 	sector = indx[0];
 	ladder = indx[1];
 	sensor = indx[2];
@@ -715,6 +664,24 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	rotA = rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
+#else
+      case kPxlSensor: // PLAC
+	sector = indx[0];
+	ladder = indx[1];
+	sensor = indx[2];
+	Id = sensor + 10*(ladder+4*(sector-1) - 1);
+	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
+	//	D = *nodeP->GetNode(NLevel)->GetMatrix(); PrPV(B);   // PLAC_1 ==> rotL
+	C = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXSI_1
+	B = *nodeP->GetNode(NLevel-2)->GetMatrix(); PrPV(B); // LADX_1
+        A = PixelLadderT * B * C;  PrPV(A);
+	rotA = A.Inverse() * SensorOnLadder;
+	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
+	break;
+#endif
+	/*
+Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[ladder - 1] * SensorOnLadder[ladder - 1][sensor - 1];
+	 */
       case kIst:
 	A = StpstOnIds::instance()->GetMatrix(0);
 	B = StistOnPst::instance()->GetMatrix(0);
@@ -823,6 +790,17 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	    Int_t matIst = -1;
 	    // Check node
 	    switch (kDetector) {
+	    case kPxLadder:
+	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      PxlOnHft = (*StPxlDb::instance()->geoHMatrixPstOnIds()) 
+		* (*StPxlDb::instance()->geoHMatrixPxlOnPst());	            PrPV(PxlOnHft);
+	      SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
+		* (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
+	      LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
+	      temp = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * PixelLadderT;
+	      comb = &temp;
+	      break;
 	    case kPxlSensor:
 	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
 	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
@@ -852,6 +830,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	      temp = Tpc2Global * HftOnTpc * sstOnOsc; temp.SetName("kSst"); PrPV(temp);
 	      comb = &temp;
 	      break;
+#if 0
 	    case kSstLadder:
 	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
 	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
@@ -860,13 +839,14 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst; temp.SetName("kSstLadder"); PrPV(temp);
 	      comb = &temp;
 	      break;
+#endif
 	    case kSstWafer:
 	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
 	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
 	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(100+ladder); PrPV(sstLadderOnSst);
 	      sstSensorOnLadder = StsstSensorOnLadder::instance()->GetMatrix4Id(7000 + ladder + 100*sensor); PrPV(sstSensorOnLadder);
-	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst * sstSensorOnLadder; temp.SetName("kSstWafer"); PrPV(temp);
+	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst * sstSensorOnLadder * SstSensorR; temp.SetName("kSstWafer"); PrPV(temp);
 	      comb = &temp;
 	      break;
 	    case kSstSensor:
@@ -882,11 +862,11 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	      nMat->Print();
 	      cout << "---------------------------------+ Matrix from Db  ---------------------------------------++" << endl;
 	      comb->Print();
-	      cout << "---------------------------------+ Diff ?     ---------------------------------------------+" << endl;
+	      cout << "---------------------------------+ Inverse     ---------------------------------------------+" << endl;
 	      TGeoHMatrix combI = comb->Inverse(); combI.Print();
 	      D = combI * (*nMat);
 	      if (!(D == I)) {
-		cout << "Node = " << nodeP->GetName() << endl;
+		cout << "---------------------------------+ Diff for Node = " << nodeP->GetName() << endl;
 		D.Print();
 	      }
 	      Double_t *tran = D.GetTranslation();
@@ -911,7 +891,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       }
     }
     if (NN) {
-      cout << "++++++++++++++++++++++++++++++++++ Check Node " <<  listOfDet2Align[i].Name << endl;
+      cout << "++++++++++++++++++++++++++++++++++ Check Node Local " <<  listOfDet2Align[i].Name << endl;
       for (Int_t l = 0; l < 12; l++) {
 	Xyz[l] = Xyz[l]/NN;
 	Xyz2[l] = Xyz2[l]/NN;
@@ -926,7 +906,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
       iBreak++;
     }
     if (NNG) {
-      cout << "++++++++++++++++++++++++++++++++++ Check Node " <<  listOfDet2Align[i].Name << endl;
+      cout << "++++++++++++++++++++++++++++++++++ Check Node Global " <<  listOfDet2Align[i].Name << endl;
       for (Int_t l = 0; l < 12; l++) {
 	XyzG[l] = XyzG[l]/NNG;
 	Xyz2G[l] = Xyz2G[l]/NNG;
