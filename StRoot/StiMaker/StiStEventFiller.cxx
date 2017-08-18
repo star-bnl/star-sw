@@ -1639,7 +1639,11 @@ enum dcaEmx {kImpImp,
   aux.gPHit = atan2(stiHit->y_g(),stiHit->x_g());
   aux.gZHit = stiHit->z_g();
   memset(F[0],0,sizeof(F));
-  F[0][0]=  x/(r*r);
+  if (r > 0) {
+    F[0][0]=  x/(r*r);
+  } else {
+    F[0][0]=  1;
+  }
   F[1][1]= 1;
   TCL::trasat(F[0],aux.lHitEmx,aux.gHitEmx,2,2);
   aux.gPHitErr = sqrt(aux.gHitEmx[0]);

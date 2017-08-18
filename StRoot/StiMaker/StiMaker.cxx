@@ -556,7 +556,7 @@ Int_t StiMaker::InitPulls()
   assert(bfc);
   TFile *tfile  = GetTFile();
   if (!tfile) {
-    TString ts  = bfc->GetFileIn();
+    TString ts  = bfc->GetFileOut();
     ts= gSystem->BaseName(ts);
     int ext = ts.Index(".");
     if (ext>0) ts.Replace(ext,999,"");
