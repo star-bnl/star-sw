@@ -3,7 +3,7 @@
 #include "TFile.h"
 #include "TList.h"
 #include "TDirIter.h"
-#ifdef __CINT__
+#if defined(__CINT__) && ! defined(__MAKECINT__)
 TChain *Chain(const Char_t *TreeName = "MuDst") {
   TChain *chain = 0;
   TCollection *files = gROOT->GetListOfFiles();
