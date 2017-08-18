@@ -793,6 +793,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     // book histograms
     Bool_t fSetDefaultSumw2 = TH1::GetDefaultSumw2();
     TH1::SetDefaultSumw2(kFALSE);
+    mHitsUsage  = new TH2F("HitsUsage","log10(No.of Used in dE/dx hits) versus log10(Total no. of Tpc Hits",
+			   80,0,8,60,0,6);
     Int_t      nZBins = 200;
     Double_t ZdEdxMin = -5;
     Double_t ZdEdxMax =  5;
@@ -1432,8 +1434,6 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	  fTdEdx[k][t]->SetMarkerColor(t+1);
 	}
       } 
-      mHitsUsage  = new TH2F("HitsUsage","log10(No.of Used in dE/dx hits) versus log10(Total no. of Tpc Hits",
-			     80,0,8,60,0,6);
 #ifdef __USEZ3A__
       Int_t      nZBins = 200;
       Double_t ZdEdxMin = -5;
