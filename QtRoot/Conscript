@@ -51,6 +51,7 @@ my @DepsI  = map {$INCLUDE .  "/TQ" . $_ . ".h"}
       tCanvasPainter  tEmitter              tGui             tMutex               tRootApplication      tTimer
    );
 my $DEBUG = "";
+# setenv QMAKESPEC $XOPTSTAR/qt4/mkspecs/linux-g++
 if ($STAR_HOST_SYS =~ /darwin/) {
 #  $DEBUG .= " -spec macx-g++ ";
 #  $DEBUG .= " -spec macx-xcode ";
