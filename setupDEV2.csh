@@ -14,6 +14,7 @@ else
     setenv AFS_RHIC  /afs/rhic.bnl.gov/star
   endif
 endif
+if (! $?PERL5LIB) setenv PERL5LIB ""
 setenv STAR_ROOT ${AFS_RHIC}
 setenv OPTSTAR   ${STAR_ROOT}/opt
 setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
