@@ -47,7 +47,6 @@
 #include "StDetectorDbMaker/StSstSurveyC.h"
 #include "StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StPxlDbMaker/StPxlDb.h"
 #include "StIstDbMaker/StIstDb.h"
 #include "StSsdDbMaker/StSstDbMaker.h"
 #include "StSstUtil/StSstBarrel.hh"
@@ -66,7 +65,7 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
   fMcHits(0),
   fFieldB(0),
   fDebug(0),
-  fAlignment(kFALSE), //(kTRUE)
+  fAlignment(kTRUE),
   fAlignmentDone(kFALSE)
 {
   // Standard constructor
@@ -613,7 +612,7 @@ Pxl: SensorOnGlobal[sector]ladder[sensor] = TpcOnGlobal * IdsOnTpc * PstOnIds * 
       case kPxLadder: // LADR
 	sector = indx[0];
 	ladder = indx[1];
-	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
+	Id = 4*(sector-1) + ladder;
 	half   = (sector-1)/5; 
 	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
@@ -637,7 +636,7 @@ Pxl: SensorOnGlobal[sector]ladder[sensor] = TpcOnGlobal * IdsOnTpc * PstOnIds * 
       case kPxLadder: // LADR
 	sector = indx[0];
 	ladder = indx[1];
-	Id = kNumberOfPxlLaddersPerSector*(sector-1) + ladder;
+	Id = 4*(sector-1) + ladder;
 	half   = (sector-1)/5; 
 	E = StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
 	rotA = rotLI[sector-1] * E * PixelLadderT; PrPV(rotA);
@@ -751,6 +750,7 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
       if (D == I) {NoPerfMatch++;}
       else {
 	rotm = new TGeoHMatrix(rotA);
+	St_SurveyC::Normalize(*rotm);
 	if (Debug()) {
 	  if (Debug() > 1) {
 	    cout << "Id : " << Id << "\tBefore\t" << nodeP->GetName() << "\t"; nodeP->GetMatrix()->Print();
@@ -791,32 +791,34 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	    // Check node
 	    switch (kDetector) {
 	    case kPxLadder:
-	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
-	      PxlOnHft = (*StPxlDb::instance()->geoHMatrixPstOnIds()) 
-		* (*StPxlDb::instance()->geoHMatrixPxlOnPst());	            PrPV(PxlOnHft);
-	      SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
-		* (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
-	      LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
-	      temp = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * PixelLadderT;
+	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
+	      PxlOnHft = StPxlpstOnIds::instance()->GetMatrix() 
+		* StpxlOnPst::instance()->GetMatrix();	            PrPV(PxlOnHft);
+	      SectorOnPxl = StpxlHalfOnPxl::instance()->GetMatrix4Id((sector-1)/5+1)
+		* StpxlSectorOnHalf::instance()->GetMatrix4Id(sector);	    PrPV(SectorOnPxl);
+	      LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(4*(sector-1) + ladder); 	  PrPV(LadderOnSector);
+	      temp = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * PixelLadderT; temp.SetName("temp");
+	      St_SurveyC::Normalize(temp);
 	      comb = &temp;
 	      break;
 	    case kPxlSensor:
-	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
-	      PxlOnHft = (*StPxlDb::instance()->geoHMatrixPstOnIds()) 
-		* (*StPxlDb::instance()->geoHMatrixPxlOnPst());	            PrPV(PxlOnHft);
-	      SectorOnPxl = (*StPxlDb::instance()->geoHMatrixHalfOnPxl((sector-1)/5+1))
-		* (*StPxlDb::instance()->geoHMatrixSectorOnHalf(sector));	    PrPV(SectorOnPxl);
-	      LadderOnSector = *StPxlDb::instance()->geoHMatrixLadderOnSector(sector,ladder); 	  PrPV(LadderOnSector);
-	      SensorOnLadder = *StPxlDb::instance()->geoHMatrixSensorOnLadder(sector,ladder,sensor);PrPV(SensorOnLadder);
+	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
+	      PxlOnHft = StPxlpstOnIds::instance()->GetMatrix() 
+		* StpxlOnPst::instance()->GetMatrix();	            PrPV(PxlOnHft);
+	      SectorOnPxl = StpxlHalfOnPxl::instance()->GetMatrix4Id((sector-1)/5+1)
+		* StpxlSectorOnHalf::instance()->GetMatrix4Id(sector);	    PrPV(SectorOnPxl);
+	      LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(4*(sector-1) + ladder); 	  PrPV(LadderOnSector);
+	      SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(sensor + 10*(ladder+4*(sector-1) - 1));PrPV(SensorOnLadder);
 	      SensorOnGlobal = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * SensorOnLadder;PrPV(SensorOnGlobal);
-	      // 	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix())  x
+	      // 	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcPosition::instance()->GetMatrix())  x
 	      // 	      * mGeoHMatrixIdsOnTpc                                                         x
 	      //            * mGeoHMatrixPstOnIds * mGeoHMatrixPxlOnPst                                   x
 	      //            * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
 	      // 	      * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
-	      comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
+	      //	      comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
+	      comb = &SensorOnGlobal;
 	      break;
 	      //	  case kIstWafer:
 	    case kIstSensor:
@@ -824,16 +826,16 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	      comb = (TGeoHMatrix *) StIstDb::instance()->getRotations()->FindObject(Form("R%04i", matIst));
 	      break;
 	    case kSst:
-	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
 	      temp = Tpc2Global * HftOnTpc * sstOnOsc; temp.SetName("kSst"); PrPV(temp);
 	      comb = &temp;
 	      break;
 #if 0
 	    case kSstLadder:
-	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
 	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(100 + ladder); PrPV(sstLadderOnSst);
 	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst; temp.SetName("kSstLadder"); PrPV(temp);
@@ -841,8 +843,8 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	      break;
 #endif
 	    case kSstWafer:
-	      Tpc2Global = StTpcDb::instance()->Tpc2GlobalMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc = (*StPxlDb::instance()->geoHMatrixIdsOnTpc());	    PrPV(HftOnTpc);
+	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
+	      HftOnTpc =  StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
 	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(100+ladder); PrPV(sstLadderOnSst);
 	      sstSensorOnLadder = StsstSensorOnLadder::instance()->GetMatrix4Id(7000 + ladder + 100*sensor); PrPV(sstSensorOnLadder);

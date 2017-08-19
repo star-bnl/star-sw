@@ -68,7 +68,7 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual Double_t 		   TrackingZmax() const { return 1.e5; } 		  
   virtual void     		   SetDebug(Int_t m);
   virtual Int_t    		   Debug() {return fDebug;}				  
-  virtual void     		   DoMisAlignment(Bool_t m = kFALSE) {fAlignment = m;}	  
+  virtual void     		   DoMisAlignment(Bool_t m = kTRUE) {fAlignment = m;}	  
   static  Int_t     		   LoopOverTgeo(TGeoNode *nodeT = 0, TString pathT = "");
   static  void     		   GeometryDb(TDataSet *Detectors=0);			  
   virtual Bool_t   		   MisalignGeometry();					  
