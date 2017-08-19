@@ -52,10 +52,10 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   bfc(-1,chain2Opt);
   chain2 = chain;
   chain2->SetName("MC"); 
-  StVMCMaker *geant = (StVMCMaker *) chain2->Maker("geant");
+  StMaker *geant = chain2->Maker("geant");
   if (! geant) return;
   geant->SetAttr("MuDstFile",MuDstfile);
-  geant->SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051");
+  geant->SetAttr("GoodTriggers",triggersC);
 #if 0
   StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
   if (tofSim) tofSim->setEmbeddingMode(kTRUE);
@@ -83,7 +83,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   OutputFileName.Append(".root");
   TString chain4Opt("P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D");
   chain4Opt += ",noInput,-in,useInTracker,-hitfilt,StiCA"; // ,MiniMcMk,McAna,GeantOut
-  chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,fmsdat"; // ,evout
+  chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,fmsdat,-evout"; // ,evout
   chain4Opt += ",NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
   chain4Opt += ",noTags,noHistos,noRunco";
   //  chain4Opt += ",KFVertex";
@@ -160,6 +160,6 @@ void bfcMixerVMC(Int_t Last=1, const Char_t *opt = "Vmc,Lc3pi,VMCAlignment",
 		 const Char_t *daqfile="/net/l404/data/fisyak/daq/2016/125/17125034/st_physics_adc_17125034_raw_1000007.daq",
 		 const Char_t *MuDstfile="/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17125034_raw_1000007.MuDst.root",
 #endif
-		 Int_t RunG=0, const Char_t *triggersC = 0) {
+		 Int_t RunG=0, const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051") {
   bfcMixerVMC(1,Last,opt,daqfile,MuDstfile,RunG,triggersC);
 }
