@@ -1053,6 +1053,7 @@ MakeChairInstance(pxlSensorTps,Geometry/pxl/pxlSensorTps);
 //________________________________________________________________________________
 void St_SurveyC::Normalize(TGeoHMatrix &rot) {
 #if 0
+#if 0
   Double_t *rA = rot.GetRotationMatrix();
   Double_t r[9] = {rA[0], rA[3], rA[6],
 		   rA[1], rA[4], rA[7],
@@ -1065,17 +1066,36 @@ void St_SurveyC::Normalize(TGeoHMatrix &rot) {
 		    r[2], r[5], r[8]};
   rot.SetRotation(rB);
 #else
-  Double_t normfactor = rot.Determinant();
-  if (normfactor <= 1E-10) return;
-  if (TMath::Abs(normfactor)-1 <= 1e-10) return;
-  normfactor = TMath::Power(TMath::Abs(normfactor), -1./3);
-  TCL::vscale(rot.GetRotationMatrix(), normfactor, rot.GetRotationMatrix(), 9);
+  Double_t det = rot.Determinant();
+  if (det <= 1E-10) {
+    LOG_ERROR << "St_SurveyC::Normalize matrix " << rot.GetName() << " has illegal determinant = " << det << endl;
+    return;
+  }
+  if (TMath::Abs(det - 1) > 1e-7) {
+#if 0
+    Double_t scale = TMath::Power(TMath::Abs(det), -1./3);
+    LOG_INFO << "St_SurveyC::Normalize matrix " << rot.GetName() 
+	     << Form(" has determinant = %10.7f\tscale matrix by %10.7f",det,scale) << endm;
+    TCL::vscale(rot.GetRotationMatrix(), scale, rot.GetRotationMatrix(), 9);
+#else
+    LOG_INFO << "St_SurveyC::Normalize matrix " << rot.GetName() 
+	     << Form(" has determinant = %10.7f\trescale !",det) << endm;
+    TGeoRotation R;
+    R.SetMatrix(rot.GetRotationMatrix());
+    Double_t theta1, phi1, theta2, phi2, theta3, phi3;
+    R.GetAngles(theta1, phi1, theta2, phi2, theta3, phi3);
+    R.SetAngles(theta1, phi1, theta2, phi2, theta3, phi3);
+    rot.SetRotation(R.GetRotationMatrix());
+#endif
+  }
+#endif
 #endif
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   static TGeoHMatrix rot;
-  rot.SetName(Table()->GetName());
+  if (! i) rot.SetName(Table()->GetName());
+  else     rot.SetName(Form("%s_%i",Table()->GetName(),i));
   rot.SetRotation(Rotation(i));
   rot.SetTranslation(Translation(i));
   Normalize(rot);
@@ -1092,7 +1112,7 @@ const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
       return *&rot;
     }
   }
-  cout << "St_SurveyC::GetMatrix4Id(" << id << ") entry has not been found" << endl;
+  LOG_INFO  << "St_SurveyC::GetMatrix4Id(" << id << ") entry has not been found" << endm;
   const TTable *table = Table();
   Int_t Nrows = table->GetNRows();
   table->Print(0,Nrows);
@@ -1242,7 +1262,7 @@ St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
     Int_t j = Index(trayId(i), moduleId(i), cellId(i));
     if (_debug) {
       Table()->Print(i,1);
-      cout << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endl;
+      LOG_INFO << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endm;
     }
     if (j >= 0) {
       if (! mIndxArray[j]) mIndxArray[j] = i;
