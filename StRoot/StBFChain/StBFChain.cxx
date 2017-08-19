@@ -532,6 +532,8 @@ Int_t StBFChain::Instantiate()
 	}
 	if (GetOption("VMCAlignment")) {
 	  mk->SetAttr("VMCAlignment",1);
+	} else if (GetOption("NoVMCAlignment")) {
+	  mk->SetAttr("NoVMCAlignment",1);
 	}
 	if (fRunG > 0) {
 	  mk->SetAttr("RunG",fRunG);
