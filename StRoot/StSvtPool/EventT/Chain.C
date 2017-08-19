@@ -3,14 +3,14 @@
 #include "TFile.h"
 #include "TList.h"
 #include "TDirIter.h"
+TChain *tChain = 0;
 #if defined(__CINT__) && ! defined(__MAKECINT__)
 TChain *Chain(const Char_t *TreeName = "MuDst") {
-  TChain *chain = 0;
   TCollection *files = gROOT->GetListOfFiles();
-  if (! files) return chain;
+  if (! files) return tChain;
   TIter next(files);
   TFile *f = 0;
-  chain = new TChain(TreeName);
+  tChain = new TChain(TreeName);
   Int_t NFiles = 0;
   ULong64_t nEvents = 0;
   ULong64_t nEvTot = 0;
@@ -22,7 +22,7 @@ TChain *Chain(const Char_t *TreeName = "MuDst") {
       nEvents = tree->GetEntries();
       cout << "\t" << nEvents << endl;
       nEvTot += nEvents;
-      chain->Add(f->GetName());
+      tChain->Add(f->GetName());
     } else {
       cout << "\tTTree is missing" << endl;
     }
@@ -30,17 +30,16 @@ TChain *Chain(const Char_t *TreeName = "MuDst") {
   }
   cout	<< "chained " << NFiles  << " files \t" 
 	<< "with total " << nEvTot << " events \t" 
-  	<< "chain returned pointer: " << chain << endl;
-  return chain;
+  	<< "chain returned pointer: " << tChain << endl;
+  return tChain;
 }
 #else
 TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "MuDst") {
   TDirIter Dir(files);
   //  TTreeIter iter(TreeName);
   //  iter.AddFile(files);
-  TChain *chain = 0;
   TFile *f = 0;
-  chain = new TChain(TreeName);
+  tChain = new TChain(TreeName);
   Int_t NFiles = 0;
   ULong64_t nEvents = 0;
   ULong64_t nEvTot = 0;
@@ -55,7 +54,7 @@ TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "M
       nEvents = tree->GetEntries();
       cout << "\t" << nEvents << endl;
       nEvTot += nEvents;
-      chain->Add(f->GetName());
+      tChain->Add(f->GetName());
     } else {
       cout << "\tTTree is missing" << endl;
     }
@@ -63,8 +62,8 @@ TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "M
   }
   cout	<< "chained " << NFiles  << " files \t" 
 	<< "with total " << nEvTot << " events \t" 
-  	<< "chain returned pointer: " << chain << endl;
-  return chain;
+  	<< "chain returned pointer: " << tChain << endl;
+  return tChain;
 }
 
 #endif
