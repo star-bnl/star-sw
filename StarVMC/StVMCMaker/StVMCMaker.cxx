@@ -164,6 +164,7 @@ Int_t StVMCMaker::Init() {
   LOG_INFO << "Init Geant3 has been created." << endm;
   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
+  if (IAttr("NoVMCAlignment")) fgStarVMCApplication->DoMisAlignment(kFALSE);
   if (! IAttr("VMCPassive")) {
     LOG_INFO << "InitRun Active mode" << endm; 
     TString CintF(SAttr("GeneratorFile"));
@@ -216,6 +217,8 @@ Int_t StVMCMaker::Init() {
   fRndmSaved = gRandom;
   fRndm = new TRandom3(IAttr("RunG"));
   LOG_INFO << "Init, Generator type: TRandom3 Seed: " << fRndm->GetSeed() << endm;
+  TString GoodTriggers(SAttr("GoodTriggers"));
+  if (GoodTriggers != "") SetGoodTriggers(GoodTriggers);
   return kStOK; // StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -415,6 +418,7 @@ void StVMCMaker::SetDebug(Int_t l) {
 }
 //________________________________________________________________________________
 void StVMCMaker::SetGoodTriggers(const Char_t *trigList) {
+
   fGoodTiggerIds.clear();
   TString Trig(trigList);
   if (Trig == "") return;
@@ -541,6 +545,16 @@ Int_t StVMCMaker::SetVertex() {
       }
     }
     StarMCPrimaryGenerator::Instance()->SetVertex(V);
+    TString Opt(StarMCPrimaryGenerator::Instance()->GetOption());
+    if (Opt.Contains("PerCent",TString::kIgnoreCase)) {
+      Double_t perCent = 0;
+      if      (Opt.Contains( "5PerCent",TString::kIgnoreCase)) perCent = 0.05;
+      else if (Opt.Contains("10PerCent",TString::kIgnoreCase)) perCent = 0.10;
+      if (perCent > 0) {
+	Int_t np = perCent*NumberOfGoodPrimaryTracks[0] + 1;
+	StarMCPrimaryGenerator::Instance()->SetNofPrimaries(np);
+      }
+    }
     return kStOK;
   } while(1);
   return kStFatal;
