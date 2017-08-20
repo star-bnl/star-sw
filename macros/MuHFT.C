@@ -2,7 +2,6 @@
   root.exe lMuDst.C 'MuHFT.C+("LcKppimTsq_43.MuDst.root")'
 */
 //#define DEBUG
-//#define __OLD_DCA__
 #define __ONLY_GLOBAL__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -103,6 +102,8 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const UChar_t *&mNHitsFit                  = iter("PrimaryTracks.mNHitsFit");
   const UShort_t*&   PrimaryVertices_mRefMultNeg              = iter("PrimaryVertices.mRefMultNeg");
   const UShort_t*&   PrimaryVertices_mRefMultPos              = iter("PrimaryVertices.mRefMultPos");
+  const Int_t*&   PrimaryVertices_mIdTruth                 = iter("PrimaryVertices.mIdTruth");
+  const Int_t*&   PrimaryVertices_mQuality                 = iter("PrimaryVertices.mQuality");
   
   const Float_t *&pT                         = iter("PrimaryTracks.mPt");
   const Float_t *&pX                         = iter("PrimaryTracks.mP.mX1");
@@ -110,10 +111,6 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const Float_t *&pZ                         = iter("PrimaryTracks.mP.mX3");
   const Float_t *&Eta                        = iter("PrimaryTracks.mEta");
   const Float_t *&Phi                        = iter("PrimaryTracks.mPhi");
-#ifdef __OLD_DCA__
-  const   Float_t   *&mSigmaDcaD             = iter("PrimaryTracks.mSigmaDcaD");
-  const   Float_t   *&mSigmaDcaZ             = iter("PrimaryTracks.mSigmaDcaZ");
-#endif
   const Int_t   *&mIndex2Global              = iter("PrimaryTracks.mIndex2Global");
   //   const Float_t*&    mDCA_mX1                   = iter("PrimaryTracks.mDCA.mX1");
   //   const Float_t*&    mDCA_mX2                   = iter("PrimaryTracks.mDCA.mX2");
@@ -133,10 +130,6 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
   const Float_t *&pZGl                         = iter("GlobalTracks.mP.mX3");
   const Float_t *&EtaGl                        = iter("GlobalTracks.mEta");
   const Float_t *&PhiGl                        = iter("GlobalTracks.mPhi");
-#ifdef __OLD_DCA__
-  const Float_t *&mSigmaDcaDGl                 = iter("GlobalTracks.mSigmaDcaD");
-  const Float_t *&mSigmaDcaZGl                 = iter("GlobalTracks.mSigmaDcaZ");
-#else
   const Int_t*&      GlobalTracks_mIndex2Cov                  = iter("GlobalTracks.mIndex2Cov");
   const Int_t&       NoCovGlobTrack                           = iter("CovGlobTrack");
   const Float_t*&    CovGlobTrack_mImp                        = iter("CovGlobTrack.mImp");
@@ -323,17 +316,6 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
 	  cout << "global track momentum " << globP
 	       << "\tdcaG: " << dcaG << endl;
 #endif
-#ifdef 	__OLD_DCA__
-	  StThreeVectorF dirG = globP.unit();
-	  Double_t cosL = dirG.perp();
-	  Double_t tanL = TMath::Tan(TMath::ACos(cosL));
-	  Double_t cosP = dirG.x()/cosL;
-	  Double_t sinP = dirG.y()/cosL;
-	  Double_t dcaXY = sinP * dcaG.x() - cosP * dcaG.y(); // switched sign
-	  Double_t dcaZ  = dcaG.z()/(cosL*cosL);
-	  Double_t sigmaXY   = mSigmaDcaDGl[kg];
-	  Double_t sigmaZ    = mSigmaDcaZGl[kg]/(cosL*cosL); // account bug in StMuTrack
-#else
 	  Int_t kgc = GlobalTracks_mIndex2Cov[kg];
 	  static StDcaGeometry dcaGeometry;
 	  Float_t pars[6] = {
@@ -356,7 +338,6 @@ void MuHFT(const Char_t *files="*.MuDst.root", const Char_t *Out="MuHFTOut.root"
 	  Double_t sigmaZ    = 0;
 	  if (dcaEmx[0] > 0) sigmaXY = TMath::Sqrt(dcaEmx[0]);
 	  if (dcaEmx[2] > 0) sigmaZ  = TMath::Sqrt(dcaEmx[2]);
-#endif
 	  if (sigmaXY <= 0 || sigmaZ > 1 || sigmaZ <= 0 || sigmaZ > 1) {
 #ifdef DEBUG
 	    cout << "First Point x/y/z = " 
