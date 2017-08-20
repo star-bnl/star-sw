@@ -120,6 +120,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mNHitsPossInner=track->numberOfPossiblePoints(kSvtId) & 0x7;
   if (! mNHitsPossInner) mNHitsPossInner=track->numberOfPossiblePoints(kIstId) & 0x7;
   mNHitsPossInner|=(track->numberOfPossiblePoints(kSsdId) & 0x3) << 3;
+  mNHitsPossInner|=(track->numberOfPossiblePoints(kSstId) & 0x3) << 3;
   mNHitsPossInner|=(track->numberOfPossiblePoints(kPxlId) & 0x7) << 5;
   
   mNHitsFit = track->fitTraits().numberOfFitPoints();
@@ -144,6 +145,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mNHitsFitInner=track->fitTraits().numberOfFitPoints(kSvtId) & 0x7;
   if (! mNHitsFitInner) mNHitsFitInner=track->fitTraits().numberOfFitPoints(kIstId) & 0x7;
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSsdId) & 0x3) << 3;
+  mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSstId) & 0x3) << 3;
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kPxlId) & 0x7) << 5;
 
   mChiSqXY = track->fitTraits().chi2(0);
@@ -277,6 +279,7 @@ UShort_t StMuTrack::nHitsPoss(StDetectorId det) const {
     return (mNHitsPossInner & 0x7);
     break;
   case kSsdId:
+  case kSstId:
     return ((mNHitsPossInner >> 3) & 0x3);
     break;
   case kPxlId:
@@ -313,6 +316,7 @@ UShort_t StMuTrack::nHitsFit(StDetectorId det) const {
     return (mNHitsFitInner & 0x7);
     break;
   case kSsdId:
+  case kSstId:
     return ((mNHitsFitInner >> 3) & 0x3);
     break;
   case kPxlId:
@@ -519,14 +523,14 @@ void StMuTrack::Print(Option_t *option) const {
        << "\t ( TPC "
        << nHitsFit(kTpcId) << ", FTPC "
        << nHitsFit(kFtpcEastId) + nHitsFit(kFtpcWestId) << ", SVT "  
-       << nHitsFit(kSvtId) << ", SSD "
-       << nHitsFit(kSsdId) << " ) " << endl;
+       << nHitsFit(kSvtId) << ", SSD/SST "
+       << nHitsFit(kSsdId)+ nHitsFit(kSstId)<< " ) " << endl;
 
   cout << "Possible points: " << nHitsPoss() << " \t( TPC "
        << nHitsPoss(kTpcId) << ", FTPC "
        << nHitsPoss(kFtpcEastId) + nHitsPoss(kFtpcWestId) << ", SVT "
-       << nHitsPoss(kSvtId) << ", SSD "
-       << nHitsPoss(kSsdId) << " ) " << endl;
+       << nHitsPoss(kSvtId) << ", SSD/SST "
+       << nHitsPoss(kSsdId)+nHitsPoss(kSstId) << " ) " << endl;
 
   cout << "\t first point " << mFirstPoint << endl;
   cout << "\t last point  " << mLastPoint << endl;
