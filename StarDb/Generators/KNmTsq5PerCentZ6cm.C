@@ -38,7 +38,7 @@ TDataSet *CreateTable() {
     TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
     if (! p) return;
     Int_t pdg = p->PdgCode();
-    if (pdg < 0) return;
+    if (!pdg) return 0;
     Int_t iD  = g3->IdFromPDG(pdg);
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
