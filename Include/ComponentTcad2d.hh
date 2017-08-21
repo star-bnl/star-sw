@@ -1,11 +1,11 @@
-// Interpolation in a two-dimensional field map created by Sentaurus Device
-
 #ifndef G_COMPONENT_TCAD_2D_H
 #define G_COMPONENT_TCAD_2D_H
 
 #include "ComponentBase.hh"
 
 namespace Garfield {
+
+/// Interpolation in a two-dimensional field map created by Sentaurus Device.
 
 class ComponentTcad2d : public ComponentBase {
 

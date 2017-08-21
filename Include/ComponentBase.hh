@@ -1,5 +1,3 @@
-// Abstract base class for components
-
 #ifndef G_COMPONENT_BASE_H
 #define G_COMPONENT_BASE_H
 
@@ -9,6 +7,8 @@
 #include "GeometryBase.hh"
 
 namespace Garfield {
+
+/// Abstract base class for components.
 
 class ComponentBase {
 

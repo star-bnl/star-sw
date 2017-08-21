@@ -1,11 +1,11 @@
-// Component with constant electric field
-
 #ifndef G_COMPONENT_CONSTANT_H
 #define G_COMPONENT_CONSTANT_H
 
 #include "ComponentBase.hh"
 
 namespace Garfield {
+
+/// Component with constant electric field.
 
 class ComponentConstant : public ComponentBase {
 
