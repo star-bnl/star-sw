@@ -9,6 +9,8 @@
 
 namespace Garfield {
 
+/// Definition of styles and color schemes.
+
 class PlottingEngineRoot : public PlottingEngine {
 
  public:

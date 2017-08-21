@@ -1,5 +1,3 @@
-/// Random number generation and sampling from random number distributions.
-
 #ifndef G_RANDOM_H
 #define G_RANDOM_H
 

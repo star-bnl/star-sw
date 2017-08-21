@@ -5,7 +5,7 @@
 
 namespace Garfield {
 
-/// Track generation using differential cross-sections computed by H. Bichsel.
+/// Generate tracks using differential cross-sections computed by Hans Bichsel.
 /// References:
 ///   - H. Bichsel, Rev. Mod. Phys. 60 (1988), 663-699
 ///   - https://faculty.washington.edu/hbichsel/

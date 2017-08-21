@@ -5,7 +5,8 @@
 
 namespace Garfield {
 
-/// Interface to Magboltz (version 9).
+/// Interface to %Magboltz (version 9).
+///  - http://magboltz.web.cern.ch/magboltz/
 
 class MediumMagboltz : public MediumGas {
 

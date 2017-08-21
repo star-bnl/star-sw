@@ -246,8 +246,8 @@ class ComponentCST : public ComponentFieldMap {
   int Index2Node(const unsigned int i, const unsigned int j, const unsigned int k);
 };
 
+/// Helper struct for drawing the mesh with ViewFEMesh.
 struct PolygonInfo {
-  // This struct is used for drawing the mesh with ViewFEMesh.h
   double p1[2];
   double p2[2];
   double p3[2];

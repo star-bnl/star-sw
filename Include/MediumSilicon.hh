@@ -4,7 +4,7 @@
 #include "Medium.hh"
 
 namespace Garfield {
-/// Solid crystalline silicon
+/// %Solid crystalline silicon
 
 class MediumSilicon : public Medium {
 

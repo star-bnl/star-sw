@@ -7,7 +7,7 @@
 
 namespace Garfield {
 
-/// Sensor
+/// %Sensor
 
 class Sensor {
 

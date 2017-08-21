@@ -31,7 +31,7 @@ namespace Garfield {
 class HeedChamber;
 class Medium;
 
-/// Track generation using Heed++.
+/// Generate tracks using Heed++.
 
 class TrackHeed : public Track {
 
