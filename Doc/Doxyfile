@@ -96,6 +96,8 @@ ALIASES                =
 
 INLINE_SIMPLE_STRUCTS  = YES 
 
+JAVADOC_AUTOBRIEF = YES
+
 #---------------------------------------------------------------------------
 # Build related configuration options
 #---------------------------------------------------------------------------
