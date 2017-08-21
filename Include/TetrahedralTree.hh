@@ -1,4 +1,3 @@
-
 #ifndef TETRAHEDRAL_TREE_H
 #define TETRAHEDRAL_TREE_H
 

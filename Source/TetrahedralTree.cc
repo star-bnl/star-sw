@@ -1,3 +1,8 @@
+#include "TetrahedralTree.hh"
+#include <iostream>
+
+namespace Garfield {
+
 /**
 TetrahedralTree.cc
 This class stores the mesh nodes and elements in an Octree data
@@ -6,12 +11,6 @@ structure to optimize the element search operations
 Author: Ali Sheharyar
 Organization: Texas A&M University at Qatar
 */
-
-#include "TetrahedralTree.hh"
-#include <iostream>
-
-namespace Garfield {
-
 TetrahedralTree::TetrahedralTree(const Vec3& origin, const Vec3& halfDimension)
     : m_origin(origin), m_halfDimension(halfDimension) {
 
