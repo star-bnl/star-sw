@@ -1,5 +1,3 @@
-// Collection of numerical routines
-
 #ifndef G_NUMERICS_H
 #define G_NUMERICS_H
 
@@ -8,6 +6,7 @@
 
 namespace Garfield {
 
+/// Collection of numerical routines.
 namespace Numerics {
 
 // Linear algebra routines from CERNLIB
@@ -28,12 +27,12 @@ void Cfinv(const int n, std::vector<std::vector<std::complex<double> > >& a,
 void Cinv(const int n, std::vector<std::vector<std::complex<double> > >& a,
           int& ifail);
 
-// Numerical integration using 15-point Gauss-Kronrod algorithm
+/// Numerical integration using 15-point Gauss-Kronrod algorithm
 double GaussKronrod15(double (*f)(const double), const double a,
                       const double b);
 
-// Modified Bessel functions.
-// Series expansions from Abramowitz and Stegun.
+/// Modified Bessel functions.
+/// Series expansions from Abramowitz and Stegun.
 inline double BesselI0S(const double xx) {
   return 1. + 3.5156229 * pow(xx / 3.75, 2) + 3.0899424 * pow(xx / 3.75, 4) +
          1.2067492 * pow(xx / 3.75, 6) + 0.2659732 * pow(xx / 3.75, 8) +

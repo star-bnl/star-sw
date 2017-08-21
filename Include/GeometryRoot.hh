@@ -1,5 +1,3 @@
-// Abstract base class for components
-
 #ifndef G_GEOMETRY_ROOT_H
 #define G_GEOMETRY_ROOT_H
 
@@ -12,27 +10,30 @@
 
 namespace Garfield {
 
+/// Use a geometry defined using the ROOT TGeo package.
+
 class GeometryRoot : public GeometryBase {
 
  public:
-  // Constructors
+  /// Constructor
   GeometryRoot();
-  // Destructor
+  /// Destructor
   ~GeometryRoot() {}
 
-  // Set the geometry (pointer to ROOT TGeoManager)
+  /// Set the geometry (pointer to ROOT TGeoManager).
   void SetGeometry(TGeoManager* geoman);
 
   // Get the medium at a given point (x, y, z)
   Medium* GetMedium(const double x, const double y, 
                     const double z) const;
 
-  // Get the number of materials defined in the ROOT geometry
+  /// Get the number of materials defined in the ROOT geometry.
   unsigned int GetNumberOfMaterials();
-  // Get pointer to ROOT material with given index/name
+  /// Get pointer to ROOT material with given index.
   TGeoMaterial* GetMaterial(const unsigned int i);
+  /// Get pointer to ROOT material with given name.
   TGeoMaterial* GetMaterial(const char* name);
-  // Associate ROOT material with Garfield medium
+  // Associate a ROOT material with Garfield medium.
   void SetMedium(const unsigned int imat, Medium* med);
   void SetMedium(const char* mat, Medium* med);
 

@@ -1,4 +1,3 @@
-// Cadmium-Telluride
 #ifndef G_MEDIUM_CDTE_H
 #define G_MEDIUM_CDTE_H
 
@@ -6,12 +5,14 @@
 
 namespace Garfield {
 
+/// Cadmium-Telluride.
+
 class MediumCdTe : public Medium {
 
  public:
-  // Constructor
+  /// Constructor
   MediumCdTe();
-  // Destructor
+  /// Destructor
   ~MediumCdTe() {}
 
   bool IsSemiconductor() const { return true; }

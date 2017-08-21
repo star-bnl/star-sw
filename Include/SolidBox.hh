@@ -1,5 +1,3 @@
-// Box
-
 #ifndef G_SOLID_BOX_H
 #define G_SOLID_BOX_H
 
@@ -7,16 +5,19 @@
 
 namespace Garfield {
 
+/// Box.
+
 class SolidBox : public Solid {
 
  public:
-  // Constructors from centre and half-widths
+  /// Constructor from centre and half-widths.
   SolidBox(const double cx, const double cy, const double cz, 
            const double lx, const double ly, const double lz);
+  /// Constructor from centre, half-widths, and orientation.
   SolidBox(const double cx, const double cy, const double cz, 
            const double lx, const double ly, const double lz, 
            const double dx, const double dy, const double dz);
-  // Destructor
+  /// Destructor
   ~SolidBox() {}
 
   virtual bool IsInside(const double x, const double y, const double z) const;

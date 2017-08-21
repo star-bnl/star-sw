@@ -1,5 +1,3 @@
-// Energy loss calculation using the Photoabsorption-Ionisation Model
-
 #ifndef G_TRACK_PAI
 #define G_TRACK_PAI
 
@@ -9,6 +7,8 @@
 #include "Track.hh"
 
 namespace Garfield {
+
+/// Energy loss calculation using the Photoabsorption-Ionisation Model.
 
 class TrackPAI : public Track {
 

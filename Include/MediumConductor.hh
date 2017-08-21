@@ -1,5 +1,3 @@
-// Conducting medium
-
 #ifndef G_MEDIUM_CONDUCTOR_H
 #define G_MEDIUM_CONDUCTOR_H
 
@@ -7,15 +5,17 @@
 
 namespace Garfield {
 
+/// Conducting medium.
+
 class MediumConductor : public Medium {
 
  public:
-  // Constructor
+  /// Constructor
   MediumConductor() : Medium() {
     m_className = "MediumConductor";
     m_name = "Conductor";
   }
-  // Destructor
+  /// Destructor
   ~MediumConductor() {}
 
   void EnableDrift() {}

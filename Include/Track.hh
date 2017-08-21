@@ -1,5 +1,3 @@
-// Abstract base class for track generation
-
 #ifndef G_TRACK_H
 #define G_TRACK_H
 
@@ -10,6 +8,8 @@ namespace Garfield {
 
 class Sensor;
 class ViewDrift;
+
+/// Abstract base class for track generation.
 
 class Track {
 

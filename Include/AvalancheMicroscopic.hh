@@ -1,5 +1,3 @@
-// Calculate electron avalanches using microscopic tracking
-
 #ifndef G_AVALANCHE_MICROSCOPIC_H
 #define G_AVALANCHE_MICROSCOPIC_H
 
@@ -13,6 +11,8 @@
 #include "GarfieldConstants.hh"
 
 namespace Garfield {
+
+/// Calculate electron drift lines and avalanches using microscopic tracking.
 
 class AvalancheMicroscopic {
 

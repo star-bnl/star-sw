@@ -1,5 +1,3 @@
-// Sphere
-
 #ifndef G_SOLID_SPHERE_H
 #define G_SOLID_SPHERE_H
 
@@ -7,13 +5,15 @@
 
 namespace Garfield {
 
+/// Sphere.
+
 class SolidSphere : public Solid {
 
  public:
-  // Constructors
+  /// Constructor
   SolidSphere(const double cx, const double cy, const double cz,
               const double rmin, const double rmax);
-  // Destructor
+  /// Destructor
   ~SolidSphere() {}
 
   virtual bool IsInside(const double x, const double y, const double z) const;

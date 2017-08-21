@@ -11,6 +11,9 @@
 
 namespace Garfield {
 
+/// Calculation of drift lines based on macroscopic transport coefficients 
+/// using Runge-Kutta-Fehlberg integration.
+
 class DriftLineRKF {
 
  public:

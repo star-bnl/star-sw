@@ -1,4 +1,3 @@
-// Some functionality for this class was copied/modified from ViewField.hh
 #ifndef G_VIEW_FE_MESH
 #define G_VIEW_FE_MESH
 
@@ -22,12 +21,14 @@
 
 namespace Garfield {
 
+/// Draw the mesh of a field-map component.
+
 class ViewFEMesh {
 
  public:
-  // Constructor
+  /// Constructor
   ViewFEMesh();
-  // Destructor
+  /// Destructor
   ~ViewFEMesh();
 
   TCanvas* GetCanvas();
@@ -35,13 +36,15 @@ class ViewFEMesh {
   void SetCanvas(TCanvas* c);
   void SetComponent(ComponentFieldMap* comp);
 
-  // Set area to be plotted
+  /// Set area to be plotted to the default.
   void SetArea();
+  /// Set area to be plotted explicitly.
   void SetArea(const double xmin, const double ymin, const double zmin,
                const double xmax, const double ymax, const double zmax);
 
-  // Projection plane
+  /// Reset the projection plane
   void SetDefaultProjection();
+  /// Set the projection plane.
   void SetPlane(double fx, double fy, double fz, double x0, double y0,
                 double z0);
 
@@ -53,36 +56,36 @@ class ViewFEMesh {
   void EnableAxes() { m_drawAxes = true; }
   void DisableAxes() { m_drawAxes = false; }
 
-  // Plot method to be called by user
+  /// Plot method to be called by user
   bool Plot();
 
-  // Element fill switch; 2D only, set false for wireframe mesh
+  /// Element fill switch; 2D only, set false for wireframe mesh
   void SetFillMesh(const bool f) { m_fillMesh = f; }
 
-  // Associate a color with each element material map ID;
-  //  Uses ROOT color numberings
+  /// Associate a color with each element material map ID;
+  /// Uses ROOT color numberings
   void SetColor(int matID, int colorID) { m_colorMap[matID] = colorID; }
   void SetFillColor(int matID, int colorID) {
     m_colorMap_fill[matID] = colorID;
   }
 
-  // Set the optional associated ViewDrift
+  /// Set the optional associated ViewDrift
   void SetViewDrift(ViewDrift* vd) { m_viewDrift = vd; }
 
-  // Show filled mesh elements
+  /// Show filled mesh elements
   void SetFillMeshWithBorders() {
     m_plotMeshBorders = true;
     m_fillMesh = true;
   }
 
-  // Debugging switch
+  /// Debugging switch
   void EnableDebugging() { m_debug = true; }
   void DisableDebugging() { m_debug = false; }
 
-  // Create a default set of custom-made axes.
+  /// Create a default set of custom-made axes.
   void CreateDefaultAxes();
 
-  // Disable a material so that its mesh cells are not drawn
+  /// Disable a material so that its mesh cells are not drawn
   void DisableMaterial(int materialID) {
     m_disabledMaterial[materialID] = true;
   }

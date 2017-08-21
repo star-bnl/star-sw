@@ -1,12 +1,7 @@
 /**
 
-TetrahedralTree.hh
-
 This class stores the mesh nodes and elements in an Octree data
-
 structure to optimize the element search operations
-
-
 
 Author: Ali Sheharyar
 

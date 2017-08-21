@@ -1,5 +1,3 @@
-// Cylindrical tube
-
 #ifndef G_SOLID_TUBE_H
 #define G_SOLID_TUBE_H
 
@@ -7,16 +5,19 @@
 
 namespace Garfield {
 
+/// Cylindrical tube.
+
 class SolidTube : public Solid {
 
  public:
-  // Constructors
+  /// Constructor from centre, inner/outer radii, and length.
   SolidTube(const double cx, const double cy, const double cz,
             const double rmin, const double rmax, const double lz);
+  /// Constructor from centre, inner/outer radii, length and orientation.
   SolidTube(const double cx, const double cy, const double cz,
             const double rmin, const double rmax, const double lz,
             const double dx, const double dy, const double dz);
-  // Destructor
+  /// Destructor
   ~SolidTube() {}
 
   virtual bool IsInside(const double x, const double y, const double z) const;

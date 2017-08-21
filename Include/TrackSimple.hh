@@ -1,4 +1,3 @@
-
 #ifndef G_TRACK_SIMPLE_H
 #define G_TRACK_SIMPLE_H
 
@@ -6,19 +5,25 @@
 
 namespace Garfield {
 
+/// Generate tracks based on a cluster density given by the user. 
+
 class TrackSimple : public Track {
 
  public:
-  // Constructor
+  /// Constructor
   TrackSimple();
-  // Destructor
+  /// Destructor
   ~TrackSimple() {}
 
+  /// Constant distance between clusters.
   void SetEqualSpacing() { m_useEqualSpacing = true; }
+  /// Exponentially distributed distance between clusters.
   void SetExponentialSpacing() { m_useEqualSpacing = false; }
 
+  /// Set the cluster density (inverse mean free path).
   void SetClusterDensity(const double d);
   double GetClusterDensity();
+  /// Set the stopping power (dE/dx).
   void SetStoppingPower(const double dedx);
   double GetStoppingPower();
 
