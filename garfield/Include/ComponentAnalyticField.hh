@@ -9,6 +9,9 @@
 
 namespace Garfield {
 
+/// Semi-analytic calculation of two-dimensional configurations 
+/// consisting of wires, planes, and tubes.
+
 class ComponentAnalyticField : public ComponentBase {
 
  public:

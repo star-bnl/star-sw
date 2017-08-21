@@ -1,11 +1,11 @@
-// Two-dimensional implementation of nearly exact Boundary Element Method
-
 #ifndef G_COMPONENT_NEBEM_2D_H
 #define G_COMPONENT_NEBEM_2D_H
 
 #include "ComponentBase.hh"
 
 namespace Garfield {
+
+/// Two-dimensional implementation of the nearly exact Boundary Element Method.
 
 class ComponentNeBem2d : public ComponentBase {
 

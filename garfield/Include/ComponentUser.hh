@@ -1,11 +1,11 @@
-// Simple component with electric field given by a user function
-
 #ifndef G_COMPONENT_USER_H
 #define G_COMPONENT_USER_H
 
 #include "ComponentBase.hh"
 
 namespace Garfield {
+
+/// Simple component with electric field given by a user function.
 
 class ComponentUser : public ComponentBase {
 

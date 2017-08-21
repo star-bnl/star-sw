@@ -5,12 +5,14 @@
 
 namespace Garfield {
 
+/// Component for importing and interpolating two-dimensional ANSYS field maps.
+
 class ComponentAnsys121 : public ComponentFieldMap {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentAnsys121();
-  // Destructor
+  /// Destructor
   ~ComponentAnsys121() {}
 
   Medium* GetMedium(const double x, const double y, const double z);

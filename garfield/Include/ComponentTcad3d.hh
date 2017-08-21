@@ -1,11 +1,11 @@
-// Interpolation in a three-dimensional field map created by Sentaurus Device
-
 #ifndef G_COMPONENT_TCAD_3D_H
 #define G_COMPONENT_TCAD_3D_H
 
 #include "ComponentBase.hh"
 
 namespace Garfield {
+
+/// Interpolation in a three-dimensional field map created by Sentaurus Device.
 
 class ComponentTcad3d : public ComponentBase {
 
