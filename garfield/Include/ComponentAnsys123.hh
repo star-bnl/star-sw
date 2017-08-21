@@ -5,6 +5,8 @@
 
 namespace Garfield {
 
+/// Component for importing and interpolating two-dimensional ANSYS field maps.
+
 class ComponentAnsys123 : public ComponentFieldMap {
 
  public:

@@ -7,6 +7,8 @@
 
 namespace Garfield {
 
+/// Component for importing field maps computed by Elmer.
+
 class ComponentElmer : public ComponentFieldMap {
 
  public:
@@ -14,7 +16,7 @@ class ComponentElmer : public ComponentFieldMap {
   ComponentElmer();
   ComponentElmer(std::string header, std::string elist, std::string nlist,
                  std::string mplist, std::string volt, std::string unit);
-  // Destructor
+  /// Destructor
   ~ComponentElmer() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,

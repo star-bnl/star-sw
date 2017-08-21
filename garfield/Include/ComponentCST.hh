@@ -1,8 +1,3 @@
-// Copied and modified ComponentAnsys123.hh
-// This Interface assumes a certain format of the ascii files
-// Please find the tools to extract the field data from CST
-// in the correct way here: http://www.desy.de/~zenker/garfieldpp.html
-
 #ifndef G_COMPONENT_CST_H
 #define G_COMPONENT_CST_H
 
@@ -11,6 +6,11 @@
 #include "ComponentFieldMap.hh"
 
 namespace Garfield {
+
+/// Component for importing and interpolating field maps from CST. 
+/// This interface assumes a certain format of the ascii files
+/// Please find the tools to extract the field data from CST
+/// in the correct way here: http://www.desy.de/~zenker/garfieldpp.html
 
 class ComponentCST : public ComponentFieldMap {
 

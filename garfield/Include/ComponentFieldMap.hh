@@ -8,6 +8,8 @@
 
 namespace Garfield {
 
+/// Base class for components based on finite-element field maps. 
+
 class ComponentFieldMap : public ComponentBase {
 
  public:

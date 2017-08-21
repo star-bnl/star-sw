@@ -276,7 +276,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   // Current time.
   double t = t0;
   // Current drift point.
-  driftPoint point;
+  DriftPoint point;
   point.x = x0;
   point.y = y0;
   point.z = z0;
@@ -447,7 +447,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
 
   // Create an "endpoint".
-  endpoint endPoint;
+  EndPoint endPoint;
   endPoint.x0 = x0;
   endPoint.y0 = y0;
   endPoint.z0 = z0;
@@ -1054,7 +1054,7 @@ bool AvalancheMC::Equilibrate(std::vector<double>& alphas) const {
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
     if (alphas[i] >= 0.) continue;
     // Targets for subtracting
-    double sub1 = -alphas[i] / 2.;
+    double sub1 = -0.5 * alphas[i];
     double sub2 = sub1;
     bool try1 = false;
     bool try2 = false;
@@ -1142,8 +1142,9 @@ void AvalancheMC::ComputeSignal(const double q) {
     const double x =  m_drift[i].x + 0.5 * dx;
     const double y =  m_drift[i].y + 0.5 * dy;
     const double z =  m_drift[i].z + 0.5 * dz;
+    const double s = 1. / dt;
     m_sensor->AddSignal(q, m_drift[i].t, dt, x, y, z,
-                        dx / dt, dy / dt, dz / dt);
+                        dx * s, dy * s, dz * s);
   }
 }
 

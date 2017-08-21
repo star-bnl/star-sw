@@ -1,10 +1,10 @@
-// Copied and modified ComponentAnsys123.hh
-
 #pragma once
 
 #include "ComponentFieldMap.hh"
 
 namespace Garfield {
+
+/// Component for importing and interpolating Comsol field maps.
 
 class ComponentComsol : public ComponentFieldMap {
 
