@@ -1,5 +1,3 @@
-// Abstract base class for media
-
 #ifndef G_MEDIUM_H
 #define G_MEDIUM_H
 
@@ -7,6 +5,8 @@
 #include <vector>
 
 namespace Garfield {
+
+/// Abstract base class for media.
 
 class Medium {
 

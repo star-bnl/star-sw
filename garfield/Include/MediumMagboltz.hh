@@ -1,11 +1,12 @@
-// Interface to Magboltz (version 9)
-
 #ifndef G_MEDIUM_MAGBOLTZ_9
 #define G_MEDIUM_MAGBOLTZ_9
 
 #include "MediumGas.hh"
 
 namespace Garfield {
+
+/// Interface to %Magboltz (version 9).
+///  - http://magboltz.web.cern.ch/magboltz/
 
 class MediumMagboltz : public MediumGas {
 

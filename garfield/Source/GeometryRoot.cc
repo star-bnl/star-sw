@@ -18,8 +18,7 @@ GeometryRoot::GeometryRoot()
 void GeometryRoot::SetGeometry(TGeoManager* geoman) {
 
   if (!geoman) {
-    std::cerr << "GeometryRoot::SetGeometry:\n";
-    std::cerr << "    Pointer to TGeoManager is null.\n";
+    std::cerr << m_className << "::SetGeometry:\n    Null pointer.";
     return;
   }
 

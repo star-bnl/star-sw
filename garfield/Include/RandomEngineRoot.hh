@@ -1,5 +1,3 @@
-// ROOT random number generator
-
 #ifndef G_RANDOM_ENGINE_ROOT_H
 #define G_RANDOM_ENGINE_ROOT_H
 
@@ -8,6 +6,8 @@
 #include "RandomEngine.hh"
 
 namespace Garfield {
+
+/// ROOT random number generator.
 
 class RandomEngineRoot : public RandomEngine {
 

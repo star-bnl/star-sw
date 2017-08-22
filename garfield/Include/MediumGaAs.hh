@@ -1,4 +1,3 @@
-// Gallium-Arsenide
 #ifndef G_MEDIUM_GAAS_H
 #define G_MEDIUM_GAAS_H
 
@@ -6,21 +5,25 @@
 
 namespace Garfield {
 
+/// Gallium-Arsenide.
+
 class MediumGaAs : public Medium {
 
  public:
-  // Constructor
+  /// Constructor
   MediumGaAs();
-  // Destructor
+  /// Destructor
   ~MediumGaAs() {}
 
   bool IsSemiconductor() const { return true; }
 
   void GetComponent(const unsigned int i, std::string& label, double& f);
 
-  // Trapping cross-section
+  /// Set electron and hole trapping cross-sections [cm-2].
   void SetTrapCrossSection(const double ecs, const double hcs);
+  /// Set the density of traps [cm-3].
   void SetTrapDensity(const double n);
+  /// Set the trapping time [ns] for electrons and holes.
   void SetTrappingTime(const double etau, const double htau);
 
   // Electron transport parameters

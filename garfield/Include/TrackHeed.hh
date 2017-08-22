@@ -1,5 +1,3 @@
-// Track generation using Heed++
-
 #ifndef G_TRACK_HEED_H
 #define G_TRACK_HEED_H
 
@@ -32,6 +30,8 @@ namespace Garfield {
 
 class HeedChamber;
 class Medium;
+
+/// Generate tracks using Heed++.
 
 class TrackHeed : public Track {
 

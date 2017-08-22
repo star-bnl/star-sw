@@ -8,6 +8,8 @@
 
 namespace Garfield {
 
+/// Base class for gas media.
+
 class MediumGas : public Medium {
 
  public:

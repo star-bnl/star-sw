@@ -1,5 +1,3 @@
-// Sensor
-
 #ifndef G_SENSOR_H
 #define G_SENSOR_H
 
@@ -9,56 +7,60 @@
 
 namespace Garfield {
 
+/// %Sensor
+
 class Sensor {
 
  public:
-  // Constructor
+  /// Constructor
   Sensor();
-  // Destructor
+  /// Destructor
   ~Sensor() {}
 
-  // Add a component
+  /// Add a component.
   void AddComponent(ComponentBase* comp);
   unsigned int GetNumberOfComponents() const { return m_components.size(); }
   ComponentBase* GetComponent(const unsigned int componentNumber);
 
-  // Add an electrode
+  /// Add an electrode.
   void AddElectrode(ComponentBase* comp, const std::string& label);
   unsigned int GetNumberOfElectrodes() const { return m_electrodes.size(); }
-  // Remove all components, electrodes and reset the sensor
+  /// Remove all components, electrodes and reset the sensor.
   void Clear();
 
-  // Get the drift field at (x, y, z)
+  /// Get the drift field and potential at (x, y, z).
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& medium,
                      int& status);
+  /// Get the drift field at (x, y, z).
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& medium, int& status);
 
-  // Get the magnetic field at (x, y, z)
+  /// Get the magnetic field at (x, y, z).
   void MagneticField(const double x, const double y, const double z, double& bx,
                      double& by, double& bz, int& status);
 
-  // Get the weighting field at (x, y, z)
+  /// Get the weighting field at (x, y, z).
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
                       const std::string& label);
-  // Get the weighting potential at (x, y, z)
+  /// Get the weighting potential at (x, y, z).
   double WeightingPotential(const double x, const double y, const double z,
                             const std::string& label);
 
-  // Get the medium at (x, y, z)
+  /// Get the medium at (x, y, z).
   bool GetMedium(const double x, const double y, const double z,
                  Medium*& medium);
 
-  // Set the user area
+  /// Set the user area to the default.
   bool SetArea();
+  /// Set the user area explicitly.
   bool SetArea(const double xmin, const double ymin, const double zmin,
                const double xmax, const double ymax, const double zmax);
-  // Return the current user area
+  /// Return the current user area.
   bool GetArea(double& xmin, double& ymin, double& zmin, double& xmax,
                double& ymax, double& zmax);
-  // Check if a point is inside the user area
+  /// Check if a point is inside the user area.
   bool IsInArea(const double x, const double y, const double z);
 
   bool IsWireCrossed(const double x0, const double y0, const double z0,
@@ -68,12 +70,12 @@ class Sensor {
   bool IsInTrapRadius(const double q0, const double x0, const double y0, 
                       const double z0, double& xw, double& yw, double& rw);
 
-  // Return the voltage range
+  /// Return the voltage range.
   bool GetVoltageRange(double& vmin, double& vmax);
 
-  // Signal calculation
+  /// Start a new event, when computing the average signal over multiple events.
   void NewSignal() { ++m_nEvents; }
-  // Reset signals and induced charges of all electrodes
+  /// Reset signals and induced charges of all electrodes.
   void ClearSignal();
   void AddSignal(const double q, const double t, const double dt,
                  const double x, const double y, const double z,
@@ -110,7 +112,7 @@ class Sensor {
   bool GetThresholdCrossing(const unsigned int i, double& time, double& level,
                             bool& rise) const;
 
-  // Switch on/off debugging messages
+  /// Switch on debugging messages
   void EnableDebugging() { m_debug = true; }
   void DisableDebugging() { m_debug = false; }
 

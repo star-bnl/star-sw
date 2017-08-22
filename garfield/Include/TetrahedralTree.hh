@@ -1,19 +1,3 @@
-/**
-
-TetrahedralTree.hh
-
-This class stores the mesh nodes and elements in an Octree data
-
-structure to optimize the element search operations
-
-
-
-Author: Ali Sheharyar
-
-Organization: Texas A&M University at Qatar
-
-*/
-
 #ifndef TETRAHEDRAL_TREE_H
 #define TETRAHEDRAL_TREE_H
 
@@ -58,6 +42,18 @@ struct Vec3 {
   Vec3 operator/(float r) const { return Vec3(x / r, y / r, z / r); }
 };
 
+/**
+
+\brief Helper class for searches in field maps.
+
+This class stores the mesh nodes and elements in an Octree data
+structure to optimize the element search operations
+
+Author: Ali Sheharyar
+
+Organization: Texas A&M University at Qatar
+
+*/
 class TetrahedralTree {
 
  private:

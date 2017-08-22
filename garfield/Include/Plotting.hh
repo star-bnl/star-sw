@@ -1,4 +1,3 @@
-
 #ifndef G_PLOTTING_H
 #define G_PLOTTING_H
 

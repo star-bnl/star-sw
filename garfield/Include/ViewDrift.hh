@@ -10,6 +10,8 @@
 
 namespace Garfield {
 
+/// Visualize drift lines and tracks.
+
 class ViewDrift {
 
  public:
