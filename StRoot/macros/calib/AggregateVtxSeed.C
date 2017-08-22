@@ -27,6 +27,8 @@ Int_t AggregateVtxSeed(char* dir, const char* cuts, const Int_t offset) {
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StdEdxY2Maker");
+  gSystem->Load("StPicoEvent");
+  gSystem->Load("StPicoDstMaker");
   gSystem->Load("StPass0CalibMaker");
 
   StVertexSeedMaker vtxSeedMk;
@@ -36,8 +38,11 @@ Int_t AggregateVtxSeed(char* dir, const char* cuts, const Int_t offset) {
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.4 2013/08/14 21:41:15 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.5 2017/08/22 17:32:13 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.5  2017/08/22 17:32:13  genevb
+// Add Pico dependendence for StPass0CalibMaker lib
+//
 // Revision 1.4  2013/08/14 21:41:15  genevb
 // Introduce time offsets, noclobber toggle
 //
