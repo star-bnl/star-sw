@@ -13,4 +13,6 @@ struct epdQTMap {
   short qt_channel_adc[744]; /* qt_channel_adc=1-32, -1 for non existing channels*/
   short qt_board_tac[744]; /* TAC channle adddress, -1 for non existing channels*/
   short qt_channel_tac[744]; /* qt_channel_tac=1-32, -1 for non existing channels*/
+  short qt_crate_adc[744]; /* VME crate number for ADC channels*/
+  short qt_crate_tac[744]; /* VME crate number for TAC channels*/
 };

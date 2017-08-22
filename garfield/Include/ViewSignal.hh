@@ -11,12 +11,14 @@ namespace Garfield {
 
 class Sensor;
 
+/// Plot the signal computed by a sensor as a ROOT histogram.
+
 class ViewSignal {
 
  public:
-  // Constructor
+  /// Constructor
   ViewSignal();
-  // Destructor
+  /// Destructor
   ~ViewSignal();
 
   void SetSensor(Sensor* s);

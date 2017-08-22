@@ -1,25 +1,29 @@
-// Abstract base class for solids
-
 #ifndef G_SOLID_H
 #define G_SOLID_H
 
 namespace Garfield {
 
+/// Abstract base class for solids.
+
 class Solid {
 
  public:
-  // Constructor
+  /// Constructor
   Solid() : m_debug(false) {}
-  // Destructor
+  /// Destructor
   virtual ~Solid() {}
 
+  /// Check whether a given point is inside the solid.
   virtual bool IsInside(const double x, const double y, 
                         const double z) const = 0;
+  /// Return the bounding box of the solid.
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                               double& xmax, double& ymax, double& zmax) const = 0;
-  // Solid type
+  /// Return true if the solid is a box.
   virtual bool IsBox() const { return false; }
+  /// Return true if the solid is a tube.
   virtual bool IsTube() const { return false; }
+  /// Return true if the solid is a sphere.
   virtual bool IsSphere() const { return false; }
 
   virtual bool GetCenter(double& x, double& y, double& z) const = 0;
@@ -27,7 +31,7 @@ class Solid {
   virtual bool GetOrientation(double& ctheta, double& stheta, double& cphi,
                               double& shpi) const = 0;
 
-  // Switch on/off debugging messages
+  /// Switch on debugging messages.
   void EnableDebugging() { m_debug = true; }
   void DisableDebugging() { m_debug = false; }
 

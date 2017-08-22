@@ -10,6 +10,8 @@ namespace Garfield {
 class Sensor;
 class ComponentBase;
 
+/// Visualize the potential or electric field of a component or sensor.
+ 
 class ViewField {
 
  public:

@@ -14,6 +14,8 @@ namespace Garfield {
 
 class Medium;
 
+/// Plot transport coefficients as function of electric and magnetic field. 
+
 class ViewMedium {
 
  public:

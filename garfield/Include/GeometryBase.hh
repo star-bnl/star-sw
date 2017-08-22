@@ -1,5 +1,3 @@
-// Abstract base class for geometry classes
-
 #ifndef G_GEOMETRY_BASE_H
 #define G_GEOMETRY_BASE_H
 
@@ -8,6 +6,8 @@
 #include "Medium.hh"
 
 namespace Garfield {
+
+/// Abstract base class for geometry classes.
 
 class GeometryBase {
 

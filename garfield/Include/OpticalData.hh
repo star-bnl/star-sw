@@ -6,6 +6,8 @@
 
 namespace Garfield {
 
+/// Photoabsorption cross-sections for some gases.
+ 
 class OpticalData {
 
  public:

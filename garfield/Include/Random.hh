@@ -1,5 +1,3 @@
-// Random number generation and sampling from random number distributions
-
 #ifndef G_RANDOM_H
 #define G_RANDOM_H
 
@@ -9,13 +7,13 @@
 
 namespace Garfield {
 
-// Random number generator
+/// Random number generator
 extern RandomEngineRoot randomEngine;
 
-// Draw a random number uniformly distributed in the range [0, 1)
+/// Draw a random number uniformly distributed in the range [0, 1).
 inline double RndmUniform() { return randomEngine.Draw(); }
 
-// Draw a random number uniformly distributed in the range (0, 1)
+/// Draw a random number uniformly distributed in the range (0, 1).
 inline double RndmUniformPos() {
 
   double r = RndmUniform();
@@ -23,7 +21,7 @@ inline double RndmUniformPos() {
   return r;
 }
 
-// Draw a Gaussian random variate with mean zero and standard deviation one
+/// Draw a Gaussian random variate with mean zero and standard deviation one.
 inline double RndmGaussian() {
 
   static bool cached = false;
@@ -47,23 +45,23 @@ inline double RndmGaussian() {
   return v * p;
 }
 
-// Draw a Gaussian random variate with mean mu and standard deviation sigma
+/// Draw a Gaussian random variate with mean mu and standard deviation sigma.
 inline double RndmGaussian(const double mu, const double sigma) {
 
   return mu + sigma * RndmGaussian();
 }
 
-// Draw a Lorentzian random variate with mean mu
-// and half-width at half maximum gamma
+/// Draw a Lorentzian random variate with mean mu
+/// and half-width at half maximum gamma.
 inline double RndmLorentzian(const double mu, const double gamma) {
 
   return mu + gamma * tan(Pi * (RndmUniform() - 0.5));
 }
 
-// Draw a random number according to a Voigt function with mean mu.
-// The Voigt function is a convolution of a
-// Gaussian (standard deviation sigma) and
-// a Lorentzian (half width gamma).
+/// Draw a random number according to a Voigt function with mean mu.
+/// The Voigt function is a convolution of a
+/// Gaussian (standard deviation sigma) and
+/// a Lorentzian (half width gamma).
 inline double RndmVoigt(const double mu, const double sigma,
                         const double gamma) {
 
@@ -73,7 +71,7 @@ inline double RndmVoigt(const double mu, const double sigma,
   return mu + x * Sqrt2 * sigma;
 }
 
-// Draw a Polya distributed random number
+/// Draw a Polya distributed random number.
 inline double RndmPolya(const double theta) {
 
   // Algorithm from Review of Particle Physics
@@ -98,7 +96,9 @@ inline double RndmPolya(const double theta) {
   }
 }
 
+/// Draw a random number from a Landau distribution.
 double RndmLandau();
+/// Draw a random number from a Vavilov distribution.
 double RndmVavilov(const double rkappa, const double beta2);
 double RndmHeedWF(const double w, const double f);
 

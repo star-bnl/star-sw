@@ -1,5 +1,3 @@
-// Ionization calculation based on MIP program (S. Biagi)
-
 #ifndef G_TRACK_ELECTRON
 #define G_TRACK_ELECTRON
 
@@ -9,6 +7,8 @@
 #include "Track.hh"
 
 namespace Garfield {
+
+/// Ionization calculation based on MIP program (S. Biagi).
 
 class TrackElectron : public Track {
 

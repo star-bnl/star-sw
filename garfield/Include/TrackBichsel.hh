@@ -1,14 +1,14 @@
-// Track generation using differential cross-sections computed by H. Bichsel
-// References:
-//   - H. Bichsel, Rev. Mod. Phys. 60 (1988), 663-699
-//   - https://faculty.washington.edu/hbichsel/
-
 #ifndef G_TRACK_BICHSEL_H
 #define G_TRACK_BICHSEL_H
 
 #include "Track.hh"
 
 namespace Garfield {
+
+/// Generate tracks using differential cross-sections computed by Hans Bichsel.
+/// References:
+///   - H. Bichsel, Rev. Mod. Phys. 60 (1988), 663-699
+///   - https://faculty.washington.edu/hbichsel/
 
 class TrackBichsel : public Track {
 

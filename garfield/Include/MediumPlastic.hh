@@ -1,11 +1,11 @@
-// Plastic medium
-
 #ifndef G_MEDIUM_PLASTIC_H
 #define G_MEDIUM_PLASTIC_H
 
 #include "Medium.hh"
 
 namespace Garfield {
+
+/// Plastic medium.
 
 class MediumPlastic : public Medium {
 

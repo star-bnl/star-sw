@@ -10,6 +10,8 @@ namespace Garfield {
 
 class ComponentAnalyticField;
 
+/// Visualize the "cell" defined in an analytic-field component.
+
 class ViewCell {
 
  public:

@@ -1,4 +1,5 @@
-/*    epdFEEMap.idl
+/*
+*    epdFEEMap.idl
 *
 *  Table: epdFEEMap
 *
@@ -14,5 +15,6 @@ struct epdFEEMap {
   short tuff_channel[744]; /* TUFF channel, undefined -1 */
   short receiver_board[744]; /* Receiver board # 1...6... undefined -1 */
   short receiver_board_channel[744]; /* Re. brd ch 1...16, unsigned -1*/
+  short camac_crate_address[744]; /* Address of CAMAC crate */
   char wire_1_id[14880]; /* 1_wire_id, undefined -1 */
 };

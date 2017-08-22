@@ -10,6 +10,8 @@ namespace Garfield {
 
 class GeometrySimple;
 
+/// Visualize a geometry defined using the "native" shapes.
+
 class ViewGeometry {
 
  public:

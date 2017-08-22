@@ -1,27 +1,26 @@
-// Solid crystalline silicon
-
 #ifndef G_MEDIUM_SILICON_H
 #define G_MEDIUM_SILICON_H
 
 #include "Medium.hh"
 
 namespace Garfield {
+/// %Solid crystalline silicon
 
 class MediumSilicon : public Medium {
 
  public:
-  // Constructor
+  /// Constructor
   MediumSilicon();
-  // Destructor
+  /// Destructor
   ~MediumSilicon() {}
 
   bool IsSemiconductor() const { return true; }
 
-  // Doping concentration [cm-3] and type ('i', 'n', 'p')
+  /// Doping concentration [cm-3] and type ('i', 'n', 'p')
   void SetDoping(const char type, const double c);
   void GetDoping(char& type, double& c) const;
 
-  // Trapping cross-section
+  /// Trapping cross-sections for electrons and holes.
   void SetTrapCrossSection(const double ecs, const double hcs);
   void SetTrapDensity(const double n);
   void SetTrappingTime(const double etau, const double htau);

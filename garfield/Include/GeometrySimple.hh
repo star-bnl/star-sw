@@ -1,5 +1,3 @@
-// Abstract base class for components
-
 #ifndef G_GEOMETRY_SIMPLE_H
 #define G_GEOMETRY_SIMPLE_H
 
@@ -9,6 +7,8 @@
 #include "Solid.hh"
 
 namespace Garfield {
+
+/// "Native" geometry, using simple shapes.
 
 class GeometrySimple : public GeometryBase {
 

@@ -1,5 +1,3 @@
-// Abstract base class for plotting engines
-
 #ifndef G_PLOTTING_ENGINE_H
 #define G_PLOTTING_ENGINE_H
 
@@ -8,10 +6,12 @@
 
 namespace Garfield {
 
+/// Abstract base class for plotting engines.
+
 class PlottingEngine {
 
  public:
-  // Constructor
+  /// Constructor
   PlottingEngine()
       : m_className("PlottingEngine"),
         m_colorLine1("dark-blue"),
@@ -23,7 +23,7 @@ class PlottingEngine {
         m_colorChargedParticle("dark-green"),
         m_debug(false) {}
 
-  // Destructor
+  /// Destructor
   virtual ~PlottingEngine() {}
 
   // Set/get colors.
