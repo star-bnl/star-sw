@@ -1074,6 +1074,7 @@ void GblTrajectory::prepare() {
 					if (measDim > 2) {
 						matPDer = matP * matDer;
 					} else { // 'shortcut' for position measurements
+						matPDer.setZero();
 						matPDer.block<2, 5>(3, 0) = matP.block<2, 2>(3, 3)
 								* matDer.block<2, 5>(3, 0);
 					}
@@ -1081,9 +1082,11 @@ void GblTrajectory::prepare() {
 					if (numInnerTrans > 0) {
 						// transform for external parameters
 						proDer.resize(measDim, Eigen::NoChange);
+						proDer.setZero();
 						// match parameters
 						unsigned int ifirst = 0;
 						unsigned int ilabel = 0;
+						unsigned int numRelated = 0;
 						while (ilabel < 5) {
 							if (labDer[ilabel] > 0) {
 								while (innerTransLab[iTraj][ifirst]
@@ -1095,6 +1098,7 @@ void GblTrajectory::prepare() {
 								} else {
 									// match
 									labDer[ilabel] = 0; // mark as related to external parameters
+									numRelated++;
 									for (unsigned int k = iOff; k < 5; ++k) {
 										proDer(k - iOff, ifirst) = matPDer(k,
 												ilabel);
@@ -1103,8 +1107,10 @@ void GblTrajectory::prepare() {
 							}
 							++ilabel;
 						}
-						transDer.resize(measDim, numCurvature);
-						transDer = proDer * innerTransDer[iTraj];
+						if (numRelated > 0) {
+							transDer.resize(measDim, numCurvature);
+							transDer = proDer * innerTransDer[iTraj];
+						}
 					}
 					for (unsigned int i = iOff; i < 5; ++i) {
 						if (aPrec(i) > minPrecision) {
@@ -1124,7 +1130,7 @@ void GblTrajectory::prepare() {
 		}
 	} // end of scope for proDer
 
-	Matrix2d matT;              // measurements
+	Matrix2d matT;              // kinks
 	// limit the scope of proDer:
 	{
 		// transform for external parameters
@@ -1148,9 +1154,11 @@ void GblTrajectory::prepare() {
 					if (numInnerTrans > 0) {
 						// transform for external parameters
 						proDer.resize(nDim, Eigen::NoChange);
+						proDer.setZero();
 						// match parameters
 						unsigned int ifirst = 0;
 						unsigned int ilabel = 0;
+						unsigned int numRelated = 0;
 						while (ilabel < 7) {
 							if (labDer[ilabel] > 0) {
 								while (innerTransLab[iTraj][ifirst]
@@ -1162,6 +1170,7 @@ void GblTrajectory::prepare() {
 								} else {
 									// match
 									labDer[ilabel] = 0; // mark as related to external parameters
+									numRelated++;
 									for (unsigned int k = 0; k < nDim; ++k) {
 										proDer(k, ifirst) = matTDer(k, ilabel);
 									}
@@ -1169,8 +1178,10 @@ void GblTrajectory::prepare() {
 							}
 							++ilabel;
 						}
-						transDer.resize(nDim, numCurvature);
-						transDer = proDer * innerTransDer[iTraj];
+						if (numRelated > 0) {
+							transDer.resize(nDim, numCurvature);
+							transDer = proDer * innerTransDer[iTraj];
+						}
 					}
 					for (unsigned int i = 0; i < nDim; ++i) {
 						unsigned int iDim = theDimension[i];
@@ -1323,6 +1334,9 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 }
 
 /// Write valid trajectory to Millepede-II binary file.
+/**
+ * Trajectory state after construction (independent of fitting) is used.
+ */
 void GblTrajectory::milleOut(MilleBinary &aMille) {
 	double aValue;
 	double aErr;
