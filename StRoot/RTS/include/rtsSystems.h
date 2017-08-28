@@ -416,11 +416,10 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TRG_BBQ_INSTANCE 21
 #define TRG_MXQ_INSTANCE 22
 // #define TRG_FEQ_INSTANCE 23   // JML via JN.  8/29/16
-#define TRG_EPQ_INSTANCE 23
-
+#define TRG_EQ3_INSTANCE 23      // Rename EPQ EQ3.  JMN 8/15/17
 #define TRG_TCD_NEW_INSTANCE	24
-#define TRG_FQ1_INSTANCE 25
-#define TRG_FQ2_INSTANCE 26
+#define TRG_EQ1_INSTANCE 25      // Rename FQ1 EQ1.  JMN 8/15/17    
+#define TRG_EQ2_INSTANCE 26      // Rename FQ2 EQ2.  JMN 8/15/17
 
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
@@ -597,10 +596,10 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TRG_BBQ_NODE    ((TRG_SYSTEM<<12) | TRG_BBQ_INSTANCE)
 #define TRG_MXQ_NODE    ((TRG_SYSTEM<<12) | TRG_MXQ_INSTANCE)
 //#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_FEQ_INSTANCE)
-#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_EPQ_INSTANCE)
-#define TRG_EPQ_NODE    ((TRG_SYSTEM<<12) | TRG_EPQ_INSTANCE)
-#define TRG_FQ1_NODE    ((TRG_SYSTEM<<12) | TRG_FQ1_INSTANCE)
-#define TRG_FQ2_NODE    ((TRG_SYSTEM<<12) | TRG_FQ2_INSTANCE)
+//#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_EPQ_INSTANCE)   // Comment FEQ.       JMN 8/15/17
+#define TRG_EQ3_NODE    ((TRG_SYSTEM<<12) | TRG_EQ3_INSTANCE)     // Rename EPQ > EQ3.  JMN 8/15/17
+#define TRG_EQ1_NODE    ((TRG_SYSTEM<<12) | TRG_EQ1_INSTANCE)     // Rename FQ1 > EQ1.  JMN
+#define TRG_EQ2_NODE    ((TRG_SYSTEM<<12) | TRG_EQ2_INSTANCE)     // Rename FQ2 > EQ2.  JMN
 
 
 #define TRG_SCALER48_NODE  ((TRG_SYSTEM<<12) | TRG_SCALER48_INSTANCE)
