@@ -25,7 +25,7 @@ class TTreeIter;
 class StVMCMaker : public StMaker {
  public: 
   StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), 
-    fInitRun(0), fVolume(0), fMuDstIter(0), fRndm(0), 
+    fInitRun(0), fVolume(0), fMuDstIter(0), fRndm(0), fRndmSaved(0), 
     fvzlow(-6), fvzhigh(6), fvrMax(1), fvxSigma(0.0050), fdzVpdMax(3), 
     fSkipMode(kTRUE), fVpdVzCutMode(kTRUE), fGoodTiggerIds()
     {fgGeantMk = this;}
