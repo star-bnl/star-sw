@@ -177,7 +177,7 @@ public:
       static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.9 2014/10/07 19:25:28 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
-
+   static Int_t _debug;
 private:
    //! geoHMatrices describing rotation + shift translations between different coordinate systems
 #ifndef __NEW_PXLDB__

@@ -61,8 +61,9 @@
 
 
 StPxlDb* StPxlDb::fgInstance = 0;
-ClassImp(StPxlDb)
-
+ClassImp(StPxlDb);
+Int_t  StPxlDb::_debug = 0;
+#define PrPV(B)      if (_debug)                {std::cout << (#B) << " = \t"; (B).Print();} 
 //_____________________________________________________________________________
 StPxlDb::StPxlDb() : StObject()
 {
@@ -171,8 +172,18 @@ void StPxlDb::setGeoHMatrices()
 	      * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
 #endif /* ! __NEW_PXLDB__ */
             mGeoHMatrixSensorOnGlobal[i][j][k].SetName(Form("sensorOnGlobal%03i%03i%03i", i + 1, j + 1, k + 1));
+#ifdef  __NEW_PXLDB__
+	    if (_debug) {
+	      cout << "i = " << i << "\tj = " << j  << "\tk = " << k << endl;
+	      PrPV(StTpcDb::instance()->Tpc2GlobalMatrix());  PrPV(mGeoHMatrixIdsOnTpc); PrPV(mGeoHMatrixPstOnIds);
+	      PrPV(mGeoHMatrixPxlOnPst ); PrPV(mGeoHMatrixHalfOnPxl[i / 5] ); PrPV(mGeoHMatrixSectorOnHalf[i]);
+	      PrPV(mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]); 
+	      PrPV(mGeoHMatrixLadderOnSector[i][j] ); PrPV(mGeoHMatrixSensorOnLadder[i][j][k]);
+	      PrPV(mGeoHMatrixSensorOnGlobal[i][j][k]);
+	      cout << "================================================================================" << endl;
+	    }
+#endif	      
          }
-
 }
 #ifndef  __NEW_PXLDB__
 //_____________________________________________________________________________
