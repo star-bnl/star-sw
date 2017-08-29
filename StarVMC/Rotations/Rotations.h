@@ -26,16 +26,17 @@
 #include "TGeoMatrix.h"
 #include "TGeoManager.h"
 #endif /* ! __NO_TGEO__ */
+#include "TString.h"
 class rotm_t {
  public:
   rotm_t(const Char_t *Name = "", 
 	 Float_t thet1 = 0, Float_t phi1 = 0, 
 	 Float_t thet2 = 0, Float_t phi2 = 0, 
 	 Float_t thet3 = 0, Float_t phi3 = 0) : 
-    Thet1(thet1), Phi1(phi1), Thet2(thet2), Phi2(phi2), Thet3(thet3), Phi3(phi3) {strcpy(name, (Char_t *) Name);}
+    name(Name), Thet1(thet1), Phi1(phi1), Thet2(thet2), Phi2(phi2), Thet3(thet3), Phi3(phi3) {}
     //  static vector<rotm_t> fgRotaions;
   void Print() {std::cout 
-      << name 
+      << name.Data()
       << "\t" <<  Thet1 
       << "\t" <<   Phi1 
       << "\t" <<  Thet2 
@@ -43,7 +44,7 @@ class rotm_t {
       << "\t" <<  Thet3 
       << "\t" <<   Phi3 
       << std::endl;}
-  Char_t name[10];
+  TString name;
   Float_t Thet1,    Phi1,   Thet2,    Phi2,   Thet3,    Phi3;
   static void Rotations();
 #ifndef __NO_TGEO__
