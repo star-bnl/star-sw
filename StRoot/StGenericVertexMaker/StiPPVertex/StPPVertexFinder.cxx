@@ -817,7 +817,7 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex)
    // Fill member array of pointers to StDcaGeometry objects for selected tracks
    // in mTrackData corresponding to this vertex. These will be used in static
    // minimization function
-   while (!mDCAs.empty()) delete mDCAs.back(), mDCAs.pop_back();
+   while (!mDCAs.empty()) {delete mDCAs.back(); mDCAs.pop_back();}
 
 
    for (const TrackData & track : mTrackData)
@@ -1020,7 +1020,7 @@ void StPPVertexFinder::exportVertices()
 
        // The daughter StTrack-s are removed at this time because we don't save them
        while ( !primV.daughters().empty() )
-          delete primV.daughters().back(), primV.daughters().pop_back();
+	 {delete primV.daughters().back(); primV.daughters().pop_back();}
     }
 
     //..... add vertex to the list
