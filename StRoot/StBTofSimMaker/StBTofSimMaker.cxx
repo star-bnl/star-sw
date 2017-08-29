@@ -107,10 +107,8 @@ void StBTofSimMaker::Reset()
 	mGeantData = 0;
 	mEvent  = 0;
 	mMcEvent = 0;
-	delete mMcBTofHitCollection;
-	mSimDb  = 0;
-
-	if(mDaqMap){delete mDaqMap; mDaqMap = 0;}
+	//	SafeDelete(mMcBTofHitCollection);
+        SafeDelete(mDaqMap);
 
 	ResetFlags();
 }
@@ -169,7 +167,8 @@ int StBTofSimMaker::Make()
 {
 	LOG_INFO << "StBTofSimMaker  Make() starts" << endm;
 
-	ResetFlags();
+	//yf	ResetFlags();
+	Reset();
 
 	mMcBTofHitCollection = new StMcBTofHitCollection();
 
@@ -548,9 +547,9 @@ int StBTofSimMaker::fillEvent()
 		mMcEvent->setBTofHitCollection(mMcBTofHitCollection);       //! Replaces existing collection with the passed argument
 		LOG_INFO << " ... StMcBTofHitCollection stored in StMcEvent" << endm;
 	}
-
+#if 0
 	if (!mIsEmbedding) {  //! send off to StEvent
-
+#endif
       //! Store Collections
       mBTofCollection = mEvent->btofCollection();
       if(!mBTofCollection) {
@@ -558,13 +557,14 @@ int StBTofSimMaker::fillEvent()
           mBTofCollection = new StBTofCollection();
           mEvent->setBTofCollection(mBTofCollection);
       }
+#if 0
     }
     else if (mIsEmbedding) { //! perform embedding
         
         LOG_INFO << "Creating new StBTofCollection locally" << endm;
         mBTofCollection = new StBTofCollection();
     }
-
+#endif
     //! create StBTofHit / tofRawData / tofData collection
     for(int jj = 0; jj < (int)mMcBTofHitCollection->hits().size(); jj++) {
         StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
@@ -605,8 +605,9 @@ int StBTofSimMaker::fillEvent()
         aBTofRawHit.setFlag(1);
         mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
     }
-
+#if 0
     if (!mIsEmbedding) {
+#endif
         //! Fill StBTofHeader --
 
         StBTofHeader *tofHeader = mBTofCollection->tofHeader();
@@ -621,8 +622,9 @@ int StBTofSimMaker::fillEvent()
         }
 
         LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
+#if 0
     }
-    
+#endif    
     //! check StMcEvent and StEvent
 	if(Debug()) {
 		LOG_DEBUG << " ==== Test McBTofHitCollection ==== " << endm;
@@ -678,9 +680,9 @@ int StBTofSimMaker::fillEvent()
                 }
             }
         }
-	}
 
-	if(Debug()) cout<<"leaving fillevent"<<endl;
+	cout<<"leaving fillevent"<<endl;
+	}
 
 	return kStOk;
 }
