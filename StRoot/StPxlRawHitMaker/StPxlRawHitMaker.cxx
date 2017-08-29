@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.11 2016/03/03 07:36:09 qiuh Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.12 2017/08/28 17:05:16 dongx Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.12  2017/08/28 17:05:16  dongx
+ * Append rawHits to StPxlRawHitCollection only if exists - for simu/embedding
+ *
  * Revision 1.11  2016/03/03 07:36:09  qiuh
  * fix bug on row number, should use last row information FOR THE SAME SENSOR
  *
@@ -106,8 +109,19 @@ Int_t StPxlRawHitMaker::Make()
    LOG_INFO << "StPxlRawHitMaker::Make()" << endm;
 
    // prepare output data collection
-   mPxlRawHitCollection = new StPxlRawHitCollection();
-   ToWhiteBoard("pxlRawHit", mPxlRawHitCollection);
+   TObjectSet* pxlRawHitDataSet = (TObjectSet*)GetDataSet("pxlRawHit");
+   
+   if (!pxlRawHitDataSet)
+   {
+      LOG_INFO << " pxlRawHitCollection does NOT exist! Create a new one! " << endm;
+      mPxlRawHitCollection = new StPxlRawHitCollection();
+      ToWhiteBoard("pxlRawHit", mPxlRawHitCollection);
+   } else
+   {
+      LOG_INFO << " pxlRawHitCollection exists! Append raw hits to this collection!" << endm;
+      mPxlRawHitCollection = (StPxlRawHitCollection*)pxlRawHitDataSet->GetObject();
+      LOG_INFO << " Before RTS unpacking. Number of PxlRawHits = " << mPxlRawHitCollection->numberOfRawHits() << endm;      
+   }
 
    // input data loop (should be 10 loops for 10 sectors normally)
    StRtsTable *rts_table = 0;
@@ -124,6 +138,8 @@ Int_t StPxlRawHitMaker::Make()
       decodeHitsData();
    }
 
+   LOG_INFO << " Finishing PxlRawHitMaker. Number of PxlRawHits = " << mPxlRawHitCollection->numberOfRawHits() << endm;
+      
    return kStOk;
 }
 //_______________________________________________                                                                                                                                                  
