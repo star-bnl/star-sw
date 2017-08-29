@@ -31,7 +31,7 @@ StIstCluster::StIstCluster(int key, int ladder, int sensor,
 
 StIstCluster::~StIstCluster()
 {
-   while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
+  while (!mRawHitVec.empty()) {delete mRawHitVec.back(); mRawHitVec.pop_back();}
 }
 
 //accessors

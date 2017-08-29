@@ -15,7 +15,7 @@ StIstRawHitCollection::StIstRawHitCollection( int ladder ) : StObject(), mLadder
 /** Free memory and clear the vector */
 StIstRawHitCollection::~StIstRawHitCollection()
 {
-   while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
+  while (!mRawHitVec.empty()) {delete mRawHitVec.back(); mRawHitVec.pop_back();}
 
    mRawHitElecIdVec.clear();
 };
@@ -58,7 +58,7 @@ unsigned char StIstRawHitCollection::getLadder() const
 
 void StIstRawHitCollection::Clear( Option_t *opt )
 {
-   while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
+  while (!mRawHitVec.empty()) {delete mRawHitVec.back(); mRawHitVec.pop_back();}
 
    //clear the vector for alternate lookups
    for (unsigned int i = 0; i < mRawHitElecIdVec.size(); i++)
