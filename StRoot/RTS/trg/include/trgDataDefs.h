@@ -17,8 +17,18 @@
 *
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
+*
+*     8Dec16:  JMN changed FORMAT_VERSION
+*     26Jul17: JMN removed specific DSM definitions and replaced with variable
+*              blocks as for QT.  New FORMAT_VERSION
+*     09Aug17: JMN changed FORMAT_VERSION
+*              trgDataDefs.h now defines trigger block
+*              All DSM and QT crate definitions are now in trgCrateDefs.h
+*              An include line joins crate definitions with trigger block defs.
 ******************************************************************************/
-#define FORMAT_VERSION        0x16120844      /* Format: yymmddvv */
+#include "trgCrateDefs.h"
+#include "daqFormats.h"
+#define FORMAT_VERSION        0x17072645      /* Format: yymmddvv */
 #define MAX_TRG_BLK_SIZE          122896      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
@@ -33,25 +43,35 @@
 typedef struct {
     char           name[3];                     /* Contains  EVD */
     char           TrgDataFmtVer;               /* Exception for use by DAQ (LS byte of FORMAT_VERSION) */
- 
     int            length;                      /* Byte count of data that follows */
     unsigned int   bunchXing_hi;
     unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
-
     unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
     unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
     unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
-
     unsigned short TrgToken;                    /* from Fifo 2 */
     unsigned short addBits;                     /* used by trigger/daq: bit 5=Force store; bit 6=L2.5 abort; bit 7=1 is fake data */
-
     unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
     unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
-
     unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
-    unsigned short trgDetMask;                  // After 11/8/16
 
-    unsigned short tcuCtrBunch_hi;               // After 11/8/16
+
+#ifndef __linux
+    unsigned int tcuCtrBunch;
+#else
+    union {
+	struct { 
+	    unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
+	    unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
+	};
+	struct {
+	    unsigned short trgDetMask;                  // After 11/8/16
+	    unsigned short tcuCtrBunch_hi;               // After 11/8/16
+	};
+	unsigned int tcuCtrBunch;
+    };
+#endif
+
     unsigned short DSMAddress;                  /* from Fifo 10 (Fifo 6 Mk1 TCU) */
 
     unsigned short TCU_Mark;                    /* TCU_Mark Mk1=1 Mk2=2 */
@@ -90,63 +110,6 @@ typedef struct {
   unsigned int   C2Result[64];                /* Result from last algorithm */
   unsigned int   LocalClocks[32];	      /* localClock values from RCC2*/
 } TrgSumData;
-
-typedef struct {
-  char name[4];
-  int length;                                 /* Byte count of data that follows */
-  unsigned int data[1];                       /* NB: this definition is generic but would vary depending on actual data */
-} DataBlock;
-
-typedef struct {
-  char name[4];                               /* Contains BBC */
-  int length;                                 /* Byte count of data that follows */
-  unsigned short BBClayer1[16];               /* This is the layer1 DSM that feeds the VTX DSM */
-  unsigned short ZDClayer1[8];                /* This is the new layer1 ZDC DSM that also feeds the VTX DSM */
-  unsigned short VPD[8];                      /* ADC & TAC values for VPD detectors*/
-} BBCBlock;
-
-typedef struct {
-  char name[4];                               /* Contains MIX */
-  int length;                                 /* Byte count of data that follows */
-  unsigned short FPDEastNSLayer1[8];          /* FPD east north/south layer 1  */  
-  unsigned char  MTD_P2PLayer1[16];           /* Data from MTD and PP2PP */
-  unsigned short TOFLayer1[8];                /* This is TOF Layer 1 */
-  unsigned short TOF[48];                     /* TOF data */
-  unsigned short TPCpreMask[24];              /* EMC, MTD, & TOF TPC Grid Masks */
-} MIXBlock;
-
-typedef struct  {
-  char name[4];
-  int length;                                 /* Byte count of data that follows */
-  int dataLoss;                               /* Byte count of data truncated due to buffer limitations */
-  unsigned int data[1];                       /* NB: this definition is generic but would vary depending on actual data */
-} QTBlock;
-
-typedef struct {
-  char name[4];
-  int length;
-  unsigned char BEMCEast[240];                /* 15 DSMs covering the East half of BEMC */
-} BEastBlock; 
-
-typedef struct {
-  char name[4];
-  int length;
-  unsigned char BEMCWest[240];                /* 15 DSMs covering the West half of BEMC */
-} BWestBlock;
-
-typedef struct {
-  char name[4];
-  int length;
-  unsigned short BEMClayer1[48];              /* 6 DSMs for BEMC at layer1 */
-  unsigned short EEMClayer1[16];              /* 2 DSMs for EEMC at layer1 */
-  unsigned char  EEMC[144];                   /* 9 DSMs for EEMC at layer0 */
-} BELayerBlock;
-
-typedef struct {
-  char name[4];
-  int length;
-  unsigned char FMS[256];                     /* 16 DSMs for FMS */
-} FMSBlock;
 
 typedef struct {
   int offset;                                 /* Offset (in bytes) from the start of Trigger block to data */
