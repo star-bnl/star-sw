@@ -36,6 +36,14 @@ StMtdCollection::StMtdCollection()
 StMtdCollection::~StMtdCollection()
 {
     if(mMtdHeader) delete mMtdHeader;
+    for (unsigned int i=0; i<mMtdHits.size(); i++) {
+        delete mMtdHits[i];
+        mMtdHits[i] = 0;
+    }
+    for (unsigned int i=0; i<mMtdRawHits.size(); i++) {
+        delete mMtdRawHits[i];
+        mMtdRawHits[i] = 0;
+    }
 }
 
 StMtdHeader*
