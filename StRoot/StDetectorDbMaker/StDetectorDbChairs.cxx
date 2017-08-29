@@ -3,6 +3,11 @@
 #include "StDetectorDbMaker.h"
 #include "TEnv.h"
 #include "TF1.h"
+#include "TMath.h"
+#include "TString.h"
+#include "Math/SMatrix.h"
+using namespace ROOT::Math;
+
 #include "TCernLib.h"
 #include "St_db_Maker/St_db_Maker.h"
 #if 0
@@ -1051,65 +1056,111 @@ MakeChairInstance(pxlControl,Geometry/pxl/pxlControl);
 #include "St_pxlSensorTpsC.h"
 MakeChairInstance(pxlSensorTps,Geometry/pxl/pxlSensorTps);
 //________________________________________________________________________________
-void St_SurveyC::Normalize(TGeoHMatrix &rot) {
-#if 0
-#if 0
-  Double_t *rA = rot.GetRotationMatrix();
-  Double_t r[9] = {rA[0], rA[3], rA[6],
-		   rA[1], rA[4], rA[7],
-		   rA[2], rA[5], rA[8]};
-  TGeoMatrix::Normalize(&r[0]);
-  TGeoMatrix::Normalize(&r[3]);
-  TGeoMatrix::Normalize(&r[6]);
-  Double_t rB[9] = {r[0], r[3], r[6],
-		    r[1], r[4], r[7],
-		    r[2], r[5], r[8]};
-  rot.SetRotation(rB);
-#else
-  Double_t det = rot.Determinant();
-  if (det <= 1E-10) {
-    LOG_ERROR << "St_SurveyC::Normalize matrix " << rot.GetName() << " has illegal determinant = " << det << endl;
-    return;
+St_SurveyC::St_SurveyC(St_Survey *table) : TChair(table), fRotations(0)  {
+  UInt_t N = getNumRows();
+  fRotations = new TGeoHMatrix*[N];
+  for (UInt_t i = 0; i < N; i++) {
+    fRotations[i] = new TGeoHMatrix;
+    TGeoHMatrix &rot = *fRotations[i];
+    if (! i) rot.SetName(Table()->GetName());
+    else     rot.SetName(Form("%s_%i",Table()->GetName(),i));
+    rot.SetRotation(Rotation(i));
+    rot.SetTranslation(Translation(i));
+    Normalize(rot);
   }
-  if (TMath::Abs(det - 1) > 1e-7) {
-#if 0
-    Double_t scale = TMath::Power(TMath::Abs(det), -1./3);
-    LOG_INFO << "St_SurveyC::Normalize matrix " << rot.GetName() 
-	     << Form(" has determinant = %10.7f\tscale matrix by %10.7f",det,scale) << endm;
-    TCL::vscale(rot.GetRotationMatrix(), scale, rot.GetRotationMatrix(), 9);
-#else
-    LOG_INFO << "St_SurveyC::Normalize matrix " << rot.GetName() 
-	     << Form(" has determinant = %10.7f\trescale !",det) << endm;
-    TGeoRotation R;
-    R.SetMatrix(rot.GetRotationMatrix());
-    Double_t theta1, phi1, theta2, phi2, theta3, phi3;
-    R.GetAngles(theta1, phi1, theta2, phi2, theta3, phi3);
-    R.SetAngles(theta1, phi1, theta2, phi2, theta3, phi3);
-    rot.SetRotation(R.GetRotationMatrix());
-#endif
+}
+//________________________________________________________________________________
+St_SurveyC::~St_SurveyC() {
+  if (fRotations) {
+    for (UInt_t i = 0; i < getNumRows(); i++) {
+      SafeDelete(fRotations[0]);
+    } 
+    SafeDelete(fRotations);
   }
-#endif
+}
+//________________________________________________________________________________
+Double_t St_SurveyC::IsOrtogonal(const Double_t *r) {
+// Perform orthogonality test for rotation.
+  Double_t cmax = 0;
+  Double_t cij;
+  for (Int_t i=0; i<2; i++) {
+    for (Int_t j=i+1; j<3; j++) {
+      // check columns
+      cij = TMath::Abs(r[i]*r[j]+r[i+3]*r[j+3]+r[i+6]*r[j+6]);
+      if (cij>1E-4) cmax = cij;
+      // check rows
+      cij = TMath::Abs(r[3*i]*r[3*j]+r[3*i+1]*r[3*j+1]+r[3*i+2]*r[3*j+2]);
+      if (cij>cmax) cmax = cij;
+    }
+  }
+  return cmax;   
+}
+//________________________________________________________________________________
+void St_SurveyC::Normalize(TGeoHMatrix &R) {
+#if 0
+  Double_t det = R.Determinant();
+  Double_t ort = IsOrtogonal(R.GetRotationMatrix());
+  static Double_t eps = 1e-7;
+  if ( TMath::Abs(TMath::Abs(det) - 1) < eps && ort < eps) return;
+  LOG_INFO << "St_SurveyC::Normalize matrix " << R.GetName() 
+	   << Form(" has determinant-1 = %10.7f\tortoganality %10.7f",TMath::Abs(det)-1,ort) << endm;
+  cout << "Old\t"; R.Print();
+  const Double_t *r = R.GetRotationMatrix();
+  SMatrix<double,3,3> A(r,9); //   cout << "A: " << endl << A << endl;
+  SMatrix<double,3,3> B = A;
+  A.Det(det); //  cout << "Determinant - 1: " << det-1 << endl;  cout << "A again: " << endl << A << endl;
+  A = B;
+  A.Invert();//   cout << "A^-1: " << endl << A << endl;
+  // check if this is really the inverse:  cout << "A^-1 * B: " << endl << A * B << endl;
+  // the Babylonian method for extracting the square root of a matrix :  Q_{n+1} = 2 * M * ((Q_{n}^{-1} * M) + (M^{T} *Q_{n}))^{-1}
+  SMatrix<double,3,3> Qn1;
+  SMatrix<double,3,3> Qn2;
+  SMatrix<double,3,3> M = B;
+  SMatrix<double,3,3> Qn = M;
+  Int_t ifail = 0;
+  Int_t N = 0;
+  Qn.Det(det); if (_debug) {LOG_INFO << "N " << N << "\tQn Determinant - 1: " << Form("%15.5g",det-1) << endm;}
+  Qn = M;
+  while (TMath::Abs(TMath::Abs(det) - 1) > eps) {
+    SMatrix<double,3> QnInv = Qn.Inverse(ifail);
+    if (ifail) {
+      LOG_ERROR << "St_SurveyC::Normalize:: Qn inversion failed" << endm;
+      break;
+    }
+    SMatrix<double,3,3> C1 = QnInv * M;
+    SMatrix<double,3,3> C2 = Transpose(M) * Qn;
+    SMatrix<double,3,3> C  = C1 + C2;
+    SMatrix<double,3,3> CInv = C.Inverse(ifail);
+    if (ifail) {
+      LOG_ERROR << "St_SurveyC::Normalize:: C inversion failed" << endm;
+      break;
+    }
+    Qn1 = 2 * M * CInv; 
+    Qn2 = Qn1;
+    N++;
+    Qn2.Det(det);  if (_debug) {LOG_INFO << "N " << N << "\tQn2 Determinant - 1: " << Form("%15.5g",det-1) << endm;}
+    if (N > 13) break;
+    Qn = Qn1;
+    if (_debug) {LOG_INFO << "Qn:" << endl << Qn << endm;}
+  }
+  R.SetRotation(Qn.Array()); cout << "New\t"; R.Print();
+  if (_debug) {
+    LOG_INFO << "Determinant-1 = " << R.Determinant()-1 << endm;
+    const Double_t *rr = R.GetRotationMatrix();
+    LOG_INFO << "Ortogonality " << IsOrtogonal(rr) << endm;
+  }
 #endif
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
-  static TGeoHMatrix rot;
-  if (! i) rot.SetName(Table()->GetName());
-  else     rot.SetName(Form("%s_%i",Table()->GetName(),i));
-  rot.SetRotation(Rotation(i));
-  rot.SetTranslation(Translation(i));
-  Normalize(rot);
-  return *&rot;
+  assert(fRotations || fRotations[i]);
+  return *fRotations[i];
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
-  static TGeoHMatrix rot("UnKnown");
   for (UInt_t i = 0; i < getNumRows(); i++) {
     if (Id(i) == id) {
-      rot = GetMatrix(i);
-      rot.SetName(Form("%s_%i",Table()->GetName(),id));
-      //      Table()->Print(i,1);
-      return *&rot;
+      return GetMatrix(i);
     }
   }
   LOG_INFO  << "St_SurveyC::GetMatrix4Id(" << id << ") entry has not been found" << endm;
@@ -1117,7 +1168,7 @@ const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
   Int_t Nrows = table->GetNRows();
   table->Print(0,Nrows);
   assert(0);
-  return *&rot;
+  return GetMatrix(0);
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrixR(Int_t i) {
