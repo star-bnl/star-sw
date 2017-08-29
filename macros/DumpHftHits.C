@@ -1,8 +1,29 @@
 /*
   root.exe -q -b -x DumpHftHits.C >& DumpHftHits.log &
+  TH1::SetDefaultSumw2();
   Int_t det = 1; 
   HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>al(90,-180,180)",Form("det==%i",det),"");
   HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>us(90,-180,180)",Form("det==%i&&us>0",det),"");
+  TH1F *effPxl = new TH1F(*us);
+  effPxl->SetName("Pxl");
+  effPxl->Divide(us,al,1,1,"b");
+  effPxl->Fit("pol0","e");
+  det = 2;
+  HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>al(90,-180,180)",Form("det==%i",det),"");
+  HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>us(90,-180,180)",Form("det==%i&&us>0",det),"");
+  TH1F *effIst = new TH1F(*us);
+  effIst->SetName("Ist"); effIst->SetMarkerColor(det);
+  effIst->Divide(us,al,1,1,"b");
+  effIst->Fit("pol0","e","same");
+  det = 3;
+  HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>al(90,-180,180)",Form("det==%i",det),"");
+  HftHit->Draw("TMath::RadToDeg()*TMath::ATan2(y,x)>>us(90,-180,180)",Form("det==%i&&us>0",det),"");
+  TH1F *effSst = new TH1F(*us);
+  effSst->SetName("Sst"); effSst->SetMarkerColor(det);
+  effSst->Divide(us,al,1,1,"b");
+  effSst->Fit("pol0","e","same");
+
+
   al->Fit("pol0");
   TEfficiency *eff = new TEfficiency(*us,*al);
   eff->Draw();
@@ -33,14 +54,15 @@ void DumpHftHits(Int_t noEvents = 1000000, const Char_t *InFile = "./*event.root
   }
 }
 //________________________________________________________________________________
-TH1F *Efficiency(Int_t det=1, Int_t color=1) {
+TH1F *Efficiency(Int_t det=1) {
   TNtuple *HftHit = (TNtuple *) gDirectory->Get("HftHit");
   if (! HftHit) return 0;
+  TH1::SetDefaultSumw2();
   TH1F *al = new TH1F(Form("al%i",det),"al",90,-180,180); al->Sumw2();
   TH1F *us = new TH1F(Form("us%i",det),"us",90,-180,180); us->Sumw2();
   HftHit->Draw(Form("TMath::RadToDeg()*TMath::ATan2(y,x)>>al%i",det),Form("det==%i",det),"goff");
   HftHit->Draw(Form("TMath::RadToDeg()*TMath::ATan2(y,x)>>us%i",det),Form("det==%i&&us>0",det),"goff");
-  TH1F *ef = new TH1F(Form("ef%i",det),"ef",90,-180,180); ef->Sumw2(); ef->SetMarkerColor(color);
+  TH1F *ef = new TH1F(Form("ef%i",det),"ef",90,-180,180); ef->Sumw2(); ef->SetMarkerColor(det);
   if (det == 1) ef->SetTitle("Pixel Efficiency");
   else if (det == 2) ef->SetTitle("Ist Efficiency");
   else if (det == 3) ef->SetTitle("Sst Efficiency");

@@ -146,6 +146,11 @@ switch ( $STAR_HOST_SYS )
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
      breaksw
     case *gcc6*:
+#    setenv ENABLE_CXX11 "--enable-cxx14"
+     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
+     breaksw
     case *gcc5*:
     case *gcc492*:
      setenv ENABLE_CXX11 "--enable-cxx14"
@@ -183,13 +188,17 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
     --with-xpm-libdir=$xpmlibdir \
     --with-gsl-incdir=$GSL_DIR/include \
     --with-gsl-libdir=$GSL_DIR/lib \
-    --with-pythia6-libdir=$STAR_LIB \
-    --with-pythia8-libdir=$STAR_LIB \
-    --with-pythia8-incdir=$STAR/pams/gen/pythia8/include \
+    --with-pythia6-libdir=$XOPTSTAR/lib \
     --with-llvm-config=$ROOTSYS/../../../.sl64_gcc447/tools \
     --with-f77=$F77 \
     --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
     --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
+    --enable-builtin_ftgl       \
+    --enable-builtin_freetype   \
+    --enable-builtin_glew       \
+    --enable-builtin_pcre       \
+    --enable-builtin_zlib       \
+    --enable-builtin_lzma       \
     --all \
     --disable-python \
     $DISABLE \
@@ -198,3 +207,7 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
 #unsetenv libdir 
 #unsetenv macrodir
 #unsetenv plugindir
+#    --enable-builtin_afterimage \
+#    --enable-builtin_lz4        \
+#    --with-pythia8-libdir=$XOPTSTAR/lib \
+#    --with-pythia8-incdir=$XOPTSTAR/include \

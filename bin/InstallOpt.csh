@@ -8,32 +8,32 @@ setenv CXX "g++"
 setenv F77 "gfortran"
 switch (${STAR_HOST_SYS})
   case "*x8664*":
-#        setenv CC       "gcc -m64"
-#        setenv CXX      "g++ -m64"
-#        setenv F77      "gfortran -m64"
-#	setenv CFLAGS   "-m64 -fPIC"
-#	setenv CXXFLAGS "-m64 -fPIC"
-#	setenv LDFLAGS  "-m64"
-#	setenv FCFLAGS  "-m64 -fPIC"
+        setenv CC       "gcc -m64"
+        setenv CXX      "g++ -m64"
+        setenv F77      "gfortran -m64"
+	setenv CFLAGS   "-m64 -fPIC"
+	setenv CXXFLAGS "-m64 -fPIC"
+	setenv LDFLAGS  "-m64"
+	setenv FCFLAGS  "-m64 -fPIC"
         setenv arch     "x86_64"
 	setenv bits     "64b"
      breaksw
   default:
         setenv FORCE_32BITS TRUE
-#        setenv CC       "gcc -m32"
-#        setenv CXX      "g++ -m32"
-#        setenv F77      "gfortran -m32"
-#	setenv CFLAGS   "-m32 -fPIC"
-#	setenv CXXFLAGS "-m32 -fPIC"
-#	setenv LDFLAGS  "-m32"
-#	setenv FCFLAGS  "-m32 -fPIC"
+        setenv CC       "gcc -m32"
+        setenv CXX      "g++ -m32"
+        setenv F77      "gfortran -m32"
+	setenv CFLAGS   "-m32 -fPIC"
+	setenv CXXFLAGS "-m32 -fPIC"
+	setenv LDFLAGS  "-m32"
+	setenv FCFLAGS  "-m32 -fPIC"
         setenv arch     "i386"
 	setenv bits     "32b"
      breaksw
 endsw
 setenv LDFLAGS `root-config --ldflags` 
-setenv CFLAGS  "" #"`root-config --auxcflags` -fPIC -pthread"
-#setenv CFLAGS "`root-config --auxcflags` -fPIC -pthread"
+#setenv CFLAGS  "" #"`root-config --auxcflags` -fPIC -pthread"
+setenv CFLAGS "`root-config --auxcflags` -fPIC -pthread"
 setenv CXXFLAGS "$CFLAGS"
 setenv FCFLAGS  "$CFLAGS"
 setenv CC  "`root-config --cc`"
@@ -54,11 +54,12 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-#set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen-eigen-10219c95fe65";
+set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen3";
+#eigen-eigen-10219c95fe65";
 #set list = "pythia8226"
 #set list = "pythia6"
 #set list = "eigen3"
-set list = "qt-everywhere-opensource-src-4.8.6"
+#set list = "qt-everywhere-opensource-src-4.8.6"
 #if ($#argv != 0) set list = $argv[1];
 foreach pkg ($list) 
     cd ~/sources/.${STAR_HOST_SYS}
@@ -195,6 +196,13 @@ EOF
           ./configure --prefix=$XOPTSTAR --enable-64bit  --enable-shared #--cxx-common=\'$CFLAGS\' 
 	  make install
           if ( $?) break;
+          touch ../${pkg}.Done
+	  breaksw
+      case "fftw*":
+          ./configure --prefix=$XOPTSTAR --with-pic
+          make install
+          if ( $?) break;
+          touch ../${pkg}.Done
 	  breaksw
       case "apr-1.5.1":
       default:

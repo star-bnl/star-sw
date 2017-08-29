@@ -2,7 +2,8 @@
 set list = "";
 switch ($HOSTNAME) 
   case "*local":
-    set list = "gcc521";
+  case "*starp.bnl.gov":
+    set list = "gcc521 gcc621";
     breaksw
   case "*bnl.gov":
     set list = "gcc482 gcc492";
@@ -10,7 +11,9 @@ switch ($HOSTNAME)
 endsw
 foreach gcc (${list})
   foreach opt (debug opt)
-    foreach bit (32b 64b)
+    set bits = "32b 64b";
+    if ($gcc == "gcc621") set bits = "64b";
+    foreach bit (${bits})
       if ($opt == "debug") then 
         unsetenv NODEBUG
       else      

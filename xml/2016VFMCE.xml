@@ -19,7 +19,7 @@
     exit 1;
   endif
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons) 
     echo $Name | grep $name
     if (! $?) break;
   end
@@ -48,5 +48,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 100 500" />
+<input URL="command:RunId.pl 101 500 100" />
 </job>

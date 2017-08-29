@@ -8,3 +8,10 @@ root.exe -q -b Chain.C+ | tee Chain.log
 foreach f (`grep missing Chain.log | awk '{print $3}' `)
   set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
 end
+
+if (! -d Done) mkdir Done
+foreach f (`ls -1d *B.log`)
+	tail -2 ${f} | grep 'end of ROOT -- Goodbye'; 
+	if ($?) continue;
+	set b = `basename ${f} B.log`; mv ${b}* Done/
+end

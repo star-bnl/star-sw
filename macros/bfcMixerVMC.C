@@ -1,1 +1,0 @@
-../StRoot/macros/embedding/bfcMixerVMC.C
