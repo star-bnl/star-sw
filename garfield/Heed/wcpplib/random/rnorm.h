@@ -8,7 +8,7 @@
 
 namespace Heed {
 
-double rnorm_improved(void) { return Garfield::RndmGaussian(); }
+  double rnorm_improved(void);
 
 void rnorm_double(const double r1, const double r2, // flat random numbers
                   double &x1, double &x2);          // results
