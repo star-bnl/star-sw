@@ -1522,8 +1522,10 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
 void StBFChain::SetFlags(const Char_t *Chain)
 {
   TString tChain(Chain);
+#if 0
   Int_t mode = 1;
   Setup(mode);
+#endif
   Int_t k=0;
   if (tChain == "" || tChain.CompareTo("ittf",TString::kIgnoreCase) == 0) {
     gMessMgr->QAInfo() << "\tPossible Chain Options are:" << endm;

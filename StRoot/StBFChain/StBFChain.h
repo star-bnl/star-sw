@@ -57,14 +57,8 @@ class StBFChain : public StChain {
            StChain(name,UseOwnHeader)
 	     ,fBFC(0), fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
 	     ,FDate(0),FTime(0),FDateS(0),FTimeS(0),fFiltTrg(""),fRunG(0)
-	     ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
+    ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {Setup();}
 
-#if 0
-    StBFChain(Int_t /* mode */, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
-            StChain(name,UseOwnHeader)
-           ,fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
-	   ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
-#endif
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
    virtual void        Clear(Option_t *option="");
