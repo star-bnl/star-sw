@@ -40,6 +40,7 @@
 #include "StDetectorDbMaker/StSsdSurveyC.h"
 #include "StDetectorDbMaker/StSvtSurveyC.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
+#include "StPxlDbMaker/StPxlDb.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/StPxlSurveyC.h"
@@ -138,45 +139,6 @@ void StarVMCApplication::GeneratePrimaries() {
   } else {
     fPrimaryGenerator->GeneratePrimaries();
   } 
-#if 0
-  else {
-    // Fill the user stack (derived from TVirtualMCStack) with primary particles.
-    // ---
-    // Track ID (filled by stack)
-    Int_t ntr;
-    
-    // Option: to be tracked
-    Int_t toBeDone = 1; 
-    
-    // Particle type
-    Int_t pdg  = 0;    // geantino
-    // Polarization
-    Double_t polx = 0.; 
-    Double_t poly = 0.; 
-    Double_t polz = 0.; 
-    
-    // Position
-    Double_t vx  = 0.; 
-    Double_t vy  = 0.; 
-    Double_t vz = 10.;
-    Double_t tof = 0.;
-    
-    // Energy
-    Double_t kinEnergy = 3.0;
-    Double_t mass = 0.9382723;
-    Double_t e  = mass + kinEnergy;
-    
-    // Momentum
-    Double_t px, py, pz;
-    px = 0.; 
-    py = 0.; 
-    pz = sqrt(e*e - mass*mass); 
-    
-    // Add particle to stack 
-    fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
-		      kPPrimary, ntr, 1., 2);
-  }
-#endif
   Int_t NPrimary = fStarStack->GetNtrack();
   if (! NPrimary) TVirtualMC::GetMC()->StopRun();
 }
@@ -464,9 +426,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
     {"Pixel-%d",             kPxl,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_%d",                        	 1, { 1, 0, 0}, 0},
     {"PxlSector-%d",   kPxlSector,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d",                 	 1, {10, 0, 0}, 0},
     {"PxLadder-%d",     kPxLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d",         	 2, {10, 4, 0}, 0},
-#if 0
-    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/LADX_%d/PXSI_1",       3, {10, 4,10}, 0},
-#endif
+    //    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/LADX_%d/PXSI_1",       3, {10, 4,10}, 0},
+    {"PxlWafer-%d",   kPxlWafer,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/LADX_%d",       3, {10, 4,10}, 0},
     {"PxlSensor-%d",kPxlSensor, "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%d/LADR_%d/LADX_%d/PXSI_1/PLAC_1",3, {10, 4,10}, 0},
     {"Ist-%d",             kIst,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_%d",                             1, { 1, 0, 0}, 0},
     {"IstLadder-%d", kIstLadder,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%d",                      1, {24, 0, 0}, 0},
@@ -479,14 +440,23 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   };
   static const Int_t  NoDetectos2Align = sizeof(listOfDet2Align)/sizeof(listOfDetectorToAlign_t);
   static Int_t iBreak = 0;
-  TGeoHMatrix rotLI[10];
   TGeoHMatrix I("Indentity");
   I.SetRotation(kIdentityMatrix);
   I.SetTranslation(kNullVector);
-  TGeoTranslation PixelLadderT(-0.2381, 0, -4.8750);//                                       PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
-  TGeoTranslation PixelWaferT(0.8480000E-01 - 0.0163,-0.1250002E-02 + 0.00375 ,0.01604 ); // LADX->AddNode(PXSI,1,new TGeoTranslation(0.8480000E-01,-0.1250002E-02,0));
-  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);//                        PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
-  TGeoTranslation PixelSensorX(0.0163-0.0326, -0.0037+0.00745, -0.01604+0.03208); // Extra ?
+  TGeoNode *nodeT = 0;
+  Bool_t ok = kFALSE;
+  ok = gGeoManager->cd("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/LADR_1/LADX_1/PXSI_1/PLAC_1");
+  assert(ok);
+  nodeT = gGeoManager->GetCurrentNode();
+  TGeoHMatrix PLAC = *(nodeT->GetMatrix());
+  ok = gGeoManager->cd("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/LADR_1/LADX_1/PXSI_1");
+  assert(ok);
+  nodeT = gGeoManager->GetCurrentNode();
+  TGeoHMatrix PXSI = *(nodeT->GetMatrix());
+  TGeoHMatrix PixelWaferT = PXSI * PLAC; PrPV(PixelWaferT);
+  TGeoTranslation PixelLadderT(-0.2381, 0.000010, -4.8750);//   PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
+  //  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);//                        PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
+  //  TGeoTranslation PixelSensorX(0.0163-0.0326, -0.0037+0.00745, -0.01604+0.03208); // Extra ?
   Double_t tIstLadder[3] = {-3.1253  , 13.6559,  -4.4929}; 
   Double_t rIstLadder[9] = {-0.944925,  0.327287, 0, -0.327287, -0.944925, 0, 0, 0, 1};
   TGeoHMatrix IstLadderH;
@@ -521,10 +491,11 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	indx[k] = ind%listOfDet2Align[i].NVmax[k]+1; ind /= listOfDet2Align[i].NVmax[k];
       }
       TString path(StarVMCDetector::FormPath(listOfDet2Align[i].path,listOfDet2Align[i].Ndim,indx));
-      TString pathA(path);
+      TString pathA(gSystem->BaseName(path));
       if (! gGeoManager->CheckPath(path)) continue;
       TObjArray *objs = gGeoManager->GetListOfPhysicalNodes();
       TGeoPhysicalNode *nodeP = 0;
+      TGeoPhysicalNode *nodeU = 0;
       if (objs) nodeP = (TGeoPhysicalNode *) objs->FindObject(path);
       if (nodeP) {
 	if (nodeP->IsAligned()) {
@@ -587,11 +558,13 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	  kHft:             : HftOnTpc = StidsOnTpc
 	  PXMO -> kHft      : PxlOnHft = StPxlpstOnIds * StpxlOnPst
 	  PXLA -> kPxlSector: PXLA       
-	  LADR -> kPxLadder : PXLA^-1 * StpxlHalfOnPxl * StpxlSectorOnHalf * StpxlLadderOnSector * PixelLadderT
+	  LADR -> kPxLadder : PXLA^-1 * StpxlHalfOnPxl * StpxlwafertSectorOnHalf * StpxlLadderOnSector * PixelLadderT
+	  LADX 
 	  PXSI -> kPxlWafer : PSXI 
-	  PLAC -> kPxlSensor: (PixleLadderT * PXSI)^-1 * StpxlSensorOnLadder
+	  PLAC -> kPxlSensor: (PixelLadderT * PXSI)^-1 * StpxlSensorOnLadder
 Pxl: SensorOnGlobal[sector]ladder[sensor] = TpcOnGlobal * IdsOnTpc * PstOnIds * PxlOnPst * HalfOnPxl[sector / 5] * SectorOnHalf[sector] * 
 		                             LadderOnSector[sector]ladder * SensorOnLadder[sector]ladder[sensor];
+         					     
 	*/
       case kHft:  // IDSM
 	HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);
@@ -605,54 +578,33 @@ Pxl: SensorOnGlobal[sector]ladder[sensor] = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	rotA = PxlOnHft;
 	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
 	break;
-#if 0
-      case kPxlSector: // PXLA
-	rotA = rotL;
-	break;
-      case kPxLadder: // LADR
-	sector = indx[0];
-	ladder = indx[1];
-	Id = 4*(sector-1) + ladder;
-	half   = (sector-1)/5; 
-	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
-	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
-	E = StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
- 	LadderOnPxl = B * C * E; PrPV(LadderOnPxl);
-	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXLA
-	rotA = B.Inverse() * LadderOnPxl * PixelLadderT.Inverse();
-	rotA.SetName(Form(listOfDet2Align[i].Name,indx[0]));
-	break;
-#else
       case kPxlSector: // PXLA
 	sector = indx[0];
-	half   = (sector-1)/5; 
-	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half+1); PrPV(B);
+	half   = (sector-1)/5 + 1; 
+	B = StpxlHalfOnPxl::instance()->GetMatrix4Id(half); PrPV(B);
 	C = StpxlSectorOnHalf::instance()->GetMatrix4Id(sector); PrPV(C);
-	D = rotL;// * PixelLadderT;
-        rotA = B * C * D; PrPV(rotA);	
-	rotLI[sector-1] = D.Inverse();
+	//	D = rotL; PrPV(D);// * PixelLadderT;
+        rotA = B * C * rotL; PrPV(rotL); PrPV(rotA);	
 	rotA.SetName(Form(listOfDet2Align[i].Name,sector));
 	break;
       case kPxLadder: // LADR
 	sector = indx[0];
 	ladder = indx[1];
 	Id = 4*(sector-1) + ladder;
-	half   = (sector-1)/5; 
-	E = StpxlLadderOnSector::instance()->GetMatrix4Id(Id); PrPV(E);
-	rotA = rotLI[sector-1] * E * PixelLadderT; PrPV(rotA);
+	LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(Id) * PixelLadderT; PrPV(LadderOnSector);
+	nodeU = (TGeoPhysicalNode *) gGeoManager->GetListOfPhysicalNodes()->FindObject(gSystem->DirName(path)); 
+	A = nodeU->GetOriginalMatrix();  PrPV(A);
+	rotA = A.Inverse() * LadderOnSector; PrPV(rotA);
 	rotA.SetName(Form(listOfDet2Align[i].Name,sector,ladder));
 	break;
-#endif
-#if 0
-      case kPxlWafer: // LADX/PXSI
+      case kPxlWafer: // LADX
 	sector = indx[0];
 	ladder = indx[1];
 	sensor = indx[2];
 	Id = sensor + 10*(ladder+4*(sector-1) - 1);
-	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
-	D = PixelLadderT.Inverse(); 
-	B = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B);
-	rotA   =  D * B.Inverse() * SensorOnLadder * PixelWaferT.Inverse() * PixelSensorT.Inverse() * PixelSensorX;
+	//	rotA = rotL;
+	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id); PrPV(SensorOnLadder);
+	rotA = PixelLadderT.Inverse() * SensorOnLadder * PixelWaferT.Inverse();
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
       case kPxlSensor: // PLAC
@@ -663,23 +615,8 @@ Pxl: SensorOnGlobal[sector]ladder[sensor] = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	rotA = rotL;
 	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
 	break;
-#else
-      case kPxlSensor: // PLAC
-	sector = indx[0];
-	ladder = indx[1];
-	sensor = indx[2];
-	Id = sensor + 10*(ladder+4*(sector-1) - 1);
-	SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(Id);
-	//	D = *nodeP->GetNode(NLevel)->GetMatrix(); PrPV(B);   // PLAC_1 ==> rotL
-	C = *nodeP->GetNode(NLevel-1)->GetMatrix(); PrPV(B); // PXSI_1
-	B = *nodeP->GetNode(NLevel-2)->GetMatrix(); PrPV(B); // LADX_1
-        A = PixelLadderT * B * C;  PrPV(A);
-	rotA = A.Inverse() * SensorOnLadder;
-	rotA.SetName(Form(listOfDet2Align[i].Name,Id));
-	break;
-#endif
 	/*
-Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[ladder - 1] * SensorOnLadder[ladder - 1][sensor - 1];
+Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[ladder - 1] * SensorOnLadder[ladder - 1][sensor - 1];
 	 */
       case kIst:
 	A = StpstOnIds::instance()->GetMatrix(0);
@@ -740,6 +677,8 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	rotA.SetName(Form(listOfDet2Align[i].Name,ID));
 	break;
       case kSstSensor:
+	ladder = indx[0];
+	sensor = indx[1];
 	rotA = rotL;
 	break;
       default:
@@ -793,12 +732,13 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	    case kPxLadder:
 	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
 	      HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
-	      PxlOnHft = StPxlpstOnIds::instance()->GetMatrix() 
-		* StpxlOnPst::instance()->GetMatrix();	            PrPV(PxlOnHft);
+	      A        = StPxlpstOnIds::instance()->GetMatrix();    PrPV(A);
+	      B        = StpxlOnPst::instance()->GetMatrix();	    PrPV(B);
+	      PxlOnHft = A * B;                                     PrPV(PxlOnHft);
 	      SectorOnPxl = StpxlHalfOnPxl::instance()->GetMatrix4Id((sector-1)/5+1)
 		* StpxlSectorOnHalf::instance()->GetMatrix4Id(sector);	    PrPV(SectorOnPxl);
-	      LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(4*(sector-1) + ladder); 	  PrPV(LadderOnSector);
-	      temp = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * PixelLadderT; temp.SetName("temp");
+	      LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(4*(sector-1) + ladder) * PixelLadderT; 	  PrPV(LadderOnSector);
+	      temp = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector; temp.SetName("temp");
 	      St_SurveyC::Normalize(temp);
 	      comb = &temp;
 	      break;
@@ -809,16 +749,16 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 		* StpxlOnPst::instance()->GetMatrix();	            PrPV(PxlOnHft);
 	      SectorOnPxl = StpxlHalfOnPxl::instance()->GetMatrix4Id((sector-1)/5+1)
 		* StpxlSectorOnHalf::instance()->GetMatrix4Id(sector);	    PrPV(SectorOnPxl);
-	      LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(4*(sector-1) + ladder); 	  PrPV(LadderOnSector);
-	      SensorOnLadder = StpxlSensorOnLadder::instance()->GetMatrix4Id(sensor + 10*(ladder+4*(sector-1) - 1));PrPV(SensorOnLadder);
+	      LadderOnSector = StpxlLadderOnSector::instance()->GetMatrix4Id(4*(sector-1) + ladder) * PixelLadderT; 	  PrPV(LadderOnSector);
+	      SensorOnLadder = PixelLadderT.Inverse() * StpxlSensorOnLadder::instance()->GetMatrix4Id(sensor + 10*(ladder+4*(sector-1) - 1));PrPV(SensorOnLadder);
 	      SensorOnGlobal = Tpc2Global * HftOnTpc * PxlOnHft * SectorOnPxl * LadderOnSector * SensorOnLadder;PrPV(SensorOnGlobal);
 	      // 	    mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcPosition::instance()->GetMatrix())  x
 	      // 	      * mGeoHMatrixIdsOnTpc                                                         x
 	      //            * mGeoHMatrixPstOnIds * mGeoHMatrixPxlOnPst                                   x
 	      //            * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
 	      // 	      * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
-	      //	      comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
-	      comb = &SensorOnGlobal;
+	      comb = (TGeoHMatrix *) StPxlDb::instance()->geoHMatrixSensorOnGlobal(sector, ladder,sensor); PrPV(*(comb));
+	      //	      comb = &SensorOnGlobal;
 	      break;
 	      //	  case kIstWafer:
 	    case kIstSensor:
@@ -827,9 +767,8 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 	      break;
 	    case kSst:
 	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc = StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
-	      temp = Tpc2Global * HftOnTpc * sstOnOsc; temp.SetName("kSst"); PrPV(temp);
+	      temp = Tpc2Global * sstOnOsc; temp.SetName("kSst"); PrPV(temp);
 	      comb = &temp;
 	      break;
 #if 0
@@ -844,11 +783,11 @@ Ist: SensorGlobal                         = TpcOnGlobal * IdsOnTpc * PstOnIds * 
 #endif
 	    case kSstWafer:
 	      Tpc2Global = StTpcPosition::instance()->GetMatrix();	    PrPV(Tpc2Global);
-	      HftOnTpc =  StidsOnTpc::instance()->GetMatrix(0);	    PrPV(HftOnTpc);
 	      sstOnOsc = StsstOnOsc::instance()->GetMatrix(0); PrPV(sstOnOsc);
 	      sstLadderOnSst = StsstLadderOnSst::instance()->GetMatrix4Id(100+ladder); PrPV(sstLadderOnSst);
 	      sstSensorOnLadder = StsstSensorOnLadder::instance()->GetMatrix4Id(7000 + ladder + 100*sensor); PrPV(sstSensorOnLadder);
-	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst * sstSensorOnLadder * SstSensorR; temp.SetName("kSstWafer"); PrPV(temp);
+	      //	      temp = Tpc2Global * HftOnTpc * sstOnOsc * sstLadderOnSst * sstSensorOnLadder * SstSensorR; temp.SetName("kSstWafer"); PrPV(temp);
+	      temp = Tpc2Global * sstOnOsc * sstLadderOnSst * sstSensorOnLadder * SstSensorR; temp.SetName("kSstWafer"); PrPV(temp);
 	      comb = &temp;
 	      break;
 	    case kSstSensor:
