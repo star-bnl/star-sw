@@ -3,13 +3,11 @@
 //
 // $Id:$
 //////////////////////////////////////////////////////////////////////////
-// root.exe -q -b -x 'bfcMixerVMC.C(10'
+// root.exe -q -b -x 'bfcMixerVMC.C(10)'
 //#define __NO_DAQ_CLUSTERS__
 //#define __TrackingOnly__
-class StChain;
-StChain  *Chain=0;
 class StBFChain;
-StBFChain *chain1, *chain2, *chain3, *chain4;
+StBFChain *Chain = 0, *chain1, *chain2, *chain3, *chain4;
 //_____________________________________________________________________
 void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
 		 const Char_t *daqfile,
@@ -27,7 +25,10 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   gROOT->LoadMacro("bfc.C");
   if (gClassTable->GetID("StBFChain") < 0) Load();
   //______________Create the main chain object______________________________________
-  Chain = new StChain("Embedding");
+  Chain = new StBFChain("Embedding");
+  Chain->SetName("Embedding");
+  Chain->SetFlags("TObjTable");
+  StMaker::lsMakers(Chain);
   //________________________________________________________________________________
   TString Opt(opt);
   TString chain1Opt("in,daq,magF,tpcDb,MakeEvent,trgd,NoDefault,NoOutput");
@@ -56,11 +57,14 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   if (! geant) return;
   geant->SetAttr("MuDstFile",MuDstfile);
   geant->SetAttr("GoodTriggers",triggersC);
-#if 0
+#if 1
   StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
   if (tofSim) tofSim->setEmbeddingMode(kTRUE);
-  StMaker *ist_raw_hit = chain2->Maker("ist_raw_hit");
-  if (ist_raw_hit) ist_raw_hit->SetAttr("DoEmbedding",1);
+  StIstRawHitMaker *ist_raw_hit = (StIstRawHitMaker *) chain2->Maker("ist_raw_hit");
+  if (ist_raw_hit) {// Bingchu Huang, 08/18/2017
+    ist_raw_hit->SetAttr("DoEmbedding",1);
+    ist_raw_hit->setDataType(1);  //non zero-suppressed data
+  }
 #endif
   Chain->cd();
   TString chain3Opt("noInput,-in,NoInput");

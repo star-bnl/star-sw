@@ -198,7 +198,8 @@ void bfc(Int_t First, Int_t Last,
   //  if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
   //    if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
    if ( TString(gProgName) == "root4star") tChain += ",gstar,useXgeom";
-#if 0
+   //#define __IDEAL__
+#ifdef __IDEAL__
    else                                    tChain += ",vmc,VMCAlignment,RunG.1";
 #else
    else                                    tChain += ",vmc,VMCAlignment,sdt20160301,RunG.1";
