@@ -595,20 +595,35 @@ void StTrack::setIdTruth() // match with IdTruth
     // 		Loop to store all the mc track keys and quality of every reco hit on the track.
     Int_t nHits = vh.size(),id=0,qa=0;
     for (Int_t hi=0;hi<nHits; hi++) {
-        const StHit* rHit = vh[hi];
-        id = rHit->idTruth(); if (!id) continue;
-        qa = rHit->qaTruth(); if (!qa) qa = 1;
-        idTruths[id]+=qa;
+      const StHit* rHit = vh[hi];
+      id = rHit->idTruth(); // 
+      qa = rHit->qaTruth();
+      if (!id || !qa) qa = 100;
+      idTruths[id]+=qa;
     }
     if (! idTruths.size()) return;		//no simu hits
     Int_t tkBest=-1; Float_t qaBest=0,qaSum=0;
     for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
-        qaSum+=(*it).second;
-        if ((*it).second<qaBest)	continue;
-        tkBest=(*it).first; qaBest=(*it).second;
+      qaSum+=(*it).second;
+      if ((*it).second<qaBest)	continue;
+      tkBest=(*it).first; qaBest=(*it).second;
     }
     if (tkBest < 0 || tkBest> 0xffff) return;
     Int_t avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
+    // Set quality to 0 if SVT/HFT hits do not match with TPC ones
+    for (Int_t hi=0;hi<nHits; hi++) {
+      const StHit* rHit = vh[hi];
+      id = rHit->idTruth(); // 
+      if (rHit->detector() == kSvtId ||
+	  rHit->detector() == kSsdId ||
+	  rHit->detector() == kIstId ||
+	  rHit->detector() == kPxlId) {
+	if (id != tkBest) {
+	  avgQua = 0;
+	  break;
+	}
+      }
+    }    
     setIdTruth(tkBest,avgQua);
     Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
     setIdParentVx(IdVx);
