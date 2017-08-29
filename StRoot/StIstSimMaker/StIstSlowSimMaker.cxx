@@ -67,16 +67,6 @@ StIstSlowSimMaker::StIstSlowSimMaker(const char* name): StMaker(name), mIstDb(NU
 Int_t StIstSlowSimMaker::Init()
 {
 	LOG_DEBUG<<"StIstSlowSimMaker::Init()"<<endm;
-
-	//prepare output dataset
-	mIstCollectionPtr = new StIstCollection();
-   ToWhiteConst("istRawAdcSimu",mIstCollectionPtr);
-
-	if(!mIstCollectionPtr ) {
-		LOG_WARN << "Error constructing istCollection" << endm;
-	   return kStErr;
-	}
-
 	return kStOk;
 }
 
@@ -128,6 +118,16 @@ Int_t StIstSlowSimMaker::InitRun(Int_t runnumber)
 //______________________________________________________________________________
 Int_t StIstSlowSimMaker::Make()
 {
+
+  //prepare output dataset
+  mIstCollectionPtr = new StIstCollection();
+  ToWhiteBoard("istRawAdcSimu",mIstCollectionPtr);
+  
+	if(!mIstCollectionPtr ) {
+		LOG_WARN << "Error constructing istCollection" << endm;
+	   return kStErr;
+	}
+
 	// Get the input data structures from StMcEvent
 	StMcEvent* mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
 	if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
