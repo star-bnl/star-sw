@@ -6,14 +6,11 @@ namespace Garfield {
 
 ComponentUser::ComponentUser()
     : ComponentBase(),
-      m_hasField(false),
-      m_field(0),
-      m_hasPotential(false),
-      m_potential(0),
-      m_hasWeightingField(false),
-      m_wfield(0),
-      m_hasWeightingPotential(false),
-      m_wpot(0) {
+      m_efield(NULL),
+      m_potential(NULL),
+      m_wfield(NULL),
+      m_wpot(NULL),
+      m_bfield(NULL) {
 
   m_className = "ComponentUser";
 }
@@ -22,14 +19,14 @@ void ComponentUser::ElectricField(const double x, const double y,
                                   const double z, double& ex, double& ey,
                                   double& ez, Medium*& m, int& status) {
 
-  if (!m_hasField) {
+  if (!m_efield) {
     ex = ey = ez = 0.;
-    m = 0;
+    m = NULL;
     status = -10;
     return;
   }
 
-  m_field(x, y, z, ex, ey, ez);
+  m_efield(x, y, z, ex, ey, ez);
   m = GetMedium(x, y, z);
   if (!m) {
     if (m_debug) {
@@ -53,15 +50,15 @@ void ComponentUser::ElectricField(const double x, const double y,
                                   double& ez, double& v, Medium*& m,
                                   int& status) {
 
-  if (!m_hasField) {
+  if (!m_efield) {
     ex = ey = ez = v = 0.;
-    m = 0;
+    m = NULL;
     status = -10;
     return;
   }
-  m_field(x, y, z, ex, ey, ez);
+  m_efield(x, y, z, ex, ey, ez);
 
-  if (m_hasPotential) {
+  if (m_potential) {
     m_potential(x, y, z, v);
   } else {
     v = 0.;
@@ -91,12 +88,27 @@ bool ComponentUser::GetVoltageRange(double& vmin, double& vmax) {
   return false;
 }
 
+void ComponentUser::MagneticField(const double x, const double y, 
+                                  const double z,
+                                  double& bx, double& by, double& bz, 
+                                  int& status) {
+
+  if (!m_bfield) {
+    bx = by = bz = 0.;
+    status = -10;
+    return;
+  }
+  m_bfield(x, y, z, bx, by, bz);
+  status = 0;  
+  
+}
+
 void ComponentUser::WeightingField(const double x, const double y,
                                    const double z, double& wx, double& wy,
                                    double& wz, const std::string& label) {
 
   wx = wy = wz = 0.;
-  if (!m_hasWeightingField) return;
+  if (!m_wfield) return;
   m_wfield(x, y, z, wx, wy, wz, label);
 }
 
@@ -105,9 +117,7 @@ double ComponentUser::WeightingPotential(const double x, const double y,
                                          const std::string& label) {
 
   double v = 0.;
-  if (m_hasWeightingPotential) {
-    m_wpot(x, y, z, v, label);
-  }
+  if (m_wpot) m_wpot(x, y, z, v, label);
   return v;
 }
 
@@ -116,12 +126,10 @@ void ComponentUser::SetElectricField(void (*f)(const double, const double,
                                                double&)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetElectricField:\n";
-    std::cerr << "    Function pointer is null.\n";
+    std::cerr << m_className << "::SetElectricField:\n    Null pointer.\n";
     return;
   }
-  m_field = f;
-  m_hasField = true;
+  m_efield = f;
   m_ready = true;
 }
 
@@ -129,12 +137,10 @@ void ComponentUser::SetPotential(void (*f)(const double, const double,
                                            const double, double&)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetPotential:\n";
-    std::cerr << "    Function pointer is null.\n";
+    std::cerr << m_className << "::SetPotential:\n    Null pointer.\n";
     return;
   }
   m_potential = f;
-  m_hasPotential = true;
 }
 
 void ComponentUser::SetWeightingField(void (*f)(const double, const double,
@@ -142,12 +148,10 @@ void ComponentUser::SetWeightingField(void (*f)(const double, const double,
                                                 double&, const std::string)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetWeightingField:\n";
-    std::cerr << "    Function pointer is null.\n";
+    std::cerr << m_className << "::SetWeightingField:\n    Null pointer.\n";
     return;
   }
   m_wfield = f;
-  m_hasWeightingField = true;
 }
 
 void ComponentUser::SetWeightingPotential(void (*f)(const double, const double,
@@ -155,32 +159,38 @@ void ComponentUser::SetWeightingPotential(void (*f)(const double, const double,
                                                     const std::string)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetWeightingPotential:\n";
-    std::cerr << "    Function pointer is null.\n";
+    std::cerr << m_className << "::SetWeightingPotential:\n    Null pointer.\n";
     return;
   }
   m_wpot = f;
-  m_hasWeightingPotential = true;
+}
+
+void ComponentUser::SetMagneticField(void (*f)(const double, const double,
+                                               const double, double&, double&,
+                                               double&)) {
+
+  if (!f) {
+    std::cerr << m_className << "::SetMagneticField:\n    Null pointer.\n";
+    return;
+  }
+  m_bfield = f;
 }
 
 void ComponentUser::Reset() {
 
-  m_field = 0;
-  m_potential = 0;
-  m_wfield = 0;
-  m_wpot = 0;
-  m_hasField = false;
-  m_hasPotential = false;
-  m_hasWeightingField = false;
-  m_hasWeightingPotential = false;
+  m_efield = NULL;
+  m_potential = NULL;
+  m_wfield = NULL;
+  m_wpot = NULL;
+  m_bfield = NULL;
   m_ready = false;
 }
 
 void ComponentUser::UpdatePeriodicity() {
 
   if (m_debug) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n";
-    std::cerr << "    Periodicities are not supported.\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n"
+              << "    Periodicities are not supported.\n";
   }
 }
 }

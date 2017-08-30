@@ -10,9 +10,9 @@ namespace Garfield {
 class ComponentUser : public ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentUser();
-  // Destructor
+  /// Destructor
   ~ComponentUser() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
@@ -21,44 +21,52 @@ class ComponentUser : public ComponentBase {
                      double& ey, double& ez, double& v, Medium*& m,
                      int& status);
   bool GetVoltageRange(double& vmin, double& vmax);
+  void MagneticField(const double x, const double y, const double z,
+                     double& bx, double& by, double& bz, int& status);
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
                       const std::string& label);
   double WeightingPotential(const double x, const double y, const double z,
                             const std::string& label);
 
+  /// Set the function to be called for calculating the electric field.
   void SetElectricField(void (*f)(const double, const double, const double,
                                   double&, double&, double&));
+  /// Set the function to be called for calculating the potential.
   void SetPotential(void (*f)(const double, const double, const double,
                               double&));
-
+  /// Set the function to be called for calculating the weighting field.
   void SetWeightingField(void (*f)(const double, const double, const double,
                                    double&, double&, double&,
                                    const std::string));
+  /// Set the function to be called for calculating the weighting potential.
   void SetWeightingPotential(void (*f)(const double, const double, const double,
                                        double&, const std::string));
+  /// Set the function to be called for calculating the magnetic field.
+  void SetMagneticField(void (*f)(const double, const double, const double,
+                                  double&, double&, double&));
 
  private:
-  // Electric field function
-  bool m_hasField;
-  void (*m_field)(const double, const double, const double, double&, double&,
-                  double&);
+  /// Electric field function
+  void (*m_efield)(const double, const double, const double, double&, double&,
+                   double&);
 
-  // Potential
-  bool m_hasPotential;
+  /// Potential function
   void (*m_potential)(const double, const double, const double, double&);
 
-  // Weighting field
-  bool m_hasWeightingField;
+  /// Weighting field function
   void (*m_wfield)(const double, const double, const double, double&, double&,
                    double&, const std::string);
 
-  // Weighting potential
-  bool m_hasWeightingPotential;
+  /// Weighting potential function
   void (*m_wpot)(const double, const double, const double, double&,
                  const std::string);
 
-  // Reset the component
+  /// Magnetic field function
+  void (*m_bfield)(const double, const double, const double, double&, double&,
+                   double&);
+
+  /// Reset the component
   void Reset();
   // Verify periodicities
   void UpdatePeriodicity();
