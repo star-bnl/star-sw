@@ -61,6 +61,6 @@ TDataSet *CreateTable() {
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
-  TDataSet *tableSet = new TDataSet("Lc3pimTsq");
+  TDataSet *tableSet = new TDataSet("DsKKpimTsq");
   return (TDataSet *)tableSet;
 }
