@@ -18,7 +18,7 @@ VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ..
 	../DAQ_READER  ../SFS ../LOG 
 
 
-BINS = daqFileHacker daqFileChopper testReader rts_example tpc_rerun tpx_read_gains
+BINS = daqFileHacker daqFileChopper testReader testReader2 rts_example tpc_rerun tpx_read_gains
 
 all:   $(BINS)
 
@@ -48,6 +48,10 @@ daqFileHacker: daqFileHacker.o $(VOBJS)
 
 testReader: testReader.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
+testReader2: testReader2.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
 
 # DO NOT DELETE
 

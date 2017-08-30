@@ -1683,7 +1683,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    int bbq_usec;
 
 	    QtParse(MXQ_CONF_NUM, trg, &mxq_sz, &mxq_usec);
-	    QtParse(EPQ_CONF_NUM, trg, &epq_sz, &epq_usec);
+	    QtParse(EQ1_CONF_NUM, trg, &epq_sz, &epq_usec);
 	    QtParse(BBQ_CONF_NUM, trg, &bbq_sz, &bbq_usec);
 
 
@@ -1729,7 +1729,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    UINT32 l1_bx = trgSum->LocalClocks[L1_CONF_NUM];
 	    UINT32 mxq_bx = trgSum->LocalClocks[MXQ_CONF_NUM] ;
 	    UINT32 bbq_bx = trgSum->LocalClocks[BBQ_CONF_NUM];
-	    UINT32 epq_bx = trgSum->LocalClocks[EPQ_CONF_NUM];
+	    UINT32 epq_bx = trgSum->LocalClocks[EQ1_CONF_NUM];
 
 	    printf("%d %d 0x%llx %d %d %d %d %d %d %d MXSIZE\n",
 		   rdr->seq,
