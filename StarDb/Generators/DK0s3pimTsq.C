@@ -31,7 +31,7 @@ TDataSet *CreateTable() {
     cflag->iswit[1] = 2;
     cflag->iswit[2] = 2; 
 #endif
-    const Char_t *nameP = "D0";
+    const Char_t *nameP = "D+";
     TGeant3TGeo *g3 = (TGeant3TGeo *)TVirtualMC::GetMC();
     TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
     if (! p) return;
@@ -39,7 +39,11 @@ TDataSet *CreateTable() {
     if (!pdg) return 0;
     Int_t iD  = g3->IdFromPDG(pdg);
     StarVMCApplication::Instance()->ForceDecay(nameP, 
-					       "K+", "K-", "", 100);
+					       "K_S0", "pi+", "rho0", 100);
+    StarVMCApplication::Instance()->ForceDecay("K_S0", 
+					       "pi+", "pi-", 0, 100);
+    StarVMCApplication::Instance()->ForceDecay("rho0", 
+					       "pi+", "pi-", 0, 100);
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;
@@ -51,6 +55,6 @@ TDataSet *CreateTable() {
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
-  TDataSet *tableSet = new TDataSet("D0K0s2pimTsq");
+  TDataSet *tableSet = new TDataSet("DK0s3pimTsq");
   return (TDataSet *)tableSet;
 }
