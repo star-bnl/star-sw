@@ -273,15 +273,11 @@ StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
       }
       getTimeAdc(row,pad,ADCs1,IDTs1);
       v.getTimeAdc(row,pad,ADCs2,IDTs2);
-      Bool_t ifIDT = kFALSE;
       for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	if (! ADCs2[i]) continue;
-	if (! ifIDT && (IDTs1[i] || IDTs2[i])) ifIDT = kTRUE;
 	if ((IDTs1[i] || IDTs2[i]) && ADCs1[i] < ADCs2[i]) IDTs1[i] = IDTs2[i];
 	ADCs1[i] += ADCs2[i];
       }
-      if (ifIDT) putTimeAdc(row, pad, ADCs1, IDTs1);
-      else       putTimeAdc(row, pad, ADCs1);
+      putTimeAdc(row, pad, ADCs1, IDTs1);
     }
   }
   return *this;
