@@ -27,7 +27,11 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   //______________Create the main chain object______________________________________
   Chain = new StBFChain("Embedding");
   Chain->SetName("Embedding");
+#if 0
   Chain->SetFlags("TObjTable");
+#else
+  Chain->SetFlags("");
+#endif
   StMaker::lsMakers(Chain);
   //________________________________________________________________________________
   TString Opt(opt);
