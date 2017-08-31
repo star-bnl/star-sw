@@ -191,30 +191,36 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
   if (opt.Contains("g",TString::kIgnoreCase)) {
     StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
     UInt_t nTracks = trackNode.size();
-    StTrackNode *node = 0;
-#ifndef StTrackMassFit_hh
-    cout << " Global tracks " << nTracks << endl;
-#else
     cout << nTracks << " Track nodes" << endl;
-#endif
+    StTrackNode *node = 0;
+    StTrack     *track = 0;
     for (UInt_t  i=0; i < nTracks; i++) {
       node = trackNode[i]; if (!node) continue;
-#ifdef StTrackMassFit_hh
+#if 0
       cout << *node << endl;
 #else
-      UInt_t nentries = node->entries();
-      for (UInt_t j = 0; j < nentries; j++) {
-	StTrack *track = node->track(j);
-	if (! track) continue;
+      UInt_t nR = node->referencedTracks().size();
+      UInt_t nO = node->ownedTracks().size();
+      for (UInt_t k = 0; k < nR + nO; k++) {
+	if (k < nR) track = node->referencedTracks()[k];
+	else        track = node->ownedTracks()[k-nR];
 	if (mOnlyIdT && track->idTruth() <= 0) continue;
-	if (track->type() == global) {
-	  StGlobalTrack* gTrack = (StGlobalTrack* ) track;
-	  cout << *gTrack << endl;
-	} else if (track->type() == primary) {
-	  StPrimaryTrack* pTrack = (StPrimaryTrack* ) track;
-	  cout << *pTrack << endl;
+#if 0
+	if (k) cout << endl;
+	if (k == nR) cout << "Owned  tracks:" << endl;
+#endif
+	if (track->type() == primary) {
+	  cout << *((const StPrimaryTrack*) track) << endl;
+	} else if (track->type() == global) {
+	  cout << *((const StGlobalTrack*) track) << endl;
+#ifdef StTrackMassFit_hh
+	} else if (track->type() == massFitAtVx || track->type() == massFit) {
+	  cout << *((const StTrackMassFit*) track) << endl;
+#endif
+	} else {
+	  cout << *track << endl;
 	}
-      } 
+      }
 #endif
     }
   }
