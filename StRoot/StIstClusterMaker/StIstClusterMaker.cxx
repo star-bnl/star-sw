@@ -27,12 +27,15 @@ StIstClusterMaker::~StIstClusterMaker()
 
 void StIstClusterMaker::Clear( Option_t *opts )
 {
+#if 0
    if ( mIstCollectionPtr ) {
       for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
          mIstCollectionPtr->getRawHitCollection(i)->Clear( "" );
          mIstCollectionPtr->getClusterCollection(i)->Clear( "" );
       }
    }
+#endif
+   return StMaker::Clear();
 };
 
 
