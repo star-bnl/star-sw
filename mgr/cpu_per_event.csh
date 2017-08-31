@@ -2,13 +2,10 @@
 set LOG = '*.log'
 if ($#argv > 0)   set LOG = "$argv";
 #echo $LOG
+set GREP = "grep";
 echo "$LOG" | grep 'gz$'
-if ($? ) then
+if (! $? ) set GREP = "zgrep"
 #    echo "use grep"
-  grep 'Done with Event' $LOG | grep -v 'no. 1/' | sed -e 's/.*Cpu Time =//' |  awk  'BEGIN {n=0;j = 0;}{j++; n += $1;} END {print "CPU/event = "n/j "(sec) for "j" events"}'
-else 
-#    echo "use zgrep"
-zgrep 'Done with Event' $LOG | grep -v 'no. 1/' | sed -e 's/.*Cpu Time =//' |  awk  'BEGIN {n=0;j = 0;}{j++; n += $1;} END {print "CPU/event = "n/j "(sec) for "j" events"}'
-endif
-unsetenv LOG
-
+${GREP} 'Done with Event' $LOG | grep -v 'no. 1/' | sed -e 's/.*Real Time =//' |  awk  'BEGIN {n=0;j = 0; k= 0;}{j++; k += $1; n += $6} END {print "CPU/event = "n/j "(sec) and Total/event = "k/j "(sec)  "100*n/k" % for "j" events"}'
+unset LOG
+unset GREP

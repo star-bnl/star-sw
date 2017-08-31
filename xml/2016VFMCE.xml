@@ -8,6 +8,7 @@
   setenv NODEBUG yes
   setenv STARFPE NO
   setup 64b
+#  starver TFG17h
   starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
@@ -19,7 +20,7 @@
     exit 1;
   endif
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq  ) 
     echo $Name | grep $name
     if (! $?) break;
   end
@@ -31,11 +32,12 @@
   if (! $?) set Sti = ",-Sti,nodefault,mysql";
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,StiHftC,beamLine,-geantOut,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
 #  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,StiHftC,beamLine,-geantOut,-evout,noRunco,noHistos,noTags,vmc,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
-  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+#  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
+  set chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name};
   set sdt = "";
   set VMCE = "";
-  echo $Name | grep -i real
-  if (! $?) set sdt = ",sdt20160301";
+  echo $Name | grep -i Ideal
+  if ($?) set sdt = ",sdt20160301";
   echo $Name | grep -i 20Muons
   if ( $? ) set VMCE = ",VFMCE";
   set Chain = ${chain}${VMCE}${sdt}",Rung."${rung}
@@ -48,5 +50,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 101 500 100" />
+<input URL="command:RunId.pl 101 400 100" />
 </job>

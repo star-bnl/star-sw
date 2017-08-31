@@ -1,5 +1,5 @@
 /* 
-   root.exe -q -b -x  'lMuDst.C(0,"*.MuDst.root")' rMuHFT.C+
+   root.exe -q -b -x  'lMuDst.C(0,"*.MuDst.root")' rMuHFT.C+ >& rMuHFT.log &
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
@@ -285,79 +285,45 @@ void Plots() {
   if (! nn) return;
   TFile **FitFiles = new TFile *[nn];
   TIter next(files);
-  TH2D *****hists = new TH2D****[nn];
+  TH2D ******hists = new TH2D*****[nn];
   Int_t NF = 0;
   TFile *f = 0;
   while ( (f = (TFile *) next()) ) { 
-    hists[NF] = new TH2D***[kSel];
+    hists[NF] = new TH2D****[kRCMC];
     FitFiles[NF] = f;
-    for (Int_t i = 0; i < kSel; i++) {
-      hists[NF][i] =  new TH2D**[kVarX];
-      for (Int_t j = 0; j < kVarX; j++) {
-	hists[NF][i][j] =  new TH2D*[kVarY];
-	for (Int_t k = 0; k < kVarY; k++) {
-	  hists[NF][i][j][k] = (TH2D*) f->Get(Form("%s%s%i",varN[k],pTpN[j],i));
-#if 0
-	  if (hists[NF][i][j][k]) cout << "Found";
+    for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
+      hists[NF][iRM] = new TH2D***[kSel];
+      for (Int_t i = 0; i < kSel; i++) {
+	hists[NF][iRM][i] =  new TH2D**[kVarX];
+	for (Int_t j = 0; j < kVarX; j++) {
+	  hists[NF][iRM][i][j] =  new TH2D*[kVarY];
+	  for (Int_t k = 0; k < kVarY; k++) {
+	    hists[NF][iRM][i][j][k] = (TH2D*) f->Get(Form("%s%s%s%i",NameRcMc[iRM],varN[k],pTpN[j],i));
+#if 1
+	  if (hists[NF][iRM][i][j][k]) cout << "Found";
 	  else                    cout << "Not found";
 	  cout << " plot " << Form("%s%s%i",varN[k],pTpN[j],i) << " in file " << f->GetName() << endl;
 #endif
+	  }
 	}
       }
     }
     NF++;
   }
-#if 1
-  {
-    // sigma_dca_XY versus 1/pT
-    Int_t x = 0; // InvpT
-    Int_t y = 0; // dcaXY
-    for (Int_t i = kSel - 2; i >= 0; i--) {
-      TString cName(Form("%s_%s_%s",sel[i],pTp[x],varN[y]));
-      TCanvas *c = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(cName);
-      if (c) c->Clear();
-      else   c = new TCanvas(cName,cName);
-      Double_t ymax = 0.02;
-      if (i == kSel - 2) ymax = 0.6;
-      TH1F *frame = c->DrawFrame(0,0,5, ymax);
-      frame->SetTitle(sel[i]);
-      frame->SetXTitle(pTp[x]);
-      frame->SetYTitle(Form("#sigma %s",varN[y]));
-      TLegend *l = new TLegend(0.5,0.2,0.7,0.4);
-      l->Draw();
-      for (Int_t m = 0; m < NF; m++) {
-	TString NameF(FitFiles[m]->GetName());
-	NameF.ReplaceAll("P.root","+");
-	NameF.ReplaceAll("N.root","-");
-	NameF.ReplaceAll(".root","");
-	NameF.ReplaceAll("rMuHFT","");
-	NameF.ReplaceAll("pi","#pi");
-	FitFiles[m]->cd();
-	hists[m][i][x][y]->FitSlicesY();
-	TH1D *sigma = (TH1D *) FitFiles[m]->Get(Form("%s_2",hists[m][i][x][y]->GetName()));
-	if (! sigma) continue;
-	sigma->SetMarkerColor(m+1);
-	sigma->SetLineColor(m+1);
-	sigma->Draw("same");
-	l->AddEntry(sigma,NameF);
-	c->Update();
-      }
-    }
-  }
-#endif
-  {
-    // Efficiency
-    TString cName("Efficiency");
+  // sigma_dca_XY versus 1/pT
+  Int_t x = 0; // InvpT
+  Int_t y = 0; // dcaXY
+  for (Int_t i = kSel - 2; i >= 0; i--) {
+    TString cName(Form("%s_%s_%s",sel[i],pTp[x],varN[y]));
     TCanvas *c = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(cName);
     if (c) c->Clear();
     else   c = new TCanvas(cName,cName);
-    TH1F *frame = c->DrawFrame(0,0,5,100.);
-    Int_t x = 0; // InvpT
-    Int_t y = 0; // dcaXY
-    frame->SetTitle(cName);
+    Double_t ymax = 0.02;
+    if (i == kSel - 2) ymax = 0.6;
+    TH1F *frame = c->DrawFrame(0,0,5, ymax);
+    frame->SetTitle(sel[i]);
     frame->SetXTitle(pTp[x]);
-    frame->SetYTitle("(%)");
-    Int_t ref = kSel - 1;
+    frame->SetYTitle(Form("#sigma %s",varN[y]));
     TLegend *l = new TLegend(0.5,0.2,0.7,0.4);
     l->Draw();
     for (Int_t m = 0; m < NF; m++) {
@@ -368,14 +334,47 @@ void Plots() {
       NameF.ReplaceAll("rMuHFT","");
       NameF.ReplaceAll("pi","#pi");
       FitFiles[m]->cd();
-      TH1D *refH = hists[m][ref][x][y]->ProjectionX();
+      for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
+	hists[m][iRM][i][x][y]->FitSlicesY();
+	TH1D *sigma = (TH1D *) FitFiles[m]->Get(Form("%s_2",hists[m][iRM][i][x][y]->GetName()));
+	if (! sigma) continue;
+	sigma->SetMarkerColor(m+1);
+	sigma->SetLineColor(m+1);
+	sigma->Draw("same");
+	l->AddEntry(sigma,NameF);
+	c->Update();
+      }
+    }
+  }
+  // Efficiency
+  TString cName("Efficiency");
+  TCanvas *c = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(cName);
+  if (c) c->Clear();
+  else   c = new TCanvas(cName,cName);
+  TH1F *frame = c->DrawFrame(0,0,5,100.);
+  frame->SetTitle(cName);
+  frame->SetXTitle(pTp[x]);
+  frame->SetYTitle("(%)");
+  Int_t ref = kSel - 1;
+  TLegend *l = new TLegend(0.5,0.2,0.7,0.4);
+  l->Draw();
+  for (Int_t m = 0; m < NF; m++) {
+    TString NameF(FitFiles[m]->GetName());
+    NameF.ReplaceAll("P.root","+");
+    NameF.ReplaceAll("N.root","-");
+    NameF.ReplaceAll(".root","");
+    NameF.ReplaceAll("rMuHFT","");
+    NameF.ReplaceAll("pi","#pi");
+    FitFiles[m]->cd();
+    for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
+      TH1D *refH = hists[m][iRM][ref][x][y]->ProjectionX();
       for (Int_t i = kSel - 2; i >= 0; i--) {
-	TH1D *proj = hists[m][i][x][y]->ProjectionX();
+	TH1D *proj = hists[m][iRM][i][x][y]->ProjectionX();
 	TH1D *eff  = new TH1D(*proj); eff->SetName(Form("Eff_%s",proj->GetName()));
 	eff->Divide(proj,refH,1,1,"b");
 	eff->Scale(100.);
-	eff->SetMarkerColor(m+1);
-	eff->SetLineColor(m+1);
+	eff->SetMarkerColor(iRM+1);
+	eff->SetLineColor(iRM+1);
 	eff->SetMarkerStyle(20+i);
 	l->AddEntry(eff,Form("%s %s",sel[i],NameF.Data()));
 	eff->Draw("samep");
