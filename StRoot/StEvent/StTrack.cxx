@@ -608,7 +608,7 @@ void StTrack::setIdTruth() // match with IdTruth
       if ((*it).second<qaBest)	continue;
       tkBest=(*it).first; qaBest=(*it).second;
     }
-    if (tkBest < 0 || tkBest> 0xffff) return;
+    if (tkBest <= 0 || tkBest> 0xffff) return;
     Int_t avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
     // Set quality to 0 if SVT/HFT hits do not match with TPC ones
     for (Int_t hi=0;hi<nHits; hi++) {
