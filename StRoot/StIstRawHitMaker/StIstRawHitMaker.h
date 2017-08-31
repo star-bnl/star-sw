@@ -37,8 +37,9 @@ public:
    Int_t Init();
    Int_t InitRun(Int_t runNumber);
    Int_t Make();
+#if 0
    void Clear( Option_t *opts = "" );
-
+#endif
    void setIsCalibrationMode( bool isCaliMode = false )   	{ mIsCaliMode = isCaliMode;}
    void setHitCut(double hitCut = 5.)				{ mHitCut = hitCut;        }
    void setCmnCorrection( bool doCmnCorrection = false )	{ mDoCmnCorrection = doCmnCorrection; }

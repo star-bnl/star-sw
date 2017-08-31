@@ -62,10 +62,12 @@ StPxlRawHitMaker::StPxlRawHitMaker(const Char_t *name) : StRTSBaseMaker("pxl", n
 //_______________________________________________
 void StPxlRawHitMaker::Clear(const Option_t *)
 {
+#if 0
    if (mPxlRawHitCollection) {
       delete mPxlRawHitCollection;
       mPxlRawHitCollection = 0;
    }
+#endif
    return StMaker::Clear();
 }
 //_______________________________________________
@@ -115,7 +117,7 @@ Int_t StPxlRawHitMaker::Make()
    {
       LOG_INFO << " pxlRawHitCollection does NOT exist! Create a new one! " << endm;
       mPxlRawHitCollection = new StPxlRawHitCollection();
-      ToWhiteBoard("pxlRawHit", mPxlRawHitCollection);
+      ToWhiteBoard("pxlRawHit", mPxlRawHitCollection,1);
    } else
    {
       LOG_INFO << " pxlRawHitCollection exists! Append raw hits to this collection!" << endm;

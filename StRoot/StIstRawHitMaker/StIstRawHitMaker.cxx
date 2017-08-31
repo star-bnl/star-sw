@@ -23,7 +23,7 @@
 StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ),
    mIsCaliMode(false), mDoEmbedding(false), mDoCmnCorrection(false),
    mHitCut(5.), mCmnCut(3.),
-   mIstCollectionPtr(new StIstCollection()), mIstCollectionSimuPtr(nullptr),
+   mIstCollectionPtr(0), mIstCollectionSimuPtr(nullptr),
    mCmnVec(kIstNumApvs, 0),
    mPedVec(kIstNumElecIds, 0),
    mRmsVec(kIstNumElecIds, 0),
@@ -46,7 +46,6 @@ StIstRawHitMaker::~StIstRawHitMaker()
  */
 Int_t StIstRawHitMaker::Init()
 {
-   ToWhiteConst("istRawHitAndCluster", mIstCollectionPtr);
 
    return kStOk;
 }
@@ -188,7 +187,8 @@ Int_t StIstRawHitMaker::Make()
    if( !mIstCollectionSimuPtr ) {
       LOG_WARN << "StIstRawHitMaker::Make() - No istCollection found in simu dataset! "<<endm;
    }
-
+   mIstCollectionPtr = new StIstCollection();
+   ToWhiteBoard("istRawHitAndCluster", mIstCollectionPtr, 1);
 
    StRtsTable *rts_tbl = 0;
    UChar_t dataFlag = mALLdata;
@@ -510,7 +510,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromSimData()
       }
    }
 }
-
+#if 0
 void StIstRawHitMaker::Clear( Option_t *opts )
 {
    if (mIstCollectionPtr ) {
@@ -519,5 +519,5 @@ void StIstRawHitMaker::Clear( Option_t *opts )
       }
    }
 }
-
+#endif
 ClassImp(StIstRawHitMaker)

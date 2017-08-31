@@ -52,8 +52,9 @@ class StIstSlowSimMaker : public StMaker {
   Int_t Make();
   Int_t Init();
   Int_t InitRun( Int_t runNumber );
+#if 0
   void Clear( Option_t *opts = "" );
-
+#endif
   virtual const char *GetCVS() const
   {
     static const char cvs[]="Tag $Name:  $ $Id: StIstSlowSimMaker.h,v 1.1 2016/02/17 14:39:00 jeromel Exp $ built " __DATE__ " " __TIME__ ;

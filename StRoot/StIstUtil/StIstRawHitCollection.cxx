@@ -15,9 +15,8 @@ StIstRawHitCollection::StIstRawHitCollection( int ladder ) : StObject(), mLadder
 /** Free memory and clear the vector */
 StIstRawHitCollection::~StIstRawHitCollection()
 {
-  while (!mRawHitVec.empty()) {delete mRawHitVec.back(); mRawHitVec.pop_back();}
-
-   mRawHitElecIdVec.clear();
+  Clear();
+  mRawHitElecIdVec.clear();
 };
 
 //sort internal vector by raw hit geometry ID

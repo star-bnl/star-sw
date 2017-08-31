@@ -120,8 +120,13 @@ Int_t StIstSlowSimMaker::Make()
 {
 
   //prepare output dataset
+  TObjectSet *istDataSet = (TObjectSet*) GetDataSet("istRawAdcSimu");
+  if (istDataSet) {
+    LOG_WARN << "istRawAdcSimu has not been cleaned. Delete it ?" << endm;
+    delete istDataSet;
+  }
   mIstCollectionPtr = new StIstCollection();
-  ToWhiteBoard("istRawAdcSimu",mIstCollectionPtr);
+  ToWhiteBoard("istRawAdcSimu",mIstCollectionPtr, 1);
   
 	if(!mIstCollectionPtr ) {
 		LOG_WARN << "Error constructing istCollection" << endm;
@@ -194,7 +199,7 @@ Int_t StIstSlowSimMaker::Make()
 
 	return kStOK;
 }
-
+#if 0
 void StIstSlowSimMaker::Clear( Option_t *opts )
 {
 	if(mIstCollectionPtr ) {
@@ -204,7 +209,7 @@ void StIstSlowSimMaker::Clear( Option_t *opts )
    }
    return StMaker::Clear();
 }
-
+#endif
 /**
  * calculate the pad row and column value in IST sensor by using the local position of mc hit in the sensor local coordinates. Origin of local coordinates sits at the corner of the sensor, zPos and rPhiPos are shifted from origin at center to at corner to calculate the row and column. Row is from 1-64, column is from 1-12. 
  *
