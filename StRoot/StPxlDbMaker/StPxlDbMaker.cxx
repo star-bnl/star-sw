@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.18 2015/02/04 07:55:41 smirnovd Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.19 2017/09/01 03:10:49 dongx Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.19  2017/09/01 03:10:49  dongx
+ * Added access functions for pxlDigmapsSim table
+ *
  * Revision 1.18  2015/02/04 07:55:41  smirnovd
  * Create StPxlDb object in constructor and pass it to the framework via ToWhiteConst() in Init()
  *
@@ -59,6 +62,7 @@
 #include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
+#include "tables/St_pxlDigmapsSim_Table.h"
 
 ClassImp(StPxlDbMaker)
 //_____________________________________________________________________________
@@ -139,6 +143,16 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    }
    else {
       LOG_WARN << "InitRun : No access to pxlControl table, abort PXL reconstruction" << endm;
+      return kStErr;
+   }
+
+   // set pxlDigmapsSim
+   St_pxlDigmapsSim *pxlDigmapsSim = (St_pxlDigmapsSim *)GetDataBase("Geometry/pxl/pxlDigmapsSim");
+   if (pxlDigmapsSim) {
+      mPxlDb->setPxlDigmapsSim(pxlDigmapsSim->GetTable());
+   }
+   else {
+      LOG_WARN << "InitRun : No access to pxlDigmapsSim table, abort PXL reconstruction" << endm;
       return kStErr;
    }
 
