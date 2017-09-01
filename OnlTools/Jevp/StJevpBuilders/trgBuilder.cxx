@@ -496,7 +496,7 @@ void trgBuilder::handleQTOccupancyPlots(daqReader *rdr) {
 	    LOG(DBG, "BBQ");
 	    fillQtHisto(BBQ_CONF_NUM, trg, (TH1D *)contents.bbq_sz_h, (TH1D *)contents.bbq_readout_time_h, (TProfile *)contents.bbq_board_occ_h);
 	    LOG(DBG, "EPQ");
-	    fillQtHisto(EPQ_CONF_NUM, trg, (TH1D *)contents.epq_sz_h, (TH1D *)contents.epq_readout_time_h, (TProfile *)contents.epq_board_occ_h);
+	    fillQtHisto(EQ3_CONF_NUM, trg, (TH1D *)contents.epq_sz_h, (TH1D *)contents.epq_readout_time_h, (TProfile *)contents.epq_board_occ_h);
 	    LOG(DBG, "QTs done");
 	}
     }	    
