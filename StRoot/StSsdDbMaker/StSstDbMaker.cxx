@@ -1,6 +1,9 @@
-//$Id: StSstDbMaker.cxx,v 1.22 2016/06/20 18:48:31 bouchet Exp $
+//$Id: StSstDbMaker.cxx,v 1.23 2017/09/01 22:22:14 yiguo Exp $
 //
 //$Log: StSstDbMaker.cxx,v $
+//Revision 1.23  2017/09/01 22:22:14  yiguo
+//corresponding to DB table change sstOnTpc = oscOnTpc*sstOnOsc by Yi Guo
+//
 //Revision 1.22  2016/06/20 18:48:31  bouchet
 //coverity : STACK_USE ; heap allocation for sstWafersPosition
 //
@@ -130,15 +133,27 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
    fRotList = new THashList(320, 0);
    fRotList->SetOwner(kFALSE);
 
-   TGeoHMatrix LS, SG, LA, WG;
+   ///////////////////////////////
+   // matrix LS ~ ladderOnSst
+   //        OT ~ oscOnTpc
+   //        SO ~ sstOnOsc
+   //        SG = OT*SO
+
+   TGeoHMatrix LS, OT, SO, SG, LA, WG;
    assert(gStTpcDb);
    const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
 
    // SSD
-   St_Survey *sstOnOsc = (St_Survey *) GetDataBase("Geometry/sst/sstOnOsc");  // OSC in IDS
+   St_Survey *sstOnOsc = (St_Survey *) GetDataBase("Geometry/sst/sstOnOsc");  // sst in Osc
 
    if (!sstOnOsc) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstOnOsc' table" << endm;
+      return 0;
+   }
+
+   St_Survey *oscOnTpc = (St_Survey *) GetDataBase("Geometry/sst/oscOnTpc");  // osc in tpc
+   if (!oscOnTpc) {
+      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/oscOnTpc' table" << endm;
       return 0;
    }
 
@@ -156,8 +171,9 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
       return 0;
    }
 
-   Survey_st *oscOnGlobal    = sstOnOsc->GetTable();
-   Survey_st *ladderOnIds    = sstLadderOnSst->GetTable();
+   Survey_st *oscOnTpc_st    = oscOnTpc->GetTable(); 
+   Survey_st *sstOnOsc_st    = sstOnOsc->GetTable();
+   Survey_st *ladderOnSst    = sstLadderOnSst->GetTable();
    Survey_st *sensorOnLadder = sstSensorOnLadder->GetTable();
 
    Int_t NoOsc     = sstOnOsc->GetNRows();
@@ -174,6 +190,9 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
    Int_t num = 0;
    sstWafersPosition_st *row = new sstWafersPosition_st();
    memset(row,0, 4*960*sizeof(Double_t));
+
+   OT.SetRotation(&oscOnTpc_st->r00);
+   OT.SetTranslation(&oscOnTpc_st->t0);
 
    for (Int_t i = 0; i < NoSensors; i++, sensorOnLadder++) {
       Int_t Id = sensorOnLadder->Id;
@@ -211,17 +230,17 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
          fRotList->Add(WL);
       }
 
-      ladderOnIds = sstLadderOnSst->GetTable();
+      ladderOnSst = sstLadderOnSst->GetTable();
       Int_t Ladder = 0;
       Int_t OSC    = 0;
 
-      for (Int_t l = 0; l < NoLadders; l++, ladderOnIds++) {
-         Ladder = ladderOnIds->Id % 100;
+      for (Int_t l = 0; l < NoLadders; l++, ladderOnSst++) {
+         Ladder = ladderOnSst->Id % 100;
 
          if (Ladder == ladder) {
-            OSC = ladderOnIds->Id / 100;
-            LS.SetRotation(&ladderOnIds->r00);
-            LS.SetTranslation(&ladderOnIds->t0);
+            OSC = ladderOnSst->Id / 100;
+            LS.SetRotation(&ladderOnSst->r00);
+            LS.SetTranslation(&ladderOnSst->t0);
 
             if (Debug() >= 2) {
                LOG_DEBUG << "CalculateWafersPosition: LS" << endm;
@@ -237,17 +256,19 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
          continue;
       }
 
-      oscOnGlobal = sstOnOsc->GetTable();
+      sstOnOsc_st = sstOnOsc->GetTable();
       Int_t osc = 0;
 
-      for (Int_t s = 0; s < NoOsc; s++, oscOnGlobal++) {
-         if (oscOnGlobal->Id != OSC) continue;
+      for (Int_t s = 0; s < NoOsc; s++, sstOnOsc_st++) {
+         if (sstOnOsc_st->Id != OSC) continue;
 
          osc = OSC;
-         SG.SetRotation(&oscOnGlobal->r00);
-         SG.SetTranslation(&oscOnGlobal->t0);
+         SO.SetRotation(&sstOnOsc_st->r00);
+         SO.SetTranslation(&sstOnOsc_st->t0);
          break;
       }
+
+      SG = OT * SO;
 
       if (!osc) {
          LOG_WARN << "CalculateWafersPosition: OSC " << OSC << " has not been found. Skipping to next sensor..." << endm;
