@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.8 2014/10/07 19:25:28 smirnovd Exp $
+ * $Id: StPxlDb.cxx,v 1.10 2017/09/01 03:10:49 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,15 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.10  2017/09/01 03:10:49  dongx
+ * Added access functions for pxlDigmapsSim table
+ *
+ * Revision 1.9  2015/05/07 04:33:32  smirnovd
+ * StPxlDb: Set name of resulting matrix after copying from a temporary matrix object
+ *
+ * Due to the bug all matrices were given the same name. This inconsistency has
+ * been noted and reported by @MustafaMustafa
+ *
  * Revision 1.8  2014/10/07 19:25:28  smirnovd
  * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
  *
@@ -58,6 +67,7 @@
 #else /* __NEW_PXLDB__ */
 #include "TEnv.h"
 #endif /* ! __NEW_PXLDB__ */
+#include "tables/St_pxlDigmapsSim_Table.h"
 
 
 StPxlDb* StPxlDb::fgInstance = 0;
@@ -75,6 +85,7 @@ StPxlDb::StPxlDb() : StObject()
 #ifndef __NEW_PXLDB__
    mPxlControl = 0;
 #endif /* __NEW_PXLDB__ */
+   mPxlDigmapsSim = 0;
    memset(mThinPlateSpline, 0, sizeof(mThinPlateSpline));
    fgInstance = this;
 }

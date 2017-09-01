@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterCollection.cxx,v 1.4 2014/02/27 00:44:08 smirnovd Exp $
+ * $Id: StPxlClusterCollection.cxx,v 1.5 2017/09/01 02:58:33 dongx Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterCollection.cxx,v $
+ * Revision 1.5  2017/09/01 02:58:33  dongx
+ * Update to ensure idTruth is preserved for MC hits for overlapping scenarios between MC/data and two or more MC hits
+ *
  * Revision 1.4  2014/02/27 00:44:08  smirnovd
  * Use constructor initializer list
  *
@@ -48,4 +51,17 @@ Int_t StPxlClusterCollection::numberOfClusters(Int_t sector, Int_t ladder, Int_t
 const StPxlCluster *StPxlClusterCollection::cluster(Int_t sector, Int_t ladder, Int_t sensor, Int_t clusterIndex) const
 {
    return &mClusterVec[sector - 1][ladder - 1][sensor - 1][clusterIndex];
+}
+
+Int_t StPxlClusterCollection::numberOfClusters() const
+{
+   int n = 0;
+   for (int i = 0; i < kNumberOfPxlSectors; i++) {
+      for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++) {
+        for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
+           n += mClusterVec[i][j][k].size();
+        }
+      }
+   }
+   return n;  
 }

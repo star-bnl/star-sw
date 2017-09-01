@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.9 2014/10/07 19:25:28 smirnovd Exp $
+ * $Id: StPxlDb.h,v 1.10 2017/09/01 03:10:49 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.10  2017/09/01 03:10:49  dongx
+ * Added access functions for pxlDigmapsSim table
+ *
  * Revision 1.9  2014/10/07 19:25:28  smirnovd
  * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
  *
@@ -73,6 +76,7 @@ class pxlControl_st;
 #include "StDetectorDbMaker/St_pxlSensorTpsC.h"
 #endif /* ! __NEW_PXLDB__ */
 class StThinPlateSpline;
+class pxlDigmapsSim_st;
 
 
 /*!
@@ -156,6 +160,8 @@ public:
 #else /*  __NEW_PXLDB__ */
    const pxlControl_st *pxlControl() {return St_pxlControlC::instance()->Struct();}
 #endif /* ! __NEW_PXLDB__ */
+   /*! Slow simulator parameters */
+   const pxlDigmapsSim_st *pxlDigmapsSim() {return mPxlDigmapsSim;}
 #ifndef  __NEW_PXLDB__
    void setGeoHMatrices(Survey_st **tables); ///< set geoHMatrix parameters with parameters from Survey_st tables
    void setSensorStatus(pxlSensorStatus_st *sensorStatus) {mSensorStatusTable = sensorStatus;}
@@ -171,10 +177,11 @@ public:
 #ifndef  __NEW_PXLDB__
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 #endif /* ! __NEW_PXLDB__ */
+   void setPxlDigmapsSim(pxlDigmapsSim_st *pxlDigmapsSim) {mPxlDigmapsSim = pxlDigmapsSim;}
 
    virtual void Print(Option_t *opt = "") const;
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.9 2014/10/07 19:25:28 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.10 2017/09/01 03:10:49 dongx Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
    static Int_t _debug;
@@ -204,6 +211,8 @@ private:
    StThinPlateSpline *mThinPlateSpline[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; ///< thin plate spline function to describe the sensor surface
    static StPxlDb       *fgInstance;
 
+   pxlDigmapsSim_st *mPxlDigmapsSim; ///< slow simulator parameters
+   
    ClassDef(StPxlDb, 0)
 };
 #endif /* StPxlDb_h */
