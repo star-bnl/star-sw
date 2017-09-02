@@ -27,10 +27,10 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   //______________Create the main chain object______________________________________
   Chain = new StBFChain("Embedding");
   Chain->SetName("Embedding");
-#if 0
+#if 1
   Chain->SetFlags("TObjTable");
 #else
-  Chain->SetFlags("");
+  Chain->SetFlags("empty");
 #endif
   StMaker::lsMakers(Chain);
   //________________________________________________________________________________
@@ -144,15 +144,6 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   StMaker::lsMakers(Chain);
   Int_t iInit = Chain->Init();
   if (iInit >=  kStEOF) {Chain->FatalErr(iInit,"on init"); return;}
-  std::vector<Int_t> triggers;
-  if (triggersC) {
-    TPMERegexp pm(":");
-    Int_t N = pm.Split(triggersC);
-    for (Int_t i = 0; i < N; i++) {
-      TString num(pm[i]);
-      triggers.push_back(num.Atoi());
-    }
-  }
   if (First <= Last) {
     Chain->EventLoop(First,Last);
     gMessMgr->QAInfo() << "Run completed " << endm;
