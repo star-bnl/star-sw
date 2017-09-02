@@ -702,6 +702,29 @@ void StAnalysisMaker::PrintRnDHits() {
   }
 }
 //________________________________________________________________________________
+void StAnalysisMaker::HitCounts(StHit *hit, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, UInt_t Flag) {
+  if (hit) {
+    TotalNoOfHits++;
+    if ( hit->flag() > Flag) noBadHits++;
+    if (hit->usedInFit()) noHitsUsedInFit++;
+    if (hit->idTruth()) {
+      TotalNoOfMcHits++;
+      if (hit->usedInFit()) noMcHitsUsedInFit++;
+    }
+  }
+}
+//________________________________________________________________________________
+void StAnalysisMaker::PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit) {
+  LOG_QA   << "# " << name << " hits:          " << TotalNoOfHits 
+	   << ":\tBad ones (! flag):     " << noBadHits 
+	   << ":\tUsed in Fit:      " << noHitsUsedInFit;
+  if (TotalNoOfMcHits > 0 && (TotalNoOfHits != TotalNoOfMcHits || noHitsUsedInFit != noMcHitsUsedInFit)) {
+    LOG_QA  << ":\tMc " << TotalNoOfMcHits
+	    << ":\tUsed in Fit:      " << noMcHitsUsedInFit;
+  }
+  LOG_QA << endm;
+}
+//________________________________________________________________________________
 void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (! event) event = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   static const UInt_t NoFitPointCutForGoodTrack = StVertex::NoFitPointCutForGoodTrack();
@@ -876,10 +899,11 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       << ",MessageKey=" << "'KinkVertices'," << "MessageValue="<< event->kinkVertices().size() << endm;
   }
   
-  UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
+  UInt_t TotalNoOfHits, noBadHits, noHitsUsedInFit, TotalNoOfMcHits, noMcHitsUsedInFit;
   StTpcHitCollection* TpcHitCollection = event->tpcHitCollection();
   if (TpcHitCollection) {
     UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+    TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
     for (UInt_t i = 0; i< numberOfSectors; i++) {
       StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
       if (sectorCollection) {
@@ -890,24 +914,18 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	    StSPtrVecTpcHit &hits = rowCollection->hits();
 	    UInt_t NoHits = hits.size();
 	    for (UInt_t k = 0; k < NoHits; k++) {
-	      StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
-	      if (tpcHit) {
-		TotalNoOfTpcHits++;
-		if ( tpcHit->flag()) noBadTpcHits++;
-		if (tpcHit->usedInFit()) noTpcHitsUsedInFit++;
-	      }
+	      StHit *hit = hits[k];
+	      HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
 	    }
 	  }
 	}
       }
     }
+    if (TotalNoOfHits) {
+      PrintHitCounts("TPC",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
+    }
   }
-  if (TotalNoOfTpcHits) {
-    LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
-	     << ":\tBad ones (! flag):     " << noBadTpcHits 
-	     << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
-  }
-  UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
+  TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
   StSvtHitCollection* svthits = event->svtHitCollection();
   if (svthits) {
     StSvtHit* hit;
@@ -923,24 +941,19 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	  const StSPtrVecSvtHit& hits = waferhits->hits();
 	  for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it) {
 	    hit = static_cast<StSvtHit*>(*it);
-	    if (!hit) continue;
-	    TotalNoOfSvtHits++;
-	    if (hit->flag() >3)   noBadSvtHits++;
-	    if (hit->usedInFit()) noSvtHitsUsedInFit++;
+	    HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, 3);
 	  }
 	}
       }
     }
+    if (TotalNoOfHits) {
+      PrintHitCounts("SVT",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
+    }
   }
-  if (TotalNoOfSvtHits) {
-    LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
-	   << ":\tBad ones(flag >3): " << noBadSvtHits 
-	   << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
-  }
-  UInt_t TotalNoOfPxlHits = 0, noBadPxlHits = 0, noPxlHitsUsedInFit = 0;
   StPxlHitCollection* pxlhits = event->pxlHitCollection();
   if (pxlhits) {
     StPxlHit* hit;
+    TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
     for (UInt_t sector=0; sector<pxlhits->numberOfSectors(); ++sector) {
       StPxlSectorHitCollection* sectorhits = pxlhits->sector(sector);
       if (!sectorhits) continue;
@@ -953,23 +966,18 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	  const StSPtrVecPxlHit& hits = sensorhits->hits();
 	  for (const_StPxlHitIterator it=hits.begin(); it!=hits.end(); ++it) {
 	    hit = static_cast<StPxlHit*>(*it);
-	    if (!hit) continue;
-	    TotalNoOfPxlHits++;
-	    if (hit->flag() >3)   noBadPxlHits++;
-	    if (hit->usedInFit()) noPxlHitsUsedInFit++;
+	    HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, 3);
 	  }
 	}
       }
     }
+    if (TotalNoOfHits) {
+      PrintHitCounts("PXL",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
+    }
   }
-  if (TotalNoOfPxlHits) {
-    LOG_QA << "# PXL hits:          " << TotalNoOfPxlHits 
-	   << ":\tBad ones(flag >3): " << noBadPxlHits 
-	   << ":\tUsed in Fit:      " << noPxlHitsUsedInFit << endm;
-  }
-  UInt_t TotalNoOfIstHits = 0, noBadIstHits = 0, noIstHitsUsedInFit = 0;
   StIstHitCollection* isthits = event->istHitCollection();
   if (isthits) {
+    TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
     StIstHit* hit;
     for (Int_t ladder=0; ladder<kIstNumLadders; ++ladder) {
       StIstLadderHitCollection* ladderhits = isthits->ladder(ladder);
@@ -980,24 +988,18 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	const StSPtrVecIstHit& hits = sensorhits->hits();
 	for (const_StIstHitIterator it=hits.begin(); it!=hits.end(); ++it) {
 	  hit = static_cast<StIstHit*>(*it);
-	  if (!hit) continue;
-	  TotalNoOfIstHits++;
-	  if (hit->flag() >3)   noBadIstHits++;
-	  if (hit->usedInFit()) noIstHitsUsedInFit++;
+	  HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, 3);
 	}
       }
     }
   }
-  if (TotalNoOfIstHits) {
-    LOG_QA << "# IST hits:          " << TotalNoOfIstHits 
-	   << ":\tBad ones(flag >3): " << noBadIstHits 
-	   << ":\tUsed in Fit:      " << noIstHitsUsedInFit << endm;
+  if (TotalNoOfHits) {
+    PrintHitCounts("IST",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
   }
-
-  UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
   StSsdHitCollection* ssdhits = event->ssdHitCollection();
   if (ssdhits) {
     StSsdHit* hit;
+    TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
     for (UInt_t ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
       StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
       if (!ladderhits) continue;
@@ -1007,23 +1009,18 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	const StSPtrVecSsdHit& hits = waferhits->hits();
 	for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
 	  hit = static_cast<StSsdHit*>(*it);
-	  if (!hit) continue;
-	  TotalNoOfSsdHits++;
-	  if (hit->flag() >3) noBadSsdHits++;
-	  if (hit->usedInFit()) noSsdHitsUsedInFit++;
+	  HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, 3);
 	}
       }
     }
+    if (TotalNoOfHits) {
+      PrintHitCounts("SSD",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
+    }
   }
-  if (TotalNoOfSsdHits) {
-    LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
-	   << ":\tBad ones(flag>3): " << noBadSsdHits 
-	   << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
-  }
-  UInt_t TotalNoOfSstHits = 0, noBadSstHits = 0, noSstHitsUsedInFit = 0;
   StSstHitCollection* ssthits = event->sstHitCollection();
   if (ssthits) {
     StSstHit* hit;
+    TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
     for (UInt_t ladder=0; ladder<ssthits->numberOfLadders(); ++ladder) {
       StSstLadderHitCollection* ladderhits = ssthits->ladder(ladder);
       if (!ladderhits) continue;
@@ -1033,23 +1030,18 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	const StSPtrVecSstHit& hits = waferhits->hits();
 	for (const_StSstHitIterator it=hits.begin(); it!=hits.end(); ++it) {
 	  hit = static_cast<StSstHit*>(*it);
-	  if (!hit) continue;
-	  TotalNoOfSstHits++;
-	  if (hit->flag() >3) noBadSstHits++;
-	  if (hit->usedInFit()) noSstHitsUsedInFit++;
+	  HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, 3);
 	}
       }
     }
+    if (TotalNoOfHits) {
+      PrintHitCounts("SST",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
+    }
   }
-  if (TotalNoOfSstHits) {
-    LOG_QA << "# SST hits:          " << TotalNoOfSstHits 
-	   << ":\tBad ones(flag>3): " << noBadSstHits 
-	   << ":\tUsed in Fit:      " << noSstHitsUsedInFit << endm;
-  }
-  UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
   StFtpcHitCollection* ftpchits = event->ftpcHitCollection();
   if (ftpchits) {
     StFtpcHit* hit;
+    TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
     for (UInt_t plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
       StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
       if (!planehits) continue;
@@ -1059,8 +1051,6 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	const StSPtrVecFtpcHit& hits = sectorhits->hits();
 	for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
 	  hit = static_cast<StFtpcHit*>(*it);
-	  if (!hit) continue;
-	  TotalNoOfFtpcHits++;
 	  /*
 	    bit0:unfolded
 	    bit1:unfold failed
@@ -1077,16 +1067,17 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	    
 	    Janet
 	  */
+#if 0
 	  if (! ( hit->flag() & 1 || hit->flag() & (1 << 5))) noBadFtpcHits++;
 	  else if (hit->flag() & (1 << 5))  noFtpcHitsUsedInFit++;
+#endif
+	  HitCounts(hit, TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, 32);
 	}
       }
     }
-  }
-  if (TotalNoOfFtpcHits) {
-    LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
-	   << ":\tBad ones(!bit0): " << noBadFtpcHits 
-	   << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
+    if (TotalNoOfHits) {
+      PrintHitCounts("FTPC",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit);
+    }
   }
 #ifdef  StRnDHit_hh
   StRnDHitCollection* rndhits = event->rndHitCollection();
@@ -1097,31 +1088,30 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       struct NoHits_t {
 	StDetectorId  kId;
 	const Char_t *Name;
-	Int_t         TotalNoOfHits;
-	Int_t         noBadHits;
-	Int_t         noHitsUsedInFit;
+	UInt_t         TotalNoOfHits;
+	UInt_t         noBadHits;
+	UInt_t         noHitsUsedInFit;
+	UInt_t         TotalNoOfMcHits;
+	UInt_t         noMcHitsUsedInFit;
       };
       const Int_t NHtypes = 4;
       NoHits_t Hits[7] = {
-	{kPxlId, "Hft", 0, 0, 0},
-	{kIstId, "Ist", 0, 0, 0},           
-	{kFgtId, "Fgt", 0, 0, 0},           
-	{kUnknownId,"UnKnown", 0, 0, 0}
+	{kPxlId, "Hft", 0, 0, 0, 0, 0},
+	{kIstId, "Ist", 0, 0, 0, 0, 0},           
+	{kFgtId, "Fgt", 0, 0, 0, 0, 0},           
+	{kUnknownId,"UnKnown", 0, 0, 0, 0, 0}
       };           
       StRnDHit* hit;
+      TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
       for (Int_t i = 0; i < NoHits; i++) {
 	hit = hits[i];
 	Int_t j = 0;
 	for (j = 0; j < NHtypes-1; j++) if ( Hits[j].kId == hit->detector()) break;
-	Hits[j].TotalNoOfHits++;
-	if (hit->flag())  Hits[j].noBadHits++;
-	if (hit->usedInFit()) Hits[j].noHitsUsedInFit++;
+	HitCounts(hit, Hits[j].TotalNoOfHits, Hits[j].noBadHits, Hits[j].noHitsUsedInFit, Hits[j]. TotalNoOfMcHits, Hits[j].noMcHitsUsedInFit);
       }
       for (Int_t j = 0; j < NHtypes; j++) {
 	if (Hits[j].TotalNoOfHits) {
-	  LOG_QA << "# " << Hits[j].Name << " hits:         " << Hits[j].TotalNoOfHits
-		 << ":\tBad ones: " << Hits[j].noBadHits
-		 << ":\tUsed in Fit:      " << Hits[j].noHitsUsedInFit << endm;
+	  PrintHitCounts(Hits[j].Name, Hits[j].TotalNoOfHits, Hits[j].noBadHits, Hits[j].noHitsUsedInFit, Hits[j]. TotalNoOfMcHits, Hits[j].noMcHitsUsedInFit);
 	}
       }
     }

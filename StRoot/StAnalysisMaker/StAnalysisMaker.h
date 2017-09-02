@@ -88,7 +88,6 @@
 //  inherits from StMaker. 
 #include "StMaker.h"
 #include "TString.h"
-
 //
 //  Forward declarations.
 //  It is always a good idea to reduce the dependencies
@@ -102,7 +101,7 @@
 //
 class StEvent;
 class StTrack;
-
+class StHit;
 //
 //  The class declaration. Every maker has to
 //  inherit from StMaker.
@@ -119,6 +118,8 @@ public:
   virtual void        Print(Option_t *option="") const;
   void                DumpHftHits(); // dump HFT hit into TTree
   static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
+  static void HitCounts(StHit *hit, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, UInt_t Flag = 0);
+  static void PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit);
   static void PrintStEvent(TString opt="vpgl3");
   static void PrintVertex(Int_t ivx = -1);
   static void PrintGlobalTrack(Int_t itk = 0);
