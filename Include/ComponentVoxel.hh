@@ -56,14 +56,16 @@ class ComponentVoxel : public ComponentBase {
     *   - either two or three floating point numbers,
     *     specifying the coordinates (in cm) of the element centre or
     *   - two or three integers specifying the index of the element in the mesh,
+    *
     * followed by
     *   - two or three floating point numbers for the electric field (in V/cm),
     * and (depending on the values of withPotential and withRegion),
     *   - a floating point number specifying the potential (in V), and
     *   - an integer specifying the "region" of the element.
+    *
     * Format types are:
-    * "xy", "xyz": elements are specified by the coordinates of their centres
-    * "ij", "ijk": elements are specified by their indices
+    *  - "xy", "xyz": elements are specified by the coordinates of their centres
+    *  - "ij", "ijk": elements are specified by their indices
     */
   bool LoadElectricField(const std::string& filename, const std::string& format,
                          const bool withPotential, const bool withRegion,
