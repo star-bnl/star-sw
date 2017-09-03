@@ -152,7 +152,7 @@ void rotm_t::Rotations() {
   Double_t phi;
   for (phi = 0; phi <= 360; phi += 5) {
     rotm_t rotm;
-    rotm.name = Form("R%03.0f",phi);
+    sprintf(rotm.name,"R%03.0f",phi);
     rotm.Thet1 = 90;
     rotm.Phi1  = phi;
     rotm.Thet2 = 90;
@@ -166,7 +166,7 @@ void rotm_t::Rotations() {
   // Rotations around Z with step 22.5 degrees "R?.?"
   for (phi = 22.5; phi <= 360; phi += 45.) {
     rotm_t rotm;
-    rotm.name = Form("R%03.0f",phi);
+    sprintf(rotm.name,"R%03.0f",phi);
     rotm.Thet1 = 90;
     rotm.Phi1  = phi;
     rotm.Thet2 = 90;
@@ -180,7 +180,7 @@ void rotm_t::Rotations() {
   // Flip (x,y,z) => ( x,-y,-z) and Rotate around Z with step 30 degrees
   for (phi = 0; phi < 360; phi += 30) {
     rotm_t rotm;
-    rotm.name = Form("Y%03.0f",phi);
+    sprintf(rotm.name,"Y%03.0f",phi);
     rotm.Thet1 = 90;
     rotm.Phi1  = phi;
     rotm.Thet2 = 90;
@@ -194,7 +194,7 @@ void rotm_t::Rotations() {
   // Flip (x,y,z) => ( x, y,-z) and Rotate around Z with step 5 degrees
   for (phi = -15; phi <= 360; phi += 5) {
     rotm_t rotm;
-    rotm.name = Form("%03.0fT",phi);
+    sprintf(rotm.name,"%03.0fT",phi);
     rotm.Thet1 = 90;
     rotm.Phi1  = phi;
     rotm.Thet2 = 90;
