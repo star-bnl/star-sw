@@ -8,8 +8,8 @@
   setenv NODEBUG yes
   setenv STARFPE NO
   setup 64b
-#  starver TFG17h
-  starver .DEV2
+  starver TFG17i
+#  starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`

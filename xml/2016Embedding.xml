@@ -8,7 +8,7 @@
   setenv NODEBUG yes
   setup 64b
   setenv STARFPE NO
-  starver TFG17h
+  starver TFG17i
 #  starver .DEV2
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
