@@ -13,231 +13,269 @@ namespace Garfield {
 class ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentBase();
-  // Destructor
+  /// Destructor
   virtual ~ComponentBase() {}
 
+  /// Define the geometry.
   virtual void SetGeometry(GeometryBase* geo);
+  /// Reset.
   virtual void Clear();
 
-  // Get the medium at a given location (x, y, z)
-  virtual Medium* GetMedium(const double x, const double y, 
-                            const double z);
+  /// Get the medium at a given location (x, y, z).
+  virtual Medium* GetMedium(const double x, const double y, const double z);
 
-  // Electric field
-  //
-  // Status flags:
-  //
-  //             0: Inside an active medium
-  //           > 0: Inside a wire of type X
-  //     -4 ... -1: On the side of a plane where no wires are
-  //            -5: Inside the mesh but not in an active medium
-  //            -6: Outside the mesh
-  //           -10: Unknown potential type (should not occur)
-  //         other: Other cases (should not occur)
-  //
-  // Calculate the drift field [V/cm] at (x, y, z)
+  /** Calculate the drift field at given point.
+    *
+    * \param x,y,z coordinates [cm].
+    * \param ex,ey,ez components of the electric field [V/cm].
+    * \param m pointer to the medium at this location.
+    * \param status status flag
+    *
+    * Status flags:
+    *
+    *             0: Inside an active medium
+    *           > 0: Inside a wire of type X
+    *     -4 ... -1: On the side of a plane where no wires are
+    *            -5: Inside the mesh but not in an active medium
+    *            -6: Outside the mesh
+    *           -10: Unknown potential type (should not occur)
+    *         other: Other cases (should not occur)
+    */
   virtual void ElectricField(const double x, const double y, const double z,
                              double& ex, double& ey, double& ez, Medium*& m,
                              int& status) = 0;
-  // Calculate the drift field [V/cm] and potential [V] at (x, y, z)
+  //// Calculate the drift field [V/cm] and potential [V] at (x, y, z).
   virtual void ElectricField(const double x, const double y, const double z,
                              double& ex, double& ey, double& ez, double& v,
                              Medium*& m, int& status) = 0;
-  // Calculate the voltage range [V]
+  /// Calculate the voltage range [V].
   virtual bool GetVoltageRange(double& vmin, double& vmax) = 0;
 
-  // Calculate the weighting field [1/cm] at (x,y,z)
-  // for an electrode (specified by its label)
+  /** Calculate the weighting field at a given point and for a given electrode.
+    * \param x,y,z coordinates [cm].
+    * \param wx,wy,wz components of the weighting field [1/cm].
+    * \param label name of the electrode
+    */
   virtual void WeightingField(const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
                               const std::string& label);
   virtual double WeightingPotential(const double x, const double y,
                                     const double z, const std::string& label);
 
-  // Magnetic field
-  // Calculate the magnetic field [Tesla] at (x, y, z)
+  /** Calculate the magnetic field at a given point.
+    *
+    * \param x,y,z coordinates [cm].
+    * \param bx,by,bz components of the magnetic field [Tesla].
+    * \param status status flag.
+    */
   virtual void MagneticField(const double x, const double y, const double z,
                              double& bx, double& by, double& bz, int& status);
-  // Set a constant magnetic field
+  /// Set a constant magnetic field.
   void SetMagneticField(const double bx, const double by, const double bz);
 
-  // Ready for use?
+  /// Ready for use?
   virtual bool IsReady() { return m_ready; }
 
-  // Get the bounding box coordinates
+  /// Get the bounding box coordinates.
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                               double& xmax, double& ymax, double& zmax);
 
+  /** Determine whether the line between two points crosses a wire.
+    * \param x0,y0,z0 first point [cm].
+    * \param x1,y1,z1 second point [cm]
+    * \param xc,yc,zc point [cm] where the line crosses the wire.
+    */
   virtual bool IsWireCrossed(const double x0, const double y0, const double z0,
                              const double x1, const double y1, const double z1,
                              double& xc, double& yc, double& zc);
-  virtual bool IsInTrapRadius(const double q0, const double x0, 
-                              const double y0, const double z0, 
-                              double& xw, double& yw, double& rw);
+  /** Determine whether a particle is inside the trap radius of a wire.
+    * \param q0 charge of the particle [in elementary charges].
+    * \param x0,y0,z0 position [cm] of the particle.
+    * \param xw,yw coordinates of the wire (if applicable).
+    * \param rw radius of the wire (if applicable).
+    */
+  virtual bool IsInTrapRadius(const double q0, const double x0, const double y0,
+                              const double z0, double& xw, double& yw,
+                              double& rw);
 
+  /// Enable simple periodicity in the \f$x\f$ direction.
+  void EnablePeriodicityX(const bool on = true) {
+    m_xPeriodic = on;
+    UpdatePeriodicity();
+  }
+  void DisablePeriodicityX() { EnablePeriodicityX(false); }
+  /// Enable simple periodicity in the \f$y\f$ direction.
+  void EnablePeriodicityY(const bool on = true) {
+    m_yPeriodic = on;
+    UpdatePeriodicity();
+  }
+  void DisablePeriodicityY() { EnablePeriodicityY(false); }
+  /// Enable simple periodicity in the \f$z\f$ direction.
+  void EnablePeriodicityZ(const bool on = true) {
+    m_zPeriodic = on;
+    UpdatePeriodicity();
+  }
+  void DisablePeriodicityZ() { EnablePeriodicityZ(false); }
 
-  // Enable and disable periodicities
-  void EnablePeriodicityX() {
-    m_xPeriodic = true;
+  /// Enable mirror periodicity in the \f$x\f$ direction.
+  void EnableMirrorPeriodicityX(const bool on = true) {
+    m_xMirrorPeriodic = on;
     UpdatePeriodicity();
   }
-  void DisablePeriodicityX() {
-    m_xPeriodic = false;
+  void DisableMirrorPeriodicityX() { EnableMirrorPeriodicityX(false); }
+  /// Enable mirror periodicity in the \f$y\f$ direction.
+  void EnableMirrorPeriodicityY(const bool on = true) {
+    m_yMirrorPeriodic = on;
     UpdatePeriodicity();
   }
-  void EnablePeriodicityY() {
-    m_yPeriodic = true;
+  void DisableMirrorPeriodicityY() { EnableMirrorPeriodicityY(false); }
+  /// Enable mirror periodicity in the \f$y\f$ direction.
+  void EnableMirrorPeriodicityZ(const bool on = true) {
+    m_zMirrorPeriodic = on;
     UpdatePeriodicity();
   }
-  void DisablePeriodicityY() {
-    m_yPeriodic = false;
-    UpdatePeriodicity();
-  }
-  void EnablePeriodicityZ() {
-    m_zPeriodic = true;
-    UpdatePeriodicity();
-  }
-  void DisablePeriodicityZ() {
-    m_zPeriodic = false;
-    UpdatePeriodicity();
-  }
+  void DisableMirrorPeriodicityZ() { EnableMirrorPeriodicityZ(false); }
 
-  void EnableMirrorPeriodicityX() {
-    m_xMirrorPeriodic = true;
+  /// Enable axial periodicity in the \f$x\f$ direction.
+  void EnableAxialPeriodicityX(const bool on = true) {
+    m_xAxiallyPeriodic = on;
     UpdatePeriodicity();
   }
-  void DisableMirrorPeriodicityX() {
-    m_xMirrorPeriodic = false;
+  void DisableAxialPeriodicityX() { EnableAxialPeriodicityX(false); }
+  /// Enable axial periodicity in the \f$y\f$ direction.
+  void EnableAxialPeriodicityY(const bool on = true) {
+    m_yAxiallyPeriodic = on;
     UpdatePeriodicity();
   }
-  void EnableMirrorPeriodicityY() {
-    m_yMirrorPeriodic = true;
+  void DisableAxialPeriodicityY() { EnableAxialPeriodicityY(false); }
+  /// Enable axial periodicity in the \f$z\f$ direction.
+  void EnableAxialPeriodicityZ(const bool on = true) {
+    m_zAxiallyPeriodic = on;
     UpdatePeriodicity();
   }
-  void DisableMirrorPeriodicityY() {
-    m_yMirrorPeriodic = false;
-    UpdatePeriodicity();
-  }
-  void EnableMirrorPeriodicityZ() {
-    m_zMirrorPeriodic = true;
-    UpdatePeriodicity();
-  }
-  void DisableMirrorPeriodicityZ() {
-    m_zMirrorPeriodic = false;
-    UpdatePeriodicity();
-  }
+  void DisableAxialPeriodicityZ() { EnableAxialPeriodicityZ(false); }
 
-  void EnableAxialPeriodicityX() {
-    m_xAxiallyPeriodic = true;
+  /// Enable rotation symmetry around the \f$x\f$ axis.
+  void EnableRotationSymmetryX(const bool on = true) {
+    m_xRotationSymmetry = on;
     UpdatePeriodicity();
   }
-  void DisableAxialPeriodicityX() {
-    m_xAxiallyPeriodic = false;
+  void DisableRotationSymmetryX() { EnableRotationSymmetryX(false); }
+  /// Enable rotation symmetry around the \f$y\f$ axis.
+  void EnableRotationSymmetryY(const bool on = true) {
+    m_yRotationSymmetry = on;
     UpdatePeriodicity();
   }
-  void EnableAxialPeriodicityY() {
-    m_yAxiallyPeriodic = true;
+  void DisableRotationSymmetryY() { EnableRotationSymmetryY(false); }
+  /// Enable rotation symmetry around the \f$z\f$ axis.
+  void EnableRotationSymmetryZ(const bool on = true) {
+    m_zRotationSymmetry = on;
     UpdatePeriodicity();
   }
-  void DisableAxialPeriodicityY() {
-    m_yAxiallyPeriodic = false;
-    UpdatePeriodicity();
-  }
-  void EnableAxialPeriodicityZ() {
-    m_zAxiallyPeriodic = true;
-    UpdatePeriodicity();
-  }
-  void DisableAxialPeriodicityZ() {
-    m_zAxiallyPeriodic = false;
-    UpdatePeriodicity();
-  }
+  void DisableRotationSymmetryZ() { EnableRotationSymmetryZ(false); }
 
-  void EnableRotationSymmetryX() {
-    m_xRotationSymmetry = true;
-    UpdatePeriodicity();
-  }
-  void DisableRotationSymmetryX() {
-    m_xRotationSymmetry = false;
-    UpdatePeriodicity();
-  }
-  void EnableRotationSymmetryY() {
-    m_yRotationSymmetry = true;
-    UpdatePeriodicity();
-  }
-  void DisableRotationSymmetryY() {
-    m_yRotationSymmetry = false;
-    UpdatePeriodicity();
-  }
-  void EnableRotationSymmetryZ() {
-    m_zRotationSymmetry = true;
-    UpdatePeriodicity();
-  }
-  void DisableRotationSymmetryZ() {
-    m_zRotationSymmetry = false;
-    UpdatePeriodicity();
-  }
-
-  // Switch on/off debugging messages
+  /// Switch on debugging messages.
   void EnableDebugging() { m_debug = true; }
+  /// Switch off debugging messages.
   void DisableDebugging() { m_debug = false; }
 
-  // Active trapping taken care of by component (for TCAD components)
-  void ActivateTraps(){m_activeTraps = true;}
-  void DeactivateTraps(){m_activeTraps = false;}
-  bool IsTrapActive(){return m_activeTraps;}
+  /// Request trapping to be taken care of by the component (for TCAD).
+  void ActivateTraps() { m_activeTraps = true; }
+  void DeactivateTraps() { m_activeTraps = false; }
+  bool IsTrapActive() { return m_activeTraps; }
 
-  // Activate velocity taken care of by component (for TCAD components) 
-  void ActivateVelocityMap(){m_hasVelocityMap = true;};
-  void DectivateVelocityMap(){m_hasVelocityMap = false;};
-  bool IsVelocityActive(){return m_hasVelocityMap;};
+  /// Request velocity to be taken care of by the component (for TCAD).
+  void ActivateVelocityMap() { m_hasVelocityMap = true; }
+  void DectivateVelocityMap() { m_hasVelocityMap = false; }
+  bool IsVelocityActive() { return m_hasVelocityMap; }
 
-  // Get Electron attachments and velocities. 
-  virtual bool ElectronAttachment(const double /* x */, const double /* y */, const double /* z */,
-                          double& eta){eta = 0; return false;};
-  virtual bool HoleAttachment(const double /* x */, const double /* y */, const double /* z */, 
-		          double& eta){eta = 0; return false;};
-  virtual void ElectronVelocity(const double /* x */, const double /* y */, const double /* z */,
-                             double& vx, double& vy, double& vz, Medium*& /* m */,
-                             int& status){vx=vy=vz=0; status = -100;};
-  virtual void HoleVelocity(const double /* x */, const double /* y */, const double /* z */,
-                             double& vx, double& vy, double& vz, Medium*& /* m */,
-                             int& status){vx=vy=vz=0; status = -100;};
-  virtual bool GetElectronLifetime(const double /* x */, const double /* y */, const double /* z */, double& etau){ etau = -1; return false;}
-  virtual bool GetHoleLifetime(const double /* x */, const double /* y */, const double /* z */, double& htau){htau = -1; return false;}
+  /// Get the electron attachment coefficient.
+  virtual bool ElectronAttachment(const double /*x*/, const double /*y*/,
+                                  const double /*z*/, double& eta) {
+    eta = 0;
+    return false;
+  }
+  /// Get the hole attachment coefficient.
+  virtual bool HoleAttachment(const double /*x*/, const double /*y*/,
+                              const double /*z*/, double& eta) {
+    eta = 0;
+    return false;
+  }
+  /// Get the electron drift velocity.
+  virtual void ElectronVelocity(const double /*x*/, const double /*y*/,
+                                const double /*z*/, double& vx, double& vy,
+                                double& vz, Medium*& /*m*/, int& status) {
+    vx = vy = vz = 0;
+    status = -100;
+  }
+  /// Get the hole drift velocity.
+  virtual void HoleVelocity(const double /*x*/, const double /*y*/,
+                            const double /*z*/, double& vx, double& vy,
+                            double& vz, Medium*& /*m*/, int& status) {
+    vx = vy = vz = 0;
+    status = -100;
+  }
+  virtual bool GetElectronLifetime(const double /*x*/, const double /*y*/,
+                                   const double /*z*/, double& etau) {
+    etau = -1;
+    return false;
+  }
+  virtual bool GetHoleLifetime(const double /*x*/, const double /*y*/,
+                               const double /*z*/, double& htau) {
+    htau = -1;
+    return false;
+  }
 
  protected:
+  /// Class name.
   std::string m_className;
 
+  /// Pointer to the geometry.
   GeometryBase* m_geometry;
 
-  // Ready for use?
+  /// Ready for use?
   bool m_ready;
 
-  // Does the component have traps?
+  /// Does the component have traps?
   bool m_activeTraps;
-  // Does the component have velocity maps? 
+  /// Does the component have velocity maps?
   bool m_hasVelocityMap;
 
-  // Simple periodicity in x, y, z
-  bool m_xPeriodic, m_yPeriodic, m_zPeriodic;
-  // Mirror periodicity in x, y, z
-  bool m_xMirrorPeriodic, m_yMirrorPeriodic, m_zMirrorPeriodic;
-  // Axial periodicity in x, y, z
-  bool m_xAxiallyPeriodic, m_yAxiallyPeriodic, m_zAxiallyPeriodic;
-  // Rotation symmetry around x-axis, y-axis, z-axis
-  bool m_xRotationSymmetry, m_yRotationSymmetry, m_zRotationSymmetry;
+  /// Simple periodicity in x.
+  bool m_xPeriodic;
+  /// Simple periodicity in y.
+  bool m_yPeriodic;
+  /// Simple periodicity in z.
+  bool  m_zPeriodic;
+  /// Mirror periodicity in x.
+  bool m_xMirrorPeriodic;
+  /// Mirror periodicity in y.
+  bool m_yMirrorPeriodic;
+  /// Mirror periodicity in z.
+  bool m_zMirrorPeriodic;
+  /// Axial periodicity in x.
+  bool m_xAxiallyPeriodic;
+  /// Axial periodicity in y.
+  bool m_yAxiallyPeriodic;
+  /// Axial periodicity in z.
+  bool m_zAxiallyPeriodic;
+  /// Rotation symmetry around x-axis.
+  bool m_xRotationSymmetry;
+  /// Rotation symmetry around y-axis.
+  bool m_yRotationSymmetry;
+  /// Rotation symmetry around z-axis.
+  bool m_zRotationSymmetry;
 
-  // Constant magnetic field
-  double m_bx0, m_by0, m_bz0;
+  double m_bx0, m_by0, m_bz0; //< Constant magnetic field.
 
-  // Switch on/off debugging messages
+  /// Switch on/off debugging messages
   bool m_debug;
 
-  // Geometry checks
+  /// Geometry checks
   virtual void Reset() = 0;
-  // Verify periodicities
+  /// Verify periodicities
   virtual void UpdatePeriodicity() = 0;
 };
 }
