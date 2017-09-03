@@ -35,7 +35,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   StMaker::lsMakers(Chain);
   //________________________________________________________________________________
   TString Opt(opt);
-  TString chain1Opt("in,daq,magF,tpcDb,MakeEvent,trgd,NoDefault,NoOutput");
+  TString chain1Opt("in,daq,magF,tpcDb,MakeEvent,trgd,NoDefault,NoOutput,DbV20170830");
   bfc(-1,chain1Opt,daqfile);
   chain1 = chain;
   chain1->SetName("DAQ"); 
@@ -98,6 +98,13 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   bfc(-1,chain4Opt,0,OutputFileName);
   chain4 = chain;
   chain4->SetName("RC"); 
+#if 0
+  StMaker *MuDstMk = chain4->Maker("MuDst");
+  if (MuDstMk) {
+    cout << "Deactivate " << MuDstMk->GetName() << endl;
+    MuDstMk->SetActive(kFALSE);
+  }
+#endif
   Chain->cd();
 #ifndef __TrackingOnly__
   // Twicks
