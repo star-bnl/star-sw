@@ -19,13 +19,14 @@
 
 static const char rcsid[] = "$Id: StMtdRawHit.cxx,v 2.1 2011/04/25 21:24:02 ullrich Exp $";
 
-ClassImp(StMtdRawHit)
-
+ClassImp(StMtdRawHit);
+Int_t StMtdRawHit::_count = 0;
 StMtdRawHit::StMtdRawHit() {
     mFlag = 0;
     mBackLeg = 0;
     mChannel = 0;
     mTdc = 0;
+    _count++;
 }
 
 StMtdRawHit::StMtdRawHit(char iflag, unsigned char backleg,
@@ -34,9 +35,12 @@ StMtdRawHit::StMtdRawHit(char iflag, unsigned char backleg,
     mBackLeg = backleg;
     mChannel = channel;
     mTdc = rawTdc;
+    _count++;
 }
 
-StMtdRawHit::~StMtdRawHit() { /* noop */ }
+StMtdRawHit::~StMtdRawHit() { 
+  _count--;
+}
 
 int StMtdRawHit::operator==(const StMtdRawHit& p) const {
     return (p.mFlag == mFlag &&

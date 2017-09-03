@@ -463,11 +463,11 @@ int StVpdSimMaker::fillEvent()
             aVpdRawHit.setFlag(1);
             mVpdCollection->addRawHit(new StBTofRawHit(aVpdRawHit));
         }
-
-        //! Fill StBTofHeader --
-        StBTofHeader aHead;
-        mVpdCollection->setHeader(new StBTofHeader(aHead));
-
+	if (! mVpdCollection->tofHeader()) {
+	  //! Fill StBTofHeader --
+	  StBTofHeader aHead;
+	  mVpdCollection->setHeader(new StBTofHeader(aHead));
+	}
         LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
 
     }

@@ -169,6 +169,7 @@ int StBTofSimMaker::Make()
 
 	//yf	ResetFlags();
 	Reset();
+	mMcEvent = (StMcEvent*)GetInputDS("StMcEvent");
 
 	mMcBTofHitCollection = new StMcBTofHitCollection();
 
@@ -486,7 +487,13 @@ int StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 
 		if(pass) {
 			StMcBTofHit *mcHit = new StMcBTofHit();
-			StMcTrack *partnerTrk = new StMcTrack(&(tof_track[trackSumVec[i].trkId]));
+			StMcTrack *partnerTrk = 0;
+			for (auto x : mMcEvent->tracks()) {
+			  if (x->key() ==  tof_track[trackSumVec[i].trkId].id) {
+			    partnerTrk = x; break;
+			  }
+			}
+			if (partnerTrk) {
 			int truthId=partnerTrk->key();
 			mcHit->setTray(trackSumVec[i].tray);
 			mcHit->setModule(trackSumVec[i].module);
@@ -512,6 +519,7 @@ int StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 				double mass=sqrt(beta*beta*momentum*momentum/(1.-beta*beta));
                 if(beta!=1.0 && pathLength>150){  mRecMass->Fill(mass);}
                 mTofResReco->Fill( (tof - trackSumVec[i].t0*1000.) );//ps
+			}
 			}
 		}
 	} //! end loop trackSumVec
@@ -539,7 +547,6 @@ int StBTofSimMaker::fillEvent()
 	}
 
 	/// send off to StMcEvent
-	mMcEvent = (StMcEvent*)GetInputDS("StMcEvent");
 	if (!mMcEvent) {
 		LOG_ERROR << "No StMcEvent! Bailing out ..." << endm;
 	}
@@ -797,7 +804,16 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
 	int partnerTrkId;
 	for(int j=0;j<no_tracks;j++){
 		if(tofHitsFromGeant->track_p==tof_track[j].id){
+#if 0
 			partnerTrk = new StMcTrack(&(tof_track[j]));
+#else
+			for (auto x : mMcEvent->tracks()) {
+			  if (x->key() ==  tof_track[j].id) {
+			    partnerTrk = x; break;
+			  }
+			}
+			if (! partnerTrk) continue;
+#endif
 			partnerTrkId=partnerTrk->key();
 		}
 	}

@@ -71,7 +71,8 @@ protected:
    UChar_t     mNRawHitsRPhi;           	///< Cluster size in r-phi direction
    UChar_t     mNRawHitsZ;              	///< Cluster size in beam direction
    std::vector<StIstRawHit *> mRawHitVec;	///< Map container to save raw hits who contribute to the cluster
-
+     public:
+   static Int_t _count;
    ClassDef(StIstCluster, 1);
 };
 

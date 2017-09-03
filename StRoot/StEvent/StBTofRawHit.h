@@ -61,7 +61,8 @@ protected:
     UChar_t  mTray;
     UChar_t  mChannel;
     UInt_t   mTdc;
-
+    public:
+    static Int_t    _count;
     ClassDef(StBTofRawHit,1)
 };
 

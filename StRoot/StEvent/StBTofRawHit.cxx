@@ -22,7 +22,7 @@
 #include "StBTofRawHit.h"
 
 static const char rcsid[] = "$Id: StBTofRawHit.cxx,v 2.2 2009/01/15 00:48:10 ullrich Exp $";
-
+Int_t StBTofRawHit::_count = 0;
 ClassImp(StBTofRawHit)
 
 StBTofRawHit::StBTofRawHit()
@@ -31,6 +31,7 @@ StBTofRawHit::StBTofRawHit()
     mTray = 0;
     mChannel = 0;
     mTdc = 0;
+    _count++;
  }
 
 StBTofRawHit::StBTofRawHit(char iflag, unsigned char tray,
@@ -40,9 +41,12 @@ StBTofRawHit::StBTofRawHit(char iflag, unsigned char tray,
     mTray = tray;
     mChannel = channel;
     mTdc = rawTdc;
+    _count++;
 }
 
-StBTofRawHit::~StBTofRawHit() { /* noop */ }
+StBTofRawHit::~StBTofRawHit() {     
+  _count--;
+}
     
 int StBTofRawHit::operator==(const StBTofRawHit& p) const
 {

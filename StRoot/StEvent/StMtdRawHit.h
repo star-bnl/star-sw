@@ -53,7 +53,8 @@ protected:
     UChar_t  mBackLeg;
     UChar_t  mChannel;
     UInt_t   mTdc;
-    
+ public:
+    static Int_t _count;
     ClassDef(StMtdRawHit,1)
 };
 

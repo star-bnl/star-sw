@@ -10,7 +10,7 @@
 #include "StIstConsts.h"
 #include "StIstCluster.h"
 #include "StRoot/St_base/StMessMgr.h"
-
+Int_t StIstCluster::_count = 0;
 
 StIstCluster::StIstCluster(int key, int ladder, int sensor,
                            float meanRow, float meanColumn, float totCharge, float totChargeErr,
@@ -27,11 +27,13 @@ StIstCluster::StIstCluster(int key, int ladder, int sensor,
    mMaxTimeBin(3), mNRawHits(1), mNRawHitsRPhi(1),
    mNRawHitsZ(1), mRawHitVec()
 {
+  _count++;
 }
 
 StIstCluster::~StIstCluster()
 {
   while (!mRawHitVec.empty()) {delete mRawHitVec.back(); mRawHitVec.pop_back();}
+  _count--;
 }
 
 //accessors

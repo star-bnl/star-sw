@@ -19,7 +19,7 @@ class StIstRawHit : public StObject
 public:
    //constructors
    StIstRawHit();
-
+   virtual ~StIstRawHit();
    template<typename Container>
    StIstRawHit(int channelId, int geoId,
       const Container &charges, const Container &chargeErrs = Container{},
@@ -73,7 +73,8 @@ private:
    UShort_t    mIdTruth;                   ///< for embedding, 0 as background
 
    static UChar_t mDefaultTimeBin;
-
+ public:
+   static Int_t _count;
    ClassDef(StIstRawHit, 1)
 };
 

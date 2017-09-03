@@ -4,7 +4,7 @@
 
 #include "StIstRawHit.h"
 #include "StRoot/St_base/StMessMgr.h"
-
+Int_t StIstRawHit::_count = 0;
 using namespace StIstConsts;
 
 
@@ -21,6 +21,7 @@ StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), 
    mIdTruth(0)
 {
    std::fill_n(mCharge, kIstNumTimeBins, -999);
+   _count++;
 }
 
 
@@ -32,10 +33,14 @@ StIstRawHit::StIstRawHit(int channelId, int geoId,
    mChannelId(channelId), mGeoId(geoId), mCharge(), mChargeErr(),
    mMaxTimeBin(maxTimeBin), mIdTruth(idTruth)
 {
+   _count++;
    std::copy(std::begin(charges), std::end(charges), mCharge);
    std::copy(std::begin(chargeErrs), std::end(chargeErrs), mChargeErr);
 }
 
+StIstRawHit::~StIstRawHit() {
+  _count--;
+}
 
 int StIstRawHit::getChannelId() const              { return mChannelId;     };
 int StIstRawHit::getGeoId() const                  { return mGeoId;      };
