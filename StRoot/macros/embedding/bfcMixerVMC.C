@@ -6,6 +6,7 @@
 // root.exe -q -b -x 'bfcMixerVMC.C(10)'
 //#define __NO_DAQ_CLUSTERS__
 //#define __TrackingOnly__
+#define __IST_SLOW_SIM__ 
 class StBFChain;
 StBFChain *Chain = 0, *chain1, *chain2, *chain3, *chain4;
 //_____________________________________________________________________
@@ -42,7 +43,11 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   Chain->cd();
   //________________________________________________________________________________
   TString chain2Opt(Form("%s,gen_T,geomT,sim_T,CorrX,OSpaceZ2,OGridLeak3D,nodefault,Rung.%i",Opt.Data(),RunG));
+#ifdef  __IST_SLOW_SIM__
   chain2Opt += ",TpcRS,pxlFastSim,istSlowSim,sstfast,bbcSim,btofsim,emcSim"; 
+#else
+  chain2Opt += ",TpcRS,pxlFastSim,istFastSim,sstfast,bbcSim,btofsim,emcSim"; 
+#endif
 #ifndef __NO_DAQ_CLUSTERS__
   chain2Opt += ",TpxRaw,NoAnnotateCL";
   chain2Opt += ",pxlHit,istHit,sstHit";
@@ -64,11 +69,13 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
 #if 1
   StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
   if (tofSim) tofSim->setEmbeddingMode(kTRUE);
+#ifdef __IST_SLOW_SIM__
   StIstRawHitMaker *ist_raw_hit = (StIstRawHitMaker *) chain2->Maker("ist_raw_hit");
   if (ist_raw_hit) {// Bingchu Huang, 08/18/2017
     ist_raw_hit->SetAttr("DoEmbedding",1);
     ist_raw_hit->setDataType(1);  //non zero-suppressed data
   }
+#endif /*  __IST_SLOW_SIM__ */
 #endif
   Chain->cd();
   TString chain3Opt("noInput,-in,NoInput");
