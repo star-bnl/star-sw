@@ -159,10 +159,8 @@ class AvalancheMC {
   Sensor* m_sensor;
 
   struct DriftPoint {
-    /// Position
-    double x, y, z, t;
-    /// Number of secondaries produced at this point
-    int ne, nh, ni;
+    double x, y, z, t; //< Position.
+    int ne, nh, ni;    //< Number of secondaries produced at this point.
   };
   /// Current drift line
   std::vector<DriftPoint> m_drift;
@@ -189,9 +187,9 @@ class AvalancheMC {
   unsigned int m_nIons;
 
   struct EndPoint {
-    double x0, y0, z0, t0;
-    double x1, y1, z1, t1;
-    int status;
+    double x0, y0, z0, t0; //< Starting point.
+    double x1, y1, z1, t1; //< End point.
+    int status;            //< Status flag at the end point.
   };
   /// Endpoints of all electrons in the avalanche (including captured ones)
   std::vector<EndPoint> m_endpointsElectrons;

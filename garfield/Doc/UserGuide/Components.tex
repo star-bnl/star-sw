@@ -382,6 +382,21 @@ The class \texttt{ComponentCST} (contributed by K.~Zenker) reads field maps
 extracted from CST Studio. More details can be found at 
 \href{http://www.desy.de/~zenker/FLC/garfieldpp.html}{http://www.desy.de/~zenker/FLC/garfieldpp.html}.
 
+\subsection{COMSOL}
+
+The class \texttt{ComponentComsol} (contributed by E.~Bodnia) can be used for 
+importing field maps computed using COMSOL.
+The function to import a field map is 
+\begin{lstlisting}
+bool Initialise(std::string header = "mesh.mphtxt",
+                std::string mplist = "dielectrics.dat",
+                std::string field = "field.txt");
+\end{lstlisting}
+\begin{description}
+  \item[header] COMSOL Multiphysics text field (\texttt{.mphtxt}) containing the mesh data.
+  \item[] exported field data. 
+\end{description}
+
 \subsection{Regular grids}
 
 Electric field values on a regular two-dimensional or three-dimensional grid 
@@ -402,10 +417,10 @@ void SetMesh(const unsigned int nx, const unsigned int ny,
 The electric field values (and potential) for each grid cell are read in 
 using
 \begin{lstlisting}
-bool LoadData(const std::string filename, std::string format,
-              const bool withPotential, const bool withRegion,
-              const double scaleX = 1., const double scaleE = 1.,
-              const double scaleP = 1.);
+bool LoadElectricField(const std::string& filename, const std::string& format,
+                       const bool withPotential, const bool withRegion,
+                       const double scaleX = 1., const double scaleE = 1.,
+                       const double scaleP = 1.);
 \end{lstlisting}
 \begin{description}
   \item[filename]
@@ -417,7 +432,7 @@ bool LoadData(const std::string filename, std::string format,
   \item[withRegion]
   flag whether the file contains an additional column with an integer value 
   corresponding to the region index (each region can be associated with a different medium)
-  \item[scaleX, scalE, scaleP]
+  \item[scaleX, scaleE, scaleP]
   scaling factors to be applied to the coordinates, electric field values 
   and potentials 
 \end{description}
@@ -431,6 +446,14 @@ this point. The class then looks up the grid cell corresponding to this
 point and assigns the electric field and potential accordingly.
 In case of \texttt{IJ} (\texttt{IJK}) the indices of the grid cell 
 along $x$, $y$ (and $z$) are specified directly.
+
+A magnetic field map can be imported using the function
+\begin{lstlisting}
+bool LoadMagneticField(const std::string& filename, const std::string& format,
+                       const double scaleX = 1., const double scaleB = 1.);
+\end{lstlisting}
+The available formats are the same as for the electric field (except for the 
+extra columns for potential and region index).
 
 \subsection{Visualizing the Mesh}
 

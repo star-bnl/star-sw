@@ -15,9 +15,9 @@ namespace Garfield {
 class ComponentAnalyticField : public ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentAnalyticField();
-  // Destructor
+  /// Destructor
   ~ComponentAnalyticField() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
@@ -84,18 +84,18 @@ class ComponentAnalyticField : public ComponentBase {
   bool IsInTrapRadius(const double q0, const double x0, const double y0,
                       const double z0, double& xw, double& yx, double& rw);
 
-  // Add a wire at (x, y) .
+  /// Add a wire at (x, y) .
   void AddWire(const double x, const double y, const double diameter,
                const double voltage, const std::string& label,
                const double length = 100., const double tension = 50.,
                const double rho = 19.3, const int ntrap = 5);
-  // Add a tube.
+  /// Add a tube.
   void AddTube(const double radius, const double voltage, const int nEdges,
                const std::string& label);
-  // Add a plane at constant x
+  /// Add a plane at constant x.
   void AddPlaneX(const double x, const double voltage,
                  const std::string& label);
-  // Add a plane at constant y
+  /// Add a plane at constant y.
   void AddPlaneY(const double y, const double voltage,
                  const std::string& label);
 
@@ -123,29 +123,31 @@ class ComponentAnalyticField : public ComponentBase {
   void ClearCharges();
   void PrintCharges() const;
 
+  /** Return the cell type.
+    * Cells are classified according to the number
+    * and orientation of planes, the presence of
+    * periodicities and the location of the wires
+    * as one of the following types:
+    * 
+    * A    non-periodic cells with at most 1 x- and 1 y-plane
+    * B1X  x-periodic cells without x-planes and at most 1 y-plane
+    * B1Y  y-periodic cells without y-planes and at most 1 x-plane
+    * B2X  cells with 2 x-planes and at most 1 y-plane
+    * B2Y  cells with 2 y-planes and at most 1 x-plane
+    * C1   doubly periodic cells without planes
+    * C2X  doubly periodic cells with x-planes
+    * C2Y  doubly periodic cells with y-planes
+    * C3   double periodic cells with x- and y-planes
+    * D1   round tubes without axial periodicity
+    * D2   round tubes with axial periodicity
+    * D3   polygonal tubes without axial periodicity
+    */
   std::string GetCellType() {
     if (!m_cellset) {
       if (CellCheck()) CellType();
     }
     return m_scellType;
   }
-  // Cells are classified according to the number
-  // and orientation of planes, the presence of
-  // periodicities and the location of the wires
-  // as one of the following types:
-  //
-  // A    non-periodic cells with at most 1 x- and 1 y-plane
-  // B1X  x-periodic cells without x-planes and at most 1 y-plane
-  // B1Y  y-periodic cells without y-planes and at most 1 x-plane
-  // B2X  cells with 2 x-planes and at most 1 y-plane
-  // B2Y  cells with 2 y-planes and at most 1 x-plane
-  // C1   doubly periodic cells without planes
-  // C2X  doubly periodic cells with x-planes
-  // C2Y  doubly periodic cells with y-planes
-  // C3   double periodic cells with x- and y-planes
-  // D1   round tubes without axial periodicity
-  // D2   round tubes with axial periodicity
-  // D3   polygonal tubes without axial periodicity
 
   void AddReadout(const std::string& label);
 
@@ -214,30 +216,20 @@ class ComponentAnalyticField : public ComponentBase {
   int mxmin, mxmax, mymin, mymax;
   int mfexp;
 
-  // int nReadout;
   std::vector<std::string> m_readout;
 
   // Wires
   unsigned int m_nWires;
   struct wire {
-    // Location
-    double x;
-    double y;
-    // Diameter
-    double d;
-    // Potential
-    double v;
-    // Charge
-    double e;
-    // Label
-    std::string type;
-    // Length
-    double u;
-    // Readout group
-    int ind;
-    // Trap Radius - tracked particle "trapped" if within
-    // nTrap*radius of wire.
-    int nTrap;
+    double x, y;       //< Location.
+    double d;          //< Diameter.
+    double v;          //< Potential.
+    double e;          //< Charge.
+    std::string type;  //< Label.
+    double u;          //< Length.
+    int ind;           //< Readout group.
+    /// Trap radius. Particle is "trapped" if within nTrap * radius of wire.
+    int nTrap;         
   };
   std::vector<wire> m_w;
 
@@ -284,40 +276,27 @@ class ComponentAnalyticField : public ComponentBase {
   double m_vtplan[4];
 
   struct strip {
-    // Label
-    std::string type;
-    // Readout group
-    int ind;
-    // Coordinates
-    double smin, smax;
-    double gap;
+    std::string type;  //< Label.
+    int ind;           //< Readout group.
+    double smin, smax; //< Coordinates.
+    double gap;        //< Distance to the opposite electrode.
   };
 
   struct pixel {
-    // Label
-    std::string type;
-    // Readout group
-    int ind;
-    // Coordinates
-    double smin, smax;
-    double zmin, zmax;
-    double gap;
+    std::string type;  //< Label.
+    int ind;           //< Readout group.
+    double smin, smax; //< Coordinates in x/y.
+    double zmin, zmax; //< Coordinates in z.
+    double gap;        //< Distance to the opposite electrode.
   };
 
   struct plane {
-    // Labels
-    std::string type;
-    // Readout group
-    int ind;
-    // Background weighting fields
-    double ewxcor;
-    double ewycor;
-    // x/y strips
-    std::vector<strip> strips1;
-    // z strips
-    std::vector<strip> strips2;
-    // Pixels
-    std::vector<pixel> pixels;
+    std::string type;           //< Label.
+    int ind;                    //< Readout group.
+    double ewxcor, ewycor;      //< Background weighting fields
+    std::vector<strip> strips1; //< x/y strips.
+    std::vector<strip> strips2; //< z strips.
+    std::vector<pixel> pixels;  //< Pixels.
   };
 
   std::vector<plane> planes;
@@ -338,8 +317,8 @@ class ComponentAnalyticField : public ComponentBase {
 
   // Point charges
   struct charge3d {
-    double x, y, z;
-    double e;
+    double x, y, z; //< Coordinates.
+    double e;       //< Charge.
   };
   std::vector<charge3d> m_ch3d;
   unsigned int m_nTermBessel;
