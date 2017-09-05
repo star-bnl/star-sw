@@ -1,8 +1,11 @@
 // \class StFmsDiPi0
 // \author Akio Ogawa
 //
-//  $Id: StFmsDiPi0.cxx,v 1.4 2016/11/17 18:57:23 akio Exp $
+//  $Id: StFmsDiPi0.cxx,v 1.5 2017/09/05 17:42:19 akio Exp $
 //  $Log: StFmsDiPi0.cxx,v $
+//  Revision 1.5  2017/09/05 17:42:19  akio
+//  update
+//
 //  Revision 1.4  2016/11/17 18:57:23  akio
 //  Many updates
 //
@@ -51,7 +54,7 @@
 static const double PI=TMath::Pi();
 static const double twoPI=PI*2.0;
 
-const float mPtBin[7]={0.5,1.0,1.5,2.0,2.5,3.0,20.0};
+const float mPtBin[7]={0.5,1.0,1.5,2.0,2.5,3.0,4.0};
 const float energyCut=1.0;
 const float ptCut=0.1;
 const float ZggCut=0.7;
@@ -133,6 +136,13 @@ Int_t StFmsDiPi0::Init(){
 	mBBCMTOF=new TH2F("BBCMult_TOF","BBCMult_TOF",17,0.0,17.0,50,0.0,300.0);
 	mBBCBBCM=new TH2F("BBC_BBCMult","BBC_BBCMult",50,0.0,70000.0,17,0.0,17.0);
 	mTOFTOF=new TH2F("TOF_TOF","TOF_TOF",50,0.0,300.0,50,0.0,300.0);
+
+	mMass0=new TH2F("Mass0","Mass0",50,0.0,  0.4,16,0.0,16.0);
+	mMass1=new TH2F("Mass1","Mass1",50,0.0,  0.4,16,0.0,16.0);
+	mMass2=new TH2F("Mass2","Mass2",50,0.0,  0.4,16,0.0,16.0);
+	mEne =new TH2F("Ene", "Ene",    50,0.0,100.0,16,0.0,16.0);
+	mPt  =new TH2F("pT",  "pT",     50,0.0, 10.0,16,0.0,16.0);
+
 	for(int i=0; i<kNPtBin; i++){
 	    for(int j=0; j<=i; j++){
 		for(int k=0; k<=kNCut; k++){
@@ -222,10 +232,11 @@ Int_t StFmsDiPi0::Finish(){
 }
 
 Int_t StFmsDiPi0::ptbin(float pt){
+    if(pt < mPtBin[0]) return -1;
     for(int i=0; i<kNPtBin; i++){
 	if(pt >= mPtBin[i] && pt < mPtBin[i+1]) return i;
     }
-    return -1;
+    return kNPtBin;    
 }
 
 Int_t StFmsDiPi0::Make(){
@@ -415,11 +426,31 @@ Int_t StFmsDiPi0::Make(){
 	    for(unsigned int i=0; i<pair.size(); i++){ //loop over 1st pair
 		int ptbin0=ptbin(pair[i]->pT());
 		if(ptbin0<0) continue; //below lowest pt bin
+
 		int id0=pair[i]->point(0)->id();
 		int id1=pair[i]->point(1)->id();
 		float m0=pair[i]->mass();
 		float z0=pair[i]->zgg();
 		float p0=wrapAround(pair[i]->phi());
+		int topbot=1; //bottom
+		if(p0>=0.0 && p0<PI) topbot=0;//top
+
+		//QA to look for mass/pt/energy for each octet
+		float pp=p0;
+		while(pp<0.0) pp+=twoPI;
+		while(pp>=twoPI) pp-=twoPI;
+		int ii=int(8.0*pp/twoPI);
+		int dd=pair[i]->point(0)->detectorId();
+		if(dd==kFmsNorthSmallDetId || dd==kFmsSouthSmallDetId) ii+=8;
+		mMass0->Fill(m0,float(ii));
+		if(pair[i]->pT()>1.5) mMass1->Fill(m0,float(ii));
+		if(pair[i]->energy()>30.0) mMass2->Fill(m0,float(ii));
+		if(m0>=MassCut0 && m0<MassCut1){
+		    mEne->Fill(pair[i]->energy(),float(ii));
+		    mPt->Fill(pair[i]->pT(),float(ii));
+		}
+
+		if(ptbin0>=kNPtBin) continue; //above highest pt bin
 		int cut1[kNCut];
 		memset(cut1,0,sizeof(cut1));
 
@@ -460,7 +491,9 @@ Int_t StFmsDiPi0::Make(){
 		if(ag==0 && bsSTrg==1    && exclusive1) cut1[12]=1;
 		if(ag==0 && bsLTrg==1    && exclusive1) cut1[13]=1;
 		if(ag==0 && bsTrg==1     && exclusive1 && firstpair==0) cut1[14]=1;
-		
+		if(ag==0 && bsTrg==1     && exclusive1 && topbot==0) cut1[18]=1;
+		if(ag==0 && bsTrg==1     && exclusive1 && topbot==1) cut1[19]=1;
+
 		for(unsigned int k=0; k<kNCut; k++){
 		    if(cut1[k]==1){
 			mM0[ptbin0][k]->Fill(m0); //this is for normalization
@@ -532,6 +565,8 @@ Int_t StFmsDiPi0::Make(){
 		    if(ag==0 && bsSTrg==1    && exc1) cut2[12]=1;
 		    if(ag==0 && bsLTrg==1    && exc1) cut2[13]=1;
 		    if(ag==0 && bsTrg==1     && exc1 && firstpair==0) {firstpair=1;cut2[14]=1;}
+		    if(ag==0 && bsTrg==1     && exc1 && topbot==0) cut2[18]=1;
+		    if(ag==0 && bsTrg==1     && exc1 && topbot==1) cut2[19]=1;
 		    
 		    //filling histos
 		    for(unsigned int k=0; k<kNCut; k++){
