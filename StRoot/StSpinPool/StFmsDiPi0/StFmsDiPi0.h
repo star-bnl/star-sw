@@ -3,8 +3,11 @@
 //
 //   This is FMS di-pi0 analysis
 // 
-//  $Id: StFmsDiPi0.h,v 1.4 2016/11/17 18:57:23 akio Exp $
+//  $Id: StFmsDiPi0.h,v 1.5 2017/09/05 17:42:19 akio Exp $
 //  $Log: StFmsDiPi0.h,v $
+//  Revision 1.5  2017/09/05 17:42:19  akio
+//  update
+//
 //  Revision 1.4  2016/11/17 18:57:23  akio
 //  Many updates
 //
@@ -62,7 +65,7 @@ private:
     int mPythia=0;
     void readPythia();
     
-    enum {kNPtBin=6,kNCut=18};
+    enum {kNPtBin=6,kNCut=20};
     Int_t ptbin(float pt);
 
     Int_t mBBCCut1=0;
@@ -81,6 +84,12 @@ private:
     TH2F* mBBCMTOF=0;
     TH2F* mBBCBBCM=0;
     TH2F* mTOFTOF=0;
+    
+    TH2F* mMass0=0;
+    TH2F* mMass1=0;
+    TH2F* mMass2=0;
+    TH2F* mEne=0;
+    TH2F* mPt=0;
 
     TH1F* mM0[kNPtBin][kNCut+1];
     TH1F* mPhi0[kNPtBin][kNCut+1];
@@ -111,7 +120,7 @@ private:
     TTree* mChain=0;
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.4 2016/11/17 18:57:23 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.5 2017/09/05 17:42:19 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsDiPi0,0);
 };
