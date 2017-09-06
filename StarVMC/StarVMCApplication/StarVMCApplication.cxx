@@ -476,7 +476,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   Double_t rSstSensor[9] = {-1, 0, 0, 0, -1, 0, 0, 0, 1}; 
   SstSensorR.SetRotation(rSstSensor);
   TGeoHMatrix Tpc2Global, HftOnTpc, PxlOnHft, SectorOnPxl, LadderOnSector, LadderOnPxl, SensorOnLadder, SensorOnGlobal;
-  TGeoHMatrix temp, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
+  TGeoHMatrix temp, oscOnTpc, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
     Int_t NoPerfMatch = 0;
@@ -645,6 +645,7 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 	rotA = rotL; 
 	break;
       case kSst:
+	// Yi Guo: tpc2global * oscOnTpc *sstOnOsc * sstLadderOnSst * sstSensorOnLadder
 	// Xin: tpc2global * sstOnOsc * sstLadderOnSst * sstSensorOnLadder
 	//                   ????????
 	// WG = Tpc2Global * SG       * LS             * WLL
@@ -658,7 +659,9 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 	// HALL * CAVE * TpcRefSys * IDSM                       * SFMO *           SFLM          * SFSW  * SFSL * SFSD
 	//              tpc2global * idsOnTpc * idsOnTpc^-1 * sstOnOsc * sstLadderOnSst * H      * H^1                * sstSensorOnLadder
 	A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	rotA = A * StsstOnOsc::instance()->GetMatrix(0);
+	oscOnTpc = StoscOnTpc::instance()->GetMatrix(0);
+	sstOnOsc = StsstOnOsc::instance()->GetMatrix(0);
+	rotA = A * oscOnTpc * sstOnOsc;
 	break;
       case kSstLadder:
 	ladder = indx[0];

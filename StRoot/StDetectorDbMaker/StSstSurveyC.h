@@ -3,6 +3,16 @@
 
 #include "St_SurveyC.h"
 
+class StoscOnTpc : public St_SurveyC {
+ public:
+  static StoscOnTpc* 	      instance();
+  StoscOnTpc(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StoscOnTpc() {fgInstance = 0;}
+ private:
+  static StoscOnTpc* fgInstance;
+  ClassDef(StoscOnTpc,1) //C++ TChair for oscOnTpc
+};
+
 class StsstOnOsc : public St_SurveyC {
  public:
   static StsstOnOsc* 	      instance();

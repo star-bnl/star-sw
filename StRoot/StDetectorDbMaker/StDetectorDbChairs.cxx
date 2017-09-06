@@ -1023,6 +1023,7 @@ MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
 #include "StSstSurveyC.h"
+MakeChairInstance2(Survey,StoscOnTpc,Geometry/sst/oscOnTpc);
 MakeChairInstance2(Survey,StsstOnOsc,Geometry/sst/sstOnOsc);
 MakeChairInstance2(Survey,StsstLadderOnSst,Geometry/sst/sstLadderOnSst);
 MakeChairInstance2(Survey,StsstSensorOnLadder,Geometry/sst/sstSensorOnLadder);
