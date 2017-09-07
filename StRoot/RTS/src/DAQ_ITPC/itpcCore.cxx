@@ -7,6 +7,8 @@
 
 #include <rtsLog.h>
 
+#define IFEE_NO_LANE_HDRS	1
+
 #include "itpc_maps.h"
 #include "itpc_rowlen.h"
 #include "itpc_padplane.h"
@@ -196,6 +198,10 @@ void itpc_data_c::data_accum(int fee, int ch, int tb, int adc)
 
 	if(!ped_p || !ped_run) return ;
 	
+	ped_p->g_mean[fee][ch] += adc ;
+	ped_p->g_rms[fee][ch] += adc*adc ;
+	ped_p->g_cou[fee][ch]++ ;
+
 	ped_p->mean[fee][ch][tb] += adc ;
 	ped_p->rms[fee][ch][tb] += adc*adc ;
 	ped_p->cou[fee][ch][tb]++ ;
@@ -234,6 +240,16 @@ void itpc_data_c::ped_stop()
 				ped_p->rms[f][c][t] = rms ;
 			}
 			ped_p->cou[f][c][0] = any_cou ; //marker for this channel!
+
+			int cou = ped_p->g_cou[f][c] ;
+			if(cou==0) continue ;
+
+			double mean = ped_p->g_mean[f][c]/cou ;
+			double rms = ped_p->g_rms[f][c]/cou ;
+
+			rms = sqrt(rms-mean*mean) ;
+
+			printf("FEE %2d, Ch %2d: %f +- %f\n",f,c,mean,rms) ;
 		}
 	}
 
@@ -346,20 +362,24 @@ void itpc_data_c::rdo_zap(void *rdo_p)
 int itpc_data_c::fee_scan(u_short *d16, int shorts)
 {
 
+//	for(int i=0;i<10;i++) {
+//		LOG(TERR,"%d = 0x%04X",i,d16[i]) ;
+//	}
 
 	if(next_word==0) {	//start of scan!
+		fee_err = 0 ;
+
 		//event header check
-		if(d16[0] != 0xFD04) fee_err |= 1 ;	//start of FEE marker
-//		if(d16[1]!=0xFF8C || d16[1]!=0xFF16) fee_err |= 1 ;
-		if(d16[2] != 0xFFFF) fee_err |= 1 ;
-		if(d16[3] != 0xFD05) fee_err |= 1 ;	//end of FEE marker
+//		if(d16[0] != 0xFD04) fee_err |= 1 ;	//start of FEE marker
+//		if(d16[1] != 0xFF8C || d16[1]!=0xFF16) fee_err |= 1 ;
+//		if(d16[2] != 0xFFFF) fee_err |= 1 ;
+//		if(d16[3] != 0xFD05) fee_err |= 1 ;	//end of FEE marker
 
 
 //		for(int i=0;i<4;i++) LOG(TERR,"HDR %d: 0x%04X",i,d16[i]) ;
 
 		sector = 1 ;	//we assume we get it in the data...
 
-		fee_err = 0 ;
 
 		sampa_type = -1 ;
 
@@ -371,11 +391,13 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 
 		sampa_bx = -1 ;
 
-		fee_id = -1 ;
+//		fee_id = -1 ;
+		fee_id = d16[0] ;
 
 		memset(hdr_cou,0,sizeof(hdr_cou)) ;
 
-		next_word = 4 ;
+//		next_word = 4 ;
+		next_word = 1 ;
 	}
 
 	sampa_ch++ ;
@@ -396,7 +418,7 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		int h = (d16[i] >> 10) & 0x7 ;
 		int d = d16[i] & 0x3FF ;
 		
-		//LOG(TERR,"Lane %d, hdr %d, d 0x%03X - 0x%04X",l,h,d,d16[i]) ;
+		//LOG(TERR,"Lane %d, hdr %d, d 0x%03X - 0x%04X [%d]",l,h,d,d16[i],i) ;
 
 		hdr_cou[h]++ ;	//MUST come last to avoid the spurious, last 0xFFFF datum
 		
@@ -425,16 +447,27 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 
 			//LOG(TERR,"Id %d, expect %d; ch %d, expect %d",id,sampa_id,ch,sampa_ch) ;
 
+#ifdef IFEE_NO_LANE_HDRS
+//			if(sampa_id >= 0) {
+//				if(id != sampa_id) fee_err |= 0x4 ;
+//			}
+
+//			fee_id = id & 0xFE ;
+#else
 			if(id != sampa_id) fee_err |= 0x4 ;
+#endif
 
 			if(type == 0) {
 				if(ch != 21) fee_err |= 0x8 ;
 			}
 			else {
+#ifdef IFEE_NO_LANE_HDRS
+#else
 				if(ch != sampa_ch) {
 					LOG(ERR,"SAMPA ch %d, expect %d",ch,sampa_ch) ;
 					fee_err |= 0x8 ;
 				}
+#endif
 			}
 
 			sampa_id = id ;
@@ -470,67 +503,30 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 
 			
 			start(d16+i+1) ;
+
 			i += words ;
 			next_word = i + 1 ;
 			if(fee_err) LOG(ERR,"0x%X",fee_err) ;
-			//LOG(INFO,"Done: FEE %d, SAMPA %d, ch %d",fee_id,sampa_id,sampa_ch) ;
+			LOG(INFO,"Done: FEE %d, SAMPA %d, ch %d, words %d",fee_id,sampa_id,sampa_ch,words) ;
+
 			//LOG(TERR,"Next word: %d/%d, words %d",next_word,shorts,words) ;
 			words = 0 ;
 			return 1 ;
 
 			break ;
+		default :
 		case 5 :	//data
-			LOG(ERR,"Can't have data!") ;
+			LOG(ERR,"Can't have data 0x%04X!",d16[i]) ;
 			break ;
-		case 7 :	//lane header 1st word
-			//LOG(TERR,"lane %d, lane_expect %d",l,lane_expect) ;
 
-			if(d16[i]==0xFD03) {
-				if(i==(shorts-1) || i==(shorts-2)) {
-					hdr_cou[7]-- ;
-					goto stop ;
-				}
-			}
-//			if(d16[i]==0xFFFF && (i==(shorts-1))) {
-//				hdr_cou[7]-- ;	// negate the count
-//				goto stop;
-//			}
-
-			lane_expect = l+1 ;	//next lane
-
-			fee = d & 0x3F ;
-
-			if(fee_id < 0) fee_id = fee ;
-			else if(fee != fee_id) fee_err |= 0x100 ;
-
-			switch(l) {
-			case 0 :	
-				sampa_ch = 0 ;
-				sampa_id = (fee << 1)|0 ;
-				break ;
-			case 1 :
-				sampa_ch = 16 ;
-				sampa_id = (fee << 1)|0 ;
-				break ;
-			case 2 :
-				sampa_ch = 0 ;
-				sampa_id = (fee << 1)|1 ;
-				break ;
-			case 3 :
-				sampa_ch = 16 ;
-				sampa_id = (fee << 1)|1 ;
-				break ;
-			}
-
-			sampa_id &= 0xF ;
-
+		case 7 :	// end of lane data
+			LOG(TERR,"Lane %d: end of lane data 0x%X",l,d) ;
 			break ;
-		case 6 :	//lane header 2nd & 3rd word
+		case 6 :
+
+			LOG(TERR,"Lane %d: start of lane data 0x%X",l,d) ;
 			break ;
 		}
-
-
-
 	}
 
 	stop:; 
@@ -541,16 +537,20 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 
 		//there is a bug in this version of the FEE firmware which 
 		//eats header 0 for all cases apart from the start of lane
-		//if(hdr_cou[0] != 64) fee_err |= 0x1000 ;
-		if(hdr_cou[0] != 4) fee_err |= 0x1000 ;
+		if(hdr_cou[0] != 64) fee_err |= 0x1000 ;
+//		if(hdr_cou[0] != 4) fee_err |= 0x1000 ;
 
 		if(hdr_cou[1] != 64) fee_err |= 0x1000 ;
 		if(hdr_cou[2] != 64) fee_err |= 0x1000 ;
 		if(hdr_cou[3] != 64) fee_err |= 0x1000 ;
 		if(hdr_cou[4] != 64) fee_err |= 0x1000 ;
 		if(hdr_cou[5] != 0) fee_err |= 0x2000 ;
+
+#ifdef IFEE_NO_LANE_HDRS
+#else
 		if(hdr_cou[6] != 8) fee_err |= 0x1000 ;
 		if(hdr_cou[7] != 4) fee_err |= 0x1000 ;
+#endif
 
 	}
 	else if(sampa_type == 0) {
@@ -560,9 +560,11 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		if(hdr_cou[3] != 2) fee_err |= 0x2000 ;
 		if(hdr_cou[4] != 2) fee_err |= 0x2000 ;
 		if(hdr_cou[5] != 0) fee_err |= 0x2000 ;
-
+#ifdef IFEE_NO_LANE_HDRS
+#else
 		if(hdr_cou[6] != 4) fee_err |= 0x2000 ;
-		if(hdr_cou[7] != 2) fee_err |= 0x2000 ;		
+		if(hdr_cou[7] != 2) fee_err |= 0x2000 ;	
+#endif	
 	}
 
 	if(fee_err) {
