@@ -7,6 +7,10 @@ struct itpc_ped_t {
 	double mean[64][64][512] ;
 	double rms[64][64][512] ;
 	int cou[64][64][512] ;
+
+	double g_mean[64][64] ;
+	double g_rms[64][64] ;
+	int g_cou[64][64] ;
 } ;
 
 class itpc_data_c {
@@ -58,6 +62,8 @@ public:
 	static int ped_run ;
 	static void ped_start() ;
 	static void ped_stop() ;
+
+	u_int format_version ;
 
 	int sector ;
 
