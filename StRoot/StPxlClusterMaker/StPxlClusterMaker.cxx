@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.11 2017/09/01 02:58:33 dongx Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.12 2017/09/08 17:37:18 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.12  2017/09/08 17:37:18  dongx
+ * change std::random_shuffle to std::rand to be consistent with STAR coding
+ *
  * Revision 1.11  2017/09/01 02:58:33  dongx
  * Update to ensure idTruth is preserved for MC hits for overlapping scenarios between MC/data and two or more MC hits
  *
@@ -42,7 +45,7 @@
  *
  **************************************************************************/
 
-#include <algorithm>
+#include <cstdlib>
 #include <map>
 
 #include "StPxlClusterMaker.h"
@@ -121,14 +124,14 @@ Int_t StPxlClusterMaker::Make()
 
               if(!mcHits.empty()) // if any of the hits is MC then pick a random mc hit
               {
-                std::random_shuffle(mcHits.begin(), mcHits.end());
-                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, mcHits[0]);
+                int const rnd_idx = std::rand() % static_cast<int>(mcHits.size());
+                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, mcHits[rnd_idx]);
                 mRawHitMap[rawHit->row()][rawHit->column()] = rawHit;
               }
               else // pick a random hit
               {
-                std::random_shuffle(pixel.second.begin(), pixel.second.end());
-                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, pixel.second[0]);
+                int const rnd_idx = std::rand() % static_cast<int>(pixel.second.size());
+                StPxlRawHit const* rawHit = pxlRawHitCollection->rawHit(i + 1, j + 1, k + 1, pixel.second[rnd_idx]);
                 mRawHitMap[rawHit->row()][rawHit->column()] = rawHit;
               }
                           
