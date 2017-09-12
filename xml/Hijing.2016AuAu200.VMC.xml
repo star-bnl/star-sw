@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <job  name="Hijing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setenv NODEBUG yes
   setup 64b
-  starver .DEV2 
+  setenv STARFPE NO
+  starver TFG17i
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
@@ -15,13 +16,23 @@
   set name = `basename ${file} .gener.root`;
   echo "${name}"
   set logName  = ${name}B.log
-  set generF   = ${name}.MuDst.root
+  set MuDstF   = ${name}.MuDst.root
   setenv StarEndMakerShell
-  if (! -r ${generF} ) then
+  set sdt = "";
+  set Name = `basename $PWD`
+  echo $Name | grep -i Ideal
+  if ($?) set sdt = ",sdt20160301";
+  set fitter = ""
+  set chain = "genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,ZCut5cm,TObjTable"${fitter}${sdt}",noRunco,noHistos";
+#  set chain = "genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,KFVertex,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,ZCut5cm,TObjTable"${fitter},${sdt}",noRunco,noHistos";
+  echo "chain = ${chain}"
+  
+  if (! -r ${MuDstF} ) then
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,-bbcSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160504.180732","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm","'${file}'")' &gt;&amp; ${logName}
-    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,KFVertex,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm,TObjTable","'${file}'")' &gt;&amp; ${logName}
+#    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,KFVertex,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm,TObjTable","'${file}'")' &gt;&amp; ${logName}
+    root.exe -q -b -x 'bfc.C(1000,"'${chain}'","'${file}'")' &gt;&amp; ${logName}
   endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->

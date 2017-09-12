@@ -23,6 +23,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
     cout << "Set kine : " << kine.Data() << endl;
     St_geant_Maker::instance()->Do(kine.Data());
+    St_geant_Maker::instance()->Do("gspread   0.015 0.015 42.00");
     //    St_geant_Maker::instance()->Do("gspread 100. 100. 0.");
     //                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
@@ -94,6 +95,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
       StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
       cout << "Set StarMCSimplePrimaryGenerator" << endl;
       }
+      gener->SetSigmasOrigin(.015, 0.015, 42.00);
       //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
       //      geant->SetSetAttr("phys_off",kTRUE); // physics off
       gMC->SetProcess("DCAY", 0);

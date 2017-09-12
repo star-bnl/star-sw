@@ -2,8 +2,9 @@ cpu_per_event.csh | tee cpu_per_event
 root.exe -q -b Recover.C | tee Recover.log
 if (! -d Zombie) mkdir Zombie
 foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
-  set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+  set b = `basename ${f} .MuDst.root`; mv ${b}* Zombie/
 end
+#  set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
 root.exe -q -b Chain.C+ | tee Chain.log
 foreach f (`grep missing Chain.log | awk '{print $3}' `)
   set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
@@ -14,4 +15,10 @@ foreach f (`ls -1d *B.log`)
 	tail -2 ${f} | grep 'end of ROOT -- Goodbye'; 
 	if ($?) continue;
 	set b = `basename ${f} B.log`; mv ${b}* Done/
+end
+
+# check consistency between MuDst and *daq files
+touch missing
+foreach f (`ls -1d *MuDst.root`)
+set b = `basename ${f} .MuDst.root`; ls -l  /net/l401/data/scratch1/daq/2016/*/*/${b}.daq; if ($?) echo "daq file for ${f} is missing =====" >> missing;
 end
