@@ -18,6 +18,8 @@ class StMessMgr;
 #include "StBFChain.h"
 #include "StMessMgr.h"
 #include "TROOT.h"
+//#include "StRoot/St_geant_Maker/St_geant_Maker.h"
+//#include "StarVMC/StVMCMaker/StVMCMaker.h"
 #endif
 StBFChain    *chain=0; 
 //_____________________________________________________________________
@@ -78,13 +80,13 @@ void Load(const Char_t *options)
 
   if ( TString(gProgName)!="root4star") { // ! root4star
     if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
-      Char_t *mysql = "libmysqlclient";
+      const Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
 
       //
       // May use USE_64BITS - the x8664 work fine too
       //
-      Char_t *libsLocal[]= {"",
+      const Char_t *libsLocal[]= {"",
 	                    "$OPTSTAR/lib/",
 			    "$OPTSTAR/lib/mysql/",
 			    "/usr/lib/", 
@@ -92,7 +94,7 @@ void Load(const Char_t *options)
 			    "/usr/mysql/lib/",
 			    "/sw/lib/",
 			    NULL}; 
-      Char_t *libsGlbal[]= {"", 
+      const Char_t *libsGlbal[]= {"", 
 			    "/usr/lib/", 
 			    "/usr/lib/mysql/", 
 			    "/usr/mysql/lib/",
@@ -101,7 +103,7 @@ void Load(const Char_t *options)
 			    "/sw/lib/",
 			    NULL}; 
 
-      Char_t **libs;
+      const Char_t **libs;
 
       if ( gSystem->Getenv("USE_LOCAL_MYSQL") ){
 	libs = libsLocal;
@@ -112,7 +114,7 @@ void Load(const Char_t *options)
 
       TString Arch( gSystem->GetBuildArch() );
       Bool_t i64 = kFALSE;
-      if ( gSystem->Getenv("USE_64BITS")==1 || Arch.Contains("x8664")) i64 = kTRUE;
+      if ( gSystem->Getenv("USE_64BITS") || Arch.Contains("x8664")) i64 = kTRUE;
 
       Int_t i = 0;
       while ((libs[i])) {
@@ -132,7 +134,7 @@ void Load(const Char_t *options)
     cout << endl;
   }
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
-#if 1
+#ifndef __CLING__
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
   if (gSystem->Load("liblog4cxx") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
@@ -163,7 +165,7 @@ void Load(const Char_t *options)
   cout << endl;
 }
 //#define __V0Filter__
-//#ifdef __V0Filter__
+#ifdef __V0Filter__
 //_____________________________________________________________________
 void V0Filter() {
   St_geant_Maker *geant = (St_geant_Maker *) chain->Maker("geant");
@@ -173,7 +175,7 @@ void V0Filter() {
     geant->Do("gfilter example");
   }
 }
-//#endif /* __V0Filter__ */
+#endif /* __V0Filter__ */
 //_____________________________________________________________________
 void bfc(Int_t First, Int_t Last,
 	 const Char_t *Chain,

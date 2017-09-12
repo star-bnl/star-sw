@@ -93,7 +93,9 @@
     gSystem->Load("StarClassLibrary");
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
+#ifndef __CLING_
     StCloseFileOnTerminate::Instantiate();
+#endif
 #if 1
     if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
       gSystem->Load("KFParticle");
@@ -129,10 +131,6 @@
 
 
 
-  // ROOT and XROOTD
-  // some rootd default dummy stuff
-  TAuthenticate::SetGlobalUser("starlib");
-  TAuthenticate::SetGlobalPasswd("ROOT4STAR");
 
   // This is already implied in system.rootrc although one could use
   // this to switch to a beta version of the client library.
@@ -153,6 +151,12 @@
     TString QTDIR("$QTDIR");                   gSystem->ExpandPathName(QTDIR);
     cout <<  Form("QAInfo:You are using STAR_LEVEL : %s, ROOT_LEVEL : %s and node : %s ",  
 		  STAR_LEVEL.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
+#ifndef __CLING__
+    // ROOT and XROOTD
+    // some rootd default dummy stuff
+    TAuthenticate::SetGlobalUser("starlib");
+    TAuthenticate::SetGlobalPasswd("ROOT4STAR");
+#endif
     SysInfo_t info;
     if (gSystem->GetSysInfo(&info) >= 0) {
       cout << Form("with %i %s",info.fCpus,info.fModel.Data());

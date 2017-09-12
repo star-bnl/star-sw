@@ -9,12 +9,13 @@ use File::Basename;
 
 #
 my $Lib = "";
-my $Pcm = "";
+#my $Pcm = "";
 if ($ROOT_LEVEL =~ /^6/) {
   $Lib = shift;
   $RootMap = shift;
-  $Pcm     = shift;
-  print "RootCint.pl : Lib = $Lib, RootMap = $RootMap, Pcm = $Pcm\n";
+#  $Pcm     = shift;
+#  print "RootCint.pl : Lib = $Lib, RootMap = $RootMap, Pcm = $Pcm\n";
+  print "RootCint.pl : Lib = $Lib, RootMap = $RootMap\n";
 }
 my $Cint_cxx = shift;
 my $Cint_h  = $Cint_cxx;
@@ -437,7 +438,13 @@ if ($h_files) {
   } else {
 #    $cmd  = "rootcling -f $Cint_cxx -c -rmf $RootMap  -rml $Lib -s $Lib -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
 # rootcling -rootbuild -f K_Dict.cc -s libK -rml libA.so -rml libC.so -rml libG.so -rmf libK.rootmap -c -p -I[INCLUDES] K1.hh K2.hh K3.hh LinkDef.hh
-    $cmd  = "rootcling -rootbuild -f $Cint_cxx -rml $Lib -rmf $RootMap -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+#    $cmd  = "rootcling -rootbuild -f $Cint_cxx -rml $Lib -rmf $RootMap -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+    my $bLib = File::Basename::basename($Lib);
+#    $cmd  = "rootcling -v4 -rootbuild -f $Cint_cxx -s $Lib";
+    $cmd  = "rootcling -v2 -f $Cint_cxx -s $Lib";
+#    $cmd .= " -m StarRoot_rdict.pcm";
+#    $cmd .= "  -excludePath StRoot -excludePath -excludePath .sl69_x8664_gcc521/include";
+    $cmd .= " -rml $bLib -rmf $RootMap -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
 #
 #rootcling -v0 "--lib-list-prefix=/star/u/fisyak/macros/Chain_C_ACLiC_map" -f "/star/u/fisyak/macros/Chain_C_ACLiC_dict.cxx" -c -p -I$ROOTSYS/include -I"/net/l402/data/fisyak/STAR/ROOT/6.99.99/.sl68_x8664_gcc521/rootdeb/etc" -I"/net/l402/data/fisyak/STAR/ROOT/6.99.99/.sl68_x8664_gcc521/rootdeb/etc/cling" -I"/net/l402/data/fisyak/STAR/ROOT/6.99.99/.sl68_x8664_gcc521/rootdeb/include" -I"/opt/rh/devtoolset-4/root/usr/lib/gcc/x86_64-redhat-linux/5.2.1/../../../../include/c++/5.2.1" -I"/opt/rh/devtoolset-4/root/usr/lib/gcc/x86_64-redhat-linux/5.2.1/../../../../include/c++/5.2.1/x86_64-redhat-linux" -I"/opt/rh/devtoolset-4/root/usr/lib/gcc/x86_64-redhat-linux/5.2.1/../../../../include/c++/5.2.1/backward" -I"/net/l402/data/fisyak/STAR/ROOT/6.99.99/.sl68_x8664_gcc521/rootdeb/Build/include" -D__ACLIC__ -I$HOME/macros -I/usr/include/QtGui "/star/u/fisyak/macros/Chain.C" "/star/u/fisyak/macros/Chain_C_ACLiC_linkdef.h
 #    $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib  -rml $Lib -rmf $RootMap -c -p -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
