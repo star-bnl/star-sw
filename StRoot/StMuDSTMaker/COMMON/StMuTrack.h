@@ -78,6 +78,8 @@ class StMuTrack : public TObject {
     const StDcaGeometry* dcaGeom()      const {return (mIndex2Cov         >= 0) ? StMuDst::instance()->covGlobTracks(mIndex2Cov) : 0;}
     UShort_t nHits() const {return mNHits;}      ///< Return total number of hits on track.
     UShort_t nHitsPoss() const; ///< Return number of possible hits on track.
+    UShort_t nHitsFitInner() const {return mNHitsFitInner;}
+    UShort_t nHitsPossInner() const {return mNHitsPossInner;}
     UShort_t nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
     UShort_t nHitsDedx() const {return mNHitsDedx;} ///< Return number of hits used for dEdx. 
     UShort_t nHitsFit() const  {return mNHitsFit;} ///< Return total number of hits used in fit. 
