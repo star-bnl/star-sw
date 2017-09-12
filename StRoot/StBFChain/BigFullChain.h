@@ -1421,11 +1421,13 @@ Bfc_st BFC[] = { // standard chains
   {"Kinematics", "","Generators","Generators",                "StarKinematics","StarKinematics","", kFALSE},
   {"Herwig6", "","Generators","Generators",                        "StarHerwig6","Herwig6_5_20","", kFALSE},
   {"Hijing", "","Generators","Generators",                           "StarHijing","Hijing1_383","", kFALSE},
+#if 0
   {"Pythia6_2_22", "","Generators","Generators",                   "StarPythia6","Pythia6_2_22","", kFALSE},
   {"Pythia6_4_23", "","Generators","Generators",                   "StarPythia6","Pythia6_4_23","", kFALSE},
   {"Pythia6_4_28", "","Generators","Generators",                   "StarPythia6","Pythia6_4_28","", kFALSE},
   {"Pythia8_1_62", "","Generators","Generators",                   "StarPythia8","Pythia8_1_62","", kFALSE},
   {"Pythia8_1_86", "","Generators","Generators",                   "StarPythia8","Pythia8_1_86","", kFALSE},
+#endif
   {"StarLight", "","Generators","Generators",                           "StarLight","StarLight","", kFALSE},
   {"StarUrQMD" , "","Generators","Generators",                     "StarStarUrQMD","UrQMD3_3_1","", kFALSE},
   {"genIn", "GenTreeReader","Generators","Generators"
