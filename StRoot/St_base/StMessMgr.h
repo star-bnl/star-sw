@@ -23,7 +23,7 @@
 #endif
 #endif
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #ifdef LOGGERMESSAGE
 #error An attempt to redefine the LOGGERMESSAGE macro
 #else
@@ -47,7 +47,7 @@
 #endif
 #endif 
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "StarCallf77.h"
 #define Message_ F77_NAME(message,MESSAGE)
 #define Msg_Enable_ F77_NAME(msg_enable,MSG_ENABLE)
@@ -106,11 +106,18 @@ class StMessage;
 #ifndef ClassMessVec
 class messVec;
 #endif
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <Stsstream.h>
 #include <Stiostream.h>
 #endif
-class StMessMgr : public ostrstream {
+class StMessMgr 
+#ifndef __CLING__
+: public ostrstream 
+#endif
+{
+
+
+
    friend ostream& operator<<(ostream& ,StMessage*);
    friend ostream& operator++(StMessMgr&);
    friend ostream& operator-(StMessMgr&);
@@ -137,8 +144,10 @@ class StMessMgr : public ostrstream {
    virtual ostream& OperatorShift(ostream& os, StMessage* stm) = 0;
 
 // Generic Messages:
+#if !defined(__CLING__)
    virtual ostrstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1)= 0;
+#endif
    virtual       void Print() =0;
    virtual        int PrintList(messVec* list) =0;
    virtual        int PrintAll() =0;
@@ -213,7 +222,9 @@ protected:
          
 public:
 // Info Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)=0;
+#endif
    virtual        int PrintInfos() =0;
    virtual const messVec* GetInfos() =0;
    virtual StMessage* FindInfo(const char* s1, const char* s2="",
@@ -222,7 +233,9 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // Warning Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)= 0;
+#endif
    virtual        int PrintWarnings() =0;
    virtual const messVec* GetWarnings() =0;
    virtual StMessage* FindWarning(const char* s1, const char* s2="",
@@ -231,7 +244,9 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // Error Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1) = 0;
+#endif
    virtual        int PrintErrors() =0;
    virtual const messVec* GetErrors() =0;
    virtual StMessage* FindError(const char* s1, const char* s2="",
@@ -240,7 +255,9 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // Debug Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
+#endif
    virtual        int PrintDebug() =0;
    virtual const messVec* GetDebugs() =0;
    virtual StMessage* FindDebug(const char* s1, const char* s2="",
@@ -249,7 +266,9 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // QAInfo Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
+#endif
    virtual        int PrintQAInfo() =0;
    virtual const messVec* GetQAInfos() =0;
    virtual StMessage* FindQAInfo(const char* s1, const char* s2="",
@@ -258,7 +277,9 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // UCMInfo Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
+#endif
    virtual        int PrintUCMInfo() =0;
    virtual const messVec* GetUCMInfos() =0;
    virtual StMessage* FindUCMInfo(const char* s1, const char* s2="",
@@ -267,13 +288,15 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // "As is" Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& out(const char* mess="") = 0;
    virtual ostrstream& err(const char* mess="") = 0;
-
+#endif
    virtual       void PrintInfo() =0;
    // Fatal Messages:
+#if  !defined(__CLING__)
    virtual ostrstream& Fatal(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
-
+#endif
 #ifdef __ROOT__
    ClassDef(StMessMgr,0)
 #endif
@@ -318,7 +341,7 @@ inline StTurnLogger::~StTurnLogger()
 inline ostream& operator<<(ostream& os, StMessage* stm) {
    return gMessMgr->OperatorShift(os,stm);
 }
-
+#if !defined(__CLING__)
 //______________________________________________________________________________
 inline ostream& operator++(StMessMgr&) {
   return gMessMgr->Info();
@@ -335,7 +358,7 @@ inline ostream& operator~(StMessMgr&) {
 inline ostream& operator-(StMessMgr&) {
   return gMessMgr->err();
 }
-
+#endif
 
 
 
