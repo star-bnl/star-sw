@@ -145,13 +145,17 @@ void StarVMCApplication::GeneratePrimaries() {
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
   fStarStack->Reset();
-  if (fMcHits) fMcHits->Clear();
+  if (fMcHits) {
+    fMcHits->BeginEvent();
+  }
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginPrimary() {    // User actions at beginning of a primary track
+  if (fMcHits) fMcHits->BeginPrimary();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PreTrack() {    // User actions at beginning of each track
+  if (fMcHits) fMcHits->PreTrack();  
 }
 //_____________________________________________________________________________
 void StarVMCApplication::Stepping() {    // User actions at each step
@@ -165,10 +169,13 @@ void StarVMCApplication::PostTrack() {    // User actions after finishing of eac
   TParticle *current =  0; // fStarStack->GetCurrentParticle();
   TObjArray *objs = fStarStack->GetParticles();
   if (objs->IndexOf(current) < objs->LowerBound()) delete current;
+#else
+  if (fMcHits) fMcHits->PostTrack();
 #endif
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishPrimary() {    // User actions after finishing of a primary track
+  if (fMcHits) fMcHits->FinishPrimary();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishEvent() {    // User actions after finishing of an event
