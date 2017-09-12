@@ -107,6 +107,7 @@ C
 *
       COMMON / QUEST / IQUEST(100)
 *
+#include "geant321/sckine.inc"
       CHARACTER *(*) CHCOMM
 #if defined(CERNLIB_DECS) || defined(CERNLIB_LXIA64)
       INTEGER*8 GCADDB, GCADDI, GCADDF, GCADDL, GCADDC, GCADDD, IADD
@@ -274,6 +275,8 @@ C
          IADD=GCADDI(NZEBRA)
       ELSE IF(CHCOMM.EQ.'GCCHAN') THEN
          IADD=GCADDB(LSAMVL)
+      ELSE IF(CHCOMM.EQ.'SCKINE') THEN
+         IADD=GCADDI(MTRACK)
       ELSE
          WRITE(6,123) CHCOMM
          IADD=0
