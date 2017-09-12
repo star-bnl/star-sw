@@ -596,9 +596,9 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	StTrackTopologyMap topologyMap = track->topologyMap();
 	UInt_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
 	UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
-	UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
-	//	UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
-	if (noPxlHits >= 2 && noIstHits + noSsdHits >= 1) {countHft++; Track = track;}
+	UInt_t noSstHits = topologyMap.numberOfHits(kSstId); // 0-2
+	//	UInt_t noHftHits = noPxlHits + noIstHits + noSstHits;
+	if (noPxlHits >= 2 && noIstHits + noSstHits >= 1) {countHft++; Track = track;}
       }
       if (Track && Track->btofPidTraits().matchFlag()) {countToF++;}
       // kNotDefined, kLostTk, kRecoTk, kCloneTk
