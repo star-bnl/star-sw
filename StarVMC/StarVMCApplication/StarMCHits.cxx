@@ -318,13 +318,15 @@ void StarMCHits::SetDebug(Int_t m) {
 }
 //________________________________________________________________________________
 void StarMCHits::PreTrack() {
-  TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
 #if 0
+  TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
   Sckine_t *sckine = geant3->Sckine();
   Int_t mtrack = sckine->mtrack;
 #endif
   TParticle* part = TVirtualMC::GetMC()->GetStack()->GetCurrentTrack();
   Int_t Id = TVirtualMC::GetMC()->GetStack()->GetCurrentTrackNumber() + 1;
+  // Track from stack ?
+  if (ftrackCurrent && ftrackCurrent->id == Id) return;
   //  TParticle  *particle = 0;   
   TLorentzVector newV(0,0,0,0);
   TLorentzVector devV(0,0,0,0);
