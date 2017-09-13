@@ -145,7 +145,9 @@ void StarMCHits::Step() {
   Float_t dEstep = TVirtualMC::GetMC()->Edep();
   Float_t Step = TVirtualMC::GetMC()->TrackStep();
   fHit.iPart = TVirtualMC::GetMC()->TrackPid();
-  fHit.iTrack = ((StarStack *)TVirtualMC::GetMC()->GetStack())->GetCurrentTrackNumber() + 1; // GetCurrentTrackNumber() + 1 to be consistent with g2t
+  //  fHit.iTrack = ((StarStack *)TVirtualMC::GetMC()->GetStack())->GetCurrentTrackNumber() + 1; // GetCurrentTrackNumber() + 1 to be consistent with g2t
+  //  fHit.iPart = Current_g2t_track()->ge_pid;
+  fHit.iTrack = Current_g2t_track()->id;
   // - - - - - - - - - - - - - energy correction - - - - - - - - - -
   if (TVirtualMC::GetMC()->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
     TArrayI proc;
