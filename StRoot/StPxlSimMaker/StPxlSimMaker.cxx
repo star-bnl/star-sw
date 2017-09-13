@@ -55,9 +55,12 @@
 
 #include "StPxlSimMaker.h"
 #include "StPxlFastSim.h"
+#include "StPxlDigmapsSim.h"
 #include "StPxlISim.h"
 #include "StMcEvent/StMcPxlHitCollection.hh"
 #include "StEvent/StPxlHitCollection.h"
+#include "StPxlRawHitMaker/StPxlRawHit.h"
+#include "StPxlRawHitMaker/StPxlRawHitCollection.h"
 
 #include "Stiostream.h"
 #include "StHit.h"
@@ -91,17 +94,17 @@ Int_t StPxlSimMaker::Init()
 
    mUseDIGMAPSSim = IAttr("useDIGMAPSSim");
 
-   //if(mUseDIGMAPSSim)
-   //{
-   // mPxlSimulator = new StPxlSlowSim();
-   //}
-   //else
-   //{
-   // temporary till DIGMAPS algorithm is added and option added in StMaker
-   mUseFastSim = true;
-   mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
-   LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
-   //}
+   if(mUseDIGMAPSSim)
+   {
+     mPxlSimulator = new StPxlDigmapsSim();
+     LOG_INFO << "StPxlSimMaker: using StPxlDigmapsSim " << endm;     
+   }
+   else
+   {
+     mUseFastSim = true;
+     mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
+     LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
+   }
 
    return kStOk;
 }
@@ -185,22 +188,24 @@ Int_t StPxlSimMaker::Make()
       if(newCollection) rcEvent->setPxlHitCollection(pxlHitCol);
       LOG_DEBUG << " size of hit collection : " << pxlHitCol->numberOfHits() << endm;
    }
-   else if (mUseDIGMAPSSim)
+   else //if (mUseDIGMAPSSim)
    {
-      // for testing
-      /*StPxlRawHitCollection* pxlRawHitCol = 0;
+      StPxlRawHitCollection* pxlRawHitCol = 0;
 
       TObjectSet* pxlRawHitDataSet = (TObjectSet*)GetDataSet("pxlRawHit");
 
       if (!pxlRawHitDataSet)
       {
-           pxlRawHitDataSet = new TObjectSet("pxlRawHit");
-           m_DataSet = pxlRawHitDataSet;
+	LOG_INFO << " pxlRawHit does NOT exist! Create a new one! " << endm;
+//           pxlRawHitDataSet = new TObjectSet("pxlRawHit");
+//           m_DataSet = pxlRawHitDataSet;
            pxlRawHitCol = new StPxlRawHitCollection();
-           pxlRawHitDataSet->AddObject(pxlRawHitCol);
+	   ToWhiteBoard("pxlRawHit", pxlRawHitCol);
+//           pxlRawHitDataSet->AddObject(pxlRawHitCol);
       }
       else
       {
+          LOG_INFO << " pxlRawHit exists! Append raw hits to this collection! " << endm;
           pxlRawHitCol= (StPxlRawHitCollection*)pxlRawHitDataSet->GetObject();
       }
 
@@ -209,8 +214,9 @@ Int_t StPxlSimMaker::Make()
       LOG_ERROR << "Make() - no pxlRawHitCollection."<<endm;
       return kStErr;
       }
+      mPxlSimulator->addPxlRawHits(*mcPxlHitCol,*pxlRawHitCol); 
 
-      mPxlSimulator->addPxlRawHits(*mcPxlHitCol,*pxlRawHitCol); */
+      LOG_INFO << " Finishing DIGMAPS simulator. Number of PxlRawHits = " << pxlRawHitCol->numberOfRawHits() << endm;
    }
 
 

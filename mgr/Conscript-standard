@@ -775,6 +775,8 @@ if ( $pkg =~ m/^St.*Db/             ||
   print "EXPANDING CPPPATH = $CPPPATH\n" if $param::debug;
 } elsif ( $Dir =~ m/StarVMC/ and $pkg =~ m/StiVMC/) {
   $CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
+} elsif ( $pkg =~ m/StPxlSimMaker/) {
+  $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/StPxlSimMaker/DIGMAPS"; 
 } elsif ($pkg =~ m/^StHLTCAMaker$/ || $pkg =~ m/^StvMaker$/ || $pkg =~ m/^StvSeed$/ ){ #  
   $CXXFLAGS .= " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION";# . $SSE_FLAGS; #" -msse -msse2";
   if ($CC ne 'icc') {
