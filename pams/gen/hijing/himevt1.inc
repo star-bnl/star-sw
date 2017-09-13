@@ -1,0 +1,10 @@
+*
+*
+*  himevt1.inc
+*
+*
+     INTEGER NATT, JATT, NT, NP, N0, NO1, N10, N11
+     REAL EATT
+     COMMON/HIMAIN1/NATT,EATT,JATT,NT,NP,N0,N01,N10,N11
+     SAVE  /HIMAIN1/
+ 

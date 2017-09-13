@@ -1,0 +1,7 @@
+      REAL FUNCTION RAN(IDUMMY)
+
+ 100  RAN = RLU(IDUMMY)
+      if(RAN.LE.0. .OR. RAN.GE.1.) GOTO 100
+      
+      RETURN
+      END
