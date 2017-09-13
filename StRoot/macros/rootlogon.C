@@ -75,25 +75,26 @@
   gPrompt += " [%d] ";
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); 
     
-  //  if (gSystem->DynamicPathName("libNet.so",kTRUE))
-  //    gSystem->Load("libNet.so");
+  //  if (gSystem->DynamicPathName("libNet",kTRUE))
+  //    gSystem->Load("libNet");
   
   // 	Load StarRoot lib.
   //  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
-  gSystem->Load("libMatrix.so");
-  gSystem->Load("libPhysics.so");
+  gSystem->Load("libMatrix");
+  gSystem->Load("libPhysics");
 #if 1
-  gSystem->Load("libGraf3d.so");
+  gSystem->Load("libGraf3d");
   if (!strstr(gSystem->GetLibraries(),"libTable")) {
     gSystem->Load("libGeom"); 
     gSystem->Load("libTable");
   }
-  gSystem->Load("libEG.so");
+  gSystem->Load("libEG");
+  gSystem->Load("libVMC");
   if (gSystem->DynamicPathName("StarClassLibrary",kTRUE))
     gSystem->Load("StarClassLibrary");
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
-#ifndef __CLING_
+#ifndef __CLING__
     StCloseFileOnTerminate::Instantiate();
 #endif
 #if 1

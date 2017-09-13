@@ -16,7 +16,9 @@ class StMessMgr;
 #include "TApplication.h"
 #include "TInterpreter.h"
 #include "StBFChain.h"
+#ifndef __CLING__
 #include "StMessMgr.h"
+#endif
 #include "TROOT.h"
 //#include "StRoot/St_geant_Maker/St_geant_Maker.h"
 //#include "StarVMC/StVMCMaker/StVMCMaker.h"
@@ -213,17 +215,29 @@ void bfc(Int_t First, Int_t Last,
   chain->SetDebug(1);
   if (Last < -3) return;
   chain->SetFlags(tChain);
+#ifndef __CLING__
   gMessMgr->QAInfo() << Form("Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endm;
+#else
+  cout <<  Form("QA :INFO  - Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endl;
+#endif
   if (Last < -2) return;
   if (chain->Load() > kStOk) {
+#ifndef __CLING__
     gMessMgr->Error() << "Problems with loading of shared library(ies)" << endm;
+#else
+    cout << "QA :ERROR - Problems with loading of shared library(ies)" << endl;
+#endif
     gSystem->Exit(1);
   }
   chain->Set_IO_Files(infile,outfile);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
   if (Last < -1) return;
   if (chain->Instantiate() > kStOk)  { 
+#ifndef __CLING__
     gMessMgr->Error() << "Problems with instantiation of Maker(s)" << endm;
+#else
+    cout << "QA :ERROR - Problems with instantiation of Maker(s)" << endl;
+#endif
     gSystem->Exit(1);
   }
 #ifdef __V0Filter__
@@ -265,10 +279,19 @@ void bfc(Int_t First, Int_t Last,
 #endif
   {
     TDatime t;
+#ifndef __CLING__
     gMessMgr->QAInfo() << Form("Run is started at Date/Time %i/%i",t.GetDate(),t.GetTime()) << endm;
+#else
+    cout << Form("QA :INFO  - Run is started at Date/Time %i/%i",t.GetDate(),t.GetTime()) << endl;
+#endif
   }
+#ifndef __CLING__
   gMessMgr->QAInfo() << Form("Run on %s in %s",gSystem->HostName(),gSystem->WorkingDirectory()) << endm;
   gMessMgr->QAInfo() << Form("with %s", chain->GetCVS()) << endm;
+#else
+  cout << Form("QA :INFO  - Run on %s in %s",gSystem->HostName(),gSystem->WorkingDirectory()) << endl;
+  cout << Form("QA :INFO  - with %s", chain->GetCVS()) << endl;
+#endif
   // Init the chain and all its makers
   TAttr::SetDebug(0);
   chain->SetAttr(".Privilege",0,"*"                ); 	  //All  makers are NOT priviliged
@@ -292,7 +315,11 @@ void bfc(Int_t First, Int_t Last,
   if (hd) hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
   chain->EventLoop(First,Last,0);
+#ifndef __CLING__
   gMessMgr->QAInfo() << "Run completed " << endm;
+#else
+  cout << "QA :INFO  - Run completed " << endl;
+#endif
 }
 //_____________________________________________________________________
 void bfc(Int_t Last, 

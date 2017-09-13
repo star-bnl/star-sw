@@ -44,6 +44,7 @@
 // description:
 ///////////////////////////////////////////////////////////////
 {
+#ifndef __CLING__
 class StMaker;
 // namespace rootlogoff {
 // ::StMaker *mk=0;
@@ -64,5 +65,6 @@ if (TClassTable::GetDict("StMaker"))
       printf ("*** Chain not deleted***\n");
   }
 }
+#endif
 printf("\nThis is the end of ROOT -- Goodbye\n\n");
 }
