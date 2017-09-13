@@ -18,7 +18,13 @@
   if (! -r ${daq}) exit 1;
 #  set name = "Lc3pi";
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons antiprotonmTsq5PerCentZ6cm  KNmTsq5PerCentZ6cm  KPmTsq5PerCentZ6cm  piNmTsq5PerCentZ6cm  piPmTsq5PerCentZ6cm  protonmTsq5PerCentZ6cm D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq ) 
+  foreach name (  antiprotonmTsq5PerCentZ6cm protonmTsq5PerCentZ6cm \
+                  KNmTsq5PerCentZ6cm KPmTsq5PerCentZ6cm \
+                  piNmTsq5PerCentZ6cm piPmTsq5PerCentZ6cm \
+                  D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0K3pimTsq D0KpimTsq \
+                  DK0s3pimTsq DK0spimTsq DK2pimTsq \
+                  DsK0sK0spimTsq DsK0sK2pimTsq DsK0sKmTsq DsKKpimTsq \
+                  Lc3pi Lc3pimT Lc3pimTsq LcKppi LcKppimT LcKppimTsq)
     echo $Name | grep $name
     if (! $?) break;
   end
