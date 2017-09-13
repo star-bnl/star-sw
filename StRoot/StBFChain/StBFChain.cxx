@@ -968,6 +968,9 @@ Int_t StBFChain::Instantiate()
     if (maker == "StIstRawHitMaker" && GetOption("istEmbed")) {
       mk->SetAttr("DoEmbedding", 1);
     }
+    if (maker == "StPxlSimMaker" && GetOption("pxlSlowSim")) {
+      mk->SetAttr("useDIGMAPSSim", 1);
+    }
 
   Add2Chain:
     if (! mk) continue;
