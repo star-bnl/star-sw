@@ -8,13 +8,13 @@
   setenv NODEBUG yes
   setup 64b
   setenv STARFPE NO
-  starver TFG17j
+  starver TFG17i
 #  starver .DEV2
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
 #  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
 #  set daq  = `ls -1d /star/data03/daq/2016/*/*/${base}.daq`
-  set daq  = `ls -1d /net/l401/data/scratch1/daq/2016/*/*/${base}.daq`
+  set daq  = `ls -1d /net/l404/data/fisyak/daq/2016/*/*/${base}.daq`
   if (! -r ${daq}) exit 1;
 #  set name = "Lc3pi";
   set name = ""
