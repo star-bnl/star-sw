@@ -7,8 +7,9 @@
   cd ${SUBMITTINGDIRECTORY}  
   setenv NODEBUG yes
   setup 64b
+  setup gcc621
   setenv STARFPE NO
-  starver TFG17i
+  starver TFG17j
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
@@ -23,7 +24,7 @@
   echo $Name | grep -i Ideal
   if ($?) set sdt = ",sdt20160301";
   set fitter = ""
-  set chain = "genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,ZCut5cm,TObjTable"${fitter}${sdt}",noRunco,noHistos";
+  set chain = "genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,ZCut5cm"${fitter}${sdt}",noRunco,noHistos";
 #  set chain = "genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,KFVertex,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,ZCut5cm,TObjTable"${fitter},${sdt}",noRunco,noHistos";
   echo "chain = ${chain}"
   
