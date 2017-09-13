@@ -36,10 +36,11 @@ void trig( Int_t n=0 )
     primary -> event() -> Print();
   }
 }
+StarHijing *hijing = 0; 
 // ----------------------------------------------------------------------------
 void Hijing()
 {
-  StarHijing *hijing = new StarHijing("hijing");
+  hijing = new StarHijing(); 
   hijing->SetTitle("Hijing 1.383");
 
   // Setup collision frame, energy and beam species
@@ -48,21 +49,7 @@ void Hijing()
   hijing->SetYell("Au");  
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
 
-  // Configure HIJING simulation
-  HiParnt_t &hiparnt = hijing->hiparnt();
-  {
-    hiparnt.ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
-    hiparnt.ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
-    hiparnt.hipr1(10) = 2.0;  //    pT jet
-    hiparnt.ihpr2(8)  = 10;   // Max number of jets / nucleon
-    hiparnt.ihpr2(11) = 1;    // Set baryon production
-    hiparnt.ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
-    hiparnt.ihpr2(18) = 0;    // 1=B quark production.  0=C quark production.
-    hiparnt.hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
-  }
 
-  // For more configuration options, see the HIJING manual
-  // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
 
   primary -> AddGenerator(hijing);
   primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
@@ -116,6 +103,21 @@ void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
   //
   primary -> Init();
 
+  // Configure HIJING simulation
+  HiParnt_t &hiparnt = hijing->hiparnt();
+  {
+    hiparnt.ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
+    hiparnt.ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
+    hiparnt.hipr1(10) = 2.0;  //    pT jet
+    hiparnt.ihpr2(8)  = 10;   // Max number of jets / nucleon
+    hiparnt.ihpr2(11) = 1;    // Set baryon production
+    hiparnt.ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
+    hiparnt.ihpr2(18) = 0;    // 1=B quark production.  0=C quark production.
+    hiparnt.hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+
+  // For more configuration options, see the HIJING manual
+  // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
+  }
   //
   // Setup geometry and set starsim to use agusread for input
   //
