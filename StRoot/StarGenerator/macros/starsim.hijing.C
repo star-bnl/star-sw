@@ -108,7 +108,7 @@ void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
   {
     hiparnt.ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
     hiparnt.ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
-    hiparnt.hipr1(10) = 2.0;  //    pT jet
+    //hiparnt.hipr1(10) = -2.5;  //    pT jet (negative indicates lower limit)
     hiparnt.ihpr2(8)  = 10;   // Max number of jets / nucleon
     hiparnt.ihpr2(11) = 1;    // Set baryon production
     hiparnt.ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
