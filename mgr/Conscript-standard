@@ -749,6 +749,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^StTofPool$/          ||
 	      $pkg =~ m/^StRichPool$/         ||
 	      $pkg =~ m/^StGeneri/            ||
+	      $pkg =~ m/^StPxlSim/            ||
 	      $pkg =~ m/^St.*Utilities/       ||
 	      $pkg =~ m/^StTriggerUtilities$/ ||
 	      $pkg =~ m/^Stv$/                ||
