@@ -1472,6 +1472,9 @@ Bfc_st BFC[] = { // standard chains
 
   {"pxlFastSim"  ,"","","StMcEvent,StEvent"
    ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
+  {"pxlSlowSim"  ,"","","StMcEvent,StEvent"
+   ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Slow Simulator",kFALSE},
+   
   {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker",     "PXL raw hit maker",kFALSE},
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker",     "PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker",     "PXL hit maker",kFALSE},

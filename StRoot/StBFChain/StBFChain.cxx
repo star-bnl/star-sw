@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.642 2017/08/08 18:51:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.643 2017/09/13 15:33:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -718,6 +718,8 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
+
+    // TPC
     if (maker == "StTpcRTSHitMaker") {
       if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", kTRUE);
     }
@@ -787,12 +789,16 @@ Int_t StBFChain::Instantiate()
 	 maker == "StFtpcTrackMaker"    )  &&
 	GetOption("fgain"))                    mk->SetMode(mk->GetMode()+4);
 
-    // FTPC
 
     // PMD
     if ( maker == "StPmdReadMaker"         &&
          GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",kTRUE);
-    // PMD
+
+    // HFT
+    if (maker == "StPxlSimMaker"           &&
+	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim",kTRUE);
+
+
 
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
