@@ -1,5 +1,0 @@
-# $Id $
-# package hij
-# author: 
-#Library:libhij.so:LIBS +=   -lgeant3  -lminicern
-#Library:libSt_hij.so:LIBS +=   -lgeant3  -lminicern
