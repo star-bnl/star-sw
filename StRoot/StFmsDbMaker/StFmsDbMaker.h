@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.18 2017/08/14 16:08:55 smirnovd Exp $
+ * $Id: StFmsDbMaker.h,v 1.19 2017/09/15 15:43:54 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.19  2017/09/15 15:43:54  akio
+ * Adding readGainCorrFromText()
+ *
  * Revision 1.18  2017/08/14 16:08:55  smirnovd
  * StFmsDbMaker: Declare member functions const
  *
@@ -202,6 +205,7 @@ class StFmsDbMaker : public StMaker {
   void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value               
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
   void readGainFromText(int v=1)           {mReadGainFile=v;}               //! force gain to be read from FmsGain.txt
+  void readGainCorrFromText(int v=1)       {mReadGainCorrFile=v;}           //! force gain to be read from FmsGainCorr.txt
 
   //! fmsTimeDepCorr relayed
   float getTimeDepCorr(int event, int det, int ch); //det = detectorId - 8 (0=largeNoth, 1=largeSouth, 2=smallNorth, 3=smallSouth)
@@ -331,6 +335,7 @@ class StFmsDbMaker : public StMaker {
   Float_t                 mForceUniformGain=0.0; //!
   Float_t                 mForceUniformGainCorrection=0.0; //!
   Int_t                   mReadGainFile=0; //!             
+  Int_t                   mReadGainCorrFile=0; //!             
 
   Int_t                   mReadRecParam=0; //!
 

@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.27 2017/08/14 16:08:55 smirnovd Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.28 2017/09/15 15:43:54 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.28  2017/09/15 15:43:54  akio
+ * Adding readGainCorrFromText()
+ *
  * Revision 1.27  2017/08/14 16:08:55  smirnovd
  * StFmsDbMaker: Declare member functions const
  *
@@ -371,8 +374,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	}
       }
       fclose(f);
+      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain was overwritten by FmsGain.txt"<<endm;
     }
-    LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain was overwritten by FmsGain.txt"<<endm;
   }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsGain with mMaxGain = "<<mMaxGain<< endm;
   
@@ -414,6 +417,25 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       }
       mmGainCorrection[d][c-1].corr=mForceUniformGainCorrection;
     }
+  }
+  if(mReadGainCorrFile){
+      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr will be overwritten by FmsGainCorr.txt"<<endm;
+      FILE* f=fopen("FmsGainCorr.txt","r");
+      if(!f){ 
+	  LOG_INFO<<"Failed to open FmsGainCorr.txt"<<endm; 
+      }else{
+	  int ew,nstb,ch;
+	  float corr;
+	  while(fscanf(f,"%d %d %d %f",&ew,&nstb,&ch,&corr)!=EOF){
+	      if(ew==2){
+		  int dd=nstb+7;
+		  //printf("Reading FmsGainCorr.txt  %1d %1d %2d %3d %f\n",ew,nstb,dd,ch,corr);
+		  mmGainCorrection[dd][ch-1].corr=corr;
+	      }
+	  }
+	  fclose(f);
+	  LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr was overwritten by FmsGainCorr.txt"<<endm;
+      }
   }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
 
