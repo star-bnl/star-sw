@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "Stiostream.h"
+#include "StarVMCApplication.h"
 #include "StarVMCDetector.h"
 #include "StarDetectorMap.h"
 #include "StarMCHits.h"
@@ -21,10 +22,10 @@ extern "C"
   Int_t type_of_call g2t_volume_id_(DEFCHARD, Int_t * DEFCHARL); 
   Int_t type_of_call StarVMCDetector::g2t_volume_id(const Char_t *det, Int_t *numbv) 
   {return g2t_volume_id_(PASSCHARD(det), numbv PASSCHARL(det));}
-  //  Float_t type_of_call getvalue_(const Char_t *parN) { TString par(parN,sizeof(parN)); return gEnv->GetValue(par, 0.);}
+  //  Float_t type_of_call getvalue_(const Char_t *parN) { TString par(parN,sizeof(parN)); return gConfigGeom->GetValue(par, 0.);}
   Float_t type_of_call getvalue_(DEFCHARD parN DEFCHARL parL) { 
     TString par(parN,parL); 
-    return gEnv->GetValue(par, 0.);
+    return StarVMCApplication::fgConfigGeom->GetValue(par, 0.);
   }
 }
 ClassImp(StarVMCDetector);

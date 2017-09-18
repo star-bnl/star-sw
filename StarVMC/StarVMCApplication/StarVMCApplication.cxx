@@ -57,6 +57,7 @@ ClassImp(StarVMCApplication);
 #define PrPV(B)      if (Debug())                {std::cout << (#B) << " = \t"; (B).Print();} 
 static const TString separator("/_"); 
 TDataSet        *StarVMCApplication::fgDetSets = 0;
+TEnv            *StarVMCApplication::fgConfigGeom = 0;
 //_____________________________________________________________________________
 StarVMCApplication::StarVMCApplication(const char *name, const char *title) : 
   TVirtualMCApplication(name,title),
