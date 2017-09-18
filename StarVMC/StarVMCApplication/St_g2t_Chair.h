@@ -28,7 +28,7 @@
 #include "tables/St_g2t_svt_hit_Table.h"  /* Done */
 #include "tables/St_g2t_tpc_hit_Table.h"  /* Done */
 #include "tables/St_g2t_vpd_hit_Table.h"  /* Done */
-#include "tables/St_g2t_track_Table.h"
+
 #include "StarHitVector.h"
 class St_g2t_Chair : public TChair {
  public:

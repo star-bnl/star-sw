@@ -1132,7 +1132,7 @@ Gcchan_t *gcchan = 0;
 Gconst_t *gconst=0;          //! GCONST common structure
 Gconsx_t *gconsx=0;          //! GCONSX common structure
 Gcjump_t *gcjump=0;          //! GCJUMP common structure
-Sckine_t *sckine=0;
+
 
 
 
@@ -1366,8 +1366,6 @@ void TGeant3::LoadAddress()
    gctrak = fGctrak;
    gcvolu = fGcvolu;
    gckine = fGckine;
-   gcomad(PASSCHARD("SCKINE"),(int*&) fSckine  PASSCHARL("SCKINE"));
-   sckine = fSckine;
 }
 
 //______________________________________________________________________

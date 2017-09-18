@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #my @Files = glob "*.csh";
-my @Files = glob "sched*";
+my @Files = glob "*.pcm";
 my $i = 0;
 foreach my $file (@Files) {
   print "$file\t";

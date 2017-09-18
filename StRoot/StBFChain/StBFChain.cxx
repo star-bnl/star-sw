@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.640 2017/01/06 22:30:45 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.643 2017/09/13 15:33:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -809,6 +809,8 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
+
+    // TPC
     if (maker == "StTpcRTSHitMaker") {
       if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", 1);
     }
@@ -895,12 +897,14 @@ Int_t StBFChain::Instantiate()
 	 maker == "StFtpcTrackMaker"    )  &&
 	GetOption("fgain"))                    mk->SetMode(mk->GetMode()+4);
 
-    // FTPC
 
     // PMD
     if ( maker == "StPmdReadMaker"         &&
-         GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",1);
-    // PMD
+         GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw", 1);
+
+    // HFT
+    if (maker == "StPxlSimMaker"           &&
+	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim", 1);
 
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
@@ -968,9 +972,6 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StIstRawHitMaker" && GetOption("istEmbed")) {
       mk->SetAttr("DoEmbedding", 1);
-    }
-    if (maker == "StPxlSimMaker" && GetOption("pxlSlowSim")) {
-      mk->SetAttr("useDIGMAPSSim", 1);
     }
 
   Add2Chain:

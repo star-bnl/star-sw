@@ -15,7 +15,6 @@
 #else
 #include "TCernLib.h"
 #endif
-#include "StMessMgr.h"
 //______________________________________________________________________
 extern "C"
 {
@@ -42,7 +41,7 @@ StarVMCDetector::StarVMCDetector(const Char_t *name) : TDataSet(name), fId(kUnkn
   //  assert(fK >= 0);
   if (fK >= 0) InvertBit(kInvalidObject);
   else {
-    LOG_ERROR << "Ignore sensitive volume: " << Name.Data() << endm;
+    cout << "Ignore sensitive volume: " << Name.Data() << endl;
   }
 }
 //________________________________________________________________________________
@@ -101,7 +100,7 @@ const Char_t *StarVMCDetector::FormPath(const Char_t *FMT, Int_t N, Int_t *numbv
   case 15: return Form(FMT, numbv[0],numbv[1],numbv[2],numbv[3],numbv[4],numbv[5],numbv[6],numbv[7],numbv[8],numbv[9],
 		       numbv[10],numbv[11],numbv[12],numbv[13],numbv[14]);
   default:
-    LOG_ERROR<< "StarVMCDetector::FormPath illegal NVL = " << N << endm;
+    cout << "StarVMCDetector::FormPath illegal NVL = " << N << endl;
     assert(0);
   }
   return 0;
@@ -147,13 +146,13 @@ void StarVMCDetector::GetNumbv(const Char_t *path, Int_t *numbvR) {
   case 14: nread = sscanf(path, fFMT.Data(), &numbv[0],&numbv[1],&numbv[2],&numbv[3],&numbv[4],&numbv[5],
 			  &numbv[6],&numbv[7],&numbv[8],&numbv[9],&numbv[10],&numbv[11],&numbv[12],&numbv[13]); break;
   default:
-    LOG_ERROR << "StarVMCDetector::GetNumbv for volume " << GetName() << " illegal NVL = " << N << endm;
+    cout << "StarVMCDetector::GetNumbv for volume " << GetName() << " illegal NVL = " << N << endl;
     //    assert(0);
   }
   if (N != nread) {
-    LOG_ERROR << "StarVMCDetector::GetNumbv for volume " << GetName() << " mismatched" << endm;
-    LOG_ERROR << "path  \t" << path << "\tand" << endm;
-    LOG_ERROR << "format\t" << fFMT << endm;
+    cout << "StarVMCDetector::GetNumbv for volume " << GetName() << " mismatched" << endl;
+    cout << "path  \t" << path << "\tand" << endl;
+    cout << "format\t" << fFMT << endl;
     N = 0;
   }
   // Reduce to no. of active numb (fNVmax[] != 1)
@@ -186,7 +185,7 @@ const Char_t *StarVMCDetector::FormPath(Int_t volumeId) {
       if (row <= 40) numbv[2] = 1 + row;
       else           numbv[2] = 2 + row;
     } else {
-      LOG_ERROR << path.Data() << " configuration for " << fNVmax[2] << " pad rows" << endm;
+      cout << path.Data() << " configuration for " << fNVmax[2] << " pad rows" << endl;
       return path.Data();
     }
     path = FormPath(fFMT,numbv);

@@ -1398,6 +1398,8 @@ Bfc_st BFC[] = { // standard chains
 
   {"Stu"         ,""  ,"","","",                 "StTpcDb,StEventUtilities","Load StEventUtilities",kFALSE},
 
+  {"epdDb"       ,"epdDb","","epdDb",               "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},

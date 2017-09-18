@@ -14,10 +14,6 @@
   endif
 #  setenv NODEBUG yes
 #  starver .DEV2
-  setenv NODEBUG yes
-  setenv STARFPE NO
-  setup 64b
-  starver TFG17i
   set file = hijing_R${rung}_${f}_${l}
   echo "${file}"
   set logFile  = ${file}B.log
@@ -30,25 +26,17 @@
   set ddir = `pwd`
   set case = `basename $ddir`; echo "case = $case";
   echo $case | grep PPV
-#  set fitter = ",StiCA,KFVertex";
-  set fitter = ",StiCA"
+  set fitter = ",StiCA,KFVertex";
 #  if (! $?) set fitter = ",VFPPVnoCTB,Sti";
 #  if (! $?) set fitter = ",VFPPVnoCTB,StiCA";
   echo "fitter $fitter"
-  set sdt = "";
-  set Name = `basename $PWD`
-  echo $Name | grep -i Ideal
-  if ($?) set sdt = ",sdt20160301";
-  set chain = "MC.2016a,HijingAuAu200Z6cm,CorrX,OSpaceZ2,OGridLeak3D,rung."${rung}${fitter},${sdt}",noRunco,noHistos";
-  echo "chain = ${chain}"
   set tagFile = ${file}.root
 #  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,CorrX,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-#  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
-  root4star -q -b 'bfc.C('$f','$l',"'${chain}'",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:./sched$JOBID.log" />
-        <stderr URL="file:./schd$JOBID.err" />
-<!-- <input URL="command:RunId.pl 11 301 20" /> -->
-<input URL="command:RunId.pl 1 10 10" />
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<input URL="command:RunId.pl 11 301 20" />
+<!-- <input URL="command:RunId.pl 1 10 10" /> -->
 </job>

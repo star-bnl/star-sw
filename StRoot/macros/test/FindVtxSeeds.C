@@ -19,6 +19,8 @@ void load() {
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StdEdxY2Maker");
+  gSystem->Load("StPicoEvent");
+  gSystem->Load("StPicoDstMaker");
   gSystem->Load("StPass0CalibMaker");
 }
 
@@ -36,6 +38,7 @@ void FindVtxSeeds(
 
   // Set up VertexSeedMaker
   StVertexSeedMaker* vtxSeedMk=0;
+  St_db_Maker* dbMaker=0;
   TString pstr = path;
   if (pstr.Length() > 0 && !(pstr.EndsWith("/"))) pstr.Append("/");
   TString fstr = file;
@@ -53,9 +56,17 @@ void FindVtxSeeds(
     dstMaker->SetStatus("MuEvent",1);
     dstMaker->SetStatus("PrimaryVertices",1);
     dstMaker->SetStatus("PrimaryTracks",1);
+    dstMaker->SetStatus("GlobalTracks",1);
     dstMaker->SetStatus("BTofHeader",1);
     new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
     vtxSeedMk = (StVertexSeedMaker*) (new StMuDstVtxSeedMaker());
+  } else if (fstr.EndsWith("picoDst.root")) {
+    pstr += fstr;
+    dstMaker = new StPicoDstMaker(2,pstr.Data());
+    dstMaker->SetStatus("Event",1);
+    dstMaker->SetStatus("Track",1);
+    dbMaker = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
+    vtxSeedMk = (StVertexSeedMaker*) (new StPicoDstVtxSeedMaker());
   } else if (fstr.EndsWith("daq")) {
     cout << "Please process with a BFC chain. Stopping." << endl;
     return;
@@ -69,6 +80,34 @@ void FindVtxSeeds(
   int status = chain.Init();
   if (status) { chain.Fatal(status,"on init"); return; }
 
+  // Attempt to determine the run number, and if necessary,
+  // set the date/time
+  if (fstr.BeginsWith("st_")) {
+    fstr.ReplaceAll("adc_","");
+    fstr.Remove(0,fstr.Index('_',fstr.First('_')+1)+1);
+    int run = fstr.Atoi();
+    if (run > 0) {
+      cout << "Guessing run number from filename to be: " << run << endl;
+      chain.InitRun(run);
+      if (dbMaker) {
+        int port = (((run/1000) - 1273)/1000) + 3400;
+        TMySQLServer serv(Form("mysql://dbbak.starp.bnl.gov:%d/RunLog",port),"","");
+        TSQLResult* result = serv.Query(Form("SELECT FLOOR(1e-6*(FROM_UNIXTIME(firstEventTime)+0)),FLOOR(FROM_UNIXTIME(firstEventTime)+0)%1000000 FROM daqSummary WHERE runNumber=%d",run));
+        if (result) {
+          TSQLRow* row = result->Next();
+          if (row) {
+            int date = atoi(row->GetField(0));
+            int time = atoi(row->GetField(1));
+            dbMaker->SetDateTime(date,time);
+          }
+        }
+      }
+    } else {
+      cout << "Unable to guess run number...skipping InitRun()" << endl;
+    }
+  }
+  
+
   // Loop over events
   for( Int_t i=0; i<nevents; i++ ) {
     chain.Clear();
@@ -81,8 +120,11 @@ void FindVtxSeeds(
 
 }
 
-// $Id: FindVtxSeeds.C,v 1.3 2015/05/23 02:39:21 genevb Exp $
+// $Id: FindVtxSeeds.C,v 1.4 2017/09/15 14:49:38 genevb Exp $
 // $Log: FindVtxSeeds.C,v $
+// Revision 1.4  2017/09/15 14:49:38  genevb
+// Allow use of PicoDsts
+//
 // Revision 1.3  2015/05/23 02:39:21  genevb
 // Reduce number of MuDst branches to read
 //

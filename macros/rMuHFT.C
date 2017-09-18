@@ -76,14 +76,11 @@ enum {kSel = 5, kVarX = 3, kVarY = 4};
 const Char_t *NameRcMc[2] = {"RC","MC"};
 const Char_t *NameCharge[kTotalSigns] = {"Pos", "Neg"};
 const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};
-const Double_t zcut = 6;
+const Double_t zcut = 5;
 const Char_t *sel[kSel] = {"Pxl+Ist","Pxl+Sst","Pxl+Ist+Sst","No HFT","All"}; // i
 const Char_t *pTp[kVarX] = {"1/pT","1/p","Phi"}; // j
 const Char_t *pTpN[kVarX] = {"InvpT","Invp","Phi"}; // jj
 const Char_t *varN[kVarY] = {"dcaXY","pullXY","dcaZ","pullZ"}; // k
-const Char_t *detN[3] = {"Pxl", "Ist", "Sst"};
-TH2D ******hists = 0;
-TFile **FitFiles = 0;
 //________________________________________________________________________________
 static Int_t _debug = 0;
 void SetDebug(Int_t k) {_debug = k;}
@@ -96,9 +93,7 @@ Bool_t Accept(const StMuTrack *gTrack = 0) {
   if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) return kFALSE; // bad fit or short track pointing to EEMC
   if (  gTrack->flag() > 1000) return kFALSE;  // pile up track in TPC
   if (  gTrack->nHitsFit() < 15) return kFALSE;
-  if (TMath::Abs(gTrack->eta()) > 1.5) return kFALSE;
   //  if (  gTrack->qaTruth() < 90) return kFALSE;
-  
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -124,14 +119,15 @@ void rMuHFT(Long64_t nevent = 9999999, const  char* outFile="rMuHFT.root") {
   TString zCut(Form(" vs no. of Possible ones for primary tracks with primary vertex |Z| < %f cm", zcut));
   TString Name;
   TString Title;
-  TH2D *NoHits[kRCMC][3];
+  Name = "NoPxlHits"; Title = "No.of fitted PXL hits"; Title += zCut;
+  TH2D *NoPxlHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  Name = "NoIstHits"; Title = "No.of fitted IST hits"; Title += zCut;
+  TH2D *NoIstHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  Name = "NoSstHits"; Title = "No.of fitted SST hits"; Title += zCut;
+  TH2D *NoSstHits = new TH2D(Name, Title,10,0,10,10,0,10); 
+  Name = "NoPxlIstSstHits"; Title = "No.of fitted Pxl,Ist and SST hits"; Title += zCut;
   TH2D *hists[kRCMC][kSel][kVarX][4];
   for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
-    for (Int_t d = 0; d < 3; d++) {
-      Name = Form("No%sHits",detN[d]);
-      Title = Form("No.of fitted %s hits versus no. of possible %s",detN[d], zCut.Data());
-      NoHits[iRM][d] = new TH2D(Name, Title,10,0,10,10,0,10); 
-    }
     for (Int_t i = 0; i < kSel; i++) {
       for (Int_t j = 0; j < kVarX; j++) {
 	for (Int_t k = 0; k < kVarY; k++) {
@@ -227,21 +223,16 @@ void rMuHFT(Long64_t nevent = 9999999, const  char* outFile="rMuHFT.root") {
 	if (noPxlHits && noSstHits) iok = 1;
 	if (noPxlHits && noIstHits && noSstHits) iok = 2;
 	
-	HftHits->Fill(noTpcHits,noHftHits);
-	
-	
-	Int_t NoFIstHits = ( pTrack->nHitsPossInner()       & 0x7);
-	Int_t NoFSstHits = ((pTrack->nHitsPossInner() >> 3) & 0x3);
-	Int_t NoFPxlHits = ((pTrack->nHitsPossInner() >> 5) & 0x7);
-	Int_t NoFPxlIstSstHits = NoFPxlHits +  NoFSstHits;
-
-	Int_t NoPIstHits = ( pTrack->nHitsPossInner()       & 0x7);
-	Int_t NoPSstHits = ((pTrack->nHitsPossInner() >> 3) & 0x3);
-	Int_t NoPPxlHits = ((pTrack->nHitsPossInner() >> 5) & 0x7);
-	Int_t NoPPxlIstSstHits = NoPPxlHits + NoPSstHits;
-	Int_t NoF[3] = {NoFPxlHits, NoFIstHits, NoFSstHits};
-	Int_t NoP[3] = {NoPPxlHits, NoPIstHits, NoPSstHits};
-	for (Int_t d = 0; d < 3; d++)NoHits[iRM][d]->Fill(NoP[d],NoF[d]); 
+// 	HftHits->Fill(noTpcHits,noHftHits);
+// 	Int_t NoFPxlHits =  (mNHitsFitInner[k] & 0x7);
+// 	Int_t NoFSstHits = ((mNHitsFitInner[k] & 0x18) >> 3);
+// 	Int_t NoFPxlIstSstHits = NoFPxlHits +  NoFSstHits;
+// 	Int_t NoPPxlHits =  (mNHitsPossInner[k] & 0x7);
+// 	Int_t NoPSstHits = ((mNHitsPossInner[k] & 0x18) >> 3);
+// 	Int_t NoPPxlIstSstHits = NoPPxlHits + NoPSstHits;
+//	NoPxlHits->Fill(NoPPxlHits,NoFPxlHits);
+//	NoSstHits->Fill(NoPSstHits,NoFSstHits);
+//	NoPxlIstSstHits->Fill(NoPPxlIstSstHits,NoFPxlIstSstHits);
 	Double_t phi = TMath::RadToDeg()*pTrack->p().phi();
 	Double_t pT  = pTrack->p().perp();
 	Double_t p   = pTrack->p().mag();
@@ -286,16 +277,16 @@ void rMuHFT(Long64_t nevent = 9999999, const  char* outFile="rMuHFT.root") {
   if (fOut) fOut->Write();
 }
 //________________________________________________________________________________
-Int_t Init() {
-  static Int_t NF = 0;
-  if (hists) return NF;
+void Plots() {
+  TH1::SetDefaultSumw2();
   TSeqCollection *files = gROOT->GetListOfFiles();
-  if (! files) return NF;
+  if (! files) return;
   Int_t nn = files->GetSize();
-  if (! nn) return NF;
-  FitFiles = new TFile *[nn];
+  if (! nn) return;
+  TFile **FitFiles = new TFile *[nn];
   TIter next(files);
-  hists = new TH2D*****[nn];
+  TH2D ******hists = new TH2D*****[nn];
+  Int_t NF = 0;
   TFile *f = 0;
   while ( (f = (TFile *) next()) ) { 
     hists[NF] = new TH2D****[kRCMC];
@@ -319,26 +310,11 @@ Int_t Init() {
     }
     NF++;
   }
-  return NF;
-}
-//________________________________________________________________________________
-void ParseName(const Char_t *name, Int_t &iRM, Int_t &x, Int_t &y) {
-  TString Name(name);
-  for (iRM = 0; iRM < kRCMC; iRM++) {
-    if (Name.BeginsWith(NameRcMc[iRM])) break;
-  }
-  for (x = 0; x < kVarX; x++) {
-    if (Name.Contains(pTpN[x])) break;
-  }
-  for (y = 0; y < kVarX; x++) {
-    if (Name.Contains(varN[y])) break;
-  }
-}
-//________________________________________________________________________________
-void Resolution(Int_t iRM, Int_t x, Int_t y) {
-  Int_t NF = Init();
+  // sigma_dca_XY versus 1/pT
+  Int_t x = 0; // InvpT
+  Int_t y = 0; // dcaXY
   for (Int_t i = kSel - 2; i >= 0; i--) {
-    TString cName(Form("%s_%s_%s_%s",NameRcMc[iRM],sel[i],pTp[x],varN[y]));
+    TString cName(Form("%s_%s_%s",sel[i],pTp[x],varN[y]));
     TCanvas *c = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(cName);
     if (c) c->Clear();
     else   c = new TCanvas(cName,cName);
@@ -370,18 +346,8 @@ void Resolution(Int_t iRM, Int_t x, Int_t y) {
       }
     }
   }
-}
-//________________________________________________________________________________
-void Resolution(const Char_t *name = "RCdcaXYInvpT") {
-  Int_t iRM, x, y;
-  ParseName(name, iRM, x, y);
-  Resolution(iRM, x, y);
-}
-//________________________________________________________________________________
-void Efficiency(Int_t iRM, Int_t x, Int_t y) {
-  Int_t NF = Init();
   // Efficiency
-  TString cName(Form("Efficiency%s",NameRcMc[iRM]));
+  TString cName("Efficiency");
   TCanvas *c = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(cName);
   if (c) c->Clear();
   else   c = new TCanvas(cName,cName);
@@ -390,7 +356,7 @@ void Efficiency(Int_t iRM, Int_t x, Int_t y) {
   frame->SetXTitle(pTp[x]);
   frame->SetYTitle("(%)");
   Int_t ref = kSel - 1;
-  TLegend *l = new TLegend(0.5,0.6,0.7,0.8);
+  TLegend *l = new TLegend(0.5,0.2,0.7,0.4);
   l->Draw();
   for (Int_t m = 0; m < NF; m++) {
     TString NameF(FitFiles[m]->GetName());
@@ -400,11 +366,9 @@ void Efficiency(Int_t iRM, Int_t x, Int_t y) {
     NameF.ReplaceAll("rMuHFT","");
     NameF.ReplaceAll("pi","#pi");
     FitFiles[m]->cd();
-    //    for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
-    TH1D *refH = hists[m][iRM][ref][x][y]->ProjectionX();
-    TH1D *effHFT = 0;
-    for (Int_t i = kSel - 2; i >= -1; i--) {
-      if (i >= 0) {
+    for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
+      TH1D *refH = hists[m][iRM][ref][x][y]->ProjectionX();
+      for (Int_t i = kSel - 2; i >= 0; i--) {
 	TH1D *proj = hists[m][iRM][i][x][y]->ProjectionX();
 	TH1D *eff  = new TH1D(*proj); eff->SetName(Form("Eff_%s",proj->GetName()));
 	eff->Divide(proj,refH,1,1,"b");
@@ -412,52 +376,10 @@ void Efficiency(Int_t iRM, Int_t x, Int_t y) {
 	eff->SetMarkerColor(iRM+1);
 	eff->SetLineColor(iRM+1);
 	eff->SetMarkerStyle(20+i);
-	l->AddEntry(eff,Form("%s %s %s",NameRcMc[iRM],sel[i],NameF.Data()));
+	l->AddEntry(eff,Form("%s %s",sel[i],NameF.Data()));
 	eff->Draw("samep");
-	if (i <= 2) {
-	  if (! effHFT) effHFT = new TH1D(*eff);
-	  else  	effHFT->Add(eff);
-	}
-      } else {
-	l->AddEntry(effHFT,"HFT");
-	effHFT->SetMarkerColor(iRM+1);
-	effHFT->SetLineColor(iRM+1);
-	effHFT->SetMarkerStyle(25);
-	effHFT->Draw("samep");
       }
     }
   }
-  //}
 }
-//________________________________________________________________________________
-void Efficiency(const Char_t *name = "RCdcaXYInvpT") {
-  Int_t iRM, x, y;
-  ParseName(name, iRM, x, y);
-  Efficiency(iRM, x, y);
-}
-//________________________________________________________________________________
-void Plots() {
-  TH1::SetDefaultSumw2();
-  Init();
-  // sigma_dca_XY versus 1/pT
-  Int_t x = 0; // InvpT
-  Int_t y = 0; // dcaXY
-  for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
-    Efficiency(iRM, x, y);
-  }
-  for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
-    Resolution(iRM, x, y);
-  }
-}
-/*
-  TCanvas *MC = new TCanvas("MC","MC");
-  TLegend *lMC = new TLegend(0.5,0.5,0.9,0.9);
-  TString same;
-  for (Int_t i = 4; i >= 0; i--) {TH2 *h2 = (TH2 *) gDirectory->Get(Form("MCpullXYInvpT%i",i)); TH1D *h1 = h2->ProjectionX(); h1->SetMarkerColor(i+1); h1->SetLineColor(i+1); h1->Draw(same); same = "same"; lMC->AddEntry(h1,h2->GetTitle());} 
-  lMC->Draw();
-  TCanvas *RC = new TCanvas("RC","RC");
-  TLegend *lRC = new TLegend(0.5,0.5,0.9,0.9);
-  TString same;
-  for (Int_t i = 4; i >= 0; i--) {TH2 *h2 = (TH2 *) gDirectory->Get(Form("RCpullXYInvpT%i",i)); TH1D *h1 = h2->ProjectionX();  h1->SetMarkerColor(i+1); h1->SetLineColor(i+1); h1->Draw(same); same = "same"; lRC->AddEntry(h1,h2->GetTitle());} 
-  lRC->Draw();
- */
+
