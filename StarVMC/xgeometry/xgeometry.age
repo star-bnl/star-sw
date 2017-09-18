@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.23 2017/04/20 16:59:00 jwebb Exp $
+* $Id: xgeometry.age,v 1.24 2017/09/18 22:13:50 jwebb Exp $
 
 
 
@@ -2492,10 +2492,11 @@ If LL>0
   Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015c    '; call geom_y2015c; }
 
-  Case y2016   { y2016 : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
-  Case y2016a  { y2016 : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
+  Case y2016   { y2016  : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
+  Case y2016a  { y2016a : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
 
-  Case y2017   { y2017 : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
+  Case y2017   { y2017  : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
+  Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  }
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
@@ -4618,8 +4619,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.23 2017/04/20 16:59:00 jwebb Exp $
+* $Id: xgeometry.age,v 1.24 2017/09/18 22:13:50 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.24  2017/09/18 22:13:50  jwebb
+* y2017a production geometry added
+*
 * Revision 1.23  2017/04/20 16:59:00  jwebb
 * Add y2011b case statement.
 *
