@@ -129,6 +129,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2016a",      20151215,     1, "y2016a",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
 
   {"y2017",       20161215,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
+  {"y2017a",      20161215,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},   
  
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
