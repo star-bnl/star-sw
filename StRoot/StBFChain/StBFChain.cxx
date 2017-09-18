@@ -16,6 +16,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
+#include "StStarLogger/StLoggerManager.h"
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
@@ -53,17 +54,15 @@ ClassImp(StBFChain);
 static Int_t NoMakersWithInput = 0; // no. of makers which have time stamp 
 static TString Dirs[10] = {""};
 //_____________________________________________________________________________
-// Hack constructor.
-/*!
- * This method can be called with mode 1 or 2 to enable chain setup 1 or chain
- * setup 2.
- *
- * Note: This constructor now accepts a second argument for the chain name.
- * Embedding scripts were modified accordingly.
- *
- * This was primarily set to make possible the transition between the regular
- * chain and the ITTF chain options.
- */
+StBFChain::StBFChain(const Char_t *name, const Bool_t UseOwnHeader) :
+  StChain(name,UseOwnHeader)
+  ,fBFC(0), fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
+  ,FDate(0),FTime(0),FDateS(0),FTimeS(0),fFiltTrg(""),fRunG(0)
+  ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {
+  if (! gMessMgr) StLoggerManager::StarLoggerInit();
+  Setup();
+}
+//_____________________________________________________________________________
 void StBFChain::Setup(Int_t mode) {
   static const Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
   TString chain("BFC.C");
@@ -722,12 +721,14 @@ Int_t StBFChain::Instantiate()
     }
 
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
       TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
       cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
       cmd += "pSMMk->DoXi();";
       cmd += "pSMMk->DoKink();";
       cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
       ProcessLine(cmd);
+#endif
     }
 
     // Alex requested an option (not turned by default) to disable all
