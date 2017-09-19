@@ -7,6 +7,7 @@
 class TClonesArray;
 
 class TVirtualMCDecayer;
+class TParticle;
 
 /**!
    \class AgUDecay
@@ -27,7 +28,7 @@ public:
     return d;
   };
 
-  Int_t operator()();
+  int operator()();
 
   enum DiscoveryPolicy_t 
     {
@@ -42,6 +43,7 @@ private:
 protected:
 
   AgUDecay();
+  virtual ~AgUDecay(); 
 
   static AgUDecay sInstance;
 
@@ -51,6 +53,11 @@ protected:
 
   DiscoveryPolicy_t mDiscovery;
   int mNextG3id;
+
+  double StackParticleForTransport( const TParticle* particle );
+  bool MayTransport( const TParticle* particle );
+
+  int mNonConservation;
 
   ClassDef(AgUDecay,1);
 };
