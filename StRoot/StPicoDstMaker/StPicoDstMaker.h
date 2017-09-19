@@ -5,6 +5,7 @@
 #include "StPicoDstMaker/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoBbcFiller.h"
 #include "StPicoDstMaker/StPicoEpdFiller.h"
+#include "StPicoDstMaker/StPicoFmsFiller.h"
 
 class TClonesArray;
 class TChain;
@@ -166,6 +167,7 @@ private:
 
   StPicoBbcFiller  mBbcFiller;
   StPicoEpdFiller  mEpdFiller;
+  StPicoFmsFiller  mFmsFiller;
 
   ClassDef(StPicoDstMaker, 0)
 };

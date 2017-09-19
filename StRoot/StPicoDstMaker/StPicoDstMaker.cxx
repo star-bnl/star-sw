@@ -32,6 +32,7 @@
 #include "StMuDSTMaker/COMMON/StMuMtdPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcPoint.h"
+#include "StMuDSTMaker/COMMON/StMuFmsUtil.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -41,6 +42,8 @@
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcRawMaker/defines.h"
 #include "StEmcRawMaker/StBemcTables.h"
+
+#include "StFmsDbMaker/StFmsDbMaker.h"
 
 #include "tables/St_mtdModuleToQTmap_Table.h"
 #include "tables/St_mtdQTSlewingCorr_Table.h"
@@ -55,6 +58,7 @@
 #include "StPicoEvent/StPicoBTowHit.h"
 #include "StPicoEvent/StPicoBTofHit.h"
 #include "StPicoEvent/StPicoMtdHit.h"
+#include "StPicoEvent/StPicoFmsHit.h"
 #include "StPicoEvent/StPicoBEmcPidTraits.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 #include "StPicoEvent/StPicoMtdPidTraits.h"
@@ -75,7 +79,8 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
   mPicoArrays{}, mStatusArrays{},
   mBbcFiller(*mPicoDst),
-  mEpdFiller(*mPicoDst)
+  mEpdFiller(*mPicoDst),
+  mFmsFiller(*mPicoDst)
 {
   streamerOff();
   createArrays();
@@ -169,6 +174,7 @@ void StPicoDstMaker::streamerOff()
   StPicoMtdHit::Class()->IgnoreTObjectStreamer();
   StPicoBbcTile::Class()->IgnoreTObjectStreamer();
   StPicoEpdTile::Class()->IgnoreTObjectStreamer();
+  StPicoFmsHit::Class()->IgnoreTObjectStreamer();
   StPicoEmcTrigger::Class()->IgnoreTObjectStreamer();
   StPicoMtdTrigger::Class()->IgnoreTObjectStreamer();
   StPicoBTofPidTraits::Class()->IgnoreTObjectStreamer();
@@ -621,6 +627,14 @@ Int_t StPicoDstMaker::MakeWrite()
   fillMtdHits();
   mBbcFiller.fill(*mMuDst);
   mEpdFiller.fill(*mMuDst);
+
+  // Could be a good idea to move this call to Init() or InitRun()
+  StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
+
+  if (fmsDbMaker)
+    StMuFmsUtil::recoverMuFmsCollection(*mMuDst, fmsDbMaker);
+
+  mFmsFiller.fill(*mMuDst);
 
   if (Debug()) mPicoDst->printTracks();
 
