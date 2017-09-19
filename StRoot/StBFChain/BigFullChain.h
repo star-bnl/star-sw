@@ -1819,8 +1819,8 @@ Bfc_st BFC[] = { // standard chains
 
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
   {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
-  {"PicoVtxDefault","","",""                                            ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd","","",""                                     ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
+  {"PicoVtxVpd"     ,"","",""                            ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
 
 
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
