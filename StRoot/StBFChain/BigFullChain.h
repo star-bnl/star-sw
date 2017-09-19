@@ -56,7 +56,6 @@ Bfc_st BFC[] = { // standard chains
   // geometry timestamps are now dynamic. Please see StChain/StMaker
   {"ForceGeometry","","","","","",  "Force geometry to overwrite the geometry coming from fz-file", kFALSE},
   // geometry timestamps are now dynamic. Please see StChain/StMaker
-
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -72,7 +71,6 @@ Bfc_st BFC[] = { // standard chains
   {"DbV1007"     ,""  ,"","db,ry1h"        ,"","",                "20011007/0 Db Version for p01hi",kFALSE},
   {"DbV1107"     ,""  ,"","db,ry1h"        ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
   {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
-
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -86,7 +84,6 @@ Bfc_st BFC[] = { // standard chains
 #endif /* __AgMLonFly__ */
   {"Agi" ,"" ,"","-VmcGeo,-AgML","","","Alias VmcGeometry to AgiGeometry (gstar original geometry)",kFALSE},
   {"VmcGeo"      ,""  ,"","-AgML,-Agi"                    ,"",""     ,"Alias VmcGeometry to VmcGeo",kFALSE},
-
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -114,7 +111,7 @@ Bfc_st BFC[] = { // standard chains
   {"Test.default.StiVMC","","","TpcRS,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,"
    "miniMcMk,McAna,Test.reco.StiVMC,CMuDst"                                               ,"","","",kFALSE},
   {"Test.StiVMC","","","TpcRS,StiVMC,event,analysis,tags,EvOut,StarMagField,FieldOn,Idst,CMuDst"
-   ,                                                                                      "","","",kFALSE},
+   ,                                                                                       "","","",kFALSE},
   {"Test.VeryFast.StiVMC","","","TpcFastSim,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,"
    "SvtCL,tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,StiVMC,Idst,event,analysis,EventQA,tags,"
    "EvOut,StarMagField,FieldOn,IAna,CMuDst"                                               ,"","","",kFALSE},
@@ -164,8 +161,7 @@ Bfc_st BFC[] = { // standard chains
    "SsdIt,SvtIt,VFMinuit,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,useXGeom"
    ,                                                                                       "","","",kFALSE},
   {"MC.y2006"        ,"","","tpcRS,fss,y2006h,Idst,IAna,l0,tpcI,tpxClu,ftpc,VFMinuit,NoSsdIt,NoSvtIt"
-   ",MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"
-   ,                                                                                       "","","",kFALSE},
+   ",MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom",         "","","",kFALSE},
   {"MC.y2007"        ,"","","tpcRS,srs,ssd,fss,y2007,Idst,BAna,tpcI,tpxClu,ftpc,SvtIt,SsdIt,"
    "VFMinuit,MakeEvent,IdTruth,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,useXGeom"
    ""                                                               ,"","","no l0 and trg any more",kFALSE},
@@ -179,8 +175,7 @@ Bfc_st BFC[] = { // standard chains
    "NoSvtIt,VFMinuit,tpcDB,MakeEvent,IdTruth,tags,bbcsim,emcY2,EEfs,evout,big,McEvout,MiniMcMk,"
    "ReadAll,useXGeom"                                                                     ,"","","",kFALSE},
   {"MC.y2009"       ,"","","TpcRS,TpxClu,fss,y2009,Idst,IAna,tpcI,ftpc,VFMinuit,NoSsdIt,NoSvtIt"
-   ",MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"
-   ,                                                                                       "","","",kFALSE},
+   ",MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom",         "","","",kFALSE},
   {"MC.y2009a"       ,"","","TpcRS,TpxClu,fss,y2009a,Idst,IAna,tpcI,ftpc,VFMinuit,NoSsdIt,NoSvtIt,"
    "MakeEvent,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big,usexgeom"
    ,                                                                                       "","","",kFALSE},
@@ -195,7 +190,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC.in.y2010"     ,"","","in,y2010c,FieldOn,ReverseField,Idst,BAna,fss,ftpcT,fpt,NoSsdIt,"
    "NoSvtIt,VFMinuit,tpcDB,MakeEvent,IdTruth,tags,bbcsim,emcY2,EEfs,evout,big,McEvout,MiniMcMk,"
    "ReadAll,useXGeom"                                                                     ,"","","",kFALSE},
-  {"MC.y2011"        ,"","","TpcRS,TpxClu,y2011,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,fss,ftpcT,fpt,VFMinuit,tpcDB"
+  {"MC.y2011","","","TpcRS,TpxClu,y2011,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,fss,ftpcT,fpt,VFMinuit,tpcDB"
    ",TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"
    ,                                                       "","","no l0 and trg any more, +BTof RC",kFALSE},
   {"MC.fast.y2011"   ,"","","y2011,Test.default.Fast.ITTF,NosvtIT,NossdIT,NosstIT,-sfs,-ssdFast,"
@@ -205,7 +200,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"MC.y2012"        ,"","","TpcRS,TpxClu,y2012,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"
-   ,                                                        "","","no l0 and trg any more, +BTof RC",kFALSE},
+   ,                                                       "","","no l0 and trg any more, +BTof RC",kFALSE},
   {"MC.y2012a"       ,"","","TpcRS,TpxClu,y2012a,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"
    ,                                                                                       "","","",kFALSE},
@@ -334,9 +329,8 @@ Bfc_st BFC[] = { // standard chains
   {"RC.y2014.nohft","","","P2014a,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
    ,                                                                                       "","","",kFALSE},
   {"RC.y2014","","","RC.y2014.nohft,pxlHit,istHit",                                        "","","",kFALSE},
-
-  {"RC.pp2015.nohft","","","pp2015,mtd,btof,BEmcChkStat,pp2pp,fmsDat,fmsPoint,fpsDat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
-   ,                                                                                       "","","",kFALSE},
+  {"RC.pp2015.nohft","","","pp2015,mtd,btof,BEmcChkStat,pp2pp,fmsDat,fmsPoint,fpsDat,CorrX,OSpaceZ2,"
+   "OGridLeak3D,-hitfilt",                                                                 "","","",kFALSE},
   {"RC.pp2015","","","RC.pp2015.nohft,pxlHit,istHit",                                      "","","",kFALSE},
   {"RC.y2016.nohft","","","P2016,btof,mtd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D"
    ,                                                                                       "","","",kFALSE},
@@ -408,7 +402,7 @@ Bfc_st BFC[] = { // standard chains
   {"test_UU200.MC.y2012","","","MC.y2012,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf12002_1_100evts.fzd",kFALSE},
   {"test_AuAu200.MC.y2014","","","MC.2014,fzin,TpcRS,Sti","",""
-   ,"/star/rcf/simu/rcf15000_1_100evts.fzd"                                                       ,kFALSE}, 
+   ,"/star/rcf/simu/rcf15000_1_100evts.fzd"                                                        ,kFALSE}, 
   {"test.RC.centr.y2000","","","RC.y2000,Sti","",""
    ,                                   "/star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq",kFALSE},
   {"test.RC.minb.y2000","","","RC.y2000,Sti","",""
@@ -501,7 +495,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2012/115/st_physics_13115004_raw_2010002.daq",kFALSE},
   {"test.RC.pp500.y2013","","","RC.pp.y2013,Sti","",""
    ,                              "/star/rcf/test/daq/2013/079/st_physics_14079008_raw_1920004.daq",kFALSE},
-
   {"test.RC.AuAu15.y2014","","","RC.y2014.nohft,Sti","",""
    ,                              "/star/rcf/test/daq/2014/069/st_physics_15069008_raw_2500008.daq",kFALSE},
   {"test.RC.AuAu200.y2014","","","RC.y2014.nohft,Sti","",""
@@ -518,7 +511,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
   {"test.RC.AuAu200.y2016","","","RC.y2016,-hitfilt,Sti","",""          
    ,                              "/star/rcf/test/daq/2016/078/st_physics_17078006_raw_1000030.daq",kFALSE},
-  //   ,                              "/star/rcf/test/daq/2016/056/st_physics_17056024_raw_1500020.daq",kFALSE}, 
   //_________ eval _____________
   {"eval_Sti_auau200.MC.y2007"  ,"","","MC.y2007,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf1296_02_100evts.fzd",kFALSE},
@@ -823,7 +815,7 @@ Bfc_st BFC[] = { // standard chains
   {"C2003X"      ,""  ,"","y2003X,C3default"           ,"","","Turn on chain Y2003X (full B/E EMC)",kFALSE},
   // MDC / Sim chain agregates
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
-  {"MDC4" ,""  ,"","C2001,tpcRS,tpc_daq,Simu,srs,fss,rrs,big,GeantOut","","","Turn on chain for MDC4",kFALSE},
+  {"MDC4" ,"","","C2001,tpcRS,tpc_daq,Simu,srs,fss,rrs,big,GeantOut","","","Turn on chain for MDC4",kFALSE},
   {"MDC4New"     ,""  ,"","y2001n,C2default,tpcRS,tpc_daq,Simu,srs,fss,rrs,big,GeantOut","",""
    ,                                                 "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,tpcRS,tpc_daq,Simu,sss,fss,rrs,big,GeantOut"
@@ -977,10 +969,8 @@ Bfc_st BFC[] = { // standard chains
   {"P2008"       ,"" ,"",  // this one is final and official production ready, June 2008
    "B2008a,IAna,hitfilt,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,Corr4,analysis"
    ,                        "","","Production chain for 2008 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
-  //
   // Chains for 2009 run p+p essentially
   // Note that we always need to start with VFMinuit as VFPPV is full of asserts
-  //
   {"B2009.1","","","ry2009,in,tpcX,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2009 ITTF (tpc)",kFALSE},
   {"B2009.2","","","ry2009a,in,tpcX,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
@@ -1068,7 +1058,6 @@ Bfc_st BFC[] = { // standard chains
    ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
   {"B2014a","","","ry2014a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                              "Base chain for 2014a ITTF (tpc)",kFALSE},
-
   {"P2014","" ,"",
    "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,analysis" //,l3onl,fpd
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -1079,16 +1068,12 @@ Bfc_st BFC[] = { // standard chains
   // Year 15 chains
   {"B2015"  ,"","","ry2015,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
-
   {"B2015a"  ,"","","ry2015a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                                "Base chain for run 2015a data",kFALSE},
-
   {"B2015b"  ,"","","ry2015b,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                 "Base chain for run 2015 with y2015b geometry",kFALSE},
-
   {"B2015c"  ,"","","ry2015c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                  "Base chain for run 2015 with y2015c geometry",kFALSE},
-
   {"pp2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,emcDY2,trgd,ZDCvtx,StiHftC,analysis"
    ,                               "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
@@ -1119,32 +1104,30 @@ Bfc_st BFC[] = { // standard chains
   {"P2016","" ,"",
    "B2016,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
   {"B2016a"  ,"","","ry2016a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                         "Production chain for 2016 data (tpc)",kFALSE},
   {"P2016a","" ,"",
    "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
+  // Year 17, p+p and BES - first chains are FastOffline related as usual
   {"B2017"  ,"","","ry2017,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2017 ITTF (tpc)",kFALSE},
   {"P2017","" ,"", "B2017,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
-   ,                                                          "","","Production chain for 2017 data",kFALSE},
-
+   ,                                                         "","","Production chain for 2017 data",kFALSE},
   {"pp2017","" ,"",
    "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
-   ,               "","","Production chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   ,              "","","Production chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"P2017","" ,"",
    "B2017,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,               "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
-
-  // TEST
-  //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-  // ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
-  //{"pp2013X","" ,"",
-  // "B2013_X,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-  // "","",                "Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
+  {"B2017a"  ,"","","ry2017a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                      "Production chain for run 2017 data (tpc)",kFALSE},
+  {"pp2017a","" ,"",
+   "B2017a,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   ,               "","","Production chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2017a","" ,"",
+   "B2017a,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   ,               "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
@@ -1335,9 +1318,7 @@ Bfc_st BFC[] = { // standard chains
   {"l3Util"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
   {"EmcTrig"     ,""  ,"","","",                                             "StEmcTriggerMaker","",kFALSE},
-
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
-
 #ifndef  __NoStrangeMuDst__
   {"MuDSTDeps"   ,"","","StEvent,Stu,StBichsel",""
    ,                                     "StStrangeMuDstMaker,Tree","Load MuDST misc. dependencies",kFALSE},
@@ -1351,8 +1332,6 @@ Bfc_st BFC[] = { // standard chains
   {"picoEvt"    ,"","","StEvent,Stu","",            "StPicoEvent","Load picoEvent and dependencies",kFALSE},
   {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
-
-
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
@@ -1459,7 +1438,6 @@ Bfc_st BFC[] = { // standard chains
   {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
-
   // Note: MTD related chains - because of the TrkMask, need to happen before TpcHitMaker
   {"mtdFilt"  ,"","","", "StMtdEvtFilterApplyMaker","StDataFilterMaker","MTD-based event filtering",kFALSE},
   {"mtd"      ,"","","mtdDat,mtdMatch","",                                           "","MTD Chain",kFALSE},
@@ -1471,7 +1449,6 @@ Bfc_st BFC[] = { // standard chains
   {"gmtClu"   ,"","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
   {"gmtCosmics" ,"","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
   {"gmtClusTree","","","","","",                               "WARNING *** Option is OBSOLETE ***",kFALSE},
-
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
@@ -1487,7 +1464,6 @@ Bfc_st BFC[] = { // standard chains
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
   {"St_tpc"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"St_svt"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-
   {"tpc_daq"  ,"","","TpxRaw",        "","","WARNING *** Option is OBSOLETE *** use TpxRaw instead",kFALSE},
   {"tcl","","","TpxRaw,TpxClu,MakeEvent","",""
   ,                 "WARNING *** Option is OBSOLETE *** use option TpxRaw,TpxClu,MakeEvent instead",kFALSE},
@@ -1495,8 +1471,6 @@ Bfc_st BFC[] = { // standard chains
   {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,tpc_T,StEvent,rts,detDb"
    ,                  "StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
   {"NoAnnotateCL","","","",                             "","","switch off Tonko Cluster Annotation",kFALSE},
-
-
   {"TpxPulser","TpxPulser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX pulser analysis"
    ,                                                                                                kFALSE},
   {"TpxPadMonitor","","","",                             "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1556,7 +1530,6 @@ Bfc_st BFC[] = { // standard chains
   {"dEdx"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
-
   {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker", "Run PXL raw hit maker",kFALSE},
   {"pxlSlowSim" ,"","","McEvent,StEvent,pxlDb,-pxlFastSim,pxlcluster,pxlhit","StPxlSimMaker"
    ,                                                           "StPxlSimMaker","SlowPixelSimulator",kFALSE},
@@ -1577,21 +1550,16 @@ Bfc_st BFC[] = { // standard chains
   {"sstdat"      ,"","","sst_daq"                             ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"sst_daq","","","sstCalDb,svt_T,-sls,-spa,sstUtil","StSstDaqMaker","StSstDaqMaker","... SSDT Daq",kFALSE},
-
   {"ssd"         ,"","","ssdCalDb,sls,spa,sptd"              ,"","","SSD full chain for simulation",kFALSE},
   {"sls","","","McEvent,Simu,svt_T,SvtCL"
    ,                                "St_sls_Maker","StSsdSimulationMaker", "... SSD slow simulator",kFALSE},
   {"spa"         ,"SpaStrip","","Simu,svt_T,SvtCL,ssdUtil","St_spa_Maker","StSsdSimulationMaker"
    ,                                                                 "... SSD Pedestal Annihilator",kFALSE},
   {"SsdEmbed"   ,"","","","StSsdEmbeddingMaker","StSsdSimulationMaker","... SSD Mixing geom Maker" ,kFALSE},
-
   {"spt"        ,"","","sptd", "",""                    ,"Alias for sptd - please replace in chain",kFALSE},
-
   {"sptd"       ,"","","ssdUtil,svt_T", "StSsdPointMaker","StSsdPointMaker","... SSD Point Creator",kFALSE},
   {"sptt"       ,"","","sstUtil", "StSstPointMaker","StSstPointMaker",      "... SST Point Creator",kFALSE},
-
   {"sstHit",     "", "", "sst_daq,sptt", "",                          "","SST reconstruction chain",kFALSE},
-
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
    "... SSD fast simulator"                                                                        ,kFALSE},
   {"sstfast"     ,"","","sstDb,StMcEvent,StEvent","StSstFastSimMaker","StSstFastSimMaker",
@@ -1620,9 +1588,7 @@ Bfc_st BFC[] = { // standard chains
   {"EEmcMixer", "","","",                    "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"eemcA2E","eemcA2E","" ,"db","StEEmcA2EMaker",       "StEEmcA2EMaker","E-EMC ADC to E converter",kFALSE},
   {"eemCl"    ,"eemCl","","db","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
-
   // BTOF related chains
-  
   {"btof"       ,"","","btofDat,vpdCalib,btofMatch,btofCalib"                   ,"","","BTOF Chain",kFALSE},
   {"BtofDat"   ,"tof_raw","","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    ,                                                                               "BTOF hit maker",kFALSE},
@@ -1681,7 +1647,6 @@ Bfc_st BFC[] = { // standard chains
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points",                              kFALSE},
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
-
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
   // FGT
   {"fgt"        ,"FgtChain","","fgtDat,fgtClu,fgtAtoC"        ,"StMaker","StChain","Fgt data Chain",kFALSE},
@@ -1690,7 +1655,6 @@ Bfc_st BFC[] = { // standard chains
   {"fgtClu"     ,"","", "fgtutil",    "StFgtClusterMaker","StFgtClusterMaker",  "FGT cluster maker",kFALSE},
   {"fgtAtoC"    ,"","", "fgtdb",      "StFgtA2CMaker","StFgtA2CMaker",    "FGT ADC to Charge maker",kFALSE},
   {"fgtPoint"   ,"","", "event",      "StFgtPointMaker",    "StFgtPointMaker", "Creates FGT points",kFALSE},
-
   // Some global Sti stuff including vertexing
   {"TMVARank"   ,"","",""     ,"","libTMVA,StTMVARank","Load STAR interface to TMVA for PV ranking",kFALSE},
   {"genvtx","","","TMVARank,ctf_T,EEmcUtil","StGenericVertexMaker"
@@ -1705,7 +1669,6 @@ Bfc_st BFC[] = { // standard chains
   {"VFppLMV"        ,""  ,"","genvtx"                ,"","","... VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","VFppLMV"       ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
   {"VFStoreX"       ,""  ,"","genvtx"  ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
-
   // Sti options
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
@@ -1718,7 +1681,6 @@ Bfc_st BFC[] = { // standard chains
   {"StiPxl"   ,"","",""                           ,"","StPxlUtil,StPxlDbMaker,StiPxl","Load StiPxl",kFALSE},
   {"StiIst"   ,"","",""                           ,"","StIstUtil,StIstDbMaker,StiIst","Load StiIst",kFALSE},
   {"StiBToF"  ,"","",""                                                ,"",",StiBTof","Load StiIst",kFALSE},
-
   // left for historical purpose
   {"StiLibs"    ,"","","StiTpc,StiSvt,StiSsd,BTofUtil" ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
   // switch to the HFT based chain
@@ -1726,7 +1688,6 @@ Bfc_st BFC[] = { // standard chains
   {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb",""      ,"","Enables partial  Hft (PXL)",kFALSE},
   {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,sstDb",""
    ,                                                        "","Enables complete Hft (PXL+IST+SST)",kFALSE},
-
   // depends on Sti symbols
   {"VFPPV"    ,""  ,"","ITTF,ctf_T,eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
    ,        "ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
@@ -1734,8 +1695,6 @@ Bfc_st BFC[] = { // standard chains
   {"VFPPVEv"    ,""     ,""	,"ctf_T,eemcDb"	,"StGenericVertexMaker"
    ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker"	,  "... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof"     	,""  ,""	,"VFPPVEv"	,""	     ,"","...VFPPVEv with no Btof ",kFALSE},
-
-
   // Sti/Stv chains
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
   {"StiCA"    ,"","","Sti,StiCALib",                                    "","libEG","Sti+CA tracker",kFALSE},
@@ -1755,7 +1714,6 @@ Bfc_st BFC[] = { // standard chains
   {"TpcIT"    ,"","","ITTF"                                              ,"","","Sti tracking: TPC",kFALSE},
   {"SvtIT"    ,"","","ITTF"                                              ,"","","Sti tracking: SVT",kFALSE},
   {"SsdIT"    ,"","","ITTF"                                              ,"","","Sti tracking: SSD",kFALSE},
-
   {"HpdIT"  ,""  ,"","ITTF",""                                         ,"","Sti tracking: Hpd geom",kFALSE},
   {"PixelIT",""  ,"","PxlIT",""                                               ,"","Alias for PxlIT",kFALSE},
   {"PxlIT"  ,""  ,"","ITTF",""                                       ,"","Sti tracking: Pixel geom",kFALSE},
@@ -1781,20 +1739,17 @@ Bfc_st BFC[] = { // standard chains
   {"LdEdxY2"     ,"","","tpcDb,StEvent",             "","libMinuit,StdEdxY2Maker","Load dEdx Maker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
   {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
-
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
   {"UseMCTstart","","","",                                       "","","Use MC Time start for BTOF",kFALSE},
-  
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
   // makers are part of the same library (let's not forget this)
   //{"mtdTrkMask"  ,"","","db",    "StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},
   {"mtdMatch"    ,"","","db,MtdUtil",  "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
   {"mtdCalib"    ,"","","db",                 "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
-
   {"gmtMatch"                                 ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"gmtPlotter"                               ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps,picoDst","StVertexSeedMaker"
@@ -1835,7 +1790,6 @@ Bfc_st BFC[] = { // standard chains
   {"V02"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Xi2"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-
   {"V0svt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Xisvt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"SCEbyE"      ,"scebye","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
@@ -1862,27 +1816,21 @@ Bfc_st BFC[] = { // standard chains
    ,                                        "StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"noTags"      ,"","","-tags,-HeavyTags,-HighPtTags"                       ,"","","Turn Off tags",kFALSE},
   {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
-
 #ifndef __NoStrangeMuDst__
   {"StrngMuDST","","MuDSTDeps","",              "StStrangeMuDstMaker","","Creates Stangeness MuDST",kFALSE},
 #else
   {"StrngMuDST","","",""                                ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-
   {"EMCmDST"   ,"","MuDSTChain","MuDst",                "StEmcMicroDstMaker","","Creates EMC MuDST",kFALSE},
-
 #ifndef __NoStrangeMuDst__
   {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST,Tree",    "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
   {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
-  {"PicoVtxDefault","","",""                                            ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd","","",""                                     ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
-
-
+  {"PicoVtxDefault","","","",""                                         ,"","pico Vtx default mode",kFALSE},
+  {"PicoVtxVpd","","","",""                                  ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"
