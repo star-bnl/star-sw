@@ -1,5 +1,6 @@
 #ifndef __BigFullChain_h__
 #define __BigFullChain_h__
+// $Id:$
 #if 0
 /*   -- from Jeff list 04/26/12 -- zdc always in
                                    fpd   (>=2003) is in TriggerMaker
@@ -1829,8 +1830,8 @@ Bfc_st BFC[] = { // standard chains
 #endif /* __NoStrangeMuDst__ */
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
   {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
-  {"PicoVtxDefault","","","",""                                         ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd","","","",""                                  ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
+  {"PicoVtxVpd"     ,"","",""                            ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"
@@ -1902,4 +1903,5 @@ Bfc_st BFC[] = { // standard chains
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE}
 };
+// $Log:$
 #endif /* __BigFullChain_h__ */

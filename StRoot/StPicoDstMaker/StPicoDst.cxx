@@ -6,6 +6,7 @@
 #include "StPicoEvent/StPicoBTowHit.h"
 #include "StPicoEvent/StPicoBTofHit.h"
 #include "StPicoEvent/StPicoMtdHit.h"
+#include "StPicoEvent/StPicoFmsHit.h"
 #include "StPicoEvent/StPicoBEmcPidTraits.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 #include "StPicoEvent/StPicoMtdPidTraits.h"
@@ -126,6 +127,24 @@ void StPicoDst::printMtdHits()
   {
     LOG_INFO << "+++ mtdHit " << i_t << "\n";
     mtdHit(i_t)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}//-----------------------------------------------------------------------
+void StPicoDst::printFmsHits()
+{
+  if (numberOfFmsHits() == 0)
+  {
+    LOG_INFO << "No FmsHit found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ Fms list ( " << numberOfFmsHits() << " entries )\n\n";
+  for (UInt_t i_t = 0; i_t < numberOfFmsHits(); i_t++)
+  {
+    LOG_INFO << "+++ fmsHit " << i_t << "\n";
+    fmsHit(i_t)->Print();
     LOG_INFO << "\n";
   }
 
