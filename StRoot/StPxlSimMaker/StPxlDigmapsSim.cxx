@@ -5,6 +5,12 @@
  *
  **********************************************************
  * $Log: StPxlDigmapsSim.cxx,v $
+ * Revision 1.1.2.2  2017/09/20 21:13:02  dongx
+ * Review comments from Jason implemented
+ *   - Int_t -> int etc.
+ *   - documentation
+ *   - random generator using STAR standard
+ *
  * Revision 1.1.2.1  2017/09/11 20:15:14  dongx
  * Pxl slow simulator added
  *
@@ -39,7 +45,7 @@
 #include "DIGMAPS/digevent.h"
 
 StPxlDigmapsSim::StPxlDigmapsSim(const Char_t *name): StPxlISim(name),
-  mRndGen(nullptr), mDigPlane(nullptr), mDigAdc(nullptr), mDigTransport(nullptr),
+  mRndGen(nullptr), mOwnRndSeed(0), mDigPlane(nullptr), mDigAdc(nullptr), mDigTransport(nullptr),
   mPxlDb(nullptr)
 {}
 
@@ -53,11 +59,12 @@ StPxlDigmapsSim::~StPxlDigmapsSim()
   if (mdEdxvsBGNorm) delete mdEdxvsBGNorm;
 }
 
-Int_t StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet, const Int_t run)
+int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet, const Int_t run)
 {
   LOG_INFO << "StPxlDigmapsSim::init()" << endm;
 
-  mRndGen = new TRandom3(time(NULL));
+  mRndGen = (TRandom3 *)gRandom;
+  if ( 0 == mRndGen || mOwnRndSeed > 0 ) mRndGen = new TRandom3(mOwnRndSeed);
 
   if (pxlDbDataSet != 0)
   {
@@ -84,15 +91,14 @@ Int_t StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDb
 
   pxlDigmapsSim_st const* const pxlDigmapsSimTable = mPxlDb->pxlDigmapsSim();
   // set ADC threshold(s)
-  Int_t nAdcBits = 1;
-  Int_t nAdcThresholds = int(TMath::Power(2.0, nAdcBits) - 1);
+  int nAdcBits = 1;
+  int nAdcThresholds = int(TMath::Power(2.0, nAdcBits) - 1);
   Bool_t adcLinear = 0;
-  Float_t adcElectronConversion = -999;
-  Float_t adcThresholds[] = {pxlDigmapsSimTable[0].adcThreshold}; // one threshold only
-  Float_t adcLsb = adcThresholds[0];
+  float adcElectronConversion = -999;
+  float adcThresholds[] = {pxlDigmapsSimTable[0].adcThreshold}; // one threshold only
+  float adcLsb = adcThresholds[0];
 
   if (!mDigAdc) mDigAdc = new DIGADC();
-  cout << mDigAdc << endl;
   mDigAdc->SetNbits(nAdcBits);
   mDigAdc->SetNThresholds(nAdcThresholds);
   mDigAdc->SetADC_linear(adcLinear);
@@ -101,20 +107,20 @@ Int_t StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDb
   mDigAdc->SetADC_thresholds(adcThresholds, nAdcThresholds);
 
   // set transport
-  Int_t transportChargeModel = (Int_t)pxlDigmapsSimTable[0].transportChargeModel;
-  Float_t   transportRangeLimit_InPitchUnit = pxlDigmapsSimTable[0].transportRangeLimit;
-  Float_t   transport_l1dimgauslor_Norm_g_1st = pxlDigmapsSimTable[0].transport_Norm_g_1st;
-  Float_t   transport_l1dimgauslor_x0_g_1st = pxlDigmapsSimTable[0].transport_x0_g_1st;
-  Float_t   transport_l1dimgauslor_sigma_g_1st = pxlDigmapsSimTable[0].transport_sigma_g_1st;
-  Float_t   transport_l1dimgauslor_Gamma_lor_1st = pxlDigmapsSimTable[0].transport_Gamma_lor_1st;
-  Float_t   transport_l1dimgauslor_x0_lor_1st = pxlDigmapsSimTable[0].transport_x0_lor_1st;
-  Float_t   transport_l1dimgauslor_norm_lor_1st = pxlDigmapsSimTable[0].transport_norm_lor_1st;
-  Float_t   transport_l1dimgauslor_Norm_g_2nd = pxlDigmapsSimTable[0].transport_Norm_g_2nd;
-  Float_t   transport_l1dimgauslor_x0_g_2nd = pxlDigmapsSimTable[0].transport_x0_g_2nd;
-  Float_t   transport_l1dimgauslor_sigma_g_2nd = pxlDigmapsSimTable[0].transport_sigma_g_2nd;
-  Float_t   transport_l1dimgauslor_Gamma_lor_2nd = pxlDigmapsSimTable[0].transport_Gamma_lor_2nd;
-  Float_t   transport_l1dimgauslor_x0_lor_2nd = pxlDigmapsSimTable[0].transport_x0_lor_2nd;
-  Float_t   transport_l1dimgauslor_norm_lor_2nd = pxlDigmapsSimTable[0].transport_norm_lor_2nd;
+  int transportChargeModel = (int)pxlDigmapsSimTable[0].transportChargeModel;
+  float   transportRangeLimit_InPitchUnit = pxlDigmapsSimTable[0].transportRangeLimit;
+  float   transport_l1dimgauslor_Norm_g_1st = pxlDigmapsSimTable[0].transport_Norm_g_1st;
+  float   transport_l1dimgauslor_x0_g_1st = pxlDigmapsSimTable[0].transport_x0_g_1st;
+  float   transport_l1dimgauslor_sigma_g_1st = pxlDigmapsSimTable[0].transport_sigma_g_1st;
+  float   transport_l1dimgauslor_Gamma_lor_1st = pxlDigmapsSimTable[0].transport_Gamma_lor_1st;
+  float   transport_l1dimgauslor_x0_lor_1st = pxlDigmapsSimTable[0].transport_x0_lor_1st;
+  float   transport_l1dimgauslor_norm_lor_1st = pxlDigmapsSimTable[0].transport_norm_lor_1st;
+  float   transport_l1dimgauslor_Norm_g_2nd = pxlDigmapsSimTable[0].transport_Norm_g_2nd;
+  float   transport_l1dimgauslor_x0_g_2nd = pxlDigmapsSimTable[0].transport_x0_g_2nd;
+  float   transport_l1dimgauslor_sigma_g_2nd = pxlDigmapsSimTable[0].transport_sigma_g_2nd;
+  float   transport_l1dimgauslor_Gamma_lor_2nd = pxlDigmapsSimTable[0].transport_Gamma_lor_2nd;
+  float   transport_l1dimgauslor_x0_lor_2nd = pxlDigmapsSimTable[0].transport_x0_lor_2nd;
+  float   transport_l1dimgauslor_norm_lor_2nd = pxlDigmapsSimTable[0].transport_norm_lor_2nd;
 
   if (!mDigTransport) mDigTransport = new DIGTransport();
   mDigTransport->SetChargeModel(transportChargeModel);
@@ -133,21 +139,21 @@ Int_t StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDb
   mDigTransport->Setf1dimgauslor_norm_lor_2nd(transport_l1dimgauslor_norm_lor_2nd);
 
   // set plane
-  Float_t planePitchX = StPxlConsts::kPixelSize * 1e4;
-  Float_t planePitchY = StPxlConsts::kPixelSize * 1e4;
-  Float_t planeEpitaxialThickness = pxlDigmapsSimTable[0].planeEpitaxialThickness;
-  Float_t planeNoiseElectrons = pxlDigmapsSimTable[0].planeNoiseElectrons;
-  Int_t planeNpixelsX = kNumberOfPxlRowsOnSensor;   // row - local X - DIGMAPS X
-  Int_t planeNpixelsY = kNumberOfPxlColumnsOnSensor; // column - local z - DIGMAPS Y
-  Float_t planeTemprature = pxlDigmapsSimTable[0].planeTemprature;
-  Float_t planeIonizationEnergy = pxlDigmapsSimTable[0].planeIonizationEnergy;
-  Float_t planeSegmentSize = pxlDigmapsSimTable[0].planeSegmentSize;
-  Float_t planeMaximumSegmentSize = pxlDigmapsSimTable[0].planeMaxSegmentSize;
-  Float_t planeMaximumChargePerSegment = pxlDigmapsSimTable[0].planeMaxChargePerSegment;
-  Float_t planeDiffusionMaximumRangeInX = pxlDigmapsSimTable[0].planeDiffusionMaxX;
-  Float_t planeDiffusionMaximumRangeInY = pxlDigmapsSimTable[0].planeDiffusionMaxY;
-  Float_t planeReflexionCoefficient = pxlDigmapsSimTable[0].planeReflexCoefficient;
-  Float_t planeBasicModel_SigmaTenMicrons = pxlDigmapsSimTable[0].planeMod_SigTenMicrons;
+  float planePitchX = StPxlConsts::kPixelSize * 1e4;
+  float planePitchY = StPxlConsts::kPixelSize * 1e4;
+  float planeEpitaxialThickness = pxlDigmapsSimTable[0].planeEpitaxialThickness;
+  float planeNoiseElectrons = pxlDigmapsSimTable[0].planeNoiseElectrons;
+  int planeNpixelsX = kNumberOfPxlRowsOnSensor;   // row - local X - DIGMAPS X
+  int planeNpixelsY = kNumberOfPxlColumnsOnSensor; // column - local z - DIGMAPS Y
+  float planeTemprature = pxlDigmapsSimTable[0].planeTemprature;
+  float planeIonizationEnergy = pxlDigmapsSimTable[0].planeIonizationEnergy;
+  float planeSegmentSize = pxlDigmapsSimTable[0].planeSegmentSize;
+  float planeMaximumSegmentSize = pxlDigmapsSimTable[0].planeMaxSegmentSize;
+  float planeMaximumChargePerSegment = pxlDigmapsSimTable[0].planeMaxChargePerSegment;
+  float planeDiffusionMaximumRangeInX = pxlDigmapsSimTable[0].planeDiffusionMaxX;
+  float planeDiffusionMaximumRangeInY = pxlDigmapsSimTable[0].planeDiffusionMaxY;
+  float planeReflexionCoefficient = pxlDigmapsSimTable[0].planeReflexCoefficient;
+  float planeBasicModel_SigmaTenMicrons = pxlDigmapsSimTable[0].planeMod_SigTenMicrons;
 
   if (!mDigPlane) mDigPlane = new DIGPlane();
   mDigPlane->SetPitch(planePitchX, planePitchY);
@@ -186,7 +192,7 @@ Int_t StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDb
   return kStOk;
 }
 //____________________________________________________________
-Int_t StPxlDigmapsSim::addPxlRawHits(const StMcPxlHitCollection& mcPxlHitCol,
+int StPxlDigmapsSim::addPxlRawHits(const StMcPxlHitCollection& mcPxlHitCol,
                                      StPxlRawHitCollection& pxlRawHitCol)
 {
   for (unsigned int iSec = 0; iSec < mcPxlHitCol.numberOfSectors(); ++iSec)
@@ -210,7 +216,7 @@ Int_t StPxlDigmapsSim::addPxlRawHits(const StMcPxlHitCollection& mcPxlHitCol,
           continue;
         }
 
-        UInt_t nSenHits = mcPxlSensorHitCol->hits().size();
+        unsigned int nSenHits = mcPxlSensorHitCol->hits().size();
         LOG_DEBUG << "Sector/Ladder/Sensor = " << iSec+1 << "/" << iLad+1 << "/" << iSen+1 << ". Number of sensor hits = " << nSenHits << endm;
 
         // Loop over hits in the sensor
@@ -310,7 +316,7 @@ float StPxlDigmapsSim::calculateDepositedEnergy(float const totalLength, float c
   return energy;
 }
 
-Double_t StPxlDigmapsSim::dEdxvsBGNorm(Double_t *x, Double_t *par)
+double StPxlDigmapsSim::dEdxvsBGNorm(double *x, double *par)
 {
   double beta2 = x[0]*x[0]/(1+x[0]*x[0]);
   double delta = TMath::Log(x[0])+par[2];

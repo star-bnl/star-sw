@@ -37,35 +37,59 @@ class StPxlDigmapsSim: public StPxlISim
      */
     virtual ~StPxlDigmapsSim();
 
-    virtual Int_t initRun(TDataSet const& calib_db, TObjectSet const* pxlDbDataSet, Int_t run);
-
-    /*! \brief creates an StPxlHit object for every StMcPxlHit, and fills the
-     *  hit StPxlHitCollection container.
-     *
-     *  Returns:
-     *  kStOk: if hits have been loaded to StPxlHitCollection successfully.
+    /*! \brief initRun function to read in DB entries for slow simulator parameters and masking tables.
      */
-    virtual Int_t addPxlRawHits(StMcPxlHitCollection const& in, StPxlRawHitCollection& out);
+    virtual int initRun(TDataSet const& calib_db, TObjectSet const* pxlDbDataSet, Int_t run);
+    
+    /*! \brief set own random seed if needed, default to use gRandom
+     */
+    void setSeed(unsigned int seed) { mOwnRndSeed = seed; }
 
     /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
      *  of all maker versions in use.
      */
     virtual const char *GetCVS() const
     {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDigmapsSim.h,v 1.1.2.1 2017/09/11 20:15:14 dongx Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDigmapsSim.h,v 1.1.2.2 2017/09/20 21:13:10 dongx Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
     }
 
   private:
+    /*! \brief main class to take MC hit, create DIGMAPS event and generate cluster pixels in DIGMAPS.
+     */
     void fillDigmapsEvent(int, StMcPxlHit const*, DIGEvent&) const;
+    /*! \brief calculate the in and out positions for a MC hit in the PXL epitaxial volume
+     */
     void calculateIncidencePositions(int, StMcPxlHit const*, TVector3&, TVector3&) const;
+    /*! \brief re-sample the deposite energy loss in PXL epitaxial volume, correct for betagamma
+     *  using the PDG dependence, valid for betagamma upto 50000
+     */
     float calculateDepositedEnergy(float totalLength, float betagamma) const;
+    /*! \brief calculate beta*gamma for a given McTrack
+     */
     float betaGamma(StMcTrack const*) const;
+    /*! \brief betagamma dependence function parametrized using the dependence taken from PDG
+     *  normalized to the minimum dE/dx
+     */
     double dEdxvsBGNorm(double* x, double* par);
+    /*! \brief apply the hotPixel masking table
+     */
     bool goodPixel(int sec, int lad, int sen, int ix, int iy) const;
+    /*! \brief apply the sensorStatus table
+     */
     bool goodSensor(int sec, int lad, int sen) const;
+    /*! \brief creates an StPxlHit object for every StMcPxlHit, and fills the
+     *  hit StPxlHitCollection container.
+     *
+     *  Returns:
+     *  kStOk: if hits have been loaded to StPxlHitCollection successfully.
+     */
+    virtual int addPxlRawHits(StMcPxlHitCollection const& in, StPxlRawHitCollection& out);
 
+    //! random generator for dE/dx energy re-sampling
     TRandom3* mRndGen;
+    unsigned int mOwnRndSeed;
+    
     DIGPlane* mDigPlane;
     DIGADC* mDigAdc;
     DIGTransport* mDigTransport;
