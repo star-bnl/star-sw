@@ -19,11 +19,13 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/math/DoubleAc.h"
 
+namespace Heed {
+
 void inverse_DynArr_prot(const DynArr<DoubleAc>& mi, DynArr<DoubleAc>& mr,
-                         int& szero,     // sign that the calculations are
+                         int& szero,  // sign that the calculations are
                          // terminated owing to attempt to divide by 0.
                          // The final matrix is not correct.
-                         int& serr,      // sign that the interval precision
+                         int& serr,  // sign that the interval precision
                          // is broken
                          // (but the final matrix may be provided if
                          // szero=0)
@@ -63,20 +65,6 @@ DoubleAc determinant_DynArr(const DynArr<DoubleAc>& mi,
                             const DynLinArr<int>& s_var,  // 1 if variable
                             long q = 0);  // default means total matrix
                                           // counts active rows and columns
-                                          //int& serr);
-/*
-DoubleAc determinant_DynArr_prot(const DynArr<DoubleAc>& mi,
-			  long q, // dimension of minor
-			 int& szero, // sign that the calculations are
-			 // terminated owing to attempt to divide by 0.
-			 // The final determinant is not correct.
-			 int& serr, // sign that the interval precision
-			 // is broken
-			 // (but the final matrix may be provided if
-			 // szero=0)
-			 int s_stop=1 // directive to stop if
-			 // the interval precision is broken
-			 );
-*/
-
+// int& serr);
+}
 #endif

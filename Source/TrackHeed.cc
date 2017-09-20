@@ -186,7 +186,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     m_mediumDensity = medium->GetMassDensity();
   }
 
-  std::list<ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
+  std::list<Heed::ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
   for (; it != m_particleBank.end(); ++it) (*it).clear();
   m_particleBank.clear();
   m_deltaElectrons.clear();
@@ -215,7 +215,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     dy /= d;
     dz /= d;
   }
-  vec velocity(dx, dy, dz);
+  Heed::vec velocity(dx, dy, dz);
   velocity = velocity * Heed::c_light * GetBeta();
 
   if (m_debug) {
@@ -228,7 +228,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
 
   // Initial position (shift with respect to bounding box center and
   // convert from cm to mm).
-  point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
+  Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
   // Setup the particle.
   if (m_particle) {
     delete m_particle;
@@ -346,7 +346,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   bool ok = false;
   Medium* medium = NULL;
   // Get the first element from the particle bank.
-  std::list<ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
+  std::list<Heed::ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
   Heed::HeedPhoton* virtualPhoton = NULL;
   while (!ok) {
     if (it == m_particleBank.end()) {
@@ -652,7 +652,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
     dy /= d;
     dz /= d;
   }
-  vec velocity(dx, dy, dz);
+  Heed::vec velocity(dx, dy, dz);
 
   // Calculate the speed for the given kinetic energy.
   const double gamma = 1. + e0 / ElectronMass;
@@ -662,7 +662,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
 
   // Initial position (shift with respect to bounding box center and
   // convert from cm to mm).
-  point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
+  Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
 
   // Transport the electron.
   Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0, &m_fieldMap);
@@ -755,7 +755,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   // Clusters from the current track will be lost.
   m_hasActiveTrack = false;
   Heed::last_particle_number = 0;
-  std::list<ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
+  std::list<Heed::ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
   for (; it != m_particleBank.end(); ++it) (*it).clear();
   m_particleBank.clear();
   m_deltaElectrons.clear();
@@ -778,12 +778,12 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     dy /= d;
     dz /= d;
   }
-  vec velocity(dx, dy, dz);
+  Heed::vec velocity(dx, dy, dz);
   velocity = velocity * Heed::c_light;
 
   // Initial position (shift with respect to bounding box center and
   // convert from cm to mm).
-  point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
+  Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
 
   // Create and transport the photon.
   Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
@@ -982,7 +982,8 @@ bool TrackHeed::Setup(Medium* medium) {
     std::cout << "    Min. ionization potential:   " << minI << " eV\n";
   }
 
-  fixsyscoor primSys(point(0., 0., 0.), basis("primary"), "primary");
+  Heed::fixsyscoor primSys(Heed::point(0., 0., 0.), 
+                           Heed::basis("primary"), "primary");
   if (m_chamber) {
     delete m_chamber;
     m_chamber = NULL;
@@ -1011,9 +1012,9 @@ bool TrackHeed::SetupGas(Medium* medium) {
     m_molPacs = NULL;
   }
   m_molPacs = new Heed::MolecPhotoAbsCS* [nComponents];
-  DynLinArr<std::string> notations;
+  std::vector<std::string> notations;
   notations.clear();
-  DynLinArr<double> fractions;
+  std::vector<double> fractions;
   fractions.clear();
 
   for (int i = 0; i < nComponents; ++i) {
@@ -1127,8 +1128,8 @@ bool TrackHeed::SetupGas(Medium* medium) {
                 << " are not available.\n";
       return false;
     }
-    notations.increment(gasname);
-    fractions.increment(frac);
+    notations.push_back(gasname);
+    fractions.push_back(frac);
   }
   if (m_usePacsOutput) {
     std::ofstream pacsfile;
@@ -1184,9 +1185,9 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
   }
   m_atPacs = new Heed::AtomPhotoAbsCS* [nComponents];
 
-  DynLinArr<std::string> notations;
+  std::vector<std::string> notations;
   notations.clear();
-  DynLinArr<double> fractions;
+  std::vector<double> fractions;
   fractions.clear();
   for (int i = 0; i < nComponents; ++i) {
     std::string materialName;
@@ -1213,8 +1214,8 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
                 << " are not implemented.\n";
       return false;
     }
-    notations.increment(materialName);
-    fractions.increment(frac);
+    notations.push_back(materialName);
+    fractions.push_back(frac);
   }
   if (m_usePacsOutput) {
     std::ofstream pacsfile;

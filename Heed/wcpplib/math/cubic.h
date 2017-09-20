@@ -24,9 +24,7 @@ class Cubic {
   inline double b(void) const { return db; }
   inline double c(void) const { return dc; }
   inline double d(void) const { return dd; }
-  inline double s_xzero(void) const {
-    return s_dxzero;
-  }  // for debug
+  inline double s_xzero(void) const { return s_dxzero; }  // for debug
   inline void put_a(double fa) {
     da = fa;
     s_dxzero = 0;

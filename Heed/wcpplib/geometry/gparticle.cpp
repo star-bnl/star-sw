@@ -64,7 +64,7 @@ gparticle::gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
   origin.tid.up_absref(&origin.dirloc);
   origin.time = time;
   origin.sb = 0;
-  origin.s_ent = 1;  //origin.next_eid=NULL;
+  origin.s_ent = 1;  // origin.next_eid=NULL;
   if (origin.tid.qeid == 0) return;
   s_life = 1;
   currpos = origin;
@@ -120,7 +120,7 @@ stvpoint gparticle::calc_step_to_bord() {
   if (currpos.sb > 0) {
     // it does not do step, but switch to new volume
     return switch_new_vol();
-  } 
+  }
   manip_absvol_eid faeid;
   int s_cf;
   vec relcen;
@@ -178,7 +178,7 @@ stvpoint gparticle::switch_new_vol(void) {
     if (tidl == nextp.tid) {
       // Remains in the same old volume, may be numerical error
       // Will probably repeat attempt to switch at the same steps until ok.
-      s_e = 0;  
+      s_e = 0;
       double curprec = nextp.tid.G_lavol()->prec;
       if (currpos.prange <= curprec) {
         // very bad case, to repeat the trial.
@@ -187,7 +187,7 @@ stvpoint gparticle::switch_new_vol(void) {
         tidl = manip_absvol_treeid();
         continue;
       }
-    } 
+    }
     return stvpoint(pth, nextp.dir, nextp.speed, tidl, 0.0, nextp.time, 0, s_e,
                     eidl);
   }
@@ -233,5 +233,4 @@ void gparticle::print(std::ostream& file, int l) const {
   indn.n -= 2;
   file.flush();
 }
-
 }

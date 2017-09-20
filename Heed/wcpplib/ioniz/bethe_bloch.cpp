@@ -5,9 +5,8 @@
 #include "wcpplib/math/lorgamma.h"
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
-/*
-2002, I. Smirnov
-*/
+
+// 2002, I. Smirnov
 
 namespace Heed {
 
@@ -32,9 +31,9 @@ double Bethe_Bloch_energy_loss_gamma_1(const double ratio_Z_to_A,
   const double beta2 = beta * beta;
   const double gamma = gamma_1 + 1.0;
   const double gamma2 = gamma * gamma;
-  const double coef1 =
-      4 * M_PI * pow(classic_electr_radius, 2) * electron_mass_c2 *
-      Avogadro;  // should be 0.3071 according to PDG
+  const double coef1 = 4 * M_PI * pow(classic_electr_radius, 2) *
+                       electron_mass_c2 *
+                       Avogadro;  // should be 0.3071 according to PDG
   const double coef2 = z * z * ratio_Z_to_A / beta2;
   const double sum =
       log(2. * electron_mass_c2 * beta2 * gamma2 / I_eff) - beta2;
@@ -49,9 +48,9 @@ double Bethe_Bloch_restricted_energy_loss_gamma_1(
   const double beta2 = beta * beta;
   const double gamma = gamma_1 + 1.0;
   const double gamma2 = gamma * gamma;
-  const double coef1 =
-      2 * M_PI * pow(classic_electr_radius, 2) * electron_mass_c2 *
-      Avogadro;  // should be 0.3071 according to PDG
+  const double coef1 = 2 * M_PI * pow(classic_electr_radius, 2) *
+                       electron_mass_c2 *
+                       Avogadro;  // should be 0.3071 according to PDG
   const double coef2 = z * z * ratio_Z_to_A / beta2;
   const double mrat = electron_mass_c2 / (m * c_squared);
   const double emax = 2.0 * electron_mass_c2 * beta2 * gamma2 /
@@ -66,5 +65,4 @@ double Bethe_Bloch_restricted_energy_loss_gamma_1(
   }
   return coef1 * coef2 * sum;
 }
-
 }

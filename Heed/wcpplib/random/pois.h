@@ -4,7 +4,6 @@
 namespace Heed {
 
 long pois(const double amu, int &ierror);
-
 }
 
 #endif

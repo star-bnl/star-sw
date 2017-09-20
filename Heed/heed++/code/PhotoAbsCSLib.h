@@ -7,14 +7,11 @@
 #include "wcpplib/matter/GasLib.h"
 #endif
 
-/*
-Library of photoabsorption cross sections for some frequently used atoms
-and molecules
-
-2004, I. Smirnov
-*/
-
 namespace Heed {
+
+/// Library of photoabsorption cross sections for some frequently used atoms
+/// and molecules.
+/// 2004, I. Smirnov
 
 extern HydrogenPhotoAbsCS Hydrogen_shell_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_PACS;
@@ -121,7 +118,6 @@ extern MolecPhotoAbsCS Hg_MPACS;
 extern MolecPhotoAbsCS H2S_MPACS;
 extern MolecPhotoAbsCS GeH4_MPACS;
 extern MolecPhotoAbsCS SiH4_MPACS;
-
 }
 
 #endif

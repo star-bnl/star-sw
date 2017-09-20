@@ -31,13 +31,11 @@ absvol* manip_absvol_treeid::G_lavol() const {
 }
 
 void manip_absvol_treeid::down_absref(absref* f) {
-  for (int n = qeid - 1; n >= 1; n--)
-    eid[n].amvol->down_absref(f);
+  for (int n = qeid - 1; n >= 1; n--) eid[n].amvol->down_absref(f);
 }
 
 void manip_absvol_treeid::up_absref(absref* f) {
-  for (int n = 1; n < qeid; ++n)
-    eid[n].amvol->up_absref(f);
+  for (int n = 1; n < qeid; ++n) eid[n].amvol->up_absref(f);
 }
 
 int manip_absvol_treeid::check_manip_absvol_registered(manip_absvol* amvol) {
@@ -85,24 +83,25 @@ void manip_absvol_treeid::print(std::ostream& file, int l) const {
   file.flush();
 }
 // ********  absvol   *******
-DynLinArr<manip_absvol*> absvol::Gamanip_embed(void) const {
-  return DynLinArr<manip_absvol*>();
+std::vector<manip_absvol*> absvol::Gamanip_embed(void) const {
+  return std::vector<manip_absvol*>();
 }
 
 int absvol::find_embed_vol(const point& fpt, const vec& dir,
                            manip_absvol_treeid* atid) const {
   if (check_point_inside(fpt, dir) == 0) return 0;
   const int s = atid->qeid;
-  DynLinArr<manip_absvol*> aman = Gamanip_embed();
-  if (aman.get_qel() > 0 && atid->qeid >= pqamvol) {
+  std::vector<manip_absvol*> aman = Gamanip_embed();
+  const int qaman = aman.size();
+  if (qaman > 0 && atid->qeid >= pqamvol) {
     mcerr << "absvol::find_embed_vol:\n"
-          << "    aman->get_qel() > 0 && atid->qeid == pqamvol\n"
+          << "    aman->size() > 0 && atid->qeid == pqamvol\n"
           << "    atid->qeid=" << atid->qeid << '\n';
     mcerr << "    Increase pqamvol\n";
     exit(1);
   }
 
-  for (int n = 0; n < aman.get_qel(); ++n) {
+  for (int n = 0; n < qaman; ++n) {
     atid->eid[atid->qeid].nembed = n;  // for next
     const int i = aman[n]->m_find_embed_vol(fpt, dir, atid);
     if (i == 1) {
@@ -123,14 +122,10 @@ int absvol::range(trajestep& fts, int s_ext, int& sb,
     sb = 1;
     return range_ext(fts, 0);
   }
-  int s = range_ext(fts, 1);
-  if (s == 1) {
-    sb = 1;
-  } else {
-    sb = 0;
-  }
-  DynLinArr<manip_absvol*> aman = Gamanip_embed();
-  for (int n = 0; n < aman.get_qel(); ++n) {
+  sb = range_ext(fts, 1) == 1 ? 1 : 0;
+  std::vector<manip_absvol*> aman = Gamanip_embed();
+  const int qaman = aman.size();
+  for (int n = 0; n < qaman; ++n) {
     if (aman[n]->m_range_ext(fts, 0) == 1) {
       sb = 2;
       faeid->amvol.put(aman[n]);
@@ -148,13 +143,13 @@ void absvol::print(std::ostream& file, int l) const {
   Ifile << "absvol::print(l=" << l << "): name=" << s << '\n';
   --l;
   if (l > 0) {
-    DynLinArr<manip_absvol*> embed = Gamanip_embed();
+    std::vector<manip_absvol*> embed = Gamanip_embed();
     indn.n += 2;
-    if (embed.get_qel() > 0) {
-      Ifile << "The following volumes are embraced, q=" << embed.get_qel()
-            << '\n';
+    const int qembed = embed.size();
+    if (qembed > 0) {
+      Ifile << "The following volumes are embraced, q=" << embed.size() << '\n';
       indn.n += 2;
-      for (int n = 0; n < embed.get_qel(); ++n) {
+      for (int n = 0; n < qembed; ++n) {
         Ifile << "n=" << n << '\n';
         indn.n += 2;
         embed[n]->m_print(file, l);
@@ -265,7 +260,6 @@ void manip_absvol::m_print(std::ostream& file, int l) const {
     indn.n -= 2;
   }
   file.flush();
-
 }
 
 macro_copy_body_not_defined(manip_absvol)
@@ -286,7 +280,7 @@ sh_manip_absvol::sh_manip_absvol(const sh_manip_absvol& f)
 sh_manip_absvol::sh_manip_absvol(const abssyscoor& f) : csys(f) {}
 
 sh_manip_absvol::sh_manip_absvol(const point& fc, const basis& fbas,
-                                 const String& fname)
+                                 const std::string& fname)
     : csys(fc, fbas, fname) {}
 
 void sh_manip_absvol::m_chname(char* nm) const {
@@ -313,5 +307,4 @@ void sh_manip_absvol::m_print(std::ostream& file, int l) const {
   }
   file.flush();
 }
-
 }

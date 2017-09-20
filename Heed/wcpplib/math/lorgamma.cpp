@@ -35,5 +35,4 @@ double lorbeta(const double momentum, const double mass) {
   x = sqrt(x);
   return x;
 }
-
 }

@@ -4,8 +4,7 @@
 #include "wcpplib/geometry/gparticle.h"
 #include "wcpplib/math/lorgamma.h"
 
-/* massive particle. A force can be applied.
-
+/*
 Copyright (c) 2000 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
@@ -18,6 +17,8 @@ The file is provided "as is" without express or implied warranty.
  */
 
 namespace Heed {
+
+/// Massive particle. A force can be applied.
 
 class mparticle : public gparticle {
  public:
@@ -32,7 +33,7 @@ class mparticle : public gparticle {
   double curr_gamma_1;  // gamma-1
 
   // Check consistency of kin_energy, gamma_1, speed, speed_of_light and mass
-  void check_consistency(void) const;  
+  void check_consistency(void) const;
 
   virtual void step(void);
 
@@ -76,9 +77,9 @@ class mparticle : public gparticle {
   void new_speed(void);
   // Set new speed, direction and time for currpos.
 
-  /// Constructors 
+  /// Constructors
   mparticle(void) : gparticle(), mass(0.0) { ; }
-  mparticle(gparticle const& gp, double fmass);  
+  mparticle(gparticle const& gp, double fmass);
   // Dangerous,
   // only not for very fast particles, since gamma-1 is computed from speed.
   mparticle(gparticle const& gp, double fmass, double gamma_1);
@@ -98,7 +99,6 @@ class mparticle : public gparticle {
 };
 
 std::ostream& operator<<(std::ostream& file, const mparticle& f);
-
 }
 
 #endif

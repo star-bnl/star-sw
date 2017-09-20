@@ -53,15 +53,20 @@ The file is provided "as is" without express or implied warranty.
 
 //#define DEBUG_ABSLIST  // make some print
 
-template <class T> class AbsList;
-template <class T> class AbsListNode;
+namespace Heed {
+
+template <class T>
+class AbsList;
+template <class T>
+class AbsListNode;
 
 template <class T>
 AbsListNode<T>* glob_insert_before(AbsList<T>&, AbsListNode<T>*, const T& fel);
 template <class T>
 AbsListNode<T>* glob_insert_after(AbsList<T>&, AbsListNode<T>*, const T& fel);
 
-template <class T> void glob_pilfer(AbsList<T>&, PILF_CONST AbsList<T>&);
+template <class T>
+void glob_pilfer(AbsList<T>&, PILF_CONST AbsList<T>&);
 
 #ifndef DONT_USE_ABSPTR
 template <class T>
@@ -79,7 +84,7 @@ class AbsListNode {
 #ifndef DONT_USE_ABSPTR
       : RegPassivePtr()
 #endif
-        {
+  {
     head_node = f.head_node;
     prev_node = f.prev_node;
     next_node = f.next_node;
@@ -113,15 +118,15 @@ class AbsListNode {
   // in insert_before, insert_after, etc. functions of AbsList<T>.
 
   virtual ~AbsListNode()  // excludes from list
-      {
+  {
     exclude();
     /*
       if(head_node != NULL)
-	mcout<<"~AbsListNode(): error: head_node != NULL\n";
+        mcout<<"~AbsListNode(): error: head_node != NULL\n";
       if(prev_node != NULL)
-	mcout<<"~AbsListNode(): error: prev_node != NULL\n";
+        mcout<<"~AbsListNode(): error: prev_node != NULL\n";
       if(next_node != NULL)
-	mcout<<"~AbsListNode(): error: next_node != NULL\n";
+        mcout<<"~AbsListNode(): error: next_node != NULL\n";
       */
   }
   friend AbsListNode<T>* glob_insert_before<>(AbsList<T>&, AbsListNode<T>*,
@@ -132,12 +137,12 @@ class AbsListNode {
 
 // The following is more logical, but not compiled at some newer compilers,
 // alas!
-//friend AbsListNode<T>*  AbsList<T>::insert_before(AbsListNode<T>*, const T&
-//fel);
-//friend AbsListNode<T>*  AbsList<T>::insert_after(AbsListNode<T>*, const T&
-//fel);
+// friend AbsListNode<T>*  AbsList<T>::insert_before(AbsListNode<T>*, const T&
+// fel);
+// friend AbsListNode<T>*  AbsList<T>::insert_after(AbsListNode<T>*, const T&
+// fel);
 
-//friend void AbsList<T>::pilfer(PILF_CONST AbsList<T>&);
+// friend void AbsList<T>::pilfer(PILF_CONST AbsList<T>&);
 #ifndef DONT_USE_ABSPTR
   macro_copy_total(AbsListNode);
 #endif
@@ -147,8 +152,8 @@ class AbsListNode {
 template <class T>
 class AbsList : public RegPassivePtr
 #else
-                template <class T>
-                class AbsList
+template <class T>
+class AbsList
 #endif
                 {
  private:
@@ -176,7 +181,7 @@ class AbsList : public RegPassivePtr
     else
       return an->get_prev_node();
   }
-  //This function defined above allows simple loops like
+  // This function defined above allows simple loops like
   // AbsListNode<T>* an=NULL;
   // while( (an = list.get_next_node(an)) != NULL)
   // { do anything with valid an
@@ -217,13 +222,12 @@ class AbsList : public RegPassivePtr
                                 // with element equal ro t
 
   inline void clear(void) {
-    while (first_node != NULL) {  //mcout<<"erasing first node\n";
+    while (first_node != NULL) {  // mcout<<"erasing first node\n";
       erase(first_node);
-    }
-    ;
+    };
   }
-  //inline       AbsListNode& operator[](long n) const ;
-  //inline const AbsListNode& operator[](long n) const ;
+  // inline       AbsListNode& operator[](long n) const ;
+  // inline const AbsListNode& operator[](long n) const ;
   long get_qel(void) const { return qel; }
   AbsList(const AbsList<T>& al)
       :
@@ -249,7 +253,7 @@ class AbsList : public RegPassivePtr
   AbsList<T>& operator=(const AbsList<T>& al);
   virtual ~AbsList() { clear(); }
   friend void AbsListNode<T>::exclude(void);
-//friend template<class T> void AbsListNode<T>::exclude(void);
+// friend template<class T> void AbsListNode<T>::exclude(void);
 #ifndef DONT_USE_ABSPTR
   macro_copy_total(AbsList);
 #endif
@@ -262,7 +266,7 @@ AbsListNode<T>::AbsListNode(AbsList<T>* fhead_node, AbsListNode<T>* fprev_node,
       prev_node(fprev_node),
       next_node(fnext_node),
       el(fel) {
-  //mcout<<"Constructor\n";
+  // mcout<<"Constructor\n";
   if (fprev_node != NULL) {
     if (fprev_node->next_node != fnext_node) {  // for debug
       mcerr << "template<class T> AbsListNode<T>::AbsListNode<T>\n";
@@ -287,11 +291,11 @@ template <class T>
 void AbsListNode<T>::exclude(void)
     // exclude this node from list, but don't erase it
     // Then don't forget to delete it
-    {
+{
   if (prev_node != NULL) prev_node->next_node = next_node;
   if (next_node != NULL) next_node->prev_node = prev_node;
   if (head_node != NULL)  // normally cannot be
-      {
+  {
     if (head_node->qel <= 0) {
       mcerr << "ERROR in template<class T> void AbsListNode<T>::exclude()\n";
       mcerr << "head_node->qel <= 0, contradicts to request to exclude\n";
@@ -312,9 +316,9 @@ AbsListNode<T>* glob_insert_before(AbsList<T>& al, AbsListNode<T>* aln,
                                    const T& fel) {
   AbsListNode<T>* new_aln = NULL;
   if (aln == NULL)  // means to insert at the first place
-      {
+  {
     if (al.qel == 0)  // no elements, then the addresses should be empty as well
-        {
+    {
       if (al.first_node != NULL || al.last_node != NULL) {
         mcerr << "ERROR in template<class T> AbsListNode<T>*  "
                  "glob_insert_before\n";
@@ -374,15 +378,15 @@ template<class T> AbsListNode<T>* AbsList<T>::insert_before
     {
       if(first_node != NULL || last_node != NULL)
       {
-	mcerr<<"ERROR in template<class T> void AbsList<T>::insert_before\n";
-	mcerr<<"qel == 0, but first_node != NULL || last_node != NULL \n";
-	Iprintn(mcerr, first_node);
-	Iprintn(mcerr, last_node);
-	spexit(mcerr);
+        mcerr<<"ERROR in template<class T> void AbsList<T>::insert_before\n";
+        mcerr<<"qel == 0, but first_node != NULL || last_node != NULL \n";
+        Iprintn(mcerr, first_node);
+        Iprintn(mcerr, last_node);
+        spexit(mcerr);
       }
       first_node = new AbsListNode<T>(this, NULL, NULL, fel);
       last_node = first_node;
-	  new_aln = first_node;
+          new_aln = first_node;
       qel = 1;
     }
     else
@@ -405,20 +409,20 @@ template<class T> AbsListNode<T>* AbsList<T>::insert_before
     {
       if(qel <= 0)
       {
-	mcerr<<"ERROR in template<class T> void AbsList<T>::insert_before\n";
-	mcerr<<"qel <= 0 but aln is not empty\n";
-	Iprintn(mcerr, qel);
-	spexit(mcerr);
+        mcerr<<"ERROR in template<class T> void AbsList<T>::insert_before\n";
+        mcerr<<"qel <= 0 but aln is not empty\n";
+        Iprintn(mcerr, qel);
+        spexit(mcerr);
       }
       else
       {
-	new_aln = new AbsListNode<T>
-	  (this, aln->get_prev_node(), aln, fel);
-	if(aln == first_node)
-	{
-	  first_node = new_aln;
-	}
-	qel++;
+        new_aln = new AbsListNode<T>
+          (this, aln->get_prev_node(), aln, fel);
+        if(aln == first_node)
+        {
+          first_node = new_aln;
+        }
+        qel++;
       }
     }
   }
@@ -431,9 +435,9 @@ AbsListNode<T>* glob_insert_after(AbsList<T>& al, AbsListNode<T>* aln,
                                   const T& fel) {
   AbsListNode<T>* new_aln = NULL;
   if (aln == NULL)  // no node after which it needs to insert
-      {
+  {
     if (al.qel == 0)  // empty list, OK
-        {
+    {
       al.first_node = new AbsListNode<T>(&al, NULL, NULL, fel);
       al.last_node = al.first_node;
       new_aln = al.first_node;
@@ -445,7 +449,7 @@ AbsListNode<T>* glob_insert_after(AbsList<T>& al, AbsListNode<T>* aln,
     }
   } else {
     if (aln->get_head_node() != &al)  // not our node or list
-        {
+    {
       mcerr
           << "ERROR in template<class T> AbsListNode<T>*  glob_insert_after\n";
       mcerr << "aln->get_heed_node() != this\n";
@@ -453,7 +457,7 @@ AbsListNode<T>* glob_insert_after(AbsList<T>& al, AbsListNode<T>* aln,
       spexit(mcerr);
     } else {
       if (al.qel <= 0)  // all ours but empty list - it is not consistent
-          {
+      {
         mcerr << "ERROR in template<class T> AbsListNode<T>*  "
                  "glob_insert_after\n";
         mcerr << "qel <= 0 but aln is not empty\n";
@@ -461,7 +465,7 @@ AbsListNode<T>* glob_insert_after(AbsList<T>& al, AbsListNode<T>* aln,
         spexit(mcerr);
       } else {
         new_aln = new AbsListNode<T>(&al, aln, aln->get_next_node(), fel);
-        //if(new_aln->get_next_node().get() == NULL)
+        // if(new_aln->get_next_node().get() == NULL)
         if (aln == al.last_node) {
           al.last_node = new_aln;
         }
@@ -488,7 +492,7 @@ template<class T> AbsListNode<T>*  AbsList<T>::insert_after
     {
       first_node = new AbsListNode<T>(this, NULL, NULL, fel);
       last_node = first_node;
-	  new_aln = first_node;
+          new_aln = first_node;
       qel = 1;
     }
     else
@@ -511,21 +515,21 @@ template<class T> AbsListNode<T>*  AbsList<T>::insert_after
     {
       if(qel <= 0)  // all ours but empty list - it is not consistent
       {
-	mcerr<<"ERROR in template<class T> void AbsList<T>::insert_after\n";
-	mcerr<<"qel <= 0 but aln is not empty\n";
-	Iprintn(mcerr, qel);
-	spexit(mcerr);
+        mcerr<<"ERROR in template<class T> void AbsList<T>::insert_after\n";
+        mcerr<<"qel <= 0 but aln is not empty\n";
+        Iprintn(mcerr, qel);
+        spexit(mcerr);
       }
       else
       {
-	new_aln = new AbsListNode<T>
-	  (this, aln, aln->get_next_node(), fel);
-	//if(new_aln->get_next_node().get() == NULL)
-	if(aln  == last_node)
-	{
-	  last_node = new_aln;
-	}
-	qel++;
+        new_aln = new AbsListNode<T>
+          (this, aln, aln->get_next_node(), fel);
+        //if(new_aln->get_next_node().get() == NULL)
+        if(aln  == last_node)
+        {
+          last_node = new_aln;
+        }
+        qel++;
       }
     }
   }
@@ -533,22 +537,23 @@ template<class T> AbsListNode<T>*  AbsList<T>::insert_after
 }
 */
 
-template <class T> void AbsList<T>::erase(AbsListNode<T>* aln) {
+template <class T>
+void AbsList<T>::erase(AbsListNode<T>* aln) {
   if (aln->get_head_node() != this) {
     mcerr << "ERROR in template<class T> void AbsList<T>::erase(...)\n";
     mcerr << "aln->get_heed_node() != this\n";
     spexit(mcerr);
   }
   if (qel <= 0)  // empty list - it is not consistent
-      {
+  {
     mcerr << "ERROR in template<class T> void AbsList<T>::erase(...)\n";
     mcerr << "qel <= 0 before erase \n";
     Iprintn(mcerr, qel);
     spexit(mcerr);
   }
 
-  //AbsListNode<T>* aaln = aln.get();
-  //aln->exclude();  now called from delete
+  // AbsListNode<T>* aaln = aln.get();
+  // aln->exclude();  now called from delete
   /*
   if(first_node == aln)
   {
@@ -560,15 +565,15 @@ template <class T> void AbsList<T>::erase(AbsListNode<T>* aln) {
   }
   */
   delete aln;
-  //qel--; now in exclude();
-  //aaln->get_prev_node()->put_next_node(aaln->get_next_node() );
-  //aaln->get_next_node()->put_prev_node(aaln->get_prev_node() );
+  // qel--; now in exclude();
+  // aaln->get_prev_node()->put_next_node(aaln->get_next_node() );
+  // aaln->get_next_node()->put_prev_node(aaln->get_prev_node() );
 }
 
 template <class T>
 void AbsList<T>::remove(const T& t)
     // function to exclude the node
-    {
+{
   AbsListNode<T>* an = NULL;
   while ((an = get_next_node(an)) != NULL) {
     if (an->el == t) {
@@ -581,7 +586,7 @@ void AbsList<T>::remove(const T& t)
 template <class T>
 void AbsList<T>::remove_all(const T& t)
     // function to exclude the node
-    {
+{
   AbsListNode<T>* an = NULL;
   while ((an = get_next_node(an)) != NULL) {
     if (an->el == t) {
@@ -604,7 +609,8 @@ template<class T> void AbsListNode<T>::exclude(void)
 }
 */
 
-template <class T> AbsList<T>& AbsList<T>::operator=(const AbsList<T>& f) {
+template <class T>
+AbsList<T>& AbsList<T>::operator=(const AbsList<T>& f) {
 #ifdef DEBUG_ABSLIST
   mcout
       << "AbsList<T>& AbsList<T>::operator=(const AbsList<T>& f) is starting\n";
@@ -650,7 +656,8 @@ void glob_pilfer(AbsList<T>& this_al, PILF_CONST AbsList<T>& al) {
   al.qel = 0;
 }
 
-template <class T> void AbsList<T>::pilfer(PILF_CONST AbsList<T>& al) {
+template <class T>
+void AbsList<T>::pilfer(PILF_CONST AbsList<T>& al) {
   glob_pilfer(*this, al);
 }
 
@@ -690,10 +697,11 @@ void AbsList<T>::pilfer(PILF_CONST AbsList<T>& al)
 
 template <class T>
 void print_AbsList(std::ostream& file, const AbsList<T>& f, int l) {
-  mfunnamep("template<class T> void print_AbsList(std::ostream& file, const "
-            "AbsList<T>& f, int l)");
+  mfunnamep(
+      "template<class T> void print_AbsList(std::ostream& file, const "
+      "AbsList<T>& f, int l)");
   Ifile << "AbsList<T>: qel=" << f.get_qel() << '\n';
-  //f.check();
+  // f.check();
   long n = 0;
   indn.n += 2;
   AbsListNode<T>* aln = NULL;
@@ -703,8 +711,8 @@ void print_AbsList(std::ostream& file, const AbsList<T>& f, int l) {
     n++;
   }
   // Another form of the same loop:
-  //AbsListNode<T>* aln = f.get_first_node();
-  //for( n=0; n<f.get_qel(); n++)
+  // AbsListNode<T>* aln = f.get_first_node();
+  // for( n=0; n<f.get_qel(); n++)
   //{
   //  Ifile<<"n="<<n<<" el[n]="<<noindent; aln->el.print(file, l);
   //  aln = aln->get_next_node();
@@ -713,11 +721,13 @@ void print_AbsList(std::ostream& file, const AbsList<T>& f, int l) {
   indn.n -= 2;
 }
 
-template <class T> void print_AbsList(std::ostream& file, const AbsList<T>& f) {
-  mfunnamep("template<class T> void print_AbsList(std::ostream& file, const "
-            "AbsList<T>& f)");
+template <class T>
+void print_AbsList(std::ostream& file, const AbsList<T>& f) {
+  mfunnamep(
+      "template<class T> void print_AbsList(std::ostream& file, const "
+      "AbsList<T>& f)");
   Ifile << "AbsList<T>: qel=" << f.get_qel() << '\n';
-  //f.check();
+  // f.check();
   long n = 0;
   indn.n += 2;
   AbsListNode<T>* aln = NULL;
@@ -726,8 +736,8 @@ template <class T> void print_AbsList(std::ostream& file, const AbsList<T>& f) {
     aln->el.print(file);
     n++;
   }
-  //AbsListNode<T>* aln = f.get_first_node();
-  //for( n=0; n<f.get_qel(); n++)
+  // AbsListNode<T>* aln = f.get_first_node();
+  // for( n=0; n<f.get_qel(); n++)
   //{
   //  Ifile<<"n="<<n<<" el[n]="<<noindent; aln->el.print(file);
   //  aln = aln->get_next_node();
@@ -737,9 +747,10 @@ template <class T> void print_AbsList(std::ostream& file, const AbsList<T>& f) {
 }
 
 template <class T>
-    std::ostream& operator<<(std::ostream& file, const AbsListNode<T>& f) {
-  mfunnamep("template<class T> std::ostream& operator<<(std::ostream& file, "
-            "const AbsListNode<T>& f)");
+std::ostream& operator<<(std::ostream& file, const AbsListNode<T>& f) {
+  mfunnamep(
+      "template<class T> std::ostream& operator<<(std::ostream& file, "
+      "const AbsListNode<T>& f)");
   Ifile << "AbsListNode<T>:\n";
   indn.n += 2;
 #ifdef DONT_USE_ABSPTR
@@ -753,11 +764,12 @@ template <class T>
 }
 
 template <class T>
-    std::ostream& operator<<(std::ostream& file, const AbsList<T>& f) {
-  mfunnamep("template<class T> std::ostream& operator<<(std::ostream& file, "
-            "const AbsList<T>& f)");
+std::ostream& operator<<(std::ostream& file, const AbsList<T>& f) {
+  mfunnamep(
+      "template<class T> std::ostream& operator<<(std::ostream& file, "
+      "const AbsList<T>& f)");
   Ifile << "AbsList<T>: qel=" << f.get_qel() << '\n';
-  //f.check();
+  // f.check();
   long n = 0;
   indn.n += 2;
   AbsListNode<T>* aln = NULL;
@@ -765,8 +777,8 @@ template <class T>
     Ifile << "n=" << n << " el[n]=" << aln->el << '\n';
     n++;
   }
-  //AbsListNode<T>* aln = f.get_first_node();
-  //for( n=0; n<f.get_qel(); n++)
+  // AbsListNode<T>* aln = f.get_first_node();
+  // for( n=0; n<f.get_qel(); n++)
   //{
   //  Ifile<<"n="<<n<<" el[n]="<<aln->el<<'\n';
   //  aln = aln->get_next_node();
@@ -775,6 +787,8 @@ template <class T>
   file << yesindent;
   indn.n -= 2;
   return file;
+}
+
 }
 
 #endif

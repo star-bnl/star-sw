@@ -5,7 +5,11 @@
 
 #include "Random.hh"
 
+namespace Heed {
+
 inline double SRANLUX() { return Garfield::RndmUniform(); }
+
+}
 
 #else
 
@@ -14,7 +18,7 @@ inline double SRANLUX() { return Garfield::RndmUniform(); }
 #include "wcpplib/random/WRandomEngine.h"
 //#include <CLHEP/Random/RandomEngine.h>
 
-//using namespace CLHEP;  // uncomment if below is CLHEP variant.
+// using namespace CLHEP;  // uncomment if below is CLHEP variant.
 
 extern WHepRandomEngine& random_engine;
 

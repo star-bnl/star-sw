@@ -26,7 +26,7 @@ namespace Heed {
 const int pqqsurf = 10;
 const int pqcrossurf = 4;
 
-class surface : public absref virt_common_base_pcomma {
+class surface : public absref {
  public:
   macro_copy_total_zero(surface);
   virtual ~surface() {}
@@ -64,7 +64,6 @@ class surface : public absref virt_common_base_pcomma {
   virtual int cross(const polyline& fpl, point* cntrpt, int& qcntrpt,
                     vfloat prec) const = 0;
   virtual void print(std::ostream& file, int l) const = 0;
-
 };
 
 // **** splane ****
@@ -75,7 +74,7 @@ class splane : public surface {
   vec dir_ins;  // direction to inside, supposed to be unit length (What for?)
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  static absref(absref::* aref_splane[2]);
+  static absref(absref::*aref_splane[2]);
 
  public:
   /// Constructors
@@ -116,40 +115,39 @@ class splane : public surface {
     polyline* plh = new polyline[fpl.Gqsl()];
     int qplh;
     int i = pn.cross(fpl, cntrpt, qcntrpt, plh, qplh, prec);
-    delete [] plh;
+    delete[] plh;
     return i;
   }
   virtual void print(std::ostream& file, int l) const;
-
 };
 
 // **** ulsvolume ****
 
 class ulsvolume : public absvol {
-      // unlimited surfaces volume
-      // It is volume constructed by unlimited surfaces.
-      // The surface itself can be not convex.
-      // But that part of surface which is border of the volume
-      // must be from the right internal side from the other surfaces.
-      // It can be formulated by the other way: neigbouring crossing surfaces
-      // should cross only in the corners of the shape.
-      // This allows to formulate algorithm of finding nearest cross of a track
-      // with border of this type of volume:
-      // For tracks coming (entering) from outside:
-      // Nearest entering crossing point of track with a surface
-      // which is from inside of the other surfaces.
-      // For tracks exiting from inside:
-      // Nearest crossing point of track with a surface for exiting track.
-      // For each crossing point we know whether or not the track exits or
-      // enters to inside of this surface.
-      // This allows to reject that crossing points which are exiting for
-      // track going from outside volume.
-      // It allows to make cylinders, tubes and many other complicated shapes.
+  // unlimited surfaces volume
+  // It is volume constructed by unlimited surfaces.
+  // The surface itself can be not convex.
+  // But that part of surface which is border of the volume
+  // must be from the right internal side from the other surfaces.
+  // It can be formulated by the other way: neigbouring crossing surfaces
+  // should cross only in the corners of the shape.
+  // This allows to formulate algorithm of finding nearest cross of a track
+  // with border of this type of volume:
+  // For tracks coming (entering) from outside:
+  // Nearest entering crossing point of track with a surface
+  // which is from inside of the other surfaces.
+  // For tracks exiting from inside:
+  // Nearest crossing point of track with a surface for exiting track.
+  // For each crossing point we know whether or not the track exits or
+  // enters to inside of this surface.
+  // This allows to reject that crossing points which are exiting for
+  // track going from outside volume.
+  // It allows to make cylinders, tubes and many other complicated shapes.
 
  public:
   int qsurf;
   ActivePtr<surface> surf[pqqsurf];
-  String name;
+  std::string name;
 
  protected:
   surface* adrsurf[pqqsurf];  // used only for get_components
@@ -170,8 +168,8 @@ class ulsvolume : public absvol {
   int range_ext(trajestep& fts, int s_ext) const;
   // If no cross, returns 0 and does not change fts
   // If there is cross, returns 1 and assign fts.mrange and fts.mpoint
-  void ulsvolume_init(surface* fsurf[pqqsurf], int fqsurf, const String& fname,
-                      vfloat fprec);
+  void ulsvolume_init(surface* fsurf[pqqsurf], int fqsurf,
+                      const std::string& fname, vfloat fprec);
 
   virtual void income(gparticle* /*gp*/) {}
   virtual void chname(char* nm) const {
@@ -180,7 +178,6 @@ class ulsvolume : public absvol {
   }
   virtual void print(std::ostream& file, int l) const;
   virtual int mandatory(void) const { return 0; }
-
 };
 
 class manip_ulsvolume : virtual public manip_absvol, public ulsvolume {
@@ -200,9 +197,7 @@ class manip_ulsvolume : virtual public manip_absvol, public ulsvolume {
     strcat(nm, name.c_str());
   }
   virtual void print(std::ostream& file, int l) const;
-
 };
-
 }
 
 #endif

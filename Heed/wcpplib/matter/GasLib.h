@@ -8,14 +8,14 @@ The gas is the highest class in this hierarchy.
 The reason to gather all initializations in one file is the undefinite
 order of initialization of the global objects in C++.
 This order is definite only for objects presented in single object file.
-Since each atom, molecula, and matter should be registered in the system,
+Since each atom, molecule, and matter should be registered in the system,
 the logbooks should be initialized and ready for work prior to
 initialization of the first registered object.
 This is now guaranteed with the help of singleton class.
-But moleculas and matters depend on atoms, and the order of initialization
+But molecules and matters depend on atoms, and the order of initialization
 should be kept strongly.
 The only way to guarantee
-this is to initialize all the ingredients in the same file  in correct order.
+this is to initialize all the ingredients in the same file in correct order.
 For not global objects there is no problem,
 since global static logbooks are anyway initialized before running main().
 
@@ -33,13 +33,12 @@ with the existing GasLib.o.
 
 The last half of Mendeleev's (Mendel's) table is not totally included yet.
 
-
 1998-2004,  I. Smirnov
 
 */
 
 #include "wcpplib/matter/AtomDef.h"
-#include "wcpplib/matter/MatterDef.h"
+// #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/matter/MoleculeDef.h"
 #include "wcpplib/matter/GasDef.h"
 
@@ -112,39 +111,39 @@ extern MoleculeDef Helium_molec;
 extern MoleculeDef Nitrogen_molec;
 extern MoleculeDef Oxygen_molec;
 extern MoleculeDef Neon_molec;
-extern VanDerVaals Argon_VanDerVaals;
+extern VanDerWaals Argon_VanDerWaals;
 extern MoleculeDef Argon_molec;
-//extern MoleculeDef Argon_without_K_molec;
-extern VanDerVaals Krypton_VanDerVaals;
+// extern MoleculeDef Argon_without_K_molec;
+extern VanDerWaals Krypton_VanDerWaals;
 extern MoleculeDef Krypton_molec;
-extern VanDerVaals Xenon_VanDerVaals;
+extern VanDerWaals Xenon_VanDerWaals;
 extern MoleculeDef Xenon_molec;
 extern MoleculeDef NH3;
 extern MoleculeDef N2O;
 extern MoleculeDef CO2;
-extern VanDerVaals CH4_VanDerVaals;
+extern VanDerWaals CH4_VanDerWaals;
 extern MoleculeDef CH4;
-extern VanDerVaals CF4_VanDerVaals;
+extern VanDerWaals CF4_VanDerWaals;
 extern MoleculeDef CF4;
 
-// The following is defined without VanDerVaals corrections
+// The following is defined without Van der Waals corrections
 extern MoleculeDef SF4;
 extern MoleculeDef SF6;
 
 extern MoleculeDef C2H2;
 extern MoleculeDef C2H4;
 extern MoleculeDef C2H6;
-extern VanDerVaals C3H8_VanDerVaals;
+extern VanDerWaals C3H8_VanDerWaals;
 extern MoleculeDef C3H8;
-extern VanDerVaals C4H10_VanDerVaals;
+extern VanDerWaals C4H10_VanDerWaals;
 extern MoleculeDef C4H10;
 
-// The following is defined without VanDerVaals corrections
+// The following is defined without Van der Waals corrections
 extern MoleculeDef C2H2F4;
 
-extern VanDerVaals Water_VanDerVaals;
+extern VanDerWaals Water_VanDerWaals;
 extern MoleculeDef Water_molec;
-extern VanDerVaals Methylal_VanDerVaals;
+extern VanDerWaals Methylal_VanDerWaals;
 extern MoleculeDef Methylal_molec;
 
 // Additional molecule definitions for compatibility with Magboltz
@@ -171,7 +170,6 @@ extern MoleculeDef Hg_molec;
 extern MoleculeDef H2S_molec;
 extern MoleculeDef GeH4_molec;
 extern MoleculeDef SiH4_molec;
-
 }
 
 #endif

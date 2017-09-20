@@ -1,15 +1,12 @@
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/random/ranluxint.h"
-#include "wcpplib/random/chisran.h"
 #include "wcpplib/random/pois.h"
 #include "wcpplib/random/rnorm.h"
 #include "heed++/code/HeedDeltaElectron.h"
 #include "heed++/code/HeedDeltaElectronCS.h"
 #include "heed++/code/HeedCondElectron.h"
 
-/*
-2003, I. Smirnov
-*/
+// 2003, I. Smirnov
 
 #define USE_ADJUSTED_W
 #define RANDOM_POIS
@@ -39,7 +36,6 @@ HeedDeltaElectron::HeedDeltaElectron(manip_absvol* primvol, const point& pt,
       necessary_energy(0.0),
       total_Eloss(0.) {
   mfunname("HeedDeltaElectron::HeedDeltaElectron(...)");
-
 }
 
 void HeedDeltaElectron::physics_mrange(double& fmrange) {
@@ -73,7 +69,7 @@ void HeedDeltaElectron::physics_mrange(double& fmrange) {
   double dedx = hdecs->eLoss[n1] + (hdecs->eLoss[n2] - hdecs->eLoss[n1]) /
                                        (emesh->get_ec(n2) - emesh->get_ec(n1)) *
                                        (ek - emesh->get_ec(n1));
-  //double ek_reduced = ek * 0.9;
+  // double ek_reduced = ek * 0.9;
   double eloss = 0.1 * ek;               // MeV
   if (eloss < 0.00005) eloss = 0.00005;  // loss by 50eV
   if (eloss > ek) {
@@ -101,7 +97,8 @@ void HeedDeltaElectron::physics_mrange(double& fmrange) {
     low_path_length = (hdecs->low_lambda[n1r] +
                        (hdecs->low_lambda[n2r] - hdecs->low_lambda[n1r]) /
                            (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
-                           (ek_restricted - emesh->get_ec(n1r))) * cm;
+                           (ek_restricted - emesh->get_ec(n1r))) *
+                      cm;
     if (s_print_listing == 1) Iprintnf(mcout, low_path_length / cm);
     long qscat = hdecs->eesls->get_qscat();
     double sigma_ctheta = hdecs->get_sigma(ek_restricted, qscat);
@@ -136,7 +133,8 @@ void HeedDeltaElectron::physics_mrange(double& fmrange) {
     double mean_path_length =
         (hdecs->lambda[n1r] + (hdecs->lambda[n2r] - hdecs->lambda[n1r]) /
                                   (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
-                                  (ek_restricted - emesh->get_ec(n1r))) * cm;
+                                  (ek_restricted - emesh->get_ec(n1r))) *
+        cm;
     if (s_print_listing == 1) {
       Iprintnf(mcout, mean_path_length);
       Iprintnf(mcout, mean_path_length / cm);
@@ -263,8 +261,8 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
         // since necessary_energy is not an addition
         if (s_print_listing == 1) {
           mcout << "\nstart to leave conduction electrons" << std::endl;
-          //Iprintnf(mcout, Eloss/eV);
-          //Iprintnf(mcout, necessary_energy/eV);
+          // Iprintnf(mcout, Eloss/eV);
+          // Iprintnf(mcout, necessary_energy/eV);
           Iprintnf(mcout, dedx);
         }
         if (necessary_energy <= 0.0) {
@@ -343,7 +341,8 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           low_path_length = (hdecs->low_lambda[n1r] +
                              (hdecs->low_lambda[n2r] - hdecs->low_lambda[n1r]) /
                                  (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
-                                 (ek_restricted - emesh->get_ec(n1r))) * cm;
+                                 (ek_restricted - emesh->get_ec(n1r))) *
+                            cm;
           if (s_print_listing == 1) Iprintnf(mcout, low_path_length / cm);
           s_mult_low_path_length = 0;
           q_low_path_length = currpos.prange / low_path_length;
@@ -384,7 +383,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           if (s_print_listing == 1)
             Iprint2nf(mcout, theta_rot, theta_rot / M_PI * 180.0);
           vec dir = currpos.dir;
-          //Iprint(mcout, dir);
+          // Iprint(mcout, dir);
           basis temp(dir, "temp");
           vec vturn;
           vturn.random_round_vec();
@@ -421,7 +420,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
         {
 #ifdef USE_MEAN_COEF
 #else
-          double sq2 = sqrt(2.0);
+        double sq2 = sqrt(2.0);
 #endif
           do {
             double y = 0.0;
@@ -432,7 +431,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
 #ifdef USE_MEAN_COEF
             double x = sigma_ctheta * (-log(1.0 - y));
 #else
-            double x = sigma_ctheta * 1.0 / sq2 * (-log(1.0 - y));
+          double x = sigma_ctheta * 1.0 / sq2 * (-log(1.0 - y));
 #endif
             ctheta = 1.0 - x;
             if (s_print_listing == 1) Iprint2nf(mcout, x, ctheta);
@@ -445,19 +444,19 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           Iprint2nf(mcout, theta_rot, theta_rot / M_PI * 180.0);
         }
         vec dir = currpos.dir;
-        //Iprint(mcout, dir);
+        // Iprint(mcout, dir);
         basis temp(dir, "temp");
-        //long n1r = emesh->get_interval_number_between_centers(ek_restricted);
-        //double theta_rot = angular_points_ran[nr1].ran(SRANLUX());
-        //Iprintn(mcout, theta_rot);
-        //double phi = 2.0 * M_PI * SRANLUX();
+        // long n1r = emesh->get_interval_number_between_centers(ek_restricted);
+        // double theta_rot = angular_points_ran[nr1].ran(SRANLUX());
+        // Iprintn(mcout, theta_rot);
+        // double phi = 2.0 * M_PI * SRANLUX();
         vec vturn;
         vturn.random_round_vec();
         vturn = vturn * sin(theta_rot);
         vec new_dir(vturn.x, vturn.y, cos(theta_rot));
         new_dir.down(&temp);
         currpos.dir = new_dir;
-        //Iprint(mcout, new_dir);
+        // Iprint(mcout, new_dir);
         currpos.dirloc = currpos.dir;
         currpos.tid.up_absref(&currpos.dirloc);
       }
@@ -476,7 +475,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           hdecs->angular_points_ran[n1r].ran(SRANLUX()) / 180.0 * M_PI;
       if (s_print_listing == 1) Iprintnf(mcout, theta_rot);
       vec dir = currpos.dir;
-      //Iprint(mcout, dir);
+      // Iprint(mcout, dir);
       basis temp(dir, "temp");
       vec vturn;
       vturn.random_round_vec();
@@ -484,12 +483,12 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
       vec new_dir(vturn.x, vturn.y, cos(theta_rot));
       new_dir.down(&temp);
       currpos.dir = new_dir;
-      //Iprint(mcout, new_dir);
+      // Iprint(mcout, new_dir);
       currpos.dirloc = currpos.dir;
       currpos.tid.up_absref(&currpos.dirloc);
     }
   } else {
-    // no need to scater
+    // no need to scatter
     absvol* vav = currpos.G_lavol();  // get least address of volume
     SensitiveVolume* asv = dynamic_cast<SensitiveVolume*>(vav);
     if (asv != NULL) {
@@ -523,5 +522,4 @@ void HeedDeltaElectron::print(std::ostream& file, int l) const {
   mparticle::print(file, l - 1);
   indn.n -= 2;
 }
-
 }

@@ -5,12 +5,12 @@
 #include "wcpplib/geometry/vec.h"
 
 namespace Garfield {
-  class Sensor;
+class Sensor;
 }
 
 namespace Heed {
 
-class HeedFieldMap { 
+class HeedFieldMap {
  public:
   HeedFieldMap() : m_sensor(NULL), m_useEfield(false), m_useBfield(false) {}
 
@@ -18,15 +18,14 @@ class HeedFieldMap {
   void UseEfield(const bool flag) { m_useEfield = flag; }
   void UseBfield(const bool flag) { m_useBfield = flag; }
 
-  void field_map(const point& pt, vec& efield, vec& bfield, 
+  void field_map(const point& pt, vec& efield, vec& bfield,
                  vfloat& mrange) const;
+
  private:
   Garfield::Sensor* m_sensor;
   bool m_useEfield;
   bool m_useBfield;
-
 };
-
 }
 
 #endif

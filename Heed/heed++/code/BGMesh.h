@@ -1,12 +1,11 @@
 #ifndef BGMESH_H
 #define BGMESH_H
 
-#include "wcpplib/safetl/AbsArr.h"
+#include <vector>
+
+#include "wcpplib/safetl/AbsPtr.h"
 
 namespace Heed {
-
-// Here q is the total number of points (not interval).
-// Minimum one interval and two points
 
 class BGMesh : public RegPassivePtr {
  public:
@@ -14,16 +13,15 @@ class BGMesh : public RegPassivePtr {
   BGMesh(double fxmin, double fxmax, long fq);
   double xmin;
   double xmax;
+  /// Total number of points (not number of intervals).
   long q;
-  DynLinArr<double> x;
+  std::vector<double> x;
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total(BGMesh);
-
 };
 std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
 
-DynLinArr<double> make_log_mesh(double fxmin, double fxmax, long fq);
-
+std::vector<double> make_log_mesh(double fxmin, double fxmax, long fq);
 }
 
 #endif

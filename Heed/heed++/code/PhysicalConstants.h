@@ -33,7 +33,6 @@ const double PLANKCLIGHT = 197.327e-13;  // crossed plank * CLIGHT (Mev* cm)
 // The length of wave vector k in vacuum in units 1/[length]
 // (that is 1/cm in this system)
 // is the energy divided by PLANKCLIGHT
-
 }
 
 #endif

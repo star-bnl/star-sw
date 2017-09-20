@@ -19,22 +19,23 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// ********  box (3-dimensional rectangle (rectangular parallelogram)  *******
-// center of coordinate system is meant in the center of the box
+/// Box (three-dimensional rectangle/rectangular parallelogram).
+/// Center of coordinate system is meant in the center of the box.
 class box : public absvol {
  public:
-  vfloat m_dx, m_dy, m_dz;     // lengths of sides
-  vfloat m_dxh, m_dyh, m_dzh;  // half-lengths of sides
+  vfloat m_dx, m_dy, m_dz;     ///< Lengths of sides
+  vfloat m_dxh, m_dyh, m_dzh;  ///< Half-lengths of sides
   ulsvolume m_ulsv;
-  String m_name;
+  std::string m_name;
 
  public:
-  /// Constructors
+  /// Default constructor.
   box(void);
-  // Compute precision as a ratio vprecision from mean of dimensions
-  box(vfloat fdx, vfloat fdy, vfloat fdz, const String& fname);
-  // Use user-provided precision
-  box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec, const String& fname);
+  // Constructor, compute precision from mean of dimensions.
+  box(vfloat fdx, vfloat fdy, vfloat fdz, const std::string& fname);
+  /// Constructor with user-provided precision.
+  box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec,
+      const std::string& fname);
   box(box& fb);
   box(const box& fb);
   macro_copy_header(box);
@@ -46,7 +47,7 @@ class box : public absvol {
 
   virtual int check_point_inside(const point& fpt, const vec& dir) const;
 
-  // Range till exit from given volume or to entry only
+  /// Range till exit from given volume or to entry only.
   virtual int range_ext(trajestep& fts, int s_ext) const;
   virtual void income(gparticle* gp);
   virtual void chname(char* nm) const;
@@ -54,14 +55,13 @@ class box : public absvol {
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-
 };
 
 // *****   manip_box  ********
 
 class manip_box : public manip_absvol, public box {
  public:
-  /// Constructors
+  /// Constructor
   manip_box(void) : manip_absvol(), box() {}
   manip_box(const box& f) : manip_absvol(), box(f) {}
   macro_copy_header(manip_box);
@@ -77,7 +77,7 @@ class manip_box : public manip_absvol, public box {
 
 class sh_manip_box : virtual public sh_manip_absvol, public box {
  public:
-  /// Constructors
+  /// Constructor
   sh_manip_box(void) : sh_manip_absvol(), box() {}
   sh_manip_box(const box& f) : sh_manip_absvol(), box(f) {}
   sh_manip_box(const abssyscoor& fcsys, const box& fbx)
@@ -92,9 +92,7 @@ class sh_manip_box : virtual public sh_manip_absvol, public box {
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-
 };
-
 }
 
 #endif

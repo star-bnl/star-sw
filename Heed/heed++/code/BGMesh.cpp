@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "heed++/code/BGMesh.h"
 
 namespace Heed {
@@ -13,8 +15,9 @@ void BGMesh::print(std::ostream& file, int l) const {
   indn.n += 2;
   Ifile << "xmin=" << xmin << " xmax=" << xmax << " quantity of intervals=" << q
         << '\n';
+  // TODO (HS)
   if (l > 1) {
-    Iprintn(mcout, x);
+    // Iprintn(mcout, x);
   }
   indn.n -= 2;
 }
@@ -25,24 +28,22 @@ std::ostream& operator<<(std::ostream& file, const BGMesh& bgm) {
   return file;
 }
 
-DynLinArr<double> make_log_mesh(double fxmin, double fxmax, long fq) {
-  mfunname(
-      "DynLinArr< double > make_log_mesh(double fxmin, double fxmax, long fq)");
+std::vector<double> make_log_mesh(double fxmin, double fxmax, long fq) {
+  mfunname("vector<double> make_log_mesh(double fxmin, double fxmax, long fq)");
+  // The minimum is one interval and two points.
+  check_econd11(fq, <= 1, mcerr);
 
-  check_econd11(fq, <= 1, mcerr);  // minimum one interval and two points
+  const double rk = pow(fxmax / fxmin, (1.0 / double(fq - 1)));
 
-  double rk = pow(fxmax / fxmin, (1.0 / double(fq - 1)));
-
-  DynLinArr<double> x(fq);
+  std::vector<double> x(fq);
   x[0] = fxmin;
   x[fq - 1] = fxmax;
 
   double xr = fxmin;
   for (long n = 1; n < fq - 1; n++) {
-    xr = xr * rk;
+    xr *= rk;
     x[n] = xr;
   }
   return x;
 }
-
 }
