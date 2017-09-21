@@ -1,7 +1,7 @@
-macro y2017
-*  starsim -w 1 -b y2017.kumac
-  DETP geom y2017a  
-#  DETP geom y2017
+macro y2019
+*  starsim -w 1 -b y2019.kumac
+  DETP geom dev2019  
+#  DETP geom y2019
 * field=-5  hadr_off=1
   gexec $STAR_LIB/StarMagFieldNoDict.so
   gexec $STAR_LIB/xgeometry.so
@@ -17,9 +17,9 @@ return
 macro ycut
 ************  Y ************
  next
- for/file 67 y2017C-y.eps
+ for/file 67 y2019aC-y.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2017)  y-cut = 0'
+  title_g 'STAR Wide Angle Hall (y2019a)  y-cut = 0'
   null -2000 2000 -1500 1500
   atitle 'Z (cm)' 'X (cm)'
   dcut hall y 0 0 0 1 1
@@ -28,9 +28,9 @@ return
 macro ycutFarAway
 ************  Y ************
   next
- for/file 67 y2017C-yFarAway.eps
+ for/file 67 y2019aC-yFarAway.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2017)  y-cut = -390 cm'
+  title_g 'STAR Wide Angle Hall (y2019a)  y-cut = -390 cm'
   null -2000 2000 -1500 1500
   atitle 'Z (cm)' 'X (cm)'
   dcut hall y -390 0 0 1 1
@@ -39,9 +39,9 @@ return
 macro xcut
 ************  X ************
   next
-  for/file 67 y2017-x.eps
+  for/file 67 y2019a-x.eps
   meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2017)  x-cut'
+  title_g 'STAR Wide Angle Hall (y2019a)  x-cut'
   null 0 400 0 400
   atitle 'Z (cm)' 'Y (cm)'
   dcut hall x 0 0 0 1 1
@@ -50,9 +50,9 @@ return
 macro rcut
 ************  X ************
   next
- for/file 67 y2017-r.eps
+ for/file 67 y2019a-r.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2017)  x-cut = 1 cm'
+  title_g 'STAR Wide Angle Hall (y2019a)  x-cut = 1 cm'
   null -2000 2000 0 1500
 * atitle 'Z (cm)' 'R (cm)'
   dcut hall x 1 0 0 1 1
@@ -61,9 +61,9 @@ return
 macro zcut 
 ************  Z ************
   next
- for/file 67 y2017-z.eps
+ for/file 67 y2019a-z.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2017)  z-cut = 1 cm'
+  title_g 'STAR Wide Angle Hall (y2019a)  z-cut = 1 cm'
   null -600 600 -600 600
   atitle 'X (cm)' 'Y (cm)'
   dcut hall z 1 0 0 1 1
@@ -72,9 +72,9 @@ return
 macro zcut2 
 ************  Z ************
   next
- for/file 67 y2017-z2.eps
+ for/file 67 y2019a-z2.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2017)  z-cut = 53 cm'
+  title_g 'STAR Wide Angle Hall (y2019a)  z-cut = 53 cm'
   null -600 600 -600 600
   atitle 'X (cm)' 'Y (cm)'
   dcut hall z 53 0 0 1 1
