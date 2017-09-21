@@ -23,10 +23,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 #include <string>
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/safetl/AbsPtr.h"
-// #include "wcpplib/util/String.h"
+
 #define pvecerror(string)                                      \
   mfunname(string);                                            \
   if (vecerror != 0) {                                         \
@@ -100,7 +99,7 @@ class absref {
 };
 
 // Contains three methods of transmission, the fastest, slower and the slowest
-class absref_transmit virt_common_base_col {
+class absref_transmit {
  public:
   // For transmiting the members of the class, when
   // their relative addresses are avalable:
@@ -319,7 +318,7 @@ extern vec dv0;  // zero vector
 
 //             **** basis ****
 /// Basis.
-class basis : public absref virt_common_base_pcomma {
+class basis : public absref {
  protected:
   /// Unit vectors giving directions of Cartesian axes.
   /// Supposed to be perpendicular, therefore not public.
@@ -375,7 +374,7 @@ extern std::ostream& operator<<(std::ostream& file, const basis& b);
 //             **** point ****
 /// Point.
 
-class point : public absref virt_common_base_pcomma {
+class point : public absref {
  public:
   vec v;
 

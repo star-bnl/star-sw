@@ -316,7 +316,7 @@ std::ostream& operator<<(std::ostream& file, const GasDef& f) {
 }
 
 double gasdensity(double temperature, double pressure,
-                  std::vector<ProtPtr<MoleculeDef> > molec,
+                  std::vector<PassivePtr<MoleculeDef> > molec,
                   std::vector<double> weight_quan_molec, long qmolec) {
   mfunname("double gasdensity(...)");
   double sw = 0.0;

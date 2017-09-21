@@ -13,32 +13,24 @@ The file is provided "as is" without express or implied warranty.
 */
 
 #include <iostream>
-#include <cstring>
 #include <limits.h>
 #include <typeinfo>
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
 //#define IMPLICIT_X_STAR
 
-//#define USE_DYNCAST_IN_PASSIVEPTR  // (possibly obsolete, see below) default
-// option used to provide possibility of making base class RegPassivePtr
-// virtual.
-// In order to cast from base RegPassivePtr to the real pointer type
-// we need to use dynamic cast, which makes the referencing
-// little bit slower.
-
-#define USE_DOUBLE_PTR_IN_PASSIVEPTR  //
+#define USE_DOUBLE_PTR_IN_PASSIVEPTR 
 // New option. Makes passive ptr keeping address of counter and address
 // of object. This allow to avoid dynamic casts while still allowing
 // the class RegPassivePtr be virtual.
+
 //#define USE_CHECK_DOUBLE_PTR_IN_PASSIVEPTR
 // for debug of the option above. At each access it checks
 // that the object address in ptr is equal to the address
 // restored from the counter.
 
-#define USE_DELETE_AT_ZERO_COUNT  // to switch on option
-                                  // for emulation of shared pointer.
+#define USE_DELETE_AT_ZERO_COUNT  
+// to switch on option for emulation of shared pointer.
 // But it only gives possibility to emulate it by the passive pointer,
 // but does not make passive pointer equival to shared one.
 // You should assign 1 to s_allow_del_at_zero_count of each particular object,
@@ -54,8 +46,8 @@ The file is provided "as is" without express or implied warranty.
 // This option is incerted due to curiosity about for how much
 // the checks delay the program.
 // For Monte Carlo simulation the result was a few percent.
-// Therefore the use (uncommenting ) of this macro for the purposes
-// other than similar curiosity does NOT have any sence.
+// Therefore the use (uncommenting) of this macro for the purposes
+// other than similar curiosity does NOT have any sense.
 
 // To be addressed by active pointer an object of a class
 // should have functions
@@ -73,27 +65,8 @@ The file is provided "as is" without express or implied warranty.
 // to detect missings of copy functions in classes referred by
 // active pointers.
 
-//#define DEBUG_ACTIVEPTR  // print some messages at running ActivePtr
-//  components
-// The pilfer constructor and the pilfer function is sometimes not resolved
-// (i.e. at Scientific Linux 4.1,
-// on the contrary at Windows Vis. Studio it is resolved always)
-// if they are declared with non-const argument.
-// The solution is declaration them with const and class fields as mutable
-// as follows:
-#define PILF_CONST const
-#define PILF_MUTABLE mutable
-// Otherwise leave these macros empty
-//#define PILF_CONST
-//#define PILF_MUTABLE
-// The mutable fields do not seem to be harmful, except if
-// a user wants to add a new member functions. In the latter case
-// it might be useful to compile a program which does not use pilfers
-// with non-const arguments and without muables in order to verify
-// whether new functions erroneously change their constant arguments.
-// Then, mutables should be again switched on.
-// Note: these desclarations are repeated in AbsArr.h and AbsList,
-// see it for details.
+//#define DEBUG_ACTIVEPTR  
+// print some messages at running ActivePtr components
 
 #define USE_GETSETTERS_IN_PASSIVEPTR  // new option allowing to use
 // getters and setters in the passive pointer
@@ -160,62 +133,8 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-#ifdef COPY_RETURNS_COMMON_BASE
-class CommonBase {
- public:
-  virtual ~CommonBase() {}
-};
-// For macros which are designed to disappear completely without
-// editing of source when covariant types are
-// included and COPY_RETURNS_COMMON_BASE gets not defined anymore:
-#define virt_common_base \
- public                  \
-  virtual CommonBase
-#define virt_common_base_col :public virtual CommonBase  // for single case
-#define virt_common_base_comma \
- public                        \
-  virtual CommonBase,                                          // one of many
-#define virt_common_base_col_comma :public virtual CommonBase, // first of many
-#define virt_common_base_pcomma , public virtual CommonBase    // last of many
-#else
-// define them just empty
-#define virt_common_base
-#define virt_common_base_col        // for single case
-#define virt_common_base_comma      // one of many
-#define virt_common_base_col_comma  // first of many
-#define virt_common_base_pcomma     // last of many
-
-#endif
-
-#ifndef COPY_RETURNS_COMMON_BASE
-// return type
-#define AbsCont_copy(type) \
-  virtual type* copy(void) const { return new type(*this); }
 #define AnyType_copy(derived_type, base_type) \
   virtual derived_type* copy(void) const { return new derived_type(*this); }
-#else
-// return CommonBase
-#define AbsCont_copy(type) \
-  virtual CommonBase* copy(void) const { return new type(*this); }
-#define AnyType_copy(derived_type, base_type) \
-  virtual CommonBase* copy(void) const { return new derived_type(*this); }
-#endif
-
-// New definitions
-#ifndef COPY_RETURNS_COMMON_BASE
-// return type
-
-/// Abstract container.
-class AbsCont {
- public:
-  virtual AbsCont* copy(void) const = 0;
-  // printing function
-  // parameter l is useful so as to control length of listing.
-  virtual void print(std::ostream& file, int l) const {
-    Ifile << "AbsCont::print is called, l=" << l << "\n";
-  }
-  virtual ~AbsCont() {}
-};
 
 // Interesting that the following macros do not seem to be working
 // with templates with more than one argument, since preprocessor
@@ -234,44 +153,6 @@ class AbsCont {
     spexit(mcerr);                                                             \
     return NULL;                                                               \
   }
-// return NULL to calm compiler of Solaris which wants to see return value
-
-#else
-
-// return void
-
-/// Abstract container
-class AbsCont virt_common_base_col {
- public:
-  virtual CommonBase* copy(void) const = 0;
-  /// Printing function. Parameter l controls length of listing.
-  virtual void print(std::ostream& file, int l) const {
-    Ifile << "AbsCont::print is called, l=" << l << "\n";
-  }  
-  virtual ~AbsCont() {}
-};
-
-#define macro_copy_total(type) \
-  virtual CommonBase* copy(void) const { return new type(*this); }
-#define macro_copy_total_zero(type) virtual CommonBase* copy(void) const = 0
-#define macro_copy_header(type) virtual CommonBase* copy(void) const;
-#define macro_copy_body(type) \
-  CommonBase* type::copy(void) const { return new type(*this); }
-#define macro_copy_body_not_defined(type)                                      \
-  CommonBase* type::copy(void) const {                                         \
-    mcerr << "macro_copy_body_not_defined(" << #type << "): forbidden call\n"; \
-    spexit(mcerr);                                                             \
-    return NULL;                                                               \
-  }
-// return NULL to calm compiler of Solaris which wants to see return value
-#endif
-
-inline std::ostream& operator<<(std::ostream& file, const AbsCont& f) {
-  Ifile << "operator<<AbsCont& is called.\n";
-  f.print(file, 0);  // this line is needed only to avoid warnings
-                     // at some severe compiler options that f is unused.
-  return file;
-}
 
 template <class X>
 class StandardCopyDefinition {
@@ -280,20 +161,10 @@ class StandardCopyDefinition {
 #ifdef DEBUG_ACTIVEPTR
     mcout << "static X* StandardCopyDefinition::copy(const X* f)\n";
 #endif
-// If to allow the type of copy function be any (void* for example,
-// it needs to convert it. This seems there is no reason to allow this.
+  // If to allow the type of copy function be any (void* for example,
+  // it needs to convert it. This seems there is no reason to allow this.
 #ifndef COPY_TYPE_CHECK
-#ifndef COPY_RETURNS_COMMON_BASE
     return f->copy();
-#else
-    X* ptr = dynamic_cast<X*>(f->copy());
-    if (ptr == NULL) {
-      mcerr << "Error in X* StandardCopyDefinition::copy(const X* f): "
-            << "cannot convert pointer returned from f->copy()"
-            << "to type " << typeid(X).name() << '\n';
-    }
-    return ptr;
-#endif
 #else
     X* p = f->copy();
 #ifdef DEBUG_ACTIVEPTR
@@ -338,12 +209,6 @@ But do not forget to add virtual destructors in pointee classes!
 In particular, when playing with multiple inheritance.
 */
 
-#define USE_OLD_POINTER_NAMES
-#ifdef USE_OLD_POINTER_NAMES
-// To use old name:
-#define AutoCont ActivePtr
-#endif
-
 enum Pilfer {
   steal
 };
@@ -356,7 +221,7 @@ enum Pass {
 
 /// Active pointer or automatic container or controlling pointer.
 template <class X, class C = StandardCopyDefinition<X> >
-class ActivePtr virt_common_base_col {
+class ActivePtr {
  public:
   // First of all, two pointer's operations.
   // NULL address is interpreted as error.
@@ -382,10 +247,9 @@ class ActivePtr virt_common_base_col {
   //             block of dynamic memory).
   // The old kept object in deleted in both cases.
   //
-  inline void put(const X* fptr)  // delete old owned object and
-      // copy object fptr to ownership of this.
-      // At fptr==NULL old object is deleted and new one is not copyed.
-  {  //
+  inline void put(const X* fptr) {
+    // delete old owned object and copy object fptr to ownership of this.
+    // At fptr == NULL old object is deleted and new one is not copied.
 #ifdef DEBUG_ACTIVEPTR
     mcout << "inline void put(const X* fptr)\n";
     Iprintn(mcout, ptr);
@@ -398,27 +262,26 @@ class ActivePtr virt_common_base_col {
     // object *fptr could be dependant or part of *this,
     // and could be deleted prior to copying  at the reverse order.
     X* ptr_temp = (fptr != NULL ? C::copy(fptr) : (X*)(NULL));
-    if (ptr != NULL) delete ptr;
+    if (ptr) delete ptr;
     ptr = ptr_temp;
 #ifdef DEBUG_ACTIVEPTR
     mcout << "finishing inline void put(const X* fptr):\n";
     Iprintn(mcout, ptr);
 #endif
   }
-  inline void pass(X* fptr)  // delete old owned object and
-      // pass address of object fptr to ownership of this
-      // without copying.
-      // At fptr==NULL old object is deleted and new one is not copyed.
-      // In general this is dengerous operation.
-      // In particular if object pointed by fptr is direct or indirect part
-      // of object pointed by ptr, it will be destroyed, which would probably
-      // cause error.
-      // But it is more efficient since does not require copying.
-  {  //
-    // if(ptr!=NULL) delete ptr;
+  inline void pass(X* fptr) {
+    // delete old owned object and
+    // pass address of object fptr to ownership of this
+    // without copying.
+    // At fptr==NULL old object is deleted and new one is not copyed.
+    // In general this is dengerous operation.
+    // In particular if object pointed by fptr is direct or indirect part
+    // of object pointed by ptr, it will be destroyed, which would probably
+    // cause error.
+    // But it is more efficient since does not require copying.
 
-    if (ptr != NULL) {
-      if (fptr != NULL) {
+    if (ptr) {
+      if (fptr) {
         mcerr << "ERROR in ActivePtr::pass(X* fptr):\n";
         mcerr << "Both the destination and source pointers are not empty\n";
         // if f belongs to *ptr, deletion of *ptr would lead to
@@ -444,21 +307,20 @@ class ActivePtr virt_common_base_col {
 #ifdef DEBUG_ACTIVEPTR
     mcout << "ActivePtr::clear is called, ptr =" << ptr << '\n';
 #endif
-    if (ptr != NULL) {
+    if (ptr) {
       delete ptr;
       ptr = NULL;
     }
   }
 
-  inline void pilfer(PILF_CONST ActivePtr<X, C>& f)
+  inline void pilfer(const ActivePtr<X, C>& f) {
       //!Attention: actually not const
-  {
 #ifdef DEBUG_ACTIVEPTR
     mcout << "ActivePtr::pilfer is called\n";
 #endif
     if (this != &f) {
-      if (ptr != NULL) {
-        if (f.ptr != NULL) {
+      if (ptr) {
+        if (f.ptr) {
           mcerr << "ERROR in ActivePtr::pilfer(...):\n";
           mcerr << "Both the destination and source pointers are not empty\n";
           // if f belongs to *ptr, deletion of *ptr would lead to
@@ -494,9 +356,6 @@ class ActivePtr virt_common_base_col {
   }
 // debug
 #endif
-  // inline ActivePtr(      ActivePtr<X,C>& f):   // was required at some old
-  // systems, don't remember why.
-  //  ptr(f.ptr != NULL ? C::copy(f.ptr) : f.ptr) {}
   inline ActivePtr(const ActivePtr<X, C>& f)
       : ptr(f.ptr != NULL ? C::copy(f.ptr) : f.ptr)
 #ifndef DEBUG_ACTIVEPTR
@@ -509,7 +368,7 @@ class ActivePtr virt_common_base_col {
 #endif
 
   // Pilfer constructor
-  inline ActivePtr(PILF_CONST ActivePtr<X, C>& f, Pilfer)
+  inline ActivePtr(const ActivePtr<X, C>& f, Pilfer)
       : ptr(f.ptr) {  //!Attention: actually not const
 #ifdef DEBUG_ACTIVEPTR
     mcout << "ActivePtr(const ActivePtr<X,C>& f, Pilfer) is run\n";
@@ -529,14 +388,14 @@ class ActivePtr virt_common_base_col {
   }
 
   macro_copy_total(ActivePtr);
-  virtual ~ActivePtr()  // unfortunately it should be virtual
-      // in order to avoid some rare (not met in practice but
-      // in principle possible) problems with ActivePtrReg.
-      // Therefore (if there is a virtual member)
-      // we can also include virtual copy (see above),
-      // although there is no obvious application for it
-      // (multiple indirection depth, but for what?).
-  {
+  virtual ~ActivePtr() { 
+    // unfortunately it should be virtual
+    // in order to avoid some rare (not met in practice but
+    // in principle possible) problems with ActivePtrReg.
+    // Therefore (if there is a virtual member)
+    // we can also include virtual copy (see above),
+    // although there is no obvious application for it
+    // (multiple indirection depth, but for what?).
     if (ptr != NULL) {
       delete ptr;
       ptr = NULL;
@@ -545,7 +404,7 @@ class ActivePtr virt_common_base_col {
   // the last assignment is for debug to assure the fast detection of error
   // in the case of continuing access to this ptr.
  private:
-  PILF_MUTABLE X* ptr;  // mutable is only to allow pilfer function and pilfer
+  mutable X* ptr;  // mutable is only to allow pilfer function and pilfer
   // constructor to have const descriptor of its argument and still to steal
   // the object.
   // Somewhy if without const, this function and this constructor
@@ -553,13 +412,8 @@ class ActivePtr virt_common_base_col {
   // (when argument is temporary, actual at receiving return value).
 };
 
-// Trying to change name
-// typedef ActivePtr<class X, class C > ActivePtr;
-// does not work
-
 template <class X, class C>
 void ActivePtr<X, C>::print(std::ostream& file, int l) const {
-  // if(ptr!=NULL) ptr->print(file, l);
   Ifile << "ActivePtr<X,C>: ";
   if (ptr == NULL)
     file << " ptr==NULL. \n";  // optimized to provide automatic reading
@@ -610,13 +464,13 @@ inline X* ActivePtr<X, C>::operator->(void) const {
 #ifdef SKIP_CHECKS_NULL
   return ptr;
 #else
-  if (ptr != NULL) return ptr;
+  if (ptr) return ptr;
   mcerr << "Error in X* ActivePtr<X,C>::operator->(void) const: "
         << " ptr == NULL\n";
   mcerr << "Type of X is (in internal notations) " << typeid(X).name() << '\n';
   // mcerr<<"Type of ptr is "<<typeid(ptr).name()<<'\n';
   spexit(mcerr);
-  return ptr;  // just to quiet compiler which wants to see a return value
+  return ptr;
 #endif
 }
 template <class X, class C>
@@ -624,12 +478,12 @@ inline X& ActivePtr<X, C>::operator*(void) const {
 #ifdef SKIP_CHECKS_NULL
   return *ptr;
 #else
-  if (ptr != NULL) return *ptr;
+  if (ptr) return *ptr;
   mcerr << "Error in X& ActivePtr<X,C>::operator*(void) const: "
         << " ptr == NULL\n";
   mcerr << "Type of X is (in internal notations) " << typeid(X).name() << '\n';
   spexit(mcerr);
-  return *ptr;  // just to quiet compiler which wants to see a return value
+  return *ptr;
 #endif
 }
 template <class X, class C>
@@ -637,12 +491,12 @@ inline X* ActivePtr<X, C>::getver(void) const {
 #ifdef SKIP_CHECKS_NULL
   return ptr;
 #else
-  if (ptr != NULL) return ptr;
+  if (ptr) return ptr;
   mcerr << "Error in X* ActivePtr<X,C>::getver(void) const: "
         << " ptr == NULL\n";
   mcerr << "Type of X is (in internal notations) " << typeid(X).name() << '\n';
   spexit(mcerr);
-  return ptr;  // just to quiet compiler which wants to see a return value
+  return ptr;
 #endif
 }
 #ifdef IMPLICIT_X_STAR
@@ -651,12 +505,12 @@ inline ActivePtr<X, C>::operator X*(void) const {
 #ifdef SKIP_CHECKS_NULL
   return ptr;
 #else
-  if (ptr != NULL) return ptr;
+  if (ptr) return ptr;
   mcerr << "Error in ActivePtr<X,C>::operator X*(void) const: "
         << " ptr == NULL\n";
   mcerr << "Type of X is (in internal notations) " << typeid(X).name() << '\n';
   spexit(mcerr);
-  return ptr;  // just to quiet compiler which wants to see a return value
+  return ptr;
 #endif
 }
 #endif
@@ -666,14 +520,6 @@ inline void exchange(ActivePtr<X, C>& f1, ActivePtr<X, C>& f2) {
   f1.pass(f2.extract());
   f2.pass(ptr);
 }
-
-#define USE_OLD_POINTER_NAMES
-#ifdef USE_OLD_POINTER_NAMES
-// To use old name:
-#define ProtPtr PassivePtr
-#define RegProtPtr RegPassivePtr
-#define CountProtPtr CountPassivePtr
-#endif
 
 template <class X>
 class PassivePtr;
@@ -722,7 +568,6 @@ inline void CountPassivePtr::unbook(void) {
   number_of_booked--;
 }
 }
-// template<class X>class PassivePtr;
 
 #ifdef USE_BIT_OPERA
 
@@ -736,10 +581,7 @@ const unsigned char eb_s_allow_del_at_zero_count = 32;
 #endif
 #endif
 
-class RegPassivePtr virt_common_base_col
-    // virt_common_base_col is added just to avoid repetitions in application
-    // classes
-    {
+class RegPassivePtr {
  public:
   friend class CountPP_ns::CountPassivePtr;
 // used for making cpp NULL when CountPassivePtr
@@ -747,13 +589,6 @@ class RegPassivePtr virt_common_base_col
 
 #ifdef USE_BIT_OPERA
  private:
-  /*
-  enum E_cwb{eb_s_ban_del=01, eb_s_ban_sub1 = 010, eb_s_ban_sub2 = 0100,
-             eb_s_ban_cop1=01000, eb_s_ban_cop2=010000
-             #ifdef USE_DELETE_AT_ZERO_COUNT
-             , eb_s_allow_del_at_zero_count = 0100000
-             #endif
-             };*/
   inline static void clear_bit(unsigned char& cw, unsigned char b) {
     if ((cw & b) != 0) {
       cw ^= b;
@@ -838,7 +673,6 @@ class RegPassivePtr virt_common_base_col
   };  // the total 6 bits
 #endif  // ifdef USE_BIT_FIELDS
 
-  // friend template<class X>class PassivePtr;
   inline RegPassivePtr(void)
       :
 #ifdef USE_BIT_OPERA
@@ -879,7 +713,6 @@ class RegPassivePtr virt_common_base_col
     set_s_ban_cop(fs_ban_cop);
 #endif
   }
-  //{mcout<<"RegPassivePtr::RegPassivePtr(void) is run\n";}
 
   RegPassivePtr(const RegPassivePtr& f);
 
@@ -889,17 +722,14 @@ class RegPassivePtr virt_common_base_col
   // spexit() if s_ban_sub==2 and the alist_of_prot_pointers is not empty.
 
   inline CountPP_ns::CountPassivePtr* book(void) const {
-    if (cpp == NULL) {
-      cpp = new CountPP_ns::CountPassivePtr(this);
-    }
+    if (!cpp) cpp = new CountPP_ns::CountPassivePtr(this);
     cpp->book();
     return cpp;
   }
 
-  inline void clear_pointers(void) const  // all pointers addressing this
-      // are cleared;
-  {
-    if (cpp != NULL) cpp->change_rpp(NULL);
+  inline void clear_pointers(void) const { 
+    // all pointers addressing this are cleared;
+    if (cpp) cpp->change_rpp(NULL);
   }
 
   macro_copy_total(RegPassivePtr);
@@ -1330,7 +1160,7 @@ CountPP_ns::CountPassivePtr::~CountPassivePtr() {
 }
 
 template <class X>
-class PassivePtr virt_common_base_col {
+class PassivePtr {
  public:
   friend class RegPassivePtr;
 
@@ -1349,26 +1179,8 @@ class PassivePtr virt_common_base_col {
 #endif
     return ptr;
 #else  // for ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
-
-#ifdef USE_DYNCAST_IN_PASSIVEPTR
-    // else return dynamic_cast< X* >
-    //	     (const_cast< RegPassivePtr* >( cpp->get_rpp() ) );
-    const RegPassivePtr* rpp = cpp->get_rpp();
-    if (rpp == NULL) return NULL;
-    X* temp_ptr = dynamic_cast<X*>(const_cast<RegPassivePtr*>(rpp));
-    if (temp_ptr == NULL) {
-      mcerr << "Error in inline X* PassivePtr::get(void):\n"
-            << " dynamic cast from RegPassivePtr to X* is not successful."
-            << " You have probably tried to address with passive pointer "
-            << " an object which is not derived from RegPassivePtr\n";
-      spexit(mcerr);
-    }
-    return temp_ptr;
-#else  // for ifdef USE_DYNCAST_IN_PASSIVEPTR
     else
       return (X*)(cpp->get_rpp());
-#endif  // for ifdef USE_DYNCAST_IN_PASSIVEPTR
-
 #endif  // for ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
   }
 
@@ -1392,8 +1204,6 @@ class PassivePtr virt_common_base_col {
 #endif
   {
   }
-  // inline PassivePtr(X* fptr):ptr(fptr)
-  //  { if(ptr!=NULL) ptr->loc_book((void**)&ptr); }
   inline PassivePtr(X* fptr) {
     if (fptr != NULL)
       cpp = fptr->book();
@@ -1403,30 +1213,17 @@ class PassivePtr virt_common_base_col {
     ptr = fptr;
 #endif
   }
-  // inline PassivePtr(Y* fptr):ptr(fptr)
-  //  { if(ptr!=NULL) ptr->loc_book((void**)&ptr); }
   inline PassivePtr(X& fptr) {
     cpp = fptr.book();
 #ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
     ptr = &fptr;
 #endif
   }
-  // inline PassivePtr(PassivePtr<X>& f);
-
-  // The following contractor allows to avoid copying of pointer at s = 0.
-  // Perhaps it is not necessary
-  // inline PassivePtr(PassivePtr<X>& f, int s); // s==0 do not copy, s==1 copy
-  // to new
 
   inline PassivePtr(const PassivePtr<X>& f);
-  // inline PassivePtr(const PassivePtr<X>& f, int s);
-  // s==0 do not copy, s==1 copy to new
 
   inline PassivePtr<X>& operator=(const PassivePtr<X>& f);
   inline PassivePtr<X>& operator=(X* f);
-  // template< class Y > explicit operator PassivePtr< Y >() const ; does not
-  // work,
-  // produces ambiguity with operators X* and constructors
 
   // Y may be any derived class from X
   template <class Y>
@@ -1458,12 +1255,6 @@ class PassivePtr virt_common_base_col {
   X* ptr;
 #endif
 };
-
-/*
-template<class X >
-template<class Y >
-PassivePtr<X>::operator PassivePtr<Y>() const { return PassivePtr<Y>(get());}
-*/
 
 template <class X>
 template <class Y>
@@ -1506,10 +1297,8 @@ std::ostream& operator<<(std::ostream& file, const PassivePtr<X>& f) {
 }
 
 template <class X>
-inline void PassivePtr<X>::put(X* fptr)
-    // unregirster old registered object and
-    // pass fptr to  this.
-{
+inline void PassivePtr<X>::put(X* fptr) {
+  // unregister old registered object and pass fptr to this.
   if (cpp != NULL) {
 #ifdef USE_DELETE_AT_ZERO_COUNT
     const RegPassivePtr* arptr;
@@ -1645,30 +1434,12 @@ inline X* PassivePtr<X>::operator->(void) const {
     spexit(mcerr);
   }
 #endif
-#ifdef USE_DYNCAST_IN_PASSIVEPTR
-  X* temp_ptr = dynamic_cast<X*>(const_cast<RegPassivePtr*>(rpp));
-  if (temp_ptr == NULL) {
-    mcerr << "Error in X* PassivePtr<X>::operator->(void) const:\n"
-          << " dynamic cast from RegPassivePtr to X* is not successful"
-          << " (although the addresses of counter and abject are not zero)."
-          << " You have probably initialized passive pointer "
-          << " with address of deleted object\n";
-    //<<" You have probably tried to address with passive pointer "
-    //<<" an object which is not derived from RegPassivePtr\n";
-    mcerr << "Type of X is (in internal notations) " << typeid(X).name()
-          << '\n';
-    spexit(mcerr);
-  }
-  return temp_ptr;
-#else
   return (X*)(rpp);
-#endif
 #endif  // for ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
 }
 
 template <class X>
 inline X& PassivePtr<X>::operator*(void) const {
-// mcout<<"PassivePtr<X>::operator* is called\n";
 #ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
 #ifdef SKIP_CHECKS_NULL
   return *ptr;
@@ -1732,19 +1503,7 @@ inline X& PassivePtr<X>::operator*(void) const {
     spexit(mcerr);
   }
 #endif
-#ifdef USE_DYNCAST_IN_PASSIVEPTR
-  X* temp_ptr = dynamic_cast<X*>(const_cast<RegPassivePtr*>(rpp));
-  if (temp_ptr == NULL) {
-    mcerr << "Error in X& PassivePtr<X>::operator*(void) const:\n"
-          << " dynamic cast from RegPassivePtr to X* is not successful."
-          << " You have probably tried to address with passive pointer "
-          << " an object which is not derived from RegPassivePtr\n";
-    spexit(mcerr);
-  }
-  return *temp_ptr;
-#else
   return *((X*)(rpp));
-#endif
 #endif  // for ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
 }
 
@@ -1804,19 +1563,7 @@ inline X* PassivePtr<X>::getver(void) const {
     spexit(mcerr);
   }
 #endif
-#ifdef USE_DYNCAST_IN_PASSIVEPTR
-  X* temp_ptr = dynamic_cast<X*>(const_cast<RegPassivePtr*>(rpp));
-  if (temp_ptr == NULL) {
-    mcerr << "Error in X* PassivePtr<X>::getver(void) const:\n"
-          << " dynamic cast from RegPassivePtr to X* is not successful."
-          << " You have probably tried to address with passive pointer "
-          << " an object which is not derived from RegPassivePtr\n";
-    spexit(mcerr);
-  }
-  return temp_ptr;
-#else
   return (X*)(rpp);
-#endif
 #endif  // for ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
 }
 
@@ -1878,34 +1625,19 @@ inline PassivePtr<X>::operator X*(void) const {
     spexit(mcerr);
   }
 #endif
-#ifdef USE_DYNCAST_IN_PASSIVEPTR
-  X* temp_ptr = dynamic_cast<X*>(const_cast<RegPassivePtr*>(rpp));
-  if (temp_ptr == NULL) {
-    mcerr << "Error in X* PassivePtr<X>::operator X*(void) const:\n"
-          << " dynamic cast from RegPassivePtr to X* is not successful."
-          << " You have probably tried to address with passive pointer "
-          << " an object which is not derived from RegPassivePtr\n";
-    spexit(mcerr);
-  }
-  return temp_ptr;
-#else
   return (X*)(rpp);
-#endif
 #endif  // for ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
 }
 #endif
 template <class X>
-inline int operator==(const PassivePtr<X>& f1,
-                      const PassivePtr<X>& f2) {  // comparison of addresses, so
-                                                  // it mimics
-                                                  // regular pointers
+inline int operator==(const PassivePtr<X>& f1, const PassivePtr<X>& f2) {
+  // comparison of addresses, so it mimics regular pointers
   return f1.get() == f2.get();
 }
 
 template <class X>
 PassivePtr<X>::~PassivePtr() {
-  if (cpp != NULL) {
-// mcout<<"PassivePtr<X>::~PassivePtr(): &ptr="<<&ptr<<" *ptr="<<*ptr<<'\n';
+  if (cpp) {
 #ifdef USE_DELETE_AT_ZERO_COUNT
     const RegPassivePtr* arptr;
     if ((arptr = cpp->get_rpp()) != NULL &&
@@ -1927,55 +1659,9 @@ PassivePtr<X>::~PassivePtr() {
 }
 
 template <class X>
-bool operator<(PassivePtr<X> f1, PassivePtr<X> f2)  // necessary for std::set
-{
+bool operator<(PassivePtr<X> f1, PassivePtr<X> f2) {
+  // necessary for std::set
   return f1.get() < f2.get();
-}
-
-#define USE_OLD_POINTER_NAMES
-#ifdef USE_OLD_POINTER_NAMES
-#define AutoContReg ActivePtrReg
-#endif
-
-template <class X, class C = StandardCopyDefinition<X> >
-class ActivePtrReg : public RegPassivePtr, public ActivePtr<X, C> {
- public:
-  inline ActivePtrReg(void) : RegPassivePtr(), ActivePtr<X, C>() {}
-  inline ActivePtrReg(const X* fptr, Clone)
-      : RegPassivePtr(), ActivePtr<X, C>(fptr, do_clone) {}
-  inline ActivePtrReg(const X* fptr, Pass)
-      : RegPassivePtr(), ActivePtr<X, C>(fptr, dont_clone) {}
-
-  inline ActivePtrReg(ActivePtrReg<X, C>& f)
-      : RegPassivePtr(), ActivePtr<X, C>(f) {}
-  inline ActivePtrReg(const ActivePtrReg<X, C>& f)
-      : RegPassivePtr(), ActivePtr<X, C>(f) {}
-  inline ActivePtrReg& operator=(const ActivePtrReg<X, C>& f) {
-    if (this != &f) put(f.get());
-    return *this;
-  }
-  virtual void print(std::ostream& file, int l = 1) const;
-  macro_copy_total(ActivePtrReg);
-  virtual ~ActivePtrReg() {}
-};
-
-template <class X, class C>
-void ActivePtrReg<X, C>::print(std::ostream& file, int l) const {
-  // if(ptr!=NULL) ptr->print(file, l);
-  Ifile << "ActivePtrReg<X,C>:\n";
-  indn.n += 2;
-  RegPassivePtr::print(file, l);
-  ActivePtr<X, C>::print(file, l);
-  indn.n -= 2;
-}
-
-template <class X>
-std::ostream& operator<<(std::ostream& file, const ActivePtrReg<X>& f) {
-  Ifile << "ActivePtrReg<X>:";
-  file << noindent;
-  file << (ActivePtr<X>&)f;
-  file << yesindent;
-  return file;
 }
 
 }

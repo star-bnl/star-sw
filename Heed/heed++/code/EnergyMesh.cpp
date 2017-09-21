@@ -111,21 +111,4 @@ void EnergyMesh::print(std::ostream& file, int l) const {
   indn.n -= 2;
 }
 
-std::vector<double> make_log_mesh_ec(double emin, double emax, long q) {
-  mfunname(
-      "std::vector< double > make_log_mesh_ec(double emin, double emax, long "
-      "q)");
-
-  double rk = pow(emax / emin, (1.0 / double(q)));
-  double er = emin;
-  std::vector<double> ec(q);
-  double e1;
-  double e2 = er;
-  for (long n = 0; n < q; n++) {
-    e1 = e2;
-    e2 = e2 * rk;
-    ec[n] = (e1 + e2) * 0.5;
-  }
-  return ec;
-}
 }

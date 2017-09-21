@@ -3,7 +3,6 @@
 #include <cmath>
 #include "wcpplib/ioniz/e_cont_enloss.h"
 #include "wcpplib/math/lorgamma.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/util/FunNameStack.h"
 

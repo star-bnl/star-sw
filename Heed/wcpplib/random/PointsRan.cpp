@@ -1,7 +1,6 @@
 #include <iomanip>
 #include <cmath>
 #include "wcpplib/random/PointsRan.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
 /*

@@ -1,6 +1,5 @@
 #include <cfloat>
 #include "wcpplib/math/linexi2.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 /*
 Copyright (c) 2000 I. B. Smirnov

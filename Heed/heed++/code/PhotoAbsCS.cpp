@@ -6,7 +6,6 @@
 #include "wcpplib/math/tline.h"
 #include "wcpplib/geometry/vfloat.h"
 #include "heed++/code/PhotoAbsCS.h"
-#include "heed++/code/EnergyMesh.h"  // From this used only make_log_mesh_ec
 
 // 2004, I. Smirnov
 
@@ -264,52 +263,43 @@ void PhotoAbsCS::print(std::ostream& file, int l) const {
   }
 }
 
-OveragePhotoAbsCS::OveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,  // MeV
-                                     double fstep,                      // MeV
-                                     long fmax_q_step)
+AveragePhotoAbsCS::AveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,
+                                     double fstep, long fmax_q_step)
     : real_pacs(apacs, do_clone),
       width(fwidth),
       max_q_step(fmax_q_step),
       step(fstep) {
-  mfunname("OveragePhotoAbsCS::OveragePhotoAbsCS(...)");
+  mfunname("AveragePhotoAbsCS::AveragePhotoAbsCS(...)");
   check_econd11(apacs, == NULL, mcerr);
   if (fwidth > 0.0) {
-    check_econd11(fstep, >= 0.6 * fwidth, mcerr);  // 0.5 is bad but OK
+    // 0.5 is bad but OK
+    check_econd11(fstep, >= 0.6 * fwidth, mcerr);  
   }
-  /* I do not understand why the access is not allowed below.
-     So I call functions
-     name =
-     apacs->name;
-     //real_pacs->name;
-     Z = real_pacs->Z;
-     threshold = real_pacs->threshold;
-  */
   name = real_pacs->get_name();
   Z = real_pacs->get_Z();
   threshold = real_pacs->get_threshold();
 }
 
-double OveragePhotoAbsCS::get_CS(double energy) const {
-  mfunname("double OveragePhotoAbsCS::get_CS(double energy) const");
-  // mcout<<"OveragePhotoAbsCS::get_CS is started\n";
-  // mcout<<"OveragePhotoAbsCS::get_CS:\n";
+double AveragePhotoAbsCS::get_CS(double energy) const {
+  mfunname("double AveragePhotoAbsCS::get_CS(double energy) const");
+  // mcout<<"AveragePhotoAbsCS::get_CS is started\n";
+  // mcout<<"AveragePhotoAbsCS::get_CS:\n";
   if (width == 0.0) {
     // for no modification:
     return real_pacs->get_CS(energy);
   }
   const double w2 = width * 0.5;
-  double e1 = energy - w2;
-  if (e1 < 0.0) e1 = 0.0;
+  const double e1 = std::max(energy - w2, 0.);
   const double res = real_pacs->get_integral_CS(e1, energy + w2) / width;
   return res;
 }
 
-double OveragePhotoAbsCS::get_integral_CS(double energy1,
+double AveragePhotoAbsCS::get_integral_CS(double energy1,
                                           double energy2) const {
   mfunname(
-      "double OveragePhotoAbsCS::get_integral_CS(double energy1, double "
+      "double AveragePhotoAbsCS::get_integral_CS(double energy1, double "
       "energy2) const");
-  // mcout<<"OveragePhotoAbsCS::get_integral_CS is started\n";
+  // mcout<<"AveragePhotoAbsCS::get_integral_CS is started\n";
   if (width == 0.0 || energy1 >= energy2) {
     // for no modification:
     return real_pacs->get_integral_CS(energy1, energy2);
@@ -329,14 +319,14 @@ double OveragePhotoAbsCS::get_integral_CS(double energy1,
   return s;
 }
 
-void OveragePhotoAbsCS::scale(double fact) {
-  mfunname("void OveragePhotoAbsCS::scale(double fact)");
+void AveragePhotoAbsCS::scale(double fact) {
+  mfunname("void AveragePhotoAbsCS::scale(double fact)");
   real_pacs->scale(fact);
 }
 
-void OveragePhotoAbsCS::print(std::ostream& file, int l) const {
+void AveragePhotoAbsCS::print(std::ostream& file, int l) const {
   mfunname("void PhotoAbsCS::print(std::ostream& file, int l) const");
-  Ifile << "OveragePhotoAbsCS: width = " << width << " step=" << step
+  Ifile << "AveragePhotoAbsCS: width = " << width << " step=" << step
         << " max_q_step=" << max_q_step << '\n';
   indn.n += 2;
   real_pacs->print(file, l);
@@ -373,10 +363,9 @@ double HydrogenPhotoAbsCS::get_integral_CS(double energy1,
 void HydrogenPhotoAbsCS::scale(double fact) { prefactor = fact; }
 
 void HydrogenPhotoAbsCS::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    Ifile << "HydrogenPhotoAbsCS: name=" << name << " Z = " << Z
-          << " threshold = " << threshold << std::endl;
-  }
+  if (l <= 0) return;
+  Ifile << "HydrogenPhotoAbsCS: name=" << name << " Z = " << Z
+        << " threshold = " << threshold << std::endl;
 }
 
 SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
@@ -436,9 +425,21 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
                                              double P, double sigma)
     : PhotoAbsCS(fname, fZ, fthreshold) {
   mfunname("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS");
-  long q = 1000;
-  ener = make_log_mesh_ec(2.0e-6, 2.0e-1, q);
-  cs.resize(q, 0.0);
+  const long q = 1000;
+  // Make a logarithmic energy mesh.
+  ener.resize(q, 0.);
+  const double emin = 2.e-6;
+  const double emax = 2.e-1;
+  const double rk = pow(emax / emin, (1.0 / double(q)));
+  double er = emin;
+  double e1;
+  double e2 = er;
+  for (long n = 0; n < q; n++) {
+    e1 = e2;
+    e2 = e2 * rk;
+    ener[n] = (e1 + e2) * 0.5;
+  }
+  cs.resize(q, 0.);
   long n;
   for (n = 0; n < q; n++) {
     double energy = ener[n];
@@ -2338,16 +2339,16 @@ int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
   return i;
 }
 
-void ExAtomPhotoAbsCS::replace_shells_by_overage(double fwidth,  // MeV
+void ExAtomPhotoAbsCS::replace_shells_by_average(double fwidth,  // MeV
                                                  double fstep,
                                                  long fmax_q_step) {
-  mfunname("void ExAtomPhotoAbsCS::replace_shells_by_overage(...)");
+  mfunname("void ExAtomPhotoAbsCS::replace_shells_by_average(...)");
   for (long n = 0; n < qshell; n++) {
     // Iprintn(mcout, n);
     // mcout<<"----------------before replacement:\n";
     // acs[n]->print(mcout, 10);
     PhotoAbsCS* a =
-        new OveragePhotoAbsCS(acs[n].getver(), fwidth, fstep, fmax_q_step);
+        new AveragePhotoAbsCS(acs[n].getver(), fwidth, fstep, fmax_q_step);
     // mcout<<"----------------after replacement:\n";
     // acs[n]->print(mcout, 10);
     acs[n].pass(a);

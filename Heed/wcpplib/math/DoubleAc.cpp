@@ -10,7 +10,6 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 #include <iomanip>
-#include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/math/minmax.h"
 #include "wcpplib/math/DoubleAc.h"
 

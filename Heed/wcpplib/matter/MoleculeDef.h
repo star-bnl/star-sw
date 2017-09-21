@@ -5,7 +5,7 @@
 
 namespace Heed {
 
-class VanDerWaals virt_common_base_col {
+class VanDerWaals {
  private:
   double ah;
   double bh;

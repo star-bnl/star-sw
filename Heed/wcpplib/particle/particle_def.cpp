@@ -1,11 +1,8 @@
-#include <stdlib.h>
 #include "wcpplib/particle/particle_def.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-/*
-1998 - 2004,   I. Smirnov
-*/
+
+// 1998 - 2004,   I. Smirnov
 
 namespace Heed {
 

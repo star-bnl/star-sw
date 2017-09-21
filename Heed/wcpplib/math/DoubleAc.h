@@ -24,7 +24,6 @@ The file is provided "as is" without express or implied warranty.
 #include <climits>
 #include <cfloat>
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/stream/prstream.h"
 
 namespace Heed {
 

@@ -67,10 +67,10 @@ The file is provided "as is" without express or implied warranty.
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/stream/definp.h"
 #include "wcpplib/util/String.h"
+#include "wcpplib/safetl/AbsPtr.h"
 
 // Here there is a good place to switch on the bound check in all programs
 #ifndef ALR_CHECK_BOUND
@@ -85,30 +85,6 @@ The file is provided "as is" without express or implied warranty.
 // functions from DynArr make some formally unnecessary checks, which are
 // however useful for debug.
 
-//#define DONT_USE_ABSPTR
-#ifndef DONT_USE_ABSPTR  // in oder to supply some programs without
-                         // smart pointers
-#include "wcpplib/safetl/AbsPtr.h"
-
-// Note: at current setup, if DONT_USE_ABSPTR is not activated,
-// DynLinArr and DynArr are both addressable from ActivePtr,
-// since they are derived from RegPassivePtr, which is itself addressable,
-// and since they have virtual copy functions and constructors themselves.
-
-#else
-// Some necessary repetitions from AbsPtr.h:
-enum Pilfer {
-  steal
-};
-
-// See AnsPtr.h for details regarding the following:
-#define PILF_CONST const
-#define PILF_MUTABLE mutable
-//#define PILF_CONST
-//#define PILF_MUTABLE
-
-#endif
-
 namespace Heed {
 extern long max_qel_DynLinArr;  // increase it if need
 // Helps to detect access to not inited DynLinArr,
@@ -118,28 +94,12 @@ extern long max_qel_DynLinArr;  // increase it if need
 template <class T>
 class DynArr;
 
-// enum ArgInterp { interp_as_arr };  // these "enums" are replaced to
-// class types because it was noticed that unexpected conversions
-// from and to int may spoil everything, also see comment just below.
 class ArgInterp_Arr {};
-// enum PutArgInterp { interp_as_adr };
-class ArgInterp_SingleAdr  // for put_qel()
-    {};
-// class PutArgInterp_Arr
-//{ };
-// enum ArgInterpVal { interp_as_val };  // No, it can be converted
-// to int and leads to call of incorrect contructors.
-// Trying to use empty classes.
+class ArgInterp_SingleAdr {}; // for put_qel()
 class ArgInterp_Val {};
 
-#ifndef DONT_USE_ABSPTR
 template <class T>
-class DynLinArr : public RegPassivePtr
-#else
-template <class T>
-class DynLinArr
-#endif
-                  {
+class DynLinArr : public RegPassivePtr {
  public:
   // Constructors
   DynLinArr(void) : qel(0), el(NULL) { ; }
@@ -229,7 +189,7 @@ class DynLinArr
   }
 
   inline DynLinArr(const DynLinArr<T>& f);
-  DynLinArr(PILF_CONST DynLinArr<T>& f, Pilfer) : qel(f.qel), el(f.el) {
+  DynLinArr(const DynLinArr<T>& f, Pilfer) : qel(f.qel), el(f.el) {
 #ifdef DEBUG_DYNLINARR
     mcout << "DynLinArr( DynLinArr<T>& f, Pilfer) is working\n";
 #endif
@@ -352,7 +312,7 @@ class DynLinArr
   }
   void clear(void) { put_qel(0); }  // Not only clears the content,
                                     // but makes zero dimension.
-  void pilfer(PILF_CONST DynLinArr<T>& f) {
+  void pilfer(const DynLinArr<T>& f) {
 #ifdef DEBUG_DYNLINARR
     mcout << "DynLinArr::pilfer is called\n";
 #endif
@@ -441,11 +401,7 @@ class DynLinArr
   void sort_select_decreasing(DynLinArr<long>& sort_ind,
                               long q_to_sort = 0) const;
 
-// void sort(DynLinArr< long >& sort_ind, long q_to_sort = 0) const;
-
-#ifndef DONT_USE_ABSPTR
   macro_copy_header(DynLinArr);
-#endif
 
   virtual ~DynLinArr() {
     check();
@@ -453,25 +409,22 @@ class DynLinArr
   }
 
  private:
-  PILF_MUTABLE long qel;  // number of elements, mutable only for pilfer
-  PILF_MUTABLE T* el;     // array of qel elements, mutable only for pilfer
+  mutable long qel;  // number of elements, mutable only for pilfer
+  mutable T* el;     // array of qel elements, mutable only for pilfer
   //(regarding mutable and pilfer see ActivePtr for more comments).
 };
-#ifndef DONT_USE_ABSPTR
 template <class T>
 macro_copy_body(DynLinArr<T>)
-#endif
-    template <class T>
+
+template <class T>
 void apply1(DynLinArr<T>& ar, void (*fun)(T& f)) {
-  long n;
-  for (n = 0; n < ar.qel; n++) (*fun)(ar.el[n]);
+  for (long n = 0; n < ar.qel; n++) (*fun)(ar.el[n]);
 }
 
 template <class T, class X>
 void apply2(DynLinArr<T>& ar, void (*fun1)(T& f, void (*fun21)(X& f)),
             void (*fun2)(X& f)) {
-  long n;
-  for (n = 0; n < ar.qel; n++) (*fun1)(ar.el[n], fun2);
+  for (long n = 0; n < ar.qel; n++) (*fun1)(ar.el[n], fun2);
 }
 
 template <class T>
@@ -485,7 +438,6 @@ void DynLinArr<T>::check(void) const {
   }
   if (qel == 0 && el != NULL) {
     mcerr << "ERROR in template<class T> void DynLinArr<T>::check(void):\n";
-    // mcerr<<"qel == 0 && el != NULL: long(el)="<<long(el)<<'\n';
     mcerr << "qel == 0 && el != NULL: el=" << el << '\n';
     mcerr << "Type of T is (in internal notations) " << typeid(T).name()
           << '\n';
@@ -563,10 +515,7 @@ DynLinArr<T>& DynLinArr<T>::operator=(const DynLinArr<D>& f) {
 
 template <class T>
 inline DynLinArr<T>::DynLinArr(const DynLinArr<T>& f)
-    :
-#ifndef DONT_USE_ABSPTR
-      RegPassivePtr(),
-#endif
+    : RegPassivePtr(),
       qel(0),
       el(NULL) {
 #ifdef DEBUG_DYNLINARR
@@ -1415,14 +1364,8 @@ DynLinArr<T> merge(const DynLinArr<T>& fd1, long qfd1, const DynLinArr<T>& fd2,
   return ret;
 }
 
-#ifndef DONT_USE_ABSPTR
 template <class T>
-class DynArr : public RegPassivePtr
-#else
-template <class T>
-class DynArr
-#endif
-               {
+class DynArr : public RegPassivePtr {
  public:
   // Constructors
   DynArr(void) { ; }
@@ -1561,24 +1504,20 @@ class DynArr
     if (val != NULL) assignAll(*val);
   }
 
-  DynArr(const DynArr<T>& f)
-#ifndef DONT_USE_ABSPTR
-      : RegPassivePtr()
-#endif
-  {
+  DynArr(const DynArr<T>& f) : RegPassivePtr() {
 #ifdef DEBUG_DYNARR
     mcout << "DynArr(const DynArr<T>& f) is working\n";
 #endif
     *this = f;
   }
-  DynArr(PILF_CONST DynArr<T>& f, Pilfer)
+  DynArr(const DynArr<T>& f, Pilfer)
       : qel(f.qel, steal), cum_qel(f.cum_qel, steal), el(f.el, steal) {
 #ifdef DEBUG_DYNARR
     mcout << "DynArr( DynArr<T>& f, Pilfer) is working\n";
 #endif
   }
 
-  void pilfer(PILF_CONST DynArr<T>& f) {
+  void pilfer(const DynArr<T>& f) {
 #ifdef DEBUG_DYNARR
     mcout << "DynArr::pilfer is called\n";
 #endif
@@ -2279,21 +2218,19 @@ qel.acu(1)\n";
     }
     return 1;
   }
-#ifndef DONT_USE_ABSPTR
   macro_copy_total(DynArr);
-#endif
   virtual ~DynArr(void) {}
 
  private:
-  PILF_MUTABLE DynLinArr<long> qel;
+  mutable DynLinArr<long> qel;
   // Linear array with number of elements by each dimension
-  PILF_MUTABLE DynLinArr<long> cum_qel;
+  mutable DynLinArr<long> cum_qel;
   // "cumulative qel": each element contains product
   // of next elements of qel.
   // The last element is always 1.
   // Used for fast search of proper element in el.
 
-  PILF_MUTABLE DynLinArr<T> el;
+  mutable DynLinArr<T> el;
   // Contains all elements.
   // The last index varies faster.
 

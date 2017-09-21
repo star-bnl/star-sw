@@ -8,7 +8,6 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/math/parabol.h"
 #include "wcpplib/math/DoubleAc.h"

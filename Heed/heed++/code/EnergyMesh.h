@@ -74,7 +74,6 @@ class EnergyMesh : public RegPassivePtr {
   double ec[pqener - 1];
 };
 
-std::vector<double> make_log_mesh_ec(double emin, double emax, long q);
 }
 
 #endif

@@ -1,6 +1,5 @@
 #include <cfloat>
 #include <iomanip>
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/math/cubic.h"
 #include "wcpplib/math/parabol.h"
 #include "wcpplib/util/FunNameStack.h"
