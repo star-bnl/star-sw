@@ -12,42 +12,22 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/matrix/multiply.h"
 #include "wcpplib/util/FunNameStack.h"
 
-DoubleAc norm_DynLinArr(const DynLinArr<DoubleAc>& f) {
-  long q = f.get_qel();
-  DoubleAc s(0.0);
-  long n;
-  for (n = 0; n < q; n++) {
-    DoubleAc t = f[n];
-    s = s + square(t);
-  }
-  return sqrt(s);
-}
-
-DoubleAc normsq_DynLinArr(const DynLinArr<DoubleAc>& f) {
-  long q = f.get_qel();
-  DoubleAc s(0.0);
-  long n;
-  for (n = 0; n < q; n++) {
-    DoubleAc t = f[n];
-    s = s + square(t);
-  }
-  return s;
-}
+namespace Heed {
 
 DynLinArr<DoubleAc> operator*(const DynArr<DoubleAc>& mt,
                               const DynLinArr<double>& vc) {
-  mfunname("DynLinArr<DoubleAc> operator*(const DynArr<DoubleAc>& mt, const "
-           "DynLinArr<double>& vc)");
+  mfunname(
+      "DynLinArr<DoubleAc> operator*(const DynArr<DoubleAc>& mt, const "
+      "DynLinArr<double>& vc)");
 
   const DynLinArr<long>& qel_mt(mt.get_qel());
   check_econd11(qel_mt.get_qel(), != 2, mcerr);
-  long q = vc.get_qel();
+  const long q = vc.get_qel();
   check_econd12(q, !=, qel_mt[1], mcerr);
   DoubleAc s(0);  // assumes that this clears the element
   DynLinArr<DoubleAc> res(qel_mt[0], s);
-  long n1, n2;
-  for (n1 = 0; n1 < qel_mt[0]; n1++) {
-    for (n2 = 0; n2 < q; n2++) {
+  for (long n1 = 0; n1 < qel_mt[0]; n1++) {
+    for (long n2 = 0; n2 < q; n2++) {
       res.acu(n1) += mt.acu(n1, n2) * vc.acu(n2);
     }
   }
@@ -56,18 +36,18 @@ DynLinArr<DoubleAc> operator*(const DynArr<DoubleAc>& mt,
 
 DynLinArr<DoubleAc> operator*(const DynArr<double>& mt,
                               const DynLinArr<DoubleAc>& vc) {
-  mfunname("DynLinArr<DoubleAc> operator*(const DynArr<double>& mt, const "
-           "DynLinArr<DoubleAc>& vc)");
+  mfunname(
+      "DynLinArr<DoubleAc> operator*(const DynArr<double>& mt, const "
+      "DynLinArr<DoubleAc>& vc)");
 
   const DynLinArr<long>& qel_mt(mt.get_qel());
   check_econd11(qel_mt.get_qel(), != 2, mcerr);
-  long q = vc.get_qel();
+  const long q = vc.get_qel();
   check_econd12(q, !=, qel_mt[1], mcerr);
   DoubleAc s(0);  // assumes that this clears the element
   DynLinArr<DoubleAc> res(qel_mt[0], s);
-  long n1, n2;
-  for (n1 = 0; n1 < qel_mt[0]; n1++) {
-    for (n2 = 0; n2 < q; n2++) {
+  for (long n1 = 0; n1 < qel_mt[0]; n1++) {
+    for (long n2 = 0; n2 < q; n2++) {
       res.acu(n1) += mt.acu(n1, n2) * vc.acu(n2);
     }
   }
@@ -76,15 +56,15 @@ DynLinArr<DoubleAc> operator*(const DynArr<double>& mt,
 
 DoubleAc operator*(const DynLinArr<DoubleAc>& vc1,
                    const DynLinArr<double>& vc2) {
-  mfunname("DoubleAc operator*(const DynLinArr<DoubleAc>& vc1, const "
-           "DynLinArr<double>& vc2)");
+  mfunname(
+      "DoubleAc operator*(const DynLinArr<DoubleAc>& vc1, const "
+      "DynLinArr<double>& vc2)");
 
-  long q1 = vc1.get_qel();
-  long q2 = vc2.get_qel();
+  const long q1 = vc1.get_qel();
+  const long q2 = vc2.get_qel();
   check_econd12(q1, !=, q2, mcerr);
   DoubleAc s(0);  // assumes that this clears the element
-  long n;
-  for (n = 0; n < q1; n++) {
+  for (long n = 0; n < q1; n++) {
     s += vc1.acu(n) * vc2.acu(n);
   }
   return s;
@@ -92,49 +72,47 @@ DoubleAc operator*(const DynLinArr<DoubleAc>& vc1,
 
 DoubleAc operator*(const DynLinArr<double>& vc1,
                    const DynLinArr<DoubleAc>& vc2) {
-  mfunname("DoubleAc operator*(const DynLinArr<double>& vc1, const "
-           "DynLinArr<DoubleAc>& vc2)");
-  //mcout<<"operator*(const DynLinArr<double>& vc1, ...):\n";
-  long q1 = vc1.get_qel();
-  long q2 = vc2.get_qel();
+  mfunname(
+      "DoubleAc operator*(const DynLinArr<double>& vc1, const "
+      "DynLinArr<DoubleAc>& vc2)");
+  const long q1 = vc1.get_qel();
+  const long q2 = vc2.get_qel();
   check_econd12(q1, !=, q2, mcerr);
   DoubleAc s(0);  // assumes that this clears the element
-  long n;
-  //mcout<<"s="<<s<<'\n';
-  for (n = 0; n < q1; n++) {
+  for (long n = 0; n < q1; n++) {
     s += vc1.acu(n) * vc2.acu(n);
-    //mcout<<"vc1[n]="<<vc1[n]<<'\n';
-    //mcout<<"vc2[n]="<<vc2[n]<<'\n';
-    //mcout<<"vc1[n] * vc2[n]="<<vc1[n] * vc2[n]<<'\n';
-    //mcout<<"s="<<s<<'\n';
+    // mcout<<"vc1[n]="<<vc1[n]<<'\n';
+    // mcout<<"vc2[n]="<<vc2[n]<<'\n';
+    // mcout<<"vc1[n] * vc2[n]="<<vc1[n] * vc2[n]<<'\n';
+    // mcout<<"s="<<s<<'\n';
   }
   return s;
 }
 
 DynLinArr<DoubleAc> operator+(const DynLinArr<DoubleAc>& vc1,
                               const DynLinArr<double>& vc2) {
-  mfunname("DoubleAc operator+(const DynLinArr<DoubleAc>& vc1, const "
-           "DynLinArr<double>& vc2)");
-  long q1 = vc1.get_qel();
-  long q2 = vc2.get_qel();
+  mfunname(
+      "DoubleAc operator+(const DynLinArr<DoubleAc>& vc1, const "
+      "DynLinArr<double>& vc2)");
+  const long q1 = vc1.get_qel();
+  const long q2 = vc2.get_qel();
   check_econd12(q1, !=, q2, mcerr);
   DynLinArr<DoubleAc> s(q1);
-  long n;
-  for (n = 0; n < q1; n++) {
+  for (long n = 0; n < q1; n++) {
     s.acu(n) = vc1.acu(n) + vc2.acu(n);
   }
   return s;
 }
 DynLinArr<DoubleAc> operator-(const DynLinArr<DoubleAc>& vc1,
                               const DynLinArr<double>& vc2) {
-  mfunname("DoubleAc operator-(const DynLinArr<DoubleAc>& vc1, const "
-           "DynLinArr<double>& vc2)");
-  long q1 = vc1.get_qel();
-  long q2 = vc2.get_qel();
+  mfunname(
+      "DoubleAc operator-(const DynLinArr<DoubleAc>& vc1, const "
+      "DynLinArr<double>& vc2)");
+  const long q1 = vc1.get_qel();
+  const long q2 = vc2.get_qel();
   check_econd12(q1, !=, q2, mcerr);
   DynLinArr<DoubleAc> s(q1);
-  long n;
-  for (n = 0; n < q1; n++) {
+  for (long n = 0; n < q1; n++) {
     s.acu(n) = vc1.acu(n) - vc2.acu(n);
   }
   return s;
@@ -142,28 +120,28 @@ DynLinArr<DoubleAc> operator-(const DynLinArr<DoubleAc>& vc1,
 
 DynLinArr<DoubleAc> operator+(const DynLinArr<double>& vc1,
                               const DynLinArr<DoubleAc>& vc2) {
-  mfunname("DoubleAc operator+(const DynLinArr<double>& vc1, const "
-           "DynLinArr<DoubleAc>& vc2)");
-  long q1 = vc1.get_qel();
-  long q2 = vc2.get_qel();
+  mfunname(
+      "DoubleAc operator+(const DynLinArr<double>& vc1, const "
+      "DynLinArr<DoubleAc>& vc2)");
+  const long q1 = vc1.get_qel();
+  const long q2 = vc2.get_qel();
   check_econd12(q1, !=, q2, mcerr);
   DynLinArr<DoubleAc> s(q1);
-  long n;
-  for (n = 0; n < q1; n++) {
+  for (long n = 0; n < q1; n++) {
     s.acu(n) = vc1.acu(n) + vc2.acu(n);
   }
   return s;
 }
 DynLinArr<DoubleAc> operator-(const DynLinArr<double>& vc1,
                               const DynLinArr<DoubleAc>& vc2) {
-  mfunname("DoubleAc operator-(const DynLinArr<double>& vc1, const "
-           "DynLinArr<DoubleAc>& vc2)");
-  long q1 = vc1.get_qel();
-  long q2 = vc2.get_qel();
+  mfunname(
+      "DoubleAc operator-(const DynLinArr<double>& vc1, const "
+      "DynLinArr<DoubleAc>& vc2)");
+  const long q1 = vc1.get_qel();
+  const long q2 = vc2.get_qel();
   check_econd12(q1, !=, q2, mcerr);
   DynLinArr<DoubleAc> s(q1);
-  long n;
-  for (n = 0; n < q1; n++) {
+  for (long n = 0; n < q1; n++) {
     s.acu(n) = vc1.acu(n) - vc2.acu(n);
   }
   return s;
@@ -171,10 +149,11 @@ DynLinArr<DoubleAc> operator-(const DynLinArr<double>& vc1,
 
 DynArr<DoubleAc> operator+(const DynArr<DoubleAc>& mt1,
                            const DynArr<double>& mt2) {
-  mfunname("DynArr<DoubleAc> operator+(const DynArr<DoubleAc>& mt1, const "
-           "DynArr<double>& mt2)");
-  long qdim1 = mt1.get_qdim();
-  long qdim2 = mt2.get_qdim();
+  mfunname(
+      "DynArr<DoubleAc> operator+(const DynArr<DoubleAc>& mt1, const "
+      "DynArr<double>& mt2)");
+  const long qdim1 = mt1.get_qdim();
+  const long qdim2 = mt2.get_qdim();
   check_econd12(qdim1, !=, qdim2, mcerr);
   const DynLinArr<long>& qe1 = mt1.get_qel();
   const DynLinArr<long>& qe2 = mt2.get_qel();
@@ -189,8 +168,9 @@ DynArr<DoubleAc> operator+(const DynArr<DoubleAc>& mt1,
 }
 DynArr<DoubleAc> operator-(const DynArr<DoubleAc>& mt1,
                            const DynArr<double>& mt2) {
-  mfunname("DynArr<DoubleAc> operator-(const DynArr<DoubleAc>& mt1, const "
-           "DynArr<double>& mt2)");
+  mfunname(
+      "DynArr<DoubleAc> operator-(const DynArr<DoubleAc>& mt1, const "
+      "DynArr<double>& mt2)");
   long qdim1 = mt1.get_qdim();
   long qdim2 = mt2.get_qdim();
   check_econd12(qdim1, !=, qdim2, mcerr);
@@ -208,8 +188,9 @@ DynArr<DoubleAc> operator-(const DynArr<DoubleAc>& mt1,
 
 DynArr<DoubleAc> operator+(const DynArr<double>& mt1,
                            const DynArr<DoubleAc>& mt2) {
-  mfunname("DynArr<DoubleAc> operator+(const DynArr<double>& mt1, const "
-           "DynArr<DoubleAc>& mt2)");
+  mfunname(
+      "DynArr<DoubleAc> operator+(const DynArr<double>& mt1, const "
+      "DynArr<DoubleAc>& mt2)");
   long qdim1 = mt1.get_qdim();
   long qdim2 = mt2.get_qdim();
   check_econd12(qdim1, !=, qdim2, mcerr);
@@ -227,8 +208,9 @@ DynArr<DoubleAc> operator+(const DynArr<double>& mt1,
 
 DynArr<DoubleAc> operator-(const DynArr<double>& mt1,
                            const DynArr<DoubleAc>& mt2) {
-  mfunname("DynArr<DoubleAc> operator-(const DynArr<double>& mt1, const "
-           "DynArr<DoubleAc>& mt2)");
+  mfunname(
+      "DynArr<DoubleAc> operator-(const DynArr<double>& mt1, const "
+      "DynArr<DoubleAc>& mt2)");
   long qdim1 = mt1.get_qdim();
   long qdim2 = mt2.get_qdim();
   check_econd12(qdim1, !=, qdim2, mcerr);
@@ -242,4 +224,6 @@ DynArr<DoubleAc> operator-(const DynArr<double>& mt1,
     (*at) = -(*at) + mt1.acu(iter.get_ncur());
   }
   return ms;
+}
+
 }

@@ -3,8 +3,7 @@
 
 namespace Heed {
 
-  const double low_cut_angle_deg = 20.0;  // degrees
-
+const double low_cut_angle_deg = 20.0;  // degrees
 }
 
 #endif

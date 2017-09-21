@@ -27,4 +27,3 @@ void rnorm_float(const float r1, const float r2, float &x1, float &x2) {
 double rnorm_improved(void) { return Garfield::RndmGaussian(); }
 
 }
-

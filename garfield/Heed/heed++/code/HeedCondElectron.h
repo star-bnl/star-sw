@@ -4,38 +4,36 @@
 #include <vector>
 #include "wcpplib/geometry/vec.h"
 
-/*
-Conduction electrons deposited in gas.
-Usually these are electron-ion pairs created by the delta-electron.
-But the delta-electron is itself converted in conduction electron
-at the end of its route. In this case the ion may be located somewhere else.
-To reduce the computer expenses, the position of conduction electron
-is determined only in the local coordinate system, that is in the
-most deep volume.
-
-To make the conduction electrons generated, the volume
-must be derived from class SensitiveVolume.
-
-2003, I. Smirnov
-
-*/
-
 namespace Heed {
+
+/// Conduction electrons deposited in gas.
+/// Usually these are electron-ion pairs created by the delta-electron.
+/// But the delta-electron is itself converted in conduction electron
+/// at the end of its route. In this case the ion may be located somewhere else.
+/// To reduce the computer expenses, the position of conduction electron
+/// is determined only in the local coordinate system, that is in the
+/// most deep volume.
+///
+/// 2003, I. Smirnov
 
 class HeedCondElectron {
  public:
-  // position (in the local system, the last system from tid)
+  /// Position (in the local system, the last system from tid)
   point ptloc;
-  // time
+  /// Time
   double time;
-  // Constructors
+  /// Default constructor
   HeedCondElectron() {}
+  /// Constructor
   HeedCondElectron(const point& fptloc, const double ftime)
       : ptloc(fptloc), time(ftime) {}
-  // Destructor
+  /// Destructor
   virtual ~HeedCondElectron() {}
   virtual void print(std::ostream& file, int l) const;
 };
+
+/// To make the conduction electrons generated, the volume
+/// must be derived from class SensitiveVolume.
 
 class SensitiveVolume {
  public:

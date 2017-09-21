@@ -8,10 +8,9 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
-#include "wcpplib/stream/prstream.h"
+#include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/math/parabol.h"
 #include "wcpplib/math/DoubleAc.h"
-#include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/matrix/multiply.h"
 #include "wcpplib/matrix/inverse.h"
@@ -23,17 +22,14 @@ Parabol::Parabol(const Parabol& f) { *this = f; }
 Parabol::Parabol(double x[3], double y[3]) : s_det(0), s_dxzero(0) {
   mfunname("Parabol::Parabol(double x[3], double y[3])");
 
-  check_econd12a(x[0], ==, x[1],
-                 "x[2]=" << x[2] << " y[0]=" << y[0] << " y[1]=" << y[1]
-                         << " y[2]=" << y[2] << '\n',
+  check_econd12a(x[0], ==, x[1], "x[2]=" << x[2] << " y[0]=" << y[0] << " y[1]="
+                                         << y[1] << " y[2]=" << y[2] << '\n',
                  mcerr);
-  check_econd12a(x[0], ==, x[2],
-                 "x[1]=" << x[1] << " y[0]=" << y[0] << " y[1]=" << y[1]
-                         << " y[2]=" << y[2] << '\n',
+  check_econd12a(x[0], ==, x[2], "x[1]=" << x[1] << " y[0]=" << y[0] << " y[1]="
+                                         << y[1] << " y[2]=" << y[2] << '\n',
                  mcerr);
-  check_econd12a(x[1], ==, x[2],
-                 "x[0]=" << x[0] << " y[0]=" << y[0] << " y[1]=" << y[1]
-                         << " y[2]=" << y[2] << '\n',
+  check_econd12a(x[1], ==, x[2], "x[0]=" << x[0] << " y[0]=" << y[0] << " y[1]="
+                                         << y[1] << " y[2]=" << y[2] << '\n',
                  mcerr);
   DynArr<DoubleAc> mat(3, 3);
   DynLinArr<DoubleAc> par(3);
@@ -48,13 +44,13 @@ Parabol::Parabol(double x[3], double y[3]) : s_det(0), s_dxzero(0) {
   int szero;
   DynArr<DoubleAc> mat_inv;
   inverse_DynArr_prot(mat, mat_inv, szero, ierr);
-  //check_econd11a( ierr, != 0 , "should never happen\n", mcerr );
+  // check_econd11a( ierr, != 0 , "should never happen\n", mcerr );
   if (ierr == 0) {
     par = mat_inv * f;
-    //Iprintdla_DoubleAc(mcout, par, 3);
-    //if(fabs(par[0]) == 0.0)
+    // Iprintdla_DoubleAc(mcout, par, 3);
+    // if(fabs(par[0]) == 0.0)
     //  da=0.0;
-    //else
+    // else
     //  da=par[0];
     da = par[0];
     db = par[1];
@@ -66,8 +62,8 @@ Parabol::Parabol(double x[3], double y[3]) : s_det(0), s_dxzero(0) {
     s_var[1] = 1;
     s_var[2] = 1;
     DynArr<DoubleAc> mat_inv1(3, 3);
-    //int ierr1;
-    //inverse_DynArr(mat, s_var, mat_inv, ierr, mat_inv1, ierr1);
+    // int ierr1;
+    // inverse_DynArr(mat, s_var, mat_inv, ierr, mat_inv1, ierr1);
     inverse_DynArr_prot(mat, s_var, mat_inv, szero, ierr);
     if (ierr != 0) {
       // what if x1 and x2 are the same but the both differ from x0
@@ -88,7 +84,6 @@ Parabol::Parabol(double x[3], double y[3]) : s_det(0), s_dxzero(0) {
     db = par[1];
     dc = par[2];
   }
-
 }
 
 Parabol::Parabol(double x1, double x2, double x3, double y1, double y2,
@@ -125,13 +120,13 @@ Parabol::Parabol(double x1, double x2, double x3, double y1, double y2,
   int szero;
   DynArr<DoubleAc> mat_inv;
   inverse_DynArr_prot(mat, mat_inv, szero, ierr);
-  //check_econd11a( ierr, != 0 , "should never happen\n", mcerr );
+  // check_econd11a( ierr, != 0 , "should never happen\n", mcerr );
   if (ierr == 0) {
     par = mat_inv * f;
-    //Iprintdla_DoubleAc(mcout, par, 3);
-    //if(fabs(par[0]) == 0.0)
+    // Iprintdla_DoubleAc(mcout, par, 3);
+    // if(fabs(par[0]) == 0.0)
     //  da=0.0;
-    //else
+    // else
     //  da=par[0];
     da = par[0];
     db = par[1];
@@ -143,8 +138,8 @@ Parabol::Parabol(double x1, double x2, double x3, double y1, double y2,
     s_var[1] = 1;
     s_var[2] = 1;
     DynArr<DoubleAc> mat_inv1(3, 3);
-    //int ierr1;
-    //inverse_DynArr(mat, s_var, mat_inv, ierr, mat_inv1, ierr1);
+    // int ierr1;
+    // inverse_DynArr(mat, s_var, mat_inv, ierr, mat_inv1, ierr1);
     inverse_DynArr_prot(mat, s_var, mat_inv, szero, ierr);
     if (ierr != 0) {
       // what if x1 and x2 are the same but the both differ from x0
@@ -165,25 +160,23 @@ Parabol::Parabol(double x1, double x2, double x3, double y1, double y2,
     db = par[1];
     dc = par[2];
   }
-
 }
 
 Parabol::Parabol(double x[3], double y[3], int /*ii*/) : s_det(0), s_dxzero(0) {
   mfunname("Parabol::Parabol(double x[3], double y[3], int)");
 
   check_econd12(x[0], ==, x[1], mcerr);
-  //check_econd12( x[0] , == , x[2] , mcerr);
-  //check_econd12( x[1] , == , x[2] , mcerr);
+  // check_econd12( x[0] , == , x[2] , mcerr);
+  // check_econd12( x[1] , == , x[2] , mcerr);
 
   DynArr<DoubleAc> mat(3, 3);
   DynLinArr<DoubleAc> par(3);
   DynLinArr<DoubleAc> f(3);
-  for (int i = 0; i < 3; ++i)
-    f[i] = y[i];
+  for (int i = 0; i < 3; ++i) f[i] = y[i];
   for (int i = 0; i < 2; ++i) {
     mat.ac(i, 2) = 1.0;
     mat.ac(i, 1) = x[i];
-    //Iprintdan(mcout, mat.ac(i,1));
+    // Iprintdan(mcout, mat.ac(i,1));
     mat.ac(i, 0) = x[i] * x[i];
   }
   mat.ac(2, 2) = 0.0;
@@ -237,7 +230,7 @@ int Parabol::find_zero(double xzero[2]) const {
   mfunnamep("int Parabol::find_zero(double xzero[2]) const");
   const Parabol& t = (*this);
   if (s_dxzero == 0) {
-    //mcout<<"Parabol::find_zero: s_dxzero == 0\n";
+    // mcout<<"Parabol::find_zero: s_dxzero == 0\n";
     t.s_dxzero = 1;
     if (da == 0.0) {
       if (db == 0.0) {
@@ -266,9 +259,9 @@ int Parabol::find_zero(double xzero[2]) const {
           t.dxzero[1] = (-db - sq) / (2.0 * da);
           t.dxzero[0] = (-db + sq) / (2.0 * da);
         }
-        //mcout<<"Parabol::find_zero: t.dxzero[0]="<<t.dxzero[0]
+        // mcout<<"Parabol::find_zero: t.dxzero[0]="<<t.dxzero[0]
         //     <<" dxzero[0]="<<dxzero[0]<<'\n';
-        //mcout<<"Parabol::find_zero: t.dxzero[1]="<<t.dxzero[1]
+        // mcout<<"Parabol::find_zero: t.dxzero[1]="<<t.dxzero[1]
         //     <<" dxzero[1]="<<dxzero[1]<<'\n';
       }
     }
@@ -294,5 +287,4 @@ std::ostream& operator<<(std::ostream& file, const Parabol& f) {
   file << '\n';
   return file;
 }
-
 }

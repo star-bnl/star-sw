@@ -1,5 +1,4 @@
 #include "wcpplib/random/chisran.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
 // I. B. Smirnov, 2003.
@@ -16,8 +15,7 @@ float chispre(float *x, float *p, float *f, long q) {
     f[i] = r;
   }
   check_econd11(r, <= 0, mcerr);
-  for (long i = 0; i < q; ++i)
-    f[i] /= r;
+  for (long i = 0; i < q; ++i) f[i] /= r;
   return r;
 }
 
@@ -66,10 +64,10 @@ float chisran(float flat_random_number, float *x, float *f, long q) {
   return 0.0;
 }
 
-double chispre(DynLinArr<double> &f, int s_allow_zero_f) {
-  mfunnamep("double chispre(DynLinArr< double >& f, int s_allow_zero_f=0)");
-  //check_econd12(p.get_qel() , != , f.get_qel() , mcerr);
-  const long q = f.get_qel();
+double chispre(std::vector<double> &f, int s_allow_zero_f) {
+  mfunnamep("double chispre(vector<double>& f, int s_allow_zero_f=0)");
+  // check_econd12(p.get_qel() , != , f.get_qel() , mcerr);
+  const long q = f.size();
   check_econd11(q, <= 0, mcerr);
   double r = 0;
   for (int i = 0; i < q; ++i) {
@@ -77,8 +75,8 @@ double chispre(DynLinArr<double> &f, int s_allow_zero_f) {
       check_econd11a(f[i], < 0.0, "i=" << i << '\n', mcerr);
     } else {
       if (f[i] < 0.0) {
-        mcout << "Warning: f[i] < 0.0 in double chispre(DynLinArr< double >& "
-                 "f, int s_allow_zero_f)\n";
+        mcout << "Warning: f[i] < 0.0 in double chispre(vector<double>& f, "
+                 "int s_allow_zero_f)\n";
         Iprint2n(mcout, i, f[i]);
         f[i] = 0.0;
       }
@@ -87,17 +85,13 @@ double chispre(DynLinArr<double> &f, int s_allow_zero_f) {
     f[i] = r;
   }
   check_econd11(r, <= 0, mcerr);
-  for (int i = 0; i < q; ++i)
-    f[i] /= r;
+  for (int i = 0; i < q; ++i) f[i] /= r;
   return r;
 }
 
-double chisran(double flat_random_number, DynLinArr<double> f) {
-  mfunnamep(
-      "double chisran(double flat_random_number, DynLinArr < double >  f)");
-  //mcout<<"chisran is started\n";
-  //Iprintn(mcout, flat_random_number);
-  const long q = f.get_qel();
+double chisran(double flat_random_number, const std::vector<double> &f) {
+  mfunnamep("double chisran(double flat_random_number, vector<double> f)");
+  const long q = f.size();
   check_econd11(q, <= 0, mcerr);
   check_econd21(flat_random_number, < 0.0 &&, > 1.0, mcerr);
   if (flat_random_number == 0.0) {
@@ -130,10 +124,10 @@ double chisran(double flat_random_number, DynLinArr<double> f) {
         const double yr = f[nr];
         const double a = (xr - xl) / (yr - yl);
         const double b = xl;
-        //Iprint3n(mcout, nl, nr, nc);
-        //Iprint2n(mcout, xl, xr);
-        //Iprint2n(mcout, yl, yr);
-        //Iprint2n(mcout, a, b);
+        // Iprint3n(mcout, nl, nr, nc);
+        // Iprint2n(mcout, xl, xr);
+        // Iprint2n(mcout, yl, yr);
+        // Iprint2n(mcout, a, b);
         return a * (flat_random_number - yl) + b;
       }
     }
@@ -143,5 +137,4 @@ double chisran(double flat_random_number, DynLinArr<double> f) {
   spexit(mcerr);
   return 0.0;
 }
-
 }

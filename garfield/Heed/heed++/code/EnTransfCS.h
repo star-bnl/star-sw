@@ -1,16 +1,7 @@
 #ifndef ENTRANFCS_H
 #define ENTRANFCS_H
+
 #include "heed++/code/HeedMatterDef.h"
-
-/*
-The PAI cross section of energy transfers from charged particle
-to media.
-The particle has fixed parameters: energy, speed, etc., which
-are not affected to energy transfers, since they are considered
-too little if compared with the particle energy.
-
-2003, I. Smirnov
-*/
 
 namespace Heed {
 
@@ -21,13 +12,18 @@ namespace Heed {
 #define EXCLUDE_VAL_FADDA  // exclude values not necessary for MC
 // #define EXCLUDE_MEAN       // exclude calculation of means
 
-#define CLEAR_ARRAYS
+/// The PAI cross section of energy transfers from charged particle to media.
+/// The particle has fixed parameters (energy, speed, etc.), which
+/// are not affected by energy transfers, since they are considered
+/// too small compared with the particle energy.
+///
+/// 2003, I. Smirnov
 
 class EnTransfCS : public RegPassivePtr {
  public:
-  /// Constructors
+  /// Default constructor
   EnTransfCS(void) {}
-  ;
+  /// Constructor
   EnTransfCS(double fparticle_mass, double fgamma_1, int fs_primary_electron,
              HeedMatterDef* fhmd, long fparticle_charge = 1);
   virtual void print(std::ostream& file, int l) const;
@@ -42,11 +38,16 @@ class EnTransfCS : public RegPassivePtr {
   /// Charge in units of electron charge (used square, sign does not matter).
   long particle_charge;
 
+  /// Velocity
   double beta;
-  double beta2;   // beta^2
-  double beta12;  // 1 - beta^2
+  /// beta^2
+  double beta2;
+  /// 1 - beta^2
+  double beta12;
+  /// Lorentz factor
   double gamma;
-  double gamma_1;  // gamma - 1 (the best dimensionless measurement of speed)
+  /// gamma - 1 (the best dimensionless measurement of speed)
+  double gamma_1;
 
   /// Max. energy transfer [MeV]
   double maximal_energy_trans;
@@ -56,31 +57,32 @@ class EnTransfCS : public RegPassivePtr {
   /// Simple form means that there are two terms.
   /// The third term is assumed zero.
   int s_simple_form;
-  // Flag that the primary particle is the electron
+  /// Flag that the primary particle is the electron
   int s_primary_electron;
 
   PassivePtr<HeedMatterDef> hmd;
 
   /// In the following arrays there is the only index: the energy.
   /// The meaning: the average value on the energy interval.
-  DynLinArr<double> log1C;        // common first log without cs
-  DynLinArr<double> log2C;        // common second log without cs
-  DynLinArr<double> chereC;       // Cherenkov's radiation
-  DynLinArr<double> chereCangle;  // angle of Cherenkov's radiation
-  DynLinArr<double> Rreser;       // term called R in my paper
+  std::vector<double> log1C;        ///< common first log without cs
+  std::vector<double> log2C;        ///< common second log without cs
+  std::vector<double> chereC;       ///< Cherenkov's radiation
+  std::vector<double> chereCangle;  ///< angle of Cherenkov's radiation
+  std::vector<double> Rreser;       ///< term called R in my paper
 #ifdef DEBUG_EnTransfCS
-  DynLinArr<double> treser;  // total rezer, sum of frezer
-// by atoms and shells, per one electron ( in the paper it is per atom)
+  // total rezer, sum of frezer by atoms and shells, per one electron
+  // (in the paper it is per atom).
+  std::vector<double> treser;
 #endif
 
   /// Sum of (ionization) differential cross-section terms
-  DynLinArr<double> addaC;
+  std::vector<double> addaC;
   /// Integrated (ionization) cross-section
   double quanC;
 
 #ifndef EXCLUDE_A_VALUES
   /// Sum of (absorption) differential cross-section terms
-  DynLinArr<double> addaC_a;
+  std::vector<double> addaC_a;
   /// Integrated (absorption) cross-section
   double quanC_a;
 #endif
@@ -108,42 +110,41 @@ class EnTransfCS : public RegPassivePtr {
   /// In the following arrays there are three indices:
   /// atom number in the matter, shell number in atom, energy
   /// Fraction of Cherenkov term.
-  DynLinArr<DynLinArr<DynLinArr<double> > > cher;
+  std::vector<std::vector<std::vector<double> > > cher;
   /// Rutherford term
-  DynLinArr<DynLinArr<DynLinArr<double> > > frezer;
+  std::vector<std::vector<std::vector<double> > > frezer;
   /// Sum
-  DynLinArr<DynLinArr<DynLinArr<double> > > adda;
+  std::vector<std::vector<std::vector<double> > > adda;
   /// Integral, normalised to unity
-  DynLinArr<DynLinArr<DynLinArr<double> > > fadda;
+  std::vector<std::vector<std::vector<double> > > fadda;
 #ifndef EXCLUDE_A_VALUES
-  DynLinArr<DynLinArr<DynLinArr<double> > > cher_a;
-  DynLinArr<DynLinArr<DynLinArr<double> > > adda_a;
-  DynLinArr<DynLinArr<DynLinArr<double> > > fadda_a;
+  std::vector<std::vector<std::vector<double> > > cher_a;
+  std::vector<std::vector<std::vector<double> > > adda_a;
+  std::vector<std::vector<std::vector<double> > > fadda_a;
 #endif
 
 #ifndef EXCLUDE_VAL_FADDA
-  // The true values of the integral (should be equal to quan)
-  DynLinArr<DynLinArr<double> > val_fadda;  // integral * hmd->xeldens;
+  /// The true values of the integral (should be equal to quan)
+  std::vector<std::vector<double> > val_fadda;  // integral * hmd->xeldens;
 #ifndef EXCLUDE_A_VALUES
-  DynLinArr<DynLinArr<double> > val_fadda_a;  // integral * hmd->xeldens;
+  std::vector<std::vector<double> > val_fadda_a;  // integral * hmd->xeldens;
 #endif
 #endif
 
   /// In the following arrays there are two indices:
   /// atom number in the matter, shell number in atom.
-  DynLinArr<DynLinArr<double> > quan;  // per 1 cm, used for path length
+  std::vector<std::vector<double> > quan;  // per 1 cm, used for path length
 #ifndef EXCLUDE_A_VALUES
-  DynLinArr<DynLinArr<double> > quan_a;
+  std::vector<std::vector<double> > quan_a;
 #endif
 #ifndef EXCLUDE_MEAN
-  DynLinArr<DynLinArr<double> > mean;
+  std::vector<std::vector<double> > mean;
 #ifndef EXCLUDE_A_VALUES
-  DynLinArr<DynLinArr<double> > mean_a;
+  std::vector<std::vector<double> > mean_a;
 #endif
 #endif
 
-  DynLinArr<double> length_y0;
-
+  std::vector<double> length_y0;
 };
 
 class EnTransfCSType {
@@ -153,7 +154,6 @@ class EnTransfCSType {
   EnTransfCSType(EnTransfCS* md) : etcs(md) { ; }
 };
 std::ostream& operator<<(std::ostream& file, const EnTransfCSType& f);
-
 }
 
 #endif

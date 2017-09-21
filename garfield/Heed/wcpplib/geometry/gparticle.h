@@ -2,14 +2,8 @@
 #define GPARTICLE_H
 #include "wcpplib/geometry/volume.h"
 
-/*
-"geometrical particle"
-It is particle which does not interact with materials.
-It flyes by polyline line or by circumferences from one volume to another.
-The flying is represented by changing of class members representing
-particle position.
-Interacted particle should be derived class from this one.
 
+/*
 Copyright (c) 2000 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
@@ -23,7 +17,7 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// point in space, time and velocity
+/// Point in space, time and velocity
 class stvpoint {
  public:
   // coordinates in the first system from tid system
@@ -163,20 +157,30 @@ class stvpoint {
 
 extern trajestep_limit gtrajlim;
 
+/// "Geometrical particle" (particle which does not interact with materials).
+/// It flies by polyline line or by circumferences from one volume to another.
+/// The flying is represented by changing of class members representing
+/// particle position.
+/// Interacted particle should be derived class from this one.
+
 class gparticle : public RegPassivePtr {
  public:
   int s_life;
-  long nstep;                      // step number
-  double total_range_from_origin;  // from origin to currpos
-  long n_zero_step;                // number of previous steps with zero range
-                                   // including this step
+  /// Step number.
+  long nstep;                      
+  /// Range from origin to currpos.
+  double total_range_from_origin;  
+  /// Number of previous steps with zero range (including this step).
+  long n_zero_step;                
+
   static long max_q_zero_step;
   stvpoint origin;
   stvpoint prevpos;
   stvpoint currpos;
   stvpoint nextpos;
-  vec curr_relcen;  // current relcen computed
+  // current relcen computed
   // at the last call of calc_step_to_bord(), only for debug print
+  vec curr_relcen;  
 
   gparticle(void) : s_life(0), nstep(0) { ; }
   gparticle(const stvpoint& sp)
@@ -241,7 +245,6 @@ class gparticle : public RegPassivePtr {
   macro_copy_total(gparticle);
   virtual ~gparticle() { ; }
 };
-
 }
 
 #endif

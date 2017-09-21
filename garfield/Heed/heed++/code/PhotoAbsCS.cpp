@@ -6,10 +6,8 @@
 #include "wcpplib/math/tline.h"
 #include "wcpplib/geometry/vfloat.h"
 #include "heed++/code/PhotoAbsCS.h"
-#include "heed++/code/EnergyMesh.h"  // From this used only make_log_mesh_ec
-                                     /*
-2004, I. Smirnov
-*/
+
+// 2004, I. Smirnov
 
 //#define DEBUG_PRINT_get_escape_particles
 //#define DEBUG_ignore_non_standard_channels
@@ -25,11 +23,11 @@ int sign_nonlinear_interpolation(double e1, double cs1, double e2, double cs2,
 #else
   // normal case:
   if (cs2 >= cs1 || cs2 <= 0 || e1 < 300.0e-6 || e1 < 1.5 * threshold) {
-    //if(cs2 >= cs1 || cs2 <= 0)  // for debug
+    // if(cs2 >= cs1 || cs2 <= 0)  // for debug
     return 0;
   } else {
     const double pw = log(cs1 / cs2) / log(e1 / e2);
-    //Iprintn(mcout, pw);
+    // Iprintn(mcout, pw);
     if (pw >= -1.0) {
       // good case for linear interpolation
       return 0;
@@ -69,15 +67,16 @@ double my_val_fun(double xp1, double yp1, double xp2, double yp2, double xmin,
   return res;
 }
 
-double glin_integ_ar(DynLinArr<double> x, DynLinArr<double> y, long q,
+double glin_integ_ar(std::vector<double> x, std::vector<double> y, long q,
                      double x1, double x2, double threshold) {
   // Fit table by a straight line and integrate the area below it.
-  mfunname("double glin_integ_ar(DynLinArr< double > x ...)");
+  mfunname("double glin_integ_ar(std::vector< double > x ...)");
 
-  PointCoorMesh<double, DynLinArr<double> > pcmd(q, &x);
-  double s = t_integ_generic_point_ar<
-      double, DynLinArr<double>, PointCoorMesh<double, DynLinArr<double> > >(
-      pcmd, y, &my_integr_fun, x1, x2, 1, threshold, 0, DBL_MAX);
+  PointCoorMesh<double, std::vector<double> > pcmd(q, &x);
+  double s =
+      t_integ_generic_point_ar<double, std::vector<double>,
+                               PointCoorMesh<double, std::vector<double> > >(
+          pcmd, y, &my_integr_fun, x1, x2, 1, threshold, 0, DBL_MAX);
   /*
   // compare with old version
   double old_res = old_glin_integ_ar(x, y, q, x1, x2, threshold);
@@ -95,26 +94,12 @@ double glin_integ_ar(DynLinArr<double> x, DynLinArr<double> y, long q,
 }
 
 /*
-double glin_val_ar(DynLinArr<double> x, DynLinArr<double> y, long q, double ex,
-double threshold) {
-  // fit table by a straight line and integrate the area below it.
-  mfunname("double glin_val_ar(DynLinArr< double > x ...)");
-
-  PointCoorMesh< double, DynLinArr< double > > pcmd( q, &x);
-  double s = t_value_generic_point_ar<double, DynLinArr<double>,
-      PointCoorMesh<double, DynLinArr<double> >  >
-      (pcmd, y, &my_val_fun, ex
-       1, threshold, 0, DBL_MAX);
-  return s;
-}
-*/
-/*
-double old_glin_integ_ar(DynLinArr< double > x, DynLinArr< double > y,
+double old_glin_integ_ar(std::vector< double > x, std::vector< double > y,
                          long q, double x1, double x2,
                          double threshold )
 // fit table by a straight line and integrate the area below it.
 {
-  mfunname("double old_glin_integ_ar(DynLinArr< double > x ...)");
+  mfunname("double old_glin_integ_ar(std::vector< double > x ...)");
   //mcout<<"old_glin: q="<<q<<" x1="<<x1<<" x2="<<x2
   //     <<" threshold="<<threshold<<'\n';
   long i;
@@ -266,7 +251,7 @@ double old_glin_integ_ar(DynLinArr< double > x, DynLinArr< double > y,
 
 PhotoAbsCS::PhotoAbsCS(void) : Z(0), threshold(0.0) { ; }
 
-PhotoAbsCS::PhotoAbsCS(const String& fname, int fZ, double fthreshold)
+PhotoAbsCS::PhotoAbsCS(const std::string& fname, int fZ, double fthreshold)
     : name(fname), Z(fZ), threshold(fthreshold) {
   ;
 }
@@ -278,59 +263,51 @@ void PhotoAbsCS::print(std::ostream& file, int l) const {
   }
 }
 
-OveragePhotoAbsCS::OveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,  // MeV
-                                     double fstep,                      // MeV
-                                     long fmax_q_step)
+AveragePhotoAbsCS::AveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,
+                                     double fstep, long fmax_q_step)
     : real_pacs(apacs, do_clone),
       width(fwidth),
       max_q_step(fmax_q_step),
       step(fstep) {
-  mfunname("OveragePhotoAbsCS::OveragePhotoAbsCS(...)");
+  mfunname("AveragePhotoAbsCS::AveragePhotoAbsCS(...)");
   check_econd11(apacs, == NULL, mcerr);
   if (fwidth > 0.0) {
-    check_econd11(fstep, >= 0.6 * fwidth, mcerr);  // 0.5 is bad but OK
+    // 0.5 is bad but OK
+    check_econd11(fstep, >= 0.6 * fwidth, mcerr);  
   }
-  /* I do not understand why the access is not allowed below.
-     So I call functions
-     name =
-     apacs->name;
-     //real_pacs->name;
-     Z = real_pacs->Z;
-     threshold = real_pacs->threshold;
-  */
   name = real_pacs->get_name();
   Z = real_pacs->get_Z();
   threshold = real_pacs->get_threshold();
 }
 
-double OveragePhotoAbsCS::get_CS(double energy) const {
-  mfunname("double OveragePhotoAbsCS::get_CS(double energy) const");
-  //mcout<<"OveragePhotoAbsCS::get_CS is started\n";
-  //mcout<<"OveragePhotoAbsCS::get_CS:\n";
+double AveragePhotoAbsCS::get_CS(double energy) const {
+  mfunname("double AveragePhotoAbsCS::get_CS(double energy) const");
+  // mcout<<"AveragePhotoAbsCS::get_CS is started\n";
+  // mcout<<"AveragePhotoAbsCS::get_CS:\n";
   if (width == 0.0) {
     // for no modification:
     return real_pacs->get_CS(energy);
-  } 
+  }
   const double w2 = width * 0.5;
-  double e1 = energy - w2;
-  if (e1 < 0.0) e1 = 0.0;
+  const double e1 = std::max(energy - w2, 0.);
   const double res = real_pacs->get_integral_CS(e1, energy + w2) / width;
   return res;
 }
 
-double OveragePhotoAbsCS::get_integral_CS(double energy1,
+double AveragePhotoAbsCS::get_integral_CS(double energy1,
                                           double energy2) const {
-  mfunname("double OveragePhotoAbsCS::get_integral_CS(double energy1, double "
-           "energy2) const");
-  //mcout<<"OveragePhotoAbsCS::get_integral_CS is started\n";
+  mfunname(
+      "double AveragePhotoAbsCS::get_integral_CS(double energy1, double "
+      "energy2) const");
+  // mcout<<"AveragePhotoAbsCS::get_integral_CS is started\n";
   if (width == 0.0 || energy1 >= energy2) {
     // for no modification:
     return real_pacs->get_integral_CS(energy1, energy2);
-  } 
+  }
   long q = long((energy2 - energy1) / step);
   if (q > max_q_step) {
     return real_pacs->get_integral_CS(energy1, energy2);
-  } 
+  }
   q++;
   double rstep = (energy2 - energy1) / q;
   double x0 = energy1 + 0.5 * rstep;
@@ -340,17 +317,16 @@ double OveragePhotoAbsCS::get_integral_CS(double energy1,
   }
   s *= rstep;
   return s;
-
 }
 
-void OveragePhotoAbsCS::scale(double fact) {
-  mfunname("void OveragePhotoAbsCS::scale(double fact)");
+void AveragePhotoAbsCS::scale(double fact) {
+  mfunname("void AveragePhotoAbsCS::scale(double fact)");
   real_pacs->scale(fact);
 }
 
-void OveragePhotoAbsCS::print(std::ostream& file, int l) const {
+void AveragePhotoAbsCS::print(std::ostream& file, int l) const {
   mfunname("void PhotoAbsCS::print(std::ostream& file, int l) const");
-  Ifile << "OveragePhotoAbsCS: width = " << width << " step=" << step
+  Ifile << "AveragePhotoAbsCS: width = " << width << " step=" << step
         << " max_q_step=" << max_q_step << '\n';
   indn.n += 2;
   real_pacs->print(file, l);
@@ -361,50 +337,40 @@ HydrogenPhotoAbsCS::HydrogenPhotoAbsCS(void)
     : PhotoAbsCS("H", 1, 15.43e-6), prefactor(1.) {}
 
 double HydrogenPhotoAbsCS::get_CS(double energy) const {
-  if (energy < threshold) {
-    return 0.0;
-  } else {
-    if (energy != DBL_MAX) {
-      return 0.5 *  // accounts one atom instead of two
-             prefactor * 0.0535 * (pow(100.0e-6 / energy, 3.228));
-    } else {
-      return 0.0;
-    }
-  }
+  if (energy < threshold) return 0.0;
+  if (energy == DBL_MAX) return 0.0;
+  // accounts one atom instead of two
+  return 0.5 * prefactor * 0.0535 * (pow(100.0e-6 / energy, 3.228));
 }
 
 double HydrogenPhotoAbsCS::get_integral_CS(double energy1,
                                            double energy2) const {
-  if (energy2 < threshold) {
-    return 0.0;
+  if (energy2 < threshold) return 0.;
+  if (energy1 < threshold) {
+    energy1 = threshold;  // local var.
+  }
+  if (energy2 == DBL_MAX) {
+    return 0.5 *  // accounts one atom instead of two
+           prefactor * 0.0535 * pow(100.0e-6, 3.228) / 2.228 *
+           (1.0 / pow(energy1, 2.228));
   } else {
-    if (energy1 < threshold) {
-      energy1 = threshold;  // local var.
-    }
-    if (energy2 == DBL_MAX) {
-      return 0.5 *  // accounts one atom instead of two
-             prefactor * 0.0535 * pow(100.0e-6, 3.228) / 2.228 *
-             (1.0 / pow(energy1, 2.228));
-    } else {
-      return 0.5 *  // accounts one atom instead of two
-             prefactor * 0.0535 * pow(100.0e-6, 3.228) / 2.228 *
-             (1.0 / pow(energy1, 2.228) - 1.0 / pow(energy2, 2.228));
-    }
+    return 0.5 *  // accounts one atom instead of two
+           prefactor * 0.0535 * pow(100.0e-6, 3.228) / 2.228 *
+           (1.0 / pow(energy1, 2.228) - 1.0 / pow(energy2, 2.228));
   }
 }
 
 void HydrogenPhotoAbsCS::scale(double fact) { prefactor = fact; }
 
 void HydrogenPhotoAbsCS::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    Ifile << "HydrogenPhotoAbsCS: name=" << name << " Z = " << Z
-          << " threshold = " << threshold << std::endl;
-  }
+  if (l <= 0) return;
+  Ifile << "HydrogenPhotoAbsCS: name=" << name << " Z = " << Z
+        << " threshold = " << threshold << std::endl;
 }
 
-SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
+SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
                                              double fthreshold,
-                                             const String& ffile_name)
+                                             const std::string& ffile_name)
     : PhotoAbsCS(fname, fZ, fthreshold), file_name(ffile_name) {
   mfunnamep("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(...)");
   std::ifstream file(file_name.c_str());
@@ -413,59 +379,67 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
     mcerr << "cannot open file " << file_name << std::endl;
     spexit(mcerr);
   }
-  long q = 0;  // number of read values
-  ener = DynLinArr<double>(10, 0.0);
-  cs = DynLinArr<double>(10, 0.0);
+  // Count the read values.
+  unsigned long q = 0;
+  ener.resize(10, 0.);
+  cs.resize(10, 0.);
   do {
     file >> ener[q];
-    //Iprintn(mcout, file.good());
-    //Iprintn(mcout, file.eof());
-    //Iprintn(mcout, file.fail());
-    //Iprintn(mcout, file.bad());
-    //file.clear();  // idiotic thing necessary for the new compiler
     if (!file.good()) break;
     check_econd11(ener[q], < 0.0, mcerr);
     if (q > 0) {
       check_econd12(ener[q], <, ener[q - 1], mcerr);
     }
-    ener[q] *= 1.0e-6;  // convertion to MeV
+    ener[q] *= 1.0e-6;  // convert to MeV
     file >> cs[q];
     if (!file.good()) break;
     check_econd11(cs[q], < 0.0, mcerr);
     q++;
-    if (q == ener.get_qel()) {  // increasing the size of arrays
-      long q1 = q * 2;
-      ener.put_qel(q1);
-      cs.put_qel(q1);
+    if (q == ener.size()) {
+      // Increase the size of arrays.
+      const long q1 = q * 2;
+      ener.resize(q1);
+      cs.resize(q1);
     }
   } while (1);
-  if (q != ener.get_qel()) {  // reducing the size if necessary
-    ener.put_qel(q);
-    cs.put_qel(q);
+  if (q != ener.size()) {  // reducing the size if necessary
+    ener.resize(q);
+    cs.resize(q);
   }
-
 }
-SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
+SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
                                              double fthreshold,
-                                             const DynLinArr<double>& fener,
-                                             const DynLinArr<double>& fcs)
+                                             const std::vector<double>& fener,
+                                             const std::vector<double>& fcs)
     : PhotoAbsCS(fname, fZ, fthreshold),
       file_name("none"),
       ener(fener),
       cs(fcs) {
   mfunname("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(...)");
-  check_econd12(ener.get_qel(), !=, cs.get_qel(), mcerr);
+  check_econd12(ener.size(), !=, cs.size(), mcerr);
 }
 
-SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
+SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
                                              double fthreshold, int l,
                                              double E0, double yw, double ya,
                                              double P, double sigma)
     : PhotoAbsCS(fname, fZ, fthreshold) {
   mfunname("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS");
-  long q = 1000;
-  ener = make_log_mesh_ec(2.0e-6, 2.0e-1, q);
-  cs.put_qel(q, 0.0);
+  const long q = 1000;
+  // Make a logarithmic energy mesh.
+  ener.resize(q, 0.);
+  const double emin = 2.e-6;
+  const double emax = 2.e-1;
+  const double rk = pow(emax / emin, (1.0 / double(q)));
+  double er = emin;
+  double e1;
+  double e2 = er;
+  for (long n = 0; n < q; n++) {
+    e1 = e2;
+    e2 = e2 * rk;
+    ener[n] = (e1 + e2) * 0.5;
+  }
+  cs.resize(q, 0.);
   long n;
   for (n = 0; n < q; n++) {
     double energy = ener[n];
@@ -478,8 +452,6 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
                      pow((1.0 + sqrt(y / ya)), (-P));
       Fpasc = Fpasc * sigma;
       cs[n] = Fpasc;
-      //Iprint3n(mcout, energy, E0, threshold);
-      //Iprint4n(mcout, Q, y, sigma, Fpasc);
     }
   }
   remove_leading_zeros();
@@ -488,16 +460,17 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
 SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const SimpleTablePhotoAbsCS& total,
                                              const SimpleTablePhotoAbsCS& part,
                                              double emax_repl) {
-  mfunname("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS (const "
-           "SimpleTablePhotoAbsCS& total,...)");
+  mfunname(
+      "SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS (const "
+      "SimpleTablePhotoAbsCS& total,...)");
 
   *this = total;  // to assure that all is preserved
 
-  long qe_i = total.ener.get_qel();
+  long qe_i = total.ener.size();
 
-  const DynLinArr<double>& ener_r = part.get_arr_ener();
-  const DynLinArr<double>& cs_r = part.get_arr_CS();
-  long qe_r = ener_r.get_qel();
+  const std::vector<double>& ener_r = part.get_arr_ener();
+  const std::vector<double>& cs_r = part.get_arr_CS();
+  long qe_r = ener_r.size();
   std::vector<double> new_ener;
   std::vector<double> new_cs;
   // first write replacements
@@ -514,27 +487,25 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const SimpleTablePhotoAbsCS& total,
     }
   }
   const long qe = new_ener.size();
-  ener.put_qel(qe);
-  cs.put_qel(qe);
+  ener.resize(qe);
+  cs.resize(qe);
   for (long ne = 0; ne < qe; ne++) {
     ener[ne] = new_ener[ne];
     cs[ne] = new_cs[ne];
-    //Iprint3n(mcout, ne, ener[ne], cs[ne]);
   }
 }
 
 void SimpleTablePhotoAbsCS::remove_leading_zeros(void) {
-  long q = ener.get_qel();
+  const long q = ener.size();
   long ne;
-  long nez;
   for (ne = 0; ne < q; ne++) {
     if (cs[ne] > 0.0) break;
   }
   if (ne > 0) {
-    long qn = q - ne;
-    DynLinArr<double> enern(qn);
-    DynLinArr<double> csn(qn);
-    for (nez = ne; nez < q; nez++) {
+    const long qn = q - ne;
+    std::vector<double> enern(qn);
+    std::vector<double> csn(qn);
+    for (long nez = ne; nez < q; nez++) {
       enern[nez - ne] = ener[nez];
       csn[nez - ne] = cs[nez];
     }
@@ -543,17 +514,16 @@ void SimpleTablePhotoAbsCS::remove_leading_zeros(void) {
   }
 }
 void SimpleTablePhotoAbsCS::remove_leading_tiny(double level) {
-  long q = ener.get_qel();
+  const long q = ener.size();
   long ne;
-  long nez;
   for (ne = 0; ne < q; ne++) {
     if (cs[ne] > level) break;
   }
   if (ne > 0) {
-    long qn = q - ne;
-    DynLinArr<double> enern(qn);
-    DynLinArr<double> csn(qn);
-    for (nez = ne; nez < q; nez++) {
+    const long qn = q - ne;
+    std::vector<double> enern(qn);
+    std::vector<double> csn(qn);
+    for (long nez = ne; nez < q; nez++) {
       enern[nez - ne] = ener[nez];
       csn[nez - ne] = cs[nez];
     }
@@ -564,22 +534,18 @@ void SimpleTablePhotoAbsCS::remove_leading_tiny(double level) {
 
 double SimpleTablePhotoAbsCS::get_CS(double energy) const {
   mfunname("double SimpleTablePhotoAbsCS::get_CS(double energy) const");
-  //mcout<<"SimpleTablePhotoAbsCS::get_CS is started\n";
-  //Iprintn(mcout, energy);
-  long q = ener.get_qel();
+  long q = ener.size();
   if (q == 0) return 0.0;
   check_econd11(q, == 1, mcerr);
-  //Iprint3n(mcout, threshold,  ener[0], energy);
   if (energy < threshold)
     return 0.0;
   else {
     if (energy <= ener[q - 1]) {
-      //mcout<<"Create mesh\n";
-      PointCoorMesh<double, const DynLinArr<double> > pcmd(q, &ener);
+      PointCoorMesh<double, const std::vector<double> > pcmd(q, &ener);
       double s;
       s = t_value_generic_point_ar<
-          double, DynLinArr<double>,
-          PointCoorMesh<double, const DynLinArr<double> > >(
+          double, std::vector<double>,
+          PointCoorMesh<double, const std::vector<double> > >(
           pcmd, cs, &my_val_fun, energy, 1, threshold, 0, DBL_MAX);
       return s;
     } else {
@@ -591,7 +557,7 @@ double SimpleTablePhotoAbsCS::get_CS(double energy) const {
 
     /*
     long i1, i2;
-    long q = ener.get_qel();
+    long q = ener.size();
     if(energy < ener[0])
     {
       i1 = 0;
@@ -653,10 +619,9 @@ double SimpleTablePhotoAbsCS::get_integral_CS(double energy1,
                                               double energy2) const {
   mfunname("double SimpleTablePhotoAbsCS::get_integral_CS(...)");
 
-  long q = ener.get_qel();
+  const long q = ener.size();
   if (q == 0) return 0.0;
   check_econd11(q, == 1, mcerr);
-  //Iprint2n(mcout, energy2, threshold);
   if (energy2 < threshold) return 0.0;
   if (energy1 < threshold) energy1 = threshold;
   double s = 0.0;
@@ -664,10 +629,10 @@ double SimpleTablePhotoAbsCS::get_integral_CS(double energy1,
   if (energy1 < energy21) {
     if (energy21 > energy2) energy21 = energy2;
     check_econd12(energy1, >, energy21, mcerr);
-    s = glin_integ_ar(ener, cs, ener.get_qel(), energy1, energy21, threshold);
+    s = glin_integ_ar(ener, cs, q, energy1, energy21, threshold);
   }
-  //print(mcout, 3);
-  //mcout << "energy1="<<energy1
+  // print(mcout, 3);
+  // mcout << "energy1="<<energy1
   //      << " energy21="<<energy21
   //      << " ener[q-1]="<<ener[q-1]
   //      << " threshold="<<threshold
@@ -679,13 +644,13 @@ double SimpleTablePhotoAbsCS::get_integral_CS(double energy1,
       if (energy1 < ener[q - 1]) energy1 = ener[q - 1];
       double c =
           cs[q - 1] / (1.75 * pow(ener[q - 1], -2.75)) * pow(energy1, -1.75);
-      //check_econd11(c , < 0.0, mcout);
+      // check_econd11(c , < 0.0, mcout);
       s += c;
     } else {
       if (energy1 < ener[q - 1]) energy1 = ener[q - 1];
       double c = cs[q - 1] / (1.75 * pow(ener[q - 1], -2.75)) *
                  (pow(energy1, -1.75) - pow(energy2, -1.75));
-      //check_econd11(c , < 0.0, mcout);
+      // check_econd11(c , < 0.0, mcout);
       s += c;
     }
   }
@@ -694,33 +659,30 @@ double SimpleTablePhotoAbsCS::get_integral_CS(double energy1,
 
 void SimpleTablePhotoAbsCS::scale(double fact) {
   mfunnamep("void SimpleTablePhotoAbsCS::scale(double fact)");
-  long q = ener.get_qel();
+  long q = ener.size();
   for (long n = 0; n < q; ++n) {
     cs[n] *= fact;
   }
 }
 
 void SimpleTablePhotoAbsCS::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    Ifile << "SimpleTablePhotoAbsCS: name=" << name << " Z = " << Z
-          << std::endl;
-    Ifile << " threshold = " << threshold << " file_name=" << file_name
-          << std::endl;
-    if (l > 1) {
-      indn.n += 2;
-      for (long n = 0; n < ener.get_qel(); ++n) {
-        Ifile << "n=" << n << " ener=" << ener[n] << " cs=" << cs[n]
-              << std::endl;
-      }
-      indn.n -= 2;
+  if (l <= 0) return;
+  Ifile << "SimpleTablePhotoAbsCS: name=" << name << " Z = " << Z << "\n";
+  Ifile << " threshold = " << threshold << " file_name=" << file_name << "\n";
+  if (l > 1) {
+    indn.n += 2;
+    const long q = ener.size();
+    for (long n = 0; n < q; ++n) {
+      Ifile << "n=" << n << " ener=" << ener[n] << " cs=" << cs[n] << "\n";
     }
+    indn.n -= 2;
   }
 }
 
 PhenoPhotoAbsCS::PhenoPhotoAbsCS() : PhotoAbsCS("none", 0, 0.0), power(0.0) {}
 
-PhenoPhotoAbsCS::PhenoPhotoAbsCS(const String& fname, int fZ, double fthreshold,
-                                 double fpower)
+PhenoPhotoAbsCS::PhenoPhotoAbsCS(const std::string& fname, int fZ,
+                                 double fthreshold, double fpower)
     : PhotoAbsCS(fname, fZ, fthreshold), power(fpower) {
   mfunname("PhenoPhotoAbsCS::PhenoPhotoAbsCS");
   check_econd11a(power, <= 2,
@@ -735,7 +697,7 @@ double PhenoPhotoAbsCS::get_CS(double energy) const {
 }
 
 double PhenoPhotoAbsCS::get_integral_CS(double energy1, double energy2) const {
-  //Imcout<<"energy1="<<energy1<<" energy2="<<energy2<<'\n';
+  // Imcout<<"energy1="<<energy1<<" energy2="<<energy2<<'\n';
   if (energy2 < threshold) return 0.0;
   if (energy1 < threshold) energy1 = threshold;
   double s;
@@ -770,7 +732,7 @@ FitBTPhotoAbsCS::FitBTPhotoAbsCS(void): PhotoAbsCS("none",0, 0.0),
 {;}
 
 FitBTPhotoAbsCS::FitBTPhotoAbsCS
-(const String& fname, int fZ, double fthreshold,
+(const std::string& fname, int fZ, double fthreshold,
  int  fl, double fE0, double fyw, double fya,
  double fP, double fsigma):
   PhotoAbsCS(fname, fZ, fthreshold),
@@ -816,7 +778,7 @@ double PhenoPhotoAbsCS::get_integral_CS(double energy1, double energy2) const
 
 /*
 FitBTPhotoAbsCS::FitBTPhotoAbsCS
-(const String& fname, int fZ, double fthreshold, double fpower):
+(const std::string& fname, int fZ, double fthreshold, double fpower):
   PhotoAbsCS(fname, fZ, 0.0)
 {
   mfunname("FitBTPhotoAbsCS::FitBTPhotoAbsCS");
@@ -849,17 +811,15 @@ FitBTPhotoAbsCS::FitBTPhotoAbsCS
 //------------------------------------------------------------------------
 
 void AtomicSecondaryProducts::add_channel(
-    double fchannel_prob_dens, const DynLinArr<double>& felectron_energy,
-    const DynLinArr<double>& fphoton_energy, int s_all_rest) {
+    double fchannel_prob_dens, const std::vector<double>& felectron_energy,
+    const std::vector<double>& fphoton_energy, int s_all_rest) {
   mfunnamep("void AtomicSecondaryProducts::add_channel(...)");
   check_econd21(fchannel_prob_dens, < 0.0 ||, > 1.0, mcerr);
-  long q_old = channel_prob_dens.get_qel();
+  long q_old = channel_prob_dens.size();
   long q_new = q_old + 1;
-  channel_prob_dens.put_qel(q_new);
-  electron_energy.put_qel(q_new);
-  photon_energy.put_qel(q_new);
-  //Iprintn(mcout, s);
-  //check_econd11( s , > 1.0 , mcerr);
+  channel_prob_dens.resize(q_new);
+  electron_energy.resize(q_new);
+  photon_energy.resize(q_new);
   if (s_all_rest == 1) {
     double s = 0.0;
     for (long n = 0; n < q_old; ++n) {
@@ -887,28 +847,28 @@ void AtomicSecondaryProducts::add_channel(
   }
 }
 
-int AtomicSecondaryProducts::get_channel(
-    DynLinArr<double>& felectron_energy,
-    DynLinArr<double>& fphoton_energy) const {
+int AtomicSecondaryProducts::get_channel(std::vector<double>& felectron_energy,
+                                         std::vector<double>& fphoton_energy)
+    const {
   mfunname("int AtomicSecondaryProducts::get_channel(...)");
 #ifdef DEBUG_PRINT_get_escape_particles
   mcout << "AtomicSecondaryProducts::get_channel is started\n";
-  Iprintn(mcout, channel_prob_dens.get_qel());
+  Iprintn(mcout, channel_prob_dens.size());
 #endif
   int ir = 0;
-  if (channel_prob_dens.get_qel() > 0) {
+  if (channel_prob_dens.size() > 0) {
     double rn = SRANLUX();
 #ifdef DEBUG_PRINT_get_escape_particles
     Iprintn(mcout, rn);
 #endif
-    if (channel_prob_dens.get_qel() == 1) {
+    if (channel_prob_dens.size() == 1) {
       if (rn < channel_prob_dens[0]) {
         felectron_energy = electron_energy[0];
         fphoton_energy = photon_energy[0];
         ir = 1;
       }
     } else {
-      long q = channel_prob_dens.get_qel();
+      long q = channel_prob_dens.size();
       double s = 0.0;
       for (long n = 0; n < q; ++n) {
         s += channel_prob_dens[n];
@@ -934,14 +894,14 @@ int AtomicSecondaryProducts::get_channel(
 void AtomicSecondaryProducts::print(std::ostream& file, int l) const {
   if (l > 0) {
     Ifile << "AtomicSecondaryProducts(l=" << l << "):\n";
-    long q = channel_prob_dens.get_qel();
+    long q = channel_prob_dens.size();
     Ifile << "number of channels=" << q << '\n';
     indn.n += 2;
     for (long n = 0; n < q; ++n) {
       Ifile << "n_channel=" << n << " probability=" << channel_prob_dens[n]
             << '\n';
       indn.n += 2;
-      long qel = electron_energy[n].get_qel();
+      long qel = electron_energy[n].size();
       Ifile << "number of electrons=" << qel << '\n';
       indn.n += 2;
       for (long nel = 0; nel < qel; ++nel) {
@@ -949,7 +909,7 @@ void AtomicSecondaryProducts::print(std::ostream& file, int l) const {
               << '\n';
       }
       indn.n -= 2;
-      long qph = photon_energy[n].get_qel();
+      long qph = photon_energy[n].size();
       Ifile << "number of photons=" << qph << '\n';
       indn.n += 2;
       for (long nph = 0; nph < qph; ++nph) {
@@ -967,8 +927,9 @@ AtomPhotoAbsCS::AtomPhotoAbsCS() : name("none"), Z(0), qshell(0) {}
 
 double AtomPhotoAbsCS::get_TICS(double energy,
                                 double factual_minimal_threshold) const {
-  mfunname("double AtomPhotoAbsCS::get_TICS(double energy, double "
-           "factual_minimal_threshold) const");
+  mfunname(
+      "double AtomPhotoAbsCS::get_TICS(double energy, double "
+      "factual_minimal_threshold) const");
 
   if (factual_minimal_threshold <= energy) {
     // All what is absorbed, should ionize
@@ -979,8 +940,9 @@ double AtomPhotoAbsCS::get_TICS(double energy,
 
 double AtomPhotoAbsCS::get_integral_TICS(
     double energy1, double energy2, double factual_minimal_threshold) const {
-  mfunname("double AtomPhotoAbsCS::get_integral_TICS(double energy1, double "
-           "energy2, double factual_minimal_threshold) const");
+  mfunname(
+      "double AtomPhotoAbsCS::get_integral_TICS(double energy1, double "
+      "energy2, double factual_minimal_threshold) const");
 
   if (factual_minimal_threshold <= energy2) {
     // All what is absorbed, should ionize
@@ -994,10 +956,11 @@ double AtomPhotoAbsCS::get_integral_TICS(
 
 double AtomPhotoAbsCS::get_TICS(int nshell, double energy,
                                 double factual_minimal_threshold) const {
-  mfunname("double AtomPhotoAbsCS::get_TICS(int nshell, double energy, double "
-           "factual_minimal_threshold) const");
+  mfunname(
+      "double AtomPhotoAbsCS::get_TICS(int nshell, double energy, double "
+      "factual_minimal_threshold) const");
 
-  if (s_ignore_shell[nshell] == 0) {
+  if (s_ignore_shell[nshell] != 0) {
     if (factual_minimal_threshold <= energy) {
       // All what is absorbed, should ionize
       return get_integral_ACS(nshell, energy);
@@ -1009,8 +972,9 @@ double AtomPhotoAbsCS::get_TICS(int nshell, double energy,
 double AtomPhotoAbsCS::get_integral_TICS(
     int nshell, double energy1, double energy2,
     double factual_minimal_threshold) const {
-  mfunname("double AtomPhotoAbsCS::get_integral_TICS(int nshell, double "
-           "energy1, double energy2, double factual_minimal_threshold) const");
+  mfunname(
+      "double AtomPhotoAbsCS::get_integral_TICS(int nshell, double "
+      "energy1, double energy2, double factual_minimal_threshold) const");
 
   if (s_ignore_shell[nshell] == 0) {
     if (factual_minimal_threshold <= energy1) {
@@ -1040,10 +1004,10 @@ void AtomPhotoAbsCS::print(std::ostream& file, int l) const {
   if (l > 0) {
     Ifile << "AtomPhotoAbsCS(l=" << l << "): name=" << name << " Z = " << Z
           << " qshell = " << qshell << std::endl;
-    Iprintn(mcout, asp.get_qel());
-    long q = asp.get_qel();
+    Iprintn(mcout, asp.size());
+    long q = asp.size();
     if (q == 0) {
-      q = s_ignore_shell.get_qel();
+      q = s_ignore_shell.size();
       indn.n += 2;
       for (long n = 0; n < q; ++n) {
         Ifile << "n=" << n << " s_ignore_shell[n] = " << s_ignore_shell[n]
@@ -1051,7 +1015,7 @@ void AtomPhotoAbsCS::print(std::ostream& file, int l) const {
       }
       indn.n -= 2;
     } else {
-      check_econd12(asp.get_qel(), !=, s_ignore_shell.get_qel(), mcerr);
+      check_econd12(asp.size(), !=, s_ignore_shell.size(), mcerr);
       indn.n += 2;
       for (long n = 0; n < q; ++n) {
         Ifile << "n=" << n << " s_ignore_shell[n] = " << s_ignore_shell[n]
@@ -1079,9 +1043,9 @@ double AtomPhotoAbsCS::get_I_min(void) const {
   return st;
 }
 
-void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
-                                          DynLinArr<double>& el_energy,
-                                          DynLinArr<double>& ph_energy) const {
+void AtomPhotoAbsCS::get_escape_particles(
+    int nshell, double energy, std::vector<double>& el_energy,
+    std::vector<double>& ph_energy) const {
   mfunname("void AtomPhotoAbsCS::get_escape_particles(...)");
 #ifdef DEBUG_PRINT_get_escape_particles
   mcout << "AtomPhotoAbsCS::get_escape_particles is started\n";
@@ -1098,8 +1062,8 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
 
   // program is complicated; to make sure that there is no remains
   // from previous runs are allowed to pass, I clear arrays:
-  el_energy = DynLinArr<double>(0);
-  ph_energy = DynLinArr<double>(0);
+  el_energy.clear();
+  ph_energy.clear();
 
   int n_min = 0;
   double st = DBL_MAX;
@@ -1117,14 +1081,9 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
   if (nshell == n_min) {
     // generate delta-electron, here it will be the only one, since the shell
     // is the outmost valent one.
-    double en;
-    if (energy - get_threshold(n_min) >= 0.0) {
-      en = energy - get_threshold(n_min);
-    } else {
-      en = 0.0;
-    }
-    el_energy = DynLinArr<double>(1, en);
-    ph_energy = DynLinArr<double>(0);
+    const double en = std::max(energy - get_threshold(n_min), 0.);
+    el_energy.push_back(en);
+    ph_energy.clear();
   } else {
     // Energy of photo-electron
     double en = energy - get_threshold(nshell);
@@ -1140,13 +1099,13 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
       en = 0.0;
     }
     int is = 0;
-    DynLinArr<double> felectron_energy;
-    DynLinArr<double> fphoton_energy;
+    std::vector<double> felectron_energy;
+    std::vector<double> fphoton_energy;
 #ifdef DEBUG_PRINT_get_escape_particles
-    Iprint2n(mcout, asp.get_qel(), get_qshell());
+    Iprint2n(mcout, asp.size(), get_qshell());
 #endif
 #ifndef DEBUG_ignore_non_standard_channels
-    if (asp.get_qel() == get_qshell()) {
+    if (asp.size() == get_qshell()) {
       // works only in this case?
       is = asp[nshell].get_channel(felectron_energy, fphoton_energy);
       // Here zero can be if the shell is not included in database
@@ -1161,9 +1120,6 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
     Iprint(mcout, felectron_energy);
     Iprint(mcout, fphoton_energy);
 #endif
-    //check_econd22( is , == 0 && , main_n , < 0 , mcerr);  // since
-    //// there will be neither default channel nor the explicit one
-    //if(is == 0 && main_n > 0)
     if (is == 0) {
       // generate default channel
       if (main_n > 0) {
@@ -1200,13 +1156,11 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
           check_econd11(n_choosen, < 0, mcerr);
           double e_temp = 0.0;
           if ((e_temp = get_threshold(nshell) - hdist -
-                        2.0 * get_threshold(n_choosen))
-              //if(get_threshold(nshell) - hdist - 2.0*get_threshold(n_choosen)
-              > 0.0) {
-            el_energy = DynLinArr<double>(4);
+                        2.0 * get_threshold(n_choosen)) > 0.0) {
+            el_energy.resize(4);
             el_energy[0] = en;  // photo-electron
             el_energy[1] = e_temp;
-            //el_energy[1] = get_threshold(nshell) - hdist -
+            // el_energy[1] = get_threshold(nshell) - hdist -
             //  2.0*get_threshold(n_choosen);
             // first Auger from choosen shell
             // Then filling two vacancies at the next (choosen) shell
@@ -1214,71 +1168,73 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
             if ((e_temp = get_threshold(n_choosen) -
                           2.0 * get_threshold(n_min)) > 0.0) {
               el_energy[2] = e_temp;
-              //el_energy[2] =
-              //  get_threshold(n_choosen) - 2.0 * get_threshold(n_min);
               el_energy[3] = el_energy[2];
               check_econd11(el_energy[2], < 0.0, mcerr);
-            } else {  // ignore two last Auger electrons
-              el_energy.put_qel(2);
+            } else {
+              // ignore two last Auger electrons
+              el_energy.resize(2);
             }
           } else if ((e_temp = get_threshold(nshell) - hdist -
-                      get_threshold(n_choosen) - get_threshold(n_min)) > 0.0) {
-            el_energy = DynLinArr<double>(3);
+                               get_threshold(n_choosen) -
+                               get_threshold(n_min)) > 0.0) {
+            el_energy.resize(3);
             el_energy[0] = en;  // photo-electron
             el_energy[1] = e_temp;
-            //el_energy[1] = get_threshold(nshell) - hdist -
+            // el_energy[1] = get_threshold(nshell) - hdist -
             //  get_threshold(n_choosen) - get_threshold(n_min);
             // filling initially ionized level from choosen
-            // and emmitance of Auger from outermost.
+            // and emittance of Auger from outermost.
             check_econd11(el_energy[1], < 0.0, mcerr);
             if ((e_temp = get_threshold(n_choosen) -
                           2.0 * get_threshold(n_min)) > 0.0) {
               el_energy[2] = e_temp;
-              //el_energy[2] = get_threshold(n_choosen) - 2.0 *
-              //get_threshold(n_min);
-            } else {  // ignore this last Auger electron
-              el_energy.put_qel(2);
+              // el_energy[2] = get_threshold(n_choosen) - 2.0 *
+              // get_threshold(n_min);
+            } else {
+              // ignore this last Auger electron
+              el_energy.resize(2);
             }
           }
-          ph_energy = DynLinArr<double>(0);
-        } else  // for if(main_n_largest - main_n >= 2)
-            {
-          //generate Auger from the outermost shell
+          ph_energy.clear();
+        } else {
+          // for if(main_n_largest - main_n >= 2)
+          // generate Auger from the outermost shell
           double en1 =
               get_threshold(nshell) - hdist - 2.0 * get_threshold(n_min);
           if (en1 >= 0.0) {
-            el_energy = DynLinArr<double>(2);
+            el_energy.resize(2);
             el_energy[0] = en;
             el_energy[1] = en1;
           } else {
-            el_energy = DynLinArr<double>(1);
+            el_energy.resize(1);
             el_energy[0] = en;
           }
-          ph_energy = DynLinArr<double>(0);
+          ph_energy.clear();
         }
-      } else  // for if(main_n > 0)
-          {   // principal numbers are not available, then we generate Auger
-              // to outmost shell
+      } else {
+        // for if(main_n > 0)
+        // principal numbers are not available, then we generate Auger to
+        // outmost shell
         double en1 = get_threshold(nshell) - hdist - 2.0 * get_threshold(n_min);
         if (en1 >= 0.0) {
-          el_energy = DynLinArr<double>(2);
+          el_energy.resize(2);
           el_energy[0] = en;
           el_energy[1] = en1;
         } else {
-          el_energy = DynLinArr<double>(1);
+          el_energy.resize(1);
           el_energy[0] = en;
         }
-        ph_energy = DynLinArr<double>(0);
+        ph_energy.clear();
       }
-    } else  // for if(is == 0),  generate explicit channel
-        {
+    } else {
+      // for if(is == 0),  generate explicit channel
       // Generate photo-electron and
       // just copy all what is proposed by get_channel
       // with corrections by hdist.
 
-      el_energy = DynLinArr<double>(1 + felectron_energy.get_qel());
+      el_energy.resize(1 + felectron_energy.size());
       el_energy[0] = en;
-      long q = felectron_energy.get_qel();
+      long q = felectron_energy.size();
       for (long n = 0; n < q; ++n) {
         check_econd21(felectron_energy[n], < 0 ||, > get_threshold(nshell),
                       mcerr);
@@ -1290,8 +1246,8 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
           hdist = 0.0;
         }
       }
-      ph_energy = DynLinArr<double>(fphoton_energy.get_qel());
-      q = fphoton_energy.get_qel();
+      ph_energy.resize(fphoton_energy.size());
+      q = fphoton_energy.size();
       for (long n = 0; n < q; ++n) {
         check_econd21(fphoton_energy[n], < 0 ||, > get_threshold(nshell),
                       mcerr);
@@ -1308,7 +1264,7 @@ void AtomPhotoAbsCS::get_escape_particles(int nshell, double energy,
 #ifdef DEBUG_PRINT_get_escape_particles
   Iprintn(mcout, ph_energy);
   Iprintn(mcout, el_energy);
-  mcout << "AtomPhotoAbsCS::get_escape_particles: exitting\n";
+  mcout << "AtomPhotoAbsCS::get_escape_particles: exiting\n";
 #endif
 }
 
@@ -1320,10 +1276,12 @@ AtomicSecondaryProducts* AtomPhotoAbsCS::get_asp(int nshell) {
 
 SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(void) : AtomPhotoAbsCS() {}
 
-SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& ffile_name)
+SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ,
+                                           const std::string& ffile_name)
     : file_name(ffile_name) {
-  mfunnamep("SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& "
-            "ffile_name)");
+  mfunnamep(
+      "SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const std::string& "
+      "ffile_name)");
   check_econd11(fZ, < 1, mcerr);
   std::ifstream file(file_name.c_str());
   if (!file) {
@@ -1333,52 +1291,47 @@ SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& ffile_name)
   }
   while (findmark(file, "#") == 1) {
     file >> Z;
-    if (Z == fZ) {
-      file >> qshell;
-      check_econd21(qshell, < 1 ||, > 10000, mcerr);
-      s_ignore_shell.put_qel(qshell, 0);
-      file >> name;
-      acs = DynLinArr<ActivePtr<PhotoAbsCS> >(qshell);
-      asp = DynLinArr<AtomicSecondaryProducts>(qshell);
-      DynLinArr<double> fl(qshell);
-      int sZshell = 0;
-      for (int nshell = 0; nshell < qshell; ++nshell) {
-        double thr = 0.0;
-        int Zshell = 0;
-        //double fl;
-        String shell_name;
-        file >> thr;
-        check_econd11(thr, <= 0.0, mcerr);
-        file >> Zshell;
-        check_econd11(Zshell, <= 0, mcerr);
-        sZshell += Zshell;
-        file >> fl[nshell];
-        findmark(file, "!");
-        file >> shell_name;
-        //PhotoAbsCS* ap = new PhenoPhotoAbsCS(shell_name, Zshell, thr);
-        //acs[nshell].pass( ap );
-        acs[nshell].pass(new PhenoPhotoAbsCS(shell_name, Zshell, thr * 1.0e-6));
-      }
-      check_econd12(sZshell, !=, Z, mcerr);
-
-      int n_min = 0;
-      double st = DBL_MAX;
-      for (int nshell = 0; nshell < qshell; ++nshell) {
-        // currently the minimal shell is the last,
-        // but to avoid this assumption we check all
-        if (get_threshold(nshell) < st) n_min = nshell;
-      }
-      for (int nshell = 0; nshell < qshell; ++nshell) {
-        if (fl[nshell] > 0) {
-          check_econd12(nshell, ==, n_min, mcerr);
-          DynLinArr<double> felectron_energy(0);
-          DynLinArr<double> fphoton_energy(1);
-          fphoton_energy[0] = get_threshold(nshell) - get_threshold(n_min);
-          asp[nshell].add_channel(fl[nshell], felectron_energy, fphoton_energy);
-        }
-      }
-      return;
+    if (Z != fZ) continue;
+    file >> qshell;
+    check_econd21(qshell, < 1 ||, > 10000, mcerr);
+    s_ignore_shell.resize(qshell, 0);
+    file >> name;
+    acs.resize(qshell);
+    asp.resize(qshell);
+    std::vector<double> fl(qshell);
+    int sZshell = 0;
+    for (int nshell = 0; nshell < qshell; ++nshell) {
+      double thr = 0.0;
+      int Zshell = 0;
+      std::string shell_name;
+      file >> thr;
+      check_econd11(thr, <= 0.0, mcerr);
+      file >> Zshell;
+      check_econd11(Zshell, <= 0, mcerr);
+      sZshell += Zshell;
+      file >> fl[nshell];
+      findmark(file, "!");
+      file >> shell_name;
+      acs[nshell].pass(new PhenoPhotoAbsCS(shell_name, Zshell, thr * 1.0e-6));
     }
+    check_econd12(sZshell, !=, Z, mcerr);
+
+    int n_min = 0;
+    double st = DBL_MAX;
+    for (int nshell = 0; nshell < qshell; ++nshell) {
+      // currently the minimal shell is the last,
+      // but to avoid this assumption we check all
+      if (get_threshold(nshell) < st) n_min = nshell;
+    }
+    for (int nshell = 0; nshell < qshell; ++nshell) {
+      if (fl[nshell] <= 0) continue;
+      check_econd12(nshell, ==, n_min, mcerr);
+      std::vector<double> felectron_energy;
+      std::vector<double> fphoton_energy;
+      fphoton_energy.push_back(get_threshold(nshell) - get_threshold(n_min));
+      asp[nshell].add_channel(fl[nshell], felectron_energy, fphoton_energy);
+    }
+    return;
   }
   funnw.ehdr(mcerr);
   mcerr << "there is no element Z=" << fZ << " in file " << file_name
@@ -1387,15 +1340,16 @@ SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& ffile_name)
 }
 
 SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const PhotoAbsCS& facs) {
-  mfunname("SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const "
-           "PhotoAbsCS& facs)");
+  mfunname(
+      "SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const "
+      "PhotoAbsCS& facs)");
   check_econd11(fZ, <= 0, mcerr);
   check_econd12(fZ, !=, facs.get_Z(), mcerr);
   Z = fZ;
   qshell = 1;
-  s_ignore_shell.put_qel(qshell, 0);
+  s_ignore_shell.resize(qshell, 0);
   name = facs.get_name();
-  acs.put_qel(1);
+  acs.resize(1);
   acs[0].put(&facs);
 }
 
@@ -1409,9 +1363,7 @@ double SimpleAtomPhotoAbsCS::get_ACS(double energy) const {
   mfunname("double SimpleAtomPhotoAbsCS::get_ACS(double energy) const");
   double s = 0.0;
   for (int n = 0; n < qshell; ++n) {
-    if (s_ignore_shell[n] == 0) {
-      s += acs[n]->get_CS(energy);
-    }
+    if (s_ignore_shell[n] == 0) s += acs[n]->get_CS(energy);
   }
   return s;
 }
@@ -1421,18 +1373,16 @@ double SimpleAtomPhotoAbsCS::get_integral_ACS(double energy1,
       "double SimpleAtomPhotoAbsCS::get_integral_ACS(double energy)const");
   double s = 0.0;
   for (int n = 0; n < qshell; ++n) {
-    if (s_ignore_shell[n] == 0) {
-      double t;
-      s += (t = acs[n]->get_integral_CS(energy1, energy2));
-      if (t < 0) {
-        funnw.ehdr(mcout);
-        mcout << "t < 0\n";
-        Iprintn(mcout, t);
-        print(mcout, 4);
-        spexit(mcout);
-      }
+    if (s_ignore_shell[n] != 0) continue;
+    const double t = acs[n]->get_integral_CS(energy1, energy2);
+    if (t < 0) {
+      funnw.ehdr(mcout);
+      mcout << "t < 0\n";
+      Iprintn(mcout, t);
+      print(mcout, 4);
+      spexit(mcout);
     }
-    //check_econd11a(t , < 0 , "n="<<n<<'\n',  mcerr);
+    s += t;
   }
   return s;
 }
@@ -1440,16 +1390,14 @@ double SimpleAtomPhotoAbsCS::get_integral_ACS(double energy1,
 double SimpleAtomPhotoAbsCS::get_ACS(int nshell, double energy) const {
   mfunname("double SimpleAtomPhotoAbsCS::get_ACS(int nshell, double energy)");
   check_econd21(nshell, < 0 ||, > qshell, mcerr);
-  if (s_ignore_shell[nshell] == 0) {
-    return acs[nshell]->get_CS(energy);
-  }
-  return 0.0;
+  return s_ignore_shell[nshell] == 0 ? acs[nshell]->get_CS(energy) : 0.;
 }
 
 double SimpleAtomPhotoAbsCS::get_integral_ACS(int nshell, double energy1,
                                               double energy2) const {
-  mfunname("double SimpleAtomPhotoAbsCS::get_integral_ACS(int nshell, double "
-           "energy1, double energy2)");
+  mfunname(
+      "double SimpleAtomPhotoAbsCS::get_integral_ACS(int nshell, double "
+      "energy1, double energy2)");
   check_econd21(nshell, < 0 ||, > qshell, mcerr);
   if (s_ignore_shell[nshell] == 0) {
     return acs[nshell]->get_integral_CS(energy1, energy2);
@@ -1461,22 +1409,19 @@ double SimpleAtomPhotoAbsCS::get_ICS(double energy) const {
   mfunname("double SimpleAtomPhotoAbsCS::get_ICS(double energy) const");
   double s = 0.0;
   for (int n = 0; n < qshell; ++n) {
-    if (s_ignore_shell[n] == 0) {
-      s += acs[n]->get_CS(energy);
-    }
+    if (s_ignore_shell[n] == 0) s += acs[n]->get_CS(energy);
   }
   return s;
 }
 
 double SimpleAtomPhotoAbsCS::get_integral_ICS(double energy1,
                                               double energy2) const {
-  mfunname("double SimpleAtomPhotoAbsCS::get_integral_ICS(double energy1, "
-           "double energy2) const");
+  mfunname(
+      "double SimpleAtomPhotoAbsCS::get_integral_ICS(double energy1, "
+      "double energy2) const");
   double s = 0.0;
   for (int n = 0; n < qshell; ++n) {
-    if (s_ignore_shell[n] == 0) {
-      s += acs[n]->get_integral_CS(energy1, energy2);
-    }
+    if (s_ignore_shell[n] == 0) s += acs[n]->get_integral_CS(energy1, energy2);
   }
   return s;
 }
@@ -1484,53 +1429,43 @@ double SimpleAtomPhotoAbsCS::get_integral_ICS(double energy1,
 double SimpleAtomPhotoAbsCS::get_ICS(int nshell, double energy) const {
   mfunname("double SimpleAtomPhotoAbsCS::get_ICS(int nshell, double energy)");
   check_econd21(nshell, < 0 ||, > qshell, mcerr);
-  if (s_ignore_shell[nshell] == 0) {
-    return acs[nshell]->get_CS(energy);
-  }
-  return 0.0;
+  return s_ignore_shell[nshell] == 0 ? acs[nshell]->get_CS(energy) : 0.;
 }
 
 double SimpleAtomPhotoAbsCS::get_integral_ICS(int nshell, double energy1,
                                               double energy2) const {
-  mfunname("double SimpleAtomPhotoAbsCS::get_integral_ICS(int nshell, double "
-           "energy1, double energy2)");
+  mfunname(
+      "double SimpleAtomPhotoAbsCS::get_integral_ICS(int nshell, double "
+      "energy1, double energy2)");
   check_econd21(nshell, < 0 ||, > qshell, mcerr);
-  if (s_ignore_shell[nshell] == 0) {
-    return acs[nshell]->get_integral_CS(energy1, energy2);
-  }
-  return 0.0;
+  return s_ignore_shell[nshell] == 0
+             ? acs[nshell]->get_integral_CS(energy1, energy2)
+             : 0.;
 }
 
 void SimpleAtomPhotoAbsCS::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    Ifile << "SimpleAtomPhotoAbsCS(l=" << l << "): name=" << name
-          << " Z = " << Z << " qshell = " << qshell
-          << " file_name=" << file_name << std::endl;
-    l--;
-    if (l > 0) {
-      indn.n += 2;
-      for (int n = 0; n < qshell; ++n) {
-        Ifile << "nshell=" << n << std::endl;
-        acs[n].print(file, l);
-      }
-      AtomPhotoAbsCS::print(file, l);
-      indn.n -= 2;
-    }
+  if (l <= 0) return;
+  Ifile << "SimpleAtomPhotoAbsCS(l=" << l << "): name=" << name << " Z = " << Z
+        << " qshell = " << qshell << " file_name=" << file_name << std::endl;
+  l--;
+  if (l <= 0) return;
+  indn.n += 2;
+  for (int n = 0; n < qshell; ++n) {
+    Ifile << "nshell=" << n << std::endl;
+    acs[n].print(file, l);
   }
+  AtomPhotoAbsCS::print(file, l);
+  indn.n -= 2;
 }
 
 int SimpleAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
   mfunname("int SimpleAtomPhotoAbsCS::get_main_shell_number(int nshell) const");
-  String shell_name = acs[nshell]->get_name();
-#ifdef STRSTREAM_AVAILABLE
-  istrstream sfile(shell_name.c_str());
-#else
+  std::string shell_name = acs[nshell]->get_name();
   std::istringstream sfile(shell_name.c_str());
-#endif
   int i = -100;
   sfile >> i;
-  //Iprintn(mcout, i);
-  //check_econd(i <  1  || i > 50 , "i="<<i<<" shell_name="<<shell_name<<'\n' ,
+  // Iprintn(mcout, i);
+  // check_econd(i <  1  || i > 50 , "i="<<i<<" shell_name="<<shell_name<<'\n' ,
   //                 mcerr);
   if (i < 1 || i > 50) {
     i = -1;
@@ -1540,18 +1475,20 @@ int SimpleAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
 
 //----------------------------------------------------------------------
 
-ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fthreshold_file_name,
-                                   const String& fsimple_table_file_name,
-                                   const String& fname,
+ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ,
+                                   const std::string& fthreshold_file_name,
+                                   const std::string& fsimple_table_file_name,
+                                   const std::string& fname,
                                    double fminimal_threshold)
     : threshold_file_name(fthreshold_file_name),
       simple_table_file_name(fsimple_table_file_name),
       BT_file_name("none"),
       minimal_threshold(fminimal_threshold) {
-  mfunnamep("SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& "
-            "fname, , const String& fthreshold_file_name, const String& "
-            "fsimple_table_file_name, double fminimal_threshold)");
-  //Imcout<<"ExAtomPhotoAbsCS::ExAtomPhotoAbsCS is run for fZ="<<fZ<<std::endl;
+  mfunnamep(
+      "ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const string& fname,"
+      "const string& fthreshold_file_name, const string& "
+      "fsimple_table_file_name, double fminimal_threshold)");
+  // Imcout<<"ExAtomPhotoAbsCS::ExAtomPhotoAbsCS is run for fZ="<<fZ<<std::endl;
   check_econd11(fZ, < 1, mcerr);
   std::ifstream threshold_file(threshold_file_name.c_str());
   if (!threshold_file) {
@@ -1559,120 +1496,97 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fthreshold_file_name,
     mcerr << "cannot open file " << threshold_file_name << std::endl;
     spexit(mcerr);
   }
-  DynLinArr<double> thr(0, 0.0);
-  DynLinArr<int> Zshell(0, 0);
-  DynLinArr<double> fl(0, 0.0);
-  DynLinArr<String> shell_name(0);
+  std::vector<double> thr;
+  std::vector<int> Zshell;
+  std::vector<double> fl;
+  std::vector<std::string> shell_name;
+  bool foundZ = false;
   while (findmark(threshold_file, "#") == 1) {
     threshold_file >> Z;
-    if (Z == fZ) {
-      threshold_file >> qshell;
-      check_econd21(qshell, < 1 ||, > 10000, mcerr);
-      s_ignore_shell.put_qel(qshell, 0);
-      //Iprintn(mcout, qshell);
-      thr = DynLinArr<double>(qshell, 0.0);
-      Zshell = DynLinArr<int>(qshell, 0);
-      fl = DynLinArr<double>(qshell, 0.0);
-      shell_name = DynLinArr<String>(qshell);
-      acs = DynLinArr<ActivePtr<PhotoAbsCS> >(qshell);
-      asp = DynLinArr<AtomicSecondaryProducts>(qshell);
-      String temp_name;
-      threshold_file >> temp_name;
-      if (fname == "none")
-        name = temp_name;
-      else
-        name = fname;
-      int nshell;
-      int sZshell = 0;
-      for (nshell = 0; nshell < qshell; nshell++) {
-        threshold_file >> thr[nshell];
-        check_econd11(thr[nshell], <= 0.0, mcerr);
-        thr[nshell] *= 1.0e-6;
-        threshold_file >> Zshell[nshell];
-        check_econd11(Zshell[nshell], <= 0, mcerr);
-        sZshell += Zshell[nshell];
-        threshold_file >> fl[nshell];
-        findmark(threshold_file, "!");
-        threshold_file >> shell_name[nshell];
-        //PhotoAbsCS* ap = new PhenoPhotoAbsCS(shell_name, Zshell, thr);
-        //acs[nshell].pass( ap );
-      }
-      check_econd12(sZshell, !=, Z, mcerr);
-      int n_min = 0;
-      double st = DBL_MAX;
-      for (nshell = 0; nshell < qshell;
-           nshell++) {  // currently the minimal shell is the last,
-                        // but to avoid this assumption
-                        // we check all
-        if (thr[nshell] < st) {
-          n_min = nshell;
-          st = thr[nshell];
-        }
-      }
-      for (nshell = 0; nshell < qshell; nshell++) {
-        if (fl[nshell] > 0) {
-          check_econd12(nshell, ==, n_min, mcerr);
-          DynLinArr<double> felectron_energy(0);
-          DynLinArr<double> fphoton_energy(1);
-          fphoton_energy[0] = thr[nshell] - thr[n_min];
-          asp[nshell].add_channel(fl[nshell], felectron_energy, fphoton_energy);
-        }
-      }
-      goto mark1;
+    if (Z != fZ) continue;
+    threshold_file >> qshell;
+    check_econd21(qshell, < 1 ||, > 10000, mcerr);
+    s_ignore_shell.resize(qshell, 0);
+    // Iprintn(mcout, qshell);
+    thr.resize(qshell, 0.0);
+    Zshell.resize(qshell, 0);
+    fl.resize(qshell, 0.0);
+    shell_name.resize(qshell);
+    acs.resize(qshell);
+    asp.resize(qshell);
+    std::string temp_name;
+    threshold_file >> temp_name;
+    name = fname == "none" ? temp_name : fname;
+    int sZshell = 0;
+    for (int nshell = 0; nshell < qshell; nshell++) {
+      threshold_file >> thr[nshell];
+      check_econd11(thr[nshell], <= 0.0, mcerr);
+      thr[nshell] *= 1.0e-6;
+      threshold_file >> Zshell[nshell];
+      check_econd11(Zshell[nshell], <= 0, mcerr);
+      sZshell += Zshell[nshell];
+      threshold_file >> fl[nshell];
+      findmark(threshold_file, "!");
+      threshold_file >> shell_name[nshell];
     }
+    check_econd12(sZshell, !=, Z, mcerr);
+    // currently the minimal shell is the last,
+    // but to avoid this assumption, we check all.
+    int n_min = 0;
+    double st = DBL_MAX;
+    for (int nshell = 0; nshell < qshell; nshell++) {
+      if (thr[nshell] < st) {
+        n_min = nshell;
+        st = thr[nshell];
+      }
+    }
+    for (int nshell = 0; nshell < qshell; nshell++) {
+      if (fl[nshell] <= 0) continue;
+      check_econd12(nshell, ==, n_min, mcerr);
+      std::vector<double> felectron_energy;
+      std::vector<double> fphoton_energy;
+      fphoton_energy.push_back(thr[nshell] - thr[n_min]);
+      asp[nshell].add_channel(fl[nshell], felectron_energy, fphoton_energy);
+    }
+    foundZ = true;
+    break;
   }
-  funnw.ehdr(mcerr);
-  mcerr << "there is no element Z=" << fZ << " in file " << threshold_file_name
-        << std::endl;
-  spexit(mcerr);
-mark1:
-  // Here it reads the PACS as an one shell curve:
-  SimpleTablePhotoAbsCS stpacs(name, Z, 0.0, fsimple_table_file_name);
-  const DynLinArr<double>& ener = stpacs.get_arr_ener();
-  const DynLinArr<double>& CS = stpacs.get_arr_CS();
-  //Iprintn(mcout, ener.get_qel());
-  DynLinArr<double> left_CS = CS;             // used in sequencial algorithm
-  DynLinArr<DynLinArr<double> > SCS(qshell);  // here cs is saved
-  int n;
-  for (n = 0; n < qshell; n++)
-    SCS[n] = DynLinArr<double>(ener.get_qel(), 0.0);
-  /*
-  if(ener[0] < thr[qshell-1])
-  {
-    funnw.ehdr(cerr);
-    mcerr<<"ener[0] < thr[qshell-1]\n";
-    mcerr<<"This possibility is not bad, but it is not implemented \n"
-         <<"in the program yet, sorry\n";
+  if (!foundZ) {
+    funnw.ehdr(mcerr);
+    mcerr << "there is no element Z=" << fZ << " in file "
+          << threshold_file_name << std::endl;
     spexit(mcerr);
   }
-  */
-  int nct = qshell - 1;  //"current" threshold index
-  long nce = 0;          // "current" energy index
-                         // Let uss ignore values below the lowest threshold
+  // Here it reads the PACS as an one shell curve:
+  SimpleTablePhotoAbsCS stpacs(name, Z, 0.0, fsimple_table_file_name);
+  const std::vector<double>& ener = stpacs.get_arr_ener();
+  const std::vector<double>& CS = stpacs.get_arr_CS();
+  std::vector<double> left_CS = CS;  // used in sequencial algorithm
+  const long qe = ener.size();
+  // here cs is saved
+  std::vector<std::vector<double> > SCS(qshell, std::vector<double>(qe, 0.));
+  int nct = qshell - 1;   // "current" threshold index
+  unsigned long nce = 0;  // "current" energy index
+  // We ignore values below the lowest threshold.
   // It is not clear whether it is right, perhaps this is one of possible ways
   if (ener[0] < thr[qshell - 1]) {
-    long ne;
-    for (ne = 0; ne < ener.get_qel() && (ener[ne] < thr[qshell - 1] ||
-                                         (ener[ne] >= thr[qshell - 1] &&
-                                          ne > 1 && CS[ne - 1] <= CS[ne - 2]));
+    for (long ne = 0; ne < qe && (ener[ne] < thr[qshell - 1] ||
+                                  (ener[ne] >= thr[qshell - 1] && ne > 1 &&
+                                   CS[ne - 1] <= CS[ne - 2]));
          ne++) {
       if (ne > 0) left_CS[ne - 1] = 0.0;
       nce = ne;
     }
   }
-  //Iprintn(mcout, nce);
-  //mcout<<"ener[nce]="<<ener[nce]<<" CS[nce]="<<CS[nce]
-  //     <<"  CS[nce+1]="<<CS[nce+1]<<std::endl;
   int s_more;
   int nt2 = 0;  // < nt1
   int s_spes = 0;
-  do  // Actually this is a loop by the group of thresholds
-      {
-    //mcout<<"nct="<<nct<<" nce="<<nce<<std::endl;
+  // Actually this is a loop by the group of thresholds
+  do {
     // Find all thresholds which are less then the current energy
     int nt;
-    s_more = 0;  // sign that there are thresholds more than
-                 // the current energy
+    // sign that there are thresholds more than the current energy
+    s_more = 0;
     for (nt = nct; nt >= 0; nt--) {
       if (s_spes == 0) {
         if (thr[nt] > ener[nce]) {
@@ -1689,66 +1603,67 @@ mark1:
     // nt is now index of the next threshold or -1, if the thresholds are
     // made up.
     int nt1 = nct;
-    int nce_next = ener.get_qel();
+    int nce_next = ener.size();
     nt2 = nt + 1;
-    //mcout<<"nt="<<nt<<" nt1="<<nt1<<" nt2="<<nt2<<" s_more="<<s_more<<'\n';
+    // mcout<<"nt="<<nt<<" nt1="<<nt1<<" nt2="<<nt2<<" s_more="<<s_more<<'\n';
     if (s_more == 1) {
-      //if(nt >= 0)  // so if there are other larger thresholds,
+      // if(nt >= 0)  // so if there are other larger thresholds,
       //{        // we should check how far we can pass at this step
-      long ne;
-      for (ne = nce; ne < ener.get_qel();
-           ne++) {  // finding energy larger than the next threshold
+      unsigned long ne;
+      // finding energy larger than the next threshold
+      for (ne = nce; ne < ener.size(); ne++) {
         if (thr[nt] <= ener[ne]) {
           nce_next = ne;
           s_spes = 0;
           break;
-        } else {  // At the following condition energy could be less then
-                  // threshold,
-          // but this point will anyway be assotiated with the next shell
-          // corresponding to this threshold.
-          // This is related to not precise measurement of cross section
-          // and not precise knowledge of shell energies.
-          // Occurence of this condition is marked by s_spes = 1.
-          // At the next passing of this loop the thresholds are compared with
-          // the next energy.
-          if (ne > 1 && ne < ener.get_qel() - 1 && ne > nce + 2 &&
-              thr[nt] <= ener[ne + 1] &&
-              (thr[nt] - ener[ne]) / (ener[ne + 1] - ener[ne]) < 0.1 &&
-              CS[ne] > CS[ne - 1]) {
-            //mcout<<"special condition is satisf.\n";
-            nce_next = ne;
-            s_spes = 1;
-            break;
-          }
+        }
+        // At the following condition energy could be less than threshold,
+        // but this point will anyway be associated with the next shell
+        // corresponding to this threshold.
+        // This is related to not precise measurement of cross section
+        // and not precise knowledge of shell energies.
+        // Occurence of this condition is marked by s_spes = 1.
+        // At the next passing of this loop the thresholds are compared with
+        // the next energy.
+        if (ne > 1 && ne < ener.size() - 1 && ne > nce + 2 &&
+            thr[nt] <= ener[ne + 1] &&
+            (thr[nt] - ener[ne]) / (ener[ne + 1] - ener[ne]) < 0.1 &&
+            CS[ne] > CS[ne - 1]) {
+          // mcout<<"special condition is satisf.\n";
+          nce_next = ne;
+          s_spes = 1;
+          break;
         }
       }
-      if (ne == ener.get_qel())  // threshold is larger then energy mesh
-        s_more = 0;              // to finish the loop
+      if (ne == ener.size())  // threshold is larger then energy mesh
+        s_more = 0;           // to finish the loop
     }
-    //Iprintn(mcout, nce_next);
-    //Iprintn(mcout, ener[nce_next-1]);
-    int qt = nt1 - nt2 + 1;   // quantity of the new thresholds
-                              //Iprintn(mcout, qt);
-    DynLinArr<double> w(qt);  // weights accouring to charges
-    int s = 0;                // sum of Z
+    // Iprintn(mcout, nce_next);
+    // Iprintn(mcout, ener[nce_next-1]);
+    int qt = nt1 - nt2 + 1;  // quantity of the new thresholds
+    // Iprintn(mcout, qt);
+
+    // Calculate sum of Z.
+    int s = 0;
     for (nt = 0; nt < qt; nt++) {
-      int nshell = nct - nt;
+      const int nshell = nct - nt;
       s += Zshell[nshell];
     }
+    // Weights according to charges
+    std::vector<double> w(qt);
     for (nt = 0; nt < qt; nt++) {
-      int nshell = nct - nt;
+      const int nshell = nct - nt;
       w[nt] = double(Zshell[nshell]) / s;
     }
     double save_left_CS = left_CS[nce_next - 1];
-    long ne;
-    for (ne = 0; ne < nce_next; ne++) {
+    for (long ne = 0; ne < nce_next; ne++) {
       for (nt = 0; nt < qt; nt++) {
         int nshell = nct - nt;
         SCS[nshell][ne] = left_CS[ne] * w[nt];
       }
       left_CS[ne] = 0.0;
     }
-    for (ne = nce_next; ne < ener.get_qel(); ne++) {
+    for (unsigned long ne = nce_next; ne < ener.size(); ne++) {
       double extrap_CS =
           save_left_CS * pow(ener[nce_next - 1], 2.75) / pow(ener[ne], 2.75);
       if (extrap_CS > left_CS[ne]) extrap_CS = left_CS[ne];
@@ -1763,17 +1678,12 @@ mark1:
   } while (s_more != 0);
   // now nt2 will be index of last filled shell
   // Now to fill the shells which are absent in the input table.
-  // They will be initialized phenomenologically, basing on the sum rule:
-  int ns;
-  //Iprintn(mcout, nt2);
-  for (ns = 0; ns < nt2; ns++) {
+  // They will be initialized phenomenologically, based on the sum rule.
+  for (int ns = 0; ns < nt2; ns++) {
     acs[ns].pass(new PhenoPhotoAbsCS(shell_name[ns], Zshell[ns], thr[ns]));
   }
-  // Initialization of input shells:
-  for (ns = nt2; ns < qshell; ns++) {
-    //acs[ns].pass( new SimpleTablePhotoAbsCS(shell_name[ns], Zshell[ns],
-    //                                thr[ns],
-    //                                ener, SCS[ns]) );
+  // Initialization of input shells.
+  for (int ns = nt2; ns < qshell; ns++) {
     SimpleTablePhotoAbsCS* adr = new SimpleTablePhotoAbsCS(
         shell_name[ns], Zshell[ns], thr[ns], ener, SCS[ns]);
     adr->remove_leading_zeros();
@@ -1782,10 +1692,10 @@ mark1:
   height_of_excitation = 0.0;
   exener[0] = exener[1] = 0.0;
   double integ = get_integral_ACS(0.0, DBL_MAX);
-  //Iprintn(mcout, integ);
+  // Iprintn(mcout, integ);
   integ_abs_before_corr = integ;
   double pred_integ = Thomas_sum_rule_const_Mb * Z;
-  //Iprintn(mcout, pred_integ);
+  // Iprintn(mcout, pred_integ);
   if (pred_integ > integ) {
     if (s_add_excitations_to_normalize == 1) {
       // add excitation
@@ -1801,13 +1711,6 @@ mark1:
         }
       }
     }
-    /*
-    else
-    {
-      height_of_excitation = 0.0;
-      exener[0] = exener[1] = 0.0;
-    }
-    */
   } else if (pred_integ < integ) {
     if (s_scale_to_normalize_if_more == 1) {
       const double fact = pred_integ / integ;
@@ -1816,20 +1719,20 @@ mark1:
       }
     }
   }
-
   integ_abs_after_corr = get_integral_ACS(0.0, DBL_MAX);
   integ_ioniz_after_corr = get_integral_ICS(0.0, DBL_MAX);
 }
 
-ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
-                                   const String& fBT_file_name, int id,
+ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,
+                                   const std::string& fBT_file_name, int id,
                                    double fminimal_threshold)
     : threshold_file_name("none"),
       simple_table_file_name("none"),
       BT_file_name(fBT_file_name),
       minimal_threshold(fminimal_threshold) {
-  mfunnamep("ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname, "
-            "const String& fBT_file_name, int id, double fminimal_threshold)");
+  mfunnamep(
+      "ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname, "
+      "const std::string& fBT_file_name, int id, double fminimal_threshold)");
   check_econd11(fZ, < 1, mcerr);
   check_econd21(id, < 1 ||, > 2, mcerr);
 
@@ -1840,8 +1743,8 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
     mcerr << "cannot open file " << BT_file_name << std::endl;
     spexit(mcerr);
   }
-  DynLinArr<double> thresh(0, 0.0);
-  DynLinArr<double> fl(0, 0.0);
+  std::vector<double> thresh;
+  std::vector<double> fl;
   Z = fZ;
   int i = findmark(BT_file, "NUCLEAR CHARGE =");
   check_econd11a(i, != 1, "wrong file format", mcerr);
@@ -1852,27 +1755,26 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
   while ((i = findmark(BT_file, "Z =")) == 1) {
     BT_file >> i;
     check_econd11(i, != Z, mcerr);
-    String shellname;
+    std::string shellname;
     BT_file >> shellname;
-    //Iprintn(mcout, shellname);
+    // Iprintn(mcout, shellname);
     i = findmark(BT_file, "$");
     check_econd11(i, != 1, mcerr);
     long qen;
     BT_file >> qen;
     check_econd11(qen, <= 0, mcerr);
-    DynLinArr<double> fener(qen, 0.0);
-    DynLinArr<double> fcs(qen, 0.0);
+    std::vector<double> fener(qen, 0.0);
+    std::vector<double> fcs(qen, 0.0);
     double thr = 0.0;
     BT_file >> thr;
     check_econd11(thr, <= 0, mcerr);
     thr *= 1.0e-3;  // pass from keV to MeV
     if (id == 2) {
-      thresh.increment();
-      fl.increment();
-      thresh[qshell] = thr;
+      thresh.push_back(thr);
+      fl.resize(fl.size() + 1);
       BT_file >> fl[qshell];
       check_econd21(fl[qshell], < 0.0 ||, > 1.0, mcerr);
-      //Iprintn(mcout, fl[qshell]);
+      // Iprintn(mcout, fl[qshell]);
     }
     long nen;
     for (nen = 0; nen < qen; nen++) {
@@ -1882,7 +1784,7 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
       fener[nen] *= 1.0e-3;  // pass from keV to MeV
     }
     qshell++;
-    acs.put_qel(qshell);
+    acs.resize(qshell);
     acs[qshell - 1]
         .pass(new SimpleTablePhotoAbsCS(shellname, 0,  // unknown here
                                         thr, fener, fcs));
@@ -1899,27 +1801,27 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
         st = thresh[nshell];
       }
     }
-    asp = DynLinArr<AtomicSecondaryProducts>(qshell);
+    asp.resize(qshell);
     for (int nshell = 0; nshell < qshell; ++nshell) {
       if (fl[nshell] > 0) {
         check_econd12(nshell, ==, n_min, mcerr);
-        DynLinArr<double> felectron_energy(0);
-        DynLinArr<double> fphoton_energy(1);
-        fphoton_energy[0] = thresh[nshell] - thresh[n_min];
+        std::vector<double> felectron_energy;
+        std::vector<double> fphoton_energy;
+        fphoton_energy.push_back(thresh[nshell] - thresh[n_min]);
         asp[nshell].add_channel(fl[nshell], felectron_energy, fphoton_energy);
       }
     }
   }
 
   check_econd11(qshell, <= 0, mcerr);
-  s_ignore_shell.put_qel(qshell, 0);
+  s_ignore_shell.resize(qshell, 0);
   height_of_excitation = 0.0;
   exener[0] = exener[1] = 0.0;
   double integ = get_integral_ACS(0.0, DBL_MAX);
-  //Iprintn(mcout, integ);
+  // Iprintn(mcout, integ);
   integ_abs_before_corr = integ;
   double pred_integ = Thomas_sum_rule_const_Mb * Z;
-  //Iprintn(mcout, pred_integ);
+  // Iprintn(mcout, pred_integ);
   if (pred_integ > integ) {
     if (s_add_excitations_to_normalize == 1) {
       // add excitation
@@ -1949,8 +1851,8 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
 
 #define READ_FILE_WITH_PRINCIPAL_NUMBERS
 
-ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
-                                   const String& fFitBT_file_name,
+ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,
+                                   const std::string& fFitBT_file_name,
                                    int id,  // to distinguish it from
                                    // constructor above
                                    int s_no_scale, double fminimal_threshold)
@@ -1959,8 +1861,10 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
       BT_file_name(fFitBT_file_name),
       minimal_threshold(fminimal_threshold) {
   mfunnamep(
-      "ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname, const "
-      "String& fFitBT_file_name, int id, int id1, double fminimal_threshold)");
+      "ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname, "
+      "const "
+      "std::string& fFitBT_file_name, int id, int id1, double "
+      "fminimal_threshold)");
   check_econd11(fZ, < 1, mcerr);
   check_econd21(id, < 1 ||, > 2, mcerr);
   Z = fZ;
@@ -1971,23 +1875,22 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
     mcerr << "cannot open file " << BT_file_name << std::endl;
     spexit(mcerr);
   }
-  DynLinArr<double> thresh(0, 0.0);
-  DynLinArr<double> fl(0, 0.0);
-
+  std::vector<double> thresh;
+  std::vector<double> fl;
   int i = 0;
   while ((i = findmark(BT_file, "$")) == 1) {
     long iZ;
     BT_file >> iZ;
-    //Iprintn(mcout, iZ);
+    // Iprintn(mcout, iZ);
     if (iZ == Z) {
       BT_file >> qshell;
-      //Iprintn(mcout, qshell);
+      // Iprintn(mcout, qshell);
       check_econd11(qshell, <= 0, mcerr);
       check_econd11(qshell, > 1000, mcerr);
-      acs.put_qel(qshell);
+      acs.resize(qshell);
       if (id == 2) {
-        thresh.put_qel(qshell);
-        fl.put_qel(qshell);
+        thresh.resize(qshell);
+        fl.resize(qshell);
       }
       for (int nshell = 0; nshell < qshell; ++nshell) {
 #ifdef READ_FILE_WITH_PRINCIPAL_NUMBERS
@@ -2042,19 +1945,19 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
           fl[nshell] = flu;
         }
 #ifdef READ_FILE_WITH_PRINCIPAL_NUMBERS
-        String shellname(long_to_String(n_princ) +  // necessary
-                         // for generation escape products
-                         String(" shell number ") + long_to_String(nshell));
+        // necessary for generation escape products
+        std::string shellname(long_to_String(n_princ) + " shell number " +
+                              long_to_String(nshell));
 #else
-        String shellname(String("shell number ") + long_to_String(nshell));
+        std::string shellname("shell number " + long_to_String(nshell));
 #endif
         acs[nshell].pass(
             new SimpleTablePhotoAbsCS(shellname, 0,  // unknown here
                                       threshold, l, E0, yw, ya, P, sigma));
-        //Iprintn(mcout, nshell);
-        //Iprint3n(mcout, l, threshold, E0);
-        //Iprint4n(mcout, yw, ya, P, sigma);
-        //acs[nshell]->print(mcout, 5);
+        // Iprintn(mcout, nshell);
+        // Iprint3n(mcout, l, threshold, E0);
+        // Iprint4n(mcout, yw, ya, P, sigma);
+        // acs[nshell]->print(mcout, 5);
       }
       goto mark1;
     }
@@ -2076,27 +1979,27 @@ mark1:
         st = thresh[nshell];
       }
     }
-    asp = DynLinArr<AtomicSecondaryProducts>(qshell);
+    asp.resize(qshell);
     for (int nshell = 0; nshell < qshell; ++nshell) {
       if (fl[nshell] > 0) {
         check_econd12(nshell, ==, n_min, mcerr);
-        DynLinArr<double> felectron_energy(0);
-        DynLinArr<double> fphoton_energy(1);
-        fphoton_energy[0] = thresh[nshell] - thresh[n_min];
+        std::vector<double> felectron_energy;
+        std::vector<double> fphoton_energy;
+        fphoton_energy.push_back(thresh[nshell] - thresh[n_min]);
         asp[nshell].add_channel(fl[nshell], felectron_energy, fphoton_energy);
       }
     }
   }
 
   check_econd11(qshell, <= 0, mcerr);
-  s_ignore_shell.put_qel(qshell, 0);
+  s_ignore_shell.resize(qshell, 0);
   height_of_excitation = 0.0;
   exener[0] = exener[1] = 0.0;
   double integ = get_integral_ACS(0.0, DBL_MAX);
-  //Iprintn(mcout, integ);
+  // Iprintn(mcout, integ);
   integ_abs_before_corr = integ;
   double pred_integ = Thomas_sum_rule_const_Mb * Z;
-  //Iprintn(mcout, pred_integ);
+  // Iprintn(mcout, pred_integ);
   if (pred_integ > integ) {
     if (s_add_excitations_to_normalize == 1) {
       // add excitation
@@ -2125,20 +2028,17 @@ mark1:
 }
 
 ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(
-    int fZ, const String& fname,  // just name of this atom
-    const String& fFitBT_file_name,
-    // const String& fthreshold_file_name, // minimal potential corresponding
-    // to:
-    const String& fsimple_table_file_name,
-    double emax_repl, int id,     // to distinguish it from constructor above
+    int fZ, const std::string& fname,  // just name of this atom
+    const std::string& fFitBT_file_name,
+    const std::string& fsimple_table_file_name, double emax_repl,
+    int id,  // to distinguish it from constructor above
     double fminimal_threshold) {
   mfunname("ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(...)");
   Z = fZ;
   name = fname;
   int s_no_scale = 1;
-  *this =
-      ExAtomPhotoAbsCS(fZ, fname,  // just name of this atom
-                       fFitBT_file_name, id, s_no_scale, fminimal_threshold);
+  *this = ExAtomPhotoAbsCS(fZ, fname, fFitBT_file_name, id, s_no_scale,
+                           fminimal_threshold);
 
   height_of_excitation = 0.0;
   exener[0] = exener[1] = 0.0;
@@ -2147,22 +2047,21 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(
   long nsmin = -1;
   // look for minimal shell (usually the last)
   for (long ns = 0; ns < qshell; ++ns) {
-    //Iprint2n(mcout, ns, acs[ns]->get_threshold());
+    // Iprint2n(mcout, ns, acs[ns]->get_threshold());
     if (thrmin > acs[ns]->get_threshold()) {
       nsmin = ns;
       thrmin = acs[ns]->get_threshold();
     }
   }
-  //Iprint3n(mcout, nsmin, acs[nsmin]->get_threshold(), thrmin);
+  // Iprint3n(mcout, nsmin, acs[nsmin]->get_threshold(), thrmin);
   check_econd11(nsmin, < 0, mcerr);
   check_econd11(nsmin, != qshell - 1, mcerr);  // now it has to be by this way
   ActivePtr<PhotoAbsCS> facs = acs[nsmin];     // copying the valence shell
   PhotoAbsCS* apacs = facs.get();
-  //PhotoAbsCS* apacs = acs[nsmin]->getver();
   SimpleTablePhotoAbsCS* first_shell =
       dynamic_cast<SimpleTablePhotoAbsCS*>(apacs);
-  //mcout<<"first_shell:\n";
-  //first_shell->print(mcout, 2);
+  // mcout<<"first_shell:\n";
+  // first_shell->print(mcout, 2);
   // Strange why the following does not work (because of something being not
   // implemented in commpiler)? - may be due to an error before, which is now
   // corrected.
@@ -2171,67 +2070,6 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(
   // dynamic_cast<SimpleTablePhotoAbsCS*>(&(acs[nsmin]->getver()));
 
   check_econd11(first_shell, == NULL, mcerr);
-  /*
-  std::ifstream threshold_file(threshold_file_name.c_str());
-  if( !threshold_file )
-  {
-    funnw.ehdr(mcerr);
-    mcerr<<"cannot open file "<<threshold_file_name<<std::endl;
-    spexit(mcerr);
-  }
-  DynLinArr< double > thr(0, 0.0);
-  DynLinArr< int > Zshell(0, 0);
-  DynLinArr< double > fl(0, 0.0);
-  DynLinArr< String > shell_name(0);
-  int n_min=0;
-  double thr_min = DBL_MAX;
-  while (findmark(threshold_file, "#") == 1) {
-    threshold_file >> Z;
-    if (Z == fZ) {
-      threshold_file >> qshell;
-      check_econd21( qshell , < 1 || , > 10000 , mcerr);
-      s_ignore_shell.put_qel(qshell, 0);
-      //Iprintn(mcout, qshell);
-      thr = DynLinArr< double >(qshell, 0.0);
-      Zshell = DynLinArr< int >(qshell, 0);
-      fl = DynLinArr< double >(qshell, 0.0);
-      shell_name = DynLinArr< String >(qshell);
-      String temp_name;
-      threshold_file >> temp_name;
-      if(fname == "none") name = temp_name;
-      else name = fname;
-      int sZshell = 0;
-      for (int nshell = 0; nshell < qshell; nshell++) {
-        threshold_file >> thr[nshell];
-        check_econd11(thr[nshell] , <= 0.0, mcerr);
-        thr[nshell] *= 1.0e-6;
-        threshold_file >> Zshell[nshell];
-        check_econd11(Zshell[nshell] , <= 0, mcerr);
-        sZshell += Zshell[nshell];
-        threshold_file >> fl[nshell];
-        findmark(threshold_file, "!");
-        threshold_file >> shell_name[nshell];
-        //PhotoAbsCS* ap = new PhenoPhotoAbsCS(shell_name, Zshell, thr);
-        //acs[nshell].pass( ap );
-      }
-      check_econd12( sZshell , != , Z , mcerr);
-      for(nshell=0; nshell<qshell; nshell++) {
-        // currently the minimal shell is the last,
-        // but to avoid this assumption we check all
-        if (thr[nshell] < thr_min) {
-          n_min = nshell;
-          thr_min = thr[nshell];
-        }
-      }
-      goto mark1;
-    }
-  }
-  funnw.ehdr(mcerr);
-  mcerr<<"there is no element Z="<<fZ<<" in file
-"<<threshold_file_name<<std::endl;
-  spexit(mcerr);
-  mark1:
-  */
 
   SimpleTablePhotoAbsCS stpacs(name, Z, 0.0, fsimple_table_file_name);
   stpacs.remove_leading_tiny(1.0e-10);
@@ -2239,14 +2077,14 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(
   // Merging shells:
   acs[nsmin].pass(new SimpleTablePhotoAbsCS(*first_shell, stpacs, emax_repl));
 
-  s_ignore_shell.put_qel(qshell, 0);
+  s_ignore_shell.resize(qshell, 0);
   height_of_excitation = 0.0;
   exener[0] = exener[1] = 0.0;
   double integ = get_integral_ACS(0.0, DBL_MAX);
-  //Iprintn(mcout, integ);
+  // Iprintn(mcout, integ);
   integ_abs_before_corr = integ;
   double pred_integ = Thomas_sum_rule_const_Mb * Z;
-  //Iprintn(mcout, pred_integ);
+  // Iprintn(mcout, pred_integ);
   if (pred_integ > integ) {
     if (s_add_excitations_to_normalize == 1) {
       // add excitation
@@ -2294,9 +2132,9 @@ double ExAtomPhotoAbsCS::get_ICS(double energy) const {
       if (minimal_threshold > 0.0) {
         if (t < minimal_threshold) shift = minimal_threshold - t;
       }
-      //Iprint3n(mcout, n, t, shift);
+      // Iprint3n(mcout, n, t, shift);
       s += acs[n]->get_CS(energy - shift);
-      //Iprintn(mcout, s);
+      // Iprintn(mcout, s);
     }
   }
   return s;
@@ -2335,8 +2173,9 @@ double ExAtomPhotoAbsCS::get_ICS(int nshell, double energy) const {
 
 double ExAtomPhotoAbsCS::get_integral_ICS(int nshell, double energy1,
                                           double energy2) const {
-  mfunname("double ExAtomPhotoAbsCS::get_integral_ICS(int nshell, double "
-           "energy1, double energy2)");
+  mfunname(
+      "double ExAtomPhotoAbsCS::get_integral_ICS(int nshell, double "
+      "energy1, double energy2)");
   check_econd21(nshell, < 0 ||, > qshell, mcerr);
   if (s_ignore_shell[nshell] == 0) {
     double shift = 0.0;
@@ -2370,30 +2209,30 @@ double ExAtomPhotoAbsCS::get_ACS(double energy) const {
 
 double ExAtomPhotoAbsCS::get_integral_ACS(double energy1,
                                           double energy2) const {
-  mfunname("double ExAtomPhotoAbsCS::get_integral_ACS(double energy1, double "
-           "energy2) const");
+  mfunname(
+      "double ExAtomPhotoAbsCS::get_integral_ACS(double energy1, double "
+      "energy2) const");
   double s = 0.0;
   for (int n = 0; n < qshell; ++n) {
-    if (s_ignore_shell[n] == 0) {
-      double shift = 0.0;
-      const double t = acs[n]->get_threshold();
-      if (minimal_threshold > 0.0) {
-        if (t < minimal_threshold) shift = minimal_threshold - t;
-      }
-      s += acs[n]->get_integral_CS(energy1 - shift, energy2 - shift);
+    if (s_ignore_shell[n] != 0) continue;
+    double shift = 0.0;
+    const double t = acs[n]->get_threshold();
+    if (minimal_threshold > 0.0) {
+      if (t < minimal_threshold) shift = minimal_threshold - t;
     }
+    s += acs[n]->get_integral_CS(energy1 - shift, energy2 - shift);
   }
-  //Imcout<<"energy1="<<setw(13)<<energy1
+  // Imcout<<"energy1="<<setw(13)<<energy1
   //        <<"energy2="<<setw(13)<<energy2
   //        <<" s="<<s<<'\n';
   double b[2];
-  b[0] = find_max(exener[0], energy1);
-  b[1] = find_min(exener[1], energy2);
-  //Iprint3n(mcout, b[0], b[1], height_of_excitation);
+  b[0] = std::max(exener[0], energy1);
+  b[1] = std::min(exener[1], energy2);
+  // Iprint3n(mcout, b[0], b[1], height_of_excitation);
   if (b[1] >= b[0]) {
     s += height_of_excitation * (b[1] - b[0]);
   }
-  //Iprintn(mcout, s);
+  // Iprintn(mcout, s);
   return s;
 }
 
@@ -2417,8 +2256,9 @@ double ExAtomPhotoAbsCS::get_ACS(int nshell, double energy) const {
 
 double ExAtomPhotoAbsCS::get_integral_ACS(int nshell, double energy1,
                                           double energy2) const {
-  mfunname("double ExAtomPhotoAbsCS::get_integral_ACS(int nshell, double "
-           "energy1, double energy2)");
+  mfunname(
+      "double ExAtomPhotoAbsCS::get_integral_ACS(int nshell, double "
+      "energy1, double energy2)");
   check_econd21(nshell, < 0 ||, > qshell, mcerr);
   if (s_ignore_shell[nshell] == 0) {
     double shift = 0.0;
@@ -2427,11 +2267,11 @@ double ExAtomPhotoAbsCS::get_integral_ACS(int nshell, double energy1,
       if (t < minimal_threshold) shift = minimal_threshold - t;
     }
     double s = acs[nshell]->get_integral_CS(energy1 - shift, energy2 - shift);
-    //Imcout<<"energy1="<<setw(13)<<energy1<<" s="<<s<<'\n';
+    // Imcout<<"energy1="<<setw(13)<<energy1<<" s="<<s<<'\n';
     if (nshell == qshell - 1) {
       double b[2];
-      b[0] = find_max(exener[0], energy1);
-      b[1] = find_min(exener[1], energy2);
+      b[0] = std::max(exener[0], energy1);
+      b[1] = std::min(exener[1], energy2);
       if (b[1] >= b[0]) {
         s += height_of_excitation * (b[1] - b[0]);
       }
@@ -2482,7 +2322,7 @@ void ExAtomPhotoAbsCS::print(std::ostream& file, int l) const {
 
 int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
   mfunname("int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const");
-  String shell_name = acs[nshell]->get_name();
+  std::string shell_name = acs[nshell]->get_name();
 #ifdef STRSTREAM_AVAILABLE
   istrstream sfile(shell_name.c_str());
 #else
@@ -2490,8 +2330,8 @@ int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
 #endif
   int i = -1;
   sfile >> i;
-  //Iprintn(mcout, i);
-  //check_econd(i <  1  || i > 50 , "i="<<i<<" shell_name="<<shell_name<<'\n' ,
+  // Iprintn(mcout, i);
+  // check_econd(i <  1  || i > 50 , "i="<<i<<" shell_name="<<shell_name<<'\n' ,
   //                 mcerr);
   if (i < 1 || i > 50) {
     i = -1;
@@ -2499,18 +2339,18 @@ int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
   return i;
 }
 
-void ExAtomPhotoAbsCS::replace_shells_by_overage(double fwidth,  // MeV
+void ExAtomPhotoAbsCS::replace_shells_by_average(double fwidth,  // MeV
                                                  double fstep,
                                                  long fmax_q_step) {
-  mfunname("void ExAtomPhotoAbsCS::replace_shells_by_overage(...)");
+  mfunname("void ExAtomPhotoAbsCS::replace_shells_by_average(...)");
   for (long n = 0; n < qshell; n++) {
-    //Iprintn(mcout, n);
-    //mcout<<"----------------before replacement:\n";
-    //acs[n]->print(mcout, 10);
+    // Iprintn(mcout, n);
+    // mcout<<"----------------before replacement:\n";
+    // acs[n]->print(mcout, 10);
     PhotoAbsCS* a =
-        new OveragePhotoAbsCS(acs[n].getver(), fwidth, fstep, fmax_q_step);
-    //mcout<<"----------------after replacement:\n";
-    //acs[n]->print(mcout, 10);
+        new AveragePhotoAbsCS(acs[n].getver(), fwidth, fstep, fmax_q_step);
+    // mcout<<"----------------after replacement:\n";
+    // acs[n]->print(mcout, 10);
     acs[n].pass(a);
   }
 }
@@ -2521,8 +2361,8 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom, int fqatom,
                                  double fW, double fF)
     : W(fW), F(fF) {
   qatom = fqatom;
-  qatom_ps.put_qel(1, qatom);
-  atom.put_qel(1, PassivePtr<const AtomPhotoAbsCS>(&fatom));
+  qatom_ps.push_back(qatom);
+  atom.push_back(PassivePtr<const AtomPhotoAbsCS>(&fatom));
   if (W == 0.0) {
     W = coef_I_to_W * atom[0]->get_I_min();
   }
@@ -2533,10 +2373,10 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
                                  double fW, double fF)
     : W(fW), F(fF) {
   qatom = fqatom_ps1 + fqatom_ps2;
-  qatom_ps.put_qel(2);
-  atom.put_qel(2);
+  qatom_ps.resize(2);
   qatom_ps[0] = fqatom_ps1;
   qatom_ps[1] = fqatom_ps2;
+  atom.resize(2);
   atom[0] = fatom1;
   atom[1] = fatom2;
   if (W == 0.0) {
@@ -2546,7 +2386,8 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
         (qatom_ps[0] * atom[0]->get_Z() + qatom_ps[1] * atom[1]->get_Z());
 #else
     W = coef_I_to_W * (qatom_ps[0] * atom[0]->get_I_min() +
-                       qatom_ps[1] * atom[1]->get_I_min()) / qatom;
+                       qatom_ps[1] * atom[1]->get_I_min()) /
+        qatom;
 #endif
   }
 }
@@ -2557,11 +2398,11 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
                                  double fW, double fF)
     : W(fW), F(fF) {
   qatom = fqatom_ps1 + fqatom_ps2 + fqatom_ps3;
-  qatom_ps.put_qel(3);
-  atom.put_qel(3);
+  qatom_ps.resize(3);
   qatom_ps[0] = fqatom_ps1;
   qatom_ps[1] = fqatom_ps2;
   qatom_ps[2] = fqatom_ps3;
+  atom.resize(3);
   atom[0] = fatom1;
   atom[1] = fatom2;
   atom[2] = fatom3;
@@ -2575,14 +2416,15 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
 #else
     W = coef_I_to_W * (qatom_ps[0] * atom[0]->get_I_min() +
                        qatom_ps[1] * atom[1]->get_I_min() +
-                       qatom_ps[2] * atom[2]->get_I_min()) / qatom;
+                       qatom_ps[2] * atom[2]->get_I_min()) /
+        qatom;
 #endif
   }
 }
 
-double MolecPhotoAbsCS::get_ACS(double energy) const {
+double MolecPhotoAbsCS::get_ACS(const double energy) const {
   mfunname("double MolecPhotoAbsCS::get_ACS(double energy) const");
-  const long q = qatom_ps.get_qel();
+  const long q = qatom_ps.size();
   double s = 0.0;
   for (long n = 0; n < q; n++) {
     s += qatom_ps[n] * atom[n]->get_ACS(energy);
@@ -2591,9 +2433,10 @@ double MolecPhotoAbsCS::get_ACS(double energy) const {
 }
 
 double MolecPhotoAbsCS::get_integral_ACS(double energy1, double energy2) const {
-  mfunname("double MolecPhotoAbsCS::get_integral_ACS(double energy1, double "
-           "energy2) const");
-  const long q = qatom_ps.get_qel();
+  mfunname(
+      "double MolecPhotoAbsCS::get_integral_ACS(double energy1, double "
+      "energy2) const");
+  const long q = qatom_ps.size();
   double s = 0.0;
   for (long n = 0; n < q; n++) {
     s += qatom_ps[n] * atom[n]->get_integral_ACS(energy1, energy2);
@@ -2603,7 +2446,7 @@ double MolecPhotoAbsCS::get_integral_ACS(double energy1, double energy2) const {
 
 double MolecPhotoAbsCS::get_ICS(double energy) const {
   mfunname("double MolecPhotoAbsCS::get_ICS(double energy) const");
-  const long q = qatom_ps.get_qel();
+  const long q = qatom_ps.size();
   double s = 0.0;
   for (long n = 0; n < q; n++) {
     s += qatom_ps[n] * atom[n]->get_ICS(energy);
@@ -2612,9 +2455,10 @@ double MolecPhotoAbsCS::get_ICS(double energy) const {
 }
 
 double MolecPhotoAbsCS::get_integral_ICS(double energy1, double energy2) const {
-  mfunname("double MolecPhotoAbsCS::get_integral_ICS(double energy1, double "
-           "energy2) const");
-  const long q = qatom_ps.get_qel();
+  mfunname(
+      "double MolecPhotoAbsCS::get_integral_ICS(double energy1, double "
+      "energy2) const");
+  const long q = qatom_ps.size();
   double s = 0.0;
   for (long n = 0; n < q; n++) {
     s += qatom_ps[n] * atom[n]->get_integral_ICS(energy1, energy2);
@@ -2624,8 +2468,8 @@ double MolecPhotoAbsCS::get_integral_ICS(double energy1, double energy2) const {
 
 int MolecPhotoAbsCS::get_total_Z() const {
   mfunname("int MolecPhotoAbsCS::get_total_Z() const");
+  const long q = qatom_ps.size();
   int s = 0;
-  const long q = qatom_ps.get_qel();
   for (long n = 0; n < q; n++) {
     s += atom[n]->get_Z();
   }
@@ -2637,7 +2481,7 @@ void MolecPhotoAbsCS::print(std::ostream& file, int l) const {
   Iprintn(file, qatom);
   Iprintn(file, W);
   Iprintn(file, F);
-  const long q = qatom_ps.get_qel();
+  const long q = qatom_ps.size();
   Ifile << "number of sorts of atoms is " << q << '\n';
   indn.n += 2;
   for (long n = 0; n < q; n++) {
@@ -2651,64 +2495,4 @@ std::ostream& operator<<(std::ostream& file, const MolecPhotoAbsCS& f) {
   f.print(file, 1);
   return file;
 }
-
-/*
-PhotoAbsorptionCS::PhotoAbsorptionCS(void):sqh(0) {};
-
-PhotoAbsorptionCS::PhotoAbsorptionCS(const String& ffile_name, PassivePtr<
-EnergyMesh > fenergy_mesh) {
-  mfunname("PhotoAbsorptionCS::PhotoAbsorptionCS(const String& ffile_name,
-PassivePtr< EnergyMesh > fenergy_mesh)");
-
-  std::ifstream file(ffile_name);
-  if (!file) {
-    mcerr<<" can not open file "<<ffile_name<<'\n';
-    spexit(mcerr);
-  }
-  file>>z;
-  check_econd12(z , < 1 || , >= max_poss_atom_z , mcerr);
-  file>>qsh;
-  check_econd12(qsh , < 1 || , >= z , mcerr);
-  String atname;
-  file >> atname;
-  shell_energy = DinLinArr< double >(qsh, 0.0);
-  fluorescence_yield = DinLinArr< double >(qsh, 0.0);
-  z_shell = DinLinArr< int >(qsh, 0);
-
-  for (int nsh = qsh-1; nsh >= 0; nsh--) {
-    file >> shell_energy[nsh] >> z_shell[nsh] >> fluorescence_yield[nsh];
-    check_econd11(shell_energy[nsh] , >  0.0 , mcerr);
-    check_econd12(z_shell[nsh] , < 1 || , >= z , mcerr);
-    check_econd12(fluorescence_yield[nsh] , < 0.0 || , > 1.0 , mcerr);
-    int ci;  // now pass comments
-    while( !((ci=getc(fli))=='\n') ) {
-      check_econd11( ci , == EOF , mcerr);
-    }
-  }
-  long qen;
-  file >> qen;
-  check_econd11(qen , < 1 ,  mcerr);
-  DinLinArr< double >en(qen, 0.0);
-  total_cs = DinLinArr< double >(qen, 0.0);
-  shell_cs = DinArr< double >(qsh, qen, 0.0);
-  for (long nen = 0; nen<qen; ++nen) {
-    file>>en[nen];
-    if(nen > 0) {
-      check_econd11(en[nen] , < en[nen-1] ,  mcerr);
-    }
-    file>>total_cs[nen];
-    check_econd11(total_cs[nen] , < 0.0 ,  mcerr);
-    double s = 0;
-    for (nsh = 0; nsh < qsh; nsh++) {
-      file>>shell_cs[nsh][nen];
-      check_econd11(shell_cs[nen] , < 0.0 ,  mcerr);
-      s+=shell_cs[nsh][nen];
-    }
-    s = fabs((total_cs[nen] - s)/(total_cs[nen] + s));
-    check_econd11(s , > 0.001 ,  mcerr);  // precision of printing
-  }
-  *fenergy_mesh = EnergyMesh(en);
-}
-*/
-
 }

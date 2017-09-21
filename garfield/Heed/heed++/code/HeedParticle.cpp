@@ -8,17 +8,16 @@
 #include "heed++/code/HeedCluster.h"
 #include "heed++/code/HeedPhoton.h"
 #include "heed++/code/EnTransfCS.h"
-/*
-2003-2008, I. Smirnov
-*/
+
+// 2003-2008, I. Smirnov
 
 namespace Heed {
 
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            const vec& vel, vfloat time, particle_def* fpardef,
                            std::list<ActivePtr<gparticle> >& particleBank,
-                           HeedFieldMap* fieldmap,
-                           int fs_loss_only, int fs_print_listing)
+                           HeedFieldMap* fieldmap, int fs_loss_only,
+                           int fs_print_listing)
     : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
       s_print_listing(fs_print_listing),
       particle_number(last_particle_number++),
@@ -78,10 +77,10 @@ void HeedParticle::physics(void) {
         int ierror = 0;
         qt = pois(aetcs->quan[na][ns] * currpos.prange / cm, ierror);
         check_econd11a(ierror, == 1,
-            " aetcs->quan[na][ns]=" << aetcs->quan[na][ns]
-                                    << " currpos.prange/cm=" << currpos.prange /
-                                                                    cm << '\n',
-            mcerr);
+                       " aetcs->quan[na][ns]=" << aetcs->quan[na][ns]
+                                               << " currpos.prange/cm="
+                                               << currpos.prange / cm << '\n',
+                       mcerr);
       }
 #endif
       if (s_print_listing == 1) Iprintn(mcout, qt);
@@ -104,7 +103,7 @@ void HeedParticle::physics(void) {
             Iprintn(mcout, aetcs);
             Iprintn(mcout, aetcs->fadda[na][ns][1]);
           }
-          double r = t_hisran_step_ar<double, DynLinArr<double>,
+          double r = t_hisran_step_ar<double, std::vector<double>,
                                       PointCoorMesh<double, const double*> >(
               pcm_e, aetcs->fadda[na][ns], rn);
 
@@ -129,7 +128,8 @@ void HeedParticle::physics(void) {
           if (s_loss_only != 0) continue;
           if (s_print_listing == 1) mcout << "generating new cluster\n";
           m_clusterBank.push_back(HeedCluster(transferred_energy[qtransfer - 1],
-                                              0, pt, ptloc, prevpos.tid, na, ns));
+                                              0, pt, ptloc, prevpos.tid, na,
+                                              ns));
 
           const double Ep0 = mass * c_squared + curr_kin_energy;
           const double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
@@ -186,7 +186,5 @@ void HeedParticle::print(std::ostream& file, int l) const {
       }
     }
   }
-
 }
-
 }

@@ -21,3 +21,13 @@ edep: edep.C
 	$(CXX) $(CFLAGS) edep.C
 	$(CXX) -o edep edep.o $(LDFLAGS)
 	rm edep.o
+
+qdepSi: qdepSi.C 
+	$(CXX) $(CFLAGS) qdepSi.C
+	$(CXX) -o qdepSi qdepSi.o $(LDFLAGS)
+	rm qdepSi.o
+
+rangeSi: rangeSi.C 
+	$(CXX) $(CFLAGS) rangeSi.C
+	$(CXX) -o rangeSi rangeSi.o $(LDFLAGS)
+	rm rangeSi.o

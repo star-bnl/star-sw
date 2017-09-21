@@ -1,9 +1,10 @@
 #ifndef VOLUME_H
 #define VOLUME_H
 #include <iostream>
+#include <vector>
+
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/trajestep.h"
-#include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/safetl/AbsPtr.h"
 
 /*
@@ -30,36 +31,36 @@ class volume;
 class manip_absvol;
 class absvol;
 
-// Two little service classes
-// (1) Address of volume and index in embracing volume.
+/// Service class (address of volume and index in embracing volume).
 class manip_absvol_eid {
  public:
-  // Constructor
+  /// Constructor
   manip_absvol_eid(void);
-  // Address of volume
+  /// Address of volume
   PassivePtr<manip_absvol> amvol;
-  // Index of this volume in array
+  /// Index of this volume in array
   int nembed;
   void print(std::ostream& file, int l) const;
 };
-// (2) Array of manip_absvol_eid classes
+
+/// Service class (array of manip_absvol_eid classes).
 class manip_absvol_treeid {
  public:
-  // Constructor
+  /// Constructor
   manip_absvol_treeid(void) : qeid(0) { ; }
-  // Number of volumes
+  /// Number of volumes
   int qeid;
-  // List of volumes
+  /// List of volumes
   manip_absvol_eid eid[pqamvol];
-  // Get last address of manip_absvol_eid
+  /// Get last address of manip_absvol_eid
   const manip_absvol_eid* G_laeid() const {
     return qeid > 0 ? &eid[qeid - 1] : 0;
   }
-  // Get last address of manipulator
+  /// Get last address of manipulator
   manip_absvol* G_lamvol() const {
     return qeid > 0 ? eid[qeid - 1].amvol.get() : 0;
   }
-  // Get last address of volume
+  /// Get last address of volume
   absvol* G_lavol() const;
 
   friend int operator==(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2);
@@ -83,12 +84,11 @@ inline int operator!=(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2) {
   return 1;
 }
 
-// ********  absvol  *******
-// Class abstract volume: the principal volume features
-// Actual shapes should be derived.
-// The functions accept and return parameters expressed in the internal
-// coordinate system inherent to this volume.
-// For interface with external system please use manip_absvol.
+/// Class abstract volume: the principal volume features.
+/// Actual shapes should be derived.
+/// The functions accept and return parameters expressed in the internal
+/// coordinate system inherent to this volume.
+/// For interface with external system please use manip_absvol.
 class absvol : virtual public absref, public RegPassivePtr {
   // public RegPassivePtr is not necessary for general package
   // but may be useful in applications
@@ -143,7 +143,7 @@ class absvol : virtual public absref, public RegPassivePtr {
   virtual void income(gparticle*) {}
   virtual void chname(char* nm) const { strcpy(nm, "absvol"); }
   virtual void print(std::ostream& file, int l) const;
-  virtual DynLinArr<manip_absvol*> Gamanip_embed(void) const;
+  virtual std::vector<manip_absvol*> Gamanip_embed(void) const;
 };
 
 class absref_transmit_2fixsyscoor : public absref_transmit {
@@ -168,12 +168,12 @@ class absref_transmit_2fixsyscoor : public absref_transmit {
 
 class absref_transmit_fixsyscoor : public absref_transmit {
  public:
-  DynLinArr<fixsyscoor>* asys;
+  std::vector<fixsyscoor>* asys;
   virtual absref* get_other(int n) { return &((*asys)[n]); }
   absref_transmit_fixsyscoor(void) : absref_transmit() { ; }
-  absref_transmit_fixsyscoor(DynLinArr<fixsyscoor>* fasys)
+  absref_transmit_fixsyscoor(std::vector<fixsyscoor>* fasys)
       : absref_transmit(), asys(fasys) {
-    qaref_other = asys->get_qel();
+    qaref_other = asys->size();
   }
   macro_copy_total(absref_transmit_fixsyscoor);
   virtual ~absref_transmit_fixsyscoor() { ; }
@@ -181,12 +181,12 @@ class absref_transmit_fixsyscoor : public absref_transmit {
 
 class absref_transmit_absvol : public absref_transmit {
  public:
-  DynLinArr<ActivePtr<absvol> >* avol;
+  std::vector<ActivePtr<absvol> >* avol;
   virtual absref* get_other(int n) { return (*avol)[n].get(); }
   absref_transmit_absvol(void) : absref_transmit() { ; }
-  absref_transmit_absvol(DynLinArr<ActivePtr<absvol> >* favol)
+  absref_transmit_absvol(std::vector<ActivePtr<absvol> >* favol)
       : absref_transmit(), avol(favol) {
-    qaref_other = avol->get_qel();
+    qaref_other = avol->size();
   }
   macro_copy_total(absref_transmit_absvol);
   virtual ~absref_transmit_absvol() { ; }
@@ -246,7 +246,7 @@ class sh_manip_absvol : public manip_absvol {
   sh_manip_absvol(sh_manip_absvol& f);
   sh_manip_absvol(const sh_manip_absvol& f);
   sh_manip_absvol(const abssyscoor& f);
-  sh_manip_absvol(const point& fc, const basis& fbas, const String& fname);
+  sh_manip_absvol(const point& fc, const basis& fbas, const std::string& fname);
   virtual ~sh_manip_absvol() { ; }
 
   virtual void m_chname(char* nm) const;
@@ -279,19 +279,18 @@ class absref_transmit_2manip : public absref_transmit {
 
 class absref_transmit_manip : public absref_transmit {
  public:
-  DynLinArr<ActivePtr<manip_absvol> >* amvol;
+  std::vector<ActivePtr<manip_absvol> >* amvol;
   virtual absref* get_other(int n) { return (*amvol)[n].get(); }
   absref_transmit_manip(void) : absref_transmit() { ; }
-  absref_transmit_manip(DynLinArr<ActivePtr<manip_absvol> >* famvol)
+  absref_transmit_manip(std::vector<ActivePtr<manip_absvol> >* famvol)
       : absref_transmit(), amvol(famvol) {
-    qaref_other = amvol->get_qel();
+    qaref_other = amvol->size();
   }
   macro_copy_total(absref_transmit_manip);
   virtual ~absref_transmit_manip() { ; }
 };
 
 //         *************************************
-
 }
 
 #endif

@@ -4,25 +4,24 @@
 #include "wcpplib/particle/particle_def.h"
 #include "HeedFieldMap.h"
 
-/*
-Charged particle, combination of features of massive geometrical
-particle and specification of concrete particle as one of types
-known by science.
-
-1998 - 2004, I. Smirnov.
-*/
+// 1998 - 2004, I. Smirnov.
 
 namespace Heed {
 
+/// Charged particle. Combination of features of massive geometrical
+/// particle and specification of concrete particle as one of types
+/// known by science.
+
 class eparticle : public mparticle, public particle_type {
  public:
-  /// Constructors
+  /// Default constructor
   eparticle(void) : mparticle(), particle_type(), m_fieldMap(NULL) {}
+  /// Constructor using velocity vector.
   eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
             particle_def* fpardef, HeedFieldMap* fieldmap);
-  eparticle(manip_absvol* primvol, const point& pt,
-            const vec& vel,  // length does not have meaning
-            vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap, 
+  /// Constructor using gamma - 1 (direction is taken from vel).
+  eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
+            particle_def* fpardef, HeedFieldMap* fieldmap,
             const double gamma_1);
   AnyType_copy(eparticle, gparticle);
   /// Destructor
@@ -36,7 +35,6 @@ class eparticle : public mparticle, public particle_type {
  protected:
   HeedFieldMap* m_fieldMap;
 };
-
 }
 
 #endif

@@ -10,26 +10,20 @@
  */
 #endif
 #include <cmath>
-#define max_vfloat DBL_MAX  
-typedef double vfloat;
-const vfloat max_safe_vfloat = 0.5 * sqrt(DBL_MAX);  //e+307
-const vfloat vprecision = 1.0E-12;
-
-inline vfloat abslt(vfloat f) { return f > 0.0 ? f : -f; }
-
-inline int apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
-  return (abslt(f1 - f2) <= prec) ? 1 : 0;
-}
-inline int not_apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
-  return (abslt(f1 - f2) <= prec) ? 0 : 1;
-}
 
 namespace Heed {
-inline int apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
-  return (abslt(f1 - f2) <= prec) ? 1 : 0;
+
+typedef double vfloat;
+const vfloat vprecision = 1.0E-12;
+static const vfloat max_vfloat = DBL_MAX;
+
+inline int apeq(const vfloat f1, const vfloat f2, 
+                const vfloat prec = vprecision) {
+  return (fabs(f1 - f2) <= prec) ? 1 : 0;
 }
-inline int not_apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
-  return (abslt(f1 - f2) <= prec) ? 0 : 1;
+inline int not_apeq(const vfloat f1, const vfloat f2, 
+                    const vfloat prec = vprecision) {
+  return (fabs(f1 - f2) <= prec) ? 0 : 1;
 }
 }
 

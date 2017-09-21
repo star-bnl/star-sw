@@ -1,5 +1,6 @@
 #include "wcpplib/math/PolLeg.h"
 #include "wcpplib/util/FunNameStack.h"
+
 /*
 Copyright (c) 2003 I. B. Smirnov
 
@@ -45,5 +46,4 @@ double polleg(const int l, const double x) {
   }
   return 0.0;  // should never happen
 }
-
 }

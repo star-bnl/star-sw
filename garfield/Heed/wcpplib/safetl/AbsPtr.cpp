@@ -11,17 +11,14 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 RegPassivePtr::RegPassivePtr(const RegPassivePtr& f)
     :
 #ifdef USE_BIT_OPERA
       control_word(f.control_word),
 #elif defined(USE_BIT_FIELDS)
       conparam(f.conparam),
-//#ifdef USE_DELETE_AT_ZERO_COUNT
-//    conparam(fs_ban_del, fs_ban_sub, fs_ban_cop, s_allow_del_at_zero_count ),
-//#else
-//    conparam(fs_ban_del, fs_ban_sub, fs_ban_cop ),
-//#endif
 #else
       s_ban_del(f.s_ban_del),
       s_ban_sub(f.s_ban_sub),
@@ -31,69 +28,64 @@ RegPassivePtr::RegPassivePtr(const RegPassivePtr& f)
 #endif
 #endif
       cpp(NULL) {
-//mcout<<"RegPassivePtr::RegPassivePtr(...) is started\n";
+// mcout<<"RegPassivePtr::RegPassivePtr(...) is started\n";
 #ifdef USE_BIT_OPERA
-  if (f.get_s_ban_cop() == 2)
+  if (f.get_s_ban_cop() == 2) {
 #elif defined(USE_BIT_FIELDS)
-    if (f.conparam.s_ban_cop == 2)
+  if (f.conparam.s_ban_cop == 2) {
 #else
-      if (f.s_ban_cop == 2)
+  if (f.s_ban_cop == 2) {
 #endif
-          {
-        mcerr << "Error in "
-              << "RegPassivePtr::RegPassivePtr(const RegPassivePtr& f):\n"
-              << "attempt to copy object whose s_ban_cop == 2.\n";
-        spexit(mcerr);
-      }
+    mcerr << "Error in "
+          << "RegPassivePtr::RegPassivePtr(const RegPassivePtr& f):\n"
+          << "attempt to copy object whose s_ban_cop == 2.\n";
+    spexit(mcerr);
+  }
 #ifdef USE_BIT_OPERA
-          else if (f.get_s_ban_cop() == 1 && f.cpp->get_number_of_booked() > 0)
+  else if (f.get_s_ban_cop() == 1 && f.cpp->get_number_of_booked() > 0) {
 #elif defined(USE_BIT_FIELDS)
-        else if (f.conparam.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0)
+  else if (f.conparam.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0) {
 #else
-            else if (f.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0)
+  else if (f.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0) {
 #endif
-            {
-          mcerr << "Error in "
-                << "RegPassivePtr::RegPassivePtr(const RegPassivePtr& f):\n"
-                << "attempt to copy referred object whose s_ban_cop == 1.\n"
-                << "f.cpp->get_number_of_booked()="
-                << f.cpp->get_number_of_booked() << '\n';
-          spexit(mcerr);
-        }
+    mcerr << "Error in "
+          << "RegPassivePtr::RegPassivePtr(const RegPassivePtr& f):\n"
+          << "attempt to copy referred object whose s_ban_cop == 1.\n"
+          << "f.cpp->get_number_of_booked()=" << f.cpp->get_number_of_booked()
+          << '\n';
+    spexit(mcerr);
+  }
 }
 
 RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& f) {
-//mcout<<"RegPassivePtr::operator= is started\n";
+// mcout<<"RegPassivePtr::operator= is started\n";
 #ifdef USE_BIT_OPERA
-  if (f.get_s_ban_cop() == 2)
+  if (f.get_s_ban_cop() == 2) {
 #elif defined(USE_BIT_FIELDS)
-    if (f.conparam.s_ban_cop == 2)
+  if (f.conparam.s_ban_cop == 2) {
 #else
-      if (f.s_ban_cop == 2)
+  if (f.s_ban_cop == 2) {
 #endif
-          {
-        mcerr << "Error in "
-              << "RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& "
-                 "f):\n"
-              << "attempt to copy object whose s_ban_cop == 2.\n";
-        spexit(mcerr);
-      }
+    mcerr << "Error in "
+          << "RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& "
+             "f):\n"
+          << "attempt to copy object whose s_ban_cop == 2.\n";
+    spexit(mcerr);
 #ifdef USE_BIT_OPERA
-          else if (f.get_s_ban_cop() == 1 && f.cpp->get_number_of_booked() > 0)
+  } else if (f.get_s_ban_cop() == 1 && f.cpp->get_number_of_booked() > 0) {
 #elif defined(USE_BIT_FIELDS)
-        else if (f.conparam.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0)
+  } else if (f.conparam.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0) {
 #else
-            else if (f.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0)
+  } else if (f.s_ban_cop == 1 && f.cpp->get_number_of_booked() > 0) {
 #endif
-            {
-          mcerr << "Error in "
-                << "RegPassivePtr& RegPassivePtr::operator=(const "
-                   "RegPassivePtr& f):\n"
-                << "attempt to copy referred object whose s_ban_cop == 1.\n"
-                << "f.cpp->get_number_of_booked()="
-                << f.cpp->get_number_of_booked() << '\n';
-          spexit(mcerr);
-        }
+    mcerr << "Error in "
+          << "RegPassivePtr& RegPassivePtr::operator=(const "
+             "RegPassivePtr& f):\n"
+          << "attempt to copy referred object whose s_ban_cop == 1.\n"
+          << "f.cpp->get_number_of_booked()=" << f.cpp->get_number_of_booked()
+          << '\n';
+    spexit(mcerr);
+  }
 #ifdef USE_BIT_OPERA
   set_s_ban_cop(f.get_s_ban_cop());
 #ifdef USE_DELETE_AT_ZERO_COUNT
@@ -102,21 +94,21 @@ RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& f) {
   set_s_ban_del(f.get_s_ban_del());
   if (get_s_ban_sub() == 1)
 #elif defined(USE_BIT_FIELDS)
-    conparam.s_ban_cop = f.conparam.s_ban_cop;
+  conparam.s_ban_cop = f.conparam.s_ban_cop;
 #ifdef USE_DELETE_AT_ZERO_COUNT
   conparam.s_allow_del_at_zero_count = f.conparam.s_allow_del_at_zero_count;
 #endif
   conparam.s_ban_del = f.conparam.s_ban_del;
   if (conparam.s_ban_sub == 1)
 #else
-    s_ban_cop = f.s_ban_cop;
+  s_ban_cop = f.s_ban_cop;
 #ifdef USE_DELETE_AT_ZERO_COUNT
   s_allow_del_at_zero_count = f.s_allow_del_at_zero_count;
 #endif
   s_ban_del = f.s_ban_del;
   if (s_ban_sub == 1)
 #endif
-      {
+  {
     if (this == &f &&  // self-assignment
         cpp != NULL && cpp->get_number_of_booked() > 0) {
       mcerr << "Error in "
@@ -130,22 +122,21 @@ RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& f) {
     clear_pointers();
   }
 #ifdef USE_BIT_OPERA
-      else if (get_s_ban_sub() == 2 && cpp != NULL &&
-               cpp->get_number_of_booked() > 0)
+  else if (get_s_ban_sub() == 2 && cpp != NULL &&
+           cpp->get_number_of_booked() > 0)
 #elif defined(USE_BIT_FIELDS)
-    else if (conparam.s_ban_sub == 2 && cpp != NULL &&
-             cpp->get_number_of_booked() > 0)
+  else if (conparam.s_ban_sub == 2 && cpp != NULL &&
+           cpp->get_number_of_booked() > 0)
 #else
-        else if (s_ban_sub == 2 && cpp != NULL &&
-                 cpp->get_number_of_booked() > 0)
+  else if (s_ban_sub == 2 && cpp != NULL && cpp->get_number_of_booked() > 0)
 #endif
-        {
-      mcerr << "Error in "
-            << "RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& "
-               "f):\n"
-            << "s_ban_sub == 2, but the object is addressed.\n";
-      spexit(mcerr);
-    }
+  {
+    mcerr << "Error in "
+          << "RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& "
+             "f):\n"
+          << "s_ban_sub == 2, but the object is addressed.\n";
+    spexit(mcerr);
+  }
 #ifdef USE_BIT_OPERA
   set_s_ban_sub(f.get_s_ban_sub());
 #elif defined(USE_BIT_FIELDS)
@@ -187,7 +178,7 @@ std::ostream& operator<<(std::ostream& file, const RegPassivePtr& f) {
     Ifile<<"RegPassivePtr<X>: s_ban_del="<<f.s_ban_del
          <<" s_ban_sub="<<f.s_ban_sub
          <<" s_ban_cop="<<f.s_ban_cop;
-  	   */
+           */
   if (RegPassivePtr::s_print_adr_cpp == 0) {
     if (f.cpp == NULL) {
       file << " cpp=NULL\n";
@@ -210,7 +201,7 @@ std::ostream& operator<<(std::ostream& file, const RegPassivePtr& f) {
 #ifdef USE_CHAR_GETSETTERS_PARAMETERS
         << int(f.get_s_allow_del_at_zero_count()) << '\n';
 #else
-  << f.get_s_allow_del_at_zero_count() << '\n';
+        << f.get_s_allow_del_at_zero_count() << '\n';
 #endif
 #elif defined(USE_BIT_FIELDS)
   Ifile << "s_allow_del_at_zero_count=" << f.conparam.s_allow_del_at_zero_count
@@ -238,7 +229,7 @@ long RegPassivePtr::get_total_number_of_references(void) const {
 int RegPassivePtr::s_ban_del_ignore = 0;
 
 RegPassivePtr::~RegPassivePtr() {
-  //mcout<<"~RegPassivePtr(): *this="<<(*this)<<'\n';
+  // mcout<<"~RegPassivePtr(): *this="<<(*this)<<'\n';
   if (cpp != NULL) {
     cpp->change_rpp(NULL);
     if (cpp->get_number_of_booked() == 0) {
@@ -248,26 +239,20 @@ RegPassivePtr::~RegPassivePtr() {
 #ifdef USE_BIT_OPERA
       if (s_ban_del_ignore == 0 && get_s_ban_del() == 1)
 #elif defined(USE_BIT_FIELDS)
-        if (s_ban_del_ignore == 0 && conparam.s_ban_del == 1)
+      if (s_ban_del_ignore == 0 && conparam.s_ban_del == 1)
 #else
-          if (s_ban_del_ignore == 0 && s_ban_del == 1)
+      if (s_ban_del_ignore == 0 && s_ban_del == 1)
 #endif
-              {
-            mcerr << "Error in RegPassivePtr::~RegPassivePtr() "
-                  << "s_ban_del == 1, but there are pointers to this class.\n";
-            mcerr << "cpp->number_of_registered=" << cpp->get_number_of_booked()
-                  << '\n';
-            s_ban_del_ignore = 1;
-            spexit(mcerr);
-          }
+      {
+        mcerr << "Error in RegPassivePtr::~RegPassivePtr() "
+              << "s_ban_del == 1, but there are pointers to this class.\n";
+        mcerr << "cpp->number_of_registered=" << cpp->get_number_of_booked()
+              << '\n';
+        s_ban_del_ignore = 1;
+        spexit(mcerr);
+      }
     }
   }
-  //mcout<<"~RegPassivePtr(): *this="<<(*this)<<'\n';
 }
 
-std::ostream& operator<<(std::ostream& file,
-                         const DoubleReg&
-                             f) {  // make output similar to ordinary double
-  file << f.val;
-  return file;
 }

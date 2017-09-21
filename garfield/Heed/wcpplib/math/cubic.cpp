@@ -1,12 +1,8 @@
+#include <cfloat>
 #include <iomanip>
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/math/cubic.h"
 #include "wcpplib/math/parabol.h"
-#include "wcpplib/math/DoubleAc.h"
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/safetl/AbsArr.h"
-#include "wcpplib/matrix/multiply.h"
-#include "wcpplib/matrix/inverse.h"
 
 /*
 Copyright (c) 2005 Igor B. Smirnov
@@ -26,8 +22,9 @@ const Cubic::double_complex Cubic::iu(0, 1);
 
 void Cubic::find_zero(double_complex& z1, double_complex& z2,
                       double_complex& z3) const {
-  mfunname("void  Cubic::find_zero(double_complex &z1, double_complex &z2, "
-           "double_complex &z3) const");
+  mfunname(
+      "void  Cubic::find_zero(double_complex &z1, double_complex &z2, "
+      "double_complex &z3) const");
   const Cubic& t = (*this);
   if (s_dxzero == 0) {
     check_econd11a(da, == 0.0, "this is not cubic polynomial!", mcerr);
@@ -62,8 +59,8 @@ void Cubic::find_zero(double_complex& z1, double_complex& z2,
       T = pow(R - iu * sD, 1 / 3.0);
     }
     z1 = -a2 / 3.0 + (S + T);
-    z2 = -a2 / 3.0 - (S + T) / 2.0 + 0.5 * iu * sqrt(3.0) * (S - T);
-    z3 = -a2 / 3.0 - (S + T) / 2.0 - 0.5 * iu * sqrt(3.0) * (S - T);
+    z2 = -a2 / 3.0 - (S + T) / 2.0 + 0.5 * iu * std::sqrt(3.0) * (S - T);
+    z3 = -a2 / 3.0 - (S + T) / 2.0 - 0.5 * iu * std::sqrt(3.0) * (S - T);
     t.dz1 = z1;
     t.dz2 = z2;
     t.dz3 = z3;
@@ -122,8 +119,9 @@ int Cubic::find_real_zero(double z[3]) const {
 }
 
 int Cubic::find_maxmin(double xmm[2], double ymm[2], int s_mm[2]) const {
-  mfunname("int Cubic::find_maxmin(double xmm[2], double ymm[2], int s_mm[2]) "
-           "const");
+  mfunname(
+      "int Cubic::find_maxmin(double xmm[2], double ymm[2], int s_mm[2]) "
+      "const");
   double ap = 3 * da;
   double bp = 2 * db;
   double cp = dc;
@@ -165,8 +163,7 @@ std::ostream& operator<<(std::ostream& file, const Cubic& f) {
   Ifile << "The number of real zeros =" << q << '\n';
   int n;
   Ifile << "Solutions=";
-  for (n = 0; n < q; n++)
-    file << ' ' << r[n];
+  for (n = 0; n < q; n++) file << ' ' << r[n];
   file << '\n';
   double xmm[2];
   double ymm[2];
@@ -184,5 +181,4 @@ std::ostream& operator<<(std::ostream& file, const Cubic& f) {
 
   return file;
 }
-
 }

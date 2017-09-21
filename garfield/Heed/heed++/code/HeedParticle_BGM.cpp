@@ -10,19 +10,14 @@
 #include "heed++/code/HeedPhoton.h"
 #include "heed++/code/EnTransfCS_BGM.h"
 
-/*
-2003-2008, I. Smirnov
-*/
+// 2003-2008, I. Smirnov
 
 namespace Heed {
 
-HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
-                                   const vec& vel, vfloat time,
-                                   particle_def* fpardef, 
-                                   std::list<ActivePtr<gparticle> >& particleBank,
-                                   HeedFieldMap* fieldmap,
-                                   int fs_loss_only,
-                                   int fs_print_listing)
+HeedParticle_BGM::HeedParticle_BGM(
+    manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
+    particle_def* fpardef, std::list<ActivePtr<gparticle> >& particleBank,
+    HeedFieldMap* fieldmap, int fs_loss_only, int fs_print_listing)
     : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
       s_print_listing(fs_print_listing),
       particle_number(last_particle_number++),
@@ -50,7 +45,7 @@ void HeedParticle_BGM::physics(void) {
   nshell.clear();
   if (currpos.prange <= 0.0) return;
   // Get least address of volume
-  const absvol* av = currpos.G_lavol();  
+  const absvol* av = currpos.G_lavol();
   const EnTransfCS_BGM_Type* etcs_bgm_t =
       dynamic_cast<const EnTransfCS_BGM_Type*>(av);
   // Check if dynamic cast was successful.
@@ -63,7 +58,7 @@ void HeedParticle_BGM::physics(void) {
   EnergyMesh* a_energy_mesh = ahmd->energy_mesh.getver();
   const double* aetemp = ahmd->energy_mesh->get_ae();
   PointCoorMesh<double, const double*> pcm_e(a_energy_mesh->get_q() + 1,
-                                               &(aetemp));
+                                             &(aetemp));
   const long qa = amatter->qatom();
   if (s_print_listing == 1) Iprintn(mcout, qa);
   // long qe = a_energy_mesh->get_q();
@@ -82,8 +77,8 @@ void HeedParticle_BGM::physics(void) {
 #else
       double bg = sqrt(curr_gamma_1 * (curr_gamma_1 + 2.0));
 
-      PointCoorMesh<double, DynLinArr<double> > pcm(aetcs_bgm->mesh->q,
-                                                    &(aetcs_bgm->mesh->x));
+      PointCoorMesh<double, std::vector<double> > pcm(aetcs_bgm->mesh->q,
+                                                      &(aetcs_bgm->mesh->x));
 
       long n1;
       long n2;
@@ -139,10 +134,10 @@ void HeedParticle_BGM::physics(void) {
           transferred_energy.append(ener_single_transf);
 #else
           double rn = SRANLUX();
-          double r1 = t_hisran_step_ar<double, DynLinArr<double>,
+          double r1 = t_hisran_step_ar<double, std::vector<double>,
                                        PointCoorMesh<double, const double*> >(
               pcm_e, aetcs_bgm->etcs_bgm[n1].fadda[na][ns], rn);
-          double r2 = t_hisran_step_ar<double, DynLinArr<double>,
+          double r2 = t_hisran_step_ar<double, std::vector<double>,
                                        PointCoorMesh<double, const double*> >(
               pcm_e, aetcs_bgm->etcs_bgm[n2].fadda[na][ns], rn);
           double r = r1 + (bg - b1) * (r2 - r1) / (b2 - b1);
@@ -169,9 +164,9 @@ void HeedParticle_BGM::physics(void) {
           qtransfer++;
           if (s_loss_only != 0) continue;
           if (s_print_listing == 1) mcout << "generating new cluster\n";
-          m_clusterBank.push_back(
-              HeedCluster(transferred_energy[qtransfer - 1], 0, pt, ptloc,
-                          prevpos.tid, na, ns));
+          m_clusterBank.push_back(HeedCluster(transferred_energy[qtransfer - 1],
+                                              0, pt, ptloc, prevpos.tid, na,
+                                              ns));
           vec vel;
           const double Ep0 = mass * c_squared + curr_kin_energy;
           const double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
@@ -183,10 +178,10 @@ void HeedParticle_BGM::physics(void) {
           vel.down(&tempbas);  // direction is OK
           vel *= c_light;
           if (s_print_listing == 1) mcout << "generating new virtual photon\n";
-          HeedPhoton hp(currpos.tid.eid[0].amvol.getver(),
-                        pt, vel, currpos.time, particle_number,
-                        transferred_energy[qtransfer - 1], 
-                        *m_particleBank, m_fieldMap, 0);
+          HeedPhoton hp(currpos.tid.eid[0].amvol.getver(), pt, vel,
+                        currpos.time, particle_number,
+                        transferred_energy[qtransfer - 1], *m_particleBank,
+                        m_fieldMap, 0);
           hp.s_photon_absorbed = 1;
           hp.s_delta_generated = 0;
           hp.na_absorbing = na;
@@ -211,7 +206,7 @@ void HeedParticle_BGM::print(std::ostream& file, int l) const {
     print_notation(file);
     file << std::endl;
     if (l == 1) return;
-    //file<<'\n';
+    // file<<'\n';
     mparticle::print(file, l - 1);
     Iprintn(mcout, transferred_energy_in_step);
     Iprintn(mcout, qtransfer);
@@ -220,13 +215,11 @@ void HeedParticle_BGM::print(std::ostream& file, int l) const {
       Ifile << "   nt  natom nshell transferred_energy\n";
 
       for (nt = 0; nt < qtransfer; nt++) {
-        Ifile << std::setw(3) << nt << ' ' << std::setw(3) << natom[nt] << ' ' << std::setw(3)
-              << nshell[nt] << ' ' << std::setw(12) << transferred_energy[nt]
-              << '\n';
+        Ifile << std::setw(3) << nt << ' ' << std::setw(3) << natom[nt] << ' '
+              << std::setw(3) << nshell[nt] << ' ' << std::setw(12)
+              << transferred_energy[nt] << '\n';
       }
     }
   }
-
 }
-
 }

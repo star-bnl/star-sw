@@ -1,13 +1,7 @@
 #ifndef DOUBLEAC_H
 #define DOUBLEAC_H
+
 /*
-DoubleAc is abbreviation of double with accuracy.
-Really this is original implementation of interval computations.
-This is the way of watching for the numerical errors
-by establishing lower and upper limit of each numerical value.
-The central the most probable value is also watched for.
-
-
 Copyright (c) 2001 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
@@ -30,8 +24,8 @@ The file is provided "as is" without express or implied warranty.
 #include <climits>
 #include <cfloat>
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/stream/prstream.h"
-#include "wcpplib/math/minmax.h"
+
+namespace Heed {
 
 #define DEF_DBL_PREC 1.0e-15  // rounding precision for double
 const double one_plus_def_dbl_prec = double(1.0) + DEF_DBL_PREC;
@@ -41,10 +35,16 @@ const double one_minus_def_dbl_prec = double(1.0) - DEF_DBL_PREC;
 const double one_plus_def_flt_prec = double(1.0) + DEF_FLT_PREC;
 const double one_minus_def_flt_prec = double(1.0) - DEF_FLT_PREC;
 
+/// "Double with accuracy".
+/// Really this is original implementation of interval computations.
+/// This is the way of watching for the numerical errors
+/// by establishing lower and upper limit of each numerical value.
+/// The central the most probable value is also watched for.
+
 class DoubleAc {
-  double d;   // the main  value
-  double di;  // the left limit   di <= d
-  double da;  // the right limit  da >= d
+  double d;   //< the main  value
+  double di;  //< the left limit   di <= d
+  double da;  //< the right limit  da >= d
  public:
   inline DoubleAc(void) {
     di = 0.0;
@@ -127,10 +127,9 @@ class DoubleAc {
   // The most convenient options are 3 or 5.
 };
 
-inline DoubleAc::DoubleAc(double f)
-    // assumes pure numerical uncertanty which is defined via macro above
-    // unless f == 0. In this case the precision is assumed absolute.
-    {
+inline DoubleAc::DoubleAc(double f) {
+  // assumes pure numerical uncertanty which is defined via macro above
+  // unless f == 0. In this case the precision is assumed absolute.
   d = f;
   if (f == 0.0) {
     di = 0.0;
@@ -618,7 +617,7 @@ inline DoubleAc fabs(const DoubleAc& f) {
     return f;
   else if (f.right_limit() > 0) {
     return DoubleAc(fabs(f.get()), 0.0,
-                    find_max(f.right_limit(), -f.left_limit()));
+                    std::max(f.right_limit(), -f.left_limit()));
   } else {
     return DoubleAc(-f.get(), -f.right_limit(), -f.left_limit());
   }
@@ -708,5 +707,7 @@ std::ostream& operator<<(std::ostream& file, const DoubleAc& f);
   file << indn << #name << "=" << noindent; \
   name.print(file, 3);                      \
   file << yesindent << '\n';
+
+}
 
 #endif

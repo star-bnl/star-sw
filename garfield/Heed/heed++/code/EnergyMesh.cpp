@@ -10,7 +10,7 @@ EnergyMesh::EnergyMesh(double femin, double femax, long fq)
   mfunname("EnergyMesh::EnergyMesh(double femin, double femax, long fq)");
   check_econd21(q, < 0 ||, > pqener - 1, mcerr);
 
-  double rk = pow(emax / emin, (1.0 / double(q)));
+  const double rk = pow(emax / emin, (1.0 / double(q)));
   double er = emin;
   e[0] = er;
   for (long n = 1; n < q + 1; n++) {
@@ -18,61 +18,31 @@ EnergyMesh::EnergyMesh(double femin, double femax, long fq)
     ec[n - 1] = (e[n - 1] + e[n]) * 0.5;
     er = e[n];
   }
-  //pcm_e = PointCoorMesh< double, double[pqener] >( q, &e);
-  //pcm_ec = PointCoorMesh< double, double[pqener-1] >( q-1, &ec);
-  //mcout<<"EnergyMesh is done"<<endl;
 }
 
-EnergyMesh::EnergyMesh(DynLinArr<double> fec) : q(fec.get_qel()) {
-  mfunname("DynLinArr< double > fec");
+EnergyMesh::EnergyMesh(const std::vector<double>& fec) : q(fec.size()) {
+  mfunname("std::vector< double > fec");
   check_econd21(q, < 0 ||, > pqener - 1, mcerr);
   check_econd11(q, != 1, mcerr);  // otherwise problems with emin/emax
-  if (q > 0) {
-    emin = fec[0] - (fec[1] - fec[0]) / 2.0;
-    emax = fec[q - 1] + (fec[q - 1] - fec[q - 2]) / 2.0;
-    e[0] = emin;
-    e[q] = emax;
-
-    for (long n = 0; n < q; n++) {
-      ec[n] = fec[n];
-    }
-    for (long n = 1; n < q; n++) {
-      e[n] = 0.5 * (fec[n - 1] + fec[n]);
-    }
-  } else {
+  if (q <= 0) {
     emin = 0.0;
     emax = 0.0;
+    return;
   }
-  //pcm_e = PointCoorMesh< double, double[pqener] >( q, &e);
-  //pcm_ec = PointCoorMesh< double, double[pqener-1] >( q-1, &ec);
+  emin = fec[0] - (fec[1] - fec[0]) / 2.0;
+  emax = fec[q - 1] + (fec[q - 1] - fec[q - 2]) / 2.0;
+  e[0] = emin;
+  e[q] = emax;
+
+  for (long n = 0; n < q; n++) {
+    ec[n] = fec[n];
+  }
+  for (long n = 1; n < q; n++) {
+    e[n] = 0.5 * (fec[n - 1] + fec[n]);
+  }
 }
 
-/*
-EnergyMesh::EnergyMesh(const EnergyMesh& fem)
-{
-  *this = fem;
-}
-
-EnergyMesh& EnergyMesh::operator=(const EnergyMesh& fem)
-{
-  q = fem.q;
-  emin = fem.emin;
-  emax = fem.emax;
-  long n;
-  for(n=0; n<q+1; n++)
-  {
-    e[n] = fem.e[n];
-  }
-  for(n=0; n<q; n++)
-  {
-    ec[n] = fem.ec[n];
-  }
-  pcm_e = PointCoorMesh< double, double[pqener] >( q, &e);
-  pcm_ec = PointCoorMesh< double, double[pqener-1] >( q-1, &ec);
-}
-*/
-
-long EnergyMesh::get_interval_number(double ener) {
+long EnergyMesh::get_interval_number(const double ener) const {
   if (ener < emin) return -1;
   if (ener > emax) return q;
 
@@ -90,7 +60,7 @@ long EnergyMesh::get_interval_number(double ener) {
   return n1;
 }
 
-long EnergyMesh::get_interval_number_between_centers(double ener) {
+long EnergyMesh::get_interval_number_between_centers(const double ener) const {
   if (ener < ec[0]) return -1;
   if (ener > ec[q - 1]) return q;
 
@@ -120,8 +90,6 @@ std::ostream& operator<<(std::ostream& file, EnergyMesh& f) {
           << f.ec[n] << std::setw(15) << f.e[n + 1] << std::setw(15)
           << (f.e[n + 1] - f.e[n]) << '\n';
   }
-  //f.pcm_e.print(mcout);
-  //f.pcm_ec.print(mcout);
   indn.n -= 2;
   return file;
 }
@@ -141,23 +109,6 @@ void EnergyMesh::print(std::ostream& file, int l) const {
     }
   }
   indn.n -= 2;
-}
-
-DynLinArr<double> make_log_mesh_ec(double emin, double emax, long q) {
-  mfunname(
-      "DynLinArr< double > make_log_mesh_ec(double emin, double emax, long q)");
-
-  double rk = pow(emax / emin, (1.0 / double(q)));
-  double er = emin;
-  DynLinArr<double> ec(q);
-  double e1;
-  double e2 = er;
-  for (long n = 0; n < q; n++) {
-    e1 = e2;
-    e2 = e2 * rk;
-    ec[n] = (e1 + e2) * 0.5;
-  }
-  return ec;
 }
 
 }

@@ -4,9 +4,7 @@
 #include "wcpplib/math/tline.h"
 #include "heed++/code/HeedMatterDef.h"
 
-/*
-2003, I. Smirnov
-*/
+// 2003, I. Smirnov
 
 namespace Heed {
 
@@ -18,9 +16,7 @@ HeedMatterDef::HeedMatterDef(void)
       radiation_length(0.0),
       Rutherford_const(0.0),
       W(0.0),
-      F(0.0) {
-  ;
-}
+      F(0.0) {}
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
                              AtomPhotoAbsCS* faapacs[], double fW, double fF)
@@ -28,8 +24,8 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, MatterDef* amatter,
   mfunname("HeedMatterDef::HeedMatterDef(...)");
   matter.put(amatter);
   check_econd11(matter->qatom(), <= 0, mcerr);
-  long q = matter->qatom();
-  apacs.put_qel(q);
+  const long q = matter->qatom();
+  apacs.resize(q);
   for (long n = 0; n < q; ++n) {
     apacs[n].put(faapacs[n]);
     check_econd12(matter->atom(n)->Z(), !=, apacs[n]->get_Z(), mcerr);
@@ -62,15 +58,15 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
   mfunname("HeedMatterDef::HeedMatterDef(...)");
   matter.put(agas);
   check_econd11(agas->qmolec(), <= 0, mcerr);
-  long qat = agas->qatom();
-  apacs.put_qel(qat);
+  const long qat = agas->qatom();
+  apacs.resize(qat);
   const long qmol = agas->qmolec();
   long nat = 0;
   for (long nmol = 0; nmol < qmol; ++nmol) {
     check_econd12(agas->molec(nmol)->tqatom(), !=, fampacs[nmol]->get_qatom(),
                   mcerr);
     // number of different atoms in mol
-    const long qa = agas->molec(nmol)->qatom();  
+    const long qa = agas->molec(nmol)->qatom();
     for (long na = 0; na < qa; ++na) {
       apacs[nat].put(fampacs[nmol]->get_atom(na).getver());
       check_econd12(apacs[nat]->get_Z(), !=, agas->molec(nmol)->atom(na)->Z(),
@@ -115,7 +111,7 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
 }
 
 HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh,
-                             const String& gas_notation,
+                             const std::string& gas_notation,
                              MolecPhotoAbsCS* fampacs[], double fW, double fF)
     : W(fW), F(fF), energy_mesh(fenergy_mesh) {
   mfunnamep("HeedMatterDef::HeedMatterDef(...)");
@@ -132,13 +128,13 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh,
   matter.put(agas);
   check_econd11(agas->qmolec(), <= 0, mcerr);
   long qat = agas->qatom();
-  apacs.put_qel(qat);
+  apacs.resize(qat);
   long qmol = agas->qmolec();
   long nat = 0;
   for (long nmol = 0; nmol < qmol; ++nmol) {
     check_econd12(agas->molec(nmol)->tqatom(), !=, fampacs[nmol]->get_qatom(),
                   mcerr);
-    long qa = agas->molec(nmol)->qatom();  //quantity of different atoms in mol
+    long qa = agas->molec(nmol)->qatom();  // quantity of different atoms in mol
     for (long na = 0; na < qa; ++na) {
       apacs[nat].put(fampacs[nmol]->get_atom(na).getver());
       check_econd12(apacs[nat]->get_Z(), !=, agas->molec(nmol)->atom(na)->Z(),
@@ -197,8 +193,8 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
   }
   rms = rms / (gram / mole);
 
-  DynLinArr<double> RLenAt(qat);
-  DynLinArr<double> RuthAt(qat);
+  std::vector<double> RLenAt(qat);
+  std::vector<double> RuthAt(qat);
   for (long n = 0; n < qat; ++n) {
     RLenAt[n] = 716.4 * matter->atom(n)->A() / (gram / mole) /
                 (matter->atom(n)->Z() * (matter->atom(n)->Z() + 1) *
@@ -206,7 +202,7 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
     RuthAt[n] = 4.0 * M_PI * matter->atom(n)->Z() * matter->atom(n)->Z() *
                 ELRAD * ELRAD * ELMAS * ELMAS;
   }
-  DynLinArr<double> rm(qat);
+  std::vector<double> rm(qat);
   for (long n = 0; n < qat; ++n) {
     rm[n] = matter->atom(n)->A() / (gram / mole) * matter->weight_quan(n) / rms;
   }
@@ -230,11 +226,11 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
     }
   }
   long qe = energy_mesh->get_q();
-  ACS.put_qel(qe);
-  ICS.put_qel(qe);
-  epsip.put_qel(qe);
-  epsi1.put_qel(qe);
-  epsi2.put_qel(qe);
+  ACS.resize(qe);
+  ICS.resize(qe);
+  epsip.resize(qe);
+  epsi1.resize(qe);
+  epsi2.resize(qe);
   for (long ne = 0; ne < qe; ++ne) {
     double e1 = energy_mesh->get_e(ne);
     double e2 = energy_mesh->get_e(ne + 1);
@@ -248,8 +244,9 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
                                         << " na=" << na << '\n',
                      mcerr);
       if (s_use_mixture_thresholds == 1) {
-        si += matter->weight_quan(na)*(t = apacs[na]->get_integral_TICS(
-            e1, e2, min_ioniz_pot)) / (e2 - e1);
+        si += matter->weight_quan(na)*(
+                  t = apacs[na]->get_integral_TICS(e1, e2, min_ioniz_pot)) /
+              (e2 - e1);
       } else {
         si +=
             matter->weight_quan(na)*(t = apacs[na]->get_integral_ICS(e1, e2)) /
@@ -272,8 +269,6 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
 
   // To do next loop we need all epsi2
   for (long ne = 0; ne < qe; ++ne) {
-    // double e1 = energy_mesh->get_e(ne);
-    // double e2 = energy_mesh->get_e(ne+1);
     double ec = energy_mesh->get_ec(ne);
     double ec2 = ec * ec;
     double s = 0;
@@ -292,9 +287,9 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
           ep1 = epsi2[m] + (ee1 - ecm) * (epsi2[m + 1] - epsi2[m]) /
                                (energy_mesh->get_ec(m + 1) - ecm);
         } else {
-          ep1 = epsi2[m - 1] +
-                (ee1 - energy_mesh->get_ec(m - 1)) * (epsi2[m] - epsi2[m - 1]) /
-                    (ecm - energy_mesh->get_ec(m - 1));
+          ep1 = epsi2[m - 1] + (ee1 - energy_mesh->get_ec(m - 1)) *
+                                   (epsi2[m] - epsi2[m - 1]) /
+                                   (ecm - energy_mesh->get_ec(m - 1));
         }
         if (m < qe - 1) {
           ep2 = epsi2[m] + (ee2 - ecm) * (epsi2[m + 1] - epsi2[m]) /
@@ -311,8 +306,8 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
   }
 }
 
-void HeedMatterDef::replace_epsi12(const String& file_name) {
-  mfunnamep("void HeedMatterDef::replace_epsi12(const String& file_name)");
+void HeedMatterDef::replace_epsi12(const std::string& file_name) {
+  mfunnamep("void HeedMatterDef::replace_epsi12(const std::string& file_name)");
 
   std::ifstream file(file_name.c_str());
   if (!file) {
@@ -326,9 +321,9 @@ void HeedMatterDef::replace_epsi12(const String& file_name) {
   file >> qe;
   check_econd11(qe, <= 2, mcerr);
 
-  DynLinArr<double> ener(qe);
-  DynLinArr<double> eps1(qe);
-  DynLinArr<double> eps2(qe);
+  std::vector<double> ener(qe);
+  std::vector<double> eps1(qe);
+  std::vector<double> eps2(qe);
 
   for (long ne = 0; ne < qe; ++ne) {
     file >> ener[ne] >> eps1[ne] >> eps2[ne];
@@ -338,23 +333,25 @@ void HeedMatterDef::replace_epsi12(const String& file_name) {
     }
   }
 
-  PointCoorMesh<double, DynLinArr<double> > pcmd(qe, &(ener));
+  PointCoorMesh<double, std::vector<double> > pcmd(qe, &(ener));
   double emin = ener[0] - 0.5 * (ener[1] - ener[0]);
   double emax = ener[qe - 1] + 0.5 * (ener[qe - 1] - ener[qe - 2]);
 
   qe = energy_mesh->get_q();
   for (long ne = 0; ne < qe; ++ne) {
     double ec = energy_mesh->get_ec(ne);
-    epsi1[ne] = t_value_straight_point_ar<
-        double, DynLinArr<double>, PointCoorMesh<double, DynLinArr<double> > >(
-        pcmd,  // dimension q
-        eps1,  // dimension q-1
-        ec, 0, 1, emin, 1, emax);
-    epsi2[ne] = t_value_straight_point_ar<
-        double, DynLinArr<double>, PointCoorMesh<double, DynLinArr<double> > >(
-        pcmd,  // dimension q
-        eps2,  // dimension q-1
-        ec, 1, 1, emin, 1, emax);
+    epsi1[ne] =
+        t_value_straight_point_ar<double, std::vector<double>,
+                                  PointCoorMesh<double, std::vector<double> > >(
+            pcmd,  // dimension q
+            eps1,  // dimension q-1
+            ec, 0, 1, emin, 1, emax);
+    epsi2[ne] =
+        t_value_straight_point_ar<double, std::vector<double>,
+                                  PointCoorMesh<double, std::vector<double> > >(
+            pcmd,  // dimension q
+            eps2,  // dimension q-1
+            ec, 1, 1, emin, 1, emax);
     // Iprint3n(mcout, ec, epsi1[ne], epsi2[ne]);
   }
 }
@@ -391,7 +388,7 @@ void HeedMatterDef::print(std::ostream& file, int l) const {
              "ICS(1/MeV^2)       epsip       epsi1       epsi2   "
              "(1+epsi1)^2+epsi2^2\n";
     for (ne = 0; ne < qe; ne++) {
-      //double et = pow(energy_mesh->get_ec(ne), 2.0);
+      // double et = pow(energy_mesh->get_ec(ne), 2.0);
       Ifile << std::setw(3) << ne << ' ' << std::setw(12)
             << energy_mesh->get_e(ne) << ' ' << std::setw(12) << ACS[ne] << ' '
             << std::setw(12) << ICS[ne] << ' ' << std::setw(12)
@@ -407,5 +404,4 @@ void HeedMatterDef::print(std::ostream& file, int l) const {
   }
   indn.n -= 2;
 }
-
 }

@@ -5,9 +5,8 @@
 #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
-/*
-1998 - 2002,   I. Smirnov
-*/
+
+// 1998 - 2002,   I. Smirnov
 
 namespace Heed {
 
@@ -55,5 +54,4 @@ void eiparticle::print(std::ostream& file, int l) const {
         << " total_loss/keV=" << total_loss / keV << '\n';
   eparticle::print(file, l);
 }
-
 }

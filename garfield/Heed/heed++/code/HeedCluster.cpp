@@ -1,8 +1,7 @@
 #include <iomanip>
 #include "heed++/code/HeedCluster.h"
-/*
-2003, I. Smirnov
-*/
+
+// 2003, I. Smirnov
 
 namespace Heed {
 
@@ -25,5 +24,4 @@ void HeedCluster::print(std::ostream& file, int l) const {
     indn.n -= 2;
   }
 }
-
 }

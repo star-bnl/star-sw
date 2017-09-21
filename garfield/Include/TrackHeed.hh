@@ -140,7 +140,7 @@ class TrackHeed : public Track {
   double m_cX, m_cY, m_cZ;
 
 #ifndef __CINT__
-  std::list<ActivePtr<Heed::gparticle> > m_particleBank;
+  std::list<Heed::ActivePtr<Heed::gparticle> > m_particleBank;
 #endif /* __CINT __ */
   bool Setup(Medium* medium);
   bool SetupGas(Medium* medium);

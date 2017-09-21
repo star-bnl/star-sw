@@ -10,6 +10,8 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 indentation indn;
 
 std::ostream& noindent(std::ostream& f) {
@@ -21,6 +23,8 @@ std::ostream& yesindent(std::ostream& f) {
   return f;
 }
 int s_short_output = 0;
+
+}
 
 #ifndef USE_DEFAULT_STREAMS
 

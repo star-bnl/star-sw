@@ -19,20 +19,21 @@ class HeedCluster : public RegPassivePtr {
         ptloc(fptloc),
         tid(ftid),
         natom(fnatom),
-        nshell(fnshell) {
-    ;
-  }
- 
-  double transferred_energy;  // internal units
+        nshell(fnshell) {}
+  /// Energy transfer in internal units.
+  double transferred_energy;
+
   long estimated_qel;
-  point pt;     // in the first system from tid system
-  point ptloc;  // in the local system, the last system from tid
+  /// Coordinates in the first system from tid system
+  point pt;
+  /// Coordiantes in the local system, the last system from tid
+  point ptloc;
+
   manip_absvol_treeid tid;
   long natom;
   long nshell;
   virtual void print(std::ostream& file, int l) const;
 };
-
 }
 
 #endif

@@ -37,7 +37,7 @@ class circumf : public absref {
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  static absref(absref::* aref[2]);
+  static absref(absref::*aref[2]);
 
  public:
   // constructors
@@ -70,7 +70,6 @@ class circumf : public absref {
   friend std::ostream& operator<<(std::ostream& file, const circumf& f);
 };
 std::ostream& operator<<(std::ostream& file, const circumf& f);
-
 }
 
 #endif

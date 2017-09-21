@@ -1,7 +1,6 @@
 #ifndef TRAJESTEP_H
 #define TRAJESTEP_H
 #include "wcpplib/geometry/vec.h"
-#include "wcpplib/geometry/circumf.h"  // not in this file but usually in depending
 #include "wcpplib/safetl/AbsPtr.h"
 /*
 Step of trajectory of any object.
@@ -35,11 +34,11 @@ class trajestep_limit : public RegPassivePtr {
  public:
   vfloat max_range;  // useful if curvature is varyable.
                      // Then it shows how often it is changed.
-                     //vfloat max_prange;
-                     // When charged particle is curved by electric field,
-                     // the field are changed faster, the stronger is field.
-                     // This parameter limits the step by inverting field force:
-                     // max_prange/field_force.
+  // vfloat max_prange;
+  // When charged particle is curved by electric field,
+  // the field are changed faster, the stronger is field.
+  // This parameter limits the step by inverting field force:
+  // max_prange/field_force.
 
   // 3 following parameters affect if s_cf==1.
   // They regulate precision.
@@ -83,8 +82,6 @@ class trajestep : public absref {
                // Used only if s_cf=1; otherwise ignored.
                // If used, should be perpendicular to dir.
                // internal data
-               //straight sl;  // inited always
-               //circumf cf;  // should be inited only if s_cf==1
 
   // output data:
   int s_range_cf;  // 0 - range have been calculated via straight line
@@ -108,8 +105,7 @@ class trajestep : public absref {
 
   // the new object will continue propagation from the end point of the old one
   trajestep(const trajestep& fts, vfloat mrange);  // new range to travel
-  trajestep(void)
-      :                                            // temporary
+  trajestep(void) : 
         tl(),
         currpos(),
         dir(),
@@ -126,14 +122,9 @@ class trajestep : public absref {
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //                   int& fqareff, absref **&fareff)        // free memory
-  // {fqaref=4; fqareff=0; faref=&aref[0]; fareff=NULL;}
-  static absref(absref::* aref[4]);
-
+  static absref(absref::*aref[4]);
 };
 std::ostream& operator<<(std::ostream& file, const trajestep& f);
-
 }
 
 #endif

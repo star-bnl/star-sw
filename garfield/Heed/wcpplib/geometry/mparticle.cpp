@@ -23,7 +23,6 @@ mparticle::mparticle(gparticle const& gp, double fmass)
   prev_kin_energy = prev_gamma_1 * mass * c_squared;
   curr_gamma_1 = lorgamma_1(currpos.speed / c_light);
   curr_kin_energy = curr_gamma_1 * mass * c_squared;
-
 }
 
 mparticle::mparticle(gparticle const& gp, double fmass, double gamma_1)
@@ -37,7 +36,6 @@ mparticle::mparticle(gparticle const& gp, double fmass, double gamma_1)
   curr_kin_energy = curr_gamma_1 * mass * c_squared;
   orig_kin_energy = curr_kin_energy;
   check_consistency();
-
 }
 
 mparticle::mparticle(manip_absvol* primvol, const point& pt, const vec& vel,
@@ -85,30 +83,28 @@ void mparticle::check_consistency() const {
   check_econd11a(fabs(speed - origin.speed) / (speed + origin.speed), > 1.0e-10,
                  (*this), mcerr);
   speed = c_light * lorbeta(prev_gamma_1);
-  check_econd11a(
-      fabs(speed - prevpos.speed) / (speed + prevpos.speed), > 1.0e-10, (*this),
-      mcerr);
+  check_econd11a(fabs(speed - prevpos.speed) / (speed + prevpos.speed),
+                 > 1.0e-10, (*this), mcerr);
   speed = c_light * lorbeta(curr_gamma_1);
-  check_econd11a(
-      fabs(speed - currpos.speed) / (speed + currpos.speed), > 1.0e-10, (*this),
-      mcerr);
+  check_econd11a(fabs(speed - currpos.speed) / (speed + currpos.speed),
+                 > 1.0e-10, (*this), mcerr);
   double kin_ener = orig_gamma_1 * mass * c_squared;
   if (kin_ener > 1000.0 * DBL_MIN) {
     check_econd11a(
-        fabs(orig_kin_energy - kin_ener) / (orig_kin_energy + kin_ener), > 1.0e-9,
-        "kin_ener=" << kin_ener << '\n' << (*this), mcerr);
+        fabs(orig_kin_energy - kin_ener) / (orig_kin_energy + kin_ener),
+        > 1.0e-9, "kin_ener=" << kin_ener << '\n' << (*this), mcerr);
   }
   kin_ener = prev_gamma_1 * mass * c_squared;
   if (kin_ener > 1000.0 * DBL_MIN) {
     check_econd11a(
-        fabs(prev_kin_energy - kin_ener) / (prev_kin_energy + kin_ener), > 1.0e-9,
-        "kin_ener=" << kin_ener << '\n' << (*this), mcerr);
+        fabs(prev_kin_energy - kin_ener) / (prev_kin_energy + kin_ener),
+        > 1.0e-9, "kin_ener=" << kin_ener << '\n' << (*this), mcerr);
   }
   kin_ener = curr_gamma_1 * mass * c_squared;
   if (kin_ener > 1000.0 * DBL_MIN) {
     check_econd11a(
-        fabs(curr_kin_energy - kin_ener) / (curr_kin_energy + kin_ener), > 1.0e-9,
-        "kin_ener=" << kin_ener << '\n' << (*this), mcerr);
+        fabs(curr_kin_energy - kin_ener) / (curr_kin_energy + kin_ener),
+        > 1.0e-9, "kin_ener=" << kin_ener << '\n' << (*this), mcerr);
   }
 }
 
@@ -180,7 +176,6 @@ void mparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
   }
   currpos.dirloc = currpos.dir;
   currpos.tid.up_absref(&currpos.dirloc);
-
 }
 
 int mparticle::force(const point& /*pt*/, vec& f, vec& f_perp, vfloat& mrange) {
@@ -213,12 +208,12 @@ void mparticle::new_speed() {
     curr_gamma_1 = prev_gamma_1;
     currpos.speed = prevpos.speed;  // new change
                                     // speed is preserved by gparticle
-                                    //return;
+    // return;
   } else {
     vec r = currpos.pt - prevpos.pt;
     double W = 0;  // force * range * cos() = work * cos() ( may be negative )
     if (r != dv0) W = f_mean * r;
-    //W=f1*unit_vec(r) * currpos.prange;
+    // W=f1*unit_vec(r) * currpos.prange;
     // prange should be more exact than difference- no, this is not correct
     // This is work which should lead to increse or decrease the speed
     if (W == 0) {
@@ -226,20 +221,20 @@ void mparticle::new_speed() {
       curr_gamma_1 = prev_gamma_1;
       currpos.speed = prevpos.speed;  // new change
                                       // speed is preserved by gparticle
-                                      //return;
+      // return;
     } else {
       curr_kin_energy = prev_kin_energy + W;
       if (curr_kin_energy <= 0) {
         curr_kin_energy = 0;
         currpos.speed = 0;
         curr_gamma_1 = 0;
-        //if(f2==dv0)  // temporary staying. May be field changes...
+        // if(f2==dv0)  // temporary staying. May be field changes...
         //{
         currpos.dir = dv0;
         //}
-        //else
+        // else
         //{
-        //currpos.dir=unit_vec(f2);
+        // currpos.dir=unit_vec(f2);
         //}
       } else {
         double resten = mass * c_squared;
@@ -249,24 +244,24 @@ void mparticle::new_speed() {
     }
   }
   if (!(i == 0 && j == 0)) {
-    //double f_p_len=
+    // double f_p_len=
     vec fn1 = project_to_plane(f1, prevpos.dir);  // normal component
-                                                  //frelcen1=unit_vec(fn1);
-                                                  //double len1=length(fn1);
+    // frelcen1=unit_vec(fn1);
+    // double len1=length(fn1);
     vec fn2 = project_to_plane(f2, currpos.dir);  // normal component
     check_econd11a(vecerror, != 0, "position 3, after computing fn2\n", mcerr);
     vec mean_fn =
         0.5 * (fn1 + fn2);  // mean ortogonal component of working force
-                            //frelcen2=unit_vec(fn2);
-                            //double len2=length(fn2);
+    // frelcen2=unit_vec(fn2);
+    // double len2=length(fn2);
     double mean_fn_len = length(mean_fn);
     vec fdir = prevpos.dir;
     if (mean_fn_len > 0.0) {
       vec relcen = unit_vec(mean_fn);
       double mean_speed = (prevpos.speed + currpos.speed) * 0.5;
-      vfloat new_rad =
-          (mean_speed * mean_speed * ((prev_gamma_1 + curr_gamma_1) * 0.5 + 1) *
-           mass) / mean_fn_len;
+      vfloat new_rad = (mean_speed * mean_speed *
+                        ((prev_gamma_1 + curr_gamma_1) * 0.5 + 1) * mass) /
+                       mean_fn_len;
       if (new_rad > 0.0) {
         vfloat ang = currpos.prange / new_rad;  // angle to turn
         fdir.turn(prevpos.dir || relcen, ang);  // direction at the end
@@ -297,7 +292,6 @@ void mparticle::new_speed() {
     }
     currpos.dir = fdir;
     check_econd11a(vecerror, != 0, "position 9, after turn\n", mcerr);
-
   }
   currpos.dirloc = currpos.dir;
   currpos.tid.up_absref(&currpos.dirloc);
@@ -306,9 +300,9 @@ void mparticle::new_speed() {
   check_consistency();
 }
 void mparticle::print(std::ostream& file, int l) const {
-  if (l < 0) 
-  Ifile << "mparticle: mass=" << mass << " (" << mass / kg << " kg, "
-        << mass* c_squared / GeV << " GeV)\n";
+  if (l < 0)
+    Ifile << "mparticle: mass=" << mass << " (" << mass / kg << " kg, "
+          << mass* c_squared / GeV << " GeV)\n";
   Ifile << "orig_kin_energy=" << orig_kin_energy << " ("
         << orig_kin_energy / GeV << " GeV)"
         << " orig_gamma_1=" << orig_gamma_1 << '\n';
@@ -325,5 +319,4 @@ std::ostream& operator<<(std::ostream& file, const mparticle& f) {
   (&f)->print(file, 10);
   return file;
 }
-
 }

@@ -18,7 +18,6 @@ double lorgamma_1(double beta);  // gamma - 1
 double lorbeta(const double gamma_1);
 double lorbeta2(const double gamma_1);
 double lorbeta(const double momentum, const double mass);
-
 }
 
 #endif
