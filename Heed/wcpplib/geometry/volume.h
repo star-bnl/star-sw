@@ -139,13 +139,14 @@ class absvol : virtual public absref, public RegPassivePtr {
   // s_ext=1 exit, now point is inside, but embraced volumes are ingnored.
   // s_ext=0 enter, now point is outside
 
-  macro_copy_header(absvol);
   virtual void income(gparticle*) {}
   virtual void chname(char* nm) const { strcpy(nm, "absvol"); }
   virtual void print(std::ostream& file, int l) const;
+  virtual absvol* copy() const;
   virtual std::vector<manip_absvol*> Gamanip_embed(void) const;
 };
 
+/*
 class absref_transmit_2fixsyscoor : public absref_transmit {
  public:
   fixsyscoor* asys1;
@@ -191,6 +192,7 @@ class absref_transmit_absvol : public absref_transmit {
   macro_copy_total(absref_transmit_absvol);
   virtual ~absref_transmit_absvol() { ; }
 };
+*/
 
 // *********  manip_absvol  *********
 class manip_absvol : virtual public absref, public RegPassivePtr {
@@ -224,8 +226,8 @@ class manip_absvol : virtual public absref, public RegPassivePtr {
   }
   void m_chname(char* nm) const;
   virtual void m_print(std::ostream& file, int l) const;
-  macro_copy_header(manip_absvol);
-  virtual ~manip_absvol() { ; }
+  virtual manip_absvol* copy() const;
+  virtual ~manip_absvol() {}
 };
 
 // *********  sh_manip_absvol  *********
@@ -251,10 +253,10 @@ class sh_manip_absvol : public manip_absvol {
 
   virtual void m_chname(char* nm) const;
   virtual void m_print(std::ostream& file, int l) const;
-
-  macro_copy_header(sh_manip_absvol);
+  virtual sh_manip_absvol* copy() const;
 };
 
+/*
 class absref_transmit_2manip : public absref_transmit {
  public:
   ActivePtr<manip_absvol>* amvol1;
@@ -289,8 +291,8 @@ class absref_transmit_manip : public absref_transmit {
   macro_copy_total(absref_transmit_manip);
   virtual ~absref_transmit_manip() { ; }
 };
+*/
 
-//         *************************************
 }
 
 #endif

@@ -9,7 +9,7 @@ namespace Heed {
 
 class BGMesh : public RegPassivePtr {
  public:
-  BGMesh(void) : xmin(0.0), xmax(0.0), q(0), x(0) {}
+  BGMesh() : xmin(0.0), xmax(0.0), q(0), x(0) {}
   BGMesh(double fxmin, double fxmax, long fq);
   double xmin;
   double xmax;
@@ -17,11 +17,10 @@ class BGMesh : public RegPassivePtr {
   long q;
   std::vector<double> x;
   virtual void print(std::ostream& file, int l) const;
-  macro_copy_total(BGMesh);
+   virtual BGMesh* copy() const { return new BGMesh(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
 
-std::vector<double> make_log_mesh(double fxmin, double fxmax, long fq);
 }
 
 #endif

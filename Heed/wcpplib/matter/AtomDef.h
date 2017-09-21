@@ -59,13 +59,13 @@ class AtomDef : public RegPassivePtr {
 
  public:
   /// Default constructor
-  AtomDef(void);
+  AtomDef();
   /// Constructor
   AtomDef(const std::string& fnameh, const std::string& fnotationh, int fZh,
           double fAh);
   /// Destructor
   ~AtomDef();
-  void print(std::ostream& file, int l = 0) const;
+
   const std::string& name(void) const { return nameh; }
   const std::string& notation(void) const { return notationh; }
   int Z(void) const { return Zh; }
@@ -90,7 +90,8 @@ class AtomDef : public RegPassivePtr {
   /// terminates the program through spexit(). Be careful!
   static AtomDef* get_AtomDef(int fZ);
 
-  macro_copy_total(AtomDef);
+  void print(std::ostream& file, int l = 0) const;
+  virtual AtomDef* copy() const { return new AtomDef(*this); } 
 };
 std::ostream& operator<<(std::ostream& file, const AtomDef& f);
 

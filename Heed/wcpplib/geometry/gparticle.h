@@ -165,6 +165,22 @@ extern trajestep_limit gtrajlim;
 
 class gparticle : public RegPassivePtr {
  public:
+  /// Default constructor.
+  gparticle() : s_life(0), nstep(0) {}
+  /// Constructor from initial position, time and velocity.
+  gparticle(const stvpoint& sp)
+      : s_life(1), nstep(0), origin(sp), prevpos(), currpos(sp), nextpos() {
+    nextpos = calc_step_to_bord();
+    physics();
+  }
+  /// Constructor.
+  // As far as I can now understand, PassivePtr<primvol> will be at
+  // origin.tid.eid[0]
+  gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
+            vfloat time);
+  /// Destructor.
+  virtual ~gparticle() {}
+
   int s_life;
   /// Step number.
   long nstep;                      
@@ -181,18 +197,6 @@ class gparticle : public RegPassivePtr {
   // current relcen computed
   // at the last call of calc_step_to_bord(), only for debug print
   vec curr_relcen;  
-
-  gparticle(void) : s_life(0), nstep(0) { ; }
-  gparticle(const stvpoint& sp)
-      : s_life(1), nstep(0), origin(sp), prevpos(), currpos(sp), nextpos() {
-    nextpos = calc_step_to_bord();
-    physics();
-  }
-
-  gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-            vfloat time);
-  // As far as I can now understand, PassivePtr< primvol > will be at
-  // origin.tid.eid[0]
 
   virtual void step(void);  // Assigns prevpos=currpos; and currpos=nextpos;
   // calls change_vol(); if necessary and makes nextpos=calc_step_to_bord();
@@ -217,10 +221,10 @@ class gparticle : public RegPassivePtr {
   // In calc_step_to_bord() it is set to gtrajlim.max_straight_arange.
   // vec& frelcen: position of the center of circumf. relatively currpos
 
-  virtual void physics_after_new_speed(void) { ; }
+  virtual void physics_after_new_speed(void) {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
-  virtual void physics(void) { ; }
+  virtual void physics(void) {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
   virtual void physics_mrange(double& fmrange);
@@ -242,8 +246,8 @@ class gparticle : public RegPassivePtr {
     }
   }
   virtual void print(std::ostream& file, int l) const;
-  macro_copy_total(gparticle);
-  virtual ~gparticle() { ; }
+  virtual gparticle* copy() const { return new gparticle(*this); }
+
 };
 }
 

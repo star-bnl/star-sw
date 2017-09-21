@@ -35,12 +35,12 @@ class HeedParticle_BGM : public eparticle {
                    std::list<ActivePtr<gparticle> >& particleBank,
                    HeedFieldMap* fieldmap, int fs_loss_only = 0,
                    int fs_print_listing = 0);
-  macro_copy_total(HeedParticle_BGM);
   /// Destructor
   virtual ~HeedParticle_BGM() {}
 
   virtual void physics(void);
   virtual void print(std::ostream& file, int l) const;
+  virtual HeedParticle_BGM* copy() const { return new HeedParticle_BGM(*this); }
 
  private:
   int s_print_listing;

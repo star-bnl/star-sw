@@ -88,6 +88,25 @@ bool Boxin3(const std::vector<std::vector<std::vector<double> > >& value,
             double& f, const int iOrder);
 
 }
+
+inline double InterpolateBinarySearch(const std::vector<double>& x,
+                                      const std::vector<double>& y,
+                                      const double x0) {
+
+  int iLow = 0;
+  int iUp = x.size() - 1;
+  while (iUp - iLow > 1) {
+    const int iM = (iUp + iLow) >> 1;
+    if (x0 >= x[iM]) {
+      iLow = iM;
+    } else {
+      iUp = iM;
+    }
+  }
+  // Linear interpolation.
+  return y[iLow] + (x0 - x[iLow]) * (y[iUp] - y[iLow]) / (x[iUp] - x[iLow]);
+}
+
 }
 
 #endif

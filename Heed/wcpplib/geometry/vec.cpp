@@ -27,8 +27,6 @@ namespace Heed {
 
 int vecerror = 0;
 
-macro_copy_body(absref_transmit)
-
 void absref_transmit::print(std::ostream& file, int l) const {
   if (l <= 0) return;
   Ifile << "absref_transmit::print(l=" << l << ") qaref=" << qaref

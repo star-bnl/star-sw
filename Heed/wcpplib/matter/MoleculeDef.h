@@ -5,6 +5,7 @@
 
 namespace Heed {
 
+/// Helper class for Van-der-Waals equation.
 class VanDerWaals {
  private:
   double ah;
@@ -32,7 +33,7 @@ class VanDerWaals {
   // Return number of moles in the unit volume
   double volume_of_mole(double T, double p, int& s_not_single);
 
-  macro_copy_header(VanDerWaals);
+  virtual VanDerWaals* copy() const;
 };
 std::ostream& operator<<(std::ostream& file, const VanDerWaals& f);
 
@@ -102,7 +103,7 @@ class MoleculeDef : public AtomMixDef {
   /// but does not terminate the program as that for AtomDef. Be careful.
   static MoleculeDef* get_MoleculeDef(const std::string& fnotation);
 
-  macro_copy_total(MoleculeDef);
+  virtual MoleculeDef* copy() const { return new MoleculeDef(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const MoleculeDef& f);
 }

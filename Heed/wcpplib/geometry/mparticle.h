@@ -48,11 +48,11 @@ class mparticle : public gparticle {
   // If force is anti-parallel to dir, restrics range till exceeding
   // of kinetic energy.
 
-  virtual void physics_after_new_speed(void) { ; }
+  virtual void physics_after_new_speed() {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
 
-  virtual void physics(void) { ; }
+  virtual void physics() {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
 
@@ -78,7 +78,7 @@ class mparticle : public gparticle {
   // Set new speed, direction and time for currpos.
 
   /// Constructors
-  mparticle(void) : gparticle(), mass(0.0) { ; }
+  mparticle() : gparticle(), mass(0.0) {}
   mparticle(gparticle const& gp, double fmass);
   // Dangerous,
   // only not for very fast particles, since gamma-1 is computed from speed.
@@ -94,8 +94,9 @@ class mparticle : public gparticle {
             double fmass, double gamma_1);
 
   virtual void print(std::ostream& file, int l) const;
-  macro_copy_total(gparticle);
-  virtual ~mparticle() { ; }
+  virtual mparticle* copy() const { return new mparticle(*this); }
+  /// Destructor.
+  virtual ~mparticle() {}
 };
 
 std::ostream& operator<<(std::ostream& file, const mparticle& f);

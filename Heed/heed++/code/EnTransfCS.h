@@ -27,7 +27,7 @@ class EnTransfCS : public RegPassivePtr {
   EnTransfCS(double fparticle_mass, double fgamma_1, int fs_primary_electron,
              HeedMatterDef* fhmd, long fparticle_charge = 1);
   virtual void print(std::ostream& file, int l) const;
-  macro_copy_total(EnTransfCS);
+  virtual EnTransfCS* copy() const { return new EnTransfCS(*this); }
 
   /// Particle mass [MeV]
   double particle_mass;

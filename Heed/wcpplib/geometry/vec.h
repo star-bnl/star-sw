@@ -142,8 +142,8 @@ class absref_transmit {
     ;
   }
   absref_transmit(const absref_transmit& f) { *this = f; }
-  macro_copy_header(absref_transmit);
   virtual void print(std::ostream& file, int l) const;
+  virtual absref_transmit* copy() const { return new absref_transmit(*this); }
 
   /// This function is meant to be redefined in derived class to
   /// obtain additional address except those contained in aref and aref_pointer.
@@ -462,7 +462,7 @@ class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
         piv((f.Gapiv() != NULL) ? (*(f.Gapiv())) : point()),
         bas((f.Gabas() != NULL) ? (*(f.Gabas())) : basis()) {}
   virtual void print(std::ostream& file, int l) const;
-  macro_copy_total(fixsyscoor);
+  virtual fixsyscoor* copy() const { return new fixsyscoor(*this); }
   virtual ~fixsyscoor() {}
 
  protected:

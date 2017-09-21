@@ -24,13 +24,13 @@ class HeedPhoton : public gparticle {
              vfloat time, long fparent_particle_number, double fenergy,
              std::list<ActivePtr<gparticle> >& particleBank,
              HeedFieldMap* fieldmap, int fs_print_listing = 0);
-  macro_copy_total(HeedPhoton);
   /// Destructor
   virtual ~HeedPhoton() {}
 
   void physics_after_new_speed(void);
   virtual void physics(void);
   virtual void print(std::ostream& file, int l) const;
+  virtual HeedPhoton* copy() const { return new HeedPhoton(*this); }
 
   long particle_number;
   long parent_particle_number;
