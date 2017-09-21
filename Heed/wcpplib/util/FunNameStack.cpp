@@ -10,6 +10,7 @@ The file is provided "as is" without express or implied warranty.
 
 #include <iostream>
 #include <iomanip>
+#include <cstring>
 #include "wcpplib/util/FunNameStack.h"
 
 

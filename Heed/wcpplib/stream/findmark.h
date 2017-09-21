@@ -15,6 +15,7 @@ text appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+#include <cstring>
 #include "wcpplib/util/FunNameStack.h"
 
 namespace Heed {

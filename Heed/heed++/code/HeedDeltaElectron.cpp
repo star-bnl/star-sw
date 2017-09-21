@@ -14,8 +14,6 @@
 
 namespace Heed {
 
-const long max_q_low_path_length_for_direct = 5;
-
 int HeedDeltaElectron::s_low_mult_scattering = 1;
 int HeedDeltaElectron::s_high_mult_scattering = 1;
 
@@ -367,6 +365,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
 #endif
     if (q_low_path_length > 0) {
 #ifdef DIRECT_LOW_IF_LITTLE
+      const long max_q_low_path_length_for_direct = 5;
       if (q_low_path_length < max_q_low_path_length_for_direct) {
         // direct modeling
         if (s_print_listing == 1) {
