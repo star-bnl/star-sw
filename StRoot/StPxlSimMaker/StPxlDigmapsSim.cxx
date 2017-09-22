@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlDigmapsSim.cxx,v $
+ * Revision 1.1.2.3  2017/09/22 19:29:56  dongx
+ * Review comments from Victor implemented
+ *
  * Revision 1.1.2.2  2017/09/20 21:13:02  dongx
  * Review comments from Jason implemented
  *   - Int_t -> int etc.
@@ -51,12 +54,12 @@ StPxlDigmapsSim::StPxlDigmapsSim(const Char_t *name): StPxlISim(name),
 
 StPxlDigmapsSim::~StPxlDigmapsSim()
 {
-  if (mRndGen) delete mRndGen;
-  if (mDigAdc) delete mDigAdc;
-  if (mDigPlane) delete mDigPlane;
-  if (mDigTransport) delete mDigTransport;
-  if (mPxlDb) delete mPxlDb;
-  if (mdEdxvsBGNorm) delete mdEdxvsBGNorm;
+  delete mRndGen;
+  delete mDigAdc;
+  delete mDigPlane;
+  delete mDigTransport;
+  delete mPxlDb;
+  delete mdEdxvsBGNorm;
 }
 
 int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet, const Int_t run)
@@ -72,16 +75,13 @@ int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDa
     if (!mPxlDb)
     {
       LOG_ERROR << "StPxlDigmapsSim - E - mPxlDb is not available" << endm;
-      return kStErr;
-    }
-    else
-    {
-      LOG_INFO << "StPxlDigmapsSim - Using geometry from pxlDB" << endm;
+      return kStFatal;
     }
   }
   else
   {
-    LOG_INFO << "StPxlDigmapsSim - Using ideal geometry" << endm;
+    LOG_ERROR << "StPxlDigmapsSim - E - no PxlDb" << endm;
+    return kStFatal;
   }
 
   pxlControl_st const* const pxlControlTable = mPxlDb->pxlControl();
@@ -243,13 +243,10 @@ int StPxlDigmapsSim::addPxlRawHits(const StMcPxlHitCollection& mcPxlHitCol,
               if (goodPixel(iSec+1 , iLad+1, iSen+1, ix, iy))
               {
                 ++n_pxl_wmask;
-                int const idTruth = mcPix->parentTrack()? mcPix->parentTrack()->key() : -1;
+                int const idTruth = mcPix->parentTrack()? mcPix->parentTrack()->key() : 0;
                 LOG_DEBUG << "  adding a new pxlRawHit  sector/ladder/sensor = " << iSec + 1 << "/" << iLad + 1 << "/" << iSen + 1 << " ix/iy=" << ix << "/" << iy << " idTruth=" << idTruth << endm;
 
-                StPxlRawHit* pxlRawHit = new StPxlRawHit(iSec+1, iLad+1, iSen+1, ix, iy, idTruth);
-                pxlRawHitCol.addRawHit(*pxlRawHit);
-                delete pxlRawHit;
-                // pxlRawHitCol.addRawHit(StPxlRawHit(iSec + 1, iLad + 1, iSen + 1, ix, iy, idTruth));
+                pxlRawHitCol.addRawHit(StPxlRawHit(iSec + 1, iLad + 1, iSen + 1, ix, iy, idTruth));
               }
             }
           }
@@ -318,9 +315,10 @@ float StPxlDigmapsSim::calculateDepositedEnergy(float const totalLength, float c
 
 double StPxlDigmapsSim::dEdxvsBGNorm(double *x, double *par)
 {
+  static const double threshold = 10.;
   double beta2 = x[0]*x[0]/(1+x[0]*x[0]);
   double delta = TMath::Log(x[0])+par[2];
-  if(x[0]<=10.) {
+  if(x[0]<=threshold) {
     return par[0]/beta2*(0.5*TMath::Log(x[0]*x[0]*par[1])-beta2-delta/2.);
   } else {
     return par[3] + par[4]*TMath::Log(x[0])+par[5]*TMath::Log(x[0])*TMath::Log(x[0]);
