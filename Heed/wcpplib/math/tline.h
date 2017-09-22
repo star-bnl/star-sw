@@ -51,38 +51,39 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// ---------------------------------------------------------------------
-// The simplest mesh which has equal steps, and
-// determined by the number of "bins", minimum and maximum.
-// The object of this class keeps all ingredients in it.
-// It can be therefore copied and deleted freely.
-// T is the type of returned value.
-// T cannot be const.
-// At construction q has meaning of number of intervals.
+/// Mesh with equal steps.
+/// Determined by the number of "bins", minimum and maximum.
+/// The object of this class keeps all ingredients in it.
+/// It can be therefore copied and deleted freely.
+/// T is the type of returned value.
+/// T cannot be const.
+/// At construction q has meaning of number of intervals.
 
 template <class T>
 class EqualStepCoorMesh {
  public:
-  // get number of intervals
+  /// Get number of intervals.
   inline long get_qi(void) const { return q; }
 
   inline T get_xmin(void) const { return xmin; }
   inline T get_xmax(void) const { return xmax; }
 
-  // get single coordinate of the point in the mesh.
-  // It can be last point of the last interval:
+  /// Get single coordinate of the point in the mesh.
+  /// It can be last point of the last interval.
   inline void get_scoor(long n, T& b) const { b = xmin + n * step; }
-
+  /// Get interval. Return 1 if interval is found.
   inline int get_interval(long n, T& b1, T& b2) const {
     if (n < 0 || n >= q) return 0;
     b1 = xmin + n * step;
     b2 = b1 + step;
     return 1;
   }
-  // return 1 if interval is found
 
-  virtual int get_interval(T x,              // is coordinate
-                           long& n1) const;  // is the bin number
+  /** Get interval.
+    * \param x coordinate
+    * \param n1 bin number
+    */
+  virtual int get_interval(T x, long& n1) const;
 
   // The same as above, but returns more information:
   // n1, b1: the bin number and left border,
@@ -102,14 +103,15 @@ class EqualStepCoorMesh {
     return 1;
   }
 
-  EqualStepCoorMesh<T>(void) : q(0), xmin(0), xmax(0), step(0) { ; }
+  EqualStepCoorMesh<T>() : q(0), xmin(0), xmax(0), step(0) {}
   EqualStepCoorMesh<T>(long fq, T fxmin, T fxmax);
   void print(std::ostream& file) const;
 
  private:
-  long q;  // the number of steps or intervals;
-           // Attention: if you count the number of points with the
-           // last point of the last step there will be q+1 points.
+  // Number of steps or intervals.
+  /// Attention: if you count the number of points with the
+  /// last point of the last step there will be q+1 points.
+  long q;  
   T xmin;
   T xmax;
   T step;
@@ -362,10 +364,9 @@ long t_find_interval_end(double x, long q, const D& coor, long n_start) {
 #endif
 }
 
-// ---------------------------------------------------------------------
-// The generic mesh which has arbitrary steps.
-// The array determining the step edges is located somewhere outside.
-// In object of this class only the raw pointer is contained with consequences:
+/// Generic mesh with has arbitrary steps.
+/// The array determining the step edges is located somewhere outside.
+/// In object of this class only the raw pointer is contained with consequences:
 
 /*
 Attention, here there is a raw pointer to mesh.
@@ -719,31 +720,6 @@ std::ostream& operator<<(std::ostream& file, const PointCoorMesh<T, D>& f) {
 // Perhaps the latter might be slower.
 
 //-------------------------------------------------------------
-// Auxiliary class which proides easy writting of polimorphic operator==
-// See check_equat.c for details.
-
-template <class T, class B>
-int verify_types(const T* ths, const B* b2, const T** tb2) {
-  mfunnamep(
-      "template<class T> verify_types(const T* ths, const B* b2, const "
-      "T* tb2)");
-  // mcout<<"verify_types is working\n";
-  // Iprintn(mcerr, typeid(T).name());
-  // Iprintn(mcerr, typeid(B).name());
-  if (typeid(*b2) != typeid(*ths)) return 0;
-  if (typeid(*ths) != typeid(T)) {
-    funnw.ehdr(mcerr);
-    mcerr << "Operator == for class T is called for first object of different "
-             "class\n";
-    mcerr << "This may mean that this operator is missed in one of derived "
-             "classes\n";
-    Iprintn(mcerr, typeid(*ths).name());
-    spexit(mcerr);
-  }
-  *tb2 = dynamic_cast<const T*>(b2);
-  check_econd11(*tb2, == NULL, mcerr);
-  return 1;
-}
 
 // Step array is like a histogram.
 // Each value of y represents constant height in each interval
@@ -751,6 +727,7 @@ int verify_types(const T* ths, const B* b2, const T** tb2) {
 // its size should be longer by unity than the number of y-points,
 // the last x-point being represent the end of the last bin.
 
+/*
 // Extract value defined by this array for abscissa x
 template <class T, class D, class M>
 T t_value_step_ar(const M& mesh, const D& y,  // array of function values
@@ -814,9 +791,11 @@ T t_value_step_ar(const M1& mesh1, const M2& mesh2,
   check_econd11(i_ret, != 1, mcerr);
   return y[n11][n21];
 }
+*/
 
 // Fill the array y like a histogram adding value val (or 1) for bin
 // corresponding to abscissa x
+/*
 template <class T, class D, class M>
 void t_hfill_step_ar(const M& mesh, const D& y,  // array of function values
                      T x, T val = 1, int s_include_last_point = 0)
@@ -902,6 +881,7 @@ void t_hfill_step_ar_ac(const M1& mesh1, const M2& mesh2,
   y.ac(n1, n2) += val;
   return;
 }
+*/
 
 /*
 Integrate the function represented by array y (interpreted as
@@ -996,9 +976,6 @@ T t_integ_step_ar(const M& mesh, const D& y,  // array of function values
       s += 0.5 * (b * b - a * a) * y[i];
     }
   }
-  // Iprintn(mcout, s);
-
-  // T t;
   return s;
 }
 
@@ -1085,7 +1062,7 @@ T t_integ_generic_step_ar(const M& mesh,
 // simplified version for total integration along all the mesh
 // It is without "power" as function above.
 // So it is sum of functions multiplied by bin widths.
-
+/*
 template <class T, class D, class M>
 T t_total_integ_step_ar(const M& mesh, const D& y  // array of function values
                         ) {
@@ -1211,6 +1188,7 @@ T t_total_integ_step_ar(const M1& mesh1, const M2& mesh2,
   // T t;
   return s1;
 }
+*/
 
 /* Finds value x, such that the integral of y (rectangular bins)
 is equal to integ.
@@ -1219,7 +1197,7 @@ is equal to integ.
 // serial random number generation.
 // For the last purpose it is more smart to integrate the array
 // once. This program integrates it each time.
-
+/*
 template <class T, class D, class M>
 T t_find_x_for_integ_step_ar(const M& mesh,
                              const D& y,           // array of function values
@@ -1262,7 +1240,7 @@ T t_find_x_for_integ_step_ar(const M& mesh,
   // Iprintn(mcout, x);
   return x;
 }
-
+*/
 // The following program the same as previous, but
 // considers the array already integrated.
 // The algorithm is then much faster, since it uses binary search.
@@ -1622,42 +1600,6 @@ T t_value_straight_point_ar(const M& mesh,
   T x2;
   mesh.get_scoor(n2, x2);
   return t_value_straight_2point(x1, y[n1], x2, y[n2], x, s_ban_neg);
-  /*
-  T a = (y[n2] - y[n1])/(x2 - x1);
-  // Less numerical precision
-  //T b = y[n1];
-  //T res = a * ( x - x1) + b;
-  // More numerical precision (although it is not proved),
-  // starting from what is closer to x
-  T res;
-  T dx1 = x - x1;
-  T adx1 = (dx1 > 0) ? dx1 : -dx1;       // absolute value
-  //if(dx1 > 0)
-  //  adx1 = dx1;
-  //else
-  //  adx1 = -dx1;
-  T dx2 = x - x2;
-  T adx2 = (dx2 > 0) ? dx2 : -dx2;            // absolute value
-  //if(dx2 > 0)
-  //  adx2 = dx2;
-  //else
-  //  adx2 = -dx2;
-  if(adx1 < adx2)  // x is closer to x1
-  {
-    res = a * dx1 + y[n1];
-  }
-  else
-  {
-    res = a * dx2 + y[n2];
-  }
-  //T res = a * ( x - x1) + b;
-  if(s_ban_neg == 1 && res < 0.0) res = 0.0;
-  //Iprint2n(mcout, x, res);
-  //Iprint2n(mcout, x1, x2);
-  //Iprint2n(mcout, y[n1], y[n2]);
-  //Iprintn(mcout, a);
-  return res;
-  */
 }
 
 // Extract value defined by this array for abscissa x
@@ -1713,7 +1655,7 @@ T t_value_power_2point(T x1, T y1, T x2, T y2, T x) {
   }
   return res;
 }
-
+/*
 // in the case of zero of different signs of x it uses linear interpolation
 template <class T>
 T t_value_power_extended_2point(T x1, T y1, T x2, T y2, T x) {
@@ -1733,6 +1675,7 @@ T t_value_power_extended_2point(T x1, T y1, T x2, T y2, T x) {
   }
   return res;
 }
+*/
 
 template <class T>
 T t_value_exp_2point(T x1, T y1, T x2, T y2, T x) {
@@ -1964,7 +1907,7 @@ T t_integ_generic_point_ar(
 // if there are several maximal bin with the same height
 // it will decline from the first one, which might be
 // not accurate, although the result is anyway reasonable.
-
+/*
 template <class T, class D, class M>
 T t_width_at_hheight_step_ar(const M& mesh, const D& y) {
   // 0 - not include, 1 - include
@@ -2034,7 +1977,7 @@ T t_width_at_hheight_step_ar(const M& mesh, const D& y) {
   // Iprint3n(mcout, s1, s2, s2 - s1);
   return s2 - s1;
 }
-
+*/
 }
 
 #endif

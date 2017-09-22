@@ -290,8 +290,7 @@ double AveragePhotoAbsCS::get_CS(double energy) const {
   }
   const double w2 = width * 0.5;
   const double e1 = std::max(energy - w2, 0.);
-  const double res = real_pacs->get_integral_CS(e1, energy + w2) / width;
-  return res;
+  return real_pacs->get_integral_CS(e1, energy + w2) / width;
 }
 
 double AveragePhotoAbsCS::get_integral_CS(double energy1,

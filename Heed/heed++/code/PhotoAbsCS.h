@@ -114,11 +114,9 @@ class PhotoAbsCS {
 class AveragePhotoAbsCS : public PhotoAbsCS {
   ActivePtr<PhotoAbsCS> real_pacs;
   double width;
-  // parameters for get_integral_CS
-  // (it can be done only approximate by numerical integration)
-  long max_q_step;  // if real q is more, the
-                    // function calls "precise" get_integral_CS from PhotoAbsCS,
-                    // so it will be without smoothing.
+  /// Max. number of integration steps (in get_integral_CS).
+  /// If real q is more, the function calls PhotoAbsCs::get_integral_CS.
+  long max_q_step;
   /// Integration step, for example, 1/20 from width.
   double step; 
 
@@ -126,17 +124,20 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
   /// Default constructor
   AveragePhotoAbsCS() {}
   /** Constructor
-    * \param apacs photoabsorption cross-section
-    * \param fwidth [MeV]
-    * \param fstep [MeV]
+    * \param apacs 
+             photoabsorption cross-section
+    * \param fwidth 
+             width [MeV] for smoothing
+    * \param fstep 
+             step size [MeV] for numerical integration
+    * \param fmax_q_step
+             max number of integration steps
     */
   AveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,
                     double fstep, long fmax_q_step);
   /// Destructor
   virtual ~AveragePhotoAbsCS() {}
-  /// Retrieve the cross-section [Mb] at a given energy [MeV]. 
   virtual double get_CS(double energy) const;
-  /// Retrieve the integral cross-section [Mb * MeV] at a given energy [MeV].
   virtual double get_integral_CS(double energy1, double energy2) const;
 
   /// Multiply the height, y-axis, by some factor.

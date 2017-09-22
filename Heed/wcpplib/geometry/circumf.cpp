@@ -25,9 +25,7 @@ circumf::circumf(const point& fpiv, const vec& fdir, vfloat frad)
   dir = unit_vec(fdir);
 }
 circumf::circumf(const circumf& f)
-    : absref(f), piv(f.piv), dir(f.dir), rad(f.rad) {
-  ;
-}
+    : absref(f), piv(f.piv), dir(f.dir), rad(f.rad) {}
 
 void circumf::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(2, aref));
