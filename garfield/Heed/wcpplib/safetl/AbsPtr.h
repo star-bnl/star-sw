@@ -13,6 +13,7 @@ The file is provided "as is" without express or implied warranty.
 */
 
 #include <iostream>
+#include <cstring>
 #include <limits.h>
 #include <typeinfo>
 #include <string.h>
@@ -136,24 +137,6 @@ namespace Heed {
 
 #define AnyType_copy(derived_type, base_type) \
   virtual derived_type* copy(void) const { return new derived_type(*this); }
-
-// Interesting that the following macros do not seem to be working
-// with templates with more than one argument, since preprocessor
-// perhaps interprate the template arguments as macro arguments
-// and produce compiler error.
-// Direct use of these functions is recommended in this case
-#define macro_copy_total(type) \
-  virtual type* copy(void) const { return new type(*this); }
-#define macro_copy_total_zero(type) virtual type* copy(void) const = 0
-#define macro_copy_header(type) virtual type* copy(void) const
-#define macro_copy_body(type) \
-  type* type::copy(void) const { return new type(*this); }
-#define macro_copy_body_not_defined(type)                                      \
-  type* type::copy(void) const {                                               \
-    mcerr << "macro_copy_body_not_defined(" << #type << "): forbidden call\n"; \
-    spexit(mcerr);                                                             \
-    return NULL;                                                               \
-  }
 
 template <class X>
 class StandardCopyDefinition {
@@ -388,7 +371,7 @@ class ActivePtr {
     return *this;
   }
 
-  macro_copy_total(ActivePtr);
+  virtual ActivePtr* copy() const { return new ActivePtr(*this); }
   virtual ~ActivePtr() { 
     // unfortunately it should be virtual
     // in order to avoid some rare (not met in practice but
@@ -733,7 +716,7 @@ class RegPassivePtr {
     if (cpp) cpp->change_rpp(NULL);
   }
 
-  macro_copy_total(RegPassivePtr);
+  virtual RegPassivePtr* copy() const { return new RegPassivePtr(*this); }
 
   virtual ~RegPassivePtr();
   // If there are pointers addressed this object and s_ban_del = 1,
@@ -1247,7 +1230,7 @@ class PassivePtr {
       return cpp->get_number_of_booked();
   }
   void print(std::ostream& file, int l = 1) const;
-  macro_copy_total(PassivePtr);
+  virtual PassivePtr* copy() const { return new PassivePtr(*this); }
   virtual ~PassivePtr();
 
  private:

@@ -401,11 +401,11 @@ class DynLinArr : public RegPassivePtr {
   void sort_select_decreasing(DynLinArr<long>& sort_ind,
                               long q_to_sort = 0) const;
 
-  macro_copy_header(DynLinArr);
+  virtual DynLinArr* copy() const;
 
   virtual ~DynLinArr() {
     check();
-    if (el != NULL) delete[] el;
+    if (el) delete[] el;
   }
 
  private:
@@ -414,7 +414,9 @@ class DynLinArr : public RegPassivePtr {
   //(regarding mutable and pilfer see ActivePtr for more comments).
 };
 template <class T>
-macro_copy_body(DynLinArr<T>)
+DynLinArr<T>* DynLinArr<T>::copy() const {
+  return new DynLinArr<T>(*this);  
+}
 
 template <class T>
 void apply1(DynLinArr<T>& ar, void (*fun)(T& f)) {
@@ -2218,8 +2220,8 @@ qel.acu(1)\n";
     }
     return 1;
   }
-  macro_copy_total(DynArr);
-  virtual ~DynArr(void) {}
+  virtual DynArr* copy() const { return new DynArr(*this); }
+  virtual ~DynArr() {}
 
  private:
   mutable DynLinArr<long> qel;

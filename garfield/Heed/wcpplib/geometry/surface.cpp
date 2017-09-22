@@ -375,8 +375,6 @@ ulsvolume::ulsvolume(const ulsvolume& f)
   for (int n = 0; n < qsurf; ++n) surf[n].put(f.surf[n].get());
 }
 
-macro_copy_body(ulsvolume)
-
 void ulsvolume::print(std::ostream& file, int l) const {
   char s[1000];
   chname(s);
@@ -398,7 +396,6 @@ manip_ulsvolume::manip_ulsvolume(manip_ulsvolume& f)
 
 manip_ulsvolume::manip_ulsvolume(const manip_ulsvolume& f)
     : absref(f), manip_absvol(f), ulsvolume(f) {}
-macro_copy_body(manip_ulsvolume)
 
 void manip_ulsvolume::print(std::ostream& file, int l) const {
   if (l <= 0) return;

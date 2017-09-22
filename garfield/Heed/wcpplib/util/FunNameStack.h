@@ -511,10 +511,6 @@ extern int s_exit_without_core;          // the key above have larger priority
 
 namespace Heed {
 
-const int pqname = 1000;  // this depth of stack is completely OK
-                          // for all correct programs.
-// If you have overflow, it is likely the infinite loop with recursion
-// in your program!
 
 }
 
@@ -534,6 +530,10 @@ NameStack and initialize one object of this class per each found thread.
 
 class NameStack {
  public:
+  static const int pqname = 1000;
+  // this depth of stack is completely OK for all correct programs.
+  // If you have overflow, it is likely the infinite loop with recursion
+  // in your program!
   int qname;
   char* name[pqname];
   pthread_t id;
@@ -587,6 +587,7 @@ class FunNameStack {
 // and wants it to be completed.
 #else
   int qname;
+  static const int pqname = 1000;
   char* name[pqname];
 #endif
   int s_init;  // 1 - sign that it is inited,

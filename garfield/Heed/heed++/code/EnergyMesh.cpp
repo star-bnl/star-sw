@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& file, EnergyMesh& f) {
   indn.n += 2;
   Ifile << "emin=" << f.emin << " emax=" << f.emax
         << " quantity of intervals=" << f.q << '\n'
-        << " maximal possible quantity of intervals=" << pqener << '\n';
+        << " maximal quantity of intervals=" << EnergyMesh::pqener << '\n';
   Ifile << " number  left side        center       right side       widht\n";
   for (int n = 0; n < f.q; n++) {
     Ifile << std::setw(5) << n << std::setw(15) << f.e[n] << std::setw(15)

@@ -36,11 +36,11 @@ class HeedParticle : public eparticle {
                std::list<ActivePtr<gparticle> >& particleBank,
                HeedFieldMap* fieldmap, int fs_loss_only = 0,
                int fs_print_listing = 0);
-  macro_copy_total(HeedParticle);
   /// Destructor
   virtual ~HeedParticle() {}
 
   virtual void physics(void);
+  virtual HeedParticle* copy() const { return new HeedParticle(*this); }
   virtual void print(std::ostream& file, int l) const;
 
  private:

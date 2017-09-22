@@ -6,9 +6,10 @@
 
 namespace Heed {
 
+/// Cluster.
 class HeedCluster : public RegPassivePtr {
  public:
-  HeedCluster(void)
+  HeedCluster()
       : transferred_energy(0.0), estimated_qel(0), natom(0), nshell(0) {}
   HeedCluster(double ftransferred_energy, long festimated_qel, const point& fpt,
               const point& fptloc, const manip_absvol_treeid& ftid, long fnatom,
@@ -26,7 +27,7 @@ class HeedCluster : public RegPassivePtr {
   long estimated_qel;
   /// Coordinates in the first system from tid system
   point pt;
-  /// Coordiantes in the local system, the last system from tid
+  /// Coordinates in the local system, the last system from tid
   point ptloc;
 
   manip_absvol_treeid tid;

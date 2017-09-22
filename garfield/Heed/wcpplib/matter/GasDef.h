@@ -113,14 +113,10 @@ class GasDef : public MatterDef {
          double fdensity = -1.0);
 
   virtual void print(std::ostream& file, int l = 0) const;
-
-  macro_copy_total(GasDef);
+  virtual GasDef* copy() const { return new GasDef(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const GasDef& f);
 
-double gasdensity(double temperature, double pressure,
-                  std::vector<PassivePtr<MoleculeDef> > molec,
-                  std::vector<double> weight_quan_molec, long qmolec);
 }
 
 #endif

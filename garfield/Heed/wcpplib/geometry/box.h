@@ -30,7 +30,7 @@ class box : public absvol {
 
  public:
   /// Default constructor.
-  box(void);
+  box();
   // Constructor, compute precision from mean of dimensions.
   box(vfloat fdx, vfloat fdy, vfloat fdz, const std::string& fname);
   /// Constructor with user-provided precision.
@@ -38,7 +38,6 @@ class box : public absvol {
       const std::string& fname);
   box(box& fb);
   box(const box& fb);
-  macro_copy_header(box);
   /// Destructor
   virtual ~box() {}
 
@@ -52,6 +51,7 @@ class box : public absvol {
   virtual void income(gparticle* gp);
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
+  virtual box* copy() const;
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
@@ -62,15 +62,15 @@ class box : public absvol {
 class manip_box : public manip_absvol, public box {
  public:
   /// Constructor
-  manip_box(void) : manip_absvol(), box() {}
+  manip_box() : manip_absvol(), box() {}
   manip_box(const box& f) : manip_absvol(), box(f) {}
-  macro_copy_header(manip_box);
   /// Destructor
   virtual ~manip_box() {}
 
   virtual absvol* Gavol(void) const;
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
+  virtual manip_box* copy() const;
 };
 
 // *****   sh_manip_box  ********
@@ -78,17 +78,17 @@ class manip_box : public manip_absvol, public box {
 class sh_manip_box : virtual public sh_manip_absvol, public box {
  public:
   /// Constructor
-  sh_manip_box(void) : sh_manip_absvol(), box() {}
+  sh_manip_box() : sh_manip_absvol(), box() {}
   sh_manip_box(const box& f) : sh_manip_absvol(), box(f) {}
   sh_manip_box(const abssyscoor& fcsys, const box& fbx)
       : sh_manip_absvol(fcsys), box(fbx) {}
-  macro_copy_header(sh_manip_box);
   /// Destructor
-  virtual ~sh_manip_box() { ; }
+  virtual ~sh_manip_box() {}
 
   virtual absvol* Gavol(void) const;
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
+  virtual sh_manip_box* copy() const;
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);

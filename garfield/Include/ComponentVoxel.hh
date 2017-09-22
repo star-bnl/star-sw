@@ -42,7 +42,7 @@ class ComponentVoxel : public ComponentBase {
                       double& ymax, double& zmax);
 
   /** Define the grid.
-    * \param nx,ny,z number of bins along x, y, z.
+    * \param nx,ny,nz number of bins along x, y, z.
     * \param xmin,xmax range along \f$x\f$.
     * \param ymin,ymax range along \f$y\f$.
     * \param zmin,zmax range along \f$z\f$.

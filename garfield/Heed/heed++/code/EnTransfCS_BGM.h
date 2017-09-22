@@ -28,8 +28,8 @@ class EnTransfCS_BGM : public RegPassivePtr {
   EnTransfCS_BGM(double fparticle_mass, PassivePtr<BGMesh> fmesh,
                  int fs_primary_electron, HeedMatterDef* fhmd,
                  long fparticle_charge = 1);
-  macro_copy_total(EnTransfCS_BGM);
 
+  virtual EnTransfCS_BGM* copy() const { return new EnTransfCS_BGM(*this); }
   virtual void print(std::ostream& file, int l) const;
 };
 

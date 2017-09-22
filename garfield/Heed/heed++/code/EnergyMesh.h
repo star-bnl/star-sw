@@ -34,15 +34,11 @@ namespace Heed {
 ///
 /// 2003, I. Smirnov
 
-/// qener-1 is maximal possible number of bins
-const int pqener = 1001;
-
 class EnergyMesh : public RegPassivePtr {
  public:
-  EnergyMesh(void) : q(0), emin(0.0), emax(0.0) {}
+  EnergyMesh() : q(0), emin(0.0), emax(0.0) {}
   EnergyMesh(double femin, double femax, long fq);
   EnergyMesh(const std::vector<double>& fec);
-  macro_copy_total(EnergyMesh);
   virtual ~EnergyMesh() {}
 
   inline long get_q() const { return q; }
@@ -59,9 +55,13 @@ class EnergyMesh : public RegPassivePtr {
   long get_interval_number(const double ener) const;
   long get_interval_number_between_centers(const double ener) const;  // left
   friend std::ostream& operator<<(std::ostream& file, EnergyMesh& f);
+
+  virtual EnergyMesh* copy() const { return new EnergyMesh(*this); }
   virtual void print(std::ostream& file, int l) const;
 
  private:
+  /// qener-1 is maximal possible number of bins
+  static const int pqener = 1001;
   /// number of intervals
   long q;
   /// left side of the first interval

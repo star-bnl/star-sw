@@ -6,7 +6,19 @@ namespace Heed {
 
 BGMesh::BGMesh(double fxmin, double fxmax, long fq)
     : xmin(fxmin), xmax(fxmax), q(fq) {
-  x = make_log_mesh(fxmin, fxmax, fq);
+
+  mfunname("BGMesh::BGMesh(double fxmin, double fxmax, long fq)");
+  // The minimum is one interval and two points.
+  check_econd11(fq, <= 1, mcerr);
+  const double rk = pow(fxmax / fxmin, 1. / double(fq - 1));
+  x.resize(fq);
+  x[0] = fxmin;
+  x[fq - 1] = fxmax;
+  double xr = fxmin;
+  for (long n = 1; n < fq - 1; n++) {
+    xr *= rk;
+    x[n] = xr;
+  }
 }
 
 void BGMesh::print(std::ostream& file, int l) const {
@@ -28,22 +40,4 @@ std::ostream& operator<<(std::ostream& file, const BGMesh& bgm) {
   return file;
 }
 
-std::vector<double> make_log_mesh(double fxmin, double fxmax, long fq) {
-  mfunname("vector<double> make_log_mesh(double fxmin, double fxmax, long fq)");
-  // The minimum is one interval and two points.
-  check_econd11(fq, <= 1, mcerr);
-
-  const double rk = pow(fxmax / fxmin, (1.0 / double(fq - 1)));
-
-  std::vector<double> x(fq);
-  x[0] = fxmin;
-  x[fq - 1] = fxmax;
-
-  double xr = fxmin;
-  for (long n = 1; n < fq - 1; n++) {
-    xr *= rk;
-    x[n] = xr;
-  }
-  return x;
-}
 }

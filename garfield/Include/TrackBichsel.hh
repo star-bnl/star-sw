@@ -5,7 +5,8 @@
 
 namespace Garfield {
 
-/// Generate tracks using differential cross-sections computed by Hans Bichsel.
+/// Generate tracks using differential cross-sections 
+/// for silicon computed by Hans Bichsel.
 /// References:
 ///   - H. Bichsel, Rev. Mod. Phys. 60 (1988), 663-699
 ///   - https://faculty.washington.edu/hbichsel/
@@ -13,9 +14,9 @@ namespace Garfield {
 class TrackBichsel : public Track {
 
  public:
-  // Constructor
+  /// Constructor
   TrackBichsel();
-  // Destructor
+  /// Destructor
   ~TrackBichsel() {}
 
   bool NewTrack(const double x0, const double y0, const double z0,
@@ -30,19 +31,20 @@ class TrackBichsel : public Track {
   void SetDataFile(const std::string& filename) { m_datafile = filename; }
 
  private:
-  // Particle speed and rel. momentum
+  /// Particle rel. momentum.
   double m_bg;
+  /// Particle speed
   double m_speed;
 
   // Particle position and direction
   double m_x, m_y, m_z, m_t;
   double m_dx, m_dy, m_dz;
 
-  // Inverse mean free path
+  /// Inverse mean free path
   double m_imfp;
 
   std::string m_datafile;
-  // Table of cumulative distribution functions
+  /// Table of cumulative distribution functions
   std::vector<std::vector<double> > m_cdf;
   int m_iCdf;
   int m_nCdfEntries;

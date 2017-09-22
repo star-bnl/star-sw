@@ -15,13 +15,13 @@
 
 namespace Heed {
 
-const long q_angular_mesh = 50;
-
 /// Cross sections and various parameters necessary for passing delta-electron.
 /// 2003, I. Smirnov
 
 class HeedDeltaElectronCS : public RegPassivePtr {
  public:
+  static const long q_angular_mesh = 50;
+
   PassivePtr<HeedMatterDef> hmd;
   PassivePtr<ElElasticScat> ees;
   PassivePtr<ElElasticScatLowSigma> eesls;

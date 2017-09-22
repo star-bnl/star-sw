@@ -53,7 +53,10 @@ class AvalancheMicroscopic {
   void DisableHoleEnergyHistogramming() { m_histHoleEnergy = NULL; }
 
   /** Fill histograms of the distance between successive collisions.
-    * \param opt direction ('x', 'y', 'z', 'r')
+    * \param histo
+             pointer to the histogram to be filled 
+    * \param opt 
+             direction ('x', 'y', 'z', 'r')
     */
   void SetDistanceHistogram(TH1* histo, const char opt = 'r');
   void EnableDistanceHistogramming(const int type);

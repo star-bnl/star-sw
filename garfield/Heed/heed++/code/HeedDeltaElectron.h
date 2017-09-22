@@ -12,13 +12,12 @@ extern long last_particle_number;
 
 class HeedDeltaElectron : public eparticle {
  public:
-  /// Default constructor
+  /// Default constructor.
   HeedDeltaElectron() : eparticle(), s_print_listing(0) {}
-  /// Constructor
+  /// Constructor.
   HeedDeltaElectron(manip_absvol* primvol, const point& pt, const vec& vel,
                     vfloat time, long fparent_particle_number,
                     HeedFieldMap* fieldmap, int fs_print_listing = 0);
-  macro_copy_total(HeedDeltaElectron);
   /// Destructor
   virtual ~HeedDeltaElectron() {}
 
@@ -26,6 +25,9 @@ class HeedDeltaElectron : public eparticle {
 
   virtual void physics_mrange(double& fmrange);
   virtual void physics_after_new_speed();
+  virtual HeedDeltaElectron* copy() const { 
+    return new HeedDeltaElectron(*this); 
+  }
   virtual void print(std::ostream& file, int l) const;
 
  private:

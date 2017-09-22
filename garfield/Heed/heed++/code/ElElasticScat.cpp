@@ -338,24 +338,13 @@ void ElElasticScat::fill_hist_low_scat(const std::string& file_name,
   std::vector<double> angular_mesh_c(q_angular_mesh);
   // angular mesh, centers
   long n;
-  /*
-  double amin = 1.0;
-  double amax = 180.0;
-  double rk = pow(amax/amin,(1.0/double(q_angular_mesh)));
-  double ar = amin;
-  angular_mesh_c[0] = ar;
-  for( n=1; n<q_angular_mesh; n++)
-  {
-    angular_mesh_c[n] = angular_mesh_c[n-1] * rk;
-  }
-  */
   angular_mesh_c[0] = 0.0;
   double amin = 0.3;
   double amax = 180.0;
   double rk = pow(amax / amin, (1.0 / double(q_angular_mesh - 2)));
   double ar = amin;
   angular_mesh_c[1] = ar;
-  for (n = 2; n < q_angular_mesh; n++) {
+  for (long n = 2; n < q_angular_mesh; n++) {
     angular_mesh_c[n] = angular_mesh_c[n - 1] * rk;
   }
   angular_mesh_c[q_angular_mesh - 1] = 180.0;

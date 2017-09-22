@@ -5,7 +5,7 @@
 
 namespace Heed {
 
-GasDef::GasDef(void) : MatterDef(), pressureh(0.0), qmolech(0) {}
+GasDef::GasDef() : MatterDef(), pressureh(0.0), qmolech(0) {}
 
 GasDef::GasDef(const std::string& fname, const std::string& fnotation,
                long fqmolec, const std::vector<std::string>& fmolec_not,
@@ -88,8 +88,14 @@ GasDef::GasDef(const std::string& fname, const std::string& fnotation,
     }
   }
   if (fdensity < 0.0) {
-    fdensity = gasdensity(ftemperature, fpressure, molech, weight_quan_molech,
-                          qmolech);
+    double sw = 0.0;
+    double sa = 0.0;
+    for (long n = 0; n < qmolech; ++n) {
+      sa += weight_quan_molech[n] * molech[n]->A_total();
+      sw += weight_quan_molech[n];
+    }
+    const double rydberg = k_Boltzmann * Avogadro;
+    fdensity = sa * fpressure / (rydberg * ftemperature * sw);
   }
   verify(fname, fnotation);
   {
@@ -315,6 +321,7 @@ std::ostream& operator<<(std::ostream& file, const GasDef& f) {
   return file;
 }
 
+/*
 double gasdensity(double temperature, double pressure,
                   std::vector<PassivePtr<MoleculeDef> > molec,
                   std::vector<double> weight_quan_molec, long qmolec) {
@@ -327,5 +334,6 @@ double gasdensity(double temperature, double pressure,
   }
   double ridberg = k_Boltzmann * Avogadro;  // more precise
   return sa * pressure / (ridberg * temperature * sw);
-}
+}*/
+
 }

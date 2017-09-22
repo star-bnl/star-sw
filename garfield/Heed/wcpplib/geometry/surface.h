@@ -19,16 +19,14 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// **** surface ****
-// surface is not meant to be derivative of volume.
-// Thus, the surfaces should be contained in derivative of volume
+/// Surface base class.
 
 const int pqqsurf = 10;
 const int pqcrossurf = 4;
 
 class surface : public absref {
  public:
-  macro_copy_total_zero(surface);
+  virtual surface* copy() const = 0;
   virtual ~surface() {}
   virtual int check_point_inside(const point& fpt, const vec& dir,
                                  vfloat fprec) const = 0;
@@ -77,12 +75,11 @@ class splane : public surface {
   static absref(absref::*aref_splane[2]);
 
  public:
-  /// Constructors
-  splane(void) : pn() {}
+  /// Default constructor
+  splane() : pn() {}
   splane(const splane& fsp) : surface(fsp), pn(fsp.pn), dir_ins(fsp.dir_ins) {}
   splane(const plane& fpn, const vec& fdir_ins)
       : pn(fpn), dir_ins(unit_vec(fdir_ins)) {}
-  macro_copy_total(splane);
   /// Destructor
   virtual ~splane() {}
 
@@ -119,13 +116,12 @@ class splane : public surface {
     return i;
   }
   virtual void print(std::ostream& file, int l) const;
+  virtual splane* copy() const { return new splane(*this); }
 };
 
-// **** ulsvolume ****
+/// Unlimited surfaces volume.
 
 class ulsvolume : public absvol {
-  // unlimited surfaces volume
-  // It is volume constructed by unlimited surfaces.
   // The surface itself can be not convex.
   // But that part of surface which is border of the volume
   // must be from the right internal side from the other surfaces.
@@ -154,12 +150,11 @@ class ulsvolume : public absvol {
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 
  public:
-  /// Constructors
+  /// Default constructor.
   ulsvolume(void);
   ulsvolume(surface* fsurf[pqqsurf], int fqsurf, char* fname, vfloat fprec);
   ulsvolume(ulsvolume& f);
   ulsvolume(const ulsvolume& fv);
-  macro_copy_header(ulsvolume);
   /// Destructor
   virtual ~ulsvolume() {}
 
@@ -177,17 +172,15 @@ class ulsvolume : public absvol {
     strcat(nm, name.c_str());
   }
   virtual void print(std::ostream& file, int l) const;
-  virtual int mandatory(void) const { return 0; }
+  virtual ulsvolume* copy() const { return new ulsvolume(*this); }
 };
 
 class manip_ulsvolume : virtual public manip_absvol, public ulsvolume {
  public:
-  /// Constructors
-  manip_ulsvolume(void) : manip_absvol(), ulsvolume() {}
+  manip_ulsvolume() : manip_absvol(), ulsvolume() {}
   manip_ulsvolume(manip_ulsvolume& f);
   manip_ulsvolume(const manip_ulsvolume& f);
   manip_ulsvolume(const ulsvolume& f) : manip_absvol(), ulsvolume(f) {}
-  macro_copy_header(manip_ulsvolume);
   /// Destructor
   virtual ~manip_ulsvolume() {}
 
@@ -197,6 +190,7 @@ class manip_ulsvolume : virtual public manip_absvol, public ulsvolume {
     strcat(nm, name.c_str());
   }
   virtual void print(std::ostream& file, int l) const;
+  virtual manip_ulsvolume* copy() const { return new manip_ulsvolume(*this); }
 };
 }
 

@@ -37,7 +37,7 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
                             const double dz0) {
 
   // Make sure a sensor has been defined.
-  if (m_sensor) {
+  if (!m_sensor) {
     std::cerr << m_className << "::NewTrack:\n"
               << "    Sensor is not defined.\n";
     m_isInMedium = false;
@@ -197,9 +197,8 @@ double TrackBichsel::GetClusterDensity() {
   // Locate the requested energy in the table
   int iLow = 0;
   int iUp = nEntries - 1;
-  int iM;
   while (iUp - iLow > 1) {
-    iM = (iUp + iLow) >> 1;
+    const int iM = (iUp + iLow) >> 1;
     if (m_bg >= tabBg[iM]) {
       iLow = iM;
     } else {
@@ -225,7 +224,7 @@ double TrackBichsel::GetClusterDensity() {
 
 double TrackBichsel::GetStoppingPower() {
 
-  const int nEntries = 51;
+  const unsigned int nEntries = 51;
 
   const double tabBg[nEntries] = {
       0.316,     0.398,    0.501,    0.631,     0.794,     1.000,     1.259,
@@ -398,14 +397,14 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string& filename) {
 
 void TrackBichsel::SelectCrossSectionTable() {
 
-  const int nTables = 10;
+  const unsigned int nTables = 10;
   const double tabBg[nTables] = {0.31623,    1.00000,    3.16228,   10.00000,
                                  31.62278,   100.00000,  316.22780, 1000.00000,
                                  3162.27800, 10000.00000};
 
   bool gotValue = false;
-  // Chose the table which is closest to the actual value of bg.
-  for (int i = 0; i < nTables - 1; ++i) {
+  // Select the table which is closest to the value of bg.
+  for (unsigned int i = 0; i < nTables - 1; ++i) {
     double split = exp(0.5 * (log(tabBg[i]) + log(tabBg[i + 1])));
     if (m_bg < split) {
       m_iCdf = i;

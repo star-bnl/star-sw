@@ -51,9 +51,9 @@ void Sensor::ElectricField(const double x, const double y, const double z,
 
   ex = ey = ez = v = 0.;
   status = -10;
-  medium = 0;
+  medium = NULL;
   double fx, fy, fz, p;
-  Medium* med = 0;
+  Medium* med = NULL;
   int stat;
   // Add up electric field contributions from all components.
   const unsigned int nComponents = m_components.size();
@@ -78,9 +78,9 @@ void Sensor::ElectricField(const double x, const double y, const double z,
 
   ex = ey = ez = 0.;
   status = -10;
-  medium = 0;
+  medium = NULL;
   double fx, fy, fz;
-  Medium* med = 0;
+  Medium* med = NULL;
   int stat;
   // Add up electric field contributions from all components.
   const unsigned int nComponents = m_components.size();
@@ -314,8 +314,7 @@ bool Sensor::IsInTrapRadius(const double q0, const double x0,
 void Sensor::AddComponent(ComponentBase* comp) {
 
   if (!comp) {
-    std::cerr << m_className << "::AddComponent:\n";
-    std::cerr << "    Component pointer is null.\n";
+    std::cerr << m_className << "::AddComponent:\n    Null pointer.\n";
     return;
   }
 
@@ -328,8 +327,7 @@ void Sensor::AddComponent(ComponentBase* comp) {
 void Sensor::AddElectrode(ComponentBase* comp, const std::string& label) {
 
   if (!comp) {
-    std::cerr << m_className << "::AddElectrode:\n";
-    std::cerr << "    Component pointer is null.\n";
+    std::cerr << m_className << "::AddElectrode:\n    Null pointer.\n";
     return;
   }
   const unsigned int nElectrodes = m_electrodes.size();
@@ -638,8 +636,7 @@ double Sensor::GetInducedCharge(const std::string& label) {
 void Sensor::SetTransferFunction(double (*f)(double t)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetTransferFunction:\n";
-    std::cerr << "    Function pointer is null.\n";
+    std::cerr << m_className << "::SetTransferFunction:\n    Null pointer.\n";
     return;
   }
   m_fTransfer = f;
@@ -662,7 +659,7 @@ void Sensor::SetTransferFunction(const std::vector<double>& times,
   }
   m_transferFunctionTimes = times;
   m_transferFunctionValues = values;
-  m_fTransfer = 0;
+  m_fTransfer = NULL;
   m_hasTransferFunction = true;
 }
 

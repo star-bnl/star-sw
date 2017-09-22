@@ -25,7 +25,9 @@ class HeedChamber : public Heed::sh_manip_absvol,
         Heed::EnTransfCSType(etcst),
         Heed::HeedDeltaElectronCSType(hdecst) {}
 
-  macro_copy_total(Garfield::HeedChamber);
+  virtual Garfield::HeedChamber* copy() const {
+    return new Garfield::HeedChamber(*this);
+  }
   virtual absvol* Gavol() const { return (Heed::box*)this; }
 
  protected:
