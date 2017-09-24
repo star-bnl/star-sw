@@ -3300,6 +3300,12 @@ class Rotation(Handler):
             document.impl( 'place.Ortho( "%s" ); // ORT=%s'%( ortho, ortho ), unit=current )
             document.impl( '/// Axis substitution: XYZ --> %s'%ortho, unit=current )
      
+        matrix = attr.get('matrix',None)
+        if matrix:
+            document.impl( '{ // rotation matrix (overwrites any prior rotation)', unit=current )
+            document.impl( '  double _rotm[] = %s;'%matrix,                        unit=current )
+            document.impl( '  place.RotationMatrix( _rotm );',                     unit=current )
+            document.impl( '}',                                                    unit=current )
 
                
         
