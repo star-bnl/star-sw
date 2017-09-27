@@ -74,6 +74,9 @@ public:
 	double fee_currents[16][3] ;
 
 	// temporary storage for 1 channel
+	int first_rhic_strobe_tick ;
+	int trigger_tick ;
+
 	int sector ;
 	int rdo ;
 	int ch ;
