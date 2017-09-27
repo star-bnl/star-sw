@@ -37,9 +37,7 @@ PairProd::PairProd(const std::string& file_name, double fwa, double ffactorFano)
   }
   std::vector<double> xx(q);
   std::vector<double> yy(q);
-  for (long n = 0; n < q; n++) {
-    file >> xx[n] >> yy[n];
-  }
+  for (long n = 0; n < q; n++) file >> xx[n] >> yy[n];
   pran = PointsRan(xx, yy, I_table, J_table);
   k = sqrt(factorFano * wa * wa / (factorFano_table * wa_table * wa_table));
   s = wa - k * wa_table;
@@ -47,15 +45,15 @@ PairProd::PairProd(const std::string& file_name, double fwa, double ffactorFano)
   // k = wa / (factorFano * wa_table) * ( 2.0 * factorFano - factorFano_table);
 }
 
-double PairProd::get_eloss(void) const {
-  mfunname("double PairProd::get_eloss(void) const");
+double PairProd::get_eloss() const {
+  mfunname("double PairProd::get_eloss() const");
   return k * pran.ran(SRANLUX()) + s;
 }
 
 #ifdef USE_GET_ELOSS_CUT
 
 double PairProd::get_eloss(const double e_cur) const {
-  mfunname("double PairProd::get_eloss(double ecur) const");
+  mfunname("double PairProd::get_eloss(const double ecur) const");
   double e_loss = k * pran.ran(SRANLUX()) + s;
   if (e_cur - e_loss < w_cut_ratio * wa) e_loss = 1.0e20;  // to stop tracing
   return e_loss;

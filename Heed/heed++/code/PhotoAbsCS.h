@@ -17,44 +17,6 @@ const double Thomas_sum_rule_const = 2 * M_PI * M_PI / (FSCON * ELMAS);
 const double Thomas_sum_rule_const_Mb =
     2 * M_PI * M_PI / (FSCON * ELMAS) * 1.0E-6 / C1_MEV2_BN;
 
-/// Determine whether to use linear or nonlinear interpolation.
-/// Usually photoabsorption cross sections decrease as inverse power function
-/// of power like -2.75. Its linear interpolation inside large energy
-/// intervals is remarkably not precise. This function is designed
-/// to determine the cases common for the total program when the inverse power
-/// function is applied in such intervals.
-/// Conditions are empirical.
-/// 1 - nonlinear, 0 - linear.
-/// Energies and threshold are given in MeV. This is important!
-/// e1 should be < e2.
-int sign_nonlinear_interpolation(double e1, double cs1, double e2, double cs2,
-                                 double threshold);
-
-/// Fit table by a straight line or by inverse power function
-/// (see sign_nonlinear_interpolation) and integrate the area below it.
-/// The function is assumed to be non-negative, and the result of integration
-/// as well.
-/// The tail is not added right here, but added after the call of this function.
-/// The theshold is used to restrict this function from the left.
-/// If threshold is less than e[0], the function is extrapolated
-/// by the straight line till threshold.
-/// If this line crosses zero, it is extrapolated only till this point.
-double glin_integ_ar(std::vector<double> e, std::vector<double> cs, long q,
-                     double e1, double e2, double threshold);
-
-double my_integr_fun(double xp1, double yp1, double xp2, double yp2,
-                     double xmin, double xmax, double x1, double x2);
-double my_val_fun(double xp1, double yp1, double xp2, double yp2, double xmin,
-                  double xmax, double x);
-
-// double old_glin_integ_ar(DynLinArr< double > e, DynLinArr< double > cs,
-//                     long q, double e1, double e2,
-//                     double threshold );
-
-// double glin_val_ar(DynLinArr< double > e, DynLinArr< double > cs,
-//                   long q, double x
-//                   double threshold );
-
 /// Photoabsorption cross-section base class.
 ///
 /// The literature data on photoabsorption cross section are fragmentar and
@@ -87,18 +49,22 @@ class PhotoAbsCS {
   PhotoAbsCS(const std::string& fname, int fZ, double fthreshold);
   /// Destructor
   virtual ~PhotoAbsCS() {}
- 
+
+  /// Name of this shell or atom. 
   const std::string& get_name() const { return name; }
+  /// Number of this shell.
+  int get_number() const { return number; }
   /// Charge or number of electrons at this shell or in this atom
   /// (in principle the integral of CS should
   /// satisfy the Thomas-Reiche-Kuhn sum rule).
   int get_Z() const { return Z; }
+  /// Return the threshold energy.
   double get_threshold() const { return threshold; }
   /// Retrieve cross-section [Mb] at a given energy [MeV].
   virtual double get_CS(double energy) const = 0;
   /// Retrieve integral cross-section [Mb * MeV] in a given interval [MeV].
   virtual double get_integral_CS(double energy1, double energy2) const = 0;
-  /// Multiply by some factor (sometimes useful for debug and other purposes).
+  /// Multiply by some factor. Can be useful for debugging and other purposes.
   virtual void scale(double fact) = 0;
 
   virtual void print(std::ostream& file, int l) const;
@@ -106,6 +72,7 @@ class PhotoAbsCS {
 
  protected:
   std::string name;
+  int number;
   int Z;
   double threshold;  // in MeV
 };
@@ -121,9 +88,9 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
   double step; 
 
  public:
-  /// Default constructor
-  AveragePhotoAbsCS() {}
-  /** Constructor
+  /// Default constructor.
+  AveragePhotoAbsCS() : PhotoAbsCS() {}
+  /** Constructor.
     * \param apacs 
              photoabsorption cross-section
     * \param fwidth 
@@ -140,7 +107,6 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
   virtual double get_CS(double energy) const;
   virtual double get_integral_CS(double energy1, double energy2) const;
 
-  /// Multiply the height, y-axis, by some factor.
   virtual void scale(double fact);
 
   virtual void print(std::ostream& file, int l) const;
@@ -190,40 +156,39 @@ class HydrogenPhotoAbsCS : public PhotoAbsCS {
 
 class SimpleTablePhotoAbsCS : public PhotoAbsCS {
  public:
+  /// Default constructor.
   SimpleTablePhotoAbsCS();
+  /// Constructor for reading table from file.
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         const std::string& ffile_name);
+  /// Constructor from given energy and cross-section tables. 
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         const std::vector<double>& fener,
                         const std::vector<double>& fcs);
-  // Fit from one of the papers of Band-Trzaskovskaya et al, CS for any shell
-  // It is difficult to integrate that formulas analytically.
-  // So I create numerical array and treat it as input data.
+  /// Constructor from fit parameters. 
+  /// Fit formula from Band-Band-Trzaskovskaya et al.
+  /// It is difficult to integrate those formulas analytically,
+  /// so I create numerical array and treat it as input data.
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         int l, double E0, double yw, double ya, double P,
                         double sigma);
-  // Replace part:
+  /// Replace part of the cross-section table.
   SimpleTablePhotoAbsCS(const SimpleTablePhotoAbsCS& total,
                         const SimpleTablePhotoAbsCS& part, double emax_repl);
   /// Destructor
   virtual ~SimpleTablePhotoAbsCS() {}
-  void remove_leading_zeros(void);         // very useful operation
-                                           // for preparation of some tables
-  void remove_leading_tiny(double level);  // very useful operation
-                                           // for preparation of some tables,
-  // removes points with cross section below determined level.
-  // It is designed for Henke tables, which somewhy are prepared for database
-  // with leading values like 1.0e-15 .
-  // Both functions allow to use the straight interpolation to threshold
-
-  // void remove_leading_zeros(double minimal_theshold); //very useful operation
-  // removes all points which are less or equal to minimal_theshold
-  // the case of equal needs for argon
+  /// Remove points with zero cross-section from the table.
+  void remove_leading_zeros();         
+  /// Remove points with cross section below a given level from the table.
+  /// The function is designed for Henke tables, which are prepared for database
+  /// with leading values like 1.0e-15 .
+  /// Both functions allow to use the straight interpolation to threshold
+  void remove_leading_tiny(double level);
 
   virtual double get_CS(double energy) const;
   virtual double get_integral_CS(double energy1, double energy2) const;
-  inline const std::vector<double>& get_arr_ener() const { return ener; }
-  inline const std::vector<double>& get_arr_CS() const { return cs; }
+  const std::vector<double>& get_arr_ener() const { return ener; }
+  const std::vector<double>& get_arr_CS() const { return cs; }
   virtual void scale(double fact);
   virtual void print(std::ostream& file, int l) const;
   virtual SimpleTablePhotoAbsCS* copy() const { 
@@ -239,15 +204,21 @@ class SimpleTablePhotoAbsCS : public PhotoAbsCS {
   std::vector<double> cs;
 };
 
-/// Simple phenomenological CS for any shell.
+/// Simple phenomenological CS for any shell (analytic formula).
 class PhenoPhotoAbsCS : public PhotoAbsCS {
  public:
+  /// Default constructor.
   PhenoPhotoAbsCS();
+  /** Constructor
+    * \param fname name of the shell or atom
+    * \param fZ number of electrons
+    * \param fthreshold threshold level
+    * \param fpower positive number \f$x\f$ in \f$1/E^{-x}\f$
+    */ 
   PhenoPhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                   double fpower = 2.75);
+  /// Destructor.
   virtual ~PhenoPhotoAbsCS() {}
-  // power is here positive, but it is meay that there is division,
-  // the the actual power is negative.
   virtual double get_CS(double energy) const;
   virtual double get_integral_CS(double energy1, double energy2) const;
   virtual void scale(double fact);
@@ -255,41 +226,9 @@ class PhenoPhotoAbsCS : public PhotoAbsCS {
   virtual PhenoPhotoAbsCS* copy() const { return new PhenoPhotoAbsCS(*this); }
 
  private:
-  double power;  // positive power 1/E^power
+  double power;
   double factor;
 };
-
-/*
-// See above
-// Fit from one of the papers of Band-Trzaskovskaya et al, CS for any shell
-class FitBTPhotoAbsCS: public PhotoAbsCS
-{
-public:
-  FitBTPhotoAbsCS(void);
-  FitBTPhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
-                  int  lPas, double E0, double yw, double ya,
-                  double P, double sigma);
-
-  // power is here positive, but it is meay that there is division,
-  // the the actual power is negative.
-  virtual double get_CS(double energy) const ;
-  virtual double get_integral_CS(double energy1, double energy2) const ;
-  virtual void scale(double fact);
-  virtual void print(std::ostream& file, int l) const ;
-  virtual FitBTPhotoAbsCS* copy() const { return new FitBTPhotoAbsCS(*this); }
-
-private:
-  int  l;
-  double E0;
-  double yw;
-  double ya;
-  double P;
-  double sigma;
-  static EnergyMesh mesh_for_FitBT;
-  std::vector<double> cs;
-};
-*/
-//------------------------------------------------------------------------
 
 /// Sampling of secondary particles.
 /// The initial photo-electron is not included.
@@ -342,9 +281,10 @@ class AtomicSecondaryProducts : public RegPassivePtr {
 /// Atomic photoabsorption cross-section base class.
 class AtomPhotoAbsCS : public RegPassivePtr {
  public:
+  /// Default constructor.
   AtomPhotoAbsCS();
  
-  inline int get_Z() const { return Z; }
+  int get_Z() const { return Z; }
   inline unsigned int get_qshell() const { return qshell; }
   virtual double get_threshold(int nshell) const = 0;
   virtual double get_I_min(void) const;
@@ -399,10 +339,7 @@ class AtomPhotoAbsCS : public RegPassivePtr {
   virtual void print(std::ostream& file, int l) const;
   virtual AtomPhotoAbsCS* copy() const = 0;
 
-  AtomicSecondaryProducts* get_asp(int nshell);  // needs in order
-  // to allow modification (such as addition of new channels)
-  // after the main constructor is executed (but, of course, before the
-  // regular event generation).
+  AtomicSecondaryProducts* get_asp(int nshell);
  protected:
   std::string name;
   int Z;
@@ -412,7 +349,7 @@ class AtomPhotoAbsCS : public RegPassivePtr {
   // manipulate with larger  shells, to investigate their
   // influence at the final characteristics.
   // By default all is 0
-  std::vector<int> s_ignore_shell;
+  std::vector<bool> s_ignore_shell;
   std::vector<AtomicSecondaryProducts> asp;
 };
 std::ostream& operator<<(std::ostream& file, const AtomPhotoAbsCS& f);
@@ -446,8 +383,9 @@ class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
   virtual double get_integral_ICS(int nshell, double energy1,
                                   double energy2) const;
   // photo-ionization cross section, energy in MeV, CS in Mbarns.
-  virtual int get_main_shell_number(int nshell) const;
-
+  virtual int get_main_shell_number(int nshell) const {
+    return acs[nshell]->get_number();
+  }
   virtual void print(std::ostream& file, int l) const;
   virtual SimpleAtomPhotoAbsCS* copy() const { 
     return new SimpleAtomPhotoAbsCS(*this); 
@@ -484,7 +422,9 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
   /// Integral photo-ionization cross-section for a given shell.
   virtual double get_integral_ICS(int nshell, double energy1,
                                   double energy2) const;
-  virtual int get_main_shell_number(int nshell) const;
+  virtual int get_main_shell_number(int nshell) const {
+    return acs[nshell]->get_number();
+  } 
   void replace_shells_by_average(double fwidth,  // MeV
                                  double fstep, long fmax_q_step);
   virtual void print(std::ostream& file, int l) const;
@@ -534,8 +474,7 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
                    int s_no_scale,  // scaling is not done, needs for next
                    double fminimal_threshold = 0.0);
   // Takes the shell energies and fit parameters made by
-  // Band and Thragzkovskaya
-  // from a file.
+  // Band and Thragzkovskaya from a file.
   ExAtomPhotoAbsCS(int fZ, const std::string& fname,  // just name of this atom
                    const std::string& fFitBT_file_name,
                    const std::string& fsimple_table_file_name, double emax_repl,
@@ -560,7 +499,7 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
   // So it should be more logical to call this ics.
   // Initially ics was meant to be separate array.
   // But during development it was found that it is not necessary.
-  std::vector<ActivePtr<PhotoAbsCS> > acs;  
+  std::vector<ActivePtr<PhotoAbsCS> > acs;
 
   // 3 variables for printing listings
   double integ_abs_before_corr;
@@ -604,13 +543,12 @@ const double coef_I_to_W = 2.0;
 
 class MolecPhotoAbsCS : public RegPassivePtr {
  public:
-  /// Total quantity of atoms of all sorts in the molecule.
-  inline int get_qatom(void) { return qatom; }  
-  /// Quantity of atoms of a particular sort in the molecule.
-  inline int get_gatom_ps(int n) { return qatom_ps[n]; }  
-  inline const PassivePtr<const AtomPhotoAbsCS> get_atom(int n) {
-    return atom[n];
-  }
+  /// Total number of atoms of all sorts in the molecule.
+  int get_qatom(void) { return qatom; }  
+  /// Number of atoms of a particular sort in the molecule.
+  int get_gatom_ps(int n) { return qatom_ps[n]; } 
+  const PassivePtr<const AtomPhotoAbsCS> get_atom(int n) { return atom[n]; }
+
   /// Photo-absorption cross-section (energy in MeV, CS in Mb).
   virtual double get_ACS(double energy) const;
   /// Integral photo-absorption cross-section.
@@ -627,7 +565,7 @@ class MolecPhotoAbsCS : public RegPassivePtr {
   double get_F(void) const { return F; }
 
   /// Default constructor.
-  MolecPhotoAbsCS(void) : qatom(0) { ; }
+  MolecPhotoAbsCS() : qatom(0) {}
   /// Constructor for one sort of atoms.
   /// If fW == 0.0, the program assigns it as 2 * mean(I_min).
   MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom, int fqatom, double fW = 0.0,
@@ -648,7 +586,7 @@ class MolecPhotoAbsCS : public RegPassivePtr {
   virtual void print(std::ostream& file, int l) const;
 
  private:
-  /// Total quantity of atoms, NOT number of sorts, NOT qel in atom.
+  /// Total number of atoms, NOT number of sorts, NOT qel in atom.
   int qatom;  
   std::vector<int> qatom_ps;
   std::vector<PassivePtr<const AtomPhotoAbsCS> > atom;
