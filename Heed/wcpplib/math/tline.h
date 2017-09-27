@@ -364,7 +364,7 @@ long t_find_interval_end(double x, long q, const D& coor, long n_start) {
 #endif
 }
 
-/// Generic mesh with has arbitrary steps.
+/// Generic mesh with arbitrary steps.
 /// The array determining the step edges is located somewhere outside.
 /// In object of this class only the raw pointer is contained with consequences:
 

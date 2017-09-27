@@ -15,9 +15,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-/// Find solution to cubic equation.
-
 namespace Heed {
+
+/// Find solution to cubic equation.
 
 class Cubic {
  public:

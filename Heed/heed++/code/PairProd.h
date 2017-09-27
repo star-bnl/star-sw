@@ -40,11 +40,11 @@ class PairProd : public RegPassivePtr {
     * The calculations use the features found at MC calculations:
     * If w is encreased by n times (with the same form of distribution,
     * that is equivalent to the shift of distribution,
-    * the dispersion is changed as 1/n^2 D_old.
+    * the dispersion is changed as \f$1/n^2\f$ D_old.
     * If the resulting energy is multiplied by k, that is the proportional
     * extension of the distribution, the relative dispersion is not changed.
-    * The relative dispersion is (<N^2> - <N>^2)/N.
-    * If to add the onbvious change of the mean energy occured with
+    * The relative dispersion is \f$(<N^2> - <N>^2)/N\f$.
+    * If to add the onbvious change of the mean energy occurred with
     * the change of these parameters,
     * it is possible to obtain the formulae for conversion.
     */

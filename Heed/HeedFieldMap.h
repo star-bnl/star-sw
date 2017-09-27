@@ -10,6 +10,8 @@ class Sensor;
 
 namespace Heed {
 
+/// Retrieve electric and magnetic field from Sensor.
+
 class HeedFieldMap {
  public:
   HeedFieldMap() : m_sensor(NULL), m_useEfield(false), m_useBfield(false) {}

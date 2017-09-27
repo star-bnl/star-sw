@@ -175,7 +175,7 @@ class absref_transmit {
     }                                                             \
   }
 
-//             **** vector ****
+/// Vector.
 /// Each vector is presented by three components and corresponds to some basis.
 /// // The components are a projection of the vector to unit basis vectors.
 /// If bas==NULL then it is the primary basis.
