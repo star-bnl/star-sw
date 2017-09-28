@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.24 2017/09/18 22:13:50 jwebb Exp $
+* $Id: xgeometry.age,v 1.25 2017/09/28 21:33:51 jwebb Exp $
 
 
 
@@ -276,6 +276,8 @@ replace [exe BTOFb7;] with [;btof_addr=setup_btofb7();     " call btofgeo7 ";]
 replace [exe BTOFc6;] with [;btof_addr=setup_btofc6();     " call btofgeo6 ";]
 replace [exe BTOFc7;] with [;btof_addr=setup_btofc7();     " call btofgeo7 ";]
 replace [exe BTOFv8;] with [;btof_addr=setup_btofv8();     " call btofgeo8 ";]
+
+replace [exe ETOFv14s;] with [;etof_addr=setup_etofv14s();]
 
 """ ----------------------------------------------------------------------- """
 """ TPC Configurations                                                      """
@@ -1748,6 +1750,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
                             setup_btofb6, setup_btofb7, setup_btofc6, setup_btofc7,
                             setup_btofv8 
 
+  Integer :: etof_addr=0,   setup_etofv14s
+
   Integer :: tpce_addr=0,   setup_tpce00, setup_tpce01, setup_tpce02, setup_tpce03,
                             setup_tpce04, setup_tpce04r,setup_tpce30, setup_tpce31 
 
@@ -2496,7 +2500,9 @@ If LL>0
   Case y2016a  { y2016a : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
 
   Case y2017   { y2017  : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
-  Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  }
+  Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  } 
+
+  case y2018 { y2018: etof test geometyr; Geom =        'y2018     '; call geom_y2018;} 
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
@@ -2509,6 +2515,8 @@ If LL>0
 
   Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
   Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
+
+
 
 
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
@@ -4164,6 +4172,10 @@ c  }
       CALL CsJcal(btof_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
 
+   IF (etof_addr.gt.0) THEN
+      CALL CsJcal(btof_addr,0, 0,0,0,0,0, 0,0,0,0,0)
+   ENDIF 
+
    Call AGSFLAG('SIMU',1)
 
 
@@ -4619,8 +4631,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.24 2017/09/18 22:13:50 jwebb Exp $
+* $Id: xgeometry.age,v 1.25 2017/09/28 21:33:51 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.25  2017/09/28 21:33:51  jwebb
+* First cut y2018.  Not ready for prime time: contains full ETOF, and lacks the upgraded iTPC sector.
+*
 * Revision 1.24  2017/09/18 22:13:50  jwebb
 * y2017a production geometry added
 *
