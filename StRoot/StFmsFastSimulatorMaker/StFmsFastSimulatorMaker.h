@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.7 2017/05/03 15:54:21 akio Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.8 2017/09/28 17:07:19 akio Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
+// Revision 1.8  2017/09/28 17:07:19  akio
+// addoing bitshiftgain
+//
 // Revision 1.7  2017/05/03 15:54:21  akio
 // added gain scaling when attenuation was on during geant simulation
 //
@@ -80,6 +83,9 @@ class StFmsFastSimulatorMaker : public StMaker {
   // Setting zero suppression # of channels
   void setFmsZS(int v) {mFmsZSch=v;}
 
+  // Set to use Bit Shift Gain from DB when digitizing
+  void setBitShiftGain(int v) {mFmsBitShiftGain=v;}
+ 
   // Setting average energy loss per MIP for FPS
   void  setFpsDEPerMIP(float v) {mFpsDEPerMIP=v;}
 
@@ -141,7 +147,9 @@ class StFmsFastSimulatorMaker : public StMaker {
    */
   void printStEventSummary(const StEvent* event);
 
-  Int_t mFmsZSch;
+  Int_t mFmsZSch=1; //default set to 1 (zero suppresss adc=0 and 1) 20170925 -akio  (It was 2 before)
+  Int_t mFmsBitShiftGain=1; //use BitGainShift from DB when digitize 20170925 -akio  
+
   Float_t mFpsDEPerMIP;
   Float_t mFpsNPhotonPerMIP;
   
@@ -152,7 +160,7 @@ class StFmsFastSimulatorMaker : public StMaker {
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.7 2017/05/03 15:54:21 akio Exp $ built " __DATE__ " " __TIME__ ;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.8 2017/09/28 17:07:19 akio Exp $ built " __DATE__ " " __TIME__ ;
   return cvs;
 }
 
