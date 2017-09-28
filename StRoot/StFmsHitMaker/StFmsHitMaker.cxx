@@ -160,13 +160,41 @@ int StFmsHitMaker::Make(){
       int crt   =fmsHit->qtCrate();
       int slot  =fmsHit->qtSlot();
       int ch    =fmsHit->qtChannel();
-      float adc =fmsHit->adc();
+      unsigned short adc =fmsHit->adc();
       mFmsDbMaker->getReverseMap(crt,slot,ch,&d,&c);
       float e=0.0;
       if(d>0 || c>0){
-        float g1=mFmsDbMaker->getGain(d,c);
-        float g2=mFmsDbMaker->getGainCorrection(d,c);
-        e       =adc*g1*g2;
+	  //unsigned short rawadc=adc;
+	  short bitshift=0;
+	  if(mCorrectAdcOffByOne){
+	      bitshift = mFmsDbMaker->getBitShiftGain(d,c);
+	      if(bitshift>0){		  
+		  int check=adc % (1<<bitshift);
+		  if(check!=0){
+		      LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc%(1<<bitshift)=%d",
+					d,c,adc,bitshift,check) << endm;
+		  }
+	      }else if(bitshift<0){
+		  int check=adc / (1<< (12+bitshift));
+		  if(check!=0){
+		      LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc/(1<<(12+bitshift))=%d",
+					d,c,adc,bitshift,check) << endm;
+		  }
+	      }
+	      //Leaving ADC value in StFmsHit as it was recorded, so that when we read from MuDST, we don't double correct!!!!
+	      //   if(bitshift>=0) {
+	      //     adc += (0x1<<bitshift);
+	      //     fmsHit->setAdc(adc); 
+	      //   }
+	      //LOG_INFO << Form("RawADC=%4d NewADC=%4d Bitshift=%d",rawadc,adc,bitshift) << endm;
+	  }
+	  float g1=mFmsDbMaker->getGain(d,c);
+	  float g2=mFmsDbMaker->getGainCorrection(d,c);	  
+	  if(mCorrectAdcOffByOne){
+	      e=(adc+pow(2.0,bitshift))*g1*g2;
+	  }else{
+	      e=adc*g1*g2;
+	  }
       }
       fmsHit->setDetectorId(d);
       fmsHit->setChannel(c);
