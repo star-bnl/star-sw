@@ -35,6 +35,9 @@ public:
   Int_t  Make();
   Int_t  Finish();
 
+  //!
+  void SetCorrectAdcOffByOne(int v) {mCorrectAdcOffByOne=v;}
+
   //! 0=search StTriggerData from StTriggerDataMaker/StEvent/MuDst and apply new DB (default)                      
   //! 1=Read hits,clusters,points from Mudst, new calibration from DB will NOT be applied!!!!
   void SetReadMuDst(int v=1) {mReadMuDst=v;} //Set to read MuDst 
@@ -42,12 +45,13 @@ public:
   TMatrix**	GetEnergyMatrices();
   Bool_t	Legal(Int_t iew,Int_t nstb,Int_t row0,Int_t col0);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFmsHitMaker.h,v 1.3 2015/09/02 14:50:10 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFmsHitMaker.h,v 1.4 2017/09/28 17:06:19 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
   StFmsDbMaker*      mFmsDbMaker;    //! DB maker provides FMS geometry and calibration data
   StFmsCollection*   mFmsCollection; //! FMS data structure for StEvent
-  StMuFmsCollection* mMuFmsColl;     //! FMS data structure for StMuEvent
+  StMuFmsCollection* mMuFmsColl;     //! FMS data structure for StMuEvent  
+  Int_t mCorrectAdcOffByOne=1;       //! Make correction for ADC from QT being off by 1
   Int_t readMuDst();  
   Int_t mReadMuDst;   
   Int_t mCurrentRunNumber;
