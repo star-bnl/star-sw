@@ -3245,7 +3245,7 @@ class Rotation(Handler):
     def startElement(self,tag,attr):
 
         # Validate attributes
-        checkAttributes( tag, attr, ['alphax','alphay','alphaz','thetax','thetay','thetaz','phix','phiy','phiz','ort'] )
+        checkAttributes( tag, attr, ['matrix','alphax','alphay','alphaz','thetax','thetay','thetaz','phix','phiy','phiz','ort'] )
 
         list = ['alphax','alphay','alphaz' ]
         func = {'alphax' : 'AlphaX',
