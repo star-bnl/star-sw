@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.19 2017/09/15 15:43:54 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.20 2017/09/28 17:00:48 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.20  2017/09/28 17:00:48  akio
+ * adding BitShiftGain
+ *
  * Revision 1.19  2017/09/15 15:43:54  akio
  * Adding readGainCorrFromText()
  *
@@ -84,6 +87,7 @@ struct fmsPatchPanelMap_st;
 struct fmsQTMap_st;
 struct fmsGain_st;
 struct fmsGainCorrection_st;
+struct fmsBitShiftGain_st;
 struct fmsTimeDepCorr_st;
 struct fmsRec_st;
 
@@ -126,6 +130,7 @@ class StFmsDbMaker : public StMaker {
   fmsQTMap_st*            QTMap();
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
+  fmsBitShiftGain_st*     BitShiftGain();
   fmsTimeDepCorr_st*      TimeDepCorr();
   fmsRec_st*              RecPar(); //reconstruction related parameters
   fpsConstant_st*         FpsConstant();
@@ -196,16 +201,20 @@ class StFmsDbMaker : public StMaker {
   //! fmsQTMap related
   Int_t maxNS();
 
-  //! fmsGain/GainCorrection related
+  //! fmsGain/GainCorrection/Bitshift related
   Int_t maxGain();
   Int_t maxGainCorrection();
+  Int_t maxBitShiftGain();
   Float_t getGain(Int_t detectorId, Int_t ch) const; //! get the gain for the channel
   Float_t getGainCorrection(Int_t detectorId, Int_t ch) const; //! get the gain correction for the channel
+  Short_t getBitShiftGain(Int_t detectorId, Int_t ch) const; //! get the bit shift gain for the channel
     
   void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value               
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
+  void forceUniformBitShiftGain(short v)   {mForceUniformBitShiftGain=v;}   //! force bits hift gain to be specified value
   void readGainFromText(int v=1)           {mReadGainFile=v;}               //! force gain to be read from FmsGain.txt
-  void readGainCorrFromText(int v=1)       {mReadGainCorrFile=v;}           //! force gain to be read from FmsGainCorr.txt
+  void readGainCorrFromText(int v=1)       {mReadGainCorrFile=v;}           //! force gain corr to be read from FmsGainCorr.txt
+  void readBitShiftGainFromText(int v=1)   {mReadBitShiftGainFile=v;}       //! force bit shift to be read from FmsBitShiftGain.txt
 
   //! fmsTimeDepCorr relayed
   float getTimeDepCorr(int event, int det, int ch); //det = detectorId - 8 (0=largeNoth, 1=largeSouth, 2=smallNorth, 3=smallSouth)
@@ -273,6 +282,7 @@ class StFmsDbMaker : public StMaker {
   void dumpFmsQTMap           (const Char_t* filename="dumpFmsQTMap.txt");
   void dumpFmsGain            (const Char_t* filename="dumpFmsGain.txt");
   void dumpFmsGainCorrection  (const Char_t* filename="dumpFmsGainCorrection.txt");
+  void dumpFmsBitShiftGain    (const Char_t* filename="dumpFmsBitShiftGain.txt");
   void dumpFmsTimeDepCorr     (const Char_t* filename="dumpFmsTimeDepCorr.txt");
   void dumpFmsRec             (const Char_t* filename="dumpFmsRec.txt");
   void dumpFpsConstant        (const Char_t* filename="dumpFpsConstant.txt");
@@ -322,6 +332,10 @@ class StFmsDbMaker : public StMaker {
   fmsGainCorrection_st  **mmGainCorrection=0;
   Int_t                   mMaxGainCorrection=0;
 
+  fmsBitShiftGain_st    *mBitShiftGain=0;   //! bit shift gain table
+  fmsBitShiftGain_st    **mmBitShiftGain=0; 
+  Int_t                  mMaxBitShiftGain=0;
+
     enum {mFmsTimeDepMaxData=20000,mFmsTimeDepMaxTimeSlice=200,mFmsTimeDepMaxDet=4,mFmsTimeDepMaxCh=578};
   fmsTimeDepCorr_st     *mTimeDepCorr=0;
   int mMaxTimeSlice=0;
@@ -334,8 +348,10 @@ class StFmsDbMaker : public StMaker {
 
   Float_t                 mForceUniformGain=0.0; //!
   Float_t                 mForceUniformGainCorrection=0.0; //!
+  Short_t                 mForceUniformBitShiftGain=0; //!
   Int_t                   mReadGainFile=0; //!             
   Int_t                   mReadGainCorrFile=0; //!             
+  Int_t                   mReadBitShiftGainFile=0; //!             
 
   Int_t                   mReadRecParam=0; //!
 
