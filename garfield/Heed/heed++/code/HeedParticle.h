@@ -6,15 +6,6 @@
 #include "wcpplib/particle/eparticle.h"
 #include "HeedCluster.h"
 
-//#define SINGLE_TRANSFER // for debug
-#ifdef SINGLE_TRANSFER
-#include "heed++/code/EnTransfCS.h"
-extern EnTransfCS* aetcs_single_transf;
-extern long na_single_transf;
-extern long ns_single_transf;
-extern double ener_single_transf;
-#endif
-
 namespace Heed {
 extern long last_particle_number;
 
@@ -28,29 +19,27 @@ class HeedParticle : public eparticle {
   /// Default constructor
   HeedParticle() : eparticle(), m_particleBank(NULL) {}
   /// Constructor.
-  /// If fs_loss_only == 1 only transferred energy
+  /// If fs_loss_only == false only transferred energy
   /// is simulated: no deposition of clusters,
   /// no generation of virtual photons.
   HeedParticle(manip_absvol* primvol, const point& pt, const vec& vel,
                vfloat time, particle_def* fpardef,
                std::list<ActivePtr<gparticle> >& particleBank,
-               HeedFieldMap* fieldmap, int fs_loss_only = 0,
-               int fs_print_listing = 0);
+               HeedFieldMap* fieldmap, const bool fs_loss_only = false,
+               const bool fs_print_listing = false);
   /// Destructor
   virtual ~HeedParticle() {}
 
-  virtual void physics(void);
+  virtual void physics();
   virtual HeedParticle* copy() const { return new HeedParticle(*this); }
   virtual void print(std::ostream& file, int l) const;
 
  private:
-  int s_print_listing;
+  bool s_print_listing;
   long particle_number;
 
-  double transferred_energy_in_step;
-  long qtransfer;
-  int s_loss_only;
-  std::vector<double> transferred_energy;
+  bool s_loss_only;
+  std::vector<double> etransf;
   std::vector<long> natom;
   std::vector<long> nshell;
 

@@ -19,10 +19,10 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-/// Surface base class.
-
 const int pqqsurf = 10;
 const int pqcrossurf = 4;
+
+/// Surface base class.
 
 class surface : public absref {
  public:

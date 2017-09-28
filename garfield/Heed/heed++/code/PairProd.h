@@ -17,10 +17,12 @@ namespace Heed {
 
 class PairProd : public RegPassivePtr {
  public:
-  PairProd(void) { ; }
+  PairProd() {}
   PairProd(const std::string& file_name, double fwa, double ffactorFano = 0.19);
-  double get_eloss(void) const;         // in eV
-  double get_eloss(double ecur) const;  // in eV assuming V = wa / 2.0
+  /// Calculate energy loss (in eV).
+  double get_eloss() const;         
+  /// Calculate energy loss (in eV) assuming V = wa / 2.
+  double get_eloss(const double ecur) const;  
 
   virtual void print(std::ostream& file, int l) const;
 
@@ -38,11 +40,11 @@ class PairProd : public RegPassivePtr {
     * The calculations use the features found at MC calculations:
     * If w is encreased by n times (with the same form of distribution,
     * that is equivalent to the shift of distribution,
-    * the dispersion is changed as 1/n^2 D_old.
+    * the dispersion is changed as \f$1/n^2\f$ D_old.
     * If the resulting energy is multiplied by k, that is the proportional
     * extension of the distribution, the relative dispersion is not changed.
-    * The relative dispersion is (<N^2> - <N>^2)/N.
-    * If to add the onbvious change of the mean energy occured with
+    * The relative dispersion is \f$(<N^2> - <N>^2)/N\f$.
+    * If to add the onbvious change of the mean energy occurred with
     * the change of these parameters,
     * it is possible to obtain the formulae for conversion.
     */

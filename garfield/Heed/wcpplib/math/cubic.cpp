@@ -22,9 +22,7 @@ const Cubic::double_complex Cubic::iu(0, 1);
 
 void Cubic::find_zero(double_complex& z1, double_complex& z2,
                       double_complex& z3) const {
-  mfunname(
-      "void Cubic::find_zero(double_complex &z1, double_complex &z2, "
-      "double_complex &z3) const");
+  mfunname("void Cubic::find_zero(...) const");
   const Cubic& t = (*this);
   if (s_dxzero != 0) {
     z1 = dz1;
@@ -96,7 +94,7 @@ int Cubic::find_real_zero(double z[3]) const {
     z[q] = zc3.real();
     q++;
   }
-  int n2;
+  int n2 = 0;
   for (int n1 = 0; n1 < q - 1; n1++) {
     for (n2 = n1; n2 < q; n2++) {
       if (z[n1] > z[n2]) {

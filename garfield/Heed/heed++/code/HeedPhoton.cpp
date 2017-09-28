@@ -17,16 +17,16 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
                        double fenergy,
                        std::list<ActivePtr<gparticle> >& particleBank,
-                       HeedFieldMap* fieldmap, int fs_print_listing)
+                       HeedFieldMap* fieldmap, const bool fs_print_listing)
     : gparticle(primvol, pt, vel, time),
       particle_number(last_particle_number++),
       parent_particle_number(fparent_particle_number),
       energy(fenergy),
-      s_photon_absorbed(0),
+      s_photon_absorbed(false),
 #ifdef SFER_PHOTOEL
       s_sfer_photoel(0),
 #endif
-      s_delta_generated(0),
+      s_delta_generated(false),
       s_print_listing(fs_print_listing),
       m_particleBank(&particleBank),
       m_fieldMap(fieldmap) {
@@ -36,13 +36,11 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                 mcerr);
 }
 
-void HeedPhoton::physics(void) {
-  mfunname("void HeedPhoton::physics(void)");
-  if (s_print_listing == 1) {
-    mcout << "void HeedPhoton::physics(void) is starting\n";
-  }
+void HeedPhoton::physics() {
+  mfunname("void HeedPhoton::physics()");
+  if (s_print_listing) mcout << "HeedPhoton::physics() starts\n";
   // Stop here if the photon has already been absorbed.
-  if (s_photon_absorbed != 0) return;
+  if (s_photon_absorbed) return;
   if (nextpos.prange <= 0.0) return;
   // Get least address of volume
   const absvol* av = currpos.G_lavol();
@@ -83,22 +81,22 @@ void HeedPhoton::physics(void) {
       nst++;
     }
   }
-  if (s_print_listing == 1) Iprintn(mcout, s);
+  if (s_print_listing) Iprintn(mcout, s);
   // Calculate the path length.
   // s = s * hmd->eldens / hmd->matter->Z_mean() * C1_MEV_CM;
   s = s * 1.0e-18 * AVOGADRO / (hmd->matter->A_mean() / (gram / mole)) *
       hmd->matter->density() / (gram / cm3);
-  if (s_print_listing == 1) Iprintn(mcout, s);
+  if (s_print_listing) Iprintn(mcout, s);
   const double path_length = 1.0 / s;  // cm
-  if (s_print_listing == 1) Iprint2n(mcout, energy, path_length);
+  if (s_print_listing) Iprint2n(mcout, energy, path_length);
   // Draw a random step length.
   const double xleng = -path_length * log(1.0 - SRANLUX());
-  if (s_print_listing == 1) {
+  if (s_print_listing) {
     Iprintn(mcout, xleng);
     Iprintn(mcout, nextpos.prange / cm);
   }
   if (xleng * cm < nextpos.prange) {
-    s_photon_absorbed = 1;
+    s_photon_absorbed = true;
 #ifdef SFER_PHOTOEL
     s_sfer_photoel = 1;  // assumes that virtual photons are already
                          // absorbed and s_sfer_photoel is  0 for them
@@ -110,7 +108,7 @@ void HeedPhoton::physics(void) {
     long n = long(r);
     if (n < 0) n = 0;
     if (n > nst - 1) n = nst - 1;
-    if (s_print_listing == 1) Iprintn(mcout, n);
+    if (s_print_listing) Iprintn(mcout, n);
     na_absorbing = nat[n];
     ns_absorbing = nsh[n];
     nextpos.prange = xleng * cm;
@@ -120,15 +118,13 @@ void HeedPhoton::physics(void) {
   }
 }
 
-void HeedPhoton::physics_after_new_speed(void) {
-  mfunname("void HeedPhoton::physics_after_new_speed(void)");
-  if (s_print_listing == 1) {
-    mcout << "HeedPhoton::physics_after_new_speed is started\n";
-  }
+void HeedPhoton::physics_after_new_speed() {
+  mfunname("void HeedPhoton::physics_after_new_speed()");
+  if (s_print_listing) mcout << "HeedPhoton::physics_after_new_speed starts\n";
   // Stop if the photon has not been absorbed.
-  if (s_photon_absorbed != 1) return;
+  if (!s_photon_absorbed) return;
   // Stop if the delta electrons have already been generated.
-  if (s_delta_generated != 0) return;
+  if (s_delta_generated) return;
   // Get least address of volume
   const absvol* av = currpos.G_lavol();
   HeedMatterDef* hmd = NULL;
@@ -138,24 +134,21 @@ void HeedPhoton::physics_after_new_speed(void) {
   } else {
     const HeedDeltaElectronCSType* hmecst =
         dynamic_cast<const HeedDeltaElectronCSType*>(av);
-    if (hmecst) {
-      hmd = hmecst->hdecs->hmd.get();
-    }
+    if (hmecst) hmd = hmecst->hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
-  // Generate delta-electrons
+  // Generate delta-electrons.
   std::vector<double> el_energy;
   std::vector<double> ph_energy;
   hmd->apacs[na_absorbing]
       ->get_escape_particles(ns_absorbing, energy, el_energy, ph_energy);
-  if (s_print_listing == 1) {
+  if (s_print_listing) {
     mcout << "The condition:\n";
     Iprint2n(mcout, na_absorbing, ns_absorbing);
     mcout << "The decay products:\n";
-    // TODO
-    // Iprintn(mcout, el_energy);
-    // Iprintn(mcout, ph_energy);
+    for (unsigned int k = 0; k < el_energy.size(); ++k) mcout << el_energy[k] << "\n"; 
+    for (unsigned int k = 0; k < ph_energy.size(); ++k) mcout << ph_energy[k] << "\n"; 
   }
   const long qel = el_energy.size();
   for (long nel = 0; nel < qel; nel++) {
@@ -178,7 +171,7 @@ void HeedPhoton::physics_after_new_speed(void) {
     const double beta = sqrt(1.0 - inv * inv);
     const double mod_v = beta * c_light;
     vel = vel * mod_v;
-    if (s_print_listing == 1) {
+    if (s_print_listing) {
       mcout << "Initializing delta electron\n";
       Iprint4n(mcout, el_energy[nel], gam_1, beta, mod_v);
     }
@@ -193,7 +186,7 @@ void HeedPhoton::physics_after_new_speed(void) {
     vec vel;
     vel.random_sfer_vec();
     vel *= c_light;
-    if (s_print_listing == 1) {
+    if (s_print_listing) {
       mcout << "Initializing photon\n";
       Iprint2n(mcout, el_energy[nph], vel);
     }
@@ -203,11 +196,9 @@ void HeedPhoton::physics_after_new_speed(void) {
                            *m_particleBank, m_fieldMap));
     m_particleBank->push_back(ac);
   }
-  s_delta_generated = 1;
+  s_delta_generated = true;
   s_life = 0;
-  if (s_print_listing == 1) {
-    mcout << "HeedPhoton::physics_after_new_speed is exited\n";
-  }
+  if (s_print_listing) mcout << "HeedPhoton::physics_after_new_speed exited\n";
 }
 
 void HeedPhoton::print(std::ostream& file, int l) const {

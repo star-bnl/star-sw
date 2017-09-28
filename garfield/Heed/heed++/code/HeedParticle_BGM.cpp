@@ -182,8 +182,8 @@ void HeedParticle_BGM::physics(void) {
                         currpos.time, particle_number,
                         transferred_energy[qtransfer - 1], *m_particleBank,
                         m_fieldMap, 0);
-          hp.s_photon_absorbed = 1;
-          hp.s_delta_generated = 0;
+          hp.s_photon_absorbed = true;
+          hp.s_delta_generated = false;
           hp.na_absorbing = na;
           hp.ns_absorbing = ns;
           ActivePtr<gparticle> ac;

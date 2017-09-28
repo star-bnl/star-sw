@@ -21,6 +21,7 @@ namespace Heed {
 class HeedDeltaElectronCS : public RegPassivePtr {
  public:
   static const long q_angular_mesh = 50;
+  static const double low_cut_angle_deg;
 
   PassivePtr<HeedMatterDef> hmd;
   PassivePtr<ElElasticScat> ees;

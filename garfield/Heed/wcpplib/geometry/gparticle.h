@@ -20,26 +20,28 @@ namespace Heed {
 /// Point in space, time and velocity
 class stvpoint {
  public:
-  // coordinates in the first system from tid system
+  /// Coordinates in the first system from tid system
   point pt;
-  // unit vector, in the first system from tid system
+  /// Unit vector, in the first system from tid system
   vec dir;
-  // coordinates in the local system, the last system from tid
+  /// Coordinates in the local system, the last system from tid
   point ptloc;
-  // unit vector, in the local system, the last system from tid
+  /// Unit vector, in the local system, the last system from tid
   vec dirloc;
-  // longitudinal velocity
+  /// Longitudinal velocity
   vfloat speed;
   manip_absvol_treeid tid;
 
-  int sb;     // 0 - inside volume, or unknown
-              // 1 - on the border of the volume
-              // 2 - on the border of an embraced volume
+  /// Position flag
+  /// 0 - inside volume, or unknown
+  /// 1 - on the border of the volume
+  /// 2 - on the border of an embraced volume
+  int sb;     
   int s_ent;  // 1 - entering new volume, 0 otherwise
               // embraced volume is also considered new.
 
   manip_absvol_eid next_eid;  // if nextpos.sb==2
-                              // range from previous point
+  /// Range from previous point.
   vfloat prange;
   vfloat time;
 
@@ -157,7 +159,7 @@ class stvpoint {
 
 extern trajestep_limit gtrajlim;
 
-/// "Geometrical particle" (particle which does not interact with materials).
+/// "Geometric particle" (particle which does not interact with materials).
 /// It flies by polyline line or by circumferences from one volume to another.
 /// The flying is represented by changing of class members representing
 /// particle position.

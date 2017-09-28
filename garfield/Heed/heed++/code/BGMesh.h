@@ -17,7 +17,7 @@ class BGMesh : public RegPassivePtr {
   long q;
   std::vector<double> x;
   virtual void print(std::ostream& file, int l) const;
-   virtual BGMesh* copy() const { return new BGMesh(*this); }
+  virtual BGMesh* copy() const { return new BGMesh(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
 

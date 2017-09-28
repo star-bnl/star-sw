@@ -1,20 +1,9 @@
-#ifndef ELELASCTICSCAT_H
-#define ELELASCTICSCAT_H
+#ifndef EL_ELASTIC_SCAT_H
+#define EL_ELASTIC_SCAT_H
 
 #include <vector>
 
 #include "wcpplib/safetl/AbsPtr.h"
-#include "HeedGlobals.h"
-
-// People, who does not want to link with graphics,
-// can uncomment the following macro.
-// The result will be the disappearance of the two functions
-// from class ElElasticScat, which are the only functions in heed++,
-// which call histdef.
-// These functions were used at preparation of the condensed simulation
-// scheme, namely fitting condensed cross-sections.
-// During actual simulations these two functions are not necessary.
-//#define EXCLUDE_FUNCTIONS_WITH_HISTDEF
 
 namespace Heed {
 
@@ -28,7 +17,7 @@ class ElElasticScatDataStruct {
   double CS(const double theta) const;  ///< Return -1 if not valid
 };
 
-/// Contains array of the structures defined above for a set of energies.
+/// Array of ElElasticScatDataStruct objects for a set of energies.
 class ElElasticScatData {
  public:
   long Z;
@@ -71,35 +60,6 @@ class ElElasticScat : public RegPassivePtr {
   /// Constructor with file name.
   ElElasticScat(const std::string& file_name);
   void print(std::ostream& file, int l) const;
-#ifndef EXCLUDE_FUNCTIONS_WITH_HISTDEF
-  void fill_hist(void);
-  // Makes a package of histograms for all atoms for which the
-  // fit is presented in the data file.
-  // There are 6 types of histograms:
-  // raw..., cor..., corrad, int..., rut..., rutrad
-  // Difference between raw and cor I forgot for the moment.
-  // The plots looks the same but created by diffeent manner.
-  // raw by the call of atom[na].data[ne].CS(angle/180.0 * M_PI );
-  // cor by the normal call:
-  // get_CS(atom[na].Z, energyMeV, angle/180.0 * M_PI );
-  // int is produced by interpolation between neighboring presented atoms.
-  // It is useful, in particular, to check the precision of interpolation.
-  // rut is Rutherford cross section.
-  // histograms with suffix rad are the same but with factor
-  //  2.0 * M_PI * sin(anglerad)
-  // path length is inverse linear coefficient of absorption
-  // for unit A and density (they are not known in this program)
-  // So you should multiply by A and divide by density in gr/cm3.
-
-  void fill_hist_low_scat(const std::string& file_name,
-                          const std::string& file_name_dist);
-// It fills some histograms and write file with tables
-// energy vs coefficient which gives dependency (proportional)
-// of root from dispertion
-// on number of interactions.
-// If file_name_dist != "" and "none",
-// the program will write there the shapes of distributions.
-#endif
  private:
   /// Number of energies (local mesh)
   long qe;
