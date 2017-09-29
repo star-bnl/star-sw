@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
 	}
 	else {
 
+		sprintf(logstr,"COLOR%s: %s [line %d]:",loglevel,filearg,linenum) ;
 
 		while(optind < argc) {
 			strcat(logstr," ") ;
