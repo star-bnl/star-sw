@@ -42,6 +42,7 @@ void itpc_ifee_to_rowpad(int fee_id, int ch, int &row, int &pad)
 	if((fee_id<1)||(fee_id>55)) return ;
 	if((ch<0)||(ch>63)) return ;
 
+	//first: get from the channel# to the pin of the padplane connector
 	if(ch > 31) pin = itpc_sampa_to_pin[1][ch-32] ;
 	else pin = itpc_sampa_to_pin[0][ch] ;
 
@@ -190,8 +191,11 @@ void itpc_altro_to_rowpad(int altro, int ch, int odd, int &row, int &pad)
 itpc_ped_t *itpc_data_c::ped_p = 0 ;
 int itpc_data_c::ped_run = 0 ;
 
-void itpc_data_c::data_accum(int fee, int ch, int tb, int adc)
+void itpc_data_c::data_accum(fee_ch_t *fee_p, int tb, int adc)
 {
+	int fee = fee_p->fee ;
+	int ch = fee_p->ch ;
+
 	at[tb_cou].tb = tb ;
 	at[tb_cou].adc = adc ;
 	tb_cou++ ;
@@ -249,7 +253,12 @@ void itpc_data_c::ped_stop()
 
 			rms = sqrt(rms-mean*mean) ;
 
-			printf("FEE %2d, Ch %2d: %f +- %f\n",f,c,mean,rms) ;
+
+			int row, pad ;
+
+			itpc_ifee_to_rowpad(f,c,row,pad) ;
+
+			printf("%2d %2d %2d %3d %f %f\n",f,c,row,pad,mean,rms) ;
 		}
 	}
 
@@ -287,15 +296,18 @@ void itpc_data_c::ped_stop()
 }
 
 //start of channel data!
-void itpc_data_c::start(u_short *d16)
+int itpc_data_c::start(u_short *d16)
 {
 	fee_ch_t *fee_p = rdo_p->fee_ch[rdo_p->fee_ch_cou] = (fee_ch_t *)malloc(sizeof(fee_ch_t)) ;
 	rdo_p->fee_ch_cou++ ;
 
+	fee_p->port = port_id ;
 	fee_p->fee = fee_id ;
 	fee_p->ch = fee_ch ;
-	fee_p->words = words ;
 	fee_p->err = 0 ;
+
+	fee_p->words = words ;
+
 
 	u_short *d16_stop = d16 + words ;
 		
@@ -329,7 +341,7 @@ void itpc_data_c::start(u_short *d16)
 
 		//do something with the data at timebin "t"
 		for(int t=tb_start;t<=tb_stop;t++) {
-			data_accum(fee_p->fee, fee_p->ch, t, *d16 & 0x3FF) ;
+			data_accum(fee_p, t, *d16 & 0x3FF) ;
 			d16++ ;
 		}
 			
@@ -339,9 +351,10 @@ void itpc_data_c::start(u_short *d16)
 
 	if(fee_p->err) {
 		LOG(ERR,"FEE %d:%d -- error 0x%X",fee_p->fee,fee_p->ch,fee_p->err) ;
+		return -1 ;
 	}
 
-//	return fee_p->err ;
+	return 0 ;
 }
 
 
@@ -349,10 +362,15 @@ void itpc_data_c::start(u_short *d16)
 
 void itpc_data_c::rdo_zap(void *rdo_p)
 {
+	if(rdo_p==0) {
+		LOG(ERR,"rdo_p NULL") ;
+		return ;
+	}
+
 	rdo_t *rdo = (rdo_t *)rdo_p ;
 
 	for(int i=0;i<rdo->fee_ch_cou;i++) {
-		free(rdo->fee_ch[i]) ;
+		if(rdo->fee_ch[i]) free(rdo->fee_ch[i]) ;
 	}
 
 	free(rdo) ;
@@ -366,7 +384,7 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 //		LOG(TERR,"%d = 0x%04X",i,d16[i]) ;
 //	}
 
-	if(next_word==0) {	//start of scan!
+	if(next_word==0) {	//start of FEE scan!
 		fee_err = 0 ;
 
 		//event header check
@@ -392,12 +410,14 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		sampa_bx = -1 ;
 
 //		fee_id = -1 ;
-		fee_id = d16[0] ;
+
+		port_id = d16[0] ;
+		fee_id = d16[1] ;	// actually FEE port, from RDO!
 
 		memset(hdr_cou,0,sizeof(hdr_cou)) ;
 
 //		next_word = 4 ;
-		next_word = 1 ;
+		next_word = 2 ;
 	}
 
 	sampa_ch++ ;
@@ -418,7 +438,7 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		int h = (d16[i] >> 10) & 0x7 ;
 		int d = d16[i] & 0x3FF ;
 		
-		//LOG(TERR,"Lane %d, hdr %d, d 0x%03X - 0x%04X [%d]",l,h,d,d16[i],i) ;
+		LOG(TERR,"Lane %d, hdr %d, d 0x%03X - 0x%04X [%d]",l,h,d,d16[i],i) ;
 
 		hdr_cou[h]++ ;	//MUST come last to avoid the spurious, last 0xFFFF datum
 		
@@ -427,8 +447,10 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 			type = d>>7 ;
 
 			if(sampa_type < 0) sampa_type = type ;
-			else if(sampa_type != type) fee_err |= 0x2 ;
-
+			else if(sampa_type != type) {
+				fee_err |= 0x2 ;
+				LOG(ERR,"Different event type %d, expect %d",type,sampa_type) ;
+			}
 			
 			if(type==0) lane_expect = 2 ;	//hearbeat!
 
@@ -436,6 +458,7 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 		case 1 :
 			if(words != 0) {
 				fee_err |= 0x4000 ;
+				LOG(ERR,"Words are not 0") ;
 			}
 
 			words = d ;
@@ -458,7 +481,10 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 #endif
 
 			if(type == 0) {
-				if(ch != 21) fee_err |= 0x8 ;
+				if(ch != 21) {
+					fee_err |= 0x8 ;
+					LOG(ERR,"Wrong channel") ;
+				}
 			}
 			else {
 #ifdef IFEE_NO_LANE_HDRS
@@ -487,26 +513,33 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 			if(sampa_bx < 0) sampa_bx = bx ;
 			else if(bx != sampa_bx) {
 				fee_err |= 0x10 ;
+				LOG(ERR,"Different BX") ;
 			}	
 
 			switch(type) {
 			case 0:	//heartbeat
-				if(words!=0 || ch!=21) fee_err |= 0x20 ;
+				if(words!=0 || ch!=21) {
+					fee_err |= 0x20 ;
+					LOG(ERR,"Wrong words in Hearbeat") ;
+				}
 				break ;
 			case 4 :	//data
 				break ;
 			default :
-				LOG(ERR,"type %d",type) ;
+				LOG(ERR,"Bad event type %d",type) ;
 				fee_err |= 0x40 ;
 				break ;
 			}
 
 			
-			start(d16+i+1) ;
+			start(d16+i+1) ;	//THIS is where I fill the data!!!
+
+			LOG(INFO,"Starting: FEE %d, SAMPA %d, ch %d, words %d",fee_id,sampa_id,sampa_ch,words) ;
 
 			i += words ;
 			next_word = i + 1 ;
 			if(fee_err) LOG(ERR,"0x%X",fee_err) ;
+
 			LOG(INFO,"Done: FEE %d, SAMPA %d, ch %d, words %d",fee_id,sampa_id,sampa_ch,words) ;
 
 			//LOG(TERR,"Next word: %d/%d, words %d",next_word,shorts,words) ;
@@ -520,11 +553,21 @@ int itpc_data_c::fee_scan(u_short *d16, int shorts)
 			break ;
 
 		case 7 :	// end of lane data
-			LOG(TERR,"Lane %d: end of lane data 0x%X",l,d) ;
+			//fee_id = d & 0x3F ;
+			{
+				LOG(TERR,"Lane %d: end of lane data 0x%04X, token %d",l,d16[i],d) ;
+
+			}
 			break ;
 		case 6 :
-
-			LOG(TERR,"Lane %d: start of lane data 0x%X",l,d) ;
+			{
+				int fee = d & 0x3F ;
+				int ev = (d >> 6)&3 ;
+				int tkn = (d>>8)&3 ;
+				LOG(TERR,"Lane %d: start of lane data 0x%X [0x%04X] - fee %d, ev %d, tkn %d",
+					l,d,d16[i],
+					fee,ev,tkn) ;
+			}
 			break ;
 		}
 	}

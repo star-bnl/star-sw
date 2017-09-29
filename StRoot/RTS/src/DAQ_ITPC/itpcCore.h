@@ -3,12 +3,14 @@
 
 #include <DAQ_READER/daq_dta_structs.h>
 
+
+//per sector
 struct itpc_ped_t {
-	double mean[64][64][512] ;
+	double mean[64][64][512] ;	//fee,ch,timebin
 	double rms[64][64][512] ;
 	int cou[64][64][512] ;
 
-	double g_mean[64][64] ;
+	double g_mean[64][64] ;		//fee,ch
 	double g_rms[64][64] ;
 	int g_cou[64][64] ;
 } ;
@@ -18,20 +20,29 @@ public:
 	itpc_data_c() { rdo_p = 0 ; next_word = 0 ;} ;
 	~itpc_data_c() {;} ;
 
+	//per FEE
 	struct fee_ch_t {
-		u_char fee ;	//0..63
+		u_char port ;	//0..15
+		u_char fee ;	//0..63; padplane id
 		u_char ch ;	//0..63
 		u_char err ;
 
 		u_short words ;
 	} ;
 
-	
+	//per RDO, per event
 	struct rdo_t {
+		u_char sector ;
+		u_char rdo ;
+		u_char rb ;
+		u_char reserved ;
+
 		u_short token ;
+
 		u_char trg_cmd ;
 		u_char daq_cmd ;
-		u_char rdo ;
+
+
 
 		fee_ch_t *fee_ch[64*64] ;	//64 FEEs with 64ch
 		int fee_ch_cou ;
@@ -40,20 +51,28 @@ public:
 	rdo_t *rdo_p ;
 
 
-
-	void rdo_start(int irdo) {
+	//start of RDO event
+	void rdo_start(int sector, int irdo, int rb) {
 		next_word = 0 ;
 
+//		if(rdo_p) {
+//			LOG(ERR,"rdo_p not free!") ;
+//		}
+
 		rdo_p = (rdo_t *)malloc(sizeof(rdo_t)) ;
+
+		rdo_p->sector = sector ;
 		rdo_p->rdo = irdo ;
-		
+		rdo_p->rb = rb ;
+		rdo_p->reserved = 0 ;	//just in case
+
 		rdo_p->fee_ch_cou = 0 ;
 
 	}
 
 	static void rdo_zap(void *rdo_p) ;
 
-	void data_accum(int fee, int ch, int tb, int adc) ;
+	void data_accum(fee_ch_t *fee_p, int tb, int adc) ;
 
 	int fee_scan(u_short *d16, int shorts) ;
 
@@ -66,6 +85,8 @@ public:
 	u_int format_version ;
 
 	int sector ;
+
+	int port_id ;	//via RDO
 
 	int fee_id ;
 	int fee_ch ;
@@ -85,7 +106,7 @@ private:
 	int next_word ;
 	int hdr_cou[8] ;
 
-	void start(u_short *d16) ;	
+	int start(u_short *d16) ;	
 };
 
 
