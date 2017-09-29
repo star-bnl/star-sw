@@ -189,7 +189,8 @@
     <Construct sys="mutd" config="MUTD15" simu="2" />
   </Geometry>
 
-  <Geometry tag="y2017a"  check="false" comment="Y2017 rough cut geometry">
+
+  <Geometry tag="y2017a"  check="false" comment="Y2017a production geometry">
 
     <Construct sys="cave" config="CAVE05" simu="1" />
     <Construct sys="scon" config="SCON14" simu="2" />
@@ -204,8 +205,9 @@
     <Construct sys="fpdm" config="FPDM04" simu="1" />
     <Construct sys="zcal" config="ZCALon" simu="1" />
     <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD15" simu="2" />
+    <Construct sys="mutd" config="MUTD16" simu="2" />
   </Geometry>
+
 
 
   <!-- y2016 series geometry tags -->
