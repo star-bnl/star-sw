@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 	char filearg[128] ;
 	char cmdarg[128] ;
 	int linenum ;
+	int use_stdin ;
+	char buff[256] ;
 
 	logport = RTS_LOG_PORT_TEST ;	// test.log
 	strcpy(logdest,"172.16.0.1") ;	// daqman on local net
@@ -30,13 +32,14 @@ int main(int argc, char *argv[])
 	strcpy(filearg,"shell.sh") ;
 	strcpy(cmdarg,"shell") ;
 	linenum = 0 ;
+	use_stdin = 0 ;
 
 	rtsLogLevel(DBG) ;
 	rtsLogOutput(RTS_LOG_NET) ;
 
 	memset(logstr,0,sizeof(logstr)) ;
 
-	while((c = getopt(argc,argv,"c:d:p:w:h:f:l:")) != EOF) {
+	while((c = getopt(argc,argv,"c:d:p:w:h:f:l:i")) != EOF) {
 	switch(c) {
 	case 'c' :
 		strcpy(cmdarg,optarg) ;
@@ -59,6 +62,9 @@ int main(int argc, char *argv[])
 	case 'l' :
 		linenum = atoi(optarg) ;
 		break ;
+	case 'i' :
+		use_stdin = 1 ;
+		break ;
 	case '?' :
 	default :
 		fprintf(stderr,"Usage %s: [-d loglevel] [-p port] [-w output] [-h log host] [-c cmd]\n",argv[0]) ;
@@ -69,17 +75,27 @@ int main(int argc, char *argv[])
 	rtsLogAddCmd(cmdarg) ;
 	rtsLogAddDest(logdest,logport) ;
 
-	sprintf(logstr,"COLOR%s: %s [line %d]:",loglevel,filearg,linenum) ;
+	if(use_stdin) {
+		while(!feof(stdin)) {
+			if(fgets(buff,sizeof(buff),stdin)==0) continue ;
 
-	while(optind < argc) {
-		strcat(logstr," ") ;
-		strcat(logstr,argv[optind]) ;
-		optind++ ;
+			sprintf(logstr,"COLOR%s: %s [line %d]: %s",loglevel,filearg,linenum,buff) ;
+			rtsLogUnix_v(logstr) ;
+		}
 	}
+	else {
 
-	strcat(logstr,"\n") ;
 
-	rtsLogUnix_v(logstr) ;
+		while(optind < argc) {
+			strcat(logstr," ") ;
+			strcat(logstr,argv[optind]) ;
+			optind++ ;
+		}
+
+		strcat(logstr,"\n") ;
+
+		rtsLogUnix_v(logstr) ;
+	}
 
 	return 0 ;
 }
