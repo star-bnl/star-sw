@@ -1,15 +1,33 @@
 #!/bin/sh
 
-#Please copy this file to the working directory for embedding submission
+#1. copy this script to the embedding working directory for a specific request.
+#2. edit the options for $script first, run this script at PDSF first, generate the xml for embedding job submission.
+#3. submit the job at PDSF, produce one fset there.
+#4. obtain the number of events and the CPU hours per fset with the fSetStatistics.sh script.
+#5. calculate the number of fsets according to the requested statistics
+#6. edit the three options for Cori accordingly for full embedding production
+#7. run this script again at Cori, generate the .slr script for SLURM job submission.
+#8. submit the SLURM job for the full production
 
 if [[ $HOST =~ "cori" ]] ; then
  module load python/3.5-anaconda
  cp StRoot/macros/embedding/cori/farmerQAmonitor.ipynb ./
+ script="python StRoot/macros/embedding/cori/prepEmbedTaskList.py"
+
+#EDIT the following three options before use this script at Cori farm
+ fset="-fSetRange 100-109"
+ cpuh="-fSetCPUHours 1321"
+ outp="-outPath /global/cscratch1/sd/zhux/embedding"
+
+else
+ script="perl StRoot/macros/embedding/get_embedding_xml.pl"
+ fset=""
+ cpuh=""
+ outp=""
 fi
 
-#use perl script at PDSF, and python script at Cori
-#perl StRoot/macros/embedding/get_embedding_xml.pl \
-python StRoot/macros/embedding/cori/prepEmbedTaskList.py \
+#EDIT the following options according to the embedding request page
+$script \
  -trg AuAu200_production_2011 -production P11id -lib SL11d_embed \
  -mixer StRoot/macros/embedding/bfcMixer_Tpx.C -prodname P11idAuAu200 \
  -r 20172901 \
@@ -21,8 +39,7 @@ python StRoot/macros/embedding/cori/prepEmbedTaskList.py \
  -local \
  -daq /global/projecta/projectdirs/starprod/daq/2011/2011_auau200 \
  -tag /global/projecta/projectdirs/starprod/tags/2011_auau200 \
- -fSetRange 100-109 \
- -fSetCPUHours 1321 \
- -outPath /global/cscratch1/sd/zhux/embedding
+ $fset \
+ $cpuh \
+ $outp
 
-#The last three lines (fSetRange, fSetCPUHours, outPath) are specific to the Cori script, comment them out for PDSF.
