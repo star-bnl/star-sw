@@ -1,0 +1,11 @@
+<Document file="StarVMC/Geometry/EtofGeo0/EtofConf.xml">
+<Detector name="ETOF" comment="CBM/STAR Endcap Time-of-Flight">
+  <Modules>
+    EtofGeo0
+  </Modules>
+
+  <Setup name="ETOFof" comment="OFF" module="EtofGeo0" onoff="off" />
+  <Setup name="ETOFv14s" comment="tof_v14s.root" module="EtofGeo0" onoff="on" />
+
+</Detector>
+</Document>
