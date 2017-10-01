@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60 2017/05/02 20:08:52 perev Exp $
+// $Id: StvMaker.cxx,v 1.61 2017/09/29 16:54:51 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -356,6 +356,7 @@ static int initialized = 0;
           assert(gSystem->Load("TPCCATracker.so")	>=0);
 	}
 	StvSeedFinder *mySeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+        if (IAttr("truthSeedFinder")) mySeedFinder->SetIdTruth();       
         if (TString(seedNick[nick])=="Fts") mySeedFinder->SetSgn(-1);
 	assert(mySeedFinder && !seedErr);
         mSeedFinders[jreg]->Add(mySeedFinder);

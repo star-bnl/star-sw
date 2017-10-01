@@ -174,6 +174,9 @@ std::vector<TObject*> mySeedObjs;
   int nTally = 0; 
   while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
+    int fstIdTruth = fstHit->idTru();
+    if (fIdTruth && fstIdTruth==0) continue;
+
     if (fstHit->isUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
       ++(*f1stHitMapIter); mNDejavu = 0; continue;
     }
@@ -206,6 +209,7 @@ std::vector<TObject*> mySeedObjs;
 	nexHit = (StvHit*)node->GetObj()	;++(*fMultiIter); 
 
 	if (nexHit->isUsed()) 	continue;
+        if (fIdTruth && fstIdTruth!=nexHit->idTru()) continue;
 	const StHitPlane *hpNex = nexHit->detector();
 	if (hpNex==hp) 		continue;
 	int dejavu = 0;

@@ -1590,7 +1590,7 @@ class Placement(Handler):
 		if key == 'matrix':
 		    val = rotation.value
 		    formatter( "agml_rotm = %s"%val );
-		    formatter( "CALL agml_matrix(agml_rotm)")
+		    formatter( "CALL agml_rotation(agml_rotm)")
 		    
 
             #

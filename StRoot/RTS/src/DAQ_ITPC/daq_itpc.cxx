@@ -170,7 +170,7 @@ daq_dta *daq_itpc::handle_ifee_sampa()
 	LOG(NOTE,"Starting fee_scan") ;
 
 	itpc_data_c dta_c ;
-	dta_c.rdo_start(1) ;
+	dta_c.rdo_start(0,0,0) ;
 
 	//raw data at "ptr"
 	while(dta_c.fee_scan((u_short *)ptr,size/2)) {

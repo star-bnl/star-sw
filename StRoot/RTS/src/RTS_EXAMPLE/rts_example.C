@@ -2292,7 +2292,10 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 				u_short *d16 = (u_short *)dd->Void ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
-					printf(" %5d = 0x%04X [%5u dec]\n",i,d16[i],d16[i]) ;
+					u_int flags = d16[i] >> 12 ;
+					u_int data = d16[i] & 0xFFF ;
+
+					printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
 				}
 			}
 

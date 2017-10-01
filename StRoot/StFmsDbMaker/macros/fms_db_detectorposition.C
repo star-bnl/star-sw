@@ -27,6 +27,10 @@ void fms_db_detectorposition(char* opt = "readtext", char* dataspec) {
       storeTime = "2014-12-17 00:00:00";
       readDate = 20141217;
       readTime = 120000;
+  }else if(data.Contains("run17sim")){
+      storeTime = "2016-12-10 00:00:01";
+      readDate = 20161210;
+      readTime = 120001;
   }else{
       std::cout<<"Invalid year range"<<std::endl;
       exit;

@@ -179,14 +179,14 @@ int StvTpcPrompt::operator()(const double xyz[3])
 #include "StEvent/StTpcHit.h"
 #include "Stv/StvHit.h"
 //		Workaround of bug in StTpcHit::padrow()
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //		End of workaround
 
 //______________________________________________________________________________
 int StvTpcHitActor::operator()(const double xyz[3]) 
 {
 static int nCall = 0; nCall++;
-static const int kMaxRows = St_tpcPadPlanesC::instance()->numberOfRows();
+static const int kMaxRows = St_tpcPadConfigC::instance()->numberOfRows(20);
 static const int iSect[24] = {23,22,21,20,19,18,17,16,15,14,13,24
                              ,11,10, 9, 8, 7, 6, 5, 4, 3, 2, 1,12};
  assert(mHit);
