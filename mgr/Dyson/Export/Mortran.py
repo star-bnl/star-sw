@@ -1587,6 +1587,12 @@ class Placement(Handler):
                     val = rotation.value
                     formatter( "CALL agml_ortho('%s'//char(0))"%val )
 
+		if key == 'matrix':
+		    val = rotation.value
+		    formatter( "agml_rotm = %s"%val );
+		    formatter( "CALL agml_rotation(agml_rotm)")
+		    
+
             #
             # Is defined by the six G3 angles
             if rotation.angles:
@@ -1744,6 +1750,7 @@ class Rotation(Handler):
             self.key = 'matrix'
             self.value = matrix
             self.parent.add(self)
+            return
 
 
         list = ['alphax','alphay','alphaz','ort']
