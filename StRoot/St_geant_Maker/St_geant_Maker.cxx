@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.164 2017/04/26 20:26:56 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.165 2017/10/02 15:29:38 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.165  2017/10/02 15:29:38  jwebb
+// Integration of ETOF into simulation
+//
 // Revision 1.164  2017/04/26 20:26:56  perev
 // Hide m_DataSet
 //
@@ -594,7 +597,8 @@
 #include "g2t/St_g2t_ftp_Module.h"
 #include "g2t/St_g2t_ctb_Module.h"
 #include "g2t/St_g2t_tof_Module.h"
-#include "g2t/St_g2t_tfr_Module.h" 
+#include "g2t/St_g2t_tfr_Module.h"  // barrel tof
+#include "g2t/St_g2t_eto_Module.h"  // endcap tof
 #include "g2t/St_g2t_rch_Module.h"
 #include "g2t/St_g2t_emc_Module.h"
 #include "g2t/St_g2t_smd_Module.h"
@@ -1358,6 +1362,16 @@ Int_t St_geant_Maker::Make() {
     St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
     AddData(g2t_tfr_hit);
     iRes = g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
+    //           ==============================
+  }
+
+  nhits = 0;
+  geant3->Gfnhit("ETOH","ECEL", nhits);
+  LOG_INFO << "ETOF nhits = " << nhits << endm;
+  if (nhits>0) {
+    St_g2t_ctf_hit *g2t_eto_hit = new St_g2t_ctf_hit("g2t_eto_hit",nhits);
+    AddData(g2t_eto_hit);
+    iRes = g2t_eto(g2t_track,g2t_eto_hit); if (Debug() > 1) g2t_eto_hit->Print(0,10);
     //           ==============================
   }
   

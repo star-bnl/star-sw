@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.81 2016/11/03 13:49:01 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.82 2017/10/02 15:29:38 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.82  2017/10/02 15:29:38  jwebb
+* Integration of ETOF into simulation
+*
 * Revision 1.81  2016/11/03 13:49:01  jwebb
 * Integrate EPD into framework.
 *
@@ -240,6 +243,8 @@
       Integer hcal_cell   "HCAL cells  3x3"
       Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
       Integer hcal_sl     "HCAL short long cell, 1 short,2 long"
+
+      Integer etof_sector, etof_plane, etof_counter, etof_gap, etof_cell
  
       Structure  SVTG  {version}
       Structure  TPCG  {version, tpadconfig }
@@ -1022,12 +1027,37 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          
            "East / west is first in numbv, paddle number is second"           
            volume_id = 100*numbv(1) + numbv(2)
-            
+
+
+*******************************************************************************************
+** 29                                                                           Jason Webb
+      ELSE IF (CSYS=='eto') THEN
+
+         """Endcap TIME OF FLIGHT"""
+
+         etof_plane    = numbv(1)/100          "1 closest to IP, 3 furthest from IP"
+         etof_sector   = mod( numbv(1), 100 )  "matches TPC scheme 13 to 24"
+         etof_counter  = numbv(2)              "3 counters per gas volume"
+         etof_gap      = numbv(3)              "12 gaps between glass"
+         etof_cell     = numbv(4)              "32 cells per gap"
+
+        
+
+         volume_id = etof_cell               + 
+                     100      * etof_gap     +
+                     10000    * etof_counter + 
+                     100000   * etof_sector  +   
+                     10000000 * etof_plane
+
+         """ Note: this last part could just be 100000*numbv(1).  We break it """
+         """ into plane and sector just to make explicit the numbering scheme """
+                     
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
-    g2t_volume_id = volume_id
 
+
+    g2t_volume_id = volume_id
 
     end
       
