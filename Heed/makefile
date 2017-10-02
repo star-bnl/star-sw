@@ -144,12 +144,6 @@ $(OBJDIR)/Heed/rnorm.o: \
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 
-$(OBJDIR)/Heed/eiparticle.o: \
-	$(HEEDDIR)/wcpplib/particle/eiparticle.cpp\
-	$(HEEDDIR)/wcpplib/particle/eiparticle.h
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-
 $(OBJDIR)/Heed/eparticle.o: \
 	$(HEEDDIR)/wcpplib/particle/eparticle.cpp\
 	$(HEEDDIR)/wcpplib/particle/eparticle.h

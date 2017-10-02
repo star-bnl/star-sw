@@ -24,10 +24,10 @@ class MatterDef : public AtomMixDef {
   // I_eff is still not very reliable.
   // There are too many approximations for this.
   // Here is a simplest and probably not good.
-  void calc_I_eff(void);
+  void calc_I_eff();
 
  public:
-  MatterDef(void);
+  MatterDef();
   MatterDef(const std::string& fname, const std::string& fnotation, long fqatom,
             const std::vector<std::string>& fatom_not,
             const std::vector<double>& fweight_quan, double fdensity,
@@ -67,15 +67,5 @@ class MatterDef : public AtomMixDef {
 };
 std::ostream& operator<<(std::ostream& file, const MatterDef& f);
 
-/// Helper class.
-
-class MatterType {
- public:
-  PassivePtr<MatterDef> matdef;
-  MatterType(void) : matdef() { ; }
-  MatterType(MatterDef* md) : matdef(md) { ; }
-};
-std::ostream& operator<<(std::ostream& file, const MatterType& f);
 }
-
 #endif
