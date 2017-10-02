@@ -8,13 +8,11 @@
 namespace Heed {
 
 /// Charged ionizing particle.
-/// Very simple and crude class - for start and for debug (comparison with more
-/// accurate but complicated future classes).
 
 class eiparticle : public eparticle {
  public:
   /// Default constructor
-  eiparticle(void) : eparticle() {}
+  eiparticle() : eparticle() {}
   /// Constructor
   eiparticle(manip_absvol* primvol, const point& pt, const vec& vel,
              vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap,
@@ -22,15 +20,16 @@ class eiparticle : public eparticle {
       : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
         s_add_loss(fs_add_loss),
         total_loss(0.0) {}
-  AnyType_copy(eiparticle, gparticle);
   /// Destructor
   virtual ~eiparticle() {}
+
+  virtual eiparticle* copy() const { return new eiparticle(*this); }
   virtual void print(std::ostream& file, int l) const;
-  virtual void physics_after_new_speed(void);
+  virtual void physics_after_new_speed(std::vector<gparticle*>& secondaries);
 
  private:
   /// Energy loss per unit length.
-  double Bethe_Bloch_en_loss(void);
+  double Bethe_Bloch_en_loss();
 
   /// Flag for handling energy loss.
   /// 0 - loss is subtracted from current particle energy

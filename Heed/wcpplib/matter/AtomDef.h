@@ -35,7 +35,7 @@ namespace Heed {
 ///   static std::list<AtomDef*> logbook;
 /// The can be obtained by notations by:
 /// public:
-///   static const std::list<AtomDef*>& get_AtomDefLogbook(void);
+///   static const std::list<AtomDef*>& get_AtomDefLogbook();
 ///   static AtomDef* get_AtomDef(const std::string& fnotation);
 ///  returns the address of atom with this name if it is registered in system,
 /// or NULL otherwise.
@@ -66,18 +66,18 @@ class AtomDef : public RegPassivePtr {
   /// Destructor
   ~AtomDef();
 
-  const std::string& name(void) const { return nameh; }
-  const std::string& notation(void) const { return notationh; }
-  int Z(void) const { return Zh; }
-  double A(void) const { return Ah; }
+  const std::string& name() const { return nameh; }
+  const std::string& notation() const { return notationh; }
+  int Z() const { return Zh; }
+  double A() const { return Ah; }
   /// Print all registered atoms.
   static void printall(std::ostream& file);
   /// Check that there is no atom with the same name in the container.
-  void verify(void);
+  void verify();
   /// Initialize the logbook at the first request
   /// and keep it as internal static variable.
-  static std::list<AtomDef*>& get_logbook(void);
-  static const std::list<AtomDef*>& get_const_logbook(void);
+  static std::list<AtomDef*>& get_logbook();
+  static const std::list<AtomDef*>& get_const_logbook();
   /// Return the address of atom with this name if it is registered in system,
   /// or NULL otherwise
   static AtomDef* get_AtomDef(const std::string& fnotation);
@@ -118,7 +118,7 @@ class AtomMixDef : public RegPassivePtr {
 
  public:
   /// Default constructor
-  AtomMixDef(void)
+  AtomMixDef()
       : qatomh(0),
         Z_meanh(0.0),
         A_meanh(0.0),
@@ -140,18 +140,18 @@ class AtomMixDef : public RegPassivePtr {
              const std::string& fatom_not3, double fweight_quan3,
              const std::string& fatom_not4, double fweight_quan4);
   void print(std::ostream& file, int l) const;
-  long qatom(void) const { return qatomh; }
-  const std::vector<PassivePtr<AtomDef> >& atom(void) const { return atomh; }
+  long qatom() const { return qatomh; }
+  const std::vector<PassivePtr<AtomDef> >& atom() const { return atomh; }
   PassivePtr<AtomDef> atom(long n) const { return atomh[n]; }
-  const std::vector<double>& weight_quan(void) const { return weight_quanh; }
-  const std::vector<double>& weight_mass(void) const { return weight_massh; }
+  const std::vector<double>& weight_quan() const { return weight_quanh; }
+  const std::vector<double>& weight_mass() const { return weight_massh; }
   double weight_quan(long n) const { return weight_quanh[n]; }
   double weight_mass(long n) const { return weight_massh[n]; }
-  double Z_mean(void) const { return Z_meanh; }
-  double A_mean(void) const { return A_meanh; }
-  double inv_A_mean(void) const { return inv_A_meanh; }
-  double mean_ratio_Z_to_A(void) const { return mean_ratio_Z_to_Ah; }
-  double NumberOfElectronsInGram(void) const {
+  double Z_mean() const { return Z_meanh; }
+  double A_mean() const { return A_meanh; }
+  double inv_A_mean() const { return inv_A_meanh; }
+  double mean_ratio_Z_to_A() const { return mean_ratio_Z_to_Ah; }
+  double NumberOfElectronsInGram() const {
     return NumberOfElectronsInGramh;
   }
 };

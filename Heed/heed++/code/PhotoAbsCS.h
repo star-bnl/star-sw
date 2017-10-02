@@ -50,7 +50,7 @@ class PhotoAbsCS {
   /// Destructor
   virtual ~PhotoAbsCS() {}
 
-  /// Name of this shell or atom. 
+  /// Name of this shell or atom.
   const std::string& get_name() const { return name; }
   /// Number of this shell.
   int get_number() const { return number; }
@@ -85,23 +85,23 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
   /// If real q is more, the function calls PhotoAbsCs::get_integral_CS.
   long max_q_step;
   /// Integration step, for example, 1/20 from width.
-  double step; 
+  double step;
 
  public:
   /// Default constructor.
   AveragePhotoAbsCS() : PhotoAbsCS() {}
   /** Constructor.
-    * \param apacs 
+    * \param apacs
              photoabsorption cross-section
-    * \param fwidth 
+    * \param fwidth
              width [MeV] for smoothing
-    * \param fstep 
+    * \param fstep
              step size [MeV] for numerical integration
     * \param fmax_q_step
              max number of integration steps
     */
-  AveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,
-                    double fstep, long fmax_q_step);
+  AveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth, double fstep,
+                    long fmax_q_step);
   /// Destructor
   virtual ~AveragePhotoAbsCS() {}
   virtual double get_CS(double energy) const;
@@ -110,14 +110,14 @@ class AveragePhotoAbsCS : public PhotoAbsCS {
   virtual void scale(double fact);
 
   virtual void print(std::ostream& file, int l) const;
-  virtual AveragePhotoAbsCS* copy() const { 
-    return new AveragePhotoAbsCS(*this); 
+  virtual AveragePhotoAbsCS* copy() const {
+    return new AveragePhotoAbsCS(*this);
   }
 };
 
 /// Hydrogen: empirical fit of Kosarev & Podoliak.
 /// Original formula for molecular hydrogen.
-/// Since this class for separated shell, we divide the molecular CS by two. 
+/// Since this class for separated shell, we divide the molecular CS by two.
 class HydrogenPhotoAbsCS : public PhotoAbsCS {
  public:
   /// Constructor
@@ -129,9 +129,10 @@ class HydrogenPhotoAbsCS : public PhotoAbsCS {
   virtual void scale(double fact);
 
   virtual void print(std::ostream& file, int l) const;
-  virtual HydrogenPhotoAbsCS* copy() const { 
-    return new HydrogenPhotoAbsCS(*this); 
+  virtual HydrogenPhotoAbsCS* copy() const {
+    return new HydrogenPhotoAbsCS(*this);
   }
+
  private:
   double prefactor;
 };
@@ -161,11 +162,11 @@ class SimpleTablePhotoAbsCS : public PhotoAbsCS {
   /// Constructor for reading table from file.
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         const std::string& ffile_name);
-  /// Constructor from given energy and cross-section tables. 
+  /// Constructor from given energy and cross-section tables.
   SimpleTablePhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                         const std::vector<double>& fener,
                         const std::vector<double>& fcs);
-  /// Constructor from fit parameters. 
+  /// Constructor from fit parameters.
   /// Fit formula from Band-Band-Trzaskovskaya et al.
   /// It is difficult to integrate those formulas analytically,
   /// so I create numerical array and treat it as input data.
@@ -178,7 +179,7 @@ class SimpleTablePhotoAbsCS : public PhotoAbsCS {
   /// Destructor
   virtual ~SimpleTablePhotoAbsCS() {}
   /// Remove points with zero cross-section from the table.
-  void remove_leading_zeros();         
+  void remove_leading_zeros();
   /// Remove points with cross section below a given level from the table.
   /// The function is designed for Henke tables, which are prepared for database
   /// with leading values like 1.0e-15 .
@@ -191,13 +192,13 @@ class SimpleTablePhotoAbsCS : public PhotoAbsCS {
   const std::vector<double>& get_arr_CS() const { return cs; }
   virtual void scale(double fact);
   virtual void print(std::ostream& file, int l) const;
-  virtual SimpleTablePhotoAbsCS* copy() const { 
-    return new SimpleTablePhotoAbsCS(*this); 
+  virtual SimpleTablePhotoAbsCS* copy() const {
+    return new SimpleTablePhotoAbsCS(*this);
   }
 
  private:
   /// Filename (saved for printing).
-  std::string file_name;  
+  std::string file_name;
   /// Table of energies [MeV].
   std::vector<double> ener;
   /// Cross-section values at these energies.
@@ -214,7 +215,7 @@ class PhenoPhotoAbsCS : public PhotoAbsCS {
     * \param fZ number of electrons
     * \param fthreshold threshold level
     * \param fpower positive number \f$x\f$ in \f$1/E^{-x}\f$
-    */ 
+    */
   PhenoPhotoAbsCS(const std::string& fname, int fZ, double fthreshold,
                   double fpower = 2.75);
   /// Destructor.
@@ -259,8 +260,8 @@ class AtomicSecondaryProducts : public RegPassivePtr {
     * \param fchannel_prob_dens probability for this channel.
     * \param felectron_energy electron energies [MeV]
     * \param fphoton_energy photon energies [MeV]
-    * \param s_all_rest if 1, the probability of this channel is assigned 
-    to that what is left to 1. 
+    * \param s_all_rest if 1, the probability of this channel is assigned
+    to that what is left to 1.
     fchannel_prob_dens is then ignored, it can be just 0.
     */
   void add_channel(double fchannel_prob_dens,
@@ -283,7 +284,7 @@ class AtomPhotoAbsCS : public RegPassivePtr {
  public:
   /// Default constructor.
   AtomPhotoAbsCS();
- 
+
   int get_Z() const { return Z; }
   inline unsigned int get_qshell() const { return qshell; }
   virtual double get_threshold(int nshell) const = 0;
@@ -340,6 +341,7 @@ class AtomPhotoAbsCS : public RegPassivePtr {
   virtual AtomPhotoAbsCS* copy() const = 0;
 
   AtomicSecondaryProducts* get_asp(int nshell);
+
  protected:
   std::string name;
   int Z;
@@ -354,7 +356,7 @@ class AtomPhotoAbsCS : public RegPassivePtr {
 };
 std::ostream& operator<<(std::ostream& file, const AtomPhotoAbsCS& f);
 
-/// Simple atomic photoabsorption cross-section 
+/// Simple atomic photoabsorption cross-section
 /// (no difference between absorption and ionization).
 
 class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
@@ -387,8 +389,8 @@ class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
     return acs[nshell]->get_number();
   }
   virtual void print(std::ostream& file, int l) const;
-  virtual SimpleAtomPhotoAbsCS* copy() const { 
-    return new SimpleAtomPhotoAbsCS(*this); 
+  virtual SimpleAtomPhotoAbsCS* copy() const {
+    return new SimpleAtomPhotoAbsCS(*this);
   }
 
  protected:
@@ -424,43 +426,41 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
                                   double energy2) const;
   virtual int get_main_shell_number(int nshell) const {
     return acs[nshell]->get_number();
-  } 
+  }
   void replace_shells_by_average(double fwidth,  // MeV
                                  double fstep, long fmax_q_step);
   virtual void print(std::ostream& file, int l) const;
-  virtual ExAtomPhotoAbsCS* copy() const { 
-    return new ExAtomPhotoAbsCS(*this); 
-  }
+  virtual ExAtomPhotoAbsCS* copy() const { return new ExAtomPhotoAbsCS(*this); }
 
   /// Default constructor.
   ExAtomPhotoAbsCS(void) : AtomPhotoAbsCS() {}
-  /** Constructor, 
-    * \param fthreshold_file_name 
+  /** Constructor,
+    * \param fthreshold_file_name
              file from which to read name and shell energies
     * \param fsimple_table_file_name
-             file from which to read the cross-sections 
-    * \param fname 
+             file from which to read the cross-sections
+    * \param fname
              name of the atom, if "none" it is taken from fthreshold_file_name
-    * \param fminimal 
-             threshold (normally it is used only with other threshold) 
+    * \param fminimal
+             threshold (normally it is used only with other threshold)
     */
   ExAtomPhotoAbsCS(int fZ, const std::string& fthreshold_file_name,
                    const std::string& fsimple_table_file_name,
-                   const std::string& fname = "none", 
+                   const std::string& fname = "none",
                    double fminimal_threshold = 0.0);
   /** Constructor, shells from Band and Band and Thragzkovskaya.
     * \param fname
              name of the atom
       \param fBT_file_name
-             file with shell names and energies 
+             file with shell names and energies
       \param id
              1 - old files without fluorescence rate
              2 - new files with fluorescence rate
              other values - error
     */
   ExAtomPhotoAbsCS(int fZ, const std::string& fname,
-                   const std::string& fBT_file_name,
-                   int id, double fminimal_threshold = 0.0);
+                   const std::string& fBT_file_name, int id,
+                   double fminimal_threshold = 0.0);
   // Takes the  shell names and shell energies from file generated by
   // Band and Thragzkovskaya.
   // Old comm: Currently no fluorescence.
@@ -515,7 +515,7 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
   // exener[2] is corrected at initialization in first main constructor.
   // In the second one there is no implementation of minimal_threshold so far.
 
-  /// Flag whether to add excitations. 
+  /// Flag whether to add excitations.
   /// If 0 excitations will not be added (useful for debugging and for checking
   /// the effect produced by adding excitations). For real work, this variable
   /// should always be set to 1.
@@ -544,9 +544,9 @@ const double coef_I_to_W = 2.0;
 class MolecPhotoAbsCS : public RegPassivePtr {
  public:
   /// Total number of atoms of all sorts in the molecule.
-  int get_qatom(void) { return qatom; }  
+  int get_qatom(void) { return qatom; }
   /// Number of atoms of a particular sort in the molecule.
-  int get_gatom_ps(int n) { return qatom_ps[n]; } 
+  int get_gatom_ps(int n) { return qatom_ps[n]; }
   const PassivePtr<const AtomPhotoAbsCS> get_atom(int n) { return atom[n]; }
 
   /// Photo-absorption cross-section (energy in MeV, CS in Mb).
@@ -587,11 +587,11 @@ class MolecPhotoAbsCS : public RegPassivePtr {
 
  private:
   /// Total number of atoms, NOT number of sorts, NOT qel in atom.
-  int qatom;  
+  int qatom;
   std::vector<int> qatom_ps;
   std::vector<PassivePtr<const AtomPhotoAbsCS> > atom;
   /// Mean work per pair production [MeV].
-  double W;  
+  double W;
   /// Fano factor.
   double F;
 };

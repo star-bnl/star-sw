@@ -15,7 +15,6 @@ HEEDOBJS = \
 	$(OBJDIR)/Heed/PointsRan.o \
 	$(OBJDIR)/Heed/pois.o \
 	$(OBJDIR)/Heed/rnorm.o \
-	$(OBJDIR)/Heed/eiparticle.o \
 	$(OBJDIR)/Heed/eparticle.o \
 	$(OBJDIR)/Heed/particle_def.o \
 	$(OBJDIR)/Heed/AtomDef.o \

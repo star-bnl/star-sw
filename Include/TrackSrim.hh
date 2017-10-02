@@ -14,7 +14,7 @@ class TrackSrim : public Track {
   /// Constructor
   TrackSrim();
   /// Destructor
-  ~TrackSrim() {}
+  virtual ~TrackSrim() {}
 
   /// Set/get the W value [eV].
   void SetWorkFunction(const double w) { m_work = w; }
@@ -60,11 +60,11 @@ class TrackSrim : public Track {
   void PlotRange();
   void PlotStraggling();
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0);
-  bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& n, double& e, double& extra);
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, 
+                          double& tcls, int& n, double& e, double& extra);
 
  protected:
   /// Use precise Vavilov generator

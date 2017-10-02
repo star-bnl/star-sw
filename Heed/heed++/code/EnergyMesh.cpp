@@ -48,9 +48,8 @@ long EnergyMesh::get_interval_number(const double ener) const {
 
   long n1 = 0;
   long n2 = q;  // right side of last
-  long n3 = n1;
   while (n2 - n1 > 1) {
-    n3 = n1 + (n2 - n1) / 2;
+    const long n3 = n1 + ((n2 - n1) >> 1);
     if (ener < e[n3]) {
       n2 = n3;
     } else {
@@ -66,9 +65,8 @@ long EnergyMesh::get_interval_number_between_centers(const double ener) const {
 
   long n1 = 0;
   long n2 = q - 1;  // right side of last
-  long n3 = n1;
   while (n2 - n1 > 1) {
-    n3 = n1 + (n2 - n1) / 2;
+    const long n3 = n1 + ((n2 - n1) >> 1);
     if (ener < ec[n3]) {
       n2 = n3;
     } else {
@@ -82,9 +80,9 @@ std::ostream& operator<<(std::ostream& file, EnergyMesh& f) {
   Ifile << "EnergyMesh: \n";
   indn.n += 2;
   Ifile << "emin=" << f.emin << " emax=" << f.emax
-        << " quantity of intervals=" << f.q << '\n'
-        << " maximal quantity of intervals=" << EnergyMesh::pqener << '\n';
-  Ifile << " number  left side        center       right side       widht\n";
+        << " number of intervals=" << f.q << '\n'
+        << " maximal number of intervals=" << EnergyMesh::pqener << '\n';
+  Ifile << " bin  left side        center       right side       width\n";
   for (int n = 0; n < f.q; n++) {
     Ifile << std::setw(5) << n << std::setw(15) << f.e[n] << std::setw(15)
           << f.ec[n] << std::setw(15) << f.e[n + 1] << std::setw(15)
@@ -110,5 +108,4 @@ void EnergyMesh::print(std::ostream& file, int l) const {
   }
   indn.n -= 2;
 }
-
 }

@@ -35,7 +35,7 @@ class mparticle : public gparticle {
   // Check consistency of kin_energy, gamma_1, speed, speed_of_light and mass
   void check_consistency(void) const;
 
-  virtual void step(void);
+  virtual void step(std::vector<gparticle*>& secondaries);
 
   virtual void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
                          vfloat prec);
@@ -48,11 +48,11 @@ class mparticle : public gparticle {
   // If force is anti-parallel to dir, restrics range till exceeding
   // of kinetic energy.
 
-  virtual void physics_after_new_speed() {}
+  // virtual void physics_after_new_speed() {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
 
-  virtual void physics() {}
+  // virtual void physics() {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
 
