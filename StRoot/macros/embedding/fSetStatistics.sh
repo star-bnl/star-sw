@@ -15,9 +15,9 @@ fi
 count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
 nevents=`zcat $i| tail -n 1000 | grep "Total events processed" | awk -F ':' '{print $4}' | awk '{print $1}'`
-#echo $nevents
+echo $nevents events in this daq file
 nanaevents=`zcat $i| tail -n 1000 | grep "StAnalysisMaker::Finish" | awk '{print $5}'`
-#echo $nanaevents
+echo $nanaevents events accepted for embedding in this daq file
 allevts=`echo "$allevts+$nevents" |bc -l`
 storedevts=`echo "$storedevts+$nanaevents" |bc -l`
 done
