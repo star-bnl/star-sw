@@ -58,7 +58,7 @@ def setup_parser():
    parser.add_argument("-wallHour", dest="wallHour",help="max running time for one task (in hours)",default='35')
    parser.add_argument("-nThreads", dest="nThreads",help="max number of threads on one node",default='50')
 
-   parser.add_argument("-nEve", dest="nEve",help="num. eve per r4s task",default='1000')
+   parser.add_argument("-nevents", dest="nevents",help="num. eve per r4s task",default='1000')
 
 #----------------------------------------------------------
 def  supplementArgs(argD):
@@ -166,10 +166,10 @@ def   makeTaskList(argD,taskLF):
    fout = open(outF, 'w')
    nr=0
    for x in coreL:
-      nEve=int(argD['nEve'])
+      nevents=int(argD['nevents'])
       for fset in range(fs1,fs2+1):
-         print('---make daq=',x,' fset=',fset,' nEve=',nEve)
-         text='shifter  /bin/tcsh  ${WRK_DIR}/r4sTask_embed.csh '+x+' '+str(fset)+' '+str(nEve)+'  >&   ${WRK_DIR}/logs/'+x+'_fset'+str(fset)+'.taskLog\n'
+         print('---make daq=',x,' fset=',fset,' nevents=',nevents)
+         text='shifter  /bin/tcsh  ${WRK_DIR}/r4sTask_embed.csh '+x+' '+str(fset)+' '+str(nevents)+'  >&   ${WRK_DIR}/logs/'+x+'_fset'+str(fset)+'.taskLog\n'
          fout.write(text)
          nFtot=nFtot+1
       nr=nr+1
