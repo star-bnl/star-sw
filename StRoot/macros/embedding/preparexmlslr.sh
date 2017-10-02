@@ -18,7 +18,7 @@ if [[ $HOST =~ "cori" ]] ; then
 #EDIT the following three options before use this script at Cori farm
  fset="-fSetRange 101-109"
  cpuh="-fSetCPUHours 1321"
- outp="-outPath /global/cscratch1/sd/zhux/embedding"
+ outp="-outPath /global/cscratch1/sd/$USER/embedding"
 
 else
  script="perl StRoot/macros/embedding/get_embedding_xml.pl"
