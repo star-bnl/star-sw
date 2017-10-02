@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.41 2017/08/09 09:13:24 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.42 2017/10/02 04:22:05 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.42  2017/10/02 04:22:05  zhux
+// updated run14 auau200 HFT chain. removed 'NoPXLIT,NoSstIT,NoIstIT' from the chain, removed pxlhit,isthit from the chain.
+//
 // Revision 1.41  2017/08/09 09:13:24  zhux
 // added run14 auau200 (p16id) chain
 //
@@ -136,8 +139,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run14 AuAu15 chain
   TString prodP14iiAuAu15("DbV20150110,P2014a,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
-  // Run14 AuAu200 chain
-  TString prodP15icAuAu200("DbV20150316,P2014a,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt, NoPxlIT, NoIstIT, NoSstIT");
+  // Run14 AuAu200 chain (P15ic) (NO PXL/IST hits)
+  TString prodP15icAuAu200("DbV20150316,P2014a,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   // Run14 AuAu200 MTD chain
   TString prodP15ieAuAu200("DbV20150504,P2014a,btof,mtd,mtdCalib,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
@@ -145,8 +148,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run12 CuAu200 chain
   TString prodP15ieCuAu200("DbV20150529,P2012b,AgML,mtd,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
-  // Run14 AuAu200 chain (P16id)
-  TString prodP16idAuAu200("DbV20160418,P2014a,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt, NoPxlIT, NoIstIT");
+  // Run14 AuAu200 chain (P16id) (NO PXL/IST hits)
+  TString prodP16idAuAu200("DbV20160418,P2014a,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
