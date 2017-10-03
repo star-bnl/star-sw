@@ -8,6 +8,12 @@
 
 namespace Heed {
 
+using CLHEP::k_Boltzmann;
+using CLHEP::Avogadro;
+using CLHEP::cm3;
+using CLHEP::gram;
+using CLHEP::mole;
+
 VanDerWaals::VanDerWaals(double fPk, double fTk) : Pkh(fPk), Tkh(fTk) {
   // Rydberg constant
   const double R = k_Boltzmann * Avogadro;
@@ -41,13 +47,13 @@ std::ostream& operator<<(std::ostream& file, const VanDerWaals& f) {
       "std::ostream& operator << (std::ostream& file, const VanDerWaals& f)");
   Ifile << "VanDerWaals:\n";
   indn.n += 2;
-  Iprintn(file, f.Pk() / (atmosphere));
-  Iprintn(file, f.Tk() / (kelvin));
+  Iprintn(file, f.Pk() / (CLHEP::atmosphere));
+  Iprintn(file, f.Tk() / (CLHEP::kelvin));
   Iprintn(file, f.Vk() / (cm3));
   Ifile << "For comparison, the volume of a mole of ideal gas\n";
   Ifile << "at the same conditions takes\n";
   Iprintn(file, (k_Boltzmann * Avogadro * f.Tk() / f.Pk()) / (cm3 * mole));
-  Iprintn(file, f.a() / (atmosphere * cm3 * cm3));
+  Iprintn(file, f.a() / (CLHEP::atmosphere * cm3 * cm3));
   Iprintn(file, f.b() / (cm3));
   indn.n -= 2;
   return file;
@@ -89,7 +95,6 @@ MoleculeDef::MoleculeDef(const std::string& fname, const std::string& fnotation,
     tqatomh += qatom_psh[n];
     check_econd11(qatom_psh[n], <= 0, mcerr);
   }
-  check_econd11(s, <= 0, mcerr);
   verify();
   MoleculeDef::get_logbook().push_back(this);
 }

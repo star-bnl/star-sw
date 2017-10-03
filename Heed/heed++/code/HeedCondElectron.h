@@ -27,7 +27,6 @@ class HeedCondElectron {
       : ptloc(fptloc), time(ftime) {}
   void print(std::ostream& file, int l) const;
 };
-
 }
 
 #endif

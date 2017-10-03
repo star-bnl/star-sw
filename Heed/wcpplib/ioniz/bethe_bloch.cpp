@@ -10,13 +10,21 @@
 
 namespace Heed {
 
+using CLHEP::pi;
+using CLHEP::twopi;
+using CLHEP::classic_electr_radius;
+using CLHEP::electron_mass_c2;
+using CLHEP::Avogadro;
+using CLHEP::c_squared;
+
 double Bethe_Bloch_energy_loss(const double ratio_Z_to_A, const double I_eff,
                                const double beta, const double z) {
 
   const double beta2 = beta * beta;
-  const double gamma2 = pow(lorgamma_1(beta) + 1.0, 2);
+  const double gamma = lorgamma_1(beta) + 1.;
+  const double gamma2 = gamma * gamma;
   const double coef1 =
-      4 * M_PI * pow(classic_electr_radius, 2) * electron_mass_c2 * Avogadro;
+      4 * pi * classic_electr_radius * classic_electr_radius * electron_mass_c2 * Avogadro;
   const double coef2 = z * z * ratio_Z_to_A / beta2;
   const double sum =
       log(2. * electron_mass_c2 * beta2 * gamma2 / I_eff) - beta2;
@@ -31,7 +39,7 @@ double Bethe_Bloch_energy_loss_gamma_1(const double ratio_Z_to_A,
   const double beta2 = beta * beta;
   const double gamma = gamma_1 + 1.0;
   const double gamma2 = gamma * gamma;
-  const double coef1 = 4 * M_PI * pow(classic_electr_radius, 2) *
+  const double coef1 = 4 * pi * classic_electr_radius * classic_electr_radius *
                        electron_mass_c2 *
                        Avogadro;  // should be 0.3071 according to PDG
   const double coef2 = z * z * ratio_Z_to_A / beta2;
@@ -48,7 +56,7 @@ double Bethe_Bloch_restricted_energy_loss_gamma_1(
   const double beta2 = beta * beta;
   const double gamma = gamma_1 + 1.0;
   const double gamma2 = gamma * gamma;
-  const double coef1 = 2 * M_PI * pow(classic_electr_radius, 2) *
+  const double coef1 = twopi * classic_electr_radius * classic_electr_radius *
                        electron_mass_c2 *
                        Avogadro;  // should be 0.3071 according to PDG
   const double coef2 = z * z * ratio_Z_to_A / beta2;

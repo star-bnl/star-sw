@@ -42,19 +42,19 @@ void Cubic::find_zero(double_complex& z1, double_complex& z2,
   double_complex S;
   double_complex T;
   if (D >= 0.0) {
-    double t = R + sD;
-    if (t > 0.0) {
-      S = pow(t, 1 / 3.0);
-    } else if (t < 0.0) {
-      S = -pow(-t, 1 / 3.0);
+    double tt = R + sD;
+    if (tt > 0.0) {
+      S = pow(tt, 1 / 3.0);
+    } else if (tt < 0.0) {
+      S = -pow(-tt, 1 / 3.0);
     } else {
       S = 0.0;
     }
-    t = R - sD;
-    if (t > 0.0) {
-      T = pow(t, 1 / 3.0);
-    } else if (t < 0.0) {
-      T = -pow(-t, 1 / 3.0);
+    tt = R - sD;
+    if (tt > 0.0) {
+      T = pow(tt, 1 / 3.0);
+    } else if (tt < 0.0) {
+      T = -pow(-tt, 1 / 3.0);
     } else {
       T = 0.0;
     }

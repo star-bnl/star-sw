@@ -7,7 +7,7 @@
 
 namespace Heed {
 
-void MatterDef::calc_I_eff() { I_effh = Z_mean() * 12.0 * eV; }
+void MatterDef::calc_I_eff() { I_effh = Z_mean() * 12.0 * CLHEP::eV; }
 
 MatterDef::MatterDef() : nameh("none"), notationh("none") {
   MatterDef::get_logbook().push_back(this);
@@ -147,9 +147,9 @@ std::ostream& operator<<(std::ostream& file, const MatterDef& f) {
   Ifile << "MatterDef: name=" << std::setw(10) << f.name()
         << " notation=" << std::setw(3) << f.notation() << '\n';
   indn.n += 2;
-  Ifile << "density/(gram/cm3)=" << f.density() / (gram / cm3)
-        << " temperature/kelvin=" << f.temperature() / kelvin
-        << " I_eff/eV=" << f.I_eff() / eV << '\n';
+  Ifile << "density/(gram/cm3)=" << f.density() / (CLHEP::gram / CLHEP::cm3)
+        << " temperature/kelvin=" << f.temperature() / CLHEP::kelvin
+        << " I_eff/eV=" << f.I_eff() / CLHEP::eV << '\n';
   f.AtomMixDef::print(file, 1);
   indn.n -= 2;
   return file;

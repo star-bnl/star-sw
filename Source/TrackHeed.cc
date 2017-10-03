@@ -36,8 +36,10 @@ long last_particle_number;
 }
 
 extern Heed::trajestep_limit Heed::gtrajlim;
-Heed::trajestep_limit Heed::gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
-                               0.2 * Heed::rad);
+Heed::trajestep_limit Heed::gtrajlim( 100. * Heed::CLHEP::cm, 
+                                     1000. * Heed::CLHEP::cm, 
+                                     0.1 * Heed::CLHEP::rad,
+                                     0.2 * Heed::CLHEP::rad);
 
 // Actual class implementation
 
@@ -215,7 +217,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     dz /= d;
   }
   Heed::vec velocity(dx, dy, dz);
-  velocity = velocity * Heed::c_light * GetBeta();
+  velocity = velocity * Heed::CLHEP::c_light * GetBeta();
 
   if (m_debug) {
     std::cout << m_className << "::NewTrack:\n    Track starts at ("
@@ -612,7 +614,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   // Calculate the speed for the given kinetic energy.
   const double gamma = 1. + e0 / ElectronMass;
   const double beta = sqrt(1. - 1. / (gamma * gamma));
-  double speed = Heed::c_light * beta;
+  double speed = Heed::CLHEP::c_light * beta;
   velocity = velocity * speed;
 
   // Initial position (shift with respect to bounding box center and
@@ -737,7 +739,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     dz /= d;
   }
   Heed::vec velocity(dx, dy, dz);
-  velocity = velocity * Heed::c_light;
+  velocity = velocity * Heed::CLHEP::c_light;
 
   // Initial position (shift with respect to bounding box center and
   // convert from cm to mm).
@@ -919,7 +921,7 @@ bool TrackHeed::SetupGas(Medium* medium) {
 
   // Get temperature and pressure.
   double pressure = medium->GetPressure();
-  pressure = (pressure / AtmosphericPressure) * Heed::atmosphere;
+  pressure = (pressure / AtmosphericPressure) * Heed::CLHEP::atmosphere;
   double temperature = medium->GetTemperature();
 
   const int nComponents = medium->GetNumberOfComponents();
@@ -1095,7 +1097,8 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
 
   // Get temperature and density.
   double temperature = medium->GetTemperature();
-  double density = medium->GetMassDensity() * Heed::g / Heed::cm3;
+  const double density = medium->GetMassDensity() * Heed::CLHEP::gram / 
+                         Heed::CLHEP::cm3;
 
   const int nComponents = medium->GetNumberOfComponents();
   if (m_atPacs) {

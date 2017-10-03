@@ -69,6 +69,9 @@ Heed::ExAtomPhotoAbsCS generate_Ar_PACS(const std::string& shelllist_dir,
 
 namespace Heed {
 
+using CLHEP::gram;
+using CLHEP::mole;
+
 char* a_internal_HDB;
 std::string shelllist_dir_name =
     std::string((a_internal_HDB = getenv("HEED_DATABASE")) == NULL

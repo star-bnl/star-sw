@@ -30,8 +30,6 @@ class EnTransfCS : public RegPassivePtr {
 
   /// Particle mass [MeV]
   double particle_mass;
-  /// Kinetic energy [MeV]
-  double particle_tkin;
   /// Total energy [MeV]
   double particle_ener;
   /// Charge in units of electron charge (used square, sign does not matter).
@@ -41,7 +39,7 @@ class EnTransfCS : public RegPassivePtr {
   double gamma_1;
 
   /// Max. energy transfer [MeV]
-  double maximal_energy_trans;
+  double max_etransf;
   /// Flag controlling the form of Rutherford scattering.
   /// For our purposes it is good to have simple form,
   /// so this variable is initialized to 1.
@@ -126,7 +124,6 @@ class EnTransfCS : public RegPassivePtr {
 
   std::vector<double> length_y0;
 };
-
 }
 
 #endif

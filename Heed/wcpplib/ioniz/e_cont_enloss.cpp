@@ -10,6 +10,14 @@
 
 namespace Heed {
 
+using CLHEP::electron_mass_c2;
+using CLHEP::GeV;
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::Avogadro;
+using CLHEP::cm2;
+using CLHEP::cm3;
+
 double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
                      // 1.0/(gram/mole)
                      double I_eff, double density,
@@ -53,13 +61,13 @@ double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
   // double con2 = density;
   double C =  // dimensionless
       1.0 +
-      2.0 * log((I_eff / GeV) / (28.8e-9 * sqrt(density / (g / cm3) *
+      2.0 * log((I_eff / GeV) / (28.8e-9 * sqrt(density / (gram / cm3) *
                                                 ratio_Z_to_A * gram / mole)));
   // Iprintn(mcout, density/(g/cm3));
   // Iprintn(mcout, ratio_Z_to_A * gram/mole);
   // Iprintn(mcout, C);
   double x0, x1;
-  if (density > 0.05 * g / cm3) {
+  if (density > 0.05 * gram / cm3) {
     // mcout<<"density > 0.05 * g/cm3\n";
     if (I_eff < 1.0e-7 * GeV) {
       if (C < 3.681) {

@@ -9,6 +9,17 @@
 
 namespace Heed {
 
+using CLHEP::twopi;
+using CLHEP::degree;
+using CLHEP::electron_mass_c2;
+using CLHEP::eV;
+using CLHEP::MeV;
+using CLHEP::cm;
+using CLHEP::cm3;
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::Avogadro;
+
 const double HeedDeltaElectronCS::low_cut_angle_deg = 20.0;
 
 HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
@@ -117,7 +128,7 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
     double rr;
     double ek = hmd->energy_mesh->get_ec(ne) * 1000.0;
     if (ek <= 10.0) {
-      rr = 1.0e-3 * amean / (g / mole) / zmean * 3.872e-3 * pow(ek, 1.492);
+      rr = 1.0e-3 * amean / (gram / mole) / zmean * 3.872e-3 * pow(ek, 1.492);
     } else {
       rr = 1.0e-3 * 6.97e-3 * pow(ek, 1.6);
     }
@@ -189,7 +200,7 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
       const double energy = hmd->energy_mesh->get_ec(ne);
       const long qat = hmd->matter->qatom();
       for (long nan = 0; nan < q_angular_mesh; nan++) {
-        const double angle = angular_mesh_c[nan] / 180.0 * M_PI;
+        const double angle = angular_mesh_c[nan] * degree;
         double s = 0.0;
         for (long nat = 0; nat < qat; nat++) {
           const int z = hmd->matter->atom(nat)->Z();
@@ -200,16 +211,18 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
         // s = s * 1.0E-16 * C1_MEV_CM * C1_MEV_CM;
         // Angstrem**2 -> cm**2
         // cm**2 -> MeV**-2
-        smat[nan] = s * 2.0 * M_PI * sin(angle);  // sr -> dtheta
+        smat[nan] = s * twopi * sin(angle);  // sr -> dtheta
       }
-      angular_points_ran[ne] = PointsRan(angular_mesh_c, smat, low_cut_angle_deg, 180);
-      low_angular_points_ran[ne] = PointsRan(angular_mesh_c, smat, 0., low_cut_angle_deg);
+      angular_points_ran[ne] =
+          PointsRan(angular_mesh_c, smat, low_cut_angle_deg, 180);
+      low_angular_points_ran[ne] =
+          PointsRan(angular_mesh_c, smat, 0., low_cut_angle_deg);
+      const double coef =
+          Avogadro * rho / (gram / cm3) / (amean / (gram / mole));
       lambda[ne] =
-          1.0 / (angular_points_ran[ne].get_integ_active() / 180.0 * M_PI * AVOGADRO *
-                 rho / (gram / cm3) / (amean / (gram / mole)));
+          1. / (angular_points_ran[ne].get_integ_active() * degree * coef);
       low_lambda[ne] =
-          1.0 / (low_angular_points_ran[ne].get_integ_active() / 180.0 * M_PI *
-                 AVOGADRO * rho / (gram / cm3) / (amean / (gram / mole)));
+          1. / (low_angular_points_ran[ne].get_integ_active() * degree * coef);
     }
   }
 }
@@ -289,5 +302,4 @@ void HeedDeltaElectronCS::print(std::ostream& file, int l) const {
 #endif
   indn.n -= 2;
 }
-
 }

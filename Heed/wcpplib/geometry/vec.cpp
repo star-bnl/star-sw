@@ -290,9 +290,9 @@ basis::basis(const std::string& pname) : ex(1, 0, 0), ey(0, 1, 0), ez(0, 0, 1) {
 basis::basis(const vec& p, const std::string& pname) {
   pvecerror("basis::basis(vec &p)");
   name = pname;
-  vec dex(1, 0, 0);
-  vec dey(0, 1, 0);
-  vec dez(0, 0, 1);
+  // vec dex(1, 0, 0);
+  // vec dey(0, 1, 0);
+  // vec dez(0, 0, 1);
   if (length(p) == 0) {
     vecerror = 1;
     ex = dex;
@@ -318,9 +318,9 @@ basis::basis(const vec& p, const std::string& pname) {
 basis::basis(const vec& p, const vec& c, const std::string& pname) {
   pvecerror("basis::basis(vec &p, vec &c, char pname[12])");
   name = pname;
-  vec dex(1, 0, 0);
-  vec dey(0, 1, 0);
-  vec dez(0, 0, 1);
+  // vec dex(1, 0, 0);
+  // vec dey(0, 1, 0);
+  // vec dez(0, 0, 1);
 
   if (length(p) == 0 || length(c) == 0) {
     vecerror = 1;

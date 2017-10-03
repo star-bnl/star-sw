@@ -6,17 +6,17 @@
 // This file has been provided to CLHEP by Geant4 (simulation toolkit for HEP).
 //
 // The basic units are :
-//  		millimeter              (millimeter)
-// 		nanosecond              (nanosecond)
-// 		Mega electron Volt      (MeV)
-// 		positron charge         (eplus)
-// 		degree Kelvin           (kelvin)
-//              the amount of substance (mole)
-//              luminous intensity      (candela)
-// 		radian                  (radian)
-//              steradian               (steradian)
+// millimeter              (millimeter)
+// nanosecond              (nanosecond)
+// Mega electron Volt      (MeV)
+// positron charge         (eplus)
+// degree Kelvin           (kelvin)
+// the amount of substance (mole)
+// luminous intensity      (candela)
+// radian                  (radian)
+// steradian               (steradian)
 //
-// Below is a non exhaustive list of derived and pratical units
+// Below is a non exhaustive list of derived and practical units
 // (i.e. mostly the SI units).
 // You can add your own units.
 //
@@ -24,7 +24,7 @@
 // as it is needed for conversion factor : positron charge = e_SI (coulomb)
 //
 // The others physical constants are defined in the header file :
-//			PhysicalConstants.h
+//PhysicalConstants.h
 //
 // Authors: M.Maire, S.Giani
 //
@@ -41,7 +41,15 @@
 #ifndef HEP_SYSTEM_OF_UNITS_H
 #define HEP_SYSTEM_OF_UNITS_H
 
-//#include "CLHEP/config/CLHEP.h"
+namespace CLHEP {
+
+//
+//
+//
+static const double pi = 3.14159265358979323846;
+static const double twopi = 2 * pi;
+static const double halfpi = pi / 2;
+static const double pi2 = pi * pi;
 
 //
 // Length [L]
@@ -279,5 +287,6 @@ static const double lux = lumen / meter2;
 static const double perCent = 0.01;
 static const double perThousand = 0.001;
 static const double perMillion = 0.000001;
+}
 
 #endif /* HEP_SYSTEM_OF_UNITS_H */

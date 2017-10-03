@@ -11,6 +11,14 @@
 
 namespace Heed {
 
+using CLHEP::cm;
+using CLHEP::cm3;
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::c_light;
+using CLHEP::electron_mass_c2;
+using CLHEP::Avogadro;
+
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
                        double fenergy, HeedFieldMap* fieldmap,
@@ -43,10 +51,11 @@ void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   HeedMatterDef* hmd = NULL;
   const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
   if (etcs) {
-    hmd = etcs->hmd.getver(); 
+    hmd = etcs->hmd.getver();
   } else {
-    const HeedDeltaElectronCS* hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
-    if (hdecs) hmd = hdecs->hmd.get(); 
+    const HeedDeltaElectronCS* hdecs =
+        dynamic_cast<const HeedDeltaElectronCS*>(av);
+    if (hdecs) hmd = hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
@@ -77,7 +86,7 @@ void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   if (s_print_listing) Iprintn(mcout, s);
   // Calculate the path length.
   // s = s * hmd->eldens / hmd->matter->Z_mean() * C1_MEV_CM;
-  s = s * 1.0e-18 * AVOGADRO / (hmd->matter->A_mean() / (gram / mole)) *
+  s = s * 1.0e-18 * Avogadro / (hmd->matter->A_mean() / (gram / mole)) *
       hmd->matter->density() / (gram / cm3);
   if (s_print_listing) Iprintn(mcout, s);
   const double path_length = 1.0 / s;  // cm
@@ -121,7 +130,8 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
   if (etcs) {
     hmd = etcs->hmd.getver();
   } else {
-    const HeedDeltaElectronCS* hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
+    const HeedDeltaElectronCS* hdecs =
+        dynamic_cast<const HeedDeltaElectronCS*>(av);
     if (hdecs) hmd = hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.
@@ -156,7 +166,7 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
     } else {
       vel.random_sfer_vec();
     }
-    const double gam_1 = el_energy[nel] / ELMAS;
+    const double gam_1 = el_energy[nel] / electron_mass_c2;
     const double inv = 1.0 / (gam_1 + 1.0);
     const double beta = sqrt(1.0 - inv * inv);
     const double mod_v = beta * c_light;

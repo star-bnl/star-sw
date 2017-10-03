@@ -10,6 +10,12 @@
 
 namespace Heed {
 
+using CLHEP::twopi;
+using CLHEP::electron_mass_c2;
+using CLHEP::fine_structure_const;
+using CLHEP::hbarc;
+using CLHEP::cm;
+
 EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
                        int fs_primary_electron, HeedMatterDef* fhmd,
                        long fparticle_charge)
@@ -30,22 +36,22 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   const double beta2 = beta * beta;
   const double beta12 = 1.0 - beta2;
   const double gamma = fgamma_1 + 1.;
-  particle_tkin = particle_mass * gamma_1;
+  // Particle kinetic energy.
+  const double tkin = particle_mass * gamma_1;
   particle_ener = particle_mass * gamma;
+  // Calculate the max. energy transfer.
   if (s_primary_electron == 1) {
-    maximal_energy_trans = 0.5 * particle_tkin;
+    max_etransf = 0.5 * tkin;
   } else {
     double rm2 = particle_mass * particle_mass;
-    double rme = ELMAS;
+    double rme = electron_mass_c2;
     if (beta12 > 1.0e-10) {
-      maximal_energy_trans =
-          2.0 * rm2 * ELMAS * beta2 /
-          ((rm2 + rme * rme + 2.0 * rme * gamma * particle_mass) * (beta12));
-      if (maximal_energy_trans > particle_tkin) {
-        maximal_energy_trans = particle_tkin;
-      }
+      max_etransf =
+          2.0 * rm2 * electron_mass_c2 * beta2 /
+          ((rm2 + rme * rme + 2.0 * rme * gamma * particle_mass) * beta12);
+      if (max_etransf > tkin) max_etransf = tkin;
     } else {
-      maximal_energy_trans = particle_tkin;
+      max_etransf = tkin;
     }
   }
   const long qe = hmd->energy_mesh->get_q();
@@ -110,15 +116,14 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   for (long ne = 0; ne < qe; ne++) {
     double r = -hmd->epsi1[ne] + (1.0 + hmd->epsi1[ne]) * beta12;
     r = r * r + beta2 * beta2 * hmd->epsi2[ne] * hmd->epsi2[ne];
-    r = 1.0 / sqrt(r);
-    log1C[ne] = log(r);
+    log1C[ne] = log(1. / sqrt(r));
   }
   for (long ne = 0; ne < qe; ne++) {
-    // TODO: 0.511 -> electron mass
-    double r = 2.0 * 0.511 * beta2 / hmd->energy_mesh->get_ec(ne);
+    double r = 2. * electron_mass_c2 * beta2 / hmd->energy_mesh->get_ec(ne);
     log2C[ne] = r > 0. ? log(r) : 0.;
   }
-  double coefpa = (particle_charge * particle_charge) / (FSCON * beta2 * M_PI);
+  const long q2 = particle_charge * particle_charge;
+  double coefpa = fine_structure_const * q2 / (beta2 * CLHEP::pi);
   for (long ne = 0; ne < qe; ne++) {
     const double r0 = 1.0 + hmd->epsi1[ne];
     double r = -hmd->epsi1[ne] + r0 * beta12;
@@ -127,7 +132,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     const double r1 = (-r0 * r + beta2 * rr22) / (rr12 + rr22);
     const double r2 = hmd->epsi2[ne] * beta2 / r;
     double r3 = atan(r2);
-    if (r < 0) r3 = M_PI + r3;
+    if (r < 0) r3 += CLHEP::pi;
     chereCangle[ne] = r3;
     chereC[ne] = (coefpa / hmd->eldens) * r1 * r3;
   }
@@ -136,23 +141,22 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     const double ec = hmd->energy_mesh->get_ec(ne);
     if (s_simple_form) {
       if (s_primary_electron == 0) {
-        Rruth[ne] = 1. / (ec * ec) * (1. - beta2 * ec / maximal_energy_trans);
+        Rruth[ne] = 1. / (ec * ec) * (1. - beta2 * ec / max_etransf);
       } else {
         Rruth[ne] = 1. / (ec * ec);
       }
     } else {
       if (s_primary_electron == 0) {
         Rruth[ne] =
-            1. / (ec * ec) * (1. - beta2 * ec / maximal_energy_trans +
+            1. / (ec * ec) * (1. - beta2 * ec / max_etransf +
                               ec * ec / (2. * particle_ener * particle_ener));
       } else {
-        double delta = ec / particle_mass;
-        double pg2 = gamma * gamma;
-        Rruth[ne] =
-            beta2 / (particle_mass * particle_mass) * 1.0 / (pg2 - 1.0) *
-            (gamma_1 * gamma_1 * pg2 / (pow(delta * (gamma_1 - delta), 2.0)) -
-             (2.0 * pg2 + 2.0 * gamma - 1.0) / (delta * (gamma_1 - delta)) +
-             1.0);
+        const double delta = ec / particle_mass;
+        const double pg2 = gamma * gamma;
+        const double dgd = delta * (gamma_1 - delta);
+        Rruth[ne] = beta2 / (particle_mass * particle_mass) * 1.0 /
+                    (pg2 - 1.0) * (gamma_1 * gamma_1 * pg2 / (dgd * dgd) -
+                                   (2.0 * pg2 + 2.0 * gamma - 1.0) / dgd + 1.0);
       }
     }
   }
@@ -160,8 +164,8 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
   double Z_mean = hmd->matter->Z_mean();
   for (long na = 0; na < qa; na++) {
     PassivePtr<const AtomPhotoAbsCS> pacs = hmd->apacs[na];
-    const long qs = pacs->get_qshell();
     const double awq = hmd->matter->weight_quan(na);
+    const long qs = pacs->get_qshell();
     for (long ns = 0; ns < qs; ns++) {
       std::vector<double>& acher = cher[na][ns];
 #ifndef EXCLUDE_A_VALUES
@@ -208,7 +212,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
         // Here it must be ACS to satisfy sum rule for Rutherford
         check_econd11a(r, < 0.0, "na=" << na << " ns=" << ns << " na=" << na,
                        mcerr);
-        if (ec > hmd->min_ioniz_pot && ec < maximal_energy_trans) {
+        if (ec > hmd->min_ioniz_pot && ec < max_etransf) {
           afruth[ne] = (s + 0.5 * r) * coefpa * Rruth[ne] / Z_mean;
           check_econd11a(afruth[ne], < 0,
                          "na=" << na << " ns=" << ns << " na=" << na, mcerr);
@@ -315,44 +319,39 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
             hmd->xeldens;
 #endif
   meanC1 = meanC;
+  const double coef = fine_structure_const * fine_structure_const * q2 * twopi /
+                      (electron_mass_c2 * beta2) * hmd->xeldens;
   if (s_simple_form) {
     if (s_primary_electron == 0) {
-      if (maximal_energy_trans > hmd->energy_mesh->get_e(qe)) {
+      if (max_etransf > hmd->energy_mesh->get_e(qe)) {
         double e1 = hmd->energy_mesh->get_e(qe);
-        double e2 = maximal_energy_trans;
-        meanC1 += double(particle_charge * particle_charge) * 2.0 * M_PI /
-                  (FSCON * FSCON * ELMAS * beta2) * hmd->xeldens *
-                  (log(e2 / e1) - beta2 / maximal_energy_trans * (e2 - e1));
+        double e2 = max_etransf;
+        meanC1 += coef * (log(e2 / e1) - beta2 / max_etransf * (e2 - e1));
       }
     } else {
-      if (maximal_energy_trans > hmd->energy_mesh->get_e(qe)) {
+      if (max_etransf > hmd->energy_mesh->get_e(qe)) {
         double e1 = hmd->energy_mesh->get_e(qe);
-        double e2 = maximal_energy_trans;
-        meanC1 += double(particle_charge * particle_charge) * 2.0 * M_PI /
-                  (pow(FSCON, 2.0) * ELMAS * beta2) * hmd->xeldens *
-                  log(e2 / e1);
+        double e2 = max_etransf;
+        meanC1 += coef * log(e2 / e1);
       }
     }
   } else {
     if (s_primary_electron == 0) {
-      if (maximal_energy_trans > hmd->energy_mesh->get_e(qe)) {
+      if (max_etransf > hmd->energy_mesh->get_e(qe)) {
         double e1 = hmd->energy_mesh->get_e(qe);
-        double e2 = maximal_energy_trans;
-        meanC1 += double(particle_charge * particle_charge) * 2.0 * M_PI /
-                  (FSCON * FSCON * ELMAS * beta2) * hmd->xeldens *
-                  (log(e2 / e1) - beta2 / maximal_energy_trans * (e2 - e1) +
+        double e2 = max_etransf;
+        meanC1 += coef *
+                  (log(e2 / e1) - beta2 / max_etransf * (e2 - e1) +
                    (e2 * e2 - e1 * e1) / (4.0 * particle_ener * particle_ener));
       }
 #ifndef EXCLUDE_A_VALUES
       meanC1_a = meanC_a;
-      if (maximal_energy_trans > hmd->energy_mesh->get_e(qe)) {
+      if (max_etransf > hmd->energy_mesh->get_e(qe)) {
         double e1 = hmd->energy_mesh->get_e(qe);
-        double e2 = maximal_energy_trans;
-        meanC1_a +=
-            double(particle_charge * particle_charge) * 2.0 * M_PI /
-            (FSCON * FSCON * ELMAS * beta2) * hmd->xeldens *
-            (log(e2 / e1) - beta2 / maximal_energy_trans * (e2 - e1) +
-             (e2 * e2 - e1 * e1) / (4.0 * particle_ener * particle_ener));
+        double e2 = max_etransf;
+        meanC1_a += coef * (log(e2 / e1) - beta2 / max_etransf * (e2 - e1) +
+                            (e2 * e2 - e1 * e1) /
+                                (4.0 * particle_ener * particle_ener));
       }
 #endif
     }
@@ -412,7 +411,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
 
   length_y0.resize(qe, 0.);
   for (long ne = 0; ne < qe; ne++) {
-    const double k0 = hmd->energy_mesh->get_ec(ne) / PLANKCLIGHT;
+    const double k0 = hmd->energy_mesh->get_ec(ne) / (hbarc / cm);
     const double det_value = 1.0 / (gamma * gamma) - hmd->epsi1[ne] * beta2;
     length_y0[ne] = det_value > 0. ? beta / k0 * 1.0 / sqrt(det_value) : 0.;
   }
@@ -467,13 +466,9 @@ void EnTransfCS::print(std::ostream& file, int l) const {
   Ifile << "EnTransfCS(l=" << l << "):\n";
   indn.n += 2;
   Ifile << "particle_mass=" << particle_mass
-        << " particle_tkin=" << particle_tkin
         << " particle_ener=" << particle_ener
         << " particle_charge=" << particle_charge << std::endl;
-  // Ifile << "beta=" << beta << std::endl;
-  // << " beta2=" << beta2 << " beta12=" << beta12
-  //  << " gamma=" << gamma << std::endl;
-  Ifile << "maximal_energy_trans=" << maximal_energy_trans << std::endl;
+  Ifile << "max_etransf=" << max_etransf << std::endl;
   Ifile << "s_primary_electron=" << s_primary_electron << std::endl;
   Ifile << "hmd:\n";
   hmd->print(file, 1);

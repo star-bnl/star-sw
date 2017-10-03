@@ -3,15 +3,15 @@
 // This file has been provided by Geant4 (simulation toolkit for HEP).
 //
 // The basic units are :
-//  		millimeter
-// 		nanosecond
-// 		Mega electron Volt
-// 		positon charge
-// 		degree Kelvin
-//              amount of substance (mole)
-//              luminous intensity (candela)
-// 		radian
-//              steradian
+// millimeter
+// nanosecond
+// Mega electron Volt
+// positon charge
+// degree Kelvin
+// amount of substance (mole)
+// luminous intensity (candela)
+// radian
+// steradian
 //
 // Below is a non exhaustive list of Physical CONSTANTS,
 // computed in the Internal HEP System Of Units.
@@ -37,13 +37,7 @@
 // adaptation for wcpplib:
 #include "wcpplib/clhep_units/SystemOfUnits.h"
 
-//
-//
-//
-static const double pi = 3.14159265358979323846;
-static const double twopi = 2 * pi;
-static const double halfpi = pi / 2;
-static const double pi2 = pi * pi;
+namespace CLHEP {
 
 //
 //
@@ -121,5 +115,6 @@ static const double kGasThreshold = 10. * mg / cm3;
 //
 //
 static const double universe_mean_density = 1.e-25 * g / cm3;
+}
 
 #endif /* HEP_PHYSICAL_CONSTANTS_H */

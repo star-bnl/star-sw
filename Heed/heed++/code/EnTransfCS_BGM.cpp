@@ -53,5 +53,4 @@ void EnTransfCS_BGM::print(std::ostream& file, int l) const {
   }
   indn.n -= 2;
 }
-
 }

@@ -14,6 +14,11 @@
 
 namespace Heed {
 
+using CLHEP::c_light;
+using CLHEP::c_squared;
+using CLHEP::cm;
+using CLHEP::MeV;
+
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            const vec& vel, vfloat time, particle_def* fpardef,
                            HeedFieldMap* fieldmap, const bool fs_loss_only,

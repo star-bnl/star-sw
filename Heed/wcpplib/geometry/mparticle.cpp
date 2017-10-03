@@ -14,6 +14,9 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
+using CLHEP::c_light;
+using CLHEP::c_squared;
+
 mparticle::mparticle(gparticle const& gp, double fmass)
     : gparticle(gp), mass(fmass) {
 
@@ -300,16 +303,16 @@ void mparticle::new_speed() {
 }
 void mparticle::print(std::ostream& file, int l) const {
   if (l < 0)
-    Ifile << "mparticle: mass=" << mass << " (" << mass / kg << " kg, "
-          << mass* c_squared / GeV << " GeV)\n";
+    Ifile << "mparticle: mass=" << mass << " (" << mass / CLHEP::kg << " kg, "
+          << mass* c_squared / CLHEP::GeV << " GeV)\n";
   Ifile << "orig_kin_energy=" << orig_kin_energy << " ("
-        << orig_kin_energy / GeV << " GeV)"
+        << orig_kin_energy / CLHEP::GeV << " GeV)"
         << " orig_gamma_1=" << orig_gamma_1 << '\n';
   Ifile << "prev_kin_energy=" << prev_kin_energy << " ("
-        << prev_kin_energy / GeV << " GeV)"
+        << prev_kin_energy / CLHEP::GeV << " GeV)"
         << " prev_gamma_1=" << prev_gamma_1 << '\n';
   Ifile << "curr_kin_energy=" << curr_kin_energy << " ("
-        << curr_kin_energy / GeV << " GeV)"
+        << curr_kin_energy / CLHEP::GeV << " GeV)"
         << " curr_gamma_1=" << curr_gamma_1 << '\n';
   gparticle::print(file, l);
 }

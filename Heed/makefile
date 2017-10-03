@@ -66,7 +66,7 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/HeedFieldMap.o \
 
 # Compilation flags
-CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long \
+CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Wshadow \
         `root-config --cflags` \
         -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \

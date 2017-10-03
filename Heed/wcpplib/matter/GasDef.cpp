@@ -5,6 +5,9 @@
 
 namespace Heed {
 
+using CLHEP::Avogadro;
+using CLHEP::k_Boltzmann;
+
 GasDef::GasDef() : MatterDef(), pressureh(0.0), qmolech(0) {}
 
 GasDef::GasDef(const std::string& fname, const std::string& fnotation,
@@ -298,9 +301,9 @@ std::ostream& operator<<(std::ostream& file, const GasDef& f) {
   const double mm_rt_st_in_atmosphere = 760;
   // This corresponds to 133.322 pascal in one mm
   //( 101325 pascal in one atmosphere )
-  Ifile << "pressure/atmosphere=" << f.pressure() / atmosphere
+  Ifile << "pressure/atmosphere=" << f.pressure() / CLHEP::atmosphere
         << " pressure/atmosphere * mm_rt_st_in_atmosphere = "
-        << f.pressure() / atmosphere * mm_rt_st_in_atmosphere << '\n';
+        << f.pressure() / CLHEP::atmosphere * mm_rt_st_in_atmosphere << '\n';
   Ifile << "Z_mean_molec=" << f.Z_mean_molec() << '\n';
 
   file << "qmolec()=" << f.qmolec() << '\n';
@@ -312,7 +315,7 @@ std::ostream& operator<<(std::ostream& file, const GasDef& f) {
     Ifile << "weight_quan_molec(n)=" << f.weight_quan_molec(n)
           << " weight_mass_molec(n)=" << f.weight_mass_molec(n) << '\n';
     Ifile << "Z_total=" << f.molec(n)->Z_total()
-          << " A_total/(gram/mole)=" << f.molec(n)->A_total() / (gram / mole)
+          << " A_total/(gram/mole)=" << f.molec(n)->A_total() / (CLHEP::gram / CLHEP::mole)
           << '\n';
     indn.n -= 2;
   }
@@ -320,20 +323,5 @@ std::ostream& operator<<(std::ostream& file, const GasDef& f) {
   indn.n -= 2;
   return file;
 }
-
-/*
-double gasdensity(double temperature, double pressure,
-                  std::vector<PassivePtr<MoleculeDef> > molec,
-                  std::vector<double> weight_quan_molec, long qmolec) {
-  mfunname("double gasdensity(...)");
-  double sw = 0.0;
-  double sa = 0.0;
-  for (long n = 0; n < qmolec; ++n) {
-    sa += weight_quan_molec[n] * molec[n]->A_total();
-    sw += weight_quan_molec[n];
-  }
-  double ridberg = k_Boltzmann * Avogadro;  // more precise
-  return sa * pressure / (ridberg * temperature * sw);
-}*/
 
 }

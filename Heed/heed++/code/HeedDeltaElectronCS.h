@@ -32,8 +32,8 @@ class HeedDeltaElectronCS : public RegPassivePtr {
   // copy of similar thing from ElElasticScatLowSigma
 
   virtual void print(std::ostream& file, int l) const;
-  virtual HeedDeltaElectronCS* copy() const { 
-    return new HeedDeltaElectronCS(*this); 
+  virtual HeedDeltaElectronCS* copy() const {
+    return new HeedDeltaElectronCS(*this);
   }
 
   static const long q_angular_mesh = 50;
@@ -56,7 +56,7 @@ class HeedDeltaElectronCS : public RegPassivePtr {
   /// Mminimum mean length of range, multiplied by density.
   /// sm*gr/sm**3 = gr/sm**2
   double mlambda;
-  /// Path length [cm] at the energy values of the mesh. 
+  /// Path length [cm] at the energy values of the mesh.
   /// For sruth == 2 mean free path.
   std::vector<double> lambda;
   /// Path length for low angle scatterings.
@@ -95,7 +95,6 @@ class HeedDeltaElectronCS : public RegPassivePtr {
 // this is sigma of cos(theta) - 1.0, supposing that center is 1.0
 #endif
 };
-
 }
 
 #endif

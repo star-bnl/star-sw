@@ -14,6 +14,11 @@
 
 namespace Heed {
 
+using CLHEP::c_light;
+using CLHEP::c_squared;
+using CLHEP::cm;
+using CLHEP::MeV;
+
 HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
                                    const vec& vel, vfloat time,
                                    particle_def* fpardef,
@@ -43,8 +48,7 @@ void HeedParticle_BGM::physics(std::vector<gparticle*>& secondaries) {
   if (currpos.prange <= 0.0) return;
   // Get least address of volume
   const absvol* av = currpos.tid.G_lavol();
-  const EnTransfCS_BGM* etcs =
-      dynamic_cast<const EnTransfCS_BGM*>(av);
+  const EnTransfCS_BGM* etcs = dynamic_cast<const EnTransfCS_BGM*>(av);
   // Check if dynamic cast was successful.
   if (!etcs) return;
   HeedMatterDef* hmd = etcs->hmd.getver();

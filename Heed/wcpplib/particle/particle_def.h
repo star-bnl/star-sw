@@ -13,7 +13,7 @@ class spin_def {
  public:
   float total;
   float projection;
-  spin_def(void) : total(0), projection(0) { ; }
+  spin_def() : total(0), projection(0) {}
   spin_def(float ftotal, float fprojection);
 };
 std::ostream& operator<<(std::ostream& file, const spin_def& f);
@@ -54,7 +54,7 @@ class particle_def : public RegPassivePtr {
   int baryon_n;
   float spin;
   spin_def isospin;
-  particle_def(void)
+  particle_def()
       : name("none"),
         notation("none"),
         mass(0),
@@ -81,7 +81,7 @@ class particle_def : public RegPassivePtr {
     particle_def::get_logbook().push_back(this);
   }
 
-  /// Function for making of anti particle
+  /// Function for making an anti-particle.
   particle_def anti_particle(const particle_def& p);
   /// Create anti-particle through the call of anti_particle(p)
   particle_def(const std::string& fname, const std::string& fnotation,

@@ -99,9 +99,9 @@ class trajestep : public absref {
             int fs_cf, const vec& frelcen, vfloat fmrange, vfloat prec);
   /** Constructor to continue propagation from the end point of another step.
     * \param fts old step to continue
-    *  \param mrange new range to travel
+    *  \param fmrange new range to travel
     */ 
-  trajestep(const trajestep& fts, vfloat mrange);
+  trajestep(const trajestep& fts, vfloat fmrange);
   /// Default constructor.
   trajestep() : 
         tl(),

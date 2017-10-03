@@ -63,8 +63,8 @@ trajestep::trajestep(trajestep_limit* ftl, const point& fcurrpos,
   }
 }
 
-trajestep::trajestep(const trajestep& fts, vfloat mrange) {
-  mfunname("trajestep::trajestep(const trajestep& fts, vfloat mrange)");
+trajestep::trajestep(const trajestep& fts, vfloat fmrange) {
+  mfunname("trajestep::trajestep(const trajestep& fts, vfloat fmrange)");
   // Continue propagation from the end point of the old step.
   point fpos;
   vec fdir;
@@ -72,7 +72,7 @@ trajestep::trajestep(const trajestep& fts, vfloat mrange) {
   fts.Gnextpoint1(fts.mrange, fpos, fdir, frelcen);
   vfloat prec = 0.1;  // not important here
   *this =
-      trajestep(fts.tl.getver(), fpos, fdir, fts.s_cf, frelcen, mrange, prec);
+      trajestep(fts.tl.getver(), fpos, fdir, fts.s_cf, frelcen, fmrange, prec);
 }
 
 void trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir) const {

@@ -20,7 +20,9 @@ class HeedChamber : public Heed::sh_manip_absvol,
               const double dz, const Heed::EnTransfCS& etcs,
               const Heed::HeedDeltaElectronCS& hdecs)
       : Heed::sh_manip_absvol(fcsys),
-        Heed::box(dx * Heed::cm, dy * Heed::cm, dz * Heed::cm, "chamber"),
+        Heed::box(dx * Heed::CLHEP::cm, 
+                  dy * Heed::CLHEP::cm, 
+                  dz * Heed::CLHEP::cm, "chamber"),
         Heed::EnTransfCS(etcs),
         Heed::HeedDeltaElectronCS(hdecs) {
 

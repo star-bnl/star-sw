@@ -32,7 +32,6 @@ class EnTransfCS_BGM : public RegPassivePtr {
   virtual EnTransfCS_BGM* copy() const { return new EnTransfCS_BGM(*this); }
   virtual void print(std::ostream& file, int l) const;
 };
-
 }
 
 #endif
