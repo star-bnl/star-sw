@@ -1,1 +1,0 @@
-0-59/2 * * * * /ldaphome/akio/fmstrg2015/makepage.pl 0 run noprint
