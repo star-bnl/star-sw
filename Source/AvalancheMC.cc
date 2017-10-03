@@ -549,12 +549,8 @@ bool AvalancheMC::Avalanche(const double x0, const double y0, const double z0,
   }
 
   // Add the first point to the list.
-  struct avalPoint {
-    double x, y, z, t;
-    int ne, nh, ni;
-  };
-  std::vector<avalPoint> aval;
-  avalPoint point;
+  std::vector<AvalPoint> aval;
+  AvalPoint point;
   point.x = x0;
   point.y = y0;
   point.z = z0;
@@ -572,10 +568,10 @@ bool AvalancheMC::Avalanche(const double x0, const double y0, const double z0,
     std::cerr << hdr << "Neither electron nor hole/ion component requested.\n";
   }
 
-  std::vector<avalPoint> newAval;
+  std::vector<AvalPoint> newAval;
   while (!aval.empty()) {
-    std::vector<avalPoint>::iterator it;
-    std::vector<avalPoint>::iterator end = aval.end(); 
+    std::vector<AvalPoint>::iterator it;
+    std::vector<AvalPoint>::iterator end = aval.end(); 
     for (it = aval.begin(); it != end; ++it) {
       if (m_withElectrons) {
         // Loop over the electrons at this location.

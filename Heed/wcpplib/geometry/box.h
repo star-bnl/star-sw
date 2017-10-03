@@ -76,7 +76,7 @@ class manip_box : public manip_absvol, public box {
 
 // *****   sh_manip_box  ********
 
-class sh_manip_box : virtual public sh_manip_absvol, public box {
+class sh_manip_box : public sh_manip_absvol, public box {
  public:
   /// Constructor
   sh_manip_box() : sh_manip_absvol(), box() {}

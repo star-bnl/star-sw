@@ -14,35 +14,35 @@ It is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-/// Manipulating with parabola and solution of square equation.
+/// Solution of quadratic equation.
 /// The main class is colled with a cut of the last character: Parabol
 /// to assure absence of coincidences with any other libraries and user files.
 /// This was inpired by a significant problem with link. The programs
-/// contating this class oftenly don't want to be linked due to missing of
+/// containig this class often don't want to be linked due to missing of
 /// references to functions from this class, if the file compiled from
 /// parabol.c is just included in library. The class parabol does not
 /// contain anything special, but this often happens. Why - unknown.
-/// The mentioned change of name did nto solve this problem.
+/// The mentioned change of name did not solve this problem.
 /// The only solution is the inclusion of the object file parabol.o in the list
 /// of command supplied to linker.
 /// In general, this is very simple class, see definition.
 
 class Parabol {
  public:
-  inline double a(void) const { return da; }
-  inline double b(void) const { return db; }
-  inline double c(void) const { return dc; }
-  inline void put_a(double fa) {
+  double a() const { return da; }
+  double b() const { return db; }
+  double c() const { return dc; }
+  void put_a(const double fa) {
     da = fa;
     s_det = 0;
     s_dxzero = 0;
   }
-  inline void put_b(double fb) {
+  void put_b(const double fb) {
     db = fb;
     s_det = 0;
     s_dxzero = 0;
   }
-  inline void put_c(double fc) {
+  void put_c(const double fc) {
     dc = fc;
     s_det = 0;
     s_dxzero = 0;
@@ -62,13 +62,14 @@ class Parabol {
   /// Constructor from 3 points
   Parabol(double x1, double x2, double x3, double y1, double y2, double y3);
 
-  inline double y(double x) { return da * x * x + db * x + dc; }
+  /// Evaluate the function.
+  double eval(const double x) const { return da * x * x + db * x + dc; }
 
   // Returns number of solutions. First is the least.
   int find_zero(double xzero[2]) const;
-  double find_maxmin(void);
+  double find_maxmin();
 
-  inline double determinant(void) const {
+  double determinant() const {
     const Parabol& t = (*this);
     if (s_det == 0) {
       t.s_det = 1;

@@ -286,7 +286,10 @@ void manip_box::print(std::ostream& file, int l) const {
 
 // *****   sh_manip_box  ********
 
-absvol* sh_manip_box::Gavol(void) const { return (box*)this; }
+// absvol* sh_manip_box::Gavol() const { return (box*)this; }
+absvol* sh_manip_box::Gavol() const { 
+  return dynamic_cast<box*>(const_cast<sh_manip_box*>(this)); 
+}
 
 void sh_manip_box::get_components(ActivePtr<absref_transmit>& aref_tran) {
   sh_manip_absvol::get_components(aref_tran);
