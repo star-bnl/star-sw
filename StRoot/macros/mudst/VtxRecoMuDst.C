@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: VtxRecoMuDst.C,v 1.3 2017/09/28 13:54:07 jeromel Exp $
+// $Id: VtxRecoMuDst.C,v 1.4 2017/10/03 20:55:22 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -55,6 +55,7 @@ void loadLibs()
    gSystem->Load("St_db_Maker");
    gSystem->Load("Sti");
    gSystem->Load("StEEmcUtil");
+   gSystem->Load("StBTofUtil");
    gSystem->Load("StGenericVertexMaker");
 }
 
@@ -134,6 +135,9 @@ int VtxRecoMuDst(unsigned int nEventsUser, char* inputFileName, char* outputFile
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: VtxRecoMuDst.C,v $
+// Revision 1.4  2017/10/03 20:55:22  genevb
+// Add StBTofUtil lib dependence
+//
 // Revision 1.3  2017/09/28 13:54:07  jeromel
 // Fix from Leszek Adamczyk
 //
