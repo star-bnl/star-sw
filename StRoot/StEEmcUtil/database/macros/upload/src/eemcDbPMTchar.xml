@@ -1,9 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPMTchar  <comment>  *    PMT characterization (from Sasha) </comment>
-  <dbInt> sn <comment>     pmt base serial number </comment> </dbInt> 
-  <dbFloat> speRes <comment>     single p. e.  resolution  (ch?)   </comment> </dbFloat> 
-  <dbFloat> nomHV <comment>   HV (V) at gain 2x10^5   </comment> </dbFloat> 
-  <dbFloat> darkC <comment>   dark current, (pA)     </comment> </dbFloat> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>
