@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.162 2017/10/01 22:54:41 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.163 2017/10/03 20:43:23 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1096,7 +1096,7 @@ Bfc_st BFC[] = {
   {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx" ,"" ,"","","" ,"","Use BTOF track matching for vertex ranking",kFALSE},
-  {"useBTOFmatchOnly","","","","" ,"","Use BTOF track matching only",kFALSE},
+  {"useBTOFmatchOnly","","","useBTOF4Vtx","" ,"","Use BTOF track matching only",kFALSE},
   {"svt1hit" ,"" ,"","","" ,"","Use 1 SVT hit only combination",kFALSE},
   {"onlcl" ,"" ,"","","" ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,"" ,"","","" ,"","Read/use TPC raw hits",kFALSE},
@@ -1453,7 +1453,7 @@ Bfc_st BFC[] = {
   {"VFMCE" ,"" ,"","genvtx" ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV" ,"" ,"","genvtx" ,"","","... VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
-  {"VFStoreX" ,"" ,"","genvtx" ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
+  {"VFStoreX" ,"" ,"","" ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
   {"StiPulls" ,"","","" ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","","" ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib" ,"","","" ,"","Sti,StiUtilities","Load Sti",kFALSE},
@@ -2710,7 +2710,7 @@ Bfc_st BFC[] = {
   {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx" ,"" ,"","","" ,"","Use BTOF track matching for vertex ranking",kFALSE},
-  {"useBTOFmatchOnly","","","","" ,"","Use BTOF track matching only",kFALSE},
+  {"useBTOFmatchOnly","","","useBTOF4Vtx","" ,"","Use BTOF track matching only",kFALSE},
   {"svt1hit" ,"" ,"","","" ,"","Use 1 SVT hit only combination",kFALSE},
   {"onlcl" ,"" ,"","","" ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,"" ,"","","" ,"","Read/use TPC raw hits",kFALSE},
@@ -3067,7 +3067,7 @@ Bfc_st BFC[] = {
   {"VFMCE" ,"" ,"","genvtx" ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV" ,"" ,"","genvtx" ,"","","... VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
-  {"VFStoreX" ,"" ,"","genvtx" ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
+  {"VFStoreX" ,"" ,"","" ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
   {"StiPulls" ,"","","" ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","","" ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib" ,"","","" ,"","Sti,StiUtilities","Load Sti",kFALSE},
