@@ -1225,62 +1225,6 @@ class Document( Container ):
     def setParent(self,p):
         self.parent = p
 
-class Detector( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class Setup( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class Modules( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class Init( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class StarGeometry( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class Tag( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class Geometry( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
-class Construct( Container ):
-    def __init__(self):
-        self.parent = None
-        Container.__init__(self)
-    def setParent(self,p):
-        self.parent = p
-
 # ====================================================================================================
 
 def sanitizeComments( line ):
@@ -1709,12 +1653,6 @@ class Fill( Container ):
     def __init__(self):
         Container.__init__(self,keylist=['name','comment'])
 
-class Filling(Container):
-    def setParent(self,p): self.parent = p    
-    def __init__(self):
-        Container.__init__(self,keylist=['name','comment'])
-
-
 class Use(Operator):
     """
     The <Use> operator selects different versions of an AgML data structure.
@@ -1738,10 +1676,6 @@ class Use(Operator):
     def __init__(self): Operator.__init__(self,keylist=['struct','select','value'])
     def setParent(self,p): self.parent = p    
 
-class Using(Operator):
-
-    def __init__(self): Operator.__init__(self,keylist=['struct','select','value'])
-    def setParent(self,p): self.parent = p    
 
 def ag_variable( line, classname ):
     """
@@ -2240,9 +2174,7 @@ class Rotation(Operator):
     def __init__(self): Operator.__init__(self)
     def setParent(self,p): self.parent=p
 
-class Matrix(Container):
-    def __init__(self): Container.__init__(self)
-    def setParent(self,p): self.parent=p
+
 
 
 
