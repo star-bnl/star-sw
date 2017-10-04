@@ -1,5 +1,5 @@
 
-<Document file="StarVMC/Geometry/PixlGeo/PixlGeo6b.xml">
+<Document file="StarVMC/Geometry/PixlGeo/PixlGeo6a.xml">
    <Module name="PixlGeo6b" comment="Pixel Detector Geometry  ">
 
    <Author  name="JBouchet,FVidebaek" />
@@ -67,7 +67,7 @@ September 2014 FV
             PXLA, <!-- is the Pixl Sector volume -->
             PXCA, PXCC, PXCD, PXCE, PXCF, PXCG, PXCH, PXCB, 
             PXRB, PXTR, PXTM, PXTL, PXTJ, PXTI, PXLB, PXIB,
-            LADR, GLUA, GLUB, GLUC, ALCA, CFBK, <!-- Ladder mother volume = PLAC + SFIR + SFIL -->
+            LADR, GLUA, GLUB, GLUC, ALCA, CFBK, <!-- Ladder mother volume = PXAC + SFIR + SFIL -->
             PXSI, PLAC, DRIV, 
             DTCA, DTCB, DTCC, DTCD, DTCE, DTCF, DTCG, DTCH,
             DTSA, DTSB, DTSC, DTSD, DTSE, DTSF, DTSG, DTSH,
@@ -82,6 +82,9 @@ September 2014 FV
             PCAD   <!-- outewr driver board cables -->
     <!-- names/nomenclatures start from a point located a the bottom right of a sector -->
     </Content> 
+
+    <varlist type="int"   comment="iterate over sensors">isector, iladder, isensor</varlist>
+    <varlist type="int"   comment="iterate over sensors">sectorRow, halfRow, ladderRow, sensorRow</varlist>
 
     <varlist type="float" comment=" Half length of Carbon Fibre sector" > sectorLength/17.55/</varlist> 
     <varlist type="float" comment=" Thickness of Carbon Fibre sector" > sectorThickness/0.024/</varlist>  
@@ -121,7 +124,7 @@ September 2014 FV
     <varlist type="float" comment=" phi1 of the TUBS defining a bare sector volume"> minphisecbare/90.0/</varlist>
     <varlist type="float" comment=" phi2 of the TUBS defining a bare sector volume"> maxphisecbare/126.0/</varlist> 
 
-    <varlist type="float" comment="internal computations"> xp, yp,  xpos,ypos,zpos,angle,anglepos, zsensor, alphaz, alphax, alphay</varlist> 
+    <varlist type="float" comment="internal computations"> xp, yp,  xpos,ypos,zpos,angle,anglepos, zsensor, alphaz, alphax, alphay, xxpos, yypos</varlist> 
     <varlist type="int"   comment="internal computations"> sector, ll </varlist>
     <varlist type="float" comment="internal computations">  ladBoxX, ladBoxY, ladBoxZ </varlist> 
     <varlist type="int"   comment="used for debug">  debug, sens, jj, ii</varlist> 
@@ -158,12 +161,14 @@ side sector beam" > BullHornLength/0.325/</varlist>
       <var name="SecVersion"    type="float" />
     </Structure>
 
-
     <Structure name="PIXL" >
      <var name="version"     type="float"/>
      <var name="sector"      type="int"/>
+     <var name="ladder"      type="int" />
+     <var name="sensor"      type="int" />
      <var name="phiNum(10)"  type="float"/>
      <var name="isOn(10)"    type="int"/>
+     <var name="misalign"    type="int"  />
     </Structure>
 
    <Structure name="LCSD" >
@@ -219,10 +224,22 @@ side sector beam" > BullHornLength/0.325/</varlist>
       The once relavant for Y2013 actual geometry is version 7.
  -->
     <Fill name="PIXL" comment=" General Pixel detector paramters" >
-    <var name="version" value="1.0" />
+    <var name="version" value="2.0" />
     <var name="sector"  value="10" comment=" number of sectors" />
+    <var name="ladder"  value="4"  comment=" number of ladders" />
+    <var name="sensor"  value="10" comment=" number of sensors" />
     <var name="phiNum"  value="{0,324,288,252,216,180,144,108,72,36}" comment="phi values for each sector, starting from 1, 2 .. 10"/>
     <var name="isOn"    value="{1,1,1,1,1,1,1,1,1,1}" comment="1 means present, 0 means no ladder"/>
+    <var name="misalign" value="1" />
+    </Fill>
+    <Fill name="PIXL" comment=" General Pixel detector paramters" >
+    <var name="version" value="2.1" />
+    <var name="sector"  value="10" comment=" number of sectors" />
+    <var name="ladder"  value="4"  comment=" number of ladders" />
+    <var name="sensor"  value="10" comment=" number of sensors" />
+    <var name="phiNum"  value="{0,324,288,252,216,180,144,108,72,36}" comment="phi values for each sector, starting from 1, 2 .. 10"/>
+    <var name="isOn"    value="{1,1,1,1,1,1,1,1,1,1}" comment="1 means present, 0 means no ladder"/>
+    <var name="misalign" value="1" />
     </Fill>
 
  
@@ -275,15 +292,14 @@ side sector beam" > BullHornLength/0.325/</varlist>
     </Fill>
      
 
- <Fill name="LCSD" comment="Long Cable Section D">
-   <var name="version" value="1"/>
-   <var name="numberOfCables" value="3"/>
-   <var name="xpos" value="{-1.2374,-2.9952,-4.62}"/>
-   <var name="ypos" value="{8.574,8.1293,7.3289}"/>
-   </Fill>
+    <Fill name="LCSD" comment="Long Cable Section D">
+      <var name="version" value="1"/>
+      <var name="numberOfCables" value="3"/>
+      <var name="xpos" value="{-1.2374,-2.9952,-4.62}"/>
+      <var name="ypos" value="{8.574,8.1293,7.3289}"/>
+    </Fill>
 
-  
-    
+      
 
     <!-- DEFINITION of MATERIALS/MIXTURES -->
    
@@ -351,9 +367,23 @@ side sector beam" > BullHornLength/0.325/</varlist>
       LADR_version,LADR_type
     </Print>
 
-    <Create    block="PXMO" />
+    <Create     block="PXMO" />
+    <Placement  block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="ONLY">      
 
-    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="'ONLY'"/>
+      <Misalign table="Geometry/pxl/pxlOnPst" opts="right" />
+
+    </Placement>
+
+<!--
+	       matrix="{0.9999,0.0001,0.0000,0.000;
+		       -0.0001,0.9999,0.0000,0.000;
+		        0.0000,0.0000,1.0000,0.010;
+			0.0000,0.0000,0.0000,1.000}"
+
+	       thetax="89.9991989" phix="359.9625854"       
+	       thetay="90.1522369" phiy="89.9625778"
+               thetaz="0.1522359"  phiz="90.2649689"
+-->
 
     <Volume name="PXMO" comment="Main volume for Active sectors">
     <Material  name="Air"      /> 
@@ -361,6 +391,42 @@ side sector beam" > BullHornLength/0.325/</varlist>
 
     <Shape type="TUBE" rmin="minRvol" rmax="maxRvol" dz="maxZvol" />
     
+
+
+    <!-- Placement of the misaligned sensors -->
+    <If expr="PIXL_misalign.eq.1">
+    <!-- Create the silicon wafer containing both active and passive Si -->
+    <Create block="PXSI" />
+    <Do var="isector" from="1" to="PIXL_sector"> <!-- 1 to 10 -->
+    <Do var="iladder" from="1" to="PIXL_ladder"> <!-- 1 to  4 -->
+    <Do var="isensor" from="1" to="PIXL_sensor"> <!-- 1 to 10 -->
+
+      <!-- Calculate DB row number (aka ncopy-1) -->
+      sensorRow  = (isector-1)*PIXL_ladder*PIXL_sensor 
+      sensorRow += (iladder-1)*PIXL_sensor             
+      sensorRow += (isensor-1)
+
+      ladderRow  = sensorRow/10
+      sectorRow  = sensorRow/40
+      halfRow    = sensorRow/200
+
+      <!-- Skip whole sectors if they are off -->
+      <If expr="PIXL_isOn(isector)==1">
+	<Placement block="PXSI" konly="ONLY" ncopy="sensorRow+1"
+	       x="-0.1533" 
+	       y="-0.0013" 
+	       z="-0.01604" >
+	  <Misalign table="Geometry/pxl/pxlSensorOnLadder" row="sensorrow"  opts="left" />
+	  <Misalign table="Geometry/pxl/pxlLadderOnSector" row="ladderrow"  opts="left" />
+	  <Misalign table="Geometry/pxl/pxlSectorOnHalf"   row="sectorrow"  opts="left" />
+	  <Misalign table="Geometry/pxl/pxlHalfOnPxl"      row="halfrow"    opts="left" />
+	</Placement>
+      </If>
+    </Do>
+    </Do>
+    </Do>
+    </If>
+
 
 
     <!-- placement of PXL sectors all instrumented -->
@@ -396,21 +462,96 @@ side sector beam" > BullHornLength/0.325/</varlist>
       </If>
 
      <!-- PXLA is the single sector volume equipped with LADDR-->
-     <Create block="PXLA"/>
-     <Placement block="PXLA" in="PXMO" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="ii">
-     <Rotation alphaz="alphaz"/>
-     <Rotation alphax="alphax"/>
-     <Rotation alphay="alphay"/>
+     <Create    block="PXLA"/>
+     <Placement block="PXLA" in="PXMO"           
+		x="xpos" 
+		y="ypos" 
+		z="zpos" 
+		konly="MANY" 
+		ncopy="ii">
+
+       <Rotation alphaz="alphaz"/> 
+       <Rotation alphax="alphax"/>
+       <Rotation alphay="alphay"/>
+
+       <Misalign table="Geometry/pxl/pxlHalfOnPxl"    row="(ii-1)/5"   opts="left" />  
+       <Misalign table="Geometry/pxl/pxlSectorOnHalf" row="ii-1"       opts="left"/>
+
      </Placement>
+
+     <!--
+	 Place pixel ladders directly in pixel mother volume
+     -->
+
+     <Create block="LADR" />
+
+
+     xxpos =  2.83991076 * cos( alphaz*pi/180.0 + 1.83238222 );    
+     yypos =  2.83991076 * sin( alphaz*pi/180.0 + 1.83238222 );
+<!-- xxpos = -0.7344; 
+     yypos=   2.74331; -->
+
+     <Placement  block="LADR" in="PXMO" konly="MANY"
+		 x="xxpos+xpos" 
+		 y="yypos+ypos" 
+		 z="-4.875+zpos">
+       <Rotation alphaz="175.437+alphaz" />
+       <Misalign table="Geometry/pxl/pxlLadderOnSectorMisalign" row="4*ii-4"   opts="right print" />
+     </Placement>
+   
+
+     xxpos = -8.27587534 * cos( alphaz*pi/180.0 - 1.41242 );      
+     yypos = -8.27587534 * sin( alphaz*pi/180.0 - 1.41242 );
+<!-- xxpos = -1.30523; 
+     yypos =  8.1723; --> 
+
+     <Placement block="LADR" in="PXMO" konly="MANY"
+		x="xxpos+xpos" 
+		y="yypos+ypos" 
+		z="-4.875+zpos">
+       <Rotation alphaz="349.963+alphaz" />
+       <Misalign table="Geometry/pxl/pxlLadderOnSectorMisalign" row="4*ii-3" opts="right" />
+     </Placement>
+  
+
+     xxpos = -8.27587534 * cos( alphaz*pi/180.0-1.202980173);      
+     yypos = -8.27587534 * sin( alphaz*pi/180.0-1.202980173); 
+<!-- xxpos = -2.97583; 
+     yypos =  7.72235; -->
+
+     <Placement block="LADR" in="PXMO" konly="MANY"
+		x="xxpos+xpos" 
+		y="yypos+ypos" 
+		z="-4.875+zpos">
+       <Rotation alphaz="1.963+alphaz" />
+       <Misalign table="Geometry/pxl/pxlLadderOnSectorMisalign" row="4*ii-2" opts="right" />
+     </Placement>
+    
+     xxpos = -8.27587534 * cos( alphaz*pi/180.0-9.93541569E-01 );      
+     yypos = -8.27587534 * sin( alphaz*pi/180.0-9.93541569E-01 ); 
+<!-- xxpos = -4.5636; 
+     yypos =  6.93489; -->
+
+     <Placement block="LADR" in="PXMO" konly="MANY"
+		x="xxpos+xpos" 
+		y="yypos+ypos" 
+		z="-4.875+zpos">
+       <Rotation alphaz="13.963+alphaz" />
+       <Misalign table="Geometry/pxl/pxlLadderOnSectorMisalign" row="4*ii-1" opts="right" />
+     </Placement>   
+
+     
+
      </If>
      </Do>
 
    </Volume>
 
 
-   <Volume name="PXLA" comment="pixel sector with ladders">
-   <Material name="Air"/>
-   <Attribute for="PXLA" seen="0" colo="1"/>
+   <Volume    name="PXLA" comment="pixel sector with ladders">
+   <Material  name="Air"/>
+   <Attribute for="PXLA" seen="0" colo="1" />
+
    <Shape type="TUBS" dz="halfMaxZ" rmin="minradsec" rmax="maxradsec" phi1="minphisec" phi2="maxphisec"/>
         
 
@@ -911,6 +1052,7 @@ side sector beam" > BullHornLength/0.325/</varlist>
 <!-- placement of silicon mother volume -->
 
 
+<!--
 <Create block="LADR" />
   <Placement block="LADR" x="-0.73444" y="2.74331" z="-4.875">
   <Rotation alphaz="175.437" />
@@ -930,6 +1072,7 @@ side sector beam" > BullHornLength/0.325/</varlist>
   <Placement block="LADR" x="-4.51636" y="6.93489" z="-4.875">
   <Rotation alphaz="13.963" />
  </Placement>
+-->
 
 <!-- Place piece of cables to outer driver boards within the PXLA volume 
      Tabular values from the Dtub geometry file -->
@@ -1568,18 +1711,21 @@ side sector beam" > BullHornLength/0.325/</varlist>
     <Medium name ="MedAir" epsil="0.001"/>
     <Attribute for="LADR" seen="1" colo="920"/>
     <Shape type="BOX" dx="1.245" dy="ladderhalfthickness" dz="15.325" />
-       yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025)
+
+    yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025)
 
 
 
+    <!-- Place the mother volumes which contain the sensors on the ladders -->
+    <If expr="PIXL_misalign.eq.0">
     <Do var="sens" from="1" to="SENP_sensor">
       zsensor = SENP_zpos(sens)
       <Create block="PXSI"/>
-      <Placement in="LADR" x="0.0848" y="yp" z="zsensor" block="PXSI">
-      </Placement>
+      <Placement block="PXSI" in="LADR" x="0.0848" y="yp" z="zsensor"/>
     </Do>
-    yp = yp - 0.005 
+    </If>
 
+    yp = yp - 0.005 
     <!-- Glue for CMOS sensors --> 
     <Create block="GLUA" />
     <Placement block="GLUA" in="LADR" x="0.0485" y="yp" z="4.8855">

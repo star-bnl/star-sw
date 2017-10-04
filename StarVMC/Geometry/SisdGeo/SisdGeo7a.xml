@@ -34,11 +34,10 @@
       <var name="Version"   type="float"  />
       <var name="config"    type="int"  />
       <var name="placement" type="int"  />
+      <var name="misalign"  type="int"  />
     </Structure>
     
-    <varlist type="INTEGER"  >
-      ConfigA,ConfigB
-    </varlist>
+
     
     <Structure name="SFJP"  >
       <var name="Version" type="int" />
@@ -189,18 +188,16 @@
       <var name="SFES_Pz" />
       <var name="SFEB_Px" />
       <var name="SFEB_Py" />
-    </Structure>
-        
-        <Structure name="SFPB"  >
+    </Structure>        
+    <Structure name="SFPB"  >
             <var name="Hhight" />
             <var name="Khight" />
             <var name="Hbase" />
             <var name="Kbase" />
             <var name="Fsize" />
             <var name="Zcoor" />
-        </Structure>
-        
-        <Structure name="SFPA"  >
+        </Structure>        
+    <Structure name="SFPA"  >
             <var name="Version"  />
             <var name="rmin" />
             <var name="rmax" />
@@ -229,26 +226,27 @@
             <var name="ladderTilt(20)" />
             <var name="LadderRadius(20)" />
         </Structure>
-        
-        <varlist type="INTEGER"  >
-            ilad,iwaf,jwaf,nc
-        </varlist>
-        
-        <varlist type="REAL"  >
+
+    <varlist type="INTEGER"  >
+      ConfigA,ConfigB,ncopy
+    </varlist>        
+    <varlist type="INTEGER"  >
+            ilad,iwaf,jwaf <!-- nc does nothing --> 
+        </varlist>        
+    <varlist type="REAL"     >
             wafpckLen, dthk, radtilt, ang, radius, tilt, x, y, xpos, ypos, doff, xc, yc
-        </varlist>
-        
-        <varlist type="REAL"  >
+        </varlist>        
+    <varlist type="REAL"     >
             essai,hight,lng,leng,yoffset
         </varlist>
         
-        <Fill name="SSDP" comment="Silicon Strips"  >
+    <Fill name="SSDP" comment="Silicon Strips"  >
             <var name="Version" value="1" comment=" Version " />
             <var name="Config" value="1" comment=" There are a few configuraions possible " />
             <var name="Placement" value="1" comment=" 0=cave, 1=idsm " />
-        </Fill>
-        
-        <Fill name="SFJP" comment="Different Dimension parameters"  >
+            <var name="Misalign"  value="1" comment=" 0=sensors on ladder 1=sensors in SFMO" />
+        </Fill>        
+    <Fill name="SFJP" comment="Different Dimension parameters"  >
             <var name="Version" value="1" comment=" new version information  " />
             <var name="AlphaZ" value="54" comment=" Alpha of the SFLA and other parts " />
             <var name="AlphaZH" value="45" comment=" Alpha of other parts " />
@@ -355,7 +353,7 @@
             <var name="SFRA_Dz" value="1.0" comment="     Length of the hybrid stiffner " />
             <var name="SFRA_Pz" value="1.1" comment=" Z-Position of the hybrid stiffner " />
             <var name="SFSW_Dy" value="1.0" comment=" Width of a single wafer container " />
-            <var name="SFSW_Dz" value="2.175" comment=" Lengthof of a single wafer container " />
+            <var name="SFSW_Dz" value="2.25" comment=" Lengthof of a single wafer container " />
             <var name="SFRS_Dx" value="0.04" comment=" Dx of the two supports of the hybrid stiffner " />
             <var name="SFRS_Dy" value="0.0915" comment=" Dy of the two supports of the hybrid stiffner " />
             <var name="SFRS_Px" value="3.8" comment=" x-Position of the two supports of the hybrid stiffner " />
@@ -400,14 +398,12 @@
             <var name="SFES_Pz" value="0.1" comment=" z-Position of the small elbow bus " />
             <var name="SFEB_Px" value="2.71" comment=" x-Position of the big elbow bus " />
             <var name="SFEB_Py" value="0.75" comment=" y-Position of the big elbow bus " />
-        </Fill>
-        
-        <Fill name="SFJP" comment="Different Dimension parameters"  >
+        </Fill>        
+    <Fill name="SFJP" comment="Different Dimension parameters"  >
             <var name="Version" value="2" comment=" Version  " />
             <var name="SSRS_Rmin" value="23.3" comment=" Width of the side of the small rib (outside structure) " />
         </Fill>        
-
-        <Fill name="SFPB" comment="Some SSD Shell dimensions"  >
+    <Fill name="SFPB" comment="Some SSD Shell dimensions"  >
             <var name="Hhight" value="(0.02/tan(54*pi/180)+0.02/(2*tan(pi/5))+0.2)*sin(pi/5)" comment=" haut 1 " />
             <var name="Khight" value="0.02/sin(54*pi/180)" comment=" haut 2 " />
             <var name="Hbase" value="(0.02/tan(63*pi/180)+0.01/tan(27*pi/180)+0.2)*sin(27*pi/180)" comment=" bas 1 " />
@@ -415,8 +411,7 @@
             <var name="Fsize" value="0.6/cos(15*pi/180)+0.02*tan(15*pi/180)" comment=" lenght of the side kapton film " />
             <var name="Zcoor" value="5.18462095393834410" comment=" z coord " />
         </Fill>        
-
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="1" comment=" geometry version " />
            <!-- <var name="rmin" value="21.8" comment=" mother rmin " />-->
            <!-- new rmin to accomodate the new radius -->
@@ -447,33 +442,29 @@
             <var name="ladderAngle" value="{-1.0,-1.0,45.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}" comment=" individual angles " />
             <var name="ladderTilt" value="{-1.0,-1.0,0.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{-1.0,-1.0,23.000,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}" comment=" individual radii " />
-        </Fill>
-        
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="2" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1}" comment=" presence of ladders " />
             <var name="ladderAngle" value="{90.0,108.3,130.0,-1.0,-1.0,-1.0,-1.0,-1.0,230.0,251.7,270.0,288.3,310.0,-1.0,-1.0,-1.0,-1.0,-1.0,50.0,71.7}" comment=" individual angles " />
             <var name="ladderTilt" value="{0.0,-6.0,0.0,-1.0,-1.0,-1.0,-1.0,0.0,0.0,6.0,0.0,-6.0,0.0,-1.0,-1.0,-1.0,-1.0,-1.0,0.0,6.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{23.174,22.800,24.600,-1.0,-1.0,-1.0,-1.0,-1.0,24.600,22.800,23.174,22.800,24.600,-1.0,-1.0,-1.0,-1.0,-1.0,24.600,22.800}" comment=" individual radii " />
-        </Fill>
-        
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="3" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
             <var name="ladderAngle" value="{90.0,108.3,126.6,144.4,162.2,180.0,197.8,215.6,233.4,251.7,270.0,288.3,306.6,324.4,342.2,0.0,17.8,35.6,53.4,71.7}" comment=" individual angles " />
             <var name="ladderTilt" value="{0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0,0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{23.177,22.800,22.800,22.800,23.800,22.500,23.800,22.800,22.800,22.800,23.177,22.800,22.800,22.800,23.800,22.500,23.800,22.800,22.800,22.800}" comment=" individual radii " />
-        </Fill>
-        
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="4" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
             <var name="ladderAngle" value="{90.0,108.3,126.6,144.4,162.2,180.0,197.8,215.6,233.4,251.7,270.0,288.3,306.6,324.4,342.2,0.0,17.8,35.6,53.4,71.7}" comment=" individual angles " />
             <var name="ladderTilt" value="{0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0,0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{23.177,22.800,22.800,22.800,22.800,22.500,22.800,22.800,22.800,22.800,23.177,22.800,22.800,22.800,22.800,22.500,22.800,22.800,22.800,22.800}" comment=" individual radii " />
-        </Fill>
-        
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="5" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
             <var name="ladderAngle" value="{90.0,108.3,126.6,144.4,162.2,180.0,197.8,215.6,233.4,251.7,270.0,288.3,306.6,324.4,342.2,0.0,17.8,35.6,53.4,71.7}" comment=" individual angles " />
@@ -481,24 +472,22 @@
             <var name="ladderRadius" value="{23.177,22.800,22.600,22.600,22.600,22.300,22.600,22.600,22.600,22.800,23.177,22.800,22.600,22.600,22.600,22.500,22.600,22.600,22.600,22.800}" comment=" individual radii " />
         </Fill>
 
-           <!-- these are the new paramters for the SSD-->
-           <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+    <!-- these are the new paramters for the SSD-->
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="6" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
             <var name="ladderAngle" value="{99.0,117.3,135.6,153.4,171.2,189.0,206.8,224.6,242.4,260.7,279.0,297.3,315.6,333.4,351.2,9.0,26.8,44.6,62.4,80.2}" comment=" individual angles " />
             <var name="ladderTilt" value="{-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
         </Fill>
-
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="7" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
             <var name="ladderAngle" value="{81.0,99.0,117.0,135.0,153.0,171.0,189.0,207.0,225.0,243.0,261.0,279.0,297.0,315,333,351,9.0,27.0,45.0,63.0}" comment=" individual angles " />
             <var name="ladderTilt" value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
         </Fill>
-
-        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version"      value="7.1" comment=" geometry version " />
             <var name="ladderMap"    value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
 	    <var name="ladderAngle"  value="{81.0, 63.0, 45.0, 27.0, 9.0, 351.0, 333.0, 315.0, 297.0, 279.0, 261.0, 243.0, 225.0, 207.0, 189.0, 171.0, 153.0, 135.0, 117.0, 99.0}" comment=" individual angles, revised numbering 1/12/15" />
@@ -506,41 +495,52 @@
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
         </Fill>
 
-        <Use struct="SSDP" />
+    <Use struct="SSDP" />
+
         ConfigA = mod(SSDP_Config   ,10) 
         ConfigB = mod(SSDP_Config/10,10) 
 
 <!--        <Use struct="SFPA" select="version" value="ConfigA " />-->
 <!--     jb : update : use the latest version of SFPA -->
-        <Use struct="SFPA" select="version" value="7.1" />
-        <Use struct="SFJP" select="version" value="2 " />
 
-        <Mixture name="G10" dens="1.7"  >
+     <Use struct="SFPA" select="version" value="7.1" />
+     <Use struct="SFJP" select="version" value="2 " />
+
+     <Mixture name="G10" dens="1.7"  >
             <Component name="Si" a="28.08" z="14" w="0.6*1*28./60." />
             <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174." />
             <Component name="C" a="12" z="6" w="0.4*8*12./174." />
             <Component name="H" a="1"  z="1" w="0.4*14*1./174." />
-        </Mixture>
-        
-        <Mixture name="G5" dens="0.85"  >
+        </Mixture>        
+     <Mixture name="G5"  dens="0.85"  >
             <Component name="Si" a="28.08" z="14" w="0.6*1*28./60." />
             <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174." />
             <Component name="C" a="12" z="6" w="0.4*8*12./174." />
             <Component name="H" a="1" z="1" w="0.4*14*1./174." />
         </Mixture>       
-
-        <Mixture name="DELRIN" dens="1.2"  >
+     <Mixture name="DELRIN" dens="1.2"  >
             <Component name="O" a="16" z="8" w="2*16./100." />
             <Component name="C" a="12" z="6" w="5*12./100." />
             <Component name="H" a="1" z="1" w="8*1.0/100." />
         </Mixture>        
 
     <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
-        <Create    block="SFMO" />
-        <Placement block="SFMO" in="IDSM" konly="'ONLY'"         if="SSDP_placement==1" />
-        <Placement block="SFMO" in="CAVE" konly="'MANY'"         if="SSDP_placement==0" /> 
+     <Create    block="SFMO" />
 
-	<Block name="SFMO" comment="is the mother of all Silicon Strip Detector volumes"  >
+     <Placement block="SFMO" in="IDSM" konly="ONLY" if="SSDP_placement==1" >
+       <!-- 
+       <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
+       -->
+     </Placement>
+     <Placement block="SFMO" in="CAVE" konly="MANY" if="SSDP_placement==0" >
+       <!--
+       <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
+       -->
+     </Placement>
+
+
+
+<Block name="SFMO" comment="is the mother of all Silicon Strip Detector volumes"  >
 
 	  <Material name="Air" />
 
@@ -555,276 +555,62 @@
 -->
 	  </If>
 
+
+          <!-- These are the ladders... need to understand what the NC variable does... -->
+          <!-- looks like nothing... can test by removing it... -->
 	  <Create block="SFLM" />
 	  <Do var="ilad" from="1" to="20"  >
-	    <If expr="SFPA_ladderMap(ilad).gt.0"  >
-	      
-	      ang     = (SFPA_ladderAngle(ilad)*pi)/180.0 
-	      
-	      <If expr="ilad.eq.1"  >
-		nc=1 
-		<Else  >
-		  nc=20-ilad+2 
-		</Else>
-		
+
+	    <If expr="SFPA_ladderMap(ilad).gt.0"  >   
+
+	      <!-- Place active sensors and local support material -->
+	      <If expr="SSDP_misalign.eq.1">
+		<Create    block="SFSW" />
+		<Do var="iwaf" from="1" to="SFPA_nssd">
+		  ncopy = (ilad-1)*SFPA_nssd + iwaf
+		  <Placement block="SFSW" in="SFMO" ncopy="ncopy" konly="MANY">
+		    <Rotation alphaz="180" />
+		    <Misalign table="Geometry/sst/sstSensorOnLadder"  row="ncopy-1" opts="left print" />
+		    <Misalign table="Geometry/sst/sstLadderOnSst"     row="ilad -1" opts="left print" />
+		  </Placement>
+		</Do>
 	      </If>
-	      <Placement y="0.0" x="0.0" z="0.0" konly="'MANY'" block="SFLM"  >
-<!--	      <Placement y="(SFPA_ladderRadius(ilad)*sin(ang)+(dthk*sin(ang+radtilt))/2.0)" ncopy="nc" x="(SFPA_ladderRadius(ilad)*cos(ang)+(dthk*cos(ang+radtilt))/2.0)" z="0" konly="'MANY'" block="SFLM"  >
-		<Rotation alphaz="SFPA_ladderAngle(ilad)-90.0+SFPA_ladderTilt(ilad)" />
--->
-                 <Rotation alphaz="SFPA_ladderAngle(ilad)-90" /> 
-		
+
+	      <!-- Place ladders (support material) -->
+	      ang = (SFPA_ladderAngle(ilad)*pi)/180.0 
+	      <Placement y="0.0" x="0.0" z="0.0" konly="MANY" block="SFLM"  >
+                <Rotation alphaz="SFPA_ladderAngle(ilad)-90" /> 	
+		<Misalign table="Geometry/sst/sstLadderOnSstMisalign" row="ilad-1" opts="right print" />
 	      </Placement>
-	      
 	    </If>
 	    
 	  </Do>
-            
-            <Create block="SSST" />
-<!--
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSST_Width/2.-SFJP_SSST_Pz" block="SSST"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSST_Width/2.+SFJP_SSST_Pz" block="SSST"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSST_Width/2.-SFJP_SSST_Pz" block="SSST"  >
-                <Rotation alphaz="180." />
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSST_Width/2.+SFJP_SSST_Pz" block="SSST"  >
-                <Rotation alphaz="180." />
-            </Placement>
- -->        
-            <Create block="SSSS" />
-<!--
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width/2.-SFJP_SSST_Pz" block="SSSS"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width/2.+SFJP_SSST_Pz" block="SSSS"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width/2.-SFJP_SSST_Pz" block="SSSS"  >
-                <Rotation alphaz="180." />
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width/2.+SFJP_SSST_Pz" block="SSSS"  >
-                <Rotation alphaz="180." />
-            </Placement>
- -->        
 
-            <Create block="SSRT" />
-<!--
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSST_Width/2.-SFJP_SSST_Pz" block="SSRT"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSST_Width/2.+SFJP_SSST_Pz" block="SSRT"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSST_Width/2.-SFJP_SSST_Pz" block="SSRT"  >
-                <Rotation alphaz="180." />
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSST_Width/2.+SFJP_SSST_Pz" block="SSRT"  >
-                <Rotation alphaz="180." />
-            </Placement>
- -->        
+          <!-- these have been unplaced since version 7.  why? -->            
+          <Create block="SSST" />        
+          <Create block="SSSS" />
+          <Create block="SSRT" />
+          <Create block="SSRS" />
+          <Create block="SSLB" />	  
+          <Create block="SSLT" />	  
+          <Create block="SCMP" />
+          <Create block="SCVM" />
 
-            <Create block="SSRS" />
-<!--
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width/2.-SFJP_SSST_Pz" block="SSRS"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width/2.+SFJP_SSST_Pz" block="SSRS"  >
-            </Placement>
-            
-            <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width/2.-SFJP_SSST_Pz" block="SSRS"  >
-                <Rotation alphaz="180." />
-            </Placement>
-            
-            <Placement y="0." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width/2.+SFJP_SSST_Pz" block="SSRS"  >
-                <Rotation alphaz="180." />
-            </Placement>
--->        
-
-            <Create block="SSLB" />
-<!--
-            <If expr="SFJP_version==1"  >
-                <Placement y="SFJP_SSLB_Px" x="SFJP_SSLB_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="-SFJP_SSLB_Px" x="-SFJP_SSLB_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="-SFJP_SSLB_Px" x="SFJP_SSLB_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="-SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="SFJP_SSLB_Px" x="-SFJP_SSLB_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="-SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="SFJP_SSLB_Px" x="SFJP_SSLB_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="-SFJP_SSLB_Px" x="-SFJP_SSLB_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="-SFJP_SSLB_Px" x="SFJP_SSLB_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="-SFJP_AlphaZH" />
-                </Placement>
-                
-                <Placement y="SFJP_SSLB_Px" x="-SFJP_SSLB_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                    <Rotation alphaz="-SFJP_AlphaZH" />
-                </Placement>
-                
-                <Else  >
-                    <Placement y="SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphaz="0" />
-                    </Placement>
-                    
-                    <Placement y="-SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphaz="0" />
-                    </Placement>
-                    
-                    <Placement y="-SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphaz="0" />
-                    </Placement>
-                    
-                    <Placement y="SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphaz="0" />
-                    </Placement>
-                    
-                    <Placement y="SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphay="180" />
-                    </Placement>
-                    
-                    <Placement y="-SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphay="180" />
-                    </Placement>
-                    
-                    <Placement y="-SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphay="180" />
-                    </Placement>
-                    
-                    <Placement y="SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz/2." block="SSLB"  >
-                        <Rotation alphay="180" />
-                    </Placement>
-                    
-                </Else>
-                
-            </If>
- -->        
-
-            <Create block="SSLT" />
-<!--
-            <Placement y="SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz-SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="-SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz-SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="-SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz-SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSSS_Width-SFJP_SSST_Pz-SFJP_SSLB_Dz-SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz+SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="-SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz+SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="-SFJP_SSLT_Px" x="SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz+SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
-            
-            <Placement y="SFJP_SSLT_Px" x="-SFJP_SSLT_Px" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+SFJP_SSSS_Width+SFJP_SSST_Pz+SFJP_SSLB_Dz+SFJP_SSLT_Dz/2." block="SSLT"  >
-            </Placement>
- -->        
-
-            <Create block="SCMP" />
-<!--
-            <Placement y="SFJP_SCMP_Px" x="SFJP_SCMP_Px" z="SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="-SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCMP_Px" x="-SFJP_SCMP_Px" z="SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="-SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCMP_Px" x="SFJP_SCMP_Px" z="SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="SFJP_SCMP_Px" x="-SFJP_SCMP_Px" z="SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="SFJP_SCMP_Px" x="SFJP_SCMP_Px" z="-SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="-SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCMP_Px" x="-SFJP_SCMP_Px" z="-SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="-SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCMP_Px" x="SFJP_SCMP_Px" z="-SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="SFJP_SCMP_Px" x="-SFJP_SCMP_Px" z="-SFJP_SCVM_Pz" block="SCMP"  >
-                <Rotation alphaz="SFJP_AlphaZH" />
-
-            </Placement>
-            -->
-
-            <Create block="SCVM" />
-<!--
-            <Placement y="SFJP_SCVM_Px" x="SFJP_SCVM_Px" z="SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="-SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCVM_Px" x="-SFJP_SCVM_Px" z="SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="(180.-SFJP_AlphaZH)" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCVM_Px" x="SFJP_SCVM_Px" z="SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="-(180.-SFJP_AlphaZH)" />
-            </Placement>
-            
-            <Placement y="SFJP_SCVM_Px" x="-SFJP_SCVM_Px" z="SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="SFJP_SCVM_Px" x="SFJP_SCVM_Px" z="-SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="-SFJP_AlphaZH" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCVM_Px" x="-SFJP_SCVM_Px" z="-SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="(180.-SFJP_AlphaZH)" />
-            </Placement>
-            
-            <Placement y="-SFJP_SCVM_Px" x="SFJP_SCVM_Px" z="-SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="-(180.-SFJP_AlphaZH)" />
-            </Placement>
-            
-            <Placement y="SFJP_SCVM_Px" x="-SFJP_SCVM_Px" z="-SFJP_SCVM_Pz" block="SCVM"  >
-                <Rotation alphaz="SFJP_AlphaZH" />
-            </Placement>
-            -->
        </Block>
 
 <!-- Believe I want to get rid of SFLM and SFDM and place their content in the mother volume directly -->
         
-        <Block name="SFLM" comment="is the mother of the ladder"  >
-          <Material name="Air" />
+<Block name="SFLM" comment="is the mother of the ladder"  >
+
+          <Material  name="Air" />
           <Attribute for="SFLM" seen="1" colo="7" />
-          <Shape type="TUBS" dz="SFPA_smLen/2" rmin="21.6" rmax="SFPA_rmax-0.2" phi1="-11+90" phi2="11+90"/>
+          <Shape type="TUBS" 
+		 dz="SFPA_smLen/2" 
+		 rmin="21.6" 
+		 rmax="SFPA_rmax-0.2" 
+		 phi1="-11+90" 
+		 phi2="11+90"
+	  />
 	  
 	  <!-- center offset for the SFSW volume -->
 	  doff = dthk/2.0 -(SFPA_smThk +SFPA_gpThk)/2
@@ -836,14 +622,23 @@
           wafpckLen=SFPA_wpLen/(SFPA_nssd*1.) 
 	  x = 0
 	  y = 0
-	  <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	  <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+
+	  <If expr="SSDP_misalign.eq.0">
+          <Create block="SFSW" />
           <Do var="iwaf" from="1" to="SFPA_nssd"  >
-            <Create block="SFSW" />
-            <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFSW" konly="'MANY'" >
+
+            <Placement block="SFSW" 
+		       x    ="xpos" 
+		       y    ="ypos" 
+		       z    ="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen"  
+		       konly="MANY">
 	      <Rotation alphaz="tilt" />
-            </Placement>
-            
+	    </Placement>            
+	    
           </Do>
+	  </If>
           
  <!--        
 
@@ -861,30 +656,30 @@
         hight = SFJP_SFSM_Ll*tan(54*pi/180)-SFPB_Hhight/tan(pi/5)-0.02 
 	x = -(SFPB_Hhight-SFPB_Khight)
 	y = hight+yoffset 
-	<Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	<Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
 <!--            <Placement y="hight+yoffset" x="-(SFPB_Hhight-SFPB_Khight)" z="0.0" block="SFLT" konly="'MANY'"  > -->
-         <Placement y="ypos" x="xpos" z="0.0" block="SFLT" konly="'ONLY'"  >
+         <Placement block="SFLT" konly="ONLY" y="ypos" x="xpos" z="0.0" >
            <Rotation alphaz="-90-36+tilt" />
          </Placement>
 
          x = +(SFPB_Hhight-SFPB_Khight)
 	 y = hight+yoffset 
-	 <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	 <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
  
-        <!--    <Placement y="hight+yoffset" x="(SFPB_Hhight-SFPB_Khight)" z="0" block="SFLT" konly="'ONLY'" > -->
-	<Placement y="ypos" x="xpos" z="0" block="SFLT" konly="'ONLY'" >
+        <!--    <Placement y="hight+yoffset" x="(SFPB_Hhight-SFPB_Khight)" z="0" block="SFLT" konly="ONLY" > -->
+	<Placement y="ypos" x="xpos" z="0" block="SFLT" konly="ONLY" >
           <Rotation alphay="180." />
           <Rotation alphaz="90.+36.+tilt" />
         </Placement>            
 	
         x = 0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))
 	y = yoffset 
-	<Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	<Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	
         <Create block="SFLU" />
 	<!--           <Placement y="0.+yoffset" x="0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))" z="0." block="SFLU" konly="'MANY'" > -->
-	<Placement y="ypos" x="xpos" z="0." block="SFLU" konly="'ONLY'">
+	<Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
 	  <Rotation alphaz="tilt"/>
 	  </Placement>
 		   
@@ -892,109 +687,109 @@
             essai = essai + 27 + 27 
 	    y = cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset
 	    x = -cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	    <!--            <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="-cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
                 <Rotation alphay="180" />
                 <Rotation alphaz="essai+tilt" />
             </Placement>
             x = 0.+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))
 	    y = 0.+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	    
 	    <!--            <Placement y="0.+yoffset" x="0.+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0." block="SFLU" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
               <Rotation alphay="180." />
 	      <Rotation alphaz="tilt"/>
             </Placement>
             x = cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))
 	    y = cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	    
 	    <!--         <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU"  > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
               <Rotation alphaz="-essai+tilt" />
             </Placement>            
 
 	    x = SFJP_SFFK_Px/2+SFJP_SFFK_Dxe
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
             <Create block="SFFK" />
 	    <!-- <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="SFJP_SFFK_Px/2+SFJP_SFFK_Dxe" z="0.0" block="SFFK" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFFK" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFFK" konly="ONLY">
 	      <Rotation alphaz="tilt" />
             </Placement>
      	    x = - (SFJP_SFFK_Px/2+SFJP_SFFK_Dxe)
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
        <!--  <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="-SFJP_SFFK_Px/2-SFJP_SFFK_Dxe" z="0.0" block="SFFK" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFFK" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFFK" konly="ONLY">
 	      <Rotation alphaz="tilt" />
             </Placement>
 	    
 
 	    x = -SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
             <Create block="SFFL" />
             <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFFL" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFFL" konly="ONLY">
               <Rotation alphaz="15+tilt" />
             </Placement>
             
 	    x =  SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
 
             <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFFL" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFFL" konly="ONLY">
               <Rotation alphaz="-15+tilt" />
             </Placement>
             
 	    x = 0.0
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2.
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
             <Create block="SFKK" />
         <!--    <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2." x="0." z="0." block="SFKK" konly="'MANY'" > -->
-	      <Placement y="ypos" x="xpos" z="0." block="SFKK" konly="'ONLY'">
+	      <Placement y="ypos" x="xpos" z="0." block="SFKK" konly="ONLY">
 	      <Rotation alphaz="tilt" />
             </Placement>           
 
             <Create block="SFKL" />
 	    x = -SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
             <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005" z="0" block="SFKL" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFKL" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFKL" konly="ONLY">
               <Rotation alphaz="15+tilt" />
             </Placement>
             x = +SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)-0.005
 	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
 
             <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="+SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)-0.005" z="0" block="SFKL" konly="'MANY'" > -->
-	    <Placement y="ypos" x="xpos" z="0." block="SFKL" konly="'ONLY'">
+	    <Placement y="ypos" x="xpos" z="0." block="SFKL" konly="ONLY">
               <Rotation alphaz="-15+tilt" />
             </Placement>   
             
 	    x = 0.0 
 	    y = -SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
             <Create block="SAPP" />
             <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP" konly="'MANY'" > -->
-	      <Placement y="ypos" x="xpos" z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP" konly="'ONLY'">
+	      <Placement y="ypos" x="xpos" z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP" konly="ONLY">
                 <Rotation alphay="180." />
 		<Rotation alphaz="tilt"/>
             </Placement>
             
             <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP" konly="'MANY'" >-->
-	      <Placement y="ypos" x="xpos" z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP" konly="'ONLY'">
+	      <Placement y="ypos" x="xpos" z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP" konly="ONLY">
 		<Rotation alphaz="tilt"/>
             </Placement>
             
 	    x = 0.0
 	    y = -SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
 
             <Create block="SFAM" />
             <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'" >-->
@@ -1014,7 +809,7 @@
 
 	    x = -SFJP_SFCO_Px
 	    y = SFJP_SFCO_Py +yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <Create block="SFCO" />
             <!--<Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCO" konly="'MANY'" >-->
@@ -1024,7 +819,7 @@
             
 	    x = SFJP_SFCO_Px
 	    y = SFJP_SFCO_Py +yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCO" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCO" >
@@ -1034,7 +829,7 @@
      
 	    x = +SFJP_SFCO_Px
 	    y =  SFJP_SFCO_Py +yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <Create block="SFCM" />
             <!--<Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >-->
@@ -1044,7 +839,7 @@
             
 	    x = -SFJP_SFCO_Px
 	    y =  SFJP_SFCO_Py +yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >
@@ -1055,7 +850,7 @@
             <Create block="SFKF" />
 	    x = -SFJP_SFKF_Px
 	    y = SFJP_SFKF_Py + yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
             <!--<Placement y="SFJP_SFKF_Py" x="-SFJP_SFKF_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKF" konly="'MANY'" > -->
 	    <Placement x="xpos" y="ypos" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2.-0.2" block="SFKF" >
                 <Rotation alphaz="+SFJP_AlphaZ+tilt" />
@@ -1063,7 +858,7 @@
 
      	    x = SFJP_SFKF_Px
 	    y = SFJP_SFKF_Py + yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
        
             <!--<Placement y="SFJP_SFKF_Py" x="+SFJP_SFKF_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKF" konly="'MANY'" > -->
 	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2.+0.2" block="SFKF" >
@@ -1073,7 +868,7 @@
             <Create block="SFKS" />
 	    x = +SFJP_SFKS_Px
 	    y = SFJP_SFKS_Py + yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
             <!--<Placement y="SFJP_SFKS_Py" x="+SFJP_SFKS_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKS" konly="'MANY'" > -->
 	    <Placement x="xpos" y="ypos" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKS" >
                 <Rotation alphaz="-SFJP_AlphaZ+tilt" />
@@ -1081,7 +876,7 @@
             
 	    x = -SFJP_SFKS_Px
 	    y =  SFJP_SFKS_Py + yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="SFJP_SFKS_Py" x="-SFJP_SFKS_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS" >
@@ -1091,7 +886,7 @@
             <Create block="SFPR" />
 	    x = 0.0
 	    y =  SFJP_SFPR_Py + yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	    
             <!--<Placement y="+SFJP_SFPR_Py" x="0" z="-SFJP_SFLU_Dz" block="SFPR" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz" block="SFPR">
@@ -1106,7 +901,7 @@
             <Create block="SFPB" />
 	    x = 0.0
 	    y =  +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2 + yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB">
@@ -1122,7 +917,7 @@
 	    <Create block="SSBS" />
 	    x = 0.0
 	    y = +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2.
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS">
@@ -1130,7 +925,7 @@
             </Placement>
             x = 0
 	    y = +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2.
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
             <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS">
 	      <Rotation alphaz="tilt"/>
@@ -1139,7 +934,7 @@
             <Create block="SSBB" />
 	    x = 0.0
 	    y = +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2. 
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB">
@@ -1161,14 +956,14 @@
               <Do var="jwaf" from="1" to="iwaf"  >
 		x = +SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf
 		y =  SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
-		<Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
-                <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA" konly="'ONLY'" >-->
+		<Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+                <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA" konly="ONLY" >-->
 		<Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA">
                   <Rotation alphaz="-SFJP_AlphaZ+tilt" />
 		</Placement>
 		x = -SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf
 		y =  SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
-		<Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+		<Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 		
 		<!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-iwaf*wafpckLen" block="SFLA" konly="'MANY'" >-->
 		<Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-iwaf*wafpckLen" block="SFLA">
@@ -1177,16 +972,16 @@
 		
 		x = SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf
 		y = SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
-              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'ONLY'">
+              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="ONLY">
                 <Rotation alphaz="-SFJP_AlphaZ+tilt" />
               </Placement>
               
               x = -SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf
 	      y =  SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf+ yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2.-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
               <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2.-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC">
@@ -1195,7 +990,7 @@
               
               x =  SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf
 	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'">-->
               <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA">
@@ -1204,7 +999,7 @@
               
               x = -SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf
 	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >-->
               <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA">
@@ -1213,7 +1008,7 @@
               
               x = +SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf
 	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
               <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC">
@@ -1222,7 +1017,7 @@
               
               x = -SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf
 	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
               <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC">
@@ -1235,7 +1030,7 @@
             <Do var="jwaf" from="1" to="8"  >
               x = SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf
 	      y = SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
               <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >-->
 	      <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA"  >	  
                 <Rotation alphaz="-SFJP_AlphaZ+tilt" />
@@ -1243,7 +1038,7 @@
  
               x = -SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf
 	      y = SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
-	      <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
              
               <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >-->
 
@@ -1255,7 +1050,7 @@
             
             x = +SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf
 	    y = SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf +yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
   	    
            <!-- <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB" konly="'MANY'" >-->
              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB"  >
@@ -1264,7 +1059,7 @@
             
             x = -SFJP_SFLA_Px-SFJP_FLEX_Di*iwaf
 	    y = SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf +yoffset
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 
             <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*iwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz/2." block="SFLB" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz/2." block="SFLB" >
@@ -1274,7 +1069,7 @@
 <!--
             x = -SFJP_SFES_Px
 	    y = -SFJP_SFES_Py 
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 -->
             <!--<Placement y="-SFJP_SFES_Py" x="-SFJP_SFES_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFES" konly="'MANY'" >-->
 <!--
@@ -1283,23 +1078,23 @@
             </Placement>
             x = +SFJP_SFES_Px
 	    y = -SFJP_SFES_Py 
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
         -->    <!--<Placement y="-SFJP_SFES_Py" x="+SFJP_SFES_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES" konly="'MANY'" >--> <!--
-	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES" konly="'ONLY'" >
+	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES" konly="ONLY" >
               <Rotation alphaz="-57.66+tilt" />
             </Placement>                
 	    -->
 	    x = -SFJP_SFEB_Px
 	    y = -SFJP_SFEB_Py 
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
             <!--<Placement y="-SFJP_SFEB_Py" x="-SFJP_SFEB_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB" konly="'MANY'" >-->
-	    <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB" konly="'ONLY'" >
+	    <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB" konly="ONLY" >
               <Rotation alphaz="55.35+tilt" />
             </Placement>
             
 	    x = +SFJP_SFEB_Px
 	    y = -SFJP_SFEB_Py 
-	    <Call routine="trans_to_sfm_2" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
             <!--<Placement y="-SFJP_SFEB_Py" x="+SFJP_SFEB_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFEB" konly="'MANY'" >-->
 	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFEB" >
               <Rotation alphaz="-55.35+tilt" />
@@ -1309,95 +1104,119 @@
 	  
 	</Block>
         
+
+<!--
+    Single wafer container... contains the misalignable sensitive
+    and dead / support material.  The sensitive strip is placed 
+    with unit matrix transform compared with SFSW... (except it
+    if flipped 180 degrees...)
+
+    So.... fairly easy to apply the alignment tables directly to
+    *this* layer, with (possibly) an additional flip about z-axis.
+
+    TBD
+
+-->
 	<Block name="SFSW" comment="is a single wafer container"  >
           <Material name="Air" />
           <Attribute for="SFSW" seen="0" colo="6" />
 	  
-          <Shape type="BOX" dz="SFJP_SFSW_Dz" dx="SFPA_dmWid/2" dy="SFJP_SFSW_Dy" />
+          <Shape type="BOX" 
+		 dz="SFJP_SFSW_Dz" 
+		 dx="SFPA_dmWid/2" 
+		 dy="SFJP_SFSW_Dy" />
 	  
+     <!--
+          SFSL contains SFSD, the sensitive detector of the SSD.
+	  It is placed with idenntity matrix...  with 180 flip about z.
+          So... placement of SfSW using the alignment tables, plus a
+          rotation.  Seems like the best plan.  It keeps all support 
+          matrials in the vicinity of the sensitive element aligned
+          relative to the sensor.
+          -->
           <Create block="SFSL" />
-          <Placement block="SFSL" konly="'ONLY'"  >
-          </Placement>
+          <Placement block="SFSL" konly="ONLY"  />
+
           
           <Create block="SFRA" />
-          <Placement y="SFJP_SFRA_Py" x="0.0" z="SFJP_SFRA_Pz" block="SFRA" konly="'ONLY'"   >
-          </Placement>
+          <Placement y="SFJP_SFRA_Py" x="0.0" z="SFJP_SFRA_Pz" block="SFRA" konly="ONLY"  />
+
           
-          <Placement y="SFJP_SFRA_Py" x="0.0" z="-SFJP_SFRA_Pz" block="SFRA" konly="'ONLY'"   >
+          <Placement y="SFJP_SFRA_Py" x="0.0" z="-SFJP_SFRA_Pz" block="SFRA" konly="ONLY"   >
             </Placement>
             
             <Create block="SFRS" />
-            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
             </Placement>
             
             <Create block="SFFX" />
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="SFJP_SFRA_Pz" block="SFFX" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="SFJP_SFRA_Pz" block="SFFX" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="-SFJP_SFRA_Pz" block="SFFX" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="-SFJP_SFRA_Pz" block="SFFX" konly="ONLY"   >
             </Placement>           
 
             <Create block="SFPI" />
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
                 <Rotation alphax="90" />
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
                 <Rotation alphax="90" />
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
                 <Rotation alphax="90" />
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
                 <Rotation alphax="90" />
             </Placement>
             
             <Create block="SFAA" />
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"   >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
             <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'ONLY'"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
             </Placement>
             
         </Block>       
@@ -1852,9 +1671,9 @@
     </Module>
    
 
-<Subroutine name="trans_to_sfm_2" 
+<Subroutine name="trans_to_sfm" 
 	    args="['x', 'y','xc', 'yc','tilt', 'xpos', 'ypos']" >
-<!-- The order of arguments MUST match the order of list -->
+
   <Arguement type="real" intent="in" name="x" />
   <Arguement type="real" intent="in" name="y" />
   <Arguement type="real" intent="in" name="xc" />
@@ -1873,6 +1692,7 @@
   ypos = yc  +  sint*x + cost*y
   return
 </Subroutine>
+
     
 </Document>
 

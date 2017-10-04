@@ -1,5 +1,5 @@
 
-<Document file="StarVMC/Geometry/PixlGeo/PixlGeo6.xml">
+<Document file="StarVMC/Geometry/PixlGeo/PixlGeo6a.xml">
    <Module name="PixlGeo6" comment="Pixel Detector Geometry  ">
 
    <Author  name="JBouchet,FVidebaek" />
@@ -352,8 +352,8 @@ side sector beam" > BullHornLength/0.325/</varlist>
     </Print>
 
     <Create    block="PXMO" />
-
-    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="'ONLY'"/>
+    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="ONLY"
+	       />
 
     <Volume name="PXMO" comment="Main volume for Active sectors">
     <Material  name="Air"      /> 
@@ -397,11 +397,26 @@ side sector beam" > BullHornLength/0.325/</varlist>
 
      <!-- PXLA is the single sector volume equipped with LADDR-->
      <Create block="PXLA"/>
-     <Placement block="PXLA" in="PXMO" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="ii">
-     <Rotation alphaz="alphaz"/>
-     <Rotation alphax="alphax"/>
-     <Rotation alphay="alphay"/>
+     <Placement block="PXLA" in="PXMO"           
+		x="xpos" 
+		y="ypos" 
+		z="zpos" 
+		konly="MANY" 
+		ncopy="ii">
+       <Rotation alphaz="alphaz"/> 
+       <Rotation alphax="alphax"/>
+       <Rotation alphay="alphay"/>
      </Placement>
+
+<!--
+     <Placement block="PXLA" in="PXMO"           
+
+     />
+-->
+
+
+
+
      </If>
      </Do>
 

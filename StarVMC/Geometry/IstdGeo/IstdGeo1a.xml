@@ -213,6 +213,11 @@
 	    ISCT, ICTJ, ICTA, ICTB <!-- short cooling line and joint -->
   </Content>
     
+
+  <varlist type="int" comment="indexing variables">
+    iladder, isensor, irownumber
+  </varlist>
+
     <varlist type="float" comment=" Half Width of IST ladder mother volume" >  HalfLadWdt/3.6559/</varlist>
     <varlist type="float" comment=" Half Thcikness of IST ladder mother volume" >   HalfLadThk/1.8957/</varlist>
     <varlist type="float" comment=" Half Length of IST ladder mother volume" >    HalfLadLen/40.0877/</varlist>
@@ -323,6 +328,13 @@
     <varlist type="float" comment=" Tilt angle of each ladders" > Tilt/19.1042/</varlist>
     <varlist type="float" comment=" Angle offset between 1st ladder center axis to top direction of Y axis" > angleOffset/1.1661/</varlist>
 
+    
+  <Structure name="ISTC" comment="Global configuration">
+    <var name="version"  type="float" comment="version number" />
+    <var name="misalign" type="int"   comment="0: ideal 1: real other: undefined" />
+  </Structure>
+
+
   <!-- define rotation and shift parameters for misalignment test -->
   <Structure name="PARO" comment="set of 3 paramters (offset) to misalign a ladder ">
     <var name="version" type="int" />
@@ -342,6 +354,11 @@
     <var name="lad(24)"  type="int"/>
   </Structure>
   
+  <Fill name="ISTC" comment=" Master Configuration" >
+    <var name="version" value="1.1" comment=" istdgeo1a " />
+    <var name="misalign" value="1"  comment=" testing value" />
+  </Fill>
+
   <Fill name="PARO" comment="default">
    <var name="version" value="0"/>
    <var name="DX" value="0"   comment=" default : no shift "/>
@@ -351,14 +368,14 @@
    <var name="lad"  value="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment="1..24"/>
   </Fill>
 
-  <Fill name="PARO" comment="shift">
+  <!-- Fill name="PARO" comment="shift">
    <var name="version" value="1"/>
    <var name="DX" value="0"   comment=" shift for all ladders"/>
    <var name="DY" value="0"   comment=" default = no shift "/>
    <var name="DZ" value="1"   comment=" default = no shift "/>
    <var name="mult" value="5" comment=" max is 1 cm"/>
    <var name="lad"  value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment="1..24"/>
-  </Fill>
+  </Fill -->
 
   <Fill name="PARA" comment="default">
    <var name="version" value="0"/>
@@ -369,16 +386,17 @@
    <var name="lad"  value="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment="1..24"/>
   </Fill>
 
-  <Fill name="PARA" comment="rotation gamma">
+  <!-- Fill name="PARA" comment="rotation gamma">
    <var name="version" value="1"/>
    <var name="DA" value="0"    comment=" no rot."/>
    <var name="DB" value="0"    comment=" no rot. "/>
    <var name="DG" value="1"    comment=" rot. for all ladders "/>
    <var name="mult" value="1" comment=" max is 1 degrees "/>
    <var name="lad"  value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment="1..24"/>
-  </Fill>
+  </Fill -->
     
   <!-- the next 2 structures are used for misalignment : offset + rotation -->
+  <Use struct="ISTC" />
   <Use struct="PARO" select="version" value="0" />
   <Use struct="PARA" select="version" value="0" />
 
@@ -519,20 +537,24 @@
          anglePIT_T=(360.0/24)*(nCableSet-1)-4.045
 
         <Create    block="ICCA"/>
-        <Placement block="ICCA" konly="'ONLY'" in="IDSM" x="24.3728*sin(anglePIT_A*raddeg)" y="24.3728*cos(anglePIT_A*raddeg)" z="-231.9392+0.5*170.18" />
-        <Placement block="ICCA" konly="'ONLY'" in="IDSM" x="24.3728*sin(anglePIT_B*raddeg)" y="24.3728*cos(anglePIT_B*raddeg)" z="-231.9392+0.5*170.18" />
-        <Placement block="ICCA" konly="'ONLY'" in="IDSM" x="24.3728*sin(anglePIT_C*raddeg)" y="24.3728*cos(anglePIT_C*raddeg)" z="-231.9392+0.5*170.18" />
+        <Placement block="ICCA" konly="ONLY" in="IDSM" x="24.3728*sin(anglePIT_A*raddeg)" y="24.3728*cos(anglePIT_A*raddeg)" z="-231.9392+0.5*170.18" />
+        <Placement block="ICCA" konly="ONLY" in="IDSM" x="24.3728*sin(anglePIT_B*raddeg)" y="24.3728*cos(anglePIT_B*raddeg)" z="-231.9392+0.5*170.18" />
+        <Placement block="ICCA" konly="ONLY" in="IDSM" x="24.3728*sin(anglePIT_C*raddeg)" y="24.3728*cos(anglePIT_C*raddeg)" z="-231.9392+0.5*170.18" />
 
         <Create    block="ICCL"/>
-        <Placement block="ICCL" konly="'ONLY'" in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" />
+        <Placement block="ICCL" konly="ONLY" in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" />
 
 	<Create    block="ICLP"/>
-	<Placement block="ICLP" konly="'ONLY'" in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" />
+	<Placement block="ICLP" konly="ONLY" in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" />
 
  </Do>
 
   <Create    block="IBMO"/>
-  <Placement block="IBMO" in="IDSM" konly="ONLY"/>
+  <Placement block="IBMO" in="IDSM" konly="ONLY">
+
+    <Misalign table="Geometry/ist/istOnPst" opts="left" />
+
+  </Placement>
 
 
   <!-- IBMO volume declaration -->
@@ -569,7 +591,9 @@
      <Create block="IBAM"/>
      <!-- Note the ladder active area center is not in accordance with the IBMO center in z direction -->
      <!-- the shift distance equals to OutsideTubeWestLen+2*HalfEndcapMomLen+2*HalfSenMomLen*3-HalfLadLen -->
-     <Placement in="IBMO" x="xpos" y="ypos" z="zpos-4.4929" block="IBAM" konly="'MANY'">
+
+    
+     <Placement block="IBAM" in="IBMO" x="xpos" y="ypos" z="zpos-4.4929" konly="MANY" >
 
         <If expr="debug==1"  >
         <Info format="rot along X ={6.4f}"> PARA_DA*PARA_mult </Info>
@@ -580,7 +604,36 @@
         <Rotation alphaz="(-1*aangle)-1*(PARA_DG*PARA_mult*PARA_lad(nl))"/>
         <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_lad(nl)"/>
         <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_lad(nl)"/>
+
+	<Misalign table="Geometry/ist/istLadderOnIstMisalign" row="nl-1" opts="right" />
+
      </Placement>
+
+
+     <If expr="ISTC_misalign==1.or.ISTC_misalign==2">
+     <Create    block="IBSS" />
+     <Do var  = "isensor"	 from="1"	 to="6" >
+
+       irownumber=(nl-1)*6+isensor
+
+       <Placement block="IBSS" in="IBMO" konly="ONLY" >
+
+	 <Misalign table="Geometry/ist/istSensorOnLadder"    
+		   row="irownumber-1" 
+		   opts="left" />       
+	 <Misalign table="Geometry/ist/istLadderOnIst"
+		   row="nl-1"                 
+		   opts="left" />
+
+       </Placement>
+
+     </Do>
+     </If>
+
+
+
+
+
    </Do>
    <!-- end Loop over ladders-->
 
@@ -609,22 +662,22 @@
 	angle_T=(360.0/24)*(nCableSet-1)+tilt_T
 
    	<Create     block="ISCA"/>
-   	<Placement  block="ISCA" konly="'ONLY'" in="IBMO" x="radius_A*sin(angle_A*raddeg)" y="radius_A*cos(angle_A*raddeg)" z="-34.7832-0.5*18.2616">
+   	<Placement  block="ISCA" konly="ONLY" in="IBMO" x="radius_A*sin(angle_A*raddeg)" y="radius_A*cos(angle_A*raddeg)" z="-34.7832-0.5*18.2616">
    	<Rotation alphaz="-1.0*angle_A"/>
    	</Placement>
 
    	<Create    block="ISCB"/>
-   	<Placement block="ISCB" konly="'ONLY'" in="IBMO" x="radius_B*sin(angle_B*raddeg)" y="radius_B*cos(angle_B*raddeg)" z="-32.1233-0.5*20.9215" >
+   	<Placement block="ISCB" konly="ONLY" in="IBMO" x="radius_B*sin(angle_B*raddeg)" y="radius_B*cos(angle_B*raddeg)" z="-32.1233-0.5*20.9215" >
    	<Rotation alphaz="-1.0*angle_B"/>
    	</Placement>
 
    	<Create block="ISCC"/>
-   	<Placement block="ISCC" konly="'ONLY'" in="IBMO" x="radius_C*sin(angle_C*raddeg)" y="radius_C*cos(angle_C*raddeg)" z="-29.203-0.5*23.8418" >
+   	<Placement block="ISCC" konly="ONLY" in="IBMO" x="radius_C*sin(angle_C*raddeg)" y="radius_C*cos(angle_C*raddeg)" z="-29.203-0.5*23.8418" >
    	<Rotation alphaz="-1.0*angle_C"/>
    	</Placement>
 <!-- NOTE: ISCT can be simplified into a polycone, with coolant inside. -->
    	<Create block="ISCT"/>
-   	<Placement block="ISCT" konly="'ONLY'" in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" >
+   	<Placement block="ISCT" konly="ONLY" in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" >
    	<Rotation alphaz="-1.0*angle_T"/>
    	</Placement>
 
@@ -774,7 +827,7 @@
    <Create    block="ILCC"  />
    x= HalfLadWdt-0.15-HalfCombWdt
    y=-HalfLadThk+2.4244+2*HalfSkinThk+HalfCombThk
-   <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+   <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
    <Placement block="ILCC" in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen">
      <Rotation alphaz="-1.0*Tilt"/>
    </Placement>
@@ -782,7 +835,7 @@
    <Create    block="IBCF"  />
    x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt
    y=HalfFoamThk+2.4244-HalfLadThk+2*HalfSkinThk
-   <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+   <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
    <Placement block="IBCF" in="IBAM" konly="MANY" 
 	      x="xp" 
 	      y="yp"
@@ -795,7 +848,7 @@
      <Create    block="ILST"  />
      x=HalfLadWdt-HalfSkinWdt-0.15
      y=-HalfLadThk+2*HalfCombThk+2.4244+3*HalfSkinThk-HalfThkAirInHbd
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILST">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -804,7 +857,7 @@
      <Create    block="ILSB"  />
      x=HalfLadWdt-HalfSkinWdt-0.15
      y=-HalfLadThk+2.4244+HalfSkinThk+HalfThkAirInHbd
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILSB">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -813,7 +866,7 @@
      <Create    block="IBHT"  />
      x=HalfLadWdt-HalfHbdWdtTB-0.15
      y=-HalfLadThk+4*HalfSkinThk+2*HalfCombThk+2.4244+HalfHbdThkTB-HalfThkAirInHbd
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHT">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -822,7 +875,7 @@
      <Create    block="IBHB"  />
      x=HalfLadWdt-HalfHbdWdtTB-0.15
      y=-HalfLadThk+2.4244-HalfHbdThkTB+HalfThkAirInHbd
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHB">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -830,7 +883,7 @@
      <Create    block="IBHC"  />
      x=-HalfLadWdt+DistFoamToLadder
      y=-HalfLadThk+HalfFoamThk+2.4244+2*HalfSkinThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdArcLen-OutsideTubeWestLen-1.75" block="IBHC">
          <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -840,7 +893,7 @@
      <Create    block="IBAT"  />
      x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax
      y=HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBAT"  konly="MANY"
 		x="xp" 
 		y="yp"
@@ -851,7 +904,7 @@
      <Create    block="IBCW"  /> <!-- Cooling liquid located in a tube somewhere... -->
      x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax
      y=HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBCW"  
 		x="xp"
 		y="yp"
@@ -863,7 +916,7 @@
      <Create    block="IBRB"  />
      x=-HalfLadWdt+HalfTBoardWdt
      y=HalfLadThk-HalfTBoardThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBRB"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen-OutsideTBoardLen+HalfTBoardLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -871,7 +924,7 @@
      <Create    block="IRSA"  />
      x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+5*HalfTBslotWdt+2*TBSlotGapSize
      y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IRSA"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+HalfTBslotLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -879,7 +932,7 @@
      <Create    block="IRSB"  />
      x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+3*HalfTBslotWdt+TBSlotGapSize
      y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IRSB"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+3*HalfTBslotLen-OverlapSlotsLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -887,7 +940,7 @@
      <Create    block="IRSC"  />
      x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+HalfTBslotWdt
      y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IRSC"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+5*HalfTBslotLen-2*OverlapSlotsLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -895,7 +948,7 @@
      <Create    block="IBTS"  />
      x=-HalfLadWdt+DistFoamToLadder+0.2581+0.5*0.1625
      y=2.4244-2*HalfHbdThkTB-HalfLadThk-0.5*0.06
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+21.0235+0.5*0.1625" block="IBTS">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -903,7 +956,7 @@
      <Create    block="IECW"  />  <!-- overlaping with cooling liquid IBCW -->
      x=HalfLadWdt-HalfEndcapMomWdt-0.15
      y=HalfEndcapMomThk+2.4244-HalfLadThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IECW" in="IBAM" konly="MANY"
 		x="xp"
 		y="yp"
@@ -915,7 +968,7 @@
      <Create    block="IECE"  /> <!-- overlaping with cooling liquid IBCW -->
      x=HalfLadWdt-HalfEndcapMomWdt-0.15
      y=HalfEndcapMomThk+2.4244-HalfLadThk
-     <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IECE" in="IBAM" konly="MANY" 
 		x="xp" 
 		y="yp"
@@ -931,14 +984,29 @@
 
        x=HalfLadWdt-HalfSenMomWdt-DistSensorToLadder-0.15
        y=2.4244-2*HalfHbdThkTB-HalfSenMomThk-HalfLadThk
-       <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+       <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
        <If expr="debug==1"  >
 	 <Info format="xl {7.4f}"> x  </Info>
 	 <Info format="yl {7.4f}"> y  </Info>
 	 <Info format="xp {7.4f}"> xpos  </Info>
 	 <Info format="yp {7.4f}"> ypos  </Info>
        </If>
-       <Placement in="IBAM" x="xp" y="yp" z="-1.0*HalfLadLen+DistLadderToIBLM+HalfSenMomLen*(2*nu-1)" konly="ONLY" block="IBLM">
+
+       <Placement block="IBLM" in="IBAM"     if="ISTC_misalign==0.or.ISTC_misalign==2"
+		  x="xp" 
+		  y="yp" 
+		  z="-1.0*HalfLadLen+DistLadderToIBLM+HalfSenMomLen*(2*nu-1)" 
+		  konly="ONLY" >
+         <Rotation alphaz="-1.0*Tilt"/>
+       </Placement>
+
+       <Placement block="IBLM" in="IBAM"     if="ISTC_misalign==1"
+		  x="xp" 
+		  y="yp" 
+		  z="-1.0*HalfLadLen+DistLadderToIBLM+HalfSenMomLen*(2*nu-1)" 
+		  konly="MANY" >
+
+<!-- CHANGED TO MANY -->
          <Rotation alphaz="-1.0*Tilt"/>
        </Placement>
   </Do>
@@ -949,7 +1017,7 @@
          <Create    block="ISCM"/>
 	 x=HalfLadWdt-HalfEndcapMomWdt-0.15
 	 y=-HalfLadThk+2.4244+2*HalfEndcapMomThk-0.2845
-	 <Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+	 <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
          <Placement block="ISCM" in="IBAM" konly="MANY"
 		    x="xp"
 		    y="yp"
@@ -963,7 +1031,7 @@
         <Create    block="IBSR"/>
 	x=HalfLadWdt-1.0*HalfSRMomWdt
 	y=HalfSRMomThk-1.0*HalfLadThk
-	<Call routine="trans_to_ibam_5"  expr="x,y,Tilt,xp,yp"/>
+	<Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
         <Placement block="IBSR" in="IBAM" konly="MANY"
 		   x="xp"
 		   y="yp"
@@ -1550,10 +1618,11 @@
        <Material name="Air"  />
        <Attribute for="IBLM" seen="0" colo="1"  />
        <Shape type="BOX" dx="HalfSenMomWdt" dy="HalfSenMomThk" dz="HalfSenMomLen"/>
-       <Create block="IBSS"/>
-       <Placement block="IBSS" x="HalfSenMomWdt-HalfSensorWdt-2*HalfSensorEdgeT" y="0.0" z="0.0">
-       <Rotation alphaz="180"/>
-       </Placement>
+       <If expr="ISTC_misalign==0.or.ISTC_misalign==2"><Create block="IBSS"/>
+	 <Placement block="IBSS" x="HalfSenMomWdt-HalfSensorWdt-2*HalfSensorEdgeT" y="0.0" z="0.0">
+	   <Rotation alphaz="180"/>
+	 </Placement>
+       </If>
        <Create block="IBTE"/>
        <Placement block="IBTE" x="HalfSenMomWdt-HalfSensorEdgeT" y="0.0" z="0.0">
        </Placement>
@@ -1662,7 +1731,8 @@
 
 </Module>
 
-<Subroutine name="trans_to_ibam_5" 
+
+<Subroutine name="trans_to_ibam" 
 	    args="['x', 'y','tilt', 'xpos', 'ypos']" >
   <Arguement type="real" intent="in" name="x" />
   <Arguement type="real" intent="in" name="y" />
@@ -1681,5 +1751,6 @@
   ypos = radius    -  sint*x +cost*y
   return
 </Subroutine>
+
     
 </Document>

@@ -351,9 +351,23 @@ side sector beam" > BullHornLength/0.325/</varlist>
       LADR_version,LADR_type
     </Print>
 
-    <Create    block="PXMO" />
+    <Create     block="PXMO" />
+    <Placement  block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="ONLY">
+      <!--
+      <Misalign table="Geometry/pxl/pxlOnPst" opts="right" />
+      -->
+    </Placement>
 
-    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="'ONLY'"/>
+<!--
+	       matrix="{0.9999,0.0001,0.0000,0.000;
+		       -0.0001,0.9999,0.0000,0.000;
+		        0.0000,0.0000,1.0000,0.010;
+			0.0000,0.0000,0.0000,1.000}"
+
+	       thetax="89.9991989" phix="359.9625854"       
+	       thetay="90.1522369" phiy="89.9625778"
+               thetaz="0.1522359"  phiz="90.2649689"
+-->
 
     <Volume name="PXMO" comment="Main volume for Active sectors">
     <Material  name="Air"      /> 
@@ -372,7 +386,7 @@ side sector beam" > BullHornLength/0.325/</varlist>
      anglepos=angle*(PI/180.0)
      <!-- .0001 is to place the center of the TUBS and to preserve the opening angle of a sector -->
    
-     xpos=.00001*sin(anglepos) + (PARO_DX*PARO_mult)*PARO_sec(ii) 
+     xpos=.00001*sin(anglepos) + (PARO_DX*PARO_mult)*PARO_sec(ii)  <!-- 0.1 micron shift in radius -->
      ypos=.00001*cos(anglepos) + (PARO_DY*PARO_mult)*PARO_sec(ii) 
      zpos = (PARO_DZ*PARO_mult)*PARO_sec(ii)
   
@@ -396,21 +410,41 @@ side sector beam" > BullHornLength/0.325/</varlist>
       </If>
 
      <!-- PXLA is the single sector volume equipped with LADDR-->
-     <Create block="PXLA"/>
-     <Placement block="PXLA" in="PXMO" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="ii">
-     <Rotation alphaz="alphaz"/>
-     <Rotation alphax="alphax"/>
-     <Rotation alphay="alphay"/>
+     <Create    block="PXLA"/>
+     <Placement block="PXLA" in="PXMO"           
+		x="xpos" 
+		y="ypos" 
+		z="zpos" 
+		konly="MANY" 
+		ncopy="ii">
+
+       <Rotation alphaz="alphaz"/> 
+       <Rotation alphax="alphax"/>
+       <Rotation alphay="alphay"/>
+
+       <Misalign table="Geometry/pxl/pxlHalfOnPxl"    row="(ii-1)/5"   opts="left" />  
+       <Misalign table="Geometry/pxl/pxlSectorOnHalf" row="ii-1"       opts="left"/>
+
      </Placement>
+
+<!--
+
+
+-->
+
+
+
+
      </If>
      </Do>
 
    </Volume>
 
 
-   <Volume name="PXLA" comment="pixel sector with ladders">
-   <Material name="Air"/>
-   <Attribute for="PXLA" seen="0" colo="1"/>
+   <Volume    name="PXLA" comment="pixel sector with ladders">
+   <Material  name="Air"/>
+   <Attribute for="PXLA" seen="0" colo="1" />
+
    <Shape type="TUBS" dz="halfMaxZ" rmin="minradsec" rmax="maxradsec" phi1="minphisec" phi2="maxphisec"/>
         
 

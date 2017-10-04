@@ -1,4 +1,4 @@
-<Document file="StarVMC/Geometry/IstdGeo/IstdGeo1b.xml">
+<Document file="StarVMC/Geometry/IstdGeo/IstdGeo1a.xml">
 <Module name="IstdGeo1b" comment=" is the the STAR IST geometry modeling in AgML"  >
   <Created date="27 November 2013"  />
   <Author name="Yaping Wang (University of Illinois at Chicago)"  />
@@ -9,6 +9,13 @@
   </CDE>
  
 <!--
+
+    2017 Jason :: Lift the sensor volume (IBSS) out of the ladders and place directly in
+                  IBMO.  Allows misalignments to be applied directly... in fact, we could
+                  apply the *alignment* tables directly.
+    2016 Jason :: Apply misalignments to IST placement in the IDSM.
+
+
     November 3 2014 Flemming
     Changed the IBMO to PCON to avoi the small overlap with an MSC ring.
  November 1, 2014, Flemming
@@ -532,7 +539,12 @@
  </Do>
 
   <Create    block="IBMO"/>
-  <Placement block="IBMO" in="IDSM" konly="ONLY"/>
+  <Placement block="IBMO" in="IDSM" konly="ONLY">
+
+    <Misalign table="Geometry/ist/idsOnTpc" opts="left" />
+    <Misalign table="Geometry/ist/istOnPst" opts="left" />
+
+  </Placement>
 
 
   <!-- IBMO volume declaration -->
@@ -569,7 +581,9 @@
      <Create block="IBAM"/>
      <!-- Note the ladder active area center is not in accordance with the IBMO center in z direction -->
      <!-- the shift distance equals to OutsideTubeWestLen+2*HalfEndcapMomLen+2*HalfSenMomLen*3-HalfLadLen -->
-     <Placement in="IBMO" x="xpos" y="ypos" z="zpos-4.4929" block="IBAM" konly="'MANY'">
+
+    
+     <Placement block="IBAM" in="IBMO" x="xpos" y="ypos" z="zpos-4.4929" konly="MANY" >
 
         <If expr="debug==1"  >
         <Info format="rot along X ={6.4f}"> PARA_DA*PARA_mult </Info>
@@ -580,7 +594,12 @@
         <Rotation alphaz="(-1*aangle)-1*(PARA_DG*PARA_mult*PARA_lad(nl))"/>
         <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_lad(nl)"/>
         <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_lad(nl)"/>
+
+	<Misalign table="Geometry/ist/istLadderOnIstMisalign" row="nl-1" opts="right" />
+
      </Placement>
+
+
    </Do>
    <!-- end Loop over ladders-->
 
@@ -774,7 +793,7 @@
    <Create    block="ILCC"  />
    x= HalfLadWdt-0.15-HalfCombWdt
    y=-HalfLadThk+2.4244+2*HalfSkinThk+HalfCombThk
-   <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+   <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
    <Placement block="ILCC" in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen">
      <Rotation alphaz="-1.0*Tilt"/>
    </Placement>
@@ -782,7 +801,7 @@
    <Create    block="IBCF"  />
    x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt
    y=HalfFoamThk+2.4244-HalfLadThk+2*HalfSkinThk
-   <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+   <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
    <Placement block="IBCF" in="IBAM" konly="MANY" 
 	      x="xp" 
 	      y="yp"
@@ -795,7 +814,7 @@
      <Create    block="ILST"  />
      x=HalfLadWdt-HalfSkinWdt-0.15
      y=-HalfLadThk+2*HalfCombThk+2.4244+3*HalfSkinThk-HalfThkAirInHbd
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILST">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -804,7 +823,7 @@
      <Create    block="ILSB"  />
      x=HalfLadWdt-HalfSkinWdt-0.15
      y=-HalfLadThk+2.4244+HalfSkinThk+HalfThkAirInHbd
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILSB">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -813,7 +832,7 @@
      <Create    block="IBHT"  />
      x=HalfLadWdt-HalfHbdWdtTB-0.15
      y=-HalfLadThk+4*HalfSkinThk+2*HalfCombThk+2.4244+HalfHbdThkTB-HalfThkAirInHbd
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHT">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -822,7 +841,7 @@
      <Create    block="IBHB"  />
      x=HalfLadWdt-HalfHbdWdtTB-0.15
      y=-HalfLadThk+2.4244-HalfHbdThkTB+HalfThkAirInHbd
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHB">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -830,7 +849,7 @@
      <Create    block="IBHC"  />
      x=-HalfLadWdt+DistFoamToLadder
      y=-HalfLadThk+HalfFoamThk+2.4244+2*HalfSkinThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdArcLen-OutsideTubeWestLen-1.75" block="IBHC">
          <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -840,7 +859,7 @@
      <Create    block="IBAT"  />
      x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax
      y=HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBAT"  konly="MANY"
 		x="xp" 
 		y="yp"
@@ -851,7 +870,7 @@
      <Create    block="IBCW"  /> <!-- Cooling liquid located in a tube somewhere... -->
      x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax
      y=HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBCW"  
 		x="xp"
 		y="yp"
@@ -863,7 +882,7 @@
      <Create    block="IBRB"  />
      x=-HalfLadWdt+HalfTBoardWdt
      y=HalfLadThk-HalfTBoardThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBRB"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen-OutsideTBoardLen+HalfTBoardLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -871,7 +890,7 @@
      <Create    block="IRSA"  />
      x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+5*HalfTBslotWdt+2*TBSlotGapSize
      y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IRSA"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+HalfTBslotLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -879,7 +898,7 @@
      <Create    block="IRSB"  />
      x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+3*HalfTBslotWdt+TBSlotGapSize
      y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IRSB"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+3*HalfTBslotLen-OverlapSlotsLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -887,7 +906,7 @@
      <Create    block="IRSC"  />
      x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+HalfTBslotWdt
      y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IRSC"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+5*HalfTBslotLen-2*OverlapSlotsLen" >
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -895,7 +914,7 @@
      <Create    block="IBTS"  />
      x=-HalfLadWdt+DistFoamToLadder+0.2581+0.5*0.1625
      y=2.4244-2*HalfHbdThkTB-HalfLadThk-0.5*0.06
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement in="IBAM" x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+21.0235+0.5*0.1625" block="IBTS">
        <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
@@ -903,7 +922,7 @@
      <Create    block="IECW"  />  <!-- overlaping with cooling liquid IBCW -->
      x=HalfLadWdt-HalfEndcapMomWdt-0.15
      y=HalfEndcapMomThk+2.4244-HalfLadThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IECW" in="IBAM" konly="MANY"
 		x="xp"
 		y="yp"
@@ -915,7 +934,7 @@
      <Create    block="IECE"  /> <!-- overlaping with cooling liquid IBCW -->
      x=HalfLadWdt-HalfEndcapMomWdt-0.15
      y=HalfEndcapMomThk+2.4244-HalfLadThk
-     <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+     <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IECE" in="IBAM" konly="MANY" 
 		x="xp" 
 		y="yp"
@@ -931,7 +950,7 @@
 
        x=HalfLadWdt-HalfSenMomWdt-DistSensorToLadder-0.15
        y=2.4244-2*HalfHbdThkTB-HalfSenMomThk-HalfLadThk
-       <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+       <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
        <If expr="debug==1"  >
 	 <Info format="xl {7.4f}"> x  </Info>
 	 <Info format="yl {7.4f}"> y  </Info>
@@ -949,7 +968,7 @@
          <Create    block="ISCM"/>
 	 x=HalfLadWdt-HalfEndcapMomWdt-0.15
 	 y=-HalfLadThk+2.4244+2*HalfEndcapMomThk-0.2845
-	 <Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+	 <Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
          <Placement block="ISCM" in="IBAM" konly="MANY"
 		    x="xp"
 		    y="yp"
@@ -963,7 +982,7 @@
         <Create    block="IBSR"/>
 	x=HalfLadWdt-1.0*HalfSRMomWdt
 	y=HalfSRMomThk-1.0*HalfLadThk
-	<Call routine="trans_to_ibam_9"  expr="x,y,Tilt,xp,yp"/>
+	<Call routine="istdgeo1b_trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
         <Placement block="IBSR" in="IBAM" konly="MANY"
 		   x="xp"
 		   y="yp"
@@ -1662,7 +1681,8 @@
 
 </Module>
 
-<Subroutine name="trans_to_ibam_9" 
+
+<Subroutine name="istdgeo1b_trans_to_ibam" 
 	    args="['x', 'y','tilt', 'xpos', 'ypos']" >
   <Arguement type="real" intent="in" name="x" />
   <Arguement type="real" intent="in" name="y" />
@@ -1681,5 +1701,6 @@
   ypos = radius    -  sint*x +cost*y
   return
 </Subroutine>
+
     
 </Document>
