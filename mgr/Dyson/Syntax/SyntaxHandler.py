@@ -200,22 +200,22 @@ class SyntaxHandler ( ContentHandler ):
             attr['cmdline']=self.options
 
         
-        handler = None
+        handler = None 
         try:
             handler = self.syntax[ tag ]
         except KeyError:
             print ""
-            print "================================================================="
-            print "ERROR: The tag %s is unknown to the syntax handler" % tag
-            print "       Please make sure the case is correct (i.e. 'camelcase',"
-            print "       is different from 'camelCase' and 'CamelCase'.  If the"
-            print "       case is correct, please email this message to the simu"
-            print "       team:"
-            print ""
-            print "   --   print summary of AgML at this point    --"
-            print "   -- print summary of XML stack at this point --"
-            print ""
-            print "================================================================="
+            print "!=================================================================!"
+            print "!ERROR: The tag %s is unknown to the syntax handler" % tag
+            print "!       Please make sure the case is correct (i.e. 'camelcase',"
+            print "!       is different from 'camelCase' and 'CamelCase'.  If the"
+            print "!       case is correct, please email this message to the simu"
+            print "!       team:"
+            print "!"
+            print "!   --   print summary of AgML at this point    --"
+            print "!   -- print summary of XML stack at this point --"
+            print "!"
+            print "!=================================================================!"
             print ""            
             sys.exit(0) # wah wah wah waaaahhhhh
             return
