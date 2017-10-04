@@ -167,7 +167,7 @@
     <Construct sys="zcal" config="ZCALon" simu="1" />
     <Construct sys="magp" config="MAGPon" simu="1" />
     <Construct sys="mutd" config="MUTD15" simu="2" />
-    <Construct sys="etof" config="ETOFv14s" simu="2" />
+    <!--Construct sys="etof" config="ETOFv14s" simu="2" -->
   </Geometry>
 
 <!-- y2017 series geometry tags -->
