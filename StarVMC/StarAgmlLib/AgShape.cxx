@@ -178,7 +178,7 @@ struct _Dummy {
 #undef Mbr
 
 // =============================================================================================================
-AgShape::AgShape(const Char_t *name): TNamed(name,"An AgShape"), mBlock(0), mModule(0)
+AgShape::AgShape(const Char_t *name): TNamed(name,"An AgShape") 
 {
   mId = mShapeIds[ GetName() ];
   mIsRunTime = false;
@@ -461,9 +461,6 @@ TGeoShape *AgShape::Make()
     {
       Warning("Make()","Runtime error.  Could not find TClass/dictionary %s for shape %s",
 	      mRootCtors[mId].Data(),mShapeNames[mId].Data());
-
-      delete [] param; param=0;
-
       return NULL;
     }
 
@@ -477,7 +474,7 @@ TGeoShape *AgShape::Make()
   mStoredShapes.push_back( _shape );
   mStoredParams.push_back( mParameters );
 
-  delete [] param; param = 0;
+  delete [] param;
 
   return _shape;
 
