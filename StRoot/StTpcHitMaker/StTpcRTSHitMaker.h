@@ -51,7 +51,7 @@
  *--------------------------------------------------------------------------
  *
  ***************************************************************************/
-
+#include <string.h>
 #include "StMaker.h"
 
 class StTpcDigitalSector;
@@ -60,7 +60,7 @@ class StTpcDigitalSector;
 class daq_tpx;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0),NoRows(-1), mTpx_RowLen(0) {}
+  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
@@ -72,9 +72,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
-  Int_t    NoRows;
-  Int_t    NoInnerPadRows;
-  UChar_t *mTpx_RowLen;
+  UChar_t *mTpx_RowLen[24];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $ $Id: $  built " __DATE__ " " __TIME__ ; return cvs;

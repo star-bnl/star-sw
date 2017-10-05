@@ -43,6 +43,7 @@
 #include "TVector3.h"
 #include "TRMatrix.h"
 #include "TNtuple.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //#include "MakePol.C"
 #include "TPolynomial.h"
 #include "THnSparse.h"
@@ -2098,14 +2099,14 @@ void MakeFunctions() {
   mShaperResponse->SetParameters(0.5,        1.,         FWHM,   0,     1);
   mShaperResponse->SetParNames("#tau","tbWidth",        "FWHM","t0","Norm");
   Double_t params[12];
-  params[0] = 2.85e-01;//gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
+  params[0] = 2.85e-01;//St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);                     // w = width of pad       
   params[1] = 0.2;//gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
   params[2] = 0.4;//gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
   //    params[3] = anodeWireRadius;                                                         // a = Anode wire radius  
   params[4] = 0;
   params[5] = 0;
   Double_t xmin = 0; 
-  Double_t xmax = 5.0;//4.5*gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();// 4.5 
+  Double_t xmax = 5.0;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
   if (! mPadResponseFunctionInner)
     mPadResponseFunctionInner = new TF1("PadResponseFunctionInner",
 					PadResponseFunc,xmin,xmax,6); 
@@ -2117,11 +2118,11 @@ void MakeFunctions() {
 					 "K3IP","anodeWirePitch",
 					 "CrossTalk","innerSectorPadPitch");
   //      mPadResponseFunctionInner->Save(xmin,xmax,0,0,0,0);
-  xmax = 5.0;//5*gStTpcDb->PadPlaneGeometry()->innerSectorPadLength(); // 1.42
+  xmax = 5.0;//5*St_tpcPadConfigC::instance()->innerSectorPadLength(sector); // 1.42
   if (! mChargeFractionInner) 
     mChargeFractionInner = new TF1("ChargeFractionInner",
 				   PadResponseFunc,xmin,xmax,5);
-  params[0] = 1.15;//gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
+  params[0] = 1.15;//St_tpcPadConfigC::instance()->innerSectorPadLength(sector);
   params[3] = K3OR;
   params[4] =  0; // CrossTalk
   mChargeFractionInner->SetParameters(params);
@@ -2129,11 +2130,11 @@ void MakeFunctions() {
 				    "anodeWirePitch","K3OR",
 				    "CrossTalk","innerSectorPadPitch");
   //  mChargeFractionInner->Save(xmin,xmax,0,0,0,0);
-  xmax = 5;//5.*gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth(); // 3.
+  xmax = 5;//5.*St_tpcPadConfigC::instance()->outerSectorPadWidth(sector); // 3.
   if (! mPadResponseFunctionOuter) 
     mPadResponseFunctionOuter = new TF1("PadResponseFunctionOuter",
 					PadResponseFunc,xmin,xmax,6); 
-  params[0] = 6.2e-01;//gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
+  params[0] = 6.2e-01;//St_tpcPadConfigC::instance()->outerSectorPadWidth(sector);                    // w = width of pad       
   params[1] = 0.4;//gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
   params[2] = 0.4;//gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
   //      params[3] = gStTpcDb->WirePlaneGeometry()->anodeWireRadius();                        // a = Anode wire radius  
@@ -2145,11 +2146,11 @@ void MakeFunctions() {
 					 "anodeWirePitch","K3OP",
 					 "CrossTalk","outerSectorPadPitch");
   //    mPadResponseFunctionOuter->Save(xmin,xmax,0,0,0,0);
-  xmax = 5;//5*gStTpcDb->PadPlaneGeometry()->outerSectorPadLength(); // 1.26
+  xmax = 5;//5*St_tpcPadConfigC::instance()->outerSectorPadLength(sector); // 1.26
   if (! mChargeFractionOuter) 
     mChargeFractionOuter = new TF1("ChargeFractionOuter",
 				   PadResponseFunc,xmin,xmax,5);
-  params[0] = 1.95; //gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
+  params[0] = 1.95; //St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
   params[3] =  K3OR;    // K3 from E.Mathieson, Fig. 5.3a (row) for a/s = 2.5e-3 and h/s = 1.0
   params[4] =  0; // CrossTalk
   mChargeFractionOuter->SetParameters(params);

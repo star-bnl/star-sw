@@ -21,7 +21,7 @@ TDataSet *CreateTable() {
     TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
     cout << "Set kine : " << kine.Data() << endl;
     St_geant_Maker::instance()->Do(kine.Data());
-    St_geant_Maker::instance()->Do("gspread   0.015 0.015 42.00");
+    //    St_geant_Maker::instance()->Do("gspread   0.015 0.015 42.00");
   } else {
     if (! StVMCMaker::instance()) return 0;
     if (! StarVMCApplication::Instance()) return 0;

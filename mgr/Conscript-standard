@@ -968,7 +968,7 @@ if ($pkg =~ /^Ag.*Geometry/) {
       if ( -d "./StarDb/starsim") {
 	my %geomList = ();
 	foreach my $tag ( sort keys %tagList ) {
-	  my $geom = $tagList{$tag};
+	  my $geom = $tagList{$tag}; #print "AgiGeometry: tag = $tag, geom = $geom, geomList{$geom} = $geomList{$geom}\n";
 	  next if ! $geom;
 	  next if $geomList{$geom};
 	  $geomList{$geom} = $geom;
@@ -1099,6 +1099,7 @@ $env2 = $env1->clone('Package'  => $pkg,
 		    );
 my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
 $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
+			'CXXFLAGS' => "-fpermissive " . $CXXFLAGS,
 			'CPPPATH'  => $Cint_CPPPATH,
 			'CPPFLAGS' => $CPPFLAGS,
 			'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);

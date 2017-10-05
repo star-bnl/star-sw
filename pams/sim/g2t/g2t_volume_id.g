@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.81 2016/11/03 13:49:01 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.82 2017/10/02 15:29:38 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.82  2017/10/02 15:29:38  jwebb
+* Integration of ETOF into simulation
+*
 * Revision 1.81  2016/11/03 13:49:01  jwebb
 * Integrate EPD into framework.
 *
@@ -249,13 +252,15 @@
 			    " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,"
 			    " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,"
 			    " 0, 0, 2/;                    "
-
-
+      
+      integer nbpadsiTPC, tpadsiTPC(maxpads), isdetsiTPC(maxpads)
 
       Integer hcal_tower  "HCAL towers 6x6"
       Integer hcal_cell   "HCAL cells  3x3"
       Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
       Integer hcal_sl     "HCAL short long cell, 1 short,2 long"
+
+      Integer etof_sector, etof_plane, etof_counter, etof_gap, etof_cell
  
       Structure  SVTG  {version}
       Structure  TPCG  {version, tpadconfig }
@@ -370,32 +375,31 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	  npadi = 0
           npado = 32 "outer"  
           npada = 0
-          if (TPCG_tpadconfig>0 "Inner TPC upgrade 40 pads") {
+!          if (TPCG_tpadconfig>0 "Inner TPC upgrade 40 pads") {
             npadi = 40 "inner"
-          }
-	  if (npadi .gt. 0) then 
+!          }
 	    npada = npadi + npado
-            nbpads = npadi  "inner" + npado "outer" + 4 "edge/fake"
+            nbpadsiTPC = npadi  "inner" + npado "outer" + 4 "edge/fake"
 	     j = 1
              do i = 1, npada
-	       tpads(j) = i
-               isdets(j) = 0
+	       tpadsiTPC(j) = i
+               isdetsiTPC(j) = 0
                if (i .eq. 1 .or. i .eq. npadi + 1) then
-                 isdets(j) = 1
+                 isdetsiTPC(j) = 1
                  j = j + 1
-	         tpads(j) = i
-                 isdets(j) = 0
+	         tpadsiTPC(j) = i
+                 isdetsiTPC(j) = 0
 	       else 
                  if (i .eq. npadi .or. i .eq. npada) then
 	           j = j + 1
-	           tpads(j) = i
-                   isdets(j) = 2
+	           tpadsiTPC(j) = i
+                   isdetsiTPC(j) = 2
                  endif
                endif 
                j = j + 1
              enddo                  
-          else  "Inner TPC default 13 pads"        
-
+	! Old TPC
+             npadi = 0
              nbpads = 73
              tpads = { 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
                        4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
@@ -414,7 +418,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 2 };
-          endif
 
 
 
@@ -520,10 +523,15 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           If (cd=='TPAO' & tpad==14) tpad=45
         else
 !//		tpad >nbpads (73) prompt hits
+	if (tpcg_tpadconfig == 0 | tpcg_tpadconfig == 9 & sector != 20) { ! Old tpc
+          isdet = isdets(tpad);	
           if (tpad .gt. nbpads) tpad = tpad - nbpads
-          isdet = isdets(tpad);
           tpad  = tpads (tpad);
-
+        } else {                        ! iTPC
+          if (tpad .gt. nbpadsiTPC) tpad = tpad - nbpadsiTPC
+          isdet = isdetsiTPC(tpad);	
+          tpad  = tpadsiTPC(tpad);
+        }
         endif
 
         volume_id=100000*isdet+100*sector+tpad
@@ -1132,9 +1140,36 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          
            "East / west is first in numbv, paddle number is second"           
            volume_id = 100*numbv(1) + numbv(2)
+
+
+*******************************************************************************************
+** 29                                                                           Jason Webb
+      ELSE IF (CSYS=='eto') THEN
+
+         """Endcap TIME OF FLIGHT"""
+
+         etof_plane    = numbv(1)/100          "1 closest to IP, 3 furthest from IP"
+         etof_sector   = mod( numbv(1), 100 )  "matches TPC scheme 13 to 24"
+         etof_counter  = numbv(2)              "3 counters per gas volume"
+         etof_gap      = numbv(3)              "12 gaps between glass"
+         etof_cell     = numbv(4)              "32 cells per gap"
+
+        
+
+         volume_id = etof_cell               + 
+                     100      * etof_gap     +
+                     10000    * etof_counter + 
+                     100000   * etof_sector  +   
+                     10000000 * etof_plane
+
+         """ Note: this last part could just be 100000*numbv(1).  We break it """
+         """ into plane and sector just to make explicit the numbering scheme """
+                     
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
+
+
     g2t_volume_id = volume_id
 #else /* __G2T_VERSION__ */
       g2t_version = 0

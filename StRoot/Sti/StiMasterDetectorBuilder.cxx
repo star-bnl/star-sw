@@ -1,3 +1,5 @@
+#include <assert.h>
+#include "Riostream.h"
 #include "StiMasterDetectorBuilder.h"
 #include "TGeoManager.h"
 #include "StiDetector.h"
@@ -69,9 +71,9 @@ void StiMasterDetectorBuilder::build(StMaker&source)
       for (UInt_t sector=0;sector<nSectors;sector++)	    {
 	StiDetector *detector = (*iter)->getDetector(i,sector);
 	if (detector && detector->isActive()) {
-	  if (! sector) {
+	  //	  if (! sector) {
 	    LOG_INFO << "StiMasterDetectorBuilder::build() -I- row:"<<row << "\t" << *detector << endm;
-	  }
+	    //	  }
 	  setDetector(row,sector,detector);
 	}
       }
@@ -189,5 +191,10 @@ StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
       //LOG_INFO << "StiMasterDetectorBuilder::next() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
       if((*iter)->isName(name)) return *iter;
     }
+#if 0
 	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
+#else
+	cout << "StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found" << endl;
+	assert(0);
+#endif
 }

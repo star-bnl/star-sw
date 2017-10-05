@@ -32,6 +32,7 @@
 #include "TGeoVolume.h"
 #include "TInterpreter.h"
 #include "TGeoExtension.h"
+#include "StMessMgr.h"
 ClassImp(StarVMCDetectorSet);
 StarVMCDetectorSet *StarVMCDetectorSet::fgInstance = 0;
 TDataSet           *StarVMCDetectorSet::fDetectorDescriptors = 0;
@@ -51,14 +52,14 @@ StarVMCDetectorSet *StarVMCDetectorSet::instance() {
 }
 //________________________________________________________________________________
 Int_t StarVMCDetectorSet::Init() {
-  cout << "StarVMCDetectorSet::Init() -I- Get Detectors" <<endl;
+  LOG_INFO << "StarVMCDetectorSet::Init() -I- Get Detectors" <<endm;
   MakeDetectorDescriptors();
   return 0;
 }
 //________________________________________________________________________________
 Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
   if (! gGeoManager) {
-    cout << "No gGeoManager" << endl;
+    LOG_FATAL << "No gGeoManager" << endm;
     return 0; 
   }
   Int_t NoSensVolumes = 0;
@@ -71,8 +72,8 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
     if (! nodeT) return NoSensVolumes;
     TString path = nodeT->GetName();
 #if 0
-    cout << "top " << nodeT->GetName() << "\t" << nodeT->GetVolume()->GetName() 
-	 << "\t" << path << endl;
+    LOG_INFO << "top " << nodeT->GetName() << "\t" << nodeT->GetVolume()->GetName() 
+	 << "\t" << path << endm;
 #endif
     NoSensVolumes += LoopOverTgeo(nodeT,path);
     return NoSensVolumes;
@@ -81,12 +82,12 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
   TObjArray *nodes = vol->GetNodes();
   Int_t nd = nodeT->GetNdaughters();
 #if 0
-  cout << nd << "\t" << nodeT->GetName() 
-       << "\t" << vol->GetName() 
-       << "\t" << gGeoManager->GetCurrentNode()->GetName() << "\t" << pathT 
-       << endl;
+  LOG_INFO << nd << "\t" << nodeT->GetName() 
+	   << "\t" << vol->GetName() 
+	   << "\t" << gGeoManager->GetCurrentNode()->GetName() << "\t" << pathT 
+	   << endm;
   if (pathT.Contains("TpcRefSys")) {
-    cout << "Got TpcRefSys" << endl;
+    LOG_INFO << "Got TpcRefSys" << endm;
   }
 #endif
   Int_t NoSensDauthers = 0;
@@ -135,7 +136,7 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
     St_det_path *dpath = (St_det_path *) fDetectorDescriptors->Find(vol->GetName());
     if (! dpath) {
       dpath = new St_det_path(vol->GetName(),N/2);
-      cout << "Create detector path for volume " << vol->GetName() << endl;
+      LOG_INFO << "Create detector path for volume " << vol->GetName() << endm;
       fDetectorDescriptors->Add(dpath);
       for (Int_t i = 0; i < N; i +=2) {
 	objs = (TObjString *) array->At(i); // cout << objs->GetString().Data() << endl;
@@ -184,13 +185,13 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
 //________________________________________________________________________________
 void StarVMCDetectorSet::MakeDetectorDescriptors() {
   if (! gGeoManager) {
-    cout << "StarVMCDetectorSet::MakeDetectorDescriptors No gGeoManager" << endl;
+    LOG_FATAL << "StarVMCDetectorSet::MakeDetectorDescriptors No gGeoManager" << endm;
     return;
   }
 
   LoopOverTgeo();
 
-  if (! fDetectorDescriptors) {cout << "Can't find Detector Descriptors " << endl; return;}
+  if (! fDetectorDescriptors) {LOG_ERROR << "Can't find Detector Descriptors " << endm; return;}
   TDataSetIter next(fDetectorDescriptors,99);
   TDataSet *d = 0;
   Int_t Nd = 0;
@@ -200,15 +201,15 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
     Int_t N = table->GetNRows();
     det_path_st *path = table->GetTable();
     Nd++;
-    cout << Nd << "\t";
+    LOG_INFO << Nd << "\t";
     Int_t NV   = 0;
     Int_t NVMax[20];
     Int_t NVp10[20];
     TString FMT;
     TString Name;
     for (Int_t i = 0; i < N; i++, path++) {
-      cout << path->VName << "[" << path->Ncopy << "]";
-      if (i != N-1) cout << "/";
+      LOG_INFO << path->VName << "[" << path->Ncopy << "]";
+      if (i != N-1) LOG_INFO << "/";
       FMT += "/";  FMT += path->VName; FMT += "_";
       if (path->Ncopy == 1) {
 	FMT += "1";
@@ -221,12 +222,12 @@ void StarVMCDetectorSet::MakeDetectorDescriptors() {
       }
       Name = path->VName;
     }
+    LOG_INFO << endm;
     StarVMCDetector *det = (StarVMCDetector *) fDetHash->FindObject(Name);
     if (!det) {
-      cout << "\tMissing Detector Set for " << Name.Data() << endl;
+      LOG_ERROR << "\tMissing Detector Set for " << Name.Data() << endm;
       continue;
     }
-    cout << endl;
     det->SetFMT(FMT);
     det->SetNVmax(NV,NVMax);
     det->SetNVp10(NV,NVp10);

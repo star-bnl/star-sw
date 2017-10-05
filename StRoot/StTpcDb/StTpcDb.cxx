@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *
  * $Id: StTpcDb.cxx,v 1.63 2015/05/17 22:53:52 fisyak Exp $
@@ -184,7 +183,6 @@
 #include "TVector3.h"
 #include "TGeoManager.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
 #include "StarMagField.h"
 #include "TEnv.h"
@@ -197,7 +195,6 @@ ClassImp(StTpcDb);
 StTpcDb::StTpcDb() {
   assert(gStTpcDb==0);
   memset(mBeg,0,mEnd-mBeg+1);
-  mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   mTpc2GlobMatrix = new TGeoHMatrix("Default Tpc2Glob"); 
   for (Int_t i = 1; i <= 24; i++) {
     for (Int_t k = 0; k < kTotalTpcSectorRotaions; k++) {

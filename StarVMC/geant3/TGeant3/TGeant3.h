@@ -639,7 +639,16 @@ typedef struct {
 typedef struct {
   Int_t    lsamvl;
 } Gcchan_t;
-
+//----------SCKINE
+//      CHARACTER*4 CHTREE
+//      INTEGER  MTRACK, MPRIMA
+//      COMMON / SCKINE / MTRACK, MPRIMA
+//     +,                 CHTREE(2)
+typedef struct {
+  Int_t  mtrack;
+  Int_t  mprima;
+  Char_t chtree[8];
+} Sckine_t;
 /************************************************************************
  *                                                                      *
  *      Commons for GEANE                                               *
@@ -845,6 +854,7 @@ public:
   virtual Int_t*    Iq()     const {return fZiq;}
   virtual Int_t*    Lq()     const {return fZlq;}
   virtual Float_t*  Q()      const {return fZq;}
+  virtual Sckine_t* Sckine() const {return fSckine;}
 
 
   // Access to GEANE commons
@@ -1185,14 +1195,14 @@ protected:
   Gckin3_t *fGckin3;          //! GCKIN3 common structure
   Gctrak_t *fGctrak;          //! GCTRAK common structure
   Gcchan_t *fGcchan;          //! GCCHAN common structure
-
+  Sckine_t *sckine;
 
   // commons for GEANE
   Gconst_t *fGconst;          //! GCONST common structure
   Gconsx_t *fGconsx;          //! GCONSX common structure
   Gcjump_t *fGcjump;          //! GCJUMP common structure
-
-
+  
+  Sckine_t *fSckine;
 
 
   //Put here all volume names

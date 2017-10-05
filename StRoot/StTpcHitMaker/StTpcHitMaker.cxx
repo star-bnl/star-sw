@@ -234,7 +234,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TH2.h"
@@ -311,8 +311,8 @@ void StTpcHitMaker::InitializeHistograms(Int_t token) {
   enum {NoDim = 3};
   const Char_t *NameV[NoDim] = {     "row", "pad","time"};
   const Double_t xMin[NoDim] = {0.5       ,   0.5,  -0.5};
-  const Double_t xMax[NoDim] = {0.5+NoRows, 182.5, 399.5};
-  Int_t  nBins[NoDim]  = {    NoRows,   182,   400};
+  const Double_t xMax[NoDim] = {0.5+St_tpcPadConfigC::instance()->numberOfRows(20), 182.5, 399.5};
+  Int_t  nBins[NoDim]  = {    St_tpcPadConfigC::instance()->numberOfRows(20),   182,   400};
   fSectCounts = new TH1F(Form("SectorCounts_%03i",newToken),"Count no. of sectors",25,-0.5,24.5);
 #ifdef __USE__THnSparse__
   fAvLaser = new THnSparseF *[24];
@@ -344,9 +344,7 @@ void StTpcHitMaker::InitializeHistograms(Int_t token) {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
-  NoInnerPadRows = St_tpcPadPlanesC::instance()->innerPadRows();
-  NoRows = NoInnerPadRows + St_tpcPadPlanesC::instance()->outerPadRows();
-  SetAttr("maxRow",NoRows);
+  SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   // Prepare scaled hit maxima
 
   // No hit maxima if these DB params are 0
@@ -359,8 +357,8 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
     Int_t liveSecPads = 0;
     Int_t totalSecPads = 0;
     if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-      for(Int_t row=1;row<=NoRows;row++) {
-        Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
+      for(Int_t row=1;row<=St_tpcPadConfigC::instance()->numberOfRows(sector);row++) {
+        Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
         totalSecPads += numPadsAtRow;
         if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
             StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
@@ -446,7 +444,7 @@ Int_t StTpcHitMaker::Make() {
     Int_t hitsAdded = 0;
     while (daqTpcTable) {
       assert(Sector() == sector);
-      Int_t row = NoRows;
+      Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
       fTpc = 0;
       if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
       else 	                                                  row = daqTpcTable->Row();
@@ -533,7 +531,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
     tpc_t *tpc = (tpc_t *) DaqDta()->GetTable();
     for (Int_t l = 0; l < NRows; tpc++) {
       if ( !tpc->has_clusters )  return 0;
-      for(Int_t padrow=0;padrow<NoRows;padrow++) {
+      for(Int_t padrow=0;padrow<St_tpcPadConfigC::instance()->numberOfRows(sector);padrow++) {
 	tpc_cl *c = &tpc->cl[padrow][0];
 	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
@@ -604,8 +602,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 #endif
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
-  Double_t gain = (row<=NoInnerPadRows) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
-  Double_t wire_coupling = (row<=NoInnerPadRows) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+  Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
+  Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
 				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
@@ -634,8 +632,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   Float_t pad  = cluster.pad;
   Float_t time = cluster.tb;
 
-  Double_t gain = (row<=NoInnerPadRows) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
-  Double_t wire_coupling = (row<=NoInnerPadRows) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+  Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
+  Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
 				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
@@ -694,7 +692,7 @@ void StTpcHitMaker::DoPulser(Int_t sector) {
   Int_t npeak, nnoise;
   if (! fTpc) return;
   if (! fTpc->channels_sector) return;
-  for(Int_t row = 1; row <= NoRows; row++) {
+  for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     r = row - 1;
     if (! fTpc->cl_counts[r]) continue;
     for (Int_t pad = 1; pad <= 182; pad++) {
@@ -765,7 +763,7 @@ void StTpcHitMaker::TpcAvLaser(Int_t sector) {
 #endif /* __USE__THnSparse__ */
   pixl_t pixel;
   pixel.sector = sector;
-  for(Int_t r = 0; r < NoRows; r++) {
+  for(Int_t r = 0; r < St_tpcPadConfigC::instance()->numberOfRows(sector); r++) {
     pixel.row = r+1;
     for (Int_t pad = 1; pad <= 182; pad++) {
       pixel.pad = pad;
@@ -804,7 +802,7 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
   if(r==0) return;	// TPC does not support unphy. rows so we skip em
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
-  if (p < 0 || p >= St_tpcPadPlanesC::instance()->padsPerRow(r+1)) return;
+  if (p < 0 || p >= St_tpcPadConfigC::instance()->padsPerRow(sector,r+1)) return;
   struct pixl_t {
     Double_t sector, row, pad, time;
   };
@@ -853,7 +851,7 @@ void StTpcHitMaker::DumpPixels2Ntuple(Int_t sector) {
   if (! fTpc) return;
   Int_t r, p, tb, tbmax;
   //  if (! fTpc->channels_sector) return;
-  for(Int_t row = 1; row <= NoRows; row++) {
+  for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     r = row - 1;
     for (Int_t pad = 1; pad <= 182; pad++) {
       p = pad - 1;
@@ -922,7 +920,7 @@ void StTpcHitMaker::PrintSpecial(Int_t sector) {
     UInt_t cl_count = 0 ;
     Int_t i ;
     
-    for(r=0;r<NoRows;r++) {	// padrow
+    for(r=0;r<St_tpcPadConfigC::instance()->numberOfRows(sector);r++) {	// padrow
       for(p=0;p<182;p++) {	// pad
 	for(t=0;t<fTpc->counts[r][p];t++) {	
 	  val = fTpc->adc[r][p][t] ;										
@@ -967,7 +965,7 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
   assert(data);
   StTpcDigitalSector *digitalSector = data->GetSector(sector);
   if (! digitalSector) {
-    digitalSector = new StTpcDigitalSector();
+    digitalSector = new StTpcDigitalSector(sector);
     data->setSector(sector,digitalSector);
   }
   return digitalSector;
@@ -987,7 +985,7 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   if(r==0) return 0 ;	// TPC does not support unphysical rows so we skip them
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
-  if (p < 0 || p >= St_tpcPadPlanesC::instance()->padsPerRow(r+1)) return 0;
+  if (p < 0 || p >= St_tpcPadConfigC::instance()->padsPerRow(sector,r+1)) return 0;
   TGenericTable::iterator iword = DaqDta()->begin();
   Int_t some_data = 0;
   do {
@@ -1046,7 +1044,7 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
   memset(IDTs, 0, sizeof(IDTs));
   StTpcDigitalSector *digitalSector = 0;
   Int_t Total_data = 0;
-  for (Int_t row = 1;  row <= NoRows; row++) {
+  for (Int_t row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
       Int_t r = row - 1;
       if (! digitalSector) digitalSector = GetDigitalSector(sector);
       for (Int_t pad = 1; pad <= digitalSector->numberOfPadsAtRow(row); pad++) {
@@ -1232,7 +1230,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	    Double_t pad        = kHit->pad();
 	    Double_t timeBucket = kHit->timeBucket();
 	    Int_t io = 1;
-	    if (row > NoInnerPadRows) io = 2;
+	    if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 2;
 	    Int_t np = kHit->padsInHit();
 	    pad += St_TpcPadCorrectionC::instance()->GetCorrection(pad,io,np,0);
 	    StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);

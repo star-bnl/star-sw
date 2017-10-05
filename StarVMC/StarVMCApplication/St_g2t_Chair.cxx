@@ -32,7 +32,13 @@ Int_t St_g2t_Chair::fDebug = 0;
 #define G2TFillNextTrack(A) \
   g2t_ ## A ## _hit_st *row = table->GetTable(); \
   for (Int_t i = nok - 2; i >= 0; i--) if ((row+i)->track_p == vect.iTrack) {g2t_ ## A ## _hit.next_tr_hit_p = i+1; break;} 
-#define G2TFillTrackHitB(A) \
+#define G2UpdateTrack(A,B)						\
+  g2t_track_st *track = StarMCHits::instance()->Current_g2t_track();	\
+  g2t_ ## A ## _hit.next_tr_hit_p = track->hit_ ## B ## _p;		\
+  track->hit_ ## B ## _p         = nok;					\
+  track->n_ ## B ## _hit++;
+#define G2UpdateTrack1(A) G2UpdateTrack(A,A)
+#define G2TFillTrackHitB(A,B)					\
   g2t_ ## A ## _hit.id            = nok;				\
   g2t_ ## A ## _hit.x[0]          = vect.Middle.Global.xyzT.X();	\
   g2t_ ## A ## _hit.x[1]          = vect.Middle.Global.xyzT.Y();	\
@@ -44,28 +50,41 @@ Int_t St_g2t_Chair::fDebug = 0;
   g2t_ ## A ## _hit.de            = vect.AdEstep;			\
   g2t_ ## A ## _hit.ds            = vect.AStep;				\
   g2t_ ## A ## _hit.track_p       = vect.iTrack;			\
-  g2t_ ## A ## _hit.volume_id     = vect.VolumeId;
-#define G2TFillTrackHitLocal(A) \
+  g2t_ ## A ## _hit.volume_id     = vect.VolumeId;			\
+  G2UpdateTrack(A,B)
+#define G2TFillTrackHitLocal(A,B)					\
   g2t_ ## A ## _hit.id            = nok;				\
-  g2t_ ## A ## _hit.x[0]          = vect.Middle.Local.xyzT.X();	\
-  g2t_ ## A ## _hit.x[1]          = vect.Middle.Local.xyzT.Y();	\
-  g2t_ ## A ## _hit.x[2]          = vect.Middle.Local.xyzT.Z();	\
+  g2t_ ## A ## _hit.x[0]          = vect.Middle.Local.xyzT.X();		\
+  g2t_ ## A ## _hit.x[1]          = vect.Middle.Local.xyzT.Y();		\
+  g2t_ ## A ## _hit.x[2]          = vect.Middle.Local.xyzT.Z();		\
   g2t_ ## A ## _hit.p[0]          = vect.Middle.Local.pxyzE.X();	\
   g2t_ ## A ## _hit.p[1]          = vect.Middle.Local.pxyzE.Y();	\
   g2t_ ## A ## _hit.p[2]          = vect.Middle.Local.pxyzE.Z();	\
-  g2t_ ## A ## _hit.tof           = vect.Middle.Local.xyzT.T();	\
+  g2t_ ## A ## _hit.tof           = vect.Middle.Local.xyzT.T();		\
   g2t_ ## A ## _hit.de            = vect.AdEstep;			\
   g2t_ ## A ## _hit.ds            = vect.AStep;				\
   g2t_ ## A ## _hit.track_p       = vect.iTrack;			\
-  g2t_ ## A ## _hit.volume_id     = vect.VolumeId;
-#define G2TFillTrackHit(A)			\
-  G2TFillTrackHitB(A)				\
+  g2t_ ## A ## _hit.volume_id     = vect.VolumeId;			\
+  G2UpdateTrack(A,B)
+#define G2TFillTrackHit(A,B)			\
+  G2TFillTrackHitB(A,B)				\
   G2TFillNextTrack(A)				\
   table->AddAt(&g2t_ ## A ## _hit);
-#define G2TFillTrackRCHit(A)			\
-  G2TFillTrackHitB(A)				\
+#define G2TFillTrackRCHit(A,B)			\
+  g2t_ ## A ## _hit.id            = nok;				\
+  g2t_ ## A ## _hit.x[0]          = vect.Middle.Global.xyzT.X();	\
+  g2t_ ## A ## _hit.x[1]          = vect.Middle.Global.xyzT.Y();	\
+  g2t_ ## A ## _hit.x[2]          = vect.Middle.Global.xyzT.Z();	\
+  g2t_ ## A ## _hit.p[0]          = vect.Middle.Global.pxyzE.X();	\
+  g2t_ ## A ## _hit.p[1]          = vect.Middle.Global.pxyzE.Y();	\
+  g2t_ ## A ## _hit.p[2]          = vect.Middle.Global.pxyzE.Z();	\
+  g2t_ ## A ## _hit.tof           = vect.Middle.Global.xyzT.T();	\
+  g2t_ ## A ## _hit.de            = vect.AdEstep;			\
+  g2t_ ## A ## _hit.ds            = vect.AStep;				\
+  g2t_ ## A ## _hit.track_p       = vect.iTrack;			\
+  g2t_ ## A ## _hit.volume_id     = vect.VolumeId;			\
   table->AddAt(&g2t_ ## A ## _hit);
-#define G2TFillTrackHitNoTOF(A)						\
+#define G2TFillTrackHitNoTOF(A,B)					\
   g2t_ ## A ## _hit.id            = nok;				\
   g2t_ ## A ## _hit.x[0]          = vect.Middle.Global.xyzT.X();	\
   g2t_ ## A ## _hit.x[1]          = vect.Middle.Global.xyzT.Y();	\
@@ -77,10 +96,10 @@ Int_t St_g2t_Chair::fDebug = 0;
   g2t_ ## A ## _hit.track_p       = vect.iTrack;			\
   g2t_ ## A ## _hit.volume_id     = vect.VolumeId;			\
   table->AddAt(&g2t_ ## A ## _hit);
-#define G2TTrackHit(A)				\
+#define G2TTrackHit(A,B)			\
 void St_g2t_## A ##_hitC::Fill(GHit_t &vect) {	\
   G2TBookTrackHit(A);				\
-  G2TFillTrackHit(A);				\
+  G2TFillTrackHit(A,B);				\
   if (Debug()) table->Print(nok-1,2);		\
 }
 //________________________________________________________________________________
@@ -88,10 +107,10 @@ void St_g2t_hitsC::Fill(GHit_t &vect) {}
 //________________________________________________________________________________
 void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(ctf);
-  g2t_ctf_hit.s_track       = vect.Sleng;	\
-  G2TFillTrackHitLocal(ctf);
+  g2t_ctf_hit.s_track       = vect.Sleng;	
+  G2TFillTrackHitLocal(ctf,ctb);
   table->AddAt(&g2t_ctf_hit);
-  if (Debug()) table->Print(nok-1,2);		\
+  if (Debug()) table->Print(nok-1,2);		
  }
 //________________________________________________________________________________
 void St_g2t_emc_hitC::Fill(GHit_t &vect) {
@@ -120,61 +139,63 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
       return;
     }
   }
+  StarMCHits::instance()->Current_g2t_track()->hit_emc_p         = nok;				
+  StarMCHits::instance()->Current_g2t_track()->n_emc_hit++;						
   table->AddAt(&g2t_emc_hit);    
-  if (Debug()) table->Print(nok-1,2);		\
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_epd_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(epd);
-  G2TFillTrackHitNoTOF(epd);
+  G2TFillTrackHitNoTOF(epd,epd);
   if (Debug()) table->Print(nok-1,2);}
 //________________________________________________________________________________
-G2TTrackHit(fgt);
-G2TTrackHit(ftp);
-G2TTrackHit(gem);
+G2TTrackHit(fgt,fgt);
+G2TTrackHit(ftp,ftp);
+G2TTrackHit(gem,gem);
 //________________________________________________________________________________
 void St_g2t_ist_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(ist);
-  G2TFillTrackHitLocal(ist);
+  G2TFillTrackHitLocal(ist,ist);
   table->AddAt(&g2t_ist_hit);
-  if (Debug()) table->Print(nok-1,2);		\
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_mwc_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(mwc);
-  g2t_mwc_hit.s_track       = vect.Sleng;				\
-  G2TFillTrackHit(mwc);
-  if (Debug()) table->Print(nok-1,2);		\
+  g2t_mwc_hit.s_track       = vect.Sleng;				
+  G2TFillTrackHit(mwc,mwc);
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_pix_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(pix);
-  G2TFillTrackHitLocal(pix);
+  G2TFillTrackHitLocal(pix,pix);
   table->AddAt(&g2t_pix_hit);
-  if (Debug()) table->Print(nok-1,2);		\
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_pmd_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(pmd);
-  G2TFillTrackHitNoTOF(pmd);
+  G2TFillTrackHitNoTOF(pmd,pmd);
   if (Debug()) table->Print(nok-1,2);
 }
 //________________________________________________________________________________
 void St_g2t_rch_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(rch);
-  G2TFillTrackRCHit(rch);
-  if (Debug()) table->Print(nok-1,2);		\
+  G2TFillTrackRCHit(rch,rch);
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 //G2TTrackHit(ssd);
 void St_g2t_ssd_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(ssd);
-  G2TFillTrackHitLocal(ssd);
+  G2TFillTrackHitLocal(ssd,ssd);
   table->AddAt(&g2t_ssd_hit);
-  if (Debug()) table->Print(nok-1,2);		\
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
-G2TTrackHit(svt);
+G2TTrackHit(svt,svt);
 //________________________________________________________________________________
 void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(tpc);
@@ -184,8 +205,9 @@ void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
   if (vect.Mass > 0 && GeKin > 0 && vect.Charge != 0) 
     lgam = TMath::Log10(GeKin/vect.Mass);
   g2t_tpc_hit.lgam          = lgam;
-  G2TFillTrackHit(tpc);
-  if (Debug()) table->Print(nok-1,2);		\
+  g2t_tpc_hit.length        = vect.Sleng;
+  G2TFillTrackHit(tpc,tpc);
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_etr_hitC::Fill(GHit_t &vect) {
@@ -196,25 +218,25 @@ void St_g2t_etr_hitC::Fill(GHit_t &vect) {
   if (vect.Mass > 0 && GeKin > 0 && vect.Charge != 0) 
     lgam = TMath::Log10(GeKin/vect.Mass);
   g2t_etr_hit.lgam          = lgam;
-  G2TFillTrackHit(etr);
-  if (Debug()) table->Print(nok-1,2);		\
+  G2TFillTrackHit(etr,etr);
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_mtd_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(mtd);
-  G2TFillTrackHitLocal(mtd);
+  G2TFillTrackHitLocal(mtd,mtd);
   g2t_mtd_hit.s_track       = vect.Sleng;	
   table->AddAt(&g2t_mtd_hit);
-  if (Debug()) table->Print(nok-1,2);		\
+  if (Debug()) table->Print(nok-1,2);		
 }
 //________________________________________________________________________________
 void St_g2t_vpd_hitC::Fill(GHit_t &vect) {
   G2TBookTrackHit(vpd);
   g2t_vpd_hit.s_track       = vect.Sleng;				
-  G2TFillTrackHit(vpd);
+  G2TFillTrackHit(vpd,vpd);
 }
 //________________________________________________________________________________
-G2TTrackHit(fst);
-G2TTrackHit(fts);
-G2TTrackHit(hpd);
-G2TTrackHit(igt);
+G2TTrackHit(fst,fst);
+G2TTrackHit(fts,fts);
+G2TTrackHit(hpd,hpd);
+G2TTrackHit(igt,igt);

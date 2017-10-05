@@ -9,6 +9,7 @@
 /// appear in the supporting documentation. The authors make no claims
 /// about the suitability of this software for any purpose. It is
 /// provided "as is" without express or implied warranty.
+#include <assert.h>
 #include "Stiostream.h"
 #include <stdexcept>
 #include <math.h>
@@ -98,8 +99,12 @@ _trackContainer(0)
 {
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
 memset(mTimg,0,sizeof(mTimg));
+#if 0
   if (!_toolkit)
     throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
+#else
+  assert(_toolkit);
+#endif
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 //______________________________________________________________________________
@@ -459,7 +464,12 @@ assert(direction || leadNode==track->getLastNode());
 
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
+#if 0
   if (--mEventPerm <0) throw runtime_error("FATAL::TOO MANY permutations");
+#else
+  --mEventPerm;
+  assert(mEventPerm>=0);
+#endif
   if (--mTrackPerm==0) { mUseComb = 0; }
 
   StiDetector *tDet=0;

@@ -30,6 +30,6 @@ TDataSet *CreateTable() {
   gEnv->SetValue("emcg_onoff",1);
   gEnv->SetValue("emcg_fillmode",3);
   gEnv->SetValue("fmcg_version",8);
-  gEnv->SetValue("mtdg_version",1);
+  gEnv->SetValue("mtdg_version",1.1);
   return CreateGeometry("y2016");
 }

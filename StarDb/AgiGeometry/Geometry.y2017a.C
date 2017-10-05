@@ -31,5 +31,5 @@ TDataSet *CreateTable() {
   gEnv->SetValue("emcg_fillmode",3);
   gEnv->SetValue("fmcg_version",8);
   gEnv->SetValue("mtdg_version",1);
-  return CreateGeometry("dev2018");
+  return CreateGeometry("y2017a");
 }

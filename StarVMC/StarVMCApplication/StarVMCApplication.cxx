@@ -34,7 +34,7 @@
 #include "TEnv.h"
 #include "TGeoShapeAssembly.h"
 // Alignment
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcGlobalPositionC.h"
 #include "StDetectorDbMaker/St_tpcSectorPositionC.h"
 #include "StDetectorDbMaker/StSsdSurveyC.h"
@@ -145,13 +145,17 @@ void StarVMCApplication::GeneratePrimaries() {
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
   fStarStack->Reset();
-  if (fMcHits) fMcHits->Clear();
+  if (fMcHits) {
+    fMcHits->BeginEvent();
+  }
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginPrimary() {    // User actions at beginning of a primary track
+  if (fMcHits) fMcHits->BeginPrimary();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PreTrack() {    // User actions at beginning of each track
+  if (fMcHits) fMcHits->PreTrack();  
 }
 //_____________________________________________________________________________
 void StarVMCApplication::Stepping() {    // User actions at each step
@@ -165,10 +169,13 @@ void StarVMCApplication::PostTrack() {    // User actions after finishing of eac
   TParticle *current =  0; // fStarStack->GetCurrentParticle();
   TObjArray *objs = fStarStack->GetParticles();
   if (objs->IndexOf(current) < objs->LowerBound()) delete current;
+#else
+  if (fMcHits) fMcHits->PostTrack();
 #endif
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishPrimary() {    // User actions after finishing of a primary track
+  if (fMcHits) fMcHits->FinishPrimary();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishEvent() {    // User actions after finishing of an event
@@ -370,8 +377,10 @@ void StarVMCApplication::GeometryDb(TDataSet *Detectors) {
 }
 //________________________________________________________________________________
 Bool_t StarVMCApplication::MisalignGeometry() {
-  if (! fAlignment) {
+  if (! fAlignment || St_tpcPadConfigC::instance()->numberOfRows(20) != 45) {
     cout << "No MisalignGeometry has been applied" << endl;
+    if (St_tpcPadConfigC::instance()->numberOfRows(20) != 45) 
+      cout << "Alignmnet for iTPC configuration has not been implemented yet." << endl;
     return fAlignmentDone;
   } 
   //  TGeoParallelWorld *pw = 
@@ -383,6 +392,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 2       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/IBMO[1]/IBAM[24]/IBLM[6]/IBSS[1]
 3       HALL[1]/CAVE[1]/TpcRefSys[1]/IDSM[1]/PXMO[1]/PXLA[10]/LADR[4]/PXSI[10]/PLAC[1]
 4       HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[73]
+        HALL[1]/CAVE[1]/TpcRefSys[1]/TPCE[1]/TPGV[2]/TPSS[12]/TPAD[76] with iTPC
 5       HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[60]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/BRMD[32]/BRDT[1]/BRSG[6]
 6       HALL[1]/CAVE[1]/TpcRefSys[1]/BTOF[1]/BTOH[2]/BSEC[48]/BTRA[1]/BXTR[1]/BRTC[1]/BGMT[1]/GMTS[2]/GSBE[1]/GEMG[1]
 7       HALL[1]/CAVE[1]/VPDD[2]/VRNG[1]/VDET[19]/VDTI[1]/VCNV[1]/VRAD[1]
@@ -399,7 +409,8 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 18      HALL[1]/CAVE[1]/FBOX[4]/FLXF[394]
 19      HALL[1]/CAVE[1]/FPRS[1]/FPLY[4]/FPSC[80]
    */
-  Int_t NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
+  Int_t NoOfInnerRows = -1;
+  Int_t NoOfRows = -1;
   enum EDetector2Align {
     kUnknown,
     kTPC, kTpcRefSys, kTpcHalf, kTpcSecInn, kTpcSecOut, kTpcPad, kTpcLast,
@@ -445,14 +456,16 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   I.SetTranslation(kNullVector);
   TGeoNode *nodeT = 0;
   Bool_t ok = kFALSE;
-  ok = gGeoManager->cd("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/LADR_1/LADX_1/PXSI_1/PLAC_1");
-  assert(ok);
-  nodeT = gGeoManager->GetCurrentNode();
-  TGeoHMatrix PLAC = *(nodeT->GetMatrix());
-  ok = gGeoManager->cd("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/LADR_1/LADX_1/PXSI_1");
-  assert(ok);
-  nodeT = gGeoManager->GetCurrentNode();
-  TGeoHMatrix PXSI = *(nodeT->GetMatrix());
+  TGeoHMatrix PLAC, PXSI;
+  TString path2PLAC("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/LADR_1/LADX_1/PXSI_1/PLAC_1");
+  if (gGeoManager->CheckPath(path2PLAC)) {
+    gGeoManager->cd(path2PLAC);
+    nodeT = gGeoManager->GetCurrentNode();
+    PLAC = *(nodeT->GetMatrix());
+    gGeoManager->cd(gSystem->DirName(path2PLAC));
+    nodeT = gGeoManager->GetCurrentNode();
+    PXSI = *(nodeT->GetMatrix());
+  }
   TGeoHMatrix PixelWaferT = PXSI * PLAC; PrPV(PixelWaferT);
   TGeoTranslation PixelLadderT(-0.2381, 0.000010, -4.8750);//   PXLA->AddNode(LADR,4,new TGeoCombiTrans(-4.51636,6.93489,-4.875,rot));
   //  TGeoTranslation PixelSensorT(0.1533,0.1300000E-02,0.1604000E-01);//                        PXSI->AddNode(PLAC,1,new TGeoTranslation(0.1533,0.1300000E-02,0.1604000E-01));
@@ -476,7 +489,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   Double_t rSstSensor[9] = {-1, 0, 0, 0, -1, 0, 0, 0, 1}; 
   SstSensorR.SetRotation(rSstSensor);
   TGeoHMatrix Tpc2Global, HftOnTpc, PxlOnHft, SectorOnPxl, LadderOnSector, LadderOnPxl, SensorOnLadder, SensorOnGlobal;
-  TGeoHMatrix temp, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
+  TGeoHMatrix temp, oscOnTpc, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
     Int_t NoPerfMatch = 0;
@@ -541,12 +554,26 @@ Bool_t StarVMCApplication::MisalignGeometry() {
 	break;
       case kTpcPad:
 	sector = 12*(indx[0]-1) + indx[1];
-	if (listOfDet2Align[i].Ndim == 3 && listOfDet2Align[i].NVmax[2] == 73) {
-	  if (indx[2] <= 39) row = (indx[2]-1)/3 + 1;
-	  else               row = 14 + (indx[2]-40);
-	  if (row > 45)      row = 45;
-	} else {
-	  assert(0);
+	NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
+	NoOfRows = St_tpcPadConfigC::instance()->numberOfRows(sector);
+	if (listOfDet2Align[i].Ndim == 3) {
+	  if (NoOfInnerRows == 13) {// listOfDet2Align[i].NVmax[2] == 73) { // old Tpc
+	    if (indx[2] <= 39) row = (indx[2]-1)/3 + 1;
+	    else               row = 14 + (indx[2]-40);
+	    if (row > 45)      row = 45;
+	  } else if (NoOfInnerRows == 40) {// listOfDet2Align[i].NVmax[2] == 76) { // iTpc
+	    if (indx[2] <= NoOfInnerRows + 2) {
+	      row = indx[2] - 1; 
+	      if (row < 1) row = 1; 
+	      if (row > NoOfInnerRows) row = NoOfInnerRows;
+	    } else {
+	      row = indx[2] - 2;
+	      if (row < NoOfInnerRows + 1) row = NoOfInnerRows + 1;
+	      if (row > NoOfRows) row = NoOfRows;
+		}
+	  } else {
+	    assert(0);
+	  }
 	}
 	if (row <= NoOfInnerRows) chair = StTpcInnerSectorPosition::instance();
 	else                      chair = StTpcOuterSectorPosition::instance();
@@ -645,6 +672,7 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 	rotA = rotL; 
 	break;
       case kSst:
+	// Yi Guo: tpc2global * oscOnTpc *sstOnOsc * sstLadderOnSst * sstSensorOnLadder
 	// Xin: tpc2global * sstOnOsc * sstLadderOnSst * sstSensorOnLadder
 	//                   ????????
 	// WG = Tpc2Global * SG       * LS             * WLL
@@ -658,7 +686,9 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 	// HALL * CAVE * TpcRefSys * IDSM                       * SFMO *           SFLM          * SFSW  * SFSL * SFSD
 	//              tpc2global * idsOnTpc * idsOnTpc^-1 * sstOnOsc * sstLadderOnSst * H      * H^1                * sstSensorOnLadder
 	A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	rotA = A * StsstOnOsc::instance()->GetMatrix(0);
+	oscOnTpc = StoscOnTpc::instance()->GetMatrix(0);
+	sstOnOsc = StsstOnOsc::instance()->GetMatrix(0);
+	rotA = A * oscOnTpc * sstOnOsc;
 	break;
       case kSstLadder:
 	ladder = indx[0];

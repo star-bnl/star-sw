@@ -1,7 +1,7 @@
 //StiDetectorContainer.cxx
 //M.L. Miller (Yale Software)
 //02/02/01
-
+#include <assert.h>
 #include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
@@ -72,7 +72,12 @@ void StiDetectorContainer::initialize()
       for (int sector=0; sector<nSectors; sector++)
         {
         StiDetector* detector = (*bIter)->getDetector(row,sector);
+	if (! detector) continue;
+#if 0
         if (!detector) throw runtime_error("StiDetectorContainer::build() -F- detector==0 ");
+#else
+	assert(detector);
+#endif
         if (detector->isActive()) 
 	  add(detector);
         else 
@@ -91,9 +96,12 @@ the screen and reset() is called.
 */
 void StiDetectorContainer::setToDetector(const StiDetector* layer)
 {
-
+#if 0
   if (!layer->getTreeNode()) 
     throw runtime_error("StiDetectorContainer::setToDetector(StiDetector*) -E- layer->getTreeNode()==0");
+#else
+  assert(layer->getTreeNode());
+#endif
   setToLeaf( layer->getTreeNode() );
 }
 
@@ -106,8 +114,12 @@ void StiDetectorContainer::reset()
   tempOrderKey.key = static_cast<double>( StiPlacement::kMidRapidity );
   mySameOrderKey.morderKey = tempOrderKey; //order is of type const StiOrderKey&
   StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameOrderKey);
+#if 0
   if (where==mroot->end()) 
     throw runtime_error("StiDetectorContainer::setToDetector(StiDetector*) -E-  mid-rapidity region not found - where==0");
+#else
+  assert(where!=mroot->end());
+#endif
   mregion = where;
   //This will seg fault if (*mregion)->begin()==(*mregion)->end() !!!!!!!
   mradial_it = (*mregion)->begin(); //change (MLM)
@@ -116,21 +128,37 @@ void StiDetectorContainer::reset()
 
 StiDetector* StiDetectorContainer::operator*() const
 {
+#if 0
   if (!(*mphi_it))
     throw runtime_error("StiDetectorContainer::operator*() const -E- *mphi_it==0");
+#else
+  assert(*mphi_it);
+#endif
   StiDetector * det = (*mphi_it)->getData();
+#if 0
   if (!det)
     throw runtime_error("StiDetectorContainer::operator*() const -E- *mphi_it==0");
+#else
+  assert(det);
+#endif
   return det;
 }
 
 StiDetector* StiDetectorContainer::getCurrentDetector() const
 {
+#if 0
   if (!(*mphi_it))
     throw runtime_error("StiDetectorContainer::getCurrentDetector() const -E- *mphi_it==0");
+#else
+  assert(*mphi_it);
+#endif
   StiDetector * det = (*mphi_it)->getData();
+#if 0
   if (!det)
     throw runtime_error("StiDetectorContainer::getCurrentDetector() const -E- *mphi_it==0");
+#else
+  assert(det);
+#endif
   return det;
 }
 
@@ -310,9 +338,12 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
   // pass volumes to TreeBuilder before we make like a tree and leave...
   StiDetectorTreeBuilder treeBuilder;
   mroot = treeBuilder.build(builder);
+#if 0
   if (!mroot)
     throw runtime_error("StiDetectorContainer::build() - ERROR - mroot==0");
-
+#else
+  assert(mroot);
+#endif
   //Don't need any of this!!!!!
   /*
    //Set region to midrapidity, hard-coded for now, update later to allow for other regions

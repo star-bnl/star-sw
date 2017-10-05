@@ -1,7 +1,7 @@
 //StiDetectorTreeBuilder.cxx
 //M.L. Miller (Yale Software)
 //07/01
-
+#include <assert.h>
 #include "Stiostream.h"
 #include <stdio.h>
 #include <dirent.h>
@@ -34,10 +34,18 @@ StiDetectorNode* StiDetectorTreeBuilder::build(StiDetectorBuilder * builder)
     if (mroot) 	
       {
 	cout << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
+	assert(mroot);
+#if 0
 	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
+#endif
       }
+#if 0
     if (!builder) throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
     if (!mnodefactory) throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
+#else
+    assert(builder);
+    assert(mnodefactory);
+#endif
     mDetectorBuilder = builder;
     cout <<"StiDetectorTreeBuilder::build() -I- Build root"<<endl;
 		
@@ -184,7 +192,11 @@ void StiDetectorTreeBuilder::loopOnDetectors()
       //StiDetector* layer = mdetfactory->getInstance();
       //mDetectorBuilder->fillNext(layer);
       StiDetector* detector = mDetectorBuilder->next();
+#if 0
       if (!detector) throw runtime_error("StiDetectorTreeBuilder::loopOnDetectors() - ERROR - detector==0");
+#else
+      assert(detector);
+#endif
       detector->build();
       addToTree(detector);
       // add to by-name map

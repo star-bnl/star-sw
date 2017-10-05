@@ -46,7 +46,7 @@
 #include <utility>
 #include "StSequence.hh"
 #include "StTpcPixel.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #define __MaxNumberOfTimeBins__ 512
 typedef std::vector<Short_t>  StVectorADC;
 typedef std::vector<UShort_t> StVectorIDT;
@@ -88,7 +88,7 @@ typedef std::vector<StTpcPixel>              StVectPixel;
 
 class StTpcDigitalSector : public StObject {
 public:
-    StTpcDigitalSector(void *db = 0);
+  StTpcDigitalSector(Int_t sector);
     virtual ~StTpcDigitalSector() {}
     // access functions
     const StDigitalTimeBins* timeBinsOfRowAndPad(Int_t rowN, Int_t padN) const { return (&mData[(rowN-1)][(padN-1)]);}
@@ -101,7 +101,7 @@ public:
     Int_t  numberOfTimeBins(Int_t rowN, Int_t padN) 	const    { return mData[(rowN-1)][(padN-1)].size();}
     
     // Adding
-    void   assignTimeBins(int, int, StDigitalTimeBins*);
+    void   assignTimeBins(Int_t row , Int_t pad, StDigitalTimeBins*);
     Int_t  getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequence** seq, UShort_t ***Id);
     Int_t  getPadList(Int_t row, UChar_t **padList);
     Int_t  getTimeAdc(Int_t row, Int_t pad, Short_t ADCs[__MaxNumberOfTimeBins__], 
@@ -116,8 +116,10 @@ public:
     virtual void   Print(const Option_t *opt="") const;
     virtual Int_t  PrintTimeAdc(Int_t row, Int_t pad) const;
     StTpcDigitalSector &operator+= (StTpcDigitalSector& v);
-    Int_t numberOfPadsAtRow(Int_t row) {return (row > 0 && row <= mNoRows) ? St_tpcPadPlanesC::instance()->padsPerRow(row) : 0;}
+    Int_t numberOfPadsAtRow(Int_t row) {return (row > 0 && row <= mNoRows) ? St_tpcPadConfigC::instance()->padsPerRow(mSector, row) : 0;}
     StTpcDigitalSector& operator=(const StTpcDigitalSector&);
+    Int_t sector() {return mSector;}
+    Int_t NoRows() {return mNoRows;}
 private:
     StTpcDigitalSector(const StTpcDigitalSector&);
 

@@ -4,6 +4,12 @@
 #include "St_g2t_Chair.h"
 #include "StarHitVector.h"
 #include "StarVMCDetectorSet.h"
+class g2t_event_st;
+class g2t_vertex_st;
+class g2t_track_st;
+class St_g2t_event;
+class St_g2t_vertex;
+class St_g2t_track;
 /* commons/agcrdig.inc
       Integer          IWA,   JS,JD,JX,JXD,JDS,JDU
       COMMON /AGCRDIG/ IWA(2),JS,JD,JX,JXD,JDS,JDU
@@ -39,10 +45,16 @@ class StarMCHits : public TDataSet {
   virtual TDataSet  	  *GetHitHolder() {return fHitHolder;}                  				       
   virtual StarVMCDetector *GetCurrentDetector() {return fCurrentDetector;}
   virtual void      	   FillG2Table();							       	    
+  virtual void             BeginEvent();
   virtual void             FinishEvent();
+  virtual void             BeginPrimary() {}
+  virtual void             PreTrack();
+  virtual void             PostTrack() {}
+  virtual void             FinishPrimary() {}
   virtual Int_t            Debug()        { return fDebug;}
-  virtual Agcdigi_t*  Agcdigi()  const {return fAgcdigi;}
-  virtual Agchitv_t*  Agchitv()  const {return fAgchitv;}
+  virtual Agcdigi_t*       Agcdigi()  const {return fAgcdigi;}
+  virtual Agchitv_t*       Agchitv()  const {return fAgchitv;}
+  virtual g2t_track_st*    Current_g2t_track() {return ftrackCurrent;}
  private:
   StarMCHits(const Char_t *name="StarMCHits",const Char_t *title="");
   static StarMCHits *fgInstance;
@@ -52,8 +64,14 @@ class StarMCHits : public TDataSet {
   Int_t              fDebug;
   UInt_t             fSeed;
   Int_t              fEventNumber;
-  Agcdigi_t *fAgcdigi;          //! AGCDIGI common structure
-  Agchitv_t *fAgchitv;          //! AGCHITV common structure
+  Agcdigi_t         *fAgcdigi;          //! AGCDIGI common structure
+  Agchitv_t         *fAgchitv;          //! AGCHITV common structure
+  g2t_event_st      *feventCurrent;
+  g2t_vertex_st     *fvertexCurrent;
+  g2t_track_st      *ftrackCurrent;
+  St_g2t_event      *fg2t_event;
+  St_g2t_vertex     *fg2t_vertex;
+  St_g2t_track      *fg2t_track;
   ClassDef(StarMCHits,1)
 };
 #endif

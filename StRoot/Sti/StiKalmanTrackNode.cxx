@@ -576,7 +576,7 @@
  * Added several functions for radlength calculation.
  *
  */
-
+#include <assert.h>
 #include <Stiostream.h>
 #include <stdexcept>
 #include <math.h>
@@ -1915,7 +1915,11 @@ double StiKalmanTrackNode::getWindowZ()
 //______________________________________________________________________________
 StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 {
+#if 0
   if (mFP.curv()==0) throw logic_error("StiKalmanTrackNode::getHelixCenter() -F- _curv==0 ");
+#else
+  assert(mFP.curv());
+#endif
   double xt0 = mFP.x()-mFP._sinCA/mFP.curv();   /*VP*/
   double yt0 = mFP.y()+mFP._cosCA/(mFP.curv());
   double zt0 = mFP.z()+mFP.tanl()*asin(mFP._sinCA)/mFP.curv();

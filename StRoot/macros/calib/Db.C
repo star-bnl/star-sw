@@ -14,7 +14,8 @@ void Load() {
 //________________________________________________________________________________
 //void Db(const Char_t *tabNam  = "Calibrations/tpc/noiseElim", 
 void Db(const Char_t *tabNam  = 
-	"Geometry/tpc/tpcPadPlanes",
+	//	"Geometry/tpc/tpcPadConfig",
+	"Geometry/tpc/itpcPadPlanes",
 	Int_t date = -1, Int_t time = 0,
 	Int_t debugL = 1,
 	const Char_t *flavor="sim+ofl+laserDV"
@@ -66,7 +67,7 @@ void Db(const Char_t *tabNam  =
     if (Nrows > 10) Nrows = 10;
     if (table->GetRowSize() < 256) table->Print(0,Nrows);
     cout << "==============================================" << endl;
-#if 0
+#if 1
     name += Form(".%06i.%06i.root",t[0].GetDate(),t[0].GetTime());
     TFile *f = new TFile(name.Data(),"RECREATE");
     table->Write();
