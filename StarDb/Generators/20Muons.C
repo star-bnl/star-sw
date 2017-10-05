@@ -11,6 +11,7 @@ TDataSet *CreateTable() {
   Double_t Zlow   =  -10; 
   Double_t Zhigh  =   10; 
   Int_t    Npart  =  20;
+#ifndef __CLING__
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
     if (gClassTable->GetID("St_geant_Maker") < 0) {
       cout << "You have to use root4star with St_geant_Maker already loaded" << endl; 
@@ -22,21 +23,23 @@ TDataSet *CreateTable() {
     cout << "Set kine : " << kine.Data() << endl;
     St_geant_Maker::instance()->Do(kine.Data());
     St_geant_Maker::instance()->Do("gspread   0.015 0.015 42.00");
-  } else {
-    if (! StVMCMaker::instance()) return 0;
-    if (! StarVMCApplication::Instance()) return 0;
-    StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
-    if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
-      delete gener; gener = 0;
-    }
-    if (! gener) gener =  new 
-      StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
-    else
-      gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
-    gener->SetSigmasOrigin(.015, 0.015, 42.00);
-    StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
-    cout << "Set StarMCSimplePrimaryGenerator" << endl;
+    TDataSet *tableSet = new TDataSet("20muons");
+    return (TDataSet *)tableSet;
   }
+#endif
+  if (! StVMCMaker::instance()) return 0;
+  if (! StarVMCApplication::Instance()) return 0;
+  StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
+  if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
+    delete gener; gener = 0;
+  }
+  if (! gener) gener =  new 
+    StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
+  else
+    gener->SetGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
+  gener->SetSigmasOrigin(.015, 0.015, 42.00);
+  StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
+  cout << "Set StarMCSimplePrimaryGenerator" << endl;
   TDataSet *tableSet = new TDataSet("20muons");
   return (TDataSet *)tableSet;
- }
+}

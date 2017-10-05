@@ -1,7 +1,7 @@
 #ifndef __CreateGeometry__
 #define __CreateGeometry__
 #if 1
-#ifndef __CINT__
+#if !defined( __CINT__) && !defined(__CLING__)
 #include "Riostream.h"
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
@@ -13,10 +13,9 @@
 #include "TGeoNode.h"
 #include "TGeoVolume.h"
 #include "TObjArray.h"
+#include "Tenv.h"
 #endif
 //#include "Rotations+"
-#include "Material.h"
-#include "Media.h"
 //________________________________________________________________________________
 TGeoMaterial *GetMat(const char *matname) {
   TGeoMaterial *mat = gGeoManager->GetMaterial(matname);
@@ -37,6 +36,8 @@ TGeoRotation *GetRot(const char *rotname) {
   return rot;
 }
 #endif
+#include "Material.h"
+#include "Media.h"
 //________________________________________________________________________________
 void TpcRefSys() {
   // Fix TpcRedSys
@@ -73,7 +74,8 @@ void TpcRefSys() {
 }
 
 //________________________________________________________________________________
-TDataSet *CreateGeometry(const Char_t *name="y2005") {
+TDataSet *CreateGeometry(const Char_t *name, TEnv *configGeom) {
+  TDataSet *geometry = 0;
   TObjectSet *geom = 0;
   if (gGeoManager) {
     cout << "VMC geometry " << gGeoManager->GetName() << " has beed created. Ignore request for " 
@@ -106,14 +108,18 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
   command.ReplaceAll(".L ",".U "); 
   gInterpreter->ProcessLine(command);
   if (gGeoManager) {
-    geom = new TObjectSet("Geometry",gGeoManager,kFALSE);
+    geometry = new TDataSet("Geometry");
+    geom = new TObjectSet("GeoManager",gGeoManager,kFALSE);
     geom->SetTitle(name);
+    geometry->Add(geom);
+    TObjectSet *confgeom = new TObjectSet("configGeom",configGeom,kTRUE);
+    geometry->Add(confgeom);
   }
-  // Fix TpcRedSys
 #if 0
+  // Fix TpcRedSys
   TpcRefSys();
 #endif
   gGeoManager->CloseGeometry();
-  return (TDataSet *) geom;
+  return  geometry;
 }
 #endif /* ! __CreateGeometry__ */
