@@ -58,11 +58,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       if (sector<12)      stiSector = sector;
       else                stiSector = 11 - (sector-11)%12;
     }
-    _maxRow = St_tpcPadConfigC::instance()->padRows(sector);
-    if (!secHits) {
-      cout << "StiTpcHitLoader::loadHits(StEvent* source) -W- no hits for sector:"<<sector<<endl;
-      break;
-    }
+    _maxRow = St_tpcPadConfigC::instance()->padRows(sector+1);
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
@@ -103,7 +99,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
         _hitContainer->add( stiHit );
 	noHitsLoaded++;
 	if (debug) {
-	  cout << "add hit S/R =" << sector << "/" << row << " to detector " << *detector << endl;
+	  cout << "add hit S/R =" << sector + 1 << "/" << row + 1 << " to detector " << *detector << endl;
 	}
       }
       if (hitTest.width()>0.1) {
