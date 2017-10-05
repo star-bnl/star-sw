@@ -135,7 +135,7 @@ void Load(const Char_t *options)
     }
     cout << endl;
   }
-  gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
+  gSystem->Load("St_base");                                        //  StMemStat::PrintMem("load St_base");
 #ifndef __CLING__
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
@@ -166,6 +166,7 @@ void Load(const Char_t *options)
   gSystem->Load("libStBFChain");                                      //  StMemStat::PrintMem("load StBFChain");
   cout << endl;
 }
+#ifndef __CLING__
 //#define __V0Filter__
 #ifdef __V0Filter__
 //_____________________________________________________________________
@@ -178,6 +179,7 @@ void V0Filter() {
   }
 }
 #endif /* __V0Filter__ */
+#endif
 //_____________________________________________________________________
 void bfc(Int_t First, Int_t Last,
 	 const Char_t *Chain,
@@ -193,11 +195,15 @@ void bfc(Int_t First, Int_t Last,
   if (tChain == "") {
   if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
   //  tChain += "MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
-   tChain += "MC.2016a,istSlowSim,pxlSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,DbV20170830";
-   //   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,DbV20170830";
-   //   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D";
+#ifndef __CLING__
+  //  tChain += "MC.2016a,istSlowSim,pxlSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,DbV20170830";
+  tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,DbV20170830";
+  //   tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,beamLine,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D";
   //  tChain += "MC.2016a,istSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,";
   //  tChain += "MC.2016a,Stx,geantOut,";
+#else
+  tChain += "MC.2016a,istSlowSim,pxlSlowSim,-hitfilt,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,DbV20170830,-CMuDst";
+#endif
   // ZF  2016-03-20 05:15:50 2016-03-19 06:00:00
   // RF  sdt20160301
   //  if ( TString(gProgName) == "root4star") tChain += "gstar,HijingAuAu200,Corr4,OSpaceZ2,OGridLeak3D,useXgeom";
@@ -297,7 +303,9 @@ void bfc(Int_t First, Int_t Last,
   TAttr::SetDebug(0);
   chain->SetAttr(".Privilege",0,"*"                ); 	  //All  makers are NOT priviliged
   chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	  //All IO makers are priviliged
+#ifndef __CLING__
   chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	  //It is also IO maker
+#endif
   chain->SetAttr(".Privilege",1,"StTpcDbMaker::*"); 	  //It is also TpcDb maker to catch trips
   chain->SetAttr(".Privilege",1,"*::tpc_hits"); //May be allowed to act upon excessive events
   chain->SetAttr(".Privilege",1,"*::tpx_hits"); //May be allowed to act upon excessive events

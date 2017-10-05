@@ -74,7 +74,7 @@
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
   gPrompt += " [%d] ";
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); 
-    
+#ifndef __CLING__    
   //  if (gSystem->DynamicPathName("libNet",kTRUE))
   //    gSystem->Load("libNet");
   
@@ -103,6 +103,7 @@
     }
 #endif
   }
+#endif
   if (strstr(gSystem->GetLibraries(),"libTable")) {
     gROOT->ProcessLine("typedef TCL              StCL;");              
     gROOT->ProcessLine("typedef TDataSet         St_DataSet ;");       

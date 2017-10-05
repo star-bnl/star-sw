@@ -147,6 +147,7 @@ StVMCMaker::Make
 #include "StarMCHBPrimaryGenerator.h"
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
+#include "StarVMCDetector.h"
 #include "StarVMCDetectorSet.h"
 #include "TTreeIter.h"
 ClassImp(StVMCMaker);
@@ -180,7 +181,8 @@ Int_t StVMCMaker::Init() {
       TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
       assert(!ee);
       AddConst(d);
-#if 0 /* Don' do this beacuse root will try to unload shared libraries in the macro */
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+      /* Don' do this beacuse root will try to unload shared libraries in the macro */
       command.ReplaceAll(".L ",".U ");
       gInterpreter->ProcessLine(command,&ee);
       assert(!ee);
@@ -234,6 +236,9 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
       geom = (TObjectSet *) GetDataBase("AgiGeometry/Geometry");
     }
     assert(geom);
+    TObjectSet *o = (TObjectSet *) geom->Find("configGeom");
+    TEnv *env = (TEnv *) (o->GetObject());
+    StarVMCDetector::SetConfigEnv(env);
   }
   if (!fVolume) {
 #if 0

@@ -5,6 +5,7 @@
 #include "TArrayI.h"
 #include "StEnumerations.h"
 #include "St_g2t_Chair.h"
+#include "TEnv.h"
 class StarVMCDetector : public TDataSet {
  public:
    //----- detector set flags in TGeoVolume
@@ -40,6 +41,8 @@ class StarVMCDetector : public TDataSet {
   static  TTable    	  *NewTable(const Char_t *classname, const Char_t *name="", Int_t nrows=100); 
   static  St_g2t_Chair    *NewChair(const Char_t *type, const Char_t *name="");                       
   static Int_t g2t_volume_id(const Char_t *detN, Int_t *numbv);
+  static void  SetConfigEnv(TEnv *env) {fgConfigEnv = env;}
+  static TEnv *GetConfigEnv() {return fgConfigEnv;}
  private:
   
   StDetectorId fId;
@@ -51,6 +54,7 @@ class StarVMCDetector : public TDataSet {
   TArrayI fIds;
   TArrayI fSortedId;
   Int_t **fSId;
+  static TEnv  *fgConfigEnv;
   St_g2t_Chair *fChair;
   ClassDef(StarVMCDetector,1) // Map between g2t_volume_id and VMS path
 };

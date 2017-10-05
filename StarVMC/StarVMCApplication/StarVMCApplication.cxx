@@ -57,7 +57,6 @@ ClassImp(StarVMCApplication);
 #define PrPV(B)      if (Debug())                {std::cout << (#B) << " = \t"; (B).Print();} 
 static const TString separator("/_"); 
 TDataSet        *StarVMCApplication::fgDetSets = 0;
-TEnv            *StarVMCApplication::fgConfigGeom = 0;
 //_____________________________________________________________________________
 StarVMCApplication::StarVMCApplication(const char *name, const char *title) : 
   TVirtualMCApplication(name,title),
@@ -146,13 +145,17 @@ void StarVMCApplication::GeneratePrimaries() {
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
   fStarStack->Reset();
-  if (fMcHits) fMcHits->Clear();
+  if (fMcHits) {
+    fMcHits->BeginEvent();
+  }
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginPrimary() {    // User actions at beginning of a primary track
+  if (fMcHits) fMcHits->BeginPrimary();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PreTrack() {    // User actions at beginning of each track
+  if (fMcHits) fMcHits->PreTrack();  
 }
 //_____________________________________________________________________________
 void StarVMCApplication::Stepping() {    // User actions at each step
@@ -166,10 +169,13 @@ void StarVMCApplication::PostTrack() {    // User actions after finishing of eac
   TParticle *current =  0; // fStarStack->GetCurrentParticle();
   TObjArray *objs = fStarStack->GetParticles();
   if (objs->IndexOf(current) < objs->LowerBound()) delete current;
+#else
+  if (fMcHits) fMcHits->PostTrack();
 #endif
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishPrimary() {    // User actions after finishing of a primary track
+  if (fMcHits) fMcHits->FinishPrimary();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishEvent() {    // User actions after finishing of an event
@@ -477,7 +483,7 @@ Bool_t StarVMCApplication::MisalignGeometry() {
   Double_t rSstSensor[9] = {-1, 0, 0, 0, -1, 0, 0, 0, 1}; 
   SstSensorR.SetRotation(rSstSensor);
   TGeoHMatrix Tpc2Global, HftOnTpc, PxlOnHft, SectorOnPxl, LadderOnSector, LadderOnPxl, SensorOnLadder, SensorOnGlobal;
-  TGeoHMatrix temp, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
+  TGeoHMatrix temp, oscOnTpc, sstOnOsc, sstLadderOnSst, sstSensorOnLadder;
   for (Int_t i = 0; i < NoDetectos2Align; i++) {
     EDetector2Align kDetector = listOfDet2Align[i].kDet;
     Int_t NoPerfMatch = 0;
@@ -646,6 +652,7 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 	rotA = rotL; 
 	break;
       case kSst:
+	// Yi Guo: tpc2global * oscOnTpc *sstOnOsc * sstLadderOnSst * sstSensorOnLadder
 	// Xin: tpc2global * sstOnOsc * sstLadderOnSst * sstSensorOnLadder
 	//                   ????????
 	// WG = Tpc2Global * SG       * LS             * WLL
@@ -659,7 +666,9 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 	// HALL * CAVE * TpcRefSys * IDSM                       * SFMO *           SFLM          * SFSW  * SFSL * SFSD
 	//              tpc2global * idsOnTpc * idsOnTpc^-1 * sstOnOsc * sstLadderOnSst * H      * H^1                * sstSensorOnLadder
 	A = nodeP->GetNode(NLevel-1)->GetMatrix()->Inverse();
-	rotA = A * StsstOnOsc::instance()->GetMatrix(0);
+	oscOnTpc = StoscOnTpc::instance()->GetMatrix(0);
+	sstOnOsc = StsstOnOsc::instance()->GetMatrix(0);
+	rotA = A * oscOnTpc * sstOnOsc;
 	break;
       case kSstLadder:
 	ladder = indx[0];

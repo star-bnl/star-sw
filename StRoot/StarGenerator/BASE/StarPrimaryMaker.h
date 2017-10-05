@@ -151,14 +151,29 @@ class StarPrimaryMaker : public StMaker
 		Double_t zmin=-999,   Double_t zmax=+999 );
 
   /// Set PT range.  Particles falling outside this range will be dropped from simulation.
-  void SetPtRange( Double_t ptmin, Double_t ptmax=-1 ){ LOG_INFO << " -- StarPrimaryMaker -- ptmin=" << (mPtMin = ptmin) << " ptmax=" << (mPtMax = ptmax) << endm; }
+  void SetPtRange( Double_t ptmin, Double_t ptmax=-1 ){ 
+#if !defined(__CINT__) && !defined(__CLING__)
+    LOG_INFO << " -- StarPrimaryMaker -- ptmin=" << (mPtMin = ptmin) << " ptmax=" << (mPtMax = ptmax) << endm; 
+#endif
+  }
   /// Set rapidity range.  Particles falling outside this range will be dropped from simulation.
-  void SetEtaRange( Double_t etamin, Double_t etamax ){ LOG_INFO << " -- StarPrimaryMaker --  ymin=" << (mRapidityMin = etamin) << "  ymax= " << (mRapidityMax = etamax) << endm; }
-  /// Set phi range.  Particles falling outside this range will be dropped from simulation.
-  void SetPhiRange( Double_t phimin, Double_t phimax ){ LOG_INFO << " -- StarPrimaryMaker -- phimn=" << (mPhiMin = phimin) << " phimx=" <<  (mPhiMax = phimax) << endm; }
+  void SetEtaRange( Double_t etamin, Double_t etamax ){ 
+#if !defined(__CINT__) && !defined(__CLING__)
+    LOG_INFO << " -- StarPrimaryMaker --  ymin=" << (mRapidityMin = etamin) << "  ymax= " << (mRapidityMax = etamax) << endm; 
+#endif
+}  /// Set phi range.  Particles falling outside this range will be dropped from simulation.
+  void SetPhiRange( Double_t phimin, Double_t phimax ){ 
+#if !defined(__CINT__) && !defined(__CLING__)
+LOG_INFO << " -- StarPrimaryMaker -- phimn=" << (mPhiMin = phimin) << " phimx=" <<  (mPhiMax = phimax) << endm; 
+#endif
+}
 
   /// Set z-vertex range.  Primary vertices outside these bounds will be rejected.
-  void SetZvertexRange( Double_t zmin, Double_t zmax ){ LOG_INFO << " -- StarPrimaryMaker --  zmin=" << (mZMin = zmin) << "  zmax=" << (mZMax = zmax) << endm; }
+  void SetZvertexRange( Double_t zmin, Double_t zmax ){ 
+#if !defined(__CINT__) && !defined(__CLING__)
+    LOG_INFO << " -- StarPrimaryMaker --  zmin=" << (mZMin = zmin) << "  zmax=" << (mZMax = zmax) << endm; 
+#endif
+  }
 
   /// Return a pointer to the event
   StarGenEvent *event() { return mPrimaryEvent; }

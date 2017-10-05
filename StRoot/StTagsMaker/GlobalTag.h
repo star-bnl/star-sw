@@ -1,3 +1,8 @@
+#ifndef __GlobalTag_st__
+#define __GlobalTag_st__
+#include "TDataSet.h"
+#include "TTable.h"
+#include "Ttypes.h"
 //
 // $Id: GlobalTag.idl,v 1.3 2009/11/23 16:47:59 fisyak Exp $
 //
@@ -14,7 +19,7 @@
 // Back to idl tag definition
 //
 //
-struct GlobalTag {                                           // Global:
+struct GlobalTag_st {                                           // Global:
   unsigned long   TriggerId[32];                       // Trigger Id's satisfied by an event
   unsigned long   uncorrectedNumberOfPrimaries;        // TPC StuRefMult
   unsigned long   uncorrectedNumberOfFtpcEastPrimaries;// FTPC StuFtpcRefMult
@@ -30,3 +35,10 @@ struct GlobalTag {                                           // Global:
   float           CTBsum;                              // CTB sum mMips[mMaxTrays][mMaxSlats][0]
  };
 
+class St_GlobalTag : public TTable {
+ public:
+  ClassDefTable(St_GlobalTag,GlobalTag_st)
+  ClassDef(St_GlobalTag,1) //C++ container for chain/makers status 
+};
+
+#endif /* __GlobalTag_st__ */

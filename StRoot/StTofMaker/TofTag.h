@@ -14,7 +14,17 @@
 *
 *
 **************************************************************************/
-
-struct TofTag {
+#ifndef __TofTag__
+#define __TofTag__
+#include "TDataSet.h"
+#include "TTable.h"
+#include "Ttypes.h"
+struct TofTag_st {
   long tofEventType; // differentiates Strobe Events from Physics Events
 };
+class St_TofTag : public TTable {
+ public:
+  ClassDefTable(St_TofTag,TofTag_st)
+  ClassDef(St_TofTag,1) //C++ container for chain/makers status 
+};
+#endif /* __TofTag__ */

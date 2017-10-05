@@ -79,7 +79,7 @@ public:
    static TShape* MakeShape(const TGeoSphere &shp);
    static TShape* MakeShape(const TGeoArb8  &shp);
    
-  //  ClassDef(TGeoDrawHelper,0)
+   ClassDef(TGeoDrawHelper,0)
 };
 
 

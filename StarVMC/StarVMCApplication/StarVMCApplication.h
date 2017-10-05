@@ -15,7 +15,6 @@
 #include "StarMCHits.h"
 #include "TTable.h"
 #include "Ttypes.h"
-#include "TEnv.h"
 class TGeoPhysicalNode;
 class TGeoHMatrix;
 class TGeoRotation;
@@ -91,8 +90,6 @@ class StarVMCApplication : public TVirtualMCApplication {
   Bool_t                   fAlignment;
   Bool_t                   fAlignmentDone;
   static  TDataSet        *fgDetSets;
- public:
-  static  TEnv            *fgConfigGeom;
   ClassDef(StarVMCApplication,1)  //Interface to MonteCarlo application
 };
 

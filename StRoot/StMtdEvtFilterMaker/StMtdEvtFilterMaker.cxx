@@ -29,11 +29,12 @@
 #include "StMtdEvtFilterMaker.h"
 #include "tables/St_trgOfflineFilter_Table.h"
 #include "tables/St_mtdEventFilterCuts_Table.h"
-#include "tables/St_MtdTrackFilterTag_Table.h"
+#include "MtdTrackFilterTag.h"
 
 #include "tables/St_HighPtTag_Table.h"
 
-ClassImp(StMtdEvtFilterMaker)
+TableImpl(MtdTrackFilterTag);
+ClassImp(StMtdEvtFilterMaker);
 
 //_____________________________________________________________________________
 StMtdEvtFilterMaker::StMtdEvtFilterMaker(const Char_t *name) : StMaker(name)

@@ -2550,10 +2550,11 @@ void St_geant_Maker::Version(ostream& os) {
     "fscg_version",  
     "mtdg_version", 0};
   Int_t i = 0;
+  os << "  TEnv *configGeom = new TEnv(\"configGeom\");" << endl;
   while (names[i]) {
     Float_t version = g2t_version(names[i] PASSCHARL(names[i]));
     if (version) {
-      os << "  gEnv->SetValue(\"" << names[i] << "\"," << version << ");" << endl;
+      os << " configGeom ->SetValue(\"" << names[i] << "\"," << version << ");" << endl;
     }
     i++;
   }
