@@ -8,7 +8,7 @@ class StMuMcTrack : public TObject {
  public:
   enum EHIT {ktpc, ksvt, kssd,
 	     kctb, keem, kemc, kesm, kftp, kgem, khpd, kist, kigt, kfst, 
-	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ktpcR, ktot};
+	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ketr, khca, kfts, keto, ktpcR, ktot};
   StMuMcTrack(const g2t_track_st &t);
   StMuMcTrack();
   virtual ~StMuMcTrack() {}
@@ -75,7 +75,7 @@ class StMuMcTrack : public TObject {
   Float_t        mRapidity;    /* Rapidity */
   Char_t         mEnd[1];      //!
   StThreeVectorF mPxyz;        /* Momentum */
-  ClassDef(StMuMcTrack,4)
+  ClassDef(StMuMcTrack,5)
 };
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif
