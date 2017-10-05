@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.26 2016/10/13 19:40:19 kunsu Exp $
+# $Id: get_embedding_xml.pl,v 1.27 2017/10/02 03:29:26 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.27  2017/10/02 03:29:26  zhux
+# added option '-nevents' to assign the maximum number of events to be processed for one single daq file.
+#
 # Revision 1.26  2016/10/13 19:40:19  kunsu
 # adapted to the new PDSF star-submit with array support
 #
@@ -130,6 +133,7 @@ GetOptions (
     'mixer=s' => \$bfcMixer,               # bfcMixer
     'mode=s' => \$ptOption,                # pt option
     'mult=s' => \$multiplicity,            # Number of MC tracks per event
+    'nevents=i' => \$nevents,              # Number of maximum events to be processed for ONE daq file
     'particlename=s' => \$particleName,    # Particle name
     'prodname=s' => \$prodName,            # prodName
     'production=s' => \$production,        # Production

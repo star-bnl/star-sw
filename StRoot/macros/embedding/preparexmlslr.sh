@@ -1,8 +1,9 @@
 #!/bin/sh
 
 #1. copy this script to the embedding working directory for a specific request.
-#2. edit the options for $script first, run this script at PDSF first, generate the xml for embedding job submission.
-#3. submit the job at PDSF, produce one fset there.
+#2. edit the options for $script first according to simulation request page, run this script at PDSF first, 
+#   generate the xml script for embedding job submission at PDSF.
+#3. submit the job at PDSF, produce one fset there, usually the fset ID# starts from "100".
 #4. obtain the number of events and the CPU hours per fset with the fSetStatistics.sh script.
 #5. calculate the number of fsets according to the requested statistics
 #6. edit the three options for Cori accordingly for full embedding production
@@ -15,9 +16,9 @@ if [[ $HOST =~ "cori" ]] ; then
  script="python StRoot/macros/embedding/cori/prepEmbedTaskList.py"
 
 #EDIT the following three options before use this script at Cori farm
- fset="-fSetRange 100-109"
+ fset="-fSetRange 101-109"
  cpuh="-fSetCPUHours 1321"
- outp="-outPath /global/cscratch1/sd/zhux/embedding"
+ outp="-outPath /global/cscratch1/sd/$USER/embedding"
 
 else
  script="perl StRoot/macros/embedding/get_embedding_xml.pl"
