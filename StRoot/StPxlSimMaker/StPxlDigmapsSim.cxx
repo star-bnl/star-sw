@@ -92,7 +92,7 @@ Int_t StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDb
   Float_t adcLsb = adcThresholds[0];
 
   if (!mDigAdc) mDigAdc = new DIGADC();
-  cout << mDigAdc << endl;
+  //  cout << mDigAdc << endl;
   mDigAdc->SetNbits(nAdcBits);
   mDigAdc->SetNThresholds(nAdcThresholds);
   mDigAdc->SetADC_linear(adcLinear);
