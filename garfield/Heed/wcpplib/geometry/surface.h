@@ -175,10 +175,10 @@ class ulsvolume : public absvol {
   virtual ulsvolume* copy() const { return new ulsvolume(*this); }
 };
 
-class manip_ulsvolume : virtual public manip_absvol, public ulsvolume {
+class manip_ulsvolume : public manip_absvol, public ulsvolume {
  public:
   manip_ulsvolume() : manip_absvol(), ulsvolume() {}
-  manip_ulsvolume(manip_ulsvolume& f);
+  // manip_ulsvolume(manip_ulsvolume& f);
   manip_ulsvolume(const manip_ulsvolume& f);
   manip_ulsvolume(const ulsvolume& f) : manip_absvol(), ulsvolume(f) {}
   /// Destructor

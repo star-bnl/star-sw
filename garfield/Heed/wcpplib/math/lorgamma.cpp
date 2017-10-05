@@ -5,6 +5,8 @@
 
 namespace Heed {
 
+using CLHEP::c_squared;
+
 double lorgamma_1(double beta) {
   if (beta == 0.0) return 0.0;
   if (beta >= 1.0) {

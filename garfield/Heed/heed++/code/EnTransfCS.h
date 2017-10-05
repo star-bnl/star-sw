@@ -10,7 +10,6 @@ namespace Heed {
 
 #define EXCLUDE_A_VALUES   // exclude absorption values
 #define EXCLUDE_VAL_FADDA  // exclude values not necessary for MC
-// #define EXCLUDE_MEAN       // exclude calculation of means
 
 /// The PAI cross section of energy transfers from charged particle to media.
 /// The particle has fixed parameters (energy, speed, etc.), which
@@ -22,7 +21,7 @@ namespace Heed {
 class EnTransfCS : public RegPassivePtr {
  public:
   /// Default constructor
-  EnTransfCS(void) {}
+  EnTransfCS() {}
   /// Constructor
   EnTransfCS(double fparticle_mass, double fgamma_1, int fs_primary_electron,
              HeedMatterDef* fhmd, long fparticle_charge = 1);
@@ -31,32 +30,22 @@ class EnTransfCS : public RegPassivePtr {
 
   /// Particle mass [MeV]
   double particle_mass;
-  /// Kinetic energy [MeV]
-  double particle_tkin;
   /// Total energy [MeV]
   double particle_ener;
   /// Charge in units of electron charge (used square, sign does not matter).
   long particle_charge;
 
-  /// Velocity
-  double beta;
-  /// beta^2
-  double beta2;
-  /// 1 - beta^2
-  double beta12;
-  /// Lorentz factor
-  double gamma;
-  /// gamma - 1 (the best dimensionless measurement of speed)
+  /// Lorentz factor - 1 (the best dimensionless measurement of speed).
   double gamma_1;
 
   /// Max. energy transfer [MeV]
-  double maximal_energy_trans;
+  double max_etransf;
   /// Flag controlling the form of Rutherford scattering.
   /// For our purposes it is good to have simple form,
   /// so this variable is initialized to 1.
   /// Simple form means that there are two terms.
   /// The third term is assumed zero.
-  int s_simple_form;
+  bool s_simple_form;
   /// Flag that the primary particle is the electron
   int s_primary_electron;
 
@@ -68,11 +57,11 @@ class EnTransfCS : public RegPassivePtr {
   std::vector<double> log2C;        ///< common second log without cs
   std::vector<double> chereC;       ///< Cherenkov's radiation
   std::vector<double> chereCangle;  ///< angle of Cherenkov's radiation
-  std::vector<double> Rreser;       ///< term called R in my paper
+  std::vector<double> Rruth;        ///< term called R in my paper
 #ifdef DEBUG_EnTransfCS
-  // total rezer, sum of frezer by atoms and shells, per one electron
+  // Total Rutherford, sum of fruth by atoms and shells, per one electron
   // (in the paper it is per atom).
-  std::vector<double> treser;
+  std::vector<double> truth;
 #endif
 
   /// Sum of (ionization) differential cross-section terms
@@ -87,14 +76,8 @@ class EnTransfCS : public RegPassivePtr {
   double quanC_a;
 #endif
 
-#ifndef EXCLUDE_MEAN
   // First moment (mean restricted energy loss) [MeV]
   double meanC;
-  // First moment, calculated using left side of energy interval.
-  // The value should be less than above.
-  // The difference shows the uncertainty of the value above
-  // arising from the finite number of intervals
-  double meanCleft;
   // First moment with additional tail to max. kinematically allowed transfer,
   // calculated only for heavy particles (integral for electrons non-trivial).
   double meanC1;
@@ -105,14 +88,13 @@ class EnTransfCS : public RegPassivePtr {
   // Secondary ionization
   double meaneleC;
   double meaneleC1;
-#endif  // EXCLUDE_MEAN
 
   /// In the following arrays there are three indices:
   /// atom number in the matter, shell number in atom, energy
   /// Fraction of Cherenkov term.
   std::vector<std::vector<std::vector<double> > > cher;
   /// Rutherford term
-  std::vector<std::vector<std::vector<double> > > frezer;
+  std::vector<std::vector<std::vector<double> > > fruth;
   /// Sum
   std::vector<std::vector<std::vector<double> > > adda;
   /// Integral, normalised to unity
@@ -134,26 +116,14 @@ class EnTransfCS : public RegPassivePtr {
   /// In the following arrays there are two indices:
   /// atom number in the matter, shell number in atom.
   std::vector<std::vector<double> > quan;  // per 1 cm, used for path length
-#ifndef EXCLUDE_A_VALUES
-  std::vector<std::vector<double> > quan_a;
-#endif
-#ifndef EXCLUDE_MEAN
   std::vector<std::vector<double> > mean;
 #ifndef EXCLUDE_A_VALUES
+  std::vector<std::vector<double> > quan_a;
   std::vector<std::vector<double> > mean_a;
-#endif
 #endif
 
   std::vector<double> length_y0;
 };
-
-class EnTransfCSType {
- public:
-  PassivePtr<EnTransfCS> etcs;
-  EnTransfCSType(void) : etcs() { ; }
-  EnTransfCSType(EnTransfCS* md) : etcs(md) { ; }
-};
-std::ostream& operator<<(std::ostream& file, const EnTransfCSType& f);
 }
 
 #endif

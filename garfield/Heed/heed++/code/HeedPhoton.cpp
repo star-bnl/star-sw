@@ -1,5 +1,3 @@
-#include <vector>
-
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/random/ranluxint.h"
 #include "wcpplib/random/chisran.h"
@@ -13,11 +11,18 @@
 
 namespace Heed {
 
+using CLHEP::cm;
+using CLHEP::cm3;
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::c_light;
+using CLHEP::electron_mass_c2;
+using CLHEP::Avogadro;
+
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
-                       double fenergy,
-                       std::list<ActivePtr<gparticle> >& particleBank,
-                       HeedFieldMap* fieldmap, const bool fs_print_listing)
+                       double fenergy, HeedFieldMap* fieldmap,
+                       const bool fs_print_listing)
     : gparticle(primvol, pt, vel, time),
       particle_number(last_particle_number++),
       parent_particle_number(fparent_particle_number),
@@ -28,7 +33,6 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
 #endif
       s_delta_generated(false),
       s_print_listing(fs_print_listing),
-      m_particleBank(&particleBank),
       m_fieldMap(fieldmap) {
   mfunname("HeedPhoton::HeedPhoton(...)");
   double length_vel = length(vel);
@@ -36,22 +40,22 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                 mcerr);
 }
 
-void HeedPhoton::physics() {
+void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   mfunname("void HeedPhoton::physics()");
   if (s_print_listing) mcout << "HeedPhoton::physics() starts\n";
   // Stop here if the photon has already been absorbed.
   if (s_photon_absorbed) return;
   if (nextpos.prange <= 0.0) return;
   // Get least address of volume
-  const absvol* av = currpos.G_lavol();
+  const absvol* av = currpos.tid.G_lavol();
   HeedMatterDef* hmd = NULL;
-  const EnTransfCSType* etcst = dynamic_cast<const EnTransfCSType*>(av);
-  if (etcst) {
-    hmd = etcst->etcs->hmd.getver();
+  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  if (etcs) {
+    hmd = etcs->hmd.getver();
   } else {
-    const HeedDeltaElectronCSType* hmecst =
-        dynamic_cast<const HeedDeltaElectronCSType*>(av);
-    if (hmecst) hmd = hmecst->hdecs->hmd.get();
+    const HeedDeltaElectronCS* hdecs =
+        dynamic_cast<const HeedDeltaElectronCS*>(av);
+    if (hdecs) hmd = hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
@@ -59,10 +63,8 @@ void HeedPhoton::physics() {
   // First count the shells.
   long qst = 0;
   const long qa = hmd->matter->qatom();
-  for (long na = 0; na < qa; na++) {
-    const long qs = hmd->apacs[na]->get_qshell();
-    qst += qs;
-  }
+  for (long na = 0; na < qa; na++) qst += hmd->apacs[na]->get_qshell();
+
   // Sum up the cross-sections.
   std::vector<double> cs(qst);
   std::vector<long> nat(qst);
@@ -71,10 +73,10 @@ void HeedPhoton::physics() {
   long nst = 0;
   for (long na = 0; na < qa; na++) {
     const long qs = hmd->apacs[na]->get_qshell();
-    double at_weight_quan = hmd->matter->weight_quan(na);
+    const double awq = hmd->matter->weight_quan(na);
     for (long ns = 0; ns < qs; ns++) {
-      cs[nst] = hmd->apacs[na]->get_ICS(ns, energy) * at_weight_quan;
-      // threshold is taken into account in apacs[na]->get_ACS(ns,..
+      cs[nst] = hmd->apacs[na]->get_ICS(ns, energy) * awq;
+      // threshold is taken into account in apacs[na]->get_ACS(ns,..)
       nat[nst] = na;
       nsh[nst] = ns;
       s += cs[nst];
@@ -84,17 +86,14 @@ void HeedPhoton::physics() {
   if (s_print_listing) Iprintn(mcout, s);
   // Calculate the path length.
   // s = s * hmd->eldens / hmd->matter->Z_mean() * C1_MEV_CM;
-  s = s * 1.0e-18 * AVOGADRO / (hmd->matter->A_mean() / (gram / mole)) *
+  s = s * 1.0e-18 * Avogadro / (hmd->matter->A_mean() / (gram / mole)) *
       hmd->matter->density() / (gram / cm3);
   if (s_print_listing) Iprintn(mcout, s);
   const double path_length = 1.0 / s;  // cm
   if (s_print_listing) Iprint2n(mcout, energy, path_length);
   // Draw a random step length.
   const double xleng = -path_length * log(1.0 - SRANLUX());
-  if (s_print_listing) {
-    Iprintn(mcout, xleng);
-    Iprintn(mcout, nextpos.prange / cm);
-  }
+  if (s_print_listing) Iprint2n(mcout, xleng, nextpos.prange / cm);
   if (xleng * cm < nextpos.prange) {
     s_photon_absorbed = true;
 #ifdef SFER_PHOTOEL
@@ -104,7 +103,6 @@ void HeedPhoton::physics() {
     // Sample the shell.
     chispre(cs);
     const double r = chisran(SRANLUX(), cs);
-    // Iprintn(mcout, r);
     long n = long(r);
     if (n < 0) n = 0;
     if (n > nst - 1) n = nst - 1;
@@ -118,7 +116,7 @@ void HeedPhoton::physics() {
   }
 }
 
-void HeedPhoton::physics_after_new_speed() {
+void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
   mfunname("void HeedPhoton::physics_after_new_speed()");
   if (s_print_listing) mcout << "HeedPhoton::physics_after_new_speed starts\n";
   // Stop if the photon has not been absorbed.
@@ -126,15 +124,15 @@ void HeedPhoton::physics_after_new_speed() {
   // Stop if the delta electrons have already been generated.
   if (s_delta_generated) return;
   // Get least address of volume
-  const absvol* av = currpos.G_lavol();
+  const absvol* av = currpos.tid.G_lavol();
   HeedMatterDef* hmd = NULL;
-  const EnTransfCSType* etcst = dynamic_cast<const EnTransfCSType*>(av);
-  if (etcst) {
-    hmd = etcst->etcs->hmd.getver();
+  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  if (etcs) {
+    hmd = etcs->hmd.getver();
   } else {
-    const HeedDeltaElectronCSType* hmecst =
-        dynamic_cast<const HeedDeltaElectronCSType*>(av);
-    if (hmecst) hmd = hmecst->hdecs->hmd.get();
+    const HeedDeltaElectronCS* hdecs =
+        dynamic_cast<const HeedDeltaElectronCS*>(av);
+    if (hdecs) hmd = hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
@@ -147,8 +145,10 @@ void HeedPhoton::physics_after_new_speed() {
     mcout << "The condition:\n";
     Iprint2n(mcout, na_absorbing, ns_absorbing);
     mcout << "The decay products:\n";
-    for (unsigned int k = 0; k < el_energy.size(); ++k) mcout << el_energy[k] << "\n"; 
-    for (unsigned int k = 0; k < ph_energy.size(); ++k) mcout << ph_energy[k] << "\n"; 
+    for (unsigned int k = 0; k < el_energy.size(); ++k)
+      mcout << el_energy[k] << "\n";
+    for (unsigned int k = 0; k < ph_energy.size(); ++k)
+      mcout << ph_energy[k] << "\n";
   }
   const long qel = el_energy.size();
   for (long nel = 0; nel < qel; nel++) {
@@ -166,7 +166,7 @@ void HeedPhoton::physics_after_new_speed() {
     } else {
       vel.random_sfer_vec();
     }
-    const double gam_1 = el_energy[nel] / ELMAS;
+    const double gam_1 = el_energy[nel] / electron_mass_c2;
     const double inv = 1.0 / (gam_1 + 1.0);
     const double beta = sqrt(1.0 - inv * inv);
     const double mod_v = beta * c_light;
@@ -175,11 +175,10 @@ void HeedPhoton::physics_after_new_speed() {
       mcout << "Initializing delta electron\n";
       Iprint4n(mcout, el_energy[nel], gam_1, beta, mod_v);
     }
-    ActivePtr<gparticle> ac;
-    ac.pass(new HeedDeltaElectron(currpos.tid.eid[0].amvol.getver(), currpos.pt,
-                                  vel, currpos.time, particle_number,
-                                  m_fieldMap));
-    m_particleBank->push_back(ac);
+    HeedDeltaElectron* hd =
+        new HeedDeltaElectron(currpos.tid.eid[0].getver(), currpos.pt, vel,
+                              currpos.time, particle_number, m_fieldMap);
+    secondaries.push_back(hd);
   }
   const long qph = ph_energy.size();
   for (long nph = 0; nph < qph; nph++) {
@@ -190,14 +189,13 @@ void HeedPhoton::physics_after_new_speed() {
       mcout << "Initializing photon\n";
       Iprint2n(mcout, el_energy[nph], vel);
     }
-    ActivePtr<gparticle> ac;
-    ac.pass(new HeedPhoton(currpos.tid.eid[0].amvol.getver(), currpos.pt, vel,
-                           currpos.time, particle_number, ph_energy[nph],
-                           *m_particleBank, m_fieldMap));
-    m_particleBank->push_back(ac);
+    HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0].getver(), currpos.pt,
+                                    vel, currpos.time, particle_number,
+                                    ph_energy[nph], m_fieldMap);
+    secondaries.push_back(hp);
   }
   s_delta_generated = true;
-  s_life = 0;
+  s_life = false;
   if (s_print_listing) mcout << "HeedPhoton::physics_after_new_speed exited\n";
 }
 

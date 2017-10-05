@@ -9,6 +9,17 @@
 
 namespace Heed {
 
+using CLHEP::twopi;
+using CLHEP::degree;
+using CLHEP::electron_mass_c2;
+using CLHEP::eV;
+using CLHEP::MeV;
+using CLHEP::cm;
+using CLHEP::cm3;
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::Avogadro;
+
 const double HeedDeltaElectronCS::low_cut_angle_deg = 20.0;
 
 HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
@@ -24,26 +35,30 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
       sruth(fsruth),
       mthetac(fmthetac) {
   mfunname("HeedDeltaElectronCS::HeedDeltaElectronCS(...)");
+
   const long qe = hmd->energy_mesh->get_q();
-  eLoss.resize(qe);
-  beta.resize(qe);
-  beta2.resize(qe);
-  momentum.resize(qe);
-  momentum2.resize(qe);
+  eLoss.resize(qe, 0.);
+  beta.resize(qe, 0.);
+  momentum.resize(qe, 0.);
+  std::vector<double> beta2(qe, 0.);
+  std::vector<double> momentum2(qe, 0.);
+
+  const double rho = hmd->matter->density();
+  const double zmean = hmd->matter->Z_mean();
+  const double amean = hmd->matter->A_mean();
+  const double ZA = zmean / amean;
+  const double I_eff = 15.8 * eV * zmean;
   double smax = 0.0;
   for (long ne = 0; ne < qe; ne++) {
-    double ec = hmd->energy_mesh->get_ec(ne);
-    double gamma_1 = ec * MeV / electron_mass_c2;
+    const double ec = hmd->energy_mesh->get_ec(ne) * MeV;
+    const double gamma_1 = ec / electron_mass_c2;
     beta[ne] = lorbeta(gamma_1);
     beta2[ne] = beta[ne] * beta[ne];
-    momentum2[ne] = (pow(electron_mass_c2 + ec * MeV, 2.0) -
-                     electron_mass_c2 * electron_mass_c2) /
-                    (MeV * MeV);
+    const double en = electron_mass_c2 + ec;
+    momentum2[ne] =
+        (en * en - electron_mass_c2 * electron_mass_c2) / (MeV * MeV);
     momentum[ne] = sqrt(momentum2[ne]);
-    double ZA = hmd->matter->Z_mean() / hmd->matter->A_mean();
-    double I_eff = 15.8 * eV * hmd->matter->Z_mean();
-    double dedx =
-        e_cont_enloss(ZA, I_eff, hmd->matter->density(), ec * MeV, DBL_MAX, -1);
+    const double dedx = e_cont_enloss(ZA, I_eff, rho, ec, DBL_MAX, -1);
     if (smax < dedx) smax = dedx;
     eLoss[ne] = dedx / (MeV / cm);
   }
@@ -68,12 +83,6 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
   }
 
   lambda.resize(qe);
-  rthetac.resize(qe);
-  thetac.resize(qe);
-  CosThetac12.resize(qe);
-  SinThetac12.resize(qe);
-  sisfera.resize(qe, 0);
-  msig.resize(qe);
   if (sruth == 2) {
     angular_mesh_c.resize(q_angular_mesh);
     angular_mesh_c[0] = 0.0;
@@ -86,17 +95,16 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
       angular_mesh_c[n] = angular_mesh_c[n - 1] * rk;
     }
     angular_mesh_c[q_angular_mesh - 1] = 180.0;
-
-    smat.resize(qe);
     angular_points_ran.resize(qe);
     low_angular_points_ran.resize(qe);
     low_lambda.resize(qe);
+    const long qes = eesls->get_ees()->get_qe();
 #ifdef USE_MEAN_COEF
-    mean_coef_low_sigma.resize(eesls->get_ees()->get_qe());
+    mean_coef_low_sigma.resize(qes);
 #else
-    coef_low_sigma.resize(eesls->get_ees()->get_qe());
+    coef_low_sigma.resize(qes);
 #endif
-    for (long ne = 0; ne < eesls->get_ees()->get_qe(); ne++) {
+    for (long ne = 0; ne < qes; ne++) {
       long qat = hmd->matter->qatom();
       double s = 0.0;
       for (long nat = 0; nat < qat; nat++) {
@@ -115,23 +123,22 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
 #endif
     }
   }
+
   for (long ne = 0; ne < qe; ne++) {
     double rr;
     double ek = hmd->energy_mesh->get_ec(ne) * 1000.0;
     if (ek <= 10.0) {
-      rr = 1.0e-3 * hmd->matter->A_mean() / (g / mole) / hmd->matter->Z_mean() *
-           3.872e-3 * pow(ek, 1.492);
-      rr = rr / (hmd->matter->density() / (gram / cm3));
+      rr = 1.0e-3 * amean / (gram / mole) / zmean * 3.872e-3 * pow(ek, 1.492);
     } else {
       rr = 1.0e-3 * 6.97e-3 * pow(ek, 1.6);
-      rr = rr / (hmd->matter->density() / (gram / cm3));
     }
+    rr = rr / (rho / (gram / cm3));
     rr = rr * 0.1;
     // Iprintn(mcout, rr);
     double cor = 1.0;
     {
-      //                b-k*(x-a)**2 = 0  =>  x= a +- sqrt(b/k)
-      //                k = b / (x - a)**2
+      // b-k*(x-a)**2 = 0  =>  x= a +- sqrt(b/k)
+      // k = b / (x - a)**2
       double a = 2.5;
       double b = 4;
       // k=1.0/4.0
@@ -146,97 +153,76 @@ HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
       cor = r;
     }
     if (sruth == 1) {
-      lambda[ne] = mlambda / (hmd->matter->density() / (gram / cm3));
+      lambda[ne] = mlambda / (rho / (gram / cm3));
       if (lambda[ne] < rr) lambda[ne] = rr;
       lambda[ne] = lambda[ne] * cor;
       // Calculate the minimum angle for restriction of field by atomic shell
-      double mT =
-          2.0 *
-          asin(1.0 / (2.0 * momentum[ne] * hmd->matter->Z_mean() * 5.07e2));
-      rthetac[ne] = mT;
-      if (mT < mthetac) mT = mthetac;  // Throw out too slow interaction. They
-                                       // do not influent to anything
-
+      double mT = 2.0 * asin(1.0 / (2.0 * momentum[ne] * zmean * 5.07e2));
+      // Throw out too slow interactions. They do not have any influence.
+      if (mT < mthetac) mT = mthetac;
       // Calculate the cut angle due to mean free part
       double A = hmd->Rutherford_const / cor / (momentum2[ne] * beta2[ne]) /
-                 pow(5.07e10, 2.0);
+                 pow(5.07e10, 2);
       double B = lambda[ne] * A;
       B = sqrt(B / (B + 1.0));
-      thetac[ne] = 2.0 * asin(B);
+      // Threshold turn angle
+      double thetac = 2.0 * asin(B);
 
       // If it too little, reset it. It will lead to increasing
       // of lambda and decreasing of calculation time.
-      if (thetac[ne] < mT) {
-        thetac[ne] = mT;
+      if (thetac < mT) {
+        thetac = mT;
         B = mT;  // B is double precision
-        double r = sin(B / 2.0);
+        double r = sin(0.5 * B);
         lambda[ne] = 1 / A * 2.0 * r * r / (1 + cos(B));
         // r=cos(TetacBdel(nen,nm))
         // lamBdel=A*(1.0+r)/(1.0-r)
         // lamBdel=1.0/lamBdel
         // lamBdel=(p2*bet2*sin(TetacBdel/2.0)**2) / A
       }
-      B = thetac[ne];
-      CosThetac12[ne] = cos(B / 2.0);
-      SinThetac12[ne] = sin(B / 2.0);
-      if (thetac[ne] > 1.5)
-        sisfera[ne] = 1;
-      else
-        sisfera[ne] = 0;
-
-      // c       debug mode:
-      // c        lamaBdel(nen,nm)=2.0*lamaBdel(nen,nm)
-    } else if (sruth == 0) {  // gaus formula
-
-      //  calculate path length from mTetacBdel
-      double msig_loc = mthetac;
-      double x = msig_loc / (sqrt(2.0) * 13.6 / (beta[ne] * momentum[ne]));
+      // const double CosThetac12 = cos(0.5 * thetac);
+      // const dobule SinThetac12 = sin(0.5 * thetac);
+      // Flag that scattering is spherical.
+      // const bool sisfera = thetac > 1.5 ? true : false;
+    } else if (sruth == 0) {
+      // Gauss formula
+      const double msig = sqrt(2.0) * 13.6 / (beta[ne] * momentum[ne]);
+      double x = mthetac / msig;
       x = x * x;
-
-      // x=x/DensMatDS(nMatVol(nVolBdel))
       x = x * hmd->radiation_length * cor;
-      lambda[ne] = mlambda / (hmd->matter->density() / (gram / cm3));
+      lambda[ne] = mlambda / (rho / (gram / cm3));
       if (lambda[ne] < rr) lambda[ne] = rr;
       lambda[ne] = lambda[ne] * cor;
-      // c        write(oo,*)' x=',x,' rleng=',rleng
-      // c                reset if it is too large
       if (lambda[ne] < x) lambda[ne] = x;
-      msig[ne] = sqrt(2.0) * 13.6 / (beta[ne] * momentum[ne]);
-
-      // c        debug mode:
-      // c        lamaBdel(nen,nm)=2.0*lamaBdel(nen,nm)
-      // c        msigBdel(nen)=0.5*msigBdel(nen)
     } else if (sruth == 2) {
-      smat[ne].resize(q_angular_mesh);
-      double energy = hmd->energy_mesh->get_ec(ne);
-      long qat = hmd->matter->qatom();
+      // Cross section for material per one av. atom, in cm^2/rad.
+      std::vector<double> smat(q_angular_mesh, 0.);
+      const double energy = hmd->energy_mesh->get_ec(ne);
+      const long qat = hmd->matter->qatom();
       for (long nan = 0; nan < q_angular_mesh; nan++) {
-        double angle = angular_mesh_c[nan] / 180.0 * M_PI;
+        const double angle = angular_mesh_c[nan] * degree;
         double s = 0.0;
         for (long nat = 0; nat < qat; nat++) {
-          s += ees->get_CS(hmd->matter->atom(nat)->Z(), energy, angle) *
-               hmd->matter->weight_quan(nat);
+          const int z = hmd->matter->atom(nat)->Z();
+          const double w = hmd->matter->weight_quan(nat);
+          s += ees->get_CS(z, energy, angle) * w;
         }
         s = s * 1.0E-16;
         // s = s * 1.0E-16 * C1_MEV_CM * C1_MEV_CM;
-        //      Angstrem**2 -> cm**2
-        //                cm**2 -> MeV**-2
-        s = s * 2.0 * M_PI * sin(angle);  // sr -> dtheta
-
-        smat[ne][nan] = s;
+        // Angstrem**2 -> cm**2
+        // cm**2 -> MeV**-2
+        smat[nan] = s * twopi * sin(angle);  // sr -> dtheta
       }
       angular_points_ran[ne] =
-          PointsRan(angular_mesh_c, smat[ne], low_cut_angle_deg, 180.0);
+          PointsRan(angular_mesh_c, smat, low_cut_angle_deg, 180);
       low_angular_points_ran[ne] =
-          PointsRan(angular_mesh_c, smat[ne], 0.0, low_cut_angle_deg);
+          PointsRan(angular_mesh_c, smat, 0., low_cut_angle_deg);
+      const double coef =
+          Avogadro * rho / (gram / cm3) / (amean / (gram / mole));
       lambda[ne] =
-          1.0 / (angular_points_ran[ne].get_integ_active() / 180.0 * M_PI *
-                 AVOGADRO * hmd->matter->density() / (gram / cm3) /
-                 (hmd->matter->A_mean() / (gram / mole)));
+          1. / (angular_points_ran[ne].get_integ_active() * degree * coef);
       low_lambda[ne] =
-          1.0 / (low_angular_points_ran[ne].get_integ_active() / 180.0 * M_PI *
-                 AVOGADRO * hmd->matter->density() / (gram / cm3) /
-                 (hmd->matter->A_mean() / (gram / mole)));
+          1. / (low_angular_points_ran[ne].get_integ_active() * degree * coef);
     }
   }
 }
@@ -245,32 +231,30 @@ double HeedDeltaElectronCS::get_sigma(double energy, double nscat) const {
   mfunname("double HeedDeltaElectronCS::get_sigma(...)");
   check_econd11(nscat, < 0, mcerr);
   // check_econd21(nscat , < 0 || , > eesls->get_qscat() , mcerr);
-  // ^ not compartible with Poisson
+  // ^ not compatible with Poisson
+  const long qe = ees->get_qe();
   double energyKeV = energy * 1000.0;
-  if (energyKeV < ees->get_energy_mesh(0)) energyKeV = ees->get_energy_mesh(0);
-  if (energyKeV > ees->get_energy_mesh(ees->get_qe() - 1))
-    energyKeV = ees->get_energy_mesh(ees->get_qe() - 1);
+  energyKeV = std::max(energyKeV, ees->get_energy_mesh(0));
+  energyKeV = std::min(energyKeV, ees->get_energy_mesh(qe - 1));
   long n1 = 0;
-  long n2 = ees->get_qe() - 1;
-  long n3;
+  long n2 = qe - 1;
   while (n2 - n1 > 1) {
-    n3 = n1 + (n2 - n1) / 2;
+    const long n3 = n1 + (n2 - n1) / 2;
     if (energyKeV < ees->get_energy_mesh(n3))
       n2 = n3;
     else
       n1 = n3;
   }
+  const double e1 = ees->get_energy_mesh(n1);
+  const double e2 = ees->get_energy_mesh(n2);
 #ifdef USE_MEAN_COEF
-  double v1 = nscat * mean_coef_low_sigma[n1];
-  double v2 = nscat * mean_coef_low_sigma[n2];
+  const double v1 = nscat * mean_coef_low_sigma[n1];
+  const double v2 = nscat * mean_coef_low_sigma[n2];
 #else
-  double v1 = nscat * coef_low_sigma[n1];
-  double v2 = nscat * coef_low_sigma[n2];
+  const double v1 = nscat * coef_low_sigma[n1];
+  const double v2 = nscat * coef_low_sigma[n2];
 #endif
-  double r = v1 + (v2 - v1) /
-                      (ees->get_energy_mesh(n2) - ees->get_energy_mesh(n1)) *
-                      (energyKeV - ees->get_energy_mesh(n1));
-  return r;
+  return v1 + (v2 - v1) / (e2 - e1) * (energyKeV - e1);
 }
 
 void HeedDeltaElectronCS::print(std::ostream& file, int l) const {
@@ -291,16 +275,6 @@ void HeedDeltaElectronCS::print(std::ostream& file, int l) const {
           << ' ' << std::setw(12) << momentum[ne] << ' ' << std::setw(12)
           << eLoss[ne] << ' ' << std::setw(12) << lambda[ne] << ' '
           << std::setw(12) << low_lambda[ne] << '\n';
-  }
-  indn.n -= 2;
-  Ifile << "         get_ec,        rthetac,    thetac,    sisfera,     msig:"
-        << std::endl;
-  indn.n += 2;
-  for (long ne = 0; ne < qe; ne++) {
-    Ifile << std::setw(3) << ne << ' ' << std::setw(12)
-          << hmd->energy_mesh->get_ec(ne) << ' ' << std::setw(12) << rthetac[ne]
-          << ' ' << std::setw(12) << thetac[ne] << ' ' << std::setw(12)
-          << sisfera[ne] << ' ' << std::setw(12) << msig[ne] << '\n';
   }
   indn.n -= 2;
   Ifile << "na, angular_mesh_c:" << std::endl;
@@ -327,18 +301,5 @@ void HeedDeltaElectronCS::print(std::ostream& file, int l) const {
   }
 #endif
   indn.n -= 2;
-}
-
-std::ostream& operator<<(std::ostream& file, const HeedDeltaElectronCSType& f) {
-  mfunname(
-      "std::ostream& operator << (std::ostream& file, const "
-      "HeedDeltaElectronCSType& f)");
-  if (f.hdecs.get() == NULL) {
-    Ifile << "HeedDeltaElectronCSType: type is not initialized\n";
-  } else {
-    Ifile << "HeedDeltaElectronCSType: =";
-    f.hdecs->print(file, 1);
-  }
-  return file;
 }
 }

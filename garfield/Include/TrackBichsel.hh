@@ -17,16 +17,16 @@ class TrackBichsel : public Track {
   /// Constructor
   TrackBichsel();
   /// Destructor
-  ~TrackBichsel() {}
+  virtual ~TrackBichsel() {}
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0);
-  bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& n, double& e, double& extra);
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
+                          int& n, double& e, double& extra);
 
-  double GetClusterDensity();
-  double GetStoppingPower();
+  virtual double GetClusterDensity();
+  virtual double GetStoppingPower();
 
   void SetDataFile(const std::string& filename) { m_datafile = filename; }
 

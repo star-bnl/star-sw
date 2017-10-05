@@ -21,7 +21,56 @@ If GasLib.c is already included here, there is no need to include
 it again there and there will be only one line of initializations.
 */
 
+namespace {
+
+Heed::ExAtomPhotoAbsCS generate_Ar_PACS(const std::string& shelllist_dir,
+                                        const std::string& pacs_table_dir) {
+
+  Heed::ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, shelllist_dir + "shelllist.dat",
+                                            pacs_table_dir + "Ar.dat");
+
+  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18,
+  //                                     shelllist_dir + "shelllist.dat",
+  //                                     shelllist_dir + "mw3.dat");
+
+  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, "argon",
+  //                                     shelllist_dir + "ftbf18.dat", 2);
+
+  Heed::AtomicSecondaryProducts* asp = Argon_PACS_mod_esc.get_asp(1);
+  std::vector<double> electron_energy;
+  std::vector<double> photon_energy;
+  electron_energy.push_back(0.000200);
+  // electron_energy.push_back(0.002670);
+  asp->add_channel(0.65, electron_energy, photon_energy);
+  electron_energy.resize(2);
+  electron_energy[0] = 0.000050;
+  electron_energy[1] = 0.000200;
+  asp->add_channel(0.35, electron_energy, photon_energy, 1);
+  // mcout<<"L1:\n";
+  // asp->print(mcout, 2);
+
+  asp = Argon_PACS_mod_esc.get_asp(2);
+  electron_energy.resize(1);
+  electron_energy[0] = 0.000200;
+  asp->add_channel(1.0, electron_energy, photon_energy, 1);
+  // mcout<<"L2:\n";
+  // asp->print(mcout, 2);
+
+  asp = Argon_PACS_mod_esc.get_asp(3);
+  electron_energy.resize(1);
+  electron_energy[0] = 0.000200;
+  asp->add_channel(1.0, electron_energy, photon_energy, 1);
+  // mcout<<"L3:\n";
+  // asp->print(mcout, 2);
+
+  return Argon_PACS_mod_esc;
+}
+}
+
 namespace Heed {
+
+using CLHEP::gram;
+using CLHEP::mole;
 
 char* a_internal_HDB;
 std::string shelllist_dir_name =
@@ -167,51 +216,8 @@ ExAtomPhotoAbsCS Chlorine_PACS(17, shelllist_dir_name + "shelllist.dat",
 //                             shelllist_dir_name + "mw3.dat",
 //                             40.0e-6, 2, 0.0);
 
-ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void) {
-  mfunnamep("ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)");
-  ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, shelllist_dir_name + "shelllist.dat",
-                                      pacs_table_dir_name + "Ar.dat");
-
-  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18,
-  //                                     shelllist_dir_name + "shelllist.dat",
-  //                                     shelllist_dir_name + "mw3.dat");
-
-  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, "argon",
-  //                                     shelllist_dir_name + "ftbf18.dat", 2);
-
-  AtomicSecondaryProducts* asp = Argon_PACS_mod_esc.get_asp(1);
-  // asp->print(mcout, 2);
-  std::vector<double> electron_energy;
-  std::vector<double> photon_energy;
-  // electron_energy[0] = 0.002670;
-  electron_energy.resize(1);
-  electron_energy[0] = 0.000200;
-  asp->add_channel(0.65, electron_energy, photon_energy);
-  electron_energy.resize(2);
-  electron_energy[0] = 0.000050;
-  electron_energy[1] = 0.000200;
-  asp->add_channel(0.35, electron_energy, photon_energy, 1);
-  // mcout<<"L1:\n";
-  // asp->print(mcout, 2);
-
-  asp = Argon_PACS_mod_esc.get_asp(2);
-  electron_energy.resize(1);
-  electron_energy[0] = 0.000200;
-  asp->add_channel(1.0, electron_energy, photon_energy, 1);
-  // mcout<<"L2:\n";
-  // asp->print(mcout, 2);
-
-  asp = Argon_PACS_mod_esc.get_asp(3);
-  electron_energy.resize(1);
-  electron_energy[0] = 0.000200;
-  asp->add_channel(1.0, electron_energy, photon_energy, 1);
-  // mcout<<"L3:\n";
-  // asp->print(mcout, 2);
-
-  return Argon_PACS_mod_esc;
-}
-
-ExAtomPhotoAbsCS Argon_PACS = generate_Argon_PACS_mod_esc();
+ExAtomPhotoAbsCS Argon_PACS =
+    generate_Ar_PACS(shelllist_dir_name, pacs_table_dir_name);
 
 ExAtomPhotoAbsCS Gallium_PACS(31, shelllist_dir_name + "shelllist.dat",
                               pacs_table_dir_name + "Ga.dat");

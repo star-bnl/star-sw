@@ -23,7 +23,7 @@ namespace {
 /// function is applied in such intervals.
 /// Conditions are empirical.
 /// true - nonlinear, false - linear.
-/// Energies and threshold are given in MeV. 
+/// Energies and threshold are given in MeV.
 /// e1 should be < e2.
 bool sign_nonlinear_interpolation(double e1, double cs1, double e2, double cs2,
                                   double threshold) {
@@ -33,7 +33,7 @@ bool sign_nonlinear_interpolation(double e1, double cs1, double e2, double cs2,
   // normal case:
   if (cs2 >= cs1 || cs2 <= 0 || e1 < 300.0e-6 || e1 < 1.5 * threshold) {
     return false;
-  } 
+  }
   const double pw = log(cs1 / cs2) / log(e1 / e2);
   if (pw >= -1.0) {
     // good case for linear interpolation
@@ -58,19 +58,18 @@ bool sign_nonlinear_interpolation(double e1, double cs1, double e2, double cs2,
 double my_integr_fun(double xp1, double yp1, double xp2, double yp2,
                      double xmin, double /*xmax*/, double x1, double x2) {
   const bool nonlin = sign_nonlinear_interpolation(xp1, yp1, xp2, yp2, xmin);
-  return nonlin ? 
-    Heed::t_integ_power_2point<double>(xp1, yp1, xp2, yp2, x1, x2) :
-    Heed::t_integ_straight_2point<double>(xp1, yp1, xp2, yp2, x1, x2, 0, 1);
+  return nonlin ? Heed::t_integ_power_2point<double>(xp1, yp1, xp2, yp2, x1, x2)
+                : Heed::t_integ_straight_2point<double>(xp1, yp1, xp2, yp2, x1,
+                                                        x2, 0, 1);
 }
 
 double my_val_fun(double xp1, double yp1, double xp2, double yp2, double xmin,
                   double /*xmax*/, double x) {
   const bool nonlin = sign_nonlinear_interpolation(xp1, yp1, xp2, yp2, xmin);
-  return nonlin ? 
-    Heed::t_value_power_2point<double>(xp1, yp1, xp2, yp2, x) :
-    Heed::t_value_straight_2point<double>(xp1, yp1, xp2, yp2, x, 1);
+  return nonlin
+             ? Heed::t_value_power_2point<double>(xp1, yp1, xp2, yp2, x)
+             : Heed::t_value_straight_2point<double>(xp1, yp1, xp2, yp2, x, 1);
 }
-
 }
 
 namespace Heed {
@@ -81,7 +80,7 @@ PhotoAbsCS::PhotoAbsCS() : name(""), number(-1), Z(0), threshold(0.0) {}
 
 PhotoAbsCS::PhotoAbsCS(const std::string& fname, int fZ, double fthreshold)
     : name(fname), number(-1), Z(fZ), threshold(fthreshold) {
-    
+
   std::istringstream ss(name);
   int i = -100;
   ss >> i;
@@ -105,7 +104,7 @@ AveragePhotoAbsCS::AveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth,
   mfunname("AveragePhotoAbsCS::AveragePhotoAbsCS(...)");
   check_econd11(apacs, == NULL, mcerr);
   // Check the parameters (step = 0.5 * width is bad but OK).
-  if (fwidth > 0.0) check_econd11(fstep, >= 0.6 * fwidth, mcerr);  
+  if (fwidth > 0.0) check_econd11(fstep, >= 0.6 * fwidth, mcerr);
   // Copy the parameters of the "real" cross-section.
   name = real_pacs->get_name();
   number = real_pacs->get_number();
@@ -158,7 +157,9 @@ void AveragePhotoAbsCS::print(std::ostream& file, int l) const {
 //---------------------------------------------------------
 
 HydrogenPhotoAbsCS::HydrogenPhotoAbsCS()
-    : PhotoAbsCS("H", 1, 15.43e-6), prefactor(1.) { number = 1; }
+    : PhotoAbsCS("H", 1, 15.43e-6), prefactor(1.) {
+  number = 1;
+}
 
 double HydrogenPhotoAbsCS::get_CS(double energy) const {
   if (energy < threshold || energy == DBL_MAX) return 0.0;
@@ -258,7 +259,7 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
     const double Q = 5.5 + l - 0.5 * P;
     const double y = energy / E0;
     const double Fpasc = ((y - 1) * (y - 1) + yw * yw) * pow(y, (-Q)) *
-                   pow((1.0 + sqrt(y / ya)), (-P));
+                         pow((1.0 + sqrt(y / ya)), (-P));
     cs[n] = Fpasc * sigma;
   }
   remove_leading_zeros();
@@ -267,7 +268,8 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const std::string& fname, int fZ,
 SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const SimpleTablePhotoAbsCS& total,
                                              const SimpleTablePhotoAbsCS& part,
                                              double emax_repl) {
-  mfunname("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const "
+  mfunname(
+      "SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const "
       "SimpleTablePhotoAbsCS& total,...)");
 
   *this = total;  // to assure that all is preserved
@@ -339,7 +341,8 @@ double SimpleTablePhotoAbsCS::get_CS(double energy) const {
   if (energy < threshold) return 0.;
   if (energy <= ener[q - 1]) {
     PointCoorMesh<double, const std::vector<double> > pcm(q, &ener);
-    return t_value_generic_point_ar<double, std::vector<double>,
+    return t_value_generic_point_ar<
+        double, std::vector<double>,
         PointCoorMesh<double, const std::vector<double> > >(
         pcm, cs, &my_val_fun, energy, 1, threshold, 0, DBL_MAX);
   } else {
@@ -365,9 +368,10 @@ double SimpleTablePhotoAbsCS::get_integral_CS(double energy1,
     if (energy21 > energy2) energy21 = energy2;
     check_econd12(energy1, >, energy21, mcerr);
     PointCoorMesh<double, const std::vector<double> > pcm(q, &ener);
-    s = t_integ_generic_point_ar<double, std::vector<double>,
-                         PointCoorMesh<double, const std::vector<double> > >(
-          pcm, cs, &my_integr_fun, energy1, energy21, 1, threshold, 0, DBL_MAX);
+    s = t_integ_generic_point_ar<
+        double, std::vector<double>,
+        PointCoorMesh<double, const std::vector<double> > >(
+        pcm, cs, &my_integr_fun, energy1, energy21, 1, threshold, 0, DBL_MAX);
   }
   // print(mcout, 3);
   // mcout << "energy1="<<energy1
@@ -423,8 +427,8 @@ PhenoPhotoAbsCS::PhenoPhotoAbsCS(const std::string& fname, int fZ,
                                  double fthreshold, double fpower)
     : PhotoAbsCS(fname, fZ, fthreshold), power(fpower) {
   mfunname("PhenoPhotoAbsCS::PhenoPhotoAbsCS(...)");
-  check_econd11a(power, <= 2, 
-                 " value not allowed, integral would be infinite", mcerr);
+  check_econd11a(power, <= 2, " value not allowed, integral would be infinite",
+                 mcerr);
   factor =
       pow(threshold, power - 1.) * Thomas_sum_rule_const_Mb * Z * (power - 1.);
 }
@@ -710,7 +714,7 @@ void AtomPhotoAbsCS::get_escape_particles(
     const double en = std::max(energy - get_threshold(n_min), 0.);
     el_energy.push_back(en);
     return;
-  } 
+  }
   // Energy of photo-electron
   double en = energy - get_threshold(nshell);
   double hdist = 0.0;  // used to preserve the balance of energy
@@ -748,7 +752,7 @@ void AtomPhotoAbsCS::get_escape_particles(
 #endif
 
   if (is != 0) {
-    // Generate photo-electron and just copy all what is proposed by 
+    // Generate photo-electron and just copy all what is proposed by
     // get_channel with corrections by hdist.
     el_energy.resize(1 + felectron_energy.size());
     el_energy[0] = en;
@@ -826,7 +830,7 @@ void AtomPhotoAbsCS::get_escape_particles(
   double en1 = get_threshold(nshell) - hdist - 2 * get_threshold(n_chosen);
   if (en1 > 0.) {
     // Photo-electron
-    el_energy.push_back(en); 
+    el_energy.push_back(en);
     // First Auger from chosen shell
     el_energy.push_back(en1);
     // Then filling two vacancies at the next (chosen) shell
@@ -839,7 +843,8 @@ void AtomPhotoAbsCS::get_escape_particles(
     }
     return;
   }
-  en1 = get_threshold(nshell) - hdist - get_threshold(n_chosen) - get_threshold(n_min); 
+  en1 = get_threshold(nshell) - hdist - get_threshold(n_chosen) -
+        get_threshold(n_min);
   if (en1 > 0.) {
     // Photo-electron
     el_energy.push_back(en);
@@ -1498,9 +1503,9 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,
 #else
       std::string shellname("shell number " + long_to_String(nshell));
 #endif
-      acs[nshell].pass(
-          new SimpleTablePhotoAbsCS(shellname, 0,  // unknown here
-                                    threshold, l, E0, yw, ya, P, sigma));
+      acs[nshell]
+          .pass(new SimpleTablePhotoAbsCS(shellname, 0,  // unknown here
+                                          threshold, l, E0, yw, ya, P, sigma));
       // Iprintn(mcout, nshell);
       // Iprint3n(mcout, l, threshold, E0);
       // Iprint4n(mcout, yw, ya, P, sigma);
@@ -1573,8 +1578,8 @@ mark1:
   integ_ioniz_after_corr = get_integral_ICS(0.0, DBL_MAX);
 }
 
-ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,  
-    const std::string& fFitBT_file_name,
+ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(
+    int fZ, const std::string& fname, const std::string& fFitBT_file_name,
     const std::string& fsimple_table_file_name, double emax_repl,
     int id,  // to distinguish it from constructor above
     double fminimal_threshold) {
@@ -1851,7 +1856,8 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
       (qatom_ps[0] * atom[0]->get_Z() + qatom_ps[1] * atom[1]->get_Z());
 #else
   W = coef_I_to_W * (qatom_ps[0] * atom[0]->get_I_min() +
-                     qatom_ps[1] * atom[1]->get_I_min()) / qatom;
+                     qatom_ps[1] * atom[1]->get_I_min()) /
+      qatom;
 #endif
 }
 
@@ -1874,9 +1880,10 @@ MolecPhotoAbsCS::MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
       (qatom_ps[0] * atom[0]->get_Z() + qatom_ps[1] * atom[1]->get_Z() +
        qatom_ps[2] * atom[2]->get_Z());
 #else
-  W = coef_I_to_W * (qatom_ps[0] * atom[0]->get_I_min() +
-                     qatom_ps[1] * atom[1]->get_I_min() +
-                     qatom_ps[2] * atom[2]->get_I_min()) / qatom;
+  W = coef_I_to_W *
+      (qatom_ps[0] * atom[0]->get_I_min() + qatom_ps[1] * atom[1]->get_I_min() +
+       qatom_ps[2] * atom[2]->get_I_min()) /
+      qatom;
 #endif
 }
 

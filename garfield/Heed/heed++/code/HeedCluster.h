@@ -25,9 +25,9 @@ class HeedCluster : public RegPassivePtr {
   double transferred_energy;
 
   long estimated_qel;
-  /// Coordinates in the first system from tid system
+  /// Coordinates in the first system of the tree.
   point pt;
-  /// Coordinates in the local system, the last system from tid
+  /// Coordinates in the local system (the last system in the tree).
   point ptloc;
 
   manip_absvol_treeid tid;

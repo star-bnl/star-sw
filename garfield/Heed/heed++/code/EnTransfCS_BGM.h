@@ -32,14 +32,6 @@ class EnTransfCS_BGM : public RegPassivePtr {
   virtual EnTransfCS_BGM* copy() const { return new EnTransfCS_BGM(*this); }
   virtual void print(std::ostream& file, int l) const;
 };
-
-class EnTransfCS_BGM_Type {
- public:
-  PassivePtr<EnTransfCS_BGM> etcs_bgm;
-  EnTransfCS_BGM_Type(void) : etcs_bgm() {}
-  EnTransfCS_BGM_Type(EnTransfCS_BGM* md) : etcs_bgm(md) {}
-};
-std::ostream& operator<<(std::ostream& file, const EnTransfCS_BGM_Type& f);
 }
 
 #endif

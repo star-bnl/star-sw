@@ -14,6 +14,9 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
+using CLHEP::c_light;
+using CLHEP::c_squared;
+
 mparticle::mparticle(gparticle const& gp, double fmass)
     : gparticle(gp), mass(fmass) {
 
@@ -48,7 +51,6 @@ mparticle::mparticle(manip_absvol* primvol, const point& pt, const vec& vel,
       curr_gamma_1(gamma_1) {
 
   mfunname("mparticle::mparticle(...)");
-  origin.tid.eid[0].nembed = 0;  // just to clear
   primvol->m_find_embed_vol(pt, vel, &origin.tid);
   origin.pt = pt;
   if (vel == dv0) {
@@ -66,8 +68,8 @@ mparticle::mparticle(manip_absvol* primvol, const point& pt, const vec& vel,
   origin.time = time;
   origin.sb = 0;
   origin.s_ent = 1;
-  if (origin.tid.qeid == 0) return;
-  s_life = 1;
+  if (origin.tid.eid.empty()) return;
+  s_life = true;
   currpos = origin;
   nextpos = currpos;
   nextpos.s_ent = 0;
@@ -108,7 +110,7 @@ void mparticle::check_consistency() const {
   }
 }
 
-void mparticle::step() {
+void mparticle::step(std::vector<gparticle*>& secondaries) {
   // Make step to nextpos and calculate new step to border
   mfunname("void mparticle::step(void)");
   prevpos = currpos;
@@ -121,16 +123,16 @@ void mparticle::step() {
   if (currpos.prange == 0) {
     n_zero_step++;
     check_econd12a(n_zero_step, >, max_q_zero_step,
-                   "too much zero steps, possible infinite loop\n";
+                   "too many zero steps, possible infinite loop\n";
                    print(mcout, 10);, mcerr);
   } else {
     n_zero_step = 0;
   }
   // Calculate new current speed, direction and time.
   new_speed();
-  physics_after_new_speed();
+  physics_after_new_speed(secondaries);
 
-  if (s_life == 1) {
+  if (s_life) {
     if (prevpos.tid != currpos.tid) change_vol();
     nextpos = calc_step_to_bord();
   }
@@ -296,21 +298,21 @@ void mparticle::new_speed() {
   currpos.dirloc = currpos.dir;
   currpos.tid.up_absref(&currpos.dirloc);
   currpos.time =
-      prevpos.time + currpos.prange / ((prevpos.speed + currpos.speed) / 2.0);
+      prevpos.time + currpos.prange / (0.5 * (prevpos.speed + currpos.speed));
   check_consistency();
 }
 void mparticle::print(std::ostream& file, int l) const {
   if (l < 0)
-    Ifile << "mparticle: mass=" << mass << " (" << mass / kg << " kg, "
-          << mass* c_squared / GeV << " GeV)\n";
+    Ifile << "mparticle: mass=" << mass << " (" << mass / CLHEP::kg << " kg, "
+          << mass* c_squared / CLHEP::GeV << " GeV)\n";
   Ifile << "orig_kin_energy=" << orig_kin_energy << " ("
-        << orig_kin_energy / GeV << " GeV)"
+        << orig_kin_energy / CLHEP::GeV << " GeV)"
         << " orig_gamma_1=" << orig_gamma_1 << '\n';
   Ifile << "prev_kin_energy=" << prev_kin_energy << " ("
-        << prev_kin_energy / GeV << " GeV)"
+        << prev_kin_energy / CLHEP::GeV << " GeV)"
         << " prev_gamma_1=" << prev_gamma_1 << '\n';
   Ifile << "curr_kin_energy=" << curr_kin_energy << " ("
-        << curr_kin_energy / GeV << " GeV)"
+        << curr_kin_energy / CLHEP::GeV << " GeV)"
         << " curr_gamma_1=" << curr_gamma_1 << '\n';
   gparticle::print(file, l);
 }

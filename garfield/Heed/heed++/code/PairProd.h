@@ -6,8 +6,7 @@
 
 namespace Heed {
 
-/// Class defining the pair production occured at passing the
-/// delta-electron through the matter.
+/// Production of electron-ion pairs by delta-electrons.
 /// All energies are assumed in eV.
 /// But it seems that it is not strict requirement.
 /// If to change this in file "file_name" and in interface,
@@ -20,9 +19,9 @@ class PairProd : public RegPassivePtr {
   PairProd() {}
   PairProd(const std::string& file_name, double fwa, double ffactorFano = 0.19);
   /// Calculate energy loss (in eV).
-  double get_eloss() const;         
+  double get_eloss() const;
   /// Calculate energy loss (in eV) assuming V = wa / 2.
-  double get_eloss(const double ecur) const;  
+  double get_eloss(const double ecur) const;
 
   virtual void print(std::ostream& file, int l) const;
 

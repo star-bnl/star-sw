@@ -7,6 +7,10 @@
 
 namespace Heed {
 
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::Avogadro;
+
 void AtomDef::print(std::ostream& file, int l) const {
   if (l > 0) file << (*this);
 }

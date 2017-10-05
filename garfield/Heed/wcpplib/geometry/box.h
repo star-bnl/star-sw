@@ -20,7 +20,8 @@ The file is provided "as is" without express or implied warranty.
 namespace Heed {
 
 /// Box (three-dimensional rectangle/rectangular parallelogram).
-/// Center of coordinate system is meant in the center of the box.
+/// The box is centred with respect to the centre of the coordinate system.
+
 class box : public absvol {
  public:
   vfloat m_dx, m_dy, m_dz;     ///< Lengths of sides
@@ -57,7 +58,7 @@ class box : public absvol {
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 };
 
-// *****   manip_box  ********
+/// Box "manipulator".
 
 class manip_box : public manip_absvol, public box {
  public:
@@ -67,7 +68,7 @@ class manip_box : public manip_absvol, public box {
   /// Destructor
   virtual ~manip_box() {}
 
-  virtual absvol* Gavol(void) const;
+  virtual absvol* Gavol() const;
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
   virtual manip_box* copy() const;
@@ -75,7 +76,7 @@ class manip_box : public manip_absvol, public box {
 
 // *****   sh_manip_box  ********
 
-class sh_manip_box : virtual public sh_manip_absvol, public box {
+class sh_manip_box : public sh_manip_absvol, public box {
  public:
   /// Constructor
   sh_manip_box() : sh_manip_absvol(), box() {}
@@ -85,7 +86,7 @@ class sh_manip_box : virtual public sh_manip_absvol, public box {
   /// Destructor
   virtual ~sh_manip_box() {}
 
-  virtual absvol* Gavol(void) const;
+  virtual absvol* Gavol() const;
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
   virtual sh_manip_box* copy() const;

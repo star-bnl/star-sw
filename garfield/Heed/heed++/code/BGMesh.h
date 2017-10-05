@@ -7,6 +7,8 @@
 
 namespace Heed {
 
+/// Mesh of \f$\beta\gamma\f$ values.
+
 class BGMesh : public RegPassivePtr {
  public:
   BGMesh() : xmin(0.0), xmax(0.0), q(0), x(0) {}
@@ -20,7 +22,6 @@ class BGMesh : public RegPassivePtr {
   virtual BGMesh* copy() const { return new BGMesh(*this); }
 };
 std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
-
 }
 
 #endif

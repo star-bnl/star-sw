@@ -16,7 +16,6 @@ HEEDOBJS = \
 	$(OBJDIR)/Heed/PointsRan.o \
 	$(OBJDIR)/Heed/pois.o \
 	$(OBJDIR)/Heed/rnorm.o \
-	$(OBJDIR)/Heed/eiparticle.o \
 	$(OBJDIR)/Heed/eparticle.o \
 	$(OBJDIR)/Heed/particle_def.o \
 	$(OBJDIR)/Heed/AtomDef.o \
@@ -68,7 +67,7 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/HeedFieldMap.o \
 
 # Compilation flags
-CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long \
+CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Wshadow \
         `root-config --cflags` \
         -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \

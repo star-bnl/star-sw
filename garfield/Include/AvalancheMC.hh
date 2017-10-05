@@ -165,6 +165,11 @@ class AvalancheMC {
   /// Current drift line
   std::vector<DriftPoint> m_drift;
 
+  struct AvalPoint {
+    double x, y, z, t;
+    int ne, nh, ni;
+  };
+
   /// Step size model
   int m_stepModel;
   /// Fixed time step

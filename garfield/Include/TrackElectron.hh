@@ -16,19 +16,19 @@ class TrackElectron : public Track {
   // Constructor
   TrackElectron();
   // Destructor
-  ~TrackElectron() {}
+  virtual ~TrackElectron() {}
 
-  void SetParticle(const std::string& particle);
+  virtual void SetParticle(const std::string& particle);
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0);
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
 
-  bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& ncls, double& ecls, double& extra);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
+                          int& ncls, double& ecls, double& extra);
 
-  double GetClusterDensity();
-  double GetStoppingPower();
+  virtual double GetClusterDensity();
+  virtual double GetStoppingPower();
 
  private:
   bool m_ready;

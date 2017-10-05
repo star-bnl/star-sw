@@ -53,17 +53,4 @@ void EnTransfCS_BGM::print(std::ostream& file, int l) const {
   }
   indn.n -= 2;
 }
-
-std::ostream& operator<<(std::ostream& file, const EnTransfCS_BGM_Type& f) {
-  mfunname(
-      "std::ostream& operator << (std::ostream& file, const "
-      "EnTransfCS_BGM_Type& f)");
-  if (f.etcs_bgm.get() == NULL) {
-    Ifile << "EnTransfCS_BGM_Type: type is not initialized\n";
-  } else {
-    Ifile << "EnTransfCS_BGM_Type: =";
-    f.etcs_bgm->print(file, 1);
-  }
-  return file;
-}
 }

@@ -391,8 +391,11 @@ void ulsvolume::print(std::ostream& file, int l) const {
   }
 }
 
+/*
 manip_ulsvolume::manip_ulsvolume(manip_ulsvolume& f)
+    // TODO!
     : absref(f), manip_absvol(f), ulsvolume((ulsvolume&)f) {}
+*/
 
 manip_ulsvolume::manip_ulsvolume(const manip_ulsvolume& f)
     : absref(f), manip_absvol(f), ulsvolume(f) {}

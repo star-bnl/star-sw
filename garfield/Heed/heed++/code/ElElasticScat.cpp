@@ -14,11 +14,12 @@
 #include "heed++/code/PhysicalConstants.h"
 #include "heed++/code/ElElasticScat.h"
 
-/*
-2003, I. Smirnov
-*/
+// 2003, I. Smirnov
 
 namespace Heed {
+
+using CLHEP::electron_mass_c2;
+using CLHEP::fine_structure_const;
 
 double ElElasticScatDataStruct::CS(const double theta) const {
   if (A[0] == -1.0) return -1.0;
@@ -53,7 +54,8 @@ ElElasticScat::ElElasticScat(const std::string& file_name) : atom(0) {
       mcerr << "error at reading energy_mesh, ne=" << ne << '\n';
       spexit(mcerr);
     }
-    const double rm = 0.001 * energy_mesh[ne] / ELMAS;  // energy mesh in keV
+    // energy mesh in keV
+    const double rm = 0.001 * energy_mesh[ne] / electron_mass_c2;
     const double gamma = 1. + rm;
     const double beta2 = (2 * rm + rm * rm) / (gamma * gamma);
     gamma_beta2[ne] = gamma * beta2;
@@ -102,11 +104,12 @@ double ElElasticScat::get_CS_for_presented_atom(long na, double energy,
       "double ElElasticScat::get_CS_for_presented_atom(long na, double "
       "energy, double angle)");
   const double enKeV = energy * 1000.0;
-  const double rm = energy / ELMAS;
+  const double rm = energy / electron_mass_c2;
   const double gamma = 1. + rm;
   const double beta2 = (2. * rm + rm * rm) / (gamma * gamma);
   const double gamma_beta2_t = gamma * beta2;
-  const double coe = atom[na].Z / (FSCON * FSCON) / gamma_beta2_t;
+  const double coe =
+      fine_structure_const * fine_structure_const * atom[na].Z / gamma_beta2_t;
   if (enKeV < energy_mesh[0]) {
     double r = -1.;
     // looking for valid data
@@ -201,11 +204,11 @@ double ElElasticScat::get_CS_Rutherford(long Z, double energy, double angle) {
   mfunname(
       "double ElElasticScat::get_CS_Rutherford(long Z, double energy, "
       "double angle)");
-  const double gamma_1 = energy / ELMAS;
+  const double gamma_1 = energy / electron_mass_c2;
   const double beta2 = lorbeta2(gamma_1);
-  const double momentum2 = energy * energy + 2.0 * ELMAS * energy;
+  const double momentum2 = energy * energy + 2.0 * electron_mass_c2 * energy;
   // TODO
-  double r = 0.25 * Z * Z * ELRAD * ELRAD * ELMAS * ELMAS /
+  double r = 0.25 * Z * Z * fine_structure_const * fine_structure_const /
              (momentum2 * beta2 * pow(sin(0.5 * angle), 4)) /
              (pow(5.07E10, 2)) * 1.0e16;
   return r;

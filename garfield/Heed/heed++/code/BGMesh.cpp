@@ -27,9 +27,8 @@ void BGMesh::print(std::ostream& file, int l) const {
   indn.n += 2;
   Ifile << "xmin=" << xmin << " xmax=" << xmax << " quantity of intervals=" << q
         << '\n';
-  // TODO (HS)
   if (l > 1) {
-    // Iprintn(mcout, x);
+    for (long k = 1; k < q; ++k) Iprintn(mcout, x[k]);
   }
   indn.n -= 2;
 }
@@ -39,5 +38,4 @@ std::ostream& operator<<(std::ostream& file, const BGMesh& bgm) {
   bgm.print(file, 2);
   return file;
 }
-
 }

@@ -9,6 +9,12 @@
 
 namespace Heed {
 
+using CLHEP::gram;
+using CLHEP::mole;
+using CLHEP::bar;
+using CLHEP::kelvin;
+using CLHEP::hep_pascal;
+
 AtomDef Hydrogen("Hydrogen", "H", 1, 1.0 * gram / mole);
 // AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.00794 * gram/mole);
 AtomDef Helium("Helium", "He", 2, 4.002602 * gram / mole);

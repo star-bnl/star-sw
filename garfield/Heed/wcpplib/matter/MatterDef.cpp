@@ -7,9 +7,9 @@
 
 namespace Heed {
 
-void MatterDef::calc_I_eff(void) { I_effh = Z_mean() * 12.0 * eV; }
+void MatterDef::calc_I_eff() { I_effh = Z_mean() * 12.0 * CLHEP::eV; }
 
-MatterDef::MatterDef(void) : nameh("none"), notationh("none") {
+MatterDef::MatterDef() : nameh("none"), notationh("none") {
   MatterDef::get_logbook().push_back(this);
 }
 
@@ -74,7 +74,7 @@ MatterDef::MatterDef(const std::string& fname, const std::string& fnotation,
   MatterDef::get_logbook().push_back(this);
 }
 
-void MatterDef::verify(void) {
+void MatterDef::verify() {
   mfunnamep("void MatterDef::verify(void)");
   if (nameh == "none" && notationh == "none") return;
   std::list<MatterDef*>& logbook = MatterDef::get_logbook();
@@ -123,12 +123,12 @@ void MatterDef::printall(std::ostream& file) {
   }
 }
 
-std::list<MatterDef*>& MatterDef::get_logbook(void) {
+std::list<MatterDef*>& MatterDef::get_logbook() {
   static std::list<MatterDef*> logbook;
   return logbook;
 }
 
-const std::list<MatterDef*>& MatterDef::get_const_logbook(void) {
+const std::list<MatterDef*>& MatterDef::get_const_logbook() {
   return MatterDef::get_logbook();
 }
 
@@ -143,27 +143,15 @@ MatterDef* MatterDef::get_MatterDef(const std::string& fnotation) {
 }
 
 std::ostream& operator<<(std::ostream& file, const MatterDef& f) {
-  mfunname(
-      "std::ostream& operator << (std::ostream& file, const MatterDef& f)");
+  mfunname("ostream& operator << (ostream& file, const MatterDef& f)");
   Ifile << "MatterDef: name=" << std::setw(10) << f.name()
         << " notation=" << std::setw(3) << f.notation() << '\n';
   indn.n += 2;
-  Ifile << "density/(gram/cm3)=" << f.density() / (gram / cm3)
-        << " temperature/kelvin=" << f.temperature() / kelvin
-        << " I_eff/eV=" << f.I_eff() / eV << '\n';
+  Ifile << "density/(gram/cm3)=" << f.density() / (CLHEP::gram / CLHEP::cm3)
+        << " temperature/kelvin=" << f.temperature() / CLHEP::kelvin
+        << " I_eff/eV=" << f.I_eff() / CLHEP::eV << '\n';
   f.AtomMixDef::print(file, 1);
   indn.n -= 2;
-  return file;
-}
-
-std::ostream& operator<<(std::ostream& file, const MatterType& f) {
-  mfunname(
-      "std::ostream& operator << (std::ostream& file, const MatterType& f)");
-  if (f.matdef.get() == NULL) {
-    Ifile << "MatterType: type is not initialized\n";
-  } else {
-    Ifile << "MatterType: notation=" << f.matdef->notation() << '\n';
-  }
   return file;
 }
 

@@ -12,18 +12,22 @@ namespace Garfield {
 
 class HeedChamber : public Heed::sh_manip_absvol,
                     public Heed::box,
-                    public Heed::EnTransfCSType,
-                    public Heed::HeedDeltaElectronCSType,
-                    public Heed::SensitiveVolume {
+                    public Heed::EnTransfCS,
+                    public Heed::HeedDeltaElectronCS {
 
  public:
   HeedChamber(const Heed::abssyscoor& fcsys, const double dx, const double dy,
-              const double dz, const Heed::EnTransfCSType etcst,
-              const Heed::HeedDeltaElectronCSType hdecst)
+              const double dz, const Heed::EnTransfCS& etcs,
+              const Heed::HeedDeltaElectronCS& hdecs)
       : Heed::sh_manip_absvol(fcsys),
-        Heed::box(dx * Heed::cm, dy * Heed::cm, dz * Heed::cm, "chamber"),
-        Heed::EnTransfCSType(etcst),
-        Heed::HeedDeltaElectronCSType(hdecst) {}
+        Heed::box(dx * Heed::CLHEP::cm, 
+                  dy * Heed::CLHEP::cm, 
+                  dz * Heed::CLHEP::cm, "chamber"),
+        Heed::EnTransfCS(etcs),
+        Heed::HeedDeltaElectronCS(hdecs) {
+
+    s_sensitive = true;
+  }
 
   virtual Garfield::HeedChamber* copy() const {
     return new Garfield::HeedChamber(*this);

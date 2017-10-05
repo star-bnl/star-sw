@@ -62,7 +62,6 @@ class point;
 
 class absref_transmit;
 
-//             **** absref ****
 /// Abstract reference, base class for any geometrical vector object.
 /// Used for arranging of shift, turn and shange of coordinate system of
 /// vector objects. Four functions down(), up(), turn(), and shift() do that
@@ -365,13 +364,12 @@ class basis : public absref {
   basis(const vec& pex, const vec& pey, const vec& pez, const std::string& pname);
 
   friend std::ostream& operator<<(std::ostream& file, const basis& b);
-  AnyType_copy(basis, basis);
+  virtual basis* copy() const { return new basis(*this); }
   virtual void print(std::ostream& file, int l) const;
   virtual ~basis(void) {}
 };
 extern std::ostream& operator<<(std::ostream& file, const basis& b);
 
-//             **** point ****
 /// Point.
 
 class point : public absref {
@@ -389,9 +387,12 @@ class point : public absref {
     // not defined for vectors, but defined for points
     v += dir;
   }
-  point(void) : v() {}  // v is not initialised
+  /// Default constructor (coordinates are not initialised).
+  point() : v() {}
+  /// Constructor from vector.  
   point(const vec& fv) : v(fv) {}
-  point(const vfloat& fex, const vfloat& fey, const vfloat& fez)
+  /// Constructor from coordinates.
+  point(const vfloat fex, const vfloat fey, const vfloat fez)
       : v(fex, fey, fez) {}
   point& operator=(const point& fp) {
     v = fp.v;
@@ -413,14 +414,13 @@ class point : public absref {
     return not_apeq(p1.v, p2.v, prec);
   }
   friend std::ostream& operator<<(std::ostream& file, const point& p);
-  AnyType_copy(point, point);
+  virtual point* copy() const { return new point(*this); }
   virtual void print(std::ostream& file, int l) const;
   virtual ~point() {}
 };
 std::ostream& operator<<(std::ostream& file, const point& p);
 
-//             **** system of coordinates ****
-/// System of coordinates (centre, basis and mother coordinate system).
+/// Coordinate system (centre, basis and mother coordinate system).
 /// Take care: c.abas must be equal to abas->ex.abas.
 /// If asc==NULL and abs(c)==0 than it is primary system of coordinate
 /// and therefore c.abas and abas->ex.abas must be zero,

@@ -14,6 +14,7 @@ It is provided "as is" without express or implied warranty.
 
 #include <list>
 #include <iostream>
+#include <cstdlib>
 #include "wcpplib/stream/prstream.h"
 
 //#define USE_BOOST_MULTITHREADING

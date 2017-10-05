@@ -15,7 +15,7 @@ namespace Heed {
 class eparticle : public mparticle, public particle_type {
  public:
   /// Default constructor
-  eparticle(void) : mparticle(), particle_type(), m_fieldMap(NULL) {}
+  eparticle() : mparticle(), particle_type(), m_fieldMap(NULL) {}
   /// Constructor using velocity vector.
   eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
             particle_def* fpardef, HeedFieldMap* fieldmap);
@@ -23,9 +23,10 @@ class eparticle : public mparticle, public particle_type {
   eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
             particle_def* fpardef, HeedFieldMap* fieldmap,
             const double gamma_1);
-  AnyType_copy(eparticle, gparticle);
   /// Destructor
   virtual ~eparticle() {}
+
+  virtual eparticle* copy() const { return new eparticle(*this); }
   virtual void print(std::ostream& file, int l) const;
 
   virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange);

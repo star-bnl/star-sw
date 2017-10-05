@@ -6,6 +6,15 @@
 
 namespace Heed {
 
+using CLHEP::electron_mass_c2;
+using CLHEP::proton_mass_c2;
+using CLHEP::neutron_mass_c2;
+using CLHEP::c_squared;
+using CLHEP::electron_charge;
+using CLHEP::eplus;
+using CLHEP::MeV;
+using CLHEP::GeV;
+
 spin_def::spin_def(float ftotal, float fprojection)
     : total(ftotal), projection(fprojection) {
   mfunname("spin_def::spin_def(float ftotal, float fprojection)");

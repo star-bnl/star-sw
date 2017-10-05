@@ -21,7 +21,7 @@ void box::get_components(ActivePtr<absref_transmit>& /*aref_tran*/) {
   spexit(mcerr);
 }
 
-box::box(void)
+box::box()
     : m_dx(0), m_dy(0), m_dz(0), m_dxh(0), m_dyh(0), m_dzh(0), m_name("none") {
   mfunname("box::box(void)");
   init_prec();
@@ -29,8 +29,7 @@ box::box(void)
 }
 
 box::box(vfloat fdx, vfloat fdy, vfloat fdz, const std::string& fname) {
-  pvecerror(
-      "box(vfloat fdx, vfloat fdy, vfloat fdz, const std::string &fname)");
+  pvecerror("box(vfloat fdx, vfloat fdy, vfloat fdz, const string &fname)");
   m_dx = fabs(fdx);
   m_dy = fabs(fdy);
   m_dz = fabs(fdz);
@@ -44,8 +43,7 @@ box::box(vfloat fdx, vfloat fdy, vfloat fdz, const std::string& fname) {
 
 box::box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec,
          const std::string& fname) {
-  pvecerror(
-      "box(vfloat fdx, vfloat fdy, vfloat fdz, const std::string &fname)");
+  pvecerror("box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec, const string &fname)");
   m_dx = fabs(fdx);
   m_dy = fabs(fdy);
   m_dz = fabs(fdz);
@@ -58,7 +56,7 @@ box::box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec,
 }
 
 box::box(box& fb) : absref(fb), absvol(fb) {
-  pvecerror("box(const box& fb)");
+  pvecerror("box(box& fb)");
   m_dx = fb.m_dx;
   m_dy = fb.m_dy;
   m_dz = fb.m_dz;
@@ -83,12 +81,12 @@ box::box(const box& fb) : absref(fb), absvol(fb) {
   init_planes();
 }
 
-void box::init_prec(void) {
+void box::init_prec() {
   prec = (m_dxh + m_dyh + m_dzh) / 3.0;
   prec *= vprecision;
 }
 
-void box::init_planes(void) {
+void box::init_planes() {
   mfunname("void box::init_planes(void)");
   splane spl[6];
   spl[0] = splane(plane(point(m_dxh, 0, 0), vec(-1, 0, 0)), vec(-1, 0, 0));
@@ -288,7 +286,10 @@ void manip_box::print(std::ostream& file, int l) const {
 
 // *****   sh_manip_box  ********
 
-absvol* sh_manip_box::Gavol(void) const { return (box*)this; }
+// absvol* sh_manip_box::Gavol() const { return (box*)this; }
+absvol* sh_manip_box::Gavol() const { 
+  return dynamic_cast<box*>(const_cast<sh_manip_box*>(this)); 
+}
 
 void sh_manip_box::get_components(ActivePtr<absref_transmit>& aref_tran) {
   sh_manip_absvol::get_components(aref_tran);

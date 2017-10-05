@@ -52,16 +52,11 @@ The file is provided "as is" without express or implied warranty.
 // other than similar curiosity does NOT have any sense.
 
 // To be addressed by active pointer an object of a class
-// should have functions
-// copy() which clones the object and returns new address, and may have
-// print() which prints it to a stream.
-// The others (the class name, its bases etc.) is not matter.
-// However sometimes it is convenient to derive such a class from AbsCont -
-// an abstract class, in which the function copy is declared pure
-// and the function print does nothing.
-// The copy() is declared pure just to insure that the user does not
+// should have a function copy() which clones the object and returns 
+// the new address, and may have have a function print() 
+// which prints it to a stream.
+// The copy() is declared pure just to ensure that the user does not
 // forget to define it in derivative.
-// Its body is approximately the same and consists of two lines.
 
 #define COPY_TYPE_CHECK  // make execution longer, but allows
 // to detect missings of copy functions in classes referred by
@@ -134,9 +129,6 @@ The file is provided "as is" without express or implied warranty.
 #endif
 
 namespace Heed {
-
-#define AnyType_copy(derived_type, base_type) \
-  virtual derived_type* copy(void) const { return new derived_type(*this); }
 
 template <class X>
 class StandardCopyDefinition {

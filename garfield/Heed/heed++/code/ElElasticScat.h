@@ -60,6 +60,7 @@ class ElElasticScat : public RegPassivePtr {
   /// Constructor with file name.
   ElElasticScat(const std::string& file_name);
   void print(std::ostream& file, int l) const;
+
  private:
   /// Number of energies (local mesh)
   long qe;

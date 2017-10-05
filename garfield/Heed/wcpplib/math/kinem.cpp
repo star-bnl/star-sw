@@ -39,13 +39,13 @@ void theta_two_part(const double Ep0, const double Ep1, const double Mp,
   if (ctheta > 1.0) ctheta = 1.0;
   theta_p = acos(ctheta);
   if (theta_p == 0.0) {
-    theta_t = 0.5 * M_PI;
+    theta_t = CLHEP::halfpi;
     return;
   }
   double Pp1 = Ep1 * Ep1 - Mp2;
   check_econd11(Pp1, < 0, mcerr);
   if (Pp1 == 0.0) {
-    theta_t = 0.5 * M_PI;
+    theta_t = CLHEP::halfpi;
     return;
   }
   Pp1 = sqrt(Pp1);
