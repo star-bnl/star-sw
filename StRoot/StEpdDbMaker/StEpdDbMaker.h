@@ -15,11 +15,11 @@ class StEpdDbMaker : public StMaker{
   public:
     StEpdDbMaker(const Char_t *name="epdDb");
     virtual ~StEpdDbMaker();
-    virtual Int_t Init();
-    virtual Int_t Make();
-    virtual Int_t Finish();
+    //virtual Int_t Init();
+    //virtual Int_t Make();
+    //virtual Int_t Finish();
     virtual Int_t InitRun( Int_t runNumber );
-    virtual void Clear(const Char_t *opt);
+    //virtual void Clear(const Char_t *opt);
 
     void setDebug(Int_t debug){mDebug=debug;} // 0:minimal message, >0 more debug messages
 
