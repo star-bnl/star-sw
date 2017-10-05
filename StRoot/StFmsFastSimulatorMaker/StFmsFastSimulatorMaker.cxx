@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.9 2017/05/03 15:54:21 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.10 2017/09/28 17:07:19 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.10  2017/09/28 17:07:19  akio
+// addoing bitshiftgain
+//
 // Revision 1.9  2017/05/03 15:54:21  akio
 // added gain scaling when attenuation was on during geant simulation
 //
@@ -53,7 +56,7 @@
 
 /* Constructor. */
 StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : 
-    StMaker(name),mFmsZSch(2),mFpsDEPerMIP(0.0016),mFpsNPhotonPerMIP(100.0) { }
+    StMaker(name),mFpsDEPerMIP(0.0016),mFpsNPhotonPerMIP(100.0) { }
 
 /* Process one event. */
 Int_t StFmsFastSimulatorMaker::Make() {
@@ -195,6 +198,14 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	adc = static_cast<Int_t>(energy / (gain * gainCorrection) + 0.5);    
     }else{
 	adc = static_cast<Int_t>(energy / mAttenuationGainScale / (gain * gainCorrection) + 0.5);    
+    }
+    if(mFmsBitShiftGain){
+	short bitshift = dbMaker->getBitShiftGain(detectorId,channel);
+	if(bitshift>0){
+	    adc = adc & (0x0fff << bitshift);
+	}else if(bitshift<0){
+	    adc = std::min(adc, (0x1<<(12+bitshift))-1 );
+	}
     }
     // Check for ADC values outside the allowed range and cap.
     adc = std::max(adc, 0);  // Prevent negative ADC
