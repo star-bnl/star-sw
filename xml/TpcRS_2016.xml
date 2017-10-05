@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+<stdout URL="file:./$JOBID.log" />
+<stderr URL="file:./$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
-  setenv NODEBUG yes
-  setup 64b
-  starver .DEV2 
+#  setenv NODEBUG yes
+#  setup 64b
+#  starver .DEV2 
+  starver TFG17j 
   set file = $INPUTFILE0;
   set rung = `echo $file | awk -F\_ '{print $2}'`
   echo "${file}"
@@ -15,7 +16,7 @@
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("$f" == "") then
 #    root4star -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
-    root.exe -x  -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+    root.exe -x  -q -b 'TpcRS.C(1000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>

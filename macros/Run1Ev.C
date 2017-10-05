@@ -1,9 +1,9 @@
 void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
 	    //	    Double_t pTlow=100,Double_t pThigh=100,
 	    Double_t pTlow=1,Double_t pThigh=1,
-	    Double_t Ylow=0.1, Double_t Yhigh=0.1,
-	    //	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
-	    Double_t Philow=2.094, Double_t Phihigh=2.094,
+	    //	    Double_t Ylow=0.1, Double_t Yhigh=0.1,
+	    Double_t Ylow=-.1, Double_t Yhigh=-.1,
+	    Double_t Philow=-TMath::DegToRad()*30, Double_t Phihigh=-TMath::DegToRad()*30,
 	    Double_t Zlow=0, Double_t Zhigh=0, Int_t Npart = 1) {
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
     if (gClassTable->GetID("St_geant_Maker") < 0) {
@@ -23,7 +23,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
     TString kine(Form("gkine %i %i %f %f %f %f %f %f %f %f",Npart,iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh));
     cout << "Set kine : " << kine.Data() << endl;
     St_geant_Maker::instance()->Do(kine.Data());
-    //    St_geant_Maker::instance()->Do("gspread 100. 100. 0.");
+    St_geant_Maker::instance()->Do("gspread 0. 0. 0.");
     //                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
     //                          Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");

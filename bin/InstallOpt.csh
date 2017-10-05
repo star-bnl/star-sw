@@ -101,7 +101,7 @@ foreach pkg ($list)
 	make check
         if ( $?) break;
         touch ../${pkg}.Done
-	break
+	breaksw
       case "xrootd*":
 # has problem with gcc 4.8.2
           cmake ../../${pkg} -DCMAKE_FORCE_32BITS=${FORCE_32BITS} -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} -DENABLE_PERL=FALSE -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_SHARED_LINKER_FLAGS=$LDFLAGS
@@ -110,7 +110,7 @@ foreach pkg ($list)
 	  make install
           if ( $?) break;
           touch ../${pkg}.Done
-	  break
+	  breaksw
       case "apr-util*":
           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR
           make install
