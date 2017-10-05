@@ -1,6 +1,9 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.20 2016/09/18 22:37:52 fisyak Exp $
+  /* $Id: g2t_track.idl,v 1.21 2017/10/02 15:29:39 jwebb Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.21  2017/10/02 15:29:39  jwebb
+     Integration of ETOF into simulation
+
      Revision 1.20  2016/09/18 22:37:52  fisyak
      pack no. of real TPC hits
 
@@ -76,6 +79,7 @@ struct g2t_track {
        long      hit_etr_p;  /* Id of first etr hit on track linked list */
        long      hit_hca_p;  /* Id of first hca hit on track linked list */
        long      hit_fts_p;  /* Id of first hca hit on track linked list */
+       long      hit_eto_p;  /* Id of first etof hit on track linked list */ 
        long      id;         /* primary key */
        long      is_shower;  /* 1 if shower track, 0 if not */
        long      itrmd_vertex_p; /* First intermediate vertex */
@@ -105,7 +109,8 @@ struct g2t_track {
        long      n_vpd_hit;  /* Nhits in vpd */
        long      n_etr_hit;  /* Nhits on etr */
        long      n_hca_hit;  /* Nhits on hca */
-       long      n_fts_hit;  /* Nhits on hca */
+       long      n_fts_hit;  /* Nhits on fts */
+       long      n_eto_hit;  /* Nhits on etof */
        long      next_parent_p; /* Id of next parent track */
        long      next_vtx_trk_p; /* Next daughter track of start vertex */
        long      start_vertex_p; /* Id of start vertex of track */
