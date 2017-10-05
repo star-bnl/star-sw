@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -36,13 +37,16 @@ StiIstHitLoader::~StiIstHitLoader()
 
 void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
+#if 0
    if (!_detector)
       throw runtime_error("StiIstHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
 
    if (!_hitContainer)
       throw runtime_error("StiIstHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-
-
+#else
+   assert(_detector);
+   assert(_hitContainer);
+#endif
    StIstHitCollection *col = source->istHitCollection();
 
    if (!col) {
@@ -77,10 +81,12 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
 
             for (unsigned int j = 0; j < vec.size(); j++) {
                StIstHit *hit = vec[j];
-
+#if 0
                if (!hit)
                   throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- NULL hit in container");
-
+#else
+	       assert(hit);
+#endif
                if (hit->detector() != kIstId) continue;
 
                LOG_DEBUG << *hit << "\n"

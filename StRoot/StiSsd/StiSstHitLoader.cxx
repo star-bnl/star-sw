@@ -26,7 +26,7 @@
  * \class StiSstHitLoader
  * \author Christelle Roy
 */
-
+#include <assert.h>
 #include "Stiostream.h"
 #include <cmath>
 #include <stdio.h>
@@ -59,8 +59,12 @@ void StiSstHitLoader::loadHits(StEvent* source,
 			       Filter<StiTrack> * trackFilter, 
 			       Filter<StiHit> * hitFilter)
 {
+#if 0
   if (!source)
     throw runtime_error("StiSstHitLoader::loadHits() - FATAL - source==0 ");
+#else
+  assert(source);
+#endif
   StSstHitCollection* ssthits = source->sstHitCollection();
   if (!ssthits)
     {
@@ -71,10 +75,12 @@ void StiSstHitLoader::loadHits(StEvent* source,
   StSstHit* hit;
   StiHit* stiHit;
   StiDetector* detector;
+#if 0
   if (!_hitContainer)
     throw runtime_error("StiSstHitLoader::loadHits() - FATAL - _hitContainer==0 ");
-
-  
+#else
+  assert(_hitContainer);
+#endif  
   for (unsigned int ladder = 0; ladder< ssthits->numberOfLadders(); ++ladder) 
     {
       StSstLadderHitCollection* ladderhits = ssthits->ladder(ladder);
@@ -89,11 +95,17 @@ void StiSstHitLoader::loadHits(StEvent* source,
 	  
 	  for (const_StSstHitIterator it=hits.begin(); it!=hits.end(); ++it) 
 	    {
+#if 0
 	      if (!*it) throw runtime_error("StiSstHitLoader::loadHits() - WARNING - *it==0");
+#else
+	      assert(*it);
+#endif
 	      hit = static_cast<StSstHit*>(*it);
-
+#if 0
 	      if (!hit) throw runtime_error("StiSstHitLoader::loadHits() - WARNING - hit==0");
-
+#else
+	      assert(hit);
+#endif
 	      detector = _detector->getDetector(layer, hit->ladder() - 1);
 
 	      if (hit && detector) 

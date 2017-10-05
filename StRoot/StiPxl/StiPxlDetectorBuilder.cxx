@@ -50,11 +50,14 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
  */
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
+#if 0
    if (!gGeoManager)
       throw runtime_error("StiPxlDetectorBuilder::StiPxlDetectorBuilder() "
          "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
          "Make sure STAR geometry is properly loaded with BFC AgML option");
-
+#else
+   assert(gGeoManager);
+#endif
    SetCurrentDetectorBuilder(this);
 
    // Access the (survey) geometry if requested by the user

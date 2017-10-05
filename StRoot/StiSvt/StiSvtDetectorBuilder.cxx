@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdexcept>
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StDbUtilities/StSvtLocalCoordinate.hh"
@@ -115,14 +116,27 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 
   St_DataSet *dataSet = NULL;
   dataSet = source.GetDataSet("StSvtConfig");
-  if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtConfig");
   _config = static_cast<StSvtConfig*>(dataSet->GetObject());
+#if 0
+  if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtConfig");
   if (!_config) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _config==0");
+#else
+  assert(dataSet);
+  assert(_config);
+#endif
 
   dataSet = source.GetDataSet("StSvtGeometry");
+#if 0
 	if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtGeometry");
+#else
+	assert(dataSet);
+#endif
   _geometry = static_cast<StSvtGeometry*>(dataSet->GetObject());
+#if 0
   if (!_geometry) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _geometry==0");
+#else
+  assert(_geometry);
+#endif
   nRows = 2* _config->getNumberOfBarrels();
   setNRows(nRows);
   
@@ -161,7 +175,11 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
     // width of gap between the edges of 2 adjacent ladders:
     //   first, the angle subtended by 1/2 of the ladder
     float fLadderRadius  = _geometry->getBarrelRadius(svtLayer);
+#if 0
     if (fLadderRadius<=0)	throw runtime_error("StiSvtDetectorBuilder::buildDetectors() - FATAL - fLadderRadius<=0");
+#else
+    assert(fLadderRadius>0);
+#endif
     StSvtWaferGeometry* waferGeom;
     Int_t index1, index2;
     StSvtWaferGeometry* waferGeom2;
