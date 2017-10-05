@@ -307,13 +307,36 @@
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
 
 <Create    block="IDSM"  />
-<Placement block="IDSM"   konly="'MANY'" group="TpcRefSys" in="CAVE" x="IDSA_x"  y="IDSA_y"  z="IDSA_z"   >
+<Placement block="IDSM" in="CAVE" group="TpcRefSys" konly="MANY">	   
+
+  <Misalign table="Geometry/pxl/idsOnTpc"                opts="left" />
+  <Misalign table="Geometry/tpc/TpcGlobalPositionSurvey" opts="left" />
+
+
+</Placement>
+
+<!--	   
+
+
+   thetax="89.9991989" phix="359.9625854"       
+   thetay="90.1522369" phiy="89.9625778"
+   thetaz="0.1522359"  phiz="90.2649689" -->
+
+<!-- 
+
+<Placement block="IDSM"   konly="MANY" group="TpcRefSys" 
+	   in="CAVE" 
+	   x="IDSA_x"  
+	   y="IDSA_y"  
+	   z="IDSA_z"   >
     
     <Rotation thetax="IDSA_thetax" phix="IDSA_phix"
               thetay="IDSA_thetay" phiy="IDSA_phiy"
               thetaz="IDSA_thetaz" phiz="IDSA_phiz" />
 
 </Placement>
+
+-->
 
 <!-- mmmmmmmmmmm   below no executable code outside Volumes mmmmmmmm  -->
 
@@ -432,11 +455,13 @@
 	 <Create    block="FGHV"/>		
 	 <!--  place FGT cable segments  -->  
 	 <Do var="j" from="k" to="16"> 
+
 	   <Placement block="FGHV" in="IDSM"
 		      x="(rRail+0.5*pm)*cos(angFgtCbl+(dPhiHV*(m+2.2*k-pm*.8)))"  
 		      y="(rRail+0.5*pm)*sin(angFgtCbl+(dPhiHV*(m+2.2*k-pm*.8)))" 
 		      z="IDSG_fgtStartZ+IDSG_fgtDiskStepZ*(j-0.5)"  
 		      />
+
               
 	 </Do>
        </Do>
