@@ -15,11 +15,11 @@ class StEpdDbMaker : public StMaker{
   public:
     StEpdDbMaker(const Char_t *name="epdDb");
     virtual ~StEpdDbMaker();
-    virtual Int_t Init();
-    virtual Int_t Make();
-    virtual Int_t Finish();
+    //virtual Int_t Init();
+    //virtual Int_t Make();
+    //virtual Int_t Finish();
     virtual Int_t InitRun( Int_t runNumber );
-    virtual void Clear(const Char_t *opt);
+    //virtual void Clear(const Char_t *opt);
 
     void setDebug(Int_t debug){mDebug=debug;} // 0:minimal message, >0 more debug messages
 
@@ -44,10 +44,10 @@ class StEpdDbMaker : public StMaker{
     short GetStatus(short ew, short pp, short tile){return mStatus[ew][pp][tile];}
 
     // epdGain table
-    short GetVPed(short ew, short pp, short tile){return mVPed[ew][pp][tile];}
-    short GetMip(short ew, short pp, short tile){return mMip[ew][pp][tile];}
-    short GetQtPedestals(short ew, short pp, short tile){return mQtPedestals[ew][pp][tile];}
-    short GetDarkCurrent(short ew, short pp, short tile){return mDarkCurrent[ew][pp][tile];}
+    float GetVPed(short ew, short pp, short tile){return mVPed[ew][pp][tile];}
+    float GetMip(short ew, short pp, short tile){return mMip[ew][pp][tile];}
+    float GetQtPedestals(short ew, short pp, short tile){return mQtPedestals[ew][pp][tile];}
+    float GetDarkCurrent(short ew, short pp, short tile){return mDarkCurrent[ew][pp][tile];}
 
   protected:
 

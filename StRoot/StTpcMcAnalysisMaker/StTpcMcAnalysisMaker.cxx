@@ -69,7 +69,7 @@
 #include "StDbUtilities/StCoordinates.hh" 
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcRawData.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(StTpcMcAnalysisMaker)
 
 //_________________________________________________
@@ -209,7 +209,7 @@ Int_t StTpcMcAnalysisMaker::MultiCluster() {
 	  transform(dirLSA,dirL);
 	  transform(dirL,dirG);
 	  StThreeVectorD normal(dirG.position().x(),dirG.position().y(),dirG.position().z());
-	  Double_t y = transform.yFromRow(row);
+	  Double_t y = transform.yFromRow(sector,row);
 	  StTpcLocalSectorCoordinate  lsCoord(0., y, 10.,sector,row);
 	  transform(lsCoord,lsCoordA);
 	  transform(lsCoordA, gCoord);
@@ -321,7 +321,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       transform(dirLSA,dirL);
       transform(dirL,dirG);
       StThreeVectorD normal(dirG.position().x(),dirG.position().y(),dirG.position().z());
-      Double_t y = transform.yFromRow(row);
+      Double_t y = transform.yFromRow(sector,row);
       StTpcLocalSectorCoordinate  lsCoord(0., y, 10.,sector,row);
       transform(lsCoord,lsCoordA);
       transform(lsCoordA, gCoord);
@@ -453,7 +453,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 		transform(dirLSA,dirL);
 		transform(dirL,dirG);
 		StThreeVectorD normal(dirG.position().x(),dirG.position().y(),dirG.position().z());
-		Double_t y = transform.yFromRow(row);
+		Double_t y = transform.yFromRow(sector,row);
 		StTpcLocalSectorCoordinate  lsCoord(0., y, 10.,sector,row);
 		transform(lsCoord,lsCoordA);
 		transform(lsCoordA, gCoord);

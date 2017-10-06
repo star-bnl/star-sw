@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "Stiostream.h"
 #include <cmath>
 #include <stdio.h>
@@ -30,7 +31,11 @@ void StiSvtHitLoader::loadHits(StEvent* source,
                                Filter<StiHit> * hitFilter)
 {
   cout <<"StiSvtHitLoader::loadHits() - Started"<<endl;
+#if 0  
   if (!source) throw runtime_error("StiSvtHitLoader::loadHits() -F- source==0 ");
+#else
+  assert(source);
+#endif
   StSvtHitCollection* svthits = source->svtHitCollection();
   if (!svthits)
     {
@@ -40,7 +45,11 @@ void StiSvtHitLoader::loadHits(StEvent* source,
   StSvtHit* hit=0;
   StiHit* stiHit=0;
   StiDetector* detector=0;
+#if 0
   if (!_hitContainer) throw runtime_error("StiSvtHitLoader::loadHits() -F- _hitContainer==0 ");
+#else
+  assert(_hitContainer);
+#endif
   int hitCounter = 0;
   for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel)
   {
@@ -58,15 +67,27 @@ void StiSvtHitLoader::loadHits(StEvent* source,
         StiHitTest hitTest;
         for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it)
         {
+#if 0
           if (!*it) throw runtime_error("StiSvtHitLoader::loadHits() -W- *it==0!");
+#else
+	  assert(*it);
+#endif
           hit = static_cast<StSvtHit*>(*it);
+#if 0
           if (!hit) throw runtime_error("StiSvtHitLoader::loadHits() -W- hit==0!");
+#else
+	  assert(hit);
+#endif
           int svtLayer = hit->layer();
           int svtLadder = hit->ladder();
           int stilayer = getLayer(svtLayer);
           int stiladder = getLadder(svtLayer,svtLadder);
           detector = _detector->getDetector(stilayer,stiladder);
+#if 0
           if (!detector) throw runtime_error("StiSvtHitLoader::loadHits() -W- detector==0!");
+#else
+	  assert(detector);
+#endif
           if (hit->flag()>=4) continue;
           if (hit->flag()< 0) continue;
           stiHit = _hitFactory->getInstance();

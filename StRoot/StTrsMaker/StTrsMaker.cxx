@@ -1049,7 +1049,7 @@ Int_t StTrsMaker::Make(){
 	//
 	// First make a sector where the data can go...
 	StTrsDigitalSector* aDigitalSector =
-	  new StTrsDigitalSector(mGeometryDb);
+	  new StTrsDigitalSector(20);
 	aDigitalSector->setSector(currentSectorProcessed);
 	//
 	// Point to the object you want to fill

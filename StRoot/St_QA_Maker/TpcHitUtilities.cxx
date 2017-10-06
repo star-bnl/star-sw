@@ -159,9 +159,9 @@ void TpcHitUtilities::buildMaps()
 	for (int padrow=1; padrow<=45; padrow++) {
 	    double padlength;
 	    if (padrow<14) {
-		padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();}
+		padlength = St_tpcPadConfigC::instance()->innerSectorPadLength(sector);}
 	    else {
-		padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();}
+		padlength = St_tpcPadConfigC::instance()->outerSectorPadLength(sector);}
 	    
 	    //Get the position of the padrow center, transform to local sector coordinates
 	    StTpcPadCoordinate padCoord(sector, padrow, 1, 1);

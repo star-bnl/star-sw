@@ -42,6 +42,11 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(),mEgLabel(t.eg_label)
   mHits[ktpc] = 0xff & t.n_tpc_hit;  /* Nhits in tpc */
   mHits[ktpcR]= 0xff &(t.n_tpc_hit >> 8);  /* Nhits in tpc real pad rows */
   mHits[kvpd] = 0xff & t.n_vpd_hit;  /* Nhits in vpd */
+  mHits[ketr] = 0xff & t.n_etr_hit;  /* Nhits in etr */
+  mHits[khca] = 0xff & t.n_hca_hit;  /* Nhits in hca */
+  mHits[kfts] = 0xff & t.n_fts_hit;  /* Nhits in fts */
+  mHits[keto] = 0xff & t.n_eto_hit;  /* Nhits in eto */
+  
   assert(t.pt<0 || mPxyz.perp()>1e-6);
 }
 //________________________________________________________________________________

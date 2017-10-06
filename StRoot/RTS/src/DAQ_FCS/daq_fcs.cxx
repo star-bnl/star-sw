@@ -180,6 +180,9 @@ daq_dta *daq_fcs::handle_adc()
 			at[i] = fcs_c.adc[i] ;
 		}
 
+		if(fcs_c.first_rhic_strobe_tick!=0 || fcs_c.trigger_tick != 142) {
+			LOG(WARN,"RHIC %d, Trg %d",fcs_c.first_rhic_strobe_tick,fcs_c.trigger_tick) ;
+		}
 		adc->finalize(fcs_c.tb_cou, fcs_c.sector, fcs_c.rdo, fcs_c.ch) ;
 	}
 
@@ -287,6 +290,9 @@ int fcs_data_c::event()
 	tb_cou = 0 ;
 	ch = -1 ;
 
+	trigger_tick = -1 ;
+	first_rhic_strobe_tick = -1 ;
+
 	while(dta_p<dta_stop) {
 		u_short h[3] ;
 
@@ -305,7 +311,15 @@ int fcs_data_c::event()
 			u_short d = *dta_p++ ;
 			if(d==0xFFFF) break ;
 
-			accum(ch,tb_cou,d&0xFFF) ;
+			if(d & 0x2000) {
+				if(first_rhic_strobe_tick < 0) first_rhic_strobe_tick = tb_cou ;
+			}
+			if(d & 0x8000) {
+				if(trigger_tick < 0) trigger_tick = tb_cou ;
+			}
+
+//			accum(ch,tb_cou,d&0xFFF) ;
+			accum(ch,tb_cou,d) ;
 			tb_cou++ ;
 		}
 
@@ -320,10 +334,12 @@ int fcs_data_c::event()
 
 int fcs_data_c::accum(int ch, int tb, u_short sadc)
 {
-	adc[tb] = sadc ;
+	adc[tb] = sadc ;	//but store the full data, with flags
 
+	sadc &= 0xFFF ;	//zap the flags
 
 	if(ped_run) {
+		
 		ped.mean[ch] += (double)sadc ;
 		ped.rms[ch] += (double)sadc * (double)sadc ;
 		ped.cou[ch]++ ;

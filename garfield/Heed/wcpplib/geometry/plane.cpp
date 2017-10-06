@@ -16,7 +16,7 @@ namespace Heed {
 // **** plane ****
 
 absref absref::*(plane::aref[2]) = {(absref absref::*)&plane::piv,
-                                    (absref absref::*)&plane::dir };
+                                    (absref absref::*)&plane::dir};
 
 void plane::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(2, aref));
@@ -39,7 +39,7 @@ plane::plane(const straight& sl1, const straight& sl2, vfloat prec)
     piv = pt;
     dir = unit_vec(sl1.Gdir() || sl2.Gdir());
   } else if (vecerror == 2)  // different parallel lines
-      {
+  {
     vecerror = 0;
     dir = unit_vec(sl1.Gdir() || (sl2.Gpiv() - sl1.Gpiv()));
   }
@@ -97,7 +97,7 @@ straight plane::cross(const plane& pl) const {
   pvecerror("point plane::cross(plane &pl)");
   point plpiv = pl.Gpiv();
   vec pldir = pl.Gdir();
-  vec a = dir || pldir;  //direction of the overall straight lines
+  vec a = dir || pldir;  // direction of the overall straight lines
   if (length(a) == 0) {
     if (plpiv == piv || check_par(pldir, dir, 0.0) != 0) {  // planes coinsides
       vecerror = 3;
@@ -108,10 +108,10 @@ straight plane::cross(const plane& pl) const {
     }
   }
   a = unit_vec(a);
-  vec c = a || dir;  //perpend. for ov. str.
+  vec c = a || dir;  // perpend. for ov. str.
   straight st(piv, c);
-  point pt = pl.cross(st);  //one point on ov. str.
-  return straight(pt, a);   //overall straight
+  point pt = pl.cross(st);  // one point on ov. str.
+  return straight(pt, a);  // overall straight
 }
 
 int plane::cross(const polyline& pll, point* crpt, int& qcrpt, polyline* crpll,
@@ -131,7 +131,7 @@ int plane::cross(const polyline& pll, point* crpt, int& qcrpt, polyline* crpll,
       vec v1 = cpt - pll.pt[n];
       if (length(v1) < prec) {
         if (n == 0)  // otherwise it is probably included on the previous step
-            {
+        {
           crpt[qcrpt++] = cpt;
         }
       } else {
@@ -154,7 +154,7 @@ vfloat plane::distance(const point& fpt) const {
   pvecerror("vfloat plane::distance(point& fpt)");
   if (fpt == piv) return 0.0;
   vec v = fpt - piv;
-  return abslt(v * dir);  // relys that dir is unit length vector
+  return fabs(v * dir);  // relys that dir is unit length vector
 }
 
 std::ostream& operator<<(std::ostream& file, const plane& pl) {
@@ -164,5 +164,4 @@ std::ostream& operator<<(std::ostream& file, const plane& pl) {
   indn.n -= 2;
   return file;
 }
-
 }

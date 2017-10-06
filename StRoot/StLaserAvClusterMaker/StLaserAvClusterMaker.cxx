@@ -22,7 +22,7 @@
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StDetectorDbMaker/St_tpcElectronicsC.h"
 #include "StTpcDb/StTpcDb.h"
@@ -85,7 +85,6 @@ Int_t StLaserAvClusterMaker::Make(){
     hitCollection = new StTpcHitCollection();
     pEvent->setTpcHitCollection(hitCollection);
   }
-  static Int_t NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   Double_t samplingFrequency     = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   Double_t TimeBinWidth = 1e9/samplingFrequency; // nsec
   Double_t zBinWidth     =  gStTpcDb->DriftVelocity()/samplingFrequency;
@@ -106,10 +105,11 @@ Int_t StLaserAvClusterMaker::Make(){
     if (fCluster->chisqY/fCluster->NDFY > 2000) continue;
     if (fCluster->dmvpX        >  0.04) continue;
     if (fCluster->dmuY         >  0.04) continue;
-    Double_t PadPitch        = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
-    if (fCluster->row > NoOfInnerRows) 
-      PadPitch               = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
     Int_t sector = ((Int_t) fCluster->sector)%100;
+    Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
+    Double_t PadPitch        = St_tpcPadConfigC::instance()->innerSectorPadPitch(sector);
+    if (fCluster->row > NoOfInnerRows) 
+      PadPitch               = St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
     Double_t time = fCluster->mvpX + St_tpcPadGainT0BC::instance()->T0(sector,fCluster->row,TMath::Nint(fCluster->muY));
     time += 3.0 * St_tpcElectronicsC::instance()->tau()/TimeBinWidth;
     StTpcPadCoordinate padcood(sector, fCluster->row, fCluster->muY, time);

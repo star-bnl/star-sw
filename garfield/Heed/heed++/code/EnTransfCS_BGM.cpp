@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "heed++/code/EnTransfCS_BGM.h"
 
 namespace Heed {
@@ -12,16 +14,15 @@ EnTransfCS_BGM::EnTransfCS_BGM(double fparticle_mass, PassivePtr<BGMesh> fmesh,
       mesh(fmesh) {
   mfunnamep("EnTransfCS_BGM::EnTransfCS_BGM(...)");
 
-  long q = mesh->q;
-  etcs_bgm = DynLinArr<EnTransfCS>(q);
-  long n;
-  for (n = 0; n < q; n++) {
+  const long q = mesh->q;
+  etcs_bgm.resize(q);
+  for (long n = 0; n < q; n++) {
     double bg = mesh->x[n];
-    double gamma_1 = sqrt(1.0 + (bg * bg)) - 1.0;  // gamma - 1
+    // gamma - 1
+    double gamma_1 = sqrt(1.0 + (bg * bg)) - 1.0;
     etcs_bgm[n] = EnTransfCS(fparticle_mass, gamma_1, fs_primary_electron, fhmd,
                              fparticle_charge);
   }
-
 }
 
 void EnTransfCS_BGM::print(std::ostream& file, int l) const {
@@ -37,12 +38,11 @@ void EnTransfCS_BGM::print(std::ostream& file, int l) const {
   mesh->print(file, 1);
 
   Ifile << "Array of Cross Section:\n";
-  Ifile << "Number of elements = " << etcs_bgm.get_qel() << '\n';
+  Ifile << "Number of elements = " << etcs_bgm.size() << '\n';
 
   if (l >= 2) {
-    long q = mesh->q;
-    long n;
-    for (n = 0; n < q; n++) {
+    const long q = mesh->q;
+    for (long n = 0; n < q; n++) {
       Ifile << "n=" << std::setw(5) << n << " bg=" << std::setw(14)
             << mesh->x[n] << " quan=" << std::setw(14) << etcs_bgm[n].quanC;
 #ifndef EXCLUDE_MEAN
@@ -53,17 +53,4 @@ void EnTransfCS_BGM::print(std::ostream& file, int l) const {
   }
   indn.n -= 2;
 }
-
-std::ostream& operator<<(std::ostream& file, const EnTransfCS_BGM_Type& f) {
-  mfunname("std::ostream& operator << (std::ostream& file, const "
-           "EnTransfCS_BGM_Type& f)");
-  if (f.etcs_bgm.get() == NULL) {
-    Ifile << "EnTransfCS_BGM_Type: type is not initialized\n";
-  } else {
-    Ifile << "EnTransfCS_BGM_Type: =";
-    f.etcs_bgm->print(file, 1);
-  }
-  return file;
-}
-
 }

@@ -4,13 +4,13 @@
 This is the main file which determines the output matters:
 default streams and indentation.
 
-There are two default strems in C++: cout and cerr.
+There are two default streams in C++: cout and cerr.
 In the program we often need to use stream for regular output and
 the same or another stream for emergency or exstraordinary cases,
 exceptions, error, etc. These logical streams can be realized not only to
 default tty, but to files. Perhaps there are many ways to control this,
 but the simplest one is the use symbolic stream
-notations mcout amnd mcerr (my cout and my cerr) thorought all the program,
+notations mcout amnd mcerr (my cout and my cerr) throughout the program,
 and to bound them with real streams through trivial macro-driven replacements,
 as done below.
 
@@ -107,15 +107,13 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
-#include <iostream>  // to define cout and cerr
-                     // using std::ostream;
-                     // using std::cout;
+#include <iostream>
 
-#define USE_DEFAULT_STREAMS  
+#define USE_DEFAULT_STREAMS
 // otherwise everything will be flushed to a file
 // If the macro OPEN_LOGFILE_EXPLICITLY (see below) is NOT defined,
 // the file name is fixed as "prstream_log.out" (see below).
-// Othewise the file can be opened with any name by lines like those:
+// Otherwise the file can be opened with any name by lines like those:
 //	HelperForMcout::get_ofstream().clear();
 //      HelperForMcout::get_ofstream().open("logfile.out");
 //      if(!HelperForMcout::get_ofstream())
@@ -131,9 +129,8 @@ It is provided "as is" without express or implied warranty.
 
 //#ifndef mcout
 #define mcout std::cout /* change to ordinary default C++ stream */
-                        //#endif
+//#endif
 #define mcerr std::cerr
-//#define mcerr cerr
 
 #else
 
@@ -141,8 +138,8 @@ It is provided "as is" without express or implied warranty.
 
 #include <fstream>
 
-class HelperForMcout  // and also for mcerr. Used for switching them to file
-    {
+class HelperForMcout {
+  // and also for mcerr. Used for switching them to file
  public:
   static long count;  // will be common for all modules
 
@@ -179,6 +176,8 @@ HelperForMcout __helper_for_mcout;
 
 #endif
 
+namespace Heed {
+
 class indentation {
  public:
   int n;  // current number of blanks to print
@@ -193,8 +192,7 @@ inline std::ostream& operator<<(std::ostream& file, indentation& ind) {
   if (ind.s_not == 1)
     ind.s_not = 0;
   else
-    for (n = 0; n < ind.n; n++)
-      file << ' ';
+    for (n = 0; n < ind.n; n++) file << ' ';
   return file;
 }
 
@@ -304,5 +302,6 @@ extern int s_short_output;  // sign which allows to make output shorter
 // If instead of this one tries to use special functions like
 // class_name::short_write,
 // he finds an obstacle that such functions are abcent for inbuilt types.
+}
 
 #endif

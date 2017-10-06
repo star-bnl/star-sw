@@ -1,9 +1,9 @@
 #ifndef POINTSRAN_H
 #define POINTSRAN_H
+
+#include <vector>
+
 /*
-Generates random numbers according to array. See comments to this file/
-
-
 Copyright (c) 2001 I. B. Smirnov
 
 Permission to use, copy, modify, distribute and sell this file
@@ -14,24 +14,24 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
-#include "wcpplib/safetl/AbsArr.h"
+namespace Heed {
 
-/*
-As far as I remember, this class generates random numbers
-according to pointwise distribution, with linear interpolation
-between given points and also with linear extrapolation
-*/
+/// Generates random numbers according to array.
+/// This class generates random numbers
+/// according to a pointwise distribution, with linear interpolation
+/// between given points and also with linear extrapolation.
 
 class PointsRan {
  private:
-  double xmin;           // is changed internally
-  double xmax;           // is changed internally
-  DynLinArr<double> x;   // x[0] is changed to xmin or that of zero
-                         // intepolated y,
-                         // x[q-1] to xmax or similarly zero y
-  DynLinArr<double> y;   // y[0] and y[q-1] are recalculated correspondingly
-  DynLinArr<double> iy;  // integrated minus initial level at xmin
-  DynLinArr<double> a;
+  double xmin;            // is changed internally
+  double xmax;            // is changed internally
+  std::vector<double> x;  // x[0] is changed to xmin or that of zero
+                          // interpolated y,
+                          // x[q-1] to xmax or similarly zero y
+  std::vector<double> y;  // y[0] and y[q-1] are recalculated correspondingly
+  /// Integrated minus initial level at xmin
+  std::vector<double> iy;
+  std::vector<double> a;
   double integ_total;
   double integ_active;
   double integ_start;
@@ -40,13 +40,12 @@ class PointsRan {
   int n_finish;
 
  public:
-  PointsRan(void) { ; }
-  PointsRan(DynLinArr<double> fx,  // passed by values, changed inside
-            DynLinArr<double> fy,  // passed by values, changed inside
-            double fxmin,          // minimum of generated distribution
-            double fxmax);         // maximum of generated distribution
+  PointsRan(void) {}
+  PointsRan(const std::vector<double>& fx, const std::vector<double>& fy,
+            double fxmin,   // minimum of generated distribution
+            double fxmax);  // maximum of generated distribution
   // If minimum is less then x[0], the distribution is extended
-  // by linear extraterpolation.
+  // by linear extrapolation.
   // If the extrapolated line crosses zero, the extension stops right there.
   // Otherwise it stops at fxmin.
   // The same is done when xmax is more than x[q-1].
@@ -54,9 +53,10 @@ class PointsRan {
 
   double ran(double flat_ran) const;
   double get_integ_total(void) const { return integ_total; }
-  double get_integ_active(void) const { return integ_active; }
   // actual integral of active distribution
+  double get_integ_active(void) const { return integ_active; }
   void print(std::ostream& file) const;
 };
+}
 
 #endif

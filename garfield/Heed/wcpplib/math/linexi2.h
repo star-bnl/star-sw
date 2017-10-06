@@ -63,9 +63,7 @@ class linexi2 : public linexi2_coor {
     a = lx.a;
     b = lx.b;
   }
-  double line(double x) {
-    return a * x + b;
-  }  //??
+  double line(double x) { return a * x + b; }  //??
 };
 std::ostream& operator<<(std::ostream& file, const linexi2& l);
 
@@ -81,6 +79,5 @@ class linexi2B : public linexi2 {
     return *this;
   }
 };
-
 }
 #endif

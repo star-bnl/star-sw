@@ -1,7 +1,8 @@
 #include <iomanip>
 #include <cmath>
 #include "wcpplib/random/PointsRan.h"
-#include "wcpplib/math/minmax.h"
+#include "wcpplib/util/FunNameStack.h"
+
 /*
 Copyright (c) 2001 I. B. Smirnov
 
@@ -13,26 +14,25 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
-PointsRan::PointsRan(DynLinArr<double> fx, DynLinArr<double> fy, double fxmin,
-                     double fxmax)
+namespace Heed {
+
+PointsRan::PointsRan(const std::vector<double>& fx,
+                     const std::vector<double>& fy, double fxmin, double fxmax)
     : xmin(fxmin), xmax(fxmax), x(fx), y(fy) {
   mfunnamep("PointsRan::PointsRan(...)");
-  check_econd12(x.get_qel(), !=, y.get_qel(), mcerr);
-  check_econd11(x.get_qel(), < 2, mcerr);
+  check_econd12(x.size(), !=, y.size(), mcerr);
+  check_econd11(x.size(), < 2, mcerr);
   check_econd12(xmin, >=, xmax, mcerr);
-  //check_econd12(xmin , > , x[0] , mcerr);
-  long q = x.get_qel();
-  //check_econd12(xmax , < , x[q-1] , mcerr);
-  long n;
-  for (n = 0; n < q - 1; n++) {
+  const long q = x.size();
+  for (long n = 0; n < q - 1; n++) {
     check_econd12(x[n], >=, x[n + 1], mcerr);
   }
-  for (n = 0; n < q; n++) {
+  for (long n = 0; n < q; n++) {
     check_econd11(y[n], < 0.0, mcerr);
   }
-  iy = DynLinArr<double>(q);
-  a = DynLinArr<double>(q - 1);
-  for (n = 0; n < q - 1; n++) {
+  iy.resize(q);
+  a.resize(q - 1);
+  for (long n = 0; n < q - 1; n++) {
     a[n] = (y[n + 1] - y[n]) / (x[n + 1] - x[n]);
   }
   if (xmin < x[0]) {
@@ -63,7 +63,7 @@ PointsRan::PointsRan(DynLinArr<double> fx, DynLinArr<double> fy, double fxmin,
   iy[0] = 0.0;
   integ_start = 0.0;
   n_start = 0;
-  for (n = 1; n < q; n++) {
+  for (long n = 1; n < q; n++) {
     iy[n] = iy[n - 1] + 0.5 * (x[n] - x[n - 1]) * (y[n - 1] + y[n]);
     if (xmin >= x[n]) {
       integ_start = iy[n];
@@ -83,32 +83,9 @@ PointsRan::PointsRan(DynLinArr<double> fx, DynLinArr<double> fy, double fxmin,
     }
   }
   integ_active = integ_finish - integ_start;
-  /*
-  for( n=0; n<q; n++)
-  {
-    mcout<<std::setw(3)<<n
-        <<' '<<std::setw(12)<<x[n]
-        <<' '<<std::setw(12)<<y[n]
-        <<' '<<std::setw(12)<<iy[n];
-    if(n < q-1)
-      mcout<<' '<<std::setw(12)<<a[n];
-    mcout<<'\n';
-  }
-  */
   double s = iy[q - 1];
   integ_total = s;
   check_econd11(s, <= 0.0, mcerr);
-
-  //s = 1.0 / s;
-  //for( n=0; n<q; n++)
-  //{
-  //  y[n] = y[n] * s;
-  //  iy[n] = iy[n] * s;
-  //  if(n < q-1)
-  //    a[n] = a[n] * s;
-  //}
-  //check_econd11(fabs(iy[q-1] - 1.0) , > 1.0e-10 , mcerr);
-  //iy[q-1] = 1.0;
 }
 
 double PointsRan::ran(double flat_ran) const {
@@ -127,15 +104,15 @@ double PointsRan::ran(double flat_ran) const {
     }
   }
   double dran = flat_ran - iy[n1];
-  //double dx = sqrt(2.0 * dran);
+  // double dx = sqrt(2.0 * dran);
   double dx;
   if (a[n1] != 0.0) {
     dx = (-y[n1] + sqrt(y[n1] * y[n1] + 2.0 * a[n1] * dran)) / a[n1];
   } else {
     dx = (x[n2] - x[n1]) / (iy[n2] - iy[n1]) * dran;
   }
-  //check_econd11(dx , < 0 , mcerr); // for debug
-  //check_econd11(dx , > x[n2] - x[n1] , mcerr); // for debug
+  // check_econd11(dx , < 0 , mcerr); // for debug
+  // check_econd11(dx , > x[n2] - x[n1] , mcerr); // for debug
   double r = x[n1] + dx;
   return r;
 }
@@ -149,15 +126,15 @@ void PointsRan::print(std::ostream& file) const {
         << '\n';
   Ifile << "integ_total=" << integ_total << " integ_active=" << integ_active
         << '\n';
-  //Iprintn(file, integ);
-  long q = x.get_qel();
+  // Iprintn(file, integ);
+  const long q = x.size();
   Iprintn(file, q);
-  long n;
-  for (n = 0; n < q; n++) {
+  for (long n = 0; n < q; n++) {
     file << std::setw(3) << n << ' ' << std::setw(12) << x[n] << ' '
          << std::setw(12) << y[n] << ' ' << std::setw(12) << iy[n];
     if (n < q - 1) file << ' ' << std::setw(12) << a[n];
     file << '\n';
   }
   indn.n -= 2;
+}
 }

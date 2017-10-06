@@ -1,7 +1,6 @@
 #include "heed++/code/HeedCondElectron.h"
-/*
-2003, I. Smirnov
-*/
+
+// 2003, I. Smirnov
 
 namespace Heed {
 

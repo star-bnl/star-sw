@@ -162,6 +162,7 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
         parameter (tan15 =.267949192431122696) !// Tan(Pi*15./180);
 !//   int's
    Integer i,j,iSecAng,nCount/0/,jTRIB
+   Integer half, sector,i1,i2,istep
 !//   real's
   Real x,x0,x1,x2,dx,dx1,dx2,xc;
   Real y,y0,y1,y2,dy,dy1,dy2;
@@ -172,7 +173,7 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
   Real xw,dxw,yw,dyw,zw,dzw,dYdX
   Real dRSectorShift/0/
   Real myDx,myDy,myDz,myAlph,myThet,myPhi,myPar(20)
-
+  
 !// radii of outer finest structureures
         Real tocsIR,tocsOR,tokaIR,tokaOR,tonxIR ,tonxOR ,toadIR,toadOR,toigIR,toigOR;
         Real toalIR,toalOR,tohaIR,tohaOR,toalIR2,toalOR2,tofcIR,tofcOR,tofsIR,tofsOR;
@@ -368,7 +369,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
       nRow   = 13               ! number of padrows in the sector
       pitch  = 0.335            ! tpc padrow pitch width
       width  = 1.15             ! tpc padrow thickness
-      super  = 3                ! number of padraws in a superpadrow
+      super  = 3                ! number of padrows in a superpadrow
       dAnode = 0.2              !// distance to anode wire from pad plane
       Npads  = { 88, 96, 104, 112, 118, 126, 134, 142, 150,
                 158, 166, 174, 182 }        ! number of pads in row
@@ -376,13 +377,43 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
    EndFill
         }	
-	else { ! if (TPCG_TpadConfig == 8) {
+	else if (TPCG_TpadConfig => 1 & TPCG_TpadConfig <= 8) {
    Fill TPRS                    ! devTY: sector of padrows  
       sec    = 1                ! sector number: 1 for inner, 2 for outer  
       nRow   = 40               ! number of padrows in the sector  
       pitch  = 0.5              ! tpc padrow pitch width  
       width  = 1.6              ! tpc padrow (pitch) thickness 
-      super  = 0                ! number of padraws in a superpadrow  
+      super  = 0                ! number of padrows in a superpadrow  
+      dAnode = 0.2              ! distance to anode wire from pad plane
+      Npads  = {     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
+                     70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
+                     86, 88, 90, 92, 94, 96, 98, 98,100,102,
+                    104,106,108,110,110,112,114,116,118,120} ! number of pads in row, J.Thomas : 05/31/2016
+      Rpads  = {55.8,  57.4,    59,  60.6,  62.2,  63.8,  65.4,    67,  68.6,  70.2,
+                71.8,  73.4,    75,  76.6,  78.2,  79.8,  81.4,    83,  84.6,  86.2,
+                87.8,  89.4,    91,  92.6,  94.2,  95.8,  97.4,    99, 100.6, 102.2,
+               103.8, 105.4,   107, 108.6, 110.2, 111.8, 113.4,   115, 116.6, 118.2} ! tpc padrow radii
+   EndFill
+        }
+	else if (TPCG_TpadConfig == 9) { ! iTPC only in sector 20
+   Fill TPRS                    ! sector of padrows
+      sec    = 1                ! sector number: 1 for inner, 2 for outer
+      nRow   = 13               ! number of padrows in the sector
+      pitch  = 0.335            ! tpc padrow pitch width
+      width  = 1.15             ! tpc padrow thickness
+      super  = 3                ! number of padrows in a superpadrow
+      dAnode = 0.2              !// distance to anode wire from pad plane
+      Npads  = { 88, 96, 104, 112, 118, 126, 134, 142, 150,
+                158, 166, 174, 182 }        ! number of pads in row
+      Rpads  = {60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8,
+               104.0,109.2,114.4,119.6 }    ! tpc padrow radii
+   EndFill
+   Fill TPRS                    ! devTY: sector of padrows  
+      sec    = 3                ! sector number: 1 for inner, 2 for outer  
+      nRow   = 40               ! number of padrows in the sector  
+      pitch  = 0.5              ! tpc padrow pitch width  
+      width  = 1.6              ! tpc padrow (pitch) thickness 
+      super  = 0                ! number of padrows in a superpadrow  
       dAnode = 0.2              ! distance to anode wire from pad plane
       Npads  = {     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
                      70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
@@ -692,15 +723,23 @@ Block TPCE is the TPC envelope
       zTOFCend = TPCG_LengthW/2 - TPCG_WheelTHK1;       !// write(*,*) 'zTOFCend', zTOFCend; !// end of TOFC
       zTIFCend = TPCG_LengthW/2 + 0.97;                 !// write(*,*) 'zTIFCend', zTIFCend; !// end of TIFC + flange
       zTIFCFlangeBegin = zTIFCend - 1*INCH;             !// write(*,*) 'zTIFCFlangeBegin' , zTIFCFlangeBegin;
-
+      half = 1
       Create and position  TPGV kONLY = 'MANY',
                                 z=+tpgvz,
                                 thetax=90 thetay=90 thetaz=0,
                                 phix = 75 phiy =-15 phiz=0
+      half = 2
+      if (TPCG_TpadConfig != 9) {	
                  position  TPGV kONLY = 'MANY',
                                 z=-tpgvz,
                                 thetax=90 thetay=90 thetaz=180,
                                 phix =105 phiy =195 phiz=0
+      } else {
+      Create and position  TPGV kONLY = 'MANY',
+                                z=-tpgvz,
+                                thetax=90 thetay=90 thetaz=180,
+                                phix =105 phiy =195 phiz=0
+      }	
 *                                                                2
 
       Create and position  TPCM       "    membrane    "
@@ -1688,7 +1727,12 @@ Block TPGV is the Gas Volume placed in TPC
       Material P10
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
 !//VP      Create    TPSS
+     sector = 12*(half-1)
+     if (half == 2 & TPCG_TpadConfig == 9) {
+      SHAPE     TUBE  rmin=tpgvIR+0.1  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
+     }	
      do iSecAng = 15,360-15,30
+       sector = sector + 1
        Create and Position TPSS            alphaz=iSecAng kOnly='MANY'
      endDo
 endblock
@@ -1696,13 +1740,18 @@ endblock
 Block  TPSS is a division of gas volume corresponding to a supersectors
       attribute TPSS  seen=1  colo=kBlue
 !//      shape Division  NDIV=12  IAXIS=2
-      SHAPE TUBS Phi1=-15 Phi2=15
-
+      SHAPE TUBS rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2 Phi1=-15 Phi2=15
 *
+     if (sector == 20 & TPCG_TpadConfig == 9) {
+      SHAPE TUBS rmin=tpgvIR+0.1  rmax=tpcg_SenGasOR  dz=tpgvLeng/2 Phi1=-15 Phi2=15
+     }	
       ag_ncopy = 1;
       do i_sec=1,2
-	Use    TPRS  sec=i_sec;
-!//	write(*,*) ' TPSS : sec = ',10*TPCG_TpadConfig+i_sec,' super =',tprs_super
+	i1 = i_sec
+	if (i_sec == 1 & TPCG_TpadConfig == 9 & sector == 20) i1 = 3
+	Use    TPRS  sec=i1;
+!//	write(*,*) ' TPSS : sector = ', sector, 'sec = ',10*TPCG_TpadConfig+i1,' super =',tprs_super
+!//	write(*,*) 'nRow = ', tprs_nRow
          Use    TECW  sec=i_sec;
          zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK
          zBeg = TPCG_MembTHK/2
@@ -1719,17 +1768,17 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  x=tprs_Rpads(i_row)-tprs_width;
                  Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+!//                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  x=tprs_Rpads(i_row);
                  create and position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                  write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+!//                 write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               if ((nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
                  x=tprs_Rpads(i_row)+tprs_width
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                  write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+!//                 write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,'row=',i_row,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
            enddo
       enddo

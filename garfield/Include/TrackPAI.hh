@@ -16,17 +16,17 @@ class TrackPAI : public Track {
   // Constructor
   TrackPAI();
   // Destructor
-  ~TrackPAI() {}
+  virtual ~TrackPAI() {}
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0);
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
 
-  bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& ncls, double& ecls, double& extra);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, 
+                          double& tcls, int& ncls, double& ecls, double& extra);
 
-  double GetClusterDensity();
-  double GetStoppingPower();
+  virtual double GetClusterDensity();
+  virtual double GetStoppingPower();
 
  private:
   bool m_ready;
@@ -82,6 +82,7 @@ class TrackPAI : public Track {
   double ComputeCsTail(const double emin, const double emax);
   double ComputeDeDxTail(const double emin, const double emax);
 
+  double SampleEnergyDeposit(const double u, double& f) const;
   double SampleAsymptoticCs(double u) const;
   double SampleAsymptoticCsSpinZero(const double emin, double u) const;
   double SampleAsymptoticCsSpinHalf(const double emin, double u) const;
@@ -89,7 +90,10 @@ class TrackPAI : public Track {
   double SampleAsymptoticCsElectron(const double emin, double u) const;
   double SampleAsymptoticCsPositron(const double emin, double u) const;
 
-  double LossFunction(const double eps1, const double eps2) const;
+  double LossFunction(const double eps1, const double eps2) const {
+    const double eps = eps1 * eps1 + eps2 * eps2;
+    return eps > 0. ? eps2 / eps : 0.;
+  }
 };
 }
 

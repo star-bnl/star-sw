@@ -6,10 +6,10 @@ use Cwd;
 #my @particles = qw(electron muon pion kaon proton deuteron triton He3 alpha pionMIP);
 #my @particles = qw(pion He3 alpha);
 #my @particles = qw(electron positron);
-my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha pionMIP);
+#my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha pionMIP);
 #my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha);
 #my @particles = qw(proton pionMIP);
-#my @particles = qw(pion+ pion-);
+my @particles = qw(pion+ pion-);
 #my @particles = (pionMIP);
 ##my @particles = (pionMIP1);
 #my @particles = (phi);
@@ -31,7 +31,7 @@ foreach my $part (@particles) {
 #  last;
 }
 my @cmd = qw(
-foreach f (muon tron pion proton pbar deuteron triton He3 alpha pionMIP)
+foreach f (muon pion proton pbar deuteron triton He3 alpha pionMIP)
 	    echo ${f}; hadd -T ${f}.root gstar*${f}*0.root
 end
 );

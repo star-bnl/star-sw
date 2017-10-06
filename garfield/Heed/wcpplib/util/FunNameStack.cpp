@@ -8,19 +8,11 @@ text appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-#include <stdlib.h>
 #include <iostream>
 #include <iomanip>
+#include <string.h>
 #include "wcpplib/util/FunNameStack.h"
-#ifdef USE_BOOST_MULTITHREADING
-#include "wcpplib/safetl/AbsList.h"
-#endif
 
-//#define USE_TOGETHER_WITH_CLEAN_NEW
-
-#ifdef USE_TOGETHER_WITH_CLEAN_NEW
-#include "wcpplib/util/clean_new.h"
-#endif
 
 #ifdef USE_BOOST_MULTITHREADING
 NameStack& NameStack::operator=(const NameStack& f) {
@@ -33,8 +25,8 @@ NameStack& NameStack::operator=(const NameStack& f) {
 #endif
   if (this != &f) {
     int n;
-    if (nmode == 1) for (n = 0; n < qname; n++)
-        delete name[n];
+    if (nmode == 1)
+      for (n = 0; n < qname; n++) delete name[n];
     nmode = f.nmode;
     qname = f.qname;
     id = f.id;
@@ -59,15 +51,17 @@ NameStack& NameStack::operator=(const NameStack& f) {
 }
 #endif
 
+namespace Heed {
+
 int s_throw_exception_in_spexit = 0;
 int s_exit_without_core = 0;
 
 FunNameStack& FunNameStack::instance() {
-//static FunNameStack inst;  // According to some Internet site this is
+// static FunNameStack inst;  // According to some Internet site this is
 // Meyer's approach,
 // // time of descruction is not determined.
 // // So it can potentially be destructed before it is still in use.
-//return inst;
+// return inst;
 #ifdef USE_BOOST_MULTITHREADING
 #ifdef PRINT_BEFORE_LOCK
   fprintf(stderr, "FunNameStack& FunNameStack::instance()\n");
@@ -112,8 +106,8 @@ FunNameStack::FunNameStack(void)
   s_ignore_keynumberlist = 1;  // to avoid report from delete at deletion
 #endif
 #endif
-  namestack = new AbsList<NameStack>;
-  namestack->append(NameStack());
+  namestack = new std::list<NameStack>;
+  namestack->push_back(NameStack());
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
   MemoriseIgnore::instance().not_ignore();
@@ -123,7 +117,7 @@ FunNameStack::FunNameStack(void)
 #endif  // for ifdef USE_TOGETHER_WITH_CLEAN_NEW
 
   pthread_t id = pthread_self();
-  namestack->get_last_node()->el.id = id;
+  namestack->back().id = id;
 #ifdef PRINT_MESSAGE_ABOUT_THREAD_INITIALIZATION
   mcerr
       << "-----------------------------------------------------------------\n";
@@ -151,28 +145,25 @@ FunNameStack::FunNameStack(void)
 #endif
 #else  // for ifdef USE_BOOST_MULTITHREADING
   qname = 0;
-  for (int n = 0; n < pqname; n++)
-    name[n] = NULL;
+  for (int n = 0; n < pqname; n++) name[n] = NULL;
 #endif
 }
 
 #ifdef USE_BOOST_MULTITHREADING
 NameStack* FunNameStack::get_thread_stack(void) const {
-  //long nret = 0;
+  // long nret = 0;
   pthread_t id = pthread_self();
-  AbsListNode<NameStack>* an = NULL;
   int s_found = 0;
-  an = namestack->get_first_node();
-  while (an != NULL) {
-    if (pthread_equal(an->el.id, id)) {
+  std::list<NameStack>::const_iterator it;
+  std::list<NameStack>::const_iterator end = namestack->end();
+  for (it = namestack->begin(); it != end; ++it) {
+    if (pthread_equal((*it).id, id)) {
       s_found = 1;
       break;
     }
-    an = an->get_next_node();
-    //nret++;
   }
-  if (s_found == 0)  // new thread is detected
-      {
+  if (s_found == 0) {
+// new thread is detected
 /*
 mcerr<<"-----------------------------------------------------------------\n";
 mcerr<<"-----------------------------------------------------------------\n";
@@ -191,7 +182,7 @@ Iprintn(mcerr, id);
     s_ignore_keynumberlist = 1;  // to avoid report from delete at deletion
 #endif
 #endif
-    namestack->append(NameStack());
+    namestack->push_back(NameStack());
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
     MemoriseIgnore::instance().not_ignore();
@@ -200,28 +191,27 @@ Iprintn(mcerr, id);
 #endif
 #endif
 
-    namestack->get_last_node()->el.id = id;
+    namestack->back().id = id;
   }
-  return &(namestack->get_last_node()->el);
+  return &(namestack - back());
 }
 NameStack* FunNameStack::get_thread_stack_q(long& nthread,
                                             long& qthread) const {
   nthread = 0;
   qthread = 0;
   pthread_t id = pthread_self();
-  AbsListNode<NameStack>* an = NULL;
   int s_found = 0;
-  an = namestack->get_first_node();
-  while (an != NULL) {
-    if (s_found == 0 && pthread_equal(an->el.id, id)) {
+  std::list<NameStack>::const_iterator it;
+  std::list<NameStack>::const_iterator end = namestack->end();
+  for (it = namestack->begin(); it != end; ++it) {
+    if (s_found == 0 && pthread_equal((*it).id, id)) {
       s_found = 1;
       nthread = qthread;
     }
-    an = an->get_next_node();
     qthread++;
   }
-  if (s_found == 0)  // new thread is detected
-      {
+  if (s_found == 0) {
+// new thread is detected
 /*
 mcerr<<"-----------------------------------------------------------------\n";
 mcerr<<"-----------------------------------------------------------------\n";
@@ -240,7 +230,7 @@ mcerr<<"-----------------------------------------------------------------\n";
     s_ignore_keynumberlist = 1;  // to avoid report from delete at deletion
 #endif
 #endif
-    namestack->append(NameStack());
+    namestack->push_back(NameStack());
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
     MemoriseIgnore::instance().not_ignore();
@@ -248,29 +238,25 @@ mcerr<<"-----------------------------------------------------------------\n";
     s_ignore_keynumberlist = 0;  // to avoid report from delete at deletion
 #endif
 #endif
-    namestack->get_last_node()->el.id = id;
+    namestack->back().id = id;
     nthread = qthread;
     qthread++;
-
   }
-  return &(namestack->get_last_node()->el);
+  return &(namestack->back());
 }
 void FunNameStack::remove_thread_stack(void) {
-  //long nret = 0;
   pthread_t id = pthread_self();
-  AbsListNode<NameStack>* an = NULL;
   int s_found = 0;
-  an = namestack->get_first_node();
-  while (an != NULL) {
-    if (pthread_equal(an->el.id, id)) {
+  std::list<NameStack>::const_iterator it;
+  std::list<NameStack>::const_iterator end = namestack->end();
+  for (it = namestack->begin(); it != end; ++it) {
+    if (pthread_equal((*it).id, id)) {
       s_found = 1;
       break;
     }
-    an = an->get_next_node();
-    //nret++;
   }
-  if (s_found == 0)  // new thread is detected
-      {
+  if (s_found == 0) {
+    // new thread is detected
     mcerr << "ERROR in void FunNameStack::remove_thread_stack(void) const:\n";
     mcerr << "new thread is detected\n";
     Iprintn(mcerr, id);
@@ -280,7 +266,7 @@ void FunNameStack::remove_thread_stack(void) {
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
   MemoriseIgnore::instance().ignore();
 #else
-  s_ignore_keynumberlist = 1;  // to avoid report from delete at deletion
+  s_ignore_keynumberlist = 1;    // to avoid report from delete at deletion
 #endif
 #endif
   namestack->remove(an);
@@ -288,7 +274,7 @@ void FunNameStack::remove_thread_stack(void) {
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
   MemoriseIgnore::instance().not_ignore();
 #else
-  s_ignore_keynumberlist = 0;  // to avoid report from delete at deletion
+  s_ignore_keynumberlist = 0;    // to avoid report from delete at deletion
 #endif
 #endif
 }
@@ -296,11 +282,11 @@ void FunNameStack::remove_thread_stack(void) {
 
 #ifdef USE_BOOST_MULTITHREADING
 std::ostream& FunNameStack::printname(std::ostream& file, NameStack* ns,
-                                      int n)                          //
+                                      int n)  //
 #else
-    std::ostream& FunNameStack::printname(std::ostream& file, int n)  //
+std::ostream& FunNameStack::printname(std::ostream& file, int n)  //
 #endif
-    {
+{
 #ifdef USE_BOOST_MULTITHREADING
   file << ns->name[n];
   return file;
@@ -356,8 +342,8 @@ FunNameStack& FunNameStack::operator=(const FunNameStack& f) {
   s_ignore_keynumberlist = 1;
 #endif
 #endif
-  if (namestack != NULL) delete namestack;
-  namestack = new AbsList<NameStack>(*(f.namestack));
+  if (namestack) delete namestack;
+  namestack = new std::list<NameStack>(*(f.namestack));
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
   MemoriseIgnore::instance().not_ignore();
@@ -375,8 +361,7 @@ FunNameStack& FunNameStack::operator=(const FunNameStack& f) {
   nmode = f.nmode;
 #ifdef USE_BOOST_MULTITHREADING
 #else
-  int n;
-  for (n = 0; n < f.qname; n++) {
+  for (int n = 0; n < f.qname; n++) {
     if (nmode == 0) {
       name[n] = f.name[n];
     } else {
@@ -409,7 +394,7 @@ FunNameStack::~FunNameStack() {
   s_ignore_keynumberlist = 1;
 #endif
 #endif
-  if (namestack != NULL) delete namestack;
+  if (namestack) delete namestack;
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined(MAINTAIN_KEYNUMBER_LIST) && defined(USE_BOOST_MULTITHREADING)
   MemoriseIgnore::instance().not_ignore();
@@ -418,12 +403,11 @@ FunNameStack::~FunNameStack() {
 #endif
 #endif
 #else
-  int n;
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
   s_ignore_keynumberlist = 1;
 #endif
-  if (nmode == 1) for (n = 0; n < qname; n++)
-      delete name[n];
+  if (nmode == 1)
+    for (int n = 0; n < qname; n++) delete name[n];
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
   s_ignore_keynumberlist = 0;
 #endif
@@ -478,16 +462,12 @@ std::ostream& operator<<(std::ostream& file, const FunNameStack& f) {
     file << "At the time of scanning there were " << qret << " threads \n"
          << "registered in FunNameStack system.\n";
     file << "The current one appeared nth: " << nret << '\n';
-    int n;
-    for (n = 0; n < ns->qname; n++) {
-      //file << "  n =" << std::setw(3) << n << "  " << f.name[n] << '\n';
+    for (int n = 0; n < ns->qname; n++) {
       file << std::setw(3) << n << "  " << ns->name[n] << " \n";
     }
 #else
     file << "FunNameStack: s_init=" << f.s_init << " qname=" << f.qname << '\n';
-    int n;
-    for (n = 0; n < f.qname; n++) {
-      //file << "  n =" << std::setw(3) << n << "  " << f.name[n] << '\n';
+    for (int n = 0; n < f.qname; n++) {
       file << std::setw(3) << n << "  " << f.name[n] << " \n";
     }
 #endif
@@ -500,11 +480,4 @@ std::ostream& operator<<(std::ostream& file, const FunNameWatch& f) {
   return file;
 }
 
-void GenError::print(std::ostream& file) {
-  file << "GenError::print: ERROR detected in:\n"
-       << static_cast<FunNameStack*>(this) << '\n';
-}
-void GenError::finish(std::ostream& file) {
-  print(file);
-  exit(1);
 }

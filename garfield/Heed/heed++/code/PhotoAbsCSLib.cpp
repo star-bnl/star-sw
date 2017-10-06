@@ -5,9 +5,7 @@
 #include "wcpplib/matter/GasLib.cpp"
 #endif
 
-/*
-2004, I. Smirnov
-*/
+// 2004, I. Smirnov
 
 /*
 Remark  14.10.2005:
@@ -23,15 +21,68 @@ If GasLib.c is already included here, there is no need to include
 it again there and there will be only one line of initializations.
 */
 
+namespace {
+
+Heed::ExAtomPhotoAbsCS generate_Ar_PACS(const std::string& shelllist_dir,
+                                        const std::string& pacs_table_dir) {
+
+  Heed::ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, shelllist_dir + "shelllist.dat",
+                                            pacs_table_dir + "Ar.dat");
+
+  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18,
+  //                                     shelllist_dir + "shelllist.dat",
+  //                                     shelllist_dir + "mw3.dat");
+
+  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, "argon",
+  //                                     shelllist_dir + "ftbf18.dat", 2);
+
+  Heed::AtomicSecondaryProducts* asp = Argon_PACS_mod_esc.get_asp(1);
+  std::vector<double> electron_energy;
+  std::vector<double> photon_energy;
+  electron_energy.push_back(0.000200);
+  // electron_energy.push_back(0.002670);
+  asp->add_channel(0.65, electron_energy, photon_energy);
+  electron_energy.resize(2);
+  electron_energy[0] = 0.000050;
+  electron_energy[1] = 0.000200;
+  asp->add_channel(0.35, electron_energy, photon_energy, 1);
+  // mcout<<"L1:\n";
+  // asp->print(mcout, 2);
+
+  asp = Argon_PACS_mod_esc.get_asp(2);
+  electron_energy.resize(1);
+  electron_energy[0] = 0.000200;
+  asp->add_channel(1.0, electron_energy, photon_energy, 1);
+  // mcout<<"L2:\n";
+  // asp->print(mcout, 2);
+
+  asp = Argon_PACS_mod_esc.get_asp(3);
+  electron_energy.resize(1);
+  electron_energy[0] = 0.000200;
+  asp->add_channel(1.0, electron_energy, photon_energy, 1);
+  // mcout<<"L3:\n";
+  // asp->print(mcout, 2);
+
+  return Argon_PACS_mod_esc;
+}
+}
+
 namespace Heed {
 
+using CLHEP::gram;
+using CLHEP::mole;
+
 char* a_internal_HDB;
-String shelllist_dir_name = String(
-    (a_internal_HDB = getenv("HEED_DATABASE")) == NULL ? "" : a_internal_HDB) +
-                            "/";
-String pacs_table_dir_name = String(
-    (a_internal_HDB = getenv("HEED_DATABASE")) == NULL ? "" : a_internal_HDB) +
-                             "/henke/";
+std::string shelllist_dir_name =
+    std::string((a_internal_HDB = getenv("HEED_DATABASE")) == NULL
+                    ? ""
+                    : a_internal_HDB) +
+    "/";
+std::string pacs_table_dir_name =
+    std::string((a_internal_HDB = getenv("HEED_DATABASE")) == NULL
+                    ? ""
+                    : a_internal_HDB) +
+    "/henke/";
 
 // Hydrogen
 HydrogenPhotoAbsCS Hydrogen_shell_PACS;
@@ -59,7 +110,7 @@ SimpleAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1, Hydrogen_for_NH4_shell_PACS);
 //                                        shelllist_dir_name + "H_for_CH4.dat",
 //                                        "H_for_CH4",
 //                                        12.65e-6);
-//ExAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1,
+// ExAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1,
 //				       shelllist_dir_name + "shelllist.dat",
 //				       pacs_table_dir_name + "H.dat",
 //				       10.0e-06);
@@ -165,52 +216,8 @@ ExAtomPhotoAbsCS Chlorine_PACS(17, shelllist_dir_name + "shelllist.dat",
 //                             shelllist_dir_name + "mw3.dat",
 //                             40.0e-6, 2, 0.0);
 
-ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void) {
-  mfunnamep("ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)");
-  ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, shelllist_dir_name + "shelllist.dat",
-                                      pacs_table_dir_name + "Ar.dat");
-
-  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18,
-  //                                     shelllist_dir_name + "shelllist.dat",
-  //                                     shelllist_dir_name + "mw3.dat");
-
-  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, "argon",
-  //                                     shelllist_dir_name + "ftbf18.dat", 2);
-
-  AtomicSecondaryProducts* asp = Argon_PACS_mod_esc.get_asp(1);
-  // asp->print(mcout, 2);
-  DynLinArr<double> electron_energy;
-  DynLinArr<double> photon_energy;
-  // electron_energy.put_qel(1);
-  // electron_energy[0] = 0.002670;
-  electron_energy.put_qel(1);
-  electron_energy[0] = 0.000200;
-  asp->add_channel(0.65, electron_energy, photon_energy);
-  electron_energy.put_qel(2);
-  electron_energy[0] = 0.000050;
-  electron_energy[1] = 0.000200;
-  asp->add_channel(0.35, electron_energy, photon_energy, 1);
-  // mcout<<"L1:\n";
-  // asp->print(mcout, 2);
-
-  asp = Argon_PACS_mod_esc.get_asp(2);
-  electron_energy.put_qel(1);
-  electron_energy[0] = 0.000200;
-  asp->add_channel(1.0, electron_energy, photon_energy, 1);
-  //mcout<<"L2:\n";
-  //asp->print(mcout, 2);
-
-  asp = Argon_PACS_mod_esc.get_asp(3);
-  electron_energy.put_qel(1);
-  electron_energy[0] = 0.000200;
-  asp->add_channel(1.0, electron_energy, photon_energy, 1);
-  //mcout<<"L3:\n";
-  //asp->print(mcout, 2);
-
-  return Argon_PACS_mod_esc;
-}
-
-ExAtomPhotoAbsCS Argon_PACS = generate_Argon_PACS_mod_esc();
+ExAtomPhotoAbsCS Argon_PACS =
+    generate_Ar_PACS(shelllist_dir_name, pacs_table_dir_name);
 
 ExAtomPhotoAbsCS Gallium_PACS(31, shelllist_dir_name + "shelllist.dat",
                               pacs_table_dir_name + "Ga.dat");
@@ -326,7 +333,7 @@ MolecPhotoAbsCS COS_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_PACS, 1, Sulfur_PACS,
 MolecPhotoAbsCS BF3_MPACS(Boron_PACS, 1, Fluorine_PACS, 3);
 MolecPhotoAbsCS C2HF5_MPACS(Carbon_for_C2H6_PACS, 2, Hydrogen_for_H2_PACS, 1,
                             Fluorine_PACS, 5);
-MolecPhotoAbsCS C2H2F4_MPACS(Carbon_for_C2H6_PACS, 2, Fluorine_PACS, 4, 
+MolecPhotoAbsCS C2H2F4_MPACS(Carbon_for_C2H6_PACS, 2, Fluorine_PACS, 4,
                              Hydrogen_for_H2_PACS, 2);
 MolecPhotoAbsCS CHF3_MPACS(Carbon_for_CF4_PACS, 1, Hydrogen_for_H2_PACS, 1,
                            Fluorine_PACS, 3);
@@ -338,5 +345,4 @@ MolecPhotoAbsCS Hg_MPACS(Mercury_PACS, 1);
 MolecPhotoAbsCS H2S_MPACS(Hydrogen_for_H2_PACS, 2, Sulfur_PACS, 1);
 MolecPhotoAbsCS GeH4_MPACS(Germanium_PACS, 1, Hydrogen_for_H2_PACS, 4);
 MolecPhotoAbsCS SiH4_MPACS(Silicon_PACS, 1, Hydrogen_for_H2_PACS, 4);
-
 }

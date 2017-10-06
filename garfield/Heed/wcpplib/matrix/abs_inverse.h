@@ -33,8 +33,8 @@ void abstract_inverse(M& mi, M& mr, long q, int& serr)
     {
       if(fabs(mi.ac(nr1,nr)) > d)
       {
-	d = fabs(mi.ac(nr1,nr));
-	nmax = nr1;
+        d = fabs(mi.ac(nr1,nr));
+        nmax = nr1;
       }
     }
     //mcout<<"d="<<d<<'\n';
@@ -48,15 +48,15 @@ void abstract_inverse(M& mi, M& mr, long q, int& serr)
     {
       for(nc=nr; nc<q; nc++)
       {
-	X t(mi.ac(nr,nc));
-	mi.ac(nr,nc) = mi.ac(nmax,nc);
-	mi.ac(nmax,nc) = t;
+        X t(mi.ac(nr,nc));
+        mi.ac(nr,nc) = mi.ac(nmax,nc);
+        mi.ac(nmax,nc) = t;
       }
       for(nc=0; nc<q; nc++)
       {
-	X t(mr.ac(nr,nc));
-	mr.ac(nr,nc) = mr.ac(nmax,nc);
-	mr.ac(nmax,nc) = t;
+        X t(mr.ac(nr,nc));
+        mr.ac(nr,nc) = mr.ac(nmax,nc);
+        mr.ac(nmax,nc) = t;
       }
       //long tl=order[nr];
       //order[nr] = order[nmax];
@@ -67,17 +67,17 @@ void abstract_inverse(M& mi, M& mr, long q, int& serr)
     {
       if(nr1 != nr)
       {
-	X k(mi.ac(nr1,nr)/t);
-	//mcout<<"nr1="<<nr1<<" nr="<<nr<<'\n';
-	//mcout<<"k="<<k<<'\n';
-	for(nc=nr; nc<q; nc++)
-	{
-	  mi.ac(nr1,nc) -= k * mi.ac(nr,nc);
-	}
-	for(nc=0; nc<q; nc++)
-	{
-	  mr.ac(nr1,nc) -= k * mr.ac(nr,nc);
-	}
+        X k(mi.ac(nr1,nr)/t);
+        //mcout<<"nr1="<<nr1<<" nr="<<nr<<'\n';
+        //mcout<<"k="<<k<<'\n';
+        for(nc=nr; nc<q; nc++)
+        {
+          mi.ac(nr1,nc) -= k * mi.ac(nr,nc);
+        }
+        for(nc=0; nc<q; nc++)
+        {
+          mr.ac(nr1,nc) -= k * mr.ac(nr,nc);
+        }
       }
     }
     for(nc=nr; nc<q; nc++)
@@ -100,20 +100,20 @@ template <class M, class X>
 X abstract_determinant(M& mi, long q)
 
 #else
-    template <class M, class X>
+template <class M, class X>
 X abstract_determinant(M& mi, long q,
                        X /*fict*/)  // fict - fictitious parameters,
-// any value
+                                    // any value
 #endif
 
-    //X abstract_determinant(M& mi, long q, int& serr)
+    // X abstract_determinant(M& mi, long q, int& serr)
     // array mi is changed.
     // If can not calc (diagonal elements get zero) serr=1, if all OK - serr=0
     // M any matrix class supporting access to elements by the function
     // M.ac(nrow, ncol), both indexes start from 0.
     // X - class of type of element if this array.
     // It should support fabs(X) and ariphmetic operations.
-    {
+{
   if (q == 1) {
     return mi.ac(0, 0);
   } else if (q == 2) {
@@ -137,10 +137,10 @@ X abstract_determinant(M& mi, long q,
           nmax = nr1;
         }
       }
-      //mcout<<"d="<<d<<'\n';
-      //mcout<<"nmax="<<nmax<<'\n';
+      // mcout<<"d="<<d<<'\n';
+      // mcout<<"nmax="<<nmax<<'\n';
       if (d == 0) {
-        //serr = 1;
+        // serr = 1;
         return koef * mi.ac(nmax, nr);
       }
       if (nmax > nr) {
@@ -154,8 +154,8 @@ X abstract_determinant(M& mi, long q,
       X t = mi.ac(nr, nr);
       for (nr1 = nr + 1; nr1 < q; nr1++) {
         X k(mi.ac(nr1, nr) / t);
-        //mcout<<"nr1="<<nr1<<" nr="<<nr<<'\n';
-        //mcout<<"k="<<k<<'\n';
+        // mcout<<"nr1="<<nr1<<" nr="<<nr<<'\n';
+        // mcout<<"k="<<k<<'\n';
         for (nc = nr; nc < q; nc++) {
           mi.ac(nr1, nc) -= k * mi.ac(nr, nc);
         }  // add elements of another row: the main value of

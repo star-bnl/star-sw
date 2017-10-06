@@ -2,9 +2,8 @@
 #define CIRCUMF_H
 
 #include "wcpplib/geometry/vec.h"
-/*
-Circumference determined by point (center), vector (normal), and radious.
 
+/*
 Copyright (c) 2000 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
@@ -20,28 +19,29 @@ namespace Heed {
 
 class plane;
 
-// **** circumference ****
-
+/// Circumference, determined by point (center), vector (normal), and radius.
 class circumf : public absref {
  protected:
-  point piv;   // central point, pivot
-  vec dir;     // normal direction, unit vector
-               // circles with dir and -dir are considered the same
-  vfloat rad;  // radius, >0
+  /// Central point, pivot.
+  point piv;   
+  /// Normal direction, unit vector.
+  /// Circles with dir and -dir are considered the same.
+  vec dir;     
+  /// radius, >0.
+  vfloat rad;  
+
  public:
-  // return one any point of line
   point Gpiv(void) const { return piv; }
-  // return any direction
   vec Gdir(void) const { return dir; }
   vfloat Grad(void) const { return rad; }
-
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  static absref(absref::* aref[2]);
+  static absref(absref::*aref[2]);
 
  public:
-  // constructors
+  /// Default constructor.
   circumf();
+  /// Constructor.
   circumf(const point& fpiv, const vec& fdir, vfloat frad);
   circumf(const circumf& f);
   circumf& operator=(const circumf& f) {
@@ -50,7 +50,7 @@ class circumf : public absref {
     rad = f.rad;
     return *this;
   }
-  // destructor
+  /// Destructor
   virtual ~circumf() {}
   friend int operator==(const circumf& f1, const circumf& f2);
   friend int operator!=(const circumf& f1, const circumf& f2) {
@@ -60,7 +60,7 @@ class circumf : public absref {
   friend int not_apeq(const circumf& f1, const circumf& f2, vfloat prec) {
     return apeq(f1, f2, prec) == 1 ? 0 : 1;
   }
-  // return 1 if point on the circumference
+  /// Return 1 if point on the circumference.
   int check_point_in(const point& fp, vfloat prec) const;
   // return number of crosses and calculates pt.
   // if total circle lies in the plane, it returns -1.
@@ -70,7 +70,6 @@ class circumf : public absref {
   friend std::ostream& operator<<(std::ostream& file, const circumf& f);
 };
 std::ostream& operator<<(std::ostream& file, const circumf& f);
-
 }
 
 #endif

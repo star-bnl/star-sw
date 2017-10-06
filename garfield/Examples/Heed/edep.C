@@ -14,10 +14,20 @@
 #include "Plotting.hh"
 #include "Random.hh"
 
+#include "wcpplib/clhep_units/WPhysicalConstants.h"
+#include "heed++/code/PhysicalConstants.h"
+
 using namespace Garfield;
 
 int main(int argc, char * argv[]) {
 
+  // std::cout << "FSCON: " << Heed::FSCON << "\n";
+  // std::cout << "1 / FSCON: " << 1. / Heed::FSCON << "\n";
+  std::cout << "fine_structure_const: " << Heed::CLHEP::fine_structure_const << "\n";
+  std::cout << "alpha_rcl2: " << Heed::CLHEP::alpha_rcl2 << "\n";
+  // std::cout << "ELMAS: " << Heed::ELMAS << "\n";
+  std::cout << "electron_mass_c2: " << Heed::CLHEP::electron_mass_c2 << "\n";
+  std::cout << "hbarc:       " << (Heed::CLHEP::hbarc / Heed::CLHEP::cm) << "\n";
   randomEngine.Seed(123456);
   TApplication app("app", &argc, argv);
   plottingEngine.SetDefaultStyle();

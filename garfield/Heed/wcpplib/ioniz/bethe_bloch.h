@@ -1,20 +1,20 @@
 #ifndef BETHE_H
 #define BETHE_H
 
-/*
-Ordinary Bethe-Bloch formula with various modifications,
-based on K. Kleinknecht, "Detectors for particle radiation".
-1998 - 2002,  I. Smirnov
-*/
-
 namespace Heed {
+
+/// Ordinary Bethe-Bloch formula with various modifications.
+/// Based on K. Kleinknecht, "Detectors for particle radiation".
+/// 1998 - 2002,  I. Smirnov
 
 double Bethe_Bloch_energy_loss(const double ratio_Z_to_A, const double I_eff,
                                const double beta, const double z);
-// Safer function, using gamma - 1 instead of beta
+
+/// Safer version, using gamma - 1 instead of beta.
 double Bethe_Bloch_energy_loss_gamma_1(const double ratio_Z_to_A,
                                        const double I_eff, const double gamma_1,
                                        const double z);
+
 double Bethe_Bloch_restricted_energy_loss_gamma_1(
     const double ratio_Z_to_A, const double I_eff, const double m,
     const double gamma_1, const double ecut, const double z);
@@ -49,7 +49,6 @@ double Bethe_Bloch_restricted_energy_loss_gamma_1(
 // Therefore the number of particles is Avogadro / mean(Ai)
 // and the number of electrons is Avogadro * mean(Zi) / mean(Ai)
 // Interesting relations!
-
 }
 
 #endif

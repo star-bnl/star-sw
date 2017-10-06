@@ -1,7 +1,6 @@
 #include "wcpplib/particle/eparticle.h"
-/*
-1998 - 2004,   I. Smirnov
-*/
+
+// 1998 - 2004,   I. Smirnov
 
 namespace Heed {
 
@@ -13,10 +12,11 @@ eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,
 }
 
 eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-                     vfloat time, particle_def* fpardef, 
-                     HeedFieldMap* fieldmap, const double gamma_1)
+                     vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap,
+                     const double gamma_1)
     : mparticle(primvol, pt, vel, time, fpardef->mass, gamma_1),
-      particle_type(fpardef), m_fieldMap(fieldmap) {}
+      particle_type(fpardef),
+      m_fieldMap(fieldmap) {}
 
 int eparticle::force(const point& pt, vec& f, vec& f_perp, vfloat& mrange) {
   vec efield(0., 0., 0.);
@@ -38,5 +38,4 @@ void eparticle::print(std::ostream& file, int l) const {
   file << '\n';
   mparticle::print(file, l);
 }
-
 }

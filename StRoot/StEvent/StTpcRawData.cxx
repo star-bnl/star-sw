@@ -55,13 +55,13 @@
 #include <assert.h>
 #include "TMath.h"
 #include "StDaqLib/TPC/trans_table.hh"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(StTpcDigitalSector);
 ClassImp(StTpcRawData);
 //________________________________________________________________________________
-StTpcDigitalSector::StTpcDigitalSector(void *db) {
+StTpcDigitalSector::StTpcDigitalSector(Int_t sector) : mSector(sector) {
   StDigitalTimeBins  timeBins;
-  mNoRows = St_tpcPadPlanesC::instance()->padRows();
+  mNoRows = St_tpcPadConfigC::instance()->padRows(sector);
   for(Int_t row=1; row <= mNoRows; row++) {
     StDigitalPadRow    padRow;
     for (Int_t pad = 0; pad < numberOfPadsAtRow(row); pad++) {
@@ -366,7 +366,7 @@ StTpcRawData &StTpcRawData::operator+= (StTpcRawData& v) {
     StTpcDigitalSector *b = v.getSector(sec);
     if (!b ) continue;
     if (!a) {
-      a = new StTpcDigitalSector();
+      a = new StTpcDigitalSector(sec);
       *a = *b;
       setSector(sec, a);
       continue;

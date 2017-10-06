@@ -1,6 +1,6 @@
 #ifndef CHISRAN_H
 #define CHISRAN_H
-#include "wcpplib/safetl/AbsArr.h"
+#include <vector>
 
 // Remake of CERN's subroutine hisran for generation of random numbers
 // according to histogram
@@ -26,7 +26,7 @@ float chispre(float *x, float *p, float *f, long q);
 
 float chisran(float flat_random_number, float *x, float *f, long q);
 
-double chispre(DynLinArr<double> &f, int s_allow_zero_f = 0);
+double chispre(std::vector<double> &f, int s_allow_zero_f = 0);
 // here intervals are unit
 // function p is a constant along these intervals.
 // last point x[q] is the end of last interval.
@@ -41,8 +41,7 @@ double chispre(DynLinArr<double> &f, int s_allow_zero_f = 0);
 // negative and they are made zero with diagnostic printed.
 // (this have sence only for debug.)
 
-double chisran(double flat_random_number, DynLinArr<double> f);
-
+double chisran(double flat_random_number, const std::vector<double> &f);
 }
 
 #endif

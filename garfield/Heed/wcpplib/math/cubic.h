@@ -17,38 +17,38 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
+/// Find solution to cubic equation.
+
 class Cubic {
  public:
   typedef std::complex<double> double_complex;
-  inline double a(void) const { return da; }
-  inline double b(void) const { return db; }
-  inline double c(void) const { return dc; }
-  inline double d(void) const { return dd; }
-  inline double s_xzero(void) const {
-    return s_dxzero;
-  }  // for debug
-  inline void put_a(double fa) {
+  double a() const { return da; }
+  double b() const { return db; }
+  double c() const { return dc; }
+  double d() const { return dd; }
+  double s_xzero() const { return s_dxzero; }  // for debug
+  void put_a(double fa) {
     da = fa;
     s_dxzero = 0;
   }
-  inline void put_b(double fb) {
+  void put_b(double fb) {
     db = fb;
     s_dxzero = 0;
   }
-  inline void put_c(double fc) {
+  void put_c(double fc) {
     dc = fc;
     s_dxzero = 0;
   }
-  inline void put_d(double fd) {
+  void put_d(double fd) {
     dd = fd;
     s_dxzero = 0;
   }
 
-  Cubic(void) : da(0.0), db(0.0), dc(0.0), dd(0.0), s_dxzero(0) {}
+  Cubic() : da(0.0), db(0.0), dc(0.0), dd(0.0), s_dxzero(0) {}
   Cubic(double fa, double fb, double fc, double fd)
       : da(fa), db(fb), dc(fc), dd(fd), s_dxzero(0) {}
 
-  inline double y(double x) const {
+  double y(double x) const {
     return da * x * x * x + db * x * x + dc * x + dd;
   }
 

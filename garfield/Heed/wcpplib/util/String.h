@@ -1,8 +1,9 @@
 #ifndef STRING_SWITCHING_H
 #define STRING_SWITCHING_H
+
 /*
 This is the file for indication which String class should be used by
-the wcpplib library. This library does not depend on very sophicticated
+the wcpplib library. This library does not depend on very sophisticated
 operations with strings. The strings are used for inclusion of notations
 or character names in various objects and also for keeping the file names.
 The typical string operations used in wcpplib are
@@ -59,68 +60,24 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
-//#define USE_HEPSTRING          // use HepString
-#define USE_STLSTRING  // use standard library
-                       // otherwise use gnu C++ String
-
-#ifdef USE_HEPSTRING
-
-#include "CLHEP/String/Strings.h"  // HepString
-typedef HepString String;
-
-#elif defined(USE_STLSTRING)
-
 #include <string>
-//typedef string String;
+#include <iostream>
+#include <sstream>
+
 typedef std::string String;
 
-#else                // use String from gnu C++ lib
-#include <String.h>  // gnu C++ String
-#endif
-
-// For any library:
-#include <iostream>
-
-//#define STRSTREAM_AVAILABLE
-#ifdef STRSTREAM_AVAILABLE
-#include <strstream.h>  // valid for old systems
-#else
-#include <sstream>  // good for new ones
-#endif
-
 // In <string> initialization from integer is absent
-// In HepString it is present.
-// So as to write code not dependent on the type of strings used,
-// or to quickly modify the old code rich with String(n)
-// I have defined this macro.
-// The old String(n) should be converted to long_to_String(n)
-#ifdef USE_HEPSTRING
-inline String long_to_String(int n) { return String(n); }
-// call of overloaded `HepString(long int &)' is ambiguous !!
-// perhaps there are HepString::HepString(char) and  HepString::HepString(int)
-#else
-inline String long_to_String(long n)
-    // This worked well for old standards.
-    // In new ones strstream has dissapeared.
-    //{ std::ostrstream s; s << n <<'\0'; return String(s.str()); }
-    {
+inline String long_to_String(const long n) {
   std::ostringstream s;
   s << n;
   return String(s.str());
 }
-//{ std::ostringstream s; s << n <<'\0'; return String(s.str()); }
 
-inline String double_to_String(double d)
-    // This worked well for old standards.
-    // In new ones strstream has dissapeared.
-    //{ std::ostrstream s; s << n <<'\0'; return String(s.str()); }
-    {
+inline String double_to_String(const double d) {
   std::ostringstream s;
   s << d;
   return String(s.str());
 }
-//{ std::ostringstream s; s << n <<'\0'; return String(s.str()); }
-#endif
 
 // puts one \n at the end of string stream:
 

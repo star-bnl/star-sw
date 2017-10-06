@@ -1561,6 +1561,10 @@ replace [exe TPCE05rY;] with [;"New version of the TPC backplane "; TpceConfig =
                               "gas density correction";            DensConfig = 1;
                               "radius correction";                 RmaxConfig = 1;
 	                      ;"Set the final TPAD config"; TpadConfig=8;]
+replace [exe TPCE05rZ;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                              "gas density correction";            DensConfig = 1;
+                              "radius correction";                 RmaxConfig = 1;
+	                      ;"Set the 2018 TPAD config, iTPC only in sector 20"; TpadConfig=9;]
 replace [exe TPCE51;] with [;"                     "; TpceConfig = 51; ]
 
 
@@ -2632,12 +2636,12 @@ REPLACE [exe y2017;] with ["Y2017 first cut geometry";
     exe HCALv1;      "HCAL prototype";
 
 ];    
-REPLACE [exe dev2017;] with ["Y2017 development tag";
+REPLACE [exe y2017a;] with ["Y2017 development tag";
     exe 	y2017; 
 ];
-REPLACE [exe dev2018;] with ["Y2018 development tag";
+REPLACE [exe y2018;] with ["Y2018 development tag";
 
-    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe TPCE05rZ;   "Z : iTPC (40 inner pad rows 0.500 x 1.60) only in sector 20"; 
     exe BTOFv8;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
@@ -2666,7 +2670,7 @@ REPLACE [exe dev2018;] with ["Y2018 development tag";
 
 ];    
 
-REPLACE [exe dev2019;] with ["Y2019 development tag";
+REPLACE [exe y2019;] with ["Y2019 development tag";
     exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; 
     exe BTOFv8;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -3688,11 +3692,13 @@ If LL>0
   Case y2017  { y2017 : y2017 baseline, is y2012 plus FMS preshower;
                   Geom = 'y2017   '; exe y2017; }
 
-  Case dev2017  { dev2017 : y2017 baseline, is y2012 plus FMS preshower;
-                  Geom = 'dev2017   '; exe dev2017; }
+  Case y2017a  { y2017a : y2017 baseline, is y2012 plus FMS preshower;
+                  Geom = 'y2017a   '; exe y2017a; }
 
-  Case dev2018  { dev2018 : y2018 baseline, is y2012 plus FMS preshower;
-                  Geom = 'dev2018   '; exe dev2018; }
+  Case y2018  { y2018 : y2018 baseline, is y2012 plus FMS preshower and iTPC in sector 20;
+                  Geom = 'y2018   '; exe y2018; }
+  Case y2019  { y2019 : y2019 baseline, is y2012 plus FMS preshower and iTPC in sector 20;
+                  Geom = 'y2019   '; exe y2018; }
 
   Case dev15a   { dev15a : y2014 a plus FMS preshower;          
                   Geom = 'dev15a    '; exe dev15a; }
@@ -3711,9 +3717,6 @@ If LL>0
   Case DevT  { devT : TPC upgrade studies;
                Geom = 'devT';
                exe devT; }
-  Case dev2019  { dev2019 : TPC upgrade studies 40 inner pad rows 0.500 x 1.60 no HFT;
-               Geom = 'dev2019';
-               exe dev2019; }
 
   Case estar1  { eStar1 : eStar development geometry;     Geom = 'estar1  ';  exe estar1; }
   Case TPCIv1  { TPCIv1 : TPC inner pad upgrade geometry; Geom = 'TPCIv1  ';  exe TPCIv1; }

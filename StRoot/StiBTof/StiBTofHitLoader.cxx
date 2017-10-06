@@ -6,6 +6,7 @@
 // Revision 1.1.1.1  2012/04/10 13:31:39  fisyak
 // The first version
 //
+#include <assert.h>
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -29,11 +30,15 @@ void StiBTofHitLoader::loadHits(StEvent* source,
 				Filter<StiTrack> * trackFilter,
 				Filter<StiHit> * hitFilter) {
   LOG_INFO << " -I- Started" << endl;
+#if 0
   if (!_detector)
     throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
   if(!_hitContainer)
     throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-  
+#else
+  assert(_detector);
+  assert(_hitContainer);
+#endif  
   StBTofCollection *col = source->btofCollection();
   if (!col) {
     LOG_ERROR <<"StiBTofHitLoader::loadHits\tERROR:\tNo StBTofCollection"<<endm;
@@ -44,7 +49,11 @@ void StiBTofHitLoader::loadHits(StEvent* source,
   Int_t nHit=0;
   for(UInt_t j=0; j<vec.size(); j++)	{
     StBTofHit *aHit = vec[j];
+#if 0
     if(!aHit)   throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- NULL hit in container");
+#else
+    assert(aHit);
+#endif
     if (_debug) {
       LOG_INFO <<Form("hit tray: %i module: %i cell: %i\n",aHit->tray(), aHit->module(), aHit->cell()) << endm;
     }
@@ -55,7 +64,11 @@ void StiBTofHitLoader::loadHits(StEvent* source,
     if (aHit->tray() > 60) stiTray = 176 - aHit->tray();
     stiTray = (stiTray+59)%60 + 1;
     detector= _detector->getDetector(0,stiTray-1);
+#if 0
     if(!detector)       throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
+#else
+    assert(detector);
+#endif
     if (_debug) {
       LOG_INFO <<"add hit to detector:\t"<<detector->getName()<<endm;
     }
@@ -72,7 +85,11 @@ void StiBTofHitLoader::loadHits(StEvent* source,
       LOG_INFO << " key 1 : " << detector->getKey(1) <<" key 2 : " << detector->getKey(2) << endm; 
     }
     StiHit *stiHit=_hitFactory->getInstance();
+#if 0
     if(!stiHit) throw runtime_error("StiBTofHitLoader::loadHits(StEvent*) -E- stiHit==0");
+#else
+    assert(stiHit);
+#endif
     stiHit->reset();
     TGeoHMatrix *rot = (TGeoHMatrix *) StiBTofDetectorBuilder::RotMatrices()->FindObject(Form("BTof_Tray_%i_Module_%i",aHit->tray(),aHit->module())); 
     assert(rot);

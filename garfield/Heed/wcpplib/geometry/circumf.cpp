@@ -15,7 +15,7 @@ The file is provided "as is" without express or implied warranty.
 namespace Heed {
 
 absref absref::*(circumf::aref[2]) = {(absref absref::*)&circumf::piv,
-                                      (absref absref::*)&circumf::dir };
+                                      (absref absref::*)&circumf::dir};
 
 circumf::circumf() : piv(), dir(), rad(0) {}
 circumf::circumf(const point& fpiv, const vec& fdir, vfloat frad)
@@ -25,9 +25,7 @@ circumf::circumf(const point& fpiv, const vec& fdir, vfloat frad)
   dir = unit_vec(fdir);
 }
 circumf::circumf(const circumf& f)
-    : absref(f), piv(f.piv), dir(f.dir), rad(f.rad) {
-  ;
-}
+    : absref(f), piv(f.piv), dir(f.dir), rad(f.rad) {}
 
 void circumf::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(2, aref));
@@ -91,5 +89,4 @@ std::ostream& operator<<(std::ostream& file, const circumf& f) {
   indn.n -= 2;
   return file;
 }
-
 }

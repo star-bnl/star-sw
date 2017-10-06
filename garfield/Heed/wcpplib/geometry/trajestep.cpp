@@ -31,7 +31,7 @@ void trajestep_limit::range(int fs_cf0, vfloat rad, int& fs_cf1,
 absref absref::*(trajestep::aref[4]) = {(absref absref::*)&trajestep::currpos,
                                         (absref absref::*)&trajestep::dir,
                                         (absref absref::*)&trajestep::relcen,
-                                        (absref absref::*)&trajestep::mpoint };
+                                        (absref absref::*)&trajestep::mpoint};
 
 void trajestep::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(4, aref));
@@ -63,28 +63,26 @@ trajestep::trajestep(trajestep_limit* ftl, const point& fcurrpos,
   }
 }
 
-trajestep::trajestep(const trajestep& fts,  // the new object will continue
-                     // propagation from the end point of the old one
-                     vfloat mrange)         // new range to travel
-    {
-  mfunname("trajestep::trajestep(const trajestep& fts, vfloat mrange)");
+trajestep::trajestep(const trajestep& fts, vfloat fmrange) {
+  mfunname("trajestep::trajestep(const trajestep& fts, vfloat fmrange)");
+  // Continue propagation from the end point of the old step.
   point fpos;
   vec fdir;
   vec frelcen;
   fts.Gnextpoint1(fts.mrange, fpos, fdir, frelcen);
   vfloat prec = 0.1;  // not important here
   *this =
-      trajestep(fts.tl.getver(), fpos, fdir, fts.s_cf, frelcen, mrange, prec);
+      trajestep(fts.tl.getver(), fpos, fdir, fts.s_cf, frelcen, fmrange, prec);
 }
 
 void trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir) const {
   pvecerror("int trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir)");
   check_econd12(frange, >, mrange, mcerr);
-  if (s_range_cf == 0)  // interpolation by straight line
-      {
+  if (s_range_cf == 0) {
+    // interpolation by straight line
     fpos = currpos + frange * dir;
-    if (s_cf == 0)  // no curvature
-        {
+    if (s_cf == 0) {
+      // no curvature
       fdir = dir;
       return;
     } else {
@@ -106,14 +104,15 @@ void trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir) const {
 
 void trajestep::Gnextpoint1(vfloat frange, point& fpos, vec& fdir,
                             vec& frelcen) const {
-  pvecerror("int trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir, "
-            "vec& frelcen)");
+  pvecerror(
+      "int trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir, "
+      "vec& frelcen)");
   check_econd12(frange, >, mrange, mcerr);
-  if (s_range_cf == 0)  // interpolation by straight line
-      {
+  if (s_range_cf == 0) {
+    // interpolation by straight line
     fpos = currpos + frange * dir;
-    if (s_cf == 0)  // no curvature
-        {
+    if (s_cf == 0) {
+      // no curvature
       fdir = dir;
       frelcen = relcen;  // whatever it is
       return;
@@ -146,5 +145,4 @@ std::ostream& operator<<(std::ostream& file, const trajestep& f) {
   indn.n -= 2;
   return file;
 }
-
 }

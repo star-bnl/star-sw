@@ -7,6 +7,7 @@
 #include "Track.hh"
 #ifndef __CINT__
 #include "heed++/code/HeedParticle.h"
+#include "heed++/code/HeedCondElectron.h"
 #endif /* __CINT __ */
 
 namespace Heed {
@@ -39,19 +40,23 @@ class TrackHeed : public Track {
   // Constructor
   TrackHeed();
   // Destructor
-  ~TrackHeed();
+  virtual ~TrackHeed();
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0);
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
+                          int& n, double& e, double& extra);
   bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& n, double& e, double& extra);
+                  int& ne, int& ni, double& e, double& extra);
   bool GetElectron(const unsigned int i, 
                    double& x, double& y, double& z, double& t,
                    double& e, double& dx, double& dy, double& dz);
+  bool GetIon(const unsigned int i, 
+              double& x, double& y, double& z, double& t);
 
-  double GetClusterDensity();
-  double GetStoppingPower();
+  virtual double GetClusterDensity();
+  virtual double GetStoppingPower();
   double GetW() const;
   double GetFanoFactor() const;
 
@@ -106,6 +111,8 @@ class TrackHeed : public Track {
     double dx, dy, dz;
   };
   std::vector<deltaElectron> m_deltaElectrons;
+  std::vector<Heed::HeedCondElectron> m_conductionElectrons;
+  std::vector<Heed::HeedCondElectron> m_conductionIons;
 
   // Primary particle
   Heed::HeedParticle* m_particle;
@@ -140,14 +147,15 @@ class TrackHeed : public Track {
   double m_cX, m_cY, m_cZ;
 
 #ifndef __CINT__
-  std::list<ActivePtr<Heed::gparticle> > m_particleBank;
+  std::vector<Heed::gparticle*> m_particleBank;
+  std::vector<Heed::gparticle*>::iterator m_bankIterator;
 #endif /* __CINT __ */
   bool Setup(Medium* medium);
   bool SetupGas(Medium* medium);
   bool SetupMaterial(Medium* medium);
   bool SetupDelta(const std::string& databasePath);
   std::string FindUnusedMaterialName(const std::string& namein);
-
+  void ClearParticleBank(); 
 public:
   Heed::EnergyMesh* EnergyMesh() {return m_energyMesh;}
   Heed::EnTransfCS* Transfercs() {return m_transferCs;}

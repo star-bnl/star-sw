@@ -540,7 +540,7 @@ void StMagUtilities::GetMagFactor ()
 void StMagUtilities::GetTPCParams ()  
 { 
   St_tpcWirePlanesC*    wires = StTpcDb::instance()->WirePlaneGeometry();
-  St_tpcPadPlanesC*      pads = StTpcDb::instance()->PadPlaneGeometry();
+  St_tpcPadConfigC*      pads = St_tpcPadConfigC::instance();
   St_tpcFieldCageC*     cages = StTpcDb::instance()->FieldCage();
   St_tpcDimensionsC*     dims = StTpcDb::instance()->Dimensions();
   if (! StTpcDb::IsOldScheme()) { // new schema
@@ -560,8 +560,8 @@ void StMagUtilities::GetTPCParams ()
   StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity() ;        
   TPC_Z0         =  dims->gatingGridZ() ;
   IFCShift       =      cages->InnerFieldCageShift();
-  INNER          =  pads->innerPadRows();
-  TPCROWS        =  pads->padRows();
+  INNER          =  pads->innerPadRows(20);
+  TPCROWS        =  pads->padRows(20);
   IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
   OFCRadius      =  dims->senseGasOuterRadius();
   INNERGGFirst   =  wires->firstInnerSectorGatingGridWire();
@@ -575,7 +575,7 @@ void StMagUtilities::GetTPCParams ()
   //                    (by 25 microns) from non-DB value (121.8000)
   WIREGAP        =  OUTERGGFirst - INNERGGLast;
   for ( Int_t i = 0 ; i < TPCROWS ; i++ )
-    TPCROWR[i] = pads->radialDistanceAtRow(i+1);
+    TPCROWR[i] = pads->radialDistanceAtRow(20,i+1);
 }
 
 void StMagUtilities::GetE()

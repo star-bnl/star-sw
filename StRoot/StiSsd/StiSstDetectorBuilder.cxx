@@ -48,12 +48,14 @@ StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
 void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 {
    //StSsdBarrel *mySsd = StSsdBarrel::Instance();
-
+#if 0
    if (!gGeoManager)
       throw runtime_error("StiSstDetectorBuilder::buildDetectors() "
          "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
          "Make sure STAR geometry is properly loaded with BFC AgML option");
-
+#else
+   assert(gGeoManager);
+#endif
    if (!mBuildIdealGeom) {
 
       if (!StSstDbMaker::instance()) {

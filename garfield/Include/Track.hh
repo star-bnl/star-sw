@@ -14,18 +14,25 @@ class ViewDrift;
 class Track {
 
  public:
-  // Constructor
+  /// Constructor
   Track();
-  // Destructor
+  /// Destructor
   virtual ~Track() {}
 
+  /// Set the type of particle.
   virtual void SetParticle(const std::string& part);
 
+  /// Set the particle energy.
   void SetEnergy(const double e);
+  /// Set the relative momentum of the particle.
   void SetBetaGamma(const double bg);
+  /// Set the speed (\f$\beta = v/c\f$) of the particle.
   void SetBeta(const double beta);
+  /// Set the Lorentz factor of the particle.
   void SetGamma(const double gamma);
+  /// Set the particle momentum.
   void SetMomentum(const double p);
+  /// Set the kinetic energy of the particle.
   void SetKineticEnergy(const double ekin);
 
   double GetEnergy() const { return m_energy; }
@@ -42,18 +49,25 @@ class Track {
 
   void SetSensor(Sensor* s);
 
-  // Calculate a new track starting from (x0, y0, z0) at time t0
-  // in direction (dx0, dy0, dz0).
+  /// Calculate a new track starting from (x0, y0, z0) at time t0
+  /// in direction (dx0, dy0, dz0).
   virtual bool NewTrack(const double x0, const double y0, const double z0,
                         const double t0, const double dx0, const double dy0,
                         const double dz0) = 0;
+  /** Get the next "cluster" (ionising collision of the charged particle).
+    * \param xcls,ycls,zcls coordinates of the collision
+    * \param tcls time of the collision
+    * \param n number of electrons produced
+    * \param e deposited energy
+    * \param extra additional information (not always implemented)
+    */ 
   virtual bool GetCluster(double& xcls, double& ycls, double& zcls,
                           double& tcls, int& n, double& e, double& extra) = 0;
 
-  // Get the cluster density (number of ionizing collisions per cm or
-  // inverse mean free path for ionization).
+  /// Get the cluster density (number of ionizing collisions per cm or
+  /// inverse mean free path for ionization).
   virtual double GetClusterDensity() { return 0.; }
-  // Get the stopping power (mean energy loss [eV] per cm).
+  /// Get the stopping power (mean energy loss [eV] per cm).
   virtual double GetStoppingPower() { return 0.; }
 
   void EnablePlotting(ViewDrift* viewer);

@@ -1,9 +1,7 @@
 #ifndef STRAIGHT_H
 #define STRAIGHT_H
-/*
-Definition of straight line, as combination of vector and point.
 
-Copyright (c) 2000 Igor B. Smirnov
+/* Copyright (c) 2000 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
 according to the terms of GNU Lesser General Public License version 2.1
@@ -13,6 +11,7 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
+
 #include <iostream>
 #include "wcpplib/geometry/vec.h"
 
@@ -20,7 +19,7 @@ namespace Heed {
 
 class plane;
 
-// **** straight ****
+/// Definition of straight line, as combination of vector and point.
 
 class straight : public absref {
  protected:
@@ -28,19 +27,16 @@ class straight : public absref {
   vec dir;    // direction, unit vector
  public:
   point Gpiv(void) const { return piv; }
-  vec Gdir(void) const {
-    return dir;
-  }
+  vec Gdir(void) const { return dir; }
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  static absref(absref::* aref[2]);
+  static absref(absref::*aref[2]);
 
  public:
   straight() : piv(), dir() {}
   straight(const point& fpiv, const vec& fdir)
-      : piv(fpiv), dir(unit_vec(fdir)) {
-  }
+      : piv(fpiv), dir(unit_vec(fdir)) {}
   straight& operator=(const straight& fsl) {
     piv = fsl.piv;
     dir = fsl.dir;
@@ -121,16 +117,16 @@ class straight : public absref {
 
   straight(straight* sl,  // array of lines via which it need to draw
            // this line
-           int qsl,       // number of lines in array
+           int qsl,                   // number of lines in array
            const straight& sl_start,  // first approximation
            int anum,                  // prolong axis : 0 - x, 1 - y, 2 - z.
            vfloat precision,          // wanted precision
            vfloat* dist,              // array of distances,
            // they may be negative as in vecdistance
            // For vecdistance this is this line
-           point (*pt)[2],            // points,  pt[][0] is point on this line
+           point (*pt)[2],  // points,  pt[][0] is point on this line
            // pt[][1] is point on line sl.
-           vfloat& mean2dist);        // mean square distance
+           vfloat& mean2dist);  // mean square distance
   // The constructor draws straight line via qsl lines by xi-2 method
   // residuals are calculated in planes normal to axis which is measured.
   // This axis is given by anum. 0 - x, 1 - y, 2 - z.
@@ -145,7 +141,6 @@ class straight : public absref {
 };
 
 std::ostream& operator<<(std::ostream& file, const straight& s);
-
 }
 
 #endif

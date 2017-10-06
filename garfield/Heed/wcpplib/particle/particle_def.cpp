@@ -1,13 +1,19 @@
-#include <stdlib.h>
 #include "wcpplib/particle/particle_def.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
-#include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-/*
-1998 - 2004,   I. Smirnov
-*/
+
+// 1998 - 2004,   I. Smirnov
 
 namespace Heed {
+
+using CLHEP::electron_mass_c2;
+using CLHEP::proton_mass_c2;
+using CLHEP::neutron_mass_c2;
+using CLHEP::c_squared;
+using CLHEP::electron_charge;
+using CLHEP::eplus;
+using CLHEP::MeV;
+using CLHEP::GeV;
 
 spin_def::spin_def(float ftotal, float fprojection)
     : total(ftotal), projection(fprojection) {
@@ -69,13 +75,12 @@ particle_def user_particle_def("user_particle", "X",
                                139.56755 * MeV / c_squared, eplus, 0, 0, 0.0,
                                spin_def(0.0, 0.0));
 
-particle_def::particle_def(const String& fname, const String& fnotation,
-                           double fmass, double fcharge, int flepton_n,
-                           int fbaryon_n, float fspin,
-                           const spin_def& fisospin) {
+particle_def::particle_def(const std::string& fname,
+                           const std::string& fnotation, double fmass,
+                           double fcharge, int flepton_n, int fbaryon_n,
+                           float fspin, const spin_def& fisospin) {
   name = fname;
   notation = fnotation;
-  //mcout<<"particle_def::particle_def: name="<<name<<'\n';
   mass = fmass;
   charge = fcharge;
   baryon_n = fbaryon_n;
@@ -83,42 +88,44 @@ particle_def::particle_def(const String& fname, const String& fnotation,
   spin = fspin;
   isospin = fisospin;
   verify();
-  particle_def::get_logbook().append(this);
-  //printall(mcout);
+  particle_def::get_logbook().push_back(this);
 }
 
-particle_def::particle_def(const String& fname, const String& fnotation,
-                           particle_def& p) {
+particle_def::particle_def(const std::string& fname,
+                           const std::string& fnotation, particle_def& p) {
   // creates anti-particle through the call of anti_particle(p)
   *this = anti_particle(p);
-  //if(strlen(fname) > 0)
-  //strcpy(name,fname);
+  // if(strlen(fname) > 0)
+  // strcpy(name,fname);
   if (!(fname == "" || fname == " ")) name = fname;
   if (!(fnotation == "" || fnotation == " ")) notation = fnotation;
   verify();
-  particle_def::get_logbook().append(this);
+  particle_def::get_logbook().push_back(this);
 }
 
 particle_def particle_def::anti_particle(const particle_def& p) {
-  String aname = String("anti-") + p.name;
-  String anot = String("anti-") + p.notation;
+  std::string aname = "anti-" + p.name;
+  std::string anot = "anti-" + p.notation;
   return particle_def(aname, anot, p.mass, -p.charge, -p.lepton_n, -p.baryon_n,
                       -p.spin, p.isospin);
 }
-AbsList<particle_def*>& particle_def::get_logbook(void) {
-  static AbsList<particle_def*> logbook;
+std::list<particle_def*>& particle_def::get_logbook(void) {
+  static std::list<particle_def*> logbook;
   return logbook;
 }
 
-const AbsList<particle_def*>& particle_def::get_const_logbook(void) {
+const std::list<particle_def*>& particle_def::get_const_logbook(void) {
   return particle_def::get_logbook();
 }
 
-particle_def* particle_def::get_particle_def(const String& fnotation) {
-  AbsList<particle_def*>& logbook = particle_def::get_logbook();
-  AbsListNode<particle_def*>* an = NULL;
-  while ((an = logbook.get_next_node(an)) != NULL) {
-    if (an->el->notation == fnotation) return an->el;
+particle_def* particle_def::get_particle_def(const std::string& fnotation) {
+  std::list<particle_def*>& logbook = particle_def::get_logbook();
+  std::list<particle_def*>::iterator it;
+  std::list<particle_def*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    particle_def* node = *it;
+    if (!node) continue;
+    if (node->notation == fnotation) return node;
   }
   return NULL;
 }
@@ -140,10 +147,11 @@ void particle_def::print(std::ostream& file, int l) const {
 }
 void particle_def::printall(std::ostream& file) {
   Ifile << "particle_def::printall:\n";
-  AbsList<particle_def*>& logbook = particle_def::get_logbook();
-  AbsListNode<particle_def*>* an = NULL;
-  while ((an = logbook.get_next_node(an)) != NULL) {
-    file << (*(an->el));
+  std::list<particle_def*>& logbook = particle_def::get_logbook();
+  std::list<particle_def*>::const_iterator it;
+  std::list<particle_def*>::const_iterator end;
+  for (it = logbook.begin(); it != end; ++it) {
+    if (*it) file << *it;
   }
 }
 
@@ -179,20 +187,18 @@ std::ostream& operator<<(std::ostream& file, const particle_def& f) {
 
 particle_type::particle_type(const char* name, int s) {
   mfunname("particle_type::particle_type(const char* name, int s)");
-  //mcout<<"particle_type::particle_type(char* name):\n";
-  //particle_def::printall(mcout);
-  AbsListNode<particle_def*>* an = NULL;
-  AbsList<particle_def*>& logbook = particle_def::get_logbook();
-  while ((an = logbook.get_next_node(an)) != NULL) {
-    if (name == an->el->notation) {
-      pardef = an->el;
+  std::list<particle_def*>& logbook = particle_def::get_logbook();
+  std::list<particle_def*>::iterator it;
+  std::list<particle_def*>::const_iterator end = logbook.end();
+  for (it = logbook.begin(); it != end; ++it) {
+    if (name == (*it)->notation) {
+      pardef = *it;
       return;
     }
   }
-  an = NULL;  // to start from beginning
-  while ((an = logbook.get_next_node(an)) != NULL) {
-    if (name == an->el->name) {
-      pardef = an->el;
+  for (it = logbook.begin(); it != end; ++it) {
+    if (name == (*it)->name) {
+      pardef = *it;
       return;
     }
   }
@@ -219,5 +225,4 @@ std::ostream& operator<<(std::ostream& file, const particle_type& f) {
   }
   return file;
 }
-
 }

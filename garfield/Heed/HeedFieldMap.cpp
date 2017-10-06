@@ -2,18 +2,18 @@
 
 #include "Sensor.hh"
 
-#include "wcpplib/clhep_units/WSystemOfUnits.h" 
+#include "wcpplib/clhep_units/WSystemOfUnits.h"
 
 #include "HeedFieldMap.h"
 
 namespace Heed {
 
-void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield, 
-                         vfloat& mrange) const {
+void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield,
+                             vfloat& mrange) const {
 
-  const double x = pt.v.x / cm;
-  const double y = pt.v.y / cm;
-  const double z = pt.v.z / cm;
+  const double x = pt.v.x / CLHEP::cm;
+  const double y = pt.v.y / CLHEP::cm;
+  const double z = pt.v.z / CLHEP::cm;
 
   // Initialise the electric and magnetic field.
   efield = vec(0., 0., 0.);
@@ -43,7 +43,5 @@ void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield,
     bfield.y = by * 1.e-3;
     bfield.z = bz * 1.e-3;
   }
-
 }
-
 }

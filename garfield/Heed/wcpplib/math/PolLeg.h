@@ -1,9 +1,7 @@
 #ifndef POLLEG_H
 #define POLLEG_H
-/*
-Simple function for Legendre polynomials
-Implemented only l = 0,1,2,3,4,5,6
 
+/*
 Copyright (c) 2003 I. B. Smirnov
 
 Permission to use, copy, modify, distribute and sell this file
@@ -16,8 +14,9 @@ It is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
+/// Simple function for Legendre polynomials.
+/// Implemented only l = 0, 1, 2, 3, 4, 5, 6.
 double polleg(const int l, const double x);
-
 }
 
 #endif

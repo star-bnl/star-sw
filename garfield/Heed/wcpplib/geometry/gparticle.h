@@ -2,14 +2,8 @@
 #define GPARTICLE_H
 #include "wcpplib/geometry/volume.h"
 
-/*
-"geometrical particle"
-It is particle which does not interact with materials.
-It flyes by polyline line or by circumferences from one volume to another.
-The flying is represented by changing of class members representing
-particle position.
-Interacted particle should be derived class from this one.
 
+/*
 Copyright (c) 2000 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
@@ -23,41 +17,39 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// point in space, time and velocity
+/// Point in space, time and velocity
 class stvpoint {
  public:
-  // coordinates in the first system from tid system
+  /// Coordinates in the first system in the tree.
   point pt;
-  // unit vector, in the first system from tid system
+  /// Unit vector, in the first system in the tree.
   vec dir;
-  // coordinates in the local system, the last system from tid
+  /// Coordinates in the local system (last system in the tree).
   point ptloc;
-  // unit vector, in the local system, the last system from tid
+  /// Unit vector, in the local system (last system in the tree).
   vec dirloc;
-  // longitudinal velocity
+  /// Longitudinal velocity
   vfloat speed;
   manip_absvol_treeid tid;
 
-  int sb;     // 0 - inside volume, or unknown
-              // 1 - on the border of the volume
-              // 2 - on the border of an embraced volume
-  int s_ent;  // 1 - entering new volume, 0 otherwise
-              // embraced volume is also considered new.
+  /// Position flag
+  /// 0 - inside volume, or unknown
+  /// 1 - on the border of the volume
+  /// 2 - on the border of an embraced volume
+  int sb;     
+  /// "Entering flag".
+  /// 1 - entering new volume, 0 otherwise. i
+  /// Embraced volume is also considered new.
+  int s_ent;  
 
-  manip_absvol_eid next_eid;  // if nextpos.sb==2
-                              // range from previous point
+  // manip_absvol_eid next_eid;  // if nextpos.sb==2
+  PassivePtr<manip_absvol> next_eid;  // if nextpos.sb==2
+  /// Range from previous point.
   vfloat prange;
   vfloat time;
 
-  // get least address of manipulator
-  const manip_absvol_eid* G_laeid() const { return tid.G_laeid(); }
-  // get least address of manipulator
-  manip_absvol* G_lamvol() const { return tid.G_lamvol(); }
-  // get least address of volume
-  absvol* G_lavol() const { return tid.G_lavol(); }
-
   // constructors
-  stvpoint(void)
+  stvpoint()
       : pt(),
         dir(),
         ptloc(),
@@ -68,12 +60,10 @@ class stvpoint {
         s_ent(0),
         next_eid(),
         prange(0.0),
-        time(0) {
-    ;
-  }
+        time(0) {}
   stvpoint(const point& fpt, const vec& fdir, vfloat fspeed,
            manip_absvol_treeid& ftid, vfloat fprange, vfloat ftime, int fsb,
-           int fs_ent, manip_absvol_eid& faeid)
+           int fs_ent, PassivePtr<manip_absvol>& faeid)
       : pt(fpt),
         dir(unit_vec(fdir)),
         speed(fspeed),
@@ -90,7 +80,7 @@ class stvpoint {
   }
   stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
            vfloat mrange,  // may be less than one in ts
-           int fsb, int fs_ent, manip_absvol_eid& faeid)
+           int fsb, int fs_ent, PassivePtr<manip_absvol>& faeid)
       : pt(),
         dir(),
         ptloc(),
@@ -116,7 +106,7 @@ class stvpoint {
   }
 
   stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
-           int fsb, int fs_ent, manip_absvol_eid& faeid)
+           int fsb, int fs_ent, PassivePtr<manip_absvol>& faeid)
       : pt(),
         dir(),
         ptloc(),
@@ -153,45 +143,47 @@ class stvpoint {
         s_ent(fp.s_ent),
         next_eid(fp.next_eid),
         prange(fp.prange),
-        time(fp.time) {
-    ;
-  }
-  // destructor
-  virtual ~stvpoint() {}
-  virtual void print(std::ostream& file, int l) const;
+        time(fp.time) {}
+  void print(std::ostream& file, int l) const;
 };
 
 extern trajestep_limit gtrajlim;
 
+/// "Geometric particle" (particle which does not interact with materials).
+/// It moves along a polyline line or circle from one volume to another.
+/// The flying is represented by changing of class members representing
+/// particle position.
+/// Interacted particle should be derived class from this one.
+
 class gparticle : public RegPassivePtr {
  public:
-  int s_life;
-  long nstep;                      // step number
-  double total_range_from_origin;  // from origin to currpos
-  long n_zero_step;                // number of previous steps with zero range
-                                   // including this step
+  /// Default constructor.
+  gparticle() : s_life(false), nstep(0) {}
+  /// Constructor.
+  gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
+            vfloat time);
+  /// Destructor.
+  virtual ~gparticle() {}
+
+  bool s_life;
+  /// Step number.
+  long nstep;                      
+  /// Range from origin to currpos.
+  double total_range_from_origin;  
+  /// Number of previous steps with zero range (including this step).
+  long n_zero_step;                
+
   static long max_q_zero_step;
   stvpoint origin;
   stvpoint prevpos;
   stvpoint currpos;
   stvpoint nextpos;
-  vec curr_relcen;  // current relcen computed
+  // current relcen computed
   // at the last call of calc_step_to_bord(), only for debug print
+  vec curr_relcen;  
 
-  gparticle(void) : s_life(0), nstep(0) { ; }
-  gparticle(const stvpoint& sp)
-      : s_life(1), nstep(0), origin(sp), prevpos(), currpos(sp), nextpos() {
-    nextpos = calc_step_to_bord();
-    physics();
-  }
-
-  gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-            vfloat time);
-  // As far as I can now understand, PassivePtr< primvol > will be at
-  // origin.tid.eid[0]
-
-  virtual void step(void);  // Assigns prevpos=currpos; and currpos=nextpos;
-  // calls change_vol(); if necessary and makes nextpos=calc_step_to_bord();
+  /// Assign prevpos = currpos and currpos = nextpos,
+  /// calls change_vol if necessary and update nextpos =calc_step_to_bord().
   // Derived versions can also recalculate direction of move currpos
   // right after the call of currpos=nextpos;.
   // This is especially important in the case when the move is done
@@ -199,6 +191,7 @@ class gparticle : public RegPassivePtr {
   // force which deflects the trajectory slightly. In this case
   // at the end point of each interval the velocity is corrected (but the
   // point currpos is not).
+  virtual void step(std::vector<gparticle*>& secondaries);
 
   virtual void change_vol(void) { currpos.tid.G_lavol()->income(this); }
   virtual void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
@@ -213,10 +206,10 @@ class gparticle : public RegPassivePtr {
   // In calc_step_to_bord() it is set to gtrajlim.max_straight_arange.
   // vec& frelcen: position of the center of circumf. relatively currpos
 
-  virtual void physics_after_new_speed(void) { ; }
+  virtual void physics_after_new_speed(std::vector<gparticle*>& /*secondaries*/) {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
-  virtual void physics(void) { ; }
+  virtual void physics(std::vector<gparticle*>& /*secondaries*/) {}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
   virtual void physics_mrange(double& fmrange);
@@ -225,23 +218,23 @@ class gparticle : public RegPassivePtr {
   // but before considering the crossing with volumes.
   // Therefore mrange may be reduced after this.
 
+  /// Produces nextpos
   virtual stvpoint calc_step_to_bord();
-  // produces nextpos
 
-  stvpoint switch_new_vol(void);
+  stvpoint switch_new_vol();
 
-  virtual void fly(void) {
-    mfunname("virtual void gparticle::fly(void)");
-    while (s_life == 1) {
-      step();
-      physics();
+  /// Transport the particle.
+  virtual void fly(std::vector<gparticle*>& secondaries) {
+    mfunname("virtual void gparticle::fly()");
+    while (s_life) {
+      step(secondaries);
+      physics(secondaries);
     }
   }
   virtual void print(std::ostream& file, int l) const;
-  macro_copy_total(gparticle);
-  virtual ~gparticle() { ; }
-};
+  virtual gparticle* copy() const { return new gparticle(*this); }
 
+};
 }
 
 #endif

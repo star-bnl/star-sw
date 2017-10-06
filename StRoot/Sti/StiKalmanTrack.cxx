@@ -548,7 +548,7 @@
  */
 
 
-
+#include <assert.h>
 //Std
 #include <stdexcept>
 #include <cmath>
@@ -1206,8 +1206,9 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
 {
   if (firstNode==0 || lastNode==0)
  {
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
+   cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
+   assert(0);
+   //  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
  }
 
   StiKalmanTrackNode *node = 0;

@@ -1,9 +1,7 @@
 #ifndef PLANE_H
 #define PLANE_H
-/*
-Plane defined by point and vector.  The vector is normal to plane.
 
-Copyright (c) 2000 Igor B. Smirnov
+/* Copyright (c) 2000 Igor B. Smirnov
 
 The file can be used, copied, modified, and distributed
 according to the terms of GNU Lesser General Public License version 2.1
@@ -19,28 +17,26 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// **** plane ****
-
 class polyline;
+
+/// Plane, defined by defined by a point and a vector normal to the plane.
 
 class plane : public absref {
  protected:
-  point piv;  // origin point, pivot
-  vec dir;    // direction of normal, unit vector
+  /// Origin point, pivot.
+  point piv;  
+  /// Direction of normal, unit vector.
+  vec dir;    
+
  public:
-  point Gpiv(void) const {
-    return piv;
-  }
-  vec Gdir(void) const {
-    return dir;
-  }
+  point Gpiv(void) const { return piv; }
+  vec Gdir(void) const { return dir; }
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  static absref(absref::* aref[2]);
+  static absref(absref::*aref[2]);
 
  public:
-
   plane() : piv(), dir() { ; }
   plane(const point& fpiv, const vec& fdir) : piv(fpiv), dir(unit_vec(fdir)) {
     ;
@@ -88,7 +84,6 @@ class plane : public absref {
 };
 
 std::ostream& operator<<(std::ostream& file, const plane& s);
-
 }
 
 #include "wcpplib/geometry/polyline.h"

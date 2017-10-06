@@ -10,9 +10,10 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 #include <iomanip>
-#include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/math/minmax.h"
 #include "wcpplib/math/DoubleAc.h"
+
+namespace Heed {
 
 DoubleAc::DoubleAc(double f, double ffmin, double ffmax) {
   mfunname("DoubleAc::DoubleAc(double f, double ffmin, double ffmax)");
@@ -77,14 +78,14 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f) {
       mcout << "case 1\n";
 #endif
     } else if (f.da >= 0)  // assumed that f.di < 0
-        {
+    {
       di = f.di * da;
       da *= f.da;
 #ifdef DEBUG_OPERATOR_MULT_PRINT
       mcout << "case 2\n";
 #endif
     } else  // assumed that f.da < 0
-        {
+    {
       double ti = da * f.di;
       da = di * f.da;
       di = ti;
@@ -93,7 +94,7 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f) {
 #endif
     }
   } else if (da >= 0)  // assumed that di < 0
-      {
+  {
     if (f.di >= 0) {
       di *= f.da;
       da *= f.da;
@@ -101,8 +102,8 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f) {
       mcout << "case 4\n";
 #endif
     } else if (f.da >= 0) {
-      double ti = find_min(di * f.da, da * f.di);
-      da = find_max(di * f.di, da * f.da);
+      double ti = std::min(di * f.da, da * f.di);
+      da = std::max(di * f.di, da * f.da);
       di = ti;
 #ifdef DEBUG_OPERATOR_MULT_PRINT
       mcout << "case 5\n";
@@ -116,7 +117,7 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f) {
 #endif
     }
   } else  // assumed that di < 0 and da < 0
-      {
+  {
     if (f.di >= 0) {
       di *= f.da;
       da *= f.di;
@@ -139,9 +140,9 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f) {
 #endif
     }
   }
-//mcout<<"d="<<d<<'\n';
-//mcout<<"di="<<di<<'\n';
-//mcout<<"da="<<da<<'\n';
+// mcout<<"d="<<d<<'\n';
+// mcout<<"di="<<di<<'\n';
+// mcout<<"da="<<da<<'\n';
 #ifdef CHECK_CORRECTNESS_AT_MULT
   if (d < di) {
     if (d - di == 0.0)  // strange but at Sc. Linux 4.0 with -O2 this happens
@@ -225,7 +226,7 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f) {
         di = -DBL_MAX;
       } else {
         double ti = da / f.da;
-        //mcout<<"d="<<d<<" ti="<<ti<<'\n';
+        // mcout<<"d="<<d<<" ti="<<ti<<'\n';
         da = di / f.di;
         di = ti;
       }
@@ -254,7 +255,7 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f) {
       da /= f.da;
     } else if (f.di == 0) {
       di = -DBL_MAX;
-      //check_econd11(f.da ,  == 0 , mcerr); // otherwise f.d == 0 which
+      // check_econd11(f.da ,  == 0 , mcerr); // otherwise f.d == 0 which
       // was already rejected
       if (f.da == 0) {
         funnw.ehdr(mcerr);
@@ -288,8 +289,8 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f) {
     mcerr << "Argument:\n";
     f.print(mcerr, 6);
     // for debug:
-    //mcerr<<"old value:\n";
-    //temp.print(mcerr, 6);
+    // mcerr<<"old value:\n";
+    // temp.print(mcerr, 6);
     spexit(mcerr);
   }
   if (d > da) {
@@ -300,13 +301,13 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f) {
     mcerr << "Argument:\n";
     f.print(mcerr, 6);
     // for debug:
-    //mcerr<<"old value:\n";
-    //temp.print(mcerr, 6);
+    // mcerr<<"old value:\n";
+    // temp.print(mcerr, 6);
     spexit(mcerr);
   }
 #endif
-  //check_econd12(d , < , di , mcerr);
-  //check_econd12(d , > , da , mcerr);
+  // check_econd12(d , < , di , mcerr);
+  // check_econd12(d , > , da , mcerr);
   return *this;
 }
 
@@ -317,7 +318,7 @@ DoubleAc sqrt(const DoubleAc& f) {
     spexit(mcerr);
   }
   return DoubleAc(std::sqrt(double(f.get())),
-                  std::sqrt(double(find_max(f.get_left_limit(), 0.0))),
+                  std::sqrt(double(std::max(f.get_left_limit(), 0.0))),
                   std::sqrt(double(f.get_right_limit())));
 }
 
@@ -326,7 +327,7 @@ DoubleAc square(const DoubleAc& f) {
     return DoubleAc(f.get() * f.get(), f.left_limit() * f.left_limit(),
                     f.right_limit() * f.right_limit());
   } else if (f.right_limit() >= 0.0) {
-    double t = find_max(-f.left_limit(), f.right_limit());
+    double t = std::max(-f.left_limit(), f.right_limit());
     return DoubleAc(f.get() * f.get(), 0.0, t * t);
   }
   return DoubleAc(f.get() * f.get(), f.right_limit() * f.right_limit(),
@@ -346,7 +347,7 @@ DoubleAc pow(const DoubleAc& f, double p) {
       if (di < 0.0)
         return DoubleAc(d, di, da);
       else  // the power is even
-        return DoubleAc(d, 0.0, find_max(di, da));
+        return DoubleAc(d, 0.0, std::max(di, da));
     } else {
       if (di < 0.0)
         return DoubleAc(d, di, da);
@@ -363,7 +364,7 @@ DoubleAc pow(const DoubleAc& f, double p) {
       if (di < 0.0)
         return 1.0 / DoubleAc(d, di, da);
       else  // the power is even
-        return 1.0 / DoubleAc(d, 0.0, find_max(di, da));
+        return 1.0 / DoubleAc(d, 0.0, std::max(di, da));
     } else {
       if (di < 0.0)
         return 1.0 / DoubleAc(d, di, da);
@@ -381,50 +382,50 @@ DoubleAc exp(const DoubleAc& f) {
 }
 
 DoubleAc sin(const DoubleAc& f) {
-  //mcout<<"DoubleAc sin is starting, f="; f.print(mcout, 3);
+  // mcout<<"DoubleAc sin is starting, f="; f.print(mcout, 3);
   double d = std::sin(f.get());
   double di = std::sin(f.left_limit());
   double da = std::sin(f.right_limit());
-  //Iprintn(mcout, d);
-  //Iprintn(mcout, di);
-  //Iprintn(mcout, da);
+  // Iprintn(mcout, d);
+  // Iprintn(mcout, di);
+  // Iprintn(mcout, da);
   long n = left_round(f.get() / M_PI + 0.5);
   long ni = left_round(f.left_limit() / M_PI + 0.5);
   long na = left_round(f.right_limit() / M_PI + 0.5);
-  //Iprintn(mcout, n);
-  //Iprintn(mcout, ni);
-  //Iprintn(mcout, na);
-  int seven = even_num(n);
-  //Iprintn(mcout, seven);
-  if (seven == 1) {
+  // Iprintn(mcout, n);
+  // Iprintn(mcout, ni);
+  // Iprintn(mcout, na);
+  if (n % 2 == 0) {
+    // Even number.
     if (ni < n) {
       di = -1.0;
-      da = find_max(di, da);
+      da = std::max(di, da);
       if (na > n) {
         da = 1.0;
       }
     } else if (na > n) {
       da = 1.0;
-      di = find_min(di, da);
+      di = std::min(di, da);
     }
   } else {
+    // Odd number.
     double temp = di;
     di = da;
     da = temp;
     if (ni < n) {
       da = 1.0;
-      di = find_min(di, da);
+      di = std::min(di, da);
       if (na > n) {
         di = -1.0;
       }
     } else if (na > n) {
       di = -1.0;
-      da = find_max(di, da);
+      da = std::max(di, da);
     }
   }
-  //Iprintn(mcout, d);
-  //Iprintn(mcout, di);
-  //Iprintn(mcout, da);
+  // Iprintn(mcout, d);
+  // Iprintn(mcout, di);
+  // Iprintn(mcout, da);
   return DoubleAc(d, di, da);
 }
 
@@ -435,31 +436,32 @@ DoubleAc cos(const DoubleAc& f) {
   long n = left_round(f.get() / M_PI - 1.0);
   long ni = left_round(f.left_limit() / M_PI - 1.0);
   long na = left_round(f.right_limit() / M_PI - 1.0);
-  int seven = even_num(n);
-  if (seven == 1) {
+  if (n % 2 == 0) {
+    // Even number.
     if (ni < n) {
       di = -1.0;
-      da = find_max(di, da);
+      da = std::max(di, da);
       if (na > n) {
         da = 1.0;
       }
     } else if (na > n) {
       da = 1.0;
-      di = find_min(di, da);
+      di = std::min(di, da);
     }
   } else {
+    // Odd number.
     double temp = di;
     di = da;
     da = temp;
     if (ni < n) {
       da = 1.0;
-      di = find_min(di, da);
+      di = std::min(di, da);
       if (na > n) {
         di = -1.0;
       }
     } else if (na > n) {
       di = -1.0;
-      da = find_max(di, da);
+      da = std::max(di, da);
     }
   }
   return DoubleAc(d, di, da);
@@ -544,4 +546,6 @@ DoubleAc pow(const DoubleAc& /*f*/, const DoubleAc& /*p*/) {
 std::ostream& operator<<(std::ostream& file, const DoubleAc& f) {
   f.print(file, 1);
   return file;
+}
+
 }

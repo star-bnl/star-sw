@@ -129,7 +129,7 @@
  *
  */
 
-
+#include <assert.h>
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -164,12 +164,16 @@ StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer, Factory<StiHit> 
 
 void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
+#if 0
    if (!_detector)
       throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
 
    if (!_hitContainer)
       throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-
+#else
+   assert(_detector);
+   assert(_hitContainer);
+#endif
    StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
 
    if (!pxlHitCollection) {
@@ -206,10 +210,12 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
             for (unsigned int iPxlHit = 0; iPxlHit < pxlHits.size(); iPxlHit++)
             {
                StPxlHit *pxlHit = pxlHits[iPxlHit];
-
+#if 0
                if (!pxlHit)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL hit in container");
-
+#else
+	       assert(pxlHit);
+#endif
                if (pxlHit->detector() != kPxlId) continue;
 
                LOG_DEBUG << "StiPxlHitLoader::loadHits() - \n"
@@ -220,14 +226,18 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                // sensor half to be later associated with this pxlHit
                int sensorHalf = pxlHit->localPosition(0) < 0 ? 1 : 2;
                const StiDetector *detector = static_cast<StiPxlDetectorBuilder*>(_detector)->getActiveDetector(pxlHit->sector(), pxlHit->ladder(), sensorHalf);
-
+#if 0
                if (!detector)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
-
+#else
+	       assert(detector);
+#endif
                StiHit *stiHit = _hitFactory->getInstance();
-
+#if 0
                if (!stiHit) throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- stiHit==0");
-
+#else
+	       assert(stiHit);
+#endif
                stiHit->reset();
 
                stiHit->setGlobal(detector, pxlHit,

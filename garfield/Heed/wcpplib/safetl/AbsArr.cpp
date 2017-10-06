@@ -12,11 +12,11 @@ The file is provided "as is" without express or implied warranty.
 #include <iomanip>
 #include "wcpplib/safetl/AbsArr.h"
 
-using namespace std;
+namespace Heed {
 
 long max_qel_DynLinArr = 100000000;
 
-void print_DynLinArr_int(ostream& file, const DynLinArr<int>& f) {
+void print_DynLinArr_int(std::ostream& file, const DynLinArr<int>& f) {
   Ifile << "DynLinArr<int>:";
   long q = f.get_qel();
   file << " q=" << q << '\n';
@@ -24,18 +24,17 @@ void print_DynLinArr_int(ostream& file, const DynLinArr<int>& f) {
   if (q <= 0) return;
   indn.n += 2;
   if (q <= pq_arrelem_in_line) file << indn;
-  long i;
-  for (i = 0; i < q; i++) {
+  for (long i = 0; i < q; i++) {
     if (q <= pq_arrelem_in_line)
       file << f[i] << ' ';  // all in one line
     else
-      Ifile << setw(4) << i << ' ' << f[i] << '\n';  // column
+      Ifile << std::setw(4) << i << ' ' << f[i] << '\n';  // column
   }
   if (q <= pq_arrelem_in_line) file << '\n';
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
-void print_DynLinArr_long(ostream& file, const DynLinArr<long>& f) {
+void print_DynLinArr_long(std::ostream& file, const DynLinArr<long>& f) {
   Ifile << "DynLinArr<long>:";
   long q = f.get_qel();
   file << " q=" << q << '\n';
@@ -48,14 +47,14 @@ void print_DynLinArr_long(ostream& file, const DynLinArr<long>& f) {
     if (q <= pq_arrelem_in_line)
       file << f[i] << ' ';  // all in one line
     else
-      Ifile << setw(4) << i << ' ' << f[i] << '\n';  // column
+      Ifile << std::setw(4) << i << ' ' << f[i] << '\n';  // column
   }
   if (q <= pq_arrelem_in_line) file << '\n';
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
 
-void print_DynLinArr_float(ostream& file, const DynLinArr<float>& f) {
+void print_DynLinArr_float(std::ostream& file, const DynLinArr<float>& f) {
   Ifile << "DynLinArr<float>:";
   long q = f.get_qel();
   file << " q=" << q << '\n';
@@ -68,14 +67,14 @@ void print_DynLinArr_float(ostream& file, const DynLinArr<float>& f) {
     if (q <= pq_arrelem_in_line)
       file << f[i] << ' ';  // all in one line
     else
-      Ifile << setw(4) << i << ' ' << f[i] << '\n';  // column
+      Ifile << std::setw(4) << i << ' ' << f[i] << '\n';  // column
   }
   if (q <= pq_arrelem_in_line) file << '\n';
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
 
-void print_DynLinArr_double(ostream& file, const DynLinArr<double>& f) {
+void print_DynLinArr_double(std::ostream& file, const DynLinArr<double>& f) {
   Ifile << "DynLinArr<double>:";
   long q = f.get_qel();
   file << " q=" << q << '\n';
@@ -88,14 +87,14 @@ void print_DynLinArr_double(ostream& file, const DynLinArr<double>& f) {
     if (q <= pq_arrelem_in_line)
       file << f[i] << ' ';  // all in one line
     else
-      Ifile << setw(4) << i << ' ' << f[i] << '\n';  // column
+      Ifile << std::setw(4) << i << ' ' << f[i] << '\n';  // column
   }
   if (q <= pq_arrelem_in_line) file << '\n';
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
 
-void print_DynLinArr_double2(ostream& file, const DynLinArr<double>& f1,
+void print_DynLinArr_double2(std::ostream& file, const DynLinArr<double>& f1,
                              const DynLinArr<double>& f2) {
   Ifile << "Two arrays DynLinArr<double>:";
   long q1 = f1.get_qel();
@@ -112,13 +111,13 @@ void print_DynLinArr_double2(ostream& file, const DynLinArr<double>& f1,
     Ifile << "index            array1             array2\n";
     long i;
     for (i = 0; i < q_max; i++) {
-      Ifile << setw(4) << i << ' ';
+      Ifile << std::setw(4) << i << ' ';
       if (i < q1)
-        file << setw(18) << f1[i] << ' ';
+        file << std::setw(18) << f1[i] << ' ';
       else
         file << "                   ";  // 19 blanks
       if (i < q2)
-        file << setw(18) << f2[i] << '\n';
+        file << std::setw(18) << f2[i] << '\n';
       else
         file << "                  \n";  // 18 blanks
     }
@@ -126,20 +125,20 @@ void print_DynLinArr_double2(ostream& file, const DynLinArr<double>& f1,
     long i;
     Ifile << "array1=";
     for (i = 0; i < q1; i++) {
-      file << setw(18) << f1[i] << ' ';  // all in one line
+      file << std::setw(18) << f1[i] << ' ';  // all in one line
     }
     file << '\n';
     Ifile << "array2=";
     for (i = 0; i < q2; i++) {
-      file << setw(18) << f2[i] << ' ';  // all in one line
+      file << std::setw(18) << f2[i] << ' ';  // all in one line
     }
     file << '\n';
   }
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
 
-void print_DynLinArr_int_double(ostream& file, const DynLinArr<int>& iar,
+void print_DynLinArr_int_double(std::ostream& file, const DynLinArr<int>& iar,
                                 const DynLinArr<double>& dar) {
   Ifile << "One DynLinArr<int> array and one DynLinArr<double>:\n";
   long qiar = iar.get_qel();
@@ -158,21 +157,21 @@ void print_DynLinArr_int_double(ostream& file, const DynLinArr<int>& iar,
   Ifile << "index int array    double array\n";
   long i;
   for (i = 0; i < q_max; i++) {
-    Ifile << setw(4) << i << ' ';
+    Ifile << std::setw(4) << i << ' ';
     if (i < qiar)
-      file << setw(8) << iar[i] << ' ';
+      file << std::setw(8) << iar[i] << ' ';
     else
       file << "         ";  // 19 blanks
     if (i < qdar)
-      file << setw(18) << dar[i] << ' ';
+      file << std::setw(18) << dar[i] << ' ';
     else
       file << "                   ";  // 18 blanks
   }
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
 
-void print_DynLinArr_int_double3(ostream& file, const DynLinArr<int>& iar,
+void print_DynLinArr_int_double3(std::ostream& file, const DynLinArr<int>& iar,
                                  const DynLinArr<double>& dar1,
                                  const DynLinArr<double>& dar2,
                                  const DynLinArr<double>& dar3) {
@@ -201,42 +200,29 @@ void print_DynLinArr_int_double3(ostream& file, const DynLinArr<int>& iar,
            "array3\n";
   long i;
   for (i = 0; i < q_max; i++) {
-    Ifile << setw(4) << i << ' ';
+    Ifile << std::setw(4) << i << ' ';
     if (i < qiar)
-      file << setw(8) << iar[i] << ' ';
+      file << std::setw(8) << iar[i] << ' ';
     else
       file << "         ";  // 19 blanks
     if (i < qdar1)
-      file << setw(18) << dar1[i] << ' ';
+      file << std::setw(18) << dar1[i] << ' ';
     else
       file << "                   ";  // 18 blanks
     if (i < qdar2)
-      file << setw(18) << dar2[i] << ' ';
+      file << std::setw(18) << dar2[i] << ' ';
     else
       file << "                   ";  // 18 blanks
     if (i < qdar3)
-      file << setw(18) << dar3[i] << '\n';
+      file << std::setw(18) << dar3[i] << '\n';
     else
       file << "                  \n";  // 18 blanks
   }
   indn.n -= 2;
-  file << flush;
+  file << std::flush;
 }
 
-// The following might be in String.h, but String.h is included into this
-// file, and the whole system cannot work.
-String DynLinArr_char_we_to_String(DynLinArr<char>& ar) {
-  DynLinArr<char> ar_ext(ar.get_qel() + 1);
-  long n;
-  long q = ar.get_qel();
-  for (n = 0; n < q; n++) {
-    ar_ext[n] = ar[n];
-  }
-  ar_ext[n] = '\0';
-  return String(&(ar_ext[0]));
-}
-
-void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
+void print_DynArr_int_w(std::ostream& file, const DynArr<int>& f, int w) {
   mfunname(
       "void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w)");
   f.check();
@@ -259,14 +245,14 @@ void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
       Ifile << "ar=";
       long i;
       for (i = 0; i < q; i++) {
-        file << ' ' << setw(w) << f.ac(i);
+        file << ' ' << std::setw(w) << f.ac(i);
       }
       file << '\n';
     } else {
       Ifile << "array:\n";
       long i;
       for (i = 0; i < q; i++) {
-        Ifile << setw(4) << i << ' ' << f.ac(i) << '\n';  // column
+        Ifile << std::setw(4) << i << ' ' << f.ac(i) << '\n';  // column
       }
     }
   } else if (qdim == 2) {
@@ -279,9 +265,9 @@ void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
       Ifile << "first index\n";
       long ir, ic;
       for (ir = 0; ir < qr; ir++) {
-        Ifile << setw(3) << ir;
+        Ifile << std::setw(3) << ir;
         for (ic = 0; ic < qc; ic++) {
-          Ifile << ' ' << setw(w) << f.ac(ir, ic);
+          Ifile << ' ' << std::setw(w) << f.ac(ir, ic);
         }
         file << '\n';
       }
@@ -290,9 +276,9 @@ void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
       Imcout << "second index\n";
       long ir, ic;
       for (ic = 0; ic < qc; ic++) {
-        Ifile << setw(3) << ic;
+        Ifile << std::setw(3) << ic;
         for (ir = 0; ir < qr; ir++) {
-          Ifile << ' ' << setw(w) << f.ac(ir, ic);
+          Ifile << ' ' << std::setw(w) << f.ac(ir, ic);
         }
         file << '\n';
       }
@@ -301,7 +287,7 @@ void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
       long ir, ic;
       for (ir = 0; ir < qr; ir++) {
         for (ic = 0; ic < qc; ic++) {
-          Ifile << setw(4) << ir << ' ' << setw(4) << ic << ' ' << f.ac(ir, ic)
+          Ifile << std::setw(4) << ir << ' ' << std::setw(4) << ic << ' ' << f.ac(ir, ic)
                 << '\n';  // column
         }
       }
@@ -315,7 +301,7 @@ void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
     }
     file << yesindent;
   }
-  //if(qc<=pq_elem_in_line) file<<'\n';
+  // if(qc<=pq_elem_in_line) file<<'\n';
   indn.n -= 2;
   /*
   }
@@ -326,7 +312,7 @@ void print_DynArr_int_w(ostream& file, const DynArr<int>& f, int w) {
   */
 }
 
-void print_DynArr_double(ostream& file, const DynArr<double>& f) {
+void print_DynArr_double(std::ostream& file, const DynArr<double>& f) {
   mfunname("void print_DynArr_double(ostream& file, const DynArr<double>& f)");
   f.check();
   Ifile << "DynArr<double>:";
@@ -349,7 +335,7 @@ void print_DynArr_double(ostream& file, const DynArr<double>& f) {
       if (q <= pq_arrelem_in_line)
         file << f.ac(i) << ' ';  // all in one line
       else
-        Ifile << setw(4) << i << ' ' << f.ac(i) << '\n';  // column
+        Ifile << std::setw(4) << i << ' ' << f.ac(i) << '\n';  // column
     }
     if (q <= pq_arrelem_in_line) file << '\n';
     indn.n -= 2;
@@ -366,19 +352,19 @@ void print_DynArr_double(ostream& file, const DynArr<double>& f) {
         if (qc <= pq_arrelem_in_line)
           file << f.ac(ir, ic) << ' ';  // all in one line
         else
-          Ifile << setw(4) << ir << ' ' << setw(4) << ic << ' ' << f.ac(ir, ic)
+          Ifile << std::setw(4) << ir << ' ' << std::setw(4) << ic << ' ' << f.ac(ir, ic)
                 << '\n';  // column
       }
       if (qc <= pq_arrelem_in_line) file << '\n';
     }
-    //if(qc<=pq_elem_in_line) file<<'\n';
+    // if(qc<=pq_elem_in_line) file<<'\n';
     indn.n -= 2;
   } else {
     file << f;
   }
 }
 
-void print_DynArr_float(ostream& file, const DynArr<float>& f) {
+void print_DynArr_float(std::ostream& file, const DynArr<float>& f) {
   mfunname("void print_DynArr_float(ostream& file, const DynArr<float>& f)");
   f.check();
   Ifile << "DynArr<float>:";
@@ -386,8 +372,7 @@ void print_DynArr_float(ostream& file, const DynArr<float>& f) {
   file << " qdim=" << qdim << " sizes:";
   const DynLinArr<long>& qe = f.get_qel();
   qe.check();
-  long n;
-  for (n = 0; n < qdim; n++) {
+  for (long n = 0; n < qdim; n++) {
     file << ' ' << qe[n];
   }
   file << '\n';
@@ -401,7 +386,7 @@ void print_DynArr_float(ostream& file, const DynArr<float>& f) {
       if (q <= pq_arrelem_in_line)
         file << f.ac(i) << ' ';  // all in one line
       else
-        Ifile << setw(4) << i << ' ' << f.ac(i) << '\n';  // column
+        Ifile << std::setw(4) << i << ' ' << f.ac(i) << '\n';  // column
     }
     if (q <= pq_arrelem_in_line) file << '\n';
     indn.n -= 2;
@@ -418,12 +403,12 @@ void print_DynArr_float(ostream& file, const DynArr<float>& f) {
         if (qc <= pq_arrelem_in_line)
           file << f.ac(ir, ic) << ' ';  // all in one line
         else
-          Ifile << setw(4) << ir << ' ' << setw(4) << ic << ' ' << f.ac(ir, ic)
+          Ifile << std::setw(4) << ir << ' ' << std::setw(4) << ic << ' ' << f.ac(ir, ic)
                 << '\n';  // column
       }
       if (qc <= pq_arrelem_in_line) file << '\n';
     }
-    //if(qc<=pq_elem_in_line) file<<'\n';
+    // if(qc<=pq_elem_in_line) file<<'\n';
     indn.n -= 2;
   } else {
     file << f;
@@ -439,7 +424,7 @@ int gconfirm_ind(const DynLinArr<long>& qel, const DynLinArr<long>& ind) {
     spexit(mcerr);
   }
   long qd = qel.get_qel();
-  //if( ind.get_qel() < qd) qd=ind.get_qel();
+  // if( ind.get_qel() < qd) qd=ind.get_qel();
   long n;
   for (n = 0; n < qd; n++)
     if (ind[n] < 0 || ind[n] >= qel[n]) return 0;
@@ -476,10 +461,9 @@ int find_next_comb(const DynLinArr<long>& qel, DynLinArr<long>& f) {
       f[n] = 0;
     }  // the first element
 
-  }  // it was last combination
-  for (n = 0; n < qdim - 1; n++)
-    f[n] = qel[n] - 1;          // the last element
-  f[qdim - 1] = qel[qdim - 1];  // next after last
+  }                                                  // it was last combination
+  for (n = 0; n < qdim - 1; n++) f[n] = qel[n] - 1;  // the last element
+  f[qdim - 1] = qel[qdim - 1];                       // next after last
 #else
   for (n = qdim - 1; n >= 0; n--) {
     if (f.acu(n) < qel.acu(n) - 1) {
@@ -490,9 +474,8 @@ int find_next_comb(const DynLinArr<long>& qel, DynLinArr<long>& f) {
     }  // the first element
 
   }  // it was last combination
-  for (n = 0; n < qdim - 1; n++)
-    f.acu(n) = qel.acu(n) - 1;          // the last element
-  f.acu(qdim - 1) = qel.acu(qdim - 1);  // next after last
+  for (n = 0; n < qdim - 1; n++) f.acu(n) = qel.acu(n) - 1;  // the last element
+  f.acu(qdim - 1) = qel.acu(qdim - 1);                       // next after last
 #endif
   return 0;
 }
@@ -506,14 +489,12 @@ int find_next_comb_not_less(const DynLinArr<long>& qel, DynLinArr<long>& f) {
     if (f[n] < qel[n] - 1) {
       f[n]++;
       int n1;
-      for (n1 = n + 1; n1 < qdim; n1++)
-        f[n1] = f[n];
+      for (n1 = n + 1; n1 < qdim; n1++) f[n1] = f[n];
       return 1;
     }
-  }  // it was last combination
-  for (n = 0; n < qdim - 1; n++)
-    f[n] = qel[n] - 1;          // the last element
-  f[qdim - 1] = qel[qdim - 1];  // next after last
+  }                                                  // it was last combination
+  for (n = 0; n < qdim - 1; n++) f[n] = qel[n] - 1;  // the last element
+  f[qdim - 1] = qel[qdim - 1];                       // next after last
   return 0;
 }
 
@@ -530,10 +511,10 @@ int find_prev_comb(const DynLinArr<long>& qel, DynLinArr<long>& f) {
       f[n] = qel[n] - 1;
     }  // the last element
   }
-  for (n = 0; n < qdim - 1; n++)
-    f[n] = 0;  // the first element
+  for (n = 0; n < qdim - 1; n++) f[n] = 0;  // the first element
   f[qdim - 1] = -1;
   return 0;  // previous before first
 }
 
 DynLinArr<long> qel_communicat;
+}

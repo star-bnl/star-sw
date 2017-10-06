@@ -41,8 +41,7 @@ bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::NewTrack:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::NewTrack:\n    Sensor is not defined.\n";
     return false;
   }
 
@@ -123,8 +122,7 @@ bool TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
 
   if (!m_ready) {
     std::cerr << m_className << "::GetCluster:\n";
-    std::cerr << "    Track not initialized.\n";
-    std::cerr << "    Call NewTrack first.\n";
+    std::cerr << "    Track not initialized. Call NewTrack first.\n";
     return false;
   }
 
@@ -170,47 +168,7 @@ bool TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
 
   // Sample the energy deposition.
   double f = 0.;
-  const double u = RndmUniform();
-  if (u < m_cdf.back()) {
-    if (u <= m_cdf[0]) {
-      edep = m_energies[0];
-    } else if (u >= 1.) {
-      edep = m_energies.back();
-    } else {
-      // Find the energy loss by interpolation
-      // from the cumulative distribution table
-      int iLow = 0, iUp = m_cdf.size(), iMid;
-      while (iUp - iLow > 1) {
-        iMid = (iUp + iLow) >> 1;
-        if (u >= m_cdf[iMid]) {
-          iLow = iMid;
-        } else {
-          iUp = iMid;
-        }
-      }
-      if (edep < 100.) {
-        edep = m_energies[iLow] + 
-               (u - m_cdf[iLow]) * (m_energies[iUp] - m_energies[iLow]) /
-               (m_cdf[iUp] - m_cdf[iLow]);
-        f = m_rutherford[iLow] + (edep - m_energies[iLow]) *
-                                   (m_rutherford[iUp] - m_rutherford[iLow]) /
-                                   (m_energies[iUp] - m_energies[iLow]);
-      } else {
-        edep = log(m_energies[iLow]) +
-               (log(u) - log(m_cdf[iLow])) *
-                   (log(m_energies[iUp]) - log(m_energies[iLow])) /
-                   (log(m_cdf[iUp]) - log(m_cdf[iLow]));
-        edep = exp(edep);
-        f = m_rutherford[iLow] + (log(edep) - log(m_energies[iLow])) *
-                               (m_rutherford[iUp] - m_rutherford[iLow]) /
-                               (log(m_energies[iUp]) - log(m_energies[iLow]));
-      }
-    }
-  } else {
-    // Use the free-electron differential cross-section.
-    f = 1.;
-    edep = SampleAsymptoticCs(u);
-  }
+  edep = SampleEnergyDeposit(RndmUniform(), f);
   // Update the particle energy.
   m_e -= edep;
 
@@ -224,12 +182,53 @@ bool TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
   return true;
 }
 
+double TrackPAI::SampleEnergyDeposit(const double u, double& f) const {
+
+  if (u > m_cdf.back()) { 
+    // Use the free-electron differential cross-section.
+    f = 1.;
+    return SampleAsymptoticCs(u);
+  }
+
+  if (u <= m_cdf[0]) return m_energies[0];
+  if (u >= 1.) return m_energies.back();
+
+  // Find the energy loss by interpolation
+  // from the cumulative distribution table
+  int iLow = 0, iUp = m_cdf.size(), iMid;
+  while (iUp - iLow > 1) {
+    iMid = (iUp + iLow) >> 1;
+    if (u >= m_cdf[iMid]) {
+      iLow = iMid;
+    } else {
+      iUp = iMid;
+    }
+  }
+  if (m_energies[iLow] < 100.) {
+    const double edep = m_energies[iLow] + 
+           (u - m_cdf[iLow]) * (m_energies[iUp] - m_energies[iLow]) /
+           (m_cdf[iUp] - m_cdf[iLow]);
+    f = m_rutherford[iLow] + (edep - m_energies[iLow]) *
+                               (m_rutherford[iUp] - m_rutherford[iLow]) /
+                               (m_energies[iUp] - m_energies[iLow]);
+    return edep;
+  }
+  double edep = log(m_energies[iLow]) +
+         (log(u) - log(m_cdf[iLow])) *
+             (log(m_energies[iUp]) - log(m_energies[iLow])) /
+             (log(m_cdf[iUp]) - log(m_cdf[iLow]));
+  edep = exp(edep);
+  f = m_rutherford[iLow] + (log(edep) - log(m_energies[iLow])) *
+                         (m_rutherford[iUp] - m_rutherford[iLow]) /
+                         (log(m_energies[iUp]) - log(m_energies[iLow]));
+  return edep;
+}
+
 bool TrackPAI::SetupMedium(Medium* medium) {
 
   // Make sure that the medium is defined.
   if (!medium) {
-    std::cerr << m_className << "::SetupMedium:\n"
-              << "    Medium pointer is null.\n";
+    std::cerr << m_className << "::SetupMedium:\n    Null pointer.\n";
     return false;
   }
 
@@ -237,7 +236,7 @@ bool TrackPAI::SetupMedium(Medium* medium) {
   m_electronDensity = medium->GetNumberDensity() * medium->GetAtomicNumber();
   if (m_electronDensity <= 0.) {
     std::cerr << m_className << "::SetupMedium:\n"
-              << "    Medium has an unphysical electron density ("
+              << "    Unphysical electron density ("
               << m_electronDensity << ")\n";
     return false;
   }
@@ -438,7 +437,7 @@ bool TrackPAI::SetupCrossSectionTable() {
   }
 
   if (cs <= 0.) {
-    std::cerr << "TrackPAI:SetupCrossSectionTable:\n";
+    std::cerr << m_className << "::SetupCrossSectionTable:\n";
     std::cerr << "    Total cross-section <= 0.\n";
     return false;
   }
@@ -704,14 +703,4 @@ double TrackPAI::SampleAsymptoticCsPositron(const double emin, double u) const {
   return 0.5 * (eLow + eUp);
 }
 
-double TrackPAI::LossFunction(const double eps1, const double eps2) const {
-
-  const double eps = eps1 * eps1 + eps2 * eps2;
-  if (eps <= 0.) {
-    std::cerr << m_className << "::LossFunction:\n";
-    std::cerr << "    Dielectric function is zero.\n";
-    return 0.;
-  }
-  return eps2 / (eps1 * eps1 + eps2 * eps2);
-}
 }

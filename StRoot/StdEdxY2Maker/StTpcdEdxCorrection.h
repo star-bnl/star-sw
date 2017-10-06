@@ -104,8 +104,6 @@ class StTpcdEdxCorrection : public TObject {
   dEdxY2_t            *mdEdx;
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
-  Int_t                mNumberOfRows;
-  Int_t                mNumberOfInnerRows;
   Int_t                m_Debug;                 //!
   TF1                 *f1000;
   TF1                 *f1100;

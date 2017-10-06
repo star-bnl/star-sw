@@ -13,7 +13,7 @@
 #include "StEvtVtxSeedMaker.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 
 
 ClassImp(StEvtVtxSeedMaker)
@@ -103,7 +103,7 @@ int StEvtVtxSeedMaker::GetEventData() {
       StTpcHit* hit = (StTpcHit*) (hits[hitn]);
       // TPC padrow and sector indices use 1..n
       int mask = 1<<(hit->sector()-1);
-      if (hit->padrow() <= St_tpcPadPlanesC::instance()->innerPadRows()) itpc |= mask;
+      if (hit->padrow() <= St_tpcPadConfigC::instance()->innerPadRows(hit->sector())) itpc |= mask;
       else otpc |= mask;
     }
   }

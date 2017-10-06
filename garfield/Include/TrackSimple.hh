@@ -13,7 +13,7 @@ class TrackSimple : public Track {
   /// Constructor
   TrackSimple();
   /// Destructor
-  ~TrackSimple() {}
+  virtual ~TrackSimple() {}
 
   /// Constant distance between clusters.
   void SetEqualSpacing() { m_useEqualSpacing = true; }
@@ -22,16 +22,16 @@ class TrackSimple : public Track {
 
   /// Set the cluster density (inverse mean free path).
   void SetClusterDensity(const double d);
-  double GetClusterDensity();
+  virtual double GetClusterDensity();
   /// Set the stopping power (dE/dx).
   void SetStoppingPower(const double dedx);
-  double GetStoppingPower();
+  virtual double GetStoppingPower();
 
-  bool NewTrack(const double x0, const double y0, const double z0,
-                const double t0, const double dx0, const double dy0,
-                const double dz0);
-  bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
-                  int& n, double& e, double& extra);
+  virtual bool NewTrack(const double x0, const double y0, const double z0,
+                        const double t0, const double dx0, const double dy0,
+                        const double dz0);
+  virtual bool GetCluster(double& xcls, double& ycls, double& zcls, 
+                          double& tcls, int& n, double& e, double& extra);
 
  protected:
   bool m_isReady;

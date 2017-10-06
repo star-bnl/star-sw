@@ -28,6 +28,7 @@ StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
   fMinHits = 5;
   fMaxHits = 10;
   fSgn = 1;
+  fIdTruth = 0;
   SetVtx(0);
 }
 //_____________________________________________________________________________

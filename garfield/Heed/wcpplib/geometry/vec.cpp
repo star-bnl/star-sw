@@ -22,17 +22,16 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
-int vecerror = 0;
 
-macro_copy_body(absref_transmit)
-//absref_transmit* absref_transmit::copy(void) const
-//{return new absref_transmit(*this);}
+namespace Heed {
+
+int vecerror = 0;
 
 void absref_transmit::print(std::ostream& file, int l) const {
   if (l <= 0) return;
   Ifile << "absref_transmit::print(l=" << l << ") qaref=" << qaref
-        << " qaref_pointer=" << qaref_pointer
-        << " qaref_other=" << qaref_other << "\n";
+        << " qaref_pointer=" << qaref_pointer << " qaref_other=" << qaref_other
+        << "\n";
   file.flush();
 }
 
@@ -62,75 +61,6 @@ void absref::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.put(NULL);
 }
 
-/*
-void absref::down(const abssyscoor* fasc) {
-  if (fasc == NULL) return; // considered to be unchanged
-  int qaref;
-  absref absref::**aref;
-  int qareff;
-  absref **areff;
-  Garef(qaref, aref, qareff, areff);
-  for (int n = 0; n < qaref; ++n) {
-    // changes only vectors
-    // down is virtual and it is redefined there
-    (this->*(aref[n])).down(fasc);
-  }
-  for (int n=0; n < qareff; ++n) {
-    areff[n]->down(fasc);
-  }
-}
-
-void absref::up(const abssyscoor* fasc) {
-  if (fasc == NULL) return; // considered to be unchanged
-  int qaref;
-  absref absref::**aref;
-  int qareff;
-  absref **areff;
-  Garef(qaref, aref, qareff, areff);
-  for (int n = 0; n < qaref; ++n) {
-    (this->*(aref[n])).up(fasc);
-  }
-  for (int n = 0; n < qareff; n++) {
-    areff[n]->up(fasc);
-  }
-
-}
-
-void absref::turn(const vec& dir, vfloat angle) {
-  int qaref;
-  absref absref::**aref;
-  int qareff;
-  absref **areff;
-  Garef(qaref, aref, qareff, areff);
-  for (int n = 0; n < qaref; ++n) {
-    (this->*(aref[n])).turn(dir, angle);
-  }
-  for (int n = 0; n < qareff; ++n) {
-    areff[n]->turn(dir, angle);
-  }
-}
-
-void absref::shift(const vec& dir) {
-  int qaref;
-  absref absref::**aref;
-  int qareff;
-  absref **areff;
-  Garef(qaref, aref, qareff, areff);
-  for (int n = 0; n < qaref; ++n) {
-    (this->*(aref[n])).shift(dir);
-  }
-  for (int n = 0; n < qareff; ++n) {
-    areff[n]->shift(dir);
-  }
-
-}
-
-void absref::Garef(int& qaref,  absref absref::**&aref , // fixed memory
-                   int& qareff, absref **&areff) {       // free memory
-  qaref = 0; qareff = 0; aref = NULL; areff = NULL;
-}
-*/
-
 // **** vector ****
 vfloat cos2vec(const vec& r1, const vec& r2) {
   // cosinus of angle between vectors
@@ -138,9 +68,9 @@ vfloat cos2vec(const vec& r1, const vec& r2) {
   pvecerror("vfloat cos2vec(const vec& r1, const vec& r2)");
   vfloat lr1 = length2(r1);
   vfloat lr2 = length2(r2);
-  //mcout<<"cos2vec:\n";
-  //Iprintn(mcout, lr1);
-  //Iprintn(mcout, lr2);
+  // mcout<<"cos2vec:\n";
+  // Iprintn(mcout, lr1);
+  // Iprintn(mcout, lr2);
   if (lr1 == 0 || lr2 == 0) {
     vecerror = 1;
     return 0;
@@ -150,9 +80,9 @@ vfloat cos2vec(const vec& r1, const vec& r2) {
   if (cs < 0) sign = -1;
   cs = cs * cs;
   cs = sign * sqrt(cs / (lr1 * lr2));
-  //mcout<<"r1="<<r1<<"r2="<<r2<<"cos="<<cs<<'\n';
+  // mcout<<"r1="<<r1<<"r2="<<r2<<"cos="<<cs<<'\n';
   return cs;
-  //return r1*r2/(lr1*lr2);
+  // return r1*r2/(lr1*lr2);
 }
 
 vfloat ang2vec(const vec& r1, const vec& r2) {
@@ -185,9 +115,9 @@ vfloat sin2vec(const vec& r1, const vec& r2) {
   vfloat sn = length(r1 || r2);
   sn = sn * sn;
   sn = sqrt(sn / (lr1 * lr2));
-  //mcout<<"r1="<<r1<<"r2="<<r2<<"sin="<<sn<<'\n';
+  // mcout<<"r1="<<r1<<"r2="<<r2<<"sin="<<sn<<'\n';
   return sn;
-  //return sin(ang2vec(r1,r2));
+  // return sin(ang2vec(r1,r2));
 }
 
 vec project_to_plane(const vec& r, const vec& normal) {
@@ -215,7 +145,7 @@ vfloat ang2projvec(const vec& r1, const vec& r2, const vec& normal) {
   if (tang == 0) return tang;  // projections are parallel
   vec at = rt1 || rt2;
   int i = check_par(at, normal, 0.0001);
-  //mcout<<"r1="<<r1<<"r2="<<r2<<"normal="<<normal
+  // mcout<<"r1="<<r1<<"r2="<<r2<<"normal="<<normal
   //     <<"rt1="<<rt1<<"rt2="<<rt2<<"\ntang="<<tang
   //     <<"\nat="<<at<<" i="<<i<<'\n';
   if (i == -1) return 2.0 * M_PI - tang;
@@ -223,7 +153,7 @@ vfloat ang2projvec(const vec& r1, const vec& r2, const vec& normal) {
 }
 
 vec vec::down_new(const basis* fabas) {
-  //pvecerror("vec vec::down_new(void)");
+  // pvecerror("vec vec::down_new(void)");
   vec r;
   vec ex = fabas->Gex();
   vec ey = fabas->Gey();
@@ -240,7 +170,7 @@ vec vec::up_new(const basis* fabas_new) {
   // it is assumed that fabas_new is derivative from old
   pvecerrorp("vec vec::up_new((const basis *pbas)");
   vec r;
-  //check_econd11(fabas_new , ==NULL, mcerr);
+  // check_econd11(fabas_new , ==NULL, mcerr);
   // not compiled in IRIX, reason is unkown
   if (fabas_new == NULL) {
     funnw.ehdr(mcerr);
@@ -269,20 +199,19 @@ vec vec::turn_new(const vec& dir, vfloat angle) {
   check_econd11a(dirlen, == 0, "cannot turn around zero vector", mcerr);
   vec u = dir / dirlen;  // unit vector
   vec constcomp = u * (*this) * u;
-  //vec  perpcomp = (*this) - constcomp;
-  //vfloat len=length(perpcomp);
+  // vec  perpcomp = (*this) - constcomp;
+  // vfloat len=length(perpcomp);
   vec ort1 = unit_vec(u || (*this));
   vec ort2 = ort1 || u;
   vec perpcomp = ort2 * (*this) * ort2;
   vfloat len = length(perpcomp);
-  //mcout<<" constcomp="<<constcomp<<" ort1="<<ort1<<" ort2="<<ort2;
+  // mcout<<" constcomp="<<constcomp<<" ort1="<<ort1<<" ort2="<<ort2;
   ort1 = sin(angle) * len * ort1;
   ort2 = cos(angle) * len * ort2;
-  //mcout<<" constcomp="<<constcomp<<" ort1="<<ort1<<" ort2="<<ort2
+  // mcout<<" constcomp="<<constcomp<<" ort1="<<ort1<<" ort2="<<ort2
   //    <<" len="<<len<<" sin(angle)="<<sin(angle)<<" cos(angle)="<<cos(angle)
   //    <<" angle="<<angle<<'\n';
   return constcomp + ort1 + ort2;
-
 }
 
 void vec::turn(const vec& dir, vfloat angle) {
@@ -334,30 +263,16 @@ vec dey(0, 1, 0);
 vec dez(0, 0, 1);
 vec dv0(0, 0, 0);
 
-std::ostream& operator<<(std::ostream& file, const vecReg& v) {
-  Ifile << "vecReg=" << ((vec&)v);
-  return file;
-}
-
 // **** basis ****
-//absref absref::*(basis::aref[3])=
-//{(absref absref::*)&basis::ex,
-// (absref absref::*)&basis::ey,
-// (absref absref::*)&basis::ez};
-absref absref::* basis::aref[3] = {
-  reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ex)),
-  reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ey)),
-  reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ez))
-};
+
+absref absref::*basis::aref[3] = {
+    reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ex)),
+    reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ey)),
+    reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&basis::ez))};
 
 void basis::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(3, aref));
 }
-
-//void basis::Garef(int& fqaref , absref absref::**&faref, // fixed memory
-//	            int& fqareff, absref **&fareff) {      // free memory
-//  fqaref=3; fqareff=0; faref=&aref[0]; fareff=NULL;
-//}
 
 basis basis::switch_xyz(void) const {
   pvecerror("basis basis::switch_xyz(void)");
@@ -368,17 +283,16 @@ basis::basis(void) : ex(1, 0, 0), ey(0, 1, 0), ez(0, 0, 1) {
   name = "primary_bas";
 }
 
-basis::basis(const String& pname) : ex(1, 0, 0), ey(0, 1, 0), ez(0, 0, 1) {
+basis::basis(const std::string& pname) : ex(1, 0, 0), ey(0, 1, 0), ez(0, 0, 1) {
   name = pname;
 }
 
-basis::basis(const vec& p, const String& pname) {
+basis::basis(const vec& p, const std::string& pname) {
   pvecerror("basis::basis(vec &p)");
   name = pname;
-  //strcpy(name,pname);
-  vec dex(1, 0, 0);
-  vec dey(0, 1, 0);
-  vec dez(0, 0, 1);
+  // vec dex(1, 0, 0);
+  // vec dey(0, 1, 0);
+  // vec dez(0, 0, 1);
   if (length(p) == 0) {
     vecerror = 1;
     ex = dex;
@@ -401,12 +315,12 @@ basis::basis(const vec& p, const String& pname) {
   }
 }
 
-basis::basis(const vec& p, const vec& c, const String& pname) {
+basis::basis(const vec& p, const vec& c, const std::string& pname) {
   pvecerror("basis::basis(vec &p, vec &c, char pname[12])");
   name = pname;
-  vec dex(1, 0, 0);
-  vec dey(0, 1, 0);
-  vec dez(0, 0, 1);
+  // vec dex(1, 0, 0);
+  // vec dey(0, 1, 0);
+  // vec dez(0, 0, 1);
 
   if (length(p) == 0 || length(c) == 0) {
     vecerror = 1;
@@ -430,17 +344,16 @@ basis::basis(const vec& p, const vec& c, const String& pname) {
     ey = unit_vec(ez || c);
     ex = ey || ez;
   }
-
 }
 
 // the same basis with other name, useful for later turning
-basis::basis(const basis& pb, const String& pname)
+basis::basis(const basis& pb, const std::string& pname)
     : ex(pb.ex), ey(pb.ey), ez(pb.ez) {
   name = pname;
 }
 
 basis::basis(const vec& pex, const vec& pey, const vec& pez,
-             const String& pname) {
+             const std::string& pname) {
   pvecerror("basis::basis(vec &pex, vec &pey, vec &pez, char pname[12])");
   if (!check_perp(pex, pey, vprecision) || !check_perp(pex, pez, vprecision) ||
       !check_perp(pey, pez, vprecision)) {
@@ -451,9 +364,6 @@ basis::basis(const vec& pex, const vec& pey, const vec& pez,
     mcerr << "name=" << pname << '\n';
     spexit(mcerr);
   }
-  //if(length(pex)!=vfloat(1.0) ||
-  //   length(pey)!=vfloat(1.0) ||
-  //   length(pez)!=vfloat(1.0) )
   if (not_apeq(length(pex), vfloat(1.0)) ||
       not_apeq(length(pey), vfloat(1.0)) ||
       not_apeq(length(pez), vfloat(1.0))) {
@@ -497,19 +407,11 @@ std::ostream& operator<<(std::ostream& file, const basis& b) {
   file << b.ez;
   indn.n = indnsave;
   indn.n -= 2;
-  //file << '\n';
-  return file;
-}
-
-std::ostream& operator<<(std::ostream& file, const basisReg& b) {
-  Ifile << "basisReg=" << ((basis&)b);
   return file;
 }
 
 // **** point ****
 
-//absref absref::*(point::aref)=(absref absref::*)&point::v;
-//absref absref::*(point::aref)=static_cast<absref absref::*>(&point::v);
 absref absref::*(point::aref) =
     reinterpret_cast<absref absref::*>(static_cast<vec absref::*>(&point::v));
 
@@ -533,11 +435,6 @@ std::ostream& operator<<(std::ostream& file, const point& p) {
   indn.n += 2;
   file << p.v;
   indn.n -= 2;
-  return file;
-}
-
-std::ostream& operator<<(std::ostream& file, const pointReg& b) {
-  Ifile << "pointReg=" << ((point&)b);
   return file;
 }
 
@@ -571,20 +468,11 @@ std::ostream& operator<<(std::ostream& file, const abssyscoor& f) {
   return file;
 }
 
-//void fixsyscoor::Papiv(const point* const fapiv)
-//{ piv=(fapiv!=NULL) ? (*fapiv) : point() ; }
-//void fixsyscoor::Pabas(const basis* const fabas)
-//{ bas=(fabas!=NULL) ? (*fabas) : basis() ; }
-//fixsyscoor::aref[2]=
-//{(absref::*)&fixsyscoor::piv, (absref::*)&fixsyscoor::bas};
-//absref absref::*(fixsyscoor::aref[2])=
-//{(absref absref::*)&fixsyscoor::piv, (absref absref::*)&fixsyscoor::bas};
 absref absref::*(fixsyscoor::aref[2]) = {
-  reinterpret_cast<absref absref::*>(
-      static_cast<point absref::*>(&fixsyscoor::piv)),
-  reinterpret_cast<absref absref::*>(
-      static_cast<basis absref::*>(&fixsyscoor::bas))
-};
+    reinterpret_cast<absref absref::*>(
+        static_cast<point absref::*>(&fixsyscoor::piv)),
+    reinterpret_cast<absref absref::*>(
+        static_cast<basis absref::*>(&fixsyscoor::bas))};
 
 void fixsyscoor::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(2, aref));
@@ -609,4 +497,6 @@ std::ostream& operator<<(std::ostream& file, const fixsyscoor& f) {
   f.RegPassivePtr::print(file, 2);
   f.abssyscoor::print(file, 2);
   return file;
+}
+
 }
