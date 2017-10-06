@@ -29,6 +29,7 @@ TDataSet *CreateTable() {
 #endif
   if (! StVMCMaker::instance()) return 0;
   if (! StarVMCApplication::Instance()) return 0;
+  StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
   if (! gener) gener =  new 
     StarMCSimplePrimaryGenerator( Npart, iD, pTlow,pThigh,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "G");
   else
