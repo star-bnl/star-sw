@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.29 2017/09/28 17:00:48 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.30 2017/10/06 15:06:20 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.30  2017/10/06 15:06:20  akio
+ * fix a crash
+ *
  * Revision 1.29  2017/09/28 17:00:48  akio
  * adding BitShiftGain
  *
@@ -447,10 +450,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
 
   //!fmsBitShiftGain
+  mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();
   if(dbBitShiftGain!=0){
       mBitShiftGain = (fmsBitShiftGain_st*) dbBitShiftGain->GetTable();
       mMaxBitShiftGain = dbBitShiftGain->GetNRows();
-      mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();
       for(Int_t i=0; i<mMaxBitShiftGain; i++){
 	  Int_t d=mBitShiftGain[i].detectorId;
 	  Int_t c=mBitShiftGain[i].ch;
