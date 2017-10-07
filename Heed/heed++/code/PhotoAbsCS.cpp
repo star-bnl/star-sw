@@ -1406,8 +1406,7 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,
 
 ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,
                                    const std::string& fFitBT_file_name,
-                                   int id,  // to distinguish it from
-                                   // constructor above
+                                   int id, 
                                    int s_no_scale, double fminimal_threshold)
     : threshold_file_name("none"),
       simple_table_file_name("none"),

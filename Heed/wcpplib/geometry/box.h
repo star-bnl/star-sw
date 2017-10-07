@@ -42,8 +42,8 @@ class box : public absvol {
   /// Destructor
   virtual ~box() {}
 
-  void init_prec(void);
-  void init_planes(void);
+  void init_prec();
+  void init_planes();
 
   virtual int check_point_inside(const point& fpt, const vec& dir) const;
 

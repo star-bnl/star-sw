@@ -35,7 +35,7 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
       s_print_listing(fs_print_listing),
       m_fieldMap(fieldmap) {
   mfunname("HeedPhoton::HeedPhoton(...)");
-  double length_vel = length(vel);
+  double length_vel = vel.length();
   check_econd11(fabs(length_vel - c_light) / (length_vel + c_light), > 1.0e-10,
                 mcerr);
 }

@@ -23,8 +23,8 @@ double Bethe_Bloch_energy_loss(const double ratio_Z_to_A, const double I_eff,
   const double beta2 = beta * beta;
   const double gamma = lorgamma_1(beta) + 1.;
   const double gamma2 = gamma * gamma;
-  const double coef1 =
-      4 * pi * classic_electr_radius * classic_electr_radius * electron_mass_c2 * Avogadro;
+  const double coef1 = 4 * pi * classic_electr_radius * classic_electr_radius *
+                       electron_mass_c2 * Avogadro;
   const double coef2 = z * z * ratio_Z_to_A / beta2;
   const double sum =
       log(2. * electron_mass_c2 * beta2 * gamma2 / I_eff) - beta2;

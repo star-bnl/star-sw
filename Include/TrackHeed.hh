@@ -156,6 +156,7 @@ class TrackHeed : public Track {
   bool SetupDelta(const std::string& databasePath);
   std::string FindUnusedMaterialName(const std::string& namein);
   void ClearParticleBank(); 
+  bool IsInside(const double x, const double y, const double z);
 };
 }
 

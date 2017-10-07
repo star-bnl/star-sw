@@ -22,8 +22,12 @@ class HeedFieldMap {
 
   void field_map(const point& pt, vec& efield, vec& bfield,
                  vfloat& mrange) const;
+  bool inside(const point& pt);
 
  private:
+  /// Conversion factor from mm to cm.
+  static const double conv;
+
   Garfield::Sensor* m_sensor;
   bool m_useEfield;
   bool m_useBfield;

@@ -23,8 +23,11 @@ class plane;
 
 class straight : public absref {
  protected:
-  point piv;  // origin point, pivot
-  vec dir;    // direction, unit vector
+  /// Origin point, pivot.
+  point piv;  
+  /// Direction, unit vector
+  vec dir;    
+
  public:
   point Gpiv(void) const { return piv; }
   vec Gdir(void) const { return dir; }
@@ -67,10 +70,8 @@ class straight : public absref {
   friend int operator!=(const straight& sl1, const straight& sl2) {
     return sl1 == sl2 ? 0 : 1;
   }
-  friend int apeq(const straight& sl1, const straight& sl2, vfloat prec);
-  friend int not_apeq(const straight& sl1, const straight& sl2, vfloat prec) {
-    return apeq(sl1, sl2, prec) == 1 ? 0 : 1;
-  }
+  friend bool apeq(const straight& sl1, const straight& sl2, vfloat prec);
+
   int check_point_in(const point& fp, vfloat prec) const;
   // returns 1 if point in the straight line. Calculates distance
   // and compares it with prec

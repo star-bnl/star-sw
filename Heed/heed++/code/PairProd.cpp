@@ -64,13 +64,9 @@ double PairProd::get_eloss(const double e_cur) const {
 double PairProd::get_eloss(const double e_cur) const {
   mfunname("double PairProd::get_eloss(double ecur) const");
   const double e_loss = k * pran.ran(SRANLUX()) + s;
-  double c;
-  if (e_cur <= V_ratio * wa) {
-    c = DBL_MAX;
-  } else {
-    // c = 1.0 / (1.0 - V_ratio * wa / e_cur);
-    c = 1.0 / (1.0 - pow(V_ratio * wa / e_cur, 2.0));
-  }
+  const double v = V_ratio * wa / e_cur; 
+  // const double c = 1. / (1. - v);
+  const double c = v < 1. ? 1. / (1. - v * v) : DBL_MAX;
   return e_loss * c;
 }
 

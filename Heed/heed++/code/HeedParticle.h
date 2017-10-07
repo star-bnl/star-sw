@@ -41,6 +41,7 @@ class HeedParticle : public eparticle {
   std::vector<long> natom;
   std::vector<long> nshell;
 
+  bool s_store_clusters;
   std::vector<HeedCluster> m_clusterBank;
 };
 }

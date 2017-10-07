@@ -1807,14 +1807,15 @@ void AvalancheMicroscopic::ComputeRotationMatrix(
     m_rb11 = m_rb22 = m_rb33 = 1.;
     m_rb12 = m_rb13 = m_rb21 = m_rb23 = m_rb31 = m_rb32 = 0.;
   } else {
+    const double btInv = 1. / bt;
     m_rb11 = bx / bmag;
     m_rb12 = by / bmag;
     m_rb21 = -m_rb12;
     m_rb13 = bz / bmag;
     m_rb31 = -m_rb13;
-    m_rb22 = (m_rb11 * by * by + bz * bz) / bt;
-    m_rb33 = (m_rb11 * bz * bz + by * by) / bt;
-    m_rb23 = m_rb32 = (m_rb11 - 1.) * by * bz / bt;
+    m_rb22 = (m_rb11 * by * by + bz * bz) * btInv;
+    m_rb33 = (m_rb11 * bz * bz + by * by) * btInv;
+    m_rb23 = m_rb32 = (m_rb11 - 1.) * by * bz * btInv;
   }
   // Calculate the second rotation matrix (rotation around x axis).
   const double fy = m_rb21 * ex + m_rb22 * ey + m_rb23 * ez;

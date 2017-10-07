@@ -1,5 +1,5 @@
 #include "wcpplib/geometry/mparticle.h"
-#include "wcpplib/clhep_units/PhysicalConstants.h"
+#include "wcpplib/clhep_units/WPhysicalConstants.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov
 
@@ -79,7 +79,7 @@ mparticle::mparticle(manip_absvol* primvol, const point& pt, const vec& vel,
 }
 
 void mparticle::check_consistency() const {
-  mfunname("void mparticle::check_consistency(double speed) const");
+  mfunname("void mparticle::check_consistency() const");
   check_econd11(vecerror, != 0, mcerr);
   double speed = c_light * lorbeta(orig_gamma_1);
   check_econd11a(fabs(speed - origin.speed) / (speed + origin.speed), > 1.0e-10,
@@ -112,7 +112,7 @@ void mparticle::check_consistency() const {
 
 void mparticle::step(std::vector<gparticle*>& secondaries) {
   // Make step to nextpos and calculate new step to border
-  mfunname("void mparticle::step(void)");
+  mfunname("void mparticle::step(...)");
   prevpos = currpos;
   prev_kin_energy = curr_kin_energy;
   prev_gamma_1 = curr_gamma_1;
@@ -158,20 +158,20 @@ void mparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
     // starting to move in the direction of force
     currpos.dir = unit_vec(f);
   }
-  int j;
-  if ((j = check_par(currpos.dir, f, prec)) != 0) {
+  const int j = check_par(currpos.dir, f, prec);
+  if (j != 0) {
     fs_cf = 0;
     frelcen = dv0;
     if (j == -1) {
       // decelerate, search for stop point
-      const double ran = curr_kin_energy / length(f);
+      const double ran = curr_kin_energy / f.length();
       if (fmrange > ran) fmrange = ran;
     }
   } else {
     fs_cf = 1;
     vec fn = project_to_plane(f, currpos.dir);  // normal component
     frelcen = unit_vec(fn);
-    double len = length(fn);
+    double len = fn.length();
     vfloat rad =
         (currpos.speed * currpos.speed * (curr_gamma_1 + 1) * mass) / len;
     frelcen *= rad;
@@ -202,42 +202,30 @@ void mparticle::new_speed() {
   f_perp1 = prevpos.speed * (prevpos.dir || f_perp_fl1);
   f_perp2 = currpos.speed * (currpos.dir || f_perp_fl2);
   // Later f_perp are ignored since they can not do the work;
-  f_mean = (f1 + f2) / 2.0;
+  f_mean = 0.5 * (f1 + f2);
   check_econd11a(vecerror, != 0, "position 2, after computing f_perp\n", mcerr);
 
   if ((i == 0 && j == 0) || f_mean == dv0) {
     curr_kin_energy = prev_kin_energy;
     curr_gamma_1 = prev_gamma_1;
-    currpos.speed = prevpos.speed;  // new change
-                                    // speed is preserved by gparticle
-    // return;
+    // speed is preserved by gparticle
+    currpos.speed = prevpos.speed;  
   } else {
     vec r = currpos.pt - prevpos.pt;
-    double W = 0;  // force * range * cos() = work * cos() ( may be negative )
+    double W = 0;  // force * range * cos() = work * cos() (may be negative)
     if (r != dv0) W = f_mean * r;
-    // W=f1*unit_vec(r) * currpos.prange;
-    // prange should be more exact than difference- no, this is not correct
-    // This is work which should lead to increse or decrease the speed
+    // This is work which should lead to increase or decrease the speed
     if (W == 0) {
       curr_kin_energy = prev_kin_energy;
       curr_gamma_1 = prev_gamma_1;
-      currpos.speed = prevpos.speed;  // new change
-                                      // speed is preserved by gparticle
-      // return;
+      currpos.speed = prevpos.speed;
     } else {
       curr_kin_energy = prev_kin_energy + W;
       if (curr_kin_energy <= 0) {
         curr_kin_energy = 0;
         currpos.speed = 0;
         curr_gamma_1 = 0;
-        // if(f2==dv0)  // temporary staying. May be field changes...
-        //{
         currpos.dir = dv0;
-        //}
-        // else
-        //{
-        // currpos.dir=unit_vec(f2);
-        //}
       } else {
         double resten = mass * c_squared;
         curr_gamma_1 = curr_kin_energy / resten;
@@ -246,17 +234,12 @@ void mparticle::new_speed() {
     }
   }
   if (!(i == 0 && j == 0)) {
-    // double f_p_len=
     vec fn1 = project_to_plane(f1, prevpos.dir);  // normal component
-    // frelcen1=unit_vec(fn1);
-    // double len1=length(fn1);
     vec fn2 = project_to_plane(f2, currpos.dir);  // normal component
     check_econd11a(vecerror, != 0, "position 3, after computing fn2\n", mcerr);
-    vec mean_fn =
-        0.5 * (fn1 + fn2);  // mean ortogonal component of working force
-    // frelcen2=unit_vec(fn2);
-    // double len2=length(fn2);
-    double mean_fn_len = length(mean_fn);
+    // mean ortogonal component of working force
+    vec mean_fn = 0.5 * (fn1 + fn2);  
+    double mean_fn_len = mean_fn.length();
     vec fdir = prevpos.dir;
     if (mean_fn_len > 0.0) {
       vec relcen = unit_vec(mean_fn);
@@ -271,20 +254,20 @@ void mparticle::new_speed() {
     }
     check_econd11a(vecerror, != 0, "position 4\n", mcerr);
     vec mean_f_perp_fl = 0.5 * (f_perp_fl1 + f_perp_fl2);
-    double len_mean_f_perp_fl = length(mean_f_perp_fl);
+    double len_mean_f_perp_fl = mean_f_perp_fl.length();
     f_perp2 = currpos.speed * (currpos.dir || f_perp_fl2);
-    double mean_f_perp = 0.5 * (length(f_perp1) + length(f_perp2));
+    double mean_f_perp = 0.5 * (f_perp1.length() + f_perp2.length());
     check_econd11a(vecerror, != 0, "position 5\n", mcerr);
     if (len_mean_f_perp_fl > 0.0) {
       vec fdir_proj = project_to_plane(prevpos.dir, mean_f_perp_fl);
-      if (not_apeq(length(fdir_proj), 0.0) == 1) {
+      if (!apeq(fdir_proj.length(), 0.0)) {
         check_econd11a(vecerror, != 0, "position 6\n", mcerr);
         double length_proj = currpos.prange * cos2vec(prevpos.dir, fdir_proj);
         check_econd11a(vecerror, != 0, "position 7\n", mcerr);
         double acc =
             mean_f_perp / (((prev_gamma_1 + curr_gamma_1) * 0.5 + 1) * mass);
         double mean_speed = (prevpos.speed + currpos.speed) * 0.5;
-        double new_rad = pow(mean_speed * length(fdir_proj), 2.0) / acc;
+        double new_rad = pow(mean_speed * fdir_proj.length(), 2) / acc;
         double ang = length_proj / new_rad;
         if (new_rad > 0 && ang > 0) {
           fdir.turn(mean_f_perp_fl, -ang);  // direction at the end

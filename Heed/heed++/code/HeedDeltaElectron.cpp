@@ -162,14 +162,14 @@ void HeedDeltaElectron::physics_after_new_speed(
     if (curr_kin_energy == 0.0) {
       // Get local volume.
       absvol* av = currpos.tid.G_lavol();
-      if (av && av->s_sensitive) {
+      if (av && av->s_sensitive && m_fieldMap->inside(currpos.ptloc)) {
         if (s_print_listing) {
           mcout << "HeedDeltaElectron::physics_after_new_speed: \n";
           mcout << "This is converted to conduction\n";
         }
         // TODO: replace push_back by emplace_back.
-        const point& pt = currpos.ptloc;
-        conduction_electrons.push_back(HeedCondElectron(pt, currpos.time));
+        conduction_electrons.push_back(
+            HeedCondElectron(currpos.ptloc, currpos.time));
       }
       s_life = false;
     }
@@ -235,10 +235,10 @@ void HeedDeltaElectron::physics_after_new_speed(
   if (!s_life) {
     // Done tracing the delta electron. Create the last conduction electron.
     vav = currpos.tid.G_lavol();
-    if (vav && vav->s_sensitive) {
+    if (vav && vav->s_sensitive && m_fieldMap->inside(currpos.ptloc)) {
       if (s_print_listing) mcout << "Last conduction electron\n";
-      const point& pt = currpos.ptloc;
-      conduction_electrons.push_back(HeedCondElectron(pt, currpos.time));
+      conduction_electrons.push_back(
+          HeedCondElectron(currpos.ptloc, currpos.time));
     }
     return;
   }
@@ -410,8 +410,10 @@ void HeedDeltaElectron::ionisation(const double eloss, const double dedx,
     prevpos.tid.up_absref(&ptloc);
     if (s_print_listing) mcout << "New conduction electron\n";
     // TODO: replace push_back by emplace_back.
-    conduction_electrons.push_back(HeedCondElectron(ptloc, currpos.time));
-    conduction_ions.push_back(HeedCondElectron(ptloc, currpos.time));
+    if (m_fieldMap->inside(ptloc)) {
+      conduction_electrons.push_back(HeedCondElectron(ptloc, currpos.time));
+      conduction_ions.push_back(HeedCondElectron(ptloc, currpos.time));
+    }
     eloss_left -= necessary_energy;
     ekin -= necessary_energy;
 // Generate next random energy

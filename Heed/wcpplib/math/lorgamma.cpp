@@ -32,8 +32,6 @@ double lorbeta2(const double gamma_1) {
 double lorbeta(const double momentum, const double mass) {
   double x = (mass * mass * c_squared) / (momentum * momentum);
   x = x + 1.0;
-  x = 1.0 / x;
-  x = sqrt(x);
-  return x;
+  return sqrt(1. / x);
 }
 }
