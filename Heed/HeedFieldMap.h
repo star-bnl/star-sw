@@ -14,9 +14,14 @@ namespace Heed {
 
 class HeedFieldMap {
  public:
-  HeedFieldMap() : m_sensor(NULL), m_useEfield(false), m_useBfield(false) {}
+  HeedFieldMap();
 
   void SetSensor(Garfield::Sensor* sensor) { m_sensor = sensor; }
+  void SetCentre(const double x, const double y, const double z) {
+    m_x = x;
+    m_y = y;
+    m_z = z;
+  }
   void UseEfield(const bool flag) { m_useEfield = flag; }
   void UseBfield(const bool flag) { m_useBfield = flag; }
 
@@ -27,6 +32,11 @@ class HeedFieldMap {
  private:
   /// Conversion factor from mm to cm.
   static const double conv;
+
+  // Centre of the geometry.
+  double m_x;
+  double m_y;
+  double m_z;
 
   Garfield::Sensor* m_sensor;
   bool m_useEfield;

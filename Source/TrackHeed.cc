@@ -160,6 +160,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   }
 
   m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -557,6 +558,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   m_cZ = 0.5 * (zmin + zmax);
 
   m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -683,6 +685,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   m_cZ = 0.5 * (zmin + zmax);
 
   m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
