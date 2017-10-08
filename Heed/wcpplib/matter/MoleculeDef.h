@@ -17,11 +17,11 @@ class VanDerWaals {
  public:
   VanDerWaals(double fPk, double fTk);
   virtual ~VanDerWaals() {}
-  double a(void) const { return ah; }
-  double b(void) const { return bh; }
-  double Vk(void) const { return Vkh; }
-  double Pk(void) const { return Pkh; }
-  double Tk(void) const { return Tkh; }
+  double a() const { return ah; }
+  double b() const { return bh; }
+  double Vk() const { return Vkh; }
+  double Pk() const { return Pkh; }
+  double Tk() const { return Tkh; }
   /*
   double pressure(double M, // the number of moles
                   double volume,
@@ -63,15 +63,15 @@ class MoleculeDef : public AtomMixDef {
   ActivePtr<VanDerWaals> awlsh;
 
  public:
-  inline const std::string& name(void) const { return nameh; }
-  inline const std::string& notation(void) const { return notationh; }
-  inline const std::vector<long>& qatom_ps(void) const { return qatom_psh; }
-  inline long qatom_ps(long n) const { return qatom_psh[n]; }
-  inline long Z_total(void) const { return Z_totalh; }
-  inline double A_total(void) const { return A_totalh; }
-  inline long tqatom(void) const { return tqatomh; }
-  inline const ActivePtr<VanDerWaals>& awls(void) const { return awlsh; }
-  MoleculeDef(void);
+  const std::string& name() const { return nameh; }
+  const std::string& notation() const { return notationh; }
+  const std::vector<long>& qatom_ps() const { return qatom_psh; }
+  long qatom_ps(long n) const { return qatom_psh[n]; }
+  long Z_total() const { return Z_totalh; }
+  double A_total() const { return A_totalh; }
+  long tqatom() const { return tqatomh; }
+  const ActivePtr<VanDerWaals>& awls() const { return awlsh; }
+  MoleculeDef();
   MoleculeDef(const std::string& fname, const std::string& fnotation,
               long fqatom, const std::vector<std::string>& fatom_not,
               const std::vector<long>& fqatom_ps,
@@ -93,11 +93,11 @@ class MoleculeDef : public AtomMixDef {
   void print(std::ostream& file, int l) const;
   static void printall(std::ostream& file);
   /// Check that there is no molecule with the same name in the container
-  void verify(void);
-  static std::list<MoleculeDef*>& get_logbook(void);
+  void verify();
+  static std::list<MoleculeDef*>& get_logbook();
   /// Initialize the logbook at the first request
   /// and keep it as internal static variable.
-  static const std::list<MoleculeDef*>& get_const_logbook(void);
+  static const std::list<MoleculeDef*>& get_const_logbook();
   /// Return the address of the molecule with this name.
   /// If there is no molecule with this notation, the function returns NULL
   /// but does not terminate the program as that for AtomDef. Be careful.

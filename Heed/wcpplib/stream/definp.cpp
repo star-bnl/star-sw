@@ -20,54 +20,6 @@ int definp_int(const std::string& str) {
   return i;
 }
 
-long definp_long(const std::string& str) {
-  mfunnamep("int definp_long(const std::string& str)");
-  long i = 0;
-  mcout << "definp_long: starting, read long " << str << "\n";
-  if (str != std::string()) {
-    // search for mark
-    int i_ret = findmark(std::cin, str.c_str());
-    check_econd11(i_ret, != 1, mcerr);
-  }
-  std::cin >> i;
-  Iprintn(mcout, i);
-  check_econd11(std::cin.good(), != 1, mcerr);
-  mcout << "long is read\n";
-  return i;
-}
-
-double definp_double(const std::string& str) {
-  mfunnamep("int definp_double(void)");
-  double d;
-  mcout << "definp_double: starting, read double " << str << "\n";
-  if (str != std::string()) {
-    // search for mark
-    int i_ret = findmark(std::cin, str.c_str());
-    check_econd11(i_ret, != 1, mcerr);
-  }
-  std::cin >> d;
-  Iprintn(mcout, d);
-  check_econd11(std::cin.good(), != 1, mcerr);
-  mcout << "double is read\n";
-  return d;
-}
-
-std::string definp_String(const std::string& str) {
-  mfunnamep("int definp_String(const std::string& str)");
-  std::string istr;
-  mcout << "definp_String: starting, read std::string " << str << "\n";
-  if (str != std::string()) {
-    // search for mark
-    int i_ret = findmark(std::cin, str.c_str());
-    check_econd11(i_ret, != 1, mcerr);
-  }
-  std::cin >> istr;
-  Iprintn(mcout, istr);
-  check_econd11(std::cin.good(), != 1, mcerr);
-  mcout << "String is read\n";
-  return istr;
-}
-
 long set_position(const std::string& word, std::istream& istrm, int s_rewind,
                   int s_req_sep) {
   mfunnamep(
