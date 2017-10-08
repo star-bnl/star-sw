@@ -36,25 +36,15 @@ static const double dbl_min_e_exp = (DBL_MIN_EXP - 1) * log(double(FLT_RADIX));
 static const double dbl_max_e_exp = (DBL_MAX_EXP - 1) * log(double(FLT_RADIX));
 /// Largest number the square of which can be represented.
 static const double dbl_max_square = sqrt(DBL_MAX);  
-/// Largest number the third power of which can be represented.
-static const double dbl_max_pow3 = pow(DBL_MAX, 1.0 / 3.0);  
 
 static const double flt_min_e_exp = (FLT_MIN_EXP - 1) * log(double(FLT_RADIX));
 static const double flt_max_e_exp = (FLT_MAX_EXP - 1) * log(double(FLT_RADIX));
 /// Largest number the square of which can be represented.
 static const double flt_max_square = sqrt(FLT_MAX);  
-/// Largest number the third power of which can be represented.
-static const double flt_max_pow3 = pow(FLT_MAX, float(1.0 / 3.0));  
 
 inline long left_round(double f) {
   return f >= 0 ? long(f) : -long(-f) - 1;
 }
-/*
-inline int even_num(long n) {
-  const long v = n / 2;
-  const long n1 = v * 2;
-  return n == n1 ? 1 : 0;
-}*/
 
 template <class T>
 inline T tabs(const T& x) {

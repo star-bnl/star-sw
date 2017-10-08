@@ -8,12 +8,22 @@
 
 namespace Heed {
 
+const double HeedFieldMap::conv = 1. / CLHEP::cm;
+
+HeedFieldMap::HeedFieldMap() 
+  : m_x(0.),
+    m_y(0.),
+    m_z(0.),
+    m_sensor(NULL), 
+    m_useEfield(false), 
+    m_useBfield(false) {}
+
 void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield,
                              vfloat& mrange) const {
 
-  const double x = pt.v.x / CLHEP::cm;
-  const double y = pt.v.y / CLHEP::cm;
-  const double z = pt.v.z / CLHEP::cm;
+  const double x = pt.v.x * conv + m_x;
+  const double y = pt.v.y * conv + m_y;
+  const double z = pt.v.z * conv + m_z;
 
   // Initialise the electric and magnetic field.
   efield = vec(0., 0., 0.);
@@ -44,4 +54,18 @@ void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield,
     bfield.z = bz * 1.e-3;
   }
 }
+
+bool HeedFieldMap::inside(const point& pt) {
+
+  const double x = pt.v.x * conv + m_x;
+  const double y = pt.v.y * conv + m_y;
+  const double z = pt.v.z * conv + m_z;
+  // Check if the point is inside the drift area.
+  if (!m_sensor->IsInArea(x, y, z)) return false;
+  // Check if the point is inside a medium.
+  Garfield::Medium* m = NULL;
+  if (!m_sensor->GetMedium(x, y, z, m) || !m) return false;
+  return m->IsIonisable();
+}
+
 }

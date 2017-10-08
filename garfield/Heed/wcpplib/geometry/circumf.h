@@ -19,25 +19,8 @@ namespace Heed {
 
 class plane;
 
-/// Circumference, determined by point (center), vector (normal), and radius.
+/// Circumference, determined by point (center), normal vector, and radius.
 class circumf : public absref {
- protected:
-  /// Central point, pivot.
-  point piv;   
-  /// Normal direction, unit vector.
-  /// Circles with dir and -dir are considered the same.
-  vec dir;     
-  /// radius, >0.
-  vfloat rad;  
-
- public:
-  point Gpiv(void) const { return piv; }
-  vec Gdir(void) const { return dir; }
-  vfloat Grad(void) const { return rad; }
- protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  static absref(absref::*aref[2]);
-
  public:
   /// Default constructor.
   circumf();
@@ -56,10 +39,12 @@ class circumf : public absref {
   friend int operator!=(const circumf& f1, const circumf& f2) {
     return f1 == f2 ? 0 : 1;
   }
-  friend int apeq(const circumf& f1, const circumf& f2, vfloat prec);
-  friend int not_apeq(const circumf& f1, const circumf& f2, vfloat prec) {
-    return apeq(f1, f2, prec) == 1 ? 0 : 1;
-  }
+  friend bool apeq(const circumf& f1, const circumf& f2, vfloat prec);
+
+  point Gpiv() const { return piv; }
+  vec Gdir() const { return dir; }
+  vfloat Grad() const { return rad; }
+
   /// Return 1 if point on the circumference.
   int check_point_in(const point& fp, vfloat prec) const;
   // return number of crosses and calculates pt.
@@ -68,6 +53,19 @@ class circumf : public absref {
   int cross(const plane& pn, point pt[2], vfloat prec) const;
 
   friend std::ostream& operator<<(std::ostream& file, const circumf& f);
+ 
+ protected:
+  /// Central point, pivot.
+  point piv;   
+  /// Normal direction, unit vector.
+  /// Circles with dir and -dir are considered the same.
+  vec dir;     
+  /// Radius, >0.
+  vfloat rad;  
+
+  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+  static absref(absref::*aref[2]);
+
 };
 std::ostream& operator<<(std::ostream& file, const circumf& f);
 }

@@ -17,14 +17,11 @@ typedef double vfloat;
 const vfloat vprecision = 1.0E-12;
 static const vfloat max_vfloat = DBL_MAX;
 
-inline int apeq(const vfloat f1, const vfloat f2, 
-                const vfloat prec = vprecision) {
-  return (fabs(f1 - f2) <= prec) ? 1 : 0;
+inline bool apeq(const vfloat f1, const vfloat f2, 
+                 const vfloat prec = vprecision) {
+  return (fabs(f1 - f2) <= prec);
 }
-inline int not_apeq(const vfloat f1, const vfloat f2, 
-                    const vfloat prec = vprecision) {
-  return (fabs(f1 - f2) <= prec) ? 0 : 1;
-}
+
 }
 
 #endif

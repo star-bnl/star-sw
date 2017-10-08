@@ -19,14 +19,21 @@ namespace Heed {
 
 class trajestep_limit : public RegPassivePtr {
  public:
-   // Useful if curvature is variable. Then it shows how often it is changed.
+  /// Constructor.
+  trajestep_limit(vfloat fmax_range, vfloat frad_for_straight,
+                  vfloat fmax_straight_arange, vfloat fmax_circumf_arange)
+      : max_range(fmax_range),
+        rad_for_straight(frad_for_straight),
+        max_straight_arange(fmax_straight_arange),
+        max_circumf_arange(fmax_circumf_arange) {}
+
+
    vfloat max_range;  
 
-  // 3 following parameters affect if s_cf==1.
-  // They regulate precision.
-  /// Radius beyond which straight lines are preferred to reduce calculation time.
+  // The three following parameters regulate the precision for s_cf == 1.
+  /// Radius beyond which to prefer straight lines to reduce calculation time.
   vfloat rad_for_straight;
-  // angle of range if it goes along straight line, but s_cf==1.
+  /// Angle of range if it goes along straight line, but s_cf == 1.
   // But the angle is calculated taking way as circle anyway.
   vfloat max_straight_arange;
   /// Angle of range if it goes along circle.
@@ -40,14 +47,7 @@ class trajestep_limit : public RegPassivePtr {
   //              approximated by straight line.
   // fs_cf1 : 0 - the track is simulated by straight line.
   //          1 - the track is simulated by curved line.
-  void range(int fs_cf0, vfloat rad, int& fs_cf1, vfloat& mrange);
-  /// Constructor.
-  trajestep_limit(vfloat fmax_range, vfloat frad_for_straight,
-                  vfloat fmax_straight_arange, vfloat fmax_circumf_arange)
-      : max_range(fmax_range),
-        rad_for_straight(frad_for_straight),
-        max_straight_arange(fmax_straight_arange),
-        max_circumf_arange(fmax_circumf_arange) {}
+  void range(int fs_cf0, vfloat rad, int& fs_cf1, vfloat& mrange) const;
 };
 
 /// Trajectory step of any object (particle, photon, ...).
@@ -73,19 +73,26 @@ class trajestep : public absref {
   ///  1 - curved track (but the range may anyway be calculated 
   /// as straight line, depending on s_range_cf)
   int s_cf; 
-  vec relcen;  // position of the center of circumf. relatively currpos
-               // Used only if s_cf=1; otherwise ignored.
-               // If used, should be perpendicular to dir.
 
-  // output data:
-  int s_range_cf;  // 0 - range have been calculated via straight line
-                   // 1 - via circle
-  int s_prec;      // 1 - range is limited by precision
+  // Position of the center of circumf. relatively currpos
+  // Used only if s_cf=1; otherwise ignored.
+  // If used, should be perpendicular to dir.
+  vec relcen;  
+
+  // 0 - range have been calculated via straight line
+  // 1 - via circle
+  int s_range_cf;  
+
+  // 1 - range is limited by precision
+  int s_prec;      
+
   /// Maximal possible range
   vfloat mrange;   
-  point mpoint;    // finishing point
-                   // It looks like that at s_prec=1 mpoint is not initiated
-                   // At s_prec=0 the point is initiated
+
+  // Finishing point
+  // It looks like that at s_prec=1 mpoint is not initiated
+  // At s_prec=0 the point is initiated
+  point mpoint;    
 
   void Gnextpoint(vfloat frange, point& fpos, vec& fdir) const;
   void Gnextpoint1(vfloat frange, point& fpos, vec& fdir, vec& frelcen) const;

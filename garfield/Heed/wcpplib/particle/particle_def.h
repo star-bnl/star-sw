@@ -49,7 +49,7 @@ class particle_def : public RegPassivePtr {
   std::string notation;
   double mass;
   double charge;
-  //  The following is not yet used in programs
+  // The following is not yet used in programs
   int lepton_n;
   int baryon_n;
   float spin;
@@ -96,14 +96,14 @@ class particle_def : public RegPassivePtr {
 
   /// Initialize the logbook at the first request
   /// and keep it as internal static variable.
-  static std::list<particle_def*>& get_logbook(void);
-  static const std::list<particle_def*>& get_const_logbook(void);
+  static std::list<particle_def*>& get_logbook();
+  static const std::list<particle_def*>& get_const_logbook();
 
   /// Return the address of particle with this name
   /// if it is registered in system, or NULL otherwise.
   static particle_def* get_particle_def(const std::string& fnotation);
   /// Check that there is no particle with the same name in the container.
-  void verify(void) {};
+  void verify() {};
 };
 std::ostream& operator<<(std::ostream& file, const particle_def& f);
 
@@ -146,12 +146,12 @@ extern particle_def user_particle_def;
 class particle_type {
  public:
   PassivePtr<particle_def> pardef;
-  particle_type(void) : pardef(NULL) {}
+  particle_type() : pardef(NULL) {}
   particle_type(particle_def* f) : pardef(f) {}
   particle_type(const char* name, int s = 0);
   // name is notation or name.
   // First the list of notations is checked,
-  // Then the list of names is chacked as well.
+  // then the list of names is checked as well.
   // s controls error handling
   // If the name is absent in the particle list then
   //   If s==0, the program is terminated

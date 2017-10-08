@@ -2,7 +2,6 @@
 #define GPARTICLE_H
 #include "wcpplib/geometry/volume.h"
 
-
 /*
 Copyright (c) 2000 Igor B. Smirnov
 
@@ -42,7 +41,6 @@ class stvpoint {
   /// Embraced volume is also considered new.
   int s_ent;  
 
-  // manip_absvol_eid next_eid;  // if nextpos.sb==2
   PassivePtr<manip_absvol> next_eid;  // if nextpos.sb==2
   /// Range from previous point.
   vfloat prange;

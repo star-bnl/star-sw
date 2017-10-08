@@ -50,27 +50,27 @@ polyline& polyline::operator=(const polyline& fpl) {
 void polyline::polyline_init(const point* fpt, int fqpt) {
   pvecerror("void polyline::polyline_init(const point* fpt, int fqpt)");
   check_econd11(fqpt, < 0, mcerr)
-  if (fqpt >= 1) {
-    pt = new point[fqpt];
-    for (qpt = 0; qpt < fqpt; ++qpt) pt[qpt] = fpt[qpt];
-    if (fqpt >= 2) {
-      sl = new straight[qpt - 1];
-      for (qsl = 0; qsl < qpt - 1; ++qsl) {
-        sl[qsl] = straight(pt[qsl], pt[qsl + 1]);
-      }
-    } else {
-      sl = NULL;
-    }
-    aref = new absref* [qpt + qsl];
-    for (int n = 0; n < qpt; ++n) aref[n] = &pt[n];
-    for (int n = 0; n < qsl; ++n) aref[n + qpt] = &sl[n];
-  } else {
+  if (fqpt < 1) {
     qpt = 0;
     qsl = 0;
     pt = NULL;
     sl = NULL;
     aref = NULL;
+    return;
+  } 
+  pt = new point[fqpt];
+  for (qpt = 0; qpt < fqpt; ++qpt) pt[qpt] = fpt[qpt];
+  if (fqpt >= 2) {
+    sl = new straight[qpt - 1];
+    for (qsl = 0; qsl < qpt - 1; ++qsl) {
+      sl[qsl] = straight(pt[qsl], pt[qsl + 1]);
+    }
+  } else {
+    sl = NULL;
   }
+  aref = new absref* [qpt + qsl];
+  for (int n = 0; n < qpt; ++n) aref[n] = &pt[n];
+  for (int n = 0; n < qsl; ++n) aref[n + qpt] = &sl[n];
 }
 
 int polyline::check_point_in(const point& fpt, vfloat prec) const {
@@ -106,11 +106,11 @@ int polyline::cross(const straight& fsl, point* pc, int& qpc, polyline* pl,
       pl[qpl++] = polyline(&(pt[n]), 2);
     } else {
       vec v1 = pc[qpc] - pt[n];
-      if (length(v1) < prec) {
+      if (v1.length() < prec) {
         qpc++;
       } else {
         vec v2 = pc[qpc] - pt[n + 1];
-        if (length(v2) < prec) {
+        if (v2.length() < prec) {
           qpc++;
         } else if (check_par(v1, v2, prec) == -1) {
           // anti-parallel vectors, point inside borders
@@ -159,8 +159,8 @@ vfloat polyline::distance(const point& fpt) const {
         -1) {  // anti-parallel vectors, point inside borders
       if (sldist < mx) mx = sldist;
     } else {
-      if ((sldist = length(fpt - pt[n])) < mx) mx = sldist;
-      if ((sldist = length(fpt - pt[n + 1])) < mx) mx = sldist;
+      if ((sldist = (fpt - pt[n]).length()) < mx) mx = sldist;
+      if ((sldist = (fpt - pt[n + 1]).length()) < mx) mx = sldist;
     }
   }
   return mx;
@@ -184,11 +184,11 @@ vfloat polyline::distance(const point& fpt, point& fcpt) const {
         fcpt = cpt;
       }
     } else {
-      if ((sldist = length(fpt - pt[n])) < mx) {
+      if ((sldist = (fpt - pt[n]).length()) < mx) {
         mx = sldist;
         fcpt = pt[n];
       }
-      if ((sldist = length(fpt - pt[n + 1])) < mx) {
+      if ((sldist = (fpt - pt[n + 1]).length()) < mx) {
         mx = sldist;
         fcpt = pt[n + 1];
       }
@@ -404,7 +404,7 @@ int polygon::range(const point& fpt, const vec& dir, vfloat& rng, point& fptenr,
   vec dif = pnt - fpt;
   const int i = check_par(dif, dir, prec);
   if (i == 1) {
-    rng = length(dif);
+    rng = dif.length();
     fptenr = pnt;
     return 1;
   } else

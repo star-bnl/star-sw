@@ -20,7 +20,6 @@ void inverse_DynArr_prot(const DynArr<DoubleAc>& mi, DynArr<DoubleAc>& mr,
       "void inverse_DynArr_prot(const DynArr<DoubleAc>& mi, "
       "DynArr<DoubleAc>& mr, int& s_zero, int& serr, int s_stop)");
   // mcout<<"inverse_DynArr_prot:\n";
-  // Iprintda_DoubleAc(mcout, mi, 3);
   const DynLinArr<long>& miqel(mi.get_qel());
   check_econd11(miqel.get_qel(), != 2, mcerr);
   check_econd11(miqel[0], <= 0, mcerr);
@@ -42,10 +41,8 @@ void inverse_DynArr_prot(const DynArr<DoubleAc>& mi, DynArr<DoubleAc>& mr,
     return;
   }
   DynArr<DoubleAc> mii(mi);
-  // Iprintda_DoubleAc(mcout, mii, 3);
   mr.assignAll(0.0);
   for (long n = 0; n < q; n++) mr.ac(n, n) = DoubleAc(1.0);
-  // Iprintda_DoubleAc(mcout, mr, 3);
 
   for (long nr = 0; nr < q; nr++) {
     // Iprintn(mcout, nr);
@@ -57,7 +54,6 @@ void inverse_DynArr_prot(const DynArr<DoubleAc>& mi, DynArr<DoubleAc>& mr,
         nmax = nr1;
       }
     }
-    // Iprintdan(mcout, d);
     // mcout<<"d="<<d<<'\n';
     // mcout<<"nmax="<<nmax<<'\n';
     if (d.get() == 0.0) {
@@ -97,10 +93,7 @@ void inverse_DynArr_prot(const DynArr<DoubleAc>& mi, DynArr<DoubleAc>& mr,
     }
     for (long nc = nr; nc < q; nc++) mii.ac(nr, nc) /= t;
     for (long nc = 0; nc < q; nc++) mr.ac(nr, nc) /= t;
-    // Iprintda_DoubleAc(mcout, mii, 3);
-    // Iprintda_DoubleAc(mcout, mr, 3);
   }
-  // Iprintda_DoubleAc(mcout, mr, 3);
 }
 
 void inverse_DynArr(const DynArr<double>& mi, DynArr<double>& mr, int& serr) {
@@ -154,7 +147,6 @@ void inverse_DynArr(const DynArr<DoubleAc>& mi, DynArr<DoubleAc>& mr1,
     mr2 = DynArr<DoubleAc>(q, q);
     mr1.ac(0, 0) = 1.0 / mi.ac(0, 0).get();
     mr2.ac(0, 0) = DoubleAc(1.0) / mi.ac(0, 0);
-    // Iprintdan(mcout, mr2.ac(0,0));
     if (fabs(mr2.ac(0, 0)).left_limit() == 0.0) serr2 = 1;
     return;
   }

@@ -11,6 +11,7 @@
 #include <cmath>
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/random/ranluxint.h"
+
 /*
 Copyright (c) 2000 Igor B. Smirnov
 
@@ -66,8 +67,8 @@ vfloat cos2vec(const vec& r1, const vec& r2) {
   // cosinus of angle between vectors
   // If one of vectors has zero length, it returns 2.
   pvecerror("vfloat cos2vec(const vec& r1, const vec& r2)");
-  vfloat lr1 = length2(r1);
-  vfloat lr2 = length2(r2);
+  vfloat lr1 = r1.length2();
+  vfloat lr2 = r2.length2();
   // mcout<<"cos2vec:\n";
   // Iprintn(mcout, lr1);
   // Iprintn(mcout, lr2);
@@ -106,13 +107,13 @@ vfloat ang2vec(const vec& r1, const vec& r2) {
 vfloat sin2vec(const vec& r1, const vec& r2) {
   // sinus of angle between vectors
   pvecerror("vfloat sin2vec(const vec& r1, const vec& r2)");
-  vfloat lr1 = length2(r1);
-  vfloat lr2 = length2(r2);
+  vfloat lr1 = r1.length2();
+  vfloat lr2 = r2.length2();
   if (lr1 == 0 || lr2 == 0) {
     vecerror = 1;
     return 0;
   }
-  vfloat sn = length(r1 || r2);
+  vfloat sn = (r1 || r2).length();
   sn = sn * sn;
   sn = sqrt(sn / (lr1 * lr2));
   // mcout<<"r1="<<r1<<"r2="<<r2<<"sin="<<sn<<'\n';
@@ -190,21 +191,19 @@ void vec::up(const basis* fabas_new) { *this = this->up_new(fabas_new); }
 
 vec vec::turn_new(const vec& dir, vfloat angle) {
   pvecerror("vec turn(vec& dir, vfloat& angle)");
-  if (length(*this) == 0) return vec(0, 0, 0);
+  if ((*this).length() == 0) return vec(0, 0, 0);
   if (check_par(*this, dir, 0.0) != 0) {
     // parallel vectors are not changed
     return *this;
   }
-  vfloat dirlen = length(dir);
+  vfloat dirlen = dir.length();
   check_econd11a(dirlen, == 0, "cannot turn around zero vector", mcerr);
   vec u = dir / dirlen;  // unit vector
   vec constcomp = u * (*this) * u;
-  // vec  perpcomp = (*this) - constcomp;
-  // vfloat len=length(perpcomp);
   vec ort1 = unit_vec(u || (*this));
   vec ort2 = ort1 || u;
   vec perpcomp = ort2 * (*this) * ort2;
-  vfloat len = length(perpcomp);
+  vfloat len = perpcomp.length();
   // mcout<<" constcomp="<<constcomp<<" ort1="<<ort1<<" ort2="<<ort2;
   ort1 = sin(angle) * len * ort1;
   ort2 = cos(angle) * len * ort2;
@@ -227,8 +226,8 @@ void vec::down(const abssyscoor* fasc) { down(fasc->Gabas()); }
 vec vec::up_new(const abssyscoor* fasc) { return up_new(fasc->Gabas()); }
 void vec::up(const abssyscoor* fasc) { up(fasc->Gabas()); }
 
-void vec::random_round_vec(void) {
-  vfloat phi = M_PI * 2.0 * SRANLUX();
+void vec::random_round_vec() {
+  const vfloat phi = M_PI * 2.0 * SRANLUX();
   x = sin(phi);
   y = cos(phi);
   z = 0;
@@ -274,12 +273,12 @@ void basis::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(3, aref));
 }
 
-basis basis::switch_xyz(void) const {
+basis basis::switch_xyz() const {
   pvecerror("basis basis::switch_xyz(void)");
   return basis(ez, ex, ey, name);
 }
 
-basis::basis(void) : ex(1, 0, 0), ey(0, 1, 0), ez(0, 0, 1) {
+basis::basis() : ex(1, 0, 0), ey(0, 1, 0), ez(0, 0, 1) {
   name = "primary_bas";
 }
 
@@ -293,7 +292,7 @@ basis::basis(const vec& p, const std::string& pname) {
   // vec dex(1, 0, 0);
   // vec dey(0, 1, 0);
   // vec dez(0, 0, 1);
-  if (length(p) == 0) {
+  if (p.length() == 0) {
     vecerror = 1;
     ex = dex;
     ey = dey;
@@ -318,11 +317,8 @@ basis::basis(const vec& p, const std::string& pname) {
 basis::basis(const vec& p, const vec& c, const std::string& pname) {
   pvecerror("basis::basis(vec &p, vec &c, char pname[12])");
   name = pname;
-  // vec dex(1, 0, 0);
-  // vec dey(0, 1, 0);
-  // vec dez(0, 0, 1);
 
-  if (length(p) == 0 || length(c) == 0) {
+  if (p.length() == 0 || c.length() == 0) {
     vecerror = 1;
     ex = dex;
     ey = dey;
@@ -364,9 +360,9 @@ basis::basis(const vec& pex, const vec& pey, const vec& pez,
     mcerr << "name=" << pname << '\n';
     spexit(mcerr);
   }
-  if (not_apeq(length(pex), vfloat(1.0)) ||
-      not_apeq(length(pey), vfloat(1.0)) ||
-      not_apeq(length(pez), vfloat(1.0))) {
+  if (!apeq(pex.length(), vfloat(1.0)) ||
+      !apeq(pey.length(), vfloat(1.0)) ||
+      !apeq(pez.length(), vfloat(1.0))) {
     mcerr << "ERROR in basis::basis(vec &pex, vec &pey, vec &pez) : \n"
           << "the vectors are not of unit length\n";
     mcerr << " pex,pey,pez:\n";
@@ -374,7 +370,7 @@ basis::basis(const vec& pex, const vec& pey, const vec& pez,
     mcerr << "name=" << pname << '\n';
     spexit(mcerr);
   }
-  if (not_apeq(pex || pey, pez, vprecision)) {
+  if (!apeq(pex || pey, pez, vprecision)) {
     mcerr << "ERROR in basis::basis(vec &pex, vec &pey, vec &pez) : \n";
     mcerr << "wrong direction of pez\n";
     mcerr << " pex,pey,pez:\n";

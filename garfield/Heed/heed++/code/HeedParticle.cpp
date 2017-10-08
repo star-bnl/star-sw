@@ -26,13 +26,13 @@ HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
     : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
       s_print_listing(fs_print_listing),
       particle_number(last_particle_number++),
-      s_loss_only(fs_loss_only) {
+      s_loss_only(fs_loss_only),
+      s_store_clusters(false) {
 
   mfunname("HeedParticle::HeedParticle(...)");
   etransf.reserve(100);
   natom.reserve(100);
   nshell.reserve(100);
-  m_clusterBank.reserve(100);
 }
 
 void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
@@ -75,7 +75,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
       if (qt <= 0) continue;
       point curpt = prevpos.pt;
       vec dir = unit_vec(currpos.pt - prevpos.pt);
-      const double range = length(currpos.pt - prevpos.pt);
+      const double range = (currpos.pt - prevpos.pt).length();
       if (s_print_listing) Iprint3n(mcout, curpt, dir, range);
       for (long nt = 0; nt < qt; ++nt) {
         // Sample the energy transfer in this collision.
@@ -98,8 +98,10 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         prevpos.tid.up_absref(&ptloc);
         if (s_loss_only) continue;
         if (s_print_listing) mcout << "generating new cluster\n";
-        m_clusterBank.push_back(
-            HeedCluster(et, 0, pt, ptloc, prevpos.tid, na, ns));
+        if (s_store_clusters) {
+          m_clusterBank.push_back(
+              HeedCluster(et, 0, pt, ptloc, prevpos.tid, na, ns));
+        }
         // Generate a virtual photon.
         const double Ep0 = mass * c_squared + curr_kin_energy;
         const double Ep1 = Ep0 - etransf.back();
@@ -112,7 +114,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         vel.down(&tempbas);  // direction is OK
         vel *= c_light;
         // HS
-        double speed = length(vel);
+        double speed = vel.length();
         double time = arange / speed;
         if (s_print_listing) mcout << "generating new virtual photon\n";
         HeedPhoton* hp = new HeedPhoton(currpos.tid.eid[0].getver(), pt, vel,

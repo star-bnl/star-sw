@@ -21,7 +21,7 @@ circumf::circumf() : piv(), dir(), rad(0) {}
 circumf::circumf(const point& fpiv, const vec& fdir, vfloat frad)
     : piv(fpiv), dir(), rad(frad) {
   pvecerror("circumf(...)");
-  check_econd11(length(fdir), == 0, mcerr);
+  check_econd11(fdir.length(), == 0, mcerr);
   dir = unit_vec(fdir);
 }
 circumf::circumf(const circumf& f)
@@ -40,11 +40,11 @@ int operator==(const circumf& f1, const circumf& f2) {
   else
     return 0;
 }
-int apeq(const circumf& f1, const circumf& f2, vfloat prec) {
-  pvecerror("int apeq(const circumf &f1, const circumf &f2, vfloat prec)");
-  if (check_par(f1.dir, f2.dir, prec) == 0) return 0;
-  if (apeq(f1.piv, f2.piv, prec) && apeq(f1.rad, f2.rad, prec)) return 1;
-  return 0;
+
+bool apeq(const circumf& f1, const circumf& f2, vfloat prec) {
+  pvecerror("bool apeq(const circumf &f1, const circumf &f2, vfloat prec)");
+  if (check_par(f1.dir, f2.dir, prec) == 0) return false;
+  return apeq(f1.piv, f2.piv, prec) && apeq(f1.rad, f2.rad, prec);
 }
 
 int circumf::check_point_in(const point& fp, vfloat prec) const {
@@ -52,7 +52,7 @@ int circumf::check_point_in(const point& fp, vfloat prec) const {
   pvecerror("int circumf::check_point_in(const point &fp, vfloat prec) const");
   vec d = fp - piv;
   if (check_perp(d, dir, prec) != 1) return 0;
-  if (apeq(length(d), rad)) return 1;
+  if (apeq(d.length(), rad)) return 1;
   return 0;
 }
 int circumf::cross(const plane& pn, point pt[2], vfloat prec) const {

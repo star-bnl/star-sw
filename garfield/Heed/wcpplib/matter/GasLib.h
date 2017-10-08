@@ -38,7 +38,6 @@ The last half of Mendeleev's (Mendel's) table is not totally included yet.
 */
 
 #include "wcpplib/matter/AtomDef.h"
-// #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/matter/MoleculeDef.h"
 #include "wcpplib/matter/GasDef.h"
 

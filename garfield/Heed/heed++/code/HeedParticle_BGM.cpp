@@ -103,7 +103,7 @@ void HeedParticle_BGM::physics(std::vector<gparticle*>& secondaries) {
       point curpt = prevpos.pt;
       vec dir = unit_vec(currpos.pt - prevpos.pt);
       // This approximation ignores curvature
-      const double range = length(currpos.pt - prevpos.pt);
+      const double range = (currpos.pt - prevpos.pt).length();
       if (s_print_listing) Iprint3n(mcout, curpt, dir, range);
       for (long nt = 0; nt < qt; nt++) {
         // Sample the energy transfer in this collision.

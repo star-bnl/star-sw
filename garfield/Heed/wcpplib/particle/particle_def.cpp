@@ -109,12 +109,12 @@ particle_def particle_def::anti_particle(const particle_def& p) {
   return particle_def(aname, anot, p.mass, -p.charge, -p.lepton_n, -p.baryon_n,
                       -p.spin, p.isospin);
 }
-std::list<particle_def*>& particle_def::get_logbook(void) {
+std::list<particle_def*>& particle_def::get_logbook() {
   static std::list<particle_def*> logbook;
   return logbook;
 }
 
-const std::list<particle_def*>& particle_def::get_const_logbook(void) {
+const std::list<particle_def*>& particle_def::get_const_logbook() {
   return particle_def::get_logbook();
 }
 
@@ -135,15 +135,7 @@ void particle_def::set_mass(const double m) { mass = m * MeV / c_squared; }
 void particle_def::set_charge(const double z) { charge = z * eplus; }
 
 void particle_def::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    file << (*this);
-    /*
-    file<<name<<" mass="<<mass<<" mass/(GeV/c_squared)="<<mass/(GeV/c_squared)
-        <<" charge="<<charge<<" charge/eplus="<<charge/eplus
-        <<" lepton_n="<<lepton_n<<" baryon_n="<<baryon_n
-        <<" spin="<<spin<<" isospin="<<isospin<<'\n';
-    */
-  }
+  if (l > 0) file << (*this);
 }
 void particle_def::printall(std::ostream& file) {
   Ifile << "particle_def::printall:\n";
@@ -155,24 +147,6 @@ void particle_def::printall(std::ostream& file) {
   }
 }
 
-/*
-void particle_def::verify(void)
-{
-  mfunname("void particle_def::verify(void)");
-  if (name != "none") {
-    particle_def* apd = NULL;
-    int n;
-    for (n = 0; (apd = cont[n]) != NULL ; n++) {
-      if (name == apd->name) {
-        funnw.ehdr(mcerr);
-        mcerr<<"another registered particle definition with the same name
-found\n";
-        spexit(mcerr);
-      }
-    }
-  }
-}
-*/
 std::ostream& operator<<(std::ostream& file, const particle_def& f) {
   Ifile << "particle_def: name=" << f.name << " notation=" << f.notation
         << '\n';

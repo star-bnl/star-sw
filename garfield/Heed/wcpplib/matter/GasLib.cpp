@@ -1,4 +1,3 @@
-//#include "wcpplib/matter/GasLib.h"
 #include "wcpplib/matter/AtomDef.h"
 #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/matter/MoleculeDef.h"
@@ -16,7 +15,7 @@ using CLHEP::kelvin;
 using CLHEP::hep_pascal;
 
 AtomDef Hydrogen("Hydrogen", "H", 1, 1.0 * gram / mole);
-// AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.00794 * gram/mole);
+// AtomDef Hydrogen("Hydrogen", "H", 1, 1.00794 * gram/mole);
 AtomDef Helium("Helium", "He", 2, 4.002602 * gram / mole);
 AtomDef Lithium("Lithium", "Li", 3, 6.941 * gram / mole);
 AtomDef Beryllium("Beryllium", "Be", 4, 9.012182 * gram / mole);

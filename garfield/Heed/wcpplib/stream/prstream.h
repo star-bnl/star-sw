@@ -86,16 +86,11 @@ In addition, at the bottom of this file a few useful Iprint-like macro are
 defined. The idea is to print not only variable, but start from its name
 and "=". Thus instead of
   Imcout << "my_favorite_variable=" << my_favorite_variable << '\n';
-you will need to say:
-  Iprintn( mcout, my_favorite_variable);
-Note, that's two times shorter.
+you can use the shorter
+  Iprintn(mcout, my_favorite_variable);
+
   Iprint - just print a variable without saying << '\n' at the end.
   Iprintn - print a variable and pass to next line.
-  Iprint_l(file , name , l ) - call a function name.print(file, l),
-Here l is meant a key determining the print level.
-  Iprint_al(file , name , l ) - the same, but the name is not the object but
-pointer to it (address).
-
 
 Copyright (c) 2001 I. B. Smirnov
 
@@ -188,11 +183,10 @@ class indentation {
 extern indentation indn;
 
 inline std::ostream& operator<<(std::ostream& file, indentation& ind) {
-  int n;
   if (ind.s_not == 1)
     ind.s_not = 0;
   else
-    for (n = 0; n < ind.n; n++) file << ' ';
+    for (int n = 0; n < ind.n; n++) file << ' ';
   return file;
 }
 
@@ -219,12 +213,7 @@ std::ostream& yesindent(std::ostream& f);
   file << indn << #name << "=" << noindent << name << ' ' << addition << '\n' \
        << yesindent;
 // addition is convenient as notation of units
-#define Iprintanf(file, name, addition)                                 \
-  {                                                                     \
-    file << indn << #name << "=" << noindent << name << ' ' << addition \
-         << '\n' << yesindent;                                          \
-    file.flush();                                                       \
-  }
+
 #define Iprint2(file, name1, name2)                                           \
   file << indn << #name1 << "=" << noindent << name1 << ", " << #name2 << "=" \
        << noindent << name2 << yesindent;
@@ -256,52 +245,13 @@ std::ostream& yesindent(std::ostream& f);
   file << indn << #name1 << "=" << noindent << name1 << ", " << #name2 << "=" \
        << noindent << name2 << ", " << #name3 << "=" << noindent << name3     \
        << ", " << #name4 << "=" << noindent << name4 << '\n' << yesindent;
-#define Iprint4nf(file, name1, name2, name3, name4)                       \
-  {                                                                       \
-    file << indn << #name1 << "=" << noindent << name1 << ", " << #name2  \
-         << "=" << noindent << name2 << ", " << #name3 << "=" << noindent \
-         << name3 << ", " << #name4 << "=" << noindent << name4 << '\n'   \
-         << yesindent;                                                    \
-    file.flush();                                                         \
-  }
-#define Iprint5n(file, name1, name2, name3, name4, name5)                     \
-  file << indn << #name1 << "=" << noindent << name1 << ", " << #name2 << "=" \
-       << noindent << name2 << ", " << #name3 << "=" << noindent << name3     \
-       << ", " << #name4 << "=" << noindent << name4 << ", " << #name5 << "=" \
-       << noindent << name5 << '\n' << yesindent;
-
-#define Iprint_l(file, name, l)               \
-  {                                           \
-    file << indn << #name << "=" << noindent; \
-    name.print(file, l);                      \
-    file << yesindent;                        \
-  }
-#define Iprint_al(file, name, l)              \
-  {                                           \
-    file << indn << #name << "=" << noindent; \
-    name->print(file, l);                     \
-    file << yesindent;                        \
-  }
-
-#define Iprint_p(file, name)                  \
-  {                                           \
-    file << indn << #name << "=" << noindent; \
-    name.print(file);                         \
-    file << yesindent;                        \
-  }
-#define Iprint_ap(file, name)                 \
-  {                                           \
-    file << indn << #name << "=" << noindent; \
-    name->print(file);                        \
-    file << yesindent;                        \
-  }
 
 extern int s_short_output;  // sign which allows to make output shorter
-// simultaneously for all classes. Useful for writting "persistence classes"
+// simultaneously for all classes. Useful for writing "persistence classes"
 // by standard <</>> operators.
 // If instead of this one tries to use special functions like
 // class_name::short_write,
-// he finds an obstacle that such functions are abcent for inbuilt types.
+// he finds an obstacle that such functions are absent for inbuilt types.
 }
 
 #endif

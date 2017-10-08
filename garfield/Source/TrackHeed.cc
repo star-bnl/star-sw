@@ -160,6 +160,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   }
 
   m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -327,13 +328,17 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
                            double& tcls, int& ne, int& ni, double& e, 
                            double& extra) {
 
-  // Initial settings.
+  // Initialise and reset.
   xcls = ycls = zcls = tcls = 0.;
   extra = 0.;
   ne = ni = 0;
   e = 0.;
 
-  // Make sure NewTrack has successfully been called.
+  m_deltaElectrons.clear();
+  m_conductionElectrons.clear();
+  m_conductionIons.clear();
+
+  // Make sure NewTrack has been called successfully.
   if (!m_ready) {
     std::cerr << m_className << "::GetCluster:\n"
               << "    Track has not been initialized. Call NewTrack first.\n";
@@ -347,6 +352,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     return false;
   }
 
+  // Look for the next cluster (i. e. virtual photon) in the list.
   Heed::HeedPhoton* virtualPhoton = NULL;
   for (; m_bankIterator != end; ++m_bankIterator) {
     // Convert the particle to a (virtual) photon.
@@ -364,17 +370,8 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     ycls = virtualPhoton->currpos.pt.v.y * 0.1 + m_cY;
     zcls = virtualPhoton->currpos.pt.v.z * 0.1 + m_cZ;
     tcls = virtualPhoton->currpos.time;
-    // Skip clusters outside the drift area.
-    if (!m_sensor->IsInArea(xcls, ycls, zcls)) continue;
-    // Skip clusters not inside a medium.
-    Medium* medium = NULL;
-    if (!m_sensor->GetMedium(xcls, ycls, zcls, medium)) continue;
-    // Make sure the medium has not changed.
-    if (medium->GetName() != m_mediumName ||
-        fabs(medium->GetMassDensity() - m_mediumDensity) > 1.e-9 ||
-        !medium->IsIonisable()) {
-      continue;
-    }
+    // Skip clusters outside the drift area or outside the active medium.
+    if (!IsInside(xcls, ycls, zcls)) continue;
     ++m_bankIterator;
     break;
   }
@@ -390,10 +387,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   // Get the transferred energy (convert from MeV to eV).
   e = virtualPhoton->energy * 1.e6;
 
-  m_deltaElectrons.clear();
-  m_conductionElectrons.clear();
-  m_conductionIons.clear();
-  // Add the first ion.
+  // Add the first ion (at the position of the cluster).
   m_conductionIons.push_back(
       Heed::HeedCondElectron(Heed::point(xcls, ycls, zcls), tcls));
 
@@ -406,6 +400,10 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       // Check if it is a delta electron.
       Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
       if (delta) {
+        const double x = delta->origin.pt.v.x * 0.1 + m_cX;
+        const double y = delta->origin.pt.v.y * 0.1 + m_cY;
+        const double z = delta->origin.pt.v.z * 0.1 + m_cZ;
+        if (!IsInside(x, y, z)) continue;
         if (m_useDelta) {
           // Transport the delta electron.
           delta->fly(newSecondaries);
@@ -436,10 +434,13 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       if (!photon) {
         std::cerr << m_className << "::GetCluster:\n"
                   << "    Particle is neither an electron nor a photon.\n";
-      } else {
-        // Transport the photon.
-        if (m_usePhotonReabsorption) photon->fly(newSecondaries);
       }
+      const double x = photon->origin.pt.v.x * 0.1 + m_cX;
+      const double y = photon->origin.pt.v.y * 0.1 + m_cY;
+      const double z = photon->origin.pt.v.z * 0.1 + m_cZ;
+      if (!IsInside(x, y, z)) continue;
+      // Transport the photon.
+      if (m_usePhotonReabsorption) photon->fly(newSecondaries);
     }
     for (it = secondaries.begin(); it != secondaries.end(); ++it) {
       if (*it) delete *it;
@@ -557,6 +558,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   m_cZ = 0.5 * (zmin + zmax);
 
   m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -683,6 +685,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   m_cZ = 0.5 * (zmin + zmax);
 
   m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -1237,6 +1240,22 @@ void TrackHeed::ClearParticleBank() {
   for (it = m_particleBank.begin(); it != end; ++it) if (*it) delete *it;
   m_particleBank.clear();
   m_bankIterator = m_particleBank.end();
+}
+
+bool TrackHeed::IsInside(const double x, const double y, const double z) {
+
+  // Check if the point is inside the drift area.
+  if (!m_sensor->IsInArea(x, y, z)) return false;
+  // Check if the point is inside a medium.
+  Medium* medium = NULL;
+  if (!m_sensor->GetMedium(x, y, z, medium)) return false;
+  // Make sure the medium has not changed.
+  if (medium->GetName() != m_mediumName ||
+      fabs(medium->GetMassDensity() - m_mediumDensity) > 1.e-9 ||
+      !medium->IsIonisable()) {
+    return false;
+  }
+  return true;
 }
 
 }

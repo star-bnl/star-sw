@@ -14,8 +14,7 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-//             **** surface ****
-//             **** splane ****
+// **** splane ****
 absref absref::*(splane::aref_splane[2]) = {(absref absref::*)&splane::pn,
                                             (absref absref::*)&splane::dir_ins};
 
@@ -66,7 +65,7 @@ int splane::range(const trajestep& fts, vfloat* crange, point* cpt,
       vecerror = 0;
       return 0;
     }
-    vfloat rng = length(pt - fts.currpos);
+    vfloat rng = (pt - fts.currpos).length();
     if (pt == fts.currpos || check_par(pt - fts.currpos, fts.dir, 0.01) == 1) {
       //                                   looks like not matter ^
       // otherwise the point is behind plane
@@ -90,7 +89,7 @@ int splane::range(const trajestep& fts, vfloat* crange, point* cpt,
     point pt[2];
     circumf cf(fts.currpos + fts.relcen,
                fts.dir || fts.relcen,  // if to us, moving against clock
-               length(fts.relcen));
+               fts.relcen.length());
     int q = cf.cross(pn, pt, 0.0);
     if (q == -1)  // total circle lyes in the plane
     {

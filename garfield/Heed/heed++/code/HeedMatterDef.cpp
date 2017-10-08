@@ -192,7 +192,7 @@ void HeedMatterDef::inite_HeedMatterDef() {
   const double amean = matter->A_mean() / (gram / mole);
   const double rho = matter->density() / (gram / cm3);
   eldens_cm_3 = matter->Z_mean() / amean * Avogadro * rho;
-  eldens = eldens_cm_3 / pow(C1_MEV_CM, 3.0);
+  eldens = eldens_cm_3 / pow(C1_MEV_CM, 3);
   xeldens = eldens * C1_MEV_CM;
   wpla = eldens * 4. * pi * fine_structure_const / electron_mass_c2;
   radiation_length = 0.0;
@@ -398,7 +398,7 @@ void HeedMatterDef::print(std::ostream& file, int l) const {
             << ICS[ne] * C1_MEV2_MBN << ' ' << std::setw(12) << epsip[ne] << ' '
             << std::setw(12) << epsi1[ne] << ' ' << std::setw(12) << epsi2[ne]
             << ' ' << std::setw(12)
-            << pow((1 + epsi1[ne]), 2.0) + pow(epsi2[ne], 2.0) << " \n";
+            << pow((1 + epsi1[ne]), 2) + pow(epsi2[ne], 2) << " \n";
     }
     indn.n -= 2;
   }

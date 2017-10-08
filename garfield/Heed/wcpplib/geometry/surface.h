@@ -151,7 +151,7 @@ class ulsvolume : public absvol {
 
  public:
   /// Default constructor.
-  ulsvolume(void);
+  ulsvolume();
   ulsvolume(surface* fsurf[pqqsurf], int fqsurf, char* fname, vfloat fprec);
   ulsvolume(ulsvolume& f);
   ulsvolume(const ulsvolume& fv);
@@ -178,13 +178,12 @@ class ulsvolume : public absvol {
 class manip_ulsvolume : public manip_absvol, public ulsvolume {
  public:
   manip_ulsvolume() : manip_absvol(), ulsvolume() {}
-  // manip_ulsvolume(manip_ulsvolume& f);
   manip_ulsvolume(const manip_ulsvolume& f);
   manip_ulsvolume(const ulsvolume& f) : manip_absvol(), ulsvolume(f) {}
   /// Destructor
   virtual ~manip_ulsvolume() {}
 
-  virtual absvol* Gavol(void) const { return (ulsvolume*)this; }
+  virtual absvol* Gavol() const { return (ulsvolume*)this; }
   virtual void chname(char* nm) const {
     strcpy(nm, "manip_ulsvolume: ");
     strcat(nm, name.c_str());

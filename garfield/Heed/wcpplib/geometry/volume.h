@@ -123,7 +123,7 @@ class absvol : virtual public absref, public RegPassivePtr {
   virtual void chname(char* nm) const { strcpy(nm, "absvol"); }
   virtual void print(std::ostream& file, int l) const;
   virtual absvol* copy() const;
-  virtual std::vector<manip_absvol*> Gamanip_embed(void) const;
+  virtual std::vector<manip_absvol*> Gamanip_embed() const;
 };
 
 /*

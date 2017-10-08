@@ -64,9 +64,10 @@ It is provided "as is" without express or implied warranty.
 #include <iostream>
 #include <sstream>
 
+namespace Heed {
+
 typedef std::string String;
 
-// In <string> initialization from integer is absent
 inline String long_to_String(const long n) {
   std::ostringstream s;
   s << n;
@@ -90,6 +91,8 @@ inline void put_one_n(std::ostringstream& ost) {
     }
   } else
     ost << '\n';
+}
+
 }
 
 #endif

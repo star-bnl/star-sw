@@ -23,7 +23,7 @@ void box::get_components(ActivePtr<absref_transmit>& /*aref_tran*/) {
 
 box::box()
     : m_dx(0), m_dy(0), m_dz(0), m_dxh(0), m_dyh(0), m_dzh(0), m_name("none") {
-  mfunname("box::box(void)");
+  mfunname("box::box()");
   init_prec();
   init_planes();
 }
@@ -87,7 +87,7 @@ void box::init_prec() {
 }
 
 void box::init_planes() {
-  mfunname("void box::init_planes(void)");
+  mfunname("void box::init_planes()");
   splane spl[6];
   spl[0] = splane(plane(point(m_dxh, 0, 0), vec(-1, 0, 0)), vec(-1, 0, 0));
   spl[1] = splane(plane(point(-m_dxh, 0, 0), vec(+1, 0, 0)), vec(+1, 0, 0));
@@ -263,7 +263,7 @@ void box::chname(char* nm) const {
 
 // *****   manip_box  ********
 
-absvol* manip_box::Gavol(void) const { return (box*)this; }
+absvol* manip_box::Gavol() const { return (box*)this; }
 manip_box* manip_box::copy() const { return new manip_box(*this); }
 void manip_box::chname(char* nm) const {
   strcpy(nm, "manip_box: ");

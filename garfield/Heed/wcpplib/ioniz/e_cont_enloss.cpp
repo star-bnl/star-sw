@@ -10,7 +10,9 @@
 
 namespace Heed {
 
+using CLHEP::twopi;
 using CLHEP::electron_mass_c2;
+using CLHEP::classic_electr_radius;
 using CLHEP::GeV;
 using CLHEP::gram;
 using CLHEP::mole;
@@ -43,9 +45,8 @@ double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
     const double D3 = 2.0 * D2 * D / 3.0;
     const double D4 = D2 * D2;
     F = log(gamma_1 * D) -
-        beta2 *
-            (gamma_1 + 2.0 * D -
-             y * (3.0 * D2 + y * (D - D3 + y * (D2 - gamma_1 * D3 + D4)))) /
+        beta2 * (gamma_1 + 2.0 * D -
+                 y * (3.0 * D2 + y * (D - D3 + y * (D2 - gamma_1 * D3 + D4)))) /
             gamma_1;
   } else {
     // electron
@@ -53,16 +54,13 @@ double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
     F = -1.0 - beta2 + log((gamma_1 - D) * D) + gamma_1 / (gamma_1 - D) +
         (0.5 * D * D + (1.0 + 2.0 * gamma_1) * log(1.0 - D / gamma_1)) / gamma2;
   }
-  double logI = log(I_eff / electron_mass_c2);
-  double eldens =     // in 1 / [legnth^3]
-      ratio_Z_to_A *  // 1 / [weight]/mole
-      Avogadro *      // from CLHEP Avogadro = 6.0221367e+23/mole
-      density;        // [weight]/[length]^3
-  // double con2 = density;
-  double C =  // dimensionless
-      1.0 +
-      2.0 * log((I_eff / GeV) / (28.8e-9 * sqrt(density / (gram / cm3) *
-                                                ratio_Z_to_A * gram / mole)));
+  const double logI = log(I_eff / electron_mass_c2);
+  // Electron density (in 1 / [length^3])
+  const double eldens = ratio_Z_to_A * Avogadro * density;
+  // Dimensionless constant
+  double C = 1.0 + 2.0 * log((I_eff / GeV) /
+                             (28.8e-9 * sqrt(density / (gram / cm3) *
+                                             ratio_Z_to_A * gram / mole)));
   // Iprintn(mcout, density/(g/cm3));
   // Iprintn(mcout, ratio_Z_to_A * gram/mole);
   // Iprintn(mcout, C);
@@ -113,12 +111,11 @@ double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
     del = 4.606 * x - C;
     if (x <= x1) del = del + aa * pow(x1 - x, 3);
   }
-  double cons = 0.153536e-3  // this is 2*pi*r0^2* avogadro * Emass(GeV)
-                * GeV * cm2  // translate to internal units
-                / Avogadro;  // already included in eldens
-  double dedx = cons * eldens * (log(2.0 * gamma_1 + 4.0) - 2.0 * logI + F - del) /
-         beta2;
-  if (dedx < 0.0) dedx = 0.0;
-  return dedx;
+  const double cons =
+      twopi * classic_electr_radius * classic_electr_radius * electron_mass_c2;
+  // double cons = 0.153536e-3 * GeV * cm2 / Avogadro;
+  double dedx =
+      cons * eldens * (log(2.0 * gamma_1 + 4.0) - 2.0 * logI + F - del) / beta2;
+  return dedx > 0. ? dedx : 0.;
 }
 }

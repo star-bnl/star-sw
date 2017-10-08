@@ -465,6 +465,8 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
              1 - old files without fluorescence rate
              2 - new files with fluorescence rate
              other values - error
+    * \param fminimal_threshold
+             threshold
     */
   ExAtomPhotoAbsCS(int fZ, const std::string& fname,
                    const std::string& fBT_file_name, int id,

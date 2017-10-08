@@ -234,7 +234,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
     double e1 = hmd->energy_mesh->get_e(ne);
     double ec = hmd->energy_mesh->get_ec(ne);
     double e2 = hmd->energy_mesh->get_e(ne + 1);
-    double sqepsi = pow((1 + hmd->epsi1[ne]), 2.0) + pow(hmd->epsi2[ne], 2.0);
+    double sqepsi = pow((1 + hmd->epsi1[ne]), 2) + pow(hmd->epsi2[ne], 2);
     for (long na = 0; na < qa; na++) {
       double awq = hmd->matter->weight_quan(na);
       PassivePtr<const AtomPhotoAbsCS> pacs = hmd->apacs[na];

@@ -4,15 +4,10 @@
 #include <climits>
 #include "wcpplib/random/ranluxint.h"
 #include "heed++/code/PairProd.h"
-/*
-2003, I. Smirnov
-*/
+
+// 2003, I. Smirnov
+
 //#define USE_GET_ELOSS_CUT
-#ifdef USE_GET_ELOSS_CUT
-const double w_cut_ratio = 0.2;
-#else
-const double V_ratio = 0.5;
-#endif
 
 namespace Heed {
 
@@ -54,23 +49,20 @@ double PairProd::get_eloss() const {
 
 double PairProd::get_eloss(const double e_cur) const {
   mfunname("double PairProd::get_eloss(const double ecur) const");
-  double e_loss = k * pran.ran(SRANLUX()) + s;
-  if (e_cur - e_loss < w_cut_ratio * wa) e_loss = 1.0e20;  // to stop tracing
-  return e_loss;
+  const double e_loss = k * pran.ran(SRANLUX()) + s;
+  const double w_cut_ratio = 0.2;
+  return e_cur - e_loss < w_cut_ratio * wa ? 1.0e20 : eloss;
 }
 
 #else
 
 double PairProd::get_eloss(const double e_cur) const {
-  mfunname("double PairProd::get_eloss(double ecur) const");
+  mfunname("double PairProd::get_eloss(const double ecur) const");
   const double e_loss = k * pran.ran(SRANLUX()) + s;
-  double c;
-  if (e_cur <= V_ratio * wa) {
-    c = DBL_MAX;
-  } else {
-    // c = 1.0 / (1.0 - V_ratio * wa / e_cur);
-    c = 1.0 / (1.0 - pow(V_ratio * wa / e_cur, 2.0));
-  }
+  const double V_ratio = 0.5;
+  const double v = V_ratio * wa / e_cur; 
+  // const double c = 1. / (1. - v);
+  const double c = v < 1. ? 1. / (1. - v * v) : DBL_MAX;
   return e_loss * c;
 }
 

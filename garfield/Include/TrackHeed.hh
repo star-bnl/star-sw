@@ -89,7 +89,7 @@ class TrackHeed : public Track {
   // Define particle mass and charge (for exotic particles).
   // For standard particles Track::SetParticle should be used.
   void SetParticleUser(const double m, const double z);
-
+  bool IsInside(const double x, const double y, const double z);
  private:
   // Prevent usage of copy constructor and assignment operator
   TrackHeed(const TrackHeed& heed);

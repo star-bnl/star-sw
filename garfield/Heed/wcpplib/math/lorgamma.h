@@ -14,8 +14,11 @@ Author I. B. Smirnov, 1999 - 2002.
 
 namespace Heed {
 
-double lorgamma_1(double beta);  // gamma - 1
+/// \f$\gamma - 1\f$ as function of \f$\beta\f$.
+double lorgamma_1(double beta);
+/// \f$\beta\f$ as function of \f$\gamma - 1\f$.
 double lorbeta(const double gamma_1);
+/// \f$\beta^2\f$ as function of \f$\gamma - 1\f$.
 double lorbeta2(const double gamma_1);
 double lorbeta(const double momentum, const double mass);
 }
