@@ -2,7 +2,6 @@
 
 #include "TMath.h"
 
-#include "StEvent/StDcaGeometry.h"
 #include "St_base/StMessMgr.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
@@ -41,7 +40,12 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   {
     mPMomentum = pTrk->p();
   }
-
+  // Store dca
+  const Float_t* params = dcaG.params();
+  const Float_t* errMatrix = dcaG.errMatrix();
+  for (int i = 0; i < 6; i++) mPar[i] = params[i];
+  for (int i = 0; i < 15; i++) mErrMatrix[i] = errMatrix[i];
+  
   // Calculate global momentum and position at point of DCA to the pVtx
   StPhysicalHelixD gHelix = dcaG.helix();
   gHelix.moveOrigin(gHelix.pathLength(pVtx));

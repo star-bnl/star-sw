@@ -7,11 +7,10 @@
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StThreeVectorF.hh"
 #include "StarClassLibrary/SystemOfUnits.h"
+#include "StEvent/StDcaGeometry.h"
 
 
 class StMuTrack;
-class StDcaGeometry;
-
 
 class StPicoTrack : public TObject
 {
@@ -60,16 +59,21 @@ public:
 
   /// helix at point of DCA to StPicoEvent::mPrimaryVertex
   StPhysicalHelixD helix(float B) const;
-  bool hasPxl1Hit() const;
-  bool hasPxl2Hit() const;
-  bool hasIstHit() const;
-  bool hasSstHit() const;
-  bool isHft() const;
-  bool isHFTTrack() const;
-  bool hasHft4Layers() const;
+  Bool_t hasPxl1Hit() const;
+  Bool_t hasPxl2Hit() const;
+  Bool_t hasIstHit() const;
+  Bool_t hasSstHit() const;
+  Bool_t isHft() const;
+  Bool_t isHFTTrack() const;
+  Bool_t hasHft4Layers() const;
 
   /** Checks whether this track is associated with a primary vertex. */
-  bool isPrimary() const;
+  Bool_t isPrimary() const;
+  const Float_t* params() const     { return mPar; }
+  const Float_t* errMatrix() const  { return mErrMatrix; }
+
+  StDcaGeometry dcaGeometry() const;
+  StPhysicalHelixD helix() const;
 
   // MTD pid traits
   void setBEmcPidTraitsIndex(Int_t index);
@@ -100,11 +104,13 @@ protected:
   UInt_t   mTopologyMap[2];   // Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
 
   // pidTraits
-  Short_t  mBEmcPidTraitsIndex;  // index of the EMC  pidTratis in the event
+  Short_t  mBEmcPidTraitsIndex; // index of the EMC  pidTratis in the event
   Short_t  mBTofPidTraitsIndex; // index of the BTOF pidTratis in the event
   Short_t  mMtdPidTraitsIndex;  // index of the MTD  pidTratis in the event
-
-  ClassDef(StPicoTrack, 1)
+  // dcaG
+  Float_t mPar[6];
+  Float_t mErrMatrix[15];
+  ClassDef(StPicoTrack, 2)
 };
 
 inline void StPicoTrack::setBEmcPidTraitsIndex(Int_t index) { mBEmcPidTraitsIndex = (Short_t)index; }
@@ -134,19 +140,19 @@ inline UInt_t  StPicoTrack::topologyMap(unsigned int idx) const { return mTopolo
 inline Int_t   StPicoTrack::bemcPidTraitsIndex() const { return mBEmcPidTraitsIndex; }
 inline Int_t   StPicoTrack::bTofPidTraitsIndex() const { return mBTofPidTraitsIndex; }
 inline Int_t   StPicoTrack::mtdPidTraitsIndex() const { return mMtdPidTraitsIndex; }
-inline bool    StPicoTrack::hasPxl1Hit() const { return hftHitsMap() >> 0 & 0x1; }
-inline bool    StPicoTrack::hasPxl2Hit() const { return hftHitsMap() >> 1 & 0x3; }
-inline bool    StPicoTrack::hasIstHit()  const { return hftHitsMap() >> 3 & 0x3; }
-inline bool    StPicoTrack::hasSstHit()  const { return hftHitsMap() >> 5 & 0x3; }
-inline bool    StPicoTrack::isHft() const { return hasPxl1Hit() && hasPxl2Hit() && (hasIstHit() || hasSstHit()); }
-inline bool    StPicoTrack::isHFTTrack() const { return isHft(); }
-inline bool    StPicoTrack::hasHft4Layers() const { return hasPxl1Hit() && hasPxl2Hit() && hasIstHit() && hasSstHit(); }
+inline Bool_t  StPicoTrack::hasPxl1Hit() const { return hftHitsMap() >> 0 & 0x1; }
+inline Bool_t  StPicoTrack::hasPxl2Hit() const { return hftHitsMap() >> 1 & 0x3; }
+inline Bool_t  StPicoTrack::hasIstHit()  const { return hftHitsMap() >> 3 & 0x3; }
+inline Bool_t  StPicoTrack::hasSstHit()  const { return hftHitsMap() >> 5 & 0x3; }
+inline Bool_t  StPicoTrack::isHft() const { return hasPxl1Hit() && hasPxl2Hit() && (hasIstHit() || hasSstHit()); }
+inline Bool_t  StPicoTrack::isHFTTrack() const { return isHft(); }
+inline Bool_t  StPicoTrack::hasHft4Layers() const { return hasPxl1Hit() && hasPxl2Hit() && hasIstHit() && hasSstHit(); }
 
 /**
  * The default "primary" momentum is (0, 0, 0) but it is expected to have
  * a non-zero length when the track is associated with a primary vertex.
  */
-inline bool StPicoTrack::isPrimary() const
+inline Bool_t StPicoTrack::isPrimary() const
 {
   return mPMomentum.magnitude() > 0;
 }

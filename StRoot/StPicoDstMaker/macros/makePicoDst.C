@@ -1,5 +1,6 @@
 /* 
-   root.exe 'lMuDst.C(-1,"/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_*15130037*.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+
+   root.exe 'lMuDst.C(-1,"/net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1500052.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoWrite,quiet")' makePicoDst.C+
+   root.exe 'lMuDst.C(-1,"/net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1500052.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")' makePicoDst.C+
  */
 #include "TSystem.h"
 #include "Riostream.h"
@@ -27,7 +28,7 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   MuDstMaker->SetStatus("BTof*",1);
   MuDstMaker->SetStatus("Emc*",1);
   MuDstMaker->SetStatus("MTD*",1);
-  
+#if 0  
   if(!creatingPhiWgt&&emcMode) {
     StEmcADCtoEMaker *adc2e = (StEmcADCtoEMaker *) chain->Maker("bemcA2E");
     //		adc2e->setPrint(false);
@@ -44,10 +45,11 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
     trigSimu->useOnlineDB();
     trigSimu->bemc->setConfig(StBemcTriggerSimu::kOffline);
   }
-  StPicoDstMaker *picoMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
-  picoMaker->setProdMode(prodMod); // 0-mb, 1-central, 2-ht
-  picoMaker->setEmcMode(emcMode); // 0-No EMC, 1-EMC ON
-  //        picoMaker->SetDebug(1);
+#endif
   chain->Init();
   chain->EventLoop(nEvents);
 }
+/* /net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1500052.MuDst.root
+  10/06/17 MuDst: 3895236991 default PicoDst : 571095720 : ratio = 6.82
+                             add dca         :1442666170 :         2.7   a factor 2.5
+*/
