@@ -52,4 +52,6 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
 /* /net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1500052.MuDst.root
   10/06/17 MuDst: 3895236991 default PicoDst : 571095720 : ratio = 6.82
                              add dca         :1442666170 :         2.7   a factor 2.5
+  10/09/17                   Float16_t       :1054673602 :         3.7   a factor 1.84
+  10/10/17                   & dca3D < 10 cm : 380350741 :        10.2   a factor 0.67
 */

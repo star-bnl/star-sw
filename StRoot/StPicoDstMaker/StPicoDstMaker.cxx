@@ -676,7 +676,13 @@ void StPicoDstMaker::fillTracks()
       LOG_WARN << "No dca Geometry for this track !!! " << i << endm;
       continue;
     }
-
+    // Cut large Dca
+    THelixTrack t = dcaG->thelix();
+    Double_t xyz[3] = {mMuDst->primaryVertex()->position().x(),
+		       mMuDst->primaryVertex()->position().y(),
+		       mMuDst->primaryVertex()->position().z()};
+    Double_t dca3D = t.Dca(xyz);
+    if (dca3D > 10.0) continue;
     int counter = mPicoArrays[StPicoArrays::Track]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, mBField, mMuDst->primaryVertex()->position(), *dcaG);
 
