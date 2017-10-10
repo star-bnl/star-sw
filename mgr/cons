@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.111 2014/07/23 15:36:55 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.112 2017/10/10 21:19:00 jeromel Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -863,7 +863,11 @@ sub main::doscripts {
 		$file = $path;
 	    }
 	    # Actually process the Conscript file.
-	    do $file;
+	    if ( -e "./$file"){
+		do "./$file";
+	    } else {
+		do $file;
+	    }
 	    # Save any variables defined by the Conscript file
 	    # so we can restore them later, if needed;
 	    # then delete them from the script:: namespace.
