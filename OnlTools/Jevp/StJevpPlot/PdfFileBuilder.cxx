@@ -16,52 +16,55 @@ JevpPlot *PdfFileBuilder::getPlotByName(char *name) {
 
 void PdfFileBuilder::write(char *filename, int displayNumber, int ignoreServerTags, char *serverTags)
 {    
-  this->serverTags = serverTags;
+    //printf("Start..\n");
+    displays->setIgnoreServerTags(ignoreServerTags);
+    displays->setServerTags(serverTags);
+    displays->setDisplay(displays->getDisplayNodeFromIndex(displayNumber));
+    displays->updateDisplayRoot();
 
-  displays->setIgnoreServerTags(ignoreServerTags);
-  displays->setServerTags(serverTags);
-  displays->setDisplay(displays->getDisplayNodeFromIndex(displayNumber));
-  displays->updateDisplayRoot();
-
-  LOG(DBG, "write");
-  writePdf(filename, 1);
+    LOG(DBG, "write");
+    writePdf(filename, 1);
+    //printf("Done...\n");
 }
 
 void PdfFileBuilder::writePdf(char *filename, int combo_index)
 {
-  LOG("JEFF", "Writing pdf: %s index=%d",filename,combo_index);
+    LOG(DBG, "Writing pdf: %s index=%d",filename,combo_index);
 
-  //displays->displayRoot->dump(0, "dr:");
+    //displays->displayRoot->dump(0, "dr:");
 
-  LOG(DBG, "Now write it...");
+    LOG(DBG, "Now write it...");
 
-  DisplayNode *root = displays->getTab(combo_index);
+    DisplayNode *root = displays->getTab(combo_index);
 
-  if(combo_index == 0) {
-    LOG(DBG, "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
-    root = displays->displayRoot;
-  }
+    if(combo_index == 0) {
+	LOG(DBG, "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
+	root = displays->displayRoot;
+    }
 
-  LOG(DBG, "writeNodePdf root: %s",filename);
+    LOG(DBG, "writeNodePdf root: %s",filename);
 
-  PdfIndex index;
-  writeNodePdf(root, &index, NULL, filename, 1);
+    PdfIndex index;
+    writeNodePdf(root, &index, NULL, filename, 1);
   
-  LOG(DBG, "write endfilename");
+    LOG(DBG, "write endfilename: %s", filename);
 
-  // Now a summary....
-  char endfilename[256];
-  strcpy(endfilename, filename);
-  strcat(endfilename, ")");
-  TCanvas summary("c2");
-  summary.Print(endfilename, "pdf,Portrait");
+    // Now a summary....
+    char endfilename[256];
+    strcpy(endfilename, filename);
+    strcat(endfilename, ")");
+    TCanvas summary("c2");
+    summary.Print(endfilename, "pdf,Portrait");
 
   
-  // Index the file...
-  char indexedfilename[256];
-  strcpy(indexedfilename, filename);
-  // strcat(indexedfilename, ".idx");
-  index.CreateIndexedFile(filename, indexedfilename);
+    LOG(DBG, "Index it...");
+    // Index the file...
+    char indexedfilename[256];
+    strcpy(indexedfilename, filename);
+    // strcat(indexedfilename, ".idx");
+    index.CreateIndexedFile(filename, indexedfilename);
+
+    LOG(DBG, "Done indexing");
 }
 
 int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
@@ -72,6 +75,7 @@ int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry
 
     if(node->leaf) {   // We are writing histograms...
 	writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
+	LOG(DBG, "REturn pdf");
 	return 1;
     }
     else {   // We are just writing index entries
@@ -92,6 +96,7 @@ int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry
 	    npages += writeNodePdf(node->next, index, currIndexEntry, filename, page + npages);
 	}
 
+	LOG(DBG, "Return pages");
 	return npages;
     }
 }    
@@ -153,7 +158,7 @@ int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, 
     }
     
     
-    printf("Got scaley...  Setting max value to ymax=%lf\n",ymax*1.1);
+    //printf("Got scaley...  Setting max value to ymax=%lf\n",ymax*1.1);
     cnode = node;
     while(cnode) {
       JevpPlot *plot = getPlotByName(cnode->name);

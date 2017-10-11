@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+
 #include "PdfIndex.hh"
 
 index_entry::index_entry(char *n, int p, float pos) {
@@ -40,8 +41,8 @@ void PdfIndex::set_orig_buff(char *buff, int sz)
 
 int PdfIndex::ReadFile(char *fn)
 {
-  struct stat statbuff;
-  if(stat(fn, &statbuff) < 0) {
+  struct stat64 statbuff;
+  if(stat64(fn, &statbuff) < 0) {
     perror("stat");
     return -1;
   }
