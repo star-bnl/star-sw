@@ -14,6 +14,11 @@
 #include <rtsLog.h>
 #include <iccp.h>
 
+#ifdef __CINT__
+#define unix
+#endif
+
+
 #ifdef sun
 //#include <thread.h>
 #include <synch.h>

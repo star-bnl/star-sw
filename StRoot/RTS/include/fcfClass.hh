@@ -38,7 +38,7 @@
 #define FCF_WORDS_PER_CLUSTER	2
 
 
-#if defined(__unix) || defined(__ROOT__)
+#if defined(__unix) || defined(__ROOT__) || defined(__CINT__)
 
 typedef unsigned int u_int;
 typedef unsigned short u_short;
