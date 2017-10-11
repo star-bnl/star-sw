@@ -116,11 +116,11 @@ evplibs="$evplibs   gSystem->Load("\""libQtRootGui.so"\"");  "
 cat >${shellname}<<ROOTMACRO
 {
 
-printf("a\n");
+//printf("a\n");
   gROOT->Macro("Load.C");
-printf("b\n");
+//printf("b\n");
   gSystem->Load("RTS");
-printf("c\n");
+//printf("c\n");
   if (gROOT->IsBatch()) {
      printf("Loading QT librares\n");
      gSystem->Load("libQtCore.so");
@@ -131,11 +131,11 @@ printf("c\n");
   }
   gSystem->Load("StDaqLib");
   gSystem->Load("StDbLib");
-printf("e\n");
+//printf("e\n");
   gSystem->Load("StEEmcUtil");
-printf("f\n");
+//printf("f\n");
   gSystem->Load("StEmcUtil");
-printf("g\n");
+//printf("g\n");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
   gSystem->Load("St_db_Maker");
