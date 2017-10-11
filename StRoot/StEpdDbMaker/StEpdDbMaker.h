@@ -48,6 +48,8 @@ class StEpdDbMaker : public StMaker{
     float GetMip(short ew, short pp, short tile){return mMip[ew][pp][tile];}
     float GetQtPedestals(short ew, short pp, short tile){return mQtPedestals[ew][pp][tile];}
     float GetDarkCurrent(short ew, short pp, short tile){return mDarkCurrent[ew][pp][tile];}
+    float GetQtPedestalsSigma(short ew, short pp, short tile){return mQtPedestalsSigma[ew][pp][tile];}
+    float GetOffset(short ew, short pp, short tile){return mOffset[ew][pp][tile];}
 
   protected:
 
@@ -72,10 +74,12 @@ class StEpdDbMaker : public StMaker{
 
     short mStatus[2][12][31];
 
-    short mVPed[2][12][31];
-    short mMip[2][12][31];
-    short mQtPedestals[2][12][31];
-    short mDarkCurrent[2][12][31];
+    float mVPed[2][12][31];
+    float mMip[2][12][31];
+    float mQtPedestals[2][12][31];
+    float mDarkCurrent[2][12][31];
+    float mQtPedestalsSigma[2][12][31];
+    float mOffset[2][12][31];
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
     ClassDef(StEpdDbMaker,1);

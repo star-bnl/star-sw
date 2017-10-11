@@ -115,8 +115,8 @@ Int_t StEpdDbMaker::InitRun( Int_t runNumber ){
   for (Int_t i = 0; i < 744; i++) {
     //Fetch from epdQTMap_st table
     short ew   = mEpdQtMapTable->ew[i];
-    short pp   = mEpdQtMapTable->pp[i] - 1; // changed from 1 to 12 to 0-11
-    short tile = mEpdQtMapTable->tile[i] - 1; // changed from 1->31 to 0-30
+    short pp   = mEpdQtMapTable->pp[i];
+    short tile = mEpdQtMapTable->tile[i];
 
     mCrateAdc[ew][pp][tile]   = mEpdQtMapTable->qt_crate_adc[i];
     mBoardAdc[ew][pp][tile]   = mEpdQtMapTable->qt_board_adc[i];
@@ -142,6 +142,8 @@ Int_t StEpdDbMaker::InitRun( Int_t runNumber ){
     mMip[ew][pp][tile]         = mEpdGainTable->mip[i];
     mQtPedestals[ew][pp][tile] = mEpdGainTable->qt_pedestals[i];
     mDarkCurrent[ew][pp][tile] = mEpdGainTable->dark_current[i];
+    mQtPedestalsSigma[ew][pp][tile] = mEpdGainTable->qt_pedestals_sigma[i];
+    mOffset[ew][pp][tile] = mEpdGainTable->offset[i];
   
   }
 
@@ -179,6 +181,8 @@ void StEpdDbMaker::ResetArrays(){
 	mMip[ew][pp][tile] = -1;
 	mQtPedestals[ew][pp][tile] = -1; 
 	mDarkCurrent[ew][pp][tile] = -1;
+	mQtPedestalsSigma[ew][pp][tile] = -1; 
+	mOffset[ew][pp][tile] = -1; 
 
       }
     }
