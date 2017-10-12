@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.44 2017/10/12 13:02:27 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.45 2017/10/12 13:31:06 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.45  2017/10/12 13:31:06  zhux
+// add "Run9 pp500 P16ib" chain setting.
+//
 // Revision 1.44  2017/10/12 13:02:27  zhux
 // added run15 pp200 pAu200 chains
 //
@@ -166,6 +169,10 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run15 pAu200 chains
   TString prodP16idpAu200("DbV20160710,DbV20161117_TPC_Calibrations,pp2015c,btof,mtd,mtdCalib,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFPPVnoCTB,-VFPPV,-beamline,-hitfilt");
 
+  // Run9 pp500 P16ib chain
+  TString prodP16ibpp500("DbV20110311,OGGVoltErr,pp2009c,ITTF,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeak3D,DbV20151021_TOF_Calibrations,DbV20161021_tpc_Calibrations,VFMCE,TpxClu,-hitfilt");
+
+
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
   TString geomP10ih("ry2010c");
@@ -224,6 +231,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P16iaAuAu5")   { chain1Opt += xgeom; chain3Opt = prodP16iaAuAu5;    chain3Opt += ",mtdsim";  chain2Opt += geomP16ia;}
   else if (prodName == "P16idpp200")   { chain1Opt += xgeom; chain3Opt = prodP16idpp200;    chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
   else if (prodName == "P16idpAu200")  { chain1Opt += xgeom; chain3Opt = prodP16idpAu200;   chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
+  else if (prodName == "P16ibpp500")   { chain3Opt = prodP16ibpp500;    chain2Opt += geomP10ic;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
