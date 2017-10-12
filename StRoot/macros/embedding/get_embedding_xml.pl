@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.27 2017/10/02 03:29:26 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.28 2017/10/12 11:47:34 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.28  2017/10/12 11:47:34  zhux
+# added a section to assign the default memory usage per job in xml script, for submitting jobs to SLURM partition at PDSF.
+#
 # Revision 1.27  2017/10/02 03:29:26  zhux
 # added option '-nevents' to assign the maximum number of events to be processed for one single daq file.
 #
@@ -542,6 +545,12 @@ print OUT "<!-- csh/list files -->\n";
 print OUT "<Generator>\n";
 print OUT "  <Location>$generatorDir</Location>\n";
 print OUT "</Generator>\n";
+print OUT "\n";
+print OUT "<ResourceUsage>\n";
+print OUT "<Memory>\n";
+print OUT "<MinMemory>1800</MinMemory>\n";
+print OUT "</Memory>\n";
+print OUT "</ResourceUsage>\n";
 print OUT "\n";
 print OUT "<!-- Put any locally-compiled stuffs into a sand-box -->\n";
 print OUT "<SandBox installer=\"ZIP\">\n";
