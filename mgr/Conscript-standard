@@ -1235,7 +1235,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
 
-    if ( $#Defs > -1 ) {
+    if ( $#Defs > -1 && ! $OnlinePackage ) {
 	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
 	@Defs = script::sortu(@Defs);
 	my @defs = ();
@@ -1280,6 +1280,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#	push @src, $CintFiles[0];
 	push @src, @objfiles[0];
 	print "+==========add cint $CintFiles[0]\n" if $param::debug;
+	#die ;
     }
 
     if ( $#QtDefs > -1 ) {
