@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.43 2017/10/02 09:28:09 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.44 2017/10/12 13:02:27 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.44  2017/10/12 13:02:27  zhux
+// added run15 pp200 pAu200 chains
+//
 // Revision 1.43  2017/10/02 09:28:09  zhux
 // added chain for Run15 FXT AuAu4.5/AuAl4.9
 //
@@ -157,6 +160,12 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run15 AuAu4.5 fxt chain
   TString prodP16iaAuAu5("DbV20160126,DbV20150920_tpc_Calibrations,P2015b,mtd,btof,BEmcChkStat,CorrX,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
+  // Run15 pp200 chains
+  TString prodP16idpp200("DbV20160418,DbV20161117_TPC_Calibrations,pp2015c,btof,mtd,mtdCalib,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFPPVnoCTB,-VFPPV,-beamline,-hitfilt");
+
+  // Run15 pAu200 chains
+  TString prodP16idpAu200("DbV20160710,DbV20161117_TPC_Calibrations,pp2015c,btof,mtd,mtdCalib,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFPPVnoCTB,-VFPPV,-beamline,-hitfilt");
+
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
   TString geomP10ih("ry2010c");
@@ -169,6 +178,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString geomP15ie("ry2014a");
   TString geomP16id("ry2014a");
   TString geomP16ia("ry2015b");
+  TString geomP16id_run15("ry2015c");
 
   TString xgeom(" useXgeom");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
@@ -212,6 +222,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P15ieCuAu200") { chain3Opt = prodP15ieCuAu200;  chain2Opt += geomP12id;}
   else if (prodName == "P16idAuAu200") { chain1Opt += xgeom; chain3Opt = prodP16idAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP16id;}
   else if (prodName == "P16iaAuAu5")   { chain1Opt += xgeom; chain3Opt = prodP16iaAuAu5;    chain3Opt += ",mtdsim";  chain2Opt += geomP16ia;}
+  else if (prodName == "P16idpp200")   { chain1Opt += xgeom; chain3Opt = prodP16idpp200;    chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
+  else if (prodName == "P16idpAu200")  { chain1Opt += xgeom; chain3Opt = prodP16idpAu200;   chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
