@@ -8,7 +8,9 @@
 #include <TH1S.h>
 #include <TH2S.h>
 #include <TRandom.h>
-#include "DAQ_READER/daq_dta.h"
+//#include "DAQ_READER/daq_dta.h"
+struct daq_dta;
+
 #include <string>
 #include <math.h>
 
