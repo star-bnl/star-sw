@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.50 2017/05/30 15:59:14 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.51 2017/10/13 20:13:53 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.51  2017/10/13 20:13:53  ullrich
+ * Added access fct epdADC() and epdTDC().
+ *
  * Revision 2.50  2017/05/30 15:59:14  ullrich
  * Added bbcTDC5bit() method.
  *
@@ -316,6 +319,10 @@ public:
     virtual unsigned int*  QTdata(int prepost=0) const;
     virtual unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
     virtual unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
+
+    //EPD
+    virtual unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
+    virtual unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
 
     // VPD
     virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
