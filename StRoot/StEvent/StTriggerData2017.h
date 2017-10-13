@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.h,v 2.4 2017/05/30 15:59:14 ullrich Exp $
+ * $Id: StTriggerData2017.h,v 2.5 2017/10/13 20:14:26 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.h,v $
+ * Revision 2.5  2017/10/13 20:14:26  ullrich
+ * Added access fct epdADC() and epdTDC().
+ *
  * Revision 2.4  2017/05/30 15:59:14  ullrich
  * Added bbcTDC5bit() method.
  *
@@ -127,6 +130,10 @@ public:
     unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
     
+    //EPD
+    unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
+    unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
+
     //ZDC
     bool zdcPresent(int prepost=0) const;
     unsigned short zdcAtChannel(int channel, int prepost=0) const;

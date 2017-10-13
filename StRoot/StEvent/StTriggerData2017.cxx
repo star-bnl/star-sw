@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.cxx,v 2.5 2017/05/30 15:59:14 ullrich Exp $
+ * $Id: StTriggerData2017.cxx,v 2.6 2017/10/13 20:14:26 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2016
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2017.cxx,v $
+ * Revision 2.6  2017/10/13 20:14:26  ullrich
+ * Added access fct epdADC() and epdTDC().
+ *
  * Revision 2.5  2017/05/30 15:59:14  ullrich
  * Added bbcTDC5bit() method.
  *
@@ -1222,8 +1225,9 @@ unsigned int* StTriggerData2017::QTdata(int prepost) const
 unsigned short StTriggerData2017::fmsADC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=0 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
+            case 0: return bbq[buffer][adr][ch];
             case 1: return qt1[buffer][adr][ch];
             case 2: return qt2[buffer][adr][ch];
             case 3: return qt3[buffer][adr][ch];
@@ -1249,6 +1253,28 @@ unsigned short StTriggerData2017::fmsTDC(int crt, int adr, int ch, int prepost) 
             case 5: return tepq[buffer][adr][ch];
             case 6: return tfq1[buffer][adr][ch];
             case 7: return tfq2[buffer][adr][ch];
+        }
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2017::epdADC(int crt, int adr, int ch, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && crt>=1 && crt<=1 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+        switch(crt){
+	case 1: return epq[buffer][adr][ch];
+        }
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2017::epdTDC(int crt, int adr, int ch, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && crt>=1 && crt<=1 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+        switch(crt){
+	case 1: return tepq[buffer][adr][ch];
         }
     }
     return 0;
