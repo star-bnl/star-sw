@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.45 2017/10/12 13:31:06 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.46 2017/10/13 05:36:18 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.46  2017/10/13 05:36:18  zhux
+// added lines for pvranking/primemode cut switches. the default is off.
+//
 // Revision 1.45  2017/10/12 13:31:06  zhux
 // add "Run9 pp500 P16ib" chain setting.
 //
@@ -374,7 +377,10 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
   	embMk->SetTemp(0.35);
 
-	//embMk->SetRapidityMode(kFALSE);
+	//embMk->SetRapidityMode(kFALSE);  //default is 'kTRUE'
+	
+	//Switch to prime mode for nucleus (with geantID > 10000) embedding, default is 'kFALSE'
+	//embMk->SetPrimeMode(kTRUE);
 
   	// Make trigger and z-vertex cuts (only if SkipMode is true)
   	// Trigger cut
@@ -389,8 +395,13 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   	// vr = sqrt{vx^2 + vy^2} cut
   	embMk->SetVrCut(vr);
 
+	//cut on VpdVz, need moretags.root
 	//embMk->SetVpdVzCutMode(kTRUE);
 	//embMk->SetVpdVzCut(3);
+	
+	//cut on PVranking, need moretags.root
+	//embMk->SetPVRankCutMode(kTRUE);
+	//embMk->SetPVRankCut(0);  // pvrank > 0
 
 	}
 
