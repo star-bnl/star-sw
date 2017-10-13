@@ -11,15 +11,17 @@
 
 #include "StEvent/StTriggerData.h"
 
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
-#include "DAQ_READER/daq_dta.h"
-#include "DAQ_READER/daq_det.h"
+//#include "DAQ_READER/daq_dta.h"
+struct daq_dta;
+
+//#include "DAQ_READER/daq_det.h"
 
 #include <TH1F.h>
 #include <TH2F.h>
 
 #include "Jevp/StJevpPlot/JevpPlot.h"
-#include "JevpBuilder.h"
 
 //#include "StRoot/StFmsDbMaker/StFmsDbMaker.h" // disabled
 

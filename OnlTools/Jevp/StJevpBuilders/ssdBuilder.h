@@ -7,7 +7,9 @@
 #include <TH2F.h>
 #include "TH2.h"
 #include <TRandom.h>
-#include "DAQ_READER/daq_dta.h"
+//#include "DAQ_READER/daq_dta.h"
+struct daq_dta;
+
 #include <string>
 #include <math.h>
 #include "TTree.h"

@@ -13,7 +13,9 @@
 
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
-#include <DAQ_READER/daq_dta.h>
+//#include <DAQ_READER/daq_dta.h>
+struct daq_dta;
+
 #include <DAQ_L3/daq_l3.h>
 #include <TStyle.h>
 #include "TVector3.h"
