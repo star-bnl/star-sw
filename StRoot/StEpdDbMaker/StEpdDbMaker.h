@@ -24,32 +24,32 @@ class StEpdDbMaker : public StMaker{
     void setDebug(Int_t debug){mDebug=debug;} // 0:minimal message, >0 more debug messages
 
     // epdQtMap table
-    short GetCrateAdc(short ew, short pp, short tile){return mCrateAdc[ew][pp][tile];}
-    short GetBoardAdc(short ew, short pp, short tile){return mBoardAdc[ew][pp][tile];}
-    short GetChannelAdc(short ew, short pp, short tile){return mChannelAdc[ew][pp][tile];}
-    short GetCrateTac(short ew, short pp, short tile){return mCrateTac[ew][pp][tile];}
-    short GetBoardTac(short ew, short pp, short tile){return mBoardTac[ew][pp][tile];}
-    short GetChannelTac(short ew, short pp, short tile){return mChannelTac[ew][pp][tile];}
+    short GetCrateAdc(short ew, short pp, short tile){return mCrateAdc[ew][pp-1][tile-1];}
+    short GetBoardAdc(short ew, short pp, short tile){return mBoardAdc[ew][pp-1][tile-1];}
+    short GetChannelAdc(short ew, short pp, short tile){return mChannelAdc[ew][pp-1][tile-1];}
+    short GetCrateTac(short ew, short pp, short tile){return mCrateTac[ew][pp-1][tile-1];}
+    short GetBoardTac(short ew, short pp, short tile){return mBoardTac[ew][pp-1][tile-1];}
+    short GetChannelTac(short ew, short pp, short tile){return mChannelTac[ew][pp-1][tile-1];}
 
     // epdFeeMap table
-    short GetTuffId(short ew, short pp, short tile){return mTuffId[ew][pp][tile];}
-    short GetTuffGroup(short ew, short pp, short tile){return mTuffGroup[ew][pp][tile];}
-    short GetTuffChannel(short ew, short pp, short tile){return mTuffChannel[ew][pp][tile];}
-    short GetReceiverBoard(short ew, short pp, short tile){return mReceiverBoard[ew][pp][tile];}
-    short GetReceiverBoardChannel(short ew, short pp, short tile){return mReceiverBoardChannel[ew][pp][tile];}
-    short GetCamacCrateAddress(short ew, short pp, short tile){return mCamacCrateAddress[ew][pp][tile];}
-    char* GetOneWireId(short ew, short pp, short tile){return mWireOneId[ew][pp][tile];}
+    short GetTuffId(short ew, short pp, short tile){return mTuffId[ew][pp-1][tile-1];}
+    short GetTuffGroup(short ew, short pp, short tile){return mTuffGroup[ew][pp-1][tile-1];}
+    short GetTuffChannel(short ew, short pp, short tile){return mTuffChannel[ew][pp-1][tile-1];}
+    short GetReceiverBoard(short ew, short pp, short tile){return mReceiverBoard[ew][pp-1][tile-1];}
+    short GetReceiverBoardChannel(short ew, short pp, short tile){return mReceiverBoardChannel[ew][pp-1][tile-1];}
+    short GetCamacCrateAddress(short ew, short pp, short tile){return mCamacCrateAddress[ew][pp-1][tile-1];}
+    char* GetOneWireId(short ew, short pp, short tile){return mWireOneId[ew][pp-1][tile-1];}
 
     // epdStatus table
-    short GetStatus(short ew, short pp, short tile){return mStatus[ew][pp][tile];}
+    short GetStatus(short ew, short pp, short tile){return mStatus[ew][pp-1][tile-1];}
 
     // epdGain table
-    float GetVPed(short ew, short pp, short tile){return mVPed[ew][pp][tile];}
-    float GetMip(short ew, short pp, short tile){return mMip[ew][pp][tile];}
-    float GetQtPedestals(short ew, short pp, short tile){return mQtPedestals[ew][pp][tile];}
-    float GetDarkCurrent(short ew, short pp, short tile){return mDarkCurrent[ew][pp][tile];}
-    float GetQtPedestalsSigma(short ew, short pp, short tile){return mQtPedestalsSigma[ew][pp][tile];}
-    float GetOffset(short ew, short pp, short tile){return mOffset[ew][pp][tile];}
+    float GetVPed(short ew, short pp, short tile){return mVPed[ew][pp-1][tile-1];}
+    float GetMip(short ew, short pp, short tile){return mMip[ew][pp-1][tile-1];}
+    float GetQtPedestals(short ew, short pp, short tile){return mQtPedestals[ew][pp-1][tile-1];}
+    float GetDarkCurrent(short ew, short pp, short tile){return mDarkCurrent[ew][pp-1][tile-1];}
+    float GetQtPedestalsSigma(short ew, short pp, short tile){return mQtPedestalsSigma[ew][pp-1][tile-1];}
+    float GetOffset(short ew, short pp, short tile){return mOffset[ew][pp-1][tile-1];}
 
   protected:
 
