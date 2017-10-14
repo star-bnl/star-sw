@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.28 2017/10/12 11:47:34 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.29 2017/10/14 13:50:28 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.29  2017/10/14 13:50:28  zhux
+# maximum memory increased from 1800 to 3700 MB for one task.
+#
 # Revision 1.28  2017/10/12 11:47:34  zhux
 # added a section to assign the default memory usage per job in xml script, for submitting jobs to SLURM partition at PDSF.
 #
@@ -548,7 +551,7 @@ print OUT "</Generator>\n";
 print OUT "\n";
 print OUT "<ResourceUsage>\n";
 print OUT "<Memory>\n";
-print OUT "<MinMemory>1800</MinMemory>\n";
+print OUT "<MinMemory>3700</MinMemory>\n";
 print OUT "</Memory>\n";
 print OUT "</ResourceUsage>\n";
 print OUT "\n";
