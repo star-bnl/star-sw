@@ -1,7 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPIXname  <comment>  *    EEMC PMT and MAPMT pixel names,  </comment>
-  <dbString> name <length> 16000 </length> <comment> logical name of  pixel  </comment> </dbString> 
-  <dbString> tubeName <length> 16000 </length> <comment>  hardware name of pixel   </comment> </dbString> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>
