@@ -400,9 +400,10 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       // Check if it is a delta electron.
       Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
       if (delta) {
-        const double x = delta->origin.pt.v.x * 0.1 + m_cX;
-        const double y = delta->origin.pt.v.y * 0.1 + m_cY;
-        const double z = delta->origin.pt.v.z * 0.1 + m_cZ;
+        extra += delta->curr_kin_energy * 1.e6;
+        const double x = delta->currpos.pt.v.x * 0.1 + m_cX;
+        const double y = delta->currpos.pt.v.y * 0.1 + m_cY;
+        const double z = delta->currpos.pt.v.z * 0.1 + m_cZ;
         if (!IsInside(x, y, z)) continue;
         if (m_useDelta) {
           // Transport the delta electron.
@@ -435,9 +436,10 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
         std::cerr << m_className << "::GetCluster:\n"
                   << "    Particle is neither an electron nor a photon.\n";
       }
-      const double x = photon->origin.pt.v.x * 0.1 + m_cX;
-      const double y = photon->origin.pt.v.y * 0.1 + m_cY;
-      const double z = photon->origin.pt.v.z * 0.1 + m_cZ;
+      extra += photon->energy * 1.e6;
+      const double x = photon->currpos.pt.v.x * 0.1 + m_cX;
+      const double y = photon->currpos.pt.v.y * 0.1 + m_cY;
+      const double z = photon->currpos.pt.v.z * 0.1 + m_cZ;
       if (!IsInside(x, y, z)) continue;
       // Transport the photon.
       if (m_usePhotonReabsorption) photon->fly(newSecondaries);
@@ -496,7 +498,22 @@ bool TrackHeed::GetElectron(const unsigned int i,
     dy = m_deltaElectrons[i].dy;
     dz = m_deltaElectrons[i].dz;
   }
+  return true;
+}
 
+bool TrackHeed::GetIon(const unsigned int i,
+                       double& x, double& y, double& z, double& t) const {
+
+  // Make sure a "conduction" ion with this number exists.
+  if (i >= m_conductionIons.size()) {
+    std::cerr << m_className << "::GetIon: Index out of range.\n";
+    return false;
+  }
+
+  x = m_conductionIons[i].ptloc.v.x * 0.1 + m_cX;
+  y = m_conductionIons[i].ptloc.v.y * 0.1 + m_cY;
+  z = m_conductionIons[i].ptloc.v.z * 0.1 + m_cZ;
+  t = m_conductionIons[i].time;
   return true;
 }
 
@@ -505,8 +522,18 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
                                        const double e0, const double dx0,
                                        const double dy0, const double dz0,
                                        int& nel) {
+  int ni = 0;
+  return TransportDeltaElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, nel, ni);
+}
+
+void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
+                                       const double z0, const double t0,
+                                       const double e0, const double dx0,
+                                       const double dy0, const double dz0,
+                                       int& nel, int& ni) {
 
   nel = 0;
+  ni = 0;
 
   // Check if delta electron transport was disabled.
   if (!m_useDelta) {
@@ -515,12 +542,6 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
     return;
   }
 
-  // Make sure the kinetic energy is positive.
-  if (e0 <= 0.) {
-    std::cerr << m_className << "::TransportDeltaElectron:\n"
-              << "    Kinetic energy must be positive.\n";
-    return;
-  }
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
@@ -563,12 +584,12 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << m_className << "::TransportDeltaElectron:\n";
-    std::cerr << "    No medium at initial position.\n";
+    std::cerr << m_className << "::TransportDeltaElectron:\n"
+              << "    No medium at initial position.\n";
     return;
   } else if (!medium->IsIonisable()) {
-    std::cerr << "TrackHeed:TransportDeltaElectron:\n";
-    std::cerr << "    Medium at initial position is not ionisable.\n";
+    std::cerr << "TrackHeed:TransportDeltaElectron:\n"
+              << "    Medium at initial position is not ionisable.\n";
     m_ready = false;
     return;
   }
@@ -593,6 +614,18 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   m_deltaElectrons.clear();
   m_conductionElectrons.clear();
   m_conductionIons.clear();
+
+  // Initial position (shift with respect to bounding box center and
+  // convert from cm to mm).
+  Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
+
+  // Make sure the kinetic energy is positive.
+  if (e0 <= 0.) {
+    // Just create a conduction electron on the spot.
+    m_conductionElectrons.push_back(Heed::HeedCondElectron(p0, t0));
+    nel = 1;
+    return;
+  }
 
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
@@ -619,10 +652,6 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   double speed = Heed::CLHEP::c_light * beta;
   velocity = velocity * speed;
 
-  // Initial position (shift with respect to bounding box center and
-  // convert from cm to mm).
-  Heed::point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
-
   // Transport the electron.
   std::vector<Heed::gparticle*> secondaries;
   Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0, &m_fieldMap);
@@ -632,15 +661,27 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
     if (*it) delete *it;
   } 
   m_conductionElectrons.swap(delta.conduction_electrons);
+  m_conductionIons.swap(delta.conduction_ions);
   nel = m_conductionElectrons.size();
+  ni = m_conductionIons.size();
 }
 
 void TrackHeed::TransportPhoton(const double x0, const double y0,
                                 const double z0, const double t0,
                                 const double e0, const double dx0,
                                 const double dy0, const double dz0, int& nel) {
+  int ni = 0;
+  TransportPhoton(x0, y0, z0, t0, e0, dx0, dy0, dz0, nel, ni);
+}
+
+void TrackHeed::TransportPhoton(const double x0, const double y0,
+                                const double z0, const double t0,
+                                const double e0, const double dx0,
+                                const double dy0, const double dz0, 
+                                int& nel, int& ni) {
 
   nel = 0;
+  ni = 0;
 
   // Make sure the energy is positive.
   if (e0 <= 0.) {
@@ -767,6 +808,9 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
         m_conductionElectrons.insert(m_conductionElectrons.end(), 
                                      delta->conduction_electrons.begin(),
                                      delta->conduction_electrons.end());
+        m_conductionIons.insert(m_conductionIons.end(), 
+                                delta->conduction_ions.begin(),
+                                delta->conduction_ions.end());
       } else {
         // Add the delta electron to the list, for later use.
         deltaElectron newDeltaElectron;
@@ -794,6 +838,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
 
   // Get the total number of electrons produced in this step.
   nel = m_useDelta ? m_conductionElectrons.size() : m_deltaElectrons.size();
+  ni = m_conductionIons.size();
 }
 
 void TrackHeed::EnableElectricField() { m_fieldMap.UseEfield(true); }

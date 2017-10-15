@@ -64,7 +64,7 @@ class HeedMatterDef : public RegPassivePtr {
   double min_ioniz_pot;
 
   /// Default constructor.
-  HeedMatterDef(void);
+  HeedMatterDef();
   /// Constructor.
   /// If fW == 0.0, the program takes mean W from
   /// molecules for gas or from atoms for matters.
@@ -93,7 +93,7 @@ class HeedMatterDef : public RegPassivePtr {
 
  private:
   // Initialization after assignment of matter and apacs
-  void inite_HeedMatterDef(void);
+  void inite_HeedMatterDef();
 };
 }
 

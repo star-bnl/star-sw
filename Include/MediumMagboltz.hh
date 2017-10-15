@@ -14,7 +14,7 @@ class MediumMagboltz : public MediumGas {
   // Constructor
   MediumMagboltz();
   // Destructor
-  ~MediumMagboltz() {}
+  virtual ~MediumMagboltz() {}
 
   // Set/get the highest electron energy to be included
   // in the scattering rates table
@@ -147,7 +147,8 @@ class MediumMagboltz : public MediumGas {
   double fitLineCut;
 
  private:
-  static const int nEnergySteps = 20000;
+  // static const int nEnergySteps = 20000;
+  static const int nEnergySteps = 20;
   static const int nEnergyStepsLog = 200;
   static const int nEnergyStepsGamma = 5000;
   static const int nMaxInelasticTerms = 250;

@@ -17,8 +17,12 @@ namespace Heed {
 using CLHEP::c_light;
 using CLHEP::c_squared;
 
-mparticle::mparticle(gparticle const& gp, double fmass)
-    : gparticle(gp), mass(fmass) {
+mparticle::mparticle(manip_absvol* primvol, const point& pt, const vec& vel,
+                     vfloat time, double fmass) 
+    : gparticle(primvol, pt, vel, time),
+      mass(fmass) {
+
+  mfunname("mparticle::mparticle(...)");
 
   orig_gamma_1 = lorgamma_1(origin.speed / c_light);
   orig_kin_energy = orig_gamma_1 * mass * c_squared;
@@ -26,55 +30,6 @@ mparticle::mparticle(gparticle const& gp, double fmass)
   prev_kin_energy = prev_gamma_1 * mass * c_squared;
   curr_gamma_1 = lorgamma_1(currpos.speed / c_light);
   curr_kin_energy = curr_gamma_1 * mass * c_squared;
-}
-
-mparticle::mparticle(gparticle const& gp, double fmass, double gamma_1)
-    : gparticle(gp),
-      mass(fmass),
-      orig_gamma_1(gamma_1),
-      prev_kin_energy(0.0),
-      prev_gamma_1(0.0),
-      curr_gamma_1(gamma_1) {
-
-  curr_kin_energy = curr_gamma_1 * mass * c_squared;
-  orig_kin_energy = curr_kin_energy;
-  check_consistency();
-}
-
-mparticle::mparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-                     vfloat time, double fmass, double gamma_1)
-    : gparticle(),
-      mass(fmass),
-      orig_gamma_1(gamma_1),
-      prev_kin_energy(0.0),
-      prev_gamma_1(0.0),
-      curr_gamma_1(gamma_1) {
-
-  mfunname("mparticle::mparticle(...)");
-  primvol->m_find_embed_vol(pt, vel, &origin.tid);
-  origin.pt = pt;
-  if (vel == dv0) {
-    check_econd11(gamma_1, != 0.0, mcerr);
-    origin.dir = dv0;
-    origin.speed = 0.0;
-  } else {
-    origin.dir = unit_vec(vel);
-    origin.speed = c_light * lorbeta(gamma_1);
-  }
-  origin.ptloc = origin.pt;
-  origin.tid.up_absref(&origin.ptloc);
-  origin.dirloc = origin.dir;
-  origin.tid.up_absref(&origin.dirloc);
-  origin.time = time;
-  origin.sb = 0;
-  origin.s_ent = 1;
-  if (origin.tid.eid.empty()) return;
-  s_life = true;
-  currpos = origin;
-  nextpos = currpos;
-  nextpos.s_ent = 0;
-  curr_kin_energy = curr_gamma_1 * mass * c_squared;
-  orig_kin_energy = curr_kin_energy;
   check_consistency();
 }
 
