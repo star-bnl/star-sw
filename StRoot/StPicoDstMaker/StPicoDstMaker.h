@@ -87,7 +87,7 @@ private:
   void fillEventHeader() const; //changes "global" variable, not this maker
 
   //for writing
-  void fillTracks();
+  Int_t fillTracks(); // iok != 0 skip event
   void fillEvent();
   void fillEmcTrigger();
   void fillMtdTrigger();

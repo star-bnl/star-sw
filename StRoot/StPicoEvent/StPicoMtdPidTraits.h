@@ -63,13 +63,13 @@ private:
   Short_t   mTrackIndex;            ///< Index to the associated track in the event
   Short_t   mMtdHitIndex;           ///< Index to the associated MTD hit in the event
   Char_t    mMatchFlag;             ///< Matching flag indicating multiple matches
-  Float_t   mDeltaY;                ///< DeltaY between matched track-hit pair
-  Float_t   mDeltaZ;                ///< DeltaZ between matched track-hit pair
-  Float_t   mDeltaTimeOfFlight;     ///< Difference between measured and expected time-of-flight
-  Float_t   mBeta;                  ///< Beta of matched tracks
+  Float16_t mDeltaY;                ///< DeltaY between matched track-hit pair
+  Float16_t mDeltaZ;                ///< DeltaZ between matched track-hit pair
+  Float16_t mDeltaTimeOfFlight;     ///< Difference between measured and expected time-of-flight
+  Float16_t mBeta;                  //[0,2]| //< Beta of matched tracks
   Short_t   mMtdHitChan;            ///< (backleg-1) * 60 + (module-1) * 12 + cell
 
-  ClassDef(StPicoMtdPidTraits, 1)
+  ClassDef(StPicoMtdPidTraits, 2)
 };
 inline Int_t    StPicoMtdPidTraits::trackIndex()        const { return mTrackIndex; }
 inline Int_t    StPicoMtdPidTraits::mtdHitIndex()       const { return mMtdHitIndex; }

@@ -24,7 +24,7 @@ void StPicoEpdFiller::fill(const StMuDst& muDst)
 
   StMuEvent *Event = muDst.event();
   StTriggerData *trg = const_cast<StTriggerData *>(Event->triggerData());
-
+  if (trg) {
   int nTiles = 0;
 
   // Loop over EPD tiles
@@ -45,6 +45,7 @@ void StPicoEpdFiller::fill(const StMuDst& muDst)
       DetectorSide EW = DetectorSide::East; // always East for 2017
       new((*mTileCollection)[nTiles++]) StPicoEpdTile(positionId, tileId, EW, ADC, TAC, TDC, hasTAC);
     }
+  }
   }
 }
 

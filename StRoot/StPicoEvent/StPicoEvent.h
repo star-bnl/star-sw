@@ -21,8 +21,9 @@ public:
   Float_t  bField() const;
   Int_t    time() const;
 
-  StThreeVectorF const& primaryVertex() const;
-  StThreeVectorF const& primaryVertexError() const;
+  StThreeVectorF primaryVertex() const {return StThreeVectorF(mPrimaryVertex);}
+  StThreeVectorF primaryVertexError() const {return StThreeVectorF(mPrimaryVertexError);}
+  StThreeVectorF primaryVertexCorr() const {return StThreeVectorF(mPrimaryVertexCorr);}
   Float_t               ranking() const;
   UShort_t              nBEMCMatch() const;
   UShort_t              nBTOFMatch() const;
@@ -115,8 +116,9 @@ protected:
 
   Int_t    mTime;//To set timestamp for St_db_Maker. This is what StMuDstMaker used to GetEvtHddr()->SetGMTime(cast into unsigned int). Peifeng Liu
 
-  StThreeVectorF mPrimaryVertex;
-  StThreeVectorF mPrimaryVertexError;
+  Float16_t mPrimaryVertex[3];      //[-200,200,24]|
+  Float16_t mPrimaryVertexError[3]; //[0,10,16]|
+  Float16_t mPrimaryVertexCorr[3];  //[-1,1,16]|
   Float_t  mRanking;
   UShort_t mNBEMCMatch;
   UShort_t mNBTOFMatch;
@@ -180,7 +182,7 @@ protected:
   // Online JP thresholds BEMC only
   UChar_t  mJetPatchThreshold[4];
 
-  ClassDef(StPicoEvent, 1)
+  ClassDef(StPicoEvent, 2)
 };
 
 
@@ -190,8 +192,6 @@ inline Int_t    StPicoEvent::fillId() const { return (Int_t)mFillId; }
 inline Float_t  StPicoEvent::bField() const { return mBField; }
 inline Int_t    StPicoEvent::time() const { return mTime; }
 
-inline StThreeVectorF const & StPicoEvent::primaryVertex() const { return mPrimaryVertex; }
-inline StThreeVectorF const & StPicoEvent::primaryVertexError() const { return mPrimaryVertexError; }
 inline Float_t  StPicoEvent::ranking() const { return mRanking ; }
 inline UShort_t StPicoEvent::nBEMCMatch() const { return mNBEMCMatch ; }
 inline UShort_t StPicoEvent::nBTOFMatch() const { return mNBTOFMatch ; }

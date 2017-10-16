@@ -6,18 +6,15 @@
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 #include "StPicoEvent/StPicoTrack.h"
+#include "StBichsel/StdEdxPull.h"
 
 
 //----------------------------------------------------------------------------------
 StPicoTrack::StPicoTrack() : TObject(),
 			     mId(0),
 			     mChi2(1000),
-			     mPMomentum{}, mGMomentum{}, mOrigin{},
-			     mDedx(0.), mDnDx(0.), mDnDxError(0.), mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
-			     mNSigmaPion(1000),
-			     mNSigmaKaon(1000),
-			     mNSigmaProton(1000),
-			     mNSigmaElectron(1000),
+			     mPMomentum{}, 
+			     mDedx(0.), mDedxError(0.), mDnDx(0.), mDnDxError(0.), mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
 			     mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1), mMtdPidTraitsIndex(-1) 
 {
 }
@@ -67,20 +64,9 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   //  b.Print("");
   //  for (int i = 0; i < 15; i++) mErrMatrix[i] = errMatrix[i];
   
-  // Calculate global momentum and position at point of DCA to the pVtx
-  StPhysicalHelixD gHelix = dcaG.helix();
-  gHelix.moveOrigin(gHelix.pathLength(pVtx));
-  StThreeVectorF GMomentum = gHelix.momentum(B * kilogauss);
-  mGMomentum[0] =  GMomentum.x();
-  mGMomentum[1] =  GMomentum.y();
-  mGMomentum[2] =  GMomentum.z();
-  
-  StThreeVectorF Origin = gHelix.origin();
-  mOrigin[0] = Origin.x();
-  mOrigin[1] = Origin.y();
-  mOrigin[2] = Origin.z();
 
   mDedx      = gTrk->dEdx() * 1.e6;
+  mDedxError = gTrk->probPidTraits().dEdxErrorFit();
   mDnDx      = gTrk->probPidTraits().dNdxFit();
   mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
   int flag = gTrk->flag();
@@ -104,10 +90,6 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   }
   mNHitsDedx = (Char_t)(gTrk->nHitsDedx());
   mCharge    = (Char_t)(gTrk->charge());
-  mNSigmaPion     = TMath::Abs(gTrk->nSigmaPion())     > 1000 ? 1000 : gTrk->nSigmaPion();
-  mNSigmaKaon     = TMath::Abs(gTrk->nSigmaKaon())     > 1000 ? 1000 : gTrk->nSigmaKaon();
-  mNSigmaProton   = TMath::Abs(gTrk->nSigmaProton())   > 1000 ? 1000 : gTrk->nSigmaProton();
-  mNSigmaElectron = TMath::Abs(gTrk->nSigmaElectron()) > 1000 ? 1000 : gTrk->nSigmaElectron();
 
   mTopologyMap[0] = (UInt_t)(gTrk->topologyMap().data(0));
   mTopologyMap[1] = (UInt_t)(gTrk->topologyMap().data(1));
@@ -141,3 +123,24 @@ StDcaGeometry StPicoTrack::dcaGeometry() const {
   a.set(mPar, errMatrix);
   return a;
 }      
+//________________________________________________________________________________
+Float_t StPicoTrack::dEdxPull(Float_t mass, UChar_t fit, Int_t charge) const {
+  Float_t z = -999.;
+  Float_t momentum  = gMom().mag();
+  Float_t betagamma = momentum*TMath::Abs(charge)/mass;
+  Float_t dedx_measured, dedx_resolution = -1;
+  if (! fit) { // I70
+    dedx_measured = 1e-6*dEdx();
+    dedx_resolution = dEdxError();
+  } else if ( fit == 1) {     // Ifit
+    dedx_measured = 1e-6*dEdx();
+    dedx_resolution = dEdxError();
+  } else {     // dNdx
+    dedx_measured = dNdx();
+    dedx_resolution = dNdxError();
+  }
+  if (dedx_resolution <= 0) return z;
+  z = StdEdxPull::Eval(dedx_measured,dedx_resolution,betagamma,fit,1,charge);
+  return z;
+}
+//________________________________________________________________________________
