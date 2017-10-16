@@ -1,48 +1,36 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.h,v 2.5 2017/10/13 20:14:26 ullrich Exp $
+ * $Id: StTriggerData2018.h,v 2.1 2017/10/13 20:10:17 ullrich Exp $
  *
- * Author: Akio Ogawa, Dec 2016
+ * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
  *
- * Description:  Concrete implementation of StTriggerData for 2017.
+ * Description:  Concrete implementation of StTriggerData for 2018.
  *
  ***************************************************************************
  *
- * $Log: StTriggerData2017.h,v $
- * Revision 2.5  2017/10/13 20:14:26  ullrich
- * Added access fct epdADC() and epdTDC().
- *
- * Revision 2.4  2017/05/30 15:59:14  ullrich
- * Added bbcTDC5bit() method.
- *
- * Revision 2.3  2017/05/13 00:59:54  ullrich
- * Added bbcBB101() and bbcBB102().
- *
- * Revision 2.2  2016/12/15 16:30:08  ullrich
- * Updates from Jeff.
- *
- * Revision 2.1  2016/12/08 18:58:29  ullrich
+ * $Log: StTriggerData2018.h,v $
+ * Revision 2.1  2017/10/13 20:10:17  ullrich
  * Initial Revision.
  *
  *
  **************************************************************************/
-#ifndef StTriggerData2017_hh
-#define StTriggerData2017_hh
+#ifndef StTriggerData2018_hh
+#define StTriggerData2018_hh
 
 #include "StTriggerData.h"
-#include "StDaqLib/TRG/trgStructures2017.h"
+#include "StDaqLib/TRG/trgStructures2018.h"
 
-class StTriggerData2017 : public StTriggerData {
+class StTriggerData2018 : public StTriggerData {
     
 public:
-    StTriggerData2017();
-    StTriggerData2017(const TriggerDataBlk2017* data, int run);
-    StTriggerData2017(const TriggerDataBlk2017* data, int run, int bs, int dbg=0);
-    ~StTriggerData2017();
+    StTriggerData2018();
+    StTriggerData2018(const TriggerDataBlk2018* data, int run);
+    StTriggerData2018(const TriggerDataBlk2018* data, int run, int bs, int dbg=0);
+    ~StTriggerData2018();
     
     void readData() {readData(0,0);}
-    void readData(const TriggerDataBlk2017* data, int bs);
+    void readData(const TriggerDataBlk2018* data, int bs);
     void dump() const;  //dump data into text
     
     // Versison and data type information
@@ -129,11 +117,11 @@ public:
     unsigned int*  QTdata(int prepost=0) const;    
     unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
-    
+
     //EPD
     unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
-
+    
     //ZDC
     bool zdcPresent(int prepost=0) const;
     unsigned short zdcAtChannel(int channel, int prepost=0) const;
@@ -213,7 +201,7 @@ public:
     
     // Experts only
     char*                getTriggerStructure();
-    TriggerDataBlk2017*  getTriggerStructure2017();  
+    TriggerDataBlk2018*  getTriggerStructure2018();  
     int                  getRawSize() const;
     
     unsigned char*  getDsm0_BEMCE(int prepost=0) const;
@@ -236,50 +224,50 @@ public:
     void killFMS();
     
 protected:
-    TriggerDataBlk2017 *mData;
+    TriggerDataBlk2018 *mData;
     
-    EvtDescData2017*  EvtDesc;  //!
-    L1_DSM_Data2017*  L1_DSM;   //!
-    TrgSumData2017*   TrgSum;   //!
-    BELayerBlock2017* mBC1[11]; //!
-    QTBlock2017*      mMXQ[11];	//!
-    MIXBlock2017*     mMIX[11];	//!
-    BWestBlock2017*   mBCW[11];	//!
-    BEastBlock2017*   mBCE[11];	//!
-    QTBlock2017*      mEPQ[11];	//!
-    BBCBlock2017*     mBBC[11];	//!
-    QTBlock2017*      mBBQ[11];	//!
-    FMSBlock2017*     mFMS[11];	//!
-    QTBlock2017*      mQT1[11];	//!
-    QTBlock2017*      mQT2[11];	//!
-    QTBlock2017*      mQT3[11];	//!
-    QTBlock2017*      mQT4[11];	//!
-    QTBlock2017*      mFQ1[11];	//!
-    QTBlock2017*      mFQ2[11];	//!
-    unsigned short mxq[11][16][32],epq[11][16][32],bbq[11][16][32],qt1[11][16][32],qt2[11][16][32],qt3[11][16][32],qt4[11][16][32],       
-   	fq1[11][16][32],fq2[11][16][32]; //!
-    unsigned char tmxq[11][16][32],tepq[11][16][32],tbbq[11][16][32],tqt1[11][16][32],tqt2[11][16][32],tqt3[11][16][32],tqt4[11][16][32],
-   	tfq1[11][16][32],tfq2[11][16][32]; //!
+    EvtDescData2018*  EvtDesc;  //!
+    L1_DSM_Data2018*  L1_DSM;   //!
+    TrgSumData2018*   TrgSum;   //!
+    BELayerBlock2018* mBC1[11]; //!
+    QTBlock2018*      mMXQ[11];	//!
+    MIXBlock2018*     mMIX[11];	//!
+    BWestBlock2018*   mBCW[11];	//!
+    BEastBlock2018*   mBCE[11];	//!
+    QTBlock2018*      mEQ3[11];	//!
+    BBCBlock2018*     mBBC[11];	//!
+    QTBlock2018*      mBBQ[11];	//!
+    FMSBlock2018*     mFMS[11];	//!
+    QTBlock2018*      mQT1[11];	//!
+    QTBlock2018*      mQT2[11];	//!
+    QTBlock2018*      mQT3[11];	//!
+    QTBlock2018*      mQT4[11];	//!
+    QTBlock2018*      mEQ1[11];	//!
+    QTBlock2018*      mEQ2[11];	//!
+    unsigned short mxq[11][16][32],eq3[11][16][32],bbq[11][16][32],qt1[11][16][32],qt2[11][16][32],qt3[11][16][32],qt4[11][16][32],
+    eq1[11][16][32],eq2[11][16][32]; //!
+    unsigned char tmxq[11][16][32],teq3[11][16][32],tbbq[11][16][32],tqt1[11][16][32],tqt2[11][16][32],tqt3[11][16][32],tqt4[11][16][32],
+    teq1[11][16][32],teq2[11][16][32]; //!
     
     
-    void swapOfflen(TrgOfflen2017* offlen);
-    void swapDataBlk(TriggerDataBlk2017* TrgData);
-    void swapEvtDesc(EvtDescData2017* EvtDesc);
-    void swapL1_DSM(L1_DSM_Data2017* L1_DSM);
-    void swapTrgSum(TrgSumData2017* TrgSum);
-    void swapRawDetOfflen(TrgOfflen2017* offlen);
-    void swapRawDet(DataBlock2017* data, int name, int hlength, int bs);
+    void swapOfflen(TrgOfflen2018* offlen);
+    void swapDataBlk(TriggerDataBlk2018* TrgData);
+    void swapEvtDesc(EvtDescData2018* EvtDesc);
+    void swapL1_DSM(L1_DSM_Data2018* L1_DSM);
+    void swapTrgSum(TrgSumData2018* TrgSum);
+    void swapRawDetOfflen(TrgOfflen2018* offlen);
+    void swapRawDet(DataBlock2018* data, int name, int hlength, int bs);
     
-    ClassDef(StTriggerData2017,1) 
+    ClassDef(StTriggerData2018,1) 
 };
 
-inline void StTriggerData2017::swapOfflen(TrgOfflen2017* offlen)
+inline void StTriggerData2018::swapOfflen(TrgOfflen2018* offlen)
 {
     swapI((unsigned int*)&offlen->offset);
     swapI((unsigned int*)&offlen->length);
 }
 
-inline void StTriggerData2017::swapDataBlk(TriggerDataBlk2017 *TrgData)
+inline void StTriggerData2018::swapDataBlk(TriggerDataBlk2018 *TrgData)
 {
     swapI((unsigned int*)&TrgData->FormatVersion);
     swapI((unsigned int*)&TrgData->totalTriggerLength);
@@ -290,29 +278,29 @@ inline void StTriggerData2017::swapDataBlk(TriggerDataBlk2017 *TrgData)
     swapIn((unsigned int*)TrgData->PrePostList,10);
 }
 
-inline void StTriggerData2017::swapEvtDesc(EvtDescData2017* EvtDesc)
+inline void StTriggerData2018::swapEvtDesc(EvtDescData2018* EvtDesc)
 {
     swapIn((unsigned int*)&EvtDesc->length,3);
     swapSCC((unsigned int*)&EvtDesc->actionWdDetectorBitMask);
     swapSSn((unsigned int*)&EvtDesc->TrgToken,12);
 }
 
-inline void StTriggerData2017::swapL1_DSM(L1_DSM_Data2017* L1_DSM)
+inline void StTriggerData2018::swapL1_DSM(L1_DSM_Data2018* L1_DSM)
 {
     swapI((unsigned int*)&L1_DSM->length);
     swapSSn((unsigned int*)L1_DSM->TOF,16+8*7);
 }
 
-inline void StTriggerData2017::swapTrgSum(TrgSumData2017* TrgSum)
+inline void StTriggerData2018::swapTrgSum(TrgSumData2018* TrgSum)
 {
     swapIn((unsigned int*)&TrgSum->length,1+2+2+32+64+64);
 }
 
-inline void StTriggerData2017::swapRawDetOfflen(TrgOfflen2017* offlen)
+inline void StTriggerData2018::swapRawDetOfflen(TrgOfflen2018* offlen)
 {
     int i;
-    for (i=0; i<y17MAX_OFFLEN; i++) { 
-        swapOfflen(&offlen[i]); 
+    for (i=0; i<y18MAX_OFFLEN; i++) {
+        swapOfflen(&offlen[i]);
         if (mDebug>0) printf("Offlen id=%2d offset=%d length=%d\n", i, offlen[i].offset, offlen[i].length);
     }
 }

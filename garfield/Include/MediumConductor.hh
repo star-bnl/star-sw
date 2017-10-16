@@ -16,7 +16,7 @@ class MediumConductor : public Medium {
     m_name = "Conductor";
   }
   /// Destructor
-  ~MediumConductor() {}
+  virtual ~MediumConductor() {}
 
   void EnableDrift() {}
   void EnableIonisation() {}

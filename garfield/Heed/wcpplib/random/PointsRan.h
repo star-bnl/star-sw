@@ -25,10 +25,13 @@ class PointsRan {
  private:
   double xmin;            // is changed internally
   double xmax;            // is changed internally
-  std::vector<double> x;  // x[0] is changed to xmin or that of zero
-                          // interpolated y,
-                          // x[q-1] to xmax or similarly zero y
-  std::vector<double> y;  // y[0] and y[q-1] are recalculated correspondingly
+
+  // x[0] is changed to xmin or that of zero interpolated y,
+  // x[q-1] to xmax or similarly zero y.
+  // y[0] and y[q-1] are recalculated correspondingly
+  std::vector<double> x;  
+  std::vector<double> y;  
+
   /// Integrated minus initial level at xmin
   std::vector<double> iy;
   std::vector<double> a;
@@ -40,21 +43,29 @@ class PointsRan {
   int n_finish;
 
  public:
-  PointsRan(void) {}
+  PointsRan() {}
+
+  /** Constructor
+    * \param fx
+             x values
+    * \param fy
+             y values
+    * \param fxmin
+             Minimum of generated distribution. If less then x[0], 
+             extend the distribution by linear extrapolation.
+             If the extrapolated line crosses zero, the extension stops there.
+             Otherwise it stops at fxmin.
+    * \param fxmax
+             Maximum of generated distribution. If greater than x[q-1], 
+             extend the distribution by linear extrapolation.
+    **/
   PointsRan(const std::vector<double>& fx, const std::vector<double>& fy,
-            double fxmin,   // minimum of generated distribution
-            double fxmax);  // maximum of generated distribution
-  // If minimum is less then x[0], the distribution is extended
-  // by linear extrapolation.
-  // If the extrapolated line crosses zero, the extension stops right there.
-  // Otherwise it stops at fxmin.
-  // The same is done when xmax is more than x[q-1].
-  // Thus xmin and xmax affects the shape of distribution and its integral.
+            double fxmin, double fxmax);  
 
   double ran(double flat_ran) const;
-  double get_integ_total(void) const { return integ_total; }
+  double get_integ_total() const { return integ_total; }
   // actual integral of active distribution
-  double get_integ_active(void) const { return integ_active; }
+  double get_integ_active() const { return integ_active; }
   void print(std::ostream& file) const;
 };
 }

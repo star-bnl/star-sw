@@ -100,56 +100,58 @@ class absref {
 // Contains three methods of transmission, the fastest, slower and the slowest
 class absref_transmit {
  public:
-  // For transmiting the members of the class, when
-  // their relative addresses are avalable:
-  int qaref;  // number of vector objects which are the members of the class
-  absref(absref::** aref);  // reference to address of array
-                            // containing their relative addresses
-                            // as class members.
-  // When the relative addresses are not available, in particular
-  // when the component object is located in heap memory:
-  int qaref_pointer;      // number of vector objects
-  absref** aref_pointer;  // reference to address of array
-                          // containing addresses of objects.
-
-  // For any method of the object location the pointers can also be
-  // transmitted through the function get_other(int n)
-  // which receive the index of requested object and returns its address.
-  // For this the user should determine the class derived
-  // from absref_transmit. This is the most slow method of transmittion.
-  int qaref_other;  // objects available though virtual function GetOther
-
-  absref_transmit(void) : qaref(0), qaref_pointer(0), qaref_other(0) { ; }
+  absref_transmit() : qaref(0), qaref_pointer(0), qaref_other(0) {}
+  // For transmitting the members of the class, when
+  // their relative addresses are available.
   absref_transmit(int fqaref, absref absref::** faref)
-      : qaref(fqaref), aref(faref), qaref_pointer(0), qaref_other(0) {
-    ;
-  }
+      : qaref(fqaref), aref(faref), qaref_pointer(0), qaref_other(0) {}
   absref_transmit(int fqaref_pointer, absref** faref_pointer)
       : qaref(0),
         qaref_pointer(fqaref_pointer),
         aref_pointer(faref_pointer),
-        qaref_other(0) {
-    ;
-  }
+        qaref_other(0) {}
   absref_transmit(int fqaref, absref absref::** faref, int fqaref_pointer,
                   absref** faref_pointer)
       : qaref(fqaref),
         aref(faref),
         qaref_pointer(fqaref_pointer),
         aref_pointer(faref_pointer),
-        qaref_other(0) {
-    ;
-  }
+        qaref_other(0) {}
+
   absref_transmit(const absref_transmit& f) { *this = f; }
+  /// Destructor
+  virtual ~absref_transmit() {}
+
   virtual void print(std::ostream& file, int l) const;
   virtual absref_transmit* copy() const { return new absref_transmit(*this); }
 
-  /// This function is meant to be redefined in derived class to
+  /// Number of vector objects which are the members of the class
+  int qaref;  
+  /// Reference to address of array containing their relative addresses
+  /// as class members.
+  absref(absref::** aref);  
+
+  // When the relative addresses are not available, in particular
+  // when the component object is located in heap memory:
+  // Number of vector objects
+  int qaref_pointer;      
+
+  // Reference to address of array containing addresses of objects.
+  absref** aref_pointer;  
+
+  // For any method of the object location the pointers can also be
+  // transmitted through the function get_other(int n)
+  // which receive the index of requested object and returns its address.
+  // For this the user should determine the class derived
+  // from absref_transmit. This is the slowest method of transmission.
+
+  /// Number of objects available though virtual function GetOther.
+  int qaref_other;  
+  /// This function is meant to be redefined in derived classes to
   /// obtain additional address except those contained in aref and aref_pointer.
   /// This default version always returns NULL.
   virtual absref* get_other(int n);
-  /// Destructor
-  virtual ~absref_transmit() {}
+
 };
 
 #define ApplyAnyFunctionToVecElements(func)                       \
@@ -183,7 +185,48 @@ class absref_transmit {
 
 class vec : public absref {
  public:
+  /// Constructor.
+  vec(vfloat xx, vfloat yy, vfloat zz) {
+    x = xx;
+    y = yy;
+    z = zz;
+  }
+  /// Default constructor.
+  vec() {
+    x = 0;
+    y = 0;
+    z = 0;
+  }
+  /// Destructor
+  virtual ~vec() {}
+ 
   vfloat x, y, z;
+
+  vfloat length() const { return sqrt(x * x + y * y + z * z); }
+  vfloat length2() const { return x * x + y * y + z * z; }
+
+  vec down_new(const basis* fabas);
+  void down(const basis* fabas);
+  vec up_new(const basis* fabas_new);
+  void up(const basis* fabas_new);
+  vec down_new(const abssyscoor* fasc);
+  void down(const abssyscoor* fasc);
+  vec up_new(const abssyscoor* fasc);
+  void up(const abssyscoor* fasc);
+
+  // make new turned vector and leave this unchanged
+  vec turn_new(const vec& dir, vfloat angle);
+  /// Turn this vector
+  void turn(const vec& dir, vfloat angle);
+  void shift(const vec& dir);
+
+  /// Generate random unit vector in plane perpendicular to z-axis.
+  void random_round_vec();
+  /// Generate random unit vector in any direction in conus
+  /// with symmetry axis along z-axis and with angle theta (radian).
+  void random_conic_vec(double theta);
+  // Generate random unit vector in any direction in 3D space.
+  void random_sfer_vec();
 
   friend vec operator*(const vec& v, vfloat p) {
     return vec(v.x * p, v.y * p, v.z * p);
@@ -227,17 +270,10 @@ class vec : public absref {
   friend inline int operator==(const vec& r1, const vec& r2);
   /// Return 0 if precisely the same vectors and 1 otherwise.
   friend inline int operator!=(const vec& r1, const vec& r2);
-  /// Return 1 if approximately the same vectors and 0 otherwise.
-  /// Thus r2 may be is cube with side 2*prec with center marked by r1.
-  friend inline int apeq(const vec& r1, const vec& r2, vfloat prec);
-  /// Return 0 if approximately the same vectors and 1 otherwise.
-  friend inline int not_apeq(const vec& r1, const vec& r2, vfloat prec);
-  friend vfloat length(const vec& v) {
-    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-  }
-  friend vfloat length2(const vec& v) {
-    return (v.x * v.x + v.y * v.y + v.z * v.z);
-  }
+
+  /// Return true if two vectors are approximately the same.
+  friend inline bool apeq(const vec& r1, const vec& r2, vfloat prec);
+
   friend inline vec unit_vec(const vec& v);
   // cosinus of angle between vectors
   // If one of vectors has zero length, it makes vecerror=1 and returns 0.
@@ -253,58 +289,22 @@ class vec : public absref {
   // sinus of angle between vectors, 0 or positive.
   // If one of vectors has zero length, it makes vecerror=1.
   friend vfloat sin2vec(const vec& r1, const vec& r2);
-  // check whether the vectors are parallel, or anti-parallel.
-  // returns: 1 - parallel, -1  - antiparallel, 0 not parallel
-  // 0 if one or both vectors have zero length
-  // Thus, if angle between vectors < prec, they are parallel
+
+  /// Check whether two vectors are parallel, or anti-parallel.
+  /// Returns: 1 - parallel, -1  - antiparallel, 0 not parallel.
+  /// Also returns 0 if one or both vectors have zero length.
+  /// Thus, if angle between vectors < prec, they are parallel.
   friend inline int check_par(const vec& r1, const vec& r2, vfloat prec);
-  // check whether the vectors are perpendicular.
-  // returns: 1 perpendicular, 0 not perpendicular.
-  // also 0 if one or both vectors have zero length
-  // Thus, if angle between vectors
-  // a > 0.5*M_PI - find_max( prec, vprecision )
-  // and a < 0.5*M_PI + find_max( prec, vprecision ), they are perpendicular
+
+  /// Check whether two vectors are perpendicular.
+  /// Returns: 1 perpendicular, 0 not perpendicular.
+  /// Also returns 0 if one or both vectors have zero length.
+  /// Thus, if angle between vectors
+  /// a > 0.5 * M_PI - max(prec, vprecision) and
+  /// a < 0.5 * M_PI + max(prec, vprecision), they are perpendicular.
   friend inline int check_perp(const vec& r1, const vec& r2, vfloat prec);
   friend inline vec switch_xyz(const vec&);  // don't change the vector itself
-  // constructors
-  vec(vfloat xx, vfloat yy, vfloat zz) {
-    x = xx;
-    y = yy;
-    z = zz;
-  }
-  vec() {
-    x = 0;
-    y = 0;
-    z = 0;
-  }
-  /// Destructor
-  virtual ~vec() {}
-  vec down_new(const basis* fabas);
-  void down(const basis* fabas);
-  vec up_new(const basis* fabas_new);
-  void up(const basis* fabas_new);
-  vec down_new(const abssyscoor* fasc);
-  void down(const abssyscoor* fasc);
-  vec up_new(const abssyscoor* fasc);
-  void up(const abssyscoor* fasc);
 
-  // make new turned vector and leave this unchanged
-  vec turn_new(const vec& dir, vfloat angle);
-  // turn this vector
-  void turn(const vec& dir, vfloat angle);
-  void shift(const vec& dir);
-
-  // The following things generate random unit vectors, currently with
-  // the help of SRANLUX.
-
-  // any direction in plane perpendicular to z-axis
-  void random_round_vec(void);
-  // any direction in conus
-  // with symmetry axis along z-axis
-  // and with angle theta (radian)
-  void random_conic_vec(double theta);
-  // any direction in 3-dim.space
-  void random_sfer_vec(void);
 };
 std::ostream& operator<<(std::ostream& file, const vec& v);
 
@@ -315,7 +315,6 @@ extern vec dv0;  // zero vector
 
 #include "wcpplib/geometry/vec.ic"
 
-//             **** basis ****
 /// Basis.
 class basis : public absref {
  protected:
@@ -336,10 +335,10 @@ class basis : public absref {
   vec Gez() const { return ez; }
 
   /// Change ex=ez; ey=ex; ez=ey.
-  basis switch_xyz(void) const;  
+  basis switch_xyz() const;  
 
   /// Nominal basis.
-  basis(void);                   
+  basis();                   
   /// Nominal basis.
   basis(const std::string& pname);    
   /// Longitudinal basis.
@@ -366,7 +365,7 @@ class basis : public absref {
   friend std::ostream& operator<<(std::ostream& file, const basis& b);
   virtual basis* copy() const { return new basis(*this); }
   virtual void print(std::ostream& file, int l) const;
-  virtual ~basis(void) {}
+  virtual ~basis() {}
 };
 extern std::ostream& operator<<(std::ostream& file, const basis& b);
 
@@ -407,11 +406,8 @@ class point : public absref {
   friend int operator!=(const point& p1, const point& p2) {
     return p1.v != p2.v ? 1 : 0;
   }
-  friend int apeq(const point& p1, const point& p2, vfloat prec) {
+  friend bool apeq(const point& p1, const point& p2, vfloat prec) {
     return apeq(p1.v, p2.v, prec);
-  }
-  friend int not_apeq(const point& p1, const point& p2, vfloat prec) {
-    return not_apeq(p1.v, p2.v, prec);
   }
   friend std::ostream& operator<<(std::ostream& file, const point& p);
   virtual point* copy() const { return new point(*this); }
@@ -430,9 +426,9 @@ std::ostream& operator<<(std::ostream& file, const point& p);
 class abssyscoor {
  public:
   std::string name;
-  virtual const point* Gapiv(void) const = 0;
-  virtual const basis* Gabas(void) const = 0;
-  abssyscoor(void) : name("none") {}
+  virtual const point* Gapiv() const = 0;
+  virtual const basis* Gabas() const = 0;
+  abssyscoor() : name("none") {}
   abssyscoor(char* fname) : name(fname) {}
   abssyscoor(const std::string& fname) : name(fname) {}
   virtual void print(std::ostream& file, int l) const;
@@ -443,13 +439,14 @@ extern std::ostream& operator<<(std::ostream& file, const abssyscoor& s);
 
 class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
  public:
-  virtual const point* Gapiv(void) const { return &piv; }
-  virtual const basis* Gabas(void) const { return &bas; }
+  virtual const point* Gapiv() const { return &piv; }
+  virtual const basis* Gabas() const { return &bas; }
   void Ppiv(const point& fpiv);
   void Pbas(const basis& fbas);
-  fixsyscoor(void) {}                                     // nominal system
-  fixsyscoor(char* fname) : abssyscoor(fname) {}          // nominal system
-  fixsyscoor(const std::string& fname) : abssyscoor(fname) {}  // nominal system
+  // nominal system
+  fixsyscoor() {}                                     
+  fixsyscoor(char* fname) : abssyscoor(fname) {}          
+  fixsyscoor(const std::string& fname) : abssyscoor(fname) {}
   fixsyscoor(const point& fpiv, const basis& fbas, const std::string& fname)
       : abssyscoor(fname), piv(fpiv), bas(fbas) {}
   fixsyscoor(const point* const fapiv, const basis* const fabas,

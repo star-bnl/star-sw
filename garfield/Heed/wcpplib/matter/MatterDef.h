@@ -46,18 +46,18 @@ class MatterDef : public AtomMixDef {
   ~MatterDef();
 
   static void printall(std::ostream& file);
-  const std::string& name(void) const { return nameh; }
-  const std::string& notation(void) const { return notationh; }
-  double density(void) const { return densityh; }
-  double temperature(void) const { return temperatureh; }
-  double I_eff(void) const { return I_effh; }
+  const std::string& name() const { return nameh; }
+  const std::string& notation() const { return notationh; }
+  double density() const { return densityh; }
+  double temperature() const { return temperatureh; }
+  double I_eff() const { return I_effh; }
   /// Check that there is no matter with the same name in the container.
-  void verify(void);
+  void verify();
   static void verify(const std::string& fname, const std::string& fnotation);
   /// Initialize the logbook at the first request
   /// and keep it as internal static variable.
-  static std::list<MatterDef*>& get_logbook(void);
-  static const std::list<MatterDef*>& get_const_logbook(void);
+  static std::list<MatterDef*>& get_logbook();
+  static const std::list<MatterDef*>& get_const_logbook();
   /// Return the adress of the matter with this notation if it is registered.
   /// Otherwise return NULL.
   static MatterDef* get_MatterDef(const std::string& fnotation);

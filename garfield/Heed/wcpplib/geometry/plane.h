@@ -57,10 +57,8 @@ class plane : public absref {
   friend int operator!=(const plane& pl1, const plane& pl2) {
     return pl1 == pl2 ? 0 : 1;
   }
-  friend int apeq(const plane& pl1, const plane& pl2, vfloat prec);
-  friend int not_apeq(const plane& pl1, const plane& pl2, vfloat prec) {
-    return apeq(pl1, pl2, prec) ? 0 : 1;
-  }
+  friend bool apeq(const plane& pl1, const plane& pl2, vfloat prec);
+
   int check_point_in(const point& fp, vfloat prec) const;
   // returns 1 if point in the planeCalculates distance
   // and compares it with prec

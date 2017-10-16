@@ -13,7 +13,7 @@ class MediumCdTe : public Medium {
   /// Constructor
   MediumCdTe();
   /// Destructor
-  ~MediumCdTe() {}
+  virtual ~MediumCdTe() {}
 
   bool IsSemiconductor() const { return true; }
 

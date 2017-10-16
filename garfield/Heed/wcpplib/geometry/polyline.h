@@ -18,8 +18,6 @@ The file is provided "as is" without express or implied warranty.
 
 namespace Heed {
 
-// #define vec_polyline_index 5
-
 /// Polyline.
 
 class polyline : public absref {
@@ -30,9 +28,8 @@ class polyline : public absref {
   straight* sl;
 
  public:
-  int Gqpt(void) const { return qpt; }
+  int Gqpt() const { return qpt; }
   point Gpt(int n) const {  
-    // there is no funname line, check directly
     if (n >= qpt) {
       mcerr << "error in polyline:Gpt(int n): n>qpt: n=" << n << " qpt=" << qpt
             << '\n';
@@ -40,7 +37,7 @@ class polyline : public absref {
     }
     return pt[n];
   }
-  int Gqsl(void) const { return qsl; }
+  int Gqsl() const { return qsl; }
   straight Gsl(int n) const {
     if (n >= qsl) {
       mcerr << "error in polyline:Gpt(int n): n>qsl: n=" << n << " qsl=" << qsl
@@ -76,7 +73,7 @@ class polyline : public absref {
 
  protected:
   void polyline_init(const point* fpt, int fqpt);
-  void polyline_del(void) {
+  void polyline_del() {
     if (pt) {
       delete[] pt;
       pt = NULL;
@@ -92,7 +89,7 @@ class polyline : public absref {
   }
 
  public:
-  polyline(void) {
+  polyline() {
     point ptl;
     polyline_init(&ptl, 0);
   }
@@ -105,7 +102,7 @@ class polyline : public absref {
 
   polyline& operator=(const polyline& fpl);
 
-  ~polyline(void) { polyline_del(); }
+  ~polyline() { polyline_del(); }
   friend int plane::cross(const polyline& pll, point* crpt, int& qcrpt,
                           polyline* crpll, int& qcrpll, vfloat prec) const;
   friend std::ostream& operator<<(std::ostream& file, const polyline& p);
@@ -125,14 +122,14 @@ class polyline_pl : public polyline {
   plane pn;
 
  public:
-  plane Gpn(void) const { return pn; }
+  plane Gpn() const { return pn; }
 
  protected:
   static absref(absref::*aref_pl);
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 
  public:
-  polyline_pl(void) : polyline(), pn() { ; }
+  polyline_pl() : polyline(), pn() { ; }
   polyline_pl(const polyline_pl& pl) : polyline(pl), pn(pl.pn) { ; }
   polyline_pl(const plane& fpn, const point* fpt, int fqpt)
       : polyline(fpt, fqpt), pn(fpn) {}
@@ -161,15 +158,13 @@ class polygon : public polyline_pl {
   int range(const point& fpt, const vec& dir, vfloat& rng, point& fptenr,
             vfloat prec) const;
   polygon& operator=(const polygon& fpl);
-  polygon(void) : polyline_pl(), s_convex(0) { ; }
+  polygon() : polyline_pl(), s_convex(0) {}
   polygon(const polygon& plg) : polyline_pl((polyline_pl)plg) {
     s_convex = plg.s_convex;
   }
   polygon(const polyline_pl& fpl, int fs_convex)
       : polyline_pl(fpl), s_convex(fs_convex) {
-    if (fpl.Gqpt() < 4 || fpl.Gpt(0) != fpl.Gpt(qpt - 1)) {  // 4 repeats 1, so
-                                                             // different points
-                                                             // are 3 or more
+    if (fpl.Gqpt() < 4 || fpl.Gpt(0) != fpl.Gpt(qpt - 1)) {  
       mcerr << "ERROR in polygon::polygon(polyline_pl& fpl, int fs_convex)\n";
       mcerr << "fpl.Gqpt() < 4 || fpl.Gpt(0)!=fpl.Gpt(qpt-1)\n";
       spexit(mcerr);
@@ -184,14 +179,18 @@ std::ostream& operator<<(std::ostream& file, const polygon& p);
 
 class rectangle : public polygon {
  public:
-  point piv;      // central point
-  vec dir1;       // directions of sides, unit length
-  vec dir2;       // directions of sides, unit length
-  vfloat dim[2];  // dimensions
-  rectangle(void) : polygon() { ; }
+  /// Central point
+  point piv;      
+  /// Directions of sides, unit length
+  vec dir1;       
+  /// Directions of sides, unit length
+  vec dir2;       
+  // Dimensions
+  vfloat dim[2];  
+  rectangle() : polygon() {}
   rectangle(const point& fpiv, vec fdir[2], vfloat fdim[2], vfloat prec);
   // Prec is used to check that sides are perpendicular and
-  // at initing of the polygon wia straight lines.
+  // at initing of the polygon via straight lines.
  protected:
   static absref(absref::*aref_rct[4]);
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
@@ -205,12 +204,14 @@ class spquadr : public polygon {
  protected:
   point piv;
   vec dir1, dir2;
-  vfloat awidth;  // width of total plane in units of radians
+  /// Width of total plane in units of radians
+  vfloat awidth;  
+
  public:
-  point Gpiv(void) const { return piv; }
-  vec Gdir1(void) const { return dir1; }
-  vec Gdir2(void) const { return dir2; }
-  vfloat Gawidth(void) const { return awidth; }
+  point Gpiv() const { return piv; }
+  vec Gdir1() const { return dir1; }
+  vec Gdir2() const { return dir2; }
+  vfloat Gawidth() const { return awidth; }
 
  protected:
   static absref(absref::*aref_sp[4]);
@@ -240,7 +241,7 @@ class spquadr : public polygon {
   }
   point pt_angle_rad(vfloat rad, vfloat angle);
 
-  spquadr(void) : polygon(), piv(), dir1(), dir2(), awidth(0) {}
+  spquadr() : polygon(), piv(), dir1(), dir2(), awidth(0) {}
 
   spquadr(spquadr& sq);
   spquadr(const spquadr& sq);

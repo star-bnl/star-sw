@@ -16,7 +16,7 @@ class MediumGas : public Medium {
   // Constructor
   MediumGas();
   // Destructor
-  ~MediumGas() {}
+  virtual ~MediumGas() {}
 
   bool IsGas() const { return true; }
 

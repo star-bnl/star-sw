@@ -23,7 +23,7 @@ void AtomDef::printall(std::ostream& file) {
   for (it = logbook.begin(); it != end; ++it) file << (*it);
 }
 
-AtomDef::AtomDef(void) : nameh("none"), notationh("none") {
+AtomDef::AtomDef() : nameh("none"), notationh("none") {
   AtomDef::get_logbook().push_back(this);
 }
 
@@ -64,8 +64,8 @@ AtomDef* AtomDef::get_AtomDef(int fZ) {
   return NULL;
 }
 
-void AtomDef::verify(void) {
-  mfunnamep("void AtomDef::verify(void)");
+void AtomDef::verify() {
+  mfunnamep("void AtomDef::verify()");
   if (nameh == "none" && notationh == "none") return;
   const std::list<AtomDef*>& logbook = AtomDef::get_logbook();
   std::list<AtomDef*>::const_iterator it;
@@ -88,12 +88,12 @@ std::ostream& operator<<(std::ostream& file, const AtomDef& f) {
   return file;
 }
 
-std::list<AtomDef*>& AtomDef::get_logbook(void) {
+std::list<AtomDef*>& AtomDef::get_logbook() {
   static std::list<AtomDef*> logbook;
   return logbook;
 }
 
-const std::list<AtomDef*>& AtomDef::get_const_logbook(void) {
+const std::list<AtomDef*>& AtomDef::get_const_logbook() {
   return AtomDef::get_logbook();
 }
 

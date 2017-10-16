@@ -36,6 +36,7 @@
 #pragma link C++ class StTriggerData2013-;
 #pragma link C++ class StTriggerData2016-;
 #pragma link C++ class StTriggerData2017-;
+#pragma link C++ class StTriggerData2018-;
 
 //IncFile=StDaqLib/TRG/trgStructures.h
 #pragma link C++ class TrgDataType+;
@@ -179,6 +180,21 @@
 #pragma link C++ class BELayerBlock2017+;
 #pragma link C++ class FMSBlock2017+;
 #pragma link C++ class TrgOfflen2017+;
+
+//IncFile=StDaqLib/TRG/trgStructures2018.h
+#pragma link C++ class TriggerDataBlk2018+;
+#pragma link C++ class EvtDescData2018+;
+#pragma link C++ class TrgSumData2018+;
+#pragma link C++ class L1_DSM_Data2018+;
+#pragma link C++ class DataBlock2018+;
+#pragma link C++ class BBCBlock2018+;
+#pragma link C++ class MIXBlock2018+;
+#pragma link C++ class QTBlock2018+;
+#pragma link C++ class BEastBlock2018+;
+#pragma link C++ class BWestBlock2018+;
+#pragma link C++ class BELayerBlock2018+;
+#pragma link C++ class FMSBlock2018+;
+#pragma link C++ class TrgOfflen2018+;
 
 #pragma link C++ function operator<<(ostream&, const StPxlHit&);        
 #pragma link C++ function operator<<(ostream&, const StIstHit&); 

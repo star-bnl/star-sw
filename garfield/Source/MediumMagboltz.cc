@@ -38,7 +38,7 @@ MediumMagboltz::MediumMagboltz()
       m_useGreenSawada(false),
       m_eFinalGamma(20.),
       m_eStepGamma(m_eFinalGamma / nEnergyStepsGamma) {
-
+ 
   fit3d4p = fitHigh4p = 1.;
   fit3dQCO2 = fit3dQCH4 = fit3dQC2H6 = 1.;
   fit3dEtaCO2 = fit3dEtaCH4 = fit3dEtaC2H6 = 0.5;

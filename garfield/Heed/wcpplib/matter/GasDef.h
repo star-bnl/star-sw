@@ -43,16 +43,16 @@ class GasDef : public MatterDef {
   std::vector<double> weight_quan_molech;  // sum is 1
   std::vector<double> weight_mass_molech;  // sum is 1
  public:
-  inline double pressure(void) const { return pressureh; }
-  inline long qmolec(void) const { return qmolech; }
-  inline const std::vector<PassivePtr<MoleculeDef> >& molec(void) const {
+  inline double pressure() const { return pressureh; }
+  inline long qmolec() const { return qmolech; }
+  inline const std::vector<PassivePtr<MoleculeDef> >& molec() const {
     return molech;
   }
   inline PassivePtr<MoleculeDef> molec(long n) const { return molech[n]; }
-  inline const std::vector<double>& weight_quan_molec(void) const {
+  inline const std::vector<double>& weight_quan_molec() const {
     return weight_quan_molech;
   }
-  inline const std::vector<double>& weight_mass_molec(void) const {
+  inline const std::vector<double>& weight_mass_molec() const {
     return weight_mass_molech;
   }
   inline double weight_quan_molec(const long n) const {
@@ -62,9 +62,9 @@ class GasDef : public MatterDef {
     return weight_mass_molech[n];
   }
   /// Mean charge of molecules in this gas
-  double Z_mean_molec(void) const;
+  double Z_mean_molec() const;
 
-  GasDef(void);
+  GasDef();
   // for calculation of density assume ideal gas:
   GasDef(const std::string& fname, const std::string& fnotation, long fqmolec,
          const std::vector<std::string>& fmolec_not,

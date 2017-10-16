@@ -58,7 +58,7 @@ gparticle::gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
     origin.speed = 0.0;
   } else {
     origin.dir = unit_vec(vel);
-    origin.speed = length(vel);
+    origin.speed = vel.length();
   }
   origin.ptloc = origin.pt;
   origin.tid.up_absref(&origin.ptloc);
@@ -224,7 +224,7 @@ void gparticle::print(std::ostream& file, int l) const {
     indn.n += 2;
     currpos.print(file, l);
     Iprint(file, curr_relcen);
-    Ifile << " length(curr_relcen)=" << length(curr_relcen) << '\n';
+    Ifile << " length(curr_relcen)=" << curr_relcen.length() << '\n';
     indn.n -= 2;
   }
   if (l - 3 >= 0) {

@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.30 2017/10/06 15:06:20 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.31 2017/10/10 15:34:00 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.31  2017/10/10 15:34:00  akio
+ * Fix a crashing bug
+ *
  * Revision 1.30  2017/10/06 15:06:20  akio
  * fix a crash
  *
@@ -481,7 +484,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  }
       }
   }else{
-      for(int d=0; d<maxDetectorId(); d++){
+      for(int d=0; d<=maxDetectorId(); d++){
 	  mmBitShiftGain[d] = new fmsBitShiftGain_st [maxChannel(d)]();
 	  for(int c=1; c<=maxChannel(d); c++){
 	      mmBitShiftGain[d][c-1].detectorId=d;

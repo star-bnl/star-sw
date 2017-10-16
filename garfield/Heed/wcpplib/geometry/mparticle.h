@@ -32,66 +32,44 @@ class mparticle : public gparticle {
   double curr_kin_energy;
   double curr_gamma_1;  // gamma-1
 
-  // Check consistency of kin_energy, gamma_1, speed, speed_of_light and mass
-  void check_consistency(void) const;
+  /// Check consistency of kin_energy, gamma_1, speed, speed_of_light and mass.
+  void check_consistency() const;
 
   virtual void step(std::vector<gparticle*>& secondaries);
 
+  /// Set curvature. Calls force().
+  /// If force is zero, returns fs_cf=0; frelcen=dv0;
+  /// If force is zero, and currpos.dir==dv0, makes, in addition,  fmrange=0;
+  /// If currpos.dir==dv0, makes currpos.dir=unit_vec(f);
+  /// If force is parallel or anti-parallel to dir, makes fs_cf=0; frelcen=dv0;
+  /// If force is anti-parallel to dir, restricts range till exceeding
+  /// kinetic energy.
   virtual void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
                          vfloat prec);
-  // Allows to set curvature.
-  // Calls force().
-  // If force is zero, returns fs_cf=0; frelcen=dv0;
-  // If force is zero, and currpos.dir==dv0, makes, in addition,  fmrange=0;
-  // If currpos.dir==dv0, makes currpos.dir=unit_vec(f);
-  // If force is parallel or anti-parallel to dir, makes fs_cf=0; frelcen=dv0;
-  // If force is anti-parallel to dir, restrics range till exceeding
-  // of kinetic energy.
 
-  // virtual void physics_after_new_speed() {}
-  // Allows to apply any other processes, to turn the trajectory, kill
-  // the particle and so on.
-
-  // virtual void physics() {}
-  // Allows to apply any other processes, to turn the trajectory, kill
-  // the particle and so on.
-
+  /// The force is considered to be split in two components.
+  /// One component, namely f, can be in any direction and is
+  /// capable of doing work. The other one is always normal to dir
+  /// and cannot do work. The latter can represent the magnetic component of 
+  /// the Lorentz force.
+  /// This splitting improve precision of calculation of kinetic energy.
+  /// But the latter component is not the true force. To derive the force
+  /// one should do vector multiplication of speed by f_perp,
+  /// f_perp2 = currpos.speed * (currpos.dir || f_perp_fl2);
+  /// Return 0 if there is no force, f is initialised to zero anyway.
+  /// mrange is the distance at which the force should not change much.
+  /// The dimension of f is [weight] * [lenght] / [time]^2
+  /// The dimension of f_perp is [weight] / [time];
   virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange);
-  // Force is considered to be split to two components.
-  // One component, namely f,
-  // is directed to any direction and capable to do the work.
-  // The other one is always normal to dir and it cannot do the work.
-  // The latter can represent magnetic component of Lorentz force.
-  // This splitting improve precision of calculation of kinetic energy.
-  // But the latter component is not the true force.
-  // To derive the force one should
-  // do vector multiplication of speed by f_perp.:
-  // f_perp2=currpos.speed * (currpos.dir||f_perp_fl2);
-  //
-  // if returns 0 then no force, but it should fill zero to f anyway
-  // mrange - distance at which the force should not change much
-  //
-  // The dimension of f is [weight] * [lenght] / [time]^2
-  // The dimension of f_perp is [weight] / [time];
 
-  void new_speed(void);
-  // Set new speed, direction and time for currpos.
+  /// Set new speed, direction and time for currpos.
+  void new_speed();
 
-  /// Constructors
+  /// Default constructor.
   mparticle() : gparticle(), mass(0.0) {}
-  mparticle(gparticle const& gp, double fmass);
-  // Dangerous,
-  // only not for very fast particles, since gamma-1 is computed from speed.
-  mparticle(gparticle const& gp, double fmass, double gamma_1);
-  // safe, but only current gamma_1 is given.
-  // It should be equal to origin one.
-  // The previous and the next speed should be zero.
-  // So this constructor is good when gparticle is in origin point.
-  // But gamma_1 should correspond to velocity given in gp.
-  // It is automatically checked.
-  // In the following constructor the length of velocity has no affect.
+  /// Constructor, \f$\gamma - 1\f$ calculated from the from velocity vector.
   mparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
-            double fmass, double gamma_1);
+            double fmass);
 
   virtual void print(std::ostream& file, int l) const;
   virtual mparticle* copy() const { return new mparticle(*this); }

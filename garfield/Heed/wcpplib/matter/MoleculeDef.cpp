@@ -72,7 +72,7 @@ double VanDerWaals::pressure(double M, // the number of moles
 }
 */
 
-MoleculeDef::MoleculeDef(void) : nameh("none"), notationh("none") {
+MoleculeDef::MoleculeDef() : nameh("none"), notationh("none") {
   MoleculeDef::get_logbook().push_back(this);
 }
 
@@ -185,8 +185,8 @@ void MoleculeDef::printall(std::ostream& file) {
   for (it = logbook.begin(); it != end; ++it) file << (*it);
 }
 
-void MoleculeDef::verify(void) {
-  mfunnamep("void MoleculeDef::verify(void)");
+void MoleculeDef::verify() {
+  mfunnamep("void MoleculeDef::verify()");
   if (nameh == "none" && notationh == "none") return;
   std::list<MoleculeDef*>& logbook = MoleculeDef::get_logbook();
   std::list<MoleculeDef*>::const_iterator it;
@@ -202,12 +202,12 @@ void MoleculeDef::verify(void) {
   }
 }
 
-std::list<MoleculeDef*>& MoleculeDef::get_logbook(void) {
+std::list<MoleculeDef*>& MoleculeDef::get_logbook() {
   static std::list<MoleculeDef*> logbook;
   return logbook;
 }
 
-const std::list<MoleculeDef*>& MoleculeDef::get_const_logbook(void) {
+const std::list<MoleculeDef*>& MoleculeDef::get_const_logbook() {
   return MoleculeDef::get_logbook();
 }
 

@@ -14,7 +14,7 @@ class MediumMagboltz : public MediumGas {
   // Constructor
   MediumMagboltz();
   // Destructor
-  ~MediumMagboltz() {}
+  virtual ~MediumMagboltz() {}
 
   // Set/get the highest electron energy to be included
   // in the scattering rates table

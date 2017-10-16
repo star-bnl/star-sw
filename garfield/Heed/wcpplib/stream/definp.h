@@ -8,8 +8,8 @@
 
 namespace Heed {
 
-/* Four functions below looks for string in cin input stream,
-read a value of a corresponding type and  return it.
+/* The function below looks for string in cin input stream,
+read a value of a corresponding type and return it.
 They may be dangerous because they do not require a separator in front of
 string.
 Therefore the longer name which has the same ending can be erroneously taken
@@ -19,9 +19,6 @@ The returning the read value is useful because such a functions can be used
 for initialization of global variables.
 */
 int definp_int(const std::string& str = std::string());
-long definp_long(const std::string& str = std::string());
-double definp_double(const std::string& str = std::string());
-std::string definp_string(const std::string& str = std::string());
 
 // New experimental routines
 
@@ -43,19 +40,15 @@ class definp_endpar {
   int s_print;
   int s_short;  // if 1, assumes that the names are not output and not
                 // searched for at reading.
-  definp_endpar(void)
-      : istrm(NULL), s_rewind(0), s_req_sep(0), s_print(0), s_short(0) {
-    ;
-  }
+  definp_endpar()
+      : istrm(NULL), s_rewind(0), s_req_sep(0), s_print(0), s_short(0) {}
   definp_endpar(std::istream* fistrm, int fs_rewind, int fs_req_sep,
                 int fs_print = 1, int fs_short = 0)
       : istrm(fistrm),
         s_rewind(fs_rewind),
         s_req_sep(fs_req_sep),
         s_print(fs_print),
-        s_short(fs_short) {
-    ;
-  }
+        s_short(fs_short) {}
 };
 
 template <class T>
@@ -81,28 +74,8 @@ void definp_any_par(T& inp, const std::string& word, const definp_endpar& dep,
 }
 
 //#define DEFINPPAREND definp_stream, s_rewind, s_req_sep, s_print
-//#define DEFINPAP(name)  definp_any_par(name, std::string(#name##"="), DEFINPPAREND
-//)
 #define DEFINPPAREND dep
 #define DEFINPAP(name) definp_any_par(name, std::string(#name "="), DEFINPPAREND)
-
-template <class T>
-void definp_any_2par(T& inp1, T& inp2, const std::string& word,
-                     const definp_endpar& dep, int fs_short = 0) {
-  mfunnamep("template< class T > definp_any_par(...)");
-  if (fs_short == 0)
-    if (dep.s_short == 0)
-      set_position(word, *dep.istrm, dep.s_rewind, dep.s_req_sep);
-  (*(dep.istrm)) >> inp1 >> inp2;
-  if (dep.s_print == 1)
-    Imcout << "definp_any_par: " << word << ' ' << inp1 << ' ' << inp2 << '\n';
-  // Iprintn(mcout, inp);
-  check_econd11a(dep.istrm->good(), != 1, "after input of variables after word "
-                                              << word
-                                              << "\nwhose input values are "
-                                              << inp1 << ' ' << inp2 << '\n',
-                 mcerr);
-}
 
 /*
 With these macros the programmer can reduce the volume of program inputting

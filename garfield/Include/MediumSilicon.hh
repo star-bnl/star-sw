@@ -12,7 +12,7 @@ class MediumSilicon : public Medium {
   /// Constructor
   MediumSilicon();
   /// Destructor
-  ~MediumSilicon() {}
+  virtual ~MediumSilicon() {}
 
   bool IsSemiconductor() const { return true; }
 

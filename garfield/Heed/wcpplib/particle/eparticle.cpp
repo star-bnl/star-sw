@@ -6,17 +6,9 @@ namespace Heed {
 
 eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,
                      vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap)
-    : mparticle(), particle_type(fpardef), m_fieldMap(fieldmap) {
-  gparticle gp(primvol, pt, vel, time);
-  static_cast<mparticle&>(*this) = mparticle(gp, fpardef->mass);
+    : mparticle(primvol, pt, vel, time, fpardef->mass), 
+      particle_type(fpardef), m_fieldMap(fieldmap) {
 }
-
-eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-                     vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap,
-                     const double gamma_1)
-    : mparticle(primvol, pt, vel, time, fpardef->mass, gamma_1),
-      particle_type(fpardef),
-      m_fieldMap(fieldmap) {}
 
 int eparticle::force(const point& pt, vec& f, vec& f_perp, vfloat& mrange) {
   vec efield(0., 0., 0.);
