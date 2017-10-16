@@ -15,3 +15,43 @@ foreach f (`ls -1d *B.log`)
 	if ($?) continue;
 	set b = `basename ${f} B.log`; mv ${b}* Done/
 end
+#================================================================================
+foreach d ( `ls -1d */*` ) 
+  set l = `echo $d | sed -e 's/\//_/'`; ls -alF ${d}/*.root > & ~/work/log/${l}.list 
+end
+
+foreach f (`ls -1d *.root`) 
+ if (-r /direct/gpfs01/star/pwg/fisyak/MuDst/2016/128/17128010/${f}) rm /direct/gpfs01/star/pwg/fisyak/MuDst/2016/128/17128010/${f}
+end
+
+#================================================================================
+foreach d (`ls -1d 1??/*`)
+  set l = `echo $d | sed -e 's/\//_/'`.log
+  if (-r ${l}) continue;
+  echo ${d}
+  root.exe -q -b 'Chain.C+("'${d}'/*.root")' >& ${l} &
+end
+	
+================================================================================
+#foreach f (`ls -1d /star/u/kehw/dNdxFit/StRoot/StBichsel/*.*`)
+foreach f (`ls -1d /star/u/kehw/dNdxFit/StRoot/StdEdxY2Maker/*.*`)
+   set b = `basename ${f}`; 
+   if (! -r ${b}) continue;
+   diff -D __KEHW__ ${f} ${b} > ${b}.KEHW
+end
+================================================================================
+set day = 128
+foreach d ( `ls -1d ~/scratch2/MuDst/2016/${day}/*` )
+  set b = `basename $d`; if (! -d ${day}/${b}) mkdir -p ${day}/${b}; cd ${day}/${b};
+  lsf ~/xml/PicoDST.xml
+  cd -;
+end
+================================================================================
+root.exe -q -b 'Recover.C("*.root")' | tee Recover.log
+if (! -d Zombie) mkdir Zombie
+foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
+  set b = `basename ${f} .picoDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+end
+foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
+  set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
+end
