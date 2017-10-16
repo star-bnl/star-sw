@@ -112,6 +112,11 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
   $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
 }
 #print "pkg = $pkg =======\n";
+if ($env-{ENV}-{ROOT_LEVEL} =~ /^6/) {
+  if ($pkg eq 'StMuDSTMaker' or $pkg eq 'StHbtMaker' or $pkg eq 'StBFChain') {
+    $CPPFLAGS .= " -D__NO_STRANGE_MUDST__";
+  }
+}
 if ($pkg eq "RTS") {
   if ($STAR_SYS =~ /darwin/) {}
   else {
@@ -1328,7 +1333,7 @@ if ( $#Defs > -1 ) {
 	     if ($found_path) {last;}
 	   }
 	   if (! $found_path) {
-	     my $libpkg = $LIB . "/" . $fullname . "." . $env2->{SUFSOLIB}; print "Depends $SO_PKG, $libpkg;\n";
+	     my $libpkg = $LIB . "/" . $fullname . "." . $env2->{SUFSOLIB};# print "Depends $SO_PKG, $libpkg;\n";
 	     Depends $env $SO_PKG, $libpkg;
 	   }
 	 }
@@ -1345,9 +1350,9 @@ if ( $#Defs > -1 ) {
      #endif /* __NEW__ */
      my $LLIB = $LIB; $LLIB =~ s/^\#//;
      my $lib = $LLIB . "/" . $SO_PKG;
-     my $rootmap = $LLIB . "/" . File::Basename::basename($PKG, $env1->{SUFSOLIB}) . ".rootmap";
+     my $rootmap = $LLIB . "/lib" . File::Basename::basename($PKG, $env1->{SUFSOLIB}) . ".rootmap";
      my $cintfile = $build . "/" .  $CintFiles[0];
-     my $pcmfile = $CintFiles[0];
+     my $pcmfile = "lib" . $CintFiles[0];
      $pcmfile =~ s/\.cxx/_rdict\.pcm/; #print "pcmfile = $pcmfile ==================\n";
      #    print "lib = $lib, rootmap = $rootmap, cintfile = $cintfile  ================================================================================\n";
      push @CintFiles, $pcmfile; #print "CintFiles = @CintFiles\n";
@@ -1355,6 +1360,7 @@ if ( $#Defs > -1 ) {
      my $libs = $env2->{LIBS}; chomp($libs); # print "libs = $libs\n";
      Command $env2 [$CintFiles[0]], @defs,
        qq($RCINTPL $lib "$libs" $rootmap "%>" "%<" "$ROOTCINT_CPPPATH $CPPFLAGS" );
+#     Intstall $env2 $LIB, $pcmfile;
    }
   @LinkDefs = ("LinkDef.h");
   my @objfiles = Objects $envCint ($CintFiles[0]);
@@ -1491,7 +1497,7 @@ if ( $#src > -1 ) {
 #     }
     #________________________________________________________________________________
     if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
-      $SO_PKG_PLAIN = $pkg . "NoSti";
+      $SO_PKG_PLAIN = $libPrefix . $pkg . "NoSti";
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
       $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
       @PlainObj = ();
@@ -1793,13 +1799,14 @@ sub script::TablesCLING {
     my $idlCintC = $pkg . "_Cint.cxx";
     my $idlCintH = $pkg . "_Cint.h";
     my $LLIB = $LIB; $LLIB =~ s/^\#//;
-    my $lib = $LLIB . "/" . $SO_PKG;
+    my $lib = $LLIB . "/" . $SO_PKGT;
     my $rootmap = $LLIB . "/" . $PKGT . ".rootmap";
     #    print "idlCintC = $idlCintC, idlCintH = $idlCintH, depH = @depH\n";
     #    print "SO_PKGT = $SO_PKGT, rootmap = $rootmap, ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
     #      die;
     Command $env3 [ ($idlCintC) ], @depH, 
-      qq (rootcling -v2 -f %> -s $lib -rml $SO_PKGT -rmf $rootmap -m libTable -c $ROOTCINT_CPPPATH -D__ROOT__ %<);
+      qq (rootcling -v2 -f %> -s $lib -rmf $rootmap -m libTable -c $ROOTCINT_CPPPATH -D__ROOT__ %<);
+#      qq (rootcling -v2 -f %> -s $lib -rml $SO_PKGT -rmf $rootmap -m libTable -c $ROOTCINT_CPPPATH -D__ROOT__ %<);
     push @sourcesT, $idlCintC;
     script::Keep $SO_PKGT;
     LinkedModule $env3 $SO_PKGT, @sourcesT;

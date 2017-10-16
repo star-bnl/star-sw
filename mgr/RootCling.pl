@@ -371,7 +371,8 @@ if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
   $h_files .= " " . "LinkDef.h";
   $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
-  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -rml $Lib -rmf $RootMap";
+#  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -rml $Lib -rmf $RootMap";
+  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib -rml $Lib -rmf $RootMap";
   my $bLib = File::Basename::basename($Lib);
   if ($LibDep) {
     my @libs = split(' ',$LibDep);
