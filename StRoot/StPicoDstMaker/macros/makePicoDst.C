@@ -69,7 +69,7 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   10/14/17  8                 DcaCut and Event: 312097307 :        12.48
   10/16/17
 5.3T    scratch1/MuDst/2016
-13T     scratch2/MuDst/2016  
+13T     scratch2/MuDst/2016  chained 6071 files      with total 29483322 events
 1.3T    work/Pico/2016       chained 6071 files      with total 19120471 events
 =====
 ratio = 14
