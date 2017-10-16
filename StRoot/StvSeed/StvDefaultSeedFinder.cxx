@@ -21,7 +21,7 @@
 
 
 void myBreak(int);
-enum {kFstAng=65,kErrFakt=4,kLenFakt=4,kMaxLen=500};
+enum {kFstAng=65,kErrFakt=4,kLenFakt=4,kMaxLen=300};
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.01;
@@ -156,28 +156,18 @@ const THelixTrack* StvDefaultSeedFinder::NextSeed()
 static int nCall = 0; nCall++;
 std::vector<TObject*> mySeedObjs;
 
-  StvHit *fstHit,*selHit=0; 
-
-#if 0
-  if (*f1stHitMapIter == f1stHitMap->begin()) { //print all seed hitss at the begining
-  int nnn=0;
-  for (auto it = f1stHitMap->begin(); it!=f1stHitMap->end(); ++it) {
-    nnn++;
-    auto *hit = (*it).second;
-    printf("%d  *** StvDefaultSeedFinder::NextSeed %g %g %g  ***\n",nnn
-      ,hit->x()[0],hit->x()[1],hit->x()[2]);
-    StvDebug::Count("ZSeeds",hit->x()[2]);
-  } }  
-#endif
-  
+  StvHit *fstHit,*selHit=0;   
 
   int nTally = 0; 
   while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
     int fstIdTruth = fstHit->idTru();
-    if (fIdTruth && fstIdTruth==0) continue;
-
-    if (fstHit->isUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
+    int notMine = 1;
+    do {
+      if (fIdTruth && !fstIdTruth) 			break; 
+      if (fstHit->timesUsed() || mNDejavu>=kNDejavu) 	break; 
+    } while((notMine=0));
+    if (notMine) {		//1st hit not useful
       ++(*f1stHitMapIter); mNDejavu = 0; continue;
     }
     fSeedHits.clear();
@@ -219,7 +209,6 @@ std::vector<TObject*> mySeedObjs;
 	}
 	if (dejavu) 			continue;
 	int ans = mSel.Reject(nexHit->x(),hpNex);
-StvDebug::Count("Reject",ans);
 	if (ans>0) 			continue;	//hit outside the cone
 
  //			Selecting the best
@@ -234,7 +223,6 @@ StvDebug::Count("Reject",ans);
     }// end NextHit loop
 //		If no hits found, go to next 1st hit
 
-StvDebug::Count("NSeedHits",fSeedHits.size());
     if ((int)fSeedHits.size()<=1) {mNDejavu = 99; continue;}
     if ((int)fSeedHits.size() < fMinHits) continue;
 
@@ -268,6 +256,7 @@ StvDebug::Count("NSeedHits",fSeedHits.size());
 StvConeSelector::StvConeSelector()
 {
   memset(mBeg,0,mEnd-mBeg+1);mSgn=1;
+  mVtx[2] = 1e6;
 }
 //_____________________________________________________________________________
 void StvConeSelector::AddHit(const float *x,const float *dir,float layer)
@@ -287,19 +276,24 @@ StvDebug::Break(nCall);
 
   float Rxy = sqrt(mX[0][0]*mX[0][0]+mX[0][1]*mX[0][1]);
   SetErr(SEED_ERR(Rxy)*kErrFakt);
-  float stp=0;
+  float stp=0,myLen;
   int kase = mJst; if (kase>2) kase = 2;
      
   switch(kase) {
   
     case 0: {
-      float myLen = sqrt(Dot(mX[0],mX[0]));
-      Mul(mX[0]  ,-mSgn/myLen,mDir);  
-
+      if (mVtx[2]>1e3) {
+        myLen = sqrt(Dot(mX[0],mX[0]));
+        Mul(mX[0]  ,-mSgn/myLen,mDir);  
+      } else {
+        float myX[3] = { mX[0][0]-mVtx[0],mX[0][1]-mVtx[1],mX[0][2]-mVtx[2]};
+        myLen = sqrt(Dot(myX,myX));
+        Mul(myX ,-mSgn/myLen,mDir);  
+      }  
       float sgn = Dot(mHit,mDir);
       assert(mSgn*sgn<0);
       mS[0]=0;
-      mTan = (mVtx[2]>1e6)? kFstTan: mErr/myLen;
+      mTan = (mVtx[2]>=1e3)? kFstTan: mErr/myLen;
     }; break;
 
     case 1: {
@@ -333,7 +327,6 @@ StvDebug::Break(nCall);
 
     default: assert(0 && "Wrong case");
   }
-assert(fabs(Dot(mDir,mDir)-1)<1e-5);
   mRxy2 = mHit[0]*mHit[0]+mHit[1]*mHit[1];
   mRxy = sqrt(mRxy2);
   mDelta = SEED_ERR(mRxy);
@@ -484,24 +477,21 @@ static const double kMyMax = 220;
 //_____________________________________________________________________________
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
-//???   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
+   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
 
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
 
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];
-//??   if (r2xy < (kMinTan*kMinTan)*z2) 	return 3;		
+  if (r2xy < (kMinTan*kMinTan)*z2) 	return 3;		
    mHitLen = (r2xy+z2);
    if (mHitLen  < 1e-8) 		return 4;
    mHitPrj = Dot(xx,mDir);
    if (mHitPrj  < 1e-8) 		return 4;
    if (mHitPrj>mLen) 			return 6;	//Outside of cone along
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
-   float lim = (mErr) + mHitPrj*mTan;//?????
-StvDebug::Count("ImpAll", sqrt(imp));
-StvDebug::Count("ImpRel", sqrt(imp)/lim);
+   float lim = (mErr) + mHitPrj*mTan;
    if (imp > lim*lim)          		return 7;	//Outside of cone aside
-StvDebug::Count("ImpGoo", sqrt(imp));
    int ans = 99;
    if (mHp != hp) { 					//different layers, only prj is important
      if (mHitPrj>mMinPrj) 		return 8;	//more far than best,along

@@ -19,18 +19,14 @@ class eparticle : public mparticle, public particle_type {
   /// Constructor using velocity vector.
   eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
             particle_def* fpardef, HeedFieldMap* fieldmap);
-  /// Constructor using gamma - 1 (direction is taken from vel).
-  eparticle(manip_absvol* primvol, const point& pt, const vec& vel, vfloat time,
-            particle_def* fpardef, HeedFieldMap* fieldmap,
-            const double gamma_1);
   /// Destructor
   virtual ~eparticle() {}
 
   virtual eparticle* copy() const { return new eparticle(*this); }
   virtual void print(std::ostream& file, int l) const;
 
+  /// Calculate force components.
   virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange);
-  // if returns 0 then no force, but it should fill zero to f anyway
   // mrange - distance at which the force should not change much
 
  protected:

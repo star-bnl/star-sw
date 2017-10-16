@@ -1,31 +1,16 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2017.cxx,v 2.6 2017/10/13 20:14:26 ullrich Exp $
+ * $Id: StTriggerData2018.cxx,v 2.1 2017/10/13 20:10:17 ullrich Exp $
  *
- * Author: Akio Ogawa, Dec 2016
+ * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
  *
- * Description:  Concrete implementation of StTriggerData for 2017.
+ * Description:  Concrete implementation of StTriggerData for 2018.
  *
  ***************************************************************************
  *
- * $Log: StTriggerData2017.cxx,v $
- * Revision 2.6  2017/10/13 20:14:26  ullrich
- * Added access fct epdADC() and epdTDC().
- *
- * Revision 2.5  2017/05/30 15:59:14  ullrich
- * Added bbcTDC5bit() method.
- *
- * Revision 2.4  2017/05/13 00:59:54  ullrich
- * Added bbcBB101() and bbcBB102().
- *
- * Revision 2.3  2017/02/20 16:33:37  ullrich
- * Changed mtdQtAtCh for run17 mapping
- *
- * Revision 2.2  2016/12/15 16:30:07  ullrich
- * Updates from Jeff.
- *
- * Revision 2.1  2016/12/08 18:58:28  ullrich
+ * $Log: StTriggerData2018.cxx,v $
+ * Revision 2.1  2017/10/13 20:10:17  ullrich
  * Initial Revision.
  *
  *
@@ -33,77 +18,76 @@
 #include <string.h>
 #include <assert.h>
 #include <iostream>
-#include "TBuffer.h"
-#include "StTriggerData2017.h"
+#include "StTriggerData2018.h"
 
-ClassImp(StTriggerData2017)
+ClassImp(StTriggerData2018)
 
-StTriggerData2017::StTriggerData2017():mData()
+StTriggerData2018::StTriggerData2018():mData()
 {
     mDebug = 0;
-    //    printf("StTriggerData2017 Default Constructor\n");
+    //    printf("StTriggerData2018 Default Constructor\n");
 }
 
-StTriggerData2017::StTriggerData2017(const TriggerDataBlk2017* data, int run):mData()
+StTriggerData2018::StTriggerData2018(const TriggerDataBlk2018* data, int run):mData()
 {
-    //printf("StTriggerData2017 Constructor with trigger data block\n");
-    mYear=2017; mRun = run; mDebug = 0;
-    mData = new TriggerDataBlk2017;
+    //printf("StTriggerData2018 Constructor with trigger data block\n");
+    mYear=2018; mRun = run; mDebug = 0;
+    mData = new TriggerDataBlk2018;
     readData(data,1);
 }
 
-StTriggerData2017::StTriggerData2017(const TriggerDataBlk2017* data, int run, int bs, int dbg):mData()
+StTriggerData2018::StTriggerData2018(const TriggerDataBlk2018* data, int run, int bs, int dbg):mData()
 {
-    mYear=2017; mRun = run; mDebug = dbg;
-    if(mDebug==1) printf("StTriggerData2017 Constructor with trigger data block and byteswap option=%d\n",bs);
-    mData = new TriggerDataBlk2017;
+    mYear=2018; mRun = run; mDebug = dbg;
+    if(mDebug==1) printf("StTriggerData2018 Constructor with trigger data block and byteswap option=%d\n",bs);
+    mData = new TriggerDataBlk2018;
     readData(data,bs);
 }
 
-void StTriggerData2017::readData(const TriggerDataBlk2017* data, int bs) {
+void StTriggerData2018::readData(const TriggerDataBlk2018* data, int bs) {
     int copyflag=1;
     if (data==0) {copyflag=0;}
-    if(mDebug==1) printf("StTriggerData2017::readData copyflag=%d byteswap=%d data=%p mData=%p\n",copyflag,bs,data,mData);
+    if(mDebug==1) printf("StTriggerData2018::readData copyflag=%d byteswap=%d data=%p mData=%p\n",copyflag,bs,data,mData);
     
     if (copyflag==1){
         unsigned int ver = data->FormatVersion;
         if (bs) swapI(&ver);
         
-        if (ver == y17FORMAT_VERSION ) {
-            if (mDebug==1) printf("StTriggerData2017: version = 0x%x (0x%x or 0x08121140)\n",ver,y17FORMAT_VERSION);
+        if (ver == y18FORMAT_VERSION ) {
+            if (mDebug==1) printf("StTriggerData2018: version = 0x%x (0x%x or 0x08121140)\n",ver,y18FORMAT_VERSION);
         }
         else {
             mErrorFlag = mErrorFlag | 0x1;
-            printf("StTriggerData2017: version = 0x%x != (0x%x)\n",ver,y17FORMAT_VERSION);
+            printf("StTriggerData2018: version = 0x%x != (0x%x)\n",ver,y18FORMAT_VERSION);
             assert(0);
         }
         
         unsigned int size = data->totalTriggerLength;
         if (bs) swapI(&size);
-        if (size > y17MAX_TRG_BLK_SIZE) {
-            gMessMgr->Warning() << "StTriggerData2017: Data length = " << size
-            << " is bigger than max = " << y17MAX_TRG_BLK_SIZE
+        if (size > y18MAX_TRG_BLK_SIZE) {
+            gMessMgr->Warning() << "StTriggerData2018: Data length = " << size
+            << " is bigger than max = " << y18MAX_TRG_BLK_SIZE
             << endm;
             assert(0);
         }
-        if (mDebug==1) printf("StTriggerData2017: size = %d, maxsize = %d\n",size,y17MAX_TRG_BLK_SIZE);
+        if (mDebug==1) printf("StTriggerData2018: size = %d, maxsize = %d\n",size,y18MAX_TRG_BLK_SIZE);
         memcpy(mData,data,size);
-        memset((char*)mData+size,0,sizeof(TriggerDataBlk2017)-size);
+        memset((char*)mData+size,0,sizeof(TriggerDataBlk2018)-size);
     }
     
     if (bs) swapDataBlk(mData);
     if (mDebug==1){
-        printf("StTriggerData2017: version = 0x%x (0x%x)\n",mData->FormatVersion,y17FORMAT_VERSION);
-        printf("StTriggerData2017: size = %d, maxsize = %d\n",mData->totalTriggerLength,y17MAX_TRG_BLK_SIZE);
+        printf("StTriggerData2018: version = 0x%x (0x%x)\n",mData->FormatVersion,y18FORMAT_VERSION);
+        printf("StTriggerData2018: size = %d, maxsize = %d\n",mData->totalTriggerLength,y18MAX_TRG_BLK_SIZE);
         printf("EventDesc  length=%10d   offset=%10d\n",mData->EventDesc_ofl.length,mData->EventDesc_ofl.offset);
         printf("L1_DSM     length=%10d   offset=%10d\n",mData->L1_DSM_ofl.length,mData->L1_DSM_ofl.offset);
         printf("Summary    length=%10d   offset=%10d\n",mData->Summary_ofl.length,mData->Summary_ofl.offset);
     }
     
     EvtDesc=0; L1_DSM=0; TrgSum=0;
-    if (mData->EventDesc_ofl.length > 0) EvtDesc = (EvtDescData2017*)((char*)mData + mData->EventDesc_ofl.offset);
-    if (mData->L1_DSM_ofl.length > 0)    L1_DSM  = (L1_DSM_Data2017*)((char*)mData + mData->L1_DSM_ofl.offset);
-    if (mData->Summary_ofl.length   > 0) TrgSum  = (TrgSumData2017* )((char*)mData + mData->Summary_ofl.offset);
+    if (mData->EventDesc_ofl.length > 0) EvtDesc = (EvtDescData2018*)((char*)mData + mData->EventDesc_ofl.offset);
+    if (mData->L1_DSM_ofl.length > 0)    L1_DSM  = (L1_DSM_Data2018*)((char*)mData + mData->L1_DSM_ofl.offset);
+    if (mData->Summary_ofl.length   > 0) TrgSum  = (TrgSumData2018* )((char*)mData + mData->Summary_ofl.offset);
     if (bs){
         if (EvtDesc) swapEvtDesc(EvtDesc);
         if (L1_DSM) swapL1_DSM(L1_DSM);
@@ -111,7 +95,7 @@ void StTriggerData2017::readData(const TriggerDataBlk2017* data, int bs) {
     }
     if (EvtDesc==0 || L1_DSM==0 || TrgSum==0){
         mErrorFlag = mErrorFlag | 0x1;
-        gMessMgr->Warning() << "StTriggerData2017: EvtDesc, L1_DSM or TrgSum is missing"
+        gMessMgr->Warning() << "StTriggerData2018: EvtDesc, L1_DSM or TrgSum is missing"
         <<" mErrorFlag="<<mErrorFlag<<endm;
     }
     
@@ -119,17 +103,17 @@ void StTriggerData2017::readData(const TriggerDataBlk2017* data, int bs) {
     int npost = numberOfPostXing();
     if (npre<0 || npre>10 || npost<0 || npost>10){
         mErrorFlag = mErrorFlag | 0x2;
-        gMessMgr->Warning() << "StTriggerData2017: Invalid npre/post  = "<< npre << " / " << npost
+        gMessMgr->Warning() << "StTriggerData2018: Invalid npre/post  = "<< npre << " / " << npost
         <<" mErrorFlag="<<mErrorFlag<<endm;
     }
-    if (mDebug==1) printf("StTriggerData2017: pre=%d post=%d\n",npre,npost);
+    if (mDebug==1) printf("StTriggerData2018: pre=%d post=%d\n",npre,npost);
     
     memset(mBC1,0,sizeof(mBC1));
     memset(mMXQ,0,sizeof(mMXQ));
     memset(mMIX,0,sizeof(mMIX));
     memset(mBCW,0,sizeof(mBCW));
     memset(mBCE,0,sizeof(mBCE));
-    memset(mEPQ,0,sizeof(mEPQ));
+    memset(mEQ3,0,sizeof(mEQ3));
     memset(mBBC,0,sizeof(mBBC));
     memset(mBBQ,0,sizeof(mBBQ));
     memset(mFMS,0,sizeof(mFMS));
@@ -137,20 +121,20 @@ void StTriggerData2017::readData(const TriggerDataBlk2017* data, int bs) {
     memset(mQT2,0,sizeof(mQT2));
     memset(mQT3,0,sizeof(mQT3));
     memset(mQT4,0,sizeof(mQT4));
-    memset(mFQ1,0,sizeof(mFQ1));
-    memset(mFQ2,0,sizeof(mFQ2));
+    memset(mEQ1,0,sizeof(mEQ1));
+    memset(mEQ2,0,sizeof(mEQ2));
     memset(mxq,0,sizeof(mxq)); memset(tmxq,0,sizeof(tmxq));
-    memset(epq,0,sizeof(epq)); memset(tepq,0,sizeof(tepq));
+    memset(eq3,0,sizeof(eq3)); memset(teq3,0,sizeof(teq3));
     memset(bbq,0,sizeof(bbq)); memset(tbbq,0,sizeof(tbbq));
     memset(qt1,0,sizeof(qt1)); memset(tqt1,0,sizeof(tqt1));
     memset(qt2,0,sizeof(qt2)); memset(tqt2,0,sizeof(tqt2));
     memset(qt3,0,sizeof(qt3)); memset(tqt3,0,sizeof(tqt3));
     memset(qt4,0,sizeof(qt4)); memset(tqt4,0,sizeof(tqt4));
-    memset(fq1,0,sizeof(fq1)); memset(tfq1,0,sizeof(tfq1));
-    memset(fq2,0,sizeof(fq2)); memset(tfq2,0,sizeof(tfq2));
-    TrgOfflen2017* offlen;
+    memset(eq1,0,sizeof(eq1)); memset(teq1,0,sizeof(teq1));
+    memset(eq2,0,sizeof(eq2)); memset(teq2,0,sizeof(teq2));
+    TrgOfflen2018* offlen;
     
-    for (int i=0; i<1+npre+npost; i++){
+    for (int i=0; i<1+npre+npost; i++) {
         //printf("Doing prepost = %d\n",i);
         if (i==0) {
             offlen = mData->MainX;
@@ -158,69 +142,69 @@ void StTriggerData2017::readData(const TriggerDataBlk2017* data, int bs) {
         else {
             //printf("Prepost list offset = %d\n",mData->PrePostList[i-1]);
             if (mData->PrePostList[i-1]==0) continue;
-            offlen = (TrgOfflen2017*) ((char*)mData + mData->PrePostList[i-1]);
+            offlen = (TrgOfflen2018*) ((char*)mData + mData->PrePostList[i-1]);
         }
         if (bs) swapRawDetOfflen(offlen);
-        for(int k=0; k<y17MAX_OFFLEN; k++){
+        for(int k=0; k<y18MAX_OFFLEN; k++) {
             if(static_cast<unsigned int>(offlen[k].length + offlen[k].offset) > static_cast<unsigned int>(mData->totalTriggerLength)) {
                 mErrorFlag = mErrorFlag | (1 << k);
-                gMessMgr->Warning() << "StTriggerData2017: offset ("<<offlen[k].offset<<") + length ("<<offlen[k].length
+                gMessMgr->Warning() << "StTriggerData2018: offset ("<<offlen[k].offset<<") + length ("<<offlen[k].length
                 <<") exceeds total size("<<mData->totalTriggerLength<<") for data block id="<<k
                 <<" mErrorFlag="<<mErrorFlag<<endm;
             }
         }
         int j;
-        j=offlen[y17BC1_CONF_NUM].length; if (j>0){mBC1[i] = (BELayerBlock2017*)((char*)mData + offlen[y17BC1_CONF_NUM].offset); swapRawDet((DataBlock2017*)mBC1[i],y17BC1_CONF_NUM,j,bs);}
-        j=offlen[y17MXQ_CONF_NUM].length; if (j>0){mMXQ[i] = (QTBlock2017*     )((char*)mData + offlen[y17MXQ_CONF_NUM].offset); swapRawDet((DataBlock2017*)mMXQ[i],y17MXQ_CONF_NUM,j,bs);}
-        j=offlen[y17MIX_CONF_NUM].length; if (j>0){mMIX[i] = (MIXBlock2017*    )((char*)mData + offlen[y17MIX_CONF_NUM].offset); swapRawDet((DataBlock2017*)mMIX[i],y17MIX_CONF_NUM,j,bs);}
-        j=offlen[y17BCW_CONF_NUM].length; if (j>0){mBCW[i] = (BWestBlock2017*  )((char*)mData + offlen[y17BCW_CONF_NUM].offset); swapRawDet((DataBlock2017*)mBCW[i],y17BCW_CONF_NUM,j,bs);}
-        j=offlen[y17BCE_CONF_NUM].length; if (j>0){mBCE[i] = (BEastBlock2017*  )((char*)mData + offlen[y17BCE_CONF_NUM].offset); swapRawDet((DataBlock2017*)mBCE[i],y17BCE_CONF_NUM,j,bs);}
-        j=offlen[y17EPQ_CONF_NUM].length; if (j>0){mEPQ[i] = (QTBlock2017*     )((char*)mData + offlen[y17EPQ_CONF_NUM].offset); swapRawDet((DataBlock2017*)mEPQ[i],y17EPQ_CONF_NUM,j,bs);}
-        j=offlen[y17BBC_CONF_NUM].length; if (j>0){mBBC[i] = (BBCBlock2017*    )((char*)mData + offlen[y17BBC_CONF_NUM].offset); swapRawDet((DataBlock2017*)mBBC[i],y17BBC_CONF_NUM,j,bs);}
-        j=offlen[y17BBQ_CONF_NUM].length; if (j>0){mBBQ[i] = (QTBlock2017*     )((char*)mData + offlen[y17BBQ_CONF_NUM].offset); swapRawDet((DataBlock2017*)mBBQ[i],y17BBQ_CONF_NUM,j,bs);}
-        j=offlen[y17FMS_CONF_NUM].length; if (j>0){mFMS[i] = (FMSBlock2017*    )((char*)mData + offlen[y17FMS_CONF_NUM].offset); swapRawDet((DataBlock2017*)mFMS[i],y17FMS_CONF_NUM,j,bs);}
-        j=offlen[y17QT1_CONF_NUM].length; if (j>0){mQT1[i] = (QTBlock2017*     )((char*)mData + offlen[y17QT1_CONF_NUM].offset); swapRawDet((DataBlock2017*)mQT1[i],y17QT1_CONF_NUM,j,bs);}
-        j=offlen[y17QT2_CONF_NUM].length; if (j>0){mQT2[i] = (QTBlock2017*     )((char*)mData + offlen[y17QT2_CONF_NUM].offset); swapRawDet((DataBlock2017*)mQT2[i],y17QT2_CONF_NUM,j,bs);}
-        j=offlen[y17QT3_CONF_NUM].length; if (j>0){mQT3[i] = (QTBlock2017*     )((char*)mData + offlen[y17QT3_CONF_NUM].offset); swapRawDet((DataBlock2017*)mQT3[i],y17QT3_CONF_NUM,j,bs);}
-        j=offlen[y17QT4_CONF_NUM].length; if (j>0){mQT4[i] = (QTBlock2017*     )((char*)mData + offlen[y17QT4_CONF_NUM].offset); swapRawDet((DataBlock2017*)mQT4[i],y17QT4_CONF_NUM,j,bs);}
-        j=offlen[y17FQ1_CONF_NUM].length; if (j>0){mFQ1[i] = (QTBlock2017*     )((char*)mData + offlen[y17FQ1_CONF_NUM].offset); swapRawDet((DataBlock2017*)mFQ1[i],y17FQ1_CONF_NUM,j,bs);}
-        j=offlen[y17FQ2_CONF_NUM].length; if (j>0){mFQ2[i] = (QTBlock2017*     )((char*)mData + offlen[y17FQ2_CONF_NUM].offset); swapRawDet((DataBlock2017*)mFQ2[i],y17FQ2_CONF_NUM,j,bs);}
+        j=offlen[y18BC1_CONF_NUM].length; if (j>0){mBC1[i] = (BELayerBlock2018*)((char*)mData + offlen[y18BC1_CONF_NUM].offset); swapRawDet((DataBlock2018*)mBC1[i],y18BC1_CONF_NUM,j,bs);}
+        j=offlen[y18MXQ_CONF_NUM].length; if (j>0){mMXQ[i] = (QTBlock2018*     )((char*)mData + offlen[y18MXQ_CONF_NUM].offset); swapRawDet((DataBlock2018*)mMXQ[i],y18MXQ_CONF_NUM,j,bs);}
+        j=offlen[y18MIX_CONF_NUM].length; if (j>0){mMIX[i] = (MIXBlock2018*    )((char*)mData + offlen[y18MIX_CONF_NUM].offset); swapRawDet((DataBlock2018*)mMIX[i],y18MIX_CONF_NUM,j,bs);}
+        j=offlen[y18BCW_CONF_NUM].length; if (j>0){mBCW[i] = (BWestBlock2018*  )((char*)mData + offlen[y18BCW_CONF_NUM].offset); swapRawDet((DataBlock2018*)mBCW[i],y18BCW_CONF_NUM,j,bs);}
+        j=offlen[y18BCE_CONF_NUM].length; if (j>0){mBCE[i] = (BEastBlock2018*  )((char*)mData + offlen[y18BCE_CONF_NUM].offset); swapRawDet((DataBlock2018*)mBCE[i],y18BCE_CONF_NUM,j,bs);}
+        j=offlen[y18EQ3_CONF_NUM].length; if (j>0){mEQ3[i] = (QTBlock2018*     )((char*)mData + offlen[y18EQ3_CONF_NUM].offset); swapRawDet((DataBlock2018*)mEQ3[i],y18EQ3_CONF_NUM,j,bs);}
+        j=offlen[y18BBC_CONF_NUM].length; if (j>0){mBBC[i] = (BBCBlock2018*    )((char*)mData + offlen[y18BBC_CONF_NUM].offset); swapRawDet((DataBlock2018*)mBBC[i],y18BBC_CONF_NUM,j,bs);}
+        j=offlen[y18BBQ_CONF_NUM].length; if (j>0){mBBQ[i] = (QTBlock2018*     )((char*)mData + offlen[y18BBQ_CONF_NUM].offset); swapRawDet((DataBlock2018*)mBBQ[i],y18BBQ_CONF_NUM,j,bs);}
+        j=offlen[y18FMS_CONF_NUM].length; if (j>0){mFMS[i] = (FMSBlock2018*    )((char*)mData + offlen[y18FMS_CONF_NUM].offset); swapRawDet((DataBlock2018*)mFMS[i],y18FMS_CONF_NUM,j,bs);}
+        j=offlen[y18QT1_CONF_NUM].length; if (j>0){mQT1[i] = (QTBlock2018*     )((char*)mData + offlen[y18QT1_CONF_NUM].offset); swapRawDet((DataBlock2018*)mQT1[i],y18QT1_CONF_NUM,j,bs);}
+        j=offlen[y18QT2_CONF_NUM].length; if (j>0){mQT2[i] = (QTBlock2018*     )((char*)mData + offlen[y18QT2_CONF_NUM].offset); swapRawDet((DataBlock2018*)mQT2[i],y18QT2_CONF_NUM,j,bs);}
+        j=offlen[y18QT3_CONF_NUM].length; if (j>0){mQT3[i] = (QTBlock2018*     )((char*)mData + offlen[y18QT3_CONF_NUM].offset); swapRawDet((DataBlock2018*)mQT3[i],y18QT3_CONF_NUM,j,bs);}
+        j=offlen[y18QT4_CONF_NUM].length; if (j>0){mQT4[i] = (QTBlock2018*     )((char*)mData + offlen[y18QT4_CONF_NUM].offset); swapRawDet((DataBlock2018*)mQT4[i],y18QT4_CONF_NUM,j,bs);}
+        j=offlen[y18EQ1_CONF_NUM].length; if (j>0){mEQ1[i] = (QTBlock2018*     )((char*)mData + offlen[y18EQ1_CONF_NUM].offset); swapRawDet((DataBlock2018*)mEQ1[i],y18EQ1_CONF_NUM,j,bs);}
+        j=offlen[y18EQ2_CONF_NUM].length; if (j>0){mEQ2[i] = (QTBlock2018*     )((char*)mData + offlen[y18EQ2_CONF_NUM].offset); swapRawDet((DataBlock2018*)mEQ2[i],y18EQ2_CONF_NUM,j,bs);}
         if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]);
-        if (mEPQ[i]) decodeQT(mEPQ[i]->length/4, mEPQ[i]->data, epq[i], tepq[i]);
+        if (mEQ3[i]) decodeQT(mEQ3[i]->length/4, mEQ3[i]->data, eq3[i], teq3[i]);
         if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]);
         if (mQT1[i]) decodeQT(mQT1[i]->length/4, mQT1[i]->data, qt1[i], tqt1[i]);
         if (mQT2[i]) decodeQT(mQT2[i]->length/4, mQT2[i]->data, qt2[i], tqt2[i]);
         if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]);
         if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]);
-        if (mFQ1[i]) decodeQT(mFQ1[i]->length/4, mFQ1[i]->data, fq1[i], tfq1[i]);
-        if (mFQ2[i]) decodeQT(mFQ2[i]->length/4, mFQ2[i]->data, fq2[i], tfq2[i]);
+        if (mEQ1[i]) decodeQT(mEQ1[i]->length/4, mEQ1[i]->data, eq1[i], teq1[i]);
+        if (mEQ2[i]) decodeQT(mEQ2[i]->length/4, mEQ2[i]->data, eq2[i], teq2[i]);
     }
     if (mDebug==1) dump();
 }
 
-StTriggerData2017::~StTriggerData2017() {delete mData;}
+StTriggerData2018::~StTriggerData2018() {delete mData;}
 
-unsigned int StTriggerData2017::version() const
+unsigned int StTriggerData2018::version() const
 {
     return EvtDesc->TrgDataFmtVer;
 }
 
-unsigned int StTriggerData2017::eventNumber() const
+unsigned int StTriggerData2018::eventNumber() const
 {
     return mData->eventNumber;
 }
 
-unsigned int StTriggerData2017::token() const
+unsigned int StTriggerData2018::token() const
 {
     return EvtDesc->TrgToken;
 }
 
-unsigned int StTriggerData2017::triggerWord() const
+unsigned int StTriggerData2018::triggerWord() const
 {
     return 0;
 }
 
-unsigned int StTriggerData2017::actionWord() const
+unsigned int StTriggerData2018::actionWord() const
 {
     return
     ( (unsigned short)(EvtDesc->actionWdTrgCommand) * 16 * 16 * 16 ) +
@@ -228,52 +212,52 @@ unsigned int StTriggerData2017::actionWord() const
     (                  EvtDesc->actionWdDetectorBitMask & 0x00ff   );
 }
 
-unsigned int StTriggerData2017::numberOfPreXing() const
+unsigned int StTriggerData2018::numberOfPreXing() const
 {
     return EvtDesc->npre & 0xf;
 }
 
-unsigned int StTriggerData2017::numberOfPostXing() const
+unsigned int StTriggerData2018::numberOfPostXing() const
 {
     return EvtDesc->npost & 0xf;
 }
 
-unsigned short StTriggerData2017::busyStatus() const
+unsigned short StTriggerData2018::busyStatus() const
 {
     return EvtDesc->internalBusy;
 }
 
-unsigned short StTriggerData2017::dsmInput() const
+unsigned short StTriggerData2018::dsmInput() const
 {
     return EvtDesc->DSMInput;
 }
 
-unsigned short StTriggerData2017::trgToken() const
+unsigned short StTriggerData2018::trgToken() const
 {
     return EvtDesc->TrgToken;
 }
 
-unsigned short StTriggerData2017::dsmAddress() const
+unsigned short StTriggerData2018::dsmAddress() const
 {
     return EvtDesc->DSMAddress;
 }
 
-unsigned short StTriggerData2017::mAddBits() const
+unsigned short StTriggerData2018::mAddBits() const
 {
     return EvtDesc->addBits;
 }
 
-unsigned short StTriggerData2017::bcData(int channel) const
+unsigned short StTriggerData2018::bcData(int channel) const
 {
     return L1_DSM->BCdata[channel];
 }
 
-unsigned short StTriggerData2017::getTrgDetMask() const
+unsigned short StTriggerData2018::getTrgDetMask() const
 {
     return EvtDesc->trgDetMask;
 }
 
-unsigned int StTriggerData2017::getTrgCrateMask() const
+unsigned int StTriggerData2018::getTrgCrateMask() const
 {
     unsigned int p = EvtDesc->npost & 0xfff0;
     unsigned int r = EvtDesc->res1  & 0x0ff0;
@@ -283,32 +267,32 @@ unsigned int StTriggerData2017::getTrgCrateMask() const
 	  + (r << 20) );
 }
 
-unsigned short StTriggerData2017::lastDSM(int channel) const
+unsigned short StTriggerData2018::lastDSM(int channel) const
 {
     return L1_DSM->lastDSM[channel];
 }
 
-unsigned short StTriggerData2017::tcuBits() const
+unsigned short StTriggerData2018::tcuBits() const
 {
     return EvtDesc->DSMInput;
 }
 
 
-unsigned int StTriggerData2017::tcuCounter() const
+unsigned int StTriggerData2018::tcuCounter() const
 {
     unsigned int hi = EvtDesc->tcuCtrBunch_hi;
     return (hi << 16) + EvtDesc->DSMAddress;
 }
 
-unsigned int StTriggerData2017::rccCounter(int crate) const
+unsigned int StTriggerData2018::rccCounter(int crate) const
 {
-    if(crate >= y17L1_CONF_NUM && crate <= y17QT4_CONF_NUM){
+    if(crate >= y18L1_CONF_NUM && crate <= y18QT4_CONF_NUM){
         return TrgSum->LocalClocks[crate];
     }
     return 0;
 }
 
-unsigned long long StTriggerData2017::bunchCounter() const
+unsigned long long StTriggerData2018::bunchCounter() const
 {
     unsigned long long bxinghi,bxing1,bxinglo, bx;
     bxinghi = L1_DSM->BCdata[3];
@@ -318,22 +302,22 @@ unsigned long long StTriggerData2017::bunchCounter() const
     return bx;
 }
 
-unsigned int StTriggerData2017::bunchCounterHigh() const
+unsigned int StTriggerData2018::bunchCounterHigh() const
 {
     return EvtDesc->bunchXing_hi;
 }
 
-unsigned int StTriggerData2017::bunchCounterLow() const
+unsigned int StTriggerData2018::bunchCounterLow() const
 {
     return EvtDesc->bunchXing_lo;
 }
 
-unsigned int StTriggerData2017::bunchId48Bit() const
+unsigned int StTriggerData2018::bunchId48Bit() const
 {
     return (int)(bunchCounter() % 120);
 }
 
-unsigned int StTriggerData2017::bunchId7Bit() const
+unsigned int StTriggerData2018::bunchId7Bit() const
 {
     int b7=0, b7dat;
     b7dat = L1_DSM->BCdata[2];
@@ -341,7 +325,7 @@ unsigned int StTriggerData2017::bunchId7Bit() const
     return b7;
 }
 
-unsigned int StTriggerData2017::spinBit() const
+unsigned int StTriggerData2018::spinBit() const
 {
     if(mRun<12000000){
         return (L1_DSM->lastDSM[7]/16)%256;
@@ -350,55 +334,55 @@ unsigned int StTriggerData2017::spinBit() const
     }
 }
 
-unsigned int StTriggerData2017::spinBitYellowFilled() const
+unsigned int StTriggerData2018::spinBitYellowFilled() const
 {
     unsigned int sb = spinBit();
     return sb%2;
 }
 
-unsigned int StTriggerData2017::spinBitYellowUp() const
+unsigned int StTriggerData2018::spinBitYellowUp() const
 {
     unsigned int sb = spinBit();
     return (sb/2)%2;
 }
 
-unsigned int StTriggerData2017::spinBitYellowDown() const
+unsigned int StTriggerData2018::spinBitYellowDown() const
 {
     unsigned int sb = spinBit();
     return (sb/4)%2;
 }
 
-unsigned int StTriggerData2017::spinBitYellowUnpol() const
+unsigned int StTriggerData2018::spinBitYellowUnpol() const
 {
     unsigned int sb = spinBit();
     return (sb/8)%2;
 }
 
-unsigned int StTriggerData2017::spinBitBlueFilled() const
+unsigned int StTriggerData2018::spinBitBlueFilled() const
 {
     unsigned int sb = spinBit();
     return (sb/16)%2;
 }
 
-unsigned int StTriggerData2017::spinBitBlueUp() const
+unsigned int StTriggerData2018::spinBitBlueUp() const
 {
     unsigned int sb = spinBit();
     return (sb/32)%2;
 }
 
-unsigned int StTriggerData2017::spinBitBlueDown() const
+unsigned int StTriggerData2018::spinBitBlueDown() const
 {
     unsigned int sb = spinBit();
     return (sb/64)%2;
 }
 
-unsigned int StTriggerData2017::spinBitBlueUnpol() const
+unsigned int StTriggerData2018::spinBitBlueUnpol() const
 {
     unsigned int sb = spinBit();
     return (sb/128)%2;
 }
 
-unsigned short StTriggerData2017::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
     const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         4, 4, 4, 4, 4, 4, 4, 4},
@@ -413,7 +397,7 @@ unsigned short StTriggerData2017::bbcADC(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const
 {
     const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         4, 4, 4, 4, 4, 4, 4, 4},
@@ -428,7 +412,7 @@ unsigned short StTriggerData2017::bbcTDC(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::bbcTDC5bit(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::bbcTDC5bit(StBeamDirection eastwest, int pmt, int prepost) const
 {
     const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         4, 4, 4, 4, 4, 4, 4, 4},
@@ -443,7 +427,7 @@ unsigned short StTriggerData2017::bbcTDC5bit(StBeamDirection eastwest, int pmt, 
     return 0;
 }
 
-unsigned short StTriggerData2017::bbcADCSum(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::bbcADCSum(StBeamDirection eastwest, int prepost) const
 {
     unsigned short sum=0;
     int buffer = prepostAddress(prepost);
@@ -457,7 +441,7 @@ unsigned short StTriggerData2017::bbcADCSum(StBeamDirection eastwest, int prepos
     return sum;
 }
 
-unsigned short StTriggerData2017::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const
 {
     unsigned short sum=0;
     int buffer = prepostAddress(prepost);
@@ -465,7 +449,7 @@ unsigned short StTriggerData2017::bbcADCSumLargeTile(StBeamDirection eastwest, i
     return sum;
 }
 
-unsigned short StTriggerData2017::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
@@ -477,17 +461,17 @@ unsigned short StTriggerData2017::bbcEarliestTDC(StBeamDirection eastwest, int p
     return 0;
 }
 
-unsigned short StTriggerData2017::bbcTimeDifference() const
+unsigned short StTriggerData2018::bbcTimeDifference() const
 {
     return L1_DSM->VTX[3]%8192;
 }
 
-unsigned short StTriggerData2017::bbcTacSum() const
+unsigned short StTriggerData2018::bbcTacSum() const
 {
     return (((L1_DSM->VTX[3]) >> 13) & 0x1);
 }
 
-unsigned short StTriggerData2017::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
@@ -500,13 +484,13 @@ unsigned short StTriggerData2017::bbcEarliestTDCLarge(StBeamDirection eastwest, 
     return 0;
 }
 
-unsigned short StTriggerData2017::bbcTimeDifferenceLarge() const
+unsigned short StTriggerData2018::bbcTimeDifferenceLarge() const
 {
     return L1_DSM->VTX[2]%8192;
 }
 
 
-unsigned short StTriggerData2017::bbcBB101(int ch, int prepost) const 
+unsigned short StTriggerData2018::bbcBB101(int ch, int prepost) const 
 {
     int dsmmap[8] = {3,2,1,0,7,6,5,4};
     int buffer = prepostAddress(prepost);
@@ -518,7 +502,7 @@ unsigned short StTriggerData2017::bbcBB101(int ch, int prepost) const
     return 0;
 }
 
-unsigned short StTriggerData2017::bbcBB102(int ch, int prepost) const 
+unsigned short StTriggerData2018::bbcBB102(int ch, int prepost) const 
 {
     int dsmmap[8] = {3,2,1,0,7,6,5,4};
     int buffer = prepostAddress(prepost);
@@ -531,17 +515,17 @@ unsigned short StTriggerData2017::bbcBB102(int ch, int prepost) const
 }
 
 
-unsigned short StTriggerData2017::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const
+unsigned short StTriggerData2018::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const
 {
     return 0;
 }
 
-unsigned short StTriggerData2017::fpdSum(StBeamDirection eastwest, int module) const
+unsigned short StTriggerData2018::fpdSum(StBeamDirection eastwest, int module) const
 {
     return 0;
 }
 
-unsigned short StTriggerData2017::fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost) const{
+unsigned short StTriggerData2018::fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost) const{
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
         if (eastwest==east) { if (mMIX[buffer]) return mMIX[buffer]->FPDEastNSLayer1[channel]; }
@@ -550,31 +534,31 @@ unsigned short StTriggerData2017::fpdLayer1DSMRaw(StBeamDirection eastwest, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::fpdLayer2DSMRaw(int channel) const{
+unsigned short StTriggerData2018::fpdLayer2DSMRaw(int channel) const{
     if (channel<8) return L1_DSM->FPD[channel];
     return 0;
 }
 
-bool StTriggerData2017::zdcPresent(int prepost) const
+bool StTriggerData2018::zdcPresent(int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) return mBBQ[buffer];
     return false;
 }
 
-unsigned short StTriggerData2017::zdcAtChannel(int channel, int prepost) const
+unsigned short StTriggerData2018::zdcAtChannel(int channel, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && channel>=0 && channel<32) return bbq[buffer][14][channel];
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcAtAddress(int address, int prepost) const
+unsigned short StTriggerData2018::zdcAtAddress(int address, int prepost) const
 {
     return zdcAtChannel(address,prepost);
 }
 
-unsigned short StTriggerData2017::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
@@ -584,7 +568,7 @@ unsigned short StTriggerData2017::zdcUnAttenuated(StBeamDirection eastwest, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcAttenuated(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::zdcAttenuated(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
@@ -594,7 +578,7 @@ unsigned short StTriggerData2017::zdcAttenuated(StBeamDirection eastwest, int pr
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=3) {
@@ -612,7 +596,7 @@ unsigned short StTriggerData2017::zdcADC(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcTDC(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::zdcTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
@@ -622,7 +606,7 @@ unsigned short StTriggerData2017::zdcTDC(StBeamDirection eastwest, int prepost) 
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=3) {
@@ -640,21 +624,21 @@ unsigned short StTriggerData2017::zdcPmtTDC(StBeamDirection eastwest, int pmt, i
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcHardwareSum(int prepost) const
+unsigned short StTriggerData2018::zdcHardwareSum(int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) return bbq[buffer][14][11];
     return 0;
 }
 
-bool StTriggerData2017::zdcSMDPresent(int prepost) const
+bool StTriggerData2018::zdcSMDPresent(int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) return mMXQ[buffer];
     return false;
 }
 
-unsigned short StTriggerData2017::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
+unsigned short StTriggerData2018::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
     static const int zdcsmd_map[2][2][8] ={
         { { 31, 30, 29, 28, 27, 26, 25, 19} ,
@@ -681,7 +665,7 @@ unsigned short StTriggerData2017::zdcSMD(StBeamDirection eastwest, int verthori,
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcEarliestTDC(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::zdcEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
@@ -698,7 +682,7 @@ unsigned short StTriggerData2017::zdcEarliestTDC(StBeamDirection eastwest, int p
     return 0;
 }
 
-bool StTriggerData2017::zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
+bool StTriggerData2018::zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
@@ -714,7 +698,7 @@ bool StTriggerData2017::zdcSumADCaboveThreshold(StBeamDirection eastwest, int pr
     return 0;
 }
 
-bool StTriggerData2017::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
+bool StTriggerData2018::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
@@ -730,7 +714,7 @@ bool StTriggerData2017::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int 
     return 0;
 }
 
-bool StTriggerData2017::zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
+bool StTriggerData2018::zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
@@ -746,45 +730,45 @@ bool StTriggerData2017::zdcBackADCaboveThreshold(StBeamDirection eastwest, int p
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcTimeDifference() const
+unsigned short StTriggerData2018::zdcTimeDifference() const
 {
     return L1_DSM->VTX[1]%1024;
 }
 
-bool StTriggerData2017::zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const {
+bool StTriggerData2018::zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const {
     return L1_DSM->VTX[1] & (1 << ((eastwest==east) ? 10 : 11));
 }
 
-bool StTriggerData2017::zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const {
+bool StTriggerData2018::zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const {
     return L1_DSM->VTX[1] & (1 << ((eastwest==east) ? 12 : 14));
 }
 
-bool StTriggerData2017::zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const {
+bool StTriggerData2018::zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const {
     return L1_DSM->VTX[1] & (1 << ((eastwest==east) ? 13 : 15));
 }
 
-bool StTriggerData2017::zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const {
+bool StTriggerData2018::zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const {
     if(mRun<12000000){ return lastDSM(2) & (1 << ((eastwest==east) ? 7 : 8)); }
     else             { return lastDSM(1) & (1 << ((eastwest==east) ? 7 : 8)); }
 }
 
-bool StTriggerData2017::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const {
+bool StTriggerData2018::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const {
     if(mRun<12000000){ return lastDSM(2) & (1 << ((eastwest==east) ? 9 : 11)); }
     else             { return lastDSM(1) & (1 << ((eastwest==east) ? 9 : 11)); }
 }
 
-bool StTriggerData2017::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {
+bool StTriggerData2018::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {
     if(mRun<12000000){ return lastDSM(2) & (1 << ((eastwest==east) ? 10 : 12)); }
     else             { return lastDSM(1) & (1 << ((eastwest==east) ? 10 : 12)); }
 }
 
-bool StTriggerData2017::zdcTimeDifferenceInWindow() const
+bool StTriggerData2018::zdcTimeDifferenceInWindow() const
 {
     if(mRun<12000000){ return lastDSM(2) & (1 << 6); }
     else             { return lastDSM(1) & (1 << 6); }
 }
 
-unsigned short StTriggerData2017::zdcSMDHighestStrip(StBeamDirection eastwest, int verthori, int prepost) const
+unsigned short StTriggerData2018::zdcSMDHighestStrip(StBeamDirection eastwest, int verthori, int prepost) const
 {
     if(mRun<12000000) return 0;
     // copy of the scaler output from ZDC SMD QT is sent to ZD101 J2
@@ -798,7 +782,7 @@ unsigned short StTriggerData2017::zdcSMDHighestStrip(StBeamDirection eastwest, i
     return 0;
 }
 
-unsigned short StTriggerData2017::zdcTruncatedSum(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::zdcTruncatedSum(StBeamDirection eastwest, int prepost) const
 {
     if(mRun<12000000) return 0;
     int buffer = prepostAddress(prepost);
@@ -811,7 +795,7 @@ unsigned short StTriggerData2017::zdcTruncatedSum(StBeamDirection eastwest, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
+unsigned short StTriggerData2018::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
 {
     static const int map[2][2][2][2] ={ { { { 0, 1}, { 2, 3} } , { {16,17}, {18,19} } , } ,
         { { { 8, 9}, {10,11} } , { {24,25}, {26,27} } , } };
@@ -823,7 +807,7 @@ unsigned short StTriggerData2017::pp2ppADC(StBeamDirection eastwest, int vh, int
     return 0;
 }
 
-unsigned short StTriggerData2017::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
+unsigned short StTriggerData2018::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
 {
     static const int map[2][2][2][2] ={ { { { 0, 1}, { 2, 3} } , { {16,17}, {18,19} } , } ,
         { { { 8, 9}, {10,11} } , { {24,25}, {26,27} } , } };
@@ -835,12 +819,12 @@ unsigned short StTriggerData2017::pp2ppTAC(StBeamDirection eastwest, int vh, int
     return 0;
 }
 
-unsigned long StTriggerData2017::pp2ppDSM(int prepost) const {
+unsigned long StTriggerData2018::pp2ppDSM(int prepost) const {
     if (prepost!=0) return 0;
     return L1_DSM->TOF[7];
 }
 
-unsigned short StTriggerData2017::bemcLayer1DSM(int channel, int prepost) const {
+unsigned short StTriggerData2018::bemcLayer1DSM(int channel, int prepost) const {
     const int n_bemc_layer1=48;
     if (channel<0 || channel >=n_bemc_layer1) {
         gMessMgr->Warning() << "Barrel DSM layer 1 out of range (" << channel << ")" << endm;
@@ -851,7 +835,7 @@ unsigned short StTriggerData2017::bemcLayer1DSM(int channel, int prepost) const 
     return 0;
 }
 
-unsigned short StTriggerData2017::eemcLayer1DSM(int channel, int prepost) const {
+unsigned short StTriggerData2018::eemcLayer1DSM(int channel, int prepost) const {
     const int n_eemc_layer1=16;
     if (channel<0 || channel >=n_eemc_layer1) {
         gMessMgr->Warning() << "Endap DSM layer 1 out of range (" << channel << ")" << endm;
@@ -862,7 +846,7 @@ unsigned short StTriggerData2017::eemcLayer1DSM(int channel, int prepost) const 
     return 0;
 }
 
-unsigned short StTriggerData2017::emcLayer2DSM(int channel) const {
+unsigned short StTriggerData2018::emcLayer2DSM(int channel) const {
     const int n_emc_layer2=8;
     if (channel<0 || channel >=n_emc_layer2) {
         gMessMgr->Warning() << "EMC DSM layer 2 out of range (" << channel << ")" << endm;
@@ -871,7 +855,7 @@ unsigned short StTriggerData2017::emcLayer2DSM(int channel) const {
     return L1_DSM->EMC[channel];
 }
 
-unsigned short StTriggerData2017::tpcMaskDSM(int channel) const {
+unsigned short StTriggerData2018::tpcMaskDSM(int channel) const {
     const int n_tpcMask=8;
     if (channel<0 || channel >=n_tpcMask) {
         gMessMgr->Warning() << "TPCMask DSM out of range (" << channel << ")" << endm;
@@ -880,7 +864,7 @@ unsigned short StTriggerData2017::tpcMaskDSM(int channel) const {
     return L1_DSM->TPCMask[channel];
 }
 
-unsigned char StTriggerData2017::bemcHighTower(int patch_id, int prepost) const {
+unsigned char StTriggerData2018::bemcHighTower(int patch_id, int prepost) const {
     // Unpacking of Bemc trigger data (level 0 DSM input, trigger patches)
     const int m_max_patch=300; // Full barrel
     if ( patch_id < 0 || patch_id >= m_max_patch) {
@@ -909,7 +893,7 @@ unsigned char StTriggerData2017::bemcHighTower(int patch_id, int prepost) const 
     return 0;
 }
 
-unsigned char StTriggerData2017::bemcJetPatch (int patch_id, int prepost) const
+unsigned char StTriggerData2018::bemcJetPatch (int patch_id, int prepost) const
 {
     // Unpacking of Bemc trigger data (level 0 DSM input, trigger patches)
     const int m_max_patch=300; // Full barrel
@@ -940,7 +924,7 @@ unsigned char StTriggerData2017::bemcJetPatch (int patch_id, int prepost) const
 }
 
 
-unsigned char StTriggerData2017::eemcHighTower(int patch_id, int prepost) const
+unsigned char StTriggerData2018::eemcHighTower(int patch_id, int prepost) const
 {
     // Unpacking of Eemc trigger data (level 0 DSM input, trigger patches)
     const int m_max_patch=90;
@@ -958,7 +942,7 @@ unsigned char StTriggerData2017::eemcHighTower(int patch_id, int prepost) const
     return 0;
 }
 
-unsigned char StTriggerData2017::eemcJetPatch (int patch_id, int prepost) const
+unsigned char StTriggerData2018::eemcJetPatch (int patch_id, int prepost) const
 {
     // Unpacking of Eemc trigger data (level 0 DSM input, trigger patches)
     const int m_max_patch=90;
@@ -976,7 +960,7 @@ unsigned char StTriggerData2017::eemcJetPatch (int patch_id, int prepost) const
     return 0;
 }
 
-unsigned char StTriggerData2017::bemcHighestTowerADC(int prepost) const {
+unsigned char StTriggerData2018::bemcHighestTowerADC(int prepost) const {
     // Unpacking of Bemc trigger data (level 0 DSM input, trigger patches)
     const int m_max_patch=300; // Full barrel
     unsigned char h=0;
@@ -987,7 +971,7 @@ unsigned char StTriggerData2017::bemcHighestTowerADC(int prepost) const {
     return h;
 }
 
-unsigned char StTriggerData2017::eemcHighestTowerADC(int prepost) const {
+unsigned char StTriggerData2018::eemcHighestTowerADC(int prepost) const {
     // Unpacking of Eemc trigger data (level 0 DSM input, trigger patches)
     const int m_max_patch=90;
     unsigned char h=0;
@@ -998,82 +982,82 @@ unsigned char StTriggerData2017::eemcHighestTowerADC(int prepost) const {
     return h;
 }
 
-char* StTriggerData2017::getTriggerStructure()
+char* StTriggerData2018::getTriggerStructure()
 {
     return (char*) mData;
 }
 
-TriggerDataBlk2017* StTriggerData2017::getTriggerStructure2017()
+TriggerDataBlk2018* StTriggerData2018::getTriggerStructure2018()
 {
     return mData;
 }
 
-int StTriggerData2017::getRawSize() const
+int StTriggerData2018::getRawSize() const
 {
     return  mData->totalTriggerLength;
 }
 
-unsigned char* StTriggerData2017::getDsm0_BEMCE(int prepost) const {
+unsigned char* StTriggerData2018::getDsm0_BEMCE(int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBCE[buffer]) return mBCE[buffer]->BEMCEast;
     return 0;
 }
 
-unsigned char* StTriggerData2017::getDsm0_BEMCW(int prepost) const {
+unsigned char* StTriggerData2018::getDsm0_BEMCW(int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBCW[buffer]) return mBCW[buffer]->BEMCWest;
     return 0;
 }
 
-unsigned short* StTriggerData2017::getDsm1_BEMC(int prepost) const {
+unsigned short* StTriggerData2018::getDsm1_BEMC(int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBC1[buffer]) return mBC1[buffer]->BEMClayer1;
     return 0;
 }
 
-unsigned char* StTriggerData2017::getDsm0_EEMC(int prepost) const {
+unsigned char* StTriggerData2018::getDsm0_EEMC(int prepost) const {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBC1[buffer]) return mBC1[buffer]->EEMC;
     return 0;
 }
 
-unsigned short* StTriggerData2017::getDsm1_EEMC(int prepost) const{
+unsigned short* StTriggerData2018::getDsm1_EEMC(int prepost) const{
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBC1[buffer]) return mBC1[buffer]->EEMClayer1;
     return 0;
 }
 
-unsigned short* StTriggerData2017::getDsm2_EMC() const{
+unsigned short* StTriggerData2018::getDsm2_EMC() const{
     return   L1_DSM->EMC;
 }
 
-unsigned short* StTriggerData2017::getDsm3() const{
+unsigned short* StTriggerData2018::getDsm3() const{
     return   L1_DSM->lastDSM;
 }
 
-int StTriggerData2017::L2ResultsOffset(StL2AlgorithmId id) const
+int StTriggerData2018::L2ResultsOffset(StL2AlgorithmId id) const
 {
     switch(id) {
         default: return -999999999;
     }
 }
 
-bool StTriggerData2017::isL2Triggered(StL2TriggerResultType id) const
+bool StTriggerData2018::isL2Triggered(StL2TriggerResultType id) const
 {
     return false;
 }
 
-unsigned int StTriggerData2017::l2ResultLength() const
+unsigned int StTriggerData2018::l2ResultLength() const
 {
     return sizeof(TrgSum->L2Result)/sizeof(unsigned int);
 }
 
-const unsigned int* StTriggerData2017::l2Result() const
+const unsigned int* StTriggerData2018::l2Result() const
 {
     return TrgSum->L2Result;
 }
 
-unsigned long long StTriggerData2017::l2sum() const
+unsigned long long StTriggerData2018::l2sum() const
 {
     //printf("L2sum0=%08o\n",TrgSum->L2Sum[0]);
     //printf("L2sum1=%08o\n",TrgSum->L2Sum[1]);
@@ -1083,7 +1067,7 @@ unsigned long long StTriggerData2017::l2sum() const
     return mask;
 }
 
-unsigned short StTriggerData2017::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
@@ -1095,7 +1079,7 @@ unsigned short StTriggerData2017::vpdADC(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const
 {
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
@@ -1107,7 +1091,7 @@ unsigned short StTriggerData2017::vpdTDC(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost) const
 {
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
@@ -1119,7 +1103,7 @@ unsigned short StTriggerData2017::vpdADCHighThr(StBeamDirection eastwest, int pm
     return 0;
 }
 
-unsigned short StTriggerData2017::vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost) const
 {
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
@@ -1131,7 +1115,7 @@ unsigned short StTriggerData2017::vpdTDCHighThr(StBeamDirection eastwest, int pm
     return 0;
 }
 
-unsigned short StTriggerData2017::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
@@ -1154,7 +1138,7 @@ unsigned short StTriggerData2017::vpdEarliestTDC(StBeamDirection eastwest, int p
     return 0;
 }
 
-unsigned short StTriggerData2017::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const
+unsigned short StTriggerData2018::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
@@ -1181,13 +1165,13 @@ unsigned short StTriggerData2017::vpdEarliestTDCHighThr(StBeamDirection eastwest
     return 0;
 }
 
-unsigned short StTriggerData2017::vpdTimeDifference() const
+unsigned short StTriggerData2018::vpdTimeDifference() const
 {
     return L1_DSM->VTX[7]%8192;
 }
 
 
-unsigned short StTriggerData2017::bbcVP101(int ch, int prepost) const
+unsigned short StTriggerData2018::bbcVP101(int ch, int prepost) const
 {
     int map[8]={3, 2, 1, 0, 7, 6, 5, 4};
     if(ch<0 || ch>7) return 0;
@@ -1199,13 +1183,13 @@ unsigned short StTriggerData2017::bbcVP101(int ch, int prepost) const
 }
 
 
-unsigned short StTriggerData2017::dsmTF201Ch(int ch) const   // read TF201 data
+unsigned short StTriggerData2018::dsmTF201Ch(int ch) const   // read TF201 data
 {
     int map[8]={3, 2, 1, 0, 7, 6, 5, 4};
     return L1_DSM->TOF[map[ch]];  //ch4-7 currently unused
 }
 
-unsigned short StTriggerData2017::mtd4AtAddress(int address, int prepost) const  // read QT4 data
+unsigned short StTriggerData2018::mtd4AtAddress(int address, int prepost) const  // read QT4 data
 {
     if (mRun<=15001001) return 0;           // Run-14 onwards...
     int buffer = prepostAddress(prepost);
@@ -1213,91 +1197,95 @@ unsigned short StTriggerData2017::mtd4AtAddress(int address, int prepost) const 
     return 0;
 }
 
-unsigned short StTriggerData2017::nQTdata(int prepost) const
+unsigned short StTriggerData2018::nQTdata(int prepost) const
 {
     return 0;
 }
 
-unsigned int* StTriggerData2017::QTdata(int prepost) const
+unsigned int* StTriggerData2018::QTdata(int prepost) const
 {
     return 0;
 }
 
-unsigned short StTriggerData2017::fmsADC(int crt, int adr, int ch, int prepost) const
+unsigned short StTriggerData2018::fmsADC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=0 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=7 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
-            case 0: return bbq[buffer][adr][ch];
-            case 1: return qt1[buffer][adr][ch];
+	    case 0: return bbq[buffer][adr][ch];
+	    case 1: return qt1[buffer][adr][ch];
             case 2: return qt2[buffer][adr][ch];
             case 3: return qt3[buffer][adr][ch];
             case 4: return qt4[buffer][adr][ch];
-            case 5: return epq[buffer][adr][ch];
-            case 6: return fq1[buffer][adr][ch];
-            case 7: return fq2[buffer][adr][ch];
+            case 5: return eq3[buffer][adr][ch];
+            case 6: return eq1[buffer][adr][ch];
+            case 7: return eq2[buffer][adr][ch];
         }
     }
     return 0;
 }
 
-unsigned short StTriggerData2017::fmsTDC(int crt, int adr, int ch, int prepost) const
+unsigned short StTriggerData2018::fmsTDC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=0 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=0 && crt<=7 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
             case 0: return tbbq[buffer][adr][ch];
             case 1: return tqt1[buffer][adr][ch];
             case 2: return tqt2[buffer][adr][ch];
             case 3: return tqt3[buffer][adr][ch];
             case 4: return tqt4[buffer][adr][ch];
-            case 5: return tepq[buffer][adr][ch];
-            case 6: return tfq1[buffer][adr][ch];
-            case 7: return tfq2[buffer][adr][ch];
+            case 5: return teq3[buffer][adr][ch];
+            case 6: return teq1[buffer][adr][ch];
+            case 7: return teq2[buffer][adr][ch];
         }
     }
     return 0;
 }
 
-unsigned short StTriggerData2017::epdADC(int crt, int adr, int ch, int prepost) const
+unsigned short StTriggerData2018::epdADC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=1 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=3 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
-	case 1: return epq[buffer][adr][ch];
+            case 1: return eq1[buffer][adr][ch];
+            case 2: return eq2[buffer][adr][ch];
+            case 3: return eq3[buffer][adr][ch];
         }
     }
     return 0;
 }
 
-unsigned short StTriggerData2017::epdTDC(int crt, int adr, int ch, int prepost) const
+unsigned short StTriggerData2018::epdTDC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=1 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=3 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
-	case 1: return tepq[buffer][adr][ch];
+            case 1: return teq1[buffer][adr][ch];
+            case 2: return teq2[buffer][adr][ch];
+            case 3: return teq3[buffer][adr][ch];
         }
     }
     return 0;
 }
 
-unsigned char* StTriggerData2017::getDsm_FMS(int prepost) const
+unsigned char* StTriggerData2018::getDsm_FMS(int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mFMS[buffer]) return mFMS[buffer]->FMS;
     return 0;
 }
 
-unsigned short* StTriggerData2017::getDsm1_FMS(int prepost) const
+unsigned short* StTriggerData2018::getDsm1_FMS(int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mMIX[buffer]) return mMIX[buffer]->FPDEastNSLayer1;
     return 0;
 }
 
-unsigned short* StTriggerData2017::getDsm2_FMS() const {return L1_DSM->FPD;}
+unsigned short* StTriggerData2018::getDsm2_FMS() const {return L1_DSM->FPD;}
 
-unsigned short StTriggerData2017::mxqAtSlotAddress(int address, int prepost, int slot) const
+unsigned short StTriggerData2018::mxqAtSlotAddress(int address, int prepost, int slot) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && address>=0 && address<32){
@@ -1308,7 +1296,7 @@ unsigned short StTriggerData2017::mxqAtSlotAddress(int address, int prepost, int
     return 0;
 }
 
-unsigned short StTriggerData2017::mtdQtAtCh(int qtid, int address, int prepost) const
+unsigned short StTriggerData2018::mtdQtAtCh(int qtid, int address, int prepost) const
 { // read all the MTD QTs data, and the range of qtid is 1-8
     int map1[4] = {0, 10, 12, 14};
     int map2[8] = {0,  9, 10, 11, 12, 13, 14, 15};
@@ -1345,14 +1333,14 @@ unsigned short StTriggerData2017::mtdQtAtCh(int qtid, int address, int prepost) 
     return 0;
 }
 
-unsigned short StTriggerData2017::mtdAtAddress(int address, int prepost) const
+unsigned short StTriggerData2018::mtdAtAddress(int address, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][0][address];
     return 0;
 }
 
-unsigned short StTriggerData2017::mtdgemAtAddress(int address, int prepost) const
+unsigned short StTriggerData2018::mtdgemAtAddress(int address, int prepost) const
 {
     if (mRun<=12003001) return 0;
     int buffer = prepostAddress(prepost);
@@ -1360,7 +1348,7 @@ unsigned short StTriggerData2017::mtdgemAtAddress(int address, int prepost) cons
     return 0;
 }
 
-unsigned short StTriggerData2017::mtd3AtAddress(int address, int prepost) const
+unsigned short StTriggerData2018::mtd3AtAddress(int address, int prepost) const
 {
     if (mRun<=14001001) return 0;			// Run-13 onwards...
     int buffer = prepostAddress(prepost);
@@ -1369,9 +1357,9 @@ unsigned short StTriggerData2017::mtd3AtAddress(int address, int prepost) const
 }
 
 
-unsigned short StTriggerData2017::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const
 {
-    //pmt in not used for 2017, it is place holder for next year
+    //pmt in not used for 2018, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt==0){
         if (eastwest==east) {
@@ -1383,9 +1371,9 @@ unsigned short StTriggerData2017::mtdAdc(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned short StTriggerData2017::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const
+unsigned short StTriggerData2018::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const
 {
-    //pmt in not used for 2017, it is place holder for next year
+    //pmt in not used for 2018, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt==0){
         if (eastwest==east) {
@@ -1397,20 +1385,20 @@ unsigned short StTriggerData2017::mtdTdc(StBeamDirection eastwest, int pmt, int 
     return 0;
 }
 
-unsigned char StTriggerData2017::mtdDsmAtCh(int ch, int prepost) const
+unsigned char StTriggerData2018::mtdDsmAtCh(int ch, int prepost) const
 {
     int map[16] = {7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8};
-    int map2[8] = {3, 2, 1, 0, 7, 6, 5, 4};
+    //int map2[8] = {3, 2, 1, 0, 7, 6, 5, 4};
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && ch>=0){
         if(mMIX[buffer]){
             if(ch<16){
                 return mMIX[buffer]->MTD_P2PLayer1[map[ch]];
             }else if(ch<32){
-                int add= 8 + map2[(ch-16)/2];
+                //int add= 8 + map2[(ch-16)/2];
                 unsigned char v=0;
-                if(ch%2==0){ v=(unsigned char)((mMIX[buffer]->TPCpreMask[add] & 0xff00)>>8);}
-                else       { v=(unsigned char)((mMIX[buffer]->TPCpreMask[add] & 0x00ff)   );}
+                //if(ch%2==0){ v=(unsigned char)((mMIX[buffer]->TPCpreMask[add] & 0xff00)>>8);}
+                //else       { v=(unsigned char)((mMIX[buffer]->TPCpreMask[add] & 0x00ff)   );}
                 return v;
             }
         }
@@ -1418,9 +1406,9 @@ unsigned char StTriggerData2017::mtdDsmAtCh(int ch, int prepost) const
     return 0;
 }
 
-bool StTriggerData2017::mtdDsmHit(int pmt, int prepost) const
+bool StTriggerData2018::mtdDsmHit(int pmt, int prepost) const
 {
-    //pmt in not used for 2017, it is place holder for next year
+    //pmt in not used for 2018, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
         if(mMIX[buffer]){
@@ -1436,12 +1424,12 @@ bool StTriggerData2017::mtdDsmHit(int pmt, int prepost) const
     return false;
 }
 
-unsigned short StTriggerData2017::mtdVpdTacDiff() const
+unsigned short StTriggerData2018::mtdVpdTacDiff() const
 {
     return (L1_DSM->TOF[3] & 0x3fff);
 }
 
-unsigned short StTriggerData2017::tofAtAddress(int address, int prepost) const
+unsigned short StTriggerData2018::tofAtAddress(int address, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer>=0 && address>=0 && address<48) {
@@ -1450,7 +1438,7 @@ unsigned short StTriggerData2017::tofAtAddress(int address, int prepost) const
     return 0;
 }
 
-unsigned short StTriggerData2017::tofTrayMultiplicity(int tray, int prepost) const
+unsigned short StTriggerData2018::tofTrayMultiplicity(int tray, int prepost) const
 {
     int dsmmap[8] = {3,2,1,0,7,6,5,4};
     int traydsm[120] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5,
@@ -1476,13 +1464,13 @@ unsigned short StTriggerData2017::tofTrayMultiplicity(int tray, int prepost) con
     return 0;
 }
 
-unsigned short StTriggerData2017::tofMultiplicity(int prepost) const
+unsigned short StTriggerData2018::tofMultiplicity(int prepost) const
 {
     if (prepost==0) return L1_DSM->TOF[1]%8192;
     return 0;
 }
 
-void StTriggerData2017::dump() const
+void StTriggerData2018::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
     printf(" mDebug=%d mData=%p\n",mDebug,mData);
@@ -1566,8 +1554,8 @@ void StTriggerData2017::dump() const
     printf("***** End StTriggerData Dump *****\n");
 }
 
-void StTriggerData2017::killFMS(){
-    TrgOfflen2017* offlen;
+void StTriggerData2018::killFMS(){
+    TrgOfflen2018* offlen;
     int npre  = numberOfPreXing();
     int npost = numberOfPostXing();
     for (int i=0; i<1+npre+npost; i++){
@@ -1575,75 +1563,75 @@ void StTriggerData2017::killFMS(){
         {offlen = mData->MainX;}
         else {
             if (mData->PrePostList[i-1]==0) continue;
-            offlen = (TrgOfflen2017*) ((char*)mData + mData->PrePostList[i-1]);
+            offlen = (TrgOfflen2018*) ((char*)mData + mData->PrePostList[i-1]);
         }
         int j;
-        j=offlen[y17QT1_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y17QT1_CONF_NUM].offset, 0, j); offlen[y17QT1_CONF_NUM].length=0;};
-        j=offlen[y17QT2_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y17QT2_CONF_NUM].offset, 0, j); offlen[y17QT2_CONF_NUM].length=0;};
-        j=offlen[y17QT3_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y17QT3_CONF_NUM].offset, 0, j); offlen[y17QT3_CONF_NUM].length=0;};
-        j=offlen[y17QT4_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y17QT4_CONF_NUM].offset, 0, j); offlen[y17QT4_CONF_NUM].length=0;};
+        j=offlen[y18QT1_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y18QT1_CONF_NUM].offset, 0, j); offlen[y18QT1_CONF_NUM].length=0;};
+        j=offlen[y18QT2_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y18QT2_CONF_NUM].offset, 0, j); offlen[y18QT2_CONF_NUM].length=0;};
+        j=offlen[y18QT3_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y18QT3_CONF_NUM].offset, 0, j); offlen[y18QT3_CONF_NUM].length=0;};
+        j=offlen[y18QT4_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y18QT4_CONF_NUM].offset, 0, j); offlen[y18QT4_CONF_NUM].length=0;};
     }
 }
 
-void StTriggerData2017::swapRawDet(DataBlock2017* data, int name, int hlength,int bs)
+void StTriggerData2018::swapRawDet(DataBlock2018* data, int name, int hlength,int bs)
 {
-    BELayerBlock2017* bc1;
-    MIXBlock2017* mix;
-    BBCBlock2017 *bbc;
-    QTBlock2017* qtdata;
+    BELayerBlock2018* bc1;
+    MIXBlock2018* mix;
+    BBCBlock2018 *bbc;
+    QTBlock2018* qtdata;
     int header_length = 8;
     if(bs) swapI((unsigned int*)&data->length);
     switch(name){
-        case y17MXQ_CONF_NUM : case y17EPQ_CONF_NUM : case y17BBQ_CONF_NUM : 
-        case y17QT1_CONF_NUM : case y17QT2_CONF_NUM : case y17QT3_CONF_NUM : case y17QT4_CONF_NUM :
-        case y17FQ1_CONF_NUM : case y17FQ2_CONF_NUM :
+        case y18MXQ_CONF_NUM : case y18EQ3_CONF_NUM : case y18BBQ_CONF_NUM : 
+        case y18QT1_CONF_NUM : case y18QT2_CONF_NUM : case y18QT3_CONF_NUM : case y18QT4_CONF_NUM :
+        case y18EQ1_CONF_NUM : case y18EQ2_CONF_NUM :
             header_length = 12; break;
     }
     if (hlength != data->length + header_length){
         mErrorFlag = mErrorFlag | (1 << name);
-        printf("StTriggerData2017: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
+        printf("StTriggerData2018: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
                name,data->name[0],data->name[1],data->name[2],data->name[3],
                hlength,data->length,header_length);      
-        printf("StTriggerData2017: Droping the data block =%2d [%1c%1c%1c%1c] with ErrorFlag=0x%x\n",
+        printf("StTriggerData2018: Droping the data block =%2d [%1c%1c%1c%1c] with ErrorFlag=0x%x\n",
                name,data->name[0],data->name[1],data->name[2],data->name[3],mErrorFlag);
         data=0;
         return;
     }
     if (bs){
         switch(name){
-            case y17BC1_CONF_NUM :
-                bc1 = (BELayerBlock2017*) data;
+            case y18BC1_CONF_NUM :
+                bc1 = (BELayerBlock2018*) data;
                 swapSSn((unsigned int*)bc1->BEMClayer1,48);
                 swapSSn((unsigned int*)bc1->EEMClayer1,16);
                 break;
-            case y17MIX_CONF_NUM :
-                mix = (MIXBlock2017*) data;
+            case y18MIX_CONF_NUM :
+                mix = (MIXBlock2018*) data;
                 swapSSn((unsigned int*)mix->FPDEastNSLayer1,8);
                 swapSSn((unsigned int*)mix->TOFLayer1,8+48);
                 break;
-            case y17BCW_CONF_NUM :
+            case y18BCW_CONF_NUM :
                 //only char
                 break;
-            case y17BCE_CONF_NUM :
+            case y18BCE_CONF_NUM :
                 //only char
                 break;
-            case y17BBC_CONF_NUM :
-                bbc = (BBCBlock2017*) data;
+            case y18BBC_CONF_NUM :
+                bbc = (BBCBlock2018*) data;
                 swapSSn((unsigned int*)bbc->BBClayer1,16+8+8);
                 break;
-            case y17FMS_CONF_NUM :
+            case y18FMS_CONF_NUM :
                 //only char
                 break;
-            case y17MXQ_CONF_NUM :
-            case y17EPQ_CONF_NUM :
-            case y17BBQ_CONF_NUM :
-            case y17QT1_CONF_NUM :
-            case y17QT2_CONF_NUM :
-            case y17QT3_CONF_NUM :
-            case y17QT4_CONF_NUM :
-            case y17FQ1_CONF_NUM :
-            case y17FQ2_CONF_NUM :
-                qtdata = (QTBlock2017*) data;
+            case y18MXQ_CONF_NUM :
+            case y18EQ3_CONF_NUM :
+            case y18BBQ_CONF_NUM :
+            case y18QT1_CONF_NUM :
+            case y18QT2_CONF_NUM :
+            case y18QT3_CONF_NUM :
+            case y18QT4_CONF_NUM :
+            case y18EQ1_CONF_NUM :
+            case y18EQ2_CONF_NUM :
+                qtdata = (QTBlock2018*) data;
                 swapI((unsigned int*)&qtdata->dataLoss);
                 swapIn(qtdata->data, qtdata->length/4);
                 break;
@@ -1654,16 +1642,16 @@ void StTriggerData2017::swapRawDet(DataBlock2017* data, int name, int hlength,in
                name,data->name[0],data->name[1],data->name[2],data->name[3],data->length);
 }
 
-void StTriggerData2017::Streamer(TBuffer &R__b)
+void StTriggerData2018::Streamer(TBuffer &R__b)
 {
-	// Stream an object of class StTriggerData2017.
+	// Stream an object of class StTriggerData2018.
 
 	if (R__b.IsReading()) {
-		R__b.ReadClassBuffer(StTriggerData2017::Class(),this);
-		//     cout << "StTriggerData2017::Streamer read trigger data!!!"<<endl;
+		R__b.ReadClassBuffer(StTriggerData2018::Class(),this);
+		//     cout << "StTriggerData2018::Streamer read trigger data!!!"<<endl;
 		if(mData) readData();
 	}
 	else {
-		R__b.WriteClassBuffer(StTriggerData2017::Class(),this);
+		R__b.WriteClassBuffer(StTriggerData2018::Class(),this);
 	}
 }

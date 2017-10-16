@@ -7,7 +7,11 @@
 
 /* Myrinet functions */
 
-#ifdef unix
+#ifdef __CINT__
+#define unix
+#endif
+
+#ifdef unix 
 typedef int INT32;
 typedef short int INT16;
 typedef unsigned int UINT32;

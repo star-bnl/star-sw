@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/random/ranluxint.h"
 #include "wcpplib/random/chisran.h"
@@ -59,32 +60,25 @@ void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   }
   // Stop here if we couldn't retrieve the material definition.
   if (!hmd) return;
-  // Calculate the cross section.
-  // First count the shells.
-  long qst = 0;
-  const long qa = hmd->matter->qatom();
-  for (long na = 0; na < qa; na++) qst += hmd->apacs[na]->get_qshell();
-
   // Sum up the cross-sections.
-  std::vector<double> cs(qst);
-  std::vector<long> nat(qst);
-  std::vector<long> nsh(qst);
+  std::vector<double> cs;
+  std::vector<long> nat;
+  std::vector<long> nsh;
   double s = 0.0;
-  long nst = 0;
+  const long qa = hmd->matter->qatom();
   for (long na = 0; na < qa; na++) {
     const long qs = hmd->apacs[na]->get_qshell();
     const double awq = hmd->matter->weight_quan(na);
     for (long ns = 0; ns < qs; ns++) {
-      cs[nst] = hmd->apacs[na]->get_ICS(ns, energy) * awq;
+      cs.push_back(hmd->apacs[na]->get_ICS(ns, energy) * awq);
       // threshold is taken into account in apacs[na]->get_ACS(ns,..)
-      nat[nst] = na;
-      nsh[nst] = ns;
-      s += cs[nst];
-      nst++;
+      nat.push_back(na);
+      nsh.push_back(ns);
+      s += cs.back();
     }
   }
   if (s_print_listing) Iprintn(mcout, s);
-  // Calculate the path length.
+  // Multiply with the density and calculate the path length.
   // s = s * hmd->eldens / hmd->matter->Z_mean() * C1_MEV_CM;
   s = s * 1.0e-18 * Avogadro / (hmd->matter->A_mean() / (gram / mole)) *
       hmd->matter->density() / (gram / cm3);
@@ -97,15 +91,14 @@ void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   if (xleng * cm < nextpos.prange) {
     s_photon_absorbed = true;
 #ifdef SFER_PHOTOEL
-    s_sfer_photoel = 1;  // assumes that virtual photons are already
-                         // absorbed and s_sfer_photoel is  0 for them
+    // Assume that virtual photons are already
+    // absorbed and s_sfer_photoel is 0 for them
+    s_sfer_photoel = 1;  
 #endif
     // Sample the shell.
     chispre(cs);
     const double r = chisran(SRANLUX(), cs);
-    long n = long(r);
-    if (n < 0) n = 0;
-    if (n > nst - 1) n = nst - 1;
+    const long n = std::min(std::max(long(r), 0L), long(cs.size() - 1));
     if (s_print_listing) Iprintn(mcout, n);
     na_absorbing = nat[n];
     ns_absorbing = nsh[n];
@@ -153,7 +146,8 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
   const long qel = el_energy.size();
   for (long nel = 0; nel < qel; nel++) {
     vec vel = currpos.dir;
-    if (nel == 0) {  // assumed it is photoelectron
+    if (nel == 0) {  
+      // The first in the list should be the photoelectron.
 #ifdef SFER_PHOTOEL
       if (s_sfer_photoel == 1) {
         vel.random_sfer_vec();

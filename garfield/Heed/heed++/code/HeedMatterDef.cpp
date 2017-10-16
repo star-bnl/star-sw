@@ -249,7 +249,6 @@ void HeedMatterDef::inite_HeedMatterDef() {
       check_econd11a(ta, < 0, "ACS: ne=" << ne << " e1=" << e1 << " e2=" << e2
                                          << " na=" << na << '\n',
                      mcerr);
-      // TODO: check!
       const double ti =
           s_use_mixture_thresholds == 1
               ? apacs[na]->get_integral_TICS(e1, e2, min_ioniz_pot)

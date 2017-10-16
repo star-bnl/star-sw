@@ -184,7 +184,7 @@ def   makeTaskList(argD,taskLF):
    
    nnode=int(nFtot*1.0/nthreads/npass+0.9)+1  #1 node is used to monitor tasks at Cori
    argD['nodeNumber']=str(nnode)
-   nskew=int((nnode-1)*300) #allow a DB connection time of 300 seconds for one node
+   nskew=int((nnode-1)*150) #allow a DB connection time of 150 seconds for one node
    argD['skewNumber']=str(nskew)
 
 #----------------------------------------------------------

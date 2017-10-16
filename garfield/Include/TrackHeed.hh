@@ -53,7 +53,7 @@ class TrackHeed : public Track {
                    double& x, double& y, double& z, double& t,
                    double& e, double& dx, double& dy, double& dz);
   bool GetIon(const unsigned int i, 
-              double& x, double& y, double& z, double& t);
+              double& x, double& y, double& z, double& t) const;
 
   virtual double GetClusterDensity();
   virtual double GetStoppingPower();
@@ -63,8 +63,15 @@ class TrackHeed : public Track {
   void TransportDeltaElectron(const double x0, const double y0, const double z0,
                               const double t0, const double e0,
                               const double dx0, const double dy0,
+                              const double dz0, int& nel, int& ni);
+  void TransportDeltaElectron(const double x0, const double y0, const double z0,
+                              const double t0, const double e0,
+                              const double dx0, const double dy0,
                               const double dz0, int& nel);
 
+  void TransportPhoton(const double x0, const double y0, const double z0,
+                       const double t0, const double e0, const double dx0,
+                       const double dy0, const double dz0, int& nel, int& ni);
   void TransportPhoton(const double x0, const double y0, const double z0,
                        const double t0, const double e0, const double dx0,
                        const double dy0, const double dz0, int& nel);

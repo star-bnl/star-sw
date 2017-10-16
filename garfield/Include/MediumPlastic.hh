@@ -16,7 +16,7 @@ class MediumPlastic : public Medium {
     m_name = "Plastic";
   }
   // Destructor
-  ~MediumPlastic() {}
+  virtual ~MediumPlastic() {}
 
   void EnableDrift() {}
   void EnableIonisation() {}

@@ -281,63 +281,82 @@ class AtomicSecondaryProducts : public RegPassivePtr {
   std::vector<std::vector<double> > photon_energy;
 };
 
-/// Atomic photoabsorption cross-section base class.
+/// Atomic photoabsorption cross-section abstract base class.
 class AtomPhotoAbsCS : public RegPassivePtr {
  public:
   /// Default constructor.
   AtomPhotoAbsCS();
 
+  /// Get the atomic number.
   int get_Z() const { return Z; }
+  /// Get the number of shells.
   inline unsigned int get_qshell() const { return qshell; }
+  /// Get the ionization threshold for a given shell.
   virtual double get_threshold(int nshell) const = 0;
+  /// Get the lowest ionization threshold among all shells.
   virtual double get_I_min() const;
+  /// Photo-absorption cross-section [Mbarn] at a given energy [MeV].
+  /// The photo-absorption cross-section can include excitation.
   virtual double get_ACS(double energy) const = 0;
+  /// Integrated photo-absorption cross-section overa given interval.
   virtual double get_integral_ACS(double energy1, double energy2) const = 0;
+  /// Sub-shell photo-absorption cross-section [Mbarn] at a given energy [MeV].
   virtual double get_ACS(int nshell, double energy) const = 0;
+  /// Integrated sub-shell photo-absorption cross-section.
   virtual double get_integral_ACS(int nshell, double energy1,
                                   double energy2) const = 0;
-  // photo-absorption cross section, energy in MeV, CS in Mbarns.
-  // It can include excitation.
 
+  /// Photo-ionization cross-section [Mbarn] at a given energy [MeV].
+  /// The photo-ionization cross-section does not include excitation.
   virtual double get_ICS(double energy) const = 0;
+  /// Photo-ionization cross-section assuming a redefined ionization threshold.
+  /// This function can be useful for redefining the ionization threshold in 
+  /// atomic mixtures, where on atom can transfer excitations to another one 
+  /// with lower ionization threshold (Penning/Jesse effect).
   virtual double get_TICS(double energy,
                           double factual_minimal_threshold) const;
+  /// Integrated photo-ionization cross-section over a given interval.
   virtual double get_integral_ICS(double energy1, double energy2) const = 0;
+  /// Integral photo-ionization cross-section with redefined threshold.
   virtual double get_integral_TICS(double energy1, double energy2,
                                    double factual_minimal_threshold) const;
+  /// Sub-shell photo-ionization cross-section at a given energy.
   virtual double get_ICS(int nshell, double energy) const = 0;
+  /// Sub-shell photo-ionization cross-section with redefined threshold.
   virtual double get_TICS(int nshell, double energy,
                           double factual_minimal_threshold) const;
+  /// Integrated sub-shell photo-ionization cross-section.
   virtual double get_integral_ICS(int nshell, double energy1,
                                   double energy2) const = 0;
+  /// Integrated sub-shell photo-ionization cross-section (redefined threshold).
   virtual double get_integral_TICS(int nshell, double energy1, double energy2,
                                    double factual_minimal_threshold) const;
-  // The last function is convenient to redefine ionization threshold in
-  // atomic mixtures, where one atom can pass excitation to another,
-  // which is easier to ionize.
 
-  // photo-ionization cross section, energy in MeV, CS in Mbarns.
-  // It does not include excitation.
-
-  // always assuming ionization
-  // Energy could be a little bit less than threshold.
-  // This is considered as numerical inprecision
-  // The photo-electron has to be the first in array el_energy.
-  // Later (in class HeedPhoton) the photo-electron is emitted ahead.
-  // The other ones fly  in any direction.
-  virtual void get_escape_particles(int nshell,     // input
-                                    double energy,  // input
+  /** Sample the electrons and photons emitted following
+    * ionisation of a given shell.
+    * \param nshell
+             shell index
+    * \param energy
+             can be a little bit below threshold 
+    * \param el_energy
+             electron energies. The photo-electron is the first one.
+             Later (in HeedPhoton) the photo-electron is emitted in the 
+             forward direction. The other are sampled isotropically.
+    * \param ph_energy
+             photon energies
+    */
+  virtual void get_escape_particles(int nshell, double energy,
                                     std::vector<double>& el_energy,
                                     std::vector<double>& ph_energy) const;
 
+  /// Return the shell number (1, 2, ...) for a given index.
+  /// The number is taken from the shell name.
+  /// If the shell number cannot be determined, the function returns -1.
   virtual int get_main_shell_number(int nshell) const = 0;
-  // returns the shell number (1,2,...)
-  // The current versions read it from shell name,
-  // so they interprete the shell name as the number.
-  // If the shell number cannot be recovered, the function
-  // returns -1.
 
+  /// Deactivate a sub-shell. Set s_ignore_shell flag to true. 
   virtual void remove_shell(int nshell);
+  /// Activate a sub-shell. Set s_ignore_shell flag to false. 
   virtual void restore_shell(int nshell);
   virtual void print(std::ostream& file, int l) const;
   virtual AtomPhotoAbsCS* copy() const = 0;
@@ -345,15 +364,19 @@ class AtomPhotoAbsCS : public RegPassivePtr {
   AtomicSecondaryProducts* get_asp(int nshell);
 
  protected:
+  /// Name of the atom.
   std::string name;
+  /// Atomic number.
   int Z;
+  /// Number of shells.
   int qshell;
-  // 0 - sign to use shell. 1 - sign to ignore it
-  // It does not affect threshold and escape sequences and assumed to
-  // manipulate with larger  shells, to investigate their
+  /// Array of flags whether to use a shell (false) or ignore it (true).
+  /// It does not affect threshold and escape sequences.
+  /// By default all elements are set to false.
+  // Assumed manipulate with larger shells, to investigate their
   // influence at the final characteristics.
-  // By default all is 0
   std::vector<bool> s_ignore_shell;
+  /// Sampling of relaxation products for each shell.
   std::vector<AtomicSecondaryProducts> asp;
 };
 std::ostream& operator<<(std::ostream& file, const AtomPhotoAbsCS& f);
@@ -380,13 +403,12 @@ class SimpleAtomPhotoAbsCS : public AtomPhotoAbsCS {
   virtual double get_ACS(int nshell, double energy) const;
   virtual double get_integral_ACS(int nshell, double energy1,
                                   double energy2y) const;
-  // photo-absorption cross section, energy in MeV, CS in Mbarns.
   virtual double get_ICS(double energy) const;
   virtual double get_integral_ICS(double energy1, double energy2) const;
   virtual double get_ICS(int nshell, double energy) const;
   virtual double get_integral_ICS(int nshell, double energy1,
                                   double energy2) const;
-  // photo-ionization cross section, energy in MeV, CS in Mbarns.
+
   virtual int get_main_shell_number(int nshell) const {
     return acs[nshell]->get_number();
   }
@@ -407,30 +429,24 @@ const double low_boundary_of_excitations = 0.7;  // from ionization threshold
 class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
  public:
   virtual double get_threshold(int nshell) const;
-  /// Photo-absorption cross section (energy in MeV, CS in Mbarns).
   virtual double get_ACS(double energy) const;
-  /// Integral photo-absorption cross-section.
   virtual double get_integral_ACS(double energy1, double energy2) const;
-  /// Photo-absorption cross-section for a given shell.
   virtual double get_ACS(int nshell, double energy) const;
-  /// Integral photo-absorption cross-section for a given shell.
   virtual double get_integral_ACS(int nshell, double energy1,
                                   double energy2) const;
 
-  /// Photo-ionization cross section (energy in MeV, CS in Mb).
   virtual double get_ICS(double energy) const;
-  /// Integral photo-ionization cross-section.
   virtual double get_integral_ICS(double energy1, double energy2) const;
-  /// Photo-ionization cross-section for a given shell.
   virtual double get_ICS(int nshell, double energy) const;
-  /// Integral photo-ionization cross-section for a given shell.
   virtual double get_integral_ICS(int nshell, double energy1,
                                   double energy2) const;
+
   virtual int get_main_shell_number(int nshell) const {
     return acs[nshell]->get_number();
   }
-  void replace_shells_by_average(double fwidth,  // MeV
-                                 double fstep, long fmax_q_step);
+
+  // Width [MeV]
+  void replace_shells_by_average(double fwidth, double fstep, long fmax_q_step);
   virtual void print(std::ostream& file, int l) const;
   virtual ExAtomPhotoAbsCS* copy() const { return new ExAtomPhotoAbsCS(*this); }
 
@@ -524,20 +540,19 @@ class ExAtomPhotoAbsCS : public AtomPhotoAbsCS {
   std::string threshold_file_name;
   std::string simple_table_file_name;
   std::string BT_file_name;
-  // the name acs is misleading:
-  // actually here there is ionization cross section.
-  // Excitations are added separately as height_of_excitation.
-  // So it should be more logical to call this ics.
-  // Initially ics was meant to be separate array.
-  // But during development it was found that it is not necessary.
+  /// Ionization cross-section (the name acs is misleading).
+  /// Excitations are added separately as height_of_excitation.
   std::vector<ActivePtr<PhotoAbsCS> > acs;
 
   // 3 variables for printing listings
   double integ_abs_before_corr;
   double integ_abs_after_corr;
   double integ_ioniz_after_corr;
-  double height_of_excitation;  // assumed  in the lowest shell
-  double exener[2];             // boundaries of excitation
+  /// Excitation cross-section (assumed in the lowest shell).
+  double height_of_excitation;
+  /// Boundaries of excitation.
+  double exener[2];
+
   double minimal_threshold;     // make shifts if necessary
   // The shells are corrected on the minimal_threshold "on the fly".
   // It the threshold of the atomic shell is less then minimal_threshold,
@@ -561,7 +576,7 @@ const double standard_factor_Fano = 0.19;
 #define CALC_W_USING_CHARGES
 // the opposite is just averaging potentials
 // This way is averaging potentials with taking into account charges.
-// So the atom or molecula with larger charge will affect more -
+// So the atom or molecule with larger charge will affect more -
 // this looks much more reasonable.
 // The opposite case is preserved for debug and research purposes.
 // F is calculated by the same way as W
@@ -575,25 +590,26 @@ const double coef_I_to_W = 2.0;
 class MolecPhotoAbsCS : public RegPassivePtr {
  public:
   /// Total number of atoms of all sorts in the molecule.
-  int get_qatom(void) { return qatom; }
+  int get_qatom() { return qatom; }
   /// Number of atoms of a particular sort in the molecule.
   int get_gatom_ps(int n) { return qatom_ps[n]; }
   const PassivePtr<const AtomPhotoAbsCS> get_atom(int n) { return atom[n]; }
 
-  /// Photo-absorption cross-section (energy in MeV, CS in Mb).
+  /// Photo-absorption cross-section [Mbarn] at a given energy [MeV].
   virtual double get_ACS(double energy) const;
   /// Integral photo-absorption cross-section.
   virtual double get_integral_ACS(double energy1, double energy2) const;
-  /// Photo-ionization cross-section (energy in MeV, CS in Mb).
+  /// Photo-ionization cross-section [Mbarn] at a given energy [MeV].
   virtual double get_ICS(double energy) const;
   /// Integral photo-ionization cross-section.
   virtual double get_integral_ICS(double energy1, double energy2) const;
 
+  /// Sum up the atomic numbers of all atoms in the molecule.
   int get_total_Z() const;
   /// Retrieve W value [MeV].
-  double get_W(void) const { return W; }
+  double get_W() const { return W; }
   /// Retrieve Fano factor.
-  double get_F(void) const { return F; }
+  double get_F() const { return F; }
 
   /// Default constructor.
   MolecPhotoAbsCS() : qatom(0) {}

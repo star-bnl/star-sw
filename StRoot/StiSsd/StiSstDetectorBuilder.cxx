@@ -106,20 +106,27 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
    {
-     std::ostringstream geoPath, geoName;
-      geoName << "SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
-      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/" << geoName.str().c_str();
 
-      bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
+     // Try sensitive volume at ideal path
+     std::string geoPath = Form( "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_%i/SFSW_%i/SFSL_1/SFSD_1",iLadder,iSensor );
+
+     bool isAvail = gGeoManager->cd(geoPath.c_str());     
+     if ( 0 == isAvail ) 
+       {
+	 // Try sensitive volume at misaligned path
+	 geoPath = Form( "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFSW_%i/SFSL_1/SFSD_1",(iLadder-1)*16+iSensor );
+	 isAvail = gGeoManager->cd(geoPath.c_str());     
+       }
+
 
       if (!isAvail) {
          LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node:" 
-		  << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
+		  << geoPath.c_str() << " Skipping to next ladder..." << endm;
          continue;
       }
-      gGeoManager->cd(geoPath.str().c_str());
+      gGeoManager->cd(geoPath.c_str());
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
+      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.c_str())->GetMatrix() );
 
       // Temporarily save the translation for this sensor in Z so, we can center
       // the newly built sensors at Z=0 (in ideal geometry) later
@@ -143,7 +150,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       // XXX:ds: Need to verify the constant for sensor spacing
       double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
-      StiShape *stiShape = new StiPlanarShape(geoName.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
+      StiShape *stiShape = new StiPlanarShape(geoPath.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
 
       StiPlacement *pPlacement= new StiPlacement(sensorMatrix);
 
@@ -152,7 +159,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       StiIsActiveFunctor* isActive = _active ? new StiSsdIsActiveFunctor :
          static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setProperties(geoName.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
+      stiDetector->setProperties(geoPath, isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiSstHitErrorCalculator::instance());
 
       add(stiRow, iLadder-1, stiDetector);

@@ -30,7 +30,7 @@ set extra=""
 set col=""
 set excluded=""
 set DEBUG=0
-set pool="condor02.rcf.bnl.gov:9664"
+set pool="condor02.rcf.bnl.gov:9664" 
 
 # Specific path to Unix executables (security and remote call issue)
 set GREP=/bin/grep
@@ -40,8 +40,9 @@ set SED=/bin/sed
 set CAT=/bin/cat
 set SORT=/bin/sort
 set HOSTNM=/bin/hostname
+set MKTEMP=/bin/mktemp
 
-# check validity
+# check validity 
 if ( ! $?USER ) then
     set USER=`whoami`
 endif
@@ -50,7 +51,7 @@ if ( "$USER" == "") then
 endif
 
 
-# default argument value
+# default argument value	    
 set X11Opt="-X"
 
 # Arguments parsing
@@ -60,7 +61,7 @@ while ( $count <= $#argv)
     @ count++
 
     switch ($arg)
-	# this is the option section
+	# this is the option section	
 	case "-v":
 	case "-V":
 	case "--version":
@@ -114,7 +115,11 @@ while ( $count <= $#argv)
 		set PERL=/bin/perl
 	    endif
 	    if( $?PERL && `$ID | $GREP root` == "") then
-		set file="/tmp/$$Color-for-$USER.pl"
+		set file=`$MKTEMP /tmp/$$Color-for-$USER-XXXXXXXXXX.pl`
+		if ( "$file" == "" ) then
+			echo "Unable to create required temporary file."
+			exit
+		endif
 		if ($DEBUG) then
 		    echo "Perl is located as    [$PERL]"
 		    echo "Temp file is named    [$file]"
@@ -198,12 +203,13 @@ while ( $count <= $#argv)
 print \$COLORS[\$#COLORS*rand()]."\n";
 __EOF__
 
-		if( -f $file) then
+		if ( -f $file) then
 		    set col=`$PERL $file`
 		    /bin/rm -f $file
 		    if ($DEBUG) then
 			echo "The color will be     [$col]"
 		    endif
+		endif
 	    else
 		if(`$ID | $GREP root` != "") then
 		    echo "This option is disbaled for root"
@@ -241,26 +247,26 @@ if ("$node" == "") then
 	# We have to extract this ourselves
 	set GROUP=`$ID | $SED "s/.*gid=.*(//" | $SED "s/).*//"`
     endif
-
+    
     # Now, this block will need editing if another experiment
     # needs this script functionality
     switch ($GROUP)
        case "rhstar":
         # also support the strap domain
         if ( `$HOSTNM | $GREP starp` != "") then
-	    # support STAR online domain
+	    # support STAR online domain 
 	    set node="onl+";
-	    set pool="-pool onlam3.starp.bnl.gov:9618";
+	    set pool="-pool onlam3.starp.bnl.gov:9618";     
  	else
 	    # RCF
 	    set node="rcas6+"
-	    set pool="-pool  condor02.rcf.bnl.gov:9664"
+	    set pool="-pool  condor02.rcf.bnl.gov:9664" 
         endif
 	breaksw;
 
        case "rhphobos":
         set node="rcas4+"
-        set pool="-pool  condor01.rcf.bnl.gov:9663"
+        set pool="-pool  condor01.rcf.bnl.gov:9663"  
 	breaksw;
 
        case "rhphenix":
@@ -357,9 +363,9 @@ if ($help) then
    set wnode=`echo $node | $SED "s/+//"`
    $CAT <<EOF | more
 
-rterm, $VERSION - Written by J. Lauret 2001
-This command will open a connection to any remote node using the slogin
-command and, without node precision open a terminal on the least loaded
+rterm, $VERSION - Written by J. Lauret 2001 
+This command will open a connection to any remote node using the slogin 
+command and, without node precision open a terminal on the least loaded 
 node.
 
 Syntax is
@@ -374,21 +380,21 @@ Currently implemented options are :
   -funky     pick a color randomly
   -Y         use -Y option for ssh instead of -X
 
-The 'NodeSpec' argument may be a node name (specific login to a given node)
+The 'NodeSpec' argument may be a node name (specific login to a given node) 
 or a partial node name followed by the '+' sign (wildcard). For example,
   % $prgm $node
 
-will open a connection on the least loaded node amongst all batch-available
+will open a connection on the least loaded node amongst all batch-available 
 $wnode* nodes. By default, this command will determine the appropriate
 wildcarded node specification for your GroupID. However, if this help
-is displayed when the command '% $prgm' is used, contact the RCF support
+is displayed when the command '% $prgm' is used, contact the RCF support 
 team (your group ID is probably not supported by this script).
 
-The 'UserName' argument is also optional. If unspecified, it will revert
+The 'UserName' argument is also optional. If unspecified, it will revert 
 to the current user ID.
 
 Finally, you may modify the xterminal layout by using the following
-environment variables
+environment variables 
   TERM_BKG_COLOR     sets the xterm background color
   TERM_OPTIONS       sets any other xterm options
 
@@ -401,7 +407,7 @@ endif
 # Where is the xterm program ? (may differe depending on OS)
 foreach path ( /usr/openwin/bin/ /usr/bin/X11/ /usr/X11R6/bin/ /usr/bin/ )
     if ( -e $path/xterm ) then
-	set TERM_PRGM=$path/xterm
+	set TERM_PRGM=$path/xterm	
     endif
 end
 if ( ! $?TERM_PRGM ) then
@@ -446,36 +452,43 @@ if ("$TEST" != "$node") then
     if ( "$pool" == "RANDOM" ) then
 	set CANDIDATES=`/usr/bin/perl -e "printf('${rhost}%04i.${rdomain}', ${rstart}+rand(${rrange}));"`
     # if not found, bail out
-    else if( "$LOAD" != "") then
+    else if( "$LOAD" != "") then    
         # The below was for LSF
-	#   set CANDIDATES=`$LOAD -R "select[inter] order[r1m:pg]" | $GREP $TEST |
+	#   set CANDIDATES=`$LOAD -R "select[inter] order[r1m:pg]" | $GREP $TEST | 
 	#                   $GREP -i " ok" | $AWK '{print $1}'`
         setenv CONDOR_CONFIG /dev/null
+	set loadfile=`$MKTEMP /tmp/$$.$USER.XXXXXXXXXX.lis`
+	if ( "$loadfile" == "" ) then
+		echo "Unable to create required temporary list file."
+		exit
+	endif
 	if ( $DEBUG ) then
 	    echo "We will try to execute $LOAD $pool -constraint 'interactive_node == True'"
-	    echo "Result in              [/tmp/$$.$USER.lis]"
+	    echo "Result in              [$loadfile]"
 	endif
 
 	# create an intermediate file so we d not bump into
 	# command syntax error in case the $LOAD command fails
 	# and do not produce the expected result
-	$LOAD $pool -constraint 'interactive_node == True' -format "%s " Machine -format "%f\n" TotalLoadAvg  >&/tmp/$$.$USER.lis
+	$LOAD $pool -constraint 'interactive_node == True' -format "%s " Machine -format "%f\n" TotalLoadAvg >! $loadfile
 
 	if ( $status ) then
 	    echo "$LOAD comand failed - we cannot get queue information"
 	    echo "Please select a node manually (or use -h  for more information)"
+	    /bin/rm -f $loadfile
 	    exit
 	else
-	    set TCMD=`$CAT /tmp/$$.$USER.lis`
+	    set TCMD=`$CAT $loadfile`
 	    if ( "$TCMD" == "") then
 		echo "$LOAD command failed - ir produced no results"
 		echo "Please select a node manually (or use -h  for more information)"
+                /bin/rm -f $loadfile
 		exit
 	    endif
 	endif
 
-        set CANDIDATES=`$CAT /tmp/$$.$USER.lis | $SORT -un -k 2 | $GREP $TEST | $AWK '{print $1}'`
-	/bin/rm -f /tmp/$$.$USER.lis
+        set CANDIDATES=`$CAT $loadfile | $SORT -un -k 2 | $GREP $TEST | $AWK '{print $1}'`
+	/bin/rm -f $loadfile
     else
 	set CANDIDATES=""
     endif
@@ -548,13 +561,13 @@ endif
 set SLOGIN = ""
 foreach path ( /usr/bin/ /usr/local/bin )
     if ( -e $path) then
-	if (-x $path/slogin ) then
+	if (-x $path/slogin ) then	
 	    set SLOGIN=$path/slogin
 	    break
 	endif
     endif
 end
-
+	
 
 
 
@@ -575,7 +588,7 @@ endif
 
 
 
-#
+# 
 # Note - a reminder that the current condor way relies
 #        on the 'interactive_node' to be set and selectable
 #        with constraint
@@ -590,7 +603,7 @@ endif
 # Revised 2006
 # - RCF personel added Condor support
 # - Misc fix for broken options + restored LSF lines
-#   as comment for historical purposes
+#   as comment for historical purposes 
 #
 # Revised Feb 2005
 # - Modified call to lsload
@@ -607,7 +620,7 @@ endif
 # - support for all experiments
 # - argument 1 is now optional
 # - nodes MUST be set with LSF resource 'inter'
-#
+# 
 # Revised Sep 2001
 # - Misspelling corrections
 # - Small correction in case of lsf failure or
@@ -620,6 +633,6 @@ endif
 #
 # Revised Nov 2001
 # - Added '-x' option (not the smartest implementation but works)
-# - And of course, useless (but it was a challenge) -funky option
+# - And of course, useless (but it was a challenge) -funky option 
 # - Lots of debugging lines in case ...
 #

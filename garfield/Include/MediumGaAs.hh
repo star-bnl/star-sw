@@ -13,7 +13,7 @@ class MediumGaAs : public Medium {
   /// Constructor
   MediumGaAs();
   /// Destructor
-  ~MediumGaAs() {}
+  virtual ~MediumGaAs() {}
 
   bool IsSemiconductor() const { return true; }
 

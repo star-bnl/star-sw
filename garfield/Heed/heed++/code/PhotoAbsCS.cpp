@@ -81,6 +81,7 @@ PhotoAbsCS::PhotoAbsCS() : name(""), number(-1), Z(0), threshold(0.0) {}
 PhotoAbsCS::PhotoAbsCS(const std::string& fname, int fZ, double fthreshold)
     : name(fname), number(-1), Z(fZ), threshold(fthreshold) {
 
+  // Try to get the (shell) number from the name.
   std::istringstream ss(name);
   int i = -100;
   ss >> i;
@@ -582,7 +583,8 @@ double AtomPhotoAbsCS::get_TICS(double energy,
                                 double factual_minimal_threshold) const {
   mfunname("double AtomPhotoAbsCS::get_TICS(...) const");
   if (factual_minimal_threshold <= energy) {
-    // All what is absorbed, should ionize
+    // Above threshold, the ionization cross-section is assumed to be 
+    // idential to the absorption cross-section.
     return get_ACS(energy);
   }
   return 0.0;
@@ -591,14 +593,9 @@ double AtomPhotoAbsCS::get_TICS(double energy,
 double AtomPhotoAbsCS::get_integral_TICS(
     double energy1, double energy2, double factual_minimal_threshold) const {
   mfunname("double AtomPhotoAbsCS::get_integral_TICS(...) const");
-  if (factual_minimal_threshold <= energy2) {
-    // All what is absorbed, should ionize
-    if (energy1 < factual_minimal_threshold) {
-      energy1 = factual_minimal_threshold;
-    }
-    return get_integral_ACS(energy1, energy2);
-  }
-  return 0.0;
+  if (factual_minimal_threshold > energy2) return 0.;
+  energy1 = std::max(energy1, factual_minimal_threshold);
+  return get_integral_ACS(energy1, energy2);
 }
 
 double AtomPhotoAbsCS::get_TICS(int nshell, double energy,
@@ -606,7 +603,6 @@ double AtomPhotoAbsCS::get_TICS(int nshell, double energy,
   mfunname("double AtomPhotoAbsCS::get_TICS(...) const");
   if (s_ignore_shell[nshell]) return 0.;
   if (factual_minimal_threshold <= energy) {
-    // All what is absorbed, should ionize
     return get_integral_ACS(nshell, energy);
   }
   return 0.;
@@ -618,7 +614,6 @@ double AtomPhotoAbsCS::get_integral_TICS(
   mfunname("double AtomPhotoAbsCS::get_integral_TICS(...) const");
   if (s_ignore_shell[nshell]) return 0.;
   if (factual_minimal_threshold <= energy1) {
-    // All what is absorbed, should ionize
     return get_integral_ACS(nshell, energy1, energy2);
   }
   if (factual_minimal_threshold >= energy2) return 0.0;
@@ -670,7 +665,7 @@ std::ostream& operator<<(std::ostream& file, const AtomPhotoAbsCS& f) {
 }
 
 double AtomPhotoAbsCS::get_I_min() const {
-  mfunname("double AtomPhotoAbsCS::get_I_min(void) const");
+  mfunname("double AtomPhotoAbsCS::get_I_min() const");
   double st = DBL_MAX;
   // The minimal shell is normally the last, but to be safe we check all.
   for (int n = 0; n < qshell; ++n) st = std::min(st, get_threshold(n));
