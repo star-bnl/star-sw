@@ -11,8 +11,8 @@ switch (${STAR_HOST_SYS})
         setenv CC       "gcc -m64"
         setenv CXX      "g++ -m64"
         setenv F77      "gfortran -m64"
-	setenv CFLAGS   "-m64 -fPIC"
-	setenv CXXFLAGS "-m64 -fPIC"
+	setenv cflags   "-m64 -fPIC"
+	setenv cxxflags "-m64 -fPIC"
 	setenv LDFLAGS  "-m64"
 	setenv FCFLAGS  "-m64 -fPIC"
         setenv arch     "x86_64"
@@ -23,24 +23,26 @@ switch (${STAR_HOST_SYS})
         setenv CC       "gcc -m32"
         setenv CXX      "g++ -m32"
         setenv F77      "gfortran -m32"
-	setenv CFLAGS   "-m32 -fPIC"
-	setenv CXXFLAGS "-m32 -fPIC"
+	setenv cflags   "-m32 -fPIC"
+	setenv cxxflags "-m32 -fPIC"
 	setenv LDFLAGS  "-m32"
 	setenv FCFLAGS  "-m32 -fPIC"
         setenv arch     "i386"
 	setenv bits     "32b"
      breaksw
 endsw
+setenv CXXFLAGSD "$cxxflags"
+setenv CFLAGSD   "$cflags"
 setenv LDFLAGS `root-config --ldflags` 
 #setenv CFLAGS  "" #"`root-config --auxcflags` -fPIC -pthread"
-setenv CFLAGS "`root-config --auxcflags` -fPIC -pthread"
-setenv CXXFLAGS "$CFLAGS"
-setenv FCFLAGS  "$CFLAGS"
+setenv cflags "`root-config --auxcflags` -fPIC -pthread"
+setenv cxxflags "$cflags"
+setenv FCFLAGS  "$cflags"
 setenv CC  "`root-config --cc`"
 setenv CXX "`root-config --cxx` $LDFLAGS -fPIC "
 setenv F77 "`root-config --f77` $LDFLAGS -fPIC"
-setenv PERL_EXT_CFLAGS   "$CFLAGS"
-setenv PERL_EXT_CPPFLAGS "$CXXFLAGS"
+setenv PERL_EXT_CFLAGS   "$cflags"
+setenv PERL_EXT_CPPFLAGS "$cxxflags"
 setenv ARCH "`root-config --arch`"
 switch (${STAR_HOST_SYS})
   case "*icc*"
@@ -54,7 +56,9 @@ switch (${STAR_HOST_SYS})
         setenv FC gfortran
 endsw
 # 
-set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen3";
+#set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen3";
+#set list = "cmake-3.10.0-rc1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
+set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
 #eigen-eigen-10219c95fe65";
 #set list = "pythia8226"
 #set list = "pythia6"
@@ -62,6 +66,8 @@ set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 ff
 #set list = "qt-everywhere-opensource-src-4.8.6"
 #if ($#argv != 0) set list = $argv[1];
 foreach pkg ($list) 
+    setenv CXXFLAGS "${cxxflags}"
+    setenv CFLAGS   "${cflags}"
     cd ~/sources/.${STAR_HOST_SYS}
 #    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done) continue
@@ -177,7 +183,10 @@ foreach pkg ($list)
           touch ../${pkg}.Done
           breaksw
       case "qt*":
+      setenv CXXFLAGS "${CXXFLAGSD}"
+      setenv CFLAGS   "${CFLAGSD}"
           ./configure --prefix=$XOPTSTAR -no-glib <<EOF
+#          ./configure --prefix=$XOPTSTAR -no-glib -no-qt3support <<EOF
 o
 yes
 EOF
