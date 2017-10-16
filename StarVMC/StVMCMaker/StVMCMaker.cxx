@@ -145,6 +145,7 @@ StVMCMaker::Make
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
+#include "StarVMCApplication.h"
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
 #include "StarVMCDetector.h"
