@@ -484,6 +484,7 @@ switch ($pkg)
         endif
 	breaksw
 	case "gcc621":
+	case "gcc631":
 	setenv devtools /opt/rh/devtoolset-6
 	if (-r ${devtools}) then
 	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
