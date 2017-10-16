@@ -138,7 +138,7 @@
  **************************************************************************/
 #ifndef MYSQDB_HH
 #define MYSQDB_HH
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "mysql.h"
 #else
 typedef  char  MYSQL_RES;

@@ -111,7 +111,7 @@ void StPeCPair::Clear(const char *) {
   muTrack2=NULL;
 }
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 StPeCPair::StPeCPair ( StTrack* trk1, StTrack* trk2, 
                        Bool_t primaryFlag, StEvent* event ) {
   this->Clear();
@@ -380,7 +380,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
 //
 //  fill our local Track class; not save if track pointers not properly reset !!!
 // set does not belong here ! FLK works with pointers which are not arguments of this routine !!
-// #ifndef __CINT__
+// #if !defined(__CINT__) && !defined(__CLING__)
 //    Int_t prim = 1 ;
 //    if (track1 && track2)
 //      {
@@ -479,7 +479,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
      fill ( primaryFlag, &(event->eventSummary()), 
 	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
      tr1.set(1,muTrack1, event); // 1=primary
      tr2.set(1,muTrack2, event);
 #endif
@@ -740,7 +740,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
    fill ( primaryFlag, &(event->eventSummary()), 
 	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
    tr1.set(1,muTrack1, event); // 1=primary
    tr2.set(1,muTrack2, event);
 #endif
@@ -829,7 +829,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    fill ( primaryFlag, summary, p1, h1, charge1, p2, h2, charge2, vtxP ) ;
    
    // fill local track class 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 
    tr1.set(1,track1); // 1=primary
    tr2.set(1,track2);

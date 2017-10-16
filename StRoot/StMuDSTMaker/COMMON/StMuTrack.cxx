@@ -26,8 +26,7 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdxPull.h"
 #include "THelixTrack.h"
 #include "TMath.h"
 #include "TString.h"
@@ -691,7 +690,7 @@ double StMuTrack::energyBEMC() const { //Return energy of negative 100 GeV is no
 	}
 	return -100.0;
 }
-
+//________________________________________________________________________________
 Bool_t StMuTrack::matchBEMC() const {
 	double mEmcThres = 0.15;
 	if (energyBEMC() > mEmcThres) return true;
@@ -700,28 +699,25 @@ Bool_t StMuTrack::matchBEMC() const {
 //________________________________________________________________________________
 Double_t StMuTrack::dEdxPull(Double_t mass, UChar_t fit, Int_t charge) const {
   Double_t z = -999.;
-  if (probPidTraits().dEdxTrackLength() > 0 ) {
-    const StMuHelix &mh = muHelix();
-    Double_t momentum  = mh.p().mag();
-    Double_t log2dX = probPidTraits().log2dX();
-    if (log2dX <= 0) log2dX = 1;
-    Double_t dedx_measured, dedx_expected, dedx_resolution = -1;
-    if (! fit) { // I70
-      dedx_measured = probPidTraits().dEdxTruncated();
-      dedx_expected = 1.e-6*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(momentum*TMath::Abs(charge)/mass)); 
-      dedx_resolution = probPidTraits().dEdxErrorTruncated();
-    } else if ( fit == 1) {     // Ifit
-      dedx_measured = probPidTraits().dEdxFit();
-      dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(momentum*TMath::Abs(charge)/mass)));
-      dedx_resolution = probPidTraits().dEdxErrorFit();
-    } else {     // dNdx
-      dedx_measured = probPidTraits().dNdxFit();
-      dedx_expected = StdEdxModel::instance()->dNdx(momentum*TMath::Abs(charge)/mass,charge);
-      dedx_resolution = probPidTraits().dNdxErrorFit();
-    }
-    if (dedx_resolution > 0)
-      z = TMath::Log(dedx_measured/dedx_expected)/dedx_resolution;
+  if (probPidTraits().dEdxTrackLength() <= 0 ) return z;
+  const StMuHelix &mh = muHelix();
+  Double_t momentum  = mh.p().mag();
+  Float_t betagamma = momentum*TMath::Abs(charge)/mass;
+  Double_t log2dX = probPidTraits().log2dX();
+  if (log2dX <= 0) log2dX = 1;
+  Double_t dedx_measured, dedx_expected, dedx_resolution = -1;
+  if (! fit) { // I70
+    dedx_measured = probPidTraits().dEdxTruncated();
+    dedx_resolution = probPidTraits().dEdxErrorTruncated();
+  } else if ( fit == 1) {     // Ifit
+    dedx_measured = probPidTraits().dEdxFit();
+    dedx_resolution = probPidTraits().dEdxErrorFit();
+  } else {     // dNdx
+    dedx_measured = probPidTraits().dNdxFit();
+    dedx_resolution = probPidTraits().dNdxErrorFit();
   }
+  if (dedx_resolution <= 0) return z;
+  z = StdEdxPull::Eval(dedx_measured,dedx_expected,betagamma,fit,log2dX,charge);
   return z;
 }
 //________________________________________________________________________________

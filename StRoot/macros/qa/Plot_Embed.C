@@ -14,7 +14,7 @@
 
 
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "TROOT.h"
 #include "TSystem.h"
 #include <iostream.h>

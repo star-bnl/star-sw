@@ -463,7 +463,9 @@ void  StMuDstMaker::streamerOff() {
   StMuFgtCluster::Class()->IgnoreTObjectStreamer();
   StMuFgtStripAssociation::Class()->IgnoreTObjectStreamer();
   StMuFgtAdc::Class()->IgnoreTObjectStreamer();
+#ifdef __kfpAtFirstHit__
   KFPTrack::Class()->IgnoreTObjectStreamer();
+#endif
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

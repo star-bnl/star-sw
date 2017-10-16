@@ -1,4 +1,4 @@
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <stdio.h>
 #include "TSystem.h"
 #include "TBenchmark.h"

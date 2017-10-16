@@ -55,7 +55,7 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StPeCEnumerations.h"
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
@@ -86,7 +86,7 @@ public:
   void                            Clear(const char* opt=0);
 
   void                            calculatePair4Momentum( ) ;
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
                                   StPeCPair ( StMuTrack *trk1, StMuTrack *trk2, 
 				              Bool_t primaryFlag, StMuEvent* event,  StBTofGeometry * pairTOFgeo );
 
@@ -202,7 +202,7 @@ private:
   StPeCSpec                       electronH;
   StPeCSpec                       muonH;
   
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   StTrack*                        track1; //!
   StTrack*                        track2; //!
   StMuTrack*                      muTrack1; //!

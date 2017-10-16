@@ -10,14 +10,16 @@
 class StBFChain;        
 class StMessMgr;
 #if !defined(__CINT__) || defined(__MAKECINT__)
-#include "Stiostream.h"
+#include "St_base/Stiostream.h"
 #include "TSystem.h"
 #include "TClassTable.h"
 #include "TApplication.h"
 #include "TInterpreter.h"
 #include "StBFChain.h"
-#ifndef __CLING__
+#ifndef __CLING__1
 #include "StMessMgr.h"
+#include "StStarLogger/StLoggerManager.h"
+#include "StarRoot/TAttr.h"
 #endif
 #include "TROOT.h"
 //#include "StRoot/St_geant_Maker/St_geant_Maker.h"
@@ -136,7 +138,7 @@ void Load(const Char_t *options)
     cout << endl;
   }
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
-#ifndef __CLING__
+#ifndef __CLING__1
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
   if (gSystem->Load("liblog4cxx") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
@@ -233,12 +235,16 @@ void bfc(Int_t First, Int_t Last,
 	return;
 	break;
       }
-      //      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags";
-      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,DbV20170830,McTpcAna,tags";
+      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags";
+      //      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,DbV20170830,McTpcAna,tags";
+      //      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,RunG.1";
     }
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
-  chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
+  Int_t error = 0;
+  gROOT->ProcessLine("new StBFChain();",&error);
+  chain = (StBFChain *) StMaker::GetTopChain();
+  cout << "Create chain " << chain->GetName() << endl;
   chain->cd();
   chain->SetDebug(1);
   if (Last < -3) return;
@@ -322,11 +328,10 @@ void bfc(Int_t First, Int_t Last,
 #endif
   // Init the chain and all its makers
   TAttr::SetDebug(0);
+#ifndef __CLING__
   chain->SetAttr(".Privilege",0,"*"                ); 	  //All  makers are NOT priviliged
   chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	  //All IO makers are priviliged
-#ifndef __CLING__
   chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	  //It is also IO maker
-#endif
   chain->SetAttr(".Privilege",1,"StTpcDbMaker::*"); 	  //It is also TpcDb maker to catch trips
   chain->SetAttr(".Privilege",1,"*::tpc_hits"); //May be allowed to act upon excessive events
   chain->SetAttr(".Privilege",1,"*::tpx_hits"); //May be allowed to act upon excessive events
@@ -335,6 +340,7 @@ void bfc(Int_t First, Int_t Last,
   chain->SetAttr(".Privilege",1,"StTriggerDataMaker::*"); //TriggerData could reject event based on corrupt triggers
   chain->SetAttr(".Privilege",1,"StEandBDirMaker::*"); // just for debuggin purpose
   chain->SetAttr(".Privilege",1,"StEventMaker::*"); //May be allowed to act upon trigger IDs (filtering)
+#endif
   Int_t iInit = chain->Init();
   if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
   if (Last == 0) return;

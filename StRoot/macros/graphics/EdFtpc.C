@@ -1,6 +1,6 @@
 // $Id: EdFtpc.C,v 1.5 2010/04/29 23:57:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 # include "StuDraw3DEvent.h"
 # include "TColor.h"
 # include "StEvent.h"

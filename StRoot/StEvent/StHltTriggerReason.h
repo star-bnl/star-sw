@@ -47,7 +47,7 @@ public:
     
 private:
     StHltTriggerReasonType mReasonBit;
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
     StObjLink mReason;
 #else
     StLink<StHltTriggerReasonCapable> mReason;

@@ -9,7 +9,7 @@
 //
 ///////////////////////////////////////////
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "TROOT.h"
 #include "TFile.h"
 #include "TNtupleD.h"

@@ -109,7 +109,7 @@ private:
 
   ClassDef(StTofpNtupleMaker,1)
 };
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 inline void StTofpNtupleMaker::setValidAdcRange(Int_t min, Int_t max){mMinValidAdc=min;mMaxValidAdc=max;}
 inline void StTofpNtupleMaker::setValidTdcRange(Int_t min, Int_t max){mMinValidTdc=min;mMaxValidTdc=max;}
 inline void StTofpNtupleMaker::setOuterTrackGeometry(){mOuterTrackGeometry=true;}

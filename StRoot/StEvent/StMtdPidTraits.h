@@ -81,7 +81,7 @@ public:
     void    setProbMuon(float);
     
 private:
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
     StObjLink        mMtdHit;
 #else
     StLink<StMtdHit>  mMtdHit;

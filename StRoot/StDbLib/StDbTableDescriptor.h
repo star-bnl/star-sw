@@ -74,7 +74,7 @@
 
 #include <string.h>
 #include "StTableDescriptorI.h"
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "StDbBuffer.h"
 #else
 class StDbBuffer;
@@ -155,7 +155,7 @@ public:
   unsigned int getMaxAlign();
   
 };
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 inline unsigned int
 StDbTableDescriptor::getNumElements() const {return mnumElements;}
 

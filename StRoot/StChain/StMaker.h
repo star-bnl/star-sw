@@ -25,7 +25,7 @@
 #include "TStopwatch.h"
 #include "StMessMgr.h" 
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #if ROOT_VERSION_CODE >= ROOT_VERSION(3,05,04)
 typedef TDataSet::EDataSetPass EDataSetPass;
 #endif

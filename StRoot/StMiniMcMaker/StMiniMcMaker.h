@@ -220,7 +220,7 @@ class StEmcRawHit;
 class StEmcPoint;
 
 // typdef's
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 
 typedef map<UInt_t,Int_t> RCFOUNDMAP;
 typedef map<long,Int_t> MCFOUNDMAP;

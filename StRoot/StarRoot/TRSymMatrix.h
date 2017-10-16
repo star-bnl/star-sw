@@ -17,7 +17,7 @@ class TRSymMatrix : public TRArray {
   TRSymMatrix(const TRMatrix& A,ETRMatrixCreatorsOp kop,const TRSymMatrix& S);
   TRSymMatrix(const TRSymMatrix& Q,ETRMatrixCreatorsOp kop,const TRSymMatrix& T);
   TRSymMatrix(const TRMatrix& A,ETRMatrixCreatorsOp kop);
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   TRSymMatrix (Int_t nrows, Double_t a0, ...);
 #endif
   virtual ~TRSymMatrix() {}

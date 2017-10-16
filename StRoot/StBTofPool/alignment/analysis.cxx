@@ -1,4 +1,4 @@
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
 
 #pragma link off all globals;
 #pragma link off all classes;
@@ -7,7 +7,7 @@
 #pragma link C++ class PlotFile;
 #endif
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <iostream>
 #include <iomanip>
 #include <sys/types.h>

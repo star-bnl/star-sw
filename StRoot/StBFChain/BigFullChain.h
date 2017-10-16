@@ -45,8 +45,9 @@ y2020      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt      
 ______________________________________________________________________________________________________________     
  */
 #endif
-
-//#define __NoStrangeMuDst__
+#if ROOT_VERSION_CODE > 393216 || defined(__NO_STRANGE_MUDST__) /*  ROOT_VERSION(6,0,0) */
+#define __NoStrangeMuDst__
+#endif
 #define __NoDisplay__
 //#define __AgMLonFly__
 Bfc_st BFC[] = { // standard chains

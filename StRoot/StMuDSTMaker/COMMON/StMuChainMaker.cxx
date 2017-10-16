@@ -141,7 +141,6 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
     TDirIter Dir(dirFile.c_str());
     Char_t *name = 0;
     Int_t NFiles = 0;
-    TFile *f = 0;
     Int_t numberOfEvents = kMaxEntries;
     while ((name = (Char_t *) Dir.NextFile())) {
       if ( pass(name,mSubFilters)) {

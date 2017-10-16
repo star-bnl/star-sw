@@ -1,4 +1,4 @@
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "StRoot/TR/TRMatrixD.h"
 #else
 class TRMatrixD;
@@ -374,7 +374,7 @@ void ttrla()
 
 //________________________________________________________________________________
 void Micky(){
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
   //  gSystem->Load("libStar");
   //  gSystem->Load("TR");
   gSystem->Load("../Linux-gcc-dbg/libRootKernel.so");

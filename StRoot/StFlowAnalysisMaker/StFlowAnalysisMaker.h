@@ -66,7 +66,7 @@ private:
   void     FillEventHistograms();
   void     FillParticleHistograms();
   Bool_t   mCalcReCentPars;
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity

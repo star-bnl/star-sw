@@ -39,7 +39,7 @@
 #ifndef _StTRGReader_
 #define _StTRGReader_
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TRG/trgStructures2000.h"
 #include "StDaqLib/TRG/trgStructures2003.h"

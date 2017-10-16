@@ -24,7 +24,7 @@ public:
                                   StPeCParticle();
   virtual                         ~StPeCParticle();
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
                                   StPeCParticle ( g2t_track_st *trk);
   void                            set        ( g2t_track_st* trk);
                                   StPeCParticle ( StMuMcTrack * trk);

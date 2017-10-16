@@ -103,7 +103,7 @@ namespace units {
     //
     static const double      radian = 1.;
     static const double milliradian = 1.e-3*radian;
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
     static const double      degree = (M_PI/180.0)*radian;
 #endif    
     static const double   steradian = 1.;
@@ -170,7 +170,7 @@ namespace units {
     //
     // Pressure [E][L^-3]
     //
-#ifndef __CINT__    
+#if !defined(__CINT__) && !defined(__CLING__)    
 #define pascal hep_pascal       // a trick to avoid warnings 
     static const double hep_pascal = newton/meter2;
 #else

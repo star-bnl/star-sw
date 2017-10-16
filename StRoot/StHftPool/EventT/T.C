@@ -760,7 +760,7 @@ or
    }
    fOut->Write();
 }
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________
 void FillNt(HybridFit_t *HFit[4][24][16][2]) {
   if (! HFit) return;

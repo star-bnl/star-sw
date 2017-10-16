@@ -464,7 +464,7 @@ public:
   friend class StMuIOMaker;
 
   // Maps
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   virtual Bool_t Accept(const StMuTrack *gTrack = 0);
   virtual Bool_t Accept(const StMuPrimaryVertex *RcVx = 0);
   virtual Bool_t Accept(const StMuMcTrack *McTrack = 0);
