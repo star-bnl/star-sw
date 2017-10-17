@@ -1350,7 +1350,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
   {"picoEvt"    ,"","","StEvent,Stu","",            "StPicoEvent","Load picoEvent and dependencies",kFALSE},
-  {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
+  {"picoDst"    ,"","","MuDst,picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
@@ -1371,7 +1371,7 @@ Bfc_st BFC[] = { // standard chains
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco,Tree"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
-  {"RpicoDST"    ,"PicoDst"  ,"","MuDst,Tree,noHistos,noRunco","StPicoDstMaker","StPicoDstMaker","",kFALSE},
+  {"RpicoDST"    ,"PicoDst"  ,"","picoDst"                                                ,"","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},

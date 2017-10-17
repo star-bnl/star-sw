@@ -35,11 +35,11 @@ my $OnlinePackage=0;
 my @LinkDefs = ();
 my @LinkDefsT = (); # for tables if any
 my @PlainObj = ();
-my $libPrefix = "";
-if ($env->{Packages}->{ROOT}->{ROOTCLING}) {
-  $libPrefix = "lib";
-#  print "set libPrefix = $libPrefix ================================================================================\n";
-}
+#my $libPrefix = "";
+#if ($env->{Packages}->{ROOT}->{ROOTCLING}) {
+my  $libPrefix = "lib";
+##  print "set libPrefix = $libPrefix ================================================================================\n";
+#}
 my $DEBUG   = $env->{DEBUG};
 my $FDEBUG  = $env->{FDEBUG};
 my $NOOPTIMIZED = $DEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
@@ -1392,6 +1392,10 @@ if ( $#src > -1 ) {
 #ifndef __NEW__
    printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $PKG )
      unless ($param::quiet);
+#  $LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+#  if (!$SO_PKG_lib) {$SO_PKG_lib = "lib" . $SO_PKG;}
+#  if (!$SO_PKG_lib && $pkg =~ /Agml/) {$SO_PKG_lib = "lib" . $SO_PKG;}
+#  print "Dir = $Dir, PKG = $PKG, LIBPKG = $LIBPKG, SO_PKG_lib = $SO_PKG_lib ================\n";
 #else /* __NEW__ */
 #   printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $PKG )    unless ($param::quiet);
 #   foreach my $idl(@idlL) {
@@ -1527,7 +1531,7 @@ if ( $#src > -1 ) {
       }
       my $lib = $LIB . "/" . $SO_PKG;
       if ($SO_PKG ne $SO_PKG_lib) {
-	$lib = $LIB . "/" . $SO_PKG_lib;
+	$lib = $LIB . "/" . $SO_PKG_lib;# print "$lib ================\n";
 	InstallAs $env2 $lib, $SO_PKG;
 #	my $so_map = $LIB . "/" . $SO_MAP;
 #	InstallAs $env2 $so_map, $SO_MAP;
