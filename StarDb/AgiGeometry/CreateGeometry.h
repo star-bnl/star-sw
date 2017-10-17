@@ -80,7 +80,7 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
 	 << name << " ! " << endl;
     return geom;
   }
-  gSystem->Load("Rotations");
+  gSystem->Load("libRotations");
   TString path(".:");
   TString STAR(gSystem->Getenv("STAR"));
 #if 0
