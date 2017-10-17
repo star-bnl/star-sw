@@ -74,7 +74,7 @@ using std::vector;
 using std::sort;
 using std::string;
 #endif
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS)
 typedef vector<Int_t>  IntVec;
 typedef vector<Double_t>  DoubleVec;
@@ -132,10 +132,12 @@ public:
 //_____________________________________________________________________________
 inline void StMtdGeoNode::PrintNormal()
 {
+#if !defined(__CINT__) && !defined(__CLING__)
   LOG_INFO<<"normal x,y,z = "
 	  <<fNormal[0]<<", "
 	  <<fNormal[1]<<", "
 	  <<fNormal[2]<<endm;
+#endif
 }
 
 
@@ -212,7 +214,7 @@ class StMtdGeometry : public TNamed{
   void   SetNExtraCells(Int_t val)  { mNExtraCells = val>0?val:0; }
   Bool_t ProjToMagOutR(const StPhysicalHelixD helix, const StThreeVectorD vertex, StPhysicalHelixD &outHelix, Double_t &pathL, Double_t &tof, StThreeVectorD &pos);
   void   ProjToVertex(const StPhysicalHelixD helix, const StThreeVectorD vertex, Double_t &pathL, Double_t &tof, StThreeVectorD &dcaPos);
-#ifndef __CINT__
+#if !defined( __CINT__) && !defined(__CLING__)
   Bool_t ProjToBLModVect(const StPhysicalHelixD helix, IntVec &blVect, IntVec &modVect);
   Bool_t HelixCrossCellIds(const StPhysicalHelixD helix, const StThreeVectorD vertex, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec, DoubleVec &tofVec );
   Bool_t HelixCrossCellIds(const StPhysicalHelixD helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec, DoubleVec &tofVec );
@@ -256,7 +258,7 @@ class StMtdGeometry : public TNamed{
   Bool_t 		IsMTTG(const TGeoVolume * vol) const;
   Bool_t 		IsMTRA(const TGeoVolume * vol) const { return !(strcmp(vol->GetName(), modulePref));}
   
-#ifndef __CINT__
+#if !defined( __CINT__) && !defined(__CLING__)
   void   		RemoveDuplicate(IntVec &vec);
 #endif
 
