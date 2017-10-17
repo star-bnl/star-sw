@@ -1,12 +1,9 @@
-/*
-*********************************************************
-* Table:       controlADCtoE.idl
-* Description: define keys for managing StEmcADCtoEMaker
-* Author     : Aleksei Pavlinov, WSU 
-*********************************************************
-*/
-struct  controlADCtoE
-{
+#ifndef __controlADCtoE_st__
+#define __controlADCtoE_st__
+#include "TDataSet.h"
+#include "TTable.h"
+#include "Ttypes.h"
+struct controlADCtoE_st {
     short DeductPedestal[8];    /* switch for deducting pedestal */
     short Calibration[8];       /* switch for calibration */    
     float CutOff[8];            /* cutoff value. See CutOffType for more information*/
@@ -16,3 +13,10 @@ struct  controlADCtoE
     short CheckCrate[8];        /* save only if crate is ok */
     short messLimit;            /* limit for warning message */
 };
+class St_controlADCtoE : public TTable {
+ public:
+  ClassDefTable(St_controlADCtoE,controlADCtoE_st)
+  ClassDef(St_controlADCtoE,1) //C++ container for chain/makers status 
+};
+
+#endif /* __controlADCtoE_st__ */

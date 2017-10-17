@@ -20,7 +20,8 @@
 #include "StEnumerations.h"
 
 
-ClassImp(StEmcADCtoEMaker)
+TableImpl(controlADCtoE);
+ClassImp(StEmcADCtoEMaker);
 
   //_____________________________________________________________________________
   /*
