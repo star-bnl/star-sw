@@ -51,7 +51,7 @@ class StPmdCollection;
 class StPmdHit;
 class StPmdDetector;
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <vector>
 #ifndef ST_NO_NAMESPACES
 using std::vector;

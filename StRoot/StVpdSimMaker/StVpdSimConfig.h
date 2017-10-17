@@ -57,9 +57,7 @@ public:
             vpdRes = vpdRes/counter;    //! Take an average
         }
         else {
-#if !defined(__CINT__) && !defined(__CLING__)
             LOG_WARN << "No resolutions found! Exit!" << endm;
-#endif
             return 0.;
         }
         
@@ -76,9 +74,7 @@ public:
         tubeTimeWest = tubeTimeWest/nWest; //! Avg on west in ps
         tubeTimeEast = tubeTimeEast/nEast; //! Avg on east in ps
         
-#if !defined(__CINT__) && !defined(__CLING__)
         LOG_INFO << "The resolution returned is: " << (tubeTimeEast - tubeTimeWest)/2 << endm;
-#endif
         return (tubeTimeEast - tubeTimeWest)/2;
     }
 

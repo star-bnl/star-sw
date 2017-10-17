@@ -187,7 +187,7 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   poverm *= charge;
   return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 //________________________________________________________________________________
 Double_t aleph70P(Double_t *x,Double_t *par) {
   /* 

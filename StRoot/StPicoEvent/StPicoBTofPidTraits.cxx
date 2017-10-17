@@ -33,7 +33,7 @@ StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack,
   Int_t module       = btofHit->module();
   Int_t cell         = btofHit->cell();
   Float_t tof        = gTrack->btofPidTraits().timeOfFlight();
-  Float_t beta       = (pTrack) && ! TMath::IsNaN(pTrack->btofPidTraits().beta()) ? pTrack->btofPidTraits().beta() : -999.;
+  Float_t beta       = (pTrack) ? pTrack->btofPidTraits().beta() : -999.;
   StThreeVectorF pos = gTrack->btofPidTraits().position();
 
   mBTofCellId  = (Short_t)((tray - 1) * 192 + (module - 1) * 6 + (cell - 1));

@@ -314,7 +314,7 @@ public:
 	StMatrixRow(StMatrix<DataType>&, size_t);
 	DataType& operator[](size_t);
     private:
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 	StMatrix<DataType>& _a;
 #else
 	StMatrix<DataType>* _a;
@@ -326,7 +326,7 @@ public:
 	StMatrixRowConst (const StMatrix<DataType>&, size_t);
 	const DataType & operator[](size_t) const;
     private:
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 	const StMatrix<DataType>& _a;
 #else
 	const StMatrix<DataType>* _a;
@@ -406,7 +406,7 @@ protected:
 #endif /* __ROOT__ */
 };
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 // Constructors. 
 
 template<class DataType>
@@ -1497,7 +1497,7 @@ StMatrix<DataType> dsum(const StMatrix<DataType> &m1, const StMatrix<DataType> &
 }
 
 #endif /* ! __CINT__ */
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 template<> StMatrix<double> operator*(const StMatrix<double>& m1,const StMatrix<double>& m2);
 template<> StMatrix<double> operator*(const StMatrix<double>& m1,const StMatrix<float>&  m2);
 template<> StMatrix<double> operator*(const StMatrix<float>&  m1,const StMatrix<double>& m2);

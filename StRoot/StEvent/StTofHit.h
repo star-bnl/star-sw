@@ -120,7 +120,7 @@ public:
     Float_t mPathLength;
     Float_t mBeta;
     //    StTrack *mAssociatedTrack;   //$LINK
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink        mAssociatedTrack;		
 #else
     StLink<StTrack>  mAssociatedTrack;		

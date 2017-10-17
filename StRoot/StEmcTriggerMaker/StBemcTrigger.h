@@ -164,9 +164,7 @@ public:
     void    resetConf();
     void    setEvent(StEvent* e) { mEvent = e; }
     void    setPrint(bool a) {
-#if !defined(__CINT__) && !defined(__CLING__)
                 LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
-#endif
                     }///< Obsolete function; users can control messages with logger config file.
     void    setTableMaker(StBemcTables *tab) { mTables =tab; }
    

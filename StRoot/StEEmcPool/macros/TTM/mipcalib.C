@@ -21,7 +21,7 @@
 // root './mipcalib.C(0,"root/R*.root")' 2> mipcalib.log
 // 
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -551,7 +551,7 @@ mystat(TH1 *h,
 }
 
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 int   sector  =  0;
 char *outname = "mipcalib.hist.root";
 char *fitfunc = "landau";

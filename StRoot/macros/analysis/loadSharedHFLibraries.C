@@ -1,6 +1,6 @@
 #include "TSystem.h"
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StMuDSTMaker/COMMON/macros/loadSharedLibraries.C"
 #endif
 

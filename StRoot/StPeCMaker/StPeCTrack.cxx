@@ -24,7 +24,7 @@ StPeCTrack::StPeCTrack() {
 StPeCTrack::~StPeCTrack() {
 }
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 StPeCTrack::StPeCTrack ( Int_t _primary, StTrack* trk) {
    set ( _primary, trk ) ;
 }

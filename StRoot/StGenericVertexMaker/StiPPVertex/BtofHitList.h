@@ -7,7 +7,7 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS)
 typedef vector<Int_t>  IntVec;
 #else

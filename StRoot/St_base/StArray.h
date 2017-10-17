@@ -12,14 +12,14 @@
 #include "TString.h"
 #include "TObject.h"
 #include "StObject.h"
-//#if !defined(__CINT__) && !defined(__CLING__)
+//#ifndef __CINT__
 class TObject;
 #include <vector>
 #include <algorithm>
     using std::vector;
     using std::random_shuffle;
   typedef vector<TObject*> VecTObj;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   typedef vector<TObject*>::iterator       VecTObjIter;
   typedef vector<TObject*>::const_iterator const_VecTObjIter;
   typedef VecTObjIter StObjArrayIter;
@@ -30,7 +30,7 @@ class TObject;
   typedef const_VecTObjIter const_StRefArrayIter;
 #endif /*!__CINT__*/
 
-#if defined(__CINT__NEVER)
+#ifdef __CINT__NEVER
 	class VecTObj;
 	class VecTObjIter;
 	class const_VecTObjIter;
@@ -109,7 +109,7 @@ virtual Bool_t IsFolder() const;
         TObject *       &back()        { return fV.back();}
         TObject *        find(const char *name) const;
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 	const_VecTObjIter begin() const {return fV.begin();}
         VecTObjIter       begin()       {return fV.begin();}
 const_VecTObjIter end()   const {return fV.end();}
@@ -125,7 +125,7 @@ void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
 void    ls(const char *tit="") const;
 void    Print(const char *tit="") const { ls(tit); }
 protected:
-//#if !defined(__CINT__) && !defined(__CLING__)
+//#ifndef __CINT__
 VecTObj fV;
 //#endif //_CINT__
 ClassDef(StObjArray,4)
@@ -165,7 +165,7 @@ ClassDef(StRefArray,3)
 
 //	Macros
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #define StCollectionDef(QWERTY) \
 class St ## QWERTY;\
 typedef St ## QWERTY**            St ## QWERTY ## Iterator;\

@@ -1,5 +1,4 @@
 # $Id $
 # package StSsdUtil
 # author: 
-Library:libStSsdUtil.so:LIBS += -lStEvent
-
+#Library:libStSsdUtil.so:LIBS += 

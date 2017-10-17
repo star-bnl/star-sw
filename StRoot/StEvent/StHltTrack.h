@@ -101,7 +101,7 @@ protected:
     float mDz0;
     float mDtanl;
     
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink mTrackNode;
 #else
     StLink<StHltTrackNode> mTrackNode;

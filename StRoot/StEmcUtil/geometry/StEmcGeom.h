@@ -297,41 +297,25 @@ inline void    StEmcGeom::setYWidth(const Float_t val) { mYWidth = val;}
 inline Int_t StEmcGeom::checkModule(const Int_t m) const
 {
   if(m>=1 && m<=mNModule) return 0;
-  else {
-#if !defined(__CINT__) && !defined(__CLING__)
-    LOG_ERROR<<" Bad module# "<<m<<"/"<<mNModule<<" in Detector "<<mDetector<<endm; 
-#endif
-    return 1;}
+  else {LOG_ERROR<<" Bad module# "<<m<<"/"<<mNModule<<" in Detector "<<mDetector<<endm; return 1;}
 }
 // _____________________________________________________________________
 inline Int_t StEmcGeom::checkEta(const Int_t e) const
 {
   if(e>=1 && e<=mNEta) return 0;
-  else {
-#if !defined(__CINT__) && !defined(__CLING__)
-    LOG_ERROR<<" Bad eta# "<<e<<endm; 
-#endif
-    return 1;}
+  else {LOG_ERROR<<" Bad eta# "<<e<<endm; return 1;}
 }
 // _____________________________________________________________________
 inline Int_t StEmcGeom::checkSub(const Int_t s) const
 {
   if(s>=1 && s<=mNSub) return 0;
-  else {
-#if !defined(__CINT__) && !defined(__CLING__)
-    LOG_ERROR<<" Bad sub# "<<s<<endm; 
-#endif
-    return 1;}
+  else {LOG_ERROR<<" Bad sub# "<<s<<endm; return 1;}
 }
 // _____________________________________________________________________
 inline Int_t StEmcGeom::checkId(const Int_t softId) const
 {
 	if(softId>=1 && softId<=mNRaw) return 0;
-	else {
-#if !defined(__CINT__) && !defined(__CLING__)
-	  LOG_ERROR<<" Bad raw# "<<softId<<endm; 
-#endif
-	  return 1;}
+	else {LOG_ERROR<<" Bad raw# "<<softId<<endm; return 1;}
 }
 // _____________________________________________________________________
 inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, Int_t &e, Int_t &s) const
@@ -525,9 +509,7 @@ inline Int_t StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s, Int_t
     return 0;
   }
   else {
-#if !defined(__CINT__) && !defined(__CLING__)
     LOG_WARN << Form("<W> getId(2001 Aug Scheme) | Det %i bad index m %i e %i s %i ",mDetector,m,e,s) << endm; 
-#endif
     return 1;
   }
 }

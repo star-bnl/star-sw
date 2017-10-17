@@ -184,6 +184,8 @@
 #include "StTrackTopologyMap.h"
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
+#include "StTrack.h"
+#define __kfpAtFirstHit__
 #ifdef  __kfpAtFirstHit__
 #include "KFPTrack.h"
 #endif
@@ -355,7 +357,7 @@ protected:
 //  StTrackDetectorInfo         *mDetectorInfo;         //$LINK
 //  StTrackNode                 *mNode;                 //$LINK
 //  StTrackVertex               *mVertex;                 //$LINK
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink                    mDetectorInfo;         
     StObjLink      	         mNode;                 	
     StObjLink      	         mVertex;                 	

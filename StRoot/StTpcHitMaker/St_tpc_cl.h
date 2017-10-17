@@ -1,6 +1,6 @@
 #ifndef _ST_TPC_CL_H
 #define _ST_TPC_CL_H
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "DAQ_TPC/daq_tpc.h"
 #else
 class tpc_cl;

@@ -88,7 +88,7 @@ public:
 
 private:
     //    StBTofHit *mBTofHit;   //$LINK
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink        mBTofHit;
 #else
     StLink<StBTofHit>  mBTofHit;

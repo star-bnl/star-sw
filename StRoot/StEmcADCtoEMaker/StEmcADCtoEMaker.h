@@ -16,7 +16,7 @@ files. The tasks performed by this maker are:
 #include "StMaker.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "controlADCtoE.h"
+#include "tables/St_controlADCtoE_Table.h"
 #include "StBemcData.h"
 #include "StEmcRawMaker/defines.h"
 #include "StEvent/StEnumerations.h"

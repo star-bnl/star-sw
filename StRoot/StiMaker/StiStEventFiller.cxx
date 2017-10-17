@@ -763,7 +763,6 @@ StiHftHits::hftHist("HFTAfterAll",kTrack);//???????????????????????
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
   errh.Print();
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   for (int ij=1; ij<=mUsedHits[0]; ij++) {
     if (!mUsedHits[ij]) continue;
     const char *det =  detectorNameById((StDetectorId)ij);
@@ -776,7 +775,7 @@ StiHftHits::hftHist("HFTAfterAll",kTrack);//???????????????????????
     cout <<"StiStEventFiller::fillEvent() -I- Number of GOOD hits:"<< det << "(" << ij << ") :"<<mUsedGits[ij]
          << " per track:"<<double(mUsedHits[ij])/fillTrackCountG <<endl;
   }  
-#endif
+
 
   return;
 }

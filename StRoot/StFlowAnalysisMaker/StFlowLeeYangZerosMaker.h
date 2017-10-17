@@ -67,7 +67,7 @@ private:
   Bool_t   mZeroPass;
   Bool_t   mFirstPass;
   static   Bool_t   mV1Mixed;        // flag for v1 mixed harmonic
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   TVector2 mqTPC[Flow::nSels][Flow::nHars];                  //! recentering vector
   TVector2 mqTPCE[Flow::nSels][Flow::nHars];                 //! recentering vector

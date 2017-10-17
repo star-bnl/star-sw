@@ -42,7 +42,7 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StPeCEnumerations.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -58,7 +58,7 @@ public:
 
   void                            calculatePair4Momentum( ) ;
   Int_t                           fill ( ) ;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   StPeCTrack(Int_t _primary, StMuTrack *trk, StMuEvent * mudst);
 	void set ( Int_t _primary, StMuTrack* trk, StMuEvent *mudst);
         StPeCTrack ( Int_t _primary, StTrack *trk);

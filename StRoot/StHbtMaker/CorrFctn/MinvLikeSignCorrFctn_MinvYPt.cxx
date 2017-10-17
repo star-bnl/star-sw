@@ -11,7 +11,7 @@
  ***************************************************************************
  *
  **************************************************************************/
-//#if !defined(__CINT__) && !defined(__CLING__)
+//#ifndef __CINT__
 //#include "fortranc.h"
 //#define fortrantest F77_NAME(fortrantest,FORTRANTEST)
 //extern "C" {int type_of_call F77_NAME(fortrantest,FORTRANTEST)(int*);}

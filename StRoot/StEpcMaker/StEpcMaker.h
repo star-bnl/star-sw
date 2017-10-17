@@ -49,9 +49,7 @@
 #ifndef STAR_StEpcMaker
 #define STAR_StEpcMaker
 #include "StMaker.h"
-#if !defined(__CINT__) && !defined(__CLING__)
 #include "StMessMgr.h"
-#endif
 #include <TH2.h>
 
 class StEvent;
@@ -90,9 +88,7 @@ public:
     virtual Int_t fillStEvent();
     void    setPrint(Bool_t a)
     {
-#if !defined(__CINT__) && !defined(__CLING__)
 		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
-#endif
     }///< Obsolete function; users can control messages with logger config file.
     void  setFillHisto(Bool_t a)
     {

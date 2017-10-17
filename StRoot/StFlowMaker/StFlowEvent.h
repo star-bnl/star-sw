@@ -125,7 +125,7 @@ public:
   void SetZDCe(const Float_t zdce);
   void SetZDCw(const Float_t zdcw);
   void SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd);
-#if !defined(__CINT__) && !defined(__CLING__)		
+#ifndef __CINT__		
   void SetPhiWeightFarEast(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightEast(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightWest(const Flow::PhiWgt_t &pPhiWgt);
@@ -330,7 +330,7 @@ inline   Float_t StFlowEvent::V2FtpcEastDetctWgtG_Mix(Int_t selN) const {
 inline   Float_t StFlowEvent::V2FtpcWestDetctWgtG_Mix(Int_t selN) const {
   return mV2FtpcWestDetctWgtG_Mix[selN]; }
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 inline void StFlowEvent::SetPhiWeightFarEast(const Flow::PhiWgt_t& pPhiWgtFarEast) {
   memcpy (mPhiWgtFarEast, pPhiWgtFarEast, sizeof(Flow::PhiWgt_t)); }
 

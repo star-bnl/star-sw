@@ -124,8 +124,7 @@ foreach pkg ($list)
           touch ../${pkg}.Done
           breaksw
       case "apache-log4cxx-0.10.0.CVS":
-#          ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR --disable-libtool --with-tags=$LDFLAGS
-          ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR 
+          ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR --disable-libtool --with-tags=$LDFLAGS
 	  make clean
           make
 	  if ( $?) break;

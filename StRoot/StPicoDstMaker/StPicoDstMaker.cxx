@@ -33,8 +33,6 @@
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcPoint.h"
 #include "StMuDSTMaker/COMMON/StMuFmsUtil.h"
-#include "StMuDSTMaker/COMMON/StMuMcTrack.h"
-#include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -67,11 +65,8 @@
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StPicoDstMaker/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoDst.h"
-#include "TH1.h"
-#include "TH2.h"
-static TH1F *hists[3] = {0};
-static TH2F *pVrZ = 0;
-static TH2F *pVxy = 0;
+
+
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
@@ -226,14 +221,7 @@ Int_t StPicoDstMaker::Init() {
     LOG_ERROR << "Pico IO mode is not set ... " << endm;
     return kStErr;
   }
-  if (GetTFile()) {
-    GetTFile()->cd();
-    hists[0] = new TH1F("dca3D","global track dca3D wrt best Vx",2000,0,200);
-    hists[1] = new TH1F("dca3DLam","global track from Lambda",2000,0,200);
-    hists[2] = new TH1F("dca3DK0s","global track from K0s",2000,0,200);
-    pVrZ     = new TH2F("pVrZ","rho VS Z for primary Vertex",200,-20,20,100,0,2);
-    pVxy     = new TH2F("pVxy","Y Vs X for primary Vertex",2000,-2,2,2000,-2,2);
-  }
+  
   return kStOK;
 }
 
@@ -616,8 +604,7 @@ Int_t StPicoDstMaker::MakeWrite()
     fillBTowHits();
   }
 
-  Int_t ok = fillTracks();
-  if (ok) return kStSKIP;
+  fillTracks();
   fillEvent();
   fillEmcTrigger();
   fillMtdTrigger();
@@ -656,41 +643,8 @@ void StPicoDstMaker::fillEventHeader() const
 }
 
 //_____________________________________________________________________________
-Int_t StPicoDstMaker::fillTracks()
+void StPicoDstMaker::fillTracks()
 {
-  static Double_t erMax = 0.0050; // 50 um
-  static Double_t dca3Dmax = 50;  // 50 cm
-  Int_t ok = 0;
-  /* Cuts:
-1.  -0.3 < X < 0.1 и -0.27 < Y < -0.13. Maksym
-2.  sqrt(sigma_X**2 + sigma_Y**2) < 0.0050 cm
-3.  const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051"
-4.  dca3D < 50 cm 
-  */
-  StThreeVectorD V(mMuDst->primaryVertex()->position());
-  if (pVrZ) {
-    pVrZ->Fill(V.z(),V.perp());
-    pVxy->Fill(V.y(),V.x());
-  }
-  if (! (-0.3 < V.x() && V.x() < 0.1 && -0.27 < V.y() && V.y() < - 0.13)) {ok = 1; return ok;}
-  StThreeVectorD E(mMuDst->primaryVertex()->posError());
-  const Double_t er = E.perp();
-  if (er > erMax) {ok = 2; return ok;}
-  static Int_t GoodTriggers[6] = {520001, 520011, 520021, 520031, 520041, 520051};
-  const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
-  Int_t GoodTrigger = -1;
-  for (Int_t k = 0; k < 64; k++) {
-    Int_t trig = triggers.triggerId(k);
-    if (! trig) continue;
-    for (Int_t l = 0; l < 6; l++) {
-      if (trig == GoodTriggers[l]) {
-	GoodTrigger = trig;
-	break;
-      }
-    }
-    if (GoodTrigger > 0) break;
-  }
-  if (GoodTrigger < 0) {ok = 3; return ok;}
   // We save primary tracks associated with the selected primary vertex only
   // don't use StMuTrack::primary(), it returns primary tracks associated with
   // all vertices
@@ -722,46 +676,7 @@ Int_t StPicoDstMaker::fillTracks()
       LOG_WARN << "No dca Geometry for this track !!! " << i << endm;
       continue;
     }
-    // Cut large Dca
-    THelixTrack t = dcaG->thelix();
-    StThreeVectorD V(mMuDst->primaryVertex()->position());
-    Double_t dca3D = t.Dca(V.xyz());
-    if (hists[0]) {
-      hists[0]->Fill(dca3D);
-      Int_t IdMc = gTrk->idTruth();
-      if (IdMc) {
-	StMuMcTrack *mcTrk = StMuDst::instance()->MCtrack(IdMc-1);
-	assert(mcTrk);
-	assert(IdMc == mcTrk->Id());
-	Int_t IdVx = mcTrk->IdVx(); // parent vertex
-	assert(IdVx);
-	StMuMcVertex *MuVx = StMuDst::instance()->MCvertex(IdVx-1);
-	assert(MuVx);
-	Int_t IdParentTk = MuVx->IdParTrk();
-	if (IdParentTk) {
-	  StMuMcTrack *mcParentTrk = StMuDst::instance()->MCtrack(IdParentTk-1);
-	  assert(mcParentTrk);
-#if 1
-	  Int_t pdg = mcParentTrk->Pdg();
-	  assert(pdg);
-	  if (TMath::Abs(pdg) ==  3122) {
-	    hists[1]->Fill(dca3D);
-	  } else if (pdg == 310) {
-	    hists[2]->Fill(dca3D);
-	  }
-#else
-	  Int_t gePid = mcParentTrk->GePid();
-	  if (gePid == 18 || gePid == 26) {
-	    hists[1]->Fill(dca3D);
-	  } else if (gePid == 16) {
-	    hists[2]->Fill(dca3D);
-	  }
-#endif
-	}
-      }
-    }
-    // if (dca3D > 10.0) continue;
-    if (dca3D > dca3Dmax) continue;
+
     int counter = mPicoArrays[StPicoArrays::Track]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, mBField, mMuDst->primaryVertex()->position(), *dcaG);
 
@@ -801,7 +716,6 @@ Int_t StPicoDstMaker::fillTracks()
       picoTrk->setMtdPidTraitsIndex(mtd_index);
     }
   }
-  return ok;
 }
 
 //_____________________________________________________________________________

@@ -77,11 +77,8 @@
  
  $KUIP          = $CERN_ROOT . "/bin/kuipc";
  $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
- if ($ROOTCINT and ! -e $ROOTCINT) {$ROOTCINT = "";}
  my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
  if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
- my $ROOTCLING  = $ROOTSYS . "/bin/rootcling";
- if ($ROOTCLING and ! -e $ROOTCLING) {$ROOTCLING = "";}
  if ($RLIBMAP) {
    my ($M,$S,$V) = split('\.',$ROOT_LEVEL);
    if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
@@ -794,7 +791,6 @@
 			    'CXXCPP'   => $CXXCPP,#      C++ preprocessor
 			    #                      'F77'      => $F77,#         Fortran 77 compiler command
 			    #                      'FFLAGS'   => $FFLAGS,#      Fortran 77 compiler flags
-			    'STICTMP'        => "/tmp/$<$$",
 			    'USE_64BITS'     => $USE_64BITS
 			   },
 	       'Packages' => {
@@ -803,9 +799,8 @@
 					 'LIBDIR'=> $ROOTSYS . "/lib",
 					 'INCDIR'=> $ROOTSYS . "/include",
 					 'LIBS'  => $ROOTLIBS,
-					 'RLIBMAP'   => $RLIBMAP,
-					 'ROOTCINT'  => $ROOTCINT,
-					 'ROOTCLING' => $ROOTCLING
+					 'RLIBMAP'  => $RLIBMAP,
+					 'ROOTCINT' => $ROOTCINT
 					},
 			      'CERNLIB' => {
 					    'BINDIR' => $CERN . "/bin",

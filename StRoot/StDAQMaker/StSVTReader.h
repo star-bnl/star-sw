@@ -15,7 +15,7 @@
 #ifndef _StSVTReader_
 #define _StSVTReader_
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StDAQReader.h" 
 #include "StTPCReader.h" 
 #endif /*__CINT__*/

@@ -23,9 +23,6 @@ G__*.h
 # Other Stuff
 *.d
 CVS 
-Repository
-Root
-Entries
 *.root
 paw.metafile
 gphysi.dat

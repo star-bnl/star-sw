@@ -1,4 +1,4 @@
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "Riostream.h"
 #include "TROOT.h"
 #include "TSystem.h"

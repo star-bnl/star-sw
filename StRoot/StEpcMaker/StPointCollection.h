@@ -49,9 +49,8 @@
 #include "TDataSetIter.h"
 #include "TTableSorter.h"
 #include "StPi0Candidate.h"
-#if !defined(__CINT__) && !defined(__CLING__)
 #include "StMessMgr.h"
-#endif
+
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 using namespace units;
@@ -133,9 +132,7 @@ public:
 
     void    setPrint(Bool_t a)
     {
-#if !defined(__CINT__) && !defined(__CLING__)
 		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
-#endif
     }///< Obsolete function; users can control messages with logger config file.
 
     ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection

@@ -13,7 +13,7 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <fstream.h>
 #include "TSystem.h"
 #include <TFile.h>

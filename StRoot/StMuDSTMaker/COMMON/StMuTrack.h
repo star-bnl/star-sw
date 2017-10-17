@@ -36,9 +36,8 @@
 
 #include "TObject.h"
 #include "TVector.h"
-#ifdef  __kfpAtFirstHit__
 #include "KFPTrack.h"
-#endif
+
 #define __PROB_SCALE__  1000.
 #define __SIGMA_SCALE__ 1000.
 #define __NOVALUE__     -999
@@ -155,6 +154,7 @@ class StMuTrack : public TObject {
     void setIndex2BTofHit(Int_t i) {mIndex2BTofHit=i;} /// dongx
     void setIndex2MtdHit(Int_t i) {mIndex2MtdHit=i;} /// Bingchu
     void setIndex2Cov(Int_t i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
+#define __kfpAtFirstHit__
 #ifdef  __kfpAtFirstHit__
     void         setKFPTrackatFirstHit(KFPTrack t) {mkfpTrackAtFirstHit = t;}
     void         setKFPTrackatLastHit (KFPTrack t) {mkfpTrackAtLastHit  = t;}

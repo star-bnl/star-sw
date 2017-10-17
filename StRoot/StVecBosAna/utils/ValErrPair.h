@@ -23,7 +23,7 @@ class ValErrPair : public TObject
 public:
    std::pair<Double_t, Double_t> ve;
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 public:
    Double_t &v;      //!
    Double_t &e;      //!

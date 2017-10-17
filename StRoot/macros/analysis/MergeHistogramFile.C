@@ -9,7 +9,7 @@
 
 
 
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 // #  include "TDirIter.cxx"
 #else
 #  include "TDirIter.h"
@@ -211,7 +211,7 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
          // Use the deprecated version
          MergeSimpleHistogramFile(TargetName, inputFilesPattern);
       } else {
-#if defined(__CINT__) || defined(__CLING__)         
+#ifdef __CINT__         
          gSystem->Load("St_base");
 #endif         
          MergeComplexHistogramFile(TargetName, inputFilesPattern);

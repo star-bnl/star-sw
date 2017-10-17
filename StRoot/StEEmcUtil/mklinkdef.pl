@@ -17,7 +17,7 @@ print "#pragma link off all globals;\n"  ;
 print "#pragma link off all classes;\n"  ;
 print "#pragma link off all functions;\n";
 #print "\n\n";
-print "#if defined(__CINT__) || defined(__CLING__)\n";
+print "#ifdef __CINT__\n";
 #print "// list of classes:\n";
 @sorted = sort @classes;
 foreach $class ( @sorted ) {

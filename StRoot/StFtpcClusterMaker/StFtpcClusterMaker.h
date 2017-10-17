@@ -115,7 +115,7 @@
 #include "StMaker.h"
 #endif
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/RICH/RICH_Reader.hh"
 

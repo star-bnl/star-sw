@@ -83,7 +83,7 @@ protected:
     Float_t   mTime;       // MC
     const static Float_t mBTofPadWidth;
     //    StTrack *mAssociatedTrack;   //$LINK
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink        mAssociatedTrack;
 #else
     StLink<StTrack>  mAssociatedTrack;

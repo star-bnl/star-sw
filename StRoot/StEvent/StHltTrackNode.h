@@ -79,7 +79,7 @@ public:
     
 private:
     
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink mGlobalTrack;
     StObjLink mPrimaryTrack;
     StObjLink mBTofHit;

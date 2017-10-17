@@ -31,7 +31,7 @@ void StPicoBbcFiller::fill(const StMuDst& muDst)
 
   StMuEvent *event = muDst.event();
   StTriggerData *trg = const_cast<StTriggerData *>(event->triggerData());
-  if (trg) {
+
   int nTiles = 0;
 
   // Loop over BBC tiles
@@ -48,5 +48,5 @@ void StPicoBbcFiller::fill(const StMuDst& muDst)
       new((*mTileCollection)[nTiles++]) StPicoBbcTile(ID, ADC, TAC, TDC, hasTAC);
     }
   }
-  }
+
 }

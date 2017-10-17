@@ -2,8 +2,7 @@
 <job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-ln -s $STAR/.$STAR_HOST_SYS .
-#if (! -r .sl64_gcc492) ln -s ../../.sl64_gcc492 .
+    if (! -r .sl64_gcc492) ln -s ../../.sl64_gcc492 .
 #  cd $SCRATCH
 #   pwd
   setenv STARFPE NO
@@ -24,18 +23,17 @@ ln -s $STAR/.$STAR_HOST_SYS .
     else
       exit 1;
     endif
-    set log = ${tag}B.log
+    set log = ${tag}.log
 #  if (-r ${log}) exit 0;
     if (! -r "${tag}.picoDst.root") then
-#      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'*.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
-       root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/'${tag}'*.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")'  makePicoDst.C+  &gt;&amp; ${log}
+      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'*.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
     endif
   end
         </command>
     <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
-        <stdout URL="file:./sched$JOBID.log" />
-        <stderr URL="file:./sched$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/PicoDST$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/PicoDST$JOBID.err" />
 <input URL="command:PicoDST.pl" />
 </job>

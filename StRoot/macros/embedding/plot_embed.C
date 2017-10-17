@@ -6,7 +6,7 @@
 //============================================================
 
   
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "TROOT.h"
 #include "TSystem.h"
 #include <iostream.h>

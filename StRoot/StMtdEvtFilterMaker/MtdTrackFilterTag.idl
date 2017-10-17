@@ -1,0 +1,9 @@
+//
+// MTD event filtering tags
+//
+
+struct MtdTrackFilterTag {
+    long tpcSectors;
+    long isRejectEvent;
+    long shouldHaveRejectEvent;
+};

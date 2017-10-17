@@ -155,7 +155,7 @@ struct trackPing {
 
 
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <map>
 #include <utility>
 #if !defined(ST_NO_NAMESPACES)
@@ -551,7 +551,7 @@ private:
     ClassDef(StAssociationMaker,0)
 
 };
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 ostream& operator<<(ostream& out,
 		    const pair<const StGlobalTrack* const, StTrackPairInfo*>& );
 ostream& operator<<(ostream& out,

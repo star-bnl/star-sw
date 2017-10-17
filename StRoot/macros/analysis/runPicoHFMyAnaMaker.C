@@ -28,7 +28,7 @@
  * **************************************************
  */
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TChain.h"
@@ -66,7 +66,7 @@ void runPicoHFMyAnaMaker(const Char_t *inputFile="test.list", const Char_t *outp
   
   Int_t nEvents = 10000000;
 
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
   gROOT->LoadMacro("loadSharedHFLibraries.C");
   loadSharedHFLibraries();
 #endif

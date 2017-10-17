@@ -1,7 +1,7 @@
 // $Id: EveDis.C,v 1.5 2010/02/22 06:11:49 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #  include "TVirtualPad.h"
 #  include "TColor.h"
 #  include "StEventHelper.h"

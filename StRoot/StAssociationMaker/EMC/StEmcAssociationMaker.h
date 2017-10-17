@@ -166,7 +166,7 @@ class StEmcPointAssociation:public StEmcAssociation
 
 // define basic multimap structures
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 struct compEmcTrack   { bool operator()(const StMcTrack* a, const StMcTrack* b) const {return a<b; } };
 struct compEmcHit     { bool operator()(const StEmcRawHit* a, const StEmcRawHit* b) const {return a<b; }};
 struct compEmcCluster { bool operator()(const StEmcCluster* a, const StEmcCluster* b) const {return a<b; }};

@@ -91,7 +91,7 @@ public:
 
 protected:
 //  StTrack*               mDaughter;                   //$LINK
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink              mDaughter;                   
 #else
     StLink<StTrack>        mDaughter;                   
@@ -101,7 +101,7 @@ protected:
     Float_t                mDcaDaughters;
     Float_t                mDcaParentToPrimaryVertex;
 //  StV0Vertex*            mV0Vertex;                   //$LINK
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink              mV0Vertex;                   
 #else
     StLink<StV0Vertex>     mV0Vertex;                   

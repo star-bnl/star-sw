@@ -63,7 +63,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 // General:
 #pragma link off all globals;
 #pragma link off all classes;

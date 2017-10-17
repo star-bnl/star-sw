@@ -32,7 +32,7 @@ ClassImp(StppParticle)
 StppParticle::StppParticle(){}
 StppParticle::~StppParticle(){}
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 StppParticle::StppParticle(g2t_track_st* trk){
    set(trk);
 }

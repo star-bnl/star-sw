@@ -78,7 +78,7 @@ class StSvtDaq;
 class TGeoHMatrix;
 
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StarCallf77.h"
 #define SvtLtoG_ F77_NAME(svtltog,SVTLTOG)
 #define SvtGtoL_ F77_NAME(svtgtol,SVTGTOL)

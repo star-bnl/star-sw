@@ -50,7 +50,7 @@ private:
   void     FillFromFlowEvent();
   void     FillEventHistograms();
   void     FillParticleHistograms();
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      //! flow vector subs
 

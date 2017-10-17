@@ -60,7 +60,7 @@ const float kEEmcSmdROffset[kEEmcNumSmdPlanes]={1.850,0.925,0.0};
 
 // The value of the map matrix(3x12) indicates if a EEMC SMD layer in a plane 
 // is  U=0, V=1, or void=-1  
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 
 const int   kEEmcSmdMapUV[kEEmcNumSmdPlanes][kEEmcNumSectors] = 
                                      {{1,0,-1,1,0,-1,1,0,-1,1,0,-1},

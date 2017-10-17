@@ -148,7 +148,7 @@ class StFmsTowerCluster {
   Double_t mChiSquare2;  ///< Chi-square of the fitting 2 photon
   Double_t mEnergyCutoff;  //!< Cutoff on towers to use in moment calculations
   Towers mTowers;  //!< Towers that make the cluster
-#if !defined(__CINT__) && !defined(__CLING__)  // CINT won't parse unique_ptr so hide it
+#ifndef __CINT__  // CINT won't parse unique_ptr so hide it
   std::unique_ptr<StFmsCluster> mCluster;  //!< Pointer to StEvent cluster
 #endif  // __CINT__
   Photons mPhotons;  ///< Photons in cluster
@@ -160,7 +160,7 @@ class StFmsTowerCluster {
    Use of unique_ptr makes this class non-copyable.
    This causes an error with CINT dictionary creation when a default copy
    constructor is generated, even if surrounding the unique_ptr code with
-   #if !defined(__CINT__) && !defined(__CLING__).
+   #ifndef __CINT__.
    As copying isn't required for this class we therefore simply avoid the
    automatic constructor and forbid copying with a private constructor.
    */

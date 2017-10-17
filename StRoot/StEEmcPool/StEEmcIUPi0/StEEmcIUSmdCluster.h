@@ -1,6 +1,6 @@
 #ifndef __StEEmcIUSmdCluster_h__
 #define __StEEmcIUSmdCluster_h__
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <cassert>
 #endif
 #include <TObject.h>
@@ -178,7 +178,7 @@ inline Bool_t Key(const StEEmcIUSmdCluster &me, const StEEmcIUSmdCluster &you) {
 
 
 typedef std::vector<StEEmcIUSmdCluster> StEEmcIUSmdClusterVec_t;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 inline StEEmcStrip StEEmcIUSmdCluster::seed(){ assert(mStrips.size()>0); return mStrips[0]; } 
 #endif
 #endif

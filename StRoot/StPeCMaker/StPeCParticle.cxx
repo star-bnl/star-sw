@@ -17,7 +17,7 @@ StPeCParticle::StPeCParticle() {
 StPeCParticle::~StPeCParticle() {
 }
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 StPeCParticle::StPeCParticle ( g2t_track_st* trk) {
    set ( trk ) ;
 }

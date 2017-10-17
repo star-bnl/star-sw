@@ -18,7 +18,7 @@
 #define StPeCSpec_h
 #include "Rtypes.h"
 #include "TObject.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
 #endif /* __CINT__ */
@@ -33,7 +33,7 @@ public:
   Float_t                    mInv ;
   Float_t                    cosThetaStar ;
   Float_t                    yRap ;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   StLorentzVectorF           Mom4;
 #endif /*__CINT__*/
 

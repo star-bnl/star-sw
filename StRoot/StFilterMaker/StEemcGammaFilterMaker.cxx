@@ -33,9 +33,9 @@
 // Class Header
 #include "StEemcGammaFilterMaker.h"
 
-#include "eemcGammaFilterMakerParams.h"
-TableImpl(eemcGammaFilterMakerParams);
-ClassImp(StEemcGammaFilterMaker);
+#include "tables/St_eemcGammaFilterMakerParams_Table.h"
+
+ClassImp(StEemcGammaFilterMaker)
 
 ////////////////////////////////////////////////////////////
 //                      Constructor                       //

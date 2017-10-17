@@ -14,7 +14,7 @@
 #define StPeCLumiEntry_h
 #include "Rtypes.h"
 #include "TObject.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
@@ -58,7 +58,7 @@ public:
   Float_t zVtx; 
 
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   Int_t     fill ( StEvent* event ); 
   Int_t     fill ( StMuDst* muDst );
 #endif /*__CINT__*/

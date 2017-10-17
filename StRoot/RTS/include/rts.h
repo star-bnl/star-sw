@@ -30,12 +30,12 @@
 #define _RTS_H_
 
 // jml 1/8/13
-//    This if !defined(__CINT__) && !defined(__CLING__) made its way into the code
+//    This ifndef __CINT__ made its way into the code
 //    when the APPLE changes were made.   It causes the endianness to
 //    remain unset when CINT is processing.   I've no idea what it was
 //    for, so if it is needed please figure out a way to implement it
 //    without breaking the CINT endiness...
-//#if !defined(__CINT__) && !defined(__CLING__)
+//#ifndef __CINT__
 #ifndef __GNUC__
 #warning "This may NOT work on non-GNUC compilers!"
 #endif
@@ -231,7 +231,7 @@ extern inline void swapBuff32(unsigned int *buff, int n)
 
 /********** UGLINESS for CINT which does not seem to be able to parse "sys/types.h" ********/
 
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 #define u_int unsigned int
 typedef unsigned char u_char ;
 typedef unsigned short u_short ;

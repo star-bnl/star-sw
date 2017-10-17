@@ -44,7 +44,7 @@
 #ifndef STROOT_STFMSPOINTMAKER_STFMSCLUSTERFITTER_H_
 #define STROOT_STFMSPOINTMAKER_STFMSCLUSTERFITTER_H_
 
-#if !defined(__CINT__) && !defined(__CLING__)  // Hide std::array from CINT, as CINT cannot parse C++11
+#ifndef __CINT__  // Hide std::array from CINT, as CINT cannot parse C++11
 #include <array>
 #endif  // __CINT__
 #include <list>
@@ -148,7 +148,7 @@ class StFmsClusterFitter : public TObject {
 
    Returns the &chi;<sup>2</sup> of the fit.
    */
-#if !defined(__CINT__) && !defined(__CLING__)  // Hide std::array from CINT, as CINT cannot parse C++11
+#ifndef __CINT__  // Hide std::array from CINT, as CINT cannot parse C++11
   Int_t fit2Photon(const std::array<double, 7>& parameters,
                    const std::array<double, 7>& steps,
                    const std::array<double, 7>& lower,

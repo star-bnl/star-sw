@@ -1049,7 +1049,7 @@ Float_t StPeCEvent::getPt() const{ return pt; }
 Float_t StPeCEvent::getXVertex() const{ return xVertex; }
 Float_t StPeCEvent::getYVertex() const{ return yVertex; }
 Float_t StPeCEvent::getZVertex() const{ return zVertex; }
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 
 
 StLorentzVectorF StPeCEvent::getEvent4Momentum(StPeCSpecies pid) const{

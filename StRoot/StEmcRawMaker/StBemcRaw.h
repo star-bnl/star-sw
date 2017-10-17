@@ -74,8 +74,7 @@ bemcRawData is also filled in the StEmcCollection.
 #include "TDataSet.h"
 #include "StEmcUtil/database/StBemcTables.h"
 
-//#include "tables/St_controlADCtoE_Table.h"
-#include "StEmcADCtoEMaker/controlADCtoE.h"
+#include "tables/St_controlADCtoE_Table.h"
 #include "defines.h"
 #include "TH2.h"
 #include "StChain/StRTSBaseMaker.h"

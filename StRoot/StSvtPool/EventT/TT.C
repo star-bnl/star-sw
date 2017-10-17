@@ -1,4 +1,4 @@
-// #if !defined(__CINT__) && !defined(__CLING__)
+// #ifndef __CINT__
 #define T_cxx 1
 #include <assert.h>
 #include "TH1.h"

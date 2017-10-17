@@ -38,7 +38,7 @@
 #include "StDcaGeometry.h"
 #include "TString.h"
 #include "TGeoMatrix.h"
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 class StPrimaryVertex;
 class StTrack;
 class StTpcHit;

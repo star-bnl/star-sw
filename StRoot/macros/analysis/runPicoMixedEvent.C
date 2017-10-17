@@ -19,7 +19,7 @@
 #include "TChain.h"
 
 
-# if !defined(__CINT__) && !defined(__CLING__)
+# ifndef __CINT__
 
 #include "StMaker.h"
 #include "StChain.h"

@@ -45,9 +45,8 @@ y2020      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt      
 ______________________________________________________________________________________________________________     
  */
 #endif
-#if ROOT_VERSION_CODE > 393216 || defined(__NO_STRANGE_MUDST__) /*  ROOT_VERSION(6,0,0) */
-#define __NoStrangeMuDst__
-#endif
+
+//#define __NoStrangeMuDst__
 #define __NoDisplay__
 //#define __AgMLonFly__
 Bfc_st BFC[] = { // standard chains
@@ -1341,8 +1340,8 @@ Bfc_st BFC[] = { // standard chains
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
 #ifndef  __NoStrangeMuDst__
   {"MuDSTDeps"   ,"","","StEvent,Stu,StBichsel",""
-   ,                                     "Tree,StStrangeMuDstMaker","Load MuDST misc. dependencies",kFALSE},
-  {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil,Tree",""
+   ,                                     "StStrangeMuDstMaker,Tree","Load MuDST misc. dependencies",kFALSE},
+  {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                            "StMuDSTMaker","Load MuDST library",kFALSE},
 #else /* __NoStrangeMuDst__  , StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__*/
   {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   "","Tree","Load MuDST misc. dependencies (all)",kFALSE},
@@ -1350,7 +1349,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
   {"picoEvt"    ,"","","StEvent,Stu","",            "StPicoEvent","Load picoEvent and dependencies",kFALSE},
-  {"picoDst"    ,"","","MuDst,picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
+  {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
@@ -1369,9 +1368,9 @@ Bfc_st BFC[] = { // standard chains
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","StarAgmlUtil"
    ,                                                         "suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
-  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco,Tree"
+  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
-  {"RpicoDST"    ,"PicoDst"  ,"","picoDst"                                                ,"","","",kFALSE},
+  {"RpicoDST"    ,"PicoDst"  ,"","MuDst,Tree,noHistos,noRunco","StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1439,7 +1438,7 @@ Bfc_st BFC[] = { // standard chains
   {"AgStar","","","Generators,geant,-gstar,-gstarLib","","AgStar","Utility to feed St_geant_Maker", kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
-  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","MathMore,StarGeneratorUtil"
+  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","minicern,MathMore,StarGeneratorUtil"
    ",MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,StSsdDbMaker,StIstDbMaker,StPxlDbMaker"
    ",StarVMCApplication"                                                                  ,"VMC G3",kFALSE},
   {"VMCAlignment","","","","","",                                                   "VMC Alignment",kFALSE},
@@ -1723,8 +1722,8 @@ Bfc_st BFC[] = { // standard chains
   {"Stx"    ,"","","-Sti,-StiCA,-Stv","StxMaker","TPCCATracker,StxMaker",  "eXpress reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
-  {"Stv"     ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,StarMiniCern"
-   ,"StvMaker","libHist,libHistPainter,libVMC,geant3,GeoTestMaker,StvUtil,Stv,StvMaker,StEventUtilities"
+  {"Stv"     ,"Stv","","-xgeometry,-Sti,-StiTpc,-StiSsd,-StiSvt,-StiPxl,-StiSsd,-StiSst,-StiIst,","StvMaker"
+   ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker,StEventUtilities"
    ",-StiLibs,-StiLibsHft"                                                                   ,"Stv",kFALSE},
   {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
   {"StiVMC"   ,"StiVMC","","-Sti,SCL,stu,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
@@ -1844,7 +1843,7 @@ Bfc_st BFC[] = { // standard chains
 #endif /* __NoStrangeMuDst__ */
   {"EMCmDST"   ,"","MuDSTChain","MuDst",                "StEmcMicroDstMaker","","Creates EMC MuDST",kFALSE},
 #ifndef __NoStrangeMuDst__
-  {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST",         "StMuDstMaker","","Writes Common MuDST",kFALSE},
+  {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST,Tree",    "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
@@ -1886,8 +1885,8 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"MuMc"        ,"","","KFParticle","StMuMcAnalysisMaker,KFParticlePerformance"
-   ,                                                          "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
+  {"MuMc"        ,"","","KFParticle","StMuMcAnalysisMaker"
+   ,                                    "KFParticlePerformance,StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
   {"SpinTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},

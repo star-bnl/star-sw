@@ -2,7 +2,7 @@
 use File::Basename;
 use Cwd;
 #my @list = ` condor_q -l -s fisyak | egrep '(GlobalJobId|NumCkpts_RAW|Iwd|ClusterId|RemoteUserCpu =)'`;
-my @list = ` condor_q -global -l -s fisyak | egrep '(GlobalJobId|Iwd|RemoteUserCpu =|HoldReasonCode)'`;
+my @list = ` condor_q -l -s fisyak | egrep '(GlobalJobId|Iwd|RemoteUserCpu =|HoldReasonCode)'`;
 #my @list = ` condor_q -l -s fisyak | egrep '(GlobalJobId|Iwd|CurrentHosts =|HoldReasonCode)'`;
 #print "@list\n";
 my $line = "";

@@ -1,4 +1,4 @@
 # $Id $
 # package StMcEvent
 # author: 
-Library:libStMcEvent.so:LIBS += -lStarClassLibrary
+#Library:libStMcEvent.so:LIBS += 

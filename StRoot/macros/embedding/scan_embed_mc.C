@@ -2,7 +2,7 @@
 //Modification extra histograms by Xianglei
 //Extra 3D Histograms Dca : ETA: pt and Nfit: Eta: pt are being added
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "TROOT.h"
 #include "TSystem.h"
 #include <iostream.h>

@@ -36,10 +36,8 @@
 
 //_____________________________________________________________________________
 inline void StStrangeControllerBase::PrintNumCand(const char* text, Int_t num) {
-#if !defined(__CINT__) && !defined(__CLING__)
   gMessMgr->Info("","O-") << IsA()->GetName() << ": " << text << " "
                    << num << " " << GetName() << " candidates" << endm;
-#endif
 }
 //_____________________________________________________________________________
 inline StStrangeControllerBase* StStrangeControllerBase::GetDstController() {

@@ -119,7 +119,7 @@ private:
     Int_t             mProductionVersion;
     Int_t             mId;
     Float_t           mProbability;
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink	      mAssociatedMip; 
 #else
     StLink<StRichHit> mAssociatedMip; 

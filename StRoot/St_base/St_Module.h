@@ -71,7 +71,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 #pragma Ccomment on
 #endif
 

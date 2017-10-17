@@ -1,6 +1,6 @@
 #ifndef _ST_DAQ_ADC_TB_H
 #define _ST_DAQ_ADC_TB_H
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "DAQ_READER/daq_dta_structs.h"
 #else
 class daq_adc_tb;

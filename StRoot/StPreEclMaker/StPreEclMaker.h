@@ -35,9 +35,7 @@ public:
 
     void    setPrint(Bool_t a)
     {
-#if !defined(__CINT__) && !defined(__CLING__)
 		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
-#endif
     }///< Obsolete function; users can control messages with logger config file.
     void  setAlgorithm(EmcClusterAlgorithm a)
     {

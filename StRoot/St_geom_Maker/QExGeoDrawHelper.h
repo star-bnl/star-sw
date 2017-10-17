@@ -58,7 +58,7 @@ public:
    virtual TVolume    *GetVolume()    const { return fVolume;   }
    virtual TGeoVolume *GetGeoVolume() const { return fGeoVolume;}
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
    static TVolume* MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVolume *> *volumeMap = 0);
 #endif
 //   static TVolume* MakeVolume( TGeoVolume *top, TMap *volumeMap = 0);

@@ -13,7 +13,7 @@
 
 StPicoEvent::StPicoEvent():
   mRunId(0), mEventId(0), mFillId(0), mBField(0), mTime(0),
-  mPrimaryVertex{ -999., -999., -999.}, mPrimaryVertexError{ -999., -999., -999}, mPrimaryVertexCorr{0,0,0},
+  mPrimaryVertex{ -999., -999., -999.}, mPrimaryVertexError{ -999., -999., -999},
   mRanking(-999), mNBEMCMatch(0), mNBTOFMatch(0),
   mTriggerIds{},
   mRefMultFtpcEast(0), mRefMultFtpcWest(0),
@@ -42,33 +42,12 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   mBField = ev->magneticField();
 
   mTime=ev->eventInfo().time();
-#if 0
+
   mPrimaryVertex = ev->primaryVertexPosition();
   mPrimaryVertexError = ev->primaryVertexErrors();
-#endif
+
   if (StMuPrimaryVertex* pv = muDst.primaryVertex())
   {
-    mPrimaryVertex[0] = pv->position().x();
-    mPrimaryVertex[1] = pv->position().y();
-    mPrimaryVertex[2] = pv->position().z();
-    mPrimaryVertexError[0] = pv->posError().x();
-    mPrimaryVertexError[1] = pv->posError().y();
-    mPrimaryVertexError[2] = pv->posError().z();
-#ifdef StTrackMassFit_hh
-    KFParticle *kvx =  StMuDst::instance()->IdVx2KFVxMap[pv->id()];
-    if (kvx) {
-      for (Int_t i = 0; i < 3; i++) {
-	mPrimaryVertexError[i] = TMath::Sqrt(kvx->GetCovariance(i,i));
-      }
-      mPrimaryVertexCorr[0] = kvx->GetCovariance(1,0)/(mPrimaryVertexError[1]*mPrimaryVertexError[0]);
-      mPrimaryVertexCorr[1] = kvx->GetCovariance(2,0)/(mPrimaryVertexError[2]*mPrimaryVertexError[0]);
-      mPrimaryVertexCorr[2] = kvx->GetCovariance(2,1)/(mPrimaryVertexError[2]*mPrimaryVertexError[1]);
-    } else {
-      mPrimaryVertexCorr[0] = mPrimaryVertexCorr[1] = mPrimaryVertexCorr[2] = 0;
-    }
-#else
-    mPrimaryVertexCorr[0] = mPrimaryVertexCorr[1] = mPrimaryVertexCorr[2] = 0;
-#endif    
     mRanking = pv->ranking();
     mNBEMCMatch = pv->nBEMCMatch();
     mNBTOFMatch = pv->nBTOFMatch();

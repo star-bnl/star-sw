@@ -13,7 +13,7 @@
 #else
 #include "TCernLib.h"
 #endif
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #define __VA_LIST__(name) \
   va_list args;     \
   va_start(args,va_(name)); \
@@ -39,7 +39,7 @@ class TRArray : public TArrayD {
   };
   TRArray(Int_t N=0):  TArrayD(N), fValid(kTRUE), fIsNotOwn(kFALSE) {}
   //  TRArray(Int_t N,Double_t scalar):  TArrayD(N) {if (scalar != 0) Reset(scalar);}
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TRArray(Int_t N,Double_t a0, ...);
 #endif
   TRArray(Int_t N,const Double_t *Array):  TArrayD(N,Array), fValid(kTRUE), fIsNotOwn(kFALSE) {}

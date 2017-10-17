@@ -58,7 +58,7 @@ private:
     float mTof;
     float mTriggerTime;
     
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink mTrackNode;
 #else
     StLink<StHltTrackNode> mTrackNode;

@@ -3,7 +3,7 @@
 #ifndef FRANKS2HISTO__HH
 #define FRANKS2HISTO__HH
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <Stiostream.h>
 #include <math.h>
 #ifdef GNU_GCC

@@ -1,7 +1,7 @@
 #ifndef StHbtString_hh
 #define StHbtString_hh
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 
 #ifndef StHbtString_noCint
 #define StHbtString_noCint

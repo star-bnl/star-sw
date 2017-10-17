@@ -27,7 +27,7 @@ class StppParticle : public TObject {
           StppParticle();
   virtual ~StppParticle();
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
           StppParticle (g2t_track_st *trk);
   void    set(g2t_track_st* trk);
 #endif /*__CINT__*/

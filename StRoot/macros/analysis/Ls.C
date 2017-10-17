@@ -10,7 +10,7 @@
 // =======  those contain the "hpy" substring
 // type:  Ls("hpy");
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #  include "TDirectory.h"
 #  include "StFileIter.h"
 #  include "TRegexp.h"

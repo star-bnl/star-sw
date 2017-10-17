@@ -6,7 +6,6 @@
 
 void detectorId(int *ids=0,const char** cds=0)
 {
-#ifndef __CLING__
  int         myIds[100];
  const char *myCds[100];
  if (!ids) { ids = myIds; cds = myCds; }
@@ -57,7 +56,6 @@ void detectorId(int *ids=0,const char** cds=0)
    if (tb[myE]=='}') 			break;
  }
  fclose(fp);
-#endif
 #if 0
  for (int i=1;i<=ids[0];i++) {
    printf("%d = %s\n",ids[i],cds[i]);

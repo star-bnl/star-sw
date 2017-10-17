@@ -2,7 +2,7 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 #pragma link C++ class StarPythia6+;
 // Add pythia common blocks
 #pragma link C++ struct PyJets_t+;

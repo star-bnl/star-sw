@@ -17,7 +17,7 @@ class TRMatrix : public TRArray {
   TRMatrix(const TRMatrix& A, ETRMatrixCreatorsOp kop,const TRSymMatrix &S);
   TRMatrix(const TRSymMatrix &S);
   TRMatrix(const TRMatrix &S, Int_t NI, Int_t NJ=0, Int_t I=1, Int_t J=1);
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TRMatrix(Int_t nrows,Int_t ncols,Double_t a0, ...);
 #endif
   TRMatrix    &operator=(const TRMatrix &rhs);

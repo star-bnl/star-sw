@@ -72,8 +72,7 @@ __NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__
 class StMuArrays {
  public:
  StMuArrays();
- virtual ~StMuArrays() {}
- #if !defined(__CINT__) && !defined(__CLING__)
+ #ifndef __CINT__
     ///< names of the TBranches in the TTree/File 
     static const char*         arrayNames    [__NALLARRAYS__    ];
 #ifndef __NO_STRANGE_MUDST__

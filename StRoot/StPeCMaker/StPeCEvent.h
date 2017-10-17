@@ -67,7 +67,7 @@
 #include "StPeCEnumerations.h"
 #include "TObject.h"
 #include "TClonesArray.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "PhysicalConstants.h"
 ///#include "StEventTypes.h"
 #endif /* __CINT__ */
@@ -102,7 +102,7 @@ public:
   Float_t                         getXVertex() const;
   Float_t                         getYVertex() const;
   Float_t                         getZVertex() const;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   StMuDst*                        muDst;
   StEvent*                        eventP ;
   void                            addPair(StPeCPair* pair) const;

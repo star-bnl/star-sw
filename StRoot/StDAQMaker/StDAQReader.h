@@ -156,7 +156,7 @@ class TDataSet    ;
 class daqReader;
 typedef daqReader evpReader;
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 
 struct RICH_Reader;
 struct L3_Reader;
@@ -170,7 +170,7 @@ typedef FPD_Reader  StFPDReader;
 
 #endif /*__CINT__*/
 
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 
 class StRICHReader;
 class StL3Reader;
@@ -276,7 +276,7 @@ protected:
   char *fDATAP;
   StRtsReaderMaker *fRtsMaker;  //! pointer to the RTS_READER
 };
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StTPCReader.h"
 #include "StFTPCReader.h"
 #include "StEMCReader.h"

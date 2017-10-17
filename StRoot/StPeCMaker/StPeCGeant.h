@@ -15,7 +15,7 @@
 #include "Rtypes.h"
 #include "TObject.h"
 #include "TClonesArray.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
 #endif /* __CINT__ */
@@ -32,7 +32,7 @@ public:
   virtual                ~StPeCGeant();
 
   void                   clear (  ) ; 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   Int_t                  fill  ( TDataSet* geant ) ; 
   Int_t                  fill  ( StMuDst * mu ) ; 
 #endif /* __CINT__ */

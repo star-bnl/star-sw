@@ -5,11 +5,9 @@
 // what it does: opens the ROOT session
 //=======================================================================
 {
-  //  cout << gSystem->GetDynamicPath() << endl;
   gSystem->ResetSignal(kSigChild,kTRUE);
   int rootlogon_fpe=0;const char *rootlogon_env=0;
   const Char_t *rootlogon_path  = ".:~";
-  Int_t rootlogon_error = 0;
   // eliminate the need to provide the custom ".rootrc" to activate Qt-layer 
   if (gSystem->Getenv("WITH_QT") && gSystem->Getenv("QTDIR")) 
   {
@@ -76,7 +74,7 @@
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
   gPrompt += " [%d] ";
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); 
-#ifndef __CLING__1    
+    
   //  if (gSystem->DynamicPathName("libNet",kTRUE))
   //    gSystem->Load("libNet");
   
@@ -92,24 +90,20 @@
   }
   gSystem->Load("libEG");
   gSystem->Load("libVMC");
-  if (gSystem->DynamicPathName("StarClassLibrary",kTRUE)) gSystem->Load("StarClassLibrary");
-  else if (gSystem->DynamicPathName("libStarClassLibrary",kTRUE)) gSystem->Load("libStarClassLibrary");
-  if (gSystem->DynamicPathName("StarRoot",kTRUE)) {    
+  if (gSystem->DynamicPathName("StarClassLibrary",kTRUE))
+    gSystem->Load("StarClassLibrary");
+  if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
-    gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
-  } else if (gSystem->DynamicPathName("libStarRoot",kTRUE)) { 
-    gSystem->Load("libStarRoot");
-    gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
-  }
-#if 1
-  if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
-    gSystem->Load("KFParticle");
-  } else if (gSystem->DynamicPathName("libKFParticle",kTRUE)) {
-    gSystem->Load("libKFParticle");
-  }
+#ifndef __CLING__
+    StCloseFileOnTerminate::Instantiate();
 #endif
-#endif /* __CLING__ */
-  if (TString(gSystem->GetLibraries()).Contains("libTable")) {
+#if 1
+    if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
+      gSystem->Load("KFParticle");
+    }
+#endif
+  }
+  if (strstr(gSystem->GetLibraries(),"libTable")) {
     gROOT->ProcessLine("typedef TCL              StCL;");              
     gROOT->ProcessLine("typedef TDataSet         St_DataSet ;");       
     gROOT->ProcessLine("typedef TDataSetIter     St_DataSetIter;");    

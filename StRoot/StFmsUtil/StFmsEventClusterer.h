@@ -89,7 +89,7 @@ class StFmsEventClusterer: public TObject {
    value.
    */
   Bool_t cluster(std::vector<FMSCluster::StFmsTower>* towers);
-#if !defined(__CINT__) && !defined(__CLING__)  // Hide ClusterList from CINT as it uses C++11
+#ifndef __CINT__  // Hide ClusterList from CINT as it uses C++11
   /** Returns the list of clusters in this detector for the event. */
   ClusterList& clusters() { return mClusters; }
   /** \overload */
@@ -97,7 +97,7 @@ class StFmsEventClusterer: public TObject {
 #endif  // __CINT__
 
  private:
-#if !defined(__CINT__) && !defined(__CLING__)  // Hide ClusterList from CINT as it uses C++11
+#ifndef __CINT__  // Hide ClusterList from CINT as it uses C++11
   /** ClusterList is defined in StFmsClusterFinder.h */
   typedef ClusterList::iterator ClusterIter;
   /** ClusterList is defined in StFmsClusterFinder.h */
@@ -160,7 +160,7 @@ class StFmsEventClusterer: public TObject {
    Returns the &chi;<sup>2</sup> of the fit.
    */
   Double_t fit1PhotonCluster(StFmsTowerCluster* cluster);
-#if !defined(__CINT__) && !defined(__CLING__)  // Hide Cluster(Const)Iter from CINT as it uses C++11
+#ifndef __CINT__  // Hide Cluster(Const)Iter from CINT as it uses C++11
   /*
    Special 2-photon fit for a single cluster.
 

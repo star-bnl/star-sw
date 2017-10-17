@@ -10,7 +10,7 @@ class TRDiagMatrix : public TRArray {
   TRDiagMatrix(Int_t nrows,const Float_t *Array) : TRArray(nrows,Array), fNrows(nrows) {}
   TRDiagMatrix(Int_t nrows,const Char_t *s) : TRArray(nrows,s), fNrows(nrows) {}
   TRDiagMatrix(const TRDiagMatrix& W,ETRMatrixCreatorsOp kop);
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TRDiagMatrix (Int_t nrows, Double_t a0, ...);
 #endif
   virtual ~TRDiagMatrix() {}

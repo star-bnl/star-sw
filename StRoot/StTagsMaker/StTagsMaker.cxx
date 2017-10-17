@@ -73,7 +73,7 @@
 #include "TClass.h"
 #include "TDataMember.h"
 #include "TDataType.h"
-#include "GlobalTag.h"
+#include "tables/St_GlobalTag_Table.h"
 //#include "St_GlobalTag.h"
 #include "StEvent.h"
 #include "StTriggerData.h"
@@ -83,7 +83,7 @@ static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
 static TDataSet *fTagsList =  new TDataSet("TagList");
 
-TableImpl(GlobalTag);
+//TableImpl(GlobalTag);
 ClassImp(StTagsMaker); 
 //_____________________________________________________________________________
 StTagsMaker::StTagsMaker(const char *name):StMaker(name){

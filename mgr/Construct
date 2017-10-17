@@ -238,9 +238,6 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
   push @items, "FmsPointMaker";
   push @items, "FmsUtil";
 }
-# if ($ROOT_LEVEL =~ /^6/ ){
-#   push @items, "StStrangeMuDstMaker";
-# }
 #push @items, "StiCA";
 push @items, "StarVMC/xgeometry";
 # closing exclusion list
@@ -333,7 +330,7 @@ if (-r "StarDb/AgiGeometry" ) {push @sysdirlist, "StarDb/AgiGeometry";}
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
 }
-if ($STAR_HOST_SYS !~ /darwin/ && $ROOT_LEVEL !~ /^6/ ){
+if ($STAR_HOST_SYS !~ /darwin/){
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/rexe";
@@ -353,8 +350,7 @@ foreach $dir(@sysdirlist , @subdirs ) {
 @packages = sortu(@packages);
 #print "======= STAR_HOST_SYS = $STAR_HOST_SYS $param::include\n";
 my $qtRoot = "QtRoot";
-if (($STAR_HOST_SYS !~ /darwin/) && # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $STAR_HOST_SYS !~ /gcc482/) ||
-    $ROOT_LEVEL !~ /^6/ ||
+if (($STAR_HOST_SYS !~ /darwin/) || # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $STAR_HOST_SYS !~ /gcc482/) ||
     ($param::include and $qtRoot =~ /$param::include/)) {# no qt on mac
 #  print "check $qtRoot\n";
   if (-d $qtRoot or -l $qtRoot) {

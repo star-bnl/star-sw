@@ -53,7 +53,12 @@ class StBFChain : public StChain {
   Int_t               fkChain;    // Master chain option
 
  public:
-  StBFChain(const Char_t *name="bfc", const Bool_t UseOwnHeader = kFALSE);
+  StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
+           StChain(name,UseOwnHeader)
+	     ,fBFC(0), fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
+	     ,FDate(0),FTime(0),FDateS(0),FTimeS(0),fFiltTrg(""),fRunG(0)
+    ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {Setup();}
+
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
    virtual void        Clear(Option_t *option="");

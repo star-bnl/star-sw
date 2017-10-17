@@ -9,9 +9,6 @@
    foreach f ( `grep Zombie Recover.log | awk '{print $3}'` )
      set b = `basename ${f} .MuDst.root`; mv ${b}* Zombie/
    end
-   foreach f ( `grep Zombie Recover.log | awk '{print $3}'` )
-     set b = `basename ${f} .PicoDst.root`; mv ${b}* Zombie/
-   end
  */
 
 // #include "TDirIter.h"

@@ -34,7 +34,7 @@
 //    printf("analyse run %d, event %d from file %s\n", run ,event, file);
 // }
 //
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #  include <qapplication.h> 
 #  include <qstyle.h> 
 #  include <qfiledialog.h> 
@@ -50,7 +50,7 @@
 //______________________________________________________________________
 void DialogsQ() {
    // Load the Qt ROOT dictionary
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
    gSystem->Load("qtcint");
 #endif   
 }

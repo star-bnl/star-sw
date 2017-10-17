@@ -14,7 +14,7 @@
 #define StPeCL0_h
 #include "Rtypes.h"
 #include "TObject.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
 #endif /* __CINT__ */
@@ -44,7 +44,7 @@ public:
   void setYear1Input ( ) ;
   void setYear2Input ( ) ;
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   Int_t process ( StEvent *event ) ; 
   Int_t process(StMuDst* mudst); 
 #endif /* __CINT__ */

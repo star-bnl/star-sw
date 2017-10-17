@@ -59,7 +59,7 @@ private:
     int mSoftId;
     int mDaqId;
     
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
     StObjLink mTrackNode;
 #else
     StLink<StHltTrackNode> mTrackNode;
