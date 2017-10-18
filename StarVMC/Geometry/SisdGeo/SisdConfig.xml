@@ -2,7 +2,7 @@
 <Detector name="SISD" comment="STAR Pixel detector">
 
 <Modules>
-SisdGeo,  SisdGeo1,  SisdGeo2,  SisdGeo3,  SisdGeo4,  SisdGeo5,  SisdGeo6,  SisdGeo7
+SisdGeo,  SisdGeo1,  SisdGeo2,  SisdGeo3,  SisdGeo4,  SisdGeo5,  SisdGeo6,  SisdGeo7, SisdGeo7a
 </Modules>
 
 <!-- Only most recent for now... -->
@@ -85,9 +85,16 @@ replace [exe SISD85;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=
   <Init struct="ssdp" var="placement" value="1" /> <!-- place in SVT -->
 </Setup>
 
-<Setup name="SISD85" onoff="on"  module="SisdGeo7" comment="y2014 configuration">
+<Setup name="SISD85" onoff="on"  module="SisdGeo7a" comment="y2014 configuration">
   <Init struct="ssdp" var="config" value="85" /> <!-- need to verify -->
   <Init struct="ssdp" var="placement" value="1" /> <!-- place in IDS -->
+  <Init struct="ssdp" var="misalign" value="0" /> <!-- ideal -->
+</Setup>
+
+<Setup name="SISD85a" onoff="on"  module="SisdGeo7a" comment="y2014 configuration">
+  <Init struct="ssdp" var="config" value="85" /> <!-- need to verify -->
+  <Init struct="ssdp" var="placement" value="1" /> <!-- place in IDS -->
+  <Init struct="ssdp" var="misalign" value="1" /> <!-- misaligned -->
 </Setup>
 
 </Detector>
