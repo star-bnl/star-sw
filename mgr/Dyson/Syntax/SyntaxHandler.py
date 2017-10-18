@@ -89,11 +89,11 @@ class SyntaxHandler ( ContentHandler ):
         self.syntax  = {}
         
         #              AGML TAG      Class which handles tag
-        # =================================================== # Document handling
+        # ===================================================
         self.addToken( 'Document'  , Language.Document      )
-        # ===================================================  
+        # ===================================================
         self.addToken( 'Export'    , Language.Export        ) 
-        # =================================================== # Detector modules
+        # ===================================================
         self.addToken( 'Module'    , Language.Module        )   
         self.addToken( 'Block'     , Language.Block         )
         self.addToken( 'Volume'    , Language.Block         ) # AgML syntax
@@ -114,7 +114,6 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Assign'    , Language.Assign        ) # New in AgROOT 
         self.addToken( 'Keep'      , Language.Keep          ) # New in AgROOT
         # ===================================================
-#       self.addToken( 'Structure' , Language.Structure     )
         self.addToken( 'Structure' , Language.Struct        )     
         self.addToken( 'Struct'    , Language.Struct        ) # New style struct
 #       self.addToken( 'Fill'      , Language.Fill          )
@@ -131,11 +130,12 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Component' , Language.Component     )
         self.addToken( 'Attribute' , Language.Attribute     )
         self.addToken( 'Create'    , Language.Create        )
-        self.addToken( 'Position'  , Language.Position      )
+#       self.addToken( 'Position'  , Language.Position      )
 
         self.addToken( 'Placement',  Language.Placement     )
         self.addToken( 'Translation', Language.Translation  )
         self.addToken( 'Rotation',    Language.Rotation     )
+        self.addToken( 'Misalign',    Language.Misalign     ) # AgML 2.0
         
         self.addToken( 'Create_and_Position',
                        Language.Create_and_Position         )

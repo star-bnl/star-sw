@@ -24,7 +24,12 @@ const double identity[4][4] =
   };
 
 AgTransform::AgTransform( const char* block, const char* mother, const char* group, const char* table ) 
-  : mMatrix{ {1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1} }
+  : mMatrix{ {1,0,0,0}, 
+             {0,1,0,0}, 
+             {0,0,1,0}, 
+             {0,0,0,1} },
+    mIsMisaligned(false)
+  
 {
 
   // If a DB table has been specified, look it up and overwrite
@@ -79,6 +84,8 @@ void AgTransform::Print( Option_t *opts ) const
     }
     std::cout << std::endl;
   };
+
+
 };
 
 
@@ -86,6 +93,7 @@ void AgTransform::Matrix( const double matrix[4][4], int lr )
 {
   if ( kRightMultiply == lr ) MatrixRight( matrix );
   else                        MatrixLeft ( matrix );
+
   return;
 
 }
