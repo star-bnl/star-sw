@@ -74,7 +74,7 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS)
 typedef vector<Int_t>  IntVec;
 typedef vector<Double_t>  DoubleVec;
@@ -389,7 +389,7 @@ class StBTofGeometry : public TNamed {
    Int_t             GetAtOfTray(const Int_t itray=0)   const;
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec, DoubleVec &thetaVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;

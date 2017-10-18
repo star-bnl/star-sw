@@ -1,7 +1,7 @@
 // Author V.Fine 06/12/2001 BNL mailto:fine@bnl.gov
 // This run Pythia using ROOT TPythia6 interface
 // Thanks Michael Bussmann <Michael.Bussmann@physik.uni-muenchen.de> for Pythia living example
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 # include <stdlib.h>
 # include <ostream.h>
 # include <TROOT.h>

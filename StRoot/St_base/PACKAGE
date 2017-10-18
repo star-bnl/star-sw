@@ -1,4 +1,4 @@
 # $Id $
 # package St_base
 # author: 
-
+Library:libSt_base.so:LIBS +=   -lTable -lGeom -llog4cxx -lStStarLogger

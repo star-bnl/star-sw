@@ -3,7 +3,7 @@
 #ifndef StIstRawHitMaker_hh
 #define StIstRawHitMaker_hh
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <array>
 #include <iostream>
 #endif

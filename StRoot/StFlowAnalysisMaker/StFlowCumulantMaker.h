@@ -66,7 +66,7 @@ private:
   void     FillEventHistograms();
   void     FillParticleHistograms();
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Double_t mSqrtOfSumWgtSqr[Flow::nSels][Flow::nHars]; 

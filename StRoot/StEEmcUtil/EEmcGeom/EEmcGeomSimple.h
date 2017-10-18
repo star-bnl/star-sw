@@ -84,7 +84,9 @@ public:
   /// \param eta tile index (eta bin) [0,mNumEta)
   inline Float_t getEtaMean(UInt_t eta) const {
     if (mNumEta<=eta) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getEtaHalfWidth: invalid eta index " << eta << endm;
+#endif
 	return 0;
     } else {
         return 0.5 * ( mEtaBin[eta] + mEtaBin[eta+1] );
@@ -95,7 +97,9 @@ public:
   /// \param eta tile index (eta bin) [0,mNumEta)
   inline Float_t getEtaHalfWidth(UInt_t eta) const { 
     if(mNumEta<=eta) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getEtaHalfWidth: invalid eta index" << eta << endm;
+#endif
 	return 0;
     } else {
 	return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
@@ -108,7 +112,9 @@ public:
     //const  double dPhi=2.0*M_PI/mNumSec;
     const  double dPhi= TMath::TwoPi()/mNumSec;
     if(mNumSec<=sec) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getPhiMean: invalid sector index" << sec << endm;
+#endif
 	return 0;
     } else {
         return AdjustAngle(mClock*(sec+0.5L)*dPhi+mPhi0);
@@ -122,10 +128,14 @@ public:
     //const double dPhi=2.0*M_PI/mNumSec;
     const double dPhi=TMath::TwoPi()/mNumSec;
     if(mNumSec <=sec ) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getPhiMean: invalid sector index " << sec << endm;
+#endif
 	return 0;
     } else if(mNumSSec<=ssec) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getPhiMean: invalid subsector index " << ssec << endm;
+#endif
 	return 0;
     } else {
 	return AdjustAngle(mClock*(Double_t(sec)+(ssec+0.5L)/mNumSSec)*dPhi+mPhi0);
@@ -139,10 +149,14 @@ public:
     //const double dPhi=2.0*M_PI/mNumSec;
     const double dPhi=TMath::TwoPi()/mNumSec;
     if(mNumSec <=sec ) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getPhiMean: invalid sector index " << sec << endm;
+#endif
 	return 0;
     } else if(mNumSSec<=ssec) {
+#if !defined(__CINT__) && !defined(__CLING__)
 	LOG_ERROR << "getPhiMean: invalid subsector index " << ssec << endm;
+#endif
 	return 0;
     } else {
         return (Float_t)(0.5L/mNumSSec*dPhi);

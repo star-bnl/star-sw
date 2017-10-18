@@ -169,7 +169,7 @@ Int_t StEandBDirMaker::Make(){
       c2->cd(1);
       secXY->Draw("colz");
     }
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,5,1)
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,1)
     Float_t *xpeaks = spectr->GetPositionX();
     Float_t *ypeaks = spectr->GetPositionY();
 #else
@@ -180,7 +180,7 @@ Int_t StEandBDirMaker::Make(){
     static Double_t windowY = 5;
     for (Int_t pf = 0; pf < nfound; pf++) {
       // Check significance
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,5,1)
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,1)
       Float_t xp = xpeaks[pf];
       Float_t yp = ypeaks[pf];
 #else

@@ -29,7 +29,7 @@
 #ifndef StHiMicroMaker_hh     
 #define StHiMicroMaker_hh
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <utility>
 #endif
 

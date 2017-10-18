@@ -37,7 +37,7 @@
 #ifndef _StTPCReader_
 #define _StTPCReader_
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "StDAQReader.h"
 
 #endif /*__CINT__*/

@@ -28,7 +28,7 @@
  **************************************************************************/
 
 #ifndef HEP_PHYSICAL_CONSTANTS_H
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #define HEP_PHYSICAL_CONSTANTS_H
 
 #include "SystemOfUnits.h"

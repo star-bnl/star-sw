@@ -46,7 +46,7 @@ class StFmsTowerCluster;
 class StFmsTower;
 // Typedef a list of cluster unique_ptrs for convenience.
 // Hide it from CINT as it can't handle parsing the header :(
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 typedef std::list<std::unique_ptr<StFmsTowerCluster>> ClusterList;
 #endif  // __CINT__
 /**
@@ -85,7 +85,7 @@ class StFmsClusterFinder {
 
   /** Return energy cutoff on towers used when calculating cluster moments */
   double momentEnergyCutoff() const { return mEnergyCutoff; }
-#ifndef __CINT__  // Hide ClusterList from CINT
+#if !defined(__CINT__) && !defined(__CLING__)  // Hide ClusterList from CINT
   /**
    Find clusters from a collection of input towers.
 
@@ -104,7 +104,7 @@ class StFmsClusterFinder {
 
  private:
   static const unsigned kMaxNClusters = 25;  ///< We stop looking after this many
-#ifndef __CINT__  // Hide ClusterList from CINT
+#if !defined(__CINT__) && !defined(__CLING__)  // Hide ClusterList from CINT
   /**
    Look for cluster seed towers.
 

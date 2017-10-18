@@ -29,7 +29,7 @@ class StppGeant : public TObject {
   virtual ~StppGeant();
 
   void    clear();   
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   Int_t   fill(TDataSet* geant); 
 #endif /* __CINT__ */
 

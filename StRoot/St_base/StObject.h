@@ -160,7 +160,7 @@ UInt_t   fMaxUdx;
 
 
 };
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <list>
 #include <vector>
 #ifndef ST_NO_NAMESPACES

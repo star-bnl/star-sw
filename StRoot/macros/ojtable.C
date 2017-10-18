@@ -1,4 +1,4 @@
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <stdlib.h>
 #include <stdio.h>
 #include "TObject.h"
@@ -15,7 +15,7 @@
 
 void ojtable(const char *className=0);
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 int SizeOfH(TObject *to);  
 
 void ojtable(const char *className)

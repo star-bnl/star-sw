@@ -95,7 +95,7 @@
 #ifdef __ROOT__
 #include "Rtypes.h"
 #endif
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <Stiostream.h>
 #include <math.h>
 #ifdef GNU_GCC
@@ -467,7 +467,7 @@ inline T &StThreeVector<T>::operator[] (size_t i)
 #endif
       return mX1;
 }
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 template<class T>
 inline StThreeVector<T>& StThreeVector<T>::operator*= (double c)
 {
@@ -837,7 +837,7 @@ operator- (const StThreeVector<T>& v1, const StThreeVector<double>& v2)
 {
     return StThreeVector<T>(v1) -= v2;
 }
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 template<class T>
 inline T operator* (const StThreeVector<T>& v1, const StThreeVector<double>& v2)
 {
@@ -886,7 +886,7 @@ inline StThreeVector<T> operator/ (const StThreeVector<T>& v,double c)
 {
     return StThreeVector<T>(v) /= c;
 }
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 template<class T>
 ostream&  operator<<(ostream& os, const StThreeVector<T>& v)
 {

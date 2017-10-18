@@ -2090,7 +2090,7 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
   
   // Use St_Table::New(...)  when it is available as follows:
   St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,k);
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #if ROOT_VERSION_CODE >= ROOT_VERSION(3,05,04)
   if (table) {fgGeom->Add(table); table->SetBit(TTable::kIsNotOwn);}
 #else
@@ -2564,10 +2564,11 @@ void St_geant_Maker::Version(ostream& os) {
     "fscg_version",  
     "mtdg_version", 0};
   Int_t i = 0;
+  os << "  TEnv *configGeom = new TEnv(\"configGeom\");" << endl;
   while (names[i]) {
     Float_t version = g2t_version(names[i] PASSCHARL(names[i]));
     if (version) {
-      os << "  gEnv->SetValue(\"" << names[i] << "\"," << version << ");" << endl;
+      os << " configGeom ->SetValue(\"" << names[i] << "\"," << version << ");" << endl;
     }
     i++;
   }

@@ -177,7 +177,7 @@ public:
 
 
   
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   void  setInfoLevel ( Int_t in ) { infoLevel = in ; } ; 
   Int_t        infoLevel ;
   StPeCL0      *l0_2000 ;

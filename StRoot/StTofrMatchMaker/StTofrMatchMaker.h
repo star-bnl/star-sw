@@ -359,7 +359,7 @@ private:
     
     ClassDef(StTofrMatchMaker,1)
 };
-#ifndef __CINT__      
+#if !defined(__CINT__) && !defined(__CLING__)      
 inline void StTofrMatchMaker::setValidAdcRange(Int_t min, Int_t max){
   mMinValidAdc=min;
   mMaxValidAdc=max;

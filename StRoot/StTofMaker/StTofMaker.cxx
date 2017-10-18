@@ -95,12 +95,12 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TOF/TOF_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
-#include "tables/St_TofTag_Table.h"
+#include "TofTag.h"
 #include "TFile.h"
 #include "TH1.h"
 
-ClassImp(StTofMaker)
-
+ClassImp(StTofMaker);
+TableImpl(TofTag);
 
 /// default constructor
 StTofMaker::StTofMaker(const char *name):StMaker(name) {

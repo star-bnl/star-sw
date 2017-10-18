@@ -104,7 +104,7 @@ private:
     Int_t    mId;          ///< Photon ID within event
     Int_t    mParentClusterId;  ///< ID of the parent cluster within event
     Int_t    mNParentClusterPhotons;  ///< Number of photons in the parent cluster
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
     StObjLink             mCluster;   // Parent cluster of this photon
 #else
     StLink<StFmsCluster>  mCluster;

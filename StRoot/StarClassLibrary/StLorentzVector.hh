@@ -170,7 +170,7 @@ protected:
   ClassDef(StLorentzVector,3)
 #endif
 };
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 //
 //        Implementation of member functions
 //

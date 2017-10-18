@@ -96,7 +96,7 @@ public:
 
 protected:
 //    StTrack*       mDaughter;         //$LINK
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
     StObjLink        mDaughter;		
 #else
     StLink<StTrack>  mDaughter;		

@@ -73,7 +73,7 @@ class StKFVertexMaker : public StMaker {
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
   void                           PrintParticles();
   void                           PrintPrimVertices();
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   void                           ResetDaughterIds(KFParticle *particle, vector<KFParticle> &particles);
 #endif
   static Int_t                   Key2(Int_t Id1, Int_t Id2) {return (Id1 > Id2) ? 1000000*Id1 + Id2 : 1000000*Id2 + Id1;}

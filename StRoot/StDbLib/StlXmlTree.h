@@ -1,5 +1,5 @@
 #ifndef NoXmlTreeReader
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <libxml/xmlreader.h>
 #endif
 /*! \class StlXmlTree
@@ -248,7 +248,7 @@ class StlXmlTree
 {
  private:
   StlXmlTree* Filter = 0;
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   xmlTextReaderPtr reader;
 #endif
   std::multimap<std::string,std::string> XmlTree;

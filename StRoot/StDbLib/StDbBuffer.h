@@ -47,7 +47,7 @@
  **************************************************************************/
 #ifndef STDBBUFFER_H
 #define STDBBUFFER_H
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "mysql.h"
 #include "mysql_com.h"
 #endif

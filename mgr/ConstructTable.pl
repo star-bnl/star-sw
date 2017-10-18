@@ -1,28 +1,27 @@
 #!/usr/bin/env perl
 
 use File::Basename;
-my $input = shift;
-my $file  = shift;
+my $input = $ARGV[0];
+my $file  = $ARGV[1];
 
 #print "ConstructTable :: $input $file\n";
 if ($file =~ /Table\.h/) {
-    my $idlHH   = $file; 
-    #print "ConstructTable: $idlHH\n";
-    if ($input =~ /\.idl/) {
-	TableH($idlHH);
-    } else {
-	TableD($idlHH);
-    }
-
+  my $idlHH   = $file; 
+  #print "ConstructTable: $idlHH\n";
+  if ($input =~ /\.idl/) {
+    TableH($idlHH);
+  } else {
+    TableD($idlHH);
+  }
 } elsif ($file =~ /Table\.cxx/) {
-    my $idlCXX  = $file; 
-    #print "ConstructTable: $idlCXX\n";
-    TableCXX($idlCXX);
-
+  my $idlCXX  = $file; 
+  #print "ConstructTable: $idlCXX\n";
+  TableCXX($idlCXX);
 } elsif ($file =~ /LinkDef\.h/) {
-    my $LinkDef = $file; 
-    #print "ConstructTable: $LinkDef\n";
-    TableLinkDef($LinkDef);
+  my $LinkDef = $file; 
+  TableLinkDef($LinkDef);
+} elsif ($input =~ /LinkDef/) {
+  FullLinkDef(@ARGV);
 }
 
 #_____________________________________________________________________________
@@ -137,7 +136,27 @@ sub TableLinkDef {
     print OUT $h;                               
     close (OUT);
 }
-
+#________________________________________
+sub FullLinkDef {
+#  my $env = shift;
+    my $dst = shift; print "dst = $dst\n";
+    open (OUT,">$dst") or die "Can't open $dst\n";
+    print OUT '
+#ifdef __CINT__                       
+#pragma link off all globals;         
+#pragma link off all classes;         
+#pragma link off all functions;       
+';
+    foreach my $file (@ARGV) {
+      next if ($file !~ /_Table\.h/);
+      my $stem = basename($file,"_Table.h");  print "cons::TableLinkDef : $dst => $stem\n";
+      print "file = $file; stem = $stem\n";
+      print OUT '#pragma link C++ class St_' . $stem . '-;\n';
+      print OUT '#pragma link C++ class ' . $stem . '_st+;\n';
+    }
+    print OUT '#endif \n';
+    close (OUT);
+} 
 #____________________________________________________________
 sub rmkdir {
     (my $Dir = $_[0]) =~ s/\\/\//g; 

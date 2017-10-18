@@ -63,7 +63,7 @@
 #include "StMaker.h"
 #endif
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/RICH/RICH_Reader.hh"
 #endif /*__CINT__*/

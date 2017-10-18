@@ -18,9 +18,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "StarVMCApplication.h"
 #include "TGeant3TGeo.h"
 #include "TRandom3.h"
+class StarVMCApplication;
 class TTreeIter;
 class StVMCMaker : public StMaker {
  public: 

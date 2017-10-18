@@ -193,7 +193,7 @@ void StPeCL0::printWeightedPatches ( ) {
 }
  
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 Int_t StPeCL0::process ( StEvent* event ) {
 
    StTriggerDetectorCollection* trg = event->triggerDetectorCollection();

@@ -47,12 +47,12 @@ TDataSet *CreateTable() {
 #else
     StarVMCApplication::Instance()->ForceDecay(nameP, 
 					       "K_S0", "K*0", "pi+", 37,
-					       "K_S0", "K*0_bar", "pi-", 63);
+					       "K_S0", "K*bar0", "pi-", 63);
     StarVMCApplication::Instance()->ForceDecay("K_S0", 
 					       "pi+", "pi-", 0, 100);
     StarVMCApplication::Instance()->ForceDecay("K*0", 
 					       "K+", "pi-", 0, 100);
-    StarVMCApplication::Instance()->ForceDecay("K*0_bar", 
+    StarVMCApplication::Instance()->ForceDecay("K*bar0", 
 					       "K-", "pi+", 0, 100);
 #endif
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();

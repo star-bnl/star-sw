@@ -47,7 +47,8 @@ would set CheckStatus to 0 for BTOW+BSMD+BPSD, and CutOffType to
 #include "StRTSBaseMaker.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "tables/St_controlADCtoE_Table.h"
+//#include "tables/St_controlADCtoE_Table.h"
+#include "StEmcADCtoEMaker/controlADCtoE.h"
 #include "StBemcRaw.h"
 #include "defines.h"
 

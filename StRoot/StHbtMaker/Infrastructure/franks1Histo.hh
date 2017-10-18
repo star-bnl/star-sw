@@ -2,7 +2,7 @@
 #define FRANKS1HISTO__HH
 
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <Stiostream.h>
 #include <stdio>
 #include <math.h>
@@ -64,7 +64,7 @@ public:
   void Reset(const char* c="");
 };
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
 
 // ***********
 // constructor 

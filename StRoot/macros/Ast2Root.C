@@ -43,7 +43,7 @@ void Ast2Root(const Char_t *vers="y2016a", const Char_t *geom = "useXgeom") {
   out << "#include \"CreateGeometry.h\"" << endl;
   out << "TDataSet *CreateTable() {" << endl;
   geant->Version(out);
-  out << "  return CreateGeometry(\"" << vers << "\");" << endl;
+  out << "  return CreateGeometry(\"" << vers << "\",configGeom);" << endl;
   out << "}" << endl;
   out.close(); 
 }
