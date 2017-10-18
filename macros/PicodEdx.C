@@ -1,5 +1,5 @@
 /*
-  root.exe 'lMuDst.C(-2,"","RpicoDst","PicoOut.root")' 'PicodEdx.C+("/net/l404/data/fisyak//Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root")'
+  root.exe 'lMuDst.C(0,"/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root","ldEdxY2,RpicoDst","PicoOut.root")' PicodEdx.C+
   root.exe lMuDst.C 'PicodEdx.C+("/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
   root.exe PicodEdx1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
 
@@ -222,8 +222,8 @@ void PicodEdx(const Char_t *files ="./*.MuDst.root",
 	    const Char_t *Out = "PicodEdx1.root"){
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
   if (!m_Bichsel) {
-    gSystem->Load("StBichsel"); 
-    gSystem->Load("StarClassLibrary");  
+    gSystem->Load("libStBichsel"); 
+    gSystem->Load("libStarClassLibrary");  
     m_Bichsel = Bichsel::Instance();
     StdEdxModel::instance();
   }
@@ -356,8 +356,12 @@ void PicodEdx(const Char_t *files ="./*.MuDst.root",
   Hists2D I70("I70");
   Hists2D fitZ("fitZ");
   Hists2D fitN("fitN");
+#if 0
   maker = new StPicoDstMaker(StPicoDstMaker::IoRead,files);
   maker->Init();
+#else
+  maker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
+#endif
 #if 0
   maker->SetStatus("*",0);
   const Char_t *ActiveBranches[] = {
