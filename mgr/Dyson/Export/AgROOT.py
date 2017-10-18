@@ -8,7 +8,7 @@ import os
 import re
 
 # Exception handling
-from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError
+from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError, AgmlMissingAttributeWarning
 
 #enable_warnings = os.getenv('AGML_WARNINGS',False)
 #enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
@@ -230,6 +230,45 @@ def requireAttributes( tag, attr, mylist, warning=True ):
         if value==None:            
             RaiseWarning( AgmlAttributeWarning(current_block, tag, key, warning ) )
 
+def requireAnyAttributes( tag, attr, mylist, warning=True ):
+    """
+    Require that at least one keys in mylist appears in the attribute list
+    """
+    
+    for key in mylist:
+        if key in attr.keys():
+            return
+
+    RaiseWarning( AgmlMissingAttributeWarning(current_block, tag, mylist ) )
+
+
+# ----------------------------------------------------------------------------------------------------
+def parseArray(array):
+    """
+    Given a string which is interpreted as an array, i.e.
+
+    array="{1,2,3;4,5,6;7,8,9;}"   ! 2D array
+    array="{1,2,3}"                ! 1D array
+
+    returns a (nested) list representing the (2D) 1D array
+    
+    """
+
+    work = array.strip()
+    work = work.lstrip('{')
+    work = work.rstrip('}')
+    work = work.rstrip(';')
+    work = work.replace(' ','')
+    work = work.replace('\n','')
+    
+    out = []
+    nline = 0
+    for line in work.split(';'):
+        out.append( list(line.split(',')) )
+        nline = nline + 1
+
+    if nline==1: out = out[0]
+    return list(out)
 
 # ----------------------------------------------------------------------------------------------------
 
@@ -984,7 +1023,6 @@ class Init( Handler ):
         output += "{\n";
         template = "%s,%s,%s"%(sinfo,minfo,tinfo)
         output += "AgMLDetp<%s>* %s_detp = \n\tAgMLDetp<%s>::New();\n"%( template, self.struct, template )
-
         output += "\t{\n"        
         output += "\t   %s temp = %s;"%(tinfo,self.value)
         output += "\t   memcpy( &%s_detp->member_value, &temp, sizeof(temp) );\n"%self.struct
@@ -1961,7 +1999,7 @@ class Struct( Handler ): # new style structures
         # Make type dictionary persistent
         _struct_table[ self.name ] = self.var_dict
 
-        # Name of the structure wrapper which handles the fill/use interface
+        # Name of the structure wrapper which handles the fill/use interface 
         wrap = name.upper()
 
         # First stage: declare plain c-structure
@@ -3116,6 +3154,9 @@ class Placement(Handler):
         cond  = attr.get('if',None)   # conditional placement
         matrix= attr.get('matrix',None)
 
+        table = attr.get('table',None) # DB table
+        row   = attr.get('row','0')    # row
+
 
         if cond:
             cond = replacements(cond)
@@ -3169,6 +3210,10 @@ class Placement(Handler):
         self.into  = into
         self.pos   = [x, y, z, only, copy]
 
+        # Convert matrix into a nested list of elements
+        if matrix:
+            matrix = parseArray(matrix)
+
         # If provided, add the conditional to the placement
         if cond:            document.impl( 'if ( %s )'%cond, unit=current )
 
@@ -3193,6 +3238,23 @@ class Placement(Handler):
         if ( z != None ):
             document.impl( 'place.TranslateZ(%s);'% z, unit=current )
             document.impl( '/// Translate z = %s'%z, unit=current )
+
+        if ( matrix != None ):
+            array = ""
+            for element in matrix:
+                array += '{%s},'%','.join(element)
+            array = array.rstrip(',')
+            # Matrix assignment 
+            document.impl( '{ double matrix[4][4] = {%s}; place.SetOrder( AgPosition::kGeneral ); place.Matrix( matrix ); }'%array, unit=current )
+            document.impl( '/// Rotation Matrix = %s'%array, unit=current )
+
+
+        if ( table != None ):
+            chair = table.split('/')[-1]
+            
+            document.impl( 'place.SetTable("%s",%s); // Use DB table to position object (if available)'%(table,row), unit=current )
+            document.impl( 'place.SetChair("%s");    // Use DB table to position object (if available)'%(chair    ), unit=current )            
+
         
         if ( only != None ):
             document.impl( 'place.par("only")=%s;'% only, unit=current )
@@ -3308,6 +3370,19 @@ class Rotation(Handler):
             document.impl( '}',                                                    unit=current )
 
                
+class Misalign(Handler):
+    def __init__(self):
+        Handler.__init__(self)
+    def setParent(self,p):
+        self.parent = p
+    def startElement(self,tag,attr):        
+        matrix = attr.pop('matrix',None) # get transformation matrix
+        table  = attr.pop('table', None) # alternatively get db table
+        row    = attr.pop('row',    '0') # ... and row of table
+        opts   = attr.pop('opts','+xyzr')
+        document.impl( 'place.Misalign("%s",%s,"%s");'%(table,row,opts), unit=current )
+    def endElement(self,tag):
+        pass
         
 # ----------------------------------------------------------------------------------------------------
 class For(Handler):
@@ -3427,6 +3502,14 @@ class If(Handler):
                 content += ';'
 
             document.impl( content, unit=current )
+#   def characters(self,content):        MAIN differs from AgML100417 in For/Do loops... keep MAIN
+#       content = content.lstrip()
+#       content = content.rstrip()
+#       content = content.lower()
+#       content = replacements(content)        
+#       if ( not re.match(';$',content) ):
+#           content += ';'
+#       document.impl( content, unit=current )
                 
 class Then(Handler): # always ignoring thens
     def setParent(self,p):
