@@ -436,6 +436,7 @@ int StiTrackNodeHelper::join()
       case kNewFitd: 				// Old invalid & New Fitd
         mJoinPars = mFitdPars;
         mJoinErrs = mFitdErrs;
+        mJoinPars.hz() = mTargetHz;
         kase = -1; 
 	break;
 
