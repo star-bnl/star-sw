@@ -263,7 +263,7 @@
   <Geometry tag="y2016x"  check="false" comment="Y2016 production geometry">
 
     <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="idsm" config="IDSM14a" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
     <Construct sys="tpce" config="TPCE31" />
@@ -275,11 +275,11 @@
     <Construct sys="fpdm" config="FPDM04" />
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
-    <Construct sys="sisd" config="SISD85" />
-    <Construct sys="istd" config="ISTD03" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD03a" />
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD16" />
-    <Construct sys="pixl" config="PIXL62" />
+    <Construct sys="pixl" config="PIXL62b" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
 
@@ -386,7 +386,7 @@
   <Geometry tag="y2015x" check="false" comment="Y2015 production correct mtd radii">
 
     <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="idsm" config="IDSM14a" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
     <Construct sys="tpce" config="TPCE31" />
@@ -398,11 +398,11 @@
     <Construct sys="fpdm" config="FPDM04" />
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
-    <Construct sys="sisd" config="SISD85" />
-    <Construct sys="istd" config="ISTD02" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD02a" />
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD16" />
-    <Construct sys="pixl" config="PIXL62" />
+    <Construct sys="pixl" config="PIXL62b" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
 
@@ -504,7 +504,7 @@
   <Geometry tag="y2014x" check="false" comment="Y2014 production geometry">
 
     <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="idsm" config="IDSM14a" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
     <Construct sys="tpce" config="TPCE31" />
@@ -515,11 +515,11 @@
     <Construct sys="bbcm" config="BBCMon" />
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
-    <Construct sys="sisd" config="SISD85" />
-    <Construct sys="istd" config="ISTD03" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD03a" />
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD14" />
-    <Construct sys="pixl" config="PIXL06" />
+    <Construct sys="pixl" config="PIXL06b" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
 

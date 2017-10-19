@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.25 2017/09/28 21:33:51 jwebb Exp $
+* $Id: xgeometry.age,v 1.26 2017/10/19 18:26:38 jwebb Exp $
 
 
 
@@ -2477,12 +2477,13 @@ If LL>0
   Case y2014a   { y2014a : y2014 production level;
                   Geom = 'y2014a    '; call geom_y2014a;  }
 
-  Case y2014b   { y2014b : y2014a plus hcal prototype;
-                  Geom = 'y2014b    '; call geom_y2014b; }
+  Case y2014b   { y2014b : y2014a plus hcal prototype; Geom = 'y2014b    '; 
+                 call geom_y2014b; }
+  Case y2014x   { y2014x : y2014a plus hcal prototype; Geom = 'y2014x    '; 
+                 call geom_y2014b; }
 
   Case y2015    { y2015  : y2015 baseline, is y2014a plus FMS preshower;
-                  Geom = 'y2015     '; 
-                  call geom_y2015; }
+                  Geom = 'y2015     '; call geom_y2015; }
                   
 
   Case y2015a   { y2015a : y2015a production baseline, is y2015 with pixel Al cables;
@@ -2493,11 +2494,14 @@ If LL>0
   Case y2015b   { y2015b : y2015b production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015b    '; call geom_y2015b; }
 
-  Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections;
+  Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections; 
                   Geom = 'y2015c    '; call geom_y2015c; }
+  Case y2015x   { y2015x : y2015c production baseline, is y2015 with mtd radii corrections; 
+                  Geom = 'y2015x    '; call geom_y2015x; }
 
   Case y2016   { y2016  : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
   Case y2016a  { y2016a : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
+  Case y2016x  { y2016x : y2016 production;  Geom = 'y2016x    ' ; call geom_y2016x; }
 
   Case y2017   { y2017  : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
   Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  } 
@@ -4631,8 +4635,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.25 2017/09/28 21:33:51 jwebb Exp $
+* $Id: xgeometry.age,v 1.26 2017/10/19 18:26:38 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.26  2017/10/19 18:26:38  jwebb
+* Implement the y2014x,15x,16x geometries in xgeom.  Usage printout for loadAgML.  Switch in the misalignable modules in the 'x' geometries.
+*
 * Revision 1.25  2017/09/28 21:33:51  jwebb
 * First cut y2018.  Not ready for prime time: contains full ETOF, and lacks the upgraded iTPC sector.
 *
