@@ -1,10 +1,21 @@
 /****************************************************************
- * $Id: StBTofHitCollection.h,v 1.4 2015/07/28 23:03:05 smirnovd Exp $
+ * $Id: StBTofHitCollection.h,v 1.5 2017/10/20 17:50:33 smirnovd Exp $
  *****************************************************************
  * Author: Xin Dong, Dec 2008
  * Description: Local Barrel TOF hits collection
  *****************************************************************
  * $Log: StBTofHitCollection.h,v $
+ * Revision 1.5  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.4  2015/07/28 23:03:05  smirnovd
  * Removed headers included twice by mistake while merging
  *
@@ -24,18 +35,10 @@
 
 #include <cstddef>
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-using std::copy;
-#endif
 
 class StBTofHit;
 
-#ifndef ST_NO_DEF_TEMPLATE_ARGS
-typedef vector<StBTofHit*> hitVector;
-#else
-typedef vector<StBTofHit*, allocator<StBTofHit*> > hitVector;
-#endif
+typedef std::vector<StBTofHit*> hitVector;
 
 /**
    \class StBTofHitCollection

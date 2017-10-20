@@ -1,10 +1,21 @@
 /*******************************************************************
  *
- * $Id: StBTofTables.cxx,v 1.3 2017/10/03 22:54:45 geurts Exp $
+ * $Id: StBTofTables.cxx,v 1.4 2017/10/20 17:50:33 smirnovd Exp $
  *
  *****************************************************************
  *
  * $Log: StBTofTables.cxx,v $
+ * Revision 1.4  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.3  2017/10/03 22:54:45  geurts
  * restore access to TOF status table (Calibrations/tof/tofStatus)
  *
@@ -19,7 +30,6 @@
 #include "StBTofTables.h"
 #include "StMaker.h"
 
-ClassImp(StBTofTables)
 
 //____________________________________________________________________
 StBTofTables::StBTofTables() {

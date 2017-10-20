@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.9 2014/02/06 21:21:13 geurts Exp $
+ * $Id: StBTofGeometry.h,v 1.10 2017/10/20 17:50:33 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,17 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.10  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.9  2014/02/06 21:21:13  geurts
  * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
  *
@@ -72,20 +83,9 @@
 
 #include <vector>
 #include <string>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
-#ifndef __CINT__
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS)
-typedef vector<Int_t>  IntVec;
-typedef vector<Double_t>  DoubleVec;
-typedef vector<StThreeVector<double> > PointVec;
-#else
-typedef vector<Int_t, allocator<Int_t> >  IntVec;
-typedef vector<Double_t, allocator<Double_t> >  DoubleVec;
-typedef vector<StThreeVector<double>, allocator<StThreeVector<double>>> PointVec;
-#endif
-#endif
+typedef std::vector<Int_t>  IntVec;
+typedef std::vector<Double_t>  DoubleVec;
+typedef std::vector<StThreeVector<double> > PointVec;
 class StBTofNode;
 class StBTofGeomNode;
 class StBTofGeomTray;

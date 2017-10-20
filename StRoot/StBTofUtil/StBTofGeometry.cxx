@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.13 2014/02/06 21:21:13 geurts Exp $
+ * $Id: StBTofGeometry.cxx,v 1.14 2017/10/20 17:50:33 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,17 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.14  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.13  2014/02/06 21:21:13  geurts
  * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
  *
@@ -91,9 +102,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StBTofNode)
-#endif
 
 Bool_t StBTofNode::mDebug = kFALSE;
 Double_t const StBTofGeomSensor::mSensorDy = 10.35;   // Actual module length;
@@ -515,9 +523,6 @@ void StBTofNode::Print(Option_t *opt) const
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StBTofGeomTray)
-#endif
 
 Bool_t StBTofGeomTray::mDebug = kFALSE;
 
@@ -551,9 +556,6 @@ void StBTofGeomTray::Print(const Option_t *opt) const
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StBTofGeomSensor)
-#endif
 
 Bool_t StBTofGeomSensor::mDebug = kFALSE;
 
@@ -692,9 +694,6 @@ void StBTofGeomSensor::Print(const Option_t *opt) const
 StBTofGeometry *gBTofGeometry = 0;
 static const Int_t CELLSINMODULE = 6;
 
-#ifdef __ROOT__      
-ClassImp(StBTofGeometry)
-#endif
 
 Bool_t StBTofGeometry::mDebug = kFALSE;
 

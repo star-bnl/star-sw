@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.h,v 1.6 2010/05/26 23:12:27 geurts Exp $
+ * $Id: StBTofSortRawHit.h,v 1.7 2017/10/20 17:50:33 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -28,18 +28,9 @@ class StBTofDaqMap;
 #include "TObjectSet.h"
 
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-//#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<Int_t>  IntVec;
-typedef vector<UInt_t>  UIntVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<UInt_t, allocator<UInt_t>>  UIntVec;
-#endif
+typedef std::vector<Int_t>  IntVec;
+typedef std::vector<UInt_t>  UIntVec;
 
 struct TOFRawHit {
   int fiberId;
@@ -49,12 +40,8 @@ struct TOFRawHit {
   UIntVec trailingTdc;
 };
 
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-  typedef vector<TOFRawHit> tofRawHitVector;
-#else
-  typedef vector<TOFRawHit,allocator<TOFRawHit>> tofRawHitVector;
-#endif
-  typedef vector<TOFRawHit>::iterator tofRawHitVectorIter;
+  typedef std::vector<TOFRawHit> tofRawHitVector;
+  typedef std::vector<TOFRawHit>::iterator tofRawHitVectorIter;
 
 /**
    \class StBtofSortRawHit
