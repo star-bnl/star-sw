@@ -35,7 +35,7 @@ void AgMLDbMatrix::operator()( const char* table, const int row, double matrix[4
   TTable *ttable = (TTable *)chain-> GetDataBase( tablename );
   if ( ttable )
     {
-#define VERBOSE
+//#define VERBOSE
 #ifdef VERBOSE
       LOG_INFO << "DB Matrix: " << tablename.Data() << " [" << row << "]" << endm;
       ttable->Print(row,row+1);
