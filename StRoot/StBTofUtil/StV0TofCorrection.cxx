@@ -1,4 +1,4 @@
-// $Id: StV0TofCorrection.cxx,v 1.2 2014/01/20 16:55:50 geurts Exp $
+// $Id: StV0TofCorrection.cxx,v 1.3 2017/10/20 17:50:33 smirnovd Exp $
 /*! \file StV0TofCorrection.cxx
     \brief cxx file of StV0TofCorrection class created by Patrick Huck (phuck@lbl.gov) [12/13/2010]
 
@@ -7,6 +7,17 @@
 */
 // ---
 // $Log: StV0TofCorrection.cxx,v $
+// Revision 1.3  2017/10/20 17:50:33  smirnovd
+// Squashed commit of the following:
+//
+//     StBTof: Remove outdated ClassImp macro
+//
+//     Prefer explicit namespace for std:: names in header files
+//
+//     Removed unnecessary specification of default std::allocator
+//
+// Frank signed-off
+//
 // Revision 1.2  2014/01/20 16:55:50  geurts
 // Major update by Patrick Huck:
 // - fixed memory leaks, clean-up
@@ -20,7 +31,6 @@
 #include "StV0TofCorrection.h"
 #include "TError.h"
 
-ClassImp(StV0TofCorrection)
 
 M2CutType StV0TofCorrection::mM2CutMap = StV0TofCorrection::createM2CutMap();
 

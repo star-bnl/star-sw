@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.11 2017/03/08 23:59:20 jdb Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.12 2017/10/20 17:50:33 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -57,7 +57,6 @@
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
-ClassImp(StBTofSimMaker)
 
 const float StBTofSimMaker::mVHRBIN2PS = 24.4;    //! Very High resolution mode, ps/bin
 const float StBTofSimMaker::mHRBIN2PS = 97.7;     //! High resolution mode, ps/bin

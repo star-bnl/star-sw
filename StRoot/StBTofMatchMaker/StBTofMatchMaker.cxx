@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.19 2012/05/07 14:11:16 fisyak Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.20 2017/10/20 17:50:33 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,17 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.20  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.19  2012/05/07 14:11:16  fisyak
  * Keep btofGeometry in const area for future use
  *
@@ -131,7 +142,6 @@
 #include "StBTofMatchMaker.h"
 //#include "TMemStat.h"
 
-ClassImp(StBTofMatchMaker)
 
 //---------------------------------------------------------------------------
 StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
