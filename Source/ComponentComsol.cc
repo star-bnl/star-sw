@@ -208,7 +208,10 @@ bool ComponentComsol::Initialise(std::string mesh, std::string mplist,
     }
     int closest = -1;
     double closestDist = 1;
-    for (int j : nodeIdx[tmp]) {
+    const unsigned int nIdx = nodeIdx[tmp].size();
+    // for (int j : nodeIdx[tmp]) {
+    for (unsigned int k = 0; k < nIdx; ++k) {
+      int j = nodeIdx[tmp][k];
       double dist = (tmp.x - nodes[j].x) * (tmp.x - nodes[j].x) +
                     (tmp.y - nodes[j].y) * (tmp.y - nodes[j].y) +
                     (tmp.z - nodes[j].z) * (tmp.z - nodes[j].z);
@@ -306,7 +309,10 @@ bool ComponentComsol::SetWeightingField(std::string field, std::string label) {
     tmp.z *= unit;
     int closest = -1;
     double closestDist = 1;
-    for (int j : nodeIdx[tmp]) {
+    const unsigned int nIdx = nodeIdx[tmp].size();
+    // for (int j : nodeIdx[tmp]) {
+    for (unsigned int k = 0; k < nIdx; ++k) {
+      int j = nodeIdx[tmp][k];
       double dist = (tmp.x - nodes[j].x) * (tmp.x - nodes[j].x) +
                     (tmp.y - nodes[j].y) * (tmp.y - nodes[j].y) +
                     (tmp.z - nodes[j].z) * (tmp.z - nodes[j].z);
