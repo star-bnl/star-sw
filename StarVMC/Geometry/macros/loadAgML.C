@@ -2,7 +2,7 @@ void loadAgML( const char* name=0, char* opts="" )
 {
   gROOT->LoadMacro("bfc.C");
 //  bfc(0,"agml nodefault mysql db detdb misalign sdt20150216");
-  bfc(0,Form("agml nodefault mysql %s",opts));
+  bfc(0,Form("agml nodefault mysql db detdb %s",opts));
 
   AgModule::SetStacker( new StarTGeoStacker() );
 
