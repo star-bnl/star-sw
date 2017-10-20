@@ -497,7 +497,7 @@ side sector beam" > BullHornLength/0.325/</varlist>
 		 y="yypos+ypos" 
 		 z="-4.875+zpos">
        <Rotation alphaz="175.437+alphaz" />
-       <Misalign table="Geometry/pxl/pxlLadderOnSectorMisalign" row="4*ii-4"   opts="right print" />
+       <Misalign table="Geometry/pxl/pxlLadderOnSectorMisalign" row="4*ii-4"   opts="right" />
      </Placement>
    
 

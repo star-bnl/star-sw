@@ -570,8 +570,8 @@
 		  ncopy = (ilad-1)*SFPA_nssd + iwaf
 		  <Placement block="SFSW" in="SFMO" ncopy="ncopy" konly="MANY">
 		    <Rotation alphaz="180" />
-		    <Misalign table="Geometry/sst/sstSensorOnLadder"  row="ncopy-1" opts="left print" />
-		    <Misalign table="Geometry/sst/sstLadderOnSst"     row="ilad -1" opts="left print" />
+		    <Misalign table="Geometry/sst/sstSensorOnLadder"  row="ncopy-1" opts="left" />
+		    <Misalign table="Geometry/sst/sstLadderOnSst"     row="ilad -1" opts="left" />
 		  </Placement>
 		</Do>
 	      </If>
@@ -580,7 +580,7 @@
 	      ang = (SFPA_ladderAngle(ilad)*pi)/180.0 
 	      <Placement y="0.0" x="0.0" z="0.0" konly="MANY" block="SFLM"  >
                 <Rotation alphaz="SFPA_ladderAngle(ilad)-90" /> 	
-		<Misalign table="Geometry/sst/sstLadderOnSstMisalign" row="ilad-1" opts="right print" />
+		<Misalign table="Geometry/sst/sstLadderOnSstMisalign" row="ilad-1" opts="right" />
 	      </Placement>
 	    </If>
 	    
