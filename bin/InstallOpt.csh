@@ -58,7 +58,7 @@ endsw
 # 
 #set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8226 eigen3";
 #set list = "cmake-3.10.0-rc1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
-set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
+set list = "cmake-3.8.1 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl   Python-2.7.12 pyparsing-1.5.7 xrootd-4.6.1 Coin-3.1.3 qt-everywhere-opensource-src-4.8.6 pythia6 pythia8230 eigen3";
 #eigen-eigen-10219c95fe65";
 #set list = "pythia8226"
 #set list = "pythia6"
@@ -97,6 +97,7 @@ foreach pkg ($list)
     endif
     cd ${pkg}
     switch ($pkg)
+    case 
       case "eigen*":
 	cmake -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} ../../${pkg}
 	if ( $?) break;
@@ -117,6 +118,12 @@ foreach pkg ($list)
           if ( $?) break;
           touch ../${pkg}.Done
 	  breaksw
+      case "cmake*":
+          ./configure --prefix=$XOPTSTAR
+          make install
+          if ( $?) break;
+          touch ../${pkg}.Done
+          breaksw
       case "apr-util*":
           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR
           make install

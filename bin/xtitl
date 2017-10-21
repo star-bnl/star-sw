@@ -29,7 +29,7 @@ fi
 
 # Begin source code.
 case $TERM in
- xterm|vt100|vt220|xterms|aixterm)          # vt100 tool
+ xterm|vt100|vt220|xterms|aixterm|xterm*)          # vt100 tool
  echo "]0;${TNAME}"
  ;;
 
