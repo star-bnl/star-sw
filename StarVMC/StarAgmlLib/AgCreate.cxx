@@ -3,16 +3,21 @@
 #include <iostream>
 
 // ---------------------------------------------------------------------------------------
-AgCreate::AgCreate( const Char_t *name ) : TNamed(name,"Instance of AgCreate")
+AgCreate::AgCreate( const Char_t *name ) : TNamed(name,"Instance of AgCreate"),
+					   AgParameterList()
 {
   
 }
 // ---------------------------------------------- -----------------------------------------
 AgCreate::AgCreate( const AgCreate &other ) 
 {
+  SetName(other.GetName());
+  SetTitle(other.GetTitle());
   mParameters = other.mParameters;
 }
 AgCreate &AgCreate::operator=(const AgCreate& other ) {
+  SetName(other.GetName());
+  SetTitle(other.GetTitle());
   mParameters = other.mParameters;  
   return *this;
 };
