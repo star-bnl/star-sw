@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.644 2017/10/01 22:54:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.645 2017/10/18 14:30:39 jwebb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1046,9 +1046,15 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StTagsMaker::");
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
-#if 0
+    if (fNoChainOptions) {
+      if (GetOption("misalign") ) 
+	gROOT->ProcessLine("AgPosition::SetReal();");
+      else                        
+	gROOT->ProcessLine("AgPosition::SetIdeal();");
+    }
+#if 0    
     // force load of geometry for VMC and Sti
-    
+
     if (GetOption("Sti") || GetOption("StiCA") || 
 	GetOption("Stv") || 
 	GetOption("Stx") || 

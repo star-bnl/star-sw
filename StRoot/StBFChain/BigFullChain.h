@@ -49,7 +49,7 @@ ________________________________________________________________________________
 #define __NoStrangeMuDst__
 #endif
 #define __NoDisplay__
-//#define __AgMLonFly__
+#define __AgMLonFly__
 Bfc_st BFC[] = { // standard chains
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -77,7 +77,10 @@ Bfc_st BFC[] = { // standard chains
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 #ifdef __AgMLonFly__
-  {"AgMLlib",     "",  "","",                        "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
+  {"ideal",       "",  "","",            "",           "",              "Ideal Alignment", kFALSE},
+  {"misalign",    "",  "","",            "","-AgMLideal",           "Misaligned Geometry", kFALSE},
+  {"AgMLutil",    "",  "","",            "","StarAgmlUtil",             "AgML support", kFALSE},
+  {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
   {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
