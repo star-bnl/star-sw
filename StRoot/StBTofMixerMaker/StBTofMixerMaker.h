@@ -17,9 +17,6 @@ class StBTofCollection;
 class StBTofHit;
 
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
 class StBTofMixerMaker : public StMaker{
     
@@ -35,7 +32,7 @@ public:
     virtual int  Finish();
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofMixerMaker.h,v 1.1 2017/03/02 18:40:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofMixerMaker.h,v 1.2 2017/10/20 17:50:33 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofMixerMaker,2)
     

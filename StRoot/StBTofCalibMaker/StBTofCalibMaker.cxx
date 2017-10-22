@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.14 2011/07/27 15:44:32 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.17 2017/10/20 17:50:32 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,27 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.17  2017/10/20 17:50:32  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
+ * Revision 1.16  2017/03/02 18:30:44  jeromel
+ * Changes by jdb, nl - inData.open() of files on live disk TBF later
+ *
+ * Revision 1.10 2016/11/14 11:32:15  nluttrel
+ * Simulated hits no longer undergo electronics corrections
+ * If StVpdSimMaker used in chain, defaults to use Vpd start time
+ *
+ * Revision 1.15  2016/06/30 17:09:59  jdb
+ * Fixed Several errors identified by Coverity
+ *
  * Revision 1.14  2011/07/27 15:44:32  geurts
  * minor bug update: mProjVtxZ does not get initialized when mUseEventVertex is false, but is printed regardless.
  *
@@ -97,9 +118,7 @@
 
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
-#ifdef __ROOT__
-ClassImp(StBTofCalibMaker)
-#endif
+
 
  /// Very High resolution mode, pico-second per bin
 const Double_t StBTofCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)

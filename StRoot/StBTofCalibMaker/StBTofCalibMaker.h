@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.8 2014/08/06 11:42:53 jeromel Exp $
+ * $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,27 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.11  2017/10/20 17:50:32  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
+ * Revision 1.10  2017/03/02 18:30:44  jeromel
+ * Changes by jdb, nl - inData.open() of files on live disk TBF later
+ *
+ * Revision 1.10 2016/11/14 11:32:15  nluttrel
+ * Simulated hits no longer undergo electronics corrections
+ * If StVpdSimMaker used in chain, defaults to use Vpd start time
+ *
+ * Revision 1.9  2016/06/30 17:09:56  jdb
+ * Fixed Several errors identified by Coverity
+ *
  * Revision 1.8  2014/08/06 11:42:53  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -52,10 +73,6 @@
 
 #include <string>
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::string;
-using std::vector;
-#endif
 
 class StEvent;
 class StPrimaryVertex;
@@ -70,13 +87,8 @@ class StMuBTofPidTraits;
 #include "StPhysicalHelixD.hh"
 #include "StDetectorDbMaker/St_tofCorrC.h"
 
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-typedef vector<Int_t>  IntVec;
-typedef vector<Double_t>  DoubleVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
-#endif
+typedef std::vector<Int_t>  IntVec;
+typedef std::vector<Double_t>  DoubleVec;
 
 class StBTofCalibMaker : public StMaker{
 public:
@@ -212,7 +224,7 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.8 2014/08/06 11:42:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.11 2017/10/20 17:50:32 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };

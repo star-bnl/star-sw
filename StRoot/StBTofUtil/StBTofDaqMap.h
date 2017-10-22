@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofDaqMap.h,v 1.2 2009/02/13 19:47:33 dongx Exp $
+ * $Id: StBTofDaqMap.h,v 1.3 2017/10/20 17:50:33 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,17 @@
  *****************************************************************
  *
  * $Log: StBTofDaqMap.h,v $
+ * Revision 1.3  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.2  2009/02/13 19:47:33  dongx
  * mNValidTrays set by the tofTrayConfig in db now
  *
@@ -32,16 +43,8 @@
 #include <string>
 
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-//#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<Int_t>  IntVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-#endif
+typedef std::vector<Int_t>  IntVec;
 
 /**
    \class StBTofDaqMap

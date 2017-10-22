@@ -1026,7 +1026,7 @@ c$$$    write (*,*) numbv
         volume_id = 1000000*sector + 10000*ladder + 100*sensor
 #endif /* ! __STAR_VMC__ */
 *18*                                 Maxim Potekhin 
-#ifdef  __STAR_VMC__
+#ifndef  __STAR_VMC__
       else if ( Csys=='ist' .and. iist>= 0 ) then
 
           " The extra offset on the ladder number looks odd here...      "

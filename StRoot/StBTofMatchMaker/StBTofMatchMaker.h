@@ -6,11 +6,22 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.12 2014/08/06 11:42:53 jeromel Exp $
+ * $Id: StBTofMatchMaker.h,v 1.13 2017/10/20 17:50:33 smirnovd Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.13  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.12  2014/08/06 11:42:53  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -73,10 +84,6 @@
 #include "StThreeVectorD.hh"
 #include <string>
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::string;
-using std::vector;
-#endif
 
 class StEvent;
 class StTrack;
@@ -99,15 +106,9 @@ class StMuDst;
 class StMuEvent;
 class StMuTrack;
 
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-typedef vector<Int_t>  IntVec;
-typedef vector<UInt_t>  UIntVec;
-typedef vector<Double_t>  DoubleVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<UInt_t, allocator<UInt_t>>  UIntVec;
-typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
-#endif
+typedef std::vector<Int_t>  IntVec;
+typedef std::vector<UInt_t>  UIntVec;
+typedef std::vector<Double_t>  DoubleVec;
 
 class StBTofMatchMaker : public StMaker {
 public:
@@ -285,11 +286,7 @@ private:
     
     TH1D* mCellsPrimaryPerEventMatch3;
             
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-    typedef vector<Int_t> idVector;
-#else
-    typedef vector<Int_t,allocator<Int_t>> idVector;
-#endif
+    typedef std::vector<Int_t> idVector;
     typedef idVector::iterator idVectorIter;   
 
     struct StructCellHit{
@@ -321,16 +318,12 @@ private:
     };
     TRACKTREE trackTree;
     
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-    typedef vector<StructCellHit> tofCellHitVector;
-#else
-    typedef vector<StructCellHit,allocator<StructCellHit>> tofCellHitVector;
-#endif
-    typedef vector<StructCellHit>::iterator tofCellHitVectorIter;
+    typedef std::vector<StructCellHit> tofCellHitVector;
+    typedef std::vector<StructCellHit>::iterator tofCellHitVectorIter;
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.12 2014/08/06 11:42:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.13 2017/10/20 17:50:33 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
