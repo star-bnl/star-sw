@@ -2697,7 +2697,7 @@ REPLACE [exe y2019;] with ["Y2019 development tag";
 *    exe PSUP01;      "1st version of pixl supports";
 *    exe FGTDv56;     "12 disk FGT";
     exe HCALv1;      "HCAL prototype";
-]
+];
 
 REPLACE [exe dev2020;] with ["DEV 2020 first cut";
      exe y2015a;
@@ -3697,8 +3697,8 @@ If LL>0
 
   Case y2018  { y2018 : y2018 baseline, is y2012 plus FMS preshower and iTPC in sector 20;
                   Geom = 'y2018   '; exe y2018; }
-  Case y2019  { y2019 : y2019 baseline, is y2012 plus FMS preshower and iTPC in sector 20;
-                  Geom = 'y2019   '; exe y2018; }
+  Case y2019  { y2019 : y2019 baseline, is y2012 plus FMS preshower and iTPC in;
+                  Geom = 'y2019   '; exe y2019; }
 
   Case dev15a   { dev15a : y2014 a plus FMS preshower;          
                   Geom = 'dev15a    '; exe dev15a; }

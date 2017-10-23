@@ -1,7 +1,6 @@
 macro y2017
 *  starsim -w 1 -b y2017.kumac
   DETP geom y2017a  
-#  DETP geom y2017
 * field=-5  hadr_off=1
   gexec $STAR_LIB/StarMagFieldNoDict.so
   gexec $STAR_LIB/xgeometry.so
