@@ -417,7 +417,7 @@ Int_t StBFChain::Instantiate()
 	//	if (mk) mk->SetName("RMuDst");
       } else if (maker == "StPicoDstMaker") {
 	if (GetOption("RpicoDst")) {
-	  ProcessLine(Form("new StPicoDstMaker(0,\"%s\")",fInFile.Data()));
+	  ProcessLine(Form("new StPicoDstMaker(2,\"%s\")",fInFile.Data()));
 	} else {
 	  ProcessLine(Form("new StPicoDstMaker(1,\"%s\")",fFileOut.Data()));
 	}

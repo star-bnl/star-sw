@@ -1341,16 +1341,17 @@ Bfc_st BFC[] = { // standard chains
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
 #ifndef  __NoStrangeMuDst__
   {"MuDSTDeps"   ,"","","StEvent,Stu,StBichsel",""
-   ,                                     "Tree,StStrangeMuDstMaker","Load MuDST misc. dependencies",kFALSE},
+   ,                        "Tree,StStrangeMuDstMaker,StMuDSTMaker","Load MuDST misc. dependencies",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil,Tree",""
    ,                                                            "StMuDSTMaker","Load MuDST library",kFALSE},
 #else /* __NoStrangeMuDst__  , StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__*/
-  {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   "","Tree","Load MuDST misc. dependencies (all)",kFALSE},
+  {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   ""
+   ,                                           "StMuDSTMaker","Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
-   ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
+   ,                                      "StMuDSTMaker,StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-  {"picoEvt"    ,"","","StEvent,Stu","",            "StPicoEvent","Load picoEvent and dependencies",kFALSE},
-  {"picoDst"    ,"","","MuDst,picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
+  {"picoEvt"    ,"","","MuDSTDeps,StEvent,Stu","",  "StPicoEvent","Load picoEvent and dependencies",kFALSE},
+  {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
@@ -1886,8 +1887,10 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"MuMc"        ,"","","KFParticle","StMuMcAnalysisMaker,KFParticlePerformance"
-   ,                                                          "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
+  {"MuMc"        ,"","","KFParticle","StMuMcAnalysisMaker"
+   ,                                    "KFParticlePerformance,StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
+  {"PicoAnalysis","","","KFParticle","StPicoAnalysisMaker"
+   ,                                    "KFParticlePerformance,StPicoAnalysisMaker","Pico Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
   {"SpinTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
