@@ -22,29 +22,15 @@ class StMaker;
 class StBTofTables : public TObject
 {
 protected:
-#if 0
-  static const Int_t mNTray = 120;
-  static const Int_t mNModule = 32;
-  static const Int_t mNCell = 6;
-  static const Int_t mNChanMax = 24000;  /// A large number for total channels
-    
-  /// Tray/Channel Status    
-  UShort_t     mBTofTrayConfig[mNTray];    
-  UShort_t     mBTofStatus[mNTray][mNModule][mNCell];
-#endif
  public:
     /// Default constructor
    StBTofTables() {Reset();}
    virtual ~StBTofTables() {Reset();}
-   void    Reset();
+   void    Reset() {}
     
    /// load status tables from data base
    void    loadTables(StMaker */* mk */) {loadTables();}
-   void    loadTables();
-#if 0    
-    /// function to return the tray status
-    bool  trayValid(int trayId) const;
-#endif
+   void    loadTables() {}
     /// function to return the channel status
     static Int_t   status(Int_t trayId, Int_t moduleId, Int_t cellId);
     

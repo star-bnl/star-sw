@@ -1,6 +1,12 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.13  2017/10/19 19:38:17  jeromel
+ * Merging PXL201709UPD back to MAIN
+ *
+ * Revision 1.12.6.1  2017/09/11 20:15:14  dongx
+ * Pxl slow simulator added
+ *
  * Revision 1.12  2016/04/14 23:10:19  smirnovd
  * Cosmetic changes
  *
@@ -196,17 +202,17 @@ Int_t StPxlSimMaker::Make()
 
       if (!pxlRawHitDataSet)
       {
-	LOG_INFO << " pxlRawHit does NOT exist! Create a new one! " << endm;
+           LOG_INFO << " pxlRawHit does NOT exist! Create a new one! " << endm;
 //           pxlRawHitDataSet = new TObjectSet("pxlRawHit");
 //           m_DataSet = pxlRawHitDataSet;
            pxlRawHitCol = new StPxlRawHitCollection();
-	   ToWhiteBoard("pxlRawHit", pxlRawHitCol);
+           ToWhiteBoard("pxlRawHit", pxlRawHitCol);
 //           pxlRawHitDataSet->AddObject(pxlRawHitCol);
       }
       else
       {
-          LOG_INFO << " pxlRawHit exists! Append raw hits to this collection! " << endm;
-          pxlRawHitCol= (StPxlRawHitCollection*)pxlRawHitDataSet->GetObject();
+           LOG_INFO << " pxlRawHit exists! Append raw hits to this collection! " << endm;
+           pxlRawHitCol= (StPxlRawHitCollection*)pxlRawHitDataSet->GetObject();
       }
 
       if(!pxlRawHitCol)
@@ -214,8 +220,8 @@ Int_t StPxlSimMaker::Make()
       LOG_ERROR << "Make() - no pxlRawHitCollection."<<endm;
       return kStErr;
       }
-      mPxlSimulator->addPxlRawHits(*mcPxlHitCol,*pxlRawHitCol); 
-
+      mPxlSimulator->addPxlRawHits(*mcPxlHitCol,*pxlRawHitCol);         
+      
       LOG_INFO << " Finishing DIGMAPS simulator. Number of PxlRawHits = " << pxlRawHitCol->numberOfRawHits() << endm;
    }
 
@@ -225,6 +231,12 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.13  2017/10/19 19:38:17  jeromel
+ * Merging PXL201709UPD back to MAIN
+ *
+ * Revision 1.12.6.1  2017/09/11 20:15:14  dongx
+ * Pxl slow simulator added
+ *
  * Revision 1.12  2016/04/14 23:10:19  smirnovd
  * Cosmetic changes
  *

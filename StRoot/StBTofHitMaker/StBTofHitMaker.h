@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.11 2014/08/06 11:42:53 jeromel Exp $
+ * $Id: StBTofHitMaker.h,v 1.12 2017/10/20 17:50:32 smirnovd Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -11,9 +11,6 @@
 #include "StRTSBaseMaker.h"
 
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
 #define VHRBIN2PS 24.4140625  // Very High resolution mode, pico-second per bin
                               // 1000*25/1024 (ps/chn)
@@ -40,13 +37,8 @@ struct TofRawHit {
   unsigned char  globaltdcchan;     /// 0,1,......,191   
 };
 
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-typedef vector<Int_t>  IntVec;
-typedef vector<UInt_t>  UIntVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<UInt_t, allocator<UInt_t>>  UIntVec;
-#endif
+typedef std::vector<Int_t>  IntVec;
+typedef std::vector<UInt_t>  UIntVec;
 
 
 /**
@@ -68,8 +60,8 @@ class StBTofHitMaker:public StRTSBaseMaker
       void fillStEvent();     //! ship collection to StEvent and check
       /// TOF Raw hits info. struct
       ///----------------------------------------------------
-     vector<TofRawHit> TofLeadingHits;
-     vector<TofRawHit> TofTrailingHits;
+      std::vector<TofRawHit> TofLeadingHits;
+      std::vector<TofRawHit> TofTrailingHits;
 
      Int_t                    mNValidTrays;          //! number of valid TOF trays
      unsigned int             mTriggerTimeStamp[4];  //! Trigger Time in 4 fibers
@@ -106,9 +98,9 @@ class StBTofHitMaker:public StRTSBaseMaker
      Int_t  Make();
 
      /// obtain the whole list of leading edge hits
-     vector<TofRawHit> getLeadingHits();
+     std::vector<TofRawHit> getLeadingHits();
      /// obtain the whole list of trainling edge hits
-     vector<TofRawHit> getTrailingHits();
+     std::vector<TofRawHit> getTrailingHits();
      
   /// cvs
   virtual const char *GetCVS() const
@@ -119,7 +111,7 @@ class StBTofHitMaker:public StRTSBaseMaker
   ClassDef(StBTofHitMaker, 1)    ///StBTofHitMaker - class to fille the StEvent from DAQ reader
 };
 
-inline vector<TofRawHit> StBTofHitMaker::getLeadingHits() { return TofLeadingHits; }
-inline vector<TofRawHit> StBTofHitMaker::getTrailingHits() { return TofTrailingHits; }
+inline std::vector<TofRawHit> StBTofHitMaker::getLeadingHits() { return TofLeadingHits; }
+inline std::vector<TofRawHit> StBTofHitMaker::getTrailingHits() { return TofTrailingHits; }
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofMixerMaker.cxx,v 1.1 2017/03/02 18:40:57 jeromel Exp $
+ * $Id: StBTofMixerMaker.cxx,v 1.2 2017/10/20 17:50:33 smirnovd Exp $
  *
  * Author: Nickolas Luttrell (Rice University), November 2016
  ***************************************************************************
@@ -14,6 +14,17 @@
  ***************************************************************************
  *
  * $Log: StBTofMixerMaker.cxx,v $
+ * Revision 1.2  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.1  2017/03/02 18:40:57  jeromel
  * First version of BTofMixer jdb / nl
  *
@@ -27,7 +38,6 @@
 
 #include "StBTofSimMaker/StBTofSimMaker.h"
 
-ClassImp(StBTofMixerMaker)
 
 //_____________________________________________________________________________
 StBTofMixerMaker::StBTofMixerMaker(const char *name):StMaker(name)

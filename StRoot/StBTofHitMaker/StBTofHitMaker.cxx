@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.21 2013/04/17 20:15:46 geurts Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.22 2017/10/20 17:50:32 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -29,7 +29,6 @@
 #include "StRtsTable.h"
 #include "DAQ_TOF/daq_tof.h"
 
-ClassImp(StBTofHitMaker);
 
 //_____________________________________________________________
 StBTofHitMaker::StBTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
