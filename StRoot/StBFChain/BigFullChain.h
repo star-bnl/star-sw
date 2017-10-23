@@ -1485,12 +1485,12 @@ Bfc_st BFC[] = { // standard chains
   {"svtdEdx"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
-  {"pxlFastSim"  ,"","","StMcEvent,StEvent"
+  {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker",     "PXL raw hit maker",kFALSE},
+  {"pxlFastSim"  ,"","","pxlRaw,StMcEvent,StEvent"
    ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
-  {"pxlSlowSim"  ,"","","StMcEvent,StEvent"
+  {"pxlSlowSim"  ,"","","pxlRaw,StMcEvent,StEvent"
    ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Slow Simulator",kFALSE},
    
-  {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker",     "PXL raw hit maker",kFALSE},
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker",     "PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker",     "PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
