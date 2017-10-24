@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.29 2017/10/14 13:50:28 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.30 2017/10/24 23:43:44 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.30  2017/10/24 23:43:44  zhux
+# added MaxWallTime option, now the value is set to 35 hrs. the same as Cori.
+#
 # Revision 1.29  2017/10/14 13:50:28  zhux
 # maximum memory increased from 1800 to 3700 MB for one task.
 #
@@ -550,6 +553,9 @@ print OUT "  <Location>$generatorDir</Location>\n";
 print OUT "</Generator>\n";
 print OUT "\n";
 print OUT "<ResourceUsage>\n";
+print OUT "<Times>\n";
+print OUT "<MaxWallTime>35</MaxWallTime>\n";
+print OUT "</Times>\n";
 print OUT "<Memory>\n";
 print OUT "<MinMemory>3700</MinMemory>\n";
 print OUT "</Memory>\n";
