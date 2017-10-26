@@ -21,6 +21,9 @@ const char* orderOpsName[] =
     "tran+rot" };
 
 
+static int debuglvl = 0;
+void AgPosition::SetDebug( int d ){ debuglvl = d; }
+
 /// Helper function to retrive a DB table and extract the full translation, rotation matrix
 //void GetMatrixFromDb( const char* table, const int row, double matrix[4][4] )
 #define chain StMaker::GetChain()
@@ -35,11 +38,10 @@ void AgMLDbMatrix::operator()( const char* table, const int row, double matrix[4
   TTable *ttable = (TTable *)chain-> GetDataBase( tablename );
   if ( ttable )
     {
-//#define VERBOSE
-#ifdef VERBOSE
-      LOG_INFO << "DB Matrix: " << tablename.Data() << " [" << row << "]" << endm;
-      ttable->Print(row,row+1);
-#endif
+
+      if (1 <= debuglvl) LOG_INFO << "DB Matrix: " << tablename.Data() << " [" << row << "]" << endm;
+      //  if (2 <= debug ) ttable->Print(row,row+1);
+
       Survey_st* t = (Survey_st*)ttable->At(row);
       matrix[0][0] = t->r00;
       matrix[0][1] = t->r01;
@@ -57,6 +59,17 @@ void AgMLDbMatrix::operator()( const char* table, const int row, double matrix[4
       matrix[3][1] = 0;
       matrix[3][2] = 0;
       matrix[3][3] = 1;
+      
+      if (2<=debuglvl) {
+
+	LOG_INFO << Form( "[%9.5f %9.5f %9.5f | %9.5f]", matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3] ) << endm;
+	LOG_INFO << Form( "[%9.5f %9.5f %9.5f | %9.5f]", matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3] ) << endm;
+	LOG_INFO << Form( "[%9.5f %9.5f %9.5f | %9.5f]", matrix[2][0], matrix[2][1], matrix[2][2], matrix[2][3] ) << endm;
+	LOG_INFO << Form( "[%9.5f %9.5f %9.5f | %9.5f]", matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3] ) << endm;
+
+      }
+
+
     }
   else  // no DB table.  Warn and return 1.
     {
@@ -268,7 +281,7 @@ bool AgPosition::Misalign( const char* tablename, const int rownumber, const cha
     {
       lr = kLeftMultiply;
     }
-  bool verbose = opts.Contains("print");
+  bool verbose = false; // opts.Contains("print");
 
   AgMLDbFunctor &GetMatrixFromDb = *AgMLDbFunctor::instance();
 

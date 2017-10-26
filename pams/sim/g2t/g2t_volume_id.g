@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.83 2017/10/18 14:33:39 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.84 2017/10/24 22:03:32 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.84  2017/10/24 22:03:32  jwebb
+* Shut the framework up.
+*
 * Revision 1.83  2017/10/18 14:33:39  jwebb
 * Modifications of g2t_volume_id to support alternate paths to pxl, ist, sst
 * active sensors, while maintaining the same absolute volume ID.
@@ -379,7 +382,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #ifndef __G2T_VERSION__
 
 #ifndef  __STAR_VMC__
-
+#if 0
    """This is a hack.  For some reason that I have yet to determine, the PIXL"""
    """structure is not being loaded... maybe the name PIXL gets confused with"""
    """the data struct associated w/ pixlgeo?  Maybe reasonas?"""
@@ -387,7 +390,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              pixl_misalign  = 1
 
 
-
+#endif
 #endif /* ! __STAR_VMC__ */
           """ Intialize TPADs based on TPC version """
 	  npadi = 0
@@ -535,12 +538,12 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ladder = numbv(1)
         sensor = numbv(2)
 
-        WRITE(*,*) 'Aligned SST:'
+!       WRITE(*,*) 'Aligned SST:'
 
-        write (*,*) '  uncoded numbv  = ', numbv(1:4)
-        write (*,*) '          ladder = ', ladder
-        write (*,*) '          sensor = ', sensor
-        write (*,*) '  encoded volume = ', volume_id
+!       write (*,*) '  uncoded numbv  = ', numbv(1:4)
+!       write (*,*) '          ladder = ', ladder
+!       write (*,*) '          sensor = ', sensor
+!       write (*,*) '  encoded volume = ', volume_id
 
         else if( ssdp_misalign.eq.1 ) then
 
@@ -550,11 +553,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
         volume_id = 7000 + 100*sensor + ladder
 
-        write (*,*) 'Misaligned SST: '
-        write (*,*) '  uncoded numbv  = ', numbv(1:4)
-        write (*,*) '          ladder = ', ladder
-        write (*,*) '          sensor = ', sensor
-        write (*,*) '  encoded volume = ', volume_id
+!       write (*,*) 'Misaligned SST: '
+!       write (*,*) '  uncoded numbv  = ', numbv(1:4)
+!       write (*,*) '          ladder = ', ladder
+!       write (*,*) '          sensor = ', sensor
+!       write (*,*) '  encoded volume = ', volume_id
     
         endif
 
@@ -1005,7 +1008,7 @@ c$$$    write (*,*) numbv
 
         endif
 
-        write (*,*) 'PIXL_MISALIGN = ', pixl_misalign
+!       write (*,*) 'PIXL_MISALIGN = ', pixl_misalign
 
 
         if ( pixl_misalign .eq. 1 ) then
@@ -1052,10 +1055,10 @@ c$$$    write (*,*) numbv
           volume_id = ladder * 1000000  +   
                       sensor *   10000  
 
-          write (*,*) '  uncoded numbv  = ', numbv(1:4)
-          write (*,*) '  encoded volume = ', volume_id
-          write (*,*) '  decoded ladder = ', volume_id/1000000 - 1
-          write (*,*) '  decoded sensor = ', mod(volume_id,1000000) /10000
+!         write (*,*) '  uncoded numbv  = ', numbv(1:4)
+!         write (*,*) '  encoded volume = ', volume_id
+!         write (*,*) '  decoded ladder = ', volume_id/1000000 - 1
+!         write (*,*) '  decoded sensor = ', mod(volume_id,1000000) /10000
 
 
 
