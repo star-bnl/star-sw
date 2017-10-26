@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.109 2017/04/12 19:47:02 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.110 2017/10/26 02:47:41 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.110  2017/10/26 02:47:41  genevb
+ * Allow FullGridLeak to work on specific sheets via sheet widths
+ *
  * Revision 1.109  2017/04/12 19:47:02  genevb
  * Generic SpaceCharge and GridLeak functions independent of specific modes
  *
@@ -501,7 +504,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB and EWRatio
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
-  GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
+  GetGridLeak( mode )   ;    // Get the parameters that describe the gating grid leaks
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
   UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
@@ -766,7 +769,7 @@ Int_t StMagUtilities::GetSpaceChargeMode()
    return 0;
 }
 
-void StMagUtilities::GetGridLeak ()
+void StMagUtilities::GetGridLeak ( Int_t mode )
 {
    fGridLeak   =  StDetectorDbGridLeak::instance()  ;
    InnerGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLinner )  ;  // Relative strength of the Inner grid leak
@@ -778,6 +781,11 @@ void StMagUtilities::GetGridLeak ()
    OuterGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLouter )  ;  // Relative strength of the Outer grid leak
    OuterGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLouter )  ;  // Location (in local Y coordinates) of Outer grid leak 
    OuterGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLouter )  ;  // Half-width of the Outer grid leak.  
+   if (mode & kFullGridLeak) {
+     if (InnerGridLeakWidth <= 0) memset(  GLWeights     ,0,24*sizeof(Float_t));
+     if (MiddlGridLeakWidth <= 0) memset(&(GLWeights[24]),0,48*sizeof(Float_t));
+     if (OuterGridLeakWidth <= 0) memset(&(GLWeights[72]),0,24*sizeof(Float_t));
+   }
 }
 
 void StMagUtilities::ManualGridLeakStrength (Double_t inner, Double_t middle, Double_t outer)
