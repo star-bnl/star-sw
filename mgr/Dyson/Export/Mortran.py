@@ -1605,19 +1605,21 @@ class Placement(Handler):
         #
         # Now create the executive code
         #
-        if x:
-            formatter( "%%x = %s"% tryFloat(self.x), cchar="_" )
+        if x!=None:
+            formatter( "ag_x = %s"% tryFloat(self.x), cchar="_" )
+            formatter( "CALL agml_translate_x( %x )", cchar="_")
             parlist.append( "X" )
-        if y:
-            formatter( "%%y = %s"% tryFloat(self.y), cchar="_" )
+        if y!=None:
+            formatter( "ag_y = %s"% tryFloat(self.y), cchar="_" )
+            formatter( "CALL agml_translate_y( %y )", cchar="_")            
             parlist.append( "Y" )
-        if z:
-            formatter( "%%z = %s"% tryFloat(self.z), cchar="_" )
+        if z!=None:
+            formatter( "ag_z = %s"% tryFloat(self.z), cchar="_" )
+            formatter( "CALL agml_translate_z( %z )", cchar="_")            
             parlist.append( "Z" )
 
         for key in self.attr.keys():
 
-            
             val = self.attr.pop(key,None)
             if val:
                 formatter( "%%%s = %s"%( key, tryFloat(val) ) )
@@ -1638,15 +1640,15 @@ class Placement(Handler):
 
                 if key == 'alphax':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphax = %s'%val )
+                    formatter( 'ag_alphax = %s'%val )
                     formatter( 'CALL agml_rotate_x(%alphax)' )
                 if key == 'alphay':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphay = %s'%val )
+                    formatter( 'ag_alphay = %s'%val )
                     formatter( 'CALL agml_rotate_y(%alphay)' )                    
                 if key == 'alphaz':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphaz = %s'%val )
+                    formatter( 'ag_alphaz = %s'%val )
                     formatter( 'CALL agml_rotate_z(%alphaz)' )                    
 
                 if key == 'ort':
@@ -1719,6 +1721,10 @@ class Placement(Handler):
 
         
 
+        #
+        # Now get the translation / rotation matrix
+        #
+        formatter( "CALL agml_get_translation( %x, %y, %z )" )        
         formatter( "CALL agml_get_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
         parlist.append( 'THETAX' )
         parlist.append( 'PHIX' )
@@ -1727,11 +1733,18 @@ class Placement(Handler):
         parlist.append( 'THETAZ' )
         parlist.append( 'PHIZ' )
 
+
         formatter( "%%parlist = '%s'"%'_'.join(parlist) )
         #
         # And finally invoke AgStar executive action
         #
         formatter( "CALL AxPosition" )
+
+
+
+
+
+
 
     def agstar_placement(self,tag):
 

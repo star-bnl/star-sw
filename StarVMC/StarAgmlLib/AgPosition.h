@@ -87,6 +87,8 @@ public:
   static void SetReal();
   static void SetIdeal();
 
+  static void SetDebug( const int d );
+
   int NextCopyNumber();
 
 
