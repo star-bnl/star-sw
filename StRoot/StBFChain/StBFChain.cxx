@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.645 2017/10/18 14:30:39 jwebb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.646 2017/10/23 11:25:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -690,6 +690,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("TrsToF"))    mode += 2; // account for particle time of flight
       if (mode) mk->SetMode(mode);
     }
+
     // Place-holder. Would possibly be a bitmask
     if (maker == "StTofrMatchMaker"){
       mk->SetMode(0);
@@ -797,8 +798,12 @@ Int_t StBFChain::Instantiate()
          GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",kTRUE);
 
     // HFT
-    if (maker == "StPxlSimMaker"           &&
-	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim",kTRUE);
+    //if (maker == "StPxlSimMaker"           &&
+    //	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim",kTRUE);
+    // ... PXL
+    if (maker == "StPxlSimMaker") {
+      if (GetOption("pxlSlowSim")) mk->SetAttr("useDIGMAPSSim",kTRUE);
+    }
 
 
 
