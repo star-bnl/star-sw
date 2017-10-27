@@ -608,6 +608,9 @@
      <!-- Note the ladder active area center is not in accordance with the IBMO center in z direction -->
      <!-- the shift distance equals to OutsideTubeWestLen+2*HalfEndcapMomLen+2*HalfSenMomLen*3-HalfLadLen -->
 
+xpos = 0;
+ypos = 0;
+zpos = 0;
 
      <Placement block="IBAM" in="IBMO" x="xpos" y="ypos" z="zpos-4.4929" konly="MANY" >
 <!--
