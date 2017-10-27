@@ -276,7 +276,7 @@
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="sisd" config="SISD85a" />
-    <Construct sys="istd" config="ISTD03a" />
+    <Construct sys="istd" config="ISTD02a" />
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD16" />
     <Construct sys="pixl" config="PIXL62b" />
