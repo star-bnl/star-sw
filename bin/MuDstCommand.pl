@@ -10,5 +10,5 @@ foreach my $line (@list) {
   if (-r $mudst) {next;}
   print "string:$line\n";
   $no++;
-#  if ($no >= 400) {last;}
+  if ($no >= 400) {last;}
 }
