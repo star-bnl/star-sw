@@ -67,6 +67,7 @@ switch ( $STAR_HOST_SYS )
     case rh*gcc*:
     case sl5*gcc*:
     case sl6*gcc*:
+    case sl7*gcc*:
 	setenv ARCH  linux
 #	setenv SHIFTLIBDIR $CERN_ROOT/lib
 #	setenv SHIFTINCDIR  /afs/rhic.bnl.gov/.asis/share/usr.local/include
@@ -140,7 +141,7 @@ endsw
     setenv EXTRA_FLAGS ""
 switch ( $STAR_HOST_SYS )  
     case *gcc7*:
-     setenv ENABLE_CXX11 "--enable-cxx17"
+#     setenv ENABLE_CXX11 "--enable-cxx17"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cxxflags=-msse --cxxflags=-msse2 --cxxflags=-msse3 --cxxflags=-msse4.1 --cxxflags=-mssse3"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=-msse --cflags=-msse2 --cflags=-msse3 --cflags=-msse4.1 --cflags=-mssse3"
