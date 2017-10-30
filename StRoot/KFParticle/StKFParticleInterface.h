@@ -41,6 +41,7 @@ class StKFParticleInterface: public TObject
     }
   }
   void SetParticlesPdg(std::vector<int>& pdg) { fParticlesPdg = pdg;}
+  void SetHftHits(std::vector<int>& nHftHits) { fNHftHits = nHftHits; }
   
   void SetField(float field);
   void SetBeamLine(KFParticle& p);
@@ -53,11 +54,16 @@ class StKFParticleInterface: public TObject
   
   const KFParticleTopoReconstructor* GetTopoReconstructor() { return fKFParticleTopoReconstructor; }
   
+  void SetPrimaryProbCut(float prob);
+  
  private:
-   
+  
+  double InversedChi2Prob(double p, int ndf) const;
+  
   KFParticleTopoReconstructor* fKFParticleTopoReconstructor;
   std::vector<KFParticle> fParticles;
   std::vector<int> fParticlesPdg;
+  std::vector<int> fNHftHits;
   
   ClassDef(StKFParticleInterface,1)
 };

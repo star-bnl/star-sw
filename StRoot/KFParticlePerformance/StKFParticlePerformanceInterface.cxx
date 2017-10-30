@@ -91,3 +91,20 @@ void StKFParticlePerformanceInterface::SetPrintEffFrequency(Int_t n)
 { 
   fKFTopoPerformance->SetPrintEffFrequency(n); 
 }
+
+int StKFParticlePerformanceInterface::GetNReconstructedParticles()
+{
+  return fKFTopoPerformance->GetTopoReconstructor()->GetParticles().size();
+}
+
+bool StKFParticlePerformanceInterface::GetParticle(KFParticle& particle, const int iParticle)
+{
+  if(iParticle<0 || iParticle>=fKFTopoPerformance->GetTopoReconstructor()->GetParticles().size())
+  {
+    std::cout << "Error!!!    StKFParticlePerformanceInterface::GetParticle()   iParticle " << iParticle << " size " << GetNReconstructedParticles() << std::endl;
+    return 0;
+  }
+  particle = fKFTopoPerformance->GetTopoReconstructor()->GetParticles()[iParticle];
+  bool isMatched = fKFTopoPerformance->ParticlesMatch()[iParticle].IsMatchedWithPdg();
+  return isMatched;
+}

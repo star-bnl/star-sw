@@ -1,10 +1,10 @@
 /* 
    root.exe -q -b lBichsel.C pionMIP.root 'dEdxFit.C+("SecRow3C","GF")'
 */
-#if !defined(__CINT__)
+#if !defined(__CINT__) && !defined(__CLING__) && ! defined(__MAKECINT__)
 // code that should be seen ONLY by the compiler
 #else
-#if !defined(__CINT__) || defined(__MAKECINT__)
+#if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
 // code that should be seen by the compiler AND rootcint
 #else
 // code that should always be seen
@@ -14,7 +14,7 @@
 //#define __USE_ROOFIT__
 #endif
 //________________________________________________________________________________
-#if !defined(__CINT__) || defined(__MAKECINT__)
+#if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"

@@ -61,7 +61,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
       fParticles[iTr].Transport( ds, dsdr, parTmp, covTmp);
 
       float r2 = parTmp[0]*parTmp[0] + parTmp[1]*parTmp[1];
-      //      if(r2!=r2) continue;
+      if(r2!=r2) continue;
       if(r2 > 100 ) continue;  
       
       const float V[3] = {covTmp[0], covTmp[2], covTmp[5]}; 
@@ -125,7 +125,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 
   for(int iP=0; iP<fNParticles; iP++)
   {
-    fParticles[iP].TransportToPoint(pvEstimation);
+//     fParticles[iP].TransportToPoint(pvEstimation);
 
     fWeight[iP] = fParticles[iP].CovarianceMatrix()[0]
       + fParticles[iP].CovarianceMatrix()[2] + fParticles[iP].CovarianceMatrix()[5];
@@ -296,11 +296,11 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       nNotUsedTracksNew = 0;
     
       // save PV
-#ifdef CBM
+// #ifdef CBM
       if( primVtx.GetNDF() >= cutNDF && ((cluster.fTracks.size()>0.1f*fNParticles && fNParticles > 30) || fNParticles<=30 ) ) //at least 2 particles
-#else
-      if( primVtx.GetNDF() >= cutNDF)
-#endif
+// #else
+//       if( primVtx.GetNDF() >= cutNDF)
+// #endif
       {
 //         std::cout << primVtx.X() << " " << primVtx.Y() << " " << primVtx.Z() << " " << cluster.fTracks.size() << std::endl;
         fPrimVertices.push_back(primVtx);

@@ -86,7 +86,7 @@ Bichsel *m_Bichsel = 0;
 //________________________________________________________________________________
 Int_t Debug() {return _debug;}
 //________________________________________________________________________________
-void PicodEdx1(const Char_t *files ="./*.MuDst.root",
+void PicodEdx1(const Char_t *files ="./*.Pico.root",
 	    const Char_t *Out = "PicodEdx1.root"){
   maker = new StPicoDstMaker(StPicoDstMaker::IoRead,files);
   maker->Init();

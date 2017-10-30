@@ -1121,6 +1121,10 @@ void StMaker::PrintTimer(Option_t *option)
 }
 void StMaker::lsMakers(const StMaker *top)
 {
+  if (! top) {
+    lsMakers(fgTopChain);
+    return;
+  }
   TDataSetIter   iter((TDataSet*)top,20);
   Int_t N=0;
   for(const TDataSet *mk=top;mk;mk = iter.Next()) {

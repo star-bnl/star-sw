@@ -701,7 +701,7 @@ Int_t StPicoDstMaker::fillTracks()
   {
     StMuTrack* pTrk = (StMuTrack*)mMuDst->primaryTracks(i);
     if (!pTrk) continue;
-
+    if (! mMuDst->Accept(pTrk)) continue;
     index2Primary[pTrk->id()] = i;
   }
 
@@ -710,6 +710,7 @@ Int_t StPicoDstMaker::fillTracks()
   {
     StMuTrack* gTrk = (StMuTrack*)mMuDst->globalTracks(i);
     if (!gTrk) continue;
+    if (! mMuDst->Accept(gTrk)) continue;
 
     StMuTrack const* const pTrk = index2Primary.find(gTrk->id()) != index2Primary.end() ?
                                   (StMuTrack*)mMuDst->primaryTracks(index2Primary[gTrk->id()]) : nullptr;

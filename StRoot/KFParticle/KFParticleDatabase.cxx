@@ -72,8 +72,8 @@ KFParticleDatabase::KFParticleDatabase():
   fMassSecPDGSigma[2]=2.0e-3;  
 #else 
   fMassSecPDGSigma[0]=4.9e-3; //TODO tune
-  fMassSecPDGSigma[1]=2.5e-3;
-  fMassSecPDGSigma[2]=2.5e-3; //TODO tune
+  fMassSecPDGSigma[1]=2.1e-3;
+  fMassSecPDGSigma[2]=2.1e-3; //TODO tune
 #endif
   fMassSecPDGSigma[3]=6.0e-3; //TODO tune //Gamma
   fMassSecPDGSigma[4]=2.1e-3; //Omega

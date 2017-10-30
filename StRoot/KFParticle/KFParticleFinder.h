@@ -158,8 +158,8 @@ class KFParticleFinder
   //set cuts
   void Set2DCuts(const float chi2Prim = 3.f, const float chi2 = 3.f, const float ldl = 5.f) {
     fCuts2D[0] = chi2Prim; 
-    fCuts2D[1] = chi2;      
-    fCuts2D[2] = ldl;
+//     fCuts2D[1] = chi2;      
+//     fCuts2D[2] = ldl;
   } 
   void SetSecondaryCuts(const float sigmaMass = 3.f, const float chi2Topo = 5.f, const float ldl = 10.f) {
     fSecCuts[0] = sigmaMass;
@@ -247,8 +247,27 @@ class KFParticleFinder
   std::vector<KFParticle> fD0bar;
   std::vector<KFParticle> fD04;
   std::vector<KFParticle> fD04bar;
+  std::vector<KFParticle> fD0KK;
   std::vector<KFParticle> fDPlus;
   std::vector<KFParticle> fDMinus;
+  
+  std::vector<KFParticle> fK0PiPlus;
+  std::vector<KFParticle> fK0PiMinus;
+  std::vector<KFParticle> fK0PiPi;
+  std::vector<KFParticle> fK0KPlus;
+  std::vector<KFParticle> fK0KMinus;
+
+  std::vector<KFParticle> fLPiPlus;
+  std::vector<KFParticle> fLPiPlusPiPlus;
+  std::vector<KFParticle> fLbPiMinus;
+  std::vector<KFParticle> fLbPiMinusPiMinus;
+  
+  std::vector<KFParticle> fpK0;
+  std::vector<KFParticle> fpK0PiPlus;
+  std::vector<KFParticle> fpbK0;
+  std::vector<KFParticle> fpbK0PiMinus;
+
+  
   //vectors with temporary particles for H0
   std::vector<KFParticle> fLPi; //Lambda Pi+ combination
   std::vector<int> fLPiPIndex; //index of the proton in Labmda
@@ -260,9 +279,7 @@ class KFParticleFinder
   std::vector<KFParticle> fHe5L;
   std::vector<KFParticle> fLLn;
   std::vector<KFParticle> fH5LL;
-  std::vector<KFParticle> fK0PiPlus;
   std::vector<int> fK0PiMinusIndex;
-  std::vector<KFParticle> fK0PiPi;
   
   //vectors of candidates with the mass constraint
   static const int fNSecCandidatesSets = 5;

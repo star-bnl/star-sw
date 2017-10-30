@@ -75,9 +75,10 @@ ClassImp(StEmcSimulatorMaker)
     mSimulatorMode[BPRS-1]  = StEmcVirtualSimulator::kPrimarySecondaryFullMode;
     mSimulatorMode[BSMDE-1] = StEmcVirtualSimulator::kSimpleMode;
     mSimulatorMode[BSMDP-1] = StEmcVirtualSimulator::kSimpleMode;
-    
-    mIsBFC = GetParentChain()->InheritsFrom("StBFChain");
-    LOG_INFO << "Is StEmcSimulatorMaker in BFC? " << mIsBFC << endm;
+    if ( GetParentChain() ) {
+      mIsBFC = GetParentChain()->InheritsFrom("StBFChain");
+      LOG_INFO << "Is StEmcSimulatorMaker in BFC? " << mIsBFC << endm;
+    }
 }
 
 StEmcSimulatorMaker::~StEmcSimulatorMaker() {

@@ -2,14 +2,16 @@
 
 #include "KFParticleTopoReconstructor.h"
 
-#include "TFile.h"
-#include "TDirectory.h"
+#include "TMath.h"
 
 ClassImp(StKFParticleInterface)
 
-StKFParticleInterface::StKFParticleInterface(): fKFParticleTopoReconstructor(0), fParticles(0), fParticlesPdg(0)
+StKFParticleInterface::StKFParticleInterface(): fKFParticleTopoReconstructor(0), fParticles(0), fParticlesPdg(0), fNHftHits(0)
 {
   fKFParticleTopoReconstructor = new KFParticleTopoReconstructor(); // TODO don't recreate with each event
+
+  // set default cuts
+  SetPrimaryProbCut(0.0001); // 0.01% to consider primary track as a secondary;
 }
 
 StKFParticleInterface::~StKFParticleInterface()
@@ -30,27 +32,43 @@ void StKFParticleInterface::SetBeamLine(KFParticle& p)
 
 void StKFParticleInterface::InitParticles()
 { 
-  fKFParticleTopoReconstructor->Init( fParticles, &fParticlesPdg );
+  fKFParticleTopoReconstructor->Init( fParticles, &fParticlesPdg, &fNHftHits );
   Int_t NPV =  fKFParticleTopoReconstructor->NPrimaryVertices();
   fKFParticleTopoReconstructor->GetKFParticleFinder()->Init(NPV);
+  fKFParticleTopoReconstructor->FillPVIndices();
 }
 
 void StKFParticleInterface::ReconstructParticles()
 { 
   fKFParticleTopoReconstructor->SortTracks();
   fKFParticleTopoReconstructor->ReconstructParticles();
+  
+//   static int iEvent=0;
+//   iEvent++;
+//   std::cout << "Event " << iEvent << ": init " << fKFParticleTopoReconstructor->StatTime( 0 ) 
+//             << " pv " << fKFParticleTopoReconstructor->StatTime( 1 )
+//             << " sort " << fKFParticleTopoReconstructor->StatTime( 2 )
+//             << " particles " << fKFParticleTopoReconstructor->StatTime( 3 ) <<  std::endl;
 }
 
 void StKFParticleInterface::ReconstructTopology()
 { 
   fKFParticleTopoReconstructor->Init( fParticles, &fParticlesPdg );
-  fKFParticleTopoReconstructor->ReconstructPrimVertex();
+  fKFParticleTopoReconstructor->ReconstructPrimVertex(0);
   fKFParticleTopoReconstructor->SortTracks();
   fKFParticleTopoReconstructor->ReconstructParticles();
+  
+//   static int iEvent=0;
+//   iEvent++;
+//   std::cout << "Event " << iEvent << ": init " << fKFParticleTopoReconstructor->StatTime( 0 ) 
+//             << " pv " << fKFParticleTopoReconstructor->StatTime( 1 )
+//             << " sort " << fKFParticleTopoReconstructor->StatTime( 2 )
+//             << " particles " << fKFParticleTopoReconstructor->StatTime( 3 ) <<  std::endl;
 }
 
 void StKFParticleInterface::AddPV(const KFVertex &pv, const vector<int> &tracks) { 
   fKFParticleTopoReconstructor->AddPV(pv, tracks);
+  fKFParticleTopoReconstructor->FillPVIndices();
 }
 void StKFParticleInterface::CleanPV() {
   fKFParticleTopoReconstructor->CleanPV();
@@ -78,3 +96,37 @@ const std::vector< std::vector<KFParticle> >* StKFParticleInterface::GetPrimaryC
 const std::vector< std::vector<KFParticle> >* StKFParticleInterface::GetPrimaryTopoCandidates() const {return fKFParticleTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoCandidates();        } // Get primary particles with the topologigal constraint
 const std::vector< std::vector<KFParticle> >* StKFParticleInterface::GetPrimaryTopoMassCandidates() const {return fKFParticleTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoMassCandidates();} // Get primary particles with the topologigal and mass constraint
 
+double StKFParticleInterface::InversedChi2Prob(double p, int ndf) const
+{
+  double epsilon = 1.e-14;
+  double chi2Left = 0.f;
+  double chi2Right = 10000.f;
+  
+  double probLeft = p - TMath::Prob(chi2Left, ndf);
+  
+  double chi2Centr = (chi2Left+chi2Right)/2.f;
+  double probCentr = p - TMath::Prob( chi2Centr, ndf);
+  
+  while( TMath::Abs(chi2Right-chi2Centr)/chi2Centr > epsilon )
+  {
+    if(probCentr * probLeft > 0.f)
+    {
+      chi2Left = chi2Centr;
+      probLeft = probCentr;
+    }
+    else
+    {
+      chi2Right = chi2Centr;
+    }
+    
+    chi2Centr = (chi2Left+chi2Right)/2.f;
+    probCentr = p - TMath::Prob( chi2Centr, ndf);
+  }
+  
+  return chi2Centr;
+}
+
+void StKFParticleInterface::SetPrimaryProbCut(float prob)
+{ 
+  fKFParticleTopoReconstructor->SetChi2PrimaryCut( InversedChi2Prob(prob, 2) );
+}

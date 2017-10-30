@@ -22,7 +22,7 @@ class KFPTrackVector
 {
   friend class KFParticleTopoReconstructor;
  public:
-  KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0), fND(0), fNT(0), fNHe3(0), fNHe4(0) { }
+  KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNPixelHits(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0), fND(0), fNT(0), fNHe3(0), fNHe4(0) { }
   ~KFPTrackVector() { }
 
   int Size() const { return fP[0].size(); }
@@ -55,10 +55,11 @@ class KFPTrackVector
   const kfvector_float& FieldCoefficient(const int i)  const { return fField[i]; }
 #endif
 
-  const kfvector_int& Id()      const { return fId; }
-  const kfvector_int& PDG()     const { return fPDG; }
-  const kfvector_int& Q()       const { return fQ; }
-  const kfvector_int& PVIndex() const { return fPVIndex; }
+  const kfvector_int& Id()         const { return fId; }
+  const kfvector_int& PDG()        const { return fPDG; }
+  const kfvector_int& Q()          const { return fQ; }
+  const kfvector_int& PVIndex()    const { return fPVIndex; }
+  const kfvector_int& NPixelHits() const { return fNPixelHits; }
 
   float Pt(const int n) const { return sqrt(fP[3][n]*fP[3][n]+fP[4][n]*fP[4][n]); }
   float P(const int n)  const { return sqrt(fP[3][n]*fP[3][n]+fP[4][n]*fP[4][n]+fP[5][n]*fP[5][n]); }
@@ -73,19 +74,20 @@ class KFPTrackVector
 #ifdef NonhomogeneousField
   void SetFieldCoefficient(float value, int iP, int iTr) { fField[iP][iTr] = value; }
 #endif
-  void SetId        (int value, int iTr)           { fId[iTr] = value; }
-  void SetPDG       (int value, int iTr)           { fPDG[iTr] = value; }
-  void SetQ         (int value, int iTr)           { fQ[iTr] = value; }
-  void SetPVIndex   (int value, int iTr)           { fPVIndex[iTr] = value; }
-  void SetLastElectron(int n) { fNE = n; }
-  void SetLastMuon    (int n) { fNMu = n; }
-  void SetLastPion    (int n) { fNPi = n; }
-  void SetLastKaon    (int n) { fNK = n; }
-  void SetLastProton  (int n) { fNP = n; }
-  void SetLastDeuteron(int n) { fND = n; }
-  void SetLastTritium (int n) { fNT = n; }
-  void SetLastHe3     (int n) { fNHe3 = n; }
-  void SetLastHe4     (int n) { fNHe4 = n; }
+  void SetId          (int value, int iTr) { fId[iTr] = value; }
+  void SetPDG         (int value, int iTr) { fPDG[iTr] = value; }
+  void SetQ           (int value, int iTr) { fQ[iTr] = value; }
+  void SetPVIndex     (int value, int iTr) { fPVIndex[iTr] = value; }
+  void SetNPixelHits  (int value, int iTr) { fNPixelHits[iTr] = value; }
+  void SetLastElectron(int n)              { fNE = n; }
+  void SetLastMuon    (int n)              { fNMu = n; }
+  void SetLastPion    (int n)              { fNPi = n; }
+  void SetLastKaon    (int n)              { fNK = n; }
+  void SetLastProton  (int n)              { fNP = n; }
+  void SetLastDeuteron(int n)              { fND = n; }
+  void SetLastTritium (int n)              { fNT = n; }
+  void SetLastHe3     (int n)              { fNHe3 = n; }
+  void SetLastHe4     (int n)              { fNHe4 = n; }
   
   void RecalculateLastIndex()
   {
@@ -99,6 +101,7 @@ class KFPTrackVector
         case         19: fNMu++; break;
         case        211: fNPi++; break;
         case          1: fNPi++; break;
+        case          3: fNPi++; break;
         case        321: fNK++; break;
         case       2212: fNP++; break;
         case 1000010020: fND++; break;
@@ -197,7 +200,11 @@ class KFPTrackVector
     fPVIndex.resize(localSize);
     for(int n=0; n<localSize; n++)
       fPVIndex[n] = track.fPVIndex[n];
-        
+    
+    fNPixelHits.resize(localSize);
+    for(int n=0; n<localSize; n++)
+      fNPixelHits[n] = track.fNPixelHits[n];
+    
     fNE   = track.fNE;
     fNMu  = track.fNMu;
     fNPi  = track.fNPi;
@@ -235,6 +242,9 @@ class KFPTrackVector
     offset += Size();
     
     memcpy( &(data[offset]), &(fPVIndex[0]), Size()*sizeof(float));
+    offset += Size();
+
+    memcpy( &(data[offset]), &(fNPixelHits[0]), Size()*sizeof(float));
     offset += Size();
     
 #ifdef NonhomogeneousField
@@ -282,6 +292,9 @@ class KFPTrackVector
     memcpy( &(fPVIndex[0]), &(data[offset]), Size()*sizeof(float));
     offset += Size();
     
+    memcpy( &(fNPixelHits[0]), &(data[offset]), Size()*sizeof(float));
+    offset += Size();
+    
 #ifdef NonhomogeneousField
     for(int iF=0; iF<10; iF++)
     {
@@ -316,6 +329,7 @@ class KFPTrackVector
   kfvector_int fPDG;
   kfvector_int fQ;     //charge
   kfvector_int fPVIndex; //index of Primary Vertex, to which the track is attached
+  kfvector_int fNPixelHits;
   
 #ifdef NonhomogeneousField
   kfvector_float fField[10];

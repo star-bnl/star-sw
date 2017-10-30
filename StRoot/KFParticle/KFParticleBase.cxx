@@ -1868,8 +1868,8 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
       dS1dR1[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
       dS1dR2[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
       } else {
-	dS1dR1[0][iP] = 1/bq1;
-	dS1dR2[0][iP] = 1/bq1;
+       dS1dR1[0][iP] = 1/bq1;
+       dS1dR2[0][iP] = 1/bq1;
       }
     }
     
@@ -1886,8 +1886,8 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
       dS1dR1[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
       dS1dR2[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
       } else {
-	dS1dR1[0][iP] = 1/bq1;
-	dS1dR2[0][iP] = 1/bq1;
+       dS1dR1[0][iP] = 1/bq1;
+       dS1dR2[0][iP] = 1/bq1;
       }
     }
   }
@@ -1909,8 +1909,8 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
       dS2dR1[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
       dS2dR2[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
       } else {
-	dS1dR1[0][iP] = 1/bq2;
-	dS1dR2[0][iP] = 1/bq2;
+       dS1dR1[0][iP] = 1/bq2;
+       dS1dR2[0][iP] = 1/bq2;
       }
     }
     
@@ -1927,8 +1927,8 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
       dS2dR1[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
       dS2dR2[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
       } else {
-	dS1dR1[1][iP] = 1/bq2;
-	dS1dR2[1][iP] = 1/bq2;
+       dS1dR1[1][iP] = 1/bq2;
+       dS1dR2[1][iP] = 1/bq2;
       }
     }
   }
@@ -1968,8 +1968,8 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
       dS1dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
       dS1dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
       } else {
-	dS1dR1[1][iP] = 0;
-	dS1dR2[1][iP] = 0;
+       dS1dR1[1][iP] = 0;
+       dS1dR2[1][iP] = 0;
       }
     }
   }
@@ -2009,8 +2009,8 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
       dS2dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
       dS2dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
       } else {
-	dS1dR1[1][iP] = 0;
-	dS1dR2[1][iP] = 0;
+       dS1dR1[1][iP] = 0;
+       dS1dR2[1][iP] = 0;
       }
     }
   }

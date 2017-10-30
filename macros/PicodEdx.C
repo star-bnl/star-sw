@@ -361,7 +361,9 @@ void PicodEdx(const Char_t *files ="./*.MuDst.root",
   maker->Init();
 #else
   maker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
+  if (! maker) return;
 #endif
+  maker->SetStatus("*",1);
 #if 0
   maker->SetStatus("*",0);
   const Char_t *ActiveBranches[] = {

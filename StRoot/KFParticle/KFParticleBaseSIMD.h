@@ -67,16 +67,23 @@ class KFParticleBaseSIMD {
   //* Get dS to other particle p (dSp for particle p also returned) 
 
   virtual void GetDStoParticle( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const = 0;
+  virtual void GetDStoParticleFast( const KFParticleBaseSIMD &p, float_v dS[2] ) const = 0;
   
   void GetDStoParticleLine( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+  void GetDStoParticleLine( const KFParticleBaseSIMD &p, float_v dS[2]  ) const ;
   void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6], const float_v* param1 =0, const float_v* param2 =0  ) const ;
+  void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v dS[2], const float_v* param1 =0, const float_v* param2 =0  ) const ;
   void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+//   void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v dS[2] ) const ;
   void GetDStoParticleB( float_v B[3], const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const;
+//   void GetDStoParticleB( float_v B[3], const KFParticleBaseSIMD &p, float_v dS[2] ) const;
   void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+//   void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v dS[2] ) const ;
   
   //* Transport on dS value along trajectory, output to P,C
 
   virtual void Transport( float_v dS, const float_v dsdr[6], float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const = 0;
+  virtual void TransportFast( float_v dS, float_v P[] ) const = 0;
 
 
 
@@ -240,6 +247,7 @@ class KFParticleBaseSIMD {
   void TransportToDSLine( float_v dS, const float_v* dsdr );
   //* Particular extrapolators one can use 
   void TransportBz( float_v Bz, float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const;
+  void TransportBz( float_v Bz, float_v dS, float_v P[] ) const;
   void TransportCBM( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const;  
 
   void GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p/*, float_v &r*/ ) const;

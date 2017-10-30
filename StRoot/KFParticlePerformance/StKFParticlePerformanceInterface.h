@@ -10,6 +10,7 @@
 
 class KFTopoPerformance;
 class KFParticleTopoReconstructor;
+class KFParticle;
 class TFile;
 
 class StKFParticlePerformanceInterface: public TObject
@@ -25,6 +26,9 @@ class StKFParticlePerformanceInterface: public TObject
   
   void SetEffFileName(const TString& name) { fEfffileName = name; }
   void SetPrintEffFrequency(Int_t n = 100);
+  
+  int  GetNReconstructedParticles();
+  bool GetParticle(KFParticle& particle, const int iParticle);
   
  private:
 #if 1  

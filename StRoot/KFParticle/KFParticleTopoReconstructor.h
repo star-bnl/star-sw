@@ -26,6 +26,7 @@
 #include "KFPTrackVector.h"
 #include "KFParticleSIMD.h"
 
+#define USE_TIMERS
 #ifdef USE_TIMERS
 #ifndef HLTCA_STANDALONE
 #include "TStopwatch.h"
@@ -63,7 +64,7 @@ class KFParticleTopoReconstructor{
 #ifdef KFPWITHTRACKER
   void Init(AliHLTTPCCAGBTracker* tracker, vector<int>* pdg=0); // init array of particles
 #endif
-  void Init(vector<KFParticle> &particles, vector<int>* pdg=0);
+  void Init(vector<KFParticle> &particles, vector<int>* pdg=0, vector<int>* nPixelHits=0);
   void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv);
   void Init(KFPTrackVector &tracks, KFPTrackVector &tracksAtLastPoint);
 
@@ -71,7 +72,6 @@ class KFParticleTopoReconstructor{
   void SetMixedEventAnalysis() { fKFParticleFinder->SetMixedEventAnalysis(); }
   
   void DeInit() { fTracks = NULL; }
-  void Clear() { fParticles.clear(); fPV.clear(); fKFParticlePVReconstructor->CleanPV(); }
   
   void ReconstructPrimVertex(bool isHeavySystem = 1); // find primary vertex
   void SortTracks(); //sort tracks according to the pdg hypothesis and pv index
@@ -108,6 +108,13 @@ class KFParticleTopoReconstructor{
     fPV.push_back(pvPart);
     fKFParticleFinder->SetNPV(fPV.size());
   }
+  void FillPVIndices()
+  {
+    if(fTracks)
+      for(int iPV=0; iPV<NPrimaryVertices(); iPV++)
+        for(int iPVTrack=0; iPVTrack<GetPVTrackIndexArray(iPV).size(); iPVTrack++)
+          fTracks[0].SetPVIndex(iPV,GetPVTrackIndexArray(iPV)[iPVTrack]);
+  }
   void AddParticle(const KFParticle& particle) { fParticles.push_back(particle); }
   void AddCandidate(const KFParticle& candidate, int iPV = -1) { fKFParticleFinder->AddCandidate(candidate, iPV); }
 
@@ -132,26 +139,12 @@ class KFParticleTopoReconstructor{
     fKFParticleFinder->Set2DCuts(chi);
   }
   
-  const KFParticleTopoReconstructor &operator=(const KFParticleTopoReconstructor& a)
-  {
-    fKFParticlePVReconstructor = 0;
-    fKFParticleFinder = 0;
-    fTracks = 0;
-    
-    fNThreads = a.fNThreads;
-    
-    return *this;
-  }
-  
-  KFParticleTopoReconstructor(const KFParticleTopoReconstructor& a):fKFParticlePVReconstructor(0),fKFParticleFinder(0),fTracks(0), fParticles(), fPV(), fNThreads(a.fNThreads)
-#ifdef USE_TIMERS
-  ,fTime(0.),timer()
-#endif
-  {
-    ;
-  }
+  void GetListOfDaughterTracks(const KFParticle& particle, vector<int>& daughters);
+  bool ParticleHasRepeatingDaughters(const KFParticle& particle);
   
  private:
+  KFParticleTopoReconstructor &operator=(KFParticleTopoReconstructor &);
+  KFParticleTopoReconstructor(KFParticleTopoReconstructor &);
 
   void GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV);
   void TransportPVTracksToPrimVertex();
@@ -173,7 +166,7 @@ class KFParticleTopoReconstructor{
   Stopwatch timer;
 #endif // USE_TIMERS
 
-}__attribute__((aligned(sizeof(float_v)))); // class KFParticleTopoReconstructor
+}; // class KFParticleTopoReconstructor
 
 
   

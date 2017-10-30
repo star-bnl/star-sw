@@ -569,7 +569,7 @@ using namespace std;
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
 #include "TRSymMatrix.h"
 #include "TRVector.h"
-#include "KFPTrack.h"
+#include "KFParticle/KFPTrack.h"
 map<StiKalmanTrack*, StTrackNode*> StiStEventFiller::mTrkNodeMap;
 map<StTrackNode*, StiKalmanTrack*> StiStEventFiller::mNodeTrkMap;
 StiStEventFiller *StiStEventFiller::fgStiStEventFiller = 0;
@@ -1171,7 +1171,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack)
   StTrackFitTraits& fitTrait = gTrack->fitTraits();
   //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   int svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
-  int ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId);
+  int ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId) +  fitTrait.numberOfFitPoints(kSstId);
   int pxlFitPoints = fitTrait.numberOfFitPoints(kPxlId);
   int istFitPoints = fitTrait.numberOfFitPoints(kIstId);
   //  int totFitPoints = fitTrait.numberOfFitPoints();
@@ -1508,7 +1508,7 @@ enum dcaEmx {kImpImp,
   aux.nAllHits = dets[0][2];
   aux.nTpcHits = dets[kTpcId][2];
   aux.nSvtHits = dets[kSvtId][2];
-  aux.nSsdHits = dets[kSsdId][2];
+  aux.nSsdHits = dets[kSsdId][2] + dets[kSstId][2];
   aux.nPxlHits = dets[kPxlId][2];
   aux.nIstHits = dets[kIstId][2];
   aux.mL       = (unsigned char)track->getTrackLength();
@@ -1695,7 +1695,7 @@ enum dcaEmx {kImpImp,
   aux.nAllHits  = dets[0][2];
   aux.nTpcHits  = dets[kTpcId][2];
   aux.nSvtHits  = dets[kSvtId][2];
-  aux.nSsdHits  = dets[kSsdId][2];
+  aux.nSsdHits  = dets[kSsdId][2] + dets[kSsdId][2];
   aux.nPxlHits  = dets[kPxlId][2];
   aux.nIstHits  = dets[kIstId][2];
   const StiDetector *stiDet = stiHit->detector();

@@ -67,6 +67,7 @@ switch ( $STAR_HOST_SYS )
     case rh*gcc*:
     case sl5*gcc*:
     case sl6*gcc*:
+    case sl7*gcc*:
 	setenv ARCH  linux
 #	setenv SHIFTLIBDIR $CERN_ROOT/lib
 #	setenv SHIFTINCDIR  /afs/rhic.bnl.gov/.asis/share/usr.local/include

@@ -6,7 +6,7 @@
 // root.exe -q -b -x 'bfcMixerVMC.C(10)'
 //#define __NO_DAQ_CLUSTERS__
 //#define __TrackingOnly__
-#define __IST_SLOW_SIM__ 
+//#define __IST_SLOW_SIM__ 
 class StBFChain;
 StBFChain *Chain = 0, *chain1, *chain2, *chain3, *chain4;
 //_____________________________________________________________________

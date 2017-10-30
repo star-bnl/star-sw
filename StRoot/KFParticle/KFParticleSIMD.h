@@ -292,6 +292,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   //* Get dS to other particle p (dSp for particle p also returned) 
 
   void GetDStoParticle( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+  void GetDStoParticleFast( const KFParticleBaseSIMD &p, float_v dS[2] ) const ;
   //* 
   //* OTHER UTILITIES
   //*
@@ -362,7 +363,8 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   void GetFieldValue( const float_v xyz[], float_v B[] ) const ;
   
   void Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0  ) const ;
-
+  void TransportFast( float_v dS, float_v P[] ) const ;
+  
  protected: 
   
   //*
@@ -1038,6 +1040,16 @@ inline void KFParticleSIMD::GetDStoParticle( const KFParticleBaseSIMD &p, float_
 #endif
 }
 
+inline void KFParticleSIMD::GetDStoParticleFast( const KFParticleBaseSIMD &p, float_v dS[2] )const
+{
+#ifdef HomogeneousField
+  KFParticleBaseSIMD::GetDStoParticleBz( GetFieldAlice(), p, dS ) ;
+#endif
+#ifdef NonhomogeneousField
+  KFParticleBaseSIMD::GetDStoParticleCBM( p, dS ) ;
+#endif
+}
+
 inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1 ) const 
 {
 #ifdef HomogeneousField
@@ -1045,6 +1057,16 @@ inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v 
 #endif
 #ifdef NonhomogeneousField
   KFParticleBaseSIMD::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );
+#endif
+}
+
+inline void KFParticleSIMD::TransportFast( float_v dS, float_v P[] ) const 
+{
+#ifdef HomogeneousField
+  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dS, P );
+#endif
+#ifdef NonhomogeneousField
+  KFParticleBaseSIMD::TransportCBM( dS, P );
 #endif
 }
 

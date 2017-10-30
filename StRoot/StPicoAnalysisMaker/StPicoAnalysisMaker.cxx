@@ -169,7 +169,7 @@ Int_t StPicoAnalysisMaker::Make(){
 //     LOG_ERROR << "StPicoAnalysisMaker::Make histograms have not been initialized. Probably you have missed TTree file in bfc parameters" << endm;
 //     return kStFatal;
 //   }
-  StPicoDstMaker *picoDstMaker = StPicoDstMaker::instance();
+  StPicoDstMaker *picoDstMaker = (StPicoDstMaker*) StPicoDstMaker::instance();
   if (! picoDstMaker) return kStFatal;
   fPicoDst = picoDstMaker->picoDst();
 #if 0
@@ -184,8 +184,7 @@ Int_t StPicoAnalysisMaker::Make(){
 }
 //_____________________________________________________________________________
 void StPicoAnalysisMaker::RunAnalysis(){
-  std::cout << "Ololo!!!! " << std::endl;
-#if 1
+
   vector<KFMCTrack> mcTracks(0);
   
   //read PV from pico Event
@@ -222,12 +221,12 @@ void StPicoAnalysisMaker::RunAnalysis(){
       maxGBTrackIndex = index;
   }
   
-  vector<KFParticle> particles(nGlobalTracks*3);
-  vector<int> nHftHits(nGlobalTracks*3);
+  vector<KFParticle> particles(nGlobalTracks*7);
+  vector<int> nHftHits(nGlobalTracks*7);
   vector<int> mcIndexes(maxGBTrackIndex+1);
   for(unsigned int iIndex=0; iIndex<mcIndexes.size(); iIndex++)
     mcIndexes[iIndex] = -1;
-  vector<int> particlesPdg(nGlobalTracks*3);
+  vector<int> particlesPdg(nGlobalTracks*7);
   vector< vector<float> > particleCutValues(maxGBTrackIndex+1);
   int nPartSaved = 0;
   
@@ -270,37 +269,51 @@ void StPicoAnalysisMaker::RunAnalysis(){
     } 
     track.SetCharge(q);
         
-    hdEdX->Fill(track.GetP(), gTrack->dEdx()*1.e6);
+    hdEdX->Fill(track.GetP(), gTrack->dEdx());
     
     
     double m2tof = -1.e6;
     if(gTrack->bTofPidTraitsIndex() > 0)
     {
       const StPicoBTofPidTraits* btofPid = fPicoDst->btofPidTraits(gTrack->bTofPidTraitsIndex());
-      double betaTof = btofPid->btofBeta();
+      double betaTof2 = btofPid->btofBeta() * btofPid->btofBeta();
+      if (betaTof2 > 0) {
+      m2tof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
+      
+      hTofPID->Fill(track.GetP(), m2tof);
+      hdEdXwithToF->Fill(track.GetP(), gTrack->dEdx());
+      }
     }
     
-//     if(timeTof > 0. && lengthTof > 0.)
-//     {
-//       m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
-//       hTofPID->Fill(track.GetP(), m2tof);
-//       hdEdXwithToF->Fill(track.GetP(), gTrack->dEdx()*1.e6);
-//     }
     int ToFPDG = -1;
-    if(m2tof > 0.6)
+    if(m2tof > 7 && m2tof<9)
+      ToFPDG = 1000010030*q;
+    else if(m2tof > 2.8 && m2tof < 4)
+      ToFPDG = 1000010020*q;
+    else if(m2tof > 1.5 && m2tof < 2.8)
+      ToFPDG = 1000020030*q;
+    else if(m2tof > 0.6 && m2tof < 1.5)
       ToFPDG = 2212*q;
     else if(m2tof > 0.14 && m2tof < 0.4)
       ToFPDG = 321*q;
     else if(m2tof > -0.5 && m2tof < 0.12)
       ToFPDG = 211*q;
     
-
     vector<int> dEdXPDG;
     vector<int> dEdXSigma;
-    float nSigmaCut = 3.e10f;
+    float nSigmaCut = 3.f;
     if(fabs(gTrack->nSigmaPion())   < nSigmaCut) { dEdXPDG.push_back(211*q);  dEdXSigma.push_back(fabs(gTrack->nSigmaPion()));   }
     if(fabs(gTrack->nSigmaKaon())   < nSigmaCut) { dEdXPDG.push_back(321*q);  dEdXSigma.push_back(fabs(gTrack->nSigmaKaon()));   }
     if(fabs(gTrack->nSigmaProton()) < nSigmaCut) { dEdXPDG.push_back(2212*q); dEdXSigma.push_back(fabs(gTrack->nSigmaProton())); }
+    float nSigmaDeutron = gTrack->dEdxPull(1.876124, 1, 1);
+    if(fabs(nSigmaDeutron) < nSigmaCut) { dEdXPDG.push_back(1000010020*q); dEdXSigma.push_back(fabs(nSigmaDeutron)); }
+    float nSigmaTriton = gTrack->dEdxPull(2.809432, 1, 1);
+    if(fabs(nSigmaTriton) < nSigmaCut) { dEdXPDG.push_back(1000010030*q); dEdXSigma.push_back(fabs(nSigmaTriton)); }
+    float nSigmaHe3 = gTrack->dEdxPull(2.809413, 1, 2);
+    if(fabs(nSigmaHe3) < nSigmaCut) { dEdXPDG.push_back(1000020030*q); dEdXSigma.push_back(fabs(nSigmaHe3)); }
+    float nSigmaHe4 = gTrack->dEdxPull(3.728400, 1, 2);
+    if(fabs(nSigmaHe4) < nSigmaCut) { dEdXPDG.push_back(1000020040*q); dEdXSigma.push_back(fabs(nSigmaHe4)); }
+    
     
     float minSigmadEdX = 100;
     int iMinSigmadEdX = -1;
@@ -324,9 +337,12 @@ void StPicoAnalysisMaker::RunAnalysis(){
     else
     {
       for(int iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
+      {
         if(dEdXPDG[iPDG] == ToFPDG)
           totalPDG.push_back(ToFPDG);
-        
+        if(abs(dEdXPDG[iPDG]) == 1000020040 && abs(ToFPDG) == 1000010020)
+          totalPDG.push_back(dEdXPDG[iPDG]);
+      } 
 //       if(totalPDG.size() == 0 && track.GetP() < 0.7)
 //       {
 //         if(minSigmadEdX <= 0.05f)
@@ -403,6 +419,5 @@ void StPicoAnalysisMaker::RunAnalysis(){
   Int_t nevent = 100;
   mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
   mStKFParticlePerformanceInterface->PerformanceAnalysis();
-#endif
 }
 

@@ -1047,10 +1047,12 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
     if (fNoChainOptions) {
-      if (GetOption("misalign") ) 
-	gROOT->ProcessLine("AgPosition::SetReal();");
-      else                        
-	gROOT->ProcessLine("AgPosition::SetIdeal();");
+      if (GetOption("AgMLlib")) {
+	if (GetOption("misalign") ) 
+	  gROOT->ProcessLine("AgPosition::SetReal();");
+	else                        
+	  gROOT->ProcessLine("AgPosition::SetIdeal();");
+      }
     }
 #if 0    
     // force load of geometry for VMC and Sti

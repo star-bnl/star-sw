@@ -29,6 +29,7 @@
 #include "TChain.h"
 #include "TString.h"
 #include "TAxis.h"
+#include "TObject.h"
 #include "SystemOfUnits.h"
 #include "StMuDSTMaker/COMMON/StMuTimer.h"
 #include "StMuDSTMaker/COMMON/StMuDebug.h"
@@ -53,6 +54,7 @@
 #endif
 class StKFParticleInterface;
 class StKFParticlePerformanceInterface;
+class TNtuple;
 enum TrackType {
   kGlobal = 0, kPrimary, kTotalT  // switch between global and primary tracks
 };
@@ -120,7 +122,13 @@ class StMuMcAnalysisMaker : public StMaker {
     Double_t  min,  max; // min and max for plots
     Int_t    GlobalOnly; // = 1: only global, -1: only primary, 0: both
   };
-  
+
+  static const int fNNTuples = 4;
+  TNtuple* fCutsNTuple[fNNTuples];
+  TFile* fNTupleFile[fNNTuples];
+  Bool_t fStoreCutNTuples;
+  Bool_t fProcessSignal;
+
   Char_t                mBeg[1];        //!
   StMuDst                          *muDst;                             //!
   StKFParticleInterface            *mStKFParticleInterface;            //!
@@ -131,8 +139,8 @@ class StMuMcAnalysisMaker : public StMaker {
   StMuMcAnalysisMaker(const char *name="MuMcAnalysis");
   virtual       ~StMuMcAnalysisMaker();
   virtual Int_t  Init();
+  virtual Int_t  Finish();
   virtual Int_t  InitRun(Int_t runumber);
-  static  StMuMcAnalysisMaker* instance() {return fgStMuMcAnalysisMaker;}
   void           BookTrackPlots();
   void           BookVertexPlots();
   virtual Int_t  Make();
@@ -143,7 +151,7 @@ class StMuMcAnalysisMaker : public StMaker {
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();
   Bool_t         Check();
-  Int_t          DrawAll();
+  Int_t          Draw();
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
   void           DrawEff(Double_t ymax=1.0, Double_t pTmin = -1, Int_t animate=0);
   void           DrawdEdx(Double_t lenMin=40);
@@ -155,18 +163,20 @@ class StMuMcAnalysisMaker : public StMaker {
   static         TH3F *GetdEdxHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var);
   static         TH3F *GetToFHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var);
   static         TString DirPath(const TH1* hist);
-  static         TString &FormName(const TH1 *hist);  
+  static         TString&FormName(const TH1 *hist);  
   static void    BeginHtml();
   static void    EndHtml();
-  static void    BeginTable(TString &section);
+  static void    BeginTable();
   static void    EndTable();
   static void    SetGEANTLabels(TAxis *x);
   static void    PrintMem(const Char_t *opt = "");
-  static StMuMcAnalysisMaker *fgStMuMcAnalysisMaker;
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StMuMcAnalysisMaker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
+  void ProcessSignal()     { fProcessSignal = kTRUE; }
+  void ProcessBackground() { fProcessSignal = kFALSE; }
+  void StoreCutNTuples()   { fStoreCutNTuples = kTRUE; }
   ClassDef(StMuMcAnalysisMaker,0)   //
 };
 #endif

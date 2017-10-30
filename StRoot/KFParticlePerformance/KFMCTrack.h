@@ -42,6 +42,7 @@ class KFMCTrack
   float Pt()              const { return sqrt(fPar[3]*fPar[3] + fPar[4]*fPar[4]); }
   const float *Par()      const { return fPar; }
   int   NMCPoints()       const { return fNMCPoints; }
+  int   NMCPixelPoints()  const { return fNMCPixelPoints; }
   bool  IsReconstructed() const { return fIsReconstructed; }
   bool  IsOutOfDetector() const { return fIsOutOfDetector; }
   
@@ -56,6 +57,7 @@ class KFMCTrack
   void SetMotherId( int v )      { fMotherId = v; }
   void SetPDG( int v )           { fPDG = v; }
   void SetNMCPoints( int v )     { fNMCPoints = v; }
+  void SetNMCPixelPoints( int v ){ fNMCPixelPoints = v; }
   void SetReconstructed()        { fIsReconstructed = 1; }
   void SetNotReconstructed()        { fIsReconstructed = 0; }
   void SetOutOfDetector() { fIsOutOfDetector = 1; }
@@ -66,6 +68,7 @@ class KFMCTrack
   int   fPDG;           //* particle pdg code
   float fPar[7];        //* x,y,z,ex,ey,ez,q/p
   int   fNMCPoints;     //* N MC points
+  int   fNMCPixelPoints;  
   
   bool fIsReconstructed;
   bool fIsOutOfDetector;

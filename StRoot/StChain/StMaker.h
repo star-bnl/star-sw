@@ -256,7 +256,7 @@ protected:
 
 public:
 static Int_t Cleanup(TDataSet *&ds);
-static void lsMakers(const StMaker *top);
+static void lsMakers(const StMaker *top = 0);
 
 private:
   TAttr *m_Attr;		
