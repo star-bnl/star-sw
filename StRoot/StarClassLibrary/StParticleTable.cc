@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.28 2016/11/28 21:52:43 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.29 2017/10/30 15:23:54 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.29  2017/10/30 15:23:54  jwebb
+ * Add K*0(892) aka pdg 313 to gstar with g3id = 10013
+ *
  * Revision 1.28  2016/11/28 21:52:43  jwebb
  * Add psi(2s) --> mu+mu- with 100% branching ratio.
  *
@@ -360,6 +363,8 @@ StParticleTable::StParticleTable()
 
     Geant2Pdg(15011, 321,  Kaon+ --> pi+ pi0 pi0 );    // K+
     Geant2Pdg(15012, -321, Kaon- --> pi- pi0 pi0 );   // K-
+
+    Geant2Pdg(10013, 313, Kstar0 --> K+ pi- ); 
 
 
        Geant2Pdg( 10060, +413, DStar+ ); // D*+
