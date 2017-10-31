@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.53 2016/11/28 21:52:43 jwebb Exp $
+* $Id: gstar_part.g,v 1.54 2017/10/30 15:23:54 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.54  2017/10/30 15:23:54  jwebb
+* Add K*0(892) aka pdg 313 to gstar with g3id = 10013
+*
 * Revision 1.53  2016/11/28 21:52:43  jwebb
 * Add psi(2s) --> mu+mu- with 100% branching ratio.
 *
@@ -245,7 +248,7 @@ MODULE gstar_part Is the STAR Particle Database
    Integer kGtHION / 8 /! A heavy ion
    Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
 
-   Real *8 HBAR / 6.58211928E-16 / "eV * s"
+   Real *8, Parameter :: kHBAR = 6.58211889E-25 ! GeV * s
 
    Integer, Parameter :: nw = 3     ! Number of user words for gspart direct calls
    Real               :: uw(nw)     ! buffer
@@ -380,11 +383,11 @@ MODULE gstar_part Is the STAR Particle Database
                       pdg=500553  bratio= { 1, }    mode= { 506, }
 
   Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,  TrkTyp=4,
-                      mass=3.68609 charge=0 tlife=hbar/2380.0,
+                      mass=3.68609 charge=0 tlife=khbar/0.286E-3,
                       pdg=100443 bratio={ 1, } mode={ 0203, }
 
   Particle psi2s_mu   "Psi(2S)-->mu+mu-" code=169,  TrkTyp=4,
-                      mass=3.68609 charge=0 tlife=hbar/2380.0,
+                      mass=3.68609 charge=0 tlife=khbar/0.286E-3,
                       pdg=200443 bratio={ 1, } mode={ 0605, }
 
 ************************************************************************************ 
@@ -480,6 +483,14 @@ MODULE gstar_part Is the STAR Particle Database
 
    PARTICLE KAON_MINUS code=15012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
                       trktyp=4 bratio={1.0,} mode={090707,}
+
+*
+* K0*(892) --> K+ pi-
+*
+   PARTICLE K0STAR_892 code=10013 pdg=313 mass=0.89166 tlife=khbar/0.5050 ,
+                       trktyp=4, bratio={1.0,} mode={1109,} charge=0
+   PARTICLE K0STAR_892bar code=10113 pdg=-313 mass=0.89166 tlife=khbar/0.5050 ,
+                       trktyp=4, bratio={1.0,} mode={1208,} charge=0
 
 
 * KAON 0 LONG GID=10
