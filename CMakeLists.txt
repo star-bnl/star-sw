@@ -78,8 +78,6 @@ SET( heed_dirs
 FOREACH( heed_dir ${heed_dirs} )
     AUX_SOURCE_DIRECTORY( ${heed_dir} heed_sources )
 ENDFOREACH()
-# Don't build HeedParticle_BGM.c.o because it will not compile
-LIST( REMOVE_ITEM heed_sources Heed/heed++/code/HeedParticle_BGM.c )
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES LANGUAGE CXX)
 
 ## Flags to pass to the compiler #######################
