@@ -104,18 +104,15 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
    {
-      std::ostringstream geoPath;
-      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
+      std::string geoPath( formTGeoPath(iLadder, iSensor) );
 
-      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
-
-      if (!isAvail) {
+      if ( geoPath.empty() ) {
          LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
 
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
+      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.c_str())->GetMatrix() );
 
       // Temporarily save the translation for this sensor in Z so, we can center
       // the newly built sensors at Z=0 (in ideal geometry) later
@@ -139,7 +136,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       // XXX:ds: Need to verify the constant for sensor spacing
       double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
-      StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
+      StiShape *stiShape = new StiPlanarShape(geoPath.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
 
       StiPlacement *pPlacement= new StiPlacement(sensorMatrix);
 
@@ -148,7 +145,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       StiIsActiveFunctor* isActive = _active ? new StiSsdIsActiveFunctor :
          static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
+      stiDetector->setProperties(geoPath, isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiSstHitErrorCalculator::instance());
 
       add(stiRow, iLadder-1, stiDetector);
@@ -262,4 +259,25 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
    stiDetector = getDetectorFactory()->getInstance();
    stiDetector->setProperties(pfx+"SFMO_RGHT_OUT", new StiNeverActiveFunctor, sfmoRghtOutShape, sfmoRghtOutPlacement, getGasMat(), sfmoRghtOutMaterial);
    add(getNRows(), 0, stiDetector);
+}
+
+
+/**
+ * Returns a full path to the SST sensor placed in a predifined location in the
+ * detector's ROOT geometry. An empty string is returned if the sensor not found
+ * in the geometry hierarchy (via gGeoManager).
+ */
+std::string StiSstDetectorBuilder::formTGeoPath(int ladder, int sensor)
+{
+   const std::string tgeoPathToMother("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1");
+
+   std::ostringstream geoPath;
+
+   geoPath << tgeoPathToMother << "/SFLM_" << ladder
+                               << "/SFSW_" << sensor
+                               << "/SFSL_1/SFSD_1";
+
+   bool found = gGeoManager->cd( geoPath.str().c_str() );
+
+   return found ? geoPath.str() : "";
 }

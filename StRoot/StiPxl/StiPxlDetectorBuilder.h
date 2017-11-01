@@ -31,6 +31,9 @@ private:
 
    void buildInactiveVolumes();
    static void convertSensor2StiId(int sector, int ladder, int sensorHalf, int& stiRow, int& stiSensor);
+
+   /// Returns a TGeo path to the sensor in the given sector and ladder
+   static std::string formTGeoPath(int sector, int ladder, int sensor);
 };
 
 #endif

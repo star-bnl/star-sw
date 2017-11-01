@@ -108,18 +108,16 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kIstNumLadders; ++iLadder)
    {
-      std::ostringstream geoPath;
-      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
+      std::string geoPath( formTGeoPath(iLadder, iSensor) );
 
-      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
-
-      if (!isAvail) {
+      if ( geoPath.empty() )
+      {
          LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
 
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
+      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.c_str())->GetMatrix() );
 
       // Temporarily save the translation for this sensor in Z so, we can center
       // the newly built sensors at Z=0 (in ideal geometry) later
@@ -145,7 +143,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++)
       {
          // Create new Sti shape based on the sensor geometry
-         std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
+         std::string halfLadderName(geoPath + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
 
          // IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
          double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
@@ -302,4 +300,25 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    stiDetector = getDetectorFactory()->getInstance();
    stiDetector->setProperties(pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
    add(getNRows(), 0, stiDetector);
+}
+
+
+/**
+ * Returns a full path to the IST sensor placed in a predifined location in the
+ * detector's ROOT geometry. An empty string is returned if the sensor not found
+ * in the geometry hierarchy (via gGeoManager).
+ */
+std::string StiIstDetectorBuilder::formTGeoPath(int ladder, int sensor)
+{
+   const std::string tgeoPathToMother("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+
+   std::ostringstream geoPath;
+
+   geoPath << tgeoPathToMother << "/IBAM_" << ladder
+                               << "/IBLM_" << sensor
+                               << "/IBSS_1";
+
+   bool found = gGeoManager->cd( geoPath.str().c_str() );
+
+   return found ? geoPath.str() : "";
 }
