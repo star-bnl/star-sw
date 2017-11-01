@@ -320,5 +320,13 @@ std::string StiIstDetectorBuilder::formTGeoPath(int ladder, int sensor)
 
    bool found = gGeoManager->cd( geoPath.str().c_str() );
 
+   // Look for sensors staged in the mother volume
+   if ( !found )
+   {
+      geoPath.str("");
+      geoPath << tgeoPathToMother << "/IBSS_" << (ladder - 1)*6 + sensor;
+      found = gGeoManager->cd( geoPath.str().c_str() );
+   }
+
    return found ? geoPath.str() : "";
 }

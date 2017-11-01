@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.117 2017/11/01 21:13:03 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.118 2017/11/01 21:13:14 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -207,6 +207,25 @@ std::string StiPxlDetectorBuilder::formTGeoPath(int sector, int ladder, int sens
                                << "/PLAC_1";
 
    bool found = gGeoManager->cd( geoPath.str().c_str() );
+
+   // Look for ladders staged in the mother volume
+   if ( !found )
+   {
+      geoPath.str("");
+      geoPath << tgeoPathToMother << "/LADR_" << 4*(sector - 1) + ladder
+                                  << "/PXSI_" << sensor
+                                  << "/PLAC_1";
+      found = gGeoManager->cd( geoPath.str().c_str() );
+   }
+
+   // Look for sensors staged in the mother volume
+   if ( !found )
+   {
+      geoPath.str("");
+      geoPath << tgeoPathToMother << "/PXSI_" << 40*(sector - 1) + 10*(ladder - 1) + sensor
+                                  << "/PLAC_1";
+      found = gGeoManager->cd( geoPath.str().c_str() );
+   }
 
    return found ? geoPath.str() : "";
 }
