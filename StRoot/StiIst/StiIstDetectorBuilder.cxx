@@ -108,28 +108,18 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kIstNumLadders; ++iLadder)
    {
+      std::ostringstream geoPath;
+      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
 
-     //      std::ostringstream geoPath;
-     // geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
-
-     // path to the ideally placed sensor in AgML
-     std::string geoPath(Form("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_%i/IBLM_%i/IBSS_1",iLadder,iSensor));
-     bool isAvail = gGeoManager->cd(geoPath.c_str());
-     if ( 0 == isAvail ) { // try the misaligned path instead
-       LOG_INFO << "  [Not found]:" << geoPath.c_str() <<endm;
-       geoPath = Form("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBSS_%i",(iLadder-1)*6+iSensor);
-       LOG_INFO << "  [Try path]: " << geoPath.c_str() <<endm;
-       isAvail = gGeoManager->cd(geoPath.c_str());
-     }
+      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
          LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder..." << endm;
-	 LOG_WARN << "  [Not found]:" << geoPath.c_str() <<endm;
          continue;
       }
 
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.c_str())->GetMatrix() );
+      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
       // Temporarily save the translation for this sensor in Z so, we can center
       // the newly built sensors at Z=0 (in ideal geometry) later
@@ -155,7 +145,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++)
       {
          // Create new Sti shape based on the sensor geometry
-         std::string halfLadderName(geoPath + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
+         std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
 
          // IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
          double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
