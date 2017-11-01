@@ -34,6 +34,9 @@ protected:
 
    virtual void buildInactiveVolumes();
 
+   /// Returns a TGeo path to the sensor in the given ladder
+   static std::string formTGeoPath(int ladder, int sensor);
+
    bool          mBuildIdealGeom;
    StSstDbMaker *mSstDb;
 };

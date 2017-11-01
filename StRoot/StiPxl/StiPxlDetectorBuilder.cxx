@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.116 2017/11/01 21:12:55 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.117 2017/11/01 21:13:03 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -107,18 +107,15 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    {
       for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
-         std::ostringstream geoPath;
-         geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
+         std::string geoPath( formTGeoPath(iSector, iLadder, iSensor) );
 
-         bool isAvail = gGeoManager->cd(geoPath.str().c_str());
-
-         if (!isAvail) {
+         if ( geoPath.empty() ) {
             LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (PXL sensitive) node. Skipping to next ladder..." << endm;
             continue;
          }
 
          TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-         TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
+         TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.c_str())->GetMatrix() );
 
          // Temporarily save the translation for this sensor in Z so, we can center
          // the newly built sensors at Z=0 (in ideal geometry) later
@@ -143,7 +140,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          // Split the ladder in two halves
          for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
             // Create new Sti shape based on the sensor geometry
-            std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
+            std::string halfLadderName(geoPath + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
             double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
@@ -190,6 +187,28 @@ const StiDetector* StiPxlDetectorBuilder::getActiveDetector(int sector, int ladd
    convertSensor2StiId(sector, ladder, sensorHalf, stiRow, stiSensor);
 
    return stiRow < 0 ? 0 : getDetector(stiRow, stiSensor);
+}
+
+
+/**
+ * Returns a full path to the pixel sensor placed in a predifined location in
+ * the detector's ROOT geometry. An empty string is returned if the sensor not
+ * found in the geometry hierarchy (via gGeoManager).
+ */
+std::string StiPxlDetectorBuilder::formTGeoPath(int sector, int ladder, int sensor)
+{
+   const std::string tgeoPathToMother("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1");
+
+   std::ostringstream geoPath;
+
+   geoPath << tgeoPathToMother << "/PXLA_" << sector
+                               << "/LADR_" << ladder
+                               << "/PXSI_" << sensor
+                               << "/PLAC_1";
+
+   bool found = gGeoManager->cd( geoPath.str().c_str() );
+
+   return found ? geoPath.str() : "";
 }
 
 
