@@ -26,20 +26,17 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   gROOT->LoadMacro("bfc.C");
   if (gClassTable->GetID("StBFChain") < 0) Load();
   //______________Create the main chain object______________________________________
-  Chain = new StBFChain("Embedding");
-  Chain->SetName("Embedding");
+  Chain = (StBFChain *) StMaker::New("StBFChain","Embedding");
 #if 1
-  Chain->SetFlags("TObjTable");
+  Chain->SetFlags("TObjTable,nodefault");
 #else
-  Chain->SetFlags("empty");
+  Chain->SetFlags("nodefault");
 #endif
   StMaker::lsMakers(Chain);
   //________________________________________________________________________________
   TString Opt(opt);
   TString chain1Opt("in,daq,magF,tpcDb,MakeEvent,trgd,NoDefault,NoOutput,DbV20170830");
-  bfc(-1,chain1Opt,daqfile);
-  chain1 = chain;
-  chain1->SetName("DAQ"); 
+  chain1 = bfc(-1,chain1Opt,daqfile,0,0,"DAQ");
   Chain->cd();
   //________________________________________________________________________________
   TString chain2Opt(Form("%s,gen_T,geomT,sim_T,CorrX,OSpaceZ2,OGridLeak3D,nodefault,Rung.%i",Opt.Data(),RunG));
@@ -59,9 +56,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   } else {
     chain2Opt += ",EEfs";
   }
-  bfc(-1,chain2Opt);
-  chain2 = chain;
-  chain2->SetName("MC"); 
+  chain2 = bfc(-1,chain2Opt,0,0,0,"MC");
   StMaker *geant = chain2->Maker("geant");
   if (! geant) return;
   geant->SetAttr("MuDstFile",MuDstfile);
@@ -86,9 +81,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   chain3Opt += ",btofMixer"; 
 #endif 
 #endif 
-  bfc(-1,chain3Opt);
-  chain3 = chain;
-  chain3->SetName("Mixer"); 
+  chain3 = bfc(-1,chain3Opt,0,0,0,"Mixer");
   Chain->cd();
   //________________________________________________________________________________  
   TString OutputFileName(gSystem->BaseName(daqfile));
@@ -102,9 +95,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   chain4Opt += ",NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
   chain4Opt += ",noTags,noHistos,noRunco";
   //  chain4Opt += ",KFVertex";
-  bfc(-1,chain4Opt,0,OutputFileName);
-  chain4 = chain;
-  chain4->SetName("RC"); 
+  chain4 = bfc(-1,chain4Opt,0,OutputFileName,0,"RC");
 #if 0
   StMaker *MuDstMk = chain4->Maker("MuDst");
   if (MuDstMk) {

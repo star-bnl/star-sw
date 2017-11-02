@@ -68,13 +68,13 @@ void Load(const Char_t *options="");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb,-MiniMcMk,tfs");//eemcA2E,,sdt20100107.110000");
 //TString defChain("test.RC.AuAu200.y2016,StiCA,KFVertex")
-//void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
+//StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
-void bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
-	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
+StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
+	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName);
 //	 const Char_t *Chain="gstar,20Muons,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
-void bfc(Int_t Last, const Char_t *Chain = "MC.2016",
-	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
+StBFChain * bfc(Int_t Last, const Char_t *Chain = "MC.2016",
+	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
 	 //	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
 void Load(const Char_t *options)
@@ -183,11 +183,12 @@ void V0Filter() {
 #endif /* __V0Filter__ */
 #endif
 //_____________________________________________________________________
-void bfc(Int_t First, Int_t Last,
+StBFChain *bfc(Int_t First, Int_t Last,
 	 const Char_t *Chain,
 	 const Char_t *infile,
 	 const Char_t *outfile,
-	 const Char_t *TreeFile)
+	 const Char_t *TreeFile, 
+	 const Char_t *chainName)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
@@ -196,7 +197,7 @@ void bfc(Int_t First, Int_t Last,
   TString tChain(Chain);
   if (tChain == "") {
     if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
-    return;
+    return chain;
   } else {
     // Predefined test chains
     Int_t typeC = 0;
@@ -232,7 +233,7 @@ void bfc(Int_t First, Int_t Last,
 	tChain += ",MC.2019";	
 	break;
       default:
-	return;
+	return chain;
 	break;
       }
       tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags";
@@ -241,20 +242,18 @@ void bfc(Int_t First, Int_t Last,
     }
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
-  Int_t error = 0;
-  gROOT->ProcessLine("new StBFChain();",&error);
-  chain = (StBFChain *) StMaker::GetTopChain();
+  chain = (StBFChain *) StMaker::New("StBFChain", chainName);
   cout << "Create chain " << chain->GetName() << endl;
   chain->cd();
   chain->SetDebug(1);
-  if (Last < -3) return;
+  if (Last < -3) return chain;
   chain->SetFlags(tChain);
 #ifndef __CLING__
   gMessMgr->QAInfo() << Form("Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endm;
 #else
   cout <<  Form("QA :INFO  - Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endl;
 #endif
-  if (Last < -2) return;
+  if (Last < -2) return chain;
   if (chain->Load() > kStOk) {
 #ifndef __CLING__
     gMessMgr->Error() << "Problems with loading of shared library(ies)" << endm;
@@ -265,7 +264,7 @@ void bfc(Int_t First, Int_t Last,
   }
   chain->Set_IO_Files(infile,outfile);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
-  if (Last < -1) return;
+  if (Last < -1) return chain;
   if (chain->Instantiate() > kStOk)  { 
 #ifndef __CLING__
     gMessMgr->Error() << "Problems with instantiation of Maker(s)" << endm;
@@ -278,7 +277,7 @@ void bfc(Int_t First, Int_t Last,
   gSystem->Load("StMCFilter");
 #endif
   StMaker::lsMakers(chain);
-  if (Last < 0) return;
+  if (Last < 0) return chain;
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);
 #if 0
@@ -342,8 +341,8 @@ void bfc(Int_t First, Int_t Last,
   chain->SetAttr(".Privilege",1,"StEventMaker::*"); //May be allowed to act upon trigger IDs (filtering)
 #endif
   Int_t iInit = chain->Init();
-  if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
-  if (Last == 0) return;
+  if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return chain;}
+  if (Last == 0) return chain;
 #ifdef __V0Filter__
   V0Filter();
 #endif
@@ -356,14 +355,16 @@ void bfc(Int_t First, Int_t Last,
 #else
   cout << "QA :INFO  - Run completed " << endl;
 #endif
+  return chain;
 }
 //_____________________________________________________________________
-void bfc(Int_t Last, 
-	 const Char_t *Chain,
-	 const Char_t *infile, 
-	 const Char_t *outfile, 
-	 const Char_t *TreeFile) {
-  bfc(1,Last,Chain,infile,outfile,TreeFile);
+StBFChain *bfc(Int_t Last, 
+	       const Char_t *Chain,
+	       const Char_t *infile, 
+	       const Char_t *outfile, 
+	       const Char_t *TreeFile,
+	       const Char_t *chainName) {
+  return bfc(1,Last,Chain,infile,outfile,TreeFile,chainName);
 }
 //____________________________________________________________
 void Usage() {
@@ -383,6 +384,6 @@ void Usage() {
   gSystem->Exit(1);
 }
 //_____________________________________________________________________
-void bfc(const Char_t *Chain="ittf") {
-  bfc(-2,Chain);
+StBFChain *bfc(const Char_t *Chain="ittf") {
+  return bfc(-2,Chain);
 }
