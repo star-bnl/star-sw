@@ -572,7 +572,9 @@ Int_t StPicoDstMaker::MakeRead()
     LOG_WARN << " No input files ... ! EXIT" << endm;
     return kStWarn;
   }
-  mChain->GetEntry(mEventCounter++);
+  if (mChain->GetEntry(mEventCounter++) <= 0) {
+    return kStEOF;
+  }
   fillEventHeader();
   return kStOK;
 }
