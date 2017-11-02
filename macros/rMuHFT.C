@@ -429,14 +429,23 @@ void PlotEff(Int_t x = 1, Int_t y = 0) {
       TLegend *l = new TLegend(0.5,0.2,0.7,0.4);
       l->Draw();
       TH1D *refH = gHists[m][iRM][ref][x][y]->ProjectionX();
-      for (Int_t i = kSel - 2; i >= 0; i--) {
-	TH1D *proj = gHists[m][iRM][i][x][y]->ProjectionX();
+      for (Int_t i = kSel - 2; i >= -1; i--) {
+	TH1D *proj = 0;
+	if (i >= 0) proj = gHists[m][iRM][i][x][y]->ProjectionX();
+	else {
+	  TH2F *cHist =  new TH2F(*gHists[m][iRM][0][x][y]);
+	  cHist->SetName(Form("%s: Hft",NameRcMc[iRM]));
+	  cHist->Add(gHists[m][iRM][1][x][y]);
+	  cHist->Add(gHists[m][iRM][2][x][y]);
+	  proj = cHist->ProjectionX();
+	}
 	TH1D *eff  = new TH1D(*proj); eff->SetName(Form("Eff_%s",proj->GetName()));
 	eff->Divide(proj,refH,1,1,"b");
 	eff->Scale(100.);
 	eff->SetMarkerColor(iRM+1);
 	eff->SetLineColor(iRM+1);
-	eff->SetMarkerStyle(20+i);
+	if (i >=0) 	eff->SetMarkerStyle(20+i);
+	else            eff->SetMarkerStyle(29);
 	if (x < 2) 
 	  eff->Fit("pol0","er","samep",0.5,2.5);
 	else 
@@ -446,6 +455,78 @@ void PlotEff(Int_t x = 1, Int_t y = 0) {
 	  l->AddEntry(eff,Form("%s: %s : %7.2f #pm %7.2f",NameRcMc[iRM],sel[i],pol0->GetParameter(0),pol0->GetParError(0)));
 	else 
 	  l->AddEntry(eff,Form("%s: %s",NameRcMc[iRM],sel[i]));
+	//	eff->Draw("samep");
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+void PlotEff1(Int_t x = 1, Int_t y = 0) {
+  if (x < 0 || x >= kVarX) return;
+  if (y < 0 || y >= kVarY) return;
+  Init(); 
+  // Efficiency
+  Int_t ref = kSel - 1;
+  TString cName("Efficiency");
+  TCanvas *c = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(cName);
+  if (c) c->Clear();
+  else   c = new TCanvas(cName,cName);
+  TH1F *frame = 0;
+  if (x < 2) frame = c->DrawFrame(0,0,5, 100);
+  else       frame = c->DrawFrame(-180,0,180, 100);
+  frame->SetTitle(cName);
+  if (x < 2) 
+    frame->SetXTitle(Form("%s (GeV/c)",pTp[x]));
+  else 
+    frame->SetXTitle(Form("%s (^{o})",pTp[x]));
+  frame->SetYTitle("(%)");
+  TLegend *l = new TLegend(0.5,0.2,0.7,0.4);
+  l->Draw();
+  for (Int_t m = 0; m < gNF - 1; m++) {
+    TString NameF(gFitFiles[m]->GetName());
+    NameF.ReplaceAll("P.root","+");
+    NameF.ReplaceAll("N.root","-");
+    NameF.ReplaceAll(".root","");
+    NameF.ReplaceAll("rMuHFT","");
+    NameF.ReplaceAll("pi","#pi");
+    NameF.ReplaceAll("(-)","");
+    NameF.ReplaceAll("(+)","");
+    if (NameF.Contains("RC")) {NameF.ReplaceAll("#pi",""); NameF.ReplaceAll("+",""); NameF.ReplaceAll("-",""); }
+    gFitFiles[m]->cd();
+    for (Int_t iRM = 0; iRM < kRCMC; iRM++) {
+      TH1D *refH = gHists[m][iRM][ref][x][y]->ProjectionX();
+      //      for (Int_t i = kSel - 2; i >= -1; i--) {
+      for (Int_t i = -1; i >= -1; i--) {
+	TH1D *proj = 0;
+	if (i >= 0) proj = gHists[m][iRM][i][x][y]->ProjectionX();
+	else {
+	  TH2F *cHist =  new TH2F(*gHists[m][iRM][0][x][y]);
+	  cHist->SetName(Form("%s: Hft",NameRcMc[iRM]));
+	  cHist->Add(gHists[m][iRM][1][x][y]);
+	  cHist->Add(gHists[m][iRM][2][x][y]);
+	  proj = cHist->ProjectionX();
+	}
+	TH1D *eff  = new TH1D(*proj); eff->SetName(Form("Eff_%s",proj->GetName()));
+	eff->Divide(proj,refH,1,1,"b");
+	eff->Scale(100.);
+	eff->SetMarkerColor(iRM+1);
+	eff->SetLineColor(iRM+1);
+	if (i >=0) 	eff->SetMarkerStyle(20+i);
+	else            eff->SetMarkerStyle(29);
+#if 0
+	if (x < 2) 
+	  eff->Fit("pol0","er","samep",0.5,2.5);
+	else 
+	  eff->Fit("pol0","e","samep");
+	TF1 *pol0 = (TF1 *) eff->GetListOfFunctions()->FindObject("pol0");
+	if (pol0) 
+	  l->AddEntry(eff,Form("%s: %s : %7.2f #pm %7.2f",NameRcMc[iRM],sel[i],pol0->GetParameter(0),pol0->GetParError(0)));
+	else 
+	  l->AddEntry(eff,Form("%s: %s",NameRcMc[iRM],sel[i]));
+#else
+	  eff->Draw("same");
+	  l->AddEntry(eff,Form("%s",NameRcMc[iRM]));
+#endif
 	//	eff->Draw("samep");
       }
     }

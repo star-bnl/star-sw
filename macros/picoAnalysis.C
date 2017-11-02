@@ -1,0 +1,1 @@
+../StRoot/StPicoAnalysisMaker/picoAnalysis.C
