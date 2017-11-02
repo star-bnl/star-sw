@@ -11,7 +11,7 @@
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 #include "StPicoEvent/StPicoMtdPidTraits.h"
 #include "StPicoDstMaker/StPicoDst.h"
-
+StPicoDst *StPicoDst::fgPicoDst = 0;
 TClonesArray** StPicoDst::picoArrays = 0;
 
 //-----------------------------------------------------------------------
