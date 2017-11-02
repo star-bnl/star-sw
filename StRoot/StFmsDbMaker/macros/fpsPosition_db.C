@@ -1,20 +1,20 @@
 #include <iostream.h> 
 #include <fstream.h> 
 
-void fpsPosition_db(char* opt="", char* year="17sim", char* input="fpsgeom.txt") {
+void fpsPosition_db(char* opt="", char* year="15ofl", char* input="fpsgeom_run15_20170925.txt") {
   TString option(opt), yr(year);  
   TString storeTime; // storetime is begin time for validity range for WRITING DB
   int date,time;     // time for READING DB
   std::cout << "year = " << year << "\n";
   if(yr.Contains("15ofl")){
-    storeTime="2014-12-20 00:00:01";
-    date = 20141220; time = 1;
+    storeTime="2014-12-20 00:00:05";
+    date = 20141225; time = 1;
   }else if(yr.Contains("15sim")){
     storeTime="2014-12-10 00:00:00";
-    date = 20141210; time = 0;
+    date = 20141215; time = 0;
   }else if(yr.Contains("17ofl")){
-      storeTime="2016-12-20 00:00:01";
-      date = 20161220; time = 1;
+      storeTime="2016-12-20 00:00:02";
+      date = 20161225; time = 0;
   }else if(yr.Contains("17sim")){
       storeTime="2016-12-10 00:00:01";
       date = 20161210; time = 1;

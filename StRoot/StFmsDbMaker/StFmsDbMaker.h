@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.20 2017/09/28 17:00:48 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.21 2017/11/02 13:09:25 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.21  2017/11/02 13:09:25  akio
+ * Adding getCorrectedAdc and fix a memory leak
+ *
  * Revision 1.20  2017/09/28 17:00:48  akio
  * adding BitShiftGain
  *
@@ -208,6 +211,8 @@ class StFmsDbMaker : public StMaker {
   Float_t getGain(Int_t detectorId, Int_t ch) const; //! get the gain for the channel
   Float_t getGainCorrection(Int_t detectorId, Int_t ch) const; //! get the gain correction for the channel
   Short_t getBitShiftGain(Int_t detectorId, Int_t ch) const; //! get the bit shift gain for the channel
+  unsigned short getCorrectedAdc(unsigned short detectorId, unsigned short ch, unsigned short adc) const;
+  unsigned short getCorrectedAdc(StFmsHit* hit) const;
     
   void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value               
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
