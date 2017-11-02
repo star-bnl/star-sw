@@ -64,6 +64,7 @@ StBFChain::StBFChain(const Char_t *name, const Bool_t UseOwnHeader) :
 }
 //_____________________________________________________________________________
 void StBFChain::Setup(Int_t mode) {
+#if 0
   static const Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
   TString chain("BFC.C");
   Char_t *file = gSystem->Which(path,chain,kReadPermission);
@@ -84,6 +85,14 @@ void StBFChain::Setup(Int_t mode) {
   gInterpreter->ProcessLine(cmd);
   assert(fchainOpt);
   delete [] file;
+#else
+  Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
+  St_Bfc *fchainOpt = new St_Bfc("BFC",NoChainOptions); 
+  for (Int_t i = 0; i < NoChainOptions; i++) {
+    fchainOpt->AddAt(&BFC[i]);
+  }
+  
+#endif
   fNoChainOptions = fchainOpt->GetNRows();
   fBFC = fchainOpt->GetTable();
   // add predifined time stamps and geometry versions
@@ -1610,6 +1619,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
       SetOption("-UseXgeom","Default,-TGiant3");
+      SetOption("-AgML","Default,-TGiant3");
+      SetOption("-AgMLlib","Default,-TGiant3");
+      SetOption("-AgMLutil","Default,-TGiant3");
       if (! (GetOption("Stv") || GetOption("Stx") )) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
