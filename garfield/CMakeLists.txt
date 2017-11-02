@@ -9,11 +9,11 @@ PROJECT( Garfield CXX Fortran)
 
 ### DEPENDENCIES #######################################
 IF(DEFINED ENV{ROOTSYS})
-    SET( CMAKE_MODULE_PATH $ENV{ROOTSYS}/etc/cmake )
+    list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 ELSEIF(DEFINED ROOTSYS)
-    SET( CMAKE_MODULE_PATH ${ROOTSYS}/etc/cmake )
+    list(APPEND CMAKE_PREFIX_PATH ${ROOTSYS})
 ELSEIF(DEFINED ROOT_CMAKE_DIR)
-    SET( CMAKE_MODULE_PATH ${ROOT_CMAKE_DIR} )
+    list(APPEND CMAKE_PREFIX_PATH ${ROOT_CMAKE_DIR} )
 ELSE()
     MESSAGE(FATAL_ERROR "Please consider to set ROOTSYS or use -DROOTSYS=..."
                         "If still there is a proplem, point to the directory which includes FindROOT.cmake using -DROOT_CMAKE_DIR=...")
@@ -21,6 +21,8 @@ ENDIF(DEFINED ENV{ROOTSYS})
 
 
 FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom Gdml)
+# Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
+include(${ROOT_USE_FILE})
 
 # internal root dictionary building works starting with version 6.02
 IF(ROOT_VERSION VERSION_LESS 6.02)
@@ -78,8 +80,6 @@ SET( heed_dirs
 FOREACH( heed_dir ${heed_dirs} )
     AUX_SOURCE_DIRECTORY( ${heed_dir} heed_sources )
 ENDFOREACH()
-# Don't build HeedParticle_BGM.c.o because it will not compile
-LIST( REMOVE_ITEM heed_sources Heed/heed++/code/HeedParticle_BGM.c )
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES LANGUAGE CXX)
 
 ## Flags to pass to the compiler #######################
@@ -94,7 +94,9 @@ IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
 ELSE()
  ADD_DEFINITIONS( "-O2" )
 ENDIF()
-IF(ROOT_VERSION VERSION_GREATER 5)
+IF(ROOT_VERSION VERSION_GREATER 6.10)
+    ADD_DEFINITIONS( "-std=c++1y" )
+ELSEIF(ROOT_VERSION VERSION_GREATER 5)
     ADD_DEFINITIONS( "-std=c++0x" )
 ENDIF()
 
@@ -110,7 +112,8 @@ IF(ROOT_VERSION VERSION_LESS 6.02)
     GEN_ROOT_DICT_SOURCES( GarfieldDict.cxx )
     LIST( APPEND garfield_sources ${ROOT_DICT_OUTPUT_SOURCES} )
 ELSE()
-    ROOT_GENERATE_DICTIONARY( GarfieldDict Include/*.hh LINKDEF Include/LinkDef.h OPTIONS "-I${PROJECT_SOURCE_DIR}/Heed")
+    file (GLOB garfield_header "Include/*.hh")
+    ROOT_GENERATE_DICTIONARY( GarfieldDict ${garfield_header} LINKDEF Include/LinkDef.h OPTIONS "-I${PROJECT_SOURCE_DIR}/Heed")
     LIST( APPEND garfield_sources GarfieldDict.cxx )
 ENDIF()
 
