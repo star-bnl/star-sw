@@ -59,7 +59,7 @@ Int_t StPicoAnalysisMaker::Init(){
 }
 //________________________________________________________________________________
 Int_t StPicoAnalysisMaker::InitRun(Int_t runumber) {
-  assert(StPicoDstMaker::instance());
+  assert(StPicoDst::instance());
 //   if (StPicoDstMaker::instance()->IOMode() == StPicoDstMaker::ioRead) {
     //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Ask Yuri
 //     StPicoDstMaker::instance()->SetStatus("*",0);
@@ -165,13 +165,8 @@ void StPicoAnalysisMaker::BookVertexPlots(){
 }
 //_____________________________________________________________________________
 Int_t StPicoAnalysisMaker::Make(){
-//   if (! GiD[0]) {
-//     LOG_ERROR << "StPicoAnalysisMaker::Make histograms have not been initialized. Probably you have missed TTree file in bfc parameters" << endm;
-//     return kStFatal;
-//   }
-  StPicoDstMaker *picoDstMaker = (StPicoDstMaker*) StPicoDstMaker::instance();
-  if (! picoDstMaker) return kStFatal;
-  fPicoDst = picoDstMaker->picoDst();
+  fPicoDst = StPicoDst::instance();
+  if (! fPicoDst) return kStFatal; 
 #if 0
   TObjectSet *muSet = (TObjectSet *) GetDataSet("muDst");
   if (! muSet) return kStFatal;
