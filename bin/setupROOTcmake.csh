@@ -16,27 +16,17 @@ setenv FC `which gfortran`
 setenv QT_LIBRARY_DIR ${QTDIR}/lib
 setenv QT_INCLUDE_DIR ${QTDIR}/include
 setenv QT_MOC_EXECUTABLE ${QTDIR}/bin/moc
-#switch ( $STAR_HOST_SYS )  
-#    case *x8664*gcc*:
-#    setenv BIT_ENVIRONMENT "-m64"
-#    breaksw
-#    default
-#    setenv BIT_ENVIRONMENT "-m32"
-#endsw
-
 setenv Qt4 ${QTDIR}
 #cmake cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
 cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE=Debug \
--Dall=ON -Dcxx14=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=OFF \
+-Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=OFF \
 -Dpython=OFF \
 -Dpythia6=ON  -Dpythia8=ON \
 -Dbuiltin_vdt=ON \
 -DCMAKE_C_COMPILER="${CC}" -DCMAKE_CXX_COMPILER="${CXX}" -DCMAKE_Fortran_COMPILER="${FC}" \
 -DXROOTD_ROOT_DIR="${XOPTSTAR}" \
 -Dbuiltin_cfitsio=On -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse -msse2 -msse3 -msse4.1 -mssse3" \
--DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse -msse2 -msse3 -msse4.1 -mssse3" \
--Dbuiltin_zlib=ON 
-#-DBIT_ENVIRONMENT=${BIT_ENVIRONMENT}
+-DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse -msse2 -msse3 -msse4.1 -mssse3" 
 #  -Dbuiltin_xrootd=ON 
 #-DPYTHIA6_DIR=${XOPTSTAR} \
 #-DPYTHIA8_DIR=${XOPTSTAR} \

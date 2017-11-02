@@ -2727,7 +2727,7 @@ REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2014."
     exe PXST01;      "PIXEL detector support version 1";
     exe PIXL06;      "Full config of the pixl detector";
     exe DTUB01;      "DTUB";
-];
+]
 
 
 
