@@ -1,0 +1,62 @@
+    HFT VMC Embedding status and plans.
+
+1. HFT Simulators:
+      Pxl fast simulation with status tables,
+      Ist slow simulation, 
+      Sst fast.
+2. The tests of simulated charm particle decays and their reconstrution have been done with 
+   a. misaligned (Real) geometry, and
+   b. the primary vertex using MC one
+   c. pT distribution (mTsq) : dN/dmT^2 = exp(-mT/T) with T = 0.457 GeV/c
+   d. pT range for D/Ds     : [1,10] GeV/c
+                   Lambda_c : [2,10] GeV/c
+   e. 0 < phi < 2pi; |eta| < 1
+3. MuDst files are located on HLT farm at 
+D0-> K+K-                 /net/l401/data/scratch2/fisyak/reco/2016B/D02KmTsqReal       
+D0-> K0s K+K-     	  /net/l401/data/scratch2/fisyak/reco/2016B/D0K0s2KmTsqReal   
+D0-> K0s pi+pi-   	  /net/l401/data/scratch2/fisyak/reco/2016B/D0K0s2pimTsqReal  
+D0-> K-pi+        	  /net/l401/data/scratch2/fisyak/reco/2016B/D0KpimTsqReal     
+D+-> K0s pi+      	  /net/l401/data/scratch2/fisyak/reco/2016B/DK0spimTsqReal    
+Ds+-> K0s K0s pi+ 	  /net/l401/data/scratch2/fisyak/reco/2016B/DsK0sK0spimTsqReal
+Ds+-> K0sK+       	  /net/l401/data/scratch2/fisyak/reco/2016B/DsK0sKmTsqReal    
+Ds+-> K+K-pi+      	  /net/l401/data/scratch2/fisyak/reco/2016B/DsKKpimTsqReal    
+Lambda_c+->Lambda 2pi+pi- /net/l401/data/scratch2/fisyak/reco/2016B/Lc3pimTsqReal
+Lambda_c+->K-pi+p         /net/l401/data/scratch2/fisyak/reco/2016B/LcKppimTsqReal
+
+Decays forced:
+     K0s    -> pi+ pi-
+     Lambda -> p pi-
+
+4. Maksym and Iouri are checking the above data sets. They agreed to present 
+the reconstruction efficiencies for the above channels on HF PWG. 
+This study will define a priority list for embedding.
+
+5. Pavol Frederic using Ideal geometry is studying more extensive list of open charm decay channel
+in order to check  / update the priority list. 
+
+6. Release TFG17g has been created on both RCF (gcc 4.8.2 and gcc 4.9.2) and HLT (gcc 5.2.1) 
+for i32 and x86 both debug and optimized. This release has been frozen. 
+People who would like to stay with stable environment are invited to use TFG17g.
+
+7. We are planning to use HLT cluster to do embedding of the selected channel for 
+days 125-134 (1462416 events). 
+   One channel takes ~2 days of processing on HLT farm.
+24 (h/day) * 3600 (h/sec) * 475 cpu / 25 (secs/event/cpu) / 1e6 (events) = 1.64 days/(1Mevent)
+   It is planning that the production on HLT farm will be managed by Hongwei.
+
+8. Event selection, Primary vertex with 
+        |Z| < 6 cm,
+        |Z - Z_VPD| < 3 cm,
+        sqrt(X^2 + Y^2) < 1 cm, and
+        sqrt(sigma_X^2 + sigma_Y^2) < 0.0050 cm 
+        TriggerId selection : 520001, 520011, 520021, 520031, 520041, 520051 (Jamie, Xin)
+
+9. The first pass of embedding of Lambda_c+->K-pi+p has bee done. 
+MuDst files are located at
+ /net/l401/data/scratch2/fisyak/reco/2016Embedding/LcKppimTsq/
+The sample contains 665784 events.
+
+Maksym and Iouri are checking the production. 
+I have one concern with this production:
+  I don't see Ist hits with non zero IdTruth in embedding.
+I am sure that MC hits are propagated through Ist reconstruction.
