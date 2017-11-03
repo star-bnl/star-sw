@@ -480,7 +480,8 @@ if ($qt4) {
 #ifndef __NEW__
 #$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
 #else /* __NEW__ */
-$SO_PKG = $libPrefix . $PKG . "." . $env1->{SUFSOLIB};
+$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
+$SO_PKG_lib = $libPrefix . $SO_PKG;
 #endif /* __NEW__ */
 $SO_PKG_PLAIN = $SO_PKG;
 #ifndef __NEW__

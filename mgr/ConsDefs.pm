@@ -90,12 +90,18 @@
  $CXX_VERSION  = `$CXX -dumpversion`;
  chomp($CXX_VERSION);
  ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
+
  my $cxx_version = $CXX_MAJOR . ".". $CXX_MINOR;
  my $CXXFLAGS     = `root-config --auxcflags`; chomp($CXXFLAGS); #$CXXFLAGS  =~ s/-I.*//; 
 # print "CXXFLAGS = $CXXFLAGS\n";
  $CXXFLAGS    .= " -fPIC"; #$LDFLAGS;
 # $CXXFLAGS    .= " -Wall -Wextra -Wno-long-long  -Wabi"; # garfield
  $CFLAGS       = $CXXFLAGS;
+ if ($CXX eq 'g++') {
+   if ($CXX_MAJOR > 4 or $CXX_MAJOR == 4 and $CXX_MINOR >= 6) {$CXXFLAGS .= " -fpermissive";}
+   if ($CXX_MAJOR > 6 or $CXX_MAJOR == 6 and $CXX_MINOR >= 3) {$CXXFLAGS .= " -Wmisleading-indentation -Wignored-attributes";}
+   print "CXX_MAJOR = $CXX_MAJOR, CXX_MINOR = $CXX_MINOR => CXXFLAGS = $CXXFLAGS ==============\n";
+ }
  my @words     = split(' ',$CFLAGS);# print "words = @words\n";
  my $cflags    = "";
  foreach my $w (@words) {
@@ -327,6 +333,8 @@
    }
    if ($CXX eq 'g++') {
      if ($CXX_MAJOR > 4 or $CXX_MAJOR == 4 and $CXX_MINOR >= 6) {$CXXFLAGS .= " -fpermissive";}
+#      if ($CXX_MAJOR > 6 or $CXX_MAJOR == 6 and $CXX_MINOR >= 3) {$CXXFLAGS .= " -Wmisleading-indentation";}
+#      print "CXX_MAJOR = $CXX_MAJOR, CXX_MINOR = $CXX_MINOR => CXXFLAGS = $CXXFLAGS ==============\n";
    } else {# clang
      $CXXFLAGS    .= " -std=c++11";
    }
