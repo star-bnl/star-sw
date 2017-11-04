@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.46 2017/10/13 05:36:18 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.47 2017/11/04 03:12:53 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.47  2017/11/04 03:12:53  zhux
+// added P16ig Run14 AuAu200 st_WB chain
+//
 // Revision 1.46  2017/10/13 05:36:18  zhux
 // added lines for pvranking/primemode cut switches. the default is off.
 //
@@ -175,6 +178,9 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run9 pp500 P16ib chain
   TString prodP16ibpp500("DbV20110311,OGGVoltErr,pp2009c,ITTF,BEmcChkStat,btof,Corr4,OSpaceZ2,OGridLeak3D,DbV20151021_TOF_Calibrations,DbV20161021_tpc_Calibrations,VFMCE,TpxClu,-hitfilt");
 
+  // Run14 AuAu200 st_WB chain (P16ig)
+  TString prodP16igAuAu200("DbV20160406,P2014a,StiCA,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
@@ -189,6 +195,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString geomP16id("ry2014a");
   TString geomP16ia("ry2015b");
   TString geomP16id_run15("ry2015c");
+  TString geomP16ig("ry2014a");
 
   TString xgeom(" useXgeom");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
@@ -235,6 +242,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P16idpp200")   { chain1Opt += xgeom; chain3Opt = prodP16idpp200;    chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
   else if (prodName == "P16idpAu200")  { chain1Opt += xgeom; chain3Opt = prodP16idpAu200;   chain3Opt += ",mtdsim";  chain2Opt += geomP16id_run15;}
   else if (prodName == "P16ibpp500")   { chain3Opt = prodP16ibpp500;    chain2Opt += geomP10ic;}
+  else if (prodName == "P16igAuAu200") { chain1Opt += xgeom; chain3Opt = prodP16igAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP16ig;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
