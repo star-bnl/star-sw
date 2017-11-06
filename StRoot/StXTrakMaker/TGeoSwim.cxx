@@ -1,5 +1,5 @@
 
-// $Id: TGeoSwim.cxx,v 1.7 2016/08/12 21:43:15 perev Exp $
+// $Id: TGeoSwim.cxx,v 1.8 2017/11/06 20:49:19 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -93,6 +93,8 @@ double *inOut = fInOutLen;
     fPt  = fabs(1./fPti);
     fP   = fabs(fPt/fHelx[0]->GetCos());
   }
+  fStartSign = dir[0]*pos[0]+dir[1]*pos[1];
+
   gGeoManager->SetCurrentPoint    (fHelx[0]->Pos());
   gGeoManager->SetCurrentDirection(fHelx[0]->Dir());
   fNode[0] = gGeoManager->FindNode();
@@ -202,6 +204,8 @@ double *inOut = fInOutLen;
     fHelx[1]->Move(range);
 
     if (OutScene(fHelx[1]->Pos()))	return kOutScene;
+
+
     myLen = fInOutLen[1];
     fInOutLen[2]+=fInOutLen[1];
     if (fLoss) { // Account of energy loss
@@ -219,6 +223,9 @@ double *inOut = fInOutLen;
       }
       memcpy(pos,fHelx[1]->Pos(),sizeof(pos));
       memcpy(dir,fHelx[1]->Dir(),sizeof(dir));
+      fCurrSign = dir[0]*pos[0]+dir[1]*pos[1];
+      if (fCurrSign*fStartSign<=0) return kApogee;
+
       cosTh2 = (1.-dir[2])*(1.+dir[2]);
       cosTh  = sqrt(cosTh2);
       for (int j=0;j<3;j++){ dir[j]/=cosTh;}

@@ -1,4 +1,4 @@
-/// $Id: TGeoSwim.h,v 1.8 2016/08/12 21:43:15 perev Exp $
+/// $Id: TGeoSwim.h,v 1.9 2017/11/06 20:49:19 perev Exp $
 ///
 ///
 /// Class StTGeoSwim
@@ -49,7 +49,7 @@ public:
   kUndef 		= 0,//Undefined
   kDefault 		= 1,//Immediate return after any step
   kNewVolu		= 2,//Return when new vollume started
-  kNameVolu		= 3,//Return, if mother volume name from the given list
+  kNameVolu		= 4,//Return, if mother volume name from the given list
   };
 TGeoSwimEnd(){;}
 virtual void Reset()=0;
@@ -64,7 +64,8 @@ EndKase mEnd;
 class TGeoSwim: public TNamed
 {
 public:
-enum SwimExit {kEndRange=-1,kNormal=0,kManySteps=13,kNoConv=14,kBadMom=15,kFailed=16,kOutScene=99};
+enum SwimExit {kEndRange=-1,kNormal=0 ,kManySteps=13,kNoConv=14
+              ,kBadMom=15  ,kFailed=16,kApogee=17   ,kOutScene=99};
 #define kMinMom 0.05	// minimal allowed Pt
 
 TGeoSwim(const char *name="");
@@ -114,6 +115,8 @@ double fPt;		///< Pt(GeV)
 double fPLoss;		///< momentum  loss(GeV) 
 double fTimeFly;	///< time of flight in seconds 
 double fB[3];		///< Current mag field
+double fStartSign;      ///< Start signature Dirxy*Posxy
+double fCurrSign;       ///< Current signature Dirxy*Posxy
 THelixTrack 	*fHelx[2];
 const TGeoNode  *fNode[2];
 ClassDef(TGeoSwim,0)
