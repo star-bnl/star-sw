@@ -355,6 +355,7 @@ void StDbServiceBroker::SendEmail(time_t timediff) {
   if ( marker_file.is_open() ) {
     marker_file << time(0);
     marker_file.close();
+	chmod( "/tmp/db_network_error.txt", 0666 );
   }
 
   if ( res == 0 && ( ( time(0) - attrib.st_mtime ) < seconds_to_reach_for_connect ) ) {
