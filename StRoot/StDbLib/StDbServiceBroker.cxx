@@ -346,6 +346,22 @@ void StDbServiceBroker::SendEmail(time_t timediff) {
   if (hostname) { host = hostname; }
   admin_emails = admins;
 
+  // check modification ts of the marker file ( email auto-suppression )
+  struct stat attrib;
+  int res = stat( "/tmp/db_network_error.txt", &attrib );
+
+  // create or re-create marker file file
+  std::ofstream marker_file( "/tmp/db_network_error.txt" );
+  if ( marker_file.is_open() ) {
+    marker_file << time(0);
+    marker_file.close();
+  }
+
+  if ( res == 0 && ( ( time(0) - attrib.st_mtime ) < seconds_to_reach_for_connect ) ) {
+    // if original file time was modified recently, do nothing
+    return;
+  }
+
   std::string curtime = currentDateTime();
   std::stringstream exec_command;
   exec_command << "echo \"We waited for " << timediff << " seconds (threshold: "<< seconds_to_reach_for_connect <<"), and did not get a db connection at " << host 
