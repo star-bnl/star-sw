@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlDigmapsSim.cxx,v $
+ * Revision 1.4  2017/11/08 23:14:51  smirnovd
+ * StPxlDigmapsSim: Remove pointless pointer validation
+ *
  * Revision 1.3  2017/11/08 23:14:44  smirnovd
  * StPxlDigmapsSim: Initialize member pointer in constructor
  *
@@ -54,7 +57,7 @@
 #include "DIGMAPS/digevent.h"
 
 StPxlDigmapsSim::StPxlDigmapsSim(const Char_t *name): StPxlISim(name),
-  mRndGen(nullptr), mOwnRndSeed(0), mDigPlane(nullptr), mDigAdc(nullptr), mDigTransport(nullptr),
+  mRndGen(nullptr), mOwnRndSeed(0), mDigPlane(new DIGPlane()), mDigAdc(new DIGADC()), mDigTransport(new DIGTransport()),
   mPxlDb(nullptr),
   mdEdxvsBGNorm(nullptr)
 {}
@@ -105,7 +108,6 @@ int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDa
   float adcThresholds[] = {pxlDigmapsSimTable[0].adcThreshold}; // one threshold only
   float adcLsb = adcThresholds[0];
 
-  if (!mDigAdc) mDigAdc = new DIGADC();
   mDigAdc->SetNbits(nAdcBits);
   mDigAdc->SetNThresholds(nAdcThresholds);
   mDigAdc->SetADC_linear(adcLinear);
@@ -129,7 +131,6 @@ int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDa
   float   transport_l1dimgauslor_x0_lor_2nd = pxlDigmapsSimTable[0].transport_x0_lor_2nd;
   float   transport_l1dimgauslor_norm_lor_2nd = pxlDigmapsSimTable[0].transport_norm_lor_2nd;
 
-  if (!mDigTransport) mDigTransport = new DIGTransport();
   mDigTransport->SetChargeModel(transportChargeModel);
   mDigTransport->SetRangeLimit_InPitchUnit(transportRangeLimit_InPitchUnit);
   mDigTransport->Setf1dimgauslor_Norm_g_1st(transport_l1dimgauslor_Norm_g_1st);
@@ -162,7 +163,6 @@ int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDa
   float planeReflexionCoefficient = pxlDigmapsSimTable[0].planeReflexCoefficient;
   float planeBasicModel_SigmaTenMicrons = pxlDigmapsSimTable[0].planeMod_SigTenMicrons;
 
-  if (!mDigPlane) mDigPlane = new DIGPlane();
   mDigPlane->SetPitch(planePitchX, planePitchY);
   mDigPlane->SetNpixels(planeNpixelsX, planeNpixelsY);
   mDigPlane->SetDimensions(planePitchX * planeNpixelsX, planePitchY * planeNpixelsY, planeEpitaxialThickness);
