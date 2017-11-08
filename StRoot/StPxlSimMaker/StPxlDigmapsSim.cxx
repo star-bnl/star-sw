@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlDigmapsSim.cxx,v $
+ * Revision 1.3  2017/11/08 23:14:44  smirnovd
+ * StPxlDigmapsSim: Initialize member pointer in constructor
+ *
  * Revision 1.2  2017/10/19 19:38:17  jeromel
  * Merging PXL201709UPD back to MAIN
  *
@@ -52,7 +55,8 @@
 
 StPxlDigmapsSim::StPxlDigmapsSim(const Char_t *name): StPxlISim(name),
   mRndGen(nullptr), mOwnRndSeed(0), mDigPlane(nullptr), mDigAdc(nullptr), mDigTransport(nullptr),
-  mPxlDb(nullptr)
+  mPxlDb(nullptr),
+  mdEdxvsBGNorm(nullptr)
 {}
 
 StPxlDigmapsSim::~StPxlDigmapsSim()
