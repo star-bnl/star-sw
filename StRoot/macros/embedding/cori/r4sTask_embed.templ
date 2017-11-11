@@ -38,8 +38,7 @@
 
     cd ${WRK_DIR} # important, no clue why I  need to do it again
     pwd
-    ls -l   
-    ls -l   .sl64*   
+    ls -la  . StRoot/ 
 
 
     set EMYEAR = `perl StRoot/macros/embedding/getYearDayFromFile.pl -y ${coreN}`
@@ -93,7 +92,7 @@
     # - - - -   Y O U   C A N   C H A N G E   B E L O W  - - - -
     #
     echo my pwd=`pwd`
-    ls -l  * .sl64*
+    ls -la  . StRoot/ 
     #set sandBox = $FSET_PATH/$REQUEST_PATH
     set sandBox = `hostname`.$$
     echo check sandbox  $sandBox
@@ -105,11 +104,13 @@
     mkdir -p $sandBox
     ln -s ${WRK_DIR}/St*  $sandBox
     ln -s ${WRK_DIR}/pam*  $sandBox
-    ln -s  ${WRK_DIR}/.sl64*  $sandBox
+    #ln -s  ${WRK_DIR}/.sl64*  $sandBox
     echo step into sandbox 
     cd $sandBox
     pwd
-    ls -l  * .sl64*   
+    cons
+    ls -la  . StRoot/ .sl64* 
+    ls -la  .sl64*/lib/  
     echo "===FIRE  $EXEC_NAME for coreN=$coreN fSet=$fSet "`date`
 
     # make sure local .cxx was copied to wrk-dir and compiled correctly in advance 
@@ -126,7 +127,7 @@
 EOF
 
     echo "done embedding for $coreN  "`date`
-    ls -l
+    ls -la
     gzip $r4sLogFile
     if ( ! -d $FSET_PATH/$REQUEST_PATH ) then
 	 mkdir -p $FSET_PATH/$REQUEST_PATH
