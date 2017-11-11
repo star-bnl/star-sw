@@ -8,7 +8,10 @@ if ( $#argv != 1 ) then
   exit
 endif
 
-rm -rf Localmaker*
+if ( -f "Localmakerlibs$1.zip" ) then
+  echo "CAUTION: existing sanbox file Localmakerlibs$1* will be removed!"
+  rm -rf Localmakerlibs$1*
+endif
 
 set prod = `grep "\-production" $PWD/preparexmlslr.sh | awk -F"-production |-lib" '{print $2}'`
 set prodname = `echo $prod`
