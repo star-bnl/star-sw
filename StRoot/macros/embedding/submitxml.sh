@@ -8,6 +8,8 @@ if ( $#argv != 2 ) then
   exit
 endif
 
+rm -rf Localmaker*
+
 set template = "$1"
 
 set FSET = "$2"
