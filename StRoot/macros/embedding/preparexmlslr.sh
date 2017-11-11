@@ -4,7 +4,7 @@
 #2. edit the options for $script first according to simulation request page, run this script at PDSF first, 
 #   generate the xml script for embedding job submission at PDSF.
 #3. submit the job at PDSF, produce one fset there, usually the fset ID# starts from "100".
-#4. obtain the number of events and the CPU hours per fset with the fSetStatistics.sh script.
+#4. obtain the number of events and the CPU hours per fset with the fsetstat.sh script.
 #5. calculate the number of fsets according to the requested statistics
 #6. edit the three options for Cori accordingly for full embedding production
 #7. run this script again at Cori, generate the .slr script for SLURM job submission.
