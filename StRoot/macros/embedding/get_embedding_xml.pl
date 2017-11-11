@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.30 2017/10/24 23:43:44 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.31 2017/11/11 04:16:04 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.31  2017/11/11 04:16:04  zhux
+# cons is now inside each task and can be tested with test.csh.
+#
 # Revision 1.30  2017/10/24 23:43:44  zhux
 # added MaxWallTime option, now the value is set to 35 hrs. the same as Cori.
 #
@@ -338,6 +341,12 @@ print OUT "\n";
 printDebug("Add: starver $library ...");
 print OUT "<!-- Load library -->\n";
 print OUT "starver $library &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "rm -rf .sl* &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "echo 'Build local makers for $library ...' &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "cons &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "ls -la . &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "ls -la StRoot/ &gt;&gt;&amp; \${LOGFILE}\n";
+print OUT "ls -la .sl*/lib/ &gt;&gt;&amp; \${LOGFILE}\n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -564,7 +573,7 @@ print OUT "\n";
 print OUT "<!-- Put any locally-compiled stuffs into a sand-box -->\n";
 print OUT "<SandBox installer=\"ZIP\">\n";
 print OUT "  <Package name=\"Localmakerlibs\">\n";
-print OUT "    <File>file:./$libraryPath/</File>\n";
+#print OUT "    <File>file:./$libraryPath/</File>\n";
 print OUT "    <File>file:./StRoot/</File>\n";
 print OUT "    <File>file:./pams/</File>\n";
 #if ( $simulatorMode == 1 ) { 
@@ -633,6 +642,12 @@ if($local){
   print LOCAL "#!/bin/csh\n";
   print LOCAL "\n";
   print LOCAL "starver $library\n";
+  print LOCAL "rm -rf .sl*\n";
+  print LOCAL "echo 'Build local makers for $library ...'\n";
+  print LOCAL "cons\n";
+  print LOCAL "ls -la . \n";
+  print LOCAL "ls -la StRoot/ \n";
+  print LOCAL "ls -la .sl*/lib/ \n";
   print LOCAL "set daq  = \"$daqOneFile\"\n";
   print LOCAL "set tags = \"$tagsOneFile\"\n";
   print LOCAL "\n";
