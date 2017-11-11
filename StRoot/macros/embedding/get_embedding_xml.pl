@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.31 2017/11/11 04:16:04 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.32 2017/11/11 06:32:05 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.32  2017/11/11 06:32:05  zhux
+# different fset have different sandbox.
+#
 # Revision 1.31  2017/11/11 04:16:04  zhux
 # cons is now inside each task and can be tested with test.csh.
 #
@@ -572,7 +575,7 @@ print OUT "</ResourceUsage>\n";
 print OUT "\n";
 print OUT "<!-- Put any locally-compiled stuffs into a sand-box -->\n";
 print OUT "<SandBox installer=\"ZIP\">\n";
-print OUT "  <Package name=\"Localmakerlibs\">\n";
+print OUT "  <Package name=\"Localmakerlibs&FSET;\">\n";
 #print OUT "    <File>file:./$libraryPath/</File>\n";
 print OUT "    <File>file:./StRoot/</File>\n";
 print OUT "    <File>file:./pams/</File>\n";
