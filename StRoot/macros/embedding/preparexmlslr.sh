@@ -21,7 +21,9 @@ if [[ $HOST =~ "cori" ]] ; then
  outp="-outPath /global/cscratch1/sd/$USER/embedding"
 
 else
- cp StRoot/macros/embedding/submitxml.sh ./
+ ln -s StRoot/macros/embedding/submitxml.sh
+ ln -s StRoot/macros/embedding/findfailed.sh
+ ln -s StRoot/macros/embedding/fsetstat.sh
  script="perl StRoot/macros/embedding/get_embedding_xml.pl"
  fset=""
  cpuh=""
