@@ -13,7 +13,7 @@
 #-SBATCH  --partition regular -t <wallHour>:30:00 --qos=premium   -J starFarm-prem
 
 # pick the image you need
-#SBATCH --image=custom:pdsf-sl64-star:v3
+#SBATCH --image=custom:pdsf-sl64-star:v7
 
 #SBATCH -L SCRATCH   #note: specify license need for the file systems your job needs, such as SCRATCH,project
 
