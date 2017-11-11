@@ -13,6 +13,7 @@
 if [[ $HOST =~ "cori" ]] ; then
  module load python/3.5-anaconda
  cp StRoot/macros/embedding/cori/farmerQAmonitor.ipynb ./
+ ln -s StRoot/macros/embedding/fsetstat.sh
  script="python StRoot/macros/embedding/cori/prepEmbedTaskList.py"
 
 #EDIT the following three options before use this script at Cori farm
