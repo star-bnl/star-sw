@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.26 2017/10/19 18:26:38 jwebb Exp $
+* $Id: xgeometry.age,v 1.27 2017/11/13 19:15:09 jwebb Exp $
 
 
 
@@ -2480,7 +2480,7 @@ If LL>0
   Case y2014b   { y2014b : y2014a plus hcal prototype; Geom = 'y2014b    '; 
                  call geom_y2014b; }
   Case y2014x   { y2014x : y2014a plus hcal prototype; Geom = 'y2014x    '; 
-                 call geom_y2014b; }
+                 call geom_y2014x; }
 
   Case y2015    { y2015  : y2015 baseline, is y2014a plus FMS preshower;
                   Geom = 'y2015     '; call geom_y2015; }
@@ -4635,8 +4635,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.26 2017/10/19 18:26:38 jwebb Exp $
+* $Id: xgeometry.age,v 1.27 2017/11/13 19:15:09 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.27  2017/11/13 19:15:09  jwebb
+* Enable y2014x
+*
 * Revision 1.26  2017/10/19 18:26:38  jwebb
 * Implement the y2014x,15x,16x geometries in xgeom.  Usage printout for loadAgML.  Switch in the misalignable modules in the 'x' geometries.
 *
