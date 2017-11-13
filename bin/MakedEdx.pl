@@ -1669,7 +1669,10 @@ my @badruns = qw(
 #$hist = "RunXVII15"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/02/2017  TpcLengthCorrectionMDF.20170101.000014
 #$hist = "RunXVII16"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/06/2017 recheck with nodebug x8664
 #$hist = "RunXVII17"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/07/2017 TpcLengthCorrectionMDF.20170101.000016.C from TPointsFUGPRunXVII16 
-$hist = "RunXVII18"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/09/2017 test in dev
+#$hist = "RunXVII18"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/pp500_production*_2017/ReversedFullField";  $Production = "/P17if_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/09/2017 test in dev
+# /star/data2*/reco/AuAu54_production_2017/ReversedFullField/P17ih_calib/2017/*/*
+#$hist = "RunXVII20"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/07/2017 The first pass 
+$hist = "RunXVII21"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/13/2017 update TpcSecRowB.20170602.000020 & TpcRowQ.20170602.000020
 
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;

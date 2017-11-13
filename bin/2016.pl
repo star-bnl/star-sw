@@ -1,6 +1,7 @@
 #! /usr/bin/env perl
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename,events' -cond 'filetype=online_daq,filename~st_laser,tpx=1,sanity=1,runnumber>15000000,events>10' -limit 0`;
-my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_physics_adc,tpx=1,sanity=1,runnumber=17035170,events>10' -limit 0`;
+#my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_physics_adc,tpx=1,sanity=1,runnumber=17035170,events>10' -limit 0`;
+my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_mtd_17,tpx=1,sanity=1,runnumber=17042027,events>10' -limit 0`;
 
 foreach my $file (@list) {
   chomp($file);
