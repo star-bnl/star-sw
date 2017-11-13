@@ -266,7 +266,7 @@
     <Construct sys="idsm" config="IDSM14a" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="tpce" config="TPCE31a" />
     <Construct sys="btof" config="BTOFv8" />
     <Construct sys="vpdd" config="VPDD08" />
     <Construct sys="calb" config="CALB02" />
@@ -389,7 +389,7 @@
     <Construct sys="idsm" config="IDSM14a" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="tpce" config="TPCE31a" />
     <Construct sys="btof" config="BTOFv8" />
     <Construct sys="vpdd" config="VPDD08" />
     <Construct sys="calb" config="CALB02" />
@@ -507,7 +507,7 @@
     <Construct sys="idsm" config="IDSM14a" />
     <Construct sys="pipe" config="PIPEv3" />
     <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="tpce" config="TPCE31a" />
     <Construct sys="btof" config="BTOFv8" />
     <Construct sys="vpdd" config="VPDD07" />
     <Construct sys="calb" config="CALB02" />
@@ -516,7 +516,7 @@
     <Construct sys="zcal" config="ZCALon" />
     <Construct sys="magp" config="MAGPon" />
     <Construct sys="sisd" config="SISD85a" />
-    <Construct sys="istd" config="ISTD03a" />
+    <Construct sys="istd" config="ISTD02a" />
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD14" />
     <Construct sys="pixl" config="PIXL06b" />
