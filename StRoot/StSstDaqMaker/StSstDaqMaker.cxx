@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.15 2017/04/26 14:56:42 perev Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.16 2017/11/09 16:23:57 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.16  2017/11/09 16:23:57  smirnovd
+ * StSstDaqMaker: Corrected path to included header file
+ *
  * Revision 1.15  2017/04/26 14:56:42  perev
  * Remove GetData() commited by accidant
  *
@@ -99,7 +102,7 @@
  * Initial version
  ****************************************************************************/
 #include "StSstDaqMaker.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "RTS/src/DAQ_SST/daq_sst.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "RTS/src/DAQ_READER/daqReader.h"
