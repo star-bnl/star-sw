@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.10 2016/04/13 19:15:06 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.11 2017/11/08 23:14:36 smirnovd Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.11  2017/11/08 23:14:36  smirnovd
+ * StPxlSimMaker: Don't generate ROOT streamer. Makers are not persistent
+ *
  * Revision 1.10  2016/04/13 19:15:06  mstftsm
  * The choice of geometry should be mutually exclusive
  *
@@ -102,7 +105,7 @@ class StPxlSimMaker : public StMaker
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.10 2016/04/13 19:15:06 mstftsm Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.11 2017/11/08 23:14:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
@@ -114,7 +117,7 @@ private:
     bool mUseRandomSeed;
 
 
-  ClassDef(StPxlSimMaker,1)   //StAF chain virtual base class for Makers
+  ClassDef(StPxlSimMaker, 0)   //StAF chain virtual base class for Makers
 };
 inline void StPxlSimMaker::useDIGMAPSSim() {SetAttr("useDIGMAPSSim",true);}
 inline void StPxlSimMaker::useDbGeom(bool db) {mUseDbGeom = db;}
@@ -122,11 +125,14 @@ inline void StPxlSimMaker::useRandomSeed(bool use) {mUseRandomSeed = use;}
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.10 2016/04/13 19:15:06 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.11 2017/11/08 23:14:36 smirnovd Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.11  2017/11/08 23:14:36  smirnovd
+ * StPxlSimMaker: Don't generate ROOT streamer. Makers are not persistent
+ *
  * Revision 1.10  2016/04/13 19:15:06  mstftsm
  * The choice of geometry should be mutually exclusive
  *
