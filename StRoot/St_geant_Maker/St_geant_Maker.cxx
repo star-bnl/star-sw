@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.165 2017/10/02 15:29:38 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.166 2017/11/13 19:11:05 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.166  2017/11/13 19:11:05  jwebb
+// Remove unecessary log output
+//
 // Revision 1.165  2017/10/02 15:29:38  jwebb
 // Integration of ETOF into simulation
 //
@@ -1367,7 +1370,7 @@ Int_t St_geant_Maker::Make() {
 
   nhits = 0;
   geant3->Gfnhit("ETOH","ECEL", nhits);
-  LOG_INFO << "ETOF nhits = " << nhits << endm;
+  //  LOG_INFO << "ETOF nhits = " << nhits << endm;
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_eto_hit = new St_g2t_ctf_hit("g2t_eto_hit",nhits);
     AddData(g2t_eto_hit);
