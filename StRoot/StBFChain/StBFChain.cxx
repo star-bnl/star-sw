@@ -832,7 +832,7 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("UseTonkoClusterAnnotation", 0);
     }
     if (maker == "StTpcDbMaker"){
-      //      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
+      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
       if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",1) ;// uses ofl database
       if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",1);// uses new laserDV
