@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGiant3.h,v 1.1 2005/02/07 21:08:51 fisyak Exp $ */
+/* $Id: TGiant3.h,v 1.2 2017/11/13 19:13:37 jwebb Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -70,6 +70,8 @@ typedef struct {
 //----------GCFLAG 
 //      COMMON/GCFLAG/IDEBUG,IDEMIN,IDEMAX,ITEST,IDRUN,IDEVT,IEORUN 
 //     +        ,IEOTRI,IEVENT,ISWIT(10),IFINIT(20),NEVENT,NRNDM(2) 
+#if 0
+
 typedef struct { 
   Int_t    idebug; 
   Int_t    idemin; 
@@ -85,6 +87,28 @@ typedef struct {
   Int_t    nevent; 
   Int_t    nrndm[2]; 
 } Gcflag_t; 
+#endif
+
+struct Gcflag_t {
+#if 0
+  ClassDef(Gcflag_t,1);
+#endif
+  Int_t    idebug; 
+  Int_t    idemin; 
+  Int_t    idemax; 
+  Int_t    itest; 
+  Int_t    idrun; 
+  Int_t    idevt; 
+  Int_t    ieorun; 
+  Int_t    ieotri; 
+  Int_t    ievent; 
+  Int_t    iswit[10]; 
+  Int_t    ifinit[20]; 
+  Int_t    nevent; 
+  Int_t    nrndm[2]; 
+};
+
+
  
 //----------GCKINE 
 //      COMMON/GCKINE/IKINE,PKINE(10),ITRA,ISTAK,IVERT,IPART,ITRTYP 
