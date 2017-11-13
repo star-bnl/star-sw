@@ -17,65 +17,68 @@ endif
 
 
 #
-# RedHat 7.2
+## RedHat 7.2 
+## Note: no idea of why this block is here (does not see to be 7.2/7.3 support
+## related or very generic through i386_linux24 ). Specific reote site support?
+## Disabled 2017/11
 #
-if ( -e .i386_linux24) then
-    if ( ! -e .rh73_gcc296) then
-	echo "Creating RedHat 7.3 is support via RedHat 7.2 using the same compiler"
-	/bin/ln -s .i386_linux24 .rh73_gcc296
-    endif
-
-    if ( ! -e .i386_redhat72) then
-	echo "Creating Alternate RedHat 7.2 support (naming scheme changed at RH7.2)"
-	/bin/ln -s .i386_linux24 .i386_redhat72
-    endif
-else
-    echo "The base OS support directory, .i386_linux24, does not exists"
-endif
-
-# ----------
-# RedHat 8.0
-# ----------
-if ( -e .rh80_gcc32) then
-    # Generic Redhat support / alternate STAR_HOST_SYS
-    if ( ! -e .i386_redhat80) then
-	echo "Creating Generic Redhat support / alternate STAR_HOST_SYS for RH8.0"
-	/bin/ln -s .rh80_gcc32 .i386_redhat80
-    endif
-    # alternate gcc support
-    if ( ! -e .rh80_gcc322) then
-	echo "Creating alternate gcc support for RH8.0"
-	/bin/ln -s .rh80_gcc32 .rh80_gcc322
-    endif
-else
-    echo "The base OS support directory, .rh80_gcc32, does not exists"
-endif
-
+#if ( -e .i386_linux24) then
+#    if ( ! -e .rh73_gcc296) then
+#	echo "Creating RedHat 7.3 is support via RedHat 7.2 using the same compiler"
+#	/bin/ln -s .i386_linux24 .rh73_gcc296
+#    endif
 #
-# Redhat 9.0
+#    if ( ! -e .i386_redhat72) then
+#	echo "Creating Alternate RedHat 7.2 support (naming scheme changed at RH7.2)"
+#	/bin/ln -s .i386_linux24 .i386_redhat72
+#    endif
+#else
+#    echo "The base OS support directory, .i386_linux24, does not exists"
+#endif
 #
-if ( -e .rh80_gcc32) then
-    # RedHat 9 is supported via RedHat 8 using the same compiler
-    if ( ! -e .rh9_gcc322) then
-	echo "Creating RedHat 9 is supported via RedHat 8 using an assumed equivalence gcc 3.2 -> 3.2.2"
-	/bin/ln -s .rh80_gcc32 .rh9_gcc322
-    endif
-
-
-    # A bit risky. Will get argument as confirmation
-    # Note that those are backward compatibility links
-    # only.
-    if ( $1 != "") then
-	/usr/bin/test -e .sl301_gcc323 || (/bin/ln -s .rh80_gcc322 .sl301_gcc323 && echo "SL301 compatility link created")
-	/usr/bin/test -e .sl302_gcc323 || (/bin/ln -s .rh80_gcc322 .sl302_gcc323 && echo "SL302 compatility link created")
-	/usr/bin/test -e .sl303_gcc323 || (/bin/ln -s .rh80_gcc322 .sl303_gcc323 && echo "SL303 compatility link created")
-	/usr/bin/test -e .sl304_gcc323 || (/bin/ln -s .rh80_gcc322 .sl304_gcc323 && echo "SL304 compatility link created")
-	/usr/bin/test -e .sl305_gcc323 || (/bin/ln -s .rh80_gcc322 .sl305_gcc323 && echo "SL305 compatility link created")
-    endif
-
+## ----------
+## RedHat 8.0
+## ----------
+#if ( -e .rh80_gcc32) then
+#    # Generic Redhat support / alternate STAR_HOST_SYS
+#    if ( ! -e .i386_redhat80) then
+#	echo "Creating Generic Redhat support / alternate STAR_HOST_SYS for RH8.0"
+#	/bin/ln -s .rh80_gcc32 .i386_redhat80
+#    endif
+#    # alternate gcc support
+#    if ( ! -e .rh80_gcc322) then
+#	echo "Creating alternate gcc support for RH8.0"
+#	/bin/ln -s .rh80_gcc32 .rh80_gcc322
+#    endif
 #else
 #    echo "The base OS support directory, .rh80_gcc32, does not exists"
-endif
+#endif
+#
+##
+## Redhat 9.0
+##
+#if ( -e .rh80_gcc32) then
+#    # RedHat 9 is supported via RedHat 8 using the same compiler
+#    if ( ! -e .rh9_gcc322) then
+#	echo "Creating RedHat 9 is supported via RedHat 8 using an assumed equivalence gcc 3.2 -> 3.2.2"
+#	/bin/ln -s .rh80_gcc32 .rh9_gcc322
+#    endif
+#
+#
+#    # A bit risky. Will get argument as confirmation
+#    # Note that those are backward compatibility links
+#    # only.
+#    if ( $1 != "") then
+#	/usr/bin/test -e .sl301_gcc323 || (/bin/ln -s .rh80_gcc322 .sl301_gcc323 && echo "SL301 compatility link created")
+#	/usr/bin/test -e .sl302_gcc323 || (/bin/ln -s .rh80_gcc322 .sl302_gcc323 && echo "SL302 compatility link created")
+#	/usr/bin/test -e .sl303_gcc323 || (/bin/ln -s .rh80_gcc322 .sl303_gcc323 && echo "SL303 compatility link created")
+#	/usr/bin/test -e .sl304_gcc323 || (/bin/ln -s .rh80_gcc322 .sl304_gcc323 && echo "SL304 compatility link created")
+#	/usr/bin/test -e .sl305_gcc323 || (/bin/ln -s .rh80_gcc322 .sl305_gcc323 && echo "SL305 compatility link created")
+#    endif
+#
+##else
+##    echo "The base OS support directory, .rh80_gcc32, does not exists"
+#endif
 
 #
 # Make it easy to do SL5/64 to SL4/32
@@ -167,6 +170,35 @@ foreach arch ( _ _x8664_ )
 	    end
 	end
     endif
+
+    #+
+    # SL7.x through 7.2
+    #-
+    set refos="sl73"$arch"gcc485"
+    echo "Checking possible compatibility through refos $refos"
+    if ( -e .$refos || -e $refos ) then
+	foreach ospf ( sl rh )
+	    foreach vers ( 74 )
+		#foreach cmpl ( 485 )
+		    set cmpl="485"
+		    set dir=$ospf$vers$arch"gcc"$cmpl
+		    if ( ! -e .$dir && -e .$refos ) then
+			echo "  Compatibility assumed between $dir -> $refos "
+			/bin/ln -s .$refos .$dir
+		    else
+			if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+		    endif
+		    if ( ! -e $dir && -e $refos ) then
+			echo "  Compatibility assumed between $dir -> $refos "
+			/bin/ln -s $refos $dir
+		    else
+			if ( -e $refos && -e $dir )   echo " $dir exists"
+		    endif
+		#end
+	    end
+	end
+    endif
+
 end
 
 
