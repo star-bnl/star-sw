@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.31 2017/10/10 15:34:00 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.32 2017/11/02 13:09:25 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.32  2017/11/02 13:09:25  akio
+ * Adding getCorrectedAdc and fix a memory leak
+ *
  * Revision 1.31  2017/10/10 15:34:00  akio
  * Fix a crashing bug
  *
@@ -938,6 +941,12 @@ void StFmsDbMaker::deleteArrays(){
     }
     delete [] mmGainCorrection;
   }
+  if(mmBitShiftGain){
+    for(Int_t d=0; d<=mMaxDetectorId; d++){ 
+      if(mmBitShiftGain[d]) delete [] mmBitShiftGain[d];
+    }
+    delete [] mmBitShiftGain;
+  }
   //FPS
   if(mFpsGain) delete [] mFpsGain;
   if(mFpsStatus) delete [] mFpsStatus;
@@ -1245,6 +1254,22 @@ Short_t StFmsDbMaker::getBitShiftGain(Int_t detectorId, Int_t ch) const
     if(detectorId<0 || detectorId>mMaxDetectorId || ch<1 || ch>maxChannel(detectorId) || mmGain[detectorId]==0) return 0;
     return mmBitShiftGain[detectorId][ch-1].bitshift;
 }
+
+unsigned short StFmsDbMaker::getCorrectedAdc(unsigned short detectorId, unsigned short ch, unsigned short adc) const
+{
+    short bitshift = getBitShiftGain(detectorId,ch);
+    if(bitshift>=0) {    
+	return adc + (0x1<<bitshift);
+    }else{
+	return adc;
+    }
+}
+
+unsigned short StFmsDbMaker::getCorrectedAdc(StFmsHit* hit) const
+{
+    return getCorrectedAdc(hit->detectorId(),hit->channel(),hit->adc());
+}
+
 
 //! fmsTimeDepCorr
 float StFmsDbMaker::getTimeDepCorr(int event, int det, int ch){  //det=0-3, ch=1-574
