@@ -44,6 +44,14 @@ TpceGeo2,  TpceGeo3a,  TpceGeo4, TpceGeo1
   <Init struct="tpcg" var="rmax"       value="207.77" />
 
 </Setup>
+<Setup name="TPCE31a" onoff="on" comment="New version of the TPC backplane;gas density correction;radius correction;same as TPCE04r" module="TpceGeo3a" >
+
+  <Init struct="tpcc" var="version"    value="3.1" />
+  <Init struct="tpcc" var="misalign"   value="0" />
+  <Init struct="tpcg" var="rmax"       value="207.77" />
+
+</Setup>
+
 
 
 
