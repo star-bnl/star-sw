@@ -87,7 +87,8 @@ public:
   Float_t A, Z; // A and Z of material in this tracking step
   UShort_t vnums[15]; // Volume numbers
   UShort_t cnums[15]; // Copy numbers
-  
+  Int_t    isvol;     // Sensitive volume flag
+
   TString path();
   TString volume();
 
@@ -98,7 +99,7 @@ public:
 class AgUStep : public TNamed
 {
 public:
-  AgUStep();
+  AgUStep(); 
  ~AgUStep(){ };
 
   static AgUStep *Instance();
@@ -111,6 +112,7 @@ public:
 
   static Float_t rmin;// =   0.0;
   static Float_t rmax;//= 200.0;
+  static Float_t zmin;//=-200;
   static Float_t zmax;//= 200.0;
   static Int_t   verbose;// = 0;
   static Int_t   mnTruth;//=0;
@@ -140,6 +142,7 @@ public:
   static Gcmate_t  *cmate; //!
   static Gccuts_t  *ccuts; //!
   static Gcphys_t  *cphys; //!
+  static Gctmed_t  *ctmed; //!
   static Int_t      nlev; //!
 
 private:
