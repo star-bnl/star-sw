@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.66 2017/01/30 17:59:13 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.67 2017/11/13 21:14:27 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.67  2017/11/13 21:14:27  fisyak
+ * Enable Mag.Field depending flavor
+ *
  * Revision 1.66  2017/01/30 17:59:13  fisyak
  * Undo commit
  *
@@ -220,28 +223,29 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   // Create Needed Tables:    
   //Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
-#if 0
-  if (gFactor<-0.8) {
-    gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
+  if (! IAttr("Simu")) {
+    Float_t gFactor = StarMagField::Instance()->GetFactor();
+    if (gFactor<-0.8) {
+      gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
+    }
+    else if (gFactor<-0.2) {
+      gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
+    }
+    else if (gFactor<0.2) {
+      gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
+    }
+    else if (gFactor<0.8) {
+      gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
+    }
+    else if (gFactor<1.2) {
+      gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
+    }
   }
-  else if (gFactor<-0.2) {
-    gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
-  }
-  else if (gFactor<0.2) {
-    gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
-  }
-  else if (gFactor<0.8) {
-    gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
-  }
-  else if (gFactor<1.2) {
-    gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
-  }
-#endif
   if         (IAttr("useLDV")) {
     SetFlavor("laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
