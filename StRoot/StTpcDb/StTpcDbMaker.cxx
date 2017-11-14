@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.65 2017/01/30 17:54:18 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.67 2017/11/13 21:14:27 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
- * Revision 1.65  2017/01/30 17:54:18  fisyak
- * Remove dependce on StEvent
+ * Revision 1.67  2017/11/13 21:14:27  fisyak
+ * Enable Mag.Field depending flavor
+ *
+ * Revision 1.66  2017/01/30 17:59:13  fisyak
+ * Undo commit
  *
  * Revision 1.64  2017/01/06 22:30:45  genevb
  * Introduce FullGridLeak distortion correction

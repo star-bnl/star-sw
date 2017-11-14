@@ -310,7 +310,7 @@
 <Placement block="IDSM" in="CAVE" group="TpcRefSys" konly="MANY">	   
 
   <Misalign table="Geometry/pxl/idsOnTpc"                opts="left" />
-  <Misalign table="Geometry/tpc/TpcGlobalPositionSurvey" opts="left" />
+  <Misalign table="Geometry/tpc/TpcPosition" opts="left" />
 
 </Placement>
 
