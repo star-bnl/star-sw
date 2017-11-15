@@ -20,6 +20,7 @@ subfile=submitfailed.sh
 if [ -f "$subfile" ] ; then
    rm -f $subfile
 fi
+allgood=""
 
 #echo "#!/bin/sh" > $subfile
 echo "cd "$PWD > $subfile
@@ -71,11 +72,17 @@ do
 	   minicheck=`grep $minifile tmpminimc.list`
 	   aborted=`zgrep "Bus error" $logfile`
 	   if [[ -z "$minicheck" || ! -z "$aborted" ]] ; then
-		if [ $nfailed -ne "0" ] ; then
-		   echo -n "," >> $subfile
-		fi
-		echo -n $ijob >> $subfile
-		nfailed=$(($nfailed+1))
+		eofcheck=`zgrep "StIOMaker::Make() == StEOF" $logfile`
+		zeroevent=`zgrep "StAnalysisMaker::Finish() Processed 0 events" $logfile`
+		if [[ -z "$eofcheck" || -z "$zeroevent" ]] ; then
+		   echo "found one possible failed task, its log file is:"
+		   echo $logfile
+		   if [ $nfailed -ne "0" ] ; then
+			echo -n "," >> $subfile
+		   fi
+		   echo -n $ijob >> $subfile
+		   nfailed=$(($nfailed+1))
+	      fi
 	   fi
 	fi
    done
@@ -83,9 +90,17 @@ do
    #if [ $nlogs -lt 890 ] ; then
       echo " array_0_$(($ndaq-1))_"`basename $bn`".slr" >> $subfile
    #fi
-   echo found $nfailed failed tasks !
-   echo please run \"source $subfile\"
+   echo found $nfailed failed tasks in FSET# $fset data ... 
+   if [ $nfailed -gt 0 ] ; then
+	allgood="NO"
+   fi
 done
 
-chmod a+x $subfile
+if [ ! -z $allgood ] ; then
+   echo please run \"source $subfile\"
+   chmod a+x $subfile
+else
+   rm -f $subfile
+fi
 rm -f tmplog.list tmpminimc.list
+
