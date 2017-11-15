@@ -70,12 +70,12 @@ void Load(const Char_t *options="");
 //TString defChain("test.RC.AuAu200.y2016,StiCA,KFVertex")
 //StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
-StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
-	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName);
 //	 const Char_t *Chain="gstar,20Muons,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
-StBFChain * bfc(Int_t Last, const Char_t *Chain = "MC.2016",
-	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
-	 //	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
+StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
+	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName=0);
+StBFChain *bfc(Int_t First, const Char_t *Chain = "MC.2016",
+ 	       const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
+//	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
 void Load(const Char_t *options)
 {
@@ -184,11 +184,11 @@ void V0Filter() {
 #endif
 //_____________________________________________________________________
 StBFChain *bfc(Int_t First, Int_t Last,
-	 const Char_t *Chain,
-	 const Char_t *infile,
-	 const Char_t *outfile,
-	 const Char_t *TreeFile, 
-	 const Char_t *chainName)
+	       const Char_t *Chain,
+	       const Char_t *infile,
+	       const Char_t *outfile,
+	       const Char_t *TreeFile, 
+	       const Char_t *chainName)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
