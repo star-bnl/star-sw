@@ -109,17 +109,17 @@ public:
 
 protected:
 
-  Int_t    mRunId;
-  Int_t    mEventId;
-  UShort_t mFillId;
-  Float_t  mBField;
+  Int_t     mRunId;
+  Int_t     mEventId;
+  UShort_t  mFillId;
+  Float16_t mBField;
 
-  Int_t    mTime;//To set timestamp for St_db_Maker. This is what StMuDstMaker used to GetEvtHddr()->SetGMTime(cast into unsigned int). Peifeng Liu
+  Int_t     mTime;//To set timestamp for St_db_Maker. This is what StMuDstMaker used to GetEvtHddr()->SetGMTime(cast into unsigned int). Peifeng Liu
 
-  Float16_t mPrimaryVertex[3];      //[-200,200,24]|
-  Float16_t mPrimaryVertexError[3]; //[0,10,16]|
-  Float16_t mPrimaryVertexCorr[3];  //[-1,1,16]|
-  Float_t  mRanking;
+  Float16_t mPrimaryVertex[3];      //
+  Float16_t mPrimaryVertexError[3]; //
+  Float16_t mPrimaryVertexCorr[3];  //
+  Float16_t mRanking;
   UShort_t mNBEMCMatch;
   UShort_t mNBTOFMatch;
 
@@ -158,13 +158,13 @@ protected:
 
   UInt_t   mZDCx;
   UInt_t   mBBCx;
-  Float_t  mBackgroundRate;
-  Float_t  mBbcBlueBackgroundRate;
-  Float_t  mBbcYellowBackgroundRate;
-  Float_t  mBbcEastRate;
-  Float_t  mBbcWestRate;
-  Float_t  mZdcEastRate;
-  Float_t  mZdcWestRate;
+  Float16_t  mBackgroundRate;
+  Float16_t  mBbcBlueBackgroundRate;
+  Float16_t  mBbcYellowBackgroundRate;
+  Float16_t  mBbcEastRate;
+  Float16_t  mBbcWestRate;
+  Float16_t  mZdcEastRate;
+  Float16_t  mZdcWestRate;
 
   UShort_t mZdcSumAdcEast;
   UShort_t mZdcSumAdcWest;
@@ -182,7 +182,7 @@ protected:
   // Online JP thresholds BEMC only
   UChar_t  mJetPatchThreshold[4];
 
-  ClassDef(StPicoEvent, 2)
+  ClassDef(StPicoEvent, 3)
 };
 
 

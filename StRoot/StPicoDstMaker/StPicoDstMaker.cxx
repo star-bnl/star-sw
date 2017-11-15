@@ -581,7 +581,7 @@ Int_t StPicoDstMaker::MakeRead()
 //_____________________________________________________________________________
 Int_t StPicoDstMaker::MakeWrite()
 {
-  StMaker::WhiteBoard("muDst", &mMuDst);
+  mMuDst = StMuDst::instance();
 
   if (!mMuDst)
   {
@@ -598,13 +598,13 @@ Int_t StPicoDstMaker::MakeWrite()
   }
 
   int const originalVertexId = mMuDst->currentVertexIndex();
-  if (!selectVertex())
-  {
-    LOG_INFO << "Vertex is not valid" << endm;
-    mMuDst->setVertexIndex(originalVertexId);
-    return kStOK;
+  if (! mMuDst->numberOfMcVertices()) {
+    if (!selectVertex())  {
+      LOG_INFO << "Vertex is not valid" << endm;
+      mMuDst->setVertexIndex(originalVertexId);
+      return kStOK;
+    }
   }
-
   mBField = muEvent->magneticField();
 
 
@@ -674,25 +674,29 @@ Int_t StPicoDstMaker::fillTracks()
     pVrZ->Fill(V.z(),V.perp());
     pVxy->Fill(V.y(),V.x());
   }
-  if (! (-0.3 < V.x() && V.x() < 0.1 && -0.27 < V.y() && V.y() < - 0.13)) {ok = 1; return ok;}
-  StThreeVectorD E(mMuDst->primaryVertex()->posError());
-  const Double_t er = E.perp();
-  if (er > erMax) {ok = 2; return ok;}
-  static Int_t GoodTriggers[6] = {520001, 520011, 520021, 520031, 520041, 520051};
-  const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
-  Int_t GoodTrigger = -1;
-  for (Int_t k = 0; k < 64; k++) {
-    Int_t trig = triggers.triggerId(k);
-    if (! trig) continue;
-    for (Int_t l = 0; l < 6; l++) {
-      if (trig == GoodTriggers[l]) {
-	GoodTrigger = trig;
-	break;
+  if (! mMuDst->numberOfMcVertices()) {
+    if (! (-0.3 < V.x() && V.x() < 0.1 && -0.27 < V.y() && V.y() < - 0.13)) {ok = 1; return ok;}
+    StThreeVectorD E(mMuDst->primaryVertex()->posError());
+    const Double_t er = E.perp();
+    if (er > erMax) {ok = 2; return ok;}
+    static Int_t GoodTriggers[6] = {520001, 520011, 520021, 520031, 520041, 520051};
+    const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
+    Int_t GoodTrigger = -1;
+    Int_t NoAnyTriggers = 0;
+    for (Int_t k = 0; k < 64; k++) {
+      Int_t trig = triggers.triggerId(k);
+      if (! trig) continue;
+      NoAnyTriggers++;
+      for (Int_t l = 0; l < 6; l++) {
+	if (trig == GoodTriggers[l]) {
+	  GoodTrigger = trig;
+	  break;
+	}
       }
+      if (GoodTrigger > 0) break;
     }
-    if (GoodTrigger > 0) break;
+    if (NoAnyTriggers && GoodTrigger < 0) {ok = 3; return ok;}
   }
-  if (GoodTrigger < 0) {ok = 3; return ok;}
   // We save primary tracks associated with the selected primary vertex only
   // don't use StMuTrack::primary(), it returns primary tracks associated with
   // all vertices

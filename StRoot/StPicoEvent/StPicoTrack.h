@@ -88,12 +88,12 @@ class StPicoTrack : public TObject {
 
 protected:
   UShort_t  mId;             // track Id, copied from StMuTrack, StTrack
-  Float16_t mChi2;           // [0,1000,12]|
+  Float16_t mChi2;           // 
   Float16_t mPMomentum[3];   // 
-  Float16_t mDedx;           // [0,1000,16]| dEdx in KeV/cm.
-  Float16_t mDedxError;      // [0,10,12]|
-  Float16_t mDnDx;           // [0,1000,16]|  fitted dN/dx
-  Float16_t mDnDxError;      // [0,10,12]|    fitted dN/dx error
+  Float16_t mDedx;           // dEdx in KeV/cm.
+  Float16_t mDedxError;      // 
+  Float16_t mDnDx;           // fitted dN/dx
+  Float16_t mDnDxError;      // fitted dN/dx error
   Char_t    mNHitsFit;       // nHitsFit - TPC
   Char_t    mNHitsMax;       // nHitsMax - TPC
   UChar_t   mNHitsDedx;      // nHitsDedx - TPC
@@ -108,6 +108,6 @@ protected:
   Float16_t mPar[6];
   Float16_t mSigma[5];
   Float16_t mCorr[10]; //[-1,1,12]!
-  ClassDef(StPicoTrack, 3)
+  ClassDef(StPicoTrack, 4)
 };
 #endif
