@@ -1353,9 +1353,6 @@ Bfc_st BFC[] = { // standard chains
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                      "StMuDSTMaker,StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-  {"picoEvt"    ,"","","MuDSTDeps,StEvent,Stu","",  "StPicoEvent","Load picoEvent and dependencies",kFALSE},
-  {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
-   ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
@@ -1852,6 +1849,9 @@ Bfc_st BFC[] = { // standard chains
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
+  {"picoEvt"    ,"","","MuDSTDeps,StEvent,Stu","",  "StPicoEvent","Load picoEvent and dependencies",kFALSE},
+  {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
+   ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
   {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
