@@ -1,6 +1,15 @@
 #!/bin/sh
-#loop over # of daq files, find whether there is log.gz file, if not, printout the #, if yes,
+
+#usage: in a pdsf embedding job submission directory, where the .session.xml file is, run
+#./findfailed.sh
+#
+#the code loops over # of daq files, find whether there is log.gz file, if not, printout the #, if yes,
 #keep looking for the minimc.root file, if not, return #.
+
+if [[ ! $HOST =~ "pdsf" ]] ; then
+   echo this code can only be used for PDSF!
+   exit
+fi
 
 echo I am running in $PWD
 echo parsing the request information from the configuration file \"preparexmlslr.sh\"
@@ -43,6 +52,10 @@ do
    datadir=`echo $datadirtmp | awk '{print $3}'`
    echo embedding data directory: $datadir
 
+   cshdirtmp=`grep 'sched$JOBID.csh $EMLIST/' $i` 
+   cshdir=`echo $cshdirtmp | awk '{print $3}' |xargs dirname`
+   echo csh script directory: $cshdir
+
    nlogs=`find ${datadir}/${particle}_${fset}_${reqid}/ -name "*.log.gz" |wc -l`
    echo Number of non-zero size log files: $nlogs
 
@@ -77,6 +90,12 @@ do
 		if [[ -z "$eofcheck" || -z "$zeroevent" ]] ; then
 		   echo "found one possible failed task, its log file is:"
 		   echo $logfile
+		   cshfile=`find ${datadir}/${particle}_${reqid}/ -name "sched${bn}_${ijob}.csh"`
+		   if [ ! -z "$cshfile" ] ; then
+			echo "its csh file has been moved to $cshfile"
+			echo "move it back to $cshdir"
+			mv $cshfile $cshdir
+		   fi
 		   if [ $nfailed -ne "0" ] ; then
 			echo -n "," >> $subfile
 		   fi
