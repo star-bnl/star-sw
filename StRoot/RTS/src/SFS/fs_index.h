@@ -165,9 +165,9 @@ class fs_index {
   fs_inode *find_child(fs_inode *parent, char *name);
   void free_inode(fs_inode *inode);
 #if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
-  fs_inode *alloc_inode(char *name, long long int off, int sz, int overhead);
+  fs_inode *alloc_inode(const char *name, long long int off, int sz, int overhead);
 #else
-  fs_inode *alloc_inode(char *name, int off, int sz, int overhead);
+  fs_inode *alloc_inode(const char *name, int off, int sz, int overhead);
 #endif
 
   virtual int _create()=0;    // create index for reading...
