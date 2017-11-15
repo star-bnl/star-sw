@@ -1,0 +1,48 @@
+Goals :
+===========
+  1. 2016AuAu200 => 200 M by January  
+  2. 2014AuAu200
+  3. Full statistics of 2014 + 2016 by QM2018 (?)
+Tasks:
+===========
+  1. PicoDst format.
+     a. Provide the same results from MuDst and PicoDst
+        - Test MC signal D0->K pi for both formats and find and fix differences.
+  2. PiD : Check dE/dx and ToF for RC and MC tracks.
+  3. VMC embedding.
+     a. Provide matching Pxl, Ist and Sst efficiencies from RC and MC for both 2016 and 2014 data samples 
+	 => tuning slow simulator to data.
+     b. Embedding ~1 M events for different channels.
+     c. TTree for signal and backgound => TMVA analysis dependening on kinematics.
+      - Maksym provides tool to generate TTree's
+      - Hongwei using the TTree's  provides tool to generate cuts.
+      - Maksym, Iouri, ... apply the cuts to data (PicoDst) and see signal significance
+  4. Using TMVA cuts and KFParticleFinder study different channel with 2016 and 2014 data samples
+================================================================================
+
+HK : Hongwei Ke        : kehw@bnl.gov       	   
+GX : Guannan Xie       : xieguannanpp@gmail.com	   
+IK : Ivan Kisel        : I.Kisel@gsi.de     	   
+IV : Iouri Vaisliev    : I.Vassiliev@gsi.de 	   
+JC : Jinhui Chen       : chenjinhui@sinap.ac.cn	   
+MC : Michal Kocan      : kocanmi3@fjfi.cvut.cz	   
+MZ : Maksym Zyzak      : M.Zyzak@gsi.de     	   
+PC : Petr Chaloupka    : petr.chaloupka@fjfi.cvut.cz  
+PF : Pavol Frederic    : pavol.federic@gmail.com      
+SM : Spyridon Margetis : smargeti@kent.edu
+YF : Yuri Fisyak       : fisyak@bnl.gov     
+
+================================================================================
+Plan: (tentative)
+=====
+  1. PicoDst.  Test MC signal D0->K pi for both formats and find and fix differences. (YF,MZ 11/16/17)
+  2. Tuning Pxl, Ist and Sst slow simulators  (SM,...)
+  3. PiD tests and cuts. (IV)
+  4. Tool to provide background and signal TTree's from KFParticleFinder (MZ)
+  5. Tool for TMVA analysis to obtain cuts from background and signal TTree's (HK)
+  6. Analysis of V0 (K0s, Lambda, Xi, Omega, ...) with TVMA cuts in KFParticleFinder (JC)
+  7. Analysis of D0 -> K pi with KFParticleFinder with TMVA cuts for 2016 data samples (IV,MZ)
+  8. -"-                                                         for 2014 data samples (GX, MC, ...)
+                       start with MuDst and move to PicoDst later.
+  9. -"- for different channels including V0.
+...
