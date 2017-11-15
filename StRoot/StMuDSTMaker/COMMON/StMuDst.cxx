@@ -966,7 +966,7 @@ void StMuDst::PrintMcVx(UInt_t idVx) {
 Bool_t StMuDst::Accept(const StMuTrack *gTrack) {
   if (! gTrack)            return kFALSE;
 #ifndef __RC__
-  if (! gTrack->idTruth()) return kFALSE;
+  //  if (! gTrack->idTruth()) return kFALSE;
 #endif /* ! __RC__ */
   if (! gTrack->charge())  return kFALSE;
   if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) return kFALSE; // bad fit or short track pointing to EEMC

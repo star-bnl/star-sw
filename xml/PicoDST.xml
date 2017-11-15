@@ -2,11 +2,14 @@
 <job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  starver TFG17m
+#  setup gcc631
 ln -s $STAR/.$STAR_HOST_SYS .
 #if (! -r .sl64_gcc492) ln -s ../../.sl64_gcc492 .
 #  cd $SCRATCH
 #   pwd
-  setenv STARFPE NO
 #  setenv NODEBUG yes
 #  setup  gcc
 #  setup  32b
