@@ -1,7 +1,16 @@
 #!/bin/sh
+#show statistics info of one Fset, work at both PDSF and Cori
+
+if [ ! $# -eq 1 ] ; then
+   echo ""
+   echo " Usage : $0 [Fset #] "
+   echo ""
+   echo ""
+   exit
+fi
 
 if [[ $HOST =~ "cori" ]] ; then
-   outp="/global/cscratch1/sd/$USER/embedding"
+   outp="$CSCRATCH/embedding"
 else
    outp="/global/projecta/projectdirs/starprod/embedding"
 fi
