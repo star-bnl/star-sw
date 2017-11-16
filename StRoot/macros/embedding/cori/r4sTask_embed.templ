@@ -101,6 +101,7 @@
 	rm -rf $sandBox
     endif
     pwd
+    umask 2
     mkdir -p $sandBox
     ln -s ${WRK_DIR}/St*  $sandBox
     ln -s ${WRK_DIR}/pam*  $sandBox
@@ -129,9 +130,14 @@ EOF
     echo "done embedding for $coreN  "`date`
     ls -la
     gzip $r4sLogFile
+    if ( ! -d $FSET_PATH ) then
+	 mkdir -p $FSET_PATH
+	 chmod g+s $FSET_PATH
+    endif
     if ( ! -d $FSET_PATH/$REQUEST_PATH ) then
 	 mkdir -p $FSET_PATH/$REQUEST_PATH
     endif
+    chmod o-r st*.log.gz
     cp -p st* $FSET_PATH/$REQUEST_PATH/
     cd ${WRK_DIR}
     rm -rf $sandBox
