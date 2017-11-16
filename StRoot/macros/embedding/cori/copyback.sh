@@ -1,13 +1,13 @@
 #!/bin/sh
 #the script to copy back the embedding data to PDSF embedding repository.
 #usage: 
-#%screen
-#%./copyback.sh [Fset_begin#] [Fset_end#]
+#%screen ./copyback.sh [Fset_begin#] [Fset_end#]
 # or (if only one fset)
-#%./copyback.sh [Fset#] 
+#%screen ./copyback.sh [Fset#] 
 #input the PDSF NIM password
-#use 'Ctrl+A Ctrl+D' to detach the screen session. 
+#use 'Ctrl+A Ctrl+D' to detach the screen session if the transfer starts normally. 
 #memorize the cori node host name, so that login back again to monitor the screen session (with 'screen -ls' and 'screen -r' to find the detached session and bring it back to frontend).
+#if the transfer doesn't start, remove screen in the command, and check what is going on.
 
 if [[ ! $HOST =~ "cori" ]] ; then
    echo this code can only be used for Cori!
