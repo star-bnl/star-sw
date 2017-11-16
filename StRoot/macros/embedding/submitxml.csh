@@ -1,5 +1,10 @@
 #!/bin/csh
 
+if ( "$HOST" !~ "*pdsf*" ) then
+   echo "this code can only be used for PDSF!"
+   exit
+endif
+
 if ( $#argv != 1 ) then
   echo ""
   echo " Usage : $0 [FSET number, 109 or something like that]"
