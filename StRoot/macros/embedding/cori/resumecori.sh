@@ -70,8 +70,7 @@ if [ $bswitch -eq 1 ] ; then
    nnode=`grep "#SBATCH -N" $slr | awk '{print $3}'`
    ntask=`cat $tlist |wc -l`
    nnewtask=`cat $newtlist |wc -l`
-   nnnode=`echo "scale=7;$nnewtask/$ntask*($nnode-1.0)" |bc -l`
-   nnewnode=`echo "scale=0;($nnnode+2)/1.0" |bc -l`
+   nnewnode=`echo "$nnewtask/$ntask*($nnode-1)+2" |bc -l |awk -F'.' '{print $1}'`
    sed -i "s/SBATCH -N $nnode/SBATCH -N $nnewnode/g" $newslr
 fi
 
