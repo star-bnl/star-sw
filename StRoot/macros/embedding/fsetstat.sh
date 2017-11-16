@@ -1,5 +1,5 @@
 #!/bin/sh
-#show statistics info of one Fset, work at both PDSF and Cori
+#show statistics info of one Fset, applicable at both PDSF and Cori
 
 if [ ! $# -eq 1 ] ; then
    echo ""
@@ -27,7 +27,11 @@ if [ ! -d "$fsetp" ] ; then
    echo Fset# $1 directory can not be found in $outp/$trgset 
    exit
 fi
-echo Fset# $1 directory is found in $outp/$trgset, now start to scan ... 
+echo ""
+echo "Fset# $1 data is found in $fsetp"
+echo "Now start to scan ..."
+echo ""
+echo "-------------------------------------"
 
 total=0
 count=0
@@ -50,4 +54,9 @@ echo $nanaevents events accepted for embedding in this daq file
 allevts=`echo "$allevts+$nevents" |bc -l`
 storedevts=`echo "$storedevts+$nanaevents" |bc -l`
 done
-echo "total # of files:" $count "; total # of daq events:" $allevts "; total # of embedded events:" $storedevts "; total CPU*Hours:" `echo "$total/3600+0.5" | bc -l | cut -d. -f1` "; average CPU*Hours per file:" `echo "$total/$count/3600+0.5" | bc -l | cut -d. -f1`
+
+echo ""
+echo "-----------DONE------------"
+echo "Scanned Fset# $1 data in $fsetp" 
+echo "total # of log files:" $count "; total # of daq events:" $allevts "; total # of embedded events:" $storedevts "; total CPU*Hours:" `echo "$total/3600+0.5" | bc -l | cut -d. -f1` "; average CPU*Hours per file:" `echo "$total/$count/3600+0.5" | bc -l | cut -d. -f1`
+echo ""
