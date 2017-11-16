@@ -423,166 +423,166 @@ int sfs_index::getDirSize(char *dir, SfsDirsize *sizes)
 
 int sfs_index::writeFsHeader()
 {
-  static char *volumeSpec = "SFS V00.01\0\0\0";
-  int ret;
-  int sz;
-  char *bb;
-  SFS_Header head;
+    static char *volumeSpec = (char *)"SFS V00.01\0\0\0";
+    int ret;
+    int sz;
+    char *bb;
+    SFS_Header head;
   
-  bb = volumeSpec;
-  sz = 12;
-  while(sz) {
-    ret = wfile.write(volumeSpec, sz);
+    bb = volumeSpec;
+    sz = 12;
+    while(sz) {
+	ret = wfile.write(volumeSpec, sz);
     
-    if(ret < 0) {
-      return -1;
+	if(ret < 0) {
+	    return -1;
+	}
+	sz -= ret;
+	bb += ret;
     }
-    sz -= ret;
-    bb += ret;
-  }
   
-  memcpy(head.type, "HEAD", 4);
-  head.byte_order = 0x04030201;
-  head.time = time(NULL);
+    memcpy(head.type, "HEAD", 4);
+    head.byte_order = 0x04030201;
+    head.time = time(NULL);
   
-  bb = (char *)&head;
-  sz = sizeof(head);
-  while(sz) {
-    ret = wfile.write(bb, sz);
+    bb = (char *)&head;
+    sz = sizeof(head);
+    while(sz) {
+	ret = wfile.write(bb, sz);
     
-    if(ret < 0) {
-      return -1;
-    }
+	if(ret < 0) {
+	    return -1;
+	}
 
-    sz -= ret;
-    bb += ret;
-  }
+	sz -= ret;
+	bb += ret;
+    }
   
-  return 0;
+    return 0;
 }
 
 int sfs_index::write(char *fn, char *buff, int size)
 {
-  int ret;
-  char *bb;
-  int sz;
-  char path[256];
-  int attr = SFS_ATTR_NOCD;
+    int ret;
+    char *bb;
+    int sz;
+    char path[256];
+    int attr = SFS_ATTR_NOCD;
 
-  char b[256];
-  SFS_File *file = (SFS_File *)b;
+    char b[256];
+    SFS_File *file = (SFS_File *)b;
 
-  if(cdchanged) {
-    // (a) if filename is absolute filename do nothing, leave cdchanged as is
-    // (b) if filename has no subdirs, then use fullpath and unset NOCD
-    // (c) if filename has subdirs, then write a directory entry separately
+    if(cdchanged) {
+	// (a) if filename is absolute filename do nothing, leave cdchanged as is
+	// (b) if filename has no subdirs, then use fullpath and unset NOCD
+	// (c) if filename has subdirs, then write a directory entry separately
     
-    //printf("cdchanged\n");
+	//printf("cdchanged\n");
 
-    if(fn[0] == '/') {
-      strcpy(path, fn);
+	if(fn[0] == '/') {
+	    strcpy(path, fn);
+	}
+	else {
+	    // any non-trailing slash?
+	    cdchanged = 0;        // now we do a cd either way!
+
+	    int subdirs = 0;
+	    int len = strlen(fn);
+	    for(int i=0;i<len-1;i++) {
+		if(fn[i] == '/') {
+		    subdirs = 1;
+		    break;
+		}
+	    }
+
+	    if(!subdirs) {
+		getFullPath(path, fn);
+		attr = 0;
+	    }
+      
+	    if(subdirs) {
+		memcpy(file->type, "FILE", 4);
+		file->byte_order = 0x04030201;
+		file->sz = 0;
+		file->head_sz = seeksize(strlen(cwd)+1) + sizeof(SFS_File) - 4;
+		file->attr = 0;
+		strcpy(file->name, cwd);
+	
+		bb = (char *)file;
+		sz = file->head_sz;
+	
+		while(sz) {
+		    ret = wfile.write(bb, sz);
+		    if(ret < 0) {
+			return -1;
+		    }
+	  
+		    sz -= ret;
+		    bb += ret;
+		}
+	
+		strcpy(path, fn);
+	    }
+	}
     }
     else {
-      // any non-trailing slash?
-      cdchanged = 0;        // now we do a cd either way!
-
-      int subdirs = 0;
-      int len = strlen(fn);
-      for(int i=0;i<len-1;i++) {
-	if(fn[i] == '/') {
-	  subdirs = 1;
-	  break;
-	}
-      }
-
-      if(!subdirs) {
-	getFullPath(path, fn);
-	attr = 0;
-      }
-      
-      if(subdirs) {
-	memcpy(file->type, "FILE", 4);
-	file->byte_order = 0x04030201;
-	file->sz = 0;
-	file->head_sz = seeksize(strlen(cwd)+1) + sizeof(SFS_File) - 4;
-	file->attr = 0;
-	strcpy(file->name, cwd);
-	
-	bb = (char *)file;
-	sz = file->head_sz;
-	
-	while(sz) {
-	  ret = wfile.write(bb, sz);
-	  if(ret < 0) {
-	    return -1;
-	  }
-	  
-	  sz -= ret;
-	  bb += ret;
-	}
-	
 	strcpy(path, fn);
-      }
-    }
-  }
-  else {
-    strcpy(path, fn);
-  }
-
-  //printf("cd changed = %d  path = %s\n",cdchanged,path);
-  
-
-  
-  memcpy(file->type, "FILE", 4);
-  file->byte_order = 0x04030201;
-  file->sz = size;
-  file->head_sz = seeksize(strlen(path)+1) + sizeof(SFS_File) - 4;
-  file->attr = attr;
-
-  strcpy(file->name, path);
-  
-  bb = (char *)file;
-  sz = file->head_sz;
-  
-  while(sz) {
-    ret = wfile.write(bb, sz);
-    if(ret < 0) {
-      return -1;
     }
 
-    sz -= ret;
-    bb += ret;
-  }
-
-  sz = size;
-  bb = buff;
-
-  while(sz) {
-    ret = wfile.write(bb, sz);
-    if(ret < 0) {
-      return -1;
-    }
-
-    sz -= ret;
-    bb += ret;
-  }
-
-  // pad to multiple of 4 bytes.
-  char *zero = "\0\0\0\0";
-  sz = seeksize(size) - size;
-  bb = zero;
+    //printf("cd changed = %d  path = %s\n",cdchanged,path);
   
-  while(sz) {
-    ret = wfile.write(bb, sz); 
-    if(ret < 0) {
-      return -1;
+
+  
+    memcpy(file->type, "FILE", 4);
+    file->byte_order = 0x04030201;
+    file->sz = size;
+    file->head_sz = seeksize(strlen(path)+1) + sizeof(SFS_File) - 4;
+    file->attr = attr;
+
+    strcpy(file->name, path);
+  
+    bb = (char *)file;
+    sz = file->head_sz;
+  
+    while(sz) {
+	ret = wfile.write(bb, sz);
+	if(ret < 0) {
+	    return -1;
+	}
+
+	sz -= ret;
+	bb += ret;
     }
+
+    sz = size;
+    bb = buff;
+
+    while(sz) {
+	ret = wfile.write(bb, sz);
+	if(ret < 0) {
+	    return -1;
+	}
+
+	sz -= ret;
+	bb += ret;
+    }
+
+    // pad to multiple of 4 bytes.
+    char *zero = (char *)"\0\0\0\0";
+    sz = seeksize(size) - size;
+    bb = zero;
+  
+    while(sz) {
+	ret = wfile.write(bb, sz); 
+	if(ret < 0) {
+	    return -1;
+	}
     
-    sz -= ret;
-    bb += ret;
-  }
+	sz -= ret;
+	bb += ret;
+    }
   
-  return size;
+    return size;
 }
 
 int sfs_index::getwritevsz(fs_iovec *fsiovec, int n)
@@ -857,48 +857,48 @@ int sfs_index::getSingleDirSize(char *fn, int offset)
 
 int sfs_index::mountSingleDir()   // mounts from current position of wfile...
 {
-  if(singleDirIttr) delete singleDirIttr;
+    if(singleDirIttr) delete singleDirIttr;
   
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  long long int offset = wfile.lseek(0,SEEK_CUR);
-  LOG(DBG, "mountSingleDir()   offset=%lld 0x%x", offset, wfile.wbuff);
-  if(!wfile.wbuff) {   // if a memory mount, already done...
-    singleDirOffset = offset;
-    nextSingleDirOffset = offset;
-  }
+    long long int offset = wfile.lseek(0,SEEK_CUR);
+    LOG(DBG, "mountSingleDir()   offset=%lld 0x%x", offset, wfile.wbuff);
+    if(!wfile.wbuff) {   // if a memory mount, already done...
+	singleDirOffset = offset;
+	nextSingleDirOffset = offset;
+    }
 #else
-  int offset = wfile.lseek(0,SEEK_CUR);
-  if(!wfile.wbuff) {
-    singleDirOffset = offset;
-    nextSingleDirOffset = offset;
-  }
+    int offset = wfile.lseek(0,SEEK_CUR);
+    if(!wfile.wbuff) {
+	singleDirOffset = offset;
+	nextSingleDirOffset = offset;
+    }
 #endif
 
-  singleDirMount = 1;
-  singleDirIttr = new SFS_ittr(offset);
+    singleDirMount = 1;
+    singleDirIttr = new SFS_ittr(offset);
  
-  if(singleDirIttr->get(&wfile) < 0) {
-    delete singleDirIttr;
-    singleDirIttr = NULL;
-    singleDirMount = 0;
+    if(singleDirIttr->get(&wfile) < 0) {
+	delete singleDirIttr;
+	singleDirIttr = NULL;
+	singleDirMount = 0;
     
-    root = alloc_inode("",0,0,0);
-    strcpy(cwd, "/");
-    index_created = 1;
-    return -1;
-  }
+	root = alloc_inode("",0,0,0);
+	strcpy(cwd, "/");
+	index_created = 1;
+	return -1;
+    }
 
-  if(singleDirIttr->next() < 0) {
+    if(singleDirIttr->next() < 0) {
 
-    root = alloc_inode("",0,0,0);
-    strcpy(cwd, "/");
-    index_created = 1;
+	root = alloc_inode("",0,0,0);
+	strcpy(cwd, "/");
+	index_created = 1;
     
-    LOG(NOTE, "Couldn't get any SFS dirs...");
-    return -1;
-  }
+	LOG(NOTE, "Couldn't get any SFS dirs...");
+	return -1;
+    }
 
-  return _mountNextDir();
+    return _mountNextDir();
 }
 
 // returns -1 on error

@@ -543,9 +543,9 @@ fs_dirent *fs_index::readdir(fs_dir *dir, fs_dirent *ent)
 }
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz, int overhead)
+fs_inode *fs_index::alloc_inode(const char *name, long long int off, int sz, int overhead)
 #else
-  fs_inode *fs_index::alloc_inode(char *name, int off, int sz, int overhead)
+  fs_inode *fs_index::alloc_inode(const char *name, int off, int sz, int overhead)
 #endif
 {
     //printf("alloc\n");
