@@ -51,8 +51,8 @@ do
 
    fsetp=$cori/$trgset/${particle}_${ifset}_${reqid}
    destp=$pdsf/$trgset/${particle}_${ifset}_${reqid}
-   echo CORI: $fsetp
-   echo PDSF: $destp
+   echo "CORI: $fsetp"
+   echo "--->: $destp"
    if [ ! -d "$fsetp" ] ; then
 	echo "CAUTION:"
 	echo "$fsetp can not be found at Cori! please double check!"
@@ -63,8 +63,7 @@ do
 	echo "$destp is already at PDSF! please double check!"
 	exit
    fi
-   echo ""
-   echo "now start to prepare the copy..."
+
    if [ "$ifset" -eq $begin ] ; then
 	srcdirs="$fsetp"
    else
@@ -72,7 +71,6 @@ do
    fi
 done
 
-echo $srcdirs
-
+#echo $srcdirs
 scp -rp $srcdirs $USER@dtn01.nersc.gov:$dest/
 
