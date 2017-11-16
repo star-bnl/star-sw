@@ -6,7 +6,8 @@
 #%screen ./copyback.sh [Fset#] 
 #input the PDSF NIM password
 #use 'Ctrl+A Ctrl+D' to detach the screen session if the transfer starts normally. 
-#memorize the cori node host name, so that login back again to monitor the screen session (with 'screen -ls' and 'screen -r' to find the detached session and bring it back to frontend).
+#memorize the cori node host name, so that login back again to monitor the screen 
+#session (with 'screen -ls' and 'screen -r' to find the detached session and bring it back to frontend).
 #if the transfer doesn't start, remove screen in the command, and check what is going on.
 
 if [[ ! $HOST =~ "cori" ]] ; then
