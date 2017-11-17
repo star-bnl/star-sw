@@ -5,6 +5,7 @@
 <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
+  set Name = `basename $PWD`
   setenv NODEBUG yes
   setup 64b
   starver .DEV2 
@@ -17,11 +18,17 @@
   set logName  = ${name}B.log
   set generF   = ${name}.MuDst.root
   setenv StarEndMakerShell
+  set sdt = "";
+  echo $Name | grep -i Ideal
+  if ($?) set sdt = ",sdt20160301";
+  set KFV = "";
+  echo $Name | grep -i KFV
+  if (!$?) set KFV = ",KFVertex";
   if (! -r ${generF} ) then
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,-bbcSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160504.180732","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm","'${file}'")' &gt;&amp; ${logName}
-    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,KFVertex,-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm,TObjTable","'${file}'")' &gt;&amp; ${logName}
+    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA'${KFV}',-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm","'${file}'")' &gt;&amp; ${logName}
   endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->

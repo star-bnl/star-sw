@@ -5,6 +5,7 @@
   setenv STARFPE NO
   setenv NODEBUG yes
   starver TFG17m
+  setup 64b
 #  setup gcc631
 ln -s $STAR/.$STAR_HOST_SYS .
 #if (! -r .sl64_gcc492) ln -s ../../.sl64_gcc492 .
