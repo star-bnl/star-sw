@@ -134,6 +134,10 @@ Int_t StIstHitMaker::Make()
             newHit->setLocalPosition(local[0], local[1], local[2]); //set local position on sensor
             int sensorId = 1000 + ((int)newHit->getLadder() - 1) * kIstNumSensorsPerLadder + (int)newHit->getSensor();
             TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *) mSensorTransforms->FindObject(Form("R%04i", sensorId));
+	    if (! geoMSensorOnGlobal) {
+	      LOG_ERROR << "SensorTransforms for sensor :" << sensorId << " has not been found. Skip cluster !" << endm;
+	      continue;
+	    }
 	    Double_t global[3];
             geoMSensorOnGlobal->LocalToMaster(local, global);
             StThreeVectorF vecGlobal(global);
