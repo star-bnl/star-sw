@@ -1,7 +1,7 @@
 #include <limits>
 
 #include "TMath.h"
-
+#include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -33,11 +33,32 @@ StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack,
   Int_t module       = btofHit->module();
   Int_t cell         = btofHit->cell();
   Float_t tof        = gTrack->btofPidTraits().timeOfFlight();
-  Float_t beta       = (pTrack) && ! TMath::IsNaN(pTrack->btofPidTraits().beta()) ? pTrack->btofPidTraits().beta() : -999.;
-  StThreeVectorF pos = gTrack->btofPidTraits().position();
+  const StMuBTofPidTraits &btofPid = gTrack->btofPidTraits();
+  Float_t beta       = (pTrack) && ! TMath::IsNaN(btofPid.beta()) ? btofPid.beta() : -999.;
+  StThreeVectorF tofPoint = btofPid.position();
+  // Maksym correction ================================================================================
+  double timeTof = btofPid.timeOfFlight();
+  double lengthTof = btofPid.pathLength();
+  if(lengthTof < 0.)     {
+    double dlDCA = 0;
+    if (StMuDst::instance()->currentVertexIndex() >= 0) {
+      const StThreeVectorF & dcaPoint  = gTrack->dca(StMuDst::instance()->currentVertexIndex()); 
+      StPhysicalHelixD innerHelix = gTrack->helix();
+      dlDCA = fabs( innerHelix.pathLength( StThreeVector<double>(dcaPoint.x(), dcaPoint.y(), dcaPoint.z()) ) );
+    }
+    StPhysicalHelixD outerHelix = gTrack->outerHelix();
+    double dlTOF = fabs( outerHelix.pathLength( StThreeVector<double>(tofPoint.x(), tofPoint.y(), tofPoint.z()) ) );
+    
+    double l = gTrack->length();
+    lengthTof = l + dlDCA + dlTOF;
+  }
+  if(timeTof > 0. && lengthTof > 0.)     {
+    beta = lengthTof/timeTof/(1e-9*TMath::Ccgs());
+  }
+  // end of Maksym correction ================================================================================
 
   mBTofCellId  = (Short_t)((tray - 1) * 192 + (module - 1) * 6 + (cell - 1));
-  mBTofMatchFlag = (UChar_t)(gTrack->btofPidTraits().matchFlag());
+  mBTofMatchFlag = (UChar_t)(btofPid.matchFlag());
   if (tof < 0)
   {
     mBTof = 0;
@@ -54,11 +75,11 @@ StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack,
   {
     mBTofBeta = (beta * 20000. > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(beta * 20000.));
   }
-  mBTofHitPosX = (fabs(pos.x() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(pos.x() * 100.));
-  mBTofHitPosY = (fabs(pos.y() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(pos.y() * 100.));
-  mBTofHitPosZ = (fabs(pos.z() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(pos.z() * 100.));
-  mBTofYLocal  = (fabs(gTrack->btofPidTraits().yLocal()) * 1000. > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrack->btofPidTraits().yLocal() * 1000.));
-  mBTofZLocal  = (fabs(gTrack->btofPidTraits().zLocal()) * 1000. > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrack->btofPidTraits().zLocal() * 1000.));
+  mBTofHitPosX = (fabs(tofPoint.x() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(tofPoint.x() * 100.));
+  mBTofHitPosY = (fabs(tofPoint.y() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(tofPoint.y() * 100.));
+  mBTofHitPosZ = (fabs(tofPoint.z() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(tofPoint.z() * 100.));
+  mBTofYLocal  = (fabs(btofPid.yLocal()) * 1000. > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(btofPid.yLocal() * 1000.));
+  mBTofZLocal  = (fabs(btofPid.zLocal()) * 1000. > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(btofPid.zLocal() * 1000.));
 }
 
 //----------------------------------------------------------------------------------

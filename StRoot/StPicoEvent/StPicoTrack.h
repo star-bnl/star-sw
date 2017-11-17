@@ -107,7 +107,7 @@ protected:
   // dcaG
   Float16_t mPar[6];
   Float16_t mSigma[5];
-  Float16_t mCorr[10]; //[-1,1,12]!
-  ClassDef(StPicoTrack, 4)
+  Float16_t mCorr[10]; //[-1,1,16]!
+  ClassDef(StPicoTrack, 5)
 };
 #endif

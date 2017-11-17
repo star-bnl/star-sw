@@ -8,7 +8,6 @@
 #include "StPicoEvent/StPicoTrack.h"
 #include "StBichsel/StdEdxPull.h"
 
-
 //----------------------------------------------------------------------------------
 StPicoTrack::StPicoTrack() : TObject(),
 			     mId(0),
