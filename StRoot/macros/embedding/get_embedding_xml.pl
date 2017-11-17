@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.33 2017/11/16 06:17:04 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.34 2017/11/17 13:02:36 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.34  2017/11/17 13:02:36  zhux
+# added 'StarDb' and 'Input' to sandbox
+#
 # Revision 1.33  2017/11/16 06:17:04  zhux
 # updated fromScratch tag. do not copy back the temporary TrackMap*root.
 #
@@ -582,6 +585,8 @@ print OUT "  <Package name=\"Localmakerlibs&FSET;\">\n";
 #print OUT "    <File>file:./$libraryPath/</File>\n";
 print OUT "    <File>file:./StRoot/</File>\n";
 print OUT "    <File>file:./pams/</File>\n";
+print OUT "    <File>file:./StarDb/</File>\n";
+print OUT "    <File>file:./Input/</File>\n";
 #if ( $simulatorMode == 1 ) { 
 #	print OUT " 	<File>file:$seed</File>\n"; 
 #	print OUT " 	<File>file:$kumacFile</File>\n";
