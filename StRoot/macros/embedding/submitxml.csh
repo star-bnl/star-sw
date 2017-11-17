@@ -23,6 +23,11 @@ set prodname = `echo $prod`
 
 set template = "embed_template_${prod}.xml"
 
+if ( ! -f "$template" ) then
+  echo "ERROR: $template does not exist! please run preparexmlslr.sh first!"
+  exit
+endif
+
 echo "using the template file: $template"
 
 set FSET = "$1"
