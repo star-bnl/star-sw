@@ -69,9 +69,11 @@
 #include "StPicoDstMaker/StPicoDst.h"
 #include "TH1.h"
 #include "TH2.h"
+#define __EVENT_SELECTION__
 static TH1F *hists[3] = {0};
 static TH2F *pVrZ = 0;
 static TH2F *pVxy = 0;
+static Int_t _debug = 0;
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
@@ -598,6 +600,7 @@ Int_t StPicoDstMaker::MakeWrite()
   }
 
   int const originalVertexId = mMuDst->currentVertexIndex();
+#ifndef __EVENT_SELECTION__
   if (! mMuDst->numberOfMcVertices()) {
     if (!selectVertex())  {
       LOG_INFO << "Vertex is not valid" << endm;
@@ -605,6 +608,7 @@ Int_t StPicoDstMaker::MakeWrite()
       return kStOK;
     }
   }
+#endif /* ! __EVENT_SELECTION__ */
   mBField = muEvent->magneticField();
 
 
@@ -669,11 +673,13 @@ Int_t StPicoDstMaker::fillTracks()
 3.  const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051"
 4.  dca3D < 50 cm 
   */
+  if (! mMuDst->primaryVertex()) {ok = 1; return ok;}
   StThreeVectorD V(mMuDst->primaryVertex()->position());
   if (pVrZ) {
     pVrZ->Fill(V.z(),V.perp());
     pVxy->Fill(V.y(),V.x());
   }
+#ifndef __EVENT_SELECTION__
   if (! mMuDst->numberOfMcVertices()) {
     if (! (-0.3 < V.x() && V.x() < 0.1 && -0.27 < V.y() && V.y() < - 0.13)) {ok = 1; return ok;}
     StThreeVectorD E(mMuDst->primaryVertex()->posError());
@@ -697,6 +703,7 @@ Int_t StPicoDstMaker::fillTracks()
     }
     if (NoAnyTriggers && GoodTrigger < 0) {ok = 3; return ok;}
   }
+#endif /* ! __EVENT_SELECTION__ */
   // We save primary tracks associated with the selected primary vertex only
   // don't use StMuTrack::primary(), it returns primary tracks associated with
   // all vertices
@@ -773,7 +780,12 @@ Int_t StPicoDstMaker::fillTracks()
     new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, mBField, mMuDst->primaryVertex()->position(), *dcaG);
 
     StPicoTrack* picoTrk = (StPicoTrack*)mPicoArrays[StPicoArrays::Track]->At(counter);
-
+    if (_debug) {
+      cout << "StPicoDstMaker::fillTracks: MuTrack " << Form("%4i %8.3f %8.3f %8.3f",i,gTrk->p().x() ,gTrk->p().y() ,gTrk->p().z())
+	   << Form("\te/pi/K/p\t%8.3f %8.3f %8.3f %8.3f",gTrk->nSigmaElectron(),gTrk->nSigmaPion(), gTrk->nSigmaKaon(),gTrk->nSigmaProton()) << endl
+	   << "                          PicoTrack " << Form("%4i %8.3f %8.3f %8.3f",i,picoTrk->gMom().x() ,picoTrk->gMom().y() ,picoTrk->gMom().z())
+	   << Form("\te/pi/K/p\t%8.3f %8.3f %8.3f %8.3f",picoTrk->nSigmaElectron(),picoTrk->nSigmaPion(), picoTrk->nSigmaKaon(),picoTrk->nSigmaProton()) << endl;
+    }
     // Fill pid traits
     if (mEmcCollection)
     {
@@ -1004,6 +1016,7 @@ void StPicoDstMaker::fillEmcTrigger()
   if (!trigSimu) return;
 
   // BEMC High Tower trigger
+  if (!trigSimu->bemc) return;
   int bht0 = trigSimu->bemc->barrelHighTowerTh(0);
   int bht1 = trigSimu->bemc->barrelHighTowerTh(1);
   int bht2 = trigSimu->bemc->barrelHighTowerTh(2);

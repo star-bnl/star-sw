@@ -1,5 +1,4 @@
 /* 
-   root.exe 'lMuDst.C(-1,"/net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1500052.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoWrite,quiet")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1500052.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/Hijing/VMC.Real.TFG17j/hijingAuAu200_65_1000.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
 */
@@ -68,6 +67,7 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   10/14/17  7                                 : 712262142 :
   10/14/17  8                 DcaCut and Event: 312097307 :        12.48
   10/16/17
+  11/15/17  9                 Update packing  : 268419555 :        14.51
 5.3T    scratch1/MuDst/2016
 13T     scratch2/MuDst/2016  chained 6071 files      with total 29483322 events
 1.3T    work/Pico/2016       chained 6071 files      with total 19120471 events
