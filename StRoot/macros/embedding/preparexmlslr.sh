@@ -12,7 +12,7 @@
 
 if [[ $HOST =~ "cori" ]] ; then
  module load python/3.5-anaconda
- cp StRoot/macros/embedding/cori/farmerQAmonitor.ipynb ./
+ ln -s StRoot/macros/embedding/cori/farmerQAmonitor.ipynb
  ln -s -f StRoot/macros/embedding/fsetstat.sh
  ln -s StRoot/macros/embedding/cori/resumecori.sh
  ln -s StRoot/macros/embedding/cori/copyback.sh
