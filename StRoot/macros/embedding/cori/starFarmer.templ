@@ -61,7 +61,7 @@ rm -rf $wrkDir
 mkdir -p $wrkDir/logs
 
 # it is safer to copy all code to the sandbox, so job still runs fine even if you recompile your local code 
-cp -rpL $codeDir/StRoot $codeDir/.sl64_gcc482/   $wrkDir
+cp -rpL $codeDir/StRoot $codeDir/pams $codeDir/StarDb $codeDir/Input  $wrkDir
 # the taskFarmer related code must be copied to the sadnbox
 cp -rpL  $myTaskCSH $myTaskList  $wrkDir
 
