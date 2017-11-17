@@ -103,9 +103,10 @@
     pwd
     umask 2
     mkdir -p $sandBox
-    ln -s ${WRK_DIR}/St*  $sandBox
-    ln -s ${WRK_DIR}/pam*  $sandBox
-    #ln -s  ${WRK_DIR}/.sl64*  $sandBox
+    ln -s ${WRK_DIR}/StRoot  $sandBox
+    ln -s ${WRK_DIR}/pams  $sandBox
+    ln -s ${WRK_DIR}/StarDb  $sandBox
+    ln -s ${WRK_DIR}/Input  $sandBox
     echo step into sandbox 
     cd $sandBox
     pwd
