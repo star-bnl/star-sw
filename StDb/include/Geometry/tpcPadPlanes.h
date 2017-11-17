@@ -1,24 +1,25 @@
-/*
-  :Description: 
-  :Synonyms::::
-  :Source:
-  :Update:
-  :Update frequncy:
-  :Reminder:
-  :Recall frequency:
-  :Size of Data:
-  :Pointer to data:  TPCPadplanes.time:
-*/
-struct tpc_padplanes {
-  /*  type varnam;      Units : Comments */
+#ifndef TPC_PADPLANES_H
+#define TPC_PADPLANES_H
+//:Description: geometrical characteristic of tpc's padplanes
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data: Geometry_tpc/tpcPadPlanes
+struct tpcPadPlanes {
+  //  type varnam;    //Units : Comments
 
-    long   padRows;
-    long   innerPadRows;
-    long   innerPadRows48;
-    long   innerPadRows52;
-    long   outerPadRows;
-    long   superInnerPadRows;
-    long   superOuterPadRows;
+
+    int    padRows;
+    int    innerPadRows;
+    int    innerPadRows48;
+    int    innerPadRows52;
+    int    outerPadRows;
+    int    superInnerPadRows;
+    int    superOuterPadRows;
 
     double innerSectorPadWidth;
     double innerSectorPadLength;
@@ -39,10 +40,10 @@ struct tpc_padplanes {
     double innerSectorEdge;
     double outerSectorEdge;
  
-    long   innerPadsPerRow[13];
-    long   outerPadsPerRow[32];
+    int    innerPadsPerRow[13];
+    int    outerPadsPerRow[32];
     double innerRowRadii[13];
     double outerRowRadii[32];
-};
 
-/* $Log $ */
+};
+#endif

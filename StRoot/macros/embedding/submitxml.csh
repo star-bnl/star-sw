@@ -1,5 +1,10 @@
 #!/bin/csh
 
+if ( "$HOST" !~ "*pdsf*" ) then
+   echo "this code can only be used for PDSF!"
+   exit
+endif
+
 if ( $#argv != 1 ) then
   echo ""
   echo " Usage : $0 [FSET number, 109 or something like that]"
@@ -17,6 +22,11 @@ set prod = `grep "\-production" $PWD/preparexmlslr.sh | awk -F"-production |-lib
 set prodname = `echo $prod`
 
 set template = "embed_template_${prod}.xml"
+
+if ( ! -f "$template" ) then
+  echo "ERROR: $template does not exist! please run preparexmlslr.sh first!"
+  exit
+endif
 
 echo "using the template file: $template"
 

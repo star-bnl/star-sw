@@ -40,5 +40,6 @@ root.exe -q -b -x 'bfc.C(1000,"P2014a btof mtd mtdCalib BEmcChkStat CorrX OSpace
 <!-- <input URL="command:daq_2014.pl" /> -->
 <!-- <input URL="file:/star/data03/daq/2016/035/17035170/st_physics_adc_17035170_raw_*.daq" /> -->
 <!-- <input URL="file:/star/institutions/lbl_scratch/hft/daq/Run16/039/17039018/st_physics_17039018_raw_40000*.daq" /> -->
-<input URL="file:/star/data03/daq/2016/042/17042027/st_mtd_17042027_raw_*.daq" />
+<!-- <input URL="file:/star/data03/daq/2016/042/17042027/st_mtd_17042027_raw_*.daq" /> -->
+<input URL="file:/star/data03/daq/2016/041/17041013/st_mtd_17041013_raw_*.daq" />
 </job>

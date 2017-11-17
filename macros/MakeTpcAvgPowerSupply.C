@@ -581,7 +581,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2017) {
     } else {IsBeenZeroSaved = kFALSE;}
     St_TpcAvgPowerSupply *TpcAvgPowerSupply = new St_TpcAvgPowerSupply("TpcAvgPowerSupply",1);
     TpcAvgPowerSupply->AddAt(&avgC);// TpcAvgPowerSupply->Print(0,1);
-    cout << "Run " << avgC.run << " Acummulated charge Inner = " << AcCharge[0] << " (C), Outer = " << AcCharge[1] << "(C)" << endl;
+    cout << "Run " << avgC.run << " Accumulated charge Inner = " << AcCharge[0] << " (C), Outer = " << AcCharge[1] << "(C)" << endl;
     if (uTrip > 0) {
       avgC.start_time = uBegin;
       avgC.stop_time  = uTrip;
