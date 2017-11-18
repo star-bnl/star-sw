@@ -45,7 +45,6 @@ hold
 .svn/* 
 *~
  build 
-test* 
 .#* 
 .\#* 
 .s* 
