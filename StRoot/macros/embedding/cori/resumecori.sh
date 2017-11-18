@@ -45,7 +45,7 @@ echo its scratch working dir: $CSCRATCH/starFarm-$slurmid/
 ls -l $CSCRATCH/starFarm-$slurmid/
 bswitch=0
 
-cat $tlist | while read line
+while read line
 do
    fn=`echo $line | awk '{print $4}'`
    fset=`echo $line | awk '{print $5}'`
@@ -58,10 +58,12 @@ do
    if [ $bswitch -eq 1 ] ; then
 	echo $line >> $newtlist
    fi
-done
+done < $tlist 
 
 if [ $bswitch -eq 0 ] ; then
+   echo ""
    echo this job finished properly!
+   echo ""
 fi
 
 if [ $bswitch -eq 1 ] ; then
@@ -72,6 +74,22 @@ if [ $bswitch -eq 1 ] ; then
    nnewtask=`cat $newtlist |wc -l`
    nnewnode=`echo "$nnewtask/$ntask*($nnode-1)+2" |bc -l |awk -F'.' '{print $1}'`
    sed -i "s/SBATCH -N $nnode/SBATCH -N $nnewnode/g" $newslr
+
+   nskew=`grep "export SKEW=" $slr | awk '{print $2}' | awk -F'=' '{print $2}'`
+   nnewskew=`echo "($nnewnode-1)/($nnode-1)*$nskew" |bc -l |awk -F'.' '{print $1}'`
+   sed -i "s/export SKEW=$nskew/export SKEW=$nnewskew/g" $newslr
+
+   if [ $nnewnode -lt 4 ] ; then
+	sed -i "s/#SBATCH  --partition regular -t 35:30:00   -J starFarm-reg/#-SBATCH  --partition regular -t 35:30:00   -J starFarm-reg/g" $newslr
+	sed -i "s/#-SBATCH  --partition regular -t 35:30:00 --qos=premium   -J starFarm-prem/#SBATCH  --partition regular -t 35:30:00 --qos=premium   -J starFarm-prem/g" $newslr
+   fi
+
+   echo ""
+   echo "CAUTION: found failed tasks!"
+   echo "$newslr and $newtlist are prepared"
+   echo "please submit with"
+   echo "sbatch $newslr"
+   echo ""
 fi
 
 rm -f tmp.list
