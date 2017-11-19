@@ -67,6 +67,8 @@ fi
 gzip -cd $i | tail -n 1000 > tmplog.txt
 jtime=`grep "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
 if [ -z $jtime ] ; then
+   echo CAUTION: corrupted task found!
+   echo $i
    continue
 fi
 count=$(($count+1))
@@ -88,9 +90,10 @@ echo "total # of embedded events:" $storedevts "; total CPU*Hours:" `echo "$tota
 if [ $count -lt $ndaq ] ; then
    echo CAUTION: $(($ndaq-$count))/$ndaq daq files have not been processed properly!
    if [[ $HOST =~ "cori" ]] ; then
-	echo Please use \'resumecori.sh\' to do some further check.
+	echo Please use \'findfailedslr.sh\' to do some further check.
    else
-	echo Please use \'findfailed.sh\' to do some further check.
+	echo Please use \'findfailedxml.sh\' to do some further check, if the data was produced at PDSF.
+	echo or use \'findfailedslr.sh\' at Cori node if the data was first produced at Cori.
    fi
 fi
 
