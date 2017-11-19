@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #usage: in a pdsf embedding job submission directory, where the .session.xml file is, run
-#./findfailed.sh
+#./findfailedxml.sh
 #
 #the code loops over # of daq files, find whether there is log.gz file, if not, printout the #, if yes,
 #keep looking for the minimc.root file, if not, return #.
@@ -24,7 +24,7 @@ echo particle name: $particle
 echo request ID: $reqid
 echo number of daq files: $ndaq
 
-subfile=submitfailed.sh
+subfile=resubfailedxml.sh
 
 if [ -f "$subfile" ] ; then
    rm -f $subfile
@@ -83,8 +83,9 @@ do
 	   minifile=`echo $bnjob | awk -F. '{print $1}'`
 	   #echo $minifile
 	   minicheck=`grep $minifile tmpminimc.list`
-	   aborted=`zgrep "Bus error" $logfile`
-	   if [[ -z "$minicheck" || ! -z "$aborted" ]] ; then
+	   aborted=`zgrep "StChain::Embedding" $logfile`
+	   buserr=`zgrep "Bus error" $logfile`
+	   if [[ -z "$minicheck" || -z "$aborted" || ! -z "$buserr" ]] ; then
 		eofcheck=`zgrep "StIOMaker::Make() == StEOF" $logfile`
 		zeroevent=`zgrep "StAnalysisMaker::Finish() Processed 0 events" $logfile`
 		if [[ -z "$eofcheck" || -z "$zeroevent" ]] ; then

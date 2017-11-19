@@ -139,7 +139,12 @@ EOF
 	 mkdir -p $FSET_PATH/$REQUEST_PATH
     endif
     chmod o-r st*.log.gz
-    cp -p st* $FSET_PATH/$REQUEST_PATH/
+    cp -p st*root $FSET_PATH/$REQUEST_PATH/
+    if ( ! -z "`ls st*.fzd`" ) then
+	 cp -p st*.fzd $FSET_PATH/$REQUEST_PATH/
+    endif
+    cp -p st*.log.gz $FSET_PATH/$REQUEST_PATH/
+
     cd ${WRK_DIR}
     rm -rf $sandBox
     echo end of task  coreN=$coreN fSet=$fSet
