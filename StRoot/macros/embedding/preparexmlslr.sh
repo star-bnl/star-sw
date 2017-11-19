@@ -14,7 +14,7 @@ if [[ $HOST =~ "cori" ]] ; then
  module load python/3.5-anaconda
  ln -s StRoot/macros/embedding/cori/farmerQAmonitor.ipynb
  ln -s -f StRoot/macros/embedding/fsetstat.sh
- ln -s StRoot/macros/embedding/cori/resumecori.sh
+ ln -s StRoot/macros/embedding/cori/findfailedslr.sh
  ln -s StRoot/macros/embedding/cori/copyback.sh
  script="python StRoot/macros/embedding/cori/prepEmbedTaskList.py"
 
@@ -25,7 +25,7 @@ if [[ $HOST =~ "cori" ]] ; then
 
 else
  ln -s StRoot/macros/embedding/submitxml.csh
- ln -s StRoot/macros/embedding/findfailed.sh
+ ln -s StRoot/macros/embedding/findfailedxml.sh
  ln -s -f StRoot/macros/embedding/fsetstat.sh
  script="perl StRoot/macros/embedding/get_embedding_xml.pl"
  fset=""
