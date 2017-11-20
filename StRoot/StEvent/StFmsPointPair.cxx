@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPointPair.cxx,v 2.3 2017/02/20 16:32:58 ullrich Exp $
+ * $Id: StFmsPointPair.cxx,v 2.4 2017/11/20 20:01:49 smirnovd Exp $
  *
  * Author: Akio Ogawa, Sep 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPointPair.cxx,v $
+ * Revision 2.4  2017/11/20 20:01:49  smirnovd
+ * Remove StRoot/ from included header prefix
+ *
  * Revision 2.3  2017/02/20 16:32:58  ullrich
  * Changing F to D for StLorentzVector
  *
@@ -23,10 +26,10 @@
  ***************************************************************************/
 #include "StFmsPointPair.h"
 #include "StFmsPoint.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPointPair.cxx,v 2.3 2017/02/20 16:32:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsPointPair.cxx,v 2.4 2017/11/20 20:01:49 smirnovd Exp $";
 
 StFmsPointPair::StFmsPointPair() : mFpsPid(0), mConeRadius{0.100, 0.070, 0.030}
 {
