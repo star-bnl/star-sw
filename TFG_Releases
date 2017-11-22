@@ -9,4 +9,6 @@ TFG17j The fix point for VMC alignment for HFT                      2017-09-13 1
 TFG17k The first release with iTPC in sector 20                     2017-10-05 18:43:13 -0400  (tag: TFG17k)
 TFG17l Freeze PicoDst                                               2017-11-02 09:37:30 -0400  (tag: TFG17l)
 TFG17m Fix precision in PicoDst                                     2017-11-15 12:27:29 -0500  (tag: TFG17m_1)
+TFG17n Freeze PicoDst before production                             2017-11-19 10:22:04 -0500  (HEAD, tag: TFG17n_1, master)
+TFG17o Freeze PicoDst before production                             2017-11-22 10:22:04 -0500  (HEAD, tag: TFG17o)
 .DEV2  head of TFG git repository
