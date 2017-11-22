@@ -1,0 +1,48 @@
+
+process varied input
+Processing Event Number 1 its # 1
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498
+ GenEvent units are GeV
+ pizero units are GeV
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498 GEV
+ Momenutm units:     MEV     Position units:      MM
+ pizero mass: 134.98 MEV
+Processing Event Number 2 its # 1
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498
+ GenEvent units are GeV
+ pizero units are GeV
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498 GEV
+ Momenutm units:     MEV     Position units:      MM
+ pizero mass: 134.98 MEV
+Processing Event Number 3 its # 1
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498
+ GenEvent units are GeV
+ pizero units are GeV
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498 GEV
+ Momenutm units:     MEV     Position units:      MM
+ pizero mass: 134.98 MEV
+Processing Event Number 4 its # 2
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498
+ GenEvent units are GeV
+ pizero units are GeV
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498 GEV
+ Momenutm units:     MEV     Position units:      MM
+ pizero mass: 134.98 MEV
+Processing Event Number 5 its # 3
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498
+ GenEvent units are GeV
+ pizero units are GeV
+ Momenutm units:     GEV     Position units:      MM
+ pizero mass: 0.13498 GEV
+ Momenutm units:     MEV     Position units:      MM
+ pizero mass: 134.98 MEV
+5 events processed. Finished.

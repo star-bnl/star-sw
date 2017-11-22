@@ -1,0 +1,77 @@
+time ./evtgenlhc_test1 file 1000 exampleFiles/GENERIC.DEC  
+time ./evtgenlhc_test1 print 100 exampleFiles/GENERIC.DEC  
+time ./evtgenlhc_test1 filevpho 1000 exampleFiles/GENERIC.DEC
+time ./evtgenlhc_test1 test1 1000
+time ./evtgenlhc_test1 chi1kstar 1000
+time ./evtgenlhc_test1 test2 1000
+time ./evtgenlhc_test1 omega 1000
+time ./evtgenlhc_test1 alias
+time ./evtgenlhc_test1 photos 1000
+time ./evtgenlhc_test1 trackmult 1000
+time ./evtgenlhc_test1 generic 1000
+time ./evtgenlhc_test1 generic 1000 exampleFiles/generic.list
+time ./evtgenlhc_test1 generic 1000 exampleFiles/genericlong.list
+time ./evtgenlhc_test1 finalstates 1000
+time ./evtgenlhc_test1 kstarnunu 1000
+time ./evtgenlhc_test1 bsmix 10000
+time ./evtgenlhc_test1 BtoXsgamma 1000
+time ./evtgenlhc_test1 BtoK1273gamma 1000
+time ./evtgenlhc_test1 pi0dalitz 1000 
+time ./evtgenlhc_test1 ddalitz 1000
+time ./evtgenlhc_test1 kstarll 1000
+time ./evtgenlhc_test1 kll 1000
+time ./evtgenlhc_test1 hll 1000 pimm
+time ./evtgenlhc_test1 hll 1000 piee
+time ./evtgenlhc_test1 hll 1000 pi0mm
+time ./evtgenlhc_test1 hll 1000 pi0ee
+time ./evtgenlhc_test1 vectorisr 10000
+time ./evtgenlhc_test1 bsquark 1000
+time ./evtgenlhc_test1 k3gamma 1000
+time ./evtgenlhc_test1 lambda 1000
+time ./evtgenlhc_test1 tautaupipi 1000
+time ./evtgenlhc_test1 tautauee 1000
+time ./evtgenlhc_test1 tautau2pi2pi 1000
+time ./evtgenlhc_test1 tautau3pi3pi 1000
+time ./evtgenlhc_test1 jpsikstar 1000 0
+time ./evtgenlhc_test1 jpsikstar 1000 1
+time ./evtgenlhc_test1 jpsikstar 1000 2
+time ./evtgenlhc_test1 jpsikstar 1000 3
+time ./evtgenlhc_test1 jpsikstar 1000 4
+time ./evtgenlhc_test1 svvcplh 1000
+time ./evtgenlhc_test1 svscplh 1000
+time ./evtgenlhc_test1 ssdcp 10000
+time ./evtgenlhc_test1 kstarstargamma 1000
+time ./evtgenlhc_test1 dstarpi 10000
+time ./evtgenlhc_test1 etacphiphi 10000
+time ./evtgenlhc_test1 vvpipi 1000
+time ./evtgenlhc_test1 svvhelamp 1000
+time ./evtgenlhc_test1 partwave 1000
+time ./evtgenlhc_test1 twobody 1000 exampleFiles/TWOBODY1.DEC twobody1.root
+time ./evtgenlhc_test1 twobody 1000 exampleFiles/TWOBODY2.DEC twobody2.root
+time ./evtgenlhc_test1 twobody 1000 exampleFiles/TWOBODY3.DEC twobody3.root
+time ./evtgenlhc_test1 pipipi 1000
+time ./evtgenlhc_test1 bhadronic 1000
+time ./evtgenlhc_test1 singleb 1000
+time ./evtgenlhc_test1 pipi 1000
+time ./evtgenlhc_test1 pipipipi 1000
+time ./evtgenlhc_test1 a2pi 1000 
+time ./evtgenlhc_test1 helamp 1000 exampleFiles/HELAMP1_D2STGAMMA.DEC helamp1_D2stgamma.root
+time ./evtgenlhc_test1 helamp2 1000
+time ./evtgenlhc_test1 lambda 1000
+time ./evtgenlhc_test1 d2pi 1000
+time ./evtgenlhc_test1 a1pi 1000
+time ./evtgenlhc_test1 cptest 1000 
+time ./evtgenlhc_test1 pipicpt 1000
+time ./evtgenlhc_test1 jpsiks 1000
+time ./evtgenlhc_test1 dump 10
+time ./evtgenlhc_test1 genericcont 1000
+time ./evtgenlhc_test1 d1 1000
+time ./evtgenlhc_test1 mix 1000
+time ./evtgenlhc_test1 bmix 10000 exampleFiles/BMIX_1.DEC bmix1.root
+time ./evtgenlhc_test1 bmix 10000 exampleFiles/BMIX_2.DEC bmix2.root
+time ./evtgenlhc_test1 semic 10000
+time ./evtgenlhc_test1 ddk 10000
+time ./evtgenlhc_test1 checkmass 10000 511
+time ./evtgenlhc_test1 jpsipolarization 10000
+time ./evtgenlhc_test1 checkrotboost
+time ./evtgenlhc_test1 baryonic 1000

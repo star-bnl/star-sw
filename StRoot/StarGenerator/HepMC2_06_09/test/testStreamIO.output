@@ -1,0 +1,28 @@
+
+basic IO_GenEvent input with streaming output
+Processing Event Number 1 its # 1
+Event 9 has 929 particles, 409 decayed particles, 512 undecayed particles, and 0 beam particles 
+Event 18 has 674 particles, 288 decayed particles, 378 undecayed particles, and 0 beam particles 
+Event 56 has 809 particles, 354 decayed particles, 447 undecayed particles, and 0 beam particles 
+3 out of 34 processed events passed the cuts. Finished.
+
+streaming input and output
+Processing Event Number 1 its # 1
+Event 9 has 929 particles, 409 decayed particles, 512 undecayed particles, and 0 beam particles 
+Event 18 has 674 particles, 288 decayed particles, 378 undecayed particles, and 0 beam particles 
+Event 56 has 809 particles, 354 decayed particles, 447 undecayed particles, and 0 beam particles 
+3 out of 34 processed events passed the cuts. Finished.
+
+basic IO_GenEvent input with streaming output using member function
+Processing Event Number 1 its # 1
+Event 9 has 929 particles, 409 decayed particles, 512 undecayed particles, and 0 beam particles 
+Event 18 has 674 particles, 288 decayed particles, 378 undecayed particles, and 0 beam particles 
+Event 56 has 809 particles, 354 decayed particles, 447 undecayed particles, and 0 beam particles 
+3 out of 34 processed events passed the cuts. Finished.
+
+streaming input and output using member functions
+Processing Event Number 1 its # 1
+Event 9 has 929 particles, 409 decayed particles, 512 undecayed particles, and 0 beam particles 
+Event 18 has 674 particles, 288 decayed particles, 378 undecayed particles, and 0 beam particles 
+Event 56 has 809 particles, 354 decayed particles, 447 undecayed particles, and 0 beam particles 
+3 out of 34 processed events passed the cuts. Finished.
