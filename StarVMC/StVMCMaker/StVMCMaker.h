@@ -27,7 +27,7 @@ class StVMCMaker : public StMaker {
   StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), 
     fInitRun(0), fVolume(0), fMuDstIter(0), fRndm(0), fRndmSaved(0), 
     fvzlow(-6), fvzhigh(6), fvrMax(1), fvxSigma(0.0050), fdzVpdMax(3), 
-    fSkipMode(kTRUE), fVpdVzCutMode(kTRUE), fGoodTiggerIds()
+    fSkipMode(kTRUE), fVpdVzCutMode(kTRUE), fGoodTriggerIds()
     {fgGeantMk = this;}
   virtual       ~StVMCMaker() {}
   virtual Int_t  Init();
@@ -78,7 +78,7 @@ class StVMCMaker : public StMaker {
   // Event/Primary vertex selection creteria 
   Double_t fvzlow, fvzhigh, fvrMax, fvxSigma, fdzVpdMax;
   Bool_t   fSkipMode, fVpdVzCutMode;
-  vector<Int_t>             fGoodTiggerIds;  
+  vector<Int_t>             fGoodTriggerIds;  
  public:
   virtual const Char_t *GetCVS() const {
     static const Char_t cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.1.1.2 2009/04/16 14:12:55 fisyak Exp $ built " __DATE__ " " __TIME__  ; 

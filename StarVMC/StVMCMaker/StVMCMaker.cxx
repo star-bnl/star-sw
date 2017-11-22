@@ -425,7 +425,7 @@ void StVMCMaker::SetDebug(Int_t l) {
 //________________________________________________________________________________
 void StVMCMaker::SetGoodTriggers(const Char_t *trigList) {
 
-  fGoodTiggerIds.clear();
+  fGoodTriggerIds.clear();
   TString Trig(trigList);
   if (Trig == "") return;
   TObjArray *obj = Trig.Tokenize("[^ ;,:]");
@@ -436,7 +436,7 @@ void StVMCMaker::SetGoodTriggers(const Char_t *trigList) {
       TString t(((TObjString *) obj->At(k))->GetName());
       Int_t trig = t.Atoi();
       if (! trig) continue;
-      fGoodTiggerIds.push_back(trig);
+      fGoodTriggerIds.push_back(trig);
     }
   }
   obj->SetOwner(kFALSE);
@@ -470,7 +470,7 @@ Int_t StVMCMaker::SetVertex() {
       return kStErr;
     }
     // Good Trigger if any
-    if (fGoodTiggerIds.size()) {
+    if (fGoodTriggerIds.size()) {
       Int_t GoodTrigger = -1;
       TString AllTrig;
       for (Int_t k = 0; k < 64; k++) {
@@ -478,7 +478,7 @@ Int_t StVMCMaker::SetVertex() {
 	if (! trig) continue;
 	if (AllTrig != "") AllTrig += ":";
 	AllTrig += trig;
-	for (auto x : fGoodTiggerIds) {
+	for (auto x : fGoodTriggerIds) {
 	  if (x == trig) {
 	    GoodTrigger = trig;
 	    break;
