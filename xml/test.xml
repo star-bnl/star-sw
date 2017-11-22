@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="0.1"  fileListSyntax="paths" simulateSubmission="true">
+<command>
+</command>
+<input URL="command:/bin/ls /star/data03/daq/2013/*/*/st_cosmic_14*.daq" /> 
+</job>
