@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPoint.cxx,v 2.7 2016/06/07 15:51:34 akio Exp $
+ * $Id: StFmsPoint.cxx,v 2.8 2017/11/20 20:01:49 smirnovd Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPoint.cxx,v $
+ * Revision 2.8  2017/11/20 20:01:49  smirnovd
+ * Remove StRoot/ from included header prefix
+ *
  * Revision 2.7  2016/06/07 15:51:34  akio
  * Making code better based on Coverity reports
  *
@@ -32,10 +35,10 @@
  *
  ***************************************************************************/
 #include "StFmsPoint.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.7 2016/06/07 15:51:34 akio Exp $";
+static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.8 2017/11/20 20:01:49 smirnovd Exp $";
 
 StFmsPoint::StFmsPoint()
 : mDetectorId(0), mEnergy(-1.0), mX(-99.0), mY(-99.0),
