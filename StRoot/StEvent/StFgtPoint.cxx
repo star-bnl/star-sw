@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtPoint.cxx,v 2.4 2013/02/19 21:55:57 ullrich Exp $
+ * $Id: StFgtPoint.cxx,v 2.5 2017/11/20 20:01:49 smirnovd Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPoint.cxx,v $
+ * Revision 2.5  2017/11/20 20:01:49  smirnovd
+ * Remove StRoot/ from included header prefix
+ *
  * Revision 2.4  2013/02/19 21:55:57  ullrich
  * Modified charge asymmetry calculation (Anselm).
  *
@@ -33,7 +36,7 @@
  **************************************************************************/
 #include "StFgtHit.h"
 #include "StFgtPoint.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 
 // constructor
 StFgtPoint::StFgtPoint( StFgtHit* hit1, StFgtHit* hit2, int key, int rank ) : StHit(), mKey( key ), mRank( rank ) {
