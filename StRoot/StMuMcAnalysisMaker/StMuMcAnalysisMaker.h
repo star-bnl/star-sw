@@ -126,7 +126,6 @@ class StMuMcAnalysisMaker : public StMaker {
   static const int fNNTuples = 4;
   TNtuple* fCutsNTuple[fNNTuples];
   TFile* fNTupleFile[fNNTuples];
-  Bool_t fStoreCutNTuples;
   Bool_t fProcessSignal;
 
   Char_t                mBeg[1];        //!
@@ -176,7 +175,6 @@ class StMuMcAnalysisMaker : public StMaker {
   }
   void ProcessSignal()     { fProcessSignal = kTRUE; }
   void ProcessBackground() { fProcessSignal = kFALSE; }
-  void StoreCutNTuples()   { fStoreCutNTuples = kTRUE; }
   ClassDef(StMuMcAnalysisMaker,0)   //
 };
 #endif

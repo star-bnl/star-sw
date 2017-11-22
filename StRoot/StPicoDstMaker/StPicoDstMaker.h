@@ -1,6 +1,6 @@
 #ifndef StPicoDstMaker_h
 #define StPicoDstMaker_h
-
+#include <vector>
 #include "StChain/StMaker.h"
 #include "StPicoDstMaker/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoBbcFiller.h"
@@ -58,7 +58,10 @@ public:
   void setCompression(int comp = 9);
 
   void setVtxMode(const PicoVtxMode vtxMode);
-
+  void SetGoodTriggers(const Char_t *trigList=0); 
+  void SetMaxTrackDca(Double_t cut = 50);
+  void SetMaxVertexTransError(Double_t cut = 0.0050);
+  void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13);
 private:
 
   void streamerOff();
@@ -168,7 +171,10 @@ private:
   StPicoBbcFiller  mBbcFiller;
   StPicoEpdFiller  mEpdFiller;
   StPicoFmsFiller  mFmsFiller;
-
+  static Double_t  fgerMax;
+  static Double_t  fgdca3Dmax; 
+  static vector<Int_t> fGoodTriggerIds; 
+  static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
   ClassDef(StPicoDstMaker, 0)
 };
 

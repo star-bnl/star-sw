@@ -4,7 +4,7 @@
 #include <vector>
 #include "TObject.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
-
+#include "KFParticle/KFVertex.h"
 class StMuDst;
 
 class StPicoEvent : public TObject

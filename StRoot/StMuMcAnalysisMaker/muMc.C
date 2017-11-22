@@ -1,7 +1,7 @@
 /*
   root.exe -q -b -x 'muMc.C(1e6,"../*MuDst.root")'
 */
-void muMc(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/reco/2016/Embedding/D0KpimTsq.TFG17i/st_physics_adc_17128018_raw_1000007.MuDst.root", const Char_t *output = "muMc.root") {
+void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t *output = "muMc.root") {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
@@ -9,12 +9,14 @@ void muMc(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/reco/2
   gROOT->LoadMacro("lMuDst.C");
   Char_t *file = 0; // gSystem->Which("./",output,kReadPermission);
   if (! file) {
-    lMuDst(N,input,"RMuDst,MuMc,quiet,mysql,nodefault",output);
+    lMuDst(-1,input,"RMuDst,MuMc,quiet,mysql,nodefault",output);
     StMuMcAnalysisMaker *muMc = chain->Maker("MuMcAnalysis");
+    if (muMc) {cout << "MuMcAnalysis has been found" << endl;}
     muMc->SetAttr("TrackPlots",1);
-    muMc->SetAttr("VertexPlots",1);
-    muMc->SetAttr("StoreCutNTuples",1);
-    muMc->StoreCutNTuples();
+    //    muMc->SetAttr("VertexPlots",1);
+    //    muMc->SetAttr("StoreCutNTuples",1);
+    chain->Init();
+    chain->EventLoop(N);
   } else {
     lMuDst(-1,"","RMuDst,MuMc,nodefault");
     TFile *f = new TFile(file);

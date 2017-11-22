@@ -122,7 +122,7 @@ void StPicoAnalysisMaker::BookTrackPlots(){
   if (! hTofPID) hTofPID = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
 
   
-  double maxDCA = 1.;
+  //  double maxDCA = 1.;
   hNHFTHits = (TH1F *)   dirs[1]->Get("hNHFTHits");
   if (! hNHFTHits) hNHFTHits = new TH1F("hNHFTHits", "hNHFTHits",11, -0.5, 10.5);
   
@@ -312,7 +312,7 @@ void StPicoAnalysisMaker::RunAnalysis(){
     
     float minSigmadEdX = 100;
     int iMinSigmadEdX = -1;
-    for(int iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
+    for(UInt_t iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
     {
       if(dEdXSigma[iPDG]<minSigmadEdX)
       {
@@ -331,7 +331,7 @@ void StPicoAnalysisMaker::RunAnalysis(){
     }
     else
     {
-      for(int iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
+      for(UInt_t iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
       {
         if(dEdXPDG[iPDG] == ToFPDG)
           totalPDG.push_back(ToFPDG);
@@ -350,7 +350,7 @@ void StPicoAnalysisMaker::RunAnalysis(){
     if(totalPDG.size() == 0)
       totalPDG.push_back(-1);
 
-    for(int iPDG=0; iPDG<totalPDG.size(); iPDG++)
+    for(UInt_t iPDG=0; iPDG<totalPDG.size(); iPDG++)
     {
       int pdg = totalPDG[iPDG];
       

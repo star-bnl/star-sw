@@ -70,7 +70,8 @@ class StPicoTrack : public TObject {
 
   /** Checks whether this track is associated with a primary vertex. */
   Bool_t isPrimary()            const { return pMom().magnitude() > 0;}
-  const Float_t* params()       const { return mPar; }
+  Float_t* params()                   { return &mImp; }
+  const Float_t* params()       const { return &mImp; }
   const Float_t* sigmas()       const { return mSigma; }
   const Float_t* correlations() const { return mCorr; }
 
@@ -105,9 +106,14 @@ protected:
   Short_t  mBTofPidTraitsIndex; // index of the BTOF pidTratis in the event
   Short_t  mMtdPidTraitsIndex;  // index of the MTD  pidTratis in the event
   // dcaG
-  Float16_t mPar[6];
+  Float16_t  mImp;     // signed impact parameter; Signed in such a way that: x =  -impact*sin(Psi), y =   impact*cos(Psi)
+  Float16_t  mZ;       //               Z-coordinate of this track (reference plane)
+  Float16_t  mPsi;     //[-pi,pi,20]    Psi angle of the track
+  Float16_t  mPti;     //               signed invert pt [sign = sign(-qB)]
+  Float16_t  mTan;     //[-10,10,20]    tangent of the track momentum dip angle
+  Float16_t  mCurv;    //               signed curvature
   Float16_t mSigma[5];
-  Float16_t mCorr[10]; //[-1,1,16]!
-  ClassDef(StPicoTrack, 5)
+  Float16_t mCorr[10]; //[-1,1,20] 
+  ClassDef(StPicoTrack, 6)
 };
 #endif

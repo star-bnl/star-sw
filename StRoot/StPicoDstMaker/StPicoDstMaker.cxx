@@ -69,11 +69,17 @@
 #include "StPicoDstMaker/StPicoDst.h"
 #include "TH1.h"
 #include "TH2.h"
-#define __EVENT_SELECTION__
+//#define __HIST_PV__
+#ifdef __HIST_PV__
 static TH1F *hists[3] = {0};
 static TH2F *pVrZ = 0;
 static TH2F *pVxy = 0;
+#endif /* __HIST_PV__ */
 static Int_t _debug = 0;
+Double_t StPicoDstMaker::fgerMax;    // 50 um
+Double_t StPicoDstMaker::fgdca3Dmax; // 50 cm
+vector<Int_t> StPicoDstMaker::fGoodTriggerIds;
+Double_t StPicoDstMaker::fgVxXmin, StPicoDstMaker::fgVxXmax, StPicoDstMaker::fgVxYmin, StPicoDstMaker::fgVxYmax;
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
@@ -91,7 +97,11 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
 {
   streamerOff();
   createArrays();
-
+  LOG_INFO << "StPicoDstMaker::StPicoDstMaker: Set Default cuts" << endm;
+  SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051");
+  SetMaxTrackDca(50);
+  SetMaxVertexTransError(0);
+  SetVxXYrange(0,0,0,0);
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
 }
 //_____________________________________________________________________________
@@ -228,6 +238,7 @@ Int_t StPicoDstMaker::Init() {
     LOG_ERROR << "Pico IO mode is not set ... " << endm;
     return kStErr;
   }
+#ifdef __HIST_PV__
   if (GetTFile()) {
     GetTFile()->cd();
     hists[0] = new TH1F("dca3D","global track dca3D wrt best Vx",2000,0,200);
@@ -236,6 +247,7 @@ Int_t StPicoDstMaker::Init() {
     pVrZ     = new TH2F("pVrZ","rho VS Z for primary Vertex",200,-20,20,100,0,2);
     pVxy     = new TH2F("pVxy","Y Vs X for primary Vertex",2000,-2,2,2000,-2,2);
   }
+#endif /* __HIST_PV__ */
   return kStOK;
 }
 
@@ -600,15 +612,17 @@ Int_t StPicoDstMaker::MakeWrite()
   }
 
   int const originalVertexId = mMuDst->currentVertexIndex();
-#ifndef __EVENT_SELECTION__
-  if (! mMuDst->numberOfMcVertices()) {
+  if (! mMuDst->numberOfMcVertices()) { // for MC it might be no Vpd
     if (!selectVertex())  {
-      LOG_INFO << "Vertex is not valid" << endm;
+      static Int_t count = 0;
+      count++;
+      if (count < 13) {
+	LOG_INFO << "Vertex is not valid" << endm;
+      }
       mMuDst->setVertexIndex(originalVertexId);
       return kStOK;
     }
   }
-#endif /* ! __EVENT_SELECTION__ */
   mBField = muEvent->magneticField();
 
 
@@ -626,6 +640,7 @@ Int_t StPicoDstMaker::MakeWrite()
   if (ok) return kStSKIP;
   fillEvent();
   fillEmcTrigger();
+
   fillMtdTrigger();
   fillBTofHits();
   fillMtdHits();
@@ -664,46 +679,47 @@ void StPicoDstMaker::fillEventHeader() const
 //_____________________________________________________________________________
 Int_t StPicoDstMaker::fillTracks()
 {
-  static Double_t erMax = 0.0050; // 50 um
-  static Double_t dca3Dmax = 50;  // 50 cm
   Int_t ok = 0;
+  if (! mMuDst->primaryVertex()) {ok = 1; return ok;}
+  StThreeVectorD V(mMuDst->primaryVertex()->position());
+#ifdef __HIST_PV__
+  if (pVrZ) {
+    pVrZ->Fill(V.z(),V.perp());
+    pVxy->Fill(V.y(),V.x());
+  }
+#endif /* __HIST_PV__ */
   /* Cuts:
 1.  -0.3 < X < 0.1 и -0.27 < Y < -0.13. Maksym
 2.  sqrt(sigma_X**2 + sigma_Y**2) < 0.0050 cm
 3.  const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051"
 4.  dca3D < 50 cm 
   */
-  if (! mMuDst->primaryVertex()) {ok = 1; return ok;}
-  StThreeVectorD V(mMuDst->primaryVertex()->position());
-  if (pVrZ) {
-    pVrZ->Fill(V.z(),V.perp());
-    pVxy->Fill(V.y(),V.x());
-  }
-#ifndef __EVENT_SELECTION__
-  if (! mMuDst->numberOfMcVertices()) {
-    if (! (-0.3 < V.x() && V.x() < 0.1 && -0.27 < V.y() && V.y() < - 0.13)) {ok = 1; return ok;}
+  if (! mMuDst->numberOfMcVertices()) { // No cutss for MC event
+    if (fgVxXmin < fgVxXmax && ! (fgVxXmin < V.x() && V.x() < fgVxXmax)) {ok = 1; return ok;}
+    if (fgVxYmin < fgVxYmax && ! (fgVxYmin < V.y() && V.y() < fgVxYmax)) {ok = 1; return ok;}
     StThreeVectorD E(mMuDst->primaryVertex()->posError());
     const Double_t er = E.perp();
-    if (er > erMax) {ok = 2; return ok;}
-    static Int_t GoodTriggers[6] = {520001, 520011, 520021, 520031, 520041, 520051};
-    const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
-    Int_t GoodTrigger = -1;
-    Int_t NoAnyTriggers = 0;
-    for (Int_t k = 0; k < 64; k++) {
-      Int_t trig = triggers.triggerId(k);
-      if (! trig) continue;
-      NoAnyTriggers++;
-      for (Int_t l = 0; l < 6; l++) {
-	if (trig == GoodTriggers[l]) {
-	  GoodTrigger = trig;
-	  break;
+    if (fgerMax > 0 && er > fgerMax) {ok = 2; return ok;}
+    UInt_t Nt = fGoodTriggerIds.size();
+    if (Nt) {
+      const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
+      Int_t GoodTrigger = -1;
+      Int_t NoAnyTriggers = 0;
+      for (Int_t k = 0; k < 64; k++) {
+	Int_t trig = triggers.triggerId(k);
+	if (! trig) continue;
+	NoAnyTriggers++;
+	for (UInt_t l = 0; l < Nt; l++) {
+	  if (trig == fGoodTriggerIds[l]) {
+	    GoodTrigger = trig;
+	    break;
+	  }
 	}
+	if (GoodTrigger > 0) break;
       }
-      if (GoodTrigger > 0) break;
+      if (NoAnyTriggers && GoodTrigger < 0) {ok = 3; return ok;}
     }
-    if (NoAnyTriggers && GoodTrigger < 0) {ok = 3; return ok;}
   }
-#endif /* ! __EVENT_SELECTION__ */
   // We save primary tracks associated with the selected primary vertex only
   // don't use StMuTrack::primary(), it returns primary tracks associated with
   // all vertices
@@ -740,6 +756,7 @@ Int_t StPicoDstMaker::fillTracks()
     THelixTrack t = dcaG->thelix();
     StThreeVectorD V(mMuDst->primaryVertex()->position());
     Double_t dca3D = t.Dca(V.xyz());
+#ifdef __HIST_PV__
     if (hists[0]) {
       hists[0]->Fill(dca3D);
       Int_t IdMc = gTrk->idTruth();
@@ -774,8 +791,8 @@ Int_t StPicoDstMaker::fillTracks()
 	}
       }
     }
-    // if (dca3D > 10.0) continue;
-    if (dca3D > dca3Dmax) continue;
+#endif /* __HIST_PV__ */
+    if (fgdca3Dmax > 0 && dca3D > fgdca3Dmax) continue;
     int counter = mPicoArrays[StPicoArrays::Track]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, mBField, mMuDst->primaryVertex()->position(), *dcaG);
 
@@ -1166,7 +1183,11 @@ void StPicoDstMaker::fillMtdHits()
   // check the firing hits
   if (mPicoDst->numberOfMtdTriggers() != 1)
   {
-    LOG_ERROR << "There are " << mPicoDst->numberOfMtdTriggers() << " MTD trigger. Check it!" << endm;
+    static Int_t count = 0;
+    count++;
+    if (count < 13) {
+      LOG_ERROR << "There are " << mPicoDst->numberOfMtdTriggers() << " MTD trigger. Check it!" << endm;
+    }
     return;
   }
 
@@ -1294,3 +1315,44 @@ bool StPicoDstMaker::selectVertex()
   // Retrun false if selected vertex is not valid
   return selectedVertex ? true : false;
 }
+//________________________________________________________________________________
+void  StPicoDstMaker::SetGoodTriggers(const Char_t *trigList) {
+
+  fGoodTriggerIds.clear();
+  TString Trig(trigList);
+  if (Trig == "") return;
+  TObjArray *obj = Trig.Tokenize("[^ ;,:]");
+  Int_t nParsed = obj->GetEntries();
+  for (Int_t k = 0; k < nParsed; k++) {
+    if (obj->At(k)) {
+      LOG_INFO << "Trigger: " << k << "\t" << ((TObjString *) obj->At(k))->GetName() << endm;
+      TString t(((TObjString *) obj->At(k))->GetName());
+      Int_t trig = t.Atoi();
+      if (! trig) continue;
+      fGoodTriggerIds.push_back(trig);
+    }
+  }
+  obj->SetOwner(kFALSE);
+  delete obj;
+}
+//________________________________________________________________________________
+void StPicoDstMaker::SetMaxTrackDca(Double_t cut) {
+  fgdca3Dmax = cut;
+  LOG_INFO << "StPicoDstMaker::SetMaxTrackDca = " << fgdca3Dmax << endm;
+}
+//________________________________________________________________________________
+void StPicoDstMaker::SetMaxVertexTransError(Double_t cut) {
+  fgerMax = cut;
+  LOG_INFO << "StPicoDstMaker::SetMaxVertexTransError = " << fgerMax << endm;
+}
+//________________________________________________________________________________
+void StPicoDstMaker::SetVxXYrange(Double_t xmin, Double_t xmax, Double_t ymin, Double_t ymax) {
+  fgVxXmin = xmin;
+  fgVxXmax = xmax;
+  fgVxYmin = ymin;
+  fgVxYmax = ymax;
+  LOG_INFO << "StPicoDstMaker::SetVxXYrange for PV: x in [" 
+	   << fgVxXmin << "," << fgVxXmax <<"], y in [" 
+	   << fgVxYmin << "," << fgVxYmax << "]" << endm;
+}
+//________________________________________________________________________________

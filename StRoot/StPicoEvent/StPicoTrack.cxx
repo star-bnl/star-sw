@@ -38,10 +38,11 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
     mPMomentum[2] = pTrk->p().z();
   }
   // Store dca
-  const Float_t* params = dcaG.params();
+  const Float_t* parDCA = dcaG.params();
   const Float_t* errMatrix = dcaG.errMatrix();
   //  dcaG.Print("");
-  for (int i = 0; i < 6; i++) mPar[i] = params[i];
+  Float_t *pars = params();
+  for (int i = 0; i < 6; i++) pars[i] = parDCA[i];
   /*                                                          j    0     1     2     3     4
     Float_t  mImpImp;                                       i 0  0(0) 
     Float_t  mZImp,   mZZ;                                    1  1(0)  2(1)
@@ -119,7 +120,7 @@ StDcaGeometry StPicoTrack::dcaGeometry() const {
     }
     ii += i+2;
   }
-  a.set(mPar, errMatrix);
+  a.set(params(), errMatrix);
   return a;
 }      
 //________________________________________________________________________________

@@ -101,7 +101,7 @@ static TString Chapter;
 static TString Section;
 static TString SubSection;
 //________________________________________________________________________________
-StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name), fStoreCutNTuples(kFALSE), fProcessSignal(kFALSE) {
+StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name), fProcessSignal(kFALSE) {
   memset(mBeg,0,mEnd-mBeg+1);
 }
 //________________________________________________________________________________
@@ -166,12 +166,12 @@ Int_t StMuMcAnalysisMaker::Init(){
   TFile *f = GetTFile();
   if (f) {
     f->cd();
-    BookTrackPlots();
-    BookVertexPlots();
+    if (IAttr("TrackPlots"))  BookTrackPlots();
+    if (IAttr("VertexPlots")) BookVertexPlots();
   }
   
   //Create file with NTuples for cut optimization
-  if(fStoreCutNTuples)
+  if(IAttr("StoreCutNTuples"))
   {
     TString ntupleNames[fNNTuples] = {"D0", "DPlus", "Ds", "Lc"};
     TString cutNames[fNNTuples] = {"nHFTHits_K:nTPCHits_K:m2ToF_K:nSigmadEdXPi_K:nSigmadEdXK_K:nSigmadEdXP_K:pt_K:chi2Primary_K:nHFTHits_Pi:nTPCHits_Pi:m2ToF_Pi:nSigmadEdXPi_Pi:nSigmadEdXK_Pi:nSigmadEdXP_Pi:pt_Pi:chi2Primary_Pi:Chi2NDF:LdL:Chi2Topo",
@@ -196,7 +196,7 @@ Int_t StMuMcAnalysisMaker::Init(){
 }
 //________________________________________________________________________________
 Int_t StMuMcAnalysisMaker::Finish() {
-  if(fStoreCutNTuples)
+  if(IAttr("StoreCutNTuples"))
   {
     TFile* curFile = gFile;
     TDirectory* curDirectory = gDirectory;
@@ -724,8 +724,8 @@ Int_t StMuMcAnalysisMaker::Make(){
       muDst->printMcVertices();
       muDst->printMcTracks();
     }
-  FillTrackPlots();
-  FillVertexPlots();
+  if (IAttr("TrackPlots"))  FillTrackPlots();
+  if (IAttr("VertexPlots")) FillVertexPlots();
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -1250,7 +1250,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     }
         
     vector<int> totalPDG;
-    if(ToFPDG == -1 || fStoreCutNTuples)
+    if(ToFPDG == -1 || IAttr("StoreCutNTuples"))
     {
 //       if(minSigmadEdX <= 0.05f && track.GetP() < 0.7)
 //         totalPDG.push_back(dEdXSigma[iMinSigmadEdX]);
@@ -1381,7 +1381,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
         
         particlesPdg[nPartSaved] = pdg;
         
-        if(fStoreCutNTuples)
+        if(IAttr("StoreCutNTuples"))
         {
           particleCutValues[index].resize(8);
           particleCutValues[index][0] = nHftHits[nPartSaved];
@@ -1554,7 +1554,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
   mStKFParticlePerformanceInterface->PerformanceAnalysis();
   
-  if(fStoreCutNTuples)
+  if(IAttr("StoreCutNTuples"))
   {
     for(int iParticle=0; iParticle<mStKFParticlePerformanceInterface->GetNReconstructedParticles(); iParticle++)
     {

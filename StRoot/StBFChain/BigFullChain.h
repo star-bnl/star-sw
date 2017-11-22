@@ -1372,7 +1372,9 @@ Bfc_st BFC[] = { // standard chains
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco,Tree"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
-  {"RpicoDST"    ,"PicoDst"  ,"","picoDst"                                                ,"","","",kFALSE},
+  {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
+  {"RpicoDST"  ,"","","picoDst"                                               ,"","","read PicoDST",kFALSE},
+  {"picoWrite" ,"","","picoDst",""                                      ,"","Writes picoDST format",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1852,8 +1854,6 @@ Bfc_st BFC[] = { // standard chains
   {"picoEvt"    ,"","","MuDSTDeps,StEvent,Stu","",  "StPicoEvent","Load picoEvent and dependencies",kFALSE},
   {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
-  {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
-  {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd"     ,"","",""                            ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
@@ -1882,7 +1882,6 @@ Bfc_st BFC[] = { // standard chains
   {"HftMatTreeB","","","","HftMatchedTree"
    ,                            "StHftPoolEventTB,StHftPoolHftMatchedTreeB","Create HftMatchedTree",kFALSE},
   {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
-  {"picoDST"     ,"PicoDst"  ,"",""     ,                      "StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"fastjet"     ,""  ,"",""     ,         "","fastjet,siscone,siscone_spherical,fastjetplugins","",kFALSE},
   {"Jet"         ,"","","gen_T","", "StJetEvent,StJetSkimEvent,StJets,StRandomSelector,StUeEvent,"
    "StSpinDbMaker,StMCAsymMaker,StJetFinder,fastjet,StJetMaker"                                 ,"",kFALSE},
