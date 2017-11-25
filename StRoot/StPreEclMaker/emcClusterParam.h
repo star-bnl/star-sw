@@ -1,5 +1,5 @@
-#ifndef __emcClusterParam_st__
-#define __emcClusterParam_st__
+#ifndef __emcClusterParam__
+#define __emcClusterParam__
 #include "TDataSet.h"
 #include "TTable.h"
 #include "Ttypes.h"
@@ -23,4 +23,4 @@ class St_emcClusterParam : public TTable {
   ClassDef(St_emcClusterParam,1) //C++ container for chain/makers status 
 };
 
-#endif /* __emcClusterParam_st__ */
+#endif /* __emcClusterParam__ */
