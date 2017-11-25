@@ -5,7 +5,9 @@
 #include "Stiostream.h"
 #include "TStopwatch.h"
 #include "StEmcUtil/others/emcDetectorName.h"
-ClassImp(StPreEclMaker)
+#include "emcClusterParam.h"
+TableImpl(emcClusterParam);
+ClassImp(StPreEclMaker);
 
 //_____________________________________________________________________________
 StPreEclMaker::StPreEclMaker(const char *name, const char *title):StMaker(name,title)

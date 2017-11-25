@@ -55,3 +55,68 @@ end
 foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
   set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
 end
+================================================================================
+root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log
+foreach f (`grep missing Chain.log | awk '{print $3}' `)
+  set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
+end
+
+foreach d (`ls -1d 1*`)
+  cd $d; 
+  if (! -r Chain.log) then
+  root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
+  endif
+  cd -;
+end
+================================================================================
+ls -1d 17* | xargs
+foreach d (17130001 17130002 17130003 17130004 17130005 17130006 17130007 17130008 17130009 17130010 17130011 17130012 17130013)  
+  if (! -d ${d}) mkdir -p ${d}; cd ${d};
+  lsf ~/xml/PicoDST.xml
+  cd -;
+end
+================================================================================
+foreach day (`ls -1d 1*`)
+  cd $day;
+  foreach d (`ls -1d 1*`)
+    cd $d; root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; cd -;
+  end
+  cd ..
+end
+================================================================================
+
+foreach dayd (`ls -1d ~/MuDst/2016/???`)
+  set day = `basename ${dayd}`;	
+  echo ${day}
+  cd ~/Pico/2016/
+  if (! -d ${day}) mkdir ${day}
+  cd  ${day}
+  foreach d ( `ls -1d ~/MuDst/2016/${day}/*` )
+    set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
+    pwd
+    PicoDST.pl
+    if ( ! $? ) then
+      lsf ~/xml/PicoDST.xml;
+    else
+      touch Done;
+    endif
+    cd -;
+  end
+  cd -;
+end
+================================================================================
+ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
+================================================================================
+cd ~/Pico/2016
+foreach f (`ls -1d ???/1*/Done`)
+  set d = `dirname ${f}`;
+  cd ${d}; 
+  if (-r Done) then	
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; 
+    rm Done
+  endif
+  cd -;
+end
+================================================================================
+grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%i\n", n)}'
+================================================================================

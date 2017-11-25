@@ -6,9 +6,7 @@
   setenv NODEBUG yes
   starver TFG17o
   setup 64b
-  if (! -r .sl69_x8664_gcc52) ln -s ../../.sl* .
-#  setup gcc631
-#ln -s $STAR/.$STAR_HOST_SYS .
+  ln -s ../../.sl* .
 #  cd $SCRATCH
 #   pwd
 #  setenv NODEBUG yes
