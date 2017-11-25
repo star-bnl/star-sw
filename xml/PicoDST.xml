@@ -4,11 +4,11 @@
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
   setenv NODEBUG yes
-#  starver TFG17m
+  starver TFG17o
   setup 64b
+  if (! -r .sl69_x8664_gcc52) ln -s ../../.sl* .
 #  setup gcc631
 #ln -s $STAR/.$STAR_HOST_SYS .
-if (! -r .sl64_gcc492) ln -s ../../../.sl* .
 #  cd $SCRATCH
 #   pwd
 #  setenv NODEBUG yes
@@ -31,8 +31,8 @@ if (! -r .sl64_gcc492) ln -s ../../../.sl* .
     set log = ${tag}B.log
 #  if (-r ${log}) exit 0;
     if (! -r "${tag}.picoDst.root") then
-#      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'*.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
-       root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/'${tag}'*.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")'  makePicoDst.C+  &gt;&amp; ${log}
+#      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
+       root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")'  makePicoDst.C+  &gt;&amp; ${log}
     endif
   end
         </command>
