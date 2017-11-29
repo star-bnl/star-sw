@@ -58,22 +58,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
 	       const Char_t **fileList, const Char_t* dirName)
 {
   cout << "ProcessQQ::Load : Loading libraries ..." << endl;
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("StDaqLib");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StMagF");
-  gSystem->Load("StUtilities");
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StBichsel");
-  gSystem->Load("StTriggerDataMaker");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities");
+  gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StAssociationMaker");
@@ -85,8 +70,6 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   //if( mode & 0x2){
   // EMC specific
   cout << "ProcessQQ::Load : MuDst-EMC mode is ON " << endl;
-  gSystem->Load("StEmcUtil");
-  gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   //}
@@ -101,8 +84,6 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   }
 
   gSystem->Load("StMcAnalysisMaker");
-  gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDSTMaker");
 
   if( mode & 0x2 ){
     // EMC specific
@@ -222,3 +203,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   cout << endl << "******************* Last event processed = " << iev << endl;
 }
 
+//==========================================================================================
+// $ Id: $
+// $ Log: $
+//
