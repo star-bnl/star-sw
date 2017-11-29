@@ -204,6 +204,9 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
 }
 
 //==========================================================================================
-// $ Id: $
-// $ Log: $
+// $Id: StMuDstMaker.C,v 1.16 2017/11/29 20:29:44 genevb Exp $
+// $Log: StMuDstMaker.C,v $
+// Revision 1.16  2017/11/29 20:29:44  genevb
+// Keep CVS id and log information
+//
 //
