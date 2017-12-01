@@ -61,6 +61,7 @@ storedevts=0
 for i in `find $fsetp/ -name "*.log.gz"`
 do
 #echo $i
+count=$(($count+1))
 if [ -f tmplog.txt ] ; then
    rm -f tmplog.txt
 fi
@@ -71,7 +72,6 @@ if [ -z $jtime ] ; then
    echo $i
    continue
 fi
-count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
 nevents=`grep "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
 #echo $nevents events in this daq file
