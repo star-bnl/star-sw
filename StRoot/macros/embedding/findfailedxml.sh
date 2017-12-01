@@ -72,7 +72,7 @@ do
 	logfile=`grep "${bn}_${ijob}\." tmplog.list`
 	#echo $logfile
 	if [ -z "$logfile" ] ; then
-	   echo found one possible failed task, ${bn}_${ijob}, no log file!
+	   echo "found one possible failed task, ${bn}_${ijob}, no log file!"
 	   if [ $nfailed -ne "0" ] ; then
 		echo -n "," >> $subfile
 	   fi
