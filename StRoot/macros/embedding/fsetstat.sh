@@ -61,7 +61,6 @@ storedevts=0
 for i in `find $fsetp/ -name "*.log.gz"`
 do
 #echo $i
-count=$(($count+1))
 if [ -f tmplog.txt ] ; then
    rm -f tmplog.txt
 fi
@@ -72,6 +71,7 @@ if [ -z $jtime ] ; then
    echo $i
    continue
 fi
+count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
 nevents=`grep "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
 #echo $nevents events in this daq file
@@ -85,7 +85,7 @@ if [ -f tmplog.txt ] ; then
 fi
 
 echo "Scanned Fset# $ifset data:" 
-echo "total # of daq files:" $ndaq "; total # of log files:" $count "; total # of daq events:" $allevts
+echo "total # of daq files:" $ndaq "; total # of good log files:" $count "; total # of daq events:" $allevts
 echo "total # of embedded events:" $storedevts "; total CPU*Hours:" `echo "$total/3600+0.5" | bc -l | cut -d. -f1` "; average CPU*Hours per daq file:" `echo "$total/$count/3600+0.5" | bc -l | cut -d. -f1`
 if [ $count -lt $ndaq ] ; then
    echo CAUTION: $(($ndaq-$count))/$ndaq daq files have not been processed properly!
