@@ -1,5 +1,5 @@
 
-// $Id: StvStEventMaker.cxx,v 1.2 2013/05/24 16:35:00 perev Exp $
+// $Id: StvStEventMaker.cxx,v 1.2.6.1 2017/12/02 00:40:39 perev Exp $
 /*!
 \author V Perev 2030
 

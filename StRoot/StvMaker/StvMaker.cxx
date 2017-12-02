@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.60 2017/05/02 20:08:52 perev Exp $
+// $Id: StvMaker.cxx,v 1.60.2.1 2017/12/02 00:40:36 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -297,7 +297,6 @@ static int initialized = 0;
 
 //		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
-
   if (IAttr("activeTpc")) { 	//prompt hits for geo >=y2009
     StvTpcPrompt promp;
     tgh->InitHitPlane(&promp);
@@ -390,6 +389,8 @@ static int initialized = 0;
     mVertexFinder[reg]= 0;
   } while(0);
 
+//tgh->ls();///????????????????????????????????????/
+//tgh->Print();///?????????????????????????????
   
   InitPulls();
 
@@ -637,7 +638,7 @@ static StvToolkit *kit = StvToolkit::Inst();
   {
     auto* kTrack = *it;
     int nHits = kTrack->GetNHits();
-    StvDebug::Count("IdQua_vs_NHits",nHits,kTrack->GetQua()*100);
+//???    StvDebug::Count("IdQua_vs_NHits",nHits,kTrack->GetQua()*100);
   }
   return 0;
 }

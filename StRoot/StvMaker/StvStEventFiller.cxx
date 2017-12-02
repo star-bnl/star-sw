@@ -1,11 +1,17 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.43 2016/11/29 17:13:20 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.43.2.1 2017/12/02 00:40:36 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.43.2.1  2017/12/02 00:40:36  perev
+ * Make StvKutta branch
+ *
+ * Revision 1.1  2017/07/25 22:21:34  perev
+ * Stv RungeKutta version
+ *
  * Revision 1.43  2016/11/29 17:13:20  perev
  * HideFts
  *
@@ -624,7 +630,7 @@ typedef std::map<const StvTrack*, StTrackNode*>::iterator TkMapIter;
 //_____________________________________________________________________________
 inline StThreeVectorF position(const StvNode *node)
 {
-  const double *d = node->GetFP().P;
+  const double *d = node->GetFP();
   return StThreeVectorF(d[0],d[1],d[2]);
 }
 //_____________________________________________________________________________
@@ -641,17 +647,17 @@ inline int getCharge(const StvNode *node)
 //_____________________________________________________________________________
 inline double getCurvature(const StvNode *node)
 {
- return node->GetFP()._curv;
+ return node->GetFP().getCurv();
 }
 //_____________________________________________________________________________
 inline double getPhi(const StvNode *node)
 {
- return node->GetFP()._psi;
+ return node->GetFP().getPsi();
 }
 //_____________________________________________________________________________
 inline double getDip(const StvNode *node)
 {
- return atan(node->GetFP()._tanl);
+ return atan(node->GetFP().getTanL());
 }
 //_____________________________________________________________________________
 inline StThreeVectorF getMom(const StvNode *node)
@@ -662,7 +668,7 @@ inline StThreeVectorF getMom(const StvNode *node)
 //_____________________________________________________________________________
 inline int getHelicity(const StvNode *node)
 {
-  double curv = node->GetFP()._curv;
+  double curv = node->GetFP().getCurv();
   return (curv < 0) ? -1 : 1;
 }
 
@@ -719,8 +725,7 @@ static const int toUpp[15] = 	{0,
 
   double xx[6],ee[15];
   const StvNodePars &fp = node->GetFP();
-  if (node->GetType()==StvNode::kPrimNode) {fp.GetPrimial(xx,ee,&node->GetFE());}
-  else                                     {fp.GetRadial (xx,ee,&node->GetFE());}
+  fp.GetRadial (xx,ee,&node->GetFE());
 
   for (int i=0;i<6;i++) {x[i] = (float)(xx[i]);}
   if (!e) return;
@@ -736,12 +741,12 @@ void getDcaLocal(const StvNode *node,float yz[2],float yzErr[2])
 {
 static int nCall=0; nCall++;
   const StvNodePars &fp = node->GetFP();
-  double myTan = fp._tanl;
+  double myTan = fp.getTanL();
   double cos2L = 1./(1+myTan*myTan);
   double cosL = sqrt(cos2L);
   double sinL = myTan*cosL;
-  double cosP = fp._cosCA;
-  double sinP = fp._sinCA;
+  double cosP = fp.getCosP();
+  double sinP = fp.getSinP();
 //		Track Frame
   TMatrixD dcaFrame(3,3);
 
@@ -760,13 +765,13 @@ static int nCall=0; nCall++;
   StvHit *hit=node->GetHit();
   assert(hit);
   const double *hrr=node->GetHE();
-  double d[3]={ hit->x()[0]-fp._x, hit->x()[1]-fp._y,hit->x()[2]-fp._z};
+  double d[3]={ hit->x()[0]-fp[0], hit->x()[1]-fp[1],hit->x()[2]-fp[2]};
   TVectorD dif(3,d); 
   TVectorD loc = dcaFrame*dif;
   yz[0]= loc[1];   yz[1]= loc[2] ;
   
-  yzErr[0] = (hrr[0] - node->GetFE().mHH);
-  yzErr[1] = (hrr[2] - node->GetFE().mZZ);
+  yzErr[0] = (hrr[0] - node->GetFE()[0]);
+  yzErr[1] = (hrr[2] - node->GetFE()[2]);
   for (int j=0;j<2;j++){yzErr[j] = (yzErr[j]>1e-6)? sqrt(yzErr[j]):1e-3;}
 
 
@@ -1416,20 +1421,20 @@ static int nCall=0; nCall++;
   aux.mChi2P    = track->GetXi2P();
 
 
-  aux.mCurv    = fp._curv;
+  aux.mCurv    = fp.getCurv();
   aux.mPt      = fp.getPt();
-  aux.mPsi     = fp._psi;
-  aux.mDip     = atan(fp._tanl);
-  StThreeVectorD v3(fp.P);
+  aux.mPsi     = fp.getPsi();
+  aux.mDip     = atan(fp.getTanL());
+  StThreeVectorD v3((const double*)fp);
   aux.mRxy     = v3.perp();
   aux.mPhi     = v3.phi();
   aux.mZ       = v3.z();
 
   aux.mPtErr   = sqrt(fe.mPP)*aux.mPt*aux.mPt;
-  aux.mPsiErr  = sqrt(fe.mAA);
+  aux.mPsiErr  = sqrt(fe.mFF);
   aux.mDipErr  = sqrt(fe.mLL);
-  aux.mRxyErr  = sqrt(fe.mHH);
-  aux.mZErr    = sqrt(fe.mZZ);
+  aux.mRxyErr  = sqrt(fe[0]);
+  aux.mZErr    = sqrt(fe[2]);
 
   aux.mIdTruTk = stTrack->idTruth();
   aux.mQaTruTk = stTrack->qaTruth();
@@ -1459,18 +1464,18 @@ static int nCall=0; nCall++;
       StHit *hh = (StHit*)stiHit->stHit();
       assert(hh);
       const StvNodePars &fp = node->GetFP();
-      double dL = (stiHit->x()[0]-fp._x)*fp._cosCA 
-	        + (stiHit->x()[1]-fp._y)*fp._sinCA;
-      double myX = fp._x+dL*fp._cosCA;
-      double myY = fp._y+dL*fp._sinCA;
+      double dL = (stiHit->x()[0]-fp[0])*fp.getCosP() 
+	        + (stiHit->x()[1]-fp[1])*fp.getSinP();
+      double myX = fp[0]+dL*fp.getCosP();
+      double myY = fp[1]+dL*fp.getSinP();
       if (myNode) {
         dL = sqrt(pow(preXy[0]-myX,2)+pow(preXy[1]-myY,2));
-        double rho = 0.5*(preRho+fabs(fp._curv));
+        double rho = 0.5*(preRho+fabs(fp.getCurv()));
         double mySin = 0.5*dL*rho; if (mySin>0.99) break;
         if (mySin>0.01) dL = 2*asin(mySin)/rho;
 	len+=dL; 
       }
-      myNode++;preXy[0]=myX; preXy[1]=myY; preRho = fabs(fp._curv);
+      myNode++;preXy[0]=myX; preXy[1]=myY; preRho = fabs(fp.getCurv());
 
       fillPulls(len,hh,stiHit,node,track,dets,gloPri);
       
@@ -1533,7 +1538,7 @@ static int nCall=0; nCall++;
 
 
 //		global Fit
-  x = fp._x; y = fp._y;z = fp._z;
+  x = fp[0]; y = fp[1];z = fp[2];
   r = sqrt(x*x+y*y);
   aux.gRFit = r;
   aux.gPFit = (atan2(y,x));aux.gPFit=NICE(aux.gPFit);
@@ -1541,12 +1546,12 @@ static int nCall=0; nCall++;
 
   
 
-  aux.gPsi  = fp._psi;
-  aux.gDip  = atan(fp._tanl);
+  aux.gPsi  = fp.getPsi();
+  aux.gDip  = atan(fp.getTanL());
 
   // invariant
-  aux.mCurv   = fp._curv;
-  aux.mPt     = fabs(1./fp._ptin);
+  aux.mCurv   = fp.getCurv();
+  aux.mPt     = fabs(1./fp.getPtin());
   aux.mCharge = stHit->charge();
   aux.mChi2   = node->GetXi2();
   aux.mDetector=node->GetDetId();

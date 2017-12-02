@@ -1,13 +1,19 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.8 2015/11/11 01:52:57 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.8.4.1 2017/12/02 00:40:36 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.8.4.1  2017/12/02 00:40:36  perev
+ * Make StvKutta branch
+ *
+ * Revision 1.1  2017/07/25 22:21:34  perev
+ * Stv RungeKutta version
+ *
  * Revision 1.8  2015/11/11 01:52:57  perev
  * Remove non used method setUseAux
  *

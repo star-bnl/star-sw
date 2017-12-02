@@ -1,5 +1,5 @@
 
-// $Id: StvStEventHitSelector.cxx,v 1.1 2013/05/24 16:35:42 perev Exp $
+// $Id: StvStEventHitSelector.cxx,v 1.1.6.1 2017/12/02 00:40:36 perev Exp $
 /*!
 \author V Perev 2013
 

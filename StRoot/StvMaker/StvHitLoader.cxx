@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.33 2017/01/19 16:56:01 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33.2.1 2017/12/02 00:40:36 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -251,10 +251,10 @@ static int knt=0;knt++;
 static int nnn=0;nnn++;
 printf("%d  *** StvHitLoader::MakeStvHit %g %g %g  ***\n",nnn
       ,mStvHit->x()[0],mStvHit->x()[1],mStvHit->x()[2]);
-StvDebug::Count("ZHits",mStvHit->x()[2]);
-StvDebug::Count("XYHits",mStvHit->x()[1],mStvHit->x()[1]);
-StvDebug::Count("ZXHits",mStvHit->x()[2],mStvHit->x()[0]);
-StvDebug::Count("ZYHits",mStvHit->x()[2],mStvHit->x()[1]);
+//???StvDebug::Count("ZHits",mStvHit->x()[2]);
+//???StvDebug::Count("XYHits",mStvHit->x()[1],mStvHit->x()[1]);
+//???StvDebug::Count("ZXHits",mStvHit->x()[2],mStvHit->x()[0]);
+//???StvDebug::Count("ZYHits",mStvHit->x()[2],mStvHit->x()[1]);
 #endif
    return 1;
 }
