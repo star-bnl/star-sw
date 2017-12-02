@@ -4,21 +4,25 @@
 #include <assert.h>
 #include <map>
 #include <string>
+#include "TROOT.h"
 #include "TClass.h"
 #include "TH1F.h"
 #include "TBrowser.h"
 #include "TH2F.h"
+#include "TProfile.h"
 #include "TCanvas.h"
 #include "TSystem.h"
 #include "TString.h"
 #include "StvDebug.h"
+#include "StvGrappa.h"
+
 typedef std::map<std::string, int>   myTallyMap_t;
 typedef myTallyMap_t::const_iterator myTallyIter_t;
 static  myTallyMap_t  mgTally;
 
 int StvDebug::mgDebug=1; //0=no debug, 1=Normal, 2=count is on
-int StvDebug::mgRecov=1;
-int StvDebug::mgCheck=1;
+StvGrappa *StvDebug::mgGrappa   = 0;
+StvGrappa *StvDebug::mgGrappaTmp= 0;
 
 typedef std::map<std::string, TH1*>   myDebMap_t;
 typedef myDebMap_t::const_iterator myDebIter_t;
@@ -30,7 +34,7 @@ myCanMap_t myCanMap;
 
 //______________________________________________________________________________ 
 int StvDebug::Break(int key)
-{ static int kto=-2010;
+{ static int kto=-20102017;
   if (kto != key) return 0;
   printf ("BOT OHO %d\n",key);
   return 1;
@@ -180,7 +184,10 @@ void StvDebug::Sumary(int nHist)
     double mean = h->GetMean();
     double rms  = h->GetRMS();
     printf("TH2 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
-    H[0]=h;Draw(1,H);
+    H[0]=h;//Draw(1,H);
+    TString ts(h->GetName()); ts+="_pfx";
+    H[1] = ((TH2*)h)->ProfileX(ts.Data());
+    Draw(2,H);
   }
 
   if (!n) return;
@@ -246,4 +253,51 @@ void StvDebug::Browse(const char *name, TObject *obj)
   auto *br = new TBrowser(name,obj);
   if (br){};
   return;
+}
+//______________________________________________________________________________
+void StvDebug::AddGra(double x, double y,double z, int iObj)
+{
+   if (mgDebug<2) return;
+   if (!mgGrappa)mgGrappa =  new StvGrappa("StvDebug");
+   mgGrappa->Add(x,y,z,iObj);
+}
+//______________________________________________________________________________
+void StvDebug::ClearGra()
+{
+   if (!mgGrappa) return;
+   mgGrappa->Clear();
+}
+//______________________________________________________________________________
+void StvDebug::ShowGra()
+{
+   if (!mgGrappa) return;
+   mgGrappa->Show();
+}
+//______________________________________________________________________________
+void StvDebug::SetActGra(int akt)
+{
+   mgGrappa->SetActive(akt);
+}
+//______________________________________________________________________________
+void StvDebug::Show(const StvTrack* tk)
+{
+  delete mgGrappaTmp; 
+  mgGrappaTmp = new StvGrappa("BOT OH");
+  mgGrappaTmp->Show(tk);
+}
+//______________________________________________________________________________
+void StvDebug::SaveAll()
+{
+  TIter nextCanv(gROOT->GetListOfCanvases());
+  TCanvas *obj=0;
+  while((obj=(TCanvas*)nextCanv())) {// loop over Canvas
+    if (!obj->InheritsFrom("TCanvas")) 	continue;
+    TString ts(obj->GetName());ts+=".ps";
+    obj->SaveAs(ts);
+    ts = obj->GetName(); ts+=".png";
+    obj->SaveAs(ts);
+
+  }
+//  while(!gSystem->ProcessEvents()){}; 
+
 }

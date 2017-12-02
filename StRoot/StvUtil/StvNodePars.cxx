@@ -4,6 +4,9 @@
 #include "TCernLib.h"
 #include "TMath.h"
 #include "TMath.h"
+#include "StarRoot/THelixTrack.h"
+#include "StarRoot/THelix3d.h"
+#include "StarRoot/TRungeKutta.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvUtil/StvELossTrak.h"
 #include "StvUtil/StvDebug.h"
@@ -21,8 +24,8 @@ enum {kHh,kAh,kCh,kZh,kLh};
 static const double recvCORRMAX  = 0.99;
 static const double chekCORRMAX  = 0.9999;
 
-//                              x   y   z  psi   pti  tan      cur
-static double MAXNODPARS[]   ={555,555,555,6.66,kMaxPti+10, kMaxTanL+10, .1};
+//                               X   Y   Z Dx Dy Dz Pinv
+static double MAXNODPARS[]   ={555,555,555, 1, 1, 1, 100};
 //                                   h    z   a     l   ptin
 static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
@@ -35,27 +38,18 @@ static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxCorr = 0.1;
 
+//_____________________________________________________________________________
+inline static double dot(const double *a,const double *b)
+{return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
 
-//______________________________________________________________________________ 
-static void LinearCurv (double Rho,double dRho,double len, double &dT,double &dH)
+//_____________________________________________________________________________
+inline static double dot2(const double *a,const double *b)
+{return a[0]*b[0]+a[1]*b[1];}
+//_____________________________________________________________________________
+inline static void sub(const double a[3],const double b[3],double c[3])
 {
-
-
-  double X[2]={0},D[2]={1};
-  double X0End[2];
-  TCircle tc(X,D,Rho);
-  tc.Eval(len,X0End);
-  double step = 0.1/fabs(Rho)+1e-10;
-  int nStep = int(fabs(len)/step+0.5);
-  step = len/nStep;
-  for (int istep=0;istep<nStep;istep++) {
-    tc.Move(step); tc.Rho()+=dRho/nStep;
-  }
-  dT = tc.Pos()[0]-X0End[0];
-  dH = tc.Pos()[1]-X0End[1];
-}  
-
-
+  c[0] = a[0]-b[0]; c[1] = a[1]-b[1]; c[2] = a[2]-b[2];
+}
 
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
@@ -98,66 +92,14 @@ void Testik(const Mtx55D_t &tt)
    T.Print();
    T1.Print();
 }
-#if 0
-//______________________________________________________________________________ 
-double StvTrackNode::sinX(double x)
-{
-  double x2 = x*x;
-  if (x2>0.5) return (sin(x)-x)/x2/x;
-  double nom = -1./6;
-  double sum = nom;
-  for (int it=4;1;it+=2) {
-    nom = -nom*x2/(it*(it+1));
-    sum +=nom;
-    if (fabs(nom) <= 1e-10*fabs(sum)) break;
-  }
-  return sum;
-} 
-//______________________________________________________________________________
-void StvTrackNode::mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]) 
-{
-  double T[kNPars][kNPars];
-
-  if (!Rot[0][0]) {memcpy(Rot[0],Pro[0],sizeof(T)); return;}
-
-  memcpy(T[0],Pro[0],sizeof(T));
-
-  for (int i=0;i<kNPars;i++) {
-  for (int j=0;j<kNPars;j++) {
-    if(!Rot[i][j]) continue;
-    for (int k=0;k<kNPars;k++) {
-      if (!Pro[k][i]) continue;
-      T[k][j] += Pro[k][i]*Rot[i][j];
-  }}} 
-  for (int i=0;i<kNPars;i++) {
-  for (int k=0;k<kNPars;k++) {
-    Rot[i][k] += T[i][k];
-}}
-}     
-#endif //0
-//------------------------------------------------------------------------------
-void StvFitDers::Reverse() 
-{
-static const int mius[]= {1,2,5,8,9,10,13,14,0};
-  for (int i=0;mius[i];i++) {mMtx[0][mius[i]]=-mMtx[0][mius[i]];}
-}
 //______________________________________________________________________________
 int StvNodePars::check(const char *pri) const
 {
-  if (fabs(_x+_y+_z)<=0) return 0;
-  assert(_hz);
+  if (fabs(_x[0]+_x[1]+ _x[2])<=0) return 0;
+  assert(_h[2]);
   int ierr=0;
-//  temp test
-  double tmp = _curv - _ptin* _hz;
-//		1km for 1GeV is a zero field
-  if (fabs(_hz)>=1e-5 && fabs(tmp)> 1e-3*fabs(_curv)) {ierr=1001; 	   	goto FAILED;}
-  for (int i=0;i<=kNPars;i++){if (fabs(P[i]) > MAXNODPARS[i]) {ierr = i+ 1;	goto FAILED;}} 
-
-  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.0001)        {ierr = i+1010;	goto FAILED;}} 
-  tmp = fabs(cos(_psi)-_cosCA);
-  ierr = 1002; if (tmp>1e-4) 							goto FAILED;
-  tmp = fabs(sin(_psi)-_sinCA);
-  ierr = 1003; if (tmp>1e-4) 							goto FAILED;
+  for (int i=0;i<7;i++){if (fabs(_x[i]) > MAXNODPARS[i]){ierr = i+ 1;	goto FAILED;}} 
+///???  if (getRxy()<100 && getSign()<0)			{ierr = 10;	goto FAILED;}
   return 0;
 FAILED: 
   assert(ierr<1000);
@@ -165,510 +107,249 @@ FAILED:
   printf("StvNodePars::check(%s) == FAILED(%d)\n",pri,ierr);  print();
   return ierr;
 } 
-//______________________________________________________________________________
-StvNodePars &StvNodePars::merge(double wt,StvNodePars &other)
-{
-  assert(_hz);
-   double wt0 = 1.-wt;
-   for (int i=0;i<kNPars+1;i++) {P[i] = wt0*P[i] + wt*other.P[i];}
-   ready();
-   return *this;
-}
 
 //______________________________________________________________________________
-void StvNodePars::set(const THelixTrack *th, double Hz)
+double StvNodePars::getCurv() const 
 {
-  memcpy(&_x,th->Pos(),3*sizeof(_x));
-  assert(fabs(_x)<500);
-  assert(fabs(_y)<500);
-  _psi = atan2(th->Dir()[1],th->Dir()[0]);
-  double sinL = th->Dir()[2];
-  double cosL = sqrt((1-sinL)*(1+sinL));
-  _tanl = sinL/cosL;
-  
-  _cosCA = th->Dir()[0]/cosL;
-  _sinCA = th->Dir()[1]/cosL;
-  _curv = th->GetRho();
-  _hz =  Hz;
-  assert(_hz);
-   if (fabs(_curv) > fabs(1e-6*_hz)) 	{_ptin = _curv/_hz;              } 
-   else 				{_ptin = 1e-6; _curv = _ptin*_hz;}
-} 
-
-//______________________________________________________________________________
-void StvNodePars::get(THelixTrack *th) const
-{
-  assert(_hz);
-  double dir[3]={_cosCA,_sinCA,_tanl};
-  th->Set(&_x,dir,_curv);
+  double DH = dot(_d,_h)/_h[3]; double myCosL = sqrt((1-DH)*(1+DH));
+  return  _h[3]*_pinv/myCosL;
 }
 //______________________________________________________________________________
-void StvNodePars::move(double dLen)
+void StvNodePars::set(const double h[3]) //set mag field
 {
-  double dcCA,dsCA,dC,dS,dCR,dSR,dX,dY,dZ;
-  double dLxy = dLen*getCosL();
-  double dPhi = _curv*dLxy;
-assert(fabs(_cosCA)<1.001);
-assert(fabs(_sinCA)<1.001);
 
-  assert(_hz);
-  if (fabs(dPhi) < 0.1) {
-    dCR = dLxy*dPhi*(-1./2 + dPhi*dPhi/24); 	dSR = dLxy*(1-dPhi*dPhi/6);
-    dC  = dCR*_curv;    			dS  = dSR*_curv;
-  } else {
-    dC = cos(dPhi)-1; dS = sin(dPhi);
-    dCR = dC/_curv;   dSR = dS/_curv;
-  }
-  dX = (_cosCA*dSR + _sinCA*dCR);
-  dY = (_sinCA*dSR - _cosCA*dCR);
-  dZ = dLxy*_tanl;
-  dcCA = _cosCA*dC - _sinCA*dS;
-  dsCA = _sinCA*dC + _cosCA*dS;
-  _cosCA+=dcCA; _sinCA+=dsCA; _x+=dX; _y+=dY; _z+=dZ; _psi+=dPhi;
-assert(fabs(_cosCA)<1.01);
-  if (fabs(_cosCA)>1 || fabs(_sinCA)>1 ) ready(); 
-  while(_psi> M_PI) { _psi-=2*M_PI;}
-  while(_psi<-M_PI) { _psi+=2*M_PI;}
-  assert(fabs(_psi)<=M_PI);
+  _h[0] = h[0]; _h[1] = h[1];_h[2] = h[2];
+  _h[3] = sqrt(h[0]*h[0]+h[1]*h[1]+h[2]*h[2]);
+assert(_h[3]>1e-4);
+  THelix3d::MakeTkDir(_d,_h,_tkdir);
 }
 //______________________________________________________________________________
-double StvNodePars::move(const double v[3],double dPP, int dir)
+void StvNodePars::set(const double x[3],const double d[3],double pinv,const double h[3])
 {
-// move to dca point and return dca length
-// dPP account energy loss dPP = deltaP/P/Len
-
-static int  nCall=0; nCall++;
-static const double kMomAccu = 1e-3;	//momentum relative accuracy
-static const double kAngAcc[2]={3.14/180, kAngAcc[0]*0.1};
-static const double kAngMax=0.1;
-StvDebug::Break(nCall);
-
- double MOM[3]={_cosCA,_sinCA,_tanl};
- double cos2Li = (1+_tanl*_tanl),cosL = sqrt(1./cos2Li);
-
- double myLen = 0;
- for (int jk=0;jk<2;jk++) {//jk=0=move without energy loss,=1 with
-   int converge = 0;
-   StvNodePars save = *this;
-   for (int it=0;it<5;it++) {
-     double mom[3]={_cosCA,_sinCA,_tanl};
-     double vtx[3]={v[0]-_x,v[1]-_y,v[2]-_z};
-     double tau = (vtx[0]*mom[0]+vtx[1]*mom[1]+vtx[2]*mom[2])*cosL;
-     double dang = tau*_curv*cosL;
-     if (fabs(dang)>kAngMax)	break;
-     move(tau); myLen+=tau;
-     if (fabs(dang) < kAngAcc[jk]) 	{converge = 1; break;}
-   }// end iters
-   if (!converge) { //failed, try THelix
-     *this = save;
-     double mom[3]={_cosCA,_sinCA,_tanl};
-     THelixTrack hlx(&_x,mom,_curv);
-     myLen = hlx.Path(v);
-     move(myLen); 
-   } 
-   
-assert(fabs(_z)<999);
-   if (jk)			return myLen;
-   double dRho = dPP*myLen,fak = 1+dRho;	//accounts sign dP/P = -dRho/Rho & sign of len
-   if (fabs(dRho)<kMomAccu)	return myLen;
-   if (_curv*fak < -kMaxCurv) {
-     double mydRho = (-kMaxCurv-_curv)/_curv;
-     dRho = (mydRho*dRho>0) ? mydRho:0;
-   }
-   if (_curv*fak >  kMaxCurv) {
-     double mydRho = (kMaxCurv-_curv)/_curv;
-     dRho = (mydRho*dRho>0) ? mydRho:0;
-   }
-   double lxy=myLen*cosL;
-
-   double ang = _curv*lxy,ang2=ang*ang;
-   double dH,dT,dA;
-   int jkFlag=1;
-   if (fabs(ang)<0.1) 		{//Small angle
-     dH = 1./3 ; dT = 1./4;}
-   else if ( fabs(ang)<0.5) 	{//Reasonable angle
-     double qqCos = ((cos(ang)-1)/ang2+1./2)/ang2; 	//~ 1/24
-     double qqSin = (sin(ang)/(ang)-1)/ang2;  		//~-1/6
-     dT = ((qqCos+qqSin)*2-qqCos*ang2+1./2);		//~1/4
-     dH = ((2*qqCos+qqSin)*ang2 -2*qqSin );             //~1/3
-   }
-   else				{//Big angle, approximation does NOT work
-     jkFlag=0;
-     LinearCurv(_curv,dRho*_curv,lxy,dT,dH );
-   }
-   if (jkFlag) {
-     dH*= dRho*ang *lxy/2;
-     dT*=-dRho*ang2*lxy/2;
-   }
-   dA  = dRho*ang/2;
-
-
-
-   _x += MOM[0]*dT-MOM[1]*dH;
-   _y += MOM[1]*dT+MOM[0]*dH;
-   _psi  += dA;
-   while (_psi<-M_PI) { _psi+=2*M_PI;}
-   while (_psi> M_PI) { _psi-=2*M_PI;}
-assert(fabs(_psi)<=M_PI);
-   _curv += _curv*dRho;
-   _ptin  =_curv/_hz;
-   if (fabs(dA)<1e-2) 	{
-      double cosCA = _cosCA;
-     _cosCA -= _sinCA*dA;
-     _sinCA +=  cosCA*dA;}
-   else 		{
-     _cosCA = cos(_psi);
-     _sinCA = sin(_psi);
-   }
-
-
-  }//end jk loop
-assert((myLen>0) == (dir==1));
-assert(fabs(_z)<999);
-  return myLen;
+ if (x) {_x[0] = x[0]; _x[1] = x[1];_x[2] = x[2];}
+ if (d) {
+   _d[0] = d[0]; _d[1] = d[1];_d[2] = d[2];
+   double nor = d[0]*d[0]+d[1]*d[1]+d[2]*d[2];
+   if (fabs(nor-1)>1e-6) {
+     nor = sqrt(nor);
+     _d[0]/=nor;_d[1]/=nor;_d[2]/=nor;
+  } }
+ if (pinv) _pinv = pinv;
+ if (h)set(h);
+}
+//______________________________________________________________________________
+void StvNodePars::set(const THelix3d *th)
+{
+  memcpy(_x,th->Pos(),sizeof(_x));   
+  memcpy(_d,th->Dir(),sizeof(_d));   
+  memcpy(_h,th->Mag(),sizeof(_h));   
+assert(fabs(dot(_d,_d)-1)<1e-4);
+  int iQ = th->Charge();
+  _pinv = -iQ/th->MomTot();
+  THelix3d::MakeTkDir(_d,_h,_tkdir);
 
 }
 //______________________________________________________________________________
-void StvNodePars::moveToR(double R)
+void StvNodePars::set(const THelixTrack *th)
 {
-  double myR2  = _x*_x     + _y*_y;
-  double myDot = _x*_cosCA + _y*_sinCA;
-  double dR2 = R*R-myR2;
-  double dis = myDot*myDot+dR2;
-  assert(_hz);
-  if (dis<0) dis = 0;
-  dis = sqrt(dis);
-  double dL = (dR2)/(dis+fabs(myDot));
-  if (myDot<0) dL = -dL;
-  move(dL/getCosL());
-//  assert(fabs(_x*_x+ _y*_y-R*R)/(2*R)<1e-2);
+static StvToolkit *kit = StvToolkit::Inst();
+  memcpy(_x,th->Pos(),sizeof(_x));   
+  memcpy(_d,th->Dir(),sizeof(_d));   
+  kit->GetMag(_x,_h); set(_h);
+  _pinv = th->GetRho()*th->GetCos()/(_h[2]);
+  THelix3d::MakeTkDir(_d,_h,_tkdir);
+}
+//______________________________________________________________________________
+void StvNodePars::set(const TRungeKutta *th)
+{
+  memcpy(_x,th->Pos(),sizeof(_x));   
+  memcpy(_d,th->Dir(),sizeof(_d));   
+assert(fabs(dot(_d,_d)-1)<1e-4);
+  set(th->Mag());   
+  int iQ = th->GetCharge();
+  _pinv = -iQ/th->MomTot();
+  THelix3d::MakeTkDir(_d,_h,_tkdir);
+
+}
+//______________________________________________________________________________
+//______________________________________________________________________________
+void StvNodePars::get(TRungeKutta *th) const
+{
+  int iQ = getCharge();
+  double P = fabs(1./_pinv);
+
+  double mom[3]= { _d[0]*P, _d[1]*P, _d[2]*P };
+  th->Set(iQ,_x,mom);
+}
+//______________________________________________________________________________
+void StvNodePars::get(THelix3d *th) const
+{
+  int iQ = getCharge();
+  double P = fabs(1./_pinv);
+
+  double mom[3]= { _d[0]*P, _d[1]*P, _d[2]*P };
+  th->Set(iQ,_x,mom,_h);
+}
+//______________________________________________________________________________
+void StvNodePars::move(double len, StvFitErrs *err) 
+{
+static THelix3d th;
+  get(&th); 
+  if (err) err->Get(&th);
+  th.Move(len);
+  set(&th); 
+  if (err) err->Set(&th);
 }
 
 //______________________________________________________________________________
-StvNodePars &StvNodePars::operator=(const StvNodePars& fr) 
-{
-  if (&fr==this)	return *this;
-  memcpy(this,&fr,sizeof(*this));
-assert(_hz);
-  return *this;
-}
-//______________________________________________________________________________
-const StvFitPars &StvNodePars::operator-(const StvNodePars& sub) const
+const StvFitPars &StvNodePars::operator-(const StvNodePars& what) const
 {
 static StvFitPars fp;
-
-  double cos2L = 1./(1+sub._tanl*sub._tanl); 
-  double cosL  = sqrt(cos2L);
-  double sinL  = sub._tanl*cosL;
-  double dx = _x-sub._x;
-  double dy = _y-sub._y;
-  double dz = _z-sub._z;
-  
-  fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
-  fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
-  double a = (_psi -sub._psi );
-  if      (a < -M_PI) {a += M_PI*2;}
-  else if (a >  M_PI) {a -= M_PI*2;}
-assert(fabs(_psi)<M_PI);
-  a*=cosL;
-  fp.mA = (fabs(a) <0.1)? a*(1-a*a/3): atan(a);
-  fp.mP = (_ptin-sub._ptin);
-  double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
-  if (fabs(tL) <0.3)  	{fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5));} 
-  else 			{fp.mL = atan(tL)		     ;}
+  double dif[3];
+  sub(_x,what._x,dif);
+  fp.mU = dot(dif,_tkdir[0]);
+  fp.mV = dot(dif,_tkdir[1]);
+  sub(_d,what._d,dif);
+  fp.mFita = dot(dif,_tkdir[0]);
+  fp.mLama = dot(dif,_tkdir[1]);
   return fp;
 }
 //______________________________________________________________________________
 void StvNodePars::operator+=(const StvFitPars &fp)
 {
-static int nCall=0; nCall++;
-StvDebug::Break(nCall);
-  assert(_hz);
-  double cos2L = 1./(1+_tanl*_tanl); 
-  double cosL  = sqrt(cos2L);
-  double sinL  = _tanl*cosL;
-  _x += -_sinCA*fp.mH - sinL*_cosCA*fp.mZ;
-  _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
-  _z +=                 cosL       *fp.mZ;
-  assert(fabs(_x)<999);
-  assert(fabs(_y)<999);
-  double a = 0,cA=1,sA=0;
-  double tA = fp.mA*(1.+fp.mA*fp.mA/3)/cosL;
-  if (fabs(tA)<0.1) 	{
-    a = tA*(1-tA*tA/3); sA = a*(1-a*a/6); cA = 1-a*a/2;}
-  else 			{
-    tA = tan(fp.mA)/cosL; a = atan(tA); cA = cos(a); sA = tA*cA;}
-
-  assert(fabs(a)<3.);
- _psi   += a;
-  if (_psi < -M_PI) _psi += 2*M_PI;
-  if (_psi >  M_PI) _psi -= 2*M_PI;
-  assert(fabs(_psi)<M_PI);
-
-  double cosCA = _cosCA;
-  _cosCA = cosCA*cA-_sinCA*sA;
-  _sinCA = cosCA*sA+_sinCA*cA;
-  if (fabs(_cosCA*_cosCA+_sinCA*_sinCA-1)>1e-5) ready();
-  _ptin  += fp.mP;
-  if (_ptin >  kMaxPti) _ptin = kMaxPti;
-  if (_ptin < -kMaxPti) _ptin =-kMaxPti;
-
-  double l = fp.mL,tL;
-  if (fabs(l) < 0.1) {tL = l*(1+l*l/3);}
-  else               {tL = tan(l)     ;}
-  _tanl = (_tanl+tL)/(1.-_tanl*tL);
-
-  if (_tanl < -kMaxTanL) _tanl = -kMaxTanL;
-  if (_tanl >  kMaxTanL) _tanl =  kMaxTanL;
-  _curv   = _hz *_ptin;
-  if (fabs( _cosCA)>1 || fabs( _sinCA)>1) ready();
-  assert(!check("StvNodePars::operator+=") || 1);
+  
+  if (_tkdir[0][0]>1) THelix3d::MakeTkDir(_d,_h,_tkdir);
+  for (int i=0;i<3;i++) {
+    _x[i]+= _tkdir[0][i]*fp.mU    + _tkdir[1][i]*fp.mV; 
+    _d[i]+= _tkdir[0][i]*fp.mFita + _tkdir[1][i]*fp.mLama;  
+  }
+  _pinv += fp.mPinv;  
+  double nor = dot(_d,_d);
+  if (fabs(nor-1)>1e-5) {
+    nor = sqrt(nor);
+    _d[0]/=nor; _d[1]/=nor; _d[2]/=nor;
+  }
+  THelix3d::MakeTkDir(_d,_h,_tkdir);
+}
+//_____________________________________________________________________________
+void StvNodePars::add(const StvELossTrak *el,double len)
+{    
+  if (!el) return;;
+  double fakLen = fabs(len/el->TotLen());
+  double pinv = fabs(_pinv);
+  double dpin = el->TotPinvLoss()*fakLen;
+  if (len>0) dpin = -dpin;
+  pinv += dpin;
+  _pinv = (_pinv>0) ? pinv:-pinv;
 }
 //______________________________________________________________________________
-void StvNodePars::print() const
+void StvNodePars::print(const char *name) const
 {
-static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
-  for (int i=-2;i<kNPars+1;i++) {printf("%s = %g, ",tit[i+2],P[i]);}
+static const char* tit[]={"X","Y","Z","Dx","Dy","Dz","Pinv",0};
+  printf("StvNodePars(%s) Rxy = %g",name,getRxy());
+  for (int i=0;i<kNPars+1;i++) {printf("%s = %g, ",tit[i],(*this)[i]);}
   printf("\n");
 }   
 //______________________________________________________________________________
-void StvNodePars::convert( StvFitDers &fitDer, const StvHlxDers &hlxDer) const
+void StvNodePars::update() 
 {
-
-  double cosL = 1/sqrt(1+_tanl*_tanl);
-  double sinL = _tanl*cosL;
-  double rho = _curv;
-  double mHz = _hz;
-
-  assert(_hz);
-  memset(fitDer[0],0,25*sizeof(fitDer[0][0]));
-//====================================
-fitDer[kHf][kHf] = hlxDer[kHh][kHh];
-fitDer[kHf][kZf] = hlxDer[kHh][kAh]*(sinL*rho);
-fitDer[kHf][kAf] = hlxDer[kHh][kAh]*1/cosL;
-fitDer[kHf][kPf] = hlxDer[kHh][kCh]*(mHz);
-fitDer[kZf][kHf] = cosL*hlxDer[kZh][kHh];
-fitDer[kZf][kZf] = cosL*(hlxDer[kZh][kAh]*(sinL*rho)) + 1;
-fitDer[kZf][kAf] = cosL*hlxDer[kZh][kAh]*1/cosL;
-fitDer[kZf][kLf] = cosL*hlxDer[kZh][kLh];
-fitDer[kZf][kPf] = cosL*hlxDer[kZh][kCh]*(mHz);
-fitDer[kAf][kHf] = cosL*hlxDer[kAh][kHh] + (-sinL*cosL*cosL*rho)*hlxDer[kZh][kHh];
-fitDer[kAf][kZf] = cosL*hlxDer[kAh][kAh]*(sinL*rho) + (-sinL*cosL*cosL*rho)*(hlxDer[kZh][kAh]*(sinL*rho) + 1/cosL);
-fitDer[kAf][kAf] = hlxDer[kAh][kAh] + (-sinL*cosL*cosL*rho)*hlxDer[kZh][kAh]*1/cosL;
-fitDer[kAf][kLf] = (-sinL*cosL*cosL*rho)*hlxDer[kZh][kLh];
-fitDer[kAf][kPf] = cosL*hlxDer[kAh][kCh]*(mHz) + (-sinL*cosL*cosL*rho)*hlxDer[kZh][kCh]*(mHz);
-fitDer[kLf][kLf] = 1;
-fitDer[kPf][kPf] = 1;
-//====================================
-
-
-}
-//______________________________________________________________________________
-int StvNodePars::isReady( ) const
-{
-  if (fabs(_cosCA-cos(_psi))>1e-5) return 0;
-  if (fabs(_sinCA-sin(_psi))>1e-5) return 0;
-  if (fabs(_curv -_hz*_ptin)>1e-5) return 0;
-  return 1;
-}
+}   
 //_____________________________________________________________________________
 StvFitPars StvNodePars::delta() const
 {
-   double spaceR = 0.1+sqrt(_x*_x+_y*_y)/200;
-   double spaceZ = 0.1+fabs(_z)/200;
+   double spaceR = 0.1+(fabs(_x[0])+fabs(_x[1]))/200;
+   double spaceZ = 0.1+fabs(_x[2])/200;
    StvFitPars fp;
-   fp.mH = spaceR;    fp.mZ = spaceZ; 
-   fp.mA = fp.mL = 3.14/180*30;	//ten degree
-   fp.mP = fabs(_ptin)*0.2;
-   if (fp.mP<0.1) fp.mP = 0.1;
+   fp.mU = spaceR;    fp.mV = spaceZ; 
+   fp.mFita = fp.mLama = 3.14/180*10;	//ten degree
+   fp.mPinv = fabs(_pinv)*0.1+1e-2;
    return fp;
 }
+
+
+// //_____________________________________________________________________________
+// StvFitPars StvNodePars::delta() const
+// {
+//    double spaceR = 0.1+sqrt(_x[0]*_x[0]+_x[1]*_x[1])/200;
+//    double spaceZ = 0.1+fabs(_x[2])/200;
+//    StvFitPars fp;
+//    fp.mH = spaceR;    fp.mZ = spaceZ; 
+//    fp.mA = fp.mL = 3.14/180*30;	//ten degree
+//    fp.mP = fabs(_ptin)*0.2;
+//    if (fp.mP<0.1) fp.mP = 0.1;
+//    return fp;
+// }
+// //_____________________________________________________________________________
+// StvFitErrs StvNodePars::deltaErrs() const
+// {
+//    StvFitPars dlt = delta();
+//    StvFitErrs fe;
+//    for (int i=0,li=0;i< 5;li+=++i) {fe[li+i] = kERRFACT*dlt[i]*dlt[i];}
+//    fe.mHz = _hz;
+//    return fe;
+// }
+
+
 //_____________________________________________________________________________
-StvFitErrs StvNodePars::deltaErrs() const
+void StvNodePars::merge(const StvNodePars &other,double wt)
 {
-   StvFitPars dlt = delta();
-   StvFitErrs fe;
-   for (int i=0,li=0;i< 5;li+=++i) {fe[li+i] = kERRFACT*dlt[i]*dlt[i];}
-   fe.mHz = _hz;
-   return fe;
+  int sizeD = &_tkdir[0][0] - &_x[0];
+  TCL::vlinco(_x,wt,other._x,1.-wt,_x,sizeD);
+  double nor = sqrt(TCL::vdot(_d,_d,3));
+  TCL::vscale(_d,1./nor,_d,3);
+  THelix3d::MakeTkDir(_d,_h,_tkdir);
 }
 //_____________________________________________________________________________
-void StvFitErrs::Add(const StvELossTrak *el,const StvNodePars &pa, double len)
+void StvFitErrs::Add(const StvELossTrak *el,double len)
 {    
   if (!el) return;
-
   double fakLen = (len)? fabs(len/el->TotLen()):1.;
-  double p2 = pa.getP2();
-  double e2 = p2+el->M()*el->M();
-  double fakNrj = e2/p2*(pa._ptin*pa._ptin)/p2;
-  mAA+= el->GetTheta2() 		*fakLen;
-  mLL+= el->GetTheta2()  		*fakLen;
-  mHH+= el->GetOrt2() 			*fakLen;
-  mZZ+= el->GetOrt2() 			*fakLen;
-  mPP+= el->ELossErr2()	*fakNrj *fakLen;
-  if (mHH<=0 || mHH>1e2 || mZZ<=0 || mZZ>1e2) Recov();
+  mFF+= el->TotTheta2() 		*fakLen;
+  mLL+= el->TotTheta2()  		*fakLen;
+  mUU+= el->TotOrt2() 			*fakLen;
+  mVV+= el->TotOrt2() 			*fakLen;
+  mPP+= el->TotPinvErr2()		*fakLen;
 }
 //_____________________________________________________________________________
-double StvNodePars::diff(const StvNodePars &other) const 
-{ 
-  StvFitPars fp = *this-other;
-  StvFitPars dlt = delta();
-  double myMax=0;
-  for (int i=0;i<5;i++) {
-    double d = fabs(fp[i])/dlt[i];
-    if (myMax<d) myMax=d;
-  }
-  return myMax;
+void StvFitErrs::Update(const TkDir_t &tkdir)
+{
+
+  double U0U1 = dot(tkdir[0],mTkDir[0]); 
+  double U0V1 = dot(tkdir[0],mTkDir[1]); 
+  double V0U1 = dot(tkdir[1],mTkDir[0]); 
+  double V0V1 = dot(tkdir[1],mTkDir[1]); 
+  
+  double T[5][5] = {{U0U1, U0V1,    0,    0, 0}
+                   ,{V0U1, V0V1,    0,    0, 0}
+                   ,{   0,    0, U0U1, U0V1, 0}
+                   ,{   0,    0, V0U1, V0V1, 0}
+                   ,{   0,    0,    0,    0, 1}};
+  double qwe[15];
+  TCL::ucopy((const double*)*this,qwe,15);
+  TCL::trasat(T[0],qwe,*this,5,5);
+  TCL::ucopy (tkdir[0],mTkDir[0],3*3);
 }
+
 //_____________________________________________________________________________
 double StvNodePars::diff(const StvNodePars &other,const StvFitErrs &otherr) const 
 { 
-  StvFitPars fp = *this-other;
+  double dx[3],dn[3],p[5];
+  TCL::vsub(other._x,_x,dx,3);
+  TCL::vsub(other._d,_d,dn,3);
+  p[0] = TCL::vdot(dx,(_tkdir)[0],3);
+  p[1] = TCL::vdot(dx,(_tkdir)[1],3);
+  p[2] = TCL::vdot(dn,(_tkdir)[0],3);
+  p[3] = TCL::vdot(dn,(_tkdir)[1],3);
+  p[4] = other._pinv - _pinv;
 
   double myMax=0;
   const double *ee = otherr;
   for (int i=0,li=0;i< 5;li+=++i) {
-    double d = fp[i]*fp[i]/(ee[li+i]+1e-11);
+    double d = p[i]*p[i]/(ee[li+i]+1e-11);
     if (myMax<d) myMax=d;
   }
   return myMax;
 }
-//_____________________________________________________________________________
-double StvNodePars::diff(const float hit[3]) const 
-{ 
-  StvNodePars other(*this);
-  other._x = hit[0]; other._y = hit[1]; other._z = hit[2];
-
-  StvFitPars fp = *this-other;
-  double myMax=fabs(fp.mH) ;
-  if (myMax < fabs(fp.mZ)) myMax = fabs(fp.mZ);
-  return myMax;
-}
-//______________________________________________________________________________
-void StvNodePars::Deriv(double len, StvFitDers &der) const
-{
-   double Rho   = _curv;
-   double cos2L = 1./(1.+_tanl*_tanl);
-   double cosL  = sqrt(cos2L);
-   double cos3L = cos2L*cosL;
-   double sinL  = _tanl*cosL;
-   double sin2L = sinL*sinL;
-   double lxy = len*cosL;
-   double dFi = lxy*Rho;
-   
-   double mySin,rSin,dSin,rCos,dCos,rrCos;   
-
-
-
-   if (fabs(dFi)<0.1) { //Small Phi approach
-     mySin = -1./6*dFi*dFi;
-     dSin = (1+mySin); 	rSin = lxy*dSin;   dSin*=dFi;
-     dCos = (1./2-dFi*dFi/24); 	rCos=lxy*dFi*dCos; rrCos=lxy*lxy*dCos; dCos*=dFi*dFi;
-   } else {
-     dSin =   sin(dFi); rSin = dSin/Rho;  mySin = dSin/dFi-1;
-     dCos = 1-cos(dFi); rCos = dCos/Rho; rrCos = rCos/Rho;
-   }
-
-// dH1dH0  = cos(t/R)
-// dZ1dH0 =-sinL*sin(t/R)
-// dA1/dH0 =  -Rho*sin(t/R)*cos3L
-// dLamdH0 = 0;
-// dRho/dH0 = 0
-// Now d/dZ
-// ========
-// dH1dZ0 = sinL*sin(t/R) 
-// dZ1dZ0 = sin2L*(cos(t/R)-1)+1
-// dAdZ0 = sinL*(cos(t/R)-1)*cos3L*Rho
-// dLadZ0 = 0;
-// dRhodZ0 = 0;
-// 
-// Now d/dA
-// ========
-// dH1dA = R*sin(t/R)/cosL
-// dZ1dA = R*tanL*(cos(t/R)-1);
-// dA1dA0 = sin2L +cos(t/R)*cos2L
-// dLamdA = 0;
-// dRhodA = 0;
-// 
-// Now d/dLam
-// ========
-// dH1/dLam = 0
-// dZ1/dLam = t/cosL
-// dA1/dLam =  -2*Rho*t*sinL
-// dLam/dLam = 1
-// dRho/dLam = 0;
-// 
-// Now d/dRho
-// ==========
-// dH1/dRho = R**2*(1 -cos(t*Rho))
-// dZdRho   = R*sinL*(-R*sin(t*Rho)  + t)
-
-
-
-// dA/dRho = cosL*(t + cos2L*(R*sin(t*Rho)-t))
-// dLam/dRho = 0;
-// dRho/dRho = 1;
-
-   der[kHf][kHf] = 1-dCos;		// cos(t/R)
-   der[kZf][kHf] =-sinL*dSin;		// -sinL*sin(t/R)
-   der[kAf][kHf] =-Rho*dSin*cos3L;	// -Rho*sin(t/R)*cos3L
-   der[kLf][kHf] = 0;			// dLamdH0 = 0
-   der[kPf][kHf] = 0;			// dRho/dH0=0
-
-   der[kHf][kZf] = sinL*dSin;		// sinL*sin(t/R)
-   der[kZf][kZf] = 1-sin2L*dCos;	// sin2L*(cos(t/R)-1)+1
-   der[kAf][kZf] =-sinL*dCos*cos3L*Rho;	// sinL*(cos(t/R)-1)*cos3L*Rho
-   der[kLf][kZf] = 0;			// dLadZ0 = 0
-   der[kPf][kZf] = 0;			// dRhodZ0 = 0
-
-   der[kHf][kAf] = rSin/cosL;		// R*sin(t/R)/cosL
-   der[kZf][kAf] =-rCos*sinL/cosL;	// R*tanL*(cos(t/R)-1)
-   der[kAf][kAf] = 1-dCos*cos2L;	// sin2L +cos(t/R)*cos2L
-
-
-   der[kLf][kAf] = 0;			// dLamdA = 0;
-   der[kPf][kAf] = 0;			// dRhodA = 0;
-
-   der[kHf][kLf] = 0;			// dH1/dLam = 0
-   der[kZf][kLf] = lxy/cosL;		// t/cosL
-   der[kAf][kLf] =-dFi*sinL;		// -Rho*t*sinL
-   der[kLf][kLf] = 1;			// dLam/dLam = 1
-   der[kPf][kLf] = 0;			// dRho/dLam = 0;
-
-
-   der[kHf][kPf] = rrCos;		//  R**2*(1 -cos(t*Rho))
-   der[kZf][kPf] = sinL*mySin/Rho*lxy;	// R*sinL*(R*sin(t*Rho)  - t)
-   der[kAf][kPf] = cosL*lxy*(1+cos2L*mySin);	// cosL*(t + cos2L*(R*sin(t*Rho)-t))
-   der[kLf][kPf] = 0;			// 0
-   der[kPf][kPf] = 1;			// dRho/dRho = 1;
-
-//		_curv ==> _ptin
-   der[kHf][kPf]*=_hz;
-   der[kZf][kPf]*=_hz;
-   der[kAf][kPf]*=_hz;
-
-
-}
-//______________________________________________________________________________
-void StvNodePars::Deriv(double len, double dPdP0, StvFitDers &der) const
-{
-// Update existing derivatives using energy loss info:
-//	len   	- new length
-//	dPdP0 	- d(Ploss)/dP0 /len/
-//
-//  dP = dPdP0* dP0
-//  d(Pt/cosL) = dPdP0* d(Pt0/cosL)
-//  dPt/cosL + Pt*sinL/cosL**2*dL = dPdP0* ( dPt0/cosL + Pt0*sinL/cosL**2*dL)
-
-
-
-  double dPLossdP0 = -dPdP0*len;
-  double dPtidPti0 = dPLossdP0;
-  double dPtidLam0 =-dPLossdP0*_tanl*_ptin;
-  
-  der[kPf][kPf]+= dPtidPti0;		// dPti/dRho ;
-  der[kPf][kLf]+= dPtidLam0;		// dPti/dLam ;
-}  
 
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -683,38 +364,36 @@ void StvHitErrs::rotate(double angle)
 
 
 //______________________________________________________________________________
+// //______________________________________________________________________________
+// StvFitErrs::StvFitErrs(double hh,double hz,double zz)
+// {
+//   memset(this,0,sizeof(*this));
+//   mHH=hh;mHZ=hz;mZZ=zz;mHz = 3e33;
+//   assert(&mPP-&mHH+1==15);
+// }
 //______________________________________________________________________________
-StvFitErrs::StvFitErrs(double hh,double hz,double zz)
+double StvFitErrs::Sign() const {return EmxSign(5,*this);}
+//______________________________________________________________________________
+StvFitErrs& StvFitErrs::operator= (const THEmx3d_t &emx) 
 {
-  memset(this,0,sizeof(*this));
-  mHH=hh;mHZ=hz;mZZ=zz;mHz = 3e33;
-  assert(&mPP-&mHH+1==15);
-}
+  (THEmx3d_t&)*this = emx;
+  return *this;
+}      
 //______________________________________________________________________________
-double StvFitErrs::Sign() const {return EmxSign(5,Arr());}
+StvFitErrs& StvFitErrs::operator= (const TkDir_t &tkdir) 
+{
+  memcpy(mTkDir[0],tkdir[0],sizeof(mTkDir));
+  return *this;
+}      
 //______________________________________________________________________________
 const StvFitErrs &StvFitErrs::operator*(const StvFitDers &how) const
 {
 static StvFitErrs myFitErrs;
-  TCL::trasat(how[0],Arr(),myFitErrs.Arr(),5,5);
-  myFitErrs.mHz = mHz;
+  TCL::trasat(how[0],*this,myFitErrs,5,5);
+  TCL::ucopy(how.TkDir(1)[0],myFitErrs.mTkDir[0],3*3);
   myFitErrs.Recov();
-  assert(mHH>0);
-  assert(mZZ>0);
-  
   return myFitErrs;
 }  
-//______________________________________________________________________________
-StvFitErrs &StvFitErrs::operator=(const StvFitErrs &fr) 
-{
-  assert(fr.mHH>0);
-  assert(fr.mZZ>0);
-
-  if (&fr==this)	return *this;
-  memcpy(this,&fr,sizeof(*this));
-assert(mHz);
-  return *this;
-}
 // //______________________________________________________________________________
 // void StvFitErrs::Reset(double hz)
 // {
@@ -728,138 +407,76 @@ assert(mHz);
 // }
 
 //______________________________________________________________________________
-void StvFitErrs::Set(const THelixTrack *he, double hz)
+void StvFitErrs::Set(const THelixTrack *he)
 {
-mHz = hz;assert(hz);
-const THEmx_t *emx = he->Emx();
-double  cosL = he->GetCos();
-double  sinL = he->GetSin();
-double  rho  = he->GetRho();
-//double  dAdZ = -sinL*rho;
-
-mHH = emx->mHH;
-mHZ = cosL*emx->mHZ;
-mZZ = cosL*emx->mZZ*cosL;
-mHA = cosL*emx->mHA + (-sinL*cosL*cosL*rho)*emx->mHZ;
-mZA = (cosL*emx->mAZ + (-sinL*cosL*cosL*rho)*emx->mZZ)*cosL;
-mAA = (cosL*emx->mAA + (-sinL*cosL*cosL*rho)*emx->mAZ)*cosL + (cosL*emx->mAZ + (-sinL*cosL*cosL*rho)*emx->mZZ)*(-sinL*cosL*cosL*rho);
-mHL = emx->mHL;
-mZL = emx->mZL*cosL;
-mAL = emx->mAL*cosL + emx->mZL*(-sinL*cosL*cosL*rho);
-mLL = emx->mLL;
-mHP = (1/mHz)*emx->mHC;
-mZP = (1/mHz)*emx->mCZ*cosL;
-mAP = (1/mHz)*emx->mAC*cosL + (1/mHz)*emx->mCZ*(-sinL*cosL*cosL*rho);
-mLP = (1/mHz)*emx->mCL;
-mPP = (1/mHz)*emx->mCC*(1/mHz);
-  assert(mHH>0);
-  assert(mZZ>0);
-
-
+  static StvToolkit *kit = StvToolkit::Inst();
+  double cosL = he->GetCos();
+  double h[3];
+  kit->GetMag(he->Pos(),h);
+  THelix3d::MakeTkDir(he->Dir(),h,mTkDir);
+  THelix3d::ConvertErrs(he,h[2],*this);
+}  
+//______________________________________________________________________________
+void StvFitErrs::Set(const THelix3d *he)
+{
+const THEmx3d_t *emx = he->Emx();
+ assert(emx);
+ *this = *emx;
+ assert(mUU>0);
+ assert(mVV>0);
  Recov();
 }  
 //______________________________________________________________________________
-void StvFitErrs::Get(THelixTrack *he) const
+void StvFitErrs::Get(THelix3d *he) const
 {
-  assert(mHz);
-  he->SetEmx(0);
-  THEmx_t *emx = he->Emx();
-  double  cosL = he->GetCos();
-  double  sinL = he->GetSin();
-  double  rho  = he->GetRho();
-  double  dAdZeta = sinL*rho;
-
-emx->mHH = mHH;
-emx->mHA = dAdZeta*mHZ + 1/cosL*mHA;
-emx->mAA = dAdZeta*mZZ*dAdZeta + 2/cosL*(mZA*dAdZeta) + mAA/cosL/cosL;
-emx->mHC = (mHz)*mHP;
-emx->mAC = (mHz)*(mZP*dAdZeta + mAP/cosL);
-emx->mCC = (mHz)*mPP*(mHz);
-emx->mHZ = 1/cosL*mHZ;
-emx->mAZ = 1/cosL*(mZZ*dAdZeta + mZA*1/cosL);
-emx->mCZ = 1/cosL*mZP*(mHz);
-emx->mZZ = 1/cosL*mZZ*1/cosL;
-emx->mHL = mHL;
-emx->mAL = mZL*dAdZeta + mAL*1/cosL;
-emx->mCL = mLP*(mHz);
-emx->mZL = mZL*1/cosL;
-emx->mLL = mLL;
-
-
+  he->SetEmx();
+  THEmx3d_t *emx = he->Emx();
+  assert(emx);
+  *emx = *this;
 }  
-//_____________________________________________________________________________
-void StvFitErrs::Backward()
+//______________________________________________________________________________
+void StvFitErrs::Get(TRungeKutta *he) const
 {
-  mHA*=-1; mAP*=-1; mHZ*=-1; mZP*=-1; mAL*=-1; mZL*=-1;
-}
+  he->SetEmx();
+  THEmx3d_t *emx = he->Emx();
+  assert(emx);
+  *emx = *this;
+}  
+//______________________________________________________________________________
+void StvFitErrs::Set(const TRungeKutta *he) 
+{
+const THEmx3d_t *emx = he->Emx();
+ assert(emx);
+ *this = *emx;
+ assert(mUU>0);
+ assert(mVV>0);
+ Recov();
+}  
 //_____________________________________________________________________________
 int StvFitErrs::Check(const char *tit) const
 {
-  if (!StvDebug::mgCheck) 	return 0;
-  if (mHH+mZZ<=0) 		return 0;
-  ((StvFitErrs*)((void*)this))->Recov();
+//  if (mUU+mVV<=0) 		return 0;
+//  ((StvFitErrs*)((void*)this))->Recov();
   int ierr=0;
-  double dia[5];const double *e=&mHH;
+  double dia[5];const double *e=&mUU;
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
-//  if (dia[i]< 1e-8*kFitErrs[i]*kFitErrs[i]) {ierr = i+1; goto ERR;}
-    if (dia[i]> 1e+4*kFitErrs[i]*kFitErrs[i]) {ierr = i+6; goto ERR;}
+    if (dia[i]> 1e+4*kFitErrs[i]*kFitErrs[i]) {ierr = i+1; goto ERR;}
     for (int j=0;j<i;j++) {
        if (e[li+j]*e[li+j]>=dia[i]*dia[j]){ierr = 100+10*i+j;goto ERR;}
     } }
-  assert(mHz);
   return 0;
+
 ERR: if (!tit) return ierr;
   printf("StvFitErrs::Check(%s)=%d\n",tit,ierr);
-  Print();
+  Print(tit);
   return ierr;
-}     
-//_____________________________________________________________________________
-double StvFitErrs::MaxCorr() const
-{
-  if (mHH+mZZ<=0) 		return 0;
-  double dia[5],maxCorr=0;const double *e=&mHH;
-  
-  for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]=e[li+i];
-    for (int j=0;j<i;j++) {
-      double corr = (e[li+j]/dia[i])*(e[li+j]/dia[j]);
-      if (maxCorr<corr) maxCorr=corr;
-  } }
-  return sqrt(maxCorr);
-}     
-//_____________________________________________________________________________
-void StvFitErrs::SetMaxCorr(double maxCorr) 
-{
-  double myMaxCorr = MaxCorr();
-  if (myMaxCorr<maxCorr) return;
-  double fak=maxCorr/myMaxCorr;
-  double *e = &mHH;
-  for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<i;j++) { e[li+j]*=fak;} }
-}
-//_____________________________________________________________________________
-double StvFitErrs::Diff(const StvFitErrs &err,int *idx) const
-{
-  double diaA[5],diaB[5];
-  const double *a=&mHH,*b=&err.mHH;
-  double maxDif=0; int maxIdx=-1;  
-  for (int i=0,li=0;i< 5;li+=++i) {
-    diaA[i]=a[li+i];diaB[i]=b[li+i];
-    double dif = 2*fabs(diaA[i]-diaB[i])/(diaA[i]+diaB[i]+1e-11);
-    if (maxDif<dif) {maxDif=dif; maxIdx=li+i;}
-    for (int j=0;j<i;j++) {
-      dif = 2*fabs(a[li+j]-b[li+j])/sqrt((diaA[i]+diaB[i]+1e-11)*(diaA[j]+diaB[j]+1e-11));
-      if (maxDif<dif) {maxDif=dif; maxIdx=li+j;}
-  } }
-  if (idx) *idx = maxIdx;
-  return maxDif;
 }     
 //_____________________________________________________________________________
 int StvFitErrs::Recov()
 {
 
-  double dia[5],fak[5];double *e=&mHH;
+  double dia[5],fak[5];double *e=*this;
 
   int nerr=0;
 //		Check diag errs
@@ -888,14 +505,24 @@ int StvFitErrs::Recov()
   
   return nerr+jerr;
 }     
-
+//_____________________________________________________________________________
+int StvFitErrs::Sigre() const
+{
+/// signature of error(covariant) matrix. 0=correct
+  int n = 0;
+  if (mUF<0) n+=1;
+  if (mUP<0) n+=10;
+  if (mVL<0) n+=100;
+  if (mFP<0) n+=1000;
+  return n;
+}
 //_____________________________________________________________________________
  void StvFitErrs::Print(const char *tit) const
 {
-static const char *N="HZALP";
+static const char *N="UVFLP";
   if (!tit) tit = "";
   printf("StvFitErrs::Print(%s) ==\n",tit);
-  const double *e = &mHH;
+  const double *e = *this;
   for (int i=0,li=0;i< 5;li+=++i) {
     printf("%c ",N[i]);
     for (int j=0;j<=i;j++) {
@@ -904,21 +531,24 @@ static const char *N="HZALP";
   }
 }
 //_____________________________________________________________________________
-int StvFitPars::TooBig(const StvNodePars &np) const
+StvFitPars::StvFitPars():mU(0),mV(0),mFita(0),mLama(0),mPinv(0)
 {
-  
-  double space = BIGFITPART*(fabs(np._x)+fabs(np._y)+fabs(np._z));
-  for (int i=0;i<2;i++) {if (fabs(Arr()[i]) > MAXFITPARS[i]+space) return i+1;};
-  for (int i=2;i<4;i++) {if (fabs(Arr()[i]) > MAXFITPARS[i]      ) return i+1;};
-
-  if (fabs(mP) > BIGFITPARS[4]+fabs(np._ptin)*BIGFITPART)     	   return 4+1;
-  return 0;
+}
+//_____________________________________________________________________________
+StvFitPars::StvFitPars(double u,double v):mU(u),mV(v),mFita(0),mLama(0),mPinv(0)
+{
+}
+//_____________________________________________________________________________
+StvFitPars::StvFitPars(const double *arr) 
+{
+ memcpy(&mU,arr,5*sizeof(mU));
 }
 //_____________________________________________________________________________
 int StvFitPars::Check(const char *tit) const
 {
   int ifail = 0;
-  for (int i=0;i<5;i++) {if (fabs(Arr()[i]) > MAXFITPARS[i]){ifail=i+1;break;}};
+  const double *p = *this; 
+  for (int i=0;i<5;i++) {if (fabs(p[i]) > MAXFITPARS[i]){ifail=i+1;break;}};
   if (!ifail) return 0;
   if (!tit || !tit[0]) return ifail;
   TString ts(tit);ts +=" *** Check = "; ts+=ifail;ts +=" ***";
@@ -928,9 +558,9 @@ int StvFitPars::Check(const char *tit) const
 //_____________________________________________________________________________
 void StvFitPars::Print(const char *tit) const
 {
-static const char* Nams[]={"mH","mZ","mA","mL","mP",0};
+static const char* Nams[]={"mU","mV","mFita","mLama","mPinv",0};
   if (tit && tit[0]) printf("StvFitPars::Print(%s)\n",tit);
-  for (int i=0;Nams[i]; i++) {printf("%s=%g ",Nams[i],Arr()[i]);}
+  for (int i=0;Nams[i]; i++) {printf("%s=%g ",Nams[i],(*this)[i]);}
   printf("\n");
 }
 //_____________________________________________________________________________
@@ -955,140 +585,161 @@ static const char* Nams[]={"mH","mZ","mA","mL","mP",0};
 
 */
 //_____________________________________________________________________________
-void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs *fitErr) const
-{
-//Remind StvFitPars:
-//double mH;	// direction perpendicular movement and Z
-//double mZ;	// Pseudo Z, direction perpendicular movement & H
-//double mA;	// Angle in XY. cos(A),sin(A),T moving direction
-//double mL;	// Angle lambda in Rxy/Z
-//double mP;	// 1/pt with curvature sign
-
-  enum {jRad=0,jPhi,jZ,jTan,jPsi,jPti};
-  enum {jRPhiRPhi=0
-       ,jRPhiZ  ,jZZ
-       ,jRPhiTan,jZTan,jTanTan
-       ,jRPhiPsi,jZPsi,jTanPsi,jPsiPsi
-       ,jRPhiPti,jZPti,jTanPti,jPsiPti,jPtiPti};
-  double r2xy = _x*_x+_y*_y, rxy=sqrt(r2xy);
-  double cos2L = 1./(1+_tanl*_tanl);
-  double cosL = sqrt(cos2L);
-  double sinL = _tanl*cosL;
-
-  radPar[jRad] = rxy;
-  radPar[jPhi] = atan2(_y,_x);
-  radPar[jZ  ] = _z;
-  radPar[jTan] = _tanl;
-  radPar[jPsi] = _psi;
-  radPar[jPti] = _ptin;
-  if (!radErr) return;
-
-
-  double A[6][5]=
-/*		H		   Z    A       L       P */
-/*--------------------------------------------------------*/
-/*x*/ {{  -_sinCA,	-sinL*_cosCA,	0,	0,	0},
-/*y*/  {   _cosCA,   	-sinL*_sinCA,	0,	0,	0},
-/*z*/  {        0,           	cosL,	0,	0,	0},
-/*A*/  {        0,           	   0,	1,	0,	0},
-/*L*/  {        0,           	   0,	0,	1,	0},
-/*P*/  {        0,           	   0,	0,	0,	1}};
-
-  double g[6][1]=
-      {{ cosL*_cosCA 	},
-       { cosL*_sinCA 	},
-       { sinL        	},
-       { cosL*cosL*_curv},
-       { 0         	},
-       { 0         	}};
-
-  double myX[1][6] = {{_x,_y,0,0,0,0}};
-
-  TMatrixD MA(6,5,A[0]),Mg(6,1,g[0]),Mx(1,6,myX[0]);
-  double xg = -1./(Mx*Mg)[0][0];
-  TMatrixD T1 = MA+(Mg*(Mx*MA))*xg;
-
-//
-double dRad[5][6] = 
-/*                        x,       y,   z,      A,      L,  P*/
-/*-----------------------------------------------------------*/
-/*jRPhi*/	{{-  _y/rxy,  _x/rxy,   0,      0,      0,  0}
-/*jZ  */	,{        0,       0,   1,      0,      0,  0}
-/*jTan*/	,{        0,       0,   0,      0,1/cos2L,  0}
-/*jPsi*/	,{        0,       0,   0, 1/cosL,      0,  0}
-/*jPti*/	,{        0,       0,   0,      0,      0,  1}};
-/*-----------------------------------------------------------*/
-
-  TMatrixD T2=TMatrixD(5,6,dRad[0])*T1;
-  TCL::trasat(T2.GetMatrixArray(),fitErr->Arr(),radErr,5,5); 
-
-}
-//_____________________________________________________________________________
-void StvNodePars::GetPrimial(double radPar[6],double radErr[15],const StvFitErrs *fitErr) const
+void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs *fitErr, double der[5][5]) const
 {
 /// This is GetRadial for primary track. Radial representation of errors
 /// is senseless for primary. But our oldfashiond TPT format demanding it. 
 /// All space errors supposed to be zeros.
 
 //Remind StvFitPars:
-//double mH;	// direction perpendicular movement and Z
-//double mZ;	// Pseudo Z, direction perpendicular movement & H
-//double mA;	// Angle in XY. cos(A),sin(A),T moving direction
-//double mL;	// Angle lambda in Rxy/Z
-//double mP;	// 1/pt with curvature sign
+//double mU;	// direction perpendicular movement and Z
+//double mV;	// Pseudo Z, direction perpendicular movement & H
+//double mFita;	// Angle in XY. cos(A),sin(A),T moving direction
+//double mLama;	// Angle lambda in Rxy/Z
+//double mPinv;	// 1/p with curvature sign
+
+// X = X0 + tkDir[0][0]*mU+tkDir[1][0]*mV
+// Y = Y0 + tkDir[0][1]*mU+tkDir[1][1]*mV
+// Z = Z0 + tkDir[0][2]*mU+tkDir[1][2]*mV
+// Phi = atan2(Y,X)
+// 
+// Dx = tkDir[2][0] + tkDir[0][0]*mFita+ tkDir[1][0]*mLama
+// Dy = tkDir[2][1] + tkDir[0][1]*mFita+ tkDir[1][1]*mLama
+// Dz = tkDir[2][2] + tkDir[0][2]*mFita+ tkDir[1][2]*mLama
+// 
+// Tan = Dz/sqrt(Dx*Dx+Dy*Dy)
+// Psi = atan2(Dy,Dx);
+// cosL = 1./sqrt(1+tanL*tanL)
+// Pti = Pinv/cosL;
+
+//   dXdU = tkDir[0][0]
+//   dXdV = tkDir[1][0]
+//   dYdU = tkDir[0][1]
+//   dYdV = tkDir[1][1]
+//   dZdU = tkDir[0][2]
+//   dZdV = tkDir[1][2]
+//   dPhi_dX = -Y/(X*X+Y*Y)
+//   dPhi_dY =  X/(X*X+Y*Y)
+//   dPhi_dU = dPhi_dX*dXdU + dPhi_dY*dYdU
+//   dPhi_dV = dPhi_dX*dXdV + dPhi_dY*dYdV
+// 
+//   dDx_dFita = tkDir[0][0]
+//   dDx_dLama = tkDir[1][0]
+// 
+//   dDy_dFita = tkDir[0][1]
+//   dDy_dLama = tkDir[1][1]
+// 
+//   dDz_dFita = tkDir[0][2]
+//   dDz_dLama = tkDir[1][2]
+// 
+//   D2xy = (Dx*Dx+Dy*Dy);  Dxy = sqrt(D2xy)
+//   Dxy_dFita = -(Dx_dFita*Dx+Dy_dFita*Dy)/Dxy
+//   Dxy_dLama = -(Dx_dLama*Dx+Dy_dLama*Dy)/Dxy
+// 
+//   dTan_dFita = Dz_dFita/Dxy - Dz*Dxy_dFita/(D2xy)
+//   dTan_dLama = Dz_dLama/Dxy - Dz*Dxy_dLama/(D2xy)
+
+//   dPsi_dDx = -Dy/(Dx*Dx+Dy*Dy)
+//   dPsi_dDy =  Dx/(Dx*Dx+Dy*Dy)
+//   dPsi_dFita = dPsi_dDx*dDx_dFita + dPsi_dDy*dDy_dFita
+//   dPsi_dLama = dPsi_dDx*dDx_dLama + dPsi_dDy*dDy_dLama
+
+//   CosInv = sqrt(1+Tan*Tan)
+//   dCosInv_dFita = Tan/CosInv*dTan_dFita
+//   dCosInv_dLama = Tan/CosInv*dTan_dLama
+// 
+//   dPti_dPinv = CosInv
+//   dPti_dFita = Pinv*dCosInv_dFita
+//   dPti_dLama = Pinv*dCosInv_dLama
+// 
 
   enum {jRad =0,jPhi   ,jZ  ,jTan,jPsi,jPti};
 
-  double r2xy = _x*_x+_y*_y, rxy=sqrt(r2xy);
-  double cos2L = 1./(1+_tanl*_tanl);
-  double cosL = sqrt(cos2L);
+  double r2xy = _x[0]*_x[0]+_x[1]*_x[1], rxy=sqrt(r2xy);
+  double d2xy = _d[0]*_d[0]+_d[1]*_d[1], dxy=sqrt(d2xy);
+  double tanL = _d[2]/dxy;
+  double psi  = atan2(_d[1],_d[0]);
+  double cosL = 1./sqrt(1+tanL*tanL);
 
   radPar[jRad] = rxy;
-  radPar[jPhi] = atan2(_y,_x);
-  radPar[jZ  ] = _z;
-  radPar[jTan] = _tanl;
-  radPar[jPsi] = _psi;
-  radPar[jPti] = _ptin;
-  if (!radErr) return;
+  radPar[jPhi] = atan2(_x[1],_x[0]);
+  radPar[jZ  ] = _x[2];
+  radPar[jTan] = tanL;
+  radPar[jPsi] = psi;
+  radPar[jPti] = _pinv/cosL;
+  if (!radErr && !der) return;
+
+  double  X  = _x[0],Y =_x[1];
+  double  Dx = _d[0],Dy=_d[1],Dz=_d[2];
+  double  Tan  = tanL, Pinv = _pinv;
+  double  XTk0 = dot2(_x,_tkdir[0]);
+  double  XTk1 = dot2(_x,_tkdir[1]);
+  double  XTk2 = dot2(_x,_tkdir[2]);
+  double  sub0 = XTk0/XTk2;
+  double  sub1 = XTk1/XTk2;
+
+  double  dXdU = _tkdir[0][0]-sub0*_tkdir[2][0];
+  double  dYdU = _tkdir[0][1]-sub0*_tkdir[2][1];
+  double  dZdU = _tkdir[0][2]-sub0*_tkdir[2][2];
+ 
+  double  dXdV = _tkdir[1][0]-sub1*_tkdir[2][0];
+  double  dYdV = _tkdir[1][1]-sub1*_tkdir[2][1];
+  double  dZdV = _tkdir[1][2]-sub1*_tkdir[2][2];
+
+  double  dPhi_dX = -Y/(X*X+Y*Y);
+  double  dPhi_dY =  X/(X*X+Y*Y);
+  double  dPhi_dU = dPhi_dX*dXdU + dPhi_dY*dYdU;
+  double  dPhi_dV = dPhi_dX*dXdV + dPhi_dY*dYdV;
+
+  double  dDx_dFita = _tkdir[0][0];
+  double  dDx_dLama = _tkdir[1][0];
+
+  double  dDy_dFita = _tkdir[0][1];
+  double  dDy_dLama = _tkdir[1][1];
+
+  double  dDz_dFita = _tkdir[0][2];
+  double  dDz_dLama = _tkdir[1][2];
+
+  double  D2xy = (Dx*Dx+Dy*Dy),  Dxy = sqrt(D2xy);
+  double  dDxy_dFita = (dDx_dFita*Dx+dDy_dFita*Dy)/Dxy;
+  double  dDxy_dLama = (dDx_dLama*Dx+dDy_dLama*Dy)/Dxy;
+
+  double  dPsi_dDx   = -Dy/D2xy;
+  double  dPsi_dDy   =  Dx/D2xy;
+  double  dPsi_dFita = dPsi_dDx*dDx_dFita + dPsi_dDy*dDy_dFita;
+  double  dPsi_dLama = dPsi_dDx*dDx_dLama + dPsi_dDy*dDy_dLama;
+
+
+  double  dTan_dFita = dDz_dFita/Dxy - Dz*dDxy_dFita/(D2xy);
+  double  dTan_dLama = dDz_dLama/Dxy - Dz*dDxy_dLama/(D2xy);
+  double  CosInv = sqrt(1+Tan*Tan);
+  double  dCosInv_dFita = Tan/CosInv*dTan_dFita;
+  double  dCosInv_dLama = Tan/CosInv*dTan_dLama;
+
+  double  dPti_dPinv = CosInv;
+  double  dPti_dFita = Pinv*dCosInv_dFita;
+  double  dPti_dLama = Pinv*dCosInv_dLama;
+ 
 
 double T[5][5] = 
-/*                     H,     Z,     A,      L,      P*/
-/*----------------------------------------------------*/
-/*jRPhi*/	{{     0,     0,     0,      0,      0}
-/*jZ  */	,{     0,     0,     0,      0,      0}
-/*jTan*/	,{     0,     0,     0,      1/cos2L,0}
-/*jPsi*/	,{     0,     0,1/cosL,      0,      0}
-/*jPti*/	,{     0,     0,     0,      0,      1}};
-/*----------------------------------------------------*/
-
-  TCL::trasat(T[0],fitErr->Arr(),radErr,5,5); 
+/*                       U,       V,       Fita,       Lama,      Pinv*/
+/*--------------------------------------------------------------------*/
+/*jRPhi*/	{{ dPhi_dU, dPhi_dV,          0,          0,          0}
+/*jZ   */	,{    dZdU,    dZdV,          0,          0,          0}
+/*jTan */	,{       0,       0, dTan_dFita, dTan_dLama,          0}
+/*jPsi */	,{       0,       0, dPsi_dFita, dPsi_dLama,          0}
+/*jPti */	,{       0,       0, dPti_dFita, dPti_dLama, dPti_dPinv}};
+/*--------------------------------------------------------------------*/
+  if (der) TCL::ucopy(T[0],der[0],5*5);
+  if (radErr) TCL::trasat(T[0],*fitErr,radErr,5,5); 
 
 }
 //______________________________________________________________________________
 const StvFitPars &StvFitPars::operator*(const StvFitDers &t) const  
 {
 static StvFitPars myPars;
-  TCL::vmatl(t[0],Arr(),myPars.Arr(),5,5);
+  TCL::vmatl(t[0],*this,myPars,5,5);
   return myPars;
-}
-//_____________________________________________________________________________
-void StvFitErrs::Get(const StvNodePars *np,  StvNodeErrs *ne) const
-{
-  double cos2L = 1./(np->_tanl*np->_tanl+1);
-  double dTdL = 1./cos2L;
-  double cosL = sqrt(cos2L);
-
-//                       d/dH     d/dZ       d/dA     d/dLam d/dPti
-  double T[6][5] = {{ np->_cosCA,   0,         0,         0,  0}   //dX
-  		   ,{ np->_sinCA,   0,         0,         0,  0}   //dY
-  		   ,{         0,    1/cosL,    0,         0,  0}   //dZ
-  		   ,{         0,    0,         1,         0,  0}   //dEta
-  		   ,{         0,    0,         0,         0,  1}   //dPti
-  		   ,{         0,    0,         0,      dTdL,  0}}; //dTan
-
-  assert(0);
-  TCL::trasat(T[0],this->Arr(),*ne,5,6); 
-
 }
 //______________________________________________________________________________
 StvImpact::StvImpact() {memset(this,0,sizeof(*this));}
@@ -1100,11 +751,11 @@ void StvImpact::Print(const char *opt) const
   printf("StvImpact::Print(%s) ==\n",opt);
 
 static const char* tit[]={"Imp","Z  ","Psi","Pti","Cur",0};
-  const float* P=&mImp;
+  const auto* P=&mImp;
   for (int i=0;i<5;i++) {printf("%s = %g, ",tit[i],P[i]);}
   printf("\n");
   if (mImpImp<=0) return;
-  const float *e = &mImpImp;
+  const auto *e = &mImpImp;
   for (int i=0,li=0;i< 5;li+=++i) {
     printf("%s ",tit[i]);
     for (int j=0;j<=i;j++) {
@@ -1186,6 +837,9 @@ RETN: if (B!=buf) delete B;
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
+#include "TSystem.h"
+#include "TCanvas.h"
+#include "TH1F.h"
 #include "TRandom.h"
 #include "TMatrixDSym.h"
 #include "TMatrixD.h"
@@ -1196,17 +850,19 @@ RETN: if (B!=buf) delete B;
 ClassImp(StvNodeParsTest);
 void StvNodeParsTest::Test()
 {
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
-  double thPars[7+15],Hz=0.000299792458 * 4.98478;
+  int iQ =1;
+  double thPars[7+15],Hz[3] ={ 0.,0.,0.000299792458 * 4.98478};
   for (int i=0;i<7+15;i++) {thPars[i]=gRandom->Rndm();}
-  THelixTrack th(thPars,thPars+3,thPars[6]),thh;
+  THelix3d th(iQ,thPars,thPars+3,Hz),thh;
   memcpy(thPars+3,th.Dir(),3*sizeof(double));
-  th.SetEmx(thPars+7);
+
+  THEmx3d_t emx(thPars+7,0);
+  th.SetEmx(&emx);
   
   StvNodePars pars;
   StvFitErrs  errs;
-  pars.set(&th,Hz);
-  errs.Set(&th,Hz);
+  pars.set(&th);
+  errs.Set(&th);
   pars.reverse();
   errs.Backward();
   pars.get(&thh);
@@ -1215,94 +871,217 @@ void StvNodeParsTest::Test()
 
   double thhPars[7+15];
   memcpy(thhPars,thh.Pos(),7*sizeof(double));
-  memcpy(thhPars+7,thh.Emx()->Arr(),15*sizeof(double));
+  memcpy(thhPars+7,*thh.Emx(),15*sizeof(double));
   int nerr=0;
   for (int i=0;i<7+15;i++) {
     if (fabs(thhPars[i]-thPars[i]) <1e-6) continue;
     nerr++;printf("%d = %g %g \n",i,thPars[i],thhPars[i]);}
   printf("nmErrs = %d\n",nerr);
-  StvDebug::mgRecov=saveRecov;
 }
+//_____________________________________________________________________________
+void StvNodeParsTest::TestDerRadial()
+{
+  double PtGev = 3.,Curv = 1./100, Hz = PtGev*Curv;
+  double HZ[3] = {0,0,Hz};
+  double Pbeg[3],Xbeg[3]={50,60,70};
+
+  int charge = 1;
+  TVector3 PbegV(PtGev,0,PtGev/3*4);
+  PbegV.RotateZ(gRandom->Rndm()*3.1415*2); PbegV.GetXYZ(Pbeg);
+  TVector3 XbegV(Xbeg);
+
+  double Mag[3]={HZ[0],HZ[1],HZ[2]};
+#if 1
+  TVector3 magV(HZ); 
+  double r1 = gRandom->Rndm(),r2 = gRandom->Rndm(); 
+   magV.RotateX(r1);  magV.RotateY(r2);  magV.GetXYZ(Mag);
+  PbegV.RotateX(r1); PbegV.RotateY(r2); PbegV.GetXYZ(Pbeg);
+#endif
+  
+  THelix3d TH0(charge,Xbeg,Pbeg,Mag);
+  StvNodePars pars;
+  pars.set(&TH0);
+  double Rxy2beg = pars.getRxy2();
+
+  double radPar[6],der[5][5];
+  pars.GetRadial(radPar,0,0,der);
+//		Event loop
+  for (int ip=0;ip<5;ip++) {
+    StvNodePars myPars(pars);
+    StvFitPars  myFit;
+    double eps = 1e-3;
+    ((double*)myFit)[ip]+=eps;
+    myPars+=myFit;
+    for (int it =0; it<2;it++) {
+      double Rxy2 = myPars.getRxy2();
+      double tau = -0.5*(Rxy2-Rxy2beg)/dot2(myPars._x,myPars._d);
+      TCL::vlinco(myPars._x,1,myPars._d,tau,myPars._x,3);
+    }
+    double myRadPar[6];
+    myPars.GetRadial(myRadPar);
+    TCL::vsub(myRadPar+1,radPar+1,myRadPar+1,5);
+    
+    TVectorD difV(5,myRadPar+1),derV(5);     
+    for (int j=0;j<5;j++) {derV[j] = der[j][ip];}
+    difV*=1./eps;
+    const static char *tit[5] =  {"U","V","Fita","Lama","Pinv"};
+    printf("d/d%s :\n",tit[ip]);
+    derV.Print("Analitic  "); 
+    difV.Print("Arithmetic"); 
+  }   
+
+}
+
 //_____________________________________________________________________________
 void StvNodeParsTest::TestGetRadial(int nEv)
 {
-StvFitErrs fE;
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
-  double f = 0.01;
-  TVectorD D(5);
-  D[0] = 1.0*1.0	*f;
-  D[1] = 2.0*2.0	*f;
-  D[2] = 0.03*0.03	*f;
-  D[3] = 0.04*0.04	*f;
-  D[4] = 0.07*0.07	*f;
-  TRandomVector RV(D);
+//    PhiPhi;
+//    ZPhi     ,ZZ;                       
+//    TanlPhi  ,TanlZ ,TanlTanl,                 
+//    PhiPsi   ,ZPsi  ,TanlPsi , PsiPsi ,           
+//    PhiPti  ,ZPti ,TanlPti, PsiPti, PtiPti     
+  double PtGev = 1.,Curv = 1./100, Hz = PtGev*Curv;
+  double HZ[3] = {0,0,Hz};
+  double Pbeg[3],Xbeg[3]={50,60,70};
 
-  TMatrixD S(RV.GetMtx());
-  S.Print();
+//		Canvas + Histograms
+enum {kNCanvs=10};
+static TCanvas *myCanvas[kNCanvs] = {0};
 
-  double *e = &fE.mHH;
+  myCanvas[0] = new TCanvas("C_Xi2","C_Xi2",600,800);
+  myCanvas[0]->Divide(1,1); 
+  static TH1F *hXi2[2] = {0};
+  for (int jk=0;jk<1;jk++) {
+    TString ts("Xi2_"); ts += jk;
+    delete hXi2[jk];
+    hXi2[jk]= new TH1F(ts.Data(),ts.Data(),100,0,0);
+    myCanvas[0]->cd(jk+1);  hXi2[jk]->Draw(); 
+  }
+
+//		Now pulls
+  myCanvas[1] = new TCanvas("C_Pull","C_Pull",600,800);
+  myCanvas[1]->Divide(1,5); 
+  static TH1F * hpu[5]={0};
+{
+static const char *tit[]={"Phi","Z","Tan","Psi","Pti"};
+  for (int ih=0;ih<5;ih++) {
+    delete hpu[ih];
+    hpu[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
+    myCanvas[1]->cd(ih+1  ); 
+    hpu[ih]->Draw();
+}}
+
+
+//		Now test of Corr
+static TH1F * hcr[10]={0};
+{
+  myCanvas[2] = new TCanvas("C_Corr1","C_Corr1",600,800);
+  myCanvas[3] = new TCanvas("C_Corr2","C_Corr2",600,800);
+  myCanvas[2]->Divide(1,5); 
+  myCanvas[3]->Divide(1,5); 
+  static const char *tit[]={
+ "ZPhi"
+,"TanlPhi","TanlZ"
+,"PhiPsi","ZPsi","TanlPsi"
+,"PhiPti","ZPti","TanlPti","PsiPti"};
+
+  for (int ih=0;ih<10;ih++) {
+    delete hcr[ih];
+    hcr[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
+    if (ih<5) myCanvas[2]->cd(ih+1  ); 
+    else      myCanvas[3]->cd(ih+1-5);
+    hcr[ih]->Draw();
+  }}
+  
+    
+  int charge = 1;
+  TVector3 PbegV(PtGev,0,PtGev*3);
+  double Ptot = PbegV.Mag();
+  PbegV.RotateZ(gRandom->Rndm()*3.1415*2); PbegV.GetXYZ(Pbeg);
+  TVector3 XbegV(Xbeg);
+
+  double Mag[3]={HZ[0],HZ[1],HZ[2]};
+#if 1
+  TVector3 magV(HZ); 
+  double r1 = gRandom->Rndm(),r2 = gRandom->Rndm(); 
+   magV.RotateX(r1);  magV.RotateY(r2);  magV.GetXYZ(Mag);
+  PbegV.RotateX(r1); PbegV.RotateY(r2); PbegV.GetXYZ(Pbeg);
+#endif
+  TVectorD dia(5);
+  dia[0]= 0.1; dia[1]= 0.2; dia[2]= 0.1/Ptot; dia[3]= 1./360; dia[4]= 2./360;
+  
+  TRandomVector RV(dia);
+  auto &EMX = RV.GetMtx();
+  auto &val = RV.GetLam();
+  dia.Print("DIA");
+  val.Print("VAL");
+
+
+  double Gbeg[15];
   for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++    ) {
-       e[li+j]= S[i][j];
-  } }
-
-
-  StvNodePars node;
-  node.reset();
-  double myRad = 100;
-  double phi = gRandom->Rndm()*2*M_PI;
-  node._x    = myRad*cos(phi);
-  node._y    = myRad*sin(phi);
-  node._z    = (gRandom->Rndm()-0.5)*200;
-  node._psi  = phi + (gRandom->Rndm()-0.5);
-  node._tanl = gRandom->Rndm();
-  node._ptin = (gRandom->Rndm()-0.5);
-  node._hz   = 0.000299792458 * 4.98478;
-  node.ready();
-
-  double radPar[6],radErr[15];
-  node.GetRadial(radPar,radErr,&fE);
-  TMatrixDSym SS(5);
-  for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++    ) {
-       SS[i][j]=radErr[li+j]; SS[j][i]=radErr[li+j];
-  } }
-  SS.Print();
-
-  double rE[15]={0};
-  for (int ev=0;ev<nEv;ev++) 
-  {
-    const TVectorD &res = RV.Gaus();
-    StvNodePars myNode(node);
-    StvFitPars  fitPars(res.GetMatrixArray());
-    myNode +=fitPars;
-//		Project it to x*x+y*y=r*r
-    myNode.moveToR(myRad);
-    assert(fabs(pow(myNode._x,2)+pow(myNode._y,2)-myRad*myRad)<1e-4*myRad);
-    double rP[6];
-    myNode.GetRadial(rP);
-    assert(fabs(rP[0]-myRad)<1e-4);
-    for (int i=0,li=0;i< 5;li+=++i) {
-      for (int j=0;j<=i;j++    ) {
-      rE[li+j]+= (rP[i+1]-radPar[i+1])*(rP[j+1]-radPar[j+1]);
-    } }
-  }  //End events
-static const char *radTit[6]= {"Rad","Phi","Z  ","Tan","Psi","Pti"};
-  double fak[5]={myRad,1,1,1,1};
-  for (int i=0,li=0;i< 5;li+=++i){for (int j=0;j<=i;j++){rE[li+j]*=fak[i]*fak[j]/nEv;}}
-  double qA=0,qAmax=0,dia[5];
-  for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]=radErr[li+i];
     for (int j=0;j<=i;j++) {
-      double nor = sqrt(dia[i]*dia[j]);
-      double dif = (rE[li+j]-radErr[li+j])/nor;
-      printf("([%s][%s] \t%g = \t%g \t%g\n",radTit[i+1],radTit[j+1],radErr[li+j]/nor,rE[li+j]/nor,dif);
-      dif = fabs(dif);
-      qA+= (dif); if (dif>qAmax) qAmax=dif;
+      Gbeg[li+j] = EMX[i][j];
   } }
-  qA/=15;
-  printf("Quality %g < %g < 1\n",qA,qAmax);
-  StvDebug::mgRecov=saveRecov;
+
+
+  double GbegI[15];
+  TCL::trsinv(Gbeg,GbegI,5);  
+  
+  THelix3d TH0(charge,Xbeg,Pbeg,Mag);
+  TH0.SetEmx();
+  THEmx3d_t *emx = TH0.Emx();
+  emx->Set(Gbeg);
+  StvNodePars pars;
+  pars.set(&TH0);
+  double Rxy2beg = pars.getRxy2();
+  StvFitErrs errs;  
+  errs.Set(&TH0);
+  double radPar[6],radErr[15],radErrI[15],radErrD[5];
+  pars.GetRadial(radPar,radErr,&errs);
+  TCL::trsinv(radErr,radErrI,5);  
+  for (int i=0,li=0;i<5;li+=++i) {radErrD[i] = sqrt(radErr[li+i]);}
+  
+//		Event loop
+  for (int iev=0;iev<nEv;iev++) {
+    TVectorD delta  = RV.Gaus();
+    StvNodePars myPars(pars);
+    StvFitPars  myFit(delta.GetMatrixArray());
+    myPars+=myFit;
+    for (int it =0; it<2;it++) {
+      double Rxy2 = myPars.getRxy2();
+      double tau = -0.5*(Rxy2-Rxy2beg)/dot2(myPars._x,myPars._d);
+      TCL::vlinco(myPars._x,1,myPars._d,tau,myPars._x,3);
+    }
+    assert(fabs(myPars.getRxy2()-Rxy2beg)<1e-4*Rxy2beg);
+    double myRadPar[6];
+    myPars.GetRadial(myRadPar);
+    TCL::vsub(myRadPar+1,radPar+1,myRadPar+1,5);
+    
+
+
+    double chi2;
+    TCL::trasat(myRadPar+1,radErrI,&chi2,1,5);
+//    TCL::trasat(delta.GetMatrixArray(),GbegI,&chi2,1,5);
+    assert(chi2>0);
+    hXi2[0]->Fill(chi2);
+
+
+    int jk=0;
+    for (int i=0,li=0;i<5;li+=++i) {
+      hpu[i]->Fill(myRadPar[i+1]/radErrD[i]);
+//      hpu[i]->Fill(delta[i]/GbegD[i]);
+      for (int j=0;j<i;j++) {
+	double d = myRadPar[i+1]*myRadPar[j+1] - radErr[li+j];
+	d/= radErrD[i]*radErrD[j];
+	hcr[jk++]->Fill(d);
+    } }
+  }
+
+  for (int i=0;myCanvas[i];i++) {
+    if (!myCanvas[i]) continue;
+    myCanvas[i]->Modified();myCanvas[i]->Update();}
+
+  while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
 }
 
 //_____________________________________________________________________________
@@ -1313,7 +1092,7 @@ static void Add(THelixTrack &ht,const double add[5])
   ort = ort.Unit();
   double rho=ht.GetRho();
   pos+=ort*add[0]; pos[2]+=add[3];
-  dir.SetMagThetaPhi(1.,dir.Theta()-add[4],dir.Phi()+add[1]);
+  dir.SetMagThetaPhi(1.,(M_PI/2-dir.Theta())-add[4],dir.Phi()+add[1]);
   double wk[7]={pos[0],pos[1],pos[2],dir[0],dir[1],dir[2],rho+add[2]};
   ht.Set(wk,wk+3,wk[6]);
 }
@@ -1324,49 +1103,35 @@ void StvNodeParsTest::TestErrProp(int nEv)
 {
 
 StvNodePars iP,iPR,oP,oPR;
-THelixTrack iH,iHR,oH,ht;
+THelix3d iH,iHR,oH,ht;
 StvFitErrs iE,oE,oER;
 
-THEmx_t oHE,oHER;
+StvFitErrs oHE,oHER;
 double dia[5],*e,*er,*vtx;
-  iP._cosCA = 0.99999209770847208, iP._sinCA = 0.0039754899835676982, iP._x = 153.15599597873157, 
-  iP._y = 61.139971243562862, iP._z = -165.47715347045698, iP._psi = 0.0039755004554277579, iP._ptin = 3.000133812200076, iP._tanl = 9, 
-  iP._curv = 0.0044971007445879334, iP._hz = 0.0014989667215176954;
+  double x[3] = {153.15599597873157, 61.139971243562862, -165.47715347045698};
+  double lam = atan(9), psi = 0.0039755004554277579, ptin = 3.000133812200076;
+  double d[3] = {cos(lam)*cos(psi),cos(lam)*sin(psi),sin(lam)};
+  double h[3]={0,0, 0.0014989667215176954};
+  iP.set(h);iP.set(x,d,ptin*cos(lam),h);
 
-  iE.mHH = 0.008422599212098222, iE.mHZ = -0.0091916832962463078, iE.mZZ = 0.019038123366318632, iE.mHA = -0.00039625080910056564, 
-  iE.mZA = 0.00027601715939822415, iE.mAA = 3.8654618686681686e-05, iE.mHL = 0.00029431818666556691, iE.mZL = -0.00060667408715620378, 
-  iE.mAL = -1.2045956628097832e-05, iE.mLL = 2.6946791206097881e-05, iE.mHP = 0.013476203596402746, iE.mZP = -0.00058380596704562366, 
-  iE.mAP = -0.0021487322180886877, iE.mLP = 0.00016358043963761329, iE.mPP = 0.17711658543201794, iE.mHz = 0.0014989667215176954;
-#if 0
-  iP._cosCA = 0.051522195951218416; iP._sinCA = -0.99867184876021664;  iP._x   = 56.80456301948584; 
-  iP._y     = -179.95090442478528;  iP._z     = 16.833129146428401;    iP._psi = -1.5192513089402997; iP._ptin = -4.286089548109465; 
-  iP._tanl  = -0.71077992742240803; iP._curv  = -0.0063779138641975935;iP._hz=(0.0014880496061989194);
-  iP.ready();
-
-  iE.mHH = 0.0025928369042255385;  iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
-  iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812;  iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
-  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546;  iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
-  iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
-#endif
+  double G[15] = {
+    0.008422599212098222
+  ,-0.009191683296246307, 0.019038123366318632
+  ,-0.000396250809100565, 0.000276017159398224, 3.865461868668168-05
+  , 0.000294318186665566,-0.000606674087156203,-1.20459566280978e-05, 2.69467912060978e-05
+  , 0.013476203596402746,-0.000583805967045623,-0.002148732218088687, 0.000163580439637613, 0.17711658543201794 
+  };
 
   oER*=0.;
   oHER.Clear();
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
-
 //		Prepare error matrix for TRandomVector
-  TMatrixDSym S(5);
-  e = iE.Arr();
-  for (int i=0,li=0;i< 5;li+=++i) {S[i][i] = e[li+i];}
-  TRandomVector::RandRotate(S);
-
-  for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++)        { e[li+j] = S[i][j];}}
+  TRandomVector RV(5,G);
 //
   iE.Print("Input StvFitErrs");
 
   iP.get(&iH);	// nodePar => Helix
   iE.Get(&iH);	// fitErr  => HelixErr
-  iE.Set(&iH,iP._hz);
+  iE.Set(&iH);
   iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
 
 
@@ -1374,8 +1139,8 @@ double dia[5],*e,*er,*vtx;
   oH = iH;
   double myDist = 33;
   oH.Move(myDist);		//Move helix to 100cm
-  oP.set(&oH,iP._hz);		//helix100 => nodePar100
-  oE.Set(&oH,iP._hz);		//helixErr100 => fitErr100
+  oP.set(&oH);		//helix100 => nodePar100
+  oE.Set(&oH);		//helixErr100 => fitErr100
   oE.Print("Output StvFitErrs");
   oH.Emx()->Print("Output Helix Errs");
 
@@ -1386,13 +1151,6 @@ double dia[5],*e,*er,*vtx;
 
 static int iHELIX=0;
 
-//		Prepare error matrix for TRandomVector
-  e = (iHELIX) ? iH.Emx()->Arr() : iE.Arr();
-  for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++    ) {
-       S[i][j]=e[li+j]; S[j][i]=e[li+j];
-    } }
-  TRandomVector RV(S);
 
 //		Event loop
   for (int ev=0;ev <= nEv;ev++) {
@@ -1408,7 +1166,7 @@ static int iHELIX=0;
 //		Create THelixTrack from StvNodePars
       iPR.get(&ht);
 //		Set no error matrix to helix
-      ht.SetEmx(0);
+      ht.SetEmx();
     }
       
 // //		Change helix direction for fun
@@ -1417,10 +1175,10 @@ static int iHELIX=0;
     double my100 = ht.Path(vtx);
     assert(fabs(my100-myDist) <20);
     ht.Move(my100);
-    oPR.set(&ht,iP._hz);
+    oPR.set(&ht);
     StvFitPars fp = (oPR-oP);
-    double *e = oER.Arr();
-    double *d = fp.Arr();
+    double *e = oER;
+    double *d = fp;
     for (int i=0,li=0;i< 5;li+=++i) {
       for (int j=0;j<=i;j++    ) {
         e[li+j]+=d[i]*d[j];
@@ -1433,9 +1191,9 @@ static int iHELIX=0;
     D[1] = VDir.DeltaPhi(Dir);
     D[2] = ht.GetRho()-oH.GetRho();
     D[3] = VPos[2]-Vtx[2];
-    D[4] = -(VDir.Theta()-Dir.Theta());// "-" due to theta)= Pi-Lambda
+    D[4] = -(VDir.Theta()-Dir.Theta());// "-" due to theta)= Pi/2-Lambda
 
-    e = oHER.Arr();
+    e = oHER;
     for (int i=0,li=0;i< 5;li+=++i) {
       for (int j=0;j<=i;j++    ) {
         e[li+j]+=D[i]*D[j];
@@ -1448,8 +1206,8 @@ static int iHELIX=0;
   oHER*= (1./nEv);
   
   printf("*** Check THelixTrack Error matrix ***\n");
-  e = oH.Emx()->Arr();
-  er = oHER.Arr();
+  e = *oH.Emx();
+  er = oHER;
   double qA=0,qAmax=0;
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
@@ -1463,8 +1221,8 @@ static int iHELIX=0;
 
 
   printf("*** Check StvFitErr Error matrix ***\n");
-  e = oE.Arr();
-  er = oER.Arr();
+  e = oE;
+  er = oER;
   qA=0;qAmax=0;
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
@@ -1476,84 +1234,9 @@ static int iHELIX=0;
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
-  StvDebug::mgRecov=saveRecov;
 
 }
 //_____________________________________________________________________________
-//_____________________________________________________________________________
-void StvNodeParsTest::TestMtx() 
-{
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
-  double maxEps = 0,maxEpz = 0;  
-  double hz = 0.0014880496061989194;
-  int nErr=0;
-  int iR   =100 + gRandom->Rndm()*100;
-  int iAlf = 10 + gRandom->Rndm()*100;
-  int iLam = 10 + gRandom->Rndm()*100;
-
-  double alf = iAlf/180.*M_PI;
-  double lam = iLam/180.*M_PI;
-  StvNodePars basePar,modiPar,baseEndPar,modiEndPar;
-  double Rho = 1./iR;
-  basePar._x=0.10;
-  basePar._y=0.20; 
-  basePar._z=0.30;
-  basePar._psi=alf;
-  basePar._ptin=Rho/hz;;  
-  basePar._tanl=tan(lam);
-  basePar._curv=Rho;  
-  basePar._hz=hz;  
-  basePar.ready();
-  
-  THelixTrack baseHlx,modiHlx,baseEndHlx,modiEndHlx;
-  StvFitDers mtxStv,mtxZtv,mtxNum;
-  StvHlxDers mtxHlx;
-  basePar.get(&baseHlx);
-  double len = iR*1.5;
-  baseEndHlx = baseHlx; baseEndHlx.Move(len,mtxHlx);
-  baseEndPar.set(&baseEndHlx,hz);
-  baseEndPar.convert(mtxStv , mtxHlx);
-  baseEndPar.Deriv(len,mtxZtv);
-  double stpArr[]={0.1, 0.1, 3.14/180, 3.14/180, 0.1*basePar._ptin+1e-2};
-  double fak=0.01;
-  memset(mtxNum[0],0,sizeof(mtxNum));
-  for (int ip=0;ip<5; ip++) { //Loop thru input parameters
-    StvFitPars fp; fp.Arr()[ip]=stpArr[ip]*fak;
-    modiPar = basePar;
-    modiPar+= fp;
-    modiPar.get(&modiHlx);
-    modiEndHlx = modiHlx;
-    modiEndHlx.Move(len);
-    double myLen = modiEndHlx.Path(baseEndHlx.Pos());
-    modiEndHlx.Move(myLen);
-    modiEndPar.set(&modiEndHlx,hz);
-    fp = modiEndPar-baseEndPar;
-
-    for (int jp=0;jp<5;jp++) {
-      mtxNum[jp][ip] = fp.Arr()[jp]/(stpArr[ip]*fak);
-  } }
-    printf("TestMtx: Angle=%d Lam=%d \tRad=%d\n",iAlf,iLam,iR);
-
-static const char T[]="HZALP";
-  for (int ip=0;ip<5; ip++) { //Loop thru input parameters
-    for (int jp=0;jp<5;jp++) {
-      double est = mtxNum[jp][ip];
-      double ana = mtxStv[jp][ip];
-      double unu = mtxZtv[jp][ip];
-      double eps = 2*fabs(est-ana)/(stpArr[jp]/stpArr[ip]);
-      double epz = 2*fabs(est-unu)/(stpArr[jp]/stpArr[ip]);
-      if (eps>maxEps) maxEps=eps;
-      if (epz>maxEpz) maxEpz=epz;
-
-      if (eps < 1e-3 && epz < 1e-3) continue;
-      nErr++;
-      printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],ana,est,eps);
-      printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],unu,est,epz);
-  } }  
-  printf("TestMtx: %d errors maxEps=%g maxEpz=%g\n",nErr,maxEps,maxEpz);
-  StvDebug::mgRecov=saveRecov;
-
-}
 
 //_____________________________________________________________________________
 // Some math for:
@@ -1618,208 +1301,370 @@ static const char T[]="HZALP";
 //  
 
 //_____________________________________________________________________________
-void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
+void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe,double der[5][5])  const
 {
     /// signed impact parameter; Signed in such a way that:
     ///     x =  -impact*sin(Psi)
     ///     y =   impact*cos(Psi)
-  imp->mImp  = _x*(-_sinCA) + _y*(_cosCA);
-  double tst = _x*( _cosCA) + _y*(_sinCA);
-  assert(fabs(tst)<1e-5 || fabs(imp->mImp) > 1000*fabs(tst));
-  imp->mZ   = _z;
-  imp->mPsi = _psi;
-  imp->mPti = _ptin;
-  imp->mTan = _tanl;
-  imp->mCurv= _curv;
-  if (!fe) return;
+static const double kMaxStp=1e-4, kRefStp = 1e-2;
 
-  double c2L = 1./(1+_tanl*_tanl);
-  double cL  = sqrt(c2L);
-  double sL  = cL*_tanl;
+  double cosP = getCosP(),sinP = getSinP();
+
+  imp->mImp  = _x[0]*(-sinP) + _x[1]*(cosP);
+  double tst = _x[0]*( cosP) + _x[1]*(sinP);
+  assert(fabs(tst)<kMaxStp || fabs(tst) <  kRefStp*fabs(imp->mImp));
+  imp->mZ   = _x[2];
+  imp->mPsi = getPsi();
+  imp->mPti = getPtin();
+  double cosL = getCosL();
+  double sinL = getSinL();
+  double tanL = sinL/cosL;
+  imp->mTan = tanL;
+  imp->mCurv= getCurv();
+  if (!fe && !der) return;
+
 //		StvFitPars
-// mH;	 direction perpendicular movement and Z
-// mZ;	 Pseudo Z, direction perpendicular movement & H
-// mA;	 Angle in XY. cos(A),sin(A),T moving direction
-// mL;	 Angle lambda in Rxy/Z
-// mP;	 1/pt with curvature sign
+//      		Impacts
+//     float  mImpImp;
+//     float  mZImp,   mZZ;
+//     float  mPsiImp, mPsiZ, mPsiPsi;
+//     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
+//     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
+// ==================================
 
+
+  double T[5][5]={{0}};
+
+//		Now d/dU
+  double dXdU = _tkdir[0][0];
+  double dYdU = _tkdir[0][1];
+  double dZdU = _tkdir[0][2];
+
+  double dTdU = -((dXdU*cosP+dYdU*sinP))/cosL;
+
+  dXdU+=_d[0]*dTdU;
+  dYdU+=_d[1]*dTdU;
+  dZdU+=_d[2]*dTdU;
+
+  tst = dXdU*cosP + dYdU*sinP;
+  assert(fabs(tst)<1e-6);
+  
+  T[kImp ][kU]= (dXdU *(-sinP) + dYdU*( cosP));
+  T[kImpZ][kU]= dZdU;
+
+
+//		Now d/dV
+//===========================
+  double dXdV = _tkdir[1][0];
+  double dYdV = _tkdir[1][1];
+  double dZdV = _tkdir[1][2];
+
+  double dTdV = -((dXdV*cosP+dYdV*sinP));
+
+  dXdV+=cosP*dTdV;
+  dYdV+=sinP*dTdV;
+  dZdV+=tanL*dTdV;
+
+  tst = dXdV*cosP + dYdV*sinP;
+  assert(fabs(tst)<1e-6);
+  
+  T[kImp ][kV]= (dXdV *(-sinP) + dYdV*( cosP));
+  T[kImpZ][kV]= dZdV;
+
+//		Now d/dFita
+//===========================
+  double dDx_dFita = _tkdir[0][0];
+  double dDy_dFita = _tkdir[0][1];
+  double dDz_dFita = _tkdir[0][2];
+
+
+  double dPsi_dFita = (-dDx_dFita*sinP+dDy_dFita*cosP)/cosL;
+  double dTdFita = -imp->mImp*dPsi_dFita;
+  double dZdFita = dTdFita*sinL/cosL;
+  double dLamda_dFita = dDz_dFita/cosL;
+  double dTan_dFita   = dLamda_dFita/(cosL*cosL);
+  double dCosLi_dFita = tanL/(cosL)*dLamda_dFita;
+
+  T[kImp   ][kFita] = 0;
+  T[kImpZ  ][kFita] = dZdFita;
+  T[kImpPsi][kFita] = dPsi_dFita;
+  T[kImpTan][kFita] = dTan_dFita;
+  T[kImpPti][kFita] = _pinv*dCosLi_dFita;
+
+  
+//		Now d/dLama
+//===========================
+  double dDx_dLama = _tkdir[1][0];
+  double dDy_dLama = _tkdir[1][1];
+  double dDz_dLama = _tkdir[1][2];
+
+
+  double dPsi_dLama = (-dDx_dLama*sinP+dDy_dLama*cosP)/cosL;
+  double dTdLama = -imp->mImp*dPsi_dLama;
+  double dZdLama = dTdLama*sinL/cosL;
+  double dLamda_dLama = dDz_dLama/cosL;
+  double dTan_dLama   = dLamda_dLama/(cosL*cosL);
+  double dCosLi_dLama = tanL/(cosL)*dLamda_dLama;
+
+  T[kImp   ][kLama] = 0;
+  T[kImpZ  ][kLama] = dZdLama;
+  T[kImpPsi][kLama] = dPsi_dLama;
+  T[kImpTan][kLama] = dTan_dLama;
+  T[kImpPti][kLama] = _pinv*dCosLi_dLama;
+
+//		Now d/dPinv
+//===========================
+  T[kImpPti][kPinv] =    1./(cosL);
+
+  if (der) TCL::ucopy(T[0],der[0],5*5);
+  if (!fe) return;
+  double qwe[15];
+  TCL::trasat(T[0],*fe,qwe,5,5); 
+  assert(qwe[0]>0);
+  TCL::ucopy(qwe,&imp->mImpImp,15); 
+}
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+void StvNodeParsTest::TestDerImpact()
+{
+  double PtGev = 3.,Curv = 1./100, Hz = PtGev*Curv;
+  double HZ[3] = {0,0,Hz};
+  double Pbeg[3],Xbeg[3]={5,6,0.7};
+
+  int charge = 1;
+  TVector3 PbegV(PtGev,0,PtGev/3*4);
+#if 1
+  PbegV.RotateZ(gRandom->Rndm()*3.1415*2); 
+#endif
+   PbegV.GetXYZ(Pbeg);
+  TVector3 XbegV(Xbeg);
+
+  double Mag[3]={HZ[0],HZ[1],HZ[2]};
+#if 1
+  TVector3 magV(HZ); 
+  double r1 = gRandom->Rndm(),r2 = gRandom->Rndm(); 
+   magV.RotateX(r1);  magV.RotateY(r2);  magV.GetXYZ(Mag);
+  PbegV.RotateX(r1); PbegV.RotateY(r2); PbegV.GetXYZ(Pbeg);
+#endif
+  
+  THelix3d TH0(charge,Xbeg,Pbeg,Mag);
+  double l = TH0.Path(0.,0.);
+  TH0.Move(l);
+  l = TH0.Path(0.,0.);
+  TH0.Move(l);
+
+  StvNodePars pars;
+  pars.set(&TH0);
+
+  StvImpact imp;
+  double impPar[5],impDer[5][5];
+  pars.GetImpact(&imp,0,impDer);
+  TCL::ucopy(&imp.mImp,impPar,5);
+  
+//		Event loop
+  for (int ip=0;ip<5;ip++) {
+    StvNodePars myPars(pars);
+    StvFitPars  myFit;
+    double eps = 1e-4;
+    ((double*)myFit)[ip]+=eps;
+    myPars+=myFit;
+    THelix3d TH1;
+    myPars.get(&TH1);
+    l = TH1.Path(0.,0.); TH1.Move(l);
+    l = TH1.Path(0.,0.); TH1.Move(l);
+
+    myPars.set(&TH1);
+    double myImpPar[6];
+    StvImpact myImp;
+    myPars.GetImpact(&myImp);
+    TCL::ucopy(&myImp.mImp,myImpPar,5);
+    TCL::vsub(myImpPar,impPar,myImpPar,5);
+    
+    TVectorD difV(5,myImpPar),derV(5);     
+    for (int j=0;j<5;j++) {derV[j] = impDer[j][ip];}
+    difV*=1./eps;
+    double  pct=0; int ipct=-1;
+    for (int i=0;i<5;i++) {
+      if (fabs(difV[i])<1e-2
+      &&  fabs(derV[i])<1e-2) continue;
+      double bott = 0.5*(fabs(difV[i])+fabs(derV[i]));
+      if (bott<1e-3) continue;
+      double myPct = fabs((difV[i]-derV[i])/bott);
+      if (myPct<pct) continue;
+      pct = myPct; ipct = i;
+    }
+    if (pct >0.2) printf("################################  [%d] = %d%% \n",ipct,int(pct*100));
+
+    const static char *tit[5] =  {"U","V","Fita","Lama","Pinv"};
+    printf("d/d%s :\n",tit[ip]);
+    derV.Print("Analitic  "); 
+    difV.Print("Arithmetic"); 
+  }   
+
+}
+//_____________________________________________________________________________
+void StvNodeParsTest::TestGetImpact(int nEv)
+{
 //      		Impacts
 //     float  mImpImp;
 //     float  mZImp, mZZ;
 //     float  mPsiImp, mPsiZ, mPsiPsi;
 //     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
 //     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
+  double PtGev = 3.,Curv = 1./100, Hz = PtGev*Curv;
+  double HZ[3] = {0,0,Hz};
+  double Pbeg[3],Xbeg[3]={5,6,7};
 
-// t = tL*l + imp/cL/cL/(1-imp*rho)*a
-// ===========================
+//		Canvas + Histograms
+enum {kNCanvs=10};
+static TCanvas *myCanvas[kNCanvs] = {0};
 
+  myCanvas[0] = new TCanvas("C_Xi2","C_Xi2",600,800);
+  myCanvas[0]->Divide(1,1); 
+  static TH1F *hXi2[2] = {0};
+  for (int jk=0;jk<1;jk++) {
+    TString ts("Xi2_"); ts += jk;
+    delete hXi2[jk];
+    hXi2[jk]= new TH1F(ts.Data(),ts.Data(),100,0,0);
+    myCanvas[0]->cd(jk+1);  hXi2[jk]->Draw(); 
+  }
 
-double mImp = imp->mImp;
-double nomMins = (1-mImp*_curv);
-//		d/dA
-double dtda = mImp/nomMins  /c2L;
-double dpsida = 1/nomMins   /cL;
-double dZda = sL*dtda;
-//		d/dl
-double dsdl   = sL/nomMins;
-double dPsidl = _curv*dsdl;
-double dtdl   = dsdl/cL;
-double dZdl   = sL*dtdl + cL;
-
-
-double T[5][5]={
-/*       h     l         A   Lam  Pti  */
-/*------------------------------------*/
-/*Imp*/{ 1,     0,       0,    0,   0},
-/*Z  */{ 0,  dZdl,    dZda,    0,   0},
-/*Psi*/{ 0,dPsidl,  dpsida,    0,   0},
-/*Pti*/{ 0,     0,       0,    0,   1},
-/*Tan*/{ 0,     0,       0,1/c2L,   0}};
-/*-------------------------------------*/
-  double qwe[15];
-  TCL::trasat(T[0],fe->Arr(),qwe,5,5); 
-  TCL::ucopy(qwe,&imp->mImpImp,15);
-}
-//_____________________________________________________________________________
-void StvNodeParsTest::TestImpact(int nEv)
+//		Now pulls
+  myCanvas[1] = new TCanvas("C_Pull","C_Pull",600,800);
+  myCanvas[1]->Divide(1,5); 
+  static TH1F * hpu[5]={0};
 {
-
-StvNodePars iP,iPR,oP,oPR;
-THelixTrack iH,iHR,oH,ht;
-
-THEmx_t oHE,oHER;
-double dia[5],*e,qA,qAmax;
-float *ef,*erf;
-
-  iP._cosCA = 0.051522195951218416; iP._sinCA = -0.99867184876021664;  iP._x   = 56.80456301948584; 
-  iP._y     = -179.95090442478528;  iP._z     = 16.833129146428401;    iP._psi = -1.5192513089402997; iP._ptin = -4.286089548109465; 
-  iP._tanl  = -0.71077992742240803; iP._curv  = -0.0063779138641975935;iP._hz=(0.0014880496061989194);
-  iP.ready();
-StvFitErrs iE,oE,oER;
-  iE.mHH = 0.0025928369042255385;  iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
-  iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812;  iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
-  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546;  iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
-  iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
+static const char *tit[]={"Phi","Z","Tan","Psi","Pti"};
+  for (int ih=0;ih<5;ih++) {
+    delete hpu[ih];
+    hpu[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
+    myCanvas[1]->cd(ih+1  ); 
+    hpu[ih]->Draw();
+}}
 
 
-  oER*=0.;
-  oHER.Clear();
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
+//		Now test of Corr
+static TH1F * hcr[10]={0};
+{
+  myCanvas[2] = new TCanvas("C_Corr1","C_Corr1",600,800);
+  myCanvas[3] = new TCanvas("C_Corr2","C_Corr2",600,800);
+  myCanvas[2]->Divide(1,5); 
+  myCanvas[3]->Divide(1,5); 
+  static const char *tit[]={
+ "ZImp",
+ "PsiImp", "PsiZ",
+ "PtiImp", "PtiZ", "PtiPsi", 
+ "TanImp", "TanZ", "TanPsi", "TanPti"};
 
-//		Prepare error matrix for TRandomVector
-  TMatrixDSym S(5);
-  e = iE.Arr();
-  for (int i=0,li=0;i< 5;li+=++i) {S[i][i] = e[li+i];}
-  S*=0.01;
-//		Make huge correlations
-  TRandomVector::RandRotate(S);
-//		And put it back
-  for (int i=0,li=0;i< 5;li+=++i) {for (int j=0;j<=i;j++){e[li+j] = S[i][j];}}
-//
-//  iE.Print("Input StvFitErrs");
+  for (int ih=0;ih<10;ih++) {
+    delete hcr[ih];
+    hcr[ih] = new TH1F(tit[ih],tit[ih],100,0,0);
+    if (ih<5) myCanvas[2]->cd(ih+1  ); 
+    else      myCanvas[3]->cd(ih+1-5);
+    hcr[ih]->Draw();
+  }}
+  
+    
+  int charge = 1;
+  TVector3 PbegV(PtGev,0,PtGev/3*4);
+  double Ptot = PbegV.Mag();
+#if 1
+  PbegV.RotateZ(gRandom->Rndm()*3.1415*2); 
+#endif
+  PbegV.GetXYZ(Pbeg);
+  TVector3 XbegV(Xbeg);
 
-  iP.get(&iH);			// nodePar => Helix
-  iE.Get(&iH);			// fitErr  => HelixErr
-  iE.Set(&iH,iP._hz);
-//  iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
+  double Mag[3]={HZ[0],HZ[1],HZ[2]};
+#if 1
+  TVector3 magV(HZ); 
+  double r1 = gRandom->Rndm(),r2 = gRandom->Rndm(); 
+   magV.RotateX(r1);  magV.RotateY(r2);  magV.GetXYZ(Mag);
+  PbegV.RotateX(r1); PbegV.RotateY(r2); PbegV.GetXYZ(Pbeg);
+#endif
+  TVectorD dia(5);
+  dia[0]= 0.1; dia[1]= 0.2; dia[2]= 0.1/Ptot; dia[3]= 1./360; dia[4]= 2./360;
+  
+  TRandomVector RV(dia);
+  auto &EMX = RV.GetMtx();
+  auto &val = RV.GetLam();
+  dia.Print("DIA");
+  val.Print("VAL");
 
 
-//  iH.Emx()->Print("Input Helix Errs");
-  oH = iH;
-  double myDist = oH.Path(0.,0.);
-  oH.Move(myDist);		//Move helix to 100cm
-  oP.set(&oH,iP._hz);		//helix100 => nodePar100
-  oE.Set(&oH,iP._hz);		//helixErr100 => fitErr100
-  oE.Print("Output StvFitErrs");
-//  oH.Emx()->Print("Output Helix Errs");
-  StvImpact oI,oIR;
-  oP.GetImpact(&oI,&oE);
-  oI.Print("Output StvImpact");
-
-
-
-//		Prepare error matrix for TRandomVector
-  e = iE.Arr();
+  double Gbeg[15];
   for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++    ) {
-       S[i][j]=e[li+j]; S[j][i]=e[li+j];
-    } }
-  TRandomVector RV(S);
+    for (int j=0;j<=i;j++) {
+      Gbeg[li+j] = EMX[i][j];
+  } }
 
+
+  double GbegI[15];
+  TCL::trsinv(Gbeg,GbegI,5);  
+  
+  THelix3d TH0(charge,Xbeg,Pbeg,Mag);
+  double l = TH0.Path(0.,0.);
+  TH0.Move(l);
+  TH0.SetEmx();
+  THEmx3d_t *emx = TH0.Emx();
+  emx->Set(Gbeg);
+  assert(StvFitErrs::EmxSign(5,*emx)>0);
+  StvNodePars pars;
+  pars.set(&TH0);
+  StvFitErrs errs;  
+  errs.Set(&TH0);
+  assert(StvFitErrs::EmxSign(5,errs)>0);
+  StvImpact imp;
+  double impPar[5],impErr[15],impErrI[15],impErrD[5];
+  pars.GetImpact(&imp,&errs);
+  TCL::ucopy(&imp.mImp,impPar,5);
+  TCL::ucopy(&imp.mImpImp,impErr,15);
+
+  TCL::trsinv(impErr,impErrI,5);  
+  for (int i=0,li=0;i<5;li+=++i) {impErrD[i] = sqrt(impErr[li+i]);}
+  
 //		Event loop
-  double oErr[15]={0};
-  for (int ev=0;ev <= nEv;ev++) {
-    iPR = iP;
-    ht = iH;
-//		Randomize fit parameters
-    TVectorD res = RV.Gaus();
-    StvFitPars fp(res.GetMatrixArray()); iPR+=fp;
-//		Create THelixTrack from StvNodePars
-    iPR.get(&ht);
-//		Set no error matrix to helix
-    ht.SetEmx(0);
-      
-    double my100 = ht.Path(0.,0.);
-    assert(fabs(my100-myDist)<fabs(myDist*0.1));
-    ht.Move(my100);
-    oPR.set(&ht,iP._hz);
-    oPR.GetImpact(&oIR,0);
-    TVectorF d = TVectorF(5,&oIR.mImp)-TVectorF(5,&oI.mImp);
-    if (d[2]<=-M_PI) d[2]+=2*M_PI;
-    if (d[2]>= M_PI) d[2]-=2*M_PI;
-//    float *ef = &oIR.mImpImp;
-    for (int i=0,li=0;i< 5;li+=++i) {
-      for (int j=0;j<=i;j++    ) {
-//      ef[li+j]+=d[i]*d[j];
-        oErr[li+j]+=d[i]*d[j];
-    } } 
+  for (int iev=0;iev<nEv;iev++) {
+    TVectorD delta  = RV.Gaus();
+    StvNodePars myPars(pars);
+    StvFitPars  myFit(delta.GetMatrixArray());
+    myPars+=myFit;
+    THelix3d TH1;
+    myPars.get(&TH1);
+    double l = TH1.Path(0.,0.);
+    TH1.Move(l);
+    myPars.set(&TH1);
 
-    my100 = ht.Path(oP.P);
-    ht.Move(my100);
-    oPR.set(&ht,iP._hz);
-    fp = oPR-oP;
-    const double *q = fp.Arr();
-    e = oER.Arr();
-    for (int i=0,li=0;i< 5;li+=++i) {
-      for (int j=0;j<=i;j++    ) {
-      e[li+j]+=q[i]*q[j];
-    } } 
-  }//EndEvts
-  TCL::vscale(oErr,(1./nEv),oErr,15);
-  TCL::ucopy (oErr,&oIR.mImpImp, 15);
-  oER*=(1./nEv);
+    double myImpPar[6];
+    StvImpact myImp;
+    myPars.GetImpact(&myImp);
+    TCL::ucopy(&myImp.mImp,myImpPar,5);
+    TCL::vsub(myImpPar,impPar,myImpPar,5);
 
-  printf("*** Check StvFitErr matrix ***\n");
+    
 
-  qA=0;qAmax=0;
-  for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]=oE[li+i];
-    for (int j=0;j<=i;j++) {
-    double dif = (oER[li+j]-oE[li+j])/sqrt(dia[i]*dia[j]);
-    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,oER[li+j],oE[li+j],dif);
-    dif = fabs(dif);
-    qA+= (dif); if (dif>qAmax) qAmax=dif;
-  } }
-  qA/=15;
-  printf("Quality %g < %g < 1\n",qA,qAmax);
-  
-  
-  printf("/n*** Check StvImpact Error matrix ***\n");
-  ef  = &oI.mImpImp;
-  erf = &oIR.mImpImp;
-  qA=0;qAmax=0;
-  for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]=ef[li+i];
-    for (int j=0;j<=i;j++) {
-    double dif = (erf[li+j]-ef[li+j])/sqrt(dia[i]*dia[j]);
-    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,erf[li+j],ef[li+j],dif);
-    dif = fabs(dif);
-    qA+= (dif); if (dif>qAmax) qAmax=dif;
-  } }
-  qA/=15;
-  printf("Quality %g < %g < 1\n",qA,qAmax);
-  StvDebug::mgRecov=saveRecov;
 
+    double chi2;
+    TCL::trasat(myImpPar,impErrI,&chi2,1,5);
+    TCL::trasat(delta.GetMatrixArray(),GbegI,&chi2,1,5);
+    assert(chi2>0);
+    hXi2[0]->Fill(chi2);
+
+
+    int jk=0;
+    for (int i=0,li=0;i<5;li+=++i) {
+      hpu[i]->Fill(myImpPar[i]/impErrD[i]);
+      for (int j=0;j<i;j++) {
+	double d = myImpPar[i]*myImpPar[j] - impErr[li+j];
+	d/= impErrD[i]*impErrD[j];
+	hcr[jk++]->Fill(d);
+    } }
+  }
+
+  for (int i=0;myCanvas[i];i++) {
+    if (!myCanvas[i]) continue;
+    myCanvas[i]->Modified();myCanvas[i]->Update();}
+
+  while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
 }
 //_____________________________________________________________________________
 #include "TMatrixT.h"
@@ -1855,10 +1700,3 @@ double StvFitErrs::EmxSign(int n,const double *e)
   for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
   return ans;
 } 
-//_____________________________________________________________________________
-void StvFitErrs::SetHz(double hz)
-{ mHz=hz; assert(mHz) ;}
-//_____________________________________________________________________________
-double StvFitErrs::GetHz() const
-{assert(mHz);  return mHz ;}
-//_____________________________________________________________________________

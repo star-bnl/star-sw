@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.11 2015/06/18 02:10:39 perev Exp $
+// $Id: StvELossTrak.h,v 1.11.4.1 2017/12/02 00:37:10 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -8,71 +8,72 @@
 #ifndef STIELOSSTRAK_H
 #define STIELOSSTRAK_H
 #include "TObject.h"
-#include "vector"
 class TGeoMaterial;
 static const double PiMASS=0.13956995;
-
-class StvELossTrak : public TObject
+ class StvELossTrak : public TObject
 {
 public:
-class Aux {
-public:
-Aux(){memset(this,0,sizeof(*this));}
-
-const TGeoMaterial* fMat;
-float fLen,fP,fdEdX,fA,fZ,fDens,fX0;
-};
-typedef std::vector<Aux> AuxVect;
-public:
-         StvELossTrak();
+         StvELossTrak(){Reset();}
         ~StvELossTrak(){;}
-    void Reset(int dir,double mass=PiMASS, double charge=1);
+    void unset() {Clear();}
+    void reset() {Clear();}
+    void Reset(double mass = PiMASS, double charge=1);
     void Clear(const char *opt="");
-     int Same(double A, double Z, double dens, double x0, double p) const;
-    void Set (double A, double Z, double Dens, double x0, double p,const TGeoMaterial *mate);
-    void Set (const TGeoMaterial *mate,                   double p);
-    void Set (double p);
+     int Same(const TGeoMaterial *mate) const;
+    void Set(double A, double Z, double Dens, double x0,double p);
+    void Set(const TGeoMaterial *mate,double p);
     void Add(double len);
-    void Update(int dir,double Pmom);
-    void Update() const;
-  double GetTheta2() const;
-  double GetOrt2()   const;
+//		Last step data
+  double Theta2() 	const 		{return fTheta2;	}
+  double Ort2()   	const		{return fOrth2;		}
+  double dEdX ()  	const		{return fdEdX;		}
+  double ELoss()  	const 		{return fELoss;		}
+  double PinvLoss()  	const 		{return fPinvLoss;	}
+  double ELossErr2() 	const		{return fELossErr2;	}
+  double PinvErr2() 	const 		{return fPinvErr2;	}
+  double Len() 		const		{return fLen;		}	
+//		Total data
+  double TotTheta2() 	const 		{return fTotTheta2;	}
+  double TotOrt2()   	const		{return fTotOrth2;	}
+  double TotdEdX () 	const		{return fTotELoss/(fTotLen+1e-9);}
+  double TotELoss() 	const 		{return fTotELoss;	}
+  double TotPinvLoss() 	const 		{return fTotPinvLoss;	}
+  double TotELossErr2() const		{return fTotELossErr2;	}
+  double TotPinvErr2() 	const		{return fTotPinvErr2;	}
+  double TotLen() 	const		{return fTotLen;	}	
 
-  double dEdX () const			{return fTotELoss/fTotLen;}
-  double ELoss() const 			{return fTotELoss;}
-  double ELossErr2() 		const	{return fTotELossErr2;}
-  double PLoss(double p) 	const;	
-  double dPLossdP0(double p) 	const;	
-  double TotLen() 		const	{return fTotLen;}	
-  double P() 		        const	{return fP[0];}	
-  double M() 		        const	{return fM;}	
-     int GetNMats() 		const	{return fMats.size();}	
-  const Aux &GetMate(int idx);
-  void reset();
-  void unset();
-  void Print(const char *opt) const;
-static double gdrelx(double A,double Z,double DENS,double T,double HMASS);
-
-
+  double P() 		        const	{return fP;	}	
+  double M() 		        const	{return fM;	}	
+     int GetNMats() 		const	{return fNMats;	}	
+const TGeoMaterial *GetMate()   const	{return fMate ;	}
 private:
 char   fBeg[1];
-char   fDir;
-char   fCharge;		//particle charge
-double fM;		//mass 
 double fdEdX,fdEdXErr2;
-double fP[2];		//momentum start & end
+double fP;		//momentum 
+double fM;		//mass 
 double fE;		//energy 
+double fCharge2;	//particle charge **2
 double fFak;
+double fA,fZ,fDens,fX0;
+int    fNMats;		///Number of different material used
+const TGeoMaterial *fMate;
+double fELoss; 		///last energy loss
+double fPinvLoss; 	///last 1/p loss
+double fELossErr2;	///last error of energy loss
+double fPinvErr2;	///last error of 1/p loss
+double fLen;		///last track length
+double fTheta2;
+double fOrth2;
 //
 char   fMed[1];
 double fTotELoss; 	///accumulated energy loss
+double fTotPinvLoss;	///accumulated 1/p loss
 double fTotELossErr2;	///accumulated error of energy loss
+double fTotPinvErr2;	///accumulated error of 1/p loss
 double fTotLen;		///accumulated track length
-double fMCS[3];		///
-mutable double fdLogEdLogP;	/// d(log(dEdx)/dLog(p)
+double fTotTheta2;
+double fTotOrth2;
 char   fEnd[1];
-AuxVect fMats;
 ClassDef(StvELossTrak,0) 
 };
-#endif //STIELOSSTRAK_H   
-   
+#endif //STVELOSSTRAK_H   

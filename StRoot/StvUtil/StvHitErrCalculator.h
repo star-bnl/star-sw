@@ -13,6 +13,7 @@ StvHitErrCalculator(const char *name,int nPars=2);
         void SetPars(const double *par);
         void SetTrack(const double tkDir[3]);
         void SetTrack(const float  tkDir[3]);
+        void SetTkDir(const double tkDir[3][3]);
 virtual  int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const StvHit *hit,double hRR[3]);
@@ -38,7 +39,7 @@ double mPar[kMaxPars];		// mPar
 double mDRr[6];		        // Full hitErr Matrix in detecor system
 double mTRr[6];		        // Full hitErr Matrix in track   system
 double mTG[3][3];		// track direction in global system
-double mTL[3];		// track direction in local hit plane system
+double mTL[3];			// track direction in local hit plane system
 double mCp ,mSp ,mCl ,mSl;
 double mCp2,mSp2,mCl2,mSl2,mCpCl;
 double mTT[3][3]; 	//matrix converting from detector to track(dca) system

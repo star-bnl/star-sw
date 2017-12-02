@@ -7,80 +7,92 @@
 #include <assert.h>
 #include <vector>
 #include "THelixTrack.h"
+#include "THelix3d.h"
 
 class StvNodePars;
 class StvFitPars;
-class StvFitErrs;
 class StvImpact;
 class StvELossTrak;
+class TRungeKutta;
 
 //------------------------------------------------------------------------------
-typedef double Mtx55D_t[5][5];
-void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B);
-void Multiply(double res[5], const Mtx55D_t &A,const double B[5]);
-inline void Copy(Mtx55D_t &to,const Mtx55D_t &fr){memcpy(to[0],fr[0],5*5*sizeof(to[0][0]));}
-
 //------------------------------------------------------------------------------
-class StvFitDers 	//Derivative matrix of StvFitPars
+class StvFitDers: public THDer3d_t
 {
 public:
-operator const Mtx55D_t &() const {return mMtx;};
-operator       Mtx55D_t &()       {return mMtx;};
-StvFitDers &operator=( const StvFitDers &fr) 
-         	{memcpy(mMtx[0],fr[0],sizeof(mMtx)); return *this;};
-      void  Reverse();  
-protected:
-Mtx55D_t mMtx;
+StvFitDers():THDer3d_t(){};
+StvFitDers &operator=(const THDer3d_t &fr) {THDer3d_t::operator=(fr); return *this;}
+StvFitDers(const THDer3d_t &fr){*this = fr;};
+
 };
 //------------------------------------------------------------------------------
-class StvHlxDers 	//Derivative matrix of THelixTrack
+
+class  StvFitErrs  : public THEmx3d_t 
 {
 public:
-operator const Mtx55D_t &() const {return mMtx;};
-operator       Mtx55D_t &()       {return mMtx;};
-StvHlxDers &operator=( const StvFitDers &fr) 
-         	{memcpy(mMtx[0],fr[0],sizeof(mMtx)); return *this;};
-protected:
-Mtx55D_t mMtx;
-};
+ StvFitErrs(){};
+ StvFitErrs(double errs[15]){ THEmx3d_t::Set(errs);};
+ StvFitErrs(double UU,double UV,double VV) {THEmx3d_t::Set(UU,UV,VV);};
+ void Add(const StvELossTrak *el,double len=0);
+ double Sign() const;
+    int Sigre() const;	//Check correctness of signes 
+const StvFitErrs& operator*(const StvFitDers &der) const;
+      StvFitErrs& operator= (const THEmx3d_t  &emx  );
+      StvFitErrs& operator= (const TkDir_t   &tkdir);
+             void Update(const TkDir_t &tkdir);
+ void Set(const THelixTrack *he);
+ void Set(const THelix3d *he);
+ void Get(      THelix3d *he) const;
+ void Set(const TRungeKutta *he);
+ void Get(      TRungeKutta *he) const;
+  int Check(const char  *tit) const;
+  int Recov();
+ void Print(const char  *tit) const;
 
-void Invert(Mtx55D_t &to,const Mtx55D_t &fr);
-void Testik(const Mtx55D_t &tt);
-double EmxSign(int n,const double *a); 
-double EmxSign(int n,const float  *a); 
+static double EmxSign(int n,const float  *e);
+static double EmxSign(int n,const double *e);
+}; 
+
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 class StvFitPars
 {
 public:	
-  StvFitPars():mH(0),mZ(0),mA(0),mL(0),mP(0){}
-  StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mP(0){}
-  StvFitPars(const double *arr) 		{memcpy(&mH,arr,5*sizeof(mH));}
+  StvFitPars();
+  StvFitPars(double u,double v);
+  StvFitPars(const double *arr);
 const StvFitPars &operator*(const StvFitDers &t) const;    
         void Print(const char *tit=0) const;
          int Check(const char *tit=0) const;
-         int TooBig(const StvNodePars &np) const;
-      double *Arr() 				{return &mH;}
-const double *Arr()  const 			{return &mH;}
-operator const double *() const			{return &mH;}
-operator       double *() 			{return &mH;}
-StvFitPars &operator*=(double f) 
-    		{for(int i=0;i<5;i++){(*this)[i]*=f;} return *this;}
+operator const double *() const				{return &mU;}
+operator       double *() 				{return &mU;}
+void operator*=(double f) {mU*=f;mV*=f;mFita*=f;mLama*=f;mPinv*=f;}
 
 public:	
 // Let (Dx,Dy,Dz) vector track direction
 // It could be also represented:
-// (cos(L)*cos(A),cos(L)*sin(A),sin(L))
+// T = ( cos(Lamda)*cos(Phi),  cos(Lamda)*sin(Phi), sin(Lamda))
+// U = (-           sin(Phi),             cos(Phi),          0)
+// V = (-sin(Lamda)*cos(Phi), -sin(Lamda)*sin(Phi), cos(Lamda))
+//
+// In this coordinate system define new spherical system
+// Any vector could be represented as a sum:
+// T*cos(Lama)*cos(Fita) +
+// U*cos(Lama)*sin(Fita) + 
+// V*sin(Lama)
+//
+// OR if the angles are small
+//
+// T +
+// U*Fita + 
+// V*Lama
+//
+double mU;	// 
+double mV;	// 
+double mFita;	// 
+double mLama;	// 
+double mPinv;	// -iQ/P 
 
-// mH: movement along (-Dy    ,Dx     ,           0) vector
-// mZ: movement along (-Dx*Dz , -Dz*Dy, Dy*Dy+Dx*Dx)
-// Or mH: along (-cos(A),sin(A),0)
-//    mZ: along (-sin(L)*cos(A),-sin(L)*sin(A), cos(L))
-
-double mH;	// direction perpendicular movement and Z
-double mZ;	// Pseudo Z, direction perpendicular movement & H
-double mA;	// Angle in XY. cos(A),sin(A),T moving direction
-double mL;	// Angle lambda in Rxy/Z
-double mP;	// 1/pt with curvature sign
 };
 
 
@@ -88,133 +100,69 @@ double mP;	// 1/pt with curvature sign
 class StvNodePars {
 public:	
   enum eNodePars {kNPars=5};
-  StvNodePars()			{reset();}
+  StvNodePars()				{reset();}
   void reset();
-  void ready();
-   int isReady() const;
-  void set(const THelixTrack *ht, double Hz);
-  void get(      THelixTrack *ht) const;
-double getPt() const			{ return 1./(fabs(_ptin)+1e-6); }
+  void set(const double h[3]);
+  void set(const double x[3],const double d[3],double pinv,const double h[3]);
+  void set(const THelixTrack *ht);
+  void set(const THelix3d *ht);
+  void get(      THelix3d *ht) const;
+  void set(const TRungeKutta *ht);
+  void get(      TRungeKutta *ht) const;
+  void move(double len, StvFitErrs *errs=0 );
+  void merge(const StvNodePars &other,double fak=0.5 );
+  void add(const StvELossTrak *el,double len);
+  
   void getMom(double p[3]) const; 
   void getDir(double d[3]) const; 
-double getP2()  const;
-double getP()  const;
-double getRxy() const;
-double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
-double getCosL() const;
+const double *dir() const {return _d;}
+const double *pos() const {return _x;}
+      double *pos()       {return _x;}
+double getSign() const	  {return _x[0]*_d[0]+_x[1]*_d[1];}
+double getP()    const;
+double getP2()   const;
+double getRxy2() const;
+double getRxy()  const;
+double getZ()    const { return _x[2];};
+double getSinL() const { return _d[2];};
+double getCosL() const { return sqrt((1.-_d[2])*(1.+_d[2]));};
+double getTanL() const { return _d[2]/getCosL();};
+double getSinP() const { return _d[1]/getCosL();};
+double getCosP() const { return _d[0]/getCosL();};
+double getPsi()  const { return atan2(_d[1],_d[0]);};
+double getPtin() const { return _pinv/getCosL()   ;};
+double getPt()   const { return 1./fabs(getPtin());};
+double getCurv() const ;
+const TkDir_t &getTkDir() const {return _tkdir;}
   void reverse(); 
-  void Deriv(double len,             StvFitDers &der) const;
-  void Deriv(double len,double dPdP0,StvFitDers &der) const;
-   int isValid() const 	{return  (_hz && _cosCA);};
-///		convert THelixTrack derivativ matrix into StvFitPar one
-  void convert( StvFitDers &fitDer , const StvHlxDers &hlxDer) const;
-//		move point along helix  
-  void move(double dLen); 
-double move(const double v[3],double dPP,int dir); 
-//		move point along helix  up to given radius in xy
-  void moveToR(double Rxy); 
-StvNodePars &merge(double wt,StvNodePars &other);
-//		typical variations of parametrs
+  void operator+=(const StvFitPars &fp);
+  const StvFitPars &operator-(const StvNodePars &fp) const;
 StvFitPars delta() const;
-StvFitErrs deltaErrs() const;
-double diff(const StvNodePars &other) const;
+//		typical variations of parametrs
+// StvFitPars delta() const;
+// StvFitErrs deltaErrs() const;
 double diff(const StvNodePars &other, const StvFitErrs &otherr) const;
-double diff(const float hit[3]) const;
 
-operator const double  *() const {return P;}
-operator       double  *()       {return P;}
-    int getCharge() const {return (_ptin > 0) ? -1 : 1;}
-    int     check(const char *pri=0) const;
-void  operator+=(const StvFitPars &add);
-StvNodePars &operator=(const StvNodePars &fr);
-const StvFitPars &operator-(const StvNodePars& sub) const;
-void    print() const;
-  void GetRadial (double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
-  void GetPrimial(double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
-  void GetImpact(StvImpact *imp,const StvFitErrs *fE=0)  const;
+operator const double  *() const {return _x;}
+operator       double  *()       {return _x;}
+    int getCharge() const { return (_pinv > 0) ? -1 : 1;}
 
-  enum {kX=0,kY,kZ,kPhi,kCurv,kTanL};
+   int check(const char *pri=0  ) const;
+  void print(const char *name="") const;
+  void GetRadial (double radPar[6],double *radErr=0  ,const StvFitErrs *fE=0,double der[5][5]=0) const;
+  void GetImpact (StvImpact *imp                     ,const StvFitErrs *fE=0,double der[5][5]=0) const;
+private:
+  void update();
 public:	
-  /// sine and cosine of cross angle
-  double _cosCA;
-  double _sinCA;
-  union{double P[1];double _x;};
-  double _y; 
-  double _z;
-  double _psi;
-  /// signed invert pt [sign = sign(-qB)]
-  double _ptin;  
-  /// tangent of the track momentum dip angle
-  double _tanl;
-  /// signed curvature [sign = sign(-qB)]
-  double _curv;  
-  /// Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
-  double _hz;  
+  double _x[3];
+  double _d[3];
+  double _pinv;
+  /// magnetic field in units Pt(Gev) = Hz * RCurv(cm)
+  double _h[4];  //mag field + _h[3]= module of mag field
+TkDir_t _tkdir;    
+
+
 };
-class StvNodeErrs {
-public:	
-StvNodeErrs(){reset();assert(&_cTT-&_cXX+1==21);}
-void reset()				{memset(this,0,sizeof(StvNodeErrs));}
-operator const double *() const { return &_cXX;}
-operator       double *()       { return &_cXX;}
-public:	
-  double _cXX;
-  double _cYX,_cYY;                       
-  double _cZX,_cZY, _cZZ;                 
-  double _cEX,_cEY, _cEZ, _cEE;           
-  double _cPX,_cPY, _cPZ, _cPE, _cPP;     
-  double _cTX,_cTY, _cTZ, _cTE, _cTP, _cTT;
-};  
-
-//------------------------------------------------------------------------------
-class StvFitErrs
-{
-public:	
-  enum eFitErrs {kNErrs=15};
-  StvFitErrs(double hh=0,double hz=0,double zz=0);
-  StvFitErrs(const StvFitErrs &fr) {*this = fr;}
-  void Set(const THelixTrack *he,double hz);
-  void Get(      THelixTrack *he)     const;
-  void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;
-double GetHz() const   ;//?? 	{ return mHz ;}
-  void SetHz(double hz);//??  	{ mHz=hz     ;}
-  const double *Arr() const 	{ return &mHH;}
-        double *Arr()       	{ return &mHH;}
-operator const double *() const { return &mHH;}
-operator       double *()       { return &mHH;}
-StvFitErrs &operator=(const StvFitErrs &fr) ;
-StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){(*this)[i]*=f;};return *this;}
-  void Add(const StvELossTrak *el,const StvNodePars &pa,double len=0);
-  void Backward();
-const StvFitErrs &operator*(const StvFitDers &mtx) const; 
-double Sign() const;
-   int Check(const char *tit=0) const;
-   int Recov();
-double Diff(const StvFitErrs &errs,int *idx=0) const;// difference 
-
-double MaxCorr() const   ;//  maximal correlation
-  void SetMaxCorr(double maxCorr)  ;//  set maximal correlation
-  void Print(const char *tit=0) const;
-static double EmxSign(int n,const double *S);
-static double EmxSign(int n,const float  *S);
-
-public:	
-//  dH: along ort to dir and in Track/Z plane
-//  dA: delta azimuth angle; 
-//  dP: == d(1./Pt) where Pt is signed as curvature;  
-//  dZ: ort to dH and in plane dH,Zaxis;When lamda=0 it is Zaxis 
-//  dL = dLambda, angle between track and X,Y plane
-
-double
-mHH,
-mHZ, mZZ,
-mHA, mZA, mAA,
-mHL, mZL, mAL, mLL,
-mHP, mZP, mAP, mLP, mPP;
-//protected:
-double mHz;
-};  
-
 //------------------------------------------------------------------------------
 class StvHitErrs{
 public:
@@ -227,6 +175,7 @@ void rotate(double angle);
   double hXZ,hYZ,hZZ;                 
 };
 //------------------------------------------------------------------------------
+enum {kImp=0,kImpZ=1,kImpPsi=2,kImpPti=3,kImpTan=4,kImpCur=5};
 class StvImpact {
 public:    
 StvImpact();
@@ -249,7 +198,7 @@ public:
     
     /// pars errors
     float  mImpImp;
-    float  mZImp, mZZ;
+    float  mZImp,   mZZ;
     float  mPsiImp, mPsiZ, mPsiPsi;
     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
@@ -286,10 +235,11 @@ class StvNodeParsTest
 {
 public:
 static void Test();
+static void TestDerRadial();
 static void TestGetRadial(int nEv=10000);
 static void TestErrProp  (int nEv=10000);
-static void TestMtx      ();
-static void TestImpact   (int nEv=10000) ;
+static void TestDerImpact();
+static void TestGetImpact(int nEv=10000) ;
 ClassDef(StvNodeParsTest,0)
 };
 
@@ -297,49 +247,51 @@ ClassDef(StvNodeParsTest,0)
 // 		StvNodePars::inlines
 inline void StvNodePars::reset(){memset(this,0,sizeof(StvNodePars));}
 //------------------------------------------------------------------------------
-inline void StvNodePars::ready(){_cosCA=cos(_psi);_sinCA=sin(_psi);_curv = _hz*_ptin;}
-//------------------------------------------------------------------------------
 inline void StvNodePars::getMom(double p[3]) const 
 { 
-  double pt = 1./(fabs(_ptin)+1e-6); 
-  p[0]=pt*_cosCA;p[1]=pt*_sinCA;p[2]=pt*_tanl;
+  double mom = getP();
+  p[0]=_d[0]*mom; p[1]=_d[1]*mom; p[2]=_d[2]*mom; 
 }
+//------------------------------------------------------------------------------
+inline double StvNodePars::getRxy2() const 
+{ 
+   return (_x[0]*_x[0]+_x[1]*_x[1]);
+}
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 inline double StvNodePars::getRxy() const 
 { 
-   return sqrt(_x*_x+_y*_y);
+   return sqrt(_x[0]*_x[0]+_x[1]*_x[1]);
 }
-//------------------------------------------------------------------------------
 inline void StvNodePars::getDir(double d[3]) const 
 { 
-  double nor = sqrt(1.+_tanl*_tanl);
-  d[0]=_cosCA/nor;d[1]=_sinCA/nor;d[2]=_tanl/nor;
+  memcpy(d,_d,sizeof(_d));
 }
 //------------------------------------------------------------------------------
 inline double StvNodePars::getP() const 
 { 
-  double t =_tanl*_tanl;
-  t = (t<0.01)? (1.+t*(0.5-t*0.125)) : sqrt(1.+t);
-  return t/(fabs(_ptin)+1e-12);
+return fabs(1./_pinv);
 }
-
 //------------------------------------------------------------------------------
 inline double StvNodePars::getP2() const 
-{ return 1./(_ptin*_ptin+1e-12)*(1.+_tanl*_tanl);}
+{ 
+return fabs(1./(_pinv*_pinv));
+}
+
 
 //------------------------------------------------------------------------------
 inline void StvNodePars::reverse() 
 {
- _cosCA = -_cosCA; _sinCA=-_sinCA; _psi+= M_PI; 
- while (_psi> M_PI) {_psi-=2*M_PI;}
- while (_psi<-M_PI) {_psi+=2*M_PI;}
- _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
+  _pinv = -_pinv;
+  for (int i=0;i<3;i++) {
+   _d[i]       =-_d[i]; 
+   _tkdir[0][i]=-_tkdir[0][i];
+   _tkdir[2][i]=-_tkdir[2][i];}
 }
 //------------------------------------------------------------------------------
-inline double StvNodePars::getCosL() const
-{    
-   double tt = _tanl*_tanl;
-   return (tt<0.1)? 1./(1. +tt*(0.5 - tt*0.25)) :1./sqrt(1+tt);
+inline double vsuma(double *a,int na) 
+{ double sum = 0.; 
+  for (int i=0;i<na;i++) { sum += fabs(a[i]);} 
+  return sum;
 }
-
 #endif

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include "TVector3.h"
 #include "TCernLib.h"
 #include "StvHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
@@ -14,7 +15,7 @@ enum {kMaxLam = 85,kMaxPsi=85};
 static const double kMinCosLam = cos(M_PI/180*kMaxLam),k2MinCosLam=kMinCosLam*kMinCosLam;
 static const double kMinCosPsi = cos(M_PI/180*kMaxPsi),k2MinCosPsi=kMinCosPsi*kMinCosPsi;
 static const double kMinCpCl = 0.1;
-
+#define DOT(A,B) (A[0]*B[0]+A[1]*B[1]+A[2]*B[2])
 
 // //______________________________________________________________________________
 // double Det33(double T[3][3])
@@ -74,7 +75,26 @@ void StvHitErrCalculator::SetTrack(const double tkDir[3])
     mTG[2][1] =   mTG[0][2]*mTG[1][0]/*-mTG[1][2]*mTG[0][0]*/;
     mTG[2][2] =   mTG[0][0]*mTG[1][1]  -mTG[1][0]*mTG[0][1]  ;
   }
+ for (int i=0;i<3;i++) {
+ for (int k=0;k<3;k++) {
+   double dot = TCL::vdot(mTG[i],mTG[k],3);
+   if (i==k) dot--;
+   assert(fabs(dot)<1e-6);
+ }}
 
+ for (int i=0;i<3;i++) {
+   int j=(i+1)%3;int k=(j+1)%3;
+   double qwe =(TVector3(mTG[i]).Cross(TVector3(mTG[j]))).Dot(TVector3(mTG[k]));
+   assert(fabs(qwe-1)<1e-6);
+ }
+
+}
+//______________________________________________________________________________
+void StvHitErrCalculator::SetTkDir(const double tkDir[3][3])
+{  
+  TCL::ucopy(tkDir[2],mTG[0],3);
+  TCL::ucopy(tkDir[0],mTG[1],3);
+  TCL::ucopy(tkDir[1],mTG[2],3);
 }
 //______________________________________________________________________________
 int StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
@@ -132,6 +152,48 @@ static const double c45 = cos(3.14/180*45);
     mTT[i][j] = s;}};
   return 0;
 }
+#if 1
+//______________________________________________________________________________
+int StvHitErrCalculator::CalcDcaErrs(const float hiPos[3]
+                                    ,const float hiDir[3][3],double hRr[3])
+{
+/// Calculate hit error matrix in DCA  system. In this system
+/// track is along x axis 
+// 
+// T*t+U*u+V*v = Hy*y+Hz*z
+// 
+// Mult by U
+// 
+// u = (U*Hy)*y+(U*Hz)*z
+// v = (V*Hy)*y+(V*Hz)*z
+// 
+// du/dy = (U*Hy)
+// du/dz = (U*Hz)
+// dv/dy = (V*Hy)
+// dv/dz = (V*Hz)
+//------------------------------------------------------------------------------
+static const double kMicron2 = 1.5e-8;
+   mCp2 = -1; 			//To test of calling CalcLocals
+   double detRr[3];
+   int ans = CalcDetErrs(hiPos,hiDir,detRr);
+   if (detRr[0]<kMicron2) detRr[0]=kMicron2;
+   if (detRr[2]<kMicron2) detRr[2]=kMicron2;
+   if (ans) return ans;
+   double dudy = DOT(mTG[1],hiDir[1]);
+   double dudz = DOT(mTG[1],hiDir[2]);
+   double dvdy = DOT(mTG[2],hiDir[1]);
+   double dvdz = DOT(mTG[2],hiDir[2]);
+   double T[2][2] = {{dudy,dudz}
+                    ,{dvdy,dvdz}};
+   TCL::trasat(T[0],detRr,hRr,2,2);
+   if (hRr[0]<kMicron2) hRr[0]=kMicron2;
+   if (hRr[2]<kMicron2) hRr[2]=kMicron2;
+//    assert(hRr[0]>1e-8);//???????????????????????????
+//    assert(hRr[2]>1e-8);
+   return 0;
+} 
+#endif
+#if 0
 //______________________________________________________________________________
 int StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
@@ -153,6 +215,7 @@ static int nCall = 0; nCall++;
    assert(hRr[kYY]*hRr[kXX]>hRr[kYX]*hRr[kYX]);
    return 0;
 } 
+#endif
 //______________________________________________________________________________
 void StvHitErrCalculator::CalcDcaDers(double dRr[kMaxPars][3])
 {
@@ -202,8 +265,10 @@ int StvHitRrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3]
    return 0;
 }
 
+
 //______________________________________________________________________________
-int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3]
+                                       ,const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in local detector system. In this system
 /// detector plane is x = const 
