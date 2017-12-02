@@ -80,6 +80,7 @@ Double_t StPicoDstMaker::fgerMax;    // 50 um
 Double_t StPicoDstMaker::fgdca3Dmax; // 50 cm
 vector<Int_t> StPicoDstMaker::fGoodTriggerIds;
 Double_t StPicoDstMaker::fgVxXmin, StPicoDstMaker::fgVxXmax, StPicoDstMaker::fgVxYmin, StPicoDstMaker::fgVxYmax;
+Double_t StPicoDstMaker::fgVxZmin, StPicoDstMaker::fgVxZmax, StPicoDstMaker::fgVxRmax;
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
@@ -102,6 +103,8 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   SetMaxTrackDca(50);
   SetMaxVertexTransError(0);
   SetVxXYrange(0,0,0,0);
+  SetVxZrange(0,0);
+  SetVxRmax(0);
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
 }
 //_____________________________________________________________________________
@@ -697,6 +700,8 @@ Int_t StPicoDstMaker::fillTracks()
   if (! mMuDst->numberOfMcVertices()) { // No cutss for MC event
     if (fgVxXmin < fgVxXmax && ! (fgVxXmin < V.x() && V.x() < fgVxXmax)) {ok = 1; return ok;}
     if (fgVxYmin < fgVxYmax && ! (fgVxYmin < V.y() && V.y() < fgVxYmax)) {ok = 1; return ok;}
+    if (fgVxZmin < fgVxZmax && ! (fgVxZmin < V.z() && V.z() < fgVxZmax)) {ok = 1; return ok;}
+    if (fgVxRmax > 0 &&  V.perp() > fgVxRmax)                            {ok = 1; return ok;}
     StThreeVectorD E(mMuDst->primaryVertex()->posError());
     const Double_t er = E.perp();
     if (fgerMax > 0 && er > fgerMax) {ok = 2; return ok;}
@@ -1354,5 +1359,17 @@ void StPicoDstMaker::SetVxXYrange(Double_t xmin, Double_t xmax, Double_t ymin, D
   LOG_INFO << "StPicoDstMaker::SetVxXYrange for PV: x in [" 
 	   << fgVxXmin << "," << fgVxXmax <<"], y in [" 
 	   << fgVxYmin << "," << fgVxYmax << "]" << endm;
+}
+//________________________________________________________________________________
+void StPicoDstMaker::SetVxZrange(Double_t zmin, Double_t zmax) {
+  fgVxZmin = zmin;
+  fgVxZmax = zmax;
+  LOG_INFO << "StPicoDstMaker::SetVxZrange for PV: z in [" 
+	   << fgVxZmin << "," << fgVxZmax <<"]" << endm;
+}
+//________________________________________________________________________________
+void StPicoDstMaker::SetVxRmax(Double_t rmax) {
+  fgVxRmax = rmax;
+  LOG_INFO << "StPicoDstMaker::SetVxRmax for PV: rho < " << fgVxRmax << endm;
 }
 //________________________________________________________________________________

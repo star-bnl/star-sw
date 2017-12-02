@@ -62,6 +62,8 @@ public:
   void SetMaxTrackDca(Double_t cut = 50);
   void SetMaxVertexTransError(Double_t cut = 0.0050);
   void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13);
+  void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.);
+  void SetVxRmax(Double_t rmax = 2);
 private:
 
   void streamerOff();
@@ -166,7 +168,7 @@ private:
   Int_t  mQTSlewCorr[8][16][8];     // QT Slewing correction
 
   TClonesArray*   mPicoArrays[StPicoArrays::NAllPicoArrays];
-  char            mStatusArrays[StPicoArrays::NAllPicoArrays];
+  Char_t          mStatusArrays[StPicoArrays::NAllPicoArrays];
 
   StPicoBbcFiller  mBbcFiller;
   StPicoEpdFiller  mEpdFiller;
@@ -175,6 +177,7 @@ private:
   static Double_t  fgdca3Dmax; 
   static vector<Int_t> fGoodTriggerIds; 
   static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
+  static Double_t  fgVxZmin, fgVxZmax, fgVxRmax;
   ClassDef(StPicoDstMaker, 0)
 };
 
