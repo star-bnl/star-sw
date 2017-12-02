@@ -153,24 +153,23 @@ void  StvDraw::Trak(const StvTrack *tk, int dir, EDraw3DStyle sty)
   
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     rNode = *it;
-    if (rNode->mFE[dir].mHH<0) 			continue; 		//this node is not filled
-    if (fabs(rNode->mFP[dir]._cosCA)<=0)  	continue;		//this node is not filled
+    if (rNode->mFE[dir].mUU<=0) 			continue; 		//this node is not filled
 
     const StvHit  *hit  = rNode->GetHit();
     if (hit) {
       if (rNode->GetXi2(dir)<1000) {myHits+=hit;} else {ihHits+=hit;}}
       
-    if (!lNode) { myPoits+=rNode->GetFP(dir).P;}
+    if (!lNode) { myPoits+=(const double*)rNode->GetFP(dir);}
     else        { Join(lNode,rNode,myPoits,dir);}
 
-    const double *P = rNode->GetFP(dir).P;
+    const double *P = rNode->GetFP(dir);
     if (hit)    {// make connection to hit
       const float  *H = hit->x();
       float con[6] = {(float)H[0],(float)H[1],(float)H[2],(float)P[0],(float)P[1],(float)P[2]};
       Line (2,con);            
     }  	
     {// only short line to mark node
-       const double *D = &rNode->GetFP(dir)._cosCA;
+       const double *D = rNode->GetFP(dir)._d;
        float con[6] = {(float)P[0]         ,(float)P[1]        ,(float)P[2]
                      ,float(P[0]-D[1]*0.1),float(P[1]+D[0]*0.1),(float)P[2]};
        Line (2,con);            
@@ -236,9 +235,9 @@ void StvDraw::Join(const StvNode *left,const StvNode *rite,StvPoints &poits,int 
 static const double maxStep=0.1;
   const StvNodePars &lFP = left->GetFP(dir);
   const StvNodePars &rFP = rite->GetFP(dir);
-  THelixTrack hLeft;
+  THelix3d hLeft;
   lFP.get(&hLeft);
-  double lenL =  hLeft.Path(rFP.P);
+  double lenL =  hLeft.Path(rFP._x);
 
   int nStep = fabs(lenL)/maxStep; if (nStep <3) nStep = 3;
   double step = lenL/nStep;

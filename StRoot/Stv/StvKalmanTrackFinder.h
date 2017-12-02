@@ -4,6 +4,7 @@
 #define StvKalmanTrackFinder_HH
 #include "StvTrackFinder.h"
 
+class THelix3d;
 class StvSeedFinder;
 class StvDiver;
 class StvPars;
@@ -12,8 +13,8 @@ class StvDiver;
 class StvHitter;
 class StvHitVector;
 class StvNodePars;
-class StvFitErrs;
 class StvFitDers;
+class StvFitErrs;
 class StvHitCounter;
 class StvKonst_st;
 /// \class StvKalmanTrackFinder

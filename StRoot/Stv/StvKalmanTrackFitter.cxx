@@ -6,6 +6,7 @@
 
 #include "TCernLib.h"
 #include "TSystem.h"
+#include "StarRoot/TRungeKutta.h"
 #include "StvKalmanTrackFitter.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvHit.h"
@@ -18,14 +19,17 @@
 #include "Stv/StvStl.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
-#include "Stv/StvConst.h"
 ClassImp(StvKalmanTrackFitter)
+#define DOT(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
+#define SUB(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
+#define OLEG(a,b) (2*fabs(a-b)/(fabs(a)+fabs(b)+1e-11))
 
 static const int    kXtendFactor  = 10;//Xi2 factor that fit sure failed
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxCorr = 0.1;
+
 //_____________________________________________________________________________
 StvKalmanTrackFitter::StvKalmanTrackFitter():StvTrackFitter("StvKalmanTrackFitter")
 {
@@ -87,11 +91,12 @@ static StvFitter *fitt = StvFitter::Inst();
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     preNode=node;
     node = *it; iNode++;
+assert(vsuma(node->GetFE(0).TkDir()[0],3*3)>0.1);
     if (!dir) 	{ innNode = node; outNode = preNode;}
     else 	{ outNode = node; innNode = preNode;}
 enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
-    node->GetFE(lane).mHH = -1;
-    node->GetFE(lane).mZZ = -1;
+    node->GetFE(lane)[0] = -1;
+    node->GetFE(lane)[2] = -1;
 
 //         if (node->GetType()==StvNode::kDcaNode) {
 //           printf("DCAInit lane=%d err=%g\n",jane,sqrt(node->mFE[jane].mPP));
@@ -125,8 +130,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //		get params from previous dir and set huge errors
         node->mPP[lane] = node->mFP[2];		//prediction from opposite fit
         node->mPE[lane] = node->mFE[2];	
-        assert(node->mPE[lane].mHH>0);
-        assert(node->mPE[lane].mZZ>0);
+        assert(node->mPE[lane][0]>0);
+        assert(node->mPE[lane][2]>0);
 
 	node->mPE[lane]*=kKalmanErrFact;	//Big errors
         node->mPE[lane].Recov();		//But not too big
@@ -140,8 +145,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //		and set huge errors
         node->mPP[lane] = node->mFP[2];				//prediction from opposite fit
         node->mPE[lane] = node->mFE[2];				//Big errors
-        assert(node->mPE[lane].mHH>0);
-        assert(node->mPE[lane].mZZ>0);
+        assert(node->mPE[lane][0]>0);
+        assert(node->mPE[lane][2]>0);
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
@@ -150,7 +155,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kLeft|kRite|kHit: 	// Left fits,now Hit, Rite fits
       {
 //		It was fits before. Propagate it
-       Propagate(node,preNode,dir,lane);		//prediction from last fit
+       int ierr = Propagate(node,preNode,dir,lane);		//prediction from last fit
+       if (ierr) return 2;
        break;
       }  
 
@@ -167,8 +173,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kLeft|kRite: // Left fits, no Hit, Rite fits
       {
 //		No hit. Fit = Prediction		
-        assert(node->mPE[lane].mHH>0);
-        assert(node->mPE[lane].mZZ>0);
+        assert(node->mPE[lane][0]>0);
+        assert(node->mPE[lane][2]>0);
         node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
         break;
       }
@@ -181,8 +187,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //		Fit it		
 static int nQQQQ=0; nQQQQ++;
 StvDebug::Break(nQQQQ);//???????????
-        assert(node->mPE[lane].mHH>0);
-        assert(node->mPE[lane].mZZ>0);
+        assert(node->mPE[lane][0]>0);
+        assert(node->mPE[lane][2]>0);
 	fitt->Set(node->mPP+lane,node->mPE+lane,node->mFP+lane,node->mFE+lane);
 	fitt->Prep();
 
@@ -193,11 +199,11 @@ StvDebug::Break(nQQQQ);//???????????
 	if (iFailed ) nErr+=1; 			//Fit is bad yet
 	if (myXi2> mKons->mXi2Hit) nErr+=10; //Fit is bad yet
         if ( myXi2> mKons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
-            if (--mNHits <3) 			return 1;
+            if (--mNHits <mKons->mMinHits) 	return 1;
             node->SetHit(0); hit = 0; nFitLeft--;
 //		No hit anymore. Fit = Prediction		
-        assert(node->mPE[lane].mHH>0);
-        assert(node->mPE[lane].mZZ>0);
+        assert(node->mPE[lane][0]>0);
+        assert(node->mPE[lane][2]>0);
             node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
             break;
 	}
@@ -224,8 +230,8 @@ StvDebug::Break(nQQQQ);//???????????
        case kRite: 	// Rite fits only, no  Hit
 //		No hit. No own ifo yet. Get everything from opposite fit		
        {
-        assert(node->mFE[jane].mHH>0);
-        assert(node->mFE[jane].mZZ>0);
+        assert(node->mFE[jane][0]>0);
+        assert(node->mFE[jane][2]>0);
         node->SetFit(node->mFP[jane],node->mFE[jane],2); 
         break;
        }
@@ -239,10 +245,10 @@ StvDebug::Break(nQQQQ);//???????????
 
        default:
       {
-        assert(node->mPE[lane].mHH>0);
-        assert(node->mPE[lane].mZZ>0);
-        assert(node->mPE[jane].mHH>0);
-        assert(node->mPE[jane].mZZ>0);
+        assert(node->mPE[lane][0]>0);
+        assert(node->mPE[lane][2]>0);
+        assert(node->mPE[jane][0]>0);
+        assert(node->mPE[jane][2]>0);
 	fitt->Set(node->mPP+lane         ,node->mPE+lane
         	 ,node->mPP+jane         ,node->mPE+jane
         	 ,node->mFP+2            ,node->mFE+2   );
@@ -266,8 +272,8 @@ StvDebug::Break(nQQQQ);//???????????
 //		Fit hit	 to join data	
         StvNodePars myPars(node->mFP[2]);
         StvFitErrs  myErrs(node->mFE[2]);
-        assert(node->mFE[2].mHH>0);
-        assert(node->mFE[2].mZZ>0);
+        assert(node->mFE[2][0]>0);
+        assert(node->mFE[2][2]>0);
 
 	fitt->Set(&myPars,&myErrs,node->mFP+2,node->mFE+2);
 	fitt->Prep();
@@ -280,6 +286,7 @@ StvDebug::Break(nQQQQ);//???????????
 	if (myXi2> mKons->mXi2Hit) nErr+=10000000; //Fit is bad yet
         if (myXi2> mKons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
           node->SetHit(0); hit = 0; nFitLeft--; mNHits--;
+          if (mNHits <mKons->mMinHits) 	return 1;
 //		No hit anymore. Fit = Prediction		
           node->SetFit(myPars,myErrs,2); 
           break;
@@ -294,8 +301,8 @@ StvDebug::Break(nQQQQ);//???????????
 //         }
 
     nFitRite-= wasFitted;
-    assert(node->mFE[lane].mHH>0);
-    assert(node->mFE[lane].mZZ>0);
+    assert(node->mFE[lane][0]>0);
+    assert(node->mFE[lane][2]>0);
 
 
   }//endMainLoop
@@ -312,7 +319,7 @@ static const double kEps = 1.e-2,kEPS=1e-1;
   int& nHits = NHits();
   nHits = tk->GetNHits();
   int nBegHits = nHits;
-  int nRepair =(nHits-5)*0.1;
+  int nRepair =(nHits-11);
   int state = 0;
   StvNode *tstNode = (idir)? tk->front(): tk->back();
   int nIters = 0,nDrops=0;
@@ -337,24 +344,28 @@ static const double kEps = 1.e-2,kEPS=1e-1;
       double eps = (ans || anz)? kEPS:kEps;
       if ( dif < eps) { //Fit converged
       converged = 1; break; } 
-
+      { tstNode->mFP[2].merge(lstPars); }
     }// End Fit iters
+
     
-    state = (ans!=0) + 10*((anz!=0) + 10*((!converged) 
-          + 10*((tk->GetXi2()>mKons->mXi2Trk)+10*(nHits < mKons->mMinHits))));
-    if (!state) 		break;
-    if (nHits < mKons->mMinHits) 	break;
+    state = (ans>0) 
+          + 10*((anz>0) 
+	  + 10*((!converged) 
+          + 10*((0)
+	  + 10*((nHits < mKons->mMinHits)))));
+    if (state) 					break;
+
+    state = 0;
     StvNode *badNode=tk->GetNode(StvTrack::kMaxXi2);
-//    StvNode *badNode=tk->GetMaxKnnNode();
-    if (!badNode) 		break;
+    int badXi2 = (badNode->GetXi2()>mKons->mXi2Hit) ;
+    state = 1000*badXi2;
+    if (!ans && !anz && !badXi2) 		break;
+    if (!badXi2)				continue;
     badNode->SetHit(0); nDrops++;
-    nHits--; if (nHits < mKons->mMinHits) { state = 1000000; break;}
+    nHits--; if (nHits < mKons->mMinHits) { state += 10000; break;}
+   
   }//End Repair loop
 
-
-  if (ans<=0) state &= (-2);
-  if (anz<=0) state &= (-4);
-  
   nHits = tk->GetNHits();
   nDrops = nBegHits-nHits;
   return state;
@@ -365,104 +376,37 @@ static const double kEps = 1.e-2,kEPS=1e-1;
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
 {
 static int nCall=0; nCall++;
-static const char* PropagateHelix = gSystem->Getenv("PropagateHelix");
-StvDebug::Break(nCall);
-  StvFitDers derFit;
-
   StvNode *innNode=0,*outNode=0;
   if (innNode){}; if (outNode){};
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
-  
-  double saveCurv = node->mFP[lane]._curv;
-  node->mFP[lane]._curv = (2*saveCurv+preNode->mFP[lane]._curv)/3;
-  
-double dS=0;
-if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
-{
-  THelixTrack myHlx;
-  preNode->mFP[lane].get(&myHlx);
+
+  TRungeKutta myHlx;
   const StvNodePars &prePars =  preNode->mFP[lane];
-  assert(preNode->mFE[lane].mHH>0);
+  assert(preNode->mFE[lane][0]>0);
+  assert(preNode->mFE[lane][2]>0);
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
   prePars.get(&myHlx);
   preErrs.Get(&myHlx);
   double Xnode[3];
   if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
-
-  double dS = myHlx.Path(Xnode);
-  StvHlxDers derHlx;
-//		reset ELossData for may be new momentum
-  innNode->ResetELoss(preNode->mFP[lane],dir);
-  const StvELossTrak *el = innNode->GetELoss();
-  double dP = 0;
-  if (el) {//account energy loss
-    double P = sqrt(prePars.getP2()); 
-    dP = el->PLoss(P)*(-dS);
-  }
-  if (dP > kMaxCorr) dP = kMaxCorr;
-  if (dP <-kMaxCorr) dP =-kMaxCorr;
-  double rho = prePars._curv;
-  double dRho = -rho*(dP);
-  myHlx.Set(rho+dRho/3);
-  dS = myHlx.Path(Xnode);
-  myHlx.Move(dS,derHlx);
-  myHlx.Set(rho+dRho);
-  node->mPP[lane].set(&myHlx,node->GetHz());
-  node->mPE[lane].Set(&myHlx,node->GetHz());
+  double dis = sqrt(DIST2(Xnode,preNode->mFP[lane]._x));
+  if (!dir) dis = -dis;
+  myHlx.Move(dis);
+  double dS = myHlx.Path(Xnode);		
+//  if (fabs(dS)>1e3)				return 2;				
+  assert(fabs(dS)<1e3);
+  myHlx.Move();
+  node->mPP[lane].set(&myHlx);
+  int ifail = node->mPP[lane].check();  
+  if(ifail) 					return ifail+100;
+  node->mPE[lane].Set(&myHlx);
+  StvELossTrak *eloss = innNode->ResetELoss(prePars,dir);
+  node->mPP[lane].add(eloss,dS);
+  node->mPE[lane].Add(eloss,dS);
   node->mPE[lane].Recov();
-  node->mPE[lane].Add(el,node->mPP[lane],dS);
-  node->mPP[lane].convert(derFit,derHlx);
-  innNode->SetDer(derFit,lane);
-  
-  } 
-else
-  {
-  StvNodePars pars = preNode->mFP[lane];
-  double p = pars.getP(); 
-  
-  const StvELossTrak *el = innNode->GetELoss();
-  double dPP = 0,dPdP0=0;
-  if (el) {
-    innNode->ResetELoss(preNode->mFP[lane],dir);
-    dPP = el->PLoss(p)*(el->TotLen())/p;
-    if (dPP > kMaxCorr) dPP = kMaxCorr;
-    dPP/=el->TotLen();
-  }
-
-  double Xnode[3];
-  if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
-  else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
-  
-  dS = pars.move(Xnode,dPP,dir);
-  if ((dS>0)!=(dir>0)) {
-    pars = preNode->mFP[lane];
-    dS = pars.move(node->mXDive,dPP,dir);
-  }
-
-//assert((dS>0)==(dir>0));
-  node->mPP[lane] = pars;
-
-  pars.Deriv(dS,derFit);
-  if (el) {
-    dPdP0 = el->dPLossdP0(p);
-    if (fabs(dPdP0)>0) pars.Deriv(dS,dPdP0,derFit);
-  }
-  StvFitErrs  &nowErrs = node->mPE[lane];
-  const StvFitErrs  &preErrs =  preNode->mFE[lane];
-assert(preErrs.mHH>0);
-assert(preErrs.mZZ>0);
-  nowErrs = preErrs*derFit;
-assert(nowErrs.mHH>0);
-assert(preErrs.mZZ>0);
-  nowErrs.Add(el,pars,dS);
-assert(nowErrs.mHH>0);
-assert(preErrs.mZZ>0);
-  innNode->SetDer(derFit,lane);
-  } 
-
-  node->mFP[lane]._curv = saveCurv;
+  innNode->SetDer(*myHlx.Der(),lane);
 
   return 0;
   
@@ -470,15 +414,17 @@ assert(preErrs.mZZ>0);
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
 {
+/// function for track fitting to primary vertex
+
 static int nCall = 0; nCall++;
-static       StvToolkit *kit     = StvToolkit::Inst();
-static StvFitter *fitt = StvFitter::Inst();
+static StvToolkit *kit  = StvToolkit::Inst(); if(kit){}
+static StvFitter  *fitt = StvFitter::Inst();
 enum {kDeltaZ = 100};//??????
 
   const StvNode *lastNode = trak->GetNode(StvTrack::kDcaPoint);
   if (!lastNode) return 1;
-  if (fabs(vtx->x()[2]-lastNode->GetFP()._z) > kDeltaZ) return 2;
-  THelixTrack th;
+  if (fabs(vtx->x()[2]-lastNode->GetFP().getZ()) > kDeltaZ) return 2;
+  TRungeKutta th;
   lastNode->GetFP().get(&th);
   lastNode->GetFE().Get(&th);
   const float *h = vtx->x();
@@ -487,27 +433,24 @@ enum {kDeltaZ = 100};//??????
   double x[3];
   th.Eval(len,x);
   mDca3 = DIST2(d,x);
-  StvFitDers derivFit;
-  StvHlxDers derivHlx;
-  if (node) {th.Move(len,derivHlx);} else {th.Move(len);}
-  double Hz = kit->GetHz(th.Pos());
-  StvNodePars par[2]; par[0].set(&th,Hz);
-  StvFitErrs  err[2]; err[0].Set(&th,Hz);
+  th.Move();
+  StvNodePars par[2]; par[0].set(&th);
+  StvFitErrs  err[2]; err[0].Set(&th);
   fitt->Set(par+0,err+0,par+1,err+1);
   fitt->Prep();
   mXi2 = fitt->Xi2(vtx);
   if (!node) return 0;
   
   fitt->Update();
-  assert(err[1].mHH>0);
-  assert(err[1].mZZ>0);
+  assert(err[1][0]>0);
+  assert(err[1][2]>0);
 
 
   mXi2 = fitt->GetXi2();
   node->SetPre(par[0],err[0],0);
   node->SetFit(par[1],err[1],0);
-  par[1].convert(derivFit,derivHlx);
-  node->SetDer(derivFit,0);
+  StvFitDers fiDers(*th.Der());
+  node->SetDer(fiDers,0);
   return 0;
 }   
 //_____________________________________________________________________________
@@ -526,8 +469,6 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
   mXi2 = 0;
   if (!mHelx) mHelx = new THelixFitter;
   mHelx->Clear();
-  StvFitDers Fstv;
-  StvHlxDers Fhlx;
   THelixFitter& hlx = *mHelx;
   StvNode *node=0,*preNode=0; if (preNode){};
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
@@ -536,49 +477,47 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
     if (!hit) continue;
     hlx.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
     if(mode&kUseErrs) 		{	//Account errors
-      double cos2li = node->GetFP()._tanl; cos2li = (1+cos2li*cos2li);
+      double cosL = node->GetFP().getCosL(); 
       const double *rr = node->GetHE();    
       assert(rr[0]>0);assert(rr[2]>0);assert(rr[0]*rr[2]>rr[1]*rr[1]);
-      hlx.AddErr( rr[0],rr[2]*cos2li);
+      hlx.AddErr(rr[0],rr[2]/(cosL*cosL));
     }
   }  
   mXi2 = 3e33; if (hlx.Used()<3) return 1;
   mXi2 =hlx.Fit();
   if(mode&kUseErrs) { hlx.MakeErrs();}
-  double dL = hlx.Path(trak->front()->GetFP().P);
+  double dL = hlx.Path(trak->front()->GetFP().pos());
   hlx.Move(dL);
   if ((mode&(kUpdate|kPrint))==0) return 0;
   node=0;
+  assert(hlx.Emx());
   double dHit[3],tstXi2=0,myXi2=0;
 
 //		Loop for Print,compare & update
   double totLen=0;
-  THelixTrack myHlx(hlx);
+  TRungeKutta myHlx(hlx);
   int iNode = -1;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     iNode++;preNode=node; node = *it;
-    StvNodePars sFP = node->GetFP(0);
     const StvHit *hit = node->GetHit();
-    const float *hix = (hit)? hit->x():0;
+    const float  *hix = (hit)? hit->x():0;
 
     const double *X = node->mXDive;
     if (hit) {for (int i=0;i<3;i++) {dHit[i]=hix[i];};X = dHit;}
-    double dS = myHlx.Path(X); myHlx.Move(dS,Fhlx);
+    double dS = myHlx.Path(X); myHlx.Move(dS);
     totLen+=dS;
-    StvNodePars hFP; hFP.set(&myHlx,sFP._hz);
-    hFP.convert(Fstv,Fhlx);
-//??    StvFitErrs  sFE = node->GetFE(2);
-    StvFitErrs  hFE; hFE.Set(&myHlx,sFP._hz);
+    StvNodePars hFP; hFP.set(&myHlx);
+    StvFitErrs  hFE; hFE.Set(&myHlx);
 
 
     myXi2 = 6e6;
     if (hix) {//Hit is there. Calculate Xi2i etc...
-      StvNodePars iFP(hFP); iFP._x=hix[0];iFP._y=hix[1];iFP._z=hix[2];
+      StvNodePars iFP; TCL::ucopy(hix,iFP.pos(),3);
       StvFitPars  fp = hFP-iFP;
 
       const double *hRR = node->GetHE();
-      myXi2 = fp.mH /(hFE.mHH+hRR[0]) *fp.mH;
-      myXi2+= fp.mZ /(hFE.mZZ+hRR[2]) *fp.mZ;
+      myXi2 = fp[0] /(hFE[0]+hRR[0]) *fp[0];
+      myXi2+= fp[1] /(hFE[2]+hRR[2]) *fp[1];
 
        tstXi2 +=  myXi2;
     }
@@ -599,8 +538,6 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
 
   tstXi2/=hlx.Ndf();if (tstXi2){};
   double qwe = mXi2; if (qwe){};//only to see it in gdb
-
-
   return 0;
 }
 //_____________________________________________________________________________
@@ -611,14 +548,13 @@ static int nCall = 0; nCall++;
    Helix(trak,1);  
    StvNode *node = trak->GetNode(StvTrack::kFirstPoint);
 // StvNode *node = trak->front();
-   double s = mHelx->Path(node->GetFP().P);
+   double s = mHelx->Path(node->GetFP());
    mHelx->Move(s);
    const StvFitErrs &fe = node->GetFE();
    StvFitErrs my;
-   my.Set(mHelx,fe.mHz);
+   my.Set(mHelx);
 
 
-#define OLEG(a,b) (2*fabs(a-b)/(fabs(a)+fabs(b)+1e-11))
   int ierr = 0;
   for (int i=0,li=0;i< 5;li+=++i) {
     if (OLEG(my[li+i],fe[li+i])<0.3) continue;
@@ -632,13 +568,13 @@ static int nCall = 0; nCall++;
 int StvKalmanTrackFitter::Check(const StvNodePars &parA,const StvFitErrs &errA,
 				const StvNodePars &parB,const StvFitErrs &errB)
 {
-  THelixTrack helx;
+  TRungeKutta helx;
   parA.get(&helx);  
   errA.Get(&helx);  
-  double s = helx.Path(parB.P);  
+  double s = helx.Path(parB);  
   helx.Move(s);
   StvFitErrs my;
-  my.Set(&helx,errB.mHz);
+  my.Set(&helx);
   int ierr = 0;
   for (int i=0,li=0;i< 5;li+=++i) {
     if (OLEG(my[li+i],errB[li+i])<0.1) continue;
@@ -646,31 +582,10 @@ int StvKalmanTrackFitter::Check(const StvNodePars &parA,const StvFitErrs &errA,
      printf(" Err.%d = %g != %g\n",i,errB[li+i],my[li+i]);
   };
   int rxy = parB.getRxy();
-  printf("%3d Propagate HHold=%g HHnow=%g(%g) len=%g\n",rxy,errA.mHH,errB.mHH,my.mHH,s);
-  printf("              ZZold=%g ZZnow=%g(%g)       \n",    errA.mZZ,errB.mZZ,my.mZZ  );
+  printf("%3d Propagate HHold=%g HHnow=%g(%g) len=%g\n",rxy,errA[0],errB[0],my[0],s);
+  printf("              ZZold=%g ZZnow=%g(%g)       \n",    errA[2],errB[2],my[2]  );
 
 //  assert(!ierr);
   return ierr;
-}
-   
-//_____________________________________________________________________________
-int StvKalmanTrackFitter::Clean(StvTrack *trak)
-{
-  int nErr = 0;
-
-  for (StvNodeIter it=trak->begin();it!=trak->end();++it) 
-  {
-    int fail = 0;
-    StvNode *node = *it;
-    StvHit *hit = node->GetHit();
-    if (!hit) continue;
-    const StvNodePars &np = node->GetFP();
-    if (fabs(np._ptin)    > mKons->mMaxPti) 	fail+= 1;
-    if (fabs(np._curv)    > mKons->mMaxCurv) 	fail+= 2;
-    if ( np.diff(hit->x())> mKons->mMaxRes) 	fail+= 4;
-    if (!fail) continue;   
-    node->SetXi2(3e33);node->SetHit(0); nErr++;
-  }
-  return nErr;
 }
 

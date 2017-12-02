@@ -34,10 +34,11 @@ public:
   virtual const THelixTrack *NextSeed()	=0;
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
-  virtual int       Again(int){return 0;}
+  virtual int       Again(int)		{return 0;}
   virtual void      FeedBack(const StvTrack *tk);
-  virtual void      SetSgn(int sgn=1){fSgn = sgn;}
+  virtual void      SetSgn(int sgn=1)	{fSgn = sgn;}
   virtual void      SetVtx(const float vtx[3]);
+          void      SetIdTruth() 	{fIdTruth = 1; }
   virtual  int      IfVtx() const {return fVtx[2]<1e11;}
 
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
@@ -49,7 +50,7 @@ virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
         double GetXi2(int i=1) const	{return fXi2[i];}
           void KNNMiMax(double &mi,double &ma);
-
+          void DrawHelix();
 
 static    StvDraw *NewDraw();
 protected:
@@ -58,6 +59,7 @@ protected:
 int fMinHits;		//Min number of hits accepted
 int fMaxHits;		//Max number hits fo seed
 int fSgn;
+int fIdTruth;
 StvHits  fSeedHits;
 THelixFitter fHelix;
 StvDraw *fDraw;

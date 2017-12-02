@@ -47,17 +47,19 @@ void StvHitCounter::AddHit()
   nContNits=0;nSeqNits++;
 }
 //_____________________________________________________________________________
-void StvHitCounter::AddNit()
+int StvHitCounter::AddNit()
 {
   nPossHits++;nContNits++;nTotNits++;
-  if (!nContHits) 	return;
+  if (!nContHits) 	return Skip();
   if (nContHits<mMinContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
-  if (mContHits<nContHits   )   mContHits=nContHits;
+  if (mContHits<nContHits   )  mContHits=nContHits;
   nContHits=0;nSeqHits++;
+  return Skip();
 }
 //_____________________________________________________________________________
 int StvHitCounter::Reject() const
 {
+/// Do we need to drop the track?
   int rej = 0;
   int nG = (nContHits>=mMinContHits)? nGoodHits+nContHits : nGoodHits;
   if (nG       <mMinGoodHits) rej+=1;
@@ -69,6 +71,8 @@ int StvHitCounter::Reject() const
 //_____________________________________________________________________________
 int StvHitCounter::Skip() const
 {
+/// Do we need to skip the rest of track, it is allready too bad?
+
   int rej = 0;
   if (nContNits>mMaxContNits) rej+= 1;
   if (nTotNits > mMaxTotNits) rej+= 2;

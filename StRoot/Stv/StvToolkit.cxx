@@ -174,26 +174,14 @@ void StvToolkit::Reset()
 
 }
 //______________________________________________________________________________
-double StvToolkit::GetHz(const double *x) const
+const double *StvToolkit::GetMag(const double *x,double h[3]) const
 {
-  static const Double_t EC = 2.99792458e-4;
-  do {
-    if (fabs(x[0]-mX[0])>1e-3) break;
-    if (fabs(x[1]-mX[1])>1e-3) break;
-    if (fabs(x[2]-mX[2])>1e-3) break;
-    return mH[2];
-  }while(0);
-   memcpy(mX,x,sizeof(mX));
-
-   StarMagField::Instance()->BField(mX,mH);
+static const Double_t EC     = 2.99792458e-4;
+static StarMagField *myField = StarMagField::Instance();
+   myField->BField(x,mH);
    mH[0]*= EC;mH[1]*= EC;mH[2]*= EC;
-   if (fabs(mH[2]) < 3e-33) mH[2]=3e-33;
-   return mH[2];
-}
-//______________________________________________________________________________
-double StvToolkit::GetHz(const float *x) const
-{ double xx[3]={x[0],x[1],x[2]};
-  return GetHz(xx);
+   if (h) memcpy(h,mH,sizeof(mH));
+   return mH;
 }
 //______________________________________________________________________________
 double StvToolkit::GetHA(const double *x) const

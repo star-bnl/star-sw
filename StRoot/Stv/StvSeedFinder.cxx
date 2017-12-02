@@ -28,6 +28,7 @@ StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
   fMinHits = 5;
   fMaxHits = 10;
   fSgn = 1;
+  fIdTruth = 0;
   SetVtx(0);
 }
 //_____________________________________________________________________________
@@ -112,7 +113,7 @@ static int nCall=0; nCall++;
   const float *fEnd = fSeedHits.back ()->x();
   double r2Beg = fBeg[0]*fBeg[0]+fBeg[1]*fBeg[1];
   double r2End = fEnd[0]*fEnd[0]+fEnd[1]*fEnd[1];
-  if (fSgn*r2Beg < fSgn*r2End) return 0;
+  if (fSgn*r2Beg <= fSgn*r2End) return 0;
 
   for (int iNode = 0; iNode<nNode;++iNode) {
     const StvHit * hit = fSeedHits[iNode];
@@ -164,6 +165,7 @@ static int nCall=0; nCall++;
   }
   return &fHelix;
 }    
+#if 0
 #include "StarRoot/TIdTruUtil.h"
 //_____________________________________________________________________________
 void StvSeedFinder::FeedBack(const StvTrack *tk)
@@ -179,27 +181,67 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
   if (!idu.GetIdTru()) qua=0;
   StvDebug::Count("SeedAllQua",qua);
   if (!tk) { //
-  StvDebug::Count("SeedBadXi2:Xi2E",fXi2[1],fXi2[0]);
-  StvDebug::Count("SeedBadQua",qua);
+    StvDebug::Count("SeedBadXi2:Xi2E",fXi2[1],fXi2[0]);
+    StvDebug::Count("SeedBadQua",qua);
 
   } else {
-  StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
-  
-  StvDebug::Count("SeedGooQua",qua);
-  double tqua = tk->GetQua()*100;
-  StvDebug::Count("GlobGooQua",tqua);
-  StvDebug::Count("GlobGooQua::SeedGooQua",qua,tqua);
-  const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
-  double P[3];
-  node->GetFP().getMom(P);
-  
-  double eta = TVector3(P).Eta();
-  int nHits = tk->GetNHits(kPxlId);
-  nHits    += tk->GetNHits(kIstId);
-  nHits    += tk->GetNHits(kSstId);
-  StvDebug::Count("GoodEta",eta);
-  if (nHits>=2) StvDebug::Count("HftEta",eta);
+    StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
+
+    StvDebug::Count("SeedGooQua",qua);
+    double tqua = tk->GetQua()*100;
+    StvDebug::Count("GlobGooQua",tqua);
+    StvDebug::Count("GlobGooQua::SeedGooQua",qua,tqua);
+    const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
+    double P[3];
+    node->GetFP().getMom(P);
+
+    double eta = TVector3(P).Eta();
+    int nHits = tk->GetNHits(kPxlId);
+    nHits    += tk->GetNHits(kIstId);
+    nHits    += tk->GetNHits(kSstId);
+    StvDebug::Count("GoodEta",eta);
+    if (nHits>=2) StvDebug::Count("HftEta",eta);
   }
+}
+#endif //0
+#if 1
+//_____________________________________________________________________________
+void StvSeedFinder::FeedBack(const StvTrack *tk)
+{
+  if (StvDebug::Debug()<2) return;
+  if (tk) {
+    StvDebug::Count("GoodXi2",fXi2[1]);
+  } else {
+    StvDebug::Count("BaddXi2",fXi2[1]);
+  }
+}
+
+#endif //1
+//_____________________________________________________________________________
+void StvSeedFinder::DrawHelix() 
+{
+  StvDebug::ClearGra();
+
+  THelixTrack circ(&fHelix);
+  int nNode=fSeedHits.size();
+  const float *fBeg = fSeedHits.front()->x();
+
+
+  const double dBeg[3]={fBeg[0],fBeg[1],fBeg[2]};
+  double l = circ.Path(dBeg); circ.Move(l);
+
+//		Now Draw helix
+  for (int iNode = 0; iNode<nNode ;iNode++) {
+    const StvHit * hit = fSeedHits[iNode];
+    if (!hit) continue;
+    const float *fx = hit->x();
+    const double dx[3]={fx[0],fx[1],fx[2]};
+    double l = circ.Path(dx); circ.Move(l);
+    const double *px = circ.Pos();
+    StvDebug::AddGra(px[0],px[1],px[2],3);
+    StvDebug::AddGra(fx[0],fx[1],fx[2],4);
+  }
+//  StvDebug::ShowGra();
 }
  
 //_____________________________________________________________________________
@@ -229,5 +271,4 @@ void StvSeedFinders::Add(StvSeedFinder *sf)
 {
   push_back(sf);
 }
- 
 

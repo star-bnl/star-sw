@@ -29,40 +29,40 @@ const StvHits *StvHitter::GetHits(const StvNodePars *pars
                                  ,const StvFitErrs  *errs, const float gate[4])
 {
 enum {kLittleBit = 5};
+static const double kTouchAngle = 1e-2;
 
 static int nCall=0; nCall++;
 static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   mHits.clear();
-  const StHitPlane *myHitPlane = myProxy->GetCurrentHitPlane();
+  const StHitPlane *myHitPlane = GetHitPlane();
+assert(myHitPlane);
   if (!myHitPlane) 		return 0;	//no sensitive volume there
 
-  if (mHitPlane == myHitPlane)  return 0;	//hit plane was already used
   int nHits = myHitPlane->GetNHits();
   if (!nHits)	return &mHits;	//it is sensitive but no hits
 
   mHitPlane = myHitPlane;
 
   mHitMap  = mHitPlane->GetHitMap();
-  float xNode[3]={(float)pars->_x,(float)pars->_y,(float)pars->_z};
-  mOrg =  mHitPlane->GetOrg(xNode);
+  float xNode[3]={(float)pars->pos()[0],(float)pars->pos()[1],(float)pars->pos()[2]};
+  mOrg =  mHitPlane->GetOrg(xNode);	// some point on the plane
   mDir = &mHitPlane->GetDir(xNode);
 
 
   float tau =0,den=0;
-  float const *ort =(*mDir)[0];
-  float mom[3]={(float)pars->_cosCA,(float)pars->_sinCA,(float)pars->_tanl};
+  float const  *ort =(*mDir)[0];
+  double const *mom = pars->dir();
 
   for (int j=0;j<3;j++) {tau+=(mOrg[j]-xNode[j])*ort[j];
                          den+= mom[j]           *ort[j];}
-  if (fabs(den)<1e-2) 		return 0; // track is parallel to hit plane
+  if (fabs(den)<kTouchAngle) return 0; // track is parallel to hit plane
   tau/=den;
   for (int j=0;j<3;j++) {xNode[j]+=mom[j]*tau;}
 
   double myGate[2];
 //		Obtain track errs
-  double cos2 = den*den/(1.+mom[2]*mom[2]);
 
-  double totRr = (errs->mHH+errs->mZZ)/cos2;
+  double totRr = (*errs)[0]+(*errs)[2];
   totRr = sqrt(totRr);
   for (int j=0;j<2;j++) {
     myGate[j] = gate[j]*totRr;
@@ -83,13 +83,19 @@ static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   return &mHits;
 }
 //_____________________________________________________________________________
-const StHitPlane*  StvHitter::GetHitPlane() const {return mHitPlane;}
+const StHitPlane*  StvHitter::GetHitPlane() const 
+{
+static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
+auto *myHitPlane = myProxy->GetCurrentHitPlane();
+return myHitPlane;
+}
 
 //_____________________________________________________________________________
 StDetectorId StvHitter::GetDetId() const
 { 
-  if (!mHitPlane) return (StDetectorId)0;
-  return mHitPlane->GetDetId();
+  auto *myHitPlane = GetHitPlane();
+  if (!myHitPlane) return (StDetectorId)0;
+  return myHitPlane->GetDetId();
 }
 
 

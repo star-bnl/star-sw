@@ -184,10 +184,10 @@ double StvTrack::GetLength(EPointType ept) const
       if (node->GetXi2()>1000) 		continue;
         pre = &(node->GetFP(2)); 	continue;
     }
-    const double *x1 = &pre->_x;
-    const double *x2 = &node->GetFP(2)._x;
+    const double *x1 = pre->pos();
+    const double *x2 = node->GetFP(2).pos();
     double dlen = sqrt(pow(x1[0]-x2[0],2) + pow(x1[1]-x2[1],2));
-    double curv = 0.5*fabs(pre->_curv+node->GetFP(2)._curv);
+    double curv = 0.5*fabs(pre->getCurv()+node->GetFP(2).getCurv());
     double dsin = (0.5*dlen*curv);
     if (dsin>0.9) dsin=0.9;
     dlen = (dsin<0.1)? dlen*(1.+dsin*dsin/6) : 2*asin(dsin)/curv; 
@@ -286,10 +286,10 @@ double StvTrack::GetRes() const
     if (!hit) continue;
     TVector3 dif,dir;
     const StvNodePars &fp = node->GetFP();
-    for (int i=0;i<3;i++) { dif[i]=fp.P[i]-hit->x()[i];}
-    dir[0]= fp._cosCA; 
-    dir[1]= fp._sinCA; 
-    dir[2]= fp._tanl; 
+    for (int i=0;i<3;i++) { dif[i]=fp[i]-hit->x()[i];}
+    dir[0]= fp.getCosP(); 
+    dir[1]= fp.getSinP(); 
+    dir[2]= fp.getTanL(); 
     dir = dir.Unit();
     res += (dif.Cross(dir)).Mag(); nRes++;
   }  
@@ -306,7 +306,7 @@ StvPoints showTrak;
   {
     const StvNode *node = *it;
     const StvHit  *hit  = node->GetHit();
-    showTrak += node->GetFP().P;
+    showTrak += node->GetFP();
     if (hit) showHits+=(StvHit*)hit;
   }
   StvDraw::Inst()->Trak(showTrak,kGlobalTrack);
@@ -412,8 +412,8 @@ StvNode *StvTrack::GetMaxKnnNode()
     const StvNodePars &par = node->GetFP();
     const double cosL = par.getCosL();
     const float *fx = hit->x();
-    var[1] = (fx[2]-par._z)*cosL;
-    var[0] = ((fx[0]-par._x)*(-par._sinCA)+(fx[1]-par._y)*(par._cosCA));
+    var[1] = (fx[2]-par[2])*cosL;
+    var[0] = ((fx[0]-par[0])*(-par.getSinP())+(fx[1]-par[1])*(par.getCosP()));
     knn.Add((ULong_t)node,var);
   }
   knn.GetWost((ULong_t*)&node);

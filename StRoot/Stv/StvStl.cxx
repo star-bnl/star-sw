@@ -1,4 +1,4 @@
-// $Id: StvStl.cxx,v 1.6 2015/12/12 01:58:25 perev Exp $
+// $Id: StvStl.cxx,v 1.6.4.1 2017/12/02 00:38:52 perev Exp $
 //
 //
 // Class StvStl some stl containers for Stv objects

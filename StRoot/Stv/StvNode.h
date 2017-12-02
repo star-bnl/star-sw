@@ -58,7 +58,7 @@ public:
   void GetMomentum(double p[3], double e[6]=0) const;
   /// Calculates and returns the Z mag field in the current point.
   /// units: PGeV = Hz*Radcurv_in_CM
-  double GetHz() 		const {return mFP[2]._hz;}
+  const double *GetMag() const {return mFP[2]._h;}
   double GetTime() 		const;
      int IsFitted(int dir)	const           { return (mHit && mXi2[dir]<1000);}
 
@@ -77,7 +77,7 @@ public:
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const StvFitDers &der, int dir);
    void SetXDive(const double xdive[3])		{memcpy(mXDive,xdive,sizeof(mXDive));}
-    int ResetELoss(const StvNodePars &pars,int dir);
+StvELossTrak* ResetELoss(const StvNodePars &pars,int dir);
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
 StDetectorId GetDetId() const;  

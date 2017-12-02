@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "TSystem.h"
 #include "TMath.h"
 #include "TMatrixD.h"
 #include "TVectorD.h"
@@ -12,15 +13,15 @@
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
+static const char *BOTOHO = gSystem->Getenv("BOTOHO");
 StvFitter *StvFitter::mgFitter=0;
 #define VDOT(a,b)   ( a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 #define DIST(a,b)   ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
-enum {kDeltaFactor = 21,kTooBigErrFactor = 100*100};
-
 static const double kXtraBigXi2 = 9e9;
+static const double kDeltaFactor = 1.5;
 
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
@@ -629,34 +630,19 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars = jnPars; mJnErrs = jnErrs;
-  mDelta  = mInPars->delta();  mDelta *= kDeltaFactor;
+  mDelta  = mInPars->delta();  
 
 }
 //______________________________________________________________________________
 void StvFitter::Prep()
 {
-  mDelta  = mInPars->delta();  mDelta *= kDeltaFactor;
+  mDelta  = mInPars->delta(); 
   mHit   = 0; mHitPlane = 0;
-  double myTan = mInPars->_tanl;
-  mCos2L = 1./(1+myTan*myTan);
-  mCosL = sqrt(mCos2L);
-  mSinL = myTan*mCosL;
-  mCosP = mInPars->_cosCA;
-  mSinP = mInPars->_sinCA;
-
   mTkPars = *mInPars;
 //		Track Frame
-  mDcaFrame[0][0] =  mCosL*mCosP;
-  mDcaFrame[0][1] =  mCosL*mSinP;
-  mDcaFrame[0][2] =  mSinL;
-
-  mDcaFrame[1][0] = -mSinP;
-  mDcaFrame[1][1] =  mCosP;
-  mDcaFrame[1][2] =  0;
-
-  mDcaFrame[2][0] = -mSinL*mCosP;
-  mDcaFrame[2][1] = -mSinL*mSinP;
-  mDcaFrame[2][2] =  mCosL;
+  const TkDir_t &tkd = mTkPars.getTkDir();
+  TCL::ucopy(tkd[0],mDcaFrame[1],6);
+  TCL::ucopy(tkd[2],mDcaFrame[0],3);
 
 }
 //______________________________________________________________________________
@@ -671,16 +657,19 @@ double StvFitter::Xi2(const StvHit *hit)
   mHitPlane = mHit->detector();
 
 //	restore old parameters for nhits>1  
-  mTkPars._x = mInPars->_x; mTkPars._y = mInPars->_y; mTkPars._z = mInPars->_z;
+  mTkPars = *mInPars;
 
 //		Hit position
   const float *hP = mHit->x();
 
 //		Track direction
-  double *tD = mDcaFrame[0];
+//double *tD = mTkPars._d;
 //		Start track position
-  double *tP = &mTkPars._x;
+  double *tP = mTkPars._x;
 
+  const TkDir_t &tkd = mTkPars.getTkDir();
+
+  
 
 //		Distance to DCA along track in xy
 //mDeltaL = DDOT(hP,tP,tD);  
@@ -689,11 +678,13 @@ double StvFitter::Xi2(const StvHit *hit)
     case 0: {
       mHitErrCalc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
       assert(mHitErrCalc);
-      mHitErrCalc->SetTrack(tD);
-//       const StHitPlane *hp = hit->detector(); 
-//       const Mtx33F_t &hD = hp->GetDir(hit->x());
-//       int ans = mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
+      mHitErrCalc->SetTkDir(tkd);
       int ans = mHitErrCalc->CalcDcaErrs(hit,mHitErrs);
+if(BOTOHO) {
+//BOTOHO
+printf("\tBOTOHO: DcaErrs = %g %g %g\n",mHitErrs[0],mHitErrs[1],mHitErrs[2]);
+}//BOTOHOend
+
       if (ans) {mXi2 = 1e11; return mXi2;}
       assert(mHitErrs[0]>=1e-8);
       assert(mHitErrs[1]*mHitErrs[1]<=mHitErrs[0]*mHitErrs[2]);
@@ -718,12 +709,9 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
 //		small account non zero distance to hit along track
-  double dS = mDcaT*mCosL;
-  mDcaP-= 0.5*mTkPars._curv*dS*dS;
 
-  double G[3] = {mInErrs->mHH,mInErrs->mHZ,mInErrs->mZZ};
+  double G[3]; TCL::ucopy(*mInErrs,G,3);
   if (mKase==0) {// Include Hit Errs
-//VP??    if (G[0]+G[2]>(mHitErrs[0]+mHitErrs[2])*kTooBigErrFactor) mFailed = kBigErrs;
     for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}
   }// end Include Hit Errs
 
@@ -735,8 +723,10 @@ double StvFitter::Xi2(const StvHit *hit)
 double StvFitter::Xi2()
 {
   mFailed = 0;
-  double inErr = mInErrs->mHH+mInErrs->mZZ;
-  double jnErr = mJnErrs->mHH+mJnErrs->mZZ;
+  
+
+  double inErr = (*mInErrs)[0]+(*mInErrs)[2];
+  double jnErr = (*mJnErrs)[0]+(*mJnErrs)[2];
   if (jnErr>inErr) {//Not good order
     const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
     const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
@@ -744,9 +734,9 @@ double StvFitter::Xi2()
 
   StvFitPars F   = (*mInPars-*mJnPars);
   double     Zero[5]= {0};
-  mXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
-                ,5,Zero       ,mJnErrs->Arr()
-		,mQQPars.Arr(),mQQErrs.Arr());
+  mXi2 = JoinTwo(5,(const double*)F      ,(const double*)(*mInErrs)
+                ,5,Zero                  ,(const double*)(*mJnErrs)
+		  ,(      double*)mQQPars,(      double*)  mQQErrs );
   mFailed = (mXi2>kXtraBigXi2); 
   return mXi2;
 }  
@@ -762,16 +752,19 @@ StvDebug::Break(nCall);
     case 1: mFailed = Jpdate();	break; 		//Track join
     case 2: mFailed = Vpdate();	break;		//Vertex+track
   }
+  *mOtErrs = mInErrs->mTkDir;
 
   double fak = 1.;
   for (int i=0;i<5;i++) {
-    double f = fabs(mQQPars[i])/mDelta[i];
+    double f = fabs(mQQPars[i])/(mDelta[i]*kDeltaFactor);
     if (fak<f) fak=f;
   }
   if (fak>1.) { mFailed = kBigVari; TCL::vscale(mQQPars,1./fak,mQQPars,5);}
 
   *mOtPars+= mQQPars;
-  mOtErrs->SetHz(mOtPars->_hz);
+
+  mOtErrs->Update(mOtPars->getTkDir());
+
   return mFailed;
 }
 //______________________________________________________________________________
@@ -787,12 +780,13 @@ int StvFitter::Hpdate()
   StvFitErrs myHitErrs(mHitErrs[0],mHitErrs[1],mHitErrs[2]);
   StvFitPars myTrkPars;
 
-  double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
-                        ,5,myTrkPars.Arr(),mTkErrs.Arr()
-		        ,  mQQPars.Arr(),mOtErrs->Arr());
+  double myXi2 = JoinTwo(2,myHitPars, myHitErrs
+                        ,5,myTrkPars, mTkErrs
+		        ,  mQQPars  ,*mOtErrs);
+
+  assert(fabs(mXi2-myXi2)<1e-2*mXi2);
   mFailed = (myXi2>kXtraBigXi2); 
   *mOtPars = mTkPars;
-
   return mFailed;
 }  
 //______________________________________________________________________________
@@ -806,12 +800,12 @@ static int nCall=0; nCall++;
   StvFitPars myHitPars(mDcaP, mDcaL );
   StvFitPars myTrkPars;
 
-  double myXi2 = JoinVtx(2,myHitPars.Arr(),mHitErrs
-                        ,5,myTrkPars.Arr(),mTkErrs.Arr()
-		        ,  mQQPars.Arr(),mOtErrs->Arr());
-  if (myXi2){}
+  double myXi2 = JoinVtx(2,myHitPars, mHitErrs
+                        ,5,myTrkPars, mTkErrs
+		          ,mQQPars  ,*mOtErrs);
+  assert(fabs(mXi2-myXi2)<1e-2*mXi2);
   *mOtPars = mTkPars;
-  for (int i=0;i<3;i++) {mOtErrs->Arr()[i]+=mHitErrs[i];}
+  for (int i=0;i<3;i++) {(*mOtErrs)[i]+=mHitErrs[i];}
   return 0;
 }  
 //______________________________________________________________________________

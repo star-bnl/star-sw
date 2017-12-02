@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.38 2016/12/09 21:21:41 perev Exp $
+ * $Id: StvNode.cxx,v 1.38.2.1 2017/12/02 00:38:52 perev Exp $
  *
  * /author Victor Perev
  */
@@ -52,7 +52,7 @@ static StvToolkit* kit=StvToolkit::Inst();
 //______________________________________________________________________________
 void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir)  
 {
-  assert(err.mHH>0);
+  assert(err[0]>0);
   mPP[dir]=par;mPE[dir]=err;
   mFP[dir]=par;mFE[dir]=err;
   mFP[  2]=par;mFE[  2]=err;
@@ -60,7 +60,7 @@ void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir)
 //______________________________________________________________________________
 void StvNode::SetFit(StvNodePars &par,StvFitErrs &err,int dir)  
 {
-  assert(err.mHH>0);
+  assert(err[0]>0);
   mFP[dir]=par;mFE[dir]=err;
   if (dir==2) return;
   mFP[2]=par;mFE[2]=err;
@@ -79,7 +79,7 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "X Y Z Pt Cu H R E Ep L Ps Tl P[ E[ Pa ";
+static const char *txt = "X Y Z Pt Cu H R E Ep L Ps Tl P[ E[ Pa Sg";
 static const char *hhh = "x y z r e ";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);myOpt+=" ";
@@ -89,6 +89,7 @@ static const char *hhh = "x y z r e ";
   double val,err[2];
   const StvNodePars &fp= mFP[dir];
   const StvFitErrs  &fe= mFE[dir];
+  assert(fe[0]<100. && fe[2]<100);
   int dkr = (dir<2)? dir:0;
   const StvFitErrs  &pe= mPE[dkr];
 //const StvNodePars &pp= mPP[dkr];
@@ -113,26 +114,27 @@ static const char *hhh = "x y z r e ";
     int idx =(txt[i+1]=='[') ? strtol(myopt+iopt+2,&e,10):0;
     
     {//Single letter request 
-           if (ts=="X ")        {val = fp._x;}
-      else if (ts=="Y ")        {val = fp._y;}
-      else if (ts=="Z ")        {val = fp._z;}
+           if (ts=="X ")        {val = fp[0];}
+      else if (ts=="Y ")        {val = fp[1];}
+      else if (ts=="Z ")        {val = fp[2];}
       else if (ts=="R ")        {val = fp.getRxy();}
-      else if (ts=="Ps")        {val = fp._psi ;}
-      else if (ts=="Tl")        {val = fp._tanl ;}
+      else if (ts=="Ps")        {val = fp.getPsi();}
+      else if (ts=="Tl")        {val = fp.getTanL();}
       else if (ts=="Pt")        {val = fp.getPt() ;}
-      else if (ts=="Cu")        {val = fp._curv;}
-      else if (ts=="E ")        {err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
-      else if (ts=="Ep")        {err[0] = sqrt(pe.mHH); err[1] = sqrt(pe.mZZ);}
+      else if (ts=="Cu")        {val = fp.getCurv();}
+      else if (ts=="E ")        {err[0] = sqrt(fe[0]); err[1] = sqrt(fe[2]);}
+      else if (ts=="Ep")        {err[0] = sqrt(pe[0]); err[1] = sqrt(pe[2]);}
       else if (ts=="L ")        {val = GetLen();}
-      else if (ts=="H ")        {val = fp._hz;}
+      else if (ts=="H ")        {val = fp._h[3];}
       else if (ts=="P[")        {val = fp[idx];}
       else if (ts=="E[")        {val = fe[idx];}
-      else if (ts=="Pa")        {cal = (mHitPlane)? mHitPlane->GetPath():"";}
+      else if (ts=="Pa")        {cal = (mHitPlane)? mHitPlane->GetPath():"None";}
+      else if (ts=="Sg")        {val = fp.getSign();}
       if (!cal && val==-999 && err[0]==-999) continue;
       printf("\t%s=",ts.Data());
       if (cal)                  { printf("%s ",cal);}
       if (fabs(val+999)>1e-6)   { printf("%g",val);}
-      if (err[0]>-999)          { printf("HH(%7.2g) ZZ(%7.2g)",err[0],err[1]);}
+      if (err[0]>-999)          { printf("UU(%7.2g) VV(%7.2g)",err[0],err[1]);}
     } 
   }//end for i
 
@@ -166,7 +168,7 @@ void StvNode::SetDer(const StvFitDers &der, int dir)
 {
    mDer[  dir]=der;
    mDer[1-dir]=der;
-   mDer[1-dir].Reverse();
+   mDer[1-dir].Backward();
 } 
 //________________________________________________________________________________
 void StvNode::SetHit(StvHit *hit)
@@ -185,16 +187,13 @@ void StvNode::SetMem(StvHit *hit[2],double xi2[2])
 void StvNode::UpdateDca()
 { 
   const StvNodePars &P = mFP[2];
-  double dL = -( P._x*P._cosCA+P._y*P._sinCA)
-              /(1+(-P._x*P._sinCA+P._y*P._cosCA)*P._curv);
-    if (fabs(dL)<1e-6) return;
-    THelixTrack hlx;            
-    mFP[2].get(&hlx);
-    mFE[2].Get(&hlx);
-    dL = hlx.Path(0.,0.);
-    hlx.Move(dL);
-    mFP[2].set(&hlx,mFP[2]._hz);
-    mFE[2].Set(&hlx,mFP[2]._hz);
+  double dL = -( P.pos()[0]*P.dir()[0]+P.pos()[1]*P.dir()[1]);
+  if (fabs(dL)<1e-6) return;
+  THelix3d hlx;            
+  mFP[2].get(&hlx);
+  mFE[2].Get(&hlx);
+  dL = hlx.Path(0.,0.);
+  hlx.Move(dL);
 }
 //________________________________________________________________________________
 int StvNode::Check(const char *tit, int dirs) const
@@ -213,18 +212,11 @@ int StvNode::Check(const char *tit, int dirs) const
   return nerr;
 }
 //________________________________________________________________________________
-int StvNode::ResetELoss(const StvNodePars &pars,int dir)
+StvELossTrak *StvNode::ResetELoss(const StvNodePars &pars,int dir)
 {
-static const double kSmaP      =0.01;
-static const double kBigP      =3     	,kSmaDiff=1e-2;
-
   if (!mELoss) return 0;
   double p = pars.getP(); 
-  if (p>kBigP) p=kBigP;
-  if (p<kSmaP) p=kSmaP;
-  double myP = mELoss->P();
-  if (fabs(myP-p)<kSmaDiff*p) 		return 0;
-  mELoss->Update(dir,p);	
-  return 0;
+  mELoss->Set(0,p);	
+  return mELoss;
 }
  

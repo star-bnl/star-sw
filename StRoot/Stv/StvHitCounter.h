@@ -17,7 +17,7 @@ void Clear()		{memset(mBeg,0,mMed-mBeg+1);}
 void SetCons(const StvKonst_st*);
 
 void AddHit();
-void AddNit();
+ int AddNit();
 int  Reject() const;
 int  Skip()   const;
 double Eff()  const;

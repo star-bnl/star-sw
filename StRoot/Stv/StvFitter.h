@@ -65,7 +65,7 @@ const StHitPlane  *mHitPlane;
       StvFitErrs   mQQErrs;
       StvFitPars   mDelta;	//typical deltas for parameters in current env
       double       mHitErrs[3];
-      double	   mCos2L,mCosL,mSinL,mCosP,mSinP,mXi2,mDeltaL;
+      double	   mXi2,mDeltaL;
       double       mDcaT,mDcaP,mDcaL;
       double       mDcaFrame[3][3];
       char         mEnd[1];

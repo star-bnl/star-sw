@@ -26,7 +26,6 @@ public:
   virtual  int Check(StvTrack *trak) 		{return 0;}
   virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
 		     const StvNodePars &parB,const StvFitErrs &errB) {return 0;}
-  virtual  int Clean(StvTrack *trak)=0;		
   virtual  THelixTrack* GetHelix() const 	{return     0;}
            int GetNDF()  const 			{return mNDF ;}     
         double GetDca3() const 			{return mDca3;}     

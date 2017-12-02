@@ -105,10 +105,10 @@ double StvTester::DeltaLen(const StvNode* curNode,const StvNode* preNode,double 
    const StvNodePars &parA = preNode->GetFP();
    const StvNodePars &parB = curNode->GetFP();
 
-   const double *x1 = &parA._x;
-   const double *x2 = &parB._x;
+   const double *x1 = parA.pos();
+   const double *x2 = parB.pos();
    double dlen = sqrt(pow(x1[0]-x2[0],2) + pow(x1[1]-x2[1],2));
-   double curv = 0.5*fabs(parA._curv+parB._curv);
+   double curv = 0.5*fabs(parA.getCurv()+parB.getCurv());
    double dsin = (0.5*dlen*curv);
    if (dsin>0.9) dsin=0.9;
    dlen = (dsin<0.01)? dlen*(1.+dsin*dsin/6) : 2*asin(dsin)/curv; 

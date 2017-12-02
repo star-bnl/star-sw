@@ -46,10 +46,9 @@ StvHitLoader 	*HitLoader()  const	{return mHitLoader ;}
 StvSeedFinders  *SeedFinders() const	{return mSeedFinders;}
 StvTrackFinder  *TrackFinder() const	{return mTrakFinder;}
 StvEventFiller  *EventFiller() const	{return mEventFiller;}
-double          GetHz(const double *x) const;
-double          GetHz(const float  *x) const;
-double          GetHA(const double *x) const;
-double          GetHA(const float  *x) const;
+const double    *GetMag(const double *x,double h[3]=0) const;
+double           GetHA(const double *x) const;
+double           GetHA(const float  *x) const;
 
 StvTracks      &GetTracks();
 void            Show() const;

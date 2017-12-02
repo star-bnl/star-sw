@@ -1,8 +1,11 @@
+#include "StarRoot/TRungeKutta.h"
 #include "StvDiver.h"
 #include "TSystem.h"
+#include "TCernLib.h"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TVirtualMCStack.h"
+#include "TGeant3.h"
 #include "TGeant3TGeo.h"
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
 #include "StarVMC/GeoTestMaker/StMCStack.h"
@@ -15,10 +18,20 @@
 #include "TRandom.h"
 #include "StvToolkit.h"
 
+// Debug only
+const StvNodePars *myInpPars = 0;//?????????????????????????????
+const StvFitErrs  *myInpErrs = 0;//?????????????????????????????
+const StvNodePars *myOutPars = 0;//?????????????????????????????
+const StvFitErrs  *myOutErrs = 0;//?????????????????????????????
+const StvFitDers  *myOutDeri = 0;//?????????????????????????????
+const TRungeKutta *myHelix   = 0;//?????????????????????????????
+
+
 enum DiverCons { kNearBeam=1 };
+int gCharge=0;
 
 
-
+//_____________________________________________________________________________
 class MyRandom : public TRandom 
 {
 public:
@@ -31,6 +44,25 @@ static const    int gMyPiPdg =9999;
 
 enum {kNMany = 10};
 StvDiver* StvDiver::mgInst = 0;
+
+//_____________________________________________________________________________
+class StvRKuttaMag: public TRKuttaMag
+{
+  public:
+    StvRKuttaMag (){;}
+    virtual ~StvRKuttaMag(){;}    
+    // methods
+    virtual void operator()(const double X[3], double B[3]) 
+    { 
+static const Double_t EC          = 2.99792458e-4;
+static       StarMagField *myFild =  StarMagField::Instance();
+       myFild->BField(X,B); 
+       B[0]*= EC; B[1]*= EC;B[2]*=EC;
+    };
+  protected:
+    // data members
+};  
+
 
 ClassImp(StvDiver)
 
@@ -53,8 +85,10 @@ StvDiver* StvDiver::Inst()
 //_____________________________________________________________________________
 int StvDiver::Init() 
 {
+  TRungeKutta::SetMAG(new StvRKuttaMag);
   gMyRandom = new MyRandom;
-  mHelix = new THelixTrack;
+  mHelix = new TRungeKutta;
+  mHelix->SetDerOn();
   mELoss = 0;
   StVMCApplication *app = (StVMCApplication*)TVirtualMCApplication::Instance();
   assert(app);
@@ -63,7 +97,6 @@ int StvDiver::Init()
   mSteps->Set(mHelix);
   mGen = (StvMCPrimaryGenerator*)app->GetPrimaryGenerator();
   mFld = (StvMCField*           )app->GetField();
-  mSteps->Set(mFld);
   
   TVirtualMC::GetMC()->DefineParticle( gMyPiPdg,"MyPi+",kPTHadron,gMyPiMass, 1,1e+10
 	                             ,"pType", 0., 0, 1, 0, 1, 1, 1, 0, 1, 1);
@@ -89,6 +122,11 @@ void StvDiver::Reset()
  mSteps->Reset();
 }
 //_____________________________________________________________________________
+void StvDiver::SetPrev(const char *prev) 
+{
+ mSteps->SetPrev(prev); 
+}
+//_____________________________________________________________________________
 void StvDiver::SetOpt(int opt)
 {
  mSteps->SetOpt(opt);
@@ -111,39 +149,40 @@ static StvToolkit* kit = StvToolkit::Inst();
   TRandom *myRandom = gRandom;
   gRandom = gMyRandom;
 
-  assert(fabs(mInpPars->_hz)<0.01);
+  myInpPars = mInpPars; //????????????????????????????????????????????????
+  myOutPars = mOutPars; //????????????????????????????????????????????????
+
   mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);
-  mELoss->Reset(mDir);
+  mELoss->Reset();
   int myExit = 0;
   mInpPars->get(mHelix);
+myHelix = mHelix;
+//  assert(!mInpErrs->Sigre());	//Test signature
   mInpErrs->Get(mHelix);
-  mHlxDeri[0][0]=0;		//Mark this matrix is not filled
+  mOutDeri->Clear();		//Unit matrix
   if (!mDir) mHelix->Backward();
   StvNodePars tmpPars;
   for (int iMany=0; iMany <kNMany;iMany++) {
     TVirtualMC::GetMC()->ProcessEvent();
     myExit = mSteps->GetExit();
     if (myExit & StvDiver::kDiveBreak) break;
-    double pos[4];
+
+    double pos[4],p[4];
     mSteps->CurrentPosition().GetXYZT(pos);
     auto &mom = mSteps->CurrentMomentum();
-    mOutPars->_x = pos[0];
-    mOutPars->_y = pos[1];
-    mOutPars->_z = pos[2];
-    mOutPars->_psi = mom.Phi();
-    mOutPars->_ptin = -mSteps->Charge()/mom.Pt();
-    mOutPars->_tanl = mom[2]*fabs(mOutPars->_ptin);
-    mOutPars->_hz   = mFld->GetHz(pos);
-    mOutPars->ready(); 
-    mOutErrs->Set(mHelix,mOutPars->_hz);
+    double pinv = -mSteps->Charge()/mom.P();
+    mom.GetXYZT(p);;
+    mOutPars->set(pos,p,pinv,kit->GetMag(pos));
+    mOutErrs->Set(mHelix);
     assert(mOutErrs->mPP>0);
-    mOutPars->convert(*mOutDeri,mHlxDeri);
     if (!mDir) {
       mOutPars->reverse();
-      mOutDeri->Reverse();
+      mOutDeri->Backward();
       mOutErrs->Backward();
-      assert(mOutErrs->mPP>0);
     }
+    assert(mOutErrs->mPP>0);
+//  assert(mOutErrs->Sigre()==0);
+    assert(!mOutPars->check("Dive:OutPars"));
     if (!(myExit&StvDiver::kDiveMany)) break;
     if ( (myExit&StvDiver::kDiveHits)) break;
     if ( (myExit&StvDiver::kDiveDca )) break;
@@ -153,11 +192,11 @@ static StvToolkit* kit = StvToolkit::Inst();
     double dcaStep = mHelix->Path(0.,0.);
     if (dcaStep>0 && dcaStep<bigStep) bigStep = 0.9*dcaStep;	//bigStep must be less dca
     mHelix->Move(bigStep);
-    tmpPars.set(mHelix,mOutPars->_hz);
+    tmpPars.set(mHelix);
     if (!mDir) tmpPars.reverse();				//account direction
     mGen->Set(&tmpPars,mDir);
   }
-  assert (myExit >1 || mInpPars->_ptin * mOutPars->_ptin >=0);
+  assert (myExit >1 || mInpPars->_pinv * mOutPars->_pinv >=0);
   gRandom = myRandom;
 
   return mSteps->GetExit();
@@ -170,6 +209,10 @@ void StvDiver::Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir)
   mDir    = idir;
   mSteps->SetDir(mDir);
   mGen->Set(inpar,idir);
+
+myInpPars = mInpPars;//?????????????????????????????
+myInpErrs = mInpErrs;//?????????????????????????????
+
 }
 //_____________________________________________________________________________
 void StvDiver::Set(StvNodePars *otpar,StvFitErrs *oterr,StvFitDers *deriv)
@@ -177,15 +220,49 @@ void StvDiver::Set(StvNodePars *otpar,StvFitErrs *oterr,StvFitDers *deriv)
   mOutPars = otpar;
   mOutErrs = oterr;
   mOutDeri = deriv;
-  mSteps->Set(&mHlxDeri);
+  mSteps->Set(mOutDeri);
+
+  myOutPars = mOutPars;//?????????????????????????????
+  myOutErrs = mOutErrs;//?????????????????????????????
+  myOutDeri = mOutDeri;//?????????????????????????????
 
 }
 //_____________________________________________________________________________
 double StvDiver::GetLength() const
 {
-  return TVirtualMC::GetMC()->TrackLength();
+//  return TVirtualMC::GetMC()->TrackLength();
+    return mSteps->GetLength();
 }
+//_____________________________________________________________________________
+int *StvDiver::G3Debug(int idebug,int idemin,int idemax,int itest)
+{
+  auto *tg3 = (TGeant3*)TVirtualMC::GetMC();
+  assert(tg3);
+  auto *cf = tg3->Gcflag();
+  auto *iswit = cf->iswit;
+  cf->idebug = idebug;
+  cf->idemin = idemin;
+  cf->idemax = idemax;
+  cf->itest = itest;
 
+  for (int i=0;i<10;i++) {iswit[i]=1;}
+
+//	kinematic debug
+  iswit[1 -1] = 1;
+  iswit[2 -1] = 2;
+  iswit[3 -1] = 1;
+  iswit[4 -1] = 1;
+  iswit[10-1] = 100;
+
+
+  return &cf->idebug;
+}
+//_____________________________________________________________________________
+int *StvDiver::G3Debug(int idebug)
+{
+  int idemin=0,idemax=99,itest=1;
+  return StvDiver::G3Debug(idebug,idemin,idemax,itest);
+}
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 ClassImp(StvMCInitApp)
@@ -233,7 +310,7 @@ int  StvMCInitApp::Fun()
   myMC->SetProcess("STRA", 0);
   myMC->SetCut("CUTGAM",	1e-3  );
   myMC->SetCut("CUTELE", 	1e-3  );
-  myMC->SetCut("CUTHAD", 	.001  );
+  myMC->SetCut("CUTHAD", 	.050  );
   myMC->SetCut("CUTNEU", 	.001  );
   myMC->SetCut("CUTMUO", 	.001  );
   myMC->SetCut("BCUTE", 	.001  );
@@ -253,6 +330,7 @@ ClassImp(StvMCStepping)
 StvMCStepping::StvMCStepping(const char *name,const char *tit)
   : StMCStepping(name,tit)
 {
+
   memset(fFist,0,fLast-fFist);
   fNTarget = 2;
   fNearBeam = kNearBeam;
@@ -266,8 +344,17 @@ StvMCStepping::~StvMCStepping()
 void StvMCStepping::Reset() 
 {
   memset(fFist,0,fMidl-fFist);
+  fCurrPath.Clear();		
+  fPrevPath.Clear();		
+  fNode = 0; fPrevNode = 0;
   fNTarget = 2;
+  StMCStepping::Reset();
 }		
+//_____________________________________________________________________________
+void StvMCStepping::SetPrev(const char *prev) 
+{
+  fPrevPath = prev;
+}
 //_____________________________________________________________________________
 void StvMCStepping::SetTarget(const double *target,int nTarget) 
 {
@@ -292,36 +379,22 @@ static       StTGeoProxy    *tgh      	= StTGeoProxy::Instance();
 //static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
 static       TVirtualMC     *virtualMC	= TVirtualMC::GetMC();
 static const TVirtualMCApplication *virtApp = TVirtualMCApplication::Instance();
-const double Rmax = virtApp->TrackingRmax();
-const double Zmax = virtApp->TrackingZmax();
+static const double Rmax = virtApp->TrackingRmax();
+static const double Zmax = virtApp->TrackingZmax();
 
 
   TString ts,modName;
   fKount++;
 
-double prevLen = fPrevLength;
   Case();
 
-static const char *myDebug = gSystem->Getenv("StvDEBUG");
-if (myDebug) {
-   double pos[4],b[3];
-   fCurrentPosition.GetXYZT(pos);
-   fField->FunDD(pos,b); 
-   StvDebug::Count("BZvsZ",pos[2],b[2]);
-   double Br = sqrt(b[0]*b[0]+b[1]*b[1]);
-   double Ba = sqrt(b[2]*b[2]+Br*Br);
-   StvDebug::Count("BRvsZ",pos[2],Br);
-   StvDebug::Count("BAvsZ",pos[2],Ba);
-   StvDebug::Count("TanVsZ",pos[2],Br/b[2]);
-   printf("Fun(%d): Z=%g Hz=%g Hr=%g path = %s\n"
-         ,fKount,pos[2],b[2],Br,gGeoManager->GetPath());
-}
+
+  fCurrentSign = 0;
+  for (int itg = 0; itg<fNTarget; itg++) {
+    fCurrentSign+=(fCurrentPosition[itg]-fTarget[itg])*fCurrentMomentum[itg];}
 
 
-
-int meAgain = (fNode==fPrevNode);
-if (meAgain) meAgain = (fPrevPath == tgh->GetPath());
-if (!meAgain) {fPrevNode = fNode; fPrevPath == tgh->GetPath();}
+  int meAgain = (!fPrevNode || fNode==fPrevNode)? (fPrevPath == tgh->GetPath()):0;
 
   if (fabs(fCurrentPosition.Z()) >Zmax) fKaze = kOUTtrack;
   if (fCurrentPosition.Pt()      >Rmax) fKaze = kOUTtrack;
@@ -336,23 +409,38 @@ if (!meAgain) {fPrevNode = fNode; fPrevPath == tgh->GetPath();}
 SWITCH: int myKaze = fKaze;
 //=========================
 
-// printf("KASE=%d Pos(%g %g %g) In %s\n",fKaze
-//       ,fCurrentPosition.X(),fCurrentPosition.Y(),fCurrentPosition.Z()
-//       ,gGeoManager->GetPath());
+if (IsDebug()) {
+printf("KASE=%d Pos(%g %g %g) Rxy = %g Phi=%d Lam=%d P=%g In %s\n",fKaze
+      ,fCurrentPosition.X(),fCurrentPosition.Y(),fCurrentPosition.Z(),fCurrentPosition.Perp()
+      ,int(fCurrentMomentum.Phi()*57),int(90-fCurrentMomentum.Theta()*57),fCurrentMomentum.P()
+      ,gGeoManager->GetPath());
+};
+  double pos[4],mom[4];
 
 
 
   switch (fKaze) {
     case kNEWtrack:;
+         fStartSign = fCurrentSign; 
+         fPrevSign  = 0;
+         fELossTrak->Reset(gMyPiMass,fCharge);
 
     case kENTERtrack:;{
-         double *X = &fCurrentPosition[0];
-         fHitted = ((!meAgain) && tgh->IsHitted(X));
-         if (fVolume==fHALLVolu) {fKaze=kENDEDtrack; break;}
-//          int outSide = hitShape->Outside(fCurrentPosition.Z(),fCurrentPosition.Perp());
-//          if (outSide && ((fOpt&(StvDiver::kTarg2D|StvDiver::kTarg3D))==0)) {fKaze=kENDEDtrack;  break;}
-         if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
-    break;
+ // begin volume. Define starting helix
+StvDebug::AddGra(fCurrentPosition[0],fCurrentPosition[1],fCurrentPosition[2],0);
+         fEnterLength   = fCurrentLength;
+         fEnterPosition = fCurrentPosition;
+         fEnterMomentum = fCurrentMomentum;
+         fTooManyLength = fCurrentLength;
+         fELossTrak->Set(fMaterial,fEnterMomentum.Vect().Mag());
+         fCurrentPosition.GetXYZT(pos);
+         fCurrentMomentum.GetXYZT(mom);
+         fHelix->Set(fCharge,pos,mom);
+         fHitted =  ((!meAgain) 
+	         &&  (fOpt & StvDiver::kTargHit)
+		 &&  (tgh->IsHitted(pos)));
+         if (fVolume==fHALLVolu) fKaze=kENDEDtrack;
+    break;}
        
     
     case kOUTtrack:
@@ -363,14 +451,21 @@ SWITCH: int myKaze = fKaze;
 
     case kCONTINUEtrack:
     case kIgnore:
-    break;
-
     case kEXITtrack:
     {
       fExit = EndVolume();
+      fPrevNode = fNode; fPrevPath = tgh->GetPath();
+      fCurrentPosition.GetXYZT(pos);
+      fCurrentMomentum.GetXYZT(mom);
+      fHelix->Set(fCharge,pos,mom);
+      
       if (!fExit) break;
-      fPrevPath ="";
-      if (fExit & StvDiver::kDiveHits) fPrevPath = tgh->GetPath();
+if (IsDebug()) {
+printf("EXIT=%d Pos(%g %g %g) Rxy = %g Phi=%d Lam=%d P=%g In %s\n",fExit
+      ,fCurrentPosition.X(),fCurrentPosition.Y(),fCurrentPosition.Z(),fCurrentPosition.Perp()
+      ,int(fCurrentMomentum.Phi()*57),int(90-fCurrentMomentum.Theta()*57),fCurrentMomentum.P()
+      ,gGeoManager->GetPath());
+}
       virtualMC->StopTrack();
     }
     break;
@@ -379,6 +474,7 @@ SWITCH: int myKaze = fKaze;
      Error("Case","Unexpected case %x == %s",fCase,fCasName.Data());
      assert(0);
   }
+  fPrevSign = fCurrentSign;
   if (fKaze!=myKaze) 			goto SWITCH;
   if (fExit) 				return 0;
   if (fKaze!=fLastKaze) {fLastNumb=0; fLastKaze=fKaze; return 0;}
@@ -390,112 +486,63 @@ SWITCH: int myKaze = fKaze;
   return 0;
 }		
 //_____________________________________________________________________________
-int StvMCStepping::BegVolume()
-{
-
-  fPrevMat = fMaterial;
-  fELossTrak->Set(fMaterial,fEnterMomentum.Vect().Mag());
-  fTooManyLength = fCurrentLength;
-  return (IsDca00(0));
-}
-//_____________________________________________________________________________
 int StvMCStepping::EndVolume()
 {
-  double pos[4]={0},mom[4]={0};
-
-  int isDca = (IsDca00(1));
-  if (isDca&StvDiver::kDiveBreak) 	return isDca;
-  fTooManyLength = fCurrentLength;
-  double dL = fCurrentLength-fEnterLength;
-  if (dL<1e-6) 				return isDca;
-  fCurrentPosition.GetXYZT(pos);
-  fCurrentMomentum.GetXYZT(mom);
-  double pt = fCurrentMomentum.Pt();
-  double nowRho = -fField->GetHz(pos)/pt*fCharge;
-  double wasRho =  fHelix->GetRho();
-
-assert(nowRho*wasRho> -1./(200*200));
-  fELossTrak->Add(dL);
-
-#if 0
-{//?????????????????
-  double E0 = fStartMomentum.E();		
-  double E1 = fCurrentMomentum.E();		
-  double dE = fabs(E1-E0);
-assert(dE<kStMCSMinEabs || dE/E0<kStMCSMinEref ||fabs(dE-fELossTrak->ELoss())<0.3*dE+kStMCSMinEabs);
-}//?????????????????
-#endif
-
-  if ((fOpt&StvDiver::kDoErrs)) { 	//Errors and derivatives requested
-    fHelix->Set((2*wasRho+nowRho)/3);
-    if (!(*fDeriv)[0][0]) {		//first time
-      fHelix->Move(dL,*fDeriv);
-    } else {
-      StvHlxDers T,R;
-      fHelix->Move(dL,T);
-      Multiply(R,T,*fDeriv);
-     *fDeriv=R;
-    }
-  }
-
-  fHelix->Set(pos,mom,nowRho);
-  return isDca;
-}
-//_____________________________________________________________________________
-int StvMCStepping::IsDca00(int begEnd)
-{
-  fCurrentSign = 0;
-  for (int itg = 0; itg<fNTarget; itg++) {
-    fCurrentSign+=(fCurrentPosition[itg]-fTarget[itg])*fCurrentMomentum[itg];}
-
-  switch (begEnd) {
-
-    case 0: { // begin volume
-      fStartSign = fCurrentSign; 
-      double pos[4],mom[4];
-      fCurrentPosition.GetXYZT(pos);
-      fCurrentMomentum.GetXYZT(mom);
-      double pt = fCurrentMomentum.Pt();
-      double rho = -fField->GetHz(pos)/pt*fCharge;
-      fHelix->Set(pos,mom,rho);
-      return 0;
-    }
-
-    case 1:;		// EndVolume 
-//  case 2:  		// Continue volume
-    { // end volume
-      double dL = fCurrentLength-fEnterLength;
-      if (dL<1e-6) 	return 0;		//Too small step, ignore it
-
-      int ans = 0;
-      if (IsOverstep()>0) 		{//Over step DCA00 point?
-        ans |= StvDiver::kDiveDca;
-	if ((fOpt&StvDiver::kTarg2D)==0) return ans;}	
-      else { fStartSign = fCurrentSign; }
-      
+  double deltaL = fCurrentLength-fPrevLength,dL = deltaL, dS=0;
   
-      if ((fOpt & StvDiver::kTargHit) && fHitted ) 	{//We are in hitted volume 
-        ans |= StvDiver::kDiveHits;
-      }	
-      if (!ans)	{return 0;}	//Nothing interesting(ni figa), get out
-//
-//		Now there are Hit or Dca cases
-      THelixTrack th(*fHelix);
-      double dcaL = (ans & StvDiver::kDiveDca)? th.Path(fTarget[0],fTarget[1]) : dL/2;
-      if (dcaL< 0) 	return StvDiver::kDiveBreak;		//Crazy case		
+  int kase = 0,ans = 0;
+  if (!fDir && ((fStartSign<0) && (fCurrentSign>0))) 	kase+=1;
+  if (fHitted) 						kase+=2;
+  switch(kase) {
 
-      double nowP = fCurrentMomentum.P();
-      double wasP = fEnterMomentum.P();
-      double medP = (wasP*(dL-dcaL)+nowP*dcaL)/dL;
-  //		Update end position
-      th.Move(dcaL);
-      fCurrentLength=fEnterLength+dcaL;
-      fCurrentPosition.SetVect(TVector3(th.Pos()));
-      fCurrentMomentum.SetVectM(TVector3(th.Dir())*medP,fMass);
-      return ans;
-    }
+    case 1: case 3:{
+            assert(fPrevSign*fStartSign>0);
+            dL = -fPrevSign*dL/(fCurrentSign-fPrevSign);	//First estim
+            fHelix->Move(dL);
+            (*fDeriv)*=*fHelix->Der();
+            dS = fHelix->Path(fTarget[0],fTarget[1],0);
+            dL +=dS;
+            assert(dL>=0 && dL <= deltaL);
+            
+            fHelix->Move();
+            (*fDeriv)*=*fHelix->Der();
+            ans |= StvDiver::kDiveDca ; break;
+            }
+
+    case 2: dL = (fCurrentLength-fEnterLength)/2 -(fPrevLength-fEnterLength);
+            ans |= StvDiver::kDiveHits; 
+
+    case 0:;
+            fHelix->Move(dL);
+            (*fDeriv)*=*fHelix->Der();
+            break;
+
+    default: assert(0);
+  }          
+  fELossTrak->Add(dL);
+  fHelix->Emx()->Add(fELossTrak->Theta2(),fELossTrak->Ort2(),fELossTrak->PinvErr2());
+  if (kase) {
+    double Ppre = fPrevMomentum.P();
+    double Pend = fCurrentMomentum.P();
+    double dPdL = (Pend-Ppre)/(fCurrentLength-fPrevLength);
+    double Pnow = Ppre + dPdL*dL;
+    double Pinv = (fHelix->Pinv()>0)? 1./Pnow:-1./Pnow;
+    fHelix->SetPinv(Pinv);
+    fCurrentLength=fPrevLength+dL;
+    fCurrentPosition.SetVect(TVector3(fHelix->Pos()));
+    fCurrentMomentum.SetVect(TVector3(fHelix->Mom()));
   }
-  return StvDiver::kDiveBreak;
+else {///?????????????????????????????????????????????????????????????
+    double dEgea = fCurrentMomentum.E()-fPrevMomentum.E();
+    double dElos = fELossTrak->ELoss();
+    if (fabs(dEgea)>1e-3) StvDebug::Count("ELos_of_Egea",dElos,dEgea);
+}
+
+
+
+
+StvDebug::AddGra(fCurrentPosition[0],fCurrentPosition[1],fCurrentPosition[2],0);
+  return ans;
 }
 //_____________________________________________________________________________
 int StvMCStepping::TooMany()
@@ -504,21 +551,6 @@ int StvMCStepping::TooMany()
   if (dL<1e-6) return 0;
   fEnterLength = fTooManyLength;
   return EndVolume();
-}
-//_____________________________________________________________________________
-int StvMCStepping::IsOverstep() const
-{
-///	return 0=no overstep
-///	       1=overstep of nearest to (0,0) point
-///	      -1=overstep of far     to (0,0) point
-
-  if ((fStartSign<0) == (fCurrentSign<0)) 	return 0;
-  const double *p = fHelix->Pos();
-  const double *d = fHelix->Dir();
-  double rho = fHelix->GetRho();
-  double cosl= fHelix->GetCos();
-  double dis = fabs((d[0]*p[1]-d[1]*p[0])*rho/cosl);
-  return (dis<1)? 1:-1;
 }
 
 //_____________________________________________________________________________
@@ -556,7 +588,7 @@ int  StvMCConstructGeometry::Fun()
   myMC->SetProcess("STRA", 0);
   myMC->SetCut("CUTGAM",	1e-3  );
   myMC->SetCut("CUTELE", 	1e-3  );
-  myMC->SetCut("CUTHAD", 	.001  );
+  myMC->SetCut("CUTHAD", 	.050  );
   myMC->SetCut("CUTNEU", 	.001  );
   myMC->SetCut("CUTMUO", 	.001  );
   myMC->SetCut("BCUTE", 	.001  );
@@ -604,14 +636,14 @@ static const double polx = 0.,poly = 0.,polz = 0.;
  // Position
 static  const double tof = 0.;
  
- double e  = sqrt(gMyPiMass*gMyPiMass + mPars->getP2());
+ double e  = sqrt(gMyPiMass*gMyPiMass + pow(mPars->getP(),2));
  // Add particle to stack 
  assert(e>1e-6);
  int ntr=1;
  TVirtualMC::GetMC()->GetStack()->Clear();
  TVirtualMC::GetMC()->GetStack()->PushTrack(
   	 toBeDone,-1,pdg,p[0],  p[1],  p[2],e 
-	,mPars->_x,  mPars->_y, mPars->_z,tof
+	,mPars->_x[0],  mPars->_x[1], mPars->_x[2],tof
         ,polx,poly,polz, kPPrimary, ntr, 1.,0);
  return 0;
 }
@@ -637,14 +669,20 @@ int StvMCField::FunDD(const double *x,double *b)
   } while(0);
   memcpy(mX,x,sizeof(mX));
   mFild->BField(mX,mH); 
-  if (fabs(mH[2]) < 1e-5) mH[2]=1e-5;
   if (b) memcpy(b,mH,sizeof(mH));
   return 0;
 }
 //_____________________________________________________________________________
+const double *StvMCField::GetMag(const double *x,double *b) 
+{     
+   FunDD(x,b);
+   return mH;   
+}
+#if 0
+//_____________________________________________________________________________
 double StvMCField::GetHz(const double *x) 
 {     
-static const Double_t EC = 2.99792458e-4;
    FunDD(x,0);
-   return mH[2]*EC;
+   return mH[2];
 }   
+#endif
