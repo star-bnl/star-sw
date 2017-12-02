@@ -52,6 +52,7 @@ class StPicoTrack : public TObject {
   Float_t dNdx() 	    const { return mDnDx;}                       
   Float_t dNdxError() 	    const { return mDnDxError;}
   Float_t dEdxPull(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
+  Float_t dEdxPullToF(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
   Float_t nSigmaPion()      const {return dEdxPull(0.13956995,1);}
   Float_t nSigmaKaon()      const {return dEdxPull(0.493677,1);}
   Float_t nSigmaProton()    const {return dEdxPull(0.93827231,1);}
