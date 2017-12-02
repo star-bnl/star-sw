@@ -985,7 +985,7 @@ c$$$    write (*,*) numbv
 
         """ Old numbering scheme """
         if ( pixl_alignment .eq. 0 ) then
-        write (*,*) 'old numbering'
+!       write (*,*) 'old numbering'
         sector = numbv(1)
         ladder = numbv(2)
         sensor = numbv(3)
