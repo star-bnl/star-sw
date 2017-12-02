@@ -1,4 +1,5 @@
 /* 
+   root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17134047_raw_3500050.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l401/data/scratch2/fisyak/MuDst/2016/125/17125034/st_physics_17125034_raw_1000002.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/Hijing/VMC.Real.TFG17j/hijingAuAu200_65_1000.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
 */
@@ -33,7 +34,9 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   MuDstMaker->SetStatus("StStMuMcTrack",1);
 #endif
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
-  
+  PicoDstMaker->SetGoodTriggers("");
+  PicoDstMaker->SetVxZrange(-70,70);
+  PicoDstMaker->SetVxRmax(2);
 #if 0  
   if(!creatingPhiWgt&&emcMode) {
     StEmcADCtoEMaker *adc2e = (StEmcADCtoEMaker *) chain->Maker("bemcA2E");
