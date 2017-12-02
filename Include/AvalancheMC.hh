@@ -251,17 +251,17 @@ class AvalancheMC {
                     const double bx, const double by, const double bz);
   /// Terminate a drift line close to the boundary.
   void TerminateLine(double x0, double y0, double z0, double t0,
-                     double& x, double& y, double& z, double& t); 
+                     double& x, double& y, double& z, double& t) const; 
   /// Compute multiplication and losses along the current drift line.
   bool ComputeGainLoss(const int type, int& status);
   /// Compute Townsend and attachment coefficients along the current drift line.
   bool ComputeAlphaEta(const int q, std::vector<double>& alphas,
-                       std::vector<double>& etas);
+                       std::vector<double>& etas) const;
   bool Equilibrate(std::vector<double>& alphas) const; 
   /// Compute the induced signal for the current drift line.
-  void ComputeSignal(const double q);
+  void ComputeSignal(const double q) const;
   /// Compute the induced charge for the current drift line.
-  void ComputeInducedCharge(const double q);
+  void ComputeInducedCharge(const double q) const;
 };
 }
 

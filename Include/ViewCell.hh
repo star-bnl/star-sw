@@ -58,21 +58,14 @@ class ViewCell {
 
   ComponentAnalyticField* m_component;
 
-  // 3d objects
-  std::vector<TGeoVolume*> m_volumes;
-  std::vector<TGeoMedium*> m_media;
-
-  TGeoManager* m_geoManager;
+  // 3D geometry.
+  TGeoManager* m_geo;
 
   bool Plot(const bool use3d);
   void PlotWire(const double x, const double y, const double d, 
                 const int type);
-  void PlotLine(const double x0, const double y0, 
-                const double x1, const double y1);
   void PlotTube(const double x0, const double y0, const double r, 
                 const int n);
-
-  void Reset();
 
 };
 }

@@ -768,41 +768,47 @@ bool AvalancheMC::AddDiffusion(const int type, Medium* medium,
 }
 
 void AvalancheMC::TerminateLine(double x0, double y0, double z0, double t0, 
-                                double& x, double& y, double& z, double& t) {
+                                double& x, double& y, double& z, double& t) const {
 
-  double dt = t - t0;
+  // Calculate the normalised direction vector.
   double dx = x - x0;
   double dy = y - y0;
   double dz = z - z0;
   double ds = sqrt(dx * dx + dy * dy + dz * dz);
   if (ds > 0.) {
-    dx /= ds;
-    dy /= ds;
-    dz /= ds;
+    const double scale = 1. / ds;
+    dx *= scale;
+    dy *= scale;
+    dz *= scale;
   }
+  x = x0;
+  y = y0;
+  z = z0;
+  double dt = t - t0;
+  t = t0;
   while (ds > BoundaryDistance) {
     dt *= 0.5;
     ds *= 0.5;
-    const double xm = x0 + dx * ds;
-    const double ym = y0 + dy * ds;
-    const double zm = z0 + dz * ds;
+    const double xm = x + dx * ds;
+    const double ym = y + dy * ds;
+    const double zm = z + dz * ds;
     // Check if the mid-point is inside the drift medium and the drift area.
     double ex = 0., ey = 0., ez = 0.;
     int status = 0;
     Medium* medium = NULL;
     m_sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status == 0 && m_sensor->IsInArea(xm, ym, zm)) {
-      x0 = xm;
-      y0 = ym;
-      z0 = zm;
-      t0 += dt;
+      x = xm;
+      y = ym;
+      z = zm;
+      t += dt;
     }
   }
   // Place the particle OUTSIDE the drift medium and/or the drift area.
-  x = x0 + dx * ds;
-  y = y0 + dy * ds;
-  z = z0 + dz * ds;
-  t = t0 + dt;
+  x += dx * ds;
+  y += dy * ds;
+  z += dz * ds;
+  t += dt;
 }
 
 bool AvalancheMC::ComputeGainLoss(const int type, int& status) {
@@ -829,8 +835,8 @@ bool AvalancheMC::ComputeGainLoss(const int type, int& status) {
     const double palpha = std::max(alphas[i] / nDiv, 0.);
     const double peta = std::max(etas[i] / nDiv, 0.);
     // Set initial number of electrons/ions.
-    int neInit = ne;
-    int niInit = ni;
+    const int neInit = ne;
+    const int niInit = ni;
     // Loop over the subdivisions.
     for (int j = 0; j < nDiv; ++j) {
       if (ne > 100) {
@@ -902,7 +908,7 @@ bool AvalancheMC::ComputeGainLoss(const int type, int& status) {
 }
 
 bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
-                                  std::vector<double>& etas) {
+                                  std::vector<double>& etas) const {
   // Locations and weights for 6-point Gaussian integration
   const double tg[6] = {-0.932469514203152028, -0.661209386466264514,
                         -0.238619186083196909,  0.238619186083196909,
@@ -917,27 +923,27 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
   if (nPoints < 2) return true;
   // Loop over the drift line.
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
+    const DriftPoint& p0 = m_drift[i];
+    const DriftPoint& p1 = m_drift[i + 1];
     // Compute the step length.
-    const double delx = m_drift[i + 1].x - m_drift[i].x;
-    const double dely = m_drift[i + 1].y - m_drift[i].y;
-    const double delz = m_drift[i + 1].z - m_drift[i].z;
+    const double delx = p1.x - p0.x;
+    const double dely = p1.y - p0.y;
+    const double delz = p1.z - p0.z;
     const double del = sqrt(delx * delx + dely * dely + delz * delz);
     // Integrate drift velocity and Townsend and attachment coefficients.
     double vdx = 0.;
     double vdy = 0.;
     double vdz = 0.;
-    alphas[i] = 0.;
-    etas[i] = 0.;
     for (unsigned int j = 0; j < 6; ++j) {
-      const double x = m_drift[i].x + 0.5 * (1. + tg[j]) * delx;
-      const double y = m_drift[i].y + 0.5 * (1. + tg[j]) * dely;
-      const double z = m_drift[i].z + 0.5 * (1. + tg[j]) * delz;
+      const double x = p0.x + 0.5 * (1. + tg[j]) * delx;
+      const double y = p0.y + 0.5 * (1. + tg[j]) * dely;
+      const double z = p0.z + 0.5 * (1. + tg[j]) * delz;
       // Get the electric field.
       double ex = 0., ey = 0., ez = 0.;
       Medium* medium = NULL;
       int status = 0;
       m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
-      // Make sure that we are in a drift medium.
+      // Make sure we are in a drift medium.
       if (status != 0) {
         // Check if this point is the last but one.
         if (i < nPoints - 2) {
@@ -1025,17 +1031,15 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
   if (!m_useEquilibration) return true;
   if (!Equilibrate(alphas)) {
     if (m_debug) {
-      std::cerr << m_className << "::ComputeAlphaEta:\n"
-                << "    Unable to even out alpha steps.\n"
-                << "    Calculation is probably inaccurate.\n";
+      std::cerr << m_className << "::ComputeAlphaEta:\n    Unable to even out "
+                << "alpha steps. Calculation is probably inaccurate.\n";
     }
     return false;
   }
   if (!Equilibrate(etas)) {
     if (m_debug) {
-      std::cerr << m_className << "::ComputeAlphaEta:\n"
-                << "    Unable to even out alpha steps.\n"
-                << "    Calculation is probably inaccurate.\n";
+      std::cerr << m_className << "::ComputeAlphaEta:\n    Unable to even out "
+                << "eta steps. Calculation is probably inaccurate.\n";
     }
     return false;
   }
@@ -1048,6 +1052,7 @@ bool AvalancheMC::Equilibrate(std::vector<double>& alphas) const {
   const unsigned int nPoints = alphas.size();
   // Try to alpha-equilibrate the returning parts.
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
+    // Skip non-negative points.
     if (alphas[i] >= 0.) continue;
     // Targets for subtracting
     double sub1 = -0.5 * alphas[i];
@@ -1088,6 +1093,7 @@ bool AvalancheMC::Equilibrate(std::vector<double>& alphas) const {
     if (try1 && try2) {
       done = true;
     } else if (try1) {
+      // Try earlier points again.
       sub1 = -alphas[i];
       for (unsigned int j = 0; j < i - 1; ++j) {
         if (alphas[i - j] > sub1) {
@@ -1103,7 +1109,7 @@ bool AvalancheMC::Equilibrate(std::vector<double>& alphas) const {
         }
       }
     } else if (try2) {
-      // Try upper side again.
+      // Try later points again.
       sub2 = -alphas[i];
       for (unsigned int j = 0; j < nPoints - i - 1; ++j) {
         if (alphas[i + j] > sub2) {
@@ -1126,28 +1132,31 @@ bool AvalancheMC::Equilibrate(std::vector<double>& alphas) const {
 
 }
 
-void AvalancheMC::ComputeSignal(const double q) {
+void AvalancheMC::ComputeSignal(const double q) const {
 
   const unsigned int nPoints = m_drift.size();
   if (nPoints < 2) return;
   for (unsigned int i = 0; i < nPoints - 1; ++i) {
-    const double dt = m_drift[i + 1].t - m_drift[i].t;
-    const double dx = m_drift[i + 1].x - m_drift[i].x;
-    const double dy = m_drift[i + 1].y - m_drift[i].y;
-    const double dz = m_drift[i + 1].z - m_drift[i].z;
-    const double x =  m_drift[i].x + 0.5 * dx;
-    const double y =  m_drift[i].y + 0.5 * dy;
-    const double z =  m_drift[i].z + 0.5 * dz;
+    const DriftPoint& p0 = m_drift[i];
+    const DriftPoint& p1 = m_drift[i + 1];
+    const double dt = p1.t - p0.t;
+    const double dx = p1.x - p0.x;
+    const double dy = p1.y - p0.y;
+    const double dz = p1.z - p0.z;
+    const double x =  p0.x + 0.5 * dx;
+    const double y =  p0.y + 0.5 * dy;
+    const double z =  p0.z + 0.5 * dz;
     const double s = 1. / dt;
-    m_sensor->AddSignal(q, m_drift[i].t, dt, x, y, z,
+    m_sensor->AddSignal(q, p0.t, dt, x, y, z,
                         dx * s, dy * s, dz * s);
   }
 }
 
-void AvalancheMC::ComputeInducedCharge(const double q) {
+void AvalancheMC::ComputeInducedCharge(const double q) const {
 
   if (m_drift.size() < 2) return;
-  m_sensor->AddInducedCharge(q, m_drift[0].x, m_drift[0].y, m_drift[0].z,
-                             m_drift.back().x, m_drift.back().y, m_drift.back().z);
+  const DriftPoint& p0 = m_drift.front();
+  const DriftPoint& p1 = m_drift.back();
+  m_sensor->AddInducedCharge(q, p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
 }
 }
