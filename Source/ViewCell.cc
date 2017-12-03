@@ -155,10 +155,10 @@ bool ViewCell::Plot(const bool use3d) {
       m_geo = new TGeoManager("ViewCellGeoManager", m_label.c_str());
       TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.); 
       TGeoMaterial* matMetal = new TGeoMaterial("Metal", 63.546, 29., 8.92);
-      TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 1, matVacuum);
-      TGeoMedium* medMetal = new TGeoMedium("Metal", 2, matMetal);
+      TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 0, matVacuum);
+      TGeoMedium* medMetal = new TGeoMedium("Metal", 1, matMetal);
       m_geo->AddMaterial(matVacuum);
-      m_geo->AddMaterial(matMetal);
+      m_geo->AddMaterial(medMetal->GetMaterial());
       TGeoVolume* world = m_geo->MakeBox("World", medVacuum,
                                          1.05 * dx, 1.05 * dy, 1.05 * dz);
       m_geo->SetTopVolume(world);
@@ -211,7 +211,7 @@ bool ViewCell::Plot(const bool use3d) {
                                              std::min(0.5 * lw, dz));
           switch (type) {
             case 0:
-              wire->SetLineColor(kBlue);
+              wire->SetLineColor(kGray + 2);
               break;
             case 1:
               wire->SetLineColor(kRed + 2);
@@ -245,10 +245,11 @@ bool ViewCell::Plot(const bool use3d) {
       const double x = xp + nx * sx;
       if (x < x0 || x > x1) continue;
       if (use3d) {
-        const double width = 0.01;
+        const double width = std::min(0.01 * dx, 0.01 * dy);
         TGeoVolume* plane = m_geo->MakeBox("PlaneX", m_geo->GetMedium("Metal"),
                                            width, dy, dz);
-        plane->SetLineColor(kGreen + 2);
+        plane->SetLineColor(kGreen - 5);
+        plane->SetTransparency(50);
         m_geo->GetTopVolume()->AddNode(plane, 1, 
                                        new TGeoTranslation(x, 0., 0.));
       } else {
@@ -268,10 +269,11 @@ bool ViewCell::Plot(const bool use3d) {
       const double y = yp + ny * sy;
       if (y < y0 || y > y1) continue;
       if (use3d) {
-        const double width = 0.01;
+        const double width = std::min(0.01 * dx, 0.01 * dy);
         TGeoVolume* plane = m_geo->MakeBox("PlaneY", m_geo->GetMedium("Metal"),
                                            dx, width, dz);
-        plane->SetLineColor(kGreen + 2);
+        plane->SetLineColor(kGreen - 5);
+        plane->SetTransparency(50);
         m_geo->GetTopVolume()->AddNode(plane, 1, 
                                        new TGeoTranslation(0., y, 0.));
       } else {

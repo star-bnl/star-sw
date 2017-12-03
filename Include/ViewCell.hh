@@ -15,13 +15,14 @@ class ComponentAnalyticField;
 class ViewCell {
 
  public:
-  // Constructor
+  /// Constructor
   ViewCell();
-  // Destructor
+  /// Destructor
   ~ViewCell();
 
+  /// Set the canvas on which to draw the cell geometry.
   void SetCanvas(TCanvas* c);
-
+  /// Set the component for which to draw the cell geometry.
   void SetComponent(ComponentAnalyticField* comp);
 
   // Set area to be plotted
@@ -29,14 +30,19 @@ class ViewCell {
                const double xmax, const double ymax, const double zmax);
   void SetArea();
 
+  /// Make a two-dimensional drawing of the cell geometry.
   void Plot2d();
+  /// Make a three-dimensional drawing of the cell geometry (using TGeo).
   void Plot3d();
 
-  void EnableDebugging() { m_debug = true; }
-  void DisableDebugging() { m_debug = false; }
+  /// Switch on/off debugging output.
+  void EnableDebugging(const bool on = true) { m_debug = on; }
+  void DisableDebugging() { EnableDebugging(false); }
 
-  void EnableWireMarkers() { m_useWireMarker = true; }
-  void DisableWireMarkers() { m_useWireMarker = false; }
+  /// Visualize wirers using markers or as a circle with the actual wire radius.
+  /// The default is markers.
+  void EnableWireMarkers(const bool on = true) { m_useWireMarker = on; }
+  void DisableWireMarkers() { EnableWireMarkers(false); }
 
  private:
   std::string m_className;
@@ -64,8 +70,7 @@ class ViewCell {
   bool Plot(const bool use3d);
   void PlotWire(const double x, const double y, const double d, 
                 const int type);
-  void PlotTube(const double x0, const double y0, const double r, 
-                const int n);
+  void PlotTube(const double x0, const double y0, const double r, const int n);
 
 };
 }
