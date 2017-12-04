@@ -220,8 +220,11 @@ p5                        =      2.28523   +/-   0.279332
 p6                        =     -1.43567   +/-   0.678682    
 p7                        =    -0.558613   +/-   0.664332    
 p8                        =     0.608146   +/-   0.232324    
+12/04/17
+0.0116721,-0.106367, 0.224163,  1.12377,-0.176388,  -13.855,  27.2605, -13.9522, -1.64127
 */
-    ToFCor[1][1] = new TF1("dNdxCorKaon","pol8",-0.30,1.1); ToFCor[0][1]->SetParameters(-0.0324453,   0.104644,   0.232821,  -0.205617,  -0.942393,    2.28523,   -1.43567,  -0.558613,   0.608146);
+    //    ToFCor[1][1] = new TF1("dNdxCorKaon","pol8",-0.30,1.1); ToFCor[0][1]->SetParameters(-0.0324453,   0.104644,   0.232821,  -0.205617,  -0.942393,    2.28523,   -1.43567,  -0.558613,   0.608146);
+    ToFCor[1][1] = new TF1("dNdxCorKaon","pol8",-0.30,1.1); ToFCor[0][1]->SetParameters(0.0116721,-0.106367, 0.224163,  1.12377,-0.176388,  -13.855,  27.2605, -13.9522, -1.64127);
 /*
 Proton:
 p0                        =   -0.0216107   +/-   4.06732e-05 
@@ -236,20 +239,24 @@ p8                        =      5.20165   +/-   0.161309
 */    
     ToFCor[1][2] = new TF1("dNdxCorProt","pol8",-0.65,0.9); ToFCor[1][2]->SetParameters(-0.0216107,  0.095628,  0.221496, -0.281845,  -1.81734,   3.55535,   1.78527,   -8.3076,  5.20165);
   }
-  Int_t hyp = 2; // proton
+  Int_t hyp = -1; 
+  if (mass < 1.0) hyp = 2; 
   if (mass < 0.5) hyp = 1;
   if (mass < 0.2) hyp = 0;
+  if (mass < 0.1) hyp = -1; // no ocrrection for electron
   Double_t bgL10 = TMath::Log10(betagamma);
-  if (! fit) { // I70
+  if ( fit <= 1) { // I70
     dedx_measured = 1e-6*dEdx();
     dedx_resolution = dEdxError();
     dedx_predicted = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bgL10));
-    dedx_predicted *= TMath::Exp(-ToFCor[0][hyp]->Eval(bgL10));
+    if (hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
+    dedx_predicted *= TMath::Exp(ToFCor[0][hyp]->Eval(bgL10));
   } else {     // dNdx
     dedx_measured = dNdx();
     dedx_resolution = dNdxError();
     dedx_predicted = StdEdxModel::instance()->dNdx(betagamma,charge);
-    dedx_predicted *= TMath::Exp(-ToFCor[1][hyp]->Eval(bgL10));
+    if (hyp >= 0 && bgL10 > ToFCor[0][hyp]->GetXmin() &&  bgL10 < ToFCor[0][hyp]->GetXmax())
+    dedx_predicted *= TMath::Exp(ToFCor[1][hyp]->Eval(bgL10));
   }
   if (dedx_resolution <= 0) return z;
   z = TMath::Log(dedx_measured/dedx_predicted)/dedx_resolution;
