@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.9 2017/05/02 19:35:06 perev Exp $
+// $Id: StTGeoProxy.h,v 1.9.2.1 2017/12/04 19:58:34 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -68,7 +68,7 @@ enum E_VoluInfo {
       kMODULE      = BIT(16),   // The volume is a module,with ID like TPCE,SVTT
       kActive      = BIT(17),   // The volume is active
       kHitted      = BIT(18),   // The volume has hits under it
-      kHitPlane    = BIT(19)};  // The volume is a Hit plane
+      kHitPlane    = BIT(19)};  // The volume has the Hit planes
 public:
 enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
 
@@ -89,6 +89,7 @@ const  TGeoVolume* GetVolu()    const;
 const char *GetName() const;
 StActorFunctor *GetActiveFunctor() 	{return fActiveFunctor  ;}
 virtual int Kind()              const   {return kVoluInfo	;}
+virtual StHitPlane *GetHitPlane (const TString&) const {return 0;}
        void AddSens() 			{fNSens++;		;}
         int GetSens() 			{return fNSens;		;}
 
@@ -110,8 +111,8 @@ virtual ~StHitPlaneInfo();
 void  operator=(const StVoluInfo& ext){*((StVoluInfo*)this)=ext;}
       int Kind() const          	{return kHitPlaneInfo;}
       int Axis() const          	{return fAxi;}
-const Mtx33F_t &GetDir() const   	{return fDir;}
-const float   *GetOrg() const   	{return fOrg;}
+//const Mtx33F_t &GetDir() const   	{return fDir;}
+//const float   *GetOrg() const   	{return fOrg;}
       StHitPlane *MakeHitPlane(const StTGeoIter &it,StActorFunctor *act=0);
       StHitPlane *GetHitPlane (const TString &path) const;
       StHitPlane *RemHitPlane (const TString &path);
@@ -124,6 +125,7 @@ StDetectorId fDetId;
 int   fAxi;
 float fOrg[3];
 float fDir[3][3];
+
 StHitPlanePathMap fHitPlanePathMap;
 ClassDef(StHitPlaneInfo,0) //
 };
@@ -154,8 +156,8 @@ int   GetNHits() const;
 float GetLayer() const 		{ return fNex;}
 void  SetLayer(); 	
 const StMultiKeyMap *GetHitMap() const {return fHitMap;}
-void        SetPath(const char *path) { fPath=path;  }
-const char *GetPath() const           { return fPath;}
+void        SetPath(const char *path) { SetName(path); }
+const char *GetPath() const           { return GetName();}
 protected:
 char  fBeg[1];
 StDetectorId fDetId;
@@ -164,7 +166,6 @@ float fDir[3][3];
 float fNex;		//distance to next layer
 TNamed *fHitErrCalc;
 StMultiKeyMap *fHitMap;
-const char *fPath;
 char  fEnd[1];
 
 ClassDef(StHitPlane,0) //
@@ -300,7 +301,7 @@ StVoidArr     *GetAllHits()          const {return fAllHits        ;}
 
 StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
 StHitPlaneInfo* IsHitPlane(const TGeoNode   *node) const;
-StHitPlane    * GetCurrentHitPlane ();
+StHitPlane    * GetCurrentHitPlane();
 
              int  MayHitPlane     (const TGeoVolume *volu) const;
   StHitPlaneInfo *MakeHitPlaneInfo(const StTGeoIter &iter);

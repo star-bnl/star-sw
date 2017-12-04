@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.5 2014/04/14 16:24:06 perev Exp $
+// $Id: StMCStepping.h,v 1.5.6.1 2017/12/04 19:58:33 perev Exp $
 //
 //
 // Class StMCStepping
@@ -60,8 +60,11 @@ class StMCStepping : public GCall
          StMCStepping(const char *name="",const char *tit="");
 virtual ~StMCStepping(){}    
     // methods
-virtual int  Fun();
-void  SetDir(int dir) 				{fDir=dir; }
+virtual void  Reset();
+virtual  int  Fun();
+void  SetDir(int dir) 				{fDir=dir     ;}
+void  SetDebug(int dbLev) 			{fDebug=dbLev ;}
+ int  IsDebug() const 				{return fDebug;}
 const TLorentzVector &CurrentPosition() const 	{return fCurrentPosition;}
 const TLorentzVector &CurrentMomentum() const 	{return fCurrentMomentum;}
               double  CurrentLength()   const   {return fCurrentLength  ;}
@@ -97,11 +100,15 @@ void RecovEloss();
    int    fDir;
    int    fSteps;
    TGeoNode   *fNode;
+   TGeoNode   *fPrevNode;
    TGeoVolume *fVolume;
+   TGeoVolume *fPrevVolume;
    TGeoMedium *fMedium;
+   TGeoMedium *fPrevMedium;
    TGeoMaterial *fMaterial;
+   TGeoMaterial *fPrevMaterial;
    char   fEnd[1];
-   
+   int    fDebug;
    TLorentzVector fStartPosition;
    TLorentzVector fStartMomentum;
    TLorentzVector fEnterPosition;
