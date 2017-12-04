@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.10 2014/08/20 02:31:58 perev Exp $
+// $Id: StMCStepping.cxx,v 1.10.6.1 2017/12/04 19:58:59 perev Exp $
 //
 //
 // Class StMCStepping
@@ -67,34 +67,35 @@ public:
 float fLen,fP,fEdep;
 };
 
-static std::vector<MyAux> gAux;
-
 //_____________________________________________________________________________
 StMCStepping::StMCStepping(const char *name,const char *tit)
   : GCall(name,tit)
 {
   memset(fBeg,0,fEnd-fBeg+1);	
+  fDebug = 0;
   fKazePrev = -1;
   myMC = 0;
   fDir = 1;
 }   
 //_____________________________________________________________________________
+void StMCStepping::Reset()
+{
+  memset(fBeg,0,fEnd-fBeg+1);	
+  fKazePrev = -1;
+  fStartPosition*=0.;
+  fStartMomentum*=0.;
+  fEnterPosition*=0.;
+  fEnterMomentum*=0.;
+  fCurrentPosition*=0.;
+  fCurrentMomentum*=0.;
+  fPrevPosition*=0.;
+  fPrevMomentum*=0.;
+}
+//_____________________________________________________________________________
 void StMCStepping::Print(const Option_t*) const
 {
   double lenTot = 0,eTot=0;
-  for (int i=0;i<(int)gAux.size();i++) {
-    MyAux &M = gAux[i];
-    eTot+=M.fEdep;
-    double T = sqrt(M.fP*M.fP+fMass*fMass)-fMass;
-    T = (fDir)? T+M.fEdep: T-M.fEdep;
-    printf("%6.3f eTot=%g T=%g dL=%g dE=%g dEdX=%g\n"
-          ,lenTot,eTot,T,M.fLen,M.fEdep,M.fEdep/(M.fLen+1e-11));
-    lenTot += M.fLen;
-  }
   printf("   totLen=%g totE=%g\n",lenTot,eTot);
-  
-
-
 }		
 //_____________________________________________________________________________
 TString StMCStepping::CaseAsString(int kase)
@@ -127,9 +128,13 @@ void StMCStepping::Case()
 {
 static int nCall = 0; nCall++;
   fSteps++;
+  fPrevNode = fNode;
   fNode = gGeoManager->GetCurrentNode();
+  fPrevVolume = fVolume;
   fVolume = fNode->GetVolume();
+  fPrevMedium =fMedium;
   fMedium = fVolume->GetMedium();
+  fPrevMaterial = fMaterial;
   fMaterial = fMedium->GetMaterial();
   fX0 = fMaterial->GetRadLen();
   myMC = gMC;
@@ -155,13 +160,13 @@ static int nCall = 0; nCall++;
   int kaze = fKaze;
 //  if(fKazePrev==fKaze && fKaze !=kCONTINUEtrack) fKaze= kIgnore;
   fKazePrev=kaze;
-//vp  fCasName = CaseAsString(fCase);
-//vp  fKazName = KazeAsString(fKaze);
-
+  fPrevPosition = fCurrentPosition;
   myMC->TrackPosition(fCurrentPosition);
+  fPrevMomentum = fCurrentMomentum;
   myMC->TrackMomentum(fCurrentMomentum);
-  assert(fCurrentMomentum[3]>1e-6);
+  fPrevLength   = fCurrentLength;
   fCurrentLength = myMC->TrackLength();
+  assert(fCurrentMomentum[3]>1e-6);
   fCharge = myMC->TrackCharge();
   fMass   = myMC->TrackMass();
   fEtot   = myMC->Etot();
@@ -173,7 +178,6 @@ static int nCall = 0; nCall++;
       fTrackNumber++; 
       fStartPosition = fCurrentPosition;
       fStartMomentum = fCurrentMomentum;
-      gAux.clear();
     case kENTERtrack:;
       {
       fEnterPosition = fCurrentPosition;
@@ -203,9 +207,6 @@ static int nCall = 0; nCall++;
      Error("Case","Unexpected case %d == %s",fKaze,fCasName.Data());
      assert(0);
   }
-  fPrevLength   = fCurrentLength;
-  fPrevPosition = fCurrentPosition;
-  fPrevMomentum = fCurrentMomentum;
 }		
 //_____________________________________________________________________________
 int StMCStepping::Fun()
@@ -249,6 +250,7 @@ int StMCStepping::Fun()
   }
   return 0;
 }		
+#if 1
 //_____________________________________________________________________________
 void StMCStepping::RecovEloss()
 {
@@ -257,7 +259,6 @@ void StMCStepping::RecovEloss()
 
 
 static int nCall = 0; nCall++;
-static int debu = 0;
   enum {kX=0,kY,kZ,kDx,kDy,kDz,kP};
 
 static Gctrak_t *gGctrak=((TGeant3*)TVirtualMC::GetMC())->Gctrak();
@@ -275,62 +276,16 @@ static Float_t &gekin = gGctrak->gekin;
     assert(dL>=0);
     if (dL<kStMCSMinDist) 				return;
 
-    double cL0 = fPrevMomentum.CosTheta();		//cos(Lambda0)
-    double cL1 = fCurrentMomentum.CosTheta();		//cos(Lambda1)
-    double cL = 0.5*(cL0+cL1);				//cos(Lambda) average
-    double ang = fCurrentMomentum.DeltaPhi(fPrevMomentum);
-    double dLxy = dL*(cL0+cL1)*0.5;
-    double Rho = ang/dLxy;
     double dE = (fDir)? -fEdep:fEdep*2;
-    double dP = dE*getot/vect[kP];
-    double dRho = -Rho*dP/vect[kP];
-
-
-    double ang2=ang*ang;
-    double dH,dT,dA;
-    if (fabs(ang)<0.1) 		{//Small angle
-      dH = 1./3 ; dT = 1./4;}
-    else                    	{//Reasonable angle
-      double qqCos = ((cos(ang)-1)/ang2+1./2)/ang2; 	//~ 1/24
-      double qqSin = (sin(ang)/(ang)-1)/ang2;  		//~-1/6
-      dT = ((qqCos+qqSin)*2-qqCos*ang2+1./2);		//~ 1/4
-      dH = ((2*qqCos+qqSin)*ang2 -2*qqSin );            //~ 1/3
-    }
-    dH*= dRho*ang *dLxy/2;
-    dT*=-dRho*ang2*dLxy/2;
-    dA = dRho*ang/2;
-
-    vect[kX] += (vect[kDx]*dT -vect[kDy]*dH)/cL;
-    vect[kY] += (vect[kDy]*dT +vect[kDx]*dH)/cL;
-    float vDx = vect[kDx];
-    vect[kDx] += -vect[kDy]*dA;
-    vect[kDy] +=       vDx *dA;
-
-gAux.resize(gAux.size()+1);
-gAux.back().fLen=dL;
-gAux.back().fP=fCurrentMomentum.P();
-gAux.back().fEdep=fEdep;
-
     if (fDir) 		break; 		// if (Stv direction == Geant direction ) no need to update energy
 
     getot += dE; fEtot = getot;		// update energy
     gekin += dE;
-    if (debu) printf("dL = %g dE=%g gekin=%g\n",dL,dE,gGctrak->gekin);
-    ((TGeant3*)gMC)->Gekbin();
     vect[kP] = sqrt(gekin*(getot+fMass));
 
   } while(0);
   myMC->TrackPosition(fCurrentPosition);
   myMC->TrackMomentum(fCurrentMomentum);
-  gAux.back().fP=fCurrentMomentum.P();
+}
 
-///???????????????????????????????????
-    if (fEdep<kStMCSMinEabs) 				return;
-    if (fEdep<kStMCSMinEref*fCurrentMomentum.E()) 	return;
-  double E1 = fCurrentMomentum.E();
-  double E0 = fPrevMomentum.E();
-  double deltaE = E1-E0;
-  assert(fDir == (deltaE<0));
-  assert(fabs(fEdep-fabs(deltaE))<kStMCSMinEabs+0.01*fEdep);
-///???????????????????????????????????
-}  
+#endif

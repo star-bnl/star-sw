@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.14 2017/05/02 19:36:28 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.14.2.1 2017/12/04 19:58:59 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -33,13 +33,12 @@
 
 int StTGeoProxy::StTGeoProxy::fgKount[3] = {0};
 
-
 enum {kMaxVolId = 1000000};
 
 //_____________________________________________________________________________
 int GetVoluId(const TGeoVolume *vol) 
 {
-   return vol->GetNumber()+kMaxVolId*vol->GetUniqueID();
+   return vol->GetNumber();
 }
 
 class myTVector3 : public TVector3 {
@@ -296,11 +295,9 @@ int StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af)
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
   if (af) af->SetDetId(did);
   int n = SetActive(modu,akt,af); 
-//???  if (n) return 0;
   Long64_t mask = 1; mask = mask<<(int)did;
   if (akt) { fActiveModu |=  mask; }
   else     { fActiveModu &= ~mask; }
-//???  return n;
   return 1;
 }
 //_____________________________________________________________________________
@@ -322,6 +319,10 @@ StVoluInfo *StTGeoProxy::IsActive (const TGeoVolume *volu) const
 //_____________________________________________________________________________
 StVoluInfo *StTGeoProxy::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act)
 {
+/// Set flag into StVoluInfo or StHitPlaneInfo.
+/// If NO such info and act ==0 return, else create info and fill
+
+
   int volId = ::GetVoluId(volu);
   StVoluInfo *inf = GetInfo(volId);
   if (!inf && !act) return 0;
@@ -329,9 +330,11 @@ StVoluInfo *StTGeoProxy::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo f
   if (inf) kase = inf->Kind();
   if (flg >= StVoluInfo::kHitPlane) kase += 10;
   switch (kase) {
-    case 0: 			   inf = new StVoluInfo(    volId); break;
-    case 10:  ; 
-    case StVoluInfo::kVoluInfo+10: inf = new StHitPlaneInfo(volId); break;
+    case 0: 		inf = new StVoluInfo(    volId); break;
+    case 1:  case 2:  	break;
+    case 10: case 11:	inf = new StHitPlaneInfo(volId); break;
+    case 12:		break;
+    default: assert(0 && "Wrong case");
   }
   SetInfo(inf); inf->SetBit(flg,act);
   return inf;
@@ -435,16 +438,18 @@ void StTGeoProxy::InitHitPlane(StActorFunctor *act)
   StDetectorId detId=kUnknownId;
   const TGeoVolume *vol=0;
   for (;(vol=*it);++it) {	//Loop to create StHitPlaneInfo for sensitive & active volumes
+
     if (!it.IsFirst()) {continue;}		//First visit only
     if (IsModule(vol)) {
       if (!IsActive(vol)) {it.Skip();continue;}
       detId = DetId(vol->GetName());
       if (!detId) 	continue;;
     }
-    vol->GetShape()->ComputeBBox();
 //		First visit
 //			try to make HitPlaneInfo  
     if(!IsSensitive(vol)) continue;
+    vol->GetShape()->ComputeBBox();
+
     StHitPlaneInfo *hpi = MakeHitPlaneInfo(it);
     hpi->SetDetId(detId);
   }
@@ -452,6 +457,7 @@ void StTGeoProxy::InitHitPlane(StActorFunctor *act)
   it.Reset();
   detId=kUnknownId;
   for (;(vol=*it);++it) {
+
     if (!it.IsFirst()) {continue;}		//First visit only
     if (IsModule(vol)) {
       if (!IsActive(vol)) {it.Skip();continue;}
@@ -459,6 +465,8 @@ void StTGeoProxy::InitHitPlane(StActorFunctor *act)
       if(!detId) 	continue;
     }
     if(!IsSensitive(vol)) continue;
+
+
     StHitPlaneInfo *hpi = IsHitPlane(vol);
     if (!hpi) 		continue;
     StHitPlane *hp = hpi->MakeHitPlane(it,act);
@@ -541,7 +549,10 @@ void StTGeoProxy::SetInfo(StVoluInfo* ext)
   int volId = ext->GetVoluId();
   StVoluInfo *&inf = (*fVoluInfoArr)[volId];
   if (inf==ext) return;
-  if (inf) delete inf;
+  if (inf) {
+    assert(strcmp(inf->GetName(),ext->GetName())==0);
+    delete inf;
+  }
   inf = ext;
 }    
 //_____________________________________________________________________________
@@ -1069,10 +1080,13 @@ const char *StTGeoProxy::ModName(StDetectorId detId)
 //_____________________________________________________________________________
 int StTGeoProxy::IsHitted(const double X[3]) const
 {
-  if (!IsSensitive()) return 0;
-  const TGeoVolume *mo = GetModu();
-  if (!IsActive(mo)) return 0;
-  StVoluInfo *vi = GetInfo(::GetVoluId(mo));
+  const TGeoVolume *vo = gGeoManager->GetCurrentVolume();
+  if (!IsSensitive(vo)) 			return 0;
+  StVoluInfo *vi = GetInfo(::GetVoluId(vo));
+  if (!vi)					return 0;
+  if (!vi->IsHitPlane())			return 0;
+  TString ts(gGeoManager->GetPath());
+  if (vi->GetHitPlane(ts)==0)			return 0;
   StActorFunctor *af = vi->GetActiveFunctor();
   if (!af) return 1;
   return (*af)(X);
@@ -1108,6 +1122,11 @@ static int nCall=0; nCall++;
   StHitTube  *ht=0;
   TString path(it.GetPath());
   hp= (StHitPlane *)GetHitPlane(path);
+
+  TString ts("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_2/TPSS_8/TPA1_40");
+  if (ts == path) {
+    StTGeoProxy::Break(1234);
+  }
   if (hp) return 0;
 
   float  gPos[3],lDir[3][3];
@@ -1130,8 +1149,16 @@ static int nCall=0; nCall++;
     StHitTube *ht = new StHitTube(path,::GetVoluId(volu)); hp = ht;
   }
 
-  fHitPlanePathMap[path] = hp;
+StHitPlane *&place = fHitPlanePathMap[path];
+assert(!place);	
+assert(path.Contains(hp->GetName()));
+  place = hp;
+//		Test it
   const char *pa = (*(fHitPlanePathMap.find(path))).first;
+assert(path == pa);
+
+
+
   hp->SetPath(pa);
   
   memcpy(hp->fOrg,gPos,sizeof(gPos));
@@ -1187,7 +1214,9 @@ StHitPlane *StHitPlaneInfo::GetHitPlane (const TString &path) const
 {
 static int nCall=0; nCall++;
    StHitPlanePathMapIter it = fHitPlanePathMap.find(path);
-   if (it ==  fHitPlanePathMap.end()) {return 0;}
+   if (it ==  fHitPlanePathMap.end()) {
+     return 0;
+   }
    return (*it).second;
 }
 //_____________________________________________________________________________
@@ -1209,8 +1238,10 @@ void StHitPlaneInfo::Print(const char* tit ) const
   int njk = fHitPlanePathMap.size();
   printf("HitPlanes %d:\n",njk);
   int j=0;
-  for (StHitPlanePathMapIter it =fHitPlanePathMap.begin();
-       it!=fHitPlanePathMap.end();++it) {printf(" %3d - %s\n",j,(*it).first.Data());j++;}
+  for (StHitPlanePathMapIter it =fHitPlanePathMap.begin();it!=fHitPlanePathMap.end();++it) 
+  {
+    printf(" %3d - %s[%p]\n",j,(*it).first.Data(),(*it).second);j++;
+  }
   printf("\n");
    
 }
