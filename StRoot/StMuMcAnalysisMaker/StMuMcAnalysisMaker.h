@@ -133,6 +133,7 @@ class StMuMcAnalysisMaker : public StMaker {
   StKFParticleInterface            *mStKFParticleInterface;            //!
   StKFParticlePerformanceInterface *mStKFParticlePerformanceInterface; //!
   Char_t                mEnd[1];        //!
+  static StMuMcAnalysisMaker *fgStMuMcAnalysisMaker; //!
  protected:
  public: 
   StMuMcAnalysisMaker(const char *name="MuMcAnalysis");
@@ -150,7 +151,7 @@ class StMuMcAnalysisMaker : public StMaker {
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();
   Bool_t         Check();
-  Int_t          Draw();
+  void           Draw(Option_t *option="");
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
   void           DrawEff(Double_t ymax=1.0, Double_t pTmin = -1, Int_t animate=0);
   void           DrawdEdx(Double_t lenMin=40);
@@ -169,6 +170,7 @@ class StMuMcAnalysisMaker : public StMaker {
   static void    EndTable();
   static void    SetGEANTLabels(TAxis *x);
   static void    PrintMem(const Char_t *opt = "");
+  static StMuMcAnalysisMaker *instance() {return fgStMuMcAnalysisMaker;}
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StMuMcAnalysisMaker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;

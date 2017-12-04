@@ -7,10 +7,10 @@ void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t 
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("lMuDst.C");
-  Char_t *file = 0; // gSystem->Which("./",output,kReadPermission);
+  Char_t *file = gSystem->Which("./",output,kReadPermission);
   if (! file) {
     lMuDst(-1,input,"RMuDst,MuMc,quiet,mysql,nodefault",output);
-    StMuMcAnalysisMaker *muMc = chain->Maker("MuMcAnalysis");
+    StMuMcAnalysisMaker *muMc = StMuMcAnalysisMaker::instance();
     if (muMc) {cout << "MuMcAnalysis has been found" << endl;}
     muMc->SetAttr("TrackPlots",1);
     //    muMc->SetAttr("VertexPlots",1);
@@ -18,13 +18,17 @@ void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t 
     chain->Init();
     chain->EventLoop(N);
   } else {
-    lMuDst(-1,"","RMuDst,MuMc,nodefault");
-    TFile *f = new TFile(file);
+    lMuDst(-1,"","RMuDst,MuMc,mysql,nodefault");
+    TFile *f = new TFile(output);
+    if (! f) return;
     //    StBFChain *chain = StMaker::GetTopChain();
     chain->SetTFile(f);
+    StMuMcAnalysisMaker *muMc = StMuMcAnalysisMaker::instance();
+    muMc->SetAttr("TrackPlots",1);
     chain->Init();
   }
   delete [] file;
+  StMuMcAnalysisMaker::instance()->Draw();
 #endif
   
 }
