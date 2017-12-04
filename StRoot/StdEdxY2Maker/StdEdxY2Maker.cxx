@@ -1669,6 +1669,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   if (! zdE) {
     zdE = StdEdxModel::instance()->zdEdx(); zdE->SetParameters(0.,30.,0.0,0.25,1.0);
     fMPV = StdEdxModel::instance()->zMPV();
+  }
 #else /* __HEED_MODEL__ */
   static TF1 *zFunc[2] = {0};
   //  static TF1 *fMPV[2] = {0};
@@ -1679,8 +1680,8 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
       zFunc[kTpcOuterInner] = StdEdxModel::instance()->zFunc(kTpcOuterInner); 
       //      fMPV[kTpcOuterInner] = StdEdxModel::instance()->zMPV(kTpcOuterInner);
     }
-#endif /* __HEED_MODEL__ */
   }
+#endif /* __HEED_MODEL__ */
 #ifndef __HEED_MODEL__
   //                                I     O
 #else /* __HEED_MODEL__ */
@@ -1689,41 +1690,58 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   //  static Double_t sigma_p[2] = { 0.03, 0.05};
   static Double_t sigma_p[2] = { 0.00, 0.00};
   f = 0.;
-  //  gin[0] = 0.;
-  Double_t dNdx = par[0];
+  gin[0] = 0.;
+  Double_t dNdx = par[0]; // Mu
   for (Int_t i = 0; i < NdEdx; i++) {
 #ifndef __HEED_MODEL__
-    Double_t n_P = dNdx*FdEdx[i].dxC;
-    Double_t n_PL10 = TMath::Log10(n_P);
+    Double_t dE = 1e6*FdEdx[i].F.dE; // GeV => keV
+#else /* __HEED_MODEL__ */
+    Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
+#endif /* __HEED_MODEL__ */
+    Double_t z  = TMath::Log(dE);
+    Double_t dX = FdEdx[i].dxC;
+    Double_t n_P = dNdx*dX;
+    Double_t n_PL = TMath::Log(n_P);
+    Double_t n_PL10 = n_PL/TMath::Log(10);
+    Double_t dn_P_Over_dMu = dX;
+    Double_t dn_PL_Over_dMu = dn_P_Over_dMu/n_P;
+    Double_t dN_PL10_Over_dMu = dn_PL_Over_dMu/TMath::Log(10);
+#ifndef __HEED_MODEL__
     zdE->SetParameter(1,n_P);
     Int_t io = 0; 
     if (FdEdx[i].row > 13) io = 1;
     Double_t Sigma = TMath::Sqrt(sigma_p[io]*sigma_p[io] + 1./n_P);
     zdE->SetParameter(3,Sigma);
-    Double_t dE = 1e6*FdEdx[i].F.dE; // GeV => keV
+    Double_t zMPV = fMPV->Eval(n_PL10,sigma_p[io]);
+    Double_t dzMPV_Over_dn_PL10 = StdEdxModel::instance()->zMPV1D()->Derivative(n_PL10,&sigma_p[io]);
+    Double_t d2zMPV_Over_d2n_PL10 = StdEdxModel::instance()->zMPV1D()->Derivative2(n_PL10,&sigma_p[io]);
+    Double_t xi   = z-zMPV;
+    Double_t dxi_Over_dzMPV = -1;
+    Double_t prob = zdE->Eval(xi);// zdE->Eval(0)
+    Double_t dprob_Over_dxi = zdE->Derivative(xi);
+    Double_t d2prob_Over_d2xi = zdE->Derivative2(xi);
+    Double_t dprob_Over_dMu = dprob_Over_dxi * dxi_Over_dzMPV * dzMPV_Over_dn_PL10 * dN_PL10_Over_dMu;
+    FdEdx[i].Prob = prob;
+    if (prob <= 0.0) {
+      f += 100;
+    } else             {
+      f -= 2*TMath::Log(prob);
+      Double_t df_Over_dMu = -2 * dprob_Over_dMu/prob;
+      gin[0] += df_Over_dMu;
+    }
 #else /* __HEED_MODEL__ */
-    Double_t dX = FdEdx[i].dxC;
-    Double_t n_P = dNdx*dX;
-    Double_t n_PL = TMath::Log(n_P);
     kTpcOuterInner = StdEdxModel::kTpcOuter;
     if (FdEdx[i].row < 13) kTpcOuterInner = StdEdxModel::kTpcInner;
     zFunc[kTpcOuterInner]->SetParameter(0,n_PL);
     Double_t Sigma = TMath::Sqrt(sigma_p[kTpcOuterInner]*sigma_p[kTpcOuterInner] + 1./n_P);
     zFunc[kTpcOuterInner]->SetParameter(1,Sigma);
-    Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
-#endif /* __HEED_MODEL__ */
-    Double_t z  = TMath::Log(dE);
-#ifndef __HEED_MODEL__
-    Double_t zMPV = fMPV->Eval(n_PL10,sigma_p[io]);
-    Double_t prob = zdE->Eval(z-zMPV);///zdE->Eval(0);
-#else /* __HEED_MODEL__ */
-    Double_t w  = z; // - n_PL;
+      Double_t w  = z; // - n_PL;
     //    Double_t zMPV = fMPV[kTpcOuterInner]->Eval(n_PL,sigma_p[kTpcOuterInner]);
     Double_t prob = zFunc[kTpcOuterInner]->Eval(w);///zFunc->Eval(0);
-#endif /* __HEED_MODEL__ */
     FdEdx[i].Prob = prob;
     if (prob <= 0.0) f += 100;
     else             f -= 2*TMath::Log(prob);
+#endif /* __HEED_MODEL__ */
   }
   if (_debug) {
     cout << " dNdx = " << dNdx << "\tf = " << f << endl;
@@ -1755,9 +1773,11 @@ void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
     m_Minuit->mnexcm("SET ERR", arglist ,1,ierflg);
     //    m_Minuit->mnparm(0, "LogdNdx", TMath::Log(dNdx), 0.5, 0.,0.,ierflg); //First Guess
     m_Minuit->DefineParameter(0, "dNdx", dNdx, 0.5, 0.1*dNdx, 10*dNdx);
-//     if (Debug() < 2)       arglist[0] = 1.;   // 1.
-//     else                   arglist[0] = 0.;   // Check gradient 
-//     m_Minuit->mnexcm("SET GRAD",arglist,1,ierflg);
+#ifndef __HEED_MODEL__
+    if (Debug() < 2)       arglist[0] = 1.;   // 1.
+    else                   arglist[0] = 0.;   // Check gradient 
+    m_Minuit->mnexcm("SET GRAD",arglist,1,ierflg);
+#endif /* __HEED_MODEL__ */
     arglist[0] = 500;
     arglist[1] = 1.;
     m_Minuit->mnexcm("MIGRAD", arglist ,2,ierflg);
