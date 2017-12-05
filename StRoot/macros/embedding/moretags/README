@@ -1,3 +1,8 @@
+This directory contains the code to generate the .moretags.root files for an embedding request.
+The normal .tags.root doesn't have enough information to do fine event cuts, like the VpdVz.
+The code here will scan the MuDst.root files (corresponding to the daq files) and write all 
+the relavant event info to .moretags.root
+
 1) generate the list of MuDst.root files
 find mudst_dir/ -name "*.MuDst.root" > a.list
 2) modify 'makeMuDstQA.C' according to the requested event information
@@ -9,3 +14,7 @@ find mudst_dir/ -name "*.MuDst.root" > a.list
 scancel -u ausername
 find sums/sched9EC71*csh > tasks.csh
 ./runterm.sh tasks.csh
+
+
+The output directory will contain all the st*.moretags.root files, which should be copied to
+the tags directory for embedding production.
