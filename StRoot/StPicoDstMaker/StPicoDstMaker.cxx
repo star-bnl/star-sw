@@ -321,6 +321,10 @@ Bool_t StPicoDstMaker::initMtd(Int_t const runnumber)
 
   LOG_INFO << "Retrieving mtdModuleToQTmap table from database ..." << endm;
   TDataSet* dataset = GetDataBase("Geometry/mtd/mtdModuleToQTmap");
+  if (! dataset) {
+    LOG_ERROR << "No mtdModuleToQTmap table found in database" << endm;
+    return kStErr;
+  }
   St_mtdModuleToQTmap* mtdModuleToQTmap = static_cast<St_mtdModuleToQTmap*>(dataset->Find("mtdModuleToQTmap"));
   if (!mtdModuleToQTmap)
   {
