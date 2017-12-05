@@ -1,0 +1,11 @@
+1) generate the list of MuDst.root files
+find mudst_dir/ -name "*.MuDst.root" > a.list
+2) modify 'makeMuDstQA.C' according to the requested event information
+3) run the first file for a test (and compile makeMuDst.C).
+./tryfirst.sh a.list SL15e_embed
+4) submit the full job
+./submit.sh a.list SL15e_embed
+5) IF the job has to wait due to low slurm priority, cancel the job, run it on the terminal
+scancel -u ausername
+find sums/sched9EC71*csh > tasks.csh
+./runterm.sh tasks.csh
