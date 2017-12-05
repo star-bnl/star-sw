@@ -1,5 +1,12 @@
 #!/bin/sh
 
+if [ $# -ne 2 ] ; then
+   echo ""
+   echo " Usage : $0 [MuDstList] [StarLibrary] "
+   echo ""
+   exit
+fi
+
 if [ ! -d sums ] ; then
    mkdir sums
 fi
