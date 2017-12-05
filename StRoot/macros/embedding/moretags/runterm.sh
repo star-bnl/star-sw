@@ -26,3 +26,9 @@ do
    ./$i 1> logs/${bn}.log 2> logs/${bn}.err &
 done
 
+#ramping down
+count=`ps aux | grep $tag |wc -l`
+while [ $count -gt 0 ]; do
+   sleep 1 
+   count=`ps aux | grep $tag |wc -l`
+done
