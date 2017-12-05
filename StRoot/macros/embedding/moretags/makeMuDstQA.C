@@ -174,9 +174,9 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 
 //Run11&12 vertex selection (no selection)
 ////////////////////////////////////////////////////////////////
-   StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
-   Float_t vzVpd=-999;
-   if (mBTofHeader) vzVpd = mBTofHeader->vpdVz();
+     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
+     Float_t vzVpd=-999;
+     if (mBTofHeader) vzVpd = mBTofHeader->vpdVz();
 ////////////////////////////////////////////////////////////////
 
      mRunId = mMuEvent->runNumber();
