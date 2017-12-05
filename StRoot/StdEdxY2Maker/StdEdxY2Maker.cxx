@@ -1714,12 +1714,12 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     zdE->SetParameter(3,Sigma);
     Double_t zMPV = fMPV->Eval(n_PL10,sigma_p[io]);
     Double_t dzMPV_Over_dn_PL10 = StdEdxModel::instance()->zMPV1D()->Derivative(n_PL10,&sigma_p[io]);
-    Double_t d2zMPV_Over_d2n_PL10 = StdEdxModel::instance()->zMPV1D()->Derivative2(n_PL10,&sigma_p[io]);
+    //    Double_t d2zMPV_Over_d2n_PL10 = StdEdxModel::instance()->zMPV1D()->Derivative2(n_PL10,&sigma_p[io]);
     Double_t xi   = z-zMPV;
     Double_t dxi_Over_dzMPV = -1;
     Double_t prob = zdE->Eval(xi);// zdE->Eval(0)
     Double_t dprob_Over_dxi = zdE->Derivative(xi);
-    Double_t d2prob_Over_d2xi = zdE->Derivative2(xi);
+    //    Double_t d2prob_Over_d2xi = zdE->Derivative2(xi);
     Double_t dprob_Over_dMu = dprob_Over_dxi * dxi_Over_dzMPV * dzMPV_Over_dn_PL10 * dN_PL10_Over_dMu;
     FdEdx[i].Prob = prob;
     if (prob <= 0.0) {
