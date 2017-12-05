@@ -4,6 +4,16 @@
 #%find sums/sched9EC71*csh > tasks.csh
 #%./runterm.sh tasks.csh
 
+
+if [ $# -ne 1 ] ; then
+   echo ""
+   echo " Usage : "
+   echo " %find sums/schedXXXXX*.csh > tasks.csh "
+   echo " %$0 tasks.csh " 
+   echo ""
+   exit
+fi
+
 echo $1
 
 for i in `cat $1`
