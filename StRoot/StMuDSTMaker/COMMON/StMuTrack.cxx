@@ -703,8 +703,6 @@ Double_t StMuTrack::dEdxPull(Double_t mass, UChar_t fit, Int_t charge) const {
   const StMuHelix &mh = muHelix();
   Double_t momentum  = mh.p().mag();
   Float_t betagamma = momentum*TMath::Abs(charge)/mass;
-  Double_t log2dX = probPidTraits().log2dX();
-  if (log2dX <= 0) log2dX = 1;
   Double_t dedx_measured, dedx_expected, dedx_resolution = -1;
   if (! fit) { // I70
     dedx_measured = probPidTraits().dEdxTruncated();
@@ -717,7 +715,7 @@ Double_t StMuTrack::dEdxPull(Double_t mass, UChar_t fit, Int_t charge) const {
     dedx_resolution = probPidTraits().dNdxErrorFit();
   }
   if (dedx_resolution <= 0) return z;
-  z = StdEdxPull::Eval(dedx_measured,dedx_expected,betagamma,fit,log2dX,charge);
+  z = StdEdxPull::Eval(dedx_measured,dedx_expected,betagamma,fit,charge);
   return z;
 }
 //________________________________________________________________________________

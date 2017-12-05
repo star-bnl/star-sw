@@ -17,6 +17,7 @@
 #include "KFParticle/StKFParticleInterface.h"
 #include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
 ClassImp(StMuMcAnalysisMaker);
+StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
 static TH3F *LdEdx[kTotalT][NHypTypes][kTotalSigns][NdEdxPiD] = {0};
@@ -103,6 +104,7 @@ static TString SubSection;
 //________________________________________________________________________________
 StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name), fProcessSignal(kFALSE) {
   memset(mBeg,0,mEnd-mBeg+1);
+  fgStMuMcAnalysisMaker = this;
 }
 //________________________________________________________________________________
 StMuMcAnalysisMaker::~StMuMcAnalysisMaker() {
@@ -208,6 +210,7 @@ Int_t StMuMcAnalysisMaker::Finish() {
     gFile = curFile;
     gDirectory = curDirectory;
   }
+  return kStOK;
 }
 //________________________________________________________________________________
 Int_t StMuMcAnalysisMaker::InitRun(Int_t runumber) {
@@ -306,261 +309,261 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   }
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[0]); assert(dirs[1]);
   dirs[1]->cd();
-//   for (Int_t gp = kGlobal; gp < kTotalT; gp++) { TODO
-//     const  PlotName_t plotNameMatch[kTotalTkTypes] = {
-//       {kMcTk,       "Mc",       "Mc tracks All"},                        
-//       {kMcTpcTk,    "Tpc",     Form("Mc tracks which have >= %i Mc Tpc Hits",StMuDst::MinNoTpcMcHits)},        
-//       {kRecoTk,     "Rec",     "Rc tracks matched with only Mc track"},                
-//       {kCloneTk,    "Clone",   "Mc tracks matched with > 1 Rc track (Clone)"},             
-//       {kGhostTk,    "Ghost",   "Rc tracks without Mc partner"},                  
-//       {kLostTk,     "Lost",    "Mc tracks without reconstructed one"},               
-//       {kMcToFTk,    "ToF",     Form("Mc tracks which have >= %i Mc Tpc and > 0 ToF Hits",StMuDst::MinNoTpcMcHits)},
-//       {kRecoToFTk,  "RecToF",   "Rc tracks matched with only Mc track with ToF"},
-//       {kGhostToFTk, "GhostToF", "Rc tracks without Mc partner with ToF"},
-//       {kLostToFTk,  "LostToF",  "Mc tracks without reconstructed one in ToF"},
-//       {kMcHftTk,    "Hft",      "Mc tracks with HFT"},
-//       {kRecoHftTk,  "RecHft",   "Rc tracks matched with only Mc track with HFT"},
-//       {kGhostHftTk, "GhostHft", "Rc tracks with HFT without Mc partner with HFT"},
-//       {kLostHftTk,  "LostHft",  "Mc tracks without reconstructed one in Hft"}
-//     };
-//     if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
-//       dirs[1]->mkdir(TitleTrType[gp]);
-//     }
-//     dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
-//     dirs[2]->cd();
-//     PrintMem(dirs[2]->GetPath());
-//     for (Int_t t = kMcTk; t < kTotalTkTypes; t++) {
-//       TrackMatchType type = plotNameMatch[t].k;
-//       if (! dirs[2]->GetDirectory(plotNameMatch[t].Name)) {
-//  dirs[2]->mkdir(plotNameMatch[t].Name);
-//       }
-//       dirs[3] = dirs[2]->GetDirectory(plotNameMatch[t].Name); assert(dirs[3]);
-//       dirs[3]->cd();
-//       const Char_t *ParticleType[2] = {"All","Pion"};
-//       for (Int_t particle = 0; particle < kPartypeT; particle++) {
-//  if ((type == kGhostTk || type == kGhostHftTk) && particle != kallP) continue;
-//  if (! dirs[3]->GetDirectory(ParticleType[particle])) {
-//    dirs[3]->mkdir(ParticleType[particle]);
-//  }
-//  dirs[4] = dirs[3]->GetDirectory(ParticleType[particle]); assert(dirs[4]);
-//  dirs[4]->cd();
-//  for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
-//    if (! dirs[4]->GetDirectory(TitleCharge[pm])) {
-//      dirs[4]->mkdir(TitleCharge[pm]);
-//    }
-//    dirs[5] = dirs[4]->GetDirectory(TitleCharge[pm]); assert(dirs[5]);
-//    dirs[5]->cd();
-//    const Char_t *VarSet[kVariables] = {"NoHits","EtapT"};
-//    for (Int_t x = 0; x < kVariables; x++) {
-//      if (x == 0 && type != kRecoTk) continue;
-//      if (! dirs[5]->GetDirectory(VarSet[x])) {
-//        dirs[5]->mkdir(VarSet[x]);
-//      }
-//      dirs[6] = dirs[5]->GetDirectory(VarSet[x]); assert(dirs[6]);
-//      dirs[6]->cd();
-//      //                /GlobalTracks/Mc/All/(+)/NoHits
-//      TString dir(Form("/%s/%s/%s/%s/%s/%s",TracksVertices[0],TitleTrType[gp],
-//           plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]));
-//      const VarName_t plotVar[kTotalQAll] = {         //no.fit                      no.bad,                               
-//        {"ChiSqXY",   "#chi^{2}_{Track}/NDF",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0.,  10., 0.000, 6.000, 1},
-//        {"ChiSqZ",    "#chi^{2}_{Vx} ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0., 100., 0.000,10.000,-1},
-//        {"dDcaXY",    "difference in Dca_{XY}",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
-//        {"dDcaZ",     "difference in Dca_{Z}",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
-//        {"dPsi",      "difference in  #Psi ",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
-//        {"dPti" ,     "difference in q/pT",            noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.020, 0.200, 1},
-//        {"dPtiR" ,    "difference in relative q/pT",   noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
-//        {"dTanL",     "difference in tan( #lambda )",  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
-//        {"deta",      "difference in  #eta",           noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.002, 0.025,-1},
-//        {"pDcaXY",    "pull in Dca_{XY}",              noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 0},
-//        {"pDcaZ",     "pull in Dca_{Z}",               noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.100,10.000, 0},
-//        {"pPsi",      "pull in  #Psi ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 1},
-//        {"pPti" ,     "pull in q/pT",                  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.250, 2.500, 1},
-//        {"pPtiR" ,    "pull in relative q/pT",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.230, 3.500, 1},
-//        {"pTanL",     "pull in tan( #lambda )",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.600, 6.000, 0},
-//        {"peta",      "pull for  #eta",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10.,-1.000,10.000,-1},
-//        {"Phi",       "#phi (degrees)",                      0,   0,           0,  0,   0,    0,  60,-180.,180.,-1.000,10.000, 1}
-//      };
-//      Int_t i1 = 0;
-//      if (type != kRecoTk) i1 = kTotalQA;
-//      for (Int_t i = i1; i < kTotalQAll; i++) {
-//        if (gp == kGlobal && plotVar[i].GlobalOnly <  0) continue;
-//        if (gp == kPrimary && plotVar[i].GlobalOnly == 0) continue;
-//        if (fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name)) continue;
-//        if (! x) {// No.Hits
-//    if (i == kTotalQA) continue;
-//    fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
-//                 Form("%s for %s %s %s %s %s", plotVar[i].Title,
-//                      TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
-//                 noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,
-//                 plotVar[i].nz, plotVar[i].zmin, plotVar[i].zmax);
-//    fHistsT[gp][type][particle][pm][x][i]->GetXaxis()->SetTitle("No. of Fit Points");
-//    fHistsT[gp][type][particle][pm][x][i]->GetYaxis()->SetTitle("No. of Bad Points");
-//    fHistsT[gp][type][particle][pm][x][i]->GetZaxis()->SetTitle(plotVar[i].Title);
-//    fHistsT[gp][type][particle][pm][x][i]->SetMarkerColor(pm+1); 
-//    fHistsT[gp][type][particle][pm][x][i]->SetLineColor(pm+1); 
-//    //    for (Int_t l = 1; l < 7; l++) cout << "/" << dirs[l]->GetName();
-//    //    cout << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
-//    //    cout << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() << endl;
-//        } else { // eta & pT
-//    if (i != kTotalQA) {
-//      TArrayD ZBins(plotVar[i].nz+1);
-//      Double_t *zBins = ZBins.GetArray();
-//      Double_t dz = (plotVar[i].zmax - plotVar[i].zmin)/plotVar[i].nz;
-//      for (Int_t j = 0; j <= plotVar[i].nz; j++) zBins[j] = plotVar[i].zmin + dz*j;
-//      fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
-//                   Form("%s for %s %s %s %s %s", plotVar[i].Title,
-//                      TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
-//                   neta, etaBins,
-//                   npT, ptBins,
-//                   plotVar[i].nz, zBins);
-//    } else {
-//      fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
-//                   Form("%s for %s %s %s %s %s", plotVar[i].Title,
-//                  TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
-//                   neta, etaBins,
-//                   npT, ptBins,
-//                   nphi, phiBins);
-//    }
-//    fHistsT[gp][type][particle][pm][x][i]->GetXaxis()->SetTitle("  #eta");
-//    fHistsT[gp][type][particle][pm][x][i]->GetYaxis()->SetTitle("pT/|q| (GeV/c)");
-//    
-//    fHistsT[gp][type][particle][pm][x][i]->GetZaxis()->SetTitle(plotVar[i].Title);
-//    fHistsT[gp][type][particle][pm][x][i]->SetMarkerColor(pm+1); 
-//    fHistsT[gp][type][particle][pm][x][i]->SetLineColor(pm+1); 
-//    //    for (Int_t l = 1; l < 7; l++) cout << "/" << dirs[l]->GetName();
-//    //    cout << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
-//    //    cout << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() << endl;
-//        }
-//        //    for (Int_t l = 1; l < 7; l++) cout << "/" << dirs[l]->GetName();
-//        //    cout << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
-//        //    cout << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() << endl;
-//        ofstream out;
-//        TString Out("Hist.list");
-//        if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
-//        else                              out.open(Out, ios::app);
-//        out << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
-//        out << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() 
-//      << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetDirectory()->GetPath() << endl;
-//        out.close();
-//      }
-//    }
-//  }
-//       }
-//     }
-//   }
+  for (Int_t gp = kGlobal; gp < kTotalT; gp++) {// TODO
+    const  PlotName_t plotNameMatch[kTotalTkTypes] = {
+      {kMcTk,       "Mc",       "Mc tracks All"},                        
+      {kMcTpcTk,    "Tpc",     Form("Mc tracks which have >= %i Mc Tpc Hits",StMuDst::MinNoTpcMcHits)},        
+      {kRecoTk,     "Rec",     "Rc tracks matched with only Mc track"},                
+      {kCloneTk,    "Clone",   "Mc tracks matched with > 1 Rc track (Clone)"},             
+      {kGhostTk,    "Ghost",   "Rc tracks without Mc partner"},                  
+      {kLostTk,     "Lost",    "Mc tracks without reconstructed one"},               
+      {kMcToFTk,    "ToF",     Form("Mc tracks which have >= %i Mc Tpc and > 0 ToF Hits",StMuDst::MinNoTpcMcHits)},
+      {kRecoToFTk,  "RecToF",   "Rc tracks matched with only Mc track with ToF"},
+      {kGhostToFTk, "GhostToF", "Rc tracks without Mc partner with ToF"},
+      {kLostToFTk,  "LostToF",  "Mc tracks without reconstructed one in ToF"},
+      {kMcHftTk,    "Hft",      "Mc tracks with HFT"},
+      {kRecoHftTk,  "RecHft",   "Rc tracks matched with only Mc track with HFT"},
+      {kGhostHftTk, "GhostHft", "Rc tracks with HFT without Mc partner with HFT"},
+      {kLostHftTk,  "LostHft",  "Mc tracks without reconstructed one in Hft"}
+    };
+    if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
+      dirs[1]->mkdir(TitleTrType[gp]);
+    }
+    dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
+    dirs[2]->cd();
+    PrintMem(dirs[2]->GetPath());
+    for (Int_t t = kMcTk; t < kTotalTkTypes; t++) {
+      TrackMatchType type = plotNameMatch[t].k;
+      if (! dirs[2]->GetDirectory(plotNameMatch[t].Name)) {
+ dirs[2]->mkdir(plotNameMatch[t].Name);
+      }
+      dirs[3] = dirs[2]->GetDirectory(plotNameMatch[t].Name); assert(dirs[3]);
+      dirs[3]->cd();
+      const Char_t *ParticleType[2] = {"All","Pion"};
+      for (Int_t particle = 0; particle < kPartypeT; particle++) {
+ if ((type == kGhostTk || type == kGhostHftTk) && particle != kallP) continue;
+ if (! dirs[3]->GetDirectory(ParticleType[particle])) {
+   dirs[3]->mkdir(ParticleType[particle]);
+ }
+ dirs[4] = dirs[3]->GetDirectory(ParticleType[particle]); assert(dirs[4]);
+ dirs[4]->cd();
+ for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
+   if (! dirs[4]->GetDirectory(TitleCharge[pm])) {
+     dirs[4]->mkdir(TitleCharge[pm]);
+   }
+   dirs[5] = dirs[4]->GetDirectory(TitleCharge[pm]); assert(dirs[5]);
+   dirs[5]->cd();
+   const Char_t *VarSet[kVariables] = {"NoHits","EtapT"};
+   for (Int_t x = 0; x < kVariables; x++) {
+     if (x == 0 && type != kRecoTk) continue;
+     if (! dirs[5]->GetDirectory(VarSet[x])) {
+       dirs[5]->mkdir(VarSet[x]);
+     }
+     dirs[6] = dirs[5]->GetDirectory(VarSet[x]); assert(dirs[6]);
+     dirs[6]->cd();
+     //                /GlobalTracks/Mc/All/(+)/NoHits
+     TString dir(Form("/%s/%s/%s/%s/%s/%s",TracksVertices[0],TitleTrType[gp],
+          plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]));
+     const VarName_t plotVar[kTotalQAll] = {         //no.fit                      no.bad,                               
+       {"ChiSqXY",   "#chi^{2}_{Track}/NDF",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0.,  10., 0.000, 6.000, 1},
+       {"ChiSqZ",    "#chi^{2}_{Vx} ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0., 100., 0.000,10.000,-1},
+       {"dDcaXY",    "difference in Dca_{XY}",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
+       {"dDcaZ",     "difference in Dca_{Z}",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
+       {"dPsi",      "difference in  #Psi ",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
+       {"dPti" ,     "difference in q/pT",            noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.020, 0.200, 1},
+       {"dPtiR" ,    "difference in relative q/pT",   noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
+       {"dTanL",     "difference in tan( #lambda )",  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
+       {"deta",      "difference in  #eta",           noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.002, 0.025,-1},
+       {"pDcaXY",    "pull in Dca_{XY}",              noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 0},
+       {"pDcaZ",     "pull in Dca_{Z}",               noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.100,10.000, 0},
+       {"pPsi",      "pull in  #Psi ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 1},
+       {"pPti" ,     "pull in q/pT",                  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.250, 2.500, 1},
+       {"pPtiR" ,    "pull in relative q/pT",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.230, 3.500, 1},
+       {"pTanL",     "pull in tan( #lambda )",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.600, 6.000, 0},
+       {"peta",      "pull for  #eta",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10.,-1.000,10.000,-1},
+       {"Phi",       "#phi (degrees)",                      0,   0,           0,  0,   0,    0,  60,-180.,180.,-1.000,10.000, 1}
+     };
+     Int_t i1 = 0;
+     if (type != kRecoTk) i1 = kTotalQA;
+     for (Int_t i = i1; i < kTotalQAll; i++) {
+       if (gp == kGlobal && plotVar[i].GlobalOnly <  0) continue;
+       if (gp == kPrimary && plotVar[i].GlobalOnly == 0) continue;
+       if ((fHistsT[gp][type][particle][pm][x][i] = (TH3F *) dirs[6]->Get(plotVar[i].Name))) continue;
+       if (! x) {// No.Hits
+   if (i == kTotalQA) continue;
+   fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
+                Form("%s for %s %s %s %s %s", plotVar[i].Title,
+                     TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
+                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,
+                plotVar[i].nz, plotVar[i].zmin, plotVar[i].zmax);
+   fHistsT[gp][type][particle][pm][x][i]->GetXaxis()->SetTitle("No. of Fit Points");
+   fHistsT[gp][type][particle][pm][x][i]->GetYaxis()->SetTitle("No. of Bad Points");
+   fHistsT[gp][type][particle][pm][x][i]->GetZaxis()->SetTitle(plotVar[i].Title);
+   fHistsT[gp][type][particle][pm][x][i]->SetMarkerColor(pm+1); 
+   fHistsT[gp][type][particle][pm][x][i]->SetLineColor(pm+1); 
+   //    for (Int_t l = 1; l < 7; l++) cout << "/" << dirs[l]->GetName();
+   //    cout << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
+   //    cout << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() << endl;
+       } else { // eta & pT
+   if (i != kTotalQA) {
+     TArrayD ZBins(plotVar[i].nz+1);
+     Double_t *zBins = ZBins.GetArray();
+     Double_t dz = (plotVar[i].zmax - plotVar[i].zmin)/plotVar[i].nz;
+     for (Int_t j = 0; j <= plotVar[i].nz; j++) zBins[j] = plotVar[i].zmin + dz*j;
+     fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
+                  Form("%s for %s %s %s %s %s", plotVar[i].Title,
+                     TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
+                  neta, etaBins,
+                  npT, ptBins,
+                  plotVar[i].nz, zBins);
+   } else {
+     fHistsT[gp][type][particle][pm][x][i] = new TH3F(plotVar[i].Name,
+                  Form("%s for %s %s %s %s %s", plotVar[i].Title,
+                 TitleTrType[gp],plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]),
+                  neta, etaBins,
+                  npT, ptBins,
+                  nphi, phiBins);
+   }
+   fHistsT[gp][type][particle][pm][x][i]->GetXaxis()->SetTitle("  #eta");
+   fHistsT[gp][type][particle][pm][x][i]->GetYaxis()->SetTitle("pT/|q| (GeV/c)");
+   
+   fHistsT[gp][type][particle][pm][x][i]->GetZaxis()->SetTitle(plotVar[i].Title);
+   fHistsT[gp][type][particle][pm][x][i]->SetMarkerColor(pm+1); 
+   fHistsT[gp][type][particle][pm][x][i]->SetLineColor(pm+1); 
+   //    for (Int_t l = 1; l < 7; l++) cout << "/" << dirs[l]->GetName();
+   //    cout << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
+   //    cout << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() << endl;
+       }
+       //    for (Int_t l = 1; l < 7; l++) cout << "/" << dirs[l]->GetName();
+       //    cout << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
+       //    cout << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() << endl;
+       ofstream out;
+       TString Out("Hist.list");
+       if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+       else                              out.open(Out, ios::app);
+       out << "\t" << "fHistsT[" << gp << "][" << type << "][" << particle << "][" << pm << "][" << x << "][" << i << "]";
+       out << " = " << fHistsT[gp][type][particle][pm][x][i]->GetName() << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetTitle() 
+     << "\t" << fHistsT[gp][type][particle][pm][x][i]->GetDirectory()->GetPath() << endl;
+       out.close();
+     }
+   }
+ }
+      }
+    }
+  }
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[0]); assert(dirs[1]);
   dirs[1]->cd(); 
   // PiD block
   // dE/dx and ToF block for matched global and  primary tracks
-//   for (Int_t gp = kGlobal; gp < kTotalT; gp++) {TODO
-//     if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
-//       dirs[1]->mkdir(TitleTrType[gp]);
-//     }
-//     dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
-//     dirs[2]->cd();
-//     PrintMem(dirs[2]->GetPath());
-//     for (Int_t pidType = 0; pidType < NoPiDs; pidType++) {// 
-//       if (! dirs[2]->GetDirectory(TitlePiDtype[pidType])) {
-//  dirs[2]->mkdir(TitlePiDtype[pidType]);
-//       }
-//       dirs[3] = dirs[2]->GetDirectory(TitlePiDtype[pidType]);
-//       dirs[3]->cd();
-//       for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
-//  if (! dirs[3]->GetDirectory(TitleCharge[pm])) {
-//    dirs[3]->mkdir(TitleCharge[pm]);
-//  }
-//  dirs[4] = dirs[3]->GetDirectory(TitleCharge[pm]); assert(dirs[4]);
-//  dirs[4]->cd();
-//  for (Int_t hyp = 0; hyp < NHypTypes; hyp++) {
-//    Int_t h = hyp;
-//    if (pm == kPositive) h += NHypTypes;
-//    if (! dirs[4]->GetDirectory(NamesF[h])) {
-//      dirs[4]->mkdir(NamesF[h]);
-//    }
-//    dirs[5] = dirs[4]->GetDirectory(NamesF[h]); assert(dirs[5]);
-//    dirs[5]->cd();
-//    if (pidType == 0) { // dE/dx
-//      const Char_t *dEdxTypes[NdEdxPiD] = {"I70","Fit","dNdx"};
-//      for (i = 0; i < NdEdxPiD; i++) {
-//        LdEdx[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(Form("Z%s",dEdxTypes[i]));
-//        if (LdEdx[gp][hyp][pm][i]) continue;
-//        LdEdx[gp][hyp][pm][i] = new TH3F(Form("Z%s",dEdxTypes[i]),
-//                 Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s %s",
-//                dEdxTypes[i],TitleTrType[gp],NamesF[h]),
-//                  50, 20, 220, 292,-1.6, 5.7, 200, -0.5, 0.5); 
-//        LdEdx[gp][hyp][pm][i]->GetXaxis()->SetTitle("TpcTrackLength (cm)");
-//        LdEdx[gp][hyp][pm][i]->GetYaxis()->SetTitle("log_{10} (#beta #gamma)");         
-//        LdEdx[gp][hyp][pm][i]->GetZaxis()->SetTitle(Form(" z_{%s}",dEdxTypes[i]));   
-//        LdEdx[gp][hyp][pm][i]->SetMarkerColor(pm+1);
-//        LdEdx[gp][hyp][pm][i]->SetLineColor(pm+1);
-//        TString Out("Hist.list");
-//        if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
-//        else                              out.open(Out, ios::app);
-//        out << "\t" << "LdEdx[" << gp << "][" << hyp << "][" << pm << "][" << i << "]";
-//        out << " = " << LdEdx[gp][hyp][pm][i]->GetName() << "\t" << LdEdx[gp][hyp][pm][i]->GetTitle() 
-//      << "\t" << LdEdx[gp][hyp][pm][i]->GetDirectory()->GetPath() << endl;
-//        out.close();
-//      }
-//    } else {// Tof
-//      const Char_t *ToFTypes[NToFPiD] = {"dM2","dBetaInv"};
-//      Int_t nz = 200;
-//      Double_t zmax =  0.7;
-//      Double_t zmin = -0.3;
-//      TArrayD ZBins(nz+1);
-//      Double_t *zBins = ZBins.GetArray();
-//      Double_t dz = (zmax - zmin)/nz;
-//      for (Int_t j = 0; j <= nz; j++) zBins[j] = zmin + dz*j;
-//      for (i = 0; i < NToFPiD; i++) {
-//        LToF[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(ToFTypes[i]);
-//        if (LToF[gp][hyp][pm][i]) continue;
-//        if (i == 0) { // dM2
-//    LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#Delta M^2 versus #eta and p for %s %s",
-//                 TitleTrType[gp],NamesF[h]),
-//            neta, etaBins,
-//            npT, ptBins,
-//            nz, zBins);
-//    LToF[gp][hyp][pm][i]->GetZaxis()->SetTitle("#Delta M^2"); 
-//        } else { // (1/beta^2 - 1/beta_exp^2)/beta^2
-//    LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#delta 1/#beta versus #eta and p for %s %s ",
-//                 TitleTrType[gp],NamesF[h]),
-//            neta, etaBins,
-//            npT, ptBins,
-//            nz, zBins);
-//        }
-//        LToF[gp][hyp][pm][i]->SetMarkerColor(pm+1);
-//        LToF[gp][hyp][pm][i]->SetLineColor(pm+1);
-//        LToF[gp][hyp][pm][i]->GetXaxis()->SetTitle("#eta");
-//        LToF[gp][hyp][pm][i]->GetYaxis()->SetTitle("p[GeV/c]");         
-//        LToF[gp][hyp][pm][i]->GetZaxis()->SetTitle(Form(" z_{%s}",ToFTypes[i]));   
-//        TString Out("Hist.list");
-//        if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
-//        else                              out.open(Out, ios::app);
-//        out << "\t" << "LToF[" << gp << "][" << hyp << "][" << pm << "][" << i << "]";
-//        out << " = " << LToF[gp][hyp][pm][i]->GetName() << "\t" << LToF[gp][hyp][pm][i]->GetTitle() 
-//      << "\t" << LToF[gp][hyp][pm][i]->GetDirectory()->GetPath() << endl;
-//        out.close();
-//      }
-//    }
-//  }
-//       }
-//     }
-//   }
-//   PlotName_t geant[4] = {
-//     {kNotDefined, "GiD",    "Geant ID for all MC tracks"},
-//     {kNotDefined, "GiDG",   Form("Geant ID for MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits)},
-//     {kNotDefined, "GiDPr", "Geant ID for all primary MC tracks"},
-//     {kNotDefined, "GiDPrG", Form("Geant ID for primary MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits)}
-//   };
-//   for (Int_t i = 0; i < 4; i++) {
-//     GiD[i] = (TH1F *)  dirs[1]->Get(geant[i].Name);
-//     if (! GiD[i]) {
-//       dirs[1]->cd();
-//       GiD[i] = new TH1F(geant[i].Name,geant[i].Title, 50,0.5,50.5); 
-//       GiD[i]->SetMarkerColor(i%2+1);
-//       GiD[i]->SetLineColor(i%2+1);
-//       SetGEANTLabels(GiD[i]->GetXaxis());
-//     }
-//   }
+  for (Int_t gp = kGlobal; gp < kTotalT; gp++) { // TODO
+    if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
+      dirs[1]->mkdir(TitleTrType[gp]);
+    }
+    dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
+    dirs[2]->cd();
+    PrintMem(dirs[2]->GetPath());
+    for (Int_t pidType = 0; pidType < NoPiDs; pidType++) {// 
+      if (! dirs[2]->GetDirectory(TitlePiDtype[pidType])) {
+ dirs[2]->mkdir(TitlePiDtype[pidType]);
+      }
+      dirs[3] = dirs[2]->GetDirectory(TitlePiDtype[pidType]);
+      dirs[3]->cd();
+      for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
+ if (! dirs[3]->GetDirectory(TitleCharge[pm])) {
+   dirs[3]->mkdir(TitleCharge[pm]);
+ }
+ dirs[4] = dirs[3]->GetDirectory(TitleCharge[pm]); assert(dirs[4]);
+ dirs[4]->cd();
+ for (Int_t hyp = 0; hyp < NHypTypes; hyp++) {
+   Int_t h = hyp;
+   if (pm == kPositive) h += NHypTypes;
+   if (! dirs[4]->GetDirectory(NamesF[h])) {
+     dirs[4]->mkdir(NamesF[h]);
+   }
+   dirs[5] = dirs[4]->GetDirectory(NamesF[h]); assert(dirs[5]);
+   dirs[5]->cd();
+   if (pidType == 0) { // dE/dx
+     const Char_t *dEdxTypes[NdEdxPiD] = {"I70","Fit","dNdx"};
+     for (i = 0; i < NdEdxPiD; i++) {
+       LdEdx[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(Form("Z%s",dEdxTypes[i]));
+       if (LdEdx[gp][hyp][pm][i]) continue;
+       LdEdx[gp][hyp][pm][i] = new TH3F(Form("Z%s",dEdxTypes[i]),
+                Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s %s",
+               dEdxTypes[i],TitleTrType[gp],NamesF[h]),
+                 50, 20, 220, 292,-1.6, 5.7, 200, -0.5, 0.5); 
+       LdEdx[gp][hyp][pm][i]->GetXaxis()->SetTitle("TpcTrackLength (cm)");
+       LdEdx[gp][hyp][pm][i]->GetYaxis()->SetTitle("log_{10} (#beta #gamma)");         
+       LdEdx[gp][hyp][pm][i]->GetZaxis()->SetTitle(Form(" z_{%s}",dEdxTypes[i]));   
+       LdEdx[gp][hyp][pm][i]->SetMarkerColor(pm+1);
+       LdEdx[gp][hyp][pm][i]->SetLineColor(pm+1);
+       TString Out("Hist.list");
+       if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+       else                              out.open(Out, ios::app);
+       out << "\t" << "LdEdx[" << gp << "][" << hyp << "][" << pm << "][" << i << "]";
+       out << " = " << LdEdx[gp][hyp][pm][i]->GetName() << "\t" << LdEdx[gp][hyp][pm][i]->GetTitle() 
+     << "\t" << LdEdx[gp][hyp][pm][i]->GetDirectory()->GetPath() << endl;
+       out.close();
+     }
+   } else {// Tof
+     const Char_t *ToFTypes[NToFPiD] = {"dM2","dBetaInv"};
+     Int_t nz = 200;
+     Double_t zmax =  0.7;
+     Double_t zmin = -0.3;
+     TArrayD ZBins(nz+1);
+     Double_t *zBins = ZBins.GetArray();
+     Double_t dz = (zmax - zmin)/nz;
+     for (Int_t j = 0; j <= nz; j++) zBins[j] = zmin + dz*j;
+     for (i = 0; i < NToFPiD; i++) {
+       LToF[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(ToFTypes[i]);
+       if (LToF[gp][hyp][pm][i]) continue;
+       if (i == 0) { // dM2
+   LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#Delta M^2 versus #eta and p for %s %s",
+                TitleTrType[gp],NamesF[h]),
+           neta, etaBins,
+           npT, ptBins,
+           nz, zBins);
+   LToF[gp][hyp][pm][i]->GetZaxis()->SetTitle("#Delta M^2"); 
+       } else { // (1/beta^2 - 1/beta_exp^2)/beta^2
+   LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#delta 1/#beta versus #eta and p for %s %s ",
+                TitleTrType[gp],NamesF[h]),
+           neta, etaBins,
+           npT, ptBins,
+           nz, zBins);
+       }
+       LToF[gp][hyp][pm][i]->SetMarkerColor(pm+1);
+       LToF[gp][hyp][pm][i]->SetLineColor(pm+1);
+       LToF[gp][hyp][pm][i]->GetXaxis()->SetTitle("#eta");
+       LToF[gp][hyp][pm][i]->GetYaxis()->SetTitle("p[GeV/c]");         
+       LToF[gp][hyp][pm][i]->GetZaxis()->SetTitle(Form(" z_{%s}",ToFTypes[i]));   
+       TString Out("Hist.list");
+       if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+       else                              out.open(Out, ios::app);
+       out << "\t" << "LToF[" << gp << "][" << hyp << "][" << pm << "][" << i << "]";
+       out << " = " << LToF[gp][hyp][pm][i]->GetName() << "\t" << LToF[gp][hyp][pm][i]->GetTitle() 
+     << "\t" << LToF[gp][hyp][pm][i]->GetDirectory()->GetPath() << endl;
+       out.close();
+     }
+   }
+ }
+      }
+    }
+  }
+  PlotName_t geant[4] = {
+    {kNotDefined, "GiD",    "Geant ID for all MC tracks"},
+    {kNotDefined, "GiDG",   Form("Geant ID for MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits)},
+    {kNotDefined, "GiDPr", "Geant ID for all primary MC tracks"},
+    {kNotDefined, "GiDPrG", Form("Geant ID for primary MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits)}
+  };
+  for (Int_t i = 0; i < 4; i++) {
+    GiD[i] = (TH1F *)  dirs[1]->Get(geant[i].Name);
+    if (! GiD[i]) {
+      dirs[1]->cd();
+      GiD[i] = new TH1F(geant[i].Name,geant[i].Title, 50,0.5,50.5); 
+      GiD[i]->SetMarkerColor(i%2+1);
+      GiD[i]->SetLineColor(i%2+1);
+      SetGEANTLabels(GiD[i]->GetXaxis());
+    }
+  }
   McRcHit = (TH2F *)   dirs[1]->Get("McRcHit");
   if (! McRcHit) McRcHit = new TH2F("McRcHit","No. RC hits in TPC versus No. MC ones",80,-0.5,79.5,80,-0.5,79.5);
   
@@ -731,7 +734,7 @@ Int_t StMuMcAnalysisMaker::Make(){
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::FillTrackPlots()
 {
-#if 0
+#if 1
   if (! muDst || ! muDst->event()) return;
   const Double_t field = muDst->event()->magneticField()*kilogauss;
   //  map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack = muDst->IdGlobal2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
@@ -1240,7 +1243,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     
     float minSigmadEdX = 100;
     int iMinSigmadEdX = -1;
-    for(int iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
+    for(UInt_t iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
     {
       if(dEdXSigma[iPDG]<minSigmadEdX)
       {
@@ -1259,7 +1262,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     }
     else
     {
-      for(int iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
+      for(UInt_t iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
         if(dEdXPDG[iPDG] == ToFPDG)
           totalPDG.push_back(ToFPDG);
         
@@ -1275,7 +1278,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     if(totalPDG.size() == 0)
       totalPDG.push_back(-1);
 #endif
-    for(int iPDG=0; iPDG<totalPDG.size(); iPDG++)
+    for(UInt_t iPDG=0; iPDG<totalPDG.size(); iPDG++)
     {
       int pdg = totalPDG[iPDG];
       
@@ -1507,7 +1510,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 //   mStKFParticleInterface->ReconstructTopology();
    mStKFParticleInterface->ReconstructParticles();
 #else
-//   for(int iPart=0; iPart<particles.size(); iPart++)
+//   for(UInt_t iPart=0; iPart<particles.size(); iPart++)
 //   {
 //     particles[iPart].SetId(iPart);
 //     particles[iPart].AddDaughterId(iPart);
@@ -1612,7 +1615,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, const StMuMcTrack *mcTrack, const StDcaGeometry *dcaG, const StMuMcVertex *mcVertex) {
-#if 0
+#if 1
   if (! gTrack || ! mcTrack) return;
   if (! dcaG   || ! mcVertex) return;
   EChargeType pm = kPositive;
@@ -1677,7 +1680,7 @@ void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, 
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const StMuPrimaryTrackCovariance *cov) {
-#if 0
+#if 1
   if (! pTrack || ! mcTrack) return;
   if (! mcTrack->Charge()) return;
   EChargeType pm = kPositive;
@@ -1726,7 +1729,7 @@ void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, 
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const KFParticle *particle) {
-#if 0
+#if 1
   if (! pTrack || ! mcTrack) return;
   if (! mcTrack->Charge()) return;
   EChargeType pm = kPositive;
@@ -1972,8 +1975,8 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
   }
 }
 //_____________________________________________________________________________
-Int_t StMuMcAnalysisMaker::Draw(){
-  if (! Check()) return kStOk;
+void StMuMcAnalysisMaker::Draw(Option_t *option){
+  if (! Check()) return;
   TString Out("indexMc.html");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   BeginHtml();
@@ -1993,7 +1996,6 @@ Int_t StMuMcAnalysisMaker::Draw(){
   out << "<H1>2. Vertices</H1>" << endl;
   Chapter = "2.1"; // nPng = 0;
   EndHtml();
-  return kStOK;
 }
 //________________________________________________________________________________
 TString StMuMcAnalysisMaker::DirPath(const TH1 * hist) {

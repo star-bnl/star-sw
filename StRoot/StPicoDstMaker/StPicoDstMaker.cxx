@@ -529,7 +529,7 @@ void StPicoDstMaker::buildEmcIndex()
     {
       StEmcRawHit* rawHit = modHits[iHit];
       if (!rawHit) continue;
-      unsigned int softId = rawHit->softId(1);
+      UInt_t softId = rawHit->softId(1);
       if (mEmcGeom[0]->checkId(softId) == 0) // OK
       {
         mEmcIndex[softId - 1] = rawHit;
@@ -643,8 +643,7 @@ Int_t StPicoDstMaker::MakeWrite()
     fillBTowHits();
   }
 
-  Int_t ok = fillTracks();
-  if (ok) return kStSKIP;
+  fillTracks();
   fillEvent();
   fillEmcTrigger();
 
@@ -686,53 +685,7 @@ void StPicoDstMaker::fillEventHeader() const
 //_____________________________________________________________________________
 Int_t StPicoDstMaker::fillTracks()
 {
-  Int_t ok = 0;
-  if (! mMuDst->primaryVertex()) {ok = 1; return ok;}
-  StThreeVectorD V(mMuDst->primaryVertex()->position());
-#ifdef __HIST_PV__
-  if (pVrZ) {
-    pVrZ->Fill(V.z(),V.perp());
-    pVxy->Fill(V.y(),V.x());
-  }
-#endif /* __HIST_PV__ */
-  /* Cuts:
-1.  -0.3 < X < 0.1 и -0.27 < Y < -0.13. Maksym
-2.  sqrt(sigma_X**2 + sigma_Y**2) < 0.0050 cm
-3.  const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051"
-4.  dca3D < 50 cm 
-  */
-  if (! mMuDst->numberOfMcVertices()) { // No cutss for MC event
-    if (fgVxXmin < fgVxXmax && ! (fgVxXmin < V.x() && V.x() < fgVxXmax)) {ok = 1; return ok;}
-    if (fgVxYmin < fgVxYmax && ! (fgVxYmin < V.y() && V.y() < fgVxYmax)) {ok = 1; return ok;}
-    if (fgVxZmin < fgVxZmax && ! (fgVxZmin < V.z() && V.z() < fgVxZmax)) {ok = 1; return ok;}
-    if (fgVxRmax > 0 &&  V.perp() > fgVxRmax)                            {ok = 1; return ok;}
-    StThreeVectorD E(mMuDst->primaryVertex()->posError());
-    const Double_t er = E.perp();
-    if (fgerMax > 0 && er > fgerMax) {ok = 2; return ok;}
-    UInt_t Nt = fGoodTriggerIds.size();
-    if (Nt) {
-      const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
-      Int_t GoodTrigger = -1;
-      Int_t NoAnyTriggers = 0;
-      for (Int_t k = 0; k < 64; k++) {
-	Int_t trig = triggers.triggerId(k);
-	if (! trig) continue;
-	NoAnyTriggers++;
-	for (UInt_t l = 0; l < Nt; l++) {
-	  if (trig == fGoodTriggerIds[l]) {
-	    GoodTrigger = trig;
-	    break;
-	  }
-	}
-	if (GoodTrigger > 0) break;
-      }
-      if (NoAnyTriggers && GoodTrigger < 0) {ok = 3; return ok;}
-    }
-  }
-  // We save primary tracks associated with the selected primary vertex only
-  // don't use StMuTrack::primary(), it returns primary tracks associated with
-  // all vertices
-  std::unordered_map<unsigned int, unsigned int> index2Primary;
+  std::unordered_map<UInt_t, UInt_t> index2Primary;
 
   Int_t nPrimarys = mMuDst->numberOfPrimaryTracks();
   for (int i = 0; i < nPrimarys; ++i)
@@ -846,7 +799,7 @@ Int_t StPicoDstMaker::fillTracks()
       picoTrk->setMtdPidTraitsIndex(mtd_index);
     }
   }
-  return ok;
+  return 0;
 }
 
 //_____________________________________________________________________________
@@ -1148,7 +1101,7 @@ void StPicoDstMaker::fillBTowHits()
 //_____________________________________________________________________________
 void StPicoDstMaker::fillBTofHits()
 {
-  for (unsigned int i = 0; i < mMuDst->numberOfBTofHit(); ++i)
+  for (UInt_t i = 0; i < mMuDst->numberOfBTofHit(); ++i)
   {
     StMuBTofHit* aHit = (StMuBTofHit*)mMuDst->btofHit(i);
     if (aHit->tray() > 120) continue;
@@ -1170,14 +1123,14 @@ void StPicoDstMaker::fillMtdHits()
     Int_t counter = mPicoArrays[StPicoArrays::MtdHit]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::MtdHit]))[counter]) StPicoMtdHit(hit);
   }
-  unsigned int nHits = mPicoDst->numberOfMtdHits();
+  UInt_t nHits = mPicoDst->numberOfMtdHits();
 
   // associated MTD hits with PidTraits
-  unsigned int nMtdPidTraits = mPicoDst->numberOfMtdPidTraits();
-  for (unsigned int i = 0; i < nMtdPidTraits; ++i)
+  UInt_t nMtdPidTraits = mPicoDst->numberOfMtdPidTraits();
+  for (UInt_t i = 0; i < nMtdPidTraits; ++i)
   {
     StPicoMtdPidTraits* pidTrait = mPicoDst->mtdPidTraits(i);
-    for (unsigned int j = 0; j < nHits; ++j)
+    for (UInt_t j = 0; j < nHits; ++j)
     {
       StPicoMtdHit* hit = mPicoDst->mtdHit(j);
       if (pidTrait->gChannel() == hit->gChannel())
@@ -1226,7 +1179,7 @@ void StPicoDstMaker::fillMtdHits()
   vector<Int_t> triggerPos;
   vector<Int_t> hitIndex;
 
-  for (unsigned int i = 0; i < nHits; ++i)
+  for (UInt_t i = 0; i < nHits; ++i)
   {
     StPicoMtdHit* hit = mPicoDst->mtdHit(i);
     Int_t backleg = hit->backleg();
@@ -1279,48 +1232,73 @@ void StPicoDstMaker::fillMtdHits()
  *
  * Returns `false` otherwise.
  */
-bool StPicoDstMaker::selectVertex()
-{
+bool StPicoDstMaker::selectVertex() {
   StMuPrimaryVertex* selectedVertex = nullptr;
-
-  if (mVtxMode == PicoVtxMode::Default)
-  {
-    // choose the default vertex, i.e. the first vertex
-    mMuDst->setVertexIndex(0);
-    selectedVertex = mMuDst->primaryVertex();
-  }
-  else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)
-  {
-    if(mVtxMode == PicoVtxMode::VpdOrDefault)
-    {
-      mMuDst->setVertexIndex(0);
-    }
-
-    StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
-
-    if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
-    {
-      float vzVpd = mBTofHeader->vpdVz();
-
-      for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
-      {
-        StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
-        if (!vtx) continue;
-
-        if (fabs(vzVpd - vtx->position().z()) < 3.)
-        {
-          mMuDst->setVertexIndex(iVtx);
-          selectedVertex = mMuDst->primaryVertex();
-          break;
-        }
+  UInt_t Nt = fGoodTriggerIds.size();
+  if (Nt) {
+    const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
+    Int_t GoodTrigger = -1;
+    Int_t NoAnyTriggers = 0;
+    for (Int_t k = 0; k < 64; k++) {
+      Int_t trig = triggers.triggerId(k);
+      if (! trig) continue;
+      NoAnyTriggers++;
+      for (UInt_t l = 0; l < Nt; l++) {
+	if (trig == fGoodTriggerIds[l]) {
+	  GoodTrigger = trig;
+	  break;
+	}
       }
+      if (GoodTrigger > 0) break;
+    }
+    if (NoAnyTriggers && GoodTrigger < 0) {return selectedVertex;}
+  }
+  
+  for (UInt_t iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)       {
+    StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
+    if (!vtx) continue;
+    StThreeVectorD V(vtx->position());
+#ifdef __HIST_PV__
+    if (pVrZ) {
+      pVrZ->Fill(V.z(),V.perp());
+      pVxy->Fill(V.y(),V.x());
+    }
+#endif /* __HIST_PV__ */
+    if (! mMuDst->numberOfMcVertices()) { // No cutss for MC event
+      /* Cuts:
+	 1.  -0.3 < X < 0.1 и -0.27 < Y < -0.13. Maksym
+	 2.  sqrt(sigma_X**2 + sigma_Y**2) < 0.0050 cm
+	 3.  const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051"
+	 4.  dca3D < 50 cm 
+      */
+      if (fgVxXmin < fgVxXmax && ! (fgVxXmin < V.x() && V.x() < fgVxXmax)) {continue;}
+      if (fgVxYmin < fgVxYmax && ! (fgVxYmin < V.y() && V.y() < fgVxYmax)) {continue;}
+      if (fgVxZmin < fgVxZmax && ! (fgVxZmin < V.z() && V.z() < fgVxZmax)) {continue;}
+      if (fgVxRmax > 0 &&  V.perp() > fgVxRmax)                            {continue;}
+      StThreeVectorD E(mMuDst->primaryVertex()->posError());
+      const Double_t er = E.perp();
+      if (fgerMax > 0 && er > fgerMax) {continue;}
+    }
+    // We save primary tracks associated with the selected primary vertex only
+    // don't use StMuTrack::primary(), it returns primary tracks associated with
+    // all vertices
+    if (mVtxMode == PicoVtxMode::Default)  {
+      // choose the default vertex, i.e. the first vertex
+      mMuDst->setVertexIndex(iVtx);
+      selectedVertex = vtx;
+    } else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)  {
+      StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
+      Float_t vzVpd = -999;
+      if (mBTofHeader && TMath::Abs(mBTofHeader->vpdVz()) < 200) vzVpd = mBTofHeader->vpdVz();
+      if (mVtxMode == PicoVtxMode::Vpd && vzVpd < 200) continue;
+      if (vzVpd >= -200 && TMath::Abs(vzVpd - vtx->position().z()) >= 3.) continue;
+      mMuDst->setVertexIndex(iVtx);
+      selectedVertex = mMuDst->primaryVertex();
+      break;
+    } else {// default case
+      LOG_ERROR << "Pico Vtx Mode not set!" << endm;
     }
   }
-  else // default case
-  {
-    LOG_ERROR << "Pico Vtx Mode not set!" << endm;
-  }
-
   // Retrun false if selected vertex is not valid
   return selectedVertex ? true : false;
 }

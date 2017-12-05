@@ -1,12 +1,16 @@
 unsetenv GROUP_PATH
 unsetenv STAR_PATH
+unsetenv STAR
+unsetenv ROOT
 unsetenv ROOTROOT
 unsetenv ROOTSYS
 unsetenv ROOT_LEVEL
 unsetenv CERN_LEVEL
+unsetenv SITE
 if ($?NODEBUG) unsetenv NODEBUG
 if (-d /net/l402/data/fisyak/STAR) then
   setenv AFS_RHIC  /net/l402/data/fisyak/STAR
+    setenv SITE "HLT"
 else 
   if (-d /star/subsys/tpc/fisyak/STAR) then 
     setenv AFS_RHIC  /star/subsys/tpc/fisyak/STAR
@@ -21,7 +25,11 @@ setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
 #unsetenv STAR
 source ${GROUP_DIR}/group_env.csh
 #source ${GROUP_DIR}/setup    gcc482
+if (-d /net/l402/data/fisyak/STAR) then
+source ${GROUP_DIR}/setup    gcc521
+else
 source ${GROUP_DIR}/setup    gcc492
+endif
 source ${GROUP_DIR}/setup    32b
 #setup gcc492
 #setup 32b

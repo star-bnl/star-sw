@@ -175,6 +175,12 @@ Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
   return mdEdxMPV[kTpcOuterInner]->Interpolate(n_PL, Sigma);
 #endif /* __HEED_MODEL__ */
 }
+//____________________________________________________________________________
+Double_t StdEdxModel::zMPVFuncD1(Double_t *x, Double_t *p) {
+  TF2 *h2 = StdEdxModel::zMPV();
+  Double_t val = h2->Eval(x[0],p[0]);
+  return val;
+}
 //________________________________________________________________________________
 #ifndef __HEED_MODEL__
 TF2 *StdEdxModel::zMPV() {
@@ -183,6 +189,15 @@ TF2 *StdEdxModel::zMPV() {
     f = new TF2("zFunc",StdEdxModel::zMPVFunc, 0.3,4, 0.0,0.50, 0);
   }
   return f;
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::zMPV1D() {
+  static TF1 *f = 0;
+  if (! f) {
+    f = new TF1("zFuncD1",StdEdxModel::zMPVFuncD1, 0.3,4, 1);
+  }
+  return f;
+}
 #else /* __HEED_MODEL__ */
 TF2 *StdEdxModel::zMPV(ESector kTpcOuterInner) {
   static TF2 *f[2] = {0};
@@ -191,8 +206,8 @@ TF2 *StdEdxModel::zMPV(ESector kTpcOuterInner) {
     f[kTpcOuterInner]->SetParameter(0, kTpcOuterInner);
   }
   return f[kTpcOuterInner];
-#endif /* __HEED_MODEL__ */
 }
+#endif /* __HEED_MODEL__ */
 //________________________________________________________________________________
 #ifndef __HEED_MODEL__
 Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {

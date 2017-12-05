@@ -2,7 +2,7 @@
 #include "StdEdxModel.h"
 #include "StdEdxPull.h"
 //________________________________________________________________________________
-Double_t StdEdxPull::Eval(Double_t dEdx, Double_t dEdxError, Double_t betagamma, UChar_t fit, Double_t log2dX, Int_t charge) {
+Double_t StdEdxPull::Eval(Double_t dEdx, Double_t dEdxError, Double_t betagamma, UChar_t fit, Int_t charge) {
   Double_t z = -999.;
   Double_t dedx_expected;
   if (! fit) { // I70
