@@ -126,15 +126,16 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 	  LOG_WARN << " No MuEvent " << endm; continue;
      }
 
-/*
-//Run14 vertex selection
-     StBTofHeader* mBTofHeader = mMuDst->btofHeader();
+     //vzVpd
+     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
+     Float_t vzVpd=-999;
+     if (mBTofHeader) vzVpd = mBTofHeader->vpdVz();
 
+/*
+     //Run14 vertex selection
      //////////////////////////////////////
      // select the right vertex using VPD
      /////////////////////////////////////
-     Float_t vzVpd = -999;
-     if(mBTofHeader) vzVpd = mBTofHeader->vpdVz();
      for(unsigned int i=0;i<mMuDst->numberOfPrimaryVertices();i++) {
 	  StMuPrimaryVertex *vtx = mMuDst->primaryVertex(i);
 	  if(!vtx) continue;
@@ -148,36 +149,24 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 */
 
 /*
-//Run16 vertex selection
-////////////////////////////////////////////////////////////////
-   //mMuDst->setVertexIndex(-2);
-   StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
-   Float_t vzVpd=-999;
-   if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
-   {
-     vzVpd = mBTofHeader->vpdVz();
-     for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
+     //Run16 vertex selection
+     ////////////////////////////////////////////////////////////////
+     if (fabs(vzVpd) < 200)
      {
-       StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
-       if (!vtx) continue;
+	  for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
+	  {
+	     StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
+	     if (!vtx) continue;
 
-       if (fabs(vzVpd - vtx->position().z()) < 3.)
-       {
-         mMuDst->setVertexIndex(iVtx);
-         //selectedVertex = mMuDst->primaryVertex();
-         break;
-       }
+	     if (fabs(vzVpd - vtx->position().z()) < 3.)
+	     {
+		  mMuDst->setVertexIndex(iVtx);
+		  break;
+	     }
+	  }
      }
-   }
-////////////////////////////////////////////////////////////////
+     ////////////////////////////////////////////////////////////////
 */
-
-//Run11&12 vertex selection (no selection)
-////////////////////////////////////////////////////////////////
-     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
-     Float_t vzVpd=-999;
-     if (mBTofHeader) vzVpd = mBTofHeader->vpdVz();
-////////////////////////////////////////////////////////////////
 
      mRunId = mMuEvent->runNumber();
      mEvtId = mMuEvent->eventNumber();
