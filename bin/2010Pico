@@ -1,0 +1,140 @@
+cpu_per_event.csh | tee cpu_per_event
+root.exe -q -b Recover.C | tee Recover.log
+if (! -d Zombie) mkdir Zombie
+foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
+  set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+end
+root.exe -q -b Chain.C+ | tee Chain.log
+foreach f (`grep missing Chain.log | awk '{print $3}' `)
+  set b = `basename ${f} .MuDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+end
+
+if (! -d Done) mkdir Done
+foreach f (`ls -1d *B.log`)
+	tail -2 ${f} | grep 'end of ROOT -- Goodbye'; 
+	if ($?) continue;
+	set b = `basename ${f} B.log`; mv ${b}* Done/
+end
+#================================================================================
+foreach d ( `ls -1d */*` ) 
+  set l = `echo $d | sed -e 's/\//_/'`; ls -alF ${d}/*.root > & ~/work/log/${l}.list 
+end
+
+foreach f (`ls -1d *.root`) 
+ if (-r /direct/gpfs01/star/pwg/fisyak/MuDst/2010/128/17128010/${f}) rm /direct/gpfs01/star/pwg/fisyak/MuDst/2010/128/17128010/${f}
+end
+
+#================================================================================
+foreach d (`ls -1d 1??/*`)
+  set l = `echo $d | sed -e 's/\//_/'`.log
+  if (-r ${l}) continue;
+  echo ${d}
+  root.exe -q -b 'Chain.C+("'${d}'/*.root")' >& ${l} &
+end
+	
+================================================================================
+#foreach f (`ls -1d /star/u/kehw/dNdxFit/StRoot/StBichsel/*.*`)
+foreach f (`ls -1d /star/u/kehw/dNdxFit/StRoot/StdEdxY2Maker/*.*`)
+   set b = `basename ${f}`; 
+   if (! -r ${b}) continue;
+   diff -D __KEHW__ ${f} ${b} > ${b}.KEHW
+end
+================================================================================
+set day = 128
+foreach d ( `ls -1d ~/scratch2/MuDst/2010/${day}/*` )
+  set b = `basename $d`; if (! -d ${day}/${b}) mkdir -p ${day}/${b}; cd ${day}/${b};
+  lsf ~/xml/PicoDST.xml
+  cd -;
+end
+================================================================================
+root.exe -q -b 'Recover.C("*.root")' | tee Recover.log
+if (! -d Zombie) mkdir Zombie
+foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
+  set b = `basename ${f} .picoDst.root`; mv ${b}B.log ${b}.*.root Zombie/
+end
+foreach f (`grep Zombie Recover.log | awk '{print $3}' `)
+  set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
+end
+================================================================================
+root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log
+foreach f (`grep missing Chain.log | awk '{print $3}' `)
+  set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
+end
+
+foreach d (`ls -1d 1*`)
+  cd $d; 
+  if (! -r Chain.log) then
+  root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
+  endif
+  cd -;
+end
+================================================================================
+ls -1d 17* | xargs
+foreach d (17130001 17130002 17130003 17130004 17130005 17130006 17130007 17130008 17130009 17130010 17130011 17130012 17130013)  
+  if (! -d ${d}) mkdir -p ${d}; cd ${d};
+  lsf ~/xml/PicoDST.xml
+  cd -;
+end
+================================================================================
+foreach day (`ls -1d 1*`)
+  cd $day;
+  foreach d (`ls -1d 1*`)
+    cd $d; root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; cd -;
+  end
+  cd ..
+end
+================================================================================
+
+foreach dayd (`ls -1d ~/MuDst/2010/???`)
+  set day = `basename ${dayd}`;	
+  cd ~/Pico/2010/
+  if (! -d ${day}) mkdir ${day}
+  cd  ${day}
+  foreach d ( `ls -1d ~/MuDst/2010/${day}/*` )
+    set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
+    pwd
+    PicoDST.pl
+    if ( ! $? ) then
+      lsf ~/xml/PicoDST.xml;
+    else
+      touch Done;
+    endif
+    cd -;
+  end
+  cd -;
+end
+================================================================================
+ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
+cd ~/Pico/2010
+foreach d (`ls -1d */*/Done | awk -F\/ '{print $1"/"$2}'`)
+  echo ${d}
+  ls -ltr ~/MuDst/2010/${d} | tail -1
+end 
+================================================================================
+cd ~/Pico/2010
+foreach f (`ls -1d ???/1*/Done`)
+  set d = `dirname ${f}`;
+  cd ${d}; 
+  if (-r Done) then	
+	if (! -r Chain.log) then
+	    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; 
+        endif
+    rm Done
+  endif
+  cd -;
+end
+================================================================================
+cd ~/MuDst/2010
+foreach d (`ls -1d ???/1*`)
+  cd ${d}; 
+  if (! -r Chain.log) then
+    ln -s ../../.sl* .	
+    root.exe -q -b Chain.C+ | tee Chain.log; 
+  endif
+  cd -;
+end
+================================================================================
+grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%i\n", n)}'
+================================================================================
+cd 076; 
+2010Pico2hpss.pl | hsi >& hpss.log &
