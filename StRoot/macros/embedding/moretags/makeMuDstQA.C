@@ -67,6 +67,7 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
   oFile.Prepend(OutputDir);
   oChopFile.Insert(indx1+1,"chopper.");
   oChopFile.ReplaceAll("root","txt");
+  oChopFile.Prepend(OutputDir);
 
   ofstream chop_output(oChopFile);
 
