@@ -56,13 +56,19 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
   // ---------------- modify here according to your QA purpose --------------------------
   //book histograms or trees if you need
   TString oFile(muDstMaker->GetFile());
+  TString oChopFile;
   int fileBeginIndex = oFile.Index("st_",0);
   oFile.Remove(0,fileBeginIndex);
   short indx1 = oFile.First('.');
   short indx2 = oFile.Last('.');
   if (indx1!=indx2) oFile.Remove(indx1+1,(indx2-indx1));
+  oChopFile=oFile;
   oFile.Insert(indx1+1,"moretags.");
   oFile.Prepend(OutputDir);
+  oChopFile.Insert(indx1+1,"chopper.");
+  oChopFile.ReplaceAll("root","txt");
+
+  ofstream chop_output(oChopFile);
 
   TFile *tags_output = new TFile( oFile, "recreate" ) ;
   tags_output->cd();
@@ -205,16 +211,26 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
 
      mMoreTagsTree->Fill();
 
+     //Event info (for debug)
      //cout<<"Run#: "<<mMuEvent->runNumber()<<endl;
      //cout<<"Evt#: "<<mMuEvent->eventNumber()<<endl;
      //cout<<muDstMaker->muDst()->currentVertexIndex()<<endl;
      //cout<<"refmult: "<<mMuEvent->refMult()<<endl;
-     //if( !mMuEvent->triggerIdCollection().nominal().isTrigger(290001)&&!mMuEvent->triggerIdCollection().nominal().isTrigger(290004) ) continue;
+
+     //Event cuts (NO EVENT CUTS TILL HERE!)
+     //trigger
+     if ( ! mMuEvent->triggerIdCollection().nominal().isTrigger(410008) && ! mMuEvent->triggerIdCollection().nominal().isTrigger(410005) ) continue;
+     //Vz
+     if ( fabs(mMuEvent->primaryVertexPosition().z()) > 30.0 ) continue ;
+     //Vr
+     //if ( mMuEvent->primaryVertexPosition().perp() > 100.0 ) continue ;
+     //VF failed (for some old dataset)
      //if ( fabs(mMuEvent->primaryVertexPosition().x()) < 1e-5 && fabs(mMuEvent->primaryVertexPosition().y()) < 1e-5 && fabs(mMuEvent->primaryVertexPosition().z()) < 1e-5 ) continue;
-     //if (fabs(mMuEvent->primaryVertexPosition().z()) > 50.0 ) continue ;
-     //if (mMuEvent->primaryVertexPosition().perp() > 2.0 ) continue ;
+
+     chop_output<<mRunId<<'\t'<<mEvtId<<endl;
      
      /*
+     //fill Event QA histograms
      TObjArray* tracks = muDstMaker->muDst()->primaryTracks() ;
      TObjArrayIter GetTracks(tracks) ;
      StMuTrack* gtrack ; 
@@ -239,6 +255,8 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
   if(tags_output!=NULL) tags_output -> Close() ;
   //flush(tags_output);
   delete tags_output;
+
+  chop_output.close();
   // Cleanup
   delete chain ;
 }
