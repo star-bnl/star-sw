@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?> 
 <job  minFilesPerProcess="1" maxFilesPerProcess="1" fileListSyntax="paths"> 
    <command>
-      cd $SUBMITTINGDIRECTORY
-      pwd
-      cat $FILELIST
-      echo "./runmakeMuDstQA.csh $FILELIST output/ &STARLib;"
-      ./runmakeMuDstQA.csh $FILELIST output/ &STARLib;
+	cd $SUBMITTINGDIRECTORY
+	pwd
+	cat $FILELIST
+	starver &STARLib;
+	./daqchop.sh $FILELIST &OutDir;
    </command>
    <!-- please change the output paths to valid folders where you have write permission -->
    <stdout URL="file:./logs/$JOBID.out"/>
@@ -15,8 +15,6 @@
      <Location>./sums</Location>
    </Generator>
 
-   <input URL="filelist:&MuDstList;" singleCopy="true" nFiles="all" />
+   <input URL="filelist:&DaqList;" singleCopy="true" nFiles="all" />
 
 </job>
-
-      
