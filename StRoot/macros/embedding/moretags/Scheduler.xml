@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?> 
-<job  minFilesPerProcess="1" maxFilesPerProcess="400" fileListSyntax="paths"> 
+<job  minFilesPerProcess="1" maxFilesPerProcess="1" fileListSyntax="paths"> 
    <command>
       cd $SUBMITTINGDIRECTORY
       pwd
