@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  starver .DEV2
+  setup 64b
+  ln -s $STAR/.sl* .
+#  cd $SCRATCH
+#   pwd
+#  setenv NODEBUG yes
+#  setup  gcc
+#  setup  32b
+#  starver DEV2/SL15
+  set input = $INPUTFILE0;
+  set dir      = `echo ${input} | awk -F\: '{print $1}'`
+  set tag      = `basename ${dir}`;
+  set log = ${tag}B.log
+  set pico = ${tag}.picoDst.root
+#  if (-r ${log}) exit 0;
+  test -r ${pico}
+  if (! $? )  exit 0
+  root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/*.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet",0,"'${pico}'")'  makePicoDst.C+  &gt;&amp; ${log}
+        </command>
+<!-- <input URL="command:PicoDST.pl" /> -->
+<!-- <input URL="file:/gpfs02/eic/ayk/STAR/reco/MuDst/2010/*/11*" /> -->
+<!-- <input URL="command:lsdir.pl /gpfs02/eic/ayk/STAR/reco/MuDst/2010/*/11*" /> -->
+<!-- <input URL="command:/bin/ls -1d /gpfs02/eic/ayk/STAR/reco/MuDst/2010/*/11*" /> -->
+<!-- <input URL="command:lsdir.pl /gpfs02/eic/ayk/STAR/reco/MuDst/2010/*/11*" /> -->
+<input URL="command:lsdir.pl" />
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+</job>
