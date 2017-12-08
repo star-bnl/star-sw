@@ -120,12 +120,12 @@ private:
   * param[out]  nep[1]   The number of phi strips in the BSMD cluster corresponding to the BEMC cluster matching track t
   * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
   */
-  bool getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
+  Bool_t getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
   int  setVtxModeAttr();
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
-  bool selectVertex();
+  Bool_t selectVertex();
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches

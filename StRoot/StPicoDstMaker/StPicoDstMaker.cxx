@@ -685,6 +685,7 @@ void StPicoDstMaker::fillEventHeader() const
 //_____________________________________________________________________________
 Int_t StPicoDstMaker::fillTracks()
 {
+  if (! mMuDst->primaryVertex()) return 1;
   std::unordered_map<UInt_t, UInt_t> index2Primary;
 
   Int_t nPrimarys = mMuDst->numberOfPrimaryTracks();
@@ -803,7 +804,7 @@ Int_t StPicoDstMaker::fillTracks()
 }
 
 //_____________________________________________________________________________
-bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid)
+Bool_t StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid)
 {
   *id = -1;
   *adc = 0;
@@ -825,9 +826,9 @@ bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, 
 
   double magneticField = mBField * kilogauss / tesla; // in Tesla
 
-  bool ok       = false;
-  bool okBSMDE  = false;
-  bool okBSMDP  = false;
+  Bool_t ok       = false;
+  Bool_t okBSMDE  = false;
+  Bool_t okBSMDP  = false;
 
   if (mEmcPosition)
   {
@@ -853,7 +854,7 @@ bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, 
     // Loop over all BEMC measurements, aka "points"
     for (StSPtrVecEmcPointIterator it = bEmcPoints.begin(); it != bEmcPoints.end(); ++it, ++index)
     {
-      bool associated = false;
+      Bool_t associated = false;
       // Consider only BEMC clusters
       StPtrVecEmcCluster& bEmcClusters = (*it)->cluster(kBarrelEmcTowerId);
       if (bEmcClusters.size() == 0) continue;
@@ -1232,7 +1233,8 @@ void StPicoDstMaker::fillMtdHits()
  *
  * Returns `false` otherwise.
  */
-bool StPicoDstMaker::selectVertex() {
+Bool_t StPicoDstMaker::selectVertex() {
+  if (! mMuDst->numberOfPrimaryVertices()) return kFALSE;
   StMuPrimaryVertex* selectedVertex = nullptr;
   UInt_t Nt = fGoodTriggerIds.size();
   if (Nt) {
