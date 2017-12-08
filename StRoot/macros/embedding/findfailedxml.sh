@@ -34,7 +34,7 @@ allgood=""
 #echo "#!/bin/sh" > $subfile
 echo "cd "$PWD > $subfile
 
-for i in `find $PWD -name "*.session.xml"`
+for i in `find $PWD/*.session.xml`
 do
    echo found a session.xml file:
    ls -l $i
