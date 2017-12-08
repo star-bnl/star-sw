@@ -381,7 +381,7 @@ public:
         { return (EztEmcRawData*)eztArrays[muEztESmd]->UncheckedAt(0); }
 
   static UInt_t numberOfPrimaryVertices()  { return arrays[muPrimaryVertex]->GetEntriesFast(); }
-  static UInt_t numberOfPrimaryTracks()  { return mCurrPrimaryTracks->GetEntriesFast(); }
+  static UInt_t numberOfPrimaryTracks()  { return mCurrPrimaryTracks ? mCurrPrimaryTracks->GetEntriesFast() : 0; }
   static UInt_t numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntriesFast(); }
   static UInt_t numberOfOtherTracks()    { return arrays[muOther]->GetEntriesFast(); }
   static UInt_t numberOfL3Tracks()       { return arrays[muL3]->GetEntriesFast(); }
