@@ -1673,7 +1673,9 @@ my @badruns = qw(
 # /star/data2*/reco/AuAu54_production_2017/ReversedFullField/P17ih_calib/2017/*/*
 #$hist = "RunXVII20"; $NEvents = 1000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/07/2017 The first pass 
 #$hist = "RunXVII21"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/13/2017 update TpcSecRowB.20170602.000020 & TpcRowQ.20170602.000020
-$hist = "RunXVII22"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/04/17 fit dN/dx with gradient
+#$hist = "RunXVII22"; $NEvents = 5000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/04/17 fit dN/dx with gradient
+#$hist = "RunXVII23"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/07/17 TpcLengthCorrectionMDF
+$hist = "RunXVII24"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/08/17 correct idx in TpcLengthCorrectionMDF
 
 
 my $prod = $hist; #$Production;
