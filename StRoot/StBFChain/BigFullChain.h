@@ -1618,7 +1618,7 @@ Bfc_st BFC[] = { // standard chains
   {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    ,                                                                                "Vpd Simulator",kFALSE},
   {"vpdCalib","","","db,BTofUtil","StVpdCalibMaker"            ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"btofSim" ,"","","BTofUtil,vpdSim"  ,"StBTofSimMaker",
+  {"btofSim" ,"","","BTofUtil,vpdSim,UseMCTstart"  ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    ,                                                                                   "BTof Mixer",kFALSE},
