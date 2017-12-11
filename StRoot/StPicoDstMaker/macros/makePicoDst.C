@@ -37,6 +37,8 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
 #endif
   StMaker *detDb = chain->Maker("detDb");
   detDb->SetActive(kFALSE);
+  StMaker *tpcDB = chain->Maker("tpcDB");
+  tpcDB->SetActive(kFALSE);
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
   PicoDstMaker->SetGoodTriggers("");
   PicoDstMaker->SetVxZrange(-70,70);
