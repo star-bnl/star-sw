@@ -1381,6 +1381,7 @@ Bfc_st BFC[] = { // standard chains
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"MagField","","StDbT,db,detDb","StMagFMaker","StarMagField,StMagF"
    ,                                                      "Mag.field map with scale factor from Db",kFALSE},
+  //  {"detDb","detDb","","db,MuDSTDeps","StDetectorDbMaker",",StDetectorDbMaker"
   {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker library",kFALSE},
   {"tpcDB"   ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF,StEvent","StTpcDbMaker","StTpcDb","",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
@@ -1449,8 +1450,12 @@ Bfc_st BFC[] = { // standard chains
   {"NoVMCAlignment","","","","","",                                              "no VMC Alignment",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl",       "StVMCMaker","StVMCMaker","VMC Maker in Passive Mode",kFALSE},
+#if 0
   {"trg"         ,"trg","l0Chain","trg_T,globT,db","St_trg_Maker","St_trg,St_trg_Maker"
    ,                                                     "trigger analysis for Year 2001-2005 data",kFALSE},
+#else
+  {"trg"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
   {"MakeEvent","0Event","","StEvent,detDb","StEventMaker","StEventMaker","<Early StEvent creation>",kFALSE},
@@ -1617,9 +1622,10 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                               "BTOF hit maker",kFALSE},
   {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    ,                                                                                "Vpd Simulator",kFALSE},
-  {"vpdCalib","","","db,BTofUtil","StVpdCalibMaker"            ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"btofSim" ,"","","BTofUtil,vpdSim,UseMCTstart"  ,"StBTofSimMaker",
+  {"btofSim" ,"","","BTofUtil,vpdSim"  ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
+  {"vpdCalib","","","db,BTofUtil,-vpdSim","StVpdCalibMaker"    ,"StVpdCalibMaker","VPD calibration",kFALSE},
+  //  {"btofSim" ,"","","BTofUtil,vpdSim,UseMCTstart"  ,"StBTofSimMaker",
   {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    ,                                                                                   "BTof Mixer",kFALSE},
   // left MTD chain for sumulation alone here
