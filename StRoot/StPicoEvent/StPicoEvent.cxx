@@ -81,6 +81,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   mRefMultNeg = (UShort_t)(ev->refMultNeg());
   mRefMultPos = (UShort_t)(ev->refMultPos());
 
+  if (muDst.primaryVertex())
   {
     using namespace StPicoUtilities;
     auto custom_refMult = StPicoUtilities::calculateRefMult(muDst);
