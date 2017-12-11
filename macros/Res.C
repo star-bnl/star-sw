@@ -87,8 +87,13 @@ void Set(Int_t color=1) {
   } else {cout << "Sigma is not found" << endl;}
 }
 //________________________________________________________________________________
-void Res(const Char_t *select="x") {
+void Res(const Char_t *select="x", const Char_t *name="sigma") {
   //  const Char_t *FitNames[3] = {"Fit","I70","I60"};
+  TString plot(name);
+  TString Plot;
+  if (plot == "sigma") Plot = "Sigma";
+  if (plot == "mu")    Plot = "Mu";
+  cout << "plot = " << plot.Data() << "\tPlot = " << Plot.Data() << endl;
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -114,10 +119,17 @@ void Res(const Char_t *select="x") {
   c1->SetTitle("Resolution versus Track Length");
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
-  TH1F *frame = c1->DrawFrame(10,0.04,160,0.20);
-  frame->SetTitle("Resolution versus Track Length");
+  TH1F *frame = 0;
+  if (plot == "sigma") {
+    frame = c1->DrawFrame(10,0.04,140,0.20);
+    frame->SetTitle("Resolution versus Track Length");
+    //    frame->SetYTitle("Resolution");
+  } else {
+    frame = c1->DrawFrame(10,-0.05,140,0.10);
+    frame->SetTitle("Shift versus Track Length");
+    //    frame->SetYTitle("Sift");
+  }
   frame->SetXTitle("Track Length (cm)                   ");
-  frame->SetYTitle("Resolution");
   TLegend *leg = new TLegend(0.25,0.6,0.9,0.9,"");
   Int_t c = 0;
   for (int i = 0; i<NF; i++) {
@@ -126,10 +138,10 @@ void Res(const Char_t *select="x") {
     if (FitFiles[i]) { 
       FitFiles[i]->cd();
       TH1 *Sigma = 0;
-      TH1 *sigma = (TH1 *) FitFiles[i]->Get("sigma");
+      TH1 *sigma = (TH1 *) FitFiles[i]->Get(plot);
       if (! sigma) continue;
       if (sigma->GetDimension() == 2) {
-	Sigma = ((TH2 *) sigma)->ProjectionX(Form("Sigma_%i",i),0,0);
+	Sigma = ((TH2 *) sigma)->ProjectionX(Form("%s_%i",Plot.Data(),i),0,0);
       } else {
 	Sigma = sigma; 
       }
@@ -146,8 +158,14 @@ void Res(const Char_t *select="x") {
       if (Sigma->GetEntries() < 1.) continue;
       Sigma->Rebin();
       Sigma->Scale(0.5);
-      TF1 *powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",40,160);
-      powfit->SetParameters(0.5,-0.5);
+      TF1 *powfit = 0;
+      if (plot == "sigma") {
+	powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",40,160);
+	powfit->SetParameters(0.5,-0.5);
+      } else {
+	powfit = new TF1("powfit","pol0",40,160);
+	//	powfit->SetParameter(0,0.);
+      }
       powfit->SetLineColor(c);
       Sigma->Fit("powfit","rn");
       powfit->Draw("same");
@@ -201,98 +219,35 @@ void Res(const Char_t *select="x") {
       if (Title.Contains("GPRunIX65P09ig_calibAB")) Title = "pp200 (Run IX, data)";
       if (Title.Contains("GPrcf9108.zC"))      Title = " pp200 (Run IX, TpcRS)";
       //      if (Title.Contains("602P03ih"))  Title.ReplaceAll("602P03ih"," default ");
-      Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
+      if (plot == "sigma") {
+	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
+      } else {
+	Title += Form(" : #mu = %5.2f%\%",100*powfit->GetParameter(0));
+      }
       //      Title += Form(" : #sigma(@128cm) = %5.2f%\%",100*powfit->Eval(128));
       Title.Strip();
       cout << Title << endl;
       leg->AddEntry(Sigma,Title.Data());
     }
   }
-  Double_t PositionX = 76.2, PositionY = 0.076;
-  TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
-  frame->GetListOfFunctions()->Add(pm);
-  pm->SetMarkerStyle(20);
-  pm->SetMarkerColor(kRed);
-  pm->SetMarkerSize(2.3);
-  PositionX = 62.4; PositionY = 0.091;
-//   pm = new TPolyMarker(1, &PositionX, &PositionY);
-//   frame->GetListOfFunctions()->Add(pm);
-//   pm->SetMarkerStyle(20);
-//   pm->SetMarkerColor(kBlue);
-//   pm->SetMarkerSize(2.3);
+  if (plot == "sigma") {
+    Double_t PositionX = 76.2, PositionY = 0.076;
+    TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
+    frame->GetListOfFunctions()->Add(pm);
+    pm->SetMarkerStyle(20);
+    pm->SetMarkerColor(kRed);
+    pm->SetMarkerSize(2.3);
+    PositionX = 62.4; PositionY = 0.091;
+    //   pm = new TPolyMarker(1, &PositionX, &PositionY);
+    //   frame->GetListOfFunctions()->Add(pm);
+    //   pm->SetMarkerStyle(20);
+    //   pm->SetMarkerColor(kBlue);
+    //   pm->SetMarkerSize(2.3);
+  }
   leg->Draw();
   delete [] FitFiles;
 }
 //________________________________________________________________________________
 void Mu() {
-  Int_t NF = 0;
-  TList *files = (TList *) gROOT->GetListOfFiles();
-  Int_t nn = files->GetSize();
-  if (! nn) return;
-  TFile **FitFiles = new TFile *[nn];
-  if (! files) return;
-  TIter next(files);
-  TFile *f = 0;
-  while ( (f = (TFile *) next()) ) { 
-    TString F(f->GetName());
-    if (! F.Contains("TPoints") && ! F.Contains("MPoints")) continue;
-    //    if (! F.Contains("BGP") && ! F.Contains("BUGP") && ! F.Contains("BAGP")) continue;
-    if (! F.Contains("GP")) continue;
-    FitFiles[NF] = f; 
-    cout << "Found file[" << NF << "] = " << FitFiles[NF]->GetName() << endl;
-    NF++;
-  }
-  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-  if (! c1 ) c1 = new TCanvas("c1","Resolution versus Track Length");
-  c1->Clear();
-  c1->SetTitle("Shift versus Track Length");
-  c1->SetGrid(); //x(9);
-  //  c1->SetGridy(30);
-  TH1F *frame = c1->DrawFrame(10,-0.05,100,0.05);
-  frame->SetTitle("Shift versus Track Length");
-  frame->SetXTitle("Track Length (cm)                   ");
-  frame->SetYTitle("Resolution");
-  TLegend *leg = new TLegend(0.25,0.6,0.9,0.9,"");
-  for (int i = 0; i < NF; i++) {
-    if (FitFiles[i]) { 
-      FitFiles[i]->cd();
-      TH1 *Mu = 0;
-      TH2 *mu = (TH2 *) FitFiles[i]->Get("mu");
-      if (mu) {
-	if (mu->GetDimension() == 2) {
-	  Mu = ((TH2 *) mu)->ProjectionX("Mu",0,0);
-	} else Mu = mu;
-      }
-      if (! Mu) continue;
-      Int_t c = i + 1;
-      if (c == 10) c = 11;
-      Mu->SetMarkerColor(c); // Set(c);
-      //      if (Mu->GetEntries() < 1.) continue;
-      TF1 *powfit = new TF1("powfit","[0]",40,80);
-      powfit->SetParameters(0.5,-0.5);
-      powfit->SetLineColor(c);
-      Mu->Fit("powfit","rn");
-      powfit->Draw("same");
-      //      Mu->Fit("powfit","r");
-      Mu->Draw("same");
-      //      leg->AddEntry(mu,Form("%s:  #mu(@76cm) = %5.2f%%",FitNames[i],100*powfit->Eval(76)));
-      TString Title(gSystem->BaseName(FitFiles[i]->GetName()));
-      Title.ReplaceAll(".root","");
-      Title.ReplaceAll("Hist","");
-      Title.ReplaceAll("TPoints70BGP","I70   ");
-      Title.ReplaceAll("TPoints70BUGP","Uncorrected I70   ");
-      Title.ReplaceAll("TPointsBGP"  ,"Ifit  ");
-      Title.ReplaceAll("TPointsNGP"  ,"Nfit  ");
-      Title.ReplaceAll("TPointsBUGP" ,"Uncorrected Ifit ");
-      Title.ReplaceAll("MPoints70BGP","M70   ");
-      Title.ReplaceAll("MPointsBGP"  ,"Mfit  ");
-      Title.ReplaceAll("MPointsBUGP" ,"MUncorr");
-      Title += Form(": #mu = %5.2f%\%",100*powfit->Eval(76));
-      Title.Strip();
-      cout << Title << endl;
-      leg->AddEntry(Mu,Title.Data());
-    }
-  }
-  leg->Draw();
-  delete [] FitFiles;
+  Res("x","mu");
 }
