@@ -27,12 +27,12 @@ else
    outp="/global/projecta/projectdirs/starprod/embedding"
 fi
 
-part=`grep "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
+part=`grep -a "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
 particle=`echo $part`
-trg=`grep "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
+trg=`grep -a "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
 trgset=`echo $trg`
-reqid=`grep "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
-daqdir=`grep "\-daq" $PWD/preparexmlslr.sh | awk '{print $2}'`
+reqid=`grep -a "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
+daqdir=`grep -a "\-daq" $PWD/preparexmlslr.sh | awk '{print $2}'`
 ndaq=`find $daqdir/*.daq | wc -l`
 
 for (( ifset=$begin ; $ifset - $end ; ifset++ ))
@@ -65,7 +65,7 @@ if [ -f tmplog.txt ] ; then
    rm -f tmplog.txt
 fi
 gzip -cd $i | tail -n 1000 > tmplog.txt
-jtime=`grep "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
+jtime=`grep -a "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
 if [ -z $jtime ] ; then
    echo CAUTION: corrupted task found!
    echo $i
@@ -73,9 +73,9 @@ if [ -z $jtime ] ; then
 fi
 count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
-nevents=`grep "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
+nevents=`grep -a "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
 #echo $nevents events in this daq file
-nanaevents=`grep "StAnalysisMaker::Finish" tmplog.txt | awk '{print $5}'`
+nanaevents=`grep -a "StAnalysisMaker::Finish" tmplog.txt | awk '{print $5}'`
 #echo $nanaevents events accepted for embedding in this daq file
 allevts=`echo "$allevts+$nevents" |bc -l`
 storedevts=`echo "$storedevts+$nanaevents" |bc -l`

@@ -49,6 +49,9 @@ void dEdx(Int_t nevents=1000,
 //     gSystem->Load("St_base");
 //     gSystem->Load("StChain");
   }
+  if (gClassTable->GetID("StTerminateNotified") < 0) {
+    gSystem->Load("libStarRoot");
+  }
   gROOT->LoadMacro("bfc.C");
   //  TString Chain("in dEdxY2 StEvent debug");
   //  TString Chain("in,dEdxY2,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,AlignSectors");
