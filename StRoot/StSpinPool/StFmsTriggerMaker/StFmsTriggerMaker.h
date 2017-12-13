@@ -13,9 +13,14 @@
 class TH2F;
 
 #include <cstring>
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "Board.hh"
 #include "Crate.hh"
 #include "bits.hh"
+#else
+class Board;
+class Crate;
+#endif
 #include "TDatime.h"
 #include "StMaker.h"
 
@@ -126,6 +131,7 @@ private:
 
   // Crates
   enum { NCRATES = 14 };
+#if !defined(__CINT__) && !defined(__CLING__)
 
   Crate crates[NCRATES];
 
@@ -173,7 +179,55 @@ private:
   Board& fs004;
   Board& fs005;
   Board& fs006;
+#else
+  Crate *crates;
 
+  Crate* l1;
+  Crate* fms;
+  Crate* mix;
+  Crate* feq;
+  Crate* qt1;
+  Crate* qt2;
+  Crate* qt3;
+  Crate* qt4;
+
+  // L1 crate
+  Board* fp201;
+
+  // FMS crate
+  Board* fm001;
+  Board* fm002;
+  Board* fm003;
+  Board* fm004;
+  Board* fm005;
+  Board* fm006;
+  Board* fm007;
+  Board* fm008;
+  Board* fm009;
+  Board* fm010;
+  Board* fm011;
+  Board* fm012;
+  Board* fm101;
+  Board* fm102;
+  Board* fm103;
+  Board* fm104;
+
+  // MIX crate
+  Board* fe101;
+
+  // FEQ crate
+  Board* fe001;
+  Board* fe002;
+  Board* fe003;
+  Board* fe004;
+  Board* fs001;
+  Board* fs002;
+  Board* fs003;
+  Board* fs004;
+  Board* fs005;
+  Board* fs006;
+
+#endif
   // QA histograms
   TH2F* hqt1adc;
   TH2F* hqt2adc;
