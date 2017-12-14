@@ -58,7 +58,7 @@ source ${GROUP_DIR}/group_env.csh
 if (-d /net/l402/data/fisyak/STAR) then
 source ${GROUP_DIR}/setup    gcc521
 else
-source ${GROUP_DIR}/setup    gcc492
+#source ${GROUP_DIR}/setup    gcc
 endif
 source ${GROUP_DIR}/setup    32b
 #setup gcc492

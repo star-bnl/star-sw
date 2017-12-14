@@ -88,7 +88,7 @@
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 11;
+const Int_t NMasses = 12;
 const Double_t Masses[NMasses] = {0.93827231,
 				  0.493677,
 				  0.13956995,
@@ -99,10 +99,11 @@ const Double_t Masses[NMasses] = {0.93827231,
 				  2.80923, //GEANT3
 				  3.727417, //GEANT3
 				  0.13956995,
-				  0.93827231*6.94/1.008
+				  0.93827231*6.94/1.008,
+				  0.93827231
 };
-const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2, 9};
-const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li"};
+const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2, 9, 0};
+const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi", "Li", "2p"};
 const Int_t NF = 4;  //          0    1     2   3    4     5   6     7        8      -2        9
 const Char_t *FNames[8] = {"Girrf","Sirrf","Bz","B70","B60","B70M","dNdx","BzM"};
 const Int_t Nlog2dx = 3;
@@ -275,7 +276,7 @@ void bichselG10(const Char_t *type="Bz") {
   TString Type(type);
   TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
   Double_t xmax = 4;
-  for (int h = 0; h < NMasses; h++) { // Masses
+  for (int h = 0; h < NMasses-1; h++) { // Masses
   //  for (int h = 0; h < 7; h++) { // Masses
     Int_t f = 3;
     if      (Type.Contains("BzM",TString::kIgnoreCase))  f = 7;
@@ -300,8 +301,8 @@ void bichselG10(const Char_t *type="Bz") {
     else {
       return;
     }
-    if (h == 9) func->SetParameter(0,-Masses[h]);
-    else        func->SetParameter(0,Masses[h]);
+    if (h == 9 || h == 11) func->SetParameter(0,-Masses[h]);
+    else                   func->SetParameter(0,Masses[h]);
     func->SetParameter(1,1.);
     if (h >= 7 && h < 9) func->SetParameter(1,2.);
     if (h == 10) func->SetParameter(1,3.);

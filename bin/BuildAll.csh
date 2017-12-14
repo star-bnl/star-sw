@@ -6,7 +6,8 @@ switch ($HOSTNAME)
     set list = "gcc521 gcc621";
     breaksw
   case "*bnl.gov":
-    set list = "gcc482 gcc492";
+#    set list = "gcc482 gcc492";
+    set list = "gcc"
     breaksw
 endsw
 foreach gcc (${list})
