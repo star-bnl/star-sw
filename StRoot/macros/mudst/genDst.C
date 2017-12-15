@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.1 2017/12/05 16:47:58 genevb Exp $
+// $Id: genDst.C,v 1.2 2017/12/15 18:36:53 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -201,9 +201,7 @@ void genDst(unsigned int First,
 
     }
 
-    StPicoDstMaker* picoMaker = new StPicoDstMaker(StPicoDstMaker::IoWrite, infile, "picoDst");
-    picoMaker->setVtxMode((int)(StPicoDstMaker::PicoVtxMode::Default));
-    processMaker = (StMaker*) picoMaker;
+    processMaker = (StMaker*) (new StPicoDstMaker(StPicoDstMaker::IoWrite, infile, "picoDst"));
 
   } else if (Options.Contains("vf")) {
 
@@ -316,6 +314,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.2  2017/12/15 18:36:53  genevb
+// Remove explicit function of StPicoDstMaker...params should be passed by attribute
+//
 // Revision 1.1  2017/12/05 16:47:58  genevb
 // Introduce genDst.C for creating new Dsts from MuDsts
 //
