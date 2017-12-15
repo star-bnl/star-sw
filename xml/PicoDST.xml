@@ -4,9 +4,9 @@
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
   setenv NODEBUG yes
-  starver TFG17o
+  starver .DEV2
   setup 64b
-  ln -s ../../.sl* .
+  ln -s $STAR/.sl* .
 #  cd $SCRATCH
 #   pwd
 #  setenv NODEBUG yes

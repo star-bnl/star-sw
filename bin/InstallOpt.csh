@@ -196,7 +196,8 @@ foreach pkg ($list)
       case "qt*":
       setenv CXXFLAGS "${CXXFLAGSD}"
       setenv CFLAGS   "${CFLAGSD}"
-          ./configure --prefix=$XOPTSTAR -no-glib <<EOF
+          if (! -d XOPTSTAR/qt4) mkdir -p XOPTSTAR/qt4
+          ./configure --prefix=$XOPTSTAR/qt4 -no-glib <<EOF
 #          ./configure --prefix=$XOPTSTAR -no-glib -no-qt3support <<EOF
 o
 yes
