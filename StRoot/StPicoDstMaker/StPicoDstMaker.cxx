@@ -67,11 +67,12 @@
 #include "StPicoDstMaker/StPicoDst.h"
 
 
-//_____________________________________________________________________________
+//_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
   mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
+  mTpcVpdVzDiffCut(3),
   mBField(0),
   mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
@@ -87,19 +88,22 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
 
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
 }
-//_____________________________________________________________________________
+
+//_________________
 StPicoDstMaker::StPicoDstMaker(PicoIoMode ioMode, char const* fileName, char const* name) : StPicoDstMaker(name)
 {
   StMaker::m_Mode = ioMode;
   mInputFileName = fileName;
 }
-//_____________________________________________________________________________
+
+//_________________
 StPicoDstMaker::~StPicoDstMaker()
 {
   delete mChain;
   delete mPicoDst;
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::clearArrays()
 {
   for (int i = 0; i < StPicoArrays::NAllPicoArrays; ++i)
@@ -138,7 +142,8 @@ void StPicoDstMaker::SetStatus(char const* branchNameRegex, int enable)
   if (StMaker::m_Mode == PicoIoMode::IoRead)
     setBranchAddresses(mChain);
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::setBranchAddresses(TChain* chain)
 {
   if (!chain) return;
@@ -162,7 +167,8 @@ void StPicoDstMaker::setBranchAddresses(TChain* chain)
   }
   mTTree = mChain->GetTree();
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::streamerOff()
 {
   // This is to to save space on the file. No need for TObject bits for this structure.
@@ -181,7 +187,8 @@ void StPicoDstMaker::streamerOff()
   StPicoBEmcPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoMtdPidTraits::Class()->IgnoreTObjectStreamer();
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::createArrays()
 {
   for (int i = 0; i < StPicoArrays::NAllPicoArrays; ++i)
@@ -191,7 +198,8 @@ void StPicoDstMaker::createArrays()
 
   mPicoDst->set(mPicoArrays);
 }
-//_____________________________________________________________________________
+
+//_________________
 Int_t StPicoDstMaker::Init()
 {
   switch (StMaker::m_Mode)
@@ -240,22 +248,24 @@ Int_t StPicoDstMaker::Init()
   return kStOK;
 }
 
-
+//_________________
 int StPicoDstMaker::setVtxModeAttr()
 {
-  if (strcmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0)
+  mTpcVpdVzDiffCut = DAttr("TpcVpdVzDiffCut"); //Read the Tpc-Vpd cut from the input
+
+  if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0)
   {
     setVtxMode(PicoVtxMode::Default);
     LOG_INFO << " PicoVtxDefault is being used " << endm;
     return kStOK;
   }
-  else if (strcmp(SAttr("PicoVtxMode"), "PicoVtxVpd") == 0)
+  else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxVpd") == 0)
   {
     setVtxMode(PicoVtxMode::Vpd);
     LOG_INFO << " PicoVtxVpd is being used " << endm;
     return kStOK;
   }
-  else if (strcmp(SAttr("PicoVtxMode"), "PicoVtxVpdOrDefault") == 0)
+  else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxVpdOrDefault") == 0)
   {
     setVtxMode(PicoVtxMode::VpdOrDefault);
     LOG_INFO << " PicoVtxVpdOrDefault is being used " << endm;
@@ -265,7 +275,7 @@ int StPicoDstMaker::setVtxModeAttr()
   return kStErr;
 }
 
-//_____________________________________________________________________________
+//_________________
 Int_t StPicoDstMaker::InitRun(Int_t const runnumber)
 {
   if (StMaker::m_Mode == PicoIoMode::IoWrite)
@@ -279,7 +289,7 @@ Int_t StPicoDstMaker::InitRun(Int_t const runnumber)
   return kStOK;
 }
 
-//_____________________________________________________________________________
+//_________________
 Bool_t StPicoDstMaker::initMtd(Int_t const runnumber)
 {
   // Oct. 1st (approx. 273rd day) is the start of a new running year
@@ -396,7 +406,7 @@ Bool_t StPicoDstMaker::initMtd(Int_t const runnumber)
   return kTRUE;
 }
 
-//_____________________________________________________________________________
+//_________________
 Int_t StPicoDstMaker::Finish()
 {
   if (StMaker::m_Mode == PicoIoMode::IoRead)
@@ -410,7 +420,8 @@ Int_t StPicoDstMaker::Finish()
   }
   return kStOK;
 }
-//_____________________________________________________________________________
+
+//_________________
 Int_t StPicoDstMaker::openRead()
 {
   if (!mChain) mChain = new TChain("PicoDst");
@@ -465,7 +476,8 @@ Int_t StPicoDstMaker::openRead()
 
   return kStOK;
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::openWrite()
 {
 
@@ -487,7 +499,8 @@ void StPicoDstMaker::openWrite()
     mTTree->Branch(StPicoArrays::picoArrayNames[i], &mPicoArrays[i], bufsize, mSplit);
   }
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::initEmc()
 {
   mEmcPosition = new StEmcPosition();
@@ -497,7 +510,8 @@ void StPicoDstMaker::initEmc()
     mEmcGeom[i] = StEmcGeom::getEmcGeom(detname[i].Data());
   }
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::buildEmcIndex()
 {
   StEmcDetector* mEmcDet = mMuDst->emcCollection()->detector(kBarrelEmcTowerId);
@@ -520,7 +534,8 @@ void StPicoDstMaker::buildEmcIndex()
     }
   }
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::finishEmc()
 {
   delete mEmcPosition;
@@ -528,20 +543,23 @@ void StPicoDstMaker::finishEmc()
 
   std::fill_n(mEmcGeom, 4, nullptr);
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::Clear(char const*)
 {
   if (StMaker::m_Mode == PicoIoMode::IoRead)
     return;
   clearArrays();
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::closeRead()
 {
   delete mChain;
   mChain = nullptr;
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::closeWrite()
 {
   if (StMaker::m_Mode == PicoIoMode::IoWrite)
@@ -553,7 +571,8 @@ void StPicoDstMaker::closeWrite()
     }
   }
 }
-//_____________________________________________________________________________
+
+//_________________
 int StPicoDstMaker::Make()
 {
   int returnStarCode = kStOK;
@@ -567,7 +586,8 @@ int StPicoDstMaker::Make()
 
   return returnStarCode;
 }
-//_____________________________________________________________________________
+
+//_________________
 Int_t StPicoDstMaker::MakeRead()
 {
   if (!mChain)
@@ -575,11 +595,24 @@ Int_t StPicoDstMaker::MakeRead()
     LOG_WARN << " No input files ... ! EXIT" << endm;
     return kStWarn;
   }
-  mChain->GetEntry(mEventCounter++);
+
+  int bytes = mChain->GetEntry(mEventCounter++);
+  while( bytes <= 0) {
+    if( mEventCounter >= mChain->GetEntriesFast() ) {
+      return kStEOF;
+    }
+
+    LOG_WARN << "Encountered invalid entry or I/O error while reading event "
+	     << mEventCounter << " from \"" << mChain->GetName() << "\" input tree\n";
+    bytes = mChain->GetEntry(mEventCounter++);
+  }
+
   fillEventHeader();
+
   return kStOK;
 }
-//_____________________________________________________________________________
+
+//_________________
 Int_t StPicoDstMaker::MakeWrite()
 {
   StMaker::WhiteBoard("muDst", &mMuDst);
@@ -645,6 +678,7 @@ Int_t StPicoDstMaker::MakeWrite()
   return kStOK;
 }
 
+//_________________
 void StPicoDstMaker::fillEventHeader() const
 {
   StPicoEvent* event=StPicoDst::event();
@@ -657,7 +691,7 @@ void StPicoDstMaker::fillEventHeader() const
   header->SetGMTime( (UInt_t) (event->time()) );
 }
 
-//_____________________________________________________________________________
+//_________________
 void StPicoDstMaker::fillTracks()
 {
   // We save primary tracks associated with the selected primary vertex only
@@ -733,7 +767,7 @@ void StPicoDstMaker::fillTracks()
   }
 }
 
-//_____________________________________________________________________________
+//_________________
 bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid)
 {
   *id = -1;
@@ -911,13 +945,15 @@ bool StPicoDstMaker::getBEMC(const StMuTrack* t, int* id, int* adc, float* ene, 
 
   return kTRUE;
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::fillEvent()
 {
   int counter = mPicoArrays[StPicoArrays::Event]->GetEntries();
   new((*(mPicoArrays[StPicoArrays::Event]))[counter]) StPicoEvent(*mMuDst);
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::fillEmcTrigger()
 {
 
@@ -1003,15 +1039,14 @@ void StPicoDstMaker::fillEmcTrigger()
   }
 }
 
-//_____________________________________________________________________________
+//_________________
 void StPicoDstMaker::fillMtdTrigger()
 {
   int counter = mPicoArrays[StPicoArrays::MtdTrigger]->GetEntries();
   new((*(mPicoArrays[StPicoArrays::MtdTrigger]))[counter]) StPicoMtdTrigger(*mMuDst, mQTtoModule, mQTSlewBinEdge, mQTSlewCorr);
 }
 
-
-//_____________________________________________________________________________
+//_________________
 void StPicoDstMaker::fillBTowHits()
 {
   for (int i = 0; i < 4800; ++i)
@@ -1028,7 +1063,8 @@ void StPicoDstMaker::fillBTowHits()
     new((*(mPicoArrays[StPicoArrays::BTowHit]))[counter]) StPicoBTowHit(softId, adc, energy);
   }
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::fillBTofHits()
 {
   for (unsigned int i = 0; i < mMuDst->numberOfBTofHit(); ++i)
@@ -1041,7 +1077,8 @@ void StPicoDstMaker::fillBTofHits()
     new((*(mPicoArrays[StPicoArrays::BTofHit]))[counter]) StPicoBTofHit(cellId);
   }
 }
-//_____________________________________________________________________________
+
+//_________________
 void StPicoDstMaker::fillMtdHits()
 {
   // fill MTD hits
@@ -1158,6 +1195,7 @@ void StPicoDstMaker::fillMtdHits()
  *
  * Returns `false` otherwise.
  */
+//_________________
 bool StPicoDstMaker::selectVertex()
 {
   StMuPrimaryVertex* selectedVertex = nullptr;
@@ -1173,6 +1211,7 @@ bool StPicoDstMaker::selectVertex()
     if(mVtxMode == PicoVtxMode::VpdOrDefault)
     {
       mMuDst->setVertexIndex(0);
+      selectedVertex = mMuDst->primaryVertex();
     }
 
     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
@@ -1186,7 +1225,7 @@ bool StPicoDstMaker::selectVertex()
         StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
         if (!vtx) continue;
 
-        if (fabs(vzVpd - vtx->position().z()) < 3.)
+        if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut)
         {
           mMuDst->setVertexIndex(iVtx);
           selectedVertex = mMuDst->primaryVertex();
