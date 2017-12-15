@@ -1,5 +1,5 @@
 *
-* $Id: aslgetba.age,v 1.2 2016/04/22 14:26:06 jwebb Exp $
+* $Id: aslgetba.age,v 1.3 2017/12/14 22:38:23 jwebb Exp $
 *
 * $Name:  $
 *
@@ -22,11 +22,13 @@
 #include "geant321/gcbank.inc"
 #include "geant321/gcunit.inc"
 *
-      INTEGER       NPMAX,Npar,LdetP,I,PAR(NPmax)
-      REAL          DUMMY/-787878/
+      INTEGER NPMAX,Npar,LdetP,I,PAR(NPmax)
+      REAL, volatile :: DUMMY = -787878
       CHARACTER*(*) CHdet,CBank
       SAVE          LdetP
-*
+
+      volatile :: iQ, Q, npar, ldetp
+
    entry SLGETBA (CHDET,CBank,NPMAX,Npar,PAR)
 *
 * this is not completely correct because LdetP should be a protected link
@@ -37,9 +39,8 @@
 *
    Check " if the bank is there"  LdetP>0
    Npar=MIN(IQ(LdetP-1),ABS(NPMAX))
-c  DO I=1,Npar  { IF (Q(LdetP+I)!=DUMMY) PAR(I)=IQ(LdetP+I) }
-   FORALL ( I=1:NPAR, DUMMY /= Q(ldetp+I) )
-       PAR(I) = iQ(ldetp+I)
-   END FORALL
+   DO I=1,Npar  { 
+      IF (Q(LdetP+I)!=DUMMY) PAR(I)=IQ(LdetP+I) 
+   }
    END
 
