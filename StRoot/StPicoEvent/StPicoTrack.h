@@ -40,16 +40,18 @@ public:
   StThreeVectorF gMom(StThreeVectorF const& pVtx, float B) const;
   /// origin at DCA to StPicoEvent::mPrimaryVertex
   StThreeVectorF const& origin() const;
-  /// dca point to StPicoEvent::mPrimaryVertex in global coordinates
+  /// dca point to StPicoEvent::mPrimaryVertex in global coordinates .
+  /// It is the same as origin. To get gDCA = origin(or dcaPoint) + prim.vtx.position
   StThreeVectorF const& dcaPoint() const;
   Short_t charge() const;
+  Int_t   nHits() const;       //if(isPrimary)? nHitsFit-1 : nHits=nHitsFit 
   Int_t   nHitsFit() const;
   Int_t   nHitsMax() const;
   Int_t   nHitsDedx() const;
   UInt_t  hftHitsMap() const;
   Float_t dEdx() const;
-  Float_t dNdx() const;
-  Float_t dNdxError() const;
+  //Float_t dNdx() const;
+  //Float_t dNdxError() const;
   Float_t nSigmaPion() const;
   Float_t nSigmaKaon() const;
   Float_t nSigmaProton() const;
@@ -87,12 +89,11 @@ protected:
   StThreeVectorF mGMomentum;  // global momentum at point of DCA to StPicoEvent::mPrimaryVertex
   StThreeVectorF mOrigin;     // origin at dca to primary vertex
   Float_t  mDedx;             // dEdx in KeV/cm.
-  Float_t  mDnDx;             // fitted dN/dx
-  Float_t  mDnDxError;        // fitted dN/dx error
-  Char_t   mNHitsFit;         // nHitsFit - TPC
-  Char_t   mNHitsMax;         // nHitsMax - TPC
+  //Float_t  mDnDx;             // fitted dN/dx
+  //Float_t  mDnDxError;        // fitted dN/dx error
+  Char_t   mNHitsFit;         // charge * nHitsFit - TPC; if(pTrk) ? nHitsFit=nHits+1 : nHitsFit=nHits
+  UChar_t  mNHitsMax;         // nHitsMax - TPC
   UChar_t  mNHitsDedx;        // nHitsDedx - TPC
-  Char_t   mCharge;
   Short_t  mNSigmaPion;       // nsigmaPi * 100
   Short_t  mNSigmaKaon;       // nsigmaK * 100
   Short_t  mNSigmaProton;     // nsigmaP * 100
@@ -104,7 +105,7 @@ protected:
   Short_t  mBTofPidTraitsIndex; // index of the BTOF pidTratis in the event
   Short_t  mMtdPidTraitsIndex;  // index of the MTD  pidTratis in the event
 
-  ClassDef(StPicoTrack, 1)
+  ClassDef(StPicoTrack, 2)
 };
 
 inline void StPicoTrack::setBEmcPidTraitsIndex(Int_t index) { mBEmcPidTraitsIndex = (Short_t)index; }
@@ -118,14 +119,15 @@ inline StThreeVectorF const& StPicoTrack::pMom() const { return mPMomentum; }
 inline StThreeVectorF const& StPicoTrack::gMom() const { return mGMomentum; }
 inline StThreeVectorF const& StPicoTrack::origin() const { return mOrigin; }
 inline StThreeVectorF const& StPicoTrack::dcaPoint() const { return mOrigin; }
-inline Short_t StPicoTrack::charge() const { return static_cast<Short_t>(mCharge); }
+inline Short_t StPicoTrack::charge() const { return (mNHitsFit > 0) ? 1 : -1; }
+inline Int_t   StPicoTrack::nHits() const { return ( isPrimary() ) ? (nHitsFit() - 1) : nHitsFit(); }
 inline Int_t   StPicoTrack::nHitsFit() const { return (mNHitsFit > 0) ? (Int_t)mNHitsFit : (Int_t)(-1 * mNHitsFit); }
 inline Int_t   StPicoTrack::nHitsMax() const { return mNHitsMax; }
 inline Int_t   StPicoTrack::nHitsDedx() const { return mNHitsDedx; }
 inline UInt_t  StPicoTrack::hftHitsMap() const { return topologyMap(0) >> 1 & 0x7F; }
 inline Float_t StPicoTrack::dEdx() const { return mDedx;}
-inline Float_t StPicoTrack::dNdx() const { return mDnDx;}
-inline Float_t StPicoTrack::dNdxError() const { return mDnDxError;}
+//inline Float_t StPicoTrack::dNdx() const { return mDnDx;}
+//inline Float_t StPicoTrack::dNdxError() const { return mDnDxError;}
 inline Float_t StPicoTrack::nSigmaPion() const { return mNSigmaPion / 100.f; }
 inline Float_t StPicoTrack::nSigmaKaon() const { return mNSigmaKaon / 100.f; }
 inline Float_t StPicoTrack::nSigmaProton() const { return mNSigmaProton / 100.f; }
