@@ -13,8 +13,9 @@
 StPicoTrack::StPicoTrack() : TObject(),
   mId(0),
   mChi2(std::numeric_limits<unsigned short>::max()),
-  mPMomentum(0., 0., 0.), mGMomentum(0., 0., 0.), mOrigin(0., 0., 0.),
-  mDedx(0.), mDnDx(0.), mDnDxError(0.), mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
+  mPMomentum(0., 0., 0.), mGMomentum(0., 0., 0.), mOrigin(0., 0., 0.), 
+  mDedx(0.), /* mDnDx(0.), mDnDxError(0.), */
+  mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0),
   mNSigmaPion(std::numeric_limits<short>::max()),
   mNSigmaKaon(std::numeric_limits<short>::max()),
   mNSigmaProton(std::numeric_limits<short>::max()),
@@ -49,30 +50,29 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   mOrigin = gHelix.origin();
 
   mDedx      = gTrk->dEdx() * 1.e6;
-  mDnDx      = gTrk->probPidTraits().dNdxFit();
-  mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
+  //mDnDx      = gTrk->probPidTraits().dNdxFit();
+  //mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
 
   int flag = gTrk->flag();
   if (flag / 100 < 7) // TPC tracks
   {
-    mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId));
+    mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId) * gTrk->charge());
     mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kTpcId));
   }
   else     // FTPC tracks
   {
     if (gTrk->helix().momentum(B * kilogauss).pseudoRapidity() > 0.)
     {
-      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId));
+      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId) * gTrk->charge());
       mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcWestId));
     }
     else
     {
-      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcEastId));
+      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcEastId) * gTrk->charge());
       mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcEastId));
     }
   }
-  mNHitsDedx = (Char_t)(gTrk->nHitsDedx());
-  mCharge    = (Char_t)(gTrk->charge());
+  mNHitsDedx = (UChar_t)(gTrk->nHitsDedx());
   mNSigmaPion     = (fabs(gTrk->nSigmaPion() * 100.)     > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaPion() * 100.));
   mNSigmaKaon     = (fabs(gTrk->nSigmaKaon() * 100.)     > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaKaon() * 100.));
   mNSigmaProton   = (fabs(gTrk->nSigmaProton() * 100.)   > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrk->nSigmaProton() * 100.));
