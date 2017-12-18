@@ -39,10 +39,12 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   detDb->SetActive(kFALSE);
   StMaker *tpcDB = chain->Maker("tpcDB");
   tpcDB->SetActive(kFALSE);
+#ifdef __Y2010__
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
   PicoDstMaker->SetGoodTriggers("");
   PicoDstMaker->SetVxZrange(-70,70);
   PicoDstMaker->SetVxRmax(2);
+#endif
 #if 0  
   if(!creatingPhiWgt&&emcMode) {
     StEmcADCtoEMaker *adc2e = (StEmcADCtoEMaker *) chain->Maker("bemcA2E");
