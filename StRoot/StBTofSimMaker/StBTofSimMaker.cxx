@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.12 2017/10/20 17:50:33 smirnovd Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.13 2017/12/18 23:32:27 jdb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -607,7 +607,7 @@ int StBTofSimMaker::fillEvent()
               mBTofCollection->setHeader(new StBTofHeader(aHead));
          }
         else {
-        tofHeader = (StBTofHeader *) mBTofCollection->tofHeader();
+        	tofHeader = (StBTofHeader *) mBTofCollection->tofHeader();
         }
 
         LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
@@ -869,9 +869,15 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
     else {
         if ( mUseVpdStart && btofColl ) {   //!< VpdSimMaker not present, check for vpdstart, add vpd resolution to tof
             mBTofHeader = btofColl->tofHeader();
-            int mNWest = mBTofHeader->numberOfVpdHits(west);
-            int mNEast = mBTofHeader->numberOfVpdHits(east);
-            tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
+
+            if ( mBTofHeader != NULL ){
+            	int mNWest = mBTofHeader->numberOfVpdHits(west);
+            	int mNEast = mBTofHeader->numberOfVpdHits(east);
+            	tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
+            } else {
+            	tof -= 999;
+            }
+            
         }
         else {
             // do nothing
