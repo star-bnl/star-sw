@@ -40,8 +40,8 @@ foreach f (`ls -1d /star/u/kehw/dNdxFit/StRoot/StdEdxY2Maker/*.*`)
    diff -D __KEHW__ ${f} ${b} > ${b}.KEHW
 end
 ================================================================================
-set day = 128
-foreach d ( `ls -1d ~/scratch2/MuDst/2016/${day}/*` )
+set day = 116
+foreach d ( `ls -1d /gpfs02/eic/ayk/STAR/reco/MuDst/2016/MuDst/2016/${day}/*` )
   set b = `basename $d`; if (! -d ${day}/${b}) mkdir -p ${day}/${b}; cd ${day}/${b};
   lsf ~/xml/PicoDST.xml
   cd -;
@@ -87,7 +87,6 @@ end
 
 foreach dayd (`ls -1d ~/MuDst/2016/???`)
   set day = `basename ${dayd}`;	
-  echo ${day}
   cd ~/Pico/2016/
   if (! -d ${day}) mkdir ${day}
   cd  ${day}
@@ -109,8 +108,12 @@ ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
 cd ~/Pico/2016
 foreach d (`ls -1d */*/Done | awk -F\/ '{print $1"/"$2}'`)
   echo ${d}
-  ls -ltr ~/MuDst/2016/${d} | tail -1
+  ls -ltr ~/MuDst/2016/${d}  | tail -1
+  set f = `ls -ltr ~/MuDst/2016/${d} | tail -1 | awk '{print $9}' | sed -e 's/Mu/pico/'`
+  if (! -r ${d}/${f}) echo "${d}/${f} is not yet Done"
 end 
+================================================================================
+ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
 ================================================================================
 cd ~/Pico/2016
 foreach f (`ls -1d ???/1*/Done`)
@@ -123,7 +126,18 @@ foreach f (`ls -1d ???/1*/Done`)
   cd -;
 end
 ================================================================================
-grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%i\n", n)}'
+grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%iM\n", n/1.e6)}'
 ================================================================================
 cd 076; 
 2016Pico2hpss.pl | hsi >& hpss.log &
+================================================================================
+
+
+cd ~/Pico/2016
+foreach d (`ls -1d 12?/1*`)
+  cd ${d}; 
+  if (! -r Chain.log) then	
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; 
+  endif
+  cd -;
+end
