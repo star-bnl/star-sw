@@ -131,11 +131,31 @@ bool ViewCell::Plot(const bool use3d) {
     if (!use3d) m_canvas->SetTitle(m_label.c_str());
     if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
-  if (!use3d) {
-    m_canvas->Range(x0 - 0.1 * (x1 - x0), y0 - 0.1 * (y1 - y0),
-                    x1 + 0.1 * (x1 - x0), y1 + 0.1 * (y1 - y0));
-  }
   m_canvas->cd();
+
+  if (!use3d) {
+    bool empty = false;
+    if (!gPad || (gPad->GetListOfPrimitives()->GetSize() == 0 &&
+                  gPad->GetX1() == 0 && gPad->GetX2() == 1 &&
+                  gPad->GetY1() == 0 && gPad->GetY2() == 1)) {
+      empty = true;
+    }
+    const double bm = m_canvas->GetBottomMargin();
+    const double lm = m_canvas->GetLeftMargin();
+    const double rm = m_canvas->GetRightMargin();
+    const double tm = m_canvas->GetTopMargin();
+    if (!empty) {
+      TPad* pad = new TPad("cell", "", 0, 0, 1, 1);
+      pad->SetFillStyle(0);
+      pad->SetFrameFillStyle(0);
+      pad->Draw();
+      pad->cd();
+    }
+    gPad->Range(x0 - (x1 - x0) * (lm / (1. - rm - lm)),
+                y0 - (y1 - y0) * (bm / (1. - tm - lm)),
+                x1 + (x1 - x0) * (rm / (1. - rm - lm)),
+                y1 + (y1 - y0) * (tm / (1. - tm - lm)));
+  }
 
   // Get the cell type.
   const std::string cellType = m_component->GetCellType();
@@ -198,13 +218,11 @@ bool ViewCell::Plot(const bool use3d) {
       }
     }
     for (int nx = nMinX; nx <= nMaxX; ++nx) {
+      const double x = xw + nx * sx;
+      if (x + 0.5 * dw <= x0 || x - 0.5 * dw >= x1) continue;
       for (int ny = nMinY; ny <= nMaxY; ++ny) {
-        const double x = xw + nx * sx;
         const double y = yw + ny * sy;
-        if (x + 0.5 * dw <= x0 || x - 0.5 * dw >= x1 || y + 0.5 * dw <= y0 ||
-            y - 0.5 * dw >= y1) {
-          continue;
-        }
+        if (y + 0.5 * dw <= y0 || y - 0.5 * dw >= y1) continue;
         if (use3d) {
           TGeoVolume* wire = m_geo->MakeTube("Wire", m_geo->GetMedium("Metal"),
                                              0., 0.5 * dw, 
@@ -254,6 +272,7 @@ bool ViewCell::Plot(const bool use3d) {
                                        new TGeoTranslation(x, 0., 0.));
       } else {
         TLine line;
+        line.SetDrawOption("same");
         line.DrawLine(x, y0, x, y1);
       }
     }
@@ -278,6 +297,7 @@ bool ViewCell::Plot(const bool use3d) {
                                        new TGeoTranslation(0., y, 0.));
       } else {
         TLine line;
+        line.SetDrawOption("same");
         line.DrawLine(x0, y, x1, y);
       }
     }
@@ -338,22 +358,24 @@ void ViewCell::PlotWire(const double x, const double y, const double d,
     }
     TMarker marker;
     marker.SetMarkerStyle(markerStyle);
-    marker.SetDrawOption("P");
+    marker.SetDrawOption("Psame");
     marker.DrawMarker(x, y);
     return;
   }
 
-  TEllipse* circle = new TEllipse(x, y, 0.5 * d);
-  circle->Draw("");
+  TEllipse circle;
+  circle.SetDrawOption("same");
+  circle.DrawEllipse(x, y, 0.5 * d, 0.5 * d, 0, 0, 360); 
 }
 
 void ViewCell::PlotTube(const double x0, const double y0, const double r,
                         const int n) {
 
   if (n <= 0) {
-    TEllipse* circle = new TEllipse(x0, y0, r);
-    circle->SetFillStyle(0);
-    circle->Draw("");
+    TEllipse circle;
+    circle.SetDrawOption("same");
+    circle.SetFillStyle(0);
+    circle.DrawEllipse(x0, y0, r, r, 0, 0, 360); 
     return;
   }
 
@@ -363,7 +385,7 @@ void ViewCell::PlotTube(const double x0, const double y0, const double r,
     const double y = y0 + r * sin(i * TwoPi / double(n));
     pline->SetPoint(i, x, y);
   }
-  pline->Draw("");
+  pline->Draw("same");
 }
 
 }

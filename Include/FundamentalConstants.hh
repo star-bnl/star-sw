@@ -12,6 +12,9 @@ static const double TwoPi = 2. * Pi;
 static const double HalfPi = 0.5 * Pi;
 static const double Pi2 = Pi * Pi;
 
+static const double DegreeToRad = Pi / 180.;
+static const double RadToDegree = 180. / Pi;
+
 // Euler-Mascheroni constant
 static const double Gamma = 0.577215664901532861;
 

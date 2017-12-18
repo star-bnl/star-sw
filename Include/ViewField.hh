@@ -67,6 +67,15 @@ class ViewField {
   void DisableDebugging() { m_debug = false; }
 
  private:
+  enum PlotType {
+    Potential = 0,
+    Magnitude,
+    Ex,
+    Ey,
+    Ez,
+    Unknown
+  };
+
   std::string m_className;
 
   static const unsigned int m_nMaxContours = 50;
@@ -115,8 +124,8 @@ class ViewField {
   void CreateFunction();
   void CreateProfileFunction();
   void CreateFunctionWeightingField();
-  int SetupFunction(const std::string& option, TF2* f);
-  void SetupCanvas(const bool twod);
+  PlotType SetupFunction(const std::string& option, TF2* f);
+  void SetupCanvas();
 };
 }
 #endif
