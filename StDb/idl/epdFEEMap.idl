@@ -16,5 +16,5 @@ struct epdFEEMap {
   short receiver_board[768]; /* Receiver board # 1...6... undefined -1 */
   short receiver_board_channel[768]; /* Re. brd ch 1...16, unsigned -1*/
   short camac_crate_address[768]; /* Address of CAMAC crate */
-  double wire_1_id[768]; /* 1_wire_id, undefined -1 */
+  unsigned long wire_1_id[1536]; /* 1_wire_id, undefined -1 */
 };
