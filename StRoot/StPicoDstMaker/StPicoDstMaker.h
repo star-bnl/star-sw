@@ -126,7 +126,6 @@ private:
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
   bool selectVertex();
-  Float_t   mTpcVpdVzDiffCut;
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches
@@ -139,6 +138,7 @@ private:
   StEmcPosition*   mEmcPosition;
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
+  Float_t   mTpcVpdVzDiffCut;
 
   Float_t    mBField;
 

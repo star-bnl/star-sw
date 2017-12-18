@@ -1315,7 +1315,7 @@ bool StPicoDstMaker::selectVertex() {
       Float_t vzVpd = -999;
       if (mBTofHeader && TMath::Abs(mBTofHeader->vpdVz()) < 200) vzVpd = mBTofHeader->vpdVz();
       if (mVtxMode == PicoVtxMode::Vpd && vzVpd < 200) continue;
-      if (vzVpd >= -200 && TMath::Abs(vzVpd - vtx->position().z()) >= 3.) continue;
+      if (vzVpd >= -200 && mTpcVpdVzDiffCut > 0 && TMath::Abs(vzVpd - vtx->position().z()) >= mTpcVpdVzDiffCut) continue;
       mMuDst->setVertexIndex(iVtx);
       selectedVertex = mMuDst->primaryVertex();
       break;
