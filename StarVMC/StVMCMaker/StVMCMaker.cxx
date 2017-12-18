@@ -335,6 +335,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
 Int_t StVMCMaker::Make(){
   fRndmSaved = gRandom;
   gRandom =  fRndm; 
+  LOG_INFO << "Random Seed: " << gRandom->GetSeed() << endm;
   if (! fInitRun) InitRun(fRunNo);
   fEventNo++;
   if (fEvtHddr && ! IAttr("Don'tTouchTimeStamp")) {
