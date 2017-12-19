@@ -29,7 +29,8 @@ public:
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
 
   StPicoDstMaker(char const* name = "PicoDst");
-  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
+  //  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
+  StPicoDstMaker(Int_t ioMode, char const* fileName = "", char const* name = "PicoDst");
   virtual ~StPicoDstMaker();
 
   virtual Int_t Init();

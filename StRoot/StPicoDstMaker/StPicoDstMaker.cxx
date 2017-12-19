@@ -108,7 +108,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
 }
 //_____________________________________________________________________________
-StPicoDstMaker::StPicoDstMaker(PicoIoMode ioMode, char const* fileName, char const* name) : StPicoDstMaker(name)
+StPicoDstMaker::StPicoDstMaker(Int_t ioMode, char const* fileName, char const* name) : StPicoDstMaker(name)
 {
   StMaker::m_Mode = ioMode;
   mInputFileName = fileName;
