@@ -40,7 +40,7 @@ static inline unsigned long long bswap_64(unsigned long long x) {
 
 using namespace std;
 
-static const char* crateNames[] = { 0, "L1", "BC1", "MXQ", "MIX", "BCW", "BCE", "FEQ", "BBC", "BBQ", "FMS", "QT1", "QT2", "QT3", "QT4" };
+//static const char* crateNames[] = { 0, "L1", "BC1", "MXQ", "MIX", "BCW", "BCE", "FEQ", "BBC", "BBQ", "FMS", "QT1", "QT2", "QT3", "QT4" };
 
 // L1 crate
 const int TF201_BASE_ADDRESS = 0x10000000;

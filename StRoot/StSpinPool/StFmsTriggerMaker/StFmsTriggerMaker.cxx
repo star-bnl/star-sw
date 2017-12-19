@@ -712,12 +712,12 @@ void StFmsTriggerMaker::writeFmsLayer1ToFpdLayer2(Crate& sim, int t)
 int StFmsTriggerMaker::loadRegisters(int runNumber)
 {
   MYSQL mysql;
-  char* host1 = "dbbak.starp.bnl.gov";
-  char* host2 = "onldb2.starp.bnl.gov";
+  const char* host1 = "dbbak.starp.bnl.gov";
+  const char* host2 = "onldb2.starp.bnl.gov";
   const char* user = "";
   const char* pass = "";
   // See http://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
-  char* host = host1;
+  const char* host = host1;
   int year;
   if(mForceRun==0){ 
     mDBTime=GetDBTime(); 
