@@ -675,6 +675,7 @@ class StarGeometry(Handler):
         public:
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
         static TDataSet* Construct( const char* name = "%s" );
+        static bool      List     ( const char* name = "%s");
         StarGeometry(){ /* nada */ };
         virtual ~StarGeometry(){ /* nada */ }
         private:
@@ -691,7 +692,7 @@ class StarGeometry(Handler):
         ClassDef(Geometry,1);
         };
 #endif        
-        """%self.tag
+        """%(self.tag,self.tag)
         document.head(header)
 
         implement1 = """
@@ -713,6 +714,21 @@ class StarGeometry(Handler):
         document.impl( 'return (TDataSet*)dataset;', unit='global' )
         document.impl( '};',              unit='global' )        
         
+        implement1 = """
+        bool   StarGeometry::List( const char* name )
+        {
+        std::string tag = name;
+        bool all = name==std::string("all");
+        bool found = false;
+        """
+        document.impl( implement1, unit='global' )
+        for geom in self.geoms:
+            name    = geom.name;
+            output = '             if (all||tag=="%s") { %s::list(); found = true; }'  %(name,name)         
+            document.impl( output, unit='global' )
+        document.impl( 'if ( 0==found ) LOG_INFO << tag << " not defined" << endm;', unit='global' )
+        document.impl( 'return true;};',              unit='global' )        
+        
 
         
         
@@ -728,7 +744,8 @@ class Geometry( Handler ):
         self.constructs = []
         self.sys    = [] # subsystems
         self.config = {} # subsystem configuration
-        self.includes = [] # include files for dstector tags        
+        self.includes = ['StMessMgr.h'] # include files for dstector tags
+
         Handler.__init__(self)
 
     def addModule(self, module):
@@ -768,6 +785,7 @@ class Geometry( Handler ):
 #       document.head( 'namespace Star { //$NMSPC' )
         document.head( 'struct %s {' % self.name )
         document.head( 'static bool construct();' )
+        document.head( 'static bool list();' )
         #document.head( '#if 0\n  ClassDef(%s,1);\n#endif\n'%self.name )
         document.head( '};' )
 #       document.head( '};' )
@@ -776,7 +794,8 @@ class Geometry( Handler ):
 
         for i in self.includes:
             document.impl('#include "%s"'%i, unit='global' )
- 
+
+        # Setup the builder code
         document.impl( 'bool %s::construct() {'%self.name, unit='global' )
         document.impl( 'bool result = true;',                    unit='global' )
         # Loop over detector tags.  Create in order and construct
@@ -788,17 +807,21 @@ class Geometry( Handler ):
         document.impl( 'return result;\n',                      unit='global' )
         document.impl( '};',                                      unit='global' )
 
-        ## for pmod in self.pmodules:
-        ##     document.impl( 'if(_%s) _%s -> ConstructGeometry(); // Make template function' % (pmod,pmod), unit='global' )
-        ## document.impl( 'return result;', unit='global' )
-        ## document.impl( '}', unit='global' )
+        # Setup code to list
+        document.impl( 'bool %s::list() {'%self.name, unit='global' )
+        document.impl( 'bool result = true;',                    unit='global' )
+        # Loop over detector tags.  Create in order and construct
+        for sub in self.sys:
+            subup = sub.upper();
+            cfg = self.config[sub]
+            #ocument.impl( '%s::%s::setup();'%(subup,cfg), unit='global' )
+            #ocument.impl( '%s::%s::construct();'%(subup,cfg), unit='global' )
+            document.impl( 'LOG_INFO << "%s %s" << endm;'%(subup,cfg), unit='global' )
+            document.impl( '%s::%s::list();'%(subup,cfg), unit='global' );
+        document.impl( 'return result;\n',                      unit='global' )
+        document.impl( '};',                                      unit='global' )
         
-        ## print self.name
-        ## print self.docum
-        ## for mod in self.modules:
-        ##     print mod
-        ## for pmod in self.pmodules:
-        ##     print pmod
+
     
 class Construct( Handler ):
     def __init__(self):
@@ -889,13 +912,13 @@ class Setup( Handler ):
         self.topvolume = None
         # flags (call agsflag ...)
         self.prin = None
-#       self.grap = None
-#       self.hist = None
-#       self.geom = None
-#       self.mfld = None
+        self.grap = None
+        self.hist = None
+        self.geom = None
+        self.mfld = None
         self.debu = None
         self.simu = None
-        
+        self.flags = {}
         self.inits = []
         Handler.__init__(self);
 
@@ -908,6 +931,11 @@ class Setup( Handler ):
         self.module  = attr.get('module',  None)
         self.onoff   = attr.get('onoff',   None)
         self.topvolume = attr.get('top',   None)
+        # Flags set by agsflag
+        for flag in [ 'prin', 'grap', 'hist', 'geom', 'mfld', 'debu', 'simu' ]:
+            myflag = attr.get(flag, None)
+            if myflag:
+                self.flags[flag] = int(myflag)
 
 
     def endElement(self, tag):
@@ -917,7 +945,8 @@ class Setup( Handler ):
         output += 'struct %s {\n' % self.name 
         output +=  '  static const char *name()    { return "%s"; }\n'  % self.name 
         output +=  '  static const char *comment() { return "%s"; }\n'  % self.comment 
-        output +=  '  static const char *module()  { return "%s"; }\n'  % self.module  
+        output +=  '  static const char *module()  { return "%s"; }\n'  % self.module
+        output +=  '  static       bool  list();\n'
         output +=  '  typedef %s::%s Module;\n'%( self.module.upper(), self.module ) 
         #output +=  '  static       bool  active; // true if detector configuration has been built\n' 
         #document.impl( '  bool %s::active = false;\n'%self.name );
@@ -931,33 +960,21 @@ class Setup( Handler ):
         output +=  '  static       void  setup();\n'
         output +=  '  static       AgModule* construct();\n'
         
-        output +=  '#if 0\n'
+#       output +=  '#if 0\n'
 #       output +=  'ClassDef(%s,1);\n'%self.name
-        output +=  '#endif\n'
+#       output +=  '#endif\n'
         output +=  '};\n'
         output +=  '};\n'
-        
-# No need for dictionary in AgML2
-#$$$    output += "#if 0\n ClassDef(%s,1)\n#endif\n"% self.name # insert into ROOT dictionary
+
+        # 
         self.parent.setups.append(output)
-
         
-        # Not sure the following has any effect...
-        #output +=  '      AgStructure::AgDetpNew( module(), comment() );\n'
-        #for init in self.inits:
-        #    output += '   // %s.%s = %s;\n'%(init.struct,init.variable,init.value) 
-        #output +=  '  };\n'                
-
-        # Now implementation
-        #output +=  '      AgStructure::AgDetpNew( module(), comment() );\n'
-        #for init in self.inits:
-        #    output += '   // %s.%s = %s;\n'%(init.struct,init.variable,init.value) 
-        #output +=  '  };\n'                
-
         # Wrap in namespace
         nmspc = self.module.upper()[:4]
 
+        #
         # Add SETUP
+        #
         output = "\n"
         output += "void %s::%s::setup() {\n"%(nmspc,self.name)
         document.impl( output, unit='global' )
@@ -968,7 +985,31 @@ class Setup( Handler ):
         output = "\n};\n"
         document.impl( output, unit='global' )
 
+        #
+        # Add List
+        #
+        output = "\n"
+        output += "bool %s::%s::list() {\n"%(nmspc,self.name)
+        flaglist = "";
+        for flag in [ 'prin', 'grap', 'hist', 'geom', 'mfld', 'debu', 'simu' ]:
+            try:
+                value = self.flags[flag]
+                #                output += 'LOG_INFO << "  FLAG %s = %i" << endm;'%(flag,value)
+                flaglist += '" %s = %i" << '%(flag,value)
+            except KeyError:
+                pass
+
+        output += 'LOG_INFO << name() << " " << module() << %s " [" << comment() << "]" << endm;\n'%flaglist
+        document.impl( output, unit='global' )
+        for init in self.inits:
+            init.list()
+        output  = "return true;\n};\n"
+        document.impl( output, unit='global' )
+
+
+        #
         # Add CONSTRUCT
+        #
         output = "\n"
         output += "AgModule* %s::%s::construct() {\n"%(nmspc,self.name)
         output += 'LOG_INFO << "Construct module " << %s::%s::module() << endm;\n'%(nmspc,self.name)
@@ -1027,14 +1068,22 @@ class Init( Handler ):
         output += "\t   %s temp = %s;"%(tinfo,self.value)
         output += "\t   memcpy( &%s_detp->member_value, &temp, sizeof(temp) );\n"%self.struct
         output += '\t   LOG_INFO << "  [AgML2.0] Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
-#       output += "\t   %s_detp->member_value = %s;"%(self.struct,self.value)
-#       output += "\t   %s_detp->Add( temp );\n"%self.struct
 
         output += "\t}\n"
         output += "}\n"
-        
-        
+                
         document.impl( output, unit='global' )
+
+    def list(self):
+        
+        output  = "\n";
+        output += '\t   LOG_INFO << "  [AgML2.0] Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
+                
+        document.impl( output, unit='global' )
+
+
+
+
 class Modules( Handler ):
     """
     class Modules
