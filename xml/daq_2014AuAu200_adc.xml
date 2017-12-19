@@ -2,8 +2,12 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-#   setenv STARFPE NO
-#   setenv NODEBUG yes
+#source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh
+   setenv STARFPE NO
+   setenv NODEBUG yes
+#starver SL16d
+   setup 64b
+   starver TFG17o
 #   starver .DEV2
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
@@ -52,7 +56,11 @@
 #root4star -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # daq_2014_AuAu200Z2:  root4star -q -b 'bfc.C(1000,"P2014,TpxRaw,TpxClu2D,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,Sti","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # daq_2014_AuAu200Z3:
-root4star -q -b 'bfc.C(1000,"P2014a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root4star -q -b 'bfc.C(1000,"P2014a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# P16id: DbV20160418 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat -evout CorrX OSpaceZ2 OGridLeak3D -hitfilt,evout
+#root4star -q -b -x 'bfc.C(1000,"DbV20160418,P2014a,TpxRaw,TpxClu,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# TFG17o
+root.exe -q -b -x 'bfc.C(1000,"DbV20160418,P2014a,TpxRaw,TpxClu,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />
@@ -64,5 +72,6 @@ root4star -q -b 'bfc.C(1000,"P2014a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,
 <!-- <input URL="command:Cosmics2014.pl" /> -->
 <!-- <input URL="command:daq_2014AuAu200LowLum.pl" />  -->
 <!-- <input URL="file:/star/data03/daq/2014/100/151000*/st_physics_adc*.daq" /> -->
-<input URL="file:/star/data03/daq/2014/152/15152001/st_physics_adc_15152001_raw_*.daq" />
+<!-- <input URL="file:/star/data03/daq/2014/152/15152001/st_physics_adc_15152001_raw_*.daq" /> -->
+<input URL="file:/star/data03/daq/2014/166/*/st_physics_adc_*.daq" />
 </job>
