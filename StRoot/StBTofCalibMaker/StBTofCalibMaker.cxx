@@ -118,7 +118,7 @@
 
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
-
+#include "StVpdSimMaker/StVpdSimConfig.h"
 
  /// Very High resolution mode, pico-second per bin
 const Double_t StBTofCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
