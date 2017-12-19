@@ -24,8 +24,22 @@
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 ClassImp(StPicoAnalysisMaker);
 static TH2F *hdEdX = 0;
+static TH2F *hdEdXPos = 0;
+static TH2F *hdEdXNeg = 0;
 static TH2F *hdEdXwithToF = 0;
 static TH2F *hTofPID = 0;
+
+// #define PIDHISTO
+#ifdef PIDHISTO
+static const int NTrackHistoFolders = 18;
+static TH2F *hdEdXTracks[NTrackHistoFolders] = {0};
+static TH2F *hdEdXwithToFTracks[NTrackHistoFolders] = {0};
+static TH2F *hTofPIDTracks[NTrackHistoFolders] = {0};
+static TH1F *hMomentumTracks[NTrackHistoFolders] = {0};
+static TH2F *hdEdXPull[NTrackHistoFolders] = {0};
+static TH2F *hdEdXZ[NTrackHistoFolders] = {0};
+static std::map<int, int> trackPdgToHistoIndex;
+#endif //PIDHISTO
 
 static TH1F *hChiPrimHFTp = 0;
 static TH1F *hChiPrimHFTK = 0;
@@ -38,7 +52,7 @@ static TH2F* hPVErrorVsNTracks = 0;
 static TH2F* hPVErrorVsNPVTracks = 0;
 
 //________________________________________________________________________________
-StPicoAnalysisMaker::StPicoAnalysisMaker(const char *name) : StMaker(name) {
+StPicoAnalysisMaker::StPicoAnalysisMaker(const char *name) : StMaker(name), fdEdXMode(1) {
   memset(mBeg,0,mEnd-mBeg+1);
 }
 //________________________________________________________________________________
@@ -59,7 +73,7 @@ Int_t StPicoAnalysisMaker::Init(){
 }
 //________________________________________________________________________________
 Int_t StPicoAnalysisMaker::InitRun(Int_t runumber) {
-  assert(StPicoDst::instance());
+  assert(StPicoDstMaker::instance());
 //   if (StPicoDstMaker::instance()->IOMode() == StPicoDstMaker::ioRead) {
     //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Ask Yuri
 //     StPicoDstMaker::instance()->SetStatus("*",0);
@@ -108,21 +122,60 @@ void StPicoAnalysisMaker::BookTrackPlots(){
   }
   dirs[1] = dirs[0]->GetDirectory("Tracks"); assert(dirs[1]);
   dirs[1]->cd();
-
-  dirs[1] = dirs[0]->GetDirectory("Tracks"); assert(dirs[1]);
-  dirs[1]->cd(); 
   
   hdEdX = (TH2F *)   dirs[1]->Get("hdEdX");
-  if (! hdEdX) hdEdX = new TH2F("hdEdX", "hdEdX", 1000, 0, 5, 1000, 0, 10);
+  if (! hdEdX) hdEdX = new TH2F("hdEdX", "hdEdX", 2000, 0, 10, 3000, 0, 30);
 
+  hdEdXPos = (TH2F *)   dirs[1]->Get("hdEdXPos");
+  if (! hdEdXPos) hdEdXPos = new TH2F("hdEdXPos", "hdEdXPos", 2000, 0, 10, 3000, 0, 30);
+  
+  hdEdXNeg = (TH2F *)   dirs[1]->Get("hdEdXNeg");
+  if (! hdEdXNeg) hdEdXNeg = new TH2F("hdEdXNeg", "hdEdXNeg", 2000, 0, 10, 3000, 0, 30);
+  
   hdEdXwithToF = (TH2F *)   dirs[1]->Get("hdEdXwithToF");
-  if (! hdEdXwithToF) hdEdXwithToF = new TH2F("hdEdXwithToF", "hdEdXwithToF", 1000, 0, 5, 1000, 0, 10);
+  if (! hdEdXwithToF) hdEdXwithToF = new TH2F("hdEdXwithToF", "hdEdXwithToF", 2000, 0, 10, 3000, 0, 30);
   
   hTofPID = (TH2F *)   dirs[1]->Get("hTofPID");
   if (! hTofPID) hTofPID = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
 
+#ifdef PIDHISTO
+  int pdgTrackHisto[NTrackHistoFolders] = { 11, -11, 13, -13, 211, -211, 321, -321, 2212, -2212, 
+                                            1000010020, -1000010020, 1000010030, -1000010030, 1000020030, -1000020030, 1000020040, -1000020040 };
+  TString trackFolderName[NTrackHistoFolders] = {"e-", "e+", "mu-", "mu+", "pi+", "pi-", "K+", "K-", "p", "p-", "d", "d-", "t", "t-", "He3", "He3-", "He4", "He4-"};
+                    
+  for(int iTrackHisto=0; iTrackHisto<NTrackHistoFolders; iTrackHisto++)
+  {
+    if (!dirs[1]->GetDirectory(trackFolderName[iTrackHisto].Data()))
+      dirs[1]->mkdir(trackFolderName[iTrackHisto].Data());
+    
+    dirs[2] = dirs[1]->GetDirectory(trackFolderName[iTrackHisto].Data()); assert(dirs[2]);
+    dirs[2]->cd();
+    
+    trackPdgToHistoIndex[ pdgTrackHisto[iTrackHisto] ] = iTrackHisto;
+    
+    hdEdXTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdX");
+    if (! hdEdXTracks[iTrackHisto]) hdEdXTracks[iTrackHisto] = new TH2F("hdEdX", "hdEdX", 2000, 0, 10, 3000, 0, 30);
+
+    hdEdXwithToFTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXwithToF");
+    if (! hdEdXwithToFTracks[iTrackHisto]) hdEdXwithToFTracks[iTrackHisto] = new TH2F("hdEdXwithToF", "hdEdXwithToF", 2000, 0, 10, 3000, 0, 30);
   
-  //  double maxDCA = 1.;
+    hTofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hTofPID");
+    if (! hTofPIDTracks[iTrackHisto]) hTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
+  
+    hMomentumTracks[iTrackHisto] = (TH1F *)   dirs[2]->Get("hMomentum");
+    if (! hMomentumTracks[iTrackHisto]) hMomentumTracks[iTrackHisto] = new TH1F("hMomentum", "hMomentum", 1000, 0, 10);
+    
+    hdEdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXPull");
+    if (! hdEdXPull[iTrackHisto]) hdEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, 0, 10, 600, -30, 30);
+    
+    hdEdXZ[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXZ");
+    if (! hdEdXZ[iTrackHisto]) hdEdXZ[iTrackHisto] = new TH2F("hdEdXZ", "hdEdXZ", 2000, -5, 5, 280, -1, 6);
+    
+    dirs[1]->cd();
+  }
+#endif //PIDHISTO
+  
+  double maxDCA = 1.;
   hNHFTHits = (TH1F *)   dirs[1]->Get("hNHFTHits");
   if (! hNHFTHits) hNHFTHits = new TH1F("hNHFTHits", "hNHFTHits",11, -0.5, 10.5);
   
@@ -159,20 +212,28 @@ void StPicoAnalysisMaker::BookVertexPlots(){
   PrintMem(dirs[1]->GetPath());
   
   mStKFParticleInterface = new StKFParticleInterface;
-  mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor());
+  const bool storeMCHistograms = false;
+  mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor(), storeMCHistograms);
   dirs[0]->cd();
   PrintMem(dirs[1]->GetPath());
 }
 //_____________________________________________________________________________
 Int_t StPicoAnalysisMaker::Make(){
-  fPicoDst = StPicoDst::instance();
-  if (! fPicoDst) return kStFatal; 
-#if 0
-  TObjectSet *muSet = (TObjectSet *) GetDataSet("muDst");
-  if (! muSet) return kStFatal;
-  muDst = (StMuDst *) muSet->GetObject();
+
+//   StPicoDstMaker* picoDstMaker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
+//   if (! picoDstMaker) return kStFatal;
+//   
+//   fPicoDst = picoDstMaker->picoDst();
+  
+#ifdef PIDHISTO
+  static int iEvent=0;
+  iEvent++;
+  if(iEvent%1000 == 0)
+    std::cout << "iEvent " << iEvent << std::endl;
 #endif
-  if (! fPicoDst) return kStOK;
+  
+  fPicoDst = StPicoDst::instance();
+  if (! fPicoDst)  return kStOK;
 
   RunAnalysis();
   return kStOK;
@@ -187,6 +248,8 @@ void StPicoAnalysisMaker::RunAnalysis(){
   vector<int> primaryTrackList;
     
   StPicoEvent* picoEvent = fPicoDst->event();
+  if(!picoEvent) return;
+  
   const StThreeVectorF picoPV = picoEvent->primaryVertex();
   const StThreeVectorF picoPVError = picoEvent->primaryVertexError();
   
@@ -222,16 +285,17 @@ void StPicoAnalysisMaker::RunAnalysis(){
   for(unsigned int iIndex=0; iIndex<mcIndexes.size(); iIndex++)
     mcIndexes[iIndex] = -1;
   vector<int> particlesPdg(nGlobalTracks*7);
-  vector< vector<float> > particleCutValues(maxGBTrackIndex+1);
   int nPartSaved = 0;
   
   for (Int_t kg = 0; kg < nGlobalTracks; kg++) 
   {
+//     std::cin.get();
     StPicoTrack *gTrack = fPicoDst->track(kg);
     if (! gTrack)            continue;
     
     if (! gTrack->charge())  continue;
-    if (  gTrack->nHitsFit() < 10) continue;
+    if (  gTrack->nHitsFit() < 15) continue;
+    if (  gTrack->dEdxError() < 0.04 || gTrack->dEdxError() > 0.12 ) continue;
     const int index = gTrack->id();
     
     const StDcaGeometry dcaG = gTrack->dcaGeometry();
@@ -251,7 +315,7 @@ void StPicoAnalysisMaker::RunAnalysis(){
     goodTrack &= goodTrack && CovXyzp[20] >=0.f && CovXyzp[20] < 1.f;
     if(!goodTrack) continue;
     
-    static KFPTrack track;
+    KFPTrack track;
     track.SetParameters(xyzp);
     track.SetCovarianceMatrix(CovXyzp);
     track.SetNDF(1);
@@ -265,28 +329,30 @@ void StPicoAnalysisMaker::RunAnalysis(){
     track.SetCharge(q);
         
     hdEdX->Fill(track.GetP(), gTrack->dEdx());
-    
-    
+    if(q>0)
+      hdEdXPos->Fill(track.GetP(), gTrack->dEdx());
+    else
+      hdEdXNeg->Fill(track.GetP(), gTrack->dEdx());
+      
     double m2tof = -1.e6;
     if(gTrack->bTofPidTraitsIndex() > 0)
     {
       const StPicoBTofPidTraits* btofPid = fPicoDst->btofPidTraits(gTrack->bTofPidTraitsIndex());
       double betaTof2 = btofPid->btofBeta() * btofPid->btofBeta();
-      if (betaTof2 > 0) {
-      m2tof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
+      if(fabs(betaTof2) > 1.e-6)
+        m2tof = track.GetP()*track.GetP()*(1./betaTof2 - 1.);
       
       hTofPID->Fill(track.GetP(), m2tof);
       hdEdXwithToF->Fill(track.GetP(), gTrack->dEdx());
-      }
     }
     
     int ToFPDG = -1;
     if(m2tof > 7 && m2tof<9)
-      ToFPDG = 1000010030*q;
+      ToFPDG = -1;// 1000010030*q;
     else if(m2tof > 2.8 && m2tof < 4)
-      ToFPDG = 1000010020*q;
+      ToFPDG = -1;//1000010020*q;
     else if(m2tof > 1.5 && m2tof < 2.8)
-      ToFPDG = 1000020030*q;
+      ToFPDG = 1;//1000020030*q;
     else if(m2tof > 0.6 && m2tof < 1.5)
       ToFPDG = 2212*q;
     else if(m2tof > 0.14 && m2tof < 0.4)
@@ -294,25 +360,37 @@ void StPicoAnalysisMaker::RunAnalysis(){
     else if(m2tof > -0.5 && m2tof < 0.12)
       ToFPDG = 211*q;
     
+//     int ToFPDG = GetTofPID(m2tof, track.GetP(), q);
+//     std::cout << " iTr " << kg << " x " << xyzp[0] << " y " << xyzp[1] <<  " z " << xyzp[2] << 
+//                                   " px " << xyzp[3] << " py " << xyzp[4] <<  " pz " << xyzp[3] << 
+//                                   " nPi " << gTrack->dEdxPullToF(0.139570, fdEdXMode, 1) << " nK " << gTrack->dEdxPullToF(0.493677, fdEdXMode, 1) << " nP " << gTrack->dEdxPullToF(0.938272, fdEdXMode, 1) << " m2tof " << m2tof << " ToFPDG " << ToFPDG<< std::endl;
+    
     vector<int> dEdXPDG;
     vector<int> dEdXSigma;
     float nSigmaCut = 3.f;
-    if(fabs(gTrack->nSigmaPion())   < nSigmaCut) { dEdXPDG.push_back(211*q);  dEdXSigma.push_back(fabs(gTrack->nSigmaPion()));   }
-    if(fabs(gTrack->nSigmaKaon())   < nSigmaCut) { dEdXPDG.push_back(321*q);  dEdXSigma.push_back(fabs(gTrack->nSigmaKaon()));   }
-    if(fabs(gTrack->nSigmaProton()) < nSigmaCut) { dEdXPDG.push_back(2212*q); dEdXSigma.push_back(fabs(gTrack->nSigmaProton())); }
-    float nSigmaDeutron = gTrack->dEdxPull(1.876124, 1, 1);
-    if(fabs(nSigmaDeutron) < nSigmaCut) { dEdXPDG.push_back(1000010020*q); dEdXSigma.push_back(fabs(nSigmaDeutron)); }
-    float nSigmaTriton = gTrack->dEdxPull(2.809432, 1, 1);
-    if(fabs(nSigmaTriton) < nSigmaCut) { dEdXPDG.push_back(1000010030*q); dEdXSigma.push_back(fabs(nSigmaTriton)); }
-    float nSigmaHe3 = gTrack->dEdxPull(2.809413, 1, 2);
-    if(fabs(nSigmaHe3) < nSigmaCut) { dEdXPDG.push_back(1000020030*q); dEdXSigma.push_back(fabs(nSigmaHe3)); }
-    float nSigmaHe4 = gTrack->dEdxPull(3.728400, 1, 2);
-    if(fabs(nSigmaHe4) < nSigmaCut) { dEdXPDG.push_back(1000020040*q); dEdXSigma.push_back(fabs(nSigmaHe4)); }
+    if(fabs(gTrack->dEdxPullToF(0.139570, fdEdXMode, 1))   < nSigmaCut) 
+    { 
+      dEdXPDG.push_back(211*q);  
+      dEdXSigma.push_back(fabs(gTrack->dEdxPullToF(0.139570, fdEdXMode, 1)));   
+    }
     
+    bool checkKTof = (track.GetP() > 0.5) && (track.GetP() < 1.2);
+    if(fabs(gTrack->dEdxPullToF(0.493677, fdEdXMode, 1))  < 2.f && ((checkKTof && abs(ToFPDG) == 321) || !checkKTof) ) 
+    {
+      dEdXPDG.push_back(321*q);  
+      dEdXSigma.push_back(fabs(gTrack->dEdxPullToF(0.493677, fdEdXMode, 1)));
+    }
+    
+    //bool checkPTof = (track.GetP() > 0.8) && (track.GetP() < 1.6);
+    if(fabs(gTrack->dEdxPullToF(0.938272, fdEdXMode, 1)) < nSigmaCut)    //  && ((checkPTof && abs(ToFPDG) == 2212) || !checkPTof))
+    {
+      dEdXPDG.push_back(2212*q); 
+      dEdXSigma.push_back(fabs(gTrack->dEdxPullToF(0.938272, fdEdXMode, 1)));
+    }
     
     float minSigmadEdX = 100;
     int iMinSigmadEdX = -1;
-    for(UInt_t iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
+    for(int iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
     {
       if(dEdXSigma[iPDG]<minSigmadEdX)
       {
@@ -331,12 +409,10 @@ void StPicoAnalysisMaker::RunAnalysis(){
     }
     else
     {
-      for(UInt_t iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
+      for(int iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
       {
         if(dEdXPDG[iPDG] == ToFPDG)
           totalPDG.push_back(ToFPDG);
-        if(abs(dEdXPDG[iPDG]) == 1000020040 && abs(ToFPDG) == 1000010020)
-          totalPDG.push_back(dEdXPDG[iPDG]);
       } 
 //       if(totalPDG.size() == 0 && track.GetP() < 0.7)
 //       {
@@ -347,21 +423,84 @@ void StPicoAnalysisMaker::RunAnalysis(){
 //       }
     }
     
+    if( track.GetP() < 1.5 )
+    {
+      float nSigmaDeutron = gTrack->dEdxPullToF(1.876124, fdEdXMode, 1);
+      
+      if(track.GetP() > 0.6)
+      {
+        float sigmaDCut = -3./0.9*(track.GetP()-0.6) + 3.;
+        if(fabs(nSigmaDeutron) < sigmaDCut) 
+          totalPDG.push_back(1000010020*q);
+      }
+      else
+      {
+        if(fabs(nSigmaDeutron) < 3.) 
+          totalPDG.push_back(1000010020*q);
+      }
+    }
+    if( track.GetP() < 1.5 )
+    {
+      float nSigmaTriton = gTrack->dEdxPullToF(2.809432, fdEdXMode, 1);
+      
+      if(track.GetP() > 0.6)
+      {
+        float sigmaTCut = -3./0.9*(track.GetP()-0.6) + 3.;
+        if(fabs(nSigmaTriton) < sigmaTCut) 
+          totalPDG.push_back(1000010030*q);
+      }
+      else
+      {
+        if(fabs(nSigmaTriton) < 3.) 
+          totalPDG.push_back(1000010030*q);
+      }        
+    }
+    if(track.GetP() > 1.3)
+    {
+      float nSigmaHe3 = gTrack->dEdxPullToF(2.809413, fdEdXMode, 2);
+      if(fabs(nSigmaHe3) < nSigmaCut) { totalPDG.push_back(1000020030*q); }
+      float nSigmaHe4 = gTrack->dEdxPullToF(3.728400, fdEdXMode, 2);
+      if(fabs(nSigmaHe4) < nSigmaCut) { totalPDG.push_back(1000020040*q); }
+    }
+    
+    
     if(totalPDG.size() == 0)
       totalPDG.push_back(-1);
 
-    for(UInt_t iPDG=0; iPDG<totalPDG.size(); iPDG++)
+    for(int iPDG=0; iPDG<totalPDG.size(); iPDG++)
     {
       int pdg = totalPDG[iPDG];
       
-      KFParticle particle1(track, pdg);
+      KFPTrack trackPDG = track;
+      if(abs(pdg) == 1000020030 || abs(pdg) == 1000020040)
+      {
+        trackPDG.SetCharge( trackPDG.Charge()*2.f );
+        trackPDG.SetPx( trackPDG.GetPx()*2.f );
+        trackPDG.SetPy( trackPDG.GetPy()*2.f );
+        trackPDG.SetPz( trackPDG.GetPz()*2.f );
+
+        const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
+        for(int iIndex=0; iIndex<9; iIndex++)
+        {
+          const int iC = index2[iIndex];
+          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*2.f );
+        }
+        const int index4[6] = { 9, 13,14, 18,19,20 };
+        for(int iIndex=0; iIndex<6; iIndex++)
+        {
+          const int iC = index4[iIndex];
+          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*4.f );
+        }
+      }
+
+      KFParticle particle1(trackPDG, pdg);
       float chiPrim = particle1.GetDeviationFromVertex(picoPrimaryVertex);
       
-      if(chiPrim < 8)
+      if(chiPrim < 18.6)
         primaryTrackList.push_back(nPartSaved);
        
            
-      KFParticle particle(track, pdg);
+      KFParticle particle(trackPDG, pdg);
       particle.SetId(index);
       particles[nPartSaved] = particle;
       
@@ -369,12 +508,55 @@ void StPicoAnalysisMaker::RunAnalysis(){
       if(gTrack->hasPxl1Hit()) nHftHits[nPartSaved]++;
       if(gTrack->hasPxl2Hit()) nHftHits[nPartSaved]++;
       if(gTrack->hasIstHit()) nHftHits[nPartSaved]++;
-      if(gTrack->hasSstHit()) nHftHits[nPartSaved]++;
+//       if(gTrack->hasSstHit()) nHftHits[nPartSaved]++;
       
       hNHFTHits->Fill(nHftHits[nPartSaved]);        
       particlesPdg[nPartSaved] = pdg;
               
       nPartSaved++;
+      
+#ifdef PIDHISTO
+      //fill PID histograms
+      {
+        const int iTrackHisto = trackPdgToHistoIndex[pdg];
+        if( ! (iTrackHisto < 0 || iTrackHisto >= NTrackHistoFolders) )
+        {
+          hMomentumTracks[iTrackHisto] -> Fill(track.GetP());
+          hdEdXTracks[iTrackHisto] -> Fill(track.GetP(), gTrack->dEdx());
+          if(ToFPDG != -1)
+          {
+            hdEdXwithToFTracks[iTrackHisto] -> Fill(track.GetP(), gTrack->dEdx());
+            hTofPIDTracks[iTrackHisto] -> Fill(track.GetP(), m2tof);
+            
+            if(abs(ToFPDG)==211)
+            {
+              hdEdXPull[iTrackHisto] -> Fill(track.GetP(), gTrack->dEdxPullToF(0.139570, fdEdXMode, 1));
+              float betaGamma = TMath::Log10(track.GetP()/0.139570);
+              float z = gTrack->dEdxPullToF(0.139570, fdEdXMode, 1)*gTrack->dEdxError();
+              hdEdXZ[iTrackHisto]->Fill(betaGamma, z);
+              
+              betaGamma = TMath::Log10(track.GetP()/5.485799e-4);
+              z = gTrack->nSigmaElectron()*gTrack->dEdxError();
+              hdEdXZ[0]->Fill(betaGamma, z);
+            }
+            if(abs(ToFPDG)==321)
+            {
+              hdEdXPull[iTrackHisto] -> Fill(track.GetP(), gTrack->dEdxPullToF(0.493677, fdEdXMode, 1));
+              float betaGamma = TMath::Log10(track.GetP()/0.493677);
+              float z = gTrack->dEdxPullToF(0.493677, fdEdXMode, 1)*gTrack->dEdxError();
+              hdEdXZ[iTrackHisto]->Fill(betaGamma, z);
+            }
+            if(abs(ToFPDG)==2212)
+            {
+              hdEdXPull[iTrackHisto] -> Fill(track.GetP(), gTrack->dEdxPullToF(0.938272, fdEdXMode, 1));
+              float betaGamma = TMath::Log10(track.GetP()/0.938272);
+              float z = gTrack->dEdxPullToF(0.938272, fdEdXMode, 1)*gTrack->dEdxError();
+              hdEdXZ[iTrackHisto]->Fill(betaGamma, z);
+            }
+          }
+        }
+      }
+#endif
     }
   }
 //   std::cout << "n particles " << nPartSaved << std::endl;
@@ -402,9 +584,15 @@ void StPicoAnalysisMaker::RunAnalysis(){
 //     if(fabs(dx) > 0.02 || fabs(dy) > 0.02 || fabs(dz) > 0.02 ) return;
 
   mStKFParticleInterface->AddPV(picoPrimaryVertex, primaryTrackList);
+  
+//   std::cout << "PV  x " << picoPrimaryVertex.X() << " y " << picoPrimaryVertex.Y() <<" z " << picoPrimaryVertex.Z() << " C " << 
+//                            picoPrimaryVertex.CovarianceMatrix()[0] << " " << picoPrimaryVertex.CovarianceMatrix()[1] << " " <<  picoPrimaryVertex.CovarianceMatrix()[2] << " " <<
+//                            picoPrimaryVertex.CovarianceMatrix()[3] << " " << picoPrimaryVertex.CovarianceMatrix()[4] << " " <<  picoPrimaryVertex.CovarianceMatrix()[5] << " " << std::endl;
+//   std::cin.get();
 //     vector<int> tracks;
 //     mStKFParticleInterface->AddPV(pv, tracks);
   
+#ifndef PIDHISTO
   //reconstruct short-lived particles
   mStKFParticleInterface->ReconstructParticles();
   
@@ -414,5 +602,60 @@ void StPicoAnalysisMaker::RunAnalysis(){
   Int_t nevent = 100;
   mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
   mStKFParticlePerformanceInterface->PerformanceAnalysis();
+#endif
 }
 
+int StPicoAnalysisMaker::GetTofPID(double m2, double p, int q)
+{
+  static const int order = 4;
+  static const double parMean[6][order+1] = { { 0.02283190,-0.01482910, 0.01883130,-0.01824250, 0.00409811  }, //pi+
+                                              { 0.24842500,-0.00699781,-0.00991387, 0.01327170,-0.00694824  }, //K+
+                                              { 0.863211  , 0.0264171 ,-0.0230833 , 0.00239637, 0.000262309 }, //p
+                                              { 0.0224095 ,-0.0123235 , 0.0145216 ,-0.0149944 , 0.00325952  }, //pi-
+                                              { 0.250696  ,-0.0151308 , 0.00437457, 0.00516669,-0.00529184  }, //K-
+                                              { 0.886912  ,-0.0298543 , 0.0449904 ,-0.0286879 , 0.00541963  }};//p-
+  static const double parSigma[6][order+1] = { { 0.0112498,-0.0400571, 0.0733615,-0.0316505, 0.00629469 }, //pi+
+                                               { 0.0154830,-0.0396312, 0.0719647,-0.0290683, 0.00637164 }, //K+
+                                               { 0.114465 ,-0.287213 , 0.356536 ,-0.169257 , 0.0299844  }, //p
+                                               { 0.0111682,-0.0394877, 0.0718342,-0.0302914, 0.00587317 }, //pi-
+                                               { 0.0157322,-0.0402606, 0.0716639,-0.0272101, 0.00564467 }, //K-
+                                               { 0.0899438,-0.211922 , 0.273122 ,-0.129597 , 0.0231844  }};//p-
+  double pMax = 2.;
+  double nSigmas[3];
+  for(int iHypothesys = 0; iHypothesys<3; iHypothesys++)
+  {
+    double x = p;
+    if(x>=pMax) x = pMax;
+    
+    int iSet = iHypothesys;
+    if(q<0)
+      iSet += 3;
+    double mean = 0;
+    for(int iTerm=0; iTerm<=order; iTerm++)
+      mean += parMean[iSet][iTerm]*TMath::Power(x,iTerm);  
+    
+    double sigma = 0;
+    for(int iTerm=0; iTerm<=order; iTerm++)
+      sigma += parSigma[iSet][iTerm]*TMath::Power(x,iTerm);  
+    
+    nSigmas[iHypothesys] = fabs((m2 - mean)/sigma);
+  }
+  
+  double minNSigma = nSigmas[0];
+  int minHypothesis = 0;
+  for(int iHypothesys=1; iHypothesys<3; iHypothesys++)
+  {
+    if(minNSigma > nSigmas[iHypothesys]) 
+    {
+      minNSigma = nSigmas[iHypothesys];
+      minHypothesis = iHypothesys;
+    }
+  }
+  
+  int pdgHypothesis[3] = {211, 321, 2212};
+  int tofPID = -1;
+  if(minNSigma < 3)
+    tofPID = pdgHypothesis[minHypothesis]*q;
+  
+  return tofPID;
+}
