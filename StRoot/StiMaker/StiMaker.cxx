@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.233 2017/01/26 21:17:48 perev Exp $
+// $Id: StiMaker.cxx,v 1.234 2017/12/19 20:14:12 jwebb Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -528,6 +528,9 @@ Int_t StiMaker::InitPulls()
   TFile *tfile  = GetTFile();
   if (!tfile) {
     TString ts  = bfc->GetFileIn();
+    if ( ts == "" ) {
+      ts = "pullfile";
+    }
     ts= gSystem->BaseName(ts);
     int ext = ts.Index(".");
     if (ext>0) ts.Replace(ext,999,"");
@@ -746,8 +749,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.233 2017/01/26 21:17:48 perev Exp $
+// $Id: StiMaker.cxx,v 1.234 2017/12/19 20:14:12 jwebb Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.234  2017/12/19 20:14:12  jwebb
+// If no input file, provide default name
+//
 // Revision 1.233  2017/01/26 21:17:48  perev
 // In method CleanGlobalTracks
 // 1. for track with reused hits old Dca node removed(not only marked)
