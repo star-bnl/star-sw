@@ -288,10 +288,11 @@ class StMiniMcMaker : public StMaker{
   Bool_t           acceptDebug(const StMcTrack*);
   
   StTrackPairInfo* findBestMatchedGlobal(const StMcTrack*);
+#if !defined(__CINT__) && !defined(__CLING__)
   PAIRVEC          findMatchedRc(const StMcTrack*);
   PAIRHIT          findFirstLastHit(const StTrack*);
   PAIRHIT          findFirstLastFitHit(const StTrack*);
-
+#endif
   Float_t          computeXY(const StThreeVectorF*, const StTrack*);
   StDedxPidTraits* findDedxPidTraits(const StTrack*);
   //pair<Float_t,Float_t>  computeProj(const StThreeVectorF*,const StTrack*);
