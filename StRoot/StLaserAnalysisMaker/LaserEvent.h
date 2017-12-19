@@ -214,8 +214,8 @@ class Hit : public TObject {
   Float_t  pad;
   Float_t  tbk;
   Int_t    trackKey;
-  StTpcHit hit;
-  ClassDef(Hit,6) 
+  StTpcHit *hit;
+  ClassDef(Hit,7) 
 };
 class Track : public TObject {
  public:

@@ -308,7 +308,7 @@ Int_t Track::Matched() {
 //________________________________________________________________________________
 Hit::Hit(StTpcHit *tpcHit, Int_t trKey)  : sector(0),row(0),charge(0),flag(0),usedInFit(0), trackKey(trKey) {
   if (tpcHit) {
-    hit = *tpcHit;
+    hit = tpcHit;
     sector = tpcHit->sector();
     row = tpcHit->padrow();;
     charge = tpcHit->charge();
