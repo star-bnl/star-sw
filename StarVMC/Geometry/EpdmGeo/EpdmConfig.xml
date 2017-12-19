@@ -11,30 +11,21 @@
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "EpdmGeo0" 
 	    onoff  = "on"
-	    >
-       <Init struct="EPDG" var="active" value="{0,1}" />
+            simu   = "2"
+	    >     
 
     </Setup>
 
-     <Setup  name   = "EPDMwest"
+
+    <Setup  name   = "EPDMv1"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "EpdmGeo0" 
 	    onoff  = "on"
-	    >
-       
-       <Init struct="EPDG" var="active" value="{1,0}" />
+            simu   = "2"
+	    >     
 
-     </Setup>
+    </Setup>
 
-     <Setup  name   = "EPDMeast"
-	    comment= "Default configuration for the Beam Beam counter"
-	    module = "EpdmGeo0" 
-	    onoff  = "on"
-	    >
-
-       <Init struct="EPDG" var="active" value="{0,1}" />
-
-     </Setup>
 
 
   </Detector> 
