@@ -34,6 +34,9 @@ class AliHLTTPCCAGrid {
     uint_v GetBinBounded( const float_v &Y, const float_v &Z ) const;
     void GetBinBounded( const float_v &Y, const float_v &Z, uint_v *bY, uint_v *bZ ) const;
 
+    unsigned int GetBinBounded( const float &Y, const float &Z ) const;
+    void GetBinBounded( const float &Y, const float &Z, unsigned int *bY, unsigned int *bZ ) const;
+
 //     static uint_v GetBinBounded( const AliHLTTPCCAGrid *array, const uint_v &indexes, const float_v &Y, const float_v &Z );
 //     static void GetBinBounded( const AliHLTTPCCAGrid *array, const uint_v &indexes, const float_v &Y, const float_v &Z, uint_v *bY, uint_v *bZ );
 //     static uint_v Ny( const AliHLTTPCCAGrid *array, const uint_v &indexes ) { return uint_v( array, &AliHLTTPCCAGrid::fNy, indexes ); }
@@ -53,6 +56,8 @@ class AliHLTTPCCAGrid {
     float fZMinOverStep;     //* minimal Z value * fStepZInv
     float fStepYInv; //* inverse bin size in Y
     float fStepZInv; //* inverse bin size in Z
+    // --- test
+    unsigned int *fFirstUnusedHitInBin;
 };
 
 // inline uint_v AliHLTTPCCAGrid::GetBinBounded( const AliHLTTPCCAGrid *array, const uint_v &indexes, const float_v &Y, const float_v &Z )
@@ -119,6 +124,7 @@ inline uint_v AliHLTTPCCAGrid::GetBinBounded( const float_v &Y, const float_v &Z
 
   uint_v yBin, zBin;
   GetBinBounded( Y, Z, &yBin, &zBin );
+//  std::cout<<"-------GetBinBounded-return: "<<(zBin * fNy + yBin)<<"\n\n\n";
   return zBin * fNy + yBin;
 
   // XXX: the code below can wrap incorrectly because saturation is only done after
@@ -143,10 +149,36 @@ inline void AliHLTTPCCAGrid::GetBinBounded( const float_v &Y, const float_v &Z, 
 
   const int_v &yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<int_v>();
   const int_v &zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<int_v>();
+//  std::cout<<"Y: "<<Y<<"; fStepYInv: "<<fStepYInv<<"; fYMinOverStep: "<<fYMinOverStep<<"\n";
 
   *bY = CAMath::Max( int_v( Vc::Zero ), CAMath::Min( int_v( fNy - 1 ), yBin ) ).staticCast<uint_v>();
   *bZ = CAMath::Max( int_v( Vc::Zero ), CAMath::Min( int_v( fNz - 1 ), zBin ) ).staticCast<uint_v>();
+  for( unsigned int i = 0; i < float_v::Size; i++ ) {
+    (*bY)[i] = (int)(*bY)[i];
+    (*bZ)[i] = (int)(*bZ)[i];
+  }
+//  std::cout<<"GetBinBounded1: yBin: "<<yBin<<";   zBin: "<<zBin<<";   *bY: "<<(*bY)<<";   *bZ: "<<(*bZ)<<"\n";
 
+}
+
+inline unsigned int AliHLTTPCCAGrid::GetBinBounded( const float &Y, const float &Z ) const
+{
+  //* get the bin pointer
+  unsigned int yBin, zBin;
+  GetBinBounded( Y, Z, &yBin, &zBin );
+  return zBin * fNy + yBin;
+}
+
+inline void AliHLTTPCCAGrid::GetBinBounded( const float &Y, const float &Z, unsigned int *bY, unsigned int *bZ ) const
+{
+  //* get the bin pointer
+  const int &yBin = ( Y * fStepYInv - fYMinOverStep );
+  const int &zBin = ( Z * fStepZInv - fZMinOverStep );
+//  std::cout<<"Y: "<<Y<<"; fStepYInv: "<<fStepYInv<<"; fYMinOverStep: "<<fYMinOverStep<<"\n";
+
+  *bY = CAMath::Max( 0, CAMath::Min( (int)fNy - 1, yBin ) );
+  *bZ = CAMath::Max( 0, CAMath::Min( (int)fNz - 1, zBin ) );
+//  std::cout<<"GetBinBounded1: yBin: "<<yBin<<";   zBin: "<<zBin<<";   *bY: "<<(*bY)<<";   *bZ: "<<(*bZ)<<"\n";
 }
 
 #endif

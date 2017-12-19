@@ -109,6 +109,7 @@ void StiCATpcTrackerInterface::Run()
 
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     // put data in performance
+  std::cout<q<" ------- put data in performance\n";
   FillPerformance(fCaHits,fIdTruth, fMCTracks,fMCPoints,fHitLabels);
   fPerformance->SetMCTracks(fMCTracks);
   fPerformance->SetMCPoints(fMCPoints);
@@ -130,6 +131,7 @@ void StiCATpcTrackerInterface::Run()
   name += "_";
   fTracker->SaveHitsInFile(string(name));
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+  std::cout<<" ------- fPerformance->SaveDataInFiles(string(name));\n";
   fPerformance->SaveDataInFiles(string(name));
 #endif
 // check
@@ -137,6 +139,7 @@ void StiCATpcTrackerInterface::Run()
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+  std::cout<<" ------- fPerformance->SetTracker(fTracker);\n";
   fPerformance->SetTracker(fTracker);
 #endif
   TString name = "./data/";
@@ -160,16 +163,85 @@ void StiCATpcTrackerInterface::Run()
   fPreparationTime_real = timer.RealTime();
   fPreparationTime_cpu = timer.CpuTime();  
   
+  std::cout<<" - CA FindTracks() start -\n";
   fTracker->FindTracks();
+  std::cout<<" - fTracker->NTracks(): "<<fTracker->NTracks()<<"\n";
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+  if (fTracker->NHits() > 0) {
+      std::cout<<" - Run CA Performans\n";
+      fPerformance->SetTracker(fTracker);
+      fPerformance->InitSubPerformances();
+      fPerformance->ExecPerformance();
+  }
+  else {
+    cout << "Event contains 0 hits." << std::endl;
+  }
+#endif
 
     // copy hits
   timer.Start();
+  // --- Tracking time ---
+  const int NTimers = fTracker->NTimers();
+  static int statIEvent = 0;
+  static double *statTime = new double[NTimers];
+  static double statTime_SliceTrackerTime = 0;
+  static double statTime_SliceTrackerCpuTime = 0;
   
-  MakeSeeds();
+// #ifndef __Kozlov__
+//   MakeSeeds();
+// #else /* __Kozlov__ */
+  if (!statIEvent){
+    for (int i = 0; i < NTimers; i++){
+      statTime[i] = 0;
+    }
+  }
+// #endif /* __Kozlov__ */
   
-  timer.Stop();
-  fPreparationTime_real += timer.RealTime();
-  fPreparationTime_cpu += timer.CpuTime();    
+  statIEvent++;
+  for (int i = 0; i < NTimers; i++){
+    statTime[i] += fTracker->StatTime( i );
+  }
+  statTime_SliceTrackerTime += fTracker->SliceTrackerTime();
+  statTime_SliceTrackerCpuTime += fTracker->SliceTrackerCpuTime();
+
+
+  std::cout << "Reconstruction Time"
+      << " Real = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerTime+statTime[ 9 ]) * 1.e3 << " ms,"
+      << " CPU = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerCpuTime+statTime[ 10 ]) * 1.e3 << " ms,"
+      << " parallelization speedup (only SectorTracker): " << statTime_SliceTrackerCpuTime / statTime_SliceTrackerTime
+      << std::endl;
+  if ( 1 ) {
+    std::cout
+        << " |  ------ Sector trackers (w\\o init): " << std::setw( 10 ) << 1./statIEvent*statTime[ 0 ] * 1000. << " ms\n"
+        << " |      Initialization: " << std::setw( 10 )  << 1./statIEvent*statTime[ 12 ] * 1000. << " ms\n"
+        << " |    NeighboursFinder: " << std::setw( 10 ) << 1./statIEvent*statTime[ 1 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 5 ] << " cycles\n"
+        << " |   NeighboursCleaner: " << std::setw( 10 ) << 1./statIEvent*statTime[ 11 ] * 1000. << " ms\n"
+        << " |     StartHitsFinder: " << std::setw( 10 ) << 1./statIEvent*statTime[ 4 ] * 1000. << " ms\n"
+        << " | TrackletConstructor: " << std::setw( 10 ) << 1./statIEvent*statTime[ 2 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 7 ] << " cycles\n"
+        << " |    TrackletSelector: " << std::setw( 10 ) << 1./statIEvent*statTime[ 3 ] * 1000. << " ms, " << std::setw( 12 ) << 1./statIEvent*statTime[ 8 ] << " cycles\n"
+        << " |         WriteOutput: " << std::setw( 10 ) << 1./statIEvent*statTime[ 6 ] * 1000. << " ms\n"
+        << " |  --------------------------  Merge: " << std::setw( 10 ) << 1./statIEvent*statTime[ 9 ] * 1000. << " ms\n"
+        << " |      Initialization: " << std::setw( 10 )  << 1./statIEvent*statTime[ 13 ] * 1000. << " ms\n"
+        << " | -- NoOverlapTrackMerge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 14 ] * 1000. << " ms\n"
+        << " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 16 ] * 1000. << " ms\n"
+        << " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 18 ] * 1000. << " ms\n"
+        << " | ---- OverlapTrackMerge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 15 ] * 1000. << " ms\n"
+        << " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 17 ] * 1000. << " ms\n"
+        << " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 19 ] * 1000. << " ms\n"
+      ;
+  }
+  // ---
+
+//  RunPerformance();
+
+    // copy hits
+//  timer.Start();
+//
+//  MakeSeeds();
+//
+//  timer.Stop();
+//  fPreparationTime_real += timer.RealTime();
+//  fPreparationTime_cpu += timer.CpuTime();
 } // void StiCATpcTrackerInterface::Run()
 
 void StiCATpcTrackerInterface::RunPerformance()

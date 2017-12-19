@@ -42,37 +42,69 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
     const AliHLTTPCCARow &row = data.Row( rowIndex );
     const AliHLTTPCCARow &rowUp = data.Row( rowIndex + rowStep );
     const AliHLTTPCCARow &rowDown = data.Row( rowIndex - rowStep );
+//    std::cout<<" ----- rowDn: "<<rowIndex-rowStep<<";   NHits: "<<rowDown.NHits()<<";   NUnusedHits: "<<rowDown.NUnusedHits()<<"\n";
     const int numberOfHits = row.NHits();
 
     // - look at up link, if it's valid but the down link in the row above doesn't link to us remove
     //   the link
     // - look at down link, if it's valid but the up link in the row below doesn't link to us remove
     //   the link
+//    std::cout<<" <----- rowIndex: "<<rowIndex<<" ----->\n";
     for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
 
       const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + hitIndex;
       int_m validHitsMask = hitIndexes < numberOfHits;
       assert( ( validHitsMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) ) == validHitsMask );
-      validHitsMask &= ( int_v(data.HitDataIsUsed( row ), hitIndexes, validHitsMask ) == int_v( Vc::Zero ) ); // not-used hits can be connected only with not-used, so only one check is needed
+//      validHitsMask &= ( int_v(data.HitDataIsUsed( row ), hitIndexes, validHitsMask ) == int_v( Vc::Zero ) ); // not-used hits can be connected only with not-used, so only one check is needed
+      int_v hitDataTemp;
+      for( unsigned int i = 0; i < float_v::Size; i++ ) {
+	if( !validHitsMask[i] ) continue;
+	hitDataTemp[i] = data.HitDataIsUsed( row )[(unsigned int)hitIndexes[i]];
+      }
+      validHitsMask &= hitDataTemp == int_v( Vc::Zero );
 
         // collect information
         // up part
       assert( ( validHitsMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) ) == validHitsMask );
-      const int_v up = int_v(data.HitLinkUpData( row ), hitIndexes, validHitsMask );
+//      const int_v up = int_v(data.HitLinkUpData( row ), hitIndexes, validHitsMask );
+      int_v up;
+      for( unsigned int i = 0; i < float_v::Size; i++ ) {
+	if( !validHitsMask[i] ) continue;
+	up[i] = data.HitLinkUpData( row )[(unsigned int)hitIndexes[i]];
+      }
+//      std::cout<<"\n - up: "<<up<<"\n";
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
       const uint_v upIndexes = up.staticCast<uint_v>();
       assert ( (validHitsMask && (up >= minusOne) ) == validHitsMask );
       int_m upMask = validHitsMask && up >= int_v( Vc::Zero );
       assert( ( upMask && ((upIndexes   >= 0 ) && (upIndexes   < rowUp.NHits()   )) ) == upMask );
-      int_v downFromUp = int_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );
+//      int_v downFromUp = int_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );
+      int_v downFromUp;
+      for( unsigned int i = 0; i < float_v::Size; i++ ) {
+	if( !upMask[i] ) continue;
+	downFromUp[i] = data.HitLinkDownData( rowUp )[(unsigned int)upIndexes[i]];
+      }
+//      std::cout<<" - downFromUp: "<<downFromUp<<"\n";
         // down part
-      const int_v dn = int_v(data.HitLinkDownData( row ), hitIndexes, validHitsMask );
+//      const int_v dn = int_v(data.HitLinkDownData( row ), hitIndexes, validHitsMask );
+      int_v dn;
+      for( unsigned int i = 0; i < float_v::Size; i++ ) {
+      	if( !validHitsMask[i] ) continue;
+      	dn[i] = data.HitLinkDownData( row )[(unsigned int)hitIndexes[i]];
+      }
+//      std::cout<<" - dn: "<<dn<<"\n";
       assert ( ( validHitsMask && (dn >= minusOne) ) == validHitsMask );
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       const uint_v downIndexes = dn.staticCast<uint_v>();
       int_m dnMask = validHitsMask && dn >= int_v( Vc::Zero );
       assert( ( dnMask && ((downIndexes   >= 0 ) && (downIndexes   < rowDown.NHits()   )) ) == dnMask );
-      int_v upFromDown = int_v(data.HitLinkUpData( rowDown ), downIndexes, dnMask );
+//      int_v upFromDown = int_v(data.HitLinkUpData( rowDown ), downIndexes, dnMask );
+      int_v upFromDown;
+      for( unsigned int i = 0; i < float_v::Size; i++ ) {
+      	if( !dnMask[i] ) continue;
+      	upFromDown[i] = data.HitLinkUpData( rowDown )[(unsigned int)downIndexes[i]];
+      }
+//      std::cout<<" - upFromDown: "<<upFromDown<<"\n";
       
         // -- make clean --
 
@@ -80,8 +112,10 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
 #define USE_EDGE_HITS // use edge links, which are not reciprocall
 #ifdef USE_EDGE_HITS
 //       std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << " validHitsMask " << validHitsMask << " dnMask " << dnMask << " upMask " << upMask << std::endl; // IKu debug
+//      std::cout<<" - upMask: "<<upMask<<";   dnMask: "<<dnMask<<"\n";
       upMask &= (downFromUp == -1) && (upFromDown == static_cast<int_v>(hitIndexes));  // have mutual link only downwards. is   up-link good?
       dnMask &= (upFromDown == -1) && (downFromUp == static_cast<int_v>(hitIndexes)); // have mutual link only upwards.   is down-link good?
+//      std::cout<<" - upMask: "<<upMask<<";   dnMask: "<<dnMask<<";   downFromUp: "<<downFromUp<<";   upFromDown: "<<upFromDown<<";   hitIndexes: "<<hitIndexes<<"\n";
       
       dnMask &= int_m(rowIndex + 2*rowStep < numberOfRows);  // will use up & upup hits for check. If no one there then have to delete link
       upMask &= int_m(rowIndex - 2*rowStep >= 0);

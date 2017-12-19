@@ -57,6 +57,10 @@ void AliHLTTPCCATracker::NeighboursFinder::execute()
   tbb::parallel_for( tbb::blocked_range<int>( rowStep, numberOfRows - rowStep, 1000 ), *this );//, partitioner );
 #else  //USE_TBB  
   for ( int iRow = rowStep; iRow < numberOfRows - rowStep; ++iRow ) {
+//  for ( int iRow = rowStep; iRow < rowStep + 3; ++iRow ) {
+//    std::cout<<"---------------iRow "<<iRow<<"---------------\n";
+//    executeOnRow( iRow );
+//    executeOnRowV1( iRow );
     executeOnRow( iRow );
   }
 #endif //USE_TBB  
