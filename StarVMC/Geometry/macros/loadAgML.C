@@ -1,4 +1,4 @@
-void loadAgML( const char* name="y2016x", char* opts="sdt20160216 misalign newtpcalignment" )
+void loadAgML( const char* name=0, char* opts="sdt20160216 misalign newtpcalignment" )
 {
   gROOT->LoadMacro("bfc.C");
 //  bfc(0,"agml nodefault mysql db detdb misalign sdt20150216");
@@ -12,6 +12,10 @@ AgPosition::SetDebug(2);
      cout << "  .L loadAgML.C" << endl; 
      cout << "  loadAgML(\"y2015a\"); // standard " << endl;
      cout << "  loadAgML(\"y2015x\",\"misalign sdt20150216\"); // misaligned" << endl; 
+     cout << endl;
+     cout << "  loadAgML(); " << endl;
+     cout << "  list(\"y2015a\");       " << endl;
+     cout << "  construct(\"y2015a\");       " << endl;
   }
 
   //  StarGeometry::y2015a::select();
@@ -27,4 +31,8 @@ void construct(const char * name ) {
 
   StarGeometry::Construct(name);
 
+}
+
+void list( const char* tag ) {
+   StarGeometry::List(tag); 
 }
