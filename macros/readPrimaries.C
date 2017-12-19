@@ -70,6 +70,7 @@ void readPrimaries(Long64_t nevent=1000) {
     for (int iPTrk = 0; iPTrk < mudst->numberOfPrimaryTracks(); ++iPTrk) {
       StMuTrack *pTrk = mudst->primaryTracks(iPTrk);
       if (!pTrk) continue;
+      if (! pTrk->idTruth()) continue;
       hRcPt->Fill(pTrk->pt());
       StMuBTofHit* tofHit = pTrk->tofHit();
       // int idxTofHit = pTrk->index2BTofHit();
@@ -77,9 +78,12 @@ void readPrimaries(Long64_t nevent=1000) {
       if (tofHit) {
 	// hOneOverBetaP->Fill(pTrk->p().mag(), tofHit->leadingEdgeTime()/pTrk->btofPidTraits().pathLength());
 	//Hongwei	double tofBeta = pTrk->btofPidTraits().pathLength() / ((tofHit->leadingEdgeTime()-19) * C_C_LIGHT);
+#if 0
 	double tofBeta = -1.;
 	if (pTrk->btofPidTraits().beta() > 0) tofBeta = pTrk->btofPidTraits().beta();
-	// double tofBeta = pTrk->btofPidTraits().pathLength() / ((pTrk->btofPidTraits().timeOfFlight()-19) * C_C_LIGHT);
+#else
+	double tofBeta = pTrk->btofPidTraits().pathLength() / ((pTrk->btofPidTraits().timeOfFlight()-19) * C_C_LIGHT);
+#endif
 	hBTofBeta->Fill(tofBeta);
 	hOneOverBetaP->Fill(pTrk->p().mag(), 1.0/tofBeta);
 	hBTofHitLTTray->Fill(tofHit->tray(), tofHit->leadingEdgeTime());

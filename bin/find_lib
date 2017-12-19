@@ -78,12 +78,6 @@ foreach p ($dirlist)
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep _ZN10StKinkBase8StreamerER7TBuffer
+	nm -p $lib |  grep _ZN8ROOTDict20GenerateInitInstanceEPKN8ECALGEO68EcalGeo6E
     end
 end
-#set list = `find .sl64_gcc447/obj/StarVMC/Geometry/ -name "*.o"`
-#foreach lib ($list) 
-#   echo "lib = " $lib 
-#   nm -p $lib |  grep _ZNK5boost15program_options29value_semantic_codecvt_helperIcE5parseERNS_3anyERKSt6vectorISsSaISsEEb
-#end
-#cd $cwd
