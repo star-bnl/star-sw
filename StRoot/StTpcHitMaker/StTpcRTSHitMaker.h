@@ -1,4 +1,4 @@
-#ifndef StTpcMcHitMaker_H
+#ifndef StTpcRTSHitMaker_H
 #define StTpcRTSHitMaker_H
 
 /***************************************************************************

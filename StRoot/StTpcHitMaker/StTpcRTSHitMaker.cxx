@@ -195,7 +195,7 @@ Int_t StTpcRTSHitMaker::Make() {
     Int_t hitsAdded = 0;
     Int_t nup = 0;
     Int_t NoAdcs = 0;
-    for (Int_t row = minRow; row <= digitalSector->numberOfRows(); row++) {
+    for (Int_t row = minRow; row <= TMath::Min(maxRow,digitalSector->numberOfRows()); row++) {
       if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
