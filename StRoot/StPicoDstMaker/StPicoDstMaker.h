@@ -139,6 +139,7 @@ private:
   StEmcPosition*   mEmcPosition;
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
+  Float_t   mTpcVpdVzDiffCut;
 
   Float_t    mBField;
 
