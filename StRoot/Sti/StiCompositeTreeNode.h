@@ -387,17 +387,14 @@ inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val)
 #include "StiDetector.h"
 typedef StiDetector data_t;
 
-#if !defined(__CINT__) && !defined(__CLING__)
 typedef StiCompositeTreeNode<StiDetector> StiDetectorNode;
-#else
-class StiDetectorNode;
-#endif
 typedef vector<StiDetectorNode*> StiDetectorNodeVector;
 
+#if !defined(__CINT__) && !defined(__CLING__)
 //non-members
 inline ostream& operator<<(ostream& os, const StiOrderKey& theKey)
 {
 	return os<<"key: "<<theKey.key<<" index: "<<theKey.index;
 }
-
+#endif
 #endif
