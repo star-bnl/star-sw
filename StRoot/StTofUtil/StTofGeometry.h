@@ -142,10 +142,7 @@ class StTofGeometry{
 
   void SetDebug();
   bool Debug();
-  void init();         // init the dbase and get the data from it
   void init(StMaker*); // init the dbase and get the data from it
-  void initGeomFromXdf(const Char_t* = 
-		       "/afs/rhic.bnl.gov/star/users/geurts/public/dbase/ctg_pars.xdf");
   void initGeomFromDbase(StMaker*);
   void initDaqMap();
   StructTofParam tofParam() const; // geometry access member
