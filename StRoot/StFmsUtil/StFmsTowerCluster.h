@@ -123,9 +123,14 @@ class StFmsTowerCluster {
   /** \overload */
   const Photons& photons() const { return mPhotons; }
   /** Return the StEvent cluster structure. */
+#if !defined(__CINT__) && !defined(__CLING__)  // CINT won't parse unique_ptr so hide it
   StFmsCluster* cluster() { return mCluster.get(); }
   /** \overload */
   const StFmsCluster* cluster() const { return mCluster.get(); }
+#else
+  StFmsCluster* cluster();
+  const StFmsCluster* cluster() const;
+#endif
   /** Return and give up ownership of the StEvent cluster structure. */
   StFmsCluster* release(); 
 
