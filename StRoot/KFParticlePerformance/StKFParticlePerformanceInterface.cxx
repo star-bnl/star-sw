@@ -8,7 +8,7 @@
 
 ClassImp(StKFParticlePerformanceInterface)
 
-StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, TString outFileName): 
+StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, bool storeMCHistograms, TString outFileName): 
   fOutFileName(outFileName), fOutFile(0), fEfffileName("Efficiency.txt"),fKFTopoPerformance(0), fMCTracks(0), fMCIndexes(0)
 {
   fKFTopoPerformance = new KFTopoPerformance();
@@ -19,6 +19,8 @@ StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParti
   if (fOutFileName == "")  fOutFileName = "StKFParticleFinderQA.root";
   if(! curFile)     fOutFile = new TFile(fOutFileName.Data(),"RECREATE");
   TDirectory *dir = TDirectory::CurrentDirectory();
+  if(!storeMCHistograms)
+    fKFTopoPerformance->DoNotStoreMCHistograms();
   fKFTopoPerformance->CreateHistos("",dir);
   
   TFile::CurrentFile() = curFile;

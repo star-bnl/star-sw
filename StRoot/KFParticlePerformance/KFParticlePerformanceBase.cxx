@@ -24,7 +24,7 @@
 
 
 KFParticlePerformanceBase::KFParticlePerformanceBase():
-  fParteff(), fPVeff(), fPVeffMCReconstructable(), fParticles(0), fPV(0), outfileName(), histodir(0), fNEvents(0)
+  fParteff(), fPVeff(), fPVeffMCReconstructable(), fParticles(0), fPV(0), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1)
 #ifndef KFPWITHTRACKER
   ,fHistoDir(0), fIsHistoCreated(0)
 #endif
@@ -45,28 +45,29 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFil
     fHistoDir = TDirectory::CurrentDirectory();
   }
   {
-  {
     gDirectory->mkdir("KFParticlesFinder");
     gDirectory->cd("KFParticlesFinder");
     histodir = gDirectory;
     gDirectory->mkdir("Particles");
     gDirectory->cd("Particles");
     for(int iPart=0; iPart<fParteff.nParticles; ++iPart)
+    {
+      gDirectory->mkdir(fParteff.partName[iPart].data());
+      gDirectory->cd(fParteff.partName[iPart].data());
       {
-        gDirectory->mkdir(fParteff.partName[iPart].data());
-        gDirectory->cd(fParteff.partName[iPart].data());
+        if(fStoreMCHistograms)
         {
           TString res = "res";
           TString pull = "pull";
-  
+
           gDirectory->mkdir("DaughtersQA");
           gDirectory->cd("DaughtersQA");
           {
             TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
             int nBins = 100;
-           float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
-//             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
-  
+            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
+  //             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
+
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitDaughtersQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
                                                       (GetDirectoryPath()+res+parName[iH]).Data(), 
@@ -84,7 +85,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFil
             TString parName[3] = {"X","Y","Z"};
             int nBins = 100;
             float xMax[3] = {0.5, 0.5, 2.};
-  
+
             for( int iH=0; iH<3; iH++ ){
               hDSToParticleQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
                                                       (GetDirectoryPath()+res+parName[iH]).Data(), 
@@ -100,13 +101,15 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFil
           
           CreateFitHistograms(hFitQA[iPart], iPart);
           CreateEfficiencyHistograms(hPartEfficiency[iPart]);
-            
-          gDirectory->mkdir("Parameters");
-          gDirectory->cd("Parameters");
-          {
-            bool drawZR = (iPart<5) || (iPart==41);
-            CreateParameterHistograms(hPartParam[0], hPartParam2D[0], iPart, drawZR);
+        }
+        gDirectory->mkdir("Parameters");
+        gDirectory->cd("Parameters");
+        {
+          bool drawZR = (iPart<5) || (iPart==41);
+          CreateParameterHistograms(hPartParam[0], hPartParam2D[0], iPart, drawZR);
 
+          if(fStoreMCHistograms)
+          {
             gDirectory->mkdir("Signal");
             gDirectory->cd("Signal");
             {
@@ -127,17 +130,17 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFil
             gDirectory->cd(".."); // Parameters
             
             bool plotPrimaryHistograms = abs(fParteff.partPDG[iPart]) == 310 ||
-                                         abs(fParteff.partPDG[iPart]) == 3122 ||
-                                         abs(fParteff.partPDG[iPart]) == 22 ||
-                                         abs(fParteff.partPDG[iPart]) == 111 ||
-                                         abs(fParteff.partPDG[iPart]) == 3312 ||
-                                         abs(fParteff.partPDG[iPart]) == 3334;  
-                                         
+                                          abs(fParteff.partPDG[iPart]) == 3122 ||
+                                          abs(fParteff.partPDG[iPart]) == 22 ||
+                                          abs(fParteff.partPDG[iPart]) == 111 ||
+                                          abs(fParteff.partPDG[iPart]) == 3312 ||
+                                          abs(fParteff.partPDG[iPart]) == 3334;  
+                                          
             bool plotSecondaryHistograms = abs(fParteff.partPDG[iPart]) == 310 ||
-                                           abs(fParteff.partPDG[iPart]) == 3122 ||
-                                           abs(fParteff.partPDG[iPart]) == 22 ||
-                                           abs(fParteff.partPDG[iPart]) == 111;
-                                           
+                                            abs(fParteff.partPDG[iPart]) == 3122 ||
+                                            abs(fParteff.partPDG[iPart]) == 22 ||
+                                            abs(fParteff.partPDG[iPart]) == 111;
+                                            
             if(plotPrimaryHistograms)
             {
               gDirectory->mkdir("Primary");
@@ -162,10 +165,10 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFil
               gDirectory->cd(".."); // particle directory / Parameters
             }
           }
-          gDirectory->cd(".."); //particle directory
         }
-        gDirectory->cd(".."); //Particles
+        gDirectory->cd(".."); //particle directory
       }
+      gDirectory->cd(".."); //Particles
     }
     gDirectory->cd(".."); //main
     gDirectory->mkdir("PrimaryVertexQA");
@@ -604,8 +607,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   1000, // X
                                 1000, // Y
                                 1000, // Z
-                                10000, // R
-                                10000, // L
+                                1000, // R
+                                1000, // L
                                 1000, // L/dL
                                 fParteff.partMaxMult[iPart]+1};
   float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M

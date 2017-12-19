@@ -16,7 +16,7 @@ class TFile;
 class StKFParticlePerformanceInterface: public TObject
 {
  public:
-  StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, TString outFileName="CbmKFParticleFinderQA.root");
+  StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, bool storeMCHistograms = true, TString outFileName="CbmKFParticleFinderQA.root");
   ~StKFParticlePerformanceInterface();
   
   void PerformanceAnalysis();

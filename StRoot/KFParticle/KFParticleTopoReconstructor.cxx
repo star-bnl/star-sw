@@ -191,7 +191,7 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
       
       if(ok)
       {
-        short trackPDG = -1;  
+        int trackPDG = -1;  
         if(pdg)
           trackPDG = (*pdg)[iTr];
       
@@ -261,7 +261,7 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
   
   for(int iTr=0; iTr<nTracks; iTr++)
   {  
-    short trackPDG = -1;
+    int trackPDG = -1;
     if(pdg)
       trackPDG = (*pdg)[iTr];
     
@@ -631,7 +631,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
     {
       KFParticle tmp = fParticles[iParticle];
       tmp.SetProductionVertex(GetPrimVertex(iPV));
-      if(tmp.Chi2()/tmp.NDF()<10)
+      if(tmp.Chi2()/tmp.NDF()<5)
         isSecondary=0;
     }
     if(isSecondary)

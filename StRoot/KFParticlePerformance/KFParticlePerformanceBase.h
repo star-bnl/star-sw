@@ -68,6 +68,8 @@ class KFParticlePerformanceBase
   TDirectory* GetHistosDirectory() { return fHistoDir; }
 #endif
 
+  void DoNotStoreMCHistograms() { fStoreMCHistograms = 0; }
+  
 // efficiencies
   KFPartEfficiencies fParteff;
   KFPVEfficiencies fPVeff;
@@ -88,6 +90,7 @@ class KFParticlePerformanceBase
   TDirectory* histodir;
 
   int fNEvents;
+  bool fStoreMCHistograms;
 
 //histos
   static const int nFitQA = 16;

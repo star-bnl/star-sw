@@ -248,25 +248,15 @@ class KFParticleFinder
   std::vector<KFParticle> fD04;
   std::vector<KFParticle> fD04bar;
   std::vector<KFParticle> fD0KK;
+  std::vector<KFParticle> fD0pipi;
   std::vector<KFParticle> fDPlus;
   std::vector<KFParticle> fDMinus;
-  
-  std::vector<KFParticle> fK0PiPlus;
-  std::vector<KFParticle> fK0PiMinus;
-  std::vector<KFParticle> fK0PiPi;
-  std::vector<KFParticle> fK0KPlus;
-  std::vector<KFParticle> fK0KMinus;
-
-  std::vector<KFParticle> fLPiPlus;
-  std::vector<KFParticle> fLPiPlusPiPlus;
-  std::vector<KFParticle> fLbPiMinus;
-  std::vector<KFParticle> fLbPiMinusPiMinus;
-  
-  std::vector<KFParticle> fpK0;
-  std::vector<KFParticle> fpK0PiPlus;
-  std::vector<KFParticle> fpbK0;
-  std::vector<KFParticle> fpbK0PiMinus;
-
+  std::vector<KFParticle> fDPlus3Pi;
+  std::vector<KFParticle> fDMinus3Pi;
+  std::vector<KFParticle> fDsPlusK2Pi;
+  std::vector<KFParticle> fDsMinusK2Pi;
+  std::vector<KFParticle> fLcPlusP2Pi;
+  std::vector<KFParticle> fLcMinusP2Pi;
   
   //vectors with temporary particles for H0
   std::vector<KFParticle> fLPi; //Lambda Pi+ combination
@@ -279,7 +269,6 @@ class KFParticleFinder
   std::vector<KFParticle> fHe5L;
   std::vector<KFParticle> fLLn;
   std::vector<KFParticle> fH5LL;
-  std::vector<int> fK0PiMinusIndex;
   
   //vectors of candidates with the mass constraint
   static const int fNSecCandidatesSets = 5;
