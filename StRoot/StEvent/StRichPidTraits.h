@@ -149,7 +149,9 @@ inline void StRichPidTraits::setSignedDca3d(float v) {mSigned3dDca = v;}
 inline int StRichPidTraits::productionVersion() const { return mProductionVersion;}
 inline int StRichPidTraits::id() const {return mId;}
 inline float StRichPidTraits::probability() const {return mProbability;}
+#if !defined(__CINT__) && !defined(__CLING__)
 inline const StRichHit* StRichPidTraits::associatedMip() const { return mAssociatedMip;}
+#endif
 inline const StThreeVectorF& StRichPidTraits::mipResidual() const {return mMipResidual;}
 inline const StThreeVectorF& StRichPidTraits::refitResidual() const { return mRefitResidual;}
 inline float StRichPidTraits::signedDca2d() const { return mSigned2dDca;}

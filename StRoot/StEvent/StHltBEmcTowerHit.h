@@ -75,10 +75,10 @@ inline float StHltBEmcTowerHit::eta() const {return mEta;}
 inline float StHltBEmcTowerHit::z() const {return mZ;}
 inline float StHltBEmcTowerHit::softId() const {return mSoftId;}
 inline float StHltBEmcTowerHit::daqId() const {return mDaqId;}
-
+#if !defined(__CINT__) && !defined(__CLING__)
 inline StHltTrackNode* StHltBEmcTowerHit::trackNode() {return mTrackNode;}
 inline const StHltTrackNode* StHltBEmcTowerHit::trackNode() const {return mTrackNode;}
-
+#endif
 ostream& operator<<(ostream&, const StHltBEmcTowerHit&); ///< Printting operator
 
 #endif

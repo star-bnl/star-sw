@@ -131,10 +131,10 @@ inline float StHltTrack::dpt() const {return mDpt;}
 inline float StHltTrack::dpsi() const {return mDpsi;}
 inline float StHltTrack::dz0() const {return mDz0;}
 inline float StHltTrack::dtanl() const {return mDtanl;}
-
+#if !defined(__CINT__) && !defined(__CLING__)
 inline StHltTrackNode* StHltTrack::trackNode() {return mTrackNode;}
 inline const StHltTrackNode* StHltTrack::trackNode() const {return mTrackNode;}
-
+#endif
 
 ostream& operator<<(ostream&, const StHltTrack&); ///< Printting operator
 

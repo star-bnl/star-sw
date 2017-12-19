@@ -120,7 +120,7 @@ private:
                                                       // (negative means inside, positive outside)
     ClassDef(StFmsPoint, 3)
 };
-
+#if !defined(__CINT__) && !defined(__CLING__)
 inline unsigned short StFmsPoint::detectorId() const { return mDetectorId; }
 inline float StFmsPoint::energy() const { return mEnergy; }
 inline float StFmsPoint::x() const { return mX; } // x position in cm at which point intersects the sub-detector.
@@ -165,7 +165,7 @@ inline const char* StFmsPoint::pidName(int i) {
         default:               return "????   ";
     }
 }
-
+#endif
 
 #endif  // StFmsPoint_h
 

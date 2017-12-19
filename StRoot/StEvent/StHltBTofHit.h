@@ -75,10 +75,10 @@ inline float StHltBTofHit::tof() const {return mTof;}
 inline float StHltBTofHit::triggerTime() const {return mTriggerTime;}
 inline short StHltBTofHit::module() const {return mChannel/6;}
 inline short StHltBTofHit::cell() const {return mChannel%6;}
-
+#if !defined(__CINT__) && !defined(__CLING__)
 inline StHltTrackNode* StHltBTofHit::trackNode() {return mTrackNode;}
 inline const StHltTrackNode* StHltBTofHit::trackNode() const {return mTrackNode;}
-
+#endif
 ostream& operator<<(ostream&, const StHltBTofHit&); ///< Printting operator
 
 #endif

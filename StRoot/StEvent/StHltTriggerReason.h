@@ -57,11 +57,11 @@ private:
     
     ClassDef(StHltTriggerReason,1)
 };
-
+#if !defined(__CINT__) && !defined(__CLING__)
 inline StHltTriggerReasonType StHltTriggerReason::reasonBit() const {return mReasonBit;}
 inline StHltTriggerReasonCapable* StHltTriggerReason::reason() { return mReason; }
 inline const StHltTriggerReasonCapable* StHltTriggerReason::reason() const { return mReason; }
-
+#endif
 ostream& operator<<(ostream&, const StHltTriggerReason&); ///< print operator
 
 #endif
