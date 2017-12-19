@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.84 2017/10/24 22:03:32 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.85 2017/12/19 16:36:29 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.85  2017/12/19 16:36:29  jwebb
+* Updated EPD volume id
+*
 * Revision 1.84  2017/10/24 22:03:32  jwebb
 * Shut the framework up.
 *
@@ -245,6 +248,7 @@
       Integer hcal_cell   "HCAL cells  3x3"
       Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
       Integer hcal_sl     "HCAL short long cell, 1 short,2 long"
+      Integer epd_epdm, epd_epss, epd_epdt
 
       Integer etof_sector, etof_plane, etof_counter, etof_gap, etof_cell
       Integer pixl_alignment/0/ "Pixel alignment level"
@@ -1154,11 +1158,23 @@ c$$$    write (*,*) numbv
            "Disk number is 1st entry in numbv"
            volume_id = numbv(1)
 *******************************************************************************************
-** 28                                                                           Jason Webb
+** 28                                                                           Prashanth S 
       ELSE IF (CSYS=='epd') THEN
          
-           "East / west is first in numbv, paddle number is second"           
-           volume_id = 100*numbv(1) + numbv(2)
+           epd_epdm = numbv(1) "1 for east, 2 for west mother wheel"  
+           epd_epss = numbv(2) "1 for PP1, 2 for PP2, PP-postion 1'o,2'o clock etc"
+           epd_epdt = numbv(3) "1:T1 trap, 2:T1 Triangular, 3:T2 Thin, 4:T3 Thick"
+
+	   volume_id = 10000 * epd_epdm                          +
+	                 100 * epd_epss * 1000                   +
+		           1 * (mod(epd_epdt,2) + (epd_epdt/2) ) 
+
+     " EPD volume_id " 
+     " 10,000 : east or west "
+     "    100 : Position clock wise, 1 to 12 "
+     "      1 : Tile number 1 to 31, refer EPD Drupal page"
+	               
+
 
 
 *******************************************************************************************
