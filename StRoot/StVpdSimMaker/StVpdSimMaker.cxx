@@ -142,6 +142,18 @@ int StVpdSimMaker::Finish()
 //_____________________________________________________________________________
 int StVpdSimMaker::Make()
 {
+    mEvent = (StEvent*)GetInputDS("StEvent");
+    if (!mEvent) {
+        LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	return kStErr;
+    }
+    mVpdCollection = mEvent->btofCollection();
+    if (mVpdCollection) {
+      if (mVpdCollection->tofHeader()) {
+	LOG_INFO << "tofHeader already exists. Use it" << endl;
+	return kStOK;
+      }
+    }
     mMcBTofHitCollection = new StMcBTofHitCollection();
 
     VpdSingleHit singleHit;
@@ -406,11 +418,6 @@ int StVpdSimMaker::fillEvent()
         LOG_INFO << " ... StMcVpdHitCollection stored in StMcEvent" << endm;
     }
 
-    mEvent = (StEvent*)GetInputDS("StEvent");
-    if (!mEvent) {
-        LOG_ERROR << "No StEvent! Bailing out ..." << endm;
-    }
-    else { // mEvent non-zero
         LOG_DEBUG << "mEvent = " << mEvent << endm;
 
         //! Check for the simulated vertex
@@ -470,7 +477,6 @@ int StVpdSimMaker::fillEvent()
 	}
         LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
 
-    }
 
     return kStOK;
 }

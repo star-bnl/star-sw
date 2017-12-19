@@ -17,7 +17,6 @@
 #include <TRandom3.h>
 
 using std::string;
-class vpdSimParams_st;
 
 class StVpdSimConfig {
 public:
