@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.27 2017/11/13 19:15:09 jwebb Exp $
+* $Id: xgeometry.age,v 1.28 2017/12/19 17:19:59 jwebb Exp $
 
 
 
@@ -2506,7 +2506,8 @@ If LL>0
   Case y2017   { y2017  : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
   Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  } 
 
-  case y2018 { y2018: etof test geometyr; Geom =        'y2018     '; call geom_y2018;} 
+  case y2018 { y2018: y2018 first cut geometry; Geom =        'y2018     '; call geom_y2018;} 
+  case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
@@ -2517,8 +2518,8 @@ If LL>0
   Case ftsref2  { y2017 : y2017 baseline w/ ids and fts r2;     Geom = 'ftsref2   '; call geom_ftsref2;}
 
 
-  Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
-  Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
+* Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
+* Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
 
 
 
@@ -4635,8 +4636,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.27 2017/11/13 19:15:09 jwebb Exp $
+* $Id: xgeometry.age,v 1.28 2017/12/19 17:19:59 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.28  2017/12/19 17:19:59  jwebb
+* EPD test tags deprecated.  y2018x defined.
+*
 * Revision 1.27  2017/11/13 19:15:09  jwebb
 * Enable y2014x
 *
