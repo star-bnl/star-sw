@@ -114,31 +114,32 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"20130509.000000", 20130509, 0, "y2013_1",  "y2013 with pixel, real data,AgML,xgeometry"},
   {"20130509.000000", 20130509, 1, "y2013_1c", "y2013 with pixel, real data,AgML,xgeometry"},
 
+  {"y2014x",      20131215,     0, "y2014x",   "y2014x 2014 asymptocit geometry,IST overlap correction,AgML,xgeometry"},
   {"y2014",       20131215,     0, "y2014",    "y2014 first cut geometry,AgML,xgeometry"},
   {"y2014a",      20131215,     1, "y2014a",   "y2014a 2014 production geometry,AgML,xgeometry"},
   {"y2014b",      20131215,     2, "y2014b",   "y2014b 2014 production geometry,AgML,xgeometry"},
   {"y2014c",      20131215,     3, "y2014c",   "y2014c 2014 production geometry,IST overlap correction,AgML,xgeometry"},
 
-  {"y2014x",      20131215,120000, "y2014x",   "y2014c 2014 production geometry,IST overlap correction,AgML,xgeometry"},
 
+  {"y2015x",      20141215,     0, "y2015x",   "y2015x asymptotic geometry with IST overlap correction, AgML,xgeometry"},
   {"y2015",       20141215,     0, "y2015",    "y2015 first cut geometry, AgML,xgeometry"},
   {"y2015a",      20141215,     1, "y2015a",   "y2015a production geometry, AgML,xgeometry"},
   {"y2015b",      20141215,     2, "y2015b",   "y2015b production geometry with MTD radii corrections, AgML,xgeometry"},
   {"y2015c",      20141215,     3, "y2015c",   "y2015c production geometry with MTD revised radii corrections, AgML,xgeometry"},
   {"y2015d",      20141215,     4, "y2015d",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
 
-  {"y2015x",      20141215,120000, "y2015x",   "y2015d production geometry with IST overlap correction, AgML,xgeometry"},
 
+  {"y2016x",      20151215,     0, "y2016x",   "y2016 asymptotic geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
   {"y2016",       20151215,     0, "y2016",    "y2016 development geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
   {"y2016a",      20151215,     1, "y2016a",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
 
-  {"y2016x",      20151215,120000, "y2016x",   "y2016 production geometry, AgML,xgeometry"},   // dev2016 is deprecated for reco
 
   {"y2017",       20161215,     0, "y2017",    "y2017 development geometry, AgML,xgeometry"},   
   {"y2017a",      20161215,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},   
 
  
-  {"y2018",       20171215,     0, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
+  {"y2018x",      20171215,     0, "y2018x",   "y2018x experimental TPC geometry, AgML,xgeometry"},   
+  {"y2018",       20171215,     1, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
   
   //
   // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs
