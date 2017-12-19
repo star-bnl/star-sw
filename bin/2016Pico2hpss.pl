@@ -12,7 +12,7 @@ foreach my $file (@lines) {
   next if $file !~ /root$/ && $file !~ /gz$/; 
   my $run = File::Basename::dirname($file);
   my $f = File::Basename::basename($file);
-  if ($run !~ /17128002|17128003|17128006|17128007|17128008|17128009|17128010/) {next;}
+#  if ($run !~ /17128002|17128003|17128006|17128007|17128008|17128009|17128010/) {next;}
   print "mkdir $run\n";
   print "cd $run\n";
   print "lcd $run\n";
