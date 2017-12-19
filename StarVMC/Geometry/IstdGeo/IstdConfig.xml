@@ -7,17 +7,17 @@
   </Modules>
 
   <Setup name="ISTDof"  comment="OFF"                           module="IstdGeo0"  onoff="off" />
-  <Setup name="ISTD01"  comment="Intermediate Silicon Detector" module="IstdGeo0"  onoff="on"/>
-  <Setup name="ISTD02"  comment="Intermediate Silicon Detector" module="IstdGeo1a" onoff="on">
+  <Setup name="ISTD01"  comment="Intermediate Silicon Detector" module="IstdGeo0"  onoff="on" simu="2"/>
+  <Setup name="ISTD02"  comment="Intermediate Silicon Detector" module="IstdGeo1a" onoff="on" simu="2">
       <Init struct="ISTC" var="misalign" value="0" />
   </Setup>
-  <Setup name="ISTD02a" comment="Intermediate Silicon Detector" module="IstdGeo1a" onoff="on">
+  <Setup name="ISTD02a" comment="Intermediate Silicon Detector" module="IstdGeo1a" onoff="on" simu="2">
       <Init struct="ISTC" var="misalign" value="1" />
   </Setup>
-  <Setup name="ISTD03"  comment="Intermediate Silicon Detector" module="IstdGeo2a" onoff="on">
+  <Setup name="ISTD03"  comment="Intermediate Silicon Detector" module="IstdGeo2a" onoff="on" simu="2">
       <Init struct="ISTC" var="misalign" value="0" />
   </Setup>
-  <Setup name="ISTD03a" comment="Intermediate Silicon Detector" module="IstdGeo2a" onoff="on">
+  <Setup name="ISTD03a" comment="Intermediate Silicon Detector" module="IstdGeo2a" onoff="on" simu="2">
       <Init struct="ISTC" var="misalign" value="1" />
   </Setup>
 

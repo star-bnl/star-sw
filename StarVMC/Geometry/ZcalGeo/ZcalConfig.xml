@@ -6,7 +6,7 @@ ZcalGeo
 
 <!-- Only most recent -->
 <Setup name="ZCALof" onoff="off" comment="OFF" module="ZcalGeo" />
-<Setup name="ZCALon" onoff="on"  comment="Zcalream" module="ZcalGeo"/>
+<Setup name="ZCALon" onoff="on" simu="1"  comment="Zcalream" module="ZcalGeo"/>
 
 </Detector>
 </Document>
