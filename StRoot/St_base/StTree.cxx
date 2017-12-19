@@ -100,7 +100,8 @@ TObject *StIO::Read(TFile *file, const char *name)
   TKey *key = 0;
   assert(file);
 
-  TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
+  //yf  TFile *bakfile = gFile; 
+  TDirectory *bakdir = gDirectory; file->cd();
 
   if (!gFile) { printf("<StIO::Read> No file open \n"); goto RETURN;}
 
@@ -417,7 +418,7 @@ Int_t StBranch::Open()
 //_______________________________________________________________________________
 Int_t StBranch::WriteEvent(const StUKey &ukey)
 {
-  int iret;
+  //  int iret;
   if (  fIOMode<=0)   return 0;
   if (!(fIOMode&2))   return 0;
   fUKey.Update(ukey,GetName());
@@ -430,10 +431,10 @@ Int_t StBranch::WriteEvent(const StUKey &ukey)
   SetParAll(0,this,&savList);
   if (IsOption("const"))        {//Write constant branch (event independent)
     StUKey uk(fUKey); uk = (UInt_t)(-2);
-    iret = StIO::Write(fTFile,uk,   fList);
+    StIO::Write(fTFile,uk,   fList);
     fIOMode = -fIOMode;
   } else {
-    iret = StIO::Write(fTFile,fUKey,fList);
+    StIO::Write(fTFile,fUKey,fList);
   }
   SetParAll(&savList); 
 

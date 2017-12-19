@@ -114,10 +114,9 @@ virtual Bool_t IsFolder() const;
         VecTObjIter       begin()       {return fV.begin();}
 const_VecTObjIter end()   const {return fV.end();}
         VecTObjIter end()         {return fV.end();}
+#endif /*!__CINT__*/
         TObject**   Erase(TObject**    it                 ,int del); 
         TObject**   Erase(TObject**    fst,TObject**   lst,int del);
-#endif /*!__CINT__*/
-
         TObject *&       operator[](Int_t i)       {return fV[i];}
         TObject * const &operator[](Int_t i) const {return fV[i];}
 void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
