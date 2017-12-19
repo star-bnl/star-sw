@@ -5,7 +5,7 @@
   </Modules>
 
   <Setup name="ETOFof" comment="OFF" module="EtofGeo0" onoff="off" />
-  <Setup name="ETOFv14s" comment="tof_v14s.root" module="EtofGeo0" onoff="on" />
+  <Setup name="ETOFv14s" comment="tof_v14s.root" module="EtofGeo0" onoff="on" simu="2" />
 
 </Detector>
 </Document>
