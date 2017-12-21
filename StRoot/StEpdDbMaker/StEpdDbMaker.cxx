@@ -98,24 +98,11 @@ Int_t StEpdDbMaker::InitRun( Int_t runNumber ){
   epdGain_st*   mEpdGainTable   = (epdGain_st*)dbGain->GetTable();
 
 
-  char wire_1_id[744][20];
-  int index=0;
-  for(int id=0;id<14880;id++){
-    for(int wireid=0;wireid<20;wireid++){
-      wire_1_id[index][wireid]=(char)mEpdFeeMapTable->wire_1_id[id];
-      id++;
-    }
-    wire_1_id[index][19]='\0';
-    id--;
-    index++;
-  }
-
-
-
-  for (Int_t i = 0; i < 744; i++) {
+  int wire1n=0;
+  for (Int_t i = 0; i < 768; i++) {
     //Fetch from epdQTMap_st table
     short ew   = mEpdQtMapTable->ew[i];
-    short pp   = mEpdQtMapTable->pp[i];
+    short pp   = mEpdQtMapTable->pp[i] -1; // In DB PP starts from 1
     short tile = mEpdQtMapTable->tile[i];
 
     mCrateAdc[ew][pp][tile]   = mEpdQtMapTable->qt_crate_adc[i];
@@ -132,7 +119,10 @@ Int_t StEpdDbMaker::InitRun( Int_t runNumber ){
     mReceiverBoard[ew][pp][tile] = mEpdFeeMapTable->receiver_board[i];
     mReceiverBoardChannel[ew][pp][tile] = mEpdFeeMapTable->receiver_board_channel[i];
     mCamacCrateAddress[ew][pp][tile] = mEpdFeeMapTable->camac_crate_address[i];
-    strncpy ( mWireOneId[ew][pp][tile], wire_1_id[i], sizeof(wire_1_id[i]) );
+    mWireOneId[ew][pp][tile][0] = mEpdFeeMapTable->wire_1_id[wire1n];
+    wire1n++;
+    mWireOneId[ew][pp][tile][1] = mEpdFeeMapTable->wire_1_id[wire1n];
+    wire1n++;
 
     // Fetch from epdStatus_st table
     mStatus[ew][pp][tile]= mEpdStatusTable->status[i];
@@ -155,7 +145,7 @@ Int_t StEpdDbMaker::InitRun( Int_t runNumber ){
 void StEpdDbMaker::ResetArrays(){
   for(int ew=0; ew<2 ; ew++){
     for(int pp=0; pp < 12;pp++){
-      for(int tile=0; tile<31 ; tile++){
+      for(int tile=0; tile<32 ; tile++){
 
 	mCrateAdc[ew][pp][tile] = -1;
 	mBoardAdc[ew][pp][tile] = -1;
@@ -171,7 +161,8 @@ void StEpdDbMaker::ResetArrays(){
 	mReceiverBoard[ew][pp][tile] = -1;
 	mReceiverBoardChannel[ew][pp][tile] = -1;
 	mCamacCrateAddress[ew][pp][tile] = -1;
-	memset(mWireOneId[ew][pp][tile], '\0', sizeof(mWireOneId[ew][pp][tile]));
+	mWireOneId[ew][pp][tile][0] = 0x0;
+	mWireOneId[ew][pp][tile][1] = 0x0;
 
 	// Fetch from epdStatus_st table
 	mStatus[ew][pp][tile]= -1;
