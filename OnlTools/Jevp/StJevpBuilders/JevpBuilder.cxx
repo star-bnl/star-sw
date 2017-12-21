@@ -12,6 +12,7 @@
 #include "StEvent/StTriggerData2013.h"
 #include "StEvent/StTriggerData2016.h"
 #include "StEvent/StTriggerData2017.h"
+#include "StEvent/StTriggerData2018.h"
 //#include "Jevp/StJevpPlot/RunStatus.h"
 
 // Provides the data interface to the builders...
@@ -65,6 +66,12 @@ StTriggerData *JevpBuilder::getStTriggerData(daqReader *rdr)
 	    StTriggerData2017 *trgd2017 = new StTriggerData2017(trgdatablock2017, run);
 
 	    trgd = (StTriggerData *)trgd2017;
+	}
+	else if(td[3] == 0x45) {
+	    TriggerDataBlk2018 *trgdatablock2018 = (TriggerDataBlk2018 *)td;
+	    StTriggerData2018 *trgd2018 = new StTriggerData2018(trgdatablock2018, run);
+
+	    trgd = (StTriggerData *)trgd2018;
 	}
 	else {
 	    LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x.  Add case statement for new data!", td[0], td[1], td[2], td[3]);
