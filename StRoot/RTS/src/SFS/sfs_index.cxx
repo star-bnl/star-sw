@@ -305,7 +305,8 @@ int SFS_ittr::next()
       memcpy(ttmp,buff,16) ;
       ttmp[15] = 0 ;
       LOG(ERR,"Error: %s is not a valid specifier\n",ttmp);
-      return -1;
+      filepos = -1;
+      return 0;
     }
   }
   // Read File Desc
