@@ -12,10 +12,12 @@ namespace Garfield {
 class ComponentElmer : public ComponentFieldMap {
 
  public:
-  // Constructors
+  /// Default constructor
   ComponentElmer();
-  ComponentElmer(std::string header, std::string elist, std::string nlist,
-                 std::string mplist, std::string volt, std::string unit);
+  /// Constructor with a set of field map files, see Initialise().  
+  ComponentElmer(const std::string& header, const std::string& elist, 
+                 const std::string& nlist, const std::string& mplist, 
+                 const std::string& volt, const std::string& unit);
   /// Destructor
   ~ComponentElmer() {}
 
@@ -33,18 +35,29 @@ class ComponentElmer : public ComponentFieldMap {
 
   Medium* GetMedium(const double x, const double y, const double z);
 
-  bool IsInBoundingBox(const double x, const double y, const double z) {
+  virtual bool IsInBoundingBox(const double x, const double y, 
+                               const double z) const {
     return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
            y >= yMinBoundingBox && y <= yMaxBoundingBox &&
            z >= zMinBoundingBox && y <= zMaxBoundingBox;
   }
 
-  bool Initialise(std::string header = "mesh.header",
-                  std::string elist = "mesh.elements",
-                  std::string nlist = "mesh.nodes",
-                  std::string mplist = "dielectrics.dat",
-                  std::string volt = "out.result", std::string unit = "cm");
-
+ /** Import a field map from a set of files.
+   * \param header name of the header file 
+                   (contains the number of elements and nodes).
+   * \param elist name of the file that contains the list of mesh elements 
+   * \param nlist name of the file that contains the list of mesh nodes
+   * \param mplist name of the file that contains the material properties
+   * \param volt output of the field solver (list of voltages)
+   * \param unit length unit to be used
+   */
+  bool Initialise(const std::string& header = "mesh.header",
+                  const std::string& elist = "mesh.elements",
+                  const std::string& nlist = "mesh.nodes",
+                  const std::string& mplist = "dielectrics.dat",
+                  const std::string& volt = "out.result", 
+                  const std::string& unit = "cm");
+  /// Import a list of voltages to be used as weighting field.
   bool SetWeightingField(std::string prnsol, std::string label);
 
  protected:

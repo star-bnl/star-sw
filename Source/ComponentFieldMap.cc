@@ -95,22 +95,22 @@ void ComponentFieldMap::NotDriftMedium(const unsigned int imat) {
   materials[imat].driftmedium = false;
 }
 
-double ComponentFieldMap::GetPermittivity(const unsigned int imat) {
+double ComponentFieldMap::GetPermittivity(const unsigned int imat) const {
 
   if (imat >= m_nMaterials) {
-    std::cerr << m_className << "::GetPermittivity:\n";
-    std::cerr << "    Material index " << imat << " is out of range.\n";
+    std::cerr << m_className << "::GetPermittivity:\n"
+              << "    Material index " << imat << " is out of range.\n";
     return -1.;
   }
 
   return materials[imat].eps;
 }
 
-double ComponentFieldMap::GetConductivity(const unsigned int imat) {
+double ComponentFieldMap::GetConductivity(const unsigned int imat) const {
 
   if (imat >= m_nMaterials) {
-    std::cerr << m_className << "::GetConductivity:\n";
-    std::cerr << "    Material index " << imat << " is out of range.\n";
+    std::cerr << m_className << "::GetConductivity:\n"
+              << "    Material index " << imat << " is out of range.\n";
     return -1.;
   }
 
@@ -126,7 +126,7 @@ void ComponentFieldMap::SetMedium(const unsigned int imat, Medium* m) {
   }
 
   if (!m) {
-    std::cerr << m_className << "::SetMedium:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetMedium:    Null pointer.\n";
     return;
   }
 
@@ -141,8 +141,8 @@ void ComponentFieldMap::SetMedium(const unsigned int imat, Medium* m) {
 Medium* ComponentFieldMap::GetMedium(const unsigned int imat) const {
 
   if (imat >= m_nMaterials) {
-    std::cerr << m_className << "::GetMedium:\n";
-    std::cerr << "    Material index " << imat << " is out of range.\n";
+    std::cerr << m_className << "::GetMedium:\n"
+              << "    Material index " << imat << " is out of range.\n";
     return NULL;
   }
 
@@ -171,9 +171,9 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
   // Check if bounding boxes of elements have been computed
   if (!m_cacheElemBoundingBoxes) {
     std::cout << m_className << "::FindElement5:\n"
-              << "    Caching the bounding boxes of all elements.\n";
-
+              << "    Caching the bounding boxes of all elements...";
     CalculateElementBoundingBoxes();
+    std::cout << " done.\n";
     m_cacheElemBoundingBoxes = true;
   }
 
@@ -335,9 +335,9 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
   // Check if bounding boxes of elements have been computed
   if (!m_cacheElemBoundingBoxes) {
     std::cout << m_className << "::FindElement13:\n"
-              << "    Caching the bounding boxes of all elements.\n";
-
+              << "    Caching the bounding boxes of all elements...";
     CalculateElementBoundingBoxes();
+    std::cout << " done.\n";
     m_cacheElemBoundingBoxes = true;
   }
 
@@ -1207,8 +1207,7 @@ int ComponentFieldMap::Coordinates3(const double x, const double y,
     if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 &&
         fabs(corr[2]) < 1.0e-5) {
       if (m_debug) {
-        std::cout << m_className << "::Coordinates3:\n";
-        std::cout << "    Convergence reached.\n";
+        std::cout << m_className << "::Coordinates3: Convergence reached.";
       }
       converged = true;
       break;
@@ -2417,13 +2416,11 @@ void ComponentFieldMap::PrintRange() {
 }
 
 bool ComponentFieldMap::IsInBoundingBox(const double x, const double y,
-                                        const double z) {
+                                        const double z) const {
 
-  if (x >= xMinBoundingBox && x <= xMaxBoundingBox && y >= yMinBoundingBox &&
-      y <= yMaxBoundingBox && z >= zMinBoundingBox && z <= zMaxBoundingBox) {
-    return true;
-  }
-  return false;
+  return (x >= xMinBoundingBox && x <= xMaxBoundingBox && 
+          y >= yMinBoundingBox && y <= yMaxBoundingBox && 
+          z >= zMinBoundingBox && z <= zMaxBoundingBox);
 }
 
 bool ComponentFieldMap::GetBoundingBox(double& xmin, double& ymin, double& zmin,
@@ -2686,8 +2683,8 @@ bool ComponentFieldMap::InitializeTetrahedralTree() {
     return false;
   }
 
-  std::cerr << m_className << "::InitializeTetrahedralTree:\n";
-  std::cerr << "    About to initialize the tetrahedral tree.\n";
+  std::cout << m_className << "::InitializeTetrahedralTree:\n"
+            << "    About to initialize the tetrahedral tree.\n";
 
   // check if the caching has not been done before
   if (!m_cacheElemBoundingBoxes) CalculateElementBoundingBoxes();
@@ -2715,7 +2712,7 @@ bool ComponentFieldMap::InitializeTetrahedralTree() {
   m_tetTree = new TetrahedralTree(Vec3(xmin + hx, ymin + hy, zmin + hz),
                                   Vec3(hx, hy, hz));
 
-  std::cerr << "Tree instantiated.\n";
+  std::cout << "    Tree instantiated.\n";
 
   // insert all mesh nodes in the tree
   for (unsigned int i = 0; i < nodes.size(); i++) {
@@ -2723,8 +2720,8 @@ bool ComponentFieldMap::InitializeTetrahedralTree() {
     m_tetTree->InsertMeshNode(Vec3(n.x, n.y, n.z), i);
   }
 
-  std::cerr << m_className << "::InitializeTetrahedralTree:\n";
-  std::cerr << "    Tetrahedral tree nodes initialized successfully.\n";
+  std::cout << m_className << "::InitializeTetrahedralTree:\n"
+            << "    Tetrahedral tree nodes initialized successfully.\n";
 
   // insert all mesh elements (tetrahedrons) in the tree
   for (unsigned int i = 0; i < elements.size(); i++) {

@@ -18,20 +18,6 @@ using namespace Garfield;
 typedef void(*setupFunction)(ComponentAnalyticField*, double& xmin, double& xmax, double& ymin, double& ymax);
 
 //==================================================
-// Hexagon
-//==================================================
-void hextube(ComponentAnalyticField* cmp,
-             double& xmin, double& xmax, double& ymin, double& ymax) {
-
-  cmp->AddTube(2., 0., 6, "t");
-  cmp->AddWire(0., 0., 100.e-4, 5000., "s");
-  xmin = -2.1;
-  xmax =  2.1;
-  ymin = -2.1;
-  ymax =  2.1;
-}
-
-//==================================================
 // Spiral
 //==================================================
 void spiral(ComponentAnalyticField* cmp,
@@ -49,14 +35,24 @@ void spiral(ComponentAnalyticField* cmp,
     const double v = i % 2 == 0 ? -i * 10 : i * 10;
     cmp->AddWire(x, y, d, v, label);
   }
-  xmin = -3.1;
-  xmax =  3.1;
-  ymin = -3.1;
-  ymax =  3.1;
+  xmin = ymin = -3.05;
+  xmax = ymax = +3.05;
 }
 
 //==================================================
-// Two wires
+// Hexagon
+//==================================================
+void hextube(ComponentAnalyticField* cmp,
+             double& xmin, double& xmax, double& ymin, double& ymax) {
+
+  cmp->AddTube(2., 0., 6, "t");
+  cmp->AddWire(0., 0., 100.e-4, 5000., "s");
+  xmin = ymin = -2.05;
+  xmax = ymax =  2.05;
+}
+
+//==================================================
+// Two wires, no periodicity
 //==================================================
 void b2x(ComponentAnalyticField* cmp,
          double& xmin, double& xmax, double& ymin, double& ymax) {
@@ -66,57 +62,40 @@ void b2x(ComponentAnalyticField* cmp,
   const double d = 0.01;
   cmp->AddWire(0.0, 0.0, d, 2000., "s");
   cmp->AddWire(0.5, 0.5, d, 2000., "p");
-  xmin = -1.1;
-  xmax =  1.1;
-  ymin = -0.5;
-  ymax =  1.;
+  xmin = -1.05;
+  xmax =  1.05;
+  ymin = -0.8;
+  ymax =  1.3;
 }
 
 //==================================================
-// One wire
-//==================================================
-void c2x(ComponentAnalyticField* cmp,
-         double& xmin, double& xmax, double& ymin, double& ymax) {
-
-  cmp->SetPeriodicityY(1.);
-  cmp->AddPlaneX(-1., 0., "p");
-  cmp->AddPlaneX( 1., 0., "p");
-  const double d = 0.01;
-  cmp->AddWire(0.0, 0.0, d, 5000., "s");
-  xmin = -1.1;
-  xmax =  1.1;
-  ymin = -1.1;
-  ymax =  1.1;
-
-}
-
-//==================================================
-// LHCb MWPC
+// MWPC
 //==================================================
 void mwpc(ComponentAnalyticField* cmp,
           double& xmin, double& xmax, double& ymin, double& ymax) {
 
   const double gap = 0.5;
   const double pitch = 0.2;
-  cmp->SetPeriodicityX(pitch);
+  cmp->SetPeriodicityY(pitch);
 
-  cmp->AddPlaneY( 0., 0., "p");
-  cmp->AddPlaneY(gap, 0., "q");
+  cmp->AddPlaneX( 0.,  0., "p");
+  cmp->AddPlaneX(gap,  0., "q");
 
-  const double yw = 0.5 * gap;
+  const double xw = 0.5 * gap;
   const double dw = 30.e-4;
   const double vw = 2650.;
   // const double vw = 2650.;
   const double tension = 40.;
   const double length = 32.;
   const double rho = 19.4;
-  cmp->AddWire(0., yw, dw, vw, "s", length, tension, rho);
+  cmp->AddWire(xw, 0., dw, vw, "s", length, tension, rho);
 
-  xmin = -5 * pitch;
-  xmax =  5 * pitch;
-  ymin = -0.1 * gap;
-  ymax =  1.1 * gap;
+  xmin = -0.01 * gap;
+  xmax =  1.01 * gap;
+  ymin = -5 * pitch;
+  ymax =  5 * pitch;
 }
+
 
 //==================================================
 // ALICE TPC O-ROC
@@ -166,24 +145,23 @@ void oroc(ComponentAnalyticField* cmp,
 void circle(ComponentAnalyticField* cmp,
             double& xmin, double& xmax, double& ymin, double& ymax) {
 
-  cmp->AddPlaneX(-25., 0., "p");
-  cmp->AddPlaneX( 25., 0., "p");
-  cmp->AddPlaneY(-25., 0., "p");
-  cmp->AddPlaneY( 25., 0., "p");
+  cmp->AddPlaneX(-50., 0., "p");
+  cmp->AddPlaneX( 50., 0., "p");
+  cmp->AddPlaneY(-50., 0., "p");
+  cmp->AddPlaneY( 50., 0., "p");
   const double r = 5.;
   const unsigned int n = 16;
+  const double d = 0.01;
   for (unsigned int i = 0; i < 16; ++i) {
     const double f = double(i) / n;
     const double phi = TwoPi * f;
     const double x = r * cos(phi);
     const double y = r * sin(phi);
-    cmp->AddWire(x, y, 0.01, 300., "p"); 
+    cmp->AddWire(x, y, d, 1000., "p"); 
   }
-  cmp->AddWire(0., 0., 0.001, 2500., "s");
-  xmin = -25.;
-  xmax =  25.;
-  ymin = -25.;
-  ymax =  25.;
+  cmp->AddWire(0., 0., d, 4500., "s");
+  xmin = ymin = -1.05 * r;
+  xmax = ymax =  1.05 * r;
 }
 
 int main(int argc, char * argv[]) {
@@ -204,10 +182,10 @@ int main(int argc, char * argv[]) {
   // Setup the electric field 
   ComponentAnalyticField cmp;
 
-
   // Make a sensor
   Sensor sensor;
   sensor.AddComponent(&cmp);
+  sensor.SetArea();
 
   // Plot the potential.
   TCanvas canvas("c", "", 600, 600);
@@ -220,11 +198,11 @@ int main(int argc, char * argv[]) {
   std::vector<setupFunction> cells;
   cells.push_back(&spiral);
   cells.push_back(&b2x);
-  cells.push_back(&c2x);
   cells.push_back(&mwpc);
   cells.push_back(&oroc);
   cells.push_back(&circle);
   cells.push_back(&hextube);
+
   for (auto function : cells) {
     cmp.Clear();
     cmp.SetGeometry(geo);
@@ -237,6 +215,8 @@ int main(int argc, char * argv[]) {
     fieldView.PlotContour();
     cellView.SetArea(xmin, ymin, -1., xmax, ymax, 1.);
     cellView.Plot2d();
+    std::cout << "Press ENTER to continue.\n";
+    std::cin.get();
   }
   app.Run(kTRUE);
 }
