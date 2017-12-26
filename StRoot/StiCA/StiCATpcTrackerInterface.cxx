@@ -237,11 +237,11 @@ void StiCATpcTrackerInterface::Run()
     // copy hits
 //  timer.Start();
 //
-//  MakeSeeds();
-//
-//  timer.Stop();
-//  fPreparationTime_real += timer.RealTime();
-//  fPreparationTime_cpu += timer.CpuTime();
+  MakeSeeds();
+
+  timer.Stop();
+  fPreparationTime_real += timer.RealTime();
+  fPreparationTime_cpu += timer.CpuTime();
 } // void StiCATpcTrackerInterface::Run()
 
 void StiCATpcTrackerInterface::RunPerformance()
@@ -618,7 +618,7 @@ void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   A[15] = 0;
 #endif
 }
-
+//________________________________________________________________________________
 void StiCATpcTrackerInterface::MakeSeeds()
 {
   const int NRecoTracks = fTracker->NTracks();
