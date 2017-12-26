@@ -14,4 +14,5 @@ TFG17o Freeze PicoDst before production                             2017-12-05 1
 TFG17o Adjust dE/dx and dN/dx for ToF                               2017-12-22 10:22:04 -0500  (HEAD, tag: TFG17p_1)
 TFG17o Freeze RCF version                                           2017-12-15 14:53:01 -0500  (tag: TFG17op2)
 TFG17r Freeze before merging with HLT (Grigory & Maksym)            2017-12-19 15:22:01 -0500  (tag: TFG17r)
+TFG17q Freeze after  merging with HLT (Grigory & Maksym)            2017-12-19 16:22:01 -0500  (tag: TFG17q)
 .DEV2  head of TFG git repository          
