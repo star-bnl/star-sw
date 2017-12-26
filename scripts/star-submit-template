@@ -21,7 +21,8 @@ GetOptions ( "template=s"   => \$filename,
              "policy=s"     => \$policy,
              "dispatcher=s" => \$dispatcher,
 	     "simulate"     => \$simulate,
-	     "debug"        => \$debug);
+             "use=s"        => \$use, 
+             "debug"        => \$debug);
 
 if ( !defined($filename) ){
     print STDERR "ERROR: The template name must be specified\n\n";
@@ -61,6 +62,8 @@ sub usage {
    -entities <assignment> A comma separated list of entity assignment
                           (i.e. trigger=minbias,collision=dAu200)
 
+   -use      <options>    Option to pass to SUMS as -u 
+    
    While -entities can be repeated on the command line, this script accepts
    only one template for safety purposes.
 
@@ -97,6 +100,9 @@ sub submitJobRequest {
    }
    if ( defined($dispatcher) ){
        $command .= " -dispatcher " . $dispatcher;
+   }
+   if ( defined($use) ){
+       $command .= " -u " . $use;
    }
    if ($#ARGS != -1){
        $command .= " ".join(" ",@ARGS);

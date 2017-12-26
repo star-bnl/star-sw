@@ -502,9 +502,10 @@ if ( $ThisYear == 2005 ){
 
     $PHYSTP  =  
 	rdaq_string2ftype("physics")    ."|".
-        rdaq_string2ftype("physics_adc")."|". 
-	rdaq_string2ftype("W")          ."|". 
-	rdaq_string2ftype("W_adc");
+        rdaq_string2ftype("physics_adc");
+        #rdaq_string2ftype("physics_adc")."|". 
+	#rdaq_string2ftype("W")          ."|". 
+	#rdaq_string2ftype("W_adc");
 
     $PHYSTP2 =
         rdaq_string2ftype("pxl")        ."|".  # <-- appeared in 2013 run
@@ -682,9 +683,9 @@ if ( -e $QUITF){
 
 # be sure to turn it ON
 # if (rdaq_toggle_debug()){ rdaq_toggle_debug();}
-# if ($DEBUG){
-#    rdaq_toggle_debug(1);
-# }
+if ($DEBUG){
+    rdaq_toggle_debug(1);
+}
 
 # Global condition will exclude from accidental processing of junk
 # puslers or lasers types. Note that EXPRESS are NOT added as they

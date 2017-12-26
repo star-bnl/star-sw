@@ -9,7 +9,7 @@
 $SELF = $0;
 $SELF =~ s/.*\///g; 
 
-if ( ! defined(@ARGV ) ){
+if ( ! @ARGV ){
     die 
       "\n",
       "Usage is:\n",

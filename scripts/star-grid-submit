@@ -25,7 +25,7 @@ set scriptName = `/bin/basename $0`
 set scriptDir  = `echo $0 | sed "s/$scriptName//"`
 
 # Starts the scheduler itself
-if(( X$argv[1] =~ X-kr )||( X$argv[1] =~ X-k )||( X$argv[1] =~ X-kd )||( X$argv[1] =~ X-r )||( X$argv[1] =~ X-s )||( X$argv[1] =~ X-n )||( X$argv[1] =~ X-f )||( X$argv[1] =~ X-h ))then
+if(( X$argv[1] =~ X-kr )||( X$argv[1] =~ X-k )||( X$argv[1] =~ X-r )||( X$argv[1] =~ X-s )||( X$argv[1] =~ X-n )||( X$argv[1] =~ X-f )||( X$argv[1] =~ X-h ))then
     java -Xmx196m -cp $scriptDir/:$scriptDir/scheduler.jar gov.bnl.star.offline.scheduler.util.persistent.CommandLineReDispatch $scriptDir/gridConfig.xml $*
 else
     java -Xmx196m -cp $scriptDir/:$scriptDir/scheduler.jar gov.bnl.star.offline.scheduler.SchedulerCommandLine -conf $scriptDir/gridConfig.xml $*

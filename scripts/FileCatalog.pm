@@ -786,7 +786,7 @@ sub _ReadConfig
 	    my($ref,$server) ;
 	    my($bref);
 	    # intent can be BNL::Admin
-	    &print_debug("_ReadConfig","Parsing intent [$intent]");
+	    &print_debug("_ReadConfig","Prasing intent $intent");
 	    if ($intent =~ /::/){
 		($site,$lintent) = split("::",$intent);
 	    } else {
