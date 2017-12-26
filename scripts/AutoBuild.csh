@@ -232,7 +232,7 @@ if ( -r  $GROUP_DIR/star_login.csh ) then
 		set LPATH=$AFS_RHIC/star/packages/adev
 		set SPATH=$AFS_RHIC/star/doc/www/comp/prod/Sanity
 		if ( ! $?XTRACMD ) then
-		    $SCRIPTD/AutoBuild.pl -k -i -R -1 -T $1 -p $LPATH
+		    $SCRIPTD/AutoBuild.pl -k -s -i -R -1 -T $1 -p $LPATH
 		else
 		    $SCRIPTD/AutoBuild.pl -k -s -i -R -1 -a "$XTRACMD" -T $1 -p $LPATH
 		endif
