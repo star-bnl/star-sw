@@ -865,11 +865,11 @@ endif
     endif
 #    endif
 if ( $?QTDIR ) then
-    setenv MANPATH ${MANPATH}:$QTDIR/man
-    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${QTDIR}/lib
+    setenv MANPATH ${QTDIR}/man:${MANPATH}
+    setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
     setenv PATH ${QTDIR}/bin:${PATH}
 endif
-if (! $?IVROOT && -d $XOPTSTAR/include/Inventor ) setenv IVROOT $XOPTSTAR
+if ( -d $XOPTSTAR/include/Inventor ) setenv IVROOT $XOPTSTAR
 if ($?IVROOT == 0 && $?STAR) then
    if (-r $STAR/QtRoot/qtgl/qtcoin/setup.csh) source $STAR/QtRoot/qtgl/qtcoin/setup.csh 
 endif
