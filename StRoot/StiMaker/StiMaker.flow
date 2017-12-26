@@ -1,0 +1,1213 @@
+							_x;   /// local X-coordinate of this track (reference plane)
+y(x) = y_0 - (1 - (C*x - eta)**2)**1/2/C 		_p0;  /// local Y-coordinate of this track (reference plane)	
+z(x) = z_0 - tan(lambda)/C*arcsin(C*x - eta)		_p1;  /// local Z-coordinate of this track (reference plane)
+//eta  = C*x_0                                          _p2;  /// (signed curvature)*(local X-coordinate of helix axis)
+eta  = C*(x_0-x) = -sin(Psi)                            _p2;  /// (signed curvature)*(local X-coordinate of helix axis)
+C							_p3;  /// signed curvature [sign = sign(-qB)]
+tan(lambda)						_p4;  /// tangent of the track momentum dip angle
+
+  /// covariance matrix of the track parameters	
+  ///       y     z   eta     C  tan(lambda)
+  double _c00;                       
+  double _c10, _c11;                 
+  double _c20, _c21, _c22;           
+  double _c30, _c31, _c32, _c33;     
+  double _c40, _c41, _c42, _c43, _c44;
+
+MCS:
+	
+  _c33 += _p3*_p4*_p3*_p4*theta2;
+  _c32 += _p3*_p4*_p4*_p3*_x*theta2;
+  _c43 += _p3*_p4*(_p4*_p4+1)*theta2;
+  _c22 += (2*(_p3*_x-_p2)*_p4*_p4*_p2+1-(_p3*_x-_p2)*(_p3*_x-_p2)+_p4*_p4+_p2*_p2*_p4*_p4)*theta2;
+  _c42 += _p4*(_p4*_p4+1)*_p3*_x*theta2;
+  _c44 += (_p4*_p4+1)*(_p4*_p4+1)*theta2;
+-----------------------------------------------------
+05/24/06
+ StiNodePars {
+//              E     P      T
+   _x, _y, _z, _eta, _ptin, _tanl, _curv, _hz
+}
+ StiNodeMtx {
+	double A[kNPars][kNPars];
+}
+ StiNodeErrs {
+union{double A[1];double _cXX;};
+                  double _cYX,_cYY;                        
+  		  double _cZX,_cZY, _cZZ;                  
+  		  double _cEX,_cEY, _cEZ, _cEE;            
+  		  double _cPX,_cPY, _cPZ, _cPE, _cPP;      
+  		  double _cTX,_cTY, _cTZ, _cTE, _cTP, _cTT;
+};  
+	
+}
+ StiNodePars  mFP; // fitPars
+ StiNodeErrs  mFE; // fitErrs	
+ StiNodeExt *_ext; {mPP, mPE, mMtx, // ? Prediction
+________________________________________________________________________________
+StiMaker::Init	
+	_loaderHitFilter = 0
+	_loaderTrackFilter = new StiDefaultTrackFilter("LoaderTrackFilter","MC Tracks Filter"); 
+		_loaderTrackFilter->add(new EditableParameter(..) instead of StiDefaultTrackFilter::initialize() initialize parameters for 
+	_loaderTrackFilter->add(....)
+...
+	_loaderTrackFilter = StiDefaultTrackFilter
+
+	InitDetectors()	
+		_toolkit->add(group = new StiTpcDetectorGroup(bool active,...))
+						active?new StiTpcHitLoader():0,
+						new StiTpcDetectorBuilder(active,inputFile)	
+		_toolkit->add(group = new StiSvtDetectorGroup(...))
+		_toolkit->add(group = new StiSsdDetectorGroup(...))
+		_toolkit->add(group = new StiFtpcDetectorGroup(...))
+		_toolkit->add(group = new StiPixelDetectorGroup(...))
+		...
+StiMaker::InitRun
+
+	StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer();
+	detectorContainer->initialize(); // order detector in R and Phi
+	detectorContainer->reset();
+		..
+	_seedFinder->initialize();
+	_hitLoader  = _toolkit->getHitLoader();
+	
+
+
+	masterBuilder->build(*this);
+		 (*iter)->build(source) // loop over  DetectorGroups
+			buildDetectors(StMaker&) - beam pipe ; radius = 4; thickness = 0.076;
+						  PN pipegeo.g: BeInnR    = 3.9l  BeOutR    = 4.0  BeLeng    = 76.2
+							 Al   : S1InnR    = 3.875 S1OutR    = 4.0  S1Leng    = 153.4
+						setThickness(thickness)
+						setOuterRadius(radius+thickness/2.)
+				StiDetectorBuilder data members
+				   int                 _groupId;
+                                   bool                _active;		        
+  				   materialMap         mMaterialMap;	      
+  				   shapeMap            mShapeMap;	      
+  				   detectorMap         mDetectorMap;	      
+  				   detectorIterator    mDetectorIterator;      
+  				   unsigned int        _nRows;		      
+  				   vector< unsigned int> _nSectors;	      
+  				   vector< vector<StiDetector*> > _detectors;  
+  				   Factory<StiDetector>*_detectorFactory;      
+  				   StiTrackingParameters _trackingParameters;  // ?
+   				         string _inputFile;                    
+                               StiTpcDetectorBuilder::buildDetectors // only 12 sectors, alignment West used for East
+				StiDetectorBuilder::load
+					Loadable::loadM	
+						StiTpcDetectorBuilder::loadDS
+	...
+	
+OLD================================================================================
+
+StiMaker::Make
+	// StiLocalTrackSeedFinder*       _seedFinder
+	// StiLocalTrackSeedFinder*       _trackSeedFinder
+	// StiKalmanTrackFinder*          _tracker;
+	// StiKalmanTrackFitter*          _fitter
+	// 04/23/09 StiHitLoader::loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+	StiKalmanTrackFinder::clear()
+	loadHits(); // 04/23/09
+	MyClear()
+	StiKalmanTrackFinder::reset()
+	StiKalmanTrackFinder::findTracks()
+		StiTrackFinder::reset()
+		StiTrackContainer::clear()
+	StiKalmanTrackFinder::findTpcTracks()
+	
+	StiKalmanTrackFinder::findAllTracks()
+                StiKalmanTrackFinder::extendSeeds(rMin=0)
+			StiLocalTrackSeedFinder::findTrack(rMin) <
+				StiLocalTrackSeedFinder::makeTrack
+					StiLocalTrackSeedFinder::extendHit
+					StiLocalTrackSeedFinder::extrapolate
+					StiLocalTrackSeedFinder::initializeTrack
+						StiLocalTrackSeedFinder::fit	
+							StiKalmanTrack::initialize(vector<StiHit*> &hits)
+								StiKalmanTrackNode::initialize(hit)
+									StiKalmanTrackNode::setHit(hit)
+									StiKalmanTrackNode::setHitErrors()
+										StiTrackNodeHelper::getHitErrors(hit,&mFP,&mHrr);
+											calc = StiDetector::getHitErrorCalculator
+											if (calc) calc->calculateError(pars,hrr->hYY,hrr->hZZ);
+											else      hrr->A[i]=hit->errMtx() [6]
+										StiHitErrs::rotate(_alpha);
+								StiKalmanTrack::add(StiTrackNode * node,int direction) 
+                        track->setFlag(-1);
+			track->approx(0); 
+			StiTrack::fit(kInsideOut)
+				 StiKalmanTrackFitter::fit(track,fitDirection)
+					// refit
+					for (source=first;source!=last;source++) {
+						targetNode = &(*source);	
+  						targetDet = targetNode->getDetector();
+      						targetHit = targetNode->getHit();
+						
+					}
+			StiKalmanTrackFinder::extendTrack(track,rMin);
+				StiKalmanTrackFinder::find(track,kOutsideIn,rMin)
+					StiKalmanTrackFinder::StiKalmanTrackFinder::find(track,direction,leadNode,qa)
+				StiKalmanTrackFinder::find(track,kInsideOut);
+				track->StiKalmanTrack::approx(); // 
+				track->StiKalmanTrack::refit()	
+			StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
+			track->add(extenDca,kOutsideIn);
+			track->reduce();
+			track->setFlag(1);
+		        _trackContainer->push_back(track);
+        		track->setId(_trackContainer->size());
+        		track->reserveHits();
+			BFactory::Free(track);
+	StiStEventFiller::fillEvent(event, _trackContainer);
+	"GenericVertex"::fit(event);                              /// findVertex()
+	StiKalmanTrackFinder::extendTracksToVertex(vertex)
+========================================================================
+			StiTrackFinder::findTrack(double rMin)
+				StiLocalTrackSeedFinder::findTrack(rMin)	
+				StiKalmanTrack::find(); <<<<<<<<<<<<<<<<<<<< ?
+
+3   breakpoint     keep y   0x06b172cf in StiKalmanTrackFinder::findTrack(double) at .sl44_gcc346/obj/StRoot/Sti/StiKalmanTrackFinder.cxx:810
+4   breakpoint     keep y   0x06b0d12e in StiKalmanTrack::find(int) at .sl44_gcc346/obj/StRoot/Sti/StiKalmanTrack.cxx:1128
+
+					
+				track->StiKalmanTrackFinder::find(); // direction=kOutsideIn
+					fit()
+					if(StiTrackFinder::find(this,kOutsideIn,radSvt)) {
+						StiKalmanTrack::approx(1);
+						StiKalmanTrack::refit()
+							StiKalmanTrack::refitL()
+								StiTrackNodeHelper::set(pNode,targetNode)
+								StiTrackNodeHelper::makeFit(0)
+									StiTrackNodeHelper::propagatePars
+									StiTrackNodeHelper::propagateMtx
+									StiTrackNodeHelper::propagateMCS
+									StiTrackNodeHelper::propagateFitd
+									StiTrackNodeHelper::propagateError
+									StiTrackNodeHelper::resetError
+									StiTrackNodeHelper::setHitErrs()
+									StiTrackNodeHelper::evalChi2()
+									StiTrackNodeHelper::updateNode()
+								StiTrackNodeHelper::makeFit(1)
+					}
+					if (trackFinder->find(this,kOutsideIn,0.)) {
+						StiKalmanTrack::refit()
+					}				
+					if (trackExtendedOut= trackFinder->find(this,kInsideOut)) {
+						StiKalmanTrack::refit()
+					}
+
+NEW================================================================================
+StiMaker::Make
+      StiMaker::MakeGlobalTracks(event)
+        StiKalmanTrackFinder::findTracks();
+	  StiKalmanTrackFinder::extendSeeds
+	     StiCATpcSeedFinder::findTrack
+		StiCATpcTrackerInterface::Run
+		   AliHLTTPCCAGBTracker::FindTracks
+                   StiCATpcTrackerInterface::MakeSeeds
+                StiCATpcTrackerInterface::GetSeeds
+========================================================================
+    //  PREDICTION
+    //  ----------
+    //  extrapolation of the covariance matrix
+    //  form matrix C^k-1_k[p,p] = F_k-1[p,p] * C_k-1[p,p] * FT_k[p,p] + Q_k[p,p]
+    //   covariance matrix of predicted residuals:
+    //    R^k-1_k[m,m] = V_k[m,m] + H_k[m,p] * C^k-1_k[p,p] * HT_k[m,p]
+    //
+    //   FILTER
+    //  --------
+    //   "Filter" (kalman gain matrix formalism)
+    //            K_k[p,m] = C^k-1_k[p,p] * HT_k[m,p] * (R^k-1_k)^-1[m,m]
+    //            P[p,m] =  C^k-1_k[p,p] * HT_k[m,p]
+    //            K[p,m] = P[p,m]*G[m,m]
+    //   update of the covariance matrix:
+    //    C_k = (I - K_k * H_k) * C^k-1_k * (I - K_k * H_k)T + K_k * V_k * KT_k
+    // P* C^k-1_k * PT
+    //   fitted residual r_k = m_k - H_k * x_k {= (I - H_k*K_k) r^k-1_k}
+    //   R_k = V_k - H_k * C_k * HT_k
+    //   chi^2 = rT_k * G_k * r_k
+  //  SMOOTHER: loop over accepted track segments
+  //  --------
+    //   Smoother gain matrix: A_k = C_k * FT_k+1 * (C^k_k+1)^-1
+    //   Smoothed state vector: x^n_k = x_k + A_k * ( x^n_k+1 - x^k_k+1)
+    //   Covariance matrix of smoothed state vector:
+    //   C^n_k = C_k + A_k * (C^n_k+1 - C"^k_k+1) * AT_k
+    //   new residual r^n_k = m_k - H_k * x^n_k
+    //    const TRVector vH1 = XXk.xR()->Prediction();
+    //    const TRMatrix vvH1 = XXk.xR()->Derivatives();
+    //  Transformation to scaling variables: H_k => H_k * R
+    //                                       h_k => h_k + H_k * x_k
+    //   R^n_k = V_k - H_k * C^n_k * HT_k
+//------------------------------
+typedef enum {
+  kFailed = -1,         // could not find intersection
+  kHit = 0,                                
+  kEdgePhiPlus = 1, kEdgeZminus = 2, kEdgePhiMinus = 3, kEdgeZplus = 4, 
+  kMissPhiPlus = 5, kMissZminus = 6, kMissPhiMinus = 7, kMissZplus = 8
+} StiIntersection;
+================================================================================
+StiDefaultToolKit.h
+         StiDetectorGroups<StEvent> *_detectorGroups;  add => _detectorGroups->push_back(detectorGroup);
+
+StiMasterHitLoader: typedef vector< HitLoaderKey >  HitLoaderVector;
+                      masterLoader->addLoader(loader);
+================================================================================
+StiMaker::Make
+  _tracker->clear();
+//============
+StiMasterHitLoade  _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter); 
+                     
+  HitLoaderConstIter iter;
+  for (iter=begin();iter!=end();iter++)
+    (*iter)->loadHits(source1,trackFilter, hitFilter);
+{...
+   StiHitContainer     *       _hitContainer->add( stiHit );
+...}
+  _hitContainer->sortHits();
+  _hitContainer->reset();//declare all hits as unused...
+//=============
+
+
+
+  _seedFinder->reset();
+
+//==========================================================================================
+class StiDetectorGroups : public Named, public Described, public vector<StiDetectorGroup<Event>* >
+
+class StiDetectorGroup : public Named
+              ...
+  StiHitLoader<Event,StiDetectorBuilder> * _hitLoader;
+  StiDetectorBuilder * _detectorBuilder;
+  StiDedxCalculator *  _dedxCalculator;
+  StiElossCalculator * _elossCalculator; 
+  /// Detector group identifier.
+  int _groupId;
+...
+class StiDetector : public Named
+...
+    const StiHitErrorCalculator * _hitErrorCalculator;
+    StiMaterial *gas;         
+    StiMaterial *material;   
+    StiShape     *shape;
+    StiPlacement *placement;
+    /// Pointer to the parent detector node.
+    StiCompositeTreeNode<StiDetector>  * mNode;
+    int _groupId;
+    int _groupId;
+    const StiTrackingParameters * _pars;
+    int _key1, _key2;
+
+    StiElossCalculator * _elossCalculator;
+...
+template <class T> class StiCompositeTreeNode
+...
+    vec_type mVec; ///The vector of children
+    StiCompositeTreeNode* mparent; ///A pointer to the parent of this node
+    T* mdata; ///A pointer to the data to hung on this node
+    StiOrderKey mkey; ///The order key association with this node
+    string mname; ///The name of the node.
+...
+
+class StiHitLoader : public Named
+...
+  StiHitContainer     * _hitContainer;
+  StiTrackContainer   * _trackContainer;
+  Factory<StiHit>     * _hitFactory;
+  Factory<StiKalmanTrack> * _trackFactory;
+  Detector            * _detector;
+  StiDetectorFinder   * _detectorFinder;
+....
+
+//================================================================================
+struct VectorAndEnd
+{	
+    VectorAndEnd() {theEffectiveEnd=theHitVec.end();}
+    vector<StiHit*> theHitVec;
+    vector<StiHit*>::iterator theEffectiveEnd;
+};
+typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> HitMapToVectorAndEndType;
+typedef HitMapToVectorAndEndType::value_type HitMapToVectorAndEndTypeValType;
+
+class StiHitContainer : public Named, public Described
+....
+  // Utility key used in hit retrieval (avoid constructor call per search)
+  HitMapToVectorAndEndType::key_type _key;   // Utility hit used as a minimum position in searches
+  StiHit _minPoint;                          // Utility hit used as a maximum position in searches
+  StiHit _maxPoint;                          // Utility hit used as the reference in searches
+  StiHit _utilityHit;                        // Utility iterator to mark the position of a hit vector (avoid constructor call per search)
+  vector<StiHit*>::iterator _start;          // Utility iterator to mark the position of a hit vector (avoid constructor call per search)
+  vector<StiHit*>::iterator _stop;           // Utility hit vector used to return hits  (avoid constructor call per search)
+  vector<StiHit*> _selectedHits; //!         // Actual Hit container used for storage of all hits
+  HitMapToVectorAndEndType _map; //!
+  Factory<StiHit> * _hitFactory;
+
+
+
+
+================================================================================
+
+_tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+            _tracker->findTracks();
+		_trackSeedFinder = new StiLocalTrackSeedFinder
+		track = _trackSeedFinder->findTrack();
+
+_fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
+			_tracker->load("trackFinderPars.dat",*this);
+			_fitter->load("trackFitterPars.dat",*this);
+
+...
+================================================================================
+class StiSortedHitIterator  : public forward_iterator<Hit_t, int>
+
+================================================================================
+StiHit
+    float mrefangle;
+    float mposition;
+    float mx;
+    float my;
+    float mz; 
+    float msxx;
+    float msyy;
+    float mszz;
+    float msxy;
+    float msxz;
+    float msyz;
+    // global position
+    float _xg,_yg,_zg;
+    unsigned int mTimesUsed;
+    const StiDetector* mdetector; <============
+    const StMeasuredPoint * msthit;
+    float _energy;
+================================================================================
+class StiTreeNode 
+...
+  StiTreeNode *parent;
+  StiTreeNode *children[2];
+...
+class StiTrackNode : public StiTreeNode
+...
+  const StiDetector * _detector; 
+  StiHit* _hit;
+...
+class StiKalmanTrackNode : public StiTrackNode 
+================================================================================
+Detectors
+=========
+	detectorContainer->initialize(); // order detector in R and Phi
+	detectorContainer->reset();
+...
+	masterBuilder->build(*this);
+		 (*iter)->build(source) // loop over  DetectorGroups
+
+
+
+Tracks
+=======	
+StiMaker::Make
+	StiKalmanTrackFinder::findTracks()
+                StiKalmanTrackFinder::extendSeeds(rMin=0)
+			track = StiLocalTrackSeedFinder::findTrack(rMin)
+					StiLocalTrackSeedFinder::makeTrack(&*_hitIter)	
+						StiLocalTrackSeedFinder::extendHit( *_seedHits.back() )
+...
+							if (p->getLayerRadius() < fRxyMin) return false;
+						        StiHit* closestHit = _hitContainer->getNearestHit(p->getLayerRadius(),
+						         p->getLayerAngle(),
+...						         hit.y(), hit.z(),_pars._deltaY, _pars._deltaZ);
+
+						StiLocalTrackSeedFinder::extrapolate()
+						StiLocalTrackSeedFinder::initializeTrack(_trackFactory->getInstance());
+
+			StiTrack::fit(kInsideOut)
+				 StiKalmanTrackFitter::fit(track,fitDirection)
+			StiKalmanTrackFinder::extendTrack(track,rMin);
+				StiKalmanTrackFinder::find(track,kOutsideIn,rMin)
+					StiKalmanTrackFinder::StiKalmanTrackFinder::find(track,direction,leadNode,qa)
+				StiKalmanTrackFinder::find(track,kInsideOut);
+				track->StiKalmanTrack::approx(); // 
+				track->StiKalmanTrack::refit()	
+
+
+________________________________________________________________________________
+				StiDetectorBuilder::load
+					Loadable::loadM	
+						StiTpcDetectorBuilder::loadDS
+--------------------------------------------------------------------------------
+StiStEvent:
+StiKalmanTrackNode::getGlobalTpt(float  x[6],float  e[15])
+       getGlobalRadial(xx,ee); {
+           get(alpha,xRef,xx,ee,chi2); {
+             xx = (_x, _y, _z,| _eta, _ptin, _tanl|) from StiNodePars
+             ee = () from mFE.A StiNodeErrsunion
+             double _cXX;                               _x	    
+  	     double _cYX,_cYY;                          _y	     0 		  
+  	     double _cZX,_cZY, _cZZ;                    _z	     1  2	  
+  	     double _cEX,_cEY, _cEZ,|_cEE;              _eta         3  4  5	  
+  	     double _cPX,_cPY, _cPZ,|_cPE, _cPP;        _ptin        6  7  8  9	  
+  	     double _cTX,_cTY, _cTZ,|_cTE, _cTP, _cTT;  _tanl }     10 11 12 13 14
+        enum {jRad=0,jPhi,jZ,jTan,jPsi,jCur, kX=0,kY,kZ,kE,kC,kT};
+
+       x[jRad] = sqrt(pow(xx[kX],2)+pow(xx[kY],2));			   
+       x[jPhi] = atan2(xx[kY],xx[kX]) + alpha;			   
+       x[jZ  ] = xx[kZ];						   
+       x[jTan] = xx[kT];						   
+       x[jPsi] = xx[kE] + alpha;					   
+       x[jCur] = xx[kC];						   
+       double F[kNErrs][kNErrs]; memset(F,0,sizeof(F));		   
+       F[jPhi][kX] = -1e5;						   
+       F[jPhi][kY] =  1e5;						   
+       if (fabs(xx[kY])>1e-5)  F[jPhi][kX] = -1./(xx[kY]);		   
+       if (fabs(xx[kX])>1e-5)  F[jPhi][kY] =  1./(xx[kX]);		   
+       F[jZ][kZ]   = 1.;						   
+       F[jTan][kT] = 1;						   
+       F[jPsi][kE] = 1;						   
+       F[jCur][kC] = 1;						   
+       memset(e,0,sizeof(*e)*15);					   
+     static const int    idx33[3][3] = {{0,1,3},			   
+                                        {1,2,4},			   
+                                        {3,4,5}};			   
+     static const int    idx55[5][5] = {{0,1,3,6,10},		       0
+                                        {1,2,4,7,11},		       1  2
+                                        {3,4,5,8,12},		       3  4  5
+                                        {6,7, 8, 9,13},		       6  7  8  9
+                                        {10,11,12,13,14}};            10 11 12 13 14		   
+     static const int    idx55tpt[5][5] = {{0, 1, 2, 3, 4},		   
+	     				   {1, 5, 6, 7, 8},		   
+     				           {2, 6, 9,10,11},		   
+     				           {3, 7,10,12,13},		   
+                                           {4, 8,11,13,14}};		   
+     								   
+     static const int    idx66[6][6] =				   
+       {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}	   
+       ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};   
+       for (int k1=0;k1<kNPars;k1++) {				   
+       for (int k2=0;k2<kNPars;k2++) {				   
+         double cc = mFE.A[idx66[k1][k2]];    			   
+         for (int j1=jPhi;j1<= 5;j1++){				   
+         for (int j2=jPhi;j2<=j1;j2++){				   
+           e[idx55[j1-1][j2-1]]+= cc*F[j1][k1]*F[j2][k2];		   
+       }}}}                                                             
+//______________________________________________________________________________
+void StiKalmanTrackNode::getGlobalTpt(float  x[6],float  e[15])
+{
+  enum {jRad=0,jPhi,jZ,|jTan,jPsi,jCur,jPt=jCur|};
+static const double DEG = 180./M_PI;
+static       double fak[6] = {1,0,1,1,DEG,0};
+
+  double xx[6],ee[15];
+  getGlobalRadial(xx,ee);
+  double pt = getPt();
+  fak[jPhi] = DEG*xx[jRad];
+  fak[jPt] = (double(getCharge())/pt)/xx[jCur];
+
+  for (int i=0;i<6;i++) {x[i] = (float)(fak[i]*xx[i]);}
+  if (!e) return;
+
+  for (int j1=jPhi;j1<= 5;j1++){
+  for (int j2=jPhi;j2<=j1;j2++){
+    e[idx55tpt[j1-1][j2-1]] = (float)fak[j1]*fak[j2]*ee[idx55[j1-1][j2-1]];
+  }}
+
+}
+  float      phi0;             /* azimuthal angle at start (deg)         */
+  float      z0;               /* z-coord. at start (cm)                 */
+  float      psi;              /* azimuthal angle of pT vector (deg)     */
+  float      tanl;             /* tan(dip) =pz/pt at start               */
+  float      invpt;            /* 1/pt at start (GeV/c)^(-1)             */
+
+     phi0 z0 psi tanl invpt
+        1  2   3    4     5
+phi0  1     
+z0    2 
+psi   3       33
+tanl  4       43   44 
+invpt 5       53   54    55
+
+
+StStrangeMuDstMaker:INFO  - *** StStrangeMuDstMaker::Make() == StOK(0) ***
+
+     0.20212  -3.1074e-05  -1.9688e-07     -0.01114  -1.9932e-05 
+ -3.1074e-05   4.4236e-05  -3.0745e-06   1.1035e-06  -1.3458e-06 
+ -1.9688e-07  -3.0745e-06   2.0306e-06    7.423e-07   8.8626e-07 
+    -0.01114   1.1035e-06    7.423e-07    0.0057114  -2.8058e-05 
+ -1.9932e-05  -1.3458e-06   8.8626e-07  -2.8058e-05   6.9818e-05 
+
+        2.0306e-06
+        7.423e-07       0.0057114
+        8.8626e-07      -2.8058e-05     6.9818e-05
+
+     0.36248  -5.8965e-05   1.1509e-06   -0.0052917  -0.00023862 
+ -5.8965e-05   4.4236e-05  -8.5467e-07   9.6048e-07   7.9576e-08 
+  1.1509e-06  -8.5467e-07    4.731e-06  -1.4502e-07  -3.0563e-07 
+  -0.0052917   9.6048e-07  -1.4502e-07      0.01293  -0.00017109 
+ -0.00023862   7.9576e-08  -3.0563e-07  -0.00017109     6.89e-05 
+
+        4.731e-06
+        -1.4502e-07     0.01293
+        -3.0563e-07     -0.00017109     6.89e-05
+//________________________________________________________________________________
+
+     0.20212  -3.1074e-05  -1.9688e-07     -0.01114  -1.9932e-05 
+ -3.1074e-05   4.4236e-05  -3.0745e-06   1.1035e-06  -1.3458e-06 
+ -1.9688e-07  -3.0745e-06   2.0306e-06    7.423e-07   8.8626e-07 
+    -0.01114   1.1035e-06    7.423e-07    0.0057114  -2.8058e-05 
+ -1.9932e-05  -1.3458e-06   8.8626e-07  -2.8058e-05   6.9818e-05 
+
+        2.0306e-06
+        1.2956e-08      1.7398e-06
+        8.8626e-07      -4.897e-07      6.9818e-05
+================================================================================
+01/23/09
+Sti track parameters   enum {kX=0,kY,kZ,kEta,kCurv,kTanL};
+
+							_x;     P[1] /// local X-coordinate of this track (reference plane)
+y(x) = y_0 - (1 - (C*x - eta)**2)**1/2/C 		_y   = _p0;  /// local Y-coordinate of this track (reference plane)	
+z(x) = z_0 - tan(lambda)/C*arcsin(C*x - eta)		_z   = _p1;  /// local Z-coordinate of this track (reference plane)
+eta  = C*(x_0-x) = -sin(Psi)                            _eta = _p2;  /// psi
+q/pT							_ptin= _p3;  /// signed curvature [sign = sign(-qB)] -q/pT
+tan(lambda)						_tanl= _p4;  /// tangent of the track momentum dip angle                      
+                                                        _curv        /// signed curvature [sign = sign(-qB)]
+                                                        _hz          /// Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
+_cosCA=cos(_eta);
+_sinCA=sin(_eta);
+_curv = _hz*_ptin
+inline StThreeVectorF StiKalmanTrackNode::getMomentumF() const
+{
+  double pt = getPt();
+  return StThreeVectorF(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP._tanl);
+}
+erpremc
+-------
+*     MVAR           SPECIFIES TYPE OF EXTERNAL VARIABLES
+*            =   0   ( 1/P,LAMBDA,PHI,YT, ZT ;   SC   )
+*            =   1   ( 1/P,  Y',  Z',  Y,  Z ; SPLINE )
+
+erpremc
+-------
+trprfn.F  TRPRFN(X1,P1,H1,X2,P2,H2,CH,XL,R,MVAR,IFLAG,ITRAN,IERR)
+* *** ERROR PROPAGATION ALONG A PARTICLE TRAJECTORY IN A MAGNETIC FIELD
+*     ROUTINE ASSUMES THAT IN THE INTERVAL (X1,X2) THE QUANTITIES 1/P
+*     AND (HX,HY,HZ) ARE CONSTANT.
+*
+* *** IFLAG  =  -1   INITIALIZATION, TRANSFORMATION OF ERROR MATRIX FROM  EXTERNAL TO SC VARIABLES
+*            =   0   ERROR PROPAGATION FROM X1 TO X2
+*            =   1   TRANSFORMATION OF ERROR MATRIX FROM SC TO  EXTERNAL VARIABLES
+*
+*     ITRAN          USED FOR IFLAG = 0 OR 1 ONLY
+*            =   0   TRANSFORMATION MATRIX IS UPDATED ,BUT ERROR MATRIX IS NOT TRANSFORMED
+*           =    1   TRANSF. MATRIX IS UPDATED  AND ERROR MATRIX IS TRANSFORMED
+*
+*     MVAR           SPECIFIES TYPE OF EXTERNAL VARIABLES
+*            =   0   ( 1/P,LAMBDA,PHI,YT, ZT ;   SC   )
+*            =   1   ( 1/P,  Y',  Z',  Y,  Z ; SPLINE )
+*
+* *** X1, P1, H1     X,Y,Z COMPONENTS OF POSITION, MOMENTUM AND MAGNETIC   INPUT
+*                    FIELD VECTOR/GRADIENT AT STARTING POINT OF INTERVAL
+*     X2, P2, H2     ......  AT END POINT OF INTERVAL                      INPUT
+*     CH             CHARGE OF PARTICLE                                    INPUT
+*     XL             PATHLENGTH FROM X1 TO X2   ( NEGATIVE IF OPPOSITE
+*                    TO ACTUAL MOVEMENT OF PARTICLE )                      INPUT
+*     R              ERROR MATRIX  (TRIANGLE)                       INPUT/OUTPUT
+*     B              5 * 5 TRANSFORMATION MATRIX FOR ERRORS IN
+*                    SC VARIABLES                                         OUTPUT
+*
+* *** IERR   =  1    ILLEGAL VALUE OF MVAR                                OUTPUT
+*               2    MOMENTUM IS ZERO
+*               3    H*ALFA/P AT X1 AND X2 DIFFER TOO MUCH
+*               4    PARTICLE MOVES IN Z - DIRECTION
+*
+************************************************************************
+
+trprop.F ERROR PROPAGATION ALONG A PARTICLE TRAJECTORY IN A MAGNETIC FIELD
+C     ROUTINE ASSUMES THAT IN THE INTERVAL (X1,X2) THE QUANTITIES 1/P
+C     AND (HX,HY,HZ) ARE RATHER CONSTANT. DELTA(PHI) MUST NOT BE TOO LARGE
+C *** IFLAG  =  -1   INITIALIZATION, TRANSFORMATION OF ERROR MATRIX FROM EXTERNAL TO SC VARIABLES
+C            =   0   ERROR PROPAGATION FROM X1 TO X2
+C            =   1   TRANSFORMATION OF ERROR MATRIX FROM SC TO EXTERNAL VARIABLES
+C     ITRAN          USED FOR IFLAG = 0 OR 1 ONLY
+C            =   0   TRANSFORMATION MATRIX IS UPDATED ,BUT ERROR MATRIX IS NOT TRANSFORMED
+C           =    1   TRANSF. MATRIX IS UPDATED  AND ERROR MATRIX IS TRANSFORMED
+C     MVAR           SPECIFIES TYPE OF EXTERNAL VARIABLES
+C            =   0   ( 1/P,LAMBDA,PHI,YT, ZT ;   SC   )
+C            =   1   ( 1/P,  Y',  Z',  Y,  Z ; SPLINE )
+C
+C *** X1, P1, H1     X,Y,Z COMPONENTS OF POSITION, MOMENTUM AND MAGNETIC   INPUT
+C                    FIELD VECTOR/GRADIENT AT STARTING POINT OF INTERVAL
+C     X2, P2, H2     ......  AT END POINT OF INTERVAL                      INPUT
+C     CH             CHARGE OF PARTICLE                                    INPUT
+C     XL             PATHLENGTH FROM X1 TO X2   ( NEGATIVE IF OPPOSITE TO ACTUAL MOVEMENT OF PARTICLE )                      INPUT
+C     R              ERROR MATRIX  (TRIANGLE)                       INPUT/OUTPUT
+C     B              5 * 5 TRANSFORMATION MATRIX FOR ERRORS IN
+C                    SC VARIABLES                                         OUTPUT
+C
+C *** IERR   =  1    ILLEGAL VALUE OF MVAR                                OUTPUT
+C               2    MOMENTUM IS ZERO
+C               3    H*ALFA/P AT X1 AND X2 DIFFER TOO MUCH
+C                    OR DELTA PHI IS TOO LARGE
+C               4    PARTICLE MOVES IN Z - DIRECTION
+C
+
+trptsc.F 
+      SUBROUTINE TRPTSC(PC,RC,PD,RD,IERR)
+C
+C *** TRANSFORMS ERROR MATRIX
+C     FROM   SC   VARIABLES (1/Pt,LAMBDA,PHI,YT,ZT)
+C     FROM   SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+
+trptsd.FC *** TRANSFORMS ERROR MATRIX
+C     FROM        VARIABLES (1/Pt,V',W',V,W)
+C     FROM        VARIABLES (1/P, V',W',V,W)
+
+trs1s2.F *** TRANSFORMS ERROR MATRIX
+C     FROM        VARIABLES (1/P,V1',W1',V1,W1)
+C      TO         VARIABLES (1/P,V2',W2',V2,W2)
+C *** PD1(3)    1/P,V1',W1'                             INPUT
+C     PD2(3)    1/P,V2',W2'                            OUTPUT
+C     H(3)      MAGNETIC FIELD                          INPUT
+C     RD1(15)   ERROR MATRIX IN 1/P,V1',W1',V1,W1       INPUT      (TRIANGLE)
+C     RD2(15)   ERROR MATRIX IN 1/P,V2',W2',V2,W2      OUTPUT      (TRIANGLE)
+C     CH        CHARGE OF PARTICLE                      INPUT
+C               CHARGE AND MAGNETIC FIELD ARE NEEDED
+C               FOR CORRELATION TERMS (V2',V1),(V2',W1),(W2',V1),(W2',W1)
+C               THESE CORRELATION TERMS APPEAR BECAUSE RD1 IS ASSUMED
+C               TO BE THE ERROR MATRIX FOR FIXED U1
+C               AND RD2 FOR FIXED U2
+C     SP1       SIGN OF U1-COMPONENT OF PARTICLE MOMENTUM     INPUT
+C     SP2       SIGN OF U2-COMPONENT OF PARTICLE MOMENTUM    OUTPUT
+C     DJ1(3)    UNIT VECTOR IN V1-DIRECTION
+C     DK1(3)    UNIT VECTOR IN W1-DIRECTION    OF SYSTEM 1
+C     DJ2(3)    UNIT VECTOR IN V2-DIRECTION
+C     DK2(3)    UNIT VECTOR IN W2-DIRECTION    OF SYSTEM 2
+C
+C     IERR      = 0    TRANSFORMATION OK
+C               = 1    MOMENTUM PERPENDICULAR TO U2-DIRECTION (V2',W2' NOT DEFIN
+C               = 2    MOMENTUM PERPENDICULAR TO X-AXIS
+C
+
+trscpt.F TRSCPT(PC,RC,PD,RD,IERR)
+C *** TRANSFORMS ERROR MATRIX
+C     FROM   SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+C     FROM   SC   VARIABLES (1/Pt,LAMBDA,PHI,YT,ZT)
+
+trscsd.F TRSCSD(PC,RC,PD,RD,H,CH,IERR,SPU,DJ,DK)
+C *** TRANSFORMS ERROR MATRIX
+C     FROM   SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+C      TO         VARIABLES (1/P,V',W',V,W)
+
+trscsp.F TRSCSP(PC,RC,PS,RS,H,CH,IERR,SPX)
+C *** TRANSFORMS ERROR MATRIX
+C     FROM   SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+C      TO  SPLINE VARIABLES (1/P,Y',Z',Y,Z)
+C *** PC(3)     1/P,LAMBDA,PHI                          INPUT
+C     PS(3)     1/P,Y',Z'                              OUTPUT
+C     H(3)      MAGNETIC FIELD                          INPUT
+C     RC(15)    ERROR MATRIX IN   SC   VARIABLES        INPUT     (TRIANGLE)
+C     RS(15)    ERROR MATRIX IN SPLINE VARIABLES       OUTPUT     (TRIANGLE)
+C     CH        CHARGE OF PARTICLE                      INPUT
+C               CHARGE AND MAGNETIC FIELD ARE NEEDED
+C               FOR CORRELATION TERMS (Y',YT),(Y',ZT),(Z',YT),(Z',ZT)
+C               THESE CORRELATION TERMS APPEAR BECAUSE RC IS ASSUMED
+C               TO BE THE ERROR MATRIX FOR FIXED S (PATH LENGTH)
+C               AND RS FOR FIXED X
+C
+C     IERR  =   1       PARTICLE MOVES PERPENDICULAR TO X-AXIS
+C                      ( Y',Z' ARE NOT DEFINED )
+C     SPX       SIGN OF X-COMPONENT OF PARTICLE MOMENTUM   OUTPUT
+
+trsdpt.F TRSDPT(PD,RD,PC,RC,H,CH,IERR,SPU,DJ,DK)
+C *** TRANSFORMS ERROR MATRIX
+C     FROM        VARIABLES (1/P,V',W',V,W)
+C     FROM        VARIABLES (1/Pt,V',W',V,W)
+
+trsdsc.F TRSDSC(PD,RD,PC,RC,H,CH,IERR,SPU,DJ,DK)
+C *** TRANSFORMS ERROR MATRIX
+C     FROM        VARIABLES (1/P,V',W',V,W)
+C      TO    SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+
+trspsc.F TRSPSC(PS,RS,PC,RC,H,CH,IERR,SPX)
+C *** TRANSFORMS ERROR MATRIX
+C     FROM SPLINE VARIABLES (1/P,Y',Z',Y,Z)
+C      TO    SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+================================================================================
+GEANE
+* ---
+*
+* List of changes in the fortran and C++ routines of the geant3
+* VMC directory:
+*
+* - gcmore.inc
+*   gtmore.inc
+*   geant3LinkDef.h
+*   gcomad.F
+*
+*  Added a new common that contains all the new variables:
+*       COMMON/GCMORE/GCALPHA,ICLOSE,PFINAL(3),DSTRT,WIRE1(3),WIRE2(3),
+*      +              P1(3),P2(3),P3(3),CLENG(3)
+*
+*      input to ERLAND:
+*       GCALPHA: energy cut parameter for energy loss fluctuations
+*
+*      input to EUSTEP:
+*       ICLOSE: = 1 the use of the common is enabled for the closest
+*                   approach to a point PFINAL(3)
+*               = 2 the use of the common is enabled for the closest
+*                   approach to a wire of extremes WIRE1(3) and WIRE2(3)
+*               = 0 the common is empty and disabled
+*       PFINAL(3): assigned point
+*       DSTRT: assigned distance between initial point in ERTRAK
+*              and PFINAL along straight line (currently noy used)
+*       WIRE1(3): first point of a wire
+*       WIRE2(3): second point of a wire
+*
+*      output from EUSTEP:
+*       P1(3): point previous to the point of closest approach to
+*              PFINAL() or wire
+*       P2(3): point of closest approach to PFINAL() or wire
+*       P3(3): point next to the point of closest approach to
+*              PFINAL() or wire
+*       CLENG(3): track length to the previous 3 points
+*
+*       Important note: the calculated points of closest approach are
+*       depending on the GEANE steps. For calculating the true point
+*       of closest approach the last 3 points of the extrapolation, i.e.
+*       the previous to closest, the closest and the next to closest are
+*       returned to the user. Different algorithms can be implemented, but
+*       we decided to leave this to the users in the C++ interface to GEANE.
+*
+* - ermcsc.F
+*  new expression for the variance of the Coulomb multiple scattering
+*  according to Fruhwirth and Regler, NIM A 456 (2001) 369
+*
+* - ertrch.F
+*  added DESTEP in the calling string of ERLAND for calculation with
+*  Urban model. Added and saved previous step PRSTEP.
+*
+* - erland.F
+*  added new calculation for sigma of straggling in energy loss
+*  to include in Geane the Urban/Landau approximation, as explained
+*  in the Geant manual and related papers.
+*  The model parametrization can be controlled with a user variable (GCALPHA)
+*  in the new GCMORE common block: 1 is for old gaussian model valid
+*  for dense materials, other values (see the report) are for gaseous
+*  materials.
+*
+* - eustep.F
+*  added the calculation to the distance of closest approach to a point
+*  or to a wire.
+*
+* - TGeant3.h
+* - TGeant3.cxx
+*  added the possibility to define user cuts (already present in the gccuts
+*  struct but not in the TGeant3::SetCUTS method) and to define the new
+*  variables of the GCMORE common with two new methods SetECut() and
+*  SetClose().
+*  Added new method InitGEANE() to initialize GEANE to the old behaviour
+*  (default) for backward compatibility. Only the multiple scattering has
+*  been updated to a more correct formula.
+erbcer.F ERBCER (E)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       After the back-tracking transforms the error matrix      *
+C.    *                  back to the original                          *
+C.    *                  particle direction                            *
+
+erbctr.F       SUBROUTINE ERBCTR (X)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       After the back-tracking transforms                       *
+C.    *                  the transport matrix back to the original     *
+C.    *                  particle direction                            *
+C.    *                                                                *
+C.    *       Arguments                                                *
+C.    *           X        - Transport Matrix                          *
+
+erland.F      SUBROUTINE ERLAND (STEP, Z, A, RHO, P, E, XMASS, DEDX, DEDX2)
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *  Calculates energy straggling using Gaussian theory in a step  *
+C.    *                                                                *
+C.    *  Input  STEP   =  current step-length (cm)                     *
+C.    *         Z      =  Z of the material                            *
+C.    *         A      =  A of the material                            *
+C.    *         RHO    =  density of the material                      *
+C.    *         P      =  momentum of the particle                     *
+C.    *         E      =  energy   of the particle                     *
+C.    *         XMASS  =  mass     of the particle                     *
+
+ermcsc.F     SUBROUTINE ERMCSC (E)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Calculates Multiple Scattering Matrix in a step          *
+C.    *                                                                *
+C.    *           E        - Error Matrix (Triangular)                 *
+C.    *           STEP     - Step length in cm                         *
+C.    *           RADL     - Radiation length in cm                    *
+C.    *           VECT(7)  - Momentum in GeV                           *
+C.    *           CLA      - Cosine of the deep angle                  *
+
+erpini.F      SUBROUTINE ERPINI
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Initializes the error propagation 
+erprop.F     SUBROUTINE ERPROP
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Performs the error propagation in a step                 *
+
+erstor.F      SUBROUTINE ERSTOR
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Store error matrix informations                          *
+
+ertrak.F     SUBROUTINE ERTRAK (X1, P1, X2, P2, IPA, CHOPT)
+*
+************************************************************************
+*                                                                      *
+*          Perform the tracking of the track from point X1 to          *
+*                    point X2                                          *
+*          (Before calling this routine the user should also provide   *
+*                    the input informations in /EROPTS/ and /ERTRIO/   *
+*                    using subroutine EUFIL(L/P/V)                     *
+*                 X1       - Starting coordinates (Cartesian)          *
+*                 P1       - Starting 3-momentum  (Cartesian)          *
+*                 X2       - Final coordinates    (Cartesian)          *
+*                 P2       - Final 3-momentum     (Cartesian)          *
+*                 IPA      - Particle code (a la GEANT) of the track   *
+*                                                                      *
+*                 CHOPT                                                *
+*                     'B'   'Backward tracking' - i.e. energy loss     *
+*                                        added to the current energy   *
+*                     'E'   'Exact' calculation of errors assuming     *
+*                                        helix (i.e. pathlength not    *
+*                                        assumed as infinitesimal)     *
+*                     'L'   Tracking upto prescribed Lengths reached   *
+*                     'M'   'Mixed' prediction (not yet coded)         *
+*                     'O'   Tracking 'Only' without calculating errors *
+*                     'P'   Tracking upto prescribed Planes reached    *
+*                     'V'   Tracking upto prescribed Volumes reached   *
+*                     'X'   Tracking upto prescribed Point approached  *
+*                                                                      *
+
+ertrch.F      SUBROUTINE ERTRCH
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *    Average charged track is extrapolated by one step           *
+
+ertrgo.F      SUBROUTINE ERTRGO
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Perform the tracking of the track                        *
+C.    *       Track parameters are in VECT                             *
+
+ertrnt.F      SUBROUTINE ERTRNT
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *    Average neutral track is extrapolated by one step           *
+
+erxyzc.F      SUBROUTINE ERXYZC
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *        Print track and volume parameters at current point      *
+
+eufill.F      SUBROUTINE EUFILL (N, EIN, XLF)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *    User routine to fill the input values of the commons :      *
+C.    *               /EROPTS/, /EROPTC/ and /ERTRIO/ for CHOPT = 'L'  *
+C.    *         N     Number of predictions where to store results     *
+C.    *         EIN   Input error matrix                               *
+C.    *         XLF   Defines the tracklengths which if passed the     *
+C.    *                      result should be stored                   *
+
+eufilp.F      SUBROUTINE EUFILP (N, EIN, PLI, PLF)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *    User routine to fill the input values of the commons :      *
+C.    *               /EROPTS/, /EROPTC/ and /ERTRIO/ for CHOPT = 'P'  *
+C.    *         N     Number of predictions where to store results     *
+C.    *         EIN   Input error matrix (in the 'Plane' system )      *
+C.    *         PLI   Defines the start plane                          *
+C.    *                      PLI(3,1) - and                            *
+C.    *                      PLI(3,2) - 2 unit vectors in the plane    *
+C.    *         PLF   Defines the end plane                            *
+C.    *                      PLF(3,1,I) - and                          *
+C.    *                      PLF(3,2,I) - 2 unit vectors in the plane  *
+C.    *                      PLF(3,3,I) - point on the plane           *
+
+eufilv.F      SUBROUTINE EUFILV (N, EIN, CNAMV, NUMV, IOVL)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *    User routine to fill the input values of the commons :      *
+C.    *               /EROPTS/, /EROPTC/ and /ERTRIO/ for CHOPT = 'V'  *
+C.    *         N     Number of predictions where to store results     *
+C.    *         EIN   Input error matrix                               *
+C.    *        CNAMV  Volume name of the prediction                    *
+C.    *        NUMV   Volume number (if 0 = all volumes)               *
+C.    *        IOVL   = 1  prediction when entering in the volume      *
+C.    *               = 2  prediction when leaving the volume          *
+
+eustep.F      SUBROUTINE EUSTEP
+evolio.F      SUBROUTINE EVOLIO (NVLIN,NAMIN,NUMIN,NVLOUT,NAMOUT,NUMOUT)
+*
+C.    ******************************************************************
+C.    *                                                                *
+C.    *    Called with INWVOL=2 this routine save the volume's tree    *
+C.    *                                                                *
+C.    *    Called with INWVOL=1 this routine returns                   *
+C.    *             - the list of volumes (and number) left            *
+C.    *             - the list of volumes (and number) entered         *
+
+gdedxcalc.F     SUBROUTINE GDEDXCALC(IMATE,IPART,MECAN,KDIN,TKIN,DE1GEV)
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       INTERPOLATE and RETURN the DE/DX                         *
+C.    *       tabulated in JMATE banks corresponding to                *
+C.    *       material IMATE, particle IPART, mecanism name MECAN ,    *
+C.    *       kinetic energies TKIN.                                   *
+C.    *                                                                *
+C.    *      The MECAnism name can be :                                *
+C.    *      'HADF'   'INEF'   'ELAF'   'FISF'   'CAPF'                *
+C.    *      'HADG'   'INEG'   'ELAG'   'FISG'   'CAPG'                *
+C.    *      'LOSS'   'PHOT'   'ANNI'   'COMP'   'BREM'                *
+C.    *      'PAIR'   'DRAY'   'PFIS'   'RAYL'   'HADG'                *
+C.    *      'MUNU'   'RANG'   'STEP'                                  *
+C.    *                                                                *
+C.    *       For Hadronic particles it also computes the              *
+C.    *       hadronic cross section from FLUKA ( '***F' ) or          *
+C.    *       GHEISHA ( '***G' ) programs:                             *
+C.    *       HADF or HADG -- total                                    *
+C.    *       INEF or INEG -- inelastic                                *
+C.    *       ELAF or ELAG -- elastic                                  *
+C.    *       FISF or FISG -- fission (0.0 for FLUKA)                  *
+C.    *       CAPF or CAPG -- neutron capture (0.0 for FLUKA)          *
+C.    *                                                                *
+C.    *             Input parameters                                   *
+C.    *  IMATE   Geant material number                                 *
+C.    *  IPART   Geant particle number                                 *
+C.    *  MECAN   mechanism name of the bank to be fetched              *
+C.    *  KDIM   dimension of the arrays TKIN , VALUE                   *
+C.    *  TKIN   array of kinetic energy of incident particle (in Gev)  *
+
+GeanE Flow:
+      "V" 
+
+
+
+================================================================================
+ertrak:
+   "PLAN" {
+    define HI
+	* Transforms Parameters SC => SD
+	*                          FROM   SC (PC)   VARIABLES (1/P,LAMBDA,PHI,YT,ZT) 
+	*                           TO    SD   VARIABLES (1/P,V',W',V,W) (at fixed U)
+	*                     SPU = sign of u-component of particle momentum (output)              
+	*                     ERPLI(1,1) = DJ - unit vector in v-direction
+	*                     ERPLI(1,2) = DK - unit vector in w-direction of detector system
+	*             PC        RC=covPC     PD     RD=covPD,    
+         CALL TRSCSD (ERPIN(1), DUM(1),   ERPIN(1), DUM(1),   HI(1),
+     +                CHARGE, IERR, SPU, ERPLI(1,1), ERPLI(1,2))
+	    	Calculate A(5,5) and RD = ATxRCxA
+	* Transforms Parameters and Error Matrix SD => SC
+	*                         FROM  SD   VARIABLES (1/P,V',W',V,W)
+	*                         TO    SC   VARIABLES (1/P,LAMBDA,PHI,YT,ZT)
+	*                     SPU       sign of u-component of particle momentum (input)
+	*             PD        RD=covPD     PC     RC=covPC
+         CALL TRSDSC (ERPIN(1), ERRIN(1), DUM(1),   ERRIN(1), HI(1),
+     +                CHARGE, IERR, SPU, ERPLI(1,1), ERPLI(1,2))
+		Calculate A(5,5) and RC = ATxRDxA 
+         ASDSC = A ! SD => SC  
+    }	
+    IF (BACKTR .LT. 0.) CALL ERBCER (ERRIN(1)) ! reverse
+    EI = ERRIN ! Error matrix into double precision
+    IF (.NOT.LEONLY) CALL ERPINI  ! Additional EMC initialization does nothing ? check!
+      MVAR   = 0 ! SPECIFIES TYPE OF EXTERNAL VARIABLES ( 1/P,LAMBDA,PHI,YT, ZT ;   SC   )
+      IFLAG  =-1 ! INITIALIZATION, TRANSFORMATION OF ERROR MATRIX FROM  EXTERNAL TO SC VARIABLES
+      ITRAN  = 0 ! TRANSFORMATION MATRIX IS UPDATED ,BUT ERROR MATRIX IS NOT TRANSFORMED
+      !            X1, P1,  H1,  X2,  P2, H2, CH,   XL,     R, MVAR, IFLAG, ITRAN, IERR
+      CALL TRPROP (XI, PPI, HI, DUM, DUM, HI, CHTR, DUM, DUMM, MVAR, IFLAG, ITRAN, IERR)
+	PS = (1/p, pY/p, pZ/p) == (1/p, tY, tZ)
+	!          (PS,RS,PC,RC,H ,CH,IERR,SPX) 
+	CALL TRSPSC(PS,RS,PC,RC,H1,CH,IERR,SPX) ! transforms error matrix from spline variables (1/P,Y',Z',Y,Z) 
+                                                !                               to sc variables (1/P,LAMBDA,PHI,YT,ZT)
+	TN = (1, tY, tZ)/sqrt(1 + tY**2 + tZ**2)
+	Calculate A and RC = ATxRSxA
+      EF = EI		
+    CALL ERTRGO
+	CALL ERTRCH
+	   CALL ERPROP
+                   MVAR  = 0 !  specifies type of external variables = 0 =>  ( 1/P,LAMBDA,PHI,YT, ZT ;   SC   )
+	           IFLAG = 0 ! 	ERROR PROPAGATION FROM X1 TO X2						
+	           ITRAN = 0 !  TRANSFORMATION MATRIX IS UPDATED ,BUT ERROR MATRIX IS NOT RANSFORMED							
+	           IF (.NOT.LEEXAC) THEN					
+	              CALL TRPROP (XI ,PPI, HI, XF, PF, HF, CHTR, STEP, DUM,	
+	          &                MVAR, IFLAG, ITRAN, IERR)			
+	           ELSE							
+	              CALL TRPRFN (XI ,PPI, HI, XF, PF, HF, CHTR, STEP, DUM,	
+	          &                MVAR, IFLAG, ITRAN, IERR)			
+ 	           ENDIF        
+	              Calc. A (!new B = A)
+	              B = B x A
+	              IF (ITRAN != 0) R = BTxRxB
+      	           EF = ATxEFxA
+	   CALL ERSTOR
+	CALL ERSTOR
+           C(I,J) = B(I,J)          ! Leave B-matrix intact for eventual further tracking
+	   ERROUT(I,ILPRED) = EF(I) ! Error matrix into single precision
+           IF (BACKTR.LT.0.) THEN
+              CALL ERBCER (ERROUT(1,ILPRED))
+              CALL ERBCTR (C)
+           ENDIF
+           IF (LEPLAN) THEN	
+	    *              PC        RC=covPC    PD  RD=covPD,    					 
+     	      CALL TRSCSD (PF, ERROUT(1,ILPRED), PF ,ERROUT(1,ILPRED), HF,	
+     	  +                CHARGE, IER ,SPU, ERPLO(1,1,INLIST),		
+     	  +                ERPLO(1,2,INLIST))				
+     	      IF (LEONLY) GOTO 25						
+     	      CALL DMM55 (A, C, DUM)	   DUM = A x C					
+     	      CALL DMM55 (DUM, ASDSC, C)   C   = A x C x ASDSC					
+     	   ENDIF								
+     	                                                                     
+  
+================================================================================
+================================================================================
+================================================================================
+           Detectors and Hits
+================================================================================
+StiDefaultToolkit (StiToolkit)
+  Factory< Filter<StiTrack>  > *_trackFilterFactory;
+  Factory<EditableParameter>   *_parameterFactory;
+  Factory<StiHit>              *_hitFactory;
+  Factory<StiKalmanTrack>      *_trackFactory;
+  Factory<StiDetector>         *_detectorFactory;
+  Factory< StiCompositeTreeNode<StiDetector> > *_detectorNodeFactory;
+  Factory<StiKalmanTrackNode>                  *_trackNodeFactory;
+  Factory<StiNodeExt>                          *_trackNodeExtFactory;
+  Factory<StiNodeInf>                          *_trackNodeInfFactory;
+  // common object containers 
+  StiMasterDetectorBuilder     *_detectorBuilder;
+  StiDetectorContainer         *_detectorContainer;
+  StiDetectorGroups            *_detectorGroups;  
+  StiHitContainer              *_hitContainer;
+  StiTrackContainer            *_trackContainer;
+  
+  // service and convenience class objects.
+  StiTrackFinder          *_trackSeedFinder;
+  StiTrackFinder          *_trackFinder;
+  StiTrackFitter          *_trackFitter;
+  StiVertexFinder         *_vertexFinder;
+  StiHitLoader<StEvent,StiDetectorBuilder> *_hitLoader;
+
+  EditableFilter<StiHit>   *_loaderHitFilter;
+  EditableFilter<StiTrack> *_loaderTrackFilter;
+  EditableFilter<StiTrack> *_finderTrackFilter;
+StiToolkit
+  StiToolkit * _instance;
+
+StiDetectorGroups =>  vector<StiGenericDetectorGroup * >
+
+StiGenericDetectorGroup
+      StiDetectorBuilder * _detectorBuilder;
+      StiElossCalculator * _elossCalculator; 
+      int _groupId;
+
+StiDetectorGroup (StiGenericDetectorGroup) => StiDetectorBuilder
+
+StiMasterDetectorBuilder => vector<StiDetectorBuilder*>
+                                   StiDetectorBuilder => vector< vector<StiDetector*> > _detectors
+                                                                        StiDetector => StiCompositeTreeNode<StiDetector>  
+											Pointer to the parent detector node
+
+StiDetectorBuilder               
+
+typedef map<NameMapKey, StiMaterial*> materialMap;
+typedef materialMap::value_type materialMapValType;
+typedef map<NameMapKey, StiShape*> shapeMap;
+typedef shapeMap::value_type shapeMapValType;
+typedef map<NameMapKey, StiDetector*> detectorMap;
+typedef detectorMap::const_iterator detectorIterator;
+typedef detectorMap::value_type detectorMapValType;
+  int                 _groupId;
+  bool                _active;
+  materialMap         mMaterialMap;
+  shapeMap            mShapeMap;
+  detectorMap         mDetectorMap;
+  detectorIterator    mDetectorIterator; 
+  vector< vector<StiDetector*> > _detectors;
+  Factory<StiDetector>*_detectorFactory;
+  StiTrackingParameters *_trackingParameters;
+  string _inputFile;
+  static StiDetectorBuilder* fCurrentDetectorBuilder;
+  StiMaterial    * _gasMat; // Mother Volume material
+
+
+
+StiDetectorContainer.h
+	=>      StiDetectorNode* mroot;
+	=>	vector<StiDetector *> _sortedDetectors;
+    	=>	vector<StiDetector *> _selectedDetectors;
+	=>      StiMasterDetectorBuilder * _masterDetectorBuilder ?
+
+StiDetectorTreeBuilder.h
+StiGenericDetectorGroup.h
+				
+VectorAndEnd => vector<StiHit*> theHitVec;
+typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> HitMapToVectorAndEndType;
+typedef HitMapToVectorAndEndType::value_type HitMapToVectorAndEndTypeValType;
+
+
+StiHitContainer => vector<StiHit*> _selectedHits; 
+                   HitMapToVectorAndEndType _map;
+
+
+
+StiMaker
+   InitDetectors:
+       
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+common blocks <==> accessor / modifier routine
+erwork.inc
+      DOUBLE PRECISION EI, EF, ASDSC
+      COMMON /ERWORK/ EI(15), EF(15), ASDSC(5,5),
+     +                   XI(3), PPI(3), HI(9),
+     +                   XF(3), PF(3),  HF(9),
+     +                   CHTR, DEDX2, BACKTR, CUTEK, TLGCM2, TLRAD
+trcom3.inc
+      DOUBLE PRECISION A, B, S, TN, T, COSL, SINL, COSP, SINP, COSL1
+      INTEGER          NEW
+      COMMON /TRCOM3/ A(5,5), B(5,5), S(15),
+     +                TN(3), T(5), COSL, SINL, COSP, SINP, COSL1, NEW
+================================================================================
+StiTpcSeedFinder::findTpcTracks
+   HitMapToVectorAndEndType& map =  StiToolkit::instance()->getHitContainer()->hits();
+   StiTPCCATrackerInterface::SetHits(map);
+   StiTPCCATrackerInterface::Run()
+	StiTPCCATrackerInterface::MakeSettings()
+	StiTPCCATrackerInterface::MakeHits(); <<++ real hit errors
+        AliHLTTPCCAGBTracker::FindTracks(); // AliHLTTPCCAGBTracker
+	   std::sort( fHits.Data(), fHits.Data() + fNHits, AliHLTTPCCAGBHit::Compare ); sort over sector, row, Z
+	   loop over sectors
+	     AliHLTTPCCAClusterData::readEvent
+	       AliHLTTPCCATracker::StartEvent
+	     AliHLTTPCCASliceData::InitFromClusterData
+	   loop over sectors
+	     AliHLTTPCCATracker::Reconstruct
+		AliHLTTPCCATracker::Reconstructor::execute
+		  AliHLTTPCCATracker::NeighboursFinder
+         StiTPCCATrackerInterface::MakeSeeds

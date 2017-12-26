@@ -273,7 +273,7 @@ StTrack2FastDetectorMatcher::matchTrack2EEMC(const StPhysicalHelixD *hlx,StiTrac
   if(path>maxPath) return; // too long extrapolation
 
   StThreeVectorD r = hlx->at(path);
-  Float_t periodL=hlx-> period()/TMath::Cos(hlx->dipAngle());
+  Float_t periodL=hlx-> period();
  
   if(periodL<2*path) {
     printf(" Warn, long path fac=%.1f ",path/periodL);
