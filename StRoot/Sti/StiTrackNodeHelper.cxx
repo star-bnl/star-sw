@@ -7,11 +7,6 @@
 #include "StMessMgr.h"
 #include "TArrayD.h"
 #include "TSystem.h"
-//#define __NEW_MERGER__
-#ifdef __NEW_MERGER__
-#include "TRSymMatrix.h"
-#include "TRVector.h"
-#endif /* __NEW_MERGER__ */
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -166,22 +161,10 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   }
 
   dx = x2-x1;
-#ifdef __NEW_MERGER__
-  //yf  if (fabs(dx)<1e-5) { proPars = rotPars; return 0;}
-#else /* ! __NEW_MERGER__ */
   if (fabs(dx)<1e-5) { proPars = rotPars; return 0;}
-#endif /* __NEW_MERGER__ */
   rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
-#ifdef __NEW_MERGER__
-  if (fabs(dx)<1e-5) { proPars = rotPars; return 0;}
-  //yf  if (fabs(sinCA2) > 0.99) return 2;
-  //  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
-  if (sinCA2> 0.95) sinCA2= 0.95;
-  if (sinCA2<-0.95) sinCA2=-0.95;
-  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2))*TMath::Sign(1.,rotPars._cosCA);
-#else /* !  __NEW_MERGER__ */
   if (fabs(sinCA2) > kMaxSin)  {
     sinCA2 = (sinCA2<0) ? -kMaxSin:kMaxSin;
     dsin = sinCA2-rotPars._sinCA;
@@ -189,7 +172,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     x2 = x1 + dx;
   }
   cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
-#endif /* __NEW_MERGER__ */
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
   dy = (fabs(sumCos)>1e-5) ? dx*(sumSin/sumCos):0;
@@ -523,12 +505,10 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
   int nE2 = nP2*(nP2+1)/2;
   TArrayD ard(nE2*6);
   double *a = ard.GetArray();  
-#ifndef __NEW_MERGER__
   double *sumE                 = (a);
   double *sumEI        = (a+=nE2);
   double *e1sumEIe1    = (a+=nE2);
   double *subP                 = (a+=nE2);
-#endif /* ! __NEW_MERGER__ */
   double *sumEIsubP	= (a+=nE2);
   double chi2=3e33,p,q;
 
@@ -541,12 +521,6 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
   }}
   if ( choice >0) {t = p2; p2 = p1; p1 = t; t = e2; e2 = e1; e1 = t;}
 
-#ifdef __NEW_MERGER__
-  double *sumE 		= (a);
-  double *sumEI 	= (a+=nE2);
-  double *e1sumEIe1 	= (a+=nE2);
-  double *subP 		= (a+=nE2);
-#endif /* __NEW_MERGER__ */
   do {//empty loop
 //  	Join errors
     TCL::vadd(e1,e2,sumE,nE1);
@@ -569,35 +543,6 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
     TCL::tras(sumEIsubP,e1   ,PJ       ,1,nP2);
     TCL::vadd(PJ       ,p1   ,PJ         ,nP2);
   }
-#ifdef __NEW_MERGER__ 
-  TRSymMatrix EE1(nP1,e1);
-  TRSymMatrix EE2(nP1,e2);
-  TRVector    PP1(nP1,p1);
-  TRVector    PP2(nP1,p2);
-  TRVector SubP(PP2);
-  SubP -= PP1;
-  //   Join errors
-  TRSymMatrix SumE(EE1);
-  SumE += EE2;
-  int negati = SumE[2]<0;
-  if (negati) SumE *= -1.;
-  int ign0re = SumE[0]<=0;
-  if (ign0re) SumE[0] = 1;
-  TRSymMatrix SumEI(SumE,TRArray::kInvertedA);
-  if (! SumEI.IsValid()) return chi2;
-  if (ign0re) {SumE[0]  = 0; SumEI[0] = 0;}
-  if (negati) {SumE *= -1.; SumEI *= -1.;}
-  chi2 = SumEI.Product(SubP);
-  if (!EJ) return chi2;
-  TRSymMatrix E1sumEIe1(EE1,TRArray::kRxSxR,SumEI);
-  TCL::vsub(EE1.GetArray(),E1sumEIe1.GetArray(),EJ,nE1);
-  //   Join params
-  if (PJ) {
-    TCL::tras(SubP.GetArray(),SumEI.GetArray(),sumEIsubP,1,nP1);
-    TCL::tras(sumEIsubP,EE1.GetArray()  ,PJ       ,1,nP2);
-    TCL::vadd(PJ       ,PP1.GetArray()  ,PJ         ,nP2);
-  }
-#endif /* __NEW_MERGER__  */
   return chi2;
 }
 #if 0
@@ -678,18 +623,8 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
 
   StiNodeErrs Ai=A;	//Inverted A
 
-#ifdef __NEW_MERGER__  
-  double chi2 = 3e33;
-#endif /* __NEW_MERGER__ */ 
   Ai._cXX=1;
-#ifndef __NEW_MERGER__  
   TCL::trsinv(Ai.G(),Ai.G(),nP2);
-#else /* __NEW_MERGER__  */
-  TRSymMatrix AA(nP2,Ai.G());
-  TRSymMatrix AI(AA,TRArray::kInvertedA);
-  if (! AI.IsValid()) return chi2;
-  TCL::ucopy(AI.GetArray(),Ai.G(), nP2*(nP2+1)/2);
-#endif /* ! __NEW_MERGER__  */
   Ai._cXX=0;
 
 
@@ -705,9 +640,7 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   if (M) {TCL::ucopy(m,M->P,nP2); M->ready();}	//fill resulting params
 
   TCL::vsub(X.P,m,dif,nP2);			//dif = X - M
-#ifndef __NEW_MERGER__  
   double chi2;
-#endif /* ! __NEW_MERGER__  */
   TCL::trasat(dif,Ai.G(),&chi2,1,nP2);		//calc chi2
   if (!C) return chi2;
 		// Error matrix calculation
@@ -920,12 +853,6 @@ double StiTrackNodeHelper::recvChi2()
   if (fabs(mJoinPars.eta())       >kMaxEta) 	return 1e41;
   if (fabs(mJoinPars.curv())      >kMaxCur)     return 1e41;
   if (!mDetector) {//Primary vertex
-#ifdef __NEW_MERGER__  
-    // Check positiveness of mHrr
-    TRSymMatrix A(3,&mHrr.hXX);
-    TRSymMatrix AI(A,TRArray::kInvertedA);
-    if (! AI.IsValid()) return 1e41;
-#endif /* __NEW_MERGER__  */
     double chi2 =joinVtx(mHitPars,mHrr    ,mPredPars  ,mPredErrs    );
     return chi2;
   }
