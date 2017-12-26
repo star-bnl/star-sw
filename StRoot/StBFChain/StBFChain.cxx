@@ -601,30 +601,34 @@ Int_t StBFChain::Instantiate()
 
       // back to the HFT sub-system
       if (GetOption("NoPxlIT")) {
-	mk->SetAttr("usePxl"	 ,kTRUE);
-	mk->SetAttr("usePixel"	 ,kTRUE);
+	mk->SetAttr("usePxl"	 ,1);
+	mk->SetAttr("usePixel"	 ,1);
       } else {
         if (GetOption("PixelIT") || GetOption("PxlIT") ){
-	  mk->SetAttr("usePxl"     ,kTRUE);
-	  mk->SetAttr("usePixel"	 ,kTRUE);
-	  mk->SetAttr("activePxl"  ,kTRUE);
-	  mk->SetAttr("activePixel",kTRUE);
+	  mk->SetAttr("usePxl"     ,1);
+	  mk->SetAttr("usePixel"	 ,1);
+	  mk->SetAttr("activePxl"  ,1);
+	  mk->SetAttr("activePixel",1);
+	  mk->SetAttr("useSvt"	,0);
+	  mk->SetAttr("useSsd"	,0);
         }
       }
       if (GetOption("NoIstIT")) {
-	mk->SetAttr("useIst"	 ,kTRUE);
+	mk->SetAttr("useIst"	 ,1);
       } else {
         if (GetOption("IstIT")){
-	  mk->SetAttr("useIst"     ,kTRUE);
-	  mk->SetAttr("activeIst"  ,kTRUE);
+	  mk->SetAttr("useIst"     ,1);
+	  mk->SetAttr("activeIst"  ,1);
         }
       }
       if (GetOption("NoSstIT")) {
-        mk->SetAttr("useSst"	 ,kTRUE);
+        mk->SetAttr("useSst"	 ,1);
       } else {
         if (GetOption("SstIT")){
-	  mk->SetAttr("useSst"	 ,kTRUE);
-	  mk->SetAttr("activeSst"  ,kTRUE);
+	  mk->SetAttr("useSst"	 ,1);
+	  mk->SetAttr("activeSst"  ,1);
+	  mk->SetAttr("useSvt"	,0);
+	  mk->SetAttr("useSsd"	,0);
         }
       }
 
@@ -661,24 +665,24 @@ Int_t StBFChain::Instantiate()
       if ((GetOption("VFPPV") && GetOption("Stv")) || GetOption("VFPPVEv") ) {
         gSystem->Load("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , 1);
-      } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
+      } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", 1);
       if (GetOption("VFPPVEvNoBtof")){
         gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", 1);
       }
-      if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
-      if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, kTRUE);
-      if (GetOption("VFMCE"      ) )      mk->SetAttr("VFMCE"      	, kTRUE);
-      if (GetOption("VFMinuit2"  ) )      mk->SetAttr("VFMinuit2"  	, kTRUE);
-      if (GetOption("VFMinuit3"  ) )      mk->SetAttr("VFMinuit3"  	, kTRUE);
-      if (GetOption("beamLine"   ) )      mk->SetAttr("BeamLine"   	, kTRUE);
-      if (GetOption("beamLine3D" ) )      mk->SetAttr("BeamLine3D"  	, kTRUE);
-      if (GetOption("CtbMatchVtx") )      mk->SetAttr("CTB"        	, kTRUE);
+      if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, 1);
+      if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, 1);
+      if (GetOption("VFMCE"      ) )      mk->SetAttr("VFMCE"      	, 1);
+      if (GetOption("VFMinuit2"  ) )      mk->SetAttr("VFMinuit2"  	, 1);
+      if (GetOption("VFMinuit3"  ) )      mk->SetAttr("VFMinuit3"  	, 1);
+      if (GetOption("beamLine"   ) )      mk->SetAttr("BeamLine"   	, 1);
+      if (GetOption("beamLine3D" ) )      mk->SetAttr("BeamLine3D"  	, 1);
+      if (GetOption("CtbMatchVtx") )      mk->SetAttr("CTB"        	, 1);
       if (GetOption("min2trkVtx" ) )      mk->SetAttr("minTracks" 	, 2);
-      if (GetOption("VtxSeedCalG") )      mk->SetAttr("calibBeamline" 	, kTRUE);
-      if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, kTRUE);
-      if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, kTRUE);
-      if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", kTRUE);
+      if (GetOption("VtxSeedCalG") )      mk->SetAttr("calibBeamline" 	, 1);
+      if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, 1);
+      if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, 1);
+      if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", 1);
 
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
