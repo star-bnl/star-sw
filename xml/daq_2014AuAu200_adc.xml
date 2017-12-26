@@ -7,7 +7,8 @@
    setenv NODEBUG yes
 #starver SL16d
    setup 64b
-   starver TFG17o
+#   starver TFG17o
+#   starverTFG17q
 #   starver .DEV2
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
@@ -60,7 +61,9 @@
 # P16id: DbV20160418 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat -evout CorrX OSpaceZ2 OGridLeak3D -hitfilt,evout
 #root4star -q -b -x 'bfc.C(1000,"DbV20160418,P2014a,TpxRaw,TpxClu,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # TFG17o
-root.exe -q -b -x 'bfc.C(1000,"DbV20160418,P2014a,TpxRaw,TpxClu,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b -x 'bfc.C(1000,"DbV20160418,P2014a,TpxRaw,TpxClu,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# DEV2.12/25/17
+root.exe -q -b -x 'bfc.C(100,"DbV20160418,P2014a,TpxRaw,TpxClu,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.log" />
         <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />

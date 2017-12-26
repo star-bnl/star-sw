@@ -22,6 +22,9 @@ switch ($case)
   case "*gcc482*" : 
     setup gcc482   
   breaksw
+  case "*gcc485*" : 
+    setup gcc485   
+  breaksw
   case "*gcc492*" : 
     setup gcc492 
   breaksw
@@ -40,17 +43,21 @@ switch ($case)
 endsw
 
 switch ($case) 
-  case "*15j*" :   
+  case "*SL15j*" :   
+    source /star/subsys/tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
     setenv STAR_LEVEL SL15j;       
+  case "*SL16d*" :   
+    source /star/subsys/tpc/fisyak/STAR/packages/.DEV2/unsetupDEV2.csh
+    setenv STAR_LEVEL SL16d;       
   breaksw
-  case "*SL15*":   
-    setenv STAR_LEVEL DEV2/SL15;   
+  case "*TFG17o*": 
+    setenv STAR_LEVEL TFG17o; 
+  breaksw
+  case "*TFG17q*":   
+    setenv STAR_LEVEL TFG17q;   
   breaksw
   case "*TFG16a*": 
-    setenv STAR_LEVEL DEV2/TFG16a; 
-  breaksw
-  case "*TFG16b*": 
-    setenv STAR_LEVEL DEV2/TFG16b; 
+    setenv STAR_LEVEL TFG16a; 
   breaksw
   case "*TFG16d*": 
     setenv STAR_LEVEL TFG16d; 

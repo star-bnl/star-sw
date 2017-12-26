@@ -4,7 +4,7 @@ if ($#ARGV < 0) {
   print "Usage : $0 day\n";
   exit 0;
 }
-my $debug = 0;
+my $debug = 1;
 my $day = $ARGV[0];
 my $trigger = "AuAu_200_production_mid_2014";
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename,events' -cond 'filetype=online_daq,filename~st_laser,tpx=1,sanity=1,runnumber>15000000,events>10' -limit 0`;
@@ -13,12 +13,13 @@ my $trigger = "AuAu_200_production_mid_2014";
 #get_file_list.pl -keys path,filename -cond production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_MuDst,filename~st_physics,storage=nfs -limit 0
 #my  @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_MuDst,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,runnumber>17124000,events>10' -limit 0`;
 #my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16ij,trgsetupname=AuAu_200_production_2016,filetype=daq_reco_MuDst,tpx=1,pxl=1,ist=1,sanity=1,events>10,runnumber>17000000' -limit 0"; print "$cmd\n" if ($debug);
-my $TriggerFile = $trigger . ".list"; print "Trigger file = $TriggerFile\n" if ($debug);
+my $TriggerFile = $trigger . ".txt"; print "Trigger file = $TriggerFile\n" if ($debug);
 if (! -r $TriggerFile) {
-  my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16id,trgsetupname=" . $trigger . ",filetype=daq_reco_MuDst,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,runnumber>15000000' -limit 0"; 
+#  my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16id,trgsetupname=" . $trigger . ",filetype=daq_reco_MuDst,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,runnumber>15000000' -limit 0"; 
+  my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16id,trgsetupname=" . $trigger . ",filetype=daq_reco_MuDst,filename~st_physics_adc,tpx=1,pxl=1,ist=1,sanity=1,events>10,daynumber=166' -limit 0"; 
   print "$cmd\n" if ($debug);
   my  @list = `$cmd`;
-  open(Out, ">$TrigerFile") or die "Can't open $TriggerFile";
+  open(Out, ">$TriggerFile") or die "Can't open $TriggerFile"; 
   foreach my $file (@list) {
     print Out "$file";
   }

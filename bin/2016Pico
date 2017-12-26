@@ -85,12 +85,12 @@ foreach day (`ls -1d 1*`)
 end
 ================================================================================
 
-foreach dayd (`ls -1d ~/MuDst/2016/???`)
-  set day = `basename ${dayd}`;	
+foreach dayd (`ls -1dr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/???`)
+  set day = `basename ${dayd}`;
   cd ~/Pico/2016/
   if (! -d ${day}) mkdir ${day}
   cd  ${day}
-  foreach d ( `ls -1d ~/MuDst/2016/${day}/*` )
+  foreach d ( `ls -1dr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${day}/*` )
     set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
     pwd
     PicoDST.pl
@@ -107,10 +107,10 @@ end
 ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
 cd ~/Pico/2016
 foreach d (`ls -1d */*/Done | awk -F\/ '{print $1"/"$2}'`)
-  echo ${d}
-  ls -ltr ~/MuDst/2016/${d}  | tail -1
-  set f = `ls -ltr ~/MuDst/2016/${d} | tail -1 | awk '{print $9}' | sed -e 's/Mu/pico/'`
-  if (! -r ${d}/${f}) echo "${d}/${f} is not yet Done"
+  ls -ltr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${d}  | tail -1
+  set f = `ls -ltr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${d} | tail -1 | awk '{print $9}' | sed -e 's/Mu/pico/'`
+  if (! -r ${d}/${f}) echo "${d}/Done ${f} is not yet Done"
+  if (! -r ${d}/${f}) echo "${d}/Done"
 end 
 ================================================================================
 ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
@@ -126,7 +126,7 @@ foreach f (`ls -1d ???/1*/Done`)
   cd -;
 end
 ================================================================================
-grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%iM\n", n/1.e6)}'
+grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fB\n", n/1.e9)}'
 ================================================================================
 cd 076; 
 2016Pico2hpss.pl | hsi >& hpss.log &
@@ -134,7 +134,7 @@ cd 076;
 
 
 cd ~/Pico/2016
-foreach d (`ls -1d 12?/1*`)
+foreach d (`ls -1d */1*`)
   cd ${d}; 
   if (! -r Chain.log) then	
     root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; 
@@ -142,3 +142,25 @@ foreach d (`ls -1d 12?/1*`)
   cd -;
 end
 
+================================================================================
+Clean 
+cd /gpfs01/star/pwg/fisyak/Pico/2016
+ find . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
+ find . -name "*.xml" -o -name "sched*" -exec rm {} \;
+======================================================================
+cd ~/Pico/2016
+rm count
+foreach d (`ls -1d */17*`)
+  set n = `ls -1d ${d}/*.root | wc -l`; echo "$d => $n" | tee -a count;
+end
+================================================================================
+cd ~/Pico/2016
+rm count
+foreach d (`ls -1d */17*`)
+  cd $d;
+  set c = `ls -1dtr  | tail -1`;
+  if ($c != "Chain.log") then
+    echo "$d => $c"
+  endif
+  cd -;	
+end
