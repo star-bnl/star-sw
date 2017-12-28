@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.85 2017/12/19 16:36:29 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.86 2017/12/28 18:11:29 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.86  2017/12/28 18:11:29  jwebb
+* Add FMS postshower hits interface to C++...
+*
 * Revision 1.85  2017/12/19 16:36:29  jwebb
 * Updated EPD volume id
 *
@@ -1000,6 +1003,7 @@ c$$$    write (*,*) numbv
          if(cd=='FLGR') sl=1
          if(cd=='FLXF') sl=2; 
          if(cd=='FPSC') sl=3; 
+         if(cd=='FOSC') sl=4; 
          assert(sl.gt.0)        ! Wrong sensitive detector in FPD/FMS
          if(sl.le.2) then !fms or fpd
           ew=(n1-1)/2+1
@@ -1045,10 +1049,10 @@ c$$$    write (*,*) numbv
            endif
           endif
           volume_id=ew*10000+nstb*1000+ch       
-       else                     ! FPS (FMS-Preshower)
-          ew=2          
+       else if(sl.eq.3) then    ! FPS (FMS-Preshower)
+          ew=2
           layr=n1
-          if(layr.eq.4) layr=3          
+          if(layr.eq.4) layr=3
           if(n2.le.21) then
              quad=1
              slat=n2
@@ -1058,14 +1062,30 @@ c$$$    write (*,*) numbv
           else if(n2.le.21+19+21) then
              quad=3
              slat=n2-21-19
-          else 
+          else
              quad=4
              slat=n2-21-19-21
           endif
-          volume_id=100000+ew*10000+quad*1000+layr*100+slat  
-*$$$      write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id
-         endif
-        }
+          volume_id=100000+ew*10000+quad*1000+layr*100+slat
+*$$$      write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id                           
+       else                     ! FPOST (FMS-Postshower)
+          ew=2          
+          if(n1.le.5) then
+             quad=1
+             if(n1.le.2) then
+                layr=n1
+             else
+                layr=n1+1
+             endif
+          else
+             quad=2
+             layr=n1-3
+          endif
+          slat=n2
+          volume_id=200000+ew*10000+quad*1000+layr*100+slat  
+*          write(*,*) 'FPOST volume_id : ',n1,n2,quad,layr,slat,volume_id
+       endif
+      }
 *24*                                 Dmitry Arkhipkin
       else if (Csys=='fsc') then
         volume_id = numbv(1);
