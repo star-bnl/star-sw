@@ -9,9 +9,10 @@
       logical   Local/.true./
 
       """ System number """
-      INTEGER,PARAMETER :: kFLXF=1, kFLGR=2, kFPSC=3
+      INTEGER,PARAMETER :: kFLXF=1, kFLGR=2, kFPSC=3, kFOSC=4
       """ Volume names """
-      CHARACTER*4,PARAMETER :: FLGR = 'FLGR', FLXF = 'FLXF', FPSC='FPSC'
+      CHARACTER*4,PARAMETER :: FLGR='FLGR', FLXF='FLXF'
+      CHARACTER*4,PARAMETER :: FPSC='FPSC', FOSC='FOSC'
       """ Loopers """
       Integer :: khit
 
@@ -21,12 +22,11 @@
 *
       i=0
       g2t_emc_hit_h.nok = 0
-      do Isys=1,3
-
-         if (Isys.eq.kFLXF) call G2R_GET_SYS ('FPDM',FLXF,Iprin,Idigi)
-         if (Isys.eq.kFLGR) call G2R_GET_SYS ('FPDM',FLGR,Iprin,Idigi)
-         if (Isys.eq.kFPSC) call G2R_GET_SYS ('FPDM',FPSC,Iprin,Idigi)
-
+      Do Isys = kFLXF, kFOSC
+         if (Isys.eq.1) call G2R_GET_SYS ('FPDM','FLXF',Iprin,Idigi)
+         if (Isys.eq.2) call G2R_GET_SYS ('FPDM','FLGR',Iprin,Idigi)
+         if (Isys.eq.3) call G2R_GET_SYS ('FPDM','FPSC',Iprin,Idigi)
+         if (Isys.eq.4) call G2R_GET_SYS ('FPDM','FOSC',Iprin,Idigi)
          if (Iprin.lt.0) goto 777
          Local  = Idigi.ge.2
 *

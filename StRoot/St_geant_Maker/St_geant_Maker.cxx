@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.166 2017/11/13 19:11:05 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.167 2017/12/28 18:11:34 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.167  2017/12/28 18:11:34  jwebb
+// Add FMS postshower hits interface to C++...
+//
 // Revision 1.166  2017/11/13 19:11:05  jwebb
 // Remove unecessary log output
 //
@@ -1475,7 +1478,8 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("FPDH","FLGR",nhit1);
   geant3->Gfnhit("FPDH","FLXF",nhit2);
   geant3->Gfnhit("FPDH","FPSC",nhit3);
-  nhits = nhit1+nhit2+nhit3;
+  geant3->Gfnhit("FPDH","FOSC",nhit4);
+  nhits = nhit1+nhit2+nhit3+nhit4;
   if (nhits>0) {
     St_g2t_emc_hit* g2t_fpd_hit = new St_g2t_emc_hit("g2t_fpd_hit",nhits);
     AddData(g2t_fpd_hit);
