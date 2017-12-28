@@ -12,9 +12,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 //<<<<<<< StTriggerSimuMaker.cxx
-// $Id: StTriggerSimuMaker.cxx,v 1.63 2017/06/09 20:11:25 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.64 2017/12/28 21:14:45 zchang Exp $
 //=======
-// $Id: StTriggerSimuMaker.cxx,v 1.63 2017/06/09 20:11:25 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.64 2017/12/28 21:14:45 zchang Exp $
 //>>>>>>> 1.61
 
 // MySQL C API
@@ -173,7 +173,7 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
 
   if (mMCflag == 1 || mMCflag == 2) {
     MYSQL mysql;
-    const char* host = "dbbak.starp.bnl.gov";
+    const char* host = "db04.star.bnl.gov";
     const char* user = "";
     const char* pass = "";
     unsigned int port = 3400+GetDBTime().GetYear()%100-1;
@@ -518,7 +518,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   // Open connection to online database
 
   MYSQL mysql;
-  const char* host = "dbbak.starp.bnl.gov";
+  const char* host = "db04.star.bnl.gov";
   const char* user = "";
   const char* pass = "";
 
@@ -861,6 +861,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.64  2017/12/28 21:14:45  zchang
+ * switch database server from dbbak.starp.bnl.gov to db04.star.bnl.gov
+ *
  * Revision 1.63  2017/06/09 20:11:25  zchang
  * Add pointer guard for trigger definition and trigger threshold tables, the pointers can not be null
  *
