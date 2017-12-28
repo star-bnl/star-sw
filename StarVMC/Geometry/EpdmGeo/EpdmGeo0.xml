@@ -32,7 +32,7 @@
     </Structure>
 
 
-    <Structure  name="tcdto" comment=" Cdt of a thicker part tiles">
+    <Structure  name="cdta" comment=" Cdt of a thicker part tiles">
       <var name="version" type="float"/>
       <var name="onoff"   type="int" />
       <var name="x(31)"   type="float"/> <!-- has array length of 31, but 1st tile is separtly handeled -->
@@ -47,7 +47,7 @@
     </Structure>
 
 
-    <Structure  name="tcdti" comment=" Cdt of a thiner part tiles">
+    <Structure  name="cdtb" comment=" Cdt of a thiner part tiles">
       <var name="version" type="float"/>
       <var name="onoff"   type="int" />
       <var name="x(31)"   type="float"/>
@@ -61,7 +61,7 @@
       <var name="alp(31)" type="float" />
     </Structure>
 
-    <Structure  name="tcdta" comment=" Cdt of 1st tile upper triangel">
+    <Structure  name="cdtc" comment=" Cdt of 1st tile upper triangel">
       <var name="version" type="float"/>
       <var name="onoff"   type="int" />
       <var name="x"       type="float"/>
@@ -75,7 +75,7 @@
       <var name="alp"     type="float" />
     </Structure>
 
-    <Structure  name="tcdtb" comment=" Cdt of 1st tile lower part">
+    <Structure  name="cdtd" comment=" Cdt of 1st tile lower part">
       <var name="version" type="float"/>
       <var name="onoff"   type="int" />
       <var name="x"       type="float"/>
@@ -103,14 +103,14 @@
 
 
     <!-- folowing values are caluclated in a spread sheet. Please find the details in EPD Drupal page. Coordinates of the corners of tiles are from Solid Works. -->
-     <Fill  name="tcdto" comment=" Corrdiante of a single sectors">
+     <Fill  name="cdta" comment=" Corrdiante of a single sectors">
       <var name="version" value="1.0"/>
       <var name="onoff"   value="1"/>
-      <var name="x"       value="{0.0, 1.3875, -1.3875, 2.0125, -2.0125, 2.72, -2.72, 3.5075, -3.5075, 4.2925,
+      <var name="y"       value="{0.0, 1.3875, -1.3875, 2.0125, -2.0125, 2.72, -2.72, 3.5075, -3.5075, 4.2925,
                                   -4.2925, 5.07, -5.07, 5.8125, -5.8125, 6.5275, -6.5275, 7.2425, -7.2425,
                                    7.9575, -7.9575, 8.6725, -8.6725, 9.3875, -9.3875, 10.1025, -10.1025, 10.82,
                                    -10.82, 11.7675, -11.7675}"/>
-      <var name="y"       value="{0.0, 10.6075, 10.6075, 14.9275, 14.9275, 19.7975, 19.7975, 25.2225, 25.2225,
+      <var name="x"       value="{0.0, 10.6075, 10.6075, 14.9275, 14.9275, 19.7975, 19.7975, 25.2225, 25.2225,
                                    30.65, 30.65, 36.105, 36.105, 41.515, 41.515, 46.95, 46.95, 52.385, 52.385,
                                    57.8225, 57.8225, 63.26, 63.26, 68.695, 68.695, 74.1325, 74.1325, 79.5675,
                                    79.5675, 84.9925, 84.9925}"/>
@@ -140,14 +140,14 @@
     </Fill>
 
 
-     <Fill  name="tcdti" comment=" Corrdiante of a single sectors">
+     <Fill  name="cdtb" comment=" Corrdiante of a single sectors">
       <var name="version" value="1.0"/>
       <var name="onoff"   value="1"/>
-      <var name="x"       value="{0.0, 0.1075, -0.1075, 0.1625, -0.1625, 0.2275, -0.2275, 0.3, -0.3, 0.37, -0.37,
+      <var name="y"       value="{0.0, 0.1075, -0.1075, 0.1625, -0.1625, 0.2275, -0.2275, 0.3, -0.3, 0.37, -0.37,
   				  0.43, -0.43, 0.455, -0.455, 0.455, -0.455, 0.455, -0.455, 0.455, -0.455,
 				  0.455, -0.455, 0.455, -0.455, 0.455, -0.455, 0.455, -0.455, 0.685, -0.685}"/>
 
-      <var name="y"       value="{0.0, 10.775, 10.775, 15.17, 15.17, 20.125, 20.125, 25.645, 25.645, 31.1675,
+      <var name="x"       value="{0.0, 10.775, 10.775, 15.17, 15.17, 20.125, 20.125, 25.645, 25.645, 31.1675,
  				  31.1675, 36.715, 36.715, 42.22, 42.22, 47.75, 47.75, 53.28, 53.28, 58.81,
  				  58.81, 64.34, 64.34, 69.87, 69.87, 75.4025, 75.4025, 80.9325, 80.9325,
 				  86.4725, 86.4725}"/>
@@ -182,11 +182,11 @@
 
 
 
-    <Fill  name="tcdta" comment=" Corrdiante of  upper triangle">
+    <Fill  name="cdtc" comment=" Corrdiante of  upper triangle">
       <var name="version" value="1.0"/>
       <var name="onoff"   value="1"/>
-      <var name="x"       value="0.0"/>
-      <var name="y"       value="8.375"/>
+      <var name="y"       value="0.0"/>
+      <var name="x"       value="8.375"/>
       <var name="z"       value="0.0"/>
       <var name="rot"     value="0" />
       <var name="dz"      value="1.2/2.0" />
@@ -196,11 +196,11 @@
       <var name="alp"     value="0.0" />
     </Fill>
 
-    <Fill  name="tcdtb" comment=" Corrdiante of rest of tile  one">
+    <Fill  name="cdtd" comment=" Corrdiante of rest of tile  one">
       <var name="version" value="1.0"/>
       <var name="onoff"   value="1"/>
-      <var name="x"       value="0.0"/>
-      <var name="y"       value="6.215"/>
+      <var name="y"       value="0.0"/>
+      <var name="x"       value="6.215"/>
       <var name="z"       value="0.0"/>
       <var name="rot"     value="0.0" />
       <var name="dz"      value="1.2/2.0" />
@@ -224,8 +224,8 @@
 
       <Shape type="TUBE" rmin="mcdt_srad" rmax="mcdt_lrad" dz="mcdt_thick" />
 
-      <For var="ss" from="0" to="11">
-	rotz=-15-30*ss; <!-- rotation angle of each SS,EPSS -->
+      <For var="ss" from="0" to="12">
+	rotz=-105-(30*ss); <!-- rotation angle of each SS,EPSS -->
 	<Create block="EPSS" />
 	<Placement block="EPSS" x="0" y="0" z="0">
 	  <Rotation alphay="180"/> <!-- helps to get the tile number in the g2t tables -->
@@ -245,25 +245,25 @@
       <!-- Tile one Trapzoidal part -->
       icolor=2;
       <Create block="EPDT" />
-      <Placement block="EPDT" in="EPSS" x="tcdtb_x" y="tcdtb_y" z="tcdtb_z" 
-	dz="tcdtb_z"    thet="0.0"    phi="0.0"
-	h1 ="tcdtb_h"   h2 ="tcdtb_h"
-	bl1="tcdtb_bl"   bl2="tcdtb_bl"
-	tl1="tcdtb_tl"   tl2="tcdtb_tl"
-	alp1="tcdtb_alp" alp2="tcdtb_alp" >
-	<Rotation alphaz="tcdtb_rot"/>
+      <Placement block="EPDT" in="EPSS" x="cdtd_x" y="-cdtd_y" z="cdtd_z" 
+	dz="cdtd_dz"    thet="0.0"    phi="0.0"
+	h1 ="cdtd_h"   h2 ="cdtd_h"
+	bl1="cdtd_bl"   bl2="cdtd_bl"
+	tl1="cdtd_tl"   tl2="cdtd_tl"
+	alp1="cdtd_alp" alp2="cdtd_alp" >
+	<Rotation alphaz="-90-cdtd_rot"/>
       </Placement>
 
       <!-- Tile one Triangular part -->
       icolor=6;
       <Create block="EPDT" />
-      <Placement block="EPDT" in="EPSS" x="tcdta_x" y="tcdta_y" z="tcdta_z" 
-	dz="tcdta_z"    thet="0.0"    phi="0.0"
-	h1 ="tcdta_h"   h2 ="tcdta_h"
-	bl1="tcdta_bl"   bl2="tcdta_bl"
-	tl1="tcdta_tl"   tl2="tcdta_tl"
-	alp1="tcdta_alp" alp2="tcdta_alp" >
-	<Rotation alphaz="tcdta_rot"/>
+      <Placement block="EPDT" in="EPSS" x="cdtc_x" y="-cdtc_y" z="cdtc_z" 
+	dz="cdtc_dz"    thet="0.0"    phi="0.0"
+	h1 ="cdtc_h"   h2 ="cdtc_h"
+	bl1="cdtc_bl"   bl2="cdtc_bl"
+	tl1="cdtc_tl"   tl2="cdtc_tl"
+	alp1="cdtc_alp" alp2="cdtc_alp" >
+	<Rotation alphaz="-90-cdtc_rot"/>
       </Placement>
 
       <!--Creating 31 tiles -->
@@ -272,25 +272,25 @@
 	<!-- Creating thiner part of a tile -->
         icolor=4;
 	<Create block="EPDT" />
-	<Placement block="EPDT" in="EPSS" x="tcdti_x(tt)" y="tcdti_y(tt)" z="tcdti_z" 
-	  dz="tcdti_z"    thet="0.0"    phi="0.0"
-	  h1 ="tcdti_h(tt)"   h2 ="tcdti_h(tt)"
-	  bl1="tcdti_bl(tt)"   bl2="tcdti_bl(tt)"
-	  tl1="tcdti_tl(tt)"   tl2="tcdti_tl(tt)"
-	  alp1="tcdti_alp(tt)" alp2="tcdti_alp(tt)" >
-	  <Rotation alphaz="tcdti_rot(tt)"/>
+	<Placement block="EPDT" in="EPSS" x="cdtb_x(tt)" y="-cdtb_y(tt)" z="(0.6-cdtb_dz(tt))" 
+	  dz="cdtb_dz(tt)"    thet="0.0"    phi="0.0"
+	  h1 ="cdtb_h(tt)"   h2 ="cdtb_h(tt)"
+	  bl1="cdtb_bl(tt)"   bl2="cdtb_bl(tt)"
+	  tl1="cdtb_tl(tt)"   tl2="cdtb_tl(tt)"
+	  alp1="cdtb_alp(tt)" alp2="cdtb_alp(tt)" >
+	  <Rotation alphaz="-90+cdtb_rot(tt)"/>
 	</Placement>
 
 	<!-- Creating thicker part of a tile -->
         icolor=3;
 	<Create block="EPDT" />
-	<Placement block="EPDT" in="EPSS" x="tcdto_x(tt)" y="tcdto_y(tt)" z="tcdto_z" 
-	  dz="tcdto_z"    thet="0.0"    phi="0.0"
-	  h1 ="tcdto_h(tt)"   h2 ="tcdto_h(tt)"
-	  bl1="tcdto_bl(tt)"   bl2="tcdto_bl(tt)"
-	  tl1="tcdto_tl(tt)"   tl2="tcdto_tl(tt)"
-	  alp1="tcdto_alp(tt)" alp2="tcdto_alp(tt)" >
-	  <Rotation alphaz="tcdto_rot(tt)"/>
+	<Placement block="EPDT" in="EPSS" x="cdta_x(tt)" y="-cdta_y(tt)" z="cdta_z" 
+	  dz="cdta_dz(tt)"    thet="0.0"    phi="0.0"
+	  h1 ="cdta_h(tt)"   h2 ="cdta_h(tt)"
+	  bl1="cdta_bl(tt)"   bl2="cdta_bl(tt)"
+	  tl1="cdta_tl(tt)"   tl2="cdta_tl(tt)"
+	  alp1="cdta_alp(tt)" alp2="cdta_alp(tt)" >
+	  <Rotation alphaz="-90+cdta_rot(tt)"/>
 	</Placement>
 
       </For>
