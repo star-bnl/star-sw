@@ -4,6 +4,7 @@
     use Cwd;
 my $pwd = cwd();
 my $day = File::Basename::basename($pwd);# print "day = $day\n";
+# find . -newer hpss.log -name "*.root" -exec ls -l {} \;
 my @lines = glob "*/*.root";# print "lines @lines\n";
 print "cd reco/2016Pico\n";
 print "mkdir $day\n";

@@ -145,8 +145,8 @@ end
 ================================================================================
 Clean 
 cd /gpfs01/star/pwg/fisyak/Pico/2016
- find . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
- find . -name "*.xml" -o -name "sched*" -exec rm {} \;
+ find -L . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
+ find -L . -name "*.xml" -o -name "sched*" -exec rm {} \;
 ======================================================================
 cd ~/Pico/2016
 rm count
