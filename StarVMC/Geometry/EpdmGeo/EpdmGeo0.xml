@@ -95,7 +95,7 @@
       <var name="onoff"   value="1"           comment=" 0 off, 1 on" />
       <var name="x"       value="0.0"         comment="x cdt of mother" />
       <var name="y"       value="0.0"         comment="y cdt of mother" />
-      <var name="z"       value="{-380.0,380.0}"         comment="Distance from center of star (prototype dist, not correct)" />
+      <var name="z"       value="{-374.0,374.0}"         comment="Distance from center of star (prototype dist, not correct)" />
       <var name="thick"   value="1.2/2"       comment="thickness of detector"  />
       <var name="srad"    value="3.0"         comment="check inner radius" /> <!-- slightly higer than the required values -->
       <var name="lrad"    value="100"          comment="check outer radius" /><!-- slightly higer than the required values -->
