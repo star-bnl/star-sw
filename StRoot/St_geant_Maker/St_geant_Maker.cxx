@@ -1,6 +1,11 @@
-// $Id: St_geant_Maker.cxx,v 1.167 2017/12/28 18:11:34 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.168 2017/12/28 19:10:33 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.168  2017/12/28 19:10:33  jwebb
+// Update sensitive volume names in St_geant_Maker and g2t_epd.F for interface
+// to C++.
+//
 // Revision 1.167  2017/12/28 18:11:34  jwebb
+//
 // Add FMS postshower hits interface to C++...
 //
 // Revision 1.166  2017/11/13 19:11:05  jwebb
@@ -1546,7 +1551,7 @@ Int_t St_geant_Maker::Make() {
 
   nhits=0;
 
-  geant3 -> Gfnhit("EPDH","EPAD", nhits); 
+  geant3 -> Gfnhit("EPDH","EPDT", nhits); 
   if ( nhits > 0 ) {
     St_g2t_epd_hit *g2t_epd_hit = new St_g2t_epd_hit("g2t_epd_hit",nhits);
     m_DataSet->Add(  g2t_epd_hit );
