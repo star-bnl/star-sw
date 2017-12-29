@@ -106,11 +106,16 @@ end
 ================================================================================
 ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
 cd ~/Pico/2016
+if (-r list.NotYetDone) rm list.NotYetDone
+touch list.NotYetDone
 foreach d (`ls -1d */*/Done | awk -F\/ '{print $1"/"$2}'`)
-  ls -ltr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${d}  | tail -1
-  set f = `ls -ltr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${d} | tail -1 | awk '{print $9}' | sed -e 's/Mu/pico/'`
+  if ( ! -d /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${d}) continue;
+  set m = `ls -ltr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${d}  | tail -1`
+  echo "${m}"
+  set r = `echo ${m} | awk '{print $9}'`
+  set f = `echo ${r} | sed -e 's/Mu/pico/'`
   if (! -r ${d}/${f}) echo "${d}/Done ${f} is not yet Done"
-  if (! -r ${d}/${f}) echo "${d}/Done"
+  if (! -r ${d}/${f}) echo "${d}/Done" | tee -a list.NotYetDone
 end 
 ================================================================================
 ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
@@ -145,8 +150,8 @@ end
 ================================================================================
 Clean 
 cd /gpfs01/star/pwg/fisyak/Pico/2016
- find . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
- find . -name "*.xml" -o -name "sched*" -exec rm {} \;
+ find -L . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
+ find -L . -name "*.xml" -o -name "sched*" -exec rm {} \;
 ======================================================================
 cd ~/Pico/2016
 rm count
