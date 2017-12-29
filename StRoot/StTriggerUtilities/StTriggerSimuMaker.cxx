@@ -12,9 +12,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 //<<<<<<< StTriggerSimuMaker.cxx
-// $Id: StTriggerSimuMaker.cxx,v 1.64 2017/12/28 21:14:45 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.65 2017/12/29 16:54:07 zchang Exp $
 //=======
-// $Id: StTriggerSimuMaker.cxx,v 1.64 2017/12/28 21:14:45 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.65 2017/12/29 16:54:07 zchang Exp $
 //>>>>>>> 1.61
 
 // MySQL C API
@@ -170,85 +170,46 @@ void StTriggerSimuMaker::Clear(const Option_t*){
 }
 
 Int_t StTriggerSimuMaker::InitRun(int runNumber) {
-
-  if (mMCflag == 1 || mMCflag == 2) {
-    MYSQL mysql;
-    const char* host = "db04.star.bnl.gov";
-    const char* user = "";
-    const char* pass = "";
-    unsigned int port = 3400+GetDBTime().GetYear()%100-1;
-    //    unsigned int port = 3400+mYear%100-1;
-    const char* database = "Conditions_rts";
-    const char* unix_socket = NULL;
-    unsigned long client_flag = 0;
-    char query[1024];
-
-    struct passwd *login;
-    login = getpwuid(geteuid());
-    user =  login->pw_name;
-
-    LOG_INFO << Form("host=%s user=\"%s\" pass=\"%s\" port=%d database=%s",host,user,pass,port,database) << endm;
-    
-    mysql_init(&mysql);
-
-    if (!mysql_real_connect(&mysql,host,user,pass,database,port,unix_socket,client_flag)) {
-      LOG_WARN << "Can't connect to database: " << mysql_error(&mysql) << endm;
-      return false;
-    }
-
-  
-    //query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
-    sprintf(query,"select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
-    LOG_INFO << query << endm;
-    mysql_query(&mysql,query);
-
-    if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-      while (MYSQL_ROW row = mysql_fetch_row(result)) {
-        runNumber = atoi(row[0]);
-      }
-    }
-    LOG_INFO << "DB Time = " << GetDBTime().AsSQLString() << endm;
-    LOG_INFO << "Run Number = " << runNumber << endm;
-  }
-
+ 
+  assert(runNumber != -1); 
   const TDatime& dbTime = GetDBTime();
   mYear = dbTime.GetYear();
   LOG_INFO << "runNumber=" << runNumber << " with DB timestamp " << dbTime.AsSQLString() << endm;
 
-    //Use unified EMC trigger for EEMC/BEMC triggers in year 2009 or later
-    if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
-      emc->setHeadMaker(this);
-      emc->setBemc(bemc);
-      emc->setEemc(eemc);
-      emc->setMC(mMCflag);
-      emc->setYear(mYear);
-      LOG_INFO<<Form("set year %d for emc trigger definition", mYear)<<endm;
-      mSimulators[3] = emc;
-      if (!mUseOnlineDB && !mUseOfflineDB) {
-	LOG_ERROR << "!!! ATTENTION !!! YOU MUST SPECIFY WHICH DATABASE TO USE FOR TRIGGER DEFINITIONS AND THRESHOLDS:" << endm;
-	LOG_ERROR << "StTriggerSimuMaker::useOnlineDB()" << endm;
-	LOG_ERROR << "StTriggerSimuMaker::useOfflineDB()" << endm;
-	assert(mUseOnlineDB || mUseOfflineDB);
-      }
-      assert((mUseOnlineDB  && get2009DsmRegistersFromOnlineDatabase (runNumber)) ||
-	     (mUseOfflineDB && get2009DsmRegistersFromOfflineDatabase(runNumber)));
-      //LOG_INFO << "Overwriting the following registers:" << endm;
-      //overwrite2009DsmRegisters();
-      if (mChangeJPThresh) {
-	LOG_INFO << "Shift the following registers by " << mChangeJPThresh << ":" << endm;
-	changeJetPatchTh();
-      }
+  //Use unified EMC trigger for EEMC/BEMC triggers in year 2009 or later
+  if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
+    emc->setHeadMaker(this);
+    emc->setBemc(bemc);
+    emc->setEemc(eemc);
+    emc->setMC(mMCflag);
+    emc->setYear(mYear);
+    LOG_INFO<<Form("set year %d for emc trigger definition", mYear)<<endm;
+    mSimulators[3] = emc;
+    if (!mUseOnlineDB && !mUseOfflineDB) {
+      LOG_ERROR << "!!! ATTENTION !!! YOU MUST SPECIFY WHICH DATABASE TO USE FOR TRIGGER DEFINITIONS AND THRESHOLDS:" << endm;
+      LOG_ERROR << "StTriggerSimuMaker::useOnlineDB()" << endm;
+      LOG_ERROR << "StTriggerSimuMaker::useOfflineDB()" << endm;
+      assert(mUseOnlineDB || mUseOfflineDB);
     }
-
-    for (Int_t i = 0; i < numSimulators; ++i)
-      if (mSimulators[i])
-	mSimulators[i]->InitRun(runNumber);
-
-    return kStOK;
+    assert((mUseOnlineDB  && get2009DsmRegistersFromOnlineDatabase (runNumber)) ||
+	   (mUseOfflineDB && get2009DsmRegistersFromOfflineDatabase(runNumber)));
+    //LOG_INFO << "Overwriting the following registers:" << endm;
+    //overwrite2009DsmRegisters();
+    if (mChangeJPThresh) {
+      LOG_INFO << "Shift the following registers by " << mChangeJPThresh << ":" << endm;
+      changeJetPatchTh();
+    }
+  }
+  
+  for (Int_t i = 0; i < numSimulators; ++i)
+    if (mSimulators[i])
+      mSimulators[i]->InitRun(runNumber);
+  
+  return kStOK;
 }
 
 Int_t StTriggerSimuMaker::Make() {
-   
+  
   for(Int_t i=0; i<numSimulators; i++) {
     if (mSimulators[i]){
       mSimulators[i]->Make();
@@ -861,6 +822,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.65  2017/12/29 16:54:07  zchang
+ * remove direct query to STAR database server in InitRun(int), users need to make sure that the trigger simulator retrives correct run number
+ *
  * Revision 1.64  2017/12/28 21:14:45  zchang
  * switch database server from dbbak.starp.bnl.gov to db04.star.bnl.gov
  *
