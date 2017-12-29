@@ -1332,7 +1332,7 @@ Bfc_st BFC[] = { // standard chains
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,dbUtil,KFParticle","","StTpcDb,StEvent"
    ,                                                                                 "Load StEvent",kFALSE},
-  {"PxlUtil"     ,""  ,"","","",                                       "StPxlUtil","Load StPxlUtil",kFALSE},
+  {"PxlUtil"     ,""  ,"","StEvent","",                                "StPxlUtil","Load StPxlUtil",kFALSE},
   {"IstUtil"     ,""  ,"","","",                                       "StIstUtil","Load StIstUtil",kFALSE},
   {"SsdUtil"     ,""  ,"","StarMagField,StDbT,StEvent",""         ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"SstUtil"     ,""  ,"","StarMagField,StDbT,StEvent",""         ,"Geom,StSstUtil","Load SST Util",kFALSE},
