@@ -1,3 +1,4 @@
+
 cpu_per_event.csh | tee cpu_per_event
 root.exe -q -b Recover.C | tee Recover.log
 if (! -d Zombie) mkdir Zombie
@@ -85,12 +86,12 @@ foreach day (`ls -1d 1*`)
 end
 ================================================================================
 
-foreach dayd (`ls -1dr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/???`)
+foreach dayd (`ls -1d /gpfs02/eic/ayk/STAR/reco/MuDst/2016/???`)
   set day = `basename ${dayd}`;
   cd ~/Pico/2016/
   if (! -d ${day}) mkdir ${day}
   cd  ${day}
-  foreach d ( `ls -1dr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${day}/*` )
+  foreach d ( `ls -1d /gpfs02/eic/ayk/STAR/reco/MuDst/2016/${day}/*` )
     set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
     pwd
     PicoDST.pl
@@ -118,6 +119,7 @@ foreach d (`ls -1d */*/Done | awk -F\/ '{print $1"/"$2}'`)
   if (! -r ${d}/${f}) echo "${d}/Done" | tee -a list.NotYetDone
 end 
 ================================================================================
+cat list.NotYetDone | xargs rm
 ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
 ================================================================================
 cd ~/Pico/2016
@@ -125,7 +127,8 @@ foreach f (`ls -1d ???/1*/Done`)
   set d = `dirname ${f}`;
   cd ${d}; 
   if (-r Done) then	
-    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; 
+    if (-r Chain.log) rm Chain.log	
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >& Chain.log &
     rm Done
   endif
   cd -;
@@ -152,6 +155,15 @@ Clean
 cd /gpfs01/star/pwg/fisyak/Pico/2016
  find -L . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
  find -L . -name "*.xml" -o -name "sched*" -exec rm {} \;
+
+cd ~/Pico/2016
+foreach d (`ls -1d */1*`)
+  cd $d; pwd; 
+  rm -f sched* *.xml
+  cd -;
+end
+
+
 ======================================================================
 cd ~/Pico/2016
 rm count
