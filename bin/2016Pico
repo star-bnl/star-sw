@@ -137,7 +137,7 @@ end
 grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fB\n", n/1.e9)}'
 ================================================================================
 cd 076; 
-2016Pico2hpss.pl | hsi >& hpss.log &
+2016Pico2hpss.pl > hpss.list; cat hpss.list | hsi >& hpss.`date +%m%d%y`.log &
 ================================================================================
 
 
@@ -180,4 +180,8 @@ foreach d (`ls -1d */17*`)
     echo "$d => $c"
   endif
   cd -;	
+end
+================================================================================
+foreach f ( `ls -1d *.listC` )
+  if (! -s ${f})  mv ${f} ${f}.Done
 end

@@ -61,9 +61,6 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   if (! geant) return;
   geant->SetAttr("MuDstFile",MuDstfile);
   geant->SetAttr("GoodTriggers",triggersC);
-#if 1
-  StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
-  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
 #ifdef __IST_SLOW_SIM__
   StIstRawHitMaker *ist_raw_hit = (StIstRawHitMaker *) chain2->Maker("ist_raw_hit");
   if (ist_raw_hit) {// Bingchu Huang, 08/18/2017
@@ -71,13 +68,14 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
     ist_raw_hit->setDataType(1);  //non zero-suppressed data
   }
 #endif /*  __IST_SLOW_SIM__ */
-#endif
   Chain->cd();
   TString chain3Opt("noInput,-in,NoInput");
   chain3Opt += ",TpcMixer";
 #ifndef __TrackingOnly__
   chain3Opt += ",BEmcMixer,EEmcMixer";
-#if 0
+#if 1
+  StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
+  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
   chain3Opt += ",btofMixer"; 
 #endif 
 #endif 
@@ -157,7 +155,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
 }
 //________________________________________________________________________________
 void bfcMixerVMC(Int_t Last=1, const Char_t *opt = "Vmc,Lc3pi,VMCAlignment",
-#if 0
+#if 1
 		 const Char_t *daqfile="/star/data03/daq/2016/125/17125034/st_physics_adc_17125034_raw_1000007.daq",
 		 const Char_t *MuDstfile="/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/st_physics_adc_17125034_raw_1000007.MuDst.root",
 #else

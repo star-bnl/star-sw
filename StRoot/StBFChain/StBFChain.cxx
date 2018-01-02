@@ -978,7 +978,8 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StBTofCalibMaker") {
       if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
-      if  (GetOption("UseMCTstart"))        mk->SetAttr("UseMCTstart",1);
+      if  (GetOption("UseMCTstart") || 
+	   ! GetOption("vpdCalib"))         mk->SetAttr("UseMCTstart",1);
     }
     if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {

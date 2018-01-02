@@ -15,7 +15,7 @@ void readPrimaries(Long64_t nevent=1000) {
   
   TH1D* hRcPt  = new TH1D("hRcPt", "", 500, 0, 5);
   TH1D* hRcEta = new TH1D("hRcEta", "", 400, -2, 2);
-  TH2D* hOneOverBetaP = new TH2D("hOneOverBetaP", "", 300, 0, 3, 300, 0, 3);
+  TH2D* hOneOverBetaP = new TH2D("hOneOverBetaP", "1-1/#beta", 300, 0, 3, 300, -0.1, 14.9);
   TH2D* hBTofHitLTTray = new TH2D("hBTofHitLTTray", "", 150, 0, 150, 100, 0, 100);
   TH1D* hBTofBeta = new TH1D("hBTofBeta", "", 200, 0, 1);
   
@@ -78,14 +78,14 @@ void readPrimaries(Long64_t nevent=1000) {
       if (tofHit) {
 	// hOneOverBetaP->Fill(pTrk->p().mag(), tofHit->leadingEdgeTime()/pTrk->btofPidTraits().pathLength());
 	//Hongwei	double tofBeta = pTrk->btofPidTraits().pathLength() / ((tofHit->leadingEdgeTime()-19) * C_C_LIGHT);
-#if 0
+#if 1
 	double tofBeta = -1.;
 	if (pTrk->btofPidTraits().beta() > 0) tofBeta = pTrk->btofPidTraits().beta();
 #else
 	double tofBeta = pTrk->btofPidTraits().pathLength() / ((pTrk->btofPidTraits().timeOfFlight()-19) * C_C_LIGHT);
 #endif
 	hBTofBeta->Fill(tofBeta);
-	hOneOverBetaP->Fill(pTrk->p().mag(), 1.0/tofBeta);
+	hOneOverBetaP->Fill(pTrk->p().mag(), 1. - 1.0/tofBeta);
 	hBTofHitLTTray->Fill(tofHit->tray(), tofHit->leadingEdgeTime());
 	
 	hBTofHitLETvsTof->Fill(tofHit->leadingEdgeTime()-19, pTrk->btofPidTraits().timeOfFlight());
