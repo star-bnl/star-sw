@@ -435,7 +435,7 @@ void StBTofCalibMaker::processStEvent()
   
   if(mTStart<-1000.) {
     if (IAttr("UseMCTstart")) {
-      mTStart = 0;
+      mTStart = mVpdSimConfig->getMcClock()*1000;
       LOG_INFO << "use MC start time = " << mTStart << " for this event." << endm;
       mValidStartTime = kTRUE;
     } else {

@@ -884,7 +884,9 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
   double tof= tofHitsFromGeant->tof*1000./nanosecond + ranGauss.shoot()*mSimDb->timeres_tof()*1000./nanosecond;    //! 85ps per channel
   
   if ( mVpdSim ) {    // VpdSimMaker present, assume vpdstart
+    //#ifdef __getMcClock__
     tof += mVpdSimConfig->getMcClock()*1000;
+    //#endif
   }
   else {
     if ( mUseVpdStart && btofColl ) {   //!< VpdSimMaker not present, check for vpdstart, add vpd resolution to tof
