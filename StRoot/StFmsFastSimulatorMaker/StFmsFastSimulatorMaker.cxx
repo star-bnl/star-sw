@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.10 2017/09/28 17:07:19 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.11 2018/01/03 15:25:19 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.11  2018/01/03 15:25:19  akio
+// update for FPost
+//
 // Revision 1.10  2017/09/28 17:07:19  akio
 // addoing bitshiftgain
 //
@@ -141,9 +144,14 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     if (hit) {
       const Int_t detectorId = getDetectorId(*hit);
       Int_t channel;
-      if(detectorId!=kFpsDetId) channel=hit->volume_id % 1000;
-      else                      channel=dbMaker->fpsSlatIdFromG2t(hit->volume_id);
-      //LOG_INFO << Form("volid=%8d det=%2d ch=%4d e=%f\n",hit->volume_id,detectorId,channel,hit->de);
+      if(detectorId==kFpsDetId) {
+	  channel=dbMaker->fpsSlatIdFromG2t(hit->volume_id);
+      }else if(detectorId==kFpostDetId) {
+	  channel=dbMaker->fpostSlatIdFromG2t(hit->volume_id);
+      }else{
+	  channel=hit->volume_id % 1000;
+      }
+      LOG_INFO << Form("volid=%8d det=%2d ch=%4d e=%f\n",hit->volume_id,detectorId,channel,hit->de);
       if(detectorId<0 || detectorId>=NDET || channel<0 || channel>=NCH){
 	  LOG_DEBUG << Form("det or ch out of range det=%d ch=%d",detectorId,channel) << endm;
 	continue;
@@ -152,11 +160,14 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
       StFmsHit* fmshit=0;
       if(map[detectorId][channel]==0){ // New hit
 	Int_t qtCrate, qtSlot, qtChannel, adc=0, tdc=0;
-	if(detectorId!=kFpsDetId){
-	  dbMaker->getMap(detectorId, channel, &qtCrate, &qtSlot, &qtChannel);
-	}else{ //FPS
+	if(detectorId==kFpsDetId){ //FPS
 	  qtCrate=6;
 	  dbMaker->fpsQTMap(channel,&qtSlot,&qtChannel);
+	}else if(detectorId==kFpostDetId){ //FPOST
+	  qtCrate=7;
+	  dbMaker->fpostQTMap(channel,&qtSlot,&qtChannel);
+	}else{ //FMS
+	  dbMaker->getMap(detectorId, channel, &qtCrate, &qtSlot, &qtChannel);
 	}
 	fmshit = new StFmsHit(detectorId, channel, qtCrate, qtSlot, qtChannel, adc, tdc, energy);
 	hits.push_back(fmshit);
@@ -178,20 +189,31 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     Float_t energy=hits[i]->energy();
     Float_t gain, gainCorrection;
     int adc;
-    if(detectorId!=kFpsDetId){
-      // Get gain and correction from the database.
-      gain = dbMaker->getGain(detectorId, channel);
-      gainCorrection = dbMaker->getGainCorrection(detectorId, channel);
-    }else{ //FPS      
-      gain = 1.0/dbMaker->fpsGain(channel);    //fpsGain gives ADCch for MIP peak      
-      gainCorrection=mFpsDEPerMIP;             //about 1.6MeV per MIP      
-      //add smering with poisson distriubtion
-      if(mFpsNPhotonPerMIP>0.0){
-	  static TRandom2 rnd;
-	  int nPixel=static_cast<Int_t>(energy/gainCorrection*mFpsNPhotonPerMIP);
-	  int nPixelMod = rnd.Poisson(nPixel);
-	  energy = nPixelMod*gainCorrection/mFpsNPhotonPerMIP;
-      }
+    if(detectorId==kFpsDetId){ //FPS      
+	gain = 1.0/dbMaker->fpsGain(channel);    //fpsGain gives ADCch for MIP peak      
+	gainCorrection=mFpsDEPerMIP;             //about 1.6MeV per MIP      
+	//add smering with poisson distriubtion
+	if(mFpsNPhotonPerMIP>0.0){
+	    static TRandom2 rnd;
+	    int nPixel=static_cast<Int_t>(energy/gainCorrection*mFpsNPhotonPerMIP);
+	    int nPixelMod = rnd.Poisson(nPixel);
+	    energy = nPixelMod*gainCorrection/mFpsNPhotonPerMIP;
+	}
+    }else if(detectorId==kFpostDetId){ //FPOST
+	gain = 1.0/dbMaker->fpostGain(channel);    //fpostGain gives ADCch for MIP peak      
+	gainCorrection=mFpsDEPerMIP;               //about 1.6MeV per MIP      
+	//add smering with poisson distriubtion
+	if(mFpsNPhotonPerMIP>0.0){
+	    static TRandom2 rnd;
+	    int nPixel=static_cast<Int_t>(energy/gainCorrection*mFpsNPhotonPerMIP);
+	    int nPixelMod = rnd.Poisson(nPixel);
+	    energy = nPixelMod*gainCorrection/mFpsNPhotonPerMIP;
+	}
+
+    }else{
+	// Get gain and correction from the database.
+	gain = dbMaker->getGain(detectorId, channel);
+	gainCorrection = dbMaker->getGainCorrection(detectorId, channel);
     }
     // Digitize
     if(mAttenuation==0){
@@ -212,7 +234,7 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     adc = std::min(adc, 4095);  // Cap maximum ADC = 4,095
     // Recalculate energy accounting for ADC range
     Float_t digi_energy;
-    if(detectorId!=kFpsDetId){
+    if(detectorId!=kFpsDetId && detectorId!=kFpostDetId){
 	digi_energy = adc * gain * gainCorrection;
     }else{
 	digi_energy = adc * gain; //for FPS, this is not really energy but # of MIPs
@@ -221,7 +243,7 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
       hits[i]->setAdc(adc);
       hits[i]->setEnergy(digi_energy);
       fmscollection->addHit(hits[i]);
-      if(Debug())
+      //      if(Debug())     
 	  cout << Form("Det=%2d Ch=%3d E=%8.3f gain=%6.3f ADC=%4d digiE=%8.3f\n",detectorId,channel,energy,gain,adc,digi_energy);
     }else{
       delete hits[i];
@@ -291,11 +313,13 @@ Email from Akio describing decoding of the g2t volume ID, 16th Jan 2014:
 Int_t StFmsFastSimulatorMaker::getDetectorId(const g2t_emc_hit_st& hit) const {
   enum { kFpd = 1, kFms = 2, kNorth = 0, kSouth = 1 };
   const Int_t volumeId = hit.volume_id;
+  printf("voldid=%d\n",volumeId);
   // Decode volume ID into detector type, fpd/fms and north/south locations
   const Int_t isFPS    = volumeId / 100000;
   const Int_t fpdOrFms = (volumeId % 100000) / 10000;
   const Int_t module   = (volumeId % 10000) / 1000;
-  if(isFPS) return kFpsDetId;
+  if(isFPS==1) return kFpsDetId;
+  if(isFPS==2) return kFpostDetId;
   switch (fpdOrFms) {
   case kFpd:
     switch (module) {
@@ -319,7 +343,7 @@ Int_t StFmsFastSimulatorMaker::getDetectorId(const g2t_emc_hit_st& hit) const {
 
 /* Dump hit information to LOG_INFO. */
 void StFmsFastSimulatorMaker::printStEventSummary(const StEvent* event) {
-  const Int_t NDETECTORS = 15;
+  const Int_t NDETECTORS = 16;
   const Char_t* detectorNames[NDETECTORS] = {
       "FPD-North ",
       "FPD-South",
@@ -335,7 +359,8 @@ void StFmsFastSimulatorMaker::printStEventSummary(const StEvent* event) {
       "FMS-South-Small",
       "FHC-North",
       "FHC-South",
-      "FMS-PreShower"
+      "FMS-PreShower",
+      "FMS-PostShower"
   };
   // Array of total hits per subdetector, initialised to all zeros
   Int_t nhits[NDETECTORS];
