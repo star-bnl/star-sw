@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.12 2007/04/17 23:01:51 dongx Exp $
+ * $Id: StTofGeometry.cxx,v 1.13 2018/01/03 21:07:14 smirnovd Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.13  2018/01/03 21:07:14  smirnovd
+ * StTofGeometry: Get rid of unsupported xdf and outdated ctf tables
+ *
  * Revision 1.12  2007/04/17 23:01:51  dongx
  * replaced with standard STAR Loggers
  *
@@ -77,7 +80,6 @@
 #include "StMessMgr.h"
 #include "St_DataSetIter.h"
 #include "PhysicalConstants.h"
-#include "ctf/St_ctg_Module.h"
 #include "tables/St_tofSlatGeom_Table.h"
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
@@ -117,121 +119,6 @@ void StTofGeometry::init(StMaker* maker){
 
 /// initialize TOF Slat parameters from XDF file
 void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
-#if 0
-  LOG_INFO << "StTofGeometry: loading dBase from " << InputXdfFile << endm;
-  St_XDFFile xdf(InputXdfFile);
-  St_DataSet *ctfg = xdf.NextEventGet();
-  St_DataSetIter gime(ctfg);
-  if (!ctfg){
-    LOG_INFO << " ERROR: unable read from file" << endm;
-    assert(0);
-    return;
-  }
-
-  St_ctg_geo*      stafTofParam(0);
-  St_ctg_slat_phi* stafSlatPhi(0);
-  St_ctg_slat_eta* stafSlatEta(0);
-  St_ctg_slat*     stafSlatParam(0);
-
-  stafTofParam   = static_cast<St_ctg_geo*>(gime("tof"));
-  stafSlatPhi    = static_cast<St_ctg_slat_phi*>(gime("tof_slat_phi"));
-  stafSlatEta    = static_cast<St_ctg_slat_eta*>(gime("tof_slat_eta"));
-  stafSlatParam  = static_cast<St_ctg_slat*>(gime("tof_slat"));
-
-  ctg_geo_st *geo = stafTofParam->GetTable();
-  if (geo){
-    //mTofParam.detector          = geo->detector;
-    mTofParam.i_eta_max         = geo->i_eta_max;
-    mTofParam.i_eta_min         = geo->i_eta_min;
-    mTofParam.i_phi_max         = geo->i_phi_max;
-    mTofParam.i_phi_min         = geo->i_phi_min;
-    mTofParam.n_counter_eta     = geo->n_counter_eta;
-    mTofParam.n_counter_phi     = geo->n_counter_phi;
-    mTofParam.n_tray_eta        = geo->n_tray_eta;
-    mTofParam.n_tray_phi        = geo->n_tray_phi;
-    mTofParam.counter_thickness = geo->counter_thickness;
-    mTofParam.counter_width     = geo->counter_width;
-    mTofParam.r                 = geo->r;
-    mTofParam.tray_height       = geo->tray_height;
-    mTofParam.tray_width        = geo->tray_width;
-    mTofParam.tray_length       = geo->tray_length;
-    mTofParam.tray_phi_zero     = geo->tray_phi_zero;
-  }
-  else {
-    LOG_INFO << " ERROR: unable to read TOF param table" << endm;
-    return;
-  }
-
-  // copy eta and phi database into two vectors first
-  ctg_slat_eta_st *eta = stafSlatEta->GetTable();
-  if (eta){
-    for(int iRow=0; iRow<stafSlatEta->GetNRows(); iRow++,eta++){
-      StructTofSlatEta tofSlatEta;
-      tofSlatEta.ieta    = eta->ieta;
-      tofSlatEta.cosang  = eta->cosang;
-      tofSlatEta.eta     = eta->eta;
-      tofSlatEta.eta_max = eta->eta_max;
-      tofSlatEta.eta_min = eta->eta_min;
-      tofSlatEta.r       = eta->r;
-      tofSlatEta.z       = eta->z;
-      tofSlatEta.z_max   = eta->z_max;
-      tofSlatEta.z_min   = eta->z_min;
-      mTofSlatEtaVec.push_back(tofSlatEta);
-    }
-  }
-  else {
-    LOG_INFO << " ERROR: unable to read TOF eta table" << endm;
-    return;
-  }
-
-  ctg_slat_phi_st *phi = stafSlatPhi->GetTable();
-  if (phi){
-    for(int iRow=0; iRow<stafSlatPhi->GetNRows(); iRow++,phi++){
-      StructTofSlatPhi tofSlatPhi;
-      tofSlatPhi.iphi    = phi->iphi;
-      // convert XDF 0..360 degrees to STAR -pi..pi range
-      tofSlatPhi.phi     = ((phi->phi    >180)?phi->phi     -360:phi>phi    )*degree;
-      tofSlatPhi.phi_max = ((phi->phi_max>180)?phi->phi_max-360:phi->phi_max)*degree;
-      tofSlatPhi.phi_min = ((phi->phi_min>180)?phi->phi_min-360:phi->phi_min)*degree;
-      mTofSlatPhiVec.push_back(tofSlatPhi);
-    }
-  }
-  else {
-    LOG_INFO << " ERROR: unable to read TOF phi table" << endm;
-    return;
-  }
-
-  // build the database vector.
-  for (int i=0; i<stafSlatEta->GetNRows();i++){
-    int iPhiMin, iPhiMax;
-    int iEta = mTofSlatEtaVec[i].ieta;
-    if      (iEta==10) {iPhiMin= 1 ; iPhiMax= 5;}  // 1st 5-wide row
-    else if (iEta== 9) {iPhiMin= 6 ; iPhiMax= 9;}  // 2nd 4-wide row
-    else if (iEta < 9) {iPhiMin=10 ; iPhiMax=13;}  // all other 4-wide rows
-    else {
-      LOG_INFO << "StTofGeometry: slat eta out of range " << iEta << endm;
-      iPhiMin=0; iPhiMax=-1;}
-    for (int j=iPhiMin-1;j<iPhiMax;j++){
-      tofSlatGeom_st* tofSlat = new tofSlatGeom_st;
-      tofSlat->ieta    = mTofSlatEtaVec[i].ieta;
-      tofSlat->z       = mTofSlatEtaVec[i].z;
-      tofSlat->z_min   = mTofSlatEtaVec[i].z_min;
-      tofSlat->z_max   = mTofSlatEtaVec[i].z_max;
-      tofSlat->cosang  = mTofSlatEtaVec[i].cosang;
-      tofSlat->r       = mTofSlatEtaVec[i].r;
-      tofSlat->eta     = mTofSlatEtaVec[i].eta;
-      tofSlat->eta_min = mTofSlatEtaVec[i].eta_min;
-      tofSlat->eta_max = mTofSlatEtaVec[i].eta_max;
-      tofSlat->iphi    = mTofSlatPhiVec[j].iphi;
-      tofSlat->phi     = mTofSlatPhiVec[j].phi;
-      tofSlat->phi_min = mTofSlatPhiVec[j].phi_min;
-      tofSlat->phi_max = mTofSlatPhiVec[j].phi_max;
-      tofSlat->trayId  = 32;
-      mTofSlatVec.push_back(*tofSlat);
-      delete tofSlat;
-    }
-  }
-#endif //0
 }
 
 
