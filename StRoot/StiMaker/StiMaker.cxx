@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.234 2017/12/19 20:14:12 jwebb Exp $
+// $Id: StiMaker.cxx,v 1.235 2018/01/03 21:24:21 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -65,7 +65,6 @@ More detailed: 				<br>
 */
 #include <Stiostream.h>
 #include <math.h>
-#include <string>
 #include "TSystem.h"
 #include "TTree.h"
 #if ROOT_VERSION_CODE < 331013
@@ -749,8 +748,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.234 2017/12/19 20:14:12 jwebb Exp $
+// $Id: StiMaker.cxx,v 1.235 2018/01/03 21:24:21 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.235  2018/01/03 21:24:21  smirnovd
+// Remove unused std::string
+//
 // Revision 1.234  2017/12/19 20:14:12  jwebb
 // If no input file, provide default name
 //
