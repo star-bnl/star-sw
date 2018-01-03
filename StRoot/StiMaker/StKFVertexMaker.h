@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.h,v 2.4 2014/08/06 11:43:59 jeromel Exp $
+// $Id: StKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $
 
 #ifndef STAR_StKFVertexMaker
 #define STAR_StKFVertexMaker
@@ -21,6 +21,7 @@
 #include "Math/GSLMinimizer1D.h"
 #include "StEnumerations.h"
 #include "TCanvas.h"
+#include "TH1K.h"
 class StPrimaryVertex;
 class StEvent;
 class StDcaGeometry;
@@ -71,7 +72,7 @@ class StKFVertexMaker : public StMaker {
   TCanvas                 *fc1;
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.4 2014/08/06 11:43:59 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2018/01/03 21:23:36 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -79,6 +80,9 @@ class StKFVertexMaker : public StMaker {
 };
 #endif
 // $Log: StKFVertexMaker.h,v $
+// Revision 2.5  2018/01/03 21:23:36  smirnovd
+// StKFVertexMaker: Added missing include
+//
 // Revision 2.4  2014/08/06 11:43:59  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
