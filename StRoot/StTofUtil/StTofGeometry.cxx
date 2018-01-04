@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.12 2007/04/17 23:01:51 dongx Exp $
+ * $Id: StTofGeometry.cxx,v 1.13 2018/01/03 21:07:14 smirnovd Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.13  2018/01/03 21:07:14  smirnovd
+ * StTofGeometry: Get rid of unsupported xdf and outdated ctf tables
+ *
  * Revision 1.12  2007/04/17 23:01:51  dongx
  * replaced with standard STAR Loggers
  *

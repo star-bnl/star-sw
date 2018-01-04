@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.6 2015/12/20 01:06:39 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.6 2018/01/03 21:24:14 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -70,8 +70,8 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
       eemcList =new StEemcHitList(eeDb, killStatEEmc,geomE); eemcList->initRun();
     }
     if (dateY > 2008) {
-      TObjectSet *set = (TObjectSet *) mydb->GetDataSet("btofGeometry");
-      if (set) btofGeom = (StBTofGeometry *) set->GetObject(); 
+      TObjectSet *btofGeom_dataset = (TObjectSet *) mydb->GetDataSet("btofGeometry");
+      btofGeom = btofGeom_dataset ? (StBTofGeometry *) btofGeom_dataset->GetObject() : nullptr;
       if (! btofGeom) {
 	TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
 	if (starHall) {
@@ -304,14 +304,8 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
- * Revision 2.6  2015/12/20 01:06:39  fisyak
- * Merge
- *
- * Revision 2.6  2015/01/05 21:04:31  fisyak
- * Add access to TMVA ranking
- *
- * Revision 1.2  2014/06/10 22:59:33  fisyak
- * Freeze
+ * Revision 2.6  2018/01/03 21:24:14  smirnovd
+ * Don't use common name from std:: as local variable
  *
  * Revision 2.5  2013/03/22 23:29:15  genevb
  * Initialize mTotEve to zero

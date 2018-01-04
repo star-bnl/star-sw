@@ -3,8 +3,6 @@
 #ifndef StiMaker_HH
 #define StiMaker_HH
 
-#include <string>
-using std::string;
 
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
@@ -51,7 +49,7 @@ class StiMaker : public StMaker
              void FinishTracks(int gloPri);
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.38 2016/11/07 20:51:43 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.39 2018/01/03 21:24:21 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
