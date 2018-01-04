@@ -1,6 +1,6 @@
-#include "StRoot/StIstClusterMaker/StIstIClusterAlgo.h"
-#include "StRoot/StEvent/StEnumerations.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "StIstClusterMaker/StIstIClusterAlgo.h"
+#include "StEvent/StEnumerations.h"
+#include "St_base/StMessMgr.h"
 
 
 /**

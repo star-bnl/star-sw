@@ -1,24 +1,24 @@
-/* $Id: StIstHitMaker.cxx,v 1.28 2015/01/14 02:29:10 ypwang Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.29 2018/01/04 17:34:38 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
 #include "TGeoMatrix.h"
 
 #include "StIstHitMaker.h"
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstCluster.h"
-#include "StRoot/StIstUtil/StIstClusterCollection.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstCluster.h"
+#include "StIstUtil/StIstClusterCollection.h"
 #include "StIstHit.h"
 #include "StIstHitCollection.h"
 
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "StContainers.h"
 #include "StEvent/StEnumerations.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstUtil/StIstConsts.h"
 
-#include "StRoot/StIstDbMaker/StIstDb.h"
+#include "StIstDbMaker/StIstDb.h"
 #include "tables/St_istControl_Table.h"
 
 ClassImp(StIstHitMaker);
@@ -169,6 +169,11 @@ Int_t StIstHitMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.29  2018/01/04 17:34:38  smirnovd
+* [Cosmetic] Remove StRoot/ from include path
+*
+* $STAR/StRoot is already in the default path search
+*
 * Revision 1.28  2015/01/14 02:29:10  ypwang
 * minor update in Make() back to version 1.24
 *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StIstSlowSimMaker.cxx,v 1.2 2017/08/03 04:09:57 huangbc Exp $
+ * $Id: StIstSlowSimMaker.cxx,v 1.3 2018/01/04 17:34:38 smirnovd Exp $
  *
  * Author: Leszek Kosarzewski, March 2014
  ****************************************************************************
@@ -41,11 +41,11 @@ using namespace std;
 //#include "TDataSet.h"
 #include "TF1.h"
 
-#include "StRoot/StIstDbMaker/StIstDb.h"
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstUtil/StIstConsts.h"
 #include "StIstSlowSimMaker.h"
 
 #include "tables/St_istMapping_Table.h"

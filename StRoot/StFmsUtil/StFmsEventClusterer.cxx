@@ -1,6 +1,11 @@
-// $Id: StFmsEventClusterer.cxx,v 1.12 2016/06/07 15:51:44 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.13 2018/01/04 17:35:45 smirnovd Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.13  2018/01/04 17:35:45  smirnovd
+// [Cosmetic] Remove StRoot/ from include path
+//
+// $STAR/StRoot is already in the default path search
+//
 // Revision 1.12  2016/06/07 15:51:44  akio
 // Making code better based on Coverity reports
 //
@@ -54,7 +59,7 @@
  \copyright Brookhaven National Lab
  */
 #include "StFmsEventClusterer.h"
-#include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
+#include "StFmsDbMaker/StFmsDbMaker.h"
 
 #include <algorithm>
 #include <array>
@@ -67,9 +72,9 @@
 #include "TMath.h"
 #include "TRandom.h"  // For ROOT global random generator, gRandom
 
-#include "StRoot/St_base/StMessMgr.h"
-#include "StRoot/StEvent/StFmsCluster.h"
-#include "StRoot/StEvent/StFmsHit.h"
+#include "St_base/StMessMgr.h"
+#include "StEvent/StFmsCluster.h"
+#include "StEvent/StFmsHit.h"
 
 #include "StFmsClusterFitter.h"
 #include "StFmsFittedPhoton.h"

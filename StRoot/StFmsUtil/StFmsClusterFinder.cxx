@@ -1,6 +1,11 @@
-// $Id: StFmsClusterFinder.cxx,v 1.7 2016/06/08 19:58:33 akio Exp $
+// $Id: StFmsClusterFinder.cxx,v 1.8 2018/01/04 17:35:44 smirnovd Exp $
 //
 // $Log: StFmsClusterFinder.cxx,v $
+// Revision 1.8  2018/01/04 17:35:44  smirnovd
+// [Cosmetic] Remove StRoot/ from include path
+//
+// $STAR/StRoot is already in the default path search
+//
 // Revision 1.7  2016/06/08 19:58:33  akio
 // Applying Coverity report
 //
@@ -40,7 +45,7 @@
  \copyright Brookhaven National Lab
  */
 #include "StFmsClusterFinder.h"
-#include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
+#include "StFmsDbMaker/StFmsDbMaker.h"
 #include "StFmsDbConfig.h"
 
 #include <algorithm>
@@ -51,8 +56,8 @@
 #include "TObjArray.h"
 
 #include "St_base/StMessMgr.h"
-#include "StRoot/StEvent/StFmsCluster.h"
-#include "StRoot/StEvent/StFmsHit.h"
+#include "StEvent/StFmsCluster.h"
+#include "StEvent/StFmsHit.h"
 
 #include "StFmsUtil/StFmsTower.h"
 #include "StFmsUtil/StFmsConstant.h"

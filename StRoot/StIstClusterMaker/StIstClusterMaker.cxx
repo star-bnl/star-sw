@@ -3,14 +3,14 @@
 #include "StIstClusterMaker.h"
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstCluster.h"
-#include "StRoot/StIstUtil/StIstClusterCollection.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
-#include "StRoot/StIstClusterMaker/StIstIClusterAlgo.h"
-#include "StRoot/StIstClusterMaker/StIstScanClusterAlgo.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstCluster.h"
+#include "StIstUtil/StIstClusterCollection.h"
+#include "StIstUtil/StIstConsts.h"
+#include "StIstClusterMaker/StIstIClusterAlgo.h"
+#include "StIstClusterMaker/StIstScanClusterAlgo.h"
 
 StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(UCHAR_MAX), mSplitCluster(true)
 {
@@ -109,6 +109,11 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.32  2018/01/04 17:34:37  smirnovd
+* [Cosmetic] Remove StRoot/ from include path
+*
+* $STAR/StRoot is already in the default path search
+*
 * Revision 1.31  2017/04/26 19:54:01  perev
 * Remove crash at the end
 *
