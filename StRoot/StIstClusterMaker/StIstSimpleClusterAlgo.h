@@ -1,7 +1,7 @@
 #ifndef StIstSimpleClusterAlgo_hh
 #define StIstSimpleClusterAlgo_hh
 
-#include "StRoot/StIstClusterMaker/StIstIClusterAlgo.h"
+#include "StIstClusterMaker/StIstIClusterAlgo.h"
 
 class StIstRawHit;
 class StIstCluster;
@@ -42,6 +42,11 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.17  2018/01/04 17:34:37  smirnovd
+* [Cosmetic] Remove StRoot/ from include path
+*
+* $STAR/StRoot is already in the default path search
+*
 * Revision 1.16  2015/11/02 20:15:29  perev
 * New compile, destructor added
 *

@@ -1,17 +1,17 @@
-// $Id: StIstRawHitMaker.cxx,v 1.48 2016/02/18 17:24:49 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.49 2018/01/04 17:34:38 smirnovd Exp $
 #include "StIstRawHitMaker.h"
 
 #include "StEvent.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StChain/StRtsTable.h"
 
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstDbMaker/StIstDb.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StIstUtil/StIstConsts.h"
 
 #include "tables/St_istPedNoise_Table.h"
 #include "tables/St_istGain_Table.h"

@@ -2,12 +2,12 @@
 #include "StEvent/StEnumerations.h"
 #include "StMessMgr.h"
 #include "StIstScanClusterAlgo.h"
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstUtil/StIstClusterCollection.h"
-#include "StRoot/StIstUtil/StIstCluster.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstUtil/StIstClusterCollection.h"
+#include "StIstUtil/StIstCluster.h"
+#include "StIstUtil/StIstConsts.h"
 
 #include <math.h>
 #include <iostream>
@@ -240,6 +240,11 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.20  2018/01/04 17:34:37  smirnovd
+* [Cosmetic] Remove StRoot/ from include path
+*
+* $STAR/StRoot is already in the default path search
+*
 * Revision 1.19  2016/02/18 17:27:19  smirnovd
 * StIstScanClusterAlgo: Whitespace corrected in "Add idTruth for clusters."
 *

@@ -1,4 +1,4 @@
-// $Id: StIstCluster.cxx,v 1.15 2016/01/05 16:29:25 smirnovd Exp $
+// $Id: StIstCluster.cxx,v 1.16 2018/01/04 17:34:38 smirnovd Exp $
 
 /**
  * Author: Yaping Wang, March 2013
@@ -9,7 +9,7 @@
 
 #include "StIstConsts.h"
 #include "StIstCluster.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 
 
 StIstCluster::StIstCluster(int key, int ladder, int sensor,

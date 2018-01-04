@@ -1,6 +1,11 @@
-// $Id: StFmsClusterFitter.cxx,v 1.6 2015/11/05 17:54:57 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.7 2018/01/04 17:35:44 smirnovd Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.7  2018/01/04 17:35:44  smirnovd
+// [Cosmetic] Remove StRoot/ from include path
+//
+// $STAR/StRoot is already in the default path search
+//
 // Revision 1.6  2015/11/05 17:54:57  akio
 // Adding option to scale up shower shape function for large cells
 //
@@ -36,7 +41,7 @@
  \copyright Brookhaven National Lab
  */
 #include "StFmsClusterFitter.h"
-#include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
+#include "StFmsDbMaker/StFmsDbMaker.h"
 
 #include <algorithm>  // For std::max()
 #include <array>
@@ -48,8 +53,8 @@
 #include "TMath.h"
 #include "TString.h"
 
-#include "StRoot/St_base/StMessMgr.h"
-#include "StRoot/StEvent/StFmsHit.h"
+#include "St_base/StMessMgr.h"
+#include "StEvent/StFmsHit.h"
 
 //#include "StFmsGeometry.h"
 #include "StFmsTower.h"

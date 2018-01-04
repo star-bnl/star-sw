@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFgtStrip.cxx,v 1.2 2013/01/08 22:57:33 sangalin Exp $
+ * $Id: StMuFgtStrip.cxx,v 1.3 2018/01/04 17:36:47 smirnovd Exp $
  * Author: S. Gliske, Jan. 2012
  *
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StMuFgtStrip.cxx,v $
+ * Revision 1.3  2018/01/04 17:36:47  smirnovd
+ * [Cosmetic] Remove StRoot/ from include path
+ *
+ * $STAR/StRoot is already in the default path search
+ *
  * Revision 1.2  2013/01/08 22:57:33  sangalin
  * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
  *
@@ -44,7 +49,7 @@
  **************************************************************************/
 
 #include "StMuFgtStrip.h"
-#include "StRoot/StEvent/StFgtStrip.h"
+#include "StEvent/StFgtStrip.h"
 #include "StFgtUtil/StFgtConsts.h"
 #include <assert.h>
 
