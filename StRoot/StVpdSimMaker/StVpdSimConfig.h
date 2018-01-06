@@ -17,6 +17,7 @@
 #include <TRandom3.h>
 
 using std::string;
+class vpdSimParams_st;
 
 class StVpdSimConfig {
 public:
@@ -41,10 +42,12 @@ public:
         double randNum = 0;
         double vpdRes = 0;
         int counter = 0;
-        double tubeTimeWest = 0;
-        double tubeTimeEast = 0;
+        double tSum = 0;
+        
         TRandom3 randEngine(0);
         
+
+        // this can be further improved to just use the tube resolution when sampling, like is done in VPD Sim Maker
         for (int i=0; i<MAX_ARRAY_INDEX; i++) {
             if (mSimParams[i].tubeStatusFlag) {
                 vpdRes += mSimParams[i].singleTubeRes;
@@ -57,42 +60,42 @@ public:
         }
         else {
 #if !defined(__CINT__) && !defined(__CLING__)
-            LOG_WARN << "No resolutions found! Exit!" << endm;
+            LOG_WARN << "No resolutions found in DB! Using DEFAULT avg of 120 ps single tube res- maybe a terrible guess for your dataset!" << endm;
 #endif
-            return 0.;
+            vpdRes = 120; 
         }
-        
-        for (int j=0;j<nWest;j++) {    //! Loop through West tubes
-            randNum = randEngine.Gaus(0, vpdRes);
-            tubeTimeWest += randNum;
-        }
-        
-        for (int j=0;j<nEast;j++) {   //! Loop through East tubes
-            randNum = randEngine.Gaus(0, vpdRes);
-            tubeTimeEast += randNum;
-        }
-        
-        tubeTimeWest = tubeTimeWest/nWest; //! Avg on west in ps
-        tubeTimeEast = tubeTimeEast/nEast; //! Avg on east in ps
-        
+
+        if ( 0 == nWest && 0 == nEast ){
 #if !defined(__CINT__) && !defined(__CLING__)
-        LOG_INFO << "The resolution returned is: " << (tubeTimeEast - tubeTimeWest)/2 << endm;
+            LOG_WARN << "No VPD tubes hit, resolution = 999" << endm;
 #endif
-        return (tubeTimeEast - tubeTimeWest)/2;
+            return -999;
+        }
+
+        for (int j=0;j< (nWest + nEast); j++) {    //! Loop through hit tubes
+            randNum = randEngine.Gaus(0, vpdRes);
+            tSum += randNum;
+        }
+
+        float result = tSum / ((float)(nWest + nEast));
+#if !defined(__CINT__) && !defined(__CLING__)
+        LOG_INFO << "tof blur from vpd resolution (nEast + nWest = " << (nEast+nWest) << ": " << result << endm;
+#endif
+        return result;
     }
 
     //! Loads Vpd Sim Params from database
 
-	void loadVpdSimParams()	{
-	  SingleTubeParams params;
-	  for (int i = 0; i < MAX_ARRAY_INDEX; i++) {
-	    params.tubeId = St_vpdSimParamsC::instance()->tubeID()[i];
-	    params.singleTubeRes = St_vpdSimParamsC::instance()->tubeRes()[i];
-	    params.tubeStatusFlag = St_vpdSimParamsC::instance()->tubeStatusFlag()[i];
-	    params.tubeTriggerFlag = St_vpdSimParamsC::instance()->tubeTriggerFlag()[i];
-	    mSimParams[St_vpdSimParamsC::instance()->tubeID()[i]] = params;
-	  }
-	  return;
+       void loadVpdSimParams() {
+         SingleTubeParams params;
+         for (int i = 0; i < MAX_ARRAY_INDEX; i++) {
+           params.tubeId = St_vpdSimParamsC::instance()->tubeID()[i];
+           params.singleTubeRes = St_vpdSimParamsC::instance()->tubeRes()[i];
+           params.tubeStatusFlag = St_vpdSimParamsC::instance()->tubeStatusFlag()[i];
+           params.tubeTriggerFlag = St_vpdSimParamsC::instance()->tubeTriggerFlag()[i];
+           mSimParams[St_vpdSimParamsC::instance()->tubeID()[i]] = params;
+         }
+         return;
 	}
 
 	/** Reads VPD Sim Params from a file for DEBUG purposes
