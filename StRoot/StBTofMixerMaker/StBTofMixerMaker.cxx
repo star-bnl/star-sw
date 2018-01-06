@@ -127,12 +127,12 @@ int StBTofMixerMaker::Make()
             mNewCollection->addHit(new StBTofHit(aBTofHit));
         }
     }
-    
+    // wrong     
     mEventCollection = mNewCollection;  //! Link StEvent to the new mixer collection.
 
     //! Fill StBTofHeader --
 
-    StBTofHeader *tofHeader = 0;
+    //    StBTofHeader *tofHeader = 0;
 
     tofHeader = (StBTofHeader *) mEventCollection->tofHeader();
 

@@ -86,7 +86,7 @@ foreach day (`ls -1d 1*`)
 end
 ================================================================================
 
-foreach dayd (`ls -1d /gpfs02/eic/ayk/STAR/reco/MuDst/2016/???`)
+foreach dayd (`ls -1dr /gpfs02/eic/ayk/STAR/reco/MuDst/2016/???`)
   set day = `basename ${dayd}`;
   cd ~/Pico/2016/
   if (! -d ${day}) mkdir ${day}

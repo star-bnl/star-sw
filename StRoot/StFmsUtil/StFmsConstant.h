@@ -1,7 +1,7 @@
 #ifndef STROOT_STFMSUTIL_STFMSCONSTANT_H_
 #define STROOT_STFMSUTIL_STFMSCONSTANT_H_
 
-#include "StRoot/StFmsUtil/StFmsDbConfig.h"
+#include "StFmsUtil/StFmsDbConfig.h"
 #define GetPar(name,dtype) \
 ((StFmsDbConfig::Instance()).getParameter<dtype>(name))
 

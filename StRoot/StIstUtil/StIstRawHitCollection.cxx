@@ -1,8 +1,8 @@
-// $Id: StIstRawHitCollection.cxx,v 1.20 2016/01/07 22:15:29 smirnovd Exp $
+// $Id: StIstRawHitCollection.cxx,v 1.21 2018/01/04 17:34:38 smirnovd Exp $
 
 #include "StIstRawHit.h"
 #include "StIstRawHitCollection.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 #include <cmath>
 #include <iostream>
 
