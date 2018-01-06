@@ -134,7 +134,7 @@ int StBTofMixerMaker::Make()
 
     //    StBTofHeader *tofHeader = 0;
 
-    tofHeader = (StBTofHeader *) mEventCollection->tofHeader();
+    //    tofHeader = (StBTofHeader *) mEventCollection->tofHeader();
 
     LOG_DEBUG << "... Modified StBTofCollection Stored in StEvent! " << endm;
 
