@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.13 2017/12/18 23:32:27 jdb Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.14 2018/01/04 18:42:21 jdb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -902,7 +902,22 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
       
     }
     else {
-      // do nothing
+        if ( mUseVpdStart && btofColl ) {   //!< VpdSimMaker not present, check for vpdstart, add vpd resolution to tof
+            mBTofHeader = btofColl->tofHeader();
+
+            if ( mBTofHeader != NULL ){
+            	int mNWest = mBTofHeader->numberOfVpdHits(west);
+            	int mNEast = mBTofHeader->numberOfVpdHits(east);
+				
+            	tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
+            } else {
+            	tof -= 999;
+            }
+            
+        }
+        else {
+            // do nothing
+        }
     }
   }
   

@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.48 2016/02/18 17:24:49 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.49 2018/01/04 17:34:38 smirnovd Exp $
 #include "StIstRawHitMaker.h"
 
 #include "StEvent/StEvent.h"

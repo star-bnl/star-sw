@@ -1,6 +1,11 @@
-// $Id: StFmsPointMaker.cxx,v 1.11 2016/11/22 18:24:34 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.12 2018/01/04 17:35:44 smirnovd Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.12  2018/01/04 17:35:44  smirnovd
+// [Cosmetic] Remove StRoot/ from include path
+//
+// $STAR/StRoot is already in the default path search
+//
 // Revision 1.11  2016/11/22 18:24:34  akio
 // Using StFmsDbMaker::getLorentzVector for correct momentum calcuration based on beamline angles/offsets
 //
@@ -57,13 +62,13 @@
 #include "StFmsHit.h"
 #include "StFmsPoint.h"
 #include "StRunInfo.h"
-#include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
+#include "StFmsDbMaker/StFmsDbMaker.h"
 
-#include "StRoot/StFmsUtil/StFmsEventClusterer.h"
-#include "StRoot/StFmsUtil/StFmsFittedPhoton.h"
-#include "StRoot/StFmsUtil/StFmsTower.h"
-#include "StRoot/StFmsUtil/StFmsTowerCluster.h"
-#include "StRoot/StFmsUtil/StFmsConstant.h"
+#include "StFmsUtil/StFmsEventClusterer.h"
+#include "StFmsUtil/StFmsFittedPhoton.h"
+#include "StFmsUtil/StFmsTower.h"
+#include "StFmsUtil/StFmsTowerCluster.h"
+#include "StFmsUtil/StFmsConstant.h"
 
 namespace {
   // Calculate a 4 momentum from a direction/momentum vector and energy

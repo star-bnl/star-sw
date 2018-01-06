@@ -1,10 +1,11 @@
-// $Id: StIstRawHit.cxx,v 1.19 2016/01/11 21:16:02 smirnovd Exp $
+// $Id: StIstRawHit.cxx,v 1.20 2018/01/04 17:34:38 smirnovd Exp $
 
 #include <algorithm>
 
 #include "StIstRawHit.h"
-#include "StRoot/St_base/StMessMgr.h"
 Int_t StIstRawHit::_count = 0;
+#include "St_base/StMessMgr.h"
+
 using namespace StIstConsts;
 
 

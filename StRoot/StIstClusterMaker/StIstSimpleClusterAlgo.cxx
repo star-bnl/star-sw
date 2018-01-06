@@ -1,12 +1,12 @@
-#include "StRoot/StEvent/StEvent.h"
+#include "StEvent/StEvent.h"
 #include "StMessMgr.h"
-#include "StRoot/StIstClusterMaker/StIstSimpleClusterAlgo.h"
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstUtil/StIstClusterCollection.h"
-#include "StRoot/StIstUtil/StIstCluster.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstClusterMaker/StIstSimpleClusterAlgo.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstUtil/StIstClusterCollection.h"
+#include "StIstUtil/StIstCluster.h"
+#include "StIstUtil/StIstConsts.h"
 
 #include <math.h>
 #include <iostream>
@@ -822,6 +822,11 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection &istCollection,
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.18  2018/01/04 17:34:37  smirnovd
+* [Cosmetic] Remove StRoot/ from include path
+*
+* $STAR/StRoot is already in the default path search
+*
 * Revision 1.17  2015/05/20 20:53:57  smirnovd
 * Removed a priori true condition without changing the logic
 *
