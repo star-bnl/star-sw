@@ -11,7 +11,6 @@ namespace Garfield {
 ViewDrift::ViewDrift()
     : m_className("ViewDrift"),
       m_debug(false),
-      m_label("Drift Lines"),
       m_canvas(NULL),
       m_hasExternalCanvas(false),
       m_xMin(-1.),
@@ -45,7 +44,7 @@ ViewDrift::~ViewDrift() {
 
 void ViewDrift::SetCanvas(TCanvas* c) {
 
-  if (c == NULL) return;
+  if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
     m_canvas = NULL;
@@ -54,15 +53,14 @@ void ViewDrift::SetCanvas(TCanvas* c) {
   m_hasExternalCanvas = true;
 }
 
-void ViewDrift::SetArea(const double& xmin, const double& ymin, 
-                        const double& zmin, 
-                        const double& xmax, const double& ymax,
-                        const double& zmax) {
+void ViewDrift::SetArea(const double xmin, const double ymin, 
+                        const double zmin, 
+                        const double xmax, const double ymax,
+                        const double zmax) {
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    std::cout << m_className << "::SetArea:\n";
-    std::cout << "    Null area range not permitted.\n";
+    std::cerr << m_className << "::SetArea: Null area range not permitted.\n";
     return;
   }
   m_xMin = std::min(xmin, xmax);
@@ -108,23 +106,21 @@ void ViewDrift::Clear() {
   }
 }
 
-void ViewDrift::SetClusterMarkerSize(const double& size) {
+void ViewDrift::SetClusterMarkerSize(const double size) {
 
   if (size > 0.) {
     m_markerSizeCluster = size;
   } else {
-    std::cerr << m_className << "::SetClusterMarkerSize:\n";
-    std::cerr << "    Size must be positive.\n";
+    std::cerr << m_className << "::SetClusterMarkerSize: Size must be > 0.\n";
   }
 }
 
-void ViewDrift::SetCollisionMarkerSize(const double& size) {
+void ViewDrift::SetCollisionMarkerSize(const double size) {
 
   if (size > 0.) {
     m_markerSizeCollision = size;
   } else {
-    std::cerr << m_className << "::SetCollisionMarkerSize:\n";
-    std::cerr << "    Size must be positive.\n";
+    std::cerr << m_className << "::SetCollisionMarkerSize: Size must be > 0.\n";
   }
 }
 
@@ -137,13 +133,13 @@ void ViewDrift::NewElectronDriftLine(const unsigned int np, int& id,
   driftLine d;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<marker> p(1);
+    std::vector<Marker> p(1);
     p[0].x = x0;
     p[0].y = y0;
     p[0].z = z0;
     d.vect = p;
   } else {
-    std::vector<marker> p(np);
+    std::vector<Marker> p(np);
     for (unsigned int i = 0; i < np; ++i) {
       p[i].x = x0;
       p[i].y = y0;
@@ -163,16 +159,16 @@ void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
 
   const int col = plottingEngine.GetRootColorHole();
   driftLine d;
-  marker m0;
+  Marker m0;
   m0.x = x0;
   m0.y = y0;
   m0.z = z0;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<marker> p(1, m0);
+    std::vector<Marker> p(1, m0);
     d.vect = p;
   } else {
-    std::vector<marker> p(np, m0);
+    std::vector<Marker> p(np, m0);
     d.vect = p;
   }
   d.n = col;
@@ -186,16 +182,16 @@ void ViewDrift::NewIonDriftLine(const unsigned int np, int& id, const double x0,
 
   const int col = 47;
   driftLine d;
-  marker m0;
+  Marker m0;
   m0.x = x0;
   m0.y = y0;
   m0.z = z0;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<marker> p(1, m0);
+    std::vector<Marker> p(1, m0);
     d.vect = p;
   } else {
-    std::vector<marker> p(np, m0);
+    std::vector<Marker> p(np, m0);
     d.vect = p;
   }
   d.n = col;
@@ -221,20 +217,13 @@ void ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
                                         const double x0, const double y0,
                                         const double z0) {
 
-
   // Create a new track and add it to the list.
-  track newTrack;
-  if (np <= 0) {
-    // Number of points is not yet known.
-    newTrack.vect.resize(1);
-  } else {
-    newTrack.vect.resize(np);
-  }
-  newTrack.vect[0].x = x0;
-  newTrack.vect[0].y = y0;
-  newTrack.vect[0].z = z0;
-  m_tracks.push_back(newTrack);
-  // Return the index of this drift line.
+  std::vector<Marker> track(std::max(1U, np));
+  track[0].x = x0;
+  track[0].y = y0;
+  track[0].z = z0;
+  m_tracks.push_back(track);
+  // Return the index of this track.
   id = m_tracks.size() - 1;
 }
 
@@ -243,8 +232,7 @@ void ViewDrift::SetDriftLinePoint(const unsigned int iL, const unsigned int iP,
                                   const double z) {
 
   if (iL >= m_driftLines.size()) {
-    std::cerr << m_className << "::SetDriftLinePoint:\n";
-    std::cerr << "    Drift line index " << iL << " is out of range.\n";
+    std::cerr << m_className << "::SetDriftLinePoint: Index out of range.\n";
     return;
   }
   m_driftLines[iL].vect[iP].x = x;
@@ -256,11 +244,10 @@ void ViewDrift::AddDriftLinePoint(const unsigned int iL, const double x,
                                   const double y, const double z) {
 
   if (iL >= m_driftLines.size()) {
-    std::cerr << m_className << "::AddDriftLinePoint:\n";
-    std::cerr << "    Drift line index " << iL << " is out of range.\n";
+    std::cerr << m_className << "::AddDriftLinePoint: Index out of range.\n";
     return;
   }
-  marker m;
+  Marker m;
   m.x = x;
   m.y = y;
   m.z = z;
@@ -271,34 +258,32 @@ void ViewDrift::SetTrackPoint(const unsigned int iL, const unsigned int iP,
                               const double x, const double y, const double z) {
 
   if (iL >= m_tracks.size()) {
-    std::cerr << m_className << "::SetTrackPoint:\n";
-    std::cerr << "    Track index " << iL << " is out of range.\n";
+    std::cerr << m_className << "::SetTrackPoint: Index out of range.\n";
     return;
   }
-  m_tracks[iL].vect[iP].x = x;
-  m_tracks[iL].vect[iP].y = y;
-  m_tracks[iL].vect[iP].z = z;
+  m_tracks[iL][iP].x = x;
+  m_tracks[iL][iP].y = y;
+  m_tracks[iL][iP].z = z;
 }
 
 void ViewDrift::AddTrackPoint(const unsigned int iL, const double x,
                               const double y, const double z) {
 
   if (iL >= m_tracks.size()) {
-    std::cerr << m_className << "::AddTrackPoint:\n";
-    std::cerr << "    Track index " << iL << " is out of range.\n";
+    std::cerr << m_className << "::AddTrackPoint: Index out of range.\n";
     return;
   }
-  marker newPoint;
+  Marker newPoint;
   newPoint.x = x;
   newPoint.y = y;
   newPoint.z = z; 
-  m_tracks[iL].vect.push_back(newPoint);
+  m_tracks[iL].push_back(newPoint);
 }
 
 void ViewDrift::AddExcitationMarker(const double x, const double y,
                                     const double z) {
 
-  marker newMarker;
+  Marker newMarker;
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
@@ -308,7 +293,7 @@ void ViewDrift::AddExcitationMarker(const double x, const double y,
 void ViewDrift::AddIonisationMarker(const double x, const double y,
                                     const double z) {
 
-  marker newMarker;
+  Marker newMarker;
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
@@ -318,7 +303,7 @@ void ViewDrift::AddIonisationMarker(const double x, const double y,
 void ViewDrift::AddAttachmentMarker(const double x, const double y,
                                     const double z) {
 
-  marker newMarker;
+  Marker newMarker;
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
@@ -336,11 +321,9 @@ void ViewDrift::Plot(const bool twod, const bool axis) {
 
 void ViewDrift::Plot2d(const bool axis) {
 
-  std::cout << m_className << "::Plot:\n";
-  std::cout << "    Plotting in 2D.\n";
-  if (m_canvas == NULL) {
+  std::cout << m_className << "::Plot: Plotting in 2D.\n";
+  if (!m_canvas) {
     m_canvas = new TCanvas();
-    m_canvas->SetTitle(m_label.c_str());
     if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
   m_canvas->cd();
@@ -373,10 +356,11 @@ void ViewDrift::Plot2d(const bool axis) {
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
   const unsigned int nTracks = m_tracks.size();
   for (unsigned int i = 0; i < nTracks; ++i) {
-    const unsigned int nPoints = m_tracks[i].vect.size();
+    const std::vector<Marker>& track = m_tracks[i];
+    const unsigned int nPoints = track.size();
     TGraph t(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
-      t.SetPoint(j, m_tracks[i].vect[j].x, m_tracks[i].vect[j].y);
+      t.SetPoint(j, track[j].x, track[j].y);
     }
     t.SetLineColor(trackCol);
     t.SetLineWidth(2);
@@ -399,17 +383,15 @@ void ViewDrift::Plot2d(const bool axis) {
 
 void ViewDrift::Plot3d(const bool axis) {
 
-  std::cout << m_className << "::Plot:\n";
-  std::cout << "    Plotting in 3D.\n";
-  if (m_canvas == NULL) {
+  std::cout << m_className << "::Plot: Plotting in 3D.\n";
+  if (!m_canvas) {
     m_canvas = new TCanvas();
-    m_canvas->SetTitle(m_label.c_str());
     if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
   m_canvas->cd();
   if (axis) {
-    if (m_canvas->GetView() == NULL) {
-      if (m_view == NULL) m_view = TView::CreateView(1, 0, 0);
+    if (!m_canvas->GetView()) {
+      if (!m_view) m_view = TView::CreateView(1, 0, 0);
       m_view->SetRange(m_xMin, m_yMin, m_zMin, m_xMax, m_yMax, m_zMax);
       m_view->ShowAxis();
       m_view->Top();
@@ -432,14 +414,13 @@ void ViewDrift::Plot3d(const bool axis) {
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
   const unsigned int nTracks = m_tracks.size();
   for (unsigned int i = 0; i < nTracks; ++i) {
-    const unsigned int nPoints = m_tracks[i].vect.size();
+    const std::vector<Marker>& track = m_tracks[i];
+    const unsigned int nPoints = track.size();
     TPolyMarker3D* t = new TPolyMarker3D(nPoints);
     TPolyLine3D* l = new TPolyLine3D(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
-      t->SetNextPoint(m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
-                      m_tracks[i].vect[j].z);
-      l->SetNextPoint(m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
-                      m_tracks[i].vect[j].z);
+      t->SetNextPoint(track[j].x, track[j].y, track[j].z);
+      l->SetNextPoint(track[j].x, track[j].y, track[j].z);
     }
     t->SetMarkerStyle(20);
     t->SetMarkerColor(trackCol);

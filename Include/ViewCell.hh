@@ -25,10 +25,11 @@ class ViewCell {
   /// Set the component for which to draw the cell geometry.
   void SetComponent(ComponentAnalyticField* comp);
 
-  // Set area to be plotted
+  /// Set the plot range explicitly.
   void SetArea(const double xmin, const double ymin, const double zmin, 
                const double xmax, const double ymax, const double zmax);
-  void SetArea();
+  ///  Take the plot range from the bounding box of the component class.
+  void SetArea() { m_hasUserArea = false; }
 
   /// Make a two-dimensional drawing of the cell geometry.
   void Plot2d();
@@ -37,7 +38,6 @@ class ViewCell {
 
   /// Switch on/off debugging output.
   void EnableDebugging(const bool on = true) { m_debug = on; }
-  void DisableDebugging() { EnableDebugging(false); }
 
   /// Visualize wirers using markers or as a circle with the actual wire radius.
   /// The default is markers.

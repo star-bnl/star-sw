@@ -15,23 +15,29 @@ namespace Garfield {
 class ViewDrift {
 
  public:
-  // Constructor
+  /// Constructor
   ViewDrift();
-  // Destructor
+  /// Destructor
   ~ViewDrift();
 
+  /// Set the canvas to be painted on.
   void SetCanvas(TCanvas* c);
 
-  // Set area to be plotted.
-  void SetArea(const double& xmin, const double& ymin, const double& zmin, 
-               const double& xmax, const double& ymax, const double& zmax);
+  /// Set the region to be plotted.
+  void SetArea(const double xmin, const double ymin, const double zmin, 
+               const double xmax, const double ymax, const double zmax);
+  /// Delete existing drift lines, tracks and markers.
   void Clear();
+
+  /// Draw the drift lines. 
   void Plot(const bool twod = false, const bool axis = true);
 
-  void SetClusterMarkerSize(const double& size);
-  void SetCollisionMarkerSize(const double& size);
+  /// Set the size of the cluster markers (see TAttMarker).
+  void SetClusterMarkerSize(const double size);
+  /// Set the size of the collision markers (see TAttMarker).
+  void SetCollisionMarkerSize(const double size);
 
-  // Functions to be used by transport classes.
+  // Functions used by the transport classes.
   void NewElectronDriftLine(const unsigned int np, int& id, const double x0,
                             const double y0, const double z0);
   void NewHoleDriftLine(const unsigned int np, int& id, const double x0,
@@ -55,8 +61,8 @@ class ViewDrift {
   void AddIonisationMarker(const double x, const double y, const double z);
   void AddAttachmentMarker(const double x, const double y, const double z);
 
-  void EnableDebugging() { m_debug = true; }
-  void DisableDebugging() { m_debug = false; }
+  /// Switch on/off debugging output.
+  void EnableDebugging(const bool on = true) { m_debug = on; }
 
   friend class ViewFEMesh;
 
@@ -66,9 +72,7 @@ class ViewDrift {
   // Options
   bool m_debug;
 
-  std::string m_label;
-
-  struct marker {
+  struct Marker {
     double x;
     double y;
     double z;
@@ -84,24 +88,21 @@ class ViewDrift {
   TView* m_view;
 
   struct driftLine {
-    std::vector<marker> vect;
+    std::vector<Marker> vect;
     int n;  // what kind of particle?
   };
   std::vector<driftLine> m_driftLines;
   std::vector<TPolyLine3D*> m_driftLinePlots;
 
-  struct track {
-    std::vector<marker> vect;
-  };
-  std::vector<track> m_tracks;
+  std::vector<std::vector<Marker> > m_tracks;
   std::vector<TPolyMarker3D*> m_trackPlots;
   std::vector<TPolyLine3D*> m_trackLinePlots;
 
-  std::vector<marker> m_excMarkers;
+  std::vector<Marker> m_excMarkers;
   TPolyMarker3D* m_excPlot;
-  std::vector<marker> m_ionMarkers;
+  std::vector<Marker> m_ionMarkers;
   TPolyMarker3D* m_ionPlot;
-  std::vector<marker> m_attMarkers;
+  std::vector<Marker> m_attMarkers;
   TPolyMarker3D* m_attPlot;
 
   double m_markerSizeCluster;

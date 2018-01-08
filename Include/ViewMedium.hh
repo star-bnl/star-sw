@@ -19,19 +19,25 @@ class Medium;
 class ViewMedium {
 
  public:
-  // Constructor
+  /// Constructor
   ViewMedium();
-  // Destructor
+  /// Destructor
   ~ViewMedium();
 
+  /// Set the canvas to be painted on.
   void SetCanvas(TCanvas* c);
-
+  // Set the medium from which to retrieve the transport coefficients.
   void SetMedium(Medium* m);
 
+  /// Set the limits of the electric field.
   void SetElectricFieldRange(const double emin, const double emax);
+  /// Set the limits of the magnetic field.
   void SetMagneticFieldRange(const double bmin, const double bmax);
+  /// Set the limits of the angle between electric and magnetic field.
   void SetBAngleRange(const double amin, const double amax);
+  /// Set the range of the function (velocity etc.) to be plotted. 
   void SetFunctionRange(const double vmin, const double vmax);
+  /// Use the default function range.
   void SetFunctionRange();
 
   void PlotElectronVelocity(const char xaxis, const double e, const double b,

@@ -210,7 +210,7 @@ bool GetElectronCollision(const double e, int& type, int& level,
   \item[e1]         electron energy after the collision
   \item[dx, dy, dz] incoming and outgoing direction
   \item[nion]       number of ``ionisation products'' 
-                    (i.~e. electrons and ions) 
+                    (\textit{i.\,e.} electrons and ions) 
                     created in the collision
   \item[ndxc]       number of ``deexcitation products'' 
                     created in the collision
@@ -446,7 +446,7 @@ int GetNumberOfElectronCollisions(int& nElastic, int& nIonising, int& nAttachmen
                                   int& nInelastic, int& nExcitation, int& nSuperelastic);
 int GetNumberOfElectronCollisions(const int level);
 \end{lstlisting}
-The first function returns total number of electron collisions (i.~e. calls 
+The first function returns total number of electron collisions (\textit{i.\,e.} calls 
 to \texttt{GetElectronCollisions}) since the last reset. 
 The second function additionally provides the number of collisions of each 
 cross-section category (elastic, ionising etc.). 
@@ -459,7 +459,7 @@ void ResetCollisionCounters();
 \subsubsection{Excitation Transfer}
 
 Penning transfer can be taken into account in terms of a transfer efficiency 
-\(r_{i}\), i.~e. the probability for an excited level \(i\) with an  
+\(r_{i}\), \textit{i.\,e.} the probability for an excited level \(i\) with an  
 excitation energy \(\epsilon_{i}\) exceeding the ionisation potential 
 \(\epsilon_{\text{ion}}\) of the mixture to 
 be ``converted'' to an ionisation.
@@ -584,7 +584,7 @@ void SetHighFieldMobilityModelCanali();
 void SetHighFieldMobilityModelReggiani();
 void SetHighFieldMobilityModelConstant();
   \end{lstlisting}
-  The last function requests a constant mobility (i.~e. linear dependence of the 
+  The last function requests a constant mobility (\textit{i.\,e.} linear dependence of the 
   velocity on the electric field). 
   The models activated by the other functions used the following expressions
   \begin{eqnarray*}

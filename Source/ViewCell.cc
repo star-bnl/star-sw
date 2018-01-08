@@ -81,8 +81,6 @@ void ViewCell::SetArea(const double xmin, const double ymin,
   m_hasUserArea = true;
 }
 
-void ViewCell::SetArea() { m_hasUserArea = false; }
-
 void ViewCell::Plot2d() {
 
   if (!Plot(false)) {
@@ -379,13 +377,18 @@ void ViewCell::PlotTube(const double x0, const double y0, const double r,
     return;
   }
 
-  TPolyLine* pline = new TPolyLine(n + 1);
+  double* x = new double[n + 1];
+  double* y = new double[n + 1];
   for (int i = 0; i <= n; ++i) {
-    const double x = x0 + r * cos(i * TwoPi / double(n));
-    const double y = y0 + r * sin(i * TwoPi / double(n));
-    pline->SetPoint(i, x, y);
+    const double phi = i * TwoPi / double(n);
+    x[i] = x0 + r * cos(phi);
+    y[i] = y0 + r * sin(phi);
   }
-  pline->Draw("same");
+  TPolyLine pline;
+  pline.SetDrawOption("same");
+  pline.DrawPolyLine(n + 1, x, y);
+  delete[] x;
+  delete[] y;
 }
 
 }
