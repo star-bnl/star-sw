@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.28 2017/12/19 17:19:59 jwebb Exp $
+* $Id: xgeometry.age,v 1.29 2018/01/09 17:11:32 jwebb Exp $
 
 
 
@@ -1892,6 +1892,9 @@ replace[;Case#{#;] with [
 * but the request for the next geometry should be saved in a temp. par arrray
    call ASLGETBA ('GEOM','DETP',1000,LL,Par); LL = (LL-1)*4;
    If (JVOLUM>0) call AGDROP ('*')
+
+   dcay={450,2000,0.1,0.01}
+   If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
 * -------------------- set GSTAR absolute default ------------------------
 * before parsing the request, set some default values:
@@ -3918,9 +3921,9 @@ If LL>0
 
 !// here Rxy & aZ for all STAR sensetive volumes
 !// when it is too much, use card like "DETP TRAC DCAY 210 210 0.1 0.01"
-   dcay={450,2000,0.1,0.01}
 
-   If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
+!  dcay={450,2000,0.1,0.01}
+!  If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
    if ( verbose ) {
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
@@ -4636,9 +4639,27 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.28 2017/12/19 17:19:59 jwebb Exp $
+* $Id: xgeometry.age,v 1.29 2018/01/09 17:11:32 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.29  2018/01/09 17:11:32  jwebb
+* The geometry is steered by a set of user commands, input using the DETP
+* facility, e.g.
+*
+*    DETP GEOM y2014a field=-5.0 gcalor_on=1 ...
+*
+* In AgML 1, the list of commands was iterated over.  Each command which was
+* recognized resulted in several variables being set, which would steer the
+* execution of the geometry modules at a later point in the code.
+*
+* Prior to executing the modules, a volume was defined where secondary
+* tracks would be saved.
+*
+* With AgML 2, the geometry tag is executed during the loop as soon as it is
+* recognized.  Thus, the definition of the volume where secondardies are
+* saved has to be moved earlier in the code.
+*
 * Revision 1.28  2017/12/19 17:19:59  jwebb
+*
 * EPD test tags deprecated.  y2018x defined.
 *
 * Revision 1.27  2017/11/13 19:15:09  jwebb
