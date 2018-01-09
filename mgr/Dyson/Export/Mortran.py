@@ -484,8 +484,19 @@ class Setup( Handler ):
             formatter( "  Write(*,*) '%12s [%20s] : %80s'"%(self.name,self.module,self.comment) )
         
             name = self.parent.name.upper()
-            formatter( "Call AgDetp NEW('%s')"%name )
 
+            # 
+            # Configuration of more top level flags.  Must be performed prior
+            # to creating the NEW detector bank for the module, otherwise
+            # this flag is reset to default.
+            #
+            for flag,value in self.flags.iteritems():
+                formatter("   CALL Agsflag('%s',%i)"%(flag,value))
+
+            #
+            # Configuration of detector parameters
+            # 
+            formatter( "Call AgDetp NEW('%s')"%name )
             for i in self.inits:
                 value = i.value
                 value = value.strip('{}')
@@ -501,8 +512,6 @@ class Setup( Handler ):
         formatter("ENTRY construct_%s"%self.name)
         # Setup flags
         formatter("IF address.le.0 { return; }")
-        for flag,value in self.flags.iteritems():
-            formatter("   CALL Agsflag('%s',%i)"%(flag,value))
         # Call the module stored during setup
         formatter("   CALL CsjCal(address,0, 0,0,0,0,0, 0,0,0,0,0)" )
         formatter("RETURN")        
