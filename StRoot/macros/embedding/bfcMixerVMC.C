@@ -75,7 +75,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   chain3Opt += ",BEmcMixer,EEmcMixer";
 #if 1
   StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
-  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
+  //  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
   chain3Opt += ",btofMixer"; 
 #endif 
 #endif 
@@ -155,7 +155,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
 }
 //________________________________________________________________________________
 void bfcMixerVMC(Int_t Last=1, const Char_t *opt = "Vmc,Lc3pi,VMCAlignment",
-#if 1
+#if 0
 		 const Char_t *daqfile="/star/data03/daq/2016/125/17125034/st_physics_adc_17125034_raw_1000007.daq",
 		 const Char_t *MuDstfile="/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/st_physics_adc_17125034_raw_1000007.MuDst.root",
 #else

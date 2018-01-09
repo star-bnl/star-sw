@@ -119,7 +119,7 @@ public:
   void                DumpHftHits(); // dump HFT hit into TTree
   static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
   static void HitCounts(StHit *hit, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, UInt_t Flag = 0);
-  static void PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit);
+  static void PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, const Char_t *title = "Used in Fit");
   static void PrintStEvent(TString opt="vpgl3");
   static void PrintVertex(Int_t ivx = -1);
   static void PrintGlobalTrack(Int_t itk = 0);

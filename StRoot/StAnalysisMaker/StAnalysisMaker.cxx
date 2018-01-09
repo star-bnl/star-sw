@@ -714,13 +714,13 @@ void StAnalysisMaker::HitCounts(StHit *hit, UInt_t &TotalNoOfHits, UInt_t &noBad
   }
 }
 //________________________________________________________________________________
-void StAnalysisMaker::PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit) {
+void StAnalysisMaker::PrintHitCounts(const Char_t *name, UInt_t &TotalNoOfHits, UInt_t &noBadHits, UInt_t &noHitsUsedInFit,  UInt_t &TotalNoOfMcHits, UInt_t &noMcHitsUsedInFit, const Char_t *title) {
   LOG_QA   << "# " << name << " hits:          " << TotalNoOfHits 
 	   << ":\tBad ones (! flag):     " << noBadHits 
-	   << ":\tUsed in Fit:      " << noHitsUsedInFit;
+	   << ":\t" << title << ":      " << noHitsUsedInFit;
   if (TotalNoOfMcHits > 0 && (TotalNoOfHits != TotalNoOfMcHits || noHitsUsedInFit != noMcHitsUsedInFit)) {
     LOG_QA  << ":\tMc " << TotalNoOfMcHits
-	    << ":\tUsed in Fit:      " << noMcHitsUsedInFit;
+	    << ":\t" << title << ":      " << noMcHitsUsedInFit;
   }
   LOG_QA << endm;
 }
@@ -1166,13 +1166,20 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     const StSPtrVecBTofHit& tofHits = tof->tofHits();
     if (tofHits.size()) {
       Int_t n = tofHits.size();
-      Int_t m = 0;
+      //      Int_t m = 0;
+      TotalNoOfHits = noBadHits = noHitsUsedInFit = TotalNoOfMcHits = noMcHitsUsedInFit = 0;
       for(Int_t i=0;i<n;i++) { //loop on hits in modules
 	StBTofHit *aHit = tofHits[i];
 	if(!aHit) continue;
-	if (aHit->associatedTrack()) m++;
+	TotalNoOfHits++;
+	if (aHit->associatedTrack()) noHitsUsedInFit++;
+	if (aHit->idTruth()) {
+	  TotalNoOfMcHits++;
+	  if (aHit->associatedTrack()) noMcHitsUsedInFit++;
+	}
       }
-      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
+      PrintHitCounts("BTof",TotalNoOfHits, noBadHits, noHitsUsedInFit,  TotalNoOfMcHits, noMcHitsUsedInFit, " Matched with tracks");
+      //      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
     }
   }
   const StMtdCollection* mtd = event->mtdCollection();

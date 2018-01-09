@@ -305,11 +305,14 @@ void StBTofHitMaker::fillBTofRawHitCollection()
 void StBTofHitMaker::fillBTofHeader()
 {
   /// fill the Tof header
-  StBTofHeader *tofHeader = new StBTofHeader();
+  StBTofHeader *tofHeader = mBTofCollection->tofHeader();
+  if (! tofHeader) {
+    tofHeader = new StBTofHeader();
+    mBTofCollection->setHeader(tofHeader);
+  }
   for(int i=0;i<4;i++)
     tofHeader->setTriggerTime(mTriggerTimeStamp[i], i);
   // others
-  mBTofCollection->setHeader(tofHeader);
 }
 //____________________________________________
 /*!

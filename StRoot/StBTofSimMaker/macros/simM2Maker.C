@@ -1,4 +1,4 @@
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "TSystem.h"
 #include "TBrowser.h"
 #include "TBenchmark.h"

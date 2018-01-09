@@ -1623,14 +1623,16 @@ Bfc_st BFC[] = { // standard chains
   {"btof"       ,"","","btofDat,vpdCalib,btofMatch,btofCalib"                   ,"","","BTOF Chain",kFALSE},
   {"BtofDat"   ,"tof_raw","","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    ,                                                                               "BTOF hit maker",kFALSE},
+#if 0
   {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    ,                                                                                "Vpd Simulator",kFALSE},
+#else
+  {"vpdSim"    ,"","","","",""   ,                                           "ignore Vpd Simulator",kFALSE},
+#endif
   {"btofSim" ,"","","BTofUtil,vpdSim"  ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"vpdCalib","","","db,BTofUtil,-vpdSim","StVpdCalibMaker"    ,"StVpdCalibMaker","VPD calibration",kFALSE},
   //  {"btofSim" ,"","","BTofUtil,vpdSim,UseMCTstart"  ,"StBTofSimMaker",
-  {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
-   ,                                                                                   "BTof Mixer",kFALSE},
   // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","","","StMtdSimMaker,StEvent",                   "StMtdSimMaker","MTD Simulator",kFALSE},
   // Time Of Flight related options
@@ -1648,6 +1650,12 @@ Bfc_st BFC[] = { // standard chains
   {"tofpMatch"   ,"","","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
    "TPC to TOFp track matching",                                                                    kFALSE},
   {"tofCalib"   ,"","","db,TofUtil",        "StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
+#if 1
+  {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
+   ,                                                                                   "BTof Mixer",kFALSE},
+#else
+  {"btofMixer"    ,"","","","",""                                               "ignore BTof Mixer",kFALSE},
+#endif
   // Filtering - all filters will have the pattern "FiltXXX"
   {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
    "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",                                   kFALSE},
