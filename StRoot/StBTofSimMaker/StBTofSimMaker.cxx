@@ -230,10 +230,8 @@ Int_t StBTofSimMaker::Make()
     for(Int_t i=0; i<nvpdhits; i++, vpd_hit++) {
       VpdResponse(vpd_hit);
     }
+    LOG_INFO << " McBTofHit Size (VPD) = " << mMcBTofHitCollection->hits().size() << endm;
   }  
-  LOG_INFO << " McBTofHit Size (VPD) = " << mMcBTofHitCollection->hits().size() << endm;
-  
-  
   // Look for TOF hits
   St_g2t_ctf_hit* g2t_tfr_hits = 0;
   g2t_tfr_hits = dynamic_cast<St_g2t_ctf_hit*> (mGeantData->Find("g2t_tfr_hit"));
@@ -651,7 +649,7 @@ Int_t StBTofSimMaker::fillEvent()
   }
   if(mBTofCollection) {
     TObjectSet *set = new TObjectSet("BTofSimCollection");
-    AddData(set);;
+    AddData(set);
     mBTofCollection = new StBTofCollection();
     set->SetObject(mBTofCollection);
     mIsEmbedding = kTRUE;
