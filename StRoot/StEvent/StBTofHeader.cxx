@@ -40,7 +40,7 @@ StBTofHeader::StBTofHeader()
     }
     for(int i=0; i<2; i++) mVpdHitPattern[i] = 0;
     for(int i=0; i<MAXVPDVZ; i++) mVpdVz[i] = -999.;
-    mTStart = 0.;
+    mTStart = -9999.;
     mTStartErr = 0.;
     mTDiff = -999.;
     for(int i=0; i<2; i++)
