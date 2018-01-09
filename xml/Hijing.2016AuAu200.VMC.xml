@@ -6,11 +6,11 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
-  setenv NODEBUG yes
-  setup 64b
-#  starver .DEV2 
+#  setenv NODEBUG yes
+#  setup 64b
+  starver .DEV2 
 #  starver TFG17u 
-  starver TFG17v 
+#  starver TFG17v 
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
@@ -30,7 +30,7 @@
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,-bbcSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160504.180732","'${file}'")' &gt;&amp; ${logName}
 #    root.exe -q -b -x 'bfc.C(1000,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA,-hitfilt,StiHftC,geantOut,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco,sdt20160511,ZCut5cm","'${file}'")' &gt;&amp; ${logName}
-    root.exe -q -b -x 'bfc.C(100,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA'${KFVertex}',-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm","'${file}'")' &gt;&amp; ${logName}
+    root.exe -q -b -x 'bfc.C(10,"genIn,MC.2016a,istSlowSim,-bbcSim,StiCA'${KFVertex}',-hitfilt,StiHftC,-geantOut,-evout,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,NoHistos,noTags,noRunco'${sdt}',ZCut5cm","'${file}'")' &gt;&amp; ${logName}
   endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" /> -->

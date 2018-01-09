@@ -23,7 +23,7 @@ foreach gcc (${list})
       setup ${gcc}
       setup ${bit}
       starver ${STAR_LEVEL}
-      time cons -k >& build.${gcc}.${opt}.${bit}.`date +%Y%m%d%y:%H%M`.log &
+      time cons -k >& build.${gcc}.${opt}.${bit}.`date +%m%d%y:%H%M`.log &
     end
   end
 end

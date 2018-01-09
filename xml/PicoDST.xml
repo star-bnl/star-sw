@@ -24,9 +24,10 @@
       set dir      = `echo ${input} | awk -F\: '{print $1}'`
       set tag      = `echo ${input} | awk -F\: '{print $2}'`
     else
-      exit 1;
+      set dir = `dirname ${input}`;
+      set tag = `basename ${input} .MuDst.root`;
     endif
-    set log = ${tag}B.log
+    set log = ${tag}C.log
 #  if (-r ${log}) exit 0;
     if (! -r "${tag}.picoDst.root") then
 #      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
@@ -39,5 +40,6 @@
     </ResourceUsage>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="command:PicoDST.pl" />
+<!-- <input URL="command:PicoDST.pl" /> -->
+<input URL="file:/net/l404/data/fisyak/reco/2016/Embedding/D0KpimTsq.TFG17i/*MuDst.root" />
 </job>
