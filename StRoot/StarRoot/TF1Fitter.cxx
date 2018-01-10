@@ -3,9 +3,7 @@
 
 //static Color_t gMyColors[] = {kRed,kBlue,kGreen,kMagenta,kCyan};
 //_____________________________________________________________________________
-
-
-TF1Fitter::TF1Fitter(const char *name,int nPars):TF1(name, static_cast<DummyFuncPtr_t>(nullptr), 0,0,nPars)
+TF1Fitter::TF1Fitter(const char *name,int nPars):TF1(name,(void*)0,0,0,nPars) 
 {
 fMean=0; fSigm=0;fTH1 = 0;
 }
@@ -19,7 +17,7 @@ void TF1Fitter::Copy(TObject& f1) const
 //_____________________________________________________________________________
 double TF1Fitter::operator()(const double* x, const double* params)
 {
-  if (!params) params = GetParameters();
+  if (!params) params = fParams;
   return EvalPar(x,params);
 }
 //_____________________________________________________________________________
@@ -73,11 +71,11 @@ static const double SQR2 = sqrt(2.);
    SetParameter(0,fMean);
    SetParameter(1,fSigm);
    SetParameter(2,gral/erf);
-   double xLow = GetParameters()[0]-9*GetParameters()[1];
-   double xUpp = GetParameters()[0]+9*GetParameters()[1];
+   double xLow = fParams[0]-9*fParams[1];
+   double xUpp = fParams[0]+9*fParams[1];
    SetParLimits(0,xLow,xUpp);
-   SetParLimits(1,GetParameters()[1]*0.1,GetParameters()[1]*10);
-   SetParLimits(2,             0,GetParameters()[2]*10);
+   SetParLimits(1,fParams[1]*0.1,fParams[1]*10);
+   SetParLimits(2,             0,fParams[2]*10);
 }
 
 
@@ -112,18 +110,18 @@ static const double SQR2 = sqrt(2.);
    SetParameter(0,fMean);
    SetParameter(1,fSigm);
    SetParameter(2,gral/erf);
-   double xLow = GetParameters()[0]-9*GetParameters()[1];
-   double xUpp = GetParameters()[0]+9*GetParameters()[1];
+   double xLow = fParams[0]-9*fParams[1];
+   double xUpp = fParams[0]+9*fParams[1];
    SetParLimits(0,xLow,xUpp);
-   SetParLimits(1,GetParameters()[1]*0.1,GetParameters()[1]*10);
-   SetParLimits(2,             0,GetParameters()[2]*10);
+   SetParLimits(1,fParams[1]*0.1,fParams[1]*10);
+   SetParLimits(2,             0,fParams[2]*10);
 
    SetParameter(3,fMean);
    SetParameter(4,fSigm);
    SetParameter(5,0.1);
 
    SetParLimits(3,xLow,xUpp);
-   SetParLimits(4,0,GetParameters()[1]*10);
+   SetParLimits(4,0,fParams[1]*10);
    SetParLimits(5,0,1);
 
 }
@@ -158,11 +156,11 @@ static const double SQR2 = sqrt(2.);
    SetParameter(0,fMean);
    SetParameter(1,fSigm);
    SetParameter(2,gral/erf);
-   double xLow = GetParameters()[0]-9*GetParameters()[1];
-   double xUpp = GetParameters()[0]+9*GetParameters()[1];
+   double xLow = fParams[0]-9*fParams[1];
+   double xUpp = fParams[0]+9*fParams[1];
    SetParLimits(0,xLow,xUpp);
-   SetParLimits(1,GetParameters()[1]*0.1,GetParameters()[1]*10);
-//    SetParLimits(2,             0,GetParameters()[2]*10);
+   SetParLimits(1,fParams[1]*0.1,fParams[1]*10);
+//    SetParLimits(2,             0,fParams[2]*10);
 //    SetParLimits(3,      0,999999);
 //    SetParLimits(5,-999999,     0);
 
