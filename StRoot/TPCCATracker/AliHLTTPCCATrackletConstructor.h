@@ -22,7 +22,7 @@ class AliHLTTPCCATrackletConstructor {
   AliHLTArray<TrackletVector> trackletVectors )
     : fTracker( tracker ), fTrackletVectors( trackletVectors ), fData( data ) {}
 
-  void run( unsigned int firstRow, unsigned int &tracksSaved );
+  void run();
 
   struct TrackMemory;
  private:
@@ -35,10 +35,7 @@ class AliHLTTPCCATrackletConstructor {
   int_m ExtrapolateTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex, TrackletVector &trackletVector, const bool dir, const int_m &mask );
 
     // performs both: fitTraclet & Extrapolation
-  int_m ExtendTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex, TrackletVector &trackletVector, const bool dir, const int_m &mask );
-
-    // new
-  void CreateStartSegmentV( const int rowIndex, const int iter );
+  int_m ExtendTracklet( TrackMemory &r, const int rowIndex, const uint_v trackIndex, TrackletVector &trackletVector, const bool dir, const int_m &mask ); 
 
   Tracker &fTracker;
   AliHLTArray<TrackletVector> fTrackletVectors;

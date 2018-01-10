@@ -239,7 +239,11 @@ namespace AliHLTInternal
   {
       friend class ArrayBase<T, 2>;
     public:
-      ArrayBase() : fData( 0 ) {} // XXX really shouldn't be done. But -Weffc++ wants it so
+      ArrayBase() : 
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
+	ArrayBoundsCheck(), 
+#endif
+	fData( 0 ), fSize(0) {} // XXX really shouldn't be done. But -Weffc++ wants it so
       ArrayBase( const ArrayBase &rhs ) : ArrayBoundsCheck( rhs ), fData( rhs.fData ), fSize( rhs.fSize ) {} // XXX
       ArrayBase &operator=( const ArrayBase &rhs ) { ArrayBoundsCheck::operator=( rhs ); fData = rhs.fData; fSize = rhs.fSize; return *this; } // XXX
       typedef typename ReturnTypeHelper<T>::Type R;
@@ -594,8 +598,10 @@ namespace AliHLTInternal
   inline AliHLTArray<T, 1> ArrayBase<T, 2>::operator[]( int x )
   {
     x *= fStride;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 1> AT1;
     BOUNDS_CHECK( x, AT1() );
+#endif
     AliHLTArray<T, 1> a;
     a.fData = &fData[x];
     a.ArrayBoundsCheck::operator=( *this );
@@ -607,8 +613,10 @@ namespace AliHLTInternal
   inline const AliHLTArray<T, 1> ArrayBase<T, 2>::operator[]( int x ) const
   {
     x *= fStride;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 1> AT1;
     BOUNDS_CHECK( x, AT1() );
+#endif
     AliHLTArray<T, 1> a;
     a.fData = &fData[x];
     a.ArrayBoundsCheck::operator=( *this );
@@ -632,8 +640,10 @@ namespace AliHLTInternal
   inline AliHLTArray<T, 2> ArrayBase<T, 3>::operator[]( int x )
   {
     x *= fStrideX;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 2> AT2;
     BOUNDS_CHECK( x, AT2() );
+#endif
     AliHLTArray<T, 2> a;
     a.fData = &fData[x];
     a.fStride = fStrideY;
@@ -645,8 +655,10 @@ namespace AliHLTInternal
   inline const AliHLTArray<T, 2> ArrayBase<T, 3>::operator[]( int x ) const
   {
     x *= fStrideX;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 2> AT2;
     BOUNDS_CHECK( x, AT2() );
+#endif
     AliHLTArray<T, 2> a;
     a.fData = &fData[x];
     a.fStride = fStrideY;

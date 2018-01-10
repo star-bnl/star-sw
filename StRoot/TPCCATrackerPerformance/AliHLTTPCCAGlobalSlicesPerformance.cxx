@@ -144,7 +144,7 @@ void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
 
   for ( int iMCTr = 0; iMCTr < nMCTracks; iMCTr++ ) {
     AliHLTTPCCAPerformanceMCTrackData &mc = mcData[iMCTr];
-//    if ( !mc.IsReconstructable() ) continue;
+    if ( !mc.IsReconstructable() ) continue;
     const bool reco = mc.IsReconstructed();
     const int clones = mc.GetNClones();
 

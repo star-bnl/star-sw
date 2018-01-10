@@ -50,14 +50,7 @@ class AliHLTTPCCAMergedTrack
       fOuterAlpha = t.OuterAlpha();
       fFirstClusterRef = firstClusterRef;
       fNClusters = t.NClusters();
-      // ---
-      tIsMerged = false;
-      // ---
     }
-    // ---
-    void SetMerged() { tIsMerged = true; }
-    bool IsMerged() const { return tIsMerged; }
-    // ---
   
   private:
 
@@ -67,9 +60,6 @@ class AliHLTTPCCAMergedTrack
     float fOuterAlpha;               //* alpha angle for the outer parameters
     int fFirstClusterRef;            //* index of the first track cluster in corresponding cluster arrays
     int fNClusters;                  //* number of track clusters
-    // ---
-    bool tIsMerged;
-    // ---
 };
 
 

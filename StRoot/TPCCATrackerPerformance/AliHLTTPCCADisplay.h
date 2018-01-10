@@ -59,7 +59,6 @@ class AliHLTTPCCADisplay
     void Init();
     void Update();
     void ClearView();
-    void ClearViewPT();
     void Ask();
     void SetSliceView();
     void SetTPCView();
@@ -75,7 +74,6 @@ class AliHLTTPCCADisplay
     int GetColorK( double k ) const ;
     void Global2View( double x, double y, double *xv, double *yv ) const ;
     void Slice2View( double x, double y, double *xv, double *yv ) const ;
-    void Slice2ViewPT( double x, double y, double z, double *phi, double *teta ) const ;
     int GetTrackMC( const AliHLTTPCCADisplayTmpHit *vHits, int NHits );
   
 
@@ -110,13 +108,9 @@ class AliHLTTPCCADisplay
     void DrawGBHits( const AliHLTTPCCAGBTracker &tracker, int color = -1, Size_t width = -1, int hitsType = -1 );
 
     void DrawSliceHit( int iRow, int iHit, int color = -1, Size_t width = -1 );
-    void DrawSliceHitPT( int iRow, int iHit, int color = -1, Size_t width = -1 );
     void DrawSliceHits( int color = -1, Size_t width = -1 );
-    void DrawSliceHitsPT( int color = -1, Size_t width = -1 );
     void DrawSliceLinks( int colorUp = -1, int colorDn = -1, int width = -1 );
-    void DrawSliceLinksPT( int colorUp = -1, int colorDn = -1, int width = -1 );
     void DrawSliceLink( int iRow, int iHit, int colorUp = -1, int colorDn = -1, int width = -1 );
-    void DrawSliceLinkPT( int iRow, int iHit, int colorUp = -1, int colorDn = -1, int width = -1 );
 
 #ifdef XXXX
 
@@ -133,10 +127,6 @@ class AliHLTTPCCADisplay
         
     TPad *CanvasYX() { return fYX; }
     TPad *CanvasZX() { return fZX; }
-
-    // ---
-    TPad *CanvasPT() { return fPT; }
-    // ---
 
 
 /// IKu some new functional. Supposed to be usefull.
@@ -176,10 +166,6 @@ class AliHLTTPCCADisplay
     float x, y, z;    // sector coor.
     float alpha; 
     float gx, gy, gz; // global coor.
-    // ---
-    int slice;
-    int row;
-    // ---
     
    private:
     TMarker& GetMarker();
@@ -196,12 +182,6 @@ class AliHLTTPCCADisplay
     void DrawHitsLocal(int iSlice);
     void DrawHitsGlobal();
     
-    // ---
-    void DrawGlobalPT();// draw in global coor
-    void DrawGlobalTpad();// draw in global coor
-    void DrawGlobalPpad();// draw in global coor
-    // ---
-
       // draw adjustment
     void SetHitsColor(int c);  // set color for all hits
     void SetHitsWidth(float w);
@@ -223,12 +203,6 @@ class AliHLTTPCCADisplay
   void SpecDrawHitsFromMCTrackLocal(int iMC, const AliHLTResizableArray<AliHLTTPCCAHitLabel>* hitLabels, int iSlice);
 
   void SpecDrawRecoTrackGlobal( int iTr, int color = kBlue, float width = 0.5);
-
-  // ---
-  void SpecDrawRecoTrackGlobalPT( int iTr, int color = kBlue, float width = 0.5 );
-  void SpecDrawMCTrackGlobalPT( AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray, int color, float width );
-  void SaveCanvasToFilePT( TString fileName);
-  // ---
  public:
 /// ENDOF IKu
 
@@ -260,11 +234,6 @@ class AliHLTTPCCADisplay
   bool fDrawOnlyRef; // draw only clusters from ref. mc tracks
 
   int fDrawType; // what to draw, used from tracker. Values 1,2,3 is used.
-
-  // --- For PhiTeta tests ---
-  TCanvas *fCanvasPT;
-  TPad *fPT;
-  // ---
 
   private:
     AliHLTTPCCADisplay( const AliHLTTPCCADisplay& );

@@ -9,7 +9,6 @@
 #include "AliHLTTPCCATracker.h"
 #include "AliHLTTPCCAHitArea.h"
 #include <iostream>
-#include <queue>
 using std::cout;
 using std::endl;
 
@@ -33,7 +32,6 @@ class AliHLTTPCCATracker::NeighboursFinder
   
   private:
     void executeOnRow( int rowIndex ) const;
-    void executeOnRowV1( int rowIndex ) const;
 
     AliHLTTPCCATracker *fTracker;
     SliceData &fData;
@@ -129,8 +127,9 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     // #define DRAW_NEIGHBOURSFINDING
     // #endif
   
-//  STATIC_ASSERT( int_v::Size % float_v::Size == 0, Short_Vector_Size_is_not_a_multiple_of_Float_Vector_Size );
-  for ( unsigned int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
+  STATIC_ASSERT( int_v::Size % float_v::Size == 0, Short_Vector_Size_is_not_a_multiple_of_Float_Vector_Size );
+
+  for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
 
 #ifdef DRAW_NEIGHBOURSFINDING
     float_v neighUpY[kMaxN];
@@ -199,10 +198,9 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     uint_m nextMask;
     HitArea areaDn( rowDn, fData, yDn, zDn, -DnDx*kAreaSizeY, -DnDx*kAreaSizeZ, validHitsMask );
     while ( !( nextMask = areaDn.GetNext( &neighDn ) ).isEmpty() ) {
-      if ( ISUNLIKELY( ((uint_v(Vc::Zero) < maxUpperNeighbourIndex) && neighDn.fValid).isEmpty() ) ) continue; // no both neighbours
-      
-      assert( (neighDn.fLinks < rowDn.NUnusedHits() || !neighDn.fValid).isFull() );
 
+      if ( ISUNLIKELY( ((uint_v(Vc::Zero) < maxUpperNeighbourIndex) && neighDn.fValid).isEmpty() ) ) continue; // no both neighbours
+      assert( (neighDn.fLinks < rowDn.NUnusedHits() || !neighDn.fValid).isFull() );
       nNeighDn++;
 #ifdef DRAW_NEIGHBOURSFINDING
       float_v neighDnY = neighDn.fY;
@@ -238,22 +236,17 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
         AliHLTTPCCADisplay::Instance().Ask();
 #endif
         const float_v d = dy * dy + dz * dz;
-// WRONG NEIGHBOURS DOWU EXCLUDING FIRST - FIXED
         masksf &= d < bestD;
         bestD( masksf ) = d;
         const int_m masks( masksf );
         dnMask |= masks;
-//        bestUp( masks ) = static_cast<int_v>(neighUp[i].fLinks);
-        bestUp( masks ) = neighUp[i].fLinks;
+        bestUp( masks ) = static_cast<int_v>(neighUp[i].fLinks);
         debugS() << "best up: " << masks << " " << bestUp << std::endl;
       }
-//      bestDn( dnMask ) = static_cast<int_v>(neighDn.fLinks);
-      bestDn( dnMask ) = neighDn.fLinks;
+      bestDn( dnMask ) = static_cast<int_v>(neighDn.fLinks);
       debugS() << "best down: " << dnMask << " " << bestDn << std::endl;
     }
-
     assert( (bestD < chi2Cut || float_m( bestUp == -1 && bestDn == -1 )).isFull() );
-
     debugS() << "Set Link Data: Up = " << bestUp << ", Down = " << bestDn << std::endl;
 
       // store the link indexes we found
@@ -272,245 +265,6 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
 // #endif
   } // for hitIndex
 
-}
-
-
-inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRowV1( int rowIndex ) const
-{
-  // references to the rows above and below
-  const int rowStep = AliHLTTPCCAParameters::RowStep;
-
-  if( rowIndex < rowStep ) {
-    std::cout<<" - ERROR! Wrong rowIndex: "<<rowIndex<<"; rowStep: "<<rowStep<<"\n";
-    return;
-  }
-
-  const AliHLTTPCCARow &row = fData.Row( rowIndex );
-
-  const AliHLTTPCCARow &rowUp = fData.Row( rowIndex + rowStep );
-  const AliHLTTPCCARow &rowDn = fData.Row( rowIndex - rowStep );
-
-
-  const int numberOfHits = row.NUnusedHits();
-  const int numberOfHitsUp = rowUp.NUnusedHits();
-  const int numberOfHitsDown = rowDn.NUnusedHits();
-  if ( numberOfHits == 0 ) {
-    debugS() << "no hits in this row" << std::endl;
-    return;
-  }
-  if ( numberOfHitsDown == 0 || numberOfHitsUp == 0 ) {
-    debugS() << "no hits in neighbouring rows" << std::endl;
-    return;
-  }
-
-  // the axis perpendicular to the rows
-  const float xDn = fData.RowX( rowIndex - rowStep );
-  const float x   = fData.RowX( rowIndex     );
-  const float xUp = fData.RowX( rowIndex + rowStep );
-
-  // distance of the rows (absolute and relative)
-  const float UpDx = xUp - x;
-  const float DnDx = xDn - x;
-  const float UpTx = xUp / x;
-  const float DnTx = xDn / x;
-
-  static const float kAreaSizeY = AliHLTTPCCAParameters::NeighbourAreaSizeTgY[fIter];
-  static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[fIter];
-  static const int kMaxN = 20; // TODO minimaze
-
-  const float chi2Cut = AliHLTTPCCAParameters::NeighbourChiCut[fIter]*AliHLTTPCCAParameters::NeighbourChiCut[fIter] * 4.f * ( UpDx * UpDx + DnDx * DnDx );
-
-  std::vector<unsigned int> hits0, hits1, hits2, hits2temp;
-
-  unsigned int iH1 = 0;
-  unsigned int cH = 0;
-  unsigned int bestH[3];
-  bool emptyN(true);
-  float dMin = std::numeric_limits<float>::max();
-    if( hits2.size() == 0 && iH1 >= numberOfHits ) return;	//TODO check this
-    do {
-//      if( iH1 == numberOfHits ) break;	//TODO check do we need this
-      //TODO put used condition here for collecting neighboring triplets if possible
-
-      float y, z, yUp, zUp, yDn, zDn;
-
-      y = fData.UnusedHitPDataY( row, iH1 );
-      z = fData.UnusedHitPDataZ( row, iH1 );
-      yDn = y * DnTx; // TODO change name
-      zDn = z * DnTx;
-      yUp = y * UpTx; // suppose vertex at (0,0,0)
-      zUp = z * UpTx;
-      //
-      const float minYDn = yDn + DnDx*kAreaSizeY;
-      const float maxYDn = yDn - DnDx*kAreaSizeY;
-      float minZDn(zDn), maxZDn(zDn);
-      if( minZDn > 0 ) minZDn += 0.1*DnDx*kAreaSizeZ;
-      else minZDn += DnDx*kAreaSizeZ;
-      if( maxZDn < 0 ) maxZDn -= 0.1*DnDx*kAreaSizeZ;
-      else maxZDn -= DnDx*kAreaSizeZ;
-      //
-//      HitAreaScalar areaDn( rowDn, rowIndex - rowStep, fData, yDn, zDn, -DnDx*kAreaSizeY, -DnDx*kAreaSizeZ );
-      HitAreaScalar areaDn( rowDn, rowIndex - rowStep, fData, minYDn, minZDn, maxYDn, maxZDn );
-//      std::cout<<"AreaDn: Row: "<<rowIndex - rowStep<<";   Y: "<<yDn<<";   Z: "<<zDn<<";   dy: "<<-DnDx*kAreaSizeY<<";   dz: "<<-DnDx*kAreaSizeZ<<"\n";
-      int imh0 = 0;
-      int imh2 = 0;
-      int dnN = 0;
-      bool firstIteration(true);
-      while( areaDn.GetNext(imh0) ) {
-	dnN++;
-	if( dnN > 20 ) break;
-//	if( fabs(fData.UnusedHitPDataZ( rowDn, imh0 ) - z) > fabs(DnDx*kAreaSizeZ) ) continue;	// -0.5% efficiency; nice speedup
-	if( fabs(fData.UnusedHitPDataZ( rowDn, imh0 ) - z) > fabs(DnDx*kAreaSizeZ) && fabs(fData.UnusedHitPDataZ( rowDn, imh0 )) > fabs(z) ) continue;	// does not decrease efficieny; low speedup
-//	if( fabs(fData.UnusedHitPDataY( rowDn, imh0 ) - y) > fabs(DnDx*kAreaSizeY) ) continue;
-//	float tY = y + y - fData.UnusedHitPDataY( rowDn, imh0 );
-//	float tZ = z + z - fData.UnusedHitPDataZ( rowDn, imh0 );
-	if(firstIteration) {
-	  float tY = y + y - fData.UnusedHitPDataY( rowDn, imh0 );
-	  float tZ = z + z - fData.UnusedHitPDataZ( rowDn, imh0 );
-	  const float minYUp = tY - UpDx*kAreaSizeY;
-	  const float maxYUp = tY + UpDx*kAreaSizeY;
-	  float minZUp(tZ), maxZUp(tZ);
-	  if( minZUp > 0 ) minZUp -= 0.1*UpDx*kAreaSizeZ*0.7;
-	  else minZUp -= UpDx*kAreaSizeZ*0.7;
-	  if( maxZUp < 0 ) maxZUp += 0.1*UpDx*kAreaSizeZ*0.7;
-	  else maxZUp += UpDx*kAreaSizeZ*0.7;
-	  //
-//	  HitAreaScalar areaUp( rowUp, rowIndex + rowStep, fData, yUp, zUp, UpDx*kAreaSizeY, UpDx*kAreaSizeZ );
-//	  HitAreaScalar areaUp( rowUp, rowIndex + rowStep, fData, tY, tZ, UpDx*kAreaSizeY, UpDx*kAreaSizeZ*0.7 );
-	  HitAreaScalar areaUp( rowUp, rowIndex + rowStep, fData, minYUp, minZUp, maxYUp, maxZUp );
-	  int upN = 0;
-	  while( areaUp.GetNext(imh2) ) {
-	    hits2.push_back(imh2);
-	    hits1.push_back(iH1);
-	    hits0.push_back(imh0);
-	    hits2temp.push_back(imh2);
-	    upN++;
-	    if( hits1.size() == float_v::Size ) {
-	      float_v Y0, Y1, Y2, Z0, Z1, Z2;
-	      fData.GetHitCoordinateVectors( rowDn, hits0, &Y0, &Z0 );
-	      fData.GetHitCoordinateVectors( row, hits1, &Y1, &Z1 );
-	      fData.GetHitCoordinateVectors( rowUp, hits2, &Y2, &Z2 );
-	      Y2 = DnDx * ( Y2 - Y1 );
-	      Z2 = DnDx * ( Z2 - Z1 );
-	      Y0 = UpDx * ( Y0 - Y1 );
-	      Z0 = UpDx * ( Z0 - Z1 );
-	      Y2 = Y0 - Y2;
-	      Z2 = Z0 - Z2;
-	      const float_v d = Y2 * Y2 + Z2 * Z2;
-	      for( int ii = 0; ii < float_v::Size; ii++ ) {
-		if( hits1[ii] == cH ) {
-		  if( dMin > d[ii] ){
-		    dMin = d[ii];
-		    bestH[0] = hits0[ii];
-		    bestH[1] = hits1[ii];
-		    bestH[2] = hits2[ii];
-		    emptyN = false;
-		  }
-		}
-		else {
-		  if( !emptyN ) {
-		      if( dMin < chi2Cut ) fData.SetUnusedHitLinkDataScalar( row, rowUp, rowDn, bestH );
-		      dMin = std::numeric_limits<float>::max();
-		  }
-		  dMin = d[ii];
-		  cH = hits1[ii];
-		  bestH[0] = hits0[ii];
-		  bestH[1] = hits1[ii];
-		  bestH[2] = hits2[ii];
-		  emptyN = false;
-		}
-	      }
-	      hits0.clear();
-	      hits1.clear();
-	      hits2.clear();
-	    }
-	    if( upN > 20 ) break;
-	  }
-	}
-	else {
-	  for( unsigned int iStep = 0; iStep < hits2temp.size(); iStep++ ) {
-	    hits0.push_back(imh0);
-	    hits1.push_back(iH1);
-	    hits2.push_back(hits2temp[iStep]);
-	    if( hits1.size() == float_v::Size ) {
-              float_v Y0, Y1, Y2, Z0, Z1, Z2;
-              fData.GetHitCoordinateVectors( rowDn, hits0, &Y0, &Z0 );
-              fData.GetHitCoordinateVectors( row, hits1, &Y1, &Z1 );
-              fData.GetHitCoordinateVectors( rowUp, hits2, &Y2, &Z2 );
-              Y2 = DnDx * ( Y2 - Y1 );
-              Z2 = DnDx * ( Z2 - Z1 );
-              Y0 = UpDx * ( Y0 - Y1 );
-              Z0 = UpDx * ( Z0 - Z1 );
-              Y2 = Y0 - Y2;
-              Z2 = Z0 - Z2;
-              const float_v d = Y2 * Y2 + Z2 * Z2;
-              for( int ii = 0; ii < float_v::Size; ii++ ) {
-  		if( hits1[ii] == cH ) {
-  		  if( dMin > d[ii] ){
-  		    dMin = d[ii];
-  		    bestH[0] = hits0[ii];
-  		    bestH[1] = hits1[ii];
-  		    bestH[2] = hits2[ii];
-  		  }
-  		}
-  		else {
-  		  if( !emptyN ) {
-  		    if( dMin < chi2Cut ) fData.SetUnusedHitLinkDataScalar( row, rowUp, rowDn, bestH );
-  		    dMin = std::numeric_limits<float>::max();
-  		  }
-  		  dMin = d[ii];
-  		  cH = hits1[ii];
-  		  bestH[0] = hits0[ii];
-  		  bestH[1] = hits1[ii];
-  		  bestH[2] = hits2[ii];
-  		}
-  	      }
-              hits0.clear();
-              hits1.clear();
-              hits2.clear();
-	    }
-	  }
-	}
-	firstIteration = false;
-      }
-      hits2temp.clear();
-      iH1++;
-      firstIteration = true;
-    } while( /*hits0.size() < float_v::Size && hits1.size() < float_v::Size && hits2.size() < float_v::Size &&*/ iH1 < numberOfHits );
-    float_v Y0, Y1, Y2, Z0, Z1, Z2;
-    unsigned int hs1 = hits1.size();
-    fData.GetHitCoordinateVectors( rowDn, hits0, &Y0, &Z0 );
-    fData.GetHitCoordinateVectors( row, hits1, &Y1, &Z1 );
-    fData.GetHitCoordinateVectors( rowUp, hits2, &Y2, &Z2 );
-    Y2 = DnDx * ( Y2 - Y1 );
-    Z2 = DnDx * ( Z2 - Z1 );
-    Y0 = UpDx * ( Y0 - Y1 );
-    Z0 = UpDx * ( Z0 - Z1 );
-    Y2 = Y0 - Y2;
-    Z2 = Z0 - Z2;
-    const float_v d = Y2 * Y2 + Z2 * Z2;
-    for( int ii = 0; ii < hs1; ii++ ) {
-	if( hits1[ii] == cH ) {
-	  if( dMin > d[ii] ){
-	    dMin = d[ii];
-	    bestH[0] = hits0[ii];
-	    bestH[1] = hits1[ii];
-	    bestH[2] = hits2[ii];
-	  }
-	}
-	else {
-	    if( dMin < chi2Cut ) fData.SetUnusedHitLinkDataScalar( row, rowUp, rowDn, bestH );
-	  dMin = d[ii];
-	  cH = hits1[ii];
-	  bestH[0] = hits0[ii];
-	  bestH[1] = hits1[ii];
-	  bestH[2] = hits2[ii];
-	}
-      }
-    if( dMin < chi2Cut ) fData.SetUnusedHitLinkDataScalar( row, rowUp, rowDn, bestH );
-    hits0.clear();
-    hits1.clear();
-    hits2.clear();
 }
 
 

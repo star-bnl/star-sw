@@ -72,16 +72,15 @@ tbb::task *AliHLTTPCCATracker::Reconstructor::execute()
 int AliHLTTPCCATracker::Reconstructor::execute()
 #endif //USE_TBB
 {
-//std::cout<<">Reconstructor::execute()\n";
-  d->fTimers[0] = 0.; // NeighboursFinder
-  d->fTimers[1] = 0.; // TrackletConstructor
-  d->fTimers[2] = 0.; // TrackletSelector
-  d->fTimers[3] = 0.; // StartHitsFinder
-  d->fTimers[4] = 0.; // NeighboursFinder cycles
-  d->fTimers[5] = 0.; // write output
-  d->fTimers[6] = 0.; // TrackletConstructor cycles
-  d->fTimers[7] = 0.; // TrackletSelector cycles
-  d->fTimers[10] = 0.; // NeighboursCleaner
+  d->fTimers[0] = 0; // NeighboursFinder
+  d->fTimers[1] = 0; // TrackletConstructor
+  d->fTimers[2] = 0; // TrackletSelector
+  d->fTimers[3] = 0; // StartHitsFinder
+  d->fTimers[4] = 0; // NeighboursFinder cycles
+  d->fTimers[5] = 0; // write output
+  d->fTimers[6] = 0; // TrackletConstructor cycles
+  d->fTimers[7] = 0; // TrackletSelector cycles
+  d->fTimers[10] = 0; // NeighboursCleaner
   
   d->fNTracklets = 0;
 
@@ -122,11 +121,9 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
   }
 #endif // NDEBUG
-#ifndef V5
+  
   for (int iter = 0; iter < 2; iter++) {
-#else
-  for (int iter = 0; iter < 1; iter++) {
-#endif
+
 #ifdef USE_TIMERS
     timer.Start();
     tsc.Start();
@@ -135,6 +132,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
       d->fData.CleanUsedHits( rowIndex, iter == 0 );
     }
+    
     // unset all unused links
   const int_v minusOne(-1);
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
@@ -142,16 +140,15 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     const unsigned numberOfHits = row.NHits();
     for ( unsigned int i = 0; i < numberOfHits; i += int_v::Size ) {
       const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
-      int_v usedTemp;
-      for( unsigned int j = 0; j < float_v::Size; j++ ) {
-	usedTemp[j] = d->fData.HitDataIsUsed( row )[(unsigned int)hitIndexes[j]];
-      }
-      const int_m validHitsMask = (hitIndexes < numberOfHits) && (usedTemp == int_v( Vc::Zero ));
+      const int_m validHitsMask = (hitIndexes < numberOfHits)
+        && ( int_v( d->fData.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) );
       d->fData.SetHitLinkUpData  ( row, hitIndexes, minusOne, validHitsMask );
       d->fData.SetHitLinkDownData( row, hitIndexes, minusOne, validHitsMask );
+//      d->fData.SetHitLinkUpData  ( row, i, minusOne );
+//      d->fData.SetHitLinkDownData( row, i, minusOne );
     }
   }
-
+  
 #ifndef NDEBUG
  // check of isUsed
   for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
@@ -166,16 +163,14 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
   }
 #endif // NDEBUG
-
-#ifndef V5
+  
     AliHLTTPCCATracker::NeighboursFinder neighboursFinder( d, d->fData, iter );
     neighboursFinder.execute();
-#endif
     
 #ifdef USE_TIMERS
     tsc.Stop();
     timer.Stop();
-    d->fTimers[0] += (double)timer.RealTime();
+    d->fTimers[0] += timer.RealTime();
     d->fTimers[4] += tsc.Cycles();
 #endif // USE_TIMERS
 
@@ -232,9 +227,8 @@ int AliHLTTPCCATracker::Reconstructor::execute()
       disp.SetSliceView();
       disp.SetCurrentSlice( d );
       disp.DrawSlice( d, 0 );
-      disp.DrawSliceHits(1, 0.5);
-      disp.DrawSliceLinks(-1,-1,1);
-      AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinder1.pdf");
+      disp.DrawSliceHits();
+      disp.DrawSliceLinks();
       disp.Ask();
     }
 #endif
@@ -269,18 +263,16 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
 #endif // 0
 #endif // NDEBUG
-
+    
 #ifdef USE_TIMERS
     timer.Start();
 #endif // USE_TIMERS
  
-#ifndef V5
     AliHLTTPCCANeighboursCleaner::run( d->Param().NRows(), d->fData, d->Param() );
-#endif
     
 #ifdef USE_TIMERS
     timer.Stop();
-    d->fTimers[10] += (double)timer.RealTime();
+    d->fTimers[10] += timer.RealTime();
 #endif // USE_TIMERS
     
 #ifndef DISABLE_ALL_DRAW
@@ -294,8 +286,8 @@ int AliHLTTPCCATracker::Reconstructor::execute()
       disp.SetSliceView();
       disp.SetCurrentSlice( d );
       disp.DrawSlice( d, 0/*DrawRows*/ );
-      disp.DrawSliceHits(1,0.5);
-      disp.DrawSliceLinks(-1,-1,1);
+      disp.DrawSliceHits(1,0.1);
+      disp.DrawSliceLinks(-1,-1,0.03);
       AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NCleaner.pdf");
       disp.Ask();
     }
@@ -363,13 +355,11 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     timer.Start();
 #endif // USE_TIMERS
     
-#ifndef V5
     AliHLTTPCCAStartHitsFinder::run( *d, d->fData, iter );
-#endif
-
+    
 #ifdef USE_TIMERS
     timer.Stop();
-    d->fTimers[3] += (double)timer.RealTime();
+    d->fTimers[3] += timer.RealTime();
 #endif // USE_TIMERS
 
   } // iterations
@@ -424,27 +414,15 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
   }
 #endif // NDEBUG
-
-#ifdef V5
-  d->fTrackletVectors.Resize( d->fData.NumberOfHits() / 10 + 5 );
-#else
+  
   d->fTrackletVectors.Resize( ( d->fNTracklets + int_v::Size - 1 ) / int_v::Size);
-#endif
   
 #ifdef USE_TIMERS
   timer.Start();
   tsc.Start();
 #endif // USE_TIMERS
 
-  unsigned int tracksSaved = 0;
-#ifdef V5
-  int st_rows[27] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 18, 19, 21, 25, 27, 30, 35, 37, 39, 41, 43};
-  for( int i = 0; i < 27; i++ ) {
-      AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(st_rows[i], tracksSaved);
-  }
-#else
-  AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(0, tracksSaved);
-#endif
+  AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run();
   
 #ifndef NDEBUG
     // check of isUsed
@@ -460,7 +438,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
   }
 #endif // NDEBUG
-
+  
 #ifdef USE_TIMERS
   tsc.Stop();
   timer.Stop();
@@ -503,9 +481,6 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   tsc.Start();
 #endif // USE_TIMERS
   
-//#ifdef V5
-  d->fNumberOfTracks = tracksSaved;
-//#endif
   AliHLTTPCCATrackletSelector( *d, &d->fTracks, &d->fNTrackHits, &d->fNumberOfTracks, d->fData, d->fTrackletVectors ).run();
   
 #ifdef USE_TIMERS
@@ -520,6 +495,8 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     d->fTrackMemory = new char[d->fTrackMemorySize + 1600]; // TODO rid of 1600
     d->SetPointersTracks( d->fNTracklets, d->fNTrackHits ); // set pointers for hits
   }
+
+  //std::cout<<"Slice "<<Param().ISlice()<<": N start hits/tracklets/tracks = "<<nStartHits<<" "<<nStartHits<<" "<<*fNTracks<<std::endl;
   d->WriteOutput();
   return 0;
 }

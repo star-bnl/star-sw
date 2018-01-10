@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAGBTrack.h,v 1.1 2013/01/28 21:19:03 yiguo Exp $
+// $Id: AliHLTTPCCAGBTrack.h,v 1.1 2016/02/05 23:27:27 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -13,7 +13,7 @@
 
 #include "AliHLTTPCCADef.h"
 #include "AliHLTTPCCATrackParam.h"
-
+#if 0
 namespace std
 {
   template<typename T> struct char_traits;
@@ -22,7 +22,7 @@ namespace std
   template<typename _CharT, typename _Traits> class basic_ostream;
   typedef basic_ostream<char, char_traits<char> > ostream;
 } // namespace std
-
+#endif
 /**
  * @class AliHLTTPCCAGBTrack
  *
@@ -34,7 +34,7 @@ class AliHLTTPCCAGBTrack
     friend std::ostream &operator<<( std::ostream &, const AliHLTTPCCAGBTrack & );
   public:
 
-    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsMerged(false) { ; }
+    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ) { ; }
 
     int NHits()               const { return fNHits; }
     int FirstHitRef()         const { return fFirstHitRef; }
@@ -59,11 +59,6 @@ class AliHLTTPCCAGBTrack
       return ( a->fNHits > b->fNHits );
     }
 
-    // ---
-    void SetMerged() { tIsMerged = true; }
-    bool IsMerged() const { return tIsMerged; }
-    // ---
-
   protected:
 
     int fFirstHitRef;        // index of the first hit reference in track->hit reference array
@@ -73,10 +68,6 @@ class AliHLTTPCCAGBTrack
     float fAlpha;             //* Alpha angle of the parametrerisation
     int   fNDeDx;
     float fDeDx;              //* DE/DX
-
-    // ---
-    bool tIsMerged;
-    // ---
 };
 
 std::istream &operator>>( std::istream &, AliHLTTPCCAGBTrack & );

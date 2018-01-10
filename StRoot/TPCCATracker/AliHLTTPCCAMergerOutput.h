@@ -59,11 +59,6 @@ class AliHLTTPCCAMergerOutput
     void SetClusterIDsrc( int i, const DataCompressor::SliceRowCluster &v ) {  fClusterIDsrc[i] = v; }
     void SetClusterPackedAmp( int i, UChar_t v ) {  fClusterPackedAmp[i] = v; }
 
-    // ---
-    void SetMerged( int itr ) { fTracks[itr].SetMerged(); }
-    bool IsMerged( int itr ) { return fTracks[itr].IsMerged(); }
-    // ---
-
   private:
 
     int fNTracks;                 // number of reconstructed tracks

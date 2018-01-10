@@ -12,13 +12,6 @@
  * Definitions needed for AliHLTTPCCATracker
  *
  */
-#define V5
-//#define AVX1V
-
-
-
-#define NDEBUG
-#define USE_TIMERS
 
 // ----- Vc -----
 
@@ -29,34 +22,25 @@
 
 using ::Vc::double_v;
 using ::Vc::float_v;
+using ::Vc::int_v;
+using ::Vc::uint_v;
 using ::Vc::short_v;
 using ::Vc::ushort_v;
 using ::Vc::VectorAlignment;
 using ::Vc::double_m;
 using ::Vc::float_m;
+using ::Vc::int_m;
+using ::Vc::uint_m;
 using ::Vc::short_m;
 using ::Vc::ushort_m;
 using ::Vc::atan2;
 using ::Vc::asin;
 using ::Vc::round;
 using ::Vc::isfinite;
-#ifndef AVX1V
-using ::Vc::int_v;
-using ::Vc::uint_v;
-using ::Vc::int_m;
-using ::Vc::uint_m;
-#else
-typedef float_v int_v;
-typedef float_v uint_v;
-typedef float_m int_m;
-typedef float_m uint_m;
-#endif
 
 static inline uint_m validHitIndexes( const uint_v &v )
 {
-//  return (static_cast<int_v>( v ) >= int_v( Vc::Zero ) && v < std::numeric_limits<unsigned int>::max());
-  return (static_cast<int_v>( v ) >= int_v( Vc::Zero ) && v < 100000000);
-
+  return static_cast<int_v>( v ) >= int_v( Vc::Zero );
 }
 	
 #ifdef USE_TBB
