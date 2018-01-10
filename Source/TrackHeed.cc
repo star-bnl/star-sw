@@ -890,16 +890,21 @@ void TrackHeed::SetParticleUser(const double m, const double z) {
 bool TrackHeed::Setup(Medium* medium) {
 
   // Make sure the path to the Heed database is known.
-  char* dbPath = getenv("HEED_DATABASE");
-  if (dbPath == 0) {
-    std::cerr << m_className << "::Setup:\n";
-    std::cerr << "    Database path is not defined.\n";
-    std::cerr << "    Environment variable HEED_DATABASE is not set.\n";
-    std::cerr << "    Cannot proceed with initialization.\n";
-    return false;
+  std::string databasePath;
+  char* dbPath = std::getenv("HEED_DATABASE");
+  if (dbPath == NULL) {
+    // Try GARFIELD_HOME.
+    dbPath = std::getenv("GARFIELD_HOME");
+    if (dbPath == NULL) {
+      std::cerr << m_className << "::Setup:\n    Cannot retrieve database path "
+                << "(environment variables HEED_DATABASE and GARFIELD_HOME "
+                << "are not defined).\n    Cannot proceed.\n";
+      return false;
+    }
+    databasePath = std::string(dbPath) + "/Heed/heed++/database";
+  } else {
+    databasePath = dbPath;
   }
-
-  std::string databasePath = dbPath;
   if (databasePath[databasePath.size() - 1] != '/') {
     databasePath.append("/");
   }

@@ -265,7 +265,7 @@ bool ViewCell::Plot(const bool use3d) {
         TGeoVolume* plane = m_geo->MakeBox("PlaneX", m_geo->GetMedium("Metal"),
                                            width, dy, dz);
         plane->SetLineColor(kGreen - 5);
-        plane->SetTransparency(50);
+        plane->SetTransparency(75);
         m_geo->GetTopVolume()->AddNode(plane, 1, 
                                        new TGeoTranslation(x, 0., 0.));
       } else {
@@ -290,7 +290,7 @@ bool ViewCell::Plot(const bool use3d) {
         TGeoVolume* plane = m_geo->MakeBox("PlaneY", m_geo->GetMedium("Metal"),
                                            dx, width, dz);
         plane->SetLineColor(kGreen - 5);
-        plane->SetTransparency(50);
+        plane->SetTransparency(75);
         m_geo->GetTopVolume()->AddNode(plane, 1, 
                                        new TGeoTranslation(0., y, 0.));
       } else {
