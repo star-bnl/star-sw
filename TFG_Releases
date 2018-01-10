@@ -1,6 +1,22 @@
-======= Active TFG releases =============================================================================================
-TFG16a Production of 50 M events 2014 AuAu200 and 32 M 2013 pp510W  2016-02-12 13:06:04 -0500  (tag: v02-11-16, TFG16a)
-TFG17k The first release with iTPC in sector 20                     2017-10-05 18:43:13 -0400  (tag: TFG17k)
-TFG17o Freeze RCF version                                           2017-12-15 14:53:01 -0500  (tag: TFG17op2)
-TFG17v switch off debug in FpdmGeo4.xml                             2017-12-29 12:59:48 -0500  (HEAD, tag: TFG17v, master)
-.DEV2  head of TFG git repository          
+======= Active TFG, retired releases mark by "-"  =============================================================================================
+ TFG16a Production of 50 M events 2014 AuAu200 and 32 M 2013 pp510W  2016-02-12 13:06:04 -0500  (tag: v02-11-16, TFG16a)
+-TFG16d                                                              2016-10-03 18:05:06 -0400  (tag: TFG16d_1, TFG16d_1)
+-TFG16e                                                              2016-10-17 19:09:00 -0400  (tag: TFG16e, TFG16e)
+-TFG16f                                                              2016-10-19 14:27:45 -0400  (HLT/TFG16f)
+-TFG17g                                                              2017-08-20 09:03:45 -0400  (tag: TFG17g_4)
+-TFG17h                                                              2017-08-31 15:26:01 -0400  (tag: TFG17h_3)
+-TFG17i                                                              2017-09-04 19:10:46 -0400  (tag: TFG17i_1)
+-TFG17j The fix point for VMC alignment for HFT                      2017-09-13 15:39:53 -0400  (tag: TFG17j_3, tag: TFG17j_2)
+ TFG17k The first release with iTPC in sector 20                     2017-10-05 18:43:13 -0400  (tag: TFG17k)
+-TFG17l Freeze PicoDst                                               2017-11-02 09:37:30 -0400  (tag: TFG17l)
+-TFG17m Fix precision in PicoDst                                     2017-11-15 12:27:29 -0500  (tag: TFG17m_1)
+-TFG17n Freeze PicoDst before production                             2017-11-19 10:22:04 -0500  (HEAD, tag: TFG17n_1, master)
+-TFG17o Freeze PicoDst before production                             2017-12-05 16:31:17 -0500  (HEAD, tag: TFG17o)
+-TFG17o Adjust dE/dx and dN/dx for ToF                               2017-12-22 10:22:04 -0500  (HEAD, tag: TFG17p_1)
+ TFG17o Freeze RCF version                                           2017-12-15 14:53:01 -0500  (tag: TFG17op2)
+-TFG17r Freeze before merging with HLT (Grigory & Maksym)            2017-12-19 15:22:01 -0500  (tag: TFG17r)
+-TFG17q Freeze after  merging with HLT (Grigory & Maksym)            2017-12-19 16:22:01 -0500  (tag: TFG17q)
+-TFG17u Fix Grigory StiCA (MakeSeeds), switch off dN/dx              2017-12-27 10:22:01 -0500  (tag: TFG17u)
+ TFG17v switch off debug in FpdmGeo4.xml                             2017-12-29 12:59:48 -0500  (HEAD, tag: TFG17v, master)
+ TFG18a release for 2016 embedding with fixed ToF, Old CA            2018-01-10 12:05:36 -0500  (HEAD, tag: TFG18a, master)
+ .DEV2  head of TFG git repository          

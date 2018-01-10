@@ -16,7 +16,7 @@
 
 const double C_C_LIGHT = 29.9792458; // [cm/ns]
 
-void readPrimaries(Long64_t nevent=1000) {
+void readPrimaries(Long64_t nevent=100000000) {
   
   TH1::SetDefaultSumw2(1);
   
