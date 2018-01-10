@@ -475,8 +475,8 @@ void StBTofCalibMaker::processStEvent()
     
     double tot = aHit->tot(); // ns
     double tdc = aHit->leadingEdgeTime();
-    double tof = tdc - mTStart; 
-    //    if (! aHit->idTruth() ) tof -= mTStart;
+    double tof = tdc;
+    if (aHit->flag() != 1 ) tof -= mTStart;
     Double_t zhit = pidTof->zLocal();
     
     int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
@@ -719,8 +719,8 @@ void StBTofCalibMaker::processMuDst()
     double tot = aHit->tot(); // ns
     double tdc = aHit->leadingEdgeTime();
     while(tdc>TMAX) tdc -= TMAX;
-    double tof = tdc - mTStart; 
-    //    if (! aHit->idTruth() ) tof -= mTStart;
+    double tof = tdc;
+    if (! aHit->idTruth()) tof -= mTStart;
     Double_t zhit = pidTof.zLocal();
     
     int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);

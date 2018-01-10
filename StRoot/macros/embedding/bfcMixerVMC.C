@@ -27,7 +27,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   if (gClassTable->GetID("StBFChain") < 0) Load();
   //______________Create the main chain object______________________________________
   Chain = (StBFChain *) StMaker::New("StBFChain","Embedding");
-#if 1
+#if 0
   Chain->SetFlags("TObjTable,nodefault");
 #else
   Chain->SetFlags("nodefault");
@@ -76,7 +76,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
 #if 1
   StBTofSimMaker *tofSim = (StBTofSimMaker *) chain2->Maker("TofSim");
   //  if (tofSim) tofSim->setEmbeddingMode(kTRUE);
-  chain3Opt += ",btofMixer"; 
+  //  chain3Opt += ",btofMixer"; 
 #endif 
 #endif 
   chain3 = bfc(-1,chain3Opt,0,0,0,"Mixer");
@@ -92,6 +92,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   chain4Opt += ",TpxClu,TpcHitMover,BEmcChkStat,btof,btofMatch,btofCalib,eemcA2E,fmsdat,-evout"; // ,evout
   chain4Opt += ",NoSsdIt,NoSvtIt,StiHftC,Idst,BAna,-hitfilt";
   chain4Opt += ",noTags,noHistos,noRunco";
+  chain4Opt += ",picoWrite";
   //  chain4Opt += ",KFVertex";
   chain4 = bfc(-1,chain4Opt,0,OutputFileName,0,"RC");
 #if 0
@@ -145,6 +146,7 @@ void bfcMixerVMC(Int_t First, Int_t Last, const Char_t *opt,
   Chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   Chain->SetAttr(".Privilege",1,"StVMCMaker::*"); 	//It is also IO maker
   StMaker::lsMakers(Chain);
+  StVMCMaker::instance()->SetVxSigma(-1);
   Int_t iInit = Chain->Init();
   if (iInit >=  kStEOF) {Chain->FatalErr(iInit,"on init"); return;}
   if (First <= Last) {

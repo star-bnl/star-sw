@@ -88,7 +88,7 @@ class StBTofHitMaker:public StRTSBaseMaker
      /// Default constructor
      StBTofHitMaker(const char *name="tof_raw");
      
-    ~StBTofHitMaker() ;
+     ~StBTofHitMaker() {}
 
      void   Clear(Option_t* option="");
      Int_t  Init();

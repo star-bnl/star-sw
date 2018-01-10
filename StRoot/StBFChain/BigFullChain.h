@@ -1650,7 +1650,7 @@ Bfc_st BFC[] = { // standard chains
   {"tofpMatch"   ,"","","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
    "TPC to TOFp track matching",                                                                    kFALSE},
   {"tofCalib"   ,"","","db,TofUtil",        "StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
-#if 1
+#if 0
   {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    ,                                                                                   "BTof Mixer",kFALSE},
 #else

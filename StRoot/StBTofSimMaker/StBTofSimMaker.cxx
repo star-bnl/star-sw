@@ -67,7 +67,6 @@
 #include "TNtuple.h"
 #include "TFile.h"
 #include "TMath.h"
-#include "TObjectSet.h"
 // g2t tables and collections
 #include "StMcTrack.hh"
 
@@ -143,7 +142,6 @@ void StBTofSimMaker::Reset()
   mEvent  = 0;
   mMcEvent = 0;
   mBTofCollection = 0;
-  mIsEmbedding = kFALSE;
   //if (mWriteStEvent) delete mBTofCollection;
   delete mMcBTofHitCollection;
   mSimDb  = 0;
@@ -601,8 +599,8 @@ Int_t StBTofSimMaker::fillEvent()
 {
   LOG_DEBUG << "Filling McEvent and Event"<<endm;
   
-  static  Float_t tot  = 15;
-  static  Float_t tStart = 0; // MC start time
+  static  Float_t totMC  = 15;
+  static  Float_t tStartMC = 0; // MC start time
   // update histograms
   if(mBookHisto) {
     for(Int_t i=0;i<mNTray;i++) {
@@ -647,16 +645,9 @@ Int_t StBTofSimMaker::fillEvent()
       mBTofCollection = mEvent->btofCollection();
     }
   }
-  if(mBTofCollection) {
-    TObjectSet *set = new TObjectSet("BTofSimCollection");
-    AddData(set);
-    mBTofCollection = new StBTofCollection();
-    set->SetObject(mBTofCollection);
-    mIsEmbedding = kTRUE;
-  } else {
+  if(! mBTofCollection) {
     mBTofCollection = new StBTofCollection();
     mEvent->setBTofCollection(mBTofCollection);
-    mIsEmbedding = kFALSE;
   }
   // creat StBTofHit / tofRawData / tofData collection
   for(Int_t jj = 0; jj < (Int_t)mMcBTofHitCollection->hits().size(); jj++) {
@@ -693,34 +684,33 @@ Int_t StBTofSimMaker::fillEvent()
     Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
     Float_t tdc = mcTof;
     Float_t corr;
-    if (! mIsEmbedding) {
-      if (aMcBTofHit->module() > 0) { // Tof
-	corr = St_tofTOffsetC::instance()->t0(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell());
+    if (aMcBTofHit->module() > 0) { // Tof
+      corr = St_tofTOffsetC::instance()->t0(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell());
+      if (corr < -9999.) continue;
+      tdc += corr;
+      corr = St_tofTotbCorrC::instance()->Corr(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell(),totMC);
+      if (corr < -9999.) continue;
+      tdc += corr;
+      corr = St_tofZbCorrC::instance()->Corr(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell(),aMcBTofHit->position().z());
+      if (corr < -9999.) continue;
+      tdc += corr;
+    } else { // (aMcBTofHit->module() = 0 -> VPD
+	corr = St_vpdTotCorrC::instance()->Corr(aMcBTofHit->cell(),totMC);
 	if (corr < -9999.) continue;
 	tdc += corr;
-	corr = St_tofTotbCorrC::instance()->Corr(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell(),tot);
-	if (corr < -9999.) continue;
-	tdc += corr;
-	corr = St_tofZbCorrC::instance()->Corr(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell(),aMcBTofHit->position().z());
-	if (corr < -9999.) continue;
-	tdc += corr;
-      } else { // (aMcBTofHit->module() = 0 -> VPD
-	corr = St_vpdTotCorrC::instance()->Corr(aMcBTofHit->cell(),tot);
-	if (corr < -9999.) continue;
-	tdc += corr;
-      }
     }
-    tdc += tStart;
+    tdc += tStartMC;
     //Fill the StBTofHit
     StBTofHit aBTofHit;
     aBTofHit.Clear();
+    aBTofHit.setFlag(1); // Mark MC hit with flag = 1 to MC tStart
     aBTofHit.setHardwarePosition(kBTofId);
     aBTofHit.setTray((Int_t)aMcBTofHit->tray());
     aBTofHit.setModule((unsigned char)aMcBTofHit->module());
     aBTofHit.setCell((Int_t)aMcBTofHit->cell());
     
     aBTofHit.setLeadingEdgeTime(tdc);
-    aBTofHit.setTrailingEdgeTime(tdc+tot);
+    aBTofHit.setTrailingEdgeTime(tdc+totMC);
     aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
     aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 100);
     aBTofHit.setPathLength(aMcBTofHit->pathLength());
@@ -738,10 +728,11 @@ Int_t StBTofSimMaker::fillEvent()
   }
   
   //Fill StBTofHeader -- 	
-  StBTofHeader *aHead = new StBTofHeader;
-  aHead->setTStart(tStart);	  
-  mBTofCollection->setHeader(aHead);
-  
+  if (! mBTofCollection->tofHeader()) {
+    StBTofHeader *aHead = new StBTofHeader;
+    aHead->setTStart(tStartMC);	  
+    mBTofCollection->setHeader(aHead);
+  }  
   LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
 
   // check StMcEvent and StEvent

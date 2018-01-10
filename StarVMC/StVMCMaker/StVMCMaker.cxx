@@ -505,7 +505,7 @@ Int_t StVMCMaker::SetVertex() {
 		 << " - out of Vz or Vr range, skipping." << endm;
 	return kStSKIP;
       }
-      if (er > fvxSigma) {
+      if (fvxSigma > 0 && er > fvxSigma) {
 	LOG_INFO << " Event " << fEvtHddr->GetEventNumber()
 		 << " has tags with vertex at (" << V.X() << "," << V.Y() << "," << V.Z()
 		 << "), transverse position error  = " << er

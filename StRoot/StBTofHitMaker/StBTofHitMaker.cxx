@@ -43,11 +43,6 @@ StBTofHitMaker::StBTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
 {
   LOG_DEBUG << "StBTofHitMaker::ctor"  << endm;
 }
-
-//_____________________________________________________________
-StBTofHitMaker::~StBTofHitMaker() 
-{ }
-
 //_____________________________________________________________
 void StBTofHitMaker::Clear(Option_t* option) 
 { 
@@ -362,6 +357,7 @@ void StBTofHitMaker::fillBTofHitCollection()
       aHit->setCell((UChar_t)cellId);
       aHit->setLeadingEdgeTime(letime);
       aHit->setTrailingEdgeTime(tetime);
+      aHit->setFlag(0); // RC hit flag = 0;
       mBTofCollection->addHit(aHit);
 
     } // end channel
@@ -403,6 +399,7 @@ void StBTofHitMaker::fillBTofHitCollection()
         aHit->setCell((UChar_t)tubeId);
         aHit->setLeadingEdgeTime(letime);
         aHit->setTrailingEdgeTime(tetime);
+	aHit->setFlag(0); // RC flag = 0
         mBTofCollection->addHit(aHit);
       }
     }  

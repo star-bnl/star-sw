@@ -168,7 +168,6 @@ class StBTofSimMaker : public StMaker{
 		TH1F* mTdc;          //!
 
 		TVolume *starHall;
-		Bool_t mIsEmbedding; //!
 
 		Int_t CellResponse(g2t_ctf_hit_st* tof_hit,
 				TrackVec& trackVec);   //! Slow simulation step one

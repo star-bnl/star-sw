@@ -22,8 +22,10 @@ void readPrimaries(Long64_t nevent=1000) {
   
   TH1D* hRcPt  = new TH1D("hRcPt", "", 500, 0, 5);
   TH1D* hRcEta = new TH1D("hRcEta", "", 400, -2, 2);
-  TH2D* hOneOverBetaP = new TH2D("hOneOverBetaP", "1/#beta-1", 300, 0, 3, 300, -0.1, 2.9);
-  TH2D* hMass2P = new TH2D("hMass2P", "M^{2} versus P", 300, 0, 3, 300, -0.1, 1.9);
+  TH2D* hOneOverBetaPRC = new TH2D("hOneOverBetaPRC", "1/#beta-1", 300, 0, 3, 300, -0.1, 2.9);
+  TH2D* hMass2PRC = new TH2D("hMass2PRC", "M^{2} versus P", 300, 0, 3, 300, -0.1, 1.9);
+  TH2D* hOneOverBetaPMC = new TH2D("hOneOverBetaPMC", "1/#beta-1", 300, 0, 3, 300, -0.1, 2.9);
+  TH2D* hMass2PMC = new TH2D("hMass2PMC", "M^{2} versus P", 300, 0, 3, 300, -0.1, 1.9);
   TH2D* hBTofHitLTTray = new TH2D("hBTofHitLTTray", "", 150, 0, 150, 100, 0, 100);
   TH1D* hBTofBeta = new TH1D("hBTofBeta", "", 200, 0, 1);
   
@@ -80,14 +82,14 @@ void readPrimaries(Long64_t nevent=1000) {
     for (UInt_t iPTrk = 0; iPTrk < mudst->numberOfPrimaryTracks(); ++iPTrk) {
       StMuTrack *pTrk = mudst->primaryTracks(iPTrk);
       if (!pTrk) continue;
-      if (! pTrk->idTruth()) continue;
+      //      if (! pTrk->idTruth()) continue;
       hRcPt->Fill(pTrk->pt());
       hRcEta->Fill(pTrk->eta());
       const StMuBTofHit* tofHit = pTrk->tofHit();
       // int idxTofHit = pTrk->index2BTofHit();
       // StMuBTofHit* tofHit = mudst->btofHit(idxTofHit);
       if (tofHit) {
-	// hOneOverBetaP->Fill(pTrk->p().mag(), tofHit->leadingEdgeTime()/pTrk->btofPidTraits().pathLength());
+	// hOneOverBetaPRC->Fill(pTrk->p().mag(), tofHit->leadingEdgeTime()/pTrk->btofPidTraits().pathLength());
 	//Hongwei	double tofBeta = pTrk->btofPidTraits().pathLength() / ((tofHit->leadingEdgeTime()-19) * C_C_LIGHT);
 #if 1
 #if 1
@@ -100,11 +102,15 @@ void readPrimaries(Long64_t nevent=1000) {
 	double tofBeta = pTrk->btofPidTraits().pathLength() / ((pTrk->btofPidTraits().timeOfFlight()-19) * C_C_LIGHT);
 #endif
 	hBTofBeta->Fill(tofBeta);
-	hOneOverBetaP->Fill(pTrk->p().mag(), 1.0/tofBeta - 1.0);
+	hOneOverBetaPRC->Fill(pTrk->p().mag(), 1.0/tofBeta - 1.0);
 	Double_t mass2 = (1.0/(tofBeta*tofBeta) - 1)*pTrk->p().mag2();
-	hMass2P->Fill(pTrk->p().mag(), mass2);
+	hMass2PRC->Fill(pTrk->p().mag(), mass2);
 	hBTofHitLTTray->Fill(tofHit->tray(), tofHit->leadingEdgeTime());
 	hBTofHitLETvsTof->Fill(tofHit->leadingEdgeTime()-19, pTrk->btofPidTraits().timeOfFlight());
+	if (pTrk->idTruth()) {
+	  hOneOverBetaPMC->Fill(pTrk->p().mag(), 1.0/tofBeta - 1.0);
+	  hMass2PMC->Fill(pTrk->p().mag(), mass2);
+	}
       }
     }
 #if 0    
@@ -131,5 +137,5 @@ void readPrimaries(Long64_t nevent=1000) {
   c1->DrawFrame(0, 0, 5, 1);
   hEffPt->Draw("same");
   
-  hOneOverBetaP->Draw("colz");
+  hOneOverBetaPRC->Draw("colz");
 }
