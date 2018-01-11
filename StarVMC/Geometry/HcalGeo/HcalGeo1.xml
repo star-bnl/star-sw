@@ -670,12 +670,10 @@
       <Create block="WPAR" />
       <Create block="FPBB" />
       <Create block="FPPB" />
-
       <If expr="debug.ge.1 .and. serN.eq.1"> <Export language="Mortran"> open(1,file='prs1map.txt',status='REPLACE')</Export></If>
       <If expr="debug.ge.1 .and. serN.eq.2"> <Export language="Mortran"> open(2,file='prs2map.txt',status='REPLACE')</Export></If>
       <If expr="debug.ge.1 .and. serN.eq.3"> <Export language="Mortran"> open(3,file='prsCmap.txt',status='REPLACE')</Export></If>
       <If expr="debug.ge.1 .and. serN.eq.4"> <Export language="Mortran"> open(4,file='prs3map.txt',status='REPLACE')</Export></If>
-
       <If expr="serN.le.2" >
 	layr=serN
 	<Else>

@@ -8,6 +8,10 @@ TDataSet *CreateTable() {
 StvTpcHitErrs_st row;
 St_StvTpcHitErrs *tableSet = new St_StvTpcHitErrs("StvTpcOuterHitErrs",1);
 //
+float yErrFact = 1.4; yErrFact*=yErrFact;
+float zErrFact = 1.4; zErrFact*=zErrFact;
+yErrFact=1;zErrFact=1;
+
 memset(&row,0,tableSet->GetRowSize());
     row.yErr	 = 0.0006493898; // Intrinsic resolution, padrow or Y direction		;
     row.zErr	 = 0.003386928; // Intrinsic resolution, z direction			;
@@ -16,6 +20,8 @@ memset(&row,0,tableSet->GetRowSize());
     row.zzDiff	 = 0.004859645; // Diffusion in Z direction  				;
     row.yFact	 =  0.4156496; // Error factor in Y-direction 			;
     row.zFact	 =  0.4108317; // Error factor in Z-direction 			;
+    row.yFact*=yErrFact;
+    row.zFact*=zErrFact;
     row.zAB2	 = 5.0293e-06; // Constant member in Z direction (a*b)**2		;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------

@@ -1,6 +1,9 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.cxx,v 1.4 2013/05/10 18:33:33 hmasui Exp $
+// $Id: CentralityMaker.cxx,v 1.5 2015/05/22 06:51:56 hmasui Exp $
 // $Log: CentralityMaker.cxx,v $
+// Revision 1.5  2015/05/22 06:51:56  hmasui
+// Add grefmult for Run14 Au+Au 200 GeV
+//
 // Revision 1.4  2013/05/10 18:33:33  hmasui
 // Add TOF tray mult, preliminary update for Run12 U+U
 //
@@ -36,6 +39,9 @@ CentralityMaker::CentralityMaker()
   fRefMult3Corr = new StRefMultCorr("refmult3") ;
   fTofTrayMultCorr = new StRefMultCorr("toftray") ;
   fgRefMultCorr  = new StRefMultCorr("grefmult") ;
+  fgRefMultCorr_P16id  = new StRefMultCorr("grefmult_P16id") ;
+  fgRefMultCorr_VpdMB30 = new StRefMultCorr("grefmult_VpdMB30") ;
+  fgRefMultCorr_VpdMBnoVtx = new StRefMultCorr("grefmult_VpdMBnoVtx") ;
 }
 
 //____________________________________________________________________________________________________
@@ -81,6 +87,24 @@ StRefMultCorr* CentralityMaker::getTofTrayMultCorr()
 StRefMultCorr* CentralityMaker::getgRefMultCorr()
 {
   return fgRefMultCorr ;
+}
+
+//____________________________________________________________________________________________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_P16id()
+{
+    return fgRefMultCorr_P16id ;
+}
+
+//____________________________________________________________________________________________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_VpdMB30()
+{
+    return fgRefMultCorr_VpdMB30 ;
+}
+
+//____________________________________________________________________________________________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_VpdMBnoVtx()
+{
+    return fgRefMultCorr_VpdMBnoVtx ;
 }
 
 //____________________________________________________________________________________________________
