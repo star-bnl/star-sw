@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.47 2017/11/04 03:12:53 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.48 2018/01/11 19:06:26 genevb Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.48  2018/01/11 19:06:26  genevb
+// Update B/EEMC simulation chain options and maker ordering
+//
 // Revision 1.47  2017/11/04 03:12:53  zhux
 // added P16ig Run14 AuAu200 st_WB chain
 //
@@ -248,7 +251,11 @@ void bfcMixer_Tpx(Int_t Nevents=100,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
+  chain3Opt += ",TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,emcSim,BEmcMixer,EEfs,EEmcMixer"; 
+
+  bool useEndcapSlowSim = true; // turn Endcap slow simu On/Off 
+  if (useEndcapSlowSim) chain3Opt += ",EEss";
+
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -323,42 +330,30 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   }
   Chain->cd();
 
- //............. begin of EMC embedding makers................
+  //.............. Ensure EEmc maker order here ....................
 
-  //.............. Add BEmc stuff here ....................
-  gSystem->Load("StEmcSimulatorMaker");
-  gSystem->Load("StEmcMixerMaker");
-  gSystem->Load("StEEmcSimulatorMaker");
-
-  StMcEventMaker* mcEventMaker = new StMcEventMaker();
-  StEmcSimulatorMaker *bemcSim   = new StEmcSimulatorMaker();
-  StEmcMixerMaker     *bemcMixer = new StEmcMixerMaker();
-  chain3->AddAfter("emcRaw",bemcMixer); 
-  chain3->AddAfter("emcRaw",bemcSim); 
-  chain3->AddAfter("emcRaw",mcEventMaker);
-  bemcMixer->SetDebug(0); // set it to 1 for more printouts
- // note, Barrel slow sim is always ON, said Adam 
-
-  //........... Add EEmc Stuff ( Simu, and Mixer) here ..............
-  StEEmcFastMaker  *eemcFastSim = new StEEmcFastMaker();
-  StEEmcMixerMaker *eemcMixer   = new StEEmcMixerMaker();
-
-  /* position B+E EMC makers in the chain 
-     (order is reverse because 'After' is used - looks funny but is right)
-  */
-  chain3->AddAfter("emcRaw",eemcMixer); 
-  chain3->AddAfter("emcRaw",eemcFastSim); 
-
+  // EEMC fast simulator should be run, even if slow simulator is run (Ting Lin)
+  StEEmcFastMaker  *eemcFastSim = (StEEmcFastMaker*) chain3->Maker("eefs");
+  if (!eemcFastSim) eemcFastSim = (StEEmcFastMaker*) chain3->Maker("EEmcFastSim");
+  if (!eemcFastSim) eemcFastSim = new StEEmcFastMaker();
   eemcFastSim->SetEmbeddingMode();
   //  eemcFastSim->SetDebug();
-  // eemcMixer->SetDebug();
   
-  bool useEndcapSlowSim = true;
-  if(useEndcapSlowSim) { // turn Endcap slow simu On/Off 
-    StEEmcSlowMaker *slowSim=new StEEmcSlowMaker();
-    chain3->AddAfter("EEmcFastSim",slowSim); 
-    slowSim->setEmbeddingMode();
+  StEEmcMixerMaker* eemcMixer = (StEEmcMixerMaker *) chain3->Maker("EEmcMixer");
+  if (!eemcMixer) cout << "ERROR in finding EEMC Mixer!" << endl;
+  // eemcMixer->SetDebug();
+  chain3->AddBefore(eemcMixer->GetName(),eemcFastSim);
+
+  if (useEndcapSlowSim) {
+    StEEmcSlowMaker  *eemcSlowSim = (StEEmcSlowMaker*) chain3->Maker("eess");
+    if (!eemcSlowSim) cout << "ERROR in finding EEMC Slow Simulator!" << endl;
+    eemcSlowSim->setEmbeddingMode();
+    chain3->AddBefore(eemcMixer->GetName(),eemcSlowSim);
   }
+
+  StMcEventMaker* mcEventMaker = (StMcEventMaker *) chain3->Maker("StMcEventMaker");
+  if (!mcEventMaker)  mcEventMaker = new StMcEventMaker();
+  chain3->AddAfter(eemcMixer->GetName(),mcEventMaker);
 
 
   
