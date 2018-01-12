@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.147 2017/01/26 21:32:41 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.147 2017/01/26 21:32:41 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148 2018/01/12 23:17:09 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148 2018/01/12 23:17:09 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.148  2018/01/12 23:17:09  smirnovd
+ * Removed declared but undefined functions
+ *
  * Revision 2.147  2017/01/26 21:32:41  perev
  * 1. Method removeNode added. It removes node from the track.
  *    It becames important for the case with reuse hits when old Dca node
@@ -1022,18 +1025,6 @@ double StiKalmanTrack::getTrackLength() const
   return len;
 }
 
-
-/*! Calculate and return the track segment length between two nodes.
-  <h3>Notes</h3>
-  <ol>
-  <li>This is basically a wrapper for the StiKalmanTrackNode::pathLToNode function.</li>
-  </ol>
-  \return length
- */
-//  inline double StiKalmanTrack::calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const
-//  {
-//    return p1.pathLToNode(&p2);
-//  }
 
 /*! Calculates the radiation length of material crossed by the track.
 
