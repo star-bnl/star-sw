@@ -284,7 +284,10 @@ so we keep it here for source compatibility
 #define FCS_SYSTEM       30
 #define FCS_ID           FCS_SYSTEM
 
-#define RTS_NUM_SYSTEMS	31	/* current maximum. Can not be greater than 32! */
+#define ITPC_SYSTEM       31
+#define ITPC_ID           ITPC_SYSTEM
+
+#define RTS_NUM_SYSTEMS	32	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -649,6 +652,8 @@ extern inline const char *getTrgDetBitName(int x) {
 
 #define FCS_NODES(x)  ((EXT2_SYSTEM<<12) | (FCS_SYSTEM<<7) | (x))
 
+#define ITPC_NODES(x)  ((EXT2_SYSTEM<<12) | (ITPC_SYSTEM<<7) | (x))
+
 extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
@@ -708,6 +713,8 @@ extern inline const char *rts2name(int rts_id)
 		return "ETOF" ;
 	case FCS_SYSTEM :
 		return "FCS" ;
+	case ITPC_SYSTEM :
+		return "ITPC" ;
 	case RHICF_SYSTEM :
 		return "RHICF" ;
 	default :
@@ -776,6 +783,8 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "rhicf";
 	case FCS_SYSTEM :
 		return "fcs";
+	case ITPC_SYSTEM :
+		return "itpc";
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -823,6 +832,7 @@ extern inline int rts2det(int ix)
 	case ETOF_ID:
 	case RHICF_ID:
 	case FCS_ID:
+	case ITPC_ID:
 		return ix ;
 	default :
 		return -1 ;
@@ -864,7 +874,7 @@ extern inline int rts2tcd(int rts)
 		-1,		//28
 		TCD_RHICF,	//29
 		TCD_FCS,	//30
-		-1,		//31
+		TCD_TPX,	//31	// iTPC repeats TPC TCD!
 	} ;
 
 	if(rts < 0) return -1 ;
@@ -874,6 +884,7 @@ extern inline int rts2tcd(int rts)
 
 }
 
+// This is actually bad. I really want grp2rts!!! Should remove it...
 extern inline int tcd2rts(int tcd)
 {
 	static int map[32] = {
@@ -920,7 +931,7 @@ extern inline int tcd2rts(int tcd)
 #define LEGACY_DETS (1<<FTP_ID)
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<RHICF_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
 		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<ETOF_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID) |\
-			(1<<FCS_ID) 
+			(1<<FCS_ID) | (1<<ITPC_ID) 
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
@@ -951,7 +962,7 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << ESMD_SYSTEM) ;
 	}
 	if(grp & (1 << TPX_GRP)) {
-	  ret |= (1 << TPX_SYSTEM) | (1<<TPX_SYSTEM);
+	  ret |= (1 << TPX_SYSTEM) | (1<<ITPC_SYSTEM);
 	}
 	if(grp & (1 << RHICF_GRP)) {
 	  ret |= (1 << RHICF_SYSTEM);
@@ -1000,6 +1011,8 @@ extern inline int rts2grp(int rts)
 	case FCS_ID :
 		return FCS_GRP ;
         case TPC_ID:                    // Shares the TPC TCD...
+	        return TPX_GRP;
+        case ITPC_ID:                    // Shares the TPC TCD...
 	        return TPX_GRP;
 	default:
 		return 31 ;	// this is an ERROR since groups < 16
