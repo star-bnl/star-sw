@@ -37,7 +37,8 @@ void StEpdGeom::SetPpTtEw(short uniqueID){
 }
 
 double StEpdGeom::GetZwheel(){
-  return 375.0*mEW;
+  const double z_EPD = 375.0;  // EPD is 375 cm away from center of TPC in z-direction
+  return z_EPD*mEW;
 }
 
 double StEpdGeom::GetPhiCenter(){
@@ -46,18 +47,18 @@ double StEpdGeom::GetPhiCenter(){
   if (mEW<0){    // east
     double phiSS = TMath::Pi()/2.0 - (mPP-0.5)*DeltaPhiSS;
     if (phiSS<0.0) phiSS += 2.0*TMath::Pi();
-    if (mTT==1){phiCenter = phiSS;}  // tile 1
+    if (1 == mTT){phiCenter = phiSS;}  // tile 1
     else{
-      if (mTT%2 == 0){phiCenter = phiSS - DeltaPhiSS/4.0;}
+      if (0 == mTT%2){phiCenter = phiSS - DeltaPhiSS/4.0;}
       else           {phiCenter = phiSS + DeltaPhiSS/4.0;}
     }
   }
   else{  // west
     double phiSS = TMath::Pi()/2.0 + (mPP-0.5)*DeltaPhiSS;
     if (phiSS>2.0*TMath::Pi()) phiSS -= 2.0*TMath::Pi();
-    if (mTT==1){phiCenter = phiSS;}  // tile 1
+    if (1==mTT){phiCenter = phiSS;}  // tile 1
     else{
-      if (mTT%2 == 0){phiCenter = phiSS + DeltaPhiSS/4.0;}
+      if (0 == mTT%2){phiCenter = phiSS + DeltaPhiSS/4.0;}
       else          {phiCenter = phiSS - DeltaPhiSS/4.0;}
     }
   }
@@ -137,14 +138,14 @@ TVector3 StEpdGeom::RandomPointOnTile(){
   short RR=this->Row();
   double Xmin = Rmin + GapWidth;
   double Xmax = Rmax - GapWidth;
-  if (RR==1) Xmin -= 2.0*GapWidth;  // no glue on the "inside" of tile 1
-  if (RR==16) Xmax += GapWidth; // no glue on "outside" of TT30,31
+  if (1==RR) Xmin -= 2.0*GapWidth;  // no glue on the "inside" of tile 1
+  if (16==RR) Xmax += GapWidth; // no glue on "outside" of TT30,31
 
   // the reason for this next command is that Tile 01 is a pain in the neck.
   // I didn't figure out an easy way to get a random point inside the pentagon,
   // so I make the outer radius a little too big.  Then I get a point, and if
   // it doesn't fit in the tile, I try again until it's finally there.
-  if (RR==1) Xmax += GapWidth;
+  if (1==RR) Xmax += GapWidth;
 
   double A = Aparam;
   if (1==RR) A*= 2.0;
@@ -165,7 +166,7 @@ TVector3 StEpdGeom::RandomPointOnTile(){
   // not fit into the tile after all, so check and if it doesn't
   // then try again.
   // Recursion ==  Awesomeness.
-  if (RR==1){
+  if (1==RR){
     if (!(this->IsInTile(Point.X(),Point.Y()))) return this->RandomPointOnTile();}
 
   return Point;
@@ -219,7 +220,7 @@ void StEpdGeom::GetCorners(int* nCorners, double* xc, double* yc){
     x[3] = Rmin + GapWidth;  y[3] = -Rmin*tan(OpeningAngle) + GapWidth;
     x[4] = -999;            y[4] = -999;    // unused for TT!=1
 
-    if (RR==16){       // there is no glue "outside" TT30,31
+    if (16==RR){       // there is no glue "outside" TT30,31
       x[1] += GapWidth;
       x[2] += GapWidth;
     }
