@@ -23,6 +23,28 @@ it again there and there will be only one line of initializations.
 
 namespace {
 
+std::string getDataBasePath() { 
+
+  std::string path;
+  // First try if the environment variable HEED_DATABASE is defined.
+  char* heed_database = std::getenv("HEED_DATABASE");
+  if (heed_database == NULL) {
+    // If HEED_DATABASE is not defined, try GARFIELD_HOME.
+    char* garfield_home = std::getenv("GARFIELD_HOME");
+    if (garfield_home == NULL) {
+      std::cerr << "Heed:\n    Could not retrieve database path.\n";
+    } else {
+      path = std::string(garfield_home) + "/Heed/heed++/database";
+    }
+  } else {
+    path = std::string(heed_database);
+  }
+  if (!path.empty()) {
+    std::cout << "Heed:\n    Database path: " << path << "\n";
+  }
+  return path;
+}
+
 Heed::ExAtomPhotoAbsCS generate_Ar_PACS(const std::string& shelllist_dir,
                                         const std::string& pacs_table_dir) {
 
@@ -72,17 +94,8 @@ namespace Heed {
 using CLHEP::gram;
 using CLHEP::mole;
 
-char* a_internal_HDB;
-std::string shelllist_dir_name =
-    std::string((a_internal_HDB = getenv("HEED_DATABASE")) == NULL
-                    ? ""
-                    : a_internal_HDB) +
-    "/";
-std::string pacs_table_dir_name =
-    std::string((a_internal_HDB = getenv("HEED_DATABASE")) == NULL
-                    ? ""
-                    : a_internal_HDB) +
-    "/henke/";
+const std::string shelllist_dir_name = getDataBasePath() + "/";
+const std::string pacs_table_dir_name = shelllist_dir_name + "henke/";
 
 // Hydrogen
 HydrogenPhotoAbsCS Hydrogen_shell_PACS;

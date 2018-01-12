@@ -33,7 +33,9 @@ class ViewFEMesh {
 
   TCanvas* GetCanvas();
 
+  /// Set the canvas to be painted on.
   void SetCanvas(TCanvas* c);
+  /// Set the component from which to retrieve the mesh and field.
   void SetComponent(ComponentFieldMap* comp);
 
   /// Set area to be plotted to the default.
@@ -42,7 +44,7 @@ class ViewFEMesh {
   void SetArea(const double xmin, const double ymin, const double zmin,
                const double xmax, const double ymax, const double zmax);
 
-  /// Reset the projection plane
+  /// Reset the projection plane.
   void SetDefaultProjection();
   /// Set the projection plane.
   void SetPlane(double fx, double fy, double fz, double x0, double y0,
@@ -78,9 +80,8 @@ class ViewFEMesh {
     m_fillMesh = true;
   }
 
-  /// Debugging switch
-  void EnableDebugging() { m_debug = true; }
-  void DisableDebugging() { m_debug = false; }
+  /// Switch on/off debugging output.
+  void EnableDebugging(const bool on = true) { m_debug = on; }
 
   /// Create a default set of custom-made axes.
   void CreateDefaultAxes();

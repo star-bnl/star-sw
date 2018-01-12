@@ -24,6 +24,4 @@ void rnorm_float(const float r1, const float r2, float &x1, float &x2) {
   x1 = r * cos(fi);
   x2 = r * sin(fi);
 }
-double rnorm_improved(void) { return Garfield::RndmGaussian(); }
-
 }

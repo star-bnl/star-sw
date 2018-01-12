@@ -52,7 +52,7 @@ TrackHeed::TrackHeed()
       m_mediumName(""),
       m_usePhotonReabsorption(true),
       m_usePacsOutput(false),
-      m_useDelta(true),
+      m_doDeltaTransport(true),
       m_matter(NULL),
       m_gas(NULL),
       m_material(NULL),
@@ -165,12 +165,12 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << m_className << "::NewTrack:\n";
-    std::cerr << "    No medium at initial position.\n";
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    No medium at initial position.\n";
     return false;
   } else if (!medium->IsIonisable()) {
-    std::cerr << "TrackHeed:NewTrack:\n";
-    std::cerr << "    Medium at initial position is not ionisable.\n";
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Medium at initial position is not ionisable.\n";
     return false;
   }
 
@@ -372,6 +372,9 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     tcls = virtualPhoton->currpos.time;
     // Skip clusters outside the drift area or outside the active medium.
     if (!IsInside(xcls, ycls, zcls)) continue;
+    // Add the first ion (at the position of the cluster).
+    m_conductionIons.push_back(
+        Heed::HeedCondElectron(virtualPhoton->currpos.pt, tcls));
     ++m_bankIterator;
     break;
   }
@@ -387,10 +390,6 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   // Get the transferred energy (convert from MeV to eV).
   e = virtualPhoton->energy * 1.e6;
 
-  // Add the first ion (at the position of the cluster).
-  m_conductionIons.push_back(
-      Heed::HeedCondElectron(Heed::point(xcls, ycls, zcls), tcls));
-
   while (!secondaries.empty()) {
     std::vector<Heed::gparticle*> newSecondaries;
     // Loop over the secondaries.
@@ -405,7 +404,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
         const double y = delta->currpos.pt.v.y * 0.1 + m_cY;
         const double z = delta->currpos.pt.v.z * 0.1 + m_cZ;
         if (!IsInside(x, y, z)) continue;
-        if (m_useDelta) {
+        if (m_doDeltaTransport) {
           // Transport the delta electron.
           delta->fly(newSecondaries);
           // Add the conduction electrons and ions to the list.
@@ -451,7 +450,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     secondaries.swap(newSecondaries);
   }
   // Get the total number of electrons produced in this step.
-  ne = m_useDelta ? m_conductionElectrons.size() : m_deltaElectrons.size();
+  ne = m_doDeltaTransport ? m_conductionElectrons.size() : m_deltaElectrons.size();
   ni = m_conductionIons.size();
   return true;
 }
@@ -467,7 +466,7 @@ bool TrackHeed::GetElectron(const unsigned int i,
     return false;
   }
 
-  if (m_useDelta) {
+  if (m_doDeltaTransport) {
     // Make sure an electron with this number exists.
     if (i >= m_conductionElectrons.size()) {
       std::cerr << m_className << "::GetElectron: Index out of range.\n";
@@ -536,7 +535,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   ni = 0;
 
   // Check if delta electron transport was disabled.
-  if (!m_useDelta) {
+  if (!m_doDeltaTransport) {
     std::cerr << m_className << "::TransportDeltaElectron:\n"
               << "    Delta electron transport has been switched off.\n";
     return;
@@ -801,7 +800,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     // Check if it is a delta electron.
     Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
     if (delta) {
-      if (m_useDelta) {
+      if (m_doDeltaTransport) {
         // Transport the delta electron.
         delta->fly(m_particleBank);
         // Add the conduction electrons to the list.
@@ -837,7 +836,8 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   }
 
   // Get the total number of electrons produced in this step.
-  nel = m_useDelta ? m_conductionElectrons.size() : m_deltaElectrons.size();
+  nel = m_doDeltaTransport ? m_conductionElectrons.size() : 
+                             m_deltaElectrons.size();
   ni = m_conductionIons.size();
 }
 
@@ -890,16 +890,21 @@ void TrackHeed::SetParticleUser(const double m, const double z) {
 bool TrackHeed::Setup(Medium* medium) {
 
   // Make sure the path to the Heed database is known.
-  char* dbPath = getenv("HEED_DATABASE");
-  if (dbPath == 0) {
-    std::cerr << m_className << "::Setup:\n";
-    std::cerr << "    Database path is not defined.\n";
-    std::cerr << "    Environment variable HEED_DATABASE is not set.\n";
-    std::cerr << "    Cannot proceed with initialization.\n";
-    return false;
+  std::string databasePath;
+  char* dbPath = std::getenv("HEED_DATABASE");
+  if (dbPath == NULL) {
+    // Try GARFIELD_HOME.
+    dbPath = std::getenv("GARFIELD_HOME");
+    if (dbPath == NULL) {
+      std::cerr << m_className << "::Setup:\n    Cannot retrieve database path "
+                << "(environment variables HEED_DATABASE and GARFIELD_HOME "
+                << "are not defined).\n    Cannot proceed.\n";
+      return false;
+    }
+    databasePath = std::string(dbPath) + "/Heed/heed++/database";
+  } else {
+    databasePath = dbPath;
   }
-
-  std::string databasePath = dbPath;
   if (databasePath[databasePath.size() - 1] != '/') {
     databasePath.append("/");
   }

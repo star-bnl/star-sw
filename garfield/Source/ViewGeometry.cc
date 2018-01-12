@@ -23,15 +23,14 @@ ViewGeometry::ViewGeometry()
 
 ViewGeometry::~ViewGeometry() {
 
-  if (!m_hasExternalCanvas && m_canvas != NULL) delete m_canvas;
+  if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
   Reset();
 }
 
 void ViewGeometry::SetGeometry(GeometrySimple* geo) {
 
-  if (geo == NULL) {
-    std::cerr << m_className << "::SetGeometry:\n";
-    std::cerr << "    Geometry pointer is null.\n";
+  if (!geo) {
+    std::cerr << m_className << "::SetGeometry: Null pointer.\n";
     return;
   }
 
@@ -40,8 +39,8 @@ void ViewGeometry::SetGeometry(GeometrySimple* geo) {
 
 void ViewGeometry::SetCanvas(TCanvas* c) {
 
-  if (c == NULL) return;
-  if (!m_hasExternalCanvas && m_canvas != NULL) {
+  if (!c) return;
+  if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
     m_canvas = NULL;
   }
@@ -51,23 +50,20 @@ void ViewGeometry::SetCanvas(TCanvas* c) {
 
 void ViewGeometry::Plot() {
 
-  if (m_geometry == NULL) {
-    std::cerr << m_className << "::Plot:\n";
-    std::cerr << "    Geometry is not defined.\n";
+  if (!m_geometry) {
+    std::cerr << m_className << "::Plot: Geometry is not defined.\n";
     return;
   }
 
-  if (m_canvas == NULL) {
+  if (!m_canvas) {
     m_canvas = new TCanvas();
-    m_canvas->SetTitle(m_label.c_str());
     if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
   m_canvas->cd();
 
   const unsigned int nSolids = m_geometry->GetNumberOfSolids();
   if (nSolids == 0) {
-    std::cerr << m_className << "::Plot:\n";
-    std::cerr << "    Geometry is empty.\n";
+    std::cerr << m_className << "::Plot: Geometry is empty.\n";
     return;
   }
 
@@ -75,11 +71,10 @@ void ViewGeometry::Plot() {
   double xMin = 0., yMin = 0., zMin = 0.;
   double xMax = 0., yMax = 0., zMax = 0.; 
   if (!m_geometry->GetBoundingBox(xMin, yMin, zMin, xMax, yMax, zMax)) {
-    std::cerr << m_className << "::Plot:\n";
-    std::cerr << "    Cannot retrieve bounding box.\n";
+    std::cerr << m_className << "::Plot: Cannot retrieve bounding box.\n";
     return;
   }
-  m_geoManager = new TGeoManager("ViewGeometryGeoManager", m_label.c_str());
+  m_geoManager = new TGeoManager("ViewGeometryGeoManager", "");
   TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.);
   TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 1, matVacuum);
   m_media.push_back(medVacuum);
@@ -95,24 +90,24 @@ void ViewGeometry::Plot() {
 
   for (unsigned int i = 0; i < nSolids; ++i) {
     Solid* solid = m_geometry->GetSolid(i);
-    if (solid == NULL) {
-      std::cerr << m_className << "::Plot:\n";
-      std::cerr << "    Could not get solid " << i << " from geometry.\n";
+    if (!solid) {
+      std::cerr << m_className << "::Plot:\n"
+                << "    Could not get solid " << i << " from geometry.\n";
       continue;
     }
     // Get the center coordinates.
     double x0 = 0., y0 = 0., z0 = 0.;
     if (!solid->GetCenter(x0, y0, z0)) {
-      std::cerr << m_className << "::Plot:\n";
-      std::cerr << "    Could not determine solid center.\n";
+      std::cerr << m_className << "::Plot:\n"
+                << "    Could not determine solid center.\n";
       continue;
     }
     // Get the rotation.
     double ctheta = 1., stheta = 0.;
     double cphi = 1., sphi = 0.;
     if (!solid->GetOrientation(ctheta, stheta, cphi, sphi)) {
-      std::cerr << m_className << "::Plot:\n";
-      std::cerr << "    Could not determine solid orientation.\n";
+      std::cerr << m_className << "::Plot:\n"
+                << "    Could not determine solid orientation.\n";
       continue;
     }
     double matrix[9] = {cphi * ctheta, -sphi, cphi * stheta,
@@ -122,34 +117,33 @@ void ViewGeometry::Plot() {
     if (solid->IsTube()) {
       double rmin = 0., rmax = 0., lz = 0.;
       if (!solid->GetDimensions(rmin, rmax, lz)) {
-        std::cerr << m_className << "::Plot:\n";
-        std::cerr << "    Could not determine tube dimensions.\n";
+        std::cerr << m_className << "::Plot:\n"
+                  << "    Could not determine tube dimensions.\n";
         continue;
       }
       volume = m_geoManager->MakeTube("Tube", medDefault, rmin, rmax, lz);
     } else if (solid->IsBox()) {
       double dx = 0., dy = 0., dz = 0.;
       if (!solid->GetDimensions(dx, dy, dz)) {
-        std::cerr << m_className << "::Plot:\n";
-        std::cerr << "    Could not determine box dimensions.\n";
+        std::cerr << m_className << "::Plot:\n"
+                  << "    Could not determine box dimensions.\n";
         continue;
       }
       volume = m_geoManager->MakeBox("Box", medDefault, dx, dy, dz);
     } else if (solid->IsSphere()) {
       double rmin = 0., rmax = 0., dummy = 0.;
       if (!solid->GetDimensions(rmin, rmax, dummy)) {
-        std::cerr << m_className << "::Plot:\n";
-        std::cerr << "    Could not determine sphere dimensions.\n";
+        std::cerr << m_className << "::Plot:\n"
+                  << "    Could not determine sphere dimensions.\n";
         continue;
       }
       volume = m_geoManager->MakeSphere("Sphere", medDefault, rmin, rmax); 
     } else {
-      std::cerr << m_className << "::Plot:\n";
-      std::cerr << "    Unknown solid type.\n";
+      std::cerr << m_className << "::Plot: Unknown type of solid.\n";
       continue;
     }
     Medium* medium = m_geometry->GetMedium(x0, y0, z0);
-    if (medium == NULL) {
+    if (!medium) {
       volume->SetLineColor(kGreen + 2);
       volume->SetTransparency(50);
     } else if (medium->IsGas()) {

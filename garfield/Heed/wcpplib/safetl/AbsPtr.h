@@ -16,7 +16,6 @@ The file is provided "as is" without express or implied warranty.
 #include <cstring>
 #include <limits.h>
 #include <typeinfo>
-#include <string.h>
 #include "wcpplib/util/FunNameStack.h"
 
 //#define IMPLICIT_X_STAR

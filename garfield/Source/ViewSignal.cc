@@ -54,8 +54,7 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
                             const bool electron, const bool ion) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::PlotSignal:\n";
-    std::cerr << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::PlotSignal: Sensor is not defined.\n";
     return;
   }
 

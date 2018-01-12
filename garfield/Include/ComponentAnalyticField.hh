@@ -112,12 +112,14 @@ class ComponentAnalyticField : public ComponentBase {
                         const double zmin, const double zmax,
                         const std::string& label, const double gap = -1.);
 
-  // Set the periodic length [cm] in x/y direction
+  /// Set the periodic length [cm] in the x-direction.
   void SetPeriodicityX(const double s);
+  /// Set the periodic length [cm] in the y-direction.
   void SetPeriodicityY(const double s);
   bool GetPeriodicityX(double& s);
   bool GetPeriodicityY(double& s);
 
+  /// Add a point charge.
   void AddCharge(const double x, const double y, const double z,
                  const double q);
   void ClearCharges();
@@ -149,10 +151,11 @@ class ComponentAnalyticField : public ComponentBase {
     return m_scellType;
   }
 
+  /// Setup the weighting field for a given group of wires or planes.
   void AddReadout(const std::string& label);
 
-  void EnableChargeCheck() { m_chargeCheck = true; }
-  void DisableChargeCheck() { m_chargeCheck = false; }
+  void EnableChargeCheck(const bool on = true) { m_chargeCheck = on; }
+  void DisableChargeCheck() { EnableChargeCheck(false); }
 
   unsigned int GetNumberOfWires() const { return m_nWires; }
   bool GetWire(const unsigned int i, double& x, double& y, double& diameter,
@@ -248,9 +251,9 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<double> amp2;
 
   // Parameters for B2 type cells
-  std::vector<double> b2sin;
+  std::vector<double> m_b2sin;
   // Parameters for C type cells
-  int mode;
+  int m_mode;
   std::complex<double> m_zmult;
   double m_p1, m_p2, m_c1;
   // Parameters for D3 type cells
@@ -493,14 +496,15 @@ class ComponentAnalyticField : public ComponentBase {
       return;
     }
     r = sqrt(x0 * x0 + y0 * y0);
-    theta = 180. * atan2(y0, x0) / Pi;
+    theta = atan2(y0, x0) * RadToDegree;
   }
 
   void Polar2Cartesian(const double r, const double theta, 
                        double& x0, double& y0) const {
 
-    x0 = r * cos(Pi * theta / 180.);
-    y0 = r * sin(Pi * theta / 180.);
+    const double thetap = theta * DegreeToRad;
+    x0 = r * cos(thetap);
+    y0 = r * sin(thetap);
   }
 
   // Transformation (r, theta) to (rho, phi) via the map
@@ -509,7 +513,7 @@ class ComponentAnalyticField : public ComponentBase {
                      double& theta) const {
 
     r = exp(rho);
-    theta = 180. * phi / Pi;
+    theta = RadToDegree * phi;
   }
 };
 }

@@ -37,9 +37,9 @@ class Medium;
 class TrackHeed : public Track {
 
  public:
-  // Constructor
+  /// Constructor
   TrackHeed();
-  // Destructor
+  /// Destructor
   virtual ~TrackHeed();
 
   virtual bool NewTrack(const double x0, const double y0, const double z0,
@@ -49,9 +49,22 @@ class TrackHeed : public Track {
                           int& n, double& e, double& extra);
   bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                   int& ne, int& ni, double& e, double& extra);
+  /** Retrieve the properties of a conduction or delta electron 
+    * in the current cluster.
+    * \param i index of the electron
+    * \param x,y,z coordinates of the electron
+    * \param t time
+    * \param e kinetic energy (only meaningful for delta-electrons)
+    * \param dx,dy,dz direction vector (only meaningful for delta-electrons)
+    **/ 
   bool GetElectron(const unsigned int i, 
                    double& x, double& y, double& z, double& t,
                    double& e, double& dx, double& dy, double& dz);
+  /** Retrieve the properties of an ion in the current cluster.
+    * \param i index of the ion
+    * \param x,y,z coordinates of the ion
+    * \param t time
+    **/ 
   bool GetIon(const unsigned int i, 
               double& x, double& y, double& z, double& t) const;
 
@@ -83,8 +96,8 @@ class TrackHeed : public Track {
   void EnableMagneticField();
   void DisableMagneticField();
 
-  void EnableDeltaElectronTransport() { m_useDelta = true; }
-  void DisableDeltaElectronTransport() { m_useDelta = false; }
+  void EnableDeltaElectronTransport() { m_doDeltaTransport = true; }
+  void DisableDeltaElectronTransport() { m_doDeltaTransport = false; }
 
   void EnablePhotonReabsorption() { m_usePhotonReabsorption = true; }
   void DisablePhotonReabsorption() { m_usePhotonReabsorption = false; }
@@ -96,7 +109,7 @@ class TrackHeed : public Track {
   // Define particle mass and charge (for exotic particles).
   // For standard particles Track::SetParticle should be used.
   void SetParticleUser(const double m, const double z);
-  bool IsInside(const double x, const double y, const double z);
+
  private:
   // Prevent usage of copy constructor and assignment operator
   TrackHeed(const TrackHeed& heed);
@@ -111,7 +124,7 @@ class TrackHeed : public Track {
   bool m_usePhotonReabsorption;
   bool m_usePacsOutput;
 
-  bool m_useDelta;
+  bool m_doDeltaTransport;
   struct deltaElectron {
     double x, y, z, t;
     double e;
@@ -163,11 +176,7 @@ class TrackHeed : public Track {
   bool SetupDelta(const std::string& databasePath);
   std::string FindUnusedMaterialName(const std::string& namein);
   void ClearParticleBank(); 
-public:
-  Heed::EnergyMesh* EnergyMesh() {return m_energyMesh;}
-  Heed::EnTransfCS* Transfercs() {return m_transferCs;}
-  Heed::HeedMatterDef* Matter()  {return m_matter;}
-  const Heed::MolecPhotoAbsCS** Molpacs() {return (const Heed::MolecPhotoAbsCS**)  m_molPacs;}
+  bool IsInside(const double x, const double y, const double z);
 };
 }
 

@@ -177,7 +177,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
         double e1 = hmd->energy_mesh->get_e(ne);
         double e2 = hmd->energy_mesh->get_e(ne + 1);
         double ics = 0.;
-        if (s_use_mixture_thresholds == 1) {
+        if (hmd->s_use_mixture_thresholds == 1) {
           ics = pacs->get_integral_TICS(ns, e1, e2, hmd->min_ioniz_pot) /
                 (e2 - e1) * C1_MEV2_MBN;
         } else {
@@ -241,7 +241,7 @@ EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
       const long qs = pacs->get_qshell();
       for (long ns = 0; ns < qs; ns++) {
         double ics;
-        if (s_use_mixture_thresholds == 1) {
+        if (hmd->s_use_mixture_thresholds == 1) {
           ics = pacs->get_integral_TICS(ns, e1, e2, hmd->min_ioniz_pot) /
                 (e2 - e1) * C1_MEV2_MBN;
         } else {
