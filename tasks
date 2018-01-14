@@ -1,0 +1,8 @@
+================================================================================
+12/28/17
+1. incorporate epd to StarVMC/StarVMCApplication/St_g2t_Chair
+2. TF1 function for dN/dx derivatives
+3. 1B Pico/2016 production
+4. Memory leak in new CA (?)
+5. Fix vpd timing for simulation
+6. To understand difference between new and old CA.

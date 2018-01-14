@@ -25,7 +25,7 @@ using namespace std;
 
 ClassImp(StFmsHitMaker);
 
-StFmsHitMaker::StFmsHitMaker(const char* name) : StMaker(name), mReadMuDst(0), mCurrentRunNumber(0) {
+StFmsHitMaker::StFmsHitMaker(const char* name) : StMaker(name) {
 	mFmsDbMaker = NULL;
 	mFmsCollection = NULL;
 	mMuFmsColl = NULL;
@@ -153,56 +153,72 @@ int StFmsHitMaker::Make(){
 
 
   /// Read DB and put DetectorId, channeel and apply Calibration to get Energy
-  if(flag>0){
-    for(unsigned int i=0; i<mFmsCollection->numberOfHits(); i++){
-      int d,c;
-      StFmsHit* fmsHit = (mFmsCollection->hits())[i];
-      int crt   =fmsHit->qtCrate();
-      int slot  =fmsHit->qtSlot();
-      int ch    =fmsHit->qtChannel();
-      unsigned short adc =fmsHit->adc();
-      mFmsDbMaker->getReverseMap(crt,slot,ch,&d,&c);
-      float e=0.0;
-      if(d>0 || c>0){
-	  //unsigned short rawadc=adc;
-	  short bitshift=0;
-	  if(mCorrectAdcOffByOne){
-	      bitshift = mFmsDbMaker->getBitShiftGain(d,c);
-	      if(bitshift>0){		  
-		  int check=adc % (1<<bitshift);
-		  if(check!=0){
-		      LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc%(1<<bitshift)=%d",
-					d,c,adc,bitshift,check) << endm;
-		  }
-	      }else if(bitshift<0){
-		  int check=adc / (1<< (12+bitshift));
-		  if(check!=0){
-		      LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc/(1<<(12+bitshift))=%d",
-					d,c,adc,bitshift,check) << endm;
-		  }
-	      }
-	      //Leaving ADC value in StFmsHit as it was recorded, so that when we read from MuDST, we don't double correct!!!!
-	      //   if(bitshift>=0) {
-	      //     adc += (0x1<<bitshift);
-	      //     fmsHit->setAdc(adc); 
-	      //   }
-	      //LOG_INFO << Form("RawADC=%4d NewADC=%4d Bitshift=%d",rawadc,adc,bitshift) << endm;
-	  }
-	  float g1=mFmsDbMaker->getGain(d,c);
-	  float g2=mFmsDbMaker->getGainCorrection(d,c);	  
-	  if(mCorrectAdcOffByOne){
-	      e=(adc+pow(2.0,bitshift))*g1*g2;
-	  }else{
-	      e=adc*g1*g2;
-	  }
-      }
-      fmsHit->setDetectorId(d);
-      fmsHit->setChannel(c);
-      fmsHit->setEnergy(e);
-      if(GetDebug()>0) fmsHit->print();
-    }
-  }
+		if(flag>0){
+		  Float_t mCurrentEventNumber = muDst->event()->eventNumber();
+		  mCurrentRunNumber =  muDst->event()->runNumber();
 
+		  for(unsigned int i=0; i<mFmsCollection->numberOfHits(); i++){
+		    int d,c;
+		    StFmsHit* fmsHit = (mFmsCollection->hits())[i];
+		    int crt   =fmsHit->qtCrate();
+		    int slot  =fmsHit->qtSlot();
+		    int ch    =fmsHit->qtChannel();
+		    unsigned short adc =fmsHit->adc();
+		    mFmsDbMaker->getReverseMap(crt,slot,ch,&d,&c);
+		    float e=0.0;
+		    if(d>0 || c>0){
+		      //unsigned short rawadc=adc;
+		      short bitshift=0;
+		      if(mCorrectAdcOffByOne){
+			bitshift = mFmsDbMaker->getBitShiftGain(d,c);
+			if(bitshift>0){		  
+			  int check=adc % (1<<bitshift);
+			  if(check!=0){
+			    LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc%(1<<bitshift)=%d", 
+					      d,c,adc,bitshift,check) << endm;
+			  }
+			}else if(bitshift<0){
+			  int check=adc / (1<< (12+bitshift));
+			  if(check!=0){
+			    LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc/(1<<(12+bitshift))=%d",
+					      d,c,adc,bitshift,check) << endm;
+			  }
+			}
+			//Leaving ADC value in StFmsHit as it was recorded, so that when we read from MuDST, we don't double correct!!!!
+			//   if(bitshift>=0) {
+			//     adc += (0x1<<bitshift);
+			//     fmsHit->setAdc(adc); 
+			//   }
+			//LOG_INFO << Form("RawADC=%4d NewADC=%4d Bitshift=%d",rawadc,adc,bitshift) << endm;
+		      }
+		      float g1=mFmsDbMaker->getGain(d,c);
+		      float g2=mFmsDbMaker->getGainCorrection(d,c);	  
+		      float gt=1.0;
+		      if(mTimeDepCorr==1){  // time dep. Correction                                                    
+			gt = mFmsDbMaker->getTimeDepCorr(mCurrentEventNumber,d-8,c);
+			if(gt<0){
+			  if(mTowerRej==1){
+			    gt = 0;     // making -ve(tower to be rej) to zero  
+			  }else{
+			    gt = -gt;  // making +ve : doing time dep corr. for all towers 
+			  } 
+			}
+			//      cout<<d<<"  "<<ch<<"  "<<gt<<endl;
+		      }
+	  
+		      if(mCorrectAdcOffByOne){
+			e=(adc+pow(2.0,bitshift))*g1*g2*gt;
+		      }else{
+			e=adc*g1*g2*gt;
+		      }
+		    }
+		    fmsHit->setDetectorId(d);
+		    fmsHit->setChannel(c);
+		    fmsHit->setEnergy(e);
+		    if(GetDebug()>0) fmsHit->print();
+		  }
+		}
+		
  	LOG_INFO<<"StFmsHitMaker::Make(): flag = "<<flag<<", got "<<mFmsCollection->numberOfHits()<<" hits in StFmsCollection"<<endm;
 	
 
@@ -230,12 +246,12 @@ int StFmsHitMaker::Make(){
 	}
 */
 	if(stEvent) {
-		//Adding StFmsCollection to StEvent
-		LOG_DEBUG<<"StFmsHitMaker::Make Adding StFmsCollection to StEvent"<<endm;
-		stEvent->setFmsCollection(mFmsCollection);
+	  //Adding StFmsCollection to StEvent
+	  LOG_DEBUG<<"StFmsHitMaker::Make Adding StFmsCollection to StEvent"<<endm;
+	  stEvent->setFmsCollection(mFmsCollection);
 	}
 	else LOG_INFO << "StEvent is empty" << endm;
-
+	
 	return kStOk;
 }
 
