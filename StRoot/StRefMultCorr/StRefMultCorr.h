@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.h,v 1.8 2013/05/10 18:33:33 hmasui Exp $
+// $Id: StRefMultCorr.h,v 1.9 2015/05/22 06:52:07 hmasui Exp $
 // $Log: StRefMultCorr.h,v $
+// Revision 1.9  2015/05/22 06:52:07  hmasui
+// Add grefmult for Run14 Au+Au 200 GeV
+//
 // Revision 1.8  2013/05/10 18:33:33  hmasui
 // Add TOF tray mult, preliminary update for Run12 U+U
 //
@@ -35,7 +38,6 @@
 //
 //  Centrality binning:
 //     Bin       Centrality (16)   Centrality (9)
-//     -1           80-100%           80-100% // this one should be rejected in your centrality related analysis
 //     0            75-80%            70-80%
 //     1            70-75%            60-70%
 //     2            65-70%            50-60%
@@ -112,8 +114,6 @@ class StRefMultCorr {
     // Read scale factor from text file
     void setVzForWeight(const Int_t nbin, const Double_t min, const Double_t max) ;
     void readScaleForWeight(const Char_t* input) ;
-    // tmp
-    Double_t get(const Int_t i, const Int_t j) const ;
 
     // Return begin/end run from energy and year
     Int_t getBeginRun(const Double_t energy, const Int_t year) ;

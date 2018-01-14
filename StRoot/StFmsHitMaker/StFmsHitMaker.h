@@ -35,8 +35,12 @@ public:
   Int_t  Make();
   Int_t  Finish();
 
-  //!
-  void SetCorrectAdcOffByOne(int v) {mCorrectAdcOffByOne=v;}
+  //For Time Dep Corr based on LED
+  void SetTimeDepCorr(int correct=0)  {mTimeDepCorr=correct;} //Use Time Dep. Corrections                      
+  void SetTowerRej(int rej=1)         {mTowerRej=rej;} //Use Tower Rejection mode  //! 
+
+  //Correcting ADC zero suppression done wrong online
+  void SetCorrectAdcOffByOne(int v=1) {mCorrectAdcOffByOne=v;}
 
   //! 0=search StTriggerData from StTriggerDataMaker/StEvent/MuDst and apply new DB (default)                      
   //! 1=Read hits,clusters,points from Mudst, new calibration from DB will NOT be applied!!!!
@@ -45,7 +49,7 @@ public:
   TMatrix**	GetEnergyMatrices();
   Bool_t	Legal(Int_t iew,Int_t nstb,Int_t row0,Int_t col0);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFmsHitMaker.h,v 1.4 2017/09/28 17:06:19 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFmsHitMaker.h,v 1.5 2018/01/12 20:05:19 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
   StFmsDbMaker*      mFmsDbMaker;    //! DB maker provides FMS geometry and calibration data
@@ -53,8 +57,10 @@ private:
   StMuFmsCollection* mMuFmsColl;     //! FMS data structure for StMuEvent  
   Int_t mCorrectAdcOffByOne=1;       //! Make correction for ADC from QT being off by 1
   Int_t readMuDst();  
-  Int_t mReadMuDst;   
-  Int_t mCurrentRunNumber;
+  Int_t mReadMuDst=0;                //!
+  Int_t mTimeDepCorr=0;              //!
+  Int_t mTowerRej=0;                 //!
+  Int_t mCurrentRunNumber=0;         //!
   ClassDef(StFmsHitMaker,1);
 };
 
