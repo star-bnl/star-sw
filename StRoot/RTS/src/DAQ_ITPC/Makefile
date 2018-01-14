@@ -26,7 +26,7 @@ endif
 #DEFINES += -DDO_DBG
 
 
-OBJS := itpcCore.o daq_itpc.o
+OBJS := itpcCore.o itpcPed.o itpcInterpreter.o daq_itpc.o
 
 LIBS = libitpc.a
 
@@ -44,7 +44,7 @@ daq_itpc.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_itpc.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_itpc.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_itpc.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_itpc.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
+daq_itpc.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
 daq_itpc.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_itpc.o: ../SFS/sfs_index.h
 daq_itpc.o: ../SFS/fs_index.h
@@ -58,11 +58,23 @@ daq_itpc.o: daq_itpc.h
 daq_itpc.o: ../DAQ_READER/daq_det.h
 daq_itpc.o: itpcCore.h
 daq_itpc.o: ../DAQ_READER/daq_dta_structs.h
+daq_itpc.o: itpcInterpreter.h
+daq_itpc.o: itpcPed.h
 itpcCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 itpcCore.o: itpc_maps.h
 itpcCore.o: itpc_rowlen.h
 itpcCore.o: itpc_padplane.h
 itpcCore.o: itpcCore.h
 itpcCore.o: ../DAQ_READER/daq_dta_structs.h
+itpcInterpreter.o: ../../../../StRoot/RTS/include/rtsLog.h
+itpcInterpreter.o: ../DAQ_READER/daq_dta.h
+itpcInterpreter.o: ../../../../StRoot/RTS/include/rts.h
+itpcInterpreter.o: ../DAQ_READER/daq_dta_structs.h
+itpcInterpreter.o: itpcInterpreter.h
+itpcInterpreter.o: itpcPed.h
+itpcPed.o: ../../../../StRoot/RTS/include/rtsLog.h
+itpcPed.o: ../DAQ_ITPC/itpcCore.h
+itpcPed.o: ../DAQ_READER/daq_dta_structs.h
+itpcPed.o: itpcPed.h
 daq_itpc.o: ../DAQ_READER/daq_det.h
 itpcCore.o: ../DAQ_READER/daq_dta_structs.h
