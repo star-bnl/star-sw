@@ -1,6 +1,6 @@
 #ifndef STAR_StiGeomMake
 #define STAR_StiGeomMake
-// $Id: StiDetectorVolume.h,v 2.5 2015/12/20 01:35:12 fisyak Exp $
+// $Id: StiDetectorVolume.h,v 2.6 2018/01/16 22:46:15 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "TVolume.h"
@@ -44,6 +44,8 @@ class StiDetectorVolume : public TVolume {
       StiDetectorVolume(StiToolkit &tool, const TString &detectorName="", unsigned int select=kAll);
       StiDetectorVolume(const StiDetectorBuilder &builder, unsigned int select=kAll);
       
+      void SaveGeometry(const std::string fileName="sti2rootgeo.root") const;
+
       virtual ~StiDetectorVolume(){;}
       virtual void   Browse(TBrowser *b);
       virtual char *GetObjectInfo(Int_t px, Int_t py) const;

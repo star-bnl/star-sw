@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.8 2015/12/20 01:35:12 fisyak Exp $
+// $Id: StiDetectorVolume.cxx,v 2.9 2018/01/16 22:46:15 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -8,6 +8,7 @@
 #include "TTUBS.h"
 #include "TBRIK.h"
 #include "TMath.h"
+#include "TFile.h"
 #include "TGeometry.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -240,4 +241,19 @@ TShape *StiDetectorVolume::MakeShape(const StiCylindricalShape &shape,const char
                   ,  shape.getOuterRadius()                        // rmax
                   ,  shape.getHalfDepth()                          // Dz
                   );             
+}
+
+
+
+/*!
+ * Save Sti geometry created by this builder in a root file. The Sti volumes are
+ * converted into drawable root objects with the help of StiMaker/StiDetectorBuilder.
+ * Note: The StiDetectorVolume object is created on the heap in order to avoid
+ * disturbance in the current BFC library linking order.
+ */
+void StiDetectorVolume::SaveGeometry(const std::string fileName) const
+{
+   TFile fileTmp(fileName.c_str(), "RECREATE");
+   this->Write();
+   fileTmp.Close();
 }
