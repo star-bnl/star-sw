@@ -62,47 +62,49 @@ int StFmsHitMaker::Make(){
 	LOG_DEBUG<<"StFmsHitMaker::Make start"<<endm;
 	int flag = 0;
 	StTriggerData* triggerData = 0;
+	Float_t mCurrentEventNumber=0;
 	
 	if(mReadMuDst>0) return readMuDst();
 
 	//first try to get StTriggerData from StTriggerDataMaker (works for proudction) and create StFmsCollection
 	TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
 	if (os) {
-		triggerData = (StTriggerData*)os->GetObject();
-		if(triggerData){
-			flag=1;
-			// mFmsCollection = new StFmsCollection();
-			LOG_DEBUG<<"StFmsHitMaker::Make Found StTriggerData from StTriggerDataMaker"<<endm;
-		}
+	    triggerData = (StTriggerData*)os->GetObject();
+	    if(triggerData){
+		flag=1;
+		mCurrentEventNumber=triggerData->eventNumber();
+		// mFmsCollection = new StFmsCollection();
+		LOG_DEBUG<<"StFmsHitMaker::Make Found StTriggerData from StTriggerDataMaker"<<endm;
+	    }
 	}
   
 	//2nd try to get StTriggerData from StEvent
 	//but once FMS data is killed in StEvent, this will not work and all you see is empty data
 	StEvent* stEvent = (StEvent*) GetInputDS("StEvent");
-	//StEvent* stEvent = (StEvent*) GetInputDS("StEvent");
 	if(flag==0){
-		if(stEvent){
-			triggerData = stEvent->triggerData();
-			if(triggerData) {
-				flag=2;
-				LOG_DEBUG<<"StFmsHitMaker::Make Found StTriggerData from StEvent"<<endm;
-			}
-			else{
-				mFmsCollection = stEvent->fmsCollection();
-				if(mFmsCollection){
-	  				flag=3;
-	  				LOG_DEBUG<<"StFmsHitMaker::Make Found StFmsCollection from StEvent"<<endm;
-				}
-			}
-		} //found StEvent
+	    if(stEvent){
+		mCurrentEventNumber=stEvent->id();
+		triggerData = stEvent->triggerData();
+		if(triggerData) {
+		    flag=2;
+		    LOG_DEBUG<<"StFmsHitMaker::Make Found StTriggerData from StEvent"<<endm;
+		}
+		else{
+		    mFmsCollection = stEvent->fmsCollection();
+		    if(mFmsCollection){
+			flag=3;
+			LOG_DEBUG<<"StFmsHitMaker::Make Found StFmsCollection from StEvent"<<endm;
+		    }
+		}
+	    } //found StEvent
 	}
-	LOG_DEBUG<<"before checking MuDst, flag is: "<<flag<<endl;
   
 	//3rd try to get StTriggerData from StMuEvent, works for produced data (.MuDst.root) --Yuxi
 	StMuDst* muDst = (StMuDst*)GetInputDS("MuDst");
 	if(flag==0){
 	    if(muDst && muDst->event()){
 		mCurrentRunNumber = muDst->event()->runNumber();
+		mCurrentEventNumber = muDst->event()->eventNumber();
 		triggerData = (StTriggerData*)StMuDst::event()->triggerData();
 		if(triggerData){
 		    flag = 4; //Yuxi
@@ -110,79 +112,73 @@ int StFmsHitMaker::Make(){
 		}
 		else LOG_ERROR << "Finally, no StFmsTriggerData in MuDst " <<endm;
 	    }
-	}
- 
-	LOG_DEBUG<<"after checking MuDst, flag is: "<<flag<<endm;
+	} 
+	LOG_DEBUG<<"Flag="<<flag<<" (0=Not found, 1=StTriggerDataMaker, 2=StEvent, 3=FmsCollection 4=Mudst)"<<endm;
 	//after this step triggerData is pointing to StTriggerData block of StEvent
 
 	if(flag>0){
-		mFmsCollection = new StFmsCollection();
-		//create StFmsHit and add it to StFmsCollection
-		for(unsigned short crt=1; crt<=4; crt++){
-			for(unsigned short slot=1; slot<=16; slot++){
-				for(unsigned short ch=0; ch<32; ch++){
-	  				unsigned short adc=0;
-	  				unsigned short tdc=0;
-	  				if(flag<=4 && triggerData){ //wont work when flag=3
-	    					adc=triggerData->fmsADC(crt,slot-1,ch);
-	    					tdc=triggerData->fmsTDC(crt,slot-1,ch);
-	  				}
-				
-					if(adc>0 || tdc>0){
-					//	LOG_INFO<<"adc of crt "<<crt<<", slot "<<slot<<", channel "<<ch<<" is: "<<adc<<endm;
-					//	LOG_INFO<<"tdc=====================================================is: "<<tdc<<endm;
-	    					StFmsHit* hit = new StFmsHit();
-	    					if(!hit){
-	      						LOG_ERROR <<"Failed to create FMS hit, skip this hit."<<endm;
-	      						continue;
-	    					}
-						hit->setDetectorId(0);
-						hit->setChannel(0);
-						hit->setQtCrate(crt);
-						hit->setQtSlot(slot);
-						hit->setQtChannel(ch);
-						hit->setAdc(adc);
-						hit->setTdc(tdc);
-						hit->setEnergy(0.0);
-						mFmsCollection->addHit(hit);
-						if(GetDebug()>0) hit->print();
-	  				}
-				}
-      			}	
-    		}
-
-
+	    mFmsCollection = new StFmsCollection();
+	    //create StFmsHit and add it to StFmsCollection
+	    for(unsigned short crt=1; crt<=4; crt++){
+		for(unsigned short slot=1; slot<=16; slot++){
+		    for(unsigned short ch=0; ch<32; ch++){
+			unsigned short adc=0;
+			unsigned short tdc=0;
+			if(flag<=4 && triggerData){ //wont work when flag=3
+			    adc=triggerData->fmsADC(crt,slot-1,ch);
+			    tdc=triggerData->fmsTDC(crt,slot-1,ch);
+			}
+			
+			if(adc>0 || tdc>0){
+			    //	LOG_INFO<<"adc of crt "<<crt<<", slot "<<slot<<", channel "<<ch<<" is: "<<adc<<endm;
+			    //	LOG_INFO<<"tdc=====================================================is: "<<tdc<<endm;
+			    StFmsHit* hit = new StFmsHit();
+			    if(!hit){
+				LOG_ERROR <<"Failed to create FMS hit, skip this hit."<<endm;
+				continue;
+			    }
+			    hit->setDetectorId(0);
+			    hit->setChannel(0);
+			    hit->setQtCrate(crt);
+			    hit->setQtSlot(slot);
+			    hit->setQtChannel(ch);
+			    hit->setAdc(adc);
+			    hit->setTdc(tdc);
+			    hit->setEnergy(0.0);
+			    mFmsCollection->addHit(hit);
+			    if(GetDebug()>0) hit->print();
+			}
+		    }
+		}	
+	    }
+	    
   /// Read DB and put DetectorId, channeel and apply Calibration to get Energy
-		if(flag>0){
-		  Float_t mCurrentEventNumber = muDst->event()->eventNumber();
-		  mCurrentRunNumber =  muDst->event()->runNumber();
-
-		  for(unsigned int i=0; i<mFmsCollection->numberOfHits(); i++){
-		    int d,c;
-		    StFmsHit* fmsHit = (mFmsCollection->hits())[i];
-		    int crt   =fmsHit->qtCrate();
-		    int slot  =fmsHit->qtSlot();
-		    int ch    =fmsHit->qtChannel();
-		    unsigned short adc =fmsHit->adc();
-		    mFmsDbMaker->getReverseMap(crt,slot,ch,&d,&c);
-		    float e=0.0;
-		    if(d>0 || c>0){
-		      //unsigned short rawadc=adc;
-		      short bitshift=0;
-		      if(mCorrectAdcOffByOne){
+	    for(unsigned int i=0; i<mFmsCollection->numberOfHits(); i++){
+		int d,c;
+		StFmsHit* fmsHit = (mFmsCollection->hits())[i];
+		int crt   =fmsHit->qtCrate();
+		int slot  =fmsHit->qtSlot();
+		int ch    =fmsHit->qtChannel();
+		unsigned short adc =fmsHit->adc();
+		mFmsDbMaker->getReverseMap(crt,slot,ch,&d,&c);
+		float e=0.0;
+		if(d>0 || c>0){
+		    //unsigned short rawadc=adc;
+		    short bitshift=0;
+		    if(mCorrectAdcOffByOne){
 			bitshift = mFmsDbMaker->getBitShiftGain(d,c);
 			if(bitshift>0){		  
-			  int check=adc % (1<<bitshift);
-			  if(check!=0){
-			    LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc%(1<<bitshift)=%d", 
-					      d,c,adc,bitshift,check) << endm;
-			  }
+			    int check=adc % (1<<bitshift);
+			    if(check!=0){
+				LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc%(1<<bitshift)=%d", 
+						  d,c,adc,bitshift,check) << endm;
+			    }
 			}else if(bitshift<0){
-			  int check=adc / (1<< (12+bitshift));
-			  if(check!=0){
-			    LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc/(1<<(12+bitshift))=%d",
-					      d,c,adc,bitshift,check) << endm;
-			  }
+			    int check=adc / (1<< (12+bitshift));
+			    if(check!=0){
+				LOG_ERROR << Form("Bitshift in DB is not consistent with data! det=%2d ch=%3d adc=%4d bitshift=%2d adc/(1<<(12+bitshift))=%d",
+						  d,c,adc,bitshift,check) << endm;
+			    }
 			}
 			//Leaving ADC value in StFmsHit as it was recorded, so that when we read from MuDST, we don't double correct!!!!
 			//   if(bitshift>=0) {
@@ -190,68 +186,46 @@ int StFmsHitMaker::Make(){
 			//     fmsHit->setAdc(adc); 
 			//   }
 			//LOG_INFO << Form("RawADC=%4d NewADC=%4d Bitshift=%d",rawadc,adc,bitshift) << endm;
-		      }
-		      float g1=mFmsDbMaker->getGain(d,c);
-		      float g2=mFmsDbMaker->getGainCorrection(d,c);	  
-		      float gt=1.0;
-		      if(mTimeDepCorr==1){  // time dep. Correction                                                    
+		    }
+		    float g1=mFmsDbMaker->getGain(d,c);
+		    float g2=mFmsDbMaker->getGainCorrection(d,c);	  
+		    float gt=1.0;
+		    if(mTimeDepCorr==1){  // time dep. Correction                                                    
 			gt = mFmsDbMaker->getTimeDepCorr(mCurrentEventNumber,d-8,c);
 			if(gt<0){
-			  if(mTowerRej==1){
-			    gt = 0;     // making -ve(tower to be rej) to zero  
-			  }else{
-			    gt = -gt;  // making +ve : doing time dep corr. for all towers 
-			  } 
+			    if(mTowerRej==1){
+				gt = 0;     // making -ve(tower to be rej) to zero  
+			    }else{
+				gt = -gt;  // making +ve : doing time dep corr. for all towers 
+			    } 
 			}
 			//      cout<<d<<"  "<<ch<<"  "<<gt<<endl;
-		      }
-	  
-		      if(mCorrectAdcOffByOne){
-			e=(adc+pow(2.0,bitshift))*g1*g2*gt;
-		      }else{
-			e=adc*g1*g2*gt;
-		      }
 		    }
-		    fmsHit->setDetectorId(d);
-		    fmsHit->setChannel(c);
-		    fmsHit->setEnergy(e);
-		    if(GetDebug()>0) fmsHit->print();
-		  }
+		    
+		    if(mCorrectAdcOffByOne){
+			e=(adc+pow(2.0,bitshift))*g1*g2*gt;
+		    }else{
+			e=adc*g1*g2*gt;
+		    }
 		}
-		
- 	LOG_INFO<<"StFmsHitMaker::Make(): flag = "<<flag<<", got "<<mFmsCollection->numberOfHits()<<" hits in StFmsCollection"<<endm;
-	
-
-						
-
-	}//flag, received fms data from mudst, triggerdata, etc.
-
-/*   
-	//flag = 0; //yuxi debug
-	if(flag==0) { //read hits created during production
-		if(muDst){
-			mMuFmsColl = StMuDst::muFmsCollection();
-			if(mMuFmsColl){
-				int nhits = mMuFmsColl->numberOfHits();
-				LOG_DEBUG<<"StFmsHitMaker::Make Found "<<nhits<<" hits in MuDst"<<endm;
-				cout<<"StFmsHitMaker::Make Found "<<nhits<<" hits in MuDst"<<endl;
-				for(int i=0; i<nhits; i++){
-		  			StMuFmsHit* mHit = mMuFmsColl->getHit(i);
-		  			if(mHit && GetDebug()>0) mHit->print();
-		  			mHit->print();
-				}
-				flag=5;
-			}
-		}
+		fmsHit->setDetectorId(d);
+		fmsHit->setChannel(c);
+		fmsHit->setEnergy(e);
+		if(GetDebug()>0) fmsHit->print();
+	    }
+	    LOG_INFO<<"StFmsHitMaker::Make(): flag = "<<flag<<", got "<<mFmsCollection->numberOfHits()<<" hits in StFmsCollection"<<endm;
+	}else{
+	    LOG_INFO<<"StFmsHitMaker::Make(): flag = "<<flag<<", no StTrigger data found"<<endm;
 	}
-*/
+
 	if(stEvent) {
 	  //Adding StFmsCollection to StEvent
 	  LOG_DEBUG<<"StFmsHitMaker::Make Adding StFmsCollection to StEvent"<<endm;
 	  stEvent->setFmsCollection(mFmsCollection);
+	}else{
+	    LOG_INFO << "StEvent is empty" << endm;	
 	}
-	else LOG_INFO << "StEvent is empty" << endm;
-	
+
 	return kStOk;
 }
 
