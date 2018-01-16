@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.8 2012/11/09 18:52:33 perev Exp $
+ * $Id: StiPullEvent.h,v 1.9 2018/01/16 22:46:01 smirnovd Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.9  2018/01/16 22:46:01  smirnovd
+ * Removed declared but undefined functions
+ *
  * Revision 1.8  2012/11/09 18:52:33  perev
  * Erros added
  *
@@ -54,10 +57,8 @@ class StiPullTrk : public TObject {
 public:
     StiPullTrk();
    ~StiPullTrk(){}
-    void Finish();
     void Clear(const char *opt = "");
     void Print(const char* option = "") const;
-int TestIt();
 public:
 char mBeg[1];			//|NoIO
 short mTrackNumber; 		//track number 
