@@ -2,8 +2,12 @@
 #define _ITPC_INTERPRETER_
 
 #include <sys/types.h>
+#include <stdio.h>
 
 class itpcData ;
+
+#define ERR_UNKNOWN		0
+#define ERR_DIFFERENT_FEE_IDS	1
 
 class itpcInterpreter
 {
@@ -13,9 +17,12 @@ public:
 
 	~itpcInterpreter() {;} ;
 
+	FILE *fout ;	// as stdout
+
 	void run_start(u_int run) ;
 	void run_stop() ;
 	void start_event(u_int bytes) ;
+	void stop_event() ;
 
 	void fee_dbase(const char *fname=0) ;
 
@@ -44,6 +51,8 @@ public:
 	s_type state ;
 
 	itpcData *ped_c ;
+
+	u_int evt_err[8] ;
 
 	// various variables filled in as we go
 	u_int rdo_wire1_id ;

@@ -10,7 +10,7 @@ public:
 	virtual ~itpcData() {;} ;
 
 	virtual void ch_start(int c) { ch = c ; tb_cou = 0 ;} ;
-	virtual void accum(int tb, int adc) { tb_cou++ ;} ;
+	virtual void accum(int sec0, int rdo0, int port0, int fee_id, int ch, int tb, int adc) { tb_cou++ ;} ;
 	virtual void ch_done(int err) {;} ;
 
 	int sector ;
@@ -33,8 +33,7 @@ public:
 	void set_padplane_id(int sector, int rdo, int port, int id) ;
 	void clear() ;
 
-
-	virtual void accum(int tb, int adc_val) ;
+	void accum(int sec0, int rdo0, int port0, int fee_id, int ch, int tb, int adc) ;
 
 	void calc() ;
 

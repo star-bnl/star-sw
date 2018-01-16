@@ -218,6 +218,12 @@ int main(int argc, char *argv[])
 		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		    date, evp->detectors, evp->status,evp->evpgroups) ;
 
+		if(strlen(print_det)) {
+			printf("*** Event %d, sequence %d: token %d, trgcmd %d, daqcmd %d\n",good,
+			       evp->seq,evp->token,evp->trgcmd,evp->daqcmd) ;
+		}
+			       
+
 		//printf("tinfo evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X\n",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		//   date, evp->detectors, evp->status,evp->evpgroups) ;
 
@@ -2246,26 +2252,32 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	daq_dta *dd ;
 
+	u_char rdos[4] ;
+
+	memset(rdos,0,sizeof(rdos)) ;
+
 	if(strcasestr(do_print,"itpc")) ;	// leave as is...
 	else do_print = 0 ;
 
 	for(int s=1;s<=24;s++) {
 
-#if 0
+#if 1
 		dd = rdr->det("itpc")->get("raw",s) ;
 
 		if(dd) {
 			while(dd->iterate()) {
 				adc_found = 1 ;
 
-				if(do_print) {
-					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
-				}
+				rdos[dd->row-1] = 1 ;
+
+				//if(do_print) {
+				//	printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
+				//}
 			}
 		}
 #endif
 
-#if 0
+#if 1
 		// In SAMPA form
 		dd = rdr->det("itpc")->get("sampa",s) ;
 		if(dd) {
@@ -2282,6 +2294,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 			}
 		}
 #endif
+
+#if 0
 		// In Row/Pad form
 		dd = rdr->det("itpc")->get("adc",s) ;
 		if(dd) {
@@ -2297,7 +2311,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 				}
 			}
 		}
-
+#endif
 
 
 		// PEDESTALS
@@ -2345,11 +2359,16 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	int found = 0 ;
 	if(adc_found || cld_found || ped_found) found = 1 ;
 
+	int rdos_found = 0 ;
+	for(int i=0;i<4;i++) {
+		if(rdos[i]) rdos_found++ ;
+	}
+
 	char fstr[128] ;
 	fstr[0] = 0 ;
 
 	if(adc_found) {
-		strcat(fstr,"ADC ") ;
+		sprintf(fstr,"ADC(%d) ",rdos_found) ;
 	}
 	if(cld_found) strcat(fstr,"CLD ") ;
 	if(ped_found) strcat(fstr,"PEDRMS ") ;

@@ -86,10 +86,8 @@ void itpcPed::clear()
 }
 
 // sector, rdo, port, channel, timebin, value
-void itpcPed::accum(int tb, int adc_val)
+void itpcPed::accum(int sector, int rdo, int port,int fee_id, int ch, int tb, int adc_val)
 {
-
-
 	ped_t *pt = ped_p[sector][rdo][port][ch] ;
 	
 	pt->ped[tb] += adc_val ;
