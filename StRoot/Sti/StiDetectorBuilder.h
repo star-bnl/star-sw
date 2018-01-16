@@ -72,7 +72,6 @@ public:
   double nice(double angle) const;
   void setGroupId(int id) 				{ _groupId = id;}
   int  getGroupId() const 				{return _groupId;}
-  void setTrackingParameters(const StiTrackingParameters & pars);
   StiTrackingParameters *getTrackingParameters() 	{ return  _trackingParameters;}
   Factory<StiDetector>* getDetectorFactory() 		{return _detectorFactory;}
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}

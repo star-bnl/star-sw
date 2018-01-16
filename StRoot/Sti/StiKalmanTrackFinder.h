@@ -65,12 +65,6 @@ public:
   virtual Int_t Fit(StiKalmanTrack *track, Double_t rMin=0);
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter();
-  /// Get the vertex finder used by this track finder
-  void doInitLayer(int trackingDirection);
-  void doNextDetector();
-  void doFinishLayer();
-  void doFinishTrackSearch();
-  void doNextTrackStep();
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
   typedef enum{ // type of return value for the Fit() procedure
