@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.138 2017/04/26 20:20:24 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.139 2018/01/16 19:50:44 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.139  2018/01/16 19:50:44  perev
+// Test to skip wrong file name is enhanced
+//
 // Revision 1.138  2017/04/26 20:20:24  perev
 // Hide m_DataSet
 //
@@ -518,11 +521,14 @@ TDatime St_db_Maker::Time(const char *filename)
 {
   int lfilename,lname,idate,itime;
 
-  TDatime time; time.Set(kMaxTime,0);
+  TDatime time; time.Set(kMaxTime,0);//time is defined as a far future to ignore wrong file
 
   lfilename = strlen(filename);
   lname = strcspn(filename,".");
-  if (lname+2>lfilename) return time;
+  if (lname+2>lfilename) {
+     ::Error("Time", "Wrong File name %s IGNORED",filename);
+     return time;
+  }
   idate = AliasDate(filename+lname+1);
   itime = AliasTime(filename+lname+1);
 
@@ -534,9 +540,12 @@ TDatime St_db_Maker::Time(const char *filename)
       filename[lname+16]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
        idate  = atoi(filename+lname+ 1);
        itime  = atoi(filename+lname+10);
-   } else {                        // file name format:  <name>.<ext>
+   } else if (filename[lname+1]=='C') {// file name is simple xxx.C
        idate = kMinTime;
        itime = 0;
+   } else {                        // file name is wrong
+     ::Error("Time", "Wrong File name %s IGNORED",filename);
+     return time;
    }
    time.Set(idate,itime); return time;
 
