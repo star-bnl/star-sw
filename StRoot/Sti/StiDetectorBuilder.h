@@ -80,7 +80,6 @@ public:
   void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
   StiMaterial *getGasMat()   				{return _gasMat;}
   void setSplit(double relThick=0.5, int maxSplit=20)	{mThkSplit=relThick;mMaxSplit=maxSplit;}
-  void SaveGeometry(const std::string fileName="sti2rootgeo.root") const;
 //		Static methodes
   static void setDebug(int m = 0) 			{_debug = m;}
   static int  debug() {return _debug;}
