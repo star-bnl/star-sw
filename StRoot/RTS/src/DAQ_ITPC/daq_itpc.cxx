@@ -218,6 +218,7 @@ public:
 	daq_adc_tb *at ;
 	int in_adc ;
 
+	
 	void ch_start(int c) {
 		ch = c ;
 		tb_cou = 0 ;
@@ -226,7 +227,7 @@ public:
 		at = (daq_adc_tb *) dta->request(512) ;
 	}
 
-	void accum(int tb, int adc) {
+	void accum(int sec0, int rdo0, int port0, int fee_id, int ch, int tb, int adc) {
 		at[tb_cou].adc = adc ;
 		at[tb_cou].tb = tb ;
 		tb_cou++ ;
@@ -479,16 +480,25 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	u_int err = 0 ;
 	u_int trg_fired ;
 //	u_int v_fired ;
-	int trl_ix = -1 ;
 	int trg_cou ;
 	int t_cou = 0 ;
 	u_int evt_status ;
+	int trl_ix ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
 
+	// since there are buggy TEF events without the start comma lets' search for it
+	for(int i=0;i<16;i++) {
+		if(d[i] == 0xCCCC001C) {
+			d = d + i ;
+			break ;
+		}
+	}
+
 	if(sw16(d[0]) != 0x001CCCCC) {	// expect start-comma
+		LOG(ERR,"First word 0x%08X of %d words - bad",d[0],words) ;
 		err |= 1 ;
 		goto err_end ;
 	}
@@ -506,6 +516,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	if(sw16(d[2]) != 0x12340000) {	// wrong version
+		LOG(ERR,"Wrong version 0x%X",d[2]) ;
 		err |= 2 ;
 		goto err_end ;
 	}
@@ -523,8 +534,8 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 	*/
 
-	//find trailer
-
+	//find trailer start-header
+	trl_ix = -1 ;
 	for(int i=(words-1);i>=0;i--) {
 		if(sw16(d[i]) == 0x98001000) {
 			trl_ix = i ;
@@ -534,6 +545,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 
 	if(trl_ix < 0) {
+		LOG(ERR,"No trailer found") ;
 		err |= 0x20 ;
 		goto err_end ;
 	}
@@ -541,6 +553,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	trl_ix++ ;
 
 	if(sw16(d[trl_ix++]) != 0xABCD0000) {
+		LOG(ERR,"Wrong trailer word") ;
 		err |= 0x40 ;
 		goto err_end ;
 	}
@@ -611,17 +624,26 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[t_cou].t = t ; 
 
 		if(trg[t_cou].trg>=4 && trg[t_cou].trg<13) {	// FIFO trg
+			//LOG(WARN,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
+			//    v,
+			//    trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
+			
+
 			if((v&0xFFF00000) != 0x04300000) {
-				LOG(ERR,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
+				LOG(WARN,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
 				    v,
 				    trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
 			}
-
-			continue ;
+			else {
+				continue ;
+			}
 		}
 
-		if(trg[t_cou].trg==2 && trg[t_cou].t==10 && trg[t_cou].daq==3) continue ;
-		
+		//if(trg[t_cou].trg==2 && trg[t_cou].t==10 && trg[t_cou].daq==3) continue ;
+		if(trg[t_cou].trg<=2) {
+			LOG(WARN,"Odd trg_cmd: T %d, trg %d, daq %d",trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
+			continue ;
+		}
 		t_cou++ ;
 	}
 

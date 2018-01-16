@@ -22,6 +22,8 @@ itpcInterpreter::itpcInterpreter()
 	fee_evt_cou = 0 ;
 	run_number = 0 ;
 
+	fout = 0 ;
+
 	memset(fee,0,sizeof(fee)) ;
 	ped_c = 0 ;
 }
@@ -32,11 +34,24 @@ void itpcInterpreter::run_start(u_int run)
 	evt_ix = 0 ;
 	fee_evt_cou = 0 ;
 
+	if(fout) {
+		fprintf(fout,"***** RUN_START: %08u\n",run_number) ;
+		fflush(fout) ;
+	}
+
 	LOG(DBG,"Starting run %08u",run_number) ;
 }
 
 void itpcInterpreter::run_stop()
 {
+
+	if(fout) {
+		fprintf(fout,"***** RUN_STOP: %08u\n",run_number) ;
+		fflush(fout) ;
+		fclose(fout) ;
+		fout = 0 ;
+	}
+
 	LOG(INFO,"Stopping run %08u after %d/%d events",run_number,fee_evt_cou,evt_ix) ;
 	
 }
@@ -62,7 +77,18 @@ void itpcInterpreter::start_event(u_int bytes)
 	sampa_bx = -1 ;
 
 	ascii_cou = 0 ;
+
+	memset(evt_err,0,sizeof(evt_err)) ;
 }
+
+void itpcInterpreter::stop_event()
+{
+	for(int i=0;i<8;i++) {
+		if(evt_err[i]) LOG(ERR,"%d: event errors[%d] = %u",rdo_id,i,evt_err[i]) ;
+	}
+	
+}
+
 
 static inline u_int sw16(u_int d)
 {
@@ -156,7 +182,7 @@ int itpcInterpreter::get_l2(char *addr, int words, struct daq_trg_word *trg, int
 	
 
 	if(evt_status) {
-		LOG(ERR,"... %d/%d -- evt status 0x%08X",d[6],d[5],evt_status) ;
+		LOG(ERR,"%d: %d/%d -- evt status 0x%08X",rdo_id,d[6],d[5],evt_status) ;
 
 	}
 
@@ -199,7 +225,7 @@ int itpcInterpreter::get_l2(char *addr, int words, struct daq_trg_word *trg, int
 
 	err_end:;
 
-	LOG(ERR,"Error in get_l2 %d",err) ;
+	LOG(ERR,"%d: Error in get_l2 %d",rdo_id,err) ;
 
 	return 0 ;
 	
@@ -241,7 +267,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 		switch(dd_x) {
 		case 0x980000F8 :	// End-of-FEE status (from RDO)
 			if(d[1]) {
-				LOG(ERR,"FEE #%d[%d] END: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",fee_port,fee_id,
+				LOG(ERR,"%d: FEE #%d[%d] END: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",rdo_id,fee_port,fee_id,
 				    d[0],d[1],d[2],d[3],d[4],d[5],d[6]) ;
 			}
 			else {
@@ -250,7 +276,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 			}
 
 			if((d[-2]&0xFFC00000) != 0x40000000) {
-				LOG(ERR,"FEE #%d: Before END 0x%08X",fee_port,d[-2]) ;
+				LOG(ERR,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
 			}
 
 			// search for RDO-END-FEE marker
@@ -262,7 +288,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 				}
 			}
 
-			LOG(ERR,"FEE #%d: can't find RDO-END",fee_port) ;
+			LOG(ERR,"%d: FEE #%d: can't find RDO-END",rdo_id,fee_port) ;
 			goto stop_loop ;
 
 		}
@@ -275,7 +301,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 		}
 		else {
 			if(fee_id != t_fee_id) {
-				LOG(ERR,"FEE #%d: IDs differ: expect %d, is %d, 0x%08X",fee_port,fee_id,t_fee_id,dd) ;
+				evt_err[ERR_DIFFERENT_FEE_IDS]++ ;
+				LOG(NOTE,"FEE #%d: IDs differ: expect %d, is %d, 0x%08X",fee_port,fee_id,t_fee_id,dd) ;
 			}
 		}
 
@@ -285,10 +312,10 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 		case 0x600000A0 :	// ASCII end
 			break ;
 		case 0xA00000B0 :	// binary start
-			LOG(ERR,"FEE #%d: Unexpected 0x%08X",fee_port,dd) ;
+			LOG(ERR,"%d: FEE #%d: Unexpected 0x%08X",rdo_id,fee_port,dd) ;
 			break ;
 		case 0x600000B0 :	// binary end
-			LOG(ERR,"FEE #%d: Unexpected 0x%08X",fee_port,dd) ;
+			LOG(ERR,"%d: FEE #%d: Unexpected 0x%08X",rdo_id,fee_port,dd) ;
 			break ;
 		case 0x80000001 :	// START EVENT (also hdr)
 			{
@@ -323,8 +350,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 					
 					if(i==1 || i==3) {
 						if(found_ch_mask != 0xFFFFFFFF) {
-							LOG(ERR,"fee_port %d: missing ch after lane %d: 0x%08X",
-							    fee_port,i,found_ch_mask) ;
+							LOG(ERR,"%d: fee_port %d: missing ch after lane %d: 0x%08X",
+							    rdo_id,fee_port,i,found_ch_mask) ;
 						}
 					}
 
@@ -332,14 +359,14 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 				}
 				break ;
 			}
-			LOG(ERR,"FEE #%d: %u 0x%08X -- odd",fee_port,d-start,dd) ;
+			LOG(ERR,"%d: FEE #%d: %u 0x%08X -- odd",rdo_id,fee_port,d-start,dd) ;
 			break ;
 		case 0xA0000001 :	// start event trailer 
 			cfg++ ;
 			break ;
 		case 0x40000001 :	// END EVENT (also trailer)
 			if(dd & 0xFF00) {
-				LOG(ERR,"FEE #%d: EVENT error 0x%02X",fee_port,(dd>>8)&0xFF) ;
+				LOG(ERR,"%d: FEE #%d: EVENT error 0x%02X",rdo_id,fee_port,(dd>>8)&0xFF) ;
 				fee[fee_port].event_errs++ ;
 			}
 			cfg = 0 ;
@@ -412,8 +439,11 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 				ascii_dta[ascii_cou++] = c ;
 				if(c=='\n') {
 					ascii_dta[ascii_cou++] = 0 ;
-					printf("#%02d: %s",fee_port,ascii_dta) ;
-					fflush(stdout) ;
+					if(fout) {
+						fprintf(fout,"#%02d: %s",fee_port,ascii_dta) ;
+						fflush(fout) ;
+					}
+
 
 					if(fee_port > 0) {	// this must be!
 						u_int id1 = 0 ;
@@ -436,7 +466,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 						if(strstr(ascii_dta,"ERROR")) {
 							int last = strlen(ascii_dta) - 1 ;
 							if(ascii_dta[last]=='\n') ascii_dta[last] = 0 ;
-							LOG(ERR,"FEE #%d: [%s]",fee_port,ascii_dta) ;
+							LOG(ERR,"%d: FEE #%d: [%s]",rdo_id,fee_port,ascii_dta) ;
 						}
 
 					}
@@ -448,7 +478,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 			}
 			if(cfg) break ;
 
-			LOG(ERR,"FEE #%d: %u 0x%08X -- unkown",fee_port,d-start,dd) ;
+			evt_err[ERR_UNKNOWN]++ ;
+			LOG(NOTE,"FEE #%d: %u 0x%08X -- unkown",fee_port,d-start,dd) ;
 			break ;
 		}
 
@@ -458,7 +489,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 
 	if(fee_id < 0) {
-		LOG(ERR,"FEE #%d: format error [%u 0x%08X]",fee_port,d-start,*d) ;
+		LOG(ERR,"%d: FEE #%d: format error [%u 0x%08X]",rdo_id,fee_port,d-start,*d) ;
 		return d ;
 	}
 
@@ -470,13 +501,13 @@ int itpcInterpreter::sampa_ch_scan()
 {
 	int err = 0 ;
 	int t_stop_last = -1 ;
-//	int s,r,p ;
+	int s,r,p ;
 	
 	if(ped_c) {
-		ped_c->sector = sector_id - 1 ;
-		ped_c->rdo = rdo_id - 1 ;
-		ped_c->port = fee_port - 1 ;
-		ped_c->fee_id = fee_id ;	// padplane id
+		ped_c->sector = s = sector_id - 1 ;
+		ped_c->rdo = r = rdo_id - 1 ;
+		ped_c->port = p = fee_port - 1 ;
+		ped_c->fee_id = fee_id ;
 
 		ped_c->ch_start(fee_ch) ;
 	}
@@ -495,13 +526,13 @@ int itpcInterpreter::sampa_ch_scan()
 //		LOG(TERR,"...%d %d %d",t_start,t_cou,t_stop) ;
 
 		if(t_start <= t_stop_last) {
-                        LOG(ERR,"t_start %d, t_cou %d, t_stop %d, t_stop_last %d",t_start,t_cou,t_stop,t_stop_last) ;
+                        LOG(ERR,"%d: t_start %d, t_cou %d, t_stop %d, t_stop_last %d",rdo_id,t_start,t_cou,t_stop,t_stop_last) ;
 			err = -1 ;
 			break ;
 		}
 
 		if(t_stop > 512) {
-                        LOG(ERR,"t_start %d, t_cou %d, t_stop %d, t_stop_last %d",t_start,t_cou,t_stop,t_stop_last) ;
+                        LOG(ERR,"%d: t_start %d, t_cou %d, t_stop %d, t_stop_last %d",rdo_id,t_start,t_cou,t_stop,t_stop_last) ;
 			err = -2 ;
 			break ;
 		}
@@ -512,8 +543,8 @@ int itpcInterpreter::sampa_ch_scan()
 			for(int t=t_start;t<=t_stop;t++) {
 				u_short adc = tb_buff[i++] ;
 
-				//ped_c->accum(s,r,p,fee_ch,t,adc) ;
-				ped_c->accum(t,adc) ;
+				ped_c->accum(s,r,p,fee_id,fee_ch,t,adc) ;
+				//ped_c->accum(t,adc) ;
 			}
 		}
 		else {
@@ -526,7 +557,7 @@ int itpcInterpreter::sampa_ch_scan()
 
 	if(err) {
 		for(int i=0;i<tb_cou;i++) {
-			LOG(WARN,"%d/%d = %u",i,tb_cou,tb_buff[i]) ;
+			LOG(NOTE,"%d/%d = %u",i,tb_cou,tb_buff[i]) ;
 		}
 	}
 
@@ -567,7 +598,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	if(d & 0xC0000000) {
 		err |= 0x100 ;
-		LOG(ERR,"Bad Hdr 1") ;
+		LOG(ERR,"%d: Bad Hdr 1",rdo_id) ;
 		d = *data++ ;
 	}
 
@@ -579,7 +610,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	if(d & 0xC0000000) {
 		err |= 0x200 ;
-		LOG(ERR,"Bad Hdr 2") ;
+		LOG(ERR,"%d: Bad Hdr 2",rdo_id) ;
 		d = *data++ ;
 	}
 
@@ -633,7 +664,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 
 	if(parity_err || hamming_err) {
-		LOG(ERR,"Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d",type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err) ;
+		LOG(ERR,"%d:%d: Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d",rdo_id,fee_port,type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err) ;
 		// and I should do something here!
 		err |= 1 ;
 		goto err_ret ;
@@ -658,10 +689,10 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 //		LOG(WARN,"Type %d, words %d, SAMPA %d:%d, BX %u",type,words,sampa_id,sampa_ch,l_sampa_bx) ;
 		break ;
 	case 1 :	// trigger overrun
-		LOG(ERR,"Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X],fee_port %d",type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr,fee_port) ;
+		LOG(ERR,"%d: Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X],fee_port %d",rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr,fee_port) ;
 		break ;
 	default :
-		LOG(ERR,"Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X]",type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr) ;
+		LOG(ERR,"%d: Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X]",rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr) ;
 		err |= 8 ;
 		goto err_ret ;
 	}
@@ -685,7 +716,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		d = *data++ ;
 
 		if((d&0xC0000000)) {
-			LOG(ERR,"sampa data word %d/%d = 0x%08X",i,word32,d) ;
+			LOG(ERR,"%d:%d: %d:%d sampa data word %d/%d = 0x%08X",rdo_id,fee_port,sampa_id,sampa_ch,i,word32,d) ;
 			err |= 0x10 ;
 			i-- ;
 
@@ -712,7 +743,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	
 
 	if(err) {
-		LOG(ERR,"Last SAMPA: FEE #%d: %d:%d = 0x%08X [err 0x%0x]",fee_port,sampa_id,sampa_ch,*data,err) ;
+		LOG(ERR,"%d: Last SAMPA: FEE #%d: %d:%d = 0x%08X [err 0x%0x]",rdo_id,fee_port,sampa_id,sampa_ch,*data,err) ;
 	}
 	else {
 		found_ch_mask |= (1<<sampa_ch) ;
@@ -731,7 +762,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	err_ret:
 
-	LOG(ERR,"ERR 0x%X: 0x%03X 0x%03X 0x%03X 0x%03X 0x%03X 0x%03X",err,
+	LOG(ERR,"%d: ERR 0x%X: 0x%03X 0x%03X 0x%03X 0x%03X 0x%03X 0x%03X",rdo_id,err,
 	    h[0],h[1],h[2],h[3],h[4],h[5]) ;
 
 	return data ;
@@ -794,27 +825,40 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 	u_int *data_end = data + words ;
 	u_int *data_start = data ;
 	u_int rh_xing_start = 0 ;
-	
+	u_int flags = 0 ;
+
 	u_int d  ;
 
 	char mon_string[512] ;
 	int mon_cou = 0 ;
 
+
+	// the data is already SWAPPED if processed in the sector brokers!!!
+	for(int i=0;i<16;i++) {
+		LOG(NOTE,"...%d/%d = 0x%08X",i,words,data[i]) ;
+
+		if((data[i] == 0xCCCC001C)||(data[i] == 0x001CCCCC)) {
+			data = data + i ;
+			break ;
+		}
+	}
+
 	if(data[0]==0xCCCC001C) {	// need swapping!!!!
-//		LOG(WARN,"swapping") ;
+		LOG(NOTE,"swapping") ;
 		for(int i=0;i<words;i++) {
 			data[i] = sw16(data[i]) ;
 		}
 	}
 
-	d = *data ;
+	d = *data++ ;
 
 	switch(d) {
 	case 0xFFFF001C	:	//old style
 	case 0x001CCCCC :	// new style
+		flags |= 1 ;
 		break ;
 	default:
-		LOG(ERR,"First word is not a START comma!? [0x%08X]",d) ;
+		LOG(ERR,"%d: First word is not a START comma!? [0x%08X 0x%08X 0x%08X]",rdo_id,data[-1],data[0],data[1]) ;
 	}
 
 	while(data<data_end) {
@@ -864,7 +908,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 				ascii_dta[ascii_cou++] = c ;
 				if(c=='\n') {
 					ascii_dta[ascii_cou++] = 0 ;
-
+					LOG(ERR,"WTF?") ;
 					printf("HERE #%02d: %s",fee_port,ascii_dta) ;
 
 					if(strncmp(ascii_dta,"1Wire ",6)) {
@@ -919,10 +963,20 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			LOG(INFO,"SEND_CONFIG: start") ;
 			break ;
 		case 0x5800FD71 :
+			if(fout) {
+				fprintf(fout,"%d: 1-wire Id 0x%08X\n",rdo_id,rdo_wire1_id) ;
+			}
+
 			LOG(INFO,"SEND_CONFIG: end for RDO ID 0x%08X",rdo_wire1_id) ;
 			for(int i=1;i<=16;i++) {
 				LOG(INFO,"   FEE #%02d: Padplane %02d, 1Wire 0x%08X",i,fee[i].padplane_id,fee[i].wire1_id) ;
+				if(fout) {
+					fprintf(fout,"   FEE #%02d: Padplane %02d, 1Wire 0x%08X\n",i,fee[i].padplane_id,fee[i].wire1_id) ;
+				}
 			}
+
+			if(fout) fflush(fout) ;
+
 			//fee_dbase() ;
 
 			return 2 ;
@@ -938,7 +992,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			// sometimes I get ASCII immediatelly
 			if((data[1]&0xFFC00000)!=0x80000000) {
 				if((data[1]&0xFFC0FFFF)!=0xA00000A0) {
-					LOG(ERR,"After start 0x%08X, FEE #%d",data[1],data[0]+1) ;
+					LOG(ERR,"%d: After start 0x%08X, FEE #%d",rdo_id,data[1],data[0]+1) ;
 				}
 			}
 
@@ -955,12 +1009,14 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			LOG(NOTE,"RDO FEE data: END: fee_port %d",fee_port) ;
 			break ;
 		case 0x98000004 :
+			flags |= 2 ;
 			LOG(NOTE,"RDO Event Headerr: START") ;
 			for(int i=0;i<100;i++) {
 
 				LOG(NOTE,"Event Header %2d = 0x%08X",i,d) ;
 
 				if(d==0x58000005) {
+					flags |= 4 ;
 					//data++ ;
 					break ;
 				}
@@ -1003,6 +1059,11 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 					int c = d & 0xFF ;
 					if(c=='\n') {
 						mon_string[mon_cou++] = 0 ;
+
+						if(fout) {
+							fprintf(fout,"%d: %s\n",rdo_id,mon_string) ;
+							fflush(fout) ;
+						}
 						LOG(INFO,"%d: \"%s\"",rdo_id,mon_string) ;
 						mon_cou = 0 ;
 					}
@@ -1032,6 +1093,10 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 					if(c=='\n') {
 						mon_string[mon_cou++] = 0 ;
 						LOG(INFO,"%d: \"%s\"",rdo_id,mon_string) ;
+						if(fout) {
+							fprintf(fout,"%d: \"%s\"\n",rdo_id,mon_string) ;
+							fflush(fout) ;
+						}
 						mon_cou = 0 ;
 					}
 					else {
@@ -1051,6 +1116,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			LOG(ERR,"RDO Monitoring:  END: %d = 0x%08X",word_ix,d) ;
 			break ;
 		case 0x98001000 :
+			flags |= 8 ;
 			LOG(NOTE,"RDO: Event Trailer Start") ;
 			for(int i=0;i<100;i++) {
 				if(i==2 && d) {	//status
@@ -1060,6 +1126,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 				LOG(NOTE,"Event Trailer %2d = 0x%08X",i,d) ;
 
 				if((d&0xF800FFFF)==0x58001001) {
+					flags |= 0x10 ;
 					break ;
 				}
 				else {
@@ -1086,10 +1153,10 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			break ;
 		case 0x980000F8 :
 			if(data[1]) {
-				LOG(ERR,"FEE #%d: stat 0x%08X 0x%08X 0x%08X 0x%08X",fee_port,data[1],data[2],data[3],data[4]) ;
+				LOG(ERR,"%d: FEE #%d: stat 0x%08X 0x%08X 0x%08X 0x%08X",rdo_id,fee_port,data[1],data[2],data[3],data[4]) ;
 			}
 			else {
-				LOG(TERR,"FEE #%d: stat 0x%08X 0x%08X 0x%08X 0x%08X",fee_port,data[1],data[2],data[3],data[4]) ;
+				LOG(TERR,"%d: FEE #%d: stat 0x%08X 0x%08X 0x%08X 0x%08X",rdo_id,fee_port,data[1],data[2],data[3],data[4]) ;
 			}
 			//log_start = 1 ;
 			break ;
@@ -1266,6 +1333,13 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			LOG(WARN,"FEE Event:   END") ;
 			break ;
 		default :	// all other cases
+
+			if((d & 0xFFFF0000)==0x005C0000) ;	// stop-comma is OK here
+			else {
+				if(words==(data-data_start)) ;	// OK for the last word
+				else LOG(WARN,"%d: datum huh 0x%08X at %d/%d",rdo_id,d,data-data_start,words) ;
+			}
+#if 0
 			switch(d) {
 			case 0xFFFF001C :
 				LOG(WARN,"RDO comma: START event") ;
@@ -1278,26 +1352,27 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 			if((d&0xF0000000)==0x70000000) {
 				if(d & 0x0C000000) {
-					LOG(ERR,"FEE SAMPA Lane:   END: 0x%08X",d) ;
+					LOG(ERR,"%d: FEE SAMPA Lane:   END: 0x%08X",rdo_id,d) ;
 				}
 				else {
-					LOG(ERR,"FEE SAMPA Lane:   END: 0x%08X",d) ;
+					LOG(ERR,"%d: FEE SAMPA Lane:   END: 0x%08X",rdo_id,d) ;
 				}
 			}
 			else if((d&0xF0000000)==0xB0000000) {
 				if(d & 0x0C000000) {
-					LOG(ERR,"FEE SAMPA Lane: START: 0x%08X",d) ;
+					LOG(ERR,"%d: FEE SAMPA Lane: START: 0x%08X",rdo_id,d) ;
 				}
 				else {
-					LOG(ERR,"FEE SAMPA Lane: START: 0x%08X",d) ;
+					LOG(ERR,"%d: FEE SAMPA Lane: START: 0x%08X",rdo_id,d) ;
 				}
 			}
 			else if((d&0xFFFF0000)==0xFFFF0000) {
-				LOG(ERR,"Out of band header: %d = 0x%08X",word_ix,d) ;
+				LOG(ERR,"%d: Out of band header: %d = 0x%08X",rdo_id,rdo_id,word_ix,d) ;
 			}
 			else if(d&0xC0000000) {
-				LOG(ERR,"... iFEE port #%02d: %d = 0x%08X",fee_port,word_ix,d) ;
+				LOG(ERR,"%d: ... iFEE port #%02d: %d = 0x%08X",rdo_id,fee_port,word_ix,d) ;
 			}
+#endif
 
 			break ;
 		}
@@ -1307,14 +1382,23 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 	}
 
+
+
+	if((flags != 0x1F) || ((data_end-data) != 0)) {
+		LOG(NOTE,"At end: %d, flags 0x%X",data_end-data,flags) ;
+		for(int i=0;i<16;i++) {
+			LOG(NOTE,"... %2d = 0x%08X",i,data_end[-1-i]) ;
+		}
+	}
+
 	if((data[-1] & 0xFFFF0000)==0x005C0000) {
 		log_start = 0 ;
 		//LOG(WARN,"Stop Comma at the very end") ;
 		return 1 ;
 	}
-	else LOG(ERR,"WTF? How can I be here %d %d = 0x%08X!",data_end-data,words,data[-1]) ;
+	else LOG(NOTE,"%d: no end-comma %d %d = 0x%08X!",rdo_id,data_end-data,words,data[-1]) ;
 
-	return -2 ;
+	return 1 ;
 
 
 
