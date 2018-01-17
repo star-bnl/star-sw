@@ -10,10 +10,13 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.140 2018/01/17 03:31:15 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.141 2018/01/17 17:15:59 perev Exp $
 // $Log: St_db_Maker.cxx,v $
-// Revision 1.140  2018/01/17 03:31:15  perev
-// Put corrections back
+// Revision 1.141  2018/01/17 17:15:59  perev
+// Enhanced test to skip wrong file name corrected
+//
+// Revision 1.139  2018/01/16 19:50:44  perev
+// Test to skip wrong file name is enhanced
 //
 // Revision 1.138  2017/04/26 20:20:24  perev
 // Hide m_DataSet
@@ -521,25 +524,32 @@ TDatime St_db_Maker::Time(const char *filename)
 {
   int lfilename,lname,idate,itime;
 
-  TDatime time; time.Set(kMaxTime,0);
+  TDatime time; time.Set(kMaxTime,0);//time is defined as a far future to ignore wrong file
+  TString tfilename(filename);
+  tfilename.ReplaceAll(".C","");
+  tfilename.ReplaceAll(".root","");
 
-  lfilename = strlen(filename);
-  lname = strcspn(filename,".");
-  if (lname+2>lfilename) return time;
-  idate = AliasDate(filename+lname+1);
-  itime = AliasTime(filename+lname+1);
+  lfilename = tfilename.Length();
+  lname = strcspn(tfilename.Data(),".");
+  if (lfilename== lname) { //simple case xxx.C
+     time.Set(kMinTime,0);
+     return time;
+  }
+  idate = AliasDate(tfilename.Data()+lname+1);
+  itime = AliasTime(tfilename.Data()+lname+1);
 
-  if (idate) { time.Set(idate,itime);return time;}
+  if (idate) {
+     time.Set(idate,itime);return time;
+  }
 
-  if (lname+18 <= lfilename    &&
-      filename[lname+0 ]=='.'  &&
-      filename[lname+9 ]=='.'  &&
-      filename[lname+16]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
-       idate  = atoi(filename+lname+ 1);
-       itime  = atoi(filename+lname+10);
-   } else {                        // file name format:  <name>.<ext>
-       idate = kMinTime;
-       itime = 0;
+  if (lname+16 <= lfilename     &&
+      tfilename[lname+0 ]=='.'  &&
+      tfilename[lname+9 ]=='.'    ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
+       idate  = atoi(tfilename.Data()+lname+ 1);
+       itime  = atoi(tfilename.Data()+lname+10);
+   } else {                        // file name is wrong
+     ::Error("St_db_Maker::Time", "Unrecognised File name %s IGNORED",filename);
+     return time;
    }
    time.Set(idate,itime); return time;
 
