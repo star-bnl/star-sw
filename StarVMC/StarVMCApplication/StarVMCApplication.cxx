@@ -941,7 +941,7 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
   TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
   if (! p) return;
   Int_t pdg = p->PdgCode();
-  if (pdg < 0) return;
+  if (! pdg) return;
   Int_t iD  = g3->IdFromPDG(pdg);
   const Char_t *modes[3][3] = {
     {mode1A, mode1B, mode1C},
