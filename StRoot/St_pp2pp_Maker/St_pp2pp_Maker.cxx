@@ -13,6 +13,10 @@
  * Revision 2015/10/22 (Kin Yip) : Add MakeTracks from Rafal and a couple functions to read from new databases PMTSkewConstants/AcceleratorParameters
  *
  * Revision 2015/10/28 (Kin Yip) : Add Rafal's latest revision (multi-track algorithm etc.) for his MakeTracks to be used for the imminent production
+ *
+ * Revision 2018/1/18 (Kin Yip) : --- Add  mVersion == 3 for 2017
+ *                                    Add/Use LVDT_OFFSET_2017[32] / LVDT_SCALE_2017[32] to be used for 2017 data
+ *
  */                                                                      
 
 #include "St_pp2pp_Maker.h"
@@ -40,6 +44,8 @@
 #include "StEvent/StTriggerData2009.h"
 #include "StEvent/StTriggerData2012.h"
 #include "StEvent/StTriggerData2013.h"
+#include "StEvent/StTriggerData2016.h"
+#include "StEvent/StTriggerData2017.h"
 
 using namespace std;
 
@@ -85,8 +91,10 @@ Int_t St_pp2pp_Maker::InitRun(int runumber) {
 
   if ( runumber < 16000000 )
     mVersion = 1 ; // from 2009 to < 2015
+  else if ( runumber < 18000000 )
+    mVersion = 2 ; // >= 2015 < 2017
   else
-    mVersion = 2 ; // >= 2015
+    mVersion = 3 ; // >= 2017
 
   cout << "St_pp2pp_Maker: Timestamp - Day: " << GetDateTime().GetDate() << " , DB-Time: " << GetDBTime().GetDate() << endl ;
   cout << "St_pp2pp_Maker: Timestamp - Time: " << GetDateTime().GetTime() << " , DB-Date: " << GetDBTime().GetTime() << endl ;
@@ -679,6 +687,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   // >=2015 --- W2U (~WVU) is sequencer 7 and W2D (~WVD) is sequencer 8
   const short UD[kMAXSEQ]  =  { 1, 0, 0, 1, 1, 0, 0, 1 } ; 
 
+  // 2015:
   // Bogdan's alignment-corrected offsets (in mm) // version 1.1. -> included by Rafal
   const double LVDT_OFFSET[32] = {
     4.991, -36.620,   4.945, -36.610,  -4.147,  41.738,  -4.103,  41.722,
@@ -693,6 +702,24 @@ Int_t St_pp2pp_Maker::MakeClusters() {
     0.993,   0.000,   0.993,   0.000,   0.966,   0.000,   0.965,   0.000,
     1.004,   0.000,   1.004,   0.000,   1.050,   0.000,   1.049,   0.000,
   };
+
+  // 2017:        added by K. Yip (2018-1-18)
+  /* corrected */  
+  // const char *LVDT_REVISION = "LVDTConst Version: 2017.0.1";
+  const double LVDT_OFFSET_2017[32] = { 
+    3.752, -37.124,   3.699, -37.169,  -5.160,  42.434,  -5.115,  42.355,
+    4.236, -19.230,   4.321, -19.339,  -5.311,  59.894,  -5.533,  59.612,
+    4.864,  41.480,   4.908,  41.213,  -4.293, -37.968,  -4.315, -38.297,
+    5.169,  63.474,   5.106,  63.479,   3.377, -15.926,   3.412, -16.133,
+  };
+
+  const double LVDT_SCALE_2017[32] = { 
+    0.998,   0.000,   0.998,   0.000,   0.998,   0.000,   0.998,   0.000,
+    0.996,   0.000,   0.996,   0.000,   0.996,   0.000,   0.998,   0.000,
+    0.997,   0.000,   0.997,   0.000,   1.002,   0.000,   1.002,   0.000,
+    1.003,   0.000,   1.003,   0.000,   1.007,   0.000,   1.007,   0.000,
+  };
+
 
   Bool_t is_candidate_to_store ;
 
@@ -764,9 +791,13 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	//      cout << "Offsets : " <<  i << " " << j << " " << mOffsetTable[0].rp_offset_plane[4*i+j] << endl ; 
       }
       else {
-	if ( mRPpositionsTable )
+	if ( mRPpositionsTable ) {
 	  // K. Yip (Oct. 19, 2015) : set offsets back to m (as LVDT arrays are in mm)
-	  offset = ( LVDT_OFFSET[4*i+j] + LVDT_SCALE[4*i+j]*mLVDT_pos[i] )/1000. ; 
+	  if ( mVersion == 2 )
+	    offset = ( LVDT_OFFSET[4*i+j] + LVDT_SCALE[4*i+j]*mLVDT_pos[i] )/1000. ; 
+	  else // for 2017:        added by K. Yip (2018-1-18)
+	    offset = ( LVDT_OFFSET_2017[4*i+j] + LVDT_SCALE_2017[4*i+j]*mLVDT_pos[i] )/1000. ; 
+	}
 	else
 	  offset = double(ErrorCode) ;
 	//	cout << "Offsets : " <<  i << " " << j << " " << offset << endl ; 
@@ -825,7 +856,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	    if ( (j % 2) == 0 ) { // A or C : pitch_4svx = 0.00974 cm
 	      // K. Yip : Aug. 14, 2015 : 
 	      // The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it, where _all_ SVX channels were connected to the silicon and the pitch is smaller.
-	      if ( ( mVersion == 2 ) && ( i == 3 ) && ( j == 0 ) ) { // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
+	      if ( ( mVersion >= 2 ) && ( i == 3 ) && ( j == 0 ) ) { // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
 		pitch = kpitch_4svx2 ; // in m
 	      }
 	      else {
