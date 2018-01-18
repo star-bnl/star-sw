@@ -624,7 +624,7 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 	// Getting rid of the 1st channel (0) and the last channel (127)
 	// K. Yip : Feb. 20, 2015 : 
 	// The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it. In this version _all_ SVX channels were connected to the silicon.
-	if ( ( mLastSeq == 4 ) && ( mLastChain == 0 ) && ( mVersion==2 ) ) // for 2015
+	if ( ( mLastSeq == 4 ) && ( mLastChain == 0 ) && ( mVersion>=2 ) ) // for >= 2015
 	  onehit.first = mLastSvx*(kMAXSTRIP) + oneSihit.channel  ; 
 	else
 	  onehit.first = mLastSvx*(kMAXSTRIP-2) + oneSihit.channel - 1  ; 
