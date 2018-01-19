@@ -1,5 +1,5 @@
 /*
-   root.exe -q -b -x  'lMuDst.C(0,"*.MuDst.root")' readPrimaries.C
+   root.exe 'lMuDst.C(0,"*.MuDst.root")' readPrimaries.C
  */
 #include "TH1.h"
 #include "TH2.h"
@@ -78,7 +78,7 @@ void readPrimaries(Long64_t nevent=1000) {
       if (tofHit) {
 	// hOneOverBetaP->Fill(pTrk->p().mag(), tofHit->leadingEdgeTime()/pTrk->btofPidTraits().pathLength());
 	//Hongwei	double tofBeta = pTrk->btofPidTraits().pathLength() / ((tofHit->leadingEdgeTime()-19) * C_C_LIGHT);
-#if 1
+#if 0
 	double tofBeta = -1.;
 	if (pTrk->btofPidTraits().beta() > 0) tofBeta = pTrk->btofPidTraits().beta();
 #else

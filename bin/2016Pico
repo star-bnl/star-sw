@@ -1,4 +1,4 @@
-
+Pi	
 cpu_per_event.csh | tee cpu_per_event
 root.exe -q -b Recover.C | tee Recover.log
 if (! -d Zombie) mkdir Zombie
@@ -134,12 +134,21 @@ foreach f (`ls -1d ???/1*/Done`)
   cd -;
 end
 ================================================================================
-grep total 1??/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fB\n", n/1.e9)}'
+grep total ???/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fB\n", n/1.e9)}'
 ================================================================================
 cd 076; 
 2016Pico2hpss.pl > hpss.list; cat hpss.list | hsi >& hpss.`date +%m%d%y`.log &
 2016Pico2hpss.pl | tee  hpss.list; grep root hpss.list | wc -l; 
 cat hpss.list | hsi >& hpss.`date +%m%d%y`.log &
+================================================================================
+cd /Pico/2016
+set d = 077;
+cat > hpss.${d}.list << EOD
+cd reco/2016Pico
+prompt
+cput -R ${d}
+EOD
+cat hpss.${d}.list |  hsi >& hpss.${d}.`date +%m%d%y`.log &
 ================================================================================
 
 
@@ -161,7 +170,7 @@ cd /gpfs01/star/pwg/fisyak/Pico/2016
 cd ~/Pico/2016
 foreach d (`ls -1d */1*`)
   cd $d; pwd; 
-  rm -f sched* *.xml
+  rm -f sched* *.xml st*.log
   cd -;
 end
 
@@ -187,3 +196,13 @@ end
 foreach f ( `ls -1d *.listC` )
   if (! -s ${f})  mv ${f} ${f}.Done
 end
+set d = 099/17099036
+cd ${d}
+foreach f (`ls -1d ~/Pico/2016/${d}/*.root`)
+ set b = `basename ${f} .picoDst.root`; rm ${b}*
+end
+================================================================================
+missing
+cd ~/Pico/2016
+grep missing */*/Chain.log | tee missing
+sed -e 's/Chain/ /' missing | awk '{print $1$4}' | xargs  rm
