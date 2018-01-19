@@ -238,14 +238,14 @@ public:
 		if(in_adc) {
 			int row, pad ;
 			itpc_ifee_to_rowpad(fee_id, ch, row, pad) ;
-			dta->finalize(tb_cou, sector, row, pad) ;
+			dta->finalize(tb_cou, sector+1, row, pad) ;
 		}
 		else {
-			dta->finalize(tb_cou, sector, fee_id, ch) ;
+			dta->finalize(tb_cou, sector+1, fee_id, ch) ;
 		}
 
 		if(err) {
-			LOG(ERR,"%d %d %d done, %d",sector,fee_id,ch,tb_cou) ;
+			LOG(ERR,"%d %d %d done, %d",sector+1,fee_id,ch,tb_cou) ;
 		}
 
 	}
@@ -450,11 +450,15 @@ int daq_itpc::get_token(char *addr, int words)
 
 static inline u_int sw16(u_int d)
 {
+	d = ((d>>16)&0xFFFF)|(d<<16) ;
+
+/*
         u_int tmp = d ;
 
         d >>= 16 ;
 
         d |= (tmp & 0xFFFF)<<16 ;
+*/
 
         return d ;
 }
