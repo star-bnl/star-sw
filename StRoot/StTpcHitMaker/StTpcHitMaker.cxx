@@ -277,10 +277,11 @@ StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMo
 Int_t StTpcHitMaker::Init() {
  LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
   const Char_t *Names[kAll] = {"undef",
-			       "tpc_hits","tpx_hits",
-			       "TpcPulser","TpxPulser",
+			       "tpc_hits","tpx_hits","itpc_hits",
+			       "TpcPulser","TpxPulser","iTPCPulser"
 			       "TpcDumpPxls2Nt","TpxDumpPxls2Nt",
-			       "TpcRaw","TpxRaw","TpcAvLaser","TpxAvLaser"};
+			       "TpcRaw","TpxRaw","iTPCRaw",
+			       "TpcAvLaser","TpxAvLaser"};
   TString MkName(GetName());
   for (Int_t k = 1; k < kAll; k++) {
     if (MkName.CompareTo(Names[k],TString::kIgnoreCase) == 0) {kMode = (EMode) k; break;}
@@ -422,22 +423,28 @@ Int_t StTpcHitMaker::Make() {
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
     TString cldadc("cld");
-    if ( kMode == kTpxRaw || kMode == kTpcRaw || 
+    if ( kMode == kTpxRaw || kMode == kTpcRaw || kMode == kiTPCRaw ||
 	 kMode == kTpcAvLaser || kMode == kTpxAvLaser) cldadc = "adc";
     mQuery = Form("tpx/%s[%i]",cldadc.Data(),sector);
     StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
     if (daqTpcTable) {
       kReaderType = kStandardTpx;
     } else {
-      mQuery = Form("tpc/legacy[%i]",sector);
+      mQuery = Form("itpc/%s[%i]",cldadc.Data(),sector);
       daqTpcTable = GetNextDaqElement(mQuery);
       if (daqTpcTable) {
-	kReaderType = kLegacyTpc;
+	kReaderType = kStandardiTPC;
       } else {
-	mQuery = Form("tpx/legacy[%i]",sector);
+	mQuery = Form("tpc/legacy[%i]",sector);
 	daqTpcTable = GetNextDaqElement(mQuery);
 	if (daqTpcTable) {
-	  kReaderType = kLegacyTpx;
+	  kReaderType = kLegacyTpc;
+	} else {
+	  mQuery = Form("tpx/legacy[%i]",sector);
+	  daqTpcTable = GetNextDaqElement(mQuery);
+	  if (daqTpcTable) {
+	    kReaderType = kLegacyTpx;
+	  }
 	}
       }
     }
@@ -451,6 +458,7 @@ Int_t StTpcHitMaker::Make() {
       if (row >= minRow && row <= maxRow) {
 	switch (kMode) {
 	case kTpc: 
+	case kiTPC: 
 	case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
 	case kTpcPulser:       
 	case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
@@ -464,6 +472,7 @@ Int_t StTpcHitMaker::Make() {
 	case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
 	case kTpcRaw: 
 	case kTpxRaw: 
+	case kiTPCRaw: 
 	  if ( fTpc) RawTpcData(sector);
 	  else 	     RawTpxData(sector);          
 	  break;
@@ -484,7 +493,7 @@ Int_t StTpcHitMaker::Make() {
                 << ") starting at time bin 0. Skipping event." << endm;
       return kStSkip;
   }
-  if (kMode == kTpc || kMode == kTpx) {
+  if (kMode == kTpc || kMode == kTpx || kMode == kiTPC) {
     StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
     if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
     if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}

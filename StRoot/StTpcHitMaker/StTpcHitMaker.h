@@ -92,12 +92,12 @@ class StTpcHitCollection;
 
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
-  enum EReaderType {kUnknown, kLegacyTpc, kLegacyTpx, kStandardTpx};
+  enum EReaderType {kUnknown, kLegacyTpc, kLegacyTpx, kStandardTpx, kStandardiTPC};
   enum EMode {kUndefined, 
-	      kTpc, kTpx, 
-	      kTpcPulser, kTpxPulser, 
+	      kTpc, kTpx, kiTPC,
+	      kTpcPulser, kTpxPulser, kiTPCPulser, 
 	      kTpcDumpPxls2Nt, kTpxDumpPxls2Nt, 
-	      kTpcRaw, kTpxRaw, 
+	      kTpcRaw, kTpxRaw, kiTPCRaw,
 	      kTpcAvLaser, kTpxAvLaser,      // averaging on pixel level
 	      kAll};
   StTpcHitMaker(const char *name="tpc_hits");
