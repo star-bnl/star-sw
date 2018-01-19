@@ -285,7 +285,6 @@ class StiKalmanTrack : public StiTrack
   
   void reduce();
 
-  StMCTruth getTruth(double rXYMin=0, double rXYMax=1000) const;  
   void print(const char *opt="") const;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
