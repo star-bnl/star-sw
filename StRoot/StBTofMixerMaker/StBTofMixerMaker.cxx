@@ -95,7 +95,9 @@ int StBTofMixerMaker::Make()
     
     if (btofSim) {
         mBTofSimCollection = btofSim->GetBTofCollection();  //! Load StBTofSimMaker collection
+#if 0
         mIsEmbedding = btofSim->getEmbeddingMode();
+#endif
     }
     
     if (!mIsEmbedding) {
