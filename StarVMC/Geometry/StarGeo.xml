@@ -157,7 +157,7 @@
     <Construct sys="fpdm" config="FPDMv4"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
-    <Construct sys="mutd" config="MUTD15"  />
+    <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14s"  />
   </Geometry>
 
@@ -177,7 +177,7 @@
     <Construct sys="fpdm" config="FPDMv4"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />
-    <Construct sys="mutd" config="MUTD15"  />
+    <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14s"  />
   </Geometry>
 
