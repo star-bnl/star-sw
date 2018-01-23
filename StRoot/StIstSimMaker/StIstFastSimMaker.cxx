@@ -20,8 +20,8 @@
 #include "TEnv.h"
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), 
-   mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name) : StMaker(name), mIstRot(NULL), mIstDb(NULL), 
+  mSmear(kTRUE)
 {
 }
 
@@ -180,7 +180,7 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
    Double_t smeared_x;
 
    do {
-      smeared_x = mRandom.Gaus(x, res);
+      smeared_x = gRandom->Gaus(x, res);
    }
    while ( fabs(smeared_x) > detLength);
 

@@ -70,7 +70,6 @@ private:
     float mDNW[mNumDynodes + 1];
     
     /// Internal random number generator used to obtain Poisson and normal distributions
-    TRandom3  mRandom;
     
 public:
     StPmtSignal(float pmtGain=1.5e+6, float cathodeNoise=0.0, float dynodeNoise=0.0);

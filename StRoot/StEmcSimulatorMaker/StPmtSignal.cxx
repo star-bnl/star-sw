@@ -51,7 +51,7 @@ StPmtSignal::StPmtSignal(float pmtGain, float cathodeNoise, float dynodeNoise) :
 }
 
 int StPmtSignal::getAdc(int nPhotoElectrons, simulatorVersion version) {
-    double nElectrons = nPhotoElectrons + mRandom.PoissonD(mCathodeNoise);
+    double nElectrons = nPhotoElectrons + gRandom->PoissonD(mCathodeNoise);
 
     double ADC = 0.0;
     
@@ -59,17 +59,17 @@ int StPmtSignal::getAdc(int nPhotoElectrons, simulatorVersion version) {
         int i;
         for(i=0; i<mNumDynodes; i++) {
             if(nElectrons >= 100) break;
-            nElectrons = mRandom.PoissonD( mSecondaryCoeff[i] * nElectrons + mDynodeNoise );
+            nElectrons = gRandom->PoissonD( mSecondaryCoeff[i] * nElectrons + mDynodeNoise );
         }
         ADC += mTotalGain * (nElectrons + mDynodeNoise*mG1[i]) * mDynodeGain[i];
-        ADC += mRandom.Gaus(mPedestalMean, TMath::Sqrt(mTotalGain*(ADC*mG1[i]*mDynodeGain[i] + mTotalGain*mDNW[i]) + mPedestalRMS*mPedestalRMS) );
+        ADC += gRandom->Gaus(mPedestalMean, TMath::Sqrt(mTotalGain*(ADC*mG1[i]*mDynodeGain[i] + mTotalGain*mDNW[i]) + mPedestalRMS*mPedestalRMS) );
     }
     else if(version == kFullSimulator) {
         for(int i=0; i<mNumDynodes; i++) {
-            nElectrons = mRandom.PoissonD( mSecondaryCoeff[i] * nElectrons + mDynodeNoise );
+            nElectrons = gRandom->PoissonD( mSecondaryCoeff[i] * nElectrons + mDynodeNoise );
         }
         ADC += mTotalGain * nElectrons * mDynodeGain[mNumDynodes];
-        ADC += mRandom.Gaus(mPedestalMean, mPedestalRMS);
+        ADC += gRandom->Gaus(mPedestalMean, mPedestalRMS);
     }
     else {
         LOG_ERROR << version << " is not a valid simulator version " << endm;

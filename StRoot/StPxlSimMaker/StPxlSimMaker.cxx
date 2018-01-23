@@ -85,7 +85,7 @@ ClassImp(StPxlSimMaker)
 
 using namespace std;
 
-StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(false), mUseDIGMAPSSim(false) , mUseDbGeom(true), mUseRandomSeed(true)
+StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(false), mUseDIGMAPSSim(false) , mUseDbGeom(true)
 {
 }
 //____________________________________________________________
@@ -108,7 +108,7 @@ Int_t StPxlSimMaker::Init()
    else
    {
      mUseFastSim = true;
-     mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
+     mPxlSimulator = new StPxlFastSim("pxlFastSim");
      LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
    }
 
