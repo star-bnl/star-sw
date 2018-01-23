@@ -10,7 +10,7 @@
 #   logon the node, and 'ps aux|grep robot' to retrive the job ID, 'kill $jobID'
 
 fset="101"
-nset="54"
+nset="52"
 
 if [[ $HOST =~ "cori" ]] ; then
    echo "this code can only be used for PDSF!"
@@ -27,28 +27,16 @@ do
 
    #a small robot
    echo "now working on FSET# $i ..."
-   query=`slusers |grep staremb`
-   while [ -z "$query" ]
-   do
-	sleep 10m
-   done
-   nrun=`echo $query | awk '{print $1}'`
-   npd=`echo $query | awk '{print $4}'`
-   nall=$(($nrun+$npd+$nfsetjob))
+   nqueue=`squeue --array | grep staremb | wc -l`
+   nall=$(($nqueue+$nfsetjob))
 
-   echo "now $(($nrun+$npd)) staremb jobs in the queue..."
+   echo "now $nqueue staremb jobs in the queue..."
    while [ $nall -gt 4500 ] 
    do
 	echo "no enough slots, wait for ten minutes..."
 	sleep 10m
-	query=`slusers |grep staremb`
-	while [ -z "$query" ]
-	do
-	   sleep 10m
-	done
-	nrun=`echo $query | awk '{print $1}'`
-	npd=`echo $query | awk '{print $4}'`
-	nall=$(($nrun+$npd+$nfsetjob))
+	nqueue=`squeue --array | grep staremb | wc -l`
+	nall=$(($nqueue+$nfsetjob))
    done
    echo "./submitxml.csh $i"
    ./submitxml.csh $i
