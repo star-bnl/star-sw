@@ -143,6 +143,8 @@ cat hpss.list | hsi >& hpss.`date +%m%d%y`.log &
 ================================================================================
 cd /Pico/2016
 set d = 077;
+cd ${d}
+cd ..
 cat > hpss.${d}.list << EOD
 cd reco/2016Pico
 prompt
