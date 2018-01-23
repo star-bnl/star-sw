@@ -76,9 +76,9 @@ class AliHLTTPCCAParam
     float RMax() const { return fRMax;}
     float ZMin() const { return fZMin;}
     float ZMax() const { return fZMax;}
-//     float ErrZ() const { return fErrZ;}
-//     float ErrX() const { return fErrX;}
-//     float ErrY() const { return fErrY;}
+    float ErrZ() const { return fErrZ;}
+    float ErrX() const { return fErrX;}
+    float ErrY() const { return fErrY;}
     float Bz() const { return fBz;}
     float cBz() const { return fBz*0.000299792458;}
 
@@ -376,14 +376,29 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( uint_v rowIndexes, const TrackP
 
   const float *c = &fParamS0Par[0][0][0];
   const float_v errmin=1e-6f;
-  float_v v( c, type );
-  v += z * float_v( c + 1, type )/cos2Phi +  float_v( c + 2, type ) *tg2Phi;
+//  float_v v( c, type );
+  float_v v, v1, v2, v4, v5;
+  for( int i = 0; i < float_v::Size; i++ ) {
+    const float *c_temp = &c[(unsigned int)type[i]];
+    v[i]  = c_temp[0];
+    v1[i] = c_temp[1];
+    v2[i] = c_temp[2];
+//    v3[i] = c_temp[3];
+    v4[i] = c_temp[4];
+    v5[i] = c_temp[5];
+  }
+//  v += z * float_v( c + 1, type )/cos2Phi +  float_v( c + 2, type ) *tg2Phi;
+  v += z * v1/cos2Phi +  v2 *tg2Phi;
   v(v>one) = one;
   v(v<errmin) = errmin;
   *Err2Y = CAMath::Abs( v );
 
-  v.gather( c+3, type );
-  v += z * float_v( c + 4, type )*(one + tg2Lambda) + float_v( c + 5, type )*tg2Lambda;
+//  v.gather( c+3, type );
+  for( int i = 0; i < float_v::Size; i++ ) {
+      v[i] = c[(unsigned int)type[i] + 3];
+  }
+//  v += z * float_v( c + 4, type )*(one + tg2Lambda) + float_v( c + 5, type )*tg2Lambda;
+  v += z * v4*(one + tg2Lambda) + v5*tg2Lambda;
   v(v>one) = one;
   v(v<errmin) = errmin;
   *Err2Z = CAMath::Abs( v );

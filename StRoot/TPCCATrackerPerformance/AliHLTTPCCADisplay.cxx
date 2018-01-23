@@ -51,7 +51,7 @@
 #ifdef DRAW_3D
   #include "TVector3.h"
 #endif // DRAW_3D
-using std::sort;
+
 class AliHLTTPCCADisplay::AliHLTTPCCADisplayTmpHit
 {
 
@@ -129,6 +129,28 @@ void AliHLTTPCCADisplay::Init()
     fZX->SetTitle( "ZX" );
     fMarker = TMarker( 0.0, 0.0, 20 );//6);
     fDrawOnlyRef = 0;
+
+//    // --- PT ---
+//    fCanvasPT = new TCanvas( "CA PT", "CA PT test Display", 1500, 750 );
+//    fCanvasPT->Divide( 1, 1 );
+//    fPT = static_cast<TPad *>( fCanvasPT->GetPrimitive( "CA PT_1" ) );
+//    fPT->SetCanvas( fCanvasPT );
+//    fPT->SetTitle( "PhiTeta" );
+//    fPT->cd();
+////    fPT->Range( -1.5, -0.7, 1.5, 1.2 );
+////    fPT->Range( -1.5, -1.5, 1.5, 1.5 );
+////    fPT->Range( -1.5, 0, 1.5, 3 );
+////    fPT->Range( -1.5, -0.15, 1.5, 0.15 );
+////    fPT->Range( -1.5, -1, 1.5, 46 );
+//    fPT->Range( -1.5, 50, 1.5, 190 );
+////    fPT->Range( -2.5, 50, 2.5, 190 );
+////    fPT->Range( 0, 50, 2.5, 190 );
+////    fPT->Range( -0.5, 50, 0.5, 190 );
+////    fPT->Range( 0, 50, 10, 190 );
+////    fPT->Range( 0, 50, 3, 190 );
+////    fPT->Range( -0.15, 50, 0.15, 190 );
+////    fPT->Range( -1, -0.7, 46, 1.2 );
+//    // ---
   
     firstCall = 0;
   }
@@ -140,6 +162,8 @@ void AliHLTTPCCADisplay::Update()
   if ( !fAsk ) return;
   fYX->Update();
   fZX->Update();
+  fPT->Update();
+//  fCanvasPT->Update();
 //X   fYX->Print( "YX.pdf" );
 //X   fZX->Print( "ZX.pdf" );
 
@@ -150,6 +174,13 @@ void AliHLTTPCCADisplay::ClearView()
   // clear windows
   fYX->Clear();
   fZX->Clear();
+}
+
+void AliHLTTPCCADisplay::ClearViewPT()
+{
+  // clear windows
+//  fCanvasPT->Clear();
+  fPT->Clear();
 }
 
 void AliHLTTPCCADisplay::Ask()
@@ -248,6 +279,7 @@ void AliHLTTPCCADisplay::SetSliceTransform( AliHLTTPCCATracker *slice )
 void AliHLTTPCCADisplay::DrawTPC()
 {
   // schematically draw TPC detector
+  fYX->cd();
   fYX->Range( -fROuterMax-2, -fROuterMax-2, fROuterMax+2, fROuterMax+2 );
   //fYX->Range( -fROuterMax*.7, -fROuterMax, fROuterMax*0., -fROuterMax*.5);
   fYX->Clear();
@@ -359,20 +391,20 @@ void AliHLTTPCCADisplay::DrawSlice( AliHLTTPCCATracker *slice, bool DrawRows, bo
 //         std::cout << "row = " << iRow << " nHits = " << row.NHits() << " nBinsY = " << grid.Ny() << " nBinsZ = " << grid.Nz() << std::endl;
         for (int iBin = 0; iBin < nBins; iBin++){
           grid.GetBinBounds( iBin, Ymin, Ymax, Zmin, Zmax);
-          
+
           Slice2View( x-1, Ymin, &vx0, &vy0 );
           Slice2View( x+1, Ymin, &vx1, &vy1 );
           fYX->cd();
           fLine.DrawLine( vx0, vy0, vx1, vy1 );
           fZX->cd();
-          fLine.DrawLine( Zmin, vy0, Zmin, vy1 );
-                    
+          fLine.DrawLine( fabs(Zmin), vy0, fabs(Zmin), vy1 );
+
           Slice2View( x-1, Ymax, &vx0, &vy0 );
           Slice2View( x+1, Ymax, &vx1, &vy1 );
           fYX->cd();
           fLine.DrawLine( vx0, vy0, vx1, vy1 );
           fZX->cd();
-          fLine.DrawLine( Zmax, vy0, Zmax, vy1 );
+          fLine.DrawLine( fabs(Zmax), vy0, fabs(Zmax), vy1 );
         }
       }
     }
@@ -570,6 +602,13 @@ void AliHLTTPCCADisplay::Slice2View( double x, double y, double *xv, double *yv 
   *yv = yg * fCos + xg * fSin;
 }
 
+void AliHLTTPCCADisplay::Slice2ViewPT( double x, double y, double z, double *phi, double *teta ) const
+{
+  // convert coordinates slice->view
+  *phi = acos(x / sqrt(x*x + y*y));
+  *teta = acos(x / sqrt(x*x + z*z));
+}
+
 
 void AliHLTTPCCADisplay::DrawGBHit( const AliHLTTPCCAGBTracker &tracker, int iHit, int color, Size_t width  )
 {
@@ -687,8 +726,56 @@ void AliHLTTPCCADisplay::DrawSliceHit( int iRow, int iHit, int color, Size_t wid
   fYX->cd();
   fMarker.DrawMarker( vx, vy );
   fZX->cd();
-//  fMarker.DrawMarker( fabs(z), vy );
-  fMarker.DrawMarker( z, vy );
+  fMarker.DrawMarker( fabs(z), vy );
+//  fMarker.DrawMarker( z, vy );
+}
+
+void AliHLTTPCCADisplay::DrawSliceHitPT( int iRow, int iHit, int color, Size_t width )
+{
+  // draw hit
+  if ( !fSlice ) return;
+  const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
+  // float x = fSlice->Data().RowX( iRow );
+  float x = fSlice->Data().HitDataXS( row, iHit );
+  float y = fSlice->Data().HitPDataYS( row, iHit );
+  float z = fSlice->Data().HitPDataZS( row, iHit );
+
+  if ( fGB ) { // it looks like we have problem in HitDataXS functions above, so read coordinates from the other place
+    int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
+    const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
+    x = h.X();
+    y = h.Y();
+    z = h.Z();
+  }
+
+  SetSliceTransform( fSlice );
+
+  if ( color < 0 ) {
+    if ( fPerf && fGB ) {
+      int id = fGB->FirstSliceHit()[fSlice->Param().ISlice()] + fSlice->Data().ClusterDataIndex( row, iHit );
+      const AliHLTTPCCAGBHit &h = fGB->Hits()[id];
+      int lab = -1;
+      if ( fPerf->HitLabelSize() > 0 ) lab = fPerf->HitLabel( h.ID() ).fLab[0];
+      color = GetColor( lab + 1 );
+      if ( lab >= 0 ) {
+        const AliHLTTPCCAMCTrack &mc = fPerf->MCTrack( lab );
+        if ( mc.P() >= 1. ) color = kRed;
+        else if ( fDrawOnlyRef ) return;
+      }
+    } else color = GetColorZ( z );
+  }
+  if ( width > 0 )fMarker.SetMarkerSize( width );
+  else fMarker.SetMarkerSize( .3 );
+  fMarker.SetMarkerColor( color );
+  double vx, vy;
+  Slice2View( x, y, &vx, &vy );
+  double phi0, teta0;
+  Slice2ViewPT(x, y, z, &phi0, &teta0);
+//  fYX->cd();
+  fPT->cd();
+//  fMarker.DrawMarker( 200*phi0-50, 100*teta0+70 );
+//  fMarker.DrawMarker( phi0, teta0 );
+  fMarker.DrawMarker( teta0, phi0 );
 }
 
 void AliHLTTPCCADisplay::DrawSliceHits( int color, Size_t width )
@@ -700,6 +787,19 @@ void AliHLTTPCCADisplay::DrawSliceHits( int color, Size_t width )
     const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
     for ( int ih = 0; ih < row.NHits(); ih++ ) {
       DrawSliceHit( iRow, ih, color, width );
+    }
+  }
+}
+
+void AliHLTTPCCADisplay::DrawSliceHitsPT( int color, Size_t width )
+{
+
+  // draw hits
+
+  for ( int iRow = 0; iRow < fSlice->Param().NRows(); iRow++ ) {
+    const AliHLTTPCCARow &row = fSlice->Data().Row( iRow );
+    for ( int ih = 0; ih < row.NHits(); ih++ ) {
+      DrawSliceHitPT( iRow, ih, color, width );
     }
   }
 }
@@ -745,7 +845,8 @@ void AliHLTTPCCADisplay::DrawSliceLink( int iRow, int iHit, int colorUp, int col
     fYX->cd();
     fLine.DrawLine( vx + offsetUp, vy, vx1 + offsetUp, vy1 );
     fZX->cd();
-    fLine.DrawLine( h.Z() + offsetUp, vy, h1.Z() + offsetUp, vy1 );
+//    fLine.DrawLine( h.Z() + offsetUp, vy, h1.Z() + offsetUp, vy1 );
+    fLine.DrawLine( fabs(h.Z() + offsetUp), vy, fabs(h1.Z() + offsetUp), vy1 );
   }
   if ( iDn >= 0 ) {
     if ( fSlice->Data().HitLinkUpDataS( rowDn, iDn ) == iHit ) {
@@ -762,7 +863,88 @@ void AliHLTTPCCADisplay::DrawSliceLink( int iRow, int iHit, int colorUp, int col
     fYX->cd();
     fLine.DrawLine( vx + offsetDn, vy, vx1 + offsetDn, vy1 );
     fZX->cd();
-    fLine.DrawLine( h.Z() + offsetDn, vy, h1.Z() + offsetDn, vy1 );
+    fLine.DrawLine( fabs(h.Z() + offsetDn), vy, fabs(h1.Z() + offsetDn), vy1 );
+  }
+}
+
+void AliHLTTPCCADisplay::DrawSliceLinkPT( int iRow, int iHit, int colorUp, int colorDn, int width )
+{
+  // draw link between clusters
+
+  if ( !fPerf || !fGB ) return;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
+  if ( width < 0 ) width = 1.;
+  fLine.SetLineWidth( width );
+  const int colUp = colorUp >= 0 ? colorUp : kMagenta;
+  const int colDn = colorDn >= 0 ? colorDn : kBlack;
+  const int colBoth = 8;
+
+  const int rowStep = AliHLTTPCCAParameters::RowStep;
+  if ( iRow < rowStep || iRow >= fSlice->Param().NRows() - rowStep ) return;
+
+  const AliHLTTPCCARow& row = fSlice->Data().Row( iRow );
+  const AliHLTTPCCARow& rowUp = fSlice->Data().Row( iRow + rowStep );
+  const AliHLTTPCCARow& rowDn = fSlice->Data().Row( iRow - rowStep );
+
+  int id = fSlice->Data().ClusterDataIndex( row, iHit );
+  const AliHLTTPCCAGBHit &h = tracker.Hits()[tracker.FirstSliceHit()[fSlice->Param().ISlice()] + id];
+  short iUp = fSlice->Data().HitLinkUpDataS( row, iHit );
+  short iDn = fSlice->Data().HitLinkDownDataS( row, iHit );
+
+//   double offset = (rowStep == 1) ? 0 : (( iRow & 1 ) ? 1. : -1.);
+  const float offset = 0;
+  double offsetUp = offset;
+  double offsetDn = offset;
+
+  if ( iUp >= 0 ) {
+    int id1 = fSlice->Data().ClusterDataIndex( rowUp, iUp );
+    const AliHLTTPCCAGBHit &h1 = tracker.Hits()[tracker.FirstSliceHit()[fSlice->Param().ISlice()] + id1];
+    double vx, vy, vx1, vy1;
+    Slice2View( h.X(), h.Y(), &vx, &vy );
+    Slice2View( h1.X(), h1.Y(), &vx1, &vy1 );
+    fLine.SetLineColor( colUp );
+//     fLine.SetLineWidth( 0.2 );
+    float phi = acos(h.X() / sqrt(h.X()*h.X() + h.Y()*h.Y()))*200;
+    float t = 70+acos(h.X() / sqrt(h.X()*h.X() + h.Z()*h.Z()))*100;
+    float phi1 = acos(h1.X() / sqrt(h1.X()*h1.X() + h1.Y()*h1.Y()))*200;
+    float t1 = 70+acos(h1.X() / sqrt(h1.X()*h1.X() + h1.Z()*h1.Z()))*100;
+    double phi0, phi01, teta0, teta01;
+    Slice2ViewPT(h.X(), h.Y(), h.Z(), &phi0, &teta0);
+    Slice2ViewPT(h1.X(), h1.Y(), h1.Z(), &phi01, &teta01);
+    fPT->cd();
+//    fLine.DrawLine( vx + offsetUp, vy, vx1 + offsetUp, vy1 );
+//    fLine.DrawLine( phi, t, phi1, t1 );
+//    std::cout<<">phi: "<<phi<<";     phi0: "<<phi0<<"\n";
+//    std::cout<<"_teta: "<<t<<";     teta0: "<<teta0<<"\n";
+//    fLine.DrawLine( phi0, teta0, phi01, teta01 );
+    fLine.DrawLine( teta0, phi0, teta01, phi01 );
+//    fZX->cd();
+//    fLine.DrawLine( h.Z() + offsetUp, vy, h1.Z() + offsetUp, vy1 );
+//    fLine.DrawLine( fabs(h.Z() + offsetUp), vy, fabs(h1.Z() + offsetUp), vy1 );
+//    fLine.DrawLine( phi, t, phi1, t1 );
+  }
+  if ( iDn >= 0 ) {
+    if ( fSlice->Data().HitLinkUpDataS( rowDn, iDn ) == iHit ) {
+      fLine.SetLineColor( colBoth );
+    } else {
+      fLine.SetLineColor( colDn );
+    }
+//     fLine.SetLineWidth( 0.1 );
+    int id1 = fSlice->Data().ClusterDataIndex( rowDn, iDn );
+    const AliHLTTPCCAGBHit &h1 = tracker.Hits()[tracker.FirstSliceHit()[fSlice->Param().ISlice()] + id1];
+    double vx, vy, vx1, vy1;
+    Slice2View( h.X(), h.Y(), &vx, &vy );
+    Slice2View( h1.X(), h1.Y(), &vx1, &vy1 );
+    float phi = -50+acos(h.X() / sqrt(h.X()*h.X() + h.Y()*h.Y()))*200;
+    float t = 70+acos(h.X() / sqrt(h.X()*h.X() + h.Z()*h.Z()))*100;
+    float phi1 = -50+acos(h1.X() / sqrt(h1.X()*h1.X() + h1.Y()*h1.Y()))*200;
+    float t1 = 70+acos(h1.X() / sqrt(h1.X()*h1.X() + h1.Z()*h1.Z()))*100;
+    fPT->cd();
+//    fLine.DrawLine( vx + offsetDn, vy, vx1 + offsetDn, vy1 );
+    fLine.DrawLine( phi, t, phi1, t1 );
+//    fZX->cd();
+//    fLine.DrawLine( fabs(h.Z() + offsetDn), vy, fabs(h1.Z() + offsetDn), vy1 );
+//    fLine.DrawLine( phi, t, phi1, t1 );
   }
 }
 
@@ -775,6 +957,18 @@ void AliHLTTPCCADisplay::DrawSliceLinks( int colorUp, int colorDn, int width )
     const AliHLTTPCCARow& row = fSlice->Data().Row( iRow );
     for ( int ih = 0; ih < row.NHits(); ih++ ) {
       DrawSliceLink( iRow, ih, colorUp, colorDn, width );
+    }
+  }
+}
+
+void AliHLTTPCCADisplay::DrawSliceLinksPT( int colorUp, int colorDn, int width )
+{
+  // draw links between clusters
+
+  for ( int iRow = 1; iRow < fSlice->Param().NRows() - 1; iRow++ ) {
+    const AliHLTTPCCARow& row = fSlice->Data().Row( iRow );
+    for ( int ih = 0; ih < row.NHits(); ih++ ) {
+      DrawSliceLinkPT( iRow, ih, colorUp, colorDn, width );
     }
   }
 }
@@ -1897,6 +2091,10 @@ void AliHLTTPCCADisplay::SaveCanvasToFile( TString fileName){
   fCanvas->SaveAs(fileName);
 }
 
+void AliHLTTPCCADisplay::SaveCanvasToFilePT( TString fileName){
+  fCanvasPT->SaveAs(fileName);
+}
+
 void AliHLTTPCCADisplay::SetTPC( const AliHLTTPCCAParam& tpcParam){ // iklm
   fZMin = tpcParam.ZMin();
   fZMax = tpcParam.ZMax();
@@ -2290,6 +2488,7 @@ void AliHLTTPCCADisplay::SpecDrawRecoTrackGlobal( int iTr, int color, float widt
     dhit.SetColor(color);
     dhit.SetWidth(width);
     drawTrack.hits.push_back(dhit);
+//    std::cout<<" - hit "<<i<<";   slice: "<<hit.ISlice()<<";   x: "<<hit.X()<<";   y: "<<hit.Y()<<";   y: "<<hit.Z()<<"\n";
   }
   drawTrack.SetStatColor(color);
 
@@ -2298,3 +2497,332 @@ void AliHLTTPCCADisplay::SpecDrawRecoTrackGlobal( int iTr, int color, float widt
   drawTrack.DrawHitsGlobal();
 } // void AliHLTTPCCADisplay::SpecDrawMCTrack
 
+void AliHLTTPCCADisplay::SpecDrawRecoTrackGlobalPT( int iTr, int color, float width )
+{
+  const AliHLTTPCCAGBTrack &track = fGB->Tracks()[iTr];
+
+  const int NHits =  track.NHits();
+
+  TDrawTrack drawTrack;
+
+  int ih = track.FirstHitRef();
+  for ( int i = 0; i < NHits; i++, ih++ ) {
+    const int iH = fGB->TrackHit(ih);
+    const AliHLTTPCCAGBHit &hit = fGB->Hit(iH);
+    TDrawHit dhit;
+    dhit.x = hit.X();
+    dhit.y = hit.Y();
+    dhit.z = hit.Z();
+    dhit.alpha = TDrawHit::GetAlpha( fGB, hit.ISlice() );
+    dhit.SetColor(color);
+    dhit.SetWidth(width);
+    // ---
+    dhit.slice = hit.ISlice();
+    // ---
+    drawTrack.hits.push_back(dhit);
+  }
+  drawTrack.SetStatColor(color);
+
+  drawTrack.SetStatWidth(0.5);
+//  drawTrack.DrawGlobalPT();
+//  drawTrack.DrawGlobalPpad();
+  drawTrack.DrawGlobalTpad();
+//  drawTrack.DrawHitsGlobal();
+}
+
+void AliHLTTPCCADisplay::SpecDrawMCTrackGlobalPT( AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray, int color, float width )
+{
+//  const AliHLTTPCCAGBTrack &track = fGB->Tracks()[iTr];
+//
+//  const int NHits =  track.NHits();
+//
+//  TDrawTrack drawTrack;
+//
+//  int ih = track.FirstHitRef();
+//  for ( int i = 0; i < NHits; i++, ih++ ) {
+//    const int iH = fGB->TrackHit(ih);
+//    const AliHLTTPCCAGBHit &hit = fGB->Hit(iH);
+//    TDrawHit dhit;
+//    dhit.x = hit.X();
+//    dhit.y = hit.Y();
+//    dhit.z = hit.Z();
+//    dhit.alpha = TDrawHit::GetAlpha( fGB, hit.ISlice() );
+//    dhit.SetColor(color);
+//    dhit.SetWidth(width);
+//    drawTrack.hits.push_back(dhit);
+//  }
+//  drawTrack.SetStatColor(color);
+//
+//  drawTrack.SetStatWidth(0.5);
+//  drawTrack.DrawGlobalPT();
+
+  // ---
+  const int NPoints =  mcTrack.NMCPoints();
+    if ( NPoints < 2 ) return;
+
+    AliHLTTPCCALocalMCPoint *points = &((*mcPointsArray).Data()[mcTrack.FirstMCPointID()]);
+
+    TDrawTrack drawTrack;
+
+    TDrawHit hit;
+
+    for ( int ih = 0; ih < NPoints; ih++ ) {
+	if( (ih > 0) && (drawTrack.hits[drawTrack.hits.size()-1].row == points[ih].IRow()) ) continue;
+      hit.x = points[ih].X();
+      hit.y = points[ih].Y();
+      hit.z = points[ih].Z();
+      hit.alpha = TDrawHit::GetAlpha( fGB, points[ih].ISlice() );
+      hit.SetColor(color);
+      hit.SetWidth(width);
+      // ---
+      hit.slice = points[ih].ISlice();
+      hit.row = points[ih].IRow();
+      // ---
+      drawTrack.hits.push_back(hit);
+//      if( () && (drawTrack.hits[]) )
+    }
+
+    drawTrack.SetStatColor(color);
+
+    drawTrack.SetStatWidth(0.5);
+    drawTrack.DrawGlobalPT();
+//    drawTrack.DrawGlobalTpad();
+//    drawTrack.DrawGlobalPpad();
+}
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawGlobalPT()
+{
+  const int NHits = hits.size();
+  if ( NHits < 2 ) return;
+  if ( ! hits[0].CheckGlobal() ) FillGBHitsCoor();
+
+  vector<double> phi, teta;
+  phi.resize(NHits-1);
+  teta.resize(NHits-1);
+  double *vphi = &(phi[0]), *vteta = &(teta[0]);
+//  TDrawHit &hit0 = hits[i-1];
+//  double phi0 = acos(hit0.x / sqrt(hit0.x*hit0.x + hit0.y*hit0.y));
+//  if( hit0.y < 0 ) phi0 = -phi0;
+//  phi0 += hit0.alpha;
+//  std::cout<<"\n";
+  for( int i = 1; i < NHits; i++ ) {
+//  for( int i = 1; i < NHits-1; i++ ) {
+    TDrawHit &hit = hits[i];
+    TDrawHit &hit0 = hits[i-1];
+//    TDrawHit &hit0 = hits[0];
+//    *phi = acos(x / sqrt(x*x + y*y));
+//    *teta = acos(x / sqrt(x*x + z*z));
+//    double x = hits[i].x, y = hits[i].y, z = hits[i].z;
+    double x = hits[i+1].x, y = hits[i+1].y, z = hits[i+1].z;
+    x -= hit0.x;
+    y -= hit0.y;
+    z -= hit0.z;
+//    double x = hits[i].x, y = hits[i].y, z = hits[i].z;
+    teta[i-1] = acos(x / sqrt(x*x + z*z));
+    if( z < 0 ) teta[i-1] = -teta[i-1];
+
+    double phi0 = acos(hit0.x / sqrt(hit0.x*hit0.x + hit0.y*hit0.y));
+    if( hit0.y < 0 ) phi0 = -phi0;
+
+//    double x1 = hits[i].x, y1 = hits[i].y, z1 = hits[i].z;
+    double x1 = hits[i+1].x, y1 = hits[i+1].y, z1 = hits[i+1].z;
+    double y3 = x1*tan(phi0);
+    std::cout<<"x1: "<<x1<<";   phi0: "<<phi0<<"\n";
+    if( hits[i].y < 0 ) y3 = -y3;
+    std::cout<<"y3: "<<y3<<"\n";
+    double p = fabs(y1 - y3);
+    double a = sqrt((y1 - hit0.y)*(y1 - hit0.y) + (x1 - hit0.x)*(x1 - hit0.x));
+    double b = sqrt((y3 - hit0.y)*(y3 - hit0.y) + (x1 - hit0.x)*(x1 - hit0.x));
+    std::cout<<"p: "<<p<<";   a: "<<a<<";   b: "<<b<<"\n";
+    double tmp = (a*a + b*b - p*p) / (2*a*b);
+    double phi_h = acos(tmp);
+    std::cout<<"tmp: "<<tmp<<";   phi_h: "<<phi_h<<"\n";
+    phi[i-1] = phi_h;
+//    if( i > 1 && fabs(teta[i-2] - teta[i-1]) > 0.5 ) return;
+//    if( hits[i].y < 0 ) phi[i-1] = -phi[i-1];
+
+    /*double phi1 = acos(hits[i].x / sqrt(hits[i].x*hits[i].x + hits[i].y*hits[i].y));
+    if( hits[i].y < 0 ) phi1 = -phi1;
+    phi1 += hits[i].alpha;
+//    x -= hits[0].x;
+//    y -= hits[0].y;
+//    z -= hits[0].z;
+    std::cout<<"phi0: "<<phi0<<";   phi1: "<<phi1<<";   dphi: "<<phi1-phi0<<"\n";
+    if( fabs(phi1 - phi0) < 3.14 ) phi[i-1] = phi1 - phi0;
+    else {
+	if( (phi1 - phi0) > 3.14 ) phi[i-1] = phi1 - phi0 - 6.28;
+	else phi[i-1] = phi1 - phi0 + 6.28;
+    }
+    phi0 = phi1;
+    teta[i-1] = acos(x / sqrt(x*x + z*z));
+    if( z < 0 ) teta[i-1] = -teta[i-1];
+    if( i > 1 && fabs(teta[i-2] - teta[i-1]) > 0.5 ) return;*/
+  }
+
+  TPolyLine &pl = GetPolyLine();
+
+  fDisplay.CanvasPT()->cd();
+  pl.DrawPolyLine( NHits-2, vteta, vphi );
+
+  vteta[0] = -10; vteta[1] = 10;
+  vphi[0] = 0; vphi[1] = 0;
+  pl.DrawPolyLine( 2, vteta, vphi );
+}
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawGlobalTpad()
+{
+  const int NHits = hits.size();
+  if ( NHits < 2 ) return;
+  if ( ! hits[0].CheckGlobal() ) FillGBHitsCoor();
+
+  vector<double> phi, teta;
+  phi.resize(NHits-1);
+  teta.resize(NHits-1);
+  double *vphi = &(phi[0]), *vteta = &(teta[0]);
+//  TDrawHit &hit0 = hits[0];
+  std::cout<<" --- ";
+//  for( int i = 1; i < NHits; i++ ) {
+  for( int i = 1; i < NHits-1; i++ ) {
+    TDrawHit &hit = hits[i];
+//    TDrawHit &hit0 = hits[i-1];
+    TDrawHit &hit0 = hits[0];
+//    *phi = acos(x / sqrt(x*x + y*y));
+//    *teta = acos(x / sqrt(x*x + z*z));
+    double x = hits[i].x, y = hits[i].y, z = hits[i].z;
+//    double x = hits[i+1].x, y = hits[i+1].y, z = hits[i+1].z;
+    x -= hit0.x;
+    y -= hit0.y;
+    z -= hit0.z;
+//    x -= hits[i-1].x;
+//    y -= hits[i-1].y;
+//    z -= hits[i-1].z;
+//    phi[i-1] = acos(hits[i].x / sqrt(hits[i].x*hits[i].x + hits[i].y*hits[i].y));
+    phi[i-1] = acos(x / sqrt(x*x + y*y));
+//    if( y < 0 ) phi[i-1] = -phi[i-1];
+//    if( hits[i].slice != hits[0].slice ) return;
+    if( hits[i].slice < hits[0].slice ) phi[i-1] = 0.87 - phi[i-1];
+//    if( hits[i].slice > hits[0].slice ) return;
+    if( hits[i].slice > hits[0].slice ) phi[i-1] = 1 - phi[i-1];
+//    phi[i-1] += hits[i].alpha-3.14;
+//    std::cout<<"ihit: "<<i<<";   phi: "<<phi[i-1]<<";   slice: "<<hits[i].slice<<";   alpha: "<<hits[i].alpha<<"\n";
+//    phi[i-1] -= 12;
+//    phi[i-1] += hit0.slice;
+//    std::cout<<"hit: "<<i<<";   hit0.slice: "<<hit0.slice<<";   phi[i-1]: "<<phi[i-1]<<"\n";
+//    if( y < 0 ) phi[i-1] = -phi[i-1];
+//    teta[i-1] = acos(hits[i].x / sqrt(hits[i].x*hits[i].x + hits[i].z*hits[i].z));
+    teta[i-1] = acos(x / sqrt(x*x + z*z));
+    if( z < 0 ) teta[i-1] = -teta[i-1];
+//    if( i > 1 && fabs(teta[i-2] - teta[i-1]) > 0.5 ) return;
+//    if( i > 1 && fabs(teta[i-2] - teta[i-1]) > 0.5 ) {
+//	std::cout<<" - i: "<<i<<";   x0: "<<hits[i-1].x<<";   row0: "<<hits[i-1].row<<";   z0: "<<hits[i-1].z<<";   z1: "<<hits[i].z<<";   teta: "<<teta[i-1]<<"\n";
+//    }
+//    if( (i > 1) && (x[i] < x[i-1]) )
+//    phi[i-1] = hits[i].row;
+    phi[i-1] = hits[i].x;
+//    teta[i-1] = hits[i].row;
+  }
+
+  TPolyLine &pl = GetPolyLine();
+
+  fDisplay.CanvasPT()->cd();
+  pl.DrawPolyLine( NHits-2, vteta, vphi );
+//  pl.DrawPolyLine( NHits-1, vphi, vteta );
+}
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawGlobalPpad()
+{
+  const int NHits = hits.size();
+  if ( NHits < 2 ) return;
+  if ( ! hits[0].CheckGlobal() ) FillGBHitsCoor();
+
+  vector<double> phi, teta;
+  phi.resize(NHits-1);
+  teta.resize(NHits-1);
+  double *vphi = &(phi[0]), *vteta = &(teta[0]);
+//  TDrawHit &hit0 = hits[0];
+//  double phi0 = acos(hit0.x / sqrt(hit0.x*hit0.x + hit0.y*hit0.y));
+//  if( hit0.y < 0 ) phi0 = -phi0;
+//  double phi00 = phi0;
+//  phi0 += hit0.alpha;
+//  for( int i = 1; i < NHits; i++ ) {
+  for( int i = 1; i < NHits-1; i++ ) {
+    TDrawHit &hit = hits[i];
+//    TDrawHit &hit0 = hits[i-1];
+    TDrawHit &hit0 = hits[0];
+//    *phi = acos(x / sqrt(x*x + y*y));
+//    *teta = acos(x / sqrt(x*x + z*z));
+    double x = hits[i].x, y = hits[i].y, z = hits[i].z;
+//    double x = hits[i+1].x, y = hits[i+1].y, z = hits[i+1].z;
+    double phi1 = acos(x / sqrt(x*x + y*y));
+    if( hits[i].y < 0 ) phi1 = -phi1;
+//    phi1 += hits[i].alpha;
+//    x -= hits[0].x;
+//    y -= hits[0].y;
+//    z -= hits[0].z;
+    x -= hit0.x;
+    y -= hit0.y;
+    z -= hit0.z;
+    double phi0 = acos(hit0.x / sqrt(hit0.x*hit0.x + hit0.y*hit0.y));
+    if( hit0.y < 0 ) phi0 = -phi0;
+//    phi0 += hit[i-1].alpha;
+    double phi00 = phi0;
+    if( fabs(phi1 - phi0) < 3.14 ) phi[i-1] = phi1 - phi0;
+    else {
+//      return;
+      if( (phi1 - phi0) > 3.14 ) phi[i-1] = phi1 - phi0 - 6.28;
+      else phi[i-1] = phi1 - phi0 + 6.28;
+    }
+    phi0 = phi1;
+//    phi[i-1] = acos(hits[i].x / sqrt(hits[i].x*hits[i].x + hits[i].y*hits[i].y));
+//    phi[i-1] = acos(x / sqrt(x*x + y*y));
+//    if( y < 0 ) phi[i-1] = -phi[i-1];
+//    if( hits[i].slice != hits[0].slice ) return;
+//    if( hits[i].slice < hits[0].slice ) phi[i-1] = 0.87 - phi[i-1];
+//    if( hits[i].slice > hits[0].slice ) return;
+//    if( hits[i].slice > hits[0].slice ) phi[i-1] = 1 - phi[i-1];
+//    phi[i-1] += hits[i].alpha-3.14;
+    std::cout<<"ihit: "<<i<<";   phi: "<<phi[i-1]<<";   slice: "<<hits[i].slice<<";   alpha: "<<hits[i].alpha<<"\n";
+    std::cout<<"----- x: "<<hits[i].x<<";   y: "<<hits[i].y<<";   z: "<<hits[i].z<<";   phi1: "<<phi1<<"\n";
+    // --- 2 hit segment phi ---
+//    double x1 = hits[i+1].x, y1 = hits[i+1].y, z1 = hits[i+1].z;
+    double x1 = hits[i].x, y1 = hits[i].y, z1 = hits[i].z;
+    double y3 = x1*tan(phi00);
+//    if( hits[i].y < 0 ) y3 = -y3;
+    std::cout<<"------- y3: "<<y3<<"\n";
+    double p = fabs(y1 - y3);
+    double a = sqrt((y1 - hit0.y)*(y1 - hit0.y) + (x1 - hit0.x)*(x1 - hit0.x));
+    double b = sqrt((y3 - hit0.y)*(y3 - hit0.y) + (x1 - hit0.x)*(x1 - hit0.x));
+    std::cout<<"------- p: "<<p<<";   a: "<<a<<";   b: "<<b<<"\n";
+    double tmp = (a*a + b*b - p*p) / (2*a*b);
+    std::cout<<"------- tmp: "<<tmp<<"\n";
+    double phi_h = acos(tmp);
+    std::cout<<"------- phi_h: "<<phi_h<<"\n";
+    phi[i-1] = phi_h;
+//    if( hits[i].y < 0 ) phi[i-1] = -phi[i-1];
+//	if( hits[i].slice < hits[i-1].slice ) phi[i-1] = 0.87 - phi[i-1];
+//        if( hits[i].slice > hits[0].slice ) return;//phi[i-1] = 1 - phi[i-1];
+//        if( hits[i].slice != hits[0].slice ) return;
+    phi[i-1] = phi_h + hits[0].alpha;
+//    if( i > 1 && (hits[i+1].slice != hits[i].slice || hits[i].slice != hits[i-1].slice || hits[i-1].slice != hits[i+1].slice) ) phi[i-1] = phi[i-2];
+    if( i > 1 && (hits[i-1].slice != hits[i].slice) ) phi[i-1] = phi[i-2];
+//    if( hits[i].y < 0 ) phi[i-1] = -phi[i-1];
+    // ---
+//    phi[i-1] -= 12;
+//    phi[i-1] += hit0.slice;
+//    std::cout<<"hit: "<<i<<";   hit0.slice: "<<hit0.slice<<";   phi[i-1]: "<<phi[i-1]<<"\n";
+//    if( y < 0 ) phi[i-1] = -phi[i-1];
+//    teta[i-1] = acos(hits[i].x / sqrt(hits[i].x*hits[i].x + hits[i].z*hits[i].z));
+    teta[i-1] = acos(x / sqrt(x*x + z*z));
+    if( z < 0 ) teta[i-1] = -teta[i-1];
+//    if( i > 1 && fabs(teta[i-2] - teta[i-1]) > 0.5 ) return;
+//    phi[i-1] = hits[i].row;
+//    teta[i-1] = hits[i].row;
+    teta[i-1] = hits[i].x;
+  }
+
+  TPolyLine &pl = GetPolyLine();
+
+  fDisplay.CanvasPT()->cd();
+//  pl.DrawPolyLine( NHits-1, vteta, vphi );
+  pl.DrawPolyLine( NHits-2, vphi, vteta );
+}
