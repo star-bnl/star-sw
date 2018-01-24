@@ -5,11 +5,11 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
-#  setenv NODEBUG yes
-#  setup 64b
+  setenv NODEBUG yes
+  setup 64b
   setenv STARFPE NO
-#  starver TFG17j
-  starver .DEV2
+  starver TFG18a
+#  starver .DEV2
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
 #  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
@@ -26,7 +26,7 @@
                   DK0s3pimTsq DK0spimTsq DK2pimTsq \
                   DsK0sK0spimTsq DsK0sK2pimTsq DsK0sKmTsq DsKKpimTsq \
                   Lc3pi Lc3pimT Lc3pimTsq LcKppi LcKppimT LcKppimTsq \
-                  D0KpiCutpT0 DK2pimCutpT0                  )
+                  D0KpiCutpT0_1 D0KpiCutpT3_10 D0KpiCutpT0 DK2pimCutpT0 D0barKpiCutpT0 D02KmCutpT0)
     echo $Name | grep $name
     if (! $?) break;
   end
@@ -40,9 +40,12 @@
 #    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,Lc3pi,VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b -x 'bfcMixerVMC.C(10000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
-    root.exe -q -b -x 'bfcMixerVMC.C(10,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfcMixerVMC.C(1000,"Vmc,'${name}',VMCAlignment","'${daq}'","'${muDst}'")' &gt;&amp; ${logFile}
   endif
 </command>
+    <ResourceUsage>
+      <Priority>9</Priority>
+    </ResourceUsage>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2016_AuAu200.DEV2/*.MuDst.root" /> -->
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/*.MuDst.root" /> -->
