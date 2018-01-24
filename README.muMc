@@ -2,13 +2,13 @@
   (a) Reset GROUP_DIR set version .DEV2
   source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
   (b) Default complier is your default compiler. To change it 
-  setup gcc492
+  setup gcc
   setup 32b
   (c) Default optimization level is DEBUG. To set optimized version
   setenv NODEBUG yes
   starver .DEV2
   (d) The version with gcc 4.9.2 (DEBUG) can be update any time.
-Because of this you are adviced to use gcc 4.8.2 which wil be updated very rarely.
+Because of this you are adviced to use gcc 4.8.5 which wil be updated very rarely.
 
 2. Many macros can be used from my private directory ~fisyak/macros
   You have advices to add to your ~/.rootrc lines (see ~fisyak/.rootrc)
