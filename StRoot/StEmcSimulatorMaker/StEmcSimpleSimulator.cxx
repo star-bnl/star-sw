@@ -98,15 +98,15 @@ StEmcRawHit* StEmcSimpleSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
             if(!mEmbeddingMode) {
                 pedMean = mTables->pedestal(mDetectorId-8, softId);
                 pedRMS  = mTables->pedestalRMS(mDetectorId-8, softId);
-                ADC += mRandom.Gaus(pedMean, pedRMS);
+                ADC += gRandom->Gaus(pedMean, pedRMS);
             }
             
             // finally smear with any specified calibration jitter
-            ADC = pedMean + (ADC-pedMean) * mRandom.Gaus(mCalibScale, mCalibSpread);
+            ADC = pedMean + (ADC-pedMean) * gRandom->Gaus(mCalibScale, mCalibSpread);
             
             
             // check for a valid ADC range
-            double maxADC = mRandom.Gaus(mMaxADC, mMaxADCSpread);
+            double maxADC = gRandom->Gaus(mMaxADC, mMaxADCSpread);
             if(ADC < 0)         ADC = 0.0;
             if(ADC > maxADC)    ADC = maxADC;
             

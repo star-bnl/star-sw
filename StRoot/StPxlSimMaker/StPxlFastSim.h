@@ -58,7 +58,7 @@ class StPxlFastSim: public StPxlISim
  public:
 
   /*! \brief Constructor */
-  StPxlFastSim(const Char_t *name="pxlFastSim",Bool_t randomSeed=kFALSE): StPxlISim(name), mPxlDb(0), mRandom(0), mResXPix(0), mResYPix(0), mResZPix(0), mUseRandomSeed(randomSeed) {}
+  StPxlFastSim(const Char_t *name="pxlFastSim"): StPxlISim(name), mPxlDb(0), mResXPix(0), mResYPix(0), mResZPix(0) {}
 
   /*! \brief This class does not own any hit containers.
    *        mRandom is deleted here.
@@ -96,13 +96,11 @@ class StPxlFastSim: public StPxlISim
 
  private:
   StPxlDb* mPxlDb;
-  StRandom* mRandom;
 
   Double_t mResXPix;
   Double_t mResYPix;
   Double_t mResZPix;
 
-  Bool_t mUseRandomSeed;
 };
 #endif
 /*

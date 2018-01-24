@@ -19,7 +19,7 @@ my $count = 0;
 sub wanted;
 
 sub wanted;
-my @logs = glob "hpss*.log";
+my @logs = glob "hpss*.log"; print "logs: @logs\n" if ($debug);
 my $AGE_OFhpss_log = 9999999;
 foreach my $log (@logs) {
   my $age = -M $log;

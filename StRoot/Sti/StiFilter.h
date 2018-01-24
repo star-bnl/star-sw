@@ -117,7 +117,6 @@ class StiFilter
 			return maximum;
 		}
 
-  StiFilter& operator=(const StiFilter &);
   friend   ostream& operator<<(ostream& os, const StiFilter &);
 
   virtual bool accept(bool value);

@@ -1,0 +1,13 @@
+/*    fmsGainB.idl
+*
+*  Table: fmsGainB
+*
+*       description: // FMS & FPD detector base gain
+*                       energy(GeV) = adc(ch) * gain(GeV/ch) * gaincorrection
+*/ 
+
+struct fmsGainB {   
+  octet detectorId[2500];     /* DetectorId */
+  unsigned short ch[2500];    /* Ch 1-578*/
+  float gain[2500];           /* gain GeV/ch */
+};  

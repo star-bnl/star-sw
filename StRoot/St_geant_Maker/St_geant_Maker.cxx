@@ -572,6 +572,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TRandom3.h"
 #include "StarMagField.h"
 //#include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_event_Table.h"
@@ -952,6 +953,9 @@ Int_t St_geant_Maker::InitRun(Int_t run){
     //    Do(Form("rung %d %d",gSystem->GetPid(),IAttr("RunG")));
     Do(Form("ranlux %d",IAttr("RunG")));
     Do("rndm");
+    if (gRandom) delete gRandom;
+    gRandom = new TRandom3(IAttr("RunG"));
+    geant3->SetRandom(gRandom);
   }
     //  if (m_Mode%10 != 1 && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
   if (! IAttr("Don'tTouchTimeStamp") && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF

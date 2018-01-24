@@ -1633,6 +1633,12 @@ Bfc_st BFC[] = { // standard chains
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"vpdCalib","","","db,BTofUtil,-vpdSim","StVpdCalibMaker"    ,"StVpdCalibMaker","VPD calibration",kFALSE},
   //  {"btofSim" ,"","","BTofUtil,vpdSim,UseMCTstart"  ,"StBTofSimMaker",
+#if 0
+  {"btofMixer"    ,"","","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
+   ,                                                                                   "BTof Mixer",kFALSE},
+#else
+  {"btofMixer"    ,"","","","",""                                               "ignore BTof Mixer",kFALSE},
+#endif
   // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","","","StMtdSimMaker,StEvent",                   "StMtdSimMaker","MTD Simulator",kFALSE},
   // Time Of Flight related options

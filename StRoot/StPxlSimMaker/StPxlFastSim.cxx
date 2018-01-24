@@ -72,7 +72,6 @@
 #include "StMcEvent/StMcPxlHitCollection.hh"
 #include "StMcEvent/StMcPxlHit.hh"
 #include "tables/St_HitError_Table.h"
-#include "StarClassLibrary/StRandom.hh"
 #include "StThreeVectorF.hh"
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StPxlUtil/StPxlConstants.h"
@@ -80,13 +79,12 @@
 #include "StDetectorDbMaker/St_pxlControlC.h"
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
-
+#include "TRandom.h"
 #include "TDataSet.h"
 #include "TObjectSet.h"
 
 StPxlFastSim::~StPxlFastSim()
 {
-   if (mRandom) delete mRandom;
    if (mPxlDb) delete mPxlDb;
 }
 //____________________________________________________________
@@ -113,17 +111,6 @@ Int_t StPxlFastSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDat
 	   LOG_INFO << "StPxlFastSim - Using ideal geometry" <<endm;
    }
 
-   if (!mRandom) mRandom = new StRandom();
-   if(mUseRandomSeed)
-   {
-	   Int_t seed = time(NULL);
-	   mRandom->setSeed(seed);
-	   LOG_INFO << "StPxlFastSim - smearing random generator is using random seed = " << seed <<endm;
-   }
-   else
-   {
-	   LOG_INFO << "StPxlFastSim - smearing random generator is using default seed" <<endm;
-   }
 
    St_HitError *pxlTableSet = (St_HitError*)calib_db.Find("PixelHitError");
 
@@ -262,7 +249,7 @@ double StPxlFastSim::distortHit(const double x, const double res, const double d
    double smeared_x;
 
    do {
-      smeared_x = mRandom->gauss(x, res);
+      smeared_x = gRandom->Gaus(x, res);
    } while ( std::fabs(smeared_x) > detLength);
 
    return smeared_x;
