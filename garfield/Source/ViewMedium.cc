@@ -73,8 +73,7 @@ void ViewMedium::SetMedium(Medium* m) {
 void ViewMedium::SetElectricFieldRange(const double emin, const double emax) {
 
   if (emin >= emax || emin < 0.) {
-    std::cerr << m_className << "::SetElectricFieldRange:\n";
-    std::cerr << "    Incorrect field range.\n";
+    std::cerr << m_className << "::SetElectricFieldRange: Incorrect range.\n";
     return;
   }
 
@@ -85,8 +84,7 @@ void ViewMedium::SetElectricFieldRange(const double emin, const double emax) {
 void ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 
   if (bmin >= bmax || bmin < 0.) {
-    std::cerr << m_className << "::SetMagneticFieldRange:\n";
-    std::cerr << "    Incorrect field range.\n";
+    std::cerr << m_className << "::SetMagneticFieldRange: Incorrect range.\n";
     return;
   }
 
@@ -97,8 +95,7 @@ void ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 void ViewMedium::SetBAngleRange(const double amin, const double amax) {
 
   if (amin >= amax || amin < 0.) {
-    std::cerr << m_className << "::SetBAngleRange:\n";
-    std::cerr << "    Incorrect field range.\n";
+    std::cerr << m_className << "::SetBAngleRange: Incorrect range.\n";
     return;
   }
 
@@ -109,8 +106,7 @@ void ViewMedium::SetBAngleRange(const double amin, const double amax) {
 void ViewMedium::SetFunctionRange(const double vmin, const double vmax) {
 
   if (vmin >= vmax || vmin < 0.) {
-    std::cerr << m_className << "::SetFunctionRange:\n";
-    std::cerr << "    Incorrect range.\n";
+    std::cerr << m_className << "::SetFunctionRange: Incorrect range.\n";
     return;
   }
 
@@ -311,8 +307,7 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
 
   // Make sure the medium is set.
   if (!m_medium) {
-    std::cerr << m_className << "::AddFunction:\n";
-    std::cerr << "    Medium is not defined.\n";
+    std::cerr << m_className << "::AddFunction: Medium is not defined.\n";
     return;
   }
 
@@ -398,9 +393,8 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
       graph.Set(nBangles);
       n = nBangles;
     } else {
-      std::cerr << m_className << "::AddFunction:\n";
-      std::cerr << "    Error specifying X-axis.\n";
-      std::cerr << "    Invalid parameter type.\n";
+      std::cerr << m_className << "::AddFunction:\n"
+                << "    Error specifying X-axis. Invalid parameter type.\n";
       return;
     }
     graph.SetMarkerStyle(marker);

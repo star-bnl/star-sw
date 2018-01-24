@@ -575,7 +575,7 @@ void SetPeriodicityY(const double s);
 Internally, cells are classified as belonging to one of these types:
 \begin{description}
   \item[A]
-  non-periodic cells with a most one \(x\) and one \(y\) plane
+  non-periodic cells with at most one \(x\) and one \(y\) plane
   \item[B1X]
   \(x\)-periodic cells without \(x\) planes and at most one \(y\) plane
   \item[B1Y]
@@ -609,7 +609,7 @@ std::string GetCellType();
 \subsection{Weighting Fields}
 
 The weighting field calculation for a readout group 
--- i.~e. all elements (wires, planes, etc.) with the same label --
+-- \textit{i.\,e.} all elements (wires, planes, etc.) with the same label --
 is activated by the function
 \begin{lstlisting}
 void AddReadout(const std::string& label);
@@ -742,33 +742,47 @@ for plotting the potential and field of a component.
 \begin{lstlisting}
 void PlotContour(const std::string& option = "v");
 void PlotSurface(const std::string& option = "v");
+void Plot(const std::string& option = "v", const std::string& drawopt = "arr");
 void PlotProfile(const double x0, const double y0, const double z0,
                  const double x1, const double y1, const double z1,
                  const std::string& option = "v");
-void Pot(const std::string& option = "v", const std::string& drawopt = "arr");
 \end{lstlisting}
 \begin{description}
   \item[x0, \dots, z1]
   coordinates of the start and end points of the line along which 
-  the potential is to be evaluated
+  the potential or field should be plotted.
   \item[option] 
   quantity to be plotted: potential 
   (\texttt{"v"}/\texttt{"p"}/\texttt{"phi"}), 
   magnitude of the electric field (\texttt{"e"}/\texttt{"field"}), 
   or individual components of the field (\texttt{"ex"}, \texttt{"ey"},
-  \texttt{"ez"})
+  \texttt{"ez"}).
   \item[drawopt] 
   option string passed on to the function \texttt{Draw()} of the 
-  ROOT \texttt{TF2} 
+  ROOT \texttt{TF2} class. 
 \end{description}
 
-The first two functions create a contour and surface plot, respectively, 
-in the selected viewing plane. 
-The latter function plots the potential/field along the line  
+The first three functions create a contour, surface or other two-dimensional plot in the chosen viewing plane.
+The last function plots the potential/field along the line  
 \(\left(x_{0}, y_{0}, z_{0}\right) \rightarrow 
   \left(x_{1}, y_{1}, z_{1}\right)\).
 
-The component or sensor of which the field is to be plotted 
+Similar functions are available for visualizing weighting potentials and fields.
+\begin{lstlisting}
+void PlotContourWeightingField(const std::string& label, const std::string& option);
+void PlotSurfaceWeightingField(const std::string& label, const std::string& option);
+void PlotWeightingField(const std::string& label, const std::string& option,
+                        const std::string& drawopt);
+void PlotProfileWeightingField(const std::string& label,
+                   const double x0, const double y0, const double z0,
+                   const double x1, const double y1, const double z1,
+                   const std::string& option = "v");
+\end{lstlisting}
+\begin{description}
+  \item[label] identifier of the electrode for which to plot the weighting field/potential.
+\end{description}
+
+The component or sensor from which to retrieve the field to be plotted 
 is set by means of
 \begin{lstlisting}
 void SetComponent(ComponentBase* c);
@@ -778,19 +792,32 @@ void SetSensor(Sensor* s);
 The viewing plane and the region to be drawn 
 can be specified using
 \begin{lstlisting}
-void SetArea(double xmin, double ymin,
-             double xmax, double ymax);
-void SetPlane(double fx, double fy, double fz,
-              double x0, double y0, double z0);
-void Rotate(double angle);
+void SetArea(const double xmin, const double ymin, const double xmax, const double ymax);
+void SetPlane(const double fx, const double fy, const double fz,
+              const double x0, const double y0, const double z0);
+void Rotate(const double angle);
 \end{lstlisting}
-By default, the area is set 
-to the bounding box of the component/sensor.
+\begin{description}
+  \item[xmin, ymin, xmax, ymax] plot range in ``local coordinates'' (in the current viewing plane).
+  \item[fx, fy, fz] normal vector of the plane.
+  \item[x0, y0, z0] in-plane point.
+  \item[angle] rotation angle (in radian).
+\end{description}
+By default, the viewing plane is the $x-y$ plane (at $z = 0$) and the 
+plot range is retrieved from the bounding box of the component/sensor.
+The default viewing plane can be restored using 
+\begin{lstlisting}
+void SetDefaultProjection();
+\end{lstlisting}
+and the feature to determine the plot area from the bounding box can be activated using 
+\begin{lstlisting}
+void SetArea();
+\end{lstlisting}
  
 The density of the plotting grid can be set using
 \begin{lstlisting}
-void SetNumberOfSamples1d(const int n);
-void SetNumberOfSamples2d(const int nx, const int ny);
+void SetNumberOfSamples1d(const unsigned int n);
+void SetNumberOfSamples2d(const unsigned int nx, const unsigned int ny);
 \end{lstlisting}
 \begin{description}
   \item[n, nx, ny]
@@ -801,20 +828,26 @@ void SetNumberOfSamples2d(const int nx, const int ny);
 
 The number of contour levels can be set using
 \begin{lstlisting}
-void SetNumberOfContours(const int n);
+void SetNumberOfContours(const unsigned int n);
 \end{lstlisting}
 
-The range of the function to be plotted is set using
-\begin{lstlisting}
-void SetVoltageRange(const double minval, const double maxval);
-void SetElectricFieldRange(const double minval, const double maxval);
-void SetWeightingFieldRange(const double minval, const double maxval);
-\end{lstlisting}
-For the voltage range, the (estimated) 
+By default, the voltage range is retrieved from the 
 minimum and maximum values of the 
-potential in the component/sensor are used as defaults. 
-The range of the electric and weighting fields 
-should always be set by the user. 
+potential in the component/sensor, and
+the range of the electric and weighting fields is
+``guessed'' by taking random samples.
+This feature can be switched on or off using the function
+\begin{lstlisting}
+void EnableAutoRange(const bool on = true);
+\end{lstlisting}
+
+If the ``auto-range'' feature is disabled,
+the range of the function to be plotted needs to be set using
+\begin{lstlisting}
+void SetVoltageRange(const double vmin, const double vmax);
+void SetElectricFieldRange(const double emin, const double emax);
+void SetWeightingFieldRange(const double wmin, const double wmax);
+\end{lstlisting}
 
 \section{Sensor}
 

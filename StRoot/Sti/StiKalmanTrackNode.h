@@ -138,7 +138,6 @@ public:
   double x_g() const;
   double y_g() const;
   double z_g() const;
-  void   getXYZ_g(Double_t xyzp[6], Double_t CovXyzp[21]) const;
   double getX() const 			{ return mFP.x();}
   double getY() const 			{ return mFP.y();}  
   double getZ() const 			{ return mFP.z();}
@@ -197,15 +196,6 @@ const StiELoss *getELoss()const		{return mELoss;}
 
   bool propagateToBeam(const StiKalmanTrackNode *p, int dir);
   int  propagateToRadius(StiKalmanTrackNode *pNode, double radius,int dir);
-
-  /// Evaluates, stores and returns the dedx associated with this node.
-  /// Possible returned values are:
-  /// > 0 : value of dedx
-  /// -1  : pathlength was invalid or less than "0"
-  /// -2  : no hit is associated with the node.
-  /// -3  : invalid eloss data for this node.
-  double  evaluateDedx();
-  
   int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
@@ -216,11 +206,6 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   void numeDeriv(double val,int kind,int shape=0,int dir=0);
   int  testDeriv(double *der);
   void propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet);
-  
-  /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
-  /// the track at that point.
-  StThreeVector<double> getPointAt(double xk) const;
-  
   int nudge(StiHit *hit=0);
   double evaluateChi2    (const StiHit *hit); 
   double evaluateChi2Info(const StiHit *hit) const; 

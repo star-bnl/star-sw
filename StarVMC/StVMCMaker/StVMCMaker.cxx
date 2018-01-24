@@ -217,9 +217,10 @@ Int_t StVMCMaker::Init() {
     hits->SetHitHolder(m_DataSet);
     fgStarVMCApplication->SetStepping(hits);
   }
-  fRndmSaved = gRandom;
-  fRndm = new TRandom3(IAttr("RunG"));
-  LOG_INFO << "Init, Generator type: TRandom3 Seed: " << fRndm->GetSeed() << endm;
+  SafeDelete(gRandom);
+  gRandom = new TRandom3(IAttr("RunG"));
+  fgGeant3->SetRandom(gRandom);
+  LOG_INFO << "Init, Generator type: TRandom3 Seed: " << gRandom->GetSeed() << endm;
   TString GoodTriggers(SAttr("GoodTriggers"));
   if (GoodTriggers != "") SetGoodTriggers(GoodTriggers);
   return kStOK; // StMaker::Init();
@@ -227,8 +228,6 @@ Int_t StVMCMaker::Init() {
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (fInitRun) return kStOK;
-  fRndmSaved = gRandom;
-  gRandom =  fRndm; 
   fInitRun = 1;
   if (! gGeoManager) {
     TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry/Geometry");
@@ -328,13 +327,10 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager->IsClosed()) {
     gGeoManager->CloseGeometry();
   }
-  gRandom = fRndmSaved;
   return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::Make(){
-  fRndmSaved = gRandom;
-  gRandom =  fRndm; 
   LOG_INFO << "Random Seed: " << gRandom->GetSeed() << endm;
   if (! fInitRun) InitRun(fRunNo);
   fEventNo++;
@@ -358,7 +354,6 @@ Int_t StVMCMaker::Make(){
     if (! runOk) return kStEOF;
     //    if (Debug())   sw.Print();
   }
-  gRandom = fRndmSaved;
   return kStOK;
 }
 //_____________________________________________________________________________

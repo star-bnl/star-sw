@@ -1,8 +1,12 @@
-setenv MANPATH `dropit subsys -p $MANPATH`
-setenv LD_LIBRARY_PATH `dropit subsys -p $LD_LIBRARY_PATH`
-setenv GROUPPATH `dropit subsys -p $GROUPPATH`
-if ($?PYTHONPATH) setenv PYTHONPATH `dropit subsys -p $PYTHONPATH`
-setenv PATH `dropit subsys`
+if ($?GROUP_DIR) then
+if (-e $GROUP_DIR/dropit) then
+  setenv MANPATH `$GROUP_DIR/dropit subsys -p $MANPATH`
+  setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit subsys -p $LD_LIBRARY_PATH`
+  setenv GROUPPATH `$GROUP_DIR/dropit subsys -p $GROUPPATH`
+  if ($?PYTHONPATH) setenv PYTHONPATH `$GROUP_DIR/dropit subsys -p $PYTHONPATH`
+  setenv PATH `$GROUP_DIR/dropit subsys`
+endif
+endif
 unsetenv AFS_RHIC
 unsetenv STAR_ROOT
 unsetenv ROOT

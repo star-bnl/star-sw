@@ -102,11 +102,6 @@ class StiDetectorContainer : public Named, public Described
   bool moveIn();
   ///Set iterators to the detector nearest to the passed StiDetector pointer.
   void setToDetector(const StiDetector* layer);
-  ///Set iterators to the first detector in the radial layer closest to the
-  ///specified position.
-  void setToDetector(double position);
-  ///Set iterators to the detector closest to the given position and angle.
-  void setToDetector(double position, double angle);
   vector<StiDetector*> & getDetectors();
   vector<StiDetector*> & getDetectors(Filter<StiDetector> & filter);
   StiMasterDetectorBuilder * getDetectorBuilder();

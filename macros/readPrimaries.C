@@ -16,7 +16,7 @@
 
 const double C_C_LIGHT = 29.9792458; // [cm/ns]
 
-void readPrimaries(Long64_t nevent=100000000) {
+void readPrimaries(Long64_t nevent=1e9) {
   
   TH1::SetDefaultSumw2(1);
   
@@ -53,20 +53,27 @@ void readPrimaries(Long64_t nevent=100000000) {
 #endif
   };
   Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
+  Int_t NFiles = -1;
+  TFile *oldfile = 0;
   for (Int_t i = 0; i < Nb; i++) maker->SetStatus(ActiveBranches[i],1); // Set Active braches
   //  StMuDebug::setLevel(0);  
-  TChain *tree = StMuDstMaker::instance()->chain();
-  if (! tree) return;
-  Long64_t nentries = tree->GetEntries();
+  TChain *chainT = StMuDstMaker::instance()->chain();
+  if (! chainT) return;
+  Long64_t nentries = chainT->GetEntries();
   nevent = TMath::Min(nevent,nentries);
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
   //  if (nentries < 100) return;
-  tree->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
-  tree->SetCacheLearnEntries(1); //one entry is sufficient to learn
-  tree->SetCacheEntryRange(0,nevent);
+  chainT->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
+  chainT->SetCacheLearnEntries(1); //one entry is sufficient to learn
+  chainT->SetCacheEntryRange(0,nevent);
   for (Long64_t i_evt = 0; i_evt < nevent; i_evt++) {
     maker->Clear();
     if (maker->Make()) break;
+    if (oldfile != chainT->GetFile()) {
+      cout << "New file " << chainT->GetFile()->GetName() << " has been opened" << endl;
+      oldfile = chainT->GetFile();
+    }
+    
     StMuDst *mudst = StMuDst::instance();
     if (! mudst) {
       cout << "No event" << endl;

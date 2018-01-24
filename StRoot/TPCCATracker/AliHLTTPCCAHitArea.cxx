@@ -60,11 +60,20 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
     fIz.setZero( invalidMask );
 
       // for given fIz (which is min atm.) get
-    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, mask ); // first and
-    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, mask ); // last hit index in the bin
+//    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, mask ); // first and
+    for( unsigned int i = 0; i < float_v::Size; i++ ) {
+      if( !mask[i] ) continue;
+      fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)fIndYmin[i]];
+      fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)(fIndYmin[i] + fBDY[i])];
+    }
+//    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, mask ); // last hit index in the bin
   } else {
-    fIh = fSlice.FirstUnusedHitInBin( fRow, fIndYmin );
-    fHitYlst = fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY );
+//    fIh = fSlice.FirstUnusedHitInBin( fRow, fIndYmin );
+//    fHitYlst = fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY );
+    for( unsigned int i = 0; i < float_v::Size; i++ ) {
+      fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow, fIndYmin )[i];
+      fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY )[i];
+    }
   }
 
   debugS() << "HitArea created:\n"
@@ -79,15 +88,12 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
     << "fIh:      " << fIh << "\n"
     << "fNy:      " << fNy << std::endl;
   
-#ifdef __ASSERT_YF__
-  ASSERT( fHitYlst <= fRow.NUnusedHits() || invalidMask, fHitYlst << " <= " << fRow.NUnusedHits() );
-#endif
+  ASSERT( (fHitYlst <= fRow.NUnusedHits() || invalidMask).isFull(), fHitYlst << " <= " << fRow.NUnusedHits() );
 }
 
 uint_m AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 {
   // get next hit index
-
   uint_m yIndexOutOfRange = fIh >= fHitYlst;     // current y is not in the area
   uint_m nextZIndexOutOfRange = fIz >= fBZmax;   // there isn't any new z-line
 
@@ -108,11 +114,16 @@ uint_m AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
     
       // get next hit
     fIndYmin( needNextZ ) += fNy;
-    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, needNextZ ); // get first hit in cell, if z-line is new
-    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
-#ifdef __ASSERT_YF__
-    assert( fHitYlst <= fRow.NUnusedHits() || !needNextZ );
-#endif    
+//    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, needNextZ ); // get first hit in cell, if z-line is new
+//    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
+    for( unsigned int i = 0; i < float_v::Size; i++ ) {
+      if( !needNextZ[i] ) continue;
+      fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)fIndYmin[i]];
+      fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)(fIndYmin[i] + fBDY[i])];
+//      int_v test = reinterpret_cast<int_v&>(fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)fIndYmin[i]]);
+    }
+    assert( (fHitYlst <= fRow.NUnusedHits() || !needNextZ).isFull() );
+    
     yIndexOutOfRange = fIh >= fHitYlst;
 
     needNextZ = yIndexOutOfRange && !nextZIndexOutOfRange;
@@ -144,8 +155,13 @@ uint_v AliHLTTPCCAHitArea::NHits()
   while ( !needNextZ.isEmpty() ) {
     ++iz( needNextZ );   // get new z-line
     indYmin( needNextZ ) += fNy;
-    ih.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin, needNextZ ); // get first hit in cell, if z-line is new
-    hitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin + fBDY, needNextZ );
+//    ih.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin, needNextZ ); // get first hit in cell, if z-line is new
+    for( unsigned int i = 0; i < float_v::Size; i++ ) {
+      if( !needNextZ[i] ) continue;
+      ih[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)indYmin[i]];
+      hitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)(indYmin[i] + fBDY[i])];
+    }
+//    hitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin + fBDY, needNextZ );
     nHits( needNextZ ) += hitYlst - ih;
     
     needNextZ = iz < fBZmax;

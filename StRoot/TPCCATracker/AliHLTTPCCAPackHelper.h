@@ -18,8 +18,8 @@ class PackHelper
  public:
   typedef short int TPackedY;
   typedef short int TPackedZ;
-  typedef int_v TPackedY_v;
-  typedef int_v TPackedZ_v;
+//  typedef float_v TPackedY_v;
+//  typedef float_v TPackedZ_v;
  //  typedef float TPackedY;
  //  typedef float TPackedZ;
 
@@ -28,10 +28,10 @@ class PackHelper
   static float UnpackY( const AliHLTTPCCARow& row, TPackedY y );
   static float UnpackZ( const AliHLTTPCCARow& row, TPackedZ z );
 
-  static TPackedY_v PackY( const AliHLTTPCCARow& row, float_v y );
-  static TPackedZ_v PackZ( const AliHLTTPCCARow& row, float_v z );
-  static float_v UnpackY( const AliHLTTPCCARow& row, TPackedY_v y );
-  static float_v UnpackZ( const AliHLTTPCCARow& row, TPackedZ_v z );
+//  static TPackedY_v PackY( const AliHLTTPCCARow& row, float_v y );
+//  static TPackedZ_v PackZ( const AliHLTTPCCARow& row, float_v z );
+//  static float_v UnpackY( const AliHLTTPCCARow& row, TPackedY_v y );
+//  static float_v UnpackZ( const AliHLTTPCCARow& row, TPackedZ_v z );
 };
 
 #endif

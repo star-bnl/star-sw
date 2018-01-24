@@ -745,8 +745,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif
   static TH1F *hdEI = 0, *hdEUI = 0, *hdERI = 0, *hdEPI = 0, *hdETI = 0, *hdESI = 0, *hdEZI = 0, *hdEMI = 0;
   static TH1F *hdEO = 0, *hdEUO = 0, *hdERO = 0, *hdEPO = 0, *hdETO = 0, *hdESO = 0, *hdEZO = 0, *hdEMO = 0;
-  static TH3F *TPoints[6]; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
-  static TH2F *Pulls[3] = {0};
+  static TH3F *TPoints[6] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"};
+  static TH2F *Pulls[6] = {0};
+  static StDedxMethod kTPoints[6] = {// {"F","70","FU","70U","N", "NU"};
+    kLikelihoodFitId,         // F
+    kTruncatedMeanId,         // 70
+    kWeightedTruncatedMeanId, // FU
+    kEnsembleTruncatedMeanId, // 70U
+    kOtherMethodId,           // N
+    kOtherMethodId2           // NU
+  };
 #if 0
   static Hists2D I70("I70");
   static Hists2D fitZ("fitZ");
@@ -805,13 +813,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       TPoints[t]   = new TH3F(Form("TPoints%s",N[t]),
 			      Form("%s versus Length in Tpc and <log_{2}(dX)>",T[t]),
 			      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+      Pulls[t] = new TH2F(Form("Pull%s",N[t]),
+			  Form("Pull %s versus Length in Tpc",T[t]),
+			  190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
     }
-    Pulls[0] = new TH2F("PullI70","log(I70/I(pi)))/D70  versus track length", 
-		      150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
-    Pulls[1] = new TH2F("PullIfit","(zFit - log(I(pi)))/dzFit  versus track length", 
-		      150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
-    Pulls[2] = new TH2F("PullNfit","Log((dN/dx))/(dN/dx(pi)))/ddNdx  versus track length", 
-		      150,10.,160,nZBins,ZdEdxMin,ZdEdxMax);
     TDatime t1(tMin,0); // min Time and
     TDatime t2(tMax,0); // max 
     
@@ -954,25 +959,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			<< " is wrong = " << PiD.fFit.Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
     return;
   };
-  if (PiD.fFit.fPiD) {
-    TPoints[0]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),TMath::Log(PiD.fFit.I())-TMath::Log(PiD.fFit.Pred[kPidPion]));
-    Pulls[1]->Fill(PiD.fFit.TrackLength(),(TMath::Log(PiD.fFit.I()) - TMath::Log(PiD.fFit.Pred[kPidPion]))/PiD.fFit.D());
-    if (PiD.fFitU.fPiD) {
-      TPoints[2]->Fill(PiD.fFitU.TrackLength(),PiD.fFitU.log2dX(),TMath::Log(PiD.fFitU.I())-TMath::Log(PiD.fFit.Pred[kPidPion]));
-    }
-  }
-  if (PiD.fI70.fPiD) {
-    TPoints[1]->Fill(PiD.fI70.TrackLength(),PiD.fI70.log2dX(),TMath::Log(PiD.fI70.I()/PiD.fI70.Pred[kPidPion]));
-    Pulls[0]->Fill(PiD.fI70.TrackLength(),TMath::Log(PiD.fI70.I()/PiD.fI70.Pred[kPidPion])/PiD.fI70.D());
-    if (PiD.fI70U.fPiD) {
-      TPoints[3]->Fill(PiD.fI70U.TrackLength(),PiD.fI70U.log2dX(),TMath::Log(PiD.fI70U.I()/PiD.fI70.Pred[kPidPion]));
-    }
-  }
-  if (PiD.fdNdx.fPiD) {
-    TPoints[4]->Fill(PiD.fdNdx.TrackLength(),PiD.fdNdx.log2dX(),TMath::Log(PiD.fdNdx.I()/PiD.fdNdx.Pred[kPidPion]));
-    Pulls[2]->Fill(PiD.fdNdx.TrackLength(),TMath::Log(PiD.fdNdx.I()/PiD.fdNdx.Pred[kPidPion])/PiD.fdNdx.D());
-    if (PiD.fdNdxU.fPiD) {
-      TPoints[5]->Fill(PiD.fdNdxU.TrackLength(),PiD.fdNdxU.log2dX(),TMath::Log(PiD.fdNdxU.I()/PiD.fdNdx.Pred[kPidPion]));
+  for (Int_t j = 0; j < 6; j++) {
+    if (PiD.Status(kTPoints[j])) {
+      TPoints[j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
+      Pulls[j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
     }
   }
   if (PiD.fFit.TrackLength() > 20) { 

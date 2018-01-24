@@ -301,6 +301,8 @@ void AliHLTTPCCAGBTracker::FindTracks()
       ReconstructSliceTracks( fSlices, fStatTime, mutex ) );
 #else //USE_TBB
   for ( int iSlice = 0; iSlice < fSlices.Size(); ++iSlice ) {
+//  for ( int iSlice = 0; iSlice < 1; ++iSlice ) {
+//	  std::cout<<"run on slice: "<<iSlice<<"\n\n\n";
     Stopwatch timer;
     AliHLTTPCCATracker &slice = fSlices[iSlice];
     slice.Reconstruct();
@@ -331,13 +333,13 @@ void AliHLTTPCCAGBTracker::FindTracks()
   //std::cout<<"Merge time = "<<timerMerge.RealTime()*1.e3<<"ms"<<std::endl;
   //std::cout<<"End CA merging"<<std::endl;
   fTime += timer1.RealTime();
-#if 0
+
 #ifndef NDEBUG
   {
     int iFirstHit = 0;
     for ( int i = 0; i < fNTracks; i++ ) {
       const AliHLTTPCCAGBTrack &t = fTracks[i];
-      
+
       const AliHLTTPCCAGBHit &hF = fHits[fTrackHits[iFirstHit]];
       const AliHLTTPCCAGBHit &hL = fHits[fTrackHits[iFirstHit + t.NHits() - 1]];
       assert ( t.NHits() >= 3 );
@@ -354,12 +356,12 @@ void AliHLTTPCCAGBTracker::FindTracks()
 
       ASSERT( firstXOk,  "Track " << i << ": InnerParam " << t.InnerParam().X() << " != x " << hF.X() );
       ASSERT( lastXOk,   "Track " << i << ": OuterParam " << t.OuterParam().X() << " != x " << hL.X() );
-      
+
       iFirstHit += t.NHits();
     }
   }
 #endif
-#endif  
+  
 #ifdef MAIN_DRAW
   if ( AliHLTTPCCADisplay::Instance().DrawType() == 1 )
     AliHLTTPCCADisplay::Instance().Ask();
@@ -470,6 +472,9 @@ void AliHLTTPCCAGBTracker::Merge()
     trackGB.SetOuterParam( track.OuterParam() );
     trackGB.SetAlpha( track.InnerAlpha() );
     trackGB.SetDeDx( 0 );
+    // ---
+    if( track.IsMerged() ) trackGB.SetMerged();
+    // ---
 
     for ( int icl = 0; icl < track.NClusters(); icl++ ) {
       const DataCompressor::SliceRowCluster &iDsrc = out.ClusterIDsrc( track.FirstClusterRef() + icl );
@@ -480,7 +485,7 @@ void AliHLTTPCCAGBTracker::Merge()
       //const AliHLTTPCCARow &row = data.Row( iRow );
       fTrackHits[nTrackHits + icl] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;/*data.ClusterDataIndex( row, iClu );*/
     }
-         
+
 //    if(itr==1 || itr == 2) std::cout << std::endl;
     nTrackHits += track.NClusters();
     fNTracks++;

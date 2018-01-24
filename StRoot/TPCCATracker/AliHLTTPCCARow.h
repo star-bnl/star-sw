@@ -49,6 +49,7 @@ class AliHLTTPCCARow
 
 //     static inline int_v NHits( const AliHLTTPCCARow *array, const uint_v &indexes ) { return int_v( array, &AliHLTTPCCARow::fNHits, indexes ); }
 //     static inline int_v NHits( const AliHLTTPCCARow *array, const uint_v &indexes, const uint_m &mask ) { return int_v( array, &AliHLTTPCCARow::fNHits, indexes, mask ); }
+//    int GetLinkUpS( unsigned int h ) const { return fLinkUpData[h]; }
 
   int NUnusedHits()    const { return fNUnusedHits; }
   unsigned int* HitIndex() const { return fHitIndex; }
@@ -68,7 +69,7 @@ class AliHLTTPCCARow
     // StoredFloat *fHitDataZ;         // packed z coordinate of the given (global) hit index
 
     PackHelper::TPackedY *fHitPDataY;        // memory optimized packed data
-    PackHelper::TPackedZ *fHitPDataZ;       
+    PackHelper::TPackedZ *fHitPDataZ;
   
     StoredIsUsed *fHitDataIsUsed;         // packed isUsed-flag of the given (global) hit index. Short because there is no bool_v
   

@@ -1,7 +1,10 @@
 //----------------------------------------------------------------------------------------------------
 // Example macro how to use StRefMultCorr
-// $Id: getCentralityBins.C,v 1.12 2012/05/19 00:51:14 hmasui Exp $
+// $Id: getCentralityBins.C,v 1.13 2015/05/27 02:53:20 hmasui Exp $
 // $Log: getCentralityBins.C,v $
+// Revision 1.13  2015/05/27 02:53:20  hmasui
+// Add text file for special scale factor in Run14, and update the usage in the macro accordingly.
+//
 // Revision 1.12  2012/05/19 00:51:14  hmasui
 // Update the usage for refmult3
 //
@@ -108,21 +111,14 @@ void getCentralityBins()
   //    Int_t StRefMultCorr::getEndRun(const Double_t energy, const Int_t year) ;
 
   // Print all parameters
-//  refmultCorrUtil->print();
-//  refmult2CorrUtil->print();
-//  refmult3CorrUtil->print();
-//  grefmultCorrUtil->print();
+  refmultCorrUtil->print();
+  refmult2CorrUtil->print();
+  refmult3CorrUtil->print();
+  grefmultCorrUtil->print();
 
   // scale factor test
-  // *****************************************************************************************************************************************
-  // Actually you don't need it for Run14 Vpd30 and VpdNoVtx, but for easy,just copy these lines to youe macros, and in the StRefmult we already comment these factor in StRefmult Line 482
-  grefmultCorrUtil->setVzForWeight(6, -30.0, 30.0);
+  grefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
   grefmultCorrUtil->readScaleForWeight("StRoot/StRefMultCorr/macros/weight_grefmult_vpd30_vpd5_Run14.txt");
-  for(Int_t i=0;i<6;i++){
-    cout << i << " " << grefmultCorrUtil->get(i, 0) << endl;
-  }
-
-  return;
 
   // Obtain begin and end run number from energy and year
   cout << "Run " << refmultCorrUtil->getBeginRun(200.0, 2010) << " - " << refmultCorrUtil->getEndRun(200.0, 2010) << endl;
@@ -140,17 +136,12 @@ void getCentralityBins()
   if ( refmult3CorrUtil->isBadRun(12177061) ) {
     cout << "Run 12177061 is bad" << endl;
   }
-
-  if ( grefmultCorrUtil->isBadRun(15106001) ) {
-    cout << "Run 15106001 is bad" << endl;
-  }
   //----------------------------------------------------------------------------------------------------
 
   // Dummy refmult and primary z-vertex to test the functions
   const UShort_t refmult  = 100 ;
   const UShort_t refmult2 = 100 ;
   const UShort_t refmult3 = 100 ;
-  const UShort_t grefmult = 100 ;
   const Double_t vz      = 20.0 ; // cm
   const Double_t zdcCoincidenceRate = 20000 ; // Hz
   const Double_t bbcCoincidenceRate = 20000 ; // Hz
@@ -178,7 +169,6 @@ void getCentralityBins()
 //  refmult3CorrUtil->initEvent(refmult3, vz);
   //----------------------------------------------------------------------------------------------------
 
-  grefmultCorrUtil->initEvent(grefmult, vz, zdcCoincidenceRate) ;
   // Get centrality bins
   //   - You can use exactly the same functions to obtain centrality, reweighting
   //     and corrected multiplicity for refmult2
@@ -195,15 +185,10 @@ void getCentralityBins()
   const Int_t cent16_refmult3 = refmult3CorrUtil->getCentralityBin16() ;
   const Int_t cent9_refmult3  = refmult3CorrUtil->getCentralityBin9() ;
 
-  // Centrality from grefmult
-  const Int_t cent16_grefmult = grefmultCorrUtil->getCentralityBin16() ;
-  const Int_t cent9_grefmult  = grefmultCorrUtil->getCentralityBin9() ;
-
   // Re-weighting corrections for peripheral bins
   const Double_t reweight          = refmultCorrUtil->getWeight() ;
   const Double_t reweight_refmult2 = refmult2CorrUtil->getWeight() ;
   const Double_t reweight_refmult3 = refmult3CorrUtil->getWeight() ;
-  const Double_t reweight_grefmult = grefmultCorrUtil->getWeight() ;
 
   //----------------------------------------------------------------------------------------------------
   // Corrected refmult (with z-vertex dependent correction and luminositiy correction)
@@ -211,7 +196,6 @@ void getCentralityBins()
   const Double_t refmultCor  = refmultCorrUtil->getRefMultCorr() ;
   const Double_t refmult2Cor = refmult2CorrUtil->getRefMultCorr() ;
   const Double_t refmult3Cor = refmult3CorrUtil->getRefMultCorr() ;
-  const Double_t grefmultCor = grefmultCorrUtil->getRefMultCorr() ;
 
   //----------------------------------------------------------------------------------------------------
   // Invalid run number test

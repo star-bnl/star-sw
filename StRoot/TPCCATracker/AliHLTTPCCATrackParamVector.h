@@ -277,6 +277,7 @@ inline float_m AliHLTTPCCATrackParamVector::TransportToX( const float_v &x, cons
 #endif
   float_m mask = _mask && CAMath::Abs( exi ) <= 1.e4f;
   mask &= ( (CAMath::Abs( sinPhi ) <= maxSinPhi) || (maxSinPhi <= 0.f) );
+  if( mask.isEmpty() ) return mask;
 
 
   fX   ( mask ) += dx;
@@ -325,6 +326,7 @@ inline float_m AliHLTTPCCATrackParamVector::TransportToX( const float_v &x, cons
   //fC[14]( mask ) = c44;
 
   debugKF() << mask << "\n" << *this << std::endl;
+//  std::cout<<" > mask: "<<mask<<"\n";
   return mask;
 }
 
@@ -339,6 +341,7 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
     << "\n  " << err2Y
     << "\n  " << err2Z
     << "\n):" << std::endl;
+
   assert( (err2Y > 0.f || !mask).isFull() );
   assert( (err2Z > 0.f || !mask).isFull() );
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
@@ -351,6 +354,7 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
   err2Z.setZero( !mask );
 #endif
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
+
   //* Add the y,z measurement with the Kalman filter
 
   const float_v c00 = fC[ 0];
@@ -372,14 +376,13 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
     std::cerr << err2Y << mask << ( err2Y > 0.f || !mask ) << c00 << std::endl;
   }
 #endif
-#ifdef __ASSERT_YF__
-  assert( err2Y > 0.f || !mask );
-  assert( err2Z > 0.f || !mask );
+  assert( (err2Y > 0.f || !mask).isFull() );
+  assert( (err2Z > 0.f || !mask).isFull() );
 
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[0] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[1] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[2] );
-#endif
+
   const float_v &z0 = dy;
   const float_v &z1 = dz;
 
@@ -389,10 +392,9 @@ inline float_m AliHLTTPCCATrackParamVector::FilterDelta( const float_m &mask, co
   //const float_v &mS2 = CAMath::Reciprocal( err2Z );
   debugKF() << "delta(mS0): " << CAMath::Abs( float_v( Vc::One ) / err2Y - mS0 ) << std::endl;
   debugKF() << "delta(mS2): " << CAMath::Abs( float_v( Vc::One ) / err2Z - mS2 ) << std::endl;
-#ifdef __ASSERT_YF__
-  assert( mS0 > 0.f || !mask );
-  assert( mS2 > 0.f || !mask );
-#endif
+  assert( (mS0 > 0.f || !mask).isFull() );
+  assert( (mS2 > 0.f || !mask).isFull() );
+
   // K = CHtS
 
   const float_v &k00 = c00 * mS0;
@@ -457,6 +459,7 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
     << "\n  " << err2Y
     << "\n  " << err2Z
     << "\n):" << std::endl;
+
   assert( (err2Y > 0.f || !mask).isFull() );
   assert( (err2Z > 0.f || !mask).isFull() );
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
@@ -469,6 +472,7 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
   err2Z.setZero( !mask );
 #endif
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
+
   //* Add the y,z measurement with the Kalman filter
 
   const float_v c00 = fC[ 0];
@@ -490,10 +494,9 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
     std::cerr << err2Y << mask << ( err2Y > 0.f || !mask ) << c00 << std::endl;
   }
 #endif
-#ifdef __ASSERT_YF__
-  assert( err2Y > 0.f || !mask );
-  assert( err2Z > 0.f || !mask );
-#endif
+  assert( (err2Y > 0.f || !mask).isFull() );
+  assert( (err2Z > 0.f || !mask).isFull() );
+
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[0] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[1] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[2] );
@@ -507,10 +510,9 @@ inline float_m AliHLTTPCCATrackParamVector::Filter( const float_m &mask, const f
   //const float_v &mS2 = CAMath::Reciprocal( err2Z );
   debugKF() << "delta(mS0): " << CAMath::Abs( float_v( Vc::One ) / err2Y - mS0 ) << std::endl;
   debugKF() << "delta(mS2): " << CAMath::Abs( float_v( Vc::One ) / err2Z - mS2 ) << std::endl;
-#ifdef __ASSERT_YF__
-  assert( mS0 > 0.f || !mask );
-  assert( mS2 > 0.f || !mask );
-#endif
+  assert( (mS0 > 0.f || !mask).isFull() );
+  assert( (mS2 > 0.f || !mask).isFull() );
+
   // K = CHtS
 
   const float_v &k00 = c00 * mS0;
@@ -577,6 +579,7 @@ inline float_m AliHLTTPCCATrackParamVector::Rotate( const float_v &alpha, const 
   const float_v sinPhi = -cP * sA + sP * cA;
 
   float_m mReturn = mask && (CAMath::Abs( sinPhi ) < maxSinPhi) && (CAMath::Abs( cosPhi ) > 1.e-2f) && (CAMath::Abs( cP ) > 1.e-2f);
+  if( mReturn.isEmpty() ) return mReturn;
 
   const float_v j0 = cP / cosPhi;
   const float_v j2 = cosPhi / cP;

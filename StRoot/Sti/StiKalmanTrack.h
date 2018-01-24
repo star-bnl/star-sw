@@ -211,11 +211,7 @@ class StiKalmanTrack : public StiTrack
    int isPrimary() const	{return mVertex;}
    void setPrimary(int vertex) 	{mVertex=vertex;}
 
-	double calculateTrackLength() const;
-	double calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const;
 	double getTrackRadLength() const;
-	int calculatePointCount() const;
-	int calculateMaxPointCount() const;
 
   double getTpcDedx() const;
   double getSvtDedx() const;
@@ -289,7 +285,6 @@ class StiKalmanTrack : public StiTrack
   
   void reduce();
 
-  StMCTruth getTruth(double rXYMin=0, double rXYMax=1000) const;  
   void print(const char *opt="") const;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}

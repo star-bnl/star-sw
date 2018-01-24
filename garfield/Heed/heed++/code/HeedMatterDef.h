@@ -10,14 +10,6 @@
 
 namespace Heed {
 
-/// Flag affecting mixtures of atoms with different ionization potentials.
-/// If 1, all energy transfers what is absorbed even with the energy less than
-/// the potential of ionization of single atom, but more than the minimal
-/// potential of ionization of the mixture, should ionize.
-/// This is emulation of Jesse effect in extreme case.
-/// It is likely not realistic.
-/// So the recommended value is 0.
-const int s_use_mixture_thresholds = 0;
 
 /// Definition of matter parameters necessary for HEED.
 /// This is photoabsorption cross section, dielectric constant
@@ -90,6 +82,14 @@ class HeedMatterDef : public RegPassivePtr {
   void replace_epsi12(const std::string& file_name);
   virtual void print(std::ostream& file, int l) const;
   virtual HeedMatterDef* copy() const { return new HeedMatterDef(*this); }
+
+  /// Flag affecting mixtures of atoms with different ionization potentials.
+  /// If 1, all energy transfers what is absorbed even with the energy less than
+  /// the potential of ionization of single atom, but more than the minimal
+  /// potential of ionization of the mixture, should ionize.
+  /// This is emulation of Jesse effect in extreme case.
+  /// It is likely not realistic. So the recommended value is 0.
+  static const int s_use_mixture_thresholds = 0;
 
  private:
   // Initialization after assignment of matter and apacs

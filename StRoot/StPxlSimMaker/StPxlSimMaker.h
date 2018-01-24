@@ -99,7 +99,6 @@ class StPxlSimMaker : public StMaker
 
   void useDIGMAPSSim();
   void useDbGeom(bool db = true);
-  void useRandomSeed(bool use = true);
 
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
@@ -114,14 +113,12 @@ private:
     bool mUseDIGMAPSSim;
 
     bool mUseDbGeom;
-    bool mUseRandomSeed;
 
 
   ClassDef(StPxlSimMaker, 0)   //StAF chain virtual base class for Makers
 };
 inline void StPxlSimMaker::useDIGMAPSSim() {SetAttr("useDIGMAPSSim",true);}
 inline void StPxlSimMaker::useDbGeom(bool db) {mUseDbGeom = db;}
-inline void StPxlSimMaker::useRandomSeed(bool use) {mUseRandomSeed = use;}
 #endif
 
 /*

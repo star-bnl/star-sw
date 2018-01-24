@@ -40,8 +40,6 @@ protected:
     double  mCalibScale;
     double  mCalibSpread;
     
-    TRandom3  mRandom;
-
     double samplingFraction(double eta);
     
 public:

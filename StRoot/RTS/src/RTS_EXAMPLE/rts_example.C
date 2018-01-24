@@ -218,6 +218,12 @@ int main(int argc, char *argv[])
 		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		    date, evp->detectors, evp->status,evp->evpgroups) ;
 
+		if(strlen(print_det)) {
+			printf("*** Event %d, sequence %d: token %d, trgcmd %d, daqcmd %d\n",good,
+			       evp->seq,evp->token,evp->trgcmd,evp->daqcmd) ;
+		}
+			       
+
 		//printf("tinfo evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X\n",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		//   date, evp->detectors, evp->status,evp->evpgroups) ;
 
@@ -1726,7 +1732,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		       bunches, fpre_bx, fpost_bx, fpre_sz, fpost_sz, rdr->daqbits64_l1);
 	    
 
-	    UINT32 l1_bx = trgSum->LocalClocks[L1_CONF_NUM];
+//	    UINT32 l1_bx = trgSum->LocalClocks[L1_CONF_NUM];
 	    UINT32 mxq_bx = trgSum->LocalClocks[MXQ_CONF_NUM] ;
 	    UINT32 bbq_bx = trgSum->LocalClocks[BBQ_CONF_NUM];
 	    UINT32 epq_bx = trgSum->LocalClocks[EPQ_CONF_NUM];
@@ -1782,7 +1788,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 
 	    //TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
-	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
+//	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
 	    //printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
 	    //printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
@@ -2239,18 +2245,100 @@ static int etof_doer(daqReader *rdr, const char *do_print)
 
 static int itpc_doer(daqReader *rdr, const char *do_print)
 {
+
 	int adc_found = 0 ;
+	int cld_found = 0 ;
+	int ped_found = 0 ;
+
 	daq_dta *dd ;
+
+	u_char rdos[4] ;
+
+	memset(rdos,0,sizeof(rdos)) ;
 
 	if(strcasestr(do_print,"itpc")) ;	// leave as is...
 	else do_print = 0 ;
 
-	dd = rdr->det("itpc_pseudo")->get("ifee_sampa") ;
-	
+	for(int s=1;s<=24;s++) {
 
+#if 1
+		dd = rdr->det("itpc")->get("raw",s) ;
+
+		if(dd) {
+			while(dd->iterate()) {
+				adc_found = 1 ;
+
+				rdos[dd->row-1] = 1 ;
+
+				//if(do_print) {
+				//	printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
+				//}
+			}
+		}
+#endif
+
+#if 1
+		// In SAMPA form
+		dd = rdr->det("itpc")->get("sampa",s) ;
+		if(dd) {
+			while(dd->iterate()) {
+				adc_found = 1 ;
+
+				if(do_print) {
+					printf("ITPC SAMPA: sector %2d, FEE %3d, CH %2d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+
+					for(u_int i=0;i<dd->ncontent;i++) {
+						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
+					}
+				}
+			}
+		}
+#endif
+
+#if 0
+		// In Row/Pad form
+		dd = rdr->det("itpc")->get("adc",s) ;
+		if(dd) {
+			while(dd->iterate()) {
+				adc_found = 1 ;
+
+				if(do_print) {
+					printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+
+					for(u_int i=0;i<dd->ncontent;i++) {
+						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
+					}
+				}
+			}
+		}
+#endif
+
+
+		// PEDESTALS
+		dd = rdr->det("itpc")->get("pedrms",s) ;
+		if(dd) {
+			while(dd->iterate()) {
+				ped_found = 1 ;
+
+				if(do_print) {
+					printf("ITPC PEDRMS: sector %2d, FEE %3d, CH %2d: %d content\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				}
+			}
+		}
+
+
+		
+
+	}
+
+#if 0
+	int adc_fy17_found = 0 ;
+
+	dd = rdr->det("itpc")->get("ifee_fy17_sampa") ;
+	
 	if(dd) {
 		while(dd->iterate()) {	//per xing and per RDO
-			adc_found = 1 ;
+			adc_fy17_found = 1 ;
 
 			if(do_print) {
 				printf("ITPC: sector %2d, FEE %2d, ch %2d: pixels %3d\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
@@ -2263,12 +2351,34 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	}
 
+	if(adc_fy17_found) {
+		LOG(INFO,"ITPC-FY17 found") ;
+	}
+#endif
 
-	if(adc_found) {
-		LOG(INFO,"ITPC found") ;
+	int found = 0 ;
+	if(adc_found || cld_found || ped_found) found = 1 ;
+
+	int rdos_found = 0 ;
+	for(int i=0;i<4;i++) {
+		if(rdos[i]) rdos_found++ ;
 	}
 
-	return adc_found ;
+	char fstr[128] ;
+	fstr[0] = 0 ;
+
+	if(adc_found) {
+		sprintf(fstr,"ADC(%d) ",rdos_found) ;
+	}
+	if(cld_found) strcat(fstr,"CLD ") ;
+	if(ped_found) strcat(fstr,"PEDRMS ") ;
+
+	if(found) {
+		LOG(INFO,"ITPC found [%s]",fstr) ;
+	}
+	
+
+	return found ;
 
 }
 

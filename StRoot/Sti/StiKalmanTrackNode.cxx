@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.174 2016/11/07 23:58:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175 2018/01/16 22:46:09 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.175  2018/01/16 22:46:09  smirnovd
+ * Remove inline attribute to match the declaration
+ *
+ * Let compiler decide whether to inline or not
+ *
  * Revision 2.174  2016/11/07 23:58:03  perev
  * More accurate tracking when in refit track sometimes missed the vollume.
  * It is related to bug #3243

@@ -1,4 +1,4 @@
-/* 
+/* Study +/- ratio
    root.exe lMuDst.C MupT.C+
 ToF Mass^2
    gStyle->SetOptStat(0);
@@ -211,18 +211,18 @@ void MupT(const char* file="*.MuDst.root",
   StMuDebug::setLevel(0);  
   timer.reset();
   timer.start();
-  TChain *tree = maker->chain();
-  if (! tree) {
+  TChain *chainT = maker->chain();
+  if (! chainT) {
     cout << "No tree found" << endl;
     return;
   }
-  Long64_t nentries = tree->GetEntries();
+  Long64_t nentries = chainT->GetEntries();
   cout << nentries << " events in chain " << endl;
   if (nentries < 100) return;
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,30,0)  
-  tree->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
-  tree->SetCacheLearnEntries(1); //one entry is sufficient to learn
-  tree->SetCacheEntryRange(0,nentries);
+  chainT->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
+  chainT->SetCacheLearnEntries(1); //one entry is sufficient to learn
+  chainT->SetCacheEntryRange(0,nentries);
 #endif
   TChain *chainT = maker->chain();
   TFile *oldfile = 0;

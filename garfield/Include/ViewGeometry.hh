@@ -15,27 +15,26 @@ class GeometrySimple;
 class ViewGeometry {
 
  public:
-  // Constructor
+  /// Constructor
   ViewGeometry();
-  // Destructor
+  /// Destructor
   ~ViewGeometry();
 
+  /// Set the canvas to be painted on.
   void SetCanvas(TCanvas* c);
-
+  /// Set the geometry to be drawn.
   void SetGeometry(GeometrySimple* geo);
-
+  /// Draw the geometry.
   void Plot();
 
-  void EnableDebugging() { m_debug = true; }
-  void DisableDebugging() { m_debug = false; }
+  /// Enable/disable debugging messages.
+  void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
   std::string m_className;
 
   // Options
   bool m_debug;
-
-  std::string m_label;
 
   // Canvas
   TCanvas* m_canvas;

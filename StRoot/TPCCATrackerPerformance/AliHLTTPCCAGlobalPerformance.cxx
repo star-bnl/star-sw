@@ -189,7 +189,7 @@ void AliHLTTPCCAGlobalPerformance::EfficiencyPerformance( )
 
   for ( int iMCTr = 0; iMCTr < nMCTracks; iMCTr++ ) {
     AliHLTTPCCAPerformanceMCTrackData &mc = mcData[iMCTr];
-    if ( !mc.IsReconstructable() ) continue;
+//    if ( !mc.IsReconstructable() ) continue;
     const bool reco = mc.IsReconstructed();
     const int clones = mc.GetNClones();
 
@@ -311,11 +311,11 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
   {
     for ( int itr = 0; itr < nRecoTracks; itr++ ) {
       const int iMC = recoData[itr].GetMCTrackId();
-      if ( recoData[itr].IsGhost(PParameters::MinTrackPurity) ) continue;
+//      if ( recoData[itr].IsGhost(PParameters::MinTrackPurity) ) continue;
       AliHLTTPCCAMCTrack &mc = (*fMCTracks)[iMC];
 
-      if ( mc.P() < 1 ) continue;
-      if ( mc.MotherId() != -1 ) continue;
+//      if ( mc.P() < 1 ) continue;
+//      if ( mc.MotherId() != -1 ) continue;
       
       int nFirstMC = mc.FirstMCPointID();
       int nMCPoints = mc.NMCPoints();
@@ -333,10 +333,10 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
             MCindex = iMCPoint;
         }
       }
-      if(MCindex == -1)
-      {
-        continue;
-      }
+//      if(MCindex == -1)
+//      {
+//        continue;
+//      }
       // track resolutions
       while ( 1/*mc.Set() == 2 && TMath::Abs( mc.TPCPar()[0] ) + TMath::Abs( mc.TPCPar()[1] ) > 1*/ ) {
 /*        double cosA = TMath::Cos( t.Alpha() );
@@ -367,17 +367,17 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
         double mcEy = points[MCindex].Py()*mcQP;
         double mcEz = points[MCindex].Pz()*mcQP;
         double mcEt = TMath::Sqrt( mcEx * mcEx + mcEy * mcEy );
-        if ( TMath::Abs( mcEt ) < 1.e-4 ) break;
+//        if ( TMath::Abs( mcEt ) < 1.e-4 ) break;
         double mcSinPhi = mcEy / mcEt;
         double mcDzDs   = mcEz / mcEt;
         double mcQPt =  mcQP / mcEt;
-        if ( TMath::Abs( mcQPt ) < 1.e-6 ) break;
+//        if ( TMath::Abs( mcQPt ) < 1.e-6 ) break;
         double mcPt = 1. / TMath::Abs( mcQPt );
 //        if ( mcPt < Parameters::RefThreshold ) break;
 //	if ( t.NHits() <  PParameters::MinimumHitsForMCTrack ) break;
         double bz = fTracker->Slice( 0 ).Param().cBz();
 	
-        if ( !p.TransportToXWithMaterial( mcX, bz ) ) break;
+//        if ( !p.TransportToXWithMaterial( mcX, bz ) ) break;
         if ( p.GetCosPhi()*mcEx < 0 ) { // change direction
           mcSinPhi = -mcSinPhi;
           mcDzDs = -mcDzDs;
@@ -449,8 +449,14 @@ void AliHLTTPCCAGlobalPerformance::Draw()
   disp.DrawTPC();
   disp.DrawGBHits( *gbPerfo.GetTracker(), kGreen, 0.03, 1  );
 
+  // ---
+//  disp.ClearViewPT();
+//  disp.DrawSliceHitsPT(1, 0.5);
+//  disp.DrawSliceLinksPT(-1,-1,1);
+  // ---
+
 #if 0 // MC info
-  for ( int imc = 0; imc < nMCTracks; imc++ ) {
+  /*for ( int imc = 0; imc < nMCTracks; imc++ ) {
     AliHLTTPCCAPerformanceMCTrackData &mc = mcData[imc];
     bool doDraw = true;
     // doDraw &= (mc.GetSet() >= 2);
@@ -468,18 +474,40 @@ void AliHLTTPCCAGlobalPerformance::Draw()
 
         disp.SpecDrawRecoTrackGlobal( irt, kBlue, 0.1 );
       }
-      
     }
-  }
+  }*/
+  /*for ( int imc = 0; imc < nMCTracks; imc++ ) {
+      bool doDraw = true;
+      doDraw &= (*fMCTracks)[imc].NMCPoints() < 47;
+      doDraw &= mcData[imc].IsReconstructable();
+      if(doDraw&&(*fMCTracks)[imc].P()<0.5) disp.SpecDrawMCTrackGlobalPT( (*fMCTracks)[imc], fLocalMCPoints, kBlue, 0.3 );
+      doDraw &= (*fMCTracks)[imc].P() > 0.5;
+      if ( !doDraw ) continue;
+      disp.SpecDrawMCTrackGlobalPT( (*fMCTracks)[imc], fLocalMCPoints, kRed, 0.3 );
+  }*/
 #else // reco info
+//  for ( int irt = 0; irt < nRecoTracks; irt++ ) {
+//      disp.SpecDrawRecoTrackGlobalPT( irt, kBlue, 0.03 );
+//  }
+//  for(int i = 0; i < nMCTracks; i++) {
+//      if(mcData[i].IsReconstructable())
+////      disp.SpecDrawMCTrackGlobal( (*fMCTracks)[i], fLocalMCPoints, kRed, 0.3 );
+//	disp.SpecDrawMCTrackPointsGlobal( (*fMCTracks)[i], fLocalMCPoints, kRed, 0.3 );
+//	      disp.SpecDrawMCTrackHitsGlobal( (*fMCTracks)[i], fLocalMCPoints, fHitLabels, kGreen, 0.2 );
+//  }
   for ( int irt = 0; irt < nRecoTracks; irt++ ) {
 //    AliHLTTPCCAPerformanceRecoTrackData &rt = recoData[irt];
+      const AliHLTTPCCAGBTrack &track = fTracker->Track( irt );
+//      if( !track.IsMerged() ) continue;
 
     disp.SpecDrawRecoTrackGlobal( irt, kBlue, 0.03 );
+    /*if(track.OuterParam().QPt()<0.5)disp.SpecDrawRecoTrackGlobalPT( irt, kBlue, 0.03 );
+    if(track.OuterParam().QPt()>0.5)disp.SpecDrawRecoTrackGlobalPT( irt, kRed, 0.03 );*/
   }
 #endif
   
   disp.SaveCanvasToFile( "DrawGlobalPerformance.pdf" );
+  disp.SaveCanvasToFilePT( "DrawGlobalPerformancePT.pdf" );
   disp.Ask();
   
 #endif // DRAW_GLOBALPERF

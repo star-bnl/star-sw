@@ -503,6 +503,7 @@ initializer. -->
                <object id="BNL_condor_online_quick" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> <!-- Always call this one first, it over-writes other setting -->
                     <void method="setID">                     <string>bnl_condor_online_quick</string></void>
+                    <void method="setMaxMemory">              <int>3050</int>                    </void>
                 </object>
           </void>
 
@@ -2178,9 +2179,11 @@ stream_error = false </string></void>
                     <void property="submitCommand">      <string>condor_submit</string>   </void>
                     <void property="condorOptions">
 <string>should_transfer_files = YES
-when_to_transfer_output = ON_EXIT</string>
+when_to_transfer_output = ON_EXIT
+request_memory = 3000
+</string>
                    </void>
-                    <void method="addRequirement"><string/> </void>
+                    <void method="addRequirement"><string></string> </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>

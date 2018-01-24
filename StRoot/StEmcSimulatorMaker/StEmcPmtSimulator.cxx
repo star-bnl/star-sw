@@ -56,7 +56,7 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
     int softId; mGeom->getId(mcHit->module(), mcHit->eta(), mcHit->sub(), softId);
     
     double photoElectrons = mcHit->dE() * mMipPhotoElectrons / mMipEnergyDeposit;
-    photoElectrons = mRandom.PoissonD(photoElectrons);
+    photoElectrons = gRandom->PoissonD(photoElectrons);
     
     // get the calibration value from DB if available, otherwise use ideal value
     float calib = mTables->calib(mDetectorId-8, softId);
@@ -79,7 +79,7 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
             
         case kPrimaryOnlyMode: {
             ADC  = totalGain * photoElectrons;
-            ADC += mRandom.Gaus(pedMean, pedRMS);
+            ADC += gRandom->Gaus(pedMean, pedRMS);
             break;
         }
             
@@ -95,11 +95,11 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
     
     // finally smear with any specified calibration jitter
     ADC += pedMean;
-    if (mCalibSpread > 0) ADC += (ADC-pedMean) * mRandom.Gaus(mCalibScale, mCalibSpread);
+    if (mCalibSpread > 0) ADC += (ADC-pedMean) * gRandom->Gaus(mCalibScale, mCalibSpread);
     
     // check for a valid ADC range
     double maxADC = mMaxADC;
-    if (mCalibSpread > 0) maxADC += mRandom.Gaus(0, mMaxADCSpread);
+    if (mCalibSpread > 0) maxADC += gRandom->Gaus(0, mMaxADCSpread);
     if(ADC > maxADC)    ADC = maxADC;
     if(ADC < 0)         ADC = 0.0;
     rawHit->setAdc(static_cast<unsigned int>(ADC));

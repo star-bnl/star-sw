@@ -36,7 +36,8 @@ class ComponentAnsys121 : public ComponentFieldMap {
   bool SetWeightingField(std::string prnsol, std::string label);
 
   // Range
-  bool IsInBoundingBox(const double x, const double y, const double z) {
+  virtual bool IsInBoundingBox(const double x, const double y, 
+                               const double z) const {
     return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
            y >= yMinBoundingBox && y <= yMaxBoundingBox &&
            z >= zMinBoundingBox && y <= zMaxBoundingBox;

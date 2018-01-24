@@ -498,7 +498,10 @@ struct rts2013_TmMon {
 struct ggMonStruct {
         struct rtsMonHeader m ;
 
-        u_short status[12] ;
+	u_short mode ;
+	u_short hv ;
+
+        u_int status[12] ;
         u_short adc[12][4][3] ;
         u_short dac[12][4][3] ;
 } ;

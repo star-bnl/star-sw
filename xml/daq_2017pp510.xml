@@ -27,10 +27,11 @@
 #  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,stipulls,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b -x 'bfc.C('$f','$l',"pp2017,btof,-beamline,BEmcChkStat,StiCA,CorrX,OSpaceZ2,OGridLeakFull,-hitfilt,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="file:/star/data03/daq/2017/075/*/st_physics_*.daq" />
+<!-- <input URL="file:/star/data03/daq/2017/075/*/st_physics_*.daq" /> -->
+<input URL="file:/star/data03/daq/2017/*/*/st_physics_*.daq" />
 </job>
