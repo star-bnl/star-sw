@@ -1,6 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.86 2017/12/28 18:11:29 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.87 2018/01/26 18:09:07 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.87  2018/01/26 18:09:07  jwebb
+* Reduce unneeded output
+*
 * Revision 1.86  2017/12/28 18:11:29  jwebb
+*
 * Add FMS postshower hits interface to C++...
 *
 * Revision 1.85  2017/12/19 16:36:29  jwebb
@@ -468,13 +472,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         sensor = numbv(2)
         volume_id = 7000+100*numbv(2)+numbv(1)
 
-!       WRITE(*,*) 'Aligned SST:'
-
-!       write (*,*) '  uncoded numbv  = ', numbv(1:4)
-!       write (*,*) '          ladder = ', ladder
-!       write (*,*) '          sensor = ', sensor
-!       write (*,*) '  encoded volume = ', volume_id
-
         else if( ssdp_misalign.eq.1 ) then
 
         ladder = numbv(1) - 1
@@ -483,12 +480,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
         volume_id = 7000 + 100*sensor + ladder
 
-!       write (*,*) 'Misaligned SST: '
-!       write (*,*) '  uncoded numbv  = ', numbv(1:4)
-!       write (*,*) '          ladder = ', ladder
-!       write (*,*) '          sensor = ', sensor
-!       write (*,*) '  encoded volume = ', volume_id
-    
         endif
 
 
@@ -899,21 +890,12 @@ c$$$    write (*,*) numbv
 
         """ New numbering scheme (ladders in pxmo)"""
         if ( pixl_alignment .eq. 1 ) then
-!       write (*,*) 'new numbering'
 
         sector =    ( numbv(1)-1)/4   + 1
         ladder = mod( numbv(1)-1, 4 ) + 1
         sensor = numbv(2)
 
-!       write (*,*) '----------------------------------------------'
-!       write (*,*) numbv(1:4)
-!       write (*,*) 'sector=', sector     
-!       write (*,*) 'ladder=', ladder
-!       write (*,*) 'sensor=', sensor
-
         endif
-
-!       write (*,*) 'PIXL_MISALIGN = ', pixl_misalign
 
 
         if ( pixl_misalign .eq. 1 ) then
@@ -922,11 +904,6 @@ c$$$    write (*,*) numbv
         sector = sensor / 40 + 1
         ladder = mod ( sensor / 10, 4 ) + 1
         sensor = mod ( sensor, 10 ) + 1
-        write (*,*) 'PIXEL ----------------------------------------------'
-        write (*,*) numbv(1:4)
-        write (*,*) 'sector=', sector     
-        write (*,*) 'ladder=', ladder
-        write (*,*) 'sensor=', sensor
 
         endif
 
@@ -946,12 +923,10 @@ c$$$    write (*,*) numbv
               ladder = sensor / 6 + 1 + 1   ! extra +1 as per legacy below...
               sensor = mod( sensor, 6 ) + 1 !
 
-              write (*,*) 'Misaligned IST: ', numbv(1:4), ' : ', ladder, sensor
 
           else if ( ISTC_misalign .eq. 0 ) then
               ladder = numbv(1) + 1 ! IBAM
               sensor = numbv(2)     ! IBLM
-          write (*,*) 'Ideal IST: ', ladder, sensor
 
           else
               STOP "IST misalignment in ambiguous state / test mode"
@@ -959,27 +934,19 @@ c$$$    write (*,*) numbv
           volume_id = ladder * 1000000  +   
                       sensor *   10000  
 
-!         write (*,*) '  uncoded numbv  = ', numbv(1:4)
-!         write (*,*) '  encoded volume = ', volume_id
-!         write (*,*) '  decoded ladder = ', volume_id/1000000 - 1
-!         write (*,*) '  decoded sensor = ', mod(volume_id,1000000) /10000
-
 
 
       else if (Csys=='ist') then
         if(istVersion.ne.3.and.istVersion.ne.4) then
             istLayer=numbv(1)+1
-*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(2),' ',numbv(3),' ',numbv(4)
             volume_id = istLayer*1000000 + numbv(2)*10000 + 100*numbv(3)  + numbv(4)
         endif
         if(istVersion.eq.3) then
             istLayer=3
-*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
         if(istVersion.eq.4) then
             istLayer=2
-*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
 *19*                                 Kai Schweda
@@ -1041,11 +1008,9 @@ c$$$    write (*,*) numbv
 	    if(n2.ge.362 .and. n2.le.373)  ch=n2 +166
 	    if(n2.ge.374 .and. n2.le.384)  ch=n2 +171
 	    if(n2.ge.385 .and. n2.le.394)  ch=n2 +177   
-            !write(*,*) 'matrix check - Large cells FMS: ',nstb, ch,n2
            else
             if(n2.ge. 85 .and. n2.le.154)  ch=n2 +  5 + 5*((n2-85)/7)
 	    if(n2.ge.155 .and. n2.le.238)  ch=n2 + 50 
-            !write(*,*) 'matrix check - Small cells FMS: ',nstb, ch,n2
            endif
           endif
           volume_id=ew*10000+nstb*1000+ch       
@@ -1067,7 +1032,6 @@ c$$$    write (*,*) numbv
              slat=n2-21-19-21
           endif
           volume_id=100000+ew*10000+quad*1000+layr*100+slat
-*$$$      write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id                           
        else                     ! FPOST (FMS-Postshower)
           ew=2          
           if(n1.le.5) then
@@ -1083,7 +1047,6 @@ c$$$    write (*,*) numbv
           endif
           slat=n2
           volume_id=200000+ew*10000+quad*1000+layr*100+slat  
-*          write(*,*) 'FPOST volume_id : ',n1,n2,quad,layr,slat,volume_id
        endif
       }
 *24*                                 Dmitry Arkhipkin
