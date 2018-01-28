@@ -93,6 +93,8 @@ public:
   void ready();
    int isReady() const;
   void set(const THelixTrack *ht, double Hz);
+const double *pos() const {return &_x;}
+      double *pos()       {return &_x;}
   void get(      THelixTrack *ht) const;
 double getPt() const			{ return 1./(fabs(_ptin)+1e-6); }
   void getMom(double p[3]) const; 
