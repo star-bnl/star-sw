@@ -795,7 +795,6 @@ void StvFitErrs::Backward()
 //_____________________________________________________________________________
 int StvFitErrs::Check(const char *tit) const
 {
-  if (!StvDebug::mgCheck) 	return 0;
   if (mHH+mZZ<=0) 		return 0;
   ((StvFitErrs*)((void*)this))->Recov();
   int ierr=0;
@@ -1196,7 +1195,6 @@ RETN: if (B!=buf) delete B;
 ClassImp(StvNodeParsTest);
 void StvNodeParsTest::Test()
 {
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
   double thPars[7+15],Hz=0.000299792458 * 4.98478;
   for (int i=0;i<7+15;i++) {thPars[i]=gRandom->Rndm();}
   THelixTrack th(thPars,thPars+3,thPars[6]),thh;
@@ -1221,13 +1219,11 @@ void StvNodeParsTest::Test()
     if (fabs(thhPars[i]-thPars[i]) <1e-6) continue;
     nerr++;printf("%d = %g %g \n",i,thPars[i],thhPars[i]);}
   printf("nmErrs = %d\n",nerr);
-  StvDebug::mgRecov=saveRecov;
 }
 //_____________________________________________________________________________
 void StvNodeParsTest::TestGetRadial(int nEv)
 {
 StvFitErrs fE;
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
   double f = 0.01;
   TVectorD D(5);
   D[0] = 1.0*1.0	*f;
@@ -1302,7 +1298,6 @@ static const char *radTit[6]= {"Rad","Phi","Z  ","Tan","Psi","Pti"};
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
-  StvDebug::mgRecov=saveRecov;
 }
 
 //_____________________________________________________________________________
@@ -1351,7 +1346,6 @@ double dia[5],*e,*er,*vtx;
 
   oER*=0.;
   oHER.Clear();
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
 
 //		Prepare error matrix for TRandomVector
   TMatrixDSym S(5);
@@ -1476,14 +1470,12 @@ static int iHELIX=0;
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
-  StvDebug::mgRecov=saveRecov;
 
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 void StvNodeParsTest::TestMtx() 
 {
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
   double maxEps = 0,maxEpz = 0;  
   double hz = 0.0014880496061989194;
   int nErr=0;
@@ -1551,7 +1543,6 @@ static const char T[]="HZALP";
       printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],unu,est,epz);
   } }  
   printf("TestMtx: %d errors maxEps=%g maxEpz=%g\n",nErr,maxEps,maxEpz);
-  StvDebug::mgRecov=saveRecov;
 
 }
 
@@ -1704,7 +1695,6 @@ StvFitErrs iE,oE,oER;
 
   oER*=0.;
   oHER.Clear();
-  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
 
 //		Prepare error matrix for TRandomVector
   TMatrixDSym S(5);
@@ -1818,7 +1808,6 @@ StvFitErrs iE,oE,oER;
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
-  StvDebug::mgRecov=saveRecov;
 
 }
 //_____________________________________________________________________________

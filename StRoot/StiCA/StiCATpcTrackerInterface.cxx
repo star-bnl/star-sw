@@ -204,7 +204,7 @@ void StiCATpcTrackerInterface::Run()
   statTime_SliceTrackerTime += fTracker->SliceTrackerTime();
   statTime_SliceTrackerCpuTime += fTracker->SliceTrackerCpuTime();
 
-
+  if (statTime_SliceTrackerTime > 0) {
   std::cout << "Reconstruction Time"
       << " Real = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerTime+statTime[ 9 ]) * 1.e3 << " ms,"
       << " CPU = " << std::setw( 10 ) << 1./statIEvent*(statTime_SliceTrackerCpuTime+statTime[ 10 ]) * 1.e3 << " ms,"
@@ -229,6 +229,7 @@ void StiCATpcTrackerInterface::Run()
         << " |               Merge: " << std::setw( 10 )  << 1./statIEvent*statTime[ 17 ] * 1000. << " ms\n"
         << " |           DataStore: " << std::setw( 10 )  << 1./statIEvent*statTime[ 19 ] * 1000. << " ms\n"
       ;
+  }
   }
   // ---
 
