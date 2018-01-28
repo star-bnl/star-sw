@@ -12,7 +12,7 @@
  * Definitions needed for AliHLTTPCCATracker
  *
  */
-#define V5
+//#define V5
 //#define AVX1V
 
 
