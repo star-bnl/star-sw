@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 class TObject;
 class TH1;
+class StvGrappa;
+class StvTrack;
 class StvDebug
 {
 public:	
@@ -20,6 +22,7 @@ static void Count(const char *key,double valx,double valy);
 static void Count(const char *key,double valx, double valy
                                  ,double leftx,double ritex
 				 ,double lefty,double ritey);
+static void SaveAll();
 static void Sumary(int inPage=4);
 static void Reset();
 static const char *Env(const char *key);
@@ -27,12 +30,19 @@ static        int  Inv(const char *key);
 static int    iFlag(const char *flagName, int    dflt=0);
 static double dFlag(const char *flagName, double dflt=0);
 static void Browse(const char *name, TObject *obj);
+//		StvGrappa
+static void AddGra(double x,double y,double z,int iObj);
+static void ClearGra();
+static void ShowGra();
+static void Show(const StvTrack*);
+static void SetActGra(int akt = 1);
+
 private:
 static void Draw(int nH,TH1** H);
 public:
 static int mgDebug;
-static int mgRecov;
-static int mgCheck;
+static StvGrappa *mgGrappa;
+static StvGrappa *mgGrappaTmp;
 
 
 #if 0
