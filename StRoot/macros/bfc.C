@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.192 2018/01/29 20:02:26 smirnovd Exp $
+// $Id: bfc.C,v 1.193 2018/01/29 20:18:12 smirnovd Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -32,45 +32,26 @@ void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 	 //	 const Char_t *Chain="gstar,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
-
-
-
-// A helper function to load library 'libName' from a currently available set of
-// search paths
-void LoadAndLog(const TString& libName)
-{
-  char* fullPath = gSystem->DynamicPathName( libName.Data(), true );
-
-  if ( fullPath )
-  {
-    gSystem->Load(fullPath);
-
-    std::cout << Form("Library %-22s [%15s] (%s)\tis loaded\n", libName.Data(), "bfc.C", fullPath);
-  }
-  else
-  {
-    std::cout << libName << " not found in " << gSystem->GetDynamicPath() << "\n";
-  }
-
-  delete fullPath;
-}
-
-
 //_____________________________________________________________________
 void Load(const Char_t *options)
 {
-  cout << "Load system libraries:\n";
+  cout << "Load system libraries\t";
   int nodefault = TString(options).Contains("nodefault",TString::kIgnoreCase);
 
 
+  if ( TString(gProgName)!="root4star") { // ! root4star
     if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
-      LoadAndLog("libpgf77VMC");
+      const Char_t *pgf77 = "libpgf77VMC";
+      if (gSystem->DynamicPathName(pgf77,kTRUE) ) {
+	gSystem->Load(pgf77); cout << " " << pgf77 << " + ";
+      }
     }
-
     if (!nodefault || TString(options).Contains("cern" ,TString::kIgnoreCase)) {
-      LoadAndLog("libStarMiniCern");
+        gSystem->Load("libStarMiniCern"); 
+        cout << "libStarMiniCern" ;
     }
 
+    
     if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
@@ -109,25 +90,20 @@ void Load(const Char_t *options)
       Int_t i = 0;
       while ((libs[i])) {
 	TString lib(libs[i]);
-
+	//cout << "Found " << lib << endl;
 	if (i64) lib.ReplaceAll("/lib","/lib64");
-
+	lib += mysql;
 	lib = gSystem->ExpandPathName(lib.Data());
-        gSystem->AddDynamicPath( lib.Data() );
-
+	if (gSystem->DynamicPathName(lib,kTRUE)) {
+	  gSystem->Load(lib.Data()); 
+	  cout << " + " << mysql << " from " << lib.Data();
+	  break;
+	}
 	i++;
       }
-
-      LoadAndLog("libmysqlclient");
-      LoadAndLog("libxml2");
-
-      // Add a path for log4cxx
-      TString extra_path = gSystem->ExpandPathName("$OPTSTAR/lib/");
-      gSystem->AddDynamicPath(extra_path);
-
-      LoadAndLog("liblog4cxx");
     }
     cout << endl;
+  }
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
