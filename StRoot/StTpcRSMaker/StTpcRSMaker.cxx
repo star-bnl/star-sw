@@ -65,7 +65,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.73 2016/12/19 15:22:39 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.73.2.1 2018/01/29 15:43:48 didenko Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -202,6 +202,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
   if (TESTBIT(m_Mode,kDistortion)) {
@@ -1251,7 +1252,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  tpc_hitC->de = dESum*eV; 
 	  tpc_hitC->ds = dSSum; 
 	  tpc_hitC->adc = TotalSignal;
-	  tpc_hitC->np = nP;
+	  //tpc_hitC->np = nP;
     if (ClusterProfile) {
 	  if (TotalSignal > 0) {
 	    if (hist[ioH][0]) {
@@ -1779,8 +1780,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.73 2016/12/19 15:22:39 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.73.2.1 2018/01/29 15:43:48 didenko Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.73.2.1  2018/01/29 15:43:48  didenko
+// branch revision to 1.73 for embedding
+//
 // Revision 1.73  2016/12/19 15:22:39  fisyak
 // Fix typo
 //
