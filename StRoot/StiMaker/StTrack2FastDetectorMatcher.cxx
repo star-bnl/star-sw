@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.6 2018/01/03 21:24:14 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.7 2018/01/29 19:48:40 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -86,7 +86,10 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
 	  mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
 	}
       }
-      if (btofGeom) {btofList  = new StBtofHitList; btofList->initRun();} // dongx
+
+      btofList = new StBtofHitList();
+      btofList->initRun();
+
     } else {
       ctbList   = new StCtbHitList; ctbList->initRun(); 
     }
@@ -304,6 +307,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.7  2018/01/29 19:48:40  smirnovd
+ * StTrack2FastDetectorMatcher: Remove unnecessary test for just created BTof geometry
+ *
  * Revision 2.6  2018/01/03 21:24:14  smirnovd
  * Don't use common name from std:: as local variable
  *
