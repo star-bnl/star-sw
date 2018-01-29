@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.7 2018/01/29 19:48:40 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.8 2018/01/29 19:48:54 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -79,10 +79,7 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
 	  btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
 	  if (isMC) btofGeom->SetMCOn();
 	  else      btofGeom->SetMCOff();
-	  Int_t Debug = mydb->Debug();
-	  mydb->SetDebug(0);
 	  btofGeom->Init(mydb, starHall);
-	  mydb->SetDebug(Debug);
 	  mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
 	}
       }
@@ -307,6 +304,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.8  2018/01/29 19:48:54  smirnovd
+ * StTrack2FastDetectorMatcher: Don't change debug level for StBTofGeometry (in a weird way)
+ *
  * Revision 2.7  2018/01/29 19:48:40  smirnovd
  * StTrack2FastDetectorMatcher: Remove unnecessary test for just created BTof geometry
  *
