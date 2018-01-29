@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.188 2015/10/14 21:45:48 perev Exp $
+// $Id: bfc.C,v 1.189 2018/01/29 20:01:56 smirnovd Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -32,6 +32,30 @@ void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 	 //	 const Char_t *Chain="gstar,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
+
+
+
+// A helper function to load library 'libName' from a currently available set of
+// search paths
+void LoadAndLog(const TString& libName)
+{
+  char* fullPath = gSystem->DynamicPathName( libName.Data(), true );
+
+  if ( fullPath )
+  {
+    gSystem->Load(fullPath);
+
+    std::cout << Form("Library %-22s [%15s] (%s)\tis loaded\n", libName.Data(), "bfc.C", fullPath);
+  }
+  else
+  {
+    std::cout << libName << " not found in " << gSystem->GetDynamicPath() << "\n";
+  }
+
+  delete fullPath;
+}
+
+
 //_____________________________________________________________________
 void Load(const Char_t *options)
 {
