@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.191 2018/01/29 20:02:12 smirnovd Exp $
+// $Id: bfc.C,v 1.192 2018/01/29 20:02:26 smirnovd Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -63,7 +63,6 @@ void Load(const Char_t *options)
   int nodefault = TString(options).Contains("nodefault",TString::kIgnoreCase);
 
 
-  if ( TString(gProgName)!="root4star") { // ! root4star
     if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
       LoadAndLog("libpgf77VMC");
     }
@@ -129,7 +128,6 @@ void Load(const Char_t *options)
       LoadAndLog("liblog4cxx");
     }
     cout << endl;
-  }
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
