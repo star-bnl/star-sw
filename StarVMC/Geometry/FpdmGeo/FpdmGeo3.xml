@@ -23,7 +23,7 @@
 
             <var name="FmsNorthX" />
             <var name="FmsSouthX" />
-
+	    <var name="Atten" />    
         </Structure>
 
         
@@ -222,7 +222,7 @@
 
             <var name="FmsNorthX" value="-0.3" comment="Default x-position" />
             <var name="FmsSouthX" value="+0.3" comment="Default x-position" />
-
+	    <var name="atten"     value="0.0"  commend="Default 0=attenuation off" />
         </Fill>
 
 	<Use struct="FMCG" select="version" value="8.0" />
@@ -773,7 +773,8 @@
             <Shape type="BOX" dz="FLGG_depth/2.0" dx="FLGG_Width/2.0" dy="FLGG_Width/2.0"  />
 
             <Instrument block="FLGR">
-            <Hit meas="elos" nbits="0" min="0" max="50" />
+	      <Hit meas="flgr" nbits="0" min="0" max="250" />
+              <Hit meas="elos" nbits="0" min="0" max="50" />
             </Instrument>
 
             <If expr="FMCG_ChkvSim==1"  >
@@ -795,7 +796,8 @@
             <Attribute for="FLXF" seen="1" colo="4"  />
             <Shape type="BOX" dz="FLGG_depth/2.0" dx="FLGG_Width/2.0" dy="FLGG_Width/2.0"  />
             <Instrument block="FLXF">
-               <Hit meas="elos" nbits="0" min="0" max="50" />
+	      <Hit meas="flxf" nbits="0" min="0" max="250" />
+              <Hit meas="elos" nbits="0" min="0" max="50" />
             </Instrument>
         </Block>
         

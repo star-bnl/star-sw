@@ -9,14 +9,14 @@
     <Setup  name   = "PHMDon"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "PhmdGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2"  >
 
     </Setup>
 
     <Setup  name   = "PHMD01"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "PhmdGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2"  >
       
       <Init struct="pmvr" var="config" value="1.0" />
 
@@ -25,11 +25,13 @@
     <Setup  name   = "PHMD02"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "PhmdGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2"  >
       
       <Init struct="pmvr" var="config" value="2.0" />
 
     </Setup>
+
+
   
   </Detector> 
    

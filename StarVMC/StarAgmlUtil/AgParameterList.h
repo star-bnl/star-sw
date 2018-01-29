@@ -16,7 +16,8 @@ class AgParameterList
 public:
 
   AgParameterList() 
-    : mParameters(), mParameterList(), _Block(), _Mother(), _Group(), _Table()
+    : mParameters(), mParameterList(), 
+      _Block(), _Mother(), _Group(), _Table(), _Chair(), _Row(0)
   {/* nada */ };
 
   virtual ~AgParameterList(){ /* nada */ };
@@ -42,12 +43,15 @@ public:
   void SetBlock ( const char* name ){ _Block=name;  }
   void SetMother( const char* name ){ _Mother=name; }
   void SetGroup ( const char* name ){ _Group=name;  }
-  void SetTable ( const char* name ){ _Table=name;  }
+  void SetTable ( const char* name, int row=0 ){ _Table=name; _Row=row; }
+  void SetChair ( const char* name ){ _Chair=name; }
 
   const char* block() { return _Block.c_str();  }
   const char* mother(){ return _Mother.c_str(); }
   const char* group() { return _Group.c_str();  }
   const char* table() { return _Table.c_str();  }
+  const char* chair() { return _Chair.c_str();  }
+  const int   row()   { return _Row; }
 
 private:
 protected:
@@ -59,15 +63,19 @@ protected:
   std::string _Mother;
   std::string _Group;
   std::string _Table;
+  std::string _Chair;
+  int         _Row;
 
 public:
   /// Copy ctor
   AgParameterList( const AgParameterList& other ) 
     : mParameters(other.mParameters), mParameterList(other.mParameterList),
-      _Block(other._Block), 
-      _Mother(other._Mother),
-      _Group(other._Group), 
-      _Table(other._Table)
+      _Block(other._Block)   , 
+      _Mother(other._Mother) ,
+      _Group(other._Group)   , 
+      _Table(other._Table)   ,
+      _Chair(other._Chair)   ,
+      _Row(other._Row)
   { /* nada */ }
 
   /// Assignment operators
@@ -79,6 +87,8 @@ public:
     _Mother = other._Mother;
     _Group = other._Group;
     _Table = other._Table;
+    _Chair = other._Chair;
+    _Row   = other._Row;
     return *this;
   }
 
