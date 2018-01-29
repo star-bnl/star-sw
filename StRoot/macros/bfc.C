@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.189 2018/01/29 20:01:56 smirnovd Exp $
+// $Id: bfc.C,v 1.190 2018/01/29 20:02:05 smirnovd Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -65,14 +65,10 @@ void Load(const Char_t *options)
 
   if ( TString(gProgName)!="root4star") { // ! root4star
     if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
-      const Char_t *pgf77 = "libpgf77VMC";
-      if (gSystem->DynamicPathName(pgf77,kTRUE) ) {
-	gSystem->Load(pgf77); cout << " " << pgf77 << " + ";
-      }
+      LoadAndLog("libpgf77VMC");
     }
     if (!nodefault || TString(options).Contains("cern" ,TString::kIgnoreCase)) {
-        gSystem->Load("libStarMiniCern"); 
-        cout << "libStarMiniCern" ;
+      LoadAndLog("libStarMiniCern");
     }
 
     
@@ -116,15 +112,21 @@ void Load(const Char_t *options)
 	TString lib(libs[i]);
 	//cout << "Found " << lib << endl;
 	if (i64) lib.ReplaceAll("/lib","/lib64");
-	lib += mysql;
+
 	lib = gSystem->ExpandPathName(lib.Data());
-	if (gSystem->DynamicPathName(lib,kTRUE)) {
-	  gSystem->Load(lib.Data()); 
-	  cout << " + " << mysql << " from " << lib.Data();
-	  break;
-	}
+        gSystem->AddDynamicPath( lib.Data() );
+
 	i++;
       }
+
+      LoadAndLog("libmysqlclient");
+      LoadAndLog("libxml2");
+
+      // Add a path for log4cxx
+      TString extra_path = gSystem->ExpandPathName("$OPTSTAR/lib/");
+      gSystem->AddDynamicPath(extra_path);
+
+      LoadAndLog("liblog4cxx");
     }
     cout << endl;
   }
