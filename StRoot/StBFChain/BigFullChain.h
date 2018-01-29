@@ -1528,7 +1528,7 @@ Bfc_st BFC[] = { // standard chains
   {"ssdAdd"     ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker",             "... SSD merge maker",kFALSE},
   {"ssdE"        ,"","","ssdpre,ssdAdd"                       ,"","","SSD full chain for embedding",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"emcDY2"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
+  {"emcDY2"   ,"emcRaw","","daq,eemcDb,EEmcUtil,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
   {"eemcD"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc","","" //no  emcAtoE in simulation
