@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.648 2018/01/29 20:01:19 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.649 2018/01/29 20:18:12 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1467,6 +1467,14 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
+      if (! (GetOption("Stv"))) {
+	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
+	  SetOption("VMCPassive","Default,-TGiant3");
+	}
+	SetOption("pgf77","Default,-TGiant3");
+	SetOption("mysql","Default,-TGiant3");
+	SetOption("StarMiniCern","Default,-TGiant3");
+      }
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || GetOption("StiVMC"))) {
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
