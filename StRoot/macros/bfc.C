@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.190 2018/01/29 20:02:05 smirnovd Exp $
+// $Id: bfc.C,v 1.191 2018/01/29 20:02:12 smirnovd Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -59,7 +59,7 @@ void LoadAndLog(const TString& libName)
 //_____________________________________________________________________
 void Load(const Char_t *options)
 {
-  cout << "Load system libraries\t";
+  cout << "Load system libraries:\n";
   int nodefault = TString(options).Contains("nodefault",TString::kIgnoreCase);
 
 
@@ -67,11 +67,11 @@ void Load(const Char_t *options)
     if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
       LoadAndLog("libpgf77VMC");
     }
+
     if (!nodefault || TString(options).Contains("cern" ,TString::kIgnoreCase)) {
       LoadAndLog("libStarMiniCern");
     }
 
-    
     if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
@@ -110,7 +110,7 @@ void Load(const Char_t *options)
       Int_t i = 0;
       while ((libs[i])) {
 	TString lib(libs[i]);
-	//cout << "Found " << lib << endl;
+
 	if (i64) lib.ReplaceAll("/lib","/lib64");
 
 	lib = gSystem->ExpandPathName(lib.Data());
