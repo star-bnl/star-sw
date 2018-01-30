@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.9 2018/01/29 19:49:04 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.10 2018/01/30 13:23:42 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -20,7 +20,6 @@
 #include "StEmcCollection.h"
 #include "StBTofCollection.h" // dongx
 #include "StBTofUtil/StBTofGeometry.h"
-#include "TGeoManager.h"
 #include "TMath.h"
 //________________________________________________________________________________
 ClassImp(StTrack2FastDetectorMatcher);
@@ -73,21 +72,21 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
     if (dateY > 2008) {
       TObjectSet *btofGeom_dataset = (TObjectSet *) mydb->GetDataSet("btofGeometry");
       btofGeom = btofGeom_dataset ? (StBTofGeometry *) btofGeom_dataset->GetObject() : nullptr;
-      // If StBTofGeometry object is not found in the list of maker's objects create a new one
       if (! btofGeom) {
-	// Build StBTofGeometry from TGeo geometry if available
-	TVolume *starHall = gGeoManager ? nullptr : (TVolume *)mydb->GetDataSet("HALL");
-	LOG_INFO << " BTofGeometry initialization ... " << endm;
-	btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
-	if (isMC) btofGeom->SetMCOn();
-	else      btofGeom->SetMCOff();
-	btofGeom->Init(mydb, starHall, gGeoManager);
-	mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
+	TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
+	if (starHall) {
+	  LOG_INFO << " BTofGeometry initialization ... " << endm;
+	  btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
+	  if (isMC) btofGeom->SetMCOn();
+	  else      btofGeom->SetMCOff();
+	  Int_t Debug = mydb->Debug();
+	  mydb->SetDebug(0);
+	  btofGeom->Init(mydb, starHall);
+	  mydb->SetDebug(Debug);
+	  mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
+	}
       }
-
-      btofList = new StBtofHitList();
-      btofList->initRun();
-
+      if (btofGeom) {btofList  = new StBtofHitList; btofList->initRun();} // dongx
     } else {
       ctbList   = new StCtbHitList; ctbList->initRun(); 
     }
@@ -305,6 +304,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.10  2018/01/30 13:23:42  smirnovd
+ * Revert previous changes mistakenly committed to trunk instead of a branch
+ *
  * Revision 2.9  2018/01/29 19:49:04  smirnovd
  * StTrack2FastDetectorMatcher: Build StBTOfGeometry from TGeo geometry when available
  *
