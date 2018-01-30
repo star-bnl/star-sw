@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.29 2018/01/09 17:11:32 jwebb Exp $
+* $Id: xgeometry.age,v 1.30 2018/01/30 21:26:38 jwebb Exp $
 
 
 
@@ -2512,6 +2512,8 @@ If LL>0
   case y2018 { y2018: y2018 first cut geometry; Geom =        'y2018     '; call geom_y2018;} 
   case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
+  case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
+
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
   Case ftsver3  { y2017 : y2017 baseline w/ ids and fts v3;     Geom = 'ftsver3   '; call geom_ftsver3;}
@@ -4639,9 +4641,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.29 2018/01/09 17:11:32 jwebb Exp $
+* $Id: xgeometry.age,v 1.30 2018/01/30 21:26:38 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.30  2018/01/30 21:26:38  jwebb
+* Integrate y2019 geometry (full eTOF).
+*
 * Revision 1.29  2018/01/09 17:11:32  jwebb
+*
 * The geometry is steered by a set of user commands, input using the DETP
 * facility, e.g.
 *
