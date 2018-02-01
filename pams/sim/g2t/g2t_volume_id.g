@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.87 2018/01/26 18:09:07 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.88 2018/02/01 22:52:38 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.88  2018/02/01 22:52:38  jwebb
+* Updated g2t volume ID for epd.
+*
 * Revision 1.87  2018/01/26 18:09:07  jwebb
 * Reduce unneeded output
 *
@@ -1149,7 +1152,7 @@ c$$$    write (*,*) numbv
            epd_epdt = numbv(3) "1:T1 trap, 2:T1 Triangular, 3:T2 Thin, 4:T3 Thick"
 
 	   volume_id = 10000 * epd_epdm                          +
-	                 100 * epd_epss * 1000                   +
+	                 100 * epd_epss                          +
 		           1 * (mod(epd_epdt,2) + (epd_epdt/2) ) 
 
      " EPD volume_id " 
