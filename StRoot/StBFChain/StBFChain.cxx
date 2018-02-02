@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.647 2017/12/08 20:15:55 jwebb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.649 2018/01/29 20:18:12 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
