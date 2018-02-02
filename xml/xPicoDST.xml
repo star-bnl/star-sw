@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="xrootd" simulateSubmission ="true">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  starver TFG17o
+  setup 64b
+  ln -s $STAR/.sl* .
+#  cd $SCRATCH
+#   pwd
+#  setenv NODEBUG yes
+#  setup  gcc
+#  setup  32b
+#  starver DEV2/SL15
+  set filelist = `cat $FILELIST | awk '{print $1}'`
+  echo "file list = ${filelist}"
+  set NL = `echo ${filelist} | wc -l`
+  echo "NL = ${NL}"
+  if (${NL} == 0) exit 0;
+  foreach input ( ${filelist} )
+    echo ${input} | grep ':'
+    if (! $?) then
+      set dir      = `echo ${input} | awk -F\: '{print $1}'`
+      set tag      = `echo ${input} | awk -F\: '{print $2}'`
+    else
+      set dir = `dirname ${input}`;
+      set tag = `basename ${input} .MuDst.root`;
+    endif
+    set log = ${tag}C.log
+#  if (-r ${log}) exit 0;
+    if (! -r "${tag}.picoDst.root") then
+#      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
+       root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")'  makePicoDst.C+  &gt;&amp; ${log}
+    endif
+  end
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<input URL="catalog:star.bnl.gov?production=P16ij,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,filename~MuDst,tpx=1,sanity=1,available=1,trgsetupname~AuAu_200_production_2016,storage!=HPSS" preferStorage="local" nFiles="all" />
+
+</job>
