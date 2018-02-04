@@ -75,25 +75,26 @@ ClassImp(StTpcMcAnalysisMaker)
 //_________________________________________________
 Int_t StTpcMcAnalysisMaker::Init() {
   TFile *f = GetTFile();
-  assert(f);
-  f->cd();
-  if (  m_Mode) {gMessMgr->Info() << "Multi  Cluster mode" << endm;}
-  else          {gMessMgr->Info() << "Single Cluster mode" << endm;}
-  fCluster = new TpcCluster();
-  mTpcT = new TTree("TpcT","the TPC hit pairs and pixel Info");
-  Int_t bufsize= 64000;
-  Int_t split = 99;
-  if (split)  bufsize /= 4;
-  mTpcT->Branch("TpcCluster", "TpcCluster",&fCluster, bufsize, split);
+  if (f) {
+    f->cd();
+    if (  m_Mode) {gMessMgr->Info() << "Multi  Cluster mode" << endm;}
+    else          {gMessMgr->Info() << "Single Cluster mode" << endm;}
+    fCluster = new TpcCluster();
+    mTpcT = new TTree("TpcT","the TPC hit pairs and pixel Info");
+    Int_t bufsize= 64000;
+    Int_t split = 99;
+    if (split)  bufsize /= 4;
+    mTpcT->Branch("TpcCluster", "TpcCluster",&fCluster, bufsize, split);
+  }
   return StMaker::Init();
 }
 //_________________________________________________
 Int_t StTpcMcAnalysisMaker::Make() {
+  if (! mTpcT) return kStOK;
   if (m_Mode) {
     return MultiCluster();
-  } else {
-    return SingleCluster();
-  }
+  } 
+  return SingleCluster();
 }
 //_________________________________________________
 Int_t StTpcMcAnalysisMaker::MultiCluster() {
