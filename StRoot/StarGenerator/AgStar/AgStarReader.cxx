@@ -94,7 +94,11 @@ void AgStarReader::ReadEvent()
 	  };
 
 	  myvtx = geant3->Gsvert( v, 0, 0 );
-	  assert(myvtx==idvtx);
+	  if (myvtx != idvtx) {
+	    Warning(GetName(),Form("myvtx = %i does not match with idvtx = %i. Skip it.",myvtx,idvtx));
+	    myvtx = 0;
+	  }
+	  //	  assert(myvtx==idvtx);
 
 	}
 
@@ -115,12 +119,9 @@ void AgStarReader::ReadEvent()
 	    Warning(GetName(),Form("Particle %s with PDG id=%i has no G3 code.  Skipped.",pdg->GetName(),ipdg));
 	  }
       }
-
-
-      geant3->Gskine( plab, g3id, myvtx );
-
+      if (myvtx) 
+	geant3->Gskine( plab, g3id, myvtx );
     }
-
 }
 // ----------------------------------------------------------------------------------------------------
 //
