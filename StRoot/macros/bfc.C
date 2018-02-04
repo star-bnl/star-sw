@@ -73,7 +73,7 @@ void Load(const Char_t *options="");
 //	 const Char_t *Chain="gstar,20Muons,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
 StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName=0);
-StBFChain *bfc(Int_t First, const Char_t *Chain = "MC.2016",
+StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016",
  	       const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
 //	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
@@ -201,7 +201,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
   } else {
     // Predefined test chains
     Int_t typeC = 0;
-    const Char_t *predChains[4] = {"MC.2016","MC.2017","MC.2018","MC.2019"};
+    const Char_t *predChains[4] = {"MC2016","MC2017","MC2018","MC2019"};
     for (Int_t i = 0; i < 4; i++) {
       TString PredChain(predChains[i]);
       if (TString(Chain) == PredChain) {typeC = i+1; break;}
@@ -209,37 +209,13 @@ StBFChain *bfc(Int_t First, Int_t Last,
       if (TString(Chain) == PredChain) {typeC = -(i+1); break;}
     }
     if (typeC) {
-      tChain = "";
-      if ( TString(gProgName) == "root4star") {tChain += "gstar,useXgeom,Corr4"; typeC = -TMath::Abs(typeC);}
-      else                                    {tChain += "vmc,CorrX";}
-      switch (typeC) {
-      case 1:
-	//"MC.2016a,istSlowSim,pxlSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,DbV20170830,gstar,useXgeom")'
-	tChain += ",VMCAlignment,sdt20160301";
-      case -1:
-	tChain += ",MC.2016a,istSlowSim,pxlSlowSim,StiHftC";
-	break;
-      case 2:
-	tChain += ",VMCAlignment,sdt20170424";
-      case -2:
-	tChain += ",MC.2017";
-	break;
-      case 3:
-      case -3:
-	tChain += ",MC.2018";
-	break;
-      case 4:
-      case -4:
-	tChain += ",MC.2019";	
-	break;
-      default:
-	return chain;
-	break;
+      if ( TString(gProgName) == "root4star") {
+	tChain += ".Ideal,gstar,useXgeom,Corr4"; 
+      } else                                   {
+	tChain += ",vmc,CorrX";
       }
-      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags";
-      //      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,DbV20170830,McTpcAna,tags";
-      //      tChain += ",StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,noTags,20Muons,OSpaceZ2,OGridLeak3D,StiPulls,RunG.1";
     }
+    tChain += ",RunG.1";
   }
   if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
   chain = (StBFChain *) StMaker::New("StBFChain", chainName);
