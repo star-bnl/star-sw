@@ -72,7 +72,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	StiDetector *detector = (*iter)->getDetector(i,sector);
 	if (detector && detector->isActive()) {
 	  //	  if (! sector) {
-	    LOG_INFO << "StiMasterDetectorBuilder::build() -I- row:"<<row << "\t" << *detector << endm;
+	  //	    LOG_INFO << "StiMasterDetectorBuilder::build() -I- row:"<<row << "\t" << *detector << endm;
 	    //	  }
 	  setDetector(row,sector,detector);
 	}
