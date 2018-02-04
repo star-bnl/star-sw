@@ -40,7 +40,7 @@ using namespace std;
 //#include "TGeoMatrix.h"
 //#include "TDataSet.h"
 #include "TF1.h"
-
+#include "TGeoBBox.h"
 #include "StIstDbMaker/StIstDb.h"
 #include "StIstUtil/StIstCollection.h"
 #include "StIstUtil/StIstRawHitCollection.h"
@@ -199,7 +199,7 @@ Int_t StIstSlowSimMaker::Make()
 
 	return kStOK;
 }
-#if 0
+#if 1
 void StIstSlowSimMaker::Clear( Option_t *opts )
 {
 	if(mIstCollectionPtr ) {
@@ -384,11 +384,11 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 	while(row_dist>=1 || column_dist>=1)
 	{
 		StThreeVectorD distance;
-
+#if 0
 		StThreeVectorD halfPad(direction(mcLocalDir.x())*kIstPadPitchRow/2.0,
 		direction(mcLocalDir.y())*scaleFromYvsX(mcLocalDir, kIstPadPitchRow/2.0),
 		direction(mcLocalDir.z())*kIstPadPitchColumn/2.0);
-
+#endif
 		LOG_DEBUG<<"current x = "<<current.x()<<"\ty = "<<current.y()<<"\tz = "<<current.z()<<endm;
 
 		distanceToBorder(current, mcLocalDir, mean, distance);
@@ -440,6 +440,10 @@ void StIstSlowSimMaker::transformToSensor(StThreeVectorD &hitPos) const
 
 Double_t StIstSlowSimMaker::distanceToBorder(const StThreeVectorD hitPos, const StThreeVectorD dir, const StThreeVectorD mean, StThreeVectorD &dist) const
 {
+  Double_t distance = TGeoBBox::DistFromInside(hitPos.xyz(), dir.xyz(), kIstPadPitchRow/2.0, 0.0150, kIstPadPitchColumn/2.0, mean.xyz());
+  if (TMath::Abs(distance) < 1e-4) distance = 1e-4;
+  dist = distance*dir;
+#if 0
 	StThreeVectorD halfPad(kIstPadPitchRow/2.0, 0.0150, kIstPadPitchColumn/2.0);
 	LOG_DEBUG<<"distanceToBorder() mean x = "<<mean.x()<<"\ty = "<<mean.y()<<"\tz = "<<mean.z()<<endm;
 
@@ -455,7 +459,7 @@ Double_t StIstSlowSimMaker::distanceToBorder(const StThreeVectorD hitPos, const 
 	LOG_DEBUG<<"diff_x = "<<diff_x<<"\tdiff_z = "<<diff_z<<endm;
 	LOG_DEBUG<<"dir x = "<<dir.x()<<"\ty = "<<dir.y()<<"\tz = "<<dir.z()<<endm;
 
-	if(fabs(dir.x())<1e-6)
+	if(fabs(dir.x())<1e-6)  
 	{
 		dist.setZ(diff_z);
 		dist.setY(scaleFromYvsZ(dir, diff_z));
@@ -480,15 +484,17 @@ Double_t StIstSlowSimMaker::distanceToBorder(const StThreeVectorD hitPos, const 
 
 	dist.setY(scaleFromYvsX(dir, dist.x()));
 	LOG_DEBUG<<"dist x = "<<dist.x()<<"\ty = "<<dist.y()<<"\tz = "<<dist.z()<<endm;
-	return dist.mag();	// 3D distance
+	distance = TMath::Max(1e-4,dist.mag());
+	//	dist = dir*distance;
+#endif
+	return distance;	// 3D distance
 }
-
+#if 0
 
 Double_t StIstSlowSimMaker::direction(const Double_t x) const
 {
    return (x>0) - (x<0);
 }
-
 Double_t StIstSlowSimMaker::scaleFromYvsX(const StThreeVectorD vec, const Double_t a) const
 {
 	if(fabs(vec.x())>1e-6) return a*vec.y()/vec.x(); /// scale a by y/x
@@ -506,3 +512,4 @@ Double_t StIstSlowSimMaker::scaleFromYvsZ(const StThreeVectorD vec, const Double
       return 0.;
    }
 }
+#endif

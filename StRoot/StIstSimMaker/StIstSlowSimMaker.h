@@ -52,7 +52,7 @@ class StIstSlowSimMaker : public StMaker {
   Int_t Make();
   Int_t Init();
   Int_t InitRun( Int_t runNumber );
-#if 0
+#if 1
   void Clear( Option_t *opts = "" );
 #endif
   virtual const char *GetCVS() const
@@ -84,10 +84,11 @@ class StIstSlowSimMaker : public StMaker {
 
   private:
   void generateRawHits(const StMcIstHit *istMChit) const;
+#if 0
   Double_t direction(const Double_t x) const;
   Double_t scaleFromYvsX(const StThreeVectorD vec, const Double_t a) const;
   Double_t scaleFromYvsZ(const StThreeVectorD vec, const Double_t a) const;
-
+#endif
   ClassDef(StIstSlowSimMaker,0)   //StAF chain virtual base class for Makers
 };
 
