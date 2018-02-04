@@ -76,8 +76,10 @@ static const Char_t *TitlePiDtype[NoPiDs] = {"dEdxPiD", "ToFPiD"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};   
 static const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
            "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
+#if 0
 static const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar"
            "e+","p"   ,"K+","pi+","mu+","d"   ,"t"   ,"He3"    ,"alpha"};
+#endif
 static const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417,
                0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 static const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
@@ -86,12 +88,14 @@ static const Int_t PiDHyp[NHYPS]     = {kPidElectron, kPidProton, kPidKaon, kPid
           kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha};
 static const Int_t PiDpm[NHYPS]      = {kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative,
           kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive};
+#if 0
 static const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
           "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
 static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN70B","muN70B","deuteronN70B","tritonN70B","He3N70B","alphaN70B",
             "eP70B","protonP70B","kaonP70B","piP70B","muP70B","deuteronP70B","tritonP70B","He3P70B","alphaP70B"};
 static const Char_t *HistNameP[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
           "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","He3PzB","alphaPzB"};
+#endif
 static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
@@ -742,11 +746,11 @@ void StMuMcAnalysisMaker::FillTrackPlots()
   // =============  Build map between  Rc and Mc vertices 
   //  multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
   // Loop over Mc Tracks
-  for (Int_t m = 0; m < muDst->numberOfMcTracks(); m++) {
+  for (UInt_t m = 0; m < muDst->numberOfMcTracks(); m++) {
     StMuMcTrack *mcTrack = muDst->MCtrack(m);
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
-    Int_t IdVx = mcTrack->IdVx();
+    UInt_t IdVx = mcTrack->IdVx();
     if(IdVx >= muDst->numberOfMcVertices()) continue;
     if(IdVx < 1) continue;
     while (IdVx != 1) { // Find parent vertex 
@@ -889,7 +893,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
   // ToF
   const StMuBTofPidTraits &btofPid = Track->btofPidTraits();
   Float_t pathLength = btofPid.pathLength();
-  Float_t timeOfFlight = btofPid.timeOfFlight();
+  //  Float_t timeOfFlight = btofPid.timeOfFlight();
   Float_t beta = btofPid.beta();
   
   //  const StThreeVectorF &pVx  = Track->momentum();
@@ -926,7 +930,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
     }
   }
   // check for ghost
-  for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
+  for (UInt_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
     StMuTrack *gTrack = muDst->globalTracks(kg);
     if ( ! muDst->Accept(gTrack)) continue;
     if ( gTrack->idTruth()) continue;
@@ -934,10 +938,10 @@ void StMuMcAnalysisMaker::FillTrackPlots()
     if (gTrack->charge() < 0) pm = kNegative;
     fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
   }
-  for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
+  for (Int_t l = 0; l < (Int_t) muDst->numberOfPrimaryVertices(); l++) {
     StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
     if (Vtx->idTruth() != 1) continue;
-    for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
+    for (UInt_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       if (! pTrack) continue;
       if (pTrack->vertexIndex() != l) continue;
@@ -958,9 +962,11 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 //   StMuDst::instance()->printKFTracks();
   //  return;
   static Int_t nTracksAll = 0;
+#if 0
   static Int_t nTracksGhost = 0;
-  static Int_t nStiVertex = 0;
   static Int_t nKFVertex = 0;
+#endif
+  static Int_t nStiVertex = 0;
   Int_t NoMuMcVertices = StMuDst::instance()->numberOfMcVertices(); //if (_debugAsk) cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices << std::endl;
   Int_t NoMuMcTracks = StMuDst::instance()->numberOfMcTracks();
 //   if (! NoMuMcVertices || ! NoMuMcTracks) {
@@ -995,7 +1001,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   vector< vector<int> > PrimTracks(NoPrimaryVertices);
   
   float bestRank=-1000000;
-  int bestPV=-1;
+  //  int bestPV=-1;
   
   for (Int_t l = 0; l < NoPrimaryVertices; l++) {//NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
@@ -1003,7 +1009,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     //       Vtx->Print();
     if (bestRank < Vtx->ranking()) {
       bestRank = Vtx->ranking();
-      bestPV = l;
+      //      bestPV = l;
     }
     else continue;
     
@@ -1109,8 +1115,8 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     } 
     track.SetCharge(q);
         
-    bool isSecondary = true;
-    const StMuTrack *primTrack = gTrack->primaryTrack();
+//     bool isSecondary = true;
+//     const StMuTrack *primTrack = gTrack->primaryTrack();
     
 //     if(primTrack)
 //     {
@@ -1242,13 +1248,13 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     if(fabs(gTrack->nSigmaProton()) < nSigmaCut) { dEdXPDG.push_back(2212*q); dEdXSigma.push_back(fabs(gTrack->nSigmaProton())); }
     
     float minSigmadEdX = 100;
-    int iMinSigmadEdX = -1;
+    //    int iMinSigmadEdX = -1;
     for(UInt_t iPDG=0; iPDG<dEdXSigma.size(); iPDG++)
     {
       if(dEdXSigma[iPDG]<minSigmadEdX)
       {
         minSigmadEdX = dEdXSigma[iPDG];
-        iMinSigmadEdX = iPDG;
+	//        iMinSigmadEdX = iPDG;
       }
     }
         
@@ -1329,7 +1335,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
       { 
         mcIndexes[index] = gTrack->idTruth()-1;
 
-        if(mcIndexes[index] >= mcTracks.size())
+        if(mcIndexes[index] >= (Int_t) mcTracks.size())
           mcIndexes[index] = -1;
         
         if(mcIndexes[index] > -1)
@@ -1810,6 +1816,8 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
   pngName.ReplaceAll("^","_");
   pngName.ReplaceAll("__","_");
   pngName.ReplaceAll("__","_");
+  pngName.ReplaceAll("+","");
+  pngName.ReplaceAll("-","");
   pngName += ".png"; 
   if (pngName.Contains("_NoHits_ChiSqXY_y.png")) c->SetLogy(1);
   c->Update();
@@ -1843,9 +1851,19 @@ void StMuMcAnalysisMaker::DrawPng(TCanvas *c) {
 void StMuMcAnalysisMaker::MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t amax) {
   if (! h) return;
   Int_t n = h->GetNbinsX();
+  Int_t imin = 0;
   Int_t imax = n;
+  for (Int_t i = 1; i <=n; i++) {
+    Double_t y = h->GetBinContent(i);
+    Double_t dy = h->GetBinError(i);
+    if (dy == 0.0 || TMath::Abs(y) < dy) {
+      imin = i + 1;
+      continue;
+    }
+    break;
+  }
   Bool_t entry = kFALSE;
-  for (Int_t i = n; i > 0; i--) {
+  for (Int_t i = n; i >= imin; i--) {
     Double_t y = h->GetBinContent(i);
     Double_t dy = h->GetBinError(i);
     if (dy == 0.0 && ! entry) {
@@ -1861,20 +1879,22 @@ void StMuMcAnalysisMaker::MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t 
     if (y - dy < min) min = y - dy;
   }
   if (min < -0.5*max) min = -0.5*max;
-  if (imax < n) h->GetXaxis()->SetRange(0,imax+1);
+  if (imax < n) h->GetXaxis()->SetRange(imin,imax);
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Double_t max, Int_t np) {
   if (! h3s[0] || ! h3s[1]) return;
   if (h3s[0]->GetEntries() < 100 || h3s[1]->GetEntries() < 100) {
     cout << "Histograms " << h3s[0]->GetName() << " has " << h3s[0]->GetEntries() << "entries and " 
-   << h3s[1]->GetName() << " has " << h3s[1]->GetEntries() << " entries. To few for analysis. Skip" << endl;
+	 << h3s[1]->GetName() << " has " << h3s[1]->GetEntries() << " entries. To few for analysis. Skip" << endl;
     return;
   }
-  TH2 *h2[2] = {0,0};
-  TH1 *h1[2] = {0,0};
-  TH1 *s1[2] = {0,0};
   for (Int_t p = 0; p < np; p++) {// zx, zy, x, y, yx
+    TCanvas *cpm[2] = {0};
+    TH2 *h2[2] = {0,0};
+    TH1 *h1[2] = {0,0};
+    TH1 *s1[2] = {0,0};
+    static const Char_t *pmNames[2] = {"pos","neg"};
     for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
       TH3 *h3 = h3s[pm];
       if (! h3) continue;
@@ -1895,41 +1915,41 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
       TString NameH(h3->GetName());
       cout << "Histogram: " << NameH.Data() << "\t" << Title.Data() << endl;
       if (NameH.Contains("ChiSq",TString::kIgnoreCase)) {
-  if (p < 2 || p == 4) {
-    h1[pm] = (TH1 *) h2[pm]->ProfileX();
-    //    h1[pm]->SetTitle("");
-    h1[pm]->GetYaxis()->SetTitle(h2[pm]->GetYaxis()->GetTitle());
-    h1[pm]->SetStats(0);
-    h1[pm]->SetMarkerColor(h2[pm]->GetMarkerColor());
-    h1[pm]->SetLineColor(h2[pm]->GetLineColor());
-    h1[pm]->GetXaxis()->SetTitle(h2[pm]->GetXaxis()->GetTitle());
-  } else {
-    h1[pm] = (TH1 *) h2[pm];
-    h1[pm]->GetYaxis()->SetTitle("");
-    h1[pm]->SetTitle("");
-  }
-  MinMax(h1[pm],min,max,500);
+	if (p < 2 || p == 4) {
+	  h1[pm] = (TH1 *) h2[pm]->ProfileX();
+	  //    h1[pm]->SetTitle("");
+	  h1[pm]->GetYaxis()->SetTitle(h2[pm]->GetYaxis()->GetTitle());
+	  h1[pm]->SetStats(0);
+	  h1[pm]->SetMarkerColor(h2[pm]->GetMarkerColor());
+	  h1[pm]->SetLineColor(h2[pm]->GetLineColor());
+	  h1[pm]->GetXaxis()->SetTitle(h2[pm]->GetXaxis()->GetTitle());
+	} else {
+	  h1[pm] = (TH1 *) h2[pm];
+	  h1[pm]->GetYaxis()->SetTitle("");
+	  h1[pm]->SetTitle("");
+	}
+	MinMax(h1[pm],min,max,500);
       } else {
-  h2[pm]->FitSlicesY(0,0,-1,10,"qeg3s");
-  h1[pm] = (TH1 *) TDirectory::CurrentDirectory()->Get(Form("%s_1",h2[pm]->GetName()));
-  if (h1[pm]) {
-    h1[pm]->SetTitle(Form("Fitted %s",Title.Data()));
-    h1[pm]->SetStats(0);
-    h1[pm]->SetMarkerColor(h2[pm]->GetMarkerColor());
-    h1[pm]->SetLineColor(h2[pm]->GetLineColor());
-    h1[pm]->GetXaxis()->SetTitle(h2[pm]->GetXaxis()->GetTitle());
-    h1[pm]->GetYaxis()->SetTitle(h2[pm]->GetYaxis()->GetTitle());
-    MinMax(h1[pm],min,max,10);
-    s1[pm] = (TH1 *) TDirectory::CurrentDirectory()->Get(Form("%s_2",h2[pm]->GetName()));
-    if (s1[pm]) {
-      s1[pm]->SetTitle(Form("#sigma %s",Title.Data()));
-      s1[pm]->SetMarkerStyle(21);
-      s1[pm]->SetMarkerColor(h2[pm]->GetMarkerColor());
-      s1[pm]->SetLineColor(h2[pm]->GetLineColor());
-      MinMax(s1[pm],min,max,10);
-      if (min > -0.1*max) min = -0.1*max;
-    }
-  }
+	h2[pm]->FitSlicesY(0,0,-1,10,"qeg3s");
+	h1[pm] = (TH1 *) TDirectory::CurrentDirectory()->Get(Form("%s_1",h2[pm]->GetName()));
+	if (h1[pm]) {
+	  h1[pm]->SetTitle(Form("Fitted %s",Title.Data()));
+	  h1[pm]->SetStats(0);
+	  h1[pm]->SetMarkerColor(h2[pm]->GetMarkerColor());
+	  h1[pm]->SetLineColor(h2[pm]->GetLineColor());
+	  h1[pm]->GetXaxis()->SetTitle(h2[pm]->GetXaxis()->GetTitle());
+	  h1[pm]->GetYaxis()->SetTitle(h2[pm]->GetYaxis()->GetTitle());
+	  MinMax(h1[pm],min,max,10);
+	  s1[pm] = (TH1 *) TDirectory::CurrentDirectory()->Get(Form("%s_2",h2[pm]->GetName()));
+	  if (s1[pm]) {
+	    s1[pm]->SetTitle(Form("#sigma %s",Title.Data()));
+	    s1[pm]->SetMarkerStyle(21);
+	    s1[pm]->SetMarkerColor(h2[pm]->GetMarkerColor());
+	    s1[pm]->SetLineColor(h2[pm]->GetLineColor());
+	    MinMax(s1[pm],min,max,10);
+	    if (min > -0.1*max) min = -0.1*max;
+	  }
+	}
       }
     }
     if (h1[0] && h1[1]) {
@@ -1938,39 +1958,51 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
       if (! s1[0] || ! s1[1]) yy = 0.2; 
       //      TLegend *l = new TLegend(0.7,0.1,0.9,0.1+yy);
 #endif
+      TString xName(h1[0]->GetXaxis()->GetTitle());
+      if (Debug()) {
+	for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
+	  cpm[pm] = new TCanvas(pmNames[pm],pmNames[pm]); //,700,500);
+	  if (xName.Contains("pT",TString::kIgnoreCase)) cpm[pm]->SetLogx(1);
+	  cpm[p]->SetLogz(1);
+	  h2[pm]->Draw("colz");
+	  h1[pm]->Draw("same");
+	  s1[pm]->Draw("same");
+	}
+      }
       TString &Name = FormName(h1[0]); 
-      TCanvas *c = new TCanvas(Name.Data(),Name.Data(),400,400);
+      TCanvas *c = new TCanvas(Name.Data(),Name.Data()); //,700,500);
       if (max > 0) max *= 1.1;
       else         max *= 0.9;
       if (min > 0) min *= 0.9;
       else         min *= 1.1;
-      TString xName(h1[0]->GetXaxis()->GetTitle());
       if (xName.Contains("pT",TString::kIgnoreCase)) c->SetLogx(1);
       if (p < 2) {
-  h1[0]->SetMinimum(min);
-  h1[0]->SetMaximum(max);
+	h1[0]->SetMinimum(min);
+	h1[0]->SetMaximum(max);
       }
       if (s1[0] && s1[1]) {
-  Int_t first = TMath::Min(s1[0]->FindFirstBinAbove(0.0,1), s1[1]->FindFirstBinAbove(0.0,1));
-  Int_t last  = TMath::Max(s1[0]->FindLastBinAbove(0.0,1) , s1[1]->FindLastBinAbove(0.0,1));
-  if (first > 0 && last > 0 && first < last) h1[0]->GetXaxis()->SetRange(first,last);
+	Int_t first = TMath::Min(s1[0]->FindFirstBinAbove(0.0,1), s1[1]->FindFirstBinAbove(0.0,1));
+	Int_t last  = TMath::Max(s1[0]->FindLastBinAbove(0.0,1) , s1[1]->FindLastBinAbove(0.0,1));
+	if (first > 0 && last > 0 && first < last) h1[0]->GetXaxis()->SetRange(first,last);
       }
       for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
-  if (pm == kPositive) h1[pm]->Draw(); 
-  else                 h1[pm]->Draw("same"); 
-  if (! s1[pm]) {
-    //    l->AddEntry(h1[pm], Form("averaged %s",TitleCharge[pm]));
-  } else {
-    //    l->AddEntry(h1[pm], Form("%s #mu",TitleCharge[pm]));
-    s1[pm]->Draw("same");
-    //    l->AddEntry(s1[pm], Form("%s #sigma",TitleCharge[pm]));
-  }
+	if (pm == kPositive) h1[pm]->Draw(); 
+	else                 h1[pm]->Draw("same"); 
+	if (! s1[pm]) {
+	  //    l->AddEntry(h1[pm], Form("averaged %s",TitleCharge[pm]));
+	} else {
+	  //    l->AddEntry(h1[pm], Form("%s #mu",TitleCharge[pm]));
+	  s1[pm]->Draw("same");
+	  //    l->AddEntry(s1[pm], Form("%s #sigma",TitleCharge[pm]));
+	}
       }
       //      l->Draw();
       if (animate) ForceAnimate(0,200);
       c->Update();
       DrawPng(c);
       delete c;
+      SafeDelete(cpm[0]);
+      SafeDelete(cpm[1]);
     }
   }
 }
@@ -2104,142 +2136,142 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
     for (Int_t particle = 0; particle < kPartypeT; particle++) {
       Int_t subsection = 0;
       for (Int_t i = 0; i < kEffTotal; i++) {
-  //  TrackMatchType t1 = eff[i].kDividend;
-  //  TrackMatchType t2 = eff[i].kDivider;
-  TString h4line;
-  TString tag = TitleTrType[gp];
-  tag += " tracks. ";
-  if (particle == kallP) tag += " All.";
-  else                   tag += " Pions.";
-  tag += " "; tag += eff[i].Title; 
-  h4line += tag; h4line += ".";
-  subsection++;
-  SubSection = Section; SubSection += "."; SubSection += subsection;
-  out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
-  BeginTable();
-  for (Int_t p = 0; p < 3; p++) { // projections
-    TString Name(eff[i].Name);
-    TString Title(eff[i].Title);
-    TH1 *heff[8]; memset(heff, 0, sizeof(heff));
-    Double_t min = eff[i].min;
-    Double_t max = eff[i].max;
-    Int_t NS = kTotalSigns;
-    if (pTmin < 0 && p != 1) NS *= 4;
-    for (Int_t l = kPositive; l < NS; l++) {
-      Int_t pm = l%kTotalSigns;
-      TH3F *Dividend = fHistsT[gp][eff[i].kDividend][particle][pm][1][kTotalQA];
-      TH3F *Divider  = fHistsT[gp][eff[i].kDivider][particle][pm][1][kTotalQA];
-      cout << "Sum " << Divider->GetName() << "\tentries = " << Divider->GetEntries() << endl;
-      if (! Dividend || ! Divider) {
-        cout << "Illegal fHistsT[" << gp << "][" << eff[i].kDividend << "][" << particle << "][" << pm << "][1][" << kTotalQA << "] = " 
-       << fHistsT[gp][eff[i].kDividend][particle][pm][1][kTotalQA]
-       << " or/and fHistsT[" << gp << "][" << eff[i].kDivider << "][" << particle << "][" << pm << "][1][" << kTotalQA << "] = " 
-       << fHistsT[gp][eff[i].kDivider][particle][pm][1][kTotalQA] << endl;
-        continue;
-      }
-      cout << "Eff " << Dividend->GetName() << "\tentries = " << Dividend->GetEntries() << endl;
-      if ( Dividend->GetEntries() < 100) continue;
-      Dividend->GetDirectory()->cd();
-      Int_t nbinsX = Dividend->GetNbinsX();
-      Int_t nbinsY = Dividend->GetNbinsY();
-      Int_t nbinsZ = Dividend->GetNbinsZ();
-      Int_t binX1 = 1, binX2 = nbinsX;
-      Int_t binY1 = 1, binY2 = nbinsY;
-      Int_t binZ1 = 1, binZ2 = nbinsZ;
-      Dividend->GetXaxis()->SetRange(binX1,binX2);
-      Divider->GetXaxis()->SetRange(binX1,binX2);
-      Dividend->GetYaxis()->SetRange(binY1,binY2);
-      Divider->GetYaxis()->SetRange(binY1,binY2);
-      if (p != 0) { // ! eta
-        binX1 = Dividend->GetXaxis()->FindBin(-ymax);
-        binX2 = Dividend->GetXaxis()->FindBin( ymax);
-        Dividend->GetXaxis()->SetRange(binX1,binX2);
-        Divider->GetXaxis()->SetRange(binX1,binX2);
-      } 
-      if (p != 1) { // ! pT
-        if (NS == kTotalSigns) {
-    binY1 = Dividend->GetYaxis()->FindBin(pTmin);
-        } else {
-    binY1 = Dividend->GetYaxis()->FindBin(pTmins[l/2]);
-        }
-        Dividend->GetYaxis()->SetRange(binY1,binY2);
-        Divider->GetYaxis()->SetRange(binY1,binY2);
-      }
-      heff[l] = Dividend->Project3D(proj3[p]); 
-      if (heff[l]->GetEntries() < 100) {SafeDelete(heff[l]); continue;}
-      if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
-      else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
-      heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
-      heff[l]->SetYTitle(Form("%s (%)",eff[i]));
-      heff[l]->SetStats(0);
-      heff[l]->SetMarkerColor(l+1);
-      heff[l]->SetLineColor(l+1);
-      Title = heff[l]->GetTitle();
-      if (binX1 != 1)     Title += Form(" at |  #eta | <= %3.1f",ymax);
-      if (binY1 >  1)     Title += Form(" at pT > %3.2f",pTmins[l/2]);
-      heff[l]->SetTitle(Title);   
-      TH1 *temp =Divider->Project3D(Form("%smc",proj3[p])); 
-      cout << heff[l]->GetName() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
-      if (c1) {
-        c1->cd(); 
-        temp->Draw();
-        heff[l]->Draw();
-        c1->Update();
-      }
-      if (temp->GetEntries() < 1) continue;
-      if (temp->GetNbinsX() != heff[l]->GetNbinsX()) {
-        cout << "No. of bins in " <<  heff[l]->GetName() << " and " << temp->GetName() << " is different. Ignore these histograms" << endl;
-        delete heff[l]; heff[l] = 0;
-        delete temp;
-        continue;
-      }
-      Double_t Val = 0;
-      Double_t Sum = 0;
-      for (Int_t bin = heff[l]->GetXaxis()->GetFirst(); bin <= heff[l]->GetXaxis()->GetLast(); bin++) {
-        Double_t val = heff[l]->GetBinContent(bin); Val += val;
-        Double_t sum = temp->GetBinContent(bin);    Sum += sum;
-        Double_t err = 0;
-        if      (sum < 1.e-7 && val < 1.e-7) {val =    0;}
-        else if (val > sum)                  {val = 1.05;}
-        else                                 {val /= sum;     err = TMath::Sqrt(val*(1.-val)/sum);}
-        heff[l]->SetBinContent(bin,100*val);
-        heff[l]->SetBinError(bin,100*err);
-      }
-      cout << heff[l]->GetName() 
-     << "[" << binX1 << "," << binX2 << "]"
-     << "[" << binX1 << "," << binX2 << "]"
-     << "[" << binZ1 << "," << binZ2 << "]"
-     << " Val = " << Val << "\tSum = " << Sum << endl;
-      if (Val < 100) {SafeDelete(heff[l]); continue;}
-      MinMax(heff[l],min,max,200);
-      if (c1) {
-        c1->cd(); 
-        heff[l]->Draw();
-        c1->Update();
-      }
-      SafeDelete(temp);
-    }
-    if (heff[0] && heff[1]) {
-      Name = FormName(heff[0]);
-      TCanvas *c = new TCanvas(Name.Data(),Name.Data(),400,400);
-      if (p == 1) c->SetLogx(1);
-      TLegend *l = 0;
-      if (NS > kTotalSigns) l = new TLegend(0.1,0.4,0.4,0.6);
-      for (Int_t pm = kPositive; pm < NS; pm++) {
+	//  TrackMatchType t1 = eff[i].kDividend;
+	//  TrackMatchType t2 = eff[i].kDivider;
+	TString h4line;
+	TString tag = TitleTrType[gp];
+	tag += " tracks. ";
+	if (particle == kallP) tag += " All.";
+	else                   tag += " Pions.";
+	tag += " "; tag += eff[i].Title; 
+	h4line += tag; h4line += ".";
+	subsection++;
+	SubSection = Section; SubSection += "."; SubSection += subsection;
+	out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
+	BeginTable();
+	for (Int_t p = 0; p < 3; p++) { // projections
+	  TString Name(eff[i].Name);
+	  TString Title(eff[i].Title);
+	  TH1 *heff[8]; memset(heff, 0, sizeof(heff));
+	  Double_t min = eff[i].min;
+	  Double_t max = eff[i].max;
+	  Int_t NS = kTotalSigns;
+	  if (pTmin < 0 && p != 1) NS *= 4;
+	  for (Int_t l = kPositive; l < NS; l++) {
+	    Int_t pm = l%kTotalSigns;
+	    TH3F *Dividend = fHistsT[gp][eff[i].kDividend][particle][pm][1][kTotalQA];
+	    TH3F *Divider  = fHistsT[gp][eff[i].kDivider][particle][pm][1][kTotalQA];
+	    cout << "Sum " << Divider->GetName() << "\tentries = " << Divider->GetEntries() << endl;
+	    if (! Dividend || ! Divider) {
+	      cout << "Illegal fHistsT[" << gp << "][" << eff[i].kDividend << "][" << particle << "][" << pm << "][1][" << kTotalQA << "] = " 
+		   << fHistsT[gp][eff[i].kDividend][particle][pm][1][kTotalQA]
+		   << " or/and fHistsT[" << gp << "][" << eff[i].kDivider << "][" << particle << "][" << pm << "][1][" << kTotalQA << "] = " 
+		   << fHistsT[gp][eff[i].kDivider][particle][pm][1][kTotalQA] << endl;
+	      continue;
+	    }
+	    cout << "Eff " << Dividend->GetName() << "\tentries = " << Dividend->GetEntries() << endl;
+	    if ( Dividend->GetEntries() < 100) continue;
+	    Dividend->GetDirectory()->cd();
+	    Int_t nbinsX = Dividend->GetNbinsX();
+	    Int_t nbinsY = Dividend->GetNbinsY();
+	    Int_t nbinsZ = Dividend->GetNbinsZ();
+	    Int_t binX1 = 1, binX2 = nbinsX;
+	    Int_t binY1 = 1, binY2 = nbinsY;
+	    Int_t binZ1 = 1, binZ2 = nbinsZ;
+	    Dividend->GetXaxis()->SetRange(binX1,binX2);
+	    Divider->GetXaxis()->SetRange(binX1,binX2);
+	    Dividend->GetYaxis()->SetRange(binY1,binY2);
+	    Divider->GetYaxis()->SetRange(binY1,binY2);
+	    if (p != 0) { // ! eta
+	      binX1 = Dividend->GetXaxis()->FindBin(-ymax);
+	      binX2 = Dividend->GetXaxis()->FindBin( ymax);
+	      Dividend->GetXaxis()->SetRange(binX1,binX2);
+	      Divider->GetXaxis()->SetRange(binX1,binX2);
+	    } 
+	    if (p != 1) { // ! pT
+	      if (NS == kTotalSigns) {
+		binY1 = Dividend->GetYaxis()->FindBin(pTmin);
+	      } else {
+		binY1 = Dividend->GetYaxis()->FindBin(pTmins[l/2]);
+	      }
+	      Dividend->GetYaxis()->SetRange(binY1,binY2);
+	      Divider->GetYaxis()->SetRange(binY1,binY2);
+	    }
+	    heff[l] = Dividend->Project3D(proj3[p]); 
+	    if (heff[l]->GetEntries() < 100) {SafeDelete(heff[l]); continue;}
+	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
+	    else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
+	    heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
+	    heff[l]->SetYTitle(Form("%s (%%)",eff[i].Title));
+	    heff[l]->SetStats(0);
+	    heff[l]->SetMarkerColor(l+1);
+	    heff[l]->SetLineColor(l+1);
+	    Title = heff[l]->GetTitle();
+	    if (binX1 != 1)     Title += Form(" at |  #eta | <= %3.1f",ymax);
+	    if (binY1 >  1)     Title += Form(" at pT > %3.2f",pTmins[l/2]);
+	    heff[l]->SetTitle(Title);   
+	    TH1 *temp =Divider->Project3D(Form("%smc",proj3[p])); 
+	    cout << heff[l]->GetName() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
+	    if (c1) {
+	      c1->cd(); 
+	      temp->Draw();
+	      heff[l]->Draw();
+	      c1->Update();
+	    }
+	    if (temp->GetEntries() < 1) continue;
+	    if (temp->GetNbinsX() != heff[l]->GetNbinsX()) {
+	      cout << "No. of bins in " <<  heff[l]->GetName() << " and " << temp->GetName() << " is different. Ignore these histograms" << endl;
+	      delete heff[l]; heff[l] = 0;
+	      delete temp;
+	      continue;
+	    }
+	    Double_t Val = 0;
+	    Double_t Sum = 0;
+	    for (Int_t bin = heff[l]->GetXaxis()->GetFirst(); bin <= heff[l]->GetXaxis()->GetLast(); bin++) {
+	      Double_t val = heff[l]->GetBinContent(bin); Val += val;
+	      Double_t sum = temp->GetBinContent(bin);    Sum += sum;
+	      Double_t err = 0;
+	      if      (sum < 1.e-7 && val < 1.e-7) {val =    0;}
+	      else if (val > sum)                  {val = 1.05;}
+	      else                                 {val /= sum;     err = TMath::Sqrt(val*(1.-val)/sum);}
+	      heff[l]->SetBinContent(bin,100*val);
+	      heff[l]->SetBinError(bin,100*err);
+	    }
+	    cout << heff[l]->GetName() 
+		 << "[" << binX1 << "," << binX2 << "]"
+		 << "[" << binX1 << "," << binX2 << "]"
+		 << "[" << binZ1 << "," << binZ2 << "]"
+		 << " Val = " << Val << "\tSum = " << Sum << endl;
+	    if (Val < 100) {SafeDelete(heff[l]); continue;}
+	    MinMax(heff[l],min,max,200);
+	    if (c1) {
+	      c1->cd(); 
+	      heff[l]->Draw();
+	      c1->Update();
+	    }
+	    SafeDelete(temp);
+	  }
+	  if (heff[0] && heff[1]) {
+	    Name = FormName(heff[0]);
+	    TCanvas *c = new TCanvas(Name.Data(),Name.Data(),400,400);
+	    if (p == 1) c->SetLogx(1);
+	    TLegend *l = 0;
+	    if (NS > kTotalSigns) l = new TLegend(0.1,0.4,0.4,0.6);
+	    for (Int_t pm = kPositive; pm < NS; pm++) {
               if (! heff[pm]) continue; 
-        if (pm == kPositive) {heff[pm]->SetMinimum(min); heff[pm]->SetMaximum(max); heff[pm]->Draw();}
-        else                 heff[pm]->Draw("same");
-        if (l) l->AddEntry(heff[pm],Form("%s with pT/|q| > %3.1f",TitleCharge[pm%2],pTmins[pm/2]));
-        if (l && pm == kPositive) l->Draw();
-        c->Update();
-      }
-      if (animate) ForceAnimate(0,200);
-      DrawPng(c);
-      if (Break) return;
-      delete c;
-    }
-  }
-  EndTable();
+	      if (pm == kPositive) {heff[pm]->SetMinimum(min); heff[pm]->SetMaximum(max); heff[pm]->Draw();}
+	      else                 heff[pm]->Draw("same");
+	      if (l) l->AddEntry(heff[pm],Form("%s with pT/|q| > %3.1f",TitleCharge[pm%2],pTmins[pm/2]));
+	      if (l && pm == kPositive) l->Draw();
+	      c->Update();
+	    }
+	    if (animate) ForceAnimate(0,200);
+	    DrawPng(c);
+	    if (Break) return;
+	    delete c;
+	  }
+	}
+	EndTable();
       }
     }
   }
@@ -2263,13 +2295,13 @@ void StMuMcAnalysisMaker::DrawdEdx(Double_t lenMin) {
       out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
       BeginTable();
       for (Int_t var = 0; var < NdEdxPiD; var++) {
-  TH3F *h3s[2] = {LdEdx[gp][hyp][0][var], LdEdx[gp][hyp][1][var]};
-  if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
-  cout << h3s[0]->GetName() << "\t" << h3s[1]->GetName() << endl;
-  Int_t animate = 0;
-  Double_t min =  1e9;
-  Double_t max = -1e9;
-  DrawH3s(h3s, animate, min, max);
+	TH3F *h3s[2] = {LdEdx[gp][hyp][0][var], LdEdx[gp][hyp][1][var]};
+	if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
+	cout << h3s[0]->GetName() << "\t" << h3s[1]->GetName() << endl;
+	Int_t animate = 0;
+	Double_t min =  1e9;
+	Double_t max = -1e9;
+	DrawH3s(h3s, animate, min, max);
       }
       EndTable();
     }
@@ -2294,13 +2326,13 @@ void StMuMcAnalysisMaker::DrawToF() {
       out << "<h4><a name \"" << tag.Data() << "\">" << SubSection.Data() << ". " <<h4line.Data() << "</a></h4>" << endl;
       BeginTable();
       for (Int_t var = 0; var < NToFPiD; var++) {
-  TH3F *h3s[2] = {LToF[gp][hyp][0][var], LToF[gp][hyp][1][var]};
-  if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
-  cout << h3s[0]->GetName() << "\t" << h3s[1]->GetName() << endl;
-  Int_t animate = 0;
-  Double_t min =  1e9;
-  Double_t max = -1e9;
-  DrawH3s(h3s, animate, min, max);
+	TH3F *h3s[2] = {LToF[gp][hyp][0][var], LToF[gp][hyp][1][var]};
+	if (! h3s[0] || ! h3s[1]) {cout << "No. Plots" << endl; continue;}
+	cout << h3s[0]->GetName() << "\t" << h3s[1]->GetName() << endl;
+	Int_t animate = 0;
+	Double_t min =  1e9;
+	Double_t max = -1e9;
+	DrawH3s(h3s, animate, min, max);
       }
       EndTable();
     }
@@ -2350,7 +2382,7 @@ void StMuMcAnalysisMaker::EndHtml() {
   out << "<hr>" << endl;
   out << "</body>" << endl;
   out << "</html>" << endl;
-
+  
 }
 //________________________________________________________________________________
 #include "TAxis.h"
