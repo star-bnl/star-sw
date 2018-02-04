@@ -95,7 +95,6 @@
 #ifdef __ROOT__
 #include "Rtypes.h"
 #endif
-#if !defined(__CINT__) && !defined(__CLING__)
 #include <Stiostream.h>
 #include <math.h>
 #ifdef GNU_GCC
@@ -110,7 +109,6 @@
 using std::out_of_range;
 #    endif
 #endif
-#endif // __CINT__
 
 template<class T> class StThreeVector {
 public:    
@@ -886,16 +884,16 @@ inline StThreeVector<T> operator/ (const StThreeVector<T>& v,double c)
 {
     return StThreeVector<T>(v) /= c;
 }
-#if !defined(__CINT__) && !defined(__CLING__)
+// #if !defined(__CINT__) && !defined(__CLING__)
 template<class T>
 ostream&  operator<<(ostream& os, const StThreeVector<T>& v)
 {
     return os << v.x() << '\t' << v.y() << '\t' << v.z();
 }
-#else
-template<> ostream&  operator<<(ostream& os, const StThreeVector<double>& v);
-template<> ostream&  operator<<(ostream& os, const StThreeVector<float>& v);
-#endif
+// #else
+// template<> ostream&  operator<<(ostream& os, const StThreeVector<double>& v);
+// template<> ostream&  operator<<(ostream& os, const StThreeVector<float>& v);
+// #endif
 template<class T>
 istream&  operator>>(istream& is, StThreeVector<T>& v)
 {
