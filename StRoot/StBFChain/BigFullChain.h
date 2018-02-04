@@ -276,6 +276,16 @@ Bfc_st BFC[] = { // standard chains
   {"MC.devTY","","","TpcRS,TpxClu,devTY,useXgeom,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
+  {"MC.StiCA",   "","","StiCA,-hitfilt,KFVertex,geantOut,noRunco,noHistos,20Muons,OSpaceZ2,"
+   "OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,RunG.1,McTpcAna,tags"                        ,"","","",kFALSE},
+  {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
+  {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
+  {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
+  {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
+  {"MC2018.Ideal","","","MC.2018,MC.StiCA"                                                ,"","","",kFALSE},
+  {"MC2018",      "","","MC2018.Ideal"                                                    ,"","","",kFALSE},
+  {"MC2019.Ideal","","","MC.2019,MC.StiCA"                                                ,"","","",kFALSE},
+  {"MC2019",      "","","MC2019.Ideal"                                                    ,"","","",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT,NosstIT"               ,"","","",kFALSE},
   {"RC.y2001"        ,"","","P2001a,VFMinuit,ZDCvtx,CMuDst,NosvtIT,NossdIT,NosstIT"       ,"","","",kFALSE},
