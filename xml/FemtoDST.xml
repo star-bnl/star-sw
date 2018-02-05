@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  setup 64b
+  starver .DEV2
+  set filelist = `cat $FILELIST | awk '{print $1}'`
+  echo "file list = ${filelist}"
+  set NL = `echo ${filelist} | wc -l`
+  echo "NL = ${NL}"
+  if (${NL} == 0) exit 0;
+  foreach input ( ${filelist} )
+    echo ${input} | grep ':'
+    if (! $?) then
+      set dir      = `echo ${input} | awk -F\: '{print $1}'`
+      set tag      = `echo ${input} | awk -F\: '{print $2}'`
+    else
+      set dir = `dirname ${input}`;
+      set tag = `basename ${input} .picoDst.root`;
+    endif
+    set log = ${tag}B.log
+#  if (-r ${log}) exit 0;
+    if (! -r "${tag}.femtoDst.root") then
+       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'/*'${tag}'*.picoDst.root")' &gt;&amp; ${log}
+    endif
+  end
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<input URL="command:lsPico" /> 
+</job>
