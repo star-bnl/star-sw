@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="xrootd" simulateSubmission ="true">
         <command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
@@ -40,6 +40,6 @@
     </ResourceUsage>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="command:PicoDST.pl" />
-<!-- <input URL="file:/net/l404/data/fisyak/reco/2016/Embedding/D0KpimTsq.TFG17i/*MuDst.root" />  -->
+<input URL="catalog:star.bnl.gov?production=P16ij,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,filename~MuDst,tpx=1,sanity=1,available=1,trgsetupname~AuAu_200_production_2016,storage!=HPSS" preferStorage="local" nFiles="all" />
+
 </job>

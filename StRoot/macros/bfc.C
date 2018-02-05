@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevoztchikov, G.V. Buren, L. Didenko //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.188 2015/10/14 21:45:48 perev Exp $
+// $Id: bfc.C,v 1.193 2018/01/29 20:18:12 smirnovd Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
