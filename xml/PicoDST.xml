@@ -40,6 +40,6 @@
     </ResourceUsage>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<!-- <input URL="command:PicoDST.pl" /> -->
-<input URL="file:/net/l404/data/fisyak/reco/2016/Embedding/D0KpimTsq.TFG17i/*MuDst.root" />
+<input URL="command:PicoDST.pl" />
+<!-- <input URL="file:/net/l404/data/fisyak/reco/2016/Embedding/D0KpimTsq.TFG17i/*MuDst.root" />  -->
 </job>
