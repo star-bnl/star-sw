@@ -221,7 +221,7 @@ class KFParticle :public KFParticleBase
   //* Everything in one go  
 
   void Construct( const KFParticle *vDaughters[], int nDaughters, 
-		  const KFParticle *ProdVtx=0,   float Mass=-1, Bool_t IsConstrained=0  );
+		  const KFParticle *ProdVtx=0,   float Mass=-1 );
 
   //*
   //*                   TRANSPORT
@@ -824,14 +824,14 @@ inline void KFParticle::SetNoDecayLength()
 }
 
 inline void KFParticle::Construct( const KFParticle *vDaughters[], int nDaughters, 
-			       const KFParticle *ProdVtx,   float Mass, Bool_t IsConstrained  )
+			       const KFParticle *ProdVtx,   float Mass )
 {    
 #ifdef NonhomogeneousField
   for(int i=0; i<10; i++)
     SetFieldCoeff(vDaughters[0]->GetFieldCoeff()[i], i);
 #endif
   KFParticleBase::Construct( ( const KFParticleBase**)vDaughters, nDaughters, 
-			 ( const KFParticleBase*)ProdVtx, Mass, IsConstrained );
+			 ( const KFParticleBase*)ProdVtx, Mass );
 }
 
 inline void KFParticle::TransportToDecayVertex()

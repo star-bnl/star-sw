@@ -443,7 +443,8 @@ void KFParticleTopoReconstructor::SortTracks()
     {
       int iTrSorted = sortedTracks[iTr].fIndex;
       
-      int q = fTracks[offset[iSet]].Q()[iTrSorted];
+      //int q = fTracks[offset[iSet]].Q()[iTrSorted];
+      int q = fTracks[0].Q()[iTrSorted]; //take the charge at the first point to avoid ambiguities in array size
       if(fTracks[0].PVIndex()[iTrSorted] < 0) //secondary track
       {
 
@@ -859,7 +860,7 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 //       deleteCandidate[index] = true;
 //   }
   
-  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  for(int iParticle=0; iParticle<int(fParticles.size()); iParticle++)
   {
     if(deleteCandidate[iParticle]) continue;
     

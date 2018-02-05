@@ -251,7 +251,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   //* Everything in one go  
 
   void Construct( const KFParticleSIMD *vDaughters[], int nDaughters, 
-                  const KFParticleSIMD *ProdVtx=0,   Float_t Mass=-1, Bool_t IsConstrained=0 );
+                  const KFParticleSIMD *ProdVtx=0,   Float_t Mass=-1 );
 
   //*
   //*                   TRANSPORT
@@ -873,13 +873,13 @@ inline void KFParticleSIMD::SetNoDecayLength()
 }
 
 inline void KFParticleSIMD::Construct( const KFParticleSIMD *vDaughters[], int nDaughters, 
-                                       const KFParticleSIMD *ProdVtx,   Float_t Mass, Bool_t IsConstrained )
+                                       const KFParticleSIMD *ProdVtx,   Float_t Mass )
 {
 #ifdef NonhomogeneousField
   fField = vDaughters[0]->fField;
 #endif
   KFParticleBaseSIMD::Construct( ( const KFParticleBaseSIMD**)vDaughters, nDaughters, 
-                                 ( const KFParticleBaseSIMD*)ProdVtx, Mass, IsConstrained );
+                                 ( const KFParticleBaseSIMD*)ProdVtx, Mass );
 
 //   #ifdef NonhomogeneousField
 //   // calculate a field region for the constructed particle

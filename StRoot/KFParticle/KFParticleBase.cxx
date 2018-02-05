@@ -1455,7 +1455,7 @@ void KFParticleBase::SetNoDecayLength()
 
 
 void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t nDaughters,
-				   const KFParticleBase *Parent,  float Mass, Bool_t IsConstrained         )
+				   const KFParticleBase *Parent,  float Mass)
 { 
   //* Full reconstruction in one go
   const int maxIter = 1;
@@ -1560,7 +1560,7 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   float abq = bq*a;
 
   const float LocalSmall = 1.e-8f;
-  bool mask = ( fabs(abq)<LocalSmall );
+  bool mask = ( fabs(bq)<LocalSmall );
   if(mask && p2>1.e-4f)
   {
     dS = (a + dz*pz)/p2;
@@ -1586,6 +1586,7 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   if(fabs(bq) < LocalSmall)
     bq = LocalSmall;
   float bbq = bq*(dx*py - dy*px) - pt2;
+
   dsdr[0] = (px*bbq - py*abq)/(abq*abq + bbq*bbq);
   dsdr[1] = (px*abq + py*bbq)/(abq*abq + bbq*bbq);
   dsdr[2] = 0;

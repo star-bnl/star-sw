@@ -109,7 +109,7 @@ class KFParticleFinder
                           std::vector< std::vector<KFParticle> >* vMotherPrim,
                           std::vector<KFParticle>* vMotherSec );
   
-  void ConstructPrimaryBG(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
+  void ConstructPrimaryBG(KFPTrackVector* vTracks,
                           std::vector<KFParticle>& Particles,
                           std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                           const float* cuts,

@@ -207,7 +207,7 @@ class KFParticleBase :public TObject {
   //* Everything in one go  
 
   void Construct( const KFParticleBase *vDaughters[], Int_t nDaughters, 
-		  const KFParticleBase *ProdVtx=0,   float Mass=-1, Bool_t IsConstrained=0  );
+		  const KFParticleBase *ProdVtx=0,   float Mass=-1 );
 
 
   //*

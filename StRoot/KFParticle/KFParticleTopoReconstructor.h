@@ -72,6 +72,7 @@ class KFParticleTopoReconstructor{
   void SetMixedEventAnalysis() { fKFParticleFinder->SetMixedEventAnalysis(); }
   
   void DeInit() { fTracks = NULL; }
+  void Clear() { fParticles.clear(); fPV.clear(); fKFParticlePVReconstructor->CleanPV(); }
   
   void ReconstructPrimVertex(bool isHeavySystem = 1); // find primary vertex
   void SortTracks(); //sort tracks according to the pdg hypothesis and pv index
@@ -141,10 +142,27 @@ class KFParticleTopoReconstructor{
   
   void GetListOfDaughterTracks(const KFParticle& particle, vector<int>& daughters);
   bool ParticleHasRepeatingDaughters(const KFParticle& particle);
+
+  const KFParticleTopoReconstructor &operator=(const KFParticleTopoReconstructor& a)
+  {
+    fKFParticlePVReconstructor = 0;
+    fKFParticleFinder = 0;
+    fTracks = 0;
+    
+    fNThreads = a.fNThreads;
+    
+    return *this;
+  }
+  
+  KFParticleTopoReconstructor(const KFParticleTopoReconstructor& a):fKFParticlePVReconstructor(0),fKFParticleFinder(0),fTracks(0), fParticles(), fPV(), fNThreads(a.fNThreads)
+#ifdef USE_TIMERS
+  ,fTime(0.),timer()
+#endif
+  {
+    ;
+  }
   
  private:
-  KFParticleTopoReconstructor &operator=(KFParticleTopoReconstructor &);
-  KFParticleTopoReconstructor(KFParticleTopoReconstructor &);
 
   void GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV);
   void TransportPVTracksToPrimVertex();
@@ -166,7 +184,7 @@ class KFParticleTopoReconstructor{
   Stopwatch timer;
 #endif // USE_TIMERS
 
-}; // class KFParticleTopoReconstructor
+}__attribute__((aligned(sizeof(float_v)))); // class KFParticleTopoReconstructor
 
 
   

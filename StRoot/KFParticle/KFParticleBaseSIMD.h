@@ -222,7 +222,7 @@ class KFParticleBaseSIMD {
 
   //* Everything in one go  
 
-  void Construct( const KFParticleBaseSIMD *vDaughters[], Int_t nDaughters, const KFParticleBaseSIMD *ProdVtx=0,   Float_t Mass=-1, Bool_t IsConstrained=0);
+  void Construct( const KFParticleBaseSIMD *vDaughters[], Int_t nDaughters, const KFParticleBaseSIMD *ProdVtx=0,   Float_t Mass=-1 );
 
 
   //*

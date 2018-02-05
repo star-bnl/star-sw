@@ -13,8 +13,8 @@
 #include "KFVertex.h"
 #include "KFParticle.h"
 #include "KFPTrack.h"
-#include "StKFParticleInterface.h"
-#include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
+#include "StKFParticleInterface/StKFParticleInterface.h"
+#include "StKFParticleInterface/StKFParticlePerformanceInterface.h"
 
 #include "TDatabasePDG.h"
 

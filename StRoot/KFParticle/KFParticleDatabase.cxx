@@ -27,9 +27,17 @@ KFParticleDatabase::KFParticleDatabase():
   fMassPi0PDGSigma(0.006),
 #endif
   fMassD0PDG(1.86484),
+#ifdef CBM
   fMassD0PDGSigma(0.0145),
+#else
+  fMassD0PDGSigma(0.0154),
+#endif
   fMassDPlusPDG(1.86962),
+#ifdef CBM
   fMassDPlusPDGSigma(0.0145)
+#else
+  fMassDPlusPDGSigma(0.0115)
+#endif
 {
   fMass[0] = 0.000510999;
   fMass[1] = 0.105658;

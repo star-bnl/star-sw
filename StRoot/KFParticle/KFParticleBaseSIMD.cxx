@@ -1338,7 +1338,7 @@ void KFParticleBaseSIMD::SetNoDecayLength()
 }
 
 void KFParticleBaseSIMD::Construct( const KFParticleBaseSIMD* vDaughters[], Int_t nDaughters, 
-                                    const KFParticleBaseSIMD *Parent,  Float_t Mass, Bool_t IsConstrained)
+                                    const KFParticleBaseSIMD *Parent,  Float_t Mass )
 { 
   //* Full reconstruction in one go
 
