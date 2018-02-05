@@ -211,7 +211,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
     if (typeC) {
       tChain = "";
       if ( TString(gProgName) == "root4star") {tChain += "gstar,useXgeom,Corr4"; typeC = -TMath::Abs(typeC);}
-      else                                    {tChain += "vmc,CorrX";}
+      else                                    {tChain += "vmc,CorrX,RunG.1";}
       switch (typeC) {
       case 1:
 	//"MC.2016a,istSlowSim,pxlSlowSim,StiCA,-hitfilt,KFVertex,StiHftC,geantOut,noRunco,noHistos,noTags,20Muons,CorrX,OSpaceZ2,OGridLeak3D,StiPulls,picoWrite,PicoVtxVpd,DbV20170830,gstar,useXgeom")'
