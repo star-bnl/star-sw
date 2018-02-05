@@ -1888,6 +1888,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd"     ,"","",""                            ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"femtoDst"    ,"","","KFPInter","StFemtoDstMaker", "StPicoAnalysisMaker","Load FemtoDST library",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"
@@ -1921,9 +1922,10 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"MuMc"        ,"","","KFParticle","StMuMcAnalysisMaker"
-   ,                                    "KFParticlePerformance,StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
-  {"PicoAnalysis","","","KFParticle","StPicoAnalysisMaker"
+  {"KFPInter"    ,"","","","KFParticle,picoEvt"        
+   ,                      "KFParticlePerformance,StKFParticleInterface","STAR KFParticle interface",kFALSE},
+  {"MuMc"        ,"","","KFPInter","StMuMcAnalysisMaker",     "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
+  {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
    ,                                    "KFParticlePerformance,StPicoAnalysisMaker","Pico Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},

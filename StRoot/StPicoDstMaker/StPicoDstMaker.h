@@ -65,6 +65,8 @@ public:
   void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13);
   void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.);
   void SetVxRmax(Double_t rmax = 2);
+  static StPicoDstMaker *instance() {return fgPicoDstMaker;}
+  TClonesArray** picoArrays() {return mPicoArrays;}
 private:
 
   void streamerOff();
@@ -180,6 +182,7 @@ private:
   static vector<Int_t> fGoodTriggerIds; 
   static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
   static Double_t  fgVxZmin, fgVxZmax, fgVxRmax;
+  static StPicoDstMaker *fgPicoDstMaker; //!
   ClassDef(StPicoDstMaker, 0)
 };
 

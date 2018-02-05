@@ -145,7 +145,7 @@ void KFParticleTest::RunTestSingle()
   std::cout << "4.1 Construction with constrained Mass, without vertex hypothesis " << std::endl<< std::endl;
 /// we assume Mass to be the mass of the constructed particle
   KFParticle K0;
-  K0.Construct(vDaughters,NDaughters,0,Mass,0);
+  K0.Construct(vDaughters,NDaughters,0,Mass);
   std::cout << "Dauthers" << std::endl
 	    << "  " << *vDaughters[0] << std::endl
 	    << "  " << *vDaughters[1] << std::endl
@@ -157,7 +157,7 @@ void KFParticleTest::RunTestSingle()
   std::cout << std::endl << "4.2 Construction without constrained Mass, with vertex hypothesis " << std::endl<< std::endl;
 /// we assume p1 to be the vertex of the constructed particle
   KFParticle K0_1;
-  K0_1.Construct(vDaughters,NDaughters,&pVertex,-1,0);
+  K0_1.Construct(vDaughters,NDaughters,&pVertex,-1);
 
   std::cout << "Dauthers" << std::endl
 	    << "  " << *vDaughters[0] << std::endl
@@ -167,7 +167,7 @@ void KFParticleTest::RunTestSingle()
   std::cout << std::endl << "4.3 Construction with constrained Mass, with vertex hypothesis " << std::endl<< std::endl;
 ///we assume p1 to be the vertex of the constructed particle, Mass to be the mass of the constructed particle
   KFParticle K0_2;
-  K0_2.Construct(vDaughters,NDaughters,&pVertex,Mass,0);
+  K0_2.Construct(vDaughters,NDaughters,&pVertex,Mass);
 
   std::cout << "Dauthers" << std::endl
 	    << "  " << *vDaughters[0] << std::endl
@@ -179,7 +179,7 @@ void KFParticleTest::RunTestSingle()
   std::cout << std::endl << "4.4 Construction K0_3(p2,p3) without constrained Mass, without vertex hypothesis " << std::endl<< std::endl;
 ///we assume p1 to be the vertex of the constructed particle, Mass to be the mass of the constructed particle
   KFParticle K0_3;
-  K0_3.Construct(vDaughters,NDaughters,0,-1,0);
+  K0_3.Construct(vDaughters,NDaughters,0,-1);
 
   std::cout << "Dauthers" << std::endl
        << "  " << *vDaughters[0] << std::endl

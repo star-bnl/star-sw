@@ -846,7 +846,7 @@ if ( $pkg =~ m/^St.*Db/             ||
 #       Install $envTPCCA $BIN, $prog;
 #     }
 #   }
-}  elsif ( $pkg =~ m/^KFParticle/) {
+}  elsif ( $pkg =~ m/KFParticle/) {
   $CPPFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE";
   $CPPPATH .=
     $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker" . $main::PATH_SEPARATOR . "#" .

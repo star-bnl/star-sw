@@ -16,9 +16,9 @@ using std::map;
 //#include "KFParticle/KFParticle.h"
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFPTrack.h"
-#include "KFParticle/StKFParticleInterface.h"
 #include "KFParticle/KFParticleFinder.h"
-#include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
+#include "StKFParticleInterface/StKFParticleInterface.h"
+#include "StKFParticleInterface/StKFParticlePerformanceInterface.h"
 
 #include "StAnneling.h"
 #include "StKFTrack.h"
@@ -629,7 +629,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     PrPP(MakeV0,neg);
     // 2c-Fit => Global V0 tracks
     KFParticle V0(V);
-    V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass(),0);
+    V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass());
     PrPP(MakeV0,V0);
     Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
     if (prob < fgProbCut) continue;

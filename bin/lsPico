@@ -1,0 +1,2 @@
+#! /bin/tcsh -f
+ls -1d  ~/Pico/2016/*/1*

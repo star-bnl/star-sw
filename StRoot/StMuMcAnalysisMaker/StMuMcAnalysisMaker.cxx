@@ -14,8 +14,8 @@
 #include "KFParticle/KFParticle.h"
 #include "KFParticle/KFParticleSIMD.h"
 #include "KFParticle/KFPTrack.h"
-#include "KFParticle/StKFParticleInterface.h"
-#include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
+#include "StKFParticleInterface/StKFParticleInterface.h"
+#include "StKFParticleInterface/StKFParticlePerformanceInterface.h"
 ClassImp(StMuMcAnalysisMaker);
 StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
@@ -1074,7 +1074,8 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     if (! gTrack->charge())  continue;
     if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) continue; // bad fit or short track pointing to EEMC
     if (  gTrack->flag() > 1000) continue;  // pile up track in TPC
-    if (  gTrack->nHitsFit() < 10) continue;
+    if (  gTrack->nHitsFit() < 15) continue;
+    if (  gTrack->probPidTraits().dEdxErrorFit() < 0.04 || gTrack->probPidTraits().dEdxErrorFit() > 0.12 ) continue;
 //     if (  gTrack->pt() < 0.8 ) continue;
 //     if (  gTrack->nHitsFit(kIstId) + gTrack->nHitsFit(kSsdId) + gTrack->nHitsFit(kPxlId) < 3 ) continue;
 //     if (  gTrack->qaTruth() < 90) return kFALSE;
@@ -1172,19 +1173,23 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
       lengthTof = l + dlDCA + dlTOF;
     }
     double m2tof = -1.e6;
+    bool isTofm2 = false;
     if(timeTof > 0. && lengthTof > 0.)
     {
       m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
       hTofPID->Fill(track.GetP(), m2tof);
       hdEdXwithToF->Fill(track.GetP(), gTrack->dEdx()*1.e6);
+      isTofm2 = true;
     }
-    int ToFPDG = -1;
-    if(m2tof > 0.6)
-      ToFPDG = 2212*q;
-    else if(m2tof > 0.14 && m2tof < 0.4)
-      ToFPDG = 321*q;
-    else if(m2tof > -0.5 && m2tof < 0.12)
-      ToFPDG = 211*q;
+//     int ToFPDG = -1;
+//     if(m2tof > 0.6)
+//       ToFPDG = 2212*q;
+//     else if(m2tof > 0.14 && m2tof < 0.4)
+//       ToFPDG = 321*q;
+//     else if(m2tof > -0.5 && m2tof < 0.12)
+//       ToFPDG = 211*q;
+    
+    vector<int> ToFPDG = GetTofPID(m2tof, track.GetP(), q);
     
 #if 0
     if(track.GetP() < 0.7)
@@ -1242,9 +1247,21 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 #else
     vector<int> dEdXPDG;
     vector<int> dEdXSigma;
-    float nSigmaCut = 3.e10f;
+    float nSigmaCut = 3.f;
+    if(IAttr("StoreCutNTuples"))
+      nSigmaCut = 3.e10f;
     if(fabs(gTrack->nSigmaPion())   < nSigmaCut) { dEdXPDG.push_back(211*q);  dEdXSigma.push_back(fabs(gTrack->nSigmaPion()));   }
-    if(fabs(gTrack->nSigmaKaon())   < nSigmaCut) { dEdXPDG.push_back(321*q);  dEdXSigma.push_back(fabs(gTrack->nSigmaKaon()));   }
+    
+    bool checkKTof = (track.GetP() > 0.5) && (track.GetP() < 2.);
+    bool checkKHasTof = 0;
+    for(int iTofPDG=0; iTofPDG<ToFPDG.size(); iTofPDG++)
+      if(abs(ToFPDG[iTofPDG]) == 321)
+        checkKHasTof = 1;
+    if(fabs(gTrack->nSigmaKaon())  < 2.f && ((checkKTof && checkKHasTof) || !checkKTof) ) 
+    {
+      dEdXPDG.push_back(321*q);  
+      dEdXSigma.push_back(fabs(gTrack->nSigmaKaon()));
+    }
     if(fabs(gTrack->nSigmaProton()) < nSigmaCut) { dEdXPDG.push_back(2212*q); dEdXSigma.push_back(fabs(gTrack->nSigmaProton())); }
     
     float minSigmadEdX = 100;
@@ -1259,7 +1276,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     }
         
     vector<int> totalPDG;
-    if(ToFPDG == -1 || IAttr("StoreCutNTuples"))
+    if(!isTofm2 || IAttr("StoreCutNTuples"))
     {
 //       if(minSigmadEdX <= 0.05f && track.GetP() < 0.7)
 //         totalPDG.push_back(dEdXSigma[iMinSigmadEdX]);
@@ -1269,9 +1286,10 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     else
     {
       for(UInt_t iPDG=0; iPDG<dEdXPDG.size(); iPDG++)
-        if(dEdXPDG[iPDG] == ToFPDG)
-          totalPDG.push_back(ToFPDG);
-        
+	for(int iTofPDG=0; iTofPDG<ToFPDG.size(); iTofPDG++)
+	  if(dEdXPDG[iPDG] == ToFPDG[iTofPDG])
+            totalPDG.push_back(ToFPDG[iTofPDG]);
+          
 //       if(totalPDG.size() == 0 && track.GetP() < 0.7)
 //       {
 //         if(minSigmadEdX <= 0.05f)
@@ -1301,12 +1319,10 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
       double dca = sqrt( gTrack->dca(0).x() * gTrack->dca(0).x() + 
                         gTrack->dca(0).y() * gTrack->dca(0).y() + 
                         gTrack->dca(0).z() * gTrack->dca(0).z() );
+
       KFParticle particle1(track, pdg);
       float chiPrim = particle1.GetDeviationFromVertex(PrimVertex[0]);
       
-//       if(chiPrim < 8)
-//         PrimTracks[0].push_back(nPartSaved);
-       
       if(pdg == -321) hDCAK->Fill(dca);
       if(pdg == 211)  hDCApi->Fill(dca);
       if(pdg == 2212) hDCAp->Fill(dca);
@@ -1403,6 +1419,9 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
           particleCutValues[index][7] = chiPrim;
         }
         
+        if(chiPrim < 18.6)
+          PrimTracks[0].push_back(nPartSaved);
+        
         nPartSaved++;
       }
     }
@@ -1484,6 +1503,12 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
 
     KFVertex pv(primVtx_tmp);
     mStKFParticleInterface->AddPV(pv, PrimTracks[0]);
+    
+//     std::cout << "PV  x " << pv.X() << " y " << pv.Y() <<" z " << pv.Z() << " C " << 
+//                            pv.CovarianceMatrix()[0] << " " << pv.CovarianceMatrix()[1] << " " <<  pv.CovarianceMatrix()[2] << " " <<
+//                            pv.CovarianceMatrix()[3] << " " << pv.CovarianceMatrix()[4] << " " <<  pv.CovarianceMatrix()[5] << " " << std::endl;
+//     std::cin.get();
+  
 //     vector<int> tracks;
 //     mStKFParticleInterface->AddPV(pv, tracks);
     
@@ -2449,6 +2474,66 @@ void StMuMcAnalysisMaker::SetGEANTLabels(TAxis *x) {
   }
 }
 //________________________________________________________________________________
+std::vector<int> StMuMcAnalysisMaker::GetTofPID(double m2, double p, int q)
+{
+  static const int order = 4;
+  static const double parMean[6][order+1] = { { 0.02283190,-0.01482910, 0.01883130,-0.01824250, 0.00409811  }, //pi+
+                                              { 0.24842500,-0.00699781,-0.00991387, 0.01327170,-0.00694824  }, //K+
+                                              { 0.863211  , 0.0264171 ,-0.0230833 , 0.00239637, 0.000262309 }, //p
+                                              { 0.0224095 ,-0.0123235 , 0.0145216 ,-0.0149944 , 0.00325952  }, //pi-
+                                              { 0.250696  ,-0.0151308 , 0.00437457, 0.00516669,-0.00529184  }, //K-
+                                              { 0.886912  ,-0.0298543 , 0.0449904 ,-0.0286879 , 0.00541963  }};//p-
+  static const double parSigma[6][order+1] = { { 0.0112498,-0.0400571, 0.0733615,-0.0316505, 0.00629469 }, //pi+
+                                               { 0.0154830,-0.0396312, 0.0719647,-0.0290683, 0.00637164 }, //K+
+                                               { 0.114465 ,-0.287213 , 0.356536 ,-0.169257 , 0.0299844  }, //p
+                                               { 0.0111682,-0.0394877, 0.0718342,-0.0302914, 0.00587317 }, //pi-
+                                               { 0.0157322,-0.0402606, 0.0716639,-0.0272101, 0.00564467 }, //K-
+                                               { 0.0899438,-0.211922 , 0.273122 ,-0.129597 , 0.0231844  }};//p-
+  double pMax = 2.;
+  double nSigmas[3];
+  for(int iHypothesys = 0; iHypothesys<3; iHypothesys++)
+  {
+    double x = p;
+    if(x>=pMax) x = pMax;
+    
+    int iSet = iHypothesys;
+    if(q<0)
+      iSet += 3;
+    double mean = 0;
+    for(int iTerm=0; iTerm<=order; iTerm++)
+      mean += parMean[iSet][iTerm]*TMath::Power(x,iTerm);  
+    
+    double sigma = 0;
+    for(int iTerm=0; iTerm<=order; iTerm++)
+      sigma += parSigma[iSet][iTerm]*TMath::Power(x,iTerm);  
+    
+    nSigmas[iHypothesys] = fabs((m2 - mean)/sigma);
+  }
+  
+  double minNSigma = nSigmas[0];
+  int minHypothesis = 0;
+  for(int iHypothesys=1; iHypothesys<3; iHypothesys++)
+  {
+    if(minNSigma > nSigmas[iHypothesys]) 
+    {
+      minNSigma = nSigmas[iHypothesys];
+      minHypothesis = iHypothesys;
+    }
+  }
+  
+  int pdgHypothesis[3] = {211, 321, 2212};
+  vector<int> tofPID;
+  if(minNSigma < 3)
+    tofPID.push_back(pdgHypothesis[minHypothesis]*q);
+
+//   int pdgHypothesis[3] = {211, 321, 2212};
+//   for(int iHypothesys=0; iHypothesys<3; iHypothesys++)
+//     if(nSigmas[iHypothesys] < 3)
+//       tofPID.push_back(pdgHypothesis[iHypothesys]*q);
+  
+  return tofPID;
+}
+
 
 // 
 // $Id: StMuMcAnalysisMaker.cxx,v 1.18 2007/10/27 17:42:59 fine Exp $

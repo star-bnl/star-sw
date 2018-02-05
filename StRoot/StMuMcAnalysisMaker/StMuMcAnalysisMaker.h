@@ -177,6 +177,7 @@ class StMuMcAnalysisMaker : public StMaker {
   }
   void ProcessSignal()     { fProcessSignal = kTRUE; }
   void ProcessBackground() { fProcessSignal = kFALSE; }
+  std::vector<int> GetTofPID(double m2, double p, int q);
   ClassDef(StMuMcAnalysisMaker,0)   //
 };
 #endif

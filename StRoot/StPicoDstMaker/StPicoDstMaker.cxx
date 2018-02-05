@@ -14,6 +14,7 @@
 #include "StChain/StChainOpt.h"
 #include "St_base/StMessMgr.h"
 #include "StarRoot/TAttr.h"
+#include "StarRoot/TDirIter.h"
 
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StDcaGeometry.h"
@@ -81,6 +82,7 @@ Double_t StPicoDstMaker::fgdca3Dmax; // 50 cm
 vector<Int_t> StPicoDstMaker::fGoodTriggerIds;
 Double_t StPicoDstMaker::fgVxXmin, StPicoDstMaker::fgVxXmax, StPicoDstMaker::fgVxYmin, StPicoDstMaker::fgVxYmax;
 Double_t StPicoDstMaker::fgVxZmin, StPicoDstMaker::fgVxZmax, StPicoDstMaker::fgVxRmax;
+StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
@@ -107,6 +109,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   SetVxZrange(0,0);
   SetVxRmax(0);
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
+  fgPicoDstMaker = this;
 }
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(Int_t ioMode, char const* fileName, char const* name) : StPicoDstMaker(name)
@@ -120,10 +123,11 @@ StPicoDstMaker::~StPicoDstMaker()
 {
   delete mChain;
   delete mPicoDst;
+  fgPicoDstMaker = 0;
 }
 
 //_________________
-void StPicoDstMaker::clearArrays()
+ void StPicoDstMaker::clearArrays()
 {
   for (int i = 0; i < StPicoArrays::NAllPicoArrays; ++i)
   {
@@ -457,7 +461,8 @@ Int_t StPicoDstMaker::openRead()
     string file;
     while (getline(inputStream, file))
     {
-      if (file.find(".picoDst.root") != string::npos)
+      if (file.find(".picoDst.root")  != string::npos ||
+	  file.find(".femtoDst.root") != string::npos)
       {
         TFile* ftmp = TFile::Open(file.c_str());
         if (ftmp && !ftmp->IsZombie() && ftmp->GetNkeys())
@@ -473,23 +478,35 @@ Int_t StPicoDstMaker::openRead()
 
     LOG_INFO << " Total " << nFile << " files have been read in. " << endm;
   }
-  else if (dirFile.find(".picoDst.root") != string::npos)
+  else if (! gSystem->AccessPathName(dirFile.c_str()) &&
+	   (dirFile.find(".picoDst.root")  != string::npos ||
+	    dirFile.find(".femtoDst.root") != string::npos))	  
   {
     mChain->Add(dirFile.c_str());
   }
-  else
-  {
-    LOG_WARN << " No good input file to read ... " << endm;
+  else {
+    TDirIter Dir(dirFile.c_str());
+    Char_t *name = 0;
+    Int_t NFiles = 0;
+    while ((name = (Char_t *) Dir.NextFile())) {
+      TFile* ftmp = TFile::Open(name);
+      if (ftmp && !ftmp->IsZombie() && ftmp->GetNkeys())        {
+	LOG_INFO << " Read in picoDst file " << name << endm;
+	mChain->Add(name);
+	++NFiles;
+      }
+      if (ftmp) ftmp->Close();
+    }
+    if (! NFiles) {
+      LOG_WARN << " No good input file to read ... " << endm;
+    }
   }
-
-  if (mChain)
-  {
+  if (mChain)    {
     setBranchAddresses(mChain);
     mChain->SetCacheSize(50e6);
     mChain->AddBranchToCache("*");
     mPicoDst->set(mPicoArrays);
   }
-
   return kStOK;
 }
 

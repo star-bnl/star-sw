@@ -69,7 +69,7 @@ class StPicoAnalysisMaker : public StMaker {
     static const char cvs[]="Tag $Name:  $ $Id: StPicoAnalysisMaker.h,v 1.0 2017/10/07 11:43:53 mzyzak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
-  int GetTofPID(double m2, double p, int q);
+  std::vector<int> GetTofPID(double m2, double p, int q);
   ClassDef(StPicoAnalysisMaker,0)   //
 };
 #endif
