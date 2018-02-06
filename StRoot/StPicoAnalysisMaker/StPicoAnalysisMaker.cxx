@@ -263,7 +263,7 @@ Int_t StPicoAnalysisMaker::Make(){
   if(isGoodEvent) openCharmTrigger =  mStKFParticleInterface->OpenCharmTrigger();
   mStKFParticleInterface->OpenCharmTriggerCompression(triggeredTracks.size(), fPicoDst->numberOfTracks(), openCharmTrigger);
   
-  if(isGoodEvent)
+  if(openCharmTrigger)
   {
     mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
     mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
@@ -272,17 +272,11 @@ Int_t StPicoAnalysisMaker::Make(){
     mStKFParticlePerformanceInterface->PerformanceAnalysis();
   }
   
-  
-  
   return kStOK;
 }
 //_____________________________________________________________________________
-void StPicoAnalysisMaker::RunAnalysis(){
-
-  static int nEvents =0;
-  static int nTracksInEvent = 0;
-  nEvents++;
-  nTracksInEvent += fPicoDst->numberOfTracks( );
+void StPicoAnalysisMaker::CollectHistograms(){
+#if 0
   
   vector<KFMCTrack> mcTracks(0);
   
@@ -293,42 +287,9 @@ void StPicoAnalysisMaker::RunAnalysis(){
   StPicoEvent* picoEvent = fPicoDst->event();
   if(!picoEvent) return;
   
-  const StThreeVectorF picoPV = picoEvent->primaryVertex();
-  const StThreeVectorF picoPVError = picoEvent->primaryVertexError();
-  
-  KFPVertex primVtx_tmp;
-  primVtx_tmp.SetXYZ(picoPV.x(), picoPV.y(), picoPV.z());
-  double dx = picoPVError.x();
-  double dy = picoPVError.y();
-  double dz = picoPVError.z();
-  primVtx_tmp.SetCovarianceMatrix( dx*dx, 0, dy*dy, 0, 0, dz*dz );
-  picoPrimaryVertex = KFVertex(primVtx_tmp);
-
-  bool isGoodPV = (picoPrimaryVertex.X() > -0.3) && (picoPrimaryVertex.X() < -0.1) &&
-                  (picoPrimaryVertex.Y() > -0.27) && (picoPrimaryVertex.Y() < -0.13);
-  if(!isGoodPV) return;
   
   Int_t nGlobalTracks = fPicoDst->numberOfTracks( );
-  
-  //find max global track index
-  int maxGBTrackIndex = -1;
-  for (Int_t kg = 0; kg < nGlobalTracks; kg++) {
-    StPicoTrack *gTrack = fPicoDst->track(kg);
-    if (! gTrack)            continue;
-    
-    int index = gTrack->id();
-    
-    if(index > maxGBTrackIndex)
-      maxGBTrackIndex = index;
-  }
-  
-  vector<KFParticle> particles(nGlobalTracks*7);
-  vector<int> nHftHits(nGlobalTracks*7);
-  vector<int> mcIndexes(maxGBTrackIndex+1);
-  for(unsigned int iIndex=0; iIndex<mcIndexes.size(); iIndex++)
-    mcIndexes[iIndex] = -1;
-  vector<int> particlesPdg(nGlobalTracks*7);
-  int nPartSaved = 0;
+
   
   for (Int_t kg = 0; kg < nGlobalTracks; kg++) 
   {
@@ -393,30 +354,9 @@ void StPicoAnalysisMaker::RunAnalysis(){
       hdEdXwithToF->Fill(track.GetP(), gTrack->dEdx());
     }
     
-//     int ToFPDG = -1;
-//     if(m2tof > 7 && m2tof<9)
-//       ToFPDG = -1;// 1000010030*q;
-//     else if(m2tof > 2.8 && m2tof < 4)
-//       ToFPDG = -1;//1000010020*q;
-//     else if(m2tof > 1.5 && m2tof < 2.8)
-//       ToFPDG = 1;//1000020030*q;
-//     else if(m2tof > 0.6 && m2tof < 1.5)
-//       ToFPDG = 2212*q;
-//     else if(m2tof > 0.14 && m2tof < 0.4)
-//       ToFPDG = 321*q;
-//     else if(m2tof > -0.5 && m2tof < 0.12)
-//       ToFPDG = 211*q;
-//     else if( isTofm2 )
-//       ToFPDG = -2;
 
-//     vector<int> ToFPDG = GetTofPID(m2tof, track.GetP(), q);
     vector<int> ToFPDG = GetTofPID(m2tof, track.GetP(), q);
-//     isTofm2 = false;
 
-//     int ToFPDG = GetTofPID(m2tof, track.GetP(), q);
-//     std::cout << " iTr " << kg << " x " << xyzp[0] << " y " << xyzp[1] <<  " z " << xyzp[2] << 
-//                                   " px " << xyzp[3] << " py " << xyzp[4] <<  " pz " << xyzp[3] << 
-//                                   " nPi " << gTrack->dEdxPull(0.139570, fdEdXMode, 1) << " nK " << gTrack->dEdxPull(0.493677, fdEdXMode, 1) << " nP " << gTrack->dEdxPull(0.938272, fdEdXMode, 1) << " m2tof " << m2tof << " ToFPDG " << ToFPDG<< std::endl;
     
     vector<int> dEdXPDG;
     vector<int> dEdXSigma;
@@ -573,9 +513,6 @@ void StPicoAnalysisMaker::RunAnalysis(){
 //       if(nHftHits[nPartSaved] < 3) continue;
       
       hNHFTHits->Fill(nHftHits[nPartSaved]);        
-      particlesPdg[nPartSaved] = pdg;
-              
-      nPartSaved++;
       
 #ifdef PIDHISTO
       //fill PID histograms
@@ -621,146 +558,10 @@ void StPicoAnalysisMaker::RunAnalysis(){
 #endif
     }
   }
-//   std::cout << "n particles " << nPartSaved << std::endl;
-//   std::cin.get();
-
-  particles.resize(nPartSaved);
-  particlesPdg.resize(nPartSaved);
-  nHftHits.resize(nPartSaved);
-  
-  const Double_t field = picoEvent->bField();
-  
-  mStKFParticleInterface->SetField(field);
-
-  mStKFParticleInterface->SetParticles(particles);
-  mStKFParticleInterface->SetParticlesPdg(particlesPdg);
-  mStKFParticleInterface->SetHftHits(nHftHits);
-  mStKFParticleInterface->CleanPV();
-  mStKFParticleInterface->InitParticles();
 
   //read PV
   hPVError->Fill(sqrt(dx*dx + dy*dy));
   hPVErrorVsNTracks->Fill( nPartSaved, sqrt(dx*dx + dy*dy) );
   hPVErrorVsNPVTracks->Fill( primaryTrackList.size(), sqrt(dx*dx + dy*dy) );
-  
-//     if(fabs(dx) > 0.02 || fabs(dy) > 0.02 || fabs(dz) > 0.02 ) return;
-
-  mStKFParticleInterface->AddPV(picoPrimaryVertex, primaryTrackList);
-  
-//   std::cout << "PV  x " << picoPrimaryVertex.X() << " y " << picoPrimaryVertex.Y() <<" z " << picoPrimaryVertex.Z() << " C " << 
-//                            picoPrimaryVertex.CovarianceMatrix()[0] << " " << picoPrimaryVertex.CovarianceMatrix()[1] << " " <<  picoPrimaryVertex.CovarianceMatrix()[2] << " " <<
-//                            picoPrimaryVertex.CovarianceMatrix()[3] << " " << picoPrimaryVertex.CovarianceMatrix()[4] << " " <<  picoPrimaryVertex.CovarianceMatrix()[5] << " " << std::endl;
-//   std::cin.get();
-//     vector<int> tracks;
-//     mStKFParticleInterface->AddPV(pv, tracks);
-  
-#ifndef PIDHISTO
-  //reconstruct short-lived particles
-  mStKFParticleInterface->ReconstructParticles();
-  
-  //collect histograms
-  mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
-  mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
-  Int_t nevent = 100;
-  mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
-  mStKFParticlePerformanceInterface->PerformanceAnalysis();
-  
-  bool triggerDMesons = false;
-  for(int iParticle=0; iParticle<mStKFParticlePerformanceInterface->GetNReconstructedParticles(); iParticle++)
-  {
-    KFParticle particle;
-    mStKFParticlePerformanceInterface->GetParticle(particle, iParticle);
-    
-    if( abs(particle.GetPDG()) == 421 ||
-        abs(particle.GetPDG()) == 429 || 
-        abs(particle.GetPDG()) == 420 || 
-        abs(particle.GetPDG()) == 411 || 
-        abs(particle.GetPDG()) == 431 || 
-        abs(particle.GetPDG()) == 4122 ||
-        abs(particle.GetPDG()) == 426 )
-    {
-      KFParticleSIMD tempSIMDPart(particle);
-      float_v l,dl;
-      KFParticleSIMD pv(picoPrimaryVertex);
-      tempSIMDPart.GetDistanceToVertexLine(pv, l, dl);
-      
-      if(abs(particle.GetPDG()) == 411)
-        if(l[0] < 0.4) triggerDMesons = true;
-      else    
-        if(l[0] < 0.2) triggerDMesons = true;
-        
-//         if(l[0] < 1.0) triggerDMesons = true;
-    }
-  }
-  static int nTriggeredEvents = 0;
-  static int nTracksInEventTriggered = 0;
-  if(triggerDMesons)
-  {
-    nTriggeredEvents++;
-    nTracksInEventTriggered += nPartSaved;
-    std::cout << "N Events " << nEvents << "    N triggered events " << nTriggeredEvents << "    ratio " << (double(nEvents)/double(nTriggeredEvents)) << std::endl;
-    std::cout << "N Tracks " << nTracksInEvent << "    N triggered events " << nTracksInEventTriggered << "    ratio " << (double(nTracksInEvent)/double(nTracksInEventTriggered)) << std::endl;
-  }
 #endif
-}
-
-std::vector<int> StPicoAnalysisMaker::GetTofPID(double m2, double p, int q)
-{
-  static const int order = 4;
-  static const double parMean[6][order+1] = { { 0.02283190,-0.01482910, 0.01883130,-0.01824250, 0.00409811  }, //pi+
-                                              { 0.24842500,-0.00699781,-0.00991387, 0.01327170,-0.00694824  }, //K+
-                                              { 0.863211  , 0.0264171 ,-0.0230833 , 0.00239637, 0.000262309 }, //p
-                                              { 0.0224095 ,-0.0123235 , 0.0145216 ,-0.0149944 , 0.00325952  }, //pi-
-                                              { 0.250696  ,-0.0151308 , 0.00437457, 0.00516669,-0.00529184  }, //K-
-                                              { 0.886912  ,-0.0298543 , 0.0449904 ,-0.0286879 , 0.00541963  }};//p-
-  static const double parSigma[6][order+1] = { { 0.0112498,-0.0400571, 0.0733615,-0.0316505, 0.00629469 }, //pi+
-                                               { 0.0154830,-0.0396312, 0.0719647,-0.0290683, 0.00637164 }, //K+
-                                               { 0.114465 ,-0.287213 , 0.356536 ,-0.169257 , 0.0299844  }, //p
-                                               { 0.0111682,-0.0394877, 0.0718342,-0.0302914, 0.00587317 }, //pi-
-                                               { 0.0157322,-0.0402606, 0.0716639,-0.0272101, 0.00564467 }, //K-
-                                               { 0.0899438,-0.211922 , 0.273122 ,-0.129597 , 0.0231844  }};//p-
-  double pMax = 2.;
-  double nSigmas[3];
-  for(int iHypothesys = 0; iHypothesys<3; iHypothesys++)
-  {
-    double x = p;
-    if(x>=pMax) x = pMax;
-    
-    int iSet = iHypothesys;
-    if(q<0)
-      iSet += 3;
-    double mean = 0;
-    for(int iTerm=0; iTerm<=order; iTerm++)
-      mean += parMean[iSet][iTerm]*TMath::Power(x,iTerm);  
-    
-    double sigma = 0;
-    for(int iTerm=0; iTerm<=order; iTerm++)
-      sigma += parSigma[iSet][iTerm]*TMath::Power(x,iTerm);  
-    
-    nSigmas[iHypothesys] = fabs((m2 - mean)/sigma);
-  }
-  
-  double minNSigma = nSigmas[0];
-  int minHypothesis = 0;
-  for(int iHypothesys=1; iHypothesys<3; iHypothesys++)
-  {
-    if(minNSigma > nSigmas[iHypothesys]) 
-    {
-      minNSigma = nSigmas[iHypothesys];
-      minHypothesis = iHypothesys;
-    }
-  }
-  
-//   int pdgHypothesis[3] = {211, 321, 2212};
-//   vector<int> tofPID;
-//   if(minNSigma < 3)
-//     tofPID.push_back(pdgHypothesis[minHypothesis]*q);
-
-  int pdgHypothesis[3] = {211, 321, 2212};
-  vector<int> tofPID;
-  for(int iHypothesys=0; iHypothesys<3; iHypothesys++)
-    if(nSigmas[iHypothesys] < 3)
-      tofPID.push_back(pdgHypothesis[iHypothesys]*q);
-  
-  return tofPID;
 }

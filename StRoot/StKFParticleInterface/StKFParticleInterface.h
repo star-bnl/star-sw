@@ -74,6 +74,7 @@ class StKFParticleInterface: public TObject
   void SetTriggerMode()      { fTriggerMode = true; }
   //KF Particle Finder cuts
   void SetChiPrimaryCut(float cut)  { fChiPrimaryCut = cut; }
+  void SetChiPrimaryMaxCut(float cut)  { fChiPrimaryMaxCut = cut; }
   
  private:
   
@@ -98,6 +99,7 @@ class StKFParticleInterface: public TObject
   bool fTriggerMode;
   //KF Particle Finder cuts
   float fChiPrimaryCut;
+  float fChiPrimaryMaxCut;
   
   ClassDef(StKFParticleInterface,1)
 };

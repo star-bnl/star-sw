@@ -102,7 +102,9 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   streamerOff();
   createArrays();
   LOG_INFO << "StPicoDstMaker::StPicoDstMaker: Set Default cuts" << endm;
-  SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051");
+  SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051," // VPDMB-5-p-sst (2.58B)  - (1 : 4.84M))
+		  "520802, 520812, 520822, 520832, 520842"          // VPDMB-5-p-hlt (1.81B)  - (43 : 0.55M; 45 : 24.09M) 
+		  );
   SetMaxTrackDca(50);
   SetMaxVertexTransError(0);
   SetVxXYrange(0,0,0,0);

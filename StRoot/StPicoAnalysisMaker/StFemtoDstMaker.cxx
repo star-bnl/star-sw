@@ -32,7 +32,7 @@ Int_t StFemtoDstMaker::Init(){
   fStKFParticleInterface->SetTriggerMode(); 
   fStKFParticleInterface->SetSoftKaonPIDMode(); 
   fStKFParticleInterface->SetSoftTofPidMode(); 
-  fStKFParticleInterface->SetChiPrimaryCut(12); //10); // 8
+  fStKFParticleInterface->SetChiPrimaryCut(10); //10); // 8 // 12
   return StMaker::Init();
 }
 //_____________________________________________________________________________

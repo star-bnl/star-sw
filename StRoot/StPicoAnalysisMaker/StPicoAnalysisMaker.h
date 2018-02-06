@@ -62,14 +62,13 @@ class StPicoAnalysisMaker : public StMaker {
   void           BookTrackPlots();
   void           BookVertexPlots();
   virtual Int_t  Make();
-  void           RunAnalysis();
+  void           CollectHistograms();
   Bool_t         Check();
   static void    PrintMem(const Char_t *opt = "");
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StPicoAnalysisMaker.h,v 1.0 2017/10/07 11:43:53 mzyzak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
-  std::vector<int> GetTofPID(double m2, double p, int q);
   ClassDef(StPicoAnalysisMaker,0)   //
 };
 #endif

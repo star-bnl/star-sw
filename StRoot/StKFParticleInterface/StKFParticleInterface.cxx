@@ -23,7 +23,7 @@ ClassImp(StKFParticleInterface)
 StKFParticleInterface::StKFParticleInterface(): 
   fKFParticleTopoReconstructor(0), fParticles(0), fParticlesPdg(0), fNHftHits(0), 
   fStrictTofPID(true), fCleanKaonsWitTof(true), fdEdXMode(1), fTriggerMode(false),
-  fChiPrimaryCut(18.6)
+  fChiPrimaryCut(18.6), fChiPrimaryMaxCut(2e4)
 {
   fKFParticleTopoReconstructor = new KFParticleTopoReconstructor(); // TODO don't recreate with each event
 
@@ -359,6 +359,7 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
       if(fTriggerMode) continue;
       primaryTrackList.push_back(nPartSaved);
     }
+    if(fTriggerMode && chiPrim > fChiPrimaryMaxCut) continue;
     particle.SetId(index);
     particles[nPartSaved] = particle;
 

@@ -28,4 +28,9 @@ void femtoDst(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/Pi
   SetChiPrimaryCut(8)   48219329 Feb  5 14:52 st_physics_17125034_raw_5500079.femtoDst.root.8 => 7.64
   SetChiPrimaryCut(10)  36044394 Feb  5 15:14 st_physics_17125034_raw_5500079.femtoDst.root.10 => 10.22
   SetChiPrimaryCut(12)  27451026 Feb  5 15:19 st_physics_17125034_raw_5500079.femtoDst.root => 13.4
+  SetChiPrimaryCut(8)   48196298 Feb  6 12:41 st_physics_17125034_raw_5500079.femtoDst.root.8.1e4 => 7.64
+chiMax < 1e4
+  SetChiPrimaryCut(8)   31186265 Feb  6 15:32 st_physics_17125034_raw_5500079.femtoDst.root => 11.81 
+chiMax < 1e4
+  SetChiPrimaryCut(10)  23326256 Feb  6 15:43 st_physics_17125034_raw_5500079.femtoDst.root => 15.78
  */
