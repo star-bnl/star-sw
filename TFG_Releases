@@ -20,5 +20,5 @@
  TFG17v switch off debug in FpdmGeo4.xml                             2017-12-29 12:59:48 -0500  (HEAD, tag: TFG17v, master)
  TFG18a release for 2016 embedding with fixed ToF, Old CA (TFG17o)   2018-01-10 14:58:24 -0500  (HEAD, tag: TFG18a, master)
  TFG18b new CA with V5 swithced on.                                  2018-01-24 16:23:50 -0500  (HEAD, tag: TFG18b_3, master)
- TFG18c FemtoDst                                                     2018-02-05 16:00:00                    TFG18c	
+ TFG18c FemtoDst                                                     2018-02-06 18:39:50 -0500  (HEAD, tag: TFG18c_1, master)
  .DEV2  head of TFG git repository, no V5          
