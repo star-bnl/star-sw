@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+<job maxFilesPerProcess="50" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="true">
         <command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
   setenv NODEBUG yes
   setup 64b
-  starver .DEV2
+  starver TFG18c
   set filelist = `cat $FILELIST | awk '{print $1}'`
   echo "file list = ${filelist}"
   set NL = `echo ${filelist} | wc -l`
@@ -23,7 +23,8 @@
     set log = ${tag}B.log
 #  if (-r ${log}) exit 0;
     if (! -r "${tag}.femtoDst.root") then
-       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'/*'${tag}'*.picoDst.root")' &gt;&amp; ${log}
+#       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'/*'${tag}'*.picoDst.root")' &gt;&amp; ${log}
+       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'.picoDst.root")' &gt;&amp; ${log}
     endif
   end
         </command>
@@ -32,5 +33,6 @@
     </ResourceUsage>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="command:lsPico" /> 
+<!-- <input URL="command:lsPico" />  -->
+<input URL="command:FemtoDST.pl" />
 </job>

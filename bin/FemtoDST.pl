@@ -2,17 +2,17 @@
 use File::Basename;
 use Cwd;
 use File::stat;
+my $debug = 1;
 my $pwd = cwd();
-my $day = File::Basename::basename(File::Basename::dirname($pwd));
-my $run =  File::Basename::basename($pwd);
+my $day = File::Basename::basename(File::Basename::dirname($pwd)); print "day = $day\n" if ($debug);
+my $run =  File::Basename::basename($pwd);                         print "run = $run\n" if ($debug);
 #my $dir = "/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/" . $day . "/" . $run;
 #my $dir = "/net/l401/data/scratch2/fisyak/MuDst/2016/" . $day . "/" . $run;
-my $debug = 0;
 #my $dir = "/gpfs01/star/pwg/fisyak/MuDst/2016/" . $day . "/" . $run; print "dir = $dir\n" if ($debug);
 #$dir = "./";
 #my $dir = "/gpfs02/eic/ayk/STAR/reco/MuDst/2010/" . $day . "/" . $run; print "dir = $dir\n" if ($debug);
 #my $dir = "/gpfs02/eic/ayk/STAR/reco/MuDst/2016/" . $day . "/" . $run; print "dir = $dir\n" if ($debug);
-my $dir = "/star/u/fisyak/Pico/2016/" . $run; print "dir = $dir\n" if ($debug);
+my $dir = "/star/u/fisyak/Pico/2016/" . $day . "/" . $run; print "dir = $dir\n" if ($debug);
 my %Hash = ();
 my @list = glob "$dir" . "/*.picoDst.root";
 my $NJobs = 0;
@@ -46,7 +46,7 @@ foreach my $key ( sort keys %Hash ) {
   print "$key => $Hash{$key}\n" if ($debug);
 # st_15131004_raw_3000031.picoDst.root
 # st_15131004_raw_3000031.picoDst.root
-  my $rootf = $key . ".picoDst.root"; print "rootf = $rootf\n" if ($debug);
+  my $rootf = $key . ".femtoDst.root"; print "rootf = $rootf\n" if ($debug);
   if (-r $rootf) {
     my $inode = stat($rootf);
     my $ctime = $inode->ctime;

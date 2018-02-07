@@ -2,7 +2,7 @@
   FPE_OFF
   root.exe -q -b -x femtoDst.C
 */
-void femtoDst(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "") {
+void femtoDst(Int_t N = 10000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "") {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
@@ -19,6 +19,7 @@ void femtoDst(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/Pi
   Long64_t nevent = N;
   nevent = TMath::Min(nevent,nentries);
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
+  //  TTree::SetMaxTreeSize(1000000000); // 1.0GB
   ((StBFChain *) StMaker::GetTopChain())->EventLoop(nevent);
 #endif
   

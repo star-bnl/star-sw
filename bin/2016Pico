@@ -250,3 +250,24 @@ foreach f (\
  echo "Bad run ${d}/${f}"
  mv ${d}/${f} ${d}/${f}.Bad
 end
+================================================================================
+Femto
+set DIR = "~/Pico"
+foreach dayd (`ls -1dr ${DIR}/2016/???`)
+  set day = `basename ${dayd}`;
+  cd ~/Femto/2016B/
+  if (! -d ${day}) mkdir ${day}
+  cd  ${day}
+  foreach d ( `ls -1d ${DIR}/2016/${day}/*` )
+    set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
+    pwd
+    FemtoDST.pl
+    if ( ! $? ) then
+      lsf ~/xml/FemtoDST.xml;
+    else
+      touch Done;
+    endif
+    cd -;
+  end
+  cd -;
+end
