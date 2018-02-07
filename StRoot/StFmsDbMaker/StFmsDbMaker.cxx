@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.32 2017/11/02 13:09:25 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.33 2018/02/07 14:45:14 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.33  2018/02/07 14:45:14  akio
+ * Update for faster DB tables
+ *
  * Revision 1.32  2017/11/02 13:09:25  akio
  * Adding getCorrectedAdc and fix a memory leak
  *
@@ -115,6 +118,9 @@
 #include "tables/St_fmsGain_Table.h"
 #include "tables/St_fmsGainCorrection_Table.h"
 #include "tables/St_fmsBitShiftGain_Table.h"
+#include "tables/St_fmsGainB_Table.h"
+#include "tables/St_fmsGainCorrectionB_Table.h"
+#include "tables/St_fmsBitShiftGainB_Table.h"
 #include "tables/St_fmsTimeDepCorr_Table.h"
 #include "tables/St_fmsRec_Table.h"
 #include "tables/St_fmsPositionModel_Table.h"
@@ -187,6 +193,9 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   St_fmsGain            *dbGain              =0;
   St_fmsGainCorrection  *dbGainCorrection    =0;
   St_fmsBitShiftGain    *dbBitShiftGain      =0;
+  St_fmsGainB           *dbGainB             =0;
+  St_fmsGainCorrectionB *dbGainCorrectionB   =0;
+  St_fmsBitShiftGainB   *dbBitShiftGainB     =0;
   St_fmsTimeDepCorr     *dbTimeDepCorr       =0;
   St_fmsRec             *dbRec               =0;
   St_fpsConstant        *dbFpsConstant       =0;
@@ -213,6 +222,9 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   dbGain              = (St_fmsGain*)            DBcalibration->Find("fmsGain");
   dbGainCorrection    = (St_fmsGainCorrection*)  DBcalibration->Find("fmsGainCorrection");
   dbBitShiftGain      = (St_fmsBitShiftGain*)    DBcalibration->Find("fmsBitShiftGain");
+  dbGainB             = (St_fmsGainB*)           DBcalibration->Find("fmsGainB");
+  dbGainCorrectionB   = (St_fmsGainCorrectionB*) DBcalibration->Find("fmsGainCorrectionB");
+  dbBitShiftGainB     = (St_fmsBitShiftGainB*)   DBcalibration->Find("fmsBitShiftGainB");
   dbTimeDepCorr       = (St_fmsTimeDepCorr*)     DBcalibration->Find("fmsTimeDepCorr");
   dbRec               = (St_fmsRec*)             DBcalibration->Find("fmsRec");
   dbFpsConstant       = (St_fpsConstant*)        DBFpsGeom->Find("fpsConstant");
@@ -236,9 +248,9 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbMap)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsMap"          <<endm; return kStFatal;}
   if(!dbPatchPanelMap)     {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsPatchPanelMap"<<endm; return kStFatal;}
   if(!dbQTMap)             {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsQTMap"        <<endm; return kStFatal;}
-  if(!dbGain)              {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGain"                 <<endm; return kStFatal;}
-  if(!dbGainCorrection)    {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection"       <<endm; return kStFatal;}
-  if(!dbBitShiftGain)      {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsBitShiftGain"         <<endm;}
+  if(!dbGain && !dbGainB)                     {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGain nor B"          <<endm; return kStFatal;}
+  if(!dbGainCorrection && !dbGainCorrectionB) {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection nor B"<<endm; return kStFatal;}
+  if(!dbBitShiftGain && !dbBitShiftGainB)     {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsBitShiftGain nor B"  <<endm;}
   if(!dbTimeDepCorr)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsTimeDepCorr"          <<endm;}
   if(!dbRec)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsRec"                  <<endm; return kStFatal;}
   
@@ -337,102 +349,198 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/mapping/fmsMap with mMaxMap = "<<mMaxMap<< endm;
   
   //!fmsGain
-  mGain = (fmsGain_st*) dbGain->GetTable();
-  mMaxGain = dbGain->GetNRows();
-  mmGain = new fmsGain_st* [mMaxDetectorId+1]();
-  for(Int_t i=0; i<mMaxGain; i++){
-    Int_t d=mGain[i].detectorId;
-    Int_t c=mGain[i].ch;
-    if(d<0 || d>mMaxDetectorId){
-	LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
-	continue;
-    }
-    if(maxChannel(d)<1){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain invalid max number of channel = "<<maxChannel(d)
-		<<"for det="<<d<<endm; 
-      continue;
-    }
-    if(c<1 || c>maxChannel(d)){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" exceed max = "<<maxChannel(d)<<endm; 
-      continue;
-    }
-    if(mmGain[d]==0){
-      mmGain[d] = new fmsGain_st [maxChannel(d)]();
-      //memset(mmGain[d],0,sizeof(fmsGain_st)*maxChannel(d));
-    }
-    if(mmGain[d][c-1].ch==0){
-	memcpy(&mmGain[d][c-1],&mGain[i],sizeof(fmsGain_st));
-    }else{
-	LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
-    }
-    if(mForceUniformGain>0.0){
-      static int first=0;
-      if(first<3){
-        LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain overwritten to uniform value="<<mForceUniformGain<<endm;
-        first++;
+  if(dbGainB){
+      mGainB = (fmsGainB_st*) dbGainB->GetTable();
+      mMaxGain = dbGainB->GetNRows();
+      if(mMaxGain==1){
+	  mMaxGain=0;
+	  mmGain = new fmsGain_st* [mMaxDetectorId+1]();	  
+	  for(Int_t i=0; i<2500; i++){
+	      Int_t d=mGainB[0].detectorId[i];
+	      Int_t c=mGainB[9].ch[i];
+	      if(d<0 || d>mMaxDetectorId){
+		  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainB detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
+		  continue;
+	      }
+	      if(maxChannel(d)<1){
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainB invalid max number of channel = "<<maxChannel(d)
+			    <<"for det="<<d<<endm; 
+		  continue;
+	      }
+	      if(c<1 || c>maxChannel(d)){
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainB detectorId="<<d<<" ch="<<c<<" exceed max = "<<maxChannel(d)<<endm; 
+		  continue;
+	      }
+	      if(mmGain[d]==0){
+		  mmGain[d] = new fmsGain_st [maxChannel(d)]();
+		  //memset(mmGain[d],0,sizeof(fmsGain_st)*maxChannel(d));
+	      }
+	      if(mmGain[d][c-1].ch==0){
+		  mMaxGain++;
+		  mmGain[d][c-1].detectorId=d;
+		  mmGain[d][c-1].ch=c;
+		  mmGain[d][c-1].gain=mGainB[0].gain[i];;
+	      }else{
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainB detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+	      }
+	      if(mForceUniformGain>0.0){
+		  static int first=0;
+		  if(first<3){
+		      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainB overwritten to uniform value="<<mForceUniformGain<<endm;
+		      first++;
+		  }
+		  mmGain[d][c-1].gain=mForceUniformGain;
+	      }
+	  }
+	  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsGainB with mMaxGain = "<<mMaxGain<< endm;
       }
-      mmGain[d][c-1].gain=mForceUniformGain;
-    }
-  }
+  }else if(!mmGain && dbGain){
+      mGain = (fmsGain_st*) dbGain->GetTable();
+      mMaxGain = dbGain->GetNRows();
+      mmGain = new fmsGain_st* [mMaxDetectorId+1]();
+      for(Int_t i=0; i<mMaxGain; i++){
+	  Int_t d=mGain[i].detectorId;
+	  Int_t c=mGain[i].ch;
+	  if(d<0 || d>mMaxDetectorId){
+	      LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
+	      continue;
+	  }
+	  if(maxChannel(d)<1){
+	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain invalid max number of channel = "<<maxChannel(d)
+			<<"for det="<<d<<endm; 
+	      continue;
+	  }
+	  if(c<1 || c>maxChannel(d)){
+	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" exceed max = "<<maxChannel(d)<<endm; 
+	      continue;
+	  }
+	  if(mmGain[d]==0){
+	      mmGain[d] = new fmsGain_st [maxChannel(d)]();
+	      //memset(mmGain[d],0,sizeof(fmsGain_st)*maxChannel(d));
+	  }
+	  if(mmGain[d][c-1].ch==0){
+	      memcpy(&mmGain[d][c-1],&mGain[i],sizeof(fmsGain_st));
+	  }else{
+	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+	  }
+	  if(mForceUniformGain>0.0){
+	      static int first=0;
+	      if(first<3){
+		  LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain overwritten to uniform value="<<mForceUniformGain<<endm;
+		  first++;
+	      }
+	      mmGain[d][c-1].gain=mForceUniformGain;
+	  }
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsGain with mMaxGain = "<<mMaxGain<< endm;
+  }  
   if(mReadGainFile){
-    LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain will be overwritten by FmsGain.txt"<<endm;
-    FILE* f=fopen("FmsGain.txt","r");
-    if(!f){ 
-      LOG_INFO<<"Failed to open FmsGain.txt"<<endm; 
-    }else{
-      int ew,nstb,ch;
-      float gain;
-      while(fscanf(f,"%d %d %d %f",&ew,&nstb,&ch,&gain)!=EOF){
-	if(ew==2){
-	  int dd=nstb+7;
-	  //printf("Reading FmsGain.txt  %1d %1d %2d %3d %f\n",ew,nstb,dd,ch,gain);
-	  mmGain[dd][ch-1].gain=gain;
-	}
+      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain or B will be overwritten by FmsGain.txt"<<endm;
+      FILE* f=fopen("FmsGain.txt","r");
+      if(!f){ 
+	  LOG_INFO<<"Failed to open FmsGain.txt"<<endm; 
+      }else{
+	  int ew,nstb,ch;
+	  float gain;
+	  while(fscanf(f,"%d %d %d %f",&ew,&nstb,&ch,&gain)!=EOF){
+	      if(ew==2){
+		  int dd=nstb+7;
+		  //printf("Reading FmsGain.txt  %1d %1d %2d %3d %f\n",ew,nstb,dd,ch,gain);
+		  mmGain[dd][ch-1].gain=gain;
+	      }
+	  }
+	  fclose(f);
+	  LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain was overwritten by FmsGain.txt"<<endm;
       }
-      fclose(f);
-      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain was overwritten by FmsGain.txt"<<endm;
-    }
   }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsGain with mMaxGain = "<<mMaxGain<< endm;
   
   //!fmsGainCorrection
-  mGainCorrection = (fmsGainCorrection_st*) dbGainCorrection->GetTable();
-  mMaxGainCorrection = dbGainCorrection->GetNRows();
-  mmGainCorrection = new fmsGainCorrection_st* [mMaxDetectorId+1]();
-  //memset(mmGainCorrection,0,sizeof(fmsGainCorrection_st*)*(mMaxDetectorId+1));
-  for(Int_t i=0; i<mMaxGainCorrection; i++){
-    Int_t d=mGainCorrection[i].detectorId;
-    Int_t c=mGainCorrection[i].ch;
-    if(d<0 || d>mMaxDetectorId){
-	LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
-	continue;
-    }
-    if(maxChannel(d)<1){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection invalid max number of channel = "<<maxChannel(d)
-		<<"for det="<<d<<endm; 
-      continue;
-    }
-    if(c<1 || c>maxChannel(d)){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection ch="<<c<<" exceed max="<<maxChannel(d)<<endm; 
-      continue;
-    }
-    if(mmGainCorrection[d]==0){
-      mmGainCorrection[d] = new fmsGainCorrection_st [maxChannel(d)]();
-      //memset(mmGainCorrection[d],0,sizeof(fmsGainCorrection_st)*maxChannel(d));
-    }
-    if(mmGainCorrection[d][c-1].ch==0){
-	memcpy(&mmGainCorrection[d][c-1],&mGainCorrection[i],sizeof(fmsGainCorrection_st));
-    }else{
-	LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
-    }
-    if(mForceUniformGainCorrection>0.0){
-      static int first=0;
-      if(first==0){
-        LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection overwritten to uniform value="<<mForceUniformGainCorrection<<endm;
-        first++;
+  if(dbGainCorrectionB){
+      mGainCorrectionB = (fmsGainCorrectionB_st*) dbGainCorrectionB->GetTable();
+      mMaxGainCorrection = dbGainCorrectionB->GetNRows();
+      if(mMaxGainCorrection==1){
+	  mMaxGainCorrection=0;
+	  mmGainCorrection = new fmsGainCorrection_st* [mMaxDetectorId+1]();
+	  //memset(mmGainCorrection,0,sizeof(fmsGainCorrection_st*)*(mMaxDetectorId+1));
+	  for(Int_t i=0; i<2500; i++){
+	      Int_t d=mGainCorrectionB[0].detectorId[i];
+	      Int_t c=mGainCorrectionB[0].ch[i];
+	      if(d<0 || d>mMaxDetectorId){
+		  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
+		  continue;
+	      }
+	      if(maxChannel(d)<1){
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB invalid max number of channel = "<<maxChannel(d)
+			    <<"for det="<<d<<endm; 
+		  continue;
+	      }
+	      if(c<1 || c>maxChannel(d)){
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB ch="<<c<<" exceed max="<<maxChannel(d)<<endm; 
+		  continue;
+	      }
+	      if(mmGainCorrection[d]==0){
+		  mmGainCorrection[d] = new fmsGainCorrection_st [maxChannel(d)]();
+		  //memset(mmGainCorrection[d],0,sizeof(fmsGainCorrection_st)*maxChannel(d));
+	      }
+	      if(mmGainCorrection[d][c-1].ch==0){
+		  mMaxGainCorrection++;
+		  mmGainCorrection[d][c-1].detectorId=d;
+		  mmGainCorrection[d][c-1].ch=c;
+		  mmGainCorrection[d][c-1].ch=mGainCorrectionB[0].corr[i];;
+	      }else{
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+	      }
+	      if(mForceUniformGainCorrection>0.0){
+		  static int first=0;
+		  if(first==0){
+		      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB overwritten to uniform value="<<mForceUniformGainCorrection<<endm;
+		      first++;
+		  }
+		  mmGainCorrection[d][c-1].corr=mForceUniformGainCorrection;
+	      }
+	  }
+	  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrectionB with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
       }
-      mmGainCorrection[d][c-1].corr=mForceUniformGainCorrection;
-    }
+  }else if(dbGainCorrection && !mmGainCorrection){      
+      mGainCorrection = (fmsGainCorrection_st*) dbGainCorrection->GetTable();
+      mMaxGainCorrection = dbGainCorrection->GetNRows();
+      mmGainCorrection = new fmsGainCorrection_st* [mMaxDetectorId+1]();
+      //memset(mmGainCorrection,0,sizeof(fmsGainCorrection_st*)*(mMaxDetectorId+1));
+      for(Int_t i=0; i<mMaxGainCorrection; i++){
+	  Int_t d=mGainCorrection[i].detectorId;
+	  Int_t c=mGainCorrection[i].ch;
+	  if(d<0 || d>mMaxDetectorId){
+	      LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
+	      continue;
+	  }
+	  if(maxChannel(d)<1){
+	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection invalid max number of channel = "<<maxChannel(d)
+			<<"for det="<<d<<endm; 
+	      continue;
+	  }
+	  if(c<1 || c>maxChannel(d)){
+	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection ch="<<c<<" exceed max="<<maxChannel(d)<<endm; 
+	      continue;
+	  }
+	  if(mmGainCorrection[d]==0){
+	      mmGainCorrection[d] = new fmsGainCorrection_st [maxChannel(d)]();
+	      //memset(mmGainCorrection[d],0,sizeof(fmsGainCorrection_st)*maxChannel(d));
+	  }
+	  if(mmGainCorrection[d][c-1].ch==0){
+	      memcpy(&mmGainCorrection[d][c-1],&mGainCorrection[i],sizeof(fmsGainCorrection_st));
+	  }else{
+	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+	  }
+	  if(mForceUniformGainCorrection>0.0){
+	      static int first=0;
+	      if(first==0){
+		  LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection overwritten to uniform value="<<mForceUniformGainCorrection<<endm;
+		  first++;
+	      }
+	      mmGainCorrection[d][c-1].corr=mForceUniformGainCorrection;
+	  }
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
   }
   if(mReadGainCorrFile){
       LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr will be overwritten by FmsGainCorr.txt"<<endm;
@@ -453,13 +561,49 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr was overwritten by FmsGainCorr.txt"<<endm;
       }
   }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
 
   //!fmsBitShiftGain
-  mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();
-  if(dbBitShiftGain!=0){
+  if(dbBitShiftGainB!=0){
+      mBitShiftGainB = (fmsBitShiftGainB_st*) dbBitShiftGainB->GetTable();
+      mMaxBitShiftGain = dbBitShiftGainB->GetNRows();
+      if(mMaxBitShiftGain==1){
+	  mMaxBitShiftGain=0;
+	  mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();	  
+	  for(Int_t i=0; i<2500; i++){
+	      Int_t d=mBitShiftGainB[0].detectorId[i];
+	      Int_t c=mBitShiftGainB[0].ch[i];
+	      if(d<0 || d>mMaxDetectorId){
+		  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGainB detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
+		  continue;
+	      }
+	      if(maxChannel(d)<1){
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGainB invalid max number of channel = "<<maxChannel(d)
+			    <<"for det="<<d<<endm; 
+		  continue;
+	      }
+	      if(c<1 || c>maxChannel(d)){
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGainB detectorId="<<d<<" ch="<<c<<" exceed max = "<<maxChannel(d)<<endm; 
+		  continue;
+	      }
+	      if(mmBitShiftGain[d]==0){
+		  mmBitShiftGain[d] = new fmsBitShiftGain_st [maxChannel(d)]();
+		  //memset(mmBitShiftGain[d],0,sizeof(fmsBitShiftGain_st)*maxChannel(d));
+	      }
+	      if(mmBitShiftGain[d][c-1].ch==0){
+		  mMaxBitShiftGain++;
+		  mmBitShiftGain[d][c-1].detectorId=d;
+		  mmBitShiftGain[d][c-1].ch=c;
+		  mmBitShiftGain[d][c-1].bitshift=mBitShiftGainB[0].bitshift[i];;
+	      }else{
+		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGainB detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+	      }
+	      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsBitShiftGainB with mMaxBitShiftGain = "<<mMaxBitShiftGain<< endm;
+	  }
+      }
+  }else if(!mmBitShiftGain && dbBitShiftGain){
       mBitShiftGain = (fmsBitShiftGain_st*) dbBitShiftGain->GetTable();
       mMaxBitShiftGain = dbBitShiftGain->GetNRows();
+      mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();
       for(Int_t i=0; i<mMaxBitShiftGain; i++){
 	  Int_t d=mBitShiftGain[i].detectorId;
 	  Int_t c=mBitShiftGain[i].ch;
@@ -486,7 +630,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGain detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
 	  }
       }
-  }else{
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsBitShiftGain with mMaxBitShiftGain = "<<mMaxBitShiftGain<< endm;
+  }else{ //no DB found, default to zero
       for(int d=0; d<=maxDetectorId(); d++){
 	  mmBitShiftGain[d] = new fmsBitShiftGain_st [maxChannel(d)]();
 	  for(int c=1; c<=maxChannel(d); c++){
@@ -495,6 +640,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	      mmBitShiftGain[d][c-1].bitshift=0;
 	  }
       }
+      LOG_INFO << "StFmsDbMaker::InitRun - Found no Calibration/fms/fmsBitShiftGain or B, defaulted to zero"<<endm;
   }  
   if(mForceUniformGain>0.0){
       for(int d=0; d<maxDetectorId(); d++){
@@ -509,24 +655,23 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       }
   }
   if(mReadBitShiftGainFile){
-    LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGain will be overwritten by FmsBitShiftGain.txt"<<endm;
-    FILE* f=fopen("FmsBitShiftGain.txt","r");
-    if(!f){ 
-	LOG_INFO<<"Failed to open FmsBitShiftGain.txt"<<endm; 
-    }else{
-	int ew,nstb,ch,gain;
-	while(fscanf(f,"%d %d %d %d",&ew,&nstb,&ch,&gain)!=EOF){
-	    if(ew==2){
-		int dd=nstb+7;
-		//printf("Reading FmsBitShiftGain.txt  %1d %1d %2d %3d %d\n",ew,nstb,dd,ch,gain);
-		mmBitShiftGain[dd][ch-1].bitshift=gain;
-	    }
-	}
-	fclose(f);
-	LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGain was overwritten by FmsBitShiftGain.txt"<<endm;
-    }
+      LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGain oe B will be overwritten by FmsBitShiftGain.txt"<<endm;
+      FILE* f=fopen("FmsBitShiftGain.txt","r");
+      if(!f){ 
+	  LOG_INFO<<"Failed to open FmsBitShiftGain.txt"<<endm; 
+      }else{
+	  int ew,nstb,ch,gain;
+	  while(fscanf(f,"%d %d %d %d",&ew,&nstb,&ch,&gain)!=EOF){
+	      if(ew==2){
+		  int dd=nstb+7;
+		  //printf("Reading FmsBitShiftGain.txt  %1d %1d %2d %3d %d\n",ew,nstb,dd,ch,gain);
+		  mmBitShiftGain[dd][ch-1].bitshift=gain;
+	      }
+	  }
+	  fclose(f);
+	  LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGain or B was overwritten by FmsBitShiftGain.txt"<<endm;
+      }
   }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsBitShiftGain with mMaxBitShiftGain = "<<mMaxBitShiftGain<< endm;
 
   //!fmsTimeDepCorr
   mMaxTimeSlice=0;
@@ -1251,7 +1396,7 @@ Float_t StFmsDbMaker::getGainCorrection(Int_t detectorId, Int_t ch) const
 
 Short_t StFmsDbMaker::getBitShiftGain(Int_t detectorId, Int_t ch) const
 {
-    if(detectorId<0 || detectorId>mMaxDetectorId || ch<1 || ch>maxChannel(detectorId) || mmGain[detectorId]==0) return 0;
+    if(detectorId<0 || detectorId>mMaxDetectorId || ch<1 || ch>maxChannel(detectorId) || mmBitShiftGain[detectorId]==0) return 0;
     return mmBitShiftGain[detectorId][ch-1].bitshift;
 }
 
@@ -1382,35 +1527,51 @@ void StFmsDbMaker::dumpFmsQTMap(const Char_t* filename) {
 }
 
 void StFmsDbMaker::dumpFmsGain(const Char_t* filename) {
-  FILE* fp;
-  LOG_INFO << "Writing "<<filename<<endm;
-  if((fp=fopen(filename,"w"))){
-    fprintf(fp,"maxGain = %d\n",maxGain());
-    fprintf(fp,"    i DetId    ch    gain  getGain()\n");
-    for(Int_t i=0; i<mMaxGain; i++){
-      Int_t d=mGain[i].detectorId;
-      Int_t c=mGain[i].ch;
-      fprintf(fp,"%5d%6d%6d%8.3f%11.3f\n",
-	      i,d,c,mGain[i].gain,getGain(d,c));
-    }
-    fclose(fp);
-  }      
+    FILE* fp;
+    LOG_INFO << "Writing "<<filename<<endm;
+    if((fp=fopen(filename,"w"))){
+	fprintf(fp,"maxGain = %d\n",maxGain());
+	fprintf(fp,"    i DetId    ch    gain\n");
+	int i=0;
+	for(int d=0; d<mMaxDetectorId; d++){
+	    if(mmGain[d]){
+		for(int c=0; c<maxChannel(d); c++){
+		    Int_t d=mmGain[d][c].detectorId;
+		    Int_t cc=mmGain[d][c].ch;
+		    if(cc>0){
+			fprintf(fp,"%5d%6d%6d%8.3f\n",
+				i,d,cc,getGain(d,cc));
+			i++;
+		    }
+		}
+	    }
+	}
+	fclose(fp);
+    }      
 }
 
 void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
-  FILE* fp;
-  LOG_INFO << "Writing "<<filename<<endm;
-  if((fp=fopen(filename,"w"))){
-    fprintf(fp,"maxGainCorrection = %d\n",maxGainCorrection());
-    fprintf(fp,"    i DetId    ch    gain  getGainCorrection()\n");
-    for(Int_t i=0; i<mMaxGainCorrection; i++){
-      Int_t d=mGainCorrection[i].detectorId;
-      Int_t c=mGainCorrection[i].ch;
-      fprintf(fp,"%5d%6d%6d%8.3f%21.3f\n",
-	      i,d,c,mGainCorrection[i].corr,getGainCorrection(d,c));
-    }
-    fclose(fp);
-  }      
+    FILE* fp;
+    LOG_INFO << "Writing "<<filename<<endm;
+    if((fp=fopen(filename,"w"))){
+	fprintf(fp,"maxGainCorrection = %d\n",maxGainCorrection());
+	fprintf(fp,"    i DetId    ch    gain\n");
+	int i=0;
+        for(int d=0; d<mMaxDetectorId; d++){
+            if(mmGainCorrection[d]){
+                for(int c=0; c<maxChannel(d); c++){
+		    Int_t d=mmGainCorrection[d][c].detectorId;
+		    Int_t cc=mmGainCorrection[d][c].ch;
+		    if(cc>0){
+			fprintf(fp,"%5d%6d%6d%8.3f\n",
+				i,d,cc,getGainCorrection(d,cc));
+			i++;
+		    }
+		}
+	    }
+	}
+	fclose(fp);
+    }      
 }
 
 void StFmsDbMaker::dumpFmsBitShiftGain(const Char_t* filename) {
@@ -1418,12 +1579,20 @@ void StFmsDbMaker::dumpFmsBitShiftGain(const Char_t* filename) {
     LOG_INFO << "Writing "<<filename<<endm;
     if((fp=fopen(filename,"w"))){
 	fprintf(fp,"maxGain = %d\n",maxBitShiftGain());
-	fprintf(fp,"    i DetId    ch    bitshiftgain  getBitShiftGain()\n");
-	for(Int_t i=0; i<mMaxBitShiftGain; i++){
-	    Int_t d=mBitShiftGain[i].detectorId;
-	    Int_t c=mBitShiftGain[i].ch;
-	    fprintf(fp,"%5d%6d%6d%4d%4d\n",
-		    i,d,c,mBitShiftGain[i].bitshift,getBitShiftGain(d,c));
+	fprintf(fp,"    i DetId    ch    bitshiftgain\n");
+	int i=0;
+        for(int d=0; d<mMaxDetectorId; d++){
+            if(mmBitShiftGain[d]){
+                for(int c=0; c<maxChannel(d); c++){
+                    Int_t d=mmBitShiftGain[d][c].detectorId;
+                    Int_t cc=mmBitShiftGain[d][c].ch;
+                    if(cc>0){
+                        fprintf(fp,"%5d%6d%6d%4df\n",
+                                i,d,cc,getBitShiftGain(d,cc));
+			i++;
+                    }
+		}
+	    }   
 	}
 	fclose(fp);
     }
@@ -2009,27 +2178,28 @@ StLorentzVectorF StFmsDbMaker::getLorentzVector(const StThreeVectorF& xyz, Float
 	    double Vy    = vSeed->y0;
 	    double Vdxdz = vSeed->dxdz;
 	    double Vdydz = vSeed->dydz;
-	    //Vdxdz = -0.01;
+	    //Vdxdz = -0.01; //hack for debug
 	    //Vdydz = -0.01;
 	    double thetaX = TMath::ATan( Vdxdz );
 	    double thetaY = TMath::ATan( Vdydz );
 	    StThreeVectorF xyznew(xyz.x()-Vx,xyz.y()-Vy,xyz.z());
 	    xyznew.rotateX(+thetaY); 
 	    xyznew.rotateY(-thetaX);
+
 	    /*
 	    if(1){
 		LOG_INFO << Form("vx=%6.3f vy=%6.3f dxdz=%8.5f dydz=%8.5f",Vx,Vy,Vdxdz,Vdydz) <<endm;
 		LOG_INFO << Form("old px=%6.3f py=%6.3f pz=%6.3f",xyz.x(),xyz.y(),xyz.z()) <<endm;
 		LOG_INFO << Form("new px=%6.3f py=%6.3f pz=%6.3f",xyznew.x(),xyznew.y(),xyznew.z()) <<endm;
 	    }
+	    */
 	    
 	    //With both dxdz=dydz=-0.01, positive x/y should get larger since beamline is pointing negative x/y at +z
 	    //  StFmsPointMaker:INFO  - vx= 0.096 vy=-0.272 dxdz=-0.01000 dydz=-0.01000
 	    //  StFmsPointMaker:INFO  - old px=26.820 py=61.350 pz=733.800
 	    //  StFmsPointMaker:INFO  - new px=34.054 py=68.957 pz=732.843
-	    //So... rotateX(+thetaY); and rotateY(-thetaX) is correct!?!
+	    //So... rotateX(+thetaY); and rotateY(-thetaX) is correct!
 
-	    */
 	    StThreeVectorF mom3 = xyznew.unit() * energy;
 	    return StLorentzVectorF(mom3, energy);
 	}

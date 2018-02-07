@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.21 2017/11/02 13:09:25 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.22 2018/02/07 14:45:15 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.22  2018/02/07 14:45:15  akio
+ * Update for faster DB tables
+ *
  * Revision 1.21  2017/11/02 13:09:25  akio
  * Adding getCorrectedAdc and fix a memory leak
  *
@@ -91,6 +94,9 @@ struct fmsQTMap_st;
 struct fmsGain_st;
 struct fmsGainCorrection_st;
 struct fmsBitShiftGain_st;
+struct fmsGainB_st;
+struct fmsGainCorrectionB_st;
+struct fmsBitShiftGainB_st;
 struct fmsTimeDepCorr_st;
 struct fmsRec_st;
 
@@ -134,6 +140,9 @@ class StFmsDbMaker : public StMaker {
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
   fmsBitShiftGain_st*     BitShiftGain();
+  fmsGainB_st*            GainB();
+  fmsGainCorrectionB_st*  GainCorrectionB();
+  fmsBitShiftGainB_st*    BitShiftGainB();
   fmsTimeDepCorr_st*      TimeDepCorr();
   fmsRec_st*              RecPar(); //reconstruction related parameters
   fpsConstant_st*         FpsConstant();
@@ -330,18 +339,21 @@ class StFmsDbMaker : public StMaker {
   Int_t                  mMaxNS=0;
 
   fmsGain_st            *mGain=0;   //! gain table
+  fmsGainB_st           *mGainB=0;   //! new gain table
   fmsGain_st            **mmGain=0; 
   Int_t                  mMaxGain=0;
 
   fmsGainCorrection_st  *mGainCorrection=0; //! gain correction table
+  fmsGainCorrectionB_st *mGainCorrectionB=0; //! new gain correction table
   fmsGainCorrection_st  **mmGainCorrection=0;
   Int_t                   mMaxGainCorrection=0;
 
   fmsBitShiftGain_st    *mBitShiftGain=0;   //! bit shift gain table
+  fmsBitShiftGainB_st   *mBitShiftGainB=0;   //! new bit shift gain table
   fmsBitShiftGain_st    **mmBitShiftGain=0; 
   Int_t                  mMaxBitShiftGain=0;
 
-    enum {mFmsTimeDepMaxData=20000,mFmsTimeDepMaxTimeSlice=200,mFmsTimeDepMaxDet=4,mFmsTimeDepMaxCh=578};
+  enum {mFmsTimeDepMaxData=20000,mFmsTimeDepMaxTimeSlice=200,mFmsTimeDepMaxDet=4,mFmsTimeDepMaxCh=578};
   fmsTimeDepCorr_st     *mTimeDepCorr=0;
   int mMaxTimeSlice=0;
   int mTimeDepEvt[mFmsTimeDepMaxTimeSlice];    
