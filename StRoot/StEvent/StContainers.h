@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.40 2015/11/25 16:53:36 perev Exp $
+ * $Id: StContainers.h,v 2.41 2018/02/08 17:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.41  2018/02/08 17:36:26  ullrich
+ * Changed for new EPD classes.
+ *
  * Revision 2.40  2015/11/25 16:53:36  perev
  * Backward
  *
@@ -132,6 +135,7 @@ class StDetectorState;
 class StEmcCluster;
 class StEmcPoint;
 class StEmcRawHit;
+class StEpdHit;
 class StEtrHit;
 class StFgtHit;
 class StFgtPoint;
@@ -198,6 +202,7 @@ StCollectionDef(DetectorState)
 StCollectionDef(EmcCluster)
 StCollectionDef(EmcPoint)
 StCollectionDef(EmcRawHit)
+StCollectionDef(EpdHit)    // MAL
 StCollectionDef(EtrHit)
 StCollectionDef(FgtHit)
 StCollectionDef(FgtPoint)

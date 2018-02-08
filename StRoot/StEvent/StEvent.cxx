@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.56 2015/10/09 17:46:15 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.57  2018/02/08 17:36:26  ullrich
+ * Changed for new EPD classes.
+ *
  * Revision 2.56  2015/10/09 17:46:15  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -207,6 +210,7 @@
 #include "StSstHitCollection.h"
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
+#include "StEpdCollection.h"
 #include "StFmsCollection.h"
 #include "StRichCollection.h"
 #include "StRpsCollection.h"
@@ -239,8 +243,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.56 2015/10/09 17:46:15 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.56 2015/10/09 17:46:15 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.57 2018/02/08 17:36:26 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -628,6 +632,22 @@ StEvent::btofCollection() const
     StBTofCollection *btof = 0;
     _lookup(btof, mContent);
     return btof;
+}
+
+StEpdCollection*
+StEvent::epdCollection()
+{
+    StEpdCollection *epd = 0;
+    _lookup(epd, mContent);
+    return epd;
+}
+
+const StEpdCollection*
+StEvent::epdCollection() const
+{
+    StEpdCollection *epd = 0;
+    _lookup(epd, mContent);
+    return epd;
 }
 
 StMtdCollection*
@@ -1204,6 +1224,12 @@ StEvent::setBTofCollection(StBTofCollection* val)
 }
 
 void
+StEvent::setEpdCollection(StEpdCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setMtdCollection(StMtdCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1404,6 +1430,7 @@ void StEvent::statistics()
     cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
     cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
+    cout << "\tStEpdCollection:          " << static_cast<void*>(epdCollection());
     cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection());
     cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
     cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());

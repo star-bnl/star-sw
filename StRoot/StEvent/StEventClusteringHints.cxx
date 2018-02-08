@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.38 2017/10/13 20:11:17 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.39 2018/02/08 17:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.39  2018/02/08 17:36:26  ullrich
+ * Changed for new EPD classes.
+ *
  * Revision 2.38  2017/10/13 20:11:17  ullrich
  * Changes to handle new StTriggerData2018.
  *
@@ -128,7 +131,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.38 2017/10/13 20:11:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.39 2018/02/08 17:36:26 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -174,6 +177,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
     setBranch("StBTofCollection",            "evt_aux",      7);
+    setBranch("StEpdCollection",             "evt_aux",      7);
     setBranch("StMtdCollection",             "evt_aux",      7);
     setBranch("StFpdCollection",             "evt_aux",      7);
     setBranch("StPhmdCollection",            "evt_aux",      7);
@@ -200,6 +204,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
     setBranch("StBTofCollection",            "event", 1);
+    setBranch("StEpdCollection",             "event", 1);
     setBranch("StMtdCollection",             "event", 1);
     setBranch("StFpdCollection",             "event", 1);
     setBranch("StRpsCollection",             "event", 1);
