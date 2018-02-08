@@ -252,14 +252,16 @@ foreach f (\
 end
 ================================================================================
 Femto
-set DIR = "~/Pico"
+#set DIR = "~/Pico"
+set DIR = "/gpfs02/eic/ayk/STAR/reco/Pico"
 foreach dayd (`ls -1dr ${DIR}/2016/???`)
   set day = `basename ${dayd}`;
-  cd ~/Femto/2016B/
+  cd ~/Femto/2016/
   if (! -d ${day}) mkdir ${day}
   cd  ${day}
   foreach d ( `ls -1d ${DIR}/2016/${day}/*` )
     set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
+    if ("${b}" == "17076002") continue;
     pwd
     FemtoDST.pl
     if ( ! $? ) then
@@ -269,5 +271,13 @@ foreach dayd (`ls -1dr ${DIR}/2016/???`)
     endif
     cd -;
   end
+  cd -;
+end
+================================================================================
+foreach d (`ls -1d 1*`)
+  cd $d; 
+  if (! -r Chain.log) then
+  root.exe -q -b 'Chain.C+("*/*.root","PicoDst")' | tee Chain.log;
+  endif
   cd -;
 end

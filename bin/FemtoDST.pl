@@ -2,7 +2,7 @@
 use File::Basename;
 use Cwd;
 use File::stat;
-my $debug = 1;
+my $debug = 0;
 my $pwd = cwd();
 my $day = File::Basename::basename(File::Basename::dirname($pwd)); print "day = $day\n" if ($debug);
 my $run =  File::Basename::basename($pwd);                         print "run = $run\n" if ($debug);
@@ -60,6 +60,7 @@ foreach my $key ( sort keys %Hash ) {
     my $flag = system($cmd); if ($flag) {die "flag = $flag";}
   }
   $NJobs++;
-  print "string:$dir:$key\n";
+#  print "string:$dir:$key\n";
+  print "string:$dir/$key.picoDst.root\n";
 }
 if (! $NJobs) {die "No.jobs";}

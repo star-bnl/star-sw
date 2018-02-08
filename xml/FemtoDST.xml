@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="50" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="true">
+<job maxFilesPerProcess="50" filesPerHour="50.0" fileListSyntax="paths" simulateSubmission ="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
@@ -11,22 +11,27 @@
   set NL = `echo ${filelist} | wc -l`
   echo "NL = ${NL}"
   if (${NL} == 0) exit 0;
-  foreach input ( ${filelist} )
-    echo ${input} | grep ':'
-    if (! $?) then
-      set dir      = `echo ${input} | awk -F\: '{print $1}'`
-      set tag      = `echo ${input} | awk -F\: '{print $2}'`
-    else
-      set dir = `dirname ${input}`;
-      set tag = `basename ${input} .picoDst.root`;
-    endif
-    set log = ${tag}B.log
-#  if (-r ${log}) exit 0;
-    if (! -r "${tag}.femtoDst.root") then
-#       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'/*'${tag}'*.picoDst.root")' &gt;&amp; ${log}
-       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'.picoDst.root")' &gt;&amp; ${log}
-    endif
-  end
+#  foreach input ( ${filelist} )
+#    echo ${input} | grep ':'
+#    if (! $?) then
+#      set dir      = `echo ${input} | awk -F\: '{print $1}'`
+#      set tag      = `echo ${input} | awk -F\: '{print $2}'`
+#    else
+#      set dir = `dirname ${input}`;
+#      set tag = `basename ${input} .picoDst.root`;
+#    endif
+#    set log = ${tag}B.log
+##  if (-r ${log}) exit 0;
+#    if (! -r "${tag}.femtoDst.root") then
+##       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'/*'${tag}'*.picoDst.root")' &gt;&amp; ${log}
+#       root.exe -q -b -x 'femtoDst.C(1e8,"'${dir}'/'${tag}'.picoDst.root")' &gt;&amp; ${log}
+#    endif
+#  end
+  set tag = `basename $PWD`_${JOBINDEX}
+  set log = ${tag}B.log
+  set femtoRoot = ${tag}.femtoDst.root
+  if (-r ${log}) exit 0;
+  root.exe -q -b -x 'femtoDst.C(1e8,"'${FILELIST}'","'${femtoRoot}'")' &gt;&amp; ${log}
         </command>
     <ResourceUsage>
       <Priority>99</Priority>
