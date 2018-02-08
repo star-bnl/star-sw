@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.48 2015/05/13 17:06:13 ullrich Exp $
+ * $Id: StEvent.h,v 2.49 2018/02/08 17:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.49  2018/02/08 17:36:26  ullrich
+ * Changed for new EPD classes.
+ *
  * Revision 2.48  2015/05/13 17:06:13  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -185,6 +188,7 @@ class StSsdHitCollection;
 class StSstHitCollection;
 class StEtrHitCollection;
 class StEmcCollection;
+class StEpdCollection;
 class StFmsCollection;
 class StRichCollection;
 class StRpsCollection;
@@ -273,7 +277,8 @@ public:
     const StPxlHitCollection*           pxlHitCollection() const;
     StIstHitCollection*                 istHitCollection();
     const StIstHitCollection*           istHitCollection() const;
-    
+    StEpdCollection*                    epdCollection();
+    const StEpdCollection*              epdCollection() const;
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
     StL1Trigger*                        l1Trigger();
@@ -346,6 +351,7 @@ public:
     void setPxlHitCollection(StPxlHitCollection*);
     void setIstHitCollection(StIstHitCollection*);
     void setEmcCollection(StEmcCollection*);
+    void setEpdCollection(StEpdCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRichCollection(StRichCollection*);
     void setRpsCollection(StRpsCollection*);
@@ -369,7 +375,7 @@ public:
     void removePsd(StPsd*);
     void addHitCollection(StSPtrVecHit* p, const Char_t *name);
     void removeHitCollection(const Char_t *name);
-    
+
     virtual Bool_t Notify();
     
 protected:
@@ -377,12 +383,13 @@ protected:
     static  TString          mCvsTag;
     void    Split();
      int    IsMain() const 	{return 1;}
+    
 private:
     StEvent& operator=(const StEvent&);
     StEvent(const StEvent&);
     void initToZero();
     
-    ClassDef(StEvent,5)
+    ClassDef(StEvent,6)
 };
 #endif
 

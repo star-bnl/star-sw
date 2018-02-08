@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.48 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.49 2018/02/08 17:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.49  2018/02/08 17:36:26  ullrich
+ * Changed for new EPD classes.
+ *
  * Revision 2.48  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -268,7 +271,9 @@
 #include "StTofData.h"
 #include "StTofRawData.h"
 #include "StBTofHit.h"
+#include "StEpdHit.h"
 #include "StBTofCollection.h"
+#include "StEpdCollection.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTpcHit.h"
 #include "StTpcHitCollection.h"
