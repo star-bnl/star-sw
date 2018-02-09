@@ -85,6 +85,7 @@ end
 foreach d (`ls -1d 1*`)
   cd $d; 
   if (! -r Chain.log) then
+  ln -s ../../.sl* .
   root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
   endif
   cd -;
@@ -253,15 +254,16 @@ end
 ================================================================================
 Femto
 #set DIR = "~/Pico"
+#set DIR = "/gpfs01/star/pwg/fisyak/Pico"
+#set DIR = "/gpfs01/star/pwg_tasks/hf03/Pico"
 set DIR = "/gpfs02/eic/ayk/STAR/reco/Pico"
 foreach dayd (`ls -1dr ${DIR}/2016/???`)
   set day = `basename ${dayd}`;
   cd ~/Femto/2016/
   if (! -d ${day}) mkdir ${day}
   cd  ${day}
-  foreach d ( `ls -1d ${DIR}/2016/${day}/*` )
+  foreach d ( `ls -1d ${DIR}/2016/${day}/17*` )
     set b = `basename $d`; if (! -d ${b}) mkdir -p ${b}; cd ${b};
-    if ("${b}" == "17076002") continue;
     pwd
     FemtoDST.pl
     if ( ! $? ) then

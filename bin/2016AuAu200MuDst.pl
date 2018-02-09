@@ -6,7 +6,7 @@ if ($#ARGV < 0) {
   exit 0;
 }
 my $debug = 0;
-my $day = $ARGV[0];
+my $day = $ARGV[0]; print "requested day = $day\n" if ($debug);
 my $trigger = "";
 if ($day <= 130) {
   $trigger = "AuAu_200_production_2016";
@@ -72,22 +72,13 @@ open(In, "$TriggerFile") or die "Can't open $TriggerFile";
 while (my $line = <In>) { 
   chomp($line);
   my ($file,$events) = split(":",$line);
-  my $file = File::Basename::dirname($line);
-#  my $events = File::Basename::basename($line);
-#  my @words = split('/',$file);
+  print "$line => $file with $events events\n" if ($debug);
+  my @words = split('/',$file);
   my $year = int $words[7];
   my $dayr = int $words[8]; 
   if ($dayr ne $day) {next;}
   my $run =  int $words[9]; 
-#  if ($run < 17062047 or
-#      17065002 <= $run && $run <= 17068053 or
-#      17063041 <= $run && $run <= 17063043) {next;}
-#  if ($run =~ $BadRuns) {next;}
-#  my $year = int $run/1000000;
-#  my $day = int $run/1000 - 1000 * $year;
   print "run = $run year = $year day = $day \n" if ($debug);
-#  die;
-#  print "run = $run\n";
   if ($run != $OldRun) {$i = 1; $OldRun = $run;}
   else                 {$i++;}
 #  if ($i%20 != 1) {next;}
@@ -119,3 +110,6 @@ while (my $line = <In>) {
   }
 }
 close (In);
+
+
+# awk -F\: 'BEGIN{n= 0}{n += $122}END{printf("%7.3fB\n", n/1.e9)}' AuAu_200_production_2016.txt
