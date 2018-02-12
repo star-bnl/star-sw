@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.33 2018/02/07 14:45:14 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.34 2018/02/12 20:15:06 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.34  2018/02/12 20:15:06  akio
+ * fixing typo
+ *
  * Revision 1.33  2018/02/07 14:45:14  akio
  * Update for faster DB tables
  *
@@ -357,7 +360,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  mmGain = new fmsGain_st* [mMaxDetectorId+1]();	  
 	  for(Int_t i=0; i<2500; i++){
 	      Int_t d=mGainB[0].detectorId[i];
-	      Int_t c=mGainB[9].ch[i];
+	      Int_t c=mGainB[0].ch[i];
+	      if(d==0 && c==0) continue;
 	      if(d<0 || d>mMaxDetectorId){
 		  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainB detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
 		  continue;
@@ -465,6 +469,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  for(Int_t i=0; i<2500; i++){
 	      Int_t d=mGainCorrectionB[0].detectorId[i];
 	      Int_t c=mGainCorrectionB[0].ch[i];
+	      if(d==0 && c==0) continue;
 	      if(d<0 || d>mMaxDetectorId){
 		  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
 		  continue;
@@ -572,6 +577,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  for(Int_t i=0; i<2500; i++){
 	      Int_t d=mBitShiftGainB[0].detectorId[i];
 	      Int_t c=mBitShiftGainB[0].ch[i];
+	      if(d==0 && c==0) continue;
 	      if(d<0 || d>mMaxDetectorId){
 		  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsBitShiftGainB detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
 		  continue;
@@ -1536,11 +1542,13 @@ void StFmsDbMaker::dumpFmsGain(const Char_t* filename) {
 	for(int d=0; d<mMaxDetectorId; d++){
 	    if(mmGain[d]){
 		for(int c=0; c<maxChannel(d); c++){
-		    Int_t d=mmGain[d][c].detectorId;
+		    Int_t dd=mmGain[d][c].detectorId;
 		    Int_t cc=mmGain[d][c].ch;
 		    if(cc>0){
 			fprintf(fp,"%5d%6d%6d%8.3f\n",
-				i,d,cc,getGain(d,cc));
+				i,dd,cc,getGain(d,cc));
+			printf("%5d%6d%6d%8.3f\n",
+			       i,dd,cc,getGain(d,cc));
 			i++;
 		    }
 		}
@@ -1560,11 +1568,11 @@ void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
         for(int d=0; d<mMaxDetectorId; d++){
             if(mmGainCorrection[d]){
                 for(int c=0; c<maxChannel(d); c++){
-		    Int_t d=mmGainCorrection[d][c].detectorId;
+		    Int_t dd=mmGainCorrection[d][c].detectorId;
 		    Int_t cc=mmGainCorrection[d][c].ch;
 		    if(cc>0){
 			fprintf(fp,"%5d%6d%6d%8.3f\n",
-				i,d,cc,getGainCorrection(d,cc));
+				i,dd,cc,getGainCorrection(d,cc));
 			i++;
 		    }
 		}
@@ -1584,11 +1592,11 @@ void StFmsDbMaker::dumpFmsBitShiftGain(const Char_t* filename) {
         for(int d=0; d<mMaxDetectorId; d++){
             if(mmBitShiftGain[d]){
                 for(int c=0; c<maxChannel(d); c++){
-                    Int_t d=mmBitShiftGain[d][c].detectorId;
+                    Int_t dd=mmBitShiftGain[d][c].detectorId;
                     Int_t cc=mmBitShiftGain[d][c].ch;
                     if(cc>0){
-                        fprintf(fp,"%5d%6d%6d%4df\n",
-                                i,d,cc,getBitShiftGain(d,cc));
+                        fprintf(fp,"%5d%6d%6d%4d\n",
+                                i,dd,cc,getBitShiftGain(d,cc));
 			i++;
                     }
 		}
