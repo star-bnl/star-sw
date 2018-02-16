@@ -3,6 +3,11 @@
 #include "StDetectorDbMaker.h"
 #include "TEnv.h"
 #include "TF1.h"
+#include "TMath.h"
+#include "TString.h"
+#include "Math/SMatrix.h"
+using namespace ROOT::Math;
+
 #include "TCernLib.h"
 #include "St_db_Maker/St_db_Maker.h"
 #if 0
@@ -26,7 +31,7 @@
     for (Int_t i = 0; i < table->GetNRows(); i++, s++) {	      \
       if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;}   \
     }								      \
-  } 
+  }
 //___________________Debug Print out  _____________________________________________________________
 void PrintTable(const Char_t *str, TTable *table) {
   TDatime t[2];
@@ -34,9 +39,9 @@ void PrintTable(const Char_t *str, TTable *table) {
   if (St_db_Maker::GetValidity(table,t) > 0) {
     Int_t Nrows = table->GetNRows();
     LOG_WARN << "St_" << str << "C::instance found table " << table->GetName()
-	     << " with NRows = " << Nrows << " in db" << endm;
+     << " with NRows = " << Nrows << " in db" << endm;
     LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
-	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     if (table->InheritsFrom("St_tpcCorrection")) {
       St_tpcCorrection *t = (St_tpcCorrection *) table;
       tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
@@ -58,7 +63,7 @@ void PrintTable(const Char_t *str, TTable *table) {
 static Int_t _debug = 0;
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
-StDetectorDbFTPCGas* StDetectorDbFTPCGas::fgInstance = 0; 
+StDetectorDbFTPCGas* StDetectorDbFTPCGas::fgInstance = 0;
 #include "St_ftpcGasSystemC.h"
 MakeChairInstance(ftpcGasSystem,Calibrations/ftpc/ftpcGasSystem);
 #include "St_ftpcGasOutC.h"
@@ -107,16 +112,16 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   else {
     switch  (cor->type) {
     case 10:// ADC correction offset + poly for ADC
-    case 11:// ADC correction offset + poly for log(ADC) and |Z|  
-    case 12:// ADC correction offset + poly for log(ADC) and TanL    
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|
+    case 12:// ADC correction offset + poly for log(ADC) and TanL
       X = TMath::Log(x);      break;
-    case 1: // Tchebyshev [-1,1] 
+    case 1: // Tchebyshev [-1,1]
       if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
       break;
     case 2: // Shifted TChebyshev [0,1]
       if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
       break;
-    case 3: 
+    case 3:
       if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
       else                                       X = TMath::Log(1. - TMath::Abs(x));
       break;
@@ -139,7 +144,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0;
   TF1 *f = 0;
   switch (cor->type) {
-  case 1: // Tchebyshev [-1,1] 
+  case 1: // Tchebyshev [-1,1]
     T0 = 1;
     Sum = cor->a[0]*T0;
     if (N == 1) break;
@@ -184,22 +189,22 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 1100:
   case 1200:
   case 1300:
-      if (cor->type == 1000) {
-	if (! f1000) f1000 = new TF1("f1000","gaus(9)+pol0(3)"); 
-	f = f1000;
-      } else if (cor->type == 1100) {
-	if (! f1100) f1100 = new TF1("f1100","gaus+pol1(3)"); 
-	f = f1100;
-      } else if (cor->type == 1200) {
-	if (! f1200) f1200 = new TF1("f1200","gaus+pol2(3)"); 
-	f = f1200;
-      } else if (cor->type == 1300) {
-	if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)"); 
-	f = f1300;
-      }
-      assert(f);
-      f->SetParameters(cor->a);
-      Sum = f->Eval(X);
+    if (cor->type == 1000) {
+      if (! f1000) f1000 = new TF1("f1000","gaus(9)+pol0(3)");
+      f = f1000;
+    } else if (cor->type == 1100) {
+      if (! f1100) f1100 = new TF1("f1100","gaus+pol1(3)");
+      f = f1100;
+    } else if (cor->type == 1200) {
+      if (! f1200) f1200 = new TF1("f1200","gaus+pol2(3)");
+      f = f1200;
+    } else if (cor->type == 1300) {
+      if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)");
+      f = f1300;
+    }
+    assert(f);
+    f->SetParameters(cor->a);
+    Sum = f->Eval(X);
     break;
   default: // polynomials
     Sum = cor->a[N-1];
@@ -246,7 +251,7 @@ St_TpcCurrentCorrectionC *St_TpcCurrentCorrectionC::instance() {
   if (fgInstance) return fgInstance;
   St_tpcCorrection *table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcCurrentCorrectionX");
   if (! table)      table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcCurrentCorrection");
-  assert(table);	  DEBUGTABLE(tpcCorrection);	
+  assert(table);	  DEBUGTABLE(tpcCorrection);
   fgInstance = new St_TpcCurrentCorrectionC(table);
   return fgInstance;
 }
@@ -268,13 +273,13 @@ ClassImp(St_MDFCorrectionC);
 St_MDFCorrectionC *St_MDFCorrectionC::fgMDFCorrectionC = 0;
 //____________________________________________________________________
 St_MDFCorrectionC::St_MDFCorrectionC(St_MDFCorrection *table) : TChair(table), fFunc(0) {
-  UInt_t N = table->GetNRows(); 
-  fFunc = new TF1*[N]; 
+  UInt_t N = table->GetNRows();
+  fFunc = new TF1*[N];
   memset(fFunc, 0, N*sizeof(TF1*));
 }
 //____________________________________________________________________
 St_MDFCorrectionC::~St_MDFCorrectionC() {
-  UInt_t N = Table()->GetNRows(); 
+  UInt_t N = Table()->GetNRows();
   for (UInt_t i = 0; i < N; i++) {SafeDelete(fFunc[i]);}
   delete [] fFunc;
 }
@@ -341,7 +346,7 @@ Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
   for (Int_t v = 0; v < NVariables(k); v++) {
     xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMin(k)[v]+0.999*(XMax(k)[v]-XMin(k)[v]), x[v]));
   }
-  Double_t returnValue = fFunc[k]->GetSave(xx); 
+  Double_t returnValue = fFunc[k]->GetSave(xx);
   return returnValue;
 }
 //____________________________________________________________________
@@ -377,7 +382,7 @@ Double_t St_MDFCorrectionC::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   Double_t p2  = 0;
   Double_t p3  = 0;
   Double_t r   = 0;
-  
+
   switch(p) {
   case 1:
     r = 1;
@@ -429,12 +434,108 @@ MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
 #include "St_tpcPadPlanesC.h"
+#include "St_itpcPadPlanesC.h"
+#include "St_tpcPadConfigC.h"
+tpcPadConfig_st *St_tpcPadConfigC::Struct(Int_t i)                        {return ((St_tpcPadConfig*) Table())->GetTable(i);}
+UInt_t           St_tpcPadConfigC::getNumRows()                	          {return GetNRows();}
+UChar_t          St_tpcPadConfigC::iTpc(Int_t sector)                     {UChar_t iTPC = Struct()->itpc[sector-1];  return iTPC;}
+Int_t 	         St_tpcPadConfigC::padRows(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->padRows()               :St_itpcPadPlanesC::instance()->padRows();}
+Int_t 	         St_tpcPadConfigC::innerPadRows(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerPadRows() 	   :St_itpcPadPlanesC::instance()->innerPadRows();}
+Int_t 	         St_tpcPadConfigC::innerPadRows48(Int_t sector) 	  {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerPadRows48()	   :St_itpcPadPlanesC::instance()->innerPadRows48();}
+Int_t 	         St_tpcPadConfigC::innerPadRows52(Int_t sector) 	  {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerPadRows52()	   :St_itpcPadPlanesC::instance()->innerPadRows52();}
+Int_t 	         St_tpcPadConfigC::outerPadRows(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerPadRows() 	   :St_itpcPadPlanesC::instance()->outerPadRows();}
+Int_t 	         St_tpcPadConfigC::superInnerPadRows(Int_t sector)        {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->superInnerPadRows()     :St_itpcPadPlanesC::instance()->superInnerPadRows();}
+Int_t 	         St_tpcPadConfigC::superOuterPadRows(Int_t sector)        {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->superOuterPadRows()     :St_itpcPadPlanesC::instance()->superOuterPadRows();}
+Double_t 	 St_tpcPadConfigC::innerSectorPadWidth(Int_t sector)      {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorPadWidth()   :St_itpcPadPlanesC::instance()->innerSectorPadWidth();}
+Double_t 	 St_tpcPadConfigC::innerSectorPadLength(Int_t sector)     {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorPadLength()  :St_itpcPadPlanesC::instance()->innerSectorPadLength();}
+Double_t 	 St_tpcPadConfigC::innerSectorPadPitch(Int_t sector)      {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorPadPitch()   :St_itpcPadPlanesC::instance()->innerSectorPadPitch();}
+Double_t 	 St_tpcPadConfigC::innerSectorRowPitch1(Int_t sector)     {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorRowPitch1()  :St_itpcPadPlanesC::instance()->innerSectorRowPitch1();}
+Double_t 	 St_tpcPadConfigC::innerSectorRowPitch2(Int_t sector)     {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorRowPitch2()  :St_itpcPadPlanesC::instance()->innerSectorRowPitch2();}
+Double_t 	 St_tpcPadConfigC::firstPadRow(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->firstPadRow() 	   :St_itpcPadPlanesC::instance()->firstPadRow();}
+Double_t 	 St_tpcPadConfigC::firstOuterSectorPadRow(Int_t sector)   {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->firstOuterSectorPadRow():St_itpcPadPlanesC::instance()->firstOuterSectorPadRow();}
+Double_t 	 St_tpcPadConfigC::lastOuterSectorPadRow(Int_t sector)    {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->lastOuterSectorPadRow() :St_itpcPadPlanesC::instance()->lastOuterSectorPadRow();}
+Double_t 	 St_tpcPadConfigC::firstRowWidth(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->firstRowWidth()         :St_itpcPadPlanesC::instance()->firstRowWidth();}
+Double_t 	 St_tpcPadConfigC::lastRowWidth(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->lastRowWidth()          :St_itpcPadPlanesC::instance()->lastRowWidth();}
+Double_t 	 St_tpcPadConfigC::outerSectorPadWidth(Int_t sector)      {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorPadWidth()   :St_itpcPadPlanesC::instance()->outerSectorPadWidth();}
+Double_t 	 St_tpcPadConfigC::outerSectorPadLength(Int_t sector)     {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorPadLength()  :St_itpcPadPlanesC::instance()->outerSectorPadLength();}
+Double_t 	 St_tpcPadConfigC::outerSectorPadPitch(Int_t sector)      {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorPadPitch()   :St_itpcPadPlanesC::instance()->outerSectorPadPitch();}
+Double_t 	 St_tpcPadConfigC::outerSectorRowPitch(Int_t sector)      {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorRowPitch()   :St_itpcPadPlanesC::instance()->outerSectorRowPitch();}
+Double_t 	 St_tpcPadConfigC::outerSectorLength(Int_t sector)        {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorLength()     :St_itpcPadPlanesC::instance()->outerSectorLength();}
+Double_t 	 St_tpcPadConfigC::ioSectorSeparation(Int_t sector)       {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->ioSectorSeparation()    :St_itpcPadPlanesC::instance()->ioSectorSeparation();}
+Double_t 	 St_tpcPadConfigC::innerSectorEdge(Int_t sector) 	  {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorEdge()       :St_itpcPadPlanesC::instance()->innerSectorEdge();}
+Double_t 	 St_tpcPadConfigC::outerSectorEdge(Int_t sector) 	  {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorEdge() 	   :St_itpcPadPlanesC::instance()->outerSectorEdge();}
+Double_t 	 St_tpcPadConfigC::innerSectorPadPlaneZ(Int_t sector)     {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ()  :St_itpcPadPlanesC::instance()->innerSectorPadPlaneZ();}
+Double_t 	 St_tpcPadConfigC::outerSectorPadPlaneZ(Int_t sector)     {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ()  :St_itpcPadPlanesC::instance()->outerSectorPadPlaneZ();}
+Int_t* 	         St_tpcPadConfigC::innerPadsPerRow(Int_t sector) 	  {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerPadsPerRow()       :St_itpcPadPlanesC::instance()->innerPadsPerRow();}
+Int_t* 	         St_tpcPadConfigC::outerPadsPerRow(Int_t sector) 	  {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerPadsPerRow()       :St_tpcPadPlanesC::instance()->outerPadsPerRow();}
+Int_t            St_tpcPadConfigC::padsPerRow(Int_t sector, Int_t row)    {
+  Int_t Ninner = innerPadRows(sector);
+  return (row <= Ninner) ?
+    innerPadsPerRow(sector)[row-1] :
+    outerPadsPerRow(sector)[row-1-Ninner];
+}
+Double_t* 	 St_tpcPadConfigC::innerRowRadii(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->innerRowRadii()         :St_itpcPadPlanesC::instance()->innerRowRadii();}
+Double_t* 	 St_tpcPadConfigC::outerRowRadii(Int_t sector) 	          {return (! iTpc(sector)) ? St_tpcPadPlanesC::instance()->outerRowRadii() 	   :St_itpcPadPlanesC::instance()->outerRowRadii();}
+// taken from StRItpcPadPlane
+Int_t            St_tpcPadConfigC::numberOfRows(Int_t sector)             {return padRows(sector);}
+Int_t            St_tpcPadConfigC::numberOfInnerRows(Int_t sector)        {return innerPadRows(sector);}
+Int_t            St_tpcPadConfigC::numberOfInnerRows48(Int_t sector)      {return innerPadRows48(sector);}
+Int_t            St_tpcPadConfigC::numberOfInnerRows52(Int_t sector)      {return innerPadRows52(sector);}
+Int_t            St_tpcPadConfigC::numberOfOuterRows(Int_t sector)        {return outerPadRows(sector);}
+Bool_t           St_tpcPadConfigC::isRowInRange(Int_t sector, Int_t row)  {return (row >= 1 && row<=numberOfRows(sector)) ? kTRUE: kFALSE;}
+Double_t         St_tpcPadConfigC::radialDistanceAtRow(Int_t sector, Int_t row)       {
+  if (! isRowInRange(sector,row)) return 0;
+  Int_t Ninner = innerPadRows(sector);
+  if ( row<=Ninner ) return innerRowRadii(sector)[row-1];
+  else               return outerRowRadii(sector)[row-1-Ninner];
+}
+Int_t            St_tpcPadConfigC::numberOfPadsAtRow(Int_t sector, Int_t row)       {
+  if (! isRowInRange(sector, row)) return 0;
+  Int_t Ninner = innerPadRows(sector);
+  if ( row<=Ninner ) return innerPadsPerRow(sector)[row-1];
+  return outerPadsPerRow(sector)[row-1-Ninner];
+}
+Double_t         St_tpcPadConfigC::PadWidthAtRow(Int_t sector, Int_t row)       {
+  if (! isRowInRange(sector,row)) return 0;
+  Int_t Ninner = innerPadRows(sector);
+  if ( row<=Ninner) return innerSectorPadWidth(sector);
+  return outerSectorPadWidth(sector);
+}
+Double_t         St_tpcPadConfigC::PadLengthAtRow(Int_t sector, Int_t row)       {
+  if (! isRowInRange(sector,row)) return 0;
+  Int_t Ninner = innerPadRows(sector);
+  if ( row<=Ninner) return innerSectorPadLength(sector);
+  return outerSectorPadLength(sector);
+}
+Double_t         St_tpcPadConfigC::PadPitchAtRow(Int_t sector, Int_t row)       {
+  if (! isRowInRange(sector,row)) return 0;
+  Int_t Ninner = innerPadRows(sector);
+  if ( row<=Ninner) return innerSectorPadPitch(sector);
+  return outerSectorPadPitch(sector);
+}
+Double_t         St_tpcPadConfigC::RowPitchAtRow(Int_t sector, Int_t row)       {
+  if (! isRowInRange(sector,row)) return 0;
+  Int_t Ninner = innerPadRows(sector);
+  if ( row<=numberOfInnerRows48(sector) ) return innerSectorRowPitch1(sector);
+  else if (row>numberOfInnerRows48(sector)&&row<=Ninner) return innerSectorRowPitch2(sector);
+  return outerSectorRowPitch(sector);
+}
+Int_t            St_tpcPadConfigC::indexForRowPad(Int_t sector, Int_t row, Int_t pad)       {
+  if (pad >numberOfPadsAtRow(sector,row)) return -1;
+  Int_t index = 0;
+  Int_t Ninner = innerPadRows(sector);
+  if (row>0 && row<=Ninner )             for (Int_t i=1;i<row;i++) index += numberOfPadsAtRow(sector,i);
+  else
+    if (row>Ninner&&row<=numberOfRows(sector)) for (Int_t i=Ninner+1;i<row;i++)  index += numberOfPadsAtRow(sector,i);
+  index+=pad-1;
+  return index;
+}
 #include "St_TpcAvgPowerSupplyC.h"
 //________________________________________________________________________________
 void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2) {
-  if (St_tpcPadPlanesC::instance()->padRows() != 45) {
-    if (padrow <= St_tpcPadPlanesC::instance()->innerPadRows()) {e1 = e2 = 8; f2 = 0;}
-    else                                                        {e1 = e2 = 9; f2 = 0;}
+  if (St_tpcPadConfigC::instance()->padRows(sector) != 45) {
+    if (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector)) {e1 = e2 = 8; f2 = 0;}
+    else                                                              {e1 = e2 = 9; f2 = 0;}
     return;
   }
   e1 = (sector-1)*19;
@@ -515,7 +616,7 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (TMath::Abs(v2 - v1) <  1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector) ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -535,24 +636,24 @@ Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (v2==v1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector) ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
 //________________________________________________________________________________
 Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
   //  static const Double_t RA[2]        = { 154.484, 81.42}; // Outer/ Inner average Radii
-  //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5}; 
+  //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5};
   // L Inner = 190222, Outer = 347303
   static Float_t Length[8] = {
-    1307.59, //   Channel 1 
-    1650.57, //   Channel 2 
-    1993.54, //   Channel 3 
-    2974.24, //   Channel 4 
-    3324.59, //   Channel 5 
-    3202.42, //   Channel 6 
-    3545.4 , //   Channel 7 
-    4398.53};//   Channel 8 
+    1307.59, //   Channel 1
+    1650.57, //   Channel 2
+    1993.54, //   Channel 3
+    2974.24, //   Channel 4
+    3324.59, //   Channel 5
+    3202.42, //   Channel 6
+    3545.4 , //   Channel 7
+    4398.53};//   Channel 8
 
   return AcCharge(sector,channel)/Length[channel-1];
 }
@@ -588,7 +689,7 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (v2==v1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector) ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -629,11 +730,11 @@ St_TpcPadCorrectionC::St_TpcPadCorrectionC(St_TpcPadCorrection *table) : TChair(
   }
 }
 St_TpcPadCorrectionC::~St_TpcPadCorrectionC() {
-  fgInstance = 0; 
+  fgInstance = 0;
   if (fFunc) {
     Int_t nrows = GetNRows();
-    for (Int_t i = 0; i < nrows; i++) 
-      SafeDelete(fFunc[i]); 
+    for (Int_t i = 0; i < nrows; i++)
+      SafeDelete(fFunc[i]);
     delete [] fFunc;
   }
 }
@@ -645,8 +746,8 @@ StTpcHitErrors *StTpcHitErrors::instance() {
   if (! fgInstance) {
     StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcHitErrors");
     LOG_INFO << "StTpcHitErrors have been instantiated with\n"
-	     << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << "," 
-	     << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endm;
+     << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << ","
+     << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endm;
   }
   return fgInstance;
 }
@@ -663,7 +764,7 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
   */
   Int_t s = 0, r = 0, p = 0;
   if (sec > 12) s = 1;
-  if (row > St_tpcPadPlanesC::instance()->innerPadRows()) r = 1;
+  if (row > St_tpcPadConfigC::instance()->innerPadRows(sec)) r = 1;
   Int_t pitch = s;
   if (iXZ) pitch = 2;
   Double_t Vars[7] = {
@@ -674,7 +775,7 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
     _z,                // 4 => zL
     TMath::Log(AdcL),  // 5 => Adc counts
     xPad};             // 6=> xPad
-  if (s) {// East 
+  if (s) {// East
     Vars[3] = - Vars[3];
     Vars[4] = - Vars[4];
   }
@@ -689,20 +790,31 @@ MakeChairInstance(tpcStatus,Calibrations/tpc/tpcStatus);
 #include "St_TpcAvgCurrentC.h"
 MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
 //________________________________________________________________________________
-Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t row) {
-  if (row <  1 || row > St_tpcPadPlanesC::instance()->padRows()) return -1;
-  if (St_tpcPadPlanesC::instance()->padRows() != 45) {
-    if (row <= St_tpcPadPlanesC::instance()->innerPadRows()) return 1;
-    else return 5;
+Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
+  if (row <  1 || row > St_tpcPadConfigC::instance()->padRows(sector)) return -1;
+  if (St_tpcPadConfigC::instance()->padRows(sector) == 45) {
+    if (row <  3) return 1;
+    if (row <  7) return 2;
+    if (row < 10) return 3;
+    if (row < 14) return 4;
+    if (row < 22) return 5;
+    if (row < 30) return 6;
+    if (row < 38) return 7;
+    return 8;
+  } else if (St_tpcPadConfigC::instance()->padRows(sector) == 72) {
+    // Jim Thomas, mail from 09/27/17
+    if (row < 10) return 1; //  9 shared 1&2
+    if (row < 20) return 2; // 19 shared 2&3
+    if (row < 30) return 3; // 29 shared 3&4
+    if (row < 14 - 13 + 40) return 4;
+    if (row < 22 - 13 + 40) return 5;
+    if (row < 30 - 13 + 40) return 6;
+    if (row < 38 - 13 + 40) return 7;
+    return 9;
+  } else {
+    LOG_ERROR << "St_TpcAvgCurrentC::ChannelFromRow: unknown configuration with no. pad row at sector = " << sector << " = " << St_tpcPadConfigC::instance()->padRows(sector) << endm;
   }
-  if (row <  3) return 1;
-  if (row <  7) return 2;
-  if (row < 10) return 3;
-  if (row < 14) return 4;
-  if (row < 22) return 5;
-  if (row < 30) return 6;
-  if (row < 38) return 7;
-  return 8;
+  return -1;
 }
 //________________________________________________________________________________
 Int_t St_TpcAvgCurrentC::ChannelFromSocket(Int_t socket) {
@@ -737,17 +849,17 @@ Float_t St_TpcAvgCurrentC::AcChargeL(Int_t sector, Int_t channel) {
     return St_TpcAvgPowerSupplyC::instance()->AcChargeL(sector,channel);
   }
   //  static const Double_t RA[2]        = { 154.484, 81.42}; // Outer/ Inner average Radii
-  //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5}; 
+  //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5};
   // L Inner = 190222, Outer = 347303
   static Float_t Length[8] = {
-    1307.59, //   Channel 1 
-    1650.57, //   Channel 2 
-    1993.54, //   Channel 3 
-    2974.24, //   Channel 4 
-    3324.59, //   Channel 5 
-    3202.42, //   Channel 6 
-    3545.4 , //   Channel 7 
-    4398.53};//   Channel 8 
+    1307.59, //   Channel 1
+    1650.57, //   Channel 2
+    1993.54, //   Channel 3
+    2974.24, //   Channel 4
+    3324.59, //   Channel 5
+    3202.42, //   Channel 6
+    3545.4 , //   Channel 7
+    4398.53};//   Channel 8
   return AcCharge(sector,channel)/Length[channel-1];
 }
 //________________________________________________________________________________
@@ -755,7 +867,7 @@ Float_t St_TpcAvgCurrentC::AvCurrent(Int_t sector, Int_t channel) {
   if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
     return St_TpcAvgPowerSupplyC::instance()->AvCurrent(sector,channel);
   }
-  return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ? 
+  return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ?
     Struct()->AvCurrent[8*(sector-1)+channel-1] :     0;
 }
 //________________________________________________________________________________
@@ -763,7 +875,7 @@ Float_t St_TpcAvgCurrentC::AcCharge(Int_t sector, Int_t channel) {
   if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
     return St_TpcAvgPowerSupplyC::instance()->AcCharge(sector,channel);
   }
-  return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ? 
+  return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ?
     Struct()->AcCharge[8*(sector-1)+channel-1] :     0;
 }
 //__________________Calibrations/trg______________________________________________________________
@@ -788,16 +900,16 @@ ClassImp(St_trigDetSumsC);
 #include "St_tss_tssparC.h"
 MakeChairInstance(tss_tsspar,tpc/tsspars/tsspar);
 //________________________________________________________________________________
-Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
+Float_t St_tss_tssparC::gain(Int_t sector, Int_t row) {
   Int_t l = 0;
   Double_t V_nominal = 1390;
   Float_t V = 0;
   Float_t gain = 0;
-  if (row <= St_tpcPadPlanesC::instance()->innerPadRows()) {l = 1; V_nominal = 1170;}
+  if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) {l = 1; V_nominal = 1170;}
   St_tpcGainCorrectionC *gC = St_tpcGainCorrectionC::instance();
   Int_t NRows = gC->GetNRows();
   if (l >= NRows) return gain;
-  V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
   if (V > 0) {
     Double_t v = V - V_nominal;
 #if 0
@@ -805,7 +917,7 @@ Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
     if ( gC->min(l) > -1 && v > -100 && v < 0) {
       if (l == 0) v =   0;
       else        v = -70;
-    } else 
+    } else
 #endif
     if (v < gC->min(l) || v > gC->max(l)) return gain;
     if (gC->min(l) < -150) {
@@ -837,7 +949,7 @@ MakeChairInstance(MagFactor,RunLog/MagFactor);
 MakeChairInstance(starClockOnl,RunLog/onl/starClockOnl);
 //________________________________________________________________________________
 starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
-  starClockOnl_st *s = ((St_starClockOnl* ) instance()->Table())->GetTable(); 
+  starClockOnl_st *s = ((St_starClockOnl* ) instance()->Table())->GetTable();
   Int_t N =  getNumRows(); // with i < 0 look for positive frequency
   if (i >= 0 && i < N) return s + i;
   for (Int_t j = 0; j < N; j++, s++) if (s->frequency > 0) break;
@@ -855,15 +967,15 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sector) {
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
   if(sector < 1 || sector > 24 || getNumRows() == 0){
-    LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for " 
-	     << "sector= " << sector << " getNumRows()=" << getNumRows() << endm;
+    LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for "
+     << "sector= " << sector << " getNumRows()=" << getNumRows() << endm;
     return MASK;
   }
   MASK = mask(((sector + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
   if( sector % 2 == 0){ // if its even relevent bits are 6-11
     MASK = MASK >> 6;
   }
-  // Otherwise want lower 6 bits    
+  // Otherwise want lower 6 bits
   MASK &= 0x000003F; // Mask out higher order bits
   if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
   return MASK;
@@ -895,7 +1007,7 @@ map<Int_t,Float_t> StDetectorDbTriggerID::getTotalPrescales() {
     Int_t trgId = getDsmPrescalesTrgId(irow);
     value[trgId] = Float_t(getDsmPrescalesDsmPrescale(irow));
   }
-  
+
   for (UInt_t irow=0; irow<getL0NumRows(); ++irow) {
     Int_t trgId = getL0OfflineTrgId(irow);
     map<Int_t,Float_t>::iterator p=value.find(trgId);
@@ -917,7 +1029,7 @@ map<Int_t,Float_t> StDetectorDbTriggerID::getTotalPrescales() {
       }
     }
     map<Int_t,Float_t>::iterator p=value.find(trgId);
-    
+
     if (p != value.end()) {
       (*p).second *= Float_t(getPs(irow));
     }
@@ -925,13 +1037,13 @@ map<Int_t,Float_t> StDetectorDbTriggerID::getTotalPrescales() {
       value[trgId] = Float_t(getPs(irow));
     }
   }
-  
+
   // Now deal with L3Expanded
   for (UInt_t irow=0; irow<getTrigL3ExpandedNumRows(); ++irow) {
     Int_t oldtid = getTrigL3ExpandedL3TrgId(irow);
     Int_t newtid = getTrigL3ExpandedL3ExpandedTrgId(irow);
     Float_t l2ps = getTrigL3ExpandedL2Ps(irow);
-    
+
     map<Int_t,Float_t>::iterator p = value.find(oldtid);
     if (p!= value.end()) {
       value[newtid] = ((*p).second)*l2ps;
@@ -939,7 +1051,7 @@ map<Int_t,Float_t> StDetectorDbTriggerID::getTotalPrescales() {
     else {
       value[newtid] = l2ps;
     }
-    
+
   }
   return value;
 }
@@ -966,38 +1078,40 @@ MakeChairInstance(tpcDimensions,Geometry/tpc/tpcDimensions);
 #include "St_tpcWirePlanesC.h"
 MakeChairInstance(tpcWirePlanes,Geometry/tpc/tpcWirePlanes);
 #include "St_tpcSectorPositionC.h"
-ClassImp(St_tpcSectorPositionC); 
-St_tpcSectorPositionC *St_tpcSectorPositionC::fgInstance = 0; 
+ClassImp(St_tpcSectorPositionC);
+St_tpcSectorPositionC *St_tpcSectorPositionC::fgInstance = 0;
 St_tpcSectorPosition  *St_tpcSectorPositionC::fgTables[24] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-St_tpcSectorPositionC *St_tpcSectorPositionC::instance() { 
-  if (fgInstance) return fgInstance;					
+St_tpcSectorPositionC *St_tpcSectorPositionC::instance() {
+  if (fgInstance) return fgInstance;
   TDataSet *tpc = StMaker::GetChain()->GetDataBase("Geometry/tpc");
   assert(tpc);
   for (Int_t sec = 1; sec <= 24; sec++) {
     TString path = Form("Sector_%02i/tpcSectorPosition",sec);
-    fgTables[sec-1] = (St_tpcSectorPosition  *) tpc->Find(path.Data()); 
-    if (! fgTables[sec-1]) {							
-      LOG_WARN << "St_tpcSectorPositionC::instance " << tpc->GetTitle() << "/" << path.Data() 
-	       << "\twas not found" << endm; 
-      assert(fgTables[sec-1]);							
-    }						
-    {						
-      TDatime t[2];							
-      St_db_Maker::GetValidity(fgTables[sec-1],t);					        
-      Int_t Nrows = fgTables[sec-1]->GetNRows();					
-      LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName() 
-	       << " with NRows = " << Nrows << " in db" << endm;		
-      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
-	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; 
-      fgTables[sec-1]->Print(0,1);		
+    fgTables[sec-1] = (St_tpcSectorPosition  *) tpc->Find(path.Data());
+    if (! fgTables[sec-1]) {
+      LOG_WARN << "St_tpcSectorPositionC::instance " << tpc->GetTitle() << "/" << path.Data()
+       << "\twas not found" << endm;
+      assert(fgTables[sec-1]);
     }
-  }			
-  fgInstance = new St_tpcSectorPositionC();				
-  return fgInstance;							
+    {
+      TDatime t[2];
+      St_db_Maker::GetValidity(fgTables[sec-1],t);
+      Int_t Nrows = fgTables[sec-1]->GetNRows();
+      LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName()
+	       << " with NRows = " << Nrows << " in db" << endm;
+      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+      fgTables[sec-1]->Print(0,1);
+    }
+  }
+  fgInstance = new St_tpcSectorPositionC();
+  return fgInstance;
 }
 #include "St_tpcFieldCageC.h"
 MakeChairInstance(tpcFieldCage,Geometry/tpc/tpcFieldCage);
 MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
+MakeChairInstance(itpcPadPlanes,Geometry/tpc/itpcPadPlanes);
+MakeChairInstance(tpcPadConfig,Geometry/tpc/tpcPadConfig);
 #include "St_tpcGlobalPositionC.h"
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
@@ -1018,6 +1132,7 @@ MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
 #include "StSstSurveyC.h"
+MakeChairInstance2(Survey,StoscOnTpc,Geometry/sst/oscOnTpc);
 MakeChairInstance2(Survey,StsstOnOsc,Geometry/sst/sstOnOsc);
 MakeChairInstance2(Survey,StsstLadderOnSst,Geometry/sst/sstLadderOnSst);
 MakeChairInstance2(Survey,StsstSensorOnLadder,Geometry/sst/sstSensorOnLadder);
@@ -1033,7 +1148,7 @@ MakeChairInstance2(Survey,StGmtOnTpc,Geometry/gmt/GmtOnTpc);
 MakeChairInstance2(Survey,StGmtOnModule,Geometry/gmt/GmtOnModule);
 //____________________________Geometry/ist____________________________________________________
 #include "StIstSurveyC.h"
-MakeChairInstance2(Survey,StidsOnTpc,Geometry/ist/idsOnTpc);                      
+MakeChairInstance2(Survey,StidsOnTpc,Geometry/ist/idsOnTpc);
 MakeChairInstance2(Survey,StpstOnIds,Geometry/ist/pstOnIds);
 MakeChairInstance2(Survey,StistOnPst,Geometry/ist/istOnPst);
 MakeChairInstance2(Survey,StLadderOnIst,Geometry/ist/istLadderOnIst);
@@ -1051,53 +1166,119 @@ MakeChairInstance(pxlControl,Geometry/pxl/pxlControl);
 #include "St_pxlSensorTpsC.h"
 MakeChairInstance(pxlSensorTps,Geometry/pxl/pxlSensorTps);
 //________________________________________________________________________________
-void St_SurveyC::Normalize(TGeoHMatrix &rot) {
+St_SurveyC::St_SurveyC(St_Survey *table) : TChair(table), fRotations(0)  {
+  UInt_t N = getNumRows();
+  fRotations = new TGeoHMatrix*[N];
+  for (UInt_t i = 0; i < N; i++) {
+    fRotations[i] = new TGeoHMatrix;
+    TGeoHMatrix &rot = *fRotations[i];
+    if (! i) rot.SetName(Table()->GetName());
+    else     rot.SetName(Form("%s_%i",Table()->GetName(),i));
+    rot.SetRotation(Rotation(i));
+    rot.SetTranslation(Translation(i));
+    Normalize(rot);
+  }
+}
+//________________________________________________________________________________
+St_SurveyC::~St_SurveyC() {
+  if (fRotations) {
+    for (UInt_t i = 0; i < getNumRows(); i++) {
+      SafeDelete(fRotations[0]);
+    }
+    SafeDelete(fRotations);
+  }
+}
+//________________________________________________________________________________
+Double_t St_SurveyC::IsOrtogonal(const Double_t *r) {
+// Perform orthogonality test for rotation.
+  Double_t cmax = 0;
+  Double_t cij;
+  for (Int_t i=0; i<2; i++) {
+    for (Int_t j=i+1; j<3; j++) {
+      // check columns
+      cij = TMath::Abs(r[i]*r[j]+r[i+3]*r[j+3]+r[i+6]*r[j+6]);
+      if (cij>1E-4) cmax = cij;
+      // check rows
+      cij = TMath::Abs(r[3*i]*r[3*j]+r[3*i+1]*r[3*j+1]+r[3*i+2]*r[3*j+2]);
+      if (cij>cmax) cmax = cij;
+    }
+  }
+  return cmax;
+}
+//________________________________________________________________________________
+void St_SurveyC::Normalize(TGeoHMatrix &R) {
 #if 0
-  Double_t *rA = rot.GetRotationMatrix();
-  Double_t r[9] = {rA[0], rA[3], rA[6],
-		   rA[1], rA[4], rA[7],
-		   rA[2], rA[5], rA[8]};
-  TGeoMatrix::Normalize(&r[0]);
-  TGeoMatrix::Normalize(&r[3]);
-  TGeoMatrix::Normalize(&r[6]);
-  Double_t rB[9] = {r[0], r[3], r[6],
-		    r[1], r[4], r[7],
-		    r[2], r[5], r[8]};
-  rot.SetRotation(rB);
-#else
-  Double_t normfactor = rot.Determinant();
-  if (normfactor <= 1E-10) return;
-  if (TMath::Abs(normfactor)-1 <= 1e-10) return;
-  normfactor = TMath::Power(TMath::Abs(normfactor), -1./3);
-  TCL::vscale(rot.GetRotationMatrix(), normfactor, rot.GetRotationMatrix(), 9);
+  Double_t det = R.Determinant();
+  Double_t ort = IsOrtogonal(R.GetRotationMatrix());
+  static Double_t eps = 1e-7;
+  if ( TMath::Abs(TMath::Abs(det) - 1) < eps && ort < eps) return;
+  LOG_INFO << "St_SurveyC::Normalize matrix " << R.GetName()
+   << Form(" has determinant-1 = %10.7f\tortoganality %10.7f",TMath::Abs(det)-1,ort) << endm;
+  cout << "Old\t"; R.Print();
+  const Double_t *r = R.GetRotationMatrix();
+  SMatrix<double,3,3> A(r,9); //   cout << "A: " << endl << A << endl;
+  SMatrix<double,3,3> B = A;
+  A.Det(det); //  cout << "Determinant - 1: " << det-1 << endl;  cout << "A again: " << endl << A << endl;
+  A = B;
+  A.Invert();//   cout << "A^-1: " << endl << A << endl;
+  // check if this is really the inverse:  cout << "A^-1 * B: " << endl << A * B << endl;
+  // the Babylonian method for extracting the square root of a matrix :  Q_{n+1} = 2 * M * ((Q_{n}^{-1} * M) + (M^{T} *Q_{n}))^{-1}
+  SMatrix<double,3,3> Qn1;
+  SMatrix<double,3,3> Qn2;
+  SMatrix<double,3,3> M = B;
+  SMatrix<double,3,3> Qn = M;
+  Int_t ifail = 0;
+  Int_t N = 0;
+  Qn.Det(det); if (_debug) {LOG_INFO << "N " << N << "\tQn Determinant - 1: " << Form("%15.5g",det-1) << endm;}
+  Qn = M;
+  while (TMath::Abs(TMath::Abs(det) - 1) > eps) {
+    SMatrix<double,3> QnInv = Qn.Inverse(ifail);
+    if (ifail) {
+      LOG_ERROR << "St_SurveyC::Normalize:: Qn inversion failed" << endm;
+      break;
+    }
+    SMatrix<double,3,3> C1 = QnInv * M;
+    SMatrix<double,3,3> C2 = Transpose(M) * Qn;
+    SMatrix<double,3,3> C  = C1 + C2;
+    SMatrix<double,3,3> CInv = C.Inverse(ifail);
+    if (ifail) {
+      LOG_ERROR << "St_SurveyC::Normalize:: C inversion failed" << endm;
+      break;
+    }
+    Qn1 = 2 * M * CInv;
+    Qn2 = Qn1;
+    N++;
+    Qn2.Det(det);  if (_debug) {LOG_INFO << "N " << N << "\tQn2 Determinant - 1: " << Form("%15.5g",det-1) << endm;}
+    if (N > 13) break;
+    Qn = Qn1;
+    if (_debug) {LOG_INFO << "Qn:" << endl << Qn << endm;}
+  }
+  R.SetRotation(Qn.Array()); cout << "New\t"; R.Print();
+  if (_debug) {
+    LOG_INFO << "Determinant-1 = " << R.Determinant()-1 << endm;
+    const Double_t *rr = R.GetRotationMatrix();
+    LOG_INFO << "Ortogonality " << IsOrtogonal(rr) << endm;
+  }
 #endif
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
-  static TGeoHMatrix rot;
-  rot.SetName(Table()->GetName());
-  rot.SetRotation(Rotation(i));
-  rot.SetTranslation(Translation(i));
-  Normalize(rot);
-  return *&rot;
+  assert(fRotations || fRotations[i]);
+  return *fRotations[i];
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix4Id(Int_t id) {
-  static TGeoHMatrix rot("UnKnown");
   for (UInt_t i = 0; i < getNumRows(); i++) {
     if (Id(i) == id) {
-      rot = GetMatrix(i);
-      rot.SetName(Form("%s_%i",Table()->GetName(),id));
-      //      Table()->Print(i,1);
-      return *&rot;
+      return GetMatrix(i);
     }
   }
-  cout << "St_SurveyC::GetMatrix4Id(" << id << ") entry has not been found" << endl;
+  LOG_INFO  << "St_SurveyC::GetMatrix4Id(" << id << ") entry has not been found" << endm;
   const TTable *table = Table();
   Int_t Nrows = table->GetNRows();
   table->Print(0,Nrows);
   assert(0);
-  return *&rot;
+  return GetMatrix(0);
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrixR(Int_t i) {
@@ -1115,8 +1296,8 @@ const TGeoHMatrix &St_SurveyC::GetMatrixR(Int_t i) {
 void St_SurveyC::GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i) {
   phi = the = psi = 0;  // Korn 14.10-5
   Double_t cosDelta = (r00(i) + r11(i) + r22(i) - 1)/2; // (Tr(R) - 1)/2
-  Double_t Delta = TMath::ACos(cosDelta);      
-  if (Delta < 0) Delta += 2*TMath::Pi();  
+  Double_t Delta = TMath::ACos(cosDelta);
+  if (Delta < 0) Delta += 2*TMath::Pi();
   Double_t sinDelta2 = TMath::Sin(Delta/2);
   if (TMath::Abs(sinDelta2) < 1.e-7) return;
   Double_t c[3] = {
@@ -1137,25 +1318,25 @@ void St_SurveyC::GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i)
 //________________________________________________________________________________
 St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   TString Name(name);
-  if (Name == "SvtOnGlobal")            return (St_SurveyC   *) StSvtOnGlobal::instance();	    
-  if (Name == "ShellOnGlobal")        	return (St_SurveyC   *) StSvtShellOnGlobal::instance();  	
-  if (Name == "LadderOnSurvey")       	return (St_SurveyC   *) StSvtLadderOnSurvey::instance(); 	
-  if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();  	
-  if (Name == "WaferOnLadder")        	return (St_SurveyC   *) StSvtWaferOnLadder::instance();  	
-  if (Name == "SsdOnGlobal")          	return (St_SurveyC   *) StSsdOnGlobal::instance();	
-  if (Name == "SsdSectorsOnGlobal")   	return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();	
+  if (Name == "SvtOnGlobal")            return (St_SurveyC   *) StSvtOnGlobal::instance();
+  if (Name == "ShellOnGlobal")        	return (St_SurveyC   *) StSvtShellOnGlobal::instance();
+  if (Name == "LadderOnSurvey")       	return (St_SurveyC   *) StSvtLadderOnSurvey::instance();
+  if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();
+  if (Name == "WaferOnLadder")        	return (St_SurveyC   *) StSvtWaferOnLadder::instance();
+  if (Name == "SsdOnGlobal")          	return (St_SurveyC   *) StSsdOnGlobal::instance();
+  if (Name == "SsdSectorsOnGlobal")   	return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();
   if (Name == "SsdLaddersOnSectors")  	return (St_SurveyC   *) StSsdLaddersOnSectors::instance();
-  if (Name == "SsdWafersOnLadders")   	return (St_SurveyC   *) StSsdWafersOnLadders::instance(); 
+  if (Name == "SsdWafersOnLadders")   	return (St_SurveyC   *) StSsdWafersOnLadders::instance();
   if (Name == "TpcInnerSectorPosition") return (St_SurveyC   *) StTpcInnerSectorPosition::instance();
   if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
-  if (Name == "idsOnTpc")               return (St_SurveyC   *) StidsOnTpc::instance();	    
-  if (Name == "pstOnIds")        	return (St_SurveyC   *) StpstOnIds::instance();  	
-  if (Name == "istOnPst")        	return (St_SurveyC   *) StistOnPst::instance();  	
-  if (Name == "LadderOnIst")       	return (St_SurveyC   *) StLadderOnIst::instance(); 	
-  if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();  	
-  if (Name == "istSensorOnLadder")      return (St_SurveyC   *) StistSensorOnLadder::instance();  	
+  if (Name == "idsOnTpc")               return (St_SurveyC   *) StidsOnTpc::instance();
+  if (Name == "pstOnIds")        	return (St_SurveyC   *) StpstOnIds::instance();
+  if (Name == "istOnPst")        	return (St_SurveyC   *) StistOnPst::instance();
+  if (Name == "LadderOnIst")       	return (St_SurveyC   *) StLadderOnIst::instance();
+  if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();
+  if (Name == "istSensorOnLadder")      return (St_SurveyC   *) StistSensorOnLadder::instance();
   return 0;
 }
 //__________________Calibrations/rhic______________________________________________________________
@@ -1167,7 +1348,7 @@ ClassImp(St_tofCorrC);
 St_tofCorrC::St_tofCorrC(TTable *table) : TChair(table), mCalibType(NOTSET) {
   Int_t N = 0;
   if (table) N = getNumRows();
-  mCalibType = calibtype(N);  
+  mCalibType = calibtype(N);
   mIndxArray.Set(N);
   mNusedArray.Set(N);
 }
@@ -1242,17 +1423,17 @@ St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
     Int_t j = Index(trayId(i), moduleId(i), cellId(i));
     if (_debug) {
       Table()->Print(i,1);
-      cout << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endl;
+      LOG_INFO << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endm;
     }
     if (j >= 0) {
       if (! mIndxArray[j]) mIndxArray[j] = i;
       else {
 	Int_t m = mIndxArray[j];
-	LOG_ERROR << "St_tofTotbCorrC duplicated rows " 
-		  << m << " tray:" << trayId(m) << " module:" << moduleId(m) 
+	LOG_ERROR << "St_tofTotbCorrC duplicated rows "
+		  << m << " tray:" << trayId(m) << " module:" << moduleId(m)
 		  << " cell:" << cellId(m) << " tot[0] = " << tot(m)[0] << " corr[0] = " << corr(m)[0] << " and \n"
 		  << "                                                       "
-		  << i << " tray:" << trayId(i) << " module:" << moduleId(i) 
+		  << i << " tray:" << trayId(i) << " module:" << moduleId(i)
 		  << " cell:" << cellId(i) << " tot[0] = " << tot(i)[0] << " corr[0] = " << corr(i)[0] << endm;
       }
     }
@@ -1261,7 +1442,7 @@ St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
 //________________________________________________________________________________
 Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) {
   Int_t idx = Index(tray,module,cell);
-  Int_t i = mIndxArray[idx]; 
+  Int_t i = mIndxArray[idx];
   if (i < 0) return 0;
   Int_t Tray   = trayId(i);
   Int_t Module = moduleId(i);
@@ -1286,11 +1467,11 @@ St_tofZbCorrC::St_tofZbCorrC(St_tofZbCorr *table) : St_tofCorrC(table) {
       if (! mIndxArray[j]) mIndxArray[j] = i;
       else {
 	Int_t m = mIndxArray[j];
-	LOG_ERROR << "St_tofZbCorrC duplicated rows " 
-		  << m << " tray:" << trayId(m) << " module:" << moduleId(m) 
+	LOG_ERROR << "St_tofZbCorrC duplicated rows "
+		  << m << " tray:" << trayId(m) << " module:" << moduleId(m)
 		  << " cell:" << cellId(m) << " z[0] = " << z(m)[0] << " corr[0] = " << corr(m)[0] << " and \n"
 		  << "                                                       "
-		  << i << " tray:" << trayId(i) << " module:" << moduleId(i) 
+		  << i << " tray:" << trayId(i) << " module:" << moduleId(i)
 		  << " cell:" << cellId(i) << " z[0] = " << z(i)[0] << " corr[0] = " << corr(i)[0] << endm;
       }
     }
@@ -1299,7 +1480,7 @@ St_tofZbCorrC::St_tofZbCorrC(St_tofZbCorr *table) : St_tofCorrC(table) {
 //________________________________________________________________________________
 Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) {
   Int_t idx = Index(tray,module,cell);
-  Int_t i = mIndxArray[idx]; 
+  Int_t i = mIndxArray[idx];
   if (i < 0) return 0;
   Int_t Tray   = trayId(i);
   Int_t Module = moduleId(i);
@@ -1308,7 +1489,7 @@ Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) {
   Float_t dcorr = St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i),mNusedArray[idx]);
   if (dcorr <= -9999.0) {
     LOG_ERROR << "tofZbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected.";
-    if (x < z(i)[0] || x > z(i)[mNusedArray[idx]-1]) LOG_ERROR << " Out of the range [" << z(i)[0] << "," << z(i)[mNusedArray[idx]-1] << "].";
+    if (x < z(i)[0] || x > z(i)[mNusedArray[idx]-1]) {LOG_ERROR << " Out of the range [" << z(i)[0] << "," << z(i)[mNusedArray[idx]-1] << "].";}
     LOG_ERROR << endm;
 
   }
@@ -1342,7 +1523,7 @@ MakeChairInstance(tofTDIGOnTray,Calibrations/tof/tofTDIGOnTray);
 MakeChairInstance(tofTOffset,Calibrations/tof/tofTOffset);
 Float_t St_tofTOffsetC::t0(Int_t tray, Int_t module, Int_t cell) const {
   //        [mNTray][mNModule][mNCell]
-  Int_t j = cell - 1 + mNCell*(module - 1); 
+  Int_t j = cell - 1 + mNCell*(module - 1);
   return T0(tray-1)[j];
 }
 #include "St_tofTrgWindowC.h"
@@ -1359,7 +1540,7 @@ Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) {
   Float_t dcorr = St_tofCorrC::Correction(128, tot(i), x, corr(i),mNusedArray[idx]);
   if (dcorr <= -9999.0) {
     LOG_ERROR << "St_vpdTotCorrC::Corr(" << i << "," << x << ") is rejected.";
-    if (x < tot(i)[0] || x > tot(i)[mNusedArray[idx]-1]) LOG_ERROR << " Out of the range [" << tot(i)[0] << "," << tot(i)[mNusedArray[idx]-1] << "].";
+    if (x < tot(i)[0] || x > tot(i)[mNusedArray[idx]-1]) {LOG_ERROR << " Out of the range [" << tot(i)[0] << "," << tot(i)[mNusedArray[idx]-1] << "].";}
     LOG_ERROR << endm;
   }
   return dcorr;
@@ -1425,21 +1606,21 @@ map<UInt_t,Short_t> St_pxlHotPixelsC::mMapHotPixels;
 St_pxlHotPixelsC *St_pxlHotPixelsC::instance() {
   if (! fgInstance) {
     St_pxlHotPixels *table = (St_pxlHotPixels *) StMaker::GetChain()->GetDataBase("Calibrations/pxl/pxlHotPixels");
-    if (! table) {							
+    if (! table) {
       LOG_WARN << "St_pxlHotPixelsC::instance Calibrations/pxl/pxlHotPixels\twas not found" << endm;
-      assert(table);			 			       
-    }									
+      assert(table);
+    }
     DEBUGTABLE(pxlHotPixels);
-    fgInstance = new St_pxlHotPixelsC(table);	
-    
+    fgInstance = new St_pxlHotPixelsC(table);
+
     mMapHotPixels.clear();
-    for(Int_t i=0; i<10000; i++){ 
-      if(fgInstance->hotPixel()[i]>0){ 
-	mMapHotPixels.insert ( std::pair<UInt_t, Short_t>(fgInstance->hotPixel()[i],i) ); 
-      } 
+    for(Int_t i=0; i<10000; i++){
+      if(fgInstance->hotPixel()[i]>0){
+	mMapHotPixels.insert ( std::pair<UInt_t, Short_t>(fgInstance->hotPixel()[i],i) );
+      }
       else break;
     }
-    LOG_INFO << "St_pxlHotPixelsC have been instantiated with" << mMapHotPixels.size() << endm;
+    LOG_INFO << "St_pxlHotPixelsC have been instantiated with " << mMapHotPixels.size() << endm;
   }
   return fgInstance;
 }

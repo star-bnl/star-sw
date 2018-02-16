@@ -13,7 +13,7 @@
 #include "StEvtVtxSeedMaker.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 
 
 ClassImp(StEvtVtxSeedMaker)
@@ -103,7 +103,7 @@ int StEvtVtxSeedMaker::GetEventData() {
       StTpcHit* hit = (StTpcHit*) (hits[hitn]);
       // TPC padrow and sector indices use 1..n
       int mask = 1<<(hit->sector()-1);
-      if (hit->padrow() <= St_tpcPadPlanesC::instance()->innerPadRows()) itpc |= mask;
+      if (hit->padrow() <= St_tpcPadConfigC::instance()->innerPadRows(hit->sector())) itpc |= mask;
       else otpc |= mask;
     }
   }
@@ -141,14 +141,17 @@ int StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.14 2016/08/02 21:17:16 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.14.4.1 2018/02/16 22:09:40 perev Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.14 2016/08/02 21:17:16 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.14.4.1 2018/02/16 22:09:40 perev Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.14.4.1  2018/02/16 22:09:40  perev
+// iTPC
+//
 // Revision 1.14  2016/08/02 21:17:16  genevb
 // Added tDay,tFill to resNtuple, and improved C++11 compliance
 //

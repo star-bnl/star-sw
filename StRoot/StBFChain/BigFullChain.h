@@ -1087,7 +1087,7 @@ Bfc_st BFC[] = { // standard chains
    ,                    "","","Base chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
-  {"B2017a"  ,"","","ry2017a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+  {"B2017a"  ,"","","ra,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
    ,                                                     "Production chain for run 2017 data (tpc)",kFALSE},
 
   {"pp2017a","" ,"",
@@ -1097,9 +1097,16 @@ Bfc_st BFC[] = { // standard chains
   {"P2017a","" ,"",
    "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,              "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
-
-
+// IRAKLI y2017, y2018, y2019
+  {"MC.2017","","","y2017,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                      "","","/",kFALSE},
+  {"MC.2018","","","y2018,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                      "","","/",kFALSE},
+  {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                      "","","/",kFALSE},
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""

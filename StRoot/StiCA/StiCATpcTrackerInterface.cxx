@@ -1,13 +1,7 @@
 #include "StiCATpcTrackerInterface.h"
-#ifdef __NEW_TPCCATracker__
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/AliHLTTPCCAGBTrack.h"
 #include "TPCCATracker/AliHLTTPCCAParam.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/AliHLTTPCCAGBHit.h"
-#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
-#include "TPCCATracker/AliHLTTPCCAParam.h"
-#endif /* __NEW_TPCCATracker__ */
   // need for hits data
 #include "StTpcHit.h"                
 #include "StTpcDb/StTpcDb.h"
@@ -30,14 +24,9 @@
 
   // for sti perfo
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-#ifdef __NEW_TPCCATracker__
 #include "TPCCATrackerPerformance/AliHLTTPCCAStiPerformance.h"
 #include "TPCCATrackerPerformance/AliHLTTPCCAMergerPerformance.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/Performance/AliHLTTPCCAStiPerformance.h"
-#include "TPCCATracker/Performance/AliHLTTPCCAMergerPerformance.h"
-#endif /* __NEW_TPCCATracker__ */
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 #endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
@@ -309,14 +298,14 @@ void StiCATpcTrackerInterface::MakeSettings()
 {
 
   const int NSlices = 24; //TODO initialize from StRoot
-  const int NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
-  const int NRows = St_tpcPadPlanesC::instance()->padRows();
   for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
     AliHLTTPCCAParam SlicePar;
     //    memset(&SlicePar, 0, sizeof(AliHLTTPCCAParam));
 
     Int_t sector = iSlice+1;
       // Int_t sector = iSlice;
+    const int NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sector);
+    const int NRows = St_tpcPadConfigC::instance()->padRows(sector);
     SlicePar.SetISlice( iSlice );
     SlicePar.SetNRows ( NRows ); 
     SlicePar.SetNInnerRows ( NoOfInnerRows ); 
@@ -351,7 +340,7 @@ void StiCATpcTrackerInterface::MakeSettings()
       SlicePar.SetZMax     (   0. );                                        //TODO initialize from StRoot
     }
     for( int iR = 0; iR < NRows; iR++){
-      SlicePar.SetRowX(iR, St_tpcPadPlanesC::instance()->radialDistanceAtRow(iR+1));
+      SlicePar.SetRowX(iR, St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,iR+1));
     }
 
     Double_t *coeffInner = StiTpcInnerHitErrorCalculator::instance()->coeff();
@@ -416,7 +405,7 @@ void StiCATpcTrackerInterface::MakeHits()
         // get local coordinates. take into account distortion
       StiHit *hit = *cit;
       if (! hit->stHit()) 	continue;
-      if (  hit->timesUsed()) 	continue;//VP
+      //yf      if (  hit->timesUsed()) 	continue;//VP
       
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
@@ -778,9 +767,8 @@ void StiCATpcTrackerInterface::FillStiPerformance()
       fStiCaHits.push_back(caHit);
     }
             
-    if(!(track->getInnerMostTPCHitNode(0))) continue;
-    StiKalmanTrackNode *NodePar = track->getInnerMostTPCHitNode(0);
-//    std::cout <<"node x  "<< track->getInnerMostTPCHitNode(0)->getX() << std::endl << std::endl;
+    StiKalmanTrackNode *NodePar = track->getInnerMostDetHitNode(kTpcId);
+    if (!NodePar) continue;
 
     double JI[5]; 
     JI[0] = -1.;                    // y

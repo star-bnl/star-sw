@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.8 2014/07/27 13:28:06 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.8.10.1 2018/02/16 22:09:42 perev Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.8.10.1  2018/02/16 22:09:42  perev
+    iTPC
+
     Revision 1.8  2014/07/27 13:28:06  fisyak
     Add cast for c++11 option
 
@@ -45,12 +48,12 @@
 #include "TDataSetIter.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(StTpcFastSimMaker);
 //____________________________________________________________
 Int_t StTpcFastSimMaker::Make() {
   static Int_t iBreak = 0;
-  mExB = gStTpcDb->ExB();
+  mExB = StMagUtilities::Instance();
   if (! gRandom) gRandom = new TRandom();
   // Get the input data structures from StEvent
   StEvent *rEvent =  (StEvent*) GetInputDS("StEvent");
@@ -100,11 +103,11 @@ Int_t StTpcFastSimMaker::Make() {
     static StTpcLocalSectorCoordinate  coorLS;
     transform(coorLTD,coorLS); // alignment
     Double_t xyzL[3] = {coorLS.position().x(),coorLS.position().y(),coorLS.position().z()};
-    if (TMath::Abs(xyzL[1]-transform.yFromRow(row)) > 0.1000) {
+    if (TMath::Abs(xyzL[1]-transform.yFromRow(sector,row)) > 0.1000) {
       if (Debug()) {
 	LOG_DEBUG << "Id: " << tpc_hit[i].volume_id  
 		  << "\txyzL :" << xyzL[0] << "\t" << xyzL[1] << "\t" << xyzL[2] 
-		  << "\tdR :" << xyzL[1]-transform.yFromRow(row) << endm;
+		  << "\tdR :" << xyzL[1]-transform.yFromRow(sector,row) << endm;
       }
       iBreak++;
     }
@@ -112,7 +115,7 @@ Int_t StTpcFastSimMaker::Make() {
     Double_t eta = TMath::PiOver2() - TMath::Abs(dirL.position().phi());
     Double_t tanl = dirL.position().z()/dirL.position().perp();
     Double_t sigmaY2, sigmaZ2;
-    if (row <= St_tpcPadPlanesC::instance()->innerPadRows())  
+    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector))  
       StiTpcInnerHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
     else            
       StiTpcOuterHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);

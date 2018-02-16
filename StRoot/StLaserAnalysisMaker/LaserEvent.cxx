@@ -1,5 +1,8 @@
-//$Id: LaserEvent.cxx,v 1.9 2014/03/13 21:59:44 fisyak Exp $
+//$Id: LaserEvent.cxx,v 1.9.10.1 2018/02/16 22:09:39 perev Exp $
 // $Log: LaserEvent.cxx,v $
+// Revision 1.9.10.1  2018/02/16 22:09:39  perev
+// iTPC
+//
 // Revision 1.9  2014/03/13 21:59:44  fisyak
 // add cluster position in Local Sector Coordinate System
 //
@@ -33,7 +36,7 @@
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
 #include "TGeoMatrix.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(LaserRaft);
 ClassImp(EventHeader);
 ClassImp(LaserEvent);
@@ -326,7 +329,7 @@ Hit::Hit(StTpcHit *tpcHit, Int_t trKey)  : sector(0),row(0),charge(0),flag(0),us
     Double_t xyzs[3];
     gStTpcDb->SupS2Tpc(tpcHit->sector()).MasterToLocal(localTpc.position().xyz(),xyzs);
     xyzS = StThreeVectorF(xyzs[0],xyzs[1],xyzs[2]);
-    pad  = tpcHit->pad() - St_tpcPadPlanesC::instance()->padsPerRow(row)/2 - 1;
+    pad  = tpcHit->pad() - St_tpcPadConfigC::instance()->padsPerRow(sector,row)/2 - 1;
     tbk  = tpcHit->timeBucket();
   }
 }

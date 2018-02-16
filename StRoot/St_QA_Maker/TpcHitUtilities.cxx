@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.9 2011/01/18 14:40:32 fisyak Exp $
+// $Id: TpcHitUtilities.cxx,v 1.9.14.1 2018/02/16 22:09:41 perev Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.9.14.1  2018/02/16 22:09:41  perev
+// iTPC
+//
 // Revision 1.9  2011/01/18 14:40:32  fisyak
 // Clean up TpcDb interfaces and Tpc coordinate transformation
 //
@@ -159,9 +162,9 @@ void TpcHitUtilities::buildMaps()
 	for (int padrow=1; padrow<=45; padrow++) {
 	    double padlength;
 	    if (padrow<14) {
-		padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();}
+		padlength = St_tpcPadConfigC::instance()->innerSectorPadLength(sector);}
 	    else {
-		padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();}
+		padlength = St_tpcPadConfigC::instance()->outerSectorPadLength(sector);}
 	    
 	    //Get the position of the padrow center, transform to local sector coordinates
 	    StTpcPadCoordinate padCoord(sector, padrow, 1, 1);
