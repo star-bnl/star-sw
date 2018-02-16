@@ -132,15 +132,15 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	dZ = St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(sector);
       }
       Double_t Zshift = 0; // 
+#if 0
       if (NoStiSectors == 24) {
 	Float_t maxTimeBacket = 410;
 	Float_t driftvel = 1e-6*StTpcDb::instance()->DriftVelocity(sector); // cm/usec
 	Float_t freq = StTpcDb::instance()->Electronics()->samplingFrequency(); // MHz
 	Zshift = maxTimeBacket/freq*driftvel - dZ;
-	pShape->setHalfDepth((dZ+Zshift)/2);
-      } else {
-	pShape->setHalfDepth(dZ);
       }
+#endif
+      pShape->setHalfDepth((dZ+Zshift)/2);
       pShape->setHalfWidth(St_tpcPadConfigC::instance()->PadPitchAtRow(sector,row) * St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row) / 2.);
       pShape->setName(name.Data()); if (debug>1) cout << *pShape << endl;
       //Retrieve position and orientation of the TPC pad rows from the database.
