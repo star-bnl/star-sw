@@ -1225,11 +1225,17 @@ void StSpaceChargeEbyEMaker::SetTableName() {
     setVtxTofMatch(0);
     setVtxMinTrks(10);
     setReqEmcOrTofMatch(kFALSE);
+    MINTRACKS = 1500;
+    setVtxVpdAgree(-5);
   } else if (date < 20090000) {
     setVtxEmcMatch(1);
     setVtxTofMatch(0);
     setVtxMinTrks(5);
     setReqEmcOrTofMatch(kFALSE);
+    MINTRACKS = 1500;
+    setVtxVpdAgree(-5);
+  } else if (date < 20100000) {
+    setVtxVpdAgree(-5);
   }
 }
 //_____________________________________________________________________________
@@ -1547,8 +1553,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.66 2017/04/12 19:47:25 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.67 2018/02/15 03:25:29 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.67  2018/02/15 03:25:29  genevb
+// Restore prepass settings for old data
+//
 // Revision 1.66  2017/04/12 19:47:25  genevb
 // Use generic GridLeak function
 //
