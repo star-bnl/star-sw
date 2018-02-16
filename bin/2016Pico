@@ -1,3 +1,7 @@
+================================================================================
+================================================================================
+
+
 
 Runs rejected due to HFT firmware issues:
 RunId < 17062047, 17065002 ≤ RunId ≤ 17068053, 17063041 ≤ RunId ≤ 17063043
@@ -82,7 +86,7 @@ foreach f (`grep missing Chain.log | awk '{print $3}' `)
   set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
 end
 
-foreach d (`ls -1d 1*`)
+foreach d (`ls -1d 17*`)
   cd $d; 
   if (! -r Chain.log) then
   ln -s ../../.sl* .
@@ -98,7 +102,7 @@ foreach d (17130001 17130002 17130003 17130004 17130005 17130006 17130007 171300
   cd -;
 end
 ================================================================================
-foreach day (`ls -1d 1*`)
+foreach day (`ls -1d ???`)
   cd $day;
   foreach d (`ls -1d 1*`)
     cd $d; root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; cd -;
@@ -139,17 +143,27 @@ foreach d (`ls -1d */*/Done | awk -F\/ '{print $1"/"$2}'`)
   if (! -r ${d}/${f}) echo "${d}/Done ${f} is not yet Done"
   if (! -r ${d}/${f}) echo "${d}/Done" | tee -a list.NotYetDone
 end 
+
+
+
+
+
 ================================================================================
 cat list.NotYetDone | xargs rm
 ls -1d */*/Done | awk -F\/ '{print $1"/"$2}' | xargs
 ================================================================================
 cd ~/Pico/2016
+setenv NODEBUG yes
+setup 64b
+xtitl
 foreach f (`ls -1d ???/1*/Done`)
   set d = `dirname ${f}`;
   cd ${d}; 
   if (-r Done) then	
     if (-r Chain.log) rm Chain.log	
-    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >& Chain.log &
+    rm .sl*
+    ln -s ../../.sl* .
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
     rm Done
   endif
   cd -;
@@ -162,8 +176,8 @@ cd 076;
 2016Pico2hpss.pl | tee  hpss.list; grep root hpss.list | wc -l; 
 cat hpss.list | hsi >& hpss.`date +%m%d%y`.log &
 ================================================================================
-cd /Pico/2016
-set d = 077;
+cd ~/Pico/2016
+set d = 072;
 cd ${d}
 cd ..
 cat > hpss.${d}.list << EOD
@@ -175,25 +189,33 @@ cat hpss.${d}.list |  hsi >& hpss.${d}.`date +%m%d%y`.log &
 ================================================================================
 
 
-cd ~/Pico/2016
-foreach d (`ls -1d */1*`)
+cd ~/Pico/2016/121
+foreach d (`ls -1d 1*`)
   cd ${d}; 
   if (! -r Chain.log) then	
-    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; 
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >& Chain.log &
   endif
   cd -;
 end
 
+cd ~/Femto/2016/121
+foreach d (`ls -1d 17*`)
+  cd ${d}; 
+  if (! -r Chain.log) then	
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >& Chain.log &
+  endif
+  cd -;
+end
 ================================================================================
 Clean 
 cd /gpfs01/star/pwg/fisyak/Pico/2016
  find -L . -name "*.xml" -o -name "sched*" -exec ls -l {} \;
  find -L . -name "*.xml" -o -name "sched*" -exec rm {} \;
 
-cd ~/Pico/2016
-foreach d (`ls -1d */1*`)
+cd ~/Pico/2016/072
+foreach d (`ls -1d 1*`)
   cd $d; pwd; 
-  rm -f sched* *.xml st*.log
+  rm -f sched* *.xml *.log
   cd -;
 end
 
@@ -256,8 +278,10 @@ Femto
 #set DIR = "~/Pico"
 #set DIR = "/gpfs01/star/pwg/fisyak/Pico"
 #set DIR = "/gpfs01/star/pwg_tasks/hf03/Pico"
-set DIR = "/gpfs02/eic/ayk/STAR/reco/Pico"
-foreach dayd (`ls -1dr ${DIR}/2016/???`)
+#set DIR = "/gpfs02/eic/ayk/STAR/reco/Pico"
+#set DIR = "/gpfs01/star/pwg/fisyak/Pico"
+set DIR = "~/Pico"
+foreach dayd (`ls -1dr ${DIR}/2016/064`)
   set day = `basename ${dayd}`;
   cd ~/Femto/2016/
   if (! -d ${day}) mkdir ${day}
@@ -276,10 +300,263 @@ foreach dayd (`ls -1dr ${DIR}/2016/???`)
   cd -;
 end
 ================================================================================
-foreach d (`ls -1d 1*`)
+foreach d (`ls -1d ???/1*`)
   cd $d; 
   if (! -r Chain.log) then
-  root.exe -q -b 'Chain.C+("*/*.root","PicoDst")' | tee Chain.log;
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
   endif
   cd -;
 end
+
+
+foreach d (`ls -1d 1*`)
+  cd $d; 
+  if (! -r Chain.log) then
+  rm .sl*	
+  ln -s ~/Pico/2016/.sl* .
+  root.exe -q -b 'Chain.C+("*.root","PicoDst")' >& Chain.log &
+  endif
+  cd -;
+end
+================================================================================
+set day = 121;  grep total ${day}/*/Chain.log  | awk '{print $1" "$6}' | tee ${day}.log
+grep total */Chain.log  | awk '{print $1" "$6}' | tee 121.log
+================================================================================
+  ~/Femto/2016 $ diff -y ~/Pico/2016/PicoEvents FemtoEvents | more
+
+| tee  hpss.list; grep root hpss.list | wc -l; 
+#cd /gpfs02/eic/ayk/STAR/reco/Pico/2016
+set day=121;
+cd ~/Pico/2016/${day}
+cd ..
+cat > ${day}_get << EOD
+cd reco/2016Pico
+cget -A -R ${day}
+exit
+EOD
+hsi < ${day}_get >& ${day}_get.log &
+
+================================================================================
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000061.picoDst.root")' >& st_physics_17073015_raw_5000061.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000062.picoDst.root")' >& st_physics_17073015_raw_5000062.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000065.picoDst.root")' >& st_physics_17073015_raw_5000065.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000066.picoDst.root")' >& st_physics_17073015_raw_5000066.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000068.picoDst.root")' >& st_physics_17073015_raw_5000068.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000069.picoDst.root")' >& st_physics_17073015_raw_5000069.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000071.picoDst.root")' >& st_physics_17073015_raw_5000071.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000074.picoDst.root")' >& st_physics_17073015_raw_5000074.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000077.picoDst.root")' >& st_physics_17073015_raw_5000077.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000078.picoDst.root")' >& st_physics_17073015_raw_5000078.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5000081.picoDst.root")' >& st_physics_17073015_raw_5000081.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500004.picoDst.root")' >& st_physics_17073015_raw_5500004.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500009.picoDst.root")' >& st_physics_17073015_raw_5500009.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500014.picoDst.root")' >& st_physics_17073015_raw_5500014.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500015.picoDst.root")' >& st_physics_17073015_raw_5500015.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500017.picoDst.root")' >& st_physics_17073015_raw_5500017.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500019.picoDst.root")' >& st_physics_17073015_raw_5500019.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500021.picoDst.root")' >& st_physics_17073015_raw_5500021.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500023.picoDst.root")' >& st_physics_17073015_raw_5500023.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500027.picoDst.root")' >& st_physics_17073015_raw_5500027.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500028.picoDst.root")' >& st_physics_17073015_raw_5500028.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500029.picoDst.root")' >& st_physics_17073015_raw_5500029.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500030.picoDst.root")' >& st_physics_17073015_raw_5500030.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500034.picoDst.root")' >& st_physics_17073015_raw_5500034.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500035.picoDst.root")' >& st_physics_17073015_raw_5500035.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500039.picoDst.root")' >& st_physics_17073015_raw_5500039.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500040.picoDst.root")' >& st_physics_17073015_raw_5500040.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500041.picoDst.root")' >& st_physics_17073015_raw_5500041.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500045.picoDst.root")' >& st_physics_17073015_raw_5500045.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500046.picoDst.root")' >& st_physics_17073015_raw_5500046.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500047.picoDst.root")' >& st_physics_17073015_raw_5500047.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500051.picoDst.root")' >& st_physics_17073015_raw_5500051.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500052.picoDst.root")' >& st_physics_17073015_raw_5500052.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500054.picoDst.root")' >& st_physics_17073015_raw_5500054.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500057.picoDst.root")' >& st_physics_17073015_raw_5500057.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500058.picoDst.root")' >& st_physics_17073015_raw_5500058.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500059.picoDst.root")' >& st_physics_17073015_raw_5500059.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500063.picoDst.root")' >& st_physics_17073015_raw_5500063.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500064.picoDst.root")' >& st_physics_17073015_raw_5500064.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500065.picoDst.root")' >& st_physics_17073015_raw_5500065.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500067.picoDst.root")' >& st_physics_17073015_raw_5500067.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500068.picoDst.root")' >& st_physics_17073015_raw_5500068.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500073.picoDst.root")' >& st_physics_17073015_raw_5500073.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500075.picoDst.root")' >& st_physics_17073015_raw_5500075.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500076.picoDst.root")' >& st_physics_17073015_raw_5500076.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500078.picoDst.root")' >& st_physics_17073015_raw_5500078.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500081.picoDst.root")' >& st_physics_17073015_raw_5500081.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_adc_17073015_raw_1000005.picoDst.root")' >& st_physics_adc_17073015_raw_1000005.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_adc_17073015_raw_1000029.picoDst.root")' >& st_physics_adc_17073015_raw_1000029.picoDst.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_adc_17073015_raw_1000052.picoDst.root")' >& st_physics_adc_17073015_raw_1000052.picoDst.log &
+================================================================================
+ 17124008_1B.log
+
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000026.picoDst.root")' > &st_physics_17124008_raw_2000026.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000029.picoDst.root")' > &st_physics_17124008_raw_2000029.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000031.picoDst.root")' > &st_physics_17124008_raw_2000031.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000034.picoDst.root")' > &st_physics_17124008_raw_2000034.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000036.picoDst.root")' > &st_physics_17124008_raw_2000036.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000037.picoDst.root")' > &st_physics_17124008_raw_2000037.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000039.picoDst.root")' > &st_physics_17124008_raw_2000039.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000041.picoDst.root")' > &st_physics_17124008_raw_2000041.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000044.picoDst.root")' > &st_physics_17124008_raw_2000044.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000045.picoDst.root")' > &st_physics_17124008_raw_2000045.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000046.picoDst.root")' > &st_physics_17124008_raw_2000046.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000048.picoDst.root")' > &st_physics_17124008_raw_2000048.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000049.picoDst.root")' > &st_physics_17124008_raw_2000049.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000051.picoDst.root")' > &st_physics_17124008_raw_2000051.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000058.picoDst.root")' > &st_physics_17124008_raw_2000058.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2000059.picoDst.root")' > &st_physics_17124008_raw_2000059.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500001.picoDst.root")' > &st_physics_17124008_raw_2500001.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500013.picoDst.root")' > &st_physics_17124008_raw_2500013.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500014.picoDst.root")' > &st_physics_17124008_raw_2500014.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500016.picoDst.root")' > &st_physics_17124008_raw_2500016.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500017.picoDst.root")' > &st_physics_17124008_raw_2500017.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500020.picoDst.root")' > &st_physics_17124008_raw_2500020.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500024.picoDst.root")' > &st_physics_17124008_raw_2500024.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500031.picoDst.root")' > &st_physics_17124008_raw_2500031.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500032.picoDst.root")' > &st_physics_17124008_raw_2500032.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500033.picoDst.root")' > &st_physics_17124008_raw_2500033.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500036.picoDst.root")' > &st_physics_17124008_raw_2500036.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500038.picoDst.root")' > &st_physics_17124008_raw_2500038.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500039.picoDst.root")' > &st_physics_17124008_raw_2500039.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500042.picoDst.root")' > &st_physics_17124008_raw_2500042.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500044.picoDst.root")' > &st_physics_17124008_raw_2500044.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500045.picoDst.root")' > &st_physics_17124008_raw_2500045.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500046.picoDst.root")' > &st_physics_17124008_raw_2500046.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500047.picoDst.root")' > &st_physics_17124008_raw_2500047.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500050.picoDst.root")' > &st_physics_17124008_raw_2500050.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500051.picoDst.root")' > &st_physics_17124008_raw_2500051.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500055.picoDst.root")' > &st_physics_17124008_raw_2500055.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_2500056.picoDst.root")' > &st_physics_17124008_raw_2500056.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000003.picoDst.root")' > &st_physics_17124008_raw_3000003.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000010.picoDst.root")' > &st_physics_17124008_raw_3000010.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000014.picoDst.root")' > &st_physics_17124008_raw_3000014.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000015.picoDst.root")' > &st_physics_17124008_raw_3000015.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000020.picoDst.root")' > &st_physics_17124008_raw_3000020.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000022.picoDst.root")' > &st_physics_17124008_raw_3000022.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000024.picoDst.root")' > &st_physics_17124008_raw_3000024.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000027.picoDst.root")' > &st_physics_17124008_raw_3000027.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000029.picoDst.root")' > &st_physics_17124008_raw_3000029.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000030.picoDst.root")' > &st_physics_17124008_raw_3000030.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000033.picoDst.root")' > &st_physics_17124008_raw_3000033.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/124/17124008/st_physics_17124008_raw_3000034.picoDst.root")' > &st_physics_17124008_raw_3000034.log &
+
+root.exe -q -b lMuDst.C 'Hadd.C+("17124008_1.femtoDst.root","st*.root")'
+
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000060.picoDst.root")' >& st_physics_17072001_raw_1000060.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000062.picoDst.root")' >& st_physics_17072001_raw_1000062.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000066.picoDst.root")' >& st_physics_17072001_raw_1000066.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000067.picoDst.root")' >& st_physics_17072001_raw_1000067.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000069.picoDst.root")' >& st_physics_17072001_raw_1000069.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000070.picoDst.root")' >& st_physics_17072001_raw_1000070.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000074.picoDst.root")' >& st_physics_17072001_raw_1000074.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000075.picoDst.root")' >& st_physics_17072001_raw_1000075.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000077.picoDst.root")' >& st_physics_17072001_raw_1000077.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1000080.picoDst.root")' >& st_physics_17072001_raw_1000080.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500001.picoDst.root")' >& st_physics_17072001_raw_1500001.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500012.picoDst.root")' >& st_physics_17072001_raw_1500012.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500016.picoDst.root")' >& st_physics_17072001_raw_1500016.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500017.picoDst.root")' >& st_physics_17072001_raw_1500017.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500018.picoDst.root")' >& st_physics_17072001_raw_1500018.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500021.picoDst.root")' >& st_physics_17072001_raw_1500021.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500022.picoDst.root")' >& st_physics_17072001_raw_1500022.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500025.picoDst.root")' >& st_physics_17072001_raw_1500025.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500026.picoDst.root")' >& st_physics_17072001_raw_1500026.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500028.picoDst.root")' >& st_physics_17072001_raw_1500028.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500031.picoDst.root")' >& st_physics_17072001_raw_1500031.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500033.picoDst.root")' >& st_physics_17072001_raw_1500033.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500034.picoDst.root")' >& st_physics_17072001_raw_1500034.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/072/17072001/st_physics_17072001_raw_1500038.picoDst.root")' >& st_physics_17072001_raw_1500038.log &
+
+17072001_1.femtoDst.root
+root.exe -q -b lMuDst.C 'Hadd.C+("17072001_1.femtoDst.root","st*.root")'
+
+17121041_3B.log
+
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500031.picoDst.root")' >& st_physics_17121041_raw_2500031.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500036.picoDst.root")' >& st_physics_17121041_raw_2500036.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500037.picoDst.root")' >& st_physics_17121041_raw_2500037.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500038.picoDst.root")' >& st_physics_17121041_raw_2500038.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500042.picoDst.root")' >& st_physics_17121041_raw_2500042.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500043.picoDst.root")' >& st_physics_17121041_raw_2500043.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500047.picoDst.root")' >& st_physics_17121041_raw_2500047.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500048.picoDst.root")' >& st_physics_17121041_raw_2500048.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500049.picoDst.root")' >& st_physics_17121041_raw_2500049.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500051.picoDst.root")' >& st_physics_17121041_raw_2500051.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500052.picoDst.root")' >& st_physics_17121041_raw_2500052.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500056.picoDst.root")' >& st_physics_17121041_raw_2500056.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_2500057.picoDst.root")' >& st_physics_17121041_raw_2500057.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000002.picoDst.root")' >& st_physics_17121041_raw_3000002.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000011.picoDst.root")' >& st_physics_17121041_raw_3000011.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000013.picoDst.root")' >& st_physics_17121041_raw_3000013.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000015.picoDst.root")' >& st_physics_17121041_raw_3000015.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000022.picoDst.root")' >& st_physics_17121041_raw_3000022.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000024.picoDst.root")' >& st_physics_17121041_raw_3000024.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000025.picoDst.root")' >& st_physics_17121041_raw_3000025.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000026.picoDst.root")' >& st_physics_17121041_raw_3000026.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000030.picoDst.root")' >& st_physics_17121041_raw_3000030.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000031.picoDst.root")' >& st_physics_17121041_raw_3000031.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/121/17121041/st_physics_17121041_raw_3000032.picoDst.root")' >& st_physics_17121041_raw_3000032.log &
+
+================================================================================================================================================================
+day   Pico Femto
+062 Proc
+063 Proc
+064 Done    Proc
+068 Done    Proc
+069 Done    Proc
+070 Done    Proc
+071 Done    Done
+072 OnHpss  Done
+073 OnHpss  Done
+074 OnHpss  Done
+075 OnHpss  Done
+076 OnHpss  Done
+077 OnHpss  Done
+078 OnHpss  Done
+097 OnHpss  Done
+098 OnHpss  Done
+099 OnHpss  Done
+100 OnHpss  Done
+101 OnHpss  Done
+102 OnHpss  Done
+103 OnHpss  Done
+104 OnHpss  Done
+105 OnHpss  Done
+106 OnHpss  Done
+107 OnHpss  Done
+108 OnHpss  Done
+109 OnHpss  Done
+110 OnHpss  Done
+111 OnHpss  Done
+112 OnHpss  Done
+113 OnHpss  Done
+114 OnHpss  Done
+115 OnHpss  Done
+116 OnHpss  Done
+117 OnHpss  
+118 OnHpss  
+119 OnHpss  
+120 Pulled  
+121 Pulled  Reprocess
+122 OnHpss  Done
+123 OnHpss  Done
+124 OnHpss  Done
+125 OnHpss  Done
+126 OnHpss  Done
+127 OnHpss  Done
+128 OnHpss  Done
+129 OnHpss  Done
+130 OnHpss  Done
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+================================================================================================================================================================

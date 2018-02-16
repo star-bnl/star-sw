@@ -46,7 +46,6 @@
 //#define DEBUG
 //#define __PrimaryVertices__
 //#define __PrimaryTracks__
-#define __Y2015__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -188,8 +187,8 @@ Int_t sector(Float_t x, Float_t y, Float_t z) {
   return sec;
 }
 //________________________________________________________________________________
-void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosmics/Genratedata/cosmics_R89_1_200.MuDst.root", // ./*.MuDst.root",
-	     const Char_t *Out = "Cosmics.root"
+void Cosmics(Char_t *files ="./*.MuDst.root",
+	    Char_t *Out = "Cosmics.root"
 	    ){
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
   if (!m_Bichsel) {
@@ -231,11 +230,11 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
     */
     Int_t k = -1; 
     Int_t l = -1;
+    Double_t Chi2Old = 1.e3;
     for (Int_t kg = 0; kg < NoGlobalTracks - 1; kg++) {
       if (GlobalTracks_mNHitsFitTpc[kg] < 15) continue;
       Int_t kgc = GlobalTracks_mIndex2Cov[kg];
       if (kgc < 0 || kgc > NoCovGlobTrack) continue;
-      Double_t Chi2Old = 1.e3;
       Double_t parK[6] = {CovGlobTrack_mImp[kgc], CovGlobTrack_mZ[kgc], CovGlobTrack_mPsi[kgc], CovGlobTrack_mPti[kgc], CovGlobTrack_mTan[kgc], 0};
       Double_t covK[15] = {
 	CovGlobTrack_mImpImp[kgc], 
@@ -246,7 +245,7 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
       TRVector ParK(5,parK);
       TRSymMatrix CovK(5,covK);
       tK.set(parK,covK);
-      for (Int_t lg = kg+1; lg < NoGlobalTracks; lg++) {
+      for (Int_t lg = kg+1; lg < NoGlobalTracks - 1; lg++) {
 	Int_t lgc = GlobalTracks_mIndex2Cov[lg];
       if (GlobalTracks_mNHitsFitTpc[lg] < 15) continue;
 	if (lgc < 0 || lgc > NoCovGlobTrack) continue;
@@ -279,16 +278,18 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
 	  l = lg;
 	}
       }
-      if (k < 0 || l < 0  ||  Chi2Old >= 1e3) continue;
+    }
+    if (k >= 0 && l >=0) {
+      Int_t kg = k;
       Int_t lg = l;
-      //      Int_t kgc = GlobalTracks_mIndex2Cov[kg];
-//       Double_t parK[6] = {CovGlobTrack_mImp[kgc], CovGlobTrack_mZ[kgc], CovGlobTrack_mPsi[kgc], CovGlobTrack_mPti[kgc], CovGlobTrack_mTan[kgc], 0};
-//       Double_t covK[15] = {
-// 	CovGlobTrack_mImpImp[kgc], 
-// 	CovGlobTrack_mZImp[kgc]  , CovGlobTrack_mZZ[kgc]    ,
-// 	CovGlobTrack_mPsiImp[kgc], CovGlobTrack_mPsiZ[kgc]  , CovGlobTrack_mPsiPsi[kgc], 
-// 	CovGlobTrack_mPtiImp[kgc], CovGlobTrack_mPtiZ[kgc]  , CovGlobTrack_mPtiPsi[kgc], CovGlobTrack_mPtiPti[kgc], 
-// 	CovGlobTrack_mTanImp[kgc], CovGlobTrack_mTanZ[kgc]  , CovGlobTrack_mTanPsi[kgc], CovGlobTrack_mTanPti[kgc], CovGlobTrack_mTanTan[kgc]};
+      Int_t kgc = GlobalTracks_mIndex2Cov[kg];
+      Double_t parK[6] = {CovGlobTrack_mImp[kgc], CovGlobTrack_mZ[kgc], CovGlobTrack_mPsi[kgc], CovGlobTrack_mPti[kgc], CovGlobTrack_mTan[kgc], 0};
+      Double_t covK[15] = {
+	CovGlobTrack_mImpImp[kgc], 
+	CovGlobTrack_mZImp[kgc]  , CovGlobTrack_mZZ[kgc]    ,
+	CovGlobTrack_mPsiImp[kgc], CovGlobTrack_mPsiZ[kgc]  , CovGlobTrack_mPsiPsi[kgc], 
+	CovGlobTrack_mPtiImp[kgc], CovGlobTrack_mPtiZ[kgc]  , CovGlobTrack_mPtiPsi[kgc], CovGlobTrack_mPtiPti[kgc], 
+	CovGlobTrack_mTanImp[kgc], CovGlobTrack_mTanZ[kgc]  , CovGlobTrack_mTanPsi[kgc], CovGlobTrack_mTanPti[kgc], CovGlobTrack_mTanTan[kgc]};
       tK.set(parK,covK);
       Int_t lgc = GlobalTracks_mIndex2Cov[lg];
       Double_t parL[6] = {CovGlobTrack_mImp[lgc], CovGlobTrack_mZ[lgc], CovGlobTrack_mPsi[lgc], CovGlobTrack_mPti[lgc], CovGlobTrack_mTan[lgc], 0};
@@ -330,17 +331,17 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
       tracks.bgK = tracks.pK/0.1056584; // for muon
       tracks.bichK = 1e-6*m_Bichsel->GetI70M(TMath::Log10(tracks.bgK),1.);
       tracks.zK = -999;
-      if (tracks.K70.mean() > 0) tracks.zK = TMath::Log(tracks.K70.mean()/tracks.bichK);
+      if (tracks.K70.mDedx > 0) tracks.zK = TMath::Log(tracks.K70.mDedx/tracks.bichK);
       pT = tracks.L.pt();
       tracks.pL  = pT*TMath::Sqrt(1. + tracks.L.tanDip()*tracks.L.tanDip());
       tracks.bgL = tracks.pL/0.1056584; // for muon
       tracks.bichL = 1e-6*m_Bichsel->GetI70M(TMath::Log10(tracks.bgL),1.);
       tracks.zL = -999;
-      if (tracks.L70.mean() > 0) tracks.zL = TMath::Log(tracks.L70.mean()/tracks.bichL);
+      if (tracks.L70.mDedx > 0) tracks.zL = TMath::Log(tracks.L70.mDedx/tracks.bichL);
       tracks.zFitK = -999;
-      if (tracks.Kfit.mean() > 0) tracks.zFitK = TMath::Log(tracks.Kfit.mean()/tracks.bichK);
+      if (tracks.Kfit.mDedx > 0) tracks.zFitK = TMath::Log(tracks.Kfit.mDedx/tracks.bichK);
       tracks.zFitL = -999;
-      if (tracks.Lfit.mean() > 0) tracks.zFitL = TMath::Log(tracks.Lfit.mean()/tracks.bichL);
+      if (tracks.Lfit.mDedx > 0) tracks.zFitL = TMath::Log(tracks.Lfit.mDedx/tracks.bichL);
       ftree->Fill();
       netries++;
     }
@@ -348,208 +349,109 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
   if (fOut) fOut->Write();
 }
 //________________________________________________________________________________
-void Plot(Int_t nevents = 1e9) {
+void Plot(const Char_t *opt="DPti") {
+  Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   Int_t nn = files->GetSize();
   if (!nn) return;
-  TH2D  ****H2 = new TH2D***[nn]; memset(H2, 0, nn*sizeof(TH2D***));
+  TH2 **h2 = new TH2*[nn]; memset(h2, 0, nn*sizeof(TH2*));
+  TH1 **h1 = new TH1*[nn]; memset(h1, 0, nn*sizeof(TH1*));
   TIter next(files);
-  struct Plot_t {
-    const Char_t *Name;
-    const Char_t *Title;
-    const Char_t *xTitle;
-    const Char_t *yTitle;
-    Int_t nx;
-    Double_t xmin, xmax;
-    Int_t ny;
-    Double_t ymin, ymax;
-  };
-  struct VarPr_t {
-    Double_t DeltapTI;
-    Double_t pullDeltapTI;
-    Double_t DeltapTR;
-    Double_t pullDeltapTR;
-    Double_t DeltaDCAxy;
-    Double_t pullDeltaDCAxy;
-    Double_t DeltaDCAz;
-    Double_t pullDeltaDCAz;
-    Double_t DeltaTan;
-    Double_t pullDeltaTan;
-    Double_t DeltaPsi;
-    Double_t pullDeltaPsi;
-  };
-  VarPr_t V;
-  enum {kTotal=12, kAll, kCharge = 5};
-  const Plot_t plot[kAll] = {// Name, Title,                     xTitle,              yTitle,                nx, xmin,xmax,  ny,ymin,ymax         
-    {"DelpTI"  ,   "#Delta 1/p_{T} from cosmics muons"         , "Log_{10}(p_{TAv})", "#Delta 1/p_{T}"       , 30,   -2,   1, 500, -0.05, 0.05},
-    {"PullpTI" ,   "pull of #Delta 1/p_{T} from cosmics muons" , "Log_{10}(p_{TAv})", "pull (#Delta 1/p_{T})", 30,   -2,   1, 500, -5.0, 5.0},
-    {"DelpTR"  ,   "#Delta p_{T}/p_{T} from cosmics muons"   , "Log_{10}(p_{TAv})", "#Delta p_{T}/p_{T}"     , 30,   -2,   1, 500, -0.5, 0.5},
-    {"PullpTR" ,   "pull of #Delta p_{T}/p_{T} from cosmics muons" , "Log_{10}(p_{TAv})", "pull (#Delta p_{T}/p_{T})", 30,   -2,  1, 500, -5.0, 5.0},
-    {"DelImp"  ,   "#Delta DCA_{xy} from cosmics muons"        , "Log_{10}(p_{TAv})", "DCA_{xy}"             , 30,   -2,   1, 500, -1.0, 1.0},
-    {"PullImp" ,   "pull of #Delta DCA_{xy} from cosmics muons", "Log_{10}(p_{TAv})", "pull DCA_{xy} "       , 30,   -2,   1, 500, -5.0, 5.0},
-    {"DelZ"    ,   "#Delta DCA_{z} from cosmics muons"         , "Log_{10}(p_{TAv})", "DCA_{z}"              , 30,   -2,   1, 500, -1.0, 1.0},
-    {"PullZ"   ,   "pull of #Delta DCA_{z} from cosmics muons" , "Log_{10}(p_{TAv})", "pull DCA_{z} "        , 30,   -2,   1, 500, -5.0, 5.0},
-    {"DelTan"  ,   "#Delta #lambda from cosmics muons"         , "Log_{10}(p_{TAv})", "#lambda"              , 30,   -2,   1, 500, -0.02, 0.02},
-    {"PullTan" ,   "pull of #Delta Tan(#lambda) from cosmics muons" , "Log_{10}(p_{TAv})", "pull Tan(#lambda)",30,   -2,   1, 500, -5.0, 5.0}, // ?
-    {"DelPsi"  ,   "#Delta #psi from cosmics muons"            , "Log_{10}(p_{TAv})", "#psi"                 , 30,   -2,   1, 500, -0.02, 0.02},
-    {"PullPsi" ,   "pull of #Delta #psi from cosmics muons"    , "Log_{10}(p_{TAv})", "pull #psi "           , 30,   -2,   1, 500, -5.0, 5.0},
-    {"sKsL"    ,   "sector L versus sector K"                  , "secotr K",          "Sector L"             , 24,  0.5, 24.5, 24,  0.5, 24.5}
-  };
-  
-  const Char_t *Charge[kCharge] = {"All","Pos","Neg","PosR","NegR"};
-  Int_t Npads = kCharge*2*((kAll+1)/2);
-  TLegend *leg[Npads]; memset(leg, 0, Npads*sizeof(TLegend *)); 
+  TFile *f = 0;
+  TString cn("c"); cn += opt;
+  TCanvas *c1 = new TCanvas(cn,cn);
+  TString xTitle("Log_{10}(p_{TAv})");
+  TString Cut("noFitpK>30&&noFitpL>30&&chi2<200&&TMath::Abs(K.mPti-L.mPti)>0");
+  TString Title, yTitle;
+  TString draw;
+  TString Log10pTi("-TMath::Log10(TMath::Abs(K.mPti-L.mPti)/2.)");
+  TString Opt(opt);
+  TH1F *frame = 0;
+  if      (Opt.Contains("PullPti")) {
+    draw = Form("(K.mPti+L.mPti)/TMath::Sqrt(K.mPtiPti+L.mPtiPti):%s>>%s(30,-1,2,100,-5,5)",Log10pTi.Data(),Opt.Data());
+    Title = "#sigma for 1/p_{T} pull from cosmics muons";
+    yTitle = "#sigma (#Delta 1/p_{T}/#sigma 1/p_{T})";
+  } else if (Opt.Contains("PullImp")) {
+    draw = Form("(K.mImp+L.mImp)/TMath::Sqrt(K.mImpImp+L.mImpImp):%s>>%s(30,-1,2,100,-5,5)",Log10pTi.Data(),Opt.Data());
+    Title = "#sigma for #rho pull from cosmics muons";
+    yTitle = "#sigma (#Delta #rho/#sigma #rho)";
+  } else if (Opt.Contains("PullZ")) {
+    draw = Form("(K.mZ-L.mZ)/TMath::Sqrt(K.mZZ+L.mZZ):%s>>%s(30,-1,2,100,-5,5)",Log10pTi.Data(),Opt.Data());
+    Title = "#sigma for Z pull from cosmics muons";
+    yTitle = "#sigma (#Delta Z/#sigma Z)";
+  } else if (Opt.Contains("PullPsi")) {
+    draw = Form("difPsi(K.mPsi,L.mPsi)/TMath::Sqrt(K.mPsiPsi+L.mPsiPsi):%s>>%s(30,-1,2,100,-5,5)",Log10pTi.Data(),Opt.Data());
+    Title = "#sigma for #psi pull from cosmics muons";
+    yTitle = "#sigma (#Delta #psi/#sigma #psi)";
+  } else if (Opt.Contains("PullTan")) {
+    draw = Form("(K.mTan+L.mTan)/TMath::Sqrt(K.mTanTan+L.mTanTan):%s>>%s(30,-1,2,100,-5,5)",Log10pTi.Data(),Opt.Data());
+    Title = "#sigma for tan(#lambda) pull from cosmics muons";
+    yTitle = "#sigma (#Delta tan(#lambda)/#sigma tan(#lambda))";
+  } else if (Opt.Contains("DPti")) {
+    draw = Form("(K.mPti+L.mPti)*TMath::Sqrt(2.)/TMath::Abs(K.mPti-L.mPti):%s>>%s(30,-1,2,100,-0.2,0.2)",Log10pTi.Data(),Opt.Data());
+    Title = "Relative p_{T} resolution from cosmics muons  (No. fit points > 30)";
+    yTitle = "#sigma (#Delta p_{T}/p_{TAv})/ #sqrt{2}";
+    frame = c1->DrawFrame(-1,5e-3,1,0.5, Title);
+    frame->SetXTitle(xTitle);
+    frame->SetYTitle(yTitle);
+    c1->SetLogy(1);
+  } else if (Opt.Contains("dEdxbg")) {
+    draw = Form("zK:TMath::Log10(bgK)>>%s(50,0,5.,100,-.5,0.5)",Opt.Data());
+    Title = "Z = log((dE/dx)/(dEdx_{Bichsel})) versus Log_{10}(#beta #gamma) for cosmics muons";
+    yTitle = "Z";
+    xTitle = "Log_{10} (#beta #gamma)";
+  } else if (Opt.Contains("dEdx")) {
+    draw = Form("zK:%s>>%s(30,-1,2,100,-0.25,0.25)",Log10pTi.Data(),Opt.Data());
+    Title = "Z = log((dE/dx)/(dEdx_{Bichsel})) versus Log_{10}(p_{TAv}) for cosmics muons";
+    yTitle = "Z";
+  }
+  TLegend *leg = new TLegend(0.4,0.6,0.8,0.8);
   Int_t color = 0;
-  TF1 *res = new TF1("Res","TMath::Sqrt([0]*[0]*TMath::Power(10.,x) + [1]*[1]*(([2]*[2]+TMath::Power(10.,x))))",-1,1);
+  TF1 *res = new TF1("Res","TMath::Sqrt([0]*[0]*TMath::Power(10.,2*x) + [1]*[1]*(([2]*[2]+TMath::Power(10.,2*x))/TMath::Power(10.,2*x)))",-1,4);
   res->SetParameters(1e-2,1e-2,0.1056584);
   res->FixParameter(2,0.1056584);
-  CosmicTracks tracks;
-  CosmicTracks *ftrack = &tracks;
-  TFile *f = 0;
-  TCanvas *c1 = new TCanvas("c1","c1",2,10,1200,1200);
-  c1->Divide(2*kCharge,Npads/(2*kCharge));
-  TH1F *frame = 0;
-  Int_t NF = -1;
-  Double_t RS[24] = {103.576,   59.800,   -0.000,  -59.800, -103.577, -119.600, -103.577,  -59.801,    0.000,   59.801,  103.576,  119.600,  
-		     103.576,   59.798,   -0.001,  -59.801, -103.577, -119.600, -103.576,  -59.800,   -0.001,   59.800,  103.577,  119.600};
   while ( (f = (TFile *) next()) ) {
     f->cd();
     cout << "File: " << f->GetName() << endl;
-    NF++;
-    H2[NF] = new TH2D**[kAll]; 
-    for (Int_t k = 0; k < kAll; k++) {
-      H2[NF][k] = new TH2D*[kCharge];
-      for (Int_t c = 0; c < kCharge; c++) {
-	TString Title(plot[k].Title);
-	Title += " "; Title += Charge[c];
-	if (c == 0) {}
-	else if (c < 3) Title += " DCA_{xy}  <= 50 cm";
-	else            Title += " DCA_{xy}  >  50 cm";
-	H2[NF][k][c] = new TH2D(Form("%s%s%i",plot[k].Name,Charge[c],NF),Title,plot[k].nx,plot[k].xmin,plot[k].xmax,plot[k].ny,plot[k].ymin,plot[k].ymax);
-	H2[NF][k][c]->SetXTitle(plot[k].xTitle);
-	H2[NF][k][c]->SetYTitle(plot[k].yTitle);
-      }
-    }
-    TTree *tree = (TTree *) f->Get("CosmicT");
-    if (! tree) continue;
-    TBranch *branch = tree->GetBranch("CosmicTracksB");
-    enum kIntex {kImp = 0, kZ, kPsi, kPti, kTan,
-		 kImpImp = 0, 
-		 kZImp, kZZ,
-		 kPsiImp, kPsiZ, kPsiPsi,
-		 kPtiImp, kPtiZ, kPtiPsi, kPtiPti,
-		 kTanImp, kTanZ, kTanPsi, kTanPti, kTanTan};
-    if (! branch) continue;
-    branch->SetAddress(&ftrack);
-    Int_t nentries = (Int_t)tree->GetEntries();
-    if (nentries < nevents) nevents = nentries;
-    for (Int_t ev = 0; ev < nevents; ev++) {
-      tree->LoadTree(ev);  //this call is required when using the cache
-      tree->GetEntry(ev);   
-      if (ev > 0 && ! (ev%10000)) cout << "Read event " << ev << endl;
-      if (tracks.noFitpK < 30 || tracks.noFitpL < 30) continue;
-      Double_t pTAV     = TMath::Abs(tracks.K.params()[kPti] - tracks.L.params()[kPti])/2;
-      Double_t pTAVL10 = 1.95;
-      Double_t sigmapTI = TMath::Sqrt((tracks.K.errMatrix()[kPtiPti]+tracks.L.errMatrix()[kPtiPti])/2.);
-      if (sigmapTI < 1e-7) continue;
-      if (pTAV < 1e-7) continue;
-      Int_t sK = TMath::Abs(tracks.sectorK);
-      Int_t sL = TMath::Abs(tracks.sectorL);
-      Int_t sectorK = sK;
-      Int_t sectorL = sL;
-      // track K is coming from top 
-      StDcaGeometry &K = *&tracks.K;
-      StDcaGeometry &L = *&tracks.L;
-      if (RS[sK-1] < RS[sL-1]) {
-        sectorK = sL;
-	sectorL = sK;
-	K       = *&tracks.L;
-	L       = *&tracks.K;
-      }
-      Int_t charge = (K.charge() + 3)/2;
-      if (TMath::Abs(K.params()[kImp] - L.params()[kImp])/2 > 50.0) charge += 2;
-      pTAVL10 = TMath::Log10(pTAV);
-      V.DeltapTI = (K.params()[kPti] + L.params()[kPti])/2;
-      V.pullDeltapTI = V.DeltapTI/sigmapTI;
-      V.DeltapTR = V.DeltapTI*pTAV;
-      Double_t sigmapTR = pTAV*sigmapTI;
-      V.pullDeltapTR = V.DeltapTR/sigmapTR;
-      V.DeltaDCAxy = (K.params()[kImp] + L.params()[kImp])/2;
-      Double_t sigmaDCAxy = TMath::Sqrt((K.errMatrix()[kImpImp]+L.errMatrix()[kImpImp])/2.);
-      V.pullDeltaDCAxy = V.DeltaDCAxy/sigmaDCAxy;
-      
-      V.DeltaDCAz = (K.params()[kZ] - L.params()[kZ])/2;
-      Double_t sigmaDCAz = TMath::Sqrt((K.errMatrix()[kZZ]+L.errMatrix()[kZZ])/2.);
-      V.pullDeltaDCAz = V.DeltaDCAz/sigmaDCAz;
-      
-      
-      V.DeltaTan = (K.params()[kTan] + L.params()[kTan])/2;
-      Double_t sigmaTan = TMath::Sqrt((K.errMatrix()[kTanTan]+L.errMatrix()[kTanTan])/2.);
-      V.pullDeltaTan = V.DeltaTan/sigmaTan;
-      
-      V.DeltaPsi = difPsi(K.params()[kPsi],L.params()[kPsi])/2;
-      Double_t sigmaPsi = TMath::Sqrt((K.errMatrix()[kPsiPsi]+L.errMatrix()[kPsiPsi])/2.);
-      V.pullDeltaPsi = V.DeltaPsi/sigmaPsi;
-      
-      Double_t *Y = &V.DeltapTI;
-      for (Int_t k = 0; k < kTotal; k++) {
-	H2[NF][k][0]->Fill(pTAVL10, Y[k]);
-	H2[NF][k][charge]->Fill(pTAVL10, Y[k]);
-      }
-      H2[NF][kTotal][0]->Fill(sectorK,sectorL);
-      H2[NF][kTotal][charge]->Fill(sectorK,sectorL);
-    }
+    TTree *CosmicT = (TTree *) f->Get("CosmicT");
+    if (! CosmicT) continue;
     TString File(f->GetName());
-    File.ReplaceAll("Cosmics","");
+    File.ReplaceAll("Cosmics.","");
     File.ReplaceAll(".root","");
     color++;
-    if (color == 2) color = 4;
-    for (Int_t k = 0; k < kAll; k++) {
-      for (Int_t c = 0; c < kCharge; c++) {
-	Int_t pad = kCharge*k + c + 1;
-	if (NF == 1 && k == kAll -1) pad += kCharge;
-	c1->cd(pad)->SetLogz(1);
-	if (! H2[NF][k][c]) continue;
-	TH2D *h2 = (TH2D *) f->Get(H2[NF][k][c]->GetName());
-	if (! h2) continue;
-	if (! leg[pad-1]) {
-	  leg[pad-1] = new TLegend(0.1,0.8,0.3,0.9);
-	  h2->SetStats(0);
-	  h2->Draw("colz");
-	  leg[pad-1]->SetFillColor(gStyle->GetLegendFillColor());
-	  leg[pad-1]->Draw();
-	}
-	if (k != kAll -1) {
-	  h2->FitSlicesY();
-	  TH1D *h_1 = (TH1D *) gDirectory->Get(Form("%s_1",H2[NF][k][c]->GetName()));
-	  TH1D *h_2 = (TH1D *) gDirectory->Get(Form("%s_2",H2[NF][k][c]->GetName()));
-	  Double_t mu, sigma;
-	  if (h_1) {
-	    h_1->SetMarkerStyle(20); h_1->SetMarkerColor(color);
-	    h_1->Fit("pol0","er","same",-1.5,0.5);
-	    TF1 *pol0 = (TF1 *) h_1->GetListOfFunctions()->FindObject("pol0");
-	    if (pol0) {
-	      mu = pol0->GetParameter(0);
-	      h_1->Draw("same");
-	      h_2->SetMarkerStyle(21); h_2->SetMarkerColor(color);
-	      h_2->Fit("pol0","er","same",-1.5,0.5);
-	    }
-	    pol0 = (TF1 *) h_2->GetListOfFunctions()->FindObject("pol0");
-	    if (pol0) {
-	      sigma = pol0->GetParameter(0);
-	      //	  h_2->Draw("same");
-	      leg[pad-1]->AddEntry(h_1,Form("%s %6.4g #pm %6.4g",File.Data(),mu,sigma));
-	      leg[pad-1]->SetFillColor(gStyle->GetLegendFillColor());
-	    }
-	  }
-	} else {
-	  leg[pad-1]->AddEntry(h2,File.Data());
-	  leg[pad-1]->SetFillColor(gStyle->GetLegendFillColor());
-	}
-	c1->Update();
-      }
-    }
+    xTitle = "Log_{10}(p_{TAv})";
+    cout << "draw: " << draw.Data() << "\tCut :" << Cut.Data() << endl;
+    CosmicT->Draw(draw,Cut,"goff");
+    h2[color-1] = (TH2 *) gDirectory->Get(Opt);
+    if (! h2[color-1]) {cout << "Could not find hist: " << Opt.Data() << endl; continue;}
+    h2[color-1]->FitSlicesY();
+    h1[color-1] = (TH1 *) gDirectory->Get(Form("%s_2",h2[color-1]->GetName()));
+    h1[color-1]->SetTitle(Title);
+    h1[color-1]->SetXTitle(xTitle);
+    h1[color-1]->SetYTitle(yTitle);
+    h1[color-1]->SetMarkerStyle(20);
+    h1[color-1]->SetMarkerColor(color);
+    h1[color-1]->SetLineColor(color);
+    h1[color-1]->SetStats(0);
+    res->SetParameters(1e-2,1e-2,0.1056584);
+    res->FixParameter(2,0.1056584);
+    h1[color-1]->Fit(res,"er0","",-1.,1.);
+    TString legT(Form("a = %8.2g +/- %8.2g, b = %8.2g +/- %8.2g,",
+		      res->GetParameter(0),res->GetParError(0),
+		      res->GetParameter(1),res->GetParError(1)));
+    legT += File;
+    leg->AddEntry(h1[color-1],legT);
+#if 0
+    if (color == 1) leg->AddEntry(h1[color-1],"without correction (No. fit points > 30)");
+    if (color == 2) leg->AddEntry(h1[color-1],"with correction (No. fit points > 30)");
+#endif
   }
-  //  leg->Draw();
+  if (h1[0]) h1[0]->Draw();
+  TString same("");
+  if (frame) same = "same";
+  for (Int_t i = 0; i < nn; i++) {
+    if (h1[i])  {h1[i]->Draw(same); same = "same";}
+  }
+  leg->Draw();
 }
 //________________________________________________________________________________

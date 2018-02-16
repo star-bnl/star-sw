@@ -5,6 +5,7 @@
   setenv STARFPE NO
   setenv NODEBUG yes
   starver TFG17o
+#  starver TFG18c
   setup 64b
   ln -s $STAR/.sl* .
 #  cd $SCRATCH
