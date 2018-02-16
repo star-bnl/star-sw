@@ -1,7 +1,6 @@
-
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.63 2015/05/17 22:53:52 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.63.6.1 2018/02/16 22:14:59 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.63.6.1  2018/02/16 22:14:59  perev
+ * iTPC
+ *
  * Revision 1.63  2015/05/17 22:53:52  fisyak
  * Remove duplicted line
  *
@@ -184,7 +186,6 @@
 #include "TVector3.h"
 #include "TGeoManager.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
 #include "StarMagField.h"
 #include "TEnv.h"
@@ -197,7 +198,6 @@ ClassImp(StTpcDb);
 StTpcDb::StTpcDb() {
   assert(gStTpcDb==0);
   memset(mBeg,0,mEnd-mBeg+1);
-  mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   mTpc2GlobMatrix = new TGeoHMatrix("Default Tpc2Glob"); 
   for (Int_t i = 1; i <= 24; i++) {
     for (Int_t k = 0; k < kTotalTpcSectorRotaions; k++) {
@@ -228,7 +228,6 @@ StTpcDb::~StTpcDb() {
   SafeDelete(mHalf[1]);
   SafeDelete(mSwap[0]);  
   SafeDelete(mSwap[1]);
-  SafeDelete(mExB);
   SafeDelete(mTpc2GlobMatrix);
   SafeDelete(mFlip);
   gStTpcDb = 0;
@@ -404,8 +403,6 @@ void StTpcDb::SetTpcRotations() {
 	}
       } else {
 	Id = 10*sector + k;
-	TGeoTranslation TIO; 
-	TGeoRotation    RIO;
 	StBeamDirection part = east;
 	if (sector <= 12) part = west;
 	switch (k) {

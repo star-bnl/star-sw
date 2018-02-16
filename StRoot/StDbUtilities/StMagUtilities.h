@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.61 2017/10/26 02:47:42 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.61.2.1 2018/02/16 22:14:56 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
- * Revision 1.61  2017/10/26 02:47:42  genevb
- * Allow FullGridLeak to work on specific sheets via sheet widths
+ * Revision 1.61.2.1  2018/02/16 22:14:56  perev
+ * iTPC
  *
  * Revision 1.60  2017/04/12 19:47:02  genevb
  * Generic SpaceCharge and GridLeak functions independent of specific modes
@@ -260,12 +260,12 @@ class StMagUtilities {
 
   virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
-  virtual void    GetTPCVoltages ( Int_t mode ) ;
+  virtual void    GetTPCVoltages ( Int_t mode )   ;
   virtual void    GetSpaceCharge ()   ;
   virtual void    GetSpaceChargeR2 () ;  
   virtual void    GetShortedRing ()   ;  
   virtual void    GetOmegaTau ()      ;
-  virtual void    GetGridLeak ( Int_t mode ) ;
+  virtual void    GetGridLeak()       ;
   virtual void    GetHVPlanes()       ;
   virtual void    GetE()              ;
 

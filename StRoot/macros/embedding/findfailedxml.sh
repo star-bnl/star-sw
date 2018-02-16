@@ -61,6 +61,7 @@ do
 
    #if [ $nlogs -lt 890 ] ; then
    echo "checking FSET "$fset"..."
+   echo -n "sbatch --array=" >> $subfile
    find ${datadir}${particle}_${fset}_${reqid}/ -name "*.log.gz" > tmplog.list
    find ${datadir}${particle}_${fset}_${reqid}/ -name "*.minimc.root" > tmpminimc.list
    #fi
@@ -74,8 +75,6 @@ do
 	   echo "found one possible failed task, ${bn}_${ijob}, no log file!"
 	   if [ $nfailed -ne "0" ] ; then
 		echo -n "," >> $subfile
-	   else
-		echo -n "sbatch --array=" >> $subfile
 	   fi
 	   echo -n $ijob >> $subfile
 	   nfailed=$(($nfailed+1))
@@ -101,8 +100,6 @@ do
 		   fi
 		   if [ $nfailed -ne "0" ] ; then
 			echo -n "," >> $subfile
-		   else
-			echo -n "sbatch --array=" >> $subfile
 		   fi
 		   echo -n $ijob >> $subfile
 		   nfailed=$(($nfailed+1))
@@ -111,9 +108,9 @@ do
 	fi
    done
 
-   if [ $nfailed -gt 0 ] ; then
+   #if [ $nlogs -lt 890 ] ; then
       echo " array_0_$(($ndaq-1))_"`basename $bn`".slr" >> $subfile
-   fi
+   #fi
    echo found $nfailed failed tasks in FSET# $fset data ... 
    if [ $nfailed -gt 0 ] ; then
 	allgood="NO"

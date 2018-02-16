@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.12 2014/08/06 11:43:50 jeromel Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.12.10.1 2018/02/16 22:15:00 perev Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.12.10.1  2018/02/16 22:15:00  perev
+ * iTPC
+ *
  * Revision 1.12  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -51,7 +54,7 @@
  *--------------------------------------------------------------------------
  *
  ***************************************************************************/
-
+#include <string.h>
 #include "StMaker.h"
 
 class StTpcDigitalSector;
@@ -60,7 +63,7 @@ class StTpcDigitalSector;
 class daq_tpx;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0),NoRows(-1), mTpx_RowLen(0) {}
+  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
@@ -72,12 +75,10 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
-  Int_t    NoRows;
-  Int_t    NoInnerPadRows;
-  UChar_t *mTpx_RowLen;
+  UChar_t *mTpx_RowLen[24];
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.12.10.1 2018/02/16 22:15:00 perev Exp $  built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcRTSHitMaker, 1)    //StTpcRTSHitMaker - class to fille the StEvewnt from DAQ reader
 };
