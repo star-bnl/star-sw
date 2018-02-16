@@ -962,7 +962,8 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << ESMD_SYSTEM) ;
 	}
 	if(grp & (1 << TPX_GRP)) {
-	  ret |= (1 << TPX_SYSTEM) | (1<<ITPC_SYSTEM);
+	  ret |= (1 << TPX_SYSTEM);
+	  ret |= (1 << ITPC_SYSTEM);
 	}
 	if(grp & (1 << RHICF_GRP)) {
 	  ret |= (1 << RHICF_SYSTEM);
