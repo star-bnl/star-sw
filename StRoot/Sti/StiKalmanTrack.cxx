@@ -1,13 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.148 2018/01/12 23:17:09 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.148 2018/01/12 23:17:09 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.1 2018/02/17 02:20:02 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.1 2018/02/17 02:20:02 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.148  2018/01/12 23:17:09  smirnovd
- * Removed declared but undefined functions
+ * Revision 2.148.2.1  2018/02/17 02:20:02  perev
+ * Cleanup
  *
  * Revision 2.147  2017/01/26 21:32:41  perev
  * 1. Method removeNode added. It removes node from the track.
@@ -549,9 +549,7 @@
  * Added getTrackRadLength function to return radiation thickness along track (%).
  *
  */
-
-
-
+#include <assert.h>
 //Std
 #include <stdexcept>
 #include <cmath>
@@ -590,7 +588,8 @@
 ostream& operator<<(ostream&, const StiHit&);
 
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
-int StiKalmanTrack::mgMaxRefiter = 100;
+enum {kMaxRefiter = 100};
+int StiKalmanTrack::mgMaxRefiter = kMaxRefiter;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
@@ -618,7 +617,7 @@ static int mIdCount = 0;
   mSeedHitCount = 0;
   mCombUsed = 0;
   mVertex = 0;
-  m      = -1.;
+  mMass      = -1.;
   mFlag  = 0;
   _dca   = 0;
   _vChi2=-2;
@@ -695,7 +694,6 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
 {
-  //cout << "StiCAKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
@@ -1026,6 +1024,18 @@ double StiKalmanTrack::getTrackLength() const
 }
 
 
+/*! Calculate and return the track segment length between two nodes.
+  <h3>Notes</h3>
+  <ol>
+  <li>This is basically a wrapper for the StiKalmanTrackNode::pathLToNode function.</li>
+  </ol>
+  \return length
+ */
+//  inline double StiKalmanTrack::calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const
+//  {
+//    return p1.pathLToNode(&p2);
+//  }
+
 /*! Calculates the radiation length of material crossed by the track.
 
  */
@@ -1134,11 +1144,7 @@ double StiKalmanTrack::getNearBeam(StThreeVectorD *pnt,StThreeVectorD *dir) cons
 //_____________________________________________________________________________
 StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
-  if (firstNode==0 || lastNode==0)
- {
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
- }
+  assert(firstNode &&lastNode);
   
   StiKalmanTrackNode *node;
   StiKTNIterator it =(inot) ? begin():rbegin();
@@ -1149,8 +1155,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
     if (qua&kGoodHit) {if (!hit || node->getChi2()>10000.)continue;}
     return node;
   }
-  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
-  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");
   return 0;
 }
 //_____________________________________________________________________________
@@ -1174,6 +1178,24 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode(int qua)  const
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
+}
+//_____________________________________________________________________________
+StiKalmanTrackNode * StiKalmanTrack::getInnerMostDetHitNode(int detId)   const
+{
+  assert(firstNode && lastNode);
+  StiKalmanTrackNode *node = 0;
+  for (auto it=begin();(node=it());++it) 
+  {
+    if (!node->isValid())		continue;
+    if (node->getChi2()>10000.) 	continue;
+    StiHit* hit = node->getHit();
+    if (!hit) 				continue;
+    auto *det = hit->detector();
+    if (!det) 				continue;
+    if (detId!=det->getGroupId())	continue;
+    return node;
+  }
+  return 0;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
@@ -1346,72 +1368,6 @@ static int nCall=0; nCall++;
   //  cout <<" TRACK NOT REACHING THE VERTEX PLANE!"<<endl;
   return 0;
 }
-
-//_____________________________________________________________________________
-bool StiKalmanTrack::find(int direction)
-{
-static int nCall=0; nCall++;
-//assert(0);
-StiDebug::Break(nCall);
-  bool trackExtended=false;  
-  bool trackExtendedOut=false;
-  int status = 0;
-  setFlag(0);
-  // invoke tracker to find or extend this track
-  //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
-  try 
-    {
-      if (getNNodes(3)<4) return false;
-      status = fit(kOutsideIn);
-      if (getNNodes(3)<4) return false;
-      if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
-      double radSvt= 50.;
-      if (trackFinder->find(this,kOutsideIn,radSvt)) {
-          status = approx(1);//VP if(status) return false;
-          status = refit()  ; if(status) return false;
-	  trackExtended = getNNodes(3)>5;
-      }	
-
-      if (trackFinder->find(this,kOutsideIn,0.)) {
-//VP          status = approx(1); if(status) return false;
-          status = refit()  ; if(status) return false;
-	  trackExtended = trackExtended || getNNodes(3)>5;
-      }	
-    }
-  catch (runtime_error & error)
-    {
-      cout << "SKT:find(int dir) -W- ERROR:" << error.what()<<endl;
-    }
-  // decide if an outward pass is needed.
-  const StiKalmanTrackNode * outerMostNode = getOuterMostNode(2);
-  if (!outerMostNode)
-    {
-      setFlag(-1);
-      return false;
-    }
-  if (outerMostNode->getX()<185. )
-    {
-      try
-	{
-	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
-	  trackExtendedOut= trackFinder->find(this,kInsideOut);
-          if (trackExtendedOut) { 
-//VP             status = approx(1); if(status) return false;
-             status = refit()  ; if(status) return false;
-	     trackExtendedOut = getNNodes(3)>5;
-          }
-	  if (debug()) cout << "StiKalmanTrack::find find(this,kInsideOut)" << *((StiTrack *) this);
-	}
-      catch (...)
-	{
-	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in insideOut find"<<endl;
-	}
-      //cout<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
-    }
-  setFlag(1);
-  //cout << " find track done" << endl;
-  return trackExtended||trackExtendedOut;
-}
 ///Return all the hits associated with this track, including those with a large incremental
 ///chi2 that may not contribute to the fit.
 //_____________________________________________________________________________
@@ -1562,8 +1518,10 @@ int StiKalmanTrack::refit()
   int iter=0,igor=0;
   double qA;
   double errConfidence = defConfidence;
+  int tally = 0;
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
+      tally++;
       fail = 0;
       errType = kNoErrors;
       sTNH.set(StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10,StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx()*100,errConfidence,iter);
@@ -1638,7 +1596,6 @@ int StiKalmanTrack::refit()
       node->setHit(0);
     }
   }
-
   if (fail) setFlag(-1);
   return errType;
 }
@@ -1866,7 +1823,7 @@ double Xi2=0;
 }    
 //_____________________________________________________________________________
 double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
-           ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
+                           ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
 {
   double est=0;
   for (int i=0;i<kNPars;i++) {
@@ -1886,7 +1843,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
 
   mSeedHitCount=tk.mSeedHitCount; 	//number of points used to seed the track
   mFlag        =tk.mFlag;         	//A flag to pack w/ topo info
-  m            =tk.m;             	// mass hypothesis
+  mMass        =tk.mMass;             	// mass hypothesis
   _dca	       =tk._dca;
   _vChi2       =tk._vChi2;		//
   mVertex      =tk.mVertex;
@@ -1904,7 +1861,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
 //_____________________________________________________________________________
 void StiKalmanTrack::setMaxRefiter(int maxRefiter) 
 {
-  mgMaxRefiter = maxRefiter;
+  mgMaxRefiter = (maxRefiter<0)? kMaxRefiter:maxRefiter;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::rejectByHitSet()  const
@@ -1974,4 +1931,21 @@ int StiKalmanTrack::idTruth(int *qa) const
   }
   if (qa) *qa = 100*ut.GetQua();  
   return ut.GetIdTru();
+}
+//_____________________________________________________________________________
+int StiKalmanTrack::legal(const StiHit *hit)  const
+{
+  enum {kNear= 40};
+
+  double zH = hit->z(); if (fabs(zH)>kNear)	return 1; //Too far from memb
+  double vH = hit->vz();if (fabs(vH)<=   0) 	return 1; //Non TPC hit
+  const auto fstHit = getInnerMostHitNode(1)->getHit();
+  const auto lstHit = getOuterMostHitNode(1)->getHit();
+
+  auto *tkHit = (fabs(fstHit->z()-hit->z()) < 
+                 fabs(lstHit->z()-hit->z()))
+                ? fstHit:lstHit;
+  if (tkHit->vz()*vH >= 0) return 1;	//same sign of drift velosity
+  if (tkHit->z() *zH <= 0) return 1;	//but Z sign are different
+  return 0;				//wrong hit
 }
