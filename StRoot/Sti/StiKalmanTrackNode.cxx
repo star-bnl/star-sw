@@ -1,14 +1,12 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.175 2018/01/16 22:46:09 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.175.2.1 2018/02/17 02:01:00 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 2.175  2018/01/16 22:46:09  smirnovd
- * Remove inline attribute to match the declaration
- *
- * Let compiler decide whether to inline or not
+ * Revision 2.175.2.1  2018/02/17 02:01:00  perev
+ * CleanupOnly
  *
  * Revision 2.174  2016/11/07 23:58:03  perev
  * More accurate tracking when in refit track sometimes missed the vollume.
@@ -581,7 +579,7 @@
  * Added several functions for radlength calculation.
  *
  */
-
+#include <assert.h>
 #include <Stiostream.h>
 #include <stdexcept>
 #include <math.h>
@@ -601,6 +599,7 @@ using namespace std;
 #include "StDetectorDbMaker/StiTrackingParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
+//#include "StiTrack.h"
 #include "StiTrackNodeHelper.h"
 #include "StiFactory.h"
 #include "StiUtilities/StiDebug.h"
@@ -614,7 +613,6 @@ using namespace std;
 #include "THelixTrack.h"
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
-
 #include "StarMagField.h"
 #include "TMath.h"
 #include "StMessMgr.h"
@@ -1050,7 +1048,7 @@ StiDebug::Break(nCall);
   setState(pNode);
   setDetector(tDet);
   if (mFP._cosCA <-1e-5) return -1; 
-  if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
+  if (debug()) ResetComment(::Form("%40s ",tDet->getName().c_str()));
 
   StiPlacement * place = tDet->getPlacement();
   double nNormalRadius = place->getNormalRadius();
@@ -1137,7 +1135,6 @@ StiDebug::Break(nCall);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
-  
   setHit(vertex);
   setDetector(0);
   return true;
@@ -1151,14 +1148,14 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
   setState(parentNode);
   if (debug()) {
     if (parentNode->getDetector()) 
-      ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
+      ResetComment(::Form("%40s ",parentNode->getDetector()->getName().c_str()));
     else ResetComment("Unknown Detector");
   }
   if (propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
   
   propagateError();
   if (mFE.zign()<0) return false;
-  if (debug() & 8) { PrintpT("B");}
+  if (debug() & 8) { PrintpT("B"); PrintStep();}
   setHit(0);
   setDetector(0);
   return true;
@@ -1171,11 +1168,11 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 {
   int position = 0;
   setState(pNode);
-  if (debug()) ResetComment(::Form("%30s ",pNode->getDetector()->getName().c_str()));
+  if (debug()) ResetComment(::Form("%40s ",pNode->getDetector()->getName().c_str()));
   position = propagate(radius,kCylindrical,dir);
   if (position<0) return position;
   propagateError();
-  if (debug() & 8) { PrintpT("R");}
+  if (debug() & 8) { PrintpT("R"); PrintStep();}
   _detector = 0;
   return position;
 }
@@ -1525,6 +1522,7 @@ static int nCall=0; nCall++;
   if (pt > 0.350 && TMath::Abs(getHz()) < 1e-3) pt = 0.350;
   double p2=(1.+mFP.tanl()*mFP.tanl())*pt*pt;
   double m=StiKalmanTrackFinderParameters::instance()->massHypothesis();
+  assert(m>0);
   double m2=m*m;
   double e2=p2+m2;
   double beta2=p2/e2;
@@ -1912,7 +1910,7 @@ double StiKalmanTrackNode::getWindowZ()
 //______________________________________________________________________________
 StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 {
-  if (mFP.curv()==0) throw logic_error("StiKalmanTrackNode::getHelixCenter() -F- _curv==0 ");
+  assert(mFP.curv());
   double xt0 = mFP.x()-mFP._sinCA/mFP.curv();   /*VP*/
   double yt0 = mFP.y()+mFP._cosCA/(mFP.curv());
   double zt0 = mFP.z()+mFP.tanl()*asin(mFP._sinCA)/mFP.curv();
@@ -1956,82 +1954,6 @@ int StiKalmanTrackNode::locate()
   return 0;
  }
 #endif //1
-#if 0
-//______________________________________________________________________________
-int StiKalmanTrackNode::locate()
-{
-  int position;
-  double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
-  //fast way out for projections going out of fiducial volume
-  const StiDetector *tDet = getDetector();
-  if (!tDet) return 0;
-  const StiPlacement *place = tDet->getPlacement();
-  const StiShape     *sh    = tDet->getShape();
-  double kNStd = (tDet->isActive() ? 5 : 0 ); // GVB: avoid seeing too much inactive material
-
-  if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
-  
-#ifndef DO_TPCCATRACKER // insensible region on a detector plane
-  edge  = 2.;
-  if (mFP.x()<50.)      edge  = 0.3;
-#else /* DO_TPCCATRACKER */
-  edge = 0.;
-#endif /* !DO_TPCCATRACKER */
-  
-  //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
-  Int_t shapeCode  = sh->getShapeCode();
-  switch (shapeCode) {
-  case kDisk:
-  case kCylindrical: // cylinder
-    yOff    = nice(_alpha - place->getLayerAngle());
-    yAbsOff = fabs(yOff);
-    yAbsOff -=kNStd*sqrt((mFE._cXX+mFE._cYY)/(mFP.x()*mFP.x()+mFP.y()*mFP.y()));
-    if (yAbsOff<0) yAbsOff=0;
-    detHW = ((StiCylindricalShape *) sh)->getOpeningAngle()/2.;
-    innerY = outerY = detHW;
-    break;
-  case kPlanar: 
-  default:
-    yOff = mFP.y() - place->getNormalYoffset();
-    yAbsOff = fabs(yOff) - kNStd*sqrt(mFE._cYY);
-    if (yAbsOff<0) yAbsOff=0;
-    detHW = sh->getHalfWidth();
-    innerY = detHW - edge;
-    //outerY = innerY + 2*edge;
-    //outerZ = innerZ + 2*edge;
-    outerY = innerY + edge;
-    break;
-  }
-  zOff = mFP.z() - place->getZcenter();
-  zAbsOff = fabs(zOff);
-  detHD = sh->getHalfDepth();
-  innerZ = detHD - edge;
-  outerZ = innerZ + edge;
-  if (yAbsOff<innerY && zAbsOff<innerZ)
-    position = kHit; 
-  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
-    // outside detector to positive or negative y (phi)
-    // if the track is essentially tangent to the plane, terminate it.
-      position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
-  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
-    // outside detector to positive or negative z (west or east)
-    position = zOff>0 ? kMissZplus : kMissZminus;
-  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
-    // positive or negative phi edge
-    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
-  else
-    // positive or negative z edge
-    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
-  if (debug()&8) {
-    comment += ::Form("R %8.3f y/z %8.3f/%8.3f", 
-		      mFP.x(), mFP.y(), mFP.z());
-    if (position>kEdgeZplus || position<0)  
-      comment += ::Form(" missed %2d y0/z0 %8.3f/%8.3f dY/dZ %8.3f/%8.3f",
-			position, yOff, zOff, detHW, detHD);
-  }
-  return position;
- }
-#endif //0
 
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
@@ -2262,7 +2184,7 @@ void   StiKalmanTrackNode::PrintpT(const Char_t *opt) const {
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
-  LOG_INFO << comment << "\t" << commentdEdx << endm;
+  LOG_INFO << comment.Data() << "\t" << commentdEdx.Data() << endm;
   ResetComment();
 }
 //________________________________________________________________________________
@@ -2442,14 +2364,13 @@ static const int    nsurf  = 6;
 static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
       double dir[3] = {mFP._cosCA,mFP._sinCA,mFP.tanl()};
       THelixTrack tc(mFP.P,dir,mFP.curv());
-      double s = tc.Step(smax, surf, nsurf,0,0,1);
+      double s = tc.Path(smax, surf, nsurf,0,0,1);
       if (TMath::Abs(s) < smax) 
 	time = TMath::Abs(s)/(TMath::Ccgs()*1e-6); // mksec
     }
   }
   return time;
 }
-//________________________________________________________________________________
 //______________________________________________________________________________
 /*! same as evaluateChi2 but used only _info information\*/
 double StiKalmanTrackNode::evaluateChi2Info(const StiHit * hit) const
