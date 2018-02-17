@@ -10,6 +10,7 @@
 /// appear in the supporting documentation. The authors make no claims
 /// about the suitability of this software for any purpose. It is
 /// provided "as is" without express or implied warranty.
+#include <assert.h>
 #include "Stiostream.h"
 #include <stdexcept>
 #include <math.h>
@@ -17,7 +18,6 @@
 #include "TError.h"
 #include "TStopwatch.h"
 #include "StEnumerations.h"
-using namespace std;
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/EditableParameter.h"
 #include "Sti/Base/EditableFilter.h"
@@ -97,9 +97,8 @@ _trackContainer(0)
 {
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
 memset(mTimg,0,sizeof(mTimg));
-  if (!_toolkit)
-    throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
-  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
+  assert(_toolkit);
+//  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 //______________________________________________________________________________
 /*!
@@ -166,8 +165,6 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
 
   do { //technical do
     track->setFlag(-1);
-//     status = track->approx(0); // should be filled by track->initialize()
-//     if (status) 	{nTSeed++; errType = abs(status)*100 + kApproxFail; break;}
     status = track->fit(kOutsideIn);
     if (status) 	{nTSeed++; errType = abs(status)*100 + kFitFail; break;}
     status = extendTrack(track,rMin); // 0 = OK 
@@ -457,7 +454,8 @@ assert(direction || leadNode==track->getLastNode());
 
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
-  if (--mEventPerm <0) throw runtime_error("FATAL::TOO MANY permutations");
+  --mEventPerm;
+  assert(mEventPerm>=0 && "FATAL::TOO MANY permutations");
   if (--mTrackPerm==0) { mUseComb = 0; }
 
   StiDetector *tDet=0;
@@ -570,7 +568,8 @@ assert(direction || leadNode==track->getLastNode());
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-          if (stiHit->detector() && stiHit->detector()!=tDet) continue;
+          if (stiHit->detector() && stiHit->detector()!=tDet) 	continue;
+          if (!track->legal(stiHit))				continue;
           status = testNode.nudge(stiHit);
           testNode.setReady();
           if (status)		continue;
@@ -608,7 +607,6 @@ assert(direction || leadNode==track->getLastNode());
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
-
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 
