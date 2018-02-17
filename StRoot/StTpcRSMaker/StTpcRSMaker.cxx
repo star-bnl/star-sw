@@ -66,7 +66,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.75 2017/02/14 23:40:35 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.76 2018/02/17 22:24:39 smirnovd Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -1454,7 +1454,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
   Int_t Sector = TMath::Abs(sector);
   StTpcDigitalSector *digitalSector = data->GetSector(Sector);
   if (! digitalSector) {
-    digitalSector = new StTpcDigitalSector();
+    digitalSector = new StTpcDigitalSector(Sector);
     data->setSector(Sector,digitalSector);
   } else 
     digitalSector->clear();
@@ -1778,8 +1778,14 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.75 2017/02/14 23:40:35 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.76 2018/02/17 22:24:39 smirnovd Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.76  2018/02/17 22:24:39  smirnovd
+// Use new signature of StTpcDigitalSector constructor
+//
+// StTpcDigitalSector constructor has changed in STpcRawData.cxx so, all calls have
+// to be updated to match the new signature
+//
 // Revision 1.75  2017/02/14 23:40:35  fisyak
 // Add new Table to correct dE/dx pad dependence, 2017 dAu20-62 calibration
 //
