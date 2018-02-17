@@ -94,7 +94,7 @@
 
 #ifndef StiHitContainer_HH
 #define StiHitContainer_HH
-
+#include <assert.h>
 #include <vector>
 #include <map>
 #include <time.h>
@@ -284,10 +284,8 @@ inline StiHit * StiHitContainer::getNearestHit(double position, double refAngle,
 
 inline Factory<StiHit> * StiHitContainer::getHitFactory()
 {  
-  if (_hitFactory) 
-    return _hitFactory;
-  else
-    throw runtime_error("StiHitContainer::getHitFactory() -I- _hitFactory is null");
+  assert(_hitFactory);
+  return _hitFactory;
 }
 
 inline StiHit * StiHitContainer::getHit()
