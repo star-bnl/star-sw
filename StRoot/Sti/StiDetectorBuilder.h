@@ -72,6 +72,7 @@ public:
   double nice(double angle) const;
   void setGroupId(int id) 				{ _groupId = id;}
   int  getGroupId() const 				{return _groupId;}
+  void setTrackingParameters(const StiTrackingParameters & pars);
   StiTrackingParameters *getTrackingParameters() 	{ return  _trackingParameters;}
   Factory<StiDetector>* getDetectorFactory() 		{return _detectorFactory;}
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
@@ -80,6 +81,7 @@ public:
   void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
   StiMaterial *getGasMat()   				{return _gasMat;}
   void setSplit(double relThick=0.5, int maxSplit=20)	{mThkSplit=relThick;mMaxSplit=maxSplit;}
+  void SaveGeometry(const std::string fileName="sti2rootgeo.root") const;
 //		Static methodes
   static void setDebug(int m = 0) 			{_debug = m;}
   static int  debug() {return _debug;}

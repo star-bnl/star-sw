@@ -10,6 +10,7 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiUtilities/StiDebug.h"
 #include "Sti/StiElossCalculator.h"
+#include "Sti/StiDetectorVolume.h"
 #include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
@@ -103,7 +104,7 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
     assert( !_detectors[row][sector]);
   }  
   _detectors[row][sector] = detector;
-  if (_debug || sector == 0) {
+  if (_debug || (sector == 0 && detector->isActive())) {
     cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
     if (detector) cout << detector->getName();
     else          cout << " NULL ??";
@@ -161,6 +162,19 @@ void StiDetectorBuilder::del(UInt_t row, UInt_t sector)
 void StiDetectorBuilder::build(StMaker& source)
 {
   buildDetectors(source);
+
+  do {
+// 		Save built Sti geometry in a root file
+    if (source.GetDebug() <2) 			break;
+    std::string out("sti2rootgeo_");
+    out+= getName();
+    if (out.find("Star")!=std::string::npos) 	break;
+    size_t jk = out.find("Builder");
+    if (jk == std::string::npos) 		break;
+    out.erase(jk,999);
+    out+=".root";
+    SaveGeometry(out);
+ } while(0);
 
   mDetectorIterator = mDetectorMap.begin();
 }
@@ -308,12 +322,16 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     for (int i=0;i<(int)dv.size();i++) {
       int layer = getNRows();
       add(layer,0,dv[i]); 
-      cout << "StiDetectorBuilder::AverageVolume build detector " << dv[i]->getName() << " at layer " << layer << endl;
+      if (debug()) {
+	cout << "StiDetectorBuilder::AverageVolume build detector " << dv[i]->getName() << " at layer " << layer << endl;
+      }
     } }
   else {  
    int layer = getNRows();
    add(layer,0,pDetector); 
-   cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
+   if (debug()) {
+     cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
+   }
   }
 
 }
@@ -343,6 +361,24 @@ void StiDetectorBuilder::setDetector(UInt_t row, UInt_t sector, StiDetector *det
   setNSectors(row+1,sector+1);
 assert(!_detectors[row][sector]);
    _detectors[row][sector] = detector;
+}
+
+
+
+/*!
+ * Save Sti geometry created by this builder in a root file. The Sti volumes are
+ * converted into drawable root objects with the help of StiMaker/StiDetectorBuilder.
+ * Note: The StiDetectorVolume object is created on the heap in order to avoid
+ * disturbance in the current BFC library linking order.
+ */
+//________________________________________________________________________________
+void StiDetectorBuilder::SaveGeometry(const std::string fileName) const
+{
+   TFile fileTmp(fileName.c_str(), "RECREATE");
+   StiDetectorVolume *stiDetVol = new StiDetectorVolume(*this);
+   stiDetVol->Write();
+   fileTmp.Close();
+   delete stiDetVol;
 }
 
 
