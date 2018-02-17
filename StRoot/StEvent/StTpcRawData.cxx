@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.13 2012/10/23 20:15:57 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.14 2018/02/17 02:37:08 perev Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.14  2018/02/17 02:37:08  perev
+ * iTPC
+ *
  * Revision 2.13  2012/10/23 20:15:57  fisyak
  * Don't add empty ADC
  *
@@ -55,13 +58,13 @@
 #include <assert.h>
 #include "TMath.h"
 #include "StDaqLib/TPC/trans_table.hh"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(StTpcDigitalSector);
 ClassImp(StTpcRawData);
 //________________________________________________________________________________
-StTpcDigitalSector::StTpcDigitalSector(void *db) {
+StTpcDigitalSector::StTpcDigitalSector(Int_t sector) : mSector(sector) {
   StDigitalTimeBins  timeBins;
-  mNoRows = St_tpcPadPlanesC::instance()->padRows();
+  mNoRows = St_tpcPadConfigC::instance()->padRows(sector);
   for(Int_t row=1; row <= mNoRows; row++) {
     StDigitalPadRow    padRow;
     for (Int_t pad = 0; pad < numberOfPadsAtRow(row); pad++) {
@@ -273,15 +276,11 @@ StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
       }
       getTimeAdc(row,pad,ADCs1,IDTs1);
       v.getTimeAdc(row,pad,ADCs2,IDTs2);
-      Bool_t ifIDT = kFALSE;
       for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	if (! ADCs2[i]) continue;
-	if (! ifIDT && (IDTs1[i] || IDTs2[i])) ifIDT = kTRUE;
 	if ((IDTs1[i] || IDTs2[i]) && ADCs1[i] < ADCs2[i]) IDTs1[i] = IDTs2[i];
 	ADCs1[i] += ADCs2[i];
       }
-      if (ifIDT) putTimeAdc(row, pad, ADCs1, IDTs1);
-      else       putTimeAdc(row, pad, ADCs1);
+      putTimeAdc(row, pad, ADCs1, IDTs1);
     }
   }
   return *this;
@@ -370,7 +369,7 @@ StTpcRawData &StTpcRawData::operator+= (StTpcRawData& v) {
     StTpcDigitalSector *b = v.getSector(sec);
     if (!b ) continue;
     if (!a) {
-      a = new StTpcDigitalSector();
+      a = new StTpcDigitalSector(sec);
       *a = *b;
       setSector(sec, a);
       continue;
