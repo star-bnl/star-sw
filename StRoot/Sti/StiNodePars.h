@@ -43,7 +43,7 @@ class StiNodePars {
   double &curv() 	{return P[kCurv];}
   double &hz()   	{return P[kHz];}
   double *A(Int_t i)    {return &P[i];}
-  
+  double *A()           {return P;}
   Int_t     check(const char *pri=0) const;
   void      print() const;
 
