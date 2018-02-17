@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.53 2015/04/09 19:54:03 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.54 2018/02/17 22:24:39 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.54  2018/02/17 22:24:39  smirnovd
+ * Use new signature of StTpcDigitalSector constructor
+ *
+ * StTpcDigitalSector constructor has changed in STpcRawData.cxx so, all calls have
+ * to be updated to match the new signature
+ *
  * Revision 1.53  2015/04/09 19:54:03  genevb
  * Introduce sector masking (only MTD-based so far)
  *
@@ -965,7 +971,7 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
   assert(data);
   StTpcDigitalSector *digitalSector = data->GetSector(sector);
   if (! digitalSector) {
-    digitalSector = new StTpcDigitalSector();
+    digitalSector = new StTpcDigitalSector(sector);
     data->setSector(sector,digitalSector);
   }
   return digitalSector;

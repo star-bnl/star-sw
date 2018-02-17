@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.9 2012/05/07 14:41:59 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.10 2018/02/17 22:24:38 smirnovd Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.10  2018/02/17 22:24:38  smirnovd
+ * Use new signature of StTpcDigitalSector constructor
+ *
+ * StTpcDigitalSector constructor has changed in STpcRawData.cxx so, all calls have
+ * to be updated to match the new signature
+ *
  * Revision 2.9  2012/05/07 14:41:59  fisyak
  * Remove hardcoded separation between Inner and Outer Sectors
  *
@@ -88,7 +94,7 @@ typedef std::vector<StTpcPixel>              StVectPixel;
 
 class StTpcDigitalSector : public StObject {
 public:
-    StTpcDigitalSector(void *db = 0);
+    StTpcDigitalSector(Int_t sector);
     virtual ~StTpcDigitalSector() {}
     // access functions
     const StDigitalTimeBins* timeBinsOfRowAndPad(Int_t rowN, Int_t padN) const { return (&mData[(rowN-1)][(padN-1)]);}
