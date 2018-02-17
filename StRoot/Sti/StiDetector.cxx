@@ -14,7 +14,8 @@
 #include "Sti/StiToolkit.h"
 #include "StiUtilities/StiDebug.h"
 #include "StiMapUtilities.h"
-
+#include "TMath.h"
+#include "TString.h"
 int    StiDetector::mgIndex=0;
 double StiDetector::mgValue[2]={0};
 
@@ -53,21 +54,12 @@ void StiDetector::copy(StiDetector &detector){
 //______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-    os << "StiDetector:" << endl
-       << d.getName()
-       <<"\tR:"<<d.getPlacement()->getNormalRadius()<<"cm\tA:"
-       <<d.getPlacement()->getNormalRefAngle()<< " radians" << endl;
-
-    if (d.material)
-       os << *d.material;
-
-    if (d.shape)
-       os << *d.shape;
-
-    if (d.placement)
-       os << *d.placement;
-
-    return os;
+  //    os << "StiDetector:" << endl
+  os   << d.getName()
+       << Form("\tR: %7.3f cm ",d.getPlacement()->getNormalRadius()) 
+       << Form("\tA: %7.3f degree", TMath::RadToDeg()*d.getPlacement()->getNormalRefAngle());
+  //       << endl;
+  return os;
 }
 //______________________________________________________________________________
 int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
@@ -175,14 +167,14 @@ do {
      mgIndex = 1;
      mgValue[1] = thick/2;
      mgValue[0] = fabs(xl[0]-rN)-mgValue[1];
-     if (mgValue[0]>acc) return 0;
+     if (mgValue[0]>acc) break;
    }
    if (mode&2) {
      mgIndex = 2;
      double y = xl[1]-placement->getNormalYoffset();
      mgValue[1] = shape->getHalfWidth();
      mgValue[0]  = fabs(y)-mgValue[1];
-     if (mgValue[0]>acc) return 0;
+     if (mgValue[0]>acc) break;
    }
  } else {
    if (mode&1) {
@@ -190,7 +182,7 @@ do {
      mgValue[1] = thick/2;
      double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
      mgValue[0] = (fabs(rxy-rN)-mgValue[1]);
-     if (mgValue[0]>acc) return 0;
+     if (mgValue[0]>acc) break;
    }
 
    if (mode&2) {
@@ -200,18 +192,24 @@ do {
      if (ang> M_PI) ang -=M_PI*2;
      mgValue[1] = shape->getOpeningAngle()/2;
      mgValue[0] = (fabs(ang)-mgValue[1]);
-     if (mgValue[0]>acc/rN)	return 0;
+     if (mgValue[0]>acc/rN)	break;
    }
  } 
-   if (!(mode&4)) return 1;
+   if (mode&4) {
      mgIndex = 3;
      mgValue[1] = shape->getHalfDepth();
      double z = xl[2]-placement->getZcenter();  
      mgValue[0] = (fabs(z)-mgValue[1]);
-     if (mgValue[0]>acc)	return 0;
-     
+     if (mgValue[0]>acc)	break;
+   }
    return 1;
  } while(0);
+  ::Error("StiDetector::insideL","Det=%s XYZ=(%g %g %g)"
+         ,getName().c_str(),xl[0],xl[1],xl[2]);
+  ::Error("StiDetector::insideL","idx=%d val=%g %g"
+         ,mgIndex,mgValue[0],mgValue[1]);
+
+  return 1;///?????????????????????????????????????
   return 0;
 }
 
