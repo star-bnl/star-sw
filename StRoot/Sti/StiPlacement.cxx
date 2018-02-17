@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "StiPlacement.h"
-
+#include "TString.h"
 using namespace std;
 
 
@@ -104,23 +104,10 @@ void StiPlacement::setLayerAngle(float layerAng)
   while (layerAngle< -M_PI) {layerAngle+=2*M_PI;}	
   while (layerAngle>  M_PI) {layerAngle-=2*M_PI;}	
 }
-	
-	
-//______________________________________________________________________________
-ostream& operator<<(ostream& os, const StiPlacement& p)
-{
-   os << "StiPlacement:" << endl
-      << "normalRefAngle: " << p.normalRefAngle << " rad, "
-      << "normalRadius: " << p.normalRadius << " cm, "
-      << "normalYoffset: " << p.normalYoffset << " cm" << endl
-      << "centerRefAngle: " << p.centerRefAngle << " rad, "
-      << "centerRadius: "   << p.centerRadius << " cm, "
-      << "centerOrientation: "  << p.centerOrientation << " rad" << endl
-      << "zCenter: " << p.zCenter << " cm, "
-      << "layerRadius: " << p.layerRadius << " cm, "
-      << "layerAngle: " << p.layerAngle << " rad" << endl;
-
-   return os;
+//______________________________________________________________________________	
+ostream& operator<<(ostream& os, const StiPlacement& m) {
+  os << Form(" Z:%7.2f Y:%7.2f R:%7.2f",m.getZcenter(),m.getNormalYoffset(),m.getCenterRadius());
+  return os;
 }
 //______________________________________________________________________________
 void StiPlacement::setLayerRadius(float radius_)
