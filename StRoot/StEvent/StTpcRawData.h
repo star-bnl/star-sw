@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.9.18.1 2018/02/17 02:37:04 perev Exp $
+ * $Id: StTpcRawData.h,v 2.9.18.2 2018/02/19 00:12:15 perev Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,7 +10,7 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
- * Revision 2.9.18.1  2018/02/17 02:37:04  perev
+ * Revision 2.9.18.2  2018/02/19 00:12:15  perev
  * iTPC
  *
  * Revision 2.9  2012/05/07 14:41:59  fisyak
@@ -121,8 +121,8 @@ public:
     StTpcDigitalSector &operator+= (StTpcDigitalSector& v);
     Int_t numberOfPadsAtRow(Int_t row) {return (row > 0 && row <= mNoRows) ? St_tpcPadConfigC::instance()->padsPerRow(mSector, row) : 0;}
     StTpcDigitalSector& operator=(const StTpcDigitalSector&);
-//??    Int_t sector() {return mSector;}
-//??    Int_t NoRows() {return mNoRows;}
+    Int_t sector() {return mSector;}
+    Int_t NoRows() {return mNoRows;}
 private:
     StTpcDigitalSector(const StTpcDigitalSector&);
 
