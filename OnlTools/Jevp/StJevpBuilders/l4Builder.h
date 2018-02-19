@@ -43,7 +43,7 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-		JevpPlot *HltPlots[39];
+		JevpPlot *HltPlots[45];
 		JevpPlot *BeamPlots[3];
 		JevpPlot *BesGoodPlots[5];
 		JevpPlot *HLTGood2Plots[4];
@@ -349,8 +349,11 @@ class l4Builder : public JevpBuilder {
 		//********************************
 		TH2F *hTrayID_TrgTime;
 		TH1D *hchannelID;
-		TH2F *hVzvpd_Vz ;
+		TH2F *hVzvpd_lmVz ;
+		TH1D *hLmVzDiff;
+		TH1D *hVzvpd;
 		TH1D *hVzDiff;
+
 		/*   TH3D *hMatchannel3D ; */
 
 		TH2F *hVzvpd_Vz_UPC ;
