@@ -160,8 +160,8 @@ void l4Builder::initialize(int argc, char *argv[])
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 
-	for(int i = 0; i < 39; i++) {
-		HltPlots[i] = new JevpPlot();
+	for(int i = 0; i < 45; i++) {
+	        HltPlots[i] = new JevpPlot();
 		HltPlots[i]->gridx = 0;
 		HltPlots[i]->gridy = 0;
 		HltPlots[i]->setPalette(1);
@@ -261,19 +261,18 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
 	setAllPlots();
-	for(int i = 0; i < 39; i++) {
+	for(int i = 0; i < 45; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
-
 	for(int i = 0; i < 4; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HLTGood2Plots[i]);
 	}
-	for(int i=0;i<5;i++) {
-	    addPlot(BesGoodPlots[i]);
+	for(int i = 0; i < 5; i++) {
+       	        LOG(DBG, "Adding plot %d", i);
+	        addPlot(BesGoodPlots[i]);
 	}
-
 	for(int i = 0; i < 1; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HeavyFragmentPlots[i]);
@@ -299,7 +298,7 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
-	int initialno = 39;
+	int initialno = 45;
 	for(int i = 0; i < initialno; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
@@ -568,8 +567,8 @@ void l4Builder::stoprun(daqReader *rdr)
 	timer.Stop();
 	printf("Stopping run #%d\n", runnumber);
 	cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
-		<< " Real time: " << timer.RealTime() << endl;
-
+	     << " Real time: " << timer.RealTime() << endl;
+	
 };
 
 void l4Builder::writeHistogram()
@@ -577,7 +576,7 @@ void l4Builder::writeHistogram()
 	char histfile[256];
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
-	int initialno = 39;
+	int initialno = 45;
 
 	for(int i = 0; i < initialno; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
 	if(BESGoodFilled){
@@ -817,9 +816,13 @@ void l4Builder::event(daqReader *rdr)
 	    hLm_VertexX->Fill(lmvertX);
 	    hLm_VertexY->Fill(lmvertY);
 	    hLm_VertexZ->Fill(lmvertZ);
-	    hVzvpd_Vz->Fill(VzVpd, lmvertZ);
-	    hVzDiff->Fill(VzVpd - lmvertZ);
-	    
+	    hVzvpd_lmVz->Fill(VzVpd, lmvertZ);
+	    hLmVzDiff->Fill(VzVpd - lmvertZ);
+	    //hVzvpd_Vz->Fill(VzVpd, lmvertZ);
+	    //hVzDiff->Fill(VzVpd - lmvertZ);
+	    hVzvpd->Fill(VzVpd);
+	    hVzDiff->Fill(VzVpd - vertZ);
+
 	    if(daqID & upc) {
 	      hVertexX_UPC->Fill(vertX);
 	      hVertexY_UPC->Fill(vertY);
@@ -2212,7 +2215,7 @@ static Double_t funcDedx_He4_neg(Double_t *x, Double_t *par)
  */
 void l4Builder::defineHltPlots()
 {
-	HltPlots[index]->logy = 1;
+        HltPlots[index]->logy = 1;
 	hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 6, 0., 6);
 	ph = new PlotHisto();
 	ph->histo = hEvtsAccpt;
@@ -2243,64 +2246,64 @@ void l4Builder::defineHltPlots()
 	ph->histo = hDcaZ;
 	HltPlots[index]->addHisto(ph);
 
-	index++;
+	index++; //5
 	hDcaXy_TofMatch = new TH1D("DcaXy_TofMatch", "DcaXy_TofMatch", 120, -6., 6.);
 	ph = new PlotHisto();
 	ph->histo = hDcaXy_TofMatch;
 	HltPlots[index]->addHisto(ph);
 
-	index++;
+	index++; //6
 	hDcaZ_TofMatch = new TH1D("DcaZ_TofMatch", "DcaZ_TofMatch", 120, -6., 6.);
 	ph = new PlotHisto();
 	ph->histo = hDcaZ_TofMatch;
 	HltPlots[index]->addHisto(ph);
 
-	index++;
+	index++; //7
 	hDcaXy_EMCMatch = new TH1D("DcaXy_EMCMatch", "DcaXy_EMCMatch", 120, -6., 6.);
 	ph = new PlotHisto();
 	ph->histo = hDcaXy_EMCMatch;
 	HltPlots[index]->addHisto(ph);
 
-	index++;
+	index++; //8
 	hDcaZ_EMCMatch = new TH1D("DcaZ_EMCMatch", "DcaZ_EMCMatch", 120, -6., 6.);
 	ph = new PlotHisto();
 	ph->histo = hDcaZ_EMCMatch;
 	HltPlots[index]->addHisto(ph);
 	
-	index++; 
+	index++; //9
 	hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
 	HltPlots[index]->setDrawOpts("colz");
 	ph = new PlotHisto();
 	ph->histo = hdEdx;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //5
+	index++; //10
 	hLn_dEdx = new TH1D("Ln_dEdx", "Ln_dEdx", 500, -14, -11.5);
 	ph = new PlotHisto();
 	ph->histo = hLn_dEdx;
 	HltPlots[index]->addHisto(ph);
 
 	// Glob Tracks
-	index++;//6
+	index++;//11
 	HltPlots[index]->logy = 1;
 	hGlob_Pt = new TH1D("Glob_Pt", "Glob_Pt", 150, 0., 15.);
 	ph = new PlotHisto();
 	ph->histo = hGlob_Pt;
 	HltPlots[index]->addHisto(ph);
 
-	index++;//7
+	index++;//12
 	hGlob_Phi = new TH1D("Glob_Phi", "Glob_Phi", 360, 0., twopi);
 	ph = new PlotHisto();
 	ph->histo = hGlob_Phi;
 	HltPlots[index]->addHisto(ph);
 
-	index++;  //8
+	index++;  //13
 	hGlob_Eta = new TH1D("Glob_Eta", "Glob_Eta", 120, -3, 3);
 	ph = new PlotHisto();
 	ph->histo = hGlob_Eta;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //9
+	index++; //14
 	//   HltPlots[index]->optstat = 0;
 	HltPlots[index]->setDrawOpts("colz");
 
@@ -2310,26 +2313,26 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
 	// Prim Tracks
-	index++; //10
+	index++; //15
 	HltPlots[index]->logy = 1;
 	hPrim_Pt = new TH1D("Prim_Pt", "Prim_Pt", 150, 0., 15.);
 	ph = new PlotHisto();
 	ph->histo = hPrim_Pt;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //11
+	index++; //16
 	hPrim_Phi = new TH1D("Prim_Phi", "Prim_Phi", 360, 0., twopi);
 	ph = new PlotHisto();
 	ph->histo = hPrim_Phi;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //12
+	index++; //17
 	hPrim_Eta = new TH1D("Prim_Eta", "Prim_Eta", 120, -3, 3);
 	ph = new PlotHisto();
 	ph->histo = hPrim_Eta;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //13
+	index++; //18
 	//   HltPlots[index]->optstat = 0;
 	HltPlots[index]->setDrawOpts("colz");
 
@@ -2339,102 +2342,102 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
 	// Event
-	index++; //14
+	index++; //19
 	hVertexX = new TH1D("VertexX", "VertexX", 200, -2., 2.);
 	ph = new PlotHisto();
 	ph->histo = hVertexX;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //15
+	index++; //20
 	hVertexY = new TH1D("VertexY", "VertexY", 200, -2., 2.);
 	ph = new PlotHisto();
 	ph->histo = hVertexY;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //16
+	index++; //21
 	hVertexZ = new TH1D("VertexZ", "VertexZ", 500, -100., 100.);
 	ph = new PlotHisto();
 	ph->histo = hVertexZ;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //17
+	index++; //22
 	HltPlots[index]->setDrawOpts("colz");
 	hVertexXY = new TH2D("VertexXY", "VertexXY", 200, -2, 2, 200, -2, 2);
 	ph = new PlotHisto();
 	ph->histo = hVertexXY;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //18
+	index++; //23
 	hVertexR = new TH1D("VertexR", "VertexR", 200, 0, 4);
 	ph = new PlotHisto();
 	ph->histo = hVertexR;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //19
+	index++; //24
 	hLm_VertexX = new TH1D("Lm_VertexX", "Lm_VertexX", 200, -2., 2.);
 	ph = new PlotHisto();
 	ph->histo = hLm_VertexX;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //20
+	index++; //25
 	hLm_VertexY = new TH1D("Lm_VertexY", "Lm_VertexY", 200, -2., 2.);
 	ph = new PlotHisto();
 	ph->histo = hLm_VertexY;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //21
+	index++; //26
 	hLm_VertexZ = new TH1D("Lm_VertexZ", "Lm_VertexZ", 100, -10., 10.);
 	ph = new PlotHisto();
 	ph->histo = hLm_VertexZ;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //22
+	index++; //27
 	HltPlots[index]->logy = 1;
-	hglobalMult = new TH1I("globalMult", "globalMult", 1500, 0, 7000);
+	hglobalMult = new TH1I("globalMult", "globalMult", 10000, 0, 10000);
 	ph = new PlotHisto();
 	ph->histo = hglobalMult;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //23
+	index++; //28
 	HltPlots[index]->logy = 1;
-	hprimaryMult = new TH1I("primaryMult", "primaryMult", 500, 0, 1600);
+	hprimaryMult = new TH1I("primaryMult", "primaryMult", 2000, 0, 2000);
 	ph = new PlotHisto();
 	ph->histo = hprimaryMult;
 	HltPlots[index]->addHisto(ph);
 
 
 	// Emc
-	index++; //24
+	index++; //29
 	hMatchPhi_Diff = new TH1D("Emc_matchPhiDiff", "Emc_matchPhiDiff", 50, 0., 0.1);
 	ph = new PlotHisto();
 	ph->histo = hMatchPhi_Diff;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //25
+	index++; //30
 	hTowerEnergy = new TH1D("Emc_towerEnergy", "Emc_towerEnergy", 200, 0., 20.);
 	ph = new PlotHisto();
 	ph->histo = hTowerEnergy;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //26
+	index++; //31
 	hTowerDaqId = new TH1I("Emc_towerDaqId", "Emc_towerDaqId", 5000, 0., 5000.);
 	ph = new PlotHisto();
 	ph->histo = hTowerDaqId;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //27
+	index++; //32
 	hTowerSoftId = new TH1I("Emc_towerSoftId", "Emc_towerSoftId", 5000, 0., 5000.);
 	ph = new PlotHisto();
 	ph->histo = hTowerSoftId;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //28
+	index++; //33
 	hzEdge = new TH1D("Emc_zEdge", "Emc_zEdge", 100, 0., 5.);
 	ph = new PlotHisto();
 	ph->histo = hzEdge;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //29
+	index++; //34
 	//   HltPlots[index]->optstat = 0;
 	HltPlots[index]->setDrawOpts("colz");
 	hTowerEtaPhi = new TH2F("Emc_towerEtaPhi", "Emc_towerEtaPhi", 120, -pi, pi, 40, -1, 1);
@@ -2443,26 +2446,26 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
 	// ToF
-	index++; //30
+	index++; //35
 	hLocalZ = new TH1D("Tof_LocalZ", "Tof_LocalZ", 100, -5., 5.0);
 	ph = new PlotHisto();
 	ph->histo = hLocalZ;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //31
+	index++; //36
 	hLocalY = new TH1D("Tof_LocalY", "Tof_LocalY", 300, -15., 15.);
 	ph = new PlotHisto();
 	ph->histo = hLocalY;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //32
+	index++; //37
 	HltPlots[index]->setDrawOpts("colz");
 	hInverseBeta = new TH2F("Tof_InverseBeta", "Tof_InverseBeta", 500, 0, 5, 500, 0.0, 5.);
 	ph = new PlotHisto();
 	ph->histo = hInverseBeta;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //33
+	index++; //38
 	HltPlots[index]->setDrawOpts("colz");
 	hMatchId_fiberId = new TH2F("Tof_matchId_fireId", "Tof_matchId_fireId", 200, 0, 200, 200, 0, 200);
 	ph = new PlotHisto();
@@ -2473,32 +2476,43 @@ void l4Builder::defineHltPlots()
 
 	hMatchId_fiberId_copy2 = new TH2F("Tof_matchId_fireId_copy2", "Tof_matchId_fireId_copy2", 200, 0, 200, 200, 0, 200);
 
-	index++; //34
+	index++; //39
 	HltPlots[index]->setDrawOpts("colz");
 	hTrayID_TrgTime = new TH2F("Tof_TrayID_TrgTime", "Tof_TrayID_TrgTime", 124, 0., 124, 400, 900, 1300);
 	ph = new PlotHisto();
 	ph->histo = hTrayID_TrgTime;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //35
+	index++; //40
 	hchannelID = new TH1D("Tof_channelID", "Tof_channelID", 200, 0, 200);
 	ph = new PlotHisto();
 	ph->histo = hchannelID;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //36
+	index++; //41
 	HltPlots[index]->setDrawOpts("colz");
-	hVzvpd_Vz = new TH2F("Vzvpd_Vz", "Vzvpd_Vz", 400, -100, 100, 400, -100, 100);
+	hVzvpd_lmVz = new TH2F("Vzvpd_lmVz", "Vzvpd_lmVz", 400, -100, 100, 400, -100, 100);
 	ph = new PlotHisto();
-	ph->histo = hVzvpd_Vz;
+	ph->histo = hVzvpd_lmVz;
 	HltPlots[index]->addHisto(ph);
 
-	index++; //37
+	index++; //42
+	hLmVzDiff = new TH1D("LmVzDiff", "LmVzDiff", 200, -20, 20);
+	ph = new PlotHisto();
+	ph->histo = hLmVzDiff;
+	HltPlots[index]->addHisto(ph);
+
+	index++; //43
+	hVzvpd = new TH1D("Vzvpd", "Vzvpd", 1000, -100, 100);
+	ph = new PlotHisto();
+	ph->histo = hVzvpd;
+	HltPlots[index]->addHisto(ph);
+
+	index++; //44
 	hVzDiff = new TH1D("VzDiff", "VzDiff", 200, -20, 20);
 	ph = new PlotHisto();
 	ph->histo = hVzDiff;
 	HltPlots[index]->addHisto(ph);
-
 }
 
 void l4Builder::defineBeamPlots()
@@ -3441,6 +3455,10 @@ void l4Builder::setAllPlots()
 	hLm_VertexX->GetXaxis()->SetTitle("LmVertexX (cm)");
 	hLm_VertexY->GetXaxis()->SetTitle("LmVertexY (cm)");
 	hLm_VertexZ->GetXaxis()->SetTitle("LmVertexZ (cm)");
+	hVzvpd_lmVz->SetTitle("VzVpd vs lmVertexZ");
+	hLmVzDiff->SetTitle("Vzvpd - LmVertexZ");
+	hVzvpd->SetTitle("VzVpd");
+	hVzDiff->SetTitle("Vzvpd - VertexZ (cm)");
 	hglobalMult->GetXaxis()->SetTitle("Multiplicity");
 	hprimaryMult->GetXaxis()->SetTitle("Multiplicity");
 	//    hLmPrimaryMult->GetXaxis()->SetTitle("Primary Multiplicity");
@@ -3510,9 +3528,12 @@ void l4Builder::setAllPlots()
 	hTrayID_TrgTime->GetXaxis()->SetTitle("TrayId");
 	hTrayID_TrgTime->GetYaxis()->SetTitle("TriggerTime");
 	hchannelID->GetXaxis()->SetTitle("ChannelId");
-	hVzvpd_Vz->GetXaxis()->SetTitle("pvpd VertexZ (cm)");
-	hVzvpd_Vz->GetYaxis()->SetTitle("LmVertexZ (cm)");
-	hVzDiff->GetXaxis()->SetTitle("Vzvpd - LmVertexZ (cm)");
+	hVzvpd_lmVz->GetXaxis()->SetTitle("pvpd VertexZ (cm)");
+	hVzvpd_lmVz->GetYaxis()->SetTitle("LmVertexZ (cm)");
+	hLmVzDiff->GetXaxis()->SetTitle("Vzvpd - LmVertexZ (cm)");
+	hVzvpd->GetXaxis()->SetTitle("VzVpd (cm)");
+	hVzDiff->GetXaxis()->SetTitle("Vzvpd - VertexZ (cm)");
+
 	hdEdx->SetTitle("dEdx");
 	hdEdx->GetYaxis()->SetTitle("dEdx in GeV/cm");
 	hdEdx->GetXaxis()->SetTitle("Momentum");
