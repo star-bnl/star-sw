@@ -2,6 +2,6 @@
 # demoloop.csh - Sample loop script
 set j = ${1}
 while ( ${j} <= ${2} )
-  2016AuAu200MuDst.pl ${j} | tee ${j}.listJ
+  2016AuAu200MuDst.pl ${j} | tee ${j}.listM
   @ j++
 end
