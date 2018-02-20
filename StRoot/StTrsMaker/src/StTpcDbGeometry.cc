@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.9 2003/09/02 17:59:18 perev Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.10 2018/02/20 22:33:11 smirnovd Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.10  2018/02/20 22:33:11  smirnovd
+ * Changes from Irakli's directory to make the code compile
+ *
  * Revision 1.9  2003/09/02 17:59:18  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -85,29 +88,29 @@ StTpcGeometry* StTpcDbGeometry::mInstance = 0; // static data member
 StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
 {
     gTpcDbPtr               = globalDbPointer;
-    mPadRows                = gTpcDbPtr->PadPlaneGeometry()->numberOfRows();
-    mInnerPadRows           = gTpcDbPtr->PadPlaneGeometry()->numberOfInnerRows();
-    mInnerPadRows48         = gTpcDbPtr->PadPlaneGeometry()->numberOfInnerRows48();
-    mInnerPadRows52         = gTpcDbPtr->PadPlaneGeometry()->numberOfInnerRows52();
-    mOuterPadRows           = gTpcDbPtr->PadPlaneGeometry()->numberOfOuterRows();
-    mInnerSectorPadWidth    = gTpcDbPtr->PadPlaneGeometry()->innerSectorPadWidth();
-    mInnerSectorPadLength   = gTpcDbPtr->PadPlaneGeometry()->innerSectorPadLength();
-    mInnerSectorPadPitch    = gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch();
-    mInnerSectorRowPitch1   = gTpcDbPtr->PadPlaneGeometry()->innerSectorRowPitch1();
-    mInnerSectorRowPitch2   = gTpcDbPtr->PadPlaneGeometry()->innerSectorRowPitch2();
-    mFirstPadRow            = gTpcDbPtr->PadPlaneGeometry()->firstPadRow();
-    mFirstOuterSectorPadRow = gTpcDbPtr->PadPlaneGeometry()->firstOuterSectorPadRow();
-    mLastOuterSectorPadRow  = gTpcDbPtr->PadPlaneGeometry()->lastOuterSectorPadRow();
-    mFirstRowWidth          = gTpcDbPtr->PadPlaneGeometry()->firstRowWidth();
-    mLastRowWidth           = gTpcDbPtr->PadPlaneGeometry()->lastRowWidth();
-    mOuterSectorPadWidth    = gTpcDbPtr->PadPlaneGeometry()->outerSectorPadWidth();
-    mOuterSectorPadLength   = gTpcDbPtr->PadPlaneGeometry()->outerSectorPadLength();
-    mOuterSectorPadPitch    = gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
-    mOuterSectorRowPitch    = gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch();
-    mOuterSectorLength      = gTpcDbPtr->PadPlaneGeometry()->outerSectorLength();
-    mIoSectorSeparation     = gTpcDbPtr->PadPlaneGeometry()->ioSectorSeparation();
-    mInnerSectorEdge        = gTpcDbPtr->PadPlaneGeometry()->innerSectorEdge();
-    mOuterSectorEdge        = gTpcDbPtr->PadPlaneGeometry()->outerSectorEdge();
+    mPadRows                = St_tpcPadConfigC::instance()->numberOfRows(20);
+    mInnerPadRows           = St_tpcPadConfigC::instance()->numberOfInnerRows(20);
+    mInnerPadRows48         = St_tpcPadConfigC::instance()->numberOfInnerRows48(20);
+    mInnerPadRows52         = St_tpcPadConfigC::instance()->numberOfInnerRows52(20);
+    mOuterPadRows           = St_tpcPadConfigC::instance()->numberOfOuterRows(20);
+    mInnerSectorPadWidth    = St_tpcPadConfigC::instance()->innerSectorPadWidth(20);
+    mInnerSectorPadLength   = St_tpcPadConfigC::instance()->innerSectorPadLength(20);
+    mInnerSectorPadPitch    = St_tpcPadConfigC::instance()->innerSectorPadPitch(20);
+    mInnerSectorRowPitch1   = St_tpcPadConfigC::instance()->innerSectorRowPitch1(20);
+    mInnerSectorRowPitch2   = St_tpcPadConfigC::instance()->innerSectorRowPitch2(20);
+    mFirstPadRow            = St_tpcPadConfigC::instance()->firstPadRow(20);
+    mFirstOuterSectorPadRow = St_tpcPadConfigC::instance()->firstOuterSectorPadRow(20);
+    mLastOuterSectorPadRow  = St_tpcPadConfigC::instance()->lastOuterSectorPadRow(20);
+    mFirstRowWidth          = St_tpcPadConfigC::instance()->firstRowWidth(20);
+    mLastRowWidth           = St_tpcPadConfigC::instance()->lastRowWidth(20);
+    mOuterSectorPadWidth    = St_tpcPadConfigC::instance()->outerSectorPadWidth(20);
+    mOuterSectorPadLength   = St_tpcPadConfigC::instance()->outerSectorPadLength(20);
+    mOuterSectorPadPitch    = St_tpcPadConfigC::instance()->outerSectorPadPitch(20);
+    mOuterSectorRowPitch    = St_tpcPadConfigC::instance()->outerSectorRowPitch(20);
+    mOuterSectorLength      = St_tpcPadConfigC::instance()->outerSectorLength(20);
+    mIoSectorSeparation     = St_tpcPadConfigC::instance()->ioSectorSeparation(20);
+    mInnerSectorEdge        = St_tpcPadConfigC::instance()->innerSectorEdge(20);
+    mOuterSectorEdge        = St_tpcPadConfigC::instance()->outerSectorEdge(20);
 
     mSectors   = gTpcDbPtr->Dimensions()->numberOfSectors();
     mIfcRadius = gTpcDbPtr->Dimensions()->ifcRadius();
@@ -144,7 +147,7 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
 
     mTimeBuckets = gTpcDbPtr->Electronics()->numberOfTimeBins();
     mEndCapZ     = 200.; 
-    mFrischGrid  = gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPlaneZ() - 
+    mFrischGrid  = St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(20) - 
      gTpcDbPtr->WirePlaneGeometry()->outerSectorFrischGridPadPlaneSeparation();
     mInnerSectorzOffSet = gTpcDbPtr->Dimensions()->zInnerOffset();
     mOuterSectorzOffSet = gTpcDbPtr->Dimensions()->zOuterOffset();
@@ -157,7 +160,7 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
     //mPadsInRow.assign(mPadRows);
     mPadsInRow.resize(mPadRows);
     for(unsigned int ii=0; ii<mPadsInRow.size(); ii++)
-	mPadsInRow[ii] = gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(ii+1); //careful indexing..
+      mPadsInRow[ii] = St_tpcPadConfigC::instance()->numberOfPadsAtRow(20,ii+1); //careful indexing..
     //mRadialDistanceAtRow.assign(mPadRows);
     mRadialDistanceAtRow.resize(mPadRows);
 
@@ -168,7 +171,7 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
     // there already, we can just loop over it.  Does this help?
 
     for(unsigned int jj=1; jj<46; jj++)
-	mRadialDistanceAtRow[jj-1] = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(jj);
+      mRadialDistanceAtRow[jj-1] = St_tpcPadConfigC::instance()->radialDistanceAtRow(20,jj);
     
     // Make sure units are as expected, the DB units are centimeters and so are SCL units:
     
