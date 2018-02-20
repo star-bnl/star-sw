@@ -45,9 +45,13 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   PicoDstMaker->SetVxZrange(-70,70);
   PicoDstMaker->SetVxRmax(2);
 #else /* __Y2016__ introduced 02/08/2018 for the 2-nd par of y2016 pico production*/
+#ifdef AuAu_200_production_2016
   PicoDstMaker->SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051," // VPDMB-5-p-sst (2.58B)  - (1 : 4.84M))
 				"520802, 520812, 520822, 520832, 520842"          // VPDMB-5-p-hlt (1.81B)  - (43 : 0.55M; 45 : 24.09M) 
 				);
+#else
+  PicoDstMaker->SetGoodTriggers(""); // take all trigger for AuAu200_production2_2016
+#endif  
   PicoDstMaker->SetVxZrange(-6,6);
   PicoDstMaker->SetVxRmax(2);
 #endif
