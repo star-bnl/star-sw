@@ -1,7 +1,16 @@
-// $Id: StTrsMaker.cxx,v 1.92 2018/02/20 22:45:53 smirnovd Exp $
+// $Id: StTrsMaker.cxx,v 1.92.2.1 2018/02/20 23:26:51 smirnovd Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.92.2.1  2018/02/20 23:26:51  smirnovd
+// Fix build errors for StTrsMaker
+//
+// These changes are from Irakli allow us to compile StTrsMaker
+//
+// - Calls to StTrsDigitalSector constructor need to match the new signature
+// - StTpcDbGeometry: New approach to access TPC geometry via DB object
+// - Other DB objects have new signatures
+//
 // Revision 1.92  2018/02/20 22:45:53  smirnovd
 // Revert "Changes from Irakli's directory to make the code compile"
 //
@@ -414,7 +423,7 @@ using std::max;
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.92 2018/02/20 22:45:53 smirnovd Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.92.2.1 2018/02/20 23:26:51 smirnovd Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -1052,7 +1061,7 @@ Int_t StTrsMaker::Make(){
 	//
 	// First make a sector where the data can go...
 	StTrsDigitalSector* aDigitalSector =
-	  new StTrsDigitalSector(mGeometryDb);
+	  new StTrsDigitalSector(20);
 	aDigitalSector->setSector(currentSectorProcessed);
 	//
 	// Point to the object you want to fill
