@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.53 2015/04/09 19:54:03 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.55 2018/02/18 23:35:33 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.55  2018/02/18 23:35:33  perev
+ * Remove iTPC update
+ *
  * Revision 1.53  2015/04/09 19:54:03  genevb
  * Introduce sector masking (only MTD-based so far)
  *

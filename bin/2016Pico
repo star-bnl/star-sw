@@ -677,9 +677,9 @@ day Pico    Femto status
 068 OnHpss  Done pwg       Done matched Pico & Femto 
 069 OnHpss  Done pwg_taks  Done matched Pico & Femto
 070 OnHpss  Done pwg        matched Pico & Femto 
-071 Done    Proc pwg        matched Pico & Femto 
+071 OnHpss  Done pwg        matched Pico & Femto 
 072 OnHpss  Done pwg_tasks  matched Pico & Femto  2 files are missing =? process 
-073 OnHpss  Done pwg_taks   mismathced 17073015/Chain.log:chained 1039664                            | 17073015/Chain.log:chained 1035674 by 3990 events
+073 OnHpss  Done pwg_taks   mismathced 17073015/Chain.log:chained 1039664 | 17073015/Chain.log:chained 1035674 by 3990 events
 074 OnHpss  Done pwg   matched Pico & Femto 
 075 OnHpss  Done pwg   matched Pico & Femto ]
 076 OnHpss  Done Removed   matched Pico & Femto 
@@ -719,6 +719,7 @@ day Pico    Femto status
 128 OnHpss  Done Removed    matched Pico & Femto
 129 OnHpss  Done Removed    lost Chain.log for Pico
 130 OnHpss  Done Removed    lost Chain.log for Pico 17130006 - 17130013
+======= production2 ===============
 169 Done   Proc
 170 MuDst
 171 MuDst

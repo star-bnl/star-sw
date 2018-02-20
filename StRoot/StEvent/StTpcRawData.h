@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.9 2012/05/07 14:41:59 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.11 2018/02/18 23:18:45 perev Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.11  2018/02/18 23:18:45  perev
+ * Remove iTPC related update
+ *
  * Revision 2.9  2012/05/07 14:41:59  fisyak
  * Remove hardcoded separation between Inner and Outer Sectors
  *
