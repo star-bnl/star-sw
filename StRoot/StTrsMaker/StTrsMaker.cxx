@@ -1,9 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.91 2018/02/20 22:33:11 smirnovd Exp $
+// $Id: StTrsMaker.cxx,v 1.92 2018/02/20 22:45:53 smirnovd Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
-// Revision 1.91  2018/02/20 22:33:11  smirnovd
-// Changes from Irakli's directory to make the code compile
+// Revision 1.92  2018/02/20 22:45:53  smirnovd
+// Revert "Changes from Irakli's directory to make the code compile"
 //
 // Revision 1.90  2014/12/16 04:09:08  perev
 // In Make() SetSeed() for StTrsRand called. Input seed tkane from g2t_event::ge_rndm[2]
@@ -414,7 +414,7 @@ using std::max;
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.91 2018/02/20 22:33:11 smirnovd Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.92 2018/02/20 22:45:53 smirnovd Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -1052,7 +1052,7 @@ Int_t StTrsMaker::Make(){
 	//
 	// First make a sector where the data can go...
 	StTrsDigitalSector* aDigitalSector =
-	  new StTrsDigitalSector(20);
+	  new StTrsDigitalSector(mGeometryDb);
 	aDigitalSector->setSector(currentSectorProcessed);
 	//
 	// Point to the object you want to fill

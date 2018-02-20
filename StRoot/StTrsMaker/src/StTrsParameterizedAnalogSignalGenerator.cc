@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.41 2018/02/20 22:33:11 smirnovd Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.42 2018/02/20 22:45:53 smirnovd Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,8 +11,8 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
- * Revision 1.41  2018/02/20 22:33:11  smirnovd
- * Changes from Irakli's directory to make the code compile
+ * Revision 1.42  2018/02/20 22:45:53  smirnovd
+ * Revert "Changes from Irakli's directory to make the code compile"
  *
  * Revision 1.40  2009/12/11 21:55:15  fisyak
  * Account that the space between anode wires and pad plane is sensitive, bug #1715
@@ -381,9 +381,9 @@ void StTrsParameterizedAnalogSignalGenerator::localArrayBuilder()
   for(row=0;row<rows;row++)
      {int max_pads=mGeomDb->numberOfPadsAtRow(row+1);
       mPadsAtRow[row]=max_pads;
-      yCentroid[row]=transformer.yFromRow(20,row+1);
+      yCentroid[row]=transformer.yFromRow(row+1);
       for(pad=0;pad<max_pads;pad++)
-	{ xCentroid[row][pad]=transformer.xFromPad(20,row+1,pad+1);     
+         { xCentroid[row][pad]=transformer.xFromPad(row+1,pad+1);     
 	 // gain[row][pad]=1.0+(StTrsRandom::inst().Rndm()-0.5)*0.20;
               }
         
@@ -651,7 +651,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	       
                 if(Repeat<0.5){ 
                   
-		  mCentralPad = (Int_t) transformer.padFromLocal(iter->position(),sector,irow2+1)-1;
+		  mCentralPad = (Int_t) transformer.padFromLocal(iter->position(),irow2+1)-1;
 		   if(mCentralPad>  PadsAtRow)mCentralPad= PadsAtRow;//upper limit boundary check.
 
                  
