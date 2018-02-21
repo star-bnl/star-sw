@@ -83,7 +83,7 @@ while (my $line = <In>) {
   else                 {$i++;}
 #  if ($i%20 != 1) {next;}
   my $basename = $file;
-  $basename =~ s#home/starreco/reco/AuAu_200_production_2016/ReversedFullField/P16ij/##;
+  $basename =~ s#home/starreco/reco/$trigger/ReversedFullField/P16ij/##;
 #  print "$file = > $basename\n";
   my $found = 0;
   my $dir;
