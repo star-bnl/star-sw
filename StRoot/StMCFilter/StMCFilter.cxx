@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.9 2012/07/19 21:32:57 jwebb Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.10 2018/02/21 02:04:41 perev Exp $
 // Author: Victor Perev  17/03/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -44,11 +44,10 @@ At the end Finish() is called. Print statistics.  Could be overloaded
 #include "StHepParticle.h"
 #include "StG3Particle.h"
 
-typedef std::map<std::string, StMCFilter *> myMap_t;
-static  myMap_t myMap;
 StMCFilter      *StMCFilter::fgSelected   =0;
 StHepParticleMaster *StMCFilter::fgHepParticle =0;
 StG3ParticleMaster  *StMCFilter::fgG3Particle  =0;
+myMap_t *StMCFilter::mgMap=0;
 
 extern void *gStarFiltAction; // 
 extern void *gStarFiltConfig; // 
@@ -56,15 +55,16 @@ extern void *gStarFiltConfig; //
 //______________________________________________________________________________
 StMCFilter::StMCFilter(const char *name)
 {
+  if(!mgMap) mgMap = new myMap_t;
   memset(fBeg,0,fEnd-fBeg+1);
   fName= name;
   std::string myName(fName);
   for (int i=0;i<(int)myName.size();i++) { myName[i]=tolower(myName[i]);}
 
 
-  myMap_t::iterator it = myMap.find(myName);
-  assert (it == myMap.end() && "Filter name must be unique");
-  myMap[myName] = this;
+  myMap_t::iterator it = mgMap->find(myName);
+  assert (it == mgMap->end() && "Filter name must be unique");
+  (*mgMap)[myName] = this;
   gStarFiltAction=(void*)&StMCFilter::Action;
   gStarFiltConfig=(void*)&StMCFilter::Config;
   std::cout << "*** StMCFilter::StMCFilter(" << myName.c_str() << ") CREATED ***" << std::endl;
@@ -72,7 +72,7 @@ StMCFilter::StMCFilter(const char *name)
 //______________________________________________________________________________
 StMCFilter::~StMCFilter()
 {
-  myMap.clear(); 
+  mgMap->clear(); 
   delete fgHepParticle; fgHepParticle=0;
   delete fgG3Particle ; fgG3Particle =0;
   
@@ -83,9 +83,9 @@ int StMCFilter::Select(const char *name)
 //VP  assert(!fgSelected && "Only one filter is allowed");
   std::string myName(name);
   for (int i=0;i<(int)myName.size();i++) { myName[i]=tolower(myName[i]);}
-  myMap_t::iterator it = myMap.find(std::string(myName));
-  assert (it != myMap.end() && "Filter MUST be found");
-  if (it == myMap.end()) return 1;
+  myMap_t::iterator it = mgMap->find(std::string(myName));
+  assert (it != mgMap->end() && "Filter MUST be found");
+  if (it == mgMap->end()) return 1;
   fgSelected = (*it).second;
   std::cout << "*** StMCFilter::Select(" << myName.c_str() << ") SELCTED ***" << std::endl;
   return 0;

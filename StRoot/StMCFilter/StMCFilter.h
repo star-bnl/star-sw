@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.9 2012/07/19 21:32:58 jwebb Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.10 2018/02/21 02:04:41 perev Exp $
 // Author: V.Perev  Mar/2009
 /*!
 
@@ -13,6 +13,9 @@
 #ifndef STAR_StMCFilter
 #define STAR_StMCFilter
 #include <string>
+#include <map>
+class StMCFilter;  
+typedef std::map<std::string, StMCFilter *> myMap_t;
 class StHepParticleMaster;
 class StG3ParticleMaster;
 class StGenParticleMaster;
@@ -98,6 +101,7 @@ protected:
    int  fCnt[3][2];
    double fUser[20];
    char fEnd[1];
+static myMap_t *mgMap;
 
 };
 
