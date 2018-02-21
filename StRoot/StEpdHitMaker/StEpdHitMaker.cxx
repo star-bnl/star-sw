@@ -110,7 +110,6 @@ void StEpdHitMaker::FillStEpdData(){
 
   StTriggerData* trg=mTriggerData;
 
-  // Reviewers: please keep this commented-out code.
   //  This is for BBC.  We can do this if we ever have a StBbc class.
   // for (Int_t ew=0; ew<2; ew++){
   //   for (Int_t pmt=0; pmt<24; pmt++){
@@ -133,15 +132,15 @@ void StEpdHitMaker::FillStEpdData(){
 
 	//---------------------------------------------------
 	//  This below is for debugging only...
-	cout << "StEpdHitMaker::FillStEpdData()  -- this is what I get from StEpdDbMaker...\n";
-	cout << "EW\tPP\tTT\tcrateAdc\t\boardAdc\tchannelAdc\tcrateTac\tboardTac\tchannelTac\n";
-	cout << ew << "\t" << PP << "\t" << TT << "\t" 
-	     << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
-	     << mEpdDbMaker->GetBoardAdc(ew,PP,TT) << "\t"
-	     << mEpdDbMaker->GetChannelAdc(ew,PP,TT) << "\t"
-	     << mEpdDbMaker->GetCrateTac(ew,PP,TT) << "\t"
-	     << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
-	     << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\n";
+	// cout << "StEpdHitMaker::FillStEpdData()  -- this is what I get from StEpdDbMaker...\n";
+	// cout << "EW\tPP\tTT\tcrateAdc\t\boardAdc\tchannelAdc\tcrateTac\tboardTac\tchannelTac\n";
+	// cout << ew << "\t" << PP << "\t" << TT << "\t" 
+	//      << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
+	//      << mEpdDbMaker->GetBoardAdc(ew,PP,TT) << "\t"
+	//      << mEpdDbMaker->GetChannelAdc(ew,PP,TT) << "\t"
+	//      << mEpdDbMaker->GetCrateTac(ew,PP,TT) << "\t"
+	//      << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
+	//      << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\n";
 	//---------------------------------------------------
 
 
