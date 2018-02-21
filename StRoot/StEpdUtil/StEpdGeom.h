@@ -163,5 +163,10 @@ class StEpdGeom{
 
 };
 
+inline bool StEpdGeom::IsWest(short uniqueID){return uniqueID>0;}
+inline bool StEpdGeom::IsWest(short position, short tilenumber, short eastwest){return eastwest>0;}
+inline bool StEpdGeom::IsEast(short uniqueID){return uniqueID<0;}
+inline bool StEpdGeom::IsEast(short position, short tilenumber, short eastwest){return eastwest<0;}
+
 
 #endif
