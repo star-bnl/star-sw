@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.40 2009/12/11 21:55:15 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.42 2018/02/20 22:45:53 smirnovd Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.42  2018/02/20 22:45:53  smirnovd
+ * Revert "Changes from Irakli's directory to make the code compile"
+ *
  * Revision 1.40  2009/12/11 21:55:15  fisyak
  * Account that the space between anode wires and pad plane is sensitive, bug #1715
  *
