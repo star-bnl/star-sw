@@ -499,6 +499,22 @@ switch ($pkg)
           setenv X_SCLS  `basename $devtools`
 	endif
 	breaksw
+	case "gcc72*":
+	case "gcc73*":
+	setenv devtools /opt/rh/devtoolset-7
+	if (-r ${devtools}) then
+	  setenv PATH  ${devtools}/root/usr/bin:${PATH}
+	  setenv LD_LIBRARY_PATH  ${devtools}/root/usr/lib64:${devtools}/root/usr/lib:${LD_LIBRARY_PATH}
+	  setenv INFOPATH  ${devtools}/root/usr/share/info
+	  setenv PCP_DIR   ${devtools}/root
+          setenv PERL5LIB  ${devtools}/root/usr/lib64/perl5/vendor_perl:${devtools}/root/usr/lib/perl5:${devtools}/root/usr/share/perl5/vendor_perl:${PERL5LIB}
+	  setenv PYTHONPATH  ${devtools}/root/usr/lib64/python2.7/site-packages:${devtools}/root/usr/lib/python2.7/site-packages:/opt/rh/devtoolset-3/root/usr/lib64/python2.6/site-packages:/opt/rh/devtoolset-3/root/usr/lib/python2.6/site-packages
+	  setenv PKG_CONFIG_PATH  	
+	  setenv XDG_CONFIG_DIRS  ${devtools}/root/etc/xdg:/etc/xdg
+	  setenv XDG_DATA_DIRS  ${devtools}/root/usr/share:/usr/local/share:/usr/share
+          setenv X_SCLS  `basename $devtools`
+	endif
+	breaksw
 	case "gcc710": # Hongwei private version
 	if (-r /opt/gcc/7.1.0)then
 	    setenv PATH /opt/gcc/7.1.0/bin:$PATH
