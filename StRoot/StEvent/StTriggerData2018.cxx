@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2018.cxx,v 2.1 2017/10/13 20:10:17 ullrich Exp $
+ * $Id: StTriggerData2018.cxx,v 2.2 2018/02/22 16:47:20 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2018.cxx,v $
+ * Revision 2.2  2018/02/22 16:47:20  ullrich
+ * Changes for blind analysis and EPD
+ *
  * Revision 2.1  2017/10/13 20:10:17  ullrich
  * Initial Revision.
  *
@@ -42,6 +45,18 @@ StTriggerData2018::StTriggerData2018(const TriggerDataBlk2018* data, int run, in
     if(mDebug==1) printf("StTriggerData2018 Constructor with trigger data block and byteswap option=%d\n",bs);
     mData = new TriggerDataBlk2018;
     readData(data,bs);
+}
+
+void StTriggerData2018::blindRunInfo()
+{
+    mRun=1000000*int(mRun/1000000);
+    mData->eventNumber    = 0;
+    EvtDesc->bunchXing_hi = 0;
+    EvtDesc->bunchXing_lo = 0;
+    L1_DSM->BCdata[2]     = 0;
+    L1_DSM->BCdata[3]     = 0;
+    L1_DSM->BCdata[10]    = 0;
+    L1_DSM->BCdata[11]    = 0;
 }
 
 void StTriggerData2018::readData(const TriggerDataBlk2018* data, int bs) {
@@ -272,6 +287,14 @@ unsigned short StTriggerData2018::lastDSM(int channel) const
     return L1_DSM->lastDSM[channel];
 }
 
+
+unsigned short StTriggerData2018::vertexDSM(int channel) const
+{
+    int dsmmap[8] = {3,2,1,0,7,6,5,4};
+    if(channel<0 || channel>7) return 0;
+    return L1_DSM->VTX[dsmmap[channel]];
+}
+
 unsigned short StTriggerData2018::tcuBits() const
 {
     return EvtDesc->DSMInput;
@@ -286,7 +309,7 @@ unsigned int StTriggerData2018::tcuCounter() const
 
 unsigned int StTriggerData2018::rccCounter(int crate) const
 {
-    if(crate >= y18L1_CONF_NUM && crate <= y18QT4_CONF_NUM){
+    if(crate >= y18L1_CONF_NUM && crate <= y18EQ2_CONF_NUM){
         return TrgSum->LocalClocks[crate];
     }
     return 0;
@@ -393,7 +416,7 @@ unsigned short StTriggerData2018::bbcADC(StBeamDirection eastwest, int pmt, int 
         { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
             16,17,18,19,24,25,26,27} };
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
+    if (buffer >= 0 && pmt>=1 && pmt<=16) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
     return 0;
 }
 
@@ -408,7 +431,7 @@ unsigned short StTriggerData2018::bbcTDC(StBeamDirection eastwest, int pmt, int 
         { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
             16,17,18,19,24,25,26,27} };
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]+4];
+    if (buffer >= 0 && pmt>=1 && pmt<=16) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]+4];
     return 0;
 }
 
@@ -423,7 +446,7 @@ unsigned short StTriggerData2018::bbcTDC5bit(StBeamDirection eastwest, int pmt, 
         { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
             16,17,18,19,24,25,26,27} };
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && pmt>=1 && pmt<=24) return tbbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
+    if (buffer >= 0 && pmt>=1 && pmt<=16) return tbbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
     return 0;
 }
 
@@ -444,8 +467,8 @@ unsigned short StTriggerData2018::bbcADCSum(StBeamDirection eastwest, int prepos
 unsigned short StTriggerData2018::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const
 {
     unsigned short sum=0;
-    int buffer = prepostAddress(prepost);
-    if (buffer >= 0) for(int i=17; i<=24; i++) {sum+=bbcADC(eastwest,i,prepost);}
+    //int buffer = prepostAddress(prepost);
+    //if (buffer >= 0) for(int i=17; i<=24; i++) {sum+=bbcADC(eastwest,i,prepost);}
     return sum;
 }
 
@@ -473,14 +496,14 @@ unsigned short StTriggerData2018::bbcTacSum() const
 
 unsigned short StTriggerData2018::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const
 {
-    int buffer = prepostAddress(prepost);
-    if (buffer >=0){
-        if (mBBC[buffer]){
-            if (eastwest==east) {return  mBBC[buffer]->BBClayer1[11] & 0x0fff;}
-            else {return ((mBBC[buffer]->BBClayer1[11] & 0xf000) >> 12)
-                +((mBBC[buffer]->BBClayer1[10] & 0x00ff) << 4 );}
-        }
-    }
+    //int buffer = prepostAddress(prepost);
+    //if (buffer >=0){
+    //    if (mBBC[buffer]){
+    //        if (eastwest==east) {return  mBBC[buffer]->BBClayer1[11] & 0x0fff;}
+    //        else {return ((mBBC[buffer]->BBClayer1[11] & 0xf000) >> 12)
+    //            +((mBBC[buffer]->BBClayer1[10] & 0x00ff) << 4 );}
+    //    }
+    // }
     return 0;
 }
 
@@ -514,6 +537,52 @@ unsigned short StTriggerData2018::bbcBB102(int ch, int prepost) const
     return 0;
 }
 
+unsigned short StTriggerData2018::epdTimeDifference() const 
+{
+    return L1_DSM->VTX[6]%8192;
+}
+
+bool StTriggerData2018::epdHitLayer2(StBeamDirection eastwest) const 
+{
+    if(eastwest==east) return (L1_DSM->VTX[6] & 0x40) ? true : false;
+    return (L1_DSM->VTX[6] & 0x80) ? true : false;
+}
+
+unsigned short StTriggerData2018::epdLayer0t(int ch, int prepost) const
+{
+    int dsmmap[16] = {3,2,1,0,7,6,5,4, 11,10,9,8,15,14,13,12};
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0){
+        if (mBBC[buffer]){
+            if(ch>=0 && ch<16) return mBBC[buffer]->EPDlayer0t[dsmmap[ch]];
+        }
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2018::epdLayer1(int ch, int prepost) const
+{
+    int dsmmap[8] = {3,2,1,0,7,6,5,4};
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0){
+        if (mBBC[buffer]){
+            if(ch>=0 && ch<8) return mBBC[buffer]->EPDlayer1[dsmmap[ch]];
+        }
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2018::epdLayer0a(int ch, int prepost) const
+{
+    int dsmmap[16] = {3,2,1,0,7,6,5,4};
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0){
+        if (mBBC[buffer]){
+            if(ch>=0 && ch<8) return mBBC[buffer]->EPDlayer0a[dsmmap[ch]];
+        }
+    }
+    return 0;
+}
 
 unsigned short StTriggerData2018::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const
 {
@@ -1474,7 +1543,7 @@ void StTriggerData2018::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
     printf(" mDebug=%d mData=%p\n",mDebug,mData);
-    printf(" Year=%d  Version=%x\n",year(),version());
+    printf(" Year=%d EvtDesc version=%x header version%x\n",year(),version(),mData->FormatVersion);
     printf(" Run#=%d Event#=%d\n",mRun,eventNumber());
     printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
     printf(" Token=%d  TriggerWord=%x  ActionWord=%x  BusyStatus=%x\n",
@@ -1617,7 +1686,7 @@ void StTriggerData2018::swapRawDet(DataBlock2018* data, int name, int hlength,in
                 break;
             case y18BBC_CONF_NUM :
                 bbc = (BBCBlock2018*) data;
-                swapSSn((unsigned int*)bbc->BBClayer1,16+8+8);
+                swapSSn((unsigned int*)bbc->BBClayer1,16+8+8+16+8+8);
                 break;
             case y18FMS_CONF_NUM :
                 //only char
