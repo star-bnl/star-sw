@@ -15,15 +15,15 @@
 
 ClassImp(StrangeMuDstPlayer)
 
-char empty = '\0';
-char slash = '/';
 void ParseFileName(Char_t *output, Char_t **file, Char_t **dir) {
+  static char slash = '/';
   if ((*file = strrchr(output,slash))) {
     (*file)++;
     *dir = new char[strlen(output)+5];
     strncpy(*dir,output,(strlen(output)-strlen(*file)));
   } else {
     *file = output;
+    static char empty = '\0';
     *dir = &empty;
   }
 }
