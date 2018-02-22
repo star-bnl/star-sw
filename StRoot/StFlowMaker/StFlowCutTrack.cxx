@@ -128,7 +128,7 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
 
     // tpc all cut
     if (mTpcTrackCut) {
-      mTpcTrackCut++;
+      mTpcTrackCut = kTRUE;
       return kFALSE;
     }
 
