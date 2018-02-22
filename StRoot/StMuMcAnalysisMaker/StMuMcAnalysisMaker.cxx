@@ -14,8 +14,8 @@
 #include "KFParticle/KFParticle.h"
 #include "KFParticle/KFParticleSIMD.h"
 #include "KFParticle/KFPTrack.h"
-#include "StKFParticleInterface/StKFParticleInterface.h"
-#include "StKFParticleInterface/StKFParticlePerformanceInterface.h"
+#include "StKFParticleAnalysisMaker/StKFParticleInterface.h"
+#include "StKFParticleAnalysisMaker/StKFParticlePerformanceInterface.h"
 ClassImp(StMuMcAnalysisMaker);
 StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
