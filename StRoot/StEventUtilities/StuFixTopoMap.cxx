@@ -73,6 +73,10 @@
  *                30       Turn around flag, some elements used >1
  *                31       Format interpreter; (SVT/SSD/TPC=0,FTPC=1)
  *
+ *    map[2]   Bit number  Quantity                                  
+ *    ------   ----------  --------                                  
+ *                0-26     TPC, remaining pad row from 46 to 72 = 27 
+ *                30       Turn around flag, some elements used >1
  *                                                                   
  *    FTPC Tracks                                                    
  *    -----------                                                    
@@ -92,6 +96,9 @@
  *                30       Turn around flag, some elements used >1   
  *                31       Format interpreter; (SVT/SSD/TPC=0,FTPC=1)
  *
+ *    map[2]   Bit number  Quantity                                  
+ *    ------   ----------  --------                                  
+ *                0-31     not used; for future use                  
  ***************************************************************************
  *
  * $Log
@@ -109,6 +116,7 @@ bool StuFixTopoMap(StTrack* track)
     
     unsigned long word1 = 0;
     unsigned long word2 = 0;
+    unsigned long word3 = 0;
     
     // Primary vertex used or not
     if (track->type() == primary) word1 |= 1U;
@@ -199,16 +207,18 @@ bool StuFixTopoMap(StTrack* track)
                 if (k < 25) {
                     if (word1 & 1U<<(k+7)) word2 |= 1U<<30; // turnaround flag    
                     word1 |= 1U<<(k+7);
-                }
-                else {
-                    if (word2 & 1U<<(k-25)) word2 |= 1U<<30; // turnaround flag    
-                    word2 |= 1U<<(k-25);
-                }
+                } else if (k <= 45) {
+		  if (word2 & 1U<<(k-25)) word2 |= 1U<<30; // turnaround flag    
+		  word2 |= 1U<<(k-25);
+                } else {
+		  if (word3 & 1U<<(k-46)) word3 |= 1U<<30; // turnaround flag    
+		  word3 |= 1U<<(k-46);
+		}
             }		
         }	
     }
     
-    StTrackTopologyMap newmap(word1, word2);
+    StTrackTopologyMap newmap(word1, word2, word3);
     track->setTopologyMap(newmap);
     return true;
 }

@@ -82,6 +82,39 @@
  *  61     29    HFT Format (case 3) - TPC tracks
  *  62     30    turn around flag  (flags that track spirals back)
  *  63     31    FTPC Format (flags TOC or FTPC)
+ *  -------------------------- word boundary
+ *  64     0     TPC row=46
+ *  65     1     TPC row=47
+ *  66     2     TPC row=48
+ *  67     3     TPC row=49
+ *  68     4     TPC row=50
+ *  69     5     TPC row=51
+ *  70     6     TPC row=52
+ *  71     7     TPC row=53
+ *  72     8     TPC row=54
+ *  73     9     TPC row=55
+ *  74     10    TPC row=56
+ *  75     11    TPC row=57
+ *  76     12    TPC row=58
+ *  77     13    TPC row=59
+ *  78     14    TPC row=60
+ *  79     15    TPC row=61
+ *  80     16    TPC row=62
+ *  81     17    TPC row=63
+ *  82     18    TPC row=64
+ *  83     19    TPC row=65
+ *  84     20    TPC row=66
+ *  85     21 	 TPC row=67
+ *  86	   22	 TPC row=68
+ *  87	   23	 TPC row=69
+ *  88	   24    TPC row=70
+ *  89	   25	 TPC row=71
+ *  90	   26	 TPC row=72
+ *  91	   27
+ *  92	   28
+ *  93	   29
+ *  94	   30
+ *  95	   31
  *
  ***************************************************************************
  *
@@ -160,20 +193,6 @@ using std::max_element;
 static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
-
-StTrackTopologyMap::StTrackTopologyMap()
-{
-    mMap0 = mMap1 = 0;
-}
-
-StTrackTopologyMap::StTrackTopologyMap(unsigned int m1, unsigned int m2) : mMap0(m1), mMap1(m2) { /* noop */ }
-
-StTrackTopologyMap::StTrackTopologyMap(const unsigned int* m) : mMap0(m[0]), mMap1(m[1]) { /* noop */ }
-
-StTrackTopologyMap::StTrackTopologyMap(const unsigned long* m) : mMap0(m[0]), mMap1(m[1]) { /* noop */ }
-
-StTrackTopologyMap::~StTrackTopologyMap() { /* noop */ }
-
 bool
 StTrackTopologyMap::bit(int i) const
 {
@@ -192,10 +211,10 @@ StTrackTopologyMap::hftFormat() const
     return bit(61);
 }
 
-unsigned int
-StTrackTopologyMap::data(unsigned int i) const
+UInt_t
+StTrackTopologyMap::data(UInt_t i) const
 {
-    return static_cast<unsigned int>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
+    return static_cast<UInt_t>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
 }
 
 bool
@@ -228,7 +247,7 @@ StTrackTopologyMap::hasHitInDetector(StDetectorId d1, StDetectorId d2,
 }
 
 bool
-StTrackTopologyMap::hasHitInSvtLayer(unsigned int layer) const
+StTrackTopologyMap::hasHitInSvtLayer(UInt_t layer) const
 {
     if (ftpcFormat())
         return false;
@@ -237,7 +256,7 @@ StTrackTopologyMap::hasHitInSvtLayer(unsigned int layer) const
 }
 
 bool
-StTrackTopologyMap::hasHitInPxlLayer(unsigned int layer) const
+StTrackTopologyMap::hasHitInPxlLayer(UInt_t layer) const
 {
     if(ftpcFormat())
         return false;
@@ -246,7 +265,7 @@ StTrackTopologyMap::hasHitInPxlLayer(unsigned int layer) const
 }
 
 bool
-StTrackTopologyMap::hasHitInIstLayer(unsigned int layer) const
+StTrackTopologyMap::hasHitInIstLayer(UInt_t layer) const
 {
     if(ftpcFormat())
         return false;
@@ -256,7 +275,7 @@ StTrackTopologyMap::hasHitInIstLayer(unsigned int layer) const
 }
 
 bool
-StTrackTopologyMap::hasHitInSsdLayer(unsigned int layer) const
+StTrackTopologyMap::hasHitInSsdLayer(UInt_t layer) const
 {
     if(ftpcFormat())
         return false;
@@ -269,7 +288,7 @@ StTrackTopologyMap::hasHitInSsdLayer(unsigned int layer) const
 }
 
 bool
-StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
+StTrackTopologyMap::hasHitInRow(StDetectorId id, UInt_t row) const
 {
     switch (id) {
     case kTpcId:
@@ -287,7 +306,7 @@ StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
     }
 }
 
-unsigned int
+UInt_t
 StTrackTopologyMap::numberOfHits(StDetectorId id) const
 {
     if (ftpcFormat() &&
@@ -423,7 +442,7 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
             if (hasHitInRow(id, i)) rows.push_back(i);
         break;
     case kTpcId:
-        for (i=1; i<46; i++)
+        for (i=1; i<=72; i++)
             if (hasHitInRow(id, i)) rows.push_back(i);
         break;
     default:
@@ -439,11 +458,10 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
 
 ostream& operator<< (ostream& os, const StTrackTopologyMap& m)
 {
-    for (int i=0; i<64; i++) {
-        if (i>31)
-            os << ((m.data(1)>>(i-32) & 1U) ? 1 : 0);
-        else
-            os << ((m.data(0)>>i & 1U) ? 1 : 0);
+    for (int i = 0; i < 96; i++) {
+      if      (i > 63) os << ((m.data(2)>>(i-64) & 1U) ? 1 : 0);
+      else if (i > 31) os << ((m.data(1)>>(i-32) & 1U) ? 1 : 0);
+      else             os << ((m.data(0)>> i     & 1U) ? 1 : 0);
     }
     return os;
 }

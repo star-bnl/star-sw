@@ -57,33 +57,31 @@
  **************************************************************************/
 #ifndef StTrackTopologyMap_hh
 #define StTrackTopologyMap_hh
-
 #include <Stiostream.h>
 #include "StObject.h"
 #include "StEnumerations.h"
 //#define __kfpAtFirstHit__
 class StTrackTopologyMap : public StObject {
-public:
-    StTrackTopologyMap();
-    StTrackTopologyMap(unsigned int, unsigned int);
-    StTrackTopologyMap(const unsigned long*);
-    StTrackTopologyMap(const unsigned int*);
+ public:
+  StTrackTopologyMap(UInt_t m1 = 0, UInt_t m2 = 0, UInt_t m3 = 0) : mMap0(m1), mMap1(m2), mMap2(m3) {}
+  StTrackTopologyMap(const UInt_t*  m) : mMap0(m[0]), mMap1(m[1]), mMap2(0) {}
+  StTrackTopologyMap(const ULong_t* m) : mMap0(m[0]), mMap1(m[1]), mMap2(0) {}
     // StTrackTopologyMap(const StTrackTopologyMap&);            use default
     // StTrackTopologyMap& operator=(const StTrackTopologyMap&); use default
-    ~StTrackTopologyMap();
+  ~StTrackTopologyMap() {}
 
     bool           primaryVertexUsed() const;
-    unsigned int   numberOfHits(StDetectorId) const;
+    UInt_t   numberOfHits(StDetectorId) const;
     bool           hasHitInDetector(StDetectorId) const;
     bool           hasHitInDetector(StDetectorId, StDetectorId,
                               StDetectorId = kUnknownId, StDetectorId = kUnknownId,
                               StDetectorId = kUnknownId, StDetectorId = kUnknownId) const;
-    bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1
-    bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInPxlLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInSstLayer(unsigned int) const;
+    bool           hasHitInRow(StDetectorId, UInt_t) const; // first row = 1
+    bool           hasHitInSvtLayer(UInt_t) const;          // first layer = 1
+    bool           hasHitInPxlLayer(UInt_t) const;          // first layer = 1
+    bool           hasHitInIstLayer(UInt_t) const;          // first layer = 1
+    bool           hasHitInSsdLayer(UInt_t) const;          // first layer = 1
+    bool           hasHitInSstLayer(UInt_t) const;
     
     bool           trackTpcOnly() const;
     bool           trackSvtOnly() const;
@@ -93,7 +91,7 @@ public:
     bool           trackFtpc() const;
 
     bool           turnAroundFlag() const;
-    unsigned int   data(unsigned int) const;
+    UInt_t   data(UInt_t) const;
 
     int            largestGap(StDetectorId) const;
     
@@ -105,13 +103,14 @@ protected:
 private:
     UInt_t  mMap0;
     UInt_t  mMap1;
+    UInt_t  mMap2;
     
     ClassDef(StTrackTopologyMap,1)
 };
 
 ostream& operator<< (ostream&, const StTrackTopologyMap&);
 
-inline bool StTrackTopologyMap::hasHitInSstLayer(unsigned int val) const
+inline bool StTrackTopologyMap::hasHitInSstLayer(UInt_t val) const
 {
     return hasHitInSsdLayer(val);
 }
