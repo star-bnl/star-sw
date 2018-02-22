@@ -6,7 +6,8 @@
    setenv NODEBUG yes
 #.DEV2
    setup 64b
-   starver .DEV2
+#   starver .DEV2
+   starver TFG18c
 #dev
 #   setup gcc
 #   starver dev
@@ -46,7 +47,7 @@
 #root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 #root.exe -q -b 'bfc.C(10000,"P2016a,TpxRaw,StiCA,KFVertex,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+#root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # dev
 #root4star -q -b 'bfc.C(1000,"P2016,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # SL16j
@@ -56,6 +57,10 @@ root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,ss
 #root4star -q -b 'bfc.C(1000,"P2016a,StiCA,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
 # TFG17e with Tpx clustering
 #root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# TFG18c tpxRaw
+root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+# TFG18c -tpxRaw
+#root.exe -q -b 'bfc.C(1000,"P2016a,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
 <!--
         <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />

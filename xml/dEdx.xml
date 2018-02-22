@@ -4,7 +4,12 @@
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
-  cd ${SUBMITTINGDIRECTORY}  
+   cd ${SUBMITTINGDIRECTORY}  
+   setenv STARFPE NO
+   setup 64b
+   setenv NODEBUG yes
+   starver TFG18c
+  
   set file = `basename ${INPUTFILE0} .event.root`;
   echo "${file}"
   set logFile  = ${file}B.log
@@ -14,7 +19,7 @@
 #  endif
 </command>
 <!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
-<!-- <input URL="command:dEdxSample.pl" /> -->
+<input URL="command:dEdxSample.pl" />
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
-<input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
 </job>

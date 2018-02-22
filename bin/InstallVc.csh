@@ -8,6 +8,8 @@
 # cd -
 
 #cd ./build
+if (! -d Vc) mkdir Vc
+cd Vc
 rm -rf ./*
 if (! $?NODEBUG) then
     set ROOTBUILD="debug"
