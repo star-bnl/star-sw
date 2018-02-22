@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.51 2017/10/13 20:13:53 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.52 2018/02/22 16:47:20 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.52  2018/02/22 16:47:20  ullrich
+ * Changes for blind analysis and EPD
+ *
  * Revision 2.51  2017/10/13 20:13:53  ullrich
  * Added access fct epdADC() and epdTDC().
  *
@@ -184,8 +187,9 @@ public:
     virtual ~StTriggerData();
     
     virtual void readData() {};
-    virtual void dump() const = 0;   //dump data into text
+    virtual void dump() const = 0;   // dump data into text
     virtual void setDebug(unsigned int); 
+    virtual void blindRunInfo();     // for run18 blinding analysis
        
     // version and data type information   
     virtual int year() const;                          // year of the data
@@ -321,6 +325,11 @@ public:
     virtual unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
 
     //EPD
+    virtual unsigned short epdTimeDifference() const;
+    virtual bool           epdHitLayer2(StBeamDirection eastwest) const;
+    virtual unsigned short epdLayer0t(int ch, int prepost=0) const;
+    virtual unsigned short epdLayer1(int ch, int prepost=0) const;
+    virtual unsigned short epdLayer0a(int ch, int prepost=0) const;
     virtual unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     virtual unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
 

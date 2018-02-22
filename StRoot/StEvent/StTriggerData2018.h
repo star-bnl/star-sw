@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2018.h,v 2.1 2017/10/13 20:10:17 ullrich Exp $
+ * $Id: StTriggerData2018.h,v 2.2 2018/02/22 16:47:20 ullrich Exp $
  *
  * Author: Akio Ogawa, October 13, 2017
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2018.h,v $
+ * Revision 2.2  2018/02/22 16:47:20  ullrich
+ * Changes for blind analysis and EPD
+ *
  * Revision 2.1  2017/10/13 20:10:17  ullrich
  * Initial Revision.
  *
@@ -32,6 +35,7 @@ public:
     void readData() {readData(0,0);}
     void readData(const TriggerDataBlk2018* data, int bs);
     void dump() const;  //dump data into text
+    void blindRunInfo(); 
     
     // Versison and data type information
     unsigned int version() const;           
@@ -79,6 +83,7 @@ public:
     // High Level Trigger info
     unsigned short tcuBits() const;
     unsigned short lastDSM(int address) const;
+    unsigned short vertexDSM(int channel) const;
     unsigned short bemcLayer1DSM(int channel, int prepost=0) const;
     unsigned short eemcLayer1DSM(int channel, int prepost=0) const;
     unsigned short emcLayer2DSM(int channel) const;
@@ -119,6 +124,11 @@ public:
     unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
 
     //EPD
+    unsigned short epdTimeDifference() const;
+    bool           epdHitLayer2(StBeamDirection eastwest) const;
+    unsigned short epdLayer0t(int ch, int prepost=0) const;
+    unsigned short epdLayer1(int ch, int prepost=0) const;
+    unsigned short epdLayer0a(int ch, int prepost=0) const;
     unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
     
