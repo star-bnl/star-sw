@@ -1,4 +1,4 @@
-// $Id: itpcBuilder.cxx,v 1.2 2018/02/22 16:44:05 videbaks Exp $
+// $Id: itpcBuilder.cxx,v 1.3 2018/02/22 16:53:08 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,12 +83,12 @@ itpcBuilder::~itpcBuilder() {
 
 void itpcBuilder::initialize(int argc, char *argv[]) {
 
-  //contents.itpc_occ_physics = new TH1D("tpc_physics","iTPC Channel Occupancy (in %) Physics",100,0,100);
+  //contents.itpc_occ_physics = new TH1D("itpc_physics","iTPC Channel Occupancy (in %) Physics",100,0,100);
   //contents.h44_itpc_occ_laser = new TH1D("h44_itpc_occ_laser","iTPC Channel Occupancy (in %) Lasers",100,0,100);
   //contents.h43_itpc_occ_pulser = new TH1D("h43_itpc_occ_pulser","iTPC Channel Occupancy (in %) Pulsers",100,0,100);
-  contents.itpc_pix_occ_physics = new TH1D("tpc_pix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
-  contents.itpc_pix_occ_laser = new TH1D("tpc_pix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
-  contents.itpc_pix_occ_pulser = new TH1D("tpc_pix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
+  contents.itpc_pix_occ_physics = new TH1D("itpc_pix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
+  contents.itpc_pix_occ_laser = new TH1D("itpc_pix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
+  contents.itpc_pix_occ_pulser = new TH1D("itpc_pix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
   contents.h15_itpc_sec1 = new TH2D("h15_itpc_sec1","iTPC Sec. 1 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
   contents.h16_itpc_sec2 = new TH2D("h16_itpc_sec2","iTPC Sec. 2 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
   contents.h17_itpc_sec3 = new TH2D("h17_itpc_sec3","iTPC Sec. 3 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
@@ -144,9 +144,9 @@ void itpcBuilder::initialize(int argc, char *argv[]) {
   contents.h67_itpc_sector_charge = new TH1D("h67_itpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
   
   // cluster based vesions...
-  extras.itpc_clpix_occ_physics = new TH1D("tpc_clpix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
-  extras.itpc_clpix_occ_laser = new TH1D("tpc_clpix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
-  extras.itpc_clpix_occ_pulser = new TH1D("tpc_clpix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
+  extras.itpc_clpix_occ_physics = new TH1D("itpc_clpix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
+  extras.itpc_clpix_occ_laser = new TH1D("itpc_clpix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
+  extras.itpc_clpix_occ_pulser = new TH1D("itpc_clpix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
   extras.cl120_itpc_chargeStep_s1 = new TH1D("cl120_itpc_chargeStep_s1","iTPC adc vs time sector#1",512,0,512);
   extras.cl121_itpc_chargeStep_s2 = new TH1D("cl121_itpc_chargeStep_s2","iTPC adc vs time sector#2",512,0,512);
   extras.cl122_itpc_chargeStep_s3 = new TH1D("cl122_itpc_chargeStep_s3","iTPC adc vs time sector#3",512,0,512);
