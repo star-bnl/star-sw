@@ -1,1 +1,1 @@
-../StRoot/StPicoAnalysisMaker/femtoDst.C
+../StRoot/StKFParticleAnalysisMaker/femtoDst.C
