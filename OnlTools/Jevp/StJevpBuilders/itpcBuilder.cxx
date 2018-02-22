@@ -1,4 +1,4 @@
-// $Id: itpcBuilder.cxx,v 1.1 2018/02/22 16:04:25 videbaks Exp $
+// $Id: itpcBuilder.cxx,v 1.2 2018/02/22 16:44:05 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,97 +83,97 @@ itpcBuilder::~itpcBuilder() {
 
 void itpcBuilder::initialize(int argc, char *argv[]) {
 
-  //contents.tpc_occ_physics = new TH1D("tpc_physics","iTPC Channel Occupancy (in %) Physics",100,0,100);
-  //contents.h44_tpc_occ_laser = new TH1D("h44_tpc_occ_laser","iTPC Channel Occupancy (in %) Lasers",100,0,100);
-  //contents.h43_tpc_occ_pulser = new TH1D("h43_tpc_occ_pulser","iTPC Channel Occupancy (in %) Pulsers",100,0,100);
-  contents.tpc_pix_occ_physics = new TH1D("tpc_pix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
-  contents.tpc_pix_occ_laser = new TH1D("tpc_pix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
-  contents.tpc_pix_occ_pulser = new TH1D("tpc_pix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
-  contents.h15_tpc_sec1 = new TH2D("h15_tpc_sec1","iTPC Sec. 1 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h16_tpc_sec2 = new TH2D("h16_tpc_sec2","iTPC Sec. 2 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h17_tpc_sec3 = new TH2D("h17_tpc_sec3","iTPC Sec. 3 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h18_tpc_sec4 = new TH2D("h18_tpc_sec4","iTPC Sec. 4 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h19_tpc_sec5 = new TH2D("h19_tpc_sec5","iTPC Sec. 5 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h20_tpc_sec6 = new TH2D("h20_tpc_sec6","iTPC Sec. 6 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h21_tpc_sec7 = new TH2D("h21_tpc_sec7","iTPC Sec. 7 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h22_tpc_sec8 = new TH2D("h22_tpc_sec8","iTPC Sec. 8 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h23_tpc_sec9 = new TH2D("h23_tpc_sec9","iTPC Sec. 9 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h24_tpc_sec10 = new TH2D("h24_tpc_sec10","iTPC Sec. 10 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h25_tpc_sec11 = new TH2D("h25_tpc_sec11","iTPC Sec. 11 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h26_tpc_sec12 = new TH2D("h26_tpc_sec12","iTPC Sec. 12 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h27_tpc_sec13 = new TH2D("h27_tpc_sec13","iTPC Sec. 13 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h28_tpc_sec14 = new TH2D("h28_tpc_sec14","iTPC Sec. 14 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h29_tpc_sec15 = new TH2D("h29_tpc_sec15","iTPC Sec. 15 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h30_tpc_sec16 = new TH2D("h30_tpc_sec16","iTPC Sec. 16 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h31_tpc_sec17 = new TH2D("h31_tpc_sec17","iTPC Sec. 17 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h32_tpc_sec18 = new TH2D("h32_tpc_sec18","iTPC Sec. 18 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h33_tpc_sec19 = new TH2D("h33_tpc_sec19","iTPC Sec. 19 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h34_tpc_sec20 = new TH2D("h34_tpc_sec20","iTPC Sec. 20 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h35_tpc_sec21 = new TH2D("h35_tpc_sec21","iTPC Sec. 21 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h36_tpc_sec22 = new TH2D("h36_tpc_sec22","iTPC Sec. 22 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h37_tpc_sec23 = new TH2D("h37_tpc_sec23","iTPC Sec. 23 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
-  contents.h38_tpc_sec24 = new TH2D("h38_tpc_sec24","iTPC Sec. 24 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);  
-  contents.h120_chargeStep_s1 = new TH1D("h120_chargeStep_s1","iTPC adc vs time sector#1",512,0,512);
-  contents.h121_chargeStep_s2 = new TH1D("h121_chargeStep_s2","iTPC adc vs time sector#2",512,0,512);
-  contents.h122_chargeStep_s3 = new TH1D("h122_chargeStep_s3","iTPC adc vs time sector#3",512,0,512);
-  contents.h123_chargeStep_s4 = new TH1D("h123_chargeStep_s4","iTPC adc vs time sector#4",512,0,512);
-  contents.h124_chargeStep_s5 = new TH1D("h124_chargeStep_s5","iTPC adc vs time sector#5",512,0,512);
-  contents.h125_chargeStep_s6 = new TH1D("h125_chargeStep_s6","iTPC adc vs time sector#6",512,0,512);
-  contents.h126_chargeStep_s7 = new TH1D("h126_chargeStep_s7","iTPC adc vs time sector#7",512,0,512);
-  contents.h127_chargeStep_s8 = new TH1D("h127_chargeStep_s8","iTPC adc vs time sector#8",512,0,512);
-  contents.h128_chargeStep_s9 = new TH1D("h128_chargeStep_s9","iTPC adc vs time sector#9",512,0,512);
-  contents.h129_chargeStep_s10 = new TH1D("h129_chargeStep_s10","iTPC adc vs time sector#10",512,0,512);
-  contents.h130_chargeStep_s11 = new TH1D("h130_chargeStep_s11","iTPC adc vs time sector#11",512,0,512);
-  contents.h131_chargeStep_s12 = new TH1D("h131_chargeStep_s12","iTPC adc vs time sector#12",512,0,512);
-  contents.h132_chargeStep_s13 = new TH1D("h132_chargeStep_s13","iTPC adc vs time sector#13",512,0,512);
-  contents.h133_chargeStep_s14 = new TH1D("h133_chargeStep_s14","iTPC adc vs time sector#14",512,0,512);
-  contents.h134_chargeStep_s15 = new TH1D("h134_chargeStep_s15","iTPC adc vs time sector#15",512,0,512);
-  contents.h135_chargeStep_s16 = new TH1D("h135_chargeStep_s16","iTPC adc vs time sector#16",512,0,512);
-  contents.h136_chargeStep_s17 = new TH1D("h136_chargeStep_s17","iTPC adc vs time sector#17",512,0,512);
-  contents.h137_chargeStep_s18 = new TH1D("h137_chargeStep_s18","iTPC adc vs time sector#18",512,0,512);
-  contents.h138_chargeStep_s19 = new TH1D("h138_chargeStep_s19","iTPC adc vs time sector#19",512,0,512);
-  contents.h139_chargeStep_s20 = new TH1D("h139_chargeStep_s20","iTPC adc vs time sector#20",512,0,512);
-  contents.h140_chargeStep_s21 = new TH1D("h140_chargeStep_s21","iTPC adc vs time sector#21",512,0,512);
-  contents.h141_chargeStep_s22 = new TH1D("h141_chargeStep_s22","iTPC adc vs time sector#22",512,0,512);
-  contents.h142_chargeStep_s23 = new TH1D("h142_chargeStep_s23","iTPC adc vs time sector#23",512,0,512);
-  contents.h143_chargeStep_s24 = new TH1D("h143_chargeStep_s24","iTPC adc vs time sector#24",512,0,512);
+  //contents.itpc_occ_physics = new TH1D("tpc_physics","iTPC Channel Occupancy (in %) Physics",100,0,100);
+  //contents.h44_itpc_occ_laser = new TH1D("h44_itpc_occ_laser","iTPC Channel Occupancy (in %) Lasers",100,0,100);
+  //contents.h43_itpc_occ_pulser = new TH1D("h43_itpc_occ_pulser","iTPC Channel Occupancy (in %) Pulsers",100,0,100);
+  contents.itpc_pix_occ_physics = new TH1D("tpc_pix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
+  contents.itpc_pix_occ_laser = new TH1D("tpc_pix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
+  contents.itpc_pix_occ_pulser = new TH1D("tpc_pix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
+  contents.h15_itpc_sec1 = new TH2D("h15_itpc_sec1","iTPC Sec. 1 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h16_itpc_sec2 = new TH2D("h16_itpc_sec2","iTPC Sec. 2 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h17_itpc_sec3 = new TH2D("h17_itpc_sec3","iTPC Sec. 3 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h18_itpc_sec4 = new TH2D("h18_itpc_sec4","iTPC Sec. 4 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h19_itpc_sec5 = new TH2D("h19_itpc_sec5","iTPC Sec. 5 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h20_itpc_sec6 = new TH2D("h20_itpc_sec6","iTPC Sec. 6 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h21_itpc_sec7 = new TH2D("h21_itpc_sec7","iTPC Sec. 7 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h22_itpc_sec8 = new TH2D("h22_itpc_sec8","iTPC Sec. 8 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h23_itpc_sec9 = new TH2D("h23_itpc_sec9","iTPC Sec. 9 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h24_itpc_sec10 = new TH2D("h24_itpc_sec10","iTPC Sec. 10 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h25_itpc_sec11 = new TH2D("h25_itpc_sec11","iTPC Sec. 11 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h26_itpc_sec12 = new TH2D("h26_itpc_sec12","iTPC Sec. 12 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h27_itpc_sec13 = new TH2D("h27_itpc_sec13","iTPC Sec. 13 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h28_itpc_sec14 = new TH2D("h28_itpc_sec14","iTPC Sec. 14 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h29_itpc_sec15 = new TH2D("h29_itpc_sec15","iTPC Sec. 15 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h30_itpc_sec16 = new TH2D("h30_itpc_sec16","iTPC Sec. 16 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h31_itpc_sec17 = new TH2D("h31_itpc_sec17","iTPC Sec. 17 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h32_itpc_sec18 = new TH2D("h32_itpc_sec18","iTPC Sec. 18 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h33_itpc_sec19 = new TH2D("h33_itpc_sec19","iTPC Sec. 19 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h34_itpc_sec20 = new TH2D("h34_itpc_sec20","iTPC Sec. 20 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h35_itpc_sec21 = new TH2D("h35_itpc_sec21","iTPC Sec. 21 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h36_itpc_sec22 = new TH2D("h36_itpc_sec22","iTPC Sec. 22 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h37_itpc_sec23 = new TH2D("h37_itpc_sec23","iTPC Sec. 23 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.h38_itpc_sec24 = new TH2D("h38_itpc_sec24","iTPC Sec. 24 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);  
+  contents.h120_itpc_chargeStep_s1 = new TH1D("h120_itpc_chargeStep_s1","iTPC adc vs time sector#1",512,0,512);
+  contents.h121_itpc_chargeStep_s2 = new TH1D("h121_itpc_chargeStep_s2","iTPC adc vs time sector#2",512,0,512);
+  contents.h122_itpc_chargeStep_s3 = new TH1D("h122_itpc_chargeStep_s3","iTPC adc vs time sector#3",512,0,512);
+  contents.h123_itpc_chargeStep_s4 = new TH1D("h123_itpc_chargeStep_s4","iTPC adc vs time sector#4",512,0,512);
+  contents.h124_itpc_chargeStep_s5 = new TH1D("h124_itpc_chargeStep_s5","iTPC adc vs time sector#5",512,0,512);
+  contents.h125_itpc_chargeStep_s6 = new TH1D("h125_itpc_chargeStep_s6","iTPC adc vs time sector#6",512,0,512);
+  contents.h126_itpc_chargeStep_s7 = new TH1D("h126_itpc_chargeStep_s7","iTPC adc vs time sector#7",512,0,512);
+  contents.h127_itpc_chargeStep_s8 = new TH1D("h127_itpc_chargeStep_s8","iTPC adc vs time sector#8",512,0,512);
+  contents.h128_itpc_chargeStep_s9 = new TH1D("h128_itpc_chargeStep_s9","iTPC adc vs time sector#9",512,0,512);
+  contents.h129_itpc_chargeStep_s10 = new TH1D("h129_itpc_chargeStep_s10","iTPC adc vs time sector#10",512,0,512);
+  contents.h130_itpc_chargeStep_s11 = new TH1D("h130_itpc_chargeStep_s11","iTPC adc vs time sector#11",512,0,512);
+  contents.h131_itpc_chargeStep_s12 = new TH1D("h131_itpc_chargeStep_s12","iTPC adc vs time sector#12",512,0,512);
+  contents.h132_itpc_chargeStep_s13 = new TH1D("h132_itpc_chargeStep_s13","iTPC adc vs time sector#13",512,0,512);
+  contents.h133_itpc_chargeStep_s14 = new TH1D("h133_itpc_chargeStep_s14","iTPC adc vs time sector#14",512,0,512);
+  contents.h134_itpc_chargeStep_s15 = new TH1D("h134_itpc_chargeStep_s15","iTPC adc vs time sector#15",512,0,512);
+  contents.h135_itpc_chargeStep_s16 = new TH1D("h135_itpc_chargeStep_s16","iTPC adc vs time sector#16",512,0,512);
+  contents.h136_itpc_chargeStep_s17 = new TH1D("h136_itpc_chargeStep_s17","iTPC adc vs time sector#17",512,0,512);
+  contents.h137_itpc_chargeStep_s18 = new TH1D("h137_itpc_chargeStep_s18","iTPC adc vs time sector#18",512,0,512);
+  contents.h138_itpc_chargeStep_s19 = new TH1D("h138_itpc_chargeStep_s19","iTPC adc vs time sector#19",512,0,512);
+  contents.h139_itpc_chargeStep_s20 = new TH1D("h139_itpc_chargeStep_s20","iTPC adc vs time sector#20",512,0,512);
+  contents.h140_itpc_chargeStep_s21 = new TH1D("h140_itpc_chargeStep_s21","iTPC adc vs time sector#21",512,0,512);
+  contents.h141_itpc_chargeStep_s22 = new TH1D("h141_itpc_chargeStep_s22","iTPC adc vs time sector#22",512,0,512);
+  contents.h142_itpc_chargeStep_s23 = new TH1D("h142_itpc_chargeStep_s23","iTPC adc vs time sector#23",512,0,512);
+  contents.h143_itpc_chargeStep_s24 = new TH1D("h143_itpc_chargeStep_s24","iTPC adc vs time sector#24",512,0,512);
  
-  contents.h102_tpc_drift_vel = new TH1D("h102_tpc_drift_vel", "iTPC Drift Velocity (cm/us)",400,5.4,5.8);
-  // contents.h113_tpc_drift_vel_dist = new TH1D("113_tpc_drift_vel_dist", "iTPC Drift Velocity Distribution(cm/us)",200,4,8);
-  contents.h66_tpc_phi_charge = new TH1D("h66_tpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
-  contents.h67_tpc_sector_charge = new TH1D("h67_tpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
+  contents.h102_itpc_drift_vel = new TH1D("h102_itpc_drift_vel", "iTPC Drift Velocity (cm/us)",400,5.4,5.8);
+  // contents.h113_itpc_drift_vel_dist = new TH1D("113_itpc_drift_vel_dist", "iTPC Drift Velocity Distribution(cm/us)",200,4,8);
+  contents.h66_itpc_phi_charge = new TH1D("h66_itpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
+  contents.h67_itpc_sector_charge = new TH1D("h67_itpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
   
   // cluster based vesions...
-  extras.tpc_clpix_occ_physics = new TH1D("tpc_clpix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
-  extras.tpc_clpix_occ_laser = new TH1D("tpc_clpix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
-  extras.tpc_clpix_occ_pulser = new TH1D("tpc_clpix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
-  extras.cl120_chargeStep_s1 = new TH1D("cl120_chargeStep_s1","iTPC adc vs time sector#1",512,0,512);
-  extras.cl121_chargeStep_s2 = new TH1D("cl121_chargeStep_s2","iTPC adc vs time sector#2",512,0,512);
-  extras.cl122_chargeStep_s3 = new TH1D("cl122_chargeStep_s3","iTPC adc vs time sector#3",512,0,512);
-  extras.cl123_chargeStep_s4 = new TH1D("cl123_chargeStep_s4","iTPC adc vs time sector#4",512,0,512);
-  extras.cl124_chargeStep_s5 = new TH1D("cl124_chargeStep_s5","iTPC adc vs time sector#5",512,0,512);
-  extras.cl125_chargeStep_s6 = new TH1D("cl125_chargeStep_s6","iTPC adc vs time sector#6",512,0,512);
-  extras.cl126_chargeStep_s7 = new TH1D("cl126_chargeStep_s7","iTPC adc vs time sector#7",512,0,512);
-  extras.cl127_chargeStep_s8 = new TH1D("cl127_chargeStep_s8","iTPC adc vs time sector#8",512,0,512);
-  extras.cl128_chargeStep_s9 = new TH1D("cl128_chargeStep_s9","iTPC adc vs time sector#9",512,0,512);
-  extras.cl129_chargeStep_s10 = new TH1D("cl129_chargeStep_s10","iTPC adc vs time sector#10",512,0,512);
-  extras.cl130_chargeStep_s11 = new TH1D("cl130_chargeStep_s11","iTPC adc vs time sector#11",512,0,512);
-  extras.cl131_chargeStep_s12 = new TH1D("cl131_chargeStep_s12","iTPC adc vs time sector#12",512,0,512);
-  extras.cl132_chargeStep_s13 = new TH1D("cl132_chargeStep_s13","iTPC adc vs time sector#13",512,0,512);
-  extras.cl133_chargeStep_s14 = new TH1D("cl133_chargeStep_s14","iTPC adc vs time sector#14",512,0,512);
-  extras.cl134_chargeStep_s15 = new TH1D("cl134_chargeStep_s15","iTPC adc vs time sector#15",512,0,512);
-  extras.cl135_chargeStep_s16 = new TH1D("cl135_chargeStep_s16","iTPC adc vs time sector#16",512,0,512);
-  extras.cl136_chargeStep_s17 = new TH1D("cl136_chargeStep_s17","iTPC adc vs time sector#17",512,0,512);
-  extras.cl137_chargeStep_s18 = new TH1D("cl137_chargeStep_s18","iTPC adc vs time sector#18",512,0,512);
-  extras.cl138_chargeStep_s19 = new TH1D("cl138_chargeStep_s19","iTPC adc vs time sector#19",512,0,512);
-  extras.cl139_chargeStep_s20 = new TH1D("cl139_chargeStep_s20","iTPC adc vs time sector#20",512,0,512);
-  extras.cl140_chargeStep_s21 = new TH1D("cl140_chargeStep_s21","iTPC adc vs time sector#21",512,0,512);
-  extras.cl141_chargeStep_s22 = new TH1D("cl141_chargeStep_s22","iTPC adc vs time sector#22",512,0,512);
-  extras.cl142_chargeStep_s23 = new TH1D("cl142_chargeStep_s23","iTPC adc vs time sector#23",512,0,512);
-  extras.cl143_chargeStep_s24 = new TH1D("cl143_chargeStep_s24","iTPC adc vs time sector#24",512,0,512);
+  extras.itpc_clpix_occ_physics = new TH1D("tpc_clpix_occ_physics","iTPC Pixel Occupancy (in %) Physics",100,0,2.5);
+  extras.itpc_clpix_occ_laser = new TH1D("tpc_clpix_occ_laser","iTPC Pixel Occupancy (in %) Lasers",100,0,1);
+  extras.itpc_clpix_occ_pulser = new TH1D("tpc_clpix_occ_pulser","iTPC Pixel Occupancy (in %) Pulsers",100,0,10);
+  extras.cl120_itpc_chargeStep_s1 = new TH1D("cl120_itpc_chargeStep_s1","iTPC adc vs time sector#1",512,0,512);
+  extras.cl121_itpc_chargeStep_s2 = new TH1D("cl121_itpc_chargeStep_s2","iTPC adc vs time sector#2",512,0,512);
+  extras.cl122_itpc_chargeStep_s3 = new TH1D("cl122_itpc_chargeStep_s3","iTPC adc vs time sector#3",512,0,512);
+  extras.cl123_itpc_chargeStep_s4 = new TH1D("cl123_itpc_chargeStep_s4","iTPC adc vs time sector#4",512,0,512);
+  extras.cl124_itpc_chargeStep_s5 = new TH1D("cl124_itpc_chargeStep_s5","iTPC adc vs time sector#5",512,0,512);
+  extras.cl125_itpc_chargeStep_s6 = new TH1D("cl125_itpc_chargeStep_s6","iTPC adc vs time sector#6",512,0,512);
+  extras.cl126_itpc_chargeStep_s7 = new TH1D("cl126_itpc_chargeStep_s7","iTPC adc vs time sector#7",512,0,512);
+  extras.cl127_itpc_chargeStep_s8 = new TH1D("cl127_itpc_chargeStep_s8","iTPC adc vs time sector#8",512,0,512);
+  extras.cl128_itpc_chargeStep_s9 = new TH1D("cl128_itpc_chargeStep_s9","iTPC adc vs time sector#9",512,0,512);
+  extras.cl129_itpc_chargeStep_s10 = new TH1D("cl129_itpc_chargeStep_s10","iTPC adc vs time sector#10",512,0,512);
+  extras.cl130_itpc_chargeStep_s11 = new TH1D("cl130_itpc_chargeStep_s11","iTPC adc vs time sector#11",512,0,512);
+  extras.cl131_itpc_chargeStep_s12 = new TH1D("cl131_itpc_chargeStep_s12","iTPC adc vs time sector#12",512,0,512);
+  extras.cl132_itpc_chargeStep_s13 = new TH1D("cl132_itpc_chargeStep_s13","iTPC adc vs time sector#13",512,0,512);
+  extras.cl133_itpc_chargeStep_s14 = new TH1D("cl133_itpc_chargeStep_s14","iTPC adc vs time sector#14",512,0,512);
+  extras.cl134_itpc_chargeStep_s15 = new TH1D("cl134_itpc_chargeStep_s15","iTPC adc vs time sector#15",512,0,512);
+  extras.cl135_itpc_chargeStep_s16 = new TH1D("cl135_itpc_chargeStep_s16","iTPC adc vs time sector#16",512,0,512);
+  extras.cl136_itpc_chargeStep_s17 = new TH1D("cl136_itpc_chargeStep_s17","iTPC adc vs time sector#17",512,0,512);
+  extras.cl137_itpc_chargeStep_s18 = new TH1D("cl137_itpc_chargeStep_s18","iTPC adc vs time sector#18",512,0,512);
+  extras.cl138_itpc_chargeStep_s19 = new TH1D("cl138_itpc_chargeStep_s19","iTPC adc vs time sector#19",512,0,512);
+  extras.cl139_itpc_chargeStep_s20 = new TH1D("cl139_itpc_chargeStep_s20","iTPC adc vs time sector#20",512,0,512);
+  extras.cl140_itpc_chargeStep_s21 = new TH1D("cl140_itpc_chargeStep_s21","iTPC adc vs time sector#21",512,0,512);
+  extras.cl141_itpc_chargeStep_s22 = new TH1D("cl141_itpc_chargeStep_s22","iTPC adc vs time sector#22",512,0,512);
+  extras.cl142_itpc_chargeStep_s23 = new TH1D("cl142_itpc_chargeStep_s23","iTPC adc vs time sector#23",512,0,512);
+  extras.cl143_itpc_chargeStep_s24 = new TH1D("cl143_itpc_chargeStep_s24","iTPC adc vs time sector#24",512,0,512);
  
-  extras.cl66_tpc_phi_charge = new TH1D("cl66_tpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
-  extras.cl67_tpc_sector_charge = new TH1D("cl67_tpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
+  extras.cl66_itpc_phi_charge = new TH1D("cl66_itpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
+  extras.cl67_itpc_sector_charge = new TH1D("cl67_itpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
  
   // Add root histograms to Plots
   int np = sizeof(contents) / sizeof(TH1 *);
@@ -181,142 +181,142 @@ void itpcBuilder::initialize(int argc, char *argv[]) {
 
   int n=0;
 
-  //plots[n] = new JevpPlot(contents.tpc_occ_physics);
-  // plots[++n] = new JevpPlot(contents.h44_tpc_occ_laser);
-  //plots[++n] = new JevpPlot(contents.h43_tpc_occ_pulser);
+  //plots[n] = new JevpPlot(contents.itpc_occ_physics);
+  // plots[++n] = new JevpPlot(contents.h44_itpc_occ_laser);
+  //plots[++n] = new JevpPlot(contents.h43_itpc_occ_pulser);
 
-  plots[n] = new JevpPlot(extras.tpc_clpix_occ_physics);
-  plots[n]->addHisto(contents.tpc_pix_occ_physics);
-  extras.tpc_clpix_occ_physics->SetLineColor(kRed);
-  contents.tpc_pix_occ_physics->SetLineColor(kGreen);
+  plots[n] = new JevpPlot(extras.itpc_clpix_occ_physics);
+  plots[n]->addHisto(contents.itpc_pix_occ_physics);
+  extras.itpc_clpix_occ_physics->SetLineColor(kRed);
+  contents.itpc_pix_occ_physics->SetLineColor(kGreen);
   plots[n]->setLegend(.78,.6,.98,.7);
   plots[n]->getHisto(1)->setLegText("adc's");
   plots[n]->getHisto(0)->setLegText("clusters");
   plots[n]->getHisto(1)->setLegArgs("l");
   plots[n]->getHisto(0)->setLegArgs("l");
 
-  plots[++n] = new JevpPlot(extras.tpc_clpix_occ_laser);
-  plots[n]->addHisto(contents.tpc_pix_occ_laser);
-  extras.tpc_clpix_occ_laser->SetLineColor(kRed);
-  contents.tpc_pix_occ_laser->SetLineColor(kGreen);
+  plots[++n] = new JevpPlot(extras.itpc_clpix_occ_laser);
+  plots[n]->addHisto(contents.itpc_pix_occ_laser);
+  extras.itpc_clpix_occ_laser->SetLineColor(kRed);
+  contents.itpc_pix_occ_laser->SetLineColor(kGreen);
   plots[n]->setLegend(.78,.6,.98,.7);
   plots[n]->getHisto(1)->setLegText("adc's");
   plots[n]->getHisto(0)->setLegText("clusters");
   plots[n]->getHisto(1)->setLegArgs("l");
   plots[n]->getHisto(0)->setLegArgs("l");
 
-  plots[++n] = new JevpPlot(extras.tpc_clpix_occ_pulser);
-  plots[n]->addHisto(contents.tpc_pix_occ_pulser);
-  extras.tpc_clpix_occ_pulser->SetLineColor(kRed);
-  contents.tpc_pix_occ_pulser->SetLineColor(kGreen);
+  plots[++n] = new JevpPlot(extras.itpc_clpix_occ_pulser);
+  plots[n]->addHisto(contents.itpc_pix_occ_pulser);
+  extras.itpc_clpix_occ_pulser->SetLineColor(kRed);
+  contents.itpc_pix_occ_pulser->SetLineColor(kGreen);
   plots[n]->setLegend(.78,.6,.98,.7);
   plots[n]->getHisto(1)->setLegText("adc's");
   plots[n]->getHisto(0)->setLegText("clusters");
   plots[n]->getHisto(1)->setLegArgs("l");
   plots[n]->getHisto(0)->setLegArgs("l");
   
-  plots[++n] = new JevpPlot(contents.h15_tpc_sec1);
-  plots[++n] = new JevpPlot(contents.h16_tpc_sec2);
-  plots[++n] = new JevpPlot(contents.h17_tpc_sec3);
-  plots[++n] = new JevpPlot(contents.h18_tpc_sec4);
-  plots[++n] = new JevpPlot(contents.h19_tpc_sec5);
-  plots[++n] = new JevpPlot(contents.h20_tpc_sec6);
-  plots[++n] = new JevpPlot(contents.h21_tpc_sec7);
-  plots[++n] = new JevpPlot(contents.h22_tpc_sec8);
-  plots[++n] = new JevpPlot(contents.h23_tpc_sec9);
-  plots[++n] = new JevpPlot(contents.h24_tpc_sec10);
-  plots[++n] = new JevpPlot(contents.h25_tpc_sec11);
-  plots[++n] = new JevpPlot(contents.h26_tpc_sec12);
-  plots[++n] = new JevpPlot(contents.h27_tpc_sec13);
-  plots[++n] = new JevpPlot(contents.h28_tpc_sec14);
-  plots[++n] = new JevpPlot(contents.h29_tpc_sec15);
-  plots[++n] = new JevpPlot(contents.h30_tpc_sec16);
-  plots[++n] = new JevpPlot(contents.h31_tpc_sec17);
-  plots[++n] = new JevpPlot(contents.h32_tpc_sec18);
-  plots[++n] = new JevpPlot(contents.h33_tpc_sec19);
-  plots[++n] = new JevpPlot(contents.h34_tpc_sec20);
-  plots[++n] = new JevpPlot(contents.h35_tpc_sec21);
-  plots[++n] = new JevpPlot(contents.h36_tpc_sec22);
-  plots[++n] = new JevpPlot(contents.h37_tpc_sec23);
-  plots[++n] = new JevpPlot(contents.h38_tpc_sec24);
-  plots[++n] = new JevpPlot(contents.h120_chargeStep_s1);
+  plots[++n] = new JevpPlot(contents.h15_itpc_sec1);
+  plots[++n] = new JevpPlot(contents.h16_itpc_sec2);
+  plots[++n] = new JevpPlot(contents.h17_itpc_sec3);
+  plots[++n] = new JevpPlot(contents.h18_itpc_sec4);
+  plots[++n] = new JevpPlot(contents.h19_itpc_sec5);
+  plots[++n] = new JevpPlot(contents.h20_itpc_sec6);
+  plots[++n] = new JevpPlot(contents.h21_itpc_sec7);
+  plots[++n] = new JevpPlot(contents.h22_itpc_sec8);
+  plots[++n] = new JevpPlot(contents.h23_itpc_sec9);
+  plots[++n] = new JevpPlot(contents.h24_itpc_sec10);
+  plots[++n] = new JevpPlot(contents.h25_itpc_sec11);
+  plots[++n] = new JevpPlot(contents.h26_itpc_sec12);
+  plots[++n] = new JevpPlot(contents.h27_itpc_sec13);
+  plots[++n] = new JevpPlot(contents.h28_itpc_sec14);
+  plots[++n] = new JevpPlot(contents.h29_itpc_sec15);
+  plots[++n] = new JevpPlot(contents.h30_itpc_sec16);
+  plots[++n] = new JevpPlot(contents.h31_itpc_sec17);
+  plots[++n] = new JevpPlot(contents.h32_itpc_sec18);
+  plots[++n] = new JevpPlot(contents.h33_itpc_sec19);
+  plots[++n] = new JevpPlot(contents.h34_itpc_sec20);
+  plots[++n] = new JevpPlot(contents.h35_itpc_sec21);
+  plots[++n] = new JevpPlot(contents.h36_itpc_sec22);
+  plots[++n] = new JevpPlot(contents.h37_itpc_sec23);
+  plots[++n] = new JevpPlot(contents.h38_itpc_sec24);
+  plots[++n] = new JevpPlot(contents.h120_itpc_chargeStep_s1);
  
-  plots[n]->addHisto(extras.cl120_chargeStep_s1);
-  plots[++n] = new JevpPlot(contents.h121_chargeStep_s2);
-  plots[n]->addHisto(extras.cl121_chargeStep_s2);
-  plots[++n] = new JevpPlot(contents.h122_chargeStep_s3);
-  plots[n]->addHisto(extras.cl122_chargeStep_s3);
-  plots[++n] = new JevpPlot(contents.h123_chargeStep_s4);
-  plots[n]->addHisto(extras.cl123_chargeStep_s4);
-  plots[++n] = new JevpPlot(contents.h124_chargeStep_s5);
-  plots[n]->addHisto(extras.cl124_chargeStep_s5);
-  plots[++n] = new JevpPlot(contents.h125_chargeStep_s6);
-  plots[n]->addHisto(extras.cl125_chargeStep_s6);
-  plots[++n] = new JevpPlot(contents.h126_chargeStep_s7);
-  plots[n]->addHisto(extras.cl126_chargeStep_s7);
-  plots[++n] = new JevpPlot(contents.h127_chargeStep_s8);
-  plots[n]->addHisto(extras.cl127_chargeStep_s8);
-  plots[++n] = new JevpPlot(contents.h128_chargeStep_s9);
-  plots[n]->addHisto(extras.cl128_chargeStep_s9);
-  plots[++n] = new JevpPlot(contents.h129_chargeStep_s10);
-  plots[n]->addHisto(extras.cl129_chargeStep_s10);
-  plots[++n] = new JevpPlot(contents.h130_chargeStep_s11);
-  plots[n]->addHisto(extras.cl130_chargeStep_s11);
-  plots[++n] = new JevpPlot(contents.h131_chargeStep_s12);
-  plots[n]->addHisto(extras.cl131_chargeStep_s12);
-  plots[++n] = new JevpPlot(contents.h132_chargeStep_s13);
-  plots[n]->addHisto(extras.cl132_chargeStep_s13);
-  plots[++n] = new JevpPlot(contents.h133_chargeStep_s14);
-  plots[n]->addHisto(extras.cl133_chargeStep_s14);
-  plots[++n] = new JevpPlot(contents.h134_chargeStep_s15);
-  plots[n]->addHisto(extras.cl134_chargeStep_s15);
-  plots[++n] = new JevpPlot(contents.h135_chargeStep_s16);
-  plots[n]->addHisto(extras.cl135_chargeStep_s16);
-  plots[++n] = new JevpPlot(contents.h136_chargeStep_s17);
-  plots[n]->addHisto(extras.cl136_chargeStep_s17);
-  plots[++n] = new JevpPlot(contents.h137_chargeStep_s18);
-  plots[n]->addHisto(extras.cl137_chargeStep_s18);
-  plots[++n] = new JevpPlot(contents.h138_chargeStep_s19);
-  plots[n]->addHisto(extras.cl138_chargeStep_s19);
-  plots[++n] = new JevpPlot(contents.h139_chargeStep_s20);
-  plots[n]->addHisto(extras.cl139_chargeStep_s20);
-  plots[++n] = new JevpPlot(contents.h140_chargeStep_s21);
-  plots[n]->addHisto(extras.cl140_chargeStep_s21);
-  plots[++n] = new JevpPlot(contents.h141_chargeStep_s22);
-  plots[n]->addHisto(extras.cl141_chargeStep_s22);
-  plots[++n] = new JevpPlot(contents.h142_chargeStep_s23);
-  plots[n]->addHisto(extras.cl142_chargeStep_s23);
-  plots[++n] = new JevpPlot(contents.h143_chargeStep_s24);
-  plots[n]->addHisto(extras.cl143_chargeStep_s24);
+  plots[n]->addHisto(extras.cl120_itpc_chargeStep_s1);
+  plots[++n] = new JevpPlot(contents.h121_itpc_chargeStep_s2);
+  plots[n]->addHisto(extras.cl121_itpc_chargeStep_s2);
+  plots[++n] = new JevpPlot(contents.h122_itpc_chargeStep_s3);
+  plots[n]->addHisto(extras.cl122_itpc_chargeStep_s3);
+  plots[++n] = new JevpPlot(contents.h123_itpc_chargeStep_s4);
+  plots[n]->addHisto(extras.cl123_itpc_chargeStep_s4);
+  plots[++n] = new JevpPlot(contents.h124_itpc_chargeStep_s5);
+  plots[n]->addHisto(extras.cl124_itpc_chargeStep_s5);
+  plots[++n] = new JevpPlot(contents.h125_itpc_chargeStep_s6);
+  plots[n]->addHisto(extras.cl125_itpc_chargeStep_s6);
+  plots[++n] = new JevpPlot(contents.h126_itpc_chargeStep_s7);
+  plots[n]->addHisto(extras.cl126_itpc_chargeStep_s7);
+  plots[++n] = new JevpPlot(contents.h127_itpc_chargeStep_s8);
+  plots[n]->addHisto(extras.cl127_itpc_chargeStep_s8);
+  plots[++n] = new JevpPlot(contents.h128_itpc_chargeStep_s9);
+  plots[n]->addHisto(extras.cl128_itpc_chargeStep_s9);
+  plots[++n] = new JevpPlot(contents.h129_itpc_chargeStep_s10);
+  plots[n]->addHisto(extras.cl129_itpc_chargeStep_s10);
+  plots[++n] = new JevpPlot(contents.h130_itpc_chargeStep_s11);
+  plots[n]->addHisto(extras.cl130_itpc_chargeStep_s11);
+  plots[++n] = new JevpPlot(contents.h131_itpc_chargeStep_s12);
+  plots[n]->addHisto(extras.cl131_itpc_chargeStep_s12);
+  plots[++n] = new JevpPlot(contents.h132_itpc_chargeStep_s13);
+  plots[n]->addHisto(extras.cl132_itpc_chargeStep_s13);
+  plots[++n] = new JevpPlot(contents.h133_itpc_chargeStep_s14);
+  plots[n]->addHisto(extras.cl133_itpc_chargeStep_s14);
+  plots[++n] = new JevpPlot(contents.h134_itpc_chargeStep_s15);
+  plots[n]->addHisto(extras.cl134_itpc_chargeStep_s15);
+  plots[++n] = new JevpPlot(contents.h135_itpc_chargeStep_s16);
+  plots[n]->addHisto(extras.cl135_itpc_chargeStep_s16);
+  plots[++n] = new JevpPlot(contents.h136_itpc_chargeStep_s17);
+  plots[n]->addHisto(extras.cl136_itpc_chargeStep_s17);
+  plots[++n] = new JevpPlot(contents.h137_itpc_chargeStep_s18);
+  plots[n]->addHisto(extras.cl137_itpc_chargeStep_s18);
+  plots[++n] = new JevpPlot(contents.h138_itpc_chargeStep_s19);
+  plots[n]->addHisto(extras.cl138_itpc_chargeStep_s19);
+  plots[++n] = new JevpPlot(contents.h139_itpc_chargeStep_s20);
+  plots[n]->addHisto(extras.cl139_itpc_chargeStep_s20);
+  plots[++n] = new JevpPlot(contents.h140_itpc_chargeStep_s21);
+  plots[n]->addHisto(extras.cl140_itpc_chargeStep_s21);
+  plots[++n] = new JevpPlot(contents.h141_itpc_chargeStep_s22);
+  plots[n]->addHisto(extras.cl141_itpc_chargeStep_s22);
+  plots[++n] = new JevpPlot(contents.h142_itpc_chargeStep_s23);
+  plots[n]->addHisto(extras.cl142_itpc_chargeStep_s23);
+  plots[++n] = new JevpPlot(contents.h143_itpc_chargeStep_s24);
+  plots[n]->addHisto(extras.cl143_itpc_chargeStep_s24);
  
-  plots[++n] = new JevpPlot(contents.h102_tpc_drift_vel);
-  //plots[++n] = new JevpPlot(contents.h113_tpc_drift_vel_dist);
+  plots[++n] = new JevpPlot(contents.h102_itpc_drift_vel);
+  //plots[++n] = new JevpPlot(contents.h113_itpc_drift_vel_dist);
 
-  plots[++n] = new JevpPlot(contents.h66_tpc_phi_charge);
-  plots[n]->addHisto(extras.cl66_tpc_phi_charge);
+  plots[++n] = new JevpPlot(contents.h66_itpc_phi_charge);
+  plots[n]->addHisto(extras.cl66_itpc_phi_charge);
   plots[n]->optstat = 0;
-  extras.cl66_tpc_phi_charge->SetLineColor(kRed);
-  contents.h66_tpc_phi_charge->SetLineColor(kGreen);
+  extras.cl66_itpc_phi_charge->SetLineColor(kRed);
+  contents.h66_itpc_phi_charge->SetLineColor(kGreen);
   plots[n]->setLegend(.78,.6,.98,.7);
   plots[n]->getHisto(0)->setLegText("adc's");
   plots[n]->getHisto(1)->setLegText("clusters");
   plots[n]->getHisto(0)->setLegArgs("l");
   plots[n]->getHisto(1)->setLegArgs("l");
 
-  plots[++n] = new JevpPlot(contents.h67_tpc_sector_charge);
-  plots[n]->addHisto(extras.cl67_tpc_sector_charge);
+  plots[++n] = new JevpPlot(contents.h67_itpc_sector_charge);
+  plots[n]->addHisto(extras.cl67_itpc_sector_charge);
   plots[n]->optstat = 0;
-  extras.cl67_tpc_sector_charge->SetLineColor(kRed);
-  contents.h67_tpc_sector_charge->SetLineColor(kGreen);
+  extras.cl67_itpc_sector_charge->SetLineColor(kRed);
+  contents.h67_itpc_sector_charge->SetLineColor(kGreen);
   plots[n]->setLegend(.78,.6,.98,.7);
   plots[n]->getHisto(0)->setLegText("adc's");
   plots[n]->getHisto(1)->setLegText("clusters");
   plots[n]->getHisto(0)->setLegArgs("l");
   plots[n]->getHisto(1)->setLegArgs("l");
 
-  long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
-  long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
-  long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
+  long q_idx = ((long)&contents.h15_itpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  long qs_idx = ((long)&contents.h120_itpc_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
+  long cl_qs_idx = ((long)&extras.cl120_itpc_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
  
   for(int i=0;i<24;i++) {
     plots[i+q_idx]->setDrawOpts((char *)"colz");
@@ -360,11 +360,11 @@ void itpcBuilder::event(daqReader *rdr)
   int has_cld=0;
 
   // printf("aa\n");
-  long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
-  long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
-  long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
+  long q_idx = ((long)&contents.h15_itpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  long qs_idx = ((long)&contents.h120_itpc_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
+  long cl_qs_idx = ((long)&extras.cl120_itpc_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
 
-  // printf("q qs cl:  %d %d %d 0x%x 0x%x\n",q_idx,qs_idx,cl_qs_idx,&extras.cl120_chargeStep_s1,extras.array);
+  // printf("q qs cl:  %d %d %d 0x%x 0x%x\n",q_idx,qs_idx,cl_qs_idx,&extras.cl120_itpc_chargeStep _s1,extras.array);
   // printf("bb\n"); 
 
   double pixel_count = 0;
@@ -455,13 +455,13 @@ void itpcBuilder::event(daqReader *rdr)
 	  charge_count_sector += charge_counts[i][j];
 	  
 	  if(charge_counts[i][j]) {
-	    contents.h66_tpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
+	    contents.h66_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
 	    ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
 	  }
 	}
       }
 
-      contents.h67_tpc_sector_charge->Fill(s,charge_count_sector);      
+      contents.h67_itpc_sector_charge->Fill(s,charge_count_sector);      
     }
 
     double charge_cl=0;
@@ -496,12 +496,12 @@ void itpcBuilder::event(daqReader *rdr)
 	for(int i=1;i<Npads1;i++) {
 	  for(int j=1;j<Nrows1;j++) {
 	    if(charge_counts_cl[i][j]) {
-	      extras.cl66_tpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts_cl[i][j]);
+	      extras.cl66_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts_cl[i][j]);
 	    }
 	  }
 	}
 	
-	extras.cl67_tpc_sector_charge->Fill(s,charge_cl);
+	extras.cl67_itpc_sector_charge->Fill(s,charge_cl);
       }
     }
 #endif
@@ -539,8 +539,8 @@ void itpcBuilder::event(daqReader *rdr)
     for(int i=1;i<=24;i++) {
       contents.array[i + qs_idx - 1]->Scale(adc_scale);
     }
-    contents.h66_tpc_phi_charge->Scale(adc_scale);
-    contents.h67_tpc_sector_charge->Scale(adc_scale);
+    contents.h66_itpc_phi_charge->Scale(adc_scale);
+    contents.h67_itpc_sector_charge->Scale(adc_scale);
   }
 
   if(has_cld) {
@@ -551,8 +551,8 @@ void itpcBuilder::event(daqReader *rdr)
     for(int i=1;i<=24;i++) {
       extras.array[i + cl_qs_idx - 1]->Scale(cld_scale);
     }
-    extras.cl66_tpc_phi_charge->Scale(cld_scale);
-    extras.cl67_tpc_sector_charge->Scale(cld_scale);
+    extras.cl66_itpc_phi_charge->Scale(cld_scale);
+    extras.cl67_itpc_sector_charge->Scale(cld_scale);
   }
 #ifdef fv
   cout << "Trig " << rdr->trgcmd << endl;
@@ -560,10 +560,10 @@ void itpcBuilder::event(daqReader *rdr)
 
   switch(rdr->trgcmd) {
   case 4:
-    //contents.tpc_occ_physics->Fill(100.0 * (double)channel_count / tpc_max_channels);
-    contents.tpc_pix_occ_physics->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
+    //contents.itpc_occ_physics->Fill(100.0 * (double)channel_count / tpc_max_channels);
+    contents.itpc_pix_occ_physics->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
 
-    extras.tpc_clpix_occ_physics->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+    extras.itpc_clpix_occ_physics->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
 
     //printf("chan=%lf pix=%lf max=%lf:  %lf %lf\n",channel_count,pixel_count,tpc_max_channels,channel_count/tpc_max_channels,pixel_count/(tpc_max_channels*400));
     break;
@@ -574,9 +574,9 @@ void itpcBuilder::event(daqReader *rdr)
       
       LOG(DBG, "Got a laser...");
 
-      //contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
-      contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
-      extras.tpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+      //contents.h44_itpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
+      contents.itpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
+      extras.itpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
 
       double vDrift = laserReader->Make(rdr);
      
@@ -584,10 +584,10 @@ void itpcBuilder::event(daqReader *rdr)
 
       if((vDrift > 5.4) && (vDrift < 5.8)) {
 	nlasers++;
-	contents.h102_tpc_drift_vel->Fill(vDrift);
+	contents.h102_itpc_drift_vel->Fill(vDrift);
       }
 
-      drift_vel = contents.h102_tpc_drift_vel->GetMean();
+      drift_vel = contents.h102_itpc_drift_vel->GetMean();
 
       LOG("JEFF", "run=%d nlasers: %d curr_drift=%lf", run, nlasers, drift_vel);
       //if(nlasers == 50) {
@@ -616,9 +616,9 @@ void itpcBuilder::event(daqReader *rdr)
     break;
 
   case 10:   // Pulsers..
-    //contents.h43_tpc_occ_pulser->Fill(100.0 * (double)channel_count / tpc_max_channels);
-    contents.tpc_pix_occ_pulser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
-    extras.tpc_clpix_occ_pulser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+    //contents.h43_itpc_occ_pulser->Fill(100.0 * (double)channel_count / tpc_max_channels);
+    contents.itpc_pix_occ_pulser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
+    extras.itpc_clpix_occ_pulser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
 
     break;
   default:
