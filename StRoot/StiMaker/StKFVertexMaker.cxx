@@ -17,8 +17,8 @@ using std::map;
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFPTrack.h"
 #include "KFParticle/KFParticleFinder.h"
-#include "StKFParticleInterface/StKFParticleInterface.h"
-#include "StKFParticleInterface/StKFParticlePerformanceInterface.h"
+#include "StKFParticleAnalysisMaker/StKFParticleInterface.h"
+#include "StKFParticleAnalysisMaker/StKFParticlePerformanceInterface.h"
 
 #include "StAnneling.h"
 #include "StKFTrack.h"

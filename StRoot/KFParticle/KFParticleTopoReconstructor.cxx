@@ -885,7 +885,7 @@ bool KFParticleTopoReconstructor::ParticleHasRepeatingDaughters(const KFParticle
   GetListOfDaughterTracks(particle, daughters);
   std::sort(daughters.begin(), daughters.end());
   bool sameDaughter=0;
-  for(int iDaughter=1; iDaughter<daughters.size(); iDaughter++)
+  for(unsigned int iDaughter=1; iDaughter<daughters.size(); iDaughter++)
   {
     if(daughters[iDaughter] == daughters[iDaughter-1])
     {
@@ -926,7 +926,7 @@ void KFParticleTopoReconstructor::ReconstructParticles()
     
   SelectParticleCandidates();
   
-  for(int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
     if(ParticleHasRepeatingDaughters(fParticles[iParticle]))
       fParticles[iParticle].SetPDG(-1);
       

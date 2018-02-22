@@ -5,7 +5,7 @@
 #include "StPicoDstMaker/StPicoDst.h"
 #include "StPicoDstMaker/StPicoArrays.h"
 #include "StChain/StChainOpt.h"
-#include "StKFParticleInterface/StKFParticleInterface.h"
+#include "StKFParticleInterface.h"
 #include "TSystem.h"
 #include "TClonesArray.h"
 #include "TArrayC.h"

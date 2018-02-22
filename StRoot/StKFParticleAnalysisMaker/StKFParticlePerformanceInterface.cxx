@@ -1,7 +1,8 @@
 #include "StKFParticlePerformanceInterface.h"
 
-#include "KFParticle/KFParticleTopoReconstructor.h"
-#include "KFParticlePerformance/KFTopoPerformance.h"
+#include "KFParticleTopoReconstructor.h"
+#include "KFTopoPerformance.h"
+
 #include "TFile.h"
 #include "TDirectory.h"
 

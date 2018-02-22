@@ -1883,7 +1883,8 @@ Bfc_st BFC[] = { // standard chains
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-  {"picoEvt"    ,"","","MuDSTDeps,StEvent,Stu","",  "StPicoEvent","Load picoEvent and dependencies",kFALSE},
+  {"picoEvt"    ,"","","MuDSTDeps,StEvent,Stu","",  "StPicoEvent,StPicoDstMaker"
+   ,                                                              "Load picoEvent and dependencies",kFALSE},
   {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
@@ -1923,7 +1924,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
   {"KFPInter"    ,"","","","KFParticle,picoEvt"        
-   ,                      "KFParticlePerformance,StKFParticleInterface","STAR KFParticle interface",kFALSE},
+   ,                  "KFParticlePerformance,StKFParticleAnalysisMaker","STAR KFParticle interface",kFALSE},
+  {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
   {"MuMc"        ,"","","KFPInter","StMuMcAnalysisMaker",     "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
    ,                                    "KFParticlePerformance,StPicoAnalysisMaker","Pico Analysis",kFALSE},

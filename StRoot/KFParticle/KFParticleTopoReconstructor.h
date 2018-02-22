@@ -113,7 +113,7 @@ class KFParticleTopoReconstructor{
   {
     if(fTracks)
       for(int iPV=0; iPV<NPrimaryVertices(); iPV++)
-        for(int iPVTrack=0; iPVTrack<GetPVTrackIndexArray(iPV).size(); iPVTrack++)
+        for(unsigned int iPVTrack=0; iPVTrack<GetPVTrackIndexArray(iPV).size(); iPVTrack++)
           fTracks[0].SetPVIndex(iPV,GetPVTrackIndexArray(iPV)[iPVTrack]);
   }
   void AddParticle(const KFParticle& particle) { fParticles.push_back(particle); }

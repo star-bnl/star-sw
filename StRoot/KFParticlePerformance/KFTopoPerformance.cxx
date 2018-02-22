@@ -1074,16 +1074,19 @@ void KFTopoPerformance::CalculateEfficiency()
             Z = mcDaughter.Z();
           }
 
-          hPartEfficiency[iPart][iEff][0]->Fill( mcTrack.P(), isReco[iPType] );
-          hPartEfficiency[iPart][iEff][1]->Fill( mcTrack.Pt(), isReco[iPType] );
-          hPartEfficiency[iPart][iEff][2]->Fill( Y, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][3]->Fill( Z, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][6]->Fill( L, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][7]->Fill( R, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][8]->Fill( Mt_mc, isReco[iPType] );
-          
-          hPartEfficiency2D[iPart][iEff][0]->Fill( Y, mcTrack.Pt(), isReco[iPType] );
-          hPartEfficiency2D[iPart][iEff][1]->Fill( Y, Mt_mc, isReco[iPType] );
+          if(fStoreMCHistograms)
+          {
+            hPartEfficiency[iPart][iEff][0]->Fill( mcTrack.P(), isReco[iPType] );
+            hPartEfficiency[iPart][iEff][1]->Fill( mcTrack.Pt(), isReco[iPType] );
+            hPartEfficiency[iPart][iEff][2]->Fill( Y, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][3]->Fill( Z, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][6]->Fill( L, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][7]->Fill( R, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][8]->Fill( Mt_mc, isReco[iPType] );
+            
+            hPartEfficiency2D[iPart][iEff][0]->Fill( Y, mcTrack.Pt(), isReco[iPType] );
+            hPartEfficiency2D[iPart][iEff][1]->Fill( Y, Mt_mc, isReco[iPType] );
+          }
         }
       }
     }

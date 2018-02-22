@@ -8,8 +8,27 @@ void femtoDst(Int_t N = 10000000, const Char_t *input = "/net/l404/data/fisyak/P
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("lMuDst.C");
-  //  lMuDst(0,input,"ry2016,RpicoDst,mysql,PicoMaker,quiet,nodefault",output);
   lMuDst(0,input,"ry2016,RpicoDst,FemtoDst,mysql,nodefault,quiet",0,output);
+  StKFParticleInterface::instance()->SetTriggerMode();
+  StKFParticleInterface::instance()->SetSoftKaonPIDMode();
+  StKFParticleInterface::instance()->SetSoftTofPidMode();
+  StKFParticleInterface::instance()->SetChiPrimaryCut(8);
+  
+  StKFParticleInterface::instance()->SetPtCutCharm(0.5);
+  StKFParticleInterface::instance()->SetChiPrimaryCutCharm(8);
+  StKFParticleInterface::instance()->SetLdLCutCharmManybodyDecays(3);
+  StKFParticleInterface::instance()->SetChi2TopoCutCharmManybodyDecays(10);
+  StKFParticleInterface::instance()->SetChi2CutCharmManybodyDecays(3);
+  StKFParticleInterface::instance()->SetLdLCutCharm2D(3);
+  StKFParticleInterface::instance()->SetChi2TopoCutCharm2D(10);
+  StKFParticleInterface::instance()->SetChi2CutCharm2D(3);
+
+  StKFParticleInterface::instance()->AddDecayToReconstructionList(  421);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList( -421);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList(  411);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList( -411);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList( 4122);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList(-4122);
   maker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
   if (! maker) return;
   maker->SetStatus("*",1);
