@@ -42,17 +42,17 @@ struct CompareHits {
 } comp;
 
 static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $";
-ClassImp(StTrackMateMaker)
+ClassImp(StTrackMateMaker);
 // tpt => old
 // sti => new
   
-  TString names("oldPtGl/F:newPtGl/F:oldEtaGl/F:newEtaGl/F:oldPhiGl/F:newPhiGl/F:oldPGl/F:newPGl/F:oldFitPtsGl/F:"
-		"newFitPtsGl/F:oldPtPr/F:newPtPr/F:oldEtaPr/F:newEtaPr/F:oldPhiPr/F:newPhiPr/F:oldPPr/F:newPPr/F:"
-		"oldFitPtsPr/F:newFitPtsPr/F:oldDedx/F:newDedx/F:oldCharge/F:newCharge/F:maxPing/F:Prim/F:"
-		"oldChi2Gl0/F:newChi2Gl0/F:oldChi2Gl1/F:newChi2Gl1/F:oldChi2Pr0/F:newChi2Pr0/F:oldChi2Pr1/F:"
-		"newChi2Pr1/F:firstHitsDist/F:lastHitsDist/F:"
-		"oldPrimX/F:oldPrimY/F:oldPrimZ/F:newPrimX/F:newPrimY/F:newPrimZ/F"
-		":newSecF/F:oldSecF/F:newSecL/F:oldSecL/F:newHitMap/I:oldHitMap/I");
+static  TString names("oldPtGl/F:newPtGl/F:oldEtaGl/F:newEtaGl/F:oldPhiGl/F:newPhiGl/F:oldPGl/F:newPGl/F:oldFitPtsGl/F:"
+		      "newFitPtsGl/F:oldPtPr/F:newPtPr/F:oldEtaPr/F:newEtaPr/F:oldPhiPr/F:newPhiPr/F:oldPPr/F:newPPr/F:"
+		      "oldFitPtsPr/F:newFitPtsPr/F:oldDedx/F:newDedx/F:oldCharge/F:newCharge/F:maxPing/F:Prim/F:"
+		      "oldChi2Gl0/F:newChi2Gl0/F:oldChi2Gl1/F:newChi2Gl1/F:oldChi2Pr0/F:newChi2Pr0/F:oldChi2Pr1/F:"
+		      "newChi2Pr1/F:firstHitsDist/F:lastHitsDist/F:"
+		      "oldPrimX/F:oldPrimY/F:oldPrimZ/F:newPrimX/F:newPrimY/F:newPrimZ/F"
+		      ":newSecF/F:oldSecF/F:newSecL/F:oldSecL/F:newHitMap/I:oldHitMap/I");
 struct mc_data_array {
   Char_t begin;
   Float_t oldPtGl;
@@ -107,7 +107,7 @@ struct mc_data_array {
 public:
   void set() {memset(&begin, 0, &end-&begin);}
 };
-mc_data_array data;    
+static mc_data_array myData;    
 //________________________________________________________________________________
 Int_t StTrackMateMaker::Init() {
   TFile *f = GetTFile();
@@ -117,7 +117,7 @@ Int_t StTrackMateMaker::Init() {
   LOG_INFO << "StTrackMateMaker::Init() - creating histogram" << endm;
   TString evNames = "refMult/F";
   trackTree = new TTree("trackMateComp","trackMateComp");
-  trackBr = trackTree->Branch("data_array",&data.oldPtGl,names.Data());
+  trackBr = trackTree->Branch("data_array",&myData.oldPtGl,names.Data());
   eventBr = trackTree->Branch("ev_array",evOutput,evNames.Data());
   LOG_INFO << "StTrackMateMaker::Init() - successful" << endm;
   
@@ -435,39 +435,39 @@ Int_t StTrackMateMaker::Make(){
 }
 //________________________________________________________________________________
 void StTrackMateMaker::Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalTrack* trk2, StPrimaryTrack* ptrk2,Int_t maxPing) {
-  data.set();
-  data.firstHitsDist = data.lastHitsDist = -999.;
+  myData.set();
+  myData.firstHitsDist = myData.lastHitsDist = -999.;
   if (trk1) {
     StDcaGeometry *dca1 = trk1->dcaGeometry();
     StThreeVectorF mom1;
     if (dca1) mom1 = dca1->momentum();
     else      mom1 = trk1->geometry()->momentum();
-    data.oldPtGl = mom1.perp(); 
-    data.oldEtaGl = mom1.pseudoRapidity();
-    data.oldPhiGl = mom1.phi();
-    data.oldPGl = mom1.mag();
-    data.oldFitPtsGl = trk1->fitTraits().numberOfFitPoints();
-    data.oldDedx = getTpcDedx(trk1);
-    data.oldCharge = trk1->geometry()->charge();
-    data.oldChi2Gl0 = trk1->fitTraits().chi2(0);
-    data.oldChi2Gl1 = trk1->fitTraits().chi2(1);
-    data.maxPing = 0;
+    myData.oldPtGl = mom1.perp(); 
+    myData.oldEtaGl = mom1.pseudoRapidity();
+    myData.oldPhiGl = mom1.phi();
+    myData.oldPGl = mom1.mag();
+    myData.oldFitPtsGl = trk1->fitTraits().numberOfFitPoints();
+    myData.oldDedx = getTpcDedx(trk1);
+    myData.oldCharge = trk1->geometry()->charge();
+    myData.oldChi2Gl0 = trk1->fitTraits().chi2(0);
+    myData.oldChi2Gl1 = trk1->fitTraits().chi2(1);
+    myData.maxPing = 0;
     if (ptrk1) {
       const StThreeVectorF& pmom1 = ptrk1->geometry()->momentum();
-      data.oldPtPr  = pmom1.perp(); 
-      data.oldEtaPr = pmom1.pseudoRapidity();
-      data.oldPhiPr = pmom1.phi();
-      data.oldPPr   = pmom1.mag();
-      data.oldFitPtsPr = trk1->fitTraits().numberOfFitPoints();
-      data.Prim    += 1;
-      data.oldChi2Pr0 = ptrk1->fitTraits().chi2(0);
-      data.oldChi2Pr1 = ptrk1->fitTraits().chi2(1);
+      myData.oldPtPr  = pmom1.perp(); 
+      myData.oldEtaPr = pmom1.pseudoRapidity();
+      myData.oldPhiPr = pmom1.phi();
+      myData.oldPPr   = pmom1.mag();
+      myData.oldFitPtsPr = trk1->fitTraits().numberOfFitPoints();
+      myData.Prim    += 1;
+      myData.oldChi2Pr0 = ptrk1->fitTraits().chi2(0);
+      myData.oldChi2Pr1 = ptrk1->fitTraits().chi2(1);
       StPrimaryTrack *prim = (StPrimaryTrack *) ptrk1;
       const StVertex *vertex = prim->vertex();
       if (vertex) {
-	data.oldPrimX = vertex->position().x();
-	data.oldPrimY = vertex->position().y();
-	data.oldPrimZ = vertex->position().z();
+	myData.oldPrimX = vertex->position().x();
+	myData.oldPrimY = vertex->position().y();
+	myData.oldPrimZ = vertex->position().z();
       }
     }
   }
@@ -476,51 +476,51 @@ void StTrackMateMaker::Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalT
     StThreeVectorF mom2;
     if (dca2) mom2 = dca2->momentum();
     else      mom2 = trk2->geometry()->momentum();
-    data.newPtGl  = mom2.perp();
-    data.newEtaGl = mom2.pseudoRapidity();
-    data.newPhiGl = mom2.phi();
-    data.newPGl   = mom2.mag();
-    data.newFitPtsGl = trk2->fitTraits().numberOfFitPoints(kTpcId);
-    data.newDedx = getTpcDedx(trk2);
-    data.newCharge = trk2->geometry()->charge();
-    data.newChi2Gl0 = trk2->fitTraits().chi2(0);
-    data.newChi2Gl1 = trk2->fitTraits().chi2(1);
-    data.maxPing = 0;
+    myData.newPtGl  = mom2.perp();
+    myData.newEtaGl = mom2.pseudoRapidity();
+    myData.newPhiGl = mom2.phi();
+    myData.newPGl   = mom2.mag();
+    myData.newFitPtsGl = trk2->fitTraits().numberOfFitPoints(kTpcId);
+    myData.newDedx = getTpcDedx(trk2);
+    myData.newCharge = trk2->geometry()->charge();
+    myData.newChi2Gl0 = trk2->fitTraits().chi2(0);
+    myData.newChi2Gl1 = trk2->fitTraits().chi2(1);
+    myData.maxPing = 0;
     if (ptrk2) {
       const StThreeVectorF& pmom2 = ptrk2->geometry()->momentum();
-      data.newPtPr  = pmom2.perp();
-      data.newEtaPr = pmom2.pseudoRapidity();
-      data.newPhiPr = pmom2.phi();
-      data.newPPr   = pmom2.mag();
-      data.newFitPtsPr = trk2->fitTraits().numberOfFitPoints(kTpcId);
-      data.Prim    += 10;
-      data.newChi2Pr0 = ptrk2->fitTraits().chi2(0);
-      data.newChi2Pr1 = ptrk2->fitTraits().chi2(1);
+      myData.newPtPr  = pmom2.perp();
+      myData.newEtaPr = pmom2.pseudoRapidity();
+      myData.newPhiPr = pmom2.phi();
+      myData.newPPr   = pmom2.mag();
+      myData.newFitPtsPr = trk2->fitTraits().numberOfFitPoints(kTpcId);
+      myData.Prim    += 10;
+      myData.newChi2Pr0 = ptrk2->fitTraits().chi2(0);
+      myData.newChi2Pr1 = ptrk2->fitTraits().chi2(1);
       StPrimaryTrack *prim = (StPrimaryTrack *) ptrk2;
       const StVertex *vertex = prim->vertex();
       if (vertex) {
-	data.newPrimX = vertex->position().x();
-	data.newPrimY = vertex->position().y();
-	data.newPrimZ = vertex->position().z();
+	myData.newPrimX = vertex->position().x();
+	myData.newPrimY = vertex->position().y();
+	myData.newPrimZ = vertex->position().z();
       }
     }
   }
-  data.maxPing = maxPing;
+  myData.maxPing = maxPing;
   StTrackDetectorInfo *det1 = 0;
   StTrackDetectorInfo *det2 = 0;
   if (trk1)  det1 = trk1->detectorInfo();
   if (trk2)  det2 = trk2->detectorInfo();
   if (det1 && det2) {
     StThreeVectorF difFirst = det1->firstPoint() - det2->firstPoint();
-    data.firstHitsDist = difFirst.mag();
+    myData.firstHitsDist = difFirst.mag();
     StThreeVectorF difLast = det1->lastPoint() - det2->lastPoint();
-    data.lastHitsDist = difLast.mag();
+    myData.lastHitsDist = difLast.mag();
   }
-  if (det1) data.oldHitMap  
+  if (det1) myData.oldHitMap  
     =    det1->numberOfReferencedPoints(kPxlId) + 
     10  *det1->numberOfReferencedPoints(kIstId) +
     100 *det1->numberOfReferencedPoints(kSsdId);
-  if (det2) data.newHitMap  
+  if (det2) myData.newHitMap  
     =    det2->numberOfReferencedPoints(kPxlId) + 
     10  *det2->numberOfReferencedPoints(kIstId) +
     100 *det2->numberOfReferencedPoints(kSsdId); 
