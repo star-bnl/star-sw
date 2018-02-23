@@ -50,6 +50,8 @@ class StMtdQAMaker : public StMaker {
   Int_t    Make();
   Int_t    Finish();
 
+  Int_t    initHistos();
+  Int_t    readQTTacOffsetFile();
   void     setCosmic(const Bool_t c);
   void     setFillQATree(const Bool_t fill = kFALSE);
   void     setOutTreeFileName(const Char_t *out);
@@ -63,23 +65,26 @@ class StMtdQAMaker : public StMaker {
   void     setMinNHitsDedx(const Int_t min);
   void     setMinFitHitsFraction(const Double_t min);
   void     setMaxDca(const Double_t max);
+  void     setMatchToTof(const bool match);
   void     setNsigmaPiCut(const Double_t min, const Double_t max);
   void     setPrintMemory(const Bool_t pMem = kTRUE);
   void     setPrintCpu(const Bool_t pCpu = kTRUE);
   void     setPrintConfig(const Bool_t print = kTRUE);
   void     setTriggerIDs(const IntVec id);
+  void     setApplyQTTacOffset(const bool apply);
+  void     setFileQTTacOffset(const char* file);
 
  protected:
   void     printConfig();
   Int_t    processStEvent();
   Int_t    processMuDst();
-  void     processTriggerData();
+  void     processTriggerData(StTriggerData *trigData);
   void     bookTree();
   void     bookHistos();
   void     fillHistos();
 
   Bool_t   isValidTrack(StTrack *t, StVertex *vtx) const ; // Check if a StTrack satisfies all the quality cuts
-  Bool_t   isValidTrack(StMuTrack *t) const ; // Check if a StMuTrack satisfies all the quality cuts
+  Bool_t   isValidTrack(const StMuTrack *t) const ; // Check if a StMuTrack satisfies all the quality cuts
 
   Bool_t   propagateHelixToMtd(StPhysicalHelixD helix, Double_t &projPhi, Double_t &projZ) const; // Propagate a helix to MTD radius and return the projected position
 
@@ -108,13 +113,13 @@ class StMtdQAMaker : public StMaker {
   static const Int_t kMaxVpdChan   = 64;
   static const Int_t kMaxMtdQTchan = 32;
   static const Int_t kNQTboard     = 8;
-  static const UShort_t mtd_qt_tac_max = 4095;  // Maximum value for a valid TAC signal in QT board
 
   Int_t    mModuleToQT[gMtdNBacklegs][gMtdNModules];     // Map from module to QT board index
   Int_t    mModuleToQTPos[gMtdNBacklegs][gMtdNModules];  // Map from module to the position on QA board
   Int_t    mQTtoModule[kNQTboard][8];                    // Map from QA board to module index
   Int_t    mQTSlewBinEdge[kNQTboard][16][8];             // Slewing table for QT board       
   Int_t    mQTSlewCorr[kNQTboard][16][8];                // Slewing correction for QT board
+  Int_t    mTrigQTpos[kNQTboard][2];                  // QT position of trigger signals
 
 
   struct StMtdQAData
@@ -122,10 +127,11 @@ class StMtdQAMaker : public StMaker {
 
     // event information
     Int_t    runId;
-
     Int_t    eventId;
     Int_t    nTrigger;
     Int_t    triggerId[30];
+    Int_t    refMult;
+    Int_t    gRefMult;
 
     // vertex information
     Float_t  vertexX, vertexY, vertexZ;
@@ -135,15 +141,49 @@ class StMtdQAMaker : public StMaker {
     Int_t  pre;
     Int_t  post;
     Int_t  prepost;
-    UShort_t fasteastHi;
-    UShort_t fastwestHi;
+    UShort_t vpdTacSum;
     UShort_t vpdHi[kMaxVpdChan];
     UShort_t mtdQTadc[kNQTboard][kMaxMtdQTchan/2];
     UShort_t mtdQTtac[kNQTboard][kMaxMtdQTchan/2];  
-    UShort_t mixMtdTacSum[32];
+    UShort_t mtdQTtacSum[kNQTboard][kMaxMtdQTchan/4];
+    UShort_t mtdQThigh2Pos[kNQTboard][2];
+    UShort_t mixMtdTacSum[kNQTboard][2];
+    UInt_t   TF201Bit;
+    UInt_t   TF201Bit2;
 
     // TOF start time
     Int_t    tofStartTime;
+
+    // Tracks
+    Int_t    nGoodTrack;
+    Double_t trkPt[kMaxTrack];
+    Double_t trkEta[kMaxTrack];
+    Double_t trkPhi[kMaxTrack];
+    Double_t trkDca[kMaxTrack];
+    Int_t    trkNHitsFit[kMaxTrack];
+    Int_t    trkNHitsDedx[kMaxTrack];
+    Double_t trkDedx[kMaxTrack];
+    Double_t trkNsigmaPi[kMaxTrack];
+
+    //== TOF hits matched to tracks
+    Bool_t   isTrkTofMatched[kMaxTrack];
+    Int_t    trkMthTofTray[kMaxTrack];
+    Int_t    trkMthTofModule[kMaxTrack];
+    Int_t    trkMthTofCell[kMaxTrack];
+    Double_t trkMthTofLocaly[kMaxTrack];
+    Double_t trkMthTofLocalz[kMaxTrack];
+
+    //== Track position projected to MTD radius
+    Bool_t   isTrkProjected[kMaxTrack];
+    Double_t trkProjPhi[kMaxTrack];
+    Double_t trkProjZ[kMaxTrack];
+    Int_t    trkProjBackleg[kMaxTrack];
+    Int_t    trkProjModule[kMaxTrack];
+    Int_t    trkProjChannel[kMaxTrack];
+    Bool_t   isTrkMtdMatched[kMaxTrack];
+    Int_t    trkMthBackleg[kMaxTrack];
+    Int_t    trkMthModule[kMaxTrack];
+    Int_t    trkMthChannel[kMaxTrack];
 
     // MTD information
     Double_t mtdTriggerTime[2];  // trigger time
@@ -159,7 +199,6 @@ class StMtdQAMaker : public StMaker {
 
     //== MTD hits
     Int_t    nMtdHits;
-    Bool_t   isGoodMtdHit[kMaxHits];
     Int_t    mtdHitBackleg[kMaxHits];        //1-30
     Int_t    mtdHitModule[kMaxHits];         //1-5
     Int_t    mtdHitChan[kMaxHits];           //0-12
@@ -173,7 +212,6 @@ class StMtdQAMaker : public StMaker {
 
     //== matched tracks
     Bool_t   isMatched[kMaxHits];
-    Bool_t   isMatchedPrim[kMaxHits];
     Int_t    nMatchMtdHits;
     Double_t mtdMatchTrkPathLength[kMaxHits];
     Double_t mtdMatchTrkTof[kMaxHits];
@@ -185,36 +223,15 @@ class StMtdQAMaker : public StMaker {
     Double_t mtdMatchTrkProjPhi[kMaxHits];
     Double_t mtdMatchTrkProjZ[kMaxHits];
     Double_t mtdMatchTrkPt[kMaxHits];
+    Double_t mtdMatchTrkDca[kMaxHits];
+    Double_t mtdMatchTrCharge[kMaxHits];
     Double_t mtdMatchTrkPhi[kMaxHits];
     Double_t mtdMatchTrkEta[kMaxHits];
-    Double_t mtdMatchTrkDedx[kMaxHits];
     Double_t mtdMatchTrkNsigmaPi[kMaxHits];
+    Bool_t   mtdMatchTrkTofHit[kMaxHits];
 
-    // Tracks
-    Int_t    nGoodTrack;
-    Double_t trkPt[kMaxTrack];
-    Double_t trkEta[kMaxTrack];
-    Double_t trkPhi[kMaxTrack];
-    Double_t trkNsigmaPi[kMaxTrack];
-    //== TOF hits matched to tracks
-    Bool_t   isTrkTofMatched[kMaxTrack];
-    Int_t    trkMthTofTray[kMaxTrack];
-    Int_t    trkMthTofModule[kMaxTrack];
-    Int_t    trkMthTofCell[kMaxTrack];
-    Double_t trkMthTofLocaly[kMaxTrack];
-    Double_t trkMthTofLocalz[kMaxTrack];
-    //== Track position projected to MTD radius
-    Bool_t   isTrkProjected[kMaxTrack];
-    Double_t trkProjPhi[kMaxTrack];
-    Double_t trkProjZ[kMaxTrack];
-    Int_t    trkProjBackleg[kMaxTrack];
-    Int_t    trkProjModule[kMaxTrack];
-    Int_t    trkProjChannel[kMaxTrack];
-    Bool_t   isTrkMtdMatched[kMaxTrack];
-    Bool_t   isGoodMthMtdHit[kMaxTrack];
-    Int_t    trkMthBackleg[kMaxTrack];
-    Int_t    trkMthModule[kMaxTrack];
-    Int_t    trkMthChannel[kMaxTrack];
+    //== trigger hits
+    Bool_t   isMtdTrig[kMaxHits];
   };
 
 
@@ -222,17 +239,22 @@ class StMtdQAMaker : public StMaker {
   Bool_t           mIsCosmic;                                  // Flag of cosmic or physics data
   StEvent          *mStEvent;                                  // Pointer to StEvent
   StMuDst          *mMuDst;                                    // Pointer to MuDst event
-  Int_t            mVertexMode;                                // 0 - default; 1 - highest-ranked one close to VPD; 2 - cloest to VPD
+  Int_t            mVertexMode;                                // 0 - default; 1 - closest to VPD with positive ranking
   Int_t            mVertexIndex;                               // Index of selected vertex
   Int_t            mRunId;                                     // Run number
   Int_t            mRunYear;                                   // Run year
-  Int_t            mRunCount;                                  // Keep track of number of runs processed
+  TString          mCollisionSystem;                           // collision system
+  Int_t            mStartRun;                                  // First run of the year
+  Int_t            mEndRun;                                    // Last run of the year
   StTriggerData    *mTriggerData;                              // Pointer to the trigger data
   Bool_t           mMuDstIn;                                   // Flag to force running on MuDst
   Bool_t           mPrintMemory;                               // Flag to print out memory usage
   Bool_t           mPrintCpu;                                  // Flag to print out CPU usage
   Bool_t           mPrintConfig;                               // Flag to print out task configuration
   IntVec           mTriggerIDs;                                // Valid trigger id collection that will be tested
+  Bool_t           mApplyQTTacOffset;                          // Flag to apply QT offset
+  TString          mFileQTTacOffset;                           // File of QT offset
+  Int_t            mQTTacOffset[kNQTboard][16];                // QT offset
   
   Double_t         mMaxVtxZ;                                   // Maximum vertex z
   Double_t         mMaxVtxDz;                                  // Maximum dz between VPD and TPC
@@ -248,6 +270,12 @@ class StMtdQAMaker : public StMaker {
   Double_t         mMaxDca;                                    // Maximum track dca
   Double_t         mMinNsigmaPi;                               // Minimum nsigma for pion assumption
   Double_t         mMaxNsigmaPi;                               // Maximum nsigma for pion assumption
+  Bool_t           mMatchToTof;                                // Flag to require tracks matched to TOF hits to reject pileup
+  UShort_t         mMtd_qt_tac_min;                            // Minimum QT tac
+  UShort_t         mMtd_qt_tac_max;                            // Maximum QT tac
+  UShort_t         mMtd_qt_tac_diff_range_abs;                 // Maximum difference between j2 and j3
+
+  Bool_t           mHistoInit;                                 // Flag to histogram initilization
   Bool_t           mFillTree;                                  // Flag to fill the QA tree
   TFile            *fOutTreeFile;                              // Output file that the QA tree will be written to
   TString          mOutTreeFileName;                           // Name of the output file for the QA tree
@@ -258,37 +286,65 @@ class StMtdQAMaker : public StMaker {
   TH1F             *mhEventTrig;                               // Event statistics 
   TH1F             *mhEventCuts;                               // Analysis cuts used
   TH1F             *mhRunId;                                   // Run indices
+  TH1F             *mhRefMult;                                 // RefMult distribution
+  TH1F             *mhgRefMult;                                // gRefMult distribution
   TH2F             *mhVertexXY;                                // Correlation between vertex x and y
   TH2F             *mhVertexXZ;                                // Correlation between vertex x and z
   TH2F             *mhVertexYZ;                                // Correlation between vertex y and z
   TH1F             *mhVertexZ;                                 // Distribution of vertex z
   TH2F             *mhVtxZvsVpdVzDefault;                      // Correlation between z of TPC and VPD vertices (default)
   TH1F             *mhVtxZDiffDefault;                         // Difference between z of TPC and VPD vertices (default)
-  TH2F             *mhVtxZvsVpdVzClosest;                      // Correlation between z of TPC and VPD vertices (closest)
-  TH1F             *mhVtxZDiffClosest;                         // Difference between z of TPC and VPD vertices (closest)
-  TH2F             *mhVtxIndClosestVsRank;                     // Correlation between indices of TPC vertex closest to VPD and close/ranking to VPD
+  TH2F             *mhVtxZvsVpdVzClosest;                      // Correlation between z of TPC and VPD vertices (closest, positive ranking)
+  TH1F             *mhVtxZDiffClosest;                         // Difference between z of TPC and VPD vertices (closest, positive ranking)
+  TH1F             *mhVtxClosestIndex;                         // Index of postively ranked vertex that is closest to VPD vz
   TH1F             *mhTofStartTime;                            // Distribution of start time from BTOF
   TH2F             *mhVpdQTadc;                                // Distribution of ADC per VPD QT channel
   TH2F             *mhVpdQTtac;                                // Distribution of TAC per VPD QT channel
 
-  TH2F             *mhMtdQTadc;                                // Distribution of ADC per MTD QT channel
-  TH2F             *mhMtdQTAllTac;                             // Distribution of TAC per MTD QT channel
-  TH2F             *mhMtdQTBestTac;                            // Distribution of earliest TAC per MTD QT channel
-  TH2F             *mhMtdMthQTTac;                             // Distribution of earliest TAC per MTD QT channel with matched tracks
-  TH2F             *mhMtdQTvsHit;                              // Random correlation between QT channel and MTD hits
-  TH2F             *mhMtdVpdTacDiffMT001;                      // Distribution of earliest TAC of MTD-VPD for MT001
-  TH2F             *mhMtdVpdMthTacDiffMT001;                   // Distribution of earliest TAC of MTD-VPD with matched tracks for MT001
-  TH2F             *mhMtdVpdTacDiffMT101;                      // Distribution of earliest TAC of MTD-VPD for MT101
-  TH2F             *mhMtdVpdMthTacDiffMT101;                   // Distribution of earliest TAC of MTD-VPD with matched tracks for MT101
+  // Primary tracks
+  TH1F             *mhNTrk;                                    // # of good tracks per event
+  TH1F             *mhTrkPt;                                   // pt distribution of all good tracks
+  TH2F             *mhTrkDcaVsPt;                              // Track dca distribution
+  TH2F             *mhTrkPhiVsPt;                              // Track phi distribution
+  TH2F             *mhTrkEtaVsPt;                              // Track eta distribution
+  TH2F             *mhTrkPhiEta;                               // Track phi vs eta with p_T > 1 GeV/c
+  TH2F             *mhTrkNHitsFitVsPt;                         // Track NHitsFit distribution
+  TH2F             *mhTrkNHitsDedxVsPt;                        // Track NHitsDedx distribtion
+  TH2F             *mhTrkDedxVsPt;                             // Track Dedx distribution
+  TH2F             *mhTrkNsigmaPiVsPt;                         // Track NsigmaPi vs. Pt
+  TH2F             *mhTrkNsigmaPiVsPhi;                        // Track NsigmaPi vs. Phi (p_T > 1 GeV/c)
+  TH2F             *mhTrkNsigmaPiVsEta;                        // Track NsigmaPi vs. eta (p_T > 1 GeV/c)
+  TH2F             *mhTofMthTrkLocaly;                         // Projected y in TOF local coordinate for tracks matched to TOF hits
+  TH2F             *mhTofMthTrkLocalz;                         // Projected z in TOF local coordinate for tracks matched to TOF hits
+  TH2F             *mhMtdTrackProjMap;                         // Hit map of tracks that can be projected to MTD radius
+
+  // MTD trigger electronics
+  TH2F             *mhMtdQTAdcAll;                             // Distribution of ADC per MTD QT channel
+  TH2F             *mhMtdQTAdcMth;                             // Distribution of ADC per MTD QT channel with matched tracks
+  TH2F             *mhMtdQTAdcMthTof;                          // Distribution of ADC per MTD QT channel with matched TOF tracks
+  TH2F             *mhMtdQTAdcMuon;                            // Distribution of ADC per MTD QT channel for muon candidates
+  TH2F             *mhMtdQTTacAll;                             // Distribution of TAC per MTD QT channel
+  TH2F             *mhMtdQTTacMth;                             // Distribution of TAC per MTD QT channel with matched tracks
+  TH2F             *mhMtdQTTacMthTof;                          // Distribution of TAC per MTD QT channel with matched TOF tracks
+  TH2F             *mhMtdQTTacMuon;                            // Distribution of TAC per MTD QT channel for muon candidates
+  TH2F             *mhMtdQTAdcVsTacAll;                        // Correlation between ADC and TAC in MTD QT
   TH2F             *mhMtdQTJ2J3Diff;                           // Distribution of TAC difference between J3-J2 per MTD QT position
   TH2F             *mhMixMtdTacSumvsMxqMtdTacSum[kNQTboard][2];// Correlation between MT001 vs MT101
-  TH1F             *mhMtdTriggerTime[2];                       // Distribution of MTD trigger time from THUB
+  TH2F             *mhMtdVpdTacDiffMT001;                      // Distribution of earliest 2 TAC of MTD-VPD for MT001
+  TH2F             *mhMtdVpdTacDiffMT001Mth;                   // Distribution of earliest 2 TAC of MTD-VPD with matched tracks for MT001
+  TH2F             *mhMtdVpdTacDiffMT001MthTof;                // Distribution of earliest 2 TAC of MTD-VPD with matched TOF tracks for MT001
+  TH2F             *mhMtdVpdTacDiffMT001Muon;                  // Distribution of earliest 2 TAC of MTD-VPD with muon candidates for MT001
+  TH2F             *mhMtdVpdTacDiffMT101;                      // Distribution of earliest 2 TAC of MTD-VPD for MT101
+  TH2F             *mhMtdVpdTacDiffMT101Mth;                   // Distribution of earliest 2 TAC of MTD-VPD with matched tracks for MT101
+  TH2F             *mhMtdVpdTacDiffMT101MthTof;                // Distribution of earliest 2 TAC of MTD-VPD with matched TOF tracks for MT101
+  TH2F             *mhMtdVpdTacDiffMT101Muon;                  // Distribution of earliest 2 TAC of MTD-VPD with muon candidates for MT101
 
+  // MTD hits
+  TH1F             *mhMtdTriggerTime[2];                       // Distribution of MTD trigger time from THUB
   TH1F             *mhMtdNRawHits;                             // Number of MTD raw hits per event
   TH2F             *mhMtdRawHitMap;                            // Hit map of MTD raw hits
   TH2F             *mhMtdRawHitLeTime;                         // Leading time distribution of MTD raw hits
   TH2F             *mhMtdRawHitTrTime;                         // Trailing time distribution of MTD raw hits
-  TH2F             *mhMtdRawHitTrigTime;                       // Difference between the leading time of MTD raw hits and trigger time from THUB
   TH1F             *mhMtdRawHitLeNEast;                        // Number of MTD raw hits with leading-edge on east
   TH1F             *mhMtdRawHitLeNWest;                        // Number of MTD raw hits with leading-edge on west
   TH1F             *mhMtdRawHitTrNEast;                        // Number of MTD raw hits with trailing-edge on east
@@ -298,44 +354,43 @@ class StMtdQAMaker : public StMaker {
 
   TH1F             *mhMtdNHits;                                // Number of MTD hits per event
   TH2F             *mhMtdHitMap;                               // Hit map of MTD hits
-  TH2F             *mhMtdHitLeTimeWest;                        // Leading time distribution of MTD hits on west
-  TH2F             *mhMtdHitLeTimeEast;                        // Leading time distribution of MTD hits on east
   TH2F             *mhMtdHitLeTimeDiff;                        // Difference between leading time of MTD hits on east and west
   TH2F             *mhMtdHitTotWest;                           // Time-Over-Threshold distribution of MTD hits on west
   TH2F             *mhMtdHitTotEast;                           // Time-Over-Threshold distribution of MTD hits on east
-  TH2F             *mhMtdHitTrigTime;                          // Difference between the leading time of MTD hits, i.e. (west+east)/2, and trigger time from THUB
+  TH2F             *mhMtdHitTrigTime;                          // Difference between the MTD hit time, i.e. (west+east)/2, and trigger time from THUB
+  TH2F             *mhMtdHitTrigTimeTrkMth;                    // MTD hit time with matched track
+  TH2F             *mhMtdHitTrigTimeTrkMthTof;                 // MTD hit time with matched TOF track
+  TH2F             *mhMtdHitTrigTimeMuon;                      // MTD hit time from muon candidates 
+  TH2F             *mhMtdHitTrigTimeGoodQT;                    // MTD hit time with good QT signal
+  TH2F             *mhMtdHitTrigTimeTrig;                      // MTD hit time from triggering hits
+  TH2F             *mhMtdHitTrigTimeVsQtAdc[2];                // MTD hit time vs. the corresponding ADC values in the QT 
+  TH2F             *mhMtdHitTrigTimeVsQtTac[2];                // MTD hit time vs. the corresponding TAC values in the QT
 
   TH1F             *mhMtdNMatchHits;                           // Number of MTD hits with matched tracks per event
   TH2F             *mhMtdMatchHitMap;                          // Hit map of MTD hits with matched tracks
-  TH2F             *mhMtdMatchPhi;                             // Correlation between MTD hit phi and projected phi of matched tracks
+  TH1F             *mhMtdMatchTrkPt;                           // pt distribution of matched tracks to MTD hits
+  TH2F             *mhMtdMatchTrkPhiEta;                       // phi vs eta of matched tracks at primary vertex
   TH2F             *mhMtdMatchDzVsChan;                        // dz vs global channel id
+  TH2F             *mhMtdMatchDzVsPtPos;                       // dz vs track pt (positive)
+  TH2F             *mhMtdMatchDzVsPtNeg;                       // dz vs track pt (negative)
   TH2F             *mhMtdMatchDyVsChan;                        // dy vs global channel id
+  TH2F             *mhMtdMatchDyVsPtPos;                       // dy vs track pt (positive)
+  TH2F             *mhMtdMatchDyVsPtNeg;                       // dy vs track pt (negative)
+  TH2F             *mhMtdMatchDtofVsPt;                        // dTof vs track pt
+  TH2F             *mhMtdMatchMtdTofVsChan;                    // MTD time vs global channel id 
+  TH2F             *mhMtdMatchExpTofVsChan;                    // TPC time vs global channel id
   TH2F             *mhMtdMatchDtofVsChan;                      // dTof vs global channel id 
   TH2F             *mhMtdMatchLocalyVsChan;                    // Projected y of matched tracks in local coordinates vs global channel id
   TH2F             *mhMtdMatchLocalzVsChan;                    // Projected z of matched tracks in local coordinates vs global channel id
-  TH2F             *mhMtdMatchDzVsPt;                          // dz vs track pt
-  TH2F             *mhMtdMatchDyVsPt;                          // dy vs track pt
-  TH2F             *mhMtdMatchDtofVsPt;                        // dTof vs track pt
-  TH1F             *mhMtdMatchTrkPt;                           // pt distribution of matched tracks to MTD hits
-  TH2F             *mhMtdMatchTrkPhiEta;                       // phi vs eta of matched tracks at primary vertex
-  TH2F             *mhMtdMatchTrkDedx;                         // de/dx distribution of matched tracks to MTD hits
 
-  TH1F             *mhTrkPt;                                   // pt distribution of all good tracks
-  TH2F             *mhTrkDca;                                  // Track dca distribution
-  TH2F             *mhTrkPhiEta;                               // phi vs eta of all good tracks at primary vertex
-  TH2F             *mhMtdTrackProjMap;                         // Hit map of tracks that can be projected to MTD radius
-  TH2F             *mhTrkProjPhiZAtMtd;                        // phi vs z of all good tracks at MTD after being projected to MTD radius
-  TH2F             *mhTrkPhiVsMtdPhi;                          // Random correlation projected phi of tracks and phi of MTD hits
-  TH2F             *mhTofMthTrkLocaly;                         // Projected y in TOF local coordinate for tracks matched to TOF hits
-  TH2F             *mhTofMthTrkLocalz;                         // Projected z in TOF local coordinate for tracks matched to TOF hits
-
-  // check calibration
-  TH2F             *mhPrimDzVsChan;                             // dz vs global channel id (primary track)
-  TH2F             *mhPrimDyVsChan;                             // dy vs global channel id (primary track)
-  TH2F             *mhPrimDtofVsChan;                           // dTof vs global channel id (primary track)
-  TH2F             *mhPrimMtdTofVsChan;                         // MTD time vs global channel id (primary track)
-  TH2F             *mhPrimExpTofVsChan;                         // TPC time vs global channel id (primary track)
-
+  TH1F             *mhNQtSignal;                                // Number of good QT signals
+  TH1F             *mhNMT101Signal;                             // Number of good MT101 signals
+  TH1F             *mhNTF201Signal;                             // Number of good TF201 signals
+  TH1F             *mhMtdTrigNHits;                             // Number of triggering MTD hits 
+  TH2F             *mhMtdTrigHitMap;                            // Hit map of trigger MTD hits
+  TH1F             *mhMtdTrigMthNHits;                          // Number of triggering MTD hits with matched tracks
+  TH2F             *mhMtdTrigMthHitMap;                         // Hit map of MTD hits with matched tracks
+ 
 
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; 
@@ -358,7 +413,10 @@ inline void StMtdQAMaker::setMinNHitsFit(const Int_t min)          { mMinNHitsFi
 inline void StMtdQAMaker::setMinNHitsDedx(const Int_t min)         { mMinNHitsDedx = min;      }
 inline void StMtdQAMaker::setMinFitHitsFraction(const Double_t min){ mMinFitHitsFraction = min;}
 inline void StMtdQAMaker::setMaxDca(const Double_t max)            { mMaxDca = max;            }
+inline void StMtdQAMaker::setMatchToTof(const bool match)          { mMatchToTof = match;      }
 inline void StMtdQAMaker::setTriggerIDs(const IntVec id)           { mTriggerIDs = id;         }
+inline void StMtdQAMaker::setApplyQTTacOffset(const bool apply)    { mApplyQTTacOffset = apply;}
+inline void StMtdQAMaker::setFileQTTacOffset(const char* file)     { mFileQTTacOffset = file;  }
 inline void StMtdQAMaker::setTrackPtLimits(const Double_t min, const Double_t max){
   mMinTrkPt = min; mMaxTrkPt = max;
 }
@@ -371,7 +429,6 @@ inline void StMtdQAMaker::setTrackEtaLimits(const Double_t min, const Double_t m
 inline void StMtdQAMaker::setNsigmaPiCut(const Double_t min, const Double_t max){
   mMinNsigmaPi = min; mMaxNsigmaPi = max;
 }
-
 
 
 #endif

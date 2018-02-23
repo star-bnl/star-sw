@@ -1,4 +1,4 @@
-
+rm 062ou	
 http://www.star.bnl.gov/public/comp/prod/DataSummary.html
 MuDst size on HPSS production P17ij:
 __________________________________________________________________________________________
@@ -100,14 +100,14 @@ root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log
 foreach f (`grep missing Chain.log | awk '{print $3}' `)
   set d = `dirname ${f}`; set b = `basename ${f} .picoDst.root`; rm ${d}/${b}*
 end
-
-foreach d (`ls -1d 17*`)
-  cd $d; 
-  if (! -r Chain.log) then
-  ln -s ../../.sl* .
-  root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
+cd ~/Pico/2016
+foreach d (`ls -1d ???/171?????`)
+  cd $d; echo "${d}";
+  if (! -r Chain.log && ! -r ~/Pico/2016//Chain/${d}/Chain.log) then
+    ln -s ../../.sl* .
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
   endif
-  cd -;
+  cd ~/Pico/2016
 end
 ================================================================================
 ls -1d 17* | xargs
@@ -201,11 +201,13 @@ cd ${dayd}
 pwd;
 foreach d (`ls -1d 17*`)
   cd $d; pwd; 
-  rm -rf sched* *.xml  .sl* st*.log 17*.log Chain.log
+  rm -rf sched* *.xml  .sl* *.log  *.o *HOLD* *hold* Done dir
   cd ../;
 end
 cd ../;
 end
+
+find . -not -name "*.root" -not -name "Chain.log" -type f
 
 ================================================================================
 cd ~/Pico/2016
@@ -222,10 +224,10 @@ cat hpss.${d}.list |  hsi >& ~/Pico/2016/hpss.${d}.`date +%m%d%y`.log &
 
 
 cd ~/Pico/2016/121
-foreach d (`ls -1d 1*`)
-  cd ${d}; 
+foreach d (`ls -1d ???/17????*`)
+  cd ${d}; echo ${PWD}
   if (! -r Chain.log) then	
-    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >& Chain.log &
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log
   endif
   cd -;
 end
@@ -304,7 +306,7 @@ Femto
 #set DIR = "/gpfs02/eic/ayk/STAR/reco/Pico"
 #set DIR = "/gpfs01/star/pwg/fisyak/Pico"
 set DIR = "~/Pico"
-foreach dayd (`ls -1dr ${DIR}/2016/175`)
+foreach dayd (`ls -1dr ${DIR}/2016/16? ${DIR}/2016/17?`)
   set day = `basename ${dayd}`;
   cd ~/Femto/2016/
   if (! -d ${day}) mkdir ${day}
@@ -322,13 +324,14 @@ foreach dayd (`ls -1dr ${DIR}/2016/175`)
   end
   cd -;
 end
-[================================================================================
-foreach d (`ls -1d ???/1*`)
-  cd $d; 
-  if (! -r Chain.log) then
+================================================================================
+foreach d (`ls -1d ???/17?????*`)
+  echo "Check ${d}"
+  if (! -r ${d}/Chain.log && ! -r Chain/${d}/Chain.log) then
+    cd $d; pwd;
     root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log;
+    cd -;
   endif
-  cd -;
 end
 
 
@@ -665,6 +668,36 @@ root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/071/17071047/st_physics
 root.exe -q -b lMuDst.C 'Hadd.C+("17071047_0.femtoDst.root","st*.root")'
 
 
+
+17073015_13B.log
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500027.picoDst.root")' >& st_physics_17073015_raw_5500027.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500028.picoDst.root")' >& st_physics_17073015_raw_5500028.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500029.picoDst.root")' >& st_physics_17073015_raw_5500029.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500030.picoDst.root")' >& st_physics_17073015_raw_5500030.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500034.picoDst.root")' >& st_physics_17073015_raw_5500034.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500035.picoDst.root")' >& st_physics_17073015_raw_5500035.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500039.picoDst.root")' >& st_physics_17073015_raw_5500039.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500040.picoDst.root")' >& st_physics_17073015_raw_5500040.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500041.picoDst.root")' >& st_physics_17073015_raw_5500041.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500045.picoDst.root")' >& st_physics_17073015_raw_5500045.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500046.picoDst.root")' >& st_physics_17073015_raw_5500046.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500047.picoDst.root")' >& st_physics_17073015_raw_5500047.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500051.picoDst.root")' >& st_physics_17073015_raw_5500051.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500052.picoDst.root")' >& st_physics_17073015_raw_5500052.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500054.picoDst.root")' >& st_physics_17073015_raw_5500054.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500057.picoDst.root")' >& st_physics_17073015_raw_5500057.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500058.picoDst.root")' >& st_physics_17073015_raw_5500058.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500059.picoDst.root")' >& st_physics_17073015_raw_5500059.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500063.picoDst.root")' >& st_physics_17073015_raw_5500063.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500064.picoDst.root")' >& st_physics_17073015_raw_5500064.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500065.picoDst.root")' >& st_physics_17073015_raw_5500065.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500067.picoDst.root")' >& st_physics_17073015_raw_5500067.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500068.picoDst.root")' >& st_physics_17073015_raw_5500068.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500073.picoDst.root")' >& st_physics_17073015_raw_5500073.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2016/073/17073015/st_physics_17073015_raw_5500075.picoDst.root")' >& st_physics_17073015_raw_5500075.log &
+root.exe -q -b lMuDst.C 'Hadd.C+("17073015_13.femtoDst.root","st*.root")'
+
+
 17119078/Chain.log:chained 925622                             | 17119078/Chain.log:chained 919521
 17119102/Chain.log:chained 1611142                            | 17119102/Chain.log:chained 1601308
 
@@ -679,10 +712,10 @@ day Pico    Femto status
 070 OnHpss  Done pwg        matched Pico & Femto 
 071 OnHpss  Done pwg        matched Pico & Femto 
 072 OnHpss  Done pwg_tasks  matched Pico & Femto  2 files are missing =? process 
-073 OnHpss  Done pwg_taks   mismathced 17073015/Chain.log:chained 1039664 | 17073015/Chain.log:chained 1035674 by 3990 events
-074 OnHpss  Done pwg   matched Pico & Femto 
-075 OnHpss  Done pwg   matched Pico & Femto ]
-076 OnHpss  Done Removed   matched Pico & Femto 
+073 OnHpss  Done pwg_taks   mismathced  17073015: 1039664 | 1039265 => ignore
+074 OnHpss  Done pwg        matched Pico & Femto 
+075 OnHpss  Done pwg        matched Pico & Femto
+076 OnHpss  Done Removed    matched Pico & Femto 
 077 OnHpss  Done Removed    matched Pico & Femto 
 078 OnHpss  Done Removed    matched Pico & Femto 
 097 OnHpss  Done Removed    matched Pico & Femto 
@@ -700,17 +733,17 @@ day Pico    Femto status
 109 OnHpss  Done Removed    lost Chain.log for Pico
 110 OnHpss  Done Removed    matched Pico & Femto 
 111 OnHpss  Done Removed    matched Pico & Femto 
-112 OnHpss  Done pwg   matched Pico & Femto 
-113 OnHpss  Done pwg   matched Pico & Femto 
-114 OnHpss  Done pwg   matched Pico & Femto  
-115 OnHpss  Done Removed   lost Chain.log for Pico
-116 OnHpss  Done Removed   lost Chain.log for Pico
-117 OnHpss  Pulled Removed        matched Pico & Femto
-118 OnHpss  Pulled Removed        matched Pico & Femto  
-119 Pulled  Proc pwg   mismatched for run 17119078 & 17119102
-120 Pulled  Done pwg   matched Pico & Femto
-121 Pulled  Done pwg   matched Pico & Femto
-122 OnHpss  Done pwg   matched Pico & Femto
+112 OnHpss  Done pwg        matched Pico & Femto 
+113 OnHpss  Done pwg        matched Pico & Femto 
+114 OnHpss  Done pwg        matched Pico & Femto  
+115 OnHpss  Done Removed    lost Chain.log for Pico
+116 OnHpss  Done Removed    lost Chain.log for Pico
+117 OnHpss  Pulled Removed  matched Pico & Femto
+118 OnHpss  Pulled Removed  matched Pico & Femto  
+119 Pulled  Done  pwg       matched Pico & Femto  
+120 Pulled  Done pwg        matched Pico & Femto
+121 Pulled  Done pwg        matched Pico & Femto
+122 OnHpss  Done pwg        matched Pico & Femto
 123 OnHpss  Done Removed    matched Pico & Femto   
 124 OnHpss  Done Removed    matched Pico & Femto   
 125 OnHpss  Done Removed    matched Pico & Femto
@@ -720,15 +753,15 @@ day Pico    Femto status
 129 OnHpss  Done Removed    lost Chain.log for Pico
 130 OnHpss  Done Removed    lost Chain.log for Pico 17130006 - 17130013
 ======= production2 ===============
-169 Done   Proc
-170 MuDst
-171 MuDst
-172 MuDst
-173 Done
-174 Done
-175 MuDst
-176 MuDst 
-177 Done
-178 Done
-179 Done
+169 Done Done matched Pico & Femto 
+170 Done Done matched Pico & Femto 
+171 Done Done matched Pico & Femto 
+172 Done Done matched Pico & Femto 
+173 Done Done matched Pico & Femto 
+174 Done Done matched Pico & Femto 
+175 Done Done mismatched 17175015:815 | 725 & 17175016: 641 | 567 ignore
+176 Done Done matched Pico & Femto 
+177 Done Done matched Pico & Femto 
+178 Done Done matched Pico & Femto 
+179 Done Done matched Pico & Femto 
 ================================================================================================================================================================
