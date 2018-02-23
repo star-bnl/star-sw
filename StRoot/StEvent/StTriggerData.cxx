@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.30 2017/10/13 20:13:53 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.31 2018/02/22 16:47:20 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.31  2018/02/22 16:47:20  ullrich
+ * Changes for blind analysis and EPD
+ *
  * Revision 2.30  2017/10/13 20:13:53  ullrich
  * Added access fct epdADC() and epdTDC().
  *
@@ -103,13 +106,13 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.30 2017/10/13 20:13:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.31 2018/02/22 16:47:20 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
 StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999), mRun(0), mErrorFlag(0) 
 { 
-    mDebug = 0; 
+    mDebug = 0;
 }
 
 StTriggerData::~StTriggerData() { /* noop */}
@@ -172,7 +175,7 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
             //oldch=ch;
             nline--;
             if (nline==0) header=1;
-        }    
+        }
     }
 }
 
@@ -181,6 +184,7 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
 //  of them will be overwritten by classes inheriting from StTriggerData.
 //
 
+void StTriggerData::blindRunInfo(){}
 int StTriggerData::year() const {return mYear;}
 unsigned int StTriggerData::errorFlag() const {return mErrorFlag;}
 unsigned int StTriggerData::eventNumber() const {return 0;}
@@ -302,6 +306,11 @@ unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udi
 unsigned long  StTriggerData::pp2ppDSM(int prepost) const {return 0;}
 unsigned short StTriggerData::fmsADC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::fmsTDC(int crt, int adr, int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdTimeDifference() const {return 0;}
+bool           StTriggerData::epdHitLayer2(StBeamDirection eastwest) const {return false;}
+unsigned short StTriggerData::epdLayer0t(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer1(int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::epdLayer0a(int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdADC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::epdTDC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm_FMS(int prepost) const {return 0;}
