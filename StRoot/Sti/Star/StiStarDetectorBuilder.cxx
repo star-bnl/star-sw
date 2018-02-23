@@ -413,7 +413,6 @@ void StiStarDetectorBuilder::Fgt() {
     {"FGCN", "FGT nylon 1st ring","HALL_1/CAVE_1/FGTM_1","",""},
     {"FGCT", "FGT inner cooling tube","HALL_1/CAVE_1/FGTM_1","",""}
   };
-  if (! gGeoManager->GetVolume("FGTM")) return;
   Int_t NoExtraVols = sizeof(FgtVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1");
   TString path("");
