@@ -121,14 +121,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	pShape->setThickness(St_tpcPadConfigC::instance()->outerSectorPadLength(sector));
 	dZ = St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(sector);
       }
-      Double_t Zshift = 0; // 
       if (NoStiSectors == 24) {
-	Float_t maxTimeBacket = 410;
-	Float_t driftvel = 1e-6*StTpcDb::instance()->DriftVelocity(sector); // cm/usec
-	Float_t freq = StTpcDb::instance()->Electronics()->samplingFrequency(); // MHz
-	Zshift = maxTimeBacket/freq*driftvel - dZ;
-	Zshift = 0; // IRAKLI : remving the shift to remove overlap of different pitch active volumes for y2018
-	pShape->setHalfDepth((dZ+Zshift)/2);
+	pShape->setHalfDepth(dZ/2);
       } else {
 	pShape->setHalfDepth(dZ);
       }
@@ -182,7 +176,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       StiPlacement *pPlacement = new StiPlacement;
       Double_t zc = 0;
       if (NoStiSectors != 12) {
-	zc = (dZ-Zshift)/2;
+	zc = dZ/2;
 	if (sector > 12) zc = -zc;
       }
       pPlacement->setZcenter(zc);
