@@ -7,11 +7,11 @@
 #include "StPicoDstMaker/StPicoEpdFiller.h"
 #include "StPicoDstMaker/StPicoFmsFiller.h"
 
+#include "StMuDSTMaker/COMMON/StMuDst.h"
 class TClonesArray;
 class TChain;
 class TFile;
 class TTree;
-class StMuDst;
 class StMuTrack;
 class StEmcCollection;
 class StEmcPosition;
@@ -26,7 +26,6 @@ class StPicoDstMaker : public StMaker
 {
 public:
   enum PicoIoMode {IoWrite=1, IoRead=2};
-  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
 
   StPicoDstMaker(char const* name = "PicoDst");
   //  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
@@ -57,14 +56,14 @@ public:
   void setBufferSize(int = 65536 * 4);
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp = 9);
-
-  void setVtxMode(const PicoVtxMode vtxMode);
-  void SetGoodTriggers(const Char_t *trigList=0); 
-  void SetMaxTrackDca(Double_t cut = 50);
-  void SetMaxVertexTransError(Double_t cut = 0.0050);
-  void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13);
-  void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.);
-  void SetVxRmax(Double_t rmax = 2);
+  PicoVtxMode vtxMode() {return StMuDst::instance()->vtxMode();}
+  void setVtxMode(const PicoVtxMode vtxMode)         {StMuDst::instance()->setVtxMode(vtxMode);}
+  void SetGoodTriggers(const Char_t *trigList=0)     {StMuDst::instance()->SetGoodTriggers(trigList);}
+  void SetMaxTrackDca(Double_t cut = 50)             {StMuDst::instance()->SetMaxTrackDca(cut);}
+  void SetMaxVertexTransError(Double_t cut = 0.0050) {StMuDst::instance()->SetMaxVertexTransError(cut);}
+  void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13) {StMuDst::instance()->SetVxXYrange(xmin,xmax,ymin,ymax);}
+  void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.) {StMuDst::instance()->SetVxZrange(zmin, zmax);}
+  void SetVxRmax(Double_t rmax = 2)                  {StMuDst::instance()->SetVxRmax(rmax);}
   static StPicoDstMaker *instance() {return fgPicoDstMaker;}
   TClonesArray** picoArrays() {return mPicoArrays;}
 private:
@@ -128,7 +127,7 @@ private:
 
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
-  Bool_t selectVertex();
+    Bool_t selectVertex() {return StMuDst::instance()->selectVertex();}
 
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches
@@ -141,11 +140,9 @@ private:
   StEmcPosition*   mEmcPosition;
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
-  Float_t   mTpcVpdVzDiffCut;
 
   Float_t    mBField;
 
-  PicoVtxMode mVtxMode;
 
   TString   mInputFileName;        //! *.list - MuDst or picoDst
   TString   mOutputFileName;       //! FileName
@@ -177,11 +174,6 @@ private:
   StPicoBbcFiller  mBbcFiller;
   StPicoEpdFiller  mEpdFiller;
   StPicoFmsFiller  mFmsFiller;
-  static Double_t  fgerMax;
-  static Double_t  fgdca3Dmax; 
-  static vector<Int_t> fGoodTriggerIds; 
-  static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
-  static Double_t  fgVxZmin, fgVxZmax, fgVxRmax;
   static StPicoDstMaker *fgPicoDstMaker; //!
   ClassDef(StPicoDstMaker, 0)
 };
@@ -193,6 +185,5 @@ inline TTree* StPicoDstMaker::tree() { return mTTree; }
 inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
-inline void StPicoDstMaker::setVtxMode(const PicoVtxMode vtxMode) { mVtxMode = vtxMode; }
 
 #endif

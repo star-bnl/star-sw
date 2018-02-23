@@ -25,8 +25,13 @@ void femtoDst(Int_t N = 10000000, const Char_t *input = "/net/l404/data/fisyak/P
 
   StKFParticleInterface::instance()->AddDecayToReconstructionList(  421);
   StKFParticleInterface::instance()->AddDecayToReconstructionList( -421);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList(  426);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList(  429);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList( -429);
   StKFParticleInterface::instance()->AddDecayToReconstructionList(  411);
   StKFParticleInterface::instance()->AddDecayToReconstructionList( -411);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList(  431);
+  StKFParticleInterface::instance()->AddDecayToReconstructionList( -431);
   StKFParticleInterface::instance()->AddDecayToReconstructionList( 4122);
   StKFParticleInterface::instance()->AddDecayToReconstructionList(-4122);
   maker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");

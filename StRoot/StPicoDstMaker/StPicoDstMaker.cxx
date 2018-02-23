@@ -70,27 +70,14 @@
 #include "StPicoDstMaker/StPicoDst.h"
 #include "TH1.h"
 #include "TH2.h"
-//#define __HIST_PV__
-#ifdef __HIST_PV__
-static TH1F *hists[3] = {0};
-static TH2F *pVrZ = 0;
-static TH2F *pVxy = 0;
-#endif /* __HIST_PV__ */
 static Int_t _debug = 0;
-Double_t StPicoDstMaker::fgerMax;    // 50 um
-Double_t StPicoDstMaker::fgdca3Dmax; // 50 cm
-vector<Int_t> StPicoDstMaker::fGoodTriggerIds;
-Double_t StPicoDstMaker::fgVxXmin, StPicoDstMaker::fgVxXmax, StPicoDstMaker::fgVxYmin, StPicoDstMaker::fgVxYmax;
-Double_t StPicoDstMaker::fgVxZmin, StPicoDstMaker::fgVxZmax, StPicoDstMaker::fgVxRmax;
 StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 //_____________________________________________________________________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mMuDst(nullptr), mPicoDst(new StPicoDst()),
   mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
-  mTpcVpdVzDiffCut(3),
   mBField(0),
-  mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
   mChain(nullptr), mTTree(nullptr), mEventCounter(0), mSplit(99), mCompression(9), mBufferSize(65536 * 4),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
@@ -101,15 +88,6 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
 {
   streamerOff();
   createArrays();
-  LOG_INFO << "StPicoDstMaker::StPicoDstMaker: Set Default cuts" << endm;
-  SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051," // VPDMB-5-p-sst (2.58B)  - (1 : 4.84M))
-		  "520802, 520812, 520822, 520832, 520842"          // VPDMB-5-p-hlt (1.81B)  - (43 : 0.55M; 45 : 24.09M) 
-		  );
-  SetMaxTrackDca(50);
-  SetMaxVertexTransError(0);
-  SetVxXYrange(0,0,0,0);
-  SetVxZrange(0,0);
-  SetVxRmax(0);
   std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
   fgPicoDstMaker = this;
 }
@@ -229,7 +207,7 @@ Int_t StPicoDstMaker::Init() {
   Int_t l;
   switch (StMaker::m_Mode)  {
   case PicoIoMode::IoWrite:
-    if (mVtxMode == PicoVtxMode::NotSet) {
+    if (StMuDst::vtxMode() == PicoVtxMode::NotSet) {
       if (setVtxModeAttr() != kStOK) {
 	LOG_ERROR << "Pico Vertex Mode is not set ... " << endm;
 	return kStErr;
@@ -269,23 +247,23 @@ Int_t StPicoDstMaker::Init() {
 //_________________
 int StPicoDstMaker::setVtxModeAttr()
 {
-  mTpcVpdVzDiffCut = DAttr("TpcVpdVzDiffCut"); //Read the Tpc-Vpd cut from the input
-
+  Float_t TpcVpdVzDiffCut = DAttr("TpcVpdVzDiffCut"); //Read the Tpc-Vpd cut from the input
+  StMuDst::SetTpcVpdVzDiffCut(TpcVpdVzDiffCut);
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0)
   {
-    setVtxMode(PicoVtxMode::Default);
+    StMuDst::setVtxMode(PicoVtxMode::Default);
     LOG_INFO << " PicoVtxDefault is being used " << endm;
     return kStOK;
   }
   else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxVpd") == 0)
   {
-    setVtxMode(PicoVtxMode::Vpd);
+    StMuDst::setVtxMode(PicoVtxMode::Vpd);
     LOG_INFO << " PicoVtxVpd is being used " << endm;
     return kStOK;
   }
   else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxVpdOrDefault") == 0)
   {
-    setVtxMode(PicoVtxMode::VpdOrDefault);
+    StMuDst::setVtxMode(PicoVtxMode::VpdOrDefault);
     LOG_INFO << " PicoVtxVpdOrDefault is being used " << endm;
     return kStOK;
   }
@@ -795,7 +773,7 @@ Int_t StPicoDstMaker::fillTracks()
       }
     }
 #endif /* __HIST_PV__ */
-    if (fgdca3Dmax > 0 && dca3D > fgdca3Dmax) continue;
+    if (StMuDst::dca3Dmax() > 0 && dca3D > StMuDst::dca3Dmax()) continue;
     int counter = mPicoArrays[StPicoArrays::Track]->GetEntries();
     new((*(mPicoArrays[StPicoArrays::Track]))[counter]) StPicoTrack(gTrk, pTrk, mBField, mMuDst->primaryVertex()->position(), *dcaG);
 
@@ -1264,138 +1242,3 @@ void StPicoDstMaker::fillMtdHits()
 }
 
 
-/**
- * Selects a primary vertex from `muDst` vertex collection according to the
- * vertex selection mode `mVtxMode` specified by the user. The mode must be
- * set with StMaker::SetAttr("PicoVtxMode", "your_desired_vtx_mode") as by
- * default the selection mode is `PicoVtxMode::NotSet`.
- *
- * Returns `true` if the user has specified a valid vertex selection mode and
- * a valid vertex satisfying the corresponding predefined conditions is found in
- * the muDst vertex collection.
- *
- * Returns `false` otherwise.
- */
-Bool_t StPicoDstMaker::selectVertex() {
-  if (! mMuDst->numberOfPrimaryVertices()) return kFALSE;
-  StMuPrimaryVertex* selectedVertex = nullptr;
-  UInt_t Nt = fGoodTriggerIds.size();
-  if (Nt) {
-    const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
-    Int_t GoodTrigger = -1;
-    Int_t NoAnyTriggers = 0;
-    for (Int_t k = 0; k < 64; k++) {
-      Int_t trig = triggers.triggerId(k);
-      if (! trig) continue;
-      NoAnyTriggers++;
-      for (UInt_t l = 0; l < Nt; l++) {
-	if (trig == fGoodTriggerIds[l]) {
-	  GoodTrigger = trig;
-	  break;
-	}
-	if (GoodTrigger > 0) break;
-      }
-      if (NoAnyTriggers && GoodTrigger < 0) {return selectedVertex;}
-    }
-  }
-  for (UInt_t iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)       {
-    StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
-    if (!vtx) continue;
-    StThreeVectorD V(vtx->position());
-#ifdef __HIST_PV__
-    if (pVrZ) {
-      pVrZ->Fill(V.z(),V.perp());
-      pVxy->Fill(V.y(),V.x());
-    }
-#endif /* __HIST_PV__ */
-    if (! mMuDst->numberOfMcVertices()) { // No cutss for MC event
-      /* Cuts:
-	 1.  -0.3 < X < 0.1 и -0.27 < Y < -0.13. Maksym
-	 2.  sqrt(sigma_X**2 + sigma_Y**2) < 0.0050 cm
-	 3.  const Char_t *triggersC = "520001, 520011, 520021, 520031, 520041, 520051"
-	 4.  dca3D < 50 cm 
-      */
-      if (fgVxXmin < fgVxXmax && ! (fgVxXmin < V.x() && V.x() < fgVxXmax)) {continue;}
-      if (fgVxYmin < fgVxYmax && ! (fgVxYmin < V.y() && V.y() < fgVxYmax)) {continue;}
-      if (fgVxZmin < fgVxZmax && ! (fgVxZmin < V.z() && V.z() < fgVxZmax)) {continue;}
-      if (fgVxRmax > 0 &&  V.perp() > fgVxRmax)                            {continue;}
-      StThreeVectorD E(mMuDst->primaryVertex()->posError());
-      const Double_t er = E.perp();
-      if (fgerMax > 0 && er > fgerMax) {continue;}
-    }
-    // We save primary tracks associated with the selected primary vertex only
-    // don't use StMuTrack::primary(), it returns primary tracks associated with
-    // all vertices
-    if (mVtxMode == PicoVtxMode::Default)  {
-      // choose the default vertex, i.e. the first vertex
-      mMuDst->setVertexIndex(iVtx);
-      selectedVertex = vtx;
-    } else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)  {
-      StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
-      Float_t vzVpd = -999;
-      if (mBTofHeader && TMath::Abs(mBTofHeader->vpdVz()) < 200) vzVpd = mBTofHeader->vpdVz();
-      if (mVtxMode == PicoVtxMode::Vpd && vzVpd < 200) continue;
-      if (vzVpd >= -200 && mTpcVpdVzDiffCut > 0 && TMath::Abs(vzVpd - vtx->position().z()) >= mTpcVpdVzDiffCut) continue;
-      mMuDst->setVertexIndex(iVtx);
-      selectedVertex = mMuDst->primaryVertex();
-      break;
-    } else {// default case
-      LOG_ERROR << "Pico Vtx Mode not set!" << endm;
-    }
-  }
-  // Retrun false if selected vertex is not valid
-  return selectedVertex ? true : false;
-}
-//________________________________________________________________________________
-void  StPicoDstMaker::SetGoodTriggers(const Char_t *trigList) {
-
-  fGoodTriggerIds.clear();
-  TString Trig(trigList);
-  if (Trig == "") return;
-  TObjArray *obj = Trig.Tokenize("[^ ;,:]");
-  Int_t nParsed = obj->GetEntries();
-  for (Int_t k = 0; k < nParsed; k++) {
-    if (obj->At(k)) {
-      LOG_INFO << "Trigger: " << k << "\t" << ((TObjString *) obj->At(k))->GetName() << endm;
-      TString t(((TObjString *) obj->At(k))->GetName());
-      Int_t trig = t.Atoi();
-      if (! trig) continue;
-      fGoodTriggerIds.push_back(trig);
-    }
-  }
-  obj->SetOwner(kFALSE);
-  delete obj;
-}
-//________________________________________________________________________________
-void StPicoDstMaker::SetMaxTrackDca(Double_t cut) {
-  fgdca3Dmax = cut;
-  LOG_INFO << "StPicoDstMaker::SetMaxTrackDca = " << fgdca3Dmax << endm;
-}
-//________________________________________________________________________________
-void StPicoDstMaker::SetMaxVertexTransError(Double_t cut) {
-  fgerMax = cut;
-  LOG_INFO << "StPicoDstMaker::SetMaxVertexTransError = " << fgerMax << endm;
-}
-//________________________________________________________________________________
-void StPicoDstMaker::SetVxXYrange(Double_t xmin, Double_t xmax, Double_t ymin, Double_t ymax) {
-  fgVxXmin = xmin;
-  fgVxXmax = xmax;
-  fgVxYmin = ymin;
-  fgVxYmax = ymax;
-  LOG_INFO << "StPicoDstMaker::SetVxXYrange for PV: x in [" 
-	   << fgVxXmin << "," << fgVxXmax <<"], y in [" 
-	   << fgVxYmin << "," << fgVxYmax << "]" << endm;
-}
-//________________________________________________________________________________
-void StPicoDstMaker::SetVxZrange(Double_t zmin, Double_t zmax) {
-  fgVxZmin = zmin;
-  fgVxZmax = zmax;
-  LOG_INFO << "StPicoDstMaker::SetVxZrange for PV: z in [" 
-	   << fgVxZmin << "," << fgVxZmax <<"]" << endm;
-}
-//________________________________________________________________________________
-void StPicoDstMaker::SetVxRmax(Double_t rmax) {
-  fgVxRmax = rmax;
-  LOG_INFO << "StPicoDstMaker::SetVxRmax for PV: rho < " << fgVxRmax << endm;
-}
-//________________________________________________________________________________

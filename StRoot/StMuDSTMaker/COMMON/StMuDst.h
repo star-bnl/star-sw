@@ -98,6 +98,8 @@ typedef multimap<StMuPrimaryVertex*,KFParticle*>::iterator RcVx2KFVxIter;
     detector info, etc).  
     
 */
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+
 class StMuDst : public TObject {
 public:
   /// constructor
@@ -153,7 +155,18 @@ public:
 
   void setMtdArray(StMtdCollection *mtd_coll); 
   static StMuDst *instance() {return fgMuDst;}
+  static PicoVtxMode vtxMode() {return mVtxMode;}
+  static Double_t dca3Dmax() {return fgdca3Dmax;}
  protected:
+  static Double_t  fgerMax;
+  static Double_t  fgdca3Dmax; 
+  static vector<Int_t> fGoodTriggerIds; 
+  static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
+  static Double_t  fgVxZmin, fgVxZmax, fgVxRmax;
+  static PicoVtxMode mVtxMode;
+  static Float_t   mTpcVpdVzDiffCut;
+  static Float_t   TpcVpdVzDiffCut() {return mTpcVpdVzDiffCut;}
+
   static StMuDst *fgMuDst; //!
   /// array of TClonesArrays
   static TClonesArray** arrays;
@@ -542,6 +555,16 @@ public:
   static map<Int_t,Int_t>                            IdKFTk2IndxMap;
   static map<Int_t,Int_t>                            IdKFVx2IndxMap;
 
+  Bool_t selectVertex();
+  static void setVtxMode(const PicoVtxMode vtxMode) {mVtxMode = vtxMode;}
+  static void SetGoodTriggers(const Char_t *trigList=0); 
+  static void SetMaxTrackDca(Double_t cut = 50);
+  static void SetMaxVertexTransError(Double_t cut = 0.0050);
+  static void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13);
+  static void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.);
+  static void SetVxRmax(Double_t rmax = 2);
+  static void SetTpcVpdVzDiffCut(Float_t cut = 3) { mTpcVpdVzDiffCut = cut;}
+  
   // Increment this by 1 every time the class structure is changed
   ClassDef(StMuDst,4)
 };
