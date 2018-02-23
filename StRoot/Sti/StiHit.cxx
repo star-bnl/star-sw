@@ -155,7 +155,7 @@ static int nCall =0; nCall++;
 	   ,StiDetector::mgIndex
 	   ,StiDetector::mgValue[0],StiDetector::mgValue[1])
          << endm;
-	 //yf          assert( detector->insideL(dd,7,1.5));     // 
+	 assert( detector->insideL(dd,7,1.5));     // 
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
