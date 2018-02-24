@@ -1,4 +1,4 @@
-// $Id: itpcBuilder.cxx,v 1.3 2018/02/22 16:53:08 videbaks Exp $
+// $Id: itpcBuilder.cxx,v 1.4 2018/02/24 15:50:40 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +36,7 @@
 //
 #define checkcld 0
 #define checklaser 0
+//#define fv 1
 
 ClassImp(itpcBuilder);
   
@@ -172,7 +173,7 @@ void itpcBuilder::initialize(int argc, char *argv[]) {
   extras.cl142_itpc_chargeStep_s23 = new TH1D("cl142_itpc_chargeStep_s23","iTPC adc vs time sector#23",512,0,512);
   extras.cl143_itpc_chargeStep_s24 = new TH1D("cl143_itpc_chargeStep_s24","iTPC adc vs time sector#24",512,0,512);
  
-  extras.cl66_itpc_phi_charge = new TH1D("cl66_itpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
+  extras.cl66_itpc_phi_charge = new TH1D("cl66_itpc_phi_charge","Azimuthal Distribution of iTPC Charge",360,-180,180);
   extras.cl67_itpc_sector_charge = new TH1D("cl67_itpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
  
   // Add root histograms to Plots
@@ -280,6 +281,7 @@ void itpcBuilder::initialize(int argc, char *argv[]) {
   plots[n]->addHisto(extras.cl138_itpc_chargeStep_s19);
   plots[++n] = new JevpPlot(contents.h139_itpc_chargeStep_s20);
   plots[n]->addHisto(extras.cl139_itpc_chargeStep_s20);
+  plots[n]->logy = 1;
   plots[++n] = new JevpPlot(contents.h140_itpc_chargeStep_s21);
   plots[n]->addHisto(extras.cl140_itpc_chargeStep_s21);
   plots[++n] = new JevpPlot(contents.h141_itpc_chargeStep_s22);
@@ -434,7 +436,9 @@ void itpcBuilder::event(daqReader *rdr)
 	    LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
 	  }
 	  else {
-	    charge_counts[dd->pad][dd->row] += adc;
+	    if(tb>30 && tb<430) {
+	      charge_counts[dd->pad][dd->row] += adc;
+	    }
 	    tb_charge_counts[tb] += adc;
 	  }
 	}
