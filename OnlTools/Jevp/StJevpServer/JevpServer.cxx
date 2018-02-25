@@ -56,6 +56,7 @@
 #include "Jevp/StJevpBuilders/ppBuilder.h"
 #include "Jevp/StJevpBuilders/fpsBuilder.h"
 #include "Jevp/StJevpBuilders/epdBuilder.h"
+#include "Jevp/StJevpBuilders/itpcBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 
@@ -679,6 +680,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	//builders.Add(new ssdBuilder(this));
 	builders.Add(new ppBuilder(this));
 	builders.Add(new epdBuilder(this));
+	builders.Add(new itpcBuilder(this));
     }
     else {
 	builders.Add(new trgBuilder(this));
@@ -690,7 +692,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     TListIter next(&builders);
     JevpPlotSet *curr;
     while((curr = (JevpPlotSet *)next())) {
-	LOG(NOTE, "init");
+      LOG(NOTE, "init %s", curr->getPlotSetName());
 	curr->_initialize(argc, argv);
 	curr->clientdatadir = clientdatadir;
 	LOG(NOTE, "init done");
