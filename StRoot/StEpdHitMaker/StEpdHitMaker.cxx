@@ -121,6 +121,12 @@ void StEpdHitMaker::FillStEpdData(){
 
   int PrePost=0;  // this probably will henceforth always be zero, but keep it
 
+  // ofstream EpdOfs;
+  // EpdOfs.open("FromStEpdHitMaker.txt");
+  // ofstream EpdOfs2;
+  // EpdOfs.open("FromStEpdHitMaker2.txt");
+
+
   int nHitsAdded=0;
   for (short ew=0; ew<2; ew++){        // EastWest (ew) = 0,1 for east,west
     for (short PP=1; PP<13; PP++){     // note position (PP) goes from 1..12
@@ -142,6 +148,16 @@ void StEpdHitMaker::FillStEpdData(){
 	//      << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
 	//      << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\n";
 	//---------------------------------------------------
+
+
+	// EpdOfs << ew << "\t" << PP << "\t" << TT << "\t" 
+	//        << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
+	//        << mEpdDbMaker->GetBoardAdc(ew,PP,TT) << "\t"
+	//        << mEpdDbMaker->GetChannelAdc(ew,PP,TT) << "\t"
+	//        << mEpdDbMaker->GetCrateTac(ew,PP,TT) << "\t"
+	//        << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
+	//        << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\n";
+
 
 
 	if (crateAdc>0){     // only create a StEpdHit object if database says it is in the data
@@ -171,6 +187,16 @@ void StEpdHitMaker::FillStEpdData(){
 
 	  int truthId=0;  // this is for simulation
 
+
+	  // EpdOfs2 << ew << "\t" << PP << "\t" << TT << "\t" 
+	  // 	  << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
+	  // 	  << mEpdDbMaker->GetBoardAdc(ew,PP,TT) << "\t"
+	  // 	  << mEpdDbMaker->GetChannelAdc(ew,PP,TT) << "\t"
+	  // 	  << mEpdDbMaker->GetCrateTac(ew,PP,TT) << "\t"
+	  // 	  << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
+	  // 	  << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\t"
+	  // 	  << ADC << "\t" << nMIP << endl;
+
 	  StEpdHit* hit = new StEpdHit(PP,TT,EWforHit,ADC,TAC,TDC,HasTac,nMIP,isGood,truthId);
 	  mEpdCollection->addHit(hit);
 	  nHitsAdded++;
@@ -178,6 +204,10 @@ void StEpdHitMaker::FillStEpdData(){
       }
     }
   }
+
+  //  EpdOfs.close();
+  //  EpdOfs2.close();
+
   LOG_INFO << "StEpdHitMaker::FillStEpdData - added " << nHitsAdded << " to StEpdHitCollection" << endm;
 }
 
