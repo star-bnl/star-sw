@@ -163,10 +163,20 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     contents.bbq_board_occ_h->Sumw2();
     contents.bbq_readout_time_h = new TH1D("bbq_readout_time_h", "BBQ Readout Time", 100, 0, 1000);
   
-    contents.epq_sz_h = new TH1D("epq_sz_h", "EPQ Data Size", 101, 0, 1400);
-    contents.epq_board_occ_h  = new TProfile("epq_board_occ_h", "EPQ Board Average Occupancy", 16, 15.5, 31.5);
-    contents.epq_board_occ_h->Sumw2();
-    contents.epq_readout_time_h = new TH1D("epq_readout_time_h", "EPQ Readout Time", 100, 0, 1000);
+    contents.eq1_sz_h = new TH1D("eq1_sz_h", "EQ1 Data Size", 101, 0, 1400);
+    contents.eq1_board_occ_h  = new TProfile("eq1_board_occ_h", "EQ1 Board Average Occupancy", 16, 15.5, 31.5);
+    contents.eq1_board_occ_h->Sumw2();
+    contents.eq1_readout_time_h = new TH1D("eq1_readout_time_h", "EQ1 Readout Time", 100, 0, 1000);
+
+    contents.eq2_sz_h = new TH1D("eq2_sz_h", "EQ2 Data Size", 101, 0, 1400);
+    contents.eq2_board_occ_h  = new TProfile("eq2_board_occ_h", "EQ2 Board Average Occupancy", 16, 15.5, 31.5);
+    contents.eq2_board_occ_h->Sumw2();
+    contents.eq2_readout_time_h = new TH1D("eq2_readout_time_h", "EQ2 Readout Time", 100, 0, 1000);
+
+    contents.eq3_sz_h = new TH1D("eq3_sz_h", "EQ3 Data Size", 101, 0, 1400);
+    contents.eq3_board_occ_h  = new TProfile("eq3_board_occ_h", "EQ3 Board Average Occupancy", 16, 15.5, 31.5);
+    contents.eq3_board_occ_h->Sumw2();
+    contents.eq3_readout_time_h = new TH1D("eq3_readout_time_h", "EQ3 Readout Time", 100, 0, 1000);
 
 
     // Add root histograms to Plots
@@ -383,21 +393,55 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     plots[++n] = new JevpPlot(contents.bbq_readout_time_h);
     plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Readout Time (usec)");
   
-    plots[++n] = new JevpPlot(contents.epq_sz_h);
+    plots[++n] = new JevpPlot(contents.eq1_sz_h);
     {	
 	plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Crate Size (Bytes)");
     }
-    plots[++n] = new JevpPlot(contents.epq_board_occ_h);
+    plots[++n] = new JevpPlot(contents.eq1_board_occ_h);
     {
 	plots[n]->setDrawOpts("hist");
 	for(int i=0;i<16;i++) {
-	    contents.epq_board_occ_h->GetXaxis()->SetBinLabel(i+1,Form("0x%x",i+16));
+	    contents.eq1_board_occ_h->GetXaxis()->SetBinLabel(i+1,Form("0x%x",i+16));
 	}
-	contents.epq_board_occ_h->GetXaxis()->SetTitle("Board Address");
-	contents.epq_board_occ_h->GetYaxis()->SetTitle("Occupancy");
+	contents.eq1_board_occ_h->GetXaxis()->SetTitle("Board Address");
+	contents.eq1_board_occ_h->GetYaxis()->SetTitle("Occupancy");
     }
-    plots[++n] = new JevpPlot(contents.epq_readout_time_h);
+    plots[++n] = new JevpPlot(contents.eq1_readout_time_h);
     plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Readout Time (usec)");
+
+    plots[++n] = new JevpPlot(contents.eq2_sz_h);
+    {	
+	plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Crate Size (Bytes)");
+    }
+    plots[++n] = new JevpPlot(contents.eq2_board_occ_h);
+    {
+	plots[n]->setDrawOpts("hist");
+	for(int i=0;i<16;i++) {
+	    contents.eq2_board_occ_h->GetXaxis()->SetBinLabel(i+1,Form("0x%x",i+16));
+	}
+	contents.eq2_board_occ_h->GetXaxis()->SetTitle("Board Address");
+	contents.eq2_board_occ_h->GetYaxis()->SetTitle("Occupancy");
+    }
+    plots[++n] = new JevpPlot(contents.eq2_readout_time_h);
+    plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Readout Time (usec)");
+
+
+    plots[++n] = new JevpPlot(contents.eq3_sz_h);
+    {	
+	plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Crate Size (Bytes)");
+    }
+    plots[++n] = new JevpPlot(contents.eq3_board_occ_h);
+    {
+	plots[n]->setDrawOpts("hist");
+	for(int i=0;i<16;i++) {
+	    contents.eq3_board_occ_h->GetXaxis()->SetBinLabel(i+1,Form("0x%x",i+16));
+	}
+	contents.eq3_board_occ_h->GetXaxis()->SetTitle("Board Address");
+	contents.eq3_board_occ_h->GetYaxis()->SetTitle("Occupancy");
+    }
+    plots[++n] = new JevpPlot(contents.eq3_readout_time_h);
+    plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Readout Time (usec)");
+
   
     // Add Plots to plot set...
     for(int i=0;i<=n;i++) {
@@ -495,8 +539,12 @@ void trgBuilder::handleQTOccupancyPlots(daqReader *rdr) {
 	    fillQtHisto(MXQ_CONF_NUM, trg, (TH1D *)contents.mxq_sz_h, (TH1D *)contents.mxq_readout_time_h, (TProfile *)contents.mxq_board_occ_h);
 	    LOG(DBG, "BBQ");
 	    fillQtHisto(BBQ_CONF_NUM, trg, (TH1D *)contents.bbq_sz_h, (TH1D *)contents.bbq_readout_time_h, (TProfile *)contents.bbq_board_occ_h);
-	    LOG(DBG, "EPQ");
-	    fillQtHisto(EQ3_CONF_NUM, trg, (TH1D *)contents.epq_sz_h, (TH1D *)contents.epq_readout_time_h, (TProfile *)contents.epq_board_occ_h);
+	    LOG(DBG, "EQ1");
+	    fillQtHisto(EQ1_CONF_NUM, trg, (TH1D *)contents.eq1_sz_h, (TH1D *)contents.eq1_readout_time_h, (TProfile *)contents.eq1_board_occ_h);
+	    LOG(DBG, "EQ2");
+	    fillQtHisto(EQ2_CONF_NUM, trg, (TH1D *)contents.eq2_sz_h, (TH1D *)contents.eq2_readout_time_h, (TProfile *)contents.eq2_board_occ_h);
+	    LOG(DBG, "EQ3");
+	    fillQtHisto(EQ3_CONF_NUM, trg, (TH1D *)contents.eq3_sz_h, (TH1D *)contents.eq3_readout_time_h, (TProfile *)contents.eq3_board_occ_h);
 	    LOG(DBG, "QTs done");
 	}
     }	    

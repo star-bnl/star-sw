@@ -132,9 +132,19 @@ public:
 	  TH1* bbq_board_occ_h;
 	  TH1* bbq_readout_time_h;
 	  
-	  TH1* epq_sz_h;
-	  TH1* epq_board_occ_h;
-	  TH1* epq_readout_time_h;
+	  TH1* eq1_sz_h;
+	  TH1* eq1_board_occ_h;
+	  TH1* eq1_readout_time_h;
+	
+	  TH1* eq2_sz_h;
+	  TH1* eq2_board_occ_h;
+	  TH1* eq2_readout_time_h;
+	
+	  TH1* eq3_sz_h;
+	  TH1* eq3_board_occ_h;
+	  TH1* eq3_readout_time_h;
+
+
       };
   } contents;
   
