@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.26 2018/02/26 23:28:38 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.27 2018/02/26 23:28:45 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -810,7 +810,10 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
      }
    }
 
-   InitFrom(starHall);
+   if ( starHall )
+     InitFrom( *starHall );
+   else
+     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant input\n";
 
 
 /* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
@@ -845,7 +848,7 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
 
 }
 //_____________________________________________________________________________
-void StBTofGeometry::InitFrom(TVolume *starHall)
+void StBTofGeometry::InitFrom(TVolume &starHall)
 {
   // Initialize TOFr geometry from STAR geometry
   //     BTofConf   --     0     tray_BTof   (default)
@@ -857,7 +860,7 @@ void StBTofGeometry::InitFrom(TVolume *starHall)
   }
 
   // Loop over the STAR geometry and mark the volume needed
-  TDataSetIter volume(starHall,0);
+  TDataSetIter volume(&starHall,0);
 
   TVolume *starDetectorElement = 0;
   while ( (starDetectorElement = ( TVolume *)volume()) )
@@ -880,8 +883,8 @@ void StBTofGeometry::InitFrom(TVolume *starHall)
       }
     }
 
-  starHall->SetVisibility(TVolume::kBothVisible);
-  mTopNode = new TVolumeView(*starHall,10); 
+  starHall.SetVisibility(TVolume::kBothVisible);
+  mTopNode = new TVolumeView(starHall,10);
 
   mSectorsInBTOH = mTopNode->GetListSize()/2;    // # of sectors in one half
 
@@ -1744,6 +1747,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.27  2018/02/26 23:28:45  smirnovd
+ * StBTofGeometry: InitFrom(TVolume*) to InitFrom(TVolume&)
+ *
  * Revision 1.26  2018/02/26 23:28:38  smirnovd
  * StBTofGeometry: s/InitFromStar/InitFrom/ and make it private
  *
