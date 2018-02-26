@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.12 2018/02/26 23:27:01 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.13 2018/02/26 23:27:15 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -253,7 +253,6 @@ class StBTofGeometry : public TNamed {
    Int_t       mModulesInTray; //number of modules in a tray
    Int_t       mCellsInModule; //number of cell in a module
    Bool_t      mInitFlag;      //flag of initialization, kTRUE if done
-   TVolume*    mStarHall;
    Int_t       mBTofConf;      //configuration for tray/full (0/1) tof
 
    StBTofGeomTray* mBTofTray[mNTrays];
@@ -347,7 +346,7 @@ class StBTofGeometry : public TNamed {
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 #endif
-  ClassDef(StBTofGeometry,1)  //Simplified TOF Geometry
+  ClassDef(StBTofGeometry,2)  //Simplified TOF Geometry
 };
 
 R__EXTERN  StBTofGeometry* gBTofGeometry;
@@ -356,6 +355,9 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.13  2018/02/26 23:27:15  smirnovd
+ * StBTofGeometry: Removed unused member pointer to non-TGeo ROOT geometry
+ *
  * Revision 1.12  2018/02/26 23:27:01  smirnovd
  * Remove unnecessary guards around ClassDef macro
  *

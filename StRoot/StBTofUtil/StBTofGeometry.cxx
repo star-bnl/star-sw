@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.15 2018/02/26 23:13:19 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.16 2018/02/26 23:27:15 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -651,7 +651,6 @@ StBTofGeometry::StBTofGeometry(const char* name, const char* title)
    mRootFile       = 0;
    mInitFlag       = kFALSE;
    mTopNode        = 0;
-   mStarHall       = 0;
    mIsMC           = kFALSE;
    SetAlignFile("");
 
@@ -771,7 +770,6 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
    }
 
    InitFromStar(starHall);
-   mStarHall = starHall;
 
 
 /* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
@@ -1672,6 +1670,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.16  2018/02/26 23:27:15  smirnovd
+ * StBTofGeometry: Removed unused member pointer to non-TGeo ROOT geometry
+ *
  * Revision 1.15  2018/02/26 23:13:19  smirnovd
  * Move embedded CVS log messages to the end of file
  *
