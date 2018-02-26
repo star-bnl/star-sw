@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.35 2016/02/24 16:50:00 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.36 2018/02/26 23:30:18 smirnovd Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.36  2018/02/26 23:30:18  smirnovd
+// StPeCMaker: Init BTOF geometry using proper interface
+//
 // Revision 1.35  2016/02/24 16:50:00  ramdebbe
 // just removed commented lines
 //
@@ -146,7 +149,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.35 2016/02/24 16:50:00 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.36 2018/02/26 23:30:18 smirnovd Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -253,7 +256,7 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
      if(mBTofGeom && !mBTofGeom->IsInitDone()) {
        LOG_INFO << " BTofGeometry initialization ... " << endm;
        mstarHall->Print();
-       mBTofGeom->InitFromStar(mstarHall);
+       mBTofGeom->Init(this, mstarHall);
        LOG_INFO << "starHall defined in StPeCMaker InitRun value of mBTofGeom  "  << mBTofGeom<<endm;
      }
    if ( outputPerRun ) {
