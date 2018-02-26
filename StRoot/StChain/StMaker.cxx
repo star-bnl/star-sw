@@ -596,7 +596,7 @@ Int_t icol,islas;
     FOUND: if (uppMk || dowMk) 	return dataset;
 	   if (GetDebug()<2) 	return dataset;
 #ifdef STAR_LOGGER     
-	   LOG_DEBUG << Form("<%s::%s> DataSet %s FOUND in %s\n"
+	   LOG_INFO << Form("<%s::%s> DataSet %s FOUND in %s"
 			     ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path()) << endm;
 #else
       printf("Remark: <%s::%s> DataSet %s FOUND in %s\n"
