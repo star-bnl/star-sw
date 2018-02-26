@@ -67,7 +67,8 @@ StTpcDigitalSector::StTpcDigitalSector(Int_t sector) : mSector(sector) {
   mNoRows = St_tpcPadConfigC::instance()->padRows(sector);
   for(Int_t row=1; row <= mNoRows; row++) {
     StDigitalPadRow    padRow;
-    for (Int_t pad = 0; pad < numberOfPadsAtRow(row); pad++) {
+    Int_t NoPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+    for (Int_t pad = 0; pad < NoPads; pad++) {
       padRow.push_back( timeBins);
     }
     mData.push_back(padRow);

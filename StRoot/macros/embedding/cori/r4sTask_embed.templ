@@ -104,9 +104,15 @@
     umask 2
     mkdir -p $sandBox
     ln -s ${WRK_DIR}/StRoot  $sandBox
-    ln -s ${WRK_DIR}/pams  $sandBox
-    ln -s ${WRK_DIR}/StarDb  $sandBox
-    ln -s ${WRK_DIR}/Input  $sandBox
+    if ( -d ${WRK_DIR}/pams ) then
+      ln -s ${WRK_DIR}/pams  $sandBox
+    endif
+    if ( -d ${WRK_DIR}/StarDb ) then
+      ln -s ${WRK_DIR}/StarDb  $sandBox
+    endif
+    if ( -d ${WRK_DIR}/Input ) then
+      ln -s ${WRK_DIR}/Input  $sandBox
+    endif
     echo step into sandbox 
     cd $sandBox
     pwd

@@ -142,6 +142,105 @@ end
       </object>
     </void>
     
+    
+    
+    
+    <!-- CSHApplication configuration for LCG Grid Sites -->
+    <void method="put">
+      <string>CSHApplication_LCG</string>
+      <object id="CSHApplication_LCG" class="gov.bnl.star.offline.scheduler.Dispatchers.CSHApplication">
+        <void property="recurseCopy">
+          <boolean>true</boolean>
+        </void>
+        <void property="copyScript">
+          <string>copyURIs.pl</string>
+        </void>
+        <void property="registerScript">
+          <string>register_file.pl</string>
+        </void>
+        <void property="storageScript">
+          <string>storageService.pl</string>
+        </void>
+        <void property="EnvVariableLimit">
+          <int>200</int>
+        </void>
+        <!-- Knowledge of location should be confined to programLocations -->
+        <!-- non-URI based syntax implies OS depencies                    -->
+        <!-- How can the config file be OS independent ??? Below, are a 
+            few example and syntax where it is NOT                        -->
+
+        <void property="copyCommand">
+            <string>/bin/cp (fromScratch) (toURL)</string>
+        </void>
+        
+        <void property="recursiveCopyCommand">
+            <string>    
+    ########### Copy Command Block ########### 
+    echo "Starting copy block"
+    foreach file ( (fromScratch) )
+         set i=0
+         
+         if ( -d $file ) then
+            set cpCommand="/bin/cp -r $file (toURL)"
+         else
+            set cpCommand="/bin/cp -fp $file (toURL)"
+         endif
+         
+         RETRY_CP:
+         echo "Running copy command: " $cpCommand
+         $cpCommand
+         if ( $status &amp;&amp; $i &lt; 15 ) then
+             echo "The copy failed, waiting to try again."
+             @ i++
+             sleep 60
+             echo "Trying copy again at "`/bin/date`
+             goto RETRY_CP
+         endif
+
+    end
+    ##########################################
+            </string>
+        </void>
+        
+        
+        <void property="gridCopyCommand">
+            <string>
+# This loop solves the problem of not being able to use wild cards in the globus-url-copy command.
+# However the (toURL) area will need to be different for each pass of the loop as a destination file name must be specified. 
+# In this syntax the user must put the last slash on the “toURL” or else it will concatenate the last dir to the file name.
+cd $SCRATCH
+foreach file ((fromScratch))
+  globus-url-copy -p 25 file:$SCRATCH/$file gsiftp://(copyBackGateKeeper)(toURL)$file
+end 
+            </string>
+        </void>
+       
+        <void property="makeExecutableCommand"> <!--<void property="makeEvnd">-->
+            <string>/bin/chmod +x </string>
+        </void>
+        <void property="helperScripts">  
+            <string>/star/data08/HRM/scripts/</string>
+        </void>
+<!--
+         <void property="ucmCommand">
+            <string>/bla/bla/bla/UCMcoammmnd</string>
+        </void>
+-->
+        <void property="localCommands"></void>
+        <void property="gridCommands"></void>
+        <void property="gridInitializationScript">
+            <string>
+                setenv STARTUPDIR `/bin/pwd`
+                setenv OSG_WN_TMP $TMPDIR
+                setenv OSG_GRID $TMPDIR
+                goto ENVSETUPSECTION
+            </string>
+        </void>
+        <void property="initializationScript"></void>
+        
+      </object>
+    </void>
+    
       
     
 <!--The is the new RDL Application Resolver used to solve the Task and Application tags RDL requests
@@ -388,7 +487,7 @@ initializer. -->
                     <void method="setType">                   <string>CONDOR</string>           </void>
                     <void method="setSite">                   <string>STAR</string>             </void>
                     <void method="setTimeLimit">              <int>180</int>                     </void>
-                    <void method="setMaxMemory">              <int>350</int>                    </void> <!-- I made this value up L.B.H. -->
+                    <void method="setMaxMemory">              <int>10000</int>                   </void> <!-- I made this value up L.B.H. -->
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
                 </object>
@@ -402,7 +501,7 @@ initializer. -->
                     <void method="setSearchOrderPriority">    <int>50</int>                      </void>
                     <void method="setType">                   <string>CONDOR</string>           </void> 
                     <void method="setSite">                   <string>STAR</string>             </void> 
-                    <void method="setTimeLimit">              <int>300</int>                     </void>
+                    <void method="setTimeLimit">              <int>10000</int>                     </void>
                     <void method="setMaxMemory">              <int>400</int>                    </void> <!-- I made this value up L.B.H. -->
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
@@ -417,8 +516,8 @@ initializer. -->
                     <void method="setSearchOrderPriority">    <int>100</int>                    </void>
                     <void method="setType">                   <string>CONDOR</string>           </void> 
                     <void method="setSite">                   <string>STAR</string>             </void> 
-                    <void method="setTimeLimit">              <int>14400</int>                  </void>
-                    <void method="setMaxMemory">              <int>440</int>                    </void>
+                    <void method="setTimeLimit">              <int>7200</int>                   </void>
+                    <void method="setMaxMemory">              <int>10000</int>                    </void>
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void property="jobPriorityAdjust">       <byte>10</byte>                   </void> <!--Add 10% to the -->
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
@@ -471,7 +570,7 @@ initializer. -->
                     <void method="setSearchOrderPriority">    <int>100</int>                    </void>
                     <void method="setType">                   <string>CONDOR</string>           </void>
                     <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>14400</int>                  </void>
+                    <void method="setTimeLimit">              <int>7200</int>                  </void>
                     <void method="setMaxMemory">              <int>440</int>                    </void>
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void property="jobPriorityAdjust">       <byte>10</byte>                   </void> 
@@ -489,7 +588,7 @@ initializer. -->
                     <void method="setSearchOrderPriority">    <int>100</int>                    </void>
                     <void method="setType">                   <string>CONDOR</string>           </void>
                     <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>14400</int>                  </void>
+                    <void method="setTimeLimit">              <int>7200</int>                  </void>
                     <void method="setMaxMemory">              <int>440</int>                    </void>
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void property="jobPriorityAdjust">       <byte>10</byte>                   </void> 
@@ -608,11 +707,18 @@ initializer. -->
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
                 </object>
-          </void>
-
+            </void>
           
           
-          <void method="add">
+            <void method="add"> <!-- Queue for RCF nighly test benchmarking -->
+               <object id="BNL_condor_benchmark_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">            <string>bnl_condor_benchmark_queue</string>     </void>
+                    <void method="getValuesFrom">    <object idref="BNL_condor_high_queue"/>         </void> 
+                </object>
+            </void>
+          
+          
+            <void method="add">
                <object id="BNL_condor_crs" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                     <string>bnl_condor_rcrs</string></void>  
                     <void method="setName">                   <string></string></void>
@@ -624,24 +730,41 @@ initializer. -->
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
                 </object>
-          </void>
+            </void>
           
           
-          <void method="add">
-              <object id="PDSF_SGE_Queue" class="gov.bnl.star.offline.scheduler.Queue">
-                <void method="setID">                   <string>PDSF_SGE_Queue</string>    </void>  
-                <void method="setName">                 <string></string></void> <!--The true queue name useded by the bsud -q to submit this job-->
-                <!--<void method="setAssociatedDispatcher"> <object idref="PDSFDispatcher"/>   </void>--> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
-                <void method="setCluster">              <string>PDSF</string>              </void>
-                <void method="setSearchOrderPriority">  <int>1</int>                       </void> <!-- Big numbers get tryed last -->
-                <void method="setType">                 <string>SGE</string>               </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
-                <void method="setSite">                 <string>STAR</string>              </void>
-                <void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>
-              </object>
-          </void>
+            <void method="add">
+                <object id="PDSF_SGE_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>PDSF_SGE_Queue</string>    </void>  
+                    <void method="setName">                 <string></string></void> <!--The true queue name useded by the bsud -q to submit this job-->
+                    <!--<void method="setAssociatedDispatcher"> <object idref="PDSFDispatcher"/>   </void>--> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                    <void method="setCluster">              <string>PDSF</string>              </void>
+                    <void method="setSearchOrderPriority">  <int>1</int>                       </void> <!-- Big numbers get tryed last -->
+                    <void method="setSite">                 <string>STAR</string>              </void>
+                    <void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>
+                </object>
+            </void>
+            
+            
+            <void method="add">
+                <object id="PDSF_SLURM_shared_chos_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">    <object idref="PDSF_SGE_Queue"/>                        </void> 
+                    <void method="setID">                   <string>PDSF_SLURM_shared_chos_Queue</string>    </void>  
+                    
+                </object>
+            </void>
+            
+            
+            <void method="add">
+                <object id="PDSF_SLURM_shared_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">    <object idref="PDSF_SGE_Queue"/>                   </void>
+                    <void method="setID">                   <string>PDSF_SLURM_shared_Queue</string>    </void>  
+                    
+                </object>
+            </void>
+
           
-          
-          <void method="add">
+            <void method="add">
                 <object id="PDSFGrid1_SGE_Queue" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                   <string>PDSF_SGE_Queue</string>    </void>  
                     <void method="setName">                 <string></string></void> <!--The true queue name useded by the bsud -q to submit this job-->
@@ -652,10 +775,10 @@ initializer. -->
                     <void method="setSite">                 <string>STAR</string>              </void>
                     <void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>
                 </object>
-          </void>
+            </void>
           
           
-          <void method="add">
+            <void method="add">
                 <object id="PDSF_SGE_testQ" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                   <string>PDSF_SGE_testQ</string>    </void>  
                     <void method="setName">                 <string>test.q</string></void> <!--The true queue name useded by the bsud -q to submit this job-->
@@ -666,12 +789,12 @@ initializer. -->
                     <void method="setSite">                 <string>STAR</string>              </void>
                     <void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>
                 </object>
-          </void>
+            </void>
           
           
           
-          <!--carver.nersc --> 
-          <void method="add">
+            <!--carver.nersc --> 
+            <void method="add">
                 <object id="NERSC_Carver_PBS_Queue" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                   <string>NERSC_Carver_PBS_Queue</string>    </void>  
                     <void method="setName">                 <string>serial</string>       </void> <!--The true queue name useded by the bsud -q to submit this job-->
@@ -681,7 +804,7 @@ initializer. -->
                     <void method="setSite">                 <string>STAR</string>              </void>
                     <!--<void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>-->
                 </object>
-          </void>
+            </void>
           
           
 <!--          
@@ -725,12 +848,12 @@ initializer. -->
                     <void method="setType">                 <string>SGE</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
                     <void method="setSite">                 <string>STAR</string>             </void>
                     <void method="setImplementation">       <string>local</string>            </void>
-               </object>
+                </object>
              </void>
              
              
-             <void method="add">
-                  <object id="MIT_XGrid_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+            <void method="add">
+                <object id="MIT_XGrid_Queue" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                   <string>mit_XGrid_Queue</string>    </void>  
                     <void method="setName">                 <string></string></void> <!--The true queue name useded by the bsud -q to submit this job-->
                     <void method="setCluster">              <string>MIT.XGrid</string>         </void>
@@ -738,13 +861,13 @@ initializer. -->
                     <void method="setType">                 <string>XGrid</string>             </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
                     <void method="setSite">                 <string>MIT</string>               </void>
                     <void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>
-                  </object>
-              </void>
+                </object>
+            </void>
               
               
               
-              <void method="add">
-                   <object id="BHAM_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+            <void method="add">
+                <object id="BHAM_Queue" class="gov.bnl.star.offline.scheduler.Queue">
                         <void method="setID">                   <string>shortQueue</string>       </void> 
                         <void method="setName">                 <string></string>                 </void> 
                         <void method="setCluster">              <string>ph.bham.ac.uk</string></void>
@@ -754,8 +877,8 @@ initializer. -->
                         <void method="setType">                 <string>SGE</string>              </void> 
                         <void method="setSite">                 <string>STAR</string>             </void>
                         <void method="setImplementation">       <string>local</string>            </void>
-                   </object>
-             </void>
+                </object>
+            </void>
              
              
              <void method="add">
@@ -851,8 +974,22 @@ initializer. -->
              </void>
              
              
+             <void method="add"> 
+                <object id="jinr_pbs_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>jinr_pbs_Queue</string>          </void> 
+                    <void method="setName">                 <string>jinr</string>                    </void> 
+                    <void method="setCluster">              <string>jinr.ru</string>                 </void> 
+                    <void method="setTimeLimit">            <int>2880</int>                          </void> 
+                    <void method="setMaxMemory">            <int>44000</int>                         </void> 
+                    <void method="setSearchOrderPriority">  <int>1</int>                             </void> 
+                    <void method="setType">                 <string>pbs</string>                     </void> 
+                    <void method="setSite">                 <string>STAR</string>                    </void> 
+                    <void method="setImplementation">       <string>grid</string>                    </void> 
+                </object> 
+             </void>
              
              
+
  
              <void method="add">
                    <object id="local_Queue" class="gov.bnl.star.offline.scheduler.Queue">
@@ -869,12 +1006,7 @@ initializer. -->
              </void>
              
              
-             
-             
-             
-             
-
-            
+                    
         </object>
     </void>     
 
@@ -1001,14 +1133,22 @@ initializer. -->
     </void>
 
 
-
-
     <void method="put">
       <string>bnl_condor_high</string> <!-- Very high priority policy for L.D. -->
       <object id="bnl_condor_high" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
           <void method="addQueue"><object idref="BNL_condor_high_queue"/></void>
       </object>
     </void>
+    
+    
+    <void method="put">
+        <string>bnl_condor_benchmark</string> 
+        <object id="bnl_condor_benchmark" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_benchmark_queue"/></void>
+        </object>
+    </void>
+    
+    
 
 
     <void method="put">
@@ -1165,6 +1305,16 @@ initializer. -->
 <!-- ************************************ end of ITB policy **************************** -->
 
 
+<!-- ************************************ start of jinr ru policy **************************** -->
+<void method="put">
+      <string>jinr</string>   
+      <object class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+              <void method="addQueue"><object idref="jinr_pbs_Queue"/></void>
+      </object>
+</void>
+<!-- ************************************ end of jinr policy **************************** -->
+
+
 
 <!--********************************************************* older policys ******************************************************** -->    
 
@@ -1282,6 +1432,20 @@ make use of queue information. -->
           <string>pdsf_sge</string>
           <object id="pdsf_sge" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
              <void method="addQueue"><object idref="PDSF_SGE_Queue"/></void>
+          </object>
+        </void>
+        
+        <void method="put">
+          <string>pdsf_slurm_chos</string>
+          <object id="pdsf_slurm_chos" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+             <void method="addQueue"><object idref="PDSF_SLURM_shared_chos_Queue"/></void>
+          </object>
+        </void>
+        
+         <void method="put">
+          <string>pdsf_slurm_shared</string>
+          <object id="pdsf_slurm_shared" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+             <void method="addQueue"><object idref="PDSF_SLURM_shared_Queue"/></void>
           </object>
         </void>
         
@@ -1516,7 +1680,7 @@ make use of queue information. -->
 +Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")  </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Experiment == "star")  </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1537,7 +1701,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")  </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1559,7 +1723,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;long&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (TotalSlots == 40  &amp;&amp; CPU_Experiment == "star") </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star") </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1581,7 +1745,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;high&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(TotalSlots == 40  &amp;&amp; CPU_Experiment == "star") </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Experiment == "star") </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1592,6 +1756,70 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                     <void property="application">   <object idref="CSHApplication"/> </void>
                 </object>
             </void>
+            
+            
+            
+            <void method="add">
+                <object id="condorBNL_benchmark_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
+                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="condorOptions">
+<string>+Experiment     = &quot;star&quot;
+<!--   +Job_Type       = &quot;high&quot; -->
++Job_Type       = &quot;cas&quot;
+kill_sig        = SIGINT
+PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void method="addRequirement"><string>(CPU_Experiment == "star") &amp;&amp; ( \
+(machine == "rcas2901.rcf.bnl.gov") || (machine == "rcas2902.rcf.bnl.gov") || (machine == "rcas2903.rcf.bnl.gov") || (machine == "rcas2904.rcf.bnl.gov") || \ 
+(machine == "rcas2905.rcf.bnl.gov") || (machine == "rcas2906.rcf.bnl.gov") || (machine == "rcas2907.rcf.bnl.gov") || (machine == "rcas2908.rcf.bnl.gov") || \
+(machine == "rcas2909.rcf.bnl.gov") || (machine == "rcas2910.rcf.bnl.gov") || (machine == "rcas2911.rcf.bnl.gov") || (machine == "rcas2912.rcf.bnl.gov") || \
+(machine == "rcas2913.rcf.bnl.gov") || (machine == "rcas2914.rcf.bnl.gov") || (machine == "rcas2915.rcf.bnl.gov") || (machine == "rcas2916.rcf.bnl.gov") || \
+(machine == "rcas2917.rcf.bnl.gov") || (machine == "rcas2918.rcf.bnl.gov") || (machine == "rcas2919.rcf.bnl.gov") || (machine == "rcas2920.rcf.bnl.gov") || \
+(machine == "rcas2921.rcf.bnl.gov") || (machine == "rcas2922.rcf.bnl.gov") || (machine == "rcas2923.rcf.bnl.gov") || (machine == "rcas2924.rcf.bnl.gov") || \
+(machine == "rcas2925.rcf.bnl.gov") || (machine == "rcas2926.rcf.bnl.gov") || (machine == "rcas2927.rcf.bnl.gov") || (machine == "rcas2928.rcf.bnl.gov") || \
+(machine == "rcas2929.rcf.bnl.gov") || (machine == "rcas2930.rcf.bnl.gov") || (machine == "rcas2931.rcf.bnl.gov") || (machine == "rcas2932.rcf.bnl.gov") || \
+(machine == "rcas2933.rcf.bnl.gov") || (machine == "rcas2934.rcf.bnl.gov") || (machine == "rcas2935.rcf.bnl.gov") || (machine == "rcas2936.rcf.bnl.gov") || \
+(machine == "rcas2937.rcf.bnl.gov") || (machine == "rcas2938.rcf.bnl.gov") || (machine == "rcas2939.rcf.bnl.gov") || (machine == "rcas2940.rcf.bnl.gov") || \
+(machine == "rcas2941.rcf.bnl.gov") || (machine == "rcas2942.rcf.bnl.gov") || (machine == "rcas2943.rcf.bnl.gov") || (machine == "rcas2944.rcf.bnl.gov") || \
+(machine == "rcas2945.rcf.bnl.gov") || (machine == "rcas2946.rcf.bnl.gov") || (machine == "rcas2948.rcf.bnl.gov") || (machine == "rcas2949.rcf.bnl.gov") || \
+(machine == "rcas2950.rcf.bnl.gov") || (machine == "rcas2951.rcf.bnl.gov") || (machine == "rcas2952.rcf.bnl.gov") || (machine == "rcas2953.rcf.bnl.gov") || \
+(machine == "rcas2954.rcf.bnl.gov") || (machine == "rcas2955.rcf.bnl.gov") || (machine == "rcas2960.rcf.bnl.gov") || (machine == "rcas2961.rcf.bnl.gov") || \
+(machine == "rcas2962.rcf.bnl.gov") || (machine == "rcas2963.rcf.bnl.gov") || (machine == "rcas2964.rcf.bnl.gov") || (machine == "rcas2965.rcf.bnl.gov") || \
+(machine == "rcas2966.rcf.bnl.gov") || (machine == "rcas2967.rcf.bnl.gov") || (machine == "rcas2968.rcf.bnl.gov") || (machine == "rcas2969.rcf.bnl.gov") || \
+(machine == "rcas2970.rcf.bnl.gov") || (machine == "rcas2971.rcf.bnl.gov") || (machine == "rcas2972.rcf.bnl.gov") || (machine == "rcas2973.rcf.bnl.gov") || \
+(machine == "rcas2974.rcf.bnl.gov") || (machine == "rcas2975.rcf.bnl.gov") || (machine == "rcas2976.rcf.bnl.gov") || (machine == "rcas2977.rcf.bnl.gov") || \
+(machine == "rcas2978.rcf.bnl.gov") || (machine == "rcas2979.rcf.bnl.gov") || (machine == "rcas2980.rcf.bnl.gov") || (machine == "rcas6335.rcf.bnl.gov") || \
+(machine == "rcas6336.rcf.bnl.gov") || (machine == "rcas6337.rcf.bnl.gov") || (machine == "rcas6338.rcf.bnl.gov") || (machine == "rcas6339.rcf.bnl.gov") || \
+(machine == "rcas6340.rcf.bnl.gov") || (machine == "rcas6341.rcf.bnl.gov") || (machine == "rcas6342.rcf.bnl.gov") || (machine == "rcas6343.rcf.bnl.gov") || \
+(machine == "rcas6344.rcf.bnl.gov") || (machine == "rcas6345.rcf.bnl.gov") || (machine == "rcas6346.rcf.bnl.gov") || (machine == "rcas6347.rcf.bnl.gov") || \
+(machine == "rcas6348.rcf.bnl.gov") || (machine == "rcas6349.rcf.bnl.gov") || (machine == "rcas6350.rcf.bnl.gov") || (machine == "rcas6351.rcf.bnl.gov") || \
+(machine == "rcas6352.rcf.bnl.gov") || (machine == "rcas6353.rcf.bnl.gov") || (machine == "rcas6354.rcf.bnl.gov") || (machine == "rcas6355.rcf.bnl.gov") || \
+(machine == "rcas6356.rcf.bnl.gov") || (machine == "rcas6357.rcf.bnl.gov") || (machine == "rcas6358.rcf.bnl.gov") || (machine == "rcas6359.rcf.bnl.gov") || \
+(machine == "rcas6360.rcf.bnl.gov") || (machine == "rcas6361.rcf.bnl.gov") || (machine == "rcas6362.rcf.bnl.gov") || (machine == "rcas6363.rcf.bnl.gov") || \
+(machine == "rcas6364.rcf.bnl.gov") || (machine == "rcrs6023.rcf.bnl.gov") || (machine == "rcrs6024.rcf.bnl.gov") || (machine == "rcrs6025.rcf.bnl.gov") || \
+(machine == "rcrs6026.rcf.bnl.gov") || (machine == "rcrs6027.rcf.bnl.gov") || (machine == "rcrs6028.rcf.bnl.gov") || (machine == "rcrs6029.rcf.bnl.gov") || \
+(machine == "rcrs6030.rcf.bnl.gov") || (machine == "rcrs6031.rcf.bnl.gov") || (machine == "rcrs6032.rcf.bnl.gov") || (machine == "rcrs6033.rcf.bnl.gov") || \
+(machine == "rcrs6034.rcf.bnl.gov") || (machine == "rcrs6035.rcf.bnl.gov") || (machine == "rcrs6036.rcf.bnl.gov") || (machine == "rcrs6037.rcf.bnl.gov") || \
+(machine == "rcrs6038.rcf.bnl.gov") || (machine == "rcrs6039.rcf.bnl.gov") || (machine == "rcrs6040.rcf.bnl.gov") || (machine == "rcrs6041.rcf.bnl.gov") || \
+(machine == "rcrs6042.rcf.bnl.gov") || (machine == "rcrs6043.rcf.bnl.gov") || (machine == "rcrs6044.rcf.bnl.gov") || (machine == "rcrs6045.rcf.bnl.gov") || \
+(machine == "rcrs6046.rcf.bnl.gov") || (machine == "rcrs6047.rcf.bnl.gov") || (machine == "rcrs6048.rcf.bnl.gov") || (machine == "rcrs6049.rcf.bnl.gov") || \
+(machine == "rcrs6050.rcf.bnl.gov") || (machine == "rcrs6051.rcf.bnl.gov") || (machine == "rcrs6052.rcf.bnl.gov") || (machine == "rcrs6053.rcf.bnl.gov") || \
+(machine == "rcrs6054.rcf.bnl.gov") || (machine == "rcrs6055.rcf.bnl.gov") || (machine == "rcrs6056.rcf.bnl.gov") || (machine == "rcrs6057.rcf.bnl.gov") || \
+(machine == "rcrs6058.rcf.bnl.gov") || (machine == "rcrs6059.rcf.bnl.gov") || (machine == "rcrs6060.rcf.bnl.gov") || (machine == "rcrs6061.rcf.bnl.gov") || \
+(machine == "rcrs6062.rcf.bnl.gov") || (machine == "rcrs6063.rcf.bnl.gov") || (machine == "rcrs6064.rcf.bnl.gov") || (machine == "rcrs6065.rcf.bnl.gov") || \
+(machine == "rcrs6066.rcf.bnl.gov") || (machine == "rcrs6067.rcf.bnl.gov") || (machine == "rcrs6068.rcf.bnl.gov") || (machine == "rcrs6069.rcf.bnl.gov") || \
+(machine == "rcrs6070.rcf.bnl.gov") || (machine == "rcrs6071.rcf.bnl.gov") || (machine == "rcrs6072.rcf.bnl.gov") ) </string>  
+                    </void> <!-- TotalSlots == 40 is used to select nodes for the same type -->
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+            
 
 
 <!-- ..............................................................End of local short, medium, long local BNL dispachers ...............................................................-->
@@ -1609,7 +1837,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")  </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Experiment == "star")  </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1632,7 +1860,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")  </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1654,7 +1882,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;long&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (TotalSlots == 40  &amp;&amp; CPU_Experiment == "star") </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star") </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1706,7 +1934,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;crs&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(TotalSlots == 40  &amp;&amp; CPU_Experiment == "star") </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Experiment == "star") </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1730,7 +1958,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 +Job_Type       = &quot;eval&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type == "cas") &amp;&amp; (TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")  </string>  </void>
+                    <void method="addRequirement"><string>(CPU_Type == "cas") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1773,7 +2001,7 @@ Priority        = +10
  <string>+Experiment     = &quot;general&quot;                              
 +Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
-PeriodicRemove  = (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10))  || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)</string></void>
+PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10))  || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)</string></void>
                     <!--
                     Priority        = +10  
                     <void property="defaultStorageSpace">
@@ -1784,7 +2012,7 @@ PeriodicRemove  = (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate 
                     <void property="msBtwnSuccess">  <int>1000</int>                  </void>
                     <void property="application">    <object idref="CSHApplication"/> </void>
                     -->
-                    <void method="addRequirement"><string> ((TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")) </string>  </void>
+                    <void method="addRequirement"><string> ((CPU_Experiment == "star") || ( CPU_Experiment == "phenix" )) </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -1827,7 +2055,7 @@ Priority       = +10
  <string>+Experiment     = &quot;star&quot;
 +Job_Type       = &quot;cas&quot;
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string> </void>
-                    <void method="addRequirement"><string>(TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")</string>  </void>
+                    <void method="addRequirement"><string>(CPU_Experiment == "star")</string>  </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
                     <void property="maxAttempts">    <int>1</int>                    </void>
                     <void property="msBtwnFailure">  <int>10000</int>                </void>
@@ -1865,7 +2093,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 <string>+Experiment     = &quot;star&quot;
 +Job_Type       = &quot;cas&quot;
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)  || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string> </void>
-                        <void method="addRequirement"><string>(CPU_Type == "crs") &amp;&amp; (TotalSlots == 40  &amp;&amp; CPU_Experiment == "star")  &amp;&amp; (Arch == "X86_64")  </string>  </void>
+                        <void method="addRequirement"><string>(CPU_Type == "crs") &amp;&amp; (CPU_Experiment == "star")  &amp;&amp; (Arch == "X86_64")  </string>  </void>
                         <void property="defaultStorageSpace"><int>-1</int></void>
                         <void property="maxAttempts">    <int>1</int>                    </void>
                         <void property="msBtwnFailure">  <int>10000</int>                 </void>
@@ -1892,10 +2120,86 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                             <void property="application"><object idref="CSHApplication"/></void>
                         </object>
                   </void>
-              
-              
-              
+                  
+                  
+                  
+                <void method="add">
+                    <object id="BNLOnline_condorG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                        <void property="submitCommand"><string>condor_submit</string></void>
+                        <void property="universe"><string>grid</string></void>
+                        <void property="grid_resource"><string>condor stargw3.starp.bnl.gov stargw3.starp.bnl.gov:9619</string></void>
+                        <void property="useRSL"><boolean>false</boolean></void>
+                        <void property="condorGOptions"><string>use_x509userproxy = true</string></void> 
+                        <void property="defaultStorageSpace"><int>-1</int></void>
+                        <void property="maxAttempts"><int>1</int></void>
+                        <void property="msBtwnFailure"><int>10000</int></void>
+                        <void property="msBtwnSuccess"><int>1000</int></void>
+                        <void property="queueName"><string>medium</string></void>
+                        <void property="transferExecutable"><boolean>true</boolean></void>
+                        <void property="application"><object idref="CSHApplication"/></void>
+                    </object>
+                </void>
+                
+                
+                <void method="add">
+                    <object id="JINR_condorG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                        <void property="submitCommand"><string>condor_submit</string></void>
+                        <void property="universe"><string>grid</string></void>
+                        <!--<void property="grid_resource"><string>cream lcgce12.jinr.ru:8443/cream-pbs-star</string></void> --> <!--Note: jinr has another GK on lcgce21.jinr.ru:8443 -->
+                        <void property="grid_resource"><string>condor osgce.jinr.ru osgce.jinr.ru:9619</string></void>
+                        <void property="useRSL"><boolean>false</boolean></void>
+                        <void property="condorGOptions"><string>use_x509userproxy = true
+delegate_job_GSI_credentials_lifetime = 864000</string> <!--10 day proxy-->
+                        </void>
+                        <void property="transfer_input_files"><boolean>false</boolean></void> <!--Test moving the input file with condor -->
+                        <void property="defaultStorageSpace"><int>-1</int></void>
+                        <void property="maxAttempts"><int>1</int></void>
+                        <void property="msBtwnFailure"><int>10000</int></void>
+                        <void property="msBtwnSuccess"><int>30</int></void> 
+                        <!--<void property="msBtwnSuccess"><int>1000</int></void>-->
+                        <void property="queueName"><string>medium</string></void>
+                        <void property="transferExecutable"><boolean>true</boolean></void>
+                        <void property="application"><object idref="CSHApplication_LCG"/></void>
+                    </object>
+                </void>
+            
+                              
                   <void method="add">
+                      <object id="PDSF_Local_slurm_shared_chos_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.slurm.SLURMArrayDispatcher">
+                          <void property="submitCommand"><string>sbatch</string></void>
+                          <void property="maxAttempts"><int>5</int></void>
+                          <void property="msBtwnFailure"><int>5000</int></void>
+                          <void property="msBtwnSuccess"><int>0</int></void>
+                          <void property="maxElapseTime"> <int>30000</int></void>
+                          <void property="application"><object idref="CSHApplication"/></void>
+                          <void property="pool"><string>shared-chos</string></void>
+                      </object>
+                  </void>
+                      
+                   <void method="add">    
+                      <object id="PDSF_Local_slurm_shared_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.slurm.SLURMArrayDispatcher">
+                          <void property="submitCommand"><string>sbatch</string></void>
+                          <void property="maxAttempts"><int>5</int></void>
+                          <void property="msBtwnFailure"><int>5000</int></void>
+                          <void property="msBtwnSuccess"><int>0</int></void>
+                          <void property="maxElapseTime"> <int>30000</int></void>
+                          <void property="application"><object idref="CSHApplication"/></void>
+                          <void property="pool"><string>shared</string></void>
+                      </object>
+                   </void>
+
+                   <void method="add">  
+                      <object id="PDSF_Local_SGE_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.sge.SGEArrayDispatcher">
+                          <void property="submitCommand"><string>qsub</string></void>
+                          <void property="maxAttempts"><int>5</int></void>
+                          <void property="msBtwnFailure"><int>5000</int></void>
+                          <void property="msBtwnSuccess"><int>0</int></void>
+                          <void property="maxElapseTime"> <int>30000</int></void>
+                          <void property="application"><object idref="CSHApplication"/></void>
+                      </object>
+                   </void>  
+                      
+                      <!--
                       <object id="PDSF_Local_SGE_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.sge.SGEDispatcher">
                             <void property="submitCommand"><string>qsub</string></void>
                             <void property="qsubOptions"><string/></void>
@@ -1953,13 +2257,25 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                             
                             
                         </object> 
+                        
                   </void>
-                  
+                  -->
                   
                   <void method="add">
                       <object id="PDSF_Grid_SGE_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
                         <void property="useRSL"><boolean>false</boolean></void>
                         <void property="submitCommand"><string>condor_submit</string></void>
+                        
+                        <void property="universe"><string>grid</string></void>
+                        <void property="grid_resource"><string>condor mpdsfgrid01.nersc.gov mpdsfgrid01.nersc.gov:9619</string></void>
+                        <void property="useRSL"><boolean>false</boolean></void>
+                        <void property="condorGOptions"><string>use_x509userproxy = true
+stream_output = false
+stream_error = false
+                        </string>
+                        </void> 
+                        <void property="endingLine"><string>queue 1</string></void> 
+                        
                         <void property="bsubOptions"><string/></void>
                         <void property="maxAttempts"><int>1</int></void>
                         <void property="msBtwnFailure"><int>10000</int></void>
@@ -1967,8 +2283,6 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                         <void property="queueName"><string>medium</string></void>
                         <void property="transferExecutable"><boolean>true</boolean></void>
                         <void property="application"><object idref="CSHApplication"/></void>
-                        <void property="CondorGOptions"><string>stream_output = false
-stream_error = false </string></void>
                        <!--<void method="addRequirement"><string></string> </void>-->
                        <void property="defaultStorageSpace"><int>-1</int></void>
                         <void property="resourceStrategy">
@@ -2192,9 +2506,7 @@ when_to_transfer_output = ON_EXIT</string>
                 </object>
             </void>
             
-            
 
-            
             <void method="add">
                 <object id="Generic_condorG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
                     <void property="useRSL"><boolean>true</boolean></void>
@@ -2368,13 +2680,23 @@ when_to_transfer_output = ON_EXIT</string>
 
 
 
-                              <!-- ******** CONDOR BNL high batch queue (local) ******** -->
-                             <void method="addAccessMethod">
+                            <!-- ******** CONDOR BNL high batch queue (local) ******** -->
+                            <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_condor_high_queue"/> </void>
                                         <void property="dispatcher"> <object idref="condorBNL_high_Dispatcher"/> </void>
                                     </object>
-                             </void>
+                            </void>
+                            
+                            
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_benchmark_queue"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_benchmark_Dispatcher"/> </void>
+                                    </object>
+                            </void>
+                             
+                             
 
                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of basic user access mothods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
@@ -2709,7 +3031,7 @@ ls -al
                     <void property="canonicalName"><string>lbl</string></void>
                     
                     <!--/////////////////////////////////////////////////////////-->
-                    <void  method="setInformationService"> 
+                    <!--<void  method="setInformationService">-->
                     <!-- <object id="pdsf_IS" class="gov.bnl.star.offline.scheduler.informationService.GridCat">
                                  <void property="siteID"><string>NERSC-PDSF</string></void> 
                                  <void property="service"><string>http://osg-cat.grid.iu.edu/services.php</string></void>
@@ -2718,15 +3040,17 @@ ls -al
                                   <void property="siteID"><string>NERSC-PDSF</string></void>
                                   <void property="service"><string>http://vors.grid.iu.edu</string></void>
                         </object> -->
+                        <!--
                         <object class="gov.bnl.star.offline.scheduler.informationService.DBII">
                                 <void property="siteID"><string>NERSC-PDSF</string></void>
                                 <void property="service"><string>ldap://is.grid.iu.edu:2170</string></void>
                         </object>
-                    </void>
+                       
+                    </void> -->
                     <!--/////////////////////////////////////////////////////////-->
                     
                     
-                    <void  method="AddFileTransferGatekeeper">
+                    <void method="AddFileTransferGatekeeper">
                         <object id="pdsf_AddFileTransferGatekeeper"  class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
                             <void property="name"><string>pdsfgrid.nersc.gov</string></void> 
                             <!--<void property="name"><string>pdsfgrid1.nersc.gov</string></void> -->
@@ -2753,6 +3077,7 @@ ls -al
 
                    <void method="addAccessPoint">
                         <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+                            
                             <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void property="dispatcher">    <object idref="PDSF_Local_SGE_Dispatcher"/>      </void>
@@ -2761,6 +3086,23 @@ ls -al
                                         <void method="addQueue">        <object idref="PDSF_SGE_Queue"/>                 </void>
                                    </object>
                             </void>
+                            
+                            <void method="addAccessMethod">
+                                <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                    <void property="dispatcher">    <object idref="PDSF_Local_slurm_shared_chos_Dispatcher"/> </void>
+                                    <void property="batchSystem">   <string>SLURM</string>                                </void> 
+                                    <void method="addQueue"> <object idref="PDSF_SLURM_shared_chos_Queue"/> </void>
+                                </object>
+                            </void> 
+                            
+                            <void method="addAccessMethod">
+                                <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                    <void property="dispatcher">    <object idref="PDSF_Local_slurm_shared_Dispatcher"/> </void>
+                                    <void property="batchSystem">   <string>SLURM</string>                                </void> 
+                                    <void method="addQueue"> <object idref="PDSF_SLURM_shared_Queue"/> </void>
+                                </object>
+                            </void> 
+                            
                         </object>
                     </void>
                       
@@ -2768,26 +3110,27 @@ ls -al
                     <void method="addAccessPoint">
                           <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
                             <void property="name"><string>pdsfgrid.nersc.gov</string></void>
+                            
                             <void method="addAccessMethod">
-                                
                                 <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                     <void property="dispatcher">    <object idref="PDSF_Grid_SGE_Dispatcher"/> </void>
                                     <void property="batchSystem">   <string>sge</string>                                </void> 
                                     <void method="addQueue"> <object idref="PDSF_SGE_Queue"/> </void>
                                 </object>
-                            
                             </void>  
-                            <void method="addAccessMethod">
-                               
+                            
+
+                            
+                            <void method="addAccessMethod">   
                                <!-- Test access point for submitting to the sge queue "test.q" -->
                                <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                     <void property="dispatcher">    <object idref="PDSF_Grid_SGE_RSL_Dispatcher"/> </void>
                                     <void property="batchSystem">   <string>sge</string>                                </void> 
                                     <void method="addQueue"> <object idref="PDSF_SGE_testQ"/> </void>
                                </object>
-                               
                             </void>          
-                         </object>
+                         
+                          </object>
                    </void> 
                    
                    
@@ -2852,8 +3195,8 @@ ls -al
                         <object id="PDSFProgramLocations" class="java.util.Hashtable">
                             <void method="put">
                                 <string>$SCRATCH</string>
-                                <string>$SCRATCH</string> <!--<string>$SCRATCH/$USER/$JOBID</string>--> <!-- At PDSF $SCRATCH will exist for local jobs -->
-
+                                <string>$SCRATCH</string>
+                                <!--<string>$SLURM_TMP</string>--> 
                             </void>
                             <void method="put">
                               <string>ls</string>
@@ -2885,7 +3228,8 @@ ls -al
                     </void>
                     
                     <void property="defaultPolicy"> 
-                        <object idref="pdsf_sge"/>
+                        <!--<object idref="pdsf_sge"/>-->
+                        <object idref="pdsf_slurm_chos"/>
                     </void>
                           
             
@@ -3758,19 +4102,18 @@ end
                         </void>
                    </object>
                </void>    
-               
+   
                <void method="addAccessPoint">   
                    <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">                   
                         <void method="addAccessMethod">
                             <object class="gov.bnl.star.offline.scheduler.AccessMethod">    
-                                <void property="dispatcher">       <object idref="Generic_Fast_condor_Dispatcher"/>     </void>  <!--SHould chaneg to generic name-->
+                                <void property="dispatcher">       <object idref="Generic_Fast_condor_Dispatcher"/>   </void>  <!--SHould chaneg to generic name-->
                                 <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
                                 <void method="addQueue">           <object idref="kisti_condor_Queue"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
                             </object>
                         </void>
-                    </object>
-                   
-                </void>
+                    </object>    
+               </void>
                 
 
                 <void property="logConf">
@@ -3827,11 +4170,106 @@ end
             </object>
         </void>
        <!-- ***************************************** End of KISTI test block ***************************************** --> 
+       
+              <!-- ************************************************* Start of JINR test block ***************************************************** --> 
+
+            <void method="add">
+            <object class="gov.bnl.star.offline.scheduler.Site">
+                <void property="siteName"><string>jinr.ru</string></void>
+
+
+
+                <void method="addAccessPoint">
+                   <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                        <void property="name"><string>osgce.jinr.ru</string></void>
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                <void property="dispatcher">    <object idref="JINR_condorG_Dispatcher"/> </void>  <!--This seem to work fine for now, but the name is wrong -->
+                                <void property="batchSystem">   <string>pbs</string>      </void> 
+                                <void method="addQueue">        <object idref="jinr_pbs_Queue"/>  </void>       
+                            </object>
+                        </void>
+                   </object>
+               </void>    
+   
+               <void method="addAccessPoint">   
+                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">                   
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">    
+                                <void property="dispatcher">       <object idref="Generic_Fast_condor_Dispatcher"/>   </void>  <!--SHould chaneg to generic name-->
+                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
+                                <void method="addQueue">           <object idref="kisti_condor_Queue"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
+                            </object>
+                        </void>
+                    </object>    
+               </void>
+                
+
+                <void property="logConf">
+                    <object class="java.util.Hashtable">
+                        <void method="put">
+                          <string>directory</string>
+                          <!--<string>/data/r20g/log</string>-->
+                          <string>./</string>
+                        </void>
+                        <void method="put">
+                          <string>level</string>
+                          <string>INFO</string> <!-- DEBUG INFO WARN ERROR FATAL -->
+                        </void>
+                    </object>
+                </void>
+
+
+                <void property="programLocations">
+                    <object class="java.util.Hashtable">
+                        <void method="put">
+                            <string>$SCRATCH</string>
+                            <string>$TMPDIR</string>
+                        </void>
+                        <void method="put">
+                          <string>unzip</string>
+                          <string>/usr/bin/unzip</string>
+                        </void>  
+                        <void method="put">
+                          <string>ls</string>
+                          <string>/bin/ls</string>
+                        </void>
+                        <void method="put">
+                          <string>csh</string>
+                          <string>/bin/csh</string>
+                        </void>
+                        
+                        <void method="put">
+                          <string>pacman_setup_script</string>
+                          <string>$OSG_APP/star/pacman-3.18.3/setup.csh</string>
+                        </void>
+                        <void method="put">
+                          <string>pacman_caches</string>
+                          <string>gsiftp://stargrid02.rcf.bnl.gov/afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES</string>
+                        </void>
+  
+                    </object>
+                </void>
+
+                
+               <void property="defaultPolicy">
+                   <object idref="kisti_condor"/>
+               </void>
+
+            </object>
+        </void>
+       <!-- ***************************************** End of KISTI test block ***************************************** --> 
+       
+       
+       
+       
+       
        <!-- ************************************************* Start of STAR ONLINE block ***************************************************** --> 
 
             <void method="add">
             <object class="gov.bnl.star.offline.scheduler.Site">
-                <void property="siteName"><string>star.bnl.gov</string></void>
+               <!--<void property="siteName"><string>star.bnl.gov</string></void> Moved to starp network-->
+               <void property="siteName"><string>starp.bnl.gov</string></void>
                
                <void method="addAccessPoint">   
                    <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">                   
@@ -3843,8 +4281,21 @@ end
                             </object>
                         </void>
                     </object>
-                   
                 </void>
+                
+                
+                <void method="addAccessPoint">
+                   <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                        <void property="name"><string>stargw3.starp.bnl.gov</string></void><!--Not used becuase of custom grid_resource-->
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                <void property="dispatcher">    <object idref="BNLOnline_condorG_Dispatcher"/> </void>  <!--This seem to work fine for now, but the name is wrong -->
+                                <void property="batchSystem">   <string>condor</string></void> <!--Not used becuase of custom grid_resource-->
+                                <void method="addQueue">        <object idref="BNL_condor_online_quick"/>  </void>       
+                            </object>
+                        </void>
+                   </object>
+               </void>    
                 
 
                 <void property="logConf">

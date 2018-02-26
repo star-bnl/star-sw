@@ -415,6 +415,7 @@ void LanaTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out 
       }
 #endif
     }
+#if 1
     for (Int_t i = 0; i <  event->GetNhit(); i++) {
       Hit *hit = (Hit *) event->Hits()->UncheckedAt(i);
       Int_t io = 0; if (hit->row    > 13) io = 1;
@@ -422,8 +423,9 @@ void LanaTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out 
       Int_t we = 0; if (hit->sector > 12) we = 1;
       dMembraneY[io][we][0]->Fill(hit->xyz.x(),hit->xyzTpcL.z());
       dMembraneY[io][we][1]->Fill(hit->xyz.y(),hit->xyzTpcL.z());
-      if (TMath::Abs(TMath::Abs(hit->xyzTpcL.z())-205) < 25 && hit->hit.adc() > 0) memAdc->Fill(2.*we + io + 1., TMath::Log(hit->hit.adc()));
+      if (TMath::Abs(TMath::Abs(hit->xyzTpcL.z())-205) < 25 && hit->adc > 0) memAdc->Fill(2.*we + io + 1., TMath::Log(hit->adc));
     }
+#endif
     Double_t dt =  event->GetHeader()->fDate%1000000 + ((Double_t) event->GetHeader()->fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;
     if (dt < DT) {

@@ -1153,15 +1153,15 @@ Bfc_st BFC[] = { // standard chains
    "B2017a,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,              "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2018"  ,"","","r2018,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-   ,                                                     "Production chain for run 2017 data (tpc)",kFALSE},
+   ,                                                     "Production chain for run 2018 data (tpc)",kFALSE},
   {"P2018","" ,"",
    "B2018,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                 "","","Production chain for year 2018 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2019"  ,"","","r2019,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-   ,                                                     "Production chain for run 2017 data (tpc)",kFALSE},
+   ,                                                     "Production chain for run 2019 data (tpc)",kFALSE},
   {"P2019","" ,"",
    "B2019,StiCA,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
-   ,                 "","","Production chain for year 2018 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   ,                 "","","Production chain for year 2019 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},

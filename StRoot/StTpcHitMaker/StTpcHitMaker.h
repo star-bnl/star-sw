@@ -141,6 +141,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH1F        *fSectCounts;
   Int_t    NoRows;
   Int_t    NoInnerPadRows;
+  Int_t    mRowOffSet4iTPC;
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);

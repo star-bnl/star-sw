@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.dev2019.C,v 1.1 2017/02/07 16:58:36 fisyak Exp $
-// $Log: TpcResponseSimulator.dev2019.C,v $
+// $Id: TpcResponseSimulator.y2019.C,v 1.1 2018/02/16 20:56:50 perev Exp $
+// $Log: TpcResponseSimulator.y2019.C,v $
+// Revision 1.1  2018/02/16 20:56:50  perev
+// iTPC
+//
 // Revision 1.1  2017/02/07 16:58:36  fisyak
 // Clean up
 //

@@ -105,7 +105,7 @@ private:
     UInt_t  mMap1;
     UInt_t  mMap2;
     
-    ClassDef(StTrackTopologyMap,1)
+    ClassDef(StTrackTopologyMap,2)
 };
 
 ostream& operator<< (ostream&, const StTrackTopologyMap&);

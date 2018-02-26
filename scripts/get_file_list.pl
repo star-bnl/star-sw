@@ -1,6 +1,7 @@
-#!/usr/bin/env perl
+#!/opt/star/bin/perl
+##!/usr/bin/env perl
 ##!/opt/star/rh64_gcc482/bin/perl
-##!/opt/star/bin/perl
+#
 
 #
 # This is the command line utility, which allows access to the data in the
@@ -29,7 +30,7 @@
 use lib "/afs/rhic.bnl.gov/star/packages/.DEV2/scripts";
 use strict;
 use FileCatalog;
-
+use XML::Simple qw(:strict);
 my @output;
 my $i;
 my $count;
