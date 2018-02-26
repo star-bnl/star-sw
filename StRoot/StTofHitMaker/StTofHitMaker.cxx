@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.5 2009/06/09 19:45:36 jeromel Exp $
+ * $Id: StTofHitMaker.cxx,v 1.6 2018/02/26 23:13:20 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -10,48 +10,6 @@
  * Input:  RTS_Reader
  * Output: TOF data
  *
- ***************************************************************************
- * Add UnpackTofRawData() to process TOF raw data.
- * Add fillTofDataCollection to fill TOF data in StEvent Tofcollection.
- * Revision 1.7, 02/09/2008, Jing liu
- *
- * $Log: StTofHitMaker.cxx,v $
- * Revision 1.5  2009/06/09 19:45:36  jeromel
- * Changes for BT#1428
- *
- * Revision 1.4  2009/06/08 17:56:30  geurts
- * prevent a chain from running this maker on Run9+ data
- *
- * Revision 1.3  2008/12/15 21:27:31  fine
- * Prepare the code for the new DAQ_READER from Tonko
- *
- * Revision 1.2  2008/12/02 23:58:44  fine
- * Adjust the inteface to accnt the new base class
- *
- * Revision 1.1  2008/03/11 19:16:26  dongx
- * first release. TOF offline reader for Run8+
- *
- * Revision 1.6  2008/02/01 01:31:07  fine
- * Synch MAker with EVP_READER
- *
- * Revision 1.5  2008/01/30 20:04:35  fine
- * introdcue the test and tofCollection
- *
- * Revision 1.4  2008/01/30 14:01:36  fine
- * Replicate the tofReader.C code
- *
- * Revision 1.3  2008/01/30 04:38:49  fine
- * Add RTS_READER parameters follow the Jeff's EVP_READER impl
- *
- * Revision 1.2  2008/01/29 15:56:48  fine
- * remove the redundant dependency
- *
- * Revision 1.1  2008/01/25 22:30:24  fine
- * Add the base makr for all RTS-based makers and template for the TofHitMaker
- *
- * Revision 1.4  2008/01/12 00:22:01  fine
- * Update the test macro
-  *
  **************************************************************************/
 #include "StTofHitMaker.h"
 
@@ -334,3 +292,49 @@ void StTofHitMaker::fillStEvent() {
     LOG_INFO << " - StEvent tofRawDataCollection does not Exist" << endm;
   }
 }
+
+/***************************************************************************
+ * Add UnpackTofRawData() to process TOF raw data.
+ * Add fillTofDataCollection to fill TOF data in StEvent Tofcollection.
+ * Revision 1.7, 02/09/2008, Jing liu
+ *
+ * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.6  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.5  2009/06/09 19:45:36  jeromel
+ * Changes for BT#1428
+ *
+ * Revision 1.4  2009/06/08 17:56:30  geurts
+ * prevent a chain from running this maker on Run9+ data
+ *
+ * Revision 1.3  2008/12/15 21:27:31  fine
+ * Prepare the code for the new DAQ_READER from Tonko
+ *
+ * Revision 1.2  2008/12/02 23:58:44  fine
+ * Adjust the inteface to accnt the new base class
+ *
+ * Revision 1.1  2008/03/11 19:16:26  dongx
+ * first release. TOF offline reader for Run8+
+ *
+ * Revision 1.6  2008/02/01 01:31:07  fine
+ * Synch MAker with EVP_READER
+ *
+ * Revision 1.5  2008/01/30 20:04:35  fine
+ * introdcue the test and tofCollection
+ *
+ * Revision 1.4  2008/01/30 14:01:36  fine
+ * Replicate the tofReader.C code
+ *
+ * Revision 1.3  2008/01/30 04:38:49  fine
+ * Add RTS_READER parameters follow the Jeff's EVP_READER impl
+ *
+ * Revision 1.2  2008/01/29 15:56:48  fine
+ * remove the redundant dependency
+ *
+ * Revision 1.1  2008/01/25 22:30:24  fine
+ * Add the base makr for all RTS-based makers and template for the TofHitMaker
+ *
+ * Revision 1.4  2008/01/12 00:22:01  fine
+ * Update the test macro
+  */

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.22 2012/12/14 06:35:48 geurts Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.23 2018/02/26 23:13:19 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -9,81 +9,6 @@
  *              (start timing) , TOFp and TOFr
  *              - store into StTofHit
  *              - if no valid calibration parameters, store matched hits
- *
- *****************************************************************
- *
- * $Log: StTofCalibMaker.cxx,v $
- * Revision 1.22  2012/12/14 06:35:48  geurts
- * Changed global database calls to direct table access and/or removed deprecated database access code.
- *
- * Revision 1.21  2011/05/27 18:25:32  genevb
- * Propagate StTrack::key => Int_t to other codes
- *
- * Revision 1.20  2008/09/03 22:30:43  dongx
- * mTStart added, applicable for Run8
- *
- * Revision 1.19  2008/07/30 20:03:03  dongx
- * mBeamLine initialized in constructor to avoid null pointer when no calibration tables
- *
- * Revision 1.18  2008/07/22 00:16:47  dongx
- * initialization added for global variables in StTofCollection in each event
- *
- * Revision 1.17  2008/06/25 21:45:29  dongx
- * Reset time values when tot/z is out of range
- *
- * Revision 1.16  2008/06/24 21:33:37  dongx
- * Added the filling of vzvpd into StTofCollection
- *
- * Revision 1.15  2008/06/17 17:49:19  dongx
- * Update for Run 8 - first release
- *
- * Revision 1.14  2007/11/30 17:11:23  dongx
- * removed tdcId in tofZCorr for tofZCorr.tdcId is not defined in db, and removed from idl definition
- *
- * Revision 1.13  2007/03/13 15:09:10  dongx
- * Remove breaking of failure on number of return rows during db I/O for tofTotCorr and tofZCorr
- *
- * Revision 1.12  2007/03/05 18:51:02  dongx
- * updated for Run V CuCu calibration
- *  - INL correction moved in this maker
- *  - Tot Corr and Z Corr use new tables in data base
- *  - pVPD calibrated information cannot be fully stored within current infrastructure, need update on TofCollection. Configurations better than (1,1) are all selected.
- *
- * Revision 1.11  2005/04/12 17:33:47  dongx
- * update for year 5 data. not completed, leave as empty now.
- *
- * Revision 1.10  2004/09/20 16:07:35  dongx
- * correct the nsigma in StTofPidTraits
- *
- * Revision 1.9  2004/08/13 00:15:03  dongx
- * correct the nSigmaXXX calculation
- *
- * Revision 1.8  2004/08/11 19:35:40  dongx
- * loose the ADC cut of tofp
- *
- * Revision 1.7  2004/08/11 18:58:40  dongx
- * missing nSigmaXX in tofHit implemented
- *
- * Revision 1.6  2004/07/24 03:33:56  dongx
- * Tofp slewing function changed back
- *
- * Revision 1.5  2004/07/16 18:28:17  dongx
- * -Tofp Slewing function changed in AuAu200 GeV Run IV
- * -Include those runs with eastern PVPD dead
- *
- * Revision 1.4  2004/07/16 15:06:08  dongx
- * Z correction function separated for TOFp and TOFr.
- * Use a new one for RunIV AuAu 200GeV runs
- *
- * Revision 1.3  2004/07/15 18:11:22  dongx
- *  -introduce two new tables in dbase: tofAdcRange & tofResolution
- *  -continue update on writing StTofPidTraits
- *
- * Revision 1.2  2004/07/08 18:26:09  dongx
- * filling StTofPidTraits added (not completed, null nsigmaXXX now)
- *
- * Revision 1.1  2004/07/01 17:23:48  dongx
- * first release
  *
  *
  *******************************************************************/
@@ -2048,3 +1973,81 @@ Double_t StTofCalibMaker::GetINLcorr(const int edgeflag,const int tdcchan,const 
   return mINLtable[iboard][itdc][bin];
 }
 
+/*****************************************************************
+ *
+ * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.23  2018/02/26 23:13:19  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.22  2012/12/14 06:35:48  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
+ * Revision 1.21  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
+ * Revision 1.20  2008/09/03 22:30:43  dongx
+ * mTStart added, applicable for Run8
+ *
+ * Revision 1.19  2008/07/30 20:03:03  dongx
+ * mBeamLine initialized in constructor to avoid null pointer when no calibration tables
+ *
+ * Revision 1.18  2008/07/22 00:16:47  dongx
+ * initialization added for global variables in StTofCollection in each event
+ *
+ * Revision 1.17  2008/06/25 21:45:29  dongx
+ * Reset time values when tot/z is out of range
+ *
+ * Revision 1.16  2008/06/24 21:33:37  dongx
+ * Added the filling of vzvpd into StTofCollection
+ *
+ * Revision 1.15  2008/06/17 17:49:19  dongx
+ * Update for Run 8 - first release
+ *
+ * Revision 1.14  2007/11/30 17:11:23  dongx
+ * removed tdcId in tofZCorr for tofZCorr.tdcId is not defined in db, and removed from idl definition
+ *
+ * Revision 1.13  2007/03/13 15:09:10  dongx
+ * Remove breaking of failure on number of return rows during db I/O for tofTotCorr and tofZCorr
+ *
+ * Revision 1.12  2007/03/05 18:51:02  dongx
+ * updated for Run V CuCu calibration
+ *  - INL correction moved in this maker
+ *  - Tot Corr and Z Corr use new tables in data base
+ *  - pVPD calibrated information cannot be fully stored within current infrastructure, need update on TofCollection. Configurations better than (1,1) are all selected.
+ *
+ * Revision 1.11  2005/04/12 17:33:47  dongx
+ * update for year 5 data. not completed, leave as empty now.
+ *
+ * Revision 1.10  2004/09/20 16:07:35  dongx
+ * correct the nsigma in StTofPidTraits
+ *
+ * Revision 1.9  2004/08/13 00:15:03  dongx
+ * correct the nSigmaXXX calculation
+ *
+ * Revision 1.8  2004/08/11 19:35:40  dongx
+ * loose the ADC cut of tofp
+ *
+ * Revision 1.7  2004/08/11 18:58:40  dongx
+ * missing nSigmaXX in tofHit implemented
+ *
+ * Revision 1.6  2004/07/24 03:33:56  dongx
+ * Tofp slewing function changed back
+ *
+ * Revision 1.5  2004/07/16 18:28:17  dongx
+ * -Tofp Slewing function changed in AuAu200 GeV Run IV
+ * -Include those runs with eastern PVPD dead
+ *
+ * Revision 1.4  2004/07/16 15:06:08  dongx
+ * Z correction function separated for TOFp and TOFr.
+ * Use a new one for RunIV AuAu 200GeV runs
+ *
+ * Revision 1.3  2004/07/15 18:11:22  dongx
+ *  -introduce two new tables in dbase: tofAdcRange & tofResolution
+ *  -continue update on writing StTofPidTraits
+ *
+ * Revision 1.2  2004/07/08 18:26:09  dongx
+ * filling StTofPidTraits added (not completed, null nsigmaXXX now)
+ *
+ * Revision 1.1  2004/07/01 17:23:48  dongx
+ * first release
+ */

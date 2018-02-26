@@ -1,36 +1,12 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.6 2007/04/17 23:01:28 dongx Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.7 2018/02/26 23:13:20 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
  *
  * Description: Maker fills TOFp Tree from StTofCollection
  *             
- ***************************************************************************
- *
- * $Log: StTofpNtupleMaker.cxx,v $
- * Revision 1.6  2007/04/17 23:01:28  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.5  2004/04/10 04:36:25  dongx
- * additional update for AdcLoRes in ntuple
- *
- * Revision 1.4  2004/04/09 19:26:25  dongx
- * Add some missing updates for year4, add AdcLoRes in ntuple
- *
- * Revision 1.3  2004/04/01 19:19:00  dongx
- * update for year4 run
- *
- * Revision 1.2  2003/12/04 06:54:08  geurts
- * introduced variables relevant to TOFp flow analysis
- *  * trackId, px and py
- *  * xvtx and yvtx
- *
- * Revision 1.1  2003/08/07 23:55:47  geurts
- * first release
- *
- *
  **************************************************************************/
 #include <iostream>
 #include "StEventTypes.h"
@@ -433,3 +409,30 @@ void StTofpNtupleMaker::bookNtuples(){
 
 
 //---------------------------------------------------------------------------
+/***************************************************************************
+ *
+ * $Log: StTofpNtupleMaker.cxx,v $
+ * Revision 1.7  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.6  2007/04/17 23:01:28  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.5  2004/04/10 04:36:25  dongx
+ * additional update for AdcLoRes in ntuple
+ *
+ * Revision 1.4  2004/04/09 19:26:25  dongx
+ * Add some missing updates for year4, add AdcLoRes in ntuple
+ *
+ * Revision 1.3  2004/04/01 19:19:00  dongx
+ * update for year4 run
+ *
+ * Revision 1.2  2003/12/04 06:54:08  geurts
+ * introduced variables relevant to TOFp flow analysis
+ *  * trackId, px and py
+ *  * xvtx and yvtx
+ *
+ * Revision 1.1  2003/08/07 23:55:47  geurts
+ * first release
+ *
+ */

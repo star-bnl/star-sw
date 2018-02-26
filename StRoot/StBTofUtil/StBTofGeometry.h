@@ -1,55 +1,12 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.10 2017/10/20 17:50:33 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.11 2018/02/26 23:13:19 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
- *
- *******************************************************************
- * $Log: StBTofGeometry.h,v $
- * Revision 1.10  2017/10/20 17:50:33  smirnovd
- * Squashed commit of the following:
- *
- *     StBTof: Remove outdated ClassImp macro
- *
- *     Prefer explicit namespace for std:: names in header files
- *
- *     Removed unnecessary specification of default std::allocator
- *
- * Frank signed-off
- *
- * Revision 1.9  2014/02/06 21:21:13  geurts
- * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
- *
- * Revision 1.8  2011/07/27 16:15:12  geurts
- * Alignment calibration modifications [Patrick Huck]:
- *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
- *  - phi0, x0, z0 made mNTrays dependent
- *
- * Revision 1.7  2010/08/09 18:45:36  geurts
- * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
- *
- * Revision 1.6  2010/07/14 20:35:28  geurts
- * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
- *
- * Revision 1.5  2009/08/25 15:41:29  fine
- * fix the compilation issues under SL5_64_bits  gcc 4.3.2
- *
- * Revision 1.4  2009/03/18 14:18:18  dongx
- * - Optimized the geometry initialization function, reduced the CPU time use
- * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
- *
- * Revision 1.3  2009/02/13 00:00:56  dongx
- * Tray geometry alignment implemented.
- *
- * Revision 1.2  2009/02/12 01:45:57  dongx
- * Clean up
- *
- * Revision 1.1  2009/02/02 21:56:54  dongx
- * first release - Barrel geometry
  *
  *
  *******************************************************************/
@@ -404,3 +361,50 @@ class StBTofGeometry : public TNamed {
 R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 #endif  //end of STBTOFGEOMETRY_H
+
+/*******************************************************************
+ * $Log: StBTofGeometry.h,v $
+ * Revision 1.11  2018/02/26 23:13:19  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.10  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
+ * Revision 1.9  2014/02/06 21:21:13  geurts
+ * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
+ *
+ * Revision 1.8  2011/07/27 16:15:12  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
+ *  - phi0, x0, z0 made mNTrays dependent
+ *
+ * Revision 1.7  2010/08/09 18:45:36  geurts
+ * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
+ *
+ * Revision 1.6  2010/07/14 20:35:28  geurts
+ * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
+ *
+ * Revision 1.5  2009/08/25 15:41:29  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
+ * Revision 1.4  2009/03/18 14:18:18  dongx
+ * - Optimized the geometry initialization function, reduced the CPU time use
+ * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
+ *
+ * Revision 1.3  2009/02/13 00:00:56  dongx
+ * Tray geometry alignment implemented.
+ *
+ * Revision 1.2  2009/02/12 01:45:57  dongx
+ * Clean up
+ *
+ * Revision 1.1  2009/02/02 21:56:54  dongx
+ * first release - Barrel geometry
+ */
