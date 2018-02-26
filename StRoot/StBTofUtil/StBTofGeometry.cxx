@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.29 2018/02/26 23:29:00 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.30 2018/02/26 23:29:05 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -1366,6 +1366,10 @@ const
 Int_t StBTofGeometry::GetTrayIndexAt(const Int_t idx)
 const
 {
+   if (!mTopNode) {
+     return idx + 1;
+   }
+
    //
    //Get the tray index at index of the list
    //
@@ -1409,6 +1413,10 @@ const
 Int_t  StBTofGeometry::GetAtOfTray(const Int_t itray)
 const
 {
+   if (!mTopNode) {
+     return itray - 1;
+   }
+
    //
    //Find out the list-index of StBTofGeomTray with TrayIndex=itray
    // itray is dummy if itray==0 and it is the current single tray
@@ -1800,6 +1808,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.30  2018/02/26 23:29:05  smirnovd
+ * StBTofGeometry: Simple relation between tray index and id
+ *
  * Revision 1.29  2018/02/26 23:29:00  smirnovd
  * StBTofGeometry: Introduced alternative initialization using TGeo geometry
  *
