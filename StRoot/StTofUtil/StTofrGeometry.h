@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.9 2018/02/26 23:13:21 smirnovd Exp $
+ * $Id: StTofrGeometry.h,v 1.10 2018/02/26 23:27:02 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -121,9 +121,7 @@ class StTofrGeomNode : public TNode {
                               Double_t &pathLen, StThreeVectorD &cross);
    virtual void    Print() const;
 
-#ifdef __ROOT__
  C_l_assDef(StTofrGeomNode,2)  //Virutal TNode for TOFr geometry
-#endif
 };
 #endif
 
@@ -200,9 +198,7 @@ class StTofrNode : public TObject {
                               Double_t &pathLen, StThreeVectorD &cross);
    virtual void    Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__
   ClassDef(StTofrNode,2)  //Virutal TNode for TOFr geometry
-#endif
 };
 
 
@@ -253,9 +249,7 @@ class StTofrGeomTray : public StTofrNode {
    StTofrGeomSensor* GetSensor(const Int_t imodule) const;
    virtual void      Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__      
   ClassDef(StTofrGeomTray,1)  //Tray node in TOFr geometry
-#endif
 };
 
 
@@ -310,9 +304,7 @@ class StTofrGeomSensor : public StTofrNode {
    StThreeVectorD    GetCellPosition(const Int_t icell);
    virtual void      Print(Option_t *opt="") const ;
 
-#ifdef __ROOT__      
    ClassDef(StTofrGeomSensor,2)  //Module node in TOFr geometry
-#endif
 };
 
 //_____________________________________________________________________________
@@ -458,9 +450,7 @@ class StTofrGeometry : public TNamed {
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 #endif
-#ifdef __ROOT__      
   ClassDef(StTofrGeometry,2)  //Simplified TOFr Geometry
-#endif
 };
 
 R__EXTERN  StTofrGeometry* gTofrGeometry;
@@ -469,6 +459,9 @@ R__EXTERN  StTofrGeometry* gTofrGeometry;
 
 /*******************************************************************
  * $Log: StTofrGeometry.h,v $
+ * Revision 1.10  2018/02/26 23:27:02  smirnovd
+ * Remove unnecessary guards around ClassDef macro
+ *
  * Revision 1.9  2018/02/26 23:13:21  smirnovd
  * Move embedded CVS log messages to the end of file
  *
