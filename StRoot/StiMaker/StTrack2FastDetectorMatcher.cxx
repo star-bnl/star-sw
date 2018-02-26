@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.10 2018/01/30 13:23:42 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.11 2018/02/26 23:29:33 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -86,7 +86,10 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
 	  mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
 	}
       }
-      if (btofGeom) {btofList  = new StBtofHitList; btofList->initRun();} // dongx
+
+      btofList = new StBtofHitList();
+      btofList->initRun();
+
     } else {
       ctbList   = new StCtbHitList; ctbList->initRun(); 
     }
@@ -304,6 +307,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.11  2018/02/26 23:29:33  smirnovd
+ * StTrack2FastDetectorMatcher: Remove unnecessary test for just created BTof geometry
+ *
  * Revision 2.10  2018/01/30 13:23:42  smirnovd
  * Revert previous changes mistakenly committed to trunk instead of a branch
  *
