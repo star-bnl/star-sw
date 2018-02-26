@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.15 2018/02/26 23:27:53 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.16 2018/02/26 23:28:00 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -50,6 +50,7 @@ class StBTofGeomSensor;
 class StBTofGeometry;
 
 class TVolumeView;
+class TGeoPhysicalNode;
 
 /**
    \class StBTofNode
@@ -79,6 +80,8 @@ class StBTofNode : public TObject {
  protected:
 //    StBTofNode(TVolumeView *element, TVolumeView *top);
     StBTofNode(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
+
+    StBTofNode(const TGeoPhysicalNode& gpNode, const StThreeVectorD& align);
     
     StBTofNode& operator=(const StBTofNode&);
 
@@ -87,7 +90,15 @@ class StBTofNode : public TObject {
 
  public:
     StBTofNode() {}
-   ~StBTofNode() {}
+   ~StBTofNode() {
+     if ( TestBit(kIsOwner) ) {
+       delete fView;
+       delete pView;
+       delete mMasterNode;
+       delete mTVolume;
+       delete mTShape;
+     }
+   }
 
    TVolumeView*    GetfView() const { return fView; }
    TVolumePosition* GetpView() const { return pView; }
@@ -120,6 +131,21 @@ class StBTofNode : public TObject {
    Bool_t          HelixCross(const StHelixD &helix, Double_t &pathLen, StThreeVectorD &cross, Double_t &theta);
    StThreeVectorD* Align() const {return new StThreeVectorD(mAlign[0], mAlign[1], mAlign[2]); }
    virtual void    Print(const Option_t *opt="") const;
+
+ private:
+
+   enum EBTofNodeBits {
+      /// True when this node creates TVolume objects that needs to be deleted and
+      /// pointed to by fView, pView, and mMasterNode
+      kIsOwner = BIT(23)
+   };
+
+   /// A transient TVolume and TShape objects may need to be created for this
+   /// StBTofNode when the input geometry is not given by a TVolume hierarchy
+   /// @{
+   TVolume *mTVolume;  //!
+   TShape  *mTShape;   //!
+   /// @}
 
   ClassDef(StBTofNode,2)  //Virutal TNode for TOF geometry
 };
@@ -357,6 +383,14 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.16  2018/02/26 23:28:00  smirnovd
+ * StBTofNode: New constructor accepting TGeo volume
+ *
+ * The new TGeo constructor creates transient TVolume objects to provide
+ * functionality compatible with the existing TVolume-base geometry
+ * transformations. Unlike previously, the TVolume objects are owned by this class
+ * and so have to be deleted.
+ *
  * Revision 1.15  2018/02/26 23:27:53  smirnovd
  * Accept reference instead of pointer to xyz alignment
  *
