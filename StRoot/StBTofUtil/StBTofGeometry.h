@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.11 2018/02/26 23:13:19 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.12 2018/02/26 23:27:01 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -121,9 +121,7 @@ class StBTofNode : public TObject {
    StThreeVectorD* Align() const {return new StThreeVectorD(mAlign[0], mAlign[1], mAlign[2]); }
    virtual void    Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__
   ClassDef(StBTofNode,2)  //Virutal TNode for TOF geometry
-#endif
 };
 
 
@@ -160,9 +158,7 @@ class StBTofGeomTray : public StBTofNode {
    Int_t             Index() const { return mTrayIndex; }
    virtual void      Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__      
   ClassDef(StBTofGeomTray,1)  //Tray node in TOF geometry
-#endif
 };
 
 
@@ -211,9 +207,7 @@ class StBTofGeomSensor : public StBTofNode {
    StThreeVectorD    GetCellPosition(const Int_t icell);
    virtual void      Print(Option_t *opt="") const ;
 
-#ifdef __ROOT__      
    ClassDef(StBTofGeomSensor,1)  //Module node in TOF geometry
-#endif
 };
 //____________________________________________________________________________
 inline void StBTofGeomSensor::SetIndex(Int_t imod){ mModuleIndex = imod;}
@@ -353,9 +347,7 @@ class StBTofGeometry : public TNamed {
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 #endif
-#ifdef __ROOT__      
   ClassDef(StBTofGeometry,1)  //Simplified TOF Geometry
-#endif
 };
 
 R__EXTERN  StBTofGeometry* gBTofGeometry;
@@ -364,6 +356,9 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.12  2018/02/26 23:27:01  smirnovd
+ * Remove unnecessary guards around ClassDef macro
+ *
  * Revision 1.11  2018/02/26 23:13:19  smirnovd
  * Move embedded CVS log messages to the end of file
  *
