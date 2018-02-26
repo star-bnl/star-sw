@@ -2,7 +2,7 @@ int write_trigger_thresholds(int runNumber = 13078009)
 {
 
   // Load all required libraries
-  gROOT->Load("loadMuDst.C");
+  gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
   gSystem->Load("St_base.so");
   gSystem->Load("libStDb_Tables.so");
@@ -22,7 +22,7 @@ int write_trigger_thresholds(int runNumber = 13078009)
   StDbConfigNode* node = mgr->initConfig("Calibrations_trg");
   StDbTable* dbtable = node->addDbTable("triggerThreshold");
   // beginTime timestamp in MySQL format: "YYYY-MM-DD HH:mm:ss"
-  ifstream intime(Form("beginTimes/%d.beginTimes.offsets.txt", runNumber));
+  ifstream intime(Form("beginTimes/%d.beginTimes.txt", runNumber));
   if(!intime){
     cout<<"can't open beginTime file"<<endl;
     return 0;
@@ -77,7 +77,7 @@ int write_trigger_thresholds(int runNumber = 13078009)
 TObjArray readOnline(int runNumber)
 {
   // Open connection to online database
-  const char* database = "mysql://dbbak.starp.bnl.gov:3411/Conditions_rts?timeout=60";
+  const char* database = "mysql://db04.star.bnl.gov:3411/Conditions_rts?timeout=60";
   const char* user = "zchang";
   const char* pass = "";
   TMySQLServer* mysql = TMySQLServer::Connect(database,user,pass);

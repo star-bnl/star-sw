@@ -24,7 +24,7 @@ int read_trigger_definitions(int runNumber = 13078009)
 
   gSystem->Load("StTriggerUtilities");
 
-  ifstream in(Form("beginTimes/%d.beginTimes.offsets.txt", runNumber));
+  ifstream in(Form("beginTimes/%d.beginTimes.txt", runNumber));
   if(!in) {
     cout<<"can't open input file\n";
     return 0;
