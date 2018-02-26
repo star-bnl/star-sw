@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.19 2018/02/26 23:27:38 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.20 2018/02/26 23:27:45 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -69,14 +69,6 @@ StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *a
    BuildMembers();
 }
 
-//_____________________________________________________________________________
-StBTofNode::~StBTofNode()
-{ 
-  fView = 0;
-  pView = 0;
-  mMasterNode = 0;
-  mTransFlag = kFALSE;
-}
 
 //_____________________________________________________________________________
 void  StBTofNode::UpdateMatrix()
@@ -481,12 +473,7 @@ StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeVi
   mTrayIndex = ibtoh * mSectorsInBTOH + sector->GetPosition()->GetId();
 }
 
-//_____________________________________________________________________________
-StBTofGeomTray::~StBTofGeomTray()
-{
-  mBTOHIndex = 0;
-  mTrayIndex = 0;
-}
+
 //_____________________________________________________________________________
 void StBTofGeomTray::Print(const Option_t *opt) const
 {
@@ -513,11 +500,7 @@ StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThr
    CreateGeomCells();
 }
 
-//_____________________________________________________________________________
-StBTofGeomSensor::~StBTofGeomSensor()
-{
-  mModuleIndex = 0;
-}
+
 //_____________________________________________________________________________
 void StBTofGeomSensor::CreateGeomCells()
 {
@@ -1665,6 +1648,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.20  2018/02/26 23:27:45  smirnovd
+ * StBTofGeometry: Senseless assignments in destructors
+ *
  * Revision 1.19  2018/02/26 23:27:38  smirnovd
  * StBTofGeometry: Set correct z component for tray alignment
  *
