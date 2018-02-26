@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.18 2018/02/26 23:27:30 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.19 2018/02/26 23:27:38 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -750,14 +750,15 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
        double ss = TMath::Sin(phi*TMath::Pi()/180.);
        mTrayX0[i] = phi0[i]*ss + x0[i]*cs;
        mTrayY0[i] = -phi0[i]*cs + x0[i]*ss;
+       mTrayZ0[i] = z0[i];
      } else {
        phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
        double cs = TMath::Cos(phi*TMath::Pi()/180.);
        double ss = TMath::Sin(phi*TMath::Pi()/180.);
        mTrayX0[i] = -phi0[i]*ss + x0[i]*cs;
        mTrayY0[i] = phi0[i]*cs + x0[i]*ss;
+       mTrayZ0[i] = -z0[i];  // thus z0 will be the distance between the tray end to the TPC central membrane
      }
-     mTrayZ0[i] = z0[i];
 
      if(maker->Debug()) {
        LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
@@ -877,9 +878,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
 
         int itray = trayIndex - 1;
 
-        if(align) delete align;    align = 0;
-        if(trayIndex<=60) align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
-        else align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], -mTrayZ0[itray]);  // thus z0 will be the distance between the tray end to the TPC central membrane
+        align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
 
         transPos = nextDet[0];
 
@@ -887,6 +886,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
 
         mBTofTray[mNValidTrays-1] = new StBTofGeomTray(ibtoh, secVolume, mTopNode, align, transPos);
         delete transPos;  transPos = 0;
+        delete align;    align = 0;
 
         if(mDebug) {
           LOG_DEBUG << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
@@ -1665,6 +1665,12 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.19  2018/02/26 23:27:38  smirnovd
+ * StBTofGeometry: Set correct z component for tray alignment
+ *
+ * It makes more sense to set the right sign for the z component depending on the
+ * BTOF half instead of accounting for that sign later.
+ *
  * Revision 1.18  2018/02/26 23:27:30  smirnovd
  * StBTofGeometry: C++ style to zero out arrays
  *
