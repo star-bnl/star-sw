@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.27 2018/02/26 23:28:45 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.28 2018/02/26 23:28:53 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -968,6 +968,61 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
 }
 
 /**
+ * Creates BTof volumes for mBTofTray and mBTofSensor arrays using the
+ * corresponding volume parameters in TGeoManager.
+ */
+void StBTofGeometry::InitFrom(TGeoManager &geoManager)
+{
+  mNValidTrays = 0;
+
+  for (int trayId = 1; trayId <= mNTrays; trayId++)
+  {
+    bool hasGmt = StBTofGeometry::TrayHasGmtModules(trayId);
+
+    std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt) );
+
+    if ( geoPath.empty() ) {
+      LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF tray "
+                  "(id " << trayId << "). Skipping...\n";
+      continue;
+    }
+
+    mNValidTrays++;
+
+    const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
+
+    StThreeVectorD align(mTrayX0[trayId-1], mTrayY0[trayId-1], mTrayZ0[trayId-1]);
+
+    mBTofTray[trayId-1] = new StBTofGeomTray(trayId, *gpNode, align);
+
+    // Loop over the max number of modules (mNModules) that can be present in a tray
+    int maxModuleId = hasGmt ? 24 : mNModules;
+
+    for(int moduleId = 1; moduleId <= maxModuleId; moduleId++)
+    {
+      std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt, moduleId) );
+
+      if ( geoPath.empty() ) {
+         LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF module "
+                     "(id " << moduleId << "). Skipping...\n";
+         continue;
+      }
+
+      const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
+
+      mBTofSensor[trayId-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
+    }
+  }
+
+  mBTofConf = ( mNValidTrays == 120 ? 1 : 0 );
+
+  mModulesInTray = mNModules;
+
+  LOG_INFO << "[StBTofGeometry] Done. NValidTrays = " << mNValidTrays << "  NModulesInTray = " << mModulesInTray << endm;
+}
+
+
+/**
  * Returns a full path to the BTOF module placed in a predifined location in
  * the detector's ROOT geometry. An empty string is returned if the module not
  * found in the geometry hierarchy (via TGeoManager).
@@ -1747,6 +1802,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.28  2018/02/26 23:28:53  smirnovd
+ * StBTofGeometry: Added private InitFrom(TGeoManager)
+ *
  * Revision 1.27  2018/02/26 23:28:45  smirnovd
  * StBTofGeometry: InitFrom(TVolume*) to InitFrom(TVolume&)
  *
