@@ -32,7 +32,6 @@
 #include "tofHitTree.h"
 
 
-ClassImp(StTofMuDstReader)
 
 //_________________________________________________
 StTofMuDstReader::StTofMuDstReader(const char *name, const char *file, StMuDstMaker* maker):StMaker(name)

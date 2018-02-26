@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.6 2018/02/26 23:13:20 smirnovd Exp $
+ * $Id: StTofHitMaker.cxx,v 1.7 2018/02/26 23:26:50 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -38,7 +38,6 @@
 #endif
 #endif /* NEW_DAQ_READER */
 
-ClassImp(StTofHitMaker);
 
 //_____________________________________________________________
 #ifndef NEW_DAQ_READER
@@ -299,6 +298,9 @@ void StTofHitMaker::fillStEvent() {
  * Revision 1.7, 02/09/2008, Jing liu
  *
  * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.7  2018/02/26 23:26:50  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.6  2018/02/26 23:13:20  smirnovd
  * Move embedded CVS log messages to the end of file
  *

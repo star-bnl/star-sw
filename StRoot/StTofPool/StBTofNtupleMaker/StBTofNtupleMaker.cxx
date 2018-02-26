@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofNtupleMaker.cxx,v 1.2 2018/02/26 23:13:20 smirnovd Exp $
+ * $Id: StBTofNtupleMaker.cxx,v 1.3 2018/02/26 23:26:51 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -73,7 +73,6 @@
 
 #include "StEnumerations.h"
 
-ClassImp(StBTofNtupleMaker)
 
 //---------------------------------------------------------------------------
 /// constructor sets default parameters
@@ -698,6 +697,9 @@ void StBTofNtupleMaker::bookNtuples(){
 /*****************************************************************
  *
  * $Log: StBTofNtupleMaker.cxx,v $
+ * Revision 1.3  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.2  2018/02/26 23:13:20  smirnovd
  * Move embedded CVS log messages to the end of file
  *

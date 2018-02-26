@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.14 2018/02/26 23:13:21 smirnovd Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.15 2018/02/26 23:26:52 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -32,7 +32,6 @@
 #include "StTofpMatchMaker.h"
 
 
-ClassImp(StTofpMatchMaker)
 
 //---------------------------------------------------------------------------
 /// default constructor, set default values
@@ -1161,6 +1160,9 @@ StTrackGeometry* StTofpMatchMaker::trackGeometry(StTrack* track){
 /***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.15  2018/02/26 23:26:52  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.14  2018/02/26 23:13:21  smirnovd
  * Move embedded CVS log messages to the end of file
  *

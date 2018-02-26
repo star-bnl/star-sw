@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdAnalysisMaker.cxx,v 1.3 2018/02/26 23:13:21 smirnovd Exp $
+ * $Id: StVpdAnalysisMaker.cxx,v 1.4 2018/02/26 23:26:51 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -38,9 +38,6 @@
 #include "StMemoryInfo.hh"
 #include "StTimer.hh"
 
-#ifdef __ROOT__
-ClassImp(StVpdAnalysisMaker)
-#endif
 
 //_____________________________________________________________________________
 StVpdAnalysisMaker::StVpdAnalysisMaker(const char *name) : StMaker(name)
@@ -439,6 +436,9 @@ void StVpdAnalysisMaker::tsum(const Double_t *tot, const Double_t *time)
 /*****************************************************************
  *
  * $Log: StVpdAnalysisMaker.cxx,v $
+ * Revision 1.4  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.3  2018/02/26 23:13:21  smirnovd
  * Move embedded CVS log messages to the end of file
  *

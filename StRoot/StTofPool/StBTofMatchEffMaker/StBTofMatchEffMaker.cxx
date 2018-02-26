@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchEffMaker.cxx,v 1.3 2018/02/26 23:13:20 smirnovd Exp $
+ * $Id: StBTofMatchEffMaker.cxx,v 1.4 2018/02/26 23:26:51 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -33,7 +33,6 @@
 #include "StBTofMatchEffMaker.h"
 //#include "TMemStat.h"
 
-ClassImp(StBTofMatchEffMaker)
 
 //---------------------------------------------------------------------------
 StBTofMatchEffMaker::StBTofMatchEffMaker(const Char_t *name): StMaker(name){
@@ -302,6 +301,9 @@ bool StBTofMatchEffMaker::validTrack(StTrack *track){
 /*****************************************************************
  *
  * $Log: StBTofMatchEffMaker.cxx,v $
+ * Revision 1.4  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.3  2018/02/26 23:13:20  smirnovd
  * Move embedded CVS log messages to the end of file
  *

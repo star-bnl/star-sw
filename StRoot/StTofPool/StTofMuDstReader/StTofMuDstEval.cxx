@@ -35,7 +35,6 @@
 
 #include "StTofMuDstEval.h"
 
-ClassImp(StTofMuDstEval)
 
 //_________________________________________________
 StTofMuDstEval::StTofMuDstEval(const char *name, StMuDstMaker *maker):StMaker(name)

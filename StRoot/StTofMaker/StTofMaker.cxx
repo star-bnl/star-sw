@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.19 2018/02/26 23:13:20 smirnovd Exp $
+ * $Id: StTofMaker.cxx,v 1.20 2018/02/26 23:26:50 smirnovd Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -49,7 +49,6 @@
 #include "TFile.h"
 #include "TH1.h"
 
-ClassImp(StTofMaker)
 
 
 /// default constructor
@@ -408,6 +407,9 @@ Int_t StTofMaker::Finish(){
 /***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.20  2018/02/26 23:26:50  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.19  2018/02/26 23:13:20  smirnovd
  * Move embedded CVS log messages to the end of file
  *
