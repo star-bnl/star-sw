@@ -1,19 +1,6 @@
 /*************************************************
  *
- * $Id: StTofpMcAnalysisMaker.cxx,v 1.4 2011/04/03 15:52:57 fisyak Exp $
- * $Log: StTofpMcAnalysisMaker.cxx,v $
- * Revision 1.4  2011/04/03 15:52:57  fisyak
- * Fix effect of constness in StAssociationMaker
- *
- * Revision 1.3  2007/04/17 23:11:04  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.2  2005/10/06 19:58:15  fisyak
- * Adjust for persistent StMcEvent
- *
- * Revision 1.1  2004/03/16 04:58:55  geurts
- * *** empty log message ***
- *
+ * $Id: StTofpMcAnalysisMaker.cxx,v 1.5 2018/02/26 23:13:20 smirnovd Exp $
  *
  *************************************************/
 
@@ -1065,3 +1052,19 @@ const StTrackGeometry* StTofpMcAnalysisMaker::trackGeometry(const StTrack* track
 }
 
 //--------------------------------------------------------------------------
+/* $Log: StTofpMcAnalysisMaker.cxx,v $
+ * Revision 1.5  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.4  2011/04/03 15:52:57  fisyak
+ * Fix effect of constness in StAssociationMaker
+ *
+ * Revision 1.3  2007/04/17 23:11:04  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.2  2005/10/06 19:58:15  fisyak
+ * Adjust for persistent StMcEvent
+ *
+ * Revision 1.1  2004/03/16 04:58:55  geurts
+ * *** empty log message ***
+ */

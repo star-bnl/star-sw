@@ -1,62 +1,12 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.18 2007/04/17 23:00:41 dongx Exp $
+ * $Id: StTofMaker.cxx,v 1.19 2018/02/26 23:13:20 smirnovd Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
  ***************************************************************************
  *
  * Description: TOF offline software: maker to insert TOFp raw data onto DST
- *
- ***************************************************************************
- *
- * $Log: StTofMaker.cxx,v $
- * Revision 1.18  2007/04/17 23:00:41  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.17  2005/04/12 17:33:18  dongx
- * update for year 5 new data format. Store into TofRawData from now on.
- *
- * Revision 1.16  2004/09/19 00:09:02  perev
- * Small Walgrind leak fixed
- *
- * Revision 1.15  2004/09/10 22:09:21  perev
- * more defence agains corrupted DAQ data
- *
- * Revision 1.14  2004/01/27 23:17:01  dongx
- *  change for year4 run (pVPD+TOFp+TOFr')
- *  - Additional TOFr' ADC and TDC channels put in
- *  - Add TOTs of TOFr' in
- *
- *
- * Revision 1.12  2003/09/17 19:54:28  geurts
- * zeroed geometry pointer
- *
- * Revision 1.11  2003/08/08 00:20:41  geurts
- * moved local collection code to StTofUtil, changed StTofMaker accordingly
- *
- * Revision 1.10  2003/07/18 18:31:49  perev
- * test for nonexistance of XXXReader added
- *
- * Revision 1.9  2003/02/06 05:02:05  geurts
- * Added TOFr and extra pVPD-ADC channels to the datastream:
- * StTofMaker is now aware of year2 (TOFp+pVPD) and year3 (TOFp+pVPD+TOFr) raw data.
- *
- * Revision 1.8  2002/01/22 06:50:34  geurts
- * modifications for STAR dBase access and doxygenized
- *
- * Revision 1.7  2001/10/09 03:06:38  geurts
- * TofTag introduced
- *
- * Revision 1.6  2001/10/07 19:01:46  geurts
- * change default operation mode to DAQ-reader
- *
- * Revision 1.5  2001/10/05 21:08:40  geurts
- * clean-up histograms and private root file
- *
- * Revision 1.4  2001/09/28 18:40:03  llope
- * first release
- *
  *
  **************************************************************************/
 //! Time-of-Flight Raw Data Maker
@@ -454,3 +404,57 @@ Int_t StTofMaker::Finish(){
   // nope 
   return kStOK;
 }
+
+/***************************************************************************
+ *
+ * $Log: StTofMaker.cxx,v $
+ * Revision 1.19  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.18  2007/04/17 23:00:41  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.17  2005/04/12 17:33:18  dongx
+ * update for year 5 new data format. Store into TofRawData from now on.
+ *
+ * Revision 1.16  2004/09/19 00:09:02  perev
+ * Small Walgrind leak fixed
+ *
+ * Revision 1.15  2004/09/10 22:09:21  perev
+ * more defence agains corrupted DAQ data
+ *
+ * Revision 1.14  2004/01/27 23:17:01  dongx
+ *  change for year4 run (pVPD+TOFp+TOFr')
+ *  - Additional TOFr' ADC and TDC channels put in
+ *  - Add TOTs of TOFr' in
+ *
+ *
+ * Revision 1.12  2003/09/17 19:54:28  geurts
+ * zeroed geometry pointer
+ *
+ * Revision 1.11  2003/08/08 00:20:41  geurts
+ * moved local collection code to StTofUtil, changed StTofMaker accordingly
+ *
+ * Revision 1.10  2003/07/18 18:31:49  perev
+ * test for nonexistance of XXXReader added
+ *
+ * Revision 1.9  2003/02/06 05:02:05  geurts
+ * Added TOFr and extra pVPD-ADC channels to the datastream:
+ * StTofMaker is now aware of year2 (TOFp+pVPD) and year3 (TOFp+pVPD+TOFr) raw data.
+ *
+ * Revision 1.8  2002/01/22 06:50:34  geurts
+ * modifications for STAR dBase access and doxygenized
+ *
+ * Revision 1.7  2001/10/09 03:06:38  geurts
+ * TofTag introduced
+ *
+ * Revision 1.6  2001/10/07 19:01:46  geurts
+ * change default operation mode to DAQ-reader
+ *
+ * Revision 1.5  2001/10/05 21:08:40  geurts
+ * clean-up histograms and private root file
+ *
+ * Revision 1.4  2001/09/28 18:40:03  llope
+ * first release
+ *
+ */

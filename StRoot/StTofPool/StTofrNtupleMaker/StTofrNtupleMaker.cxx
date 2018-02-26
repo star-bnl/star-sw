@@ -1,47 +1,12 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.11 2016/05/05 16:18:07 geurts Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.12 2018/02/26 23:13:20 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
  * Description: example maker to get the matched TOFr cells and fill
  *              into TOFr tree.
- *
- *****************************************************************
- *
- * $Log: StTofrNtupleMaker.cxx,v $
- * Revision 1.11  2016/05/05 16:18:07  geurts
- * addressed Cppcheck report: fixed uninitialized variables and remove one unused variable.
- *
- * Revision 1.10  2012/12/14 06:35:52  geurts
- * Changed global database calls to direct table access and/or removed deprecated database access code.
- *
- * Revision 1.9  2008/06/05 18:33:45  dongx
- * -added members in tree: tDiff, tofcorr and beta for check
- * -beamLine read from database
- *
- * Revision 1.8  2008/05/08 21:09:37  dongx
- * Changed precision of time info to double type
- *
- * Revision 1.7  2008/05/06 18:42:09  dongx
- * Updated for Run8 analysis
- *
- * Revision 1.5  2007/04/17 23:11:12  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.4  2004/04/12 16:17:03  dongx
- * add AdcLoRes in the ntuple
- *
- * Revision 1.3  2004/04/09 16:13:23  dongx
- * fix a potential bug causing crash
- *
- * Revision 1.2  2004/03/29 19:10:56  dongx
- * correct the pVPD ADC read-out for year2 and year3
- *
- * Revision 1.1  2004/03/11 22:39:54  dongx
- * first release
- *
  *
  *******************************************************************/
 #include <iostream>
@@ -606,3 +571,41 @@ void StTofrNtupleMaker::bookNtuples(){
   return;
 }
 
+/*****************************************************************
+ *
+ * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.12  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.11  2016/05/05 16:18:07  geurts
+ * addressed Cppcheck report: fixed uninitialized variables and remove one unused variable.
+ *
+ * Revision 1.10  2012/12/14 06:35:52  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
+ * Revision 1.9  2008/06/05 18:33:45  dongx
+ * -added members in tree: tDiff, tofcorr and beta for check
+ * -beamLine read from database
+ *
+ * Revision 1.8  2008/05/08 21:09:37  dongx
+ * Changed precision of time info to double type
+ *
+ * Revision 1.7  2008/05/06 18:42:09  dongx
+ * Updated for Run8 analysis
+ *
+ * Revision 1.5  2007/04/17 23:11:12  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.4  2004/04/12 16:17:03  dongx
+ * add AdcLoRes in the ntuple
+ *
+ * Revision 1.3  2004/04/09 16:13:23  dongx
+ * fix a potential bug causing crash
+ *
+ * Revision 1.2  2004/03/29 19:10:56  dongx
+ * correct the pVPD ADC read-out for year2 and year3
+ *
+ * Revision 1.1  2004/03/11 22:39:54  dongx
+ * first release
+ *
+ */

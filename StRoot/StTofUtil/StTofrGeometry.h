@@ -1,39 +1,12 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.8 2008/03/27 00:15:39 dongx Exp $
+ * $Id: StTofrGeometry.h,v 1.9 2018/02/26 23:13:21 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
- *
- *******************************************************************
- * $Log: StTofrGeometry.h,v $
- * Revision 1.8  2008/03/27 00:15:39  dongx
- * Update for Run8 finished.
- *
- * Revision 1.7  2005/07/07 01:22:28  fisyak
- * Hide typedefs IntVec, DoubleVec, PointVec and methods HelixCrossCellIds,HelixCross, projTrayVector from CINT
- *
- * Revision 1.6  2005/07/06 19:24:59  fisyak
- * Use templated StThreeVector
- *
- * Revision 1.5  2004/05/03 23:07:49  dongx
- * -Introduce data members to save the Tray and Sensor geometries in the initialization.
- * -Optimize the HelixCrossCellIds() function to save CPU time
- * -Introduce a new function projTrayVector()
- * -Update the //classDef number 1->2
- *
- *
- * Revision 1.3  2004/03/09 16:45:16  dongx
- * Remove InitDaqMap() since a StTofrDaqMap is introduced
- *
- * Revision 1.2  2003/09/11 05:49:23  perev
- * ansi corrs
- *
- * Revision 1.1  2003/08/06 23:00:53  geurts
- * First Release
  *
  *******************************************************************/
 #ifndef STTOFRGEOMETRY_H
@@ -493,3 +466,34 @@ class StTofrGeometry : public TNamed {
 R__EXTERN  StTofrGeometry* gTofrGeometry;
 
 #endif  //end of STTOFRGEOMETRY_H
+
+/*******************************************************************
+ * $Log: StTofrGeometry.h,v $
+ * Revision 1.9  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.8  2008/03/27 00:15:39  dongx
+ *  Update for Run8 finished.
+ *
+ * Revision 1.7  2005/07/07 01:22:28  fisyak
+ * Hide typedefs IntVec, DoubleVec, PointVec and methods HelixCrossCellIds,HelixCross, projTrayVector from CINT
+ *
+ * Revision 1.6  2005/07/06 19:24:59  fisyak
+ * Use templated StThreeVector
+ *
+ * Revision 1.5  2004/05/03 23:07:49  dongx
+ * -Introduce data members to save the Tray and Sensor geometries in the initialization.
+ * -Optimize the HelixCrossCellIds() function to save CPU time
+ * -Introduce a new function projTrayVector()
+ * -Update the //classDef number 1->2
+ *
+ *
+ * Revision 1.3  2004/03/09 16:45:16  dongx
+ * Remove InitDaqMap() since a StTofrDaqMap is introduced
+ *
+ * Revision 1.2  2003/09/11 05:49:23  perev
+ * ansi corrs
+ *
+ * Revision 1.1  2003/08/06 23:00:53  geurts
+ * First Release
+ */

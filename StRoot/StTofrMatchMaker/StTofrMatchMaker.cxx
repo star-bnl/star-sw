@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.32 2012/12/17 22:57:29 geurts Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.33 2018/02/26 23:13:21 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -8,105 +8,6 @@
  * Description: Tofr Match Maker to do the matching between the 
  *              fired celles and TPC tracks ( similar to  Frank's
  *              TofpMatchMaker )
- *
- *****************************************************************
- *
- * $Log: StTofrMatchMaker.cxx,v $
- * Revision 1.32  2012/12/17 22:57:29  geurts
- * bugfix (tickets #2456/#2457)
- *
- * Revision 1.31  2012/12/14 06:36:04  geurts
- * Changed global database calls to direct table access and/or removed deprecated database access code.
- *
- * Revision 1.30  2009/07/28 16:06:42  geurts
- * Bug Ticket #1591: explicit initialization of mStrobeTdcMin, mStrobeTdcMax, and mPedTOFr.
- *
- * Revision 1.29  2009/07/24 22:42:08  fine
- * replace the deprecated API of the STAR messenger
- *
- * Revision 1.28  2009/07/24 22:33:33  fine
- * Make the code C++ compliant
- *
- * Revision 1.27  2009/06/09 19:45:35  jeromel
- * Changes for BT#1428
- *
- * Revision 1.26  2008/07/23 19:22:03  dongx
- * New track quality cuts for Run8
- *
- * Revision 1.25  2008/06/24 21:58:13  dongx
- * fixed a bug of crashing due to potential empty track in trackNodes
- *
- * Revision 1.24  2008/06/19 16:11:54  dongx
- * fixed bug of filling an undefined histogram in case of production
- *
- * Revision 1.23  2008/05/12 17:16:37  dongx
- * letime and tetime in StTofCell stored in nano-seconds
- *
- * Revision 1.22  2008/05/06 18:41:39  dongx
- * - Fixed bug in ouput histogram filename switch
- * - Added switch for tpc track tree output
- *
- * Revision 1.21  2008/04/23 18:20:15  dongx
- * vpd letime and tetime stored in double precision
- *
- * Revision 1.20  2008/04/22 22:31:22  dongx
- * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
- *
- * Revision 1.19  2008/04/22 20:55:13  dongx
- * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
- *
- * Revision 1.18  2008/03/27 00:16:03  dongx
- *  update for Run8 finished.
- *
- * Revision 1.17  2007/11/29 22:43:11  dongx
- * changed vpd trayId definition to 121 (East) and 122 (West)
- *
- * Revision 1.16  2007/11/28 02:17:08  dongx
- * trayId for vpd in StTofCell: 901 (E), 902 (W)
- * dataIndex for vpd in StTofData:  use 121 and 122 as trayId
- *
- * Revision 1.15  2007/11/22 00:22:37  dongx
- * update for run8 - first version
- *
- * Revision 1.14  2007/04/17 23:02:20  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.13  2007/02/28 23:31:59  dongx
- * completion for Run V matching
- *   - trailing tdc and leading tdc stored as adc and tdc in StTofCell
- *   - multi-hit association cases use hit position priority
- *
- * Revision 1.12  2005/04/12 17:31:56  dongx
- * update for year 5 data - not completed, leave as empty at present
- *
- * Revision 1.11  2004/08/11 18:57:44  dongx
- * deltay quality cut applied
- *
- * Revision 1.10  2004/08/10 19:25:13  dongx
- * updated to be compatible with RunII data
- *
- * Revision 1.9  2004/07/13 16:12:32  dongx
- * continuing update for the DAQ array in Run IV
- *
- * Revision 1.8  2004/07/12 17:21:19  dongx
- * fix the crashing when running events before day 030 (TofDaq not updated to 184 yet)
- *
- * Revision 1.7  2004/05/03 23:08:50  dongx
- * change according to the update of StTofrGeometry, save CPU time by 100 times
- *
- * Revision 1.5  2004/04/01 20:08:54  dongx
- * fix a bug about the hit position stored in TofCell
- *
- * Revision 1.4  2004/03/16 22:30:49  dongx
- * fix the warning message when compiling
- *
- * Revision 1.3  2004/03/11 22:30:34  dongx
- * -move m_Mode control to Init()
- * -clear up
- *
- * Revision 1.2  2004/03/09 17:44:56  dongx
- * first release
- *
  *
  *******************************************************************/
 #include <iostream>
@@ -2895,3 +2796,106 @@ StTrackGeometry* StTofrMatchMaker::trackGeometry(StTrack* track){
     thisTrackGeometry = track->geometry();
   return thisTrackGeometry;
 }
+
+/*****************************************************************
+ *
+ * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.33  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.32  2012/12/17 22:57:29  geurts
+ * bugfix (tickets #2456/#2457)
+ *
+ * Revision 1.31  2012/12/14 06:36:04  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
+ * Revision 1.30  2009/07/28 16:06:42  geurts
+ * Bug Ticket #1591: explicit initialization of mStrobeTdcMin, mStrobeTdcMax, and mPedTOFr.
+ *
+ * Revision 1.29  2009/07/24 22:42:08  fine
+ * replace the deprecated API of the STAR messenger
+ *
+ * Revision 1.28  2009/07/24 22:33:33  fine
+ * Make the code C++ compliant
+ *
+ * Revision 1.27  2009/06/09 19:45:35  jeromel
+ * Changes for BT#1428
+ *
+ * Revision 1.26  2008/07/23 19:22:03  dongx
+ * New track quality cuts for Run8
+ *
+ * Revision 1.25  2008/06/24 21:58:13  dongx
+ * fixed a bug of crashing due to potential empty track in trackNodes
+ *
+ * Revision 1.24  2008/06/19 16:11:54  dongx
+ * fixed bug of filling an undefined histogram in case of production
+ *
+ * Revision 1.23  2008/05/12 17:16:37  dongx
+ * letime and tetime in StTofCell stored in nano-seconds
+ *
+ * Revision 1.22  2008/05/06 18:41:39  dongx
+ * - Fixed bug in ouput histogram filename switch
+ * - Added switch for tpc track tree output
+ *
+ * Revision 1.21  2008/04/23 18:20:15  dongx
+ * vpd letime and tetime stored in double precision
+ *
+ * Revision 1.20  2008/04/22 22:31:22  dongx
+ * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
+ *
+ * Revision 1.19  2008/04/22 20:55:13  dongx
+ * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
+ *
+ * Revision 1.18  2008/03/27 00:16:03  dongx
+ *  update for Run8 finished.
+ *
+ * Revision 1.17  2007/11/29 22:43:11  dongx
+ * changed vpd trayId definition to 121 (East) and 122 (West)
+ *
+ * Revision 1.16  2007/11/28 02:17:08  dongx
+ * trayId for vpd in StTofCell: 901 (E), 902 (W)
+ * dataIndex for vpd in StTofData:  use 121 and 122 as trayId
+ *
+ * Revision 1.15  2007/11/22 00:22:37  dongx
+ * update for run8 - first version
+ *
+ * Revision 1.14  2007/04/17 23:02:20  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.13  2007/02/28 23:31:59  dongx
+ * completion for Run V matching
+ *   - trailing tdc and leading tdc stored as adc and tdc in StTofCell
+ *   - multi-hit association cases use hit position priority
+ *
+ * Revision 1.12  2005/04/12 17:31:56  dongx
+ * update for year 5 data - not completed, leave as empty at present
+ *
+ * Revision 1.11  2004/08/11 18:57:44  dongx
+ * deltay quality cut applied
+ *
+ * Revision 1.10  2004/08/10 19:25:13  dongx
+ * updated to be compatible with RunII data
+ *
+ * Revision 1.9  2004/07/13 16:12:32  dongx
+ * continuing update for the DAQ array in Run IV
+ *
+ * Revision 1.8  2004/07/12 17:21:19  dongx
+ * fix the crashing when running events before day 030 (TofDaq not updated to 184 yet)
+ *
+ * Revision 1.7  2004/05/03 23:08:50  dongx
+ * change according to the update of StTofrGeometry, save CPU time by 100 times
+ *
+ * Revision 1.5  2004/04/01 20:08:54  dongx
+ * fix a bug about the hit position stored in TofCell
+ *
+ * Revision 1.4  2004/03/16 22:30:49  dongx
+ * fix the warning message when compiling
+ *
+ * Revision 1.3  2004/03/11 22:30:34  dongx
+ * -move m_Mode control to Init()
+ * -clear up
+ *
+ * Revision 1.2  2004/03/09 17:44:56  dongx
+ * first release
+ *
+ */

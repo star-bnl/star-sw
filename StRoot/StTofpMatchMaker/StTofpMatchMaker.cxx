@@ -1,59 +1,12 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.13 2012/12/14 06:36:02 geurts Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.14 2018/02/26 23:13:21 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
  *
  * Description: Match Maker for TOFp detector
  *             
- ***************************************************************************
- *
- * $Log: StTofpMatchMaker.cxx,v $
- * Revision 1.13  2012/12/14 06:36:02  geurts
- * Changed global database calls to direct table access and/or removed deprecated database access code.
- *
- * Revision 1.12  2007/04/17 23:01:03  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.11  2005/04/12 17:32:45  dongx
- * update for year 5 data. Tofp removed, so do nothing in this maker from now on.
- *
- * Revision 1.10  2004/06/10 15:54:31  dongx
- * rename the defition of int vector
- *
- * Revision 1.9  2004/06/09 21:28:05  dongx
- * update matching : checking before projecting track, improve the speed by around an order of magnitude
- *
- * Revision 1.8  2004/04/10 04:32:39  dongx
- * fix a potential crashing of filling histo w/o mHisto
- *
- * Revision 1.7  2004/03/11 22:29:32  dongx
- * -remove assert()
- * -add member mYear4
- * -use m_Mode to control the output root file
- *
- * Revision 1.6  2003/12/05 08:17:27  geurts
- * changed default TDC and ADC ranges
- *
- * Revision 1.5  2003/09/17 19:40:12  geurts
- * zeroed event counters and one pointer
- *
- * Revision 1.4  2003/09/15 22:38:10  geurts
- * dBase updates:
- *  - removed initLocalDb option
- *  - introduced dBase parameters for strobe event definitions
- *
- * Revision 1.3  2003/09/13 19:15:52  geurts
- * Changed passing of StSPtrVecTofData for strobeEvent (see bugtracker ticket #172)
- *
- * Revision 1.2  2003/09/02 17:59:11  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.1  2003/08/08 18:31:26  geurts
- * first release
- *
- *
  **************************************************************************/
 #include <iostream>
 #include "StEventTypes.h"
@@ -1204,3 +1157,54 @@ StTrackGeometry* StTofpMatchMaker::trackGeometry(StTrack* track){
 
 
 //---------------------------------------------------------------------------
+
+/***************************************************************************
+ *
+ * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.14  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.13  2012/12/14 06:36:02  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
+ * Revision 1.12  2007/04/17 23:01:03  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.11  2005/04/12 17:32:45  dongx
+ * update for year 5 data. Tofp removed, so do nothing in this maker from now on.
+ *
+ * Revision 1.10  2004/06/10 15:54:31  dongx
+ * rename the defition of int vector
+ *
+ * Revision 1.9  2004/06/09 21:28:05  dongx
+ * update matching : checking before projecting track, improve the speed by around an order of magnitude
+ *
+ * Revision 1.8  2004/04/10 04:32:39  dongx
+ * fix a potential crashing of filling histo w/o mHisto
+ *
+ * Revision 1.7  2004/03/11 22:29:32  dongx
+ * -remove assert()
+ * -add member mYear4
+ * -use m_Mode to control the output root file
+ *
+ * Revision 1.6  2003/12/05 08:17:27  geurts
+ * changed default TDC and ADC ranges
+ *
+ * Revision 1.5  2003/09/17 19:40:12  geurts
+ * zeroed event counters and one pointer
+ *
+ * Revision 1.4  2003/09/15 22:38:10  geurts
+ * dBase updates:
+ *  - removed initLocalDb option
+ *  - introduced dBase parameters for strobe event definitions
+ *
+ * Revision 1.3  2003/09/13 19:15:52  geurts
+ * Changed passing of StSPtrVecTofData for strobeEvent (see bugtracker ticket #172)
+ *
+ * Revision 1.2  2003/09/02 17:59:11  perev
+ * gcc 3.2 updates + WarnOff
+ *
+ * Revision 1.1  2003/08/08 18:31:26  geurts
+ * first release
+ *
+ */

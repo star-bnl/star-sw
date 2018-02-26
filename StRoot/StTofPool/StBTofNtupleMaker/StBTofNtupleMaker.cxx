@@ -1,22 +1,12 @@
 /*******************************************************************
  *
- * $Id: StBTofNtupleMaker.cxx,v 1.1 2010/04/09 00:28:48 dongx Exp $
+ * $Id: StBTofNtupleMaker.cxx,v 1.2 2018/02/26 23:13:20 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
  * Description: example maker to get the matched TOFr cells and fill
  *              into TOFr tree.
- *
- *****************************************************************
- *
- * $Log: StBTofNtupleMaker.cxx,v $
- * Revision 1.1  2010/04/09 00:28:48  dongx
- * First release
- *
- * Revision 1.1  2010/04/09 00:16:05  dongx
- * first release
- *
  *
  *******************************************************************/
 #include <iostream>
@@ -705,3 +695,16 @@ void StBTofNtupleMaker::bookNtuples(){
 }
 
 
+/*****************************************************************
+ *
+ * $Log: StBTofNtupleMaker.cxx,v $
+ * Revision 1.2  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.1  2010/04/09 00:28:48  dongx
+ * First release
+ *
+ * Revision 1.1  2010/04/09 00:16:05  dongx
+ * first release
+ *
+ */

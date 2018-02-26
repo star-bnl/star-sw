@@ -1,45 +1,12 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.10 2009/01/26 15:05:33 fisyak Exp $
+ * $Id: StTofrGeometry.cxx,v 1.11 2018/02/26 23:13:21 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
- *
- *******************************************************************
- * $Log: StTofrGeometry.cxx,v $
- * Revision 1.10  2009/01/26 15:05:33  fisyak
- * rename TMemStat => StMemStat due to clash with ROOT class
- *
- * Revision 1.9  2008/03/27 00:15:39  dongx
- *  Update for Run8 finished.
- *
- * Revision 1.8  2007/04/17 23:01:52  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.7  2007/02/28 23:28:17  dongx
- * R_tof used for pre-match calculation updated to ~215cm
- *
- * Revision 1.6  2004/05/03 23:07:49  dongx
- * -Introduce data members to save the Tray and Sensor geometries in the initialization.
- * -Optimize the HelixCrossCellIds() function to save CPU time
- * -Introduce a new function projTrayVector()
- * -Update the ClassDef number 1->2
- *
- *
- * Revision 1.4  2004/03/09 16:45:16  dongx
- * Remove InitDaqMap() since a StTofrDaqMap is introduced
- *
- * Revision 1.3  2003/09/11 05:49:23  perev
- * ansi corrs
- *
- * Revision 1.2  2003/09/07 03:49:06  perev
- * gcc 3.2 + WarnOff
- *
- * Revision 1.1  2003/08/06 23:00:53  geurts
- * First Release
  *
  *******************************************************************/
 #include "Stiostream.h"
@@ -2610,3 +2577,40 @@ Bool_t lackTofrgeometry(const char* fromWhere)
    } else return kFALSE;
 }
 */
+
+/*******************************************************************
+ * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.11  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.10  2009/01/26 15:05:33  fisyak
+ * rename TMemStat => StMemStat due to clash with ROOT class
+ *
+ * Revision 1.9  2008/03/27 00:15:39  dongx
+ *  Update for Run8 finished.
+ *
+ * Revision 1.8  2007/04/17 23:01:52  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.7  2007/02/28 23:28:17  dongx
+ * R_tof used for pre-match calculation updated to ~215cm
+ *
+ * Revision 1.6  2004/05/03 23:07:49  dongx
+ * -Introduce data members to save the Tray and Sensor geometries in the initialization.
+ * -Optimize the HelixCrossCellIds() function to save CPU time
+ * -Introduce a new function projTrayVector()
+ * -Update the ClassDef number 1->2
+ *
+ *
+ * Revision 1.4  2004/03/09 16:45:16  dongx
+ * Remove InitDaqMap() since a StTofrDaqMap is introduced
+ *
+ * Revision 1.3  2003/09/11 05:49:23  perev
+ * ansi corrs
+ *
+ * Revision 1.2  2003/09/07 03:49:06  perev
+ * gcc 3.2 + WarnOff
+ *
+ * Revision 1.1  2003/08/06 23:00:53  geurts
+ * First Release
+ */

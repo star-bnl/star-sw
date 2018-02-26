@@ -1,21 +1,11 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchEffMaker.cxx,v 1.2 2010/01/28 18:16:53 perev Exp $
+ * $Id: StBTofMatchEffMaker.cxx,v 1.3 2018/02/26 23:13:20 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
  * Description: TPC->TOF match efficiency maker
- *
- *****************************************************************
- *
- * $Log: StBTofMatchEffMaker.cxx,v $
- * Revision 1.2  2010/01/28 18:16:53  perev
- * WarningOff
- *
- * Revision 1.1  2009/02/26 21:23:17  dongx
- * first release - example to calculate the TPC->TOF matching efficiency
- *
  *
  *******************************************************************/
 #include <iostream>
@@ -308,3 +298,17 @@ bool StBTofMatchEffMaker::validTrack(StTrack *track){
 
   return true;
 }
+
+/*****************************************************************
+ *
+ * $Log: StBTofMatchEffMaker.cxx,v $
+ * Revision 1.3  2018/02/26 23:13:20  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.2  2010/01/28 18:16:53  perev
+ * WarningOff
+ *
+ * Revision 1.1  2009/02/26 21:23:17  dongx
+ * first release - example to calculate the TPC->TOF matching efficiency
+ *
+ */

@@ -1,48 +1,11 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.11 2007/04/17 23:02:36 dongx Exp $
+ * $Id: StTofSimMaker.cxx,v 1.12 2018/02/26 23:13:21 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
  *
  * Description: StTofSimMaker class for TOFp Simulations
- *
- ***************************************************************************
- *
- * $Log: StTofSimMaker.cxx,v $
- * Revision 1.11  2007/04/17 23:02:36  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.10  2006/12/08 18:55:26  dongx
- * Update to avoid zero tdc value in denominator - modified by Jing Liu
- *
- * Revision 1.9  2005/04/13 16:03:29  dongx
- * corresponding changes because of the update of StTofData structure
- *
- * Revision 1.8  2004/04/01 21:33:46  jeromel
- * More than one place where m_Mode should be used
- *
- * Revision 1.6  2003/09/17 19:49:10  geurts
- * zeroed pointers in constructor
- *
- * Revision 1.5  2003/09/02 17:59:10  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.4  2003/08/08 00:22:11  geurts
- * changed location of header files for the local collections
- *
- * Revision 1.3  2003/07/25 04:34:44  geurts
- * - upper adc and tdc limits
- * - geometry initialization moved to InitRun()
- *
- * Revision 1.2  2002/12/12 01:43:46  geurts
- * Introduced InitRun() and FinishRun() members.
- * TofData in TofCollection is filled with adc and tdc data.
- * Extra checks for StEvent object to prevent null pointers.
- * Primitive ADC response function, disabled slatResponseExp().
- *
- * Revision 1.1  2001/09/28 19:11:11  llope
- * first version
  *
  **************************************************************************/
 //! Time-of-Flight Fast Simulator Maker
@@ -486,3 +449,44 @@ void StTofSimMaker::electronicNoise(){
 /// fill event (empty)
  void StTofSimMaker::fillEvent(){
 }
+
+/***************************************************************************
+ *
+ * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.12  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.11  2007/04/17 23:02:36  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.10  2006/12/08 18:55:26  dongx
+ * Update to avoid zero tdc value in denominator - modified by Jing Liu
+ *
+ * Revision 1.9  2005/04/13 16:03:29  dongx
+ * corresponding changes because of the update of StTofData structure
+ *
+ * Revision 1.8  2004/04/01 21:33:46  jeromel
+ * More than one place where m_Mode should be used
+ *
+ * Revision 1.6  2003/09/17 19:49:10  geurts
+ * zeroed pointers in constructor
+ *
+ * Revision 1.5  2003/09/02 17:59:10  perev
+ * gcc 3.2 updates + WarnOff
+ *
+ * Revision 1.4  2003/08/08 00:22:11  geurts
+ * changed location of header files for the local collections
+ *
+ * Revision 1.3  2003/07/25 04:34:44  geurts
+ * - upper adc and tdc limits
+ * - geometry initialization moved to InitRun()
+ *
+ * Revision 1.2  2002/12/12 01:43:46  geurts
+ * Introduced InitRun() and FinishRun() members.
+ * TofData in TofCollection is filled with adc and tdc data.
+ * Extra checks for StEvent object to prevent null pointers.
+ * Primitive ADC response function, disabled slatResponseExp().
+ *
+ * Revision 1.1  2001/09/28 19:11:11  llope
+ * first version
+ */

@@ -1,24 +1,12 @@
 /*******************************************************************
  *
- * $Id: StVpdAnalysisMaker.cxx,v 1.2 2012/12/14 06:35:56 geurts Exp $
+ * $Id: StVpdAnalysisMaker.cxx,v 1.3 2018/02/26 23:13:21 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
  * Description: Vpd analysis Maker to do the calibration for pVPD 
  *              hit pattern, VzVpd, Tdiff, Tstart
- *
- *****************************************************************
- *
- * $Log: StVpdAnalysisMaker.cxx,v $
- * Revision 1.2  2012/12/14 06:35:56  geurts
- * Changed global database calls to direct table access and/or removed deprecated database access code.
- *
- * Revision 1.1  2008/09/02 18:27:21  dongx
- * first release.
- * - Vpd analysis maker from MuDst to extract vz, Tstart, Tdiff etc.
- * - TPC primary vertex used for Tstart and Tdiff calculation
- *
  *
  *******************************************************************/
 #include <iostream>
@@ -447,3 +435,19 @@ void StVpdAnalysisMaker::tsum(const Double_t *tot, const Double_t *time)
   
   return;
 }
+
+/*****************************************************************
+ *
+ * $Log: StVpdAnalysisMaker.cxx,v $
+ * Revision 1.3  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.2  2012/12/14 06:35:56  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
+ * Revision 1.1  2008/09/02 18:27:21  dongx
+ * first release.
+ * - Vpd analysis maker from MuDst to extract vz, Tstart, Tdiff etc.
+ * - TPC primary vertex used for Tstart and Tdiff calculation
+ *
+ */
