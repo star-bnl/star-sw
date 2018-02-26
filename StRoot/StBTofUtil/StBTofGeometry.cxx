@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.28 2018/02/26 23:28:53 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.29 2018/02/26 23:29:00 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -24,6 +24,7 @@
 #include "TDataSet.h"
 #include "TDataSetIter.h"
 #include "TGeoBBox.h"
+#include "TGeoManager.h"
 #include "TGeoMatrix.h"
 #include "TGeoPhysicalNode.h"
 
@@ -735,7 +736,7 @@ StBTofGeometry::~StBTofGeometry()
 }
 
 //_____________________________________________________________________________
-void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
+void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoManager )
 {
    //
    //Define geometry parameters and establish the geometry
@@ -810,10 +811,12 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
      }
    }
 
-   if ( starHall )
+   if ( geoManager )
+     InitFrom( *geoManager );
+   else if ( starHall )
      InitFrom( *starHall );
    else
-     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant input\n";
+     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input\n";
 
 
 /* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
@@ -853,11 +856,6 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
   // Initialize TOFr geometry from STAR geometry
   //     BTofConf   --     0     tray_BTof   (default)
   //                       1     full_BTof
-
-  if (!starHall) {
-    LOG_ERROR << "[StBTofGeometry] No STAR Hall volume defined" << endm;
-    return;
-  }
 
   // Loop over the STAR geometry and mark the volume needed
   TDataSetIter volume(&starHall,0);
@@ -1802,6 +1800,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.29  2018/02/26 23:29:00  smirnovd
+ * StBTofGeometry: Introduced alternative initialization using TGeo geometry
+ *
  * Revision 1.28  2018/02/26 23:28:53  smirnovd
  * StBTofGeometry: Added private InitFrom(TGeoManager)
  *

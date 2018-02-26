@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.23 2018/02/26 23:28:53 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.24 2018/02/26 23:29:00 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -344,7 +344,7 @@ class StBTofGeometry : public TNamed {
 
    void          SetAlignFile(const Char_t *infile="") { mAlignFile = infile; }
 
-   void          Init(StMaker *maker, TVolume *starHall);
+   void          Init(StMaker *maker, TVolume *starHall, TGeoManager* geoManager = nullptr);
 
    Bool_t  IsInitDone() const { return mInitFlag; }
    Bool_t  IsCellValid(const Int_t icell)     const;
@@ -402,6 +402,9 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.24  2018/02/26 23:29:00  smirnovd
+ * StBTofGeometry: Introduced alternative initialization using TGeo geometry
+ *
  * Revision 1.23  2018/02/26 23:28:53  smirnovd
  * StBTofGeometry: Added private InitFrom(TGeoManager)
  *
