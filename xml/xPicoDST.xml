@@ -40,6 +40,8 @@
     </ResourceUsage>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="catalog:star.bnl.gov?production=P16ij,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,filename~MuDst,tpx=1,sanity=1,available=1,trgsetupname~AuAu_200_production_2016,storage!=HPSS" preferStorage="local" nFiles="all" />
-
+<!-- <input URL="catalog:star.bnl.gov?production=P16ij,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,filename~MuDst,tpx=1,sanity=1,available=1,trgsetupname~AuAu_200_production_2016,storage!=HPSS" preferStorage="local" nFiles="all" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P17id,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,tpx=1,pxl=1,sanity=1,events>10,filename~MuDst,sanity=1,available=1,trgsetupname~AuAu_200_production_mid_2014,storage!=HPSS" preferStorage="local" nFiles="all" /> -->
+<!-- <input URL="root://xrdstar.rcf.bnl.gov:port//home/starlib/home/starreco/reco/AuAu_200_production_mid_2014/ReversedFullField/P17id/2014/160/15160003::st_physics_15160003_raw_5500025.MuDst.root" /> -->
+<input URL="file:/data0/%home%starreco%reco%AuAu_200_production_mid_2014%ReversedFullField%P17id%2014%160%15160003%st_physics_15160003_raw_4000063.MuDst.root" />
 </job>
