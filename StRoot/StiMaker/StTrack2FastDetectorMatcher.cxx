@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.12 2018/02/26 23:29:42 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.13 2018/02/26 23:29:50 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -20,6 +20,7 @@
 #include "StEmcCollection.h"
 #include "StBTofCollection.h" // dongx
 #include "StBTofUtil/StBTofGeometry.h"
+#include "TGeoManager.h"
 #include "TMath.h"
 //________________________________________________________________________________
 ClassImp(StTrack2FastDetectorMatcher);
@@ -72,16 +73,16 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
     if (dateY > 2008) {
       TObjectSet *btofGeom_dataset = (TObjectSet *) mydb->GetDataSet("btofGeometry");
       btofGeom = btofGeom_dataset ? (StBTofGeometry *) btofGeom_dataset->GetObject() : nullptr;
+      // If StBTofGeometry object is not found in the list of maker's objects create a new one
       if (! btofGeom) {
-	TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
-	if (starHall) {
-	  LOG_INFO << " BTofGeometry initialization ... " << endm;
-	  btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
-	  if (isMC) btofGeom->SetMCOn();
-	  else      btofGeom->SetMCOff();
-	  btofGeom->Init(mydb, starHall);
-	  mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
-	}
+	// Build StBTofGeometry from TGeo geometry if available
+	TVolume *starHall = gGeoManager ? nullptr : (TVolume *)mydb->GetDataSet("HALL");
+	LOG_INFO << " BTofGeometry initialization ... " << endm;
+	btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
+	if (isMC) btofGeom->SetMCOn();
+	else      btofGeom->SetMCOff();
+	btofGeom->Init(mydb, starHall, gGeoManager);
+	mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
       }
 
       btofList = new StBtofHitList();
@@ -304,6 +305,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.13  2018/02/26 23:29:50  smirnovd
+ * StTrack2FastDetectorMatcher: Build StBTOfGeometry from TGeo geometry when available
+ *
  * Revision 2.12  2018/02/26 23:29:42  smirnovd
  * StTrack2FastDetectorMatcher: Don't change debug level for StBTofGeometry (in a weird way)
  *
