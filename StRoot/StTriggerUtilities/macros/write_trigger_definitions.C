@@ -20,7 +20,7 @@ int write_trigger_definitions(int runNumber = 13078009)
   StDbConfigNode* node = mgr->initConfig("Calibrations_trg");
   StDbTable* dbtable = node->addDbTable("triggerDefinition");
   // beginTime timestamp in MySQL format: "YYYY-MM-DD HH:mm:ss"
-  ifstream intime(Form("beginTimes/%d.beginTimes.offsets.txt", runNumber));
+  ifstream intime(Form("beginTimes/%d.beginTimes.txt", runNumber));
   if(!intime){
     cout<<"can't open beginTime file"<<endl;
     return 0;
@@ -73,7 +73,7 @@ TObjArray readOnline(int runNumber)
   TObjArray array;
 
   // Open connection to online database
-  const char* database = "mysql://dbbak.starp.bnl.gov:3411/Conditions_rts?timeout=60";
+  const char* database = "mysql://db04.star.bnl.gov:3411/Conditions_rts?timeout=60";
   const char* user = "zchang";
   const char* pass = "";
   TMySQLServer* mysql = TMySQLServer::Connect(database,user,pass);
