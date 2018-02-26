@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.14 2018/02/26 23:27:45 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.15 2018/02/26 23:27:53 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -78,7 +78,7 @@ class StBTofNode : public TObject {
 
  protected:
 //    StBTofNode(TVolumeView *element, TVolumeView *top);
-    StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
+    StBTofNode(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
     
     StBTofNode& operator=(const StBTofNode&);
 
@@ -145,7 +145,9 @@ class StBTofGeomTray : public StBTofNode {
 
  public:
 //   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
-   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
+
+   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
+
    StBTofGeomTray() {}
    ~StBTofGeomTray() {};
 
@@ -186,7 +188,7 @@ class StBTofGeomSensor : public StBTofNode {
 
  public:
 //   StBTofGeomSensor(TVolumeView *element, TVolumeView *top);
-   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
+   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
 
    StBTofGeomSensor() {}
    ~StBTofGeomSensor() {}
@@ -355,6 +357,9 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.15  2018/02/26 23:27:53  smirnovd
+ * Accept reference instead of pointer to xyz alignment
+ *
  * Revision 1.14  2018/02/26 23:27:45  smirnovd
  * StBTofGeometry: Senseless assignments in destructors
  *
