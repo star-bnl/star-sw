@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.23 2018/02/26 23:28:07 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.24 2018/02/26 23:28:14 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -551,6 +551,14 @@ StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, const
   : StBTofNode(element, top, align, pos)
 {
    mModuleIndex = element->GetPosition()->GetId();
+   CreateGeomCells();
+}
+
+
+StBTofGeomSensor::StBTofGeomSensor(const int moduleId, const TGeoPhysicalNode& node, const StThreeVectorD& align)
+  : StBTofNode(node, align)
+{
+   mModuleIndex = moduleId;
    CreateGeomCells();
 }
 
@@ -1700,6 +1708,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.24  2018/02/26 23:28:14  smirnovd
+ * StBTofGeomSensor: New constructor accepting TGeo
+ *
  * Revision 1.23  2018/02/26 23:28:07  smirnovd
  * StBTofGeoTray: New constructor accepting TGeo
  *
