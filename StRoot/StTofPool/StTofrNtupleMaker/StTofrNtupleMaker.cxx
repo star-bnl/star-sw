@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.12 2018/02/26 23:13:20 smirnovd Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.13 2018/02/26 23:26:51 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -53,7 +53,6 @@
 #include "StTofrNtupleMaker.h"
 
 
-ClassImp(StTofrNtupleMaker)
 
 //---------------------------------------------------------------------------
 /// constructor sets default parameters
@@ -574,6 +573,9 @@ void StTofrNtupleMaker::bookNtuples(){
 /*****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.13  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.12  2018/02/26 23:13:20  smirnovd
  * Move embedded CVS log messages to the end of file
  *

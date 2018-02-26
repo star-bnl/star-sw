@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.33 2018/02/26 23:13:21 smirnovd Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.34 2018/02/26 23:26:52 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -48,7 +48,6 @@
 #include "StTofrMatchMaker.h"
 //#include "TMemStat.h"
 
-ClassImp(StTofrMatchMaker)
 
 // Define the  static constants:
 
@@ -2800,6 +2799,9 @@ StTrackGeometry* StTofrMatchMaker::trackGeometry(StTrack* track){
 /*****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.34  2018/02/26 23:26:52  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.33  2018/02/26 23:13:21  smirnovd
  * Move embedded CVS log messages to the end of file
  *

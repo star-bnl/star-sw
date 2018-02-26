@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.12 2018/02/26 23:13:21 smirnovd Exp $
+ * $Id: StTofSimMaker.cxx,v 1.13 2018/02/26 23:26:51 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -47,7 +47,6 @@ typedef tofMCSlatVector::iterator tofMCSlatVecIter;
 
 static RanluxEngine engine;
 
-ClassImp(StTofSimMaker)
 
 /// default constructor
 StTofSimMaker::StTofSimMaker(const char *name):StMaker(name){
@@ -453,6 +452,9 @@ void StTofSimMaker::electronicNoise(){
 /***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.13  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.12  2018/02/26 23:13:21  smirnovd
  * Move embedded CVS log messages to the end of file
  *

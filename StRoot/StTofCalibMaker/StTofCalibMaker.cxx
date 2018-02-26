@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.23 2018/02/26 23:13:19 smirnovd Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.24 2018/02/26 23:26:50 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -63,9 +63,6 @@
 #include "StMemoryInfo.hh"
 #include "StTimer.hh"
 
-#ifdef __ROOT__
-ClassImp(StTofCalibMaker)
-#endif
 
 //_____________________________________________________________________________
 StTofCalibMaker::StTofCalibMaker(const char *name) : StMaker(name)
@@ -1976,6 +1973,9 @@ Double_t StTofCalibMaker::GetINLcorr(const int edgeflag,const int tdcchan,const 
 /*****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.24  2018/02/26 23:26:50  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.23  2018/02/26 23:13:19  smirnovd
  * Move embedded CVS log messages to the end of file
  *

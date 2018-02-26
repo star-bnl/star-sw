@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.11 2018/02/26 23:13:21 smirnovd Exp $
+ * $Id: StTofrGeometry.cxx,v 1.12 2018/02/26 23:26:51 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -45,9 +45,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StTofrNode)
-#endif
 
 Bool_t StTofrNode::mDebug = kFALSE;
 Double_t const StTofrGeomSensor::mSensorDy = 10.35;   // Actual module length;
@@ -426,9 +423,6 @@ StTofrGeomNode::StTofrGeomNode(const char* name, const char* title,
 }
 */
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeomNode)
-#endif
 
 Bool_t StTofrGeomNode::mDebug = kFALSE;
 //_____________________________________________________________________________
@@ -793,9 +787,6 @@ const
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeomTray)
-#endif
 
 Bool_t StTofrGeomTray::mDebug = kFALSE;
 
@@ -980,9 +971,6 @@ void StTofrGeomTray::Print(const Option_t *opt) const
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeomSensor)
-#endif
 
 Bool_t StTofrGeomSensor::mDebug = kFALSE;
 
@@ -1139,9 +1127,6 @@ void StTofrGeomSensor::Print(const Option_t *opt) const
 StTofrGeometry *gTofrGeometry = 0;
 static const Int_t CELLSINMODULE = 6;
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeometry)
-#endif
 
 Bool_t StTofrGeometry::mDebug = kFALSE;
 
@@ -2580,6 +2565,9 @@ Bool_t lackTofrgeometry(const char* fromWhere)
 
 /*******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.12  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
  * Revision 1.11  2018/02/26 23:13:21  smirnovd
  * Move embedded CVS log messages to the end of file
  *
