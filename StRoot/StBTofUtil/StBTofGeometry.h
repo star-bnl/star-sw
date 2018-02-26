@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.13 2018/02/26 23:27:15 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.14 2018/02/26 23:27:45 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -87,7 +87,7 @@ class StBTofNode : public TObject {
 
  public:
     StBTofNode() {}
-   ~StBTofNode();
+   ~StBTofNode() {}
 
    TVolumeView*    GetfView() const { return fView; }
    TVolumePosition* GetpView() const { return pView; }
@@ -147,7 +147,7 @@ class StBTofGeomTray : public StBTofNode {
 //   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
    StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
    StBTofGeomTray() {}
-   ~StBTofGeomTray();
+   ~StBTofGeomTray() {};
 
    StBTofGeomTray& operator=(const StBTofGeomTray&);
    static void       DebugOn()   { mDebug = kTRUE; }     
@@ -189,7 +189,7 @@ class StBTofGeomSensor : public StBTofNode {
    StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
 
    StBTofGeomSensor() {}
-   ~StBTofGeomSensor();
+   ~StBTofGeomSensor() {}
 
    StBTofGeomSensor& operator=(const StBTofGeomSensor&);
    static void       DebugOn()   { mDebug = kTRUE; }     
@@ -355,6 +355,9 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.14  2018/02/26 23:27:45  smirnovd
+ * StBTofGeometry: Senseless assignments in destructors
+ *
  * Revision 1.13  2018/02/26 23:27:15  smirnovd
  * StBTofGeometry: Removed unused member pointer to non-TGeo ROOT geometry
  *
