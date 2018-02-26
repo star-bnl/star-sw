@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.22 2018/02/26 23:28:00 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.23 2018/02/26 23:28:07 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -513,6 +513,18 @@ StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeVi
   mSectorsInBTOH = top->GetListSize()/2;
   mBTOHIndex = ibtoh + 1;
   mTrayIndex = ibtoh * mSectorsInBTOH + sector->GetPosition()->GetId();
+}
+
+
+StBTofGeomTray::StBTofGeomTray(const int trayId, const TGeoPhysicalNode& node, const StThreeVectorD& align)
+  : StBTofNode(node, align)
+{
+  int mBTOHId  = ( trayId <= 60 ? 1 : 2 );
+  int sectorId = ( trayId <= 60 ? trayId : trayId - 60 );
+
+  mSectorsInBTOH = StBTofGeometry::mNTrays/2;
+  mBTOHIndex = mBTOHId;
+  mTrayIndex = (mBTOHId - 1) * mSectorsInBTOH + sectorId;
 }
 
 
@@ -1688,6 +1700,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.23  2018/02/26 23:28:07  smirnovd
+ * StBTofGeoTray: New constructor accepting TGeo
+ *
  * Revision 1.22  2018/02/26 23:28:00  smirnovd
  * StBTofNode: New constructor accepting TGeo volume
  *
