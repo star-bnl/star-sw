@@ -12,7 +12,7 @@ using namespace std;
    
 void sqlvertexSeed()
 {
-   TSQLServer *db = TSQLServer::Connect("mysql://dbx.star.bnl.gov:3316","", "");
+   TSQLServer *db = TSQLServer::Connect("mysql://dbx.star.bnl.gov:3315","", "");
 
    printf("Server info: %s\n", db->ServerInfo());
    
