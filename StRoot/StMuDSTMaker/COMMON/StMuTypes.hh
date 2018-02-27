@@ -32,3 +32,5 @@
 #include "StMuFmsHit.h"
 #include "StMuFmsUtil.h"
 #include "StMuFmsInfo.h"
+#include "StMuEpdHit.h"
+#include "StMuEpdHitCollection.h"
