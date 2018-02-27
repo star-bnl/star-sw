@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.61 2015/08/28 18:36:03 jdb Exp $
+ * $Id: StMuDstMaker.h,v 1.62 2018/02/27 04:15:02 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -60,6 +60,8 @@ class StMuEmcUtil;
 #include "StMuFmsCollection.h"
 class StMuFmsUtil;
 
+#include "StMuEpdHitCollection.h" // MALisa
+class StMuEpdUtil;
 /// PMD by Supriya Das
 #include "StMuPmdCollection.h"
 class StMuPmdUtil;
@@ -177,7 +179,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.61 2015/08/28 18:36:03 jdb Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.62 2018/02/27 04:15:02 jdb Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
@@ -212,6 +214,7 @@ protected:
   StMuTofUtil* mTofUtil;
   /// dongx
   StMuBTofUtil* mBTofUtil;
+  StMuEpdUtil*  mEpdUtil;  // MALisa
   StMuEzTree* mEzTree; 
 
   int mIoMode;
@@ -280,6 +283,7 @@ virtual   void closeRead();
 
 	void fillsttrigger(StEvent* ev);	
   void fillPmd(StEvent* ev);
+  void fillEpd(StEvent* ev);    // MALisa
   void fillEmc(StEvent* ev);
   void fillFms(StEvent* ev);
 #ifndef __NO_STRANGE_MUDST__
@@ -352,6 +356,7 @@ virtual   void closeRead();
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   /// dongx
   TClonesArray** mBTofArrays;   //[__NBTOFARRAYS__   ];
+  TClonesArray** mEpdArrays;    //[__NEPDARRAYS__    ];  /// MALisa
   TClonesArray** mMtdArrays;    //[__NMTDARRAYS__    ];
   TClonesArray** mFgtArrays;    //[__NFGTARRAYS__    ];
   TClonesArray** mEztArrays;    //[__NEZTARRAYS__    ];
@@ -362,9 +367,10 @@ virtual   void closeRead();
   StMuFmsCollection *mFmsCollection;
   TClonesArray*  mPmdCollectionArray; // Needed to hold old format
   StMuPmdCollection *mPmdCollection;
+  //  StMuEpdHitCollection *mMuEpdHitCollection;   // MALisa
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDstMaker, 3)
+  ClassDef(StMuDstMaker, 4)
 };
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
@@ -404,6 +410,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.62  2018/02/27 04:15:02  jdb
+ * added EPD support and fixed long standing bug in SetStatus, cleaned up
+ *
  * Revision 1.61  2015/08/28 18:36:03  jdb
  * Added Akios FMS codes
  *
