@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.33 2015/11/06 17:47:16 jdb Exp $
+ * $Id: StMuArrays.h,v 1.34 2018/02/27 04:11:17 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -42,6 +42,7 @@ enum btofTypes {muBTofHit=0, muBTofRawHit, muBTofHeader};
 
 enum mtdTypes {muMTDHit=0, muMTDRawHit, muMTDHeader};
 
+enum epdTypes {muEpdHit=0};    // MALisa
 
 /// @enum eztTypes enumeration to to index the eztArrays (IUCF-ezTree)
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
@@ -58,15 +59,16 @@ __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArray
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
+__NEPDARRAYS__     =1,   /// MALisa
 __NMTDARRAYS__    =3,
  __NFGTARRAYS__    =4 ,	///< size of the fgt arrays, i.e. number of TClonesArrays  
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
      
 /// dongx
 #ifndef __NO_STRANGE_MUDST__
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #else
-__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #endif
 };
 class StMuArrays {
@@ -84,6 +86,7 @@ class StMuArrays {
     static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
+    static const char**     epdArrayNames; //[__NEPDARRAYS__    ] // MALisa
     static const char**      mtdArrayNames;//[__NMTDARRAYS__    ]
     static const char**      fgtArrayNames;//[__NFGTARRAYS__    ]
     static const char**      eztArrayNames;//[__NEZARRAYS__     ]
@@ -99,6 +102,7 @@ class StMuArrays {
     static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
+    static const char**  epdArrayTypes;//    [__NEPDARRAYS__    ]  // MALisa
     static const char**  mtdArrayTypes;//    [__NMTDARRAYS__    ]
     static const char**  fgtArrayTypes;//    [__NFGTARRAYS__    ]
     static const char**  eztArrayTypes;//    [__NEZARRAYS__     ]
@@ -114,6 +118,7 @@ class StMuArrays {
     static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
+    static int*       epdArraySizes;// [__NEPDARRAYS__    ]  // MALisa
     static int*       mtdArraySizes;// [__NMTDARRAYS__     ]
     static int*       fgtArraySizes;// [__NFGTARRAYS__    ]
     static int*       eztArraySizes;// [__NEZARRAYS__     ]
@@ -129,6 +134,7 @@ class StMuArrays {
     static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
+    static int*    epdArrayCounters;// [__NEPDARRAYS__    ]  // MALisa
     static int*    mtdArrayCounters;// [__NEZARRAYS__    ]
     static int*    fgtArrayCounters;// [__NFGTARRAYS__    ]
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
@@ -141,6 +147,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.34  2018/02/27 04:11:17  jdb
+ * Added EPD types
+ *
  * Revision 1.33  2015/11/06 17:47:16  jdb
  * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
  *
