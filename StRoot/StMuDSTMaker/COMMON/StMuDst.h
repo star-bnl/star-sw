@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.53 2017/01/19 23:03:27 smirnovd Exp $
+ * $Id: StMuDst.h,v 1.54 2018/02/27 04:11:57 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -51,7 +51,8 @@ class StBTofCollection;
 class StMuBTofHit;
 class StBTofRawHit;
 class StBTofHeader;
-
+class StMuEpdHitCollection;  // MALisa
+class StMuEpdHit;            // MALisa
 class EztEventHeader;
 class EztTrigBlob;
 class EztFpdBlob;
@@ -109,10 +110,11 @@ public:
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
-            TClonesArray** mtd_ptca=0,
+		    TClonesArray**  epd_col=0,  // MALisa
+		    TClonesArray** mtd_ptca=0,
 		    TClonesArray** fgt_ptca=0,
 		    TClonesArray** ezt_ptca=0,
-            TClonesArray *emc_tca=0, 
+		    TClonesArray *emc_tca=0, 
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
 		    TClonesArray *pmd_tca=0, 
@@ -164,6 +166,8 @@ public:
   static TClonesArray** tofArrays;
   /// array of TClonesArrays for the stuff inherited from the BTOF // dongx
   static TClonesArray** btofArrays;  
+  /// array of TClonesArrays for Epd
+  static TClonesArray** epdArrays;
   /// array of TClonesArrays for the stuff inherited from the Mtd
   static TClonesArray** mtdArrays;  
   /// array of TClonesArrays for the stuff inherited from the Fgt
@@ -182,6 +186,7 @@ public:
   static StEmcCollection *mEmcCollection;
   /// pointer to FmsCollecion (for Fms clusterfinding etc)
   static StFmsCollection *mFmsCollection;
+
   /// array of TClonesArrays for the stuff inherited from the EZT (ezTree)
   static TClonesArray** eztArrays;
 
@@ -220,7 +225,8 @@ public:
   static TClonesArray* fgtArray(int type) { return fgtArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the ezt arrays
   static TClonesArray* eztArray(int type) { return eztArrays[type]; }
-
+  /// returns pointer to the EpdHitCollection
+  static TClonesArray* epdHits() { return epdArrays[muEpdHit]; }  // MALisa
   /// returns pointer to the primary vertex list
   static TClonesArray* primaryVertices() { return arrays[muPrimaryVertex]; }
   /// returns pointer to a list of tracks belonging to the selected primary vertex
@@ -336,6 +342,8 @@ public:
   /// returns pointer to the btofHeader - dongx
   static StBTofHeader* btofHeader() { return (StBTofHeader*)btofArrays[muBTofHeader]->UncheckedAt(0); }
 
+  static StMuEpdHit* epdHit(int i) { return (StMuEpdHit*)epdArrays[muEpdHit]->UncheckedAt(i); }  // MALisa
+
   static StMuMtdHit* mtdHit(int i) { return (StMuMtdHit*)mtdArrays[muMTDHit]->UncheckedAt(i); }
     static StMuMtdRawHit* mtdRawHit(int i) { return (StMuMtdRawHit*)mtdArrays[muMTDRawHit]->UncheckedAt(i); }
     static StMuMtdHeader* mtdHeader() { return (StMuMtdHeader*)mtdArrays[muMTDHeader]->UncheckedAt(0); } 
@@ -394,6 +402,8 @@ public:
   static unsigned int numberOfBTofHit()       { return btofArrays[muBTofHit]->GetEntriesFast(); }
   static unsigned int numberOfBTofRawHit()    { return btofArrays[muBTofRawHit]->GetEntriesFast(); }
 
+  static unsigned int numberOfEpdHit()       { return epdArrays[muEpdHit]->GetEntriesFast(); }
+
   static unsigned int numberOfMTDHit()       { return mtdArrays[muMTDHit]->GetEntriesFast(); }
   static unsigned int numberOfBMTDRawHit()    { return mtdArrays[muMTDRawHit]->GetEntriesFast(); }
     
@@ -426,6 +436,8 @@ public:
   static unsigned int GetNBTofHit()         { return numberOfBTofHit(); }
   static unsigned int GetNBTofRawHit()      { return numberOfBTofRawHit(); }
 
+  static unsigned int GetNEpdHit()         { return numberOfEpdHit(); }
+
   static unsigned int GetNMTDHit()         { return numberOfMTDHit(); }
   static unsigned int GetNMTDRawHit()      { return numberOfBMTDRawHit(); }
     
@@ -438,7 +450,7 @@ public:
   friend class StMuIOMaker;
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,3)
+  ClassDef(StMuDst,4)
 };
 
 #endif
@@ -446,6 +458,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.54  2018/02/27 04:11:57  jdb
+ * Added epdArrays
+ *
  * Revision 1.53  2017/01/19 23:03:27  smirnovd
  * StMuDst: Make methods static as logic suggests
  *

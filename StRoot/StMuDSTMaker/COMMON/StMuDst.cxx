@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.68 2017/01/19 23:03:19 smirnovd Exp $
+ * $Id: StMuDst.cxx,v 1.69 2018/02/27 04:11:57 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -36,6 +36,8 @@
 #include "StBTofHeader.h"
 #include "StBTofPidTraits.h"
 #include "StMuBTofHit.h"
+#include "StMuEpdHitCollection.h"     // MALisa
+#include "StMuEpdHit.h"              // MALisa
 #include "StMuMtdHit.h"
 #include "StMuMtdHeader.h"
 #include "TClonesArray.h"
@@ -57,6 +59,7 @@ TClonesArray** StMuDst::fmsArrays            = 0;
 TClonesArray** StMuDst::pmdArrays            = 0;
 TClonesArray** StMuDst::tofArrays            = 0;
 TClonesArray** StMuDst::btofArrays           = 0;   /// dongx
+TClonesArray** StMuDst::epdArrays            = 0;   /// MALisa
 TClonesArray** StMuDst::mtdArrays            = 0;
 TClonesArray** StMuDst::fgtArrays            = 0;
 TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
@@ -90,7 +93,8 @@ void StMuDst::unset() {
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
-    mtdArrays    = 0;   // dongx
+    mtdArrays     = 0;   // dongx
+    epdArrays      = 0;   // MALisa
     fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
     mMuEmcCollection = 0; 
@@ -118,8 +122,10 @@ void StMuDst::set(StMuDstMaker* maker) {
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;   // dongx
+  epdArrays     = maker->mEpdArrays;    // MALisa
   mtdArrays    = maker->mMtdArrays;  
   fgtArrays     = maker->mFgtArrays;
+
 
     mMuEmcCollectionArray = maker->mEmcCollectionArray;
   mMuEmcCollection      = maker->mEmcCollection;
@@ -146,9 +152,10 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
 		  TClonesArray** thePmdArrays,
-          TClonesArray** theTofArrays,
-          TClonesArray** theBTofArrays,    // dongx
-          TClonesArray** theMTDArrays,
+		  TClonesArray** theTofArrays,
+		  TClonesArray** theBTofArrays,    // dongx
+		  TClonesArray** theEpdArrays,     // MALisa
+		  TClonesArray** theMTDArrays,
 		  TClonesArray** theFgtArrays,
 		  TClonesArray** theEztArrays,
                   TClonesArray* emc_arr,
@@ -171,6 +178,7 @@ void StMuDst::set(TClonesArray** theArrays,
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
   btofArrays    = theBTofArrays;    // dongx
+  epdArrays     = theEpdArrays;     // MALisa
   mMuEmcCollectionArray = emc_arr;  
   mMuEmcCollection = emc; 
   mMuFmsCollection = fms;  
@@ -856,6 +864,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.69  2018/02/27 04:11:57  jdb
+ * Added epdArrays
+ *
  * Revision 1.68  2017/01/19 23:03:19  smirnovd
  * Copy previously missing values in StMuTrack to StTrack conversion
  *
