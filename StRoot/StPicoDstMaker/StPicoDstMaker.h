@@ -20,11 +20,10 @@ class StEmcRawHit;
 class StPicoDst;
 class StPicoEvent;
 
+//_________________
+class StPicoDstMaker : public StMaker {
 
-
-class StPicoDstMaker : public StMaker
-{
-public:
+ public:
   enum PicoIoMode {IoWrite=1, IoRead=2};
   enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
 
@@ -59,7 +58,7 @@ public:
 
   void setVtxMode(const PicoVtxMode vtxMode);
 
-private:
+ private:
 
   void streamerOff();
 

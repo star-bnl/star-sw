@@ -16,12 +16,12 @@ class StPicoBEmcPidTraits;
 class StPicoBTofPidTraits;
 class StPicoMtdPidTraits;
 
+//_________________
+class StPicoDst {
 
-class StPicoDst
-{
-public:
-  StPicoDst() {}
-  ~StPicoDst() {}
+ public:
+  StPicoDst() { /* empty */ }
+  ~StPicoDst() { /* empty */}
 
   /// set the pointers to the TClonesArrays
   static void set(TClonesArray**);
@@ -77,11 +77,10 @@ public:
   static void printBTofPidTraits();
   static void printMtdPidTraits();
 
-private:
+ private:
 
   /// array of TClonesArrays
   static TClonesArray** picoArrays;
-
 };
 
 #endif
