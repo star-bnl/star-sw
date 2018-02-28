@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.148.2.1 2018/02/17 02:20:02 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.148.2.1 2018/02/17 02:20:02 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.2 2018/02/28 01:47:37 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.148.2.2 2018/02/28 01:47:37 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.148.2.2  2018/02/28 01:47:37  perev
+ * Debug--
+ *
  * Revision 2.148.2.1  2018/02/17 02:20:02  perev
  * Cleanup
  *
@@ -1910,7 +1913,7 @@ void StiKalmanTrack::test(const char *txt) const
     if (tst>=0) continue;
     tst /= sqrt(P[0]*P[0]+P[1]*P[1]);
 //    assert (tst>=-1e-5);
-StiDebug::Count("OverKill",tst);
+//StiDebug::Count("OverKill",tst);
   }
 }
 //_____________________________________________________________________________

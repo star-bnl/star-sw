@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.235 2018/01/03 21:24:21 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.235.4.1 2018/02/28 01:49:15 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -729,17 +729,17 @@ void StiMaker::FinishTracks (int gloPri)
         }
      }
      int qa,idt = track->idTruth(&qa);if(idt){};
-     if (!gloPri) {
-       StiDebug::Count("GloIdQa",qa);
-       StiDebug::Count("GloIdQa_vs_nHits",nHits                     ,qa);
-       StiDebug::Count("GloIdQa_vs_Pt"   ,track->getPt()            ,qa);
-       StiDebug::Count("GloIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
-     } else {
-       StiDebug::Count("PriIdQa",qa);
-       StiDebug::Count("PriIdQa_vs_nHits",nHits                     ,qa);
-       StiDebug::Count("PriIdQa_vs_Pt"   ,track->getPt()            ,qa);
-       StiDebug::Count("PriIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
-     }
+//     if (!gloPri) {
+//        StiDebug::Count("GloIdQa",qa);
+//        StiDebug::Count("GloIdQa_vs_nHits",nHits                     ,qa);
+//        StiDebug::Count("GloIdQa_vs_Pt"   ,track->getPt()            ,qa);
+//        StiDebug::Count("GloIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
+//      } else {
+//        StiDebug::Count("PriIdQa",qa);
+//        StiDebug::Count("PriIdQa_vs_nHits",nHits                     ,qa);
+//        StiDebug::Count("PriIdQa_vs_Pt"   ,track->getPt()            ,qa);
+//        StiDebug::Count("PriIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
+//     }
 //      StiDebug::Count(noNames[gloPri],nNodes );
 //      StiDebug::Count(inNames[gloPri],nInside);
 //      StiDebug::Count(hiNames[gloPri],nHits  );
@@ -748,8 +748,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.235 2018/01/03 21:24:21 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.235.4.1 2018/02/28 01:49:15 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.235.4.1  2018/02/28 01:49:15  perev
+// Debug--
+//
 // Revision 1.235  2018/01/03 21:24:21  smirnovd
 // Remove unused std::string
 //

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.119 2016/06/30 18:33:48 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.119.6.1 2018/02/28 01:50:12 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.119.6.1  2018/02/28 01:50:12  perev
+ * Debug--
+ *
  * Revision 2.119  2016/06/30 18:33:48  perev
  * simplifacation
  *
@@ -1050,8 +1053,6 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   if (gTrack->type()==primary) {
     assert(node->getDetector()==0);
     chi2[1]=node->getChi2();
-StiDebug::Count("Xi2Prim.node",chi2[1]);
-
   }
     
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
