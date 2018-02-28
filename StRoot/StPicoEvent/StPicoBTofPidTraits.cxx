@@ -9,23 +9,22 @@
 
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 
+ClassImp(StPicoBTofPidTraits)
 
-//----------------------------------------------------------------------------------
+//_________________
 StPicoBTofPidTraits::StPicoBTofPidTraits() :
   mTrackIndex(-1),
   mBTofCellId(-1), mBTofMatchFlag(-1),
   mBTof(0), mBTofBeta(0),
   mBTofYLocal(-999), mBTofZLocal(-999),
-  mBTofHitPosX(-999), mBTofHitPosY(-999), mBTofHitPosZ(-999)
-{
-  // constructor
+  mBTofHitPosX(-999), mBTofHitPosY(-999), mBTofHitPosZ(-999) {
+  /* empty */
 }
 
-//----------------------------------------------------------------------------------
-StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack,
-    const StMuTrack* pTrack,
-    const Int_t idx2PicoTrack): StPicoBTofPidTraits()
-{
+//_________________
+StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack, const StMuTrack* pTrack,
+					 const Int_t idx2PicoTrack): StPicoBTofPidTraits() {
+
   mTrackIndex = (idx2PicoTrack > std::numeric_limits<short>::max()) ? -1 : (Short_t)idx2PicoTrack;
 
   StMuBTofHit* btofHit = (StMuBTofHit*)gTrack->tofHit();
@@ -38,22 +37,19 @@ StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack,
 
   mBTofCellId  = (Short_t)((tray - 1) * 192 + (module - 1) * 6 + (cell - 1));
   mBTofMatchFlag = (UChar_t)(gTrack->btofPidTraits().matchFlag());
-  if (tof < 0)
-  {
+  if (tof < 0) {
     mBTof = 0;
   }
-  else
-  {
+  else {
     mBTof = (tof * 1000. > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(tof * 1000.));
   }
-  if (beta < 0)
-  {
+  if (beta < 0) {
     mBTofBeta = 0;
   }
-  else
-  {
+  else {
     mBTofBeta = (beta * 20000. > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(beta * 20000.));
   }
+
   mBTofHitPosX = (fabs(pos.x() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(pos.x() * 100.));
   mBTofHitPosY = (fabs(pos.y() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(pos.y() * 100.));
   mBTofHitPosZ = (fabs(pos.z() * 100.) > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(pos.z() * 100.));
@@ -61,15 +57,27 @@ StPicoBTofPidTraits::StPicoBTofPidTraits(const StMuTrack* gTrack,
   mBTofZLocal  = (fabs(gTrack->btofPidTraits().zLocal()) * 1000. > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)(TMath::Nint(gTrack->btofPidTraits().zLocal() * 1000.));
 }
 
-//----------------------------------------------------------------------------------
-StPicoBTofPidTraits::~StPicoBTofPidTraits()
-{
-  // destructor
+//_________________
+StPicoBTofPidTraits::StPicoBTofPidTraits(const StPicoBTofPidTraits &traits) {
+  mTrackIndex = traits.mTrackIndex;
+  mBTofCellId = traits.mBTofCellId;
+  mBTofMatchFlag = traits.mBTofMatchFlag;
+  mBTof = traits.mBTof;
+  mBTofBeta = traits.mBTofBeta;
+  mBTofYLocal = traits.mBTofYLocal;
+  mBTofZLocal = traits.mBTofZLocal;
+  mBTofHitPosX = traits.mBTofHitPosX;
+  mBTofHitPosY = traits.mBTofHitPosY;
+  mBTofHitPosZ = traits.mBTofHitPosZ;
 }
 
-//----------------------------------------------------------------------------------
-void StPicoBTofPidTraits::Print(const Char_t* option) const
-{
+//_________________
+StPicoBTofPidTraits::~StPicoBTofPidTraits() {
+  /* empty */
+}
+
+//_________________
+void StPicoBTofPidTraits::Print(const Char_t* option) const {
   LOG_INFO << " Matched track index = " << mTrackIndex << endm;
   LOG_INFO << " BTOF cellId = " << btofCellId() << " tof = " << btof() << " beta = " << btofBeta() << endm;
   LOG_INFO << " BTOF match = " << btofMatchFlag() << " yLocal/zLocal " << btofYLocal() << " " << btofZLocal() << endm;

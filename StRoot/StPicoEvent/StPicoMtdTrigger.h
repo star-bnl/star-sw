@@ -11,9 +11,11 @@
 class StMuDst;
 #include "TObject.h"
 
-class StPicoMtdTrigger : public TObject
-{
-public:
+//_________________
+class StPicoMtdTrigger : public TObject {
+
+ public:
+  //Defaults constructor
   StPicoMtdTrigger();
 
   /*!
@@ -26,7 +28,9 @@ public:
    */
   StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8][8],
                    const int QTSlewBinEdge[8][16][8], const int QTSlewCorr[8][16][8]);
-
+  //Copy constructor
+  StPicoMtdTrigger(const StPicoMtdTrigger &trigger);
+  //Destructor
   virtual ~StPicoMtdTrigger();
 
   // VPD tag sum
@@ -87,12 +91,11 @@ public:
 
   Char_t     shouldHaveRejectEvent();
 
-protected:
+ protected:
   static const UShort_t mtd_qt_tac_max = 4095;
   static const UShort_t kNQTboard = 8;
 
-
-private:
+ private:
   UShort_t      mVpdTacSum;              ///< VPD: TACsum (east+west) for the event
   UInt_t        mTHUBtime[2];            ///< Trigger time from the two THUBs
   UShort_t      mQTtacSum[kNQTboard][8]; ///< MTD: TACsum (j2+j3) of each position in each QT board
@@ -109,6 +112,7 @@ private:
 
   ClassDef(StPicoMtdTrigger, 1);
 };
+
 inline UShort_t StPicoMtdTrigger::getVpdTacSum() { return mVpdTacSum; }
 inline UInt_t   StPicoMtdTrigger::getTHUBtime(const Int_t thub) { return mTHUBtime[thub - 1]; }
 inline UShort_t StPicoMtdTrigger::getQTtacSum(const Int_t qt, const Int_t pos) { return mQTtacSum[qt - 1][pos - 1]; }

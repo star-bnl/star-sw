@@ -3,20 +3,27 @@
 
 #include "TObject.h"
 
-class StPicoBTowHit : public TObject
-{
-public:
-  StPicoBTowHit();
-  StPicoBTowHit(int, int, float);
-  virtual ~StPicoBTowHit();
+//_________________
+class StPicoBTowHit : public TObject {
 
-  virtual void Print(const Char_t* option = "") const;  ///< Print trigger info
+ public:
+  //Default constructor
+  StPicoBTowHit();
+  //Constructor that takes id, ADC and energy
+  StPicoBTowHit(int id, int adc, float e);
+  //Copy constructor
+  StPicoBTowHit(const StPicoBTowHit &hit);
+  //Destructor
+  virtual ~StPicoBTowHit();
+  //Print tower information
+  virtual void Print(const Char_t* option = "") const;
 
   Int_t   id() const;
   Int_t   adc() const;
   Float_t energy() const;
 
-protected:
+ protected:
+
   UShort_t mId;    // towerId 1-4800
   UShort_t mAdc;   // adc
   Short_t  mE;     // Energy * 1000;

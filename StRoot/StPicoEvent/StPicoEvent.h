@@ -7,14 +7,20 @@
 
 class StMuDst;
 
-class StPicoEvent : public TObject
-{
-public:
+//_________________
+class StPicoEvent : public TObject {
 
+ public:
+  //Defaults constructor
   StPicoEvent();
-  virtual ~StPicoEvent();
+  //Constuctor that takes muDst
   StPicoEvent(StMuDst const& muDst);
+  //Copy constructor
+  StPicoEvent(const StPicoEvent &event);
+  //Destructor
+  virtual ~StPicoEvent();
 
+  //Getters
   Int_t    runId() const;
   Int_t    eventId() const;
   Int_t    fillId() const;
@@ -103,10 +109,11 @@ public:
   int      year() const;
   int      day() const;
 
+  //Setters
   void     setHighTowerThreshold(const Int_t i, const Int_t th);
   void     setJetPatchThreshold(const Int_t i, const Int_t th);
 
-protected:
+ protected:
 
   Int_t    mRunId;
   Int_t    mEventId;
@@ -182,7 +189,6 @@ protected:
 
   ClassDef(StPicoEvent, 1)
 };
-
 
 inline Int_t    StPicoEvent::runId() const { return mRunId; }
 inline Int_t    StPicoEvent::eventId() const { return mEventId; }

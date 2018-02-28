@@ -5,12 +5,19 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 class StMuTrack;
 
-class StPicoBTofPidTraits : public TObject
-{
-public:
+//_________________
+class StPicoBTofPidTraits : public TObject {
+
+ public:
+  //Default constructor
   StPicoBTofPidTraits();
+  //Constructor that takes StMuTracks
   StPicoBTofPidTraits(const StMuTrack* globalTrack, const StMuTrack* primarayTrack, const Int_t idx2PicoTrack);
+  //Copy constructor
+  StPicoBTofPidTraits(const StPicoBTofPidTraits &traits);
+  //Destructor
   virtual ~StPicoBTofPidTraits();
+  //Print TOF PID traits information
   virtual void Print(const Char_t* option = "") const;
 
   Int_t   trackIndex() const;
@@ -22,7 +29,8 @@ public:
   Float_t btofZLocal() const;
   StThreeVectorF btofHitPos() const;
 
-private:
+ private:
+
   Short_t  mTrackIndex;       // Index to the associated track in the event
   Short_t  mBTofCellId;       // (tray-1)*192+(module-1)*6+(cell-1): -1 - no match
   UChar_t  mBTofMatchFlag;    // 0 - no match, 1 - one-to-one, 2 - one-to-multiple
@@ -36,6 +44,7 @@ private:
 
   ClassDef(StPicoBTofPidTraits, 1);
 };
+
 inline Int_t   StPicoBTofPidTraits::trackIndex() const { return mTrackIndex; }
 inline Int_t   StPicoBTofPidTraits::btofCellId() const { return (Int_t)mBTofCellId; }
 inline Int_t   StPicoBTofPidTraits::btofMatchFlag() const { return (Int_t)mBTofMatchFlag; }
