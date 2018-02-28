@@ -1,0 +1,34 @@
+set DIR = /gpfs02/eic/ayk/STAR/reco/Pico/2014/AuAu_200_production_mid_2014;
+foreach dayd (`ls -1dr ${DIR}/16?`)
+  set day = `basename ${dayd}`;
+  cd ${DIR}
+  if (! -d ${day}) mkdir ${day}
+  cd  ${day}
+  foreach run ( `ls -1d 15*` )
+    cd ${run}
+    pwd
+    PicoDST2014.pl
+    if ( ! $? ) then
+      lsf ~/xml/PicoDST2014.xml;
+    else
+      touch Done;
+    endif
+    cd -;
+  end
+end
+================================================================================
+cd ~/Pico/2014
+setenv NODEBUG yes
+setup 64b
+xtitl
+foreach f (`ls -1d 1*/Done`)
+  set d = `dirname ${f}`;
+  cd ${d}; 
+  if (-r Done && ! -r Chain.log) then	
+    rm -rf .sl*
+    ln -s ../../../.sl73_* .	
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
+    rm Done
+  endif
+  cd -;
+end

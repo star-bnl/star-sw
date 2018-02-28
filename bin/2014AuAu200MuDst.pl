@@ -7,6 +7,7 @@ if ($#ARGV < 0) {
 my $debug = 1;
 my $day = $ARGV[0];
 my $trigger = "AuAu_200_production_mid_2014";
+my Prod = "P17id";
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename,events' -cond 'filetype=online_daq,filename~st_laser,tpx=1,sanity=1,runnumber>15000000,events>10' -limit 0`;
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_physics_15,tpx=1,sanity=1,runnumber>15000000,events>10' -limit 0`;
 #my @list = `get_file_list.pl -delim '/' -keys 'path,filename' -cond 'filetype=online_daq,filename~st_,tpx=1,sanity=1,events>10,runnumber>16140032,trgsetupname=fixedTarget2015' -limit 0`; 
@@ -16,7 +17,7 @@ my $trigger = "AuAu_200_production_mid_2014";
 my $TriggerFile = $trigger . ".txt"; print "Trigger file = $TriggerFile\n" if ($debug);
 if (! -r $TriggerFile) {
 #  my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16id,trgsetupname=" . $trigger . ",filetype=daq_reco_MuDst,filename~st_physics,tpx=1,pxl=1,ist=1,sanity=1,events>10,runnumber>15000000' -limit 0"; 
-  my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=P16id,trgsetupname=" . $trigger . ",filetype=daq_reco_MuDst,filename~st_physics_adc,tpx=1,pxl=1,ist=1,sanity=1,events>10,daynumber=166' -limit 0"; 
+  my $cmd = "get_file_list.pl -delim '/' -keys 'path,filename' -cond 'production=".$Prod.",trgsetupname=" . $trigger . ",filetype=daq_reco_MuDst,filename~st_physics,tpx=1,pxl=1,,sanity=1,events>10,daynumber=".$day."' -limit 0"; 
   print "$cmd\n" if ($debug);
   my  @list = `$cmd`;
   open(Out, ">$TriggerFile") or die "Can't open $TriggerFile"; 
@@ -48,8 +49,13 @@ while (my $file = <In>) {
   else                 {$i++;}
 #  if ($i%20 != 1) {next;}
   my $basename = $file;
-  $basename =~ s#home/starreco/reco/AuAu_200_production_2016/ReversedFullField/P16ij/##;
-  $basename =~ s#home/starreco/reco/AuAu_200_production_mid_2014/ReversedFullField/P16id/##;
+  $basename =~ s#home/starreco/reco/##;
+  $basename =~ s#trigger##;
+  $basename =~ s#Prod##;
+  $basename =~ s#ReversedFullField##;
+  $basename =~ s#//#/g;
+#  $basename =~ s#home/starreco/reco/AuAu_200_production_2016/ReversedFullField/P16ij/##;
+#  $basename =~ s#home/starreco/reco/AuAu_200_production_mid_2014/ReversedFullField/P16id/##;
 #  print "$file = > $basename\n";
   my $found = 0;
   my $dir;
