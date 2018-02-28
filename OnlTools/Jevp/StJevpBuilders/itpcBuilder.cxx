@@ -1,4 +1,4 @@
-// $Id: itpcBuilder.cxx,v 1.4 2018/02/24 15:50:40 videbaks Exp $
+// $Id: itpcBuilder.cxx,v 1.5 2018/02/28 16:07:12 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +33,8 @@
 // Flag to skip the rdr->get("cld") produce error for each event
 // change to 1 when clusters are ready 
 // skip the laser cal for now - revisit for run19
+//
+// mask out a set of hot paws in row28  NOTE a general feature.
 //
 #define checkcld 0
 #define checklaser 0
@@ -405,12 +407,12 @@ void itpcBuilder::event(daqReader *rdr)
 
       while(dd->iterate()) {
 #ifdef fv
-	cout << dd->row << " , " << dd->pad << " , " << dd->ncontent << endl;
+	cout << "row " << dd->row << " , " << dd->pad << " , " << dd->ncontent << endl;
 #endif
 	//
 	// skip padrow 0 -- don't know what it is?
 	//
-	if((dd->pad < 1 ) ||
+	if((dd->pad < 1 ) || 
 	   (dd->row < 1))
 	  {
 	    continue;
@@ -436,7 +438,10 @@ void itpcBuilder::event(daqReader *rdr)
 	    LOG(ERR, "event=%d pad=%d row=%d tb=%d out of range.  Ignore.", event_no, dd->pad, dd->row, tb);
 	  }
 	  else {
-	    if(tb>30 && tb<430) {
+	    if((dd->row == 28) && (dd->pad > 51) && (dd->pad <56)){
+	      continue;
+	    }
+	    else if(tb>32 && tb<430) {
 	      charge_counts[dd->pad][dd->row] += adc;
 	    }
 	    tb_charge_counts[tb] += adc;
