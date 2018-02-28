@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.53 2017/01/19 23:03:27 smirnovd Exp $
+ * $Id: StMuDst.h,v 1.54 2018/02/27 04:11:57 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -56,7 +56,8 @@ class StBTofCollection;
 class StMuBTofHit;
 class StBTofRawHit;
 class StBTofHeader;
-
+class StMuEpdHitCollection;  // MALisa
+class StMuEpdHit;            // MALisa
 class EztEventHeader;
 class EztTrigBlob;
 class EztFpdBlob;
@@ -118,10 +119,11 @@ public:
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
-            TClonesArray** mtd_ptca=0,
+		    TClonesArray**  epd_col=0,  // MALisa
+		    TClonesArray** mtd_ptca=0,
 		    TClonesArray** fgt_ptca=0,
 		    TClonesArray** ezt_ptca=0,
-            TClonesArray *emc_tca=0, 
+		    TClonesArray *emc_tca=0, 
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
 		    TClonesArray *pmd_tca=0, 
@@ -185,6 +187,8 @@ public:
   static TClonesArray** tofArrays;
   /// array of TClonesArrays for the stuff inherited from the BTOF // dongx
   static TClonesArray** btofArrays;  
+  /// array of TClonesArrays for Epd
+  static TClonesArray** epdArrays;
   /// array of TClonesArrays for the stuff inherited from the Mtd
   static TClonesArray** mtdArrays;  
   /// array of TClonesArrays for the stuff inherited from the Fgt
@@ -203,6 +207,7 @@ public:
   static StEmcCollection *mEmcCollection;
   /// pointer to FmsCollecion (for Fms clusterfinding etc)
   static StFmsCollection *mFmsCollection;
+
   /// array of TClonesArrays for the stuff inherited from the EZT (ezTree)
   static TClonesArray** eztArrays;
 
@@ -242,8 +247,9 @@ public:
   /// returns pointer to the n-th TClonesArray from the fgt arrays
   static TClonesArray* fgtArray(Int_t type) { return fgtArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the ezt arrays
-  static TClonesArray* eztArray(Int_t type) { return eztArrays[type]; }
-
+  static TClonesArray* eztArray(int type) { return eztArrays[type]; }
+  /// returns pointer to the EpdHitCollection
+  static TClonesArray* epdHits() { return epdArrays[muEpdHit]; }  // MALisa
   /// returns pointer to the primary vertex list
   static TClonesArray* primaryVertices() { return arrays[muPrimaryVertex]; }
   static TClonesArray* allPrimaryTracks() { return arrays[muPrimary]; } 
@@ -367,8 +373,10 @@ public:
   /// returns pointer to the btofHeader - dongx
   static StBTofHeader* btofHeader() { return (StBTofHeader*)btofArrays[muBTofHeader]->UncheckedAt(0); }
 
-  static StMuMtdHit* mtdHit(Int_t i) { return (StMuMtdHit*)mtdArrays[muMTDHit]->UncheckedAt(i); }
-    static StMuMtdRawHit* mtdRawHit(Int_t i) { return (StMuMtdRawHit*)mtdArrays[muMTDRawHit]->UncheckedAt(i); }
+  static StMuEpdHit* epdHit(int i) { return (StMuEpdHit*)epdArrays[muEpdHit]->UncheckedAt(i); }  // MALisa
+
+  static StMuMtdHit* mtdHit(int i) { return (StMuMtdHit*)mtdArrays[muMTDHit]->UncheckedAt(i); }
+    static StMuMtdRawHit* mtdRawHit(int i) { return (StMuMtdRawHit*)mtdArrays[muMTDRawHit]->UncheckedAt(i); }
     static StMuMtdHeader* mtdHeader() { return (StMuMtdHeader*)mtdArrays[muMTDHeader]->UncheckedAt(0); } 
     
     
@@ -429,8 +437,10 @@ public:
   static UInt_t numberOfBTofHit()       { return btofArrays[muBTofHit]->GetEntriesFast(); }
   static UInt_t numberOfBTofRawHit()    { return btofArrays[muBTofRawHit]->GetEntriesFast(); }
 
-  static UInt_t numberOfMTDHit()       { return mtdArrays[muMTDHit]->GetEntriesFast(); }
-  static UInt_t numberOfBMTDRawHit()    { return mtdArrays[muMTDRawHit]->GetEntriesFast(); }
+  static unsigned int numberOfEpdHit()       { return epdArrays[muEpdHit]->GetEntriesFast(); }
+
+  static unsigned int numberOfMTDHit()       { return mtdArrays[muMTDHit]->GetEntriesFast(); }
+  static unsigned int numberOfBMTDRawHit()    { return mtdArrays[muMTDRawHit]->GetEntriesFast(); }
     
   static UInt_t GetNPrimaryVertex()    { return numberOfPrimaryVertices(); }  
   static UInt_t GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
@@ -461,8 +471,10 @@ public:
   static UInt_t GetNBTofHit()         { return numberOfBTofHit(); }
   static UInt_t GetNBTofRawHit()      { return numberOfBTofRawHit(); }
 
-  static UInt_t GetNMTDHit()         { return numberOfMTDHit(); }
-  static UInt_t GetNMTDRawHit()      { return numberOfBMTDRawHit(); }
+  static unsigned int GetNEpdHit()         { return numberOfEpdHit(); }
+
+  static unsigned int GetNMTDHit()         { return numberOfMTDHit(); }
+  static unsigned int GetNMTDRawHit()      { return numberOfBMTDRawHit(); }
     
   virtual void Print(Option_t *option = "") const; ///< Print basic event info
   static void printPrimaryTracks();
@@ -574,6 +586,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.54  2018/02/27 04:11:57  jdb
+ * Added epdArrays
+ *
  * Revision 1.53  2017/01/19 23:03:27  smirnovd
  * StMuDst: Make methods static as logic suggests
  *
