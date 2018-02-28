@@ -3,11 +3,11 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.19.10.1 2018/02/16 22:15:00 perev Exp $
+ * $Id: StTpcHitMaker.h,v 1.19.10.2 2018/02/28 01:42:13 perev Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
- * Revision 1.19.10.1  2018/02/16 22:15:00  perev
- * iTPC
+ * Revision 1.19.10.2  2018/02/28 01:42:13  perev
+ * There are some fixes to properly read the real data. Irakli
  *
  * Revision 1.19  2014/08/06 11:43:50  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -144,6 +144,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH1F        *fSectCounts;
   Int_t    NoRows;
   Int_t    NoInnerPadRows;
+  Int_t    mRowOffSet4iTPC;
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);

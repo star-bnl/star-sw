@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.40.6.1 2018/02/16 22:15:00 perev Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.40.6.2 2018/02/28 01:42:13 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -195,7 +195,7 @@ Int_t StTpcRTSHitMaker::Make() {
     Int_t hitsAdded = 0;
     Int_t nup = 0;
     Int_t NoAdcs = 0;
-    for (Int_t row = minRow; row <= digitalSector->numberOfRows(); row++) {
+    for (Int_t row = minRow; row <= TMath::Min(maxRow,digitalSector->numberOfRows()); row++) {
       if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
