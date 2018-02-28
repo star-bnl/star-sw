@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.13 2018/02/26 23:29:50 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.14 2018/02/28 19:40:48 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -105,9 +105,11 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
       <<"\n Min/Max Z position for BTOF hit = "<<mMinZBtof<<" "<<mMaxZBtof   // dongx
       <<"\n MinAdcBemc for MIP ="<<mMinAdcBemc
       <<"\n MinAdcEemc for MIP ="<<mMinAdcEemc
-      <<"\n bool   isMC ="<<isMC
-      <<"\n bool useCtb ="<< (ctbList != 0)
-     <<"\n bool useBtof ="<< (bemcList != 0)
+      <<"\n bool    isMC ="<<isMC
+      <<"\n bool  useCtb ="<< (ctbList  != 0)
+      <<"\n bool useBemc ="<< (bemcList != 0)
+      <<"\n bool useEemc ="<< (eemcList != 0)
+      <<"\n bool useBtof ="<< (btofList != 0)
       <<endm; 
     InitRun = kFALSE;
   }
@@ -305,6 +307,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.14  2018/02/28 19:40:48  genevb
+ * Fix some informational output
+ *
  * Revision 2.13  2018/02/26 23:29:50  smirnovd
  * StTrack2FastDetectorMatcher: Build StBTOfGeometry from TGeo geometry when available
  *
