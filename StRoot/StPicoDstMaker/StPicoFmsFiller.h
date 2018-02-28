@@ -6,17 +6,17 @@ class StMuDst;
 class StPicoDst;
 class StFmsDbMaker;
 
+//_________________
+class StPicoFmsFiller {
 
-class StPicoFmsFiller
-{
-public:
+ public:
 
   StPicoFmsFiller(StPicoDst& picoDst);
 
   void fill(const StMuDst& muDst, const StFmsDbMaker* fmsDbMaker = nullptr);
 
-private:
-
+ private:
+  
   StPicoDst&  mPicoDst;
 
 };

@@ -26,5 +26,8 @@ int StPicoArrays::picoArraySizes [NAllPicoArrays] = {1, 1000, 100, 100,
                                                      100, 100, 1300,
                                                      100, 100, 100
                                                     };
-StPicoArrays::StPicoArrays()
-{}
+
+//_________________
+StPicoArrays::StPicoArrays() {
+  /* empty */
+}

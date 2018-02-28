@@ -12,21 +12,18 @@
 
 using namespace StarPicoDst;
 
-
-StBeamDirection eastwestdir(DetectorSide ew)
-{
+//_________________
+StBeamDirection eastwestdir(DetectorSide ew) {
   return ew == DetectorSide::East ? StBeamDirection::east : StBeamDirection::west;
 }
 
-
-StPicoBbcFiller::StPicoBbcFiller(StPicoDst& picoDst, int year) :
-  mPicoDst(picoDst)
-{
+//_________________
+StPicoBbcFiller::StPicoBbcFiller(StPicoDst& picoDst, int year) : mPicoDst(picoDst) { 
+  /* no-op */
 }
 
-
-void StPicoBbcFiller::fill(const StMuDst& muDst)
-{
+//_________________
+void StPicoBbcFiller::fill(const StMuDst& muDst) {
   TClonesArray *mTileCollection = mPicoDst.picoArray(StPicoArrays::BbcTile);
 
   StMuEvent *event = muDst.event();
@@ -35,10 +32,8 @@ void StPicoBbcFiller::fill(const StMuDst& muDst)
   int nTiles = 0;
 
   // Loop over BBC tiles
-  for (DetectorSide ew : detectorSides)
-  {
-    for (int pmtId = 1; pmtId <= 24; pmtId++)
-    {
+  for (DetectorSide ew : detectorSides) {
+    for (int pmtId = 1; pmtId <= 24; pmtId++) {
       int ADC = trg->bbcADC(eastwestdir(ew), pmtId, 0);
       int TAC = trg->bbcTDC(eastwestdir(ew), pmtId, 0); // yes I know the method says "TDC" but it's the TAC
       int TDC = trg->bbcTDC5bit(eastwestdir(ew), pmtId);
@@ -46,7 +41,6 @@ void StPicoBbcFiller::fill(const StMuDst& muDst)
       bool hasTAC = kTRUE;
 
       new((*mTileCollection)[nTiles++]) StPicoBbcTile(ID, ADC, TAC, TDC, hasTAC);
-    }
-  }
-
+    } //for (int pmtId = 1; pmtId <= 24; pmtId++)
+  } //for (DetectorSide ew : detectorSides)
 }

@@ -9,17 +9,14 @@
 #include "StPicoDstMaker/StPicoDst.h"
 #include "StPicoEvent/StPicoEpdTile.h"
 
-
-
-StPicoEpdFiller::StPicoEpdFiller(StPicoDst& picoDst, int year) :
-  mPicoDst(picoDst)
-{
+//_________________
+StPicoEpdFiller::StPicoEpdFiller(StPicoDst& picoDst, int year) : mPicoDst(picoDst) {
   if (year == 2017)  setDefaultMapping_30may2017();
 }
 
+//_________________
+void StPicoEpdFiller::fill(const StMuDst& muDst) {
 
-void StPicoEpdFiller::fill(const StMuDst& muDst)
-{
   TClonesArray *mTileCollection = mPicoDst.picoArray(StPicoArrays::EpdTile);
 
   StMuEvent *Event = muDst.event();
@@ -29,10 +26,8 @@ void StPicoEpdFiller::fill(const StMuDst& muDst)
 
   // Loop over EPD tiles
   // here, the "ADC","TDC" and"TAC" can be a little subtle...
-  for (int positionId = 4; positionId <= 6; positionId++)
-  {
-    for (int tileId = 1; tileId <= 31; tileId++)
-    {
+  for (int positionId = 4; positionId <= 6; positionId++) {
+    for (int tileId = 1; tileId <= 31; tileId++) {
       EpdAnalysisMap& epdMap = mEpdMap[0][positionId-1][tileId-1];
 
       int ADC = trg->fmsADC(5, epdMap.qt_board_address, epdMap.qt_channel_ADC, 0);
@@ -44,13 +39,12 @@ void StPicoEpdFiller::fill(const StMuDst& muDst)
 
       DetectorSide EW = DetectorSide::East; // always East for 2017
       new((*mTileCollection)[nTiles++]) StPicoEpdTile(positionId, tileId, EW, ADC, TAC, TDC, hasTAC);
-    }
-  }
+    } //for (int tileId = 1; tileId <= 31; tileId++)
+  } //for (int positionId = 4; positionId <= 6; positionId++)
 }
 
-
-void StPicoEpdFiller::setDefaultMapping_30may2017()
-{
+//_________________
+void StPicoEpdFiller::setDefaultMapping_30may2017() {
   // until we get the Database integrated _OR_ a standard set of access functions for EPD data in the StTriggerData object,
   // we need a map array relating position/tile with QT/channel.  Prashanth had been using map.txt files, but this will not work
   // on rcf nodes.  Therefore, I (Mike) am hard-coding the map that we will use starting on 30 May 2017, through the remainder
