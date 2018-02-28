@@ -1,11 +1,3 @@
-/*!
- *  \class StPicoMtdPidTraits
- *
- *  \brief Class storing the matching information
- *  between TPC tracks and MTD hits for muon PID.
- * 
- */
-
 #ifndef StPicoMtdPidTraits_h
 #define StPicoMtdPidTraits_h
 
@@ -13,9 +5,11 @@
 class StMuMtdPidTraits;
 class StMuMtdHit;
 
-class StPicoMtdPidTraits : public TObject
-{
-public:
+//_________________
+class StPicoMtdPidTraits : public TObject {
+
+ public:
+  //Default constructor
   StPicoMtdPidTraits();
 
   /*!
@@ -26,15 +20,11 @@ public:
    *  \param index Index to the associated TPC track
    */
   StPicoMtdPidTraits(const StMuMtdHit* hit, const StMuMtdPidTraits* trait, const Int_t index);
-
-
-  /*!
-   *
-   *  \brief Default destructor
-   */
+  //Copy constructor
+  StPicoMtdPidTraits(const StPicoMtdPidTraits &traits);
+  //Destructor
   virtual ~StPicoMtdPidTraits();
-
-
+  //Print MTD PID traits information
   virtual void Print(const Char_t* option = "") const;
 
   // Matching information
@@ -59,7 +49,7 @@ public:
   void    setDeltaTimeOfFlight(Float_t t);
   void    setBeta(Float_t beta);
 
-private:
+ private:
   Short_t   mTrackIndex;            ///< Index to the associated track in the event
   Short_t   mMtdHitIndex;           ///< Index to the associated MTD hit in the event
   Char_t    mMatchFlag;             ///< Matching flag indicating multiple matches
@@ -71,6 +61,7 @@ private:
 
   ClassDef(StPicoMtdPidTraits, 1)
 };
+
 inline Int_t    StPicoMtdPidTraits::trackIndex()        const { return mTrackIndex; }
 inline Int_t    StPicoMtdPidTraits::mtdHitIndex()       const { return mMtdHitIndex; }
 inline Int_t    StPicoMtdPidTraits::gChannel()          const { return mMtdHitChan; }

@@ -3,14 +3,19 @@
 
 #include "TObject.h"
 
-class StPicoBTofHit : public TObject
-{
-public:
+//_________________
+class StPicoBTofHit : public TObject {
 
+ public:
+  //Defaults consturctor
   StPicoBTofHit();
-  StPicoBTofHit(int);
+  //Constructor that takes id
+  StPicoBTofHit(int id);
+  //Copy constructor
+  StPicoBTofHit(const StPicoBTofHit &hit);
+  //Destructor
   virtual ~StPicoBTofHit();
-
+  //Print hit information
   virtual void Print(const Char_t* option = "") const;  ///< Print trigger info
 
   Int_t   id() const;
@@ -18,7 +23,7 @@ public:
   Int_t   module() const;
   Int_t   cell() const;
 
-protected:
+ protected:
 
   Short_t mId;     // (tray-1)*192+(module-1)*6+(cell-1):
 

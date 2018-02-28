@@ -10,7 +10,9 @@
 #include "StPicoEvent/StPicoUtilities.h"
 #include "StPicoEvent/StPicoEvent.h"
 
+ClassImp(StPicoEvent)
 
+//_________________
 StPicoEvent::StPicoEvent():
   mRunId(0), mEventId(0), mFillId(0), mBField(0), mTime(0),
   mPrimaryVertex{ -999., -999., -999.}, mPrimaryVertexError{ -999., -999., -999},
@@ -29,11 +31,13 @@ StPicoEvent::StPicoEvent():
   mZdcSumAdcEast(0), mZdcSumAdcWest(0),
   mZdcSmdEastHorizontal{}, mZdcSmdEastVertical{}, mZdcSmdWestHorizontal{}, mZdcSmdWestVertical{},
   mBbcAdcEast{}, mBbcAdcWest{},
-  mHighTowerThreshold{}, mJetPatchThreshold{}
-{}
+  mHighTowerThreshold{}, mJetPatchThreshold{} {
+    /* empty */
+}
 
-StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
-{
+//_________________
+StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent() {
+
   StMuEvent* ev = muDst.event() ;
 
   mRunId = ev->runNumber();
@@ -46,8 +50,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   mPrimaryVertex = ev->primaryVertexPosition();
   mPrimaryVertexError = ev->primaryVertexErrors();
 
-  if (StMuPrimaryVertex* pv = muDst.primaryVertex())
-  {
+  if (StMuPrimaryVertex* pv = muDst.primaryVertex()) {
     mRanking = pv->ranking();
     mNBEMCMatch = pv->nBEMCMatch();
     mNBTOFMatch = pv->nBTOFMatch();
@@ -89,8 +92,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   mNHitsHFT[2] = (UShort_t)ev->numberOfIstHits();
   mNHitsHFT[3] = (UShort_t)ev->numberOfSsdHits();
 
-  if (StBTofHeader* header = muDst.btofHeader())
-  {
+  if (StBTofHeader* header = muDst.btofHeader()) {
     mNVpdHitsEast = (UChar_t)(header->numberOfVpdHits(east));
     mNVpdHitsWest = (UChar_t)(header->numberOfVpdHits(west));
     mNTofT0 = (UShort_t)(header->nTzero());
@@ -110,8 +112,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   StZdcTriggerDetector& ZDC = ev->zdcTriggerDetector();
   mZdcSumAdcEast = (UShort_t)ZDC.adcSum(east);
   mZdcSumAdcWest = (UShort_t)ZDC.adcSum(west);
-  for (int strip = 1; strip < 9; ++strip)
-  {
+  for (int strip = 1; strip < 9; ++strip) {
     if (ZDC.zdcSmd(east, 1, strip))
       mZdcSmdEastHorizontal[strip - 1] = (UShort_t)ZDC.zdcSmd(east, 1, strip);
     if (ZDC.zdcSmd(east, 0, strip))
@@ -123,8 +124,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   }
 
   StBbcTriggerDetector bbc = ev->bbcTriggerDetector() ;
-  for (UInt_t i = 0; i < bbc.numberOfPMTs(); ++i)
-  {
+  for (UInt_t i = 0; i < bbc.numberOfPMTs(); ++i) {
     UInt_t const eastWest = (i < 24) ? 0 : 1 ; // East:0-23, West:24-47
     UInt_t const pmtId    = i % 24 ;         // pmtId:0-23
 
@@ -133,20 +133,100 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent()
   }
 }
 
-StPicoEvent::~StPicoEvent()
-{ }
+//_________________
+StPicoEvent::StPicoEvent(const StPicoEvent &event) {
+  mRunId = event.mRunId;
+  mEventId = event.mEventId;
+  mFillId = event.mFillId;
+  mBField = event.mBField;
+  mTime = event.mTime;
+  mPrimaryVertex = event.mPrimaryVertex;
+  mPrimaryVertexError = event.mPrimaryVertexError;
+  mRanking = event.mRanking;
+  mNBEMCMatch = event.mNBEMCMatch;
+  mNBTOFMatch = event.mNBTOFMatch;
 
-int StPicoEvent::year() const
-{
+  mTriggerIds = event.mTriggerIds;
+
+  mRefMultFtpcEast = event.mRefMultFtpcEast;
+  mRefMultFtpcWest = event.mRefMultFtpcWest;
+  mRefMultNeg = event.mRefMultNeg;
+  mRefMultPos = event.mRefMultPos;
+  mRefMult2NegEast = event.mRefMult2NegEast;
+  mRefMult2PosEast = event.mRefMult2PosEast;
+  mRefMult2NegWest = event.mRefMult2NegWest;
+  mRefMult2PosWest = event.mRefMult2PosWest;
+  mRefMult3NegEast = event.mRefMult3NegEast;
+  mRefMult3PosEast = event.mRefMult3PosEast;
+  mRefMult3NegWest = event.mRefMult3NegWest;
+  mRefMult3PosWest = event.mRefMult3PosWest;
+  mRefMult4NegEast = event.mRefMult4NegEast;
+  mRefMult4PosEast = event.mRefMult4PosEast;
+  mRefMult4NegWest = event.mRefMult4NegWest;
+  mRefMult4PosWest = event.mRefMult4PosWest;
+  mRefMultHalfNegEast = event.mRefMultHalfNegEast;
+  mRefMultHalfPosEast = event.mRefMultHalfPosEast;
+  mRefMultHalfNegWest = event.mRefMultHalfNegWest;
+  mRefMultHalfPosWest = event.mRefMultHalfPosWest;
+
+  mGRefMult = event.mGRefMult;
+  mNumberOfGlobalTracks = event.mNumberOfGlobalTracks;
+  mbTofTrayMultiplicity = event.mbTofTrayMultiplicity;
+  for(int iIter=0; iIter<4; iIter++) {
+    mNHitsHFT[iIter] = event.mNHitsHFT[iIter];
+  }
+
+  mNVpdHitsEast = event.mNVpdHitsEast;
+  mNVpdHitsWest = event.mNVpdHitsWest;
+  mNTofT0 = event.mNTofT0;
+  mVzVpd = event.mVzVpd;
+
+  mZDCx = event.mZDCx;
+  mBBCx = event.mBBCx;
+  mBackgroundRate = event.mBackgroundRate;
+  mBbcBlueBackgroundRate = event.mBbcBlueBackgroundRate;
+  mBbcYellowBackgroundRate = event.mBbcYellowBackgroundRate;
+  mBbcEastRate = event.mBbcEastRate;
+  mBbcWestRate = event.mBbcWestRate;
+  mZdcEastRate = event.mZdcEastRate;
+  mZdcWestRate = event.mZdcWestRate;
+
+  mZdcSumAdcEast = event.mZdcSumAdcEast;
+  mZdcSumAdcWest = event.mZdcSumAdcWest;
+  for(int iIter=0; iIter<8; iIter++) {
+    mZdcSmdEastHorizontal[iIter] = event.mZdcSmdEastHorizontal[iIter];
+    mZdcSmdEastVertical[iIter] = event.mZdcSmdEastVertical[iIter];
+    mZdcSmdWestHorizontal[iIter] = event.mZdcSmdWestHorizontal[iIter];
+    mZdcSmdWestVertical[iIter] = event.mZdcSmdWestVertical[iIter];
+  }
+
+  for(int iIter=0; iIter<24; iIter++) {
+    mBbcAdcEast[iIter] = event.mBbcAdcEast[iIter];
+    mBbcAdcWest[iIter] = event.mBbcAdcWest[iIter];
+  }
+
+  for(int iIter=0; iIter<4; iIter++) {
+    mHighTowerThreshold[iIter] = event.mHighTowerThreshold[iIter];
+    mJetPatchThreshold[iIter] = event.mJetPatchThreshold[iIter];
+  }
+}
+
+//_________________
+StPicoEvent::~StPicoEvent() { 
+  /* empty */
+}
+
+//_________________
+int StPicoEvent::year() const {
   return mRunId / 1000000 - 1 + 2000;
 }
 
-int StPicoEvent::day() const
-{
+//_________________
+int StPicoEvent::day() const {
   return (mRunId % 1000000) / 1000;
 }
 
-bool StPicoEvent::isTrigger(unsigned int id) const
-{
+//_________________
+bool StPicoEvent::isTrigger(unsigned int id) const {
   return std::find(mTriggerIds.begin(), mTriggerIds.end(), id) != mTriggerIds.end();
 }

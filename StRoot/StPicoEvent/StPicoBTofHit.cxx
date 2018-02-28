@@ -3,22 +3,30 @@
 #include "St_base/StMessMgr.h"
 #include "StPicoEvent/StPicoBTofHit.h"
 
+ClassImp(StPicoBTofHit)
 
-StPicoBTofHit::StPicoBTofHit() : mId(0) {}
-StPicoBTofHit::StPicoBTofHit(int id): StPicoBTofHit()
-{
+//_________________
+StPicoBTofHit::StPicoBTofHit() : mId(0) {
+  /* empty */
+}
+
+//_________________
+StPicoBTofHit::StPicoBTofHit(int id): StPicoBTofHit() {
   if (id  < 0) return;
-  mId   = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id;
+  mId = (id > std::numeric_limits<short>::max()) ? std::numeric_limits<short>::max() : (Short_t)id;
 }
 
-//----------------------------------------------------------------------------------
-StPicoBTofHit::~StPicoBTofHit()
-{
-  /* noop */
+//_________________
+StPicoBTofHit::StPicoBTofHit(const StPicoBTofHit &hit) {
+  mId = hit.mId;
 }
 
-//----------------------------------------------------------------------------------
-void StPicoBTofHit::Print(const Char_t* option) const
-{
+//_________________
+StPicoBTofHit::~StPicoBTofHit() {
+  /* empty */
+}
+
+//_________________
+void StPicoBTofHit::Print(const Char_t* option) const {
   LOG_INFO << " Id = " << id() << endm;
 }

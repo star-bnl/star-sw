@@ -2,11 +2,11 @@
 
 #include "TMath.h"
 #include "St_base/StMessMgr.h"
-
 #include "StPicoEvent/StPicoBEmcPidTraits.h"
 
+ClassImp(StPicoBEmcPidTraits)
 
-//----------------------------------------------------------------------------------
+//_________________
 StPicoBEmcPidTraits::StPicoBEmcPidTraits() :
   mTrackIndex(-1),
   mBemcId(-9999), mBemcAdc0(-9999), mBemcE0(-9999), mBemcE(-9999),
@@ -14,18 +14,17 @@ StPicoBEmcPidTraits::StPicoBEmcPidTraits() :
   mBemcSmdNEta(std::numeric_limits<unsigned char>::max()), mBemcSmdNPhi(std::numeric_limits<unsigned char>::max()),
   mBtowId(-9999), mBtowId23(std::numeric_limits<unsigned char>::max()),
   mBtowE(-9999), mBtowE2(-9999), mBtowE3(-9999),
-  mBtowEtaDist(-9999), mBtowPhiDist(-9999)
-{
-  // constructor
+  mBtowEtaDist(-9999), mBtowPhiDist(-9999) {
+  /* emtpy */
 }
 
-//----------------------------------------------------------------------------------
-StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Float_t const* e, Float_t const* dist, Int_t const* nhit, Int_t const* ntow): StPicoBEmcPidTraits()
-{
+//_________________
+StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Float_t const* e, Float_t const* dist, 
+					 Int_t const* nhit, Int_t const* ntow): StPicoBEmcPidTraits() {
+
   mTrackIndex = (index > std::numeric_limits<short>::max()) ? -1 : (Short_t)index;
 
-  auto getConstrainedShort = [](float x)
-  {
+  auto getConstrainedShort = [](float x) {
     return fabs(x) >= std::numeric_limits<short>::max() ? std::numeric_limits<short>::max() : (short)(TMath::Nint(x));
   };
 
@@ -47,15 +46,34 @@ StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Floa
   mBtowPhiDist  = getConstrainedShort(dist[3] * 10000.);
 }
 
-//----------------------------------------------------------------------------------
-StPicoBEmcPidTraits::~StPicoBEmcPidTraits()
-{
-  // destructor
+//_________________
+StPicoBEmcPidTraits::StPicoBEmcPidTraits(const StPicoBEmcPidTraits &traits) {
+  mTrackIndex = traits.mTrackIndex;
+  mBemcId = traits.mBemcId;
+  mBemcAdc0 = traits.mBemcAdc0;
+  mBemcE0 = traits.mBemcE0;
+  mBemcE = traits.mBemcE;
+  mBemcZDist = traits.mBemcZDist;
+  mBemcPhiDist = traits.mBemcPhiDist;
+  mBemcSmdNEta = traits.mBemcSmdNEta;
+  mBemcSmdNPhi = traits.mBemcSmdNPhi;
+
+  mBtowId = traits.mBtowId;
+  mBtowId23 = traits.mBtowId23;
+  mBtowE = traits.mBtowE;
+  mBtowE2 = traits.mBtowE2;
+  mBtowE3 = traits.mBtowE3;
+  mBtowEtaDist = traits.mBtowEtaDist;
+  mBtowPhiDist = traits.mBtowPhiDist;
 }
 
-//----------------------------------------------------------------------------------
-void StPicoBEmcPidTraits::Print(const Char_t* option) const
-{
+//_________________
+StPicoBEmcPidTraits::~StPicoBEmcPidTraits() {
+  /* empty */
+}
+
+//_________________
+void StPicoBEmcPidTraits::Print(const Char_t* option) const {
   LOG_INFO << "Matched track index = " << mTrackIndex << endm;
   LOG_INFO << " BEMC Id = " << bemcId() << " BTOW Adc0 = " << bemcAdc0() << " bemc E0 = " << bemcE0() << " e = " << bemcE() << endm;
   LOG_INFO << " BEMC distz = " << bemcZDist() << " distphi = " << bemcPhiDist() << endm;

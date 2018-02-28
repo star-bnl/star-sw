@@ -8,24 +8,25 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 #include "StarClassLibrary/SystemOfUnits.h"
 
-
 class StMuTrack;
 class StDcaGeometry;
 
+//_________________
+class StPicoTrack : public TObject {
 
-class StPicoTrack : public TObject
-{
-public:
-
+ public:
+  //Default constructor
   StPicoTrack();
-
-  /// ctor. Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
+  //Constructor that takes global and primary trakcs
+  //Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
   StPicoTrack(StMuTrack const* globalTrack, StMuTrack const* primaryTrack,
-     double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
-
-  virtual ~StPicoTrack() {}
-
-  virtual void Print(Char_t const* option = "") const;  ///< Print track info
+	      double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
+  //Copy constructor
+  StPicoTrack(const StPicoTrack &track);
+  //Destructor
+  virtual ~StPicoTrack();
+  //Print track parameters
+  virtual void Print(Char_t const* option = "") const;
 
   /// track id, copied from StMuTrack, StTrack
   Int_t   id() const;
@@ -82,7 +83,8 @@ public:
   Int_t bTofPidTraitsIndex() const;
   Int_t mtdPidTraitsIndex() const;
 
-protected:
+ protected:
+
   UShort_t mId;               // track Id, copied from StMuTrack, StTrack
   UShort_t mChi2;             // chi2*1000
   StThreeVectorF mPMomentum;  // primary momentum, (0.,0.,0.) if none
@@ -148,20 +150,19 @@ inline bool    StPicoTrack::hasHft4Layers() const { return hasPxl1Hit() && hasPx
  * The default "primary" momentum is (0, 0, 0) but it is expected to have
  * a non-zero length when the track is associated with a primary vertex.
  */
-inline bool StPicoTrack::isPrimary() const
-{
+inline bool StPicoTrack::isPrimary() const {
   return mPMomentum.magnitude() > 0;
 }
 
 /// Return the global momentum at the dca point to the pVtx (usually it is the primary vertex.   B - magnetic field from PicoEvent::bField()
-inline StThreeVectorF StPicoTrack::gMom(StThreeVectorF const& pVtx, float const B) const
-{
+//_________________
+inline StThreeVectorF StPicoTrack::gMom(StThreeVectorF const& pVtx, float const B) const {
   StPhysicalHelixD gHelix = helix(B);
   return gHelix.momentumAt(gHelix.pathLength(pVtx), B * kilogauss);
 }
 
-inline StPhysicalHelixD StPicoTrack::helix(float const B) const
-{
+//_________________
+inline StPhysicalHelixD StPicoTrack::helix(float const B) const {
   return StPhysicalHelixD(mGMomentum, mOrigin, B * kilogauss, static_cast<float>(charge()));
 }
 

@@ -7,40 +7,52 @@
 
 #include "StPicoEvent/StPicoMtdPidTraits.h"
 
+ClassImp(StPicoMtdPidTraits)
 
-//----------------------------------------------------------------------------------
+//_________________
 StPicoMtdPidTraits::StPicoMtdPidTraits() : TObject(),
-  mTrackIndex(-1), mMtdHitIndex(-1), mMatchFlag(-1),
-  mDeltaY(-999.), mDeltaZ(-999.), mDeltaTimeOfFlight(-999.), mBeta(-999.), mMtdHitChan(-1)
-{
-  // constructor
+					   mTrackIndex(-1), mMtdHitIndex(-1), mMatchFlag(-1),
+					   mDeltaY(-999.), mDeltaZ(-999.), mDeltaTimeOfFlight(-999.), 
+					   mBeta(-999.), mMtdHitChan(-1) {
+  /* emtpy */
 }
 
-//----------------------------------------------------------------------------------
+//_________________
 StPicoMtdPidTraits::StPicoMtdPidTraits(const StMuMtdHit*  hit,
                                        const StMuMtdPidTraits* trait,
-                                       const Int_t index):
-  mTrackIndex((Short_t)index),
-  mMtdHitIndex(-1),
-  mMatchFlag((Char_t) trait->matchFlag()),
-  mDeltaY(trait->deltaY()),
-  mDeltaZ(trait->deltaZ()),
-  mDeltaTimeOfFlight(trait->timeOfFlight() - trait->expTimeOfFlight()),
-  mBeta((trait->pathLength() / trait->expTimeOfFlight()) * 1e9 / c_light),
-  mMtdHitChan(-1)
-{
+                                       const Int_t index) {
+  mTrackIndex = (Short_t)index;
+  mMtdHitIndex = -1;
+  mMatchFlag = (Char_t)trait->matchFlag();
+  mDeltaY = trait->deltaY();
+  mDeltaZ = trait->deltaZ();
+  mDeltaTimeOfFlight = trait->timeOfFlight() - trait->expTimeOfFlight();
+  mBeta = (trait->pathLength() / trait->expTimeOfFlight()) * 1e9 / c_light;
+  mMtdHitChan = -1;
   Int_t gchan = (hit->backleg() - 1) * 60 + (hit->module() - 1) * 12 + hit->cell();
   mMtdHitChan = (gchan > std::numeric_limits<short>::max()) ? -1 : (Short_t) gchan;
 }
 
-//----------------------------------------------------------------------------------
-StPicoMtdPidTraits::~StPicoMtdPidTraits()
-{
-  // dummy destructor
+//_________________
+StPicoMtdPidTraits::StPicoMtdPidTraits(const StPicoMtdPidTraits &traits) {
+  mTrackIndex = traits.mTrackIndex;
+  mMtdHitIndex = traits.mMtdHitIndex;
+  mMatchFlag = traits.mMatchFlag;
+  mDeltaY = traits.mDeltaY;
+  mDeltaZ = traits.mDeltaZ;
+  mDeltaTimeOfFlight = traits.mDeltaTimeOfFlight;
+  mBeta = traits.mBeta;
+  mMtdHitChan = traits.mMtdHitChan;
 }
-//----------------------------------------------------------------------------------
-void StPicoMtdPidTraits::Print(const Char_t* option) const
-{
+
+//_________________
+StPicoMtdPidTraits::~StPicoMtdPidTraits() {
+  /* emtpy */
+}
+
+//_________________
+void StPicoMtdPidTraits::Print(const Char_t* option) const {
+
   LOG_INFO << "Matched hit: backleg =  " << backleg()
            << ", module  = " << module()
            << ", cell    = " << cell()

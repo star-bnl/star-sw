@@ -20,13 +20,19 @@ using namespace StarPicoDst;
  *
  * - Mike Lisa 20 May 2017
  */
-class StPicoEpdTile : public TObject
-{
-public:
+//_________________
+class StPicoEpdTile : public TObject {
 
+ public:
+  //Default constructor
   StPicoEpdTile();
+  //Constructor that takes values
   StPicoEpdTile(int positionId, int tileId, DetectorSide EW, int ADC, int TAC, int TDC, bool hasTAC, bool statusIsGood = true);
-
+  //Copy constructor
+  StPicoEpdTile(const StPicoEpdTile &tile);
+  //Destructor
+  virtual ~StPicoEpdTile();
+  //Print EPD tile information
   virtual void Print(const Char_t *option = "") const;
 
   bool hasTac() const;
@@ -42,8 +48,8 @@ public:
   /// false if tile is bad or missing
   bool isGood() const;
 
-protected:
-
+ protected:
+  
   /// Packed channel Id: 100*positionId + tileId
   /// sign: +/- = West/East
   /// positionId and tileId are phototube indices start at 1, [1, 12] and [1, 31] respectively
@@ -58,11 +64,9 @@ protected:
 };
 
 inline DetectorSide StPicoEpdTile::side() const { return mId < 0 ? DetectorSide::East : DetectorSide::West;}
-
 inline int  StPicoEpdTile::id() const { return mId; }
 inline int  StPicoEpdTile::position() const { return std::abs(mId / 100); }
 inline int  StPicoEpdTile::tile() const { return std::abs(mId % 100); }
-
 inline int  StPicoEpdTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoEpdTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoEpdTile::tdc() const { return (mQTdata >> 24) & 0x001F; }
