@@ -341,7 +341,7 @@ Bool_t StPicoDstMaker::initMtd(Int_t const runnumber) {
 
   LOG_INFO << "Retrieving mtdQTSlewingCorr table from database ..." << endm;
   dataset = GetDataBase("Calibrations/mtd/mtdQTSlewingCorr");
-  St_mtdQTSlewingCorr* mtdQTSlewingCorr = static_cast<St_mtdQTSlewingCorr*>(dataset->Find("mtdQTSlewingCorr"));
+  St_mtdQTSlewingCorr* mtdQTSlewingCorr = dataset ? static_cast<St_mtdQTSlewingCorr*>(dataset->Find("mtdQTSlewingCorr")) : nullptr;
   if (!mtdQTSlewingCorr) {
     LOG_ERROR << "No mtdQTSlewingCorr table found in database" << endm;
     return kStErr;
@@ -358,19 +358,21 @@ Bool_t StPicoDstMaker::initMtd(Int_t const runnumber) {
   } //for (int j = 0; j < 4; ++j)
   if (year == 2016) {
     dataset = GetDataBase("Calibrations/mtd/mtdQTSlewingCorrPart2");
-    if (dataset) {
-      St_mtdQTSlewingCorrPart2* mtdQTSlewingCorr2 = static_cast<St_mtdQTSlewingCorrPart2*>(dataset->Find("mtdQTSlewingCorrPart2"));
-      mtdQTSlewingCorrPart2_st* mtdQTSlewingCorrtable2 = static_cast<mtdQTSlewingCorrPart2_st*>(mtdQTSlewingCorr2->GetTable());
-      for (int j = 0; j < 4; ++j) {
-        for (int i = 0; i < 16; ++i) {
-          for (Int_t k = 0; k < 8; ++k) {
-            Int_t index = j * 16 * 8 + i * 8 + k;
-            mQTSlewBinEdge[j + 4][i][k] = (int) mtdQTSlewingCorrtable2->slewingBinEdge[index];
-            mQTSlewCorr[j + 4][i][k] = (int) mtdQTSlewingCorrtable2->slewingCorr[index];
-          } //for (Int_t k = 0; k < 8; ++k)
-        } //for (int i = 0; i < 16; ++i)
-      } //for (int j = 0; j < 4; ++j)
-    } //if (dataset)
+    St_mtdQTSlewingCorrPart2* mtdQTSlewingCorr2 = dataset ? static_cast<St_mtdQTSlewingCorrPart2*>(dataset->Find("mtdQTSlewingCorrPart2")) : nullptr;
+    if (!mtdQTSlewingCorr2) {
+      LOG_ERROR << "No mtdQTSlewingCorr2 table found in database for year " << year << endm;
+      return kStErr;
+    }
+    mtdQTSlewingCorrPart2_st* mtdQTSlewingCorrtable2 = static_cast<mtdQTSlewingCorrPart2_st*>(mtdQTSlewingCorr2->GetTable());
+    for (int j = 0; j < 4; ++j) {
+      for (int i = 0; i < 16; ++i) {
+	for (Int_t k = 0; k < 8; ++k) {
+	  Int_t index = j * 16 * 8 + i * 8 + k;
+	  mQTSlewBinEdge[j + 4][i][k] = (int) mtdQTSlewingCorrtable2->slewingBinEdge[index];
+	  mQTSlewCorr[j + 4][i][k] = (int) mtdQTSlewingCorrtable2->slewingCorr[index];
+	} //for (Int_t k = 0; k < 8; ++k)
+      } //for (int i = 0; i < 16; ++i)
+    } //for (int j = 0; j < 4; ++j)
   } // if (year == 2016)
 
   return kTRUE;
