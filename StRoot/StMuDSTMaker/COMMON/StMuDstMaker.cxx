@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.127 2018/02/27 04:15:02 jdb Exp $
+ * $Id: StMuDstMaker.cxx,v 1.128 2018/03/01 20:42:38 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -364,6 +364,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
   mBTofUtil= new StMuBTofUtil();  /// dongx
+  mEpdUtil = new StMuEpdUtil(); // jdb, fix rt 3338
   mEzTree  = new StMuEzTree();
 }
 //-----------------------------------------------------------------------
@@ -1869,6 +1870,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.128  2018/03/01 20:42:38  jdb
+ * mEpdUtil was not initialized in the second StMuDstMaker ctor, causing seg fault when deleted - added initialization to second ctor solves issue
+ *
  * Revision 1.127  2018/02/27 04:15:02  jdb
  * added EPD support and fixed long standing bug in SetStatus, cleaned up
  *
