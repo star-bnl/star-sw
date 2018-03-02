@@ -19,6 +19,8 @@ itpcInterpreter::itpcInterpreter()
 {
 	evt_ix = 0 ;
 	realtime = 0 ;
+	dbg_level = 0 ;
+
 	fee_evt_cou = 0 ;
 	run_number = 0 ;
 
@@ -101,6 +103,8 @@ static inline u_int sw16(u_int d)
 	return d ;
 }
 
+
+#if 0
 int itpcInterpreter::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
 {
 	u_int err = 0 ;
@@ -230,7 +234,7 @@ int itpcInterpreter::get_l2(char *addr, int words, struct daq_trg_word *trg, int
 	return 0 ;
 	
 }
-
+#endif
 
 
 /* We start with 0x980000008 */
@@ -255,10 +259,25 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 	ascii_cou = 0 ;
 
 	// We are at the start of FEE data:
+	u_int dd_x = d[0] & 0xFFC000FF ;	// command
+
+	// I should now point at 0x80xx0001
+	if(dd_x != 0x80000001) {
+		LOG(WARN,"Missing start 0x%08X",d[0]) ;
+
+		//for(int i=0;i<32;i++) {
+		//	LOG(TERR,"%d = 0x%08X",i-8,d[i-8]) ;
+		//}
+
+		fee_bx = 0 ;	// dummy
+
+		cfg++ ;
+		trg++ ;
+	}
 
 	while(d<end) {
 		dd = *d++ ;
-		u_int dd_x = dd & 0xFFC000FF ;	// just commands
+		dd_x = dd & 0xFFC000FF ;	// just commands
 		u_int dd_a ;
 
 		LOG(NOTE,"FEE #%d: %u 0x%08X",fee_port,d-start,dd) ;
@@ -276,7 +295,13 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 			}
 
 			if((d[-2]&0xFFC00000) != 0x40000000) {
-				LOG(ERR,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
+				// might fire due to a bug in readout
+				if((d[-2]&0xFFC00000) != 0x80000000) {				
+					LOG(ERR,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
+				}
+				else {
+					LOG(WARN,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
+				}
 			}
 
 			// search for RDO-END-FEE marker
@@ -318,6 +343,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 			LOG(ERR,"%d: FEE #%d: Unexpected 0x%08X",rdo_id,fee_port,dd) ;
 			break ;
 		case 0x80000001 :	// START EVENT (also hdr)
+			// this can be missing! and can also show up at the very end!
 			{
 				u_int bx_lo = d[4] & 0xFFFF ;
 				u_int bx_hi = d[5] & 0xFFFF ;
@@ -335,10 +361,11 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 			trg++ ;	
 			break ;
 		case 0x60000001 :	// end event hdr
+			//LOG(TERR,"END event %d %d",cfg,trg) ;
 			cfg = 0 ;
 			if(trg==1) {
 				fee_id = (dd>>16)&0x3F ;
-				LOG(NOTE,"FEE #%d(%d) start SAMPA: FEE BX %u (0x%08X)",fee_port,fee_id,fee_bx&0xFFFFF,fee_bx) ;
+				//LOG(TERR,"FEE #%d(%d) start SAMPA: FEE BX %u (0x%08X)",fee_port,fee_id,fee_bx&0xFFFFF,fee_bx) ;
 
 				for(int i=0;i<4;i++) {
 					u_int *cur_d = d ;
@@ -346,7 +373,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 					if(i==0 || i==2) found_ch_mask = 0 ;
 
 					d = sampa_lane_scan(d,end) ;
-					LOG(NOTE,"fee_port %d: lane %d was %d words",fee_port,i,d-cur_d) ;
+					//LOG(TERR,"fee_port %d: lane %d was %d words",fee_port,i,d-cur_d) ;
 					
 					if(i==1 || i==3) {
 						if(found_ch_mask != 0xFFFFFFFF) {
@@ -710,36 +737,49 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	word32 = words / 3 + (words%3?1:0) ;	
 
 	//LOG(TERR,"words %d, word32 %d",words,word32) ;
+	tb_cou = words ;
 
-	tb_cou = 0 ;
-	for(u_int i=0;i<word32;i++) {
-		d = *data++ ;
+	if(ped_c && ped_c->want_data) {	// I will handle my own data
+		ped_c->sector = sector_id ;
+		ped_c->rdo = rdo_id ;
 
-		if((d&0xC0000000)) {
-			LOG(ERR,"%d:%d: %d:%d sampa data word %d/%d = 0x%08X",rdo_id,fee_port,sampa_id,sampa_ch,i,word32,d) ;
-			err |= 0x10 ;
-			i-- ;
-
-			if(d==0x980000F8) {	//end of event!!!
-				return data-1 ;
-			}
-			continue ;
+		if(ped_c->do_ch(fee_id, fee_ch, data, words)<0) {
+			err |= 0x200 ;
 		}
 
+		data += word32 ;
+	}
+	else {
+		int t_cou = 0 ;	// local
+		for(u_int i=0;i<word32;i++) {
+			d = *data++ ;
 
+			if((d&0xC0000000)) {
+				LOG(ERR,"%d:%d: %d:%d sampa data word %d/%d = 0x%08X",rdo_id,fee_port,sampa_id,sampa_ch,i,word32,d) ;
+				err |= 0x10 ;
+				i-- ;
 
-		tb_buff[tb_cou++] = (d>>20) & 0x3FF ;
-		tb_buff[tb_cou++] = (d>>10) & 0x3FF ;
-		tb_buff[tb_cou++] = d & 0x3FF ;
+				if(d==0x980000F8) {	//end of event!!!
+					return data-1 ;
+				}
+				continue ;
+			}
+
+			//LOG(TERR,"... 0x%08X",d) ;
+
+			tb_buff[t_cou++] = (d>>20) & 0x3FF ;
+			tb_buff[t_cou++] = (d>>10) & 0x3FF ;
+			tb_buff[t_cou++] = d & 0x3FF ;
+		}
+
+		if(sampa_ch_scan()<0) {
+			err |= 0x200 ;
+		}
 	}
 
 	//note this hack
-	tb_cou = words ;
+	//tb_cou = words ;
 
-
-	if(sampa_ch_scan()<0) {
-		err |= 0x200 ;
-	}
 	
 
 	if(err) {
@@ -992,7 +1032,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			// sometimes I get ASCII immediatelly
 			if((data[1]&0xFFC00000)!=0x80000000) {
 				if((data[1]&0xFFC0FFFF)!=0xA00000A0) {
-					LOG(ERR,"%d: After start 0x%08X, FEE #%d",rdo_id,data[1],data[0]+1) ;
+					LOG(ERR,"%d: evt %d: After start 0x%08X, FEE #%d",rdo_id,evt_ix,data[1],data[0]+1) ;
 				}
 			}
 
@@ -1009,19 +1049,30 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			LOG(NOTE,"RDO FEE data: END: fee_port %d",fee_port) ;
 			break ;
 		case 0x98000004 :
+			if(flags & 0x6) {
+				LOG(ERR,"Duplicate hdr") ;
+			}
+
 			flags |= 2 ;
-			LOG(NOTE,"RDO Event Headerr: START") ;
-			for(int i=0;i<100;i++) {
+			LOG(NOTE,"RDO Event Header: START") ;
+			{
+				u_int *d_now = data ;
 
-				LOG(NOTE,"Event Header %2d = 0x%08X",i,d) ;
+				for(int i=0;i<10;i++) {
+					
+					LOG(NOTE,"Event Header %2d = 0x%08X",i,d) ;
 
-				if(d==0x58000005) {
-					flags |= 4 ;
-					//data++ ;
-					break ;
+					if(d==0x58000005) {
+						flags |= 4 ;
+						break ;
+					}
+					else {
+						d = *data++ ;
+					}
 				}
-				else {
-					d = *data++ ;
+
+				if((data-d_now)!=8) {
+					LOG(ERR,"RDO Event Header corrupt %d",data-d_now) ;
 				}
 
 			}
@@ -1116,21 +1167,82 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			LOG(ERR,"RDO Monitoring:  END: %d = 0x%08X",word_ix,d) ;
 			break ;
 		case 0x98001000 :
+			if(flags & 0x18) {
+				LOG(ERR,"RDO %d: duplicate trailer",rdo_id) ;
+			}
 			flags |= 8 ;
 			LOG(NOTE,"RDO: Event Trailer Start") ;
-			for(int i=0;i<100;i++) {
-				if(i==2 && d) {	//status
-					LOG(ERR,"FEE #%d: Event Trailer %u = 0x%08X",fee_port,word_ix,d) ;
+			{
+				u_int trg_cou ;
+				u_int *d_now = data ;
+				int suspect = 0 ;
+
+				if(data[0] != 0xABCD0000) {
+					suspect = 1 ;
+					LOG(ERR,"RDO %d: Event Trailer %u/%u = ABCD 0x%08X",rdo_id,word_ix,words,data[0]) ;
 				}
 
-				LOG(NOTE,"Event Trailer %2d = 0x%08X",i,d) ;
-
-				if((d&0xF800FFFF)==0x58001001) {
-					flags |= 0x10 ;
-					break ;
+				if(data[1] != 0) {
+					suspect = 1 ;
+					LOG(ERR,"RDO %d: Event Trailer %u/%u = status 0x%08X",rdo_id,word_ix,words,data[1]) ;
 				}
-				else {
-					d = *data++ ;
+
+				trg_cou=data[2] ;
+				if(trg_cou>100) {
+					suspect = 1 ;
+					LOG(ERR,"RDO %d: Event Trailer %u/%u = trg_cou 0x%08X",rdo_id,word_ix,words,data[2]) ;
+					trg_cou = 0 ;
+				}
+
+				if(suspect) {
+					LOG(ERR,"flags 0x%X",flags) ;
+				}
+
+				if((data[3+trg_cou+2]&0xF800FFFF)!=0x58001001) suspect = 1 ;	// very often
+
+
+				//LOG(TERR,"END 0x%08X",data[3+trg_cou+2]) ;
+
+				// data[0] = 0xabcd0000 ;
+				// data[1] = status (must be 0)
+				// data[2] = trigger count
+				// data[3..] = triggers
+				// data[x] = yada ;
+				// data[x+1] = yada
+				// data[x+2] = 0x58001001 ;
+
+				for(int i=0;i<100;i++) {
+					//if(i==2 && d) {	//status
+					//	LOG(ERR,"FEE #%d: Event Trailer %u = 0x%08X",fee_port,word_ix,d) ;
+					//}
+
+					LOG(NOTE,"Event Trailer %2d = 0x%08X",i,d) ;
+
+					if((d&0xF800FFFF)==0x58001001) {
+						flags |= 0x10 ;
+						break ;
+					}
+					else {
+						d = *data++ ;
+						if(data>data_end) {
+							flags |= 0x1000 ;
+							suspect = 2 ;
+							break ;
+						}
+					}
+				}
+
+				// unfortuntatelly this is not a fixed value... THINK!
+				// ALSO -- it seems to be 100 easily which means that I am missing the end of event!
+				int t_len = data - d_now ;
+				if(0) {
+				//if(suspect) {
+					LOG(ERR,"RDO %d: Event Trailer Suspect %d - %d",rdo_id,suspect,t_len) ;
+					for(int i=0;i<16;i++) {
+						LOG(TERR,"%d/%d = 0x%08X",d_now-data_start,words,*d_now) ;
+						d_now++ ;
+					}
+					data = data_end + 1 ;	// to make sure it's over
 				}
 			}
 
@@ -1334,43 +1446,25 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			break ;
 		default :	// all other cases
 
+			if(words==(data-data_start)) {	// last word
+				if((d & 0xFFFF0000)==0x005C0000) break ;	// last word and it's a end-comma -- normal
+
+				//last word but it's some gibberish -- it can happen occassionally, don't know why
+				//LOG(WARN,"%d: last huh 0x%08X at %d/%d",rdo_id,d,word_ix,words) ;
+				break ;
+			}	
+				
+
+			//LOG(WARN,"%d: huh 0x%08X at %d/%d",rdo_id,d,word_ix,words) ;
+
+#if 0
 			if((d & 0xFFFF0000)==0x005C0000) ;	// stop-comma is OK here
 			else {
 				if(words==(data-data_start)) ;	// OK for the last word
-				else LOG(WARN,"%d: datum huh 0x%08X at %d/%d",rdo_id,d,data-data_start,words) ;
-			}
-#if 0
-			switch(d) {
-			case 0xFFFF001C :
-				LOG(WARN,"RDO comma: START event") ;
-				goto re_loop ;
-			case 0xFFFF005C :
-				LOG(WARN,"RDO comma:   END event") ;
-				log_start = 0 ;
-				return 1 ;
-			}
-
-			if((d&0xF0000000)==0x70000000) {
-				if(d & 0x0C000000) {
-					LOG(ERR,"%d: FEE SAMPA Lane:   END: 0x%08X",rdo_id,d) ;
-				}
 				else {
-					LOG(ERR,"%d: FEE SAMPA Lane:   END: 0x%08X",rdo_id,d) ;
+					// junk at the end of event
+					//LOG(WARN,"%d: datum huh 0x%08X at %d/%d",rdo_id,d,data-data_start,words) ;
 				}
-			}
-			else if((d&0xF0000000)==0xB0000000) {
-				if(d & 0x0C000000) {
-					LOG(ERR,"%d: FEE SAMPA Lane: START: 0x%08X",rdo_id,d) ;
-				}
-				else {
-					LOG(ERR,"%d: FEE SAMPA Lane: START: 0x%08X",rdo_id,d) ;
-				}
-			}
-			else if((d&0xFFFF0000)==0xFFFF0000) {
-				LOG(ERR,"%d: Out of band header: %d = 0x%08X",rdo_id,rdo_id,word_ix,d) ;
-			}
-			else if(d&0xC0000000) {
-				LOG(ERR,"%d: ... iFEE port #%02d: %d = 0x%08X",rdo_id,fee_port,word_ix,d) ;
 			}
 #endif
 
@@ -1385,9 +1479,9 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 
 	if((flags != 0x1F) || ((data_end-data) != 0)) {
-		LOG(NOTE,"At end: %d, flags 0x%X",data_end-data,flags) ;
-		for(int i=0;i<16;i++) {
-			LOG(NOTE,"... %2d = 0x%08X",i,data_end[-1-i]) ;
+		//LOG(WARN,"At end: %d, flags 0x%X",data_end-data,flags) ;
+		for(int i=0;i<32;i++) {
+			//LOG(WARN,"... %2d = 0x%08X",i,data_end[16-i]) ;
 		}
 	}
 
