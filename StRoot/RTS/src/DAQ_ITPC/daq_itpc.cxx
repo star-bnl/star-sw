@@ -484,7 +484,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	u_int err = 0 ;
 	u_int trg_fired ;
 //	u_int v_fired ;
-	int trg_cou ;
+	u_int trg_cou ;
 	int t_cou = 0 ;
 	u_int evt_status ;
 	int trl_ix ;
@@ -538,7 +538,13 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 	*/
 
-	//find trailer start-header
+	//find trailer start-header, scanning from the end
+	if(words < 1) {
+		LOG(ERR,"Bad words %d",words) ;
+		err |= 0x100 ;
+		goto err_end ;
+	}
+
 	trl_ix = -1 ;
 	for(int i=(words-1);i>=0;i--) {
 		if(sw16(d[i]) == 0x98001000) {
@@ -565,18 +571,28 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	evt_status = sw16(d[trl_ix++]) ;
 	trg_cou = sw16(d[trl_ix++]) ;
 
+	if(evt_status) {
+		LOG(ERR,"... RDO %d: %d/%d -- evt status 0x%08X, trg_cou %d",rdo,sw16(d[6]),sw16(d[5]),evt_status,trg_cou) ;
+	}
+
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;
 
 	trg[0].reserved[0] = trg_fired ;
 
-	for(int i=0;i<trg_cou;i++) {
+	if(trg_cou > 128) {
+		LOG(ERR,"Bad trg cou 0x%08X",trg_cou) ;
+		err |= 0x80 ;
+		goto err_end ;
+	}
+	else if (trg_cou > 10) {
+		LOG(WARN,"Lots of triggers") ;
+	}
+
+	for(u_int i=0;i<trg_cou;i++) {
 		trg[i+1].reserved[0] = sw16(d[trl_ix++]) ;
 	}
 	
 
-	if(evt_status) {
-		LOG(ERR,"... RDO %d: %d/%d -- evt status 0x%08X, trg_cou %d",rdo,sw16(d[6]),sw16(d[5]),evt_status,trg_cou) ;
-	}
 
 	
 	if(trg_cou==0 && trg[0].reserved[0]==0) {	// Monitoring Event
@@ -615,7 +631,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	}
 
-	for(int i=1;i<(trg_cou+1);i++) {
+	for(u_int i=1;i<(trg_cou+1);i++) {
 		u_int v = trg[i].reserved[0] ;
 		u_int t ;
 

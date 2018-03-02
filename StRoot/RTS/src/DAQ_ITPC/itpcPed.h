@@ -6,12 +6,17 @@
 class itpcData
 {
 public:
-	itpcData() {;} ;
+	itpcData() { want_data = 0 ;} ;
 	virtual ~itpcData() {;} ;
 
 	virtual void ch_start(int c) { ch = c ; tb_cou = 0 ;} ;
 	virtual void accum(int sec0, int rdo0, int port0, int fee_id, int ch, int tb, int adc) { tb_cou++ ;} ;
 	virtual void ch_done(int err) {;} ;
+	virtual int do_ch(int fee_id, int fee_ch, u_int *data, int words) { return 0 ; } ;
+
+	int want_data ;
+	u_int data ;
+	int words ;
 
 	int sector ;
 	int rdo ;
@@ -39,6 +44,7 @@ public:
 
 	int from_cache() ;
 	int to_cache(const char *fname=0) ;
+
 
 
 
