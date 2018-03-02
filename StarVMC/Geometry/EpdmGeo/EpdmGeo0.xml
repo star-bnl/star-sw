@@ -299,8 +299,8 @@
 
     <!-- Instrument block, a gen. Trapziod -->
     <Volume name="EPDT" comment="EPD a general trapzoid">
-      <Material  name="POLYSTYREN"      /> 
 
+      <Material  name="POLYSTYREN"      /> 
       <Material name="Cpolystyren" isvol="1"  />
       <!-- By specifying isvol="1", polystyrene is copied into a new material
        named Cpolystyrene.  A new material is introduced here in order to
@@ -331,8 +331,8 @@
       <!-- Parameters are the Geant3 paramters which may be set via a call to GSTPar.  -->
 
       <Instrument block="EPDT">
-	<Hit meas="eloss" opts="S" nbits="0" min="0" max="100.0"  />
-	<Hit meas="tof"  nbits="0" opts="C" min="0" max="10" />
+	<Hit meas="eloss"          opts="S" nbits="0" min="0" max="100.0"  />
+	<Hit meas="tof"  nbits="0" opts="S"  min="0" max="10" />
       </Instrument>
 
       <!-- The instrument block indicates what information should be saved
