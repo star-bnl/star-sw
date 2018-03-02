@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.7 2015/11/05 17:53:09 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.8 2018/03/02 20:26:44 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.8  2018/03/02 20:26:44  akio
+// Big update from Zhanwen Zhu with new shower shape and six z slices
+//
 // Revision 1.7  2015/11/05 17:53:09  akio
 // Adding setScaleShowerShape() option for scaling up shower shape function for large cell
 //
@@ -39,6 +42,7 @@
 class StFmsCollection;
 class StFmsDbMaker;
 class StFmsPoint;
+class StMuDst;
 
 namespace FMSCluster {
 class StFmsFittedPhoton;
@@ -90,8 +94,14 @@ class StFmsPointMaker : public StMaker {
   /* set cluster categorization algo */
   void setCategorizationAlgo(int v=1) {mCategorizationAlgo=v;}
 
-  /* set to scale shower shape for large cell */
-  void setScaleShowerShape(int v=1) {mScaleShowerShape=v;}
+  /* set to scale shower shape for large cell  - only take effect if mShowerShapeWithAngle=0 */
+  void setScaleShowerShape(int v=1) {mScaleShowerShape=v;} 
+
+  /* 0=original shower shape, 1=new shower shape with 6 z slices, 2=Yuxi's 6 slices */
+  void setShowerShapeWithAngle(int v=1) {mShowerShapeWithAngle=v;} 
+
+  /* 0=no vertex correction, 1=take vertex from Mudst BBC based on run11 calibration */
+  void setVertexZ(int v=1) {mVertexZ=v;} 
 
  private:
   /** Definition of a collection of towers. */
@@ -170,14 +180,19 @@ class StFmsPointMaker : public StMaker {
   Float_t mMaxEnergySum; //! max energy cut on sum of all cells
    
   Int_t readMuDst();
-  Int_t mReadMuDst;   //! 0= Do clustering and make Fms points
-                      //! 1= Just recalc positions based on DB values
+  Int_t mReadMuDst=0;  //! 0= Do clustering and make Fms points
+                       //! 1= Just recalc positions based on DB values
 
-  Int_t mGlobalRefit;       //! if this is none-zero, perform gloab refit of all photon in a module
-  Int_t mMergeSmallToLarge; //! if this is none-zero, merge small cells to large cells
-  Int_t mTry1PhotonFitWhen2PhotonFitFailed; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
-  Int_t mCategorizationAlgo; //! choose cluster categorization algo
-  Int_t mScaleShowerShape;   //! scale shower shape for large cell 
+  Int_t mGlobalRefit=0;       //! if this is none-zero, perform gloab refit of all photon in a module
+  Int_t mMergeSmallToLarge=1; //! if this is none-zero, merge small cells to large cells
+  Int_t mTry1PhotonFitWhen2PhotonFitFailed=1; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
+  Int_t mCategorizationAlgo=1;    //! choose cluster categorization algo
+  Int_t mScaleShowerShape=0;      //! scale shower shape for large cell 
+  Int_t mShowerShapeWithAngle=1;  //! incident angle with 6 slices or not
+  Int_t mVertexZ=0;               //! use BBC vertex or not
+  Double_t vertexz=0;             //! vertex position[cm]
+
+  StMuDst* muDst; //!
 
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)
