@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.cxx,v 1.7 2018/01/04 17:35:44 smirnovd Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.8 2018/03/02 20:27:29 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.8  2018/03/02 20:27:29  akio
+// Big update from	Zhanwen Zhu with new shower shape and six z slices
+//
 // Revision 1.7  2018/01/04 17:35:44  smirnovd
 // [Cosmetic] Remove StRoot/ from include path
 //
@@ -62,8 +65,95 @@
 
 namespace {
 const Int_t kMaxNPhotons = 7;  // Maximum number of photons that can be fitted
-std::array<double, 7> fitParameters{ {SS_C, SS_A1, SS_A2, SS_A3,
-                                      SS_B1, SS_B2, SS_B3} };
+
+
+int mshowershapewithangle=1;// for static func
+int mmerge=1;// for static func
+int vertexz=0;
+void setOption(int v1, int v2 , double v3){
+     mshowershapewithangle=v1;
+     mmerge=v2;	
+     vertexz=v3;
+}
+
+//Yuxi's 
+double unused=0.0;
+double a11=0.998438; double a12=0.222782;  double a13=-0.22122;double b11=0.177028;double b12=0.000473222;double b13=0.178897;double w1 = 0.0372556;
+double a21=1.07711 ; double a22=-0.0281385;double a23=-0.0489747;double b21=0.199964;double b22=3.5021;double b23=2.35246;double w2 = 0.202699;
+double a31=1.07901 ; double a32=0.0650143; double a33=-0.144025;double b31=0.446845;double b32=0.00544512;double b33=1.64565;double w3 = 0.293878;
+double a41=0.922174; double a42=0.0778254; double a43=1.07474e-07;double b41=0.593804;double b42=0.6199;double b43=3.49798;double w4 = 0.236854;
+double a51=0.999849; double a52=0.000151185;double a53=2.20244e-07;double b51=0.949953;double b52=1.84451;double b53=3.40799;double w5 = 0.146041;
+double a61=0.997454; double a62=0.00254497;double a63=1.02127e-06;double b61=1.43387;double b62=2.91155;double b63=3.4484;double w6 = 0.0832717;
+
+
+//Zhanwen's small 45GeV new
+double a1S[6]={0.0303644,0.212191,0.277429,0.0370035,0.0524404,0.00844062};
+double a2S[6]={0.00122867,0.105355,0.10538,0.152656,0.00664331,0.0108688};
+double b1S[6]={0.403493,0.514546,0.672826,1.82344,0.727991,1.48785};
+double b2S[6]={0.270492,0.514593,0.672655,0.644871,4.32003,0.25};
+
+
+//large 45GeV new
+double a1L[6]={0.0275364,0.200363,0.277157,0.0391611,0.0590757,0.0101089};
+double a2L[6]={0.000429808,0.0991777,0.104781,0.161916,0.00764026,0.012653};
+double b1L[6]={0.515974,0.661722,0.865167,2.35237,0.932038,1.87933};
+double b2L[6]={0.53531,0.661519,0.865226,0.828017,5.49041,0.321139};
+
+double a1[6]={0. , 0  ,  0. , 0. , 0. , 0. };
+double a2[6]={0. , 0  ,  0. , 0. , 0. , 0. };
+double b1[6]={0. , 0. ,  0. , 0. , 0. , 0. };
+double b2[6]={0. , 0. ,  0. , 0. , 0. , 0. };
+double a3[6]={0. , 0  ,  0. , 0. , 0. , 0. };
+double b3[6]={0. , 0. ,  0. , 0. , 0. , 0. };
+double w[6]={1. , 1. ,  1. , 1. , 1. , 1. };
+
+std::array<double,60 > fitParameters;
+void clear_fitParameters(){
+  for (int  i=0 ; i<60 ; i++) {  fitParameters[i]=0 ;  }
+}
+
+void choose_fitParameters(int detID){
+    if (detID<=9) {unused=5;} //large cell
+    else          {unused=3;} //small cell
+    if ( mshowershapewithangle==2 ) {
+	fitParameters= {unused, a11, a12, a13, b11, b12, b13, w1 ,unused, unused,
+			unused, a21, a22, a23, b21, b22, b23, w2 ,unused, unused,
+			unused, a31, a32, a33, b31, b32, b33, w3 ,unused, unused,
+			unused, a41, a42, a43, b41, b42, b43, w4 ,unused, unused,
+			unused, a51, a52, a53, b51, b52, b53, w5 ,unused, unused,
+			unused, a61, a62, a63, b61, b62, b63, w6 ,unused, unused          };
+    } else if ( mshowershapewithangle==1 ) {
+        if (detID>9) {//small cell
+	    for (int i=0 ; i<6 ; i++) {
+                a1[i]=a1S[i];
+                a2[i]=a2S[i];
+                b1[i]=b1S[i];
+                b2[i]=b2S[i];
+	    }	    
+        }else{//large cell
+	    for (int i=0 ; i<6 ; i++) {
+                a1[i]=a1L[i];
+                a2[i]=a2L[i];
+                b1[i]=b1L[i];
+                b2[i]=b2L[i];
+	    }
+	}	
+	fitParameters= {  unused, a1[0], a2[0], a3[0], b1[0], b2[0], b3[0], w[0] ,unused, unused,
+			  unused, a1[1], a2[1], a3[1], b1[1], b2[1], b3[1], w[1] ,unused, unused,
+			  unused, a1[2], a2[2], a3[2], b1[2], b2[2], b3[2], w[2] ,unused, unused,
+			  unused, a1[3], a2[3], a3[3], b1[3], b2[3], b3[3], w[3] ,unused, unused,
+			  unused, a1[4], a2[4], a3[4], b1[4], b2[4], b3[4], w[4] ,unused, unused,
+			  unused, a1[5], a2[5], a3[5], b1[5], b2[5], b3[5], w[5] ,unused, unused};	
+    }else if( mshowershapewithangle==0 ) {
+	fitParameters[1] =  SS_A1;
+	fitParameters[2] =  SS_A2;
+	fitParameters[3] =  SS_A3;
+	fitParameters[4] =  SS_B1;
+	fitParameters[5] =  SS_B2;
+	fitParameters[6] =  SS_B3;	
+    }
+}
+
 TF2 showerShapeFitFunction("showerShapeFitFunction",
                        &FMSCluster::StFmsClusterFitter::energyDepositionInTower,
                       -25.0, 25.0, -25.0, 25.0, fitParameters.size());
@@ -96,15 +186,18 @@ StFmsTowerCluster::Towers* StFmsClusterFitter::mTowers(nullptr);
 Double_t StFmsClusterFitter::mEnergySum(0.0);
 
 StFmsClusterFitter::StFmsClusterFitter( //const StFmsGeometry* geometry,
-                                       Int_t detectorId, Float_t xw, Float_t yw, Int_t scaleShowerShape)
-    : mMinuit(3 * kMaxNPhotons + 1), mScaleShowerShape(scaleShowerShape) {
+         Int_t detectorId, Float_t xw, Float_t yw, Int_t scaleShowerShape , Int_t ShowerShapeWithAngle, Int_t MergeSmallToLarge, double vertexZ)
+    : mMinuit(3 * kMaxNPhotons + 1), mScaleShowerShape(scaleShowerShape), mShowerShapeWithAngle( ShowerShapeWithAngle) , mMergeSmallToLarge(MergeSmallToLarge)          {
   // Set tower (x, y) widths for this detector
   towerWidths.clear();
   towerWidths.push_back(xw);
   towerWidths.push_back(yw);
-  fitParameters = {towerWidths.at(0), SS_A1, SS_A2, SS_A3, SS_B1, SS_B2, SS_B3};
+
+  setOption(mShowerShapeWithAngle,mMergeSmallToLarge ,vertexZ);
+  clear_fitParameters();
+  choose_fitParameters(detectorId);
   showerShapeFitFunction.SetParameters(fitParameters.data());
-  mMinuit.SetPrintLevel(-1);  // Quiet, including suppression of warnings
+  mMinuit.SetPrintLevel(-1);  // Quiet, including suppression of warnings (change to 0 for more info)
 }
 
 StFmsClusterFitter::~StFmsClusterFitter() { }
@@ -142,7 +235,12 @@ Double_t StFmsClusterFitter::fitNPhoton(const std::vector<double>& parameters,
     setMinuitParameter(j++, Form("y%d", i), parameters, steps, lower, upper);
     setMinuitParameter(j++, Form("E%d", i), parameters, steps, lower, upper);
   }  // if
-  runMinuitMinimization();
+  
+  //ZZ never change energy!!!!!
+  if (nPhotons==1) {mMinuit.FixParameter(3) ; } // fix Energy during 1P fit
+  if (nPhotons==2) {mMinuit.FixParameter(3) ; mMinuit.FixParameter(6);  } // fix Energy during 2P fit
+
+   runMinuitMinimization();
   // Populate the list of photons from the fit results
   if (mMinuit.GetStatus() == 0) {
     // Get the fit results and errors
@@ -243,25 +341,50 @@ Int_t StFmsClusterFitter::fit2Photon(const std::array<double, 7>& parameters,
   return chiSquare;
 }
 
-Double_t StFmsClusterFitter::energyDepositionInTower(Double_t* xy,
-                                                     Double_t* parameters) {
-  // Calculate the energy deposited in a tower by evaluating
-  // energyDepositionDistribution() at x+/-d/2 and y+/-d/2, for tower
-  // width d. The double-loop below is equivalent to
-  // F(x+d/2, y+d/2) + F(x-d/2, y-d/2) - F(x-d/2, y+d/2) - F(x+d/2, y-d/2)
-  const double width = parameters[0];
-  double energy(0);
-  for (int ix = 0; ix < 2; ++ix) {
-    for (int iy = 0; iy < 2; ++iy) {
-      double signX = std::pow(-1., ix);  // 1 or -1
-      double signY = std::pow(-1., iy);  // 1 or -1
-      std::array<double, 2> s{ {xy[0] + signX * width / 2.,    // x +/- d/2
-                                xy[1] + signY * width / 2.} }; // y +/- d/2
-      energy += signX * signY * energyDepositionDistribution(s.data(),
-                                                             parameters);
-    }  // for
-  }  // for
-  return energy;
+Double_t StFmsClusterFitter::energyDepositionInTower(Double_t* xy,                                                     
+						     Double_t* parameters) {
+    // Calculate the energy deposited in a tower by evaluating
+    // energyDepositionDistribution() at x+/-d/2 and y+/-d/2, for tower
+    // width d. The double-loop below is equivalent to
+    // F(x+d/2, y+d/2) + F(x-d/2, y-d/2) - F(x-d/2, y+d/2) - F(x+d/2, y-d/2)
+    Double_t energy=0.0;
+
+    if(mshowershapewithangle==0){
+	double w = parameters[0];
+	for (int ix = 0; ix < 2; ++ix) {
+	    for (int iy = 0; iy < 2; ++iy) {
+		double signX = std::pow(-1., ix);  // 1 or -1
+		double signY = std::pow(-1., iy);  // 1 or -1
+		std::array<double, 2> s{ {xy[0] + signX * w / 2.,    // x +/- d/2
+			                  xy[1] + signY * w / 2.} }; // y +/- d/2
+		energy += signX * signY * energyDepositionDistribution(s.data(),
+								       parameters);
+	    }  // for
+	}  // for
+        //cout<<"we are calling the OLD energyDepositionInTower(Double_t* xy,Double_t* parameters"<<endl;
+    }else{
+	Double_t *Zc;
+        Double_t ZcS[6] = {720.45,727.95,735.45,742.95,750.45,757.95};
+        Double_t ZcL[6] = {722.98,733.01,743.04,753.07,763.10,773.13};	
+	Double_t Zmax,xoff,yoff;
+        if (parameters[0]>4) { 
+	    yoff=98.8; Zmax=735.45; xoff=0.3; Zc=ZcL;
+        }else{
+	    yoff=46.5; Zmax=735.45; xoff=0.93; Zc=ZcS;
+        }
+        if (mmerge >0) yoff=98.8;  // large cells always 98.8
+
+        Double_t tany = ( yoff - xy[3]) / (Zmax - vertexz); 
+        Double_t tanx = ( xy[1]- xoff ) / (Zmax - vertexz); //ZZ just in case     
+
+        for(Int_t i = 0; i < 6; i++){
+	    Double_t xc = xy[1] + tanx*(Zc[i] - Zmax);
+	    Double_t yc = xy[3] - tany*(Zc[i] - Zmax); //large (positive) tany corresponds to smaller row # (yc)
+	    Int_t istart = i*10;
+	    energy += energyDepositionInTowerSingleLayer(xy[0]-xc,xy[2]-yc,&parameters[istart])  *  parameters[istart+7]    ;
+        }
+    }    
+    return energy;
 }
 
 int StFmsClusterFitter::maxNFittedPhotons() {
@@ -334,8 +457,14 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
     double expected = 0;
     for (int j = 0; j < nPhotons; ++j) {  // Recall there are 3 paras per photon
 	int k = 3 * j;
-	expected += para[k + 3] * 
-	    energyDepositionInTower(x - para[k + 1], y - para[k + 2], fitParameters.data());
+
+        if(mshowershapewithangle>0 ){   expected += para[k + 3] *
+            energyDepositionInTower(x , y ,para[k+1] , para[k+2], fitParameters.data(),mmerge,vertexz); 
+        }
+        if(mshowershapewithangle==0 ){  expected += para[k + 3] *
+            energyDepositionInTowerOLD(x - para[k + 1], y - para[k + 2], fitParameters.data());
+        }
+
     }
     //const double measured = tower->hit()->energy();
     const double measured = tower->e();
@@ -348,6 +477,7 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
                          energySum + 0.01;
     */
     const Double_t ratio = measured / mEnergySum;
+    // const double err = 0.03 * measured * (1 - ratio) + 0.01;
     const Double_t err = 0.03 *
                          pow(ratio, 1. - 0.001 * mEnergySum) *
                          pow(1. - ratio, 1. - 0.007 * mEnergySum) *
@@ -410,11 +540,11 @@ void StFmsClusterFitter::setTowers(StFmsTowerCluster::Towers* towers) {
     mTowers = towers; 
     mEnergySum = std::accumulate(mTowers->begin(), mTowers->end(), 0., addTowerEnergy);
     //if mScaleShowerShape is on, and if top cell is in large cell, scale shower shape up
-    if(mScaleShowerShape){
+    if(mScaleShowerShape ==1 && mShowerShapeWithAngle==0){
 	if(mTowers->front()->hit()->detectorId() <= 9){ 
-	    fitParameters.at(4) = SS_B1*1.5;
-	    fitParameters.at(5) = SS_B2*1.5;
-	    fitParameters.at(6) = SS_B3*1.5;
+	    fitParameters.at(4) = SS_B1*1.3;
+	    fitParameters.at(5) = SS_B2*1.3;
+	    fitParameters.at(6) = SS_B3*1.3;
 	}else{
 	    fitParameters.at(4) = SS_B1;
 	    fitParameters.at(5) = SS_B2;
@@ -422,6 +552,18 @@ void StFmsClusterFitter::setTowers(StFmsTowerCluster::Towers* towers) {
 	}
 	showerShapeFitFunction.SetParameters(fitParameters.data());
     }
+
+   int count=0;
+  for (auto i = mTowers->begin(), e = mTowers->end(); i!=e; ++i){
+    const StFmsTower* tower = *i;
+    Double_t x=tower->x();
+    Double_t y=tower->y();
+    Double_t etower=tower->e();
+    Double_t detId=tower->hit()->detectorId();
+        ++count;
+        cout<<"              tower"<<count<<"id="<<detId<<" X="<<x<<"Y="<<y<<" E="<<etower<<endl;
+  }
+
 }
     
 }  // namespace FMSCluster

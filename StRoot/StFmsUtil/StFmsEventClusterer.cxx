@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.13 2018/01/04 17:35:45 smirnovd Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.14 2018/03/02 20:27:29 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.14  2018/03/02 20:27:29  akio
+// Big update from	Zhanwen Zhu with new shower shape and six z slices
+//
 // Revision 1.13  2018/01/04 17:35:45  smirnovd
 // [Cosmetic] Remove StRoot/ from include path
 //
@@ -215,15 +218,24 @@ struct OnePhotonFitParameters {
 struct TwoPhotonFitParameters {
   std::array<double, 7> start, steps, lower, upper;
   TwoPhotonFitParameters(const std::vector<double>& xyWidth,
-                         const fms::StFmsTowerCluster* towerCluster, const double w) {
-    const double x = xyWidth.at(0);
+                         const fms::StFmsTowerCluster* towerCluster, const int largesmall , double vertexZ) {
+    const double x = xyWidth.at(0); //width of cell coordinate, while largesmall indicate top cells l/s
     const double y = xyWidth.at(1);
     const auto cluster = towerCluster->cluster();
+
+    //When small merge to large , x y above from xyWidth are large cell width for coodinate calc
+    //Overwrite w1 and w2 for step/limit calc
+    double w1=0, w2=0;
+    if (largesmall==0)  {w1=x; w2=y;}// could be no merging or large cell cluster when merging, anyway ,nothing need be done
+    else                {w1=3.822; w2=3.875;} 
+    LOG_DEBUG<<"x in FitP "<< x <<"    w1="<<w1<<endm;
+
     start = std::array<double, 7>{ {
       PH2_START_NPH,
-      x * cluster->x(),
+      x * cluster->x(),// both terms are scaled, no need to use w1/w2 
       y * cluster->y(),
-      PH2_START_FSIGMAMAX * x * cluster->sigmaMax(),
+      //PH2_START_FSIGMAMAX * x * cluster->sigmaMax(),      // original
+      PH2_START_FSIGMAMAX * x * cluster->sigmaMax() / 2.0,  // above is too big, scale down by 1/2
       towerCluster->thetaAxis(),
       gRandom->Uniform(PH2_RAN_LOW, PH2_RAN_HIGH),
       cluster->energy(),
@@ -234,26 +246,40 @@ struct TwoPhotonFitParameters {
     maxTheta = std::min(maxTheta, TMath::PiOver2());
     lower = std::array<double, 7>{ {
       PH2_LOWER_NPH,
-      start.at(1) - PH2_LOWER_XF * w,
-      start.at(2) - PH2_LOWER_YF * w,
-      std::max(PH2_LOWER_XMAX_F / pow(sigmaMaxE, PH2_LOWER_XMAX_POW), PH2_LOWER_XMAX_LIMIT) * x,
+      start.at(1) - PH2_LOWER_XF * w1 ,
+      start.at(2) - PH2_LOWER_YF * w2,
+      //use vertex for lower limit!!!
+      //if starting point is close to the thoretical limit, still allowed to go down -20% by limit below
+      std::max(0.1345*2/cluster->energy()*(735.45-vertexZ) , 0.5*w1 ), 
+      //theoretical lower limit assuming vertex=0,
+      //std::max(0.1345*2/cluster->energy()*735.45 , 0.5*w1 ),
+      //This is original limit * 0.5
+      //    std::max(PH2_LOWER_XMAX_F / pow(sigmaMaxE, PH2_LOWER_XMAX_POW), PH2_LOWER_XMAX_LIMIT) * x / 2,
+      //This is original limit which is too high
+      //    std::max(PH2_LOWER_XMAX_F / pow(sigmaMaxE, PH2_LOWER_XMAX_POW), PH2_LOWER_XMAX_LIMIT) * x,
       start.at(4) - maxTheta,
       PH2_LOWER_5_F,
       start.at(6) * PH2_LOWER_6_F
     } };
     upper = std::array<double, 7>{ {
       PH2_UPPER_NPH,
-      start.at(1) + PH2_UPPER_XF * w,
-      start.at(2) + PH2_UPPER_YF * w,
-      std::min(PH2_UPPER_XMIN_F * (PH2_UPPER_XMIN_P0 - sigmaMaxE), PH2_UPPER_XMIN_LIMIT) * x,
+      start.at(1) + PH2_UPPER_XF * w1,
+      start.at(2) + PH2_UPPER_YF * w2,
+      // original * 5, still it will be overwroitten by limit at few lines below if it goes negative
+      std::min(PH2_UPPER_XMIN_F * (PH2_UPPER_XMIN_P0 - sigmaMaxE), PH2_UPPER_XMIN_LIMIT) * w1 * 5,
+      //original, wrong at high energy and goes negative
+      //std::min(PH2_UPPER_XMIN_F * (PH2_UPPER_XMIN_P0 - sigmaMaxE), PH2_UPPER_XMIN_LIMIT) * w1 * 5,
       start.at(4) + maxTheta,
       PH2_UPPER_5_F,
       start.at(6) * PH2_UPPER_6_F
     } };
     // With the above approach the limits on parameter 3 can sometimes go beyond
     // sensible values, so limit them.
-    lower.at(3) = std::min(lower.at(3), start.at(3) * PH2_3_LIMIT_LOWER);
-    upper.at(3) = std::max(upper.at(3), start.at(3) * PH2_3_LIMIT_UPPER);
+    lower.at(3) = std::min(lower.at(3), start.at(3) * 0.8);
+    upper.at(3) = std::max(upper.at(3), start.at(3) * 3.0);
+    //original is too tight
+    //    lower.at(3) = std::min(lower.at(3), start.at(3) * PH2_3_LIMIT_LOWER);
+    //    upper.at(3) = std::max(upper.at(3), start.at(3) * PH2_3_LIMIT_UPPER);
   }
 };
 
@@ -289,11 +315,11 @@ namespace FMSCluster {
 					   StFmsDbMaker* db, Int_t detectorId, 
 					   Int_t globalrefit, Int_t mergeSmallToLarge, 
 					   Int_t try1PhotonFit, Int_t categorizationAlgo,
-					   Int_t scaleShowerShape)
+					   Int_t scaleShowerShape , Int_t showerShapeWithAngle ,double vertexZ)
       : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mTowers(0), 
 	mFmsDbMaker(db), mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), 
 	mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit), mCategorizationAlgo(categorizationAlgo),
-        mScaleShowerShape(scaleShowerShape) { }
+        mScaleShowerShape(scaleShowerShape), mShowerShapeWithAngle(showerShapeWithAngle), vertexz(vertexZ) { }
     
 StFmsEventClusterer::~StFmsEventClusterer() {}
 
@@ -314,7 +340,7 @@ Bool_t StFmsEventClusterer::cluster(std::vector<StFmsTower>* towerList) {
     LOG_ERROR << "Too many towers for Fit" << endm;
     return false;
   }  // if
-  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw,mScaleShowerShape));
+  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw,mScaleShowerShape, mShowerShapeWithAngle,mMergeSmallToLarge,vertexz) );
   return fitEvent();  // Return true for success
 }
 
@@ -360,11 +386,17 @@ Bool_t StFmsEventClusterer::fitClusters() {
   // Loop over clusters, catagorize, guess the photon locations for cat 0 or 2
   // clusters then fit, compare, and choose the best fit
   bool badFit = false;
+    int Clucount=0;
   for (auto iter = mClusters.begin(); iter != mClusters.end(); ++iter) {
     int category = -1;
+    ++Clucount;
+    cout<<" processing cluster"<<Clucount<<endl;
+
+
     if(mCategorizationAlgo==0) {category = mClusterFinder.categorise(iter->get());}
     else                       {category = mClusterFinder.categorise2(iter->get());}
     mFitter->setTowers(&(*iter)->towers());
+	cout<<" cata="<<category<<endl;
     switch (category) {
       case k1PhotonCluster:	
         fit1PhotonCluster(iter->get());
@@ -436,7 +468,9 @@ Double_t StFmsEventClusterer::photonEnergyInTower(
     //double x = (tower->column() - 0.5) * mTowerWidthXY.at(0) - photon->x;
     //double y = (tower->row() - 0.5) * mTowerWidthXY.at(1) - photon->y;
     //return photon->energy * mFitter->showerShapeFunction()->Eval(x, y);
-  return photon->energy * mFitter->showerShapeFunction()->Eval(tower->x()-photon->x,tower->y()-photon->y);
+
+ if (mShowerShapeWithAngle>0)   return photon->energy * mFitter->showerShapeFunction()->Eval(tower->x(),photon->x,tower->y(),photon->y);
+ if (mShowerShapeWithAngle==0)  return photon->energy * mFitter->showerShapeFunction()->Eval(tower->x()-photon->x,tower->y()-photon->y);
 }
 
 /* 1-photon fitting function */
@@ -460,8 +494,13 @@ Double_t StFmsEventClusterer::fit1PhotonCluster(StFmsTowerCluster* towerCluster)
 
 /* 2-photon fitting function */
 Double_t StFmsEventClusterer::fit2PhotonCluster(ClusterIter towerCluster) {
-  double w=towerCluster->get()->towers().front()->w();   //get tower width from 1st/top tower   
-  TwoPhotonFitParameters parameters(mTowerWidthXY, towerCluster->get(), w);
+  double x=towerCluster->get()->towers().front()->x();    
+  double y=towerCluster->get()->towers().front()->y();   //get top energy tower position  
+  double w=0;//indicator
+  if(mMergeSmallToLarge>0 && x<8.0 && y>9.0 && y<25.0){
+      w=1;
+  }
+  TwoPhotonFitParameters parameters(mTowerWidthXY, towerCluster->get(), w,vertexz);
   PhotonList photons;
   double chiSquare =
     mFitter->fit2Photon(parameters.start, parameters.steps,
@@ -562,7 +601,7 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
   int column = 1 + int(x);
   int row    = 1 + int(y);
   if(mMergeSmallToLarge>0 && x<8.0 && y>9.0 && y<25.0){
-      column = 1 + int(x*1.5);
+      column = 1 + int(x*1.5); //ZZW
       row    = 1 + int((y-9.0)*1.5);
       det+=2;
   } 
