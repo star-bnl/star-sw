@@ -1,4 +1,3 @@
-class StEpdGeom;
 class StBbcGeom;
 
 void DrawBbc(){
@@ -15,7 +14,10 @@ void DrawBbc(){
 
   for (short tileId=-18; tileId<0; tileId++){     // NOTE negative tileId because East Bbc
     cout << "tileID = " << tileId << endl;
-    TVector3 cent = Bgeo->TileCenter(tileId);
+    unsigned short tid = abs(tileId);
+    TVector3 cent = Bgeo->TileCenter(tid,0);
+
+    //    TVector3 cent = Bgeo->TileCenter(tileId);
     cout << cent.X() << " " << cent.Y() << " " << cent.Z() << endl;
 
     TText* txt = new TText(cent.X(),cent.Y(),Form("%d",tileId));
@@ -31,6 +33,14 @@ void DrawBbc(){
     pline->SetLineColor(4);
     pline->SetLineWidth(2);
     pline->Draw();
+
+
+    unsigned short pmtNumber = Bgeo->PmtOfTile(tid);
+    TText* Ptxt = new TText(cent.X(),cent.Y()-5.0,Form("%d",pmtNumber));
+    Ptxt->SetTextSize(0.01);
+    Ptxt->SetTextColor(2);
+    Ptxt->Draw();
+
   }
 
 
