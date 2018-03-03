@@ -72,35 +72,89 @@ void StBbcGeom::InitializeGeometry(){
     zc = zBBC;
     mWestTileCenter[iTile-1].SetXYZ(xc,yc,zc);
   }
+
+  //------------- fill member array of phototube numbers.
+  //------------- I am too stupid to figure out a better way of doing this:
+
+  for (int pmt=0; pmt<16; pmt++){
+    mNtilesOfPmt[pmt] = 0;
+    mTileNumbersOfPmt[pmt][0] = 0;
+    mTileNumbersOfPmt[pmt][1] = 0;
+  }
+
+  // phototube number corresponding to a given inner BBC tile.  Same for east and west BBCs
+  //    Tile#               1  2  3  4  5  6  7  8  9 10  11  12  12  14  15  16  17  18
+  unsigned short pmt[18] = {1, 2, 3, 4, 5, 6, 7, 8, 7, 9, 10, 11, 12, 13, 12, 14, 15, 16};
+  for (int itile=0; itile<18; itile++){
+    mPMT[itile] = pmt[itile];
+    // note ordering of the following two statements
+    mTileNumbersOfPmt[pmt[itile]][mNtilesOfPmt[pmt[itile]]] = itile;
+    mNtilesOfPmt[pmt[itile]]++;
+  }
 }
-  
+ 
+//-------------------------------------------------------
+void StBbcGeom::GetTilesOfPmt(unsigned short pmtNumber, unsigned short *nTiles, unsigned short* tileNumbers){
+  *nTiles = mNtilesOfPmt[pmtNumber-1];                   // will usually be 1.  Will be 2 for pmt #7 and #12
+  tileNumbers[0] = mTileNumbersOfPmt[pmtNumber-1][0];
+  tileNumbers[1] = mTileNumbersOfPmt[pmtNumber-1][1];    // this will usually be zero except for pmt #7 and #12
+}
+			      
+
+
+
+//-------------------------------------------------------
 TVector3 StBbcGeom::TileCenter(short tileId){
-  short index = abs(tileId) - 1;
-  if (tileId<0){return mEastTileCenter[index];}
-  else {return mWestTileCenter[index];}
+  //  short index = abs(tileId) - 1;
+  //  if (tileId<0){return mEastTileCenter[index];}
+  //  else {return mWestTileCenter[index];}
+  unsigned short absValTile = abs(tileId);
+  return (tileId<0)?TileCenter(absValTile,0):TileCenter(absValTile,1);
+}
+TVector3 StBbcGeom::TileCenter(unsigned short absValueTileNumber, short eastwest){
+  return (eastwest>0)?mWestTileCenter[absValueTileNumber-1]:mEastTileCenter[absValueTileNumber-1];
 }
 
+
+
+//-------------------------------------------------------
 void StBbcGeom::GetCorners(short tileId, double* x, double* y){
-  double xcent = this->TileCenter(tileId).X();
-  double ycent = this->TileCenter(tileId).Y();
+  unsigned short absValTile = abs(tileId);
+  return (tileId<0)?GetCorners(absValTile,0,x,y):GetCorners(absValTile,1,x,y);
+}
+/*
+
+  TVector3 cent = this->TileCenter(tileId);
+  double xcent = cent.X();
+  double ycent = cent.Y();
   for (int i=0; i<6; i++){
     x[i] = mX[i]+xcent;
     y[i] = mY[i]+ycent;
   }
-
-  // cout << "Returning these corners for tile " << tileId << endl;
-  // for (int i=0; i<6; i++){
-  //   cout << x[i] << ", " << y[i] << endl;
-  // }
-
+}
+*/
+void StBbcGeom::GetCorners(unsigned short absValueTileNumber, short eastwest, double* x, double* y){
+  TVector3 cent = this->TileCenter(absValueTileNumber,eastwest);
+  double xcent = cent.X();
+  double ycent = cent.Y();
+  for (int i=0; i<6; i++){
+    x[i] = mX[i]+xcent;
+    y[i] = mY[i]+ycent;
+  }
 }
 
+
+
+//-------------------------------------------------------
 bool StBbcGeom::IsInTile(short tileId, double x, double y){
+  unsigned short absValTile = abs(tileId);
+  return (tileId<0)?IsInTile(absValTile,0,x,y):IsInTile(absValTile,1,x,y);
+}
+bool StBbcGeom::IsInTile(unsigned short absValueTileNumber, short eastwest, double x, double y){
   double PolygonX[7];
   double PolygonY[7];
-  GetCorners(tileId,PolygonX,PolygonY);
+  GetCorners(absValueTileNumber,eastwest,PolygonX,PolygonY);
   PolygonX[6]=PolygonX[0];   // must close the polygon
   PolygonY[6]=PolygonY[0];   // must close the polygon
   return TMath::IsInside(x,y,7,PolygonX,PolygonY);
 }
-
