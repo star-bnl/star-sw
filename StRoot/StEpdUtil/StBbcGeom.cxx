@@ -88,8 +88,8 @@ void StBbcGeom::InitializeGeometry(){
   for (int itile=0; itile<18; itile++){
     mPMT[itile] = pmt[itile];
     // note ordering of the following two statements
-    mTileNumbersOfPmt[pmt[itile]][mNtilesOfPmt[pmt[itile]]] = itile;
-    mNtilesOfPmt[pmt[itile]]++;
+    mTileNumbersOfPmt[pmt[itile]-1][mNtilesOfPmt[pmt[itile]-1]] = itile+1;
+    mNtilesOfPmt[pmt[itile]-1]++;
   }
 }
  
