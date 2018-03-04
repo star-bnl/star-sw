@@ -28,16 +28,23 @@ class StEpdGeom{
   short   mEW;  /// West/East = +1/-1
   TRandom3* pRan;
 
+  double mPhiCenter[12][31][2];  // PP,TT,EW
+  double mRmin[16];   // row
+  double mRmax[16];   // row
+  double mRave[16];   // row
+
+  void InitializeGeometry();
+
   /* these methods are used internally */
   /// z coordinate of the wheel in STAR coordinate system
   /// depends on internal parameter mEW
   double GetZwheel();
   /// phi of the center of the tile in STAR coordinate syste
   /// depends on internal parameters mPP, mTT, mEW
-  double GetPhiCenter();
+  //--------- obsolete (always the plan; that's why it was private)  double GetPhiCenter();
   /// the inner and outer extent of the tile in the radial direction
   /// depends on internal parameters mPP, mTT, mEW
-  void     GetRminRmax(double *Rmin, double *Rmax);
+  //--------- obsolete (always the plan; that's why it was private)  void     GetRminRmax(double *Rmin, double *Rmax);
   /// the "tile row" of the tile.  Row = [1,16]
   /// depends on internal parameter mTT
   short  Row();
