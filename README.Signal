@@ -1,0 +1,18 @@
+How to simulate and reconstruct signal.
+________________________________________
+1. Setup TFG environmnet 
+    source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
+2. Setup TFG Release. The list of TFG releases can be found /afs/rhic.bnl.gov/star/packages/.DEV2/TFG_Releases
+    setup STFG18d
+3. An example to run simulation and reconstruction  
+    a. ~fisyak/xml/2016VFMCE.xml 
+    b. Set of runs defined via ~fisyak/bin/RunId.pl 
+    c. The chain is defined as
+      Chain = "MC.2016a,istSlowSim"${Sti}",StiPulls,-hitfilt,KFVertex,StiHftC,beamLine,-geantOut,-evout,picoWrite,PicoVtxVpd,noRunco,noHistos,noTags,vmc,VMCAlignment,CorrX,OSpaceZ2,OGridLeak3D,-useXgeom,"${name}${VMCE}${sdt}",Rung."${rung}
+    where  
+    -   name is the name of Cint macro in $STAR/StarDb/Generators which defines type of particle, decay mode and pT - distribution
+        The list of available generators contains
+D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi
+    - VMCE = VMCE 
+    - sdt  = "" for Ideal geometry or sdt20160301 for real one
+   

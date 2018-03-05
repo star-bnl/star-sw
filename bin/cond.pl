@@ -49,6 +49,7 @@ foreach my $line (@list) {
     print "node  $node from $line" if ($debug);
   } elsif ($line =~ /Iwd/) {
     ($dum3,$pwd) = split('"',$line);
+    $pwd =~ s#/gpfs02/eic/ayk/STAR/reco/##;
     $pwd =~ s#/afs/rhic.bnl.gov/star/users/fisyak/work/##;
     $pwd =~ s#/gpfs01/star/pwg/fisyak/##;
     $pwd =~ s#/afs/rhic.bnl.gov/star/users/fisyak/pwg/##;

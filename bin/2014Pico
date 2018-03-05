@@ -1,12 +1,20 @@
-set DIR = /gpfs02/eic/ayk/STAR/reco/Pico/2014/AuAu_200_production_mid_2014;
-foreach dayd (`ls -1dr ${DIR}/16?`)
+============== environment ==============
+#set TRIG = AuAu_200_production_mid_2014;
+#set TRIG = AuAu_200_production_2014
+set TRIG = AuAu_200_production_low_2014
+set PicoDIR  = /gpfs02/eic/ayk/STAR/reco/Pico/2014/${TRIG};
+set FemtoDIR = /gpfs01/star/pwg/fisyak/Femto/2014/${TRIG};
+set hpssDir = reco/Pico/2014/${TRIG}
+
+================================================================================
+foreach dayd (`ls -1dr ${PicoDIR}/???`)
   set day = `basename ${dayd}`;
-  cd ${DIR}
+  cd ${PicoDIR}
   if (! -d ${day}) mkdir ${day}
   cd  ${day}
-  foreach run ( `ls -1d 15*` )
-    cd ${run}
-    pwd
+  foreach run ( `ls -d 15*` )
+    if (-r ${run}/Chain.log) continue;	
+    cd ${run};  echo "$PWD";
     PicoDST2014.pl
     if ( ! $? ) then
       lsf ~/xml/PicoDST2014.xml;
@@ -17,18 +25,136 @@ foreach dayd (`ls -1dr ${DIR}/16?`)
   end
 end
 ================================================================================
-cd ~/Pico/2014
+#    if ($count > 20) break;
 setenv NODEBUG yes
 setup 64b
 xtitl
-foreach f (`ls -1d 1*/Done`)
+cd ${PicoDIR}
+@ count = 0
+foreach f (`ls -1d ???/*/Done`)
   set d = `dirname ${f}`;
-  cd ${d}; 
-  if (-r Done && ! -r Chain.log) then	
+  cd ${d}; pwd;
+  if (-r MuDst.list && -r Done && ! -r Chain.log) then	
+    rm Done
     rm -rf .sl*
     ln -s ../../../.sl73_* .	
     root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
-    rm Done
+    @ count++;  echo "count $count";
+  endif
+  cd -;
+end
+================================================================================
+cd ${PicoDIR};
+foreach f (`ls -1d */*/Chain.log`)
+  set dir = `dirname ${f}`;
+  cd ${FemtoDIR}
+  if (! -d ${dir}) mkdir -p ${dir}
+  cd  ${dir};  pwd;
+  if (! -r Done && ! -r Chain.log) then
+    FemtoDST2014.pl
+    if ( ! $? ) then
+      lsf ~/xml/FemtoDST2014.xml;
+    else
+      touch Done;
+    endif
+  endif
+end
+================================================================================
+grep total ???/1*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fB\n", n/1.e9)}'
+================================================================================
+#    if ($count > 20) break;
+setenv NODEBUG yes
+setup 64b
+xtitl
+cd ${FemtoDIR}
+@ count = 0
+foreach d (`ls -1dr ???/15??????`)
+  if (! -d ${d}) continue;	
+  cd ${d}; pwd;
+  if (! -r Chain.log) then	
+    rm -rf .sl*
+    ln -s ../../../.sl73_* .	
+    root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
+    @ count++;
+    echo "count = $count"
+  endif
+  cd -;
+end
+================================================================================
+tar cf - ???/*.log ???/*/Chain.log | (cd Chain; tar xfv -)
+cd ${PicoDIR}
+=============================================Clean up Chain.log===================================
+foreach f (`ls -1d ???/*/Chain.log`)
+  set d = `dirname ${f}`;
+  cd ${d}; pwd;
+  set test = `find . -maxdepth 1 -name "*.root" -cnewer Chain.log`;
+  if ("${test}" != "") then
+    echo "${test}";
+    rm Chain.log
+  endif
+  cd -;
+end
+================================================================================
+find . -not -name "*.root" -type f
+================================================================================
+foreach d (`ls -1d 1*`)
+  cd $d;
+  lsf ~/xml/FemtoDST2014.xml;
+  cd -;
+end
+================================================================================
+cd ${PicoDIR}
+set d = 165;
+find ${d} -not -name "*.root" -type f
+cat > Chain/hpss.${d}.list << EOD
+cd ${hpssDir}
+prompt
+cput -R ${d}
+EOD
+cat Chain/hpss.${d}.list |  hsi >& Chain//hpss.${d}.`date +%m%d%y`.log &
+================================================================================
+cd ${PicoDIR}
+if (-r tohpss.csh) rm tohpss.csh
+touch tohpss.csh
+foreach f (`ls -1rd ${PicoDIR}/Chain/*/To*`)
+  set dd = `dirname ${f}`;
+  set day = `basename ${dd}`;
+  if (! -d ${day}) continue;
+  cat >> tohpss.csh << EOD
+  find ${day} -not -name "*.root" -not -type d -exec rm {} \;
+  cat > Chain/hpss.${day}.list << EOF
+  cd ${hpssDir}
+  prompt
+  cput -R ${day}
+EOF
+  cat Chain/hpss.${day}.list |  hsi >& Chain/hpss.${day}.`date +%m%d%y`.log
+  if (\$?) break;
+  rm -rf ${day}
+EOD
+end
+================================================================================
+set day = `basename $PWD`; grep total */Chain.log  | awk '{print $1" "$6}' | tee ${day}.log
+diff -y ${PicoDIR}/Chain//${day}/${day}.log .
+
+
+
+foreach d (`diff -y ${PicoDIR}/Chain//${day}/${day}.log . | grep '|' | awk -F \/ '{print $1}'`)
+  cd $d
+  mkdir hold; mv *.root *B.log hold
+  rm *.*
+  lsf ~/xml/FemtoDST2014.xml
+  cd -;
+end
+==================missing==============================================================
+foreach f (`grep -l missing ???/1*/Chain.log`)
+  set d = `dirname ${f}`;
+  cd ${d}
+  if (-r Chain.log) then	
+    foreach q (`grep missing Chain.log | awk '{print $3}'`)
+      set b = `basename ${q} .picoDst.root`;
+      rm ${b}*
+    end
+    rm Chain.log
   endif
   cd -;
 end
