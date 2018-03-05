@@ -39,6 +39,7 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
   // Trigger data
   UShort_t mtd_qt_tac_min = 100;
   if (runnumber >= 16045067) mtd_qt_tac_min = 80;
+  if (runnumber >= 18070005) mtd_qt_tac_min = 200; // change due to new boards
   UShort_t mtd_qt_tac_diff_range_abs = 600;
   if (year == 2015) mtd_qt_tac_diff_range_abs = 1023;
 
