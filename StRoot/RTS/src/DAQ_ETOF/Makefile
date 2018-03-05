@@ -30,7 +30,7 @@ daq_etof.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_etof.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_etof.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_etof.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_etof.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
+daq_etof.o: ../../../../StRoot/RTS/trg/include/trgDataDefs_45.h
 daq_etof.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_etof.o: ../SFS/sfs_index.h
 daq_etof.o: ../SFS/fs_index.h
