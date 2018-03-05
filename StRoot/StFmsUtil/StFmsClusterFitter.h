@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.8 2016/06/07 15:51:44 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.9 2018/03/02 20:27:29 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.9  2018/03/02 20:27:29  akio
+// Big update from	Zhanwen Zhu with new shower shape and six z slices
+//
 // Revision 1.8  2016/06/07 15:51:44  akio
 // Making code better based on Coverity reports
 //
@@ -86,7 +89,8 @@ class StFmsTower;
 class StFmsClusterFitter : public TObject {
  public:
   /** Constructor using detector geometry for a single sub-detector */
-  StFmsClusterFitter(/*const StFmsGeometry* geometry,*/ Int_t detectorId, Float_t xw, Float_t yw, Int_t scaleShowerShape);
+  StFmsClusterFitter(/*const StFmsGeometry* geometry,*/ Int_t detectorId, Float_t xw, Float_t yw, 
+           Int_t scaleShowerShape , Int_t ShowerShapeWithAngle , Int_t MergeSmallToLarge, double vertexZ);
   /**
    Default constructor.
 
@@ -168,9 +172,16 @@ class StFmsClusterFitter : public TObject {
    https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
 
    \todo Provide LaTeX math function in documentation
-   */
-  static inline Double_t energyDepositionInTower(Double_t x, Double_t y, Double_t* par);
+  **/
+  static inline Double_t energyDepositionInTowerOLD(Double_t x, Double_t y, Double_t* par);
+
+  /**
+     adding 6 slices aong z with angle taken into account
+   **/
   static Double_t energyDepositionInTower(Double_t* x, Double_t* par);
+  static inline Double_t energyDepositionInTower(Double_t x, Double_t y,Double_t xun, Double_t yun, Double_t* parmeters,Int_t  MergeSmallToLarge,double vertexz);
+  static inline Double_t energyDepositionInTowerSingleLayer(Double_t x, Double_t y, Double_t* parameters);
+
   /** Maximum number of photons that can be fit at once. */
   static int maxNFittedPhotons();
 
@@ -248,6 +259,9 @@ class StFmsClusterFitter : public TObject {
   static StFmsTowerCluster::Towers* mTowers;  ///< List of towers to fit
   static Double_t mEnergySum;
   Int_t mScaleShowerShape;
+  Int_t mShowerShapeWithAngle;
+  Int_t mMergeSmallToLarge;
+
 
   ClassDef(StFmsClusterFitter, 0)
 };  // class StFmsClusterFitter
@@ -270,12 +284,56 @@ inline Double_t StFmsClusterFitter::energyDepositionDistribution(double x, doubl
 	       + showerShapeComponent(x, y, parameters[3], parameters[6]) ) * ootwopi;
 }
 
-inline Double_t StFmsClusterFitter::energyDepositionInTower(Double_t x, Double_t y, Double_t* parameters){
+inline Double_t StFmsClusterFitter::energyDepositionInTowerOLD(Double_t x, Double_t y, Double_t* parameters){
+    //old version without incident angle effect
     const double w = parameters[0]/2.0;
     return  energyDepositionDistribution(x-w,y-w,parameters)
           - energyDepositionDistribution(x-w,y+w,parameters)
           - energyDepositionDistribution(x+w,y-w,parameters)
           + energyDepositionDistribution(x+w,y+w,parameters);
+}
+
+//x,y are cell position, and xun,yun are photon position, in cell coordinate at Z=ZMAX
+inline Double_t StFmsClusterFitter::energyDepositionInTower(Double_t x, Double_t y,Double_t xun, Double_t yun, 
+		Double_t* parameters,Int_t mMerge ,double vertexz){
+    //Double_t para[60];
+    Double_t *Zc;
+    Double_t ZcS[6] = {720.45,727.95,735.45,742.95,750.45,757.95};
+    Double_t ZcL[6] = {722.98,733.01,743.04,753.07,763.10,773.13};
+    
+    //for(Int_t i = 0; i < 60; i++){ para[i]=parameters[i]; }
+    Double_t Zmax,yoff,xoff;
+    if (parameters[0] > 4) { 
+	yoff=98.8; Zmax=735.45; xoff=0.3; Zc=ZcL;
+    }else{
+	yoff=46.5; Zmax=735.45; xoff=0.93; Zc=ZcS;
+    }
+    if (mMerge>0) yoff=98.8;
+    
+    Double_t tanx = ( xun + xoff) / (Zmax-vertexz); //recalculate tanx and tany for each iteration
+    Double_t tany = ( yoff - yun) / (Zmax-vertexz); //use Zmax instead of lzz, 06/25/2012 Yuxi
+    
+    Double_t sum = 0.0; 
+    for(Int_t i = 0; i < 6; i++){
+	Double_t xc = xun + tanx*(Zc[i] - Zmax);
+	Double_t yc = yun - tany*(Zc[i] - Zmax); //large (positive) tany corresponds to smaller row # (yc)
+	Int_t istart = i*10;
+	sum += ( energyDepositionInTowerSingleLayer(x-xc,y-yc,&parameters[istart])  *  parameters[istart+7]) ;
+    }
+    return sum;
+}
+
+inline Double_t StFmsClusterFitter::energyDepositionInTowerSingleLayer(Double_t x, Double_t y, Double_t* parameters){
+    const double w = parameters[0];
+    double ww1=0;
+    double ww2=0;
+    if (w < 4) {ww1=3.822/2; ww2=3.875/2; }
+    else       {ww1=5.812/2; ww2=5.812/2; }
+    
+    return  energyDepositionDistribution(x-ww1,y-ww2,parameters)
+          - energyDepositionDistribution(x-ww1,y+ww2,parameters)
+          - energyDepositionDistribution(x+ww1,y-ww2,parameters)
+          + energyDepositionDistribution(x+ww1,y+ww2,parameters);
 }
 
 
