@@ -2,145 +2,6 @@
 
   <StarGeometry default="y2016" >
 
-  <!-- Quick test geometry for FTS deveolpment -->
-  <Geometry tag="ftsver1" comment="Forward Tracking test setup">
-
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="vpdd" config="VPDD08" />
-    <Construct sys="calb" config="CALB02" />
-    <Construct sys="ecal" config="ECALv6" />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="zcal" config="ZCALon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="mutd" config="MUTD15" />
-
-    <Construct sys="ftsd" config="FTSDv1" />
-  
-  </Geometry>
-  <Geometry tag="ftsver2" comment="Forward Tracking test setup">
-
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="vpdd" config="VPDD08" />
-    <Construct sys="calb" config="CALB02" />
-    <Construct sys="ecal" config="ECALv6" />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="zcal" config="ZCALon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="mutd" config="MUTD15" />
-
-    <Construct sys="ftsd" config="FTSDv2" />
-  
-  </Geometry>
-  <Geometry tag="ftsver3" comment="Forward Tracking test setup">
-
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="idsm" config="IDSM14" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="upst" config="UPSTon" />
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="vpdd" config="VPDD08" />
-    <Construct sys="calb" config="CALB02" />
-    <Construct sys="ecal" config="ECALv6" />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="zcal" config="ZCALon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="mutd" config="MUTD15" />
-
-    <Construct sys="ftsd" config="FTSDv3" />
-  
-  </Geometry>
-  <Geometry tag="ftsver4" comment="Forward Tracking test setup">
-
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="ftsd" config="FTSDv4" />
-    <Construct sys="epdm" config="EPDMon"  />
-
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="mutd" config="MUTD15" />
-    <Construct sys="calb" config="CALB02" />
-
-  </Geometry>
-
-  <Geometry tag="ftsref1" comment="Forward Tracking reference 1">
-
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="ftsd" config="FTSDr1" />
-    <Construct sys="epdm" config="EPDMon"  />
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="mutd" config="MUTD15" />
-    <Construct sys="calb" config="CALB02" />
-
-  </Geometry>
-
-  <Geometry tag="ftsref2" comment="Forward Tracking reference 1">
-
-    <Construct sys="cave" config="CAVE05" />
-    <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="bbcm" config="BBCMon" />
-    <Construct sys="magp" config="MAGPon" />
-    <Construct sys="ftsd" config="FTSDr2" />
-    <Construct sys="epdm" config="EPDMon"  />
-    <Construct sys="tpce" config="TPCE31" />
-    <Construct sys="btof" config="BTOFv8" />
-    <Construct sys="mutd" config="MUTD15" />
-    <Construct sys="calb" config="CALB02" />
-
-  </Geometry>
-
-
-  <!-- Just the CAVE and upstream area -->
-  <Geometry tag="blackhole" check="false" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon"  />
-    <Construct sys="idsm" config="IDSMof"  />
-    <Construct sys="pipe" config="PIPEof"  />
-    <Construct sys="upst" config="UPSTon"  />
-    <Construct sys="shld" config="SHLDon"  />
-    <Construct sys="quad" config="QUADon"  />
-    <Construct sys="scon" config="SCONof"  />
-    <Construct sys="svtt" config="SVTTof"  />
-    <Construct sys="tpce" config="TPCEof"  />
-    <Construct sys="ftpc" config="FTPCof"  />
-    <Construct sys="supo" config="SUPOof"  />
-    <Construct sys="ftro" config="FTROof"  />
-    <Construct sys="btof" config="BTOFof"  />
-    <Construct sys="vpdd" config="VPDDof"  />
-    <Construct sys="calb" config="CALBof"  />
-    <Construct sys="ecal" config="ECALof"  />
-    <Construct sys="bbcm" config="BBCMon"  />
-    <Construct sys="fpdm" config="FPDMof"  />
-    <Construct sys="hcal" config="HCALof"  />
-    <Construct sys="zcal" config="ZCALof"  />
-    <Construct sys="magp" config="MAGPof"  />
-    <Construct sys="sisd" config="SISDof"  />
-    <Construct sys="istd" config="ISTDof"  />
-    <Construct sys="pxst" config="PXSTof"  />
-    <Construct sys="mutd" config="MUTDof"  />
-    <Construct sys="pixl" config="PIXLof"  />    
-    <Construct sys="dtub" config="DTUBof"  />
-    <Construct sys="psup" config="PSUPof"  />
-    <Construct sys="fgtd" config="FGTDof"  />
-    <Construct sys="phmd" config="PHMDof"  />
-</Geometry>
-
 <!-- y2018 series geometry tags -->
   <Geometry tag="y2019"  check="false" comment="Y2019 rough cut geometry">
 
@@ -165,6 +26,42 @@
 <!-- y2018 series geometry tags -->
   <Geometry tag="y2018"  check="false" comment="Y2018 rough cut geometry">
 
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="tpce" config="TPCE31"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14s"  />
+  </Geometry>
+
+<!-- y2018 series geometry tags -->
+  <Geometry tag="y2018a"  check="false" comment="Y2018a physics production geometry (version A)">
+    <!--
+
+	As there are no plans to use the iTPC for physics production, we 
+	implement y2018a with the 2000-2017 geometry model of the TPC.
+	
+	o No impact on reco, since agml only provides dead materials to Sti
+	o No impact on physics embed or simu (iTPC not to be used)
+
+        iTPC model will be defined in the asymptotic y2018x, y, z tags
+
+        o Allows SnC to evaluate tracking performance with Sti
+	o Reduces risk that embedding and production teams will not mistakenly
+	  include iTPC in simulations... even though TpcRS should probably
+	  take care not to create hits regardless
+
+    -->
     <Construct sys="cave" config="CAVE05"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
@@ -2042,6 +1939,140 @@
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="magp" config="MAGPon"  />     
   </Geometry>
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="ftsver1" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv1" />
+  
+  </Geometry>
+  <Geometry tag="ftsver2" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv2" />
+  
+  </Geometry>
+  <Geometry tag="ftsver3" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv3" />
+  
+  </Geometry>
+  <Geometry tag="ftsver4" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDv4" />
+    <Construct sys="epdm" config="EPDMon"  />
+
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref1" comment="Forward Tracking reference 1">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr1" />
+    <Construct sys="epdm" config="EPDMon"  />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <Geometry tag="ftsref2" comment="Forward Tracking reference 1">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr2" />
+    <Construct sys="epdm" config="EPDMon"  />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+  <!-- Just the CAVE and upstream area -->
+  <Geometry tag="blackhole" check="false" comment="All detectors off">
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="idsm" config="IDSMof"  />
+    <Construct sys="pipe" config="PIPEof"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="quad" config="QUADon"  />
+    <Construct sys="scon" config="SCONof"  />
+    <Construct sys="svtt" config="SVTTof"  />
+    <Construct sys="tpce" config="TPCEof"  />
+    <Construct sys="ftpc" config="FTPCof"  />
+    <Construct sys="supo" config="SUPOof"  />
+    <Construct sys="ftro" config="FTROof"  />
+    <Construct sys="btof" config="BTOFof"  />
+    <Construct sys="vpdd" config="VPDDof"  />
+    <Construct sys="calb" config="CALBof"  />
+    <Construct sys="ecal" config="ECALof"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDMof"  />
+    <Construct sys="hcal" config="HCALof"  />
+    <Construct sys="zcal" config="ZCALof"  />
+    <Construct sys="magp" config="MAGPof"  />
+    <Construct sys="sisd" config="SISDof"  />
+    <Construct sys="istd" config="ISTDof"  />
+    <Construct sys="pxst" config="PXSTof"  />
+    <Construct sys="mutd" config="MUTDof"  />
+    <Construct sys="pixl" config="PIXLof"  />    
+    <Construct sys="dtub" config="DTUBof"  />
+    <Construct sys="psup" config="PSUPof"  />
+    <Construct sys="fgtd" config="FGTDof"  />
+    <Construct sys="phmd" config="PHMDof"  />
+</Geometry>
 
 
   </StarGeometry>
