@@ -428,9 +428,7 @@ Int_t StPicoDstMaker::openRead() {
   }
   else if (! gSystem->AccessPathName(dirFile.c_str()) &&
 	   (dirFile.find(".picoDst.root")  != string::npos ||
-	    ddirFile.find(".picoDst.root") != string::npos ||
-	    dirFile.find(".femtoDst.root")  != string::npos ||
-	    ddirFile.find(".femtoDst.root") != string::npos) {
+	    dirFile.find(".femtoDst.root")  != string::npos)) {
     mChain->Add(dirFile.c_str());
   }
   else {
