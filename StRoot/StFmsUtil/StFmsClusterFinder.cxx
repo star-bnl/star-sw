@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFinder.cxx,v 1.8 2018/01/04 17:35:44 smirnovd Exp $
+// $Id: StFmsClusterFinder.cxx,v 1.9 2018/03/02 20:27:29 akio Exp $
 //
 // $Log: StFmsClusterFinder.cxx,v $
+// Revision 1.9  2018/03/02 20:27:29  akio
+// Big update from	Zhanwen Zhu with new shower shape and six z slices
+//
 // Revision 1.8  2018/01/04 17:35:44  smirnovd
 // [Cosmetic] Remove StRoot/ from include path
 //
@@ -210,7 +213,7 @@ class TowerClusterAssociation : public TObject {
       float rL=rowL-0.5;
       float cL=colL-0.5;
       float rS=(rowS-0.5)/1.5 + 9.0;
-      float cS=(colS-0.5)/1.5;
+      float cS=(colS-0.5)/1.5; 
       return sqrt(pow(rL-rS,2.0)+pow(cL-cS,2.0));
   }
   /**
@@ -235,7 +238,7 @@ class TowerClusterAssociation : public TObject {
 			pow(cluster->cluster()->y() - (mTower->row() - 0.5), 2.));
 	}else{ //different detector (large cell cluster and small cell tower) - make small cell fit to large
 	    float col=(mTower->column()-0.5)/1.5; 
-	    float row=(mTower->row()-0.5)/1.5+9.0;    
+	    float row=(mTower->row()-0.5)/1.5+9.0; 
 	    return sqrt(pow(cluster->cluster()->x() - col,2.0) +
 			pow(cluster->cluster()->y() - row,2.0));
 	}  // if	

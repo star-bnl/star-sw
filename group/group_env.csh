@@ -1,9 +1,9 @@
 #!/bin/csh
-#       $Id: group_env.csh,v 1.260 2014/12/10 21:40:51 jeromel Exp $
+#       $Id: group_env.csh,v 1.261 2018/02/26 22:52:32 jeromel Exp $
 #	Purpose:	STAR group csh setup
 #
 # Revisions & notes
-#    2001-2009  Maintained J. Lauret
+#    2001-2017  Maintained J. Lauret
 #    24 Apr 01  J. Lauret  Disabled echoing in ! prompt.
 #                          DO NOT MODIFY THIS !!!
 #     2 Apr 01  J. Lauret  Insure path added
@@ -396,6 +396,10 @@ if ( ! $?SITE ) then
 	case "rcf.bnl.gov":
 	case "star.bnl.gov":
 	    setenv SITE "BNL"
+	    breaksw
+
+	case "starp.bnl.gov":
+	    setenv SITE "BNLONL"
 	    breaksw
 
 	case "if.usp.br":

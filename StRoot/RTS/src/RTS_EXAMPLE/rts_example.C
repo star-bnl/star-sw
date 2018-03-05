@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
 		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		    date, evp->detectors, evp->status,evp->evpgroups) ;
 
-		if(strlen(print_det)) {
+		if(strlen(print_det)) {	// if any detector full printout is requested
 			printf("*** Event %d, sequence %d: token %d, trgcmd %d, daqcmd %d\n",good,
 			       evp->seq,evp->token,evp->trgcmd,evp->daqcmd) ;
 		}
@@ -1835,13 +1835,21 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   swap32(trg->L1_DSM_ofl.length));
 	    */
 	      for(int i=2;i<MAX_OFFLEN-1;i++) {
-		if(confnum2str[i])
-		    printf("ids: crate %s(0x%x):\toffset=%d\tsize=%d\n", 
-			   confnum2str[i],
+		if(swap32(trg->MainX[i].length)) {
+
+			char *nm = (char *)trg + swap32(trg->MainX[i].offset);
+			nm[4] =0 ;
+
+//		if(confnum2str[i]) {
+		    printf("ids %2d: crate %s[%s](0x%x):\toffset=%d\tsize=%d\n",i,
+			   confnum2str[i],nm,
 			   1<<i,
 			   swap32(trg->MainX[i].offset),
 			   swap32(trg->MainX[i].length));
 			   }
+
+			//printf("---> [%s]\n",nm) ;
+		}
       
 	}
     }
@@ -2225,8 +2233,11 @@ static int etof_doer(daqReader *rdr, const char *do_print)
 			if(do_print) {
 				printf("ETOF: %d bytes\n",dd->ncontent) ;
 
-				for(int i=0;i<10;i++) {
-					printf("    %d: 0x%08X\n",i,dd->Int32[i]) ;
+				u_int words = dd->ncontent/4 ;
+				if(words > 16) words = 16 ;
+
+				for(u_int i=0;i<words;i++) {
+					printf("    %d/%d: 0x%08X\n",i,dd->ncontent/4,dd->Int32[i]) ;
 				}
 			}
 
@@ -2270,9 +2281,15 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				rdos[dd->row-1] = 1 ;
 
-				//if(do_print) {
-				//	printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
-				//}
+				if(do_print) {
+					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
+
+					u_int *d32 = (u_int *)dd->Void ;
+
+					for(u_int i=0;i<dd->ncontent/4;i++) {
+						printf("%4d = 0x%08X\n",i,d32[i]) ;
+					}
+				}
 			}
 		}
 #endif

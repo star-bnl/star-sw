@@ -28,13 +28,16 @@ public:
 
 
 	int rdo_scan(u_int *ddata, int words) ;
-	int get_l2(char *ddata, int words, struct daq_trg_word *trgs, int do_log) ;
+//	int get_l2(char *ddata, int words, struct daq_trg_word *trgs, int do_log) ;
 
 	u_int *fee_scan(u_int *start, u_int *end) ;
 	u_int *sampa_lane_scan(u_int *start, u_int *end) ;
 	int sampa_ch_scan() ;
 
+	
+
 	// filled by client
+	int dbg_level ;
 	int realtime ;	// running in realtime
 	u_int run_number ;
 	int sector_id ;

@@ -133,6 +133,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       }
       Double_t Zshift = 0; // 
       Double_t Zdepth = dZ;
+      Double_t zc = 0;
 #if 1
       if (NoStiSectors == 24) {
 	Float_t maxTimeBacket = 410;
@@ -140,6 +141,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	Float_t freq = StTpcDb::instance()->Electronics()->samplingFrequency(); // MHz
 	Zshift = maxTimeBacket/freq*driftvel - dZ;
 	Zdepth = (dZ + Zshift)/2;
+	zc     = (dZ - Zshift)/2;
+	if (sector > 12) zc = -zc;
       }
 #endif
       pShape->setHalfDepth(Zdepth);
@@ -191,11 +194,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       Double_t phiD = normalVector.phi();
       Double_t r = centerVector.perp();
       StiPlacement *pPlacement = new StiPlacement;
-      Double_t zc = 0;
-      if (NoStiSectors != 12) {
-	zc = (dZ-Zshift)/2;
-	if (sector > 12) zc = -zc;
-      }
       pPlacement->setZcenter(zc);
       pPlacement->setLayerRadius(fRadius);
       pPlacement->setLayerAngle(phi);

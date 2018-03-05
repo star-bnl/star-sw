@@ -24,11 +24,61 @@ StEpdGeom::StEpdGeom() : mPP(0), mTT(0), mEW(0){
     pRan = new TRandom3();
     pRan -> SetSeed();
   }
+  InitializeGeometry();
 }
 
 StEpdGeom::~StEpdGeom(){
   if ( pRan && pRan != gRandom ) delete pRan;
 }
+
+void StEpdGeom::InitializeGeometry(){
+
+  //  First, save the phi values of the centers of all tiles.
+  //  I am aware that this is a bit wasteful, since all the even (or odd) numbered
+  //  tiles of a given position all have the same phi.  But you'll go nuts otherwise.
+  //  Better to waste a little memory than to get confused.
+  double DeltaPhiSS = 30.0*TMath::Pi()/180.0;  // 30 degree supersectors
+  int EW=0;   // East
+  for (int PP=1; PP<13; PP++){
+    double phiSS = TMath::Pi()/2.0 - (PP-0.5)*DeltaPhiSS;
+    if (phiSS<0.0) phiSS += 2.0*TMath::Pi();
+    mPhiCenter[PP-1][0][EW] = phiSS;
+    for (int TT=2; TT<32; TT+=2){      // EVENS
+      mPhiCenter[PP-1][TT-1][EW] = phiSS - DeltaPhiSS/4.0;
+    }
+    for (int TT=3; TT<32; TT+=2){      // ODDS
+      mPhiCenter[PP-1][TT-1][EW] = phiSS + DeltaPhiSS/4.0;
+    }
+  }
+  EW=1;   // West
+  for (int PP=1; PP<13; PP++){
+    double phiSS = TMath::Pi()/2.0 + (PP-0.5)*DeltaPhiSS;
+    if (phiSS>2.0*TMath::Pi()) phiSS -= 2.0*TMath::Pi();
+    mPhiCenter[PP-1][0][EW] = phiSS;
+    for (int TT=2; TT<32; TT+=2){      // EVENS
+      mPhiCenter[PP-1][TT-1][EW] = phiSS + DeltaPhiSS/4.0;
+    }
+    for (int TT=3; TT<32; TT+=2){      // ODDS
+      mPhiCenter[PP-1][TT-1][EW] = phiSS - DeltaPhiSS/4.0;
+    }
+  }
+
+  //  Now the inner, outer, and average radius of a _ROW_
+  double RowHeight[16]={4.4, 4.4, 4.4, 5.53, 5.53, 5.53,
+			  5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53};
+  double Rminimum = 4.6;  // the distance from beamline to the inner edge of tile 1
+  mRmin[0] = Rminimum;  // row 1 (tiles 1)
+  for (int irow=1; irow<16; irow++){
+    mRmin[irow]=mRmin[irow-1]+RowHeight[irow-1];
+    mRmax[irow-1]=mRmin[irow];
+  }
+  mRmax[15]=mRmin[15]+RowHeight[15];
+  for (int irow=0; irow<16; irow++){
+    mRave[irow] = 0.5*(mRmin[irow]+mRmax[irow]);
+  }
+}
+
+
 
 void StEpdGeom::SetPpTtEw(short uniqueID){
   mPP = std::abs(uniqueID/100);
@@ -41,43 +91,43 @@ double StEpdGeom::GetZwheel(){
   return z_EPD*mEW;
 }
 
-double StEpdGeom::GetPhiCenter(){
-  double phiCenter;
-  double DeltaPhiSS = 30.0*TMath::Pi()/180.0;  // 30 degree supersectors
-  if (mEW<0){    // east
-    double phiSS = TMath::Pi()/2.0 - (mPP-0.5)*DeltaPhiSS;
-    if (phiSS<0.0) phiSS += 2.0*TMath::Pi();
-    if (1 == mTT){phiCenter = phiSS;}  // tile 1
-    else{
-      if (0 == mTT%2){phiCenter = phiSS - DeltaPhiSS/4.0;}
-      else           {phiCenter = phiSS + DeltaPhiSS/4.0;}
-    }
-  }
-  else{  // west
-    double phiSS = TMath::Pi()/2.0 + (mPP-0.5)*DeltaPhiSS;
-    if (phiSS>2.0*TMath::Pi()) phiSS -= 2.0*TMath::Pi();
-    if (1==mTT){phiCenter = phiSS;}  // tile 1
-    else{
-      if (0 == mTT%2){phiCenter = phiSS + DeltaPhiSS/4.0;}
-      else          {phiCenter = phiSS - DeltaPhiSS/4.0;}
-    }
-  }
-  return phiCenter;
-}
+// double StEpdGeom::GetPhiCenter(){
+//   double phiCenter;
+//   double DeltaPhiSS = 30.0*TMath::Pi()/180.0;  // 30 degree supersectors
+//   if (mEW<0){    // east
+//     double phiSS = TMath::Pi()/2.0 - (mPP-0.5)*DeltaPhiSS;
+//     if (phiSS<0.0) phiSS += 2.0*TMath::Pi();
+//     if (1 == mTT){phiCenter = phiSS;}  // tile 1
+//     else{
+//       if (0 == mTT%2){phiCenter = phiSS - DeltaPhiSS/4.0;}
+//       else           {phiCenter = phiSS + DeltaPhiSS/4.0;}
+//     }
+//   }
+//   else{  // west
+//     double phiSS = TMath::Pi()/2.0 + (mPP-0.5)*DeltaPhiSS;
+//     if (phiSS>2.0*TMath::Pi()) phiSS -= 2.0*TMath::Pi();
+//     if (1==mTT){phiCenter = phiSS;}  // tile 1
+//     else{
+//       if (0 == mTT%2){phiCenter = phiSS + DeltaPhiSS/4.0;}
+//       else          {phiCenter = phiSS - DeltaPhiSS/4.0;}
+//     }
+//   }
+//   return phiCenter;
+// }
 
-void StEpdGeom::GetRminRmax(double *Rmin, double *Rmax){
-  double RowHeight[16]={4.4, 4.4, 4.4, 5.53, 5.53, 5.53,
-			  5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53};
-  double Rminimum = 4.6;  // the distance from beamline to the inner edge of tile 1
-  double Rlimit[17];
-  Rlimit[0] = Rminimum;
-  for (int iRow=0; iRow<16; iRow++){
-    Rlimit[iRow+1] = Rlimit[iRow] + RowHeight[iRow];
-  }
-  int Row = this->Row();
-  *Rmin = Rlimit[Row-1];
-  *Rmax = Rlimit[Row];
-}
+// void StEpdGeom::GetRminRmax(double *Rmin, double *Rmax){
+//   double RowHeight[16]={4.4, 4.4, 4.4, 5.53, 5.53, 5.53,
+// 			  5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53, 5.53};
+//   double Rminimum = 4.6;  // the distance from beamline to the inner edge of tile 1
+//   double Rlimit[17];
+//   Rlimit[0] = Rminimum;
+//   for (int iRow=0; iRow<16; iRow++){
+//     Rlimit[iRow+1] = Rlimit[iRow] + RowHeight[iRow];
+//   }
+//   int Row = this->Row();
+//   *Rmin = Rlimit[Row-1];
+//   *Rmax = Rlimit[Row];
+// }
 
 //------------------------------------------------
 short StEpdGeom::Row(short uniqueID){
@@ -106,12 +156,14 @@ TVector3 StEpdGeom::TileCenter(short PP, short TT, short EW){
   return this->TileCenter();
 }
 TVector3 StEpdGeom::TileCenter(){
-  double Rmin,Rmax;
-  GetRminRmax(&Rmin,&Rmax);
+  //  double Rmin,Rmax;
+  //  GetRminRmax(&Rmin,&Rmax);
   double ZZ = this->GetZwheel();
-  TVector3 cent;
-  cent.SetXYZ(0.5*(Rmin+Rmax),0.0,ZZ);
-  cent.RotateZ(this->GetPhiCenter());
+  TVector3 cent(mRave[this->Row()-1],0.0,ZZ);
+  //  cent.SetXYZ(0.5*(Rmin+Rmax),0.0,ZZ);
+  //  cent.RotateZ(this->GetPhiCenter());
+  int ew = (mEW>0)?1:0;
+  cent.RotateZ(mPhiCenter[mPP-1][mTT-1][ew]);
   return cent;
 }
 
@@ -133,9 +185,10 @@ TVector3 StEpdGeom::RandomPointOnTile(){
   double Bparam = -2.0*GapWidth;
 
   double ZZ = this->GetZwheel();
-  double Rmin,Rmax;
-  GetRminRmax(&Rmin,&Rmax);
   short RR=this->Row();
+  double Rmin = mRmin[RR-1];
+  double Rmax = mRmax[RR-1];
+  //  GetRminRmax(&Rmin,&Rmax);
   double Xmin = Rmin + GapWidth;
   double Xmax = Rmax - GapWidth;
   if (1==RR) Xmin -= 2.0*GapWidth;  // no glue on the "inside" of tile 1
@@ -160,7 +213,10 @@ TVector3 StEpdGeom::RandomPointOnTile(){
   double YY = (q-0.5)*DeltaY;
 
   TVector3 Point(XX,YY,ZZ);
-  Point.RotateZ(this->GetPhiCenter());
+  //  Point.RotateZ(this->GetPhiCenter());
+  int ew = (mEW>0)?1:0;
+  Point.RotateZ(mPhiCenter[mPP-1][mTT-1][ew]);
+
 
   // if this is Tile 01, there's the possibility that the point does
   // not fit into the tile after all, so check and if it doesn't
@@ -193,8 +249,10 @@ void StEpdGeom::GetCorners(int* nCorners, double* xc, double* yc){
   double OpeningAngle = 7.5*TMath::Pi()/180.0;
   double GapWidth = 0.08;  // gap between tiles / 2
   short RR = this->Row();
-  double Rmin,Rmax;
-  GetRminRmax(&Rmin,&Rmax);
+  //  double Rmin,Rmax;
+  double Rmin=mRmin[RR-1];
+  double Rmax=mRmax[RR-1];
+  //  GetRminRmax(&Rmin,&Rmax);
   if (1==RR){
     *nCorners=5;
     double xtmp[3], ytmp[3];
@@ -225,7 +283,9 @@ void StEpdGeom::GetCorners(int* nCorners, double* xc, double* yc){
       x[2] += GapWidth;
     }
   }
-  double phi = this->GetPhiCenter();
+  //  double phi = this->GetPhiCenter();
+  int ew=(mEW>0)?1:0;
+  double phi = mPhiCenter[mPP-1][mTT-1][ew];
   for (int icorn=0; icorn<(*nCorners); icorn++){
     xc[icorn] = +x[icorn]*cos(phi) - y[icorn]*sin(phi);
     yc[icorn] = +x[icorn]*sin(phi) + y[icorn]*cos(phi);

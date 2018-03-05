@@ -1929,10 +1929,10 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"KFPInter"    ,"","","","KFParticle,picoEvt"        
-   ,                  "KFParticlePerformance,StKFParticleAnalysisMaker","STAR KFParticle interface",kFALSE},
+  {"KFPInter"    ,"","","","KFParticle,picoEvt", "KFParticlePerformance,StPicoEvent,StPicoDstMaker,"
+   "StKFParticleAnalysisMaker"                                         ,"STAR KFParticle interface",kFALSE},
   {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
-  {"MuMc"        ,"","","KFPInter","StMuMcAnalysisMaker",     "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
+  {"MuMc"        ,"","","KFPAna","StMuMcAnalysisMaker",       "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
    ,                                    "KFParticlePerformance,StPicoAnalysisMaker","Pico Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"

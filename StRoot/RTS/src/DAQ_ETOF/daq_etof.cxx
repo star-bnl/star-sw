@@ -124,17 +124,28 @@ daq_dta *daq_etof::handle_raw(int sec, int rdo)
 
 	LOG(DBG,"sfs read succeeded") ;
 
-	//I need to skip the 40 byte bankHeader!
+#if 0
 	{
 	daq_trg_word trg ;
 	int ret = get_l2(ptr,size*4,&trg,1) ;
 	LOG(NOTE,"get_l2 returns %d: %d %d %d",ret,trg.trg,trg.daq,trg.t) ;
 	}
+
+	LOG(TERR,"ETOF size %d",size) ;
+	u_int *d32 = (u_int *)ptr ;
+	for(int i=0;i<size/4;i++) {
+		LOG(TERR,"%d = 0x%08X",i,d32[i]) ;
+	}
+#endif
+
+	//I need to skip the 40 byte bankHeader!
+
 	size -= 40 ;	//bank header
 
 	raw->create(size,"etof_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
 	char *st = (char *) raw->request(size) ;
+
 
 	memcpy(st,ptr+40,size) ;
 	free(ptr) ;

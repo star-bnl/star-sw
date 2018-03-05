@@ -165,41 +165,44 @@ void StEpdHitMaker::FillStEpdData(){
 	  short boardAdc   = mEpdDbMaker->GetBoardAdc(ew,PP,TT);
 	  short channelAdc = mEpdDbMaker->GetChannelAdc(ew,PP,TT);
 	  int ADC = trg->epdADC(crateAdc,boardAdc,channelAdc,PrePost);
-	  int TDC = trg->epdTDC(crateAdc,boardAdc,channelAdc,PrePost);
 
-	  //	  bool isGood = kTRUE;  // until it is in the database
-	  bool isGood = true;  // until it is in the database
+	  if (ADC>0){        // we are zero-suppressing at QT level, so don't just write a bunch of zeros into the data
+	    int TDC = trg->epdTDC(crateAdc,boardAdc,channelAdc,PrePost);
 
-	  bool HasTac = (mEpdDbMaker->GetChannelTac(ew,PP,TT)>=0);
-	  int TAC;
-	  if (HasTac){
-	    TAC = trg->epdADC(mEpdDbMaker->GetCrateTac(ew,PP,TT),    // relying on conversion from int to short
-				     mEpdDbMaker->GetBoardTac(ew,PP,TT),
-				     mEpdDbMaker->GetChannelTac(ew,PP,TT),
-				     PrePost);}
-	  else{TAC = 0;}
-
-	  // finally.... CALIBRATED data....
-	  double gain = mEpdDbMaker->GetMip(ew,PP,TT);
-	  if (gain<=0.0) gain = 1.0;  // not yet calibrated.  Give it a gain of unity
+	    //	  bool isGood = kTRUE;  // until it is in the database
+	    bool isGood = true;  // until it is in the database
+	    
+	    bool HasTac = (mEpdDbMaker->GetChannelTac(ew,PP,TT)>=0);
+	    int TAC;
+	    if (HasTac){
+	      TAC = trg->epdADC(mEpdDbMaker->GetCrateTac(ew,PP,TT),    // relying on conversion from int to short
+				mEpdDbMaker->GetBoardTac(ew,PP,TT),
+				mEpdDbMaker->GetChannelTac(ew,PP,TT),
+				PrePost);}
+	    else{TAC = 0;}
+	    
+	    // finally.... CALIBRATED data....
+	    double gain = mEpdDbMaker->GetMip(ew,PP,TT);
+	    if (gain<=0.0) gain = 1.0;  // not yet calibrated.  Give it a gain of unity
 	  
-	  float nMIP = (ADC + mEpdDbMaker->GetOffset(ew,PP,TT)) / mEpdDbMaker->GetMip(ew,PP,TT);
+	    float nMIP = (ADC + mEpdDbMaker->GetOffset(ew,PP,TT)) / mEpdDbMaker->GetMip(ew,PP,TT);
 
-	  int truthId=0;  // this is for simulation
+	    int truthId=0;  // this is for simulation
 
 
-	  // EpdOfs2 << ew << "\t" << PP << "\t" << TT << "\t" 
-	  // 	  << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
-	  // 	  << mEpdDbMaker->GetBoardAdc(ew,PP,TT) << "\t"
-	  // 	  << mEpdDbMaker->GetChannelAdc(ew,PP,TT) << "\t"
-	  // 	  << mEpdDbMaker->GetCrateTac(ew,PP,TT) << "\t"
-	  // 	  << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
-	  // 	  << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\t"
-	  // 	  << ADC << "\t" << nMIP << endl;
+	    // EpdOfs2 << ew << "\t" << PP << "\t" << TT << "\t" 
+	    // 	  << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
+	    // 	  << mEpdDbMaker->GetBoardAdc(ew,PP,TT) << "\t"
+	    // 	  << mEpdDbMaker->GetChannelAdc(ew,PP,TT) << "\t"
+	    // 	  << mEpdDbMaker->GetCrateTac(ew,PP,TT) << "\t"
+	    // 	  << mEpdDbMaker->GetBoardTac(ew,PP,TT) << "\t"
+	    // 	  << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\t"
+	    // 	  << ADC << "\t" << nMIP << endl;
 
-	  StEpdHit* hit = new StEpdHit(PP,TT,EWforHit,ADC,TAC,TDC,HasTac,nMIP,isGood,truthId);
-	  mEpdCollection->addHit(hit);
-	  nHitsAdded++;
+	    StEpdHit* hit = new StEpdHit(PP,TT,EWforHit,ADC,TAC,TDC,HasTac,nMIP,isGood,truthId);
+	    mEpdCollection->addHit(hit);
+	    nHitsAdded++;
+	  }
 	}
       }
     }

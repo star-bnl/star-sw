@@ -1,32 +1,35 @@
 #include <limits>
-
 #include "TMath.h"
 #include "TF1.h"
 #include "St_base/StMessMgr.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-
 #include "StPicoEvent/StPicoTrack.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StBichsel/StdEdxPull.h"
 
-//----------------------------------------------------------------------------------
-StPicoTrack::StPicoTrack() : TObject(),
-			     mId(0),
-			     mChi2(1000),
-			     mPMomentum{}, 
-			     mDedx(0.), mDedxError(0.), mDnDx(0.), mDnDxError(0.), mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
-  mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1), mMtdPidTraitsIndex(-1) 
-{
-}
-//----------------------------------------------------------------------------------
-StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTrk, double const B, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG)
-  : StPicoTrack()
-{
-  if (!gTrk || gTrk->type() != global || (pTrk && (pTrk->type() != primary || pTrk->id() != gTrk->id())))
-  {
-    LOG_WARN << "Invalid arguments passed to StPicoTrack constructor. Object is default initialized" << endm;
+ClassImp(StPicoTrack)
 
+//_________________
+StPicoTrack::StPicoTrack() : TObject(),
+  mId(0),
+  mChi2(std::numeric_limits<unsigned short>::max()),
+  mPMomentum{},
+  mDedx(0.), mDedxError(0.), mDnDx(0.), mDnDxError(0.), 
+  mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mCharge(0),
+  mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1), mMtdPidTraitsIndex(-1) {
+    /* empty */
+}
+
+//_________________
+StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTrk, double const B, 
+			 StThreeVectorD const& pVtx, StDcaGeometry const& dcaG) : StPicoTrack() {
+
+  if ( !gTrk || 
+       (gTrk->type() != global) || 
+       ( pTrk && (pTrk->type() != primary || pTrk->id() != gTrk->id()) ) ) {
+
+    LOG_WARN << "Invalid arguments passed to StPicoTrack constructor. Object is default initialized" << endm;
     return;
   }
 
@@ -72,20 +75,17 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   mDnDx      = gTrk->probPidTraits().dNdxFit();
   mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
   int flag = gTrk->flag();
-  if (flag / 100 < 7) // TPC tracks
-  {
+  if (flag / 100 < 7) { // TPC tracks
     mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId));
     mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kTpcId));
   }
-  else     // FTPC tracks
-  {
+  else {    // FTPC tracks
     if (gTrk->helix().momentum(B * kilogauss).pseudoRapidity() > 0.)
       {
       mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId));
       mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcWestId));
     }
-    else
-    {
+    else {
       mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcEastId));
       mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcEastId));
     }
@@ -95,10 +95,11 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
 
   mTopologyMap[0] = (UInt_t)(gTrk->topologyMap().data(0));
   mTopologyMap[1] = (UInt_t)(gTrk->topologyMap().data(1));
+  mTopologyMap[2] = (UInt_t)(gTrk->topologyMap().data(2));
 }
-//----------------------------------------------------------------------------------
-void StPicoTrack::Print(Char_t const* option) const
-{
+
+//_________________
+void StPicoTrack::Print(Char_t const* option) const {
   LOG_INFO << "id: " << id()
            << " chi2: " << chi2() << "\n"
            << "pMom: " << pMom()

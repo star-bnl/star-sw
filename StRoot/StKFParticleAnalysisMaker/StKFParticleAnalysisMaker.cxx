@@ -77,7 +77,7 @@ Int_t StKFParticleAnalysisMaker::Init()
 //________________________________________________________________________________
 Int_t StKFParticleAnalysisMaker::InitRun(Int_t runumber) 
 {
-  assert(StPicoDstMaker::instance());
+  //  assert(StPicoDstMaker::instance());
 //   if (StPicoDstMaker::instance()->IOMode() == StPicoDstMaker::ioRead) {
     //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Ask Yuri
 //     StPicoDstMaker::instance()->SetStatus("*",0);

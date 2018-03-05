@@ -20,14 +20,13 @@ class StEmcRawHit;
 class StPicoDst;
 class StPicoEvent;
 
+//_________________
+class StPicoDstMaker : public StMaker {
 
-
-class StPicoDstMaker : public StMaker
-{
-public:
+ public:
   enum PicoIoMode {IoWrite=1, IoRead=2};
 
-  StPicoDstMaker(char const* name = "PicoDst");
+  StPicoDstMaker(char const* name);
   //  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
   StPicoDstMaker(Int_t ioMode, char const* fileName = "", char const* name = "PicoDst");
   virtual ~StPicoDstMaker();
@@ -66,7 +65,6 @@ public:
   void SetVxRmax(Double_t rmax = 2)                  {StMuDst::instance()->SetVxRmax(rmax);}
   static StPicoDstMaker *instance() {return fgPicoDstMaker;}
   TClonesArray** picoArrays() {return mPicoArrays;}
-private:
 
   void streamerOff();
 
@@ -128,7 +126,6 @@ private:
   /// Selects a primary vertex from `muDst` vertex collection according to the
   /// vertex selection mode `mVtxMode` specified by the user.
     Bool_t selectVertex() {return StMuDst::instance()->selectVertex();}
-
   /// A pointer to the main input source containing all muDst `TObjArray`s
   /// filled from corresponding muDst branches
   StMuDst*  mMuDst;
@@ -140,6 +137,8 @@ private:
   StEmcPosition*   mEmcPosition;
   StEmcGeom*       mEmcGeom[4];
   StEmcRawHit*     mEmcIndex[4800];
+
+  Float_t   mTpcVpdVzDiffCut;
 
   Float_t    mBField;
 

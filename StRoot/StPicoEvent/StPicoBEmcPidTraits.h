@@ -3,52 +3,60 @@
 
 #include "TObject.h"
 
-class StPicoBEmcPidTraits: public TObject
-{
-public:
+//_________________
+class StPicoBEmcPidTraits: public TObject {
+
+ public:
+  //Defaults constructor
   StPicoBEmcPidTraits();
-  StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Float_t const* e, Float_t const* dist, Int_t const* nhit, Int_t const* ntow);
+  //Constructor that fills the parameters accordingly to the input
+  StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Float_t const* e, Float_t const* dist, 
+		      Int_t const* nhit, Int_t const* ntow);
+  //Copy constructor
+  StPicoBEmcPidTraits(const StPicoBEmcPidTraits &traits);
+  //Destructor
   virtual ~StPicoBEmcPidTraits();
+  //Print BEMC PID traits information
   virtual void Print(const Char_t* option = "") const;
 
+  //Return track index
   Int_t   trackIndex() const;
-
-  /// associated BEMC cluster id (STAR standard clustering algorithm)
+  //Associated BEMC cluster id (STAR standard clustering algorithm)
   Int_t   bemcId() const;
-  /// associated bemc cluster highest tower adc (STAR standard clustering algorithm)
+  //Associated bemc cluster highest tower adc (STAR standard clustering algorithm)
   Int_t   bemcAdc0() const;
-  /// associated bemc cluster highest tower energy (STAR standard clustering algorithm)
+  //Associated bemc cluster highest tower energy (STAR standard clustering algorithm)
   Float_t bemcE0() const;
-  /// associated bemc cluster energy (STAR standard clustering algorithm)
+  //Associated bemc cluster energy (STAR standard clustering algorithm)
   Float_t bemcE() const;
-  /// associated bemc cluster Z-distance (cm) (STAR standard clustering algorithm)
+  //Associated bemc cluster Z-distance (cm) (STAR standard clustering algorithm)
   Float_t bemcZDist() const;
-  /// associated bemc cluster phi-distance (cm) (STAR standard clustering algorithm)
+  //Associated bemc cluster phi-distance (cm) (STAR standard clustering algorithm)
   Float_t bemcPhiDist() const;
-  /// associated bemc cluster number of fired SMD-eta wires (STAR standard clustering algorithm)
+  //Associated bemc cluster number of fired SMD-eta wires (STAR standard clustering algorithm)
   Int_t   bemcSmdNEta() const;
-  /// associated bemc cluster number of fired SMD-phi wires (STAR standard clustering algorithm)
+  //Associated bemc cluster number of fired SMD-phi wires (STAR standard clustering algorithm)
   Int_t   bemcSmdNPhi() const;
 
-  /// track matched tower id (using StEmcPosition::projTrack())
+  //Track matched tower id (using StEmcPosition::projTrack())
   Int_t   btowId() const;
-  /// track second closest tower local id
+  //Track second closest tower local id
   Int_t   btowId2() const;
-  /// track third closest tower local id
+  //Track third closest tower local id
   Int_t   btowId3() const;
-  /// matched tower energy
+  //Matched tower energy
   Float_t btowE() const;
-  /// energy of second closest tower
+  //Energy of second closest tower
   Float_t btowE2() const;
-  /// energy of third closest tower
+  //Energy of third closest tower
   Float_t btowE3() const;
-  /// eta distance to matched tower (cm)
+  //Eta distance to matched tower (cm)
   Float_t btowEtaDist() const;
-  /// phi distance to matched tower (cm)
+  //Phi distance to matched tower (cm)
   Float_t btowPhiDist() const;
 
-
-private:
+ private:
+  
   Short_t  mTrackIndex;       // Index to the associated track in the event
 
   // these variables are extracted from the standard BEMC cluster algorithm
@@ -72,6 +80,7 @@ private:
 
   ClassDef(StPicoBEmcPidTraits, 1);
 };
+
 inline Int_t   StPicoBEmcPidTraits::trackIndex() const { return (Int_t)mTrackIndex; }
 inline Int_t   StPicoBEmcPidTraits::bemcId() const { return (Int_t)mBemcId; }
 inline Int_t   StPicoBEmcPidTraits::bemcAdc0() const { return (Int_t)mBemcAdc0; }

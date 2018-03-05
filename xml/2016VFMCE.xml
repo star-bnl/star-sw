@@ -8,8 +8,7 @@
   setenv NODEBUG yes
   setenv STARFPE NO
   setup 64b
-#  starver TFG17l
-  starver .DEV2
+  starver TFG18d
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -20,9 +19,10 @@
     exit 1;
   endif
   set name = ""
-  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq  ) 
+  foreach name (D02KmTsq D0K0s2KmTsq D0K0s2pimTsq D0KpimTsq DK2pimTsq DK0spimTsq DsK0sK0spimTsq DsK0sKmTsq DsKKpimTsq Lc3pimTsq LcKppimTsq 20Muons D0K3pimTsq DK0s3pimTsq DsK0sK2pimTsq DK2pi  DsKKpi  LcKppi ) 
     echo $Name | grep $name
     if (! $?) break;
+#    if ($name == $Name) break;
   end
   echo "name = $name";
   if ($name == "") exit 1;
@@ -50,5 +50,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 101 200 500" />
+<input URL="command:RunId.pl 11 200 5000" />
 </job>

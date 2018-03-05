@@ -3,13 +3,19 @@
 
 #include "TObject.h"
 
-class StPicoEmcTrigger : public TObject
-{
-public:
-  StPicoEmcTrigger();
-  StPicoEmcTrigger(int flag, int id, int adc);
-  virtual ~StPicoEmcTrigger();
+//_________________
+class StPicoEmcTrigger : public TObject {
 
+ public:
+  //Default constructor
+  StPicoEmcTrigger();
+  //Constructor that takes values
+  StPicoEmcTrigger(int flag, int id, int adc);
+  //Copy constructor
+  StPicoEmcTrigger(const StPicoEmcTrigger &trigger);
+  //Destructor
+  virtual ~StPicoEmcTrigger();
+  //Print EMC trigger information
   virtual void Print(const Char_t* option = "") const;  ///< Print trigger info
 
   UInt_t   flag() const;
@@ -25,7 +31,7 @@ public:
   bool isJP1() const;
   bool isJP2() const;
 
-protected:
+ protected:
   UChar_t mFlag;   // 0x1: ht0, 0x2: ht1, 0x4: ht2; 0x8: ht3
                    // 0x10: jp0, 0x20: jp1, 0x40: jp2
   UShort_t mId;    // soft id.  bjp: 1-18, ht: 1-4800
@@ -33,6 +39,7 @@ protected:
 
   ClassDef(StPicoEmcTrigger, 1)
 };
+
 inline UInt_t StPicoEmcTrigger::flag() const { return (UInt_t)mFlag; }
 inline Int_t StPicoEmcTrigger::id() const { return (Int_t)mId; }
 inline Int_t StPicoEmcTrigger::adc() const { return (Int_t)mAdc; }

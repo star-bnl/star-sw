@@ -11,14 +11,22 @@
 
 class StMuTrack;
 
+//_________________
 class StPicoTrack : public TObject {
+
  public:
+  //Default constructor
   StPicoTrack();
-  //! ctor. Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
+  //Constructor that takes global and primary trakcs
+  //Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
   StPicoTrack(StMuTrack const* globalTrack, StMuTrack const* primaryTrack,
-	      Double_t magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
+	      double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
+  //Copy constructor
+  // Take default  StPicoTrack(const StPicoTrack &track);
+  //Destructor
   virtual ~StPicoTrack() {}
-  virtual void Print(Char_t const* option = "") const;  //!< Print track info
+  //Print track parameters
+  virtual void Print(Char_t const* option = "") const;
   //! track id, copied from StMuTrack, StTrack
   Int_t   id() const   { return mId; }
   Float_t chi2() const { return mChi2; }
@@ -100,7 +108,7 @@ protected:
   Char_t    mNHitsMax;       // nHitsMax - TPC
   UChar_t   mNHitsDedx;      // nHitsDedx - TPC
   Float16_t mCharge;         // [-1,1,2]|
-  UInt_t    mTopologyMap[2]; // Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
+  UInt_t    mTopologyMap[3]; // Toplogy Map data0 and data1. data2 is iTPC extension See StEvent/StTrackTopologyMap.cxx
 
   // pidTraits
   Short_t  mBEmcPidTraitsIndex; // index of the EMC  pidTratis in the event
@@ -117,4 +125,5 @@ protected:
   Float16_t mCorr[10]; //[-1,1,20] 
   ClassDef(StPicoTrack, 6)
 };
+
 #endif

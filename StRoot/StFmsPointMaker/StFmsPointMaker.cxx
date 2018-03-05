@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.12 2018/01/04 17:35:44 smirnovd Exp $
+// $Id: StFmsPointMaker.cxx,v 1.13 2018/03/02 20:26:44 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.13  2018/03/02 20:26:44  akio
+// Big update from Zhanwen Zhu with new shower shape and six z slices
+//
 // Revision 1.12  2018/01/04 17:35:44  smirnovd
 // [Cosmetic] Remove StRoot/ from include path
 //
@@ -54,6 +57,11 @@
 #include "StLorentzVectorF.hh"
 #include <TProcessID.h>
 
+
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+
 #include "StMessMgr.h"
 #include "StEvent.h"
 #include "StEnumerations.h"
@@ -80,10 +88,7 @@ namespace {
 }  // unnamed namespace
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
-    : StMaker(name), mFmsDbMaker(0), mFmsCollection(0), mObjectCount(0),
-      mMaxEnergySum(255.0), mReadMuDst(0), 
-      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), 
-      mCategorizationAlgo(1), mScaleShowerShape(1) { }
+    : StMaker(name) {}
 
 StFmsPointMaker::~StFmsPointMaker() { }
 
@@ -114,6 +119,16 @@ Int_t StFmsPointMaker::Make() {
       STAR makers use TRef. */
   LOG_DEBUG << "StFmsPointMaker making" << endm;
   if(mReadMuDst) return readMuDst();
+  
+  vertexz = 0 ;
+  if(mVertexZ==1){
+      muDst = (StMuDst*)GetInputDS("MuDst");
+      if(muDst) {
+	  // get vertex Z from BBCTime
+	  unsigned short bbcTimeBin = muDst->event()->bbcTriggerDetector().onlineTimeDifference();
+	  if (bbcTimeBin!=0)  vertexz =  633.544 - 0.158*bbcTimeBin;
+      }
+  }
 
   mObjectCount = TProcessID::GetObjectCount();
   if (!populateTowerLists()) { //this also assigns mFmsCollection
@@ -174,7 +189,7 @@ int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
   FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,
 					     mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo,
-					     mScaleShowerShape);
+					     mScaleShowerShape,mShowerShapeWithAngle,vertexz);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
       //LOG_INFO << Form("clusterDetector found no cluster for det=%d ",detectorId)<<endm;
@@ -231,7 +246,7 @@ bool StFmsPointMaker::processTowerCluster(
   if(mMergeSmallToLarge>0){
       if(x<8.0 && y>9.0 && y<25.0){ // Central hole, those are small cell merged to large
 	  det=detectorId+2;         //put back to small cell coordinate
-	  cluster->setX(x*1.5);
+	  cluster->setX(x*1.5);  
 	  cluster->setY((y-9.0)*1.5);
       }
   }
@@ -241,8 +256,11 @@ bool StFmsPointMaker::processTowerCluster(
   cluster->setId(200*(det-kFmsNorthLargeDetId) + mFmsCollection->numberOfPoints());
   // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(det,cluster->x(),cluster->y());
+  // putting z position where angled shower shape uses as z reference
+  if( mShowerShapeWithAngle>0 ) xyz.setZ (735.45); 
   //cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
-  cluster->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,cluster->energy()));
+  cluster->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,cluster->energy()));  
+
   // Save photons reconstructed from this cluster
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
       StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
@@ -275,14 +293,14 @@ StFmsPoint* StFmsPointMaker::makeFmsPoint(
   float x=photon.x; //photon xy is in detector local coordinate in [cm]
   float y=photon.y;
   int det=detectorId;
+  float lwx=mFmsDbMaker->getXWidth(kFmsNorthLargeDetId);//take large cell width since all merged to large cell
+  float lwy=mFmsDbMaker->getYWidth(kFmsNorthLargeDetId);
+  float wx=mFmsDbMaker->getXWidth(kFmsNorthSmallDetId);
+  float wy=mFmsDbMaker->getYWidth(kFmsNorthSmallDetId);
   if(mMergeSmallToLarge>0){
-      float lwx=mFmsDbMaker->getXWidth(kFmsNorthLargeDetId);//take large cell width since all merged to large cell
-      float lwy=mFmsDbMaker->getYWidth(kFmsNorthLargeDetId);
-      float wx=mFmsDbMaker->getXWidth(kFmsNorthSmallDetId);
-      float wy=mFmsDbMaker->getYWidth(kFmsNorthSmallDetId);
       if(x<8.0*lwx && y>9.0*lwy && y<25.0*lwy){ // Central hole, those are small cell merged to large
-	  x = x/lwx*1.5*wx;
-	  y = (y/lwy - 9.0)*1.5*wy;
+	  x =  x/lwx*1.5*wx; 
+	  y = (y/lwy - 9.0)*1.5*wy;  
 	  det+=2;
       }
   }
@@ -294,6 +312,8 @@ StFmsPoint* StFmsPointMaker::makeFmsPoint(
   // StFmsFittedPhoton position is in detector-local (x, y) [cm] coordinates
   // Convert to global STAR coordinates for StFmsPoint  
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZ(det,x,y);
+  // putting z position where angled shower shape uses as z reference
+  if( mShowerShapeWithAngle>0) xyz.setZ(735.45);
   point->setXYZ(xyz);  //This is in STAR global coordinate
   point->setFourMomentum(mFmsDbMaker->getLorentzVector(xyz,point->energy()));
   return point;

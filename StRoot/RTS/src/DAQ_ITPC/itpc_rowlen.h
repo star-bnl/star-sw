@@ -1,7 +1,7 @@
 #ifndef _ITPC_ROWLEN_H_
 #define _ITPC_ROWLEN_H_
 
-unsigned char itpc_rowlen[41] = 
+static unsigned char __attribute__ ((unused)) itpc_rowlen[41] = 
 {
 	0,
 	52,	//1

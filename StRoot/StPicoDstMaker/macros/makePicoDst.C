@@ -7,7 +7,7 @@
 */
 #include "TSystem.h"
 #include "Riostream.h"
-
+#if !defined(__CINT__) &&  !defined(__CLING__)
 #include "StChain/StMaker.h"
 #include "StBFChain/StBFChain.h" 
 #include "StPicoDstMaker/StPicoDstMaker.h"
@@ -18,6 +18,7 @@
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
+#endif 
 void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, const int emcMode=1) {
   Int_t nEvents = 10000000;
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
