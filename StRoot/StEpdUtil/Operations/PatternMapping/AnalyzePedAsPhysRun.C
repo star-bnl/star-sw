@@ -12,6 +12,7 @@ void AnalyzePedAsPhysRun(char* inputDirectory, char* inputFileName)
 {
 
   TString _infile = inputDirectory;
+  _infile += "/";
   _infile += inputFileName;
 
   TString outfile = inputFileName;
@@ -65,19 +66,58 @@ void AnalyzePedAsPhysRun(char* inputDirectory, char* inputFileName)
 // be filled in with dots
 void DrawWheel(StSPtrVecEpdHit hits, TString outputFileName){
 
-  /*
-  int lowLimitB[4]   = {25, 80,130,190};
-  int hiLimitB[4]    = {80,130,190,260};
-  int lowLimitC[4]   = {35, 110,200,290};
-  int hiLimitC[4]    = {110,200,290,380};
-  int levelColor[4] = {2,3,4,6};
-  */
 
-  int lowLimitB[2] = {10,149};
-  int hiLimitB[2]  = {150,3000};
-  int lowLimitC[2] = {10,149};
-  int hiLimitC[2]  = {150,3000};
-  int levelColor[2] = {3,2};
+  int lowLimitB[4] = {-1,10,149,3001};
+  int hiLimitB[4]  = {9,150,3000,5000};
+  int lowLimitC[4] = {-1,10,149,3001};
+  int hiLimitC[4]  = {9,150,3000,5000};
+  int levelColor[4] = {4,3,2,6};
+
+
+  int tileLevel[12][31][2];
+  int tileAdc[12][31][2];
+
+  for (int ew=0; ew<2; ew++){
+    for (int pp=1; pp<13; pp++){
+      for (int tt=1; tt<32; tt++){
+	tileLevel[pp-1][tt-1][ew] = 0;
+	tileAdc[pp-1][tt-1][ew] = 0;
+      }
+    }
+  }
+
+  for (unsigned int tile=0; tile<hits.size(); tile++){
+    StEpdHit* theHit = hits[tile];
+    int pp = theHit->position();
+    int tt = theHit->tile();
+    int ew = theHit->side();
+    int ewIndex = (ew<0)?0:1;
+    int adc = theHit->adc();
+    int Level,lowCutoff,hiCutoff;
+    for (Level=0; Level<4; Level++){
+      if (tt<10){lowCutoff=lowLimitC[Level];  hiCutoff=hiLimitC[Level];}
+      else {lowCutoff=lowLimitB[Level];  hiCutoff=hiLimitB[Level];}
+      if ((adc>lowCutoff)&&(adc<hiCutoff)) break;
+    }
+    if (Level>3) cout << "ERROR!!\n\n";
+    tileLevel[pp-1][tt-1][ewIndex] = Level;
+    tileAdc[pp-1][tt-1][ewIndex] = adc;
+  }
+
+  ofstream ofs;
+  ofs.open(outputFileName.Data());
+
+  for (int ew=0; ew<2; ew++){
+    int ewSigned = (ew==0)?-1:1;
+    for (int pp=1; pp<13; pp++){
+      for (int tt=1; tt<32; tt++){
+	ofs << ewSigned << "\t" << pp << "\t" << tt << "\t" << 	tileLevel[pp-1][tt-1][ew] << "\t" << tileAdc[pp-1][tt-1][ew] << endl;
+      }
+    }
+  }
+
+  ofs.close();
+
 
 
   StEpdGeom* geo = new StEpdGeom;
@@ -113,55 +153,32 @@ void DrawWheel(StSPtrVecEpdHit hits, TString outputFileName){
   }
 
 
-  ofstream ofs;
-  ofs.open(outputFileName.Data());
-  //Form("ExtractedLevels.txt"));
-
-
   int nCorners;
   double xcorn[6];
   double ycorn[6];
   TPad* thePad;
-  int ADCthreshold=10;   // I get this by looking at the adc distribution.
-  for (unsigned int tile=0; tile<hits.size(); tile++){
-    StEpdHit* theHit = hits[tile];
-    geo->GetCorners(theHit->id(),&nCorners,xcorn,ycorn);
-    xcorn[nCorners]=xcorn[0];      ycorn[nCorners]=ycorn[0];   // need to close the polylines
-    TPolyLine* pline = new TPolyLine(nCorners+1,xcorn,ycorn);
-    pline->SetLineWidth(1);
-    pline->SetLineColor(1);
-    int ADCval = theHit->adc();
-    pline->SetFillColor(4);  // blue if nothing
-    int LevelNumber = 0;
-    for (int ilevel=0; ilevel<2; ilevel++){
-      int lowCutoff,highCutoff;
-      if (theHit->tile()<10){lowCutoff=lowLimitC[ilevel];  highCutoff=hiLimitC[ilevel];}
-      else {lowCutoff=lowLimitB[ilevel];  highCutoff=hiLimitB[ilevel];}
-      if ((ADCval>lowCutoff)&&(ADCval<highCutoff)){
-	pline->SetFillColor(levelColor[ilevel]);
-	LevelNumber = ilevel+1;
+
+  for (int ew=0; ew<2; ew++){
+    for (int pp=1; pp<13; pp++){
+      for (int tt=1; tt<32; tt++){
+	int id = 100*pp+tt;
+	if (ew==0) id *= -1;
+	geo->GetCorners(id,&nCorners,xcorn,ycorn);
+	xcorn[nCorners]=xcorn[0];      ycorn[nCorners]=ycorn[0];   // need to close the polylines
+	TPolyLine* pline = new TPolyLine(nCorners+1,xcorn,ycorn);
+	pline->SetLineWidth(1);
+	pline->SetLineColor(1);
+	pline->SetFillColor(levelColor[tileLevel[pp-1][tt-1][ew]]);
+	thePad = (ew>0)?westPad:eastPad;
+	thePad->cd();
+	pline->Draw();
+	pline->Draw("f");
+	TText* ttlabel = new TText(geo->TileCenter(id).X(),geo->TileCenter(id).Y(),Form("%d",tt));
+	ttlabel->SetTextAlign(22);
+	ttlabel->SetTextSize(0.015);
+	ttlabel->Draw();
       }
     }
-
-    if (ADCval>3500){
-      pline->SetFillColor(6);   // this is to catch stuff up at like 4096
-      LevelNumber = 6;
-    }
-
-    ofs << theHit->side() << "\t" << theHit->position() << "\t" << theHit->tile() << "\t" << LevelNumber << "\t" << theHit->adc() << endl;
-
-
-    //    if (theHit->adc()>ADCthreshold) pline->SetFillColor(2);
-    thePad = (geo->IsWest(theHit->id()))?westPad:eastPad;
-    thePad->cd();
-    pline->Draw();
-    pline->Draw("f");
-
-    TText* ttlabel = new TText(geo->TileCenter(theHit->id()).X(),geo->TileCenter(theHit->id()).Y(),Form("%d",theHit->tile()));
-    ttlabel->SetTextAlign(22);
-    ttlabel->SetTextSize(0.015);
-    ttlabel->Draw();
-
   }
 
   TString imageName = outputFileName + ".png";
