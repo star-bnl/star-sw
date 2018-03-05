@@ -77,7 +77,7 @@ bool MediumGas::SetComposition(const std::string& gas1, const double f1,
     // Find the gas name corresponding to the input string.
     std::string gasname = "";
     if (fractions[i] > 0. && GetGasName(gases[i], gasname)) {
-      m_gas[m_nComponents] = gases[i];
+      m_gas[m_nComponents] = gasname;
       m_fraction[m_nComponents] = fractions[i];
       ++m_nComponents;
     }
