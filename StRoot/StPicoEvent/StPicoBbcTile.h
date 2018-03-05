@@ -8,7 +8,6 @@
 
 using namespace StarPicoDst;
 
-
 /**
  * BBC tile class for STAR picoDst
  * Total size of this object is 5 bytes
@@ -18,13 +17,21 @@ using namespace StarPicoDst;
  *
  * - Mike Lisa 20 May 2017
  */
-class StPicoBbcTile : public TObject
-{
-public:
 
+//_________________
+class StPicoBbcTile : public TObject {
+
+ public:
+
+  //Default constructor
   StPicoBbcTile();
+  //Constructor that takes values
   StPicoBbcTile(int ID, int ADC, int TAC, int TDC, bool hasTAC, bool statusIsGood = true);
-
+  //Copy constructor
+  StPicoBbcTile(const StPicoBbcTile &tile);
+  //Destructor
+  virtual ~StPicoBbcTile();
+  //Print BBC tile information
   virtual void Print(const Char_t *option = "") const;
 
   bool hasTac() const;
@@ -38,7 +45,7 @@ public:
   /// false if bad or missing
   bool isGood() const;
 
-protected:
+ protected:
 
   /// Phototube #: [1, 32], sign: +/- = West/East
   Char_t  mId;
@@ -51,11 +58,8 @@ protected:
   ClassDef(StPicoBbcTile, 1)
 };
 
-
 inline DetectorSide StPicoBbcTile::side() const { return mId < 0 ? DetectorSide::East : DetectorSide::West;}
-
 inline int  StPicoBbcTile::pmt() const { return std::abs( (int)mId ); }
-
 inline int  StPicoBbcTile::adc() const { return mQTdata & 0x0FFF; }
 inline int  StPicoBbcTile::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int  StPicoBbcTile::tdc() const { return (mQTdata >> 24) & 0x001F; }

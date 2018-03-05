@@ -16,10 +16,10 @@ class StPicoBEmcPidTraits;
 class StPicoBTofPidTraits;
 class StPicoMtdPidTraits;
 
+//_________________
+class StPicoDst {
 
-class StPicoDst
-{
-public:
+ public:
   StPicoDst() { fgPicoDst = this;}
   ~StPicoDst() {fgPicoDst = 0;}
 
@@ -77,11 +77,10 @@ public:
   static void printBTofPidTraits();
   static void printMtdPidTraits();
   static StPicoDst *instance() {return fgPicoDst;}
-private:
+ private:
   static StPicoDst *fgPicoDst; //!
   /// array of TClonesArrays
   static TClonesArray** picoArrays;
-
 };
 
 #endif
