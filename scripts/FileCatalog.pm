@@ -2031,7 +2031,10 @@ sub disentangle_collision_type {
     }
     my ($colstring) = @_;
     my ($firstParticle,$secondParticle,$el);
-    my (@particles) = ("proton", "gas", "au", "ga", "si", "p", "d", "s", "cu", "ca", "u","he3","al");
+    my (@particles) = ("proton", "gas",
+		       "au", "ga", "si", "cu", "ca", "he3", "al",
+		       "zr", "ru",
+		       "p", "d", "s", "u");
 
     $firstParticle = $secondParticle = "";
     $colstring     = lc($colstring);
