@@ -450,8 +450,8 @@
     -->
    
   <Instrument block="BPOL">
-    <Hit meas="tof"  nbits="16" opts="C" min="0" max="1.0E-6" />
-    <Hit meas="birk" nbits="0"  opts="C" min="0" max="10"     />
+    <Hit meas="tof"  nbits="16" opts="S" min="0" max="1.0E-6" />
+    <Hit meas="birk" nbits="0"  opts="S" min="0" max="10"     />
   </Instrument>
   <!-- The instrument block indicates what information should be saved
        for this volume, and how the information should be packed. -->
