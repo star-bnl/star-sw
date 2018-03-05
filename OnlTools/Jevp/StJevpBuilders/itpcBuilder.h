@@ -31,7 +31,6 @@ class itpcBuilder : public JevpBuilder {
   int n_cld;
   int n_adc;
   int event_no;
-
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
@@ -68,6 +67,32 @@ class itpcBuilder : public JevpBuilder {
       TH1 *h36_itpc_sec22;
       TH1 *h37_itpc_sec23;
       TH1 *h38_itpc_sec24;
+
+      TH1 *e_itpc_sec1;
+      TH1 *e_itpc_sec2;
+      TH1 *e_itpc_sec3;
+      TH1 *e_itpc_sec4;
+      TH1 *e_itpc_sec5;
+      TH1 *e_itpc_sec6;
+      TH1 *e_itpc_sec7;
+      TH1 *e_itpc_sec8;
+      TH1 *e_itpc_sec9;
+      TH1 *e_itpc_sec10;
+      TH1 *e_itpc_sec11;
+      TH1 *e_itpc_sec12;
+      TH1 *e_itpc_sec13;
+      TH1 *e_itpc_sec14;
+      TH1 *e_itpc_sec15;
+      TH1 *e_itpc_sec16;
+      TH1 *e_itpc_sec17;
+      TH1 *e_itpc_sec18;
+      TH1 *e_itpc_sec19;
+      TH1 *e_itpc_sec20;
+      TH1 *e_itpc_sec21;
+      TH1 *e_itpc_sec22;
+      TH1 *e_itpc_sec23;
+      TH1 *e_itpc_sec24;
+
       TH1 *h120_itpc_chargeStep_s1;
       TH1 *h121_itpc_chargeStep_s2;
       TH1 *h122_itpc_chargeStep_s3;
