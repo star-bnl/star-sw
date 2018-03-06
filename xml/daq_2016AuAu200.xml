@@ -29,8 +29,8 @@
 #root.exe -q -b -x 'bfc.C(1000,"DbV20170726 P2016a StiCA -VFMinuit mtd mtdCalib btof PxlHit IstHit SstHit VFPPVnoCTB beamline VFStoreX picoWrite PicoVtxVpd BEmcChkStat -evout CorrX OSpaceZ2 OGridLeak3D -hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
 root.exe -q -b -x 'bfc.C(1000,"P2014a btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/da2016$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
+        <stdout URL="file:./da2016$JOBID.log" />
+        <stderr URL="file:./daq2016$JOBID.err" />
 <!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2015/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2015.pl" /> -->
