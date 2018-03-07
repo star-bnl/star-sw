@@ -10,12 +10,14 @@
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "TSystem.h"
 #include "TArrayD.h"
+#if 0
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFParticle.h"
 #include "KFParticle/KFParticleSIMD.h"
 #include "KFParticle/KFPTrack.h"
 #include "StKFParticleAnalysisMaker/StKFParticleInterface.h"
 #include "StKFParticleAnalysisMaker/StKFParticlePerformanceInterface.h"
+#endif
 ClassImp(StMuMcAnalysisMaker);
 StMuMcAnalysisMaker *StMuMcAnalysisMaker::fgStMuMcAnalysisMaker = 0;
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
@@ -112,8 +114,10 @@ StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name), fPro
 }
 //________________________________________________________________________________
 StMuMcAnalysisMaker::~StMuMcAnalysisMaker() {
+#if 0
   SafeDelete(mStKFParticleInterface);
   SafeDelete(mStKFParticlePerformanceInterface);
+#endif
 }
 //________________________________________________________________________________
 TH3F *StMuMcAnalysisMaker::GetTrackHist(UInt_t track, UInt_t match, 
@@ -700,9 +704,10 @@ void StMuMcAnalysisMaker::BookVertexPlots(){
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[1]); assert(dirs[1]);
   dirs[1]->cd();
   PrintMem(dirs[1]->GetPath());
-  
+#if 0  
   mStKFParticleInterface = new StKFParticleInterface;
   mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor());
+#endif
   dirs[0]->cd();
   PrintMem(dirs[1]->GetPath());
 }
@@ -732,7 +737,9 @@ Int_t StMuMcAnalysisMaker::Make(){
       muDst->printMcTracks();
     }
   if (IAttr("TrackPlots"))  FillTrackPlots();
+#if 0
   if (IAttr("VertexPlots")) FillVertexPlots();
+#endif
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -956,6 +963,7 @@ void StMuMcAnalysisMaker::FillTrackPlots()
   }
 #endif
 }
+#if 0
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::FillVertexPlots(){
 //   StMuDst::instance()->printKFVertices();
@@ -1644,6 +1652,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   std::cout << "nKFVertex " << nKFVertex << " nStiVertex "  << nStiVertex << std::endl;
 #endif
 }
+#endif
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, const StMuMcTrack *mcTrack, const StDcaGeometry *dcaG, const StMuMcVertex *mcVertex) {
 #if 1
@@ -1950,6 +1959,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
 	  h1[pm]->GetXaxis()->SetTitle(h2[pm]->GetXaxis()->GetTitle());
 	} else {
 	  h1[pm] = (TH1 *) h2[pm];
+	  h2[pm] = 0;
 	  h1[pm]->GetYaxis()->SetTitle("");
 	  h1[pm]->SetTitle("");
 	}
@@ -2026,8 +2036,12 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
       c->Update();
       DrawPng(c);
       delete c;
-      SafeDelete(cpm[0]);
-      SafeDelete(cpm[1]);
+      for (Int_t i = 0; i < 2; i++) {
+	SafeDelete(cpm[i]);
+	SafeDelete(h2[1]);
+	SafeDelete(h1[1]);
+	SafeDelete(s1[1]);
+      }
     }
   }
 }
@@ -2195,14 +2209,19 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	      continue;
 	    }
 	    cout << "Eff " << Dividend->GetName() << "\tentries = " << Dividend->GetEntries() << endl;
-	    if ( Dividend->GetEntries() < 100) continue;
-	    Dividend->GetDirectory()->cd();
+	    if ( Dividend->GetEntries() < 100) {continue;}
 	    Int_t nbinsX = Dividend->GetNbinsX();
 	    Int_t nbinsY = Dividend->GetNbinsY();
 	    Int_t nbinsZ = Dividend->GetNbinsZ();
 	    Int_t binX1 = 1, binX2 = nbinsX;
 	    Int_t binY1 = 1, binY2 = nbinsY;
 	    Int_t binZ1 = 1, binZ2 = nbinsZ;
+	    Double_t Val = 0;
+	    Double_t Sum = 0;
+	    Double_t val = 0, sum = 0;
+	    Int_t bin = 0;
+	    TH1 *temp = 0;
+	    Double_t err = 0;
 	    Dividend->GetXaxis()->SetRange(binX1,binX2);
 	    Divider->GetXaxis()->SetRange(binX1,binX2);
 	    Dividend->GetYaxis()->SetRange(binY1,binY2);
@@ -2222,6 +2241,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	      Dividend->GetYaxis()->SetRange(binY1,binY2);
 	      Divider->GetYaxis()->SetRange(binY1,binY2);
 	    }
+	    Dividend->GetDirectory()->cd();
 	    heff[l] = Dividend->Project3D(proj3[p]); 
 	    if (heff[l]->GetEntries() < 100) {SafeDelete(heff[l]); continue;}
 	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
@@ -2235,7 +2255,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (binX1 != 1)     Title += Form(" at |  #eta | <= %3.1f",ymax);
 	    if (binY1 >  1)     Title += Form(" at pT > %3.2f",pTmins[l/2]);
 	    heff[l]->SetTitle(Title);   
-	    TH1 *temp =Divider->Project3D(Form("%smc",proj3[p])); 
+	    temp =Divider->Project3D(Form("%smc",proj3[p])); 
 	    cout << heff[l]->GetName() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
 	    if (c1) {
 	      c1->cd(); 
@@ -2243,19 +2263,17 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	      heff[l]->Draw();
 	      c1->Update();
 	    }
-	    if (temp->GetEntries() < 1) continue;
+	    if (temp->GetEntries() < 1) {continue;}
 	    if (temp->GetNbinsX() != heff[l]->GetNbinsX()) {
 	      cout << "No. of bins in " <<  heff[l]->GetName() << " and " << temp->GetName() << " is different. Ignore these histograms" << endl;
 	      delete heff[l]; heff[l] = 0;
 	      delete temp;
 	      continue;
 	    }
-	    Double_t Val = 0;
-	    Double_t Sum = 0;
-	    for (Int_t bin = heff[l]->GetXaxis()->GetFirst(); bin <= heff[l]->GetXaxis()->GetLast(); bin++) {
-	      Double_t val = heff[l]->GetBinContent(bin); Val += val;
-	      Double_t sum = temp->GetBinContent(bin);    Sum += sum;
-	      Double_t err = 0;
+	    for (bin = heff[l]->GetXaxis()->GetFirst(); bin <= heff[l]->GetXaxis()->GetLast(); bin++) {
+	      val = heff[l]->GetBinContent(bin); Val += val;
+	      sum = temp->GetBinContent(bin);; Sum += sum;
+	      err = 0;
 	      if      (sum < 1.e-7 && val < 1.e-7) {val =    0;}
 	      else if (val > sum)                  {val = 1.05;}
 	      else                                 {val /= sum;     err = TMath::Sqrt(val*(1.-val)/sum);}
@@ -2295,7 +2313,9 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    if (Break) return;
 	    delete c;
 	  }
+	  for (Int_t i = 0; i < 8; i++) {SafeDelete(heff[i]);}
 	}
+	
 	EndTable();
       }
     }
@@ -2474,8 +2494,7 @@ void StMuMcAnalysisMaker::SetGEANTLabels(TAxis *x) {
   }
 }
 //________________________________________________________________________________
-std::vector<int> StMuMcAnalysisMaker::GetTofPID(double m2, double p, int q)
-{
+std::vector<int> StMuMcAnalysisMaker::GetTofPID(double m2, double p, int q) {
   static const int order = 4;
   static const double parMean[6][order+1] = { { 0.02283190,-0.01482910, 0.01883130,-0.01824250, 0.00409811  }, //pi+
                                               { 0.24842500,-0.00699781,-0.00991387, 0.01327170,-0.00694824  }, //K+
@@ -2491,8 +2510,7 @@ std::vector<int> StMuMcAnalysisMaker::GetTofPID(double m2, double p, int q)
                                                { 0.0899438,-0.211922 , 0.273122 ,-0.129597 , 0.0231844  }};//p-
   double pMax = 2.;
   double nSigmas[3];
-  for(int iHypothesys = 0; iHypothesys<3; iHypothesys++)
-  {
+  for(int iHypothesys = 0; iHypothesys<3; iHypothesys++)  {
     double x = p;
     if(x>=pMax) x = pMax;
     
@@ -2512,10 +2530,8 @@ std::vector<int> StMuMcAnalysisMaker::GetTofPID(double m2, double p, int q)
   
   double minNSigma = nSigmas[0];
   int minHypothesis = 0;
-  for(int iHypothesys=1; iHypothesys<3; iHypothesys++)
-  {
-    if(minNSigma > nSigmas[iHypothesys]) 
-    {
+  for(int iHypothesys=1; iHypothesys<3; iHypothesys++)  {
+    if(minNSigma > nSigmas[iHypothesys])     {
       minNSigma = nSigmas[iHypothesys];
       minHypothesis = iHypothesys;
     }
@@ -2525,16 +2541,14 @@ std::vector<int> StMuMcAnalysisMaker::GetTofPID(double m2, double p, int q)
   vector<int> tofPID;
   if(minNSigma < 3)
     tofPID.push_back(pdgHypothesis[minHypothesis]*q);
-
-//   int pdgHypothesis[3] = {211, 321, 2212};
-//   for(int iHypothesys=0; iHypothesys<3; iHypothesys++)
-//     if(nSigmas[iHypothesys] < 3)
-//       tofPID.push_back(pdgHypothesis[iHypothesys]*q);
+  
+  //   int pdgHypothesis[3] = {211, 321, 2212};
+  //   for(int iHypothesys=0; iHypothesys<3; iHypothesys++)
+  //     if(nSigmas[iHypothesys] < 3)
+  //       tofPID.push_back(pdgHypothesis[iHypothesys]*q);
   
   return tofPID;
 }
-
-
 // 
 // $Id: StMuMcAnalysisMaker.cxx,v 1.18 2007/10/27 17:42:59 fine Exp $
 // $Log: StMuMcAnalysisMaker.cxx,v $

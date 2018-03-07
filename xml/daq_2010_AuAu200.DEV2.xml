@@ -15,7 +15,7 @@
    root4star -q -b bfc.C\(500,\"RC.y2010,-hitfilt,useXgeom,Sti,noHistos,noRunco\",\"${evtsFile}\"\) &gt;&amp; ${logFile}
 #  root4star -q -b bfc.C\(500,\"RC.y2010,-hitfilt,useXgeom,StiCA,noHistos,noRunco\",\"${evtsFile}\"\) &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/u/fisyak/scheduler/out/sched$JOBID.log" />
+<stdout URL="file:./sched$JOBID.log" />
 <!-- <input URL="file:/star/data03/daq/2010/007/*/st_physics_adc*.daq" /> -->
 <input URL="command:daq_2010AuAu200.pl" />
 

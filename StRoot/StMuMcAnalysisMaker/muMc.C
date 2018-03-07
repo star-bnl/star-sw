@@ -17,6 +17,8 @@ void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t 
     //    muMc->SetAttr("StoreCutNTuples",1);
     chain->Init();
     chain->EventLoop(N);
+    TFile *f = chain->GetTFile();
+    if (f) f->Write();
   } else {
     lMuDst(-1,"","RMuDst,MuMc,mysql,nodefault");
     TFile *f = new TFile(output);

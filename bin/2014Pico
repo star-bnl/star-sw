@@ -5,8 +5,8 @@ cput cos=3 st_physics_15094070_raw_2000053.picoDst.root
 ============== environment ==============
 #set TRIG = AuAu_200_production_mid_2014;
 #
-set TRIG = AuAu_200_production_low_2014
 set TRIG = AuAu_200_production_2014
+set TRIG = AuAu_200_production_low_2014
 set PicoDIR  = /gpfs02/eic/ayk/STAR/reco/Pico/2014/${TRIG};
 set FemtoDIR = /gpfs01/star/pwg/fisyak/Femto/2014/${TRIG};
 set hpssDir = reco/Pico/2014/${TRIG}
@@ -55,7 +55,7 @@ foreach f (`ls -1d ???/*/Done`)
     ln -s ../../../.sl73_* .	
     root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
     @ count++;  echo "count $count";
-    if ($count > 20) break;
+    if ($count > 40) break;
   endif
   cd -;
 end
@@ -83,7 +83,7 @@ setenv NODEBUG yes
 setup 64b
 xtitl
 cd ${FemtoDIR}
-@ count = 0
+@ count = 0;
 foreach d (`ls -1dr ???/15??????`)
   if (! -d ${d}) continue;	
   cd ${d}; pwd;
@@ -151,7 +151,6 @@ end
 ================================================================================
 set day = `basename $PWD`; grep total */Chain.log  | awk '{print $1" "$6}' | tee ${day}.log
 diff -y ${PicoDIR}/Chain//${day}/${day}.log .
-
 
 
 foreach d (`diff -y ${PicoDIR}/Chain//${day}/${day}.log . | grep '|' | awk -F \/ '{print $1}'`)

@@ -63,8 +63,8 @@ root.exe -q -b 'bfc.C(1000,"P2016a,TpxRaw,TpxClu,StiCA,btof,mtd,pxlHit,istHit,ss
 #root.exe -q -b 'bfc.C(1000,"P2016a,StiCA,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
 <!--
-        <stdout URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/daq2016$JOBID.err" />
+        <stdout URL="file:./daq2016$JOBID.log" />
+        <stderr URL="file:./daq2016$JOBID.err" />
 -->
         <stdout URL="file:./daq2016$JOBID.log" />
         <stderr URL="file:./daq2016$JOBID.err" />

@@ -35,8 +35,8 @@
   root4star -q -b 'bfc.C('$f','$l',"MC.2016a,HijingAuAu200Z6cm,Corr4,OSpaceZ2,OGridLeak3D,rung.'${rung}${fitter}',noRunco,noHistos",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:./$JOBID.log" />
+        <stderr URL="file:./$JOBID.err" />
 <input URL="command:RunId.pl 11 301 20" />
 <!-- <input URL="command:RunId.pl 1 10 10" /> -->
 </job>
