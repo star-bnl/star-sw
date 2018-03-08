@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.50 2018/03/08 08:40:32 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.51 2018/03/08 08:41:59 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.51  2018/03/08 08:41:59  zhux
+// default is flat in rapidity, not pseudo-rapidity.
+//
 // Revision 1.50  2018/03/08 08:40:32  zhux
 // added P17id Run14 AuAu200 chain.
 //
@@ -395,7 +398,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
   	embMk->SetTemp(0.35);
 
-	embMk->SetRapidityMode(kFALSE);  //default is 'kTRUE'
+	//embMk->SetRapidityMode(kFALSE);  //default is 'kTRUE'
 	
 	//Switch to prime mode for nucleus (with geantID > 10000) embedding, default is 'kFALSE'
 	//embMk->SetPrimeMode(kTRUE);
