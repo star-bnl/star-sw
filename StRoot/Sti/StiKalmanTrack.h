@@ -241,7 +241,6 @@ class StiKalmanTrack : public StiTrack
    /// Accessor method returns the last node associated with the track.
    // Assumes the track has been pruned.
    StiKalmanTrackNode * getLastNode()   const { return  lastNode; };
-                  int   legal(const StiHit* hit) const;   // is hit is legal to use for this track
    void  setLastNode (StiKalmanTrackNode *n) { lastNode  = n; };
    void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };   
    void  setFirstLastNode(StiKalmanTrackNode *n);   
