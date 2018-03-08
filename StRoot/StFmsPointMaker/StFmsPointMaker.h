@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.8 2018/03/02 20:26:44 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.9 2018/03/08 20:07:27 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.9  2018/03/08 20:07:27  akio
+// initialization of mObjectCount and mMaxEnergySum was missing
+//
 // Revision 1.8  2018/03/02 20:26:44  akio
 // Big update from Zhanwen Zhu with new shower shape and six z slices
 //
@@ -175,9 +178,9 @@ class StFmsPointMaker : public StMaker {
   //FMSCluster::StFmsGeometry mGeometry;  //!< Access to current FMS geometry
   StFmsCollection* mFmsCollection; //!< StFmsCollection as retrieved from StEvent
   TowerMap mTowers;  //!< One for each sub-detector, keyed by detector ID
-  int mObjectCount;  //!< Object count in event for use with TRef
+  int mObjectCount=0;  //!< Object count in event for use with TRef
 
-  Float_t mMaxEnergySum; //! max energy cut on sum of all cells
+  Float_t mMaxEnergySum=255.0; //! max energy cut on sum of all cells
    
   Int_t readMuDst();
   Int_t mReadMuDst=0;  //! 0= Do clustering and make Fms points
@@ -187,10 +190,10 @@ class StFmsPointMaker : public StMaker {
   Int_t mMergeSmallToLarge=1; //! if this is none-zero, merge small cells to large cells
   Int_t mTry1PhotonFitWhen2PhotonFitFailed=1; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
   Int_t mCategorizationAlgo=1;    //! choose cluster categorization algo
-  Int_t mScaleShowerShape=0;      //! scale shower shape for large cell 
+  Int_t mScaleShowerShape=0;      //! scale shower shape for large cell (only for mShowerShapeWithAngle=0)
   Int_t mShowerShapeWithAngle=1;  //! incident angle with 6 slices or not
   Int_t mVertexZ=0;               //! use BBC vertex or not
-  Double_t vertexz=0;             //! vertex position[cm]
+  Double_t vertexz=0.0;           //! vertex position[cm]
 
   StMuDst* muDst; //!
 
