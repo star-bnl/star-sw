@@ -16,6 +16,9 @@
 #include "TRandom3.h"
 #include "TMath.h"
 
+
+
+
 StEpdGeom::StEpdGeom() : mPP(0), mTT(0), mEW(0){
   if ( gRandom ) {
     pRan = (TRandom3*)gRandom;
@@ -313,3 +316,331 @@ bool StEpdGeom::IsInTile(double x, double y){
   PolygonX[numberOfCorners] = PolygonX[0];     PolygonY[numberOfCorners] = PolygonY[0];
   return TMath::IsInside(x,y,numberOfCorners+1,PolygonX,PolygonY);  
 }
+
+
+//-------------------------------------------------------------------
+
+void StEpdGeom::GetOverlappingBbcTiles(short uniqueID,
+				       int* nOverlappingBbcTiles, short* BbcTileIDs){
+  SetPpTtEw(uniqueID);
+  GetOverlappingBbcTiles(nOverlappingBbcTiles,BbcTileIDs);
+}
+
+void StEpdGeom::GetOverlappingBbcTiles(short position, short tilenumber, short eastwest,
+				       int* nOverlappingBbcTiles, short* BbcTileIDs){
+  mPP = position;
+  mTT = tilenumber;
+  mEW = eastwest;
+  GetOverlappingBbcTiles(nOverlappingBbcTiles,BbcTileIDs);
+}
+void StEpdGeom::GetOverlappingBbcTiles(int* nOverlappingBbcTiles, short* BbcTileIDs){
+  if (mTT>9){                // only tiles 1-9 overlap with inner BBC
+    nOverlappingBbcTiles=0;
+    return;
+  }
+  if (mEW<=0){   // East
+    *nOverlappingBbcTiles = mEastNumberOfOverlappingBbcTiles[mPP-1][mTT-1];
+    for (int i=0; i<*nOverlappingBbcTiles; i++){
+      BbcTileIDs[i] = mEastBbcTilesWhichOverlap[mPP-1][mTT-1][i];
+    }
+    for (int i=*nOverlappingBbcTiles; i<10; i++){
+      BbcTileIDs[i] = 0;
+    }
+  }
+  else{   // West
+    *nOverlappingBbcTiles = mWestNumberOfOverlappingBbcTiles[mPP-1][mTT-1];
+    for (int i=0; i<*nOverlappingBbcTiles; i++){
+      BbcTileIDs[i] = mWestBbcTilesWhichOverlap[mPP-1][mTT-1][i];
+    }
+    for (int i=*nOverlappingBbcTiles; i<10; i++){
+      BbcTileIDs[i] = 0;
+    }
+  }
+
+}
+
+
+
+// EastNumberOfOverlappingBbcTiles[PP-1][TT-1]; gives the number of BBC tiles that overlap
+short StEpdGeom::mEastNumberOfOverlappingBbcTiles[12][9] = {
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 1
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 2
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 3
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 4
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 5
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 6
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 7
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 8
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 9
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 10
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 11
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0}    // PP= 12
+};
+
+// EastBbcTilesWhichOverlap[PP-1][TT-1][j] gives the BBC tile ID of the jth overlapping BBC tile
+short StEpdGeom::mEastBbcTilesWhichOverlap[12][9][3] = {
+  { { -1, 0, 0}, // PP = 1 TT = 1
+    { -1, -7, 0}, // PP = 1 TT = 2
+    { -1, 0, 0}, // PP = 1 TT = 3
+    { -7, 0, 0}, // PP = 1 TT = 4
+    { -1, -7, -8}, // PP = 1 TT = 5
+    { -7, -8, 0}, // PP = 1 TT = 6
+    { -7, -8, 0}, // PP = 1 TT = 7
+    { 0, 0, 0}, // PP = 1 TT = 8
+    { -8, 0, 0} // PP = 1 TT = 9
+  },
+  { { -6, 0, 0}, // PP = 2 TT = 1
+    { -6, 0, 0}, // PP = 2 TT = 2
+    { -6, -7, 0}, // PP = 2 TT = 3
+    { -6, -7, -18}, // PP = 2 TT = 4
+    { -7, 0, 0}, // PP = 2 TT = 5
+    { -7, -18, 0}, // PP = 2 TT = 6
+    { -7, -18, 0}, // PP = 2 TT = 7
+    { -18, 0, 0}, // PP = 2 TT = 8
+    { 0, 0, 0} // PP = 2 TT = 9
+  },
+  { { -6, 0, 0}, // PP = 3 TT = 1
+    { -6, -17, 0}, // PP = 3 TT = 2
+    { -6, 0, 0}, // PP = 3 TT = 3
+    { -17, 0, 0}, // PP = 3 TT = 4
+    { -6, -17, -18}, // PP = 3 TT = 5
+    { -17, -18, 0}, // PP = 3 TT = 6
+    { -17, -18, 0}, // PP = 3 TT = 7
+    { 0, 0, 0}, // PP = 3 TT = 8
+    { -18, 0, 0} // PP = 3 TT = 9
+  },
+  { { -5, 0, 0}, // PP = 4 TT = 1
+    { -5, 0, 0}, // PP = 4 TT = 2
+    { -5, -17, 0}, // PP = 4 TT = 3
+    { -5, -16, -17}, // PP = 4 TT = 4
+    { -17, 0, 0}, // PP = 4 TT = 5
+    { -16, -17, 0}, // PP = 4 TT = 6
+    { -16, -17, 0}, // PP = 4 TT = 7
+    { -16, 0, 0}, // PP = 4 TT = 8
+    { 0, 0, 0} // PP = 4 TT = 9
+  },
+  { { -5, 0, 0}, // PP = 5 TT = 1
+    { -5, -15, 0}, // PP = 5 TT = 2
+    { -5, 0, 0}, // PP = 5 TT = 3
+    { -15, 0, 0}, // PP = 5 TT = 4
+    { -5, -15, -16}, // PP = 5 TT = 5
+    { -15, -16, 0}, // PP = 5 TT = 6
+    { -15, -16, 0}, // PP = 5 TT = 7
+    { 0, 0, 0}, // PP = 5 TT = 8
+    { -16, 0, 0} // PP = 5 TT = 9
+  },
+  { { -4, 0, 0}, // PP = 6 TT = 1
+    { -4, 0, 0}, // PP = 6 TT = 2
+    { -4, -15, 0}, // PP = 6 TT = 3
+    { -4, -14, -15}, // PP = 6 TT = 4
+    { -15, 0, 0}, // PP = 6 TT = 5
+    { -14, -15, 0}, // PP = 6 TT = 6
+    { -14, -15, 0}, // PP = 6 TT = 7
+    { -14, 0, 0}, // PP = 6 TT = 8
+    { 0, 0, 0} // PP = 6 TT = 9
+  },
+  { { -4, 0, 0}, // PP = 7 TT = 1
+    { -4, -13, 0}, // PP = 7 TT = 2
+    { -4, 0, 0}, // PP = 7 TT = 3
+    { -13, 0, 0}, // PP = 7 TT = 4
+    { -4, -13, -14}, // PP = 7 TT = 5
+    { -13, -14, 0}, // PP = 7 TT = 6
+    { -13, -14, 0}, // PP = 7 TT = 7
+    { 0, 0, 0}, // PP = 7 TT = 8
+    { -14, 0, 0} // PP = 7 TT = 9
+  },
+  { { -3, 0, 0}, // PP = 8 TT = 1
+    { -3, 0, 0}, // PP = 8 TT = 2
+    { -3, -13, 0}, // PP = 8 TT = 3
+    { -3, -12, -13}, // PP = 8 TT = 4
+    { -13, 0, 0}, // PP = 8 TT = 5
+    { -12, -13, 0}, // PP = 8 TT = 6
+    { -12, -13, 0}, // PP = 8 TT = 7
+    { -12, 0, 0}, // PP = 8 TT = 8
+    { 0, 0, 0} // PP = 8 TT = 9
+  },
+  { { -3, 0, 0}, // PP = 9 TT = 1
+    { -3, -11, 0}, // PP = 9 TT = 2
+    { -3, 0, 0}, // PP = 9 TT = 3
+    { -11, 0, 0}, // PP = 9 TT = 4
+    { -3, -11, -12}, // PP = 9 TT = 5
+    { -11, -12, 0}, // PP = 9 TT = 6
+    { -11, -12, 0}, // PP = 9 TT = 7
+    { 0, 0, 0}, // PP = 9 TT = 8
+    { -12, 0, 0} // PP = 9 TT = 9
+  },
+  { { -2, 0, 0}, // PP = 10 TT = 1
+    { -2, 0, 0}, // PP = 10 TT = 2
+    { -2, -11, 0}, // PP = 10 TT = 3
+    { -2, -10, -11}, // PP = 10 TT = 4
+    { -11, 0, 0}, // PP = 10 TT = 5
+    { -10, -11, 0}, // PP = 10 TT = 6
+    { -10, -11, 0}, // PP = 10 TT = 7
+    { -10, 0, 0}, // PP = 10 TT = 8
+    { 0, 0, 0} // PP = 10 TT = 9
+  },
+  { { -2, 0, 0}, // PP = 11 TT = 1
+    { -2, -9, 0}, // PP = 11 TT = 2
+    { -2, 0, 0}, // PP = 11 TT = 3
+    { -9, 0, 0}, // PP = 11 TT = 4
+    { -2, -9, -10}, // PP = 11 TT = 5
+    { -9, -10, 0}, // PP = 11 TT = 6
+    { -9, -10, 0}, // PP = 11 TT = 7
+    { 0, 0, 0}, // PP = 11 TT = 8
+    { -10, 0, 0} // PP = 11 TT = 9
+  },
+  { { -1, 0, 0}, // PP = 12 TT = 1
+    { -1, 0, 0}, // PP = 12 TT = 2
+    { -1, -9, 0}, // PP = 12 TT = 3
+    { -1, -8, -9}, // PP = 12 TT = 4
+    { -9, 0, 0}, // PP = 12 TT = 5
+    { -8, -9, 0}, // PP = 12 TT = 6
+    { -8, -9, 0}, // PP = 12 TT = 7
+    { -8, 0, 0}, // PP = 12 TT = 8
+    { 0, 0, 0} // PP = 12 TT = 9
+  }
+};
+
+// WestNumberOfOverlappingBbcTiles[PP-1][TT-1]; gives the number of BBC tiles that overlap
+short StEpdGeom::mWestNumberOfOverlappingBbcTiles[12][9] = {
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 1
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 2
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 3
+  { 1, 1, 2, 3, 1, 1, 2, 1, 0},   // PP= 4
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 5
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 6
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 7
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 8
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 9
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0},   // PP= 10
+  { 1, 2, 1, 1, 3, 2, 2, 0, 1},   // PP= 11
+  { 1, 1, 2, 3, 1, 2, 2, 1, 0}    // PP= 12 
+};
+
+// WestBbcTilesWhichOverlap[PP-1][TT-1][j] gives the BBC tile ID of the jth overlapping BBC tile
+short StEpdGeom::mWestBbcTilesWhichOverlap[12][9][3] = {
+  { { 1, 0, 0}, // PP = 1 TT = 1
+    { 1, 7, 0}, // PP = 1 TT = 2
+    { 1, 0, 0}, // PP = 1 TT = 3
+    { 7, 0, 0}, // PP = 1 TT = 4
+    { 1, 7, 8}, // PP = 1 TT = 5
+    { 7, 8, 0}, // PP = 1 TT = 6
+    { 7, 8, 0}, // PP = 1 TT = 7
+    { 0, 0, 0}, // PP = 1 TT = 8
+    { 8, 0, 0} // PP = 1 TT = 9
+  },
+  { { 6, 0, 0}, // PP = 2 TT = 1
+    { 6, 0, 0}, // PP = 2 TT = 2
+    { 6, 7, 0}, // PP = 2 TT = 3
+    { 6, 7, 18}, // PP = 2 TT = 4
+    { 7, 0, 0}, // PP = 2 TT = 5
+    { 7, 18, 0}, // PP = 2 TT = 6
+    { 7, 18, 0}, // PP = 2 TT = 7
+    { 18, 0, 0}, // PP = 2 TT = 8
+    { 0, 0, 0} // PP = 2 TT = 9
+  },
+  { { 6, 0, 0}, // PP = 3 TT = 1
+    { 6, 17, 0}, // PP = 3 TT = 2
+    { 6, 0, 0}, // PP = 3 TT = 3
+    { 17, 0, 0}, // PP = 3 TT = 4
+    { 6, 17, 18}, // PP = 3 TT = 5
+    { 17, 18, 0}, // PP = 3 TT = 6
+    { 17, 18, 0}, // PP = 3 TT = 7
+    { 0, 0, 0}, // PP = 3 TT = 8
+    { 18, 0, 0} // PP = 3 TT = 9
+  },
+  { { 5, 0, 0}, // PP = 4 TT = 1
+    { 5, 0, 0}, // PP = 4 TT = 2
+    { 5, 17, 0}, // PP = 4 TT = 3
+    { 5, 16, 17}, // PP = 4 TT = 4
+    { 17, 0, 0}, // PP = 4 TT = 5
+    { 16, 0, 0}, // PP = 4 TT = 6
+    { 16, 17, 0}, // PP = 4 TT = 7
+    { 16, 0, 0}, // PP = 4 TT = 8
+    { 0, 0, 0} // PP = 4 TT = 9
+  },
+  { { 5, 0, 0}, // PP = 5 TT = 1
+    { 5, 15, 0}, // PP = 5 TT = 2
+    { 5, 0, 0}, // PP = 5 TT = 3
+    { 15, 0, 0}, // PP = 5 TT = 4
+    { 5, 15, 16}, // PP = 5 TT = 5
+    { 15, 16, 0}, // PP = 5 TT = 6
+    { 15, 16, 0}, // PP = 5 TT = 7
+    { 0, 0, 0}, // PP = 5 TT = 8
+    { 16, 0, 0} // PP = 5 TT = 9
+  },
+  { { 4, 0, 0}, // PP = 6 TT = 1
+    { 4, 0, 0}, // PP = 6 TT = 2
+    { 4, 15, 0}, // PP = 6 TT = 3
+    { 4, 14, 15}, // PP = 6 TT = 4
+    { 15, 0, 0}, // PP = 6 TT = 5
+    { 14, 15, 0}, // PP = 6 TT = 6
+    { 14, 15, 0}, // PP = 6 TT = 7
+    { 14, 0, 0}, // PP = 6 TT = 8
+    { 0, 0, 0} // PP = 6 TT = 9
+  },
+  { { 4, 0, 0}, // PP = 7 TT = 1
+    { 4, 13, 0}, // PP = 7 TT = 2
+    { 4, 0, 0}, // PP = 7 TT = 3
+    { 13, 0, 0}, // PP = 7 TT = 4
+    { 4, 13, 14}, // PP = 7 TT = 5
+    { 13, 14, 0}, // PP = 7 TT = 6
+    { 13, 14, 0}, // PP = 7 TT = 7
+    { 0, 0, 0}, // PP = 7 TT = 8
+    { 14, 0, 0} // PP = 7 TT = 9
+  },
+  { { 3, 0, 0}, // PP = 8 TT = 1
+    { 3, 0, 0}, // PP = 8 TT = 2
+    { 3, 13, 0}, // PP = 8 TT = 3
+    { 3, 12, 13}, // PP = 8 TT = 4
+    { 13, 0, 0}, // PP = 8 TT = 5
+    { 12, 13, 0}, // PP = 8 TT = 6
+    { 12, 13, 0}, // PP = 8 TT = 7
+    { 12, 0, 0}, // PP = 8 TT = 8
+    { 0, 0, 0} // PP = 8 TT = 9
+  },
+  { { 3, 0, 0}, // PP = 9 TT = 1
+    { 3, 11, 0}, // PP = 9 TT = 2
+    { 3, 0, 0}, // PP = 9 TT = 3
+    { 11, 0, 0}, // PP = 9 TT = 4
+    { 3, 11, 12}, // PP = 9 TT = 5
+    { 11, 12, 0}, // PP = 9 TT = 6
+    { 11, 12, 0}, // PP = 9 TT = 7
+    { 0, 0, 0}, // PP = 9 TT = 8
+    { 12, 0, 0} // PP = 9 TT = 9
+  },
+  { { 2, 0, 0}, // PP = 10 TT = 1
+    { 2, 0, 0}, // PP = 10 TT = 2
+    { 2, 11, 0}, // PP = 10 TT = 3
+    { 2, 10, 11}, // PP = 10 TT = 4
+    { 11, 0, 0}, // PP = 10 TT = 5
+    { 10, 11, 0}, // PP = 10 TT = 6
+    { 10, 11, 0}, // PP = 10 TT = 7
+    { 10, 0, 0}, // PP = 10 TT = 8
+    { 0, 0, 0} // PP = 10 TT = 9
+  },
+  { { 2, 0, 0}, // PP = 11 TT = 1
+    { 2, 9, 0}, // PP = 11 TT = 2
+    { 2, 0, 0}, // PP = 11 TT = 3
+    { 9, 0, 0}, // PP = 11 TT = 4
+    { 2, 9, 10}, // PP = 11 TT = 5
+    { 9, 10, 0}, // PP = 11 TT = 6
+    { 9, 10, 0}, // PP = 11 TT = 7
+    { 0, 0, 0}, // PP = 11 TT = 8
+    { 10, 0, 0} // PP = 11 TT = 9
+  },
+  { { 1, 0, 0}, // PP = 12 TT = 1
+    { 1, 0, 0}, // PP = 12 TT = 2
+    { 1, 9, 0}, // PP = 12 TT = 3
+    { 1, 8, 9}, // PP = 12 TT = 4
+    { 9, 0, 0}, // PP = 12 TT = 5
+    { 8, 9, 0}, // PP = 12 TT = 6
+    { 8, 9, 0}, // PP = 12 TT = 7
+    { 8, 0, 0}, // PP = 12 TT = 8
+    { 0, 0, 0} // PP = 12 TT = 9
+  }
+};
+
+
+
+

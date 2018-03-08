@@ -43,6 +43,21 @@ class StBbcGeom{
   unsigned short mNtilesOfPmt[16];          // how many tiles correspond to the phototube?  (either 1 or 2)
   unsigned short mTileNumbersOfPmt[16][2];  // WHICH tiles correspond to the phototube?
 
+
+// mEastNumberOfOverlappingEpdTiles[BB-1]  gives the number of EPD tiles that have any overlap with BBC tile BB
+  static short mEastNumberOfOverlappingEpdTiles[18];
+// mEastEpdTilesWhichOverlap[BB-1][i]  gives the EPD tile id of the jth EPD tile that overlaps BBC inner tile BB
+  static short mEastEpdTilesWhichOverlap[18][10];
+
+// mWestNumberOfOverlappingEpdTiles[BB-1]  gives the number of EPD tiles that have any overlap with BBC tile BB
+  static short mWestNumberOfOverlappingEpdTiles[18];
+// mWestEpdTilesWhichOverlap[BB-1][i]  gives the EPD tile id of the jth EPD tile that overlaps BBC inner tile BB
+  static short mWestEpdTilesWhichOverlap[18][10];
+
+
+
+
+
   void InitializeGeometry();
 
  public:
@@ -75,6 +90,24 @@ class StBbcGeom{
 
   //------------------------------------------------------
 
+  /// returns a list of (the IDs of) EPD tiles that overlap with a given BBC tile
+  /// \param tileId    |tileId| = 1..18 (inner BBC).  Sign of tileId tells side.  +/- for West/East
+  /// \param nOverlappingEpdTiles       *output* parameter.  Number of EPD tiles that overlaps this BBC tile (0, 8, or 10)
+  /// \param EpdTileIDs                 *output* parameter: list of EPD Tile IDs
+  void GetOverLappingEpdTiles(short tileId,
+			      int* nOverlappingEpdTiles, short* EpdTileIDs);
+
+
+  /// returns a list of (the IDs of) EPD tiles that overlap with a given BBC tile
+  /// \param absValueTileNumber         this is a positive number between 1 and 16, inclusive
+  /// \param eastwest                   <=0  for East, >0 for West
+  /// \param nOverlappingEpdTiles       *output* parameter.  Number of EPD tiles that overlaps this BBC tile (0, 8, or 10)
+  /// \param EpdTileIDs                 *output* parameter: list of EPD Tile IDs
+  void GetOverLappingEpdTiles(unsigned short absValueTileNumber, short eastwest,
+			      int* nOverlappingEpdTiles, short* EpdTileIDs);
+
+  //------------------------------------------------------
+
   /// returns true if (x,y) lies within the tile.  Assumes z=zWheel
   /// useful if the user would like to project a track (using straight line of helix or whatever)
   /// to the plane of the wheel and determine whether it hit a given tile
@@ -97,7 +130,6 @@ class StBbcGeom{
   /// it is the same on the East and West sides
   /// \param tileNumber     inner tile number, [1,18] inclusive
   unsigned short PmtOfTile(unsigned short tileNumber);
-
 
   /// returns the NUMBER OF TILES and the tile numbers corresponding to a given phototube
   /// the BBC is such a pain in the neck this way!!
