@@ -262,7 +262,6 @@ protected:
 //..............................................................................
 class StSvtBarrelHitIter : public StHitIter {
 public:
-    		StSvtBarrelHitIter();
 virtual        ~StSvtBarrelHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -271,7 +270,6 @@ protected:
 //..............................................................................
 class StSvtLadderHitIter : public StHitIter {
 public:
-    		StSvtLadderHitIter();
 virtual        ~StSvtLadderHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -280,7 +278,6 @@ protected:
 //..............................................................................
 class StSvtWaferHitIter : public StHitIter {
 public:
-    		StSvtWaferHitIter();
 virtual        ~StSvtWaferHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -392,7 +389,6 @@ protected:
 //..............................................................................
 class StSsdLadderHitIter : public StHitIter {
 public:
-    		StSsdLadderHitIter();
 virtual        ~StSsdLadderHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -401,7 +397,6 @@ protected:
 //..............................................................................
 class StSsdWaferHitIter : public StHitIter {
 public:
-    		StSsdWaferHitIter();
 virtual        ~StSsdWaferHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
