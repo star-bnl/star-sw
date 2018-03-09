@@ -3,9 +3,6 @@
 #SBATCH -N <nodeNumber>  # number of nodes
 # The -c is for SLURM.  THREADS is for tasks farmer.   If you don't include the -c, SLURM will put everything on one core. For Cori: -c 64, Edison -c 48
 #SBATCH -c64 -C haswell # 123 GB RAM
-#-SBATCH -c 68 -C knl,quad,flat   # 108 GB RAM, 30 min delay due to reboot
-#-SBATCH  -c 68 -C knl,quad,cache  # 87 GB RAM, faster start
-#  note: KNL nodes valid thredding: 68, 136, or 272
 #-SBATCH -c48  # Edison, 59 GB RAM
 
 #-SBATCH --partition debug -t 00:29:00   -J starFarm-dbg
@@ -13,16 +10,13 @@
 #-SBATCH  --partition regular -t <wallHour>:30:00 --qos=premium   -J starFarm-prem
 
 # pick the image you need
-#SBATCH --image=custom:pdsf-sl64-star:v7
+#SBATCH --image=custom:pdsf-sl64-star:v8
 
 #SBATCH -L SCRATCH   #note: specify license need for the file systems your job needs, such as SCRATCH,project
-
-#module load shifter  #Edison only
 
 # pick STAR library you want to use
 export STAR_VER=<starLib>
 export EXEC_NAME=root4star
-#export EXEC_NAME=vet3.exe  # for testing
 
 # here taskfarmer code resides 
 #module load taskfarmer
