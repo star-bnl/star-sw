@@ -33,6 +33,17 @@ class StEpdGeom{
   double mRmax[16];   // row
   double mRave[16];   // row
 
+  // EastNumberOfOverlappingBbcTiles[PP-1][TT-1] =  number of BBC tiles that overlap
+  static short mEastNumberOfOverlappingBbcTiles[12][9];  
+  // EastBbcTilesWhichOverlap[PP-1][TT-1][j] gives the BBC tile ID of the jth overlapping BBC tile
+  static short mEastBbcTilesWhichOverlap[12][9][3];  // 
+
+  // WestNumberOfOverlappingBbcTiles[PP-1][TT-1] =  number of BBC tiles that overlap
+  static short mWestNumberOfOverlappingBbcTiles[12][9];  
+  // WestBbcTilesWhichOverlap[PP-1][TT-1][j] gives the BBC tile ID of the jth overlapping BBC tile
+  static short mWestBbcTilesWhichOverlap[12][9][3];  // 
+
+
   void InitializeGeometry();
 
   /* these methods are used internally */
@@ -73,6 +84,15 @@ class StEpdGeom{
   /// \param y    y-coordinate of projected hit
   /// depends on internal parameters mPP, mTT, mEW
   bool   IsInTile(double x, double y);
+
+  /// returns a list of (the IDs of) BBC tiles that overlap with a given EPD tile
+  /// \param nOverlappingBbcTiles         *output* parameter: number of BBC tiles that overlaps this EPD tile (even just barely)
+  /// \param BbcTileIDs                   *output* parameter: array of BBC tile IDs
+  void GetOverlappingBbcTiles(int* nOverlappingBbcTiles, short* BbcTileIDs);
+
+
+
+
 
  public:
 
@@ -117,6 +137,24 @@ class StEpdGeom{
   /// \param y           this is a RETURNED values.  y-coordinates of corners
   void GetCorners(short position, short tilenumber, short eastwest,
 		  int* nCorners, double* x, double* y);
+
+
+  /// returns a list of (the IDs of) BBC tiles that overlap with a given EPD tile
+  /// \param uniqueID                     identifier of the EPD tile = sign*(100*PP+TT) where sign=+/- for West/East
+  /// \param nOverlappingBbcTiles         *output* parameter: number of BBC tiles that overlaps this EPD tile (even just barely)
+  /// \param BbcTileIDs                   *output* parameter: array of BBC tile IDs
+  void GetOverlappingBbcTiles(short uniqueID,
+			      int* nOverlappingBbcTiles, short* BbcTileIDs);
+
+  /// returns a list of (the IDs of) BBC tiles that overlap with a given EPD tile
+  /// \param position   position of supersector [1,12]
+  /// \param tilenumber tile on supsersector [1,31]
+  /// \eastwest         east (-1) or west (+1) wheel
+  /// \param nOverlappingBbcTiles         *output* parameter: number of BBC tiles that overlaps this EPD tile (even just barely)
+  /// \param BbcTileIDs                   *output* parameter: array of BBC tile IDs
+  void GetOverlappingBbcTiles(short position, short tilenumber, short eastwest,
+			      int* nOverlappingBbcTiles, short* BbcTileIDs);
+
 
 
   /// returns true if (x,y) lies within the tile.  Assumes z=zWheel
@@ -174,6 +212,8 @@ inline bool StEpdGeom::IsWest(short uniqueID){return uniqueID>0;}
 inline bool StEpdGeom::IsWest(short position, short tilenumber, short eastwest){return eastwest>0;}
 inline bool StEpdGeom::IsEast(short uniqueID){return uniqueID<0;}
 inline bool StEpdGeom::IsEast(short position, short tilenumber, short eastwest){return eastwest<0;}
+
+
 
 
 #endif
