@@ -65,7 +65,6 @@ class StTrackHelper: public StHelixHelper
 public:
       StTrackHelper(const StTrack *trk=0);
      ~StTrackHelper();
-       void     SetTrack(const StTrack *trk);    
         int     GetType() 	const;
         int     GetFlag() 	const;
         int     GetCharge()	const;
