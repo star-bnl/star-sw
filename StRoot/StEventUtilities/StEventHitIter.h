@@ -159,7 +159,6 @@ public:
   StEventHitIter(const TObject *ev=0){if (ev) Reset(ev);}
   virtual ~StEventHitIter(){;}
   int   AddDetector(StDetectorId detId);
-  int   AddDetector(const char *name);
 private:
 ClassDef(StEventHitIter,0)//
 

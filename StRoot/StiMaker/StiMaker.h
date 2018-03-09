@@ -49,11 +49,10 @@ class StiMaker : public StMaker
              void FinishTracks(int gloPri);
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.39 2018/01/03 21:24:21 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.40 2018/03/09 21:36:18 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
-    void load(TDataSet *);
 
  protected:
     virtual TDataSet  *FindDataSet (const char* logInput,

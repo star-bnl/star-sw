@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.24 2018/02/26 23:29:00 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.25 2018/03/09 21:36:17 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -84,7 +84,6 @@ class StBTofNode : public TObject {
 
     StBTofNode(const TGeoPhysicalNode& gpNode, const StThreeVectorD& align);
     
-    StBTofNode& operator=(const StBTofNode&);
 
     void      UpdateMatrix();
     void      BuildMembers();
@@ -180,7 +179,6 @@ class StBTofGeomTray : public StBTofNode {
    StBTofGeomTray() {}
    ~StBTofGeomTray() {};
 
-   StBTofGeomTray& operator=(const StBTofGeomTray&);
    static void       DebugOn()   { mDebug = kTRUE; }     
    static void       DebugOff()  { mDebug = kFALSE; }
    static Bool_t     IsDebugOn() { return mDebug; }
@@ -224,7 +222,6 @@ class StBTofGeomSensor : public StBTofNode {
    StBTofGeomSensor() {}
    ~StBTofGeomSensor() {}
 
-   StBTofGeomSensor& operator=(const StBTofGeomSensor&);
    static void       DebugOn()   { mDebug = kTRUE; }     
    static void       DebugOff()  { mDebug = kFALSE; }
    static Bool_t     IsDebugOn() { return mDebug; }
@@ -402,6 +399,9 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.25  2018/03/09 21:36:17  smirnovd
+ * Remove declared but undefined function
+ *
  * Revision 1.24  2018/02/26 23:29:00  smirnovd
  * StBTofGeometry: Introduced alternative initialization using TGeo geometry
  *

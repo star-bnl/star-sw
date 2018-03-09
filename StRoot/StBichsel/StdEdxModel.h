@@ -29,7 +29,6 @@ class StdEdxModel {
   TF2    *zMPV();
   TF1    *zFunc();
   TF1    *zdEdx();   // log(dE) with respect to Most Probable Value (MPV)
-  TF1    *zdEdxA();  // log(dE[GeV]) 
   Double_t zdE(Double_t n_P = 30, Double_t sigma = 0.25);
   Double_t dNdx(Double_t betagamma = 4.0, Double_t charge = 1.0) {return charge*charge*mdNdx->Interpolate(betagamma);}
   static Double_t W() {return 45.44e-3;}// keV => eV per conducting electron P10: 26.2e-3*TMath::Exp(5.50667e-01) = 45.44e-3
@@ -60,8 +59,11 @@ class StdEdxModel {
   static Int_t        _debug;
   ClassDef(StdEdxModel,0)
 };
-// $Id: StdEdxModel.h,v 1.1 2015/12/24 00:16:25 fisyak Exp $
+// $Id: StdEdxModel.h,v 1.2 2018/03/09 21:36:17 smirnovd Exp $
 // $Log: StdEdxModel.h,v $
+// Revision 1.2  2018/03/09 21:36:17  smirnovd
+// Remove declared but undefined function
+//
 // Revision 1.1  2015/12/24 00:16:25  fisyak
 // Add TpcRS model and macros
 //
