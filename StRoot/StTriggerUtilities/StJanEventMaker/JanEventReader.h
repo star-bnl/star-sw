@@ -20,7 +20,7 @@ public:
   ~JanEventReader();
 
   istream& operator()(JanEvent& event);
-  bool isOpen(){ return in!=0;}
+  bool isOpen(){ return in.is_open();}
 
 private:
   ifstream& in;
