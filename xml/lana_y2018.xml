@@ -1,6 +1,6 @@
 <job  name="lana" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-<stdout URL="file:./lana$JOBID.log" />
-<stderr URL="file:./lana$JOBID.err" />
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
 <command> 
 #  source ~/.tcshrc
   cd ${SUBMITTINGDIRECTORY}  
@@ -39,6 +39,6 @@
       root.exe -q -b -x 'bfc.C(99999,"lana,B2018,TpxRaw,TpxClu,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/> 
-<!-- <input URL="command:Lana2017.pl"/> -->
+<!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
+<input URL="command:Lana2018.pl"/>
 </job>

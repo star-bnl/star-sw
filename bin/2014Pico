@@ -12,7 +12,7 @@ set FemtoDIR = /gpfs01/star/pwg/fisyak/Femto/2014/${TRIG};
 set hpssDir = reco/Pico/2014/${TRIG}
 
 ================================================================================
-foreach dayd (`ls -1dr ${PicoDIR}/???`)
+foreach dayd (`ls -1d ${PicoDIR}/???`)
   set day = `basename ${dayd}`;
   cd ${PicoDIR}
   if (! -d ${day}) mkdir ${day}
@@ -161,6 +161,11 @@ foreach d (`diff -y ${PicoDIR}/Chain//${day}/${day}.log . | grep '|' | awk -F \/
   cd -;
 end
 ==================missing==============================================================
+foreach d (`diff -y ${PicoDIR}/Chain//${day}/${day}.log . | grep '|' | awk -F \/ '{print $1}'`)
+  cd $d
+   root.exe -q -b 'Chain.C+("*.root","PicoDst")' >&  Chain.log  &
+  cd -;
+end
 foreach f (`grep -l missing ???/1*/Chain.log`)
   set d = `dirname ${f}`;
   cd ${d}
@@ -172,4 +177,26 @@ foreach f (`grep -l missing ???/1*/Chain.log`)
     rm Chain.log
   endif
   cd -;
+end
+================================================================================
+foreach day (`ls -1d ???`)
+  cd ${day}
+  echo "$PWD";
+  foreach f (`egrep -l '(Tree created as a memory-resident Tree|ERROR - StCloseFileOnTerminate::Notify)' */*C.log`)
+    set d = `dirname ${f}`;
+    set b = `basename ${f} C.log`;
+    rm ${d}/${b}*
+  end
+  cd -;
+end 
+================================================================================
+foreach dayd (`ls -1d  ???`)
+cd ${dayd}
+pwd;
+foreach d (`ls -1d 1*`)
+  cd $d; pwd; 
+  rm -rf sched* *.xml  .sl*  *.o *HOLD* *hold* Done
+  cd ../;
+end
+cd ../;
 end
