@@ -13,7 +13,8 @@ sub rmkdir {
     if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory File::Find::path ($!).\n";}
   }
 }
-my @List = glob "AuAu*2014.list";
+#my @List = glob "AuAu*2014.list";
+my @List = glob "AuAu_200_production_low_2014.list";
 foreach my $file (@List) {
   my $trig = File::Basename::basename($file,".list");
   print "file = $file => trig = $trig\n";
@@ -30,7 +31,8 @@ foreach my $file (@List) {
     $FileN .= $dir . "/" . $mudst;
     print "dir = |$dir|, mudst = |$mudst|, day = $day, run = $run => $FileN\n" if ($debug);
 
-    my $DIR = "/gpfs02/eic/ayk/STAR/reco/Pico/2014/" . $trig . "/" . $day . "/" . $run;
+#    my $DIR = "/gpfs02/eic/ayk/STAR/reco/Pico/2014/" . $trig . "/" . $day . "/" . $run;
+    my $DIR = "./" . $trig . "/" . $day . "/" . $run;
     if (! -d $DIR) {`mkdir -p $DIR`;}
     my $L = $DIR . "/MuDst.list";  print "output $L\n" if ($debug);
     open (Out,">>$L") or die "Can't open $L";

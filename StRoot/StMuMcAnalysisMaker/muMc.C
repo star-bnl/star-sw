@@ -1,4 +1,5 @@
 /*
+  FPE_OFF
   root.exe -q -b -x 'muMc.C(1e6,"../*MuDst.root")'
 */
 void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t *output = "muMc.root") {

@@ -177,7 +177,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
 //{"y2018x",      20171215,     0, "y2018x",   "y2018x experimental TPC geometry, AgML,xgeometry"},   
   {"y2018",       20171210,     0, "y2018",   "y2018, no HFT,xgeometry, sector 20 with iTPC"},//
-  {"y2018a",      20171215,     3, "y2018a",  "y2018a physics production geometry version A, AgML,xgeometry"},//
+//{"y2018a",      20171215,     3, "y2018a",  "y2018a physics production geometry version A, AgML,xgeometry"},//  not read yet
   {"r2018",       20171210,     0, "y2018a",  "y2018a, no HFT,xgeometry"}, // 
   {"y2019",       20181210,     0, "y2019",   "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"r2019",       20181210,     0, "y2019",   "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 

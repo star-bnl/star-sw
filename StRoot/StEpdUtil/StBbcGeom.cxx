@@ -143,8 +143,6 @@ void StBbcGeom::GetCorners(unsigned short absValueTileNumber, short eastwest, do
   }
 }
 
-
-
 //-------------------------------------------------------
 bool StBbcGeom::IsInTile(short tileId, double x, double y){
   unsigned short absValTile = abs(tileId);
@@ -158,3 +156,88 @@ bool StBbcGeom::IsInTile(unsigned short absValueTileNumber, short eastwest, doub
   PolygonY[6]=PolygonY[0];   // must close the polygon
   return TMath::IsInside(x,y,7,PolygonX,PolygonY);
 }
+
+//-------------------------------------------------------
+void StBbcGeom::GetOverLappingEpdTiles(short tileId,
+				       int* nOverlappingEpdTiles, short* EpdTileIDs){
+  unsigned short absValTile = abs(tileId);
+  if (tileId<0) {GetOverLappingEpdTiles(absValTile,-1,nOverlappingEpdTiles,EpdTileIDs);}
+  else {GetOverLappingEpdTiles(absValTile,1,nOverlappingEpdTiles,EpdTileIDs);}
+}
+void StBbcGeom::GetOverLappingEpdTiles(unsigned short BB, short eastwest,
+				       int* nOverlappingEpdTiles, short* EpdTileIDs){
+  if ((BB==0)||(BB>18)){
+    *nOverlappingEpdTiles=0;
+    return;
+  }
+  if (eastwest<0){  // East
+    *nOverlappingEpdTiles = mEastNumberOfOverlappingEpdTiles[BB-1];
+    for (int i=0; i<*nOverlappingEpdTiles; i++){
+      EpdTileIDs[i] = mEastEpdTilesWhichOverlap[BB-1][i];
+    }
+  }
+  else{            // west
+    *nOverlappingEpdTiles = mWestNumberOfOverlappingEpdTiles[BB-1];
+    for (int i=0; i<*nOverlappingEpdTiles; i++){
+      EpdTileIDs[i] = mWestEpdTilesWhichOverlap[BB-1][i];
+    }
+  }
+  for (int i=*nOverlappingEpdTiles; i<10; i++){
+    EpdTileIDs[i] = 0;
+  }
+}
+
+
+
+//-------------------------------------------------------
+// EastNumberOfOverlappingEpdTiles[BB-1]  gives the number of EPD tiles that have any overlap with BBC tile BB
+short StBbcGeom::mEastNumberOfOverlappingEpdTiles[18] = { 8, 8, 8, 8, 8, 8, 10, 8, 10, 8, 10, 8, 9, 8, 10, 8, 10, 8};
+
+// EastEpdTilesWhichOverlap[BB-1][i]  gives the EPD tile id of the jth EPD tile that overlaps BBC inner tile BB
+short StBbcGeom::mEastEpdTilesWhichOverlap[18][10] = {
+  { -101, -102, -103, -105, -1201, -1202, -1203, -1204, 0, 0},         // BBC tile #1
+  { -1001, -1002, -1003, -1004, -1101, -1102, -1103, -1105, 0, 0},         // BBC tile #2
+  { -801, -802, -803, -804, -901, -902, -903, -905, 0, 0},         // BBC tile #3
+  { -601, -602, -603, -604, -701, -702, -703, -705, 0, 0},         // BBC tile #4
+  { -401, -402, -403, -404, -501, -502, -503, -505, 0, 0},         // BBC tile #5
+  { -201, -202, -203, -204, -301, -302, -303, -305, 0, 0},         // BBC tile #6
+  { -102, -104, -105, -106, -107, -203, -204, -205, -206, -207},         // BBC tile #7
+  { -105, -106, -107, -109, -1204, -1206, -1207, -1208, 0, 0},         // BBC tile #8
+  { -1102, -1104, -1105, -1106, -1107, -1203, -1204, -1205, -1206, -1207},         // BBC tile #9
+  { -1004, -1006, -1007, -1008, -1105, -1106, -1107, -1109, 0, 0},         // BBC tile #10
+  { -902, -904, -905, -906, -907, -1003, -1004, -1005, -1006, -1007},         // BBC tile #11
+  { -804, -806, -807, -808, -905, -906, -907, -909, 0, 0},         // BBC tile #12
+  { -702, -704, -705, -706, -707, -803, -804, -805, -807, 0},         // BBC tile #13
+  { -604, -606, -607, -608, -705, -706, -707, -709, 0, 0},         // BBC tile #14
+  { -502, -504, -505, -506, -507, -603, -604, -605, -606, -607},         // BBC tile #15
+  { -404, -406, -407, -408, -505, -506, -507, -509, 0, 0},         // BBC tile #16
+  { -302, -304, -305, -306, -307, -403, -404, -405, -406, -407},         // BBC tile #17
+  { -204, -206, -207, -208, -305, -306, -307, -309, 0, 0}         // BBC tile #18
+};
+
+// WestNumberOfOverlappingEpdTiles[BB-1]  gives the number of EPD tiles that have any overlap with BBC tile BB
+short StBbcGeom::mWestNumberOfOverlappingEpdTiles[18] = { 8, 8, 8, 8, 8, 8, 10, 8, 10, 8, 10, 8, 10, 8, 10, 8, 10, 8};
+
+// WestEpdTilesWhichOverlap[BB-1][i]  gives the EPD tile id of the jth EPD tile that overlaps BBC inner tile BB
+short StBbcGeom::mWestEpdTilesWhichOverlap[18][10] = {
+  { 101, 102, 103, 105, 1201, 1202, 1203, 1204, 0, 0},         // BBC tile #1
+  { 1001, 1002, 1003, 1004, 1101, 1102, 1103, 1105, 0, 0},         // BBC tile #2
+  { 801, 802, 803, 804, 901, 902, 903, 905, 0, 0},         // BBC tile #3
+  { 601, 602, 603, 604, 701, 702, 703, 705, 0, 0},         // BBC tile #4
+  { 401, 402, 403, 404, 501, 502, 503, 505, 0, 0},         // BBC tile #5
+  { 201, 202, 203, 204, 301, 302, 303, 305, 0, 0},         // BBC tile #6
+  { 102, 104, 105, 106, 107, 203, 204, 205, 206, 207},         // BBC tile #7
+  { 105, 106, 107, 109, 1204, 1206, 1207, 1208, 0, 0},         // BBC tile #8
+  { 1102, 1104, 1105, 1106, 1107, 1203, 1204, 1205, 1206, 1207},         // BBC tile #9
+  { 1004, 1006, 1007, 1008, 1105, 1106, 1107, 1109, 0, 0},         // BBC tile #10
+  { 902, 904, 905, 906, 907, 1003, 1004, 1005, 1006, 1007},         // BBC tile #11
+  { 804, 806, 807, 808, 905, 906, 907, 909, 0, 0},         // BBC tile #12
+  { 702, 704, 705, 706, 707, 803, 804, 805, 806, 807},         // BBC tile #13
+  { 604, 606, 607, 608, 705, 706, 707, 709, 0, 0},         // BBC tile #14
+  { 502, 504, 505, 506, 507, 603, 604, 605, 606, 607},         // BBC tile #15
+  { 404, 406, 407, 408, 505, 506, 507, 509, 0, 0},         // BBC tile #16
+  { 302, 304, 305, 306, 307, 403, 404, 405, 406, 407},         // BBC tile #17
+  { 204, 206, 207, 208, 305, 306, 307, 309, 0, 0}         // BBC tile #18
+};
+
+
