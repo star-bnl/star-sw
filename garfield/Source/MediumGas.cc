@@ -65,43 +65,22 @@ bool MediumGas::SetComposition(const std::string& gas1, const double f1,
 
   // Make a backup copy of the gas composition.
   std::string gasOld[m_nMaxGases];
-  for (unsigned int i = 0; i< m_nMaxGases; ++i) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     gasOld[i] = m_gas[i];
   }
   const unsigned int nComponentsOld = m_nComponents;
   m_nComponents = 0;
 
-  // Find the gas name corresponding to the input string.
-  std::string gasname = "";
-  if (f1 > 0. && GetGasName(gas1, gasname)) {
-    m_gas[m_nComponents] = gasname;
-    m_fraction[m_nComponents] = f1;
-    ++m_nComponents;
-  }
-  if (f2 > 0. && GetGasName(gas2, gasname)) {
-    m_gas[m_nComponents] = gasname;
-    m_fraction[m_nComponents] = f2;
-    ++m_nComponents;
-  }
-  if (f3 > 0. && GetGasName(gas3, gasname)) {
-    m_gas[m_nComponents] = gasname;
-    m_fraction[m_nComponents] = f3;
-    ++m_nComponents;
-  }
-  if (f4 > 0. && GetGasName(gas4, gasname)) {
-    m_gas[m_nComponents] = gasname;
-    m_fraction[m_nComponents] = f4;
-    ++m_nComponents;
-  }
-  if (f5 > 0. && GetGasName(gas5, gasname)) {
-    m_gas[m_nComponents] = gasname;
-    m_fraction[m_nComponents] = f5;
-    ++m_nComponents;
-  }
-  if (f6 > 0. && GetGasName(gas6, gasname)) {
-    m_gas[m_nComponents] = gasname;
-    m_fraction[m_nComponents] = f6;
-    ++m_nComponents;
+  std::string gases[6] = {gas1, gas2, gas3, gas4, gas5, gas6};
+  double fractions[6] = {f1, f2, f3, f4, f5, f6};
+  for (unsigned int i = 0; i < 6; ++i) {
+    // Find the gas name corresponding to the input string.
+    std::string gasname = "";
+    if (fractions[i] > 0. && GetGasName(gases[i], gasname)) {
+      m_gas[m_nComponents] = gasname;
+      m_fraction[m_nComponents] = fractions[i];
+      ++m_nComponents;
+    }
   }
 
   // Check if at least one valid ingredient was specified.
@@ -165,11 +144,11 @@ bool MediumGas::SetComposition(const std::string& gas1, const double f1,
       if (rPenningGasOld[j] > 0.) {
         m_rPenningGas[i] = rPenningGasOld[j];
         m_lambdaPenningGas[i] = lambdaPenningGasOld[i];
-        std::cout << m_className << "::SetComposition:\n";
-        std::cout << "    Using Penning transfer parameters for " 
-                  << m_gas[i] << " from previous mixture.\n";
-        std::cout << "      r      = " << m_rPenningGas[i] << "\n";
-        std::cout << "      lambda = " << m_lambdaPenningGas[i] << " cm\n";
+        std::cout << m_className << "::SetComposition:\n"
+                  << "    Using Penning transfer parameters for " 
+                  << m_gas[i] << " from previous mixture.\n"
+                  << "      r      = " << m_rPenningGas[i] << "\n"
+                  << "      lambda = " << m_lambdaPenningGas[i] << " cm\n";
       }
     }
   }
@@ -199,8 +178,7 @@ void MediumGas::GetComponent(const unsigned int i,
                              std::string& label, double& f) {
 
   if (i >= m_nComponents) {
-    std::cerr << m_className << "::GetComponent:\n";
-    std::cerr << "    Index out of range.\n";
+    std::cerr << m_className << "::GetComponent:\n    Index out of range.\n";
     label = "";
     f = 0.;
     return;

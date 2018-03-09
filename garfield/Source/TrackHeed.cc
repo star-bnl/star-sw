@@ -1132,8 +1132,7 @@ bool TrackHeed::SetupGas(Medium* medium) {
   m_gas = new Heed::GasDef(gasname, gasname, nComponents, notations, fractions,
                            pressure, temperature, -1.);
 
-  double w = medium->GetW() * 1.e-6;
-  if (w < 0.) w = 0.;
+  const double w = std::max(medium->GetW() * 1.e-6, 0.);
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 

@@ -345,7 +345,7 @@ class AtomPhotoAbsCS : public RegPassivePtr {
     * \param ph_energy
              photon energies
     */
-  virtual void get_escape_particles(int nshell, double energy,
+  virtual void get_escape_particles(const int nshell, double energy,
                                     std::vector<double>& el_energy,
                                     std::vector<double>& ph_energy) const;
 
@@ -590,10 +590,12 @@ const double coef_I_to_W = 2.0;
 class MolecPhotoAbsCS : public RegPassivePtr {
  public:
   /// Total number of atoms of all sorts in the molecule.
-  int get_qatom() { return qatom; }
+  int get_qatom() const { return qatom; }
   /// Number of atoms of a particular sort in the molecule.
-  int get_gatom_ps(int n) { return qatom_ps[n]; }
-  const PassivePtr<const AtomPhotoAbsCS> get_atom(int n) { return atom[n]; }
+  int get_qatom_ps(const int n) const { return qatom_ps[n]; }
+  const PassivePtr<const AtomPhotoAbsCS> get_atom(const int n) { 
+    return atom[n]; 
+  }
 
   /// Photo-absorption cross-section [Mbarn] at a given energy [MeV].
   virtual double get_ACS(double energy) const;
