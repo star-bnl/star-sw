@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.35 2018/03/01 15:58:34 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.36 2018/03/09 21:37:06 smirnovd Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.36  2018/03/09 21:37:06  smirnovd
+ * Remove inline keyword from source file
+ *
  * Revision 1.35  2018/03/01 15:58:34  akio
  * fixed a typo
  *
@@ -1639,12 +1642,12 @@ void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
 
 }
 
-inline Int_t StFmsDbMaker::fpsNQuad()     {if(mFpsConstant) {return mFpsConstant->nQuad;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpsNLayer()    {if(mFpsConstant) {return mFpsConstant->nLayer;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpsMaxSlat()   {if(mFpsConstant) {return mFpsConstant->maxSlat;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpsMaxQTaddr() {if(mFpsConstant) {return mFpsConstant->maxQTaddr;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpsMaxQTch()   {if(mFpsConstant) {return mFpsConstant->maxQTch;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mFpsMaxSlatId;} else {return 0;}}
+Int_t StFmsDbMaker::fpsNQuad()     {if(mFpsConstant) {return mFpsConstant->nQuad;} else {return 0;}}
+Int_t StFmsDbMaker::fpsNLayer()    {if(mFpsConstant) {return mFpsConstant->nLayer;} else {return 0;}}
+Int_t StFmsDbMaker::fpsMaxSlat()   {if(mFpsConstant) {return mFpsConstant->maxSlat;} else {return 0;}}
+Int_t StFmsDbMaker::fpsMaxQTaddr() {if(mFpsConstant) {return mFpsConstant->maxQTaddr;} else {return 0;}}
+Int_t StFmsDbMaker::fpsMaxQTch()   {if(mFpsConstant) {return mFpsConstant->maxQTch;} else {return 0;}}
+Int_t StFmsDbMaker::fpsMaxSlatId() {if(mFpsConstant) {return mFpsMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpsNSlat(int quad, int layer) {
   if(quad>0 && quad<=fpsNQuad() && layer>0 && layer<=fpsNLayer()) return mFpsChannelGeometry[quad-1][layer-1].nslat;
@@ -1689,7 +1692,7 @@ void StFmsDbMaker::fpsPosition(int slatid, float xyz[3], float dxyz[3]){
   memset(dxyz,0,sizeof(*dxyz));
 }
 
-inline void StFmsDbMaker::fpsPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3]){
+void StFmsDbMaker::fpsPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3]){
   fpsPosition(fpsSlatId(quad,layer,slat),xyz,dxyz);
 }
 
@@ -1710,7 +1713,7 @@ Int_t StFmsDbMaker::fpsSlatidFromQT(int QTaddr, int QTch){
   return -1;
 }
 
-inline void StFmsDbMaker::fpsQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat){
+void StFmsDbMaker::fpsQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat){
   int slatid=fpsSlatidFromQT(QTaddr,QTch);
   fpsQLSfromSlatId(slatid,quad,layer,slat);    
 }
@@ -1720,7 +1723,7 @@ Float_t StFmsDbMaker::fpsGain(int slatid){
   return 0.0;
 }
 
-inline Float_t StFmsDbMaker::fpsGain(int quad, int layer, int slat){
+Float_t StFmsDbMaker::fpsGain(int quad, int layer, int slat){
   return fpsGain(fpsSlatId(quad,layer,slat));
 }
 
@@ -1729,7 +1732,7 @@ Float_t StFmsDbMaker::fpsMipSigma(int slatid){
   return 0.0;
 }
 
-inline Float_t StFmsDbMaker::fpsMipSigma(int quad, int layer, int slat){
+Float_t StFmsDbMaker::fpsMipSigma(int quad, int layer, int slat){
   return fpsMipSigma(fpsSlatId(quad,layer,slat));
 }
 
@@ -1738,7 +1741,7 @@ Float_t StFmsDbMaker::fpsValley(int slatid){
   return 0.0;
 }
 
-inline Float_t StFmsDbMaker::fpsValley(int quad, int layer, int slat){
+Float_t StFmsDbMaker::fpsValley(int quad, int layer, int slat){
   return fpsValley(fpsSlatId(quad,layer,slat));
 }
 
@@ -1747,7 +1750,7 @@ UShort_t StFmsDbMaker::fpsStatus(int slatid){
   return 999;
 }
 
-inline UShort_t StFmsDbMaker::fpsStatus(int quad, int layer, int slat){
+UShort_t StFmsDbMaker::fpsStatus(int quad, int layer, int slat){
   return fpsStatus(fpsSlatId(quad,layer,slat));
 }
 
@@ -1867,12 +1870,12 @@ void StFmsDbMaker::dumpFpsStatus(const Char_t* filename){
   }
 }
 
-inline Int_t StFmsDbMaker::fpostNQuad()     {if(mFpostConstant) {return mFpostConstant->nQuad;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpostNLayer()    {if(mFpostConstant) {return mFpostConstant->nLayer;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpostMaxSlat()   {if(mFpostConstant) {return mFpostConstant->maxSlat;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpostMaxQTaddr() {if(mFpostConstant) {return mFpostConstant->maxQTaddr;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpostMaxQTch()   {if(mFpostConstant) {return mFpostConstant->maxQTch;} else {return 0;}}
-inline Int_t StFmsDbMaker::fpostMaxSlatId() {if(mFpostConstant) {return mFpostMaxSlatId;} else {return 0;}}
+Int_t StFmsDbMaker::fpostNQuad()     {if(mFpostConstant) {return mFpostConstant->nQuad;} else {return 0;}}
+Int_t StFmsDbMaker::fpostNLayer()    {if(mFpostConstant) {return mFpostConstant->nLayer;} else {return 0;}}
+Int_t StFmsDbMaker::fpostMaxSlat()   {if(mFpostConstant) {return mFpostConstant->maxSlat;} else {return 0;}}
+Int_t StFmsDbMaker::fpostMaxQTaddr() {if(mFpostConstant) {return mFpostConstant->maxQTaddr;} else {return 0;}}
+Int_t StFmsDbMaker::fpostMaxQTch()   {if(mFpostConstant) {return mFpostConstant->maxQTch;} else {return 0;}}
+Int_t StFmsDbMaker::fpostMaxSlatId() {if(mFpostConstant) {return mFpostMaxSlatId;} else {return 0;}}
 
 Int_t StFmsDbMaker::fpostNSlat(int quad, int layer) {
   if(quad>0 && quad<=fpostNQuad() && layer>0 && layer<=fpostNLayer()) return mFpostChannelGeometry[quad-1][layer-1].nslat;
@@ -1919,7 +1922,7 @@ void StFmsDbMaker::fpostPosition(int slatid, float xyz[3], float dxyz[3], float 
     *angle=0.0;
 }
 
-inline void StFmsDbMaker::fpostPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3], float* angle){
+void StFmsDbMaker::fpostPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3], float* angle){
   fpostPosition(fpostSlatId(quad,layer,slat),xyz,dxyz,angle);
 }
 
@@ -1940,7 +1943,7 @@ Int_t StFmsDbMaker::fpostSlatidFromQT(int QTaddr, int QTch){
   return -1;
 }
 
-inline void StFmsDbMaker::fpostQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat){
+void StFmsDbMaker::fpostQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat){
   int slatid=fpostSlatidFromQT(QTaddr,QTch);
   fpostQLSfromSlatId(slatid,quad,layer,slat);    
 }
@@ -1950,7 +1953,7 @@ Float_t StFmsDbMaker::fpostGain(int slatid){
   return 0.0;
 }
 
-inline Float_t StFmsDbMaker::fpostGain(int quad, int layer, int slat){
+Float_t StFmsDbMaker::fpostGain(int quad, int layer, int slat){
   return fpostGain(fpostSlatId(quad,layer,slat));
 }
 
@@ -1959,7 +1962,7 @@ Float_t StFmsDbMaker::fpostMipSigma(int slatid){
   return 0.0;
 }
 
-inline Float_t StFmsDbMaker::fpostMipSigma(int quad, int layer, int slat){
+Float_t StFmsDbMaker::fpostMipSigma(int quad, int layer, int slat){
   return fpostMipSigma(fpostSlatId(quad,layer,slat));
 }
 
@@ -1968,7 +1971,7 @@ Float_t StFmsDbMaker::fpostValley(int slatid){
   return 0.0;
 }
 
-inline Float_t StFmsDbMaker::fpostValley(int quad, int layer, int slat){
+Float_t StFmsDbMaker::fpostValley(int quad, int layer, int slat){
   return fpostValley(fpostSlatId(quad,layer,slat));
 }
 
@@ -1977,7 +1980,7 @@ UShort_t StFmsDbMaker::fpostStatus(int slatid){
   return 999;
 }
 
-inline UShort_t StFmsDbMaker::fpostStatus(int quad, int layer, int slat){
+UShort_t StFmsDbMaker::fpostStatus(int quad, int layer, int slat){
   return fpostStatus(fpostSlatId(quad,layer,slat));
 }
 
@@ -2097,7 +2100,7 @@ void StFmsDbMaker::dumpFpostStatus(const Char_t* filename){
   }
 }
 
-inline Int_t StFmsDbMaker::nCellHole(Int_t det){
+Int_t StFmsDbMaker::nCellHole(Int_t det){
     switch(det){
     case kFmsNorthLargeDetId: 
     case kFmsSouthLargeDetId: return 8; 
@@ -2107,7 +2110,7 @@ inline Int_t StFmsDbMaker::nCellHole(Int_t det){
     }
 }	   
 
-inline Int_t StFmsDbMaker::nCellCorner(Int_t det){
+Int_t StFmsDbMaker::nCellCorner(Int_t det){
     switch(det){
     case kFmsNorthLargeDetId: 
     case kFmsSouthLargeDetId: return 7; 
