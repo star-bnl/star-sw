@@ -67,7 +67,6 @@ public:
       StTrackHelper(const StTrack *trk=0);
       StTrackHelper(const StGlobalTrack *trk);
      ~StTrackHelper();
-       void     SetTrack(const StTrack *trk);    
         int     GetType() 	const;
         int     GetFlag() 	const;
         int     GetCharge()	const;
