@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.10 2017/10/20 17:50:33 smirnovd Exp $
+ * $Id: StBTofGeometry.h,v 1.25 2018/03/09 21:36:17 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -123,7 +123,6 @@ class StBTofNode : public TObject {
 //    StBTofNode(TVolumeView *element, TVolumeView *top);
     StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
     
-    StBTofNode& operator=(const StBTofNode&);
 
     void      UpdateMatrix();
     void      BuildMembers();
@@ -194,7 +193,6 @@ class StBTofGeomTray : public StBTofNode {
    StBTofGeomTray() {}
    ~StBTofGeomTray();
 
-   StBTofGeomTray& operator=(const StBTofGeomTray&);
    static void       DebugOn()   { mDebug = kTRUE; }     
    static void       DebugOff()  { mDebug = kFALSE; }
    static Bool_t     IsDebugOn() { return mDebug; }
@@ -238,7 +236,6 @@ class StBTofGeomSensor : public StBTofNode {
    StBTofGeomSensor() {}
    ~StBTofGeomSensor();
 
-   StBTofGeomSensor& operator=(const StBTofGeomSensor&);
    static void       DebugOn()   { mDebug = kTRUE; }     
    static void       DebugOff()  { mDebug = kFALSE; }
    static Bool_t     IsDebugOn() { return mDebug; }
@@ -404,3 +401,97 @@ class StBTofGeometry : public TNamed {
 
 
 #endif  //end of STBTOFGEOMETRY_H
+
+/*******************************************************************
+ * $Log: StBTofGeometry.h,v $
+ * Revision 1.25  2018/03/09 21:36:17  smirnovd
+ * Remove declared but undefined function
+ *
+ * Revision 1.24  2018/02/26 23:29:00  smirnovd
+ * StBTofGeometry: Introduced alternative initialization using TGeo geometry
+ *
+ * Revision 1.23  2018/02/26 23:28:53  smirnovd
+ * StBTofGeometry: Added private InitFrom(TGeoManager)
+ *
+ * Revision 1.22  2018/02/26 23:28:45  smirnovd
+ * StBTofGeometry: InitFrom(TVolume*) to InitFrom(TVolume&)
+ *
+ * Revision 1.21  2018/02/26 23:28:38  smirnovd
+ * StBTofGeometry: s/InitFromStar/InitFrom/ and make it private
+ *
+ * Revision 1.20  2018/02/26 23:28:30  smirnovd
+ * StBTofGeometry: Added static method to identify trays with GMT modules
+ *
+ * Revision 1.19  2018/02/26 23:28:22  smirnovd
+ * StBTofGeometry: New method to form TGeo paths for trays and modules
+ *
+ * Revision 1.18  2018/02/26 23:28:14  smirnovd
+ * StBTofGeomSensor: New constructor accepting TGeo
+ *
+ * Revision 1.17  2018/02/26 23:28:07  smirnovd
+ * StBTofGeoTray: New constructor accepting TGeo
+ *
+ * Revision 1.16  2018/02/26 23:28:00  smirnovd
+ * StBTofNode: New constructor accepting TGeo volume
+ *
+ * The new TGeo constructor creates transient TVolume objects to provide
+ * functionality compatible with the existing TVolume-base geometry
+ * transformations. Unlike previously, the TVolume objects are owned by this class
+ * and so have to be deleted.
+ *
+ * Revision 1.15  2018/02/26 23:27:53  smirnovd
+ * Accept reference instead of pointer to xyz alignment
+ *
+ * Revision 1.14  2018/02/26 23:27:45  smirnovd
+ * StBTofGeometry: Senseless assignments in destructors
+ *
+ * Revision 1.13  2018/02/26 23:27:15  smirnovd
+ * StBTofGeometry: Removed unused member pointer to non-TGeo ROOT geometry
+ *
+ * Revision 1.12  2018/02/26 23:27:01  smirnovd
+ * Remove unnecessary guards around ClassDef macro
+ *
+ * Revision 1.11  2018/02/26 23:13:19  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.10  2017/10/20 17:50:33  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
+ * Revision 1.9  2014/02/06 21:21:13  geurts
+ * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
+ *
+ * Revision 1.8  2011/07/27 16:15:12  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
+ *  - phi0, x0, z0 made mNTrays dependent
+ *
+ * Revision 1.7  2010/08/09 18:45:36  geurts
+ * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
+ *
+ * Revision 1.6  2010/07/14 20:35:28  geurts
+ * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
+ *
+ * Revision 1.5  2009/08/25 15:41:29  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
+ * Revision 1.4  2009/03/18 14:18:18  dongx
+ * - Optimized the geometry initialization function, reduced the CPU time use
+ * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
+ *
+ * Revision 1.3  2009/02/13 00:00:56  dongx
+ * Tray geometry alignment implemented.
+ *
+ * Revision 1.2  2009/02/12 01:45:57  dongx
+ * Clean up
+ *
+ * Revision 1.1  2009/02/02 21:56:54  dongx
+ * first release - Barrel geometry
+ */

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.22 2018/02/07 14:45:15 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.23 2018/03/09 21:36:18 smirnovd Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.23  2018/03/09 21:36:18  smirnovd
+ * Remove declared but undefined function
+ *
  * Revision 1.22  2018/02/07 14:45:15  akio
  * Update for faster DB tables
  *
@@ -139,11 +142,6 @@ class StFmsDbMaker : public StMaker {
   fmsQTMap_st*            QTMap();
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
-  fmsBitShiftGain_st*     BitShiftGain();
-  fmsGainB_st*            GainB();
-  fmsGainCorrectionB_st*  GainCorrectionB();
-  fmsBitShiftGainB_st*    BitShiftGainB();
-  fmsTimeDepCorr_st*      TimeDepCorr();
   fmsRec_st*              RecPar(); //reconstruction related parameters
   fpsConstant_st*         FpsConstant();
   fpsChannelGeometry_st** FpsChannelGeometry();
@@ -151,14 +149,12 @@ class StFmsDbMaker : public StMaker {
   fpsPosition_st*         FpsPosition();
   fpsMap_st*              FpsMap();
   fpsGain_st*             FpsGain();
-  fpsStatus_st*           FpsStatus();
   fpostConstant_st*         FpostConstant();
   fpostChannelGeometry_st** FpostChannelGeometry();
   fpostSlatId_st*           FpostSlatId();
   fpostPosition_st*         FpostPosition();
   fpostMap_st*              FpostMap();
   fpostGain_st*             FpostGain();
-  fpostStatus_st*           FpostStatus();
 
   //! Utility functions related to FMS ChannelGeometry
   UShort_t maxDetectorId(); //! maximum value of detector Id
