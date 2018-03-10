@@ -200,3 +200,35 @@ foreach d (`ls -1d 1*`)
 end
 cd ../;
 end
+================================================================================
+FPE_OFF
+
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_0000009.picoDst.root")' >& st_physics_15151056_raw_0000009.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000003.picoDst.root")' >& st_physics_15151056_raw_1000003.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000011.picoDst.root")' >& st_physics_15151056_raw_1000011.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000015.picoDst.root")' >& st_physics_15151056_raw_1000015.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000018.picoDst.root")' >& st_physics_15151056_raw_1000018.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000022.picoDst.root")' >& st_physics_15151056_raw_1000022.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000023.picoDst.root")' >& st_physics_15151056_raw_1000023.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000024.picoDst.root")' >& st_physics_15151056_raw_1000024.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000029.picoDst.root")' >& st_physics_15151056_raw_1000029.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000034.picoDst.root")' >& st_physics_15151056_raw_1000034.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000035.picoDst.root")' >& st_physics_15151056_raw_1000035.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000036.picoDst.root")' >& st_physics_15151056_raw_1000036.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000042.picoDst.root")' >& st_physics_15151056_raw_1000042.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000045.picoDst.root")' >& st_physics_15151056_raw_1000045.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000046.picoDst.root")' >& st_physics_15151056_raw_1000046.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000047.picoDst.root")' >& st_physics_15151056_raw_1000047.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000053.picoDst.root")' >& st_physics_15151056_raw_1000053.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000054.picoDst.root")' >& st_physics_15151056_raw_1000054.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000056.picoDst.root")' >& st_physics_15151056_raw_1000056.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1000058.picoDst.root")' >& st_physics_15151056_raw_1000058.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1500003.picoDst.root")' >& st_physics_15151056_raw_1500003.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1500014.picoDst.root")' >& st_physics_15151056_raw_1500014.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1500017.picoDst.root")' >& st_physics_15151056_raw_1500017.log &
+root.exe -q -b 'femtoDst.C(1e8,"/star/u/fisyak/Pico/2014/AuAu_200_production_low_2014/151/15151056/st_physics_15151056_raw_1500021.picoDst.root")' >& st_physics_15151056_raw_1500021.log &
+root.exe -q -b lMuDst.C 'Hadd.C+("15151056_0.femtoDst.root","st*.root")'
+================================================================================
+foreach d (`ls -1d ???`) 
+  if (! -r ${d}/ToHpss) echo $d
+end

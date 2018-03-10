@@ -36,7 +36,8 @@
 #      root.exe -q -b -x 'bfc.C(99999,"lana,B2017,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2018
 #      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,TpxRaw,TpxClu,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,TpxRaw,TpxClu,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+      root.exe -q -b -x 'bfc.C(99999,"lana,B2018,Tpx,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
