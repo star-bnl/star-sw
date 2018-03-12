@@ -8,14 +8,20 @@
   setenv NODEBUG yes
   setup 64b
   setenv STARFPE NO
-  starver TFG18a
-#  starver .DEV2
+#  starver TFG18a
+  starver .DEV2
   set muDst = ${INPUTFILE0}
   set base = `basename ${muDst} .MuDst.root`;
 #  set daq  = /star/data03/daq/2016/126/17126033/${base}.daq
 #  set daq  = `ls -1d /star/data03/daq/2016/*/*/${base}.daq`
 #  set daq  = `ls -1d /net/l404/data/fisyak/daq/2016/*/*/${base}.daq`
-  set daq  = `ls -1d /net/l401/data/scratch1/daq/2016/*/*/${base}.daq`
+  set DAQ = "";
+  if (-d /net/l401/data/scratch1/daq) then
+    set DAQ = /net/l401/data/scratch1/daq
+  else 
+    set DAQ = /star/data03/daq
+  endif
+  set daq  = `ls -1d ${DAQ}/2016/*/*/${base}.daq`
   if (! -r ${daq}) exit 1;
 #  set name = "Lc3pi";
   set name = ""
@@ -50,5 +56,7 @@
 <!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2016/TFG17eAuAu200/*.MuDst.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/*.MuDst.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17125034_raw_1000007.MuDst.root" /> -->
+<!-- <input URL="command:$STAR/bin/MuDstCommand.pl" /> -->
 <input URL="command:MuDstCommand.pl" />
 </job>
+
