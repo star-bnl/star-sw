@@ -188,6 +188,7 @@ void StSstCluster::copyTo(StSstCluster *ptrClone)
 void StSstCluster::update(StSstStrip *ptr,Float_t rWeight)
 {
   Int_t tmpTotAdc = this->mTotAdc;
+  if (tmpTotAdc <= 0) return;
   this->mTotAdc += (int)(ptr->getDigitSig()*rWeight);
   this->mTotNoise += (ptr->getSigma()*rWeight);
   if(ptr->getNStrip()<this->mFirstStrip) 

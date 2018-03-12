@@ -717,7 +717,7 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection* sstHitColl,St_scf_cluster *scf_cluster,StSstDynamicControl *mDynamicControl,StMcEvent *mcEvent){
   vector<const StMcSsdHit*> hitCol;
   StMcSsdHitCollection *myCol;
-  int totRatio, idTruth;
+  int totRatio = 0, idTruth = 0;
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   if(mcEvent)
     {
