@@ -1800,7 +1800,50 @@ TFile *StMaker::GetTFile() const
   if (!opt) return 0;
   return opt->GetTFile();
 }
-
+//_____________________________________________________________________________
+const TString &StMaker::GetFileIn() const 			
+{
+  const static Char_t *mktype = "StBFChain";
+  const static TString empty("");
+  StMaker  *mk = 0;
+  if (this->InheritsFrom(mktype)) {mk = (StMaker *) this;}
+  else {
+    StMakerIter mkiter(GetChain());
+    while ((mk = mkiter.NextMaker())) {//loop over makers
+      if (mk->InheritsFrom(mktype))   {// take first TFile in any BFC
+	const StChainOpt *opt = mk->GetChainOpt();
+	if (!opt) continue;
+	if (opt->GetFileIn() != empty) break;
+      }
+    }
+  }
+  if (! mk) return empty;
+  const StChainOpt *opt = mk->GetChainOpt();
+  if (!opt) return empty;
+  return opt->GetFileIn();
+}
+//_____________________________________________________________________________
+const TString &StMaker::GetFileOut() const 			
+{
+  const static Char_t *mktype = "StBFChain";
+  const static TString empty("");
+  StMaker  *mk = 0;
+  if (this->InheritsFrom(mktype)) {mk = (StMaker *) this;}
+  else {
+    StMakerIter mkiter(GetChain());
+    while ((mk = mkiter.NextMaker())) {//loop over makers
+      if (mk->InheritsFrom(mktype))   {// take first TFile in any BFC
+	const StChainOpt *opt = mk->GetChainOpt();
+	if (!opt) continue;
+	if (opt->GetFileOut() != empty) break;
+      }
+    }
+  }
+  if (! mk) return empty;
+  const StChainOpt *opt = mk->GetChainOpt();
+  if (!opt) return empty;
+  return opt->GetFileOut();
+}
 ClassImp(StTestMaker)
 //_____________________________________________________________________________
 StTestMaker::StTestMaker(const Char_t *name):StMaker(name)

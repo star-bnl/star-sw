@@ -223,7 +223,8 @@ public:
    virtual Int_t        GetDebug(){ return m_DebugLevel;}
    virtual const StChainOpt *GetChainOpt()    const;
    virtual TFile *GetTFile() const; 			
-
+   virtual const TString &GetFileIn()  const;
+   virtual const TString &GetFileOut() const;
    virtual void         NotifyEm(const char *about,const void *ptr);
 
    virtual Double_t     RealTime(){ return m_Timer.RealTime();}
