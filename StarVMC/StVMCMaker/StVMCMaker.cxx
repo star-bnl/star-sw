@@ -454,7 +454,8 @@ Int_t StVMCMaker::SetVertex() {
   static const Float_t*&    E3                   = muDstIter("PrimaryVertices.mPosError.mX3");
   static const Int_t*&      NumberOfGoodPrimaryTracks = muDstIter("MuEvent.mEventSummary.mNumberOfGoodPrimaryTracks");
   //  static const UInt_t*&     TriggerMask          = muDstIter("MuEvent.mEventInfo.mTriggerMask");
-  static const Float_t*&    VpdVz                = muDstIter("MuEvent.mVpdVz");
+  //  static const Float_t*&    VpdVz                = muDstIter("MuEvent.mVpdVz");
+  static const Float_t*&    VpdVz                = muDstIter("BTofHeader.mVpdVz[20]");
   do {
     if (! muDstIter.Next()) {return kStEOF;}
     if (RunId[0] != fEvtHddr->GetRunNumber() &&
