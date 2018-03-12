@@ -187,10 +187,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   DBFpsGeom  = GetInputDB("Geometry/fps");
   DBFpsCalibration= GetInputDB("Calibrations/fps");
   if(!DBgeom)          {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fms"<<endm;            return kStFatal;}
-  if(!DBmapping)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping"<<endm; return kStFatal;} 
-  if(!DBcalibration)   {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms"<<endm;         return kStFatal;}
+  if(!DBmapping)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibrations/fms/mapping"<<endm; return kStFatal;} 
+  if(!DBcalibration)   {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibrations/fms"<<endm;         return kStFatal;}
   if(!DBFpsGeom)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps"<<endm;            return kStFatal;}
-  if(!DBFpsCalibration){LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps"<<endm;         return kStFatal;}  
+  if(!DBFpsCalibration){LOG_ERROR << "StFmsDbMaker::InitRun - No Calibrations/fps"<<endm;         return kStFatal;}  
  
   //!Getting DB tables
   St_fmsChannelGeometry *dbChannelGeometry   =0;
