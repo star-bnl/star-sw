@@ -1,3 +1,4 @@
+
 #!/bin/csh
 #       $Id: group_env.csh,v 1.261 2018/02/26 22:52:32 jeromel Exp $
 #	Purpose:	STAR group csh setup
@@ -183,10 +184,6 @@ if ($ECHO) echo   "Setting up WWW_HOME  = $WWW_HOME"
 # Defined in CORE. GROUP_PATH/GROUPPATH are global
 # while GROUP_DIR may be local
 if ( ! $?GROUP_PATH )  setenv GROUP_PATH ${STAR_ROOT}/group
-setenv GROUPPATH  $GROUP_PATH
-
-
-
 
 # Default value (some if not already defined)
 if ($?STAR_LEVEL == 0) setenv STAR_LEVEL pro
@@ -1003,6 +1000,7 @@ endif
 if (-r ${HOME}/bin)                   setenv PATH ${HOME}/bin:${PATH}
 if (-r ${HOME}/bin/.${STAR_HOST_SYS}) setenv PATH ${HOME}/bin/.${STAR_HOST_SYS}:${PATH}
 if (-r ${STAR}/scripts/RCF)           setenv PATH ${PATH}:${STAR}/scripts/RCF
+if (-r ${STAR}/bin)                   setenv PATH ${PATH}:${STAR}/bin
 if (-x ${GROUP_DIR}/dropit)           setenv PATH `${GROUP_DIR}/dropit`
 
 #
