@@ -202,6 +202,9 @@ Int_t StIstSlowSimMaker::Make()
 #if 1
 void StIstSlowSimMaker::Clear( Option_t *opts )
 {
+  TObjectSet *istDataSet = (TObjectSet*) GetDataSet("istRawAdcSimu");
+  mIstCollectionPtr = 0;
+  if (istDataSet) mIstCollectionPtr = (StIstCollection*) istDataSet->GetObject();
 	if(mIstCollectionPtr ) {
 		for ( UChar_t i = 0; i < kIstNumLadders; ++i ) {
 			mIstCollectionPtr->getRawHitCollection(i)->Clear(opts);
