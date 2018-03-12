@@ -1023,7 +1023,6 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stx");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
-  SetDbOptions(dbMk);
 
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
   SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
@@ -1035,7 +1034,10 @@ Int_t StBFChain::Init() {
 
   TDatime td;
   Info("Init","Time=%s Cwd=%s",td.AsString(),gSystem->pwd());
-
+  if (this == GetTopChain()) {
+    St_db_Maker* dbMk = (St_db_Maker *) GetMakerInheritsFrom("St_db_Maker");
+    if (dbMk) SetDbOptions(dbMk);
+  }
   SetChainOpt(new StBFChainOpt(this));
   //  SetDbOptions(); moved to Instantiation
   if (fNoChainOptions) {
@@ -1724,14 +1726,21 @@ void StBFChain::SetInputFile (const Char_t *infile){
 //_____________________________________________________________________
 /// Takes care of output file name (extension)
 void StBFChain::SetOutputFile (const Char_t *outfile){
-  if (!  GetOption("NoOutput")) {
-    if (outfile) { 
-      fFileOut = outfile;
-    }
-    if ((fFileOut == "") & (fInFile != "")) {
+  if (GetFileOut() != "") return;
+  if (GetOption("NoOutput")) return;
+  if (outfile) { 
+    fFileOut = outfile;
+  }
+  if (fFileOut == "") {
+    if ( GetFileIn() == "") {
+      if      (GetOption("pythia")) fFileOut = "pythia.root";
+      else if (GetOption("hijing")) fFileOut = "hijing.root";
+      else if (GetOption("VMC"))    fFileOut = "VMC.root";
+      else if (GetOption("gstar"))  fFileOut = "gtrack.root";
+    }  else {
       if (GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin")) {
 	TObjArray words;
-	ParseString(fInFile,words);
+	ParseString(GetFileIn(),words);
 	TIter nextL(&words);
 	TObjString *word = 0;
 	while ((word = (TObjString *) nextL())) {
@@ -1741,30 +1750,25 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	    break;
 	  }
 	}
-      } else {
-	fFileOut = gSystem->BaseName(fInFile.Data());
       }
-    } 
-    if (fFileOut == "") {
-      if      (GetOption("pythia")) fFileOut = "pythia.root";
-      else if (GetOption("hijing")) fFileOut = "hijing.root";
-      else if (GetOption("VMC"))    fFileOut = "VMC.root";
-      else if (GetOption("gstar"))  fFileOut = "gtrack.root";
     }
-    if (  fFileOut != "") {
-      fFileOut.ReplaceAll("*","");
-      fFileOut.ReplaceAll("@","");
-      fFileOut.ReplaceAll("..",".");
-      fFileOut.ReplaceAll(".daq","");
-      fFileOut.ReplaceAll(".fzd","");
-      fFileOut.ReplaceAll(".fz","");
-      fFileOut.ReplaceAll(".nt","");
-      fFileOut.ReplaceAll(".root","");
-      fFileOut.ReplaceAll(".list","");
-      fFileOut.ReplaceAll(".lis","");
-      fFileOut.Strip();
-      fFileOut.Append(".root");
-    }
+  }    
+  if (fFileOut == "") {
+    fFileOut = gSystem->BaseName(GetFileIn().Data());
+  }
+  if (  fFileOut != "") {
+    fFileOut.ReplaceAll("*","");
+    fFileOut.ReplaceAll("@","");
+    fFileOut.ReplaceAll("..",".");
+    fFileOut.ReplaceAll(".daq","");
+    fFileOut.ReplaceAll(".fzd","");
+    fFileOut.ReplaceAll(".fz","");
+    fFileOut.ReplaceAll(".nt","");
+    fFileOut.ReplaceAll(".root","");
+    fFileOut.ReplaceAll(".list","");
+    fFileOut.ReplaceAll(".lis","");
+    fFileOut.Strip();
+    fFileOut.Append(".root");
   }
   if (fFileOut != "")  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut.Data() << endm;
   else                 SetOption("NoOutput","No Output File");
@@ -1996,16 +2000,26 @@ void StBFChain::SetDbOptions(StMaker *mk){
   }
   if (this == GetTopChain()) {
     // Db blacklist (remove black listed system from St_Db_Maker Calibrations configuration)
-    if (! GetOption("TpcDb")                        ) {mk->SetAttr("blacklist", "tpc");  gMessMgr->QAInfo() << "blacklist tpc" << endm;}
-    if (!(GetOption("SvtDb")||GetOption("SvtCalDb"))) {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
-    if (!(GetOption("SsdDb")||GetOption("SsdCalDb"))) {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
-    if (!(GetOption("SstDb")||GetOption("SstCalDb"))) {mk->SetAttr("blacklist", "sst");  gMessMgr->QAInfo() << "blacklist sst" << endm;}
-    if (! GetOption("EemcDb")                       ) {mk->SetAttr("blacklist", "eemc"); gMessMgr->QAInfo() << "blacklist eemc"<< endm;}
-    if (! GetOption("FmsDb")                        ) {mk->SetAttr("blacklist", "fms");  gMessMgr->QAInfo() << "blacklist fms" << endm;}
-  } else {// for Embedding chain trigger black list by NoSsdIT and NoSvtIT, could be some problems if you try to run svt or ssd clusters, ...
-    if (GetOption("NoSvtIt"))                         {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
-    if (GetOption("NoSsdIt"))                         {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
-    if (GetOption("NoSstIt"))                         {mk->SetAttr("blacklist", "sst");  gMessMgr->QAInfo() << "blacklist sst" << endm;}
+    struct Black_list_t {
+      const Char_t *maker;
+      const Char_t *system;
+    };
+    Black_list_t black_list[] = {
+      {"StTpcDbMaker","tpc"},
+      {"StSvtDbMaker","svt"},
+      {"StSsdDbMaker","ssd"},
+      {"StSstDbMaker","sst"},
+      {"StPxlDbMaker","pxl"},
+      {"StIstDbMaker","ist"},
+      {"StFmsDbMaker","fms"},
+      {"StEEmcDbMaker","eemc"}
+    };
+    UInt_t nbl = sizeof(black_list)/sizeof(Black_list_t);
+    for (UInt_t bl = 0; bl < nbl; bl++) {
+      if (GetMakerInheritsFrom(black_list[bl].maker)) continue;
+      mk->SetAttr("blacklist",black_list[bl].system); 
+      gMessMgr->QAInfo() << "blacklist " << black_list[bl].system  << endm;
+    }
   }
 }
 //_____________________________________________________________________
