@@ -13,10 +13,12 @@ private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
 	class daq_dta *handle_sampa(int sec, int rdo, int in_adc) ;
 	class daq_dta *handle_ped(int sec, int rdo) ;
+	class daq_dta *handle_cld(int sec) ;
 
 	class daq_dta *raw ;
 	class daq_dta *sampa ;
 	class daq_dta *ped ;
+	class daq_dta *cld ;
 
 	class daq_dta *adc_sim ;
 

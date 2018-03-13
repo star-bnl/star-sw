@@ -26,7 +26,7 @@ endif
 #DEFINES += -DDO_DBG
 
 
-OBJS := itpcCore.o itpcPed.o itpcInterpreter.o daq_itpc.o
+OBJS := itpcCore.o itpcPed.o itpcInterpreter.o itpcFCF.o daq_itpc.o
 
 LIBS = libitpc.a
 
