@@ -11,6 +11,7 @@
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
+#include <DAQ_TPX/tpxFCF.h>
 
 #include "daq_itpc.h"
 #include "itpcCore.h"
@@ -61,6 +62,7 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 	raw = new daq_dta ;
 	sampa = new daq_dta ;
 	ped = new daq_dta ;
+	cld = new daq_dta ;
 
 	adc_sim = new daq_dta;;
 
@@ -80,8 +82,11 @@ daq_itpc::~daq_itpc()
 	delete raw ;
 	delete sampa ;
 	delete ped ;
+	delete cld ;
 
 	delete adc_sim ;
+
+	delete it ;
 
 	return ;
 }
@@ -125,7 +130,13 @@ daq_dta *daq_itpc::get(const char *bank, int sec, int row, int pad, void *p1, vo
 	else if(strcasecmp(bank,"pedrms")==0) {
 		return handle_ped(sec,row) ;		// actually sec, rdo; r1 is the number of bytes
 	}
-	// these are FY17 banks!
+	else if(strcasecmp(bank,"cld")==0) {
+		return handle_cld(sec) ;		// actually sec, rdo; r1 is the number of bytes
+	}
+	
+	// ********************************************
+	// ************ these are FY17 banks!
+	// ********************************************
 	else if(strcasecmp(bank,"ifee_fy17_raw")==0) {
 		return handle_ifee_fy17_raw() ;		// actually sec, rdo; r1 is the number of bytes
 	}
@@ -328,6 +339,97 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 
 	return sampa ;
 }
+
+
+daq_dta *daq_itpc::handle_cld(int sec)
+{
+
+	int min_sec, max_sec ;
+	tpxFCF *tpx_fcf ;
+
+	// bring in the bacon from the SFS file....
+	assert(caller) ;
+
+	if((sec <= 0)||(sec>24)) {
+		min_sec = 1 ;
+		max_sec = 24 ;
+	}
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+
+	cld->create(1024,(char *)"cld",rts_id,DAQ_DTA_STRUCT(daq_cld)) ;
+
+
+	for(int s=min_sec;s<=max_sec;s++) {
+		char str[128] ;	
+
+	
+		sprintf(str,"%s/sec%02d/cld",sfs_name,s) ;
+
+		char *full_name = caller->get_sfs_name(str) ;
+
+		LOG(DBG,"name [%s] -> full_name [%s]",str,full_name) ;
+
+		if(full_name == 0) continue ;	
+
+		int size = caller->sfs->fileSize(full_name) ;
+
+		LOG(TERR,"full_name [%s] --> size %d",full_name,size) ;
+
+		if(size <= 0) continue ;	// this is really an error!
+
+		char *mem = (char *) malloc(size) ;
+
+		if(mem==0) {
+			LOG(CRIT,"ITPC: error in %d %d",s) ;
+			break ;
+		}
+
+		caller->sfs->read(full_name,mem,size) ;
+
+		u_int *end_buff = (u_int *)(mem+size) ;
+		u_int *p_buff = (u_int *)mem ;
+
+		while(p_buff < end_buff) {
+			// ints-per-cluster | row
+			// version
+			// count of clusters
+
+			u_int row = *p_buff ;
+			u_int version = *p_buff++ ;
+			u_int int_cou = *p_buff++ ;
+
+			int ints_per_cluster = (row>>16) ;
+			row &= 0xFFFF ;
+
+			LOG(TERR,"ROW %d: cou %d, version 0x%04X",row,int_cou,version) ;
+
+			int clusters = int_cou/ints_per_cluster ;	
+
+			daq_cld *dc = (daq_cld *)cld->request(clusters) ;
+
+			for(int i=0;i<clusters;i++) {
+				tpx_fcf->fcf_decode(p_buff,dc,0) ;
+
+				p_buff += ints_per_cluster ;	// for now, but depends on version!
+				dc++ ;
+			}
+
+			
+			cld->finalize(clusters,s,row,0) ;
+		}
+
+		free(mem) ;
+
+	}
+
+	cld->rewind() ;
+
+	return cld ;
+}
+
 
 
 daq_dta *daq_itpc::handle_ped(int sec, int rdo)
