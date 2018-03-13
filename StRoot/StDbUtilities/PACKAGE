@@ -1,5 +1,0 @@
-# $Id $
-# package StDbUtilities
-# author: 
-Library:libStDbUtilities.so:LIBS +=   -lStDb_Tables  -lStDetectorDbMaker  -lStSvtClassLibrary -lStChain -l_StTpcDb
-#Library:libStDbUtilities.so:LIBS +=   -lStDb_Tables  -lStDetectorDbMaker  -lStSvtClassLibrary  -lStTpcDb
