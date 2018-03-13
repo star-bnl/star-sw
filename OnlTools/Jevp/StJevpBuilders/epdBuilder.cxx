@@ -177,12 +177,20 @@ void epdBuilder::initialize(int argc, char *argv[]) {
 	sprintf(buff2,"ADC %s PP-%d Tile-%d",ewstring[ew].c_str(),pp+1,tile);
 	contents.hADC[ew][pp][tile] = new TH1D(buff1,buff2,1200,0,1200);
 	contents.hADC[ew][pp][tile] ->SetFillColor(20);
+	contents.hADC[ew][pp][tile]->GetXaxis()->SetTitle("ADC");
+	contents.hADC[ew][pp][tile]->GetXaxis()->CenterTitle(true);
+	contents.hADC[ew][pp][tile]->GetYaxis()->SetTitle("Counts");
+	contents.hADC[ew][pp][tile]->GetYaxis()->CenterTitle(true);
 
 	if(tile>9) continue;
 	sprintf(buff1,"tac_%d_%d_%d",ew,pp,tile);
 	sprintf(buff2,"TAC %s PP-%d Tile-%d",ewstring[ew].c_str(),pp+1,tile);
 	contents.hTAC[ew][pp][tile] = new TH1D(buff1,buff2,400,0,4000);
 	contents.hTAC[ew][pp][tile] ->SetFillColor(20);
+	contents.hTAC[ew][pp][tile]->GetXaxis()->SetTitle("TAC");
+	contents.hTAC[ew][pp][tile]->GetXaxis()->CenterTitle(true);
+	contents.hTAC[ew][pp][tile]->GetYaxis()->SetTitle("Counts");
+	contents.hTAC[ew][pp][tile]->GetYaxis()->CenterTitle(true);
 
       }
     }
@@ -190,11 +198,42 @@ void epdBuilder::initialize(int argc, char *argv[]) {
 
 
   contents.hHitCountEast = new TH1D("hHitCountEast","Hit Count East(EP101)",256,0,256);
+  contents.hHitCountEast->GetXaxis()->SetTitle("Number of hits from EP101");
+  contents.hHitCountEast->GetXaxis()->CenterTitle(true);
+  contents.hHitCountEast->GetYaxis()->SetTitle("Counts");
+  contents.hHitCountEast->GetYaxis()->CenterTitle(true);
+
+
   contents.hHitCountWest = new TH1D("hHitCountWest","Hit Count West(EP101)",256,0,256);
+  contents.hHitCountWest->GetXaxis()->SetTitle("Number of hits from EP101");
+  contents.hHitCountWest->GetXaxis()->CenterTitle(true);
+  contents.hHitCountWest->GetYaxis()->SetTitle("Counts");
+  contents.hHitCountWest->GetYaxis()->CenterTitle(true);
+
   contents.hTacDiff  = new TH1D("hTacDiff","Earliest TAC Diff",250,0,9000);
+  contents.hTacDiff->GetXaxis()->SetTitle("Earliest TAC Diff");
+  contents.hTacDiff->GetXaxis()->CenterTitle(true);
+  contents.hTacDiff->GetYaxis()->SetTitle("Counts");
+  contents.hTacDiff->GetYaxis()->CenterTitle(true);
+
   contents.hEarliestTacEast = new TH1D("hEarliestTacEast", "Earliest TAC East",100,0,4000);
+  contents.hEarliestTacEast->GetXaxis()->SetTitle("Earliest TAC East");
+  contents.hEarliestTacEast->GetXaxis()->CenterTitle(true);
+  contents.hEarliestTacEast->GetYaxis()->SetTitle("Counts");
+  contents.hEarliestTacEast->GetYaxis()->CenterTitle(true);
+
   contents.hEarliestTacWest = new TH1D("hEarliestTacWest", "Earliest TAC West",100,0,4000);
+  contents.hEarliestTacWest->GetXaxis()->SetTitle("Earliest TAC West");
+  contents.hEarliestTacWest->GetXaxis()->CenterTitle(true);
+  contents.hEarliestTacWest->GetYaxis()->SetTitle("Counts");
+  contents.hEarliestTacWest->GetYaxis()->CenterTitle(true);
+
   contents.hEarliestTacEvsW = new TH2D("hEarliestTacEvsW", "Earliest TAC (E vs. W)",100,0,4000,100,0,4000);
+  contents.hEarliestTacEvsW->GetXaxis()->SetTitle("Earliest TAC West");
+  contents.hEarliestTacEvsW->GetXaxis()->CenterTitle(true);
+  contents.hEarliestTacEvsW->GetYaxis()->SetTitle("Earliest TAC East");
+  contents.hEarliestTacEvsW->GetYaxis()->CenterTitle(true);
+  contents.hEarliestTacEvsW->GetYaxis()->SetTitleOffset(1.4);
 
 
 
