@@ -176,10 +176,15 @@ void etofBuilder::event(daqReader *rdr) {
 				}
 
 				if ( mess.isEpoch2Msg() ){
-					LOG( INFO, "getEpoch2EpochLost=%d", mess.getEpoch2EpochLost() );
-					LOG( INFO, "getEpoch2DataLost=%d", mess.getEpoch2DataLost() );
-					LOG( INFO, "getEpoch2Sync=%d", mess.getEpoch2Sync() );
-					LOG(INFO, "roc=%08x, chan=%d", mess.getRocNumber(), mess.getGdpbHitChanId());
+				  // JML  Messages every event kills the logs!
+
+
+				  //LOG( INFO, "getEpoch2EpochLost=%d", mess.getEpoch2EpochLost() );
+				  //	LOG( INFO, "getEpoch2DataLost=%d", mess.getEpoch2DataLost() );
+				  //	LOG( INFO, "getEpoch2Sync=%d", mess.getEpoch2Sync() );
+				  //	LOG(INFO, "roc=%08x, chan=%d", mess.getRocNumber(), mess.getGdpbHitChanId());
+
+
 					int rocN = rocMap[mess.getRocNumber()];
 					if ( mess.getEpoch2EpochMissmatch() )
 						contents.nEpochMismatch->Fill( rocN );
