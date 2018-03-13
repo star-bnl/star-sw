@@ -739,7 +739,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 				if(c_adc != 0) {
 					ret |= 4 ;
 					LOG(ERR,"Bad channel in seq %d:%d: %d %d",seq_id,chain_id,ch,c_adc) ;
-					break ;
+					//break ;
 				}
 				else {
 					LOG(NOTE,"SVX break: seq %d:%d: SVX 0x%02X",seq_id, chain_id,ch) ;
