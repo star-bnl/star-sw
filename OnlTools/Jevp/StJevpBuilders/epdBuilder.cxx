@@ -30,6 +30,7 @@
 // temp names used to assign hist titiels ans names
 char buff1[255];
 char buff2[255];
+const static std::string ewstring[2] = {"East","West"};
 
 // Arrays to convert [ew,pp,tt] to [phi,r] of polar plot
 float pi  = TMath::Pi();
@@ -151,20 +152,50 @@ void epdBuilder::initialize(int argc, char *argv[]) {
   contents.hPolPlotHit[1][0] = new TH2D("EPD_West_Rg1_Hit", "EPD_West_Rg1_Hit", 12, 0., 2.*TMath::Pi(), 1,4.2,8.6); 
   contents.hPolPlotHit[1][1] = new TH2D("EPD_West_Rg2_Hit", "EPD_West_Rg2_Hit", 24, 0., 2.*TMath::Pi(),15,8.6,89.27); 
 
-  contents.hPolPlotAdc[0][0]->GetZaxis()->SetRangeUser(0,1000);
-  contents.hPolPlotAdc[0][1]->GetZaxis()->SetRangeUser(0,1000);
-  contents.hPolPlotAdc[1][0]->GetZaxis()->SetRangeUser(0,1000);
-  contents.hPolPlotAdc[1][1]->GetZaxis()->SetRangeUser(0,1000);
+  contents.hPolPlotAdc[0][0]->GetZaxis()->SetRangeUser(0,300);
+  contents.hPolPlotAdc[0][1]->GetZaxis()->SetRangeUser(0,300);
+  contents.hPolPlotAdc[1][0]->GetZaxis()->SetRangeUser(0,300);
+  contents.hPolPlotAdc[1][1]->GetZaxis()->SetRangeUser(0,300);
 
   contents.hPolPlotTac[0][0]->GetZaxis()->SetRangeUser(0,4000);
   contents.hPolPlotTac[0][1]->GetZaxis()->SetRangeUser(0,4000);
   contents.hPolPlotTac[1][0]->GetZaxis()->SetRangeUser(0,4000);
   contents.hPolPlotTac[1][1]->GetZaxis()->SetRangeUser(0,4000);
 
-  contents.hPolPlotHit[0][0]->GetZaxis()->SetRangeUser(0,100000);
-  contents.hPolPlotHit[0][1]->GetZaxis()->SetRangeUser(0,100000);
-  contents.hPolPlotHit[1][0]->GetZaxis()->SetRangeUser(0,100000);
-  contents.hPolPlotHit[1][1]->GetZaxis()->SetRangeUser(0,100000);
+  contents.hPolPlotHit[0][0]->GetZaxis()->SetRangeUser(0,1000000);
+  contents.hPolPlotHit[0][1]->GetZaxis()->SetRangeUser(0,1000000);
+  contents.hPolPlotHit[1][0]->GetZaxis()->SetRangeUser(0,1000000);
+  contents.hPolPlotHit[1][1]->GetZaxis()->SetRangeUser(0,1000000);
+
+
+
+
+  for(int ew=0;ew<2;ew++){
+    for(int pp=0;pp<12;pp++){
+      for(int tile=0;tile<32;tile++){
+	sprintf(buff1,"adc_%d_%d_%d",ew,pp,tile);
+	sprintf(buff2,"ADC %s PP-%d Tile-%d",ewstring[ew].c_str(),pp+1,tile);
+	contents.hADC[ew][pp][tile] = new TH1D(buff1,buff2,1200,0,1200);
+	contents.hADC[ew][pp][tile] ->SetFillColor(20);
+
+	if(tile>9) continue;
+	sprintf(buff1,"tac_%d_%d_%d",ew,pp,tile);
+	sprintf(buff2,"TAC %s PP-%d Tile-%d",ewstring[ew].c_str(),pp+1,tile);
+	contents.hTAC[ew][pp][tile] = new TH1D(buff1,buff2,400,0,4000);
+	contents.hTAC[ew][pp][tile] ->SetFillColor(20);
+
+      }
+    }
+  }
+
+
+  contents.hHitCountEast = new TH1D("hHitCountEast","Hit Count East(EP101)",256,0,256);
+  contents.hHitCountWest = new TH1D("hHitCountWest","Hit Count West(EP101)",256,0,256);
+  contents.hTacDiff  = new TH1D("hTacDiff","Earliest TAC Diff",250,0,9000);
+  contents.hEarliestTacEast = new TH1D("hEarliestTacEast", "Earliest TAC East",100,0,4000);
+  contents.hEarliestTacWest = new TH1D("hEarliestTacWest", "Earliest TAC West",100,0,4000);
+  contents.hEarliestTacEvsW = new TH2D("hEarliestTacEvsW", "Earliest TAC (E vs. W)",100,0,4000,100,0,4000);
+
 
 
   //TPaletteAxis *paletteE = new TPaletteAxis(101.1905,-99.83871,108.396,100.1613,contents.hPolPlot[0][0]);
@@ -174,7 +205,7 @@ void epdBuilder::initialize(int argc, char *argv[]) {
 
 
   // Add root histograms to Plots
-  JevpPlot *plots[100];
+  JevpPlot *plots[1200];
   int n=-1;
 
   plots[++n] = new JevpPlot();
@@ -238,6 +269,43 @@ void epdBuilder::initialize(int argc, char *argv[]) {
   plots[n]->setDrawOpts("COLZ POL"); 
   plots[n]->setOptStat(0);
   plots[n]->optlogz =1;
+
+
+  plots[++n] = new JevpPlot(contents.hHitCountEast);
+  plots[n]->setOptStat(0);
+  plots[n]->logx =1;
+  plots[n]->logy =1;
+  plots[++n] = new JevpPlot(contents.hHitCountWest);
+  plots[n]->setOptStat(0);
+  plots[n]->logx =1;
+  plots[n]->logy =1;
+  plots[++n] = new JevpPlot(contents.hTacDiff);
+  plots[n]->setOptStat(0);
+  plots[++n] = new JevpPlot(contents.hEarliestTacEast);
+  plots[n]->setOptStat(0);
+  plots[n]->logy =1;
+  plots[++n] = new JevpPlot(contents.hEarliestTacWest);
+  plots[n]->setOptStat(0);
+  plots[n]->logy =1;
+  plots[++n] = new JevpPlot(contents.hEarliestTacEvsW);
+  plots[n]->setOptStat(0);
+
+
+
+  for(int ew=0;ew<2;ew++){
+    for(int pp=0;pp<12;pp++){
+      for(int tt=0;tt<32;tt++){
+	plots[++n] = new JevpPlot(contents.hADC[ew][pp][tt]);
+	plots[n]->setOptStat(0);
+	if(tt>9) continue;
+	plots[++n] = new JevpPlot(contents.hTAC[ew][pp][tt]);
+	plots[n]->setOptStat(0);
+      }
+    }
+  }
+
+
+
 
   for(int i=0;i<=n;i++) {
     addPlot(plots[i]);
@@ -384,8 +452,9 @@ void epdBuilder::event(daqReader *rdr) {
 	float tac_max = mEPDMap[ew][pp][tt].tac_max;
 
 	bool isGoodHit = (adc >= adc_min) && (adc <= adc_max ) && (tac >= tac_min) && (tac <= tac_max);
-//	cout << adc<<"\t"<<tac<<"\t"<<adc_min<<"\t"<<adc_max<<"\t"<<tac_min<<"\t"<<tac_max<<"\t"<<isGoodHit<<endl;
-	if(!isGoodHit)continue;
+	bool isGoodHitwoTac = (adc >= adc_min) && (adc <= adc_max );
+
+	if( (tt<10 && !isGoodHit) || ( tt>=10 && !isGoodHitwoTac) )continue;
 
 	if(tt==1){
 	  contents.hPolPlotAdc[ew][0] -> Fill(phiTiles[ew][pp][tt],rTiles[tt],adc);
@@ -397,9 +466,50 @@ void epdBuilder::event(daqReader *rdr) {
 	  contents.hPolPlotHit[ew][1] -> Fill(phiTiles[ew][pp][tt],rTiles[tt],1);
 	}
 
+	contents.hADC[ew][pp][tt]->Fill(adc);
+	if(tt<10)contents.hTAC[ew][pp][tt]->Fill(tac);
+
       }
     }
   }
+
+  // From Next layers
+  int hitCountEast = 0;
+  int hitCountWest = 0;
+
+  int maxTacEast = 0;
+  int maxTacWest = 0;
+  unsigned short tacDiff = 0;
+
+  //East EP001
+  unsigned short dsmEP001OutR = trgd->epdLayer1(0, 0);
+  unsigned short dsmEP001OutL = trgd->epdLayer1(1, 0);
+  unsigned int dsmEP001Out = (dsmEP001OutL<<16) + dsmEP001OutR;
+  int maxTac03 = (dsmEP001Out >> 12) & 0xfff; // max tac from channels 0:3
+  int maxTac47 = (dsmEP001Out >> 0 ) & 0xfff; // max tac from channels 4:7
+  hitCountEast = (dsmEP001Out >> 24) & 0xff;
+  maxTacEast   = (maxTac03>maxTac47)?maxTac03:maxTac47;
+
+  //East EP002
+  unsigned short dsmEP002OutR = trgd->epdLayer1(2, 0);
+  unsigned short dsmEP002OutL = trgd->epdLayer1(3, 0);
+  unsigned int dsmEP002Out = (dsmEP002OutL<<16) + dsmEP002OutR;
+  maxTac03 = (dsmEP002Out >> 12) & 0xfff; // max tac from channels 0:3
+  maxTac47 = (dsmEP002Out >> 0 ) & 0xfff; // max tac from channels 4:7
+  hitCountWest = (dsmEP002Out >> 24) & 0xff;
+  maxTacWest   = (maxTac03>maxTac47)?maxTac03:maxTac47;
+
+  //From EPD-DSM EP101
+  unsigned short dsmL2EpdOutput = trgd->vertexDSM(5);
+  tacDiff = (unsigned short)(dsmL2EpdOutput & 0x1fff); //(0-12)   EPD TAC-Difference
+
+  contents.hEarliestTacEast -> Fill(maxTacEast);
+  contents.hEarliestTacWest -> Fill(maxTacWest);
+  contents.hEarliestTacEvsW -> Fill(maxTacEast,maxTacWest);
+  if(tacDiff>0)     contents.hTacDiff -> Fill(tacDiff);
+  if(hitCountEast>0)contents.hHitCountEast -> Fill(hitCountEast);
+  if(hitCountWest>0)contents.hHitCountWest -> Fill(hitCountWest);
+
 
   if(trgd) delete trgd;
 }

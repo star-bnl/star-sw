@@ -40,6 +40,18 @@ class epdBuilder : public JevpBuilder {
 
 	TH2 *hDummyHit[2]; 
 	TH2D *hPolPlotHit[2][2]; 
+
+
+	TH1 *hADC[2][12][32];
+	TH1 *hTAC[2][12][10];
+
+	TH2 *hEarliestTacEvsW;
+	TH1 *hEarliestTacEast;
+	TH1 *hEarliestTacWest;
+	TH1 *hTacDiff;
+	TH1 *hHitCountEast;
+	TH1 *hHitCountWest;
+
       };
     } contents;
 
