@@ -2272,7 +2272,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	for(int s=1;s<=24;s++) {
 
-#if 1
+#if 0
 		dd = rdr->det("itpc")->get("raw",s) ;
 
 		if(dd) {
@@ -2294,7 +2294,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 		}
 #endif
 
-#if 1
+#if 0
 		// In SAMPA form
 		dd = rdr->det("itpc")->get("sampa",s) ;
 		if(dd) {
@@ -2312,7 +2312,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 		}
 #endif
 
-#if 0
+#if 1
 		// In Row/Pad form
 		dd = rdr->det("itpc")->get("adc",s) ;
 		if(dd) {
@@ -2329,6 +2329,26 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 			}
 		}
 #endif
+
+		// CLD data
+		dd = rdr->det("itpc")->get("cld",s) ;
+		if(dd) {
+			while(dd->iterate()) {
+				cld_found = 1 ;
+
+				if(do_print) {
+					printf("ITPC CLD: sector %2d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
+
+					for(u_int i=0;i<dd->ncontent;i++) {
+						printf("\t%f %d %d %f %d %d %d 0x%X\n", dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
+						       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
+						       dd->cld[i].charge,dd->cld[i].flags) ;
+					}
+
+				}
+			}
+		}
+
 
 
 		// PEDESTALS
@@ -2372,6 +2392,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 		LOG(INFO,"ITPC-FY17 found") ;
 	}
 #endif
+
+	fflush(stdout) ;	// just in case
 
 	int found = 0 ;
 	if(adc_found || cld_found || ped_found) found = 1 ;
