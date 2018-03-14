@@ -3674,6 +3674,7 @@ class Par(Handler):
     def startElement(self,tag,attr):
         name   = attr.get('name')
         value  = attr.get('value').strip()
+        value = replacements(value).lower()
 
         requireAttributes( tag, attr, ['name','value'] )
         
