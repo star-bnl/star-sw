@@ -606,6 +606,10 @@ if ( $ThisYear == 2005 ){
        $DCHAIN{"PPPP"} = "pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
        $DCHAIN{"AuAu"} = "P2017,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 
+   } elsif ($ThisYear == 2018) {
+       $DCHAIN{"ZuZu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
+       $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
+
    } else {
         $DCHAIN{"PPPP"} =
             "P2016,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt";

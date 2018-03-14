@@ -8,7 +8,7 @@
 #
 # This one script may therefore handle multiple production.
 #
-# Written J.Lauret July 2001-2011.
+# Written J.Lauret July 2001-2018.
 # Please, follow comments for more information ...
 #
 #  Some info :
@@ -863,15 +863,19 @@ sub Compress
 sub MkPath
 {
     my($dir,$level)=@_;
-    my(@items,$tmp,$el,$i);
+    my(@items);
+    my($tmp,$prevp,$mask);
+    my($el,$i);
 
     # default
     if( ! defined($level) ){ $level = 0;}
 
     @items = split("/",$dir);
     shift(@items);               # strip first blank space
-    $tmp = "";
-    $i   = 0;
+    $tmp   = "";
+    $prevp = "";
+    $mask  = 0;
+    $i     = 0;
     foreach $el (@items){
 	$tmp .= "/$el";
 	$i++;
@@ -881,8 +885,8 @@ sub MkPath
 	    # be executed which means that we will go into an infinit
 	    # loop until the disk is available.
 	    #
-	    if (-f $tmp){
-		# Oupses !! File exists with same name than directory.
+	    if ( -f $tmp){
+		# Oops !! File exists with same name than directory.
 		# This is a no-no in Uglix-land.
 		print STDERR
 		    "$PRGM :: Error: Cannot create dir $tmp. ",
@@ -894,14 +898,22 @@ sub MkPath
 	    # The level variable is used to prevent from accidental directory creation
 	    # in case of disk unmount. For example, level = 2 will prevent creation
 	    # before a /star/dataXX directory ...
-	    if ($i >= $level){
-		if( ! mkdir($tmp,0773) ){
+	    if ($i >= $level ){
+		if ( $prevp ne ""){
+		    # Get mask from previous directory and set any
+		    # directories afterward with that same protection
+		    $mask = (stat($prevp))[2];
+		} else {
+		    $mask = "0773";
+		}
+		if( ! mkdir($tmp,$mask) ){
 		    print STDERR
 			"$PRGM :: Error: Failed to create $tmp [$!]\n";
 		    return -2;
 		}
 	    }
 	}
+	$prevp = $tmp;
     }
     1;
 }
