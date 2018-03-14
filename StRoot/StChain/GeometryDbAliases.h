@@ -139,10 +139,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
  
   {"y2018x",      20171215,     0, "y2018x",   "y2018x experimental TPC geometry, AgML,xgeometry"},   
-  {"y2018",       20171215,     2, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
-  {"y2018a",      20171215,     3, "y2018a",   "y2018a physics production geometry version A, AgML,xgeometry"},   
-
-  {"y2019",       20181215,     0, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
+  {"y2018",       20171215,     1, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
   
   //
   // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs
@@ -173,6 +170,21 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr16",      21190101,    19, "upgr16",   ""},
   {"upgr17",      21190101,    20, "upgr17",   ""},
   {"upgr16a",     21190101,    21, "upgr16a",  ""},
+
+
+  {"ftsver0",     20201210,     1, "ftsver0",  ""},
+  {"ftsref1",     20201210,     2, "ftsref1",  ""},
+  {"ftsref2",     20201210,     3, "ftsref2",  ""},
+  {"ftsref3",     20201210,     4, "ftsref3",  ""},
+  {"ftsref4",     20201210,     5, "ftsref4",  ""},
+  {"ftsref5",     20201210,     6, "ftsref5",  ""},
+  {"ftsref6",     20201210,     7, "ftsref6",  ""},
+  {"ftsref6a",    20201210,     8, "ftsref6a", ""},
+
+  {"ftsref10",    20201210,    99, "ftsref10", ""},
+
+
+
   // Future development:
   //  {"simpletpc",   20200102,    16, "simpletpc",""},
   //  {"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
