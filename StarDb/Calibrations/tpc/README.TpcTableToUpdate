@@ -1991,5 +1991,26 @@ mysql> select entryTime,beginTime,flavor,deactive,LocalxShift,LocalyShift,Localz
 | 2000-01-01 00:00:00 | 2010-02-04 13:59:59 | ofl    |        0 | -0.17990001 | -0.67519999 | -0.08086000 | 0.00000000 | -0.00059041 | -0.00020584 | -0.00018970 | -0.00004400 |
 +---------------------+---------------------+--------+----------+-------------+-------------+-------------+------------+-------------+-------------+-------------+-------------+
 ================================================================================
-03/09/2018
+03/13/2018
 ----------
+tpcDriftVelocity updated with online clusters
+
+Don't touch 
+TpcEdge
+TpcCurrentCorrectionX
+TpcdCharge
+tpcGainCorrection
+tpcGasTemperature
+tpcGridLeak
+
+
+Defualts:
+
+tpcPadGainT0B.y2018.C
+tpcAnodeHVavg.y2018.C
+TpcAvgCurrent.y2018.C
+TpcAvgPowerSupply.y2018.C
+TpcLengthCorrectionB.y2018.C
+tpcPadGainT0B.y2018.C
+TpcRowQ.y2018.C
+TpcSecRowB.y2018.C
