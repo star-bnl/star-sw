@@ -45,6 +45,7 @@ public:
 		s1_found = 0 ;
 
 		version = 0x20180000 ;
+		words_per_cluster = 0 ;	// set in stage3!
 	} ;
 
 	~itpc_fcf_c() { ; } ;
@@ -60,6 +61,9 @@ public:
 
 	int do_fcf(void *storage, int bytes) ;
 
+
+	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
+
 private:
 
 	static const int MAX_ROW = 40 ;		// row or timebin
@@ -73,6 +77,7 @@ private:
 	static const int MAX_PHYS_ROW	= 45 ;
 	static const int MAX_PHYS_PAD	= 182 ;
 
+	int words_per_cluster ;
 
 	int rowlen[MAX_ROW+1] ;
 
