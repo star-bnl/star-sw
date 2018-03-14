@@ -55,7 +55,7 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMaxContNitsFw=1;      	/*Max length of acceptable non hit sequence*/
   row.mMaxTotNitsFw =2;      	/*Max number of acceptable non hits*/
   row.mRxyMaxFw = 207;		//Max radius for tracking
-  row.mZMaxFw   = 400;		//Max Z      for tracking
+  row.mZMaxFw   = 700;		//Max Z      for tracking
 
 
 tableSet->AddAt(&row);
