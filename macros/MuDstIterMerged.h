@@ -42,7 +42,7 @@
 const Int_t&       NoMuEvent                                = iter("MuEvent");
 const Int_t*&      MuEvent_mRunInfo_mRunId                  = iter("MuEvent.mRunInfo.mRunId");
 const UInt_t*&     MuEvent_mRunInfo_mProductionTime         = iter("MuEvent.mRunInfo.mProductionTime");
-const TString*&    MuEvent_mRunInfo_mProductionVersion      = iter("MuEvent.mRunInfo.mProductionVersion");
+//const TString*&    MuEvent_mRunInfo_mProductionVersion      = iter("MuEvent.mRunInfo.mProductionVersion");
 const Float_t*&    MuEvent_mRunInfo_mCenterOfMassEnergy     = iter("MuEvent.mRunInfo.mCenterOfMassEnergy");
 const Int_t*&      MuEvent_mRunInfo_mBeamMassNumber         = iter("MuEvent.mRunInfo.mBeamMassNumber[2]");
 const Double_t*&   MuEvent_mRunInfo_mMagneticFieldZ         = iter("MuEvent.mRunInfo.mMagneticFieldZ");
@@ -66,7 +66,7 @@ const Int_t*&      MuEvent_mRunInfo_mSpaceChargeCorrectionMode = iter("MuEvent.m
 const Float_t*&    MuEvent_mRunInfo_mSpaceCharge            = iter("MuEvent.mRunInfo.mSpaceCharge");
 #endif /* __RunInfo__ */
 #ifdef    __EventInfo__
-const TString*&    MuEvent_mEventInfo_mType                 = iter("MuEvent.mEventInfo.mType");
+//const TString*&    MuEvent_mEventInfo_mType                 = iter("MuEvent.mEventInfo.mType");
 const Int_t*&      MuEvent_mEventInfo_mRunId                = iter("MuEvent.mEventInfo.mRunId");
 const Int_t*&      MuEvent_mEventInfo_mId                   = iter("MuEvent.mEventInfo.mId");
 const Int_t*&      MuEvent_mEventInfo_mTime                 = iter("MuEvent.mEventInfo.mTime");

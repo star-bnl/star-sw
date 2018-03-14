@@ -188,7 +188,7 @@ Int_t sector(Float_t x, Float_t y, Float_t z) {
   return sec;
 }
 //________________________________________________________________________________
-void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosmics/Genratedata/cosmics_R89_1_200.MuDst.root", // ./*.MuDst.root",
+void Cosmics(const Char_t *files ="*.MuDst.root",
 	     const Char_t *Out = "Cosmics.root"
 	    ){
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel
@@ -208,6 +208,8 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
 #define __CovGlobTrack__
 #define __FirstLastPoint__
 #define __dEdx__
+#define __RunInfo__
+#define __EventInfo__
   //#include "MuDstIter.h"
 #include "MuDstIterMerged.h"
   // Book TTree
@@ -229,6 +231,7 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
         Dca: imp   16.44 +/-   0.11,Z   45.00 +/-   0.09,psi    0.76 +/-   0.00, q/pT   -1.63 +/-   1.7%,TanL    0.373 +/-   0.001 L  139.912   0.000 NF   43 chi2    0.939 NP   45
         Dca: imp  -16.55 +/-   0.11,Z   45.07 +/-   0.09,psi   -2.38 +/-   0.00, q/pT    1.61 +/-   1.5%,TanL   -0.369 +/-   0.001 L  138.818   0.000 NF   45 chi2    0.986 NP   45
     */
+    Int_t Npairs = 0;
     Int_t k = -1; 
     Int_t l = -1;
     for (Int_t kg = 0; kg < NoGlobalTracks - 1; kg++) {
@@ -248,7 +251,7 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
       tK.set(parK,covK);
       for (Int_t lg = kg+1; lg < NoGlobalTracks; lg++) {
 	Int_t lgc = GlobalTracks_mIndex2Cov[lg];
-      if (GlobalTracks_mNHitsFitTpc[lg] < 15) continue;
+	if (GlobalTracks_mNHitsFitTpc[lg] < 15) continue;
 	if (lgc < 0 || lgc > NoCovGlobTrack) continue;
 	Double_t parL[6] = {CovGlobTrack_mImp[lgc], -CovGlobTrack_mZ[lgc], -CovGlobTrack_mPsi[lgc], CovGlobTrack_mPti[lgc], CovGlobTrack_mTan[lgc], 0};
 	Double_t covL[15] = {
@@ -269,10 +272,6 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
 	Cov += CovK;
 	TRSymMatrix G(Cov,TRArray::kInverted);
         Double_t chi2 = G.Product(Par,TRArray::kATxSxA);
-#if 0
-	cout << "K\t" << kg << "\t" << tK << endl;
-	cout << "L\t" << lg << "\t" << tL << "\tchi2 = " << chi2 << endl;
-#endif
 	if (chi2 < Chi2Old) {
 	  Chi2Old = chi2;
 	  k = kg;
@@ -309,9 +308,16 @@ void Cosmics(const Char_t *files ="/gpfs01/star/pwg/pengliu/iTPC/Simulation/Cosm
       if (tracks.sectorK != sector(GlobalTracks_mLastPoint_mX1[kg], GlobalTracks_mLastPoint_mX2[kg], GlobalTracks_mLastPoint_mX3[kg])) tracks.sectorK = - tracks.sectorK;
       tracks.sectorL = sector(GlobalTracks_mFirstPoint_mX1[lg], GlobalTracks_mFirstPoint_mX2[lg], GlobalTracks_mFirstPoint_mX3[lg]);
       if (tracks.sectorL != sector(GlobalTracks_mLastPoint_mX1[lg], GlobalTracks_mLastPoint_mX2[lg], GlobalTracks_mLastPoint_mX3[lg])) tracks.sectorL = - tracks.sectorL;
-      if (netries%100 == 0) {
-	cout << "K\t" << kg << "\t" << tracks.sectorK << "\t" << tracks.K << endl;
-	cout << "L\t" << lg << "\t" << tracks.sectorL << "\t" << tracks.L << "\tchi2 = " << tracks.chi2 << endl;
+      Npairs++;
+      if (Npairs == 1) {
+	cout << "Run " << MuEvent_mRunInfo_mRunId[0] << " Event " << MuEvent_mEventInfo_mId[0] << "====================" << endl;
+	cout << "K\t" << kg << "\t" << tK << endl;
+	cout << "L\t" << lg << "\t" << tL << "\tchi2 = " << tracks.chi2 << endl;
+      } 
+      //      if (netries%100 == 0) {
+      if (TMath::Abs(tracks.sectorK) == 20 || TMath::Abs(tracks.sectorL) == 20) {
+	cout << "K\t" << kg << "\t" << tracks.sectorK << "\t" << tracks.K << "\tN " << tracks.noFitpK << endl;
+	cout << "L\t" << lg << "\t" << tracks.sectorL << "\t" << tracks.L << "\tN " << tracks.noFitpL << "\tchi2 = " << tracks.chi2  << endl;
       }
       tracks.K70 = StDedxPidTraits(kTpcId, kTruncatedMeanId, 
 				   100*((Int_t) GlobalTracks_mProbPidTraits_mdEdxTrackLength[kg])+GlobalTracks_mNHitsDedx[kg],

@@ -232,3 +232,79 @@ root.exe -q -b lMuDst.C 'Hadd.C+("15151056_0.femtoDst.root","st*.root")'
 foreach d (`ls -1d ???`) 
   if (! -r ${d}/ToHpss) echo $d
 end
+===============Bad Runs=================================================================
+cd ~/Femto/2014
+foreach r (`cat $STAR/StRoot/StRefMultCorr/bad_runs_refmult_year2014_P16id.txt`)
+  ls -1d */???/${r} | tee -a bad.list
+end
+mv AuAu_200_production_2014/075/15075007            AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/075/15075073	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/075/15075079	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/076/15076101	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/076/15076102	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/076/15076105	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/076/15076109	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079042	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079046	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079047	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079048	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079050	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079057	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079058	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079060	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/079/15079063	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080003	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080005	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080006	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080007	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080013	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080014	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080015	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080024	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080029	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080035	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080037	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080038	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080039	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080044	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080045	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080053	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080054	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080055	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080057	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080058	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080059	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/080/15080061	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/081/15081001	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/081/15081015	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/081/15081017	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/081/15081024	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/081/15081025	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/082/15082016	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/084/15084030	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/084/15084092	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/084/15084093	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/085/15085001	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/086/15086076	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_2014/087/15087006	    AuAu_200_production_2014/BadRuns/
+mv AuAu_200_production_low_2014/097/15097011        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_mid_2014/097/15097032        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_low_2014/097/15097034        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_mid_2014/099/15099001        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_low_2014/102/15102021        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/102/15102024        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/104/15104016        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/104/15104018        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/108/15108018        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/108/15108019        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/110/15110032        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_mid_2014/112/15112050        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_low_2014/129/15129013        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_mid_2014/151/15151041        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_mid_2014/151/15151042        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_mid_2014/156/15156008        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_mid_2014/161/15161051        AuAu_200_production_mid_2014/BadRuns/
+mv AuAu_200_production_low_2014/166/15166016        AuAu_200_production_low_2014/BadRuns/
+mv AuAu_200_production_low_2014/166/15166017        AuAu_200_production_low_2014/BadRuns/
+
+
