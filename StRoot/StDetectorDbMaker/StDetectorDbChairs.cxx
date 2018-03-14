@@ -801,7 +801,7 @@ Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
     if (row < 30) return 6;
     if (row < 38) return 7;
     return 8;
-  } else if (St_tpcPadConfigC::instance()->padRows(sector) == 72) {
+  } else if (St_tpcPadConfigC::instance()->padRows(sector) == 72) { // iTPC
     // Jim Thomas, mail from 09/27/17
     if (row < 10) return 1; //  9 shared 1&2
     if (row < 20) return 2; // 19 shared 2&3
