@@ -83,6 +83,79 @@ void itpc_fcf_c::event_start()
 }
 
 
+int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_cld *dc, u_int version)
+{
+	double p, t ;
+	int p1,p2,t1,t2,cha,fla ;
+	u_int p_tmp, t_tmp ;
+
+	// pad
+	p_tmp = *p_buff & 0xFFFF ;
+
+	// time
+	t_tmp = *p_buff >> 16 ;
+
+
+	p = (double)(p_tmp & 0x3FFF) / 64.0 ;
+	t = (double)(t_tmp & 0x7FFF) / 64.0 ;
+
+	fla = 0 ;
+	if(p_tmp & 0x8000) fla |= FCF_MERGED ;
+	if(p_tmp & 0x4000) fla |= FCF_DEAD_EDGE ;
+	if(t_tmp & 0x8000) fla |= FCF_ONEPAD ;
+
+
+	p_buff++ ;	// advance to next word
+	cha = *p_buff >> 16 ;
+
+	if(cha >= 0x8000) {	// special case of very large charge...
+//printf("1: Big cha: 0x%08X %d; %f %f\n",cha,cha,p,t) ;
+
+		fla |= FCF_BIG_CHARGE ;
+		cha = (cha & 0x7FFF) * 1024 ;
+//		if(cha == 0) cha = 0x8000;	// exaclty, but can't be I think...
+
+//printf("2: Big cha: 0x%08X %d\n",cha,cha) ;
+
+		// quasi fix of the very large problem...
+		if(cha > 0xFFFF) cha = 0xFFFF ;	// because the daq_cld structure has charge as a short... damn...
+
+	}
+
+	p_tmp = *p_buff & 0xFFFF ;	// reuse p_tmp
+
+	if(p_tmp & 0x8000) fla |= FCF_ROW_EDGE ;
+	if(p_tmp & 0x4000) fla |= FCF_BROKEN_EDGE ;
+
+	t1 = p_tmp & 0xF ;
+	t2 = (p_tmp >> 4) & 0xF ;
+
+
+	p1 = (p_tmp >> 8) & 0x7 ;
+	p2 = (p_tmp >> 11) & 0x7 ;
+
+
+	t1 = (int)t - t1 ;
+	t2 = (int)t + t2 ;
+
+
+	p1 = (int)p - p1 ;
+	p2 = (int)p + p2 ;
+
+	dc->t1 = t1 ;
+	dc->t2 = t2 ;
+	dc->p1 = p1 ;
+	dc->p2 = p2 ;
+	dc->charge = cha ;	// this is a problem for BIG_CHARGE... it will strip the upper bits... unsolved.
+	dc->flags = fla ;
+	dc->pad = p ;
+	dc->tb = t ;
+
+
+	return 2 ;	// 2 u_ints used
+
+}
+
 
 // Called by the raw data unpacker: fee_id and fee_ch are _physical_ channels
 // Main purpose is unpack the raw data into the canonical form ready for FCF.
@@ -223,7 +296,7 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 
 		if(found_ints) {
 
-			*row_store++ = (3<<16)|row ;	// words-per-cluster | row
+			*row_store++ = (words_per_cluster<<16)|row ;	// words-per-cluster | row
 			*row_store++ = version ;
 			*row_store++ = found_ints  ;	// in ints!
 
@@ -781,6 +854,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			*obuff++ = (cha << 16) | tmp_fl ;
 			*obuff++ = adc_max ;
 
+			words_per_cluster = 3 ;
+
 #ifdef DO_DBG1
 //			LOG(TERR,"**** S %d: row %d: %f %f %f",clusters_cou,row,f_p_ave,f_t_ave,f_charge) ;
 #endif
@@ -880,6 +955,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				*obuff++ = (time_c << 16) | pad_c ;
 				*obuff++ = (cha << 16) | tmp_fl ;
 				*obuff++ = adc_max ;
+				
+				words_per_cluster = 3 ;
 
 #ifdef DO_DBG1
 //				LOG(TERR,"0x%X 0x%X 0x%X 0x%X - 0x%X 0x%X",pad_c,time_c,cha,tmp_fl, (time_c<16)|pad_c,(cha<<16)|tmp_fl) ;

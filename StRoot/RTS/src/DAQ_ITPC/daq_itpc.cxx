@@ -11,12 +11,13 @@
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
-#include <DAQ_TPX/tpxFCF.h>
+//#include <DAQ_TPX/tpxFCF.h>
 
 #include "daq_itpc.h"
 #include "itpcCore.h"
 #include "itpcInterpreter.h"
 #include "itpcPed.h"
+#include "itpcFCF.h"
 
 const char *daq_itpc::help_string = "\
 \n\
@@ -345,7 +346,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 {
 
 	int min_sec, max_sec ;
-	tpxFCF *tpx_fcf ;
+	itpc_fcf_c *fcf ;
 
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
@@ -376,7 +377,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 
 		int size = caller->sfs->fileSize(full_name) ;
 
-		LOG(TERR,"full_name [%s] --> size %d",full_name,size) ;
+		LOG(DBG,"full_name [%s] --> size %d",full_name,size) ;
 
 		if(size <= 0) continue ;	// this is really an error!
 
@@ -397,21 +398,21 @@ daq_dta *daq_itpc::handle_cld(int sec)
 			// version
 			// count of clusters
 
-			u_int row = *p_buff ;
+			u_int row = *p_buff++ ;
 			u_int version = *p_buff++ ;
 			u_int int_cou = *p_buff++ ;
 
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFFF ;
 
-			LOG(TERR,"ROW %d: cou %d, version 0x%04X",row,int_cou,version) ;
+			LOG(NOTE,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
 
 			int clusters = int_cou/ints_per_cluster ;	
 
 			daq_cld *dc = (daq_cld *)cld->request(clusters) ;
 
 			for(int i=0;i<clusters;i++) {
-				tpx_fcf->fcf_decode(p_buff,dc,0) ;
+				fcf->fcf_decode(p_buff,dc,version) ;
 
 				p_buff += ints_per_cluster ;	// for now, but depends on version!
 				dc++ ;
