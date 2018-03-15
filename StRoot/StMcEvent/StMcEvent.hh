@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.34 2013/03/25 23:27:13 perev Exp $
+ * $Id: StMcEvent.hh,v 2.35 2018/03/15 22:00:35 smirnovd Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.35  2018/03/15 22:00:35  smirnovd
+ * Fix linker error by removing declared but undefined functions
+ *
  * Revision 2.34  2013/03/25 23:27:13  perev
  * Mustafa.Pxl corrs
  *
@@ -294,14 +297,12 @@ public:
   void setSsdHitCollection(StMcSsdHitCollection*);               
   void setFtpcHitCollection(StMcFtpcHitCollection*);              
   void setRichHitCollection(StMcRichHitCollection*);
-  void setCtbHitCollection(StMcCtbHitCollection*);              
   void setTofHitCollection(StMcTofHitCollection*);
   void setBTofHitCollection(StMcBTofHitCollection*);
   void setMtdHitCollection(StMcMtdHitCollection*);
   void setPxlHitCollection(StMcPxlHitCollection*);       
   void setIstHitCollection(StMcIstHitCollection*); 
   void setFgtHitCollection(StMcFgtHitCollection*);       
-  void setEtrHitCollection(StMcEtrHitCollection*);       
   virtual void Print(Option_t *option="") const; // *MENU* 
  protected:
   char mBeg[1];				//!

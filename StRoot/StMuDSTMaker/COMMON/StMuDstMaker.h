@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.62 2018/02/27 04:15:02 jdb Exp $
+ * $Id: StMuDstMaker.h,v 1.63 2018/03/15 22:00:35 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -170,16 +170,13 @@ class StMuDstMaker : public StIOInterFace {
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp=9);
 
-  //Set for StTriggerData. Default is 2009.
-  void setStTriggerYear(int);
-
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
   StMuFmsUtil* muFmsUtil() { return mFmsUtil; } ///< return pointer to StMuFmsUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.62 2018/02/27 04:15:02 jdb Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.63 2018/03/15 22:00:35 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
@@ -410,6 +407,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.63  2018/03/15 22:00:35  smirnovd
+ * Fix linker error by removing declared but undefined functions
+ *
  * Revision 1.62  2018/02/27 04:15:02  jdb
  * added EPD support and fixed long standing bug in SetStatus, cleaned up
  *

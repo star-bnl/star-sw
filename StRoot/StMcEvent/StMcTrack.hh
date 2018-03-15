@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.29 2013/03/25 23:47:08 perev Exp $
+ * $Id: StMcTrack.hh,v 2.30 2018/03/15 22:00:35 smirnovd Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.30  2018/03/15 22:00:35  smirnovd
+ * Fix linker error by removing declared but undefined functions
+ *
  * Revision 2.29  2013/03/25 23:47:08  perev
  * Mustafa.Pxl corrs
  *
@@ -295,7 +298,6 @@ public:
     void removeEprsHit(StMcCalorimeterHit*); 
     void removeEsmduHit(StMcCalorimeterHit*); 
     void removeEsmdvHit(StMcCalorimeterHit*); 
-    void removeFscHit(StMcCalorimeterHit*); 
     void removePxlHit(StMcPxlHit*); 
     void removeIstHit(StMcIstHit*); 
     void removeFgtHit(StMcFgtHit*); 
