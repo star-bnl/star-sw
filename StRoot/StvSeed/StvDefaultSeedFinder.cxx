@@ -19,9 +19,10 @@
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 
+#include "StMessMgr.h"
 
 void myBreak(int);
-enum {kFstAng=65,kErrFakt=4,kLenFakt=4,kMaxLen=300};
+enum {kFstAng=65,kErrFakt=10,kLenFakt=4,kMaxLen=3000};
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.01;
@@ -151,12 +152,18 @@ inline static float Impact2(const float dir[3],const float pnt[3])
 }
 //	End of Local auxiliary routines
 //_____________________________________________________________________________
+
+#define NEXT_HIT( reason ) { LOG_DEBUG << __LINE__ << " [" << reason << "]" << endm; continue; }
+#define FIRST_HIT
+
 const THelixTrack* StvDefaultSeedFinder::NextSeed()
 {
 static int nCall = 0; nCall++;
 std::vector<TObject*> mySeedObjs;
 
   StvHit *fstHit,*selHit=0;   
+
+  LOG_DEBUG << "NextSeed() " << nCall << endm;
 
   int nTally = 0; 
   while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
@@ -176,6 +183,8 @@ std::vector<TObject*> mySeedObjs;
     m1stHit = fstHit->x();
     mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
 
+    LOG_DEBUG << "... First hit found" << endm;
+
     while (1) { //Search next hit 
 //		Add info from selected hit
       nTally++;
@@ -194,12 +203,15 @@ std::vector<TObject*> mySeedObjs;
 //	for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
       StMultiKeyNode *node=0;
       StvHit *nexHit = 0;
+
+      LOG_DEBUG << "Searching for next hit..." << endm;
+
       while(1) {
 	node = *(*fMultiIter)		        ; if (!node) break; 
 	nexHit = (StvHit*)node->GetObj()	;++(*fMultiIter); 
 
-	if (nexHit->isUsed()) 	continue;
-        if (fIdTruth && fstIdTruth!=nexHit->idTru()) continue;
+	if (nexHit->isUsed()) 	                     NEXT_HIT( "the hit is used" ); //continue;
+        if (fIdTruth && fstIdTruth!=nexHit->idTru()) NEXT_HIT( "idtruth is wrong"); //continue;
 	const StHitPlane *hpNex = nexHit->detector();
 	if (hpNex==hp) 		continue;
 	int dejavu = 0;
@@ -207,13 +219,13 @@ std::vector<TObject*> mySeedObjs;
           if (mDejavu[j]!=nexHit) 	continue;
           dejavu = 2013; 		break;
 	}
-	if (dejavu) 			continue;
+	if (dejavu) 			NEXT_HIT( "dejavu" ); //continue;
 	int ans = mSel.Reject(nexHit->x(),hpNex);
-	if (ans>0) 			continue;	//hit outside the cone
+	if (ans>0) 			NEXT_HIT( "outside of cone" ); //continue;	//hit outside the cone
 
  //			Selecting the best
 	selHit=nexHit;
-	if (!ans)  			continue;
+	if (!ans)  			NEXT_HIT( " !ans " ); // continue;
  //		Decrease size of searching box
 	mSel.Update();
 	fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
@@ -475,6 +487,11 @@ static const double kMyMax = 220;
 }
 #endif //MultiPhiZMap
 //_____________________________________________________________________________
+#define REJECT_HIT( reason, code )	\
+{	\
+LOG_DEBUG << __LINE__ << " [" << reason << " " << code << " ]" << endm; \
+return code; \  
+}
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
    if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
@@ -483,21 +500,21 @@ int  StvConeSelector::Reject(const float x[3],const void* hp)
 
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];
-  if (r2xy < (kMinTan*kMinTan)*z2) 	return 3;		
+   if (r2xy < (kMinTan*kMinTan)*z2) 	REJECT_HIT( "below kMinTan", 3); // return 3;		
    mHitLen = (r2xy+z2);
-   if (mHitLen  < 1e-8) 		return 4;
+   if (mHitLen  < 1e-8) 		REJECT_HIT( "min hit length", 4); 
    mHitPrj = Dot(xx,mDir);
-   if (mHitPrj  < 1e-8) 		return 4;
-   if (mHitPrj>mLen) 			return 6;	//Outside of cone along
+   if (mHitPrj  < 1e-8) 		REJECT_HIT( "min hit length", 4); 
+   if (mHitPrj>mLen) 			REJECT_HIT( "outside cone along length",  6); //Outside of cone along
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
    float lim = (mErr) + mHitPrj*mTan;
-   if (imp > lim*lim)          		return 7;	//Outside of cone aside
+   if (imp > lim*lim)          		REJECT_HIT( Form("outside of cone radius %f %f",imp,lim*lim), 7); // return 7;	//Outside of cone aside
    int ans = 99;
    if (mHp != hp) { 					//different layers, only prj is important
-     if (mHitPrj>mMinPrj) 		return 8;	//more far than best,along
+     if (mHitPrj>mMinPrj) 		REJECT_HIT( "better hit available ", 8); // return 8;	//more far than best,along
      ans = -1;
    } else         {					//same layer, only impact is important
-     if (imp>mMinImp) 			return 9;	//same plane but impact bigger
+     if (imp>mMinImp) 			REJECT_HIT( "better hit available ", 9); return 9;	//same plane but impact bigger
      ans = 0;
    }
    if (hp) {mMinPrj= mHitPrj; mMinImp=imp; mHp = hp;}
