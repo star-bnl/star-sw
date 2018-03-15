@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlDigmapsSim.cxx,v $
+ * Revision 1.5  2018/03/15 21:37:42  dongx
+ * Added the single hit efficiency loaded from pxlSimPar table
+ *
  * Revision 1.4  2017/11/08 23:14:51  smirnovd
  * StPxlDigmapsSim: Remove pointless pointer validation
  *
@@ -38,6 +41,7 @@
 #include "StPxlDbMaker/StPxlDb.h"
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlDigmapsSim_Table.h"
+#include "tables/St_pxlSimPar_Table.h"
 #include "tables/St_HitError_Table.h"
 #include "StPxlRawHitMaker/StPxlRawHitCollection.h"
 #include "StPxlRawHitMaker/StPxlRawHit.h"
@@ -59,7 +63,7 @@
 StPxlDigmapsSim::StPxlDigmapsSim(const Char_t *name): StPxlISim(name),
   mRndGen(nullptr), mOwnRndSeed(0), mDigPlane(new DIGPlane()), mDigAdc(new DIGADC()), mDigTransport(new DIGTransport()),
   mPxlDb(nullptr),
-  mdEdxvsBGNorm(nullptr)
+  mdEdxvsBGNorm(nullptr), mHitEffMode(0), mMomCut(0.), mHitEffInner(1.0), mHitEffOuter(1.0)
 {}
 
 StPxlDigmapsSim::~StPxlDigmapsSim()
@@ -196,6 +200,17 @@ int StPxlDigmapsSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDa
       }
     }
   }
+  
+  // MC->RC hit efficiency (momentum dependence - default)
+  pxlSimPar_st const* const pxlSimParTable = mPxlDb->pxlSimPar();
+  mHitEffMode = pxlSimParTable[0].mode;
+  mMomCut = pxlSimParTable[0].pCut;
+  mHitEffInner = pxlSimParTable[0].effPxlInner; // best knowledge from ZF cosmic ray study - inner tunable
+  mHitEffOuter = pxlSimParTable[0].effPxlOuter; // best knowledge from ZF cosmic ray study - checked for outer
+  
+  LOG_INFO << " PXL MC hit efficiency mode used for PXL slow simulator: " << mHitEffMode << endm;
+  LOG_INFO << "     +++ Hit Efficiency at p > " << mMomCut << " GeV/c (Inner/Outer) = " << mHitEffInner << "/" << mHitEffOuter << endm; 
+      
   return kStOk;
 }
 //____________________________________________________________
@@ -231,6 +246,35 @@ int StPxlDigmapsSim::addPxlRawHits(const StMcPxlHitCollection& mcPxlHitCol,
         {
           StMcPxlHit const* const mcPix = mcPxlSensorHitCol->hits()[iHit];
           if (!mcPix) continue;
+
+          float hitEff = 1.0;
+          switch (mHitEffMode) {
+            case 0:    // ideal case 100% efficiency
+                    break;
+            case 1:    // momemum dependent efficiency
+              if(mcPix->parentTrack()) {
+                float const ptot = mcPix->parentTrack()->momentum().mag();
+                if( iLad==0 ) { // linear dependence 0 at p=0 and minimum at p=mMomCut
+                  hitEff = 1.0 - (1. - mHitEffInner)*ptot/mMomCut;
+                  if(hitEff<mHitEffInner) hitEff = mHitEffInner;
+                } else {
+                  hitEff = 1.0 - (1. - mHitEffOuter)*ptot/mMomCut;
+                  if(hitEff<mHitEffOuter) hitEff = mHitEffOuter;
+                }
+              }
+                    break;
+            case 2:    // constant efficiency
+              if( iLad==0 ) {
+                hitEff = mHitEffInner;
+              } else {
+                hitEff = mHitEffOuter;
+              }
+                    break;
+            default:
+                    break;
+          }
+          
+          if( mRndGen->Rndm()>hitEff ) continue;
 
           int sensorId = ( iSec * kNumberOfPxlLaddersPerSector + iLad ) * kNumberOfPxlSensorsPerLadder + iSen + 1;
           DIGEvent fdigevent{};

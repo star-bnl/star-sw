@@ -50,7 +50,7 @@ class StPxlDigmapsSim: public StPxlISim
      */
     virtual const char *GetCVS() const
     {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDigmapsSim.h,v 1.2 2017/10/19 19:38:17 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDigmapsSim.h,v 1.3 2018/03/15 21:37:42 dongx Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
     }
 
@@ -114,5 +114,10 @@ class StPxlDigmapsSim: public StPxlISim
     float mOffsetX[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder];
     float mOffsetZ[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; 
     TF1* mdEdxvsBGNorm;  // dEdx vs. beta*gamma function normalized to MIP - for momentum and particle species depenence
+    //
+    short mHitEffMode;
+    float mMomCut;      // momentum cut for momentum depenent efficiency
+    float mHitEffInner; // single hit efficiency - 0.97 (best knowledge seen from ZF cosmic ray test)
+    float mHitEffOuter; // single hit efficiency - 0.97 (best knowledge seen from ZF cosmic ray test)
 };
 #endif
