@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.cxx,v 2.7 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StMwcTriggerDetector.cxx,v 2.8 2018/03/15 22:00:50 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.cxx,v $
+ * Revision 2.8  2018/03/15 22:00:50  smirnovd
+ * Revert removal of StMwcTriggerDetector constructor
+ *
+ * This constructor was removed by Yuri on 2009-11-23 leaving the declaration
+ * behind in the corresponding header file. However, this constructor is used in
+ * existing StTriggerDetectorCollection()
+ *
  * Revision 2.7  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -33,14 +40,32 @@
  *
  **************************************************************************/
 #include "StMwcTriggerDetector.h"
+#include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.7 2009/11/23 16:34:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.8 2018/03/15 22:00:50 smirnovd Exp $";
 
 ClassImp(StMwcTriggerDetector)
 
 StMwcTriggerDetector::StMwcTriggerDetector()
 {
     memset(mBeg,0,mEnd-mBeg);
+}
+
+StMwcTriggerDetector::StMwcTriggerDetector(const dst_TrgDet_st& t)
+{
+    memset(mBeg,0,mEnd-mBeg);
+    int i, j, k;
+    for(i=0; i<mMaxSectors; i++)
+        for(j=0; j<mMaxSubSectors; j++)
+            for(k=0; k<mMaxEventSamples; k++)
+                mMips[i][j][k] = t.nMwc[i][j][k];
+
+    for(i=0; i<mMaxAux; i++)
+        for(j=0; j<mMaxEventSamples; j++)
+            mAux[i][j] = t.mwcaux[i][j];
+
+    mNumberOfPreSamples = t.npre;
+    mNumberOfPostSamples = t.npost;
 }
 
 StMwcTriggerDetector::~StMwcTriggerDetector() {/* noop */}
