@@ -1,4 +1,4 @@
-// $Id: StMuMcTrack.h,v 1.4 2014/08/06 19:19:07 perev Exp $
+// $Id: StMuMcTrack.h,v 1.4.16.1 2018/03/15 21:35:35 jwebb Exp $
 #ifndef __StMuMcTrack_h__
 #define __StMuMcTrack_h__
 #include "tables/St_g2t_track_Table.h" 
@@ -7,7 +7,8 @@ class StMuMcTrack : public TObject {
  public:
   enum EHIT {ktpc, ksvt, kssd,
 	     kctb, keem, kemc, kesm, kftp, kgem, khpd, kist, kigt, kfst, 
-	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ktot};
+	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, kfts,
+	     ktot};
   StMuMcTrack(const g2t_track_st &t);
 #if 0
   StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), mId(t.id), mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
@@ -66,6 +67,7 @@ class StMuMcTrack : public TObject {
   UChar_t     		No_tof_hit()   const {return NoHits(ktof);}   /* Nhits in tof */			   
   UChar_t     		No_tpc_hit()   const {return NoHits(ktpc);}   /* Nhits in tpc */			   
   UChar_t     		No_vpd_hit()   const {return NoHits(kvpd);}   /* Nhits in vpd */                     
+  UChar_t     		No_fts_hit()   const {return NoHits(kfts);}   /* Nhits in vpd */                     
   Int_t                 ItrmdVertex()  const {return mItrmdVertex;} /* First intermediate vertex */	   
   Int_t          	IdVx       ()  const {return mIdVx;       } /* Id of start vertex of track */	   
   Int_t          	IdVxEnd    ()  const {return mIdVxEnd;    } /* Id of stop vertex of this track */ 
@@ -99,6 +101,9 @@ class StMuMcTrack : public TObject {
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif
 // $Log: StMuMcTrack.h,v $
+// Revision 1.4.16.1  2018/03/15 21:35:35  jwebb
+// Add FTS hits in MuMcTrack
+//
 // Revision 1.4  2014/08/06 19:19:07  perev
 // Move constructor .h ==> .cxx
 //

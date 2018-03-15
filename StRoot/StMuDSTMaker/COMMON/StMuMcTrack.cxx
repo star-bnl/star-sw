@@ -1,4 +1,4 @@
-// $Id: StMuMcTrack.cxx,v 1.4 2014/08/06 19:19:02 perev Exp $
+// $Id: StMuMcTrack.cxx,v 1.4.16.1 2018/03/15 21:35:35 jwebb Exp $
 #include "StMuMcTrack.h"
 #include "Stiostream.h"
 #include "TString.h"
@@ -30,6 +30,7 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), m
     mHits[ktof] = 0xff & t.n_tof_hit;  /* Nhits in tof */
     mHits[ktpc] = 0xff & t.n_tpc_hit;  /* Nhits in tpc */
     mHits[kvpd] = 0xff & t.n_vpd_hit;  /* Nhits in vpd */
+    mHits[kfts] = 0xff & t.n_fts_hit;  /* Nhits in vpd */
 
 assert(t.pt<0 || mPxyz.perp()>1e-6);
 
@@ -94,6 +95,9 @@ const Char_t *StMuMcTrack::GeName() {
 void StMuMcTrack::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuMcTrack.cxx,v $
+// Revision 1.4.16.1  2018/03/15 21:35:35  jwebb
+// Add FTS hits in MuMcTrack
+//
 // Revision 1.4  2014/08/06 19:19:02  perev
 // Move constructor .h ==> .cxx
 //
