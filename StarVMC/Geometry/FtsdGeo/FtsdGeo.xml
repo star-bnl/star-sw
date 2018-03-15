@@ -1549,7 +1549,7 @@
 	     y="ycenter"
 	     z="zcenter" />
 
-  <Placement block="FTSM" in="CAVE" konly="MANY"      
+  <Placement block="FTSM" in="CAVE" konly="MANY"      if="MAIN_useids!=1.0"
 	     x="xcenter"
 	     y="ycenter"
 	     z="zcenter" />
@@ -1630,13 +1630,13 @@
 
     <Par name="CUTGAM" value="1 MeV" />
     <Par name="CUTELE" value="MAIN_cutele" />
-    <Par name="CUTNEU" value="10 MeV" />
-    <Par name="CUTHAD" value="10 MeV" />
-    <Par name="CUTMUO" value="10 MeV" />
+    <Par name="CUTNEU" value="10 keV" />
+    <Par name="CUTHAD" value="10 keV" />
+    <Par name="CUTMUO" value="10 keV" />
     <Par name="BCUTE"  value="1 MeV" />
     <Par name="DCUTE"  value="10000 GeV" />
     <Par name="DCUTM"  value="10000 GeV" />
-    <Par name="PPCUTM" value="10 MeV" />
+    <Par name="PPCUTM" value="10 keV" />
 
         <Instrument block="FTSA"  >
              <Hit meas="zz" opts="S" bins="0.00001"  />
