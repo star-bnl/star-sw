@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.14.2.1 2017/12/04 19:58:59 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.14.2.2 2018/03/15 15:41:09 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -1123,10 +1123,6 @@ static int nCall=0; nCall++;
   TString path(it.GetPath());
   hp= (StHitPlane *)GetHitPlane(path);
 
-  TString ts("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_2/TPSS_8/TPA1_40");
-  if (ts == path) {
-    StTGeoProxy::Break(1234);
-  }
   if (hp) return 0;
 
   float  gPos[3],lDir[3][3];
