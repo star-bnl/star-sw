@@ -79,7 +79,7 @@ use RunDAQ;
 use CRSQueues;
 
 
-$ThisYear = 2017;                 # Block to consider. Completely artificial
+$ThisYear = 2018;                 # Block to consider. Completely artificial
                                   # and used to preserve older options in if
                                   # block along with current option.
 $HPSS     = 1;                    # turn to 0 for UNIX staging only
@@ -481,7 +481,8 @@ if ( $ThisYear == 2005 ){
 	  $ThisYear == 2014 ||
           $ThisYear == 2015 ||
           $ThisYear == 2016 ||  
-          $ThisYear == 2017 ) {
+          $ThisYear == 2017 ||
+          $ThisYear == 2018 ) {
     $TREEMODE= 1;
     $LIB     = "dev";
 
@@ -607,6 +608,7 @@ if ( $ThisYear == 2005 ){
        $DCHAIN{"AuAu"} = "P2017,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } elsif ($ThisYear == 2018) {
+       $TARGET  = "/star/data+09-12/reco/restricted"; 
        $DCHAIN{"ZuZu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
        $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
 
@@ -1953,7 +1955,7 @@ sub Submit
     if ( $mode == 4){
 	my(@el)=split(" ",$Hfile);
 	$dfile = $el[0];
-	$dfile =~ s/\/home\/starsink\/raw/$TARGET/;
+	$dfile =~ s/\/home\/starsink\/raw/$TARGET/;  # TODO may be twice restricted/
 	push(@OKFILES,$file);
 	push(@OKFRMT,"$el[0]/$el[1] $dfile/$el[1]");
 	return;
@@ -1985,6 +1987,7 @@ sub Submit
 		$run = 0;
 	    }
 	    $XXX   = "$trgsn/$field/$LIB/$items[2]/$dm/$run";
+	    
 	}
     }
 
