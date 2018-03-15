@@ -1,4 +1,4 @@
-/* $Id: StIstDb.h,v 1.12 2015/08/03 14:26:03 smirnovd Exp $ */
+/* $Id: StIstDb.h,v 1.13 2018/03/15 21:35:48 dongx Exp $ */
 
 #ifndef StIstDb_hh
 #define StIstDb_hh
@@ -15,6 +15,7 @@ class istControl_st;
 class istGain_st;
 class istMapping_st;
 class istChipConfig_st;
+class istSimPar_st;
 
 
 /**
@@ -58,17 +59,21 @@ public:
    const istControl_st *getControl() const  		{return mIstControl; }
    const istChipConfig_st *getChipStatus() const 	{return mIstChipStatus; }
 
+   /*! Simulator parameters -hft efficiency for both fast and slow*/
+   const istSimPar_st *istSimPar() {return mIstSimPar;}
+      
    Int_t setGeoHMatrices(Survey_st **tables);
    void setPedNoise(istPedNoise_st *pedNoise) 	{mIstPedNoise = pedNoise;}
    void setGain(istGain_st *gain)		{mIstGain     = gain;}
    void setMapping(istMapping_st *mapping)    	{mIstMapping  = mapping;}
    void setControl(istControl_st *control)    	{mIstControl  = control;}
    void setChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
-
+   void setIstSimPar(istSimPar_st *istSimPar) {mIstSimPar = istSimPar;}
+   
    virtual void Print(Option_t *opt = "") const;
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.12 2015/08/03 14:26:03 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.13 2018/03/15 21:35:48 dongx Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList; ///< A list of TGeoHMatrix transormations for each IST sensor
@@ -84,7 +89,8 @@ private:
    istMapping_st 	*mIstMapping;
    istControl_st 	*mIstControl;
    istChipConfig_st 	*mIstChipStatus;
-
+   istSimPar_st 	*mIstSimPar; ///< simulator parameters - hit efficiency
+   
    ClassDef(StIstDb, 1)
 };
 
@@ -94,6 +100,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.13  2018/03/15 21:35:48  dongx
+* Added the access to new table istSimPar
+*
 * Revision 1.12  2015/08/03 14:26:03  smirnovd
 * Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
 *
