@@ -4,26 +4,33 @@
 
 
     <Modules>
-      FtsdGeo
+      FtsdGeo, FtsdGeo1
     </Modules> 
 
     <Setup  name   = "FTSDof" comment="OFF" module="FtsdGeo" onoff="off" simu="2" />
 
     <Setup  name   = "FTSDon" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
     </Setup> 
 
+    <Setup  name   = "FTSIv0" simu="2" 
+	    comment= "Default configuration for the Forward Tracking System"
+	    module = "FtsdGeo1"
+	    onoff  = "on"  > 
+
+    </Setup> 
+
     <Setup  name   = "FTSDv0" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
 
     </Setup> 
 
     <Setup  name   = "FTSDv1" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
 
@@ -31,7 +38,7 @@
 
     </Setup> 
     <Setup  name   = "FTSDv2" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
 
@@ -39,7 +46,7 @@
 
     </Setup> 
     <Setup  name   = "FTSDv3" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
 
@@ -48,7 +55,7 @@
     </Setup> 
 
     <Setup  name   = "FTSDv4" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
 
@@ -58,7 +65,7 @@
     </Setup> 
 
     <Setup  name   = "FTSDv5" simu="2" 
-	    comment= "Default configuration for the Endcap EMC"
+	    comment= "Default configuration for the Forward Tracking System"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
 
