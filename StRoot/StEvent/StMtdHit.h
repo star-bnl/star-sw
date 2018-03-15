@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMtdHit.h,v 2.2 2015/10/09 17:46:14 ullrich Exp $
+ * $Id: StMtdHit.h,v 2.3 2018/03/15 22:00:34 smirnovd Exp $
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMtdHit.h,v $
+ * Revision 2.3  2018/03/15 22:00:34  smirnovd
+ * Fix linker error by removing declared but undefined functions
+ *
  * Revision 2.2  2015/10/09 17:46:14  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -53,7 +56,6 @@ public:
     void setCell(unsigned char);
     void setLeadingEdgeTime(pair<double,double>);
     void setTrailingEdgeTime(pair<double,double>);
-    void setTof(double);
     void setAssociatedTrack(StTrack*);
     void setIdTruth(int idtru, int qatru=0);
 
