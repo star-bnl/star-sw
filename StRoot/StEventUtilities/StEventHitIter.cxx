@@ -262,6 +262,7 @@ protected:
 //..............................................................................
 class StSvtBarrelHitIter : public StHitIter {
 public:
+    		StSvtBarrelHitIter();
 virtual        ~StSvtBarrelHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -270,6 +271,7 @@ protected:
 //..............................................................................
 class StSvtLadderHitIter : public StHitIter {
 public:
+    		StSvtLadderHitIter();
 virtual        ~StSvtLadderHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -278,6 +280,7 @@ protected:
 //..............................................................................
 class StSvtWaferHitIter : public StHitIter {
 public:
+    		StSvtWaferHitIter();
 virtual        ~StSvtWaferHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -389,6 +392,7 @@ protected:
 //..............................................................................
 class StSsdLadderHitIter : public StHitIter {
 public:
+    		StSsdLadderHitIter();
 virtual        ~StSsdLadderHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -397,6 +401,7 @@ protected:
 //..............................................................................
 class StSsdWaferHitIter : public StHitIter {
 public:
+    		StSsdWaferHitIter();
 virtual        ~StSsdWaferHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -855,12 +860,12 @@ int StEventHitIter::AddDetector(StDetectorId detId)
    case kPxlId: Add(new StPxlHitIter()) ;break;
    case kIstId: Add(new StIstHitIter()) ;break; 
      /* case kFgtId: n.b. This will be removing the RnD version of the FGT */ 
-   case kFmsId: 
-     Add(new StRnDHitIter(detId));break;
+   case kFmsId: Add(new StRnDHitIter(detId));break;
      
    case kTofId: Add(new StTofHitIter()) ;break;
    case kEtrId: Add(new StEtrHitIter()) ;break;
    case kFgtId: Add(new StFgtHitIter()) ;break;
+   case kFtsId: Add(new StRnDHitIter(detId));break;
        
      
    default: printf("StEventHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
