@@ -11,6 +11,8 @@
   <CDE>AGECOM,GCONST,GCUNIT</CDE>
   
   <Content>
+    FTSM,  <!-- FTS Mother volume -->
+
     FTSA,  <!-- FTS Si disk station A -->
     FTSB,  <!-- FTS Si disk station B -->
     FTSC,  <!-- FTS Si disk station C -->
@@ -27,9 +29,23 @@
 
   <varlist type="int"> station </varlist>
 
-  <Create    block="FTSA"/>  <Placement block="FTSA" in="CAVE"  z="60.0" />
-  <Create    block="FTSB"/>  <Placement block="FTSA" in="CAVE"  z="90.0" />
-  <Create    block="FTSC"/>  <Placement block="FTSA" in="CAVE" z="120.0" />
+  <Create    block="FTSM"/>  <Placement block="FTSM" in="CAVE" />
+
+
+  <Volume name="FTSM" comment="FTS mother volume"  >
+  <Material name="Air" />
+  <Shape type="tube" 
+	 rmin="2.25"
+	 rmax="20.0"
+	 dz="150.0" />
+
+
+  <Create    block="FTSA"/>  <Placement block="FTSA" in="FTSM"  z="60.0" />
+  <Create    block="FTSB"/>  <Placement block="FTSA" in="FTSM"  z="90.0" />
+  <Create    block="FTSC"/>  <Placement block="FTSA" in="FTSM" z="120.0" />
+
+  </Volume>
+
 
   <Volume name="FTSA" comment="Station A">
     <Material  name="Air" />
