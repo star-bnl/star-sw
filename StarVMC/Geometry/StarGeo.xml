@@ -4,6 +4,18 @@
 
 
   <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="sitrver0"  comment="Forward Tracking test setup for Si tracker">
+
+    <Construct sys="cave" config="CAVE05" simu="1" />
+    <Construct sys="pipe" config="PIPE12" simu="2" />
+    <Construct sys="tpce" config="TPCE31" simu="2"/>
+    <Construct sys="magp" config="MAGPon" simu="1"/>
+    <Construct sys="ftsd" config="FTSIv0" simu="2" />
+  
+  </Geometry>
+
+
+  <!-- Quick test geometry for FTS deveolpment -->
   <Geometry tag="ftsver0"  comment="Forward Tracking test setup">
 
     <Construct sys="cave" config="CAVE05" simu="1" />
