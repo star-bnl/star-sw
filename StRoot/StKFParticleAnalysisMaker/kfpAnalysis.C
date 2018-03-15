@@ -2,7 +2,9 @@
   FPE_OFF
   root.exe -q -b -x kfpAnalysis.C
 */
-void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "picoAna.root") {
+class StGoodTrigger;
+//void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "picoAna.root", const Char_t *triggerSet = "y2016") {
+void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "st_physics_adc_17125034_raw_1000007.femtoDst.root", const Char_t *output = "picoAna.root", const Char_t *triggerSet = "y2016") {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
@@ -19,6 +21,8 @@ void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "/net/l404/data/fisyak
   Long64_t nevent = N;
   nevent = TMath::Min(nevent,nentries);
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
+  new StGoodTrigger(triggerSet);
+  chain->SetAttr(".Privilege",1,"StPicoDstMaker::*")
   ((StBFChain *) StMaker::GetTopChain())->EventLoop(nevent);
 #endif
   

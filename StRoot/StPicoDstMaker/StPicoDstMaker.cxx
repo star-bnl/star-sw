@@ -552,6 +552,7 @@ int StPicoDstMaker::Make() {
   }
   else if (StMaker::m_Mode == PicoIoMode::IoRead) { 
     returnStarCode = MakeRead();
+    if (! mPicoDst->IsGoodTrigger()) return kStSkip;
   }
 
   return returnStarCode;

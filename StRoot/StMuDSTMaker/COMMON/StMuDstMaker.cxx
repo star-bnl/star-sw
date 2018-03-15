@@ -17,7 +17,7 @@
 #include "StFgtUtil/StFgtConsts.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
-
+#include "StEventUtilities/StGoodTrigger.h"
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StTimer.hh"
 #include "StarClassLibrary/StMatrixF.hh"
@@ -593,6 +593,7 @@ Int_t StMuDstMaker::MakeRead()
         returnStarCode = kStERR;
      }
   }
+   if (! mStMuDst->IsGoodTrigger()) return kStSkip;
   return returnStarCode;
 } 
     

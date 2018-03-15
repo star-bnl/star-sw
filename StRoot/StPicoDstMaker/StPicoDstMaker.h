@@ -57,7 +57,6 @@ class StPicoDstMaker : public StMaker {
   void setCompression(int comp = 9);
   PicoVtxMode vtxMode() {return StMuDst::instance()->vtxMode();}
   void setVtxMode(const PicoVtxMode vtxMode)         {StMuDst::instance()->setVtxMode(vtxMode);}
-  void SetGoodTriggers(const Char_t *trigList=0)     {StMuDst::instance()->SetGoodTriggers(trigList);}
   void SetMaxTrackDca(Double_t cut = 50)             {StMuDst::instance()->SetMaxTrackDca(cut);}
   void SetMaxVertexTransError(Double_t cut = 0.0050) {StMuDst::instance()->SetMaxVertexTransError(cut);}
   void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13) {StMuDst::instance()->SetVxXYrange(xmin,xmax,ymin,ymax);}

@@ -1,4 +1,5 @@
 /* 
+   root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016/125/17125034/st_physics_adc_17125034_raw_1000007.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' 'makePicoDst.C+("y2016")'
    root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/2010/114/11114040/*.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile",0,"11114040.picoDst.root")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/2010/114/11114040/st_physics_adc_11114040_raw_1520001.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/net/l404/data/fisyak/reco/2016/AuAu200_adc/st_physics_adc_17134047_raw_3500050.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
@@ -18,8 +19,11 @@
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
+#include "StEventUtilities/StGoodTrigger.h"
+#else
+class StGoodTrigger;
 #endif 
-void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, const int emcMode=1) {
+void makePicoDst(const Char_t *triggerSet = "y2016", const bool creatingPhiWgt = kFALSE, const int prodMod = 0, const int emcMode=1) {
   Int_t nEvents = 10000000;
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   StMuDstMaker *MuDstMaker = (StMuDstMaker *) chain->Maker("MuDst");
@@ -42,19 +46,13 @@ void makePicoDst(const bool creatingPhiWgt = kFALSE, const int prodMod = 0, cons
   tpcDB->SetActive(kFALSE);
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
 #ifdef __Y2010__
-  PicoDstMaker->SetGoodTriggers("");
   PicoDstMaker->SetVxZrange(-70,70);
   PicoDstMaker->SetVxRmax(2);
-#else /* __Y2016__ introduced 02/08/2018 for the 2-nd par of y2016 pico production*/
-#ifdef AuAu_200_production_2016
-  PicoDstMaker->SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051," // VPDMB-5-p-sst (2.58B)  - (1 : 4.84M))
-				"520802, 520812, 520822, 520832, 520842"          // VPDMB-5-p-hlt (1.81B)  - (43 : 0.55M; 45 : 24.09M) 
-				);
-#else
-  PicoDstMaker->SetGoodTriggers(""); // take all trigger for AuAu200_production2_2016
-#endif  
+#else /* __Y2014__ || __Y2016__ introduced 02/08/2018 for the 2-nd par of y2016 pico production*/
   PicoDstMaker->SetVxZrange(-6,6);
   PicoDstMaker->SetVxRmax(2);
+  chain->SetAttr(".Privilege",1,"StMuDstMaker::*");
+  StGoodTrigger tiggers(triggerSet);
 #endif
 #if 0  
   if(!creatingPhiWgt&&emcMode) {

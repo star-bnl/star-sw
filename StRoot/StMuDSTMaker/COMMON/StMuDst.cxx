@@ -18,7 +18,7 @@
 #include "StEvent/StTriggerData2007.h"
 #include "StEvent/StTriggerData2008.h"
 #include "StEvent/StTriggerData2009.h"
-
+#include "StEventUtilities/StGoodTrigger.h"
 #include "StarClassLibrary/StTimer.hh"
 #include "StMuDstMaker.h"
 #include "StMuEvent.h"
@@ -79,7 +79,6 @@ Int_t StMuDst::MinNoTpcMcHits = 15;
 Int_t StMuDst::MinNoTpcRcHits = 15;
 Double_t StMuDst::fgerMax = 0;    // 50 um
 Double_t StMuDst::fgdca3Dmax = 0; // 50 cm
-vector<Int_t> StMuDst::fGoodTriggerIds;
 Double_t StMuDst::fgVxXmin = 0, StMuDst::fgVxXmax = 0, StMuDst::fgVxYmin = 0, StMuDst::fgVxYmax = 0;
 Double_t StMuDst::fgVxZmin = 0, StMuDst::fgVxZmax = 0, StMuDst::fgVxRmax = 0;
 PicoVtxMode StMuDst::mVtxMode = NotSet; // This should always be ::NotSet, do not change it, see ::Init()
@@ -132,10 +131,6 @@ TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
   fgMuDst = this;
-  LOG_INFO << "StPicoDstMaker::StPicoDstMaker: Set Default cuts" << endm;
-  SetGoodTriggers("520001, 520011, 520021, 520031, 520041, 520051," // VPDMB-5-p-sst (2.58B)  - (1 : 4.84M))
-		  "520802, 520812, 520822, 520832, 520842"          // VPDMB-5-p-hlt (1.81B)  - (43 : 0.55M; 45 : 24.09M) 
-		  );
   SetMaxTrackDca(50);
   SetMaxVertexTransError(0);
   SetVxXYrange(0,0,0,0);
@@ -1623,6 +1618,13 @@ map<Int_t,Int_t> &StMuDst::IdKFVx2Indx() {
   return *&IdGlTk2IndxMap;
 }
 //________________________________________________________________________________
+Bool_t StMuDst::IsGoodTrigger() const {
+  if ( StGoodTrigger::instance()) {
+    return StGoodTrigger::instance()->IsGood(&(event()->triggerIdCollection().nominal()));
+  } 
+  return kTRUE;
+}
+//________________________________________________________________________________
 /**
  * Selects a primary vertex from `muDst` vertex collection according to the
  * vertex selection mode `mVtxMode` specified by the user. The mode must be
@@ -1637,26 +1639,8 @@ map<Int_t,Int_t> &StMuDst::IdKFVx2Indx() {
  */
 Bool_t StMuDst::selectVertex() {
   if (! numberOfPrimaryVertices()) return kFALSE;
-  StMuPrimaryVertex* selectedVertex = nullptr;
-  UInt_t Nt = fGoodTriggerIds.size();
-  if (Nt) {
-    const StTriggerId& triggers = StMuDst::instance()->event()->triggerIdCollection().l1();
-    Int_t GoodTrigger = -1;
-    Int_t NoAnyTriggers = 0;
-    for (Int_t k = 0; k < 64; k++) {
-      Int_t trig = triggers.triggerId(k);
-      if (! trig) continue;
-      NoAnyTriggers++;
-      for (UInt_t l = 0; l < Nt; l++) {
-	if (trig == fGoodTriggerIds[l]) {
-	  GoodTrigger = trig;
-	  break;
-	}
-	if (GoodTrigger > 0) break;
-      }
-      if (NoAnyTriggers && GoodTrigger < 0) {return selectedVertex;}
-    }
-  }
+  Bool_t selectedVertex = kFALSE;
+  if (! IsGoodTrigger()) return kFALSE;
   for (UInt_t iVtx = 0; iVtx < numberOfPrimaryVertices(); ++iVtx)       {
     StMuPrimaryVertex* vtx = primaryVertex(iVtx);
     if (!vtx) continue;
@@ -1688,7 +1672,7 @@ Bool_t StMuDst::selectVertex() {
     if (mVtxMode == PicoVtxMode::Default)  {
       // choose the default vertex, i.e. the first vertex
       setVertexIndex(iVtx);
-      selectedVertex = vtx;
+      selectedVertex = kTRUE;
     } else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)  {
       StBTofHeader const* mBTofHeader = btofHeader();
       Float_t vzVpd = -999;
@@ -1696,34 +1680,14 @@ Bool_t StMuDst::selectVertex() {
       if (mVtxMode == PicoVtxMode::Vpd && vzVpd < 200) continue;
       if (vzVpd >= -200 && mTpcVpdVzDiffCut > 0 && TMath::Abs(vzVpd - vtx->position().z()) >= mTpcVpdVzDiffCut) continue;
       setVertexIndex(iVtx);
-      selectedVertex = primaryVertex();
+      selectedVertex = kTRUE;
       break;
     } else {// default case
       LOG_ERROR << "Pico Vtx Mode not set!" << endm;
     }
   }
   // Retrun false if selected vertex is not valid
-  return selectedVertex ? true : false;
-}
-//________________________________________________________________________________
-void  StMuDst::SetGoodTriggers(const Char_t *trigList) {
-
-  fGoodTriggerIds.clear();
-  TString Trig(trigList);
-  if (Trig == "") return;
-  TObjArray *obj = Trig.Tokenize("[^ ;,:]");
-  Int_t nParsed = obj->GetEntries();
-  for (Int_t k = 0; k < nParsed; k++) {
-    if (obj->At(k)) {
-      LOG_INFO << "Trigger: " << k << "\t" << ((TObjString *) obj->At(k))->GetName() << endm;
-      TString t(((TObjString *) obj->At(k))->GetName());
-      Int_t trig = t.Atoi();
-      if (! trig) continue;
-      fGoodTriggerIds.push_back(trig);
-    }
-  }
-  obj->SetOwner(kFALSE);
-  delete obj;
+  return selectedVertex;
 }
 //________________________________________________________________________________
 void StMuDst::SetMaxTrackDca(Double_t cut) {

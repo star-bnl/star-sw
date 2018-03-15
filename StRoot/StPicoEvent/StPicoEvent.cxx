@@ -6,6 +6,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StEventUtilities/StGoodTrigger.h"
 
 #include "StPicoEvent/StPicoUtilities.h"
 #include "StPicoEvent/StPicoEvent.h"
@@ -175,4 +176,9 @@ int StPicoEvent::day() const {
 //_________________
 bool StPicoEvent::isTrigger(unsigned int id) const {
   return std::find(mTriggerIds.begin(), mTriggerIds.end(), id) != mTriggerIds.end();
+}
+//_________________
+Bool_t StPicoEvent::IsGoodTrigger() {
+  if (! StGoodTrigger::instance()) return kTRUE;
+  return StGoodTrigger::instance()->IsGood(mTriggerIds);
 }

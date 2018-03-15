@@ -27,7 +27,7 @@ class EveDis : public StuDraw3DEvent {
   //  You have to apply ACliC to use the custom class this macro defines as follows:
   //
   //   root.exe
-  //      root.exe [0].x Load.C
+  //      root.exe [0].x lMuDst.C
   //      root.exe [1].L EveDis.C++
   //      root.exe [2] EveDis display;
   //      root.exe [3] display.Draw3DTest()

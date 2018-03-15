@@ -36,7 +36,7 @@ class StPicoEvent : public TObject {
 
   std::vector<unsigned int> triggerIds() const;
   bool                      isTrigger(unsigned int) const;
-
+  virtual  Bool_t IsGoodTrigger();                    
   Int_t    refMultPos() const;
   Int_t    refMultNeg() const;
   Int_t    refMultFtpcEast() const;

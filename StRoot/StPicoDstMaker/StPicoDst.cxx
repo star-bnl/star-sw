@@ -196,4 +196,5 @@ void StPicoDst::printMtdPidTraits() {
 
   LOG_INFO << endm;
 }
-
+//_________________
+Bool_t StPicoDst::IsGoodTrigger() const {return event() ? event()->IsGoodTrigger() : kFALSE;}

@@ -2,13 +2,15 @@
   FPE_OFF
   root.exe -q -b -x femtoDst.C
 */
-void femtoDst(Int_t N = 10000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "") {
+class StGoodTrigger;
+//void femtoDst(Int_t N = 10000000, const Char_t *input = "/net/l404/data/fisyak/Pico/2016/125/17125034/st_physics_17125034_raw_5500079.picoDst.root", const Char_t *output = "", const Char_t *tiggerSet = "y2016") {
+void femtoDst(Int_t N = 10000000, const Char_t *input = "st_physics_adc_17125034_raw_1000007.picoDst.root", const Char_t *output = "", const Char_t *triggerSet = "y2016") {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
-  gROOT->LoadMacro("lMuDst.C");
-  lMuDst(0,input,"ry2016,RpicoDst,FemtoDst,mysql,nodefault,quiet",0,output);
+  gROOT->LoadMacro("bfc.C");
+  bfc(0,"ry2016,RpicoDst,FemtoDst,mysql,nodefault,quiet",input,output);
   StKFParticleInterface::instance()->SetTriggerMode();
   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
   StKFParticleInterface::instance()->SetSoftTofPidMode();
@@ -36,6 +38,8 @@ void femtoDst(Int_t N = 10000000, const Char_t *input = "/net/l404/data/fisyak/P
   StKFParticleInterface::instance()->AddDecayToReconstructionList(-4122);
   maker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
   if (! maker) return;
+  new StGoodTrigger(triggerSet);
+  maker->SetAttr(".Privilege",1);
   maker->SetStatus("*",1);
   TChain *tree = maker->chain();
   Long64_t nentries = tree->GetEntries();

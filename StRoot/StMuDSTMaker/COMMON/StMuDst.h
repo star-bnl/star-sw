@@ -162,7 +162,6 @@ public:
  protected:
   static Double_t  fgerMax;
   static Double_t  fgdca3Dmax; 
-  static vector<Int_t> fGoodTriggerIds; 
   static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
   static Double_t  fgVxZmin, fgVxZmax, fgVxRmax;
   static PicoVtxMode mVtxMode;
@@ -485,6 +484,7 @@ public:
   void printMcVertices();
   void printMcTracks();
   void PrintMcVx(UInt_t idVx = 1);
+  virtual Bool_t IsGoodTrigger() const;
   friend class StMuDstMaker;
   friend class StMuIOMaker;
 
@@ -566,10 +566,9 @@ public:
   static map<Int_t,Int_t>                            IdPrVx2IndxMap;
   static map<Int_t,Int_t>                            IdKFTk2IndxMap;
   static map<Int_t,Int_t>                            IdKFVx2IndxMap;
-
+  
   Bool_t selectVertex();
   static void setVtxMode(const PicoVtxMode vtxMode) {mVtxMode = vtxMode;}
-  static void SetGoodTriggers(const Char_t *trigList=0); 
   static void SetMaxTrackDca(Double_t cut = 50);
   static void SetMaxVertexTransError(Double_t cut = 0.0050);
   static void SetVxXYrange(Double_t xmin = -0.3, Double_t xmax = 0., Double_t ymin = -0.27, Double_t ymax = -0.13);

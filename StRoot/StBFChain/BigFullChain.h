@@ -1353,6 +1353,7 @@ Bfc_st BFC[] = { // standard chains
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,dbUtil,KFParticle","","StTpcDb,StEvent"
    ,                                                                                 "Load StEvent",kFALSE},
+  {"Stu"         ,""  ,"","","",                 "StTpcDb,StEventUtilities","Load StEventUtilities",kFALSE},
   {"PxlUtil"     ,""  ,"","StEvent","",                                "StPxlUtil","Load StPxlUtil",kFALSE},
   {"IstUtil"     ,""  ,"","","",                                       "StIstUtil","Load StIstUtil",kFALSE},
   {"SsdUtil"     ,""  ,"","StarMagField,StDbT,StEvent",""         ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
@@ -1422,9 +1423,6 @@ Bfc_st BFC[] = { // standard chains
   {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
   {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
   {"sstCalDb"    ,""     ,"","sstDb"         ,"","","Declare Calibrations/sst as while list member",kFALSE},
-
-  {"Stu"         ,""  ,"","","",                 "StTpcDb,StEventUtilities","Load StEventUtilities",kFALSE},
-
   {"epdDb"       ,"epdDb","","tpcDb",               "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1906,7 +1904,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd"     ,"","",""                            ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
-  {"femtoDst"    ,"","","KFPInter","StFemtoDstMaker", "StPicoAnalysisMaker","Load FemtoDST library",kFALSE},
+  {"femtoDst"    ,"","","KFPInter","StFemtoDstMaker"
+   ,                                            "StKFParticleAnalysisMaker","Load FemtoDST library",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom,Stu"

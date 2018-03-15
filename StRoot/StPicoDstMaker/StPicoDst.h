@@ -21,8 +21,8 @@ class StPicoDst {
 
  public:
   StPicoDst() { fgPicoDst = this;}
-  ~StPicoDst() {fgPicoDst = 0;}
-
+  virtual ~StPicoDst() {fgPicoDst = 0;}
+  virtual Bool_t IsGoodTrigger() const;
   /// set the pointers to the TClonesArrays
   static void set(TClonesArray**);
   /// resets the pointers to the TClonesArrays to 0
