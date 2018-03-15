@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.29 2015/02/04 07:56:31 smirnovd Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.30 2018/03/15 21:35:48 dongx Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -11,6 +11,7 @@
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
+#include "tables/St_istSimPar_Table.h"
 
 ClassImp(StIstDbMaker)
 
@@ -141,7 +142,17 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    mIstDb->setChipStatus(mChipConfig->GetTable());
-
+   
+   // set istSimPar
+   St_istSimPar *istSimPar = (St_istSimPar *)GetDataBase("Calibrations/ist/istSimPar");
+   if (istSimPar) {
+     mIstDb->setIstSimPar(istSimPar->GetTable());
+   }
+   else {
+     LOG_WARN << "InitRun : No access to istSimPar table, abort IST reconstruction" << endm;
+     return kStErr;
+   }
+                                    
    if ( GetDebug() >= 2)
       mIstDb->Print();
 
@@ -160,6 +171,9 @@ Int_t StIstDbMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.30  2018/03/15 21:35:48  dongx
+* Added the access to new table istSimPar
+*
 * Revision 1.29  2015/02/04 07:56:31  smirnovd
 * StIstDbMaker: Changed ToWhiteBoard() to ToWhiteConst() because we don't want to loose the StIstDb object at every call to StMaker::Clear()
 *
