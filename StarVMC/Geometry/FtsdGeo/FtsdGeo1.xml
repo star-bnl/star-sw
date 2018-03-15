@@ -1,0 +1,89 @@
+<Document  file="StarVMC/Geometry/FtsdGeo/FtsdGeo1.xml">
+
+<Replace match="GeV">*1.0E+0;</Replace>    
+<Replace match="MeV">*1.0E-3;</Replace>    
+<Replace match="keV">*1.0E-6;</Replace>
+
+<Module name="FtsdGeo1" comment="Forward Tracking System Geometry / development for Si tracker">
+
+  <Created date="03/15/2018" />
+  <Author  name="Guannan Xie" />
+  <CDE>AGECOM,GCONST,GCUNIT</CDE>
+  
+  <Content>
+    FTSA,  <!-- FTS Si disk station A -->
+    FTSB,  <!-- FTS Si disk station B -->
+    FTSC,  <!-- FTS Si disk station C -->
+    
+    FSIS   <!-- FTS Si sensor -->
+
+  </Content>
+
+  <Structure name="MAIN" comment="Main configuration control structure, selects version at run time">
+    <var name="version" type="float" />
+    <var name="useids"  type="float" />
+    <var name="active(20)" type="float" />
+  </Structure>
+
+  <varlist type="int"> station </varlist>
+
+  <Create    block="FTSA"/>  <Placement block="FTSA" in="CAVE"  z="60.0" />
+  <Create    block="FTSB"/>  <Placement block="FTSA" in="CAVE"  z="90.0" />
+  <Create    block="FTSC"/>  <Placement block="FTSA" in="CAVE" z="120.0" />
+
+  <Volume name="FTSA" comment="Station A">
+    <Material  name="Air" />
+    <Attribute for="FTSA" seen="1" colo="2" />
+    <Shape     type="tube" rmin="3.0" rmax="20.0" dz="1.0" />
+
+    <Create block="FSIS" />
+
+    <Placement block="FSIS" x="5.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="4.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="3.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="2.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="1.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+   
+  </Volume>
+
+  <Volume name="FTSB" comment="Station B">
+    <Material  name="Air" />
+    <Attribute for="FTSB" seen="1" colo="3" />
+    <Shape     type="tube" rmin="3.0" rmax="20.0" dz="1.0" />
+
+    <Placement block="FSIS" x="5.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="4.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="3.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="2.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="1.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+
+  </Volume>
+
+  <Volume name="FTSC" comment="Station C">
+    <Material  name="Air" />
+    <Attribute for="FTSC" seen="1" colo="4" />
+    <Shape     type="tube" rmin="3.0" rmax="20.0" dz="1.0" />
+
+    <Placement block="FSIS" x="5.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="4.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="3.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="2.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+    <Placement block="FSIS" x="1.0" y="5.0" dx="0.5" dy="0.5" dz="0.1" />
+
+  </Volume>
+
+
+  <Volume name="FSIS" comment="Silicon sensor">
+    <Material name="silicon"/>
+    <Material name="silicon" isvol="1" /> <!-- will copy the material into the volume, rather than reference it -->
+    <Attribute for="FSIS" seen="1" colo="6" />
+    <!-- We set the shape as a box with zero dimensions.  This allows us to
+    specify the dimensions when we place the box -->
+    <Shape type="box" dx="0" dy="0" dz="0" />
+    
+  </Volume>
+
+
+</Module>
+<!--  ================================================================================================================ -->
+</Document>
