@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StIstSlowSimMaker.cxx,v 1.3 2018/01/04 17:34:38 smirnovd Exp $
+ * $Id: StIstSlowSimMaker.cxx,v 1.4 2018/03/15 21:38:24 dongx Exp $
  *
  * Author: Leszek Kosarzewski, March 2014
  ****************************************************************************
@@ -47,6 +47,8 @@ using namespace std;
 #include "StIstUtil/StIstRawHit.h"
 #include "StIstUtil/StIstConsts.h"
 #include "StIstSlowSimMaker.h"
+#include "TRandom3.h"
+#include "tables/St_istSimPar_Table.h"
 
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
@@ -55,7 +57,7 @@ using namespace std;
 
 ClassImp(StIstSlowSimMaker)
 
-StIstSlowSimMaker::StIstSlowSimMaker(const char* name): StMaker(name), mIstDb(NULL), mBuildIdealGeom(kFALSE), mIstCollectionPtr(NULL) 
+StIstSlowSimMaker::StIstSlowSimMaker(const char* name): StMaker(name), mIstDb(NULL), mBuildIdealGeom(kFALSE), mIstCollectionPtr(NULL), mHitEffMode(0), mMomCut(0.),  mHitEff(1.0), mRndGen(nullptr)
 {
 	mMappingGeomVec.resize( kIstNumElecIds ); //! initialize to number of channels in StIstUtil/StIstConsts.h
    mDefaultTimeBin = 9; //! default ADC timebins, load from control table
@@ -122,6 +124,17 @@ Int_t StIstSlowSimMaker::InitRun(Int_t runnumber)
 		}
 	}
 
+        //! tunable parameter
+        mRndGen = (TRandom3 *)gRandom;
+        // MC->RC hit efficiency (momentum dependence - default)
+        istSimPar_st const* const istSimParTable = mIstDb->istSimPar();
+        mHitEffMode = istSimParTable[0].mode;
+        mMomCut = istSimParTable[0].pCut;
+        mHitEff = istSimParTable[0].effIst; // best knowledge from ZF cosmic ray study - tunable
+            
+        LOG_INFO << " IST MC hit efficiency mode used for IST slow simulator: " << mHitEffMode << endm;
+        LOG_INFO << "     +++ Hit Efficiency at p > " << mMomCut << " GeV/c = " << mHitEff << endm;
+            
 	return ierr;
 }
 
@@ -154,6 +167,26 @@ Int_t StIstSlowSimMaker::Make()
 				for(std::vector<StMcIstHit*>::iterator mcHitIt = mcHitVec.begin();mcHitIt!=mcHitVec.end(); ++mcHitIt){
 					LOG_DEBUG << "IST MC hit found ...... " << endm;
 					StMcIstHit* mcIstHit = (*mcHitIt);
+					if(!mcIstHit) continue;
+                                        float hitEff = 1.0;
+                                        switch (mHitEffMode) {
+                                          case 0:   // ideal case 100% efficiency
+                                                  break;
+                                          case 1:
+                                            if(mcIstHit->parentTrack()) {
+                                              float const ptot = mcIstHit->parentTrack()->momentum().mag();
+                                              hitEff = 1.0 - (1. - mHitEff)*ptot/mMomCut;
+                                              if(hitEff<mHitEff) hitEff = mHitEff;
+                                            }
+                                                  break;
+                                          case 2:
+                                              hitEff = mHitEff;
+                                                  break;
+                                          default:
+                                                  break;
+                                        }
+                                        
+                                        if( mRndGen->Rndm()>hitEff ) continue;
 
 					//mcIstHits stored local position
 					Double_t localIstHitPos[3]={mcIstHit->position().x(),mcIstHit->position().y(),mcIstHit->position().z()};
