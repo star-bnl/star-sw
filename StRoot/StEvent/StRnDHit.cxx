@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRnDHit.cxx,v 2.3 2017/05/04 01:07:34 perev Exp $
+ * $Id: StRnDHit.cxx,v 2.3.6.1 2018/03/15 21:24:18 jwebb Exp $
  *
  * Author: Mike Miller and Andrew Rose, Jan 2006
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StRnDHit.cxx,v $
- * Revision 2.3  2017/05/04 01:07:34  perev
- * Own err matrix added
+ * Revision 2.3.6.1  2018/03/15 21:24:18  jwebb
+ * Extend extra bytes in RnD hit for use in FTS development
  *
  * Revision 2.2  2016/02/25 17:10:20  ullrich
  * Implemented detector() which is now a pure abstract method in StHit.
@@ -49,7 +49,7 @@ StRnDHit::StRnDHit() :
   mErrorMatrix{0,0,0, 0,0,0, 0,0,0}
 {
     mLayer = mLadder = mWafer = -1;
-    mExtraByte1 = mExtraByte0 = 0;
+    mExtraByte1 = mExtraByte0 = mExtraByte2 = mExtraByte3 = 0;
     mKey = mVolumeId = -1;
     mDouble0 = mDouble1 = mDouble2 = mDouble3 = mDouble4 = 0.;
     mDetectorId = kUnknownId;

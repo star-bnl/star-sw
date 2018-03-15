@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRnDHit.h,v 2.3 2017/05/04 01:06:46 perev Exp $
+ * $Id: StRnDHit.h,v 2.3.6.1 2018/03/15 21:24:19 jwebb Exp $
  *
  * Author: Mike Miller and Andrew Rose, Jan 2006
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StRnDHit.h,v $
- * Revision 2.3  2017/05/04 01:06:46  perev
- * Own err matrix added
+ * Revision 2.3.6.1  2018/03/15 21:24:19  jwebb
+ * Extend extra bytes in RnD hit for use in FTS development
  *
  * Revision 2.2  2006/09/27 18:31:43  ullrich
  * Fixed setDouble() interface. Was sooo wrong.
@@ -48,6 +48,8 @@ public:
     
     int    extraByte0() const;
     int    extraByte1() const;
+    int    extraByte2() const;
+    int    extraByte3() const;
     
     int    key() const;
     int    volumeId() const;
@@ -63,6 +65,8 @@ public:
     void setWafer(short);
     void setExtraByte0(int);
     void setExtraByte1(int);
+    void setExtraByte2(int);
+    void setExtraByte3(int);
     void setDetectorId(StDetectorId);
     
     void setKey(int);
@@ -92,6 +96,8 @@ protected:
     //Extras
     Int_t mExtraByte0;
     Int_t mExtraByte1;
+    Int_t mExtraByte2;
+    Int_t mExtraByte3;
     
     //info to get back to StMcHit pointer:
     Int_t mKey; ///key from StMcHit
@@ -120,6 +126,8 @@ inline unsigned int  StRnDHit::ladder() const {return mLadder;}
 inline unsigned int  StRnDHit::wafer() const {return mWafer;}
 inline int    StRnDHit::extraByte0() const {return mExtraByte0;}
 inline int    StRnDHit::extraByte1() const {return mExtraByte1;}
+inline int    StRnDHit::extraByte2() const {return mExtraByte2;}
+inline int    StRnDHit::extraByte3() const {return mExtraByte3;}
 inline int    StRnDHit::key() const {return mKey;}
 inline int    StRnDHit::volumeId() const {return mVolumeId;}
 inline double StRnDHit::double0() const {return mDouble0;}
@@ -133,6 +141,8 @@ inline void StRnDHit::setLadder(short v) {mLadder = v;}
 inline void StRnDHit::setWafer(short v) {mWafer = v;}
 inline void StRnDHit::setExtraByte0(int v) {mExtraByte0=v;}
 inline void StRnDHit::setExtraByte1(int v) {mExtraByte1=v;}
+inline void StRnDHit::setExtraByte2(int v) {mExtraByte2=v;}
+inline void StRnDHit::setExtraByte3(int v) {mExtraByte3=v;}
 inline void StRnDHit::setKey(int v) {mKey = v;}
 inline void StRnDHit::setVolumeId(int v) {mVolumeId=v;}
 inline void StRnDHit::setDouble0(double val) {mDouble0 = val;}
