@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.19 2017/09/01 03:10:49 dongx Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.20 2018/03/15 21:33:07 dongx Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.20  2018/03/15 21:33:07  dongx
+ * *** empty log message ***
+ *
  * Revision 1.19  2017/09/01 03:10:49  dongx
  * Added access functions for pxlDigmapsSim table
  *
@@ -63,6 +66,7 @@
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlDigmapsSim_Table.h"
+#include "tables/St_pxlSimPar_Table.h"
 
 ClassImp(StPxlDbMaker)
 //_____________________________________________________________________________
@@ -153,6 +157,16 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    }
    else {
       LOG_WARN << "InitRun : No access to pxlDigmapsSim table, abort PXL reconstruction" << endm;
+      return kStErr;
+   }
+
+   // set pxlSimPar
+   St_pxlSimPar *pxlSimPar = (St_pxlSimPar *)GetDataBase("Calibrations/pxl/pxlSimPar");
+   if (pxlSimPar) {
+      mPxlDb->setPxlSimPar(pxlSimPar->GetTable());
+   }
+   else {
+      LOG_WARN << "InitRun : No access to pxlSimPar table, abort PXL reconstruction" << endm;
       return kStErr;
    }
 

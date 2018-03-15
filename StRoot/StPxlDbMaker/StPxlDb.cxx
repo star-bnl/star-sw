@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.10 2017/09/01 03:10:49 dongx Exp $
+ * $Id: StPxlDb.cxx,v 1.11 2018/03/15 21:33:07 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.11  2018/03/15 21:33:07  dongx
+ * *** empty log message ***
+ *
  * Revision 1.10  2017/09/01 03:10:49  dongx
  * Added access functions for pxlDigmapsSim table
  *
@@ -64,6 +67,7 @@
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlDigmapsSim_Table.h"
+#include "tables/St_pxlSimPar_Table.h"
 
 
 ClassImp(StPxlDb)
@@ -76,6 +80,7 @@ StPxlDb::StPxlDb() : StObject()
    mRowColumnStatusTable = 0;
    mPxlControl = 0;
    mPxlDigmapsSim = 0;
+   mPxlSimPar = 0;
    memset(mThinPlateSpline, 0, sizeof(mThinPlateSpline));
 }
 //_____________________________________________________________________________
