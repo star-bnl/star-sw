@@ -1170,7 +1170,7 @@ static const char *tit[]={"HP","HC","PC","HZ","PZ","CZ","HL","PL","CL","ZL"};
 
   const auto *d = TH0.Dir();
   double cosL = TH0.GetCos();
-  double tkDir[3][3] = {{-d[1]/cosL,d[0]/cosL,0},{0,0,1},{d[0],d[1],d[2]}};
+  // unused ? double tkDir[3][3] = {{-d[1]/cosL,d[0]/cosL,0},{0,0,1},{d[0],d[1],d[2]}};
 
   TH0.SetEmx(Gbeg);
   TH0.Move(L);
@@ -2895,7 +2895,7 @@ if (!(helx.GetCase()&kase)) continue;
 
 }
 //______________________________________________________________________________
-void TCircle::Show(int nPts,const double *Pts,int pstep) 
+void TCircle::Show(int nPts,const double *Pts,int pstep) const  
 {
 static TCanvas *myCanvas = 0;
 static TGraph  *ptGraph  = 0;
@@ -3476,7 +3476,7 @@ return ans;
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.78.4.1 2018/03/15 19:34:37 jwebb Exp $
+ * $Id: THelixTrack.cxx,v 1.78.4.2 2018/03/16 15:25:15 jwebb Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3492,7 +3492,16 @@ return ans;
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.78.4.2  2018/03/16 15:25:15  jwebb
+ * Restored the Step(...) functions in the THelixTrack interface.  These
+ * functions are present on the MAIN branch, and used by (e.g.) Sti.
+ *
+ * The intent here is to be able to compile the branch against DEV and run.
+ * It does compile, but reaches a segmentation violation.  So there is something
+ * missing on the branch which we will need to find before rebuilding EVAL.
+ *
  * Revision 1.78.4.1  2018/03/15 19:34:37  jwebb
+ *
  * Adding Victor's updated THelixTrack to the fwd tracking branch.  Increased
  * precision and calculated w/ respect to the Stv coordinate system.  May or
  * may not be compatible with the MAIN branch.  Integration with main should
