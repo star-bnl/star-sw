@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.14 2017/05/10 23:16:42 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.15 2018/03/16 18:38:49 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -33,6 +33,8 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StIOMaker/StIOMaker.h" // to save  local histos 
 #include "StBFChain/StBFChain.h"
+
+#include "TGeoManager.h"
 
 #define xL(t)   (t->getX())
 #define yL(t)   (t->getY())
@@ -166,8 +168,8 @@ void StPPVertexFinder::InitRun(int runnumber)
     } 
     if(btofGeom && !btofGeom->IsInitDone()) {
       LOG_INFO << " BTofGeometry initialization ... " << endm;
-      TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
-      btofGeom->Init(mydb, starHall);
+      TVolume *starHall = gGeoManager ? nullptr : (TVolume *) (mydb->GetDataSet("HALL"));
+      btofGeom->Init(mydb, starHall, gGeoManager);
     }
   }
 
@@ -1167,6 +1169,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.15  2018/03/16 18:38:49  genevb
+ * Use TGeo initializer for BTof geometry
+ *
  * Revision 1.14  2017/05/10 23:16:42  smirnovd
  * Some minor refactoring changes:
  *
