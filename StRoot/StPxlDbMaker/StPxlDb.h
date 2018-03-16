@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.10 2017/09/01 03:10:49 dongx Exp $
+ * $Id: StPxlDb.h,v 1.11 2018/03/15 21:33:07 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.11  2018/03/15 21:33:07  dongx
+ * *** empty log message ***
+ *
  * Revision 1.10  2017/09/01 03:10:49  dongx
  * Added access functions for pxlDigmapsSim table
  *
@@ -77,6 +80,7 @@ class pxlControl_st;
 #endif /* ! __NEW_PXLDB__ */
 class StThinPlateSpline;
 class pxlDigmapsSim_st;
+class pxlSimPar_st;
 
 
 /*!
@@ -162,6 +166,8 @@ public:
 #endif /* ! __NEW_PXLDB__ */
    /*! Slow simulator parameters */
    const pxlDigmapsSim_st *pxlDigmapsSim() {return mPxlDigmapsSim;}
+   /*! Simulator parameters -hft efficiency for both fast and slow*/
+   const pxlSimPar_st *pxlSimPar() {return mPxlSimPar;}
 #ifndef  __NEW_PXLDB__
    void setGeoHMatrices(Survey_st **tables); ///< set geoHMatrix parameters with parameters from Survey_st tables
    void setSensorStatus(pxlSensorStatus_st *sensorStatus) {mSensorStatusTable = sensorStatus;}
@@ -178,10 +184,11 @@ public:
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 #endif /* ! __NEW_PXLDB__ */
    void setPxlDigmapsSim(pxlDigmapsSim_st *pxlDigmapsSim) {mPxlDigmapsSim = pxlDigmapsSim;}
-
+   void setPxlSimPar(pxlSimPar_st *pxlSimPar) {mPxlSimPar = pxlSimPar;}
+   
    virtual void Print(Option_t *opt = "") const;
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.10 2017/09/01 03:10:49 dongx Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.11 2018/03/15 21:33:07 dongx Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
    static Int_t _debug;
@@ -212,7 +219,8 @@ private:
    static StPxlDb       *fgInstance;
 
    pxlDigmapsSim_st *mPxlDigmapsSim; ///< slow simulator parameters
-   
+   pxlSimPar_st *mPxlSimPar; ///< simulator parameters - hit efficiency
+      
    ClassDef(StPxlDb, 0)
 };
 #endif /* StPxlDb_h */
