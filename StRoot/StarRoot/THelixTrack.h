@@ -246,14 +246,16 @@ THelixTrack &operator=(const THelixTrack &from);
 ///            +surf[4]*x*x +surf[5]*y*y+surf[6]*z*z
 ///            +surf[7]*x*y +surf[8]*y*z+surf[9]*z*x  == 0
 ///            nearest==0 search alon direction, else the nearest
-        double Step(double stmax, const double *surf, int nsurf
-	           ,double *x=0, double *dir=0, int nearest=0) const { return Path( stmax,surf,nsurf,x,dir,nearest ); } 
-        double Path(double stmax, const double *surf, int nsurf
-	           ,double *x=0, double *dir=0, int nearest=0) const;
+
+  double Path(double stmax, const double *surf, int nsurf
+	      ,double *x=0, double *dir=0, int nearest=0) const { return Step( stmax,surf,nsurf,x,dir,nearest ); } 
+  double Step(double stmax, const double *surf, int nsurf
+	      ,double *x=0, double *dir=0, int nearest=0) const;
 
 ///		Distance to nearest point to given space point
-        double Step(const double point[3],double *xyz=0, double *dir=0) const {return Path(point,xyz,dir);}
-        double Path(const double point[3],double *xyz=0, double *dir=0) const;
+  double Path(const double point[3],double *xyz=0, double *dir=0) const {return Step(point,xyz,dir);}
+  double Step(const double point[3],double *xyz=0, double *dir=0) const;
+
 ///		DCA to given space point (with error matrix)
         double Dca(const double point[3],double *dcaErr=0) const;
 

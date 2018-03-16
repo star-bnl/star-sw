@@ -440,7 +440,7 @@ double THelixTrack::Move(double step,double F[5][5])
 }
 
 //_____________________________________________________________________________
-double THelixTrack::Path(double stmax,const  double *surf, int nsurf,
+double THelixTrack::Step(double stmax,const  double *surf, int nsurf,
                          double *xyz, double *dir, int nearest) const
 {
   int i;
@@ -678,7 +678,7 @@ double THelixTrack::Path(double x,double y) const
    return ht.Path(ar)/fCosL;
 }
 //_____________________________________________________________________________
-double THelixTrack::Path(const double *point,double *xyz, double *dir) const
+double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 {
 
     static int nCount=0; nCount++;
@@ -3476,7 +3476,7 @@ return ans;
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.78.4.2 2018/03/16 15:25:15 jwebb Exp $
+ * $Id: THelixTrack.cxx,v 1.78.4.3 2018/03/16 19:51:56 jwebb Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3492,6 +3492,14 @@ return ans;
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.78.4.3  2018/03/16 19:51:56  jwebb
+ * And one last change to make sure we get the signature right vs DEV...
+ *
+ * After modifying THelixTrack (and recompiling StarRoot), able to run
+ * the Stv tracker compiled against DEV and reproduce tracking efficiency
+ * in eval (88/100 tracks reconstructed...  low stats but reasonable for
+ * this use case).
+ *
  * Revision 1.78.4.2  2018/03/16 15:25:15  jwebb
  * Restored the Step(...) functions in the THelixTrack interface.  These
  * functions are present on the MAIN branch, and used by (e.g.) Sti.
