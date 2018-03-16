@@ -12,10 +12,11 @@ use lib "/afs/rhic.bnl.gov/star/packages/scripts/";
 use RunDAQ;
 
 # Mode 1 will quit
-$mode    = 1;     # default mode - overwritten by argument 1
-$sltime  = 60;    # sleep time between default between loops - overwriten by arguments 2
-$FILE    = "";    # Default file name for LOG - overwirten by argument 3 (i.e. DAQFill.log);
-$EXPIRET = 172800;# 172800 = 48 hours / 21600 = 6 hours / 14400 = 4 hours / 10800 = 3 hours delays expected
+$mode    = 1;      # default mode - overwritten by argument 1
+$sltime  = 60;     # sleep time between default between loops - overwriten by arguments 2
+$FILE    = "";     # Default file name for LOG - overwirten by argument 3 (i.e. DAQFill.log);
+$EXPIRET = 259200; # 172800 = 48 hours / 21600 = 6 hours / 14400 = 4 hours / 10800 = 3 hours delays expected
+                   # 259200 3 days
 
 $SSELF   = "DAQFill";
 
@@ -180,13 +181,14 @@ sub GetRun
 
     $cv = $rv = "0.0";
     if( $FILE ne ""){
-	@lines = `/usr/bin/tail -20 $FILE`;
+	@lines = `/usr/bin/tail -100 $FILE`;
 	foreach $line (@lines){
 	    if ($line =~ m/(Run=)(\d+)\.(\d+)/){
 		# this run information comes from rdaq_last_run() which will look
 		# at the latest record in the db. We need to fetch records since an
 		# older run number until now.
 		$cv = $rv = "$2.$3";
+		last;
 	    }
 	}
 	if ( $rv ne "0.0" ){

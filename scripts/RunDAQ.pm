@@ -193,7 +193,7 @@ $dbpass    = "";
 $DBTABLE   = "DAQInfo";
 $dbname    = "operation";
 
-$HPSSBASE  = "/home/starsink/raw/daq";        # base path for HPSS file loc.
+$HPSSBASE  = "/home/starsink/raw";            # base path for HPSS file loc.
 $DELAY     = 60;                              # delay backward in time in seconds
 
 # Required tables on $DDBSERVER
@@ -598,7 +598,11 @@ sub rdaq_raw_files
 	}
 
 	# skip scaler files added in 2006
-	if ( $res[0] =~ /\.sca/ || $res[0] =~ m/run\d+\.\d+\.dat/ ){  next;}
+	if ( $res[0] =~ /\.log/ ||                  # <-- added 2018 as there are lots of it
+	     $res[0] =~ /\.sca/ ||                  # <-- scaler files, skip warning
+	     $res[0] =~ m/run\d+\.\d+\.dat/ ){  
+	    next;
+	}
 	# even more exotic files are appearing in the DB from 2007 onwards
 	if ( $res[0] !~ /\.daq/){
 	    if ($DEBUG){
@@ -1556,7 +1560,7 @@ sub rdaq_file2hpss
 	# The default path is to store by month
 	# We are NOT taking care of exceptions ...
 	@items = Date::Manip::Date_NthDayOfYear($y,$dm);
-	my($y1path)=sprintf("%s/%s/%2.2d",$HPSSBASE,$y,$items[1]);
+	my($y1path)=sprintf("%s/daq/%s/%2.2d",$HPSSBASE,$y,$items[1]);
 
 	if($mode == 1){
 	    "$y1path $file";
@@ -1568,27 +1572,34 @@ sub rdaq_file2hpss
     } elsif ($y <= 2005) {
 	# the default option is to store by day-of-year
 	if($mode==1){
-	    "$HPSSBASE/$y/$dm $file";
+	    "$HPSSBASE/daq//$y/$dm $file";
 	} elsif ($mode == 2 || $mode == 3){
 	    @items = Date::Manip::Date_NthDayOfYear($y,$dm);
 	    ($mode == 2)?
-		"$HPSSBASE/$y/$dm $file $y $items[1]":
-		"$HPSSBASE/$y/$dm $file $y $items[1] $dm";
+		"$HPSSBASE/daq/$y/$dm $file $y $items[1]":
+		"$HPSSBASE/daq/$y/$dm $file $y $items[1] $dm";
 	} else {
-	    "$HPSSBASE/$y/$dm/$file";
+	    "$HPSSBASE/daq/$y/$dm/$file";
 	}
     } else {
 	# the default since 2005+ is to store by day-of-year
 	# and run number
+	my($base)=$HPSSBASE;
+	if ( $y == 2018 ) {  
+	    # this path is used for runs >= 19073057
+	    if ( $code >= 19073057){
+		$base .= "/restricted";
+	    }
+	}
 	if($mode==1){
-	    "$HPSSBASE/$y/$dm/$code $file";
+	    "$base/daq/$y/$dm/$code $file";
 	} elsif ($mode == 2 || $mode == 3){
 	    @items = Date::Manip::Date_NthDayOfYear($y,$dm);
 	    ($mode == 2)?
-		"$HPSSBASE/$y/$dm/$code $file $y $items[1]":
-		"$HPSSBASE/$y/$dm/$code $file $y $items[1] $dm";
+		"$base/daq/$y/$dm/$code $file $y $items[1]":
+		"$base/daq/$y/$dm/$code $file $y $items[1] $dm";
 	} else {
-	    "$HPSSBASE/$y/$dm/$code/$file";
+	    "$base/daq/$y/$dm/$code/$file";
 	}
     }
 }

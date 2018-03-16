@@ -121,7 +121,7 @@ $THROTTLE = 2;
 $TREEMODE = 0;
 
 #### SET THIS TO 1 TO DEBUG NEW SCRIPTS / FEATURES - Can be done by year
-$DEBUG    = 0;
+$DEBUG    = 0||defined($ENV{"JobSubmit_DEBUG"});
 
 
 # variables default value before they were implemented
@@ -141,6 +141,8 @@ my $njobs = 0;
 $TOT = 0;
 
 my @STATES = ("RUNNING","QUEUED","SUBMITTED","STAGING","CREATED");
+
+print "DEBUG We are starting with year=$ThisYear\n" if ($DEBUG);
 
 
 if ( $ThisYear == 2005 ){
@@ -609,7 +611,7 @@ if ( $ThisYear == 2005 ){
 
    } elsif ($ThisYear == 2018) {
        $TARGET  = "/star/data+09-12/reco/restricted"; 
-       $DCHAIN{"ZuZu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
+       $DCHAIN{"ZrZr"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
        $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } else {
@@ -636,6 +638,8 @@ if ( $ThisYear == 2005 ){
     $SCALIB{"UU"}        = "OptLaser";
     $SCALIB{"CuAu"}      = "OptLaser";
     $SCALIB{"DAu"}       = "OptLaser";
+    $SCALIB{"ZrZr"}      = "OptLaser";
+    $SCALIB{"RuRu"}      = "OptLaser";
 
 
 } else {
@@ -684,7 +688,11 @@ $MINEVT  =  0 if (!defined($MINEVT)); # minimum number of events to consider
 if ( -e $QUITF){
     print "$SELF : $QUITF detected I have been asked to skip processing\n";
     rdaq_set_message($SSELF,"$QUITF detected","I have been asked to skip processing");
-    &Exit();
+    if ( ! $DEBUG ){
+	&Exit();
+    } else {
+	print "DEBUG Continuing anyhow\n";
+    }
 }
 
 # be sure to turn it ON
@@ -882,10 +890,15 @@ if( $TARGET =~ m/^\// || $TARGET =~ m/^\^\// ){
 $njobs = 0;   
 $NSLOT = 0;
 
-    foreach my $jstate (@STATES) {
-    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
-    next if( !defined $njobs) ;
-    $NSLOT +=  $njobs;
+    if ( $DEBUG ){
+	$NSLOT = 1;
+    } else {
+	foreach my $jstate (@STATES) {
+	    print "DEBUG Getting State=$jstate\n" if ($DEBUG);
+	    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
+	    next if( !defined $njobs) ;
+	    $NSLOT +=  $njobs;
+	}
     }
 
     print "Number of jobs 1  ", $NSLOT, "\n";
@@ -1130,10 +1143,16 @@ $njobs = 0;
 $NSLOT = 0;
 $TOT = 0;
 
-    foreach my $jstate (@STATES) {
-    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
-    next if( !defined $njobs) ;
-    $NSLOT +=  $njobs;
+
+    if ( $DEBUG ){
+	$NSLOT = 1;
+    } else {
+	foreach my $jstate (@STATES) {
+	    print "DEBUG Getting State=$jstate\n" if ($DEBUG);
+	    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
+	    next if( !defined $njobs) ;
+	    $NSLOT +=  $njobs;
+	}
     }
 
     $TOT = $MAXSLOTS - $NSLOT;
@@ -1352,10 +1371,15 @@ $njobs = 0;
 $NSLOT = 0;
 $TOT = 0;
 
-    foreach my $jstate (@STATES) {
-    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
-    next if( !defined $njobs) ;
-    $NSLOT +=  $njobs;
+    if ( $DEBUG){
+	$NSLOT = 1;
+    } else {
+	foreach my $jstate (@STATES) {
+	    print "DEBUG Getting State=$jstate\n" if ($DEBUG);
+	    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
+	    next if( !defined $njobs) ;
+	    $NSLOT +=  $njobs;
+	}
     }
     $TOT = $MAXSLOTS - $NSLOT;
     if( $TOT < 0) {$TOT = 0};
@@ -1676,10 +1700,15 @@ $TOT = 0;
 $njobs = 0;
 $NSLOT = 0;
 
-    foreach my $jstate (@STATES) {
-    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
-    next if( !defined $njobs) ;
-    $NSLOT +=  $njobs;
+    if ( $DEBUG ){
+	$NSLOT = 1;
+    } else {
+	foreach my $jstate (@STATES) {
+	    print "DEBUG Getting State=$jstate\n" if ($DEBUG);
+	    $njobs = `/usr/bin/crs_job -long -s $jstate | grep Stdout | grep dev | wc -l` ;
+	    next if( !defined $njobs) ;
+	    $NSLOT +=  $njobs;
+	}
     }
 
     print "Number of jobs   ", $NSLOT, "\n";
@@ -1773,6 +1802,7 @@ sub Submit
     my($filseq);
     my($stagedon);
     my($destination);
+    my($pad);
 
     # We are assuming that the return value of $file is
     # the mode 2 of get_ffiles() and counting on the
@@ -1943,6 +1973,18 @@ sub Submit
     @items = split(" ",$Hfile);
 
 
+    
+    # does the path contains anything else tha raw/daq?
+    $pad =  $items[0];
+    #$pad = " /home/starsink/raw/daq/2018/074/19074092";
+    $pad =~ s/daq.*//;
+    $pad =~ s/.*raw\///;
+    #if ( $pad ne ""){ chop($pad);}
+  
+    print "DEBUG Padding is [$pad]\n" if ($DEBUG);
+
+
+
     # No trigger information nowadays
     $m     = sprintf("%2.2d",$items[3]);
     $dm    = $items[4];
@@ -1976,17 +2018,17 @@ sub Submit
     # PATH are different depending on HPSS storage or local
     # Mode for UNIX is a Fast-local buffering.
     if ( $TREEMODE == 0){
-	$XXX = "$LIB/$items[2]/$m";
+	$XXX = "$pad$LIB/$items[2]/$m";
     } else {
 	if ($ThisYear < 2006){
-	    $XXX = "$trgsn/$field/$LIB/$items[2]/$dm";
+	    $XXX = "$pad$trgsn/$field/$LIB/$items[2]/$dm";
 	} else {
 	    if ( $mfile =~ m/(\d+)(_raw_)/ ){
 		$run = $1;
 	    } else {
 		$run = 0;
 	    }
-	    $XXX   = "$trgsn/$field/$LIB/$items[2]/$dm/$run";
+	    $XXX   = "$pad$trgsn/$field/$LIB/$items[2]/$dm/$run";
 	    
 	}
     }
@@ -2001,7 +2043,7 @@ sub Submit
 	$stagedon    = "UNIX";
     }
 
-my $NEVT = $MAXEVT!=0?$MAXEVT:$NUMEVT ;
+    my $NEVT = $MAXEVT!=0?$MAXEVT:$NUMEVT ;
 
     # Now generate the file and submit
     if( open(FO,">$jfile") ){

@@ -189,11 +189,12 @@ sub ProcessRun {
 
 
     if ($#all == -1){
+	print "DEBUG: Nothing known about $run\n"  if (defined($ENV{FOlocate_DEBUG}));
 	print "Do not know about runNumber=$run\n" unless ( ! $warn || $QHPSS );
     } else {
 	print "runNumber=$run summary\n"           if ( ! $QHPSS || $ALLP );
 	foreach $ligne (@all){
-	    print "DEBUG: [$ligne]\n" if (defined($ENV{FOlocate_DEBUG}));
+	    print "DEBUG: [$ligne]\n"              if (defined($ENV{FOlocate_DEBUG}));
 	    @info = split(" ",$ligne);
 	    $file = $info[0];
 	    if ( $DIFF ){
