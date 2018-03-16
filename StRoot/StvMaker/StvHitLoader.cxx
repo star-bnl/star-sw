@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.33 2017/01/19 16:56:01 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.33.4.1 2018/03/16 16:52:54 jwebb Exp $
 /*!
 \author V Perev 2010  
 
@@ -137,6 +137,9 @@ if (myGraph) { //create canvas
     mDetId = did;
     int sure=0;
     int nStvHits = MakeStvHit(stHit,mHitIter->UPath(),sure);
+
+
+
 //     if (!sure && mStvHit) { //Non reliable hit
 //       double rxy = sqrt(pow(mStvHit->x()[0],2)+pow(mStvHit->x()[1],2));
 //       StvDebug::Count("OrphanHits",mStvHit->x()[2],rxy);
@@ -223,7 +226,8 @@ static int knt=0;knt++;
      assert(fabs(x[0])+fabs(x[1])>1);
      if (fabs(x[2])>250) {
        static StvToolkit *tk = StvToolkit::Inst();
-       if (tk->GetHA(x)<1./1000) seed = 0;
+       // uncomment line to require hit is in B field to be valid for seed finding 
+       //if (tk->GetHA(x)<1./1000) seed = 0;
    } }
 //VP   if (mStvHit->IsCombo()) seed = 0;
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
