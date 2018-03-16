@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.hh,v 1.22 2010/06/02 12:12:01 jcs Exp $
+// $Id: StFtpcConfMapper.hh,v 1.23 2018/03/15 22:00:35 smirnovd Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.23  2018/03/15 22:00:35  smirnovd
+// Fix linker error by removing declared but undefined functions
+//
 // Revision 1.22  2010/06/02 12:12:01  jcs
 // undo correction for Bug#1939 since it was incorrect
 //
@@ -294,11 +297,6 @@ public:
   Double_t const  GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);          //returns normalized difference of eta
   Double_t const  GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);  // returns distance between to clusters
   Double_t const  GetDistanceFromFit(const StFtpcConfMapPoint *hit);                                   // returns distance of cluster from fit
-
-  Double_t const  GetSetupTime();
-  Double_t const  GetMainVertexTrackingTime();
-  Double_t const  GetFreeTrackingTime();
-  Double_t const  GetLaserTrackingTime();
 
   // Tracking procedures
               void  ClusterLoop();                                                                               // loops over clusters
