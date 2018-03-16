@@ -736,7 +736,7 @@ Int_t DIGParticle::GetPixelNumber(DIGPlane *myDIGPlane,  Float_t Xpos, Float_t Y
      (Xpos>myDIGPlane->GetXdimension())||
      (Ypos<0.0)||
      (Ypos>myDIGPlane->GetYdimension())){
-    cout<<" DIGParticle::GetPixelNumber WARNING  charge is going outside the plane limits"<<endl;
+//    cout<<" DIGParticle::GetPixelNumber WARNING  charge is going outside the plane limits: x/y([0,"<<myDIGPlane->GetXdimension()<<"],[0,"<<myDIGPlane->GetYdimension()<<"])="<<Xpos<<"/"<<Ypos<<endl;
     return 0;
   }else{
     return PixelNumber;
