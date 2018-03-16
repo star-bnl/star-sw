@@ -1373,11 +1373,11 @@ Bfc_st BFC[] = { // standard chains
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil,Tree",""
    ,                                                            "StMuDSTMaker","Load MuDST library",kFALSE},
 #else /* __NoStrangeMuDst__  , StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__*/
-  {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   ""
+  {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel,EmcUtil,TofUtil,BTofUtil,PmdUtil",   ""
    ,                                           "StMuDSTMaker","Load MuDST misc. dependencies (all)",kFALSE},
-  {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
-   ,                                      "StMuDSTMaker,StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
+  {"MuDST"       ,"" ,"","MuDSTDeps","",  "StMuDSTMaker,StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
+  {"PicoDeps"    ,"","","MuDSTDeps",    "", "StPicoEvent,StPicoDstMaker","Load PicoDST dependences",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
@@ -1398,7 +1398,7 @@ Bfc_st BFC[] = { // standard chains
   {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco,Tree"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
-  {"RpicoDST"  ,"","","picoDst"                                               ,"","","read PicoDST",kFALSE},
+  {"RpicoDST"  ,"RPicoDst","","PicoDeps"                        ,"StPicoDstMaker","","read PicoDST",kFALSE},
   {"picoWrite" ,"","","picoDst",""                                      ,"","Writes picoDST format",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},

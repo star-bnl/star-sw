@@ -10,7 +10,8 @@ void femtoDst(Int_t N = 10000000, const Char_t *input = "st_physics_adc_17125034
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("bfc.C");
-  bfc(0,"ry2016,RpicoDst,FemtoDst,mysql,nodefault,quiet",input,output);
+  bfc(0,"RpicoDst,FemtoDst,mysql,nodefault",input,output);
+  //  bfc(0,"ry2016,RpicoDst,FemtoDst,mysql,nodefault,quiet",input,output);
   StKFParticleInterface::instance()->SetTriggerMode();
   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
   StKFParticleInterface::instance()->SetSoftTofPidMode();

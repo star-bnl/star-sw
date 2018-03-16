@@ -36,15 +36,30 @@ StGoodTrigger::StGoodTrigger(const Char_t *trigList) {
 }
 //________________________________________________________________________________
 Bool_t StGoodTrigger::IsGood(const vector<UInt_t> &triggers) {
+  static Int_t debug = 0;
   UInt_t NT = fGoodTriggerIds.size();
+  if (debug) {
+    LOG_INFO << "StGoodTrigger::IsGood -- no. of requested triggers " << NT << endm;
+  }
   if (!NT) return kTRUE; // no trigger selection
   UInt_t nt = triggers.size();
+  if (debug) {
+    LOG_INFO << "StGoodTrigger::IsGood -- no. of event triggers " << nt << endm;
+  }
   if (! nt) return kFALSE; // no trigger information
+  Int_t goodTrigger = -1;
   for (UInt_t i = 0; i < NT; i++) {
     for (UInt_t j = 0; j < nt; j++) {
-      if (triggers[j] == fGoodTriggerIds[i]) return kTRUE;
+      if (triggers[j] == fGoodTriggerIds[i]) {
+	goodTrigger = triggers[j];
+	break;
+      }
     }
   }
+  if (debug) {
+    LOG_INFO << "StGoodTrigger::IsGood -- matched trigger " << goodTrigger << endm;
+  }
+  if (goodTrigger > 0) return kTRUE;
   return kFALSE;
 }
 //________________________________________________________________________________

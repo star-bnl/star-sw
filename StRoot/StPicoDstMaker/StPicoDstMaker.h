@@ -98,7 +98,7 @@ class StPicoDstMaker : public StMaker {
   void fillBTowHits();
   void fillBTofHits();
   void fillMtdHits();
-
+  void fillHddr();
  /**
   * Returns various measurements by the BEMC and BSMD detectors corresponding to
   * a given global track.

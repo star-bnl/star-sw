@@ -23,7 +23,7 @@ void kfpAnalysis(Int_t N = 1000000, const Char_t *input = "st_physics_adc_171250
   cout << nentries << " events in chain " << nevent << " will be read." << endl;
   new StGoodTrigger(triggerSet);
   chain->SetAttr(".Privilege",1,"StPicoDstMaker::*")
-  ((StBFChain *) StMaker::GetTopChain())->EventLoop(nevent);
+  chain->EventLoop(nevent);
 #endif
   
 }

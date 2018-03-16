@@ -1640,7 +1640,7 @@ Bool_t StMuDst::IsGoodTrigger() const {
 Bool_t StMuDst::selectVertex() {
   if (! numberOfPrimaryVertices()) return kFALSE;
   Bool_t selectedVertex = kFALSE;
-  if (! IsGoodTrigger()) return kFALSE;
+  //  if (! IsGoodTrigger()) return kFALSE;
   for (UInt_t iVtx = 0; iVtx < numberOfPrimaryVertices(); ++iVtx)       {
     StMuPrimaryVertex* vtx = primaryVertex(iVtx);
     if (!vtx) continue;

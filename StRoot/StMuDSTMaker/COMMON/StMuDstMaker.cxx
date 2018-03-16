@@ -583,6 +583,7 @@ Int_t StMuDstMaker::MakeRead()
    if (mIoMode == ioRead) {
      try {
        read();
+       if (! mStMuDst->IsGoodTrigger()) return kStSkip;
      }
      catch(StMuExceptionEOF e) {
        e.print();
@@ -593,7 +594,6 @@ Int_t StMuDstMaker::MakeRead()
         returnStarCode = kStERR;
      }
   }
-   if (! mStMuDst->IsGoodTrigger()) return kStSkip;
   return returnStarCode;
 } 
     
@@ -1896,10 +1896,6 @@ void StMuDstMaker::fillHddr()
   StEventInfo 		&ei = me->eventInfo();
   StRunInfo 		&ri = me->runInfo();
   StEvtHddr *hd = GetEvtHddr();
-  if (!hd) {                            // Standalone run
-    hd = new StEvtHddr(m_ConstSet);
-    SetOutput(hd);	              //Declare this "EvtHddr" for output
-  }
   Int_t id, it;
   TUnixTime ut(ei.time()); ut.GetGTime(id,it);
   hd->SetDateTime(id,it);

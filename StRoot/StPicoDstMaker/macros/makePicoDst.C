@@ -1,4 +1,6 @@
 /* 
+   root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016/125/17125034/st_physics_adc_17125034_raw_1000007.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")' 'makePicoDst.C+("y2016")'
+   root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016/125/17125034/st_physics_adc_17125034_raw_1000007.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite")' 'makePicoDst.C+("y2016")'
    root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016/125/17125034/st_physics_adc_17125034_raw_1000007.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' 'makePicoDst.C+("y2016")'
    root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/2010/114/11114040/*.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile",0,"11114040.picoDst.root")' makePicoDst.C+
    root.exe 'lMuDst.C(-1,"/gpfs02/eic/ayk/STAR/reco/MuDst/2010/114/11114040/st_physics_adc_11114040_raw_1520001.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet,TTreeFile")' makePicoDst.C+
