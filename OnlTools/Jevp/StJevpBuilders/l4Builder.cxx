@@ -1431,16 +1431,16 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	  {
 	    // di-muon
-	    const int nNodes = hlt_node->nNodes;
-	    int global2prim[nNodes];
-	    for(int inode = 0; inode<hlt_node->nNodes; inode++)
-	      {
-		int gTrackSN  = hlt_node->node[inode].globalTrackSN;
-		int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
-		global2prim[gTrackSN] = pTrackSN;
-	      }
-	    
 	    if(decision & triggerBitDiMuon) {
+	      const int nNodes = hlt_node->nNodes;
+	      int global2prim[nNodes];
+	      for(int inode = 0; inode<hlt_node->nNodes; inode++)
+		{
+		  int gTrackSN  = hlt_node->node[inode].globalTrackSN;
+		  int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+		  global2prim[gTrackSN] = pTrackSN;
+		}
+	      
 	      int nMtdHit = hlt_mtd->nMtdHits;
 	      vector<int> pMuTrkId;
 	      pMuTrkId.clear();
@@ -1560,92 +1560,92 @@ void l4Builder::event(daqReader *rdr)
 		tmp_global2prim[tmp_gTrackSN] = tmp_pTrackSN;
 	      }
 	    //-----------------------------------------------------------------
-	    //if(decision & triggerBitDiMuon) {   need the triggerBitMTDQuarkonium
-	    int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
-	    for(int i=0; i<nMTDQmPairs; i++){
-	      
-		int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
-		int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
+	    if(decision & triggerBitMTDQuarkonium) 
+	      {   //need the triggerBitMTDQuarkonium
+		int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
+		for(int i=0; i<nMTDQmPairs; i++){
+		  
+		  int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
+		  int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
 
-		int pTrackSN1 = tmp_global2prim[mgtrkid1];
-		int pTrackSN2 = tmp_global2prim[mgtrkid2];
-		if( pTrackSN1<0||pTrackSN2<0 ) continue;
+		  int pTrackSN1 = tmp_global2prim[mgtrkid1];
+		  int pTrackSN2 = tmp_global2prim[mgtrkid2];
+		  if( pTrackSN1<0||pTrackSN2<0 ) continue;
 
-		hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
-		hlt_track muPtrk2 =  hlt_pt->primaryTrack[pTrackSN2];
-		if(muPtrk1.nHits<15||muPtrk2.nHits<15)continue;
-		if(muPtrk1.ndedx<10||muPtrk2.ndedx<10)continue;
+		  hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
+		  hlt_track muPtrk2 =  hlt_pt->primaryTrack[pTrackSN2];
+		  if(muPtrk1.nHits<15||muPtrk2.nHits<15)continue;
+		  if(muPtrk1.ndedx<10||muPtrk2.ndedx<10)continue;
 
-		double mupt1 = muPtrk1.pt;
-		double mupt2 = muPtrk2.pt;
-		double mupt_lead = (mupt1>mupt2) ? mupt1 : mupt2;
-		if(mupt1<1.0||mupt2<1.0||mupt_lead<1.5) continue;
+		  double mupt1 = muPtrk1.pt;
+		  double mupt2 = muPtrk2.pt;
+		  double mupt_lead = (mupt1>mupt2) ? mupt1 : mupt2;
+		  if(mupt1<1.0||mupt2<1.0||mupt_lead<1.5) continue;
 
-		//find the mtd hits for these two muons
-		int muhit1=-1;
-		int muhit2=-1;
+		  //find the mtd hits for these two muons
+		  int muhit1=-1;
+		  int muhit2=-1;
 
-		int nMtdHit = hlt_mtd->nMtdHits;
-		for(int ihit=0; ihit<nMtdHit; ihit++)
-		{
-			if(muhit1>=0&&muhit2>=0) break;
-			int gtrkid  = (int)hlt_mtd->mtdHit[ihit].hlt_trackId;
-			if(gtrkid==mgtrkid1){muhit1=ihit; continue;}
-			if(gtrkid==mgtrkid2){muhit2=ihit; continue;}
+		  int nMtdHit = hlt_mtd->nMtdHits;
+		  for(int ihit=0; ihit<nMtdHit; ihit++)
+		    {
+		      if(muhit1>=0&&muhit2>=0) break;
+		      int gtrkid  = (int)hlt_mtd->mtdHit[ihit].hlt_trackId;
+		      if(gtrkid==mgtrkid1){muhit1=ihit; continue;}
+		      if(gtrkid==mgtrkid2){muhit2=ihit; continue;}
+		    }
+
+		  double mudy1 = hlt_mtd->mtdHit[muhit1].delta_y;
+		  double mudy2 = hlt_mtd->mtdHit[muhit2].delta_y;
+		  if(fabs(mudy1)>20||fabs(mudy2)>20)continue;
+
+		  double mudz1 = hlt_mtd->mtdHit[muhit1].delta_z;
+		  double mudz2 = hlt_mtd->mtdHit[muhit2].delta_z;
+		  if(fabs(mudz1)>20||fabs(mudz2)>20)continue;
+
+		  const double mumass = 0.10566; 
+
+		  double mupx1 = mupt1 * cos(muPtrk1.psi);
+		  double mupy1 = mupt1 * sin(muPtrk1.psi);
+		  double mupz1 = mupt1 * muPtrk1.tanl;
+
+		  double mupx2 = mupt2 * cos(muPtrk2.psi);
+		  double mupy2 = mupt2 * sin(muPtrk2.psi);
+		  double mupz2 = mupt2 * muPtrk2.tanl;
+
+		  TVector3 muPMom1(mupx1, mupy1, mupz1);
+
+		  TVector3 muPMom2(mupx2, mupy2, mupz2);
+		
+		  TLorentzVector Muon1(0,0,0,0);
+		  Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
+		  TLorentzVector Muon2(0,0,0,0);
+		  Muon2.SetXYZM(mupx2, mupy2, mupz2, mumass);
+
+		  TLorentzVector QmPair = Muon1 + Muon2;
+		  double qmMass=QmPair.M();
+		  double qmPt=QmPair.Pt();
+		
+		  if(muPtrk1.q*muPtrk2.q<0){
+
+		    hMTDQmInvMassUS->Fill(qmMass);
+		    hMTDQmJpsiMass_ptcut0_US->Fill(qmMass);
+		    if(qmPt>2.)hMTDQmJpsiMass_ptcut2_US->Fill(qmMass);
+		    if(qmPt>4.)hMTDQmJpsiMass_ptcut4_US->Fill(qmMass);
+
+		    hMTDQmUpsilonMassUS->Fill(qmMass);
+		  }
+		  else{
+		    hMTDQmInvMassLS->Fill(qmMass);
+		    hMTDQmJpsiMass_ptcut0_LS->Fill(qmMass);
+		    if(qmPt>2.)hMTDQmJpsiMass_ptcut2_LS->Fill(qmMass);
+		    if(qmPt>4.)hMTDQmJpsiMass_ptcut4_LS->Fill(qmMass);
+		    
+		    hMTDQmUpsilonMassLS->Fill(qmMass);
+		  }
+		
 		}
-
-		double mudy1 = hlt_mtd->mtdHit[muhit1].delta_y;
-		double mudy2 = hlt_mtd->mtdHit[muhit2].delta_y;
-		if(fabs(mudy1)>20||fabs(mudy2)>20)continue;
-
-		double mudz1 = hlt_mtd->mtdHit[muhit1].delta_z;
-		double mudz2 = hlt_mtd->mtdHit[muhit2].delta_z;
-		if(fabs(mudz1)>20||fabs(mudz2)>20)continue;
-
-		const double mumass = 0.10566; 
-
-		double mupx1 = mupt1 * cos(muPtrk1.psi);
-		double mupy1 = mupt1 * sin(muPtrk1.psi);
-		double mupz1 = mupt1 * muPtrk1.tanl;
-
-		double mupx2 = mupt2 * cos(muPtrk2.psi);
-		double mupy2 = mupt2 * sin(muPtrk2.psi);
-		double mupz2 = mupt2 * muPtrk2.tanl;
-
-		TVector3 muPMom1(mupx1, mupy1, mupz1);
-
-		TVector3 muPMom2(mupx2, mupy2, mupz2);
-		
-		TLorentzVector Muon1(0,0,0,0);
-		Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
-		TLorentzVector Muon2(0,0,0,0);
-		Muon2.SetXYZM(mupx2, mupy2, mupz2, mumass);
-
-		TLorentzVector QmPair = Muon1 + Muon2;
-		double qmMass=QmPair.M();
-		double qmPt=QmPair.Pt();
-		
-		if(muPtrk1.q*muPtrk2.q<0){
-
-			hMTDQmInvMassUS->Fill(qmMass);
-			hMTDQmJpsiMass_ptcut0_US->Fill(qmMass);
-			if(qmPt>2.)hMTDQmJpsiMass_ptcut2_US->Fill(qmMass);
-			if(qmPt>4.)hMTDQmJpsiMass_ptcut4_US->Fill(qmMass);
-
-			hMTDQmUpsilonMassUS->Fill(qmMass);
-
-		}else{
-
-			hMTDQmInvMassLS->Fill(qmMass);
-			hMTDQmJpsiMass_ptcut0_LS->Fill(qmMass);
-			if(qmPt>2.)hMTDQmJpsiMass_ptcut2_LS->Fill(qmMass);
-			if(qmPt>4.)hMTDQmJpsiMass_ptcut4_LS->Fill(qmMass);
-
-			hMTDQmUpsilonMassLS->Fill(qmMass);
-		}
-		
-	    }
-	    
+	      }
 	    double lowm1=2.7, highm1=3.5;
 	    int lowbin = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm1);
 	    int highbin = hMTDQmJpsiMass_ptcut0_US->FindBin(highm1);
@@ -1762,274 +1762,275 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	  {
 	    //di-e2Twr
-	    
-	    for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
-	      int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
-	      int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
-	      int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-	      int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-	      int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-	      int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-	      int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
-	      int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+	    if(decision & triggerBitDiElectron2Twr) {
+	      for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
+		int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
+		int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
+		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
 	      
-	      if(Daughter1TrackSN < 0) continue;
-	      hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+		if(Daughter1TrackSN < 0) continue;
+		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 
-	      float Daughter1beta = -999.;
-	      float Daughter1phidiff = -999.;
-	      float Daughter1_PE_ratio = -999.;
-	      float Daughter1_EP_ratio = -999.;
+		float Daughter1beta = -999.;
+		float Daughter1phidiff = -999.;
+		float Daughter1_PE_ratio = -999.;
+		float Daughter1_EP_ratio = -999.;
 	      
-	      float Daughter1q     = Daughter1Track.q;
-	      float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-	      float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-	      float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-	      float Daughter1dedx  = Daughter1Track.dedx;
-	      int Daughter1ndedx = Daughter1Track.ndedx;
+		float Daughter1q     = Daughter1Track.q;
+		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+		float Daughter1dedx  = Daughter1Track.dedx;
+		int Daughter1ndedx = Daughter1Track.ndedx;
 	      
-	      TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-	      float Daughter1p = Daughter1.Mag();
+		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+		float Daughter1p = Daughter1.Mag();
 	      
-	      double dedx1E = getDedx(Daughter1p, e);
-	      float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+		double dedx1E = getDedx(Daughter1p, e);
+		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
 	      
-	      float Daughter1phi = Daughter1.Phi();
-	      if(Daughter1phi < 0.) Daughter1phi += twopi;
-	      hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
-	      if(Daughter1EmcSN >= 0) {
-		float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-		Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-		Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-		hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
-		Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
-	      }
-	      if(Daughter1TofSN >= 0.) {
-		Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
-	      }
+		float Daughter1phi = Daughter1.Phi();
+		if(Daughter1phi < 0.) Daughter1phi += twopi;
+		hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
+		if(Daughter1EmcSN >= 0) {
+		  float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+		  Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+		  Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+		  hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
+		  Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+		}
+		if(Daughter1TofSN >= 0.) {
+		  Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
+		}
 
-	      if(Daughter2TrackSN < 0.) continue;
-	      hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-	      float Daughter2phidiff = -999.;
-	      float Daughter2beta = -999.;
-	      float Daughter2_PE_ratio = -999.;
-	      float Daughter2_EP_ratio = -999.;
+		if(Daughter2TrackSN < 0.) continue;
+		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		float Daughter2phidiff = -999.;
+		float Daughter2beta = -999.;
+		float Daughter2_PE_ratio = -999.;
+		float Daughter2_EP_ratio = -999.;
 	      
-	      float Daughter2q     =  Daughter2Track.q;
-	      float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-	      float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-	      float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-	      float Daughter2dedx  =  Daughter2Track.dedx;
-	      int Daughter2ndedx = Daughter2Track.ndedx;
+		float Daughter2q     =  Daughter2Track.q;
+		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+		float Daughter2dedx  =  Daughter2Track.dedx;
+		int Daughter2ndedx = Daughter2Track.ndedx;
 	      
-	      TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-	      float Daughter2p = Daughter2.Mag();
+		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+		float Daughter2p = Daughter2.Mag();
 	      
-	      double dedx2E = getDedx(Daughter2p, e);
-	      float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
+		double dedx2E = getDedx(Daughter2p, e);
+		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
 
-	      float Daughter2phi = Daughter2.Phi();
-	      if(Daughter2phi < 0.0) Daughter2phi += twopi;
+		float Daughter2phi = Daughter2.Phi();
+		if(Daughter2phi < 0.0) Daughter2phi += twopi;
 	      
-	      hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
-	      if(Daughter2EmcSN >= 0) {
-		float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-		Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-		Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-		hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
-		Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
-	      }
-	      if(Daughter2TofSN >= 0.) {
-		Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
-	      }
+		hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
+		if(Daughter2EmcSN >= 0) {
+		  float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+		  Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+		  Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+		  hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
+		  Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		}
+		if(Daughter2TofSN >= 0.) {
+		  Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+		}
 	      
-	      // j/psi
+		// j/psi
 	
-	      float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
-	      float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
-	      float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
-	      float m = hlt_Twrdiep->ePair[i].invariantMass;
+		float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+		float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+		float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
+		float m = hlt_Twrdiep->ePair[i].invariantMass;
 	      
-	      if(Daughter1q * Daughter2q < 0.) {
-		hDiElectronInvMassFullRange_Twr->Fill(m);
-	      } else {
-		hDiElectronInvMassFullRangeBG_Twr->Fill(m);
-	      }
+		if(Daughter1q * Daughter2q < 0.) {
+		  hDiElectronInvMassFullRange_Twr->Fill(m);
+		} else {
+		  hDiElectronInvMassFullRangeBG_Twr->Fill(m);
+		}
 	      
-	      if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-		 Daughter1p > 2.3 && Daughter2p > 1.5 &&
-		 Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-		 Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-		 Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05){
-		if(Daughter1q * Daughter2q < 0.)
-		  {
-		    hDiElectronInvMassTpxEmc_Twr->Fill(m);
-		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-		      {
-			hDiElectronInvMassCut_Twr->Fill(m);
-		      }
-		  }
-		else
-		  {
-		    hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
-		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-		      {
-			hDiElectronInvMassCutBG_Twr->Fill(m);
-		      } 
-		  }
-		if(Daughter1TofSN >= 0.)
-		  {
-		    hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
-		  }
-		if(Daughter2TofSN >= 0.)
-		  {
-		    hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
-		  }
-	      }
-	    
-	      TLorentzVector jpsi(0, 0, 0, 0);
-	      jpsi.SetXYZM(px, py, pz, m);
-	      float rapidity = jpsi.Rapidity();
-	      hDiLeptonRapidity_Twr->Fill(rapidity);
-	      
-	    }//nEPair
+		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+		   Daughter1p > 2.3 && Daughter2p > 1.5 &&
+		   Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+		   Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+		   Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05){
+		  if(Daughter1q * Daughter2q < 0.)
+		    {
+		      hDiElectronInvMassTpxEmc_Twr->Fill(m);
+		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+			{
+			  hDiElectronInvMassCut_Twr->Fill(m);
+			}
+		    }
+		  else
+		    {
+		      hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
+		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+			{
+			  hDiElectronInvMassCutBG_Twr->Fill(m);
+			} 
+		    }
+		  if(Daughter1TofSN >= 0.)
+		    {
+		      hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
+		    }
+		  if(Daughter2TofSN >= 0.)
+		    {
+		      hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
+		    }
+		}
+		
+		TLorentzVector jpsi(0, 0, 0, 0);
+		jpsi.SetXYZM(px, py, pz, m);
+		float rapidity = jpsi.Rapidity();
+		hDiLeptonRapidity_Twr->Fill(rapidity);
+		
+	      }//nEPair
+	    }
 	  }
-
 #pragma omp section
 	  {
 	    // di-e
-	    for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
-	      int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
-	      int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
-	      int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
-	      int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
-	      int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
-	      int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
-	      int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
-	      int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+	    if(decision & triggerBitDiElectron) {
 	      
-	      if(Daughter1TrackSN < 0) continue;
-	      hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+	      for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
+		int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
+		int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
+		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+	      
+		if(Daughter1TrackSN < 0) continue;
+		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
 
-	      float Daughter1beta = -999.;
-	      float Daughter1phidiff = -999.;
-	      float Daughter1_PE_ratio = -999.;
-	      float Daughter1_EP_ratio = -999.;
+		float Daughter1beta = -999.;
+		float Daughter1phidiff = -999.;
+		float Daughter1_PE_ratio = -999.;
+		float Daughter1_EP_ratio = -999.;
 	      
-	      float Daughter1q     = Daughter1Track.q;
-	      float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
-	      float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
-	      float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
-	      float Daughter1dedx  = Daughter1Track.dedx;
-	      int Daughter1ndedx = Daughter1Track.ndedx;
+		float Daughter1q     = Daughter1Track.q;
+		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+		float Daughter1dedx  = Daughter1Track.dedx;
+		int Daughter1ndedx = Daughter1Track.ndedx;
 	      
-	      TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
-	      float Daughter1p = Daughter1.Mag();
+		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+		float Daughter1p = Daughter1.Mag();
 	      
-	      double dedx1E = getDedx(Daughter1p, e);
-	      float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+		double dedx1E = getDedx(Daughter1p, e);
+		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
 	      
-	      float Daughter1phi = Daughter1.Phi();
-	      if(Daughter1phi < 0.) Daughter1phi += twopi;
-	      hdEdx_P1->Fill(Daughter1p , Daughter1dedx);
-	      if(Daughter1EmcSN >= 0) {
-		float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
-		Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
-		Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
-		hDaughter1P_TowerEnergy->Fill(Daughter1_EP_ratio);
-		Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
-	      }
-	      if(Daughter1TofSN >= 0.) {
-		Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
-	      }
-	      
-	      if(Daughter2TrackSN < 0.) continue;
-	      hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
-	      float Daughter2phidiff = -999.;
-	      float Daughter2beta = -999.;
-	      float Daughter2_PE_ratio = -999.;
-	      float Daughter2_EP_ratio = -999.;
-	      
-	      float Daughter2q     =  Daughter2Track.q;
-	      float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
-	      float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
-	      float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
-	      float Daughter2dedx  =  Daughter2Track.dedx;
-	      int Daughter2ndedx = Daughter2Track.ndedx;
-	      
-	      TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
-	      float Daughter2p = Daughter2.Mag();
-	      
-	      double dedx2E = getDedx(Daughter2p, e);
-	      float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
-	      
-	      float Daughter2phi = Daughter2.Phi();
-	      if(Daughter2phi < 0.0) Daughter2phi += twopi;
-	      
-	      hdEdx_P2->Fill(Daughter2p , Daughter2dedx);
-	      if(Daughter2EmcSN >= 0) {
-		float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
-		Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
-		Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
-		hDaughter2P_TowerEnergy->Fill(Daughter2_EP_ratio);
-		Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		float Daughter1phi = Daughter1.Phi();
+		if(Daughter1phi < 0.) Daughter1phi += twopi;
+		hdEdx_P1->Fill(Daughter1p , Daughter1dedx);
+		if(Daughter1EmcSN >= 0) {
+		  float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+		  Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+		  Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+		  hDaughter1P_TowerEnergy->Fill(Daughter1_EP_ratio);
+		  Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
 		}
-	      if(Daughter2TofSN >= 0.) {
-		Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
-	      }
-
-	      // j/psi
-	
-	      float px = cos(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
-	      float py = sin(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
-	      float pz = hlt_diep->ePair[i].tanl * hlt_diep->ePair[i].pt;
-	      float m = hlt_diep->ePair[i].invariantMass;
-	      
-	      if(Daughter1q * Daughter2q < 0.) {
-		hDiElectronInvMassFullRange->Fill(m);
-	      }
-	      else {
-		hDiElectronInvMassFullRangeBG->Fill(m);
-	      }
-	      
-	      if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
-		 Daughter1p > 2.3 && Daughter2p > 1.5 &&
-		 Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
-		 Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
-		 Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
-		if(Daughter1q * Daughter2q < 0.)
-		  {
-		    hDiElectronInvMassTpxEmc->Fill(m);
-		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-		      {
-			hDiElectronInvMassCut->Fill(m);
-		      }
-		  }
-		else
-		  {
-		    hDiElectronInvMassTpxEmcBG->Fill(m);
-		    if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
-		      {
-			hDiElectronInvMassCutBG->Fill(m);
-		      }
-		    }
-		
 		if(Daughter1TofSN >= 0.) {
-		  hDaughter1TpxEmcInverseBeta->Fill(1 / Daughter1beta);
+		  Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
+		}
+	      
+		if(Daughter2TrackSN < 0.) continue;
+		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		float Daughter2phidiff = -999.;
+		float Daughter2beta = -999.;
+		float Daughter2_PE_ratio = -999.;
+		float Daughter2_EP_ratio = -999.;
+	      
+		float Daughter2q     =  Daughter2Track.q;
+		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+		float Daughter2dedx  =  Daughter2Track.dedx;
+		int Daughter2ndedx = Daughter2Track.ndedx;
+	      
+		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+		float Daughter2p = Daughter2.Mag();
+	      
+		double dedx2E = getDedx(Daughter2p, e);
+		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
+	      
+		float Daughter2phi = Daughter2.Phi();
+		if(Daughter2phi < 0.0) Daughter2phi += twopi;
+	      
+		hdEdx_P2->Fill(Daughter2p , Daughter2dedx);
+		if(Daughter2EmcSN >= 0) {
+		  float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+		  Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+		  Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+		  hDaughter2P_TowerEnergy->Fill(Daughter2_EP_ratio);
+		  Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
 		}
 		if(Daughter2TofSN >= 0.) {
-		  hDaughter2TpxEmcInverseBeta->Fill(1 / Daughter2beta);
-		  }
-	      }
+		  Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+		}
+
+		// j/psi
+	
+		float px = cos(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
+		float py = sin(hlt_diep->ePair[i].psi) * hlt_diep->ePair[i].pt;
+		float pz = hlt_diep->ePair[i].tanl * hlt_diep->ePair[i].pt;
+		float m = hlt_diep->ePair[i].invariantMass;
 	      
-	      TLorentzVector jpsi(0, 0, 0, 0);
-	      jpsi.SetXYZM(px, py, pz, m);
-	      float rapidity = jpsi.Rapidity();
-	      hDiLeptonRapidity->Fill(rapidity);
-	    }//nEPair
-	    
+		if(Daughter1q * Daughter2q < 0.) {
+		  hDiElectronInvMassFullRange->Fill(m);
+		}
+		else {
+		  hDiElectronInvMassFullRangeBG->Fill(m);
+		}
+	      
+		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+		   Daughter1p > 2.3 && Daughter2p > 1.5 &&
+		   Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+		   Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+		   Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
+		  if(Daughter1q * Daughter2q < 0.)
+		    {
+		      hDiElectronInvMassTpxEmc->Fill(m);
+		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+			{
+			  hDiElectronInvMassCut->Fill(m);
+			}
+		    }
+		  else
+		    {
+		      hDiElectronInvMassTpxEmcBG->Fill(m);
+		      if(fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04)
+			{
+			  hDiElectronInvMassCutBG->Fill(m);
+			}
+		    }
+		
+		  if(Daughter1TofSN >= 0.) {
+		    hDaughter1TpxEmcInverseBeta->Fill(1 / Daughter1beta);
+		  }
+		  if(Daughter2TofSN >= 0.) {
+		    hDaughter2TpxEmcInverseBeta->Fill(1 / Daughter2beta);
+		  }
+		}
+	      
+		TLorentzVector jpsi(0, 0, 0, 0);
+		jpsi.SetXYZM(px, py, pz, m);
+		float rapidity = jpsi.Rapidity();
+		hDiLeptonRapidity->Fill(rapidity);
+	      }//nEPair
+	    }
 	  }
-	  
 	}
 };
 
