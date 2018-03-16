@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHitIter.h,v 2.1 2012/03/22 01:08:05 perev Exp $
+ * $Id: StMcHitIter.h,v 2.2 2018/03/15 22:00:35 smirnovd Exp $
  * $Log: StMcHitIter.h,v $
+ * Revision 2.2  2018/03/15 22:00:35  smirnovd
+ * Fix linker error by removing declared but undefined functions
+ *
  * Revision 2.1  2012/03/22 01:08:05  perev
  * McHitIter added
  *
@@ -19,12 +22,8 @@ class StMcHitIter : public TObject {
 public:
 StMcHitIter(const StMcEvent *mcev);
 void  Reset(const StMcEvent *mcev);
-void Add(StDetectorId det);
-const StMcHit *operator*();
 const int *Path(int &lev) const 	{lev = mLev; return mPath;}
 const int *MaxN() const 		{return mMaxN;}
-StDetectorId GetDetId();
-StMcHitIter &operator++();
 
 protected:
 

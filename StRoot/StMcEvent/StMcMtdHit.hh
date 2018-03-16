@@ -20,9 +20,7 @@ public:
 
   virtual ~StMcMtdHit();
     
-    int operator==(const StMcMtdHit&) const;
     int operator!=(const StMcMtdHit&) const;
-   void operator+=(const StMcMtdHit&);
 
     bool sameCell(const StMcMtdHit&) const;
 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.10 2012/06/11 14:51:46 fisyak Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.11 2018/03/15 22:00:35 smirnovd Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.11  2018/03/15 22:00:35  smirnovd
+ * Fix linker error by removing declared but undefined functions
+ *
  * Revision 2.10  2012/06/11 14:51:46  fisyak
  * std namespace
  *
@@ -55,9 +58,6 @@ class StMcEmcHitCollection : public TDataSet {
   
   StMcEmcModuleHitCollection*       module(unsigned int m);
   const StMcEmcModuleHitCollection* module(unsigned int m) const;
-  
-  StMcEmcModuleHitCollection&       Module(unsigned int m);
-  const StMcEmcModuleHitCollection& Module(unsigned int m) const;
   
   StMcEmcModuleHitCollection&       thisModule(unsigned int m) {
     TObjArray &modules = *GetObjArray();
