@@ -2260,6 +2260,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	int adc_found = 0 ;
 	int cld_found = 0 ;
 	int ped_found = 0 ;
+	int clusters = 0 ;
+	int pixels = 0 ;
 
 	daq_dta *dd ;
 
@@ -2272,7 +2274,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	for(int s=1;s<=24;s++) {
 
-#if 0
+#if 1
 		dd = rdr->det("itpc")->get("raw",s) ;
 
 		if(dd) {
@@ -2281,6 +2283,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				rdos[dd->row-1] = 1 ;
 
+#if 0
 				if(do_print) {
 					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
 
@@ -2290,6 +2293,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 						printf("%4d = 0x%08X\n",i,d32[i]) ;
 					}
 				}
+#endif
 			}
 		}
 #endif
@@ -2301,6 +2305,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 			while(dd->iterate()) {
 				adc_found = 1 ;
 
+
+			
 				if(do_print) {
 					printf("ITPC SAMPA: sector %2d, FEE %3d, CH %2d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
@@ -2319,6 +2325,8 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 			while(dd->iterate()) {
 				adc_found = 1 ;
 
+				pixels += dd->ncontent ;
+
 				if(do_print) {
 					printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
@@ -2335,6 +2343,9 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 		if(dd) {
 			while(dd->iterate()) {
 				cld_found = 1 ;
+
+				clusters += dd->ncontent ;
+				
 
 				if(do_print) {
 					printf("ITPC CLD: sector %2d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
@@ -2413,7 +2424,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	if(ped_found) strcat(fstr,"PEDRMS ") ;
 
 	if(found) {
-		LOG(INFO,"ITPC found [%s]",fstr) ;
+		LOG(INFO,"ITPC found [%s] pixels %d, clusters %d",fstr,pixels,clusters) ;
 	}
 	
 
