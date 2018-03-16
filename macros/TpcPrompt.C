@@ -295,17 +295,20 @@ void T0Fit(TChain *TpcHit = 0) {
 #if defined(__CINT__) && !defined(__MAKECINT__)
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents = 9999999, 
-	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
+	       //	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
+	       const Char_t *daqfile = "./st_physics_adc_19073049*.*event.root",
 	       const Char_t *treefile = "") {
   gROOT->LoadMacro("bfc.C");
 
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,Corr4,mysql");
-  TString Chain("in,StEvent,trgD,tpcDb,analysis,magF,NoDefault,mysql");
+  //  TString Chain("in,StEvent,trgD,tpcDb,analysis,magF,NoDefault,mysql");
+  TString Chain("in,StEvent,analysis,mysql,NoDefault");
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,CorrX");
   if (TString(daqfile).EndsWith(".daq")) Chain += ",tpx,TpcHitMover,CorrX";
   TString TreeFile(treefile);
   if (TreeFile == "") {
     TreeFile = gSystem->BaseName(daqfile);
+    TreeFile.ReplaceAll("*","_");
     TreeFile.ReplaceAll(".daq",".TpcHit.root");
     TreeFile.ReplaceAll(".event.root",".TpcHit.root");
   }
