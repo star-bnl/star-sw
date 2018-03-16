@@ -31,6 +31,7 @@
 
 #include <DAQ_ITPC/itpcFCF.h>
 
+//#define DO_DBG1	1
 
 static double mark(void)
 {
@@ -544,8 +545,11 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			continue ;
 		}
 
-		if((u_int)(dt*dp) >  sizeof(smooth_dta)/sizeof(smooth_dta[0])) {	// too big!
-			LOG(ERR,"%d: toobig %d %d",i,dp,dt) ;
+		u_int bytes_for_blob = (dp+2)*(dt+2)*2*2 ;
+
+		if(bytes_for_blob > sizeof(smooth_dta)) {
+//		if((u_int)(dt*dp) >  sizeof(smooth_dta)/sizeof(smooth_dta[0])) {	// too big!
+			LOG(ERR,"row %d: %d: toobig %d X %d",row,i,dp,dt) ;
 			LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;
 			continue ;
@@ -598,6 +602,10 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 		
 		int dt_2 = dt + 2 ;
 
+
+#ifdef DO_DBG1
+		printf("...bytes %d vs %d\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
+#endif
 		memset(smooth_dta,0,dt_2*(dp+2)*sizeof(short)*2) ;	// clear both storages which is why there's a 2
 
 		dta_s = smooth_dta + (dp+2)*dt_2 ;	// for smoothed data
@@ -764,8 +772,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 		peaks_done: ;
 		
 		//LOG(TERR,"Blob %d: peaks %d",ix,peaks_cou) ;
+		
 
-
+		words_per_cluster = 3 ;
 
 		if(peaks_cou <= 1) {	// do usual averaging!
 			double f_charge = 0.0 ;
@@ -804,7 +813,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				f_p_ave += i * corr_charge ;
 			}
 
-			if(f_charge==0) {
+			if(f_charge<0.1) {
 				goto done_peaks;
 			}
 
@@ -821,7 +830,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			u_int pad_c = (u_int)(f_p_ave * 64.0 + 0.5) ;
 			u_int cha = (u_int)(f_charge + 0.5) ;
 
-			if(cha==0) printf("WTF cha %f\n",f_charge) ;
+			// cant happen
+			//if(cha==0) printf("WTF cha %f\n",f_charge*1000.0) ;
 
 			//extents 
 			u_int tmp_fl ;
@@ -920,6 +930,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 					f_p_ave += i * corr_charge ;
 				}
 
+
+				if(f_charge < 0.1) continue ;
+
 				f_t_ave /= f_charge ;
 				f_p_ave /= f_charge ;
 
@@ -932,6 +945,10 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				u_int time_c = (u_int)(f_t_ave * 64.0 + 0.5) ;
 				u_int pad_c = (u_int)(f_p_ave * 64.0 + 0.5) ;
 				u_int cha = (u_int)(f_charge + 0.5) ;
+
+				//if(cha==0) {
+				//	printf("WTF Multi peak %f\n",f_charge) ;
+				//}
 
 				//extents 
 				u_int tmp_fl ;

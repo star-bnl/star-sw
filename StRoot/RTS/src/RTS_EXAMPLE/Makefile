@@ -81,6 +81,13 @@ daqFileHacker.o: ../../../../StRoot/RTS/include/rts.h
 daqFileHacker.o: ../DAQ_READER/daq_dta_structs.h
 daqFileHacker.o: ../DAQ_BTOW/daq_btow.h
 daqFileHacker.o: ../DAQ_EMC/daq_emc.h
+daqFileMerger.o: ../../../../StRoot/RTS/include/rtsLog.h
+daqFileMerger.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daqFileMerger.o: ../DAQ_READER/daqReader.h
+daqFileMerger.o: ../DAQ_READER/daqConfig.h
+daqFileMerger.o: ../DAQ_READER/daq_dta.h
+daqFileMerger.o: ../../../../StRoot/RTS/include/rts.h
+daqFileMerger.o: ../DAQ_READER/daq_dta_structs.h
 rts_example.o: ../../../../StRoot/RTS/include/rtsLog.h
 rts_example.o: ../../../../StRoot/RTS/include/rtsSystems.h
 rts_example.o: ../DAQ_READER/daqReader.h
