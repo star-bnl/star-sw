@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlDigmapsSim.cxx,v $
+ * Revision 1.6  2018/03/16 06:40:01  dongx
+ * Suppress warning output
+ *
  * Revision 1.5  2018/03/15 21:37:42  dongx
  * Added the single hit efficiency loaded from pxlSimPar table
  *
@@ -321,6 +324,7 @@ void StPxlDigmapsSim::fillDigmapsEvent(int sensorId, StMcPxlHit const* const mcP
   LOG_DEBUG << " Energy deposit for this hit = " << depositedEnergy << "\t totalLength = " << (inPos-outPos).Mag() << "\t betagamma = " << betagamma << endm;
 
   DIGParticle fdigparticle(inPos.X(), inPos.Y(), inPos.Z(), outPos.X(), outPos.Y(), outPos.Z(), depositedEnergy);
+  LOG_DEBUG << "  InPos = " << inPos.X() << "/" << inPos.Y() << "/" << inPos.Z() << "\t outPos = " << outPos.X() << "/" << outPos.Y() << "/" << outPos.Z() << " E = " << depositedEnergy << endm;
 
   //---------charge generation
   fdigparticle.ComputeChargeDeposition(mDigPlane->GetSegmentSize(), mDigPlane->GetMaximumSegmentSize(), mDigPlane->GetMaximumChargePerSegment());
@@ -351,15 +355,18 @@ float StPxlDigmapsSim::calculateDepositedEnergy(float const totalLength, float c
   float const energyMPV = mEnergyLandauMean * totalLength;
   float const energySigma = mEnergyLandauSigma * totalLength;
   float energy = mRndGen->Landau(energyMPV, energySigma) * mdEdxvsBGNorm->Eval(betagamma);
-  LOG_DEBUG << " energyMPV/Sigma = " << energyMPV << " " << energySigma << "\t dEdx correction = " << mdEdxvsBGNorm->Eval(betagamma) << endm;
+  LOG_DEBUG << " energyMPV/Sigma = " << energyMPV << " " << energySigma << "\t betagamma = " << betagamma << " dEdx correction = " << mdEdxvsBGNorm->Eval(betagamma) << endm;
 
   int count=0;
   while (energy > 50000 && count < 50) // count to avoid infinite loop in case of large energy deposit
   {
-    LOG_WARN << "Energy too high -> Energy regenerated " << energy << " MPV/sigma= " << energyMPV << " " << energySigma << "  Seed = " << mRndGen->GetSeed() << endm;
+    LOG_DEBUG << "Energy too high -> Energy regenerated " << energy << " MPV/sigma= " << energyMPV << " " << energySigma << " betagamma=" << betagamma << " Correction=" << mdEdxvsBGNorm->Eval(betagamma) << "  Seed = " << mRndGen->GetSeed() << endm;
+    mRndGen->SetSeed(mRndGen->GetSeed()*mRndGen->GetSeed());
     energy = mRndGen->Landau(energyMPV, energySigma) * mdEdxvsBGNorm->Eval(betagamma);
     count++;
   }
+  if(count==50)  
+    LOG_WARN << " Failed in Sample: energy= " << energy << " MPV/sigma= " << energyMPV << " " << energySigma << " betagamma=" << betagamma << " Correction=" << mdEdxvsBGNorm->Eval(betagamma) << "  Seed = " << mRndGen->GetSeed() << endm;
 
   return energy;
 }
@@ -415,7 +422,7 @@ float StPxlDigmapsSim::betaGamma(StMcTrack const* const mcTrk) const
   float const m = mcTrk->fourMomentum().m();
   if(m>0) betagamma = mcTrk->momentum().mag()/m;
   LOG_DEBUG << " track info: " << mcTrk->momentum().mag() << " " << m << " " << betagamma << endm;
-  if(m>1.0) LOG_WARN << "  large mass particle " << mcTrk->geantId() << " " << mcTrk->pdgId() << endm;
+  if(m>1.0) LOG_DEBUG << "  This is a large mass particle: geantId=" << mcTrk->geantId() << " pdgId=" << mcTrk->pdgId() << endm;
 
   return betagamma;
 }
