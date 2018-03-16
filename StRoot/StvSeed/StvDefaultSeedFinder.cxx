@@ -22,9 +22,10 @@
 #include "StMessMgr.h"
 
 void myBreak(int);
-enum {kFstAng=65,kErrFakt=10,kLenFakt=4,kMaxLen=3000};
+enum {kFstAng=65,kVtxAng=33,kErrFakt=10,kLenFakt=4,kMaxLen=900,kMinRad};
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
+static const double kVtxTan = tan(kVtxAng*M_PI/180);
 static const double kMinTan = 0.01;
 
 ClassImp(StvDefaultSeedFinder)
@@ -154,7 +155,6 @@ inline static float Impact2(const float dir[3],const float pnt[3])
 //_____________________________________________________________________________
 
 #define NEXT_HIT( reason ) { LOG_DEBUG << __LINE__ << " [" << reason << "]" << endm; continue; }
-#define FIRST_HIT
 
 const THelixTrack* StvDefaultSeedFinder::NextSeed()
 {
@@ -181,7 +181,7 @@ std::vector<TObject*> mySeedObjs;
     mSel.Reset();
     selHit = fstHit;
     m1stHit = fstHit->x();
-    mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
+    mSel.SetErr(sqrt(fstHit->err2())*kErrFakt*kErrFakt);
 
     LOG_DEBUG << "... First hit found" << endm;
 
@@ -221,6 +221,7 @@ std::vector<TObject*> mySeedObjs;
 	}
 	if (dejavu) 			NEXT_HIT( "dejavu" ); //continue;
 	int ans = mSel.Reject(nexHit->x(),hpNex);
+        if (ans>0) StvDebug::Count("Reject",ans);
 	if (ans>0) 			NEXT_HIT( "outside of cone" ); //continue;	//hit outside the cone
 
  //			Selecting the best
@@ -268,7 +269,7 @@ std::vector<TObject*> mySeedObjs;
 StvConeSelector::StvConeSelector()
 {
   memset(mBeg,0,mEnd-mBeg+1);mSgn=1;
-  mVtx[2] = 1e6;
+  mVtx[2] = 1e6; mIsVtx=0;
 }
 //_____________________________________________________________________________
 void StvConeSelector::AddHit(const float *x,const float *dir,float layer)
@@ -278,6 +279,9 @@ void StvConeSelector::AddHit(const float *x,const float *dir,float layer)
   mHit = x;
   mLayer = layer;
   mHitDir = dir;
+  mRxy2 = mHit[0]*mHit[0]+mHit[1]*mHit[1];
+  mRxy = sqrt(mRxy2);
+  mDelta = SEED_ERR(mRxy);
   assert(mJst<100);
 }
 //_____________________________________________________________________________
@@ -288,24 +292,24 @@ StvDebug::Break(nCall);
 
   float Rxy = sqrt(mX[0][0]*mX[0][0]+mX[0][1]*mX[0][1]);
   SetErr(SEED_ERR(Rxy)*kErrFakt);
-  float stp=0,myLen;
+  float stp=0;
   int kase = mJst; if (kase>2) kase = 2;
-     
   switch(kase) {
   
     case 0: {
-      if (mVtx[2]>1e3) {
-        myLen = sqrt(Dot(mX[0],mX[0]));
+      if (!mIsVtx) {
+        float myLen = sqrt(Dot(mX[0],mX[0]));
         Mul(mX[0]  ,-mSgn/myLen,mDir);  
+        mTan = kFstTan;
       } else {
         float myX[3] = { mX[0][0]-mVtx[0],mX[0][1]-mVtx[1],mX[0][2]-mVtx[2]};
-        myLen = sqrt(Dot(myX,myX));
+        float myLen = sqrt(Dot(myX,myX));
         Mul(myX ,-mSgn/myLen,mDir);  
+        mTan = kVtxTan;
       }  
       float sgn = Dot(mHit,mDir);
       assert(mSgn*sgn<0);
       mS[0]=0;
-      mTan = (mVtx[2]>=1e3)? kFstTan: mErr/myLen;
     }; break;
 
     case 1: {
@@ -339,11 +343,10 @@ StvDebug::Break(nCall);
 
     default: assert(0 && "Wrong case");
   }
-  mRxy2 = mHit[0]*mHit[0]+mHit[1]*mHit[1];
-  mRxy = sqrt(mRxy2);
-  mDelta = SEED_ERR(mRxy);
-  mLen= mLayer*kLenFakt/(fabs(Dot(mHitDir,mDir))+1e-10);
-  if (mLen>kMaxLen) mLen = kMaxLen;
+
+
+  mLen = - ( mHit[0]*mDir[0]+mHit[1]*mDir[1])/(1.-mDir[2]*mDir[2]);
+  if (mLen<0 && mLen>kMaxLen) mLen = kMaxLen;
   UpdateLims();
 
 }   
@@ -494,7 +497,7 @@ return code; \
 }
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
-   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
+//VP   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
 
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
 
@@ -507,7 +510,7 @@ int  StvConeSelector::Reject(const float x[3],const void* hp)
    if (mHitPrj  < 1e-8) 		REJECT_HIT( "min hit length", 4); 
    if (mHitPrj>mLen) 			REJECT_HIT( "outside cone along length",  6); //Outside of cone along
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
-   float lim = (mErr) + mHitPrj*mTan;
+   float lim = (mErr)*2 + mHitPrj*mTan;
    if (imp > lim*lim)          		REJECT_HIT( Form("outside of cone radius %f %f",imp,lim*lim), 7); // return 7;	//Outside of cone aside
    int ans = 99;
    if (mHp != hp) { 					//different layers, only prj is important
