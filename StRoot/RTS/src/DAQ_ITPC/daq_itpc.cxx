@@ -377,7 +377,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 
 		int size = caller->sfs->fileSize(full_name) ;
 
-		LOG(DBG,"full_name [%s] --> size %d",full_name,size) ;
+		LOG(NOTE,"full_name [%s] --> size %d",full_name,size) ;
 
 		if(size <= 0) continue ;	// this is really an error!
 
@@ -753,7 +753,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			
 
 			if((v&0xFFF00000) != 0x04300000) {
-				LOG(WARN,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
+				LOG(NOTE,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
 				    v,
 				    trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
 			}
