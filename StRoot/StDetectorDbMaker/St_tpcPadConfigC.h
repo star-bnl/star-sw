@@ -57,6 +57,7 @@ class St_tpcPadConfigC : public TChair {
   Double_t 	   PadPitchAtRow(Int_t sector, Int_t row);		   
   Double_t 	   RowPitchAtRow(Int_t sector, Int_t row);		   
   Int_t            indexForRowPad(Int_t sector, Int_t row, Int_t pad);
+  Int_t            IsRowInner(Int_t sector, Int_t row) {return (row < innerPadRows(sector)) ? 1 : 0;}
  protected:
   St_tpcPadConfigC(St_tpcPadConfig *table=0) : TChair(table) {}
   virtual ~St_tpcPadConfigC() {fgInstance = 0;}

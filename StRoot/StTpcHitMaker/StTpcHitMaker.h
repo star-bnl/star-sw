@@ -89,7 +89,6 @@ class tpc_cl;
 class daq_cld;
 class tpc_t;
 class StTpcHitCollection;
-
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
   enum EReaderType {kUnknown, kLegacyTpc, kLegacyTpx, kStandardTpx, kStandardiTPC};
@@ -139,9 +138,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH3F       **fAvLaser;
 #endif /* __USE__THnSparse__ */
   TH1F        *fSectCounts;
-  Int_t    NoRows;
-  Int_t    NoInnerPadRows;
-  Int_t    mRowOffSet4iTPC;
+  Int_t        RowNumber();
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);

@@ -430,7 +430,6 @@ Int_t StTpcHitMaker::Make() {
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
     Int_t hitsAdded = 0;
-    mRowOffSet4iTPC = 0;
     for (Int_t k = kStandardiTPC;  k > 0; k--) {
       if (k > kLegacyTpx) 
 	mQuery = Form("%s/%s[%i]",tpcDataNames[k],cldadc.Data(),sector);
@@ -439,14 +438,12 @@ Int_t StTpcHitMaker::Make() {
       StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
       kReaderType = (EReaderType) k;
-      if (kReaderType == kStandardiTPC) mRowOffSet4iTPC = 41 - 14;
       while (daqTpcTable) {
 	if (Sector() == sector) {
-	  Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
+	  Int_t row = -1;
 	  fTpc = 0;
 	  if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
-	  else 	                                                  row = daqTpcTable->Row();
-	  if (row > 13 && kReaderType != kStandardiTPC) row += mRowOffSet4iTPC;
+	  else 	                                                  row = RowNumber();
 	  if (row >= minRow && row <= maxRow) {
 	    switch (kMode) {
 	    case kTpc: 
@@ -529,8 +526,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
   if (NRows <= 0) return 0;
   Int_t nhitsBefore = hitCollection->numberOfHits();
   Int_t sec = DaqDta()->Sector();
-  Int_t row = DaqDta()->Row();
-  if (row > 13 && kReaderType != kStandardiTPC) row += mRowOffSet4iTPC;
+  Int_t row = RowNumber();
   if (kReaderType == kLegacyTpc || kReaderType == kLegacyTpx) {
     tpc_t *tpc = (tpc_t *) DaqDta()->GetTable();
     for (Int_t l = 0; l < NRows; tpc++) {
@@ -802,8 +798,7 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
     GetTFile()->Add(fAvLaser[sector-1]);
   }
 #endif /* __USE__THnSparse__ */
-  Int_t r=Row() ;	// I count from 1
-  if (r > 13 && kReaderType != kStandardiTPC) r += mRowOffSet4iTPC;
+  Int_t r=RowNumber() ;	// I count from 1
   if(r==0) return;	// TPC does not support unphy. rows so we skip em
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
@@ -986,8 +981,7 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   Int_t r_old = -1;
   Int_t p_old = -1;
   Int_t Total_data = 0;
-  Int_t r=Row() ;	// I count from 1
-  if (r > 13 && kReaderType != kStandardiTPC) r += mRowOffSet4iTPC;
+  Int_t r=RowNumber() ;	// I count from 1
   if(r==0) return 0 ;	// TPC does not support unphysical rows so we skip them
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
@@ -1320,3 +1314,14 @@ THnSparseF *StTpcHitMaker::CompressTHn(THnSparseF *hist, Double_t compress) {
   return hnew;
 }
 #endif /* __USE__THnSparse__ */
+//________________________________________________________________________________
+Int_t StTpcHitMaker::RowNumber(){
+  Int_t sector = DaqDta()->Sector();
+  Int_t row = DaqDta()->Row();
+  if (kReaderType != kStandardiTPC) {
+    if (St_tpcPadConfigC::instance()->iTpc(sector) && row > 13) {
+      row += 41-14;
+    }
+  }
+  return row;
+}
