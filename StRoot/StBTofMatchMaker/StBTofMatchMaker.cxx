@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.20 2017/10/20 17:50:33 smirnovd Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.21 2018/03/16 18:38:49 genevb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.21  2018/03/16 18:38:49  genevb
+ * Use TGeo initializer for BTof geometry
+ *
  * Revision 1.20  2017/10/20 17:50:33  smirnovd
  * Squashed commit of the following:
  *

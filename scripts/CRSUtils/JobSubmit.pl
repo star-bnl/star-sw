@@ -2049,7 +2049,7 @@ sub Submit
     if( open(FO,">$jfile") ){
 	if($calib ne ""){ 
 
-	    $chain = "LanaDVtpx,ITTF,StiCA,CorrX,OSpaceZ2,OGridLeak3D";
+	    $chain = "LanaDVtpx,AgML,ITTF,StiCA,CorrX,OSpaceZ2,OGridLeak3D";
 	    # ------------------------------------------------------------------
 	    # THIS IS A CALIBRATION PRE-PASS -- IT REQUIRES AN ADDITIONAL INPUT
 	    print FO <<__EOF__;
