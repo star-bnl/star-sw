@@ -11,25 +11,38 @@
   <CDE>AGECOM,GCONST,GCUNIT</CDE>
   
   <Content>
-    FTSM,  <!-- FTS Mother volume -->
+    FTSM,  <!-- FTS Mother volume -->    
+    FTSA,
+    FTSB,
+    FTSC,
 
-    FTSA,  <!-- FTS Si disk station A -->
-    FTSB,  <!-- FTS Si disk station B -->
-    FTSC,  <!-- FTS Si disk station C -->
-    
-    FSIS   <!-- FTS Si sensor -->
+    FSIA,  <!-- FTS Si sensor -->
+    FSIB,
+    FSIC
+
 
   </Content>
 
   <Structure name="MAIN" comment="Main configuration control structure, selects version at run time">
     <var name="version" type="float" />
+    <var name="type"    type="int" />
     <var name="useids"  type="float" />
     <var name="active(20)" type="float" />
+    <var name="rmnDSK" type="float" /> <!-- min disk radius -->
+    <var name="rmxDSK" type="float" /> <!-- max disk radius -->
+    <var name="cutele" type="float" />
   </Structure>
 
   <varlist type="int"> station </varlist>
 
-  <Create    block="FTSM"/>  <Placement block="FTSM" in="CAVE" />
+  <Fill name="MAIN" comment="MAIN FTS control structure">
+    <var name="version" value="1.0" />
+    <var name="type"    value="1" comment="1: Si, 2: sTGC, else: Si+sTGC" />
+  </Fill>
+
+  <Use struct="MAIN" />
+
+  <Create    block="FTSM"/>  <Placement block="FTSM" in="CAVE" konly="MANY" />
 
 
   <Volume name="FTSM" comment="FTS mother volume"  >
@@ -40,392 +53,466 @@
 	 dz="190.0" />
 
 
-  <Create    block="FTSA"/>  <Placement block="FTSA" in="FTSM"  z="93.3" />
-  <Create    block="FTSB"/>  <Placement block="FTSB" in="FTSM"  z="140.0" />
-  <Create    block="FTSC"/>  <Placement block="FTSC" in="FTSM" z="186.6" />
+  station = 1; <Create    block="FTSA"/>  <Placement block="FTSA" in="FTSM"  z="93.3" />
+  station = 2; <Create    block="FTSB"/>  <Placement block="FTSB" in="FTSM"  z="140.0" />
+  station = 3; <Create    block="FTSC"/>  <Placement block="FTSC" in="FTSM"  z="186.6" />
+
 
   </Volume>
-
 
   <Volume name="FTSA" comment="Station A">
     <Material  name="Air" />
     <Attribute for="FTSA" seen="1" colo="2" />
     <Shape     type="tube" rmin="3.0" rmax="20.0" dz="1.0" />
 
-    <Create block="FSIS" />
+    <Create block="FSIA" />
 
-    <Placement block="FSIS" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
    
-    <Placement block="FSIS" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="5.5" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="8.7" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="12.9" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="17.1" dx="3.1" dy="2.1" dz="0.1" />
 
 
-    <Placement block="FSIS" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
    
-    <Placement block="FSIS" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-5.5" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-8.7" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-12.9" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="15.5"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="15.5"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="9.3"   y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="3.1"   y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-3.1"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-9.3"  y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIA" x="-15.5" y="-17.1" dx="3.1" dy="2.1" dz="0.1" />
   </Volume>
-
   <Volume name="FTSB" comment="Station B">
     <Material  name="Air" />
     <Attribute for="FTSB" seen="1" colo="3" />
     <Shape     type="tube" rmin="3.0" rmax="25.0" dz="1.0" />
 
-    <Placement block="FSIS" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Create block="FSIB" />
+    <Placement block="FSIB" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="14.9" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="20.1" dx="3.1" dy="3.1" dz="0.1" />
 
 
-    <Placement block="FSIS" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-14.9" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="21.7"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="21.7"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="15.5"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="9.3"   y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="3.1"   y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-3.1"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-9.3"  y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-15.5" y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIB" x="-21.7" y="-20.1" dx="3.1" dy="3.1" dz="0.1" />
 
   </Volume>
-
   <Volume name="FTSC" comment="Station C">
     <Material  name="Air" />
     <Attribute for="FTSC" seen="1" colo="4" />
-    <Shape     type="tube" rmin="3.0" rmax="30.0" dz="1.0" />
+    <Shape     type="tube" rmin="3.0" rmax="30.0" dz="1.0" /> 
 
-    <Placement block="FSIS" x="27.9"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Create block="FSIC" />
+    <Placement block="FSIC" x="27.9"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="1.1" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="3.3" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="6.5" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="10.7" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="15.9" dx="3.1" dy="3.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="22.1" dx="3.1" dy="3.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="28.3" dx="3.1" dy="3.1" dz="0.1" />
 
 
-    <Placement block="FSIS" x="27.9"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-1.1" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-3.3" dx="3.1" dy="1.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-6.5" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-10.7" dx="3.1" dy="2.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-15.9" dx="3.1" dy="3.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-22.1" dx="3.1" dy="3.1" dz="0.1" />
 
-    <Placement block="FSIS" x="27.9"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="21.7"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="15.5"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="9.3"   y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="3.1"   y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-3.1"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-9.3"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-15.5" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-21.7" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
-    <Placement block="FSIS" x="-27.9" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="27.9"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="21.7"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="15.5"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="9.3"   y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="3.1"   y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-3.1"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-9.3"  y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-15.5" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-21.7" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
+    <Placement block="FSIC" x="-27.9" y="-28.3" dx="3.1" dy="3.1" dz="0.1" />
 
   </Volume>
 
+  <Volume name="FSIA" comment="Silicon sensor">
 
-  <Volume name="FSIS" comment="Silicon sensor">
     <Material name="silicon"/>
     <Material name="silicon" isvol="1" /> <!-- will copy the material into the volume, rather than reference it -->
-    <Attribute for="FSIS" seen="1" colo="6" />
+    <Attribute for="FSIA" seen="1" colo="6" serial="station" />
     <!-- We set the shape as a box with zero dimensions.  This allows us to
     specify the dimensions when we place the box -->
     <Shape type="box" dx="0" dy="0" dz="0" />
+
+    <Instrument block="FSIA"  >
+      <!-- Local coordinates 0.1 micron resolution -->
+      <Hit meas="z"  opts="S" bins="0.00001"  />
+      <Hit meas="y"  opts="S" bins="0.00001"  />
+      <Hit meas="x"  opts="S" bins="0.00001"  />
+      <!-- Global coordinates 0.1 micron resolution-->
+      <Hit meas="zz" opts="S" bins="0.00001"  />
+      <Hit meas="yy" opts="S" bins="0.00001"  />
+      <Hit meas="xx" opts="S" bins="0.00001"  />
+      <!-- Time of flight, energy lost, direction cosines, total momentum -->    
+      <Hit meas="ptot"  nbits="16" min="0" max="100"  />
+      <Hit meas="cx"    nbits="16"  />
+      <Hit meas="cy"    nbits="16"  />
+      <Hit meas="cz"    nbits="16"  />
+      <Hit meas="tof"   nbits="16"  />
+      <Hit meas="eloss" nbits="16"  />
+    </Instrument>
+    
+  </Volume>
+  <Volume name="FSIB" comment="Silicon sensor">
+
+    <Material name="silicon"/>
+    <Material name="silicon" isvol="1" /> <!-- will copy the material into the volume, rather than reference it -->
+    <Attribute for="FSIB" seen="1" colo="6" serial="station" />
+    <!-- We set the shape as a box with zero dimensions.  This allows us to
+    specify the dimensions when we place the box -->
+    <Shape type="box" dx="0" dy="0" dz="0" />
+
+    <Instrument block="FSIB"  >
+      <!-- Local coordinates 0.1 micron resolution -->
+      <Hit meas="z"  opts="S" bins="0.00001"  />
+      <Hit meas="y"  opts="S" bins="0.00001"  />
+      <Hit meas="x"  opts="S" bins="0.00001"  />
+      <!-- Global coordinates 0.1 micron resolution-->
+      <Hit meas="zz" opts="S" bins="0.00001"  />
+      <Hit meas="yy" opts="S" bins="0.00001"  />
+      <Hit meas="xx" opts="S" bins="0.00001"  />
+      <!-- Time of flight, energy lost, direction cosines, total momentum -->    
+      <Hit meas="ptot"  nbits="16" min="0" max="100"  />
+      <Hit meas="cx"    nbits="16"  />
+      <Hit meas="cy"    nbits="16"  />
+      <Hit meas="cz"    nbits="16"  />
+      <Hit meas="tof"   nbits="16"  />
+      <Hit meas="eloss" nbits="16"  />
+    </Instrument>
+    
+  </Volume>
+  <Volume name="FSIC" comment="Silicon sensor">
+
+    <Material name="silicon"/>
+    <Material name="silicon" isvol="1" /> <!-- will copy the material into the volume, rather than reference it -->
+    <Attribute for="FSIC" seen="1" colo="6" serial="station" />
+    <!-- We set the shape as a box with zero dimensions.  This allows us to
+    specify the dimensions when we place the box -->
+    <Shape type="box" dx="0" dy="0" dz="0" />
+
+    <Instrument block="FSIC"  >
+      <!-- Local coordinates 0.1 micron resolution -->
+      <Hit meas="z"  opts="S" bins="0.00001"  />
+      <Hit meas="y"  opts="S" bins="0.00001"  />
+      <Hit meas="x"  opts="S" bins="0.00001"  />
+      <!-- Global coordinates 0.1 micron resolution-->
+      <Hit meas="zz" opts="S" bins="0.00001"  />
+      <Hit meas="yy" opts="S" bins="0.00001"  />
+      <Hit meas="xx" opts="S" bins="0.00001"  />
+      <!-- Time of flight, energy lost, direction cosines, total momentum -->    
+      <Hit meas="ptot"  nbits="16" min="0" max="100"  />
+      <Hit meas="cx"    nbits="16"  />
+      <Hit meas="cy"    nbits="16"  />
+      <Hit meas="cz"    nbits="16"  />
+      <Hit meas="tof"   nbits="16"  />
+      <Hit meas="eloss" nbits="16"  />
+    </Instrument>
     
   </Volume>
 

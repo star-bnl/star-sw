@@ -19,6 +19,7 @@
 
   <Structure name="MAIN" comment="Main configuration control structure, selects version at run time">
     <var name="version" type="float" />
+    <var name="type"    type="int" />
     <var name="useids"  type="float" />
     <var name="active(20)" type="float" />
     <var name="rmnDSK" type="float" /> <!-- min disk radius -->
@@ -71,6 +72,7 @@
     <var name="rmnDSK"  value="2.25" comment="default disk inner radius" />
     <var name="rmxDSK"  value="32.5" comment="default disk outer radius" />
     <var name="cutele"  value="1 MeV" comment="electron propagation threshold" />
+    <var name="type"    value="0" comment="This is combined Si+sTGC" />
   </Fill>
   <Use struct="MAIN" />
 
