@@ -86,9 +86,9 @@ class Roo2DKeysPdf;
 void Draw(const Char_t *tag = "New") {
   TNtuple *TpcHit = (TNtuple *) gDirectory->Get("TpcHit");
   if (! TpcHit) return;
-  const Char_t *Sides[2] = {"W","E"};
-  const Char_t *Cuts[2]  = {"sector<=12","sector>12"};
-  for (Int_t i = 0; i < 2; i++) {
+  const Char_t *Sides[3] = {"W","E","I"};
+  const Char_t *Cuts[3]  = {"sector<=12","sector>12&&sector!=20","sector==20"};
+  for (Int_t i = 0; i < 3; i++) {
     TpcHit->Draw(Form("abs(z):row>>%sR%s(45,0.5,45.5,60,208,213)",tag,Sides[i]),Cuts[i],"colz");
     TH2 *R = (TH2 *) gDirectory->Get(Form("%sR%s",tag,Sides[i]));
     if (R) {

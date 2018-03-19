@@ -1,22 +1,20 @@
+/*
+  root.exe lMuDst.C EdMu.C
+ */
 // $Id: EdMu.C,v 1.1 2013/02/02 18:04:55 fisyak Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //  Additions to use BEMC towers (for display of upsilon events) by Manuel Calderon de la Barca. Feb 2010.
 //class StMuEmcHit;
-//class StMuDst;
+class StMuDst;
 StMuDst* muDst = 0; //< The pointer to the current instanse fo the StMuDst object
-//class StMuEvent;
+class StMuEvent;
 StMuEvent* MuDstEvent = 0; //< The pointer to the \a StMuEvent object 
-//class StMuDstMaker;
+class StMuDstMaker;
 StMuDstMaker* muDstMaker = 0;
-#if 0
-//class StChain;
-StChain *chain = 0;
-//class St_db_Maker;
-#endif
-//class StuDraw3DMuEvent;
+class StuDraw3DMuEvent;
 StuDraw3DMuEvent *gEd = 0; //< The pointer to the current instance of the Event Display. You may want it to change the the drawing option
-//class StBemcTables;
+class StBemcTables;
 StBemcTables* mBemcTables = 0;
 bool gRotationIsOn = false; //< Flag whether the animated rotation was initialized to do it at once
 
@@ -254,7 +252,7 @@ void mae(bool rotation=false, bool doTowerCuts=false, bool doTrackCuts=false,  i
     //    chain->Skip(skipEvent); // want to get to event 42752, skip 205 events in file
  newevent:
     //     chain->Make();
-     mBemcTables->loadTables(chain);
+    //     mBemcTables->loadTables(chain);
 
      if (MuDstEvent = muDstMaker->muDst()->event()) {
      cout << "Run / Event Number: " << muDstMaker->muDst()->event()->runNumber() << " / " << muDstMaker->muDst()->event()->eventNumber() << endl;
@@ -290,10 +288,11 @@ void mae(bool rotation=false, bool doTowerCuts=false, bool doTrackCuts=false,  i
 */
 //____________________________________________________________________________________
  void EdMu(const char* file =
- "/star/institutions/bnl/fine/testfiles/st_upsilon_8112020_raw_1130030.MuDst.root"
+	   "/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_production_2016/ReversedFullField/P16ij/2016/125/17125034/st_physics_adc_17125034_raw_1000007.MuDst.root"
+	   // "/star/institutions/bnl/fine/testfiles/st_upsilon_8112020_raw_1130030.MuDst.root"
  , const char * detectorNames="TPC,StarBeam")
  {
-#if 0
+#if 1
    // Start application open the file provided.
    if ( gSystem->AccessPathName(file)) {
       cout << endl << endl 
@@ -311,22 +310,22 @@ void mae(bool rotation=false, bool doTowerCuts=false, bool doTrackCuts=false,  i
       return;
    }
    TString muDstFile=file;
-   gROOT->Macro("loadMuDst.C");
-   gSystem->Load("St_Tables.so");
-   gSystem->Load("St_db_Maker.so");
-   gSystem->Load("StTpcDb");
-   gSystem->Load("StDetectorDbMaker");
-   gSystem->Load("StDbUtilities");
-   gSystem->Load("StDbLib");
-   gSystem->Load("StDbBroker");
+//    gROOT->Macro("loadMuDst.C");
+//    gSystem->Load("St_Tables.so");
+//    gSystem->Load("St_db_Maker.so");
+//    gSystem->Load("StTpcDb");
+//    gSystem->Load("StDetectorDbMaker");
+//    gSystem->Load("StDbUtilities");
+//    gSystem->Load("StDbLib");
+//    gSystem->Load("StDbBroker");
 
-   gSystem->Load("StEEmcUtil");
-   chain = new StChain();
-   St_db_Maker* dbMaker = new St_db_Maker("dbName","$STAR/StarDb","MySQL:StarDb");
+//    gSystem->Load("StEEmcUtil");
+//   Chain = new StChain();
+//   St_db_Maker* dbMaker = new St_db_Maker("dbName","$STAR/StarDb","MySQL:StarDb");
    muDstMaker = new StMuDstMaker(0,0,muDstFile.Data());
    chain->Init();
 #endif
-   //chain->InitRun(8112020);//hardwired...
+   //Chain->InitRun(8112020);//hardwired...
    mBemcTables = new StBemcTables;  
    delete gEd; // destroy the built-in display
    gEd = new StuDraw3DMuEvent(detectorNames); // create our own one (with no detector geometry)
