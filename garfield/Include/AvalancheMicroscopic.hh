@@ -210,7 +210,7 @@ class AvalancheMicroscopic {
     double x, y, z, t;
   };
 
-  struct electron {
+  struct Electron {
     int status;                   //< Status.
     bool hole;                    //< Electron or hole.
     double x0, y0, z0, t0;        //< Starting point and time.
@@ -222,9 +222,8 @@ class AvalancheMicroscopic {
     std::vector<point> driftLine; //< Drift line.
     double xLast, yLast, zLast;   //< Previous position.
   };
-  std::vector<electron> m_stack;
-  std::vector<electron> m_endpointsElectrons;
-  std::vector<electron> m_endpointsHoles;
+  std::vector<Electron> m_endpointsElectrons;
+  std::vector<Electron> m_endpointsHoles;
 
   struct photon {
     int status;            //< Status
@@ -300,12 +299,13 @@ class AvalancheMicroscopic {
 
   // Electron transport
   bool TransportElectron(const double x0, const double y0, const double z0,
-                         const double t0, const double e0, const double dx0,
+                         const double t0, double e0, const double dx0,
                          const double dy0, const double dz0, const bool aval,
                          bool hole);
   // Photon transport
   void TransportPhoton(const double x, const double y, const double z,
-                       const double t, const double e);
+                       const double t, const double e, 
+                       std::vector<Electron>& stack);
 
   void ComputeRotationMatrix(const double bx, const double by, const double bz,
                              const double bmag, const double ex,
@@ -314,7 +314,7 @@ class AvalancheMicroscopic {
   void RotateGlobal2Local(double& dx, double& dy, double& dz) const;
   void RotateLocal2Global(double& dx, double& dy, double& dz) const;
 
-  static bool IsInactive(const electron& item) {
+  static bool IsInactive(const Electron& item) {
 
     return item.status == StatusLeftDriftMedium ||
            item.status == StatusBelowTransportCut ||
@@ -322,13 +322,32 @@ class AvalancheMicroscopic {
            item.status == StatusLeftDriftArea ||
            item.status == StatusAttached;
   }
-  void AddToEndPoints(const electron& item, const bool hole) {
+  void Update(std::vector<Electron>::iterator it,
+              const double x, const double y, const double z,
+              const double t, const double energy,
+              const double kx, const double ky, const double kz,
+              const int band);
+  void AddToEndPoints(const Electron& item, const bool hole) {
     if (hole) {
       m_endpointsHoles.push_back(item);
     } else {
       m_endpointsElectrons.push_back(item);
     }
   }
+
+  /// Add a new electron/hole (with random direction) to a container.
+  void AddToStack(const double x, const double y, const double z, 
+                  const double t, const double energy, 
+                  const bool hole,
+                  std::vector<Electron>& container) const;
+  /// Add a new electron/hole to a container.
+  void AddToStack(const double x, const double y, const double z, 
+                  const double t, const double energy, 
+                  const double dx, const double dy, const double dz, 
+                  const int band, const bool hole,
+                  std::vector<Electron>& container) const;
+  void Terminate(double x0, double y0, double z0, double t0, 
+                 double& x1, double& y1, double& z1, double& t1);
 };
 }
 

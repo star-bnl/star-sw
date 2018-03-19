@@ -27,6 +27,18 @@
 
 #include "TrackHeed.hh"
 
+namespace {
+
+void ClearBank(std::vector<Heed::gparticle*>& bank) {
+
+  std::vector<Heed::gparticle*>::iterator it;
+  std::vector<Heed::gparticle*>::const_iterator end = bank.end();
+  for (it = bank.begin(); it != end; ++it) if (*it) delete *it;
+  bank.clear();
+}
+
+}
+
 // Global functions and variables required by Heed
 namespace Heed {
 
@@ -655,10 +667,8 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   std::vector<Heed::gparticle*> secondaries;
   Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0, &m_fieldMap);
   delta.fly(secondaries);
-  std::vector<Heed::gparticle*>::iterator it;
-  for (it = secondaries.begin(); it != secondaries.end(); ++it) {
-    if (*it) delete *it;
-  } 
+  ClearBank(secondaries);
+
   m_conductionElectrons.swap(delta.conduction_electrons);
   m_conductionIons.swap(delta.conduction_ions);
   nel = m_conductionElectrons.size();
@@ -792,47 +802,55 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
                           &m_fieldMap);
   ClearParticleBank();
-  photon.fly(m_particleBank);
+  std::vector<Heed::gparticle*> secondaries;
+  photon.fly(secondaries);
 
-  // Loop over the particle bank and look for daughter particles.
-  std::vector<Heed::gparticle*>::iterator it;
-  for (it = m_particleBank.begin(); it != m_particleBank.end(); ++it) {
-    // Check if it is a delta electron.
-    Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
-    if (delta) {
-      if (m_doDeltaTransport) {
-        // Transport the delta electron.
-        delta->fly(m_particleBank);
-        // Add the conduction electrons to the list.
-        m_conductionElectrons.insert(m_conductionElectrons.end(), 
-                                     delta->conduction_electrons.begin(),
-                                     delta->conduction_electrons.end());
-        m_conductionIons.insert(m_conductionIons.end(), 
-                                delta->conduction_ions.begin(),
-                                delta->conduction_ions.end());
-      } else {
-        // Add the delta electron to the list, for later use.
-        deltaElectron newDeltaElectron;
-        newDeltaElectron.x = delta->currpos.pt.v.x * 0.1 + m_cX;
-        newDeltaElectron.y = delta->currpos.pt.v.y * 0.1 + m_cY;
-        newDeltaElectron.z = delta->currpos.pt.v.z * 0.1 + m_cZ;
-        newDeltaElectron.t = delta->currpos.time;
-        newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
-        newDeltaElectron.dx = delta->currpos.dir.x;
-        newDeltaElectron.dy = delta->currpos.dir.y;
-        newDeltaElectron.dz = delta->currpos.dir.z;
-        m_deltaElectrons.push_back(newDeltaElectron);
+  while (!secondaries.empty()) {
+    std::vector<Heed::gparticle*> newSecondaries;
+    // Loop over the particle bank and look for daughter particles.
+    std::vector<Heed::gparticle*>::iterator it;
+    for (it = secondaries.begin(); it != secondaries.end(); ++it) {
+      // Check if it is a delta electron.
+      Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
+      if (delta) {
+        if (m_doDeltaTransport) {
+          // Transport the delta electron.
+          delta->fly(newSecondaries);
+          // Add the conduction electrons to the list.
+          m_conductionElectrons.insert(m_conductionElectrons.end(), 
+                                       delta->conduction_electrons.begin(),
+                                       delta->conduction_electrons.end());
+          m_conductionIons.insert(m_conductionIons.end(), 
+                                  delta->conduction_ions.begin(),
+                                  delta->conduction_ions.end());
+        } else {
+          // Add the delta electron to the list, for later use.
+          deltaElectron newDeltaElectron;
+          newDeltaElectron.x = delta->currpos.pt.v.x * 0.1 + m_cX;
+          newDeltaElectron.y = delta->currpos.pt.v.y * 0.1 + m_cY;
+          newDeltaElectron.z = delta->currpos.pt.v.z * 0.1 + m_cZ;
+          newDeltaElectron.t = delta->currpos.time;
+          newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
+          newDeltaElectron.dx = delta->currpos.dir.x;
+          newDeltaElectron.dy = delta->currpos.dir.y;
+          newDeltaElectron.dz = delta->currpos.dir.z;
+          m_deltaElectrons.push_back(newDeltaElectron);
+        }
+        continue;
       }
-      continue;
-    } 
-    // Check if it is a fluorescence photon.
-    Heed::HeedPhoton* fluorescencePhoton = dynamic_cast<Heed::HeedPhoton*>(*it);
-    if (!fluorescencePhoton) {
-      std::cerr << m_className << "::TransportPhoton:\n"
-                << "    Unknown secondary particle.\n";
-      return;
+      // Check if it is a fluorescence photon.
+      Heed::HeedPhoton* fluorescencePhoton = dynamic_cast<Heed::HeedPhoton*>(*it);
+      if (!fluorescencePhoton) {
+        std::cerr << m_className << "::TransportPhoton:\n"
+                  << "    Unknown secondary particle.\n";
+        ClearBank(secondaries);
+        ClearBank(newSecondaries);
+        return;
+      }
+      fluorescencePhoton->fly(newSecondaries);
     }
-    fluorescencePhoton->fly(m_particleBank);
+    secondaries.swap(newSecondaries);
+    ClearBank(newSecondaries);
   }
 
   // Get the total number of electrons produced in this step.
@@ -1284,10 +1302,7 @@ std::string TrackHeed::FindUnusedMaterialName(const std::string& namein) {
 void TrackHeed::ClearParticleBank() {
 
   Heed::last_particle_number = 0;
-  std::vector<Heed::gparticle*>::iterator it;
-  std::vector<Heed::gparticle*>::const_iterator end = m_particleBank.end();
-  for (it = m_particleBank.begin(); it != end; ++it) if (*it) delete *it;
-  m_particleBank.clear();
+  ClearBank(m_particleBank);
   m_bankIterator = m_particleBank.end();
 }
 
