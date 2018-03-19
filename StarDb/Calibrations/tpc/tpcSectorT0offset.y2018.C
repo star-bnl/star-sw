@@ -10,7 +10,7 @@ TDataSet *CreateTable() {
   //
   memset(&row,0,tableSet->GetRowSize());
   for (Int_t i = 0; i < 48; i++)  row.t0[i] = -22.2572 ;
-  row.t0[23+20] -= 7.11;
+  row.t0[23+20] -= 7.4645;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
