@@ -5,6 +5,9 @@
 #include "genhit.h"
       INTEGER   G2T_FTS,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
       logical   Local/.false./
+
+      CHARACTER (len=4), dimension(3), parameter :: subsys = (/'FSIA', 'FSIB', 'FSIC'/)
+
 *
       G2T_FTS=STAFCV_OK
       if (g2t_fts_hit_h.maxlen.le.0) return
@@ -13,7 +16,13 @@
       g2t_fts_hit_h.nok = 0
 
 
-      call G2R_GET_SYS ('FTSD','FTSA',Iprin,Idigi)
+c     call G2R_GET_SYS ('FTSD','FTSA',Iprin,Idigi)
+c     call G2R_GET_SYS ('FTSD','FSIS',Iprin,Idigi)
+
+       DO isys=1, size(subsys)
+
+       CALL g2r_get_sys( 'FTSD', subsys(isys), Iprin, Idigi )
+
        if (Iprin.lt.0) go to 99
 *      Local  = Idigi.ge.2
        local  = .false. ! Ensure global coordinates
@@ -55,6 +64,8 @@
          g2t_track(trac).hit_fts_p    = i
          g2t_track(trac).n_fts_hit    = g2t_track(trac).n_fts_hit + 1
        enddo    
+
+      ENDDO
     
  99   RETURN
       END

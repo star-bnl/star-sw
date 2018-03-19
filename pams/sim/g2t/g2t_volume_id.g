@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.88 2018/02/01 22:52:38 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.88.2.1 2018/03/19 17:56:25 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.88.2.1  2018/03/19 17:56:25  jwebb
+* Defines g2t volume id and reads out fts hits for the new version of the SI
+* tracker.
+*
 * Revision 1.88  2018/02/01 22:52:38  jwebb
 * Updated g2t volume ID for epd.
 *
@@ -283,6 +287,11 @@
       Structure  ISTC { version, int misalign }
       Structure  SSDP { version, int contig, int placement, int misalign }
 
+      " FTS MAIN control structure /DETM/FTSD/MAIN "
+      Structure  FTSM  { version, int type, useids, active(20), rmndsk, rmxdsk, cutele }
+      Integer   iFTSM /0/ 
+      Integer    g2t_fts_volume_id
+      
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -1140,9 +1149,10 @@ c$$$    write (*,*) numbv
 *******************************************************************************************
 ** 27                                                                            Jason Webb
       ELSE IF (CSYS=='fts') THEN
-         
-           "Disk number is 1st entry in numbv"
-           volume_id = numbv(1)
+
+            volume_id = g2t_fts_volume_id( numbv )
+            write (*,*) volume_id         
+
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
       ELSE IF (CSYS=='epd') THEN
@@ -1195,3 +1205,51 @@ c$$$    write (*,*) numbv
 
     end
       
+
+
+*******************************************************************************************
+      Function g2t_fts_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+
+      Logical :: first = .true.
+      Structure  MAIN  { version, int type, useids, active(20), rmndsk, rmxdsk, cutele }
+      Integer ::  iFTSM = 0, g2t_fts_volume_id
+
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      Integer :: subsys  
+      Integer :: station
+      Integer :: sensor
+
+      if ( first ) then
+         call rbpushd  "save current zebra directory"
+         first = .false.
+         USE /DETM/FTSD/MAIN stat=iftsm 
+         call rbpopd   "restore original zebra directory"
+      endif
+
+      subsys = MAIN_type
+
+      if (subsys=0) then "FtsdGeo configuration (prototype Si+sTGC)"
+          g2t_fts_volume_id = numbv(1)
+          return
+      endif
+
+      if (subsys=1) then "FtsdGeo1 configuration (Si development)
+
+         if (cd=='FSIA') station = 1;
+         if (cd=='FSIB') station = 2;
+         if (cd=='FSIC') station = 3;
+
+         g2t_fts_volume_id = 10000 * subsys  + 
+                               100 * station + 
+                                     numbv(1)
+
+
+         return
+      endif
+
+      Return
+      End Function
