@@ -164,10 +164,11 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
 
 
   setProbabilityPidFile();
+#if 0
   StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
   FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
   FORCEDDEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
-
+#endif
   gStMuDstMaker = this;
 
 }
