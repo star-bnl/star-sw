@@ -240,8 +240,8 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	}
 
 	// for later optimization!
-	if(s_count >= max_s1_len) {
-		max_s1_len = s_count ;
+	if(s_count >= (int)f_stat.max_s1_len) {
+		f_stat.max_s1_len = s_count ;
 	}
 
 	s1_found += seq_cou ;
@@ -252,8 +252,8 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	return 0 ;	
 }
 
-// Note that the work is done in shorts! (2 bytes)
-// Returns bytes of storage.
+
+// Returns words(ints) of storage.
 int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 {
 	out_store = (u_int *) v_store ;
@@ -261,8 +261,7 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 
 	u_int *store_start = out_store ;
 		
-	double tm[6] ;
-	memset(tm,0,sizeof(tm)) ;
+	f_stat.evt_cou++ ;
 
 	for(int row=1;row<=MAX_ROW;row++) {
 		double tmx ;
@@ -273,13 +272,11 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 		out_store++ ;	// leave space for cluster count
 
 
-//		LOG(INFO,"Row %d: start",row) ;
-
 		tmx = mark() ;
 		do_blobs_stage1(row) ;
 		tmx = delta(tmx) ;
 
-		tm[0] += tmx ;	
+		f_stat.tm[1] += tmx ;	
 
 		//do_row_check(row) ;
 
@@ -287,13 +284,14 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 		do_blobs_stage2(row) ;
 		tmx = delta(tmx) ;
 
-		tm[1] += tmx ;
+		f_stat.tm[2] += tmx ;
 
 		tmx = mark() ;
 		found_ints = do_blobs_stage3(row) ;
 		tmx = delta(tmx) ;
 
-		tm[2] += tmx ;
+		f_stat.tm[3] += tmx ;
+
 
 		if(found_ints) {
 
@@ -307,20 +305,54 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 			out_store = row_store ;	// rewind 
 		}
 
-//		LOG(INFO,"Row %d: end",row) ;
+		if((out_store-store_start)>(max_out_bytes/4-1000)) {
+			LOG(ERR,"not enough ints %d vs %d",out_store-store_start,max_out_bytes/4) ;
+			break ;
+		}		
 	}
 
 
-	if(s1_found > max_s1_found) {
-		max_s1_found = s1_found ;
+	if(s1_found > (int)f_stat.max_s1_found) {
+		f_stat.max_s1_found = s1_found ;
 	}
-
-//	LOG(TERR,"Had %d sequences, total bytes used %u",s1_found,(store-store_start)*2) ;
-//	LOG(TERR,"So far: max_s1_found %d, max_s1_len %d, max_blob_cou %d", max_s1_found,max_s1_len,max_blob_cou) ;
-//	LOG(TERR,"delta stage1 %f, stage2 %f, stage3 %f",tm[0],tm[1],tm[2]) ;
 
 	return (out_store-store_start) ;	// in ints
 }
+
+void itpc_fcf_c::run_start()
+{
+	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+
+	memset(&f_stat,0,sizeof(f_stat)) ;
+
+}
+
+void itpc_fcf_c::run_stop()
+{
+
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+
+	for(int i=0;i<10;i++) {
+		f_stat.tm[i] /= f_stat.evt_cou ;
+	}
+	
+	LOG(INFO,"itpcFCF: %d: events %d, times %f %f %f %f",my_id,
+	    f_stat.evt_cou,
+	    f_stat.tm[0],f_stat.tm[1],f_stat.tm[2],f_stat.tm[3]) ;
+
+	LOG(INFO,"   times %f %f %f %f",
+	    f_stat.tm[4],f_stat.tm[5],f_stat.tm[6],f_stat.tm[7]) ;
+
+
+	LOG(INFO,"   max s1_found %d, s1_len %d, blob_cou %d",f_stat.max_s1_found,f_stat.max_s1_len,f_stat.max_blob_cou) ;
+	if(f_stat.toobigs) {
+		LOG(WARN,"   toobigs %d",f_stat.toobigs) ;
+	}
+	else {
+		LOG(INFO,"   toobigs %d",f_stat.toobigs) ;
+	}
+}
+
 
 int itpc_fcf_c::do_blobs_stage1(int row)
 {
@@ -436,8 +468,8 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 		pads++ ;
 	}
 
-	if(blob_cou > max_blob_cou) {
-		max_blob_cou = blob_cou ;
+	if(blob_cou > f_stat.max_blob_cou) {
+		f_stat.max_blob_cou = blob_cou ;
 	}
 
 
@@ -549,8 +581,10 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 		if(bytes_for_blob > sizeof(smooth_dta)) {
 //		if((u_int)(dt*dp) >  sizeof(smooth_dta)/sizeof(smooth_dta[0])) {	// too big!
-			LOG(ERR,"row %d: %d: toobig %d X %d",row,i,dp,dt) ;
-			LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
+			f_stat.toobigs++ ;
+
+//			LOG(ERR,"row %d: %d: toobig %d X %d",row,i,dp,dt) ;
+			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;
 			continue ;
 		}
@@ -581,7 +615,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 {
 	short *dta_s ;
 	rp_t *rp = &(row_pad[row][0]) ;
-
+	double tm ;
 	
 	u_int *obuff = (u_int *)out_store ;
 	int clusters_cou = 0 ;
@@ -590,7 +624,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 	for(int ix=0;ix<blob_cou;ix++) {
 		if(blob[ix].seq_cou==0) continue ;
 
-//		LOG(TERR,"Blob %d in play",ix) ;
+		tm = mark() ;
+
+
 
 		blob[ix].tot_charge = 0 ;
 		blob[ix].pixels = 0 ;
@@ -676,6 +712,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			continue ;
 		}
 
+		f_stat.tm[4] += delta(tm) ;
+
 		// do 3x3 averaging
 		for(int i=1;i<=dp;i++) {
 		for(int j=1;j<=dt;j++) {
@@ -708,6 +746,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			*adc_p = sum ;	
 		}
 		}
+
+		f_stat.tm[5] += delta(tm) ;
 
 		// do peak finding over the smoothed ADC
 		int peaks_cou = 0 ;
@@ -771,6 +811,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 		peaks_done: ;
 		
+		f_stat.tm[6] += delta(tm) ;
+
 		//LOG(TERR,"Blob %d: peaks %d",ix,peaks_cou) ;
 		
 
@@ -985,6 +1027,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 
 		done_peaks:;
+		f_stat.tm[7] += delta(tm) ;
 
 #ifdef DO_DBG1
 		printf("BLOB start: row %d, peaks %d: %d:%d, %d:%d\n",row,peaks_cou,blob[ix].p1,blob[ix].p2,blob[ix].t1,blob[ix].t2) ;

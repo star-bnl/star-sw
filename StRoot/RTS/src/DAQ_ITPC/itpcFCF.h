@@ -37,11 +37,11 @@ class itpc_fcf_c : public itpcPed {
 public:
 	itpc_fcf_c() { 
 		want_data = 1 ; 
-		init(-1) ; 
+		my_id = -1 ;
 
-		max_s1_found=0 ; 
-		max_s1_len=0 ; 
-		max_blob_cou=0 ;
+		init(-1) ; 
+		run_start() ;	// just in case
+
 		s1_found = 0 ;
 
 		version = 0x20180000 ;
@@ -52,6 +52,8 @@ public:
 
 
 	int init(int sector) ;
+	void run_start() ;
+	void run_stop() ;
 
 	void event_start() ;	// mostly to zap some debugging counters
 
@@ -63,6 +65,19 @@ public:
 
 
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
+
+	int my_id ;
+
+	struct f_stat_t {
+		double tm[10] ;
+		u_int evt_cou ;
+
+		u_int toobigs ;
+
+		u_int max_s1_found ;
+		u_int max_s1_len ;
+		u_int max_blob_cou ;
+	} f_stat ;
 
 private:
 
@@ -131,9 +146,9 @@ private:
 
 	int s1_found ;
 
-	int max_s1_len ;
-	int max_s1_found ;
-	int max_blob_cou ;
+//	int max_s1_len ;
+//	int max_s1_found ;
+//	int max_blob_cou ;
 
 	int do_blobs_stage1(int row) ;
 	int do_blobs_stage2(int row) ;
