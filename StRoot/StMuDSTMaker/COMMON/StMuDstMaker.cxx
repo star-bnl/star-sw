@@ -146,8 +146,6 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mFileName="";
   streamerOff();
   zeroArrays();
-  if (mIoMode==ioRead) openRead();
-  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
@@ -173,7 +171,21 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   gStMuDstMaker = this;
 
 }
-
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) :
+  StMuDstMaker(name)
+{
+  mIoMode = mode;
+  mIoNameMode = nameMode;
+  mDirName = dirName;
+  mFileName = fileName;
+  mFilter = filter;
+  mMaxFiles = maxFiles;
+  if (mIoMode==ioRead) openRead();
+  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+}
 /*! 
  * This method assigns individual TCloneArrays location from one
  * big global one. Dirty init MUST follow the order in StMuArrays.
@@ -322,51 +334,6 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
   }
   if (mIoMode==ioRead)
     setBranchAddresses(mChain);
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) :
-  StIOInterFace(name),
-  mStEvent(0), mStMuDst(0), 
-#ifndef __NO_STRANGE_MUDST__
-  mStStrangeMuDstMaker(0),
-#endif
-  mIOMaker(0), mTreeMaker(0),
-  mIoMode(mode), mIoNameMode(nameMode), 
-  mDirName(dirName), mFileName(fileName), mFilter(filter), 
-  mMaxFiles(maxFiles), mEventList(0),
-  mTrackType(256), mReadTracks(1),
-  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
-#if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
-  mSplit(99), 
-#else
-  mSplit(-10), 
-#endif
-  mCompression(9), mBufferSize(65536*4),
-  mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
-{
-  assignArrays();
-  streamerOff();
-  zeroArrays();
-  createArrays();
-  if (mIoMode==ioRead) openRead();
-  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
-
-  setProbabilityPidFile();
-
-  mEventCounter=0;
-  mStMuDst = new StMuDst();
-  mEmcUtil = new StMuEmcUtil();
-  mFmsUtil = new StMuFmsUtil();
-  mPmdUtil = new StMuPmdUtil();
-  mTofUtil = new StMuTofUtil();
-  mBTofUtil= new StMuBTofUtil();  /// dongx
-  mEpdUtil = new StMuEpdUtil(); // jdb, fix rt 3338
-  mEzTree  = new StMuEzTree();
-  gStMuDstMaker = this;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -555,7 +522,7 @@ void StMuDstMaker::Clear(const char *){
    will hold the current event if the io was successful, or return a null pointer.
 */
 int StMuDstMaker::Make(){
-
+  mStMuDst->SetInstance();
   DEBUGMESSAGE2("");
   int returnStarCode = kStOK;
   StTimer timer;
