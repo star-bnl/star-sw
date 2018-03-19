@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.168 2017/12/28 19:10:33 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.169 2018/03/19 17:50:42 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.169  2018/03/19 17:50:42  jwebb
+// Setup support for 3 planes of Si tracking
+//
 // Revision 1.168  2017/12/28 19:10:33  jwebb
+//
 // Update sensitive volume names in St_geant_Maker and g2t_epd.F for interface
 // to C++.
 //
@@ -1540,9 +1544,10 @@ Int_t St_geant_Maker::Make() {
     iRes = g2t_hca( g2t_track, g2t_hca_hit);
   } 
 
-  nhits=0;
-
-  geant3 -> Gfnhit("FTSH","FTSA", nhits); 
+  nhits=nhit1=nhit2=nhit3=0;
+  geant3 -> Gfnhit("FTSH","FSIA", nhit1); nhits+=nhit1; 
+  geant3 -> Gfnhit("FTSH","FSIB", nhit2); nhits+=nhit2; 
+  geant3 -> Gfnhit("FTSH","FSIC", nhit3); nhits+=nhit3; 
   if ( nhits > 0 ) {
     St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
     AddData(  g2t_fts_hit );
