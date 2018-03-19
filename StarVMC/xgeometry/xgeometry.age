@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.30.2.1 2018/03/14 22:11:33 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.2 2018/03/19 17:55:56 jwebb Exp $
 
 
 
@@ -2538,6 +2538,8 @@ If LL>0
   Case ftsref10 { y2017 : y2017 baseline w/ ids and fts r10;    Geom = 'ftsref10  '; call geom_ftsref10;}
 
 
+  Case sitrver0  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'sitrver0  '; call geom_sitrver0;}
+
 
 * Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
 * Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
@@ -4657,8 +4659,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.30.2.1 2018/03/14 22:11:33 jwebb Exp $
+* $Id: xgeometry.age,v 1.30.2.2 2018/03/19 17:55:56 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.30.2.2  2018/03/19 17:55:56  jwebb
+* Integrates si tracker tag into xgeometry.
+*
 * Revision 1.30.2.1  2018/03/14 22:11:33  jwebb
 * xgeometry part of the steering for FTS.
 *
