@@ -60,7 +60,7 @@ StPicoEvent::StPicoEvent(StMuDst const& muDst) : StPicoEvent() {
     mPrimaryVertexError[1] = pv->posError().y();
     mPrimaryVertexError[2] = pv->posError().z();
 #ifdef StTrackMassFit_hh
-    KFParticle *kvx =  StMuDst::instance()->IdVx2KFVxMap[pv->id()];
+    KFParticle *kvx =  StMuDst::instance()->IdVx2KFVx()[pv->id()];
     if (kvx) {
       for (Int_t i = 0; i < 3; i++) {
 	mPrimaryVertexError[i] = TMath::Sqrt(kvx->GetCovariance(i,i));
