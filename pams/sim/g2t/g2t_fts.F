@@ -6,7 +6,7 @@
       INTEGER   G2T_FTS,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
       logical   Local/.false./
 
-      CHARACTER (len=4), dimension(3), parameter :: subsys = (/'FSIA', 'FSIB', 'FSIC'/)
+      CHARACTER (len=4), dimension(*), parameter :: subsys = (/'FTSA', 'FSIA', 'FSIB', 'FSIC'/)
 
 *
       G2T_FTS=STAFCV_OK
