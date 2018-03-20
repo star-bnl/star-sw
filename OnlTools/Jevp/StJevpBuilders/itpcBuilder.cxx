@@ -1,4 +1,4 @@
-// $Id: itpcBuilder.cxx,v 1.6 2018/03/05 21:10:15 videbaks Exp $
+// $Id: itpcBuilder.cxx,v 1.7 2018/03/20 14:10:04 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +36,7 @@
 //
 // mask out a set of hot paws in row28  NOTE a general feature.
 //
-#define checkcld 0
+#define checkcld 1
 #define checklaser 0
 //#define fv 1
 
@@ -551,7 +551,6 @@ void itpcBuilder::event(daqReader *rdr)
       cl_max_channels += tpc_max_channels_sector;
       
       while(dd->iterate()) {
-	
 	for(u_int i=0;i<dd->ncontent;i++) {
 	  pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
 	  charge_counts_cl[(int)dd->cld[i].pad][dd->row] += dd->cld[i].charge;
@@ -616,7 +615,7 @@ void itpcBuilder::event(daqReader *rdr)
     contents.h66_itpc_phi_charge->Scale(adc_scale);
     contents.h67_itpc_sector_charge->Scale(adc_scale);
   }
-  contents.h34_itpc_sec20->SetMaximum(500);
+  //  contents.h34_itpc_sec20->SetMaximum(500);
   if(has_cld) {
     n_cld++;   
     double cld_scale = (double)(n_cld-1) / (double)n_cld;
