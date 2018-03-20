@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.165 2017/10/23 11:25:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.166 2018/03/20 14:23:56 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -988,6 +988,11 @@ Bfc_st BFC[] = {
   {"P2017a","" ,"",
    "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    , "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2018a" ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+   , "Base chain for run 2018 data (tpc)",kFALSE},
+  {"P2018a","" ,"",
+   "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -1112,7 +1117,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"tables","","","StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
+  {"tables" ,"","","StDbT,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
   {"StDbT" ,"" ,"","","" ,"StDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T" ,"" ,"","","" ,"ctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT" ,"" ,"","","" ,"ebye_Tables","Load ebye_Tables",kFALSE},
@@ -1221,7 +1226,7 @@ Bfc_st BFC[] = {
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"epdDb" ,"epdDb","","epdDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
+  {"epdDb" ,"epdDb","","tpcDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1369,6 +1374,7 @@ Bfc_st BFC[] = {
   {"ssdpre" ,"","","ssdEmbed,spa" ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd" ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker", "... SSD merge maker",kFALSE},
   {"ssdE" ,"","","ssdpre,ssdAdd" ,"","","SSD full chain for embedding",kFALSE},
+  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2" ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker", "B/E EMC data common maker",kFALSE},
@@ -1445,8 +1451,8 @@ Bfc_st BFC[] = {
   {"fgtClu" ,"","", "fgtutil", "StFgtClusterMaker","StFgtClusterMaker", "FGT cluster maker",kFALSE},
   {"fgtAtoC" ,"","", "fgtdb", "StFgtA2CMaker","StFgtA2CMaker", "FGT ADC to Charge maker",kFALSE},
   {"fgtPoint" ,"","", "event", "StFgtPointMaker", "StFgtPointMaker", "Creates FGT points",kFALSE},
-  {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
+  {"genvtx" ,"" ,"","EEmcUtil","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMakerNoSti"
    , "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit" ,"" ,"" ,"genvtx" ,"","","... Generic VF will use Minuit method",kFALSE},
   {"CtbMatchVtx" ,"" ,"","VFMinuit","" ,"","... CTB Matching ON in Vertex Finding",kFALSE},
@@ -1473,11 +1479,11 @@ Bfc_st BFC[] = {
   {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb","" ,"","Enables partial  Hft (PXL)",kFALSE},
   {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,sstDb",""
    , "","Enables complete Hft (PXL+IST+SST)",kFALSE},
-  {"VFPPV" ,"" ,"","ctf_T,eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
-   , "ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPV" ,"" ,"","      eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB" ,"" ,"","VFPPV","" ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
-  {"VFPPVEv" ,"" ,"" ,"ctf_T,eemcDb" ,"StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker" , "... StEvent based VFPPV, noCTB",kFALSE},
+  {"VFPPVEv" ,"" ,"" ,"eemcDb" ,"StGenericVertexMaker"
+   , "Minui,StGenericVertexMaker" ,"... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof" ,"" ,"" ,"VFPPVEv" ,"" ,"","...VFPPVEv with no Btof ",kFALSE},
   {"Sti" ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    , "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
@@ -2605,6 +2611,11 @@ Bfc_st BFC[] = {
   {"P2017a","" ,"",
    "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    , "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2018a" ,"","","ry2018a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+   , "Base chain for run 2018 data (tpc)",kFALSE},
+  {"P2018a","" ,"",
+   "B2018a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -2729,7 +2740,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"tables","","","StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
+  {"tables" ,"","","StDbT,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
   {"StDbT" ,"" ,"","","" ,"StDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T" ,"" ,"","","" ,"ctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT" ,"" ,"","","" ,"ebye_Tables","Load ebye_Tables",kFALSE},
@@ -2838,7 +2849,7 @@ Bfc_st BFC[] = {
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"epdDb" ,"epdDb","","epdDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
+  {"epdDb" ,"epdDb","","tpcDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -2986,6 +2997,7 @@ Bfc_st BFC[] = {
   {"ssdpre" ,"","","ssdEmbed,spa" ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd" ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker", "... SSD merge maker",kFALSE},
   {"ssdE" ,"","","ssdpre,ssdAdd" ,"","","SSD full chain for embedding",kFALSE},
+  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2" ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker", "B/E EMC data common maker",kFALSE},
@@ -3062,8 +3074,8 @@ Bfc_st BFC[] = {
   {"fgtClu" ,"","", "fgtutil", "StFgtClusterMaker","StFgtClusterMaker", "FGT cluster maker",kFALSE},
   {"fgtAtoC" ,"","", "fgtdb", "StFgtA2CMaker","StFgtA2CMaker", "FGT ADC to Charge maker",kFALSE},
   {"fgtPoint" ,"","", "event", "StFgtPointMaker", "StFgtPointMaker", "Creates FGT points",kFALSE},
-  {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
+  {"genvtx" ,"" ,"","EEmcUtil","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMakerNoSti"
    , "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit" ,"" ,"" ,"genvtx" ,"","","... Generic VF will use Minuit method",kFALSE},
   {"CtbMatchVtx" ,"" ,"","VFMinuit","" ,"","... CTB Matching ON in Vertex Finding",kFALSE},
@@ -3090,11 +3102,11 @@ Bfc_st BFC[] = {
   {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb","" ,"","Enables partial  Hft (PXL)",kFALSE},
   {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,sstDb",""
    , "","Enables complete Hft (PXL+IST+SST)",kFALSE},
-  {"VFPPV" ,"" ,"","ctf_T,eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
-   , "ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPV" ,"" ,"","      eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
+   , "Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB" ,"" ,"","VFPPV","" ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
-  {"VFPPVEv" ,"" ,"" ,"ctf_T,eemcDb" ,"StGenericVertexMaker"
-   ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker" , "... StEvent based VFPPV, noCTB",kFALSE},
+  {"VFPPVEv" ,"" ,"" ,"eemcDb" ,"StGenericVertexMaker"
+   , "Minui,StGenericVertexMaker" ,"... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof" ,"" ,"" ,"VFPPVEv" ,"" ,"","...VFPPVEv with no Btof ",kFALSE},
   {"Sti" ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    , "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
@@ -4160,9 +4172,9 @@ Int_t StBFChain::Init() {
 
 
     if (fNoChainOptions) {
-      if (GetOption("misalign") ) 
+      if (GetOption("misalign") && TClass::GetClass("AgPosition") ) 
 	gROOT->ProcessLine("AgPosition::SetReal();");
-      else                        
+      else if ( TClass::GetClass("AgPosition") )                        
 	gROOT->ProcessLine("AgPosition::SetIdeal();");
     }
 
