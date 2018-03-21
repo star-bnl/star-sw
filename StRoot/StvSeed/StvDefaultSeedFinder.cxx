@@ -19,10 +19,15 @@
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 
-#include "StMessMgr.h"
+#include "StMessMgr.h" 
 
 void myBreak(int);
-enum {kFstAng=65,kVtxAng=33,kErrFakt=10,kLenFakt=4,kMaxLen=900,kMinRad};
+//enum {kFstAng=65,kVtxAng=33,kErrFakt=5,kLenFakt=4,kMaxLen=900,kMinRad};   // 
+//enum {kFstAng=35,kVtxAng=33,kErrFakt=5,kLenFakt=4,kMaxLen=900,kMinRad}; // 875 720 74 8
+//enum {kFstAng=15           ,kVtxAng=33,kErrFakt=5,kLenFakt=4,kMaxLen=900,kMinRad}; // 875 720 74 8
+enum {kFstAng=5           ,kVtxAng=33,kErrFakt=5,kLenFakt=4,kMaxLen=900,kMinRad}; // 875 720 74 8
+//enum {kFstAng=1           ,kVtxAng=33,kErrFakt=5,kLenFakt=4,kMaxLen=900,kMinRad}; // 875 720 74 8
+
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kVtxTan = tan(kVtxAng*M_PI/180);
@@ -39,6 +44,12 @@ StvDefaultSeedFinder::StvDefaultSeedFinder(const char *name):StvSeedFinder(name)
   f1stHitMap 	= new Stv1stHitMap;
   f1stHitMapIter= new Stv1stHitMapIter;
   fSgn = 1;
+
+  LOG_INFO << Form( "kFstAng = %i / kVtxAng = %i / kErrFakt = %i / kMaxLen = %i / kNDejavu = %i ",
+		    kFstAng, kVtxAng, kErrFakt, kMaxLen, kNDejavu ) 
+	   << endm;
+
+
 }  
 //_____________________________________________________________________________
 void StvDefaultSeedFinder::Clear(const char*)
@@ -181,7 +192,7 @@ std::vector<TObject*> mySeedObjs;
     mSel.Reset();
     selHit = fstHit;
     m1stHit = fstHit->x();
-    mSel.SetErr(sqrt(fstHit->err2())*kErrFakt*kErrFakt);
+    mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
 
     LOG_DEBUG << "... First hit found" << endm;
 
@@ -382,7 +393,9 @@ void  StvConeSelector::UpdateLims()
 static int nCall=0; nCall++;
 StvDebug::Break(nCall);
 struct myLim_t {double Phi,Rxy,tanL,Z;};
-//static const StvConst  *kons = StvConst::Inst();
+// StvConst loads StvKonst_st table... so even though it's not used... it's used... 
+//   (THIS DEPENDENCY NEEDS TO BE SATISFIED ELSEWHERE) 
+static const StvConst  *kons = StvConst::Inst();
 static const double kMyMax = 220;
    TVector3 vHit(mHit);
    TVector3 nT(mDir);
@@ -492,8 +505,8 @@ static const double kMyMax = 220;
 //_____________________________________________________________________________
 #define REJECT_HIT( reason, code )	\
 {	\
-LOG_DEBUG << __LINE__ << " [" << reason << " " << code << " ]" << endm; \
-return code; \  
+ LOG_DEBUG << __LINE__ << " [" << reason << " " << code << " ]" << endm; \
+ return code;   \
 }
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {

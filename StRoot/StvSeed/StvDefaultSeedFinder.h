@@ -71,8 +71,10 @@ TVector3 mPnt[100];
 
 class StvDefaultSeedFinder : public StvSeedFinder
 {
-enum { kNDejavu=4 };
+  
 public:
+  enum { kNDejavu = 99 };
+
   StvDefaultSeedFinder(const char *name="Default");
    ~StvDefaultSeedFinder(){;}
   const THelixTrack* NextSeed();
