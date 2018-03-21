@@ -1184,18 +1184,21 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 				if(data[1] != 0) {
 					suspect = 1 ;
-					LOG(ERR,"RDO %d: Event Trailer %u/%u = status 0x%08X",rdo_id,word_ix,words,data[1]) ;
+					//often!
+					//LOG(ERR,"RDO %d: Event Trailer %u/%u = status 0x%08X",rdo_id,word_ix,words,data[1]) ;
 				}
 
 				trg_cou=data[2] ;
 				if(trg_cou>100) {
 					suspect = 1 ;
-					LOG(ERR,"RDO %d: Event Trailer %u/%u = trg_cou 0x%08X",rdo_id,word_ix,words,data[2]) ;
+					//often
+					//LOG(ERR,"RDO %d: Event Trailer %u/%u = trg_cou 0x%08X",rdo_id,word_ix,words,data[2]) ;
 					trg_cou = 0 ;
 				}
 
 				if(suspect) {
-					LOG(ERR,"flags 0x%X",flags) ;
+					// almost always 0xF which is correct.
+					if(flags != 0xF) LOG(ERR,"flags 0x%X",flags) ;
 				}
 
 				if((data[3+trg_cou+2]&0xF800FFFF)!=0x58001001) suspect = 1 ;	// very often
