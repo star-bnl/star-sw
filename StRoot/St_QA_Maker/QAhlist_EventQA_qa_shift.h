@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.48 2015/04/02 19:53:46 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.49 2018/03/21 02:46:29 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.49  2018/03/21 02:46:29  genevb
+// Updated list
+//
 // Revision 2.48  2015/04/02 19:53:46  genevb
 // TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
 //
@@ -217,7 +220,7 @@
   ":tpx;tpc:QaPtrkEtaTTS",
   ":tpx;tpc:QaPtrkMeanPtTTS",
   ":tpx;tpc:QaPtrkMeanEtaTTS",
-  ":tpx;tpc:QaPtrkGoodsm",
+  ":tpx;tpc:QaPtrkGood",
   ":tpx;tpc:QaPtrkGoodTTS",
   ":tpx;tpc:QaPtrkChisq0TTS",
   ":tpx;tpc:QaPtrkFlag",
@@ -235,7 +238,7 @@
   ":tpx;tpc:QaPidGlobtrkDstdedxPVsDedx",
   ":tpx;tpc:QaDedxBBTTS",
   ":tpx;tpc:QaDedxBTTS",
-  ":tpx;tpc:Z3A",
+  //":tpx;tpc:Z3A",
   ":tpx;tpc:QaEvsumTotChg",
   ":tpx;tpc:QaGtrkRZf0",
   ":tpx,svt;tpc,svt:QaGtrkRZf0TS",
@@ -282,7 +285,7 @@
   ":fpd:QaFpdSums4",
   ":fpd:QaFpdSums5",
   ":fpd:QaFpdSums6",
-  ":fpd:QaFpdSums7",
+  //":fpd:QaFpdSums7",
   ":mtd:QaMtdNHits",
   ":mtd:QaMtdHitMap",
   ":mtd:QaMtdNMatchHits",
