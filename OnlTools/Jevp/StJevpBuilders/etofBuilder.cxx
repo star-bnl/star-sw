@@ -209,7 +209,7 @@ void etofBuilder::event(daqReader *rdr) {
 }
 
 void etofBuilder::startrun(daqReader *rdr) {
-  
+  resetAllPlots();
 }
 
 void etofBuilder::stoprun(daqReader *rdr) {
