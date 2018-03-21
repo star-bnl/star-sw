@@ -510,7 +510,8 @@ static const double kMyMax = 220;
 }
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
-//VP   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
+
+   if (x[0]*x[0]+x[1]*x[1]>mRxy2) REJECT_HIT( "hit outside of last radius", 1 );
 
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
 
