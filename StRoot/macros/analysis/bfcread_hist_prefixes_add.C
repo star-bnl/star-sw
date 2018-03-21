@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add.C,v 3.5 2017/02/27 21:41:36 genevb Exp $
+// $Id: bfcread_hist_prefixes_add.C,v 3.6 2018/03/21 02:53:12 genevb Exp $
 // $Log: bfcread_hist_prefixes_add.C,v $
+// Revision 3.6  2018/03/21 02:53:12  genevb
+// Improper use of endl corrected
+//
 // Revision 3.5  2017/02/27 21:41:36  genevb
 // StEvent.so now depends on StBichsel.so
 //
@@ -123,7 +126,7 @@ void bfcread_hist_prefixes_add(
      //  cout << " --- Skipping " << MakerHistDir << endl;
      //  continue;
      //}
-     cout << endl << " --- MakerHistDir : " << MakerHistDir << endl;
+     cout << "\n --- MakerHistDir : " << MakerHistDir << endl;
 
      HU[nbranch] = new StHistUtil();
      HU[nbranch]->SetPntrToMaker(IOMk);
