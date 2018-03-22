@@ -263,7 +263,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 	// I should now point at 0x80xx0001
 	if(dd_x != 0x80000001) {
-		LOG(WARN,"Missing start 0x%08X",d[0]) ;
+		// HAPPENS
+		//LOG(WARN,"Missing start 0x%08X",d[0]) ;
 
 		//for(int i=0;i<32;i++) {
 		//	LOG(TERR,"%d = 0x%08X",i-8,d[i-8]) ;
@@ -300,7 +301,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 					LOG(ERR,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
 				}
 				else {
-					LOG(WARN,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
+					//OFTEN
+					//LOG(WARN,"%d: FEE #%d: Before END 0x%08X",rdo_id,fee_port,d[-2]) ;
 				}
 			}
 
@@ -368,19 +370,32 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 				//LOG(TERR,"FEE #%d(%d) start SAMPA: FEE BX %u (0x%08X)",fee_port,fee_id,fee_bx&0xFFFFF,fee_bx) ;
 
 				for(int i=0;i<4;i++) {
+					u_int expect_mask ;
 					u_int *cur_d = d ;
 
-					if(i==0 || i==2) found_ch_mask = 0 ;
+					switch(i) {
+					case 0 :
+					case 2 :
+						expect_mask = 0x0000FFFF ;
+						break ;
+					default :
+						expect_mask = 0xFFFF0000 ;
+						break ;
+					}
+
+					//if(i==0 || i==2) found_ch_mask = 0 ;
+					found_ch_mask = 0 ;
 
 					d = sampa_lane_scan(d,end) ;
 					//LOG(TERR,"fee_port %d: lane %d was %d words",fee_port,i,d-cur_d) ;
 					
-					if(i==1 || i==3) {
-						if(found_ch_mask != 0xFFFFFFFF) {
+					//if(i==1 || i==3) {
+						if(found_ch_mask != expect_mask) {
+							//LOG(ERR,"expect 0x%08X",expect_mask) ;
 							LOG(ERR,"%d: fee_port %d: missing ch after lane %d: 0x%08X",
 							    rdo_id,fee_port,i,found_ch_mask) ;
 						}
-					}
+					//}
 
 
 				}
@@ -516,7 +531,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 
 	if(fee_id < 0) {
-		LOG(ERR,"%d: FEE #%d: format error [%u 0x%08X]",rdo_id,fee_port,d-start,*d) ;
+		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(u_int)fee_port,d-start,*d) ;
 		return d ;
 	}
 
@@ -697,7 +712,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		goto err_ret ;
 	}
 	else {
-		LOG(NOTE,"Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d, fee_port %d",type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err,fee_port) ;
+		//LOG(TERR,"Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d, fee_port %d",type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err,fee_port) ;
 	}
 
 
@@ -742,6 +757,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	if(ped_c && ped_c->want_data) {	// I will handle my own data
 		ped_c->sector = sector_id ;
 		ped_c->rdo = rdo_id ;
+		ped_c->port = fee_port ;
 
 		if(ped_c->do_ch(fee_id, fee_ch, data, words)<0) {
 			err |= 0x200 ;
@@ -1032,7 +1048,8 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			// sometimes I get ASCII immediatelly
 			if((data[1]&0xFFC00000)!=0x80000000) {
 				if((data[1]&0xFFC0FFFF)!=0xA00000A0) {
-					LOG(ERR,"%d: evt %d: After start 0x%08X, FEE #%d",rdo_id,evt_ix,data[1],data[0]+1) ;
+					// I read e.g. 0x002E0000 instread of 0x802E0001
+					//LOG(ERR,"%d: evt %d: After start 0x%08X, FEE #%d",rdo_id,evt_ix,data[1],data[0]+1) ;
 				}
 			}
 
