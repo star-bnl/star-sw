@@ -23,15 +23,16 @@ c     call G2R_GET_SYS ('FTSD','FSIS',Iprin,Idigi)
 
        CALL g2r_get_sys( 'FTSD', subsys(isys), Iprin, Idigi )
 
-       if (Iprin.lt.0) go to 99
+       if (Iprin.lt.0) goto 123
+
 *      Local  = Idigi.ge.2
        local  = .false. ! Ensure global coordinates
 
        Do While (G2R_GET_HIT('fts') .eq. 0)
-*          print *,i,id,trac,next,volume,
-*     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
-*     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
-*     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
+*         print *,i,id,trac,next,volume,
+*    >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
+*    >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
+*    >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
 
          i=i+1
          g2t_fts_hit_h.nok            = i
@@ -65,9 +66,10 @@ c     call G2R_GET_SYS ('FTSD','FSIS',Iprin,Idigi)
          g2t_track(trac).n_fts_hit    = g2t_track(trac).n_fts_hit + 1
        enddo    
 
+ 123  continue
       ENDDO
-    
- 99   RETURN
+ 99   RETURN    
+
       END
 
 
