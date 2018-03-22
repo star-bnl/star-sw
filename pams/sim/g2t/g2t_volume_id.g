@@ -1,6 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.88.2.1 2018/03/19 17:56:25 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.88.2.2 2018/03/22 20:40:22 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.88.2.2  2018/03/22 20:40:22  jwebb
+* Third plane has >100 sensors... planeID needs to be *1000.
+*
 * Revision 1.88.2.1  2018/03/19 17:56:25  jwebb
+*
 * Defines g2t volume id and reads out fts hits for the new version of the SI
 * tracker.
 *
@@ -1151,7 +1155,7 @@ c$$$    write (*,*) numbv
       ELSE IF (CSYS=='fts') THEN
 
             volume_id = g2t_fts_volume_id( numbv )
-            write (*,*) volume_id         
+
 
 *******************************************************************************************
 ** 28                                                                           Prashanth S 
@@ -1244,7 +1248,7 @@ c$$$    write (*,*) numbv
          if (cd=='FSIC') station = 3;
 
          g2t_fts_volume_id = 10000 * subsys  + 
-                               100 * station + 
+                              1000 * station + 
                                      numbv(1)
 
 
