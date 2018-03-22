@@ -171,6 +171,10 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 {
 	int row, pad ;
 	u_short tb_buff[MAX_TB] ;
+	int seq_cou = 0 ;
+	int s_count ;
+	int t_stop_last ;
+	u_short *s1_data ;
 
 	itpc_ifee_to_rowpad(fee_id, fee_ch, row, pad) ;
 
@@ -186,19 +190,41 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	for(int i=0;i<word32;i++) {
 		u_int d = *data++ ;
 
+		if(d & 0xC0000000) {
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+			goto err_ret ;
+		}
+
 		tb_buff[t_cou++] = (d>>20) & 0x3FF ;
 		tb_buff[t_cou++] = (d>>10) & 0x3FF ;
 		tb_buff[t_cou++] = d & 0x3FF ;
 	}
 
-	int seq_cou = 0  ;
 
-	u_short *s1_data = (u_short *)row_pad[row][pad].s1_data ;
+
+	s1_data = (u_short *)row_pad[row][pad].s1_data ;
+	
+	// I MUST put protection against broken data!!!
+	t_stop_last = -1 ;
 
 	for(int i=0;i<words;) {		// now timebins!
 		int t_cou = tb_buff[i++] ;
 		int t_start = tb_buff[i++] ;
 		int t_stop = t_start + t_cou - 1 ;
+
+		if(t_start <= t_stop_last) {
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+			seq_cou = 0 ;
+			goto err_ret ;
+		}
+		if(t_stop > 511) {
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",fee_id,rdo,port,fee_ch,words) ;
+			seq_cou = 0 ;
+			goto err_ret ;
+
+		}
+
+		t_stop_last = t_stop ;
 
 		seq_cou++ ;
 
@@ -206,7 +232,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		*s1_data++ = t_cou ;
 		*s1_data++ = t_start ;
 
-
+		
 
 		for(int t=t_start;t<=t_stop;t++) {
 			// initial cuts, where I blow of data
@@ -234,7 +260,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	*s1_data++ = 0xFFFF ;	// end sentinel
 
 	// check for data overrun!
-	int s_count = s1_data - (u_short *)row_pad[row][pad].s1_data ;
+	s_count = s1_data - (u_short *)row_pad[row][pad].s1_data ;
 	if(s_count >= MAX_TB) {
 		LOG(ERR,"In trouble at RP %d:%d",row,pad) ;
 	}
@@ -246,6 +272,8 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 	s1_found += seq_cou ;
 	
+
+	err_ret:;
 
 	row_pad[row][pad].s1_len = seq_cou ;	// sequence count!
 
