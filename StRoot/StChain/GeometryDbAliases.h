@@ -183,6 +183,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
   {"ftsref10",    20201210,    99, "ftsref10", ""},
 
+  {"sitrver0",    20201210,   100, "sitrver0", ""}, // plain Si tracker
+
 
 
   // Future development:
