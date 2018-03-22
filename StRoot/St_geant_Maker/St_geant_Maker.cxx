@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.170 2018/03/20 20:46:26 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.171 2018/03/22 19:46:19 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.171  2018/03/22 19:46:19  jwebb
+// Get the hit count right for FTS
+//
 // Revision 1.170  2018/03/20 20:46:26  jwebb
+//
 // Re-enable the FTSA (fts "active") volume.  (Temporarily lost when I during
 // integration of the FtsdGeo1 model).
 //
@@ -1551,8 +1555,8 @@ Int_t St_geant_Maker::Make() {
   nhits=nhit1=0;
   geant3 -> Gfnhit("FTSH","FTSA", nhit1); nhits+=nhit1; nhit1=0;
   geant3 -> Gfnhit("FTSH","FSIA", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIB", nhit2); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIC", nhit3); nhits+=nhit1; nhit1=0;
+  geant3 -> Gfnhit("FTSH","FSIB", nhit1); nhits+=nhit1; nhit1=0;
+  geant3 -> Gfnhit("FTSH","FSIC", nhit1); nhits+=nhit1; nhit1=0;
   if ( nhits > 0 ) {
     St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
     AddData(  g2t_fts_hit );
