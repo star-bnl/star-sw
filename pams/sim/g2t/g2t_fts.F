@@ -6,7 +6,8 @@
       INTEGER   G2T_FTS,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
       logical   Local/.false./
 
-      CHARACTER (len=4), dimension(*), parameter :: subsys = (/'FTSA', 'FSIA', 'FSIB', 'FSIC'/)
+      CHARACTER (len=4), dimension(*), parameter :: subsys  = (/'FTSA', 'FSIA', 'FSIB', 'FSIC'/)
+      LOGICAL,           dimension(*), parameter :: islocal = (/ .false., .true., .true., .true. /)
 
 *
       G2T_FTS=STAFCV_OK
@@ -26,7 +27,10 @@ c     call G2R_GET_SYS ('FTSD','FSIS',Iprin,Idigi)
        if (Iprin.lt.0) goto 123
 
 *      Local  = Idigi.ge.2
-       local  = .false. ! Ensure global coordinates
+*      local  = .false. ! Ensure global coordinates
+
+       local  = islocal( isys )
+
 
        Do While (G2R_GET_HIT('fts') .eq. 0)
 *         print *,i,id,trac,next,volume,
