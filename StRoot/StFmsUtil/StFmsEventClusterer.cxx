@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.14 2018/03/02 20:27:29 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.15 2018/03/23 18:43:01 smirnovd Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.15  2018/03/23 18:43:01  smirnovd
+// Turn off excessive output from StFmsEventClusterer
+//
 // Revision 1.14  2018/03/02 20:27:29  akio
 // Big update from	Zhanwen Zhu with new shower shape and six z slices
 //
@@ -390,13 +393,10 @@ Bool_t StFmsEventClusterer::fitClusters() {
   for (auto iter = mClusters.begin(); iter != mClusters.end(); ++iter) {
     int category = -1;
     ++Clucount;
-    cout<<" processing cluster"<<Clucount<<endl;
-
 
     if(mCategorizationAlgo==0) {category = mClusterFinder.categorise(iter->get());}
     else                       {category = mClusterFinder.categorise2(iter->get());}
     mFitter->setTowers(&(*iter)->towers());
-	cout<<" cata="<<category<<endl;
     switch (category) {
       case k1PhotonCluster:	
         fit1PhotonCluster(iter->get());
