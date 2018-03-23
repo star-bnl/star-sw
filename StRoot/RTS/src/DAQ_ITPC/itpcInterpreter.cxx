@@ -480,11 +480,18 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 				ascii_dta[ascii_cou++] = c ;
 				if(c=='\n') {
+					int last ;
+
 					ascii_dta[ascii_cou++] = 0 ;
 					if(fout) {
 						fprintf(fout,"#%02d: %s",fee_port,ascii_dta) ;
 						fflush(fout) ;
 					}
+					
+
+					last = strlen(ascii_dta) - 1 ;
+					if(ascii_dta[last]=='\n') ascii_dta[last] = 0 ;
+					LOG(TERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
 
 
 					if(fee_port > 0) {	// this must be!
@@ -506,7 +513,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 						}
 						   
 						if(strstr(ascii_dta,"ERROR")) {
-							int last = strlen(ascii_dta) - 1 ;
+							last = strlen(ascii_dta) - 1 ;
 							if(ascii_dta[last]=='\n') ascii_dta[last] = 0 ;
 							LOG(ERR,"%d: FEE #%d: [%s]",rdo_id,fee_port,ascii_dta) ;
 						}
@@ -924,6 +931,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 		d = *data++ ;
 
+		LOG(NOTE,"%d/%d = 0x%08X",word_ix,words,d) ;
 
 		switch(d) {
 		//case 0x5800FD71 :	// end of send_config 
@@ -943,16 +951,6 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			//goto re_loop ;
 		}
 
-#if 0
-		if((d&0xE0000000)==0x80000000) {
-			LOG(WARN,"START HDR %d 0x%08X",word_ix,d) ;
-		}
-
-		if((d&0xE0000000)==0x40000000) {
-			LOG(WARN,"END HDR %d 0x%08X",word_ix,d) ;
-		}
-
-#endif
 		switch(state) {
 		case S_FEE_ASCII :
 			if((d&0xFFFF0000)==0x00AA0000) {
