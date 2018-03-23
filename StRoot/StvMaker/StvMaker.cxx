@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.61 2017/09/29 16:54:51 perev Exp $
+// $Id: StvMaker.cxx,v 1.61.2.1 2018/03/23 15:41:32 jwebb Exp $
 /*!
 \author V Perev 2010
 
@@ -322,9 +322,11 @@ static int initialized = 0;
 
 
 //		Choose seed finders
-  assert(gSystem->Load("StvSeed.so")>=0);
+  //assert(gSystem->Load("StvSeed.so")>=0);
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
   mMaxTimes = IAttr("setMaxTimes");
+  LOG_INFO << "mMaxTimes = " << mMaxTimes << endm; 
+
   for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
     if (mMaxTimes>1)mHitLoader[jreg]->SetMaxTimes(mMaxTimes);
@@ -350,6 +352,7 @@ static int initialized = 0;
     for (int idx=0;idx<=tokens->GetLast();idx++) {
     TString &chunk = ((TObjString*)tokens->At(idx))->String();
       for (int nick=0;seedNick[nick];nick++) {
+
 	if (chunk.CompareTo(seedNick[nick],TString::kIgnoreCase)!=0) continue;
 	if (nick==0) {
           assert(gSystem->Load("Vc.so")>=0);
