@@ -23,22 +23,17 @@ void MuDstTbyT(const Char_t *oldf="/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_prod
   Int_t NoGTrkOld = 0, NoGTrkNew = 0;
   Int_t nev = 0;
   Bool_t bothRead = kTRUE;
-  while (kTRUE) {
-    Int_t iok = 0;
-    if (bothRead) iok = chain->MakeEvent();
-    cout << "ok = " << iok << endl;
-    if (iok) break;
+  Int_t iok = chain->MakeEvent();
+  while (! iok) {
     oldMuDst = muDstMko->muDst(); oldMuDst->SetInstance(); oldEv = oldMuDst->event(); NoGTrkOld = oldMuDst->numberOfGlobalTracks();
     newMuDst = muDstMkn->muDst(); newMuDst->SetInstance(); newEv = newMuDst->event(); NoGTrkNew = newMuDst->numberOfGlobalTracks();
     if (oldEv->runId() != newEv->runId()) break;
     if (oldEv->eventId() == newEv->eventId()) {
       nev++;
       cout << "event " << nev << "\trun = " << oldEv->runId() << "\tevent = " << oldEv->eventId() << " has matched" << " with no. of global tracks old / new = " << NoGTrkOld << "/" << NoGTrkNew	  << endl;
-      bothRead = kTRUE;
     } else {
       cout << "event " << nev << "\trun = " << oldEv->runId() << "\tevents Old = " << oldEv->eventId() << "\tnew = " << newEv->eventId() 
 	   << " has not matched" << endl;
-      bothRead = kFALSE;
       if (oldEv->eventId() < newEv->eventId()) {
         muDstMko->Clear(); iok = muDstMko->Make();
 	if (iok) break;
@@ -46,6 +41,8 @@ void MuDstTbyT(const Char_t *oldf="/gpfs02/eic/ayk/STAR/reco/MuDst/AuAu_200_prod
 	muDstMkn->Clear(); iok = muDstMkn->Make();
 	if (iok) break;
       }
+      continue;
     }
+    iok = chain->MakeEvent();
   }
 }

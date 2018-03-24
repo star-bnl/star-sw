@@ -1,3 +1,6 @@
+/* 
+   root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
+ */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -89,7 +92,11 @@ void Draw(const Char_t *tag = "New") {
   const Char_t *Sides[3] = {"W","E","I"};
   const Char_t *Cuts[3]  = {"sector<=12","sector>12&&sector!=20","sector==20"};
   for (Int_t i = 0; i < 3; i++) {
-    TpcHit->Draw(Form("abs(z):row>>%sR%s(45,0.5,45.5,60,208,213)",tag,Sides[i]),Cuts[i],"colz");
+    if (i < 2) {
+      TpcHit->Draw(Form("abs(z):row>>%sR%s(45,0.5,45.5,60,208,213)",tag,Sides[i]),Cuts[i],"colz");
+    } else {
+      TpcHit->Draw(Form("abs(z):row>>%sR%s(72,0.5,72.5,60,208,213)",tag,Sides[i]),Cuts[i],"colz");
+    }
     TH2 *R = (TH2 *) gDirectory->Get(Form("%sR%s",tag,Sides[i]));
     if (R) {
       R->FitSlicesY();
@@ -296,8 +303,8 @@ void T0Fit(TChain *TpcHit = 0) {
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents = 9999999, 
 	       //	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
-	       const Char_t *daqfile = "./st_physics_adc_19073049*.*event.root",
-	       const Char_t *treefile = "") {
+	       const Char_t *daqfile = "./st_physics_adc_19*.*event.root",
+	       const Char_t *treefile = "TpcHit.root") {
   gROOT->LoadMacro("bfc.C");
 
   //  TString Chain("in,StEvent,tpcDb,analysis,magF,NoDefault,tpcHitMover,OSpaceZ2,OGridLeak3D,Corr4,mysql");
