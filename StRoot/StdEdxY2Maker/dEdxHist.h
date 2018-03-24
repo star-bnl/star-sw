@@ -18,6 +18,7 @@ class Hists3D {
 	  Double_t xmin = 0, Double_t xmax = -1);
   virtual ~Hists3D() {}
   void    Fill(Double_t x, Double_t y, Double_t *z);
+  static Int_t NtotHist;
 };
 //________________________________________________________________________________
 class Hists2D {

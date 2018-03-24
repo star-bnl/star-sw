@@ -1,4 +1,5 @@
 #include "dEdxHist.h"
+Int_t Hists3D::NtotHist = 9;
 Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 		 const Char_t *TitleX, const Char_t *TitleY,
 		 Int_t nXBins, 
@@ -16,7 +17,7 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
     ymin = 0.5;
     ymax = nYBins+0.5;
   }
-  for (Int_t j = 0; j < 9; j++) {
+  for (Int_t j = 0; j < NtotHist; j++) {
     TString name(Name); 
     name += Names[j];
     TString title(Title); 
@@ -48,7 +49,7 @@ Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 }
 //________________________________________________________________________________
 void Hists3D::Fill(Double_t x, Double_t y, Double_t *z) {
-  for (Int_t i = 0; i < 9; i++) {
+  for (Int_t i = 0; i < NtotHist; i++) {
     if (hists[i]) {
       if (i < 8) ((TH3F *) hists[i])->Fill(x,y,z[i]);
       else       ((TProfile2D *) hists[i])->Fill(x,y,z[i]);
