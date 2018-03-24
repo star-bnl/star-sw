@@ -1,8 +1,3 @@
-#include "Riostream.h"
-#include "TChain.h"
-#include "TFile.h"
-#include "TList.h"
-#include "TDirIter.h"
 TChain *tChain = 0;
 #if defined(__CINT__) && ! defined(__MAKECINT__)
 TChain *Chain(const Char_t *TreeName = "MuDst") {
@@ -34,6 +29,11 @@ TChain *Chain(const Char_t *TreeName = "MuDst") {
   return tChain;
 }
 #else
+#include "Riostream.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TList.h"
+#include "TDirIter.h"
 TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "MuDst") {
   TDirIter Dir(files);
   //  TTreeIter iter(TreeName);
