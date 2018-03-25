@@ -175,6 +175,23 @@ void makeMuDstQA(TString InputFileList, Int_t nFiles, Int_t nEvents, TString Out
      ////////////////////////////////////////////////////////////////
 */
 
+/*
+     //Run15 pAu & Run16 dAu vertex selection
+     int index = 0;
+     const double mTpcVpdVzDiffCut = 6;
+     if (mBTofHeader && fabs(vzVpd) < 200) {
+	  for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx) {
+	     StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
+	     if (!vtx) continue;
+	     if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut) {
+		  index = iVtx;
+		  break;
+	     }
+	  }
+     }
+     if(index>=0) mMuDst->setVertexIndex(index);
+*/
+
      mRunId = mMuEvent->runNumber();
      mEvtId = mMuEvent->eventNumber();
      mnRefMult = mMuEvent->refMult();

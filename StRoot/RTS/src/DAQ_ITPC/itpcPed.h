@@ -42,17 +42,8 @@ public:
 
 	void calc() ;
 
-	int from_cache() ;
+	int from_cache(const char *fname) ;
 	int to_cache(const char *fname=0) ;
-
-
-
-
-private:
-
-	u_short fee_mask[24][4] ;
-
-	u_char padplane_id[24][4][16] ;
 
 	struct ped_t {
 		double ped[512] ;
@@ -63,6 +54,15 @@ private:
 		double c_rms ;
 		u_int c_cou ;
 	} *ped_p[24][4][16][64] ;
+
+
+
+
+private:
+
+	u_short fee_mask[24][4] ;
+
+	u_char padplane_id[24][4][16] ;
 
 	
 } ;

@@ -138,10 +138,41 @@ void itpcPed::calc()
 }
 
 
-int itpcPed::from_cache()
+int itpcPed::from_cache(const char *fname)
 {
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"%s: [%s]",fname,strerror(errno)) ;
+		return -1 ;
+	}
 
 
+	while(!feof(f)) {
+		char buff[256] ;
+		int sec, rdo, fee_port, fee_ch, dummy ;
+		float fd, fped, frms ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d %d %d %d %d %f %f %f %f",
+			&sec,&rdo,&fee_port,&fee_ch,&dummy,&dummy,&dummy,&dummy,&dummy,&fd,&fd,&fped,&frms) ;
+
+		if(ret != 13) {
+			//LOG(TERR,"ret %d",ret) ;
+			continue ;
+		}
+
+		sec-- ;
+		rdo-- ;
+		fee_port-- ;
+
+		if(ped_p[sec][rdo][fee_port][fee_ch]) ;
+		else continue ;
+
+		ped_p[sec][rdo][fee_port][fee_ch]->c_ped = fped ;
+		ped_p[sec][rdo][fee_port][fee_ch]->c_rms = frms ;
+		
+	}
 	return 0 ;
 }
 
@@ -188,7 +219,22 @@ int itpcPed::to_cache(const char *fname)
 
 				//LOG(TERR,"%2d %d %2d %2d -1 %.3f %.3f :: FEE_ID %d,RP %d:%d, pin %d",s+1,r+1,p+1,c,pt->c_ped,pt->c_rms,fee_id,row,pad,pin) ;
 
-				fprintf(outf,"%2d %d %2d %2d %2d %2d %2d %3d %3d %.3f %.3f\n",s+1,r+1,p+1,c,fee_id,pin,row,pad,-1,pt->c_ped,pt->c_rms) ;
+	
+				double m_ped = 0.0 ;
+				double m_rms = 0.0 ;
+				u_int m_cou = 0 ;
+
+				for(int t=0;t<=20;t++) {
+					m_ped += pt->ped[t] ;
+					m_rms += pt->ped[t] * pt->ped[t] ;
+					m_cou++ ;
+				}
+
+				m_ped /= m_cou ;
+				m_rms /= m_cou ;
+				m_rms = sqrt(m_rms - m_ped*m_ped) ;
+
+				fprintf(outf,"%2d %d %2d %2d %2d %2d %2d %3d %3d %.3f %.3f %.3f %.3f \n",s+1,r+1,p+1,c,fee_id,pin,row,pad,-1,pt->c_ped,pt->c_rms, m_ped, m_rms) ;
 			}
 		}
 	}
