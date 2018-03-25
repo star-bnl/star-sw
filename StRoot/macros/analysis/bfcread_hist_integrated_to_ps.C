@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_integrated_to_ps.C,v 3.4 2017/02/27 21:41:36 genevb Exp $
+// $Id: bfcread_hist_integrated_to_ps.C,v 3.5 2018/03/21 02:53:12 genevb Exp $
 // $Log: bfcread_hist_integrated_to_ps.C,v $
+// Revision 3.5  2018/03/21 02:53:12  genevb
+// Improper use of endl corrected
+//
 // Revision 3.4  2017/02/27 21:41:36  genevb
 // StEvent.so now depends on StBichsel.so
 //
@@ -162,7 +165,7 @@ void bfcread_hist_integrated_to_ps(
 
   while (ifl<nfiles && istat==0) {  
   
-   cout << endl << "Now processing file : " << ifl+1 << endl << endl;
+   cout << "\nNow processing file : " << ifl+1 << "\n" << endl;
 
 // --- each file contains only histograms (1 "event" == 1 Make call)
 

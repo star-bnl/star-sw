@@ -687,8 +687,8 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		err |= 0x80 ;
 		goto err_end ;
 	}
-	else if (trg_cou > 10) {
-		LOG(WARN,"Lots of triggers") ;
+	else if (trg_cou > 32) {
+		LOG(WARN,"Lots of triggers %d",trg_cou) ;
 	}
 
 	for(u_int i=0;i<trg_cou;i++) {
@@ -761,6 +761,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 				continue ;
 			}
 		}
+		if(trg[t_cou].trg==14) {	// HACK!!!
+			continue ;
+		}
 
 		//if(trg[t_cou].trg==2 && trg[t_cou].t==10 && trg[t_cou].daq==3) continue ;
 		if(trg[t_cou].trg<=2) {
@@ -771,7 +774,12 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 
-		
+//	for(int i=0;i<t_cou;i++) {
+//		const char *s = "" ;
+//		if((trg[i].reserved[0] & 0xFFF00000)!=0x04300000) s = "OVERRUN" ;
+//
+//		LOG(TERR,"%d: %d/%d: T %d, trg %d [0x%08X %s]",rdo,i+1,t_cou,trg[i].t,trg[i].trg, trg[i].reserved[0],s) ;
+//	}
 
 	return t_cou ;
 

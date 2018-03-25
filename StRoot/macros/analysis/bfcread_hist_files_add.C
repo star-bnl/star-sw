@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.23 2017/02/27 21:41:36 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.24 2018/03/21 02:37:32 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.24  2018/03/21 02:37:32  genevb
+// Improper use of endl corrected
+//
 // Revision 2.23  2017/02/27 21:41:36  genevb
 // StEvent.so now depends on StBichsel.so
 //
@@ -172,7 +175,7 @@ void bfcread_hist_files_add(
 
  EventLoop: if (ifl<nevents && istat==0) {  
   
-   cout << endl << "Now processing file : " << ifl+1 << endl << endl;
+   cout << "\nNow processing file : " << ifl+1 << "\n" << endl;
 
 // --- each file contains only histograms (1 "event" == 1 Make call)
 
@@ -199,7 +202,7 @@ void bfcread_hist_files_add(
      //  cout << " --- Skipping " << MakerHistDir << endl;
      //  continue;
      //}
-     cout << endl << " --- MakerHistDir : " << MakerHistDir << endl;
+     cout << "\n --- MakerHistDir : " << MakerHistDir << endl;
 
 // check for new branches and instantiate them
      int bnum=-1;

@@ -8,8 +8,8 @@
    setenv STARFPE NO
    setup 64b
    setenv NODEBUG yes
-   starver TFG18c
-  
+#   starver TFG18c
+   staver .DEV2 
   set file = `basename ${INPUTFILE0} .event.root`;
   echo "${file}"
   set logFile  = ${file}B.log

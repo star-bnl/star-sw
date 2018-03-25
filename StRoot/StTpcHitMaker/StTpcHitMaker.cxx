@@ -440,10 +440,9 @@ Int_t StTpcHitMaker::Make() {
       kReaderType = (EReaderType) k;
       while (daqTpcTable) {
 	if (Sector() == sector) {
-	  Int_t row = -1;
 	  fTpc = 0;
 	  if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
-	  else 	                                                  row = RowNumber();
+	  Int_t row = RowNumber();
 	  if (row >= minRow && row <= maxRow) {
 	    switch (kMode) {
 	    case kTpc: 

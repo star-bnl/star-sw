@@ -2,7 +2,7 @@
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
-#define __Use_dNdx__
+//#define __Use_dNdx__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -680,6 +680,7 @@ Int_t StdEdxY2Maker::Make(){
     if (pTrack) QAPlots(gTrack);
     if ((TESTBIT(m_Mode, kCalibration))) {
       if (! pTrack) continue; // reject non primary tracks
+#if 0
       if (! pEvent->primaryVertex()) continue; 
       // AuAu could have wrong ranking
       if (pEvent->primaryVertex()->ranking() > 0) {
@@ -688,6 +689,7 @@ Int_t StdEdxY2Maker::Make(){
       } else {// try to use VpdZ to select best vertex
 	if (pTrack->vertex() != pVbest) continue;
       }
+#endif
       Histogramming(gTrack);
     }
   }
@@ -722,6 +724,9 @@ void StdEdxY2Maker::SortdEdx() {
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   // Histograms
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
+#ifndef __Use_dNdx__
+  Hists3D::NtotHist = 2;
+#endif
   static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",St_tpcPadConfigC::instance()->numberOfRows(20),150, 6.84, 6.99); // ? mix of inner and outer
   //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",St_tpcPadConfigC::instance()->numberOfRows(20),150, 6.84, 6.99);
   
@@ -730,7 +735,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
-  static Hists3D SecRow3;
+  static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)>","sector","row",numberOfSectors,St_tpcPadConfigC::instance()->numberOfRows(20));
   static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",St_tpcPadConfigC::instance()->numberOfRows(20),200,-2.,2.); // ? mix of inner and outer
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",St_tpcPadConfigC::instance()->numberOfRows(20),105,0,210);
@@ -1040,6 +1045,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (BBCP) BBCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()), FdEdx[k].F.dEdxN);
 	  }
 	}
+#ifdef __Use_dNdx__
 	Double_t n_P = FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion];
 	Double_t sigma = 1./n_P;
 #ifndef __HEED_MODEL__
@@ -1048,10 +1054,15 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	Double_t dEN = TMath::Log(1e9*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
 #endif /* __HEED_MODEL__ */
 	Double_t zdEMVP = StdEdxModel::instance()->zdE(n_P,sigma); // log(dE[keV])
+#else
+	Double_t zdEMVP = 0;
+	Double_t dEN = 0;
+#endif /* __Use_dNdx__ */
 	Double_t Vars[9] = {
 	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB-1].dEdxN,
 	  FdEdx[k].F.dEdxN,
 	  dEN - zdEMVP,
+#ifdef __Use_dNdx__
 #ifndef __HEED_MODEL__
 	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidElectron]),
 	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion]),
@@ -1065,6 +1076,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidProton]),
 	  TMath::Log(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidDeuteron]),
 #endif /* __HEED_MODEL__ */
+#else /* !  __Use_dNdx__ */
+	  0,0,0,0,0,
+#endif /* __Use_dNdx__ */
 	  FdEdx[k].F.dx
 	};
 	Double_t VarsV[9] = {

@@ -610,9 +610,7 @@ if ( $ThisYear == 2005 ){
        $DCHAIN{"AuAu"} = "P2017,btof,mtd,fmsDat,fmsPoint,fpsDat,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } elsif ($ThisYear == 2018) {
-       $TARGET  = "/star/data+09-12/reco/restricted"; 
-       $DCHAIN{"ZrZr"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
-       $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
+       $DCHAIN{"ZrZr"} = $DCHAIN{"RuRu"} = "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } else {
         $DCHAIN{"PPPP"} =
