@@ -75,5 +75,7 @@ do
 
    globus-url-copy -p 6 -vb -r file://$fsetp/ gsiftp://$USER@dtn01.nersc.gov/$destp/
 
+   chmod -R g+w $destp
+
 done
 
