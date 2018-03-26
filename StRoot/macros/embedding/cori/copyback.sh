@@ -73,5 +73,7 @@ do
 done
 
 #echo $srcdirs
+echo ""
+echo "scp -rp $srcdirs $USER@dtn01.nersc.gov:$dest/"
 scp -rp $srcdirs $USER@dtn01.nersc.gov:$dest/
 
