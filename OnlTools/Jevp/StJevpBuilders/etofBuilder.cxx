@@ -70,7 +70,7 @@ void etofBuilder::initialize(int argc, char *argv[]) {
 		rocrMap[ kv.second ] = kv.first;
 	}
 
-	contents.nHits = new TH1F( "nHits", "ETOF # hits; # hits", 100, 0, 100 );
+	contents.nHits = new TH1F( "nHits", "ETOF # hits; # hits", 250, 0, 250 );
 	contents.nEpochMismatch = new TH1F( "nEpochMismatch", "ETOF # of Epoch Mismatch / roc; roc;# Epoch Mismatch", 5, 0, 5 );
 	contents.nEpochLoss = new TH1F( "nEpochLoss", "ETOF # of Epoch loss / roc; roc;# Epoch Lost", 5, 0, 5 );
 	contents.nEpochSync = new TH1F( "nEpochSync", "ETOF # of Epoch Sync / roc; roc;# Epoch Sync", 5, 0, 5 );
