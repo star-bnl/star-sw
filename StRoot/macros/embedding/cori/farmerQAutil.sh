@@ -66,6 +66,9 @@ echo "#QAutil_2 farmer SKEW:$SKEW  THREADS:$THREADS  NUM_EVE:$NUM_EVE" >>$logF
 echo "#" >>$logF 
 echo "#format: date , totSec,  totDbCon, nDoneTask, nExeTask " >>$logF 
 
+WNODES=$(($SLURM_JOB_NUM_NODES - 1))
+SKEWTASK=$(($THREADS*$WNODES))
+
 while true ; do    
     echo  Q-$NN   $totSec sec,  sleep  $nSleep " "`date`
     echo  Q-$NN pwd `pwd`
@@ -90,7 +93,12 @@ while true ; do
     SEC4=`date +%s`
     totSec=$[ $SEC4 - $SEC3 ]
     echo `date` ",  $totSec,  $totDbCon,  $nDoneTask, $nExeTask " >>$logF     
- 
+
+    if [ $nExeTask -ge $SKEWTASK ] ; then
+	 if [ ! -f ${WRK_DIR}/skewdone ] ; then
+	    touch ${WRK_DIR}/skewdone
+	 fi
+    fi
 
     if [  $totSec -gt 2000 ] ; then 
 	nSleep=30
