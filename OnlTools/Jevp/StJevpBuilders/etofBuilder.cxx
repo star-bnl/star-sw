@@ -70,20 +70,19 @@ void etofBuilder::initialize(int argc, char *argv[]) {
 		rocrMap[ kv.second ] = kv.first;
 	}
 
-	contents.nHits = new TH1F( "nHits", "# ETOF hits; # hits", 100, 0, 100 );
-	contents.nEpochMismatch = new TH1F( "nEpochMismatch", "# of Epoch Mismatch / roc; roc;# Epoch Mismatch", 5, 0, 5 );
-	contents.nEpochLoss = new TH1F( "nEpochLoss", "# of Epoch loss / roc; roc;# Epoch Lost", 5, 0, 5 );
-	contents.nEpochSync = new TH1F( "nEpochSync", "# of Epoch Sync / roc; roc;# Epoch Sync", 5, 0, 5 );
-	contents.nEpochDataLoss = new TH1F( "nEpochDataLoss", "# of Epoch Data loss / roc; roc;# Epoch Data Lost", 5, 0, 5 );
-	contents.totAll = new TH1F( "totAll", "ToT of all hits; ToT", 60, 0, 60 );
-	contents.hitMap = new TH2F( "hitMap", "hit map;roc;channel", 5, 0, 5, 4, 0, 4 );
+	contents.nHits = new TH1F( "nHits", "ETOF # hits; # hits", 100, 0, 100 );
+	contents.nEpochMismatch = new TH1F( "nEpochMismatch", "ETOF # of Epoch Mismatch / roc; roc;# Epoch Mismatch", 5, 0, 5 );
+	contents.nEpochLoss = new TH1F( "nEpochLoss", "ETOF # of Epoch loss / roc; roc;# Epoch Lost", 5, 0, 5 );
+	contents.nEpochSync = new TH1F( "nEpochSync", "ETOF # of Epoch Sync / roc; roc;# Epoch Sync", 5, 0, 5 );
+	contents.nEpochDataLoss = new TH1F( "nEpochDataLoss", "ETOF # of Epoch Data loss / roc; roc;# Epoch Data Lost", 5, 0, 5 );
+	contents.totAll = new TH1F( "totAll", "ETOF ToT of all hits; ToT", 60, 0, 60 );
+	contents.hitMap = new TH2F( "hitMap", "ETOF hit map;roc;channel", 5, 0, 5, 4, 0, 4 );
 	for ( size_t i = 0; i < 20; i++ ){
 		int roc = i / 4;
 		int chan = i % 4;
-		contents.fineTime[i] = new TH1F( TString::Format("fineTime_%lu", i), TString::Format( "Fine Time ROC %#06x, chan %d", rocrMap[ roc ], chan ), 130, 0, 130 );
+		contents.fineTime[i] = new TH1F( TString::Format("fineTime_%lu", (long unsigned int) i ), TString::Format( "ETOF Fine Time ROC %#06x, chan %d", rocrMap[ roc ], chan ), 130, 0, 130 );
 	}
 	
-
 	// size_t i = 1;
 	LOG(INFO, "rocrMap.size() = %lu", rocrMap.size());
 	for ( size_t i = 0; i < rocrMap.size(); i++ ){
@@ -96,19 +95,24 @@ void etofBuilder::initialize(int argc, char *argv[]) {
 		contents.nEpochSync->GetXaxis()->SetBinLabel( i+1, buf );
 		contents.nEpochDataLoss->GetXaxis()->SetBinLabel( i+1, buf );
 	}
-
-
-
+	
 	int np = sizeof(contents) / sizeof(TH1 *);
 	// JevpPlot *plots[np];
 
 	// int n=0;
 
 	for ( int i = 0; i < np; i++ ){
+		contents.array[i]->SetLineColor( kBlue );		
+		
+		if (contents.array[i] == contents.nEpochMismatch || contents.array[i] == contents.nEpochLoss ||
+		    contents.array[i] == contents.nEpochLoss     || contents.array[i] == contents.nEpochDataLoss )
+			contents.array[i]->SetFillColor( kRed );
+
 		JevpPlot *jp =  new JevpPlot( contents.array[i] );
 		jp->logy = 0;
 		if (contents.array[i] == contents.nHits || contents.array[i] == contents.totAll)
 			jp->logy = 1;
+		
 		addPlot( jp );
 	}
 
@@ -131,7 +135,7 @@ void etofBuilder::event(daqReader *rdr) {
 	
 
 	size_t nHits = 0;
-	size_t nEpochMismatch = 0;
+	//size_t nEpochMismatch = 0;
 	while ( dd->iterate() ){
 
 		int iInputSizeBytes = dd->ncontent;
