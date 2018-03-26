@@ -72,8 +72,14 @@ do
    fi
 done
 
+if [[ ! $USER =~ "staremb" && ! $USER =~ "starofl" ]] ; then
+   NERSCUSER=$USER
+else
+   read -p "Enter your NERSC user name: " NERSCUSER
+fi
+
 #echo $srcdirs
 echo ""
-echo "scp -rp $srcdirs $USER@dtn01.nersc.gov:$dest/"
-scp -rp $srcdirs $USER@dtn01.nersc.gov:$dest/
+echo "scp -rp $srcdirs $NERSCUSER@dtn01.nersc.gov:$dest/"
+scp -rp $srcdirs $NERSCUSER@dtn01.nersc.gov:$dest/
 
