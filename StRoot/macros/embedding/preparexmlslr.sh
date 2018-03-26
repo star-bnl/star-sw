@@ -16,7 +16,10 @@ if [[ $HOST =~ "cori" ]] ; then
  ln -s -f StRoot/macros/embedding/fsetstat.sh
  ln -s StRoot/macros/embedding/cori/findfailedslr.sh
  ln -s StRoot/macros/embedding/cori/copyback.sh
+#uncomment the following line to use STAR DB server at NERSC
  script="python StRoot/macros/embedding/cori/prepEmbedTaskList.py"
+#uncomment the following line to setup and use local STAR DB server on the master node
+ #script="python StRoot/macros/embedding/cori/prepEmbedTaskList2.py"
 
 #EDIT the following three options before use this script at Cori farm
  fset="-fSetRange 101-109"
