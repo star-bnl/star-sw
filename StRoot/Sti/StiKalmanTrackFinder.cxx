@@ -568,7 +568,7 @@ assert(direction || leadNode==track->getLastNode());
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-          if (stiHit->detector() && stiHit->detector()!=tDet) 	continue;
+//VP          if (stiHit->detector() && stiHit->detector()!=tDet) 	continue;
           status = testNode.nudge(stiHit);
           testNode.setReady();
           if (status)		continue;
