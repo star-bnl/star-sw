@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.119.6.1 2018/02/28 01:50:12 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.119.6.2 2018/03/26 23:52:19 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.119.6.2  2018/03/26 23:52:19  perev
+ * Remove wrong asserts
+ *
  * Revision 2.119.6.1  2018/02/28 01:50:12  perev
  * Debug--
  *
@@ -920,7 +923,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-      assert(detector == stiHit->detector());
+//VP      assert(detector == stiHit->detector());
       assert(!detector || stiHit->timesUsed());
       if (!fistNode) fistNode = node;
       lastNode = node;
@@ -1498,7 +1501,7 @@ enum dcaEmx {kImpImp,
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-      assert(detector == stiHit->detector());
+//VP      assert(detector == stiHit->detector());
       assert(!detector || stiHit->timesUsed());
       StHit *hh = (StHit*)stiHit->stHit();
       fillPulls(hh,stiHit,node,track,dets,gloPri);
