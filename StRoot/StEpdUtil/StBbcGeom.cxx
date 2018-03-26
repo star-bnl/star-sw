@@ -158,13 +158,13 @@ bool StBbcGeom::IsInTile(unsigned short absValueTileNumber, short eastwest, doub
 }
 
 //-------------------------------------------------------
-void StBbcGeom::GetOverLappingEpdTiles(short tileId,
+void StBbcGeom::GetOverlappingEpdTiles(short tileId,
 				       int* nOverlappingEpdTiles, short* EpdTileIDs){
   unsigned short absValTile = abs(tileId);
-  if (tileId<0) {GetOverLappingEpdTiles(absValTile,-1,nOverlappingEpdTiles,EpdTileIDs);}
-  else {GetOverLappingEpdTiles(absValTile,1,nOverlappingEpdTiles,EpdTileIDs);}
+  if (tileId<0) {GetOverlappingEpdTiles(absValTile,-1,nOverlappingEpdTiles,EpdTileIDs);}
+  else {GetOverlappingEpdTiles(absValTile,1,nOverlappingEpdTiles,EpdTileIDs);}
 }
-void StBbcGeom::GetOverLappingEpdTiles(unsigned short BB, short eastwest,
+void StBbcGeom::GetOverlappingEpdTiles(unsigned short BB, short eastwest,
 				       int* nOverlappingEpdTiles, short* EpdTileIDs){
   if ((BB==0)||(BB>18)){
     *nOverlappingEpdTiles=0;

@@ -94,7 +94,7 @@ class StBbcGeom{
   /// \param tileId    |tileId| = 1..18 (inner BBC).  Sign of tileId tells side.  +/- for West/East
   /// \param nOverlappingEpdTiles       *output* parameter.  Number of EPD tiles that overlaps this BBC tile (0, 8, or 10)
   /// \param EpdTileIDs                 *output* parameter: list of EPD Tile IDs
-  void GetOverLappingEpdTiles(short tileId,
+  void GetOverlappingEpdTiles(short tileId,
 			      int* nOverlappingEpdTiles, short* EpdTileIDs);
 
 
@@ -103,7 +103,7 @@ class StBbcGeom{
   /// \param eastwest                   <=0  for East, >0 for West
   /// \param nOverlappingEpdTiles       *output* parameter.  Number of EPD tiles that overlaps this BBC tile (0, 8, or 10)
   /// \param EpdTileIDs                 *output* parameter: list of EPD Tile IDs
-  void GetOverLappingEpdTiles(unsigned short absValueTileNumber, short eastwest,
+  void GetOverlappingEpdTiles(unsigned short absValueTileNumber, short eastwest,
 			      int* nOverlappingEpdTiles, short* EpdTileIDs);
 
   //------------------------------------------------------
