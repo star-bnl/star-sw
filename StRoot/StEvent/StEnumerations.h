@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.64 2017/05/04 00:54:13 perev Exp $
+ * $Id: StEnumerations.h,v 2.65 2018/03/27 02:40:12 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.65  2018/03/27 02:40:12  genevb
+ * Introduce kiTpcId
+ *
  * Revision 2.64  2017/05/04 00:54:13  perev
  * Fts added
  *
@@ -276,9 +279,10 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
-		   kGmtId       = kGmtIdentifier,
-		   kFtsId       = kFtsIdentifier,
-                   kMaxDetectorId = 40};
+		           kGmtId       = kGmtIdentifier,
+		           kFtsId       = kFtsIdentifier,
+                   kiTpcId      = kiTpcIdentifier,
+                   kMaxDetectorId = 41};
 
 /*!
  * \enum StTrackType
