@@ -88,21 +88,21 @@ class StarKinematics : public StarGenerator
   /// pT, over the specified range ptlow to pthigh.  Rapidity and phi ranges may also be
   /// specified
   /// @param ntrack  Number of particles (tracks) to generate.
-  /// @param type    Type of the particle to generate.  Defaults to mu+
+  /// @param type    Type(s) of the particle(s) to generate.  If provided a list, will randomly sample ntracks from the list.  Defaults to pi+/-, K+/-, p/anti-p
   /// @param ptlow   Minimum pT
   /// @param pthigh  Maximum pT
   /// @param ylow    Minimum rapidity
   /// @param yhigh   Maximum rapidity
   /// @param philow  Minimum azimuthal angle
   /// @param phihigh Maximum azimuthal angle
-  void Kine( Int_t ntrack, const Char_t *type="muon+", Double_t ptlow=0.0, Double_t pthigh=500.0,
+  void Kine( Int_t ntrack, const Char_t *type="pi+,pi-,K+,K-,proton,antiproton", Double_t ptlow=0.0, Double_t pthigh=500.0,
 	     Double_t ylow=-10.0, Double_t yhigh=+10.0,
 	     Double_t philow=0.0, Double_t phihigh=TMath::TwoPi() );
 
   /// Generates ntracks of the specified type according to 1D distributions
   /// in pT, eta and phi.  If not provided, phi will be flat.
   /// @param ntrack Number of particles (tracks) to generate
-  /// @param type   type of the particle
+  /// @param type   type of the particle.  If provided a list, will randomly sample ntracks from the list.
   /// @param pt     Distribution (TF1) to sample pT from.
   /// @param y      Distribution (TF1) to sample rapidity from.
   /// @param phi    Distribution (TF1) to sample phi from.  Optional.
@@ -110,7 +110,7 @@ class StarKinematics : public StarGenerator
   /// Generates ntracks of the specified type according to 1D distributions
   /// in pT, eta and phi.  If not provided, phi will be flat.
   /// @param ntrack Number of particles (tracks) to generate
-  /// @param type   type of the particle
+  /// @param type   type of the particle.  If provided a list, will randomly sample ntracks from the list.
   /// @param pt     Distribution (TH1) to sample pT from.
   /// @param y      Distribution (TH1) to sample rapidity from.
   /// @param phi    Distribution (TH1) to sample phi from.  Optional.
@@ -118,7 +118,7 @@ class StarKinematics : public StarGenerator
   
   /// Generate ntrack cosmic rays of the specified type
   /// @param ntrack number of cosmics per event
-  /// @param type is the particle type
+  /// @param type is the particle type.  If provided a list, will randomly sample ntracks from the list.
   /// @param plow is the minimum momentum
   /// @param phigh is the maximum momentum
   /// @param radius is the radius at which the track originates
