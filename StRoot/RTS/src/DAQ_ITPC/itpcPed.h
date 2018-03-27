@@ -56,13 +56,13 @@ public:
 	} *ped_p[24][4][16][64] ;
 
 
-
+	u_char padplane_id[24][4][16] ;
 
 private:
 
 	u_short fee_mask[24][4] ;
 
-	u_char padplane_id[24][4][16] ;
+
 
 	
 } ;
