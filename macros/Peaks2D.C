@@ -65,7 +65,7 @@ Float_t FitParArray[40];
 //     NormX, dNormX, MuX, dMuX, SigmaX, dSigmaX, deltaX, ddeltaX, chisqX, NDFX, 
 //     NormY, dNormY, MuY, dMuY, SigmaY, dSigmaY, deltaY, ddeltaY, chisqY, NDFY;
 // };
-static Int_t ngroup = 3; // 3
+static Int_t ngroup = 1; // 3
 //const Char_t *vnames = "sector:row:x:y:NormX:dNormX:MuX:dMuX:SigmaX:dSigmaX:deltaX:ddeltaX:chisqX:NDFX:NormY:dNormY:MuY:dMuY:SigmaY:dSigmaY:deltaY:ddeltaY:chisqY:NDFY";
 //BPoint_t BPoint;
 //________________________________________________________________________________
@@ -709,14 +709,14 @@ void Peaks2D(Int_t sector = 0, Int_t padrow = 0, Int_t tokensS = -2) {
   Int_t secMin = 1;
   Int_t secMax = 24;
   Int_t rowMin = 1;
-  Int_t rowMax = 45;
+  Int_t rowMax = 72;
   if (sector) { secMin = secMax = sector;}
   if (padrow) { rowMin = rowMax = padrow;}
   //  ff->cd();
   Bool_t ok = kTRUE;
   for (Int_t sec = secMin; sec <= secMax; sec++) {
     Int_t t1 =  -1;
-    Int_t t2 = 110;
+    Int_t t2 =  -1;
     if (tokensS > -2) {t1 = t2 = tokensS;}
     for (Int_t tokens = t1; tokens < t2; tokens++) {
       TString hName(Form("AvLaser_%02i",sec));
@@ -764,21 +764,38 @@ void Peaks2D(Int_t sector = 0, Int_t padrow = 0, Int_t tokensS = -2) {
 		 114,  116,   118,   120,   122,   122,   124,   126,   128,   128,
 		 130,  132,   134,   136,   138,   138,   140,   142,   144,   144,    
 		 144,  144};
+	const Int_t npadsiTPC[72] = 
+	  {  52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
+	     70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
+	     86, 88, 90, 92, 94, 96, 98, 98,100,102,
+	     104,106,108,110,110,112,114,116,118,120,
+	     98 ,  100,   102,   104,   106,   106,   108,   110,   112,   112,
+	     114,  116,   118,   120,   122,   122,   124,   126,   128,   128,
+	     130,  132,   134,   136,   138,   138,   140,   142,   144,   144,    
+	     144,  144};
 	TH2D *h2new = 0;
 	if (ngroup == 1) {
 	  h2new = new TH2D(*h2);
 	  h2new->SetName(Form("%s_new",h2->GetName()));
 	} else {
-	  h2new = new TH2D(Form("%s_new",h2->GetName()), Form("%s at row = %i",h2->GetTitle(),row),
-			   h2->GetXaxis()->GetNbins(),h2->GetXaxis()->GetXmin(),h2->GetXaxis()->GetXmax(),
-			   npads[row-1],0.5,0.5+npads[row-1]);
+	  if (sec != 20) {
+	    h2new = new TH2D(Form("%s_new",h2->GetName()), Form("%s at row = %i",h2->GetTitle(),row),
+			     h2->GetXaxis()->GetNbins(),h2->GetXaxis()->GetXmin(),h2->GetXaxis()->GetXmax(),
+			     npads[row-1],0.5,0.5+npads[row-1]);
+	  } else {// iTPC
+	    h2new = new TH2D(Form("%s_new",h2->GetName()), Form("%s at row = %i",h2->GetTitle(),row),
+			     h2->GetXaxis()->GetNbins(),h2->GetXaxis()->GetXmin(),h2->GetXaxis()->GetXmax(),
+			     npadsiTPC[row-1],0.5,0.5+npadsiTPC[row-1]);
+	  }
 	  Int_t nx1 = h2new->GetXaxis()->GetFirst();
 #ifdef __Membrane__Only__
 	  nx1 = 350;
 #endif
 	  Int_t nx2 = h2new->GetXaxis()->GetLast();
 	  Int_t ny1 = h2new->GetYaxis()->GetFirst();
-	  Int_t ny2 = TMath::Min(h2new->GetYaxis()->GetLast(),npads[row-1]);
+	  Int_t ny2 = - 1;
+	  if (sec != 20)  ny2 = TMath::Min(h2new->GetYaxis()->GetLast(),npads[row-1]);
+	  else            ny2 = TMath::Min(h2new->GetYaxis()->GetLast(),npadsiTPC[row-1]);
 	  for (Int_t ix = nx1 + ngroup2; ix <= nx2 - ngroup2; ix++) {
 	    for (Int_t iy = ny1 + ngroup2; iy <= ny2 - ngroup2; iy++) {
 	      Double_t sum = 0;

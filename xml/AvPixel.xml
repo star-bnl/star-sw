@@ -27,6 +27,7 @@
 <!-- <input URL="file:/star/data03/daq/2013/046/14046066/st_pedestal_adc_14046066_raw_0540001.daq"/> peds -->
 <!-- <input URL="file:/star/data03/daq/2013/158/14158028/st_laser*.daq" />  -->
 <!-- <input URL="command:AvPixel2014.pl" /> -->
-<input URL="file:/net/l401/data/scratch1/daq/2018/*/*/*laser_adc*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/*/*/*laser_adc*.daq" /> -->
+<input URL="file:/net/l401/data/scratch1/daq/2018/078/19078018/*laser_adc*.daq" />
 <!-- <input URL="file:/star/data03/daq/2013/161/14161023/st_laser*.daq" />  -->
 </job>
