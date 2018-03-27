@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.13 2016/02/24 22:01:12 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.14 2018/03/27 02:41:00 genevb Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.14  2018/03/27 02:41:00  genevb
+ * iTPC modifications, plus proper use of booleans
+ *
  * Revision 2.13  2016/02/24 22:01:12  ullrich
  * Added method hasHitInSstLayer().
  *
@@ -64,54 +67,56 @@
 
 class StTrackTopologyMap : public StObject {
 public:
-    StTrackTopologyMap();
-    StTrackTopologyMap(unsigned int, unsigned int);
-    StTrackTopologyMap(const unsigned long*);
-    StTrackTopologyMap(const unsigned int*);
+    StTrackTopologyMap();  
+    StTrackTopologyMap(unsigned int, unsigned int, unsigned long long = 0);  
+    StTrackTopologyMap(const unsigned long*, unsigned long long = 0);  
+    StTrackTopologyMap(const unsigned int*, unsigned long long = 0);  
     // StTrackTopologyMap(const StTrackTopologyMap&);            use default
     // StTrackTopologyMap& operator=(const StTrackTopologyMap&); use default
-    ~StTrackTopologyMap();
-
-    bool           primaryVertexUsed() const;
-    unsigned int   numberOfHits(StDetectorId) const;
-    bool           hasHitInDetector(StDetectorId) const;
-    bool           hasHitInDetector(StDetectorId, StDetectorId,
-                              StDetectorId = kUnknownId, StDetectorId = kUnknownId,
-                              StDetectorId = kUnknownId, StDetectorId = kUnknownId) const;
-    bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1
-    bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInPxlLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1
-    bool           hasHitInSstLayer(unsigned int) const;
+    ~StTrackTopologyMap();  
     
-    bool           trackTpcOnly() const;
-    bool           trackSvtOnly() const;
-    bool           trackTpcSvt() const;
-    bool           trackFtpcEast() const;
-    bool           trackFtpcWest() const;
-    bool           trackFtpc() const;
-
-    bool           turnAroundFlag() const;
-    unsigned int   data(unsigned int) const;
-
+    bool           primaryVertexUsed() const;     
+    unsigned int   numberOfHits(StDetectorId) const;   
+    bool           hasHitInDetector(StDetectorId) const;  
+    bool           hasHitInDetector(StDetectorId, StDetectorId,
+                                    StDetectorId = kUnknownId, StDetectorId = kUnknownId,
+                                    StDetectorId = kUnknownId, StDetectorId = kUnknownId) const;  
+    bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1     
+    bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1   
+    bool           hasHitInPxlLayer(unsigned int) const;          // first layer = 1   
+    bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1   
+    bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1   
+    bool           hasHitInSstLayer(unsigned int) const;   
+    
+    bool           trackTpcOnly() const; 
+    bool           trackSvtOnly() const;  
+    bool           trackTpcSvt() const;  
+    bool           trackFtpcEast() const; 
+    bool           trackFtpcWest() const; 
+    bool           trackFtpc() const;     
+    
+    bool           turnAroundFlag() const;    
+    unsigned long long  data(unsigned int) const;  
+    
     int            largestGap(StDetectorId) const;
     
 protected:
-    bool bit(int) const;             // range 0-63
+    bool bit(int) const;        // range 0-63
+    bool iTpcBit(int) const;    // range 0-63
     bool ftpcFormat() const;
     bool hftFormat() const;  // TPC tracks with HFT (Run13++) hit format
     
 private:
-    UInt_t  mMap0;
-    UInt_t  mMap1;
+    UInt_t     mMap0;
+    UInt_t     mMap1;
+    ULong64_t  mMap_iTpc;
     
-    ClassDef(StTrackTopologyMap,1)
+    ClassDef(StTrackTopologyMap,2)
 };
 
 ostream& operator<< (ostream&, const StTrackTopologyMap&);
 
-inline bool StTrackTopologyMap::hasHitInSstLayer(unsigned int val) const
+inline bool StTrackTopologyMap::hasHitInSstLayer(unsigned int val) const  
 {
     return hasHitInSsdLayer(val);
 }

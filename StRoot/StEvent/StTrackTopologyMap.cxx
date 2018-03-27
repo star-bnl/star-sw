@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.21 2018/03/27 02:41:00 genevb Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -13,79 +13,93 @@
  *        the FTPC. There's no confusion with the TPC since
  *        there are only tracks in either one. Starting 2007
  *        the 6 layers of the SVT are re-used for the HFT.
- *      
- * 
- * bit             Case 1               Case 2            Case 3
- *--------------------------------------------------------------------
- *  0            primary-vertex-used
- *  1            SVT layer=1      FTPC-West row=1     PXL layer=1
- *  2            SVT layer=2      FTPC-West row=2     PXL layer=2
- *  3            SVT layer=3      FTPC-West row=3     PXL layer=3
- *  4            SVT layer=4      FTPC-West row=4     IST layer=1
- *  5            SVT layer=5      FTPC-West row=5     IST layer=2
- *  6            SVT layer=6      FTPC-West row=6     SSD layer=1
- *  7            SSD              FTPC-West row=7     SSD layer=2
- *  8            TPC row=1        FTPC-West row=8
- *  9            TPC row=2        FTPC-West row=9
- *  10           TPC row=3        FTPC-West row=10
- *  11           TPC row=4        FTPC-East row=1
- *  12           TPC row=5        FTPC-East row=2
- *  13           TPC row=6        FTPC-East row=3
- *  14           TPC row=7        FTPC-East row=4
- *  15           TPC row=8        FTPC-East row=5
- *  16           TPC row=9        FTPC-East row=6
- *  17           TPC row=10       FTPC-East row=7
- *  18           TPC row=11       FTPC-East row=8
- *  19           TPC row=12       FTPC-East row=9
- *  20           TPC row=13       FTPC-East row=10
- *  21           TPC row=14
- *  22           TPC row=15
- *  23           TPC row=16
- *  24           TPC row=17
- *  25           TPC row=18
- *  26           TPC row=19
- *  27           TPC row=20
- *  28           TPC row=21
- *  29           TPC row=22
- *  30           TPC row=23
- *  31           TPC row=24
+ *
+ *        With the introduction of the iTPC things get a bit
+ *        more complex, especially for 2018 where the old inner
+ *        TPC has to coexist with one iTPC sector. A new 64
+ *        bit word has been added to keep this additional info
+ *        (if present). The iTPC is treated as a separate detector
+ *        with one exceptions:
+ *        trackTpcOnly(): does take kTpcId and kiTpcId into account.
+ *        Note also, that largestGap() is not valid when called for
+ *        kTpcId when the iTPC has hits. In 2018 tracks can have hits
+ *        in old inner TPC and iTPC.
+ *
+ * bit          Case 1           Case 2           Case 3        Addendum
+ *--------------------------------------------------------------------------
+ *  0         primary-vertex-used
+ *  1         SVT layer=1    FTPC-West row=1    PXL layer=1    iTPC row=1
+ *  2         SVT layer=2    FTPC-West row=2    PXL layer=2    iTPC row=2
+ *  3         SVT layer=3    FTPC-West row=3    PXL layer=3    iTPC row=3
+ *  4         SVT layer=4    FTPC-West row=4    IST layer=1    iTPC row=4
+ *  5         SVT layer=5    FTPC-West row=5    IST layer=2    iTPC row=5
+ *  6         SVT layer=6    FTPC-West row=6    SSD layer=1    iTPC row=6
+ *  7         SSD            FTPC-West row=7    SSD layer=2    iTPC row=7
+ *  8         TPC row=1      FTPC-West row=8                   iTPC row=8
+ *  9         TPC row=2      FTPC-West row=9                   iTPC row=9
+ *  10        TPC row=3      FTPC-West row=10                  iTPC row=10
+ *  11        TPC row=4      FTPC-East row=1                   iTPC row=11
+ *  12        TPC row=5      FTPC-East row=2                   iTPC row=12
+ *  13        TPC row=6      FTPC-East row=3                   iTPC row=13
+ *  14        TPC row=7      FTPC-East row=4                   iTPC row=14
+ *  15        TPC row=8      FTPC-East row=5                   iTPC row=15
+ *  16        TPC row=9      FTPC-East row=6                   iTPC row=16
+ *  17        TPC row=10     FTPC-East row=7                   iTPC row=17
+ *  18        TPC row=11     FTPC-East row=8                   iTPC row=18
+ *  19        TPC row=12     FTPC-East row=9                   iTPC row=19
+ *  20        TPC row=13     FTPC-East row=10                  iTPC row=20
+ *  --------> inner/outer TPC
+ *  21        TPC row=14                                       iTPC row=21
+ *  22        TPC row=15                                       iTPC row=22
+ *  23        TPC row=16                                       iTPC row=23
+ *  24        TPC row=17                                       iTPC row=24
+ *  25        TPC row=18                                       iTPC row=25
+ *  26        TPC row=19                                       iTPC row=26
+ *  27        TPC row=20                                       iTPC row=27
+ *  28        TPC row=21                                       iTPC row=28
+ *  29        TPC row=22                                       iTPC row=29
+ *  30        TPC row=23                                       iTPC row=30
+ *  31        TPC row=24                                       iTPC row=31
  *  -------------------------- word boundary
- *  32     0     TPC row=25
- *  33     1     TPC row=26
- *  34     2     TPC row=27
- *  35     3     TPC row=28
- *  36     4     TPC row=29
- *  37     5     TPC row=30
- *  38     6     TPC row=31
- *  39     7     TPC row=32
- *  40     8     TPC row=33
- *  41     9     TPC row=34
- *  42     10    TPC row=35
- *  43     11    TPC row=36
- *  44     12    TPC row=37
- *  45     13    TPC row=38
- *  46     14    TPC row=39
- *  47     15    TPC row=40
- *  48     16    TPC row=41
- *  49     17    TPC row=42
- *  50     18    TPC row=43
- *  51     19    TPC row=44
- *  52     20    TPC row=45
- *  53     21    Mwpc
- *  54     22    CTB
- *  55     23    ToF
- *  56     24    RICH
- *  57     25    Barrel EMC/SMD
- *  58     26    Endcap EMC/SMD
- *  59     27
- *  60     28
- *  61     29    HFT Format (case 3) - TPC tracks
- *  62     30    turn around flag  (flags that track spirals back)
- *  63     31    FTPC Format (flags TOC or FTPC)
+ *  32   0    TPC row=25                                       iTPC row=32
+ *  33   1    TPC row=26                                       iTPC row=33
+ *  34   2    TPC row=27                                       iTPC row=34
+ *  35   3    TPC row=28                                       iTPC row=35
+ *  36   4    TPC row=29                                       iTPC row=36
+ *  37   5    TPC row=30                                       iTPC row=37
+ *  38   6    TPC row=31                                       iTPC row=38
+ *  39   7    TPC row=32                                       iTPC row=39
+ *  40   8    TPC row=33                                       iTPC row=40
+ *  41   9    TPC row=34
+ *  42   10   TPC row=35
+ *  43   11   TPC row=36
+ *  44   12   TPC row=37
+ *  45   13   TPC row=38
+ *  46   14   TPC row=39
+ *  47   15   TPC row=40
+ *  48   16   TPC row=41
+ *  49   17   TPC row=42
+ *  50   18   TPC row=43
+ *  51   19   TPC row=44
+ *  52   20   TPC row=45
+ *  53   21   Mwpc
+ *  54   22   CTB
+ *  55   23   ToF
+ *  56   24   RICH
+ *  57   25   Barrel EMC/SMD
+ *  58   26   Endcap EMC/SMD
+ *  59   27
+ *  60   28
+ *  61   29   HFT Format (case 3) - TPC tracks
+ *  62   30   turn around flag  (flags that track spirals back)
+ *  63   31   FTPC Format (flags TOC or FTPC)
  *
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.21  2018/03/27 02:41:00  genevb
+ * iTPC modifications, plus proper use of booleans
+ *
  * Revision 2.20  2016/02/24 18:51:09  ullrich
  * Made kSsd and kSst equivalent in numberOfHits()
  *
@@ -148,29 +162,42 @@
  *
  **************************************************************************/
 #include "StTrackTopologyMap.h"
+#include "StMessMgr.h"
 #include <vector>
 #include <algorithm>
 #include <numeric>
+
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.21 2018/03/27 02:41:00 genevb Exp $";
 
 ClassImp(StTrackTopologyMap)
 
 StTrackTopologyMap::StTrackTopologyMap()
 {
     mMap0 = mMap1 = 0;
+    mMap_iTpc = 0;
 }
 
-StTrackTopologyMap::StTrackTopologyMap(unsigned int m1, unsigned int m2) : mMap0(m1), mMap1(m2) { /* noop */ }
+StTrackTopologyMap::StTrackTopologyMap(unsigned int m1,
+                                       unsigned int m2,
+                                       unsigned long long m3)
+: mMap0(m1), mMap1(m2), mMap_iTpc(m3)
+{ /* noop */ }
 
-StTrackTopologyMap::StTrackTopologyMap(const unsigned int* m) : mMap0(m[0]), mMap1(m[1]) { /* noop */ }
+StTrackTopologyMap::StTrackTopologyMap(const unsigned int* m,
+                                       unsigned long long k)
+: mMap0(m[0]), mMap1(m[1]), mMap_iTpc(k)
+{ /* noop */ }
 
-StTrackTopologyMap::StTrackTopologyMap(const unsigned long* m) : mMap0(m[0]), mMap1(m[1]) { /* noop */ }
+StTrackTopologyMap::StTrackTopologyMap(const unsigned long* m,
+                                       unsigned long long k)
+: mMap0(m[0]), mMap1(m[1]), mMap_iTpc(k)
+{ /* noop */ }
 
 StTrackTopologyMap::~StTrackTopologyMap() { /* noop */ }
 
@@ -178,6 +205,12 @@ bool
 StTrackTopologyMap::bit(int i) const
 {
     return i>31 ? (mMap1>>(i-32) & 1U) : (mMap0>>i & 1U);
+}
+
+bool
+StTrackTopologyMap::iTpcBit(int i) const
+{
+    return (mMap_iTpc>>i & 1ULL);
 }
 
 bool
@@ -192,10 +225,24 @@ StTrackTopologyMap::hftFormat() const
     return bit(61);
 }
 
-unsigned int
+unsigned long long
 StTrackTopologyMap::data(unsigned int i) const
 {
-    return static_cast<unsigned int>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
+    unsigned long long theData = 0;
+    switch (i) {
+        case 0:
+            theData = static_cast<unsigned long long>(mMap0);
+            break;
+        case 1:
+            theData = static_cast<unsigned long long>(mMap1);
+            break;
+        case 2:
+            theData = mMap_iTpc;
+            break;
+        default:
+            break;
+    }
+    return theData;
 }
 
 bool
@@ -207,24 +254,24 @@ StTrackTopologyMap::turnAroundFlag() const { return bit(62); }
 bool
 StTrackTopologyMap::hasHitInDetector(StDetectorId id) const
 {
-    return ((numberOfHits(id)) ? 1U : 0U);
+    return ((numberOfHits(id)) ? true : false);
 }
 
 
 bool
 StTrackTopologyMap::hasHitInDetector(StDetectorId d1, StDetectorId d2,
-                               StDetectorId d3, StDetectorId d4,
-                               StDetectorId d5, StDetectorId d6) const
+                                     StDetectorId d3, StDetectorId d4,
+                                     StDetectorId d5, StDetectorId d6) const
 {
     //
     //  Note d3 - d6 are optional, if not given they will have
     //  the value kUnknownId and shouldn't be used.
     //
     return (hasHitInDetector(d1) && hasHitInDetector(d2) &&
-          (d3 == kUnknownId ? true : hasHitInDetector(d3)) &&
-          (d4 == kUnknownId ? true : hasHitInDetector(d4)) &&
-          (d5 == kUnknownId ? true : hasHitInDetector(d5)) &&
-          (d6 == kUnknownId ? true : hasHitInDetector(d6)));
+            (d3 == kUnknownId ? true : hasHitInDetector(d3)) &&
+            (d4 == kUnknownId ? true : hasHitInDetector(d4)) &&
+            (d5 == kUnknownId ? true : hasHitInDetector(d5)) &&
+            (d6 == kUnknownId ? true : hasHitInDetector(d6)));
 }
 
 bool
@@ -281,6 +328,9 @@ StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
     case kFtpcEastId:
         return ftpcFormat() && bit(row+10);
         break;
+    case kiTpcId:
+        return !ftpcFormat() && iTpcBit(row);
+        break;
     default:
         return false;
         break;
@@ -296,68 +346,72 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
     
     int i;
     int n = 0;
-
+    
     switch (id) {
-    case kSvtId:
-        for (i=1; i<7; i++)
-            if (hasHitInSvtLayer(i)) n++;
-        break;
-    case kSstId:
-    case kSsdId:
-        if(! hftFormat()) {
-          if (bit(7)) n++;        
-        } else {
-          for(int i=1;i<=2;i++) {
-            if (hasHitInSsdLayer(i)) n++;
-          }
-        }
-        break;
-    case kPxlId:
-        for(i=1;i<=3;i++)
-	  if(hasHitInPxlLayer(i)) n++;
-        break;
-    case kIstId:
-//        for(i=1;i<4;i++)
-        for(i=1;i<=2;i++)
-	  if(hasHitInIstLayer(i)) n++;
-        break;
-    case kFtpcWestId:
-    case kFtpcEastId:
-        for (i=1; i<11; i++)
-            if (hasHitInRow(id, i)) n++;
-        break;
-    case kTpcId:
-        for (i=1; i<46; i++)
-            if (hasHitInRow(id, i)) n++;
-        break;
-    case kMwpcWestId:
-    case kMwpcEastId:
-        if (bit(53)) n++;
-        break;
-    case kCtbId:
-        if (bit(54)) n++;
-        break;
-    case kTofId:
-        if (bit(55)) n++;
-        break;
-    case kRichId:
-        if (bit(56)) n++;
-        break;
-    case kBarrelEmcTowerId:
-    case kBarrelEmcPreShowerId:
-    case kBarrelSmdEtaStripId:
-    case kBarrelSmdPhiStripId:
-        if (bit(57)) n++;
-        break;
-    case kEndcapEmcTowerId:
-    case kEndcapEmcPreShowerId:
-    case kEndcapSmdUStripId:
-    case kEndcapSmdVStripId:
-        if (bit(58)) n++;
-        break;
-    default:
-        n = 0;
-        break;
+        case kSvtId:
+            for (i=1; i<7; i++)
+                if (hasHitInSvtLayer(i)) n++;
+            break;
+        case kSstId:
+        case kSsdId:
+            if(! hftFormat()) {
+                if (bit(7)) n++;
+            } else {
+                for(int i=1;i<=2;i++) {
+                    if (hasHitInSsdLayer(i)) n++;
+                }
+            }
+            break;
+        case kPxlId:
+            for(i=1;i<=3;i++)
+                if(hasHitInPxlLayer(i)) n++;
+            break;
+        case kIstId:
+            //        for(i=1;i<4;i++)
+            for(i=1;i<=2;i++)
+                if(hasHitInIstLayer(i)) n++;
+            break;
+        case kFtpcWestId:
+        case kFtpcEastId:
+            for (i=1; i<11; i++)
+                if (hasHitInRow(id, i)) n++;
+            break;
+        case kTpcId:
+            for (i=1; i<46; i++)
+                if (hasHitInRow(id, i)) n++;
+            break;
+        case kiTpcId:
+            for (i=1; i<41; i++)
+                if (hasHitInRow(id, i)) n++;
+            break;
+        case kMwpcWestId:
+        case kMwpcEastId:
+            if (bit(53)) n++;
+            break;
+        case kCtbId:
+            if (bit(54)) n++;
+            break;
+        case kTofId:
+            if (bit(55)) n++;
+            break;
+        case kRichId:
+            if (bit(56)) n++;
+            break;
+        case kBarrelEmcTowerId:
+        case kBarrelEmcPreShowerId:
+        case kBarrelSmdEtaStripId:
+        case kBarrelSmdPhiStripId:
+            if (bit(57)) n++;
+            break;
+        case kEndcapEmcTowerId:
+        case kEndcapEmcPreShowerId:
+        case kEndcapSmdUStripId:
+        case kEndcapSmdVStripId:
+            if (bit(58)) n++;
+            break;
+        default:
+            n = 0;
+            break;
     }
     return n;
 }
@@ -365,47 +419,57 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
 bool
 StTrackTopologyMap::trackTpcOnly() const
 {
-    if(hftFormat())
-      return ((hasHitInDetector(kTpcId)) & 
-             ~((hasHitInDetector(kPxlId)) | (hasHitInDetector(kIstId)) | (hasHitInDetector(kSsdId))));
+    if(hftFormat()) {
+      return ((hasHitInDetector(kTpcId) || hasHitInDetector(kiTpcId)) &&
+             !(hasHitInDetector(kPxlId) || hasHitInDetector(kIstId) || hasHitInDetector(kSsdId)));
+    }
     else
-      return ((hasHitInDetector(kTpcId)) &
-             ~((hasHitInDetector(kSvtId)) | (hasHitInDetector(kSsdId))));
+      return ((hasHitInDetector(kTpcId) || hasHitInDetector(kiTpcId)) &&
+             !(hasHitInDetector(kSvtId) || hasHitInDetector(kSsdId)));
 }
 
 bool
 StTrackTopologyMap::trackSvtOnly() const
 {
-    return ((hasHitInDetector(kSvtId)) & ~(hasHitInDetector(kTpcId)));
+    return (hasHitInDetector(kSvtId) && !(hasHitInDetector(kTpcId) || hasHitInDetector(kiTpcId)));
 }
 
 bool
 StTrackTopologyMap::trackTpcSvt() const
 {
-    return ((hasHitInDetector(kTpcId)) & (hasHitInDetector(kSvtId)));
+    return ((hasHitInDetector(kTpcId) || hasHitInDetector(kiTpcId)) && hasHitInDetector(kSvtId));
 }
 
 bool
 StTrackTopologyMap::trackFtpcEast() const
 {
-    return (hasHitInDetector(kFtpcEastId));
+    return hasHitInDetector(kFtpcEastId);
 }
 
 bool
 StTrackTopologyMap::trackFtpcWest() const
 {
-    return (hasHitInDetector(kFtpcWestId));
+    return hasHitInDetector(kFtpcWestId);
 }
 
 bool
 StTrackTopologyMap::trackFtpc() const
 {
-    return ((hasHitInDetector(kFtpcWestId)) | (hasHitInDetector(kFtpcEastId)));
+    return (hasHitInDetector(kFtpcWestId) || hasHitInDetector(kFtpcEastId));
 }
 
 int
 StTrackTopologyMap::largestGap(StDetectorId id) const
 {
+    if (id == kTpcId && hasHitInDetector(kiTpcId)) {
+        gMessMgr->Warning() << "StTrackTopologyMap::largestGap():\n"
+                            << "\tWas called for detector id=kTpcId but there\n"
+                            << "\tare also hits in the iTPC present. The largest\n"
+                            << "\tgap in the TPC cannot be derived reliably at\n"
+                            << "\t this point. Results are unreliable.\n"
+                            << endm;
+    }
+    
     if (ftpcFormat() && !(id == kFtpcWestId || id == kFtpcEastId))
         return -1;
 
@@ -426,6 +490,10 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
         for (i=1; i<46; i++)
             if (hasHitInRow(id, i)) rows.push_back(i);
         break;
+    case kiTpcId:
+            for (i=1; i<41; i++)
+                if (hasHitInRow(id, i)) rows.push_back(i);
+            break;
     default:
         return -1;
     }
@@ -439,12 +507,23 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
 
 ostream& operator<< (ostream& os, const StTrackTopologyMap& m)
 {
+    auto word0 = m.data(0);
+    auto word1 = m.data(1);
+    auto word2 = m.data(2);  // iTPC
+    
     for (int i=0; i<64; i++) {
         if (i>31)
-            os << ((m.data(1)>>(i-32) & 1U) ? 1 : 0);
+            os << ((word1>>(i-32) & 1U) ? 1 : 0);
         else
-            os << ((m.data(0)>>i & 1U) ? 1 : 0);
+            os << ((word0>>i & 1U) ? 1 : 0);
     }
+    
+    os << 't' << endl;
+    
+    for (int i=0; i<64; i++) {
+        os << ((word2>>i & 1U) ? 1 : 0);
+    }
+    
     return os;
 }
 
