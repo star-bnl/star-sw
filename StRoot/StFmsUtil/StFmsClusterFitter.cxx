@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.cxx,v 1.8 2018/03/02 20:27:29 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.9 2018/03/26 15:55:37 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.9  2018/03/26 15:55:37  akio
+// removing some print outs
+//
 // Revision 1.8  2018/03/02 20:27:29  akio
 // Big update from	Zhanwen Zhu with new shower shape and six z slices
 //
@@ -552,18 +555,6 @@ void StFmsClusterFitter::setTowers(StFmsTowerCluster::Towers* towers) {
 	}
 	showerShapeFitFunction.SetParameters(fitParameters.data());
     }
-
-   int count=0;
-  for (auto i = mTowers->begin(), e = mTowers->end(); i!=e; ++i){
-    const StFmsTower* tower = *i;
-    Double_t x=tower->x();
-    Double_t y=tower->y();
-    Double_t etower=tower->e();
-    Double_t detId=tower->hit()->detectorId();
-        ++count;
-        cout<<"              tower"<<count<<"id="<<detId<<" X="<<x<<"Y="<<y<<" E="<<etower<<endl;
-  }
-
 }
     
 }  // namespace FMSCluster
