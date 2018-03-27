@@ -99,6 +99,10 @@ class StEpdGeom{
   StEpdGeom();
   ~StEpdGeom();
 
+  unsigned short position(short uniqueID);
+  unsigned short tile(short uniqueID);
+
+
   /// center of the tile in STAR coordinate system
   /// \param uniqueID    identifier of the tile = sign*(100*PP+TT) where sign=+/- for West/East
   TVector3 TileCenter(short uniqueID);
@@ -212,6 +216,8 @@ inline bool StEpdGeom::IsWest(short uniqueID){return uniqueID>0;}
 inline bool StEpdGeom::IsWest(short position, short tilenumber, short eastwest){return eastwest>0;}
 inline bool StEpdGeom::IsEast(short uniqueID){return uniqueID<0;}
 inline bool StEpdGeom::IsEast(short position, short tilenumber, short eastwest){return eastwest<0;}
+inline unsigned short StEpdGeom::position(short uniqueID){return abs(uniqueID/100);}
+inline unsigned short StEpdGeom::tile(short uniqueID){return abs(uniqueID%100);}
 
 
 

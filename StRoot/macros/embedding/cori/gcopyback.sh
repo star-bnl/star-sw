@@ -1,10 +1,10 @@
 #!/bin/sh
 #the script to copy back the embedding data to PDSF embedding repository.
 #usage: 
-#%screen ./copyback.sh [Fset_begin#] [Fset_end#]
+#%screen ./gcopyback.sh [Fset_begin#] [Fset_end#]
 # or (if only one fset)
-#%screen ./copyback.sh [Fset#] 
-#input the PDSF NIM password
+#%screen ./gcopyback.sh [Fset#] 
+#input your NERSC NIM User name and password
 #use 'Ctrl+A Ctrl+D' to detach the screen session if the transfer starts normally. 
 #memorize the cori node host name, so that login back again to monitor the screen 
 #session (with 'screen -ls' and 'screen -r' to find the detached session and bring it back to frontend).
@@ -22,6 +22,12 @@ if [[ $# -eq 0 || $# -gt 2 ]] ; then
    echo ""
    echo ""
    exit
+fi
+
+if [[ ! $USER =~ "staremb" && ! $USER =~ "starofl" ]] ; then
+   NERSCUSER=$USER
+else
+   read -p "Enter your NERSC user name: " NERSCUSER
 fi
 
 begin=$1
@@ -44,8 +50,10 @@ trg=`grep "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'
 trgset=`echo $trg`
 reqid=`grep "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
 
-srcdirs=""
 dest=$pdsf/$trgset
+
+module load globus
+myproxy-logon -s nerscca.nersc.gov -l $NERSCUSER
 
 for (( ifset=$begin ; $ifset - $end ; ifset++ ))
 do
@@ -65,21 +73,9 @@ do
 	exit
    fi
 
-   if [ "$ifset" -eq $begin ] ; then
-	srcdirs="$fsetp"
-   else
-	srcdirs="$srcdirs $fsetp"
-   fi
+   globus-url-copy -p 6 -vb -r file://$fsetp/ gsiftp://$USER@dtn01.nersc.gov/$destp/
+
+   chmod -R g+w $destp
+
 done
-
-if [[ ! $USER =~ "staremb" && ! $USER =~ "starofl" ]] ; then
-   NERSCUSER=$USER
-else
-   read -p "Enter your NERSC user name: " NERSCUSER
-fi
-
-#echo $srcdirs
-echo ""
-echo "scp -rp $srcdirs $NERSCUSER@dtn01.nersc.gov:$dest/"
-scp -rp $srcdirs $NERSCUSER@dtn01.nersc.gov:$dest/
 
