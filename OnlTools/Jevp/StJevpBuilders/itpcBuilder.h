@@ -122,6 +122,10 @@ class itpcBuilder : public JevpBuilder {
       //TH1 *h113_itpc_drift_vel_dist;
       TH1 *h66_itpc_phi_charge;
       TH1 *h67_itpc_sector_charge;
+
+      TH1 *cl_width_tb;
+      TH1 *cl_width_pad;
+
     };
   } contents;
 
@@ -160,6 +164,7 @@ class itpcBuilder : public JevpBuilder {
 
       TH1 *cl66_itpc_phi_charge;
       TH1 *cl67_itpc_sector_charge;
+
     };
   } extras;
 
