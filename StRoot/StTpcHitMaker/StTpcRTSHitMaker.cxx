@@ -112,8 +112,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	dta->finalize(183,sector,row);
 	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
 	  totalSecPads += numPadsAtRow;
-	  if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+	  if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
 	      St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
 	    liveSecPads += numPadsAtRow;
 	}

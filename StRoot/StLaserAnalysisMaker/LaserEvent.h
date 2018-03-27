@@ -131,7 +131,7 @@ class  LaserB {
 
 class EventHeader {
 
- private:
+  public:
    Int_t   fEvtNum;
    Int_t   fRun;
    Int_t   fDate;
@@ -141,7 +141,7 @@ class EventHeader {
  public:
    Float_t fDriVelWest;
    Float_t fDriVelEast;
- private:
+ public:
    Float_t fClock;
    Float_t fTrigger;
    Float_t fDriftDistance;  

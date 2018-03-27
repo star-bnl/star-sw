@@ -1133,8 +1133,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     }
 	    for(Int_t r = rowMin; r <= rowMax; r++) {              
 	      if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
-		Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(r);
-		if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+		if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,r)) continue;
 		if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,r))  continue;
 	      }
 	      StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, r);

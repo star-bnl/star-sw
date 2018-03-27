@@ -453,7 +453,7 @@ void StSpaceChargeDistMaker::GeomInit() {
       }
       m = j + NP*i;
       LiveRow[m] = (StDetectorDbTpcRDOMasks::instance()->isOn(isec,
-            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(irow)) &&
+       StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(isec,irow)) &&
             (St_tss_tssparC::instance()->gain(isec,irow) > 0) &&
             gainScales[j]>0); // gainScales necessary for dE/dx
 

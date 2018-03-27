@@ -11,6 +11,7 @@ class St_tpcPadConfigC : public TChair {
   UInt_t     	   getNumRows();
   UChar_t         *itpc(Int_t i=0) {return (((St_tpcPadConfig*) Table())->GetTable(i))->itpc;}
   UChar_t          iTpc(Int_t sector);				   
+  UChar_t          iTPC(Int_t sector) {return iTpc(sector);}
   Int_t 	   padRows(Int_t sector);				   
   Int_t 	   innerPadRows(Int_t sector);			   
   Int_t 	   innerPadRows48(Int_t sector);			   

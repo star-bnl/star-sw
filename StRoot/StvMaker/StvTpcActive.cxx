@@ -108,7 +108,7 @@ static St_tpcPadGainT0BC *tpcPadGainT0BC = St_tpcPadGainT0BC::instance();
 
   if (!VoluId()) 	return 0;
   if (!mTPad) 		return 0;
-  int iRdo  = pRdoMasks->rdoForPadrow(mTPad);
+  int iRdo  = pRdoMasks->rdoForPadrow(mSector, mTPad);
   int iact  = pRdoMasks->isOn(mSector, iRdo);
   if (!iact) return 0;
 

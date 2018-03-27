@@ -243,6 +243,7 @@
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
+static Int_t _debug = 0;
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer */)
  {
     if (St_tpcPadConfigC::instance() 
@@ -325,7 +326,11 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row)
     St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) :
     St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
   // x coordinate in sector 12
-  Double_t probablePad = (St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row)+1.)/2. - x/pitch;
+  Int_t npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+  Double_t probablePad = (npads+1.)/2. - x/pitch;
+  if (_debug) {
+    cout << "StTpcCoordinateTransform::padFromX(" << x << "," << sector << "," << row << "); npads = " << npads << ", pitch = " << pitch << endl;
+  }
   // CAUTION: pad cannot be <1
   if(probablePad<0.500001) {
     probablePad=0.500001;
@@ -338,7 +343,11 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
   Double_t pitch = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ?	
     St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) : 
     St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
-  return -pitch*(pad - (St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row)+1.)/2.);
+  Int_t npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+  if (_debug) {
+    cout << "StTpcCoordinateTransform::xFromPad(" << sector << "," << row << "," << pad << "); npads = " << npads << ", pitch = " << pitch << endl;
+  }
+  return -pitch*(pad - (npads+1.)/2.);
 }
 // Coordinate from Row
 //

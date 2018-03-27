@@ -364,8 +364,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       for(Int_t row=1;row<=St_tpcPadConfigC::instance()->numberOfRows(sector);row++) {
         Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
         totalSecPads += numPadsAtRow;
-        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
             St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           liveSecPads += numPadsAtRow;
       }
@@ -638,7 +637,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
-  time = freq * St_tpcSlewingC::instance()->correctedT(row,q,time/freq);
+  time = freq * St_tpcSlewingC::instance()->correctedT(sector,row,q,time/freq);
 
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
@@ -1251,8 +1250,8 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
              UInt_t hw, float q, UChar_t c,
              UShort_t idTruth, UShort_t quality,
              UShort_t id,
-             Short_t mnpad, Short_t mxpad, Short_t mntmbk,
-             Short_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
+             UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
+             UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
              UShort_t flag) {
   // New hit
   StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);

@@ -81,7 +81,7 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
 #ifdef __CHECKIT__
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
 #endif
-    assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
+    //yf    assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
   }
 
   mDetector   = mTargetNode->getDetector();

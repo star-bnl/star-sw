@@ -150,8 +150,8 @@ class StTpcHitMaker : public StRTSBaseMaker {
              UInt_t hw, float q, UChar_t c,
              UShort_t idTruth, UShort_t quality,
              UShort_t id,
-             Short_t mnpad, Short_t mxpad, Short_t mntmbk,
-             Short_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
+             UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
+             UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
              UShort_t flag);
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;

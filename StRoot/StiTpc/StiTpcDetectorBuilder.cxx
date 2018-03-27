@@ -136,10 +136,12 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       Double_t zc = 0;
 #if 1
       if (NoStiSectors == 24) {
+#if 0
 	Float_t maxTimeBacket = 410;
 	Float_t driftvel = 1e-6*StTpcDb::instance()->DriftVelocity(sector); // cm/usec
 	Float_t freq = StTpcDb::instance()->Electronics()->samplingFrequency(); // MHz
 	Zshift = maxTimeBacket/freq*driftvel - dZ;
+#endif
 	Zdepth = (dZ + Zshift)/2;
 	zc     = (dZ - Zshift)/2;
 	if (sector > 12) zc = -zc;
@@ -206,10 +208,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setIsOn(kTRUE);
       Bool_t west = kTRUE;
       Bool_t east = kTRUE;
-      if (nRows == 45) { // ! iTpx
-	Int_t iRdo  = s_pRdoMasks->rdoForPadrow(row);
-	Bool_t west = s_pRdoMasks->isOn(sector, iRdo);
-	Bool_t east = s_pRdoMasks->isOn( 24-(sector)%12, iRdo);
+      if (NoStiSectors == 12 && nRows == 45) { // ! iTpx
+	Bool_t west = s_pRdoMasks->isRowOn(sector, row);
+	Bool_t east = s_pRdoMasks->isRowOn( 24-(sector)%12, row);
 	if (west) {
 	  Int_t sec = sector;
 	  west = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row) &&
