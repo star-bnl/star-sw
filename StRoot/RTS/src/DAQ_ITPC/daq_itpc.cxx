@@ -240,6 +240,7 @@ public:
 	}
 
 	void accum(int sec0, int rdo0, int port0, int fee_id, int ch, int tb, int adc) {
+
 		at[tb_cou].adc = adc ;
 		at[tb_cou].tb = tb ;
 		tb_cou++ ;
@@ -253,7 +254,8 @@ public:
 			dta->finalize(tb_cou, sector+1, row, pad) ;
 		}
 		else {
-			dta->finalize(tb_cou, sector+1, fee_id, ch) ;
+			dta->finalize(tb_cou, sector+1, rdo*16+port, fee_id*256+ch) ;
+
 		}
 
 		if(err) {
@@ -328,6 +330,7 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 
 		it->sector_id = s ;
 		it->rdo_id = r ;
+		sampa_c.rdo = r ;
 
 		ret = it->rdo_scan(dta,words) ;
 
@@ -593,6 +596,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int trl_ix ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
+	words -= 4 ;
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
 
@@ -649,13 +653,24 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	trl_ix = -1 ;
-	for(int i=(words-1);i>=0;i--) {
+
+//	if(rdo==1) {
+	for(int i=(words-6);i>=0;i--) {
 		if(sw16(d[i]) == 0x98001000) {
 			trl_ix = i ;
 			break ;
 		}
 	}
 
+//	}
+//	else {
+//	for(int i=(words-1);i>=0;i--) {
+//		if(sw16(d[i]) == 0x98001000) {
+//			trl_ix = i ;
+//			break ;
+//		}
+//	}
+//	}
 
 	if(trl_ix < 0) {
 		LOG(ERR,"No trailer found") ;
@@ -666,7 +681,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	trl_ix++ ;
 
 	if(sw16(d[trl_ix++]) != 0xABCD0000) {
-		LOG(ERR,"Wrong trailer word") ;
+		LOG(ERR,"Wrong trailer word ABCD") ;
 		err |= 0x40 ;
 		goto err_end ;
 	}
@@ -687,12 +702,19 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		err |= 0x80 ;
 		goto err_end ;
 	}
-	else if (trg_cou > 32) {
-		LOG(WARN,"Lots of triggers %d",trg_cou) ;
+	else if (trg_cou > 60) {
+		LOG(WARN,"%d: Lots of triggers %d",rdo,trg_cou) ;
 	}
 
 	for(u_int i=0;i<trg_cou;i++) {
-		trg[i+1].reserved[0] = sw16(d[trl_ix++]) ;
+		if(trl_ix >= words) {
+			LOG(WARN,"%d: %d/%d = 0x%08X",rdo,trl_ix,words,sw16(d[trl_ix])) ;
+			trg[i+1].reserved[0] = 0 ;
+			trl_ix++ ;
+		}
+		else {
+			trg[i+1].reserved[0] = sw16(d[trl_ix++]) ;
+		}
 	}
 	
 
@@ -737,6 +759,8 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	for(u_int i=1;i<(trg_cou+1);i++) {
 		u_int v = trg[i].reserved[0] ;
 		u_int t ;
+
+		if(v==0) continue ;
 
 		t = ((v>>8)&0xF)<<8 ;
 		t |= ((v>>12)&0xF)<<4 ;

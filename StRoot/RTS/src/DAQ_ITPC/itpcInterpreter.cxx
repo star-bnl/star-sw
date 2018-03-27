@@ -246,6 +246,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 	int trg ;
 	int cfg ;
 
+//	LOG(TERR,"len %d: 0x%X 0x%X 0x%X",end-start,d[0],d[1],d[2]) ;
+
 	d++ ;	// skip over 0x98000008 ;
 
 	// next is FEE port (from 0)
@@ -491,8 +493,9 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 					last = strlen(ascii_dta) - 1 ;
 					if(ascii_dta[last]=='\n') ascii_dta[last] = 0 ;
-					LOG(TERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
-
+					if(last > 1) {
+						LOG(TERR,"FEE_asc %d:#%02d: \"%s\"",rdo_id,fee_port,ascii_dta) ;
+					}
 
 					if(fee_port > 0) {	// this must be!
 						u_int id1 = 0 ;
@@ -538,7 +541,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 
 	if(fee_id < 0) {
-		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(u_int)fee_port,d-start,*d) ;
+		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08X]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(u_int)fee_port,d-start,*d) ;
 		return d ;
 	}
 
@@ -552,6 +555,8 @@ int itpcInterpreter::sampa_ch_scan()
 	int t_stop_last = -1 ;
 	int s,r,p ;
 	
+//	LOG(TERR,"sampa_ch_scan") ;
+
 	if(ped_c) {
 		ped_c->sector = s = sector_id - 1 ;
 		ped_c->rdo = r = rdo_id - 1 ;
@@ -762,6 +767,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	tb_cou = words ;
 
 	if(ped_c && ped_c->want_data) {	// I will handle my own data
+
 		ped_c->sector = sector_id ;
 		ped_c->rdo = rdo_id ;
 		ped_c->port = fee_port ;
@@ -773,6 +779,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		data += word32 ;
 	}
 	else {
+
 		int t_cou = 0 ;	// local
 		for(u_int i=0;i<word32;i++) {
 			d = *data++ ;
@@ -924,6 +931,8 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		LOG(ERR,"%d: First word is not a START comma!? [0x%08X 0x%08X 0x%08X]",rdo_id,data[-1],data[0],data[1]) ;
 	}
 
+//	LOG(TERR,"RDO scan") ;
+
 	while(data<data_end) {
 		u_int hdr ;
 
@@ -1053,6 +1062,19 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 
 			data = fee_scan(data-1, data_end) ;
+#if 0
+			{
+			LOG(TERR,"Left fee_port %d: %d",fee_port,data_end-data) ;
+			if(fee_port==16) {
+				u_int *d = data ;
+
+				while(d<=data_end) {
+					LOG(TERR,"%d = 0x%08X",data_end-d,*d) ;
+					d++ ;
+				}
+			}
+			}
+#endif
 #if 0
 			fee_port = *data++ ;
 			fee_port &= 0xFF ;
@@ -1490,16 +1512,21 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		}
 
 
+		if(flags & 0x10) {
+			//LOG(TERR,"flags 0x%X",flags) ;
+			break ;
+		}
 		re_loop: ;
 
 	}
 
 
 
-	if((flags != 0x1F) || ((data_end-data) != 0)) {
-		//LOG(WARN,"At end: %d, flags 0x%X",data_end-data,flags) ;
+//	if((flags != 0x1F) || ((data_end-data) != 0)) {
+	if((flags != 0x1F)) {
+		LOG(ERR,"At end: %d, flags 0x%X",data_end-data,flags) ;
 		for(int i=0;i<32;i++) {
-			//LOG(WARN,"... %2d = 0x%08X",i,data_end[16-i]) ;
+			LOG(WARN,"... %2d = 0x%08X",i,data_end[16-i]) ;
 		}
 	}
 
