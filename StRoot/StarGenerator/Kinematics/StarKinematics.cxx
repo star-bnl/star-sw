@@ -10,8 +10,9 @@
 #include <algorithm>
 #include <random>
 
-#include "TVector3.h"
 #define random myrandom
+
+
 
 // ----------------------------------------------------------------------------
 
@@ -98,16 +99,15 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Dou
       Double_t m  = p->GetMass();
 
       // Use TVector3 to get the momentum vector correct
-      TVector3 momentum; {
-	momentum.SetPtEtaPhi( pt, eta, phi );
-      }
+      _momentum.SetPtEtaPhi( pt, eta, phi );
+      
 
-      Double_t E2 = momentum.Mag2() + m*m;
+      Double_t E2 = _momentum.Mag2() + m*m;
       Double_t E  = sqrt(E2);
 
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( _momentum.Px() );
+      p->SetPy( _momentum.Py() );
+      p->SetPz( _momentum.Pz() );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -140,16 +140,15 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *
       Double_t m   = p->GetMass();
 
       // Use TVector3 to get the momentum vector correct
-      TVector3 momentum; {
-	momentum.SetPtEtaPhi( pt, eta, phi );
-      }
+      _momentum.SetPtEtaPhi( pt, eta, phi );
+      
 
-      Double_t E2 = momentum.Mag2() + m*m;
+      Double_t E2 = _momentum.Mag2() + m*m;
       Double_t E  = sqrt(E2);
 
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( _momentum.Px() );
+      p->SetPy( _momentum.Py() );
+      p->SetPz( _momentum.Pz() );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -180,16 +179,15 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TH1 *ptFunc, TH1 *
       Double_t m   = p->GetMass();
 
       // Use TVector3 to get the momentum vector correct
-      TVector3 momentum; {
-	momentum.SetPtEtaPhi( pt, eta, phi );
-      }
+      _momentum.SetPtEtaPhi( pt, eta, phi );
+      
 
-      Double_t E2 = momentum.Mag2() + m*m;
+      Double_t E2 = _momentum.Mag2() + m*m;
       Double_t E  = sqrt(E2);
 
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( _momentum.Px() );
+      p->SetPy( _momentum.Py() );
+      p->SetPz( _momentum.Pz() );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -232,23 +230,23 @@ void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double 
       double pmag    = random(plow,  phigh);
 
       // Momentum vector pointing in towards the beamline
-      TVector3 momentum = -pmag * direct;
+      _momentum = -pmag * direct;
 
       // Now, randomize phi and theta by +/- dphi degrees about the momentum axis
-             phi   = momentum.Phi()   + deg2rad * random( -dphi, +dphi );
-      double theta = momentum.Theta() + deg2rad * random( -dphi, +dphi );
+             phi   = _momentum.Phi()   + deg2rad * random( -dphi, +dphi );
+      double theta = _momentum.Theta() + deg2rad * random( -dphi, +dphi );
 
-      momentum.SetPhi(phi);
-      momentum.SetTheta(theta);            
+      _momentum.SetPhi(phi);
+      _momentum.SetTheta(theta);            
 
       Double_t m   = p->GetMass();
 
-      Double_t E2 = momentum.Mag2() + m*m;
+      Double_t E2 = _momentum.Mag2() + m*m;
       Double_t E  = sqrt(E2);
 
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( _momentum.Px() );
+      p->SetPy( _momentum.Py() );
+      p->SetPz( _momentum.Pz() );
       p->SetEnergy( E );
 
       p->SetVx( xvertex ); 
