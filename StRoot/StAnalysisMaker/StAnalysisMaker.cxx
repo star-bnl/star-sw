@@ -313,9 +313,11 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   // plot = 1 => All hits;
   // plot = 2 => prompt hits only |z| > 190
   struct BPoint_t {
-    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL,trigId;
+    Int_t    sector, row;
+    Float_t  x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL;
+    Int_t    trigId, us,fl;
   };
-  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:trigId";
+  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:trigId/I:us/I:fl:I";
   BPoint_t BPoint;
   static TNtuple *Nt = 0;
   if (plot && Nt == 0) {
@@ -411,7 +413,9 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.npads   =  tpcHit->padsInHit();
 		    BPoint.ntbks   =  tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
 		    BPoint.trigId  = 0;
-		    Nt->Fill(&BPoint.sector);
+		    BPoint.us      = tpcHit->usedInFit();
+		    BPoint.fl      = tpcHit->flag();
+		    Nt->Fill((Float_t  *) &BPoint.sector);
 #ifdef __TRIGGER_ID__
 		    if (nominal) {
 		      UInt_t maxTriggers = nominal->maxTriggerIds();
