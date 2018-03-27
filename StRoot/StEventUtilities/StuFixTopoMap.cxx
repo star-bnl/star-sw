@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.7 2016/02/26 03:56:08 genevb Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.8 2018/03/27 02:42:23 genevb Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -109,6 +109,7 @@ bool StuFixTopoMap(StTrack* track)
     
     unsigned long word1 = 0;
     unsigned long word2 = 0;
+    unsigned long long wordiTpc = 0;
     
     // Primary vertex used or not
     if (track->type() == primary) word1 |= 1U;
@@ -204,11 +205,16 @@ bool StuFixTopoMap(StTrack* track)
                     if (word2 & 1U<<(k-25)) word2 |= 1U<<30; // turnaround flag    
                     word2 |= 1U<<(k-25);
                 }
+            }
+            else if (hits[i]->detector() == kiTpcId) {
+                k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
+                if (wordiTpc & 1ULL<<k) word2 |= 1U<<30; // turnaround flag    
+                wordiTpc |= 1ULL<<k;
             }		
         }	
     }
     
-    StTrackTopologyMap newmap(word1, word2);
+    StTrackTopologyMap newmap(word1, word2, wordiTpc);
     track->setTopologyMap(newmap);
     return true;
 }
