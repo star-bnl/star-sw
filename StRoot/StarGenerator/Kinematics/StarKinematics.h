@@ -65,6 +65,7 @@
 #include "StarGenerator/EVENT/StarGenEvent.h"
 
 #include "TMath.h"
+#include "TVector3.h"
 
 #include "TH1.h"
 #include "TF1.h"
@@ -143,6 +144,8 @@ class StarKinematics : public StarGenerator
 
   // User's event
   StarGenEvent *mUser;
+
+  TVector3 _momentum;  // Used for internal calculations
 
   ClassDef(StarKinematics,1);
 
