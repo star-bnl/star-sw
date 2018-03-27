@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.30 2016/05/16 02:44:00 perev Exp $
+ * $Id: StTpcHit.h,v 2.31 2018/03/27 02:40:12 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.31  2018/03/27 02:40:12  genevb
+ * Introduce kiTpcId
+ *
  * Revision 2.30  2016/05/16 02:44:00  perev
  * Added init of mAdd. (Coverity)
  *
@@ -107,6 +110,7 @@
 #define StTpcHit_hh
 
 #include "StHit.h"
+#include "StEnumerations.h"
 #include "StMemoryPool.hh"
 #include "TMath.h"
 
@@ -178,6 +182,6 @@ protected:
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 
-inline StDetectorId StTpcHit::detector() const {return kTpcId;}
+inline StDetectorId StTpcHit::detector() const {return (bits(1,1) ? kiTpcId : kTpcId);}
 
 #endif

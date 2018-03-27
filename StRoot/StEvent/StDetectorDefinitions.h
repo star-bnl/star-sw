@@ -119,7 +119,10 @@
 */
 #define kFtsIdentifier                38 
 
-
+/*
+ ** iTPC
+ */
+#define kiTpcIdentifier               39
 
 /*
 **  The following are more or less virtual detectors.
@@ -137,9 +140,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.13 2017/05/04 00:52:53 perev Exp $
+/* $Id: StDetectorDefinitions.h,v 2.14 2018/03/27 02:40:12 genevb Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.14  2018/03/27 02:40:12  genevb
+** Introduce kiTpcId
+**
 ** Revision 2.13  2017/05/04 00:52:53  perev
 ** Fts added
 **
