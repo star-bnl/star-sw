@@ -4,6 +4,12 @@
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
+#include <boost/algorithm/string.hpp>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <random>
+
 #include "TVector3.h"
 #define random myrandom
 
@@ -11,6 +17,9 @@
 
 StarParticleData &data = StarParticleData::instance();
 StarRandom       &random = StarRandom::Instance();
+
+static std::random_device _stl_rd;
+static std::mt19937 _mt19937( _stl_rd() );
 
 StarGenEvent *gEvent = 0;
 StarGenEvent *gUser  = 0;
@@ -63,17 +72,24 @@ StarGenParticle *StarKinematics::AddParticle( const Char_t *type )
   p->SetMass( pdg->Mass() );
   p->SetId( id );
   return p;
-}
+}	
 // ----------------------------------------------------------------------------
-void StarKinematics::Kine(Int_t ntrack, const Char_t *type, Double_t ptlow, Double_t pthigh,
+void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Double_t pthigh,
 			  Double_t ylow, Double_t yhigh,
 			  Double_t philow, Double_t phihigh )
 {
 
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0;i<ntrack;i++ )
     {
-
-      StarGenParticle *p = AddParticle(type);
+      
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+      
+      StarGenParticle *p = AddParticle(type.c_str());
 
       // Sample pt, eta, phi
       Double_t pt = random(ptlow,  pthigh);
@@ -103,12 +119,20 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *type, Double_t ptlow, Doub
 
 }
 // ----------------------------------------------------------------------------
-void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TF1 *ptFunc, TF1 *etaFunc, TF1 *phiFunc )
+void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *etaFunc, TF1 *phiFunc )
 {
+
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0; i<ntrack; i++ )
     {
 
-      StarGenParticle *p = AddParticle(type);
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+      
+      StarGenParticle *p = AddParticle(type.c_str());
       
       Double_t pt  = ptFunc  -> GetRandom();
       Double_t eta = etaFunc -> GetRandom();
@@ -136,12 +160,19 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TF1 *ptFunc, TF1 *e
     }
 }
 // ----------------------------------------------------------------------------
-void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TH1 *ptFunc, TH1 *etaFunc, TH1 *phiFunc )
+void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TH1 *ptFunc, TH1 *etaFunc, TH1 *phiFunc )
 {
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0; i<ntrack; i++ )
     {
 
-      StarGenParticle *p = AddParticle(type);
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+ 
+      StarGenParticle *p = AddParticle(type.c_str());
       
       Double_t pt  = ptFunc  -> GetRandom();
       Double_t eta = etaFunc -> GetRandom();
@@ -171,12 +202,19 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TH1 *ptFunc, TH1 *e
 // ----------------------------------------------------------------------------
 const double deg2rad = TMath::DegToRad();
 
-void StarKinematics::Cosmic( int ntrack, const char* type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
+void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
 {
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0; i<ntrack; i++ )
     {
 
-      StarGenParticle *p = AddParticle(type);
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+ 
+      StarGenParticle *p = AddParticle(type.c_str());
 
       // Generate a random vertex
       double zvertex = random( zmin, zmax );
