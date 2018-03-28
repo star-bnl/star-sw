@@ -4,9 +4,9 @@
  
     <Modules>ShldGeo</Modules>
 
-    <Setup  name   = "SHLDof" comment="Shield off" module="ShldGeo" onoff="off" />
+    <Setup  name   = "SHLDof" comment="Shield off" module="ShldGeo" onoff="off"  simu="1" />
 
-    <Setup  name   = "SHLDon"
+    <Setup  name   = "SHLDon"  simu="1"
 	    comment= "Default configuration for the beam tunnel shielding"
 	    module = "ShldGeo"
 	    onoff  = "on" >

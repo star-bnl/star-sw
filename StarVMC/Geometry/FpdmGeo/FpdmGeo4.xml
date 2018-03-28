@@ -16,16 +16,18 @@
     FEEC,FPRS,FPLY,FPPB,FPSC,FPBB,
     FLIG,FLBA,FLCO,FPMT,FFEE,
     FLLG,FBLL,FCLL,
-    WPPL,WPIS,WPUF,WPUN,WPUS,WPAR
+    WPPL,WPIS,WPUF,WPUN,WPUS,WPAR,
+    FPST,FTLY,FOSC
   </Content>
   
-  <Structure name="FMCG"   >
+  <Structure name="FMCG"   > 
     <var name="Version"   />
     <var name="ChkvSim"   />
     <var name="PbPlate"   />    
     <var name="FmsNorthX" />
     <var name="FmsSouthX" />
     <var name="Atten" />    
+    <var name="postshower" type="int" />
   </Structure>
         
   <Structure name="FPOS"  >
@@ -129,6 +131,21 @@
     <var name="DxBbd(2)" type="real" />
   </Structure>
 
+  <Structure name="POST"  > 
+    <var name="DBox(3)"      type="float"   /> ! FPOST mother PGON dimensions
+    <var name="DHole"        type="float"   /> ! size of central hole of mother PGON
+    <var name="ScThick"      type="float"   /> ! scintillatr thickness, cm  
+    <var name="ScWidth"      type="float"   /> ! scintillatr width, cm
+    <var name="ScWrap"       type="float"   /> ! scintillatr wrapping thickness, cm
+    <var name="ScLth(10)"    type="float"   /> ! scintillatr length, 10 types, s1, s2, s3, s3-1-7     
+    <var name="Xoff(6,2)"    type="float"   /> ! x of each layer
+    <var name="Yoff(6,2)"    type="float"   /> ! y of each layer
+    <var name="Zoff(6,2)"    type="float"   /> ! z of each layer (front surface)
+    <var name="Nslat(6,2)"   type="integer" /> ! number of slats
+    <var name="AngSlat(6,2)" type="float"   /> ! angle 
+    <var name="BPdz"         type="float"   /> ! backplane thickness
+  </Structure>
+
   <Structure name="WPFM"  >
     <var name="PoleD(4)" type="float"  />
     <var name="PoleP(3)" type="float"  />
@@ -148,14 +165,17 @@
   </varlist>
   
   <varlist type="INTEGER"  >
-    i,j,k,kk,m,serN,lr,tb,col,kmod,rot,id,layr,quad,slat(4,3)
+    i,j,k,kk,m,serN,lr,tb,col,kmod,rot,id,layr,quad,slat(4,3),sn
     debug,npstype,pstype(20),cpstype(20),flag
   </varlist>
+  <varlist type="INTEGER" > ch </varlist>
 
   <varlist type="REAL"  >
-    xx,yy,zz,x1,y1,z1,ztot,rtot,wid,widx,widy,bwid,x0,widL,dx,dy,dz,dxx,dyy,dzz,xxx,yyy,dxxx,dyyy,xpmt,ypmt
-    dx1,dy1,dz1,dx2,dy2,dz2,x2,y2,z2,dz3,dx1a,dx1b,dzsb,psdim(20,2)
+    xx,yy,zz,x1,y1,z1,ztot,rtot,wid,widx,widy,bwid,x0,widL,dx,dy,dz,dxx,dyy,dzz
+    xxx,yyy,zzz,dxxx,dyyy,xpmt,ypmt
+    dx1,dy1,dz1,dx2,dy2,dz2,x2,y2,z2,dz3,dx1a,dx1b,dzsb,psdim(20,2),h,d,r45,ang;
   </varlist>
+  <varlist type="REAL"  > sqrt2/1.414213562373095/</varlist>
   
   <varlist type="REAL">    ztotsmd,wtotsmd,zsmd,zsmd2,wsmd  </varlist>
   <varlist type="REAL"  >  xsmdh,ysmdh,zsmdh,xsmdv,ysmdv,zsmdv  </varlist>
@@ -197,8 +217,9 @@
     <var name="ChkvSim" value="0" comment=" = 0 dE, = 1 Cherenkov simulation for PbG "  />
     <var name="Atten" value="0.0" comment="default, no attenuation, 1 = attenuation" />
     <var name="PbPlate" value="0" comment=" =0 no plate, =1 with plate "  />
-    <var name="FmsNorthX" value="-0.3" comment="Default x-position" />
-    <var name="FmsSouthX" value="+0.3" comment="Default x-position" />
+    <var name="FmsNorthX" value="-2.0" comment="Default x-position" />
+    <var name="FmsSouthX" value="+5.0" comment="Default x-position" />
+    <var name="postshower" value="0" comment="0: no postshower 1: yes postshower" />
   </Fill>
 
   <Use struct="FMCG" select="version" value="8.0" />
@@ -353,6 +374,28 @@
     <var name="RMax" value="10.16" comment=" Radius of the inner tube for beampipe "  />
   </Fill>
 
+  <Fill name="POST" comment="Post Shower geometry" >
+    <var name="DBox"    value="{225.0,250.0,64.0}"  />
+    <var name="DHole"   value="42.00"  />
+    <var name="ScThick" value="1.0"    comment="Scintillator thickness, cm" />
+    <var name="ScWidth" value="5.0"    comment="Scintillator width"/>
+    <var name="ScWrap"  value="0.025"  comment="Scintillator wrapping thickness"/>    
+    <var name="ScLth"   value="{108.0,85.0,113.137,103.087,93.037,82.987,72.937,62.887,52.837,42.787}" 
+                        comment="length of type s1,s2,s3,s3-1,s3-2,s3-3,s3-4,s3-5,s3-6,s3-7"/> 
+    <var name="Xoff"    value="{  0.0,  39.085,  0.0,  67.925,  67.925,  68.125;
+                                  0.0,  0.0,  -39.085,  -67.925,  -67.925,  -68.125}"  />
+    <var name="Yoff"    value="{ 65.5, 65.5,  0.0,   0.877,   0.0,   0.0;
+                                  0.0,  0.0, 65.5,   0.877,   0.0,   0.0}"  />
+    <var name="Zoff"    value="{815.899, 838.259,   0.000, 848.419, 857.944, 867.469;
+                                  0.000,   0.000, 840.529, 847.784, 857.309, 866.834}" />
+    <var name="Nslat"   value="{9, 14,  0, 25, 43, 34;
+                                0,  0, 14, 25, 43, 34}" />
+    <var name="AngSlat" value="{  0.0, -45.0, 999.0, -45.0, -90.0, 0.0;
+                                999.0, 999.0, 225.0, 225.0, 90.0, 0.0}" />
+    <var name="BPdz"    value="2.54/4.0"  /> 
+
+  </Fill>
+
   <Fill name="PRSW" comment="Pre Shower geometry" >
     <var name="DBox"    value="{225.0,250,22.0}"  />
     <var name="Xoff"    value="{ 1.0,1.0,1.0,1.0}"  />
@@ -475,6 +518,11 @@
     </If>
 
     <If expr="m.ne.7"  >
+
+<!--
+      <If expr="zz.gt.0"> <Export language="Mortran"> write(*,*) 'FBOX m=',m,' xx=',xx </Export> </If>
+-->
+
       <Create block="FBOX"  />
 
       <Placement block="FBOX" in="CAVE" group="WestRefSys" if="zz&gt;0" 		 y="yy" x="xx" z="zz" konly="MANY"  >
@@ -497,6 +545,17 @@
 	     y="0.0" 
 	     z="PRSW_Zoff(1)-PRSW_DSIPM(1)+PRSW_Dbox(3)/2.0" 
 	     />
+
+  <If expr="FMCG_postshower.eq.1">
+  <Create    block = "FPST"  />
+  <Placement block = "FPST" 
+	     in    = "CAVE" 
+	     konly = "ONLY" 
+	     group = "WestRefSys" 
+	     x     = "0.0" 
+	     y     = "0.0" 
+	     z     = "POST_Zoff(1,1)-2.0+POST_Dbox(3)/2.0" />
+  </If>
 
   <Create    block="WPPL"  />
   <Placement block="WPPL" in="CAVE" group="WestRefSys" x="+WPFM_PoleP(1)" y="WPFM_PoleP(2)" z="WPFM_PoleP(3)" />
@@ -607,7 +666,7 @@
       <Use struct="FLGG" select="Type" value="2 "  />
       <Use struct="FLGM" select="Type" value="2 "  />
       wid  = FLGG_Width + FLGG_DGap +  FLGG_AlThick*2.0 
-      ztot = FLGG_Depth/2.0 
+      ztot = FLGG_Depth/2.0
       rtot = FBXD_NXL*wid/2.0 
       bwid = rtot 
       xlcOffSet = (FBXD_Width-FBXD_NXL*wid)/2.0          ! Large Cells OffSet in X 
@@ -638,6 +697,11 @@
       <Else  >
 	      <Create block="FLXF"  />
 	      <Placement y="y1" x="x1" z="z1" block="FLXF" />
+
+<!--
+	      <Export language="Mortran"> write(*,*) 'FLXF x1',x1,x1-FBXD_Width/2.0,' y1=',y1 </Export>
+-->
+
 	      x1=x1+widx 
       </Else>
       </Elif>
@@ -1108,7 +1172,7 @@
     <Material  name="Air"  />
     <Medium    name="standard"  />
     <Attribute for="FPRS" 
-	       seen="0" 
+	       seen="1" 
 	       colo="2"  
 	       />
 
@@ -1119,7 +1183,7 @@
 	   rmx="{PRSW_DBox(1)/2.0,PRSW_DBox(1)/2.0}" 
 	   />  
 
-    debug=0	     
+    debug=1	     
     <If expr="debug.ge.1" > 
       npstype=0 
       cpstype(1)=1
@@ -1175,19 +1239,81 @@
       <Do var="i" from="1" to="npstype" >
 	<Do var="j" from="1" to="npstype" >
 	  <If expr="i.eq.cpstype(j)">
+<!--
 	    <Export language="Mortran"> 
 	      write(*,'(A5,A1,I5,F8.2,F8.2,F8.2)') 'Type=',char(ichar('A')+cpstype(j)-1),pstype(j),psdim(j,1)*2,psdim(j,2)*2,1.0
 	      write(10,'(A5,A1,I5,F8.2,F8.2,F8.2)') 'Type=',char(ichar('A')+cpstype(j)-1),pstype(j),psdim(j,1)*2,psdim(j,2)*2,1.0
 	    </Export>
+-->
 	    k=k+pstype(j)
 	  </If>
 	</Do>		 
       </Do>
+<!--
       <Export language="Mortran"> write(10,*) 'Total=',k </Export> 
       <Export language="Mortran"> close(10)</Export>
       <Export language="Mortran"> close(11)</Export>
+-->
     </If>
     
+  </Block>
+
+  <!-- ==
+       == FMS PostShower Detector
+       ==                                                                         -->
+
+  <Block name="FPST" comment="is box for plastic schinti FMS post-shower detectors layer 2-6"  >
+
+    <Material  name="Air"  />
+    <Medium    name="standard"  />
+    <Attribute for="FPST" 
+	       seen="1" 
+	       colo="2"  
+	       />
+
+    <Shape type="PGON" 
+	   phi1="45" dphi="360" npdiv="4" nz="2" 
+	   zi="{-POST_DBox(3)/2.0,POST_DBox(3)/2.0}" 
+	   rmn="{POST_DHole/2.0,POST_DHole/2.0}" 
+	   rmx="{POST_DBox(1)/2.0,POST_DBox(1)/2.0}" 
+	   />  
+
+    debug=0	     
+    <If expr="debug.ge.1" > 
+      <Export language="Mortran"> open(12,file='fpostgeom.txt',status='REPLACE')</Export>
+    </If> 
+    wid=POST_ScWidth+POST_ScWrap
+
+    serN=0
+    <For var="sn" from="1" to="2" step="1" >
+      <For var="layr" from="1" to="6" step="1" >
+        <If expr="POST_Nslat(layr,sn).gt.0" >
+	   <If expr="layr.eq.1"> 
+             dx=wid*9+1.0
+	     dy=POST_ScLth(2)/2.0+1.0
+	   <Elif expr="layr.le.3"> 
+             dx=64.0 <!-- range from -24.0021 to 102.1727 -->
+	     dy=POST_ScLth(2)/2.0 <!-- range from 23.73226 to 107.2681 -->
+	   </Elif>
+           <Else >
+             dx=POST_ScLth(2)/2.0+1.0
+	     dy=POST_ScLth(1)+1.0
+	   </Else>
+           </If>
+	   xx=POST_Xoff(layr,sn)
+           yy=POST_Yoff(layr,sn)
+           dz=(POST_ScThick+POST_BPdz)/2.0
+           zz=POST_Zoff(layr,sn)-(POST_Zoff(1,1)+POST_Dbox(3)/2.0-2.0)+POST_BPdz/2.0
+           <If expr="layr.eq.3"> 
+           zz=POST_Zoff(layr,sn)-(POST_Zoff(1,1)+POST_Dbox(3)/2.0-2.0)-POST_BPdz/2.0
+           </If>
+           serN=serN+1
+           <Create    block="FTLY" />
+           <Placement block="FTLY" in="FPST" x="xx" y="yy" z="zz" konly="ONLY" /> 
+ 	</If> 
+      </For>
+    </For>
+
   </Block>
 
   <!--                                                    Preshower Layer:  FPLY -->
@@ -1227,6 +1353,7 @@
 
     <!-- Blocks can be created once.  Sized at position time -->
     <Create block="FPSC" />
+    <Create block="FOSC" />
     <Create block="FLIG" />
     <Create block="FLLG" />
     <Create block="WPAR" />
@@ -1267,10 +1394,10 @@
 		  y   = dyy
 	      </Else></If>
 	      yy=y+dyy+dlg
-	      <If expr="tb.eq.1"> rot=0</If>
-	      <If expr="tb.eq.2"> y=-y; yy=-yy; rot=180</If>
-	      <If expr="lr.eq.1"> xx=+x+PRSW_Xoff(serN)</If>
-	      <If expr="lr.eq.2"> xx=-x-PRSW_Xoff(serN)</If>
+	      <If expr="tb.eq.1"> rot = 0</If>
+	      <If expr="tb.eq.2"> y = -y; yy = -yy; rot = 180;</If>
+	      <If expr="lr.eq.1"> xx = +x+PRSW_Xoff(serN)</If>
+	      <If expr="lr.eq.2"> xx = -x-PRSW_Xoff(serN)</If>
 	      y=y+PRSW_Yoff(serN); yy=yy+PRSW_Yoff(serN);
 	      <If expr="tb.eq.1 .or. j.eq.2 .or. i.gt.PRSW_NSkipV">
 		<If expr="debug.ge.1"> 
@@ -1296,10 +1423,12 @@
 			psdim(npstype,2)=dyy
                     </Else></If>
                   </If>
+<!--
 		  <Export language="Mortran"> 
 		    write(serN,'(I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2,2X,A1)') serN,k,dxx*2,dyy*2,dzz*2,xx,y,z,char(ichar('A')+cpstype(flag)-1)
 		    write(11,'(I3,I2,I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2)') id,quad,layr,slat(quad,layr),dxx*2,dyy*2,dzz*2,xx,y,z
 		  </Export> 
+-->
 		</If>
 		<Placement block="FPSC" x="xx" y="y" z="z1" dx="dxx" dy="dyy" dz="dzz" /> 
 		<Placement block="FLIG" x="xx" y="yy" z="z1-PRSW_DSIPM(1)/2.0" if="j.eq.1"> <Rotation alphax="-90" /> <Rotation alphaz="rot" /></Placement>
@@ -1363,11 +1492,13 @@
 			psdim(npstype,1)=dxx
 			psdim(npstype,2)=dyy
                     </Else></If>
-                  </If>		  
+                  </If>	
+<!--	  
 		  <Export language="Mortran"> 
 		    write(serN,'(I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2,2X,A1)') serN,k,dxx*2,dyy*2,dzz*2,x,yy,z,char(ichar('A')+cpstype(flag)-1)
-		    write(11,'(I3,I2,I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2)') id,quad,layr,slat(quad,layr),dxx*2,dyy*2,dzz*2,xx,y,z
+		    write(11,'(I3,I2,I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2)') id,quad,layr,slat(quad,layr),dxx*2,dyy*2,dzz*2,x,yy,z
                   </Export>
+-->
 		</If>
 		<Placement block="FPSC" x="x"  y="yy" z="z1" dx="dxx" dy="dyy" dz="dzz" /> 
 		<Placement block="FLIG" x="xx" y="yy" z="z1-PRSW_DSIPM(1)/2.0" if="j.eq.1.and.serN.eq.2" > <Rotation alphax="-90" /> <Rotation alphaz="rot" /></Placement>
@@ -1459,6 +1590,123 @@
     
     <!-- Export language="Mortran"> write(*,*) 'Done serN=',serN</Export -->	   
   </Block>
+
+  <!--                                                    Postshower Layer:  FTLY -->
+  <Block name="FTLY" comment="is a layer of FMS Postshower"  >         
+    <Material  name="Air"  />
+    <Medium    name="standard"  />
+    <Attribute for="FTLY" seen="1" colo="3" serial="serN" />
+    <Shape type="BOX" dx="dx" dy="dy" dz="dz" /> 
+ 
+    <Create block="FOSC" /> 
+    <Create block="FPBB" /> 
+
+
+    <!-- Fill channels in each layer -->
+    <For var="i" from="1" to="POST_Nslat(layr,sn)" step="1" >
+      <If expr="POST_Nslat(layr,sn).gt.0" >
+      <If expr="layr.eq.1">
+	xxx=wid*(i-5)
+        yyy=0.0
+        dyy=POST_ScLth(2)/2.0
+
+        <Elif expr="layr.le.3">
+          <If expr="i.le.7">
+            xxx=-1.5*wid*sqrt2+wid*i/sqrt2-39.085
+            yyy=wid*8/sqrt2-wid*i/sqrt2
+            dyy=POST_ScLth(11-i)/2.0
+              <Elif expr="i.gt.7" >
+                xxx=2.5*wid*sqrt2+wid*(i-8)*sqrt2-39.085
+                yyy=0.0
+                dyy=POST_ScLth(3)/2.0
+              </Elif>
+           </If>
+        </Elif>
+
+      <Elif expr="layr.eq.4" >
+          <If expr="i.le.19" >
+            xxx=0.0
+            yyy=-108.0375+(60+POST_scWrap)/sqrt2+wid/2.0+wid*sqrt2*19-POST_Yoff(layr,sn)-wid*i*sqrt2
+            dyy=POST_ScLth(3)/2.0
+            <Else >
+              xxx=wid*(i-19)/sqrt2
+              yyy=-108.0375+(60+POST_scWrap)/sqrt2+wid/2.0-POST_Yoff(layr,sn)-wid*(i-19)/sqrt2
+              dyy=POST_ScLth(i-16)/2.0 
+            </Else>
+          </If>
+        </Elif>
+
+        <Elif expr="layr.eq.5" >
+           yyy=wid*(22-i)
+           xxx=0.0
+           dyy=POST_ScLth(2)/2.0
+        </Elif>
+
+        <Elif expr="layr.eq.6" >
+          dyy=POST_ScLth(1)/2.0
+          yyy=54.0
+          xxx=wid*(i-9)
+
+          <If expr="i.gt.17" >
+            xxx=wid*(i-26)
+            yyy=-yyy
+         </If>
+        </Elif>
+      </If>
+      <If expr="sn.eq.2"> xxx=-xxx </If>
+        ang=POST_AngSlat(layr,sn)
+        dzz=POST_scThick/2.0
+        dxx=POST_scWidth/2.0
+        zzz=-dz+POST_ScThick/2.0
+      <If expr="layr.eq.3"> zzz=-zzz </If>
+      <Placement block="FOSC" x="xxx" y="yyy" z="zzz" dx="dxx" dy="dyy" dz="dzz" >
+      <Rotation alphaz="ang" />
+      </Placement>
+      <!--
+        <If expr="layr.eq.3">
+         <Export language="Mortran">
+          write(*,'(I4,I4,I4,F8.3,F8.3,F8.3,F8.3,F8.3,F8.3,F8.3)') sn,layr,i,dxx*2,dyy*2,dzz*2,xxx+POST_Xoff(layr,sn),yyy+POST_Yoff(layr,sn),zzz+POST_Zoff(layr,sn)-POST_BPdz/2.0,ang
+         </Export>
+        </If>
+        -->
+      </If>
+    </For>
+
+    <For var="i" from="1" to="POST_Nslat(layr,sn)" step="1" >
+      <If expr="POST_Nslat(layr,sn).gt.0" >
+	 <If expr="layr.eq.1"> 
+           dxx=wid*9+1.0
+	   dyy=POST_ScLth(2)/2.0+1.0
+	 <Elif expr="layr.le.3"> 
+           dxx=64.0 <!-- range from -24.0021 to 102.1727 -->
+	   dyy=POST_ScLth(2)/2.0 <!-- range from 23.73226 to 107.2681 -->
+	 </Elif>
+         <Else >
+           dxx=POST_ScLth(2)/2.0+1.0
+	   dyy=POST_ScLth(1)+1.0
+	 </Else>
+         </If>
+	 xxx=0.0
+         yyy=0.0
+         dzz=POST_BPdz/2.0
+         zzz=dz-POST_BPdz/2.0
+         <If expr="layr.eq.3"> zzz=-zzz </If>
+         <Placement block="FPBB" x="xxx" y="yyy" z="zzz" dx="dxx" dy="dyy" dz="dzz" />
+      </If>
+    </For>
+
+    <!--
+    debug=1	     
+    <If expr="debug.ge.1" > 
+      <Export language="Mortran"> open(10,file='fpostgeom.txt',status='REPLACE')</Export>
+        <Export language="Mortran"> 
+          write(10,'(I2,I2,I2,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2,F4.2)') sn,layr,i,dxx*2,dyy*2,dzz*2,xxx,yyy,zzz,ang
+        </Export>
+      <Export language="Mortran"> close(10) </Export>
+    </If>
+    -->
+
+  </Block>
   
   <Block name="FPBB" comment="is the G10 back board"  >
     <Mixture name="g10" dens="1.7"  >
@@ -1490,6 +1738,22 @@
     <Par name="BIRK2" value="0.013"    />
     <Par name="BIRK3" value="9.6E-6"   />
     <Instrument block="FPSC">
+      <Hit meas="birk" nbits="0" min="0" max="10" />
+    </Instrument>
+  </Block>
+
+  <Block name="FOSC" comment="is a piece of scintillator in FMS Preshower"  >
+    <Material name="Polystyren"  />
+    <Material name="FMSPOST_scint" isvol="1"  />
+    <Attribute for="FOSC" seen="1" colo="2" />
+    <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
+    <Cut name="CUTGAM" value="0.00008" />
+    <Cut name="CUTELE" value="0.001"   />
+    <Cut name="BCUTE" value="0.0001"   />
+    <Par name="BIRK1" value="1."       />
+    <Par name="BIRK2" value="0.013"    />
+    <Par name="BIRK3" value="9.6E-6"   />
+    <Instrument block="FOSC">
       <Hit meas="birk" nbits="0" min="0" max="10" />
     </Instrument>
   </Block>
@@ -1647,7 +1911,7 @@
   ! Check whether to run attenuation or not
   !
   USE /DETM/FPDM/FMCG stat=istat
-  IF (istat.gt.0.) {
+  IF (istat.ge.0.) { "negative indicates failure mode"
 
     IF (fmcg_atten=1.0) {
 

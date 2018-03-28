@@ -9,14 +9,14 @@
     <Setup  name   = "FGTDon"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "FgtdGeo3"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2" >
 
     </Setup>
 <!--
     <Setup  name   = "FGTD02"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "FgtdGeo1"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2" >
 
     </Setup>
 -->
@@ -24,7 +24,7 @@
     <Setup  name   = "FGTD31"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "FgtdGeo3"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2" >
       
       <Init struct="fggg" var="fgstconfig" value="1.0" />
 
@@ -33,7 +33,7 @@
     <Setup  name   = "FGTD32"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "FgtdGeo3"
-	    onoff  = "on" >
+	    onoff  = "on" simu="2" >
       
       <Init struct="fggg" var="fgstconfig" value="2.0" />
 

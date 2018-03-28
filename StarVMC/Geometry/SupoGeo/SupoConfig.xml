@@ -6,14 +6,14 @@
 
     <Setup  name   = "SUPOof" comment="SUPO off" module="SupoGeo" onoff="off" />
 
-    <Setup  name   = "SUPO00"
+    <Setup  name   = "SUPO00" simu="2" 
 	    comment= "Default configuration for the Forward TPC supports"
 	    module = "SupoGeo"
 	    onoff  = "on" >
 
     </Setup>
 
-    <Setup  name   = "SUPO01"
+    <Setup  name   = "SUPO01" simu="2" 
 	    comment= "Default configuration for the Forward TPC supports"
 	    module = "SupoGeo1"
 	    onoff  = "on" >
