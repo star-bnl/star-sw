@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.14 2018/01/04 18:42:21 jdb Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.15 2018/03/28 02:01:50 jdb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -52,7 +52,7 @@
 #include "StChain/StChainOpt.h"
 #include "StVpdSimMaker/StVpdSimMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
-
+#include "StBTofSimResParams.h"
 
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
@@ -72,9 +72,9 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mWriteStEvent=kTRUE;
 	mDaqMap=0;
 	mMcBTofHitCollection = 0;
-    mIsEmbedding = kSimulation;
-    mVpdSim = kFALSE;
-    mUseVpdStart = kTRUE;
+	mIsEmbedding = kSimulation;
+	mVpdSim = kFALSE;
+	mUseVpdStart = kTRUE;
 	Reset();
 
 }
@@ -92,7 +92,7 @@ StBTofSimMaker::~StBTofSimMaker()
 int StBTofSimMaker::Init()
 {
 	Reset();
-    //mSimDb = new StTofSimParam(); //  Moved to InitRun
+	//mSimDb = new StTofSimParam(); //  Moved to InitRun
 	if (Debug()) mSimDb->print();
 	if(mBookHisto) bookHistograms();
 
@@ -102,7 +102,7 @@ int StBTofSimMaker::Init()
 //_____________________________________________________________________________
 void StBTofSimMaker::Reset()
 {
-    mBTofHeader = 0;
+	mBTofHeader = 0;
 	mGeantData = 0;
 	mEvent  = 0;
 	mMcEvent = 0;
@@ -129,21 +129,23 @@ int StBTofSimMaker::InitRun(int runnumber)
 	/// MRPC-TOF DAQ map
 	mDaqMap = new StBTofDaqMap();
 	mDaqMap->Init(this);
-    mSimDb = new StTofSimParam();
-    //mSimDb->init();   // Only enable to pull calibration values from db
-    StVpdSimMaker *vpdSim = (StVpdSimMaker *)GetMaker("VpdSim");
-    
-    //! Determine if VpdSimMaker was run
-    if (vpdSim) {
-        mVpdSim = kTRUE;
-    }
-    mVpdSimConfig = new StVpdSimConfig;
-    
-    //! Determine if vpd start or startless
-    StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
-    if(vpdCalib) {
-        mUseVpdStart = vpdCalib->useVpdStart();
-    }
+	mSimDb = new StTofSimParam();
+	mSimResDb = new StBTofSimResParams();
+	mSimResDb->loadParams();
+	//mSimDb->init();   // Only enable to pull calibration values from db
+	StVpdSimMaker *vpdSim = (StVpdSimMaker *)GetMaker("VpdSim");
+	
+	//! Determine if VpdSimMaker was run
+	if (vpdSim) {
+		mVpdSim = kTRUE;
+	}
+	mVpdSimConfig = new StVpdSimConfig;
+	
+	//! Determine if vpd start or startless
+	StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
+	if(vpdCalib) {
+		mUseVpdStart = vpdCalib->useVpdStart();
+	}
 
 	return kStOK;
 }
@@ -153,12 +155,35 @@ int StBTofSimMaker::FinishRun(int runnumber)
 {
 	LOG_INFO << "StBTofSimMaker::FinishRun -- cleaning up BTOF DAQ map --" << endm;
 	if (mDaqMap){delete mDaqMap; mDaqMap = 0;}
+	if (mSimDb){delete mSimDb; mSimDb = 0;}
+	if (mSimResDb){delete mSimResDb; mSimResDb = 0;}
+	if (mVpdSimConfig){delete mVpdSimConfig; mVpdSimConfig = 0;}
 	return kStOk;
 }
 
 //_____________________________________________________________________________
 int StBTofSimMaker::Finish()
 {
+	if(mBookHisto){
+		LOG_INFO << "StBTofSimMaker::Finish  writing BTofSim.root ..." << endm;
+		mHistoFileName = setHistFileName();
+		if (mHistoFileName == "") {
+			LOG_INFO << "Nothing stored in mHistoFileName!" << endm;
+			mHistoFileName = "BTofSim.root";
+		}
+		else {
+			LOG_INFO << "The Filename is: " << mHistoFileName.c_str() << endm;
+		}
+		TFile aFile(mHistoFileName.c_str(),"RECREATE","tofsim");
+		
+		aFile.cd();
+		// if ( ntuple )
+		// 	ntuple->SetDirectory(aFile.CurrentDirectory());
+
+		writeHistograms();
+		aFile.Write();
+		aFile.Close();
+	}
 	return kStOK;
 }
 
@@ -183,14 +208,14 @@ int StBTofSimMaker::Make()
 	}
 	LOG_INFO << " Found GEANT data -- loading VPD/TOF hits... " << endm;    //! Note that it may still be loading VPD Hits!
 
-    //! Initialize StEvent
-    mEvent = (StEvent*)GetInputDS("StEvent");
-    if (!mEvent) {
-        LOG_ERROR << "No StEvent! Bailing out ..." << endm;
-    }
-    StBTofCollection *btofColl = mEvent->btofCollection();
-    
-    
+	//! Initialize StEvent
+	mEvent = (StEvent*)GetInputDS("StEvent");
+	if (!mEvent) {
+		LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	}
+	StBTofCollection *btofColl = mEvent->btofCollection();
+	
+	
 	//! Look for TOF hits
 	St_g2t_ctf_hit* g2t_tfr_hits = 0;
 	g2t_tfr_hits = dynamic_cast<St_g2t_ctf_hit*> (mGeantData->Find("g2t_tfr_hit"));
@@ -221,7 +246,7 @@ int StBTofSimMaker::Make()
 	LOG_INFO << " McBTofHit Size (TOF) = " << mMcBTofHitCollection->hits().size() << endm;
 
 
-    fillEvent();
+	fillEvent();
 
 	return kStOK;
 }
@@ -246,7 +271,7 @@ int StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 		LOG_WARN << " No deposited energy in this TOF hit!" << endm;
 		return kStWarn;
 	}
-    
+	
 	IntVec cellId   = CalcCellId(tofHitsFromGeant->volume_id, tofHitsFromGeant->x[1]);
 	int icell, imodule, itray;
 	itray   = cellId[0];
@@ -501,8 +526,8 @@ int StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 				mTofHist->Fill(tof);
 				double momentum=partnerTrk->momentum().mag();
 				double mass=sqrt(beta*beta*momentum*momentum/(1.-beta*beta));
-                if(beta!=1.0 && pathLength>150){  mRecMass->Fill(mass);}
-                mTofResReco->Fill( (tof - trackSumVec[i].t0*1000.) );//ps
+				if(beta!=1.0 && pathLength>150){  mRecMass->Fill(mass);}
+				mTofResReco->Fill( (tof - trackSumVec[i].t0*1000.) );//ps
 			}
 		}
 	} //! end loop trackSumVec
@@ -534,140 +559,140 @@ int StBTofSimMaker::fillEvent()
 	if (!mMcEvent) {
 		LOG_ERROR << "No StMcEvent! Bailing out ..." << endm;
 	}
-    else {
+	else {
 		mMcEvent->setBTofHitCollection(mMcBTofHitCollection);       //! Replaces existing collection with the passed argument
 		LOG_INFO << " ... StMcBTofHitCollection stored in StMcEvent" << endm;
 	}
 
 	if (!mIsEmbedding) {  //! send off to StEvent
 
-      //! Store Collections
-      mBTofCollection = mEvent->btofCollection();
-      if(!mBTofCollection) {
-          LOG_INFO << "Creating new StBTofCollection" << endm;
-          mBTofCollection = new StBTofCollection();
-          mEvent->setBTofCollection(mBTofCollection);
-      }
-    }
-    else if (mIsEmbedding) { //! perform embedding
-        
-        LOG_INFO << "Creating new StBTofCollection locally" << endm;
-        mBTofCollection = new StBTofCollection();
-    }
+	  //! Store Collections
+	  mBTofCollection = mEvent->btofCollection();
+	  if(!mBTofCollection) {
+		  LOG_INFO << "Creating new StBTofCollection" << endm;
+		  mBTofCollection = new StBTofCollection();
+		  mEvent->setBTofCollection(mBTofCollection);
+	  }
+	}
+	else if (mIsEmbedding) { //! perform embedding
+		
+		LOG_INFO << "Creating new StBTofCollection locally" << endm;
+		mBTofCollection = new StBTofCollection();
+	}
 
-    //! create StBTofHit / tofRawData / tofData collection
-    for(int jj = 0; jj < (int)mMcBTofHitCollection->hits().size(); jj++) {
-        StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
+	//! create StBTofHit / tofRawData / tofData collection
+	for(int jj = 0; jj < (int)mMcBTofHitCollection->hits().size(); jj++) {
+		StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
 
-        if(!aMcBTofHit) continue;
+		if(!aMcBTofHit) continue;
 
-        int trayid = aMcBTofHit->tray();
-        int moduleid = aMcBTofHit->module();
-        int cellid = aMcBTofHit->cell();
+		int trayid = aMcBTofHit->tray();
+		int moduleid = aMcBTofHit->module();
+		int cellid = aMcBTofHit->cell();
 
-        //! Efficiency
-        float eff = 1.;
-        if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
-        if (gRandom->Uniform(1.0) > eff){LOG_DEBUG<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm; continue; } //! inefficiency
+		//! Efficiency
+		float eff = 1.;
+		if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
+		if (gRandom->Uniform(1.0) > eff){LOG_DEBUG<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm; continue; } //! inefficiency
 
 
-        //! Fill the StBTofHit
-        StBTofHit aBTofHit;
-        aBTofHit.Clear();
+		//! Fill the StBTofHit
+		StBTofHit aBTofHit;
+		aBTofHit.Clear();
 
-        float mcTof=aMcBTofHit->tof()/1000.;      //! from picoseconds to nanoseconds
+		float mcTof=aMcBTofHit->tof()/1000.;      //! from picoseconds to nanoseconds
 
-        aBTofHit.setHardwarePosition(kBTofId);
-        aBTofHit.setTray((int)aMcBTofHit->tray());
-        aBTofHit.setModule((unsigned char)aMcBTofHit->module());
-        aBTofHit.setCell((int)aMcBTofHit->cell());
-        aBTofHit.setLeadingEdgeTime((double)mcTof);
-        aBTofHit.setTrailingEdgeTime((double)mcTof);
-        aBTofHit.setAssociatedTrack(NULL);          //! done in StBTofMatchMaker
-        aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 1);
-        mBTofCollection->addHit(new StBTofHit(aBTofHit));
+		aBTofHit.setHardwarePosition(kBTofId);
+		aBTofHit.setTray((int)aMcBTofHit->tray());
+		aBTofHit.setModule((unsigned char)aMcBTofHit->module());
+		aBTofHit.setCell((int)aMcBTofHit->cell());
+		aBTofHit.setLeadingEdgeTime((double)mcTof);
+		aBTofHit.setTrailingEdgeTime((double)mcTof);
+		aBTofHit.setAssociatedTrack(NULL);          //! done in StBTofMatchMaker
+		aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 1);
+		mBTofCollection->addHit(new StBTofHit(aBTofHit));
 
-        //! Fill the StBTofRawHit
-        StBTofRawHit aBTofRawHit;
-        aBTofRawHit.Clear();
-        aBTofRawHit.setTray((int)aMcBTofHit->tray());
-        aBTofRawHit.setChannel(6*(aMcBTofHit->module() - 1) + (int)aMcBTofHit->cell());
-        aBTofRawHit.setFlag(1);
-        mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
-    }
+		//! Fill the StBTofRawHit
+		StBTofRawHit aBTofRawHit;
+		aBTofRawHit.Clear();
+		aBTofRawHit.setTray((int)aMcBTofHit->tray());
+		aBTofRawHit.setChannel(6*(aMcBTofHit->module() - 1) + (int)aMcBTofHit->cell());
+		aBTofRawHit.setFlag(1);
+		mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
+	}
 
-    if (!mIsEmbedding) {
-        //! Fill StBTofHeader --
+	if (!mIsEmbedding) {
+		//! Fill StBTofHeader --
 
-        StBTofHeader *tofHeader = mBTofCollection->tofHeader();
-        StBTofHeader aHead;
+		StBTofHeader *tofHeader = mBTofCollection->tofHeader();
+		StBTofHeader aHead;
 
-        if(!tofHeader) {
-              LOG_INFO << " No StEvent/btofCollection, creating new... " << endm;
-              mBTofCollection->setHeader(new StBTofHeader(aHead));
-         }
-        else {
-        	tofHeader = (StBTofHeader *) mBTofCollection->tofHeader();
-        }
+		if(!tofHeader) {
+			  LOG_INFO << " No StEvent/btofCollection, creating new... " << endm;
+			  mBTofCollection->setHeader(new StBTofHeader(aHead));
+		 }
+		else {
+			tofHeader = (StBTofHeader *) mBTofCollection->tofHeader();
+		}
 
-        LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
-    }
-    
-    //! check StMcEvent and StEvent
+		LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
+	}
+	
+	//! check StMcEvent and StEvent
 	if(Debug()) {
 		LOG_DEBUG << " ==== Test McBTofHitCollection ==== " << endm;
-        if (mMcEvent != nullptr) {
-            StSPtrVecMcBTofHit& mcBTofHits = mMcEvent->btofHitCollection()->hits();
-            int nCell[mNTray];
-            for(int i=0;i<mNTray;i++) nCell[i] = 0;
-            for(int i=0;i<(int)mcBTofHits.size();i++) {
-                LOG_DEBUG << (*mcBTofHits[i]) << endm;
+		if (mMcEvent != nullptr) {
+			StSPtrVecMcBTofHit& mcBTofHits = mMcEvent->btofHitCollection()->hits();
+			int nCell[mNTray];
+			for(int i=0;i<mNTray;i++) nCell[i] = 0;
+			for(int i=0;i<(int)mcBTofHits.size();i++) {
+				LOG_DEBUG << (*mcBTofHits[i]) << endm;
 
-                if(mBookHisto) {
-                    int itray = mcBTofHits[i]->tray();
-                    int imodule = mcBTofHits[i]->module();
-                    int icell = mcBTofHits[i]->cell();
-                    float t0 = mcBTofHits[i]->time();
-                    float tof = mcBTofHits[i]->tof();
-                    float de = mcBTofHits[i]->dE();
+				if(mBookHisto) {
+					int itray = mcBTofHits[i]->tray();
+					int imodule = mcBTofHits[i]->module();
+					int icell = mcBTofHits[i]->cell();
+					float t0 = mcBTofHits[i]->time();
+					float tof = mcBTofHits[i]->tof();
+					float de = mcBTofHits[i]->dE();
 
 
-                    LOG_DEBUG << "tray# "<<itray << endm;
+					LOG_DEBUG << "tray# "<<itray << endm;
 
-                    //! fill BTOF histograms
-                    if(itray>0&&itray<=120) {
-                        mCellSeen->Fill((imodule-1)*mNCell+(icell-1),itray-1);
-                        mDeSeen->Fill( de / keV );
-                        mT0Seen->Fill( t0 /1000 ); // ns
-                        mTofSeen->Fill( tof / 1000 ); // ns
-                        mTofResSeen->Fill( (tof-t0) ); // ps
-                        nCell[itray-1]++;
-                    }
-                }
-            }
-            if(mBookHisto) {
-                for(int i=0;i<mNTray;i++) mNCellSeen->Fill(nCell[i],i);
-            }
+					//! fill BTOF histograms
+					if(itray>0&&itray<=120) {
+						mCellSeen->Fill((imodule-1)*mNCell+(icell-1),itray-1);
+						mDeSeen->Fill( de / keV );
+						mT0Seen->Fill( t0 /1000 ); // ns
+						mTofSeen->Fill( tof / 1000 ); // ns
+						mTofResSeen->Fill( (tof-t0) ); // ps
+						nCell[itray-1]++;
+					}
+				}
+			}
+			if(mBookHisto) {
+				for(int i=0;i<mNTray;i++) mNCellSeen->Fill(nCell[i],i);
+			}
 
-            LOG_INFO << " ==== Test TofRawDataCollection ==== " << endm;
-            for(int i=0;i<mNTray;i++) nCell[i] = 0;
+			LOG_INFO << " ==== Test TofRawDataCollection ==== " << endm;
+			for(int i=0;i<mNTray;i++) nCell[i] = 0;
 
-            if (mWriteStEvent){
-                StSPtrVecBTofHit& bTofHits=mEvent->btofCollection()->tofHits();
-                StBTofHit* bHit;
-                for(int aa=0;aa<(int)bTofHits.size();aa++){
-                    bHit=bTofHits[aa];
-                    int itray=bHit->tray();
-                    int imodule=bHit->module();
-                    int icell=bHit->cell();
-                    if(mBookHisto) {mCellReco->Fill((imodule-1)*mNCell+(icell-1),itray-1);}
-                }
+			if (mWriteStEvent){
+				StSPtrVecBTofHit& bTofHits=mEvent->btofCollection()->tofHits();
+				StBTofHit* bHit;
+				for(int aa=0;aa<(int)bTofHits.size();aa++){
+					bHit=bTofHits[aa];
+					int itray=bHit->tray();
+					int imodule=bHit->module();
+					int icell=bHit->cell();
+					if(mBookHisto) {mCellReco->Fill((imodule-1)*mNCell+(icell-1),itray-1);}
+				}
 
-                if(mBookHisto) {
-                    for(int i=0;i<mNTray;i++) mNCellReco->Fill(nCell[i],i);
-                }
-            }
-        }
+				if(mBookHisto) {
+					for(int i=0;i<mNTray;i++) mNCellReco->Fill(nCell[i],i);
+				}
+			}
+		}
 	}
 
 	if(Debug()) cout<<"leaving fillevent"<<endl;
@@ -747,14 +772,9 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
 {
 	//! Simulate the single cell response for a geant hit
 	if((tofHitsFromGeant->s_track <= 0.0) || (tofHitsFromGeant->de / keV <= 0.0)) {
-		LOG_WARN << " No deposit energy in this tof hit! " << endm;
 		return kStWarn;
 	}
-//    else if (tofHitsFromGeant->de / keV < mSimDb->adc_thre()) {
-//        LOG_INFO << "Low deposit energy, hit rejected." << endm;
-//        return kStOK;
-//    }
-    
+	
 	if(mBookHisto) {
 		mDeGeant->Fill(tofHitsFromGeant->de / keV);
 		mTofGeant->Fill(tofHitsFromGeant->tof / nanosecond);
@@ -789,168 +809,78 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
 			partnerTrkId=partnerTrk->key();
 		}
 	}
-    
-    //! X-talk
-    int icellx = -1;
-    float wt = 1.0;
-    if(mCellXtalk)   CellXtalk(icell, local.y(), wt, icellx);
+	
+	//! X-talk
+	int icellx = -1;
+	float wt = 1.0;
+	if(mCellXtalk)   CellXtalk(icell, local.y(), wt, icellx);
 
-    double de = tofHitsFromGeant->de * wt;
-    double pathL = tofHitsFromGeant->s_track;
-    double q = 0.;
-    
-    double Rawtof = tofHitsFromGeant->tof*1000./nanosecond;
-    float Rawbeta=pathL/Rawtof/3e-2;
-    double momentum=partnerTrk->momentum().mag();
-    double mass=partnerTrk->fourMomentum().m();
-    double calcTof=pathL/(3e-2)/sqrt(1 - mass*mass/(momentum*momentum + mass*mass));
-    
-    if (mBookHisto){
-        
-        massHist->Fill(mass);
-        m2VsP->Fill(momentum, (momentum*momentum*(1 - Rawbeta*Rawbeta)/(Rawbeta*Rawbeta)));
-        mRawTofHist->Fill(Rawtof);
-        mRawBetaHist->Fill(Rawbeta);
-        mRawBetaVsMom->Fill(momentum, 1/Rawbeta);
-        mTofCalculated->Fill(calcTof);
-        mCalcBetaVsMom->Fill(momentum, 1/sqrt(1 - mass*mass/(momentum*momentum + mass*mass)));
-        
-        
-        //! Populate the individual particle histograms
-        if (mass < 0.05) {
-            Electron_BetaVsMom->Fill(momentum, 1/Rawbeta);
-        }
-        else if (mass > 0.08 && mass < 0.12) {
-            Muon_BetaVsMom->Fill(momentum, 1/Rawbeta);
-        }
-        else if (mass > 0.12 && mass < 0.141) {
-            Pion_BetaVsMom->Fill(momentum, 1/Rawbeta);
-        }
-        else if (mass > 0.45 && mass < 0.55) {
-            Kaon_BetaVsMom->Fill(momentum, 1/Rawbeta);
-        }
-        else if (mass > 0.9 && mass < 1.1) {
-            Proton_BetaVsMom->Fill(momentum, 1/Rawbeta);
-        }
-        
-        
-        if (momentum > 0.15 && momentum < 0.2) {
-            momBinRaw1->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.2 && momentum < 0.25) {
-            momBinRaw2->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.35 && momentum < 0.4) {
-            momBinRaw3->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.4 && momentum < 0.45) {
-            momBinRaw4->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.55 && momentum < 0.6) {
-            momBinRaw5->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.65 && momentum < 0.66) {
-            momBinRaw6->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.7 && momentum < 0.75) {
-            momBinRaw7->Fill(1/Rawbeta);
-        }
-        if (momentum > 0.23 && momentum < 0.24) {
-            momBinRaw8->Fill(1/Rawbeta);
-        }
-    }
-    
-    
-    double tof= tofHitsFromGeant->tof*1000./nanosecond + ranGauss.shoot()*mSimDb->timeres_tof()*1000./nanosecond;    //! 85ps per channel
-    
-    if ( mVpdSim ) {    // VpdSimMaker present, assume vpdstart
-        tof += mVpdSimConfig->getMcClock()*1000;
-    }
-    else {
-        if ( mUseVpdStart && btofColl ) {   //!< VpdSimMaker not present, check for vpdstart, add vpd resolution to tof
-            mBTofHeader = btofColl->tofHeader();
+	double de = tofHitsFromGeant->de * wt;
+	double pathL = tofHitsFromGeant->s_track;
+	double q = 0.;
+	
+	double Rawtof = tofHitsFromGeant->tof*1000./nanosecond;
+	float Rawbeta=pathL/Rawtof/3e-2;
+	double momentum=partnerTrk->momentum().mag();
+	double mass=partnerTrk->fourMomentum().m();
+	double calcTof=pathL/(3e-2)/sqrt(1 - mass*mass/(momentum*momentum + mass*mass));
+	
+	double time_blur = ranGauss.shoot()*mSimResDb->timeres_tof(itray, imodule, icell)*1e-9/nanosecond;
+	double tof = tofHitsFromGeant->tof*1000./nanosecond + time_blur;    //! 85ps per channel
 
-            if ( mBTofHeader != NULL ){
-            	int mNWest = mBTofHeader->numberOfVpdHits(west);
-            	int mNEast = mBTofHeader->numberOfVpdHits(east);
+	if ( mVpdSim ) {    // VpdSimMaker present, assume vpdstart
+		tof += mVpdSimConfig->getMcClock()*1000;
+	}
+	else {
+		if ( mUseVpdStart && btofColl ) {   //!< VpdSimMaker not present, check for vpdstart, add vpd resolution to tof
+			mBTofHeader = btofColl->tofHeader();
+
+			if ( mBTofHeader != NULL ){
+				int mNWest = mBTofHeader->numberOfVpdHits(west);
+				int mNEast = mBTofHeader->numberOfVpdHits(east);
 				
-            	tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
-            } else {
-            	tof -= 999;
-            }
-            
-        }
-        else {
-            // do nothing
-        }
-    }
-    
-//    tof = tof - mSimDb->toffset();  // Apply offset correction.
-    double t0 = tofHitsFromGeant->tof*1000./nanosecond;
-    float beta=pathL/tof/3e-2;
-    
-    if (mBookHisto){
-        mBetaHist->Fill(beta);
-        mPathLHist->Fill(pathL);
-        mTofHist->Fill(tof);
-        mBetaVsMom->Fill(momentum, 1/beta);
-        tof_RealVsCalc->Fill(pathL/(3e-2)/sqrt(1 - mass*mass/(momentum*momentum + mass*mass)), tof);
+				tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
+			} else {
+				tof -= 999;
+			}
+			
+		}
+		else {
+			// do nothing
+		}
+	}
+	
+	//    tof = tof - mSimDb->toffset();  // Apply offset correction.
+	double t0 = tofHitsFromGeant->tof*1000./nanosecond;
+	float beta=pathL/tof/3e-2;
 
-        double mass=sqrt(beta*beta*momentum*momentum/(1.-beta*beta));
-        if(beta!=1.0 && pathL>150){  mRecMass->Fill(mass);}
-        
-        if (momentum > 0.15 && momentum < 0.2) {
-            momBin1->Fill(1/beta);
-        }
-        if (momentum > 0.2 && momentum < 0.25) {
-            momBin2->Fill(1/beta);
-        }
-        if (momentum > 0.35 && momentum < 0.4) {
-            momBin3->Fill(1/beta);
-        }
-        if (momentum > 0.4 && momentum < 0.45) {
-            momBin4->Fill(1/beta);
-        }
-        if (momentum > 0.55 && momentum < 0.6) {
-            momBin5->Fill(1/beta);
-        }
-        if (momentum > 0.65 && momentum < 0.66) {
-            momBin6->Fill(1/beta);
-        }
-        if (momentum > 0.7 && momentum < 0.75) {
-            momBin7->Fill(1/beta);
-        }
-        if (momentum > 0.23 && momentum < 0.24) {
-            momBin8->Fill(1/beta);
-        }
-    }
+	StMcBTofHit *mcBTofHit = new StMcBTofHit(itray,imodule,icell,de,pathL,t0,tof,q);
+	mcBTofHit->setPosition(local);
+	mcBTofHit->setParentTrack(partnerTrk);
+	
 
-    StMcBTofHit *mcBTofHit = new StMcBTofHit(itray,imodule,icell,de,pathL,t0,tof,q);
-    mcBTofHit->setPosition(local);
-    mcBTofHit->setParentTrack(partnerTrk);
-    
+	storeMcBTofHit(mcBTofHit);
+	mTofHitFlag[itray-1][(imodule-1)*mNCell+(icell-1)] = 1;
+	
 
-    storeMcBTofHit(mcBTofHit);
-    mTofHitFlag[itray-1][(imodule-1)*mNCell+(icell-1)] = 1;
-    
+	if(icellx <= 0 || icellx > mNCell) return kStOk;  //! no X-talk
+	///
+	/// X talk signal
+	///
+	time_blur = ranGauss.shoot()*mSimResDb->timeres_tof(itray, imodule, icell)*1e-9/nanosecond;
+	double tofx = tofHitsFromGeant->tof*1000./nanosecond + time_blur;    //! 85ps per channel
+	double dex = tofHitsFromGeant->de * (1. - wt);
+	double qx = 0.*(1.-wt);
 
-    if(icellx <= 0 || icellx > mNCell) return kStOk;  //! no X-talk
-    ///
-    /// X talk signal
-    ///
-    double tofx = tofHitsFromGeant->tof + ranGauss.shoot()*mSimDb->timeres_tof();    //! 85ps per channel
-    double dex = tofHitsFromGeant->de * (1. - wt);
-    double qx = 0.*(1.-wt);
+	StMcBTofHit *mcBTofHitx = new StMcBTofHit(itray,imodule,icellx,dex,pathL,t0,tofx,qx);
+	mcBTofHitx->setPosition(local);
+	mcBTofHitx->setParentTrack(partnerTrk);
+	mcBTofHitx->setParentTrackId(partnerTrkId);
 
-    StMcBTofHit *mcBTofHitx = new StMcBTofHit(itray,imodule,icellx,dex,pathL,t0,tofx,qx);
-    mcBTofHitx->setPosition(local);
-    mcBTofHitx->setParentTrack(partnerTrk);
-    mcBTofHitx->setParentTrackId(partnerTrkId);
-
-    storeMcBTofHit(mcBTofHitx);
-    mTofHitFlag[itray-1][(imodule-1)*mNCell+(icellx-1)] = 1;
-    
-    
+	storeMcBTofHit(mcBTofHitx);
+	mTofHitFlag[itray-1][(imodule-1)*mNCell+(icellx-1)] = 1;
+	
+	
 	return kStOk;
 }
 
@@ -959,7 +889,7 @@ int StBTofSimMaker::storeMcBTofHit(StMcBTofHit* mcBTofHit)
 {
 	/** this function adds a hit to a previous hit (if they mactch the same cell location),
 	* or it stores the new hit (the last part below)
-     */
+	 */
 	bool hitFound = kFALSE;
 
 	//! this is primarily for VPD hits
@@ -1017,18 +947,18 @@ int StBTofSimMaker::electronicNoise(){
 
 //_____________________________________________________________________________
 string  StBTofSimMaker::setHistFileName(){
-    
-    string extension = ".BTofSim.root";
+	
+	string extension = ".BTofSim.root";
 
-    if (GetChainOpt()->GetFileOut() != NULL) {
-        TString outFile = GetChainOpt()->GetFileOut();
-        mHistoFileName = (string)outFile;
-        size_t lastindex = mHistoFileName.find_last_of(".");
-        mHistoFileName = mHistoFileName.substr(0, lastindex);
-        lastindex = mHistoFileName.find_last_of("/");
-        mHistoFileName = mHistoFileName.substr(lastindex+1, mHistoFileName.length());
-        mHistoFileName = mHistoFileName + extension;
-    }
+	if (GetChainOpt()->GetFileOut() != NULL) {
+		TString outFile = GetChainOpt()->GetFileOut();
+		mHistoFileName = (string)outFile;
+		size_t lastindex = mHistoFileName.find_last_of(".");
+		mHistoFileName = mHistoFileName.substr(0, lastindex);
+		lastindex = mHistoFileName.find_last_of("/");
+		mHistoFileName = mHistoFileName.substr(lastindex+1, mHistoFileName.length());
+		mHistoFileName = mHistoFileName + extension;
+	}
 
 	return mHistoFileName;
 }
@@ -1036,47 +966,47 @@ string  StBTofSimMaker::setHistFileName(){
 int StBTofSimMaker::bookHistograms()
 {
 	//! only done if Histogram setting is turned on
-    AddHist( mRawBetaHist=new TH1F("mRawBetaHist","mRawBetaHist", 400, -1, 1.5) );
+	AddHist( mRawBetaHist=new TH1F("mRawBetaHist","mRawBetaHist", 400, -1, 1.5) );
 	AddHist( mBetaHist=new TH1F("mBetaHist","mBetaHist", 400, -2, 2) );
-    
-    AddHist( mRawBetaVsMom=new TH2F("mRawBetaVsMom","mRawBetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    AddHist( mCalcBetaVsMom=new TH2F("mCalcBetaVsMom","mCalcBetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    AddHist( mBetaVsMom=new TH2F("mBetaVsMom","mBetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    
-    AddHist( Electron_BetaVsMom=new TH2F("Electron_BetaVsMom","Electron_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    AddHist( Muon_BetaVsMom=new TH2F("Muon_BetaVsMom","Muon_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    AddHist( Pion_BetaVsMom=new TH2F("Pion_BetaVsMom","Pion_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    AddHist( Kaon_BetaVsMom=new TH2F("Kaon_BetaVsMom","Kaon_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    AddHist( Proton_BetaVsMom=new TH2F("Proton_BetaVsMom","Proton_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
-    
+	
+	AddHist( mRawBetaVsMom=new TH2F("mRawBetaVsMom","mRawBetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	AddHist( mCalcBetaVsMom=new TH2F("mCalcBetaVsMom","mCalcBetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	AddHist( mBetaVsMom=new TH2F("mBetaVsMom","mBetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	
+	AddHist( Electron_BetaVsMom=new TH2F("Electron_BetaVsMom","Electron_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	AddHist( Muon_BetaVsMom=new TH2F("Muon_BetaVsMom","Muon_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	AddHist( Pion_BetaVsMom=new TH2F("Pion_BetaVsMom","Pion_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	AddHist( Kaon_BetaVsMom=new TH2F("Kaon_BetaVsMom","Kaon_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	AddHist( Proton_BetaVsMom=new TH2F("Proton_BetaVsMom","Proton_BetaVsMom; Momentum (GeV); 1/beta; counts", 1500, 0.1, 1.25, 1500, 0.6, 3) );
+	
 	AddHist( mPathLHist=new TH1F("mPathLHist","mPathLHist", 500, -2, 500) );//cm's
-    AddHist( mRawTofHist=new TH1F("mRawTofHist","mRawTofHist",2000, -10, 25000) );
+	AddHist( mRawTofHist=new TH1F("mRawTofHist","mRawTofHist",2000, -10, 25000) );
 	AddHist( mTofHist=new TH1F("mTofHist","mTofHist; Tof (ps)", 2000, -10, 25000) );
 	AddHist( mRecMass=new TH1F("mRecMass","mRecMass", 1000, -2, 4) );
-    
-    AddHist( massHist=new TH1F("massHist","Mass; Mass (GeV); Counts",200, 0, 4) );
-    AddHist( m2VsP=new TH2F("m2VsP","Mass Sqared Vs Momentum; Momentum (P); Mass Squared (GeV^2)",2000, 0.1, 1.5, 100, 0, 4) );
-    AddHist( mTofCalculated=new TH1F("mTofCalculated","Calculated Tof using mass and momentum; Tof (ps); Counts", 2000, -10, 25000) );
-    
-    AddHist( tof_RealVsCalc=new TH2F("tof_RealVsCalc","Resolution-smeared Tof Vs. Calculated Tof; Calculated Tof (ps); Given Tof (ps)", 2000, -10, 25000, 2000, -10, 25000) );
-    
-    AddHist( momBinRaw1 = new TH1F("Raw_0.15<P<0.2","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBinRaw2 = new TH1F("Raw_0.2<P<0.25","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBinRaw3 = new TH1F("Raw_0.35<P<0.4","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBinRaw4 = new TH1F("Raw_0.4<P<0.45","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBinRaw5 = new TH1F("Raw_0.55<P<0.6","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBinRaw6 = new TH1F("Raw_0.65<P<0.66","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
-    AddHist( momBinRaw7 = new TH1F("Raw_0.7<P<0.75","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBinRaw8 = new TH1F("Raw_0.23<P<0.24","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
-    
-    AddHist( momBin1 = new TH1F("0.15<P<0.2","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBin2 = new TH1F("0.2<P<0.25","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBin3 = new TH1F("0.35<P<0.4","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBin4 = new TH1F("0.4<P<0.45","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBin5 = new TH1F("0.55<P<0.6","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBin6 = new TH1F("0.65<P<0.66","1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
-    AddHist( momBin7 = new TH1F("0.7<P<0.75","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
-    AddHist( momBin8 = new TH1F("0.23<P<0.24","1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
+	
+	AddHist( massHist=new TH1F("massHist","Mass; Mass (GeV); Counts",200, 0, 4) );
+	AddHist( m2VsP=new TH2F("m2VsP","Mass Sqared Vs Momentum; Momentum (P); Mass Squared (GeV^2)",2000, 0.1, 1.5, 100, 0, 4) );
+	AddHist( mTofCalculated=new TH1F("mTofCalculated","Calculated Tof using mass and momentum; Tof (ps); Counts", 2000, -10, 25000) );
+	
+	AddHist( tof_RealVsCalc=new TH2F("tof_RealVsCalc","Resolution-smeared Tof Vs. Calculated Tof; Calculated Tof (ps); Given Tof (ps)", 2000, -10, 25000, 2000, -10, 25000) );
+	
+	AddHist( momBinRaw1 = new TH1F("Raw_0.15<P<0.2","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBinRaw2 = new TH1F("Raw_0.2<P<0.25","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBinRaw3 = new TH1F("Raw_0.35<P<0.4","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBinRaw4 = new TH1F("Raw_0.4<P<0.45","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBinRaw5 = new TH1F("Raw_0.55<P<0.6","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBinRaw6 = new TH1F("Raw_0.65<P<0.66","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
+	AddHist( momBinRaw7 = new TH1F("Raw_0.7<P<0.75","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBinRaw8 = new TH1F("Raw_0.23<P<0.24","Raw (No resolution smearing) 1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
+	
+	AddHist( momBin1 = new TH1F("0.15<P<0.2","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBin2 = new TH1F("0.2<P<0.25","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBin3 = new TH1F("0.35<P<0.4","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBin4 = new TH1F("0.4<P<0.45","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBin5 = new TH1F("0.55<P<0.6","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBin6 = new TH1F("0.65<P<0.66","1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
+	AddHist( momBin7 = new TH1F("0.7<P<0.75","1/beta in Momentum Bin; 1/beta; Counts", 600,0.5,2) );
+	AddHist( momBin8 = new TH1F("0.23<P<0.24","1/beta in Momentum Bin; 1/beta; Counts", 400,0.5,2) );
 
 	AddHist( mCellGeant  = new TH2F("CellGeant","CellGeant",192,0.,192.,120,1.,120.) );
 	AddHist( mNCellGeant = new TH2F("NCellGeant","NCellGeant",192,0.,192.,120,1.,120.) );
@@ -1094,9 +1024,73 @@ int StBTofSimMaker::bookHistograms()
 	AddHist( mCellReco   = new TH2F("CellReco","CellReco",192,0.,192.,120,1.,120.) );
 	AddHist( mNCellReco  = new TH2F("NCellReco","NCellReco",192,0.,192.,120,1.,120.) );
 	AddHist( mTofResReco = new TH1F("TofResReco","TofResReco",1000,-300.,300.) );  //! ps
-    
+	
 	return kStOk;
 
+}
+
+Int_t StBTofSimMaker::writeHistograms()
+{
+	//only done if Histogram setting is turned on
+
+    mRawBetaHist->Write();
+	mBetaHist->Write();
+    
+    mRawBetaVsMom->Write();
+    mCalcBetaVsMom->Write();
+    mBetaVsMom->Write();
+    
+    Electron_BetaVsMom->Write();
+    Muon_BetaVsMom->Write();
+    Pion_BetaVsMom->Write();
+    Kaon_BetaVsMom->Write();
+    Proton_BetaVsMom->Write();
+    
+	mPathLHist->Write();
+    mRawTofHist->Write();
+	mTofHist->Write();
+	mRecMass->Write();
+    
+    massHist->Write();
+    m2VsP->Write();
+    mTofCalculated->Write();
+    tof_RealVsCalc->Write();
+    
+    momBinRaw1->Write();
+    momBinRaw2->Write();
+    momBinRaw3->Write();
+    momBinRaw4->Write();
+    momBinRaw5->Write();
+    momBinRaw6->Write();
+    momBinRaw7->Write();
+    momBinRaw8->Write();
+    
+    momBin1->Write();
+    momBin2->Write();
+    momBin3->Write();
+    momBin4->Write();
+    momBin5->Write();
+    momBin6->Write();
+    momBin7->Write();
+    momBin8->Write();
+
+	mCellGeant->Write();
+	mNCellGeant->Write();
+	mDeGeant->Write();
+	mTofGeant->Write();
+
+	mCellSeen->Write();
+	mNCellSeen->Write();
+	mDeSeen->Write();
+	mT0Seen->Write();
+	mTofSeen->Write();
+	mTofResSeen->Write();
+
+	mCellReco->Write();
+	mNCellReco->Write();
+	mTofResReco->Write();
+
+	return kStOk;
 }
 
 // End StBTofSimMaker
