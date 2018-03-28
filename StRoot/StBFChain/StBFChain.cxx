@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.649 2018/01/29 20:18:12 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.650 2018/03/28 03:26:43 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1433,16 +1433,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
-#if 1 /* Not Active geant is not needed any more, except BTofUtil */
-      if (!( GetOption("fzin")   || 
-	     GetOption("ntin")   || 
-	     GetOption("gstar" ) || 
-	     GetOption("pythia") || 
-	     GetOption("PrepEmbed"))) {// Not Active geant
-	SetOption("geant","Default,TGiant3");
-	SetOption("MagF","Default,TGiant3");
-      }
-#endif
       if (GetOption("xgeometry")) {
 	SetOption("-geometry","Default,-xgeometry");
 	SetOption("-geomNoField","Default,-xgeometry");
