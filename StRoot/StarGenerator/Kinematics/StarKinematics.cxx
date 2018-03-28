@@ -93,21 +93,25 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Dou
       StarGenParticle *p = AddParticle(type.c_str());
 
       // Sample pt, eta, phi
-      Double_t pt = random(ptlow,  pthigh);
-      Double_t eta= random(ylow,   yhigh );
-      Double_t phi= random(philow, phihigh );
-      Double_t m  = p->GetMass();
+      double pt = random(ptlow,  pthigh);
+      double y  = random(ylow,   yhigh );
+      double phi= random(philow, phihigh );
+      double m  = p->GetMass();
 
-      // Use TVector3 to get the momentum vector correct
-      _momentum.SetPtEtaPhi( pt, eta, phi );
+      double mt = pt;
+      if ( IAttr("rapidity" ) ) { 
+	// switch from pseudorapidity to plain vanilla rapidity
+	mt = TMath::Sqrt( pt*pt + m*m );
+      }
       
+      double px = pt * TMath::Cos( phi );
+      double py = pt * TMath::Sin( phi );
+      double pz = mt * TMath::SinH( y ); 
+      double E  = mt * TMath::CosH( y );
 
-      Double_t E2 = _momentum.Mag2() + m*m;
-      Double_t E  = sqrt(E2);
-
-      p->SetPx( _momentum.Px() );
-      p->SetPy( _momentum.Py() );
-      p->SetPz( _momentum.Pz() );
+      p->SetPx( px );
+      p->SetPy( py );
+      p->SetPz( pz );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -135,20 +139,24 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *
       StarGenParticle *p = AddParticle(type.c_str());
       
       Double_t pt  = ptFunc  -> GetRandom();
-      Double_t eta = etaFunc -> GetRandom();
+      Double_t y   = etaFunc -> GetRandom();
       Double_t phi = (phiFunc) ? phiFunc->GetRandom() : random( 0., TMath::TwoPi() );
       Double_t m   = p->GetMass();
 
-      // Use TVector3 to get the momentum vector correct
-      _momentum.SetPtEtaPhi( pt, eta, phi );
+      double mt = pt;
+      if ( IAttr("rapidity" ) ) { 
+	// switch from pseudorapidity to plain vanilla rapidity
+	mt = TMath::Sqrt( pt*pt + m*m );
+      }
       
+      double px = pt * TMath::Cos( phi );
+      double py = pt * TMath::Sin( phi );
+      double pz = mt * TMath::SinH( y ); 
+      double E  = mt * TMath::CosH( y );
 
-      Double_t E2 = _momentum.Mag2() + m*m;
-      Double_t E  = sqrt(E2);
-
-      p->SetPx( _momentum.Px() );
-      p->SetPy( _momentum.Py() );
-      p->SetPz( _momentum.Pz() );
+      p->SetPx( px );
+      p->SetPy( py );
+      p->SetPz( pz );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -174,20 +182,24 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TH1 *ptFunc, TH1 *
       StarGenParticle *p = AddParticle(type.c_str());
       
       Double_t pt  = ptFunc  -> GetRandom();
-      Double_t eta = etaFunc -> GetRandom();
+      Double_t y   = etaFunc -> GetRandom();
       Double_t phi = (phiFunc) ? phiFunc->GetRandom() : random( 0., TMath::TwoPi() );
       Double_t m   = p->GetMass();
 
-      // Use TVector3 to get the momentum vector correct
-      _momentum.SetPtEtaPhi( pt, eta, phi );
+      double mt = pt;
+      if ( IAttr("rapidity" ) ) { 
+	// switch from pseudorapidity to plain vanilla rapidity
+	mt = TMath::Sqrt( pt*pt + m*m );
+      }
       
+      double px = pt * TMath::Cos( phi );
+      double py = pt * TMath::Sin( phi );
+      double pz = mt * TMath::SinH( y ); 
+      double E  = mt * TMath::CosH( y );
 
-      Double_t E2 = _momentum.Mag2() + m*m;
-      Double_t E  = sqrt(E2);
-
-      p->SetPx( _momentum.Px() );
-      p->SetPy( _momentum.Py() );
-      p->SetPz( _momentum.Pz() );
+      p->SetPx( px );
+      p->SetPy( py );
+      p->SetPz( pz );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
