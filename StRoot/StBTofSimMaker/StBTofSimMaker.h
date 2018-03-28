@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.8 2017/10/20 17:50:33 smirnovd Exp $
+ * $Id: StBTofSimMaker.h,v 1.9 2018/03/28 02:01:50 jdb Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.9  2018/03/28 02:01:50  jdb
+ * update to StBTofSimMaker to use cell-by-cell time resolution for FastSim
+ *
  * Revision 1.8  2017/10/20 17:50:33  smirnovd
  * Squashed commit of the following:
  *
@@ -75,11 +78,15 @@ class StBTofHeader;
 #include "StThreeVectorF.hh"
 #include <vector>
 
+
+
+class StBTofSimResParams;
 class StBTofSimMaker : public StMaker{
 protected:
 
 
     StTofSimParam*      mSimDb;          //!<
+    StBTofSimResParams* mSimResDb;
     StBTofDaqMap*       mDaqMap;         //!< Tof Daq map
     StMcBTofHitCollection *mMcBTofHitCollection; //!< barrel tof hit
 
@@ -258,10 +265,11 @@ public:
     void   setCellXtalk(bool val) { mCellXtalk = val; }
     string   setHistFileName();
     void   setBookHist(bool val) { mBookHisto = val; }
+    Int_t writeHistograms();
     void   writeStEvent(bool val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.8 2017/10/20 17:50:33 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.9 2018/03/28 02:01:50 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StBTofSimMaker,2)
 };
