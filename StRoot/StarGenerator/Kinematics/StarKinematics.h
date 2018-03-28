@@ -17,6 +17,11 @@
 
    // Create kinematics generator and add it to the main maker
    StarKinematics *kine = new StarKinematics("kine");
+
+   // 0=throw (flat or distribution) in pseudorapidity [default]
+   // 1=throw (flat or distribution) in rapidity
+   kine->SetAttr( "rapidity", 1 );
+
    primary->AddGenerator( kine );
    
    // ... add other makers to chain
@@ -86,14 +91,14 @@ class StarKinematics : public StarGenerator
   StarGenParticle *AddParticle( const Char_t *type );
 
   /// Emulates STARSIM aguser/gkine.  Throws ntrack particles of specified type flat in
-  /// pT, over the specified range ptlow to pthigh.  Rapidity and phi ranges may also be
+  /// pT, over the specified range ptlow to pthigh.  (Pseudo)Rapidity and phi ranges may also be
   /// specified
   /// @param ntrack  Number of particles (tracks) to generate.
   /// @param type    Type(s) of the particle(s) to generate.  If provided a list, will randomly sample ntracks from the list.  Defaults to pi+/-, K+/-, p/anti-p
   /// @param ptlow   Minimum pT
   /// @param pthigh  Maximum pT
-  /// @param ylow    Minimum rapidity
-  /// @param yhigh   Maximum rapidity
+  /// @param ylow    Minimum (pseudo)rapidity
+  /// @param yhigh   Maximum (pseudo)rapidity
   /// @param philow  Minimum azimuthal angle
   /// @param phihigh Maximum azimuthal angle
   void Kine( Int_t ntrack, const Char_t *type="pi+,pi-,K+,K-,proton,antiproton", Double_t ptlow=0.0, Double_t pthigh=500.0,
@@ -105,7 +110,7 @@ class StarKinematics : public StarGenerator
   /// @param ntrack Number of particles (tracks) to generate
   /// @param type   type of the particle.  If provided a list, will randomly sample ntracks from the list.
   /// @param pt     Distribution (TF1) to sample pT from.
-  /// @param y      Distribution (TF1) to sample rapidity from.
+  /// @param y      Distribution (TF1) to sample (pseudo)rapidity from.
   /// @param phi    Distribution (TF1) to sample phi from.  Optional.
   void Dist( Int_t ntrack, const Char_t *type, TF1 *pt, TF1 *y, TF1 *phi=0 );
   /// Generates ntracks of the specified type according to 1D distributions
@@ -113,7 +118,7 @@ class StarKinematics : public StarGenerator
   /// @param ntrack Number of particles (tracks) to generate
   /// @param type   type of the particle.  If provided a list, will randomly sample ntracks from the list.
   /// @param pt     Distribution (TH1) to sample pT from.
-  /// @param y      Distribution (TH1) to sample rapidity from.
+  /// @param y      Distribution (TH1) to sample (pseudo)rapidity from.
   /// @param phi    Distribution (TH1) to sample phi from.  Optional.
   void Dist( Int_t ntrack, const Char_t *type, TH1 *pt, TH1 *y, TH1 *phi=0 );
   
