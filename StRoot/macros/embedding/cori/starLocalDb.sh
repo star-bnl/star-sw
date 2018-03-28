@@ -37,6 +37,14 @@ mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'SELECT user, host FR
 echo  D-$NN   list_mysql tables
 mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'show databases'
 
+echo  D-$NN   mysql optimizing tables
+mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'OPTIMIZE TABLE `Calibrations_tpc`.`tpcAnodeHVavg`'
+mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'OPTIMIZE TABLE `Calibrations_tof`.`tofINLSCorr`'
+mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'OPTIMIZE TABLE `Calibrations_tof`.`tofTDIGOnTray`'
+mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'OPTIMIZE TABLE `Calibrations_tof`.`tofTotbCorr`'
+mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'OPTIMIZE TABLE `Calibrations_tof`.`tofZbCorr`'
+mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan -e 'OPTIMIZE TABLE `Calibrations_tof`.`tofTOffset`'
+
 echo  D-$NN check permission for the load balancing process
 mysql -u balewski --socket=/mysqlVault/mysql.sock -pjan   -e 'show grants for "loadbalancer"@"%";'
  
