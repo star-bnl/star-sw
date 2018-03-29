@@ -38,7 +38,7 @@ itpcPed::~itpcPed()
 // rdo: 1 to 4
 void itpcPed::init(int sector, int rdo, u_int mask)
 {
-	LOG(TERR,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
+//	LOG(TERR,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
 
 	sector-- ;	// to start from 0
 	rdo-- ;		// to start from 0
@@ -52,7 +52,7 @@ void itpcPed::init(int sector, int rdo, u_int mask)
 	}
 	}
 
-
+	
 
 	fee_mask[sector][rdo] = mask ;
 
@@ -115,6 +115,8 @@ void itpcPed::calc()
 				ped_t *pt = ped_p[s][r][p][c] ;
 
 				if(pt->c_cou==0) {	// problem!!!
+					pt->c_ped = 1023.0 ;
+					pt->c_rms = 1023.0 ;
 					continue ;
 				}
 
@@ -123,7 +125,11 @@ void itpcPed::calc()
 				pt->c_rms = sqrt(pt->c_rms - pt->c_ped*pt->c_ped) ;
 
 				for(int t=0;t<512;t++) {
-					if(pt->cou[t]==0) continue ;
+					if(pt->cou[t]==0) {
+						pt->ped[t] = 1023.0 ;
+						pt->rms[t] = 1022.0 ;
+						continue ;
+					}
 
 					pt->ped[t] /= pt->cou[t] ;
 					pt->rms[t] /= pt->cou[t] ;
@@ -149,30 +155,58 @@ int itpcPed::from_cache(const char *fname)
 
 	while(!feof(f)) {
 		char buff[256] ;
-		int sec, rdo, fee_port, fee_ch, dummy ;
+		int sec, rdo, fee_port, fee_ch, tb, fee_id, dummy ;
 		float fd, fped, frms ;
 
 		if(fgets(buff,sizeof(buff),f)==0) continue ;
 
 		int ret = sscanf(buff,"%d %d %d %d %d %d %d %d %d %f %f %f %f",
-			&sec,&rdo,&fee_port,&fee_ch,&dummy,&dummy,&dummy,&dummy,&dummy,&fd,&fd,&fped,&frms) ;
+			&sec,&rdo,&fee_port,&fee_ch,&fee_id,&dummy,&dummy,&dummy,&dummy,&fd,&fd,&fped,&frms) ;
 
-		if(ret != 13) {
-			//LOG(TERR,"ret %d",ret) ;
-			continue ;
+		
+		if(ret == 13) {	// first, global section
+
+			sec-- ;
+			rdo-- ;
+			fee_port-- ;
+
+
+			if(ped_p[sec][rdo][fee_port][fee_ch]) ;
+			else continue ;
+
+			padplane_id[sec][rdo][fee_port] = fee_id ;
+
+			ped_p[sec][rdo][fee_port][fee_ch]->c_ped = fped ;
+			ped_p[sec][rdo][fee_port][fee_ch]->c_rms = frms ;
 		}
+		else {	// per timebin
+			ret = sscanf(buff,"%d %d %d %d %d %f %f",
+				     &sec,&rdo,&fee_port,&fee_ch,&tb,&fped,&frms) ;
 
-		sec-- ;
-		rdo-- ;
-		fee_port-- ;
+			if(ret != 7) {
+				LOG(ERR,"WTF?") ;
+				continue ;
+			}
 
-		if(ped_p[sec][rdo][fee_port][fee_ch]) ;
-		else continue ;
+			sec-- ;
+			rdo-- ;
+			fee_port-- ;
 
-		ped_p[sec][rdo][fee_port][fee_ch]->c_ped = fped ;
-		ped_p[sec][rdo][fee_port][fee_ch]->c_rms = frms ;
+
+			if(ped_p[sec][rdo][fee_port][fee_ch]) ;
+			else continue ;
+
+			ped_p[sec][rdo][fee_port][fee_ch]->ped[tb] = fped ;
+			ped_p[sec][rdo][fee_port][fee_ch]->rms[tb] = frms ;
+
+
+
+		}
 		
 	}
+
+	fclose(f) ;
+
 	return 0 ;
 }
 

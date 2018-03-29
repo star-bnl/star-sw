@@ -1646,8 +1646,7 @@ Bfc_st BFC[] = { // standard chains
   {"eemCl"    ,"eemCl","","db","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
   // BTOF related chains
   {"btof"       ,"","","btofDat,vpdCalib,btofMatch,btofCalib"                   ,"","","BTOF Chain",kFALSE},
-  {"BtofDat"   ,"tof_raw","","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
-   ,                                                                               "BTOF hit maker",kFALSE},
+  {"BtofDat" ,"tof_raw","","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker","BTOF hit maker",kFALSE},
 #if 0
   {"vpdSim"    ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    ,                                                                                "Vpd Simulator",kFALSE},
