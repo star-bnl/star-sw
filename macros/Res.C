@@ -121,11 +121,11 @@ void Res(const Char_t *select="x", const Char_t *name="sigma") {
   //  c1->SetGridy(30);
   TH1F *frame = 0;
   if (plot == "sigma") {
-    frame = c1->DrawFrame(10,0.04,140,0.20);
+    frame = c1->DrawFrame(10,0.04,170,0.20);
     frame->SetTitle("Resolution versus Track Length");
     //    frame->SetYTitle("Resolution");
   } else {
-    frame = c1->DrawFrame(10,-0.05,140,0.10);
+    frame = c1->DrawFrame(10,-0.05,170,0.10);
     frame->SetTitle("Shift versus Track Length");
     //    frame->SetYTitle("Sift");
   }

@@ -41,6 +41,7 @@
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<input URL="file:/star/data03/daq/2018/073/19073049/st_physics_adc_19073049_raw_*.daq" />
-<input URL="file:/star/data03/daq/2018/078/19078015/st_physics_adc_19078015_raw_*.daq" />
+<!-- <input URL="file:/star/data03/daq/2018/073/19073049/st_physics_adc_19073049_raw_*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/078/19078015/st_physics_adc_19078015_raw_*.daq" /> -->
+<input URL="file:/star/data03/daq/2018/086/19086040/*.daq" />
 </job>

@@ -1,4 +1,5 @@
 //#define __RECOVER__
+#define __NO_TpcRowQ__
 //________________________________________________________________________________
 void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
 		    Int_t d = 20070321, Int_t t = 58, 
@@ -27,10 +28,19 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
       Bool_t badSector = kFALSE; // <<<<<<
       //!!!!!  skip sector/row = 5 /38-40, for Run XV only
       //      Bool_t badSector = ((i == 5) && (j >= 38 && j <= 40)) || ( i == 3 && j == 7);
+#ifndef  __NO_TpcRowQ__
       Double_t dev = hist->GetBinContent(i,j) - hist->GetBinContent(0,j);
       Double_t err  = TMath::Sqrt(TMath::Power(hist->GetBinError(i,j),2) + TMath::Power(hist->GetBinError(0,j),2));
+#else /*  __NO_TpcRowQ_ */
+      Double_t dev = hist->GetBinContent(i,j);
+      Double_t err  = hist->GetBinError(i,j);
+#endif /* !  __NO_TpcRowQ__ */
       Double_t devD = 1e3;
       if (err > 0  && TMath::Abs(dev) < 1) devD =  dev/err;
+//       if (i == 20) {
+// 	cout << "i/j = " << i << "/" << j << "\thist->GetBinContent(" << i << "," << j << ") = " << hist->GetBinContent(i,j) 
+// 	     << "\tdev = " << dev << "\terr = " << err << endl;
+//       }
       if (gainold)  {
 	if (histSigma && histSigma->GetBinContent(i,j) > 0.1) {
 	  if (TMath::Abs((gainold+i-1)->GainScale[j-1]) < 1e-7) (gainold+i-1)->GainScale[j-1] = 1.;
@@ -54,9 +64,8 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
 	       << "\twith correction\t" << hist->GetBinContent(i,j) << "\tError\t" << err << endl;
 	  continue;
 	}
-      }
-      else  {
-	if ( hist->GetBinError(i,j) < 1.e-7) {
+      }  else  {
+	if ( hist->GetBinError(i,j) <= 0) {
 #ifndef __RECOVER__
 	  cout << "i/j\t" << i << "/" << j << " is empty. Skipped !" << endl;
 #else
@@ -65,10 +74,13 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
 #endif
 	} else {
 	  row.GainScale[j-1] = TMath::Exp(-dev);
+// 	  if (i == 20) {
+// 	    cout << "i/j = " << i << "/" << j << "\tdev = " << dev << "\t row.GainScale[" << j-1 << "] = " << row.GainScale[j-1] << endl;
+// 	  }
 	}
       }
       if (histSigma) 
-      row.GainRms[j-1]   = histSigma->GetBinContent(i,j);
+	row.GainRms[j-1]   = histSigma->GetBinContent(i,j);
     }
     secrow->AddAt(&row);
   }
@@ -97,6 +109,7 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
   secrow->Write();
   delete f;
 #endif
+#ifndef __NO_TpcRowQ__
   tpcCorrection_st rowq;
   tpcCorrection_st *Row = &rowq;
   memset (Row, 0, sizeof(tpcCorrection_st));
@@ -138,6 +151,7 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
   out << "  return (TDataSet *)tableSet;" << endl;
   out << "}" << endl;
   out.close(); 
+#endif /* ! __NO_TpcRowQ__ */
 }
 //________________________________________________________________________________
 void MakeTpcSecRowB(Int_t d=20060210,Int_t t= 80000, const Char_t *TableName = "TpcSecRowB", const Char_t *TpcRowQ = 0){
