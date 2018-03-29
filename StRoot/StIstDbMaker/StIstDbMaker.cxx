@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.30 2018/03/15 21:35:48 dongx Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.31 2018/03/29 23:07:30 dongx Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -47,6 +47,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
          " StIstDb object will not be created" << endm;
       return kStErr;
    }
+   st_idsOnTpc->Print(0,1);
 
    // Get PST positionment relative to IDS
    St_Survey *st_pstOnIds = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");
@@ -56,6 +57,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
          " StIstDb object will not be created" << endm;
       return kStErr;
    }
+   st_pstOnIds->Print(0,1);
 
    // Get IST positionment relative to PST
    St_Survey *st_istOnPst = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");
@@ -65,6 +67,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
          " StIstDb object will not be created" << endm;
       return kStErr;
    }
+   st_istOnPst->Print(0,1);
 
    // Get ladder positionments relative to IST
    St_Survey *st_istLadderOnIst = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst");
@@ -74,6 +77,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
          " StIstDb object will not be created" << endm;
       return kStErr;
    }
+   st_istLadderOnIst->Print(0,1);
 
    // Get sensor positionments relative to ladder
    St_Survey *st_istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");
@@ -83,6 +87,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
          " StIstDb object will not be created" << endm;
       return kStErr;
    }
+   st_istSensorOnLadder->Print(0,1);
 
    Survey_st *tables[5] = {st_idsOnTpc->GetTable(), st_pstOnIds->GetTable(), st_istOnPst->GetTable(),
                            st_istLadderOnIst->GetTable(), st_istSensorOnLadder->GetTable()
@@ -99,6 +104,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    mIstDb->setPedNoise(mPedNoise->GetTable());
+   if(Debug()) mPedNoise->Print(0,1);
 
    // Access IST gain table
    St_istGain *mGain = (St_istGain *) GetDataBase("Calibrations/ist/istGain");
@@ -110,6 +116,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    mIstDb->setGain(mGain->GetTable());
+   if(Debug()) mGain->Print(0,1);
 
    St_istMapping *mMapping = (St_istMapping *) GetDataBase("Calibrations/ist/istMapping");
 
@@ -120,6 +127,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    mIstDb->setMapping(mMapping->GetTable());
+   if(Debug()) mMapping->Print(0,1);
 
    // Access IST control table
    St_istControl *mControl = (St_istControl *) GetDataBase("Calibrations/ist/istControl");
@@ -131,6 +139,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    mIstDb->setControl(mControl->GetTable());
+   mControl->Print(0,1);
 
    // Access IST chip status table
    St_istChipConfig *mChipConfig = (St_istChipConfig *) GetDataBase("Calibrations/ist/istChipConfig");
@@ -142,6 +151,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    mIstDb->setChipStatus(mChipConfig->GetTable());
+   mChipConfig->Print(0,1);
    
    // set istSimPar
    St_istSimPar *istSimPar = (St_istSimPar *)GetDataBase("Calibrations/ist/istSimPar");
@@ -152,6 +162,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
      LOG_WARN << "InitRun : No access to istSimPar table, abort IST reconstruction" << endm;
      return kStErr;
    }
+   istSimPar->Print(0,1);
                                     
    if ( GetDebug() >= 2)
       mIstDb->Print();
@@ -171,7 +182,11 @@ Int_t StIstDbMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.31  2018/03/29 23:07:30  dongx
+* Added print-out information for loaded tables
+*
 * Revision 1.30  2018/03/15 21:35:48  dongx
+*
 * Added the access to new table istSimPar
 *
 * Revision 1.29  2015/02/04 07:56:31  smirnovd
