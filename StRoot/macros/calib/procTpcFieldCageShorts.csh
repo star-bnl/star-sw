@@ -20,10 +20,25 @@ source ${GROUP_DIR}/.stardev
 set ID=`/usr/bin/whoami`
 echo "procTpcFieldCageShorts: running at `/bin/date`"
 
+if ($#argv < 1) then
+  @ runyear = 0
+else
+  @ runyear = $1
+endif
+
+@ flippedIOCurrents = 0
+
+if ($runyear > 0) then
 # archival databases can be found here:
 # https://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
-set tpc_db = "-h onld15.starp.bnl.gov --port=3502"
-set daq_db = "-h onld15.starp.bnl.gov --port=3501"
+  @ portyear = $runyear + 1399
+  set tpc_db = "-h db04.star.bnl.gov --port=$portyear "
+  set daq_db = "-h db04.star.bnl.gov --port=$portyear "
+  if ($runyear < 2015) @ flippedIOCurrents = 1
+else
+  set tpc_db = "-h heston.star.bnl.gov --port=3502 "
+  set daq_db = "-h heston.star.bnl.gov --port=3501 "
+endif
 set fcs_db = "-h dbx.star.bnl.gov --port=3316"
 
 set qq = "/tmp/FCS_short1_$ID.txt"
@@ -32,6 +47,7 @@ set dd = "currents.txt"
 set rr = "run_times.txt"
 set ff = "dbout.txt"
 set outdir = /star/data10/calib/log/FCS
+set scriptsdir = ${HOME}/scripts
 set logdir = `/bin/date --utc '+%Y%m%d.%H%M%S'`
 @ mingap = 240
 
@@ -128,13 +144,18 @@ echo "gap_time = $gap_time" >> log
 echo "thistime = $thistime" >> log
 set tlimited = "between from_unixtime($lasttime) and from_unixtime($thistime)"
 
-# query for currents
-# inner/outer appear switched, handled in matchTpcFieldCageShorts.C
+# query for currents and voltages
+# inner/outer currents appear switched before 2015
+if ($flippedIOCurrents > 0) then
+  set currentsLine = "currentOuterFieldCageEast_1,currentInnerFieldCageEast_1,currentOuterFieldCageWest_1,currentInnerFieldCageWest_1,"
+else
+  set currentsLine = "currentInnerFieldCageEast_1,currentOuterFieldCageEast_1,currentInnerFieldCageWest_1,currentOuterFieldCageWest_1,"
+endif
 # place an extra 0 to represent external resistor (for OFCW usage)
 /bin/cat >! $qq <<EOF
-select unix_timestamp(beginTime),currentInnerFieldCageEast_1,
-currentOuterFieldCageEast_1,currentInnerFieldCageWest_1,currentOuterFieldCageWest_1,0
-from tpcFieldCage where beginTime $tlimited order by beginTime;
+select unix_timestamp(beginTime),
+${currentsLine}
+0 from tpcFieldCage where beginTime $tlimited order by beginTime;
 EOF
 
 /bin/cat $qq >> log; echo "" >> log
@@ -147,13 +168,13 @@ EOF
 set entryDate = `/bin/date --utc '+%Y-%m-%d'`
 set entryTime = `/bin/date --utc '+%T'`
 
-$ROOTSYS/bin/root -l -b -q $HOME/scripts/matchTpcFieldCageShorts.C+\(\"${entryDate}\ ${entryTime}\",${last_res}\) >>& log
+$ROOTSYS/bin/root -l -b -q ${scriptsdir}/matchTpcFieldCageShorts.C+\(\"${entryDate}\ ${entryTime}\",${last_res}\) >>& log
 
 @ ndbent = `/bin/cat $ff | /usr/bin/wc -l`
 
 if ($ndbent > 0) then
   setenv DB_ACCESS_MODE write
-  $STAR/.$STAR_HOST_SYS/bin/root4star -l -b -q $HOME/scripts/LoadShorts.C\(\"$ff\"\) >>& log
+  $STAR/.$STAR_HOST_SYS/bin/root4star -l -b -q ${scriptsdir}/LoadShorts.C\(\"$ff\"\) >>& log
 endif
 
 cd $cdir
@@ -162,8 +183,11 @@ cd $cdir
 /bin/rm -rf $logdir
 
 #####################################
-# $Id: procTpcFieldCageShorts.csh,v 1.4 2013/09/12 17:09:02 genevb Exp $
+# $Id: procTpcFieldCageShorts.csh,v 1.5 2018/03/30 04:27:42 genevb Exp $
 # $Log: procTpcFieldCageShorts.csh,v $
+# Revision 1.5  2018/03/30 04:27:42  genevb
+# Corrected currents order, updated DBs, lookup past years
+#
 # Revision 1.4  2013/09/12 17:09:02  genevb
 # Update DBs, use full unixtime, small improvements
 #
