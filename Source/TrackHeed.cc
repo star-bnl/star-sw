@@ -217,12 +217,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
                 << "    Initial direction is randomized.\n";
     }
     // Null vector. Sample the direction isotropically.
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-    dx = cos(phi) * stheta;
-    dy = sin(phi) * stheta;
-    dz = ctheta;
+    RndmDirection(dx, dy, dz);
   } else {
     // Normalise the direction vector.
     dx /= d;
@@ -643,12 +638,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d <= 0.) {
     // Null vector. Sample the direction isotropically.
-    const double phi = TwoPi * RndmUniform();
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    dx = cos(phi) * stheta;
-    dy = sin(phi) * stheta;
-    dz = ctheta;
+    RndmDirection(dx, dy, dz);
   } else {
     // Normalise the direction vector.
     dx /= d;
@@ -779,12 +769,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d <= 0.) {
     // Null vector. Sample the direction isotropically.
-    const double phi = TwoPi * RndmUniform();
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    dx = cos(phi) * stheta;
-    dy = sin(phi) * stheta;
-    dz = ctheta;
+    RndmDirection(dx, dy, dz);
   } else {
     // Normalise the direction vector.
     dx /= d;

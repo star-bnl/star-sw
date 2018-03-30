@@ -742,12 +742,7 @@ bool TrackSrim::NewTrack(const double x0, const double y0, const double z0,
                 << "    Initial direction is randomized.\n";
     }
     // Null vector. Sample the direction isotropically.
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-    xdir = cos(phi) * stheta;
-    ydir = sin(phi) * stheta;
-    zdir = ctheta;
+    RndmDirection(xdir, ydir, zdir);
   } else {
     // Normalise the direction vector.
     xdir /= normdir;

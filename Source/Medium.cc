@@ -8,6 +8,15 @@
 #include "Random.hh"
 #include "Numerics.hh"
 
+namespace {
+
+void PrintNotImplemented(const std::string& cls, const std::string& fcn) {
+
+  std::cerr << cls << "::" << fcn << ": Function is not implemented.\n";
+}
+
+}
+
 namespace Garfield {
 
 int Medium::m_idCounter = -1;
@@ -643,33 +652,20 @@ void Medium::GetElectronMomentum(const double e, double& px, double& py,
                                  double& pz, int& band) {
 
   const double p = sqrt(2. * ElectronMass * e) / SpeedOfLight;
-  const double ctheta = 1. - 2. * RndmUniform();
-  const double stheta = sqrt(1. - ctheta * ctheta);
-  const double phi = TwoPi * RndmUniform();
-
-  px = p * stheta * cos(phi);
-  py = p * stheta * sin(phi);
-  pz = p * ctheta;
-
+  RndmDirection(px, py, pz, p);
   band = -1;
 }
 
 double Medium::GetElectronNullCollisionRate(const int /*band*/) {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetElectronNullCollisionRate:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetElectronNullCollisionRate");
   return 0.;
 }
 
 double Medium::GetElectronCollisionRate(const double /*e*/, 
                                         const int /*band*/) {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetElectronCollisionRate:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetElectronCollisionRate");
   return 0.;
 }
 
@@ -680,40 +676,26 @@ bool Medium::GetElectronCollision(const double e, int& type, int& level,
   type = level = -1;
   e1 = e;
   nion = ndxc = band = 0;
-  const double ctheta = 1. - 2 * RndmUniform();
-  const double stheta = sqrt(1. - ctheta * ctheta);
-  const double phi = TwoPi * RndmUniform();
-  dx = cos(phi) * stheta;
-  dy = sin(phi) * stheta;
-  dz = ctheta;
+  RndmDirection(dx, dy, dz);
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetElectronCollision:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetElectronCollision");
   return false;
 }
 
 bool Medium::GetIonisationProduct(const unsigned int /*i*/, 
                                   int& type, double& energy) const {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetIonisationProduct:\n"
-              << "    Function is not implemented for this class.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetIonisationProduct");
   type = 0;
   energy = 0.;
   return false;
 }
 
-bool Medium::GetDeexcitationProduct(const unsigned int i, double& t, double& s,
+bool Medium::GetDeexcitationProduct(const unsigned int /*i*/, 
+                                    double& t, double& s,
                                     int& type, double& energy) const {
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetDeexcitationProduct:\n"
-              << "    Deexcitation product " << i << " requested.\n"
-              << "    Not supported. Program bug!\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetDeexcitationProduct");
   t = s = energy = 0.;
   type = 0;
   return false;
@@ -1253,10 +1235,7 @@ bool Medium::GetOpticalDataRange(double& emin, double& emax,
     return false;
   }
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetOpticalDataRange:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetOpticalDataRange");
   emin = emax = 0.;
   return false;
 }
@@ -1276,10 +1255,7 @@ bool Medium::GetDielectricFunction(const double e, double& eps1, double& eps2,
     return false;
   }
 
-  if (m_debug) {
-    std::cerr << m_className << "::GetDielectricFunction:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  if (m_debug) PrintNotImplemented(m_className, "GetDielectricFunction");
   eps1 = 1.;
   eps2 = 0.;
   return false;
@@ -1301,8 +1277,7 @@ bool Medium::GetPhotoAbsorptionCrossSection(const double e, double& sigma,
   }
 
   if (m_debug) {
-    std::cerr << m_className << "::GetPhotoAbsorptionCrossSection:\n";
-    std::cerr << "    Function is not implemented.\n";
+    PrintNotImplemented(m_className, "GetPhotoAbsorptionCrossSection");
   }
   sigma = 0.;
   return false;
@@ -2692,8 +2667,7 @@ void Medium::InitParamTensor(
     const double val) {
 
   if (eRes == 0 || bRes == 0 || aRes == 0 || tRes == 0) {
-    std::cerr << m_className << "::InitParamArrays:\n";
-    std::cerr << "    Invalid grid.\n";
+    std::cerr << m_className << "::InitParamArrays: Invalid grid.\n";
     return;
   }
 

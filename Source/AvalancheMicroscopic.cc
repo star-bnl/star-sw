@@ -10,16 +10,6 @@
 
 namespace {
 
-void RndmDirection(double& dx, double& dy, double& dz) {
-
-  const double phi = Garfield::TwoPi * Garfield::RndmUniform();
-  const double ctheta = 2 * Garfield::RndmUniform() - 1.;
-  const double stheta = sqrt(1. - ctheta * ctheta);
-  dx = cos(phi) * stheta;
-  dy = sin(phi) * stheta;
-  dz = ctheta;
-}
-
 void PrintStatus(const std::string& hdr, const std::string& status,
                  const double x, const double y, const double z,
                  const bool hole) {

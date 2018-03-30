@@ -824,25 +824,11 @@ void MediumSilicon::GetElectronMomentum(const double e, double& px, double& py,
       pstar *= sqrt(1. + alpha * (e - m_eMinL));
     }
     pstar *= sqrt(3. / (1. / m_mLongL + 2. / m_mTransL));
-
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-
-    px = pstar * cos(phi) * stheta;
-    py = pstar * sin(phi) * stheta;
-    pz = pstar * ctheta;
+    RndmDirection(px, py, pz, pstar);
   } else if (band == m_nValleysX + m_nValleysL) {
     // Higher band
-    double pstar = sqrt(2. * ElectronMass * e);
-
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-
-    px = pstar * cos(phi) * stheta;
-    py = pstar * sin(phi) * stheta;
-    pz = pstar * ctheta;
+    const double pstar = sqrt(2. * ElectronMass * e);
+    RndmDirection(px, py, pz, pstar);
   }
 }
 
@@ -1264,27 +1250,12 @@ bool MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
       const double alpha = m_alphaL;
       pstar *= sqrt(1. + alpha * (e1 - m_eMinL));
     }
-
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-
     pstar *= sqrt(3. / (1. / m_mLongL + 2. / m_mTransL));
-    px = pstar * cos(phi) * stheta;
-    py = pstar * sin(phi) * stheta;
-    pz = pstar * ctheta;
+    RndmDirection(px, py, pz, pstar);
     return true;
-
   } else {
-    double pstar = sqrt(2. * ElectronMass * e1);
-
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    const double phi = TwoPi * RndmUniform();
-
-    px = pstar * cos(phi) * stheta;
-    py = pstar * sin(phi) * stheta;
-    pz = pstar * ctheta;
+    const double pstar = sqrt(2. * ElectronMass * e1);
+    RndmDirection(px, py, pz, pstar);
     return true;
   }
 

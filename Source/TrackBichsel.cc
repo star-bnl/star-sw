@@ -89,12 +89,7 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
   const double d = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (d < Small) {
     // In case of a null vector, choose a random direction.
-    const double phi = TwoPi * RndmUniform();
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    m_dx = cos(phi) * stheta;
-    m_dy = sin(phi) * stheta;
-    m_dz = ctheta;
+    RndmDirection(m_dx, m_dy, m_dz);
   } else {
     m_dx = dx0 / d;
     m_dy = dy0 / d;

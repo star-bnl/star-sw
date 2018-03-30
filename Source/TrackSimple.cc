@@ -80,16 +80,11 @@ bool TrackSimple::NewTrack(const double x0, const double y0, const double z0,
   m_z = z0;
   m_t = t0;
 
-  // Normalise the direction
+  // Normalise the direction.
   const double d = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (d < Small) {
-    // Choose random direction
-    double phi = TwoPi * RndmUniform();
-    double ctheta = 1. - 2. * RndmUniform();
-    double stheta = sqrt(1. - ctheta * ctheta);
-    m_dx = cos(phi) * stheta;
-    m_dy = sin(phi) * stheta;
-    m_dz = ctheta;
+    // Choose random direction.
+    RndmDirection(m_dx, m_dy, m_dz);
   } else {
     m_dx = dx0 / d;
     m_dy = dy0 / d;
