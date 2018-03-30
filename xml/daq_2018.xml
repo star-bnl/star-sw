@@ -37,7 +37,7 @@
   if ( -r $logFile) exit 0;
   set muFile = ${filel}.MuDst.root
   if (-r $muFile) exit 0;
-  root.exe -q -b 'bfc.C(1000,"P2018,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C(1000,"P2018,useCDV,Tpx,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,dEdxCalib","'${evtsFile}'","'$output'","'${filel}.root'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />

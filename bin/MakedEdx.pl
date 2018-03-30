@@ -1678,7 +1678,11 @@ my @badruns = qw(
 #$hist = "RunXVII24"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/08/17 correct idx in TpcLengthCorrectionMDF
 #$hist = "RunXVII25"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/09/17 correct correction for Ifit in TpcLengthCorrectionMDF
 $hist = "RunXVII26"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_production*_2017/ReversedFullField";  $Production = "/P17ih_calib"; $year = "/2017/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/09/17 test in dev
-
+# Run XVIII
+# 19078015/dEdx - dEdx5, problem with loose GG connetctor in sector 19 inner, 03/21/18 - 03/22/18 
+# 19086040/dEdx - dEdx3, use default alignment: 
+# 19086040B/dEdx4 : switched off dEdx corrections (TpcZCorrectionB, TpcTanL, tpcPressureB), reinstall TPC alignment(no difference ?)  03/29/18 
+# 19086040B/dEdx5 : switched off dEdx corrections (TpcZCorrectionB, TpcTanL), switch on  tpcPressureB), add hitograms for iTPC  03/30/18 
 
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
