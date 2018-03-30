@@ -9,7 +9,7 @@
 //
 ///////////////////////////////////////////
 
-#ifndef __CINT__
+#if !defined(__CINT__) || defined(__MAKECINT__)
 #include "TROOT.h"
 #include "TFile.h"
 #include "TNtupleD.h"
@@ -76,7 +76,7 @@ void ReadLine1() {
   ff1[0] = nexttime;
   for (i=1; i<size1; i++) in1 >> ff1[i];
   in1 >> nexttime;
-  ff1[3]-=0.377; // ignore permanent short at locaton 181.4
+  //ff1[4]-=0.377; // only if we need to ignore permanent short at locaton 181.4
   if (in1.eof()) nexttime = maxsec;
   for (i=size1; i<size1+size2; i++) ff1[i] = 0;
   if ((++li1)%LI==0) printf("Line1 = %d , time = %f\n",li1,ff1[0]);
@@ -123,12 +123,11 @@ void WriteTable() {
   for (int i=0; i<6; i++) ii[i] = (int) ff2[i+1];
   // Modify from current->resistance
 
-  // Only do Iow (which is index i=3, though it _should_ be index i=4 from db labels)
+  // Only do Iow (which is index i=4)
   Double_t ring = 80.5;
-  //Double_t reference = TMath::Max(ff3[1],ff3[4]); // Use max(Ioe,Iiw) as reference
-  Double_t reference = TMath::Max(ff3[1],ff3[2]); // Use max(Iow,Iie) as reference
-  Double_t missing_resistance = 364.44*(1.0 - reference/ff3[3]); // delR = R*(1-(I1/I2))
-//printf("GGGG ref = %g  , cur = %g\n",reference,ff3[3]);
+  Double_t reference = TMath::Max(ff3[2],ff3[3]); // Use max(Ioe,Iiw) as reference
+  Double_t missing_resistance = 364.44*(1.0 - reference/ff3[4]); // delR = R*(1-(I1/I2))
+//printf("GGGG ref = %g  , cur = %g\n",reference,ff3[4]);
   //missing_resistance += resistor;
   
   if (last_missing_resistance && TMath::Abs(missing_resistance - last_missing_resistance) > 0.5) {
@@ -172,7 +171,7 @@ void WriteTable() {
   int tt = (int) (ff4[0]-ff3[0]);
   //if (pflag) {pflag=0; cout << outname << " :: " << dcur << " :: " << tcnt << " :: " << ff3[0] <<
   {pflag=0; cout << outname << " :: " << dcur << " :: " << tcnt << " :: " << ff3[0] <<
-    "," << tt << "," << (int) ff2[0] << "," << ff3[3] << endl;}
+    "," << tt << "," << (int) ff2[0] << "," << ff3[4] << endl;}
 
 
   if (writing) {out1->close(); delete out1; out1=0;}
@@ -205,9 +204,9 @@ void IncludeThisMeasure() {
 // Big change test
   if (tcnt) {
   //if (tcnt>2) { // don't decide based on one or two points?
-    double avg = ff3[3];
+    double avg = ff3[4];
     if (tcnt>1) avg /= ff3[0];
-    if (TMath::Abs(avg-ff1[3]) > 0.045) ResetMeasure(); // 45nA change from the average
+    if (TMath::Abs(avg-ff1[4]) > 0.045) ResetMeasure(); // 45nA change from the average
   }
 
 
@@ -223,8 +222,8 @@ void IncludeThisMeasure() {
   resistor = ff1[5];
 
   // Keep track of maximum and minimum current over a measure
-  if (ff1[3]>maxcur) maxcur = ff1[3];
-  if (ff1[3]<mincur) mincur = ff1[3];
+  if (ff1[4]>maxcur) maxcur = ff1[4];
+  if (ff1[4]<mincur) mincur = ff1[4];
 }
 
 void FindNextRun() {
@@ -266,8 +265,11 @@ void matchTpcFieldCageShorts(char* T, double lr, double lm, int i) {
 }
 
 //////////////////////////////////////////
-// $Id: matchTpcFieldCageShorts.C,v 1.4 2013/09/12 17:09:02 genevb Exp $
+// $Id: matchTpcFieldCageShorts.C,v 1.5 2018/03/30 04:24:29 genevb Exp $
 // $Log: matchTpcFieldCageShorts.C,v $
+// Revision 1.5  2018/03/30 04:24:29  genevb
+// Corrected currents order, no permanent shorts, compile pragmas
+//
 // Revision 1.4  2013/09/12 17:09:02  genevb
 // Update DBs, use full unixtime, small improvements
 //
