@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.30 2018/03/15 21:35:48 dongx Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.31 2018/03/29 23:07:30 dongx Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -39,14 +39,53 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 
    // Get IDS positionment relative to TPC
    const St_Survey *st_idsOnTpc = (const St_Survey *) StidsOnTpc::instance()->Table();
+   if (!st_idsOnTpc) {
+      LOG_ERROR << "No relevant entry found in 'Geometry/ist/idsOnTpc' table."
+         " StIstDb object will not be created" << endm;
+      return kStErr;
+   }
+   st_idsOnTpc->Print(0,1);
+
    // Get PST positionment relative to IDS
    const St_Survey *st_pstOnIds = (const St_Survey *) StpstOnIds::instance()->Table();
+
+   if (!st_pstOnIds) {
+      LOG_ERROR << "No relevant entry found in 'Geometry/ist/pstOnIds' table."
+         " StIstDb object will not be created" << endm;
+      return kStErr;
+   }
+   st_pstOnIds->Print(0,1);
+
    // Get IST positionment relative to PST
    const St_Survey *st_istOnPst = (const St_Survey *) StistOnPst::instance()->Table();
+
+   if (!st_istOnPst) {
+      LOG_ERROR << "No relevant entry found in 'Geometry/ist/istOnPst' table."
+         " StIstDb object will not be created" << endm;
+      return kStErr;
+   }
+   st_istOnPst->Print(0,1);
+
    // Get ladder positionments relative to IST
    const St_Survey *st_istLadderOnIst = (const St_Survey *) StLadderOnIst::instance()->Table();
+
+   if (!st_istLadderOnIst) {
+      LOG_ERROR << "No relevant entry found in 'Geometry/ist/istLadderOnIst' table."
+         " StIstDb object will not be created" << endm;
+      return kStErr;
+   }
+   st_istLadderOnIst->Print(0,1);
+
    // Get sensor positionments relative to ladder
    const St_Survey *st_istSensorOnLadder = (const St_Survey *) StistSensorOnLadder::instance()->Table();
+
+   if (!st_istSensorOnLadder) {
+      LOG_ERROR << "No relevant entry found in 'Geometry/ist/istSensorOnLadder' table."
+         " StIstDb object will not be created" << endm;
+      return kStErr;
+   }
+   st_istSensorOnLadder->Print(0,1);
+
    Survey_st *tables[5] = {st_idsOnTpc->GetTable(), st_pstOnIds->GetTable(), st_istOnPst->GetTable(),
                            st_istLadderOnIst->GetTable(), st_istSensorOnLadder->GetTable()
                           };
@@ -54,17 +93,32 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    // Now access IST pedestal and noise tables
    const St_istPedNoise *mPedNoise = (St_istPedNoise *) St_istPedNoiseC::instance()->Table();
    mIstDb->setPedNoise(mPedNoise->GetTable());
+   if(Debug()) mPedNoise->Print(0,1);
+
    // Access IST gain table
    St_istGain *mGain = (St_istGain *) St_istGainC::instance()->Table();
    mIstDb->setGain(mGain->GetTable());
+   if(Debug()) mGain->Print(0,1);
    St_istMapping *mMapping = (St_istMapping *) St_istMappingC::instance()->Table();
+
+   if (!mMapping) {
+      LOG_ERROR << "No relevant entry found in 'Calibrations/ist/istMapping' table."
+         " StIstDb object will not be created" << endm;
+      return kStErr;
+   }
+
    mIstDb->setMapping(mMapping->GetTable());
+   if(Debug()) mMapping->Print(0,1);
+
    // Access IST control table
    St_istControl *mControl = (St_istControl *) St_istControlC::instance()->Table();
    mIstDb->setControl(mControl->GetTable());
+   mControl->Print(0,1);
+
    // Access IST chip status table
    St_istChipConfig *mChipConfig = (St_istChipConfig *) St_istChipConfigC::instance()->Table();
    mIstDb->setChipStatus(mChipConfig->GetTable());
+   mChipConfig->Print(0,1);
    
    // set istSimPar
    St_istSimPar *istSimPar = (St_istSimPar *)GetDataBase("Calibrations/ist/istSimPar");
@@ -75,6 +129,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
      LOG_WARN << "InitRun : No access to istSimPar table, abort IST reconstruction" << endm;
      return kStErr;
    }
+   istSimPar->Print(0,1);
                                     
    if ( GetDebug() >= 2)
       mIstDb->Print();
@@ -94,6 +149,9 @@ Int_t StIstDbMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.31  2018/03/29 23:07:30  dongx
+* Added print-out information for loaded tables
+*
 * Revision 1.30  2018/03/15 21:35:48  dongx
 *
 * Added the access to new table istSimPar

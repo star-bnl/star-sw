@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.20 2018/03/15 21:33:07 dongx Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.21 2018/03/29 23:07:10 dongx Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.21  2018/03/29 23:07:10  dongx
+ * Added print-out information to check loaded tables
+ *
  * Revision 1.20  2018/03/15 21:33:07  dongx
  * *** empty log message ***
  *
@@ -84,13 +87,6 @@ StPxlDbMaker::StPxlDbMaker(const char *name) :
 Int_t StPxlDbMaker::Init()
 {
    ToWhiteConst("pxl_db", mPxlDb);
-   const Char_t *TableNames[] = {"Geometry/pxl/idsOnTpc",
-				 "Geometry/pxl/pstOnIds",
-				 "Geometry/pxl/pxlOnPst",
-				 "Geometry/pxl/pxlHalfOnPxl",
-				 "Geometry/pxl/pxlSectorOnHalf",
-				 "Geometry/pxl/pxlLadderOnSector",
-				 "Geometry/pxl/pxlSensorOnLadder"};
    return kStOk;
 }
 
@@ -101,6 +97,13 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    mReady = kStFatal;
    // set geoHMatrices
 #ifndef __NEW_PXLDB__
+   const Char_t *TableNames[] = {"Geometry/pxl/idsOnTpc",
+				 "Geometry/pxl/pstOnIds",
+				 "Geometry/pxl/pxlOnPst",
+				 "Geometry/pxl/pxlHalfOnPxl",
+				 "Geometry/pxl/pxlSectorOnHalf",
+				 "Geometry/pxl/pxlLadderOnSector",
+				 "Geometry/pxl/pxlSensorOnLadder"};
    Survey_st *tables[7];
    for (Int_t i = 0; i < 7; i++) {
      St_Survey *survey = (St_Survey *) GetDataBase(TableNames[i]);
@@ -117,6 +120,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    St_pxlSensorStatus *sensorStatus = (St_pxlSensorStatus *)GetDataBase("Calibrations/pxl/pxlSensorStatus");
    if (sensorStatus) mPxlDb->setSensorStatus(sensorStatus->GetTable());
    else {LOG_WARN << " no pxl sensor status table " << endm; return kStErr;}
+   sensorStatus->Print(0,1);
 
 #endif /* ! __NEW_PXLDB__ */
    if(readAllRowColumnStatus) // old method
@@ -125,6 +129,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
            St_pxlRowColumnStatus *rowColumnStatus = (St_pxlRowColumnStatus *)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
            if (rowColumnStatus) mPxlDb->setRowColumnStatus(rowColumnStatus->GetTable());
            else {LOG_WARN << " no pxl row column status table " << endm; return kStErr;}
+           if(Debug()) rowColumnStatus->Print(0,1);
 #endif /* __NEW_PXLDB__ */
        }
    else
@@ -133,6 +138,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
            St_pxlBadRowColumns *badRowColumns = (St_pxlBadRowColumns *)GetDataBase("Calibrations/pxl/pxlBadRowColumns");
            if (badRowColumns) mPxlDb->setBadRowColumns(badRowColumns->GetTable());
            else {LOG_WARN << " no pxl bad row columns table " << endm; return kStErr;}
+           if(Debug()) badRowColumns->Print(0,1);
 #else /* __NEW_PXLDB__ */
            St_pxlBadRowColumns *badRowColumns = (St_pxlBadRowColumns *) St_pxlBadRowColumnsC::instance()->Table();
            if (badRowColumns) mPxlDb->setBadRowColumns(badRowColumns->GetTable());
@@ -146,12 +152,15 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
 #else /* __NEW_PXLDB__ */
    St_pxlHotPixels *hotPixels = (St_pxlHotPixels *) St_pxlHotPixelsC::instance()->Table();
 #endif /* __NEW_PXLDB__ */
+   if(Debug()) hotPixels->Print(0,1);
 
 #ifndef __NEW_PXLDB__
+   
    // set pxlControl
    St_pxlControl *pxlControl = (St_pxlControl *)GetDataBase("Geometry/pxl/pxlControl");
    if (pxlControl) {
       mPxlDb->setPxlControl(pxlControl->GetTable());
+      pxlControl->Print(0,1);
    }
    else {
       LOG_WARN << "InitRun : No access to pxlControl table, abort PXL reconstruction" << endm;
@@ -163,6 +172,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    St_pxlDigmapsSim *pxlDigmapsSim = (St_pxlDigmapsSim *)GetDataBase("Geometry/pxl/pxlDigmapsSim");
    if (pxlDigmapsSim) {
       mPxlDb->setPxlDigmapsSim(pxlDigmapsSim->GetTable());
+      pxlDigmapsSim->Print(0,1);
    }
    else {
       LOG_WARN << "InitRun : No access to pxlDigmapsSim table, abort PXL reconstruction" << endm;
@@ -173,6 +183,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    St_pxlSimPar *pxlSimPar = (St_pxlSimPar *)GetDataBase("Calibrations/pxl/pxlSimPar");
    if (pxlSimPar) {
       mPxlDb->setPxlSimPar(pxlSimPar->GetTable());
+      pxlSimPar->Print(0,1);
    }
    else {
       LOG_WARN << "InitRun : No access to pxlSimPar table, abort PXL reconstruction" << endm;
@@ -192,6 +203,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    datasetTps = (St_pxlSensorTps *) dbTps->Find("pxlSensorTps");
    if (datasetTps) {
       mPxlDb->setThinPlateSpline(datasetTps->GetTable());
+      if(Debug()) datasetTps->Print(0,1);
    }
    else {
       LOG_WARN << "ERROR: dataset does not contain tps table" << endm;

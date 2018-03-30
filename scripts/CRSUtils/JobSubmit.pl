@@ -2139,9 +2139,14 @@ file = $prefix$mfile.MuDst.root
 [output-2]
 path = $SCRATCH
 type = $stagedon
+file = $prefix$mfile.picoDst.root   
+   
+[output-3]
+path = $SCRATCH
+type = $stagedon
 file = $prefix$mfile.hist.root      
 
-[output-3]
+[output-4]
 path = $SCRATCH
 type = $stagedon
 file = $prefix$mfile.tags.root     
@@ -2155,7 +2160,7 @@ exec = $SPATH/bfcca
 
 [main]
 num_inputs = 1
-num_outputs = 4
+num_outputs = 5
 queue = highest
 
 [input-0]
@@ -2179,9 +2184,14 @@ file = $prefix$mfile.MuDst.root
 [output-1]
 path = $SCRATCH
 type = $stagedon
-file = $prefix$mfile.hist.root
+file = $prefix$mfile.picoDST.root
 
 [output-2]
+path = $SCRATCH
+type = $stagedon
+file = $prefix$mfile.hist.root
+
+[output-3]
 path = $SCRATCH
 type = $stagedon
 file = $prefix$mfile.tags.root      
@@ -2195,7 +2205,7 @@ exec = $SPATH/bfcca
 
 [main]
 num_inputs = 1
-num_outputs = 3
+num_outputs = 4
 queue = highest
 
 [input-0]
