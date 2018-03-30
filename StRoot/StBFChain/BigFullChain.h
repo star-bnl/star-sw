@@ -1579,8 +1579,8 @@ Bfc_st BFC[] = { // standard chains
 
 
   // Time Of Flight related options
-  {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
-  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
+  {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib,geant","StMaker","StChain","ToF Chain",kFALSE},
+  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib,geant"        ,"StMaker","StChain","ToFx Chain",kFALSE},
   {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
    "TOF Data base chain",                                                                           kFALSE},
   {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
