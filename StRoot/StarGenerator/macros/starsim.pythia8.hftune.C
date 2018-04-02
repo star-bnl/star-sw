@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 //
 // Example macro for loading a "tune" deck.  It is based on work done by
@@ -53,7 +53,7 @@ void command( TString cmd )
 void trig( Int_t n=1 )
 {
   chain->EventLoop(n);
-  primary->event()->Print();
+  _primary->event()->Print();
   
 }
 // ----------------------------------------------------------------------------
@@ -122,7 +122,7 @@ void Pythia8( TString config="pp:W" )
   // per run for simulation.
   pythia8->Set("Main:numberOfEvents = 1 ");
 
-  primary -> AddGenerator( pythia8 );
+  _primary -> AddGenerator( pythia8 );
   
 }
 // ----------------------------------------------------------------------------
@@ -180,12 +180,12 @@ void starsim( Int_t nevents=10000, Int_t rngSeed=1234 )
   // before the geant maker
   //
   //  StarPrimaryMaker *
-  primary = new StarPrimaryMaker();
+  _primary = new Star_PrimaryMaker();
   {
-    primary -> SetFileName( "pythia8.starsim.root");
-    primary -> SetVertex( 0.1, -0.1, 0.0 );
-    primary -> SetSigma ( 0.1,  0.1, 30.0 );
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( "pythia8.starsim.root");
+    _primary -> SetVertex( 0.1, -0.1, 0.0 );
+    _primary -> SetSigma ( 0.1,  0.1, 30.0 );
+    chain -> AddBefore( "geant", _primary );
   }
 
   //
@@ -198,12 +198,12 @@ void starsim( Int_t nevents=10000, Int_t rngSeed=1234 )
   //   simulation.  (To run generator in standalone mode,
   //   set ptmin=1.0E9.)
   //                    ptmin  ptmax
-  primary->SetPtRange  (1.0E9,  -1.0);         // GeV
-  //  primary->SetPtRange  (0.0,    -1.0);         // GeV
+  _primary->SetPtRange  (1.0E9,  -1.0);         // GeV
+  //  _primary->SetPtRange  (0.0,    -1.0);         // GeV
   //                    etamin etamax
-  primary->SetEtaRange ( -3.0, +3.0 );
+  _primary->SetEtaRange ( -3.0, +3.0 );
   //                    phimin phimax
-  primary->SetPhiRange ( 0., TMath::TwoPi() );
+  _primary->SetPhiRange ( 0., TMath::TwoPi() );
   
   
   // 
@@ -212,14 +212,14 @@ void starsim( Int_t nevents=10000, Int_t rngSeed=1234 )
   //   y = 0 gauss width = 1mm
   //   z = 0 gauss width = 30cm
   // 
-  primary->SetVertex( 0., 0., 0. );
-  primary->SetSigma( 0.1, 0.1, 30.0 );
+  _primary->SetVertex( 0., 0., 0. );
+  _primary->SetSigma( 0.1, 0.1, 30.0 );
 
   
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Setup geometry and set starsim to use agusread for input

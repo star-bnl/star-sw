@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
@@ -75,7 +75,7 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
     if ( tune ) pythia6->PyTune( tune );
   }
     
-  primary->AddGenerator(pythia6);
+  _primary->AddGenerator(pythia6);
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -107,10 +107,10 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   // before the geant maker
   //
   //  StarPrimaryMaker *
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "pythia6.starsim.root");
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( "pythia6.starsim.root");
+    chain -> AddBefore( "geant", _primary );
   }
 
   //
@@ -126,7 +126,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   // ptmin will always be the low pT cutoff.
   //
   //                    ptmin  ptmax
-  primary->SetPtRange  (0.0,  -1.0);         // GeV
+  _primary->SetPtRange  (0.0,  -1.0);         // GeV
   //
   // If etamax < etamin, there is no cut in eta.
   // otherwise, particles outside of the specified range are cut.
@@ -137,7 +137,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //  phirange will be mapped into 0 to 2 pi internally.
   //
   //                    phimin phimax
-  primary->SetPhiRange ( 0., TMath::TwoPi() );
+  _primary->SetPhiRange ( 0., TMath::TwoPi() );
   
   
   // 
@@ -146,13 +146,13 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //   y = 0 gauss width = 1mm
   //   z = 0 gauss width = 30cm
   // 
-  primary->SetVertex( 0., 0., 0. );
-  primary->SetSigma( 0.1, 0.1, 30.0 );
+  _primary->SetVertex( 0., 0., 0. );
+  _primary->SetSigma( 0.1, 0.1, 30.0 );
 
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Setup geometry and set starsim to use agusread for input

@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
@@ -33,7 +33,7 @@ void trig( Int_t n=0 )
   for ( Int_t i=0; i<n+1; i++ ) {
     chain->Clear();
     chain->Make();
-    primary -> event() -> Print();
+    _primary -> event() -> Print();
   }
 }
 StarHijing *hijing = 0; 
@@ -51,8 +51,8 @@ void Hijing()
 
 
 
-  primary -> AddGenerator(hijing);
-  primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
+  _primary -> AddGenerator(hijing);
+  _primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
   
 }
 // ----------------------------------------------------------------------------
@@ -86,10 +86,10 @@ void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
   // Create the primary event generator and insert it
   // before the geant maker
   //
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "hijing.starsim.root");
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( "hijing.starsim.root");
+    chain -> AddBefore( "geant", _primary );
   }
 
 
@@ -101,7 +101,7 @@ void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   // Configure HIJING simulation
   HiParnt_t &hiparnt = hijing->hiparnt();
