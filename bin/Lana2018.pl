@@ -8,14 +8,13 @@ if (-d "/net/l401/data/scratch1/fisyak/") {
 } else {
   @list = glob "/star/data03/daq/2018/*/*/st_laser*.daq";
 }
-#print "list = @list\n";
 foreach my $fullpath (@list) {
   my $file = File::Basename::basename($fullpath,".daq");
   my $rootfile = "./" . $file . ".laser.root";
   if (-r $rootfile) {next;}
-   my $glob = "./*/" . $file . ".laser.root";
-   my @rootfiles = glob $glob; #print "glob = $glob rootfiles = @rootfiles\n";
-   if ($#rootfiles >= 0) {next;}
+  my $glob = "./*/" . $file . ".laser.root";
+  my @rootfiles = glob $glob;# print "glob = $glob rootfiles = @rootfiles\n";
+  if ($#rootfiles >= 0) {next;}
   $rootfile = $file;
   $rootfile =~ s/_adc//;
   $rootfile .= "_adc.laser.root";
