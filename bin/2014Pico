@@ -5,10 +5,10 @@ cput cos=3 st_physics_15094070_raw_2000053.picoDst.root
 ============== environment ==============
 #set TRIG = AuAu_200_production_mid_2014;
 #
-set TRIG = AuAu_200_production_2014
 set TRIG = AuAu_200_production_low_2014
+set TRIG = AuAu_200_production_2014
 set PicoDIR  = /gpfs02/eic/ayk/STAR/reco/Pico/2014/${TRIG};
-set FemtoDIR = /gpfs01/star/pwg/fisyak/Femto/2014/${TRIG};
+set FemtoDIR = /gpfs01/star/pwg/fisyak/Femto/2014/${TRIG}new;
 set hpssDir = reco/Pico/2014/${TRIG}
 
 ================================================================================
@@ -63,6 +63,21 @@ end
 cd ${PicoDIR};
 foreach f (`ls -1d */*/Chain.log`)
   set dir = `dirname ${f}`;
+  cd ${FemtoDIR}
+  if (! -d ${dir}) mkdir -p ${dir}
+  cd  ${dir};  pwd;
+  if (! -r Done && ! -r Chain.log) then
+    FemtoDST2014.pl
+    if ( ! $? ) then
+      lsf ~/xml/FemtoDST2014.xml;
+    else
+      touch Done;
+    endif
+  endif
+end
+===============Reproduction of FemtoDst=================================================================
+cd ${PicoDIR};
+foreach dir (`ls -1d ???/15*`)
   cd ${FemtoDIR}
   if (! -d ${dir}) mkdir -p ${dir}
   cd  ${dir};  pwd;

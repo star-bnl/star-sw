@@ -4,7 +4,7 @@ use Cwd;
 use File::stat;
 my $debug = 0;
 my $pwd = cwd();
-my $trig = File::Basename::basename(File::Basename::dirname(File::Basename::dirname($pwd))); print "trig = $trig\n" if ($debug);
+my $trig = File::Basename::basename(File::Basename::dirname(File::Basename::dirname($pwd)),new); print "trig = $trig\n" if ($debug);
 my $day = File::Basename::basename(File::Basename::dirname($pwd)); print "day = $day\n" if ($debug);
 my $run =  File::Basename::basename($pwd);                         print "run = $run\n" if ($debug);
 #my $dir = "/star/subsys/tpc/fisyak/reco/2014/50M/SL15StiCAKFV/" . $day . "/" . $run;

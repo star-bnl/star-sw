@@ -35,7 +35,7 @@ namespace StPicoUtilities {
   std::array<int, 16> calculateRefMult(const StMuDst& muDst) {
 
     std::array<int, 16> custom_refMult = {};
-
+    if (! muDst.primaryTracks()) return custom_refMult;
     for (Int_t itrk = 0; itrk < muDst.primaryTracks()->GetEntries(); ++itrk) {
       StMuTrack* track = muDst.primaryTracks(itrk) ;
       if (!track) continue;

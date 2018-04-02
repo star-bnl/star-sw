@@ -18,6 +18,7 @@
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
@@ -274,11 +275,19 @@ void StKFParticleInterface::CollectPIDHistograms()
   fCollectPIDHistograms = true;
 }
 
-bool StKFParticleInterface::IsGoodPV(const KFVertex& pv)
+bool StKFParticleInterface::IsGoodPV(const KFVertex& V)
 {
-  bool isGoodPV = (pv.X() > -0.3) && (pv.X() < -0.1) &&
-                  (pv.Y() > -0.27) && (pv.Y() < -0.13);
+#if 0
+  bool isGoodPV = (V.X() > -0.3) && (V.X() < -0.1) &&
+                  (V.Y() > -0.27) && (V.Y() < -0.13);
   return isGoodPV;
+#else
+  if (StMuDst::VxXmin() < StMuDst::VxXmax() && ! (StMuDst::VxXmin() < V.X() && V.X() < StMuDst::VxXmax())) {return kFALSE;}
+  if (StMuDst::VxYmin() < StMuDst::VxYmax() && ! (StMuDst::VxYmin() < V.Y() && V.Y() < StMuDst::VxYmax())) {return kFALSE;}
+  if (StMuDst::VxZmin() < StMuDst::VxZmax() && ! (StMuDst::VxZmin() < V.Z() && V.Z() < StMuDst::VxZmax())) {return kFALSE;}
+  if (StMuDst::VxRmax() > 0 && TMath::Sqrt(V.X()*V.X() + V.Y()*V.Y())  > StMuDst::VxRmax())                {return kFALSE;}
+  return kTRUE;
+#endif
 }
 
 bool StKFParticleInterface::GetTrack(const StDcaGeometry& dcaG, KFPTrack& track, int q, int index)

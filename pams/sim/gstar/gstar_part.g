@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.54 2017/10/30 15:23:54 jwebb Exp $
+* $Id: gstar_part.g,v 1.55 2018/03/30 14:11:07 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.55  2018/03/30 14:11:07  jwebb
+* Added Lambda_c- with G3 id of 208.  (note: requires corresponding update to
+* StarClassLibrary...)
+*
 * Revision 1.54  2017/10/30 15:23:54  jwebb
 * Add K*0(892) aka pdg 313 to gstar with g3id = 10013
 *
@@ -399,6 +403,9 @@ MODULE gstar_part Is the STAR Particle Database
 ************************************************************************************ 
   Particle Lac2      code=207       TrkTyp=3 mass=2.285   charge=1  tlife=0.206e-12,
                      pdg=4122       bratio= { 1, }       mode= { 141208, }
+
+  Particle Lac2      code=208       TrkTyp=3 mass=2.285   charge=-1 tlife=0.206e-12,
+                     pdg=-4122      bratio= { 1, }       mode= { 151109, }
 
 
   Particle S1385plus     code=701   TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23,

@@ -745,6 +745,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*St_tpcPadConfigC::instance()->numberOfRows(20), 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",St_tpcPadConfigC::instance()->numberOfRows(20), 100,0,10.);
+  static Hists3D dX3iTPC("dX3","log(dEdx/Pion)","row"," dX(cm)",St_tpcPadConfigC::instance()->numberOfRows(20), 100,0,10.);
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
 #if 0
@@ -1130,14 +1131,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (Time)    Time->Fill(vars);
 	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
-	if (! St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) 
+	if (! St_tpcPadConfigC::instance()->iTPC(FdEdx[k].sector)) {
 	  Z3.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistance,Vars);
-	else 
+	  dX3.Fill(FdEdx[k].row,FdEdx[k].F.dx, Vars);
+	} else {
 	  Z3iTPC.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistance,Vars);
+	  dX3iTPC.Fill(FdEdx[k].row,FdEdx[k].F.dx, Vars);
+	}
 	//	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
-	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(FdEdx[k].sector)*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
+	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(20)*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
-	dX3.Fill(FdEdx[k].row,FdEdx[k].F.dx, Vars);
       }
     }
   }

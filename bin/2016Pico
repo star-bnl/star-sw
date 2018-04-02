@@ -120,7 +120,7 @@ end
 foreach day (`ls -1d ???`)
   cd $day;
   foreach d (`ls -1d 1*`)
-    cd $d; root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; cd -;
+    cd $d; ln -s ../../.sl* .; root.exe -q -b 'Chain.C+("*.root","PicoDst")' | tee Chain.log; cd -;
   end
   cd ..
 end

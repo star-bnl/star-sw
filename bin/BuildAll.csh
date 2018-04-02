@@ -23,7 +23,9 @@ foreach gcc (${list})
       setup ${gcc}
       setup ${bit}
       starver ${STAR_LEVEL}
-      time cons -k >& build.${gcc}.${opt}.${bit}.`date +%m%d%y:%H%M`.log &
+      set log = build.${gcc}.${opt}.${bit}.`date +%m%d%y:%H%M`.log;
+      printenv > ${log};
+      time cons -k >>& ${log} &
     end
   end
 end

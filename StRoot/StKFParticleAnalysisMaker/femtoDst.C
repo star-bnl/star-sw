@@ -10,7 +10,7 @@ void femtoDst(Int_t N = 10000000, const Char_t *input = "st_physics_adc_17125034
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("bfc.C");
-  bfc(0,"RpicoDst,FemtoDst,mysql,nodefault,quiet",input,output);
+  bfc(0,"ry2014,RpicoDst,FemtoDst,mysql,nodefault,quiet",input,output);
   //  bfc(0,"ry2016,RpicoDst,FemtoDst,mysql,nodefault,quiet",input,output);
   StKFParticleInterface::instance()->SetTriggerMode();
   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
@@ -39,9 +39,11 @@ void femtoDst(Int_t N = 10000000, const Char_t *input = "st_physics_adc_17125034
   StKFParticleInterface::instance()->AddDecayToReconstructionList(-4122);
   maker = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
   if (! maker) return;
+#if 0
   new StGoodTrigger(triggerSet);
   maker->SetAttr(".Privilege",1);
   maker->SetStatus("*",1);
+#endif
   TChain *tree = maker->chain();
   Long64_t nentries = tree->GetEntries();
   if (nentries <= 0) return;
