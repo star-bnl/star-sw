@@ -1,5 +1,5 @@
-TChain *tChain = 0;
 #if defined(__CINT__) && ! defined(__MAKECINT__)
+TChain *tChain = 0;
 TChain *Chain(const Char_t *TreeName = "MuDst") {
   TCollection *files = gROOT->GetListOfFiles();
   if (! files) return tChain;
@@ -34,6 +34,7 @@ TChain *Chain(const Char_t *TreeName = "MuDst") {
 #include "TFile.h"
 #include "TList.h"
 #include "TDirIter.h"
+TChain *tChain = 0;
 TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "MuDst") {
   TDirIter Dir(files);
   //  TTreeIter iter(TreeName);
