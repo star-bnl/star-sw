@@ -51,6 +51,9 @@ responsible for creating the scripts and the file lists. -->
     <void method="put">
       <string>CSHApplication</string>
       <object id="CSHApplication" class="gov.bnl.star.offline.scheduler.Dispatchers.CSHApplication">
+        <void property="noSpawn">
+          <boolean>false</boolean>
+        </void>
         <void property="recurseCopy">
           <boolean>true</boolean>
         </void>
@@ -2173,6 +2176,7 @@ delegate_job_GSI_credentials_lifetime = 864000</string> <!--10 day proxy-->
                           <void property="maxElapseTime"> <int>30000</int></void>
                           <void property="application"><object idref="CSHApplication"/></void>
                           <void property="pool"><string>shared-chos</string></void>
+                          <void property="defaultMemory"> <int>2500</int></void>
                       </object>
                   </void>
                       
@@ -2185,6 +2189,7 @@ delegate_job_GSI_credentials_lifetime = 864000</string> <!--10 day proxy-->
                           <void property="maxElapseTime"> <int>30000</int></void>
                           <void property="application"><object idref="CSHApplication"/></void>
                           <void property="pool"><string>shared</string></void>
+                          <void property="defaultMemory"> <int>2500</int></void>
                       </object>
                    </void>
 

@@ -92,7 +92,6 @@ endif
 #endsw
 
 switch ($DOMAINNAME)
-    case "usatlas.bnl.gov":
     case "rcf.bnl.gov":
         setenv DOMAINNAME "rhic.bnl.gov"
     breaksw
