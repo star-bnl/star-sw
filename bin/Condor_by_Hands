@@ -1,0 +1,9 @@
+@ count = 0
+foreach f (`ls -1tr sched*.csh`)
+  set log = ${f}.log	
+  if (-r ${log}) continue;	
+  set d = `dirname ${f}`;
+  csh -x ${f} >& ${log} &
+  @ count++;  echo "count $count";
+  if ($count > 24) break;
+end

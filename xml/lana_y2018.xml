@@ -42,4 +42,5 @@
 </command>
 <!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
 <input URL="command:Lana2018.pl"/>
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/088/19088006/st_laser_19088006_raw_0000007.daq" /> -->
 </job>
