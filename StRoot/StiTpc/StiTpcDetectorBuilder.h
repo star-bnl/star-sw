@@ -17,6 +17,8 @@ public:
     double phiForEastSector(UInt_t iSector, UInt_t nSectors) const;
     void         useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
+    static Int_t StiRow(Int_t sector, Int_t padrow);
+    static void  testStiRow();
  protected:
     StiMaterial * _fcMaterial;    
 };

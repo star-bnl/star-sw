@@ -14,6 +14,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
+#include "StiTpcDetectorBuilder.h"
 #include "Sti/StiHitTest.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
@@ -72,7 +73,8 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 #endif
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
-      detector = _detector->getDetector(row,stiSector);
+      Int_t StiRow = StiTpcDetectorBuilder::StiRow(sector+1,row+1)-1;
+      detector = _detector->getDetector(StiRow,stiSector);
       assert(detector);
       
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
