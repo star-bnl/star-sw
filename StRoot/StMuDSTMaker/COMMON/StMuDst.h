@@ -158,16 +158,30 @@ public:
   void setMtdArray(StMtdCollection *mtd_coll); 
   static StMuDst *instance() {return fgMuDst;}
   void SetInstance() {fgMuDst = this;}
-  static PicoVtxMode vtxMode() {return mVtxMode;}
-  static Double_t dca3Dmax() {return fgdca3Dmax;}
+  static PicoVtxMode vtxMode()  {return mVtxMode;}
+  static Float_t     TpcVpdVzDiffCut() {return mTpcVpdVzDiffCut;}
+  static Double_t    erMax()    {return fgerMax;}	
+  static Double_t    dca3Dmax() {return fgdca3Dmax;} 	
+  static Double_t    VxXmin()   {return fgVxXmin;}	
+  static Double_t    VxXmax()   {return fgVxXmax;}	
+  static Double_t    VxYmin()   {return fgVxYmin;}	
+  static Double_t    VxYmax()   {return fgVxYmax;}	
+  static Double_t    VxZmin()   {return fgVxZmin;}	
+  static Double_t    VxZmax()   {return fgVxZmax;}  	
+  static Double_t    VxRmax()   {return fgVxRmax;}    
+  static PicoVtxMode VtxMode()  {return mVtxMode;}   
  protected:
   static Double_t  fgerMax;
   static Double_t  fgdca3Dmax; 
-  static Double_t  fgVxXmin, fgVxXmax, fgVxYmin, fgVxYmax;
-  static Double_t  fgVxZmin, fgVxZmax, fgVxRmax;
+  static Double_t  fgVxXmin;
+  static Double_t  fgVxXmax;
+  static Double_t  fgVxYmin;
+  static Double_t  fgVxYmax;
+  static Double_t  fgVxZmin;
+  static Double_t  fgVxZmax;
+  static Double_t  fgVxRmax;
   static PicoVtxMode mVtxMode;
   static Float_t   mTpcVpdVzDiffCut;
-  static Float_t   TpcVpdVzDiffCut() {return mTpcVpdVzDiffCut;}
 
   static StMuDst *fgMuDst; //!
   /// array of TClonesArrays

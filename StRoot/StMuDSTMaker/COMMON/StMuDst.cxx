@@ -1588,6 +1588,8 @@ Bool_t StMuDst::selectVertex() {
   for (UInt_t iVtx = 0; iVtx < numberOfPrimaryVertices(); ++iVtx)       {
     StMuPrimaryVertex* vtx = primaryVertex(iVtx);
     if (!vtx) continue;
+    StThreeVectorD E(vtx->posError());
+    if (E.perp() > 999.0) continue;
     StThreeVectorD V(vtx->position());
 #ifdef __HIST_PV__
     if (pVrZ) {
