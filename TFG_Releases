@@ -23,6 +23,6 @@
  TFG18c FemtoDst                                                     2018-02-06 18:39:50 -0500  (HEAD, tag: TFG18c_1, master)
  TFG18d Merge with Maksym KFParticle, fix dEdxPull,StiTpc for iTPC   2018-02-26 16:12:12 -0500  (tag: TFG18d_1)
  TFG18e adjust VMC embedding for RCF                                 2018-03-11 23:39:34 -0400  (HEAD -> master, tag: TFG18e)
- TFG18f introduce StGoodTrigger                                      2018-04-02 12:10:55 -0400  (HEAD, tag: TFG18g_1, origin/master, origin/HEAD, master)
+ TFG18f introduce StGoodTrigger                                      2018-04-02 12:10:55 -0400  (HEAD, tag: TFG18g_2, origin/master, origin/HEAD, master)
  TFG18g Reshape Sti for sector 20                                    
  .DEV2  head of TFG git repository, no V5          
