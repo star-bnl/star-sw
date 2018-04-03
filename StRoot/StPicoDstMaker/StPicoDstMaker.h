@@ -2,9 +2,7 @@
 #define StPicoDstMaker_h
 
 #include "StChain/StMaker.h"
-#include "StPicoDstMaker/StPicoArrays.h"
-#include "StPicoDstMaker/StPicoBbcFiller.h"
-#include "StPicoDstMaker/StPicoEpdFiller.h"
+#include "StPicoEvent/StPicoArrays.h"
 #include "StPicoDstMaker/StPicoFmsFiller.h"
 
 class TClonesArray;
@@ -94,6 +92,9 @@ class StPicoDstMaker : public StMaker {
   void fillBTofHits();
   void fillMtdHits();
 
+  void fillEpdHits();
+  void fillBbcHits();
+
  /**
   * Returns various measurements by the BEMC and BSMD detectors corresponding to
   * a given global track.
@@ -165,8 +166,6 @@ class StPicoDstMaker : public StMaker {
   TClonesArray*   mPicoArrays[StPicoArrays::NAllPicoArrays];
   char            mStatusArrays[StPicoArrays::NAllPicoArrays];
 
-  StPicoBbcFiller  mBbcFiller;
-  StPicoEpdFiller  mEpdFiller;
   StPicoFmsFiller  mFmsFiller;
 
   ClassDef(StPicoDstMaker, 0)
