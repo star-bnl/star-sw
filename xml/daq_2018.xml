@@ -6,8 +6,8 @@
    setenv NODEBUG yes
 #.DEV2
    setup 64b
-   starver .DEV2
-#   starver TFG18e
+#   starver .DEV2
+   starver TFG18g
 #dev
 #   setup gcc
 #   starver dev
