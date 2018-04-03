@@ -15,17 +15,17 @@ class StDcaGeometry;
 class StPicoTrack : public TObject {
 
  public:
-  //Default constructor
+  /// Default constructor
   StPicoTrack();
-  //Constructor that takes global and primary trakcs
-  //Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
+  /// Constructor that takes global and primary trakcs
+  /// Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
   StPicoTrack(StMuTrack const* globalTrack, StMuTrack const* primaryTrack,
 	      double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
-  //Copy constructor
+  /// Copy constructor
   StPicoTrack(const StPicoTrack &track);
-  //Destructor
+  /// Destructor
   virtual ~StPicoTrack();
-  //Print track parameters
+  /// Print track parameters
   virtual void Print(Char_t const* option = "") const;
 
   /// track id, copied from StMuTrack, StTrack
@@ -44,6 +44,14 @@ class StPicoTrack : public TObject {
   /// dca point to StPicoEvent::mPrimaryVertex in global coordinates .
   /// It is the same as origin. To get gDCA = origin(or dcaPoint) + prim.vtx.position
   StThreeVectorF const& dcaPoint() const;
+  /// Next functions return DCA (or its components) of the global track
+  /// to the point with coordinates (pVtxX, pVtxY, pVtxZ)
+  Float_t gDCAx(Float_t pVtxX) const;
+  Float_t gDCAy(Float_t pVtxY) const;
+  Float_t gDCAz(Float_t pVtxZ) const;
+  Float_t gDCAxy(Float_t pVtxX, Float_t pVtxZ);
+  Float_t gDCA(Float_t pVtxX, Float_t pVtxY, Float_t pVtxZ);
+  /// Charge of the track is encoded in nHitsFit as: nHitsFit * charge
   Short_t charge() const;
   Int_t   nHits() const;       //if(isPrimary)? nHitsFit-1 : nHits=nHitsFit 
   Int_t   nHitsFit() const;
@@ -71,10 +79,10 @@ class StPicoTrack : public TObject {
   bool isHFTTrack() const;
   bool hasHft4Layers() const;
 
-  /** Checks whether this track is associated with a primary vertex. */
+  /// Checks whether this track is associated with a primary vertex
   bool isPrimary() const;
 
-  // MTD pid traits
+  /// MTD pid traits
   void setBEmcPidTraitsIndex(Int_t index);
   void setBTofPidTraitsIndex(Int_t index);
   void setMtdPidTraitsIndex(Int_t index);
@@ -102,7 +110,7 @@ class StPicoTrack : public TObject {
   Short_t  mNSigmaElectron;   // nsigmaE * 100
   UInt_t   mTopologyMap[2];   // Toplogy Map data0 and data1. See StEvent/StTrackTopologyMap.cxx
 
-  // pidTraits
+  /// pidTraits
   Short_t  mBEmcPidTraitsIndex;  // index of the EMC  pidTratis in the event
   Short_t  mBTofPidTraitsIndex; // index of the BTOF pidTratis in the event
   Short_t  mMtdPidTraitsIndex;  // index of the MTD  pidTratis in the event
@@ -121,6 +129,9 @@ inline StThreeVectorF const& StPicoTrack::pMom() const { return mPMomentum; }
 inline StThreeVectorF const& StPicoTrack::gMom() const { return mGMomentum; }
 inline StThreeVectorF const& StPicoTrack::origin() const { return mOrigin; }
 inline StThreeVectorF const& StPicoTrack::dcaPoint() const { return mOrigin; }
+inline Float_t StPicoTrack::gDCAx(Float_t x) const { return (mOrigin.x() - x); }
+inline Float_t StPicoTrack::gDCAy(Float_t y) const { return (mOrigin.y() - y); }
+inline Float_t StPicoTrack::gDCAz(Float_t z) const { return (mOrigin.z() - z); }
 inline Short_t StPicoTrack::charge() const { return (mNHitsFit > 0) ? 1 : -1; }
 inline Int_t   StPicoTrack::nHits() const { return ( isPrimary() ) ? (nHitsFit() - 1) : nHitsFit(); }
 inline Int_t   StPicoTrack::nHitsFit() const { return (mNHitsFit > 0) ? (Int_t)mNHitsFit : (Int_t)(-1 * mNHitsFit); }

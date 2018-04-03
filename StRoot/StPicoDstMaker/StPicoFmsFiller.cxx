@@ -5,7 +5,7 @@
 #include "StMuDSTMaker/COMMON/StMuFmsHit.h"
 
 #include "StPicoDstMaker/StPicoFmsFiller.h"
-#include "StPicoDstMaker/StPicoDst.h"
+#include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoFmsHit.h"
 
 //_________________
