@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.15 2018/03/30 23:36:32 smirnovd Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.16 2018/04/04 18:48:35 smirnovd Exp $
  *
  */
 
@@ -292,7 +292,7 @@ Int_t StPrepEmbedMaker::Make()
   }
 
   // Extract info for mult for this event
-  const Int_t numberOfPrimaryTracks = static_cast<int>(mMoreTree ? mMoreTree->GetV1()[0] : mTree->GetV1()[0]);
+  const Int_t numberOfPrimaryTracks = mMoreTree ? mMoreTree->GetV1()[0] : mTree->GetV1()[0];
   const Int_t npart = getMultiplicity( *EvtHddr, numberOfPrimaryTracks ) ;
 
   nFound = (Int_t) mTree->Draw("primaryVertexX:primaryVertexY:primaryVertexZ:TriggerId",
@@ -890,6 +890,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.16  2018/04/04 18:48:35  smirnovd
+ * After a long and fruitful discussion with DK it was decided to remove the static_cast. The world is in balance again and veprbl can sleep well at night
+ *
  * Revision 1.15  2018/03/30 23:36:32  smirnovd
  * Fix improper cast revealed in 64-bit build
  *
