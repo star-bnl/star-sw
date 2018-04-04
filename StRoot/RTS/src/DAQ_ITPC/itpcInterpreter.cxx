@@ -373,7 +373,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 				for(int i=0;i<4;i++) {
 					u_int expect_mask ;
-					u_int *cur_d = d ;
+					//u_int *cur_d = d ;
 
 					switch(i) {
 					case 0 :
@@ -618,6 +618,146 @@ int itpcInterpreter::sampa_ch_scan()
 	return err ;
 }
 
+u_int *itpcInterpreter::sampa_ch_hunt(u_int *start, u_int *end) 
+{
+	// I expect to be pointed to the SAMPA channel header!
+	u_int *data = start ;
+	u_int *data_start ;
+
+	u_int d ;
+	u_int err  ;
+	u_int h[6] ;
+	bool hamming_err ;
+	u_int l_sampa_bx ;
+	u_int type, words ;
+	unsigned long long hc ;
+	u_int hh[2] ;
+	bool uncorrectable ;
+	int p_cou ;
+	u_int hdr[2] ;
+
+	u_int sampa_id, sampa_ch ;	// shadow class variables on purpose!
+
+
+	retry:;
+
+	err = 0 ;
+	hdr[0] = hdr[1] = 0xFFFFEEEE ;
+
+	data_start = data ;
+
+	if(data>=end) goto err_end ;
+	d = *data++ ;
+	hdr[0] = d ;
+
+	if(d & 0xC0000000) {
+		err |= 0x1 ;
+		//LOG(ERR,"%d: Bad Hdr 1",rdo_id) ;
+		goto err_ret ;
+	}
+
+	h[0] = (d >> 20) & 0x3FF ;
+	h[1] = (d >> 10) & 0x3FF ;
+	h[2] = d & 0x3FF ;
+	
+	if(data>=end) goto err_end ;
+	d = *data++ ;
+	hdr[1] = d ;
+
+	if(d & 0xC0000000) {
+		err |= 0x2 ;
+		//LOG(ERR,"%d: Bad Hdr 2",rdo_id) ;
+		goto err_ret ;
+	}
+
+	h[3] = (d >> 20) & 0x3FF ;
+	h[4] = (d >> 10) & 0x3FF ;
+
+	h[5] = d & 0x3FF ;
+
+//	if(h[5] != 0xAB) {
+//		err |= 0x4 ;
+//		goto err_ret ;
+//	}
+
+
+	type = h[0] >> 7 ;
+	words = h[1] ;
+	sampa_id = h[2] & 0xF ;
+	sampa_ch = (h[2]>>4) & 0x1F ;
+
+
+
+	l_sampa_bx = (h[2]&0x200) >> 9 ;
+	l_sampa_bx |= (h[3]<<1) ;
+	l_sampa_bx |= (h[4]&0x1FF)<<11 ;
+
+	LOG(WARN,"....... %d %d %u",sampa_id,sampa_ch,l_sampa_bx) ;
+
+	// check parity
+	p_cou = 0 ;
+	for(int i=0;i<=4;i++) {
+		for(int j=0;j<10;j++) {
+			if(h[i] & (1<<j)) p_cou++ ;
+		}
+	}
+
+	if(p_cou&1) {	// parity error
+		err |= 0x11 ;
+		goto err_ret ;
+	}
+
+
+	hc = ((long long)h[4]<<40)|((long long)h[3]<<30)|(h[2]<<20)|(h[1]<<10)|h[0];
+	hh[0] = hc & 0x3FFFFFFF ;
+	hh[1] = (hc>>30) ;
+
+
+	hammingdecode(hh, hamming_err,uncorrectable,0) ;
+
+
+	if(hamming_err) {
+		//LOG(ERR,"%d:%d: Type %d, words %d, SAMPA %d:%d, BX %u, errors %d:%d",rdo_id,fee_port,type,words,sampa_id,sampa_ch,l_sampa_bx,parity_err,hamming_err) ;
+		// and I should do something here!
+		err |= 0x10 ;
+		goto err_ret ;
+	}
+
+
+	switch(type) {
+	case 0 :	// heartbeat
+		if(words != 0) {
+			err |= 0x20 ;
+			goto err_ret ;
+		}
+		if(sampa_ch != 21) {
+			err |= 0x21 ;
+			goto err_ret ;
+		}
+		break ;
+	case 4 :	// physics
+		break ;
+	default :
+		//LOG(ERR,"%d: Type %d, words %d, SAMPA %d:%d, BX %u",rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx) ;
+		err |= 0x40 ;
+		goto err_ret ;
+	}
+
+
+	err_ret:;
+	if(err) {
+		LOG(WARN,"... 0x%08X 0x%08X",hdr[0],hdr[1]) ;
+		goto retry ;
+	}
+
+	LOG(WARN,"Found SAMPA %d:%d [0x%08X 0x%08X]",sampa_id,sampa_ch,hdr[0],hdr[1]) ;
+	return data_start ;	// got one!
+
+	err_end:;
+
+	LOG(ERR,"Found no SAMPA channels") ;
+	return 0 ;
+}
 
 u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 {
@@ -633,8 +773,15 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	u_int lane_hdr ;
 	bool parity_err ;
 	bool hamming_err ;
+	unsigned long long hc ;
+	u_int hh[2] ;
+	bool uncorrectable ;
+	int p_cou ;
+	u_int hdr[2] ;
 
 	data = start ;
+
+
 	// first datum is the 0xB....
 	d = *data++ ;
 	lane_hdr = d ;
@@ -648,12 +795,14 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	ch_loop_cou++ ;		// count how many channels we found
 
+	// data is now at the SAMPA header
 	d = *data++ ;
+	hdr[0] = d ;
 
 	if(d & 0xC0000000) {
 		err |= 0x100 ;
 		LOG(ERR,"%d: Bad Hdr 1",rdo_id) ;
-		d = *data++ ;
+		goto err_ret ;
 	}
 
 	h[0] = (d >> 20) & 0x3FF ;
@@ -661,11 +810,12 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	h[2] = d & 0x3FF ;
 	
 	d = *data++ ;
+	hdr[1] = d ;
 
 	if(d & 0xC0000000) {
 		err |= 0x200 ;
 		LOG(ERR,"%d: Bad Hdr 2",rdo_id) ;
-		d = *data++ ;
+		goto err_ret ;
 	}
 
 	h[3] = (d >> 20) & 0x3FF ;
@@ -692,8 +842,10 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	l_sampa_bx |= (h[4]&0x1FF)<<11 ;
 
 
+	//LOG(TERR,"+++ %d %d %u",sampa_id,sampa_ch,l_sampa_bx) ;
+
 	// check parity
-	int p_cou = 0 ;
+	p_cou = 0 ;
 	for(int i=0;i<=4;i++) {
 		for(int j=0;j<10;j++) {
 			if(h[i] & (1<<j)) p_cou++ ;
@@ -708,12 +860,12 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	}
 
 
-	unsigned long long hc = ((long long)h[4]<<40)|((long long)h[3]<<30)|(h[2]<<20)|(h[1]<<10)|h[0];
-	u_int hh[2] ;
+	hc = ((long long)h[4]<<40)|((long long)h[3]<<30)|(h[2]<<20)|(h[1]<<10)|h[0];
+
 	hh[0] = hc & 0x3FFFFFFF ;
 	hh[1] = (hc>>30) ;
 
-	bool uncorrectable ;
+
 	hammingdecode(hh, hamming_err,uncorrectable,0) ;
 
 
@@ -744,6 +896,8 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		break ;
 	case 1 :	// trigger overrun
 		LOG(ERR,"%d: Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X],fee_port %d",rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr,fee_port) ;
+		err |= 8 ;
+		goto err_ret ;
 		break ;
 	default :
 		LOG(ERR,"%d: Type %d, words %d, SAMPA %d:%d, BX %u [lane_hdr 0x%08X]",rdo_id,type,words,sampa_id,sampa_ch,l_sampa_bx,lane_hdr) ;
@@ -773,7 +927,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		ped_c->port = fee_port ;
 
 		if(ped_c->do_ch(fee_id, fee_ch, data, words)<0) {
-			err |= 0x200 ;
+			//err |= 0x200 ;
 		}
 
 		data += word32 ;
@@ -834,6 +988,14 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 
 	LOG(ERR,"%d: ERR 0x%X: 0x%03X 0x%03X 0x%03X 0x%03X 0x%03X 0x%03X",rdo_id,err,
 	    h[0],h[1],h[2],h[3],h[4],h[5]) ;
+	LOG(ERR,"   0x%08X 0x%08X",hdr[0],hdr[1]) ;
+
+	u_int *n_data = sampa_ch_hunt(data,end) ;
+	if(n_data) {
+		err = 0 ;
+		data = n_data ;
+		goto new_ch ;
+	}
 
 	return data ;
 }
