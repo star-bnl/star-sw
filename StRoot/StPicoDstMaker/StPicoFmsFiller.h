@@ -1,7 +1,6 @@
 #ifndef StPicoFmsFiller_h
 #define StPicoFmsFiller_h
 
-
 class StMuDst;
 class StPicoDst;
 class StFmsDbMaker;

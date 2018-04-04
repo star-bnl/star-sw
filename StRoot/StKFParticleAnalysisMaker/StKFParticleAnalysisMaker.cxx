@@ -15,7 +15,7 @@
 #include "StKFParticlePerformanceInterface.h"
 //--- Pico classes ---
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoDstMaker/StPicoDst.h"
+#include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"

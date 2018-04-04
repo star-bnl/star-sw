@@ -15,10 +15,10 @@ class StMuTrack;
 class StPicoTrack : public TObject {
 
  public:
-  //Default constructor
+  /// Default constructor
   StPicoTrack();
-  //Constructor that takes global and primary trakcs
-  //Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
+  /// Constructor that takes global and primary trakcs
+  /// Note: primary track should be associated with the StPicoEvent::mPrimaryVertex
   StPicoTrack(StMuTrack const* globalTrack, StMuTrack const* primaryTrack,
 	      double magField, StThreeVectorD const& pVtx, StDcaGeometry const& dcaG);
   //Copy constructor
@@ -110,8 +110,8 @@ protected:
   Float16_t mCharge;         // [-1,1,2]|
   UInt_t    mTopologyMap[3]; // Toplogy Map data0 and data1. data2 is iTPC extension See StEvent/StTrackTopologyMap.cxx
 
-  // pidTraits
-  Short_t  mBEmcPidTraitsIndex; // index of the EMC  pidTratis in the event
+  /// pidTraits
+  Short_t  mBEmcPidTraitsIndex;  // index of the EMC  pidTratis in the event
   Short_t  mBTofPidTraitsIndex; // index of the BTOF pidTratis in the event
   Short_t  mMtdPidTraitsIndex;  // index of the MTD  pidTratis in the event
   // dcaG

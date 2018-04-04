@@ -2,8 +2,8 @@
 // $Log: StFemtoDstMaker.cxx,v $
 #include "StFemtoDstMaker.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoDstMaker/StPicoDst.h"
-#include "StPicoDstMaker/StPicoArrays.h"
+#include "StPicoEvent/StPicoDst.h"
+#include "StPicoEvent/StPicoArrays.h"
 #include "StChain/StChainOpt.h"
 #include "StKFParticleInterface.h"
 #include "TSystem.h"

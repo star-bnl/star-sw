@@ -9,8 +9,8 @@
 #include "TH2F.h"
 
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoDstMaker/StPicoDst.h"
-#include "StPicoDstMaker/StPicoArrays.h"
+#include "StPicoEvent/StPicoDst.h"
+#include "StPicoEvent/StPicoArrays.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"

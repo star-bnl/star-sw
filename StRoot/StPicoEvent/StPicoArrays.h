@@ -21,7 +21,7 @@ class StPicoArrays {
   static int           picoArraySizes[NAllPicoArrays];
 
   enum TypeIndex {Event=0, Track, EmcTrigger, MtdTrigger,
-                  BTowHit, BTofHit, MtdHit, BbcTile, EpdTile, FmsHit,
+                  BTowHit, BTofHit, MtdHit, BbcHit, EpdHit, FmsHit,
                   BEmcPidTraits, BTofPidTraits, MtdPidTraits};
 
 };

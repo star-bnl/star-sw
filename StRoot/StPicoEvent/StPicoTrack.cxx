@@ -75,14 +75,13 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   mDnDx      = gTrk->probPidTraits().dNdxFit();
   mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
   int flag = gTrk->flag();
-  if (flag / 100 < 7) { // TPC tracks
-    mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId));
+  if (flag / 100 < 7) { /// TPC tracks
+    mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId) * gTrk->charge());
     mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kTpcId));
   }
-  else {    // FTPC tracks
-    if (gTrk->helix().momentum(B * kilogauss).pseudoRapidity() > 0.)
-      {
-      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId));
+  else {    /// FTPC tracks
+    if (gTrk->helix().momentum(B * kilogauss).pseudoRapidity() > 0.) {
+      mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId) * gTrk->charge());
       mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcWestId));
     }
     else {

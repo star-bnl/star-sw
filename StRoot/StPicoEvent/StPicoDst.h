@@ -2,7 +2,7 @@
 #define StPicoDst_h
 
 #include "TClonesArray.h"
-#include "StPicoDstMaker/StPicoArrays.h"
+#include "StPicoArrays.h"
 
 class StPicoEvent;
 class StPicoTrack;
