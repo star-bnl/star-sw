@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.11 2018/02/18 23:18:45 perev Exp $
+ * $Id: StTpcRawData.h,v 2.12 2018/04/05 03:16:20 smirnovd Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.12  2018/04/05 03:16:20  smirnovd
+ * Make StTpcDigitalSector compatible with iTPC
+ *
  * Revision 2.11  2018/02/18 23:18:45  perev
  * Remove iTPC related update
  *
@@ -50,6 +53,7 @@
 #include "StSequence.hh"
 #include "StTpcPixel.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #define __MaxNumberOfTimeBins__ 512
 typedef std::vector<Short_t>  StVectorADC;
 typedef std::vector<UShort_t> StVectorIDT;
@@ -92,6 +96,7 @@ typedef std::vector<StTpcPixel>              StVectPixel;
 class StTpcDigitalSector : public StObject {
 public:
     StTpcDigitalSector(void *db = 0);
+    StTpcDigitalSector(int sector);
     virtual ~StTpcDigitalSector() {}
     // access functions
     const StDigitalTimeBins* timeBinsOfRowAndPad(Int_t rowN, Int_t padN) const { return (&mData[(rowN-1)][(padN-1)]);}
@@ -104,7 +109,7 @@ public:
     Int_t  numberOfTimeBins(Int_t rowN, Int_t padN) 	const    { return mData[(rowN-1)][(padN-1)].size();}
     
     // Adding
-    void   assignTimeBins(int, int, StDigitalTimeBins*);
+    void   assignTimeBins(int row , int pad, StDigitalTimeBins*);
     Int_t  getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequence** seq, UShort_t ***Id);
     Int_t  getPadList(Int_t row, UChar_t **padList);
     Int_t  getTimeAdc(Int_t row, Int_t pad, Short_t ADCs[__MaxNumberOfTimeBins__], 
@@ -119,8 +124,10 @@ public:
     virtual void   Print(const Option_t *opt="") const;
     virtual Int_t  PrintTimeAdc(Int_t row, Int_t pad) const;
     StTpcDigitalSector &operator+= (StTpcDigitalSector& v);
-    Int_t numberOfPadsAtRow(Int_t row) {return (row > 0 && row <= mNoRows) ? St_tpcPadPlanesC::instance()->padsPerRow(row) : 0;}
+    Int_t numberOfPadsAtRow(Int_t row) {return (row > 0 && row <= mNoRows) ? St_tpcPadConfigC::instance()->padsPerRow(mSector, row) : 0;}
     StTpcDigitalSector& operator=(const StTpcDigitalSector&);
+    Int_t sector() {return mSector;}
+    Int_t numberOfRows() {return mNoRows;}
 private:
     StTpcDigitalSector(const StTpcDigitalSector&);
 
