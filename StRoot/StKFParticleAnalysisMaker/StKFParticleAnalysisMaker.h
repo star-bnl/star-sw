@@ -11,6 +11,8 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "TMVA/Reader.h"
+
 class StKFParticleInterface;
 class StKFParticlePerformanceInterface;
 class StPicoDst;
@@ -28,13 +30,21 @@ class StKFParticleAnalysisMaker : public StMaker {
   StKFParticlePerformanceInterface *fStKFParticlePerformanceInterface; //!
   TNtuple* fCutsNTuple[fNNTuples];
   TFile* fNTupleFile[fNNTuples];
+  int fNTuplePDG[fNNTuples];
+  TString fNtupleNames[fNNTuples];
+  TString fNtupleCutNames[fNNTuples];
+  TString fTMVACutFile[fNNTuples];
+  double fTMVACut[fNNTuples];
+  TMVA::Reader* fTMVAReader[fNNTuples];
   Char_t                mEnd[1];        //!
+  std::vector<float> fTMVAParticleParameters[fNNTuples];
   bool fIsPicoAnalysis;
   int fdEdXMode;
   Bool_t fStoreTmvaNTuples;
   Bool_t fProcessSignal;
   Bool_t fCollectPIDHistograms;
-
+  Bool_t fTMVAselection;
+  
  public: 
   StKFParticleAnalysisMaker(const char *name="KFParticleAnalysis");
   virtual       ~StKFParticleAnalysisMaker();
@@ -53,6 +63,16 @@ class StKFParticleAnalysisMaker : public StMaker {
   void ProcessSignal() { fProcessSignal = true; }
   void StoreTMVANtuples() { fStoreTmvaNTuples = true; }
   void CollectPIDHistograms() { fCollectPIDHistograms = true; }
+  void UseTMVA() { fTMVAselection = true; }
+  void SetTMVAcutFileD0(TString file)    { fTMVACutFile[0] = file; }
+  void SetTMVAcutFileDPlus(TString file) { fTMVACutFile[1] = file; }
+  void SetTMVAcutFileDs(TString file)    { fTMVACutFile[2] = file; }
+  void SetTMVAcutFileLc(TString file)    { fTMVACutFile[3] = file; }
+  void SetTMVAcutD0(double cut)    { fTMVACut[0] = cut; }
+  void SetTMVAcutDPlus(double cut) { fTMVACut[1] = cut; }
+  void SetTMVAcutDs(double cut)    { fTMVACut[2] = cut; }
+  void SetTMVAcutLc(double cut)    { fTMVACut[3] = cut; }
+  
   ClassDef(StKFParticleAnalysisMaker,0)   //
 };
 #endif

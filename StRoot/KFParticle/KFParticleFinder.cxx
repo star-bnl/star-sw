@@ -301,7 +301,19 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
                     Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));
     //D0_bar->pi- K+ pi- pi+
     FindTrackV0Decay(fDMinus, -411, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastPion(),
-                    Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
+                    Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));
+    //B+ -> D0_bar pi+, B+ -> D0_bar K+
+    FindTrackV0Decay(fD0bar, -421, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastKaon(),
+                     Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
+    //B- -> D0 pi-, B- -> D0 K-
+    FindTrackV0Decay(fD0, 421, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastKaon(),
+                     Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));
+    //B0 -> D- pi+, B0 -> D- K+
+    FindTrackV0Decay(fDMinus, -419, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastKaon(),
+                     Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
+    //B0_bar -> D+ pi-, B0_bar -> D+ K-
+    FindTrackV0Decay(fDPlus, 419, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastKaon(),
+                     Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));
     //D0 -> pi+ K-
     SelectParticles(Particles,fD0,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
@@ -1836,19 +1848,41 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
     }
     
     //check Ds+ and Lc+ candidates not to be D+
-    if(abs(mother_temp.GetPDG())==431 || abs(mother_temp.GetPDG())==4122)
-    {
-      KFPTrack dPionTrack;
-      vTracks.GetTrack(dPionTrack, idTracks[iv]);
-      KFParticle dPion(dPionTrack, 211);
-      
-      KFParticle dMeson = *vV0[iv];
-      dMeson += dPion;
-      float dMass, dMassError;
-      dMeson.GetMass(dMass, dMassError);
-      if(fabs(dMass - KFParticleDatabase::Instance()->GetDPlusMass())/KFParticleDatabase::Instance()->GetDPlusMassSigma() < 3) continue;
-    }
+//     if(abs(mother_temp.GetPDG())==431 || abs(mother_temp.GetPDG())==4122)
+//     {
+//       KFPTrack dPionTrack;
+//       vTracks.GetTrack(dPionTrack, idTracks[iv]);
+//       KFParticle dPion(dPionTrack, 211);
+//       
+//       KFParticle dMeson = *vV0[iv];
+//       dMeson += dPion;
+//       float dMass, dMassError;
+//       dMeson.GetMass(dMass, dMassError);
+//       if(fabs(dMass - KFParticleDatabase::Instance()->GetDPlusMass())/KFParticleDatabase::Instance()->GetDPlusMassSigma() < 3) continue;
+//     }
     
+    if(abs(mother.GetPDG()[iv]) == 521 || abs(mother.GetPDG()[iv]) == 529 || abs(mother.GetPDG()[iv]) == 511 || abs(mother.GetPDG()[iv]) == 519)
+    {
+      KFParticle daughter_temp = *vV0[iv];
+      float massPDG = KFParticleDatabase::Instance()->GetDPlusMass();
+      float massSigmaPDG = KFParticleDatabase::Instance()->GetDPlusMassSigma();
+      if(abs(mother.GetPDG()[iv]) == 521 || abs(mother.GetPDG()[iv]) == 529)
+      {
+        massPDG = KFParticleDatabase::Instance()->GetD0Mass();
+        massSigmaPDG = KFParticleDatabase::Instance()->GetD0MassSigma();
+      }
+      float mass, dm;
+      daughter_temp.GetMass(mass,dm);
+      if( (fabs(mass - massPDG)/massSigmaPDG) > 3 ) continue;
+      
+      daughter_temp.SetId(Particles.size());
+      daughter_temp.SetPDG(-1);
+      mother_temp.SetId(Particles.size()+1);
+      mother_temp.CleanDaughtersId();
+      mother_temp.AddDaughterId(Particles.size());
+      mother_temp.AddDaughterId(trackId[iv]);
+      Particles.push_back(daughter_temp);
+    }
     Particles.push_back(mother_temp);
 
     if( abs(mother.GetPDG()[iv]) == 3334 ) //Omega-
@@ -1927,7 +1961,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
   int_v motherParticlePDG(Vc::Zero);
 //   Particles.reserve(Particles.size() + vV0.size());
 
-  bool isCharm = ((abs(V0PDG) == 421) || (abs(V0PDG) == 411) || (abs(V0PDG) == 429) || (abs(V0PDG) == 420)) && (v0PVIndex<0);
+  bool isCharm = ((abs(V0PDG) == 421) || (abs(V0PDG) == 411) || (abs(V0PDG) == 429) || (abs(V0PDG) == 420) || (abs(V0PDG) == 419)) && (v0PVIndex<0);
 
   for(unsigned int iV0=0; iV0 < vV0.size(); iV0++)
   {    
@@ -2062,22 +2096,26 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==  321) ) = -1003334;         
         else if(V0PDG ==  421)
         {
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211) ) =  411;
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  321) ) =  431;
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) == 2212) ) =  4122;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  211) ) =  411;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  321) ) =  431;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) ) =  4122;
           const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
-          int_m isDMeson = isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211);
+          int_m isDMeson = isSecondary && int_m(trackPdgPos[iPDGPos] ==  211);
           active[iPDGPos] &= (!(isDMeson)) || (isDMeson && ( id > iPosDaughter) );
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -211) ) =  -521;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -321) ) =  -529;          
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==   211) ) =   10411; 
         }
         else if(V0PDG == -421)
         {
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211) ) = -411;
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  321) ) = -431;
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) == 2212) ) = -4122;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -211) ) = -411;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -321) ) = -431;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==-2212) ) = -4122;
           const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
-          int_m isDMeson = isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211);
+          int_m isDMeson = isSecondary && int_m(trackPdgPos[iPDGPos] == -211);
           active[iPDGPos] &= (!(isDMeson)) || (isDMeson && ( id > iNegDaughter) );
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  211) ) = 521;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  321) ) = 529;
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==  -211) ) =  -10411; 
         }
         else if(V0PDG == 420 && q>0)
@@ -2100,13 +2138,23 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
         }
         else if(V0PDG == 411)
         {
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211) ) = 429;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -211) ) = 429;
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==  -211) ) =   10421; 
         }
         else if(V0PDG == -411)
         {
-          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211) ) = -429;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] ==  211) ) = -429;
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==   211) ) =  -10421; 
+        }
+        else if(V0PDG == 419)
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -211) ) = -511;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -321) ) = -519;
+        }
+        else if(V0PDG == -419)
+        {
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 211) ) =  511;
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 321) ) =  519;
         }
         else if(V0PDG == 429)      
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==   211) ) =   20411; 
@@ -2272,6 +2320,10 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
             case    411: motherType = 1; break; //D+-
             case    428: motherType = 1; break; //D0
             case    429: motherType = 1; break; //D0
+            case    521: motherType = 1; break; //B+
+            case    529: motherType = 1; break; //B+
+            case    511: motherType = 1; break; //B0
+            case    519: motherType = 1; break; //B0
             case   3001: motherType = 1; break; //H0
             case   3222: motherType = 1; break; //Sigma+
             case   3006: motherType = 1; break; //He4L

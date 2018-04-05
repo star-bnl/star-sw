@@ -31,6 +31,7 @@ class StKFParticleInterface: public TObject
   void ReconstructTopology();
   
   const std::vector<KFParticle> &GetParticles() const;
+  void RemoveParticle(const int iParticle);
   const std::vector<KFParticle>* GetSecondaryCandidates() const;                      // Get secondary particles with the mass constraint
   const std::vector<KFParticle>& GetSecondaryK0()         const;
   const std::vector<KFParticle>& GetSecondaryLambda()     const;

@@ -790,7 +790,13 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 426 ||
          abs(fParteff.partPDG[iParticle]) == 411 ||
          abs(fParteff.partPDG[iParticle]) == 431 ||
-         abs(fParteff.partPDG[iParticle]) == 4122;        
+         abs(fParteff.partPDG[iParticle]) == 4122 ||
+         abs(fParteff.partPDG[iParticle]) == 500 ||
+         abs(fParteff.partPDG[iParticle]) == 501 ||
+         abs(fParteff.partPDG[iParticle]) == 521 ||
+         abs(fParteff.partPDG[iParticle]) == 529 ||
+         abs(fParteff.partPDG[iParticle]) == 511 ||
+         abs(fParteff.partPDG[iParticle]) == 519;
 #endif
 }
 
@@ -820,6 +826,12 @@ bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 421 ||
          abs(fParteff.partPDG[iParticle]) == 420 ||
          abs(fParteff.partPDG[iParticle]) == 426 ||
+         abs(fParteff.partPDG[iParticle]) == 500 ||
+         abs(fParteff.partPDG[iParticle]) == 501 ||
+         abs(fParteff.partPDG[iParticle]) == 521 ||
+         abs(fParteff.partPDG[iParticle]) == 529 ||
+         abs(fParteff.partPDG[iParticle]) == 511 ||
+         abs(fParteff.partPDG[iParticle]) == 519 ||
          abs(fParteff.partPDG[iParticle]) == 300443 ||
          abs(fParteff.partPDG[iParticle]) == 400443 ||
          abs(fParteff.partPDG[iParticle]) == 500443;        

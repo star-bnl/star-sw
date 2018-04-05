@@ -1282,17 +1282,17 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
                                   abs( TempPart.GetPDG() ) == 304122 ||
                                   abs( TempPart.GetPDG() ) == 404122 || 
                                   abs( TempPart.GetPDG() ) == 504122 )  ) return;
-  if( (l[0] > 0.4 || Pt < 0.) && (abs( TempPart.GetPDG() ) == 421 ||
+  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) == 421 ||
                                   abs( TempPart.GetPDG() ) == 420 ||
                                   abs( TempPart.GetPDG() ) == 425 ||
                                   abs( TempPart.GetPDG() ) == 426 ||
                                   abs( TempPart.GetPDG() ) == 427 ||
                                   abs( TempPart.GetPDG() ) == 429)  ) return;
-  if( (l[0] > 1.0 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    411 ||
+  if( (l[0] > 0.4 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    411 ||
                                   abs( TempPart.GetPDG() ) == 100411 ||
                                   abs( TempPart.GetPDG() ) == 200411 ||
                                   abs( TempPart.GetPDG() ) == 300411)  ) return;
-  if( (l[0] > 0.5 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    431 ||
+  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    431 ||
                                   abs( TempPart.GetPDG() ) == 100431 ||
                                   abs( TempPart.GetPDG() ) == 200431 ||
                                   abs( TempPart.GetPDG() ) == 300431 ||

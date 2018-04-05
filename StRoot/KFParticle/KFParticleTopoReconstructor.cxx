@@ -638,6 +638,62 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
     if(isSecondary)
       deleteCandidate[iParticle] = true;
   }
+
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    if(abs(fParticles[iParticle].GetPDG()) == 4122)
+    {
+      float chiPrimCut = 44.4 - 8.6*fParticles[iParticle].GetPt();
+      for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+      {
+        float chiPrim = fParticles[fParticles[iParticle].DaughterIds()[iDaughter]].GetDeviationFromVertex(GetPrimVertex());
+        if(chiPrim < chiPrimCut)
+        {
+          deleteCandidate[iParticle] = true;
+          break;
+        }
+      } 
+    }
+  }
+
+//   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+//   {
+//     if(abs(fParticles[iParticle].GetPDG()) == 431 || abs(fParticles[iParticle].GetPDG()) == 4122)
+//     {
+//       vector<int> daughterIds(fParticles[iParticle].NDaughters());
+//       for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+//         daughterIds[iDaughter] = fParticles[fParticles[iParticle].DaughterIds()[iDaughter]].DaughterIds()[0];
+//       std::sort(daughterIds.begin(), daughterIds.end());
+//       
+//       for(unsigned int jParticle=0; jParticle<fParticles.size(); jParticle++)
+//       {
+//         if(abs(fParticles[jParticle].GetPDG()) == 411)
+//         {
+//           vector<int> daughterIdsDPlus(fParticles[jParticle].NDaughters());
+//           for(int iDaughter=0; iDaughter<fParticles[jParticle].NDaughters(); iDaughter++)
+//             daughterIdsDPlus[iDaughter] = fParticles[fParticles[jParticle].DaughterIds()[iDaughter]].DaughterIds()[0];
+//           std::sort(daughterIdsDPlus.begin(), daughterIdsDPlus.end());
+//           
+//           if(daughterIdsDPlus.size() != daughterIds.size()) continue;
+//           
+//           bool isSameParticle=1;
+//           for(unsigned int iDaughter=0; iDaughter<daughterIds.size(); iDaughter++)
+//             isSameParticle &= daughterIds[iDaughter] == daughterIdsDPlus[iDaughter];
+//           if(!isSameParticle) continue; 
+//       
+//           float mass, massSigma;
+//           fParticles[jParticle].GetMass(mass, massSigma);
+//           
+//           if(fabs(mass - KFParticleDatabase::Instance()->GetDPlusMass()) < 3*KFParticleDatabase::Instance()->GetDPlusMassSigma())
+//           {
+//             deleteCandidate[iParticle] = true;
+//             break;
+//           }
+//         }
+//       }
+//     }
+//   }
+  
 #if 0
   //clean K0 and Lambda
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
@@ -924,11 +980,11 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 // #pragma omp critical 
 //   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
     
-  SelectParticleCandidates();
-  
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
     if(ParticleHasRepeatingDaughters(fParticles[iParticle]))
       fParticles[iParticle].SetPDG(-1);
+    
+  SelectParticleCandidates();
       
 #ifdef USE_TIMERS
   timer.Stop();
