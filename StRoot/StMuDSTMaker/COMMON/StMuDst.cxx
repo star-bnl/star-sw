@@ -1668,6 +1668,259 @@ void StMuDst::SetVxRmax(Double_t rmax) {
   LOG_INFO << "StMuDst::SetVxRmax for PV: rho < " << fgVxRmax << endm;
 }
 //________________________________________________________________________________
+// Get the index number of the current primary vertex 
+Int_t StMuDst::currentVertexIndex() {return instance()->mCurrVertexId; }
+// returns pointer to the n-th TClonesArray 
+TClonesArray* StMuDst::array(Int_t type) { return instance()->arrays[type]; }
+#ifndef __NO_STRANGE_MUDST__
+  // returns pointer to the n-th TClonesArray from the strangeness arrays
+TClonesArray* StMuDst::strangeArray(Int_t type) { return instance()->strangeArrays[type]; }
+#endif
+TClonesArray* StMuDst::mcArray(Int_t type) { return instance()->mcArrays[type]; }
+TClonesArray* StMuDst::mcVertices()      { return instance()->mcArray(0);}
+TClonesArray* StMuDst::mcTracks()        { return instance()->mcArray(1);}
+  // returns pointer to the n-th TClonesArray from the emc arrays
+TClonesArray* StMuDst::emcArray(Int_t type) { return instance()->emcArrays[type]; }
+   // returns pointer to the n-th TClonesArray from the fms arrays
+TClonesArray* StMuDst::fmsArray(Int_t type) { return instance()->fmsArrays[type]; }
+    // returns pointer to the n-th TClonesArray from the pmd arrays
+TClonesArray* StMuDst::pmdArray(Int_t type) { return instance()->pmdArrays[type]; }
+  // returns pointer to the n-th TClonesArray from the tof arrays
+TClonesArray* StMuDst::tofArray(Int_t type) { return instance()->tofArrays[type]; }
+  // returns pointer to the n-th TClonesArray from the btof arrays // dongx
+TClonesArray* StMuDst::btofArray(Int_t type) { return instance()->btofArrays[type]; }
+  // returns pointer to the n-th TClonesArray from the mtd arrays
+TClonesArray* StMuDst::mtdArray(Int_t type) { return instance()->mtdArrays[type]; }
+  // returns pointer to the n-th TClonesArray from the fgt arrays
+TClonesArray* StMuDst::fgtArray(Int_t type) { return instance()->fgtArrays[type]; }
+  // returns pointer to the n-th TClonesArray from the ezt arrays
+TClonesArray* StMuDst::eztArray(int type) { return instance()->eztArrays[type]; }
+  // returns pointer to the EpdHitCollection
+TClonesArray* StMuDst::epdHits() { return instance()->epdArrays[muEpdHit]; }  // MALisa
+  // returns pointer to the primary vertex list
+TClonesArray* StMuDst::primaryVertices() { return instance()->arrays[muPrimaryVertex]; }
+TClonesArray* StMuDst::allPrimaryTracks() { return instance()->arrays[muPrimary]; } 
+  // returns pointer to a list of tracks belonging to the selected primary vertex
+TObjArray* StMuDst::primaryTracks() { return instance()->mCurrPrimaryTracks; } 
+  // returns pointer to the global tracks list
+TObjArray* StMuDst::globalTracks() { return instance()->arrays[muGlobal]; }
+  // returns pointer to the other tracks list (all tracks that are not flagged as primary of global)
+TClonesArray* StMuDst::otherTracks() { return instance()->arrays[muOther]; }
+  // returns pointer to the l3Tracks list
+TClonesArray* StMuDst::l3Tracks() { return instance()->arrays[muL3]; }
+  // returns pointer to the list of rich spectra
+TClonesArray* StMuDst::richSpectra() { return instance()->arrays[muRich]; }
+  // returns pointer to the list of detector states
+TClonesArray* StMuDst::detectorStates() { return instance()->arrays[muState]; }
+  // returns pointer to list of accepted l3 algorithms 
+TClonesArray* StMuDst::l3AlgoAccept() { return instance()->arrays[muAccept]; }
+  // returns pointer to list rejected l3 algorithms 
+TClonesArray* StMuDst::l3AlgoReject() { return instance()->arrays[muReject]; }
+TClonesArray* StMuDst::covGlobTrack() {return instance()->arrays[muCovGlobTrack];}
+TClonesArray* StMuDst::covPrimTrack() {return instance()->arrays[muCovPrimTrack];}
+TClonesArray* StMuDst::KFTracks() {return instance()->arrays[muKFTracks];}
+TClonesArray* StMuDst::KFVertices() {return instance()->arrays[muKFVertices];}
+
+  // returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
+StMuEvent* StMuDst::event() { return (StMuEvent*)instance()->arrays[muEvent]->UncheckedAt(0); }
+// return pointer to current primary vertex
+StMuPrimaryVertex* StMuDst::primaryVertex() { return (StMuPrimaryVertex*)instance()->arrays[muPrimaryVertex]->UncheckedAt(instance()->mCurrVertexId); }
+  // return pointer to i-th primary vertex
+StMuPrimaryVertex* StMuDst::primaryVertex(Int_t i) { return (StMuPrimaryVertex*)instance()->arrays[muPrimaryVertex]->UncheckedAt(i); }
+  // return pointer to i-th primary track 
+StMuTrack* StMuDst::primaryTracks(Int_t i) { return (StMuTrack*)instance()->mCurrPrimaryTracks->UncheckedAt(i); }
+  // return pointer to i-th global track 
+StMuTrack* StMuDst::globalTracks(Int_t i) { return (StMuTrack*)instance()->arrays[muGlobal]->UncheckedAt(i); }
+  // return pointer to i-th other track  (track that is not flagged as primary of global)
+StMuTrack* StMuDst::otherTracks(Int_t i) { return (StMuTrack*)instance()->arrays[muOther]->UncheckedAt(i); }
+  // return pointer to i-th l3 track
+StMuTrack* StMuDst::l3Tracks(Int_t i) { return (StMuTrack*)instance()->arrays[muL3]->UncheckedAt(i); }
+  // returns pointer to i-th StRichSpectra
+StRichSpectra* StMuDst::richSpectra(Int_t i) { return (StRichSpectra*)instance()->arrays[muRich]->UncheckedAt(i); }
+  // returns pointer to i-th StDetectorState
+StDetectorState* StMuDst::detectorStates(Int_t i) { return (StDetectorState*)instance()->arrays[muState]->UncheckedAt(i); }
+  // returns pointer to i-th accepted StL3AlgorithmInfo
+StL3AlgorithmInfo* StMuDst::l3AlgoAccept(Int_t i) { return (StL3AlgorithmInfo*)instance()->arrays[muAccept]->UncheckedAt(i); }
+  // returns pointer to i-th rejected StL3AlgorithmInfo
+StL3AlgorithmInfo* StMuDst::l3AlgoReject(Int_t i) { return (StL3AlgorithmInfo*)instance()->arrays[muReject]->UncheckedAt(i); }
+  //returns pp2pp infomation
+StMuRpsCollection* StMuDst::RpsCollection() { return (StMuRpsCollection*)instance()->arrays[mupp2pp]->UncheckedAt(0); }
+StMuMtdCollection* StMuDst::MtdCollection() { return (StMuMtdCollection*)instance()->arrays[muMtd]->UncheckedAt(0); }
+
+StDcaGeometry* StMuDst::covGlobTracks(Int_t i) { return (StDcaGeometry*)instance()->arrays[muCovGlobTrack]->UncheckedAt(i); }
+StMuPrimaryTrackCovariance* StMuDst::covPrimTracks(Int_t i) { return (StMuPrimaryTrackCovariance*)instance()->arrays[muCovPrimTrack]->UncheckedAt(i); }
+KFParticle* StMuDst::KFtrack(Int_t i)  { return (KFParticle*) KFTracks()->UncheckedAt(i); }
+KFVertex* StMuDst::KFvertex(Int_t i) { return (KFVertex*)   KFVertices()->UncheckedAt(i); }
+StMuMcTrack* StMuDst::MCtrack(Int_t i)  { return (StMuMcTrack*) mcTracks()->UncheckedAt(i); }
+StMuMcVertex* StMuDst::MCvertex(Int_t i) { return (StMuMcVertex*)   mcVertices()->UncheckedAt(i); }
+ 
+#ifndef __NO_STRANGE_MUDST__
+  // returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
+StStrangeEvMuDst* StMuDst::strangeEvent() { return (StStrangeEvMuDst*)instance()->strangeArrays[smuEv]->UncheckedAt(0); }
+  // returns pointer to MC version of current StStrangeEvMuDst
+StStrangeEvMuDst* StMuDst::strangeEventMc() { return (StStrangeEvMuDst*)instance()->strangeArrays[smuEvMc]->UncheckedAt(0); }
+  // returns pointer to the v0 list
+TClonesArray* StMuDst::v0s() { return instance()->strangeArrays[smuV0]; }
+  // returns pointer to the mc v0 list
+TClonesArray* StMuDst::v0sMc() { return instance()->strangeArrays[smuV0Mc]; }
+  // returns pointer to the v0 association list
+TClonesArray* StMuDst::v0Assoc() { return instance()->strangeArrays[smuV0Assoc]; }
+  // returns pointer to the xi list
+TClonesArray* StMuDst::xis() { return instance()->strangeArrays[smuXi]; }
+  // returns pointer to the mc xi list
+TClonesArray* StMuDst::xisMc() { return instance()->strangeArrays[smuXiMc]; }
+  // returns pointer to the xi association list
+TClonesArray* StMuDst::xiAssoc() { return instance()->strangeArrays[smuXiAssoc]; }
+  // returns pointer to the kink list
+TClonesArray* StMuDst::kinks() { return instance()->strangeArrays[smuKink]; }
+  // returns pointer to the mc kink list
+TClonesArray* StMuDst::kinksMc() { return instance()->strangeArrays[smuKinkMc]; }
+  // returns pointer to the kink association list
+TClonesArray* StMuDst::kinkAssoc() { return instance()->strangeArrays[smuKinkAssoc]; }
+  // returns pointer to the list of strangeCuts
+TClonesArray* StMuDst::strangeCuts() { return instance()->strangeArrays[smuCut]; }
+  // returns pointer to the i-th v0
+StV0MuDst* StMuDst::v0s(Int_t i) { return (StV0MuDst*)instance()->strangeArrays[smuV0]->UncheckedAt(i); }
+StV0Mc* StMuDst::v0sMc(Int_t i) { return (StV0Mc*)instance()->strangeArrays[smuV0Mc]->UncheckedAt(i); }
+StStrangeAssoc* StMuDst::v0Assoc(Int_t i) { return (StStrangeAssoc*)instance()->strangeArrays[smuV0Assoc]->UncheckedAt(i); }
+  // returns pointer to the i-th xi
+StXiMuDst* StMuDst::xis(Int_t i) { return (StXiMuDst*)(void*)instance()->strangeArrays[smuXi]->UncheckedAt(i); }
+StXiMc* StMuDst::xisMc(Int_t i) { return (StXiMc*)instance()->strangeArrays[smuXiMc]->UncheckedAt(i); }
+StStrangeAssoc* StMuDst::xiAssoc(Int_t i) { return (StStrangeAssoc*)instance()->strangeArrays[smuXiAssoc]->UncheckedAt(i); }
+  // returns pointer to the i-th kink
+StKinkMuDst* StMuDst::kinks(Int_t i) { return (StKinkMuDst*)instance()->strangeArrays[smuKink]->UncheckedAt(i); }
+StKinkMc* StMuDst::kinksMc(Int_t i) { return (StKinkMc*)instance()->strangeArrays[smuKinkMc]->UncheckedAt(i); }
+StStrangeAssoc* StMuDst::kinkAssoc(Int_t i) { return (StStrangeAssoc*)instance()->strangeArrays[smuKinkAssoc]->UncheckedAt(i); }
+  // returns pointer to the i-th stranneCut (of type TCut)
+TCut* StMuDst::strangeCuts(Int_t i) { return (TCut*)instance()->strangeArrays[smuCut]->UncheckedAt(i); }
+#endif
+  // returns pointer to current StMuEmcCollection
+StMuEmcCollection* StMuDst::muEmcCollection() { if (instance()->mMuEmcCollectionArray) return (StMuEmcCollection*) instance()->mMuEmcCollectionArray->UncheckedAt(0); else return instance()->mMuEmcCollection; }
+   // returns pointer to current StMuFmsCollection
+StMuFmsCollection* StMuDst::muFmsCollection() { return instance()->mMuFmsCollection; }
+  // returns pointer to current StMuPmdCollection
+StMuPmdCollection* StMuDst::pmdCollection() { if (instance()->mMuPmdCollectionArray)  return (StMuPmdCollection*) instance()->mMuPmdCollectionArray->UncheckedAt(0); else return instance()->mMuPmdCollection; }
+  // returns pointer to current StEmcCollection
+StEmcCollection* StMuDst::emcCollection() {  return instance()->mEmcCollection; }
+  // returns pointer to current StFmsCollection
+StFmsCollection* StMuDst::fmsCollection() {  return instance()->mFmsCollection; }
+
+  // returns pointer to the i-th muTofHit
+StMuTofHit* StMuDst::tofHit(Int_t i) { return (StMuTofHit*)instance()->tofArrays[muTofHit]->UncheckedAt(i); }
+  // returns pointer to the i-th tofData
+StTofData* StMuDst::tofData(Int_t i) { return (StTofData*)instance()->tofArrays[muTofData]->UncheckedAt(i); }
+  // run 5 - dongx
+  // returns pointer to the i-th tofRawData
+StTofRawData* StMuDst::tofRawData(Int_t i) { return (StTofRawData*)instance()->tofArrays[muTofRawData]->UncheckedAt(i); }
+  // returns pointer to the i-th muBTofHit
+StMuBTofHit* StMuDst::btofHit(Int_t i) { return (StMuBTofHit*)instance()->btofArrays[muBTofHit]->UncheckedAt(i); }
+  // returns pointer to the i-th btofRawHit - dongx
+StBTofRawHit* StMuDst::btofRawHit(Int_t i) { return (StBTofRawHit*)instance()->btofArrays[muBTofRawHit]->UncheckedAt(i); }
+  // returns pointer to the btofHeader - dongx
+StBTofHeader* StMuDst::btofHeader() { return (StBTofHeader*)instance()->btofArrays[muBTofHeader]->UncheckedAt(0); }
+
+StMuEpdHit* StMuDst::epdHit(int i) { return (StMuEpdHit*)instance()->epdArrays[muEpdHit]->UncheckedAt(i); }  // MALisa
+
+StMuMtdHit* StMuDst::mtdHit(int i) { return (StMuMtdHit*)instance()->mtdArrays[muMTDHit]->UncheckedAt(i); }
+  StMuMtdRawHit* StMuDst::mtdRawHit(int i) { return (StMuMtdRawHit*)instance()->mtdArrays[muMTDRawHit]->UncheckedAt(i); }
+  StMuMtdHeader* StMuDst::mtdHeader() { return (StMuMtdHeader*)instance()->mtdArrays[muMTDHeader]->UncheckedAt(0); } 
+    
+    
+  // returns pointer to eztHeader 
+ EztEventHeader* StMuDst::eztHeader() { return (EztEventHeader*)instance()->eztArrays[muEztHead]->UncheckedAt(0); }
+
+//  StMuBTofHit* StMuDst::btofHit(Int_t i) { return (StMuBTofHit*)instance()->btofArrays[muBTofHit]->UncheckedAt(i); }
+
+    
+  // returns pointer to eztTrig 
+ EztTrigBlob* StMuDst::eztTrig() 
+        { return (EztTrigBlob*)instance()->eztArrays[muEztTrig]->UncheckedAt(0); }
+
+  // returns pointer to eztFpd 
+ EztFpdBlob* StMuDst::eztFpd() 
+        { return (EztFpdBlob*)instance()->eztArrays[muEztFpd]->UncheckedAt(0); }
+
+  // returns pointer to ETOW 
+ EztEmcRawData* StMuDst::eztETow() 
+        { return (EztEmcRawData*)instance()->eztArrays[muEztETow]->UncheckedAt(0); }
+  // returns pointer to eztESmd +pre/post
+ EztEmcRawData* StMuDst::eztESmd() 
+        { return (EztEmcRawData*)instance()->eztArrays[muEztESmd]->UncheckedAt(0); }
+
+UInt_t StMuDst::numberOfPrimaryVertices()  { return instance()->arrays[muPrimaryVertex]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfPrimaryTracks()  { return instance()->mCurrPrimaryTracks ? instance()->mCurrPrimaryTracks->GetEntriesFast() : 0; }
+UInt_t StMuDst::numberOfGlobalTracks()   { return instance()->arrays[muGlobal]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfOtherTracks()    { return instance()->arrays[muOther]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfL3Tracks()       { return instance()->arrays[muL3]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfRichSpectras()   { return instance()->arrays[muRich]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfDetectorStates() { return instance()->arrays[muState]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfL3AlgoAccepts()  { return instance()->arrays[muAccept]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfL3AlgoRejects()  { return instance()->arrays[muReject]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfCovGlobTracks()  { return instance()->arrays[muCovGlobTrack]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfCovPrimTracks()  { return instance()->arrays[muCovPrimTrack]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfKFTracks()       { return instance()->arrays[muKFTracks]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfKFVertices()     { return instance()->arrays[muKFVertices]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfMcVertices()     { return instance()->mcVertices()->GetEntriesFast(); }
+UInt_t StMuDst::numberOfMcTracks()     { return instance()->mcTracks()->GetEntriesFast(); }
+#ifndef __NO_STRANGE_MUDST__
+UInt_t StMuDst::numberOfV0s()            { return instance()->strangeArrays[smuV0]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfV0sMc()          { return instance()->strangeArrays[smuV0Mc]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfV0Assoc()        { return instance()->strangeArrays[smuV0Assoc]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfXis()            { return instance()->strangeArrays[smuXi]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfXisMc()          { return instance()->strangeArrays[smuXiMc]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfXiAssoc()        { return instance()->strangeArrays[smuXiAssoc]->GetEntriesFast(); }  
+UInt_t StMuDst::numberOfKinks()          { return instance()->strangeArrays[smuKink]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfKinksMc()        { return instance()->strangeArrays[smuKinkMc]->GetEntriesFast(); } 
+UInt_t StMuDst::numberOfKinkAssoc()      { return instance()->strangeArrays[smuKinkAssoc]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfStrangeCuts()    { return instance()->strangeArrays[smuCut]->GetEntriesFast(); }
+#endif
+  // tofr
+UInt_t StMuDst::numberOfTofHit()        { return instance()->tofArrays[muTofHit]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfTofData()       { return instance()->tofArrays[muTofData]->GetEntriesFast(); }
+  // run 5 - dongx
+UInt_t StMuDst::numberOfTofRawData()    { return instance()->tofArrays[muTofRawData]->GetEntriesFast(); }
+  // dongx
+UInt_t StMuDst::numberOfBTofHit()       { return instance()->btofArrays[muBTofHit]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfBTofRawHit()    { return instance()->btofArrays[muBTofRawHit]->GetEntriesFast(); }
+
+UInt_t StMuDst::numberOfEpdHit()       { return instance()->epdArrays[muEpdHit]->GetEntriesFast(); }
+
+UInt_t StMuDst::numberOfMTDHit()       { return instance()->mtdArrays[muMTDHit]->GetEntriesFast(); }
+UInt_t StMuDst::numberOfBMTDRawHit()    { return instance()->mtdArrays[muMTDRawHit]->GetEntriesFast(); }
+    
+UInt_t StMuDst::GetNPrimaryVertex()    { return instance()->numberOfPrimaryVertices(); }  
+UInt_t StMuDst::GetNPrimaryTrack()    { return instance()->numberOfPrimaryTracks(); }  
+UInt_t StMuDst::GetNGlobalTrack()     { return instance()->numberOfGlobalTracks(); }   
+UInt_t StMuDst::GetNOtherTrack()      { return instance()->numberOfOtherTracks(); }    
+UInt_t StMuDst::GetNL3Track()         { return instance()->numberOfL3Tracks(); }       
+UInt_t StMuDst::GetNRichSpectra()     { return instance()->numberOfRichSpectras(); }   
+UInt_t StMuDst::GetNDetectorState()   { return instance()->numberOfDetectorStates(); } 
+UInt_t StMuDst::GetNL3AlgoAccept()    { return instance()->numberOfL3AlgoAccepts(); }  
+UInt_t StMuDst::GetNL3AlgoReject()    { return instance()->numberOfL3AlgoRejects(); }  
+#ifndef __NO_STRANGE_MUDST__
+UInt_t StMuDst::GetNV0()              { return instance()->numberOfV0s(); }            
+UInt_t StMuDst::GetNV0Mc()            { return instance()->numberOfV0sMc(); }            
+UInt_t StMuDst::GetNV0Assoc()         { return instance()->numberOfV0Assoc(); }            
+UInt_t StMuDst::GetNXi()              { return instance()->numberOfXis(); }            
+UInt_t StMuDst::GetNXiMc()            { return instance()->numberOfXisMc(); }            
+UInt_t StMuDst::GetNXiAssoc()         { return instance()->numberOfXiAssoc(); }            
+UInt_t StMuDst::GetNKink()            { return instance()->numberOfKinks(); }
+UInt_t StMuDst::GetNKinkMc()          { return instance()->numberOfKinksMc(); }            
+UInt_t StMuDst::GetNKinkAssoc()       { return instance()->numberOfKinkAssoc(); }            
+UInt_t StMuDst::GetNStrangeCut()      { return instance()->numberOfStrangeCuts(); }    
+#endif
+UInt_t StMuDst::GetNTofHit()          { return instance()->numberOfTofHit(); }
+UInt_t StMuDst::GetNTofData()         { return instance()->numberOfTofData(); }
+  // run 5 - dongx
+UInt_t StMuDst::GetNTofRawData()      { return instance()->numberOfTofRawData(); }
+  // dongx
+UInt_t StMuDst::GetNBTofHit()         { return instance()->numberOfBTofHit(); }
+UInt_t StMuDst::GetNBTofRawHit()      { return instance()->numberOfBTofRawHit(); }
+
+UInt_t StMuDst::GetNEpdHit()         { return instance()->numberOfEpdHit(); }
+
+UInt_t StMuDst::GetNMTDHit()         { return instance()->numberOfMTDHit(); }
+UInt_t StMuDst::GetNMTDRawHit()      { return instance()->numberOfBMTDRawHit(); }
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
