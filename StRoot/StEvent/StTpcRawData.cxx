@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.15 2018/02/18 23:04:49 perev Exp $
+ * $Id: StTpcRawData.cxx,v 2.16 2018/04/05 03:16:20 smirnovd Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.16  2018/04/05 03:16:20  smirnovd
+ * Make StTpcDigitalSector compatible with iTPC
+ *
  * Revision 2.15  2018/02/18 23:04:49  perev
  * Put back iTPC update
  *
@@ -59,6 +62,7 @@
 #include "TMath.h"
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(StTpcDigitalSector);
 ClassImp(StTpcRawData);
 //________________________________________________________________________________
@@ -73,6 +77,21 @@ StTpcDigitalSector::StTpcDigitalSector(void *db) {
     mData.push_back(padRow);
   }
 }
+
+
+StTpcDigitalSector::StTpcDigitalSector(int sector) : mSector(sector)
+{
+  StDigitalTimeBins  timeBins;
+  mNoRows = St_tpcPadConfigC::instance()->padRows(sector);
+  for(Int_t row=1; row <= mNoRows; row++) {
+    StDigitalPadRow    padRow;
+    for (Int_t pad = 0; pad < numberOfPadsAtRow(row); pad++) {
+      padRow.push_back( timeBins);
+    }
+    mData.push_back(padRow);
+  }
+}
+
 //________________________________________________________________________________
 void StTpcDigitalSector::clear() {// clears only the time bins
   for(UInt_t row=0; row<mData.size(); row++) {
@@ -276,15 +295,11 @@ StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
       }
       getTimeAdc(row,pad,ADCs1,IDTs1);
       v.getTimeAdc(row,pad,ADCs2,IDTs2);
-      Bool_t ifIDT = kFALSE;
       for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	if (! ADCs2[i]) continue;
-	if (! ifIDT && (IDTs1[i] || IDTs2[i])) ifIDT = kTRUE;
 	if ((IDTs1[i] || IDTs2[i]) && ADCs1[i] < ADCs2[i]) IDTs1[i] = IDTs2[i];
 	ADCs1[i] += ADCs2[i];
       }
-      if (ifIDT) putTimeAdc(row, pad, ADCs1, IDTs1);
-      else       putTimeAdc(row, pad, ADCs1);
+      putTimeAdc(row, pad, ADCs1, IDTs1);
     }
   }
   return *this;
