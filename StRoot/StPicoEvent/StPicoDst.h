@@ -11,6 +11,8 @@ class StPicoMtdTrigger;
 class StPicoBTowHit;
 class StPicoBTofHit;
 class StPicoMtdHit;
+class StPicoBbcHit;
+class StPicoEpdHit;
 class StPicoFmsHit;
 class StPicoBEmcPidTraits;
 class StPicoBTofPidTraits;
@@ -45,6 +47,10 @@ class StPicoDst {
   static StPicoBTofHit* btofHit(int i) { return (StPicoBTofHit*)picoArrays[StPicoArrays::BTofHit]->UncheckedAt(i); }
   /// return pointer to i-th mtd hit
   static StPicoMtdHit*  mtdHit(int i) { return (StPicoMtdHit*)picoArrays[StPicoArrays::MtdHit]->UncheckedAt(i); }
+  /// return pointer to i-th bbc hit
+  static StPicoBbcHit* bbcHit(int i) {return (StPicoBbcHit*)picoArrays[StPicoArrays::BbcHit]->UncheckedAt(i); }
+  /// return pointer to i-th epd hit
+  static StPicoEpdHit* epdHit(int i) {return (StPicoEpdHit*)picoArrays[StPicoArrays::EpdHit]->UncheckedAt(i); }
   /// return pointer to i-th fms hit
   static StPicoFmsHit*  fmsHit(int i) { return (StPicoFmsHit*)picoArrays[StPicoArrays::FmsHit]->UncheckedAt(i); }
 
