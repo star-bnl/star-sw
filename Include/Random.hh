@@ -103,8 +103,8 @@ double RndmVavilov(const double rkappa, const double beta2);
 double RndmHeedWF(const double w, const double f);
 
 /// Draw a random (isotropic) direction vector.
-void RndmDirection(double& dx, double& dy, double& dz,
-                   const double length = 1.) {
+inline void RndmDirection(double& dx, double& dy, double& dz,
+                          const double length = 1.) {
 
   const double phi = TwoPi * RndmUniform();
   const double ctheta = 2 * RndmUniform() - 1.;
