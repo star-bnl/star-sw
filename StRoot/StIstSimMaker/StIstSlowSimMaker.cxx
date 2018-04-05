@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StIstSlowSimMaker.cxx,v 1.4 2018/03/15 21:38:24 dongx Exp $
+ * $Id: StIstSlowSimMaker.cxx,v 1.5 2018/04/05 22:30:36 jwebb Exp $
  *
  * Author: Leszek Kosarzewski, March 2014
  ****************************************************************************
@@ -408,6 +408,9 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 
 	StThreeVectorD mean(rPhiPosMean, 0.0, zPosMean);
 
+        unsigned short row_next = row;
+        unsigned short column_next = column;
+
 	while(row_dist>=1 || column_dist>=1)
 	{
 		StThreeVectorD distance;
@@ -425,8 +428,18 @@ void StIstSlowSimMaker::checkPadCrossing(const StThreeVectorD inPos, const StThr
 		StThreeVectorD current_next = current+distance/100.0;
 		LOG_DEBUG<<"current_next x = "<<current_next.x()<<"\ty = "<<current_next.y()<<"\tz = "<<current_next.z()<<endm;
 
-		cross_vec.push_back(current);
-		findPad(current_next, column, row, rPhiPosMean, zPosMean);
+//		findPad(current_next, column, row, rPhiPosMean, zPosMean);
+                findPad(current_next, column_next, row_next, rPhiPosMean, zPosMean);
+                
+                if(row_next==row && column_next==column) {
+                   LOG_WARN << " distance calculating not yielding to the next row/column! Break! " << endm;
+                   break;
+                }
+                
+                row = row_next;
+                column = column_next;
+		
+                cross_vec.push_back(current);
 		mean = StThreeVectorD(rPhiPosMean, 0.0, zPosMean);
 		row_dist = abs(row-row_out);
 		column_dist = abs(column-column_out);
