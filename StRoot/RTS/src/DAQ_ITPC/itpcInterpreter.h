@@ -32,6 +32,7 @@ public:
 
 	u_int *fee_scan(u_int *start, u_int *end) ;
 	u_int *sampa_lane_scan(u_int *start, u_int *end) ;
+	u_int *sampa_ch_hunt(u_int *start, u_int *end) ;
 	int sampa_ch_scan() ;
 
 	

@@ -175,22 +175,25 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 	int s_count ;
 	int t_stop_last ;
 	u_short *s1_data ;
+	int t_cou ;
 
 	itpc_ifee_to_rowpad(fee_id, fee_ch, row, pad) ;
 
-//	LOG(TERR,"FEE %d, CH %d: RP %d:%d, words %d",fee_id,fee_ch,row,pad,words) ;
-
-//	row_pad[row][pad].raw_data = data ;
-//	row_pad[row][pad].raw_words = words ;
-	
 
 	int word32 = (words/3) + (words%3?1:0) ;
 
-	int t_cou = 0 ;
+	if((word32*3)>=MAX_TB) {
+		seq_cou = 0 ;
+		LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+		goto err_ret ;
+	}
+
+	t_cou = 0 ;
 	for(int i=0;i<word32;i++) {
 		u_int d = *data++ ;
 
 		if(d & 0xC0000000) {
+			seq_cou = 0 ;
 			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
 			goto err_ret ;
 		}
@@ -213,15 +216,14 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		int t_stop = t_start + t_cou - 1 ;
 
 		if(t_start <= t_stop_last) {
-			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
+			LOG(WARN,"%d:#%d: FEE %d:%d, words %d",rdo,port,fee_id,fee_ch,words) ;
 			seq_cou = 0 ;
 			goto err_ret ;
 		}
 		if(t_stop > 511) {
-			LOG(ERR,"%d:#%d: FEE %d:%d, words %d",fee_id,rdo,port,fee_ch,words) ;
+			LOG(WARN,"%d:#%d: FEE %d:%d, words %d",fee_id,rdo,port,fee_ch,words) ;
 			seq_cou = 0 ;
 			goto err_ret ;
-
 		}
 
 		t_stop_last = t_stop ;
@@ -243,7 +245,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 			}
 			else if((t>=26)&&(t<=31)) *s1_data = 0 ;
 			else {
-				if(tb_buff[i]<=4) *s1_data = 0 ;	// cut low data
+				if(tb_buff[i]<=4) *s1_data = 0 ;	// cut low ADC data
 				else *s1_data = tb_buff[i] ;
 			}
 
@@ -575,11 +577,15 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 		int dt = blob[i].t2 - blob[i].t1 + 1;
 
 		if(dp<=0) {
-			LOG(ERR,"dp %d",dp) ;
+			blob[i].seq_cou = 0 ;
+			LOG(ERR,"%d: dp %d",rdo,dp) ;
+			continue ;
 		}
 
 		if(dt<=0) {
-			LOG(ERR,"dt %d",dt) ;
+			blob[i].seq_cou = 0 ;
+			LOG(ERR,"%d: dt %d",rdo,dt) ;
+			continue ;
 		}
 
 
