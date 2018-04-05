@@ -429,6 +429,8 @@ MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
 #include "St_tpcPadPlanesC.h"
+#include "St_itpcPadPlanesC.h"
+#include "St_tpcPadConfigC.h"
 #include "St_TpcAvgPowerSupplyC.h"
 //________________________________________________________________________________
 void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2) {
@@ -998,6 +1000,8 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::instance() {
 #include "St_tpcFieldCageC.h"
 MakeChairInstance(tpcFieldCage,Geometry/tpc/tpcFieldCage);
 MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
+MakeChairInstance(itpcPadPlanes,Geometry/tpc/itpcPadPlanes);
+MakeChairInstance(tpcPadConfig,Geometry/tpc/tpcPadConfig);
 #include "St_tpcGlobalPositionC.h"
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
