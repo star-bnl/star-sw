@@ -31,3 +31,8 @@ rangeSi: rangeSi.C
 	$(CXX) $(CFLAGS) rangeSi.C
 	$(CXX) -o rangeSi rangeSi.o $(LDFLAGS)
 	rm rangeSi.o
+
+fe55: fe55.C 
+	$(CXX) $(CFLAGS) fe55.C
+	$(CXX) -o fe55 fe55.o $(LDFLAGS)
+	rm fe55.o
