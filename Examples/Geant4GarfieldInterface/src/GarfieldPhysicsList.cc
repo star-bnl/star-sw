@@ -78,6 +78,7 @@ void GarfieldPhysicsList::AddParameterisation() {
 	G4FastSimulationManagerProcess* fastSimProcess_garfield =
 			new G4FastSimulationManagerProcess("G4FSMP_garfield");
 
+        auto theParticleIterator = GetParticleIterator();
 	theParticleIterator->reset();
 	while ((*theParticleIterator)()) {
 
