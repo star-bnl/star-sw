@@ -837,7 +837,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     secondaries.swap(newSecondaries);
     ClearBank(newSecondaries);
   }
-
+  ClearBank(secondaries);
   // Get the total number of electrons produced in this step.
   nel = m_doDeltaTransport ? m_conductionElectrons.size() : 
                              m_deltaElectrons.size();
