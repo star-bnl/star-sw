@@ -34,7 +34,7 @@ struct dEdxCorrection_t {
 class dEdxY2_t;
 class StTpcdEdxCorrection : public TObject {
  public:
-  enum ESector : int {kTpcOuter = 0, kTpcInner = 1};
+  enum ESector : int {kTpcOuter = 0, kTpcInner = 1, kiTpc = 2};
   enum EOptions : int {
     kUncorrected           =  0,//U   				           
     kEdge                  =  1,//E   correction near edge of chamber	     
