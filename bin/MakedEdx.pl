@@ -1683,7 +1683,7 @@ $hist = "RunXVII26"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/AuAu54_pr
 # 19086040/dEdx - dEdx3, use default alignment: 
 # 19086040B/dEdx4 : switched off dEdx corrections (TpcZCorrectionB, TpcTanL, tpcPressureB), reinstall TPC alignment(no difference ?)  03/29/18 
 # 19086040B/dEdx5 : switched off dEdx corrections (TpcZCorrectionB, TpcTanL), switch on  tpcPressureB), add hitograms for iTPC  03/30/18 
-
+# 19086040.DEV2/dEdx11 : switched on dX correction 04/05/18
 my $prod = $hist; #$Production;
 $prod =~ s/\*//g;
 $prod =~ s/\//_/g;

@@ -1,5 +1,5 @@
 /* Global Alignment
-   root.exe lMuDst.C MuTpcG.C+
+   root.exe 'lMuDst.C(-1,"*MuDst.root","RMuDst,mysql,magF,nodefault","Mu.root")'  MuTpcG.C+
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
@@ -28,6 +28,8 @@
 #include "TCernLib.h"
 #include "TEnv.h"
 #include "SystemOfUnits.h"
+#include "StChain/StMaker.h"
+#include "StBFChain/StBFChain.h" 
 #include "StMuDSTMaker/COMMON/StMuTimer.h"
 #include "StMuDSTMaker/COMMON/StMuDebug.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -71,7 +73,7 @@
 class StMuDstMaker;
 #endif
 #endif
-StMuDstMaker* maker = 0;
+StMuDstMaker* MuDstMaker = 0;
 struct PlotName_t {
   const Char_t *Name;
   const Char_t *Title;
@@ -286,7 +288,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     }
   }
   if (! mu) return;
-  Int_t date = maker->GetDateTime().Convert() - timeOffSet;
+  Int_t date = MuDstMaker->GetDateTime().Convert() - timeOffSet;
   if (ev%1000 == 0) cout << "Read event\t" << ev << endl;
   StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
   Double_t Bz = muEvent->magneticField();
@@ -603,25 +605,29 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   }
 }
 //________________________________________________________________________________
-void MuTpcG(Long64_t nevent = 9999999,
-	    const char* file="*.MuDst.root",
-	    const  char* outFile="Mu.root") {
-  TString OutFile(outFile);
-  if (OutFile == "") {
-    OutFile = "Mu"; OutFile += file;
-    OutFile.ReplaceAll("*","");
-    OutFile.ReplaceAll(".MuDst.root",".root");
-  }
-  TFile *fOut = new TFile(OutFile,"recreate");
+void MuTpcG(Long64_t nEvents = 10000000) {
   Process1Event();
-  StMuDebug::setLevel(0);  
-  maker = new StMuDstMaker(0,0,"",file,"st:MuDst.root",1e9);   // set up maker in read mode
-  //                       0,0                        this mean read mode
-  //                           dir                    read all files in this directory
-  //                               file               bla.lis real all file in this list, if (file!="") dir is ignored
-  //                                    filter        apply filter to filenames, multiple filters are separated by ':'
-  //                                          10      maximum number of file to read
-  maker->SetStatus("*",0);
+  StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
+  MuDstMaker = (StMuDstMaker *) chain->Maker("MuDst");
+  if (! MuDstMaker) return;
+  MuDstMaker->SetStatus("*",0);
+  MuDstMaker->SetStatus("MuEvent",1);
+  MuDstMaker->SetStatus("PrimaryVertices",1);
+  MuDstMaker->SetStatus("PrimaryTracks",1);
+  MuDstMaker->SetStatus("GlobalTracks",1);
+  MuDstMaker->SetStatus("CovGlobTrack",1);
+  MuDstMaker->SetStatus("BTof*",1);
+  MuDstMaker->SetStatus("Emc*",1);
+  MuDstMaker->SetStatus("MTD*",1);
+#if 0
+  MuDstMaker->SetStatus("StStMuMcVertex",1);
+  MuDstMaker->SetStatus("StStMuMcTrack",1);
+#endif
+  StMaker *detDb = chain->Maker("detDb");
+  detDb->SetActive(kFALSE);
+  StMaker *tpcDB = chain->Maker("tpcDB");
+  tpcDB->SetActive(kFALSE);
+  MuDstMaker->SetStatus("*",0);
   const Char_t *ActiveBranches[] = {"MuEvent"
 				    ,"PrimaryVertices"
 				    ,"PrimaryTracks"
@@ -635,32 +641,27 @@ void MuTpcG(Long64_t nevent = 9999999,
 				    ,"KFVertices"
 #endif
   };
-  new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb"); 
-  new StMagFMaker();
-  new StTpcDbMaker;
-  StChain *chain = (StChain *)  StMaker::GetTopChain();
   chain->SetDebug(0);
   StMaker::lsMakers(chain);
   chain->Init();
   Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
-  for (Int_t i = 0; i < Nb; i++) maker->SetStatus(ActiveBranches[i],1); // Set Active braches
+  for (Int_t i = 0; i < Nb; i++) MuDstMaker->SetStatus(ActiveBranches[i],1); // Set Active braches
   StMuDebug::setLevel(0);  
-  TChain *tree = maker->chain();
+  TChain *tree = MuDstMaker->chain();
   if (! tree) return;
   Long64_t nentries = tree->GetEntries();
-  nevent = TMath::Min(nevent,nentries);
-  cout << nentries << " events in chain " << nevent << " will be read." << endl;
+  nEvents = TMath::Min(nEvents,nentries);
+  cout << nentries << " events in chain " << nEvents << " will be read." << endl;
   if (nentries < 100) return;
   tree->SetCacheSize(-1);        //by setting the read cache to -1 we set it to the AutoFlush value when writing
   tree->SetCacheLearnEntries(1); //one entry is sufficient to learn
-  tree->SetCacheEntryRange(0,nevent);
+  tree->SetCacheEntryRange(0,nEvents);
   
-  for (Long64_t ev = 0; ev < nevent; ev++) {
+  for (Long64_t ev = 0; ev < nEvents; ev++) {
     if (chain->MakeEvent()) break;
-    StMuDst* mu = maker->muDst();   // get a pointer to the StMuDst class, the class that points to all the data
+    StMuDst* mu = MuDstMaker->muDst();   // get a pointer to the StMuDst class, the class that points to all the data
     Process1Event(mu,ev);
   }
-  if (fOut) fOut->Write();
 }
 //________________________________________________________________________________
 Double_t g2g(Double_t *xx, Double_t *par) {

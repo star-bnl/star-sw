@@ -24,7 +24,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		Time TimeC
 		Voltage VoltageC Qcm QcmC AvCurrentC
 		Z3C Z3iTPCC 
-		dX3C TanL3DC TanL3DiTPCC xyPad3C Edge3C
+		dX3C dX3iTPCC TanL3DC TanL3DiTPCC xyPad3C Edge3C
 	      ); # PressureTC Volt VoltC Z3OC Zdc3C Edge3 Edge3C
 #		flowRateExhaustP flowRateRecirculationP
 #		ppmOxygenInP  inputGasTemperatureP 
