@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.16 2018/04/05 03:16:20 smirnovd Exp $
+ * $Id: StTpcRawData.cxx,v 2.17 2018/04/07 03:32:06 smirnovd Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.17  2018/04/07 03:32:06  smirnovd
+ * Set default sector id to 20
+ *
+ * Is should not matter which sector to use for past data but 20 is the one with
+ * iTPC in 2018
+ *
  * Revision 2.16  2018/04/05 03:16:20  smirnovd
  * Make StTpcDigitalSector compatible with iTPC
  *
@@ -66,7 +72,8 @@
 ClassImp(StTpcDigitalSector);
 ClassImp(StTpcRawData);
 //________________________________________________________________________________
-StTpcDigitalSector::StTpcDigitalSector(void *db) {
+StTpcDigitalSector::StTpcDigitalSector(void *db) : mSector(20)
+{
   StDigitalTimeBins  timeBins;
   mNoRows = St_tpcPadPlanesC::instance()->padRows();
   for(Int_t row=1; row <= mNoRows; row++) {
