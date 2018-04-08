@@ -181,19 +181,19 @@ class MediumMagboltz : public MediumGas {
   double m_tbGreenSawada[m_nMaxGases];
   bool m_hasGreenSawada[m_nMaxGases];
   // Energy loss
-  double m_energyLoss[nMaxLevels];
+  std::vector<double> m_energyLoss;
   // Cross-section type
-  int m_csType[nMaxLevels];
+  std::vector<int> m_csType;
   // Parameters for calculation of scattering angles
   bool m_useAnisotropic;
   double m_scatParameter[nEnergySteps][nMaxLevels];
   double m_scatParameterLog[nEnergyStepsLog][nMaxLevels];
-  int m_scatModel[nMaxLevels];
+  std::vector<int> m_scatModel;
   double m_scatCut[nEnergySteps][nMaxLevels];
   double m_scatCutLog[nEnergyStepsLog][nMaxLevels];
 
   // Level description
-  char m_description[nMaxLevels][50];
+  std::vector<std::string> m_description;
 
   // Total collision frequency
   double m_cfTot[nEnergySteps];
@@ -217,9 +217,9 @@ class MediumMagboltz : public MediumGas {
 
   // Penning transfer
   // Penning transfer probability (by level)
-  double m_rPenning[nMaxLevels];
+  std::vector<double> m_rPenning;
   // Mean distance of Penning ionisation (by level)
-  double m_lambdaPenning[nMaxLevels];
+  std::vector<double> m_lambdaPenning;
   // Number of Penning ionisations
   unsigned int m_nPenning;
 
