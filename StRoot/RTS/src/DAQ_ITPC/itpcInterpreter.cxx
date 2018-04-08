@@ -1064,6 +1064,13 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 	char mon_string[512] ;
 	int mon_cou = 0 ;
 
+	if(data[0] != 0xDDDDDDDD) {
+		LOG(ERR,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
+	}
+
+//	for(int i=(words-16);i<(words+32);i++) {
+//		LOG(TERR,"E %d/%d = 0x%08X",i,words,data[i]) ;
+//	}
 
 	// the data is already SWAPPED if processed in the sector brokers!!!
 	for(int i=0;i<16;i++) {
@@ -1071,8 +1078,19 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 
 		if((data[i] == 0xCCCC001C)||(data[i] == 0x001CCCCC)) {
 			data = data + i ;
+			words-- ;
 			break ;
 		}
+	}
+
+
+	if(words<=0) {
+		LOG(ERR,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
+	}
+
+	if((data[0] == 0xCCCC001C)||(data[0] == 0x001CCCCC)) ;	//as it should be
+	else {
+		LOG(ERR,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
 	}
 
 	if(data[0]==0xCCCC001C) {	// need swapping!!!!
@@ -1080,6 +1098,9 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		for(int i=0;i<words;i++) {
 			data[i] = sw16(data[i]) ;
 		}
+	}
+	else {
+		LOG(NOTE,"%d: words %d = 0x%08X",rdo_id,words,data[0]) ;
 	}
 
 	d = *data++ ;

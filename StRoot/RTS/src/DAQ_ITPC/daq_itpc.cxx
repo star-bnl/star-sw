@@ -325,8 +325,8 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 		if(words==0) continue ;
 
 		// first 4 words are the GTP header so let's skip
-		dta += 4 ;
-		words -= 4 ;
+		//dta += 4 ;
+		//words -= 4 ;
 
 		it->sector_id = s ;
 		it->rdo_id = r ;
