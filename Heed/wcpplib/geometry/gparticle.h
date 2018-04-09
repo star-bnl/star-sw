@@ -171,7 +171,7 @@ class gparticle : public RegPassivePtr {
   /// Number of previous steps with zero range (including this step).
   long n_zero_step;                
 
-  static long max_q_zero_step;
+  static const long max_q_zero_step = 100;
   stvpoint origin;
   stvpoint prevpos;
   stvpoint currpos;

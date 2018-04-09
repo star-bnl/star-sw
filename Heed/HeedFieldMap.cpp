@@ -26,8 +26,9 @@ void HeedFieldMap::field_map(const point& pt, vec& efield, vec& bfield,
   const double z = pt.v.z * conv + m_z;
 
   // Initialise the electric and magnetic field.
-  efield = vec(0., 0., 0.);
-  bfield = vec(0., 0., 0.);
+  efield.x = bfield.x = 0.;
+  efield.y = bfield.y = 0.;
+  efield.z = bfield.z = 0.;
   mrange = DBL_MAX;
 
   if (!m_sensor) {

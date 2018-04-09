@@ -38,8 +38,6 @@ void stvpoint::print(std::ostream& file, int l) const {
   file.flush();
 }
 
-long gparticle::max_q_zero_step = 100;
-
 gparticle::gparticle(manip_absvol* primvol, const point& pt, const vec& vel,
                      vfloat time)
     : s_life(false),
@@ -99,7 +97,9 @@ void gparticle::step(std::vector<gparticle*>& secondaries) {
 void gparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
                           vfloat /*prec*/) {
   fs_cf = 0;
-  frelcen = vec(0, 0, 0);
+  frelcen.x = 0.;
+  frelcen.y = 0.;
+  frelcen.z = 0.;
   fmrange = max_vfloat;
   /* The following is for debug
   vec field(0,1,0);

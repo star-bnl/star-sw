@@ -117,62 +117,12 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::NewTrack:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::NewTrack: Sensor is not defined.\n";
     return false;
   }
 
-  // Get the bounding box.
-  double xmin = 0., ymin = 0., zmin = 0.;
-  double xmax = 0., ymax = 0., zmax = 0.;
-  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << m_className << "::NewTrack:\n"
-              << "    Drift area is not set.\n";
-    return false;
-  }
-  // Check if the bounding box has changed.
-  const double lx = fabs(xmax - xmin);
-  const double ly = fabs(ymax - ymin);
-  const double lz = fabs(zmax - zmin);
-  if (m_debug) {
-    std::cout << m_className << "::NewTrack:\n"
-              << "    Bounding box dimensions:\n"
-              << "      x: " << lx << " cm\n"
-              << "      y: " << ly << " cm\n"
-              << "      z: " << lz << " cm\n";
-  }
-  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || fabs(lz - m_lZ) > Small) {
-    m_lX = lx;
-    m_lY = ly;
-    m_lZ = lz;
-    m_isChanged = true;
-  }
-  // Update the center of the bounding box.
-  if (std::isinf(xmin) || std::isinf(xmax)) {
-    m_cX = 0.;
-  } else {
-    m_cX = 0.5 * (xmin + xmax);
-  }
-  if (std::isinf(ymin) || std::isinf(ymax)) {
-    m_cY = 0.;
-  } else {
-    m_cY = 0.5 * (ymin + ymax);
-  }
-  if (std::isinf(zmin) || std::isinf(zmax)) {
-    m_cZ = 0.;
-  } else {
-    m_cZ = 0.5 * (zmin + zmax);
-  }
-  if (m_debug) {
-    std::cout << m_className << "::NewTrack:\n"
-              << "    Center of bounding box:\n"
-              << "      x: " << m_cX << " cm\n"
-              << "      y: " << m_cY << " cm\n"
-              << "      z: " << m_cZ << " cm\n";
-  }
-
-  m_fieldMap.SetSensor(m_sensor);
-  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
+  bool update = false;
+  if (!UpdateBoundingBox(update)) return false;
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -351,6 +301,8 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
               << "    Track has not been initialized. Call NewTrack first.\n";
     return false;
   }
+
+  if (m_particleBank.empty()) return false;
 
   std::vector<Heed::gparticle*>::const_iterator end = m_particleBank.end();
   if (m_bankIterator == end) {
@@ -557,35 +509,8 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
     return;
   }
 
-  // Get the bounding box.
-  double xmin, ymin, zmin;
-  double xmax, ymax, zmax;
-  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << m_className << "::TransportDeltaElectron:\n"
-              << "    Drift area is not set.\n";
-    m_ready = false;
-    return;
-  }
-  // Check if the bounding box has changed.
   bool update = false;
-  const double lx = fabs(xmax - xmin);
-  const double ly = fabs(ymax - ymin);
-  const double lz = fabs(zmax - zmin);
-  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || fabs(lz - m_lZ) > Small) {
-    m_lX = lx;
-    m_lY = ly;
-    m_lZ = lz;
-    m_isChanged = true;
-    update = true;
-    m_hasActiveTrack = false;
-  }
-  // Update the center of the bounding box.
-  m_cX = 0.5 * (xmin + xmax);
-  m_cY = 0.5 * (ymin + ymax);
-  m_cZ = 0.5 * (zmin + zmax);
-
-  m_fieldMap.SetSensor(m_sensor);
-  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
+  if (!UpdateBoundingBox(update)) return;
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -691,41 +616,13 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
 
   // Make sure the sensor has been set.
   if (!m_sensor) {
-    std::cerr << m_className << "::TransportPhoton:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::TransportPhoton: Sensor is not defined.\n";
     m_ready = false;
     return;
   }
 
-  // Get the bounding box.
-  double xmin, ymin, zmin;
-  double xmax, ymax, zmax;
-  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << m_className << "::TransportPhoton:\n"
-              << "    Drift area is not set.\n";
-    m_ready = false;
-    return;
-  }
-  // Check if the bounding box has changed.
   bool update = false;
-  const double lx = fabs(xmax - xmin);
-  const double ly = fabs(ymax - ymin);
-  const double lz = fabs(zmax - zmin);
-  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || fabs(lz - m_lZ) > Small) {
-    m_lX = lx;
-    m_lY = ly;
-    m_lZ = lz;
-    m_isChanged = true;
-    update = true;
-    m_hasActiveTrack = false;
-  }
-  // Update the center of the bounding box.
-  m_cX = 0.5 * (xmin + xmax);
-  m_cY = 0.5 * (ymin + ymax);
-  m_cZ = 0.5 * (zmin + zmax);
-
-  m_fieldMap.SetSensor(m_sensor);
-  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
+  if (!UpdateBoundingBox(update)) return;
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -786,7 +683,6 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   // Create and transport the photon.
   Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
                           &m_fieldMap);
-  ClearParticleBank();
   std::vector<Heed::gparticle*> secondaries;
   photon.fly(secondaries);
 
@@ -1304,6 +1200,54 @@ bool TrackHeed::IsInside(const double x, const double y, const double z) {
       !medium->IsIonisable()) {
     return false;
   }
+  return true;
+}
+
+bool TrackHeed::UpdateBoundingBox(bool& update) {
+
+  // Get the bounding box.
+  double xmin = 0., ymin = 0., zmin = 0.;
+  double xmax = 0., ymax = 0., zmax = 0.;
+  if (!m_sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << m_className << "::UpdateBoundingBox: Drift area is not set.\n";
+    m_ready = false;
+    return false;
+  }
+  // Check if the bounding box has changed.
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (m_debug) {
+    std::cout << m_className << "::UpdateBoundingBox:\n"
+              << "    Bounding box dimensions:\n"
+              << "      x: " << lx << " cm\n"
+              << "      y: " << ly << " cm\n"
+              << "      z: " << lz << " cm\n";
+  }
+  if (fabs(lx - m_lX) > Small || fabs(ly - m_lY) > Small || 
+      fabs(lz - m_lZ) > Small) {
+    m_lX = lx;
+    m_lY = ly;
+    m_lZ = lz;
+    m_isChanged = true;
+    update = true;
+    m_hasActiveTrack = false;
+  }
+  // Update the center of the bounding box.
+  m_cX = (std::isinf(xmin) || std::isinf(xmax)) ? 0. : 0.5 * (xmin + xmax);
+  m_cY = (std::isinf(ymin) || std::isinf(ymax)) ? 0. : 0.5 * (ymin + ymax);
+  m_cZ = (std::isinf(zmin) || std::isinf(zmax)) ? 0. : 0.5 * (zmin + zmax);
+  if (m_debug) {
+    std::cout << m_className << "::UpdateBoundingBox:\n"
+              << "    Center of bounding box:\n"
+              << "      x: " << m_cX << " cm\n"
+              << "      y: " << m_cY << " cm\n"
+              << "      z: " << m_cZ << " cm\n";
+  }
+
+  m_fieldMap.SetSensor(m_sensor);
+  m_fieldMap.SetCentre(m_cX, m_cY, m_cZ);
+
   return true;
 }
 

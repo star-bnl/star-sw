@@ -177,6 +177,7 @@ class TrackHeed : public Track {
   std::string FindUnusedMaterialName(const std::string& namein);
   void ClearParticleBank(); 
   bool IsInside(const double x, const double y, const double z);
+  bool UpdateBoundingBox(bool& update);
 };
 }
 
