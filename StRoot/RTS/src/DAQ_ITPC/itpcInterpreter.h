@@ -27,8 +27,14 @@ public:
 	void fee_dbase(const char *fname=0) ;
 
 
+	int rdo_scan_top(u_int *ddata, int words) ;	// new!
+
+	int ana_send_config(u_int *data, u_int *data_end) ;
+	int ana_pedestal(u_int *data, u_int *data_end) ;
+	int ana_triggered(u_int *data, u_int *data_end) ;
+
 	int rdo_scan(u_int *ddata, int words) ;
-//	int get_l2(char *ddata, int words, struct daq_trg_word *trgs, int do_log) ;
+
 
 	u_int *fee_scan(u_int *start, u_int *end) ;
 	u_int *sampa_lane_scan(u_int *start, u_int *end) ;
@@ -68,6 +74,10 @@ public:
 		u_int pedestal_errs ;
 		u_int ch_errs ;
 	} fee[17] ;	// index is RDO port starting from 1!
+
+	// electronics format versions
+	u_int rdo_version ;
+	u_int fee_version ;
 
 	// filled in fee_scan
 	int fee_port ;	// from 1..16
