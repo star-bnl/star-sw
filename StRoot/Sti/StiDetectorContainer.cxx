@@ -134,50 +134,6 @@ StiDetector* StiDetectorContainer::getCurrentDetector() const
   return det;
 }
 
-#if 0
-bool StiDetectorContainer::moveToNextRegion()
-{
-  //cout <<"StiDetectorContainer::moveToNextRegion()"<<endl;
-StiDetectorNodeVector::const_iterator region = mregion;
-  if ( ++region == mroot->end() )
-    {
-      //cout <<"StiDetectorContainer::moveToNextRegion() -I- Nowhere to go."<<endl;
-    return false;
-    }
-  //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK"<<endl;
-
-StiDetectorNodeVector::const_iterator radial_it = (*mregion)->begin();
-  //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK 2"<<endl;
-  if (radial_it==(*mregion)->end())
-    return false;
-StiDetectorNodeVector::const_iterator phi_it = (*radial_it)->begin();
-  //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK 3"<<endl;
-  if (phi_it==(*radial_it)->end())
-    return false;
-  //cout <<"StiDetectorContainer::moveToNextRegion() -I- new region OK 4"<<endl;
-
-  mregion    = region;
-  mradial_it = radial_it;
-  mphi_it    = phi_it;
-  //cout <<"StiDetectorContainer::moveToNextRegion() -I- moved to new region OK"<<endl;
-  return true;
-}
-
-bool StiDetectorContainer::moveToPreviousRegion()
-{
-  if (mregion == mroot->begin() ) 
-    {
-      //cout <<"StiDetectorContainer::moveToPreviousRegion():\t Nowhere to go. return false"<<endl;
-      return false;
-    }
-
-  --mregion;
-  //now reset to beginning of region
-  mradial_it = (*mregion)->begin();
-  mphi_it = (*mradial_it)->begin();
-  return true;
-}
-#endif
 /*! A call to moveIn() may not always alter the StiDetector to which the
 container points.  Notably, if there is nowhere else to 'move in to', then
 moveIn() will have no action.  So, to see if the action succeeded, one must
@@ -229,73 +185,6 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
     }
   return true;
 }
-#if 0
-/*! A call to moveOut() may not always alter the StiDetector to which the
-container points.  Notably, if there is nowhere else to 'move out to', then
-moveOut() will have no action.  So, to see if the action succeeded, one must
-store a pointer to the StiDetector represented by the current state of the
-container, call moveOut(), and then check that the pointer to the
-StiDetector represented by the new state of the container is different than
-that of the previous state. <p>
-Additionally, when a call to moveOut() is made, the container 'selects' the
-StiDetector object that is closest in phi to the StiDetector object that is
-being 'movedOut' from.  Therefore, a call to moveIn() usually need not be
-followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
-extreme assymetry, such as navigation through the Silicon Vertex Tracker.
-*/
-bool StiDetectorContainer::moveOut()
-{
-  //remember where we started:
-  const StiDetectorNode* oldPhiNode = *mphi_it;
-
-  //if there's nowher to go, get out before doing work!
-  // cout <<"StiDetectorContainer::moveOut()"<<endl;
-
-  //if ( (++mradial_it<mregion->end())==false) { //change (MLM)
-  if ( (++mradial_it<(*mregion)->end())==false) { //change (MLM)
-
-    // cout <<"StiDetectorContainer::moveOut():\t";
-    // cout <<"Nowhere to go. return false"<<endl;
-    --mradial_it;
-    return false;
-  }
-
-  if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
-    // cout <<"Index into array"<<endl;
-    mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
-    return true;
-  }
-  else {
-    // cout <<"Do linear search"<<endl;
-    return setPhi( oldPhiNode->getOrderKey() );
-  }
-  }
-
-/*! Plus phi is defined as clockwise if viewing sectors 1-12 from the membrane,
-increasing phi in STAR TPC global coordinates.  A call to movePlusPhi() will
-always have a valid action.  That is, the call will wrap around past 2pi.
-*/
-void StiDetectorContainer::movePlusPhi()
-{
-  ++mphi_it;
-  if (mphi_it == (*mradial_it)->end()) { //Wrap around 2pi
-    mphi_it = (*mradial_it)->begin();
-  }
-}
-
-/*! Minus phi is defined as counter-clockwise if viewing sectors 1-12 from
-the membrane,
-decreasing phi in STAR TPC global coordinates.  A call to moveMinusPhi() will
-always have a valid action.  That is, the call will wrap around past 2pi.
-*/
-void StiDetectorContainer::moveMinusPhi()
-{
-  if (mphi_it == (*mradial_it)->begin()) { //Wrap around 2pi
-    mphi_it = (*mradial_it)->end();
-  }
-  --mphi_it;
-}
-#endif
 /*! Recursively load all detector definition files from the given directory.
 There is internal protection to avoid building the detector representation
 more than once.
