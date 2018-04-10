@@ -332,7 +332,8 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 		it->rdo_id = r ;
 		sampa_c.rdo = r ;
 
-		ret = it->rdo_scan(dta,words) ;
+//		ret = it->rdo_scan(dta,words) ;
+		ret = it->rdo_scan_top(dta,words) ;
 
 		LOG(NOTE,"rdo_scan %d:%d, words %d, ret %d",s,r,words,ret) ;
 
@@ -594,6 +595,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int t_cou = 0 ;
 	u_int evt_status ;
 	int trl_ix ;
+	u_int ds ;
+	int rdo_version ;
+	char buff[128] ;
+	int buff_cou ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
@@ -604,6 +609,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	for(int i=0;i<16;i++) {
 		if(d[i] == 0xCCCC001C) {
 			d = d + i ;
+			words-- ;
 			break ;
 		}
 	}
@@ -615,46 +621,97 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	//LOG(TERR,"   0x%08X 0x%08X 0x%08X", sw16(d[1]),sw16(d[2]),sw16(d[words-1])) ;
-	
-	if(sw16(d[1]) != 0x98000004) { // not a triggered event
+	ds = sw16(d[1]) ;	// first payload word from RDO
+
+	if(ds==0x980000004) {	// Pre-Mar 2018 triggered event
+		rdo_version = 0 ;
+	}
+	else if((ds&0xFF00000F)==0x98000004) {	// Apr+ 2018 triggered event
+		rdo_version = (ds >> 4) & 0xFF ;
+	}
+	else {
+		// Hm, not a triggered event!?
 		trg[0].t = 4096 ;	// a "log" event
 		trg[0].daq = 0 ;
 		trg[0].trg = 0 ;
 	
-		LOG(WARN,"%d: not a triggered event 0x%08X",rdo,sw16(d[1])) ;
+		LOG(WARN,"%d: not a triggered event 0x%08X",rdo,ds) ;
 
 		return 1 ;	
 	}
 
-	if(sw16(d[2]) != 0x12340000) {	// wrong version
-		LOG(ERR,"Wrong version 0x%X",d[2]) ;
+
+	switch(rdo_version) {
+	case 0 :
+		if(sw16(d[2]) != 0x12340000) {	// wrong version
+			LOG(ERR,"%d: wrong version 0x%X",rdo,d[2]) ;
+			err |= 2 ;
+			goto err_end ;
+		}
+	
+		trg_fired = sw16(d[3]) ;
+		break ;
+	case 1 :
+		trg_fired = sw16(d[2]) ;
+		break ;
+	default :
+		LOG(ERR,"%d: wrong version 0x%X",rdo,rdo_version) ;
 		err |= 2 ;
 		goto err_end ;
 	}
 
-	trg_fired = sw16(d[3]) ;
-//	v_fired = sw16(d[4]) ;	// if 0, no prompt trigger	
-
-
-
-	// this gets messy so we won't check
-	/*
-	if(sw16(d[words-1]) != 0xFFFF005C) {	// expect stop-comma
-		err |= 0x10 ;
-		goto err_end ;
-	}
-	*/
-
 	//find trailer start-header, scanning from the end
 	if(words < 1) {
-		LOG(ERR,"Bad words %d",words) ;
+		LOG(ERR,"%d: bad words %d",rdo,words) ;
 		err |= 0x100 ;
 		goto err_end ;
 	}
 
+
+	if(trg_fired==0) {
+		if(rdo_version==1) {
+			if(sw16(d[3])==0x980000FC) {
+				//LOG(TERR,"RDO_mon") ;
+				u_int *dd = d+4 ;
+				u_int *dd_end = d+words ;
+				buff_cou = 0 ;
+				while(dd < dd_end) {
+					u_int sd = sw16(*dd) ;
+					u_int dd_r = sd & 0xFFFFFF00 ;
+
+					if(sd==0x580000FD) {
+						//LOG(TERR,"RDO_mon end") ;
+						if(buff_cou) {
+							buff[buff_cou++] = 0 ;
+							LOG(INFO,"RDO_asc(get_l2) %d: \"%s\"",rdo,buff) ;
+							buff_cou = 0 ;
+						}
+						break ;
+					}
+					else if(dd_r==0x9800F500) {
+						//LOG(TERR,"... 0x%08X",sd) ;
+
+						int c = sd & 0xFF ;
+						if(c=='\n' || buff_cou==120) {
+							buff[buff_cou++] = 0 ;
+							LOG(INFO,"RDO_asc(get_l2) %d: \"%s\"",rdo,buff) ;
+							buff_cou = 0 ;
+						}
+						else {
+							buff[buff_cou++] = c ;
+						}
+					}
+					else LOG(TERR,"... 0x%08X",sd) ;
+					dd++ ;
+				}
+			}
+		}
+	}
+
 	trl_ix = -1 ;
 
-//	if(rdo==1) {
+	// hunt backwards for the signature but skup a bunch of last words which are just
+	// filler (sentinels) == 0
 	for(int i=(words-6);i>=0;i--) {
 		if(sw16(d[i]) == 0x98001000) {
 			trl_ix = i ;
@@ -662,15 +719,6 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 
-//	}
-//	else {
-//	for(int i=(words-1);i>=0;i--) {
-//		if(sw16(d[i]) == 0x98001000) {
-//			trl_ix = i ;
-//			break ;
-//		}
-//	}
-//	}
 
 	if(trl_ix < 0) {
 		LOG(ERR,"No trailer found") ;
@@ -678,19 +726,21 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		goto err_end ;
 	}
 
-	trl_ix++ ;
+	trl_ix++ ;	// skip 0x98001000
 
-	if(sw16(d[trl_ix++]) != 0xABCD0000) {
-		LOG(ERR,"Wrong trailer word ABCD") ;
-		err |= 0x40 ;
-		goto err_end ;
+	if(rdo_version==0) {
+		if(sw16(d[trl_ix++]) != 0xABCD0000) {
+			LOG(ERR,"Wrong trailer word ABCD") ;
+			err |= 0x40 ;
+			goto err_end ;
+		}
 	}
 
 	evt_status = sw16(d[trl_ix++]) ;
 	trg_cou = sw16(d[trl_ix++]) ;
 
 	if(evt_status) {
-		LOG(ERR,"... RDO %d: %d/%d -- evt status 0x%08X, trg_cou %d",rdo,sw16(d[6]),sw16(d[5]),evt_status,trg_cou) ;
+		LOG(ERR,"RDO %d: get_l2: evt status 0x%08X, trg_fired 0x%08X, trg_cou %d",rdo,evt_status,trg_fired,trg_cou) ;
 	}
 
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;
@@ -791,7 +841,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 		//if(trg[t_cou].trg==2 && trg[t_cou].t==10 && trg[t_cou].daq==3) continue ;
 		if(trg[t_cou].trg<=2) {
-			LOG(WARN,"Odd trg_cmd: T %d, trg %d, daq %d",trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
+			LOG(WARN,"%d: odd trg_cmd: T %d, trg %d, daq %d",rdo,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq) ;
 			continue ;
 		}
 		t_cou++ ;
@@ -809,7 +859,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	err_end:;
 
-	LOG(ERR,"RDO %d: Error in get_l2 %d",rdo,err) ;
+	LOG(ERR,"RDO %d: Error in get_l2 0x%X [words %d]",rdo,err,words) ;
 
 	return 0 ;
 
