@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.43 2018/04/10 11:38:54 smirnovd Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.44 2018/04/10 11:39:03 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -184,7 +184,8 @@ Int_t StTpcRTSHitMaker::Make() {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
     UShort_t Id = 0;
-    if (St_tpcPadConfigC::instance()->numberOfRows(sec) != 45) 
+    bool isiTpcSector = (St_tpcPadConfigC::instance()->numberOfRows(sec) != 45);
+    if (isiTpcSector)
       dta = fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]); // used for any kind of data; transparent pointer
     else              dta = fTpx->put("adc_sim");
     Int_t hitsAdded = 0;
@@ -299,7 +300,8 @@ Int_t StTpcRTSHitMaker::Make() {
 	  ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
 		     (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 	}
-	UInt_t hw = 1;   // detid_tpc
+	UInt_t hw = 1U;   // detid_tpc
+        if (isiTpcSector) hw += 1U << 1;
 	hw += dta->sec << 4;     // (row/100 << 4);   // sector
 	hw += dta->row << 9;     // (row%100 << 9);   // row
 #if 0	
