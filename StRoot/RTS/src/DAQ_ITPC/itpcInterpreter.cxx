@@ -1210,9 +1210,29 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		//  with previous FEEs 0x40yy0010
 		//  and the first word is the 0x4321 signature already
 
-		LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-		err |= 2 ;
-		goto done ;
+		if((data[0]&0xFF00FFFF)==0x98004321) {
+			if((data[1]&0xFF00FFFF)==0x98008765) ;
+			else {
+				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+				err |= 2 ;
+				goto done ;
+			}
+		}
+		else if((data[1]&0xFF00FFFF)==0x98004321) {
+			if((data[2]&0xFF00FFFF)==0x98008765) ;
+			else {
+				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+				err |= 2 ;
+				goto done ;
+			}
+		}
+		else {
+				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+				err |= 2 ;
+				goto done ;
+
+		}
+
 	}
 	else {
 		fee_version = 1 ;
