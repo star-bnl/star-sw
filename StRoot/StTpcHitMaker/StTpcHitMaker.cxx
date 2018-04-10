@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.59 2018/04/10 11:38:54 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.60 2018/04/10 11:39:03 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.60  2018/04/10 11:39:03  smirnovd
+ * StTpcHitMaker: Update hardware Id for iTPC sectors (Gene)
+ *
  * Revision 1.59  2018/04/10 11:38:54  smirnovd
  * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
  *
@@ -613,7 +616,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   transform(padcoord,local,kFALSE);
   transform(local,global);
     
-  UInt_t hw = 1;   // detid_tpc
+  UInt_t hw = 1U;   // detid_tpc
+  if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) hw += 1U << 1; // iTPC
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
@@ -671,7 +675,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   transform(padcoord,local,kFALSE);
   transform(local,global);
     
-  UInt_t hw = 1;   // detid_tpc
+  UInt_t hw = 1U;   // detid_tpc
+  if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) hw += 1U << 1; // iTPC
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
 #if 0  
