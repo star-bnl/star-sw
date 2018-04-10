@@ -47,7 +47,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
   if (currpos.prange <= 0.0) return;
   // Get local volume.
   const absvol* av = currpos.tid.G_lavol();
-  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (!etcs) return;
   HeedMatterDef* hmd = etcs->hmd.getver();
   MatterDef* matter = hmd->matter.getver();

@@ -1124,7 +1124,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
               } else if (typedx == DxcProdTypePhoton && m_usePhotons &&
                          edx > m_gammaCut) {
                 // Radiative de-excitation
-                stackPhotons.push_back(std::make_pair(t + tdx, edx));
+                stackPhotons.emplace_back(std::make_pair(t + tdx, edx));
               }
             }
 
@@ -1191,7 +1191,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
         newPoint.y = y;
         newPoint.z = z;
         newPoint.t = t;
-        (*it).driftLine.push_back(newPoint);
+        (*it).driftLine.push_back(std::move(newPoint));
       }
     }
   }
@@ -1342,7 +1342,7 @@ void AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newPhoton.z1 = z;
     newPhoton.energy = e0;
     newPhoton.status = StatusLeftDriftMedium;
-    m_photons.push_back(newPhoton);
+    m_photons.push_back(std::move(newPhoton));
     return;
   }
 
@@ -1400,7 +1400,7 @@ void AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   newPhoton.z1 = z;
   newPhoton.energy = e0;
   newPhoton.status = -2;
-  m_photons.push_back(newPhoton);
+  m_photons.push_back(std::move(newPhoton));
 }
 
 void AvalancheMicroscopic::ComputeRotationMatrix(
@@ -1527,7 +1527,7 @@ void AvalancheMicroscopic::AddToStack(const double x, const double y,
   electron.yLast = y;
   electron.zLast = z;
   electron.driftLine.reserve(1000);
-  container.push_back(electron);
+  container.push_back(std::move(electron));
 }
 
 void AvalancheMicroscopic::Terminate(double x0, double y0, double z0, double t0,

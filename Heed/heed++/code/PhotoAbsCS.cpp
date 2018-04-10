@@ -1490,10 +1490,10 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const std::string& fname,
       }
 #ifdef READ_FILE_WITH_PRINCIPAL_NUMBERS
       // necessary for generation escape products
-      std::string shellname(long_to_String(n_princ) + " shell number " +
-                            long_to_String(nshell));
+      std::string shellname(std::to_string(n_princ) + " shell number " +
+                            std::to_string(nshell));
 #else
-      std::string shellname("shell number " + long_to_String(nshell));
+      std::string shellname("shell number " + std::to_string(nshell));
 #endif
       acs[nshell]
           .pass(new SimpleTablePhotoAbsCS(shellname, 0,  // unknown here

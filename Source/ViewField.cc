@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <limits>
@@ -251,10 +250,7 @@ std::string ViewField::FindUnusedFunctionName(const std::string& s) {
   std::string fname = s + "_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
     ++idx;
-    std::stringstream ss;
-    ss << s;
-    ss << idx;
-    fname = ss.str();
+    fname = s + "_" + std::to_string(idx);
   }
   return fname;
 }

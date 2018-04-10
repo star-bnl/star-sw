@@ -428,11 +428,11 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   endPoint.t1 = m_drift.back().t;
   endPoint.status = status;
   if (type == -1) {
-    m_endpointsElectrons.push_back(endPoint);
+    m_endpointsElectrons.push_back(std::move(endPoint));
   } else if (type == 1) {
-    m_endpointsHoles.push_back(endPoint);
+    m_endpointsHoles.push_back(std::move(endPoint));
   } else if (type == 2) {
-    m_endpointsIons.push_back(endPoint);
+    m_endpointsIons.push_back(std::move(endPoint));
   }
   if (m_debug) {
     const int nNewElectrons = m_nElectrons - nElectronsOld;
@@ -443,10 +443,9 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
               << "      " << nNewHoles << " holes, and\n"
               << "      " << nNewIons << " ions\n"
               << "    along the drift line from \n"
-              << "      (" << endPoint.x0 << ", " << endPoint.y0 << ", "
-              << endPoint.z0 << ") to \n"
-              << "      (" << endPoint.x1 << ", " << endPoint.y1 << ", "
-              << endPoint.z1 << ").\n";
+              << "      (" << x0 << ", " << y0 << ", " << z0 << ") to \n"
+              << "      (" << m_drift.back().x << ", " << m_drift.back().y 
+              << ", " << m_drift.back().z << ").\n";
   }
 
   // Compute the induced signal and induced charge if requested.

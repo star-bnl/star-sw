@@ -36,7 +36,7 @@ void ViewGeometry::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -107,7 +107,7 @@ void ViewGeometry::Plot() {
     double matrix[9] = {cphi * ctheta, -sphi, cphi * stheta,
                         sphi * ctheta,  cphi, sphi * stheta,
                               -stheta,     0,        ctheta};
-    TGeoVolume* volume = NULL;
+    TGeoVolume* volume = nullptr;
     if (solid->IsTube()) {
       double rmin = 0., rmax = 0., lz = 0.;
       if (!solid->GetDimensions(rmin, rmax, lz)) {
@@ -185,7 +185,7 @@ void ViewGeometry::Reset() {
 
   if (m_geoManager) {
     delete m_geoManager;
-    m_geoManager = NULL;
+    m_geoManager = nullptr;
   }
 
 }

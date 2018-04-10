@@ -17,7 +17,7 @@ DriftLineRKF::DriftLineRKF() {
 void DriftLineRKF::SetSensor(Sensor* s) {
 
   if (!s) {
-    std::cerr << m_className << "::SetSensor:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetSensor: Null pointer.\n";
     return;
   }
   m_sensor = s;
@@ -143,19 +143,19 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
   }
 
   // Set the numerical constants for the RKF integration.
-  const double c10 = 214. /  891.;
-  const double c11 =   1. /   33.;
-  const double c12 = 650. /  891.;
-  const double c20 = 533. / 2106.;
-  const double c22 = 800. / 1053.;
-  const double c23 =  -1. /   78.;
+  constexpr double c10 = 214. /  891.;
+  constexpr double c11 =   1. /   33.;
+  constexpr double c12 = 650. /  891.;
+  constexpr double c20 = 533. / 2106.;
+  constexpr double c22 = 800. / 1053.;
+  constexpr double c23 =  -1. /   78.;
 
-  const double b10 =    1. /   4.;
-  const double b20 = -189. / 800.;
-  const double b21 =  729. / 800.;
-  const double b30 =  214. / 891.;
-  const double b31 =    1. /  33.;
-  const double b32 =  650. / 891.;
+  constexpr double b10 =    1. /   4.;
+  constexpr double b20 = -189. / 800.;
+  constexpr double b21 =  729. / 800.;
+  constexpr double b30 =  214. / 891.;
+  constexpr double b31 =    1. /  33.;
+  constexpr double b32 =  650. / 891.;
 
   // Set the charge of the drifting particle.
   const double charge = m_particleType == ParticleTypeElectron ? -1 : 1;

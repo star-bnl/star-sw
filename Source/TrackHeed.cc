@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 
 #include "wcpplib/matter/GasLib.h"
 #include "wcpplib/matter/MatterDef.h"
@@ -304,7 +303,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     // Skip clusters outside the drift area or outside the active medium.
     if (!IsInside(xcls, ycls, zcls)) continue;
     // Add the first ion (at the position of the cluster).
-    m_conductionIons.push_back(
+    m_conductionIons.emplace_back(
         Heed::HeedCondElectron(virtualPhoton->currpos.pt, tcls));
     ++m_bankIterator;
     break;
@@ -328,7 +327,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     std::vector<Heed::gparticle*>::const_iterator send = secondaries.end();
     for (it = secondaries.begin(); it != send; ++it) {
       // Check if it is a delta electron.
-      Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
+      auto delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
       if (delta) {
         extra += delta->curr_kin_energy * 1.e6;
         const double x = delta->currpos.pt.v.x * 0.1 + m_cX;
@@ -356,12 +355,12 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
           newDeltaElectron.dx = delta->currpos.dir.x;
           newDeltaElectron.dy = delta->currpos.dir.y;
           newDeltaElectron.dz = delta->currpos.dir.z;
-          m_deltaElectrons.push_back(newDeltaElectron);
+          m_deltaElectrons.push_back(std::move(newDeltaElectron));
         }
         continue;
       } 
       // Check if it is a real photon.
-      Heed::HeedPhoton* photon = dynamic_cast<Heed::HeedPhoton*>(*it);
+      auto photon = dynamic_cast<Heed::HeedPhoton*>(*it);
       if (!photon) {
         std::cerr << m_className << "::GetCluster:\n"
                   << "    Particle is neither an electron nor a photon.\n";
@@ -525,7 +524,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   // Make sure the kinetic energy is positive.
   if (e0 <= 0.) {
     // Just create a conduction electron on the spot.
-    m_conductionElectrons.push_back(Heed::HeedCondElectron(p0, t0));
+    m_conductionElectrons.emplace_back(Heed::HeedCondElectron(p0, t0));
     nel = 1;
     return;
   }
@@ -664,7 +663,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     std::vector<Heed::gparticle*>::iterator it;
     for (it = secondaries.begin(); it != secondaries.end(); ++it) {
       // Check if it is a delta electron.
-      Heed::HeedDeltaElectron* delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
+      auto delta = dynamic_cast<Heed::HeedDeltaElectron*>(*it);
       if (delta) {
         if (m_doDeltaTransport) {
           // Transport the delta electron.
@@ -687,12 +686,12 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
           newDeltaElectron.dx = delta->currpos.dir.x;
           newDeltaElectron.dy = delta->currpos.dir.y;
           newDeltaElectron.dz = delta->currpos.dir.z;
-          m_deltaElectrons.push_back(newDeltaElectron);
+          m_deltaElectrons.push_back(std::move(newDeltaElectron));
         }
         continue;
       }
       // Check if it is a fluorescence photon.
-      Heed::HeedPhoton* fluorescencePhoton = dynamic_cast<Heed::HeedPhoton*>(*it);
+      auto fluorescencePhoton = dynamic_cast<Heed::HeedPhoton*>(*it);
       if (!fluorescencePhoton) {
         std::cerr << m_className << "::TransportPhoton:\n"
                   << "    Unknown secondary particle.\n";
@@ -1143,9 +1142,7 @@ std::string TrackHeed::FindUnusedMaterialName(const std::string& namein) {
   std::string nameout = namein;
   unsigned int counter = 0;
   while (Heed::MatterDef::get_MatterDef(nameout)) {
-    std::stringstream ss;
-    ss << namein << "_" << counter;
-    nameout = ss.str();
+    nameout = namein + "_" + std::to_string(counter);
     ++counter;
   }
   return nameout;

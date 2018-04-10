@@ -50,12 +50,11 @@ void HeedPhoton::physics(std::vector<gparticle*>& /*secondaries*/) {
   // Get least address of volume
   const absvol* av = currpos.tid.G_lavol();
   HeedMatterDef* hmd = NULL;
-  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (etcs) {
     hmd = etcs->hmd.getver();
   } else {
-    const HeedDeltaElectronCS* hdecs =
-        dynamic_cast<const HeedDeltaElectronCS*>(av);
+    auto hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
     if (hdecs) hmd = hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.
@@ -119,12 +118,11 @@ void HeedPhoton::physics_after_new_speed(std::vector<gparticle*>& secondaries) {
   // Get least address of volume
   const absvol* av = currpos.tid.G_lavol();
   HeedMatterDef* hmd = NULL;
-  const EnTransfCS* etcs = dynamic_cast<const EnTransfCS*>(av);
+  auto etcs = dynamic_cast<const EnTransfCS*>(av);
   if (etcs) {
     hmd = etcs->hmd.getver();
   } else {
-    const HeedDeltaElectronCS* hdecs =
-        dynamic_cast<const HeedDeltaElectronCS*>(av);
+    auto hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
     if (hdecs) hmd = hdecs->hmd.get();
   }
   // Stop here if we couldn't retrieve the material definition.

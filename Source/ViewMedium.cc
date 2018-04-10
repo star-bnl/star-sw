@@ -1,7 +1,5 @@
-
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <cmath>
 
 #include <TAxis.h>
@@ -292,10 +290,7 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
   std::string fname = "fMediumView_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
     ++idx;
-    std::stringstream ss;
-    ss << "fMediumView_";
-    ss << idx;
-    fname = ss.str();
+    fname = "fMediumView_" + std::to_string(idx);
   }
   if (m_debug) {
     std::cout << m_className << "::AddFunction:\n";

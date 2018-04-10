@@ -20,7 +20,7 @@ class Sensor {
   /// Add a component.
   void AddComponent(ComponentBase* comp);
   unsigned int GetNumberOfComponents() const { return m_components.size(); }
-  ComponentBase* GetComponent(const unsigned int componentNumber);
+  ComponentBase* GetComponent(const unsigned int i);
 
   /// Add an electrode.
   void AddElectrode(ComponentBase* comp, const std::string& label);
@@ -120,14 +120,11 @@ class Sensor {
   std::string m_className = "Sensor";
 
   // Components
-  struct component {
-    ComponentBase* comp;
-  };
-  std::vector<component> m_components;
-  int m_lastComponent = -1;
+  std::vector<ComponentBase*> m_components;
+  ComponentBase* m_lastComponent = nullptr;
 
   // Electrodes
-  struct electrode {
+  struct Electrode {
     ComponentBase* comp;
     std::string label;
     std::vector<double> signal;
@@ -135,7 +132,7 @@ class Sensor {
     std::vector<double> ionsignal;
     double charge;
   };
-  std::vector<electrode> m_electrodes;
+  std::vector<Electrode> m_electrodes;
 
   // Time window for signals
   unsigned int m_nTimeBins = 200;

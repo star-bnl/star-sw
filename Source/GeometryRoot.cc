@@ -115,7 +115,7 @@ void GeometryRoot::SetMedium(const unsigned int imat, Medium* med) {
     material newMaterial;
     newMaterial.name = name;
     newMaterial.medium = med;
-    m_materials.push_back(newMaterial);
+    m_materials.push_back(std::move(newMaterial));
   }
 
   // Check if material properties match

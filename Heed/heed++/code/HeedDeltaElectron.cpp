@@ -78,8 +78,7 @@ void HeedDeltaElectron::physics_mrange(double& fmrange) {
   }
   // Get local volume and convert it to a cross-section object.
   const absvol* av = currpos.tid.G_lavol();
-  const HeedDeltaElectronCS* hdecs =
-      dynamic_cast<const HeedDeltaElectronCS*>(av);
+  auto hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
   if (!hdecs) return;
   if (s_print_listing) Iprintnf(mcout, fmrange);
   const double ek = curr_kin_energy / MeV;
@@ -157,8 +156,7 @@ void HeedDeltaElectron::physics_after_new_speed(
       absvol* av = currpos.tid.G_lavol();
       if (av && av->s_sensitive && m_fieldMap->inside(currpos.ptloc)) {
         if (s_print_listing) mcout << "Convert to conduction electron.\n";
-        // TODO: replace push_back by emplace_back.
-        conduction_electrons.push_back(
+        conduction_electrons.emplace_back(
             HeedCondElectron(currpos.ptloc, currpos.time));
       }
       s_life = false;
@@ -168,8 +166,7 @@ void HeedDeltaElectron::physics_after_new_speed(
   }
   // Get local volume and convert it to a cross-section object.
   const absvol* av = currpos.tid.G_lavol();
-  const HeedDeltaElectronCS* hdecs =
-      dynamic_cast<const HeedDeltaElectronCS*>(av);
+  auto hdecs = dynamic_cast<const HeedDeltaElectronCS*>(av);
   if (!hdecs) return;
   double ek = curr_kin_energy / MeV;
   if (s_print_listing) {
@@ -385,10 +382,9 @@ void HeedDeltaElectron::ionisation(const double eloss, const double dedx,
     point ptloc = curpt;
     prevpos.tid.up_absref(&ptloc);
     if (s_print_listing) mcout << "New conduction electron\n";
-    // TODO: replace push_back by emplace_back.
     if (m_fieldMap->inside(ptloc)) {
-      conduction_electrons.push_back(HeedCondElectron(ptloc, currpos.time));
-      conduction_ions.push_back(HeedCondElectron(ptloc, currpos.time));
+      conduction_electrons.emplace_back(HeedCondElectron(ptloc, currpos.time));
+      conduction_ions.emplace_back(HeedCondElectron(ptloc, currpos.time));
     }
     eloss_left -= necessary_energy;
     ekin -= necessary_energy;

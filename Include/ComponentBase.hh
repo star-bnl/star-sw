@@ -1,7 +1,7 @@
 #ifndef G_COMPONENT_BASE_H
 #define G_COMPONENT_BASE_H
 
-#include <vector>
+#include <array>
 #include <string>
 
 #include "GeometryBase.hh"
@@ -243,12 +243,13 @@ class ComponentBase {
   /// Does the component have velocity maps?
   bool m_hasVelocityMap = false;
 
+  std::array<bool, 3> m_periodic = {{false, false, false}};
   /// Simple periodicity in x.
   bool m_xPeriodic = false;
   /// Simple periodicity in y.
   bool m_yPeriodic = false;
   /// Simple periodicity in z.
-  bool  m_zPeriodic = false;
+  bool m_zPeriodic = false;
   /// Mirror periodicity in x.
   bool m_xMirrorPeriodic = false;
   /// Mirror periodicity in y.

@@ -31,7 +31,7 @@ void ViewDrift::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -66,15 +66,15 @@ void ViewDrift::Clear() {
 
   if (m_excPlot) {
     delete m_excPlot;
-    m_excPlot = NULL;
+    m_excPlot = nullptr;
   }
   if (m_ionPlot) {
     delete m_ionPlot;
-    m_ionPlot = NULL;
+    m_ionPlot = nullptr;
   }
   if (m_attPlot) {
     delete m_attPlot;
-    m_attPlot = NULL;
+    m_attPlot = nullptr;
   }
   const unsigned int nTrackPlots = m_trackPlots.size();
   for (unsigned int i = 0; i < nTrackPlots; ++i) {
@@ -132,7 +132,7 @@ void ViewDrift::NewElectronDriftLine(const unsigned int np, int& id,
     d.vect = p;
   }
   d.n = col;
-  m_driftLines.push_back(d);
+  m_driftLines.push_back(std::move(d));
   // Return the index of this drift line.
   id = m_driftLines.size() - 1;
 }
@@ -156,7 +156,7 @@ void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
     d.vect = p;
   }
   d.n = col;
-  m_driftLines.push_back(d);
+  m_driftLines.push_back(std::move(d));
   // Return the index of this drift line.
   id = m_driftLines.size() - 1;
 }
@@ -179,7 +179,7 @@ void ViewDrift::NewIonDriftLine(const unsigned int np, int& id, const double x0,
     d.vect = p;
   }
   d.n = col;
-  m_driftLines.push_back(d);
+  m_driftLines.push_back(std::move(d));
   // Return the index of this drift line.
   id = m_driftLines.size() - 1;
 }
@@ -206,7 +206,7 @@ void ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
   track[0].x = x0;
   track[0].y = y0;
   track[0].z = z0;
-  m_tracks.push_back(track);
+  m_tracks.push_back(std::move(track));
   // Return the index of this track.
   id = m_tracks.size() - 1;
 }
@@ -261,7 +261,7 @@ void ViewDrift::AddTrackPoint(const unsigned int iL, const double x,
   newPoint.x = x;
   newPoint.y = y;
   newPoint.z = z; 
-  m_tracks[iL].push_back(newPoint);
+  m_tracks[iL].push_back(std::move(newPoint));
 }
 
 void ViewDrift::AddExcitationMarker(const double x, const double y,
@@ -271,7 +271,7 @@ void ViewDrift::AddExcitationMarker(const double x, const double y,
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
-  m_excMarkers.push_back(newMarker);
+  m_excMarkers.push_back(std::move(newMarker));
 }
 
 void ViewDrift::AddIonisationMarker(const double x, const double y,
@@ -281,7 +281,7 @@ void ViewDrift::AddIonisationMarker(const double x, const double y,
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
-  m_ionMarkers.push_back(newMarker);
+  m_ionMarkers.push_back(std::move(newMarker));
 }
 
 void ViewDrift::AddAttachmentMarker(const double x, const double y,
@@ -291,7 +291,7 @@ void ViewDrift::AddAttachmentMarker(const double x, const double y,
   newMarker.x = x;
   newMarker.y = y;
   newMarker.z = z;
-  m_attMarkers.push_back(newMarker);
+  m_attMarkers.push_back(std::move(newMarker));
 }
 
 void ViewDrift::Plot(const bool twod, const bool axis) {
@@ -418,7 +418,7 @@ void ViewDrift::Plot3d(const bool axis) {
   }
   if (m_excPlot) {
     delete m_excPlot;
-    m_excPlot = NULL;
+    m_excPlot = nullptr;
   }
   if (!m_excMarkers.empty()) {
     const unsigned int nExcMarkers = m_excMarkers.size();
@@ -434,7 +434,7 @@ void ViewDrift::Plot3d(const bool axis) {
   }
   if (m_ionPlot) {
     delete m_ionPlot;
-    m_ionPlot = NULL;
+    m_ionPlot = nullptr;
   }
   if (!m_ionMarkers.empty()) {
     const unsigned int nIonMarkers = m_ionMarkers.size();
@@ -450,7 +450,7 @@ void ViewDrift::Plot3d(const bool axis) {
   }
   if (m_attPlot) {
     delete m_attPlot;
-    m_attPlot = NULL;
+    m_attPlot = nullptr;
   }
   if (!m_attMarkers.empty()) {
     const unsigned int nAttMarkers = m_attMarkers.size();

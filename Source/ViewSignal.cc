@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 
 #include <TAxis.h>
 
@@ -149,10 +148,7 @@ std::string ViewSignal::FindHistogramName(const std::string& base) const {
   int idx = 0;
   while (gDirectory->GetList()->FindObject(hname.c_str())) {
     ++idx;
-    std::stringstream ss;
-    ss << base;
-    ss << idx;
-    hname = ss.str();
+    hname = base + "_" + std::to_string(idx);
   }
   return hname;
 }

@@ -812,7 +812,7 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
         }
         newDxcProd.energy = esec;
         newDxcProd.type = DxcProdTypeElectron;
-        m_dxcProducts.push_back(newDxcProd);
+        m_dxcProducts.push_back(std::move(newDxcProd));
         ndxc = 1;
         ++m_nPenning;
       }

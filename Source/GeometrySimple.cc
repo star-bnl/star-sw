@@ -56,7 +56,7 @@ void GeometrySimple::AddSolid(Solid* s, Medium* m) {
   }
 
   // Add the new solid to the list.
-  m_solids.push_back(std::make_pair(s, n));
+  m_solids.emplace_back(std::make_pair(s, n));
 }
 
 Solid* GeometrySimple::GetSolid(const double x, const double y, 
