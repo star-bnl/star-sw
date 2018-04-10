@@ -12,22 +12,8 @@
 
 namespace Garfield {
 
-TrackBichsel::TrackBichsel()
-    : m_bg(3.16228),
-      m_speed(SpeedOfLight * m_bg / sqrt(1. + m_bg * m_bg)),
-      m_x(0.),
-      m_y(0.),
-      m_z(0.),
-      m_t(0.),
-      m_dx(0.),
-      m_dy(0.),
-      m_dz(1.),
-      m_imfp(4.05090e4),
-      m_datafile("SiM0invw.inv"),
-      m_iCdf(2),
-      m_nCdfEntries(-1),
-      m_isInitialised(false),
-      m_isInMedium(false) {
+TrackBichsel::TrackBichsel() : Track(),
+      m_speed(SpeedOfLight * m_bg / sqrt(1. + m_bg * m_bg)) {
 
   m_className = "TrackBichsel";
 }

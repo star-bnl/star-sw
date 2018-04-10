@@ -22,78 +22,11 @@ namespace Garfield {
 int Medium::m_idCounter = -1;
 
 Medium::Medium()
-    : m_className("Medium"),
-      m_id(++m_idCounter),
-      m_name(""),
-      m_temperature(293.15),
-      m_pressure(760.),
-      m_epsilon(1.),
-      m_nComponents(1),
-      m_z(1.),
-      m_a(0.),
-      m_density(0.),
-      m_driftable(false),
-      m_microscopic(false),
-      m_ionisable(false),
-      m_w(0.),
-      m_fano(0.),
-      m_isChanged(true),
-      m_debug(false),
-      m_map2d(false) {
+    : m_id(++m_idCounter) {
 
   // Initialise the transport tables.
   m_bFields.assign(1, 0.);
   m_bAngles.assign(1, 0.);
-
-  m_hasElectronVelocityE = false;
-  m_hasElectronVelocityB = false;
-  m_hasElectronVelocityExB = false;
-  m_hasElectronDiffLong = false;
-  m_hasElectronDiffTrans = false;
-  m_hasElectronAttachment = false;
-  m_hasElectronLorentzAngle = false;
-  m_hasElectronDiffTens = false;
-
-  m_hasHoleVelocityE = false;
-  m_hasHoleVelocityB = false;
-  m_hasHoleVelocityExB = false;
-  m_hasHoleDiffLong = false;
-  m_hasHoleDiffTrans = false;
-  m_hasHoleTownsend = false;
-  m_hasHoleAttachment = false;
-  m_hasHoleDiffTens = false;
-
-  m_hasIonMobility = false;
-  m_hasIonDiffLong = false;
-  m_hasIonDiffTrans = false;
-  m_hasIonDissociation = false;
-
-  m_extrLowVelocity = 0;
-  m_extrHighVelocity = 1;
-  m_extrLowDiffusion = 0;
-  m_extrHighDiffusion = 1;
-  m_extrLowTownsend = 0;
-  m_extrHighTownsend = 1;
-  m_extrLowAttachment = 0;
-  m_extrHighAttachment = 1;
-  m_extrLowLorentzAngle = 0;
-  m_extrHighLorentzAngle = 1;
-  m_extrLowMobility = 0;
-  m_extrHighMobility = 1;
-  m_extrLowDissociation = 0;
-  m_extrHighDissociation = 1;
-
-  m_intpVelocity = 2;
-  m_intpDiffusion = 2;
-  m_intpTownsend = 2;
-  m_intpAttachment = 2;
-  m_intpLorentzAngle = 2;
-  m_intpMobility = 2;
-  m_intpDissociation = 2;
-
-  thrElectronTownsend = thrElectronAttachment = 0;
-  thrHoleTownsend = thrHoleAttachment = 0;
-  thrIonDissociation = 0;
 
   // Set the default grid.
   SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);

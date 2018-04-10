@@ -104,22 +104,22 @@ class ComponentVoxel : public ComponentBase {
   /// Region indices.
   std::vector<std::vector<std::vector<int> > > m_regions;
   // Dimensions of the mesh
-  unsigned int m_nX, m_nY, m_nZ;
-  double m_xMin, m_yMin, m_zMin;
-  double m_xMax, m_yMax, m_zMax;
+  unsigned int m_nX = 0, m_nY = 0, m_nZ = 0;
+  double m_xMin = 0., m_yMin = 0., m_zMin = 0.;
+  double m_xMax = 0., m_yMax = 0., m_zMax = 0.;
 
-  bool m_hasMesh;
-  bool m_hasPotential;
-  bool m_hasEfield;
-  bool m_hasBfield;
+  bool m_hasMesh = false;
+  bool m_hasPotential = false;
+  bool m_hasEfield = false;
+  bool m_hasBfield = false;
 
   // Offset for weighting field
-  double m_wField_xOffset;
-  double m_wField_yOffset;
-  double m_wField_zOffset;
+  double m_wField_xOffset = 0.;
+  double m_wField_yOffset = 0.;
+  double m_wField_zOffset = 0.;
 
   // Voltage range
-  double m_pMin, m_pMax;
+  double m_pMin = 0., m_pMax = 0.;
 
   /// Read data from file.
   bool LoadData(const std::string& filename, std::string format, 

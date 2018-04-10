@@ -12,36 +12,7 @@ namespace Garfield {
 
 double AvalancheMC::c1 = ElectronMass / (SpeedOfLight * SpeedOfLight);
 
-AvalancheMC::AvalancheMC()
-    : m_sensor(NULL),
-      m_stepModel(2),
-      m_tMc(0.02),
-      m_dMc(0.001),
-      m_nMc(100),
-      m_hasTimeWindow(false),
-      m_tMin(0.),
-      m_tMax(0.),
-      m_nElectrons(0),
-      m_nHoles(0),
-      m_nIons(0),
-      m_viewer(NULL),
-      m_useSignal(false),
-      m_useInducedCharge(false),
-      m_useEquilibration(true),
-      m_useDiffusion(true),
-      m_useAttachment(true),
-      m_useBfield(false),
-      m_useIons(true),
-      m_withElectrons(true),
-      m_withHoles(true),
-      m_scaleElectronSignal(1.),
-      m_scaleHoleSignal(1.),
-      m_scaleIonSignal(1.),
-      m_useTcadTrapping(false),
-      m_useTcadVelocity(false),
-      m_debug(false) {
-
-  m_className = "AvalancheMC";
+AvalancheMC::AvalancheMC() {
 
   m_drift.reserve(10000);
 }
@@ -49,7 +20,7 @@ AvalancheMC::AvalancheMC()
 void AvalancheMC::SetSensor(Sensor* sensor) {
 
   if (!sensor) {
-    std::cerr << m_className << "::SetSensor:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetSensor: Null pointer.\n";
     return;
   }
 
@@ -59,7 +30,7 @@ void AvalancheMC::SetSensor(Sensor* sensor) {
 void AvalancheMC::EnablePlotting(ViewDrift* view) {
 
   if (!view) {
-    std::cerr << m_className << "::EnablePlotting:\n    Null pointer.\n";
+    std::cerr << m_className << "::EnablePlotting: Null pointer.\n";
     return;
   }
 
@@ -98,7 +69,7 @@ void AvalancheMC::SetDistanceSteps(const double d) {
   m_dMc = d;
 }
 
-void AvalancheMC::SetCollisionSteps(const int n) {
+void AvalancheMC::SetCollisionSteps(const unsigned int n) {
 
   m_stepModel = 2;
   if (n < 1) {
@@ -211,8 +182,7 @@ bool AvalancheMC::DriftElectron(const double x0, const double y0,
                                 const double z0, const double t0) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::DriftElectron:\n"
-              << "    Sensor is not defined.\n";
+    std::cerr << m_className << "::DriftElectron: Sensor is not defined.\n";
     return false;
   }
 
@@ -231,7 +201,7 @@ bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
                             const double t0) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::DriftHole:\n    Sensor is not defined.\n";
+    std::cerr << m_className << "::DriftHole: Sensor is not defined.\n";
     return false;
   }
 
@@ -250,7 +220,7 @@ bool AvalancheMC::DriftIon(const double x0, const double y0, const double z0,
                            const double t0) {
 
   if (!m_sensor) {
-    std::cerr << m_className << "::DriftIon:\n    Sensor is not defined.\n";
+    std::cerr << m_className << "::DriftIon: Sensor is not defined.\n";
     return false;
   }
 
@@ -290,12 +260,12 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     // Get the electric and magnetic field at the current position.
     double ex = 0., ey = 0., ez = 0.;
     double bx = 0., by = 0., bz = 0.;
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     status = GetField(x, y, z, ex, ey, ez, bx, by, bz, medium);
     if (status == StatusCalculationAbandoned) {
       // Something went wrong.
       std::cerr << hdr << "Abandoning the calculation.\n";
-    } else if (status == StatusLeftDriftMedium || medium == NULL) {
+    } else if (status == StatusLeftDriftMedium || !medium) {
       // Point is not inside a "driftable" medium.
       if (m_drift.empty()) {
         std::cerr << hdr << "Initial position (" << x << ", " << y << ", " 
@@ -677,7 +647,7 @@ bool AvalancheMC::GetVelocity(const int type, Medium* medium,
     for (unsigned int i = 0; i < nComponents; ++i) {
       ComponentBase* cmp = m_sensor->GetComponent(i);
       if (!cmp->IsVelocityActive()) continue;
-      Medium* m = NULL;
+      Medium* m = nullptr;
       int status = 0;
       if (type < 0) {
         cmp->ElectronVelocity(x, y, z, vx, vy, vz, m, status);
@@ -795,7 +765,7 @@ void AvalancheMC::TerminateLine(double x0, double y0, double z0, double t0,
     // Check if the mid-point is inside the drift medium and the drift area.
     double ex = 0., ey = 0., ez = 0.;
     int status = 0;
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     m_sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status == 0 && m_sensor->IsInArea(xm, ym, zm)) {
       x = xm;
@@ -935,12 +905,13 @@ bool AvalancheMC::ComputeAlphaEta(const int type, std::vector<double>& alphas,
     double vdy = 0.;
     double vdz = 0.;
     for (unsigned int j = 0; j < 6; ++j) {
-      const double x = p0.x + 0.5 * (1. + tg[j]) * delx;
-      const double y = p0.y + 0.5 * (1. + tg[j]) * dely;
-      const double z = p0.z + 0.5 * (1. + tg[j]) * delz;
+      const double f = 0.5 * (1. + tg[j]);
+      const double x = p0.x + f * delx;
+      const double y = p0.y + f * dely;
+      const double z = p0.z + f * delz;
       // Get the electric field.
       double ex = 0., ey = 0., ez = 0.;
-      Medium* medium = NULL;
+      Medium* medium = nullptr;
       int status = 0;
       m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
       // Make sure we are in a drift medium.

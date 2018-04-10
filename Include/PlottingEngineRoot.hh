@@ -34,13 +34,13 @@ class PlottingEngineRoot : public PlottingEngine {
  private:
   TStyle m_garfieldStyle;
 
-  std::string m_colorLine1Default;
-  std::string m_colorLine2Default;
-  std::string m_colorElectronDefault;
-  std::string m_colorHoleDefault;
-  std::string m_colorIonDefault;
-  std::string m_colorPhotonDefault;
-  std::string m_colorChargedParticleDefault;
+  std::string m_colorLine1Default = "dark-blue";
+  std::string m_colorLine2Default = "olive";
+  std::string m_colorElectronDefault = "orange";
+  std::string m_colorHoleDefault = "red";
+  std::string m_colorIonDefault = "dark-red";
+  std::string m_colorPhotonDefault = "blue";
+  std::string m_colorChargedParticleDefault = "dark-green";
 };
 }
 

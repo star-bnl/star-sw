@@ -14,22 +14,7 @@
 
 namespace Garfield {
 
-ViewCell::ViewCell()
-    : m_className("ViewCell"),
-      m_debug(false),
-      m_useWireMarker(true),
-      m_label("Cell Layout"),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_hasUserArea(false),
-      m_xMin(-1.),
-      m_yMin(-1.),
-      m_zMin(-1.),
-      m_xMax(1.),
-      m_yMax(1.),
-      m_zMax(1.),
-      m_component(NULL),
-      m_geo(NULL) {
+ViewCell::ViewCell() {
 
   plottingEngine.SetDefaultStyle();
 }
@@ -56,7 +41,7 @@ void ViewCell::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;

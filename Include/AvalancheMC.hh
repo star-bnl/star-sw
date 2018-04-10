@@ -25,7 +25,7 @@ class AvalancheMC {
 
   /// Switch on drift line plotting.
   void EnablePlotting(ViewDrift* view);
-  void DisablePlotting() { m_viewer = NULL; }
+  void DisablePlotting() { m_viewer = nullptr; }
 
   /// Switch on calculation of induced currents (default: disabled).
   void EnableSignalCalculation() { m_useSignal = true; }
@@ -67,7 +67,7 @@ class AvalancheMC {
   void SetDistanceSteps(const double d = 0.001);
   /** Use exponentially distributed time steps with mean equal
     * to the specified multiple of the collision time (default model).*/
-  void SetCollisionSteps(const int n = 100);
+  void SetCollisionSteps(const unsigned int n = 100);
 
   /// Define a time interval (only carriers inside the interval are drifted).
   void SetTimeWindow(const double t0, const double t1);
@@ -151,12 +151,12 @@ class AvalancheMC {
   void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string m_className;
+  std::string m_className = "AvalancheMC";
 
   /// Numerical prefactor
   static double c1;
 
-  Sensor* m_sensor;
+  Sensor* m_sensor = nullptr;
 
   struct DriftPoint {
     double x, y, z, t; //< Position.
@@ -171,25 +171,27 @@ class AvalancheMC {
   };
 
   /// Step size model
-  int m_stepModel;
+  int m_stepModel = 2;
   /// Fixed time step
-  double m_tMc;
+  double m_tMc = 0.02;
   /// Fixed distance step
-  double m_dMc;
+  double m_dMc = 0.001;
   /// Sample step size according to collision time
-  int m_nMc;
+  unsigned int m_nMc = 100;
 
   /// Flag whether a time window should be used.
-  bool m_hasTimeWindow;
-  /// Time window
-  double m_tMin, m_tMax;
+  bool m_hasTimeWindow = false;
+  /// Lower limit of the time window.
+  double m_tMin = 0.;
+  /// Upper limit of the time window.
+  double m_tMax = 0.;
 
   /// Number of electrons produced
-  unsigned int m_nElectrons;
+  unsigned int m_nElectrons = 0;
   /// Number of holes produced
-  unsigned int m_nHoles;
+  unsigned int m_nHoles = 0;
   /// Number of ions produced
-  unsigned int m_nIons;
+  unsigned int m_nIons = 0;
 
   struct EndPoint {
     double x0, y0, z0, t0; //< Starting point.
@@ -203,27 +205,27 @@ class AvalancheMC {
   /// Endpoints of all ions in the avalanche
   std::vector<EndPoint> m_endpointsIons;
 
-  ViewDrift* m_viewer;
+  ViewDrift* m_viewer = nullptr;
 
-  bool m_useSignal;
-  bool m_useInducedCharge;
-  bool m_useEquilibration;
-  bool m_useDiffusion;
-  bool m_useAttachment;
-  bool m_useBfield;
-  bool m_useIons;
-  bool m_withElectrons;
-  bool m_withHoles;
-  double m_scaleElectronSignal;
-  double m_scaleHoleSignal;
-  double m_scaleIonSignal;
+  bool m_useSignal = false;
+  bool m_useInducedCharge = false;
+  bool m_useEquilibration = true;
+  bool m_useDiffusion = true;
+  bool m_useAttachment = true;
+  bool m_useBfield = false;
+  bool m_useIons = true;
+  bool m_withElectrons = true;
+  bool m_withHoles = true;
+  double m_scaleElectronSignal = 1.;
+  double m_scaleHoleSignal = 1.;
+  double m_scaleIonSignal = 1.;
 
-  /// Use traps from the field component, ComponentTcad2d;
-  bool m_useTcadTrapping;
-  /// Take the velocity from the field component, ComponentTcad2d;
-  bool m_useTcadVelocity;
+  /// Use traps from the field component (TCAD).
+  bool m_useTcadTrapping = false;
+  /// Take the velocity from the field component (TCAD).
+  bool m_useTcadVelocity = false;
 
-  bool m_debug;
+  bool m_debug = false;
 
   /// Compute a drift line with starting point (x0, y0, z0).
   bool DriftLine(const double x0, const double y0, const double z0,

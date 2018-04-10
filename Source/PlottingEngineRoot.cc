@@ -14,13 +14,6 @@ PlottingEngineRoot::PlottingEngineRoot()
     : PlottingEngine(), 
       m_garfieldStyle("Garfield", "Garfield Style") {
 
-  m_colorElectronDefault = "orange";
-  m_colorHoleDefault = "red";
-  m_colorIonDefault = "dark-red";
-  m_colorPhotonDefault = "blue";
-  m_colorChargedParticleDefault = "dark-green";
-  m_colorLine1Default = "dark-blue";
-  m_colorLine2Default = "olive";
 }
 
 PlottingEngineRoot::~PlottingEngineRoot() {}

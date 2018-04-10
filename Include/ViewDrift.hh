@@ -67,10 +67,10 @@ class ViewDrift {
   friend class ViewFEMesh;
 
  private:
-  std::string m_className;
+  std::string m_className = "ViewDrift";
 
   // Options
-  bool m_debug;
+  bool m_debug = false;
 
   struct Marker {
     double x;
@@ -78,14 +78,14 @@ class ViewDrift {
     double z;
   };
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
   // Box dimensions
-  double m_xMin, m_yMin, m_zMin;
-  double m_xMax, m_yMax, m_zMax;
+  double m_xMin = -1., m_yMin = -1., m_zMin = -1.;
+  double m_xMax =  1., m_yMax =  1., m_zMax =  1.;
   // View
-  TView* m_view;
+  TView* m_view = nullptr;
 
   struct driftLine {
     std::vector<Marker> vect;
@@ -99,14 +99,14 @@ class ViewDrift {
   std::vector<TPolyLine3D*> m_trackLinePlots;
 
   std::vector<Marker> m_excMarkers;
-  TPolyMarker3D* m_excPlot;
+  TPolyMarker3D* m_excPlot = nullptr;
   std::vector<Marker> m_ionMarkers;
-  TPolyMarker3D* m_ionPlot;
+  TPolyMarker3D* m_ionPlot = nullptr;
   std::vector<Marker> m_attMarkers;
-  TPolyMarker3D* m_attPlot;
+  TPolyMarker3D* m_attPlot = nullptr;
 
-  double m_markerSizeCluster;
-  double m_markerSizeCollision;
+  double m_markerSizeCluster = 1.;
+  double m_markerSizeCollision = 1.;
 
   void Plot2d(const bool axis);
   void Plot3d(const bool axis);

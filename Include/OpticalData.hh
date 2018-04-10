@@ -12,20 +12,19 @@ class OpticalData {
 
  public:
   // Constructor
-  OpticalData() : debug(false) {}
+  OpticalData();
   // Destructor
   ~OpticalData() {}
 
-  bool IsAvailable(const std::string material) const;
+  bool IsAvailable(const std::string& material) const;
 
-  bool GetPhotoabsorptionCrossSection(const std::string material,
+  bool GetPhotoabsorptionCrossSection(const std::string& material,
                                       const double e, double& cs, double& eta);
 
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
-  bool debug;
+  bool m_debug = false;
 
   bool PhotoAbsorptionCsNeon(const double e, double& cs, double& eta);
   bool PhotoAbsorptionCsArgon(const double e, double& cs, double& eta);

@@ -13,21 +13,9 @@
 
 namespace Garfield {
 
-MediumGas::MediumGas()
-    : Medium(),
-      m_usePenning(false),
-      m_rPenningGlobal(0.),
-      m_lambdaPenningGlobal(0.),
+MediumGas::MediumGas() : Medium(),
       m_pressureTable(m_pressure),
-      m_temperatureTable(m_temperature),
-      m_hasExcRates(false),
-      m_hasIonRates(false),
-      m_extrLowExcRates(0),
-      m_extrHighExcRates(1),
-      m_extrLowIonRates(0),
-      m_extrHighIonRates(1),
-      m_intpExcRates(2),
-      m_intpIonRates(2) {
+      m_temperatureTable(m_temperature) {
 
   m_className = "MediumGas";
 

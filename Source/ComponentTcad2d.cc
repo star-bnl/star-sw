@@ -18,20 +18,7 @@ void ltrim(std::string& line) {
 
 namespace Garfield {
 
-ComponentTcad2d::ComponentTcad2d() : ComponentBase(),
-      m_hasPotential(false),
-      m_hasField(false),
-      m_hasElectronMobility(false),
-      m_hasHoleMobility(false),
-      m_hasElectronVelocity(false),
-      m_hasHoleVelocity(false),
-      m_hasElectronLifetime(false),
-      m_hasHoleLifetime(false),
-      m_validTraps(false),
-      m_pMin(0.),
-      m_pMax(0.),
-      m_hasRangeZ(false),
-      m_lastElement(0) {
+ComponentTcad2d::ComponentTcad2d() : ComponentBase() {
 
   m_className = "ComponentTcad2d";
 

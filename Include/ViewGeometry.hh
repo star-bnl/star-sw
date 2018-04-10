@@ -31,21 +31,21 @@ class ViewGeometry {
   void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
-  std::string m_className;
+  std::string m_className = "ViewGeometry";
 
   // Options
-  bool m_debug;
+  bool m_debug = false;
 
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
-  GeometrySimple* m_geometry;
+  GeometrySimple* m_geometry = nullptr;
 
   std::vector<TGeoVolume*> m_volumes;
   std::vector<TGeoMedium*> m_media;
 
-  TGeoManager* m_geoManager;
+  TGeoManager* m_geoManager = nullptr;
 
   void Reset();
 

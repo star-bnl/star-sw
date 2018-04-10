@@ -115,16 +115,16 @@ class TrackHeed : public Track {
   TrackHeed(const TrackHeed& heed);
   TrackHeed& operator=(const TrackHeed& heed);
 
-  bool m_ready;
-  bool m_hasActiveTrack;
+  bool m_ready = false;
+  bool m_hasActiveTrack = false;
 
-  double m_mediumDensity;
-  std::string m_mediumName;
+  double m_mediumDensity = -1.;
+  std::string m_mediumName = "";
 
-  bool m_usePhotonReabsorption;
-  bool m_usePacsOutput;
+  bool m_usePhotonReabsorption = true;
+  bool m_usePacsOutput = false;
 
-  bool m_doDeltaTransport;
+  bool m_doDeltaTransport = true;
   struct deltaElectron {
     double x, y, z, t;
     double e;
@@ -135,36 +135,37 @@ class TrackHeed : public Track {
   std::vector<Heed::HeedCondElectron> m_conductionIons;
 
   // Primary particle
-  Heed::HeedParticle* m_particle;
+  Heed::HeedParticle* m_particle = nullptr;
 
   // Material properties
-  Heed::HeedMatterDef* m_matter;
-  Heed::GasDef* m_gas;
-  Heed::MatterDef* m_material;
+  Heed::HeedMatterDef* m_matter = nullptr;
+  Heed::GasDef* m_gas = nullptr;
+  Heed::MatterDef* m_material = nullptr;
 
   // Photoabsorption cross-sections
-  Heed::AtomPhotoAbsCS** m_atPacs;
-  Heed::MolecPhotoAbsCS** m_molPacs;
+  Heed::AtomPhotoAbsCS** m_atPacs = nullptr;
+  Heed::MolecPhotoAbsCS** m_molPacs = nullptr;
 
   // Energy mesh
-  double m_emin, m_emax;
-  int m_nEnergyIntervals;
-  Heed::EnergyMesh* m_energyMesh;
+  double m_emin = 2.e-6;
+  double m_emax = 2.e-1;
+  unsigned int m_nEnergyIntervals = 200;
+  Heed::EnergyMesh* m_energyMesh = nullptr;
 
   // Cross-sections
-  Heed::EnTransfCS* m_transferCs;
-  Heed::ElElasticScat* m_elScat;
-  Heed::ElElasticScatLowSigma* m_lowSigma;
-  Heed::PairProd* m_pairProd;
-  Heed::HeedDeltaElectronCS* m_deltaCs;
+  Heed::EnTransfCS* m_transferCs = nullptr;
+  Heed::ElElasticScat* m_elScat = nullptr;
+  Heed::ElElasticScatLowSigma* m_lowSigma = nullptr;
+  Heed::PairProd* m_pairProd = nullptr;
+  Heed::HeedDeltaElectronCS* m_deltaCs = nullptr;
 
   // Interface classes
-  HeedChamber* m_chamber;
+  HeedChamber* m_chamber = nullptr;
   Heed::HeedFieldMap m_fieldMap;
 
   // Bounding box
-  double m_lX, m_lY, m_lZ;
-  double m_cX, m_cY, m_cZ;
+  double m_lX = 0., m_lY = 0., m_lZ = 0.;
+  double m_cX = 0., m_cY = 0., m_cZ = 0.;
 
 #ifndef __CINT__
   std::vector<Heed::gparticle*> m_particleBank;

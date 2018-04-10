@@ -16,7 +16,7 @@ class RandomEngine {
   /// Draw a random number.
   virtual double Draw() = 0;
   /// Initialise the random number generator.
-  virtual void Seed(unsigned int s) = 0;
+  virtual void Seed(const unsigned int s) = 0;
 };
 }
 

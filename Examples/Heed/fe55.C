@@ -63,7 +63,7 @@ int main(int argc, char * argv[]) {
   // Use Heed for simulating the photon absorption.
   TrackHeed track;
   track.SetSensor(&sensor);
-
+  track.EnableElectricField();
   // Histogram
   const int nBins = 500;
   TH1::StatOverflows(true);

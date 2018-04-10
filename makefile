@@ -19,7 +19,7 @@ TARGETS += heed
 FC = gfortran
 
 # Compilation flags
-CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -Wshadow \
+CFLAGS = -std=c++11 -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -Wshadow \
 	 `root-config --cflags` \
         -fpic -fno-common -c \
 	-I$(INCDIR) -I$(HEEDDIR) -DINS_CRETURN 
@@ -36,7 +36,7 @@ FFLAGS += -O2
 # CFLAGS += -g
 # FFLAGS += -g
 # Profiling flag
- CFLAGS += -pg
+# CFLAGS += -pg
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \

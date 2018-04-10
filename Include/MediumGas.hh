@@ -94,12 +94,12 @@ class MediumGas : public Medium {
 
   // Penning transfer
   // Flag enabling/disabling Penning transfer
-  bool m_usePenning;
+  bool m_usePenning = false;
   // Penning transfer probability
-  double m_rPenningGlobal;
+  double m_rPenningGlobal = 0.;
   double m_rPenningGas[m_nMaxGases];
   // Mean distance of Penning ionisation
-  double m_lambdaPenningGlobal;
+  double m_lambdaPenningGlobal = 0.;
   double m_lambdaPenningGas[m_nMaxGases];
 
   // Pressure at which the transport parameter table was calculated
@@ -111,7 +111,8 @@ class MediumGas : public Medium {
   std::vector<std::vector<std::vector<double> > > m_tabTownsendNoPenning;
 
   // Tables for excitation and ionisation rates
-  bool m_hasExcRates, m_hasIonRates;
+  bool m_hasExcRates = false;
+  bool m_hasIonRates = false;
   std::vector<std::vector<std::vector<std::vector<double> > > > m_tabExcRates;
   std::vector<std::vector<std::vector<std::vector<double> > > > m_tabIonRates;
 
@@ -132,10 +133,12 @@ class MediumGas : public Medium {
   std::vector<ionListElement> m_ionisationList;
 
   // Extrapolation/interpolation for excitation and ionisation rates.
-  unsigned int m_extrLowExcRates, m_extrHighExcRates;
-  unsigned int m_extrLowIonRates, m_extrHighIonRates;
-  unsigned int m_intpExcRates;
-  unsigned int m_intpIonRates;
+  unsigned int m_extrLowExcRates = 0;
+  unsigned int m_extrHighExcRates = 1;
+  unsigned int m_extrLowIonRates = 0;
+  unsigned int m_extrHighIonRates = 1;
+  unsigned int m_intpExcRates = 2;
+  unsigned int m_intpIonRates = 2;
 
   bool GetGasInfo(const std::string& gasname, double& a, double& z) const;
   bool GetGasName(const int gasnumber, const int version, std::string& gasname);

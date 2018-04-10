@@ -7,7 +7,9 @@
 
 namespace Garfield {
 
-bool OpticalData::IsAvailable(const std::string material) const {
+OpticalData::OpticalData() {}
+
+bool OpticalData::IsAvailable(const std::string& material) const {
 
   if (material == "Ne") return true;
   if (material == "Ar") return true;
@@ -27,7 +29,7 @@ bool OpticalData::IsAvailable(const std::string material) const {
   return false;
 }
 
-bool OpticalData::GetPhotoabsorptionCrossSection(const std::string material,
+bool OpticalData::GetPhotoabsorptionCrossSection(const std::string& material,
                                                  const double e, double& cs,
                                                  double& eta) {
 

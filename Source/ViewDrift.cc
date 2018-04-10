@@ -8,23 +8,7 @@
 
 namespace Garfield {
 
-ViewDrift::ViewDrift()
-    : m_className("ViewDrift"),
-      m_debug(false),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_xMin(-1.),
-      m_yMin(-1.),
-      m_zMin(-1.),
-      m_xMax(1.),
-      m_yMax(1.),
-      m_zMax(1.),
-      m_view(NULL),
-      m_excPlot(NULL),
-      m_ionPlot(NULL),
-      m_attPlot(NULL),
-      m_markerSizeCluster(1.),
-      m_markerSizeCollision(1.) {
+ViewDrift::ViewDrift() {
 
   m_driftLines.reserve(1000);
   m_driftLinePlots.reserve(1000);

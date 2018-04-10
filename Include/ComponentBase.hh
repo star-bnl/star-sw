@@ -230,48 +230,48 @@ class ComponentBase {
 
  protected:
   /// Class name.
-  std::string m_className;
+  std::string m_className = "ComponentBase";
 
   /// Pointer to the geometry.
-  GeometryBase* m_geometry;
+  GeometryBase* m_geometry = nullptr;
 
   /// Ready for use?
-  bool m_ready;
+  bool m_ready = false;
 
   /// Does the component have traps?
-  bool m_activeTraps;
+  bool m_activeTraps = false;
   /// Does the component have velocity maps?
-  bool m_hasVelocityMap;
+  bool m_hasVelocityMap = false;
 
   /// Simple periodicity in x.
-  bool m_xPeriodic;
+  bool m_xPeriodic = false;
   /// Simple periodicity in y.
-  bool m_yPeriodic;
+  bool m_yPeriodic = false;
   /// Simple periodicity in z.
-  bool  m_zPeriodic;
+  bool  m_zPeriodic = false;
   /// Mirror periodicity in x.
-  bool m_xMirrorPeriodic;
+  bool m_xMirrorPeriodic = false;
   /// Mirror periodicity in y.
-  bool m_yMirrorPeriodic;
+  bool m_yMirrorPeriodic = false;
   /// Mirror periodicity in z.
-  bool m_zMirrorPeriodic;
+  bool m_zMirrorPeriodic = false;
   /// Axial periodicity in x.
-  bool m_xAxiallyPeriodic;
+  bool m_xAxiallyPeriodic = false;
   /// Axial periodicity in y.
-  bool m_yAxiallyPeriodic;
+  bool m_yAxiallyPeriodic = false;
   /// Axial periodicity in z.
-  bool m_zAxiallyPeriodic;
+  bool m_zAxiallyPeriodic = false;
   /// Rotation symmetry around x-axis.
-  bool m_xRotationSymmetry;
+  bool m_xRotationSymmetry = false;
   /// Rotation symmetry around y-axis.
-  bool m_yRotationSymmetry;
+  bool m_yRotationSymmetry = false;
   /// Rotation symmetry around z-axis.
-  bool m_zRotationSymmetry;
+  bool m_zRotationSymmetry = false;
 
-  double m_bx0, m_by0, m_bz0; //< Constant magnetic field.
+  double m_bx0 = 0., m_by0 = 0., m_bz0 = 0.; //< Constant magnetic field.
 
   /// Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 
   /// Geometry checks
   virtual void Reset() = 0;

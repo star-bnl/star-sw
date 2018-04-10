@@ -153,20 +153,20 @@ class ViewField {
     Unknown
   };
 
-  std::string m_className;
+  std::string m_className = "ViewField";
 
   static const unsigned int m_nMaxContours = 50;
 
   // Options
-  bool m_debug;
+  bool m_debug = false;
 
-  bool m_useAutoRange;
-  bool m_useStatus;
-  double m_vBkg;
+  bool m_useAutoRange = true;
+  bool m_useStatus = false;
+  double m_vBkg = 0.;
 
   // Sensor
-  Sensor* m_sensor;
-  ComponentBase* m_component;
+  Sensor* m_sensor = nullptr;
+  ComponentBase* m_component = nullptr;
 
   // Projection for viewing
   double m_project[3][3];
@@ -174,32 +174,33 @@ class ViewField {
   char m_xLabel[50], m_yLabel[50], m_description[50];
 
   // Plot area
-  bool m_hasUserArea;
-  double m_xmin, m_ymin;
-  double m_xmax, m_ymax;
+  bool m_hasUserArea = false;
+  double m_xmin = -1., m_ymin = -1.;
+  double m_xmax =  1., m_ymax =  1.;
 
   // Function range
-  double m_vmin, m_vmax;
-  double m_emin, m_emax;
-  double m_wmin, m_wmax;
+  double m_vmin = 0., m_vmax = 100.;
+  double m_emin = 0., m_emax = 10000.;
+  double m_wmin = 0., m_wmax = 100.;
 
   // Number of contours
-  unsigned int m_nContours;
+  unsigned int m_nContours = m_nMaxContours;
   // Number of points used to draw the functions
-  unsigned int m_nSamples1d;
-  unsigned int m_nSamples2dX, m_nSamples2dY;
+  unsigned int m_nSamples1d = 1000;
+  unsigned int m_nSamples2dX = 200;
+  unsigned int m_nSamples2dY = 200;
   // Weighting field label
-  std::string m_electrode;
+  std::string m_electrode = "";
 
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
   // Potential function
-  TF2* m_f2d;
-  TF2* m_f2dW;
-  TF1* m_fProfile;
-  TF1* m_fProfileW;
+  TF2* m_f2d = nullptr;
+  TF2* m_f2dW = nullptr;
+  TF1* m_fProfile = nullptr;
+  TF1* m_fProfileW = nullptr;
 
   void Labels();
   void CreateFunction();

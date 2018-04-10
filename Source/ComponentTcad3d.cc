@@ -19,10 +19,7 @@ void ltrim(std::string& line) {
 
 namespace Garfield {
 
-ComponentTcad3d::ComponentTcad3d() : ComponentBase(),
-      m_pMin(0.), 
-      m_pMax(0.),
-      m_lastElement(0) {
+ComponentTcad3d::ComponentTcad3d() : ComponentBase() {
 
   m_className = "ComponentTcad3d";
 

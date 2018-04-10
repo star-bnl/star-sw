@@ -111,14 +111,15 @@ class ComponentTcad3d : public ComponentBase {
   };
 
   // Voltage range
-  double m_pMin, m_pMax;
+  double m_pMin = 0.;
+  double m_pMax = 0.;
 
   // Bounding box
   double m_xMinBB, m_yMinBB, m_zMinBB;
   double m_xMaxBB, m_yMaxBB, m_zMaxBB;
 
   // Element from the previous call
-  int m_lastElement;
+  int m_lastElement = 0;
 
   // Reset the component
   void Reset();

@@ -13,73 +13,18 @@ namespace Garfield {
 
 MediumSilicon::MediumSilicon()
     : Medium(),
-      diffScale(1.0),
-      m_bandGap(1.12),
-      m_dopingType('i'),
-      m_dopingConcentration(0.),
-      m_mLongX(0.916),
-      m_mTransX(0.191),
-      m_mLongL(1.59),
-      m_mTransL(0.12),
-      m_alphaX(0.5),
-      m_alphaL(0.5),
-      m_eLatticeMobility(1.35e-6),
-      m_hLatticeMobility(0.45e-6),
-      m_eMobility(1.35e-6),
-      m_hMobility(0.45e-6),
-      m_eBetaCanali(1.109),
-      m_hBetaCanali(1.213),
       m_eBetaCanaliInv(1. / 1.109),
       m_hBetaCanaliInv(1. / 1.213),
-      m_eSatVel(1.02e-2),
-      m_hSatVel(0.72e-2),
-      m_eHallFactor(1.15),
-      m_hHallFactor(0.7),
-      m_eTrapCs(1.e-15),
-      m_hTrapCs(1.e-15),
-      m_eTrapDensity(1.e13),
-      m_hTrapDensity(1.e13),
-      m_eTrapTime(0.),
-      m_hTrapTime(0.),
-      m_trappingModel(0),
-      m_eImpactA0(3.318e5),
-      m_eImpactA1(0.703e6),
-      m_eImpactA2(0.),
-      m_eImpactB0(1.135e6),
-      m_eImpactB1(1.231e6),
-      m_eImpactB2(0.),
-      m_hImpactA0(1.582e6),
-      m_hImpactA1(0.671e6),
-      m_hImpactB0(2.036e6),
-      m_hImpactB1(1.693e6),
-      m_hasUserMobility(false),
-      m_hasUserSaturationVelocity(false),
       m_latticeMobilityModel(LatticeMobilityModelSentaurus),
       m_dopingMobilityModel(DopingMobilityModelMasetti),
       m_saturationVelocityModel(SaturationVelocityModelCanali),
       m_highFieldMobilityModel(HighFieldMobilityModelCanali),
       m_impactIonisationModel(ImpactIonisationModelVanOverstraeten),
-      m_useCfOutput(false),
-      m_useNonParabolicity(true),
       m_useFullBandDos(true),
       m_useAnisotropy(true),
-      m_eFinalXL(4.),
       m_eStepXL(m_eFinalXL / nEnergyStepsXL),
-      m_eFinalG(10.),
       m_eStepG(m_eFinalG / nEnergyStepsG),
-      m_eFinalV(8.5),
-      m_eStepV(m_eFinalV / nEnergyStepsV),
-      m_nLevelsX(0),
-      m_nLevelsL(0),
-      m_nLevelsG(0),
-      m_nLevelsV(0),
-      m_nValleysX(6),
-      m_nValleysL(8),
-      m_eMinL(1.05),
-      m_eMinG(2.24),
-      m_ieMinL(0),
-      m_ieMinG(0),
-      m_opticalDataFile("OpticalData_Si.txt") {
+      m_eStepV(m_eFinalV / nEnergyStepsV) {
 
   m_className = "MediumSilicon";
   m_name = "Si";
@@ -124,10 +69,6 @@ MediumSilicon::MediumSilicon()
   InitialiseDensityOfStates();
 
   // Initialize the collision counters.
-  m_nCollElectronAcoustic = m_nCollElectronOptical = 0;
-  m_nCollElectronIntervalley = 0;
-  m_nCollElectronImpurity = 0;
-  m_nCollElectronIonisation = 0;
   m_nCollElectronDetailed.clear();
   m_nCollElectronBand.clear();
 

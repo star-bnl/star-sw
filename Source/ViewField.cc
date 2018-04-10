@@ -49,36 +49,7 @@ void SampleRange(TF1* f, double& ymin, double& ymax) {
 
 namespace Garfield {
 
-ViewField::ViewField()
-    : m_className("ViewField"),
-      m_debug(false),
-      m_useAutoRange(true),
-      m_useStatus(false),
-      m_vBkg(0.),
-      m_sensor(NULL),
-      m_component(NULL),
-      m_hasUserArea(false),
-      m_xmin(-1.),
-      m_ymin(-1.),
-      m_xmax(1.),
-      m_ymax(1.),
-      m_vmin(0.),
-      m_vmax(100.),
-      m_emin(0.),
-      m_emax(10000.),
-      m_wmin(0.),
-      m_wmax(100.),
-      m_nContours(m_nMaxContours),
-      m_nSamples1d(1000),
-      m_nSamples2dX(200),
-      m_nSamples2dY(200),
-      m_electrode(""),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_f2d(NULL),
-      m_f2dW(NULL),
-      m_fProfile(NULL),
-      m_fProfileW(NULL) {
+ViewField::ViewField() {
 
   SetDefaultProjection();
   plottingEngine.SetDefaultStyle();

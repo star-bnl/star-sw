@@ -10,27 +10,7 @@
 
 namespace Garfield {
 
-ViewFEMesh::ViewFEMesh()
-    : m_className("ViewFEMesh"),
-      m_label("Mesh"),
-      m_debug(false),
-      m_fillMesh(false),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_hasUserArea(false),
-      m_xMin(-1.),
-      m_yMin(-1.),
-      m_zMin(-1.),
-      m_xMax(1.),
-      m_yMax(1.),
-      m_zMax(1.),
-      m_component(NULL),
-      m_viewDrift(NULL),
-      m_plotMeshBorders(false),
-      m_xaxis(NULL),
-      m_yaxis(NULL),
-      m_axes(NULL),
-      m_drawAxes(false) {
+ViewFEMesh::ViewFEMesh() {
 
   plottingEngine.SetDefaultStyle();
   SetDefaultProjection();
@@ -50,8 +30,7 @@ ViewFEMesh::~ViewFEMesh() {
 void ViewFEMesh::SetComponent(ComponentFieldMap* comp) {
 
   if (!comp) {
-    std::cerr << m_className << "::SetComponent:\n";
-    std::cerr << "    Component pointer is null.\n";
+    std::cerr << m_className << "::SetComponent: Null pointer.\n";
     return;
   }
 
@@ -63,7 +42,7 @@ void ViewFEMesh::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -76,8 +55,7 @@ void ViewFEMesh::SetArea(double xmin, double ymin, double zmin, double xmax,
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax) {
-    std::cout << m_className << "::SetArea:\n";
-    std::cout << "    Null area range not permitted.\n";
+    std::cerr << m_className << "::SetArea: Null area range not permitted.\n";
     return;
   }
   m_xMin = std::min(xmin, xmax);
@@ -97,23 +75,20 @@ void ViewFEMesh::SetArea() { m_hasUserArea = false; }
 bool ViewFEMesh::Plot() {
 
   if (!m_component) {
-    std::cerr << m_className << "::Plot:\n";
-    std::cerr << "    Component is not defined.\n";
+    std::cerr << m_className << "::Plot: Component is not defined.\n";
     return false;
   }
 
   double pmin = 0., pmax = 0.;
   if (!m_component->GetVoltageRange(pmin, pmax)) {
-    std::cerr << m_className << "::Plot:\n";
-    std::cerr << "    Component is not ready.\n";
+    std::cerr << m_className << "::Plot: Component is not ready.\n";
     return false;
   }
 
   // Get the bounding box.
   if (!m_hasUserArea) {
-    std::cerr << m_className << "::Plot:\n";
-    std::cerr << "    Bounding box cannot be determined.\n";
-    std::cerr << "    Call SetArea first.\n";
+    std::cerr << m_className << "::Plot:\n"
+              << "    Bounding box cannot be determined. Call SetArea first.\n";
     return false;
   }
 

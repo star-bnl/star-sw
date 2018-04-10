@@ -69,8 +69,8 @@ class MediumSilicon : public Medium {
 
 
   // Scaling 
-  void SetDiffusionScaling(const double d){
-    diffScale = d;
+  void SetDiffusionScaling(const double d) {
+    m_diffScale = d;
   }
 
   // Microscopic transport properties
@@ -153,48 +153,65 @@ class MediumSilicon : public Medium {
   static const int ImpactIonisationModelVanOverstraeten = 0;
   static const int ImpactIonisationModelGrant = 1;
 
-  // DiffusionScale
-  double diffScale;
+  // Diffusion scaling factor
+  double m_diffScale = 1.;
 
-  double m_bandGap;
+  double m_bandGap = 1.12;
   // Doping
-  char m_dopingType;
-  double m_dopingConcentration;
+  char m_dopingType = 'i';
+  double m_dopingConcentration = 0.;
 
   // Effective masses
   // X valleys
-  double m_mLongX, m_mTransX;
+  double m_mLongX = 0.916;
+  double m_mTransX = 0.191;
   // L valleys
-  double m_mLongL, m_mTransL;
+  double m_mLongL = 1.59;
+  double m_mTransL = 0.12;
   // Non-parabolicity parameters [1/eV]
-  double m_alphaX, m_alphaL;
+  double m_alphaX = 0.5;
+  double m_alphaL = 0.5;
   // Lattice mobility
-  double m_eLatticeMobility, m_hLatticeMobility;
+  double m_eLatticeMobility = 1.35e-6;
+  double m_hLatticeMobility = 0.45e-6;
   // Low-field mobility
-  double m_eMobility, m_hMobility;
+  double m_eMobility = 1.35e-6;
+  double m_hMobility = 0.45e-6;
   // High-field mobility parameters
-  double m_eBetaCanali, m_hBetaCanali;
+  double m_eBetaCanali = 1.109;
+  double m_hBetaCanali = 1.213;
   double m_eBetaCanaliInv, m_hBetaCanaliInv;
   // Saturation velocity
-  double m_eSatVel, m_hSatVel;
+  double m_eSatVel = 1.02e-2;
+  double m_hSatVel = 0.72e-2;
   // Hall factor
-  double m_eHallFactor, m_hHallFactor;
+  double m_eHallFactor = 1.15;
+  double m_hHallFactor = 0.7;
 
   // Trapping parameters
-  double m_eTrapCs, m_hTrapCs;
-  double m_eTrapDensity, m_hTrapDensity;
-  double m_eTrapTime, m_hTrapTime;
-  int m_trappingModel;
+  double m_eTrapCs = 1.e-15;
+  double m_hTrapCs = 1.e-15;
+  double m_eTrapDensity = 1.e13;
+  double m_hTrapDensity = 1.e13;
+  double m_eTrapTime = 0.;
+  double m_hTrapTime = 0.;
+  int m_trappingModel = 0;
 
   // Impact ionisation parameters
-  double m_eImpactA0, m_eImpactA1, m_eImpactA2;
-  double m_eImpactB0, m_eImpactB1, m_eImpactB2;
-  double m_hImpactA0, m_hImpactA1;
-  double m_hImpactB0, m_hImpactB1;
+  double m_eImpactA0 = 3.318e5;
+  double m_eImpactA1 = 0.703e6;
+  double m_eImpactA2 = 0.;
+  double m_eImpactB0 = 1.135e6;
+  double m_eImpactB1 = 1.231e6;
+  double m_eImpactB2 = 0.;
+  double m_hImpactA0 = 1.582e6;
+  double m_hImpactA1 = 0.671e6;
+  double m_hImpactB0 = 2.036e6;
+  double m_hImpactB1 = 1.693e6;
 
   // Models
-  bool m_hasUserMobility;
-  bool m_hasUserSaturationVelocity;
+  bool m_hasUserMobility = false;
+  bool m_hasUserSaturationVelocity = false;
   int m_latticeMobilityModel;
   int m_dopingMobilityModel;
   int m_saturationVelocityModel;
@@ -202,27 +219,35 @@ class MediumSilicon : public Medium {
   int m_impactIonisationModel;
 
   // Options
-  bool m_useCfOutput;
-  bool m_useNonParabolicity;
-  bool m_useFullBandDos;
-  bool m_useAnisotropy;
+  bool m_useCfOutput = false;
+  bool m_useNonParabolicity = true;
+  bool m_useFullBandDos = true;
+  bool m_useAnisotropy = true;
 
   // Energy range of scattering rates
-  double m_eFinalXL, m_eStepXL;
-  double m_eFinalG, m_eStepG;
-  double m_eFinalV, m_eStepV;
+  double m_eFinalXL = 4.;
+  double m_eStepXL;
+  double m_eFinalG = 10.;
+  double m_eStepG;
+  double m_eFinalV = 8.5;
+  double m_eStepV;
   static const int nEnergyStepsXL = 2000;
   static const int nEnergyStepsG = 2000;
   static const int nEnergyStepsV = 2000;
 
   // Number of scattering terms
-  int m_nLevelsX, m_nLevelsL, m_nLevelsG;
-  int m_nLevelsV;
+  int m_nLevelsX = 0;
+  int m_nLevelsL = 0;
+  int m_nLevelsG = 0;
+  int m_nLevelsV = 0;
   // Number of valleys
-  int m_nValleysX, m_nValleysL;
+  int m_nValleysX = 6;
+  int m_nValleysL = 8;
   // Energy offset
-  double m_eMinL, m_eMinG;
-  int m_ieMinL, m_ieMinG;
+  double m_eMinL = 1.05;
+  double m_eMinG = 2.24;
+  int m_ieMinL = 0;
+  int m_ieMinG = 0;
 
   // Electron scattering rates
   double m_cfNullElectronsX;
@@ -251,11 +276,11 @@ class MediumSilicon : public Medium {
   std::vector<int> m_scatTypeHoles;
 
   // Collision counters
-  unsigned int m_nCollElectronAcoustic;
-  unsigned int m_nCollElectronOptical;
-  unsigned int m_nCollElectronIntervalley;
-  unsigned int m_nCollElectronImpurity;
-  unsigned int m_nCollElectronIonisation;
+  unsigned int m_nCollElectronAcoustic = 0;
+  unsigned int m_nCollElectronOptical = 0;
+  unsigned int m_nCollElectronIntervalley = 0;
+  unsigned int m_nCollElectronImpurity = 0;
+  unsigned int m_nCollElectronIonisation = 0;
   std::vector<unsigned int> m_nCollElectronDetailed;
   std::vector<unsigned int> m_nCollElectronBand;
 
@@ -272,7 +297,7 @@ class MediumSilicon : public Medium {
   double m_fbDosMaxV, m_fbDosMaxC;
 
   // Optical data
-  std::string m_opticalDataFile;
+  std::string m_opticalDataFile = "OpticalData_Si.txt";
   struct opticalData {
     // Energy [eV]
     double energy;

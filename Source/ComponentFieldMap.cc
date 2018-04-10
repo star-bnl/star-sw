@@ -10,21 +10,7 @@
 
 namespace Garfield {
 
-ComponentFieldMap::ComponentFieldMap() : ComponentBase(),
-      m_is3d(true),
-      nElements(-1),
-      nNodes(-1),
-      m_nMaterials(0),
-      nWeightingFields(0),
-      hasBoundingBox(false),
-      m_deleteBackground(true),
-      m_warning(false), m_nWarnings(0),
-      m_checkMultipleElement(false),
-      m_useTetrahedralTree(false),
-      m_isTreeInitialized(false),
-      m_tetTree(NULL),
-      m_cacheElemBoundingBoxes(false),
-      m_lastElement(-1) {
+ComponentFieldMap::ComponentFieldMap() : ComponentBase() {
 
   m_className = "ComponentFieldMap";
 }
@@ -143,7 +129,7 @@ Medium* ComponentFieldMap::GetMedium(const unsigned int imat) const {
   if (imat >= m_nMaterials) {
     std::cerr << m_className << "::GetMedium:\n"
               << "    Material index " << imat << " is out of range.\n";
-    return NULL;
+    return nullptr;
   }
 
   return materials[imat].medium;

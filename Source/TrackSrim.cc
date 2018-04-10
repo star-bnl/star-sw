@@ -120,21 +120,8 @@ void PrintSettings(const std::string& hdr,
 namespace Garfield {
 
 TrackSrim::TrackSrim()
-    : Track(),
-      m_precisevavilov(false),
-      m_useTransStraggle(true),
-      m_useLongStraggle(false),
-      m_chargeset(false),
-      m_density(-1.0),
-      m_work(-1.),
-      m_fano(-1.),
-      m_a(-1.), 
-      m_z(-1.),
-      m_maxclusters(-1),
-      m_model(4),
-      m_nsize(-1) {
+    : Track() {
   m_className = "TrackSrim";
-  m_mass = -1.;
 }
 
 bool TrackSrim::ReadFile(const std::string& file) {

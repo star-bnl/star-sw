@@ -46,25 +46,25 @@ class ViewSignal {
   void EnableDebugging(const bool on = true) { m_debug = on; }
 
  private:
-  std::string m_className;
+  std::string m_className = "ViewSignal";
 
   // Options
-  bool m_debug;
+  bool m_debug = false;
 
   // Sensor
-  Sensor* m_sensor;
+  Sensor* m_sensor = nullptr;
 
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
   // Histograms
-  TH1D* m_hSignal;
-  TH1D* m_hSignalElectrons;
-  TH1D* m_hSignalIons;
+  TH1D* m_hSignal = nullptr;
+  TH1D* m_hSignalElectrons = nullptr;
+  TH1D* m_hSignalIons = nullptr;
 
   // Threshold crossings
-  TGraph* m_gCrossings;
+  TGraph* m_gCrossings = nullptr;
 
   // Find an unused histogram name.
   std::string FindHistogramName(const std::string& base) const;

@@ -10,27 +10,9 @@
 
 namespace Garfield {
 
-TrackPAI::TrackPAI()
-    : m_ready(false),
-      m_x(0.),
-      m_y(0.),
-      m_z(0.),
-      m_t(0.),
-      m_dx(0.),
-      m_dy(0),
-      m_dz(1.),
-      m_e(0.),
-      m_speed(0.),
-      m_emax(0.),
-      m_imfp(0.),
-      m_dedx(0.),
-      m_nSteps(1000),
-      m_mediumName(""),
-      m_mediumDensity(0.),
-      m_electronDensity(0.) {
+TrackPAI::TrackPAI() : Track() {
 
   m_className = "TrackPAI";
-
 }
 
 bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
@@ -46,7 +28,7 @@ bool TrackPAI::NewTrack(const double x0, const double y0, const double z0,
   }
 
   // Get the medium at this location and check if it is "ionisable".
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::NewTrack: No medium at initial position.\n";
     return false;
@@ -137,7 +119,7 @@ bool TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
   m_t += d / m_speed;
 
   // Check the medium at this location.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(m_x, m_y, m_z, medium)) {
     m_ready = false;
     return false;

@@ -57,35 +57,7 @@ Heed::trajestep_limit Heed::gtrajlim( 100. * Heed::CLHEP::cm,
 
 namespace Garfield {
 
-TrackHeed::TrackHeed()
-    : m_ready(false),
-      m_hasActiveTrack(false),
-      m_mediumDensity(-1.),
-      m_mediumName(""),
-      m_usePhotonReabsorption(true),
-      m_usePacsOutput(false),
-      m_doDeltaTransport(true),
-      m_matter(NULL),
-      m_gas(NULL),
-      m_material(NULL),
-      m_atPacs(NULL),
-      m_molPacs(NULL),
-      m_emin(2.e-6),
-      m_emax(2.e-1),
-      m_nEnergyIntervals(200),
-      m_energyMesh(NULL),
-      m_transferCs(NULL),
-      m_elScat(NULL),
-      m_lowSigma(NULL),
-      m_pairProd(NULL),
-      m_deltaCs(NULL),
-      m_chamber(NULL),
-      m_lX(0.),
-      m_lY(0.),
-      m_lZ(0.),
-      m_cX(0.),
-      m_cY(0.),
-      m_cZ(0.) {
+TrackHeed::TrackHeed() : Track() {
 
   m_className = "TrackHeed";
   m_conductionElectrons.reserve(1000);
@@ -125,7 +97,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   if (!UpdateBoundingBox(update)) return false;
 
   // Make sure the initial position is inside an ionisable medium.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::NewTrack:\n"
               << "    No medium at initial position.\n";
@@ -312,7 +284,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   }
 
   // Look for the next cluster (i. e. virtual photon) in the list.
-  Heed::HeedPhoton* virtualPhoton = NULL;
+  Heed::HeedPhoton* virtualPhoton = nullptr;
   for (; m_bankIterator != end; ++m_bankIterator) {
     // Convert the particle to a (virtual) photon.
     virtualPhoton = dynamic_cast<Heed::HeedPhoton*>(*m_bankIterator);
@@ -513,7 +485,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   if (!UpdateBoundingBox(update)) return;
 
   // Make sure the initial position is inside an ionisable medium.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::TransportDeltaElectron:\n"
               << "    No medium at initial position.\n";
@@ -625,7 +597,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   if (!UpdateBoundingBox(update)) return;
 
   // Make sure the initial position is inside an ionisable medium.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::TransportPhoton:\n"
               << "    No medium at initial position.\n";
@@ -817,7 +789,7 @@ bool TrackHeed::Setup(Medium* medium) {
   // Setup the energy mesh.
   if (m_energyMesh) {
     delete m_energyMesh;
-    m_energyMesh = NULL;
+    m_energyMesh = nullptr;
   }
   m_energyMesh = new Heed::EnergyMesh(m_emin, m_emax, m_nEnergyIntervals);
 
@@ -834,7 +806,7 @@ bool TrackHeed::Setup(Medium* medium) {
 
   if (m_transferCs) {
     delete m_transferCs;
-    m_transferCs = NULL;
+    m_transferCs = nullptr;
   }
   m_transferCs =
       new Heed::EnTransfCS(1.e-6 * m_mass, gamma - 1, sel, m_matter, long(m_q));
@@ -861,7 +833,7 @@ bool TrackHeed::Setup(Medium* medium) {
                            Heed::basis("primary"), "primary");
   if (m_chamber) {
     delete m_chamber;
-    m_chamber = NULL;
+    m_chamber = nullptr;
   }
   m_chamber = new HeedChamber(primSys, m_lX, m_lY, m_lZ, 
                               *m_transferCs, *m_deltaCs);
@@ -885,7 +857,7 @@ bool TrackHeed::SetupGas(Medium* medium) {
 
   if (m_molPacs) {
     delete m_molPacs;
-    m_molPacs = NULL;
+    m_molPacs = nullptr;
   }
   m_molPacs = new Heed::MolecPhotoAbsCS* [nComponents];
   std::vector<std::string> notations;
@@ -1025,7 +997,7 @@ bool TrackHeed::SetupGas(Medium* medium) {
   const std::string gasname = FindUnusedMaterialName(medium->GetName());
   if (m_gas) {
     delete m_gas;
-    m_gas = NULL;
+    m_gas = nullptr;
   }
 
   m_gas = new Heed::GasDef(gasname, gasname, nComponents, notations, fractions,
@@ -1037,7 +1009,7 @@ bool TrackHeed::SetupGas(Medium* medium) {
 
   if (m_matter) {
     delete m_matter;
-    m_matter = NULL;
+    m_matter = nullptr;
   }
   m_matter = new Heed::HeedMatterDef(m_energyMesh, m_gas, m_molPacs, w, f);
 
@@ -1054,7 +1026,7 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
   const int nComponents = medium->GetNumberOfComponents();
   if (m_atPacs) {
     delete m_atPacs;
-    m_atPacs = NULL;
+    m_atPacs = nullptr;
   }
   m_atPacs = new Heed::AtomPhotoAbsCS* [nComponents];
 
@@ -1107,7 +1079,7 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
   }
   if (m_material) {
     delete m_material;
-    m_material = NULL;
+    m_material = nullptr;
   }
   const std::string materialName = FindUnusedMaterialName(medium->GetName());
   m_material = new Heed::MatterDef(materialName, materialName, nComponents,
@@ -1120,7 +1092,7 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
 
   if (m_matter) {
     delete m_matter;
-    m_matter = NULL;
+    m_matter = nullptr;
   }
   m_matter = new Heed::HeedMatterDef(m_energyMesh, m_material, m_atPacs, w, f);
 
@@ -1133,14 +1105,14 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
   std::string filename = databasePath + "cbdel.dat";
   if (m_elScat) {
     delete m_elScat;
-    m_elScat = NULL;
+    m_elScat = nullptr;
   }
   m_elScat = new Heed::ElElasticScat(filename);
 
   filename = databasePath + "elastic_disp.dat";
   if (m_lowSigma) {
     delete m_lowSigma;
-    m_lowSigma = NULL;
+    m_lowSigma = nullptr;
   }
   m_lowSigma = new Heed::ElElasticScatLowSigma(m_elScat, filename);
 
@@ -1151,13 +1123,13 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
   filename = databasePath + "delta_path.dat";
   if (m_pairProd) {
     delete m_pairProd;
-    m_pairProd = NULL;
+    m_pairProd = nullptr;
   }
   m_pairProd = new Heed::PairProd(filename, w, f);
 
   if (m_deltaCs) {
     delete m_deltaCs;
-    m_deltaCs = NULL;
+    m_deltaCs = nullptr;
   }
   m_deltaCs = new Heed::HeedDeltaElectronCS(m_matter, m_elScat, m_lowSigma, m_pairProd);
   return true;
@@ -1192,7 +1164,7 @@ bool TrackHeed::IsInside(const double x, const double y, const double z) {
   // Check if the point is inside the drift area.
   if (!m_sensor->IsInArea(x, y, z)) return false;
   // Check if the point is inside a medium.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x, y, z, medium)) return false;
   // Make sure the medium has not changed.
   if (medium->GetName() != m_mediumName ||

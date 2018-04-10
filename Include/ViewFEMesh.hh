@@ -92,37 +92,38 @@ class ViewFEMesh {
   }
 
  private:
-  std::string m_className;
-  std::string m_label;
+  std::string m_className = "ViewFEMesh";
+  std::string m_label = "Mesh";
 
   // Options
-  bool m_debug;
-  bool m_fillMesh;
+  bool m_debug = false;
+  bool m_fillMesh = false;
 
   // Canvas
-  TCanvas* m_canvas;
-  bool m_hasExternalCanvas;
+  TCanvas* m_canvas = nullptr;
+  bool m_hasExternalCanvas = false;
 
   // Viewing plane
   double project[3][3];
   double plane[4];
 
   // Box dimensions
-  bool m_hasUserArea;
-  double m_xMin, m_yMin, m_zMin;
-  double m_xMax, m_yMax, m_zMax;
+  bool m_hasUserArea = false;
+  double m_xMin = -1., m_yMin = -1., m_zMin = -1.;
+  double m_xMax =  1., m_yMax =  1., m_zMax =  1.;
 
   // The field map object
-  ComponentFieldMap* m_component;
+  ComponentFieldMap* m_component = nullptr;
 
   // Optional associated ViewDrift object
-  ViewDrift* m_viewDrift;
-  bool m_plotMeshBorders;
+  ViewDrift* m_viewDrift = nullptr;
+  bool m_plotMeshBorders = false;
 
   // Axes
-  TGaxis* m_xaxis, *m_yaxis;
-  TH2D* m_axes;
-  bool m_drawAxes;
+  TGaxis* m_xaxis = nullptr;
+  TGaxis* m_yaxis = nullptr;
+  TH2D* m_axes = nullptr;
+  bool m_drawAxes = false;
 
   // The mesh, stored as a vector of TPolyLine(3D) objects
   std::vector<TPolyLine*> m_mesh;

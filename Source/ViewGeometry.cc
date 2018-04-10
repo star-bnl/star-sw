@@ -10,13 +10,7 @@
 
 namespace Garfield {
 
-ViewGeometry::ViewGeometry()
-    : m_className("ViewGeometry"),
-      m_debug(false),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_geometry(NULL),
-      m_geoManager(NULL) {
+ViewGeometry::ViewGeometry() {
 
   plottingEngine.SetDefaultStyle();
 }

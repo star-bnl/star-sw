@@ -9,18 +9,7 @@
 
 namespace Garfield {
 
-TrackElectron::TrackElectron()
-    : m_ready(false),
-      m_x(0.),
-      m_y(0.),
-      m_z(0.),
-      m_t(0.),
-      m_dx(0.),
-      m_dy(0),
-      m_dz(1.),
-      m_mediumName(""),
-      m_mediumDensity(0.),
-      m_mfp(0.) {
+TrackElectron::TrackElectron() : Track() {
 
   m_className = "TrackElectron";
 

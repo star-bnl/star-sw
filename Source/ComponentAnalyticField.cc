@@ -9,10 +9,9 @@
 
 namespace Garfield {
 
-ComponentAnalyticField::ComponentAnalyticField() {
+ComponentAnalyticField::ComponentAnalyticField() : ComponentBase() {
 
   m_className = "ComponentAnalyticField";
-  m_chargeCheck = false;
   CellInit();
 }
 
@@ -84,10 +83,11 @@ bool ComponentAnalyticField::IsWireCrossed(const double x0, const double y0,
   const double ym = 0.5 * (y0 + y1);
   double dMin2 = 0.;
   for (unsigned int i = 0; i < m_nWires; ++i) {
-    double xw = m_w[i].x, yw = m_w[i].y;
+    double xw = m_w[i].x;
     if (m_perx) {
       xw += m_sx * int(round((xm - xw) / m_sx));
     }
+    double yw = m_w[i].y;
     if (m_pery) {
       yw += m_sy * int(round((ym - yw) / m_sy));
     }
@@ -1062,8 +1062,6 @@ void ComponentAnalyticField::CellInit() {
 
   // 3D charges
   m_ch3d.clear();
-  m_nTermBessel = 10;
-  m_nTermPoly = 100;
 
   // Gravity
   down[0] = down[1] = 0.;

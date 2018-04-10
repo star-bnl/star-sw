@@ -92,10 +92,10 @@ class ComponentFieldMap : public ComponentBase {
   friend class ViewFEMesh;
 
  protected:
-  bool m_is3d;
+  bool m_is3d = true;
 
   // Elements
-  int nElements;
+  int nElements = -1;
   struct Element {
     // Nodes
     int emap[10];
@@ -108,7 +108,7 @@ class ComponentFieldMap : public ComponentBase {
   std::vector<Element> elements;
 
   // Nodes
-  int nNodes;
+  int nNodes = -1;
   struct Node {
     // Coordinates
     double x, y, z;
@@ -120,7 +120,7 @@ class ComponentFieldMap : public ComponentBase {
   std::vector<Node> nodes;
 
   // Materials
-  unsigned int m_nMaterials;
+  unsigned int m_nMaterials = 0;
   struct Material {
     // Permittivity
     double eps;
@@ -132,12 +132,12 @@ class ComponentFieldMap : public ComponentBase {
   };
   std::vector<Material> materials;
 
-  int nWeightingFields;
+  int nWeightingFields = 0;
   std::vector<std::string> wfields;
   std::vector<bool> wfieldsOk;
 
   // Bounding box
-  bool hasBoundingBox;
+  bool hasBoundingBox = false;
   double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
   double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
 
@@ -155,11 +155,11 @@ class ComponentFieldMap : public ComponentBase {
   double mapnxa, mapnya, mapnza;
 
   // Option to delete meshing in conductors
-  bool m_deleteBackground;
+  bool m_deleteBackground = true;
 
   // Warnings flag
-  bool m_warning;
-  unsigned int m_nWarnings;
+  bool m_warning = false;
+  unsigned int m_nWarnings = 0;
 
   // Reset the component
   void Reset() {};
@@ -215,18 +215,18 @@ class ComponentFieldMap : public ComponentBase {
 
  private:
   /// Scan for multiple elements that contain a point
-  bool m_checkMultipleElement;
+  bool m_checkMultipleElement = false;
 
   // Tetrahedral tree
-  bool m_useTetrahedralTree;
-  bool m_isTreeInitialized;
-  TetrahedralTree* m_tetTree;
+  bool m_useTetrahedralTree = false;
+  bool m_isTreeInitialized = false;
+  TetrahedralTree* m_tetTree = nullptr;
 
   /// Flag to check if bounding boxes of elements are cached
-  bool m_cacheElemBoundingBoxes;
+  bool m_cacheElemBoundingBoxes = false;
 
   /// Keep track of the last element found.
-  int m_lastElement;
+  int m_lastElement = -1;
 
   /// Calculate local coordinates for curved quadratic triangles.
   int Coordinates3(double x, double y, double z, double& t1, double& t2,

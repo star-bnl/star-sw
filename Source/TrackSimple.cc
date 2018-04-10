@@ -8,18 +8,7 @@
 
 namespace Garfield {
 
-TrackSimple::TrackSimple()
-    : m_isReady(false),
-      m_x(0.),
-      m_y(0.),
-      m_z(0.),
-      m_t(0.),
-      m_dx(0.),
-      m_dy(0.),
-      m_dz(1.),
-      m_mfp(0.04),
-      m_eloss(2530.),
-      m_useEqualSpacing(false) {
+TrackSimple::TrackSimple() : Track() {
 
   m_className = "TrackSimple";
 }
@@ -65,7 +54,7 @@ bool TrackSimple::NewTrack(const double x0, const double y0, const double z0,
   }
 
   // Make sure we are inside a medium
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << m_className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
@@ -118,7 +107,7 @@ bool TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls,
   n = 1;
   e = m_eloss * m_mfp;
 
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(m_x, m_y, m_z, medium)) {
     m_isReady = false;
     if (m_debug) {

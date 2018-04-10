@@ -9,23 +9,7 @@
 
 namespace Garfield {
 
-ComponentVoxel::ComponentVoxel()
-    : ComponentBase(),
-      m_nX(0), 
-      m_nY(0), 
-      m_nZ(0),
-      m_xMin(0.), 
-      m_yMin(0.), 
-      m_zMin(0.),
-      m_xMax(0.), 
-      m_yMax(0.), 
-      m_zMax(0.),
-      m_hasMesh(false),
-      m_hasPotential(false),
-      m_hasEfield(false),
-      m_hasBfield(false),
-      m_pMin(0.), 
-      m_pMax(0.) {
+ComponentVoxel::ComponentVoxel() : ComponentBase() {
 
   m_className = "ComponentVoxel";
 }
@@ -35,7 +19,7 @@ void ComponentVoxel::ElectricField(const double x, const double y,
                                    double& ez, double& p, Medium*& m,
                                    int& status) {
 
-  m = NULL;
+  m = nullptr;
   // Make sure the field map has been loaded.
   if (!m_ready) {
     std::cerr << m_className << "::ElectricField:\n"
@@ -64,7 +48,7 @@ void ComponentVoxel::ElectricField(const double x, const double y,
   // Get the medium.
   const int region = m_regions[i][j][k];
   if (region < 0 || region > (int)m_media.size()) {
-    m = NULL;
+    m = nullptr;
     status = -5;
     return;
   }
@@ -84,7 +68,7 @@ void ComponentVoxel::WeightingField(const double x, const double y,
                                     const double z, double& wx, double& wy,
                                     double& wz, const std::string& /*label*/) {
   int status = 0;
-  Medium* med = NULL;
+  Medium* med = nullptr;
   double v = 0.;
   double x1 = x - m_wField_xOffset;
   double y1 = y - m_wField_yOffset;
@@ -133,16 +117,16 @@ Medium* ComponentVoxel::GetMedium(const double x, const double y,
   if (!m_ready) {
     std::cerr << m_className << "::GetMedium:\n"
               << "    Field map is not available for interpolation.\n";
-    return NULL;
+    return nullptr;
   }
 
   unsigned int i, j, k;
   bool xMirrored, yMirrored, zMirrored;
   if (!GetElement(x, y, z, i, j, k, xMirrored, yMirrored, zMirrored)) {
-    return NULL;
+    return nullptr;
   }
   const int region = m_regions[i][j][k];
-  if (region < 0 || region > (int)m_media.size()) return NULL;
+  if (region < 0 || region > (int)m_media.size()) return nullptr;
   return m_media[region];
 }
 
@@ -622,7 +606,7 @@ void ComponentVoxel::SetMedium(const unsigned int i, Medium* m) {
     std::cerr << m_className << "::SetMedium:\n    Null pointer.\n";
     if (m_media.empty()) return;
   }
-  if (i >= m_media.size()) m_media.resize(i + 1, NULL); 
+  if (i >= m_media.size()) m_media.resize(i + 1, nullptr); 
   m_media[i] = m;
 }
 
@@ -630,7 +614,7 @@ Medium* ComponentVoxel::GetMedium(const unsigned int i) const {
 
   if (i > m_media.size()) {
     std::cerr << m_className << "::GetMedium:\n    Index out of range.\n";
-    return NULL;
+    return nullptr;
   }
   return m_media[i];
 }

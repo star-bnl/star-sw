@@ -23,63 +23,15 @@ void PrintStatus(const std::string& hdr, const std::string& status,
 namespace Garfield {
 
 AvalancheMicroscopic::AvalancheMicroscopic()
-    : m_sensor(NULL),
-      m_nElectrons(0),
-      m_nHoles(0),
-      m_nIons(0),
-      m_usePlotting(false),
-      m_viewer(NULL),
-      m_plotExcitations(true),
-      m_plotIonisations(true),
-      m_plotAttachments(true),
-      m_histElectronEnergy(NULL),
-      m_histHoleEnergy(NULL),
-      m_histDistance(NULL),
-      m_distanceOption('r'),
-      m_histSecondary(NULL),
-      m_useSignal(false),
-      m_useInducedCharge(false),
-      m_useDriftLines(false),
-      m_usePhotons(false),
-      m_useBandStructureDefault(true),
-      m_useNullCollisionSteps(false),
-      m_useBfield(false),
-      m_rb11(1.),
-      m_rb12(0.),
-      m_rb13(0.),
-      m_rb21(0.),
-      m_rb22(1.),
-      m_rb23(0.),
-      m_rb31(0.),
-      m_rb32(0.),
-      m_rb33(1.),
-      m_rx22(1.),
-      m_rx23(0.),
-      m_rx32(0.),
-      m_rx33(1.),
-      m_deltaCut(0.),
-      m_gammaCut(0.),
-      m_sizeCut(0),
-      m_nCollSkip(100),
-      m_hasTimeWindow(false),
-      m_tMin(0.),
-      m_tMax(0.),
-      m_hasUserHandleStep(false),
-      m_hasUserHandleAttachment(false),
-      m_hasUserHandleInelastic(false),
-      m_hasUserHandleIonisation(false),
+    : 
       m_userHandleStep(0),
       m_userHandleAttachment(0),
       m_userHandleInelastic(0),
-      m_userHandleIonisation(0),
-      m_debug(false) {
-
-  m_className = "AvalancheMicroscopic";
+      m_userHandleIonisation(0) {
 
   m_endpointsElectrons.reserve(10000);
   m_endpointsHoles.reserve(10000);
   m_photons.reserve(1000);
-
 }
 
 void AvalancheMicroscopic::SetSensor(Sensor* s) {
@@ -109,7 +61,7 @@ void AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
 void AvalancheMicroscopic::DisablePlotting() {
 
-  m_viewer = NULL;
+  m_viewer = nullptr;
   m_usePlotting = false;
 }
 
@@ -205,7 +157,7 @@ void AvalancheMicroscopic::DisableDistanceHistogramming(const int type) {
 
 void AvalancheMicroscopic::DisableDistanceHistogramming() {
 
-  m_histDistance = NULL;
+  m_histDistance = nullptr;
   m_distanceHistogramType.clear();
 }
 
@@ -545,7 +497,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
   }
 
   // Make sure that the starting point is inside a medium.
-  Medium* medium = NULL;
+  Medium* medium = nullptr;
   if (!m_sensor->GetMedium(x0, y0, z0, medium) || !medium) {
     std::cerr << hdr << "No medium at initial position.\n";
     return false;
@@ -1154,7 +1106,7 @@ bool AvalancheMicroscopic::TransportElectron(const double x0, const double y0,
                   zp += sdx * dzp;
                 }
                 // Get the electric field and medium at this location.
-                Medium* med = NULL;
+                Medium* med = nullptr;
                 double fx = 0., fy = 0., fz = 0.;
                 m_sensor->ElectricField(xp, yp, zp, fx, fy, fz, med, status);
                 // Check if this location is inside a drift medium/area.
@@ -1594,7 +1546,7 @@ void AvalancheMicroscopic::Terminate(double x0, double y0, double z0, double t0,
     const double tm = 0.5 * (t0 + t1);
     // Check if the mid-point is inside the drift medium.
     double ex = 0., ey = 0., ez = 0.;
-    Medium* medium = NULL;
+    Medium* medium = nullptr;
     int status = 0;
     m_sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status == 0 && m_sensor->IsInArea(xm, ym, zm)) {

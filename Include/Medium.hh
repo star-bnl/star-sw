@@ -291,42 +291,44 @@ class Medium {
   void DisableDebugging() { m_debug = false; }
 
  protected:
-  std::string m_className;
+  std::string m_className = "Medium";
 
   static int m_idCounter;
 
   // Id number
   int m_id;
   // Name
-  std::string m_name;
+  std::string m_name = "";
   // Temperature [K]
-  double m_temperature;
+  double m_temperature = 293.15;
   // Pressure [Torr]
-  double m_pressure;
+  double m_pressure = 760.;
   // Static dielectric constant
-  double m_epsilon;
+  double m_epsilon = 1.;
   // Number of components
-  unsigned int m_nComponents;
+  unsigned int m_nComponents = 1;
   // (Effective) atomic number Z
-  double m_z;
+  double m_z = 1.;
   // Atomic weight A
-  double m_a;
+  double m_a = 0.;
   // Number density [cm-3]
-  double m_density;
+  double m_density = 0.;
 
   // Transport flags
-  bool m_driftable;
-  bool m_microscopic;
-  bool m_ionisable;
+  bool m_driftable = false;
+  bool m_microscopic = false;
+  bool m_ionisable = false;
 
-  // W value and Fano factor
-  double m_w, m_fano;
+  // W value
+  double m_w = 0.;
+  // Fano factor
+  double m_fano = 0.;
 
   // Update flag
-  bool m_isChanged;
+  bool m_isChanged = true;
 
   // Switch on/off debugging messages
-  bool m_debug;
+  bool m_debug = false;
 
   // Field grids
   std::vector<double> m_eFields;
@@ -334,12 +336,16 @@ class Medium {
   std::vector<double> m_bAngles;
 
   // Tables of transport parameters
-  bool m_map2d;
+  bool m_map2d = false;
   // Electrons
-  bool m_hasElectronVelocityE, m_hasElectronVelocityB, m_hasElectronVelocityExB;
-  bool m_hasElectronDiffLong, m_hasElectronDiffTrans, m_hasElectronDiffTens;
-  bool m_hasElectronAttachment;
-  bool m_hasElectronLorentzAngle;
+  bool m_hasElectronVelocityE = false;
+  bool m_hasElectronVelocityB = false;
+  bool m_hasElectronVelocityExB = false;
+  bool m_hasElectronDiffLong = false;
+  bool m_hasElectronDiffTrans = false;
+  bool m_hasElectronDiffTens = false;
+  bool m_hasElectronAttachment = false;
+  bool m_hasElectronLorentzAngle = false;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
@@ -353,9 +359,14 @@ class Medium {
       tabElectronDiffTens;
 
   // Holes
-  bool m_hasHoleVelocityE, m_hasHoleVelocityB, m_hasHoleVelocityExB;
-  bool m_hasHoleDiffLong, m_hasHoleDiffTrans, m_hasHoleDiffTens;
-  bool m_hasHoleTownsend, m_hasHoleAttachment;
+  bool m_hasHoleVelocityE = false;
+  bool m_hasHoleVelocityB = false;
+  bool m_hasHoleVelocityExB = false;
+  bool m_hasHoleDiffLong = false;
+  bool m_hasHoleDiffTrans = false;
+  bool m_hasHoleDiffTens = false;
+  bool m_hasHoleTownsend = false;
+  bool m_hasHoleAttachment = false;
   std::vector<std::vector<std::vector<double> > > tabHoleVelocityE;
   std::vector<std::vector<std::vector<double> > > tabHoleVelocityExB;
   std::vector<std::vector<std::vector<double> > > tabHoleVelocityB;
@@ -367,39 +378,47 @@ class Medium {
   std::vector<std::vector<std::vector<std::vector<double> > > > tabHoleDiffTens;
 
   // Ions
-  bool m_hasIonMobility;
-  bool m_hasIonDiffLong, m_hasIonDiffTrans;
-  bool m_hasIonDissociation;
+  bool m_hasIonMobility = false;
+  bool m_hasIonDiffLong = false;
+  bool m_hasIonDiffTrans = false;
+  bool m_hasIonDissociation = false;
   std::vector<std::vector<std::vector<double> > > tabIonMobility;
   std::vector<std::vector<std::vector<double> > > tabIonDiffLong;
   std::vector<std::vector<std::vector<double> > > tabIonDiffTrans;
   std::vector<std::vector<std::vector<double> > > tabIonDissociation;
 
   // Thresholds for Townsend, attachment and dissociation coefficients.
-  int thrElectronTownsend;
-  int thrElectronAttachment;
+  int thrElectronTownsend = 0;
+  int thrElectronAttachment = 0;
 
-  int thrHoleTownsend;
-  int thrHoleAttachment;
-  int thrIonDissociation;
+  int thrHoleTownsend = 0;
+  int thrHoleAttachment = 0;
+  int thrIonDissociation = 0;
 
-  // Extrapolation methods
-  unsigned int m_extrLowVelocity, m_extrHighVelocity;
-  unsigned int m_extrLowDiffusion, m_extrHighDiffusion;
-  unsigned int m_extrLowTownsend, m_extrHighTownsend;
-  unsigned int m_extrLowAttachment, m_extrHighAttachment;
-  unsigned int m_extrLowLorentzAngle, m_extrHighLorentzAngle;
-  unsigned int m_extrLowMobility, m_extrHighMobility;
-  unsigned int m_extrLowDissociation, m_extrHighDissociation;
+  // Extrapolation methods (TODO: enum).
+  unsigned int m_extrLowVelocity = 0;
+  unsigned int m_extrHighVelocity = 1;
+  unsigned int m_extrLowDiffusion = 0;
+  unsigned int m_extrHighDiffusion = 1;
+  unsigned int m_extrLowTownsend = 0;
+  unsigned int m_extrHighTownsend = 1;
+  unsigned int m_extrLowAttachment = 0;
+  unsigned int m_extrHighAttachment = 1;
+  unsigned int m_extrLowLorentzAngle = 0;
+  unsigned int m_extrHighLorentzAngle = 1;
+  unsigned int m_extrLowMobility = 0;
+  unsigned int m_extrHighMobility = 1;
+  unsigned int m_extrLowDissociation = 0;
+  unsigned int m_extrHighDissociation = 1;
 
   // Interpolation methods
-  unsigned int m_intpVelocity;
-  unsigned int m_intpDiffusion;
-  unsigned int m_intpTownsend;
-  unsigned int m_intpAttachment;
-  unsigned int m_intpLorentzAngle;
-  unsigned int m_intpMobility;
-  unsigned int m_intpDissociation;
+  unsigned int m_intpVelocity = 2;
+  unsigned int m_intpDiffusion = 2;
+  unsigned int m_intpTownsend = 2;
+  unsigned int m_intpAttachment = 2;
+  unsigned int m_intpLorentzAngle = 2;
+  unsigned int m_intpMobility = 2;
+  unsigned int m_intpDissociation = 2;
 
   double GetAngle(const double ex, const double ey, const double ez,
                   const double bx, const double by, const double bz,

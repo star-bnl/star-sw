@@ -9,14 +9,7 @@
 
 namespace Garfield {
 
-ViewSignal::ViewSignal()
-    : m_className("ViewSignal"),
-      m_debug(false),
-      m_sensor(NULL),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_hSignal(NULL), m_hSignalElectrons(NULL), m_hSignalIons(NULL),
-      m_gCrossings(NULL) {
+ViewSignal::ViewSignal() {
 
   plottingEngine.SetDefaultStyle();
 }

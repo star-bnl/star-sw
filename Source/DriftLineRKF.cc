@@ -8,28 +8,10 @@
 
 namespace Garfield {
 
-DriftLineRKF::DriftLineRKF()
-    : m_sensor(NULL),
-      m_medium(NULL),
-      m_maxStepSize(1.e8),
-      m_accuracy(1.e-8),
-      m_maxSteps(1000),
-      m_maxStepsToWire(1000),
-      m_rejectKinks(true),
-      m_useStepSizeLimit(false),
-      m_usePlotting(false),
-      m_view(NULL),
-      m_status(0),
-      m_nPoints(0),
-      m_scaleElectronSignal(1.),
-      m_scaleHoleSignal(1.),
-      m_scaleIonSignal(1.),
-      m_debug(false),
-      m_verbose(false) {
+DriftLineRKF::DriftLineRKF() {
 
   const unsigned int nMaxPoints = m_maxSteps + m_maxStepsToWire + 10;
   m_path.resize(nMaxPoints);
-  m_className = "DriftLineRKF";
 }
 
 void DriftLineRKF::SetSensor(Sensor* s) {
@@ -77,7 +59,7 @@ void DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
 void DriftLineRKF::DisablePlotting() {
 
-  m_view = NULL;
+  m_view = nullptr;
   m_usePlotting = false;
 }
 

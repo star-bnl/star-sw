@@ -17,12 +17,12 @@ class RandomEngineRoot : public RandomEngine {
   // Destructor
   ~RandomEngineRoot();
   // Call the random number generator
-  double Draw() { return rng.Rndm(); }
+  double Draw() { return m_rng.Rndm(); }
   // Initialise the random number generator
-  void Seed(unsigned int s);
+  void Seed(const unsigned int s);
 
  private:
-  TRandom3 rng;
+  TRandom3 m_rng;
 };
 }
 

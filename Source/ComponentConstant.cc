@@ -6,25 +6,7 @@
 namespace Garfield {
 
 ComponentConstant::ComponentConstant()
-    : ComponentBase(),
-      m_fx(0.),
-      m_fy(0.),
-      m_fz(0.),
-      m_hasPotential(false),
-      m_x0(0.),
-      m_y0(0.),
-      m_z0(0.),
-      m_v0(0.),
-      m_hasWeightingField(false),
-      m_wfield(""),
-      m_fwx(0.),
-      m_fwy(0.),
-      m_fwz(0.),
-      m_hasWeightingPotential(false),
-      m_wx0(0.),
-      m_wy0(0.),
-      m_wz0(0.),
-      m_w0(0.) {
+    : ComponentBase() {
 
   m_className = "ComponentConstant";
 }

@@ -13,25 +13,8 @@ namespace Garfield {
 double Sensor::m_signalConversion = ElementaryCharge;
 
 Sensor::Sensor()
-    : m_lastComponent(-1),
-      m_nTimeBins(200),
-      m_tStart(0.),
-      m_tStep(10.),
-      m_nEvents(0),
-      m_hasTransferFunction(false),
-      m_fTransfer(0),
-      m_hasNoiseFunction(false),
-      m_fNoise(0),
-      m_hasUserArea(false),
-      m_xMinUser(0.),
-      m_yMinUser(0.),
-      m_zMinUser(0.),
-      m_xMaxUser(0.),
-      m_yMaxUser(0.),
-      m_zMaxUser(0.),
-      m_debug(false) {
-
-  m_className = "Sensor";
+    : m_fTransfer(0),
+      m_fNoise(0) {
 
 }
 

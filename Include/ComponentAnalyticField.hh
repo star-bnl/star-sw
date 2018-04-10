@@ -23,7 +23,7 @@ class ComponentAnalyticField : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status) { 
     
-    m = NULL;
+    m = nullptr;
     // Calculate the field.
     double v = 0.;
     status = Field(x, y, z, ex, ey, ez, v, false);
@@ -41,7 +41,7 @@ class ComponentAnalyticField : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
                      int& status) {
-    m = NULL;
+    m = nullptr;
     // Calculate the field.
     status = Field(x, y, z, ex, ey, ez, v, true);
     // If the field is ok, get the medium.
@@ -189,12 +189,12 @@ class ComponentAnalyticField : public ComponentBase {
   };
 
  private:
-  bool m_chargeCheck;
+  bool m_chargeCheck = false;
 
-  bool m_cellset;
-  bool m_sigset;
+  bool m_cellset = false;
+  bool m_sigset = false;
 
-  bool m_polar;
+  bool m_polar = false;
 
   // Cell type (as string and number)
   std::string m_scellType;
@@ -324,8 +324,8 @@ class ComponentAnalyticField : public ComponentBase {
     double e;       //< Charge.
   };
   std::vector<charge3d> m_ch3d;
-  unsigned int m_nTermBessel;
-  unsigned int m_nTermPoly;
+  unsigned int m_nTermBessel = 10;
+  unsigned int m_nTermPoly = 100;
 
   // Gravity
   double down[3];

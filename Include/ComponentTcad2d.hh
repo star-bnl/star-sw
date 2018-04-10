@@ -169,28 +169,29 @@ class ComponentTcad2d : public ComponentBase {
   std::vector<Defect> m_acceptors;
   
   // Available data.
-  bool m_hasPotential;
-  bool m_hasField;
-  bool m_hasElectronMobility;
-  bool m_hasHoleMobility;
-  bool m_hasElectronVelocity;
-  bool m_hasHoleVelocity; 
-  bool m_hasElectronLifetime;
-  bool m_hasHoleLifetime;
+  bool m_hasPotential = false;
+  bool m_hasField = false;
+  bool m_hasElectronMobility = false;
+  bool m_hasHoleMobility = false;
+  bool m_hasElectronVelocity = false;
+  bool m_hasHoleVelocity = false;
+  bool m_hasElectronLifetime = false;
+  bool m_hasHoleLifetime = false;
 
   // Are all the cross-sections and concentrations valid and set.
-  bool m_validTraps;
+  bool m_validTraps = false;
 
   // Voltage range
-  double m_pMin, m_pMax;
+  double m_pMin = 0.;
+  double m_pMax = 0.;
 
   // Bounding box
-  bool m_hasRangeZ;
+  bool m_hasRangeZ = false;
   double m_xMinBB, m_yMinBB, m_zMinBB;
   double m_xMaxBB, m_yMaxBB, m_zMaxBB;
 
   // Element from the previous call
-  int m_lastElement;
+  int m_lastElement = 0;
 
   // Reset the component
   void Reset();

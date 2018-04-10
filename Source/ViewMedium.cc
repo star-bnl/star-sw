@@ -12,32 +12,8 @@
 
 namespace Garfield {
 
-ViewMedium::ViewMedium()
-    : m_debug(false),
-      m_canvas(NULL),
-      m_hasExternalCanvas(false),
-      m_medium(NULL),
-      m_eMin(0.),
-      m_eMax(1000.),
-      m_bMin(0.),
-      m_bMax(5.),
-      m_aMin(0.),
-      m_aMax(3.14),
-      m_vMin(0.),
-      m_vMax(0.),
-      m_efield(500.),
-      m_bfield(1.e2),
-      m_angle(0.),
-      m_etolerance(1.),
-      m_btolerance(0.01),
-      m_atolerance(0.05),
-      m_labele("electric field [V/cm]"),
-      m_labelb("magnetic field [T]"),
-      m_labela("magnetic field angle [rad]"),
-      m_labelv("drift velocity [cm/ns]"),
-      m_labeld("diffusion coefficient [#sqrt{cm}]") {
+ViewMedium::ViewMedium() {
 
-  m_className = "ViewMedium";
   plottingEngine.SetDefaultStyle();
 }
 
