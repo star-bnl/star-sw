@@ -19,6 +19,7 @@
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
 
+#include <cassert>
 //STD
 #include <vector>
 using namespace std;
@@ -432,11 +433,9 @@ inline double  StiKalmanTrack::getRapidity()       const
   StiKalmanTrackNode *  inner = getInnerMostHitNode();
   inner->getMomentum(p,0);
   double mass = getMass();
-  if (mass<0)
-    throw runtime_error("StiKalmanTrack::getRapidity() - particle mass unknown");
+  assert(mass >= 0);
   double e = ::sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-  if (e<=p[2])
-    throw runtime_error("StiKalmanTrack::getRapidity() - Error: e<=pz");
+  assert(e > p[2]);
   return 0.5*::log(e+p[2]/e-p[2]);
 }
 
@@ -454,10 +453,8 @@ inline double  StiKalmanTrack::getPseudoRapidity() const
   // Return pseudo rapidity of the particle at the inner most node held by this track
   // which may (or not) be the primary vertex. 
   double tanTheta = tan(M_PI/4.- getInnerMostHitNode()->getDipAngle()/2. );
-  if (tanTheta>0.)
-    return -::log(tanTheta);
-  else
-    throw runtime_error("StiKalmanTrack::getPseudoRapidity() -E- Attempting ::log(non positive number)");
+  assert(tanTheta>0.);
+  return -::log(tanTheta);
 }
 
 /*! 
@@ -552,20 +549,12 @@ inline double  StiKalmanTrack::getDca3(StiTrack *t)   const
 */
 inline StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
-  if (!firstNode)
-		{
-			cout << "StiKTNBidirectionalIterator StiKalmanTrack::begin() -F- firstNode==0"<<endl;
-			throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
-		}
+  assert(firstNode);
   return StiKTNBidirectionalIterator::begin(firstNode);
 }
 inline StiKTNBidirectionalIterator StiKalmanTrack::rbegin() const 
 {
-  if (!lastNode)
-		{
-			cout << "StiKTNBidirectionalIterator StiKalmanTrack::rbegin() -F- lastNode==0"<<endl;
-			throw runtime_error("StiKalmanTrack::rbegin() - ERROR - lastNode==0");
-		}
+  assert(lastNode);
   return StiKTNBidirectionalIterator::rbegin(lastNode);
 }
 

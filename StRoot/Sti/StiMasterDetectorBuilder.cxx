@@ -1,3 +1,4 @@
+#include <cassert>
 #include "StiMasterDetectorBuilder.h"
 #include "TGeoManager.h"
 #include "StiDetector.h"
@@ -133,5 +134,6 @@ StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
     {
       if((*iter)->isName(name)) return *iter;
     }
-	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
+	cout << "StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found" << endl;
+	assert(0);
 }

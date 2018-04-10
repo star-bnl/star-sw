@@ -2,6 +2,7 @@
 //M.L. Miller (Yale Software)
 //02/02/01
 
+#include <cassert>
 #include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
@@ -91,9 +92,7 @@ the screen and reset() is called.
 */
 void StiDetectorContainer::setToDetector(const StiDetector* layer)
 {
-
-  if (!layer->getTreeNode()) 
-    throw runtime_error("StiDetectorContainer::setToDetector(StiDetector*) -E- layer->getTreeNode()==0");
+  assert(layer->getTreeNode() && "StiDetectorContainer::setToDetector(StiDetector*) layer->getTreeNode()==0");
   setToLeaf( layer->getTreeNode() );
 }
 
@@ -106,8 +105,7 @@ void StiDetectorContainer::reset()
   tempOrderKey.key = static_cast<double>( StiPlacement::kMidRapidity );
   mySameOrderKey.morderKey = tempOrderKey; //order is of type const StiOrderKey&
   StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameOrderKey);
-  if (where==mroot->end()) 
-    throw runtime_error("StiDetectorContainer::setToDetector(StiDetector*) -E-  mid-rapidity region not found - where==0");
+  assert(where!=mroot->end() && "StiDetectorContainer::setToDetector(StiDetector*)  mid-rapidity region not found - where==0");
   mregion = where;
   //This will seg fault if (*mregion)->begin()==(*mregion)->end() !!!!!!!
   mradial_it = (*mregion)->begin(); //change (MLM)
@@ -116,21 +114,17 @@ void StiDetectorContainer::reset()
 
 StiDetector* StiDetectorContainer::operator*() const
 {
-  if (!(*mphi_it))
-    throw runtime_error("StiDetectorContainer::operator*() const -E- *mphi_it==0");
+  assert(*mphi_it && "StiDetectorContainer::operator*() *mphi_it==0");
   StiDetector * det = (*mphi_it)->getData();
-  if (!det)
-    throw runtime_error("StiDetectorContainer::operator*() const -E- *mphi_it==0");
+  assert(det && "StiDetectorContainer::operator*() *mphi_it==0");
   return det;
 }
 
 StiDetector* StiDetectorContainer::getCurrentDetector() const
 {
-  if (!(*mphi_it))
-    throw runtime_error("StiDetectorContainer::getCurrentDetector() const -E- *mphi_it==0");
+  assert(*mphi_it && "StiDetectorContainer::getCurrentDetector() *mphi_it==0");
   StiDetector * det = (*mphi_it)->getData();
-  if (!det)
-    throw runtime_error("StiDetectorContainer::getCurrentDetector() const -E- *mphi_it==0");
+  assert(det && "StiDetectorContainer::getCurrentDetector()  det==0");
   return det;
 }
 
@@ -199,8 +193,7 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
   // pass volumes to TreeBuilder before we make like a tree and leave...
   StiDetectorTreeBuilder treeBuilder;
   mroot = treeBuilder.build(builder);
-  if (!mroot)
-    throw runtime_error("StiDetectorContainer::build() - ERROR - mroot==0");
+  assert(mroot && "StiDetectorContainer::build() mroot==0");
 
   //Don't need any of this!!!!!
   /*

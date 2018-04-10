@@ -1,6 +1,7 @@
 #ifndef StiMasterHitLoader_H
 #define StiMasterHitLoader_H
 
+#include <cassert>
 #include <stdexcept>
 #include <vector>
 #include "StiHitLoader.h"
@@ -81,8 +82,7 @@ void StiMasterHitLoader<Source1, Detector>::loadEvent(Source1 *source1,
                                                               Filter<StiTrack> * trackFilter,
                                                               Filter<StiHit>   * hitFilter)
 {
-  if(!this->_hitContainer)
-    throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
+  assert(this->_hitContainer);
   this->_hitContainer->clear();
   HitLoaderConstIter iter;
   for (iter=this->begin();iter!=this->end();iter++)	{
@@ -118,7 +118,8 @@ void StiMasterHitLoader<Source1,Detector>::setHitFactory(Factory<StiHit>*hitFact
 template<class Source1,class Detector>
 void StiMasterHitLoader<Source1,Detector>::setDetector(Detector*transform)
 {
-  throw runtime_error("StiMasterHitLoader<Source1,Detector>::setDetector(Detector*) - This call is Forbiden in StiMasterHitLoader");
+  cout << "StiMasterHitLoader<Source1,Detector>::setDetector(Detector*) - This call is Forbiden in StiMasterHitLoader" << endl;
+  assert(0);
 }
 
 
