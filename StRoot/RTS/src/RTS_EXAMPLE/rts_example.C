@@ -100,6 +100,11 @@ static int run_number ;
 //trigger related globals
 u_int rcc_timestamp ;
 
+int altro_override[256] ;
+
+extern int *tpx_altro_to_row_override ;
+
+
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
@@ -112,6 +117,11 @@ int main(int argc, char *argv[])
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel((char *)WARN) ;
 
+
+//	LOG(WARN,"Special override for TPX!") ;
+//	altro_override[50] = 1 ;
+//	altro_override[56] = 2 ;
+//	tpx_altro_to_row_override = altro_override ;
 
 	run_number = -1 ;
 
@@ -197,6 +207,8 @@ int main(int argc, char *argv[])
 		    break ;
 		  }
 		}
+
+//		if(good>1000) break ;
 
 		if(run_number < 0) {
 			
@@ -626,24 +638,66 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				//if(dd->row > 8) continue ;
 				
 				if(do_print) {
-					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					//printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
 
 				pixel_count[dd->row] += dd->ncontent ;
 
+				int seq = 0 ;
+				int last_tb = -1 ;
+				int first_i = 0 ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					int tb = dd->adc[i].tb ;
+					int adc = dd->adc[i].adc ;
+
+					if(adc > 80) {
+						//printf("ADC %d: tb %d, last_tb %d: seq %d\n",adc,tb,last_tb,seq) ;
+						if(seq==0) first_i = i ;
+
+						if(tb==(last_tb-1)) {
+							seq++ ;
+							if(seq>=5) {
+								//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[i].tb,dd->adc[i].adc) ;
+							}
+						}
+						else {
+							if(seq>=5 && (dd->adc[first_i].tb<30)) {
+								for(u_int j=first_i;j<i;j++) {
+									//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[j].tb,dd->adc[j].adc) ;
+								}
+							}
+							seq = 0 ;
+						}
+					}
+					else {
+						if(seq>=5 && (dd->adc[first_i].tb<30)) {
+							for(u_int j=first_i;j<i;j++) {
+								//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[j].tb,dd->adc[j].adc) ;
+							}
+						}
+
+						seq = 0 ;
+					}
+
+					last_tb = tb ;
+				}
+
+#if 0				
 				for(u_int i=0;i<dd->ncontent;i++) {
 					if(do_print) {
-						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
+						//printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 					}
 				}
+#endif		
 			}
-		
+
 
 			if(sec_found) {
 
 				s_mask[dd->sec-1]=1 ;
-
-				if(do_print) {
+				if(0) {
+				//if(do_print) {
 
 					for(int row=0;row<=45;row++) {
 						int max_cou = tpc_rowlen[row] * 400 ;
@@ -717,16 +771,18 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			}
 		}
 
+#if 0
 		//new ALTRO bank, for a test
 		for(int r=1;r<=6;r++) {
 			dd = rdr->det("tpx")->get("altro",s,r) ;
 			while(dd && dd->iterate()) {
+				found = 1 ;
 				if(do_print) {
 					printf("TPX ALTRO: sec %02d, RDO %d: ALTRO %3d, ch %2d: %3d pixels\n",dd->sec,r,dd->row,dd->pad,dd->ncontent) ;
 				}
 			}
 		}
-
+#endif
 				
 
 	}
@@ -2298,17 +2354,22 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 		}
 #endif
 
-#if 0
+#if 1
 		// In SAMPA form
 		dd = rdr->det("itpc")->get("sampa",s) ;
 		if(dd) {
 			while(dd->iterate()) {
 				adc_found = 1 ;
-
+				
 
 			
 				if(do_print) {
-					printf("ITPC SAMPA: sector %2d, FEE %3d, CH %2d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					int rdo = (dd->row >> 4)+1;
+					int port = (dd->row & 0xF)+1 ;
+					int ch = (dd->pad) & 0xFF ;
+					int fee_id = (dd->pad >> 8) ;
+
+					printf("ITPC SAMPA: sector %2d, RDO %d, FEE #%02d (padplane %02d), CH %2d: %3d timebins\n",dd->sec,rdo,port,fee_id,ch,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
