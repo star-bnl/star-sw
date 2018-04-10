@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.13 2018/04/10 11:32:09 smirnovd Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.14 2018/04/10 11:38:44 smirnovd Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.14  2018/04/10 11:38:44  smirnovd
+ * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
+ *
  * Revision 1.13  2018/04/10 11:32:09  smirnovd
  * Minor corrections across multiple files
  *
@@ -73,7 +76,7 @@ class StTpcDigitalSector;
 class daq_tpx;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0),NoRows(-1), mTpx_RowLen(0) {}
+  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
@@ -85,9 +88,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
-  Int_t    NoRows;
-  Int_t    NoInnerPadRows;
-  UChar_t *mTpx_RowLen;
+  UChar_t *mTpx_RowLen[24];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;

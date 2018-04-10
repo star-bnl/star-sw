@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcAvClusterMaker.cxx,v 1.1 2012/09/13 21:00:04 fisyak Exp $
+ * $Id: StTpcAvClusterMaker.cxx,v 1.2 2018/04/10 11:38:44 smirnovd Exp $
  *
  **************************************************************************/
 #include <assert.h>
@@ -8,15 +8,14 @@
 #include "StEvent.h"
 #include "StEvent/StTpcHitCollection.h"
 #include "StEvent/StTpcHit.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //_____________________________________________________________
 Int_t StTpcAvClusterMaker::InitRun(Int_t runnumber) {
   static Bool_t Done = kFALSE;
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
-  NoInnerPadRows = St_tpcPadPlanesC::instance()->innerPadRows();
-  NoRows = NoInnerPadRows + St_tpcPadPlanesC::instance()->outerPadRows();
+  Int_t NoRows = St_tpcPadConfigC::instance()->numberOfRows(20);
   SetAttr("maxRow",NoRows);
   if (! Done) {
     TFile *f = GetTFile();

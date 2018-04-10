@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.41 2018/04/10 11:32:09 smirnovd Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.42 2018/04/10 11:38:44 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -25,7 +25,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StMessMgr.h" 
 #  include "StDAQMaker/StDAQReader.h"
 #  include "StRtsTable.h"
@@ -43,7 +43,9 @@ ClassImp(StTpcRTSHitMaker);
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
-  if (mTpx_RowLen) delete [] mTpx_RowLen;
+  for (Int_t sec = 0; sec < 24; sec++) {
+    if (mTpx_RowLen[sec]) delete [] mTpx_RowLen[sec];
+  }
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
@@ -57,18 +59,18 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
-  NoInnerPadRows = St_tpcPadPlanesC::instance()->innerPadRows();
-  Int_t NoRowsOuter = St_tpcPadPlanesC::instance()->outerPadRows();
-  NoRows = NoInnerPadRows + NoRowsOuter;
-  if (NoRows != 45) {
-    // Fill no. of pad per row 
-    mTpx_RowLen = new UChar_t[NoRows+1];
-    mTpx_RowLen[0] = 0;
-    for (Int_t i = 1; i <= NoRows; i++) {
-      mTpx_RowLen[i] = St_tpcPadPlanesC::instance()->padsPerRow(i);
+  for (Int_t sec = 0; sec < 24; sec++) {
+    Int_t sector = sec + 1;
+    if (St_tpcPadConfigC::instance()->numberOfRows(sector) != 45) {
+      // Fill no. of pad per row 
+      mTpx_RowLen[sec] = new UChar_t[St_tpcPadConfigC::instance()->numberOfRows(sector)+1];
+      mTpx_RowLen[sec][0] = 0;
+      for (Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+	mTpx_RowLen[sec][row] = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
+      }
     }
   }
-  SetAttr("maxRow",NoRows);
+  SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
@@ -76,7 +78,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
   unsigned int mask = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U); // 24 bit masking for sectors 1..24
   // do gains example; one loads them from database but I don't know how...
-  if (NoRows <= 45) { // hack for now take Tonko's defaults for iTpx
+  if (St_tpcPadConfigC::instance()->numberOfRows(20) <= 45) { // hack for now take Tonko's defaults for iTpx
     daq_dta *dta  = fTpx->put("gain");
     
     // Prepare scaled hit maxima
@@ -91,8 +93,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
       if (!((1U<<(sector-1)) & mask)) continue; // sector masking
       Int_t liveSecPads = 0;
       Int_t totalSecPads = 0;
-      for(Int_t row=1;row<=NoRows;row++) {
-	Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
+      for(Int_t row=1;row<=St_tpcPadConfigC::instance()->numberOfRows(sector);row++) {
+	Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
 	daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
 	assert(gain);
 	gain[0].gain = 0.0;	// kill pad0 just in case..
@@ -100,14 +102,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
 	  gain[pad].gain = 0.; // be sure that dead pads are killed
 	  gain[pad].t0   = 0.;
-	  if (m_Mode == 2) {
-	    if (St_tpcPadGainT0BC::instance()->Gain(sector,row,pad) > 0) gain[pad].gain = 1.;
-	    gain[pad].t0   = 0.;
-	  } else {
-	    if (St_tpcPadGainT0BC::instance()->Gain(sector,row,pad) <= 0) continue;
-	    gain[pad].gain = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
-	    gain[pad].t0   = St_tpcPadGainT0BC::instance()->T0(sector,row,pad);
-	  }
+	  if (St_tpcPadGainT0BC::instance()->Gain(sector,row,pad) <= 0) continue;
+	  gain[pad].gain = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
+	  gain[pad].t0   = St_tpcPadGainT0BC::instance()->T0(sector,row,pad);
 	}
 	dta->finalize(183,sector,row);
 	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
@@ -147,7 +144,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     been previously loaded as shown in the example above they
     will be set to 1.0!
   */
-  if (NoRows <= 45) { // hack for now take Tonko's defaults for iTpx
+  if (St_tpcPadConfigC::instance()->numberOfRows(20) <= 45) { // hack for now take Tonko's defaults for iTpx
     fTpx->InitRun(runnumber);
   }
   PrintAttr();
@@ -187,12 +184,13 @@ Int_t StTpcRTSHitMaker::Make() {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
     UShort_t Id = 0;
-    if (NoRows != 45) dta = fTpx->put("adc_sim",0,NoRows+1,0,mTpx_RowLen); // used for any kind of data; transparent pointer
+    if (St_tpcPadConfigC::instance()->numberOfRows(sec) != 45) 
+      dta = fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec)+1,0,mTpx_RowLen[sec-1]); // used for any kind of data; transparent pointer
     else              dta = fTpx->put("adc_sim");
     Int_t hitsAdded = 0;
     Int_t nup = 0;
     Int_t NoAdcs = 0;
-    for (Int_t row = minRow; row <= maxRow; row++) {
+    for (Int_t row = minRow; row <= digitalSector->numberOfRows(); row++) {
       if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
@@ -294,8 +292,8 @@ Int_t StTpcRTSHitMaker::Make() {
 	transform(LS,L);                                                                             PrPP(Make,L);
 	if (dta->row != rowOld) {
 	  rowOld = dta->row;
-	  Double_t gain = (dta->row<=NoInnerPadRows) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
-	  Double_t wire_coupling = (dta->row<=NoInnerPadRows) ? 
+	  Double_t gain = (dta->row<=St_tpcPadConfigC::instance()->innerPadRows(dta->sec)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
+	  Double_t wire_coupling = (dta->row<=St_tpcPadConfigC::instance()->innerPadRows(dta->sec)) ? 
 	    St_tss_tssparC::instance()->wire_coupling_in() : 
 	    St_tss_tssparC::instance()->wire_coupling_out();
 	  ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
@@ -341,7 +339,7 @@ Int_t StTpcRTSHitMaker::Make() {
       }
     }
     // Set IdTruth
-    for (Int_t row = minRow; row <= maxRow; row++) {
+    for (Int_t row = minRow; row <= digitalSector->numberOfRows(); row++) {
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       for(Int_t pad = 1; pad <= Npads; pad++) {
 	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
