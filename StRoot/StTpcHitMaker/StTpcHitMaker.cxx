@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.58 2018/04/10 11:38:44 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.59 2018/04/10 11:38:54 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.59  2018/04/10 11:38:54  smirnovd
+ * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
+ *
  * Revision 1.58  2018/04/10 11:38:44  smirnovd
  * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
  *
@@ -437,73 +440,64 @@ Int_t StTpcHitMaker::Make() {
   unsigned int mask = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U); // 24 bit masking for sectors 1..24
   bin0Hits = 0;
   if (fSectCounts) fSectCounts->Fill(0);
+  static const Char_t *tpcDataNames[5] = {0,"tpc/legacy","tpx/legacy","tpx","itpc"};
+  TString cldadc("cld");
+  if ( kMode == kTpxRaw || kMode == kTpcRaw || kMode == kiTPCRaw ||
+       kMode == kTpcAvLaser || kMode == kTpxAvLaser) cldadc = "adc";
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
     if (!((1U<<(sector-1)) & mask)) continue; // sector masking
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
-    TString cldadc("cld");
-    if ( kMode == kTpxRaw || kMode == kTpcRaw || kMode == kiTPCRaw ||
-	 kMode == kTpcAvLaser || kMode == kTpxAvLaser) cldadc = "adc";
-    mQuery = Form("tpx/%s[%i]",cldadc.Data(),sector);
-    StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
-    if (daqTpcTable) {
-      kReaderType = kStandardTpx;
-    } else {
-      mQuery = Form("itpc/%s[%i]",cldadc.Data(),sector);
-      daqTpcTable = GetNextDaqElement(mQuery);
-      if (daqTpcTable) {
-	kReaderType = kStandardiTPC;
-      } else {
-	mQuery = Form("tpc/legacy[%i]",sector);
-	daqTpcTable = GetNextDaqElement(mQuery);
-	if (daqTpcTable) {
-	  kReaderType = kLegacyTpc;
-	} else {
-	  mQuery = Form("tpx/legacy[%i]",sector);
-	  daqTpcTable = GetNextDaqElement(mQuery);
-	  if (daqTpcTable) {
-	    kReaderType = kLegacyTpx;
+    Int_t hitsAdded = 0;
+    mRowOffSet4iTPC = 0;
+    for (Int_t k = kStandardiTPC;  k > 0; k--) {
+      if (k > kLegacyTpx) 
+	mQuery = Form("%s/%s[%i]",tpcDataNames[k],cldadc.Data(),sector);
+      else
+	mQuery = Form("%s[%i]",tpcDataNames[k],sector);
+      StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
+      if (! daqTpcTable) continue;
+      kReaderType = (EReaderType) k;
+      if (kReaderType == kStandardiTPC) mRowOffSet4iTPC = 41 - 14;
+      while (daqTpcTable) {
+	if (Sector() == sector) {
+	  Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
+	  fTpc = 0;
+	  if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
+	  else 	                                                  row = daqTpcTable->Row();
+	  if (row > 13 && kReaderType != kStandardiTPC) row += mRowOffSet4iTPC;
+	  if (row >= minRow && row <= maxRow) {
+	    switch (kMode) {
+	    case kTpc: 
+	    case kiTPC: 
+	    case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
+	    case kTpcPulser:       
+	    case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
+	    case kTpcAvLaser:   
+	    case kTpxAvLaser:   
+	      if ( fTpc)                    TpcAvLaser(sector);
+	      else 	                        TpxAvLaser(sector);
+	      fSectCounts->Fill(sector);
+	      break;
+	    case kTpcDumpPxls2Nt:  
+	    case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
+	    case kTpcRaw: 
+	    case kTpxRaw: 
+	    case kiTPCRaw: 
+	      if ( fTpc) RawTpcData(sector);
+	      else 	     RawTpxData(sector);          
+	      break;
+	    default:
+	      break;
+	    }
 	  }
 	}
+	daqTpcTable = GetNextDaqElement(mQuery);
       }
-    }
-    Int_t hitsAdded = 0;
-    while (daqTpcTable) {
-      assert(Sector() == sector);
-      Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
-      fTpc = 0;
-      if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
-      else 	                                                  row = daqTpcTable->Row();
-      if (row >= minRow && row <= maxRow) {
-	switch (kMode) {
-	case kTpc: 
-	case kiTPC: 
-	case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
-	case kTpcPulser:       
-	case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
-	case kTpcAvLaser:   
-	case kTpxAvLaser:   
-	  if ( fTpc)                    TpcAvLaser(sector);
-	  else 	                        TpxAvLaser(sector);
-	  fSectCounts->Fill(sector);
-	  break;
-	case kTpcDumpPxls2Nt:  
-	case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
-	case kTpcRaw: 
-	case kTpxRaw: 
-	case kiTPCRaw: 
-	  if ( fTpc) RawTpcData(sector);
-	  else 	     RawTpxData(sector);          
-	  break;
-	default:
-	  break;
-	}
-      }
-      daqTpcTable = GetNextDaqElement(mQuery);
-    }
+    } // Loop over ReaderType
     if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
-                << sector << "). Skipping event." << endm;
+		<< sector << "). Skipping event." << endm;
       return kStSkip;
     }
   }
@@ -555,6 +549,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
   Int_t nhitsBefore = hitCollection->numberOfHits();
   Int_t sec = DaqDta()->Sector();
   Int_t row = DaqDta()->Row();
+  if (row > 13 && kReaderType != kStandardiTPC) row += mRowOffSet4iTPC;
   if (kReaderType == kLegacyTpc || kReaderType == kLegacyTpx) {
     tpc_t *tpc = (tpc_t *) DaqDta()->GetTable();
     for (Int_t l = 0; l < NRows; tpc++) {
@@ -827,6 +822,7 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
   }
 #endif /* __USE__THnSparse__ */
   Int_t r=Row() ;	// I count from 1
+  if (r > 13 && kReaderType != kStandardiTPC) r += mRowOffSet4iTPC;
   if(r==0) return;	// TPC does not support unphy. rows so we skip em
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
@@ -1007,6 +1003,7 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   Int_t p_old = -1;
   Int_t Total_data = 0;
   Int_t r=Row() ;	// I count from 1
+  if (r > 13 && kReaderType != kStandardiTPC) r += mRowOffSet4iTPC;
   if(r==0) return 0 ;	// TPC does not support unphysical rows so we skip them
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.

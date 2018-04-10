@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.20 2018/04/10 11:38:44 smirnovd Exp $
+ * $Id: StTpcHitMaker.h,v 1.21 2018/04/10 11:38:54 smirnovd Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.21  2018/04/10 11:38:54  smirnovd
+ * StTpcHitMaker: Fixes to properly read the real data (Yuri and Irakli)
+ *
  * Revision 1.20  2018/04/10 11:38:44  smirnovd
  * StTpcHitMaker: Modified for iTPC era (Yuri and Irakli)
  *
@@ -144,6 +147,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH1F        *fSectCounts;
   Int_t    NoRows;
   Int_t    NoInnerPadRows;
+  Int_t    mRowOffSet4iTPC;
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
