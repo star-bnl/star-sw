@@ -11,10 +11,16 @@
 
 
 struct daq_store {
-	u_char sec ;
-	u_char row ;
-	u_char pad ;
+//	u_char sec ;
+//	u_char row ;
+//	u_char pad ;
+//	char type ;		// 'r' raw; 'a' adc; 'c' clusters; 'p' pedestals; 'g' gains
+
+	u_int sec ;
+	u_int row ;
+	u_int pad ;
 	char type ;		// 'r' raw; 'a' adc; 'c' clusters; 'p' pedestals; 'g' gains
+
 	u_int nitems ;		// usually 1 for raw; <512 for adc; <32 for clusters; 512 for pedestals; 1 for gains
 } ;
 
@@ -144,7 +150,7 @@ public:
 	}
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.9 2014/08/06 11:42:49 jeromel Exp $: built " __DATE__ " " __TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.10 2018/04/10 12:13:31 tonko Exp $: built " __DATE__ " " __TIME__ ; 
 		return cvs;
 	}
 
