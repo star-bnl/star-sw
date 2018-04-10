@@ -84,7 +84,6 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	}
     }
   if (gGeoManagerSV) {
-    //VP    SafeDelete(gGeoManager); 
     gGeoManager = gGeoManagerSV;
   }
   cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
@@ -94,13 +93,11 @@ void StiMasterDetectorBuilder::build(StMaker&source)
  */
 bool StiMasterDetectorBuilder::hasMore() const
 { 
-  //cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::const_iterator iter;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      //cout << "StiMasterDetectorBuilder::hasMore() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
       if((*iter)->hasMore()) return true;
     }
   return false;
@@ -111,7 +108,6 @@ no detector object left to server.
  */
 StiDetector * StiMasterDetectorBuilder::next()
 {
-  //cout << "StiMasterDetectorBuilder::next() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::const_iterator iter;
   for (iter=begin();
        iter!=end();
@@ -135,7 +131,6 @@ StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
        iter!=end();
        iter++)
     {
-      //cout << "StiMasterDetectorBuilder::next() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
       if((*iter)->isName(name)) return *iter;
     }
 	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
