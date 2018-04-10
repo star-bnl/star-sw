@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.148 2018/01/12 23:17:09 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.148 2018/01/12 23:17:09 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.149 2018/04/10 11:38:34 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.149 2018/04/10 11:38:34 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.149  2018/04/10 11:38:34  smirnovd
+ * Replace thrown exceptions with runtime asserts
+ *
  * Revision 2.148  2018/01/12 23:17:09  smirnovd
  * Removed declared but undefined functions
  *
@@ -551,7 +554,7 @@
  */
 
 
-
+#include <cassert>
 //Std
 #include <stdexcept>
 #include <cmath>
@@ -1134,11 +1137,7 @@ double StiKalmanTrack::getNearBeam(StThreeVectorD *pnt,StThreeVectorD *dir) cons
 //_____________________________________________________________________________
 StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
-  if (firstNode==0 || lastNode==0)
- {
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
- }
+  assert(firstNode && lastNode);
   
   StiKalmanTrackNode *node;
   StiKTNIterator it =(inot) ? begin():rbegin();

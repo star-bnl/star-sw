@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.56 2018/04/10 11:32:08 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.57 2018/04/10 11:38:33 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.57  2018/04/10 11:38:33  smirnovd
+ * Replace thrown exceptions with runtime asserts
+ *
  * Revision 1.56  2018/04/10 11:32:08  smirnovd
  * Minor corrections across multiple files
  *
@@ -222,7 +225,7 @@
  * StTpcHitMaker - class to fille the StEvewnt from DAQ reader
  *
  **************************************************************************/
-#include <assert.h>
+#include <cassert>
 #include "StEvent/StTpcHit.h"
 #include <algorithm>
 #include "StTpcHitMaker.h"

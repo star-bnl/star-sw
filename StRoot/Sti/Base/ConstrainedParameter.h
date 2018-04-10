@@ -1,6 +1,7 @@
 #if !defined(CONSTRAINEDPARAMETER_H__5B75CCD2_01CA_4993_8BD6_836465B6A0E1__INCLUDED_)
 #define CONSTRAINEDPARAMETER_H__5B75CCD2_01CA_4993_8BD6_836465B6A0E1__INCLUDED_
 
+#include <cassert>
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -135,7 +136,7 @@ inline  void ConstrainedParameter::set(const string & name,
 				       int key)
 {
   Parameter::set(name,description,value,type,key);
-  if (min>max) throw runtime_error("ConstrainedParameter::set() - ERROR - min>max");
+  assert(min<=max);
   if (type==Double || type==Integer)
     {
       _minimum = min;

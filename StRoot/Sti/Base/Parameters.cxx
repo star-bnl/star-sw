@@ -1,3 +1,4 @@
+#include <cassert>
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/Parameters.h"
@@ -70,7 +71,7 @@ Parameter * Parameters::getParameter(const string name)
       if ((*iter)->isName(name))
 	return *iter;
     } 
-  throw runtime_error("Parameters::getParameter(name) -E- Requested name not found");
+  assert(0);
 }
 
 

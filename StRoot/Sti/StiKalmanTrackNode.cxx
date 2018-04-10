@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.177 2018/04/10 11:32:09 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.178 2018/04/10 11:38:34 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.178  2018/04/10 11:38:34  smirnovd
+ * Replace thrown exceptions with runtime asserts
+ *
  * Revision 2.177  2018/04/10 11:32:09  smirnovd
  * Minor corrections across multiple files
  *
@@ -598,6 +601,7 @@
  *
  */
 
+#include <cassert>
 #include <Stiostream.h>
 #include <stdexcept>
 #include <math.h>
@@ -1926,7 +1930,7 @@ double StiKalmanTrackNode::getWindowZ()
 //______________________________________________________________________________
 StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 {
-  if (mFP.curv()==0) throw logic_error("StiKalmanTrackNode::getHelixCenter() -F- _curv==0 ");
+  assert(mFP.curv());
   double xt0 = mFP.x()-mFP._sinCA/mFP.curv();   /*VP*/
   double yt0 = mFP.y()+mFP._cosCA/(mFP.curv());
   double zt0 = mFP.z()+mFP.tanl()*asin(mFP._sinCA)/mFP.curv();

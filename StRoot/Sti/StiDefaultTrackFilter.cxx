@@ -1,3 +1,4 @@
+#include <cassert>
 #include "StiDefaultTrackFilter.h"
 
 #include <stdexcept>
@@ -87,7 +88,7 @@ bool StiDefaultTrackFilter::accept(const StiTrack * t) const
 		    }
 	    }
       else
-				throw runtime_error("StiDefaultTrackFilter::accept(const StiTrack * t) -E- Internal error");
+        assert(0 && "StiDefaultTrackFilter::accept Internal error");
     }
   //cout<<"/true-done"<<endl;
   return true;

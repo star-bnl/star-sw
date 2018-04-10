@@ -35,11 +35,8 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   static Int_t debug = 0;
   _maxRow = St_tpcPadPlanesC::instance()->padRows();
 //  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
-  if (!_detector)
-    throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
-  if(!_hitContainer)
-    throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-
+  assert(_detector);
+  assert(_hitContainer);
   StiDetector * detector;
   StiHit* stiHit;
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
@@ -74,9 +71,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
-        if(!_hitFactory) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- _hitFactory==0");
+        assert(_hitFactory);
         stiHit = _hitFactory->getInstance();
-        if(!stiHit)   throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- stiHit==0");
+        assert(stiHit);
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
