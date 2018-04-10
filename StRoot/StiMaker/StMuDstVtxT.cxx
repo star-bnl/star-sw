@@ -1,7 +1,7 @@
-// $Id: StMuDstVtxT.cxx,v 2.6 2015/12/20 01:35:12 fisyak Exp $
+// $Id: StMuDstVtxT.cxx,v 2.7 2018/04/10 11:32:10 smirnovd Exp $
 #include "StMuDstVtxT.h"
 #include "StKFVertex.h"
-ClassImp(StMuDstVtxT);
+
 std::ostream&  operator<<(std::ostream& os,  const StMuDstVtxT& v) {
   os << Form("Q:%3i M:%3i/%3i/%3i W/E %3i/%3i tracks rank %5i xyz = %9.3f +/- %5.3f, %9.3f +/- %5.3f, %9.3f +/- %5.3f",
 	     v.Q(),v.MultU(),v.Mult(),v.MultC(),v.MultW(),v.MultE(),v.Rank(),
@@ -14,6 +14,19 @@ std::ostream&  operator<<(std::ostream& os,  const StMuDstVtxT& v) {
   return os;
 }
 // $Log: StMuDstVtxT.cxx,v $
+// Revision 2.7  2018/04/10 11:32:10  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 2.6  2015/12/20 01:35:12  fisyak
 // Move back commits done by mistate
 //

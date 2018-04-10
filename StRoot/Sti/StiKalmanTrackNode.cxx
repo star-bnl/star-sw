@@ -1,10 +1,23 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.176 2018/04/10 11:31:24 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.177 2018/04/10 11:32:09 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.177  2018/04/10 11:32:09  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
  * Revision 2.176  2018/04/10 11:31:24  smirnovd
  * Remove dead code
  *
@@ -617,7 +630,6 @@ using namespace std;
 #include "THelixTrack.h"
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
-
 #include "StarMagField.h"
 #include "TMath.h"
 #include "StMessMgr.h"
@@ -1053,7 +1065,7 @@ StiDebug::Break(nCall);
   setState(pNode);
   setDetector(tDet);
   if (mFP._cosCA <-1e-5) return -1; 
-  if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
+  if (debug()) ResetComment(::Form("%40s ",tDet->getName().c_str()));
 
   StiPlacement * place = tDet->getPlacement();
   double nNormalRadius = place->getNormalRadius();
@@ -1140,7 +1152,6 @@ StiDebug::Break(nCall);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
-  
   setHit(vertex);
   setDetector(0);
   return true;
@@ -1154,14 +1165,14 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
   setState(parentNode);
   if (debug()) {
     if (parentNode->getDetector()) 
-      ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
+      ResetComment(::Form("%40s ",parentNode->getDetector()->getName().c_str()));
     else ResetComment("Unknown Detector");
   }
   if (propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
   
   propagateError();
   if (mFE.zign()<0) return false;
-  if (debug() & 8) { PrintpT("B");}
+  if (debug() & 8) { PrintpT("B"); PrintStep();}
   setHit(0);
   setDetector(0);
   return true;
@@ -1174,11 +1185,11 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 {
   int position = 0;
   setState(pNode);
-  if (debug()) ResetComment(::Form("%30s ",pNode->getDetector()->getName().c_str()));
+  if (debug()) ResetComment(::Form("%40s ",pNode->getDetector()->getName().c_str()));
   position = propagate(radius,kCylindrical,dir);
   if (position<0) return position;
   propagateError();
-  if (debug() & 8) { PrintpT("R");}
+  if (debug() & 8) { PrintpT("R"); PrintStep();}
   _detector = 0;
   return position;
 }
@@ -2189,7 +2200,7 @@ void   StiKalmanTrackNode::PrintpT(const Char_t *opt) const {
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
-  LOG_INFO << comment << "\t" << commentdEdx << endm;
+  LOG_INFO << comment.Data() << "\t" << commentdEdx.Data() << endm;
   ResetComment();
 }
 //________________________________________________________________________________
@@ -2376,7 +2387,6 @@ static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
   }
   return time;
 }
-//________________________________________________________________________________
 //______________________________________________________________________________
 /*! same as evaluateChi2 but used only _info information\*/
 double StiKalmanTrackNode::evaluateChi2Info(const StiHit * hit) const

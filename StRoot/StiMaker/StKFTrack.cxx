@@ -1,6 +1,5 @@
-// $Id: StKFTrack.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
+// $Id: StKFTrack.cxx,v 2.3 2018/04/10 11:32:09 smirnovd Exp $
 #include "StKFTrack.h"
-ClassImp(StKFTrack);
 //________________________________________________________________________________
 StKFTrack::StKFTrack(Int_t k, KFParticle *particle, Double_t chi2, Int_t iWE) : 
   fK(k), fWeight(-1), fW(-1), fOrigKFParticle(particle), fWestOrEast(iWE) {
@@ -54,6 +53,19 @@ std::ostream&  operator<<(std::ostream& os,  const StKFTrack& p) {
   return os;
 }
 // $Log: StKFTrack.cxx,v $
+// Revision 2.3  2018/04/10 11:32:09  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace
 //

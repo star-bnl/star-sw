@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.235 2018/01/03 21:24:21 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.236 2018/04/10 11:32:10 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -135,7 +135,6 @@ static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
 
 void CountHits();
-ClassImp(StiMaker)
 
 //_____________________________________________________________________________
 StiMaker::StiMaker(const Char_t *name) :
@@ -729,17 +728,6 @@ void StiMaker::FinishTracks (int gloPri)
         }
      }
      int qa,idt = track->idTruth(&qa);if(idt){};
-     if (!gloPri) {
-       StiDebug::Count("GloIdQa",qa);
-       StiDebug::Count("GloIdQa_vs_nHits",nHits                     ,qa);
-       StiDebug::Count("GloIdQa_vs_Pt"   ,track->getPt()            ,qa);
-       StiDebug::Count("GloIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
-     } else {
-       StiDebug::Count("PriIdQa",qa);
-       StiDebug::Count("PriIdQa_vs_nHits",nHits                     ,qa);
-       StiDebug::Count("PriIdQa_vs_Pt"   ,track->getPt()            ,qa);
-       StiDebug::Count("PriIdQa_vs_Eta"  ,track->getPseudoRapidity(),qa);
-     }
 //      StiDebug::Count(noNames[gloPri],nNodes );
 //      StiDebug::Count(inNames[gloPri],nInside);
 //      StiDebug::Count(hiNames[gloPri],nHits  );
@@ -748,8 +736,21 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.235 2018/01/03 21:24:21 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.236 2018/04/10 11:32:10 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.236  2018/04/10 11:32:10  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 1.235  2018/01/03 21:24:21  smirnovd
 // Remove unused std::string
 //

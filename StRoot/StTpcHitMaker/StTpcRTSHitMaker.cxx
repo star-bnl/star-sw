@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.40 2015/04/09 19:54:03 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.41 2018/04/10 11:32:09 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include "StTpcHitMaker.h"
 #include "StTpcRTSHitMaker.h"
-
-#include "TString.h"
 
 #include "StTpcRawData.h"
 #include "StEvent/StTpcRawData.h"

@@ -17,7 +17,6 @@
 #include "TError.h"
 #include "TStopwatch.h"
 #include "StEnumerations.h"
-using namespace std;
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/EditableParameter.h"
 #include "Sti/Base/EditableFilter.h"
@@ -606,7 +605,6 @@ assert(direction || leadNode==track->getLastNode());
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
-
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 

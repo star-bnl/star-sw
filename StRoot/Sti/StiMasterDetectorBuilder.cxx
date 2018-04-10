@@ -30,7 +30,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
   LOG_INFO << "We are StiMasterDetectorBuilder::build() and will clone the geometry if exists" << endm;
   if ( chain ){
     TDatime t = chain->StMaker::GetDBTime();
-    LOG_INFO << "Timestanp check - Date/Time from chain is " << t.GetDate() << "/" << t.GetTime() << endm;
+    LOG_INFO << "Timestamp check - Date/Time from chain is " << t.GetDate() << "/" << t.GetTime() << endm;
   }
 
 #if 1
