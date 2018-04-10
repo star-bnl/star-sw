@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.60 2018/04/10 11:39:03 smirnovd Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.61 2018/04/10 11:39:11 smirnovd Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.61  2018/04/10 11:39:11  smirnovd
+ * StTpcHitMaker: Match logic in pre-iTPC code
+ *
+ * Select DAQ reader type first and then loop over padrows instead of looping over
+ * different DAQ reader types
+ *
  * Revision 1.60  2018/04/10 11:39:03  smirnovd
  * StTpcHitMaker: Update hardware Id for iTPC sectors (Gene)
  *
@@ -453,15 +459,20 @@ Int_t StTpcHitMaker::Make() {
     // invoke tpcReader to fill the TPC DAQ sector structure
     Int_t hitsAdded = 0;
     mRowOffSet4iTPC = 0;
+    StRtsTable *daqTpcTable = nullptr;
     for (Int_t k = kStandardiTPC;  k > 0; k--) {
       if (k > kLegacyTpx) 
 	mQuery = Form("%s/%s[%i]",tpcDataNames[k],cldadc.Data(),sector);
       else
 	mQuery = Form("%s[%i]",tpcDataNames[k],sector);
-      StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
+      daqTpcTable = GetNextDaqElement(mQuery);
       if (! daqTpcTable) continue;
       kReaderType = (EReaderType) k;
       if (kReaderType == kStandardiTPC) mRowOffSet4iTPC = 41 - 14;
+
+      break;
+    }
+
       while (daqTpcTable) {
 	if (Sector() == sector) {
 	  Int_t row = St_tpcPadConfigC::instance()->numberOfRows(sector);
@@ -497,7 +508,7 @@ Int_t StTpcHitMaker::Make() {
 	}
 	daqTpcTable = GetNextDaqElement(mQuery);
       }
-    } // Loop over ReaderType
+
     if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
 		<< sector << "). Skipping event." << endm;
