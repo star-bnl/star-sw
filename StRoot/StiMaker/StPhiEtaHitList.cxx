@@ -8,7 +8,6 @@
 #include "StPhiEtaHitList.h"
 #include "StMaker.h"
 //________________________________________________________________________________
-ClassImp(StPhiEtaHitList);
 const Char_t *StPhiEtaHitList::names[3] = {"Active","Fired","Track"};
 static Int_t _debug = 0;
 void StPhiEtaHitList::SetDebug(Int_t k) {_debug = k;}
@@ -64,7 +63,6 @@ Bool_t StPhiEtaHitList::isVetoed(Int_t iBin) {
 //________________________________________________________________________________
 #include "StDetectorDbMaker/St_tofStatusC.h"
 #include "StBTofCollection.h"
-ClassImp(StBtofHitList);
 StBtofHitList *StBtofHitList::fgInstance = 0;
 //________________________________________________________________________________
 StBtofHitList::StBtofHitList() : StPhiEtaHitList() { 
@@ -180,7 +178,6 @@ Float_t StBtofHitList::getWeight(IntVec ibinVec) {
 #include <tables/St_g2t_ctf_hit_Table.h>
 #include <StTriggerData.h>
 //________________________________________________________________________________
-ClassImp(StCtbHitList);
 StCtbHitList *StCtbHitList::fgInstance = 0;
 //________________________________________________________________________________
 StCtbHitList::StCtbHitList() : StPhiEtaHitList(), // CTB clibration: 2 MeV==5 ADC
@@ -346,7 +343,6 @@ void  StCtbHitList::ctb_get_slat_from_data(Int_t slat, Int_t tray, Float_t & phi
 #include "StEmcRawHit.h"
 //Rxy = 222, 242, 262 cm
 //________________________________________________________________________________
-ClassImp(StBemcHitList);
 StBemcHitList *StBemcHitList::fgInstance = 0;
 //________________________________________________________________________________
 StBemcHitList::StBemcHitList() : StPhiEtaHitList(), kSigPed(5.0) {
@@ -455,7 +451,6 @@ void StBemcHitList::build ( StEmcDetector*det, Float_t adcMin){
 
 //Z=270, 288,306 cm 
 //________________________________________________________________________________
-ClassImp(StEemcHitList);
 StEemcHitList *StEemcHitList::fgInstance = 0;
 //________________________________________________________________________________
 StEemcHitList::StEemcHitList(StEEmcDb* x, UInt_t y, EEmcGeomSimple *z) :

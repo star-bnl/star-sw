@@ -1,4 +1,4 @@
-// $Id: StKFVerticesCollection.cxx,v 2.4 2013/04/10 22:14:20 fisyak Exp $
+// $Id: StKFVerticesCollection.cxx,v 2.5 2018/04/10 11:32:10 smirnovd Exp $
 #include "StKFVerticesCollection.h"
 #include "TArrayI.h"
 #include "TArrayD.h"
@@ -7,7 +7,6 @@
 #include "TPolyMarker.h"
 #include "TList.h"
 using namespace std;
-ClassImp(StKFVerticesCollection);
 Double_t StKFVerticesCollection::fgVxPenaltyFactor = 1000;
 //________________________________________________________________________________
 StKFVerticesCollection::StKFVerticesCollection(Int_t NoPeaks, Double_t *zOfPeaks, Double_t sigmaXY, Double_t sigmaZ) : 
@@ -369,6 +368,19 @@ Double_t StKFVerticesCollection::Fit(Int_t marker, TCanvas *c1, TH1 *Vtx) {
   return chi2Total;
 }
 // $Log: StKFVerticesCollection.cxx,v $
+// Revision 2.5  2018/04/10 11:32:10  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 2.4  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //

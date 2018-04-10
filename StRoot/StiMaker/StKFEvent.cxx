@@ -1,11 +1,23 @@
-// $Id: StKFEvent.cxx,v 2.5 2015/12/20 01:35:12 fisyak Exp $
+// $Id: StKFEvent.cxx,v 2.6 2018/04/10 11:32:09 smirnovd Exp $
 #include "StKFEvent.h"
-ClassImp(StKFEvent);
 TClonesArray *StKFEvent::fgMuDstVtx = 0;
 TClonesArray *StKFEvent::fgKFVtx = 0;
 TClonesArray *StKFEvent::fgDKFPair = 0;
 TClonesArray *StKFEvent::fgKFKFPair = 0;
 // $Log: StKFEvent.cxx,v $
+// Revision 2.6  2018/04/10 11:32:09  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 2.5  2015/12/20 01:35:12  fisyak
 // Move back commits done by mistate
 //

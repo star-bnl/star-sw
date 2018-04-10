@@ -1,4 +1,4 @@
-// $Id: StKFVertex.cxx,v 2.4 2013/04/10 22:14:20 fisyak Exp $
+// $Id: StKFVertex.cxx,v 2.5 2018/04/10 11:32:09 smirnovd Exp $
 #include "StKFVertex.h"
 #include "StKFTrack.h"
 #include "TArrayC.h"
@@ -20,8 +20,6 @@ const Char_t *StKFVertex::GeNames[52] = {
   "XiBar+"  ,"OmBar","tau+","tau-" ,"D+"    ,"D-"    ,"D0"   ,"Dbar0" ,"Ds+"      ,"Ds-"   ,
   "LambC+"  ,"W+"   ,"W-"  ,"Z0"   ,"H2"    ,"H3"    ,"alpha","geanti","He3"      ,"Cerenk",
   "??????"};
-//________________________________________________________________________________
-ClassImp(StKFVertex);
 //________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const StKFVertex& v) {
   Int_t iWest = v.MultW();
@@ -216,6 +214,19 @@ void StKFVertex::SetMc(Float_t time, Float_t x, Float_t y, Float_t z, Int_t NoDa
 }
 #undef PrPP
 // $Log: StKFVertex.cxx,v $
+// Revision 2.5  2018/04/10 11:32:09  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 2.4  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //

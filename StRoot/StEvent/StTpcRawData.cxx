@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.17 2018/04/07 03:32:06 smirnovd Exp $
+ * $Id: StTpcRawData.cxx,v 2.18 2018/04/10 11:32:08 smirnovd Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,19 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.18  2018/04/10 11:32:08  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
  * Revision 2.17  2018/04/07 03:32:06  smirnovd
  * Set default sector id to 20
  *
@@ -69,8 +82,6 @@
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
-ClassImp(StTpcDigitalSector);
-ClassImp(StTpcRawData);
 //________________________________________________________________________________
 StTpcDigitalSector::StTpcDigitalSector(void *db) : mSector(20)
 {

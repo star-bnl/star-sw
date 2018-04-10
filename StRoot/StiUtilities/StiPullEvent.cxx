@@ -9,9 +9,6 @@
 #include "StEvent/StEnumerations.h"
 #include <assert.h>
 
-ClassImp(StiPullTrk)
-ClassImp(StiPullHit)
-ClassImp(StiPullEvent)
 
 //_____________________________________________________________________________
  StiPullEvent::StiPullEvent()

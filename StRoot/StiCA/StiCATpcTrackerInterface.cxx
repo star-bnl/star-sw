@@ -1,13 +1,7 @@
 #include "StiCATpcTrackerInterface.h"
-#ifdef __NEW_TPCCATracker__
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/AliHLTTPCCAGBTrack.h"
 #include "TPCCATracker/AliHLTTPCCAParam.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/AliHLTTPCCAGBHit.h"
-#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
-#include "TPCCATracker/AliHLTTPCCAParam.h"
-#endif /* __NEW_TPCCATracker__ */
   // need for hits data
 #include "StTpcHit.h"                
 #include "StTpcDb/StTpcDb.h"
@@ -30,13 +24,8 @@
 
   // for sti perfo
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-#ifdef __NEW_TPCCATracker__
 #include "TPCCATrackerPerformance/AliHLTTPCCAStiPerformance.h"
 #include "TPCCATrackerPerformance/AliHLTTPCCAMergerPerformance.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/Performance/AliHLTTPCCAStiPerformance.h"
-#include "TPCCATracker/Performance/AliHLTTPCCAMergerPerformance.h"
-#endif /* __NEW_TPCCATracker__ */
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.14 2018/02/28 19:40:48 genevb Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.15 2018/04/10 11:32:10 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -22,8 +22,7 @@
 #include "StBTofUtil/StBTofGeometry.h"
 #include "TGeoManager.h"
 #include "TMath.h"
-//________________________________________________________________________________
-ClassImp(StTrack2FastDetectorMatcher);
+
 //________________________________________________________________________________
 StTrack2FastDetectorMatcher::StTrack2FastDetectorMatcher() : mTotEve(0), mMinZBtof(-3.0), mMaxZBtof(3.0), mMinAdcBemc(5), mMinAdcEemc(5),  
 							     isMC(kFALSE),
@@ -307,6 +306,19 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.15  2018/04/10 11:32:10  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
  * Revision 2.14  2018/02/28 19:40:48  genevb
  * Fix some informational output
  *

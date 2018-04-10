@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 2.7 2016/06/08 23:32:46 smirnovd Exp $
+// $Id: StKFVertexMaker.cxx,v 2.8 2018/04/10 11:32:09 smirnovd Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -37,7 +37,7 @@ using std::map;
 #include "TRSymMatrix.h"
 #include "Sti/StiToolkit.h"
 #include "TArrayI.h"
-ClassImp(StKFVertexMaker);
+
 StKFVerticesCollection *StKFVertexMaker::fcVertices = 0;
 //________________________________________________________________________________
 StKFVertexMaker::~StKFVertexMaker() {
@@ -593,6 +593,19 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.8  2018/04/10 11:32:09  smirnovd
+// Minor corrections across multiple files
+//
+// - Remove ClassImp macro
+// - Change white space
+// - Correct windows newlines to unix
+// - Remove unused debugging
+// - Correct StTpcRTSHitMaker header guard
+// - Remove unused preprocessor directives in StiCA
+// - Minor changes in status and debug print out
+// - Remove using std namespace from StiKalmanTrackFinder
+// - Remove includes for unused headers
+//
 // Revision 2.7  2016/06/08 23:32:46  smirnovd
 // Integration of StiCA
 //

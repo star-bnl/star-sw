@@ -1,11 +1,24 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.119 2016/06/30 18:33:48 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.120 2018/04/10 11:32:10 smirnovd Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.120  2018/04/10 11:32:10  smirnovd
+ * Minor corrections across multiple files
+ *
+ * - Remove ClassImp macro
+ * - Change white space
+ * - Correct windows newlines to unix
+ * - Remove unused debugging
+ * - Correct StTpcRTSHitMaker header guard
+ * - Remove unused preprocessor directives in StiCA
+ * - Minor changes in status and debug print out
+ * - Remove using std namespace from StiKalmanTrackFinder
+ * - Remove includes for unused headers
+ *
  * Revision 2.119  2016/06/30 18:33:48  perev
  * simplifacation
  *
@@ -1050,8 +1063,6 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   if (gTrack->type()==primary) {
     assert(node->getDetector()==0);
     chi2[1]=node->getChi2();
-StiDebug::Count("Xi2Prim.node",chi2[1]);
-
   }
     
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,

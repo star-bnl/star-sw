@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.9 2018/01/16 22:46:15 smirnovd Exp $
+// $Id: StiDetectorVolume.cxx,v 2.10 2018/04/10 11:32:10 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -48,8 +48,6 @@ inline static TRotMatrix *GetMatrix(float angle)
 
 //_____________________________________________________________________________
 // class TVolume decorator for StiDetector's
-// 
-ClassImp(StiDetectorVolume)
 // 
 //_____________________________________________________________________________
 
