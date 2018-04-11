@@ -789,10 +789,26 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	    }
       
 	    CP;
+	    //LOG("JEFF", "Event");
+	    //LOG("JEFF", "Event: %d %d", rdr->seq, rdr->event_number);
+	    //LOG("JEFF", "Event: %d %d curr=0x%x", rdr->seq, rdr->event_number, curr);
+	    //LOG("JEFF", "Event: %d %d curr=%p %s", rdr->seq, rdr->event_number, curr, curr->getPlotSetName());
+	    //LOG("JEFF", "Event: %d %d curr=0x%x %s %lf", rdr->seq, rdr->event_number, curr, curr->getPlotSetName(), curr->getAverageProcessingTime());
+
+	    CP;
+	    
 	    if(logevent) {
-		printf("Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)\n",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+	      CP;
+	      printf("Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)\n",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+	      CP;
 	    }
-      
+
+	    CP;
+
+	    // LOG("JEFF", "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)", rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+
+	    CP;
+
 	    if(sigsetjmp(env, 1)) {
 		LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
 		curr->setDisabled();
