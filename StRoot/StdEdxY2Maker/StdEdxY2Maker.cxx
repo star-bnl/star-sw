@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.90 2017/10/27 21:41:35 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.91 2018/04/11 02:41:54 smirnovd Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -73,12 +73,7 @@ dEdxY2_t *StdEdxY2Maker::FdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::dEdxS = 0;
 static Int_t numberOfSectors = 0;
 static Int_t numberOfTimeBins = 0;
-static Int_t NumberOfRows = 0;
-static Int_t NumberOfInnerRows = 0;
 static Int_t NumberOfChannels = 8;
-static Int_t NoPads = 0;
-static Double_t innerSectorPadPitch = 0;
-static Double_t outerSectorPadPitch = 0;
 
 const static Double_t pMomin = 0.35; // range for dE/dx calibration
 const static Double_t pMomax = 0.75;
@@ -144,12 +139,6 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   // 		TPG parameters
   numberOfSectors   = gStTpcDb->Dimensions()->numberOfSectors();
   numberOfTimeBins  = gStTpcDb->Electronics()->numberOfTimeBins();
-  NumberOfRows      = gStTpcDb->PadPlaneGeometry()->numberOfRows();
-  NumberOfInnerRows = gStTpcDb->PadPlaneGeometry()->numberOfInnerRows();
-  NoPads = TMath::Max(gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(NumberOfInnerRows),
-		      gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(NumberOfRows));	  
-  innerSectorPadPitch = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
-  outerSectorPadPitch = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
 
   if (! DoOnce) {
     DoOnce = 1;
@@ -357,7 +346,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (Debug() > 1) {tpcHit->Print();}
 	Int_t sector = tpcHit->sector();
 	Int_t row    = tpcHit->padrow();
-	if (NumberOfRows == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
+	if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 	StThreeVectorD middle = xyz[3];
@@ -365,11 +354,11 @@ Int_t StdEdxY2Maker::Make(){
 	StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
 	StThreeVectorD dif = upper - lower;
 	StThreeVectorD normal = dif.unit();
-	if (NumberOfRows == 45) {// ! iTpx
+	if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
-	  if ((row <= NumberOfInnerRows && 1170 - V > 100) || 
-	      (row >  NumberOfInnerRows && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
+	  if ((row <= St_tpcPadConfigC::instance()->innerPadRows(sector) && 1170 - V > 100) || 
+	      (row >  St_tpcPadConfigC::instance()->innerPadRows(sector) && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	}
 	// check that helix prediction is consistent with measurement
 	if (Propagate(middle,normal,helixI,helixO,bField,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
@@ -400,7 +389,7 @@ Int_t StdEdxY2Maker::Make(){
 	  Int_t iWestEast = 0;
 	  if (sector > 12) iWestEast = 1;
 	  Int_t io = 0;
-	  if (row > NumberOfInnerRows) io = 1;
+	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
 	  static Double_t z[2][3] = { 
 	    // Anodes         GG          Pads
 	    { -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
@@ -524,14 +513,12 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].row    = row;
 	CdEdx[NdEdx].pad    = Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
-	if (CdEdx[NdEdx].edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
-	  CdEdx[NdEdx].edge -= 1 + gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
-	Float_t Npads = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
+	Float_t Npads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+	if (CdEdx[NdEdx].edge > 0.5*Npads) 	  CdEdx[NdEdx].edge -= 1 + Npads;
 	CdEdx[NdEdx].xpad = 2*(CdEdx[NdEdx].pad - 0.5)/Npads - 1.0;
-	  (gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row) + 1);
-	CdEdx[NdEdx].yrow = sector + 0.5*((row <= NumberOfInnerRows) ? 
-					  (row - NumberOfInnerRows - 0.5)/NumberOfInnerRows : 
-					  (row - NumberOfInnerRows - 0.5) / (NumberOfRows - NumberOfInnerRows));
+	CdEdx[NdEdx].yrow = sector + 0.5*((row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? 
+					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/St_tpcPadConfigC::instance()->innerPadRows(sector) : 
+					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5) / (St_tpcPadConfigC::instance()->numberOfRows(sector) - St_tpcPadConfigC::instance()->innerPadRows(sector)));
 	CdEdx[NdEdx].Npads  = tpcHit->padsInHit();
 	CdEdx[NdEdx].Ntbins = tpcHit->pixelsInHit();
 	//	CdEdx[NdEdx].dE     = tpcHit->chargeModified();
@@ -551,11 +538,11 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].xyz[0] = localSect[3].position().x();
 	CdEdx[NdEdx].xyz[1] = localSect[3].position().y();
 	CdEdx[NdEdx].xyz[2] = localSect[3].position().z();
-	Double_t probablePad = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)/2;
-	Double_t pitch = (row <= NumberOfInnerRows) ?
-	  gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch() :
-	  gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
-	Double_t PhiMax = TMath::ATan2(probablePad*pitch, gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(row));
+	Double_t maxPad = Npads/2;
+	Double_t pitch = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ?
+	  St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) :
+	  St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
+	Double_t PhiMax = TMath::ATan2(maxPad*pitch, St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row));
 	CdEdx[NdEdx].PhiR   = TMath::ATan2(CdEdx[NdEdx].xyz[0],CdEdx[NdEdx].xyz[1])/PhiMax;
 	CdEdx[NdEdx].xyzD[0] = localDirectionOfTrack.position().x();
 	CdEdx[NdEdx].xyzD[1] = localDirectionOfTrack.position().y();
@@ -735,8 +722,8 @@ void StdEdxY2Maker::SortdEdx() {
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   // Histograms
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
-  static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",NumberOfRows,150, 6.84, 6.99);
-  //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",NumberOfRows,150, 6.84, 6.99);
+  static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",St_tpcPadConfigC::instance()->numberOfRows(20),150, 6.84, 6.99); // ? mix of inner and outer
+  //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",St_tpcPadConfigC::instance()->numberOfRows(20),150, 6.84, 6.99);
   
   static Hists3D Voltage("Voltage","log(dE/dx)","Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10);
   //  static Hists3D Volt("Volt","log(dE/dx)","Sector*Channels","Voltage", numberOfSectors*NumberOfChannels,410,990.,1400.);
@@ -744,13 +731,13 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
   static Hists3D SecRow3;
-  static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NumberOfRows,200,-2.,2.);
-  //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
-  static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NumberOfRows,105,0,210);
-  //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
-  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NumberOfRows, 201,-100.5,100.5);
+  static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",St_tpcPadConfigC::instance()->numberOfRows(20),200,-2.,2.); // ? mix of inner and outer
+  //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0.,10.);
+  static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",St_tpcPadConfigC::instance()->numberOfRows(20),105,0,210);
+  //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",St_tpcPadConfigC::instance()->numberOfRows(sector),100,0,1e4);
+  static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*St_tpcPadConfigC::instance()->numberOfRows(20), 201,-100.5,100.5);
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-  static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NumberOfRows, 100,0,10.);
+  static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",St_tpcPadConfigC::instance()->numberOfRows(20), 100,0,10.);
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
 #if 0
@@ -1001,7 +988,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (FdEdx[k].C[l].dEdx > 0)
 	  FdEdx[k].C[l].dEdxN = TMath::Log(FdEdx[k].C[l].dEdx/predB);
       }
-      if (FdEdx[k].row <= NumberOfInnerRows) {
+      if (FdEdx[k].row <= St_tpcPadConfigC::instance()->innerPadRows(FdEdx[k].sector)) {
 	hdEI->Fill(TMath::Log10(FdEdx[k].F.dE));
 	hdEUI->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kUncorrected].dE));
 	hdERI->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kAdcCorrection].dE));
@@ -1118,7 +1105,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  }
 	  Int_t cs = NumberOfChannels*(FdEdx[k].sector-1)+FdEdx[k].channel;
 	  Double_t V = FdEdx[k].Voltage;
-	  Double_t VN = (FdEdx[k].row <= NumberOfInnerRows) ? V - 1170 : V - 1390;
+	  Double_t VN = (FdEdx[k].row <= St_tpcPadConfigC::instance()->innerPadRows(FdEdx[k].sector)) ? V - 1170 : V - 1390;
 	  Voltage.Fill(cs,VN,VarsV);
 	  //	  Volt.Fill(cs,V,VarsV);
 	  Qcm.Fill(cs,FdEdx[k].Qcm,VarsV);
@@ -1134,7 +1121,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
 	Z3.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistance,Vars);
 	//	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
-	Edge3.Fill(NumberOfRows*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
+	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(FdEdx[k].sector)*(FdEdx[k].sector-1)+FdEdx[k].row,FdEdx[k].edge, Vars);
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
 	dX3.Fill(FdEdx[k].row,FdEdx[k].F.dx, Vars);
       }
@@ -1533,7 +1520,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	Double_t predB  = 1.e-6*TMath::Exp(zP);
 	Double_t dEdxN  = TMath::Log(FdEdx[k].dEdx /predB);
 	Int_t io = 0;
-	if (FdEdx[k].row > NumberOfInnerRows) io = 1;
+	if (FdEdx[k].row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
 	Z3A->Fill(io,FdEdx[k].ZdriftDistance,  dEdxN);
       }
     }

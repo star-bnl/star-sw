@@ -43,12 +43,9 @@
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
-  mNumberOfRows(-1), mNumberOfInnerRows(-1),
   m_Debug(debug), f1000(0), f1100(0), f1200(0), f1300(0)
 {
   assert(gStTpcDb);
-  mNumberOfInnerRows      = gStTpcDb->PadPlaneGeometry()->numberOfInnerRows();
-  mNumberOfRows           = gStTpcDb->PadPlaneGeometry()->numberOfRows();											          
   if (!m_Mask) m_Mask = -1;
   ReSetCorrections();
 }
@@ -184,11 +181,11 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 #endif  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
-  if (row <= mNumberOfInnerRows) kTpcOutIn = kTpcInner;
+  if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kTpcInner;
   St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   Float_t gasGain = 1;
   Float_t gainNominal = 0;
-  if (row > mNumberOfInnerRows) {
+  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) {
     gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
     gasGain = tsspar->gain_out(sector,row)*tsspar->wire_coupling_out();
   } else {
@@ -250,7 +247,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     }
     if (k == kTpcPadMDF) {
       l = 2*(sector-1);
-      if (row <= mNumberOfInnerRows) l += kTpcOutIn;
+      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcOutIn;
       dE *= TMath::Exp(-((St_TpcPadCorrectionMDF *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
       goto ENDL;
     }
@@ -258,9 +255,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     if (! cor) goto ENDL;
     nrows = cor->nrows;
     l = kTpcOuter;
-    if (nrows == 2) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
+    if (nrows == 2) {if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l = kTpcOutIn;}
     else {
-      if (nrows == mNumberOfRows) l = row - 1;
+      if (nrows == St_tpcPadConfigC::instance()->numberOfRows(sector)) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
       else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
     }
