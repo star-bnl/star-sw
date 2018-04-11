@@ -1711,8 +1711,6 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	fpost_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
     }
     
-
-
     dd = rdr->det("trg")->get("raw") ;
     if(dd) {
 	if(dd->iterate()) {
@@ -1766,6 +1764,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 
 	    bunches |= bunches_h << 16;
 
+	    double bx_sec = bunches/9.3e6;
+	   
 	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
 
 	    UINT32 tms[32];
@@ -1780,6 +1780,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    }
 	    printf("CONFNUM_TM\n");
 
+	    
 		
 	    // Get FPS timing...
 	    if(fpre_bx && fpost_bx) 
@@ -1829,7 +1830,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   );
 
 
-            printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x\n",
+            printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x bx_sec=%lf\n",
 		   rdr->seq,
 		   rdr->token,
 		   rdr->detectors,
@@ -1839,7 +1840,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		   rdr->evpgroups,
 		   rdr->flags,
 		   trgDetMask,
-		   trgCrateMask);
+		   trgCrateMask,
+		   bx_sec);
 
 	    printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 

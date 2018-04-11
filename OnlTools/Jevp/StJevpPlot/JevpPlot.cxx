@@ -493,6 +493,8 @@ void JevpPlot::draw()
     gStyle->SetOptStat(optstat);
     gPad = save;
 
+    gPad->SetRightMargin(0.15);
+
     LOG(NOTE, "l1: %lf %d", clock3.record_time(), optstat);
     gPad->SetLogx(logx);
     LOG(NOTE, "l1: %lf", clock3.record_time());
