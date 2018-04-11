@@ -120,7 +120,12 @@ void etofBuilder::initialize(int argc, char *argv[]) {
 }
 
 void etofBuilder::event(daqReader *rdr) {
-    rtsLogLevel(INFO);
+  //rtsLogLevel(INFO);    // Nope!  This changes the log level for the server!  Don't do it!!!!!!!!!!!
+  // if you wan't to modify log levels in debug mode, use the -loglevel command line argument!
+
+
+
+
     // if(disable_builder) return;
     // assert(0);
 
@@ -209,7 +214,7 @@ void etofBuilder::event(daqReader *rdr) {
 	contents.nHits->Fill( nHits );
 	// contents.nEpochMismatch->Fill( nEpochMismatch );
 
-	rtsLogLevel(INFO);
+	//rtsLogLevel(INFO);    // Nope!  This changes the log level for the server.  Don't do it!!!!!!!
 }
 
 void etofBuilder::startrun(daqReader *rdr) {
