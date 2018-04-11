@@ -709,6 +709,33 @@ Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t row) {
   return 8;
 }
 //________________________________________________________________________________
+Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t sector, Int_t row) {
+  if (row <  1 || row > St_tpcPadConfigC::instance()->padRows(sector)) return -1;
+  if (St_tpcPadConfigC::instance()->padRows(sector) == 45) {
+    if (row <  3) return 1;
+    if (row <  7) return 2;
+    if (row < 10) return 3;
+    if (row < 14) return 4;
+    if (row < 22) return 5;
+    if (row < 30) return 6;
+    if (row < 38) return 7;
+    return 8;
+  } else if (St_tpcPadConfigC::instance()->padRows(sector) == 72) {
+    // Jim Thomas, mail from 09/27/17
+    if (row < 10) return 1; //  9 shared 1&2
+    if (row < 20) return 2; // 19 shared 2&3
+    if (row < 30) return 3; // 29 shared 3&4
+    if (row < 14 - 13 + 40) return 4;
+    if (row < 22 - 13 + 40) return 5;
+    if (row < 30 - 13 + 40) return 6;
+    if (row < 38 - 13 + 40) return 7;
+    return 9;
+  } else {
+    LOG_ERROR << "St_TpcAvgCurrentC::ChannelFromRow: unknown configuration with no. pad row at sector = " << sector << " = " << St_tpcPadConfigC::instance()->padRows(sector) << endm;
+  }
+  return -1;
+}
+//________________________________________________________________________________
 Int_t St_TpcAvgCurrentC::ChannelFromSocket(Int_t socket) {
   Int_t channel = -1;
   switch (socket) {
