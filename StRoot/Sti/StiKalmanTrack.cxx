@@ -1,11 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.149 2018/04/10 11:38:34 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.149 2018/04/10 11:38:34 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.150 2018/04/11 02:40:55 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.150 2018/04/11 02:40:55 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.150  2018/04/11 02:40:55  smirnovd
+ * Add new method StikalmanTrack::getInnerMostDetHitNode()
+ *
+ * Use it in StiCA to replace getInnerMostTPCHitNode()
+ *
  * Revision 2.149  2018/04/10 11:38:34  smirnovd
  * Replace thrown exceptions with runtime asserts
  *
@@ -1173,6 +1178,24 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode(int qua)  const
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
+}
+//_____________________________________________________________________________
+StiKalmanTrackNode * StiKalmanTrack::getInnerMostDetHitNode(int detId)   const
+{
+  assert(firstNode && lastNode);
+  StiKalmanTrackNode *node = 0;
+  for (auto it=begin();(node=it());++it) 
+  {
+    if (!node->isValid())		continue;
+    if (node->getChi2()>10000.) 	continue;
+    StiHit* hit = node->getHit();
+    if (!hit) 				continue;
+    auto *det = hit->detector();
+    if (!det) 				continue;
+    if (detId!=det->getGroupId())	continue;
+    return node;
+  }
+  return 0;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
