@@ -519,7 +519,7 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (TMath::Abs(v2 - v1) <  1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector) ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -539,7 +539,7 @@ Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (v2==v1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector) ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -592,7 +592,7 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (v2==v1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadConfigC::instance()->innerPadRows(sector) ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -667,7 +667,7 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
   */
   Int_t s = 0, r = 0, p = 0;
   if (sec > 12) s = 1;
-  if (row > St_tpcPadPlanesC::instance()->innerPadRows()) r = 1;
+  if (row > St_tpcPadConfigC::instance()->innerPadRows(sec)) r = 1;
   Int_t pitch = s;
   if (iXZ) pitch = 2;
   Double_t Vars[7] = {
@@ -824,7 +824,7 @@ Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
   Double_t V_nominal = 1390;
   Float_t V = 0;
   Float_t gain = 0;
-  if (row <= St_tpcPadPlanesC::instance()->innerPadRows()) {l = 1; V_nominal = 1170;}
+  if (row <= St_tpcPadConfigC::instance()->innerPadRows(sec)) {l = 1; V_nominal = 1170;}
   St_tpcGainCorrectionC *gC = St_tpcGainCorrectionC::instance();
   Int_t NRows = gC->GetNRows();
   if (l >= NRows) return gain;

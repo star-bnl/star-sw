@@ -3,7 +3,7 @@
 
 #include "TChair.h"
 #include "tables/St_tpcDimensions_Table.h"
-#include "St_tpcPadPlanesC.h"
+#include "St_tpcPadConfigC.h"
 #include "St_tpcEffectiveGeomC.h"
 #include "St_tpcWirePlanesC.h"
 class St_tpcDimensionsC : public TChair {
@@ -80,8 +80,8 @@ class St_tpcDimensionsC : public TChair {
   Double_t* 	outerZExtraAl(Int_t i = 0) 	{return Struct(i)->outerZExtraAl;}
   Double_t* 	outerDXExtraAl(Int_t i = 0) 	{return Struct(i)->outerDXExtraAl;}
   Double_t* 	outerDZExtraAl(Int_t i = 0) 	{return Struct(i)->outerDZExtraAl;}
-  Double_t      gatingGridZ() {
-    return St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ() 
+  Double_t      gatingGridZ(Int_t sector=20) {
+    return St_tpcPadConfigC::instance()->outerSectorPadPlaneZ(sector)
       - St_tpcWirePlanesC::instance()->outerSectorGatingGridPadPlaneSeparation();}
   Double_t      zInnerOffset()                  {return St_tpcEffectiveGeomC::instance()->z_inner_offset();}
   Double_t      zOuterOffset()                  {return St_tpcEffectiveGeomC::instance()->z_outer_offset();}

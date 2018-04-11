@@ -3,18 +3,18 @@
 
 #include "TChair.h"
 #include "tables/St_tpcPadGainT0_Table.h"
-#include "St_tpcPadPlanesC.h"
+#include "St_tpcPadConfigC.h"
 class St_tpcPadGainT0C : public TChair {
  public:
   static St_tpcPadGainT0C* 	instance();
   tpcPadGainT0_st 	*Struct() 	const {return ((St_tpcPadGainT0 *) Table())->GetTable();}
   Int_t 	run()           	const {return Struct()->run;}
   Float_t 	Gain(Int_t sector, Int_t row, Int_t pad) const {
-    return ((sector > 0 && sector <= 24) && (row > 0 && row <= St_tpcPadPlanesC::instance()->padRows()) && (pad > 0 && pad <= 182)) ?  
+    return ((sector > 0 && sector <= 24) && (row > 0 && row <= St_tpcPadConfigC::instance()->padRows(sector)) && (pad > 0 && pad <= 182)) ?
       Struct()->Gain[sector-1][row-1][pad-1] : 0;
   }
   Float_t 	  T0(Int_t sector, Int_t row, Int_t pad) const {
-    return ((sector > 0 && sector <= 24) && (row > 0 && row <= St_tpcPadPlanesC::instance()->padRows()) && (pad > 0 && pad <= 182)) ?  
+    return ((sector > 0 && sector <= 24) && (row > 0 && row <= St_tpcPadConfigC::instance()->padRows(sector)) && (pad > 0 && pad <= 182)) ?
       Struct()->T0[sector-1][row-1][pad-1] : 0;
   }
   Bool_t    livePadrow(Int_t sector, Int_t row) {

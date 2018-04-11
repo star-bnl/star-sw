@@ -12,7 +12,7 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_TpcSecRowBC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDbUtilities/StMagUtilities.h"
@@ -353,7 +353,7 @@ Int_t StSpaceChargeDistMaker::Make() {
               CdEdx.xyz[1] = positionL.y();
               CdEdx.xyz[2] = positionL.z();
               Double_t probablePad = ((Double_t) Npads[j])/2.;
-              Double_t pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(CdEdx.row);
+              Double_t pitch = St_tpcPadConfigC::instance()->PadPitchAtRow(CdEdx.sector,CdEdx.row);
               Double_t PhiMax = TMath::ATan2(probablePad*pitch, Xpads[j]);
               CdEdx.PhiR   = TMath::ATan2(CdEdx.xyz[0],CdEdx.xyz[1])/PhiMax;
               //CdEdx.xyzD[] left as 0 as these hits are not necessarily on tracks
@@ -413,7 +413,7 @@ void StSpaceChargeDistMaker::GeomInit() {
   // Calculated in sector 3 coordinates
 
   GGZ = St_tpcDimensionsC::instance()->gatingGridZ();
-  NP = St_tpcPadPlanesC::instance()->padRows(); // # padrows (45)
+  NP = St_tpcPadConfigC::instance()->padRows(20); // # padrows (45)
   NR = 256; // max # pads/padrow (actually 182)
   NS = NP * NR; // > # pads/sector
 
@@ -444,11 +444,11 @@ void StSpaceChargeDistMaker::GeomInit() {
     Float_t* gainScales = St_TpcSecRowBC::instance()->GainScale(i);
     for (j = 0; j < NP; j++) {
       irow = j + 1; 
-      pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(irow);
+      pitch = St_tpcPadConfigC::instance()->PadPitchAtRow(20,irow);
       if (i==0) {
-        Npads[j] = St_tpcPadPlanesC::instance()->padsPerRow(irow);
-        Xpads[j] = St_tpcPadPlanesC::instance()->radialDistanceAtRow(irow);
-        XWID[j] = St_tpcPadPlanesC::instance()->PadLengthAtRow(irow);
+        Npads[j] = St_tpcPadConfigC::instance()->padsPerRow(20,irow);
+        Xpads[j] = St_tpcPadConfigC::instance()->radialDistanceAtRow(20,irow);
+        XWID[j] = St_tpcPadConfigC::instance()->PadLengthAtRow(20,irow);
         XMIN[j] = Xpads[j] - 0.5*XWID[j];
       }
       m = j + NP*i;
@@ -545,7 +545,7 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
     // Determine if hit falls on a pad
     ix = (Int_t) (TMath::BinarySearch(NP,&XMIN[0],x));
     if (ix < 0 || ix >= NP) continue;
-    pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(ix+1);
+    pitch = St_tpcPadConfigC::instance()->PadPitchAtRow(20,ix+1);
     if (x > XMIN[ix] + XWID[ix]) continue;
     iy = (Int_t) (TMath::BinarySearch(Npads[ix],&YMIN[ix*NR],y));
     if (y > YMIN[iy + ix*NR] + pitch) continue;
@@ -605,8 +605,15 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.9 2017/02/14 23:38:38 fisyak Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.10 2018/04/11 02:43:21 smirnovd Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.10  2018/04/11 02:43:21  smirnovd
+// Enable TPC/iTPC switch via St_tpcPadConfig
+//
+// This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+// A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+// either TPC or iTPC
+//
 // Revision 1.9  2017/02/14 23:38:38  fisyak
 // Adjustment to structure changes in StTpcdEdxCorrection
 //

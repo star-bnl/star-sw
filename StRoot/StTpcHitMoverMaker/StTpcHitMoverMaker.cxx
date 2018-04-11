@@ -8,7 +8,7 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #endif /* __CORRECT_CHARGE__ */
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcEffectiveGeomC.h"
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
 #include "TMath.h"
@@ -61,7 +61,6 @@ Int_t StTpcHitMover::Make() {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
     return kStErr;
   }
-  static Int_t NoInnerPadRows = St_tpcPadPlanesC::instance()->innerPadRows();
   if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
   StTpcCoordinateTransform &transform = *mTpcTransForm;
   StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
@@ -82,10 +81,10 @@ Int_t StTpcHitMover::Make() {
 	for (int j = 0; j< numberOfPadrows; j++) {
 	  Int_t row = j + 1;
 	  Int_t io = 0;
-	  if (row > NoInnerPadRows) io = 1;
+	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
 	  Double_t padlength = (io == 0) ? 
-	    gStTpcDb->PadPlaneGeometry()->innerSectorPadLength() : 
-	    gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
+	    St_tpcPadConfigC::instance()->innerSectorPadLength(sector) : 
+	    St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
 	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
 	  if (rowCollection) {
 	    StSPtrVecTpcHit &hits = rowCollection->hits();
@@ -115,7 +114,7 @@ Int_t StTpcHitMover::Make() {
 		  if (! StTpcDb::IsOldScheme()) {
 		    if (St_tpcTimeBucketCorC::instance()->getNumRows()) {
 		      Int_t io = 0;
-		      if (row <= NoInnerPadRows) io = 1;
+		      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
 		      Double_t noTmbks = tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
 		      time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
 		    }
@@ -168,8 +167,15 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.27 2014/07/27 13:23:09 fisyak Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.28 2018/04/11 02:43:22 smirnovd Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.28  2018/04/11 02:43:22  smirnovd
+// Enable TPC/iTPC switch via St_tpcPadConfig
+//
+// This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+// A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+// either TPC or iTPC
+//
 // Revision 1.27  2014/07/27 13:23:09  fisyak
 // Add cast for c++11 option
 //

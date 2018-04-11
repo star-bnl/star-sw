@@ -1,5 +1,12 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.8 2014/07/27 13:28:06 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.9 2018/04/11 02:43:22 smirnovd Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.9  2018/04/11 02:43:22  smirnovd
+    Enable TPC/iTPC switch via St_tpcPadConfig
+
+    This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+    A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+    either TPC or iTPC
+
     Revision 1.8  2014/07/27 13:28:06  fisyak
     Add cast for c++11 option
 
@@ -45,7 +52,7 @@
 #include "TDataSetIter.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 ClassImp(StTpcFastSimMaker);
 //____________________________________________________________
 Int_t StTpcFastSimMaker::Make() {
@@ -112,7 +119,7 @@ Int_t StTpcFastSimMaker::Make() {
     Double_t eta = TMath::PiOver2() - TMath::Abs(dirL.position().phi());
     Double_t tanl = dirL.position().z()/dirL.position().perp();
     Double_t sigmaY2, sigmaZ2;
-    if (row <= St_tpcPadPlanesC::instance()->innerPadRows())  
+    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector))  
       StiTpcInnerHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
     else            
       StiTpcOuterHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
