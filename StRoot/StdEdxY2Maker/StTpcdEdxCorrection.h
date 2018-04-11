@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.9 2017/02/14 23:36:40 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.10 2018/04/11 02:41:54 smirnovd Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -104,8 +104,6 @@ class StTpcdEdxCorrection : public TObject {
   dEdxY2_t            *mdEdx;
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
-  Int_t                mNumberOfRows;
-  Int_t                mNumberOfInnerRows;
   Int_t                m_Debug;                 //!
   TF1                 *f1000;
   TF1                 *f1100;
