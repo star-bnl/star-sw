@@ -8,6 +8,6 @@
 
 struct tpcSectorT0offset { 
 
-   float  t0[24];   /* Sector t0 offset per sector (time bins)*/
+   float  t0[48];   /* Sector t0 offset per sector: [0-23] Tpx, [24-47] iTpc  (time bins)*/
 
  };  
