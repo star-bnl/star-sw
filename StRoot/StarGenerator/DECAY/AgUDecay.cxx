@@ -7,9 +7,19 @@
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "StarGenerator/UTIL/StarParticleData.h"
 
+#include <stdexcept>
+#include <string>
+
 #define geant3 St_geant_Maker::instance()->Geant3()
 
 StarParticleData &pdb = StarParticleData::instance();
+
+//__________________________________________________________________________________________________
+// Useful exceptions for debugging
+struct EnergyNotConserved : public std::runtime_error { EnergyNotConserved( std::string const& message ) : std::runtime_error( message ) { /* nada */ } };
+struct StopOnParticle     : public std::runtime_error { StopOnParticle    ( std::string const& message ) : std::runtime_error( message ) { /* nada */ } };
+//__________________________________________________________________________________________________
+
 
 AgUDecay AgUDecay::sInstance;
 //
@@ -34,6 +44,7 @@ void gsking( int igk ){ gsking_(igk); }
 // --------------------------------------------------------------------------------------------------
 //
 
+std::map<int,int> AgUDecay::mParticleStop;
 
 Int_t AgUDecay::operator()()
 {
@@ -73,12 +84,23 @@ Int_t AgUDecay::operator()()
   // Retrieve the particles into the clones array
   int np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
 
+
+
   // 
   // Loop over daughter particles in the decay and stack them for
   // transport.  (Potentially recurses through the entire decay
   // chain until it reaches particles known to the simulator).
   //
   TParticle* mother = (TParticle*)mArray->At(0);
+  if ( mParticleStop[idPdg] || mParticleStop[-idPdg] ) {
+    LOG_INFO << "User stop on pdgid = " << idPdg << endm;
+    LOG_INFO << "==================================================" << endm;
+    mother->Print();
+    LOG_INFO << "==================================================" << endm;
+    mArray->Print();
+    LOG_INFO << "==================================================" << endm;
+    throw StopOnParticle("found it");
+  }
   // Possible that the decay is setup in a special "system" residing at zero, so 
   // start by searching for the PDG id we are decaying
   for ( int i=0;i<np;i++ ) {
@@ -102,12 +124,18 @@ Int_t AgUDecay::operator()()
     }
 
   double violation;
-  if ( violation = TMath::Abs(E - EnergySum)/E > 0.1E-5 ) {
-      TParticle    *particle    = (TParticle *)mArray->At(0);
-  LOG_WARN << particle->GetName() << " decay violates E conservation by"
-  << violation*100 <<"%"
-  <<endm;
-  mNonConservation++;
+  if ( (violation = TMath::Abs(E - EnergySum)/E > 0.1E-5) ) {
+#if 0
+    TParticle    *particle    = (TParticle *)mArray->At(0);
+    LOG_INFO << "Stop due to energy nonconservation on pdgid = " << idPdg << endm;
+    LOG_INFO << "==================================================" << endm;
+    particle->Print();
+    LOG_INFO << "==================================================" << endm;
+    mArray->Print();
+    LOG_INFO << "==================================================" << endm;
+    throw EnergyNotConserved( Form("%s decay violates E conservation", particle->GetName() ) );
+#endif
+    mNonConservation++;
   }
 
   return np;
@@ -123,9 +151,18 @@ bool AgUDecay::MayTransport( const TParticle* particle )
       TParticlePDG *particlePDG = pdb.GetParticle(pdgid); 
       int           g3id        = particlePDG->TrackingCode();
 
+      if ( 0 == g3id ) {
+	// For neutrinos, adjust the PDG entry...
+	int apdgid = TMath::Abs(pdgid);
+	if ( apdgid == 12 || apdgid == 14 || apdgid == 16 ) {
+	  g3id = 4;
+	}
+      }
+
       if ( 0 == g3id )              // particle not known to G3
       switch( mDiscovery ) {
-          case kDecay: return false;
+          case kDecay: 
+	    return false;
 	  case kSpawn: 
 	     pdb.AddParticleToG3( particlePDG, mNextG3id++ ); 
 	     assert(mNextG3id < 60000);
@@ -165,11 +202,18 @@ double AgUDecay::StackParticleForTransport( const TParticle* particle )
            for ( int kid=first; kid<=last; kid++ )
 	   {
 	        TParticle* daughter = (TParticle*)mArray->At( kid ); 
-      LOG_INFO << Form("    %s [@x%p] visit kid: %s [@0x%p]", particle->GetName(),particle,daughter->GetName(),daughter) << endm;
+		LOG_INFO << Form("    %s [@x%p] visit kid: %s [@0x%p]", particle->GetName(),particle,daughter->GetName(),daughter) << endm;
 	        EnergySum += StackParticleForTransport( daughter );
 	   }
 	   return EnergySum; 
       }
+
+      if ( g3id == 4 || g3id == 0 ) {
+	LOG_INFO << Form("%s [@0x%p] ... ignore neutrinos for transport ...", particle->GetName(),particle) << endm;
+	EnergySum += particle->Energy();
+	return EnergySum;
+      }
+
 
       // Stack this particle for transport 
       LOG_INFO << Form("%s [@0x%p] stacked for transport", particle->GetName(),particle) << endm;
