@@ -15,15 +15,23 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
-#include "StTpcRawData.h"
 #include "TF1F.h"
 #include "TH1.h"
 #include "TTree.h"
+#include "PAI.h"
+#include "TGiant3.h"
+// g2t tables
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h" 
+#include "tables/St_raw_sec_m_Table.h"
+#include "tables/St_raw_row_Table.h"
+#include "tables/St_raw_pad_Table.h"
+#include "tables/St_raw_seq_Table.h"
+#include "tables/St_type_shortdata_Table.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StTpcDb/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
-#include "TArrayF.h"
-class Altro;
-class StTpcdEdxCorrection;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -31,187 +39,142 @@ struct SignalSum_t {
 };
 class StTpcRSMaker : public StMaker {
  public:
-  enum EMode {kPAI         = 0,// switch to PAI from GEANT (obsolete)
+  enum EMode {kPAI         = 0,// switch to PAI from GEANT
 	      kBICHSEL     = 1,// switch to Bichsel from GEANT 
-	      kHEED        = 6,// switch to HEED
-	      kGAINOAtALL  = 2,// do not use GAIN at all
-	      kdEdxCorr    = 3,// do use TpcdEdxCorrection
-	      kDistortion  = 4,// include distortions
-	      kNoToflight  = 5 // don't account for particle time of flight
+	      kGAIN        = 2,// use GAIN correction (in/out)
+	      kGAINO       = 3,// use GAIN correction (in) output is uncorrected data
+	      kGAINOAtALL  = 4,// do not use GAIN at all
+	      kPedestal    = 5,// do use Pedestal and noise
+	      kAVERAGEPEDESTAL = 6, // use Pedestal in average i.e. Gaus(mAveragePedestal,mAveragePedestalRMS) for pedestal itself 
+ 	      //              and Gaus(0,mPedestalRMS) for noise
+	      kNONOISE     = 7,// No pedestal noise
+	      kdEdxCorr    = 8,// do use TpcdEdxCorrection
+	      kPseudoPadRow= 9,// include pseudo padrows in simulation
+	      kNoToflight  =10,// don't account for particle time of flight
+	      kTree        =11// make Tree
   };
   StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
   virtual Int_t         Make();
+#if 0
+  virtual void   	Clear(Option_t *option="");
+#endif
   virtual Int_t  	Finish();
-  TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
-  TF1F *GetChargeFraction(Int_t io = 0)     {return (TF1F *) mChargeFraction[io];}     
-  TF1F *GetPadResponseFunction(Int_t io = 0){return (TF1F *) mPadResponseFunction[io];}
-  TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
-  TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
-  TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
-  TF1  *GetHeed()                    {return mHeed;}
-  Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
+  virtual void          AlignHits(Bool_t flag=kFALSE){mAlignSector=flag;}
+  TF1 *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1 *) mShaperResponses[io][sector-1];}          
+  TF1 *GetChargeFractionInner()     {return (TF1 *) mChargeFractionInner;}     
+  TF1 *GetPadResponseFunctionInner(){return (TF1 *) mPadResponseFunctionInner;}
+  TF1 *GetChargeFractionOuter()     {return (TF1 *) mChargeFractionOuter;}     
+  TF1 *GetPadResponseFunctionOuter(){return (TF1 *) mPadResponseFunctionOuter;}
+  TF1 *GetPolya()                   {return (TF1 *) mPolya;}
+  Double_t GetNoPrimaryClusters(Double_t betaGamma);
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
-  static Int_t    AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]);
+  void SetClusterLength(Double_t m=0) {mClusterLength = m;}
+  static Int_t    AsicThresholds(Short_t ADCs[512]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
   static Double_t shapeEI(Double_t *x, Double_t *par=0);
   static Double_t shapeEI_I(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
-  static Double_t fei(Double_t t, Double_t t0, Double_t T);
-  static Double_t polya(Double_t *x, Double_t *par);
+  static Double_t expint(Int_t n, Double_t x); // Exponential Integrals En
+  static Double_t ei(Double_t x); // Exponential Integral Ei
   SignalSum_t  *GetSignalSum();
   SignalSum_t  *ResetSignalSum();
-  void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
-  void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
-  void SetCutEle(Double_t p = 1e-4)                  {mCutEle = p;}
-  static Double_t Ec(Double_t *x, Double_t *p); // minimal energy to create an ion pair
-  static TF1 *fEc(Double_t w = 26.2);           // HEED function to generate Ec
  private:
+  TTree   *fTree;                     //!
+  TGiant3 *mGeant;                    //!
+  SignalSum_t     *m_SignalSum;       //!
+  TH1D*    mdNdx;                     //!
+  TH1D*    mdNdE;                     //!
   static Double_t ShaperFunc(Double_t *x, Double_t *p);
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
-  static TF1F     *fgTimeShape3[2];   //!
-  static TF1F     *fgTimeShape0[2];   //!
-  Char_t   beg[1];                    //!
-  TTree   *fTree;                     //!
-  SignalSum_t     *m_SignalSum;       //!
-  TH1D*    mdNdx;                     //!
-  TH1D*    mdNdxL10;                  //!
-  TH1D*    mdNdEL10;                  //!
+  static TF1     *fgTimeShape3;       //!
+  static TF1     *fgTimeShape;        //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFraction[2];          //!
-  TF1F  *mPadResponseFunction[2];     //!
-  TF1F  *mPolya[2];                   //!
-  TF1F  *mGG;                         //! Gating Grid Transperency
-  TF1   *mHeed;                       //!
+  TF1F  *mChargeFractionInner;        //!1
+  TF1F  *mPadResponseFunctionInner;   //!
+  TF1F  *mChargeFractionOuter;        //!
+  TF1F  *mPadResponseFunctionOuter;   //!
+  TF1F  *mPolya;                      //!
+  Bool_t mAlignSector;                //! 
+  Int_t  mMagUtilitiesMask;           //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
-  Double_t InnerAlphaVariation;       //!
-  Double_t OuterAlphaVariation;       //!
-  Altro *mAltro;                      //!
-  Char_t end[1];                      //!
-  Double_t             mLaserScale;   //!
+  PAI  *mPAI;                        //!
+  Double_t             mLaserScale;  //!
+  Double_t             mClusterLength;//!
+  Double_t             mTau;         //!
+  Double_t             mTimeBinWidth;//!
   // local variables
-  Int_t NumberOfInnerRows;            //!
-  Int_t numberOfSectors;              //!
-  Int_t NumberOfRows;                 //!
-  Int_t NoPads;                       //!
-  Int_t numberOfTimeBins;             //!
+  Int_t NumberOfInnerRows;//!
+  Int_t numberOfSectors; //!
+  Int_t NumberOfRows; //!
+  Int_t NoPads; //!
+  Int_t numberOfTimeBins; //!
+  Double_t W; //!// = 26.2;// *eV
+  Double_t I0; //! = 15.7 eV for Ar (and  13.1 eV for CH4)
+  const Double_t mCluster; //!
+  //  Double_t firstOuterSectorAnodeWire ; //!
+  Double_t innerSectorzOffSet; //!
+  Double_t outerSectorzOffSet; //!
+  //  Double_t offset; //!
+  Double_t samplingFrequency; //!
+  Double_t tauGlobalOffSet; //!
   Int_t    numberOfInnerSectorAnodeWires; //! 
   Double_t firstInnerSectorAnodeWire; //!
-  Double_t lastInnerSectorAnodeWire;  //!
+  Double_t lastInnerSectorAnodeWire; //!
   Int_t    numberOfOuterSectorAnodeWires; //!
   Double_t firstOuterSectorAnodeWire; //!
-  Double_t lastOuterSectorAnodeWire;  //!
-  Double_t anodeWirePitch;            //!
+  Double_t lastOuterSectorAnodeWire; //!
+  Double_t anodeWirePitch; //!
+  Double_t OmegaTauC; //!
+  Double_t transverseDiffusionConstant; //!
+  Double_t longitudinalDiffusionConstant; //!
+  Double_t OmegaTau; //! 
+  Double_t InnerSectorGasGain; //!
+  Double_t OuterSectorGasGain; //!
+  Double_t Inner_wire_to_plane_coupling; //!
+  Double_t Outer_wire_to_plane_coupling; //!
+  const  Double_t  Inner_wire_to_plane_couplingScale; //!
+  const  Double_t  Outer_wire_to_plane_couplingScale; //!
   Double_t numberOfElectronsPerADCcount; //!
-  Double_t anodeWireRadius;           //!
-  const Double_t minSignal;           //!
-  Double_t innerSectorAnodeVoltage;   //!
-  Double_t outerSectorAnodeVoltage;   //!
-  const Double_t ElectronRange;       //!
+  Double_t anodeWireRadius; //!
+  const Double_t FanoFactor; //! // average Fano factor  
+  const Double_t K3IP; //!
+  const Double_t K3IR; //!
+  const Double_t K3OP; //!
+  const Double_t K3OR; //!
+  const Double_t mAveragePedestal;    //!
+  const Double_t mAveragePedestalRMS; //!
+  const Double_t mPedestalRMS; //!
+  const Double_t minSignal;    //!
+  const Double_t LorenzAngle;  //!
+  Double_t TanLorenzAngle; //!
+  Double_t InnerAlphaVariation; //!
+  Double_t OuterAlphaVariation; //!
+  Double_t innerSectorAnodeVoltage; //!
+  Double_t outerSectorAnodeVoltage; //!
+  const Double_t ElectronRange; //!
   const Double_t ElectronRangeEnergy; //!
-  const Double_t ElectronRangePower;  //!
-  Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
-  Double_t      mtauCX[2];            //! -"- 
-  Double_t    mLocalYDirectionCoupling[2][7]; //!
-  const Int_t NoOfSectors;            //!
-  Int_t       NoOfRows;               //!
-  Int_t       NoOfInnerRows;          //!
-  const Int_t NoOfPads;               //!
-  const Int_t NoOfTimeBins;           //!
-  Double_t   mCutEle;                 //! cut for delta electrons
+  const Double_t ElectronRangePower; //!
+  const Double_t CrossTalkInner; //!
+  const Double_t CrossTalkOuter; //!
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.28 2016/09/18 22:45:25 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.2 2008/06/19 22:45:43 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.28 2016/09/18 22:45:25 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.2 2008/06/19 22:45:43 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
-// Revision 1.28  2016/09/18 22:45:25  fisyak
-// Clean up, add Heed model, adjust for new StTpcdEdxCorrections
-//
-// Revision 1.27  2015/07/19 22:48:14  fisyak
-// Fix cvs message
-//
-// Revision 1.26  2015/07/19 22:14:07  fisyak
-// Clean up __PAD_BLOCK__, recalculate no. of real hits in g2t_track n_tpc_hit (excluding pseudo pad row), add current and accumulated charge in dE/dx correction
-//
-// Revision 1.25  2012/05/07 15:36:22  fisyak
-// Remove hardcoded TPC parameters
-//
-// Revision 1.24  2012/04/03 14:05:18  fisyak
-// Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
-//
-// Revision 1.23  2011/12/13 17:23:22  fisyak
-// remove YXTProd, add WIREHISTOGRAM and WIREMAP, use particle definition from StarClassLibrary
-//
-// Revision 1.22  2011/10/14 23:27:51  fisyak
-// Back to standard version
-//
-// Revision 1.20  2011/09/18 22:39:48  fisyak
-// Extend dN/dx table (H.Bichsel 09/12/2011) to fix bug #2174 and #2181, clean-up
-//
-// Revision 1.19  2011/03/17 14:29:31  fisyak
-// Add extrapolation in region beta*gamma < 0.3
-//
-// Revision 1.18  2010/06/14 23:34:26  fisyak
-// Freeze at Version V
-//
-// Revision 1.17  2010/03/22 23:45:06  fisyak
-// Freeze version with new parameters table
-//
-// Revision 1.16  2010/03/17 15:53:16  fisyak
-// Move StTpcdEdxCorrection to StdEdxY2Maker to avoid dependence of StTpcDb on StDetectorDbMaker
-//
-// Revision 1.15  2010/03/16 19:41:46  fisyak
-// Move diffusion and sec/row correction in DB, clean up
-//
-// Revision 1.14  2010/02/26 18:53:33  fisyak
-// Take longitudinal Diffusion from Laser track fit, add Gating Grid
-//
-// Revision 1.13  2010/01/26 19:47:26  fisyak
-// Include dE/dx calibration and distortions in the simulation
-//
-// Revision 1.12  2009/10/30 21:12:00  fisyak
-// Freeze version rcf9108.F, Clean up
-//
-// Revision 1.11  2009/10/03 21:29:09  fisyak
-// Clean up, move all TpcT related macro into StTpcMcAnalysisMaker
-//
-// Revision 1.10  2009/09/21 13:20:39  fisyak
-// Variant O4, no mSigmaJitter, 100 keV
-//
-// Revision 1.9  2009/09/01 15:06:44  fisyak
-// Version N
-//
-// Revision 1.8  2009/08/24 20:16:41  fisyak
-// Freeze with new Altro parameters
-//
-// Revision 1.7  2008/12/29 15:24:55  fisyak
-// Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
-//
-// Revision 1.6  2008/12/18 23:06:38  fisyak
-// Take care about references to TGiant
-//
-// Revision 1.5  2008/08/18 15:54:26  fisyak
-// Version 20
-//
-// Revision 1.4  2008/07/30 23:53:19  fisyak
-// Freeze
-//
-// Revision 1.3  2008/07/18 16:21:17  fisyak
-// Remove TF1F
-//
 // Revision 1.2  2008/06/19 22:45:43  fisyak
 // Freeze problem with TPX parameterization
 //
@@ -234,7 +197,7 @@ class StTpcRSMaker : public StMaker {
 // Fix pad direction, add sorting for ADC/cluster nonlinearity, replace product by sum of logs
 //
 // Revision 1.8  2004/05/04 13:39:06  fisyak
-// Add TF1
+// Add TF1F
 //
 // Revision 1.7  2004/04/22 01:05:03  fisyak
 // Freeze the version before modification parametrization for K3

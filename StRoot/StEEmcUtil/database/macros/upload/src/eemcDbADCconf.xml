@@ -1,8 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbADCconf  <comment>  *    PMT+MAPMT ADC channel/slot configuration for one sector </comment>
-  <dbString> name <length> 16000 </length> <comment>  sector/subsector/tower or strip or preTower ...  </comment> </dbString> 
-  <dbInt> crate <length> 1000 </length> <comment>  crate holding FEEs   </comment> </dbInt> 
-  <dbInt> channel <length> 1000 </length> <comment>  channel  </comment> </dbInt> 
-  <dbString> comment <length> 160 </length> <comment>  comment  </comment> </dbString> 
-</StDbTable> 
-</StarDataBase>

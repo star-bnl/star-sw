@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.110 2017/10/26 02:47:41 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.111 2018/04/11 02:35:57 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.111  2018/04/11 02:35:57  genevb
+ * Distortion smearing by calibration resolutions
+ *
  * Revision 1.110  2017/10/26 02:47:41  genevb
  * Allow FullGridLeak to work on specific sheets via sheet widths
  *
@@ -391,6 +394,7 @@ enum   DistortSelect                                                  <br>
   kSectorAlign       = 0x20000,  // Bit 18                            <br>
   kDisableTwistClock = 0x40000,  // Bit 19                            <br>
   kFullGridLeak      = 0x80000   // Bit 20                            <br>
+  kDistoSmearing     = 0x100000  // Bit 21                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -420,6 +424,7 @@ To do:  <br>
 #include "TGraphErrors.h"
 #include "TF1.h"
 #include "TH2.h"
+#include "TRandom.h"
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
 #include "StDetectorDbMaker/St_tpcHVPlanesC.h"
@@ -427,6 +432,8 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
+#include "StDetectorDbMaker/St_tpcCalibResolutionsC.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
@@ -436,6 +443,7 @@ static const Float_t  PiOver6 = TMath::Pi()/6. ;  // Commonly used constant
 TNtuple *StMagUtilities::fgDoDistortion = 0;
 TNtuple *StMagUtilities::fgUnDoDistortion = 0;
 static const size_t threeFloats = 3 * sizeof(Float_t);
+
 
 // Parameters derived from GARFIELD simulations of the GridLeaks performed by Irakli Chakaberia:
 //   https://drupal.star.bnl.gov/STAR/node/36657
@@ -496,6 +504,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+  GetDistoSmearing(mode);    // Get distortion smearing from the DB
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages( mode );    // Get the TPC Voltages from the DB
@@ -518,6 +527,7 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+  GetDistoSmearing(0)   ;        // Do not get distortion smearing out of the DB
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
@@ -534,6 +544,15 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
 
 //________________________________________
 
+void StMagUtilities::GetDistoSmearing (Int_t mode)
+{
+  fCalibResolutions = ((mode & kDistoSmearing) > 0 ?St_tpcCalibResolutionsC::instance() : 0);
+  mRandom = (fCalibResolutions ? new TRandom(time(NULL)) : 0);
+}
+
+
+//________________________________________
+
 void StMagUtilities::GetMagFactor () 
 { 
   gFactor = StarMagField::Instance()->GetFactor();
@@ -541,7 +560,7 @@ void StMagUtilities::GetMagFactor ()
 void StMagUtilities::GetTPCParams ()  
 { 
   St_tpcWirePlanesC*    wires = StTpcDb::instance()->WirePlaneGeometry();
-  St_tpcPadPlanesC*      pads = StTpcDb::instance()->PadPlaneGeometry();
+  St_tpcPadConfigC*      pads = St_tpcPadConfigC::instance();
   St_tpcFieldCageC*     cages = StTpcDb::instance()->FieldCage();
   St_tpcDimensionsC*     dims = StTpcDb::instance()->Dimensions();
   if (! StTpcDb::IsOldScheme()) { // new schema
@@ -560,9 +579,9 @@ void StMagUtilities::GetTPCParams ()
   }
   StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity() ;        
   TPC_Z0         =  dims->gatingGridZ() ;
-  IFCShift       =      cages->InnerFieldCageShift();
-  INNER          =  pads->innerPadRows();
-  TPCROWS        =  pads->padRows();
+  IFCShift       =  cages->InnerFieldCageShift();
+  INNER          =  pads->innerPadRows(1); // Use Sector 1 for default values
+  TPCROWS        =  pads->padRows(1);
   IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
   OFCRadius      =  dims->senseGasOuterRadius();
   INNERGGFirst   =  wires->firstInnerSectorGatingGridWire();
@@ -576,7 +595,7 @@ void StMagUtilities::GetTPCParams ()
   //                    (by 25 microns) from non-DB value (121.8000)
   WIREGAP        =  OUTERGGFirst - INNERGGLast;
   for ( Int_t i = 0 ; i < TPCROWS ; i++ )
-    TPCROWR[i] = pads->radialDistanceAtRow(i+1);
+    TPCROWR[i] = pads->radialDistanceAtRow(1,i+1); // Use Sector 1 for default values
 }
 
 void StMagUtilities::GetE()
@@ -619,15 +638,17 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
     TH1I innerVs("innerVs","innerVs",5,maxInner-3.5*stepsInner,maxInner+1.5*stepsInner);
     TH1I outerVs("outerVs","outerVs",5,maxOuter-3.5*stepsOuter,maxOuter+1.5*stepsOuter);
     for (Int_t i = 1 ; i < 25; i++ ) {
-      innerVs.Fill(anodeVolts->voltagePadrow(i,INNER));
-      outerVs.Fill(anodeVolts->voltagePadrow(i,INNER+1));
+      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
+      innerVs.Fill(anodeVolts->voltagePadrow(i,inner));
+      outerVs.Fill(anodeVolts->voltagePadrow(i,inner+1));
     }
     double cmnInner = innerVs.GetBinCenter(innerVs.GetMaximumBin());
     double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
     cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
     for (Int_t i = 1 ; i < 25; i++ ) {
-      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER) - cmnInner) < stepsInner/2. ) &&
-                       ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+      int inner = St_tpcPadConfigC::instance()->innerPadRows(i);
+      GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,inner  ) - cmnInner) < stepsInner/2. ) &&
+                       ( TMath::Abs(anodeVolts->voltagePadrow(i,inner+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
     }
   } else if (mode & kFullGridLeak) {
 
@@ -640,10 +661,12 @@ void StMagUtilities::GetTPCVoltages (Int_t mode)
                      (GL_charge_y_hi[2]*GL_charge_y_hi[2] - GL_charge_y_lo[2]*GL_charge_y_lo[2]) ) ;
 
     for (Int_t i = 0 ; i < 24; i++ ) {
+      int inner = St_tpcPadConfigC::instance()->innerPadRows(i+1);
+      int lastrow = St_tpcPadConfigC::instance()->padRows(i+1);
       GLWeights[i   ] = GL_rho_inner_of_innerSec(anodeVolts->voltagePadrow(i+1,      1)) * norm ;
-      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,INNER  )) * norm ;
-      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,INNER+1)) * norm ;
-      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,TPCROWS)) * norm ;
+      GLWeights[i+24] = GL_rho_outer_of_innerSec(anodeVolts->voltagePadrow(i+1,inner  )) * norm ;
+      GLWeights[i+48] = GL_rho_inner_of_outerSec(anodeVolts->voltagePadrow(i+1,inner+1)) * norm ;
+      GLWeights[i+72] = GL_rho_outer_of_outerSec(anodeVolts->voltagePadrow(i+1,lastrow)) * norm ;
     }
   }
   
@@ -678,7 +701,8 @@ void StMagUtilities::GetSpaceChargeR2 ()
   spaceTable = new_spaceTable;
   scalers = new_scalers;
 
-  SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+  SpaceChargeR2      = fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+  SmearCoefSC        = (fCalibResolutions ? mRandom->Gaus(1,fCalibResolutions->SpaceCharge()) : 1.0);
   SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
 }
 
@@ -786,6 +810,8 @@ void StMagUtilities::GetGridLeak ( Int_t mode )
      if (MiddlGridLeakWidth <= 0) memset(&(GLWeights[24]),0,48*sizeof(Float_t));
      if (OuterGridLeakWidth <= 0) memset(&(GLWeights[72]),0,24*sizeof(Float_t));
    }
+  SmearCoefGL = (fCalibResolutions && fCalibResolutions->GridLeak() > 0 ?
+    mRandom->Gaus(1,fCalibResolutions->GridLeak()) : 1.0);
 }
 
 void StMagUtilities::ManualGridLeakStrength (Double_t inner, Double_t middle, Double_t outer)
@@ -1005,6 +1031,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
   if ( mDistortionMode & kSectorAlign )   printf (" + SectorAlign") ;
   if ( mDistortionMode & kFullGridLeak )  printf (" + FullGridLeak") ;
+  if ( mDistortionMode & kDistoSmearing ) printf (" + DistoSmearing") ;
   if ( ! StTpcDb::IsOldScheme())          printf (" + New TPC Alignment schema") ;
   usingCartesian = kTRUE; // default
 
@@ -1044,6 +1071,10 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::SpaceCharge   =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
   cout << "StMagUtilities::SpaceChargeR2 =  " << SpaceChargeR2 << " Coulombs/epsilon-nought" << "  EWRatio = " 
                                               << SpaceChargeEWRatio << endl ;
+  if (mDistortionMode & kDistoSmearing) {
+  cout << "StMagUtilities::SmearCoefSC   =  " << SmearCoefSC << endl;
+  cout << "StMagUtilities::SmearCoefGL   =  " << SmearCoefGL << endl;
+  }
   cout << "StMagUtilities::IFCShift      =  " << IFCShift << " cm" << endl ;
   cout << "StMagUtilities::CathodeV      =  " << CathodeV << " volts" << endl ;
   cout << "StMagUtilities::GG            =  " << GG << " volts" << endl ;
@@ -1075,6 +1106,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
     }
   } else cout << "N/A" << endl;
 
+  doingDistortion = kFALSE;
   DoOnce = kTRUE;
 
 }
@@ -1264,7 +1296,9 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
   // NOTE: x[],Xprime[] must be Cartesian for this function!
 
   Bool_t tempIterDist = iterateDistortion;
+  Bool_t tempDoingDist = doingDistortion;
   iterateDistortion = kFALSE; // Do not iterate for DoDistortion()
+  doingDistortion = kTRUE;
 
   UndoDistortion ( x, Xprime, Sector ) ;
 
@@ -1284,6 +1318,7 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
     D.zLC = Xprime[2];
     fgDoDistortion->Fill(&D.sector);
   }
+  doingDistortion = tempDoingDist;
 }
 
 
@@ -1978,8 +2013,9 @@ void StMagUtilities::UndoSpaceChargeR0Distortion( const Float_t x[], Float_t Xpr
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
-      phi =  phi - SpaceCharge * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-      r   =  r   - SpaceCharge * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      Float_t Weight = SpaceCharge * (doingDistortion ? SmearCoefSC : 1.0);
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
@@ -2117,16 +2153,10 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC 
   if ( r > 0.0 ) 
     {
-      if ( z < 0.0 ) 
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      double Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC : 1.0);
+      if ( z < 0) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
@@ -4092,16 +4122,10 @@ void StMagUtilities::Undo2DGridLeakDistortion( const Float_t x[], Float_t Xprime
   // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
   if ( r > 0.0 ) 
     {
-      if ( z < 0.0 )
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);
+      if (                z <  0) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
@@ -4311,7 +4335,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if ( r > 0.0 ) 
     {
-      Float_t Weight = SpaceChargeR2 ;
+      Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);
       if (GLWeights[Sector] >= 0) Weight *= GLWeights[Sector] ;
       if (                z <  0) Weight *= SpaceChargeEWRatio ;
       phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
@@ -4567,7 +4591,7 @@ void StMagUtilities::UndoFullGridLeakDistortion( const Float_t x[], Float_t Xpri
 
   if ( r > 0.0 ) 
     {
-      Float_t Weight = SpaceChargeR2 ;
+      Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);
       if ( z < 0 ) Weight *= SpaceChargeEWRatio ;
       phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
       r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  

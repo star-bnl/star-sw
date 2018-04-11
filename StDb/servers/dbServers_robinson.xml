@@ -1,6 +1,0 @@
-<StDbServer>
-<server> robinson </server>
-<host> robinson.star.bnl.gov </host>
-<port> 3306 </port>
-<socket> /tmp/mysql.3306.sock </socket>
-</StDbServer>

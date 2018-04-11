@@ -1,9 +1,0 @@
-/*    tpcPadConfig.idl
-*
-*  Table: tpcPadConfig
-*
-*       description: TPC padrow configurations (tpc/itpc) for 24 sectors
-*/
-struct tpcPadConfig {
-   octet   itpc[24]; // sector status 0 => tpc, 1 => itpc
- };
