@@ -145,7 +145,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Int_t row       	  = CdEdx.row;   
   Double_t dx     	  = CdEdx.F.dx;    
   if (dE <= 0 || dx <= 0) return 3;
-  Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row); 
+  Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row);
   CdEdx.channel = channel;
   
   CdEdx.Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
