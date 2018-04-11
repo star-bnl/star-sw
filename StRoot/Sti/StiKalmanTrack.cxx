@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.150 2018/04/11 02:40:55 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.150 2018/04/11 02:40:55 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.151 2018/04/11 02:41:08 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.151 2018/04/11 02:41:08 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.151  2018/04/11 02:41:08  smirnovd
+ * Remove deprecated methods in StikalmanTrack
+ *
  * Revision 2.150  2018/04/11 02:40:55  smirnovd
  * Add new method StikalmanTrack::getInnerMostDetHitNode()
  *
@@ -1367,72 +1370,6 @@ static int nCall=0; nCall++;
   //else
   //  cout <<" TRACK NOT REACHING THE VERTEX PLANE!"<<endl;
   return 0;
-}
-
-//_____________________________________________________________________________
-bool StiKalmanTrack::find(int direction)
-{
-static int nCall=0; nCall++;
-//assert(0);
-StiDebug::Break(nCall);
-  bool trackExtended=false;  
-  bool trackExtendedOut=false;
-  int status = 0;
-  setFlag(0);
-  // invoke tracker to find or extend this track
-  //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
-  try 
-    {
-      if (getNNodes(3)<4) return false;
-      status = fit(kOutsideIn);
-      if (getNNodes(3)<4) return false;
-      if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
-      double radSvt= 50.;
-      if (trackFinder->find(this,kOutsideIn,radSvt)) {
-          status = approx(1);//VP if(status) return false;
-          status = refit()  ; if(status) return false;
-	  trackExtended = getNNodes(3)>5;
-      }	
-
-      if (trackFinder->find(this,kOutsideIn,0.)) {
-//VP          status = approx(1); if(status) return false;
-          status = refit()  ; if(status) return false;
-	  trackExtended = trackExtended || getNNodes(3)>5;
-      }	
-    }
-  catch (runtime_error & error)
-    {
-      cout << "SKT:find(int dir) -W- ERROR:" << error.what()<<endl;
-    }
-  // decide if an outward pass is needed.
-  const StiKalmanTrackNode * outerMostNode = getOuterMostNode(2);
-  if (!outerMostNode)
-    {
-      setFlag(-1);
-      return false;
-    }
-  if (outerMostNode->getX()<185. )
-    {
-      try
-	{
-	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
-	  trackExtendedOut= trackFinder->find(this,kInsideOut);
-          if (trackExtendedOut) { 
-//VP             status = approx(1); if(status) return false;
-             status = refit()  ; if(status) return false;
-	     trackExtendedOut = getNNodes(3)>5;
-          }
-	  if (debug()) cout << "StiKalmanTrack::find find(this,kInsideOut)" << *((StiTrack *) this);
-	}
-      catch (...)
-	{
-	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in insideOut find"<<endl;
-	}
-      //cout<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
-    }
-  setFlag(1);
-  //cout << " find track done" << endl;
-  return trackExtended||trackExtendedOut;
 }
 ///Return all the hits associated with this track, including those with a large incremental
 ///chi2 that may not contribute to the fit.
