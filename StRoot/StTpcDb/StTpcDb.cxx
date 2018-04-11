@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.63 2015/05/17 22:53:52 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.64 2018/04/11 02:43:22 smirnovd Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,13 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.64  2018/04/11 02:43:22  smirnovd
+ * Enable TPC/iTPC switch via St_tpcPadConfig
+ *
+ * This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
+ * A sector ID is passed to St_tpcPadConfig in order to extract parameters for
+ * either TPC or iTPC
+ *
  * Revision 1.63  2015/05/17 22:53:52  fisyak
  * Remove duplicted line
  *
@@ -184,7 +191,6 @@
 #include "TVector3.h"
 #include "TGeoManager.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
 #include "StarMagField.h"
 #include "TEnv.h"
@@ -197,7 +203,6 @@ ClassImp(StTpcDb);
 StTpcDb::StTpcDb() {
   assert(gStTpcDb==0);
   memset(mBeg,0,mEnd-mBeg+1);
-  mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   mTpc2GlobMatrix = new TGeoHMatrix("Default Tpc2Glob"); 
   for (Int_t i = 1; i <= 24; i++) {
     for (Int_t k = 0; k < kTotalTpcSectorRotaions; k++) {
