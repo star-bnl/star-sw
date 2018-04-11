@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.22 2014/06/26 21:29:27 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.23 2018/04/11 02:43:44 smirnovd Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.23  2018/04/11 02:43:44  smirnovd
+ * StTpcCoordinateTransform: Extend interface to accept TPC sector + use padConfig
+ *
  * Revision 1.22  2014/06/26 21:29:27  fisyak
  * New Tpc Alignment, v632
  *
@@ -218,15 +221,21 @@ public:
   // Transformation Routines!!
   // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
   static Int_t       rowFromLocalY(Double_t y);
+  static Int_t       rowFromLocalY(Double_t y, Int_t sector);
   static Int_t       rowFromLocal(const StThreeVector<Double_t>& a)            {return rowFromLocalY(a.y());}
+  static Int_t       rowFromLocal(const StThreeVector<Double_t>& a, Int_t sector)            {return rowFromLocalY(a.y(), sector);}
   Double_t    padFromLocal(const StThreeVector<Double_t>& a, Int_t row)  const {return padFromX(a.x(), row);}
+  Double_t    padFromLocal(const StThreeVector<Double_t>& a, Int_t sector, Int_t row)  const {return padFromX(a.x(), sector, row);}
   Double_t    padFromX(Double_t x, Int_t row)                        const; 
-  Int_t       rowFromLocal(const StTpcLocalSectorCoordinate& a)      const {return rowFromLocal(a.position());}
-  Double_t    padFromLocal(const StTpcLocalSectorCoordinate& a)      const {return padFromLocal(a.position(),a.row());}
+  Double_t    padFromX(Double_t x, Int_t sector, Int_t row) const;
+  Int_t       rowFromLocal(const StTpcLocalSectorCoordinate& a)      const {return rowFromLocal(a.position(),a.sector());}
+  Double_t    padFromLocal(const StTpcLocalSectorCoordinate& a)      const {return padFromLocal(a.position(),a.sector(),a.row());}
   // tpc local sector Coordinates from Raw Data
-  StThreeVector<Double_t> xyFromRow(const StTpcPadCoordinate& a) {return StThreeVector<Double_t> (xFromPad(a.row(),a.pad()),yFromRow(a.row()),0);}
+  StThreeVector<Double_t> xyFromRow(const StTpcPadCoordinate& a) {return StThreeVector<Double_t> (xFromPad(a.sector(),a.row(),a.pad()),yFromRow(a.sector(),a.row()),0);}
   Double_t                yFromRow(Int_t row)                        const {return (StTpcDb::instance()->PadPlaneGeometry()->radialDistanceAtRow(row));}
+  Double_t                yFromRow(Int_t sector, Int_t row)                        const {return (St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,row));}
   Double_t                xFromPad(Int_t row, Double_t pad)          const;
+  Double_t                xFromPad(Int_t sector, Int_t row, Double_t pad)          const;
 // sector from Tpc local coordinates
   Int_t sectorFromCoordinate(const StThreeVector<double>& a) const{
     Double_t angle = TMath::RadToDeg()*TMath::ATan2(a.y(),a.x());

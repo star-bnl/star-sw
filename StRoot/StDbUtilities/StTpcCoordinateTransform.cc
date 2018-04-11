@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.42 2015/07/19 22:20:42 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.43 2018/04/11 02:43:43 smirnovd Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.43  2018/04/11 02:43:43  smirnovd
+ * StTpcCoordinateTransform: Extend interface to accept TPC sector + use padConfig
+ *
  * Revision 1.42  2015/07/19 22:20:42  fisyak
  * Add recalculation of pad row during transformation
  *
@@ -236,6 +239,7 @@
 #include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "TMath.h"
 #include "StThreeVectorD.hh"
@@ -245,7 +249,7 @@ using namespace units;
 static Int_t _debug = 0;
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer */)
  {
-    if (StTpcDb::instance()->PadPlaneGeometry() 
+    if (St_tpcPadConfigC::instance() 
 	&& StTpcDb::instance()->Electronics() 
 #if 0
 	&& StTpcDb::instance()->GlobalPosition()
@@ -261,14 +265,12 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer *
     }
     else {
 	gMessMgr->Error() << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
-	assert(StTpcDb::instance()->PadPlaneGeometry());
+	assert(St_tpcPadConfigC::instance());
 	assert(StTpcDb::instance()->Electronics());
 #if 0
         assert(StTpcDb::instance()->GlobalPosition());
 #endif
     }
-    mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
-    mNoOfRows      = mNoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
 }
 //________________________________________________________________________________
 //      Local Sector Coordnate    <->  Tpc Raw Pad Coordinate
@@ -276,17 +278,17 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 { // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
   Int_t sector = a.fromSector();
   Int_t row    = a.fromRow();
-  if (row < 1 || row > mNoOfRows) row    = rowFromLocal(a);
+  if (row < 1 || row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row    = rowFromLocal(a);
     
   Double_t probablePad = padFromLocal(a);
 #if 0 /* Don't apply zOffSet for prompt hits */
   Double_t zoffset = 0; // Don't apply zOffSet for prompt hits
-  if (a.position().z() < 3) zoffset = (row>mNoOfInnerRows) ? mOuterSectorzOffset :mInnerSectorzOffset;
+  if (a.position().z() < 3) zoffset = (row>St_tpcPadConfigC::instance()->innerPadRows(sector)) ? mOuterSectorzOffset :mInnerSectorzOffset;
 #else
-  Double_t                  zoffset = (row>mNoOfInnerRows) ? mOuterSectorzOffset :mInnerSectorzOffset;
+  Double_t                  zoffset = (row>St_tpcPadConfigC::instance()->innerPadRows(sector)) ? mOuterSectorzOffset :mInnerSectorzOffset;
 #endif /* Don't apply zOffSet for prompt hits */
 #if 0
-  if (sector <= 12)         zoffset+= (row>mNoOfInnerRows) ? mOuterSectorzOffset_West :mInnerSectorzOffset_West;
+  if (sector <= 12)         zoffset+= (row>St_tpcPadConfigC::instance()->innerPadRows(sector)) ? mOuterSectorzOffset_West :mInnerSectorzOffset_West;
 #endif
   Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? St_tpcPadGainT0BC::instance()->T0(sector,row,TMath::Nint (probablePad)) : 0;
   t0offset *= mTimeBinWidth;
@@ -300,14 +302,15 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b, Bool_t useT0, Bool_t useTau) 
 { // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and = kFALSE for MC
   StThreeVector<double>  tmp=xyFromRow(a);
+  Int_t sector = a.sector();
 #if 0 /* Don't apply zOffSet for prompt hits */
   Double_t zoffset= 0; // Don't apply zOffSet for prompt hits
-  if (a.timeBucket() > 6) zoffset =  (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
+  if (a.timeBucket() > 6) zoffset =  (a.row()>St_tpcPadConfigC::instance()->innerPadRows(sector)) ? mOuterSectorzOffset : mInnerSectorzOffset;
 #else
-  Double_t                zoffset =  (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
+  Double_t                zoffset =  (a.row()>St_tpcPadConfigC::instance()->innerPadRows(sector)) ? mOuterSectorzOffset : mInnerSectorzOffset;
 #endif /* Don't apply zOffSet for prompt hits */
 #if 0
-  if (a.sector() <= 12)         zoffset+= (a.row() > mNoOfInnerRows) ? mOuterSectorzOffset_West :mInnerSectorzOffset_West;
+  if (a.sector() <= 12)         zoffset+= (a.row() > St_tpcPadConfigC::instance()->innerPadRows(sector)) ? mOuterSectorzOffset_West :mInnerSectorzOffset_West;
 #endif
   Double_t t0offset = useT0 ? St_tpcPadGainT0BC::instance()->T0(a.sector(),a.row(),TMath::Nint(a.pad())) : 0;
   t0offset *= mTimeBinWidth;
@@ -333,6 +336,22 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const {
   }
   return (probablePad);
 }
+
+//________________________________________________________________________________
+Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t sector, Int_t row) const {
+  if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
+  Double_t pitch = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ?
+    St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) :
+    St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
+  // x coordinate in sector 12
+  Double_t probablePad = (St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row)+1.)/2. - x/pitch;
+  // CAUTION: pad cannot be <1
+  if(probablePad<0.500001) {
+    probablePad=0.500001;
+  }
+  return (probablePad);
+}
+
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Double_t pad)          const {    // x coordinate in sector 12
   if (row > mNoOfRows) row = mNoOfRows;
@@ -341,12 +360,21 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Double_t pad)          co
     StTpcDb::instance()->PadPlaneGeometry()->outerSectorPadPitch();
   return -pitch*(pad - (StTpcDb::instance()->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
 }
+
+//________________________________________________________________________________
+Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pad)          const {    // x coordinate in sector 12
+  if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
+  Double_t pitch = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ?	
+    St_tpcPadConfigC::instance()->innerSectorPadPitch(sector) : 
+    St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
+  return -pitch*(pad - (St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row)+1.)/2.);
+}
 // Coordinate from Row
 //
 //Local Transformation...
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row) const {
-  if (row > mNoOfRows) row = mNoOfRows;
+  if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
   if ((sector <= 12 && tb <= 350) || // extra West laser off set, membrane cluster with time bucket > 350
@@ -361,7 +389,7 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row)
 }
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const {
-  if (row > mNoOfRows) row = mNoOfRows;
+  if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
   Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
   if ((sector <= 12 && z < 195) || // extra West laser off set, membrane cluster with time z < 195
@@ -395,14 +423,41 @@ Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y) {
   row++;
   return row;
 }
+
+Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y, Int_t sector) {
+  static Int_t Nrows = 0;
+  static Double_t *Radii = 0;
+  if (Nrows != St_tpcPadConfigC::instance()->padRows(sector)) {
+    Nrows = St_tpcPadConfigC::instance()->padRows(sector);
+    if (Radii) delete [] Radii;
+    Radii = new Double_t[Nrows+1];
+    for (Int_t i = 1; i <= Nrows+1; i++) {
+      if (i == 1) {
+	Radii[i-1] =  (3*St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i)
+		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i+1))/2;
+      } else if (i == Nrows + 1) {
+	Radii[i-1] =  (3*St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1)
+		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-2))/2;
+      } else {
+	Radii[i-1] = (St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1) +
+		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1))/2;
+      }
+    }
+  }
+  if (y < Radii[1]) return 1;
+  if (y > Radii[Nrows]) return Nrows;
+  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y);
+  return row;
+}
 //________________________________________________________________________________
 void  StTpcCoordinateTransform::operator()(const        StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b           )
 { 
   StThreeVectorD xGG;
   Int_t row    = a.fromRow();
-  if (row < 1 || row > mNoOfRows) row    = rowFromLocal(a);
+  Int_t sector = a.fromSector();
+  if (row < 1 || row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row    = rowFromLocal(a);
   StTpcDb::instance()->Pad2Tpc(a.sector(),row).LocalToMasterVect(a.position().xyz(),xGG.xyz()); 
-  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),row).GetTranslation(); // 4
+  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(sector,row).GetTranslation(); // 4
   TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
   GG2TPC.LocalToMaster(xGG.xyz(), b.position().xyz());
   b.setSector(a.sector()); b.setRow(row);
@@ -411,10 +466,11 @@ void  StTpcCoordinateTransform::operator()(const        StTpcLocalSectorCoordina
 void  StTpcCoordinateTransform::operator()(const              StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b     ) 
 { 
   Int_t row    = a.fromRow();
-  if ( ! (row >= 1 && row <= mNoOfRows)) {
+  Int_t sector = a.fromSector();
+  if ( ! (row >= 1 && row <= St_tpcPadConfigC::instance()->numberOfRows(sector))) {
     StThreeVectorD xyzS;
-    StTpcDb::instance()->SupS2Tpc(a.sector()).MasterToLocalVect(a.position().xyz(),xyzS.xyz());
-    row = rowFromLocalY(xyzS[0]);
+    StTpcDb::instance()->SupS2Tpc(sector).MasterToLocalVect(a.position().xyz(),xyzS.xyz());
+    row = rowFromLocalY(xyzS[0], sector);
   }
   const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),row).GetTranslation(); // 4
   TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
