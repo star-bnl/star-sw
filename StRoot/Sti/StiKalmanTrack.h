@@ -238,6 +238,7 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getOuterMostHitNode(int qua=0)  const;
    		/// Accessor method returns the inner most hit node associated with the track.
    StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
+   StiKalmanTrackNode * getInnerMostDetHitNode(int detectorId)   const;
    int                  getNNodes(int qua=0) const;
    int                  releaseHits(double rMin=0,double rMax=50);
    /// Accessor method returns the first node associated with the track.
