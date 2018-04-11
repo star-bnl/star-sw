@@ -215,9 +215,6 @@ class StiKalmanTrack : public StiTrack
 
 	double getTrackRadLength() const;
 
-  double getTpcDedx() const;
-  double getSvtDedx() const;
-
 	StiKTNBidirectionalIterator  begin()  const;
   const StiKTNBidirectionalIterator& end()    const;
 	StiKTNBidirectionalIterator  rbegin() const;
@@ -273,7 +270,6 @@ class StiKalmanTrack : public StiTrack
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
-  bool find(int direction=kOutsideIn);
   int  refit();
   int  refitL();
   void reserveHits(int yes=1);
@@ -480,15 +476,6 @@ inline double  StiKalmanTrack::getTanL()           const
   return getInnerMostHitNode()->getTanL();
 }
 
-inline double StiKalmanTrack::getTpcDedx() const
-{
-  return 0.; // to be changed...
-}
-
-inline double StiKalmanTrack::getSvtDedx() const
-{
-  return 0.; // to be changed...
-}
 /*! Calculate and return the distance of closest approach to given hit
    <h3>Notes</h3> 
    <ol>
