@@ -1,8 +1,0 @@
-<Document file="StarVMC/Geometry/DtubGeo/DtubConfig.xml">
-<Detector name="DTUB" comment="STAR Pixel detector">
-<Modules>DtubGeo1</Modules>
-<!-- D Tube, pixel support tube and pixel support services -->
-<Setup name="DTUBof" module="DtubGeo1" onoff="off" comment="OFF" />
-<Setup name="DTUB01" onoff="on" simu="2" module="DtubGeo1" comment="Pixel D-tube" />
-</Detector>
-</Document>

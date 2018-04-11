@@ -1,7 +1,0 @@
-
-   struct ctg_slat_phi { 
-       long      iphi;    // phi index 
-       float     phi;     // Central phi angle 
-       float     phi_max; // Maximum phi angle coverted 
-       float     phi_min; // Minimum phi angle coverted 
-   } ;
