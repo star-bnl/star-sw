@@ -1348,6 +1348,8 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 
 	    me.basedir = file.getAbsolutePath();
 
+	    System.out.println("Build document "+s);
+
 	    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	    DocumentBuilder db = dbf.newDocumentBuilder();
 	    Document doc = db.parse(file);
@@ -1355,6 +1357,8 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	    // parse it into a JNode...
 	    me.treedata = JNode.createNode(xmlroot);
 	    //   me.treedata.dump();
+
+	    System.out.println("Build pallete " + pallete_name);
 
 	    DocumentBuilder pdb = dbf.newDocumentBuilder();
 	    Document pdoc = pdb.parse(new File(pallete_name));
