@@ -17,10 +17,12 @@ public:
     double phiForEastSector(UInt_t iSector, UInt_t nSectors) const;
     void         useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
+    static Int_t StiRow(Int_t sector, Int_t padrow);
+    static void  testStiRow();
  protected:
     StiMaterial * _fcMaterial;    
 };
-
+#if 0
 /// Get the azimuthal angle of the given sector
 inline double StiTpcDetectorBuilder::phiForTpcSector(UInt_t sector) const
 {
@@ -31,7 +33,7 @@ inline double StiTpcDetectorBuilder::phiForTpcSector(UInt_t sector) const
     }
   return phiForSector(sector, 12);
 } // phiForTpcSector
-
+#endif
 /// nSectors is the number of sectors in 360 degrees (one half of the
 /// TPC or all of the SVT, for example)
 inline double StiTpcDetectorBuilder::phiForSector(UInt_t iSector, 
