@@ -99,7 +99,7 @@ void HeedParticle::physics(std::vector<gparticle*>& secondaries) {
         if (s_loss_only) continue;
         if (s_print_listing) mcout << "generating new cluster\n";
         if (s_store_clusters) {
-          m_clusterBank.push_back(
+          m_clusterBank.emplace_back(
               HeedCluster(et, 0, pt, ptloc, prevpos.tid, na, ns));
         }
         // Generate a virtual photon.

@@ -143,19 +143,19 @@ class Sensor {
 
   // Transfer function
   bool m_hasTransferFunction = false;
-  double (*m_fTransfer)(double t);
+  double (*m_fTransfer)(double t) = nullptr;
   std::vector<double> m_transferFunctionTimes;
   std::vector<double> m_transferFunctionValues;
 
   // Noise
   bool m_hasNoiseFunction = false;
-  double (*m_fNoise)(double t);
+  double (*m_fNoise)(double t) = nullptr;
 
-  struct thresholdCrossing {
+  struct ThresholdCrossing {
     double time;
     bool rise;
   };
-  std::vector<thresholdCrossing> m_thresholdCrossings;
+  std::vector<ThresholdCrossing> m_thresholdCrossings;
   double m_thresholdLevel;
 
   // User bounding box

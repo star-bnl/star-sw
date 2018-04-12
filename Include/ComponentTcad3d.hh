@@ -10,22 +10,22 @@ namespace Garfield {
 class ComponentTcad3d : public ComponentBase {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentTcad3d();
-  // Destructor
+  /// Destructor
   ~ComponentTcad3d() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) override;
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  Medium* GetMedium(const double x, const double y, const double z) override;
 
-  bool GetVoltageRange(double& vmin, double& vmax);
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax);
+                      double& ymax, double& zmax) override;
 
   // Import mesh and field map from files.
   bool Initialise(const std::string& gridfilename,
@@ -121,10 +121,8 @@ class ComponentTcad3d : public ComponentBase {
   // Element from the previous call
   int m_lastElement = 0;
 
-  // Reset the component
-  void Reset();
-  // Periodicities
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 
   bool CheckElement(const double x, const double y, const double z,
                     const Element& element, double w[nMaxVertices]) const {

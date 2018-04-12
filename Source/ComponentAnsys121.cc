@@ -10,10 +10,10 @@ namespace Garfield {
 ComponentAnsys121::ComponentAnsys121() : ComponentFieldMap() {
 
   m_className = "ComponentAnsys121";
-  // Default bounding box
   m_is3d = false;
-  zMinBoundingBox = -50;
-  zMaxBoundingBox = 50;
+  // Default bounding box
+  m_minBoundingBox[2] = -50;
+  m_maxBoundingBox[2] = 50;
 }
 
 bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
@@ -34,10 +34,9 @@ bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
-    std::cerr << m_className << "::Initialise:\n";
-    std::cerr << "    Could not open material file " << mplist
-              << " for reading.\n",
-        std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << m_className << "::Initialise:\n"
+              << "    Could not open material file " << mplist
+              << " for reading. The file perhaps does not exist.\n";
     return false;
   }
 
@@ -90,7 +89,7 @@ bool ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       for (unsigned int i = 0; i < m_nMaterials; ++i) {
         materials[i].ohm = -1;
         materials[i].eps = -1;
-        materials[i].medium = NULL;
+        materials[i].medium = nullptr;
       }
       if (m_debug) {
         std::cout << m_className << "::Initialise:\n";
@@ -729,7 +728,7 @@ void ComponentAnsys121::ElectricField(const double xin, const double yin,
 
   // Initial values
   ex = ey = ez = volt = 0;
-  m = NULL;
+  m = nullptr;
   status = 0;
 
   // Do not proceed if not properly initialised.
@@ -741,7 +740,7 @@ void ComponentAnsys121::ElectricField(const double xin, const double yin,
 
   if (m_warning) PrintWarning("ElectricField");
 
-  if (zin < zMinBoundingBox || zin > zMaxBoundingBox) {
+  if (zin < m_minBoundingBox[2] || zin > m_maxBoundingBox[2]) {
     status = -5;
     return;
   }
@@ -758,11 +757,11 @@ void ComponentAnsys121::ElectricField(const double xin, const double yin,
     return;
   }
 
+  const Element& element = elements[imap];
   if (m_debug) {
-    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, imap, 8);
+    PrintElement("ElectricField", x, y, z, t1, t2, t3, t4, element, 8);
   }
 
-  const Element& element = elements[imap];
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -890,11 +889,10 @@ void ComponentAnsys121::WeightingField(const double xin, const double yin,
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
-  if (m_debug) {
-    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, imap, 8, iw);
-  }
-
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("WeightingField", x, y, z, t1, t2, t3, t4, element, 8, iw);
+  }
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -996,12 +994,11 @@ double ComponentAnsys121::WeightingPotential(const double xin, const double yin,
   // Check if the point is in the mesh
   if (imap < 0) return 0.;
 
-  if (m_debug) {
-    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, imap, 8, iw);
-  }
-
-  // Calculate quadrilateral field, which can degenerate to a triangular field
   const Element& element = elements[imap];
+  if (m_debug) {
+    PrintElement("WeightingPotential", x, y, z, t1, t2, t3, t4, element, 8, iw);
+  }
+  // Calculate quadrilateral field, which can degenerate to a triangular field
   const Node& n0 = nodes[element.emap[0]];
   const Node& n1 = nodes[element.emap[1]];
   const Node& n2 = nodes[element.emap[2]];
@@ -1037,14 +1034,14 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
   double rcoordinate, rotation;
   MapCoordinates(x, y, z, xmirr, ymirr, zmirr, rcoordinate, rotation);
 
-  if (zin < zMinBoundingBox || z > zMaxBoundingBox) {
-    return NULL;
+  if (zin < m_minBoundingBox[2] || z > m_maxBoundingBox[2]) {
+    return nullptr;
   }
 
   // Do not proceed if not properly initialised.
   if (!m_ready) {
     PrintNotReady("GetMedium");
-    return NULL;
+    return nullptr;
   }
   if (m_warning) PrintWarning("GetMedium");
 
@@ -1056,7 +1053,7 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y << ") not in the mesh.\n";
     }
-    return NULL;
+    return nullptr;
   }
   const Element& element = elements[imap];
   if (element.matmap >= m_nMaterials) {
@@ -1065,11 +1062,11 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
       std::cerr << "    Point (" << x << ", " << y << ")"
                 << " has out of range material number " << imap << ".\n";
     }
-    return NULL;
+    return nullptr;
   }
 
   if (m_debug) {
-    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, imap, 8);
+    PrintElement("GetMedium", x, y, z, t1, t2, t3, t4, element, 8);
   }
 
   // Assign a medium.
@@ -1079,12 +1076,11 @@ Medium* ComponentAnsys121::GetMedium(const double xin, const double yin,
 void ComponentAnsys121::SetRangeZ(const double zmin, const double zmax) {
 
   if (fabs(zmax - zmin) <= 0.) {
-    std::cerr << m_className << "::SetRangeZ:\n";
-    std::cerr << "    Zero range is not permitted.\n";
+    std::cerr << m_className << "::SetRangeZ: Zero range is not permitted.\n";
     return;
   }
-  zMinBoundingBox = mapzmin = std::min(zmin, zmax);
-  zMaxBoundingBox = mapzmax = std::max(zmin, zmax);
+  m_minBoundingBox[2] = m_mapmin[2] = std::min(zmin, zmax);
+  m_maxBoundingBox[2] = m_mapmax[2] = std::max(zmin, zmax);
 }
 
 void ComponentAnsys121::UpdatePeriodicity() {

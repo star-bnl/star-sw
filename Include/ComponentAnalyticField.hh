@@ -223,7 +223,7 @@ class ComponentAnalyticField : public ComponentBase {
 
   // Wires
   unsigned int m_nWires;
-  struct wire {
+  struct Wire {
     double x, y;       //< Location.
     double d;          //< Diameter.
     double v;          //< Potential.
@@ -234,7 +234,7 @@ class ComponentAnalyticField : public ComponentBase {
     /// Trap radius. Particle is "trapped" if within nTrap * radius of wire.
     int nTrap;         
   };
-  std::vector<wire> m_w;
+  std::vector<Wire> m_w;
 
   // Stretching weight
   std::vector<double> weight;
@@ -260,9 +260,6 @@ class ComponentAnalyticField : public ComponentBase {
   // Conformal mapping in polygons
   std::vector<std::complex<double> > wmap;
   double m_kappa;
-  // Tables of coefficients
-  std::vector<std::vector<double> > m_cc1;
-  std::vector<std::vector<double> > m_cc2;
 
   // Reference potential
   double m_v0;
@@ -278,14 +275,14 @@ class ComponentAnalyticField : public ComponentBase {
   // Voltages
   double m_vtplan[4];
 
-  struct strip {
+  struct Strip {
     std::string type;  //< Label.
     int ind;           //< Readout group.
     double smin, smax; //< Coordinates.
     double gap;        //< Distance to the opposite electrode.
   };
 
-  struct pixel {
+  struct Pixel {
     std::string type;  //< Label.
     int ind;           //< Readout group.
     double smin, smax; //< Coordinates in x/y.
@@ -293,16 +290,15 @@ class ComponentAnalyticField : public ComponentBase {
     double gap;        //< Distance to the opposite electrode.
   };
 
-  struct plane {
+  struct Plane {
     std::string type;           //< Label.
     int ind;                    //< Readout group.
     double ewxcor, ewycor;      //< Background weighting fields
-    std::vector<strip> strips1; //< x/y strips.
-    std::vector<strip> strips2; //< z strips.
-    std::vector<pixel> pixels;  //< Pixels.
+    std::vector<Strip> strips1; //< x/y strips.
+    std::vector<Strip> strips2; //< z strips.
+    std::vector<Pixel> pixels;  //< Pixels.
   };
-
-  std::vector<plane> planes;
+  std::array<Plane, 5> m_planes;
 
   // Tube
   bool m_tube;
@@ -319,11 +315,11 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<std::vector<double> > m_qplane;
 
   // Point charges
-  struct charge3d {
+  struct Charge3d {
     double x, y, z; //< Coordinates.
     double e;       //< Charge.
   };
-  std::vector<charge3d> m_ch3d;
+  std::vector<Charge3d> m_ch3d;
   unsigned int m_nTermBessel = 10;
   unsigned int m_nTermPoly = 100;
 
@@ -462,14 +458,14 @@ class ComponentAnalyticField : public ComponentBase {
                       double& ey, double& volt, const int iplane,
                       const bool opt) const;
   void WfieldStripZ(const double xpos, const double ypos, double& ex,
-                    double& ey, double& volt, const int ip, const int is,
+                    double& ey, double& volt, const int ip, const Strip& strip,
                     const bool opt) const;
   void WfieldStripXy(const double xpos, const double ypos, const double zpos,
                      double& ex, double& ey, double& ez, double& volt,
-                     const int ip, const int is, const bool opt) const;
+                     const int ip, const Strip& strip, const bool opt) const;
   void WfieldPixel(const double xpos, const double ypos, const double zpos,
                    double& ex, double& ey, double& ez, double& volt,
-                   const int ip, const int is, const bool opt) const;
+                   const int ip, const Pixel& pixel, const bool opt) const;
 
   // Auxiliary functions for C type cells
   double Ph2(const double xpos, const double ypos) const;
@@ -482,7 +478,6 @@ class ComponentAnalyticField : public ComponentBase {
   // Mapping function for D30 type cells
   void ConformalMap(const std::complex<double>& z, std::complex<double>& ww,
                     std::complex<double>& wd) const;
-  void InitializeCoefficientTables();
 
   bool InTube(const double x0, const double y0, const double a, 
               const int n) const;

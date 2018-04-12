@@ -12,11 +12,7 @@ namespace Garfield {
 
 double Sensor::m_signalConversion = ElementaryCharge;
 
-Sensor::Sensor()
-    : m_fTransfer(0),
-      m_fNoise(0) {
-
-}
+Sensor::Sensor() {}
 
 ComponentBase* Sensor::GetComponent(const unsigned int i) {
 
@@ -847,22 +843,21 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
                                  (fall && values.back() < values[0]))) {
         // Compute the crossing time.
         double tcr = Numerics::Divdif(times, values, nValues, thr, iOrder);
-        // TODO
-        thresholdCrossing newCrossing;
+        ThresholdCrossing newCrossing;
         newCrossing.time = tcr;
         newCrossing.rise = rise;
-        m_thresholdCrossings.push_back(newCrossing);
+        m_thresholdCrossings.push_back(std::move(newCrossing));
         times.clear();
         values.clear();
-        times.push_back(tNew);
-        values.push_back(vNew);
+        times.emplace_back(tNew);
+        values.emplace_back(vNew);
         nValues = 1;
       } else {
         // No crossing, simply reset the vector.
         times.clear();
         values.clear();
-        times.push_back(tNew);
-        values.push_back(vNew);
+        times.emplace_back(tNew);
+        values.emplace_back(vNew);
         nValues = 1;
       }
     }
@@ -871,10 +866,10 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
         ((rise && values.back() > values[0]) ||
          (fall && values.back() < values[0]))) {
       double tcr = Numerics::Divdif(times, values, nValues, thr, iOrder);
-      thresholdCrossing newCrossing;
+      ThresholdCrossing newCrossing;
       newCrossing.time = tcr;
       newCrossing.rise = rise;
-      m_thresholdCrossings.push_back(newCrossing);
+      m_thresholdCrossings.push_back(std::move(newCrossing));
     }
     if (rise) {
       rise = false;

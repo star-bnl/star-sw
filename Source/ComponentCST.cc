@@ -19,8 +19,8 @@ ComponentCST::ComponentCST() : ComponentFieldMap() {
 
   m_className = "ComponentCST";
   // Default bounding box
-  zMinBoundingBox = -50.;
-  zMaxBoundingBox = 50.;
+  m_minBoundingBox[2] = -50.;
+  m_maxBoundingBox[2] = 50.;
   m_xlines.clear();
   m_ylines.clear();
   m_zlines.clear();
@@ -1185,29 +1185,26 @@ Medium* ComponentCST::GetMedium(const double xin, const double yin,
 
 void ComponentCST::SetRange() {
   // Establish the ranges
-  mapxmin = *m_xlines.begin();
-  mapxmax = *(m_xlines.end() - 1);
-  mapymin = *m_ylines.begin();
-  mapymax = *(m_ylines.end() - 1);
-  mapzmin = *m_zlines.begin();
-  mapzmax = *(m_zlines.end() - 1);
+  m_mapmin[0] = *m_xlines.begin();
+  m_mapmax[0] = *(m_xlines.end() - 1);
+  m_mapmin[1] = *m_ylines.begin();
+  m_mapmax[1] = *(m_ylines.end() - 1);
+  m_mapmin[2] = *m_zlines.begin();
+  m_mapmax[2] = *(m_zlines.end() - 1);
   mapvmin = *std::min_element(m_potential.begin(), m_potential.end());
   mapvmax = *std::max_element(m_potential.begin(), m_potential.end());
-  // Set the periodicity length (maybe not needed).
-  mapsx = fabs(mapxmax - mapxmin);
-  mapsy = fabs(mapymax - mapymin);
-  mapsz = fabs(mapzmax - mapzmin);
+
   // Set provisional cell dimensions.
-  xMinBoundingBox = mapxmin;
-  xMaxBoundingBox = mapxmax;
-  yMinBoundingBox = mapymin;
-  yMaxBoundingBox = mapymax;
+  m_minBoundingBox[0] = m_mapmin[0];
+  m_maxBoundingBox[0] = m_mapmax[0];
+  m_minBoundingBox[1] = m_mapmin[1];
+  m_maxBoundingBox[1] = m_mapmax[1];
   if (m_is3d) {
-    zMinBoundingBox = mapzmin;
-    zMaxBoundingBox = mapzmax;
+    m_minBoundingBox[2] = m_mapmin[2];
+    m_maxBoundingBox[2] = m_mapmax[2];
   } else {
-    mapzmin = zMinBoundingBox;
-    mapzmax = zMaxBoundingBox;
+    m_mapmin[2] = m_minBoundingBox[2];
+    m_mapmax[2] = m_maxBoundingBox[2];
   }
   hasBoundingBox = true;
 }
@@ -1219,8 +1216,8 @@ void ComponentCST::SetRangeZ(const double zmin, const double zmax) {
     std::cerr << "    Zero range is not permitted." << std::endl;
     return;
   }
-  zMinBoundingBox = std::min(zmin, zmax);
-  zMaxBoundingBox = std::max(zmin, zmax);
+  m_minBoundingBox[2] = std::min(zmin, zmax);
+  m_maxBoundingBox[2] = std::max(zmin, zmax);
 }
 
 bool ComponentCST::Coordinate2Index(const double x, const double y,

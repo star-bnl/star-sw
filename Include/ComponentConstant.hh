@@ -16,16 +16,16 @@ class ComponentConstant : public ComponentBase {
   ~ComponentConstant() {}
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
-  bool GetVoltageRange(double& vmin, double& vmax);
+                     int& status) override;
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label);
+                      const std::string& label) override;
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string& label);
+                            const std::string& label) override;
 
   void SetElectricField(const double ex, const double ey, const double ez);
   void SetPotential(const double x, const double y, const double z,
@@ -59,10 +59,8 @@ class ComponentConstant : public ComponentBase {
   // Weighting potential at this point
   double m_w0 = 0.;
 
-  // Reset the component
-  void Reset();
-  // Verify periodicities
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 };
 }
 #endif

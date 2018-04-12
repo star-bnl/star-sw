@@ -17,29 +17,29 @@ class ComponentVoxel : public ComponentBase {
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) override;
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label);
+                      const std::string& label) override;
 
   void MagneticField(const double x, const double y, const double z,
-                     double& bx, double& by, double& bz, int& status);
+                     double& bx, double& by, double& bz, int& status) override;
 
   /// Offset coordinates in the weighting field, such that the
   /// same numerical weighting field map can be used for electrodes at
   /// different positions.
   void SetWeightingFieldOffset(const double x, const double y, const double z);
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  Medium* GetMedium(const double x, const double y, const double z) override;
 
-  bool GetVoltageRange(double& vmin, double& vmax);
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   bool GetElectricFieldRange(double& exmin, double& exmax, double& eymin,
                              double& eymax, double& ezmin, double& ezmax);
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax);
+                      double& ymax, double& zmax) override;
 
   /** Define the grid.
     * \param nx,ny,nz number of bins along x, y, z.
@@ -126,10 +126,10 @@ class ComponentVoxel : public ComponentBase {
                 const bool withPotential, const bool withRegion,
                 const double scaleX, const double scaleF, const double scaleP,
                 const char field);
-  /// Reset the component.
-  void Reset();
-  /// Periodicities.
-  void UpdatePeriodicity();
+
+  void Reset() override;
+  void UpdatePeriodicity() override;
+
   /// Reduce a coordinate to the basic cell (in case of periodicity).
   double Reduce(const double xin, const double xmin, const double xmax,
                 const bool simplePeriodic, const bool mirrorPeriodic,

@@ -80,7 +80,6 @@ class DriftLineRKF {
   bool m_rejectKinks = true;
   bool m_useStepSizeLimit = false;
 
-  bool m_usePlotting = false;
   ViewDrift* m_view = nullptr;
 
   struct step {

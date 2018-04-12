@@ -226,20 +226,20 @@ void ViewFEMesh::CreateDefaultAxes() {
 void ViewFEMesh::DrawElements() {
 
   // Get the map boundaries from the component.
-  double mapxmax = m_component->mapxmax;
-  double mapxmin = m_component->mapxmin;
-  double mapymax = m_component->mapymax;
-  double mapymin = m_component->mapymin;
-  double mapzmax = m_component->mapzmax;
-  double mapzmin = m_component->mapzmin;
+  double mapxmax = m_component->m_mapmax[0];
+  double mapxmin = m_component->m_mapmin[0];
+  double mapymax = m_component->m_mapmax[1];
+  double mapymin = m_component->m_mapmin[1];
+  double mapzmax = m_component->m_mapmax[2];
+  double mapzmin = m_component->m_mapmin[2];
 
   // Get the periodicities.
   double sx = mapxmax - mapxmin;
   double sy = mapymax - mapymin;
   double sz = mapzmax - mapzmin;
-  const bool perX = m_component->m_xPeriodic || m_component->m_xMirrorPeriodic;
-  const bool perY = m_component->m_yPeriodic || m_component->m_yMirrorPeriodic;
-  const bool perZ = m_component->m_zPeriodic || m_component->m_zMirrorPeriodic;
+  const bool perX = m_component->m_periodic[0] || m_component->m_mirrorPeriodic[0];
+  const bool perY = m_component->m_periodic[1] || m_component->m_mirrorPeriodic[1];
+  const bool perZ = m_component->m_periodic[2] || m_component->m_mirrorPeriodic[2];
 
   // Clear the meshes and drift line lists.
   m_mesh.clear();
@@ -343,7 +343,7 @@ void ViewFEMesh::DrawElements() {
     for (int nx = nMinX; nx <= nMaxX; nx++) {
 
       // Determine the x-coordinates of the tetrahedral vertices.
-      if (m_component->m_xMirrorPeriodic && nx != 2 * (nx / 2)) {
+      if (m_component->m_mirrorPeriodic[0] && nx != 2 * (nx / 2)) {
         vx1 = mapxmin +
               (mapxmax -
                m_component->nodes[m_component->elements[elem].emap[0]].x) +
@@ -375,7 +375,7 @@ void ViewFEMesh::DrawElements() {
       for (int ny = nMinY; ny <= nMaxY; ny++) {
 
         // Determine the y-coordinates of the tetrahedral vertices.
-        if (m_component->m_yMirrorPeriodic && ny != 2 * (ny / 2)) {
+        if (m_component->m_mirrorPeriodic[1] && ny != 2 * (ny / 2)) {
           vy1 = mapymin +
                 (mapymax -
                  m_component->nodes[m_component->elements[elem].emap[0]].y) +
@@ -407,7 +407,7 @@ void ViewFEMesh::DrawElements() {
         for (int nz = nMinZ; nz <= nMaxZ; nz++) {
 
           // Determine the z-coordinates of the tetrahedral vertices.
-          if (m_component->m_zMirrorPeriodic && nz != 2 * (nz / 2)) {
+          if (m_component->m_mirrorPeriodic[2] && nz != 2 * (nz / 2)) {
             vz1 = mapzmin +
                   (mapzmax -
                    m_component->nodes[m_component->elements[elem].emap[0]].z) +
@@ -648,20 +648,20 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
    * faster.
    */
   // Get the map boundaries from the component
-  double mapxmax = m_component->mapxmax;
-  double mapxmin = m_component->mapxmin;
-  double mapymax = m_component->mapymax;
-  double mapymin = m_component->mapymin;
-  double mapzmax = m_component->mapzmax;
-  double mapzmin = m_component->mapzmin;
+  double mapxmax = m_component->m_mapmax[0];
+  double mapxmin = m_component->m_mapmin[0];
+  double mapymax = m_component->m_mapmax[1];
+  double mapymin = m_component->m_mapmin[1];
+  double mapzmax = m_component->m_mapmax[2];
+  double mapzmin = m_component->m_mapmin[2];
 
   // Get the periodicities.
   double sx = mapxmax - mapxmin;
   double sy = mapymax - mapymin;
   double sz = mapzmax - mapzmin;
-  const bool perX = m_component->m_xPeriodic || m_component->m_xMirrorPeriodic;
-  const bool perY = m_component->m_yPeriodic || m_component->m_yMirrorPeriodic;
-  const bool perZ = m_component->m_zPeriodic || m_component->m_zMirrorPeriodic;
+  const bool perX = m_component->m_periodic[0] || m_component->m_mirrorPeriodic[0];
+  const bool perY = m_component->m_periodic[1] || m_component->m_mirrorPeriodic[1];
+  const bool perZ = m_component->m_periodic[2] || m_component->m_mirrorPeriodic[2];
 
   // Clear the meshes and drift line lists
   m_mesh.clear();

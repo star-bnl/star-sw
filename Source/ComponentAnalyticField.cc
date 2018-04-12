@@ -67,6 +67,7 @@ bool ComponentAnalyticField::IsWireCrossed(const double x0, const double y0,
   const double d2 = dx * dx + dy * dy;
   // Check that the step length is non-zero.
   if (d2 < Small) return false;
+  const double invd2 = 1. / d2;
 
   // Check if a whole period has been crossed.
   if ((m_perx && fabs(dx) >= m_sx) || (m_pery && fabs(dy) >= m_sy)) {
@@ -82,12 +83,12 @@ bool ComponentAnalyticField::IsWireCrossed(const double x0, const double y0,
   const double xm = 0.5 * (x0 + x1);
   const double ym = 0.5 * (y0 + y1);
   double dMin2 = 0.;
-  for (unsigned int i = 0; i < m_nWires; ++i) {
-    double xw = m_w[i].x;
+  for (const auto& wire : m_w) {
+    double xw = wire.x;
     if (m_perx) {
       xw += m_sx * int(round((xm - xw) / m_sx));
     }
-    double yw = m_w[i].y;
+    double yw = wire.y;
     if (m_pery) {
       yw += m_sy * int(round((ym - yw) / m_sy));
     }
@@ -106,20 +107,19 @@ bool ComponentAnalyticField::IsWireCrossed(const double x0, const double y0,
     const double dw02 = xw0 * xw0 + yw0 * yw0;
     const double dw12 = xw1 * xw1 + yw1 * yw1;
     if (xIn1 * xIn1 * dw02 > xIn0 * xIn0 * dw12) {
-      dMin2 = dw02 - xIn0 * xIn0 / d2;
+      dMin2 = dw02 - xIn0 * xIn0 * invd2;
     } else {
-      dMin2 = dw12 - xIn1 * xIn1 / d2;
+      dMin2 = dw12 - xIn1 * xIn1 * invd2;
     }
     // Add in the times nTrap to account for the trap radius.
-    const double r2 = 0.25 * m_w[i].d * m_w[i].d;
+    const double r2 = 0.25 * wire.d * wire.d;
     if (dMin2 < r2) {
       // Wire has been crossed.
       // Find the point of intersection.
-      const double p = -xIn0 / d2;
-      const double q = (dw02 - r2) / d2;
-      const double t1 = -p + sqrt(p * p - q);
-      const double t2 = -p - sqrt(p * p - q);
-      const double t = std::min(t1, t2);
+      const double p = -xIn0 * invd2;
+      const double q = (dw02 - r2) * invd2;
+      const double s = sqrt(p * p - q); 
+      const double t = std::min(-p + s, -p - s);
       xc = x0 + t * dx;
       yc = y0 + t * dy;
       zc = z0 + t * (z1 - z0);
@@ -158,17 +158,17 @@ bool ComponentAnalyticField::IsInTrapRadius(const double qin, const double xin,
   if (m_pery && m_ynplan[2] && y0 <= m_coplan[2]) y0 += m_sy;
   if (m_pery && m_ynplan[3] && y0 >= m_coplan[3]) y0 -= m_sy;
 
-  for (unsigned int i = 0; i < m_nWires; ++i) {
+  for (const auto& wire : m_w) {
     // Skip wires with the wrong charge.
-    if (qin * m_w[i].e > 0.) continue;
-    const double dxw0 = m_w[i].x - x0;
-    const double dyw0 = m_w[i].y - y0;
+    if (qin * wire.e > 0.) continue;
+    const double dxw0 = wire.x - x0;
+    const double dyw0 = wire.y - y0;
     const double r2 = dxw0 * dxw0 + dyw0 * dyw0;
-    const double rTrap = 0.5 * m_w[i].d * m_w[i].nTrap;
+    const double rTrap = 0.5 * wire.d * wire.nTrap;
     if (r2 < rTrap * rTrap) {
-      xw = m_w[i].x;
-      yw = m_w[i].y;
-      rw = m_w[i].d * 0.5;
+      xw = wire.x;
+      yw = wire.y;
+      rw = wire.d * 0.5;
       if (m_perx && m_ynplan[0] && x0 <= m_coplan[0]) x0 -= m_sx;
       if (m_perx && m_ynplan[1] && x0 >= m_coplan[1]) x0 += m_sx;
       if (m_pery && m_ynplan[2] && y0 <= m_coplan[2]) y0 -= m_sy;
@@ -185,7 +185,7 @@ bool ComponentAnalyticField::IsInTrapRadius(const double qin, const double xin,
       if (m_debug) {
         std::cout << m_className << "::IsInTrapRadius:\n";
         std::cout << "    (" << xin << ", " << yin << ", " << zin << ")"
-                  << " within trap radius of wire " << i << ".\n";
+                  << " within trap radius.\n";
       }
       return true;
     }
@@ -232,7 +232,7 @@ void ComponentAnalyticField::AddWire(const double x, const double y,
     return;
   }
   // Create a new wire
-  wire newWire;
+  Wire newWire;
   newWire.x = x;
   newWire.y = y;
   newWire.d = diameter;
@@ -243,7 +243,7 @@ void ComponentAnalyticField::AddWire(const double x, const double y,
   newWire.ind = -1;
   newWire.nTrap = ntrap;
   // Add the wire to the list
-  m_w.push_back(newWire);
+  m_w.push_back(std::move(newWire));
   ++m_nWires;
 
   // Force recalculation of the capacitance and signal matrices.
@@ -285,8 +285,8 @@ void ComponentAnalyticField::AddTube(const double radius, const double voltage,
 
   m_ntube = nEdges;
 
-  planes[4].type = label;
-  planes[4].ind = -1;
+  m_planes[4].type = label;
+  m_planes[4].ind = -1;
 
   // Force recalculation of the capacitance and signal matrices.
   m_cellset = false;
@@ -306,14 +306,14 @@ void ComponentAnalyticField::AddPlaneX(const double x, const double v,
     m_ynplan[1] = true;
     m_coplan[1] = x;
     m_vtplan[1] = v;
-    planes[1].type = lab;
-    planes[1].ind = -1;
+    m_planes[1].type = lab;
+    m_planes[1].ind = -1;
   } else {
     m_ynplan[0] = true;
     m_coplan[0] = x;
     m_vtplan[0] = v;
-    planes[0].type = lab;
-    planes[0].ind = -1;
+    m_planes[0].type = lab;
+    m_planes[0].ind = -1;
   }
 
   // Force recalculation of the capacitance and signal matrices.
@@ -334,14 +334,14 @@ void ComponentAnalyticField::AddPlaneY(const double y, const double v,
     m_ynplan[3] = true;
     m_coplan[3] = y;
     m_vtplan[3] = v;
-    planes[3].type = lab;
-    planes[3].ind = -1;
+    m_planes[3].type = lab;
+    m_planes[3].ind = -1;
   } else {
     m_ynplan[2] = true;
     m_coplan[2] = y;
     m_vtplan[2] = v;
-    planes[2].type = lab;
-    planes[2].ind = -1;
+    m_planes[2].type = lab;
+    m_planes[2].ind = -1;
   }
 
   // Force recalculation of the capacitance and signal matrices.
@@ -375,16 +375,12 @@ void ComponentAnalyticField::AddStripOnPlaneX(const char direction,
     return;
   }
 
-  strip newStrip;
+  Strip newStrip;
   newStrip.type = label;
   newStrip.ind = -1;
   newStrip.smin = std::min(smin, smax);
   newStrip.smax = std::max(smin, smax);
-  if (gap > Small) {
-    newStrip.gap = gap;
-  } else {
-    newStrip.gap = -1.;
-  }
+  newStrip.gap = gap > Small ? gap : -1.;
 
   int iplane = 0;
   if (m_ynplan[1]) {
@@ -394,9 +390,9 @@ void ComponentAnalyticField::AddStripOnPlaneX(const char direction,
   }
 
   if (direction == 'y' || direction == 'Y') {
-    planes[iplane].strips1.push_back(newStrip);
+    m_planes[iplane].strips1.push_back(std::move(newStrip));
   } else {
-    planes[iplane].strips2.push_back(newStrip);
+    m_planes[iplane].strips2.push_back(std::move(newStrip));
   }
 }
 
@@ -426,16 +422,12 @@ void ComponentAnalyticField::AddStripOnPlaneY(const char direction,
     return;
   }
 
-  strip newStrip;
+  Strip newStrip;
   newStrip.type = label;
   newStrip.ind = -1;
   newStrip.smin = std::min(smin, smax);
   newStrip.smax = std::max(smin, smax);
-  if (gap > Small) {
-    newStrip.gap = gap;
-  } else {
-    newStrip.gap = -1.;
-  }
+  newStrip.gap = gap > Small ? gap : -1.;
 
   int iplane = 2;
   if (m_ynplan[3]) {
@@ -445,9 +437,9 @@ void ComponentAnalyticField::AddStripOnPlaneY(const char direction,
   }
 
   if (direction == 'x' || direction == 'X') {
-    planes[iplane].strips1.push_back(newStrip);
+    m_planes[iplane].strips1.push_back(std::move(newStrip));
   } else {
-    planes[iplane].strips2.push_back(newStrip);
+    m_planes[iplane].strips2.push_back(std::move(newStrip));
   }
 }
 
@@ -467,18 +459,14 @@ void ComponentAnalyticField::AddPixelOnPlaneX(
     return;
   }
 
-  pixel newPixel;
+  Pixel newPixel;
   newPixel.type = label;
   newPixel.ind = -1;
   newPixel.smin = std::min(ymin, ymax);
   newPixel.smax = std::max(ymin, ymax);
   newPixel.zmin = std::min(zmin, zmax);
   newPixel.zmax = std::max(zmin, zmax);
-  if (gap > Small) {
-    newPixel.gap = gap;
-  } else {
-    newPixel.gap = -1.;
-  }
+  newPixel.gap = gap > Small ? gap : -1.;
 
   int iplane = 0;
   if (m_ynplan[1]) {
@@ -487,7 +475,7 @@ void ComponentAnalyticField::AddPixelOnPlaneX(
     if (d1 < d0) iplane = 1;
   }
 
-  planes[iplane].pixels.push_back(newPixel);
+  m_planes[iplane].pixels.push_back(std::move(newPixel));
 }
 
 void ComponentAnalyticField::AddPixelOnPlaneY(
@@ -506,18 +494,14 @@ void ComponentAnalyticField::AddPixelOnPlaneY(
     return;
   }
 
-  pixel newPixel;
+  Pixel newPixel;
   newPixel.type = label;
   newPixel.ind = -1;
   newPixel.smin = std::min(xmin, xmax);
   newPixel.smax = std::max(xmin, xmax);
   newPixel.zmin = std::min(zmin, zmax);
   newPixel.zmax = std::max(zmin, zmax);
-  if (gap > Small) {
-    newPixel.gap = gap;
-  } else {
-    newPixel.gap = -1.;
-  }
+  newPixel.gap = gap > Small ? gap : -1.;
 
   int iplane = 2;
   if (m_ynplan[3]) {
@@ -526,7 +510,7 @@ void ComponentAnalyticField::AddPixelOnPlaneY(
     if (d1 < d0) iplane = 3;
   }
 
-  planes[iplane].pixels.push_back(newPixel);
+  m_planes[iplane].pixels.push_back(std::move(newPixel));
 }
 
 void ComponentAnalyticField::SetPeriodicityX(const double s) {
@@ -537,7 +521,7 @@ void ComponentAnalyticField::SetPeriodicityX(const double s) {
     return;
   }
 
-  m_xPeriodic = true;
+  m_periodic[0] = true;
   m_sx = s;
   UpdatePeriodicity();
 }
@@ -550,14 +534,14 @@ void ComponentAnalyticField::SetPeriodicityY(const double s) {
     return;
   }
 
-  m_yPeriodic = true;
+  m_periodic[1] = true;
   m_sy = s;
   UpdatePeriodicity();
 }
 
 bool ComponentAnalyticField::GetPeriodicityX(double& s) {
 
-  if (!m_xPeriodic) {
+  if (!m_periodic[0]) {
     s = 0.;
     return false;
   }
@@ -568,7 +552,7 @@ bool ComponentAnalyticField::GetPeriodicityX(double& s) {
 
 bool ComponentAnalyticField::GetPeriodicityY(double& s) {
 
-  if (!m_yPeriodic) {
+  if (!m_periodic[1]) {
     s = 0.;
     return false;
   }
@@ -580,11 +564,11 @@ bool ComponentAnalyticField::GetPeriodicityY(double& s) {
 void ComponentAnalyticField::UpdatePeriodicity() {
 
   // Check if the settings have actually changed.
-  if (m_perx && !m_xPeriodic) {
+  if (m_perx && !m_periodic[0]) {
     m_perx = false;
     m_cellset = false;
     m_sigset = false;
-  } else if (!m_perx && m_xPeriodic) {
+  } else if (!m_perx && m_periodic[0]) {
     if (m_sx < Small) {
       std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicity in x direction was enabled"
@@ -596,11 +580,11 @@ void ComponentAnalyticField::UpdatePeriodicity() {
     }
   }
 
-  if (m_pery && !m_yPeriodic) {
+  if (m_pery && !m_periodic[1]) {
     m_pery = false;
     m_cellset = false;
     m_sigset = false;
-  } else if (!m_pery && m_yPeriodic) {
+  } else if (!m_pery && m_periodic[1]) {
     if (m_sy < Small) {
       std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicity in y direction was enabled"
@@ -613,22 +597,22 @@ void ComponentAnalyticField::UpdatePeriodicity() {
   }
 
   // Check if symmetries other than x/y periodicity have been requested
-  if (m_zPeriodic) {
+  if (m_periodic[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Periodicity in z is not possible.\n";
   }
 
-  if (m_xMirrorPeriodic || m_yMirrorPeriodic || m_zMirrorPeriodic) {
+  if (m_mirrorPeriodic[0] || m_mirrorPeriodic[1] || m_mirrorPeriodic[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Mirror periodicity is not possible.\n";
   }
 
-  if (m_xAxiallyPeriodic || m_yAxiallyPeriodic || m_zAxiallyPeriodic) {
+  if (m_axiallyPeriodic[0] || m_axiallyPeriodic[1] || m_axiallyPeriodic[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Axial periodicity is not possible.\n";
   }
 
-  if (m_xRotationSymmetry || m_yRotationSymmetry || m_zRotationSymmetry) {
+  if (m_rotationSymmetric[0] || m_rotationSymmetric[1] || m_rotationSymmetric[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Rotation symmetry is not possible.\n";
   }
@@ -638,12 +622,12 @@ void ComponentAnalyticField::AddCharge(const double x, const double y,
                                        const double z, const double q) {
 
   // Convert from fC to internal units (division by 4 pi epsilon0).
-  charge3d newCharge;
-  newCharge.x = x;
-  newCharge.y = y;
-  newCharge.z = z;
-  newCharge.e = q / FourPiEpsilon0;
-  m_ch3d.push_back(newCharge);
+  Charge3d charge;
+  charge.x = x;
+  charge.y = y;
+  charge.z = z;
+  charge.e = q / FourPiEpsilon0;
+  m_ch3d.push_back(std::move(charge));
 }
 
 void ComponentAnalyticField::ClearCharges() {
@@ -661,11 +645,10 @@ void ComponentAnalyticField::PrintCharges() const {
     return;
   }
   std::cout << "      x [cm]      y [cm]      z [cm]      charge [fC]\n";
-  const unsigned int n3d = m_ch3d.size();
-  for (unsigned int i = 0; i < n3d; ++i) {
-    std::cout << "     " << std::setw(9) << m_ch3d[i].x << "   " << std::setw(9)
-              << m_ch3d[i].y << "   " << std::setw(9) << m_ch3d[i].z << "   "
-              << std::setw(11) << m_ch3d[i].e * FourPiEpsilon0 << "\n";
+  for (const auto& charge : m_ch3d) {
+    std::cout << "     " << std::setw(9) << charge.x << "   " << std::setw(9)
+              << charge.y << "   " << std::setw(9) << charge.z << "   "
+              << std::setw(11) << charge.e * FourPiEpsilon0 << "\n";
   }
 }
 
@@ -695,8 +678,7 @@ bool ComponentAnalyticField::GetWire(const unsigned int i, double& x, double& y,
                                      double& charge, int& ntrap) const {
 
   if (i >= m_nWires) {
-    std::cerr << m_className << "::GetWire:\n";
-    std::cerr << "    Wire index is out of range.\n";
+    std::cerr << m_className << "::GetWire: Index out of range.\n";
     return false;
   }
 
@@ -716,14 +698,13 @@ bool ComponentAnalyticField::GetPlaneX(const unsigned int i,
                                        std::string& label) const {
 
   if (i >= 2 || (i == 1 && !m_ynplan[1])) {
-    std::cerr << m_className << "::GetPlaneX:\n";
-    std::cerr << "    Plane index is out of range.\n";
+    std::cerr << m_className << "::GetPlaneX: Plane index out of range.\n";
     return false;
   }
 
   x = m_coplan[i];
   voltage = m_vtplan[i];
-  label = planes[i].type;
+  label = m_planes[i].type;
   return true;
 }
 
@@ -732,14 +713,13 @@ bool ComponentAnalyticField::GetPlaneY(const unsigned int i,
                                        std::string& label) const {
 
   if (i >= 2 || (i == 1 && !m_ynplan[3])) {
-    std::cerr << m_className << "::GetPlaneY:\n";
-    std::cerr << "    Plane index is out of range.\n";
+    std::cerr << m_className << "::GetPlaneY: Plane index out of range.\n";
     return false;
   }
 
   y = m_coplan[i + 2];
   voltage = m_vtplan[i + 2];
-  label = planes[i + 2].type;
+  label = m_planes[i + 2].type;
   return true;
 }
 
@@ -750,7 +730,7 @@ bool ComponentAnalyticField::GetTube(double& r, double& voltage, int& nEdges,
   r = m_cotube;
   voltage = m_vttube;
   nEdges = m_ntube;
-  label = planes[4].type;
+  label = m_planes[4].type;
   return true;
 }
 
@@ -982,7 +962,7 @@ void ComponentAnalyticField::CellInit() {
 
   // Periodicities
   m_perx = m_pery = false;
-  m_xPeriodic = m_yPeriodic = false; 
+  m_periodic[0] = m_periodic[1] = false; 
   m_sx = m_sy = 1.;
 
   // Signals
@@ -1018,16 +998,21 @@ void ComponentAnalyticField::CellInit() {
   // D3 type cells
   wmap.clear();
   m_kappa = 0.;
-  m_cc1.clear();
-  m_cc2.clear();
 
   // Reference potential
   m_v0 = 0.;
   m_corvta = m_corvtb = m_corvtc = 0.;
 
   // Planes
-  planes.clear();
-  planes.resize(5);
+  for (int i = 0; i < 5; ++i) {
+    m_planes[i].type = '?';
+    m_planes[i].ind = -1;
+    m_planes[i].ewxcor = 0.;
+    m_planes[i].ewycor = 0.;
+    m_planes[i].strips1.clear();
+    m_planes[i].strips2.clear();
+    m_planes[i].pixels.clear();
+  }
   for (int i = 0; i < 4; ++i) {
     m_ynplan[i] = false;
     m_coplan[i] = 0.;
@@ -1036,16 +1021,6 @@ void ComponentAnalyticField::CellInit() {
   // Plane shorthand
   m_ynplax = m_ynplay = false;
   m_coplax = m_coplay = 1.;
-
-  for (int i = 0; i < 5; ++i) {
-    planes[i].type = '?';
-    planes[i].ind = -1;
-    planes[i].ewxcor = 0.;
-    planes[i].ewycor = 0.;
-    planes[i].strips1.clear();
-    planes[i].strips2.clear();
-    planes[i].pixels.clear();
-  }
 
   // Tube properties
   m_tube = false;
@@ -1236,27 +1211,27 @@ bool ComponentAnalyticField::CellCheck() {
         m_vtplan[i] = m_vtplan[i + 1];
         m_vtplan[i + 1] = vthlp;
 
-        plane plahlp = planes[i];
-        planes[i] = planes[i + 1];
-        planes[i + 1] = plahlp;
+        Plane plahlp = m_planes[i];
+        m_planes[i] = m_planes[i + 1];
+        m_planes[i + 1] = plahlp;
       }
     }
   }
 
   // Checks on the wires, start moving them to the basic x period.
   if (m_perx) {
-    for (unsigned int i = 0; i < m_nWires; ++i) {
-      const double xnew = m_w[i].x - m_sx * int(round(m_w[i].x / m_sx));
-      if (int(round(m_w[i].x / m_sx)) != 0) {
-        double xprt = m_w[i].x;
-        double yprt = m_w[i].y;
-        if (m_polar) RTheta2RhoPhi(m_w[i].x, m_w[i].y, xprt, yprt);
-        std::cout << m_className << "::CellCheck:\n    The " << m_w[i].type
+    for (auto& wire : m_w) {
+      const double xnew = wire.x - m_sx * int(round(wire.x / m_sx));
+      if (int(round(wire.x / m_sx)) != 0) {
+        double xprt = wire.x;
+        double yprt = wire.y;
+        if (m_polar) RTheta2RhoPhi(wire.x, wire.y, xprt, yprt);
+        std::cout << m_className << "::CellCheck:\n    The " << wire.type
                   << "-wire at (" << xprt << ", " << yprt 
                   << ") is moved to the basic x (or r) period.\n"
                   << "    This should not affect the results.\n";
       }
-      m_w[i].x = xnew;
+      wire.x = xnew;
     }
   }
 
@@ -1277,39 +1252,40 @@ bool ComponentAnalyticField::CellCheck() {
       }
     }
   } else if (m_pery) {
-    for (unsigned int i = 0; i < m_nWires; ++i) {
-      double ynew = m_w[i].y - m_sy * int(round(m_w[i].y / m_sy));
-      if (int(round(m_w[i].y / m_sy)) != 0) {
-        double xprt = m_w[i].x;
-        double yprt = m_w[i].y;
-        if (m_polar) RTheta2RhoPhi(m_w[i].x, m_w[i].y, xprt, yprt);
-        std::cout << m_className << "::CellCheck:\n    The " << m_w[i].type 
+    for (auto& wire : m_w) {
+      double ynew = wire.y - m_sy * int(round(wire.y / m_sy));
+      if (int(round(wire.y / m_sy)) != 0) {
+        double xprt = wire.x;
+        double yprt = wire.y;
+        if (m_polar) RTheta2RhoPhi(wire.x, wire.y, xprt, yprt);
+        std::cout << m_className << "::CellCheck:\n    The " << wire.type 
                   << "-wire at (" << xprt << ", " << yprt 
                   << ") is moved to the basic y period.\n"
                   << "    This should not affect the results.\n";
       }
-      m_w[i].y = ynew;
+      wire.y = ynew;
     }
   }
 
   // Make sure the plane numbering is standard: P1 wires P2, P3 wires P4.
   int iplan1 = 0, iplan2 = 0, iplan3 = 0, iplan4 = 0;
-  for (unsigned int i = 0; i < m_nWires; ++i) {
-    if (m_ynplan[0] && m_w[i].x <= m_coplan[0]) ++iplan1;
-    if (m_ynplan[1] && m_w[i].x <= m_coplan[1]) ++iplan2;
-    if (m_ynplan[2] && m_w[i].y <= m_coplan[2]) ++iplan3;
-    if (m_ynplan[3] && m_w[i].y <= m_coplan[3]) ++iplan4;
+  for (const auto& wire : m_w) {
+    if (m_ynplan[0] && wire.x <= m_coplan[0]) ++iplan1;
+    if (m_ynplan[1] && wire.x <= m_coplan[1]) ++iplan2;
+    if (m_ynplan[2] && wire.y <= m_coplan[2]) ++iplan3;
+    if (m_ynplan[3] && wire.y <= m_coplan[3]) ++iplan4;
   }
 
   // Find out whether smaller (-1) or larger (+1) coord. are to be kept.
+  const int imid = int(m_nWires) / 2;
   if (m_ynplan[0] && m_ynplan[1]) {
-    if (iplan1 > int(m_nWires) / 2) {
+    if (iplan1 > imid) {
       m_ynplan[1] = false;
       iplan1 = -1;
     } else {
       iplan1 = +1;
     }
-    if (iplan2 < int(m_nWires) / 2) {
+    if (iplan2 < imid) {
       m_ynplan[0] = false;
       iplan2 = +1;
     } else {
@@ -1317,26 +1293,28 @@ bool ComponentAnalyticField::CellCheck() {
     }
   }
   if (m_ynplan[0] && !m_ynplan[1]) {
-    if (iplan1 > int(m_nWires) / 2)
+    if (iplan1 > imid) {
       iplan1 = -1;
-    else
+    } else {
       iplan1 = +1;
+    }
   }
   if (m_ynplan[1] && !m_ynplan[0]) {
-    if (iplan2 < int(m_nWires) / 2)
+    if (iplan2 < imid) {
       iplan2 = +1;
-    else
+    } else {
       iplan2 = -1;
+    }
   }
 
   if (m_ynplan[2] && m_ynplan[3]) {
-    if (iplan3 > int(m_nWires) / 2) {
+    if (iplan3 > imid) {
       m_ynplan[3] = false;
       iplan3 = -1;
     } else {
       iplan3 = +1;
     }
-    if (iplan4 < int(m_nWires) / 2) {
+    if (iplan4 < imid) {
       m_ynplan[2] = false;
       iplan4 = +1;
     } else {
@@ -1344,16 +1322,18 @@ bool ComponentAnalyticField::CellCheck() {
     }
   }
   if (m_ynplan[2] && !m_ynplan[3]) {
-    if (iplan3 > int(m_nWires) / 2)
+    if (iplan3 > imid) {
       iplan3 = -1;
-    else
+    } else {
       iplan3 = +1;
+    }
   }
   if (m_ynplan[3] && !m_ynplan[2]) {
-    if (iplan4 < int(m_nWires) / 2)
+    if (iplan4 < imid) {
       iplan4 = +1;
-    else
+    } else {
       iplan4 = -1;
+    }
   }
 
   // Adapt the numbering of the planes if necessary.
@@ -1362,7 +1342,7 @@ bool ComponentAnalyticField::CellCheck() {
     m_ynplan[1] = true;
     m_coplan[1] = m_coplan[0];
     m_vtplan[1] = m_vtplan[0];
-    planes[1] = planes[0];
+    m_planes[1] = m_planes[0];
   }
 
   if (iplan2 == +1) {
@@ -1370,7 +1350,7 @@ bool ComponentAnalyticField::CellCheck() {
     m_ynplan[0] = true;
     m_coplan[0] = m_coplan[1];
     m_vtplan[0] = m_vtplan[1];
-    planes[0] = planes[1];
+    m_planes[0] = m_planes[1];
   }
 
   if (iplan3 == -1) {
@@ -1378,7 +1358,7 @@ bool ComponentAnalyticField::CellCheck() {
     m_ynplan[3] = true;
     m_coplan[3] = m_coplan[2];
     m_vtplan[3] = m_vtplan[2];
-    planes[3] = planes[2];
+    m_planes[3] = m_planes[2];
   }
 
   if (iplan4 == +1) {
@@ -1386,7 +1366,7 @@ bool ComponentAnalyticField::CellCheck() {
     m_ynplan[2] = true;
     m_coplan[2] = m_coplan[3];
     m_vtplan[2] = m_vtplan[3];
-    planes[2] = planes[3];
+    m_planes[2] = m_planes[3];
   }
 
   std::vector<bool> wrong(m_nWires, false);
@@ -1515,37 +1495,37 @@ bool ComponentAnalyticField::CellCheck() {
   vmin = vmax = 0.;
 
   // Loop over the wires.
-  for (int i = m_nWires; i--;) {
-    const double rw = 0.5 * m_w[i].d;
+  for (const auto& wire : m_w) {
+    const double rw = 0.5 * wire.d;
     if (setx) {
-      m_xmin = std::min(m_xmin, m_w[i].x - rw);
-      m_xmax = std::max(m_xmax, m_w[i].x + rw);
+      m_xmin = std::min(m_xmin, wire.x - rw);
+      m_xmax = std::max(m_xmax, wire.x + rw);
     } else {
-      m_xmin = m_w[i].x - rw;
-      m_xmax = m_w[i].x + rw;
+      m_xmin = wire.x - rw;
+      m_xmax = wire.x + rw;
       setx = true;
     }
     if (sety) {
-      m_ymin = std::min(m_ymin, m_w[i].y - rw);
-      m_ymax = std::max(m_ymax, m_w[i].y + rw);
+      m_ymin = std::min(m_ymin, wire.y - rw);
+      m_ymax = std::max(m_ymax, wire.y + rw);
     } else {
-      m_ymin = m_w[i].y - rw;
-      m_ymax = m_w[i].y + rw;
+      m_ymin = wire.y - rw;
+      m_ymax = wire.y + rw;
       sety = true;
     }
     if (setz) {
-      m_zmin = std::min(m_zmin, -0.5 * m_w[i].u);
-      m_zmax = std::max(m_zmax, +0.5 * m_w[i].u);
+      m_zmin = std::min(m_zmin, -0.5 * wire.u);
+      m_zmax = std::max(m_zmax, +0.5 * wire.u);
     } else {
-      m_zmin = -0.5 * m_w[i].u;
-      m_zmax = +0.5 * m_w[i].u;
+      m_zmin = -0.5 * wire.u;
+      m_zmax = +0.5 * wire.u;
       setz = true;
     }
     if (setv) {
-      vmin = std::min(vmin, m_w[i].v);
-      vmax = std::max(vmax, m_w[i].v);
+      vmin = std::min(vmin, wire.v);
+      vmax = std::max(vmax, wire.v);
     } else {
-      vmin = vmax = m_w[i].v;
+      vmin = vmax = wire.v;
       setv = true;
     }
   }
@@ -1820,8 +1800,8 @@ bool ComponentAnalyticField::PrepareStrips() {
       gapDef[0] = -1.;
     } else {
       gapDef[0] = m_w[0].x - m_coplan[0];
-      for (int i = m_nWires; i--;) {
-        if (m_w[i].x - m_coplan[0] < gapDef[0]) gapDef[0] = m_w[i].x - m_coplan[0];
+      for (const auto& wire : m_w) {
+        gapDef[0] = std::min(wire.x - m_coplan[0], gapDef[0]);
       }
     }
   }
@@ -1833,8 +1813,8 @@ bool ComponentAnalyticField::PrepareStrips() {
       gapDef[1] = -1.;
     } else {
       gapDef[1] = m_coplan[1] - m_w[0].x;
-      for (int i = m_nWires; i--;) {
-        if (m_coplan[1] - m_w[i].x < gapDef[1]) gapDef[1] = m_coplan[1] - m_w[i].x;
+      for (const auto& wire : m_w) {
+        gapDef[1] = std::min(m_coplan[1] - wire.x, gapDef[1]);
       }
     }
   }
@@ -1846,8 +1826,8 @@ bool ComponentAnalyticField::PrepareStrips() {
       gapDef[2] = -1.;
     } else {
       gapDef[2] = m_w[0].y - m_coplan[2];
-      for (int i = m_nWires; i--;) {
-        if (m_w[i].y - m_coplan[2] < gapDef[2]) gapDef[2] = m_w[i].y - m_coplan[2];
+      for (const auto& wire : m_w) {
+        gapDef[2] = std::min(wire.y - m_coplan[2], gapDef[2]);
       }
     }
   }
@@ -1859,47 +1839,38 @@ bool ComponentAnalyticField::PrepareStrips() {
       gapDef[3] = -1.;
     } else {
       gapDef[3] = m_coplan[3] - m_w[0].y;
-      for (int i = m_nWires; i--;) {
-        if (m_coplan[3] - m_w[i].y < gapDef[3]) gapDef[3] = m_coplan[3] - m_w[i].y;
+      for (const auto& wire : m_w) {
+        gapDef[3] = std::min(m_coplan[3] - wire.y, gapDef[3]);
       }
     }
   }
 
   // Assign.
   for (unsigned int i = 0; i < 4; ++i) {
-    const unsigned int nStrips1 = planes[i].strips1.size();
-    for (unsigned int j = 0; j < nStrips1; ++j) {
-      if (planes[i].strips1[j].gap < 0.) {
-        planes[i].strips1[j].gap = gapDef[i];
-      }
-      if (planes[i].strips1[j].gap < 0.) {
-        std::cerr << m_className << "::PrepareStrips:\n";
-        std::cerr << "    Not able to set a default anode-cathode gap\n";
-        std::cerr << "    for x/y-strip " << j << " of plane " << i << ".\n";
+    for (auto& strip : m_planes[i].strips1) {
+      if (strip.gap < 0.) strip.gap = gapDef[i];
+      if (strip.gap < 0.) {
+        std::cerr << m_className << "::PrepareStrips:\n"
+                  << "    Not able to set a default anode-cathode gap\n"
+                  << "    for x/y-strips of plane " << i << ".\n";
         return false;
       }
     }
-    const unsigned int nStrips2 = planes[i].strips2.size();
-    for (unsigned int j = 0; j < nStrips2; ++j) {
-      if (planes[i].strips2[j].gap < 0.) {
-        planes[i].strips2[j].gap = gapDef[i];
-      }
-      if (planes[i].strips2[j].gap < 0.) {
-        std::cerr << m_className << "::PrepareStrips:\n";
-        std::cerr << "    Not able to set a default anode-cathode gap\n";
-        std::cerr << "    for z-strip " << j << " of plane " << i << ".\n";
+    for (auto& strip : m_planes[i].strips2) {
+      if (strip.gap < 0.) strip.gap = gapDef[i];
+      if (strip.gap < 0.) {
+        std::cerr << m_className << "::PrepareStrips:\n"
+                  << "    Not able to set a default anode-cathode gap\n"
+                  << "    for z-strips of plane " << i << ".\n";
         return false;
       }
     }
-    const unsigned int nPixels = planes[i].pixels.size();
-    for (unsigned int j = 0; j < nPixels; ++j) {
-      if (planes[i].pixels[j].gap < 0.) {
-        planes[i].pixels[j].gap = gapDef[i];
-      }
-      if (planes[i].pixels[j].gap < 0.) {
-        std::cerr << m_className << "::PrepareStrips:\n";
-        std::cerr << "    Not able to set a default anode-cathode gap\n";
-        std::cerr << "    for pixel " << j << " of plane " << i << ".\n";
+    for (auto& pixel : m_planes[i].pixels) {
+      if (pixel.gap < 0.) pixel.gap = gapDef[i];
+      if (pixel.gap < 0.) {
+        std::cerr << m_className << "::PrepareStrips:\n"
+                  << "    Not able to set a default anode-cathode gap\n"
+                  << "    for pixels on plane " << i << ".\n";
         return false;
       }
     }
@@ -1919,26 +1890,23 @@ void ComponentAnalyticField::AddReadout(const std::string& label) {
   m_readout.push_back(label);
 
   unsigned int nWiresFound = 0;
-  for (unsigned int i = 0; i < m_nWires; ++i) {
-    if (m_w[i].type == label) ++nWiresFound;
+  for (const auto& wire : m_w) {
+    if (wire.type == label) ++nWiresFound;
   }
 
   unsigned int nPlanesFound = 0;
   unsigned int nStripsFound = 0;
   unsigned int nPixelsFound = 0;
   for (int i = 0; i < 5; ++i) {
-    if (planes[i].type == label) ++nPlanesFound;
-    const unsigned int nStrips1 = planes[i].strips1.size();
-    for (unsigned int j = 0; j < nStrips1; ++j) {
-      if (planes[i].strips1[j].type == label) ++nStripsFound;
+    if (m_planes[i].type == label) ++nPlanesFound;
+    for (const auto& strip : m_planes[i].strips1) {
+      if (strip.type == label) ++nStripsFound;
     }
-    const unsigned int nStrips2 = planes[i].strips2.size();
-    for (unsigned int j = 0; j < nStrips2; ++j) {
-      if (planes[i].strips2[j].type == label) ++nStripsFound;
+    for (const auto& strip : m_planes[i].strips2) {
+      if (strip.type == label) ++nStripsFound;
     }
-    const unsigned int nPixels = planes[i].pixels.size();
-    for (unsigned int j = 0; j < nPixels; ++j) {
-      if (planes[i].pixels[j].type == label) ++nPixelsFound;
+    for (const auto& pixel : m_planes[i].pixels) {
+      if (pixel.type == label) ++nPixelsFound;
     }
   }
 
@@ -2707,8 +2675,6 @@ bool ComponentAnalyticField::SetupD30() {
 
   std::complex<double> wd = std::complex<double>(0., 0.);
 
-  InitializeCoefficientTables();
-
   // Evaluate kappa, a constant needed by ConformalMap.
   m_kappa = tgamma((m_ntube + 1.) / m_ntube) *
             tgamma((m_ntube - 2.) / m_ntube) / tgamma((m_ntube - 1.) / m_ntube);
@@ -2886,22 +2852,75 @@ void ComponentAnalyticField::ConformalMap(const std::complex<double>& z,
   //   (Last changed on 19/ 2/94.)
   //-----------------------------------------------------------------------
 
-  const int nterm = 15;
+  // Coefficients for centre expansion in triangles, squares, pentagons, 
+  // hexagons, heptagons, octogons.
+  constexpr std::array<std::array<double, 16>, 6> cc1 = {{
+    {{0.1000000000e+01, -.1666666865e+00, 0.3174602985e-01, -.5731921643e-02,
+      0.1040112227e-02, -.1886279933e-03, 0.3421107249e-04, -.6204730198e-05,
+      0.1125329618e-05, -.2040969207e-06, 0.3701631357e-07, -.6713513301e-08,
+      0.1217605794e-08, -.2208327132e-09, 0.4005162868e-10, -.7264017512e-11}},
+    {{0.1000000000e+01, -.1000000238e+00, 0.8333332837e-02, -.7051283028e-03,
+      0.5967194738e-04, -.5049648280e-05, 0.4273189802e-06, -.3616123934e-07,
+      0.3060091514e-08, -.2589557457e-09, 0.2191374859e-10, -.1854418528e-11,
+      0.1569274224e-12, -.1327975205e-13, 0.1123779363e-14, -.9509817570e-16}},
+    {{0.1000000000e+01, -.6666666269e-01, 0.1212121220e-02, -.2626262140e-03,
+      -.3322110570e-04, -.9413293810e-05, -.2570029210e-05, -.7695705904e-06,
+      -.2422486887e-06, -.7945993730e-07, -.2691839640e-07, -.9361642128e-08,
+      -.3327319087e-08, -.1204430555e-08, -.4428404310e-09, -.1650302672e-09}},
+    {{0.1000000000e+01, -.4761904851e-01, -.1221001148e-02, -.3753788769e-03,
+      -.9415557724e-04, -.2862767724e-04, -.9587882232e-05, -.3441659828e-05,
+      -.1299798896e-05, -.5103651119e-06, -.2066504408e-06, -.8578405186e-07,
+      -.3635090096e-07, -.1567239494e-07, -.6857355572e-08, -.3038770346e-08}},
+    {{0.1000000000e+01, -.3571428731e-01, -.2040816238e-02, -.4936389159e-03,
+      -.1446709794e-03, -.4963850370e-04, -.1877940667e-04, -.7600909157e-05,
+      -.3232265954e-05, -.1427365532e-05, -.6493634714e-06, -.3026190711e-06,
+      -.1438593245e-06, -.6953911225e-07, -.3409525462e-07, -.1692310647e-07}},
+    {{0.1000000000e+01, -.2777777612e-01, -.2246732125e-02, -.5571441725e-03,
+      -.1790652314e-03, -.6708275760e-04, -.2766949183e-04, -.1219387286e-04,
+      -.5640039490e-05, -.2706697160e-05, -.1337270078e-05, -.6763995657e-06,
+      -.3488264610e-06, -.1828456675e-06, -.9718036154e-07, -.5227070332e-07}}
+  }};
+  // Coefficients for corner expansion. 
+  constexpr std::array<std::array<double, 16>, 6> cc2 = {{
+    {{0.3333333135e+00, -.5555555597e-01, 0.1014109328e-01, -.1837154618e-02,
+      0.3332451452e-03, -.6043842586e-04, 0.1096152027e-04, -.1988050826e-05,
+      0.3605655365e-06, -.6539443120e-07, 0.1186035448e-07, -.2151069323e-08,
+      0.3901317047e-09, -.7075676156e-10, 0.1283289534e-10, -.2327455936e-11}},
+    {{0.1000000000e+01, -.5000000000e+00, 0.3000000119e+00, -.1750000119e+00,
+      0.1016666889e+00, -.5916666612e-01, 0.3442307562e-01, -.2002724260e-01,
+      0.1165192947e-01, -.6779119372e-02, 0.3944106400e-02, -.2294691978e-02,
+      0.1335057430e-02, -.7767395582e-03, 0.4519091453e-03, -.2629216760e-03}},
+    {{0.1248050690e+01, -.7788147926e+00, 0.6355384588e+00, -.4899077415e+00,
+      0.3713272810e+00, -.2838423252e+00, 0.2174729109e+00, -.1663445234e+00,
+      0.1271933913e+00, -.9728997946e-01, 0.7442557812e-01, -.5692918226e-01,
+      0.4354400188e-01, -.3330700099e-01, 0.2547712997e-01, -.1948769018e-01}},
+    {{0.1333333015e+01, -.8888888955e+00, 0.8395061493e+00, -.7242798209e+00,
+      0.6016069055e+00, -.5107235312e+00, 0.4393203855e+00, -.3745460510e+00,
+      0.3175755739e+00, -.2703750730e+00, 0.2308617830e+00, -.1966916919e+00,
+      0.1672732830e+00, -.1424439549e+00, 0.1214511395e+00, -.1034612656e+00}},
+    {{0.1359752655e+01, -.9244638681e+00, 0.9593217969e+00, -.8771237731e+00,
+      0.7490229011e+00, -.6677658558e+00, 0.6196745634e+00, -.5591596961e+00,
+      0.4905325770e+00, -.4393517375e+00, 0.4029803872e+00, -.3631100059e+00,
+      0.3199430704e+00, -.2866140604e+00, 0.2627358437e+00, -.2368256450e+00}},
+    {{0.1362840652e+01, -.9286670089e+00, 0.1035511017e+01, -.9800255299e+00,
+      0.8315343261e+00, -.7592730522e+00, 0.7612683773e+00, -.7132136226e+00,
+      0.6074471474e+00, -.5554352999e+00, 0.5699443221e+00, -.5357525349e+00,
+      0.4329345822e+00, -.3916820884e+00, 0.4401986003e+00, -.4197303057e+00}}
+  }};
 
+  constexpr int nterm = 15;
   if (z == 0.) {
-    // Z coincides with the centre.
-    // Results are trivial.
+    // Z coincides with the centre. Results are trivial.
     ww = 0;
     wd = m_kappa;
   } else if (abs(z) < 0.75) {
-    // Z is close to the centre.
-    // Series expansion.
+    // Z is close to the centre. Series expansion.
     std::complex<double> zterm = pow(m_kappa * z, m_ntube);
     std::complex<double> wdsum = 0.;
-    std::complex<double> wsum = m_cc1[m_ntube - 3][nterm];
+    std::complex<double> wsum = cc1[m_ntube - 3][nterm];
     for (int i = nterm; i--;) {
       wdsum = wsum + zterm * wdsum;
-      wsum = m_cc1[m_ntube - 3][i] + zterm * wsum;
+      wsum = cc1[m_ntube - 3][i] + zterm * wsum;
     }
     // Return the results.
     ww = m_kappa * z * wsum;
@@ -2917,10 +2936,10 @@ void ComponentAnalyticField::ConformalMap(const std::complex<double>& z,
     std::complex<double> zterm =
         pow(m_kappa * (1. - zz), m_ntube / (m_ntube - 2.));
     std::complex<double> wdsum = 0.;
-    std::complex<double> wsum = m_cc2[m_ntube - 3][nterm];
+    std::complex<double> wsum = cc2[m_ntube - 3][nterm];
     for (int i = nterm; i--;) {
       wdsum = wsum + zterm * wdsum;
-      wsum = m_cc2[m_ntube - 3][i] + zterm * wsum;
+      wsum = cc2[m_ntube - 3][i] + zterm * wsum;
     }
     // And return the results.
     ww = std::complex<double>(cos(arot), -sin(arot)) * (1. - zterm * wsum);
@@ -2943,18 +2962,18 @@ void ComponentAnalyticField::E2Sum(const double xpos, const double ypos,
   //  (Essentially by G.A.Erskine/DD, 14.8.1984)
   //-----------------------------------------------------------------------
 
-  const std::complex<double> icons = std::complex<double>(0., 1.);
+  constexpr std::complex<double> icons(0., 1.);
 
   std::complex<double> wsum = 0.;
   std::complex<double> zsin, zcof, zu, zunew;
   std::complex<double> zterm1, zterm2, zeta;
 
-  for (unsigned int j = 0; j < m_nWires; ++j) {
-    zeta = m_zmult * std::complex<double>(xpos - m_w[j].x, ypos - m_w[j].y);
+  for (const auto& wire : m_w) {
+    zeta = m_zmult * std::complex<double>(xpos - wire.x, ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum -= m_w[j].e * icons;
+      wsum -= wire.e * icons;
     } else if (imag(zeta) < -15.) {
-      wsum += m_w[j].e * icons;
+      wsum += wire.e * icons;
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -2964,7 +2983,7 @@ void ComponentAnalyticField::E2Sum(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum += m_w[j].e * (zterm2 / zterm1);
+      wsum += wire.e * (zterm2 / zterm1);
     }
   }
   ex = -real(-m_zmult * wsum);
@@ -2995,16 +3014,16 @@ void ComponentAnalyticField::FieldA00(const double xpos, const double ypos,
 
   double xxmirr = 0., yymirr = 0.;
   // Loop over all wires.
-  for (int i = m_nWires; i--;) {
-    const double xx = xpos - m_w[i].x;
-    const double yy = ypos - m_w[i].y;
+  for (const auto& wire : m_w) {
+    const double xx = xpos - wire.x;
+    const double yy = ypos - wire.y;
     double r2 = xx * xx + yy * yy;
     // Calculate the field in case there are no planes.
     double exhelp = xx / r2;
     double eyhelp = yy / r2;
     // Take care of a plane at constant x.
     if (m_ynplax) {
-      xxmirr = m_w[i].x + (xpos - 2. * m_coplax);
+      xxmirr = wire.x + (xpos - 2. * m_coplax);
       const double r2plan = xxmirr * xxmirr + yy * yy;
       exhelp -= xxmirr / r2plan;
       eyhelp -= yy / r2plan;
@@ -3012,7 +3031,7 @@ void ComponentAnalyticField::FieldA00(const double xpos, const double ypos,
     }
     // Take care of a plane at constant y.
     if (m_ynplay) {
-      yymirr = m_w[i].y + (ypos - 2. * m_coplay);
+      yymirr = wire.y + (ypos - 2. * m_coplay);
       const double r2plan = xx * xx + yymirr * yymirr;
       exhelp -= xx / r2plan;
       eyhelp -= yymirr / r2plan;
@@ -3026,9 +3045,9 @@ void ComponentAnalyticField::FieldA00(const double xpos, const double ypos,
       r2 *= r2plan;
     }
     // Calculate the electric field and potential.
-    if (opt) volt -= 0.5 * m_w[i].e * log(r2);
-    ex += m_w[i].e * exhelp;
-    ey += m_w[i].e * eyhelp;
+    if (opt) volt -= 0.5 * wire.e * log(r2);
+    ex += wire.e * exhelp;
+    ey += wire.e * eyhelp;
   }
 }
 
@@ -3056,38 +3075,44 @@ void ComponentAnalyticField::FieldB1X(const double xpos, const double ypos,
 
   const double tx = Pi / m_sx;
   // Loop over all wires.
-  for (unsigned int i = 0; i < m_nWires; ++i) {
-    const double xx = tx * (xpos - m_w[i].x);
-    const double yy = tx * (ypos - m_w[i].y);
-    const std::complex<double> zz(xx, yy);
+  for (const auto& wire : m_w) {
+    const double xx = tx * (xpos - wire.x);
+    const double yy = tx * (ypos - wire.y);
     // Calculate the field in case there are no equipotential planes.
-    if (yy > 20.) ecompl = -icons;
-    if (fabs(yy) <= 20.)
-      ecompl =
-          icons * (exp(2. * icons * zz) + 1.) / (exp(2. * icons * zz) - 1.);
-    if (yy < -20.) ecompl = icons;
+    if (yy > 20.) {
+      ecompl = -icons;
+    } else if (yy < -20.) {
+      ecompl = icons;
+    } else {
+      const std::complex<double> zz(xx, yy);
+      const auto expzz = exp(2. * icons * zz);
+      ecompl = icons * (expzz + 1.) / (expzz - 1.);
+    }
+
     if (opt) {
       if (fabs(yy) > 20.) r2 = -fabs(yy) + CLog2;
       if (fabs(yy) <= 20.) r2 = -0.5 * log(pow(sinh(yy), 2) + pow(sin(xx), 2));
     }
     // Take care of a plane at constant y.
     if (m_ynplay) {
-      const double yymirr = tx * (ypos + m_w[i].y - 2. * m_coplay);
-      const std::complex<double> zzmirr(xx, yymirr);
-      if (yymirr > 20.) ecompl += icons;
-      if (fabs(yymirr) <= 20.)
-        ecompl += -icons * (exp(2. * icons * zzmirr) + 1.) /
-                  (exp(2. * icons * zzmirr) - 1.);
-      if (yymirr < -20.) ecompl += -icons;
-
+      const double yymirr = tx * (ypos + wire.y - 2. * m_coplay);
+      if (yymirr > 20.) {
+        ecompl += icons;
+      } else if (yymirr < -20.) {
+        ecompl += -icons;
+      } else {
+        const std::complex<double> zzmirr(xx, yymirr);
+        const auto expzzmirr = exp(2. * icons * zzmirr);
+        ecompl += -icons * (expzzmirr + 1.) / (expzzmirr - 1.);
+      }
       if (opt && fabs(yymirr) > 20.) r2 += fabs(yymirr) - CLog2;
       if (opt && fabs(yymirr) <= 20.)
         r2 += 0.5 * log(pow(sinh(yymirr), 2) + pow(sin(xx), 2));
     }
     // Calculate the electric field and potential.
-    ex += m_w[i].e * real(ecompl);
-    ey -= m_w[i].e * imag(ecompl);
-    if (opt) volt += m_w[i].e * r2;
+    ex += wire.e * real(ecompl);
+    ey -= wire.e * imag(ecompl);
+    if (opt) volt += wire.e * r2;
   }
   ex *= tx;
   ey *= tx;
@@ -3115,34 +3140,43 @@ void ComponentAnalyticField::FieldB1Y(const double xpos, const double ypos,
 
   const double ty = Pi / m_sy;
   // Loop over all wires.
-  for (int i = m_nWires; i--;) {
-    const double xx = ty * (xpos - m_w[i].x);
-    const double yy = ty * (ypos - m_w[i].y);
-    const std::complex<double> zz(xx, yy);
+  for (const auto& wire : m_w) {
+    const double xx = ty * (xpos - wire.x);
+    const double yy = ty * (ypos - wire.y);
     // Calculate the field in case there are no equipotential planes.
-    if (xx > 20.) ecompl = 1.;
-    if (fabs(xx) <= 20.) ecompl = (exp(2. * zz) + 1.) / (exp(2. * zz) - 1.);
-    if (xx < -20.) ecompl = -1.;
+    if (xx > 20.) {
+      ecompl = 1.;
+    } else if (xx < -20.) {
+      ecompl = -1.;
+    } else {
+      const std::complex<double> zz(xx, yy);
+      const auto expzz = exp(2. * zz);
+      ecompl = (expzz + 1.) / (expzz - 1.);
+    }
     if (opt) {
       if (fabs(xx) > 20.) r2 = -fabs(xx) + CLog2;
       if (fabs(xx) <= 20.) r2 = -0.5 * log(pow(sinh(xx), 2) + pow(sin(yy), 2));
     }
     // Take care of a plane at constant x.
     if (m_ynplax) {
-      const double xxmirr = ty * (xpos + m_w[i].x - 2. * m_coplax);
-      const std::complex<double> zzmirr(xxmirr, yy);
-      if (xxmirr > 20.) ecompl -= 1.;
-      if (xxmirr < -20.) ecompl += 1.;
-      if (fabs(xxmirr) <= 20.)
-        ecompl -= (exp(2. * zzmirr) + 1.) / (exp(2. * zzmirr) - 1.);
+      const double xxmirr = ty * (xpos + wire.x - 2. * m_coplax);
+      if (xxmirr > 20.) {
+        ecompl -= 1.;
+      } else if (xxmirr < -20.) {
+        ecompl += 1.;
+      } else {
+        const std::complex<double> zzmirr(xxmirr, yy);
+        const auto expzzmirr = exp(2. * zzmirr); 
+        ecompl -= (expzzmirr + 1.) / (expzzmirr - 1.);
+      }
       if (opt && fabs(xxmirr) > 20.) r2 += fabs(xxmirr) - CLog2;
       if (opt && fabs(xxmirr) <= 20.)
         r2 += 0.5 * log(pow(sinh(xxmirr), 2) + pow(sin(yy), 2));
     }
     // Calculate the electric field and potential.
-    ex += m_w[i].e * real(ecompl);
-    ey -= m_w[i].e * imag(ecompl);
-    if (opt) volt += m_w[i].e * r2;
+    ex += wire.e * real(ecompl);
+    ey -= wire.e * imag(ecompl);
+    if (opt) volt += wire.e * r2;
   }
   ex *= ty;
   ey *= ty;
@@ -3171,12 +3205,12 @@ void ComponentAnalyticField::FieldB2X(const double xpos, const double ypos,
     const double xx = tx * (xpos - m_w[i].x);
     const double yy = tx * (ypos - m_w[i].y);
     const double xxneg = tx * (xpos - m_w[i].x - 2 * m_coplax);
-    const std::complex<double> zz(xx, yy);
-    const std::complex<double> zzneg(xxneg, yy);
     // Calculate the field in case there are no equipotential planes.
     std::complex<double> ecompl(0., 0.);
     double r2 = 1.;
     if (fabs(yy) <= 20.) {
+      const std::complex<double> zz(xx, yy);
+      const std::complex<double> zzneg(xxneg, yy);
       ecompl = -m_b2sin[i] / (sin(zz) * sin(zzneg));
       if (opt) {
         const double sinhy = sinh(yy);
@@ -3189,9 +3223,9 @@ void ComponentAnalyticField::FieldB2X(const double xpos, const double ypos,
     // Take care of a planes at constant y.
     if (m_ynplay) {
       const double yymirr = tx * (ypos + m_w[i].y - 2 * m_coplay);
-      const std::complex<double> zzmirr(xx, yymirr);
-      const std::complex<double> zznmirr(xxneg, yymirr);
       if (fabs(yymirr) <= 20.) {
+        const std::complex<double> zzmirr(xx, yymirr);
+        const std::complex<double> zznmirr(xxneg, yymirr);
         ecompl += m_b2sin[i] / (sin(zzmirr) * sin(zznmirr));
         if (opt) {
           const double sinhy = sinh(yymirr);
@@ -3293,8 +3327,8 @@ void ComponentAnalyticField::FieldC10(const double xpos, const double ypos,
   if (opt) {
     if (m_mode == 0) volt = m_v0 + m_c1 * xpos;
     if (m_mode == 1) volt = m_v0 + m_c1 * ypos;
-    for (unsigned int i = 0; i < m_nWires; ++i) {
-      volt += m_w[i].e * Ph2(xpos - m_w[i].x, ypos - m_w[i].y);
+    for (const auto& wire : m_w) {
+      volt += wire.e * Ph2(xpos - wire.x, ypos - wire.y);
     }
   }
 
@@ -3325,15 +3359,15 @@ void ComponentAnalyticField::FieldC2X(const double xpos, const double ypos,
   volt = 0.;
 
   // Wire loop.
-  for (int i = m_nWires; i--;) {
+  for (const auto& wire : m_w) {
     // Compute the direct contribution.
-    zeta = m_zmult * std::complex<double>(xpos - m_w[i].x, ypos - m_w[i].y);
+    zeta = m_zmult * std::complex<double>(xpos - wire.x, ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum1 -= m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum1 -= wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum1 += m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum1 += wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3343,20 +3377,20 @@ void ComponentAnalyticField::FieldC2X(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum1 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt -= m_w[i].e * log(abs(zterm1));
+      wsum1 += wire.e * (zterm2 / zterm1);
+      if (opt) volt -= wire.e * log(abs(zterm1));
     }
     // Find the plane nearest to the wire.
-    double cx = m_coplax - m_sx * int(round((m_coplax - m_w[i].x) / m_sx));
+    double cx = m_coplax - m_sx * int(round((m_coplax - wire.x) / m_sx));
     // Mirror contribution.
     zeta = m_zmult *
-           std::complex<double>(2. * cx - xpos - m_w[i].x, ypos - m_w[i].y);
+           std::complex<double>(2. * cx - xpos - wire.x, ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum2 -= m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum2 -= wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum2 += m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum2 += wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3366,12 +3400,12 @@ void ComponentAnalyticField::FieldC2X(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum2 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt += m_w[i].e * log(abs(zterm1));
+      wsum2 += wire.e * (zterm2 / zterm1);
+      if (opt) volt += wire.e * log(abs(zterm1));
     }
     // Correct the voltage, if needed (MODE).
     if (opt && m_mode == 0) {
-      volt -= TwoPi * m_w[i].e * (xpos - cx) * (m_w[i].x - cx) / (m_sx * m_sy);
+      volt -= TwoPi * wire.e * (xpos - cx) * (wire.x - cx) / (m_sx * m_sy);
     }
   }
   // Convert the two contributions to a real field.
@@ -3402,15 +3436,15 @@ void ComponentAnalyticField::FieldC2Y(const double xpos, const double ypos,
   std::complex<double> wsum2 = 0.;
 
   // Wire loop.
-  for (int i = m_nWires; i--;) {
+  for (const auto& wire : m_w) {
     // Compute the direct contribution.
-    zeta = m_zmult * std::complex<double>(xpos - m_w[i].x, ypos - m_w[i].y);
+    zeta = m_zmult * std::complex<double>(xpos - wire.x, ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum1 -= m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum1 -= wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum1 += m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum1 += wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3420,20 +3454,20 @@ void ComponentAnalyticField::FieldC2Y(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum1 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt -= m_w[i].e * log(abs(zterm1));
+      wsum1 += wire.e * (zterm2 / zterm1);
+      if (opt) volt -= wire.e * log(abs(zterm1));
     }
     // Find the plane nearest to the wire.
-    const double cy = m_coplay - m_sy * int(round((m_coplay - m_w[i].y) / m_sy));
+    const double cy = m_coplay - m_sy * int(round((m_coplay - wire.y) / m_sy));
     // Mirror contribution from the y plane.
     zeta = m_zmult *
-           std::complex<double>(xpos - m_w[i].x, 2 * cy - ypos - m_w[i].y);
+           std::complex<double>(xpos - wire.x, 2 * cy - ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum2 -= m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum2 -= wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum2 += m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum2 += wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3443,12 +3477,12 @@ void ComponentAnalyticField::FieldC2Y(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum2 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt += m_w[i].e * log(abs(zterm1));
+      wsum2 += wire.e * (zterm2 / zterm1);
+      if (opt) volt += wire.e * log(abs(zterm1));
     }
     // Correct the voltage, if needed (MODE).
     if (opt && m_mode == 1) {
-      volt -= TwoPi * m_w[i].e * (ypos - cy) * (m_w[i].y - cy) / (m_sx * m_sy);
+      volt -= TwoPi * wire.e * (ypos - cy) * (wire.y - cy) / (m_sx * m_sy);
     }
   }
   // Convert the two contributions to a real field.
@@ -3481,15 +3515,15 @@ void ComponentAnalyticField::FieldC30(const double xpos, const double ypos,
   volt = 0.;
 
   // Wire loop.
-  for (unsigned int i = 0; i < m_nWires; ++i) {
+  for (const auto& wire : m_w) {
     // Compute the direct contribution.
-    zeta = m_zmult * std::complex<double>(xpos - m_w[i].x, ypos - m_w[i].y);
+    zeta = m_zmult * std::complex<double>(xpos - wire.x, ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum1 -= m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum1 -= wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum1 += m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum1 += wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3499,20 +3533,20 @@ void ComponentAnalyticField::FieldC30(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum1 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt -= m_w[i].e * log(abs(zterm1));
+      wsum1 += wire.e * (zterm2 / zterm1);
+      if (opt) volt -= wire.e * log(abs(zterm1));
     }
     // Find the plane nearest to the wire.
-    const double cx = m_coplax - m_sx * int(round((m_coplax - m_w[i].x) / m_sx));
+    const double cx = m_coplax - m_sx * int(round((m_coplax - wire.x) / m_sx));
     // Mirror contribution from the x plane.
     zeta = m_zmult *
-           std::complex<double>(2. * cx - xpos - m_w[i].x, ypos - m_w[i].y);
+           std::complex<double>(2. * cx - xpos - wire.x, ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum2 -= m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum2 -= wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum2 += m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum2 += wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3522,20 +3556,20 @@ void ComponentAnalyticField::FieldC30(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum2 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt += m_w[i].e * log(abs(zterm1));
+      wsum2 += wire.e * (zterm2 / zterm1);
+      if (opt) volt += wire.e * log(abs(zterm1));
     }
     // Find the plane nearest to the wire.
-    const double cy = m_coplay - m_sy * int(round((m_coplay - m_w[i].y) / m_sy));
+    const double cy = m_coplay - m_sy * int(round((m_coplay - wire.y) / m_sy));
     // Mirror contribution from the x plane.
     zeta = m_zmult *
-           std::complex<double>(xpos - m_w[i].x, 2. * cy - ypos - m_w[i].y);
+           std::complex<double>(xpos - wire.x, 2. * cy - ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum3 -= m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum3 -= wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum3 += m_w[i].e * icons;
-      if (opt) volt += m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum3 += wire.e * icons;
+      if (opt) volt += wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3545,18 +3579,18 @@ void ComponentAnalyticField::FieldC30(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum3 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt += m_w[i].e * log(abs(zterm1));
+      wsum3 += wire.e * (zterm2 / zterm1);
+      if (opt) volt += wire.e * log(abs(zterm1));
     }
     // Mirror contribution from both the x and the y plane.
-    zeta = m_zmult * std::complex<double>(2. * cx - xpos - m_w[i].x,
-                                          2. * cy - ypos - m_w[i].y);
+    zeta = m_zmult * std::complex<double>(2. * cx - xpos - wire.x,
+                                          2. * cy - ypos - wire.y);
     if (imag(zeta) > 15.) {
-      wsum4 -= m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum4 -= wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
-      wsum4 += m_w[i].e * icons;
-      if (opt) volt -= m_w[i].e * (fabs(imag(zeta)) - CLog2);
+      wsum4 += wire.e * icons;
+      if (opt) volt -= wire.e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. * zsin * zsin - 2.;
@@ -3566,8 +3600,8 @@ void ComponentAnalyticField::FieldC30(const double xpos, const double ypos,
       zu = -3. * m_p1 - zcof * 5. * m_p2;
       zunew = 1. - zcof * zu - 5. * m_p2;
       zterm2 = (zunew - zu) * cos(zeta);
-      wsum4 += m_w[i].e * (zterm2 / zterm1);
-      if (opt) volt -= m_w[i].e * log(abs(zterm1));
+      wsum4 += wire.e * (zterm2 / zterm1);
+      if (opt) volt -= wire.e * log(abs(zterm1));
     }
   }
   // Convert the two contributions to a real field.
@@ -3596,19 +3630,18 @@ void ComponentAnalyticField::FieldD10(const double xpos, const double ypos,
   // Set the complex position coordinates.
   const std::complex<double> zpos = std::complex<double>(xpos, ypos);
   // Loop over all wires.
-  for (int i = m_nWires; i--;) {
-    const double q = m_w[i].e;
+  for (const auto& wire : m_w) {
     // Set the complex version of the wire-coordinate for simplicity.
-    const std::complex<double> zi(m_w[i].x, m_w[i].y);
+    const std::complex<double> zi(wire.x, wire.y);
     // Compute the contribution to the potential, if needed.
     if (opt) {
-      volt -= q * log(abs(m_cotube * (zpos - zi) / (m_cotube2 - zpos * conj(zi))));
+      volt -= wire.e * log(abs(m_cotube * (zpos - zi) / (m_cotube2 - zpos * conj(zi))));
     }
     // Compute the contribution to the electric field, always.
     const std::complex<double> wi =
         1. / conj(zpos - zi) + zi / (m_cotube2 - conj(zpos) * zi);
-    ex += q * real(wi);
-    ey += q * imag(wi);
+    ex += wire.e * real(wi);
+    ey += wire.e * imag(wi);
   }
 }
 
@@ -3633,14 +3666,14 @@ void ComponentAnalyticField::FieldD20(const double xpos, const double ypos,
   // Set the complex position coordinates.
   const std::complex<double> zpos = std::complex<double>(xpos, ypos);
   // Loop over all wires.
-  for (int i = m_nWires; i--;) {
+  for (const auto& wire : m_w) {
     // Set the complex version of the wire-coordinate for simplicity.
-    const std::complex<double> zi(m_w[i].x, m_w[i].y);
+    const std::complex<double> zi(wire.x, wire.y);
     // Case of the wire which is not in the centre.
-    if (abs(zi) > 0.5 * m_w[i].d) {
+    if (abs(zi) > 0.5 * wire.d) {
       // Compute the contribution to the potential, if needed.
       if (opt) {
-        volt -= m_w[i].e * log(abs((1. / pow(m_cotube, m_mtube)) *
+        volt -= wire.e * log(abs((1. / pow(m_cotube, m_mtube)) *
                                    (pow(zpos, m_mtube) - pow(zi, m_mtube)) /
                                    (1. - pow(zpos * conj(zi) / m_cotube2, m_mtube))));
       }
@@ -3650,19 +3683,19 @@ void ComponentAnalyticField::FieldD20(const double xpos, const double ypos,
           (1. / conj(pow(zpos, m_mtube) - pow(zi, m_mtube)) +
            pow(zi, m_mtube) /
                (pow(m_cotube, 2 * m_mtube) - pow(conj(zpos) * zi, m_mtube)));
-      ex += m_w[i].e * real(wi);
-      ey += m_w[i].e * imag(wi);
+      ex += wire.e * real(wi);
+      ey += wire.e * imag(wi);
     } else {
       // Case of the central wire.
       if (opt) {
-        volt -= m_w[i].e * log(abs((1. / m_cotube) * (zpos - zi) /
+        volt -= wire.e * log(abs((1. / m_cotube) * (zpos - zi) /
                                    (1. - zpos * conj(zi) / m_cotube2)));
       }
       const std::complex<double> wi =
           1. / conj(zpos - zi) + zi / (m_cotube2 - conj(zpos) * zi);
       // Compute the contribution to the electric field, always.
-      ex += m_w[i].e * real(wi);
-      ey += m_w[i].e * imag(wi);
+      ex += wire.e * real(wi);
+      ey += wire.e * imag(wi);
     }
   }
 }
@@ -3745,102 +3778,6 @@ bool ComponentAnalyticField::InTube(const double x0, const double y0,
   return true;
 }
 
-void ComponentAnalyticField::InitializeCoefficientTables() {
-
-  const int nterms = 16;
-
-  // Tables of coefficients used by ConformalMap
-  m_cc1.assign(6, std::vector<double>(nterms, 0.));
-  m_cc2.assign(6, std::vector<double>(nterms, 0.));
-
-  // Triangle: coefficients for centre and corner expansion.
-  const double cc13[nterms] = {
-      0.1000000000e+01, -.1666666865e+00, 0.3174602985e-01, -.5731921643e-02,
-      0.1040112227e-02, -.1886279933e-03, 0.3421107249e-04, -.6204730198e-05,
-      0.1125329618e-05, -.2040969207e-06, 0.3701631357e-07, -.6713513301e-08,
-      0.1217605794e-08, -.2208327132e-09, 0.4005162868e-10, -.7264017512e-11};
-  const double cc23[nterms] = {
-      0.3333333135e+00, -.5555555597e-01, 0.1014109328e-01, -.1837154618e-02,
-      0.3332451452e-03, -.6043842586e-04, 0.1096152027e-04, -.1988050826e-05,
-      0.3605655365e-06, -.6539443120e-07, 0.1186035448e-07, -.2151069323e-08,
-      0.3901317047e-09, -.7075676156e-10, 0.1283289534e-10, -.2327455936e-11};
-
-  // Square: coefficients for centre and corner expansion.
-  const double cc14[nterms] = {
-      0.1000000000e+01, -.1000000238e+00, 0.8333332837e-02, -.7051283028e-03,
-      0.5967194738e-04, -.5049648280e-05, 0.4273189802e-06, -.3616123934e-07,
-      0.3060091514e-08, -.2589557457e-09, 0.2191374859e-10, -.1854418528e-11,
-      0.1569274224e-12, -.1327975205e-13, 0.1123779363e-14, -.9509817570e-16};
-  const double cc24[nterms] = {
-      0.1000000000e+01, -.5000000000e+00, 0.3000000119e+00, -.1750000119e+00,
-      0.1016666889e+00, -.5916666612e-01, 0.3442307562e-01, -.2002724260e-01,
-      0.1165192947e-01, -.6779119372e-02, 0.3944106400e-02, -.2294691978e-02,
-      0.1335057430e-02, -.7767395582e-03, 0.4519091453e-03, -.2629216760e-03};
-
-  // Pentagon: coefficients for centre and corner expansion.
-  const double cc15[nterms] = {
-      0.1000000000e+01, -.6666666269e-01, 0.1212121220e-02, -.2626262140e-03,
-      -.3322110570e-04, -.9413293810e-05, -.2570029210e-05, -.7695705904e-06,
-      -.2422486887e-06, -.7945993730e-07, -.2691839640e-07, -.9361642128e-08,
-      -.3327319087e-08, -.1204430555e-08, -.4428404310e-09, -.1650302672e-09};
-  const double cc25[nterms] = {
-      0.1248050690e+01, -.7788147926e+00, 0.6355384588e+00, -.4899077415e+00,
-      0.3713272810e+00, -.2838423252e+00, 0.2174729109e+00, -.1663445234e+00,
-      0.1271933913e+00, -.9728997946e-01, 0.7442557812e-01, -.5692918226e-01,
-      0.4354400188e-01, -.3330700099e-01, 0.2547712997e-01, -.1948769018e-01};
-
-  // Hexagon: coefficients for centre and corner expansion.
-  const double cc16[nterms] = {
-      0.1000000000e+01, -.4761904851e-01, -.1221001148e-02, -.3753788769e-03,
-      -.9415557724e-04, -.2862767724e-04, -.9587882232e-05, -.3441659828e-05,
-      -.1299798896e-05, -.5103651119e-06, -.2066504408e-06, -.8578405186e-07,
-      -.3635090096e-07, -.1567239494e-07, -.6857355572e-08, -.3038770346e-08};
-  const double cc26[nterms] = {
-      0.1333333015e+01, -.8888888955e+00, 0.8395061493e+00, -.7242798209e+00,
-      0.6016069055e+00, -.5107235312e+00, 0.4393203855e+00, -.3745460510e+00,
-      0.3175755739e+00, -.2703750730e+00, 0.2308617830e+00, -.1966916919e+00,
-      0.1672732830e+00, -.1424439549e+00, 0.1214511395e+00, -.1034612656e+00};
-
-  // Heptagon: coefficients for centre and corner expansion.
-  const double cc17[nterms] = {
-      0.1000000000e+01, -.3571428731e-01, -.2040816238e-02, -.4936389159e-03,
-      -.1446709794e-03, -.4963850370e-04, -.1877940667e-04, -.7600909157e-05,
-      -.3232265954e-05, -.1427365532e-05, -.6493634714e-06, -.3026190711e-06,
-      -.1438593245e-06, -.6953911225e-07, -.3409525462e-07, -.1692310647e-07};
-  const double cc27[nterms] = {
-      0.1359752655e+01, -.9244638681e+00, 0.9593217969e+00, -.8771237731e+00,
-      0.7490229011e+00, -.6677658558e+00, 0.6196745634e+00, -.5591596961e+00,
-      0.4905325770e+00, -.4393517375e+00, 0.4029803872e+00, -.3631100059e+00,
-      0.3199430704e+00, -.2866140604e+00, 0.2627358437e+00, -.2368256450e+00};
-
-  // Octagon: coefficients for centre and corner expansion.
-  const double cc18[nterms] = {
-      0.1000000000e+01, -.2777777612e-01, -.2246732125e-02, -.5571441725e-03,
-      -.1790652314e-03, -.6708275760e-04, -.2766949183e-04, -.1219387286e-04,
-      -.5640039490e-05, -.2706697160e-05, -.1337270078e-05, -.6763995657e-06,
-      -.3488264610e-06, -.1828456675e-06, -.9718036154e-07, -.5227070332e-07};
-  const double cc28[nterms] = {
-      0.1362840652e+01, -.9286670089e+00, 0.1035511017e+01, -.9800255299e+00,
-      0.8315343261e+00, -.7592730522e+00, 0.7612683773e+00, -.7132136226e+00,
-      0.6074471474e+00, -.5554352999e+00, 0.5699443221e+00, -.5357525349e+00,
-      0.4329345822e+00, -.3916820884e+00, 0.4401986003e+00, -.4197303057e+00};
-
-  for (int i = 0; i < nterms; ++i) {
-    m_cc1[0][i] = cc13[i];
-    m_cc2[0][i] = cc23[i];
-    m_cc1[1][i] = cc14[i];
-    m_cc2[1][i] = cc24[i];
-    m_cc1[2][i] = cc15[i];
-    m_cc2[2][i] = cc25[i];
-    m_cc1[3][i] = cc16[i];
-    m_cc2[3][i] = cc26[i];
-    m_cc1[4][i] = cc17[i];
-    m_cc2[4][i] = cc27[i];
-    m_cc1[5][i] = cc18[i];
-    m_cc2[5][i] = cc28[i];
-  }
-}
-
 void ComponentAnalyticField::Field3dA00(const double xpos, const double ypos,
                                         const double zpos, double& ex,
                                         double& ey, double& ez, double& volt) {
@@ -3856,29 +3793,26 @@ void ComponentAnalyticField::Field3dA00(const double xpos, const double ypos,
   //   (Last changed on  5/12/94.)
   //-----------------------------------------------------------------------
 
-  double exhelp, eyhelp, ezhelp, vhelp;
-
   // Initialise the electric field and potential.
   ex = ey = ez = volt = 0.;
 
   // Loop over all charges.
-  const unsigned int n3d = m_ch3d.size();
-  for (unsigned int i = 0; i < n3d; ++i) {
+  for (const auto& charge : m_ch3d) {
     // Calculate the field in case there are no planes.
-    const double dx = xpos - m_ch3d[i].x;
-    const double dy = ypos - m_ch3d[i].y;
-    const double dz = zpos - m_ch3d[i].z;
+    const double dx = xpos - charge.x;
+    const double dy = ypos - charge.y;
+    const double dz = zpos - charge.z;
     const double r = sqrt(dx * dx + dy * dy + dz * dz);
     if (fabs(r) < Small) continue;
     const double r3 = pow(r, 3);
-    exhelp = -dx / r3;
-    eyhelp = -dy / r3;
-    ezhelp = -dz / r3;
-    vhelp = 1. / r;
+    double exhelp = -dx / r3;
+    double eyhelp = -dy / r3;
+    double ezhelp = -dz / r3;
+    double vhelp = 1. / r;
     // Take care of a plane at constant x.
     double dxm = 0., dym = 0.;
     if (m_ynplax) {
-      dxm = m_ch3d[i].x + xpos - 2 * m_coplax;
+      dxm = charge.x + xpos - 2 * m_coplax;
       const double rplan = sqrt(dxm * dxm + dy * dy);
       if (fabs(rplan) < Small) continue;
       const double rplan3 = pow(rplan, 3);
@@ -3889,7 +3823,7 @@ void ComponentAnalyticField::Field3dA00(const double xpos, const double ypos,
     }
     // Take care of a plane at constant y.
     if (m_ynplay) {
-      dym = m_ch3d[i].y + ypos - 2. * m_coplay;
+      dym = charge.y + ypos - 2. * m_coplay;
       const double rplan = sqrt(dx * dx + dym * dym);
       if (fabs(rplan) < Small) continue;
       const double rplan3 = pow(rplan, 3);
@@ -3909,10 +3843,10 @@ void ComponentAnalyticField::Field3dA00(const double xpos, const double ypos,
       vhelp += 1. / rplan;
     }
     // Add the terms to the electric field and the potential.
-    ex -= m_ch3d[i].e * exhelp;
-    ey -= m_ch3d[i].e * eyhelp;
-    ez -= m_ch3d[i].e * ezhelp;
-    volt += m_ch3d[i].e * vhelp;
+    ex -= charge.e * exhelp;
+    ey -= charge.e * eyhelp;
+    ez -= charge.e * ezhelp;
+    volt += charge.e * vhelp;
   }
 }
 
@@ -3939,15 +3873,13 @@ void ComponentAnalyticField::Field3dB2X(const double xpos, const double ypos,
   ex = ey = ez = volt = 0.;
 
   // Loop over all charges.
-  const unsigned int n3d = m_ch3d.size();
-  for (unsigned int i = 0; i < n3d; ++i) {
-    // Skip wires that are on the charge.
-    if (xpos == m_ch3d[i].x && ypos == m_ch3d[i].y && zpos == m_ch3d[i].z)
-      continue;
-    const double dx = xpos - m_ch3d[i].x;
-    const double dy = ypos - m_ch3d[i].y;
-    const double dz = zpos - m_ch3d[i].z;
-    const double dxm = xpos + m_ch3d[i].x - 2 * m_coplax;
+  for (const auto& charge : m_ch3d) {
+    // Skip coordinates that are on the charge.
+    if (xpos == charge.x && ypos == charge.y && zpos == charge.z) continue;
+    const double dx = xpos - charge.x;
+    const double dy = ypos - charge.y;
+    const double dz = zpos - charge.z;
+    const double dxm = xpos + charge.x - 2 * m_coplax;
     // In the far away zone, sum the modified Bessel function series.
     if (dy * dy + dz * dz > pow(rcut * 2 * m_sx, 2)) {
       // Initialise the per-wire sum.
@@ -4008,7 +3940,7 @@ void ComponentAnalyticField::Field3dB2X(const double xpos, const double ypos,
     }
     // Take care of a plane at constant y.
     if (m_ynplay) {
-      const double dym = ypos + m_ch3d[i].y - 2. * m_coplay;
+      const double dym = ypos + charge.y - 2. * m_coplay;
       if (dym * dym + dz * dz > pow(rcut * 2 * m_sx, 2)) {
         // Bessel function series.
         // Loop over the terms in the series.
@@ -4065,10 +3997,10 @@ void ComponentAnalyticField::Field3dB2X(const double xpos, const double ypos,
         }
       }
     }
-    ex += m_ch3d[i].e * exsum;
-    ey += m_ch3d[i].e * eysum;
-    ez += m_ch3d[i].e * ezsum;
-    volt += m_ch3d[i].e * vsum;
+    ex += charge.e * exsum;
+    ey += charge.e * eysum;
+    ez += charge.e * ezsum;
+    volt += charge.e * vsum;
   }
 }
 
@@ -4095,15 +4027,13 @@ void ComponentAnalyticField::Field3dB2Y(const double xpos, const double ypos,
   ex = ey = ez = volt = 0.;
 
   // Loop over all charges.
-  const unsigned int n3d = m_ch3d.size();
-  for (unsigned int i = 0; i < n3d; ++i) {
+  for (const auto& charge : m_ch3d) {
     // Skip wires that are on the charge.
-    if (xpos == m_ch3d[i].x && ypos == m_ch3d[i].y && zpos == m_ch3d[i].z)
-      continue;
-    const double dx = xpos - m_ch3d[i].x;
-    const double dy = ypos - m_ch3d[i].y;
-    const double dz = zpos - m_ch3d[i].z;
-    const double dym = ypos + m_ch3d[i].y - 2 * m_coplay;
+    if (xpos == charge.x && ypos == charge.y && zpos == charge.z) continue;
+    const double dx = xpos - charge.x;
+    const double dy = ypos - charge.y;
+    const double dz = zpos - charge.z;
+    const double dym = ypos + charge.y - 2 * m_coplay;
     // In the far away zone, sum the modified Bessel function series.
     if (dx * dx + dz * dz > pow(rcut * 2 * m_sy, 2)) {
       // Initialise the per-wire sum.
@@ -4164,7 +4094,7 @@ void ComponentAnalyticField::Field3dB2Y(const double xpos, const double ypos,
     }
     // Take care of a plane at constant x.
     if (m_ynplax) {
-      const double dxm = xpos + m_ch3d[i].x - 2. * m_coplax;
+      const double dxm = xpos + charge.x - 2. * m_coplax;
       if (dxm * dxm + dz * dz > pow(rcut * 2 * m_sy, 2)) {
         // Bessel function series.
         // Loop over the terms in the series.
@@ -4221,10 +4151,10 @@ void ComponentAnalyticField::Field3dB2Y(const double xpos, const double ypos,
         }
       }
     }
-    ex += m_ch3d[i].e * exsum;
-    ey += m_ch3d[i].e * eysum;
-    ez += m_ch3d[i].e * ezsum;
-    volt += m_ch3d[i].e * vsum;
+    ex += charge.e * exsum;
+    ey += charge.e * eysum;
+    ez += charge.e * ezsum;
+    volt += charge.e * vsum;
   }
 }
 
@@ -4270,12 +4200,12 @@ void ComponentAnalyticField::Field3dD10(const double xxpos, const double yypos,
   const double zpos = zzpos;
 
   // Loop over all point charges.
-  const unsigned int n3d = m_ch3d.size();
-  for (unsigned int i = 0; i < n3d; ++i) {
+  for (const auto& charge : m_ch3d) {
     for (int ii = -1; ii <= 1; ++ii) {
-      x3d = 0.5 * log(m_ch3d[i].x * m_ch3d[i].x + m_ch3d[i].y * m_ch3d[i].y);
-      y3d = atan2(m_ch3d[i].y, m_ch3d[i].x + ii * TwoPi);
-      z3d = m_ch3d[i].z;
+      // TODO
+      x3d = 0.5 * log(charge.x * charge.x + charge.y * charge.y);
+      y3d = atan2(charge.y, charge.x + ii * TwoPi);
+      z3d = charge.z;
       const double dx = xpos - x3d;
       const double dy = ypos - y3d;
       const double dz = zpos - z3d;
@@ -4340,9 +4270,9 @@ void ComponentAnalyticField::Field3dD10(const double xxpos, const double yypos,
           ezsum += dz * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
         }
       }
-      ex += m_ch3d[i].e * exsum;
-      ey += m_ch3d[i].e * eysum;
-      ez += m_ch3d[i].e * ezsum;
+      ex += charge.e * exsum;
+      ey += charge.e * eysum;
+      ez += charge.e * ezsum;
       // Finish the loop over the charges.
     }
   }
@@ -4460,28 +4390,19 @@ bool ComponentAnalyticField::PrepareSignals() {
   // Associate wires, planes and strips with readout groups
   const unsigned int nReadout = m_readout.size();
   for (unsigned int i = 0; i < nReadout; ++i) {
-    for (unsigned int j = 0; j < m_nWires; ++j) {
-      if (m_w[j].type == m_readout[i]) m_w[j].ind = i;
+    for (auto& wire : m_w) {
+      if (wire.type == m_readout[i]) wire.ind = i;
     }
     for (unsigned int j = 0; j < 5; ++j) {
-      if (planes[j].type == m_readout[i]) planes[j].ind = i;
-      const unsigned int nStrips1 = planes[j].strips1.size();
-      for (unsigned int k = 0; k < nStrips1; ++k) {
-        if (planes[j].strips1[k].type == m_readout[i]) {
-          planes[j].strips1[k].ind = i;
-        }
+      if (m_planes[j].type == m_readout[i]) m_planes[j].ind = i;
+      for (auto& strip : m_planes[j].strips1) {
+        if (strip.type == m_readout[i]) strip.ind = i;
       }
-      const unsigned int nStrips2 = planes[j].strips2.size();
-      for (unsigned int k = 0; k < nStrips2; ++k) {
-        if (planes[j].strips2[k].type == m_readout[i]) {
-          planes[j].strips2[k].ind = i;
-        }
+      for (auto& strip : m_planes[j].strips2) {
+        if (strip.type == m_readout[i]) strip.ind = i;
       }
-      const unsigned int nPixels = planes[j].pixels.size();
-      for (unsigned int k = 0; k < nPixels; ++k) {
-        if (planes[j].pixels[k].type == m_readout[i]) {
-          planes[j].pixels[k].ind = i;
-        }
+      for (auto& pixel : m_planes[j].pixels) {
+        if (pixel.type == m_readout[i]) pixel.ind = i;
       }
     }
   }
@@ -4932,34 +4853,34 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
   }
   // Compute the background weighting fields, first in x.
   if (m_ynplan[0] && m_ynplan[1]) {
-    planes[0].ewxcor = 1. / (m_coplan[1] - m_coplan[0]);
-    planes[1].ewxcor = 1. / (m_coplan[0] - m_coplan[1]);
+    m_planes[0].ewxcor = 1. / (m_coplan[1] - m_coplan[0]);
+    m_planes[1].ewxcor = 1. / (m_coplan[0] - m_coplan[1]);
   } else if (m_ynplan[0] && m_perx) {
-    planes[0].ewxcor = 1. / m_sx;
-    planes[1].ewxcor = 0.;
+    m_planes[0].ewxcor = 1. / m_sx;
+    m_planes[1].ewxcor = 0.;
   } else if (m_ynplan[1] && m_perx) {
-    planes[0].ewxcor = 0.;
-    planes[1].ewxcor = -1. / m_sx;
+    m_planes[0].ewxcor = 0.;
+    m_planes[1].ewxcor = -1. / m_sx;
   } else {
-    planes[0].ewxcor = planes[1].ewxcor = 0.;
+    m_planes[0].ewxcor = m_planes[1].ewxcor = 0.;
   }
-  planes[2].ewxcor = planes[3].ewxcor = planes[4].ewxcor = 0.;
+  m_planes[2].ewxcor = m_planes[3].ewxcor = m_planes[4].ewxcor = 0.;
   // Next also in y.
-  planes[0].ewycor = planes[1].ewycor = 0.;
+  m_planes[0].ewycor = m_planes[1].ewycor = 0.;
   if (m_ynplan[2] && m_ynplan[3]) {
-    planes[2].ewycor = 1. / (m_coplan[3] - m_coplan[2]);
-    planes[3].ewycor = 1. / (m_coplan[2] - m_coplan[3]);
+    m_planes[2].ewycor = 1. / (m_coplan[3] - m_coplan[2]);
+    m_planes[3].ewycor = 1. / (m_coplan[2] - m_coplan[3]);
   } else if (m_ynplan[2] && m_pery) {
-    planes[2].ewycor = 1. / m_sy;
-    planes[3].ewycor = 0.;
+    m_planes[2].ewycor = 1. / m_sy;
+    m_planes[3].ewycor = 0.;
   } else if (m_ynplan[3] && m_pery) {
-    planes[2].ewycor = 0.;
-    planes[3].ewycor = -1. / m_sy;
+    m_planes[2].ewycor = 0.;
+    m_planes[3].ewycor = -1. / m_sy;
   } else {
-    planes[2].ewycor = planes[3].ewycor = 0.;
+    m_planes[2].ewycor = m_planes[3].ewycor = 0.;
   }
   // The tube has no correction field.
-  planes[4].ewycor = 0.;
+  m_planes[4].ewycor = 0.;
 
   // Debugging output.
   if (m_debug) {
@@ -4977,8 +4898,8 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
     std::cout << "    Bias fields:\n";
     std::cout << "    Plane    x-Bias [1/cm]    y-Bias [1/cm]\n";
     for (int i = 0; i < 4; ++i) {
-      std::cout << "    " << i << "  " << planes[i].ewxcor << "  "
-                << planes[i].ewycor << "\n";
+      std::cout << "    " << i << "  " << m_planes[i].ewxcor << "  "
+                << m_planes[i].ewycor << "\n";
     }
   }
 
@@ -5300,7 +5221,6 @@ bool ComponentAnalyticField::IprD30() {
   wmap.resize(m_nWires);
 
   std::complex<double> wd;
-  InitializeCoefficientTables();
 
   // Loop over all wire combinations.
   for (int i = 0; i < int(m_nWires); ++i) {
@@ -5411,7 +5331,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
       // Loop over all planes.
       for (int ip = 0; ip < 5; ++ip) {
         // Pick out those that are part of this read out group.
-        if (planes[ip].ind == isw) {
+        if (m_planes[ip].ind == isw) {
           ex = ey = ez = 0.;
           if (m_scellTypeFourier == "A  ") {
             WfieldPlaneA00(xpos, ypos, ex, ey, volt, mx, my, ip, opt);
@@ -5432,7 +5352,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
             std::cerr << "    Unkown field type " << m_scellTypeFourier
                       << " received. Program error!\n";
             std::cerr << "    Encountered for plane " << ip
-                      << ", readout group = " << planes[ip].ind << "\n";
+                      << ", readout group = " << m_planes[ip].ind << "\n";
             exsum = eysum = ezsum = 0.;
             return false;
           }
@@ -5447,9 +5367,9 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
   }
   // Add the field due to the planes themselves.
   for (int ip = 0; ip < 5; ++ip) {
-    if (planes[ip].ind == isw) {
-      exsum += planes[ip].ewxcor;
-      eysum += planes[ip].ewycor;
+    if (m_planes[ip].ind == isw) {
+      exsum += m_planes[ip].ewxcor;
+      eysum += m_planes[ip].ewycor;
       if (opt) {
         if (ip == 0 || ip == 1) {
           double xx = xpos;
@@ -5458,7 +5378,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
             if (m_ynplan[0] && xx <= m_coplan[0]) xx += m_sx;
             if (m_ynplan[1] && xx >= m_coplan[1]) xx -= m_sx;
           }
-          vsum += 1. - planes[ip].ewxcor * (xx - m_coplan[ip]);
+          vsum += 1. - m_planes[ip].ewxcor * (xx - m_coplan[ip]);
         } else if (ip == 2 || ip == 3) {
           double yy = ypos;
           if (m_pery) {
@@ -5466,7 +5386,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
             if (m_ynplan[2] && yy <= m_coplan[2]) yy += m_sy;
             if (m_ynplan[3] && yy >= m_coplan[3]) yy -= m_sy;
           }
-          vsum += 1. - planes[ip].ewycor * (yy - m_coplan[ip]);
+          vsum += 1. - m_planes[ip].ewycor * (yy - m_coplan[ip]);
         }
       }
     }
@@ -5474,29 +5394,24 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
 
   // Add strips and pixels, if there are any.
   for (unsigned int ip = 0; ip < 5; ++ip) {
-    const unsigned int nStrips1 = planes[ip].strips1.size();
-    for (unsigned int istrip = 0; istrip < nStrips1; ++istrip) {
-      if (planes[ip].strips1[istrip].ind == isw) {
-        WfieldStripXy(xpos, ypos, zpos, ex, ey, ez, volt, ip, istrip, opt);
-        exsum += ex;
-        eysum += ey;
-        ezsum += ez;
-        if (opt) vsum += volt;
-      }
+    for (const auto& strip : m_planes[ip].strips1) {
+      if (strip.ind != isw) continue;
+      WfieldStripXy(xpos, ypos, zpos, ex, ey, ez, volt, ip, strip, opt);
+      exsum += ex;
+      eysum += ey;
+      ezsum += ez;
+      if (opt) vsum += volt;
     }
-    const unsigned int nStrips2 = planes[ip].strips2.size();
-    for (unsigned int istrip = 0; istrip < nStrips2; ++istrip) {
-      if (planes[ip].strips2[istrip].ind == isw) {
-        WfieldStripZ(xpos, ypos, ex, ey, volt, ip, istrip, opt);
-        exsum += ex;
-        eysum += ey;
-        if (opt) vsum += volt;
-      }
+    for (const auto& strip : m_planes[ip].strips2) {
+      if (strip.ind != isw) continue;
+      WfieldStripZ(xpos, ypos, ex, ey, volt, ip, strip, opt);
+      exsum += ex;
+      eysum += ey;
+      if (opt) vsum += volt;
     }
-    const unsigned int nPixels = planes[ip].pixels.size();
-    for (unsigned int ipix = 0; ipix < nPixels; ++ipix) {
-      if (planes[ip].pixels[ipix].ind != isw) continue;
-      WfieldPixel(xpos, ypos, zpos, ex, ey, ez, volt, ip, ipix, opt);
+    for (const auto& pixel : m_planes[ip].pixels) {
+      if (pixel.ind != isw) continue;
+      WfieldPixel(xpos, ypos, zpos, ex, ey, ez, volt, ip, pixel, opt);
       exsum += ex;
       eysum += ey;
       ezsum += ez;
@@ -6606,7 +6521,8 @@ void ComponentAnalyticField::WfieldPlaneD30(const double xpos,
 
 void ComponentAnalyticField::WfieldStripZ(const double xpos, const double ypos,
                                           double& ex, double& ey, double& volt,
-                                          const int ip, const int is,
+                                          const int ip, const Strip& strip,
+//                                           const int ip, const int is,
                                           const bool opt) const {
 
   //-----------------------------------------------------------------------
@@ -6617,32 +6533,31 @@ void ComponentAnalyticField::WfieldStripZ(const double xpos, const double ypos,
   // Initialise the weighting field and potential.
   ex = ey = volt = 0.;
 
-  strip theStrip = planes[ip].strips2[is];
   // Transform to normalised coordinates.
   double xw = 0., yw = 0.;
   switch (ip) {
     case 0:
-      xw = -ypos + 0.5 * (theStrip.smin + theStrip.smax);
+      xw = -ypos + 0.5 * (strip.smin + strip.smax);
       yw = xpos - m_coplan[ip];
       break;
     case 1:
-      xw = ypos - 0.5 * (theStrip.smin + theStrip.smax);
+      xw = ypos - 0.5 * (strip.smin + strip.smax);
       yw = m_coplan[ip] - xpos;
       break;
     case 2:
-      xw = xpos - 0.5 * (theStrip.smin + theStrip.smax);
+      xw = xpos - 0.5 * (strip.smin + strip.smax);
       yw = ypos - m_coplan[ip];
       break;
     case 3:
-      xw = -xpos + 0.5 * (theStrip.smin + theStrip.smax);
+      xw = -xpos + 0.5 * (strip.smin + strip.smax);
       yw = m_coplan[ip] - ypos;
       break;
     default:
       return;
   }
   // Store the gap and strip halfwidth.
-  const double w = 0.5 * fabs(theStrip.smax - theStrip.smin);
-  const double g = theStrip.gap;
+  const double w = 0.5 * fabs(strip.smax - strip.smin);
+  const double g = strip.gap;
 
   // Make sure we are in the fiducial part of the weighting map.
   if (yw <= 0. || yw > g) return;
@@ -6691,7 +6606,7 @@ void ComponentAnalyticField::WfieldStripZ(const double xpos, const double ypos,
 void ComponentAnalyticField::WfieldStripXy(const double xpos, const double ypos,
                                            const double zpos, double& ex,
                                            double& ey, double& ez, double& volt,
-                                           const int ip, const int is,
+                                           const int ip, const Strip& strip,
                                            const bool opt) const {
 
   //-----------------------------------------------------------------------
@@ -6702,24 +6617,23 @@ void ComponentAnalyticField::WfieldStripXy(const double xpos, const double ypos,
   // Initialise the weighting field and potential.
   ex = ey = ez = volt = 0.;
 
-  strip theStrip = planes[ip].strips1[is];
   // Transform to normalised coordinates.
   double xw = 0., yw = 0.;
   switch (ip) {
     case 0:
-      xw = -zpos + 0.5 * (theStrip.smin + theStrip.smax);
+      xw = -zpos + 0.5 * (strip.smin + strip.smax);
       yw = xpos - m_coplan[ip];
       break;
     case 1:
-      xw = zpos - 0.5 * (theStrip.smin + theStrip.smax);
+      xw = zpos - 0.5 * (strip.smin + strip.smax);
       yw = m_coplan[ip] - xpos;
       break;
     case 2:
-      xw = zpos - 0.5 * (theStrip.smin + theStrip.smax);
+      xw = zpos - 0.5 * (strip.smin + strip.smax);
       yw = ypos - m_coplan[ip];
       break;
     case 3:
-      xw = -zpos + 0.5 * (theStrip.smin + theStrip.smax);
+      xw = -zpos + 0.5 * (strip.smin + strip.smax);
       yw = m_coplan[ip] - ypos;
       break;
     default:
@@ -6727,8 +6641,8 @@ void ComponentAnalyticField::WfieldStripXy(const double xpos, const double ypos,
   }
 
   // Store the gap and strip halfwidth.
-  const double w = 0.5 * fabs(theStrip.smax - theStrip.smin);
-  const double g = theStrip.gap;
+  const double w = 0.5 * fabs(strip.smax - strip.smin);
+  const double g = strip.gap;
 
   // Make sure we are in the fiducial part of the weighting map.
   if (yw <= 0. || yw > g) return;
@@ -6780,7 +6694,7 @@ void ComponentAnalyticField::WfieldStripXy(const double xpos, const double ypos,
 void ComponentAnalyticField::WfieldPixel(const double xpos, const double ypos,
                                          const double zpos, double& ex,
                                          double& ey, double& ez, double& volt,
-                                         const int ip, const int is,
+                                         const int ip, const Pixel& pixel,
                                          const bool opt) const {
   //-----------------------------------------------------------------------
   //   Weighting field for pixels.
@@ -6794,16 +6708,15 @@ void ComponentAnalyticField::WfieldPixel(const double xpos, const double ypos,
   // Initialise the weighting field and potential.
   ex = ey = ez = volt = 0.;
 
-  const pixel& thePixel = planes[ip].pixels[is];
-  const double d = thePixel.gap;
+  const double d = pixel.gap;
   // Transform to standard coordinates.
   double x = 0., y = 0., z = 0.;
 
   // Pixel centre and widths.
-  const double ps = 0.5 * (thePixel.smin + thePixel.smax);
-  const double pz = 0.5 * (thePixel.zmin + thePixel.zmax);
-  const double wx = thePixel.smax - thePixel.smin;
-  const double wy = thePixel.zmax - thePixel.zmin;
+  const double ps = 0.5 * (pixel.smin + pixel.smax);
+  const double pz = 0.5 * (pixel.zmin + pixel.zmax);
+  const double wx = pixel.smax - pixel.smin;
+  const double wy = pixel.zmax - pixel.zmin;
   switch (ip) {
     case 0:
       x = ypos - ps;

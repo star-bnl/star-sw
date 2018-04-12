@@ -4,13 +4,7 @@
 
 namespace Garfield {
 
-ComponentUser::ComponentUser()
-    : ComponentBase(),
-      m_efield(NULL),
-      m_potential(NULL),
-      m_wfield(NULL),
-      m_wpot(NULL),
-      m_bfield(NULL) {
+ComponentUser::ComponentUser() : ComponentBase() {
 
   m_className = "ComponentUser";
 }
@@ -21,7 +15,7 @@ void ComponentUser::ElectricField(const double x, const double y,
 
   if (!m_efield) {
     ex = ey = ez = 0.;
-    m = NULL;
+    m = nullptr;
     status = -10;
     return;
   }
@@ -30,19 +24,14 @@ void ComponentUser::ElectricField(const double x, const double y,
   m = GetMedium(x, y, z);
   if (!m) {
     if (m_debug) {
-      std::cerr << m_className << "::ElectricField:\n";
-      std::cerr << "    (" << x << ", " << y << ", " << z << ")"
-                << " is not inside a medium.\n";
+      std::cerr << m_className << "::ElectricField:\n    (" 
+                << x << ", " << y << ", " << z << ") is not inside a medium.\n";
     }
     status = -6;
     return;
   }
 
-  if (m->IsDriftable()) {
-    status = 0;
-  } else {
-    status = -5;
-  }
+  status = m->IsDriftable() ? 0 : -5;
 }
 
 void ComponentUser::ElectricField(const double x, const double y,
@@ -52,7 +41,7 @@ void ComponentUser::ElectricField(const double x, const double y,
 
   if (!m_efield) {
     ex = ey = ez = v = 0.;
-    m = NULL;
+    m = nullptr;
     status = -10;
     return;
   }
@@ -67,19 +56,14 @@ void ComponentUser::ElectricField(const double x, const double y,
   m = GetMedium(x, y, z);
   if (!m) {
     if (m_debug) {
-      std::cerr << m_className << "::ElectricField:\n";
-      std::cerr << "    (" << x << ", " << y << ", " << z << ")"
-                << " is not inside a medium.\n";
+      std::cerr << m_className << "::ElectricField:\n    (" 
+                << x << ", " << y << ", " << z << ") is not inside a medium.\n";
     }
     status = -6;
     return;
   }
 
-  if (m->IsDriftable()) {
-    status = 0;
-  } else {
-    status = -5;
-  }
+  status = m->IsDriftable() ? 0 : -5;
 }
 
 bool ComponentUser::GetVoltageRange(double& vmin, double& vmax) {
@@ -126,7 +110,7 @@ void ComponentUser::SetElectricField(void (*f)(const double, const double,
                                                double&)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetElectricField:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetElectricField: Null pointer.\n";
     return;
   }
   m_efield = f;
@@ -137,7 +121,7 @@ void ComponentUser::SetPotential(void (*f)(const double, const double,
                                            const double, double&)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetPotential:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetPotential: Null pointer.\n";
     return;
   }
   m_potential = f;
@@ -148,7 +132,7 @@ void ComponentUser::SetWeightingField(void (*f)(const double, const double,
                                                 double&, const std::string)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetWeightingField:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetWeightingField: Null pointer.\n";
     return;
   }
   m_wfield = f;
@@ -159,7 +143,7 @@ void ComponentUser::SetWeightingPotential(void (*f)(const double, const double,
                                                     const std::string)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetWeightingPotential:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetWeightingPotential: Null pointer.\n";
     return;
   }
   m_wpot = f;
@@ -170,7 +154,7 @@ void ComponentUser::SetMagneticField(void (*f)(const double, const double,
                                                double&)) {
 
   if (!f) {
-    std::cerr << m_className << "::SetMagneticField:\n    Null pointer.\n";
+    std::cerr << m_className << "::SetMagneticField: Null pointer.\n";
     return;
   }
   m_bfield = f;
@@ -178,11 +162,11 @@ void ComponentUser::SetMagneticField(void (*f)(const double, const double,
 
 void ComponentUser::Reset() {
 
-  m_efield = NULL;
-  m_potential = NULL;
-  m_wfield = NULL;
-  m_wpot = NULL;
-  m_bfield = NULL;
+  m_efield = nullptr;
+  m_potential = nullptr;
+  m_wfield = nullptr;
+  m_wpot = nullptr;
+  m_bfield = nullptr;
   m_ready = false;
 }
 

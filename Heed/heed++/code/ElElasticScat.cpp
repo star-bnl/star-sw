@@ -64,7 +64,7 @@ ElElasticScat::ElElasticScat(const std::string& file_name) : atom(0) {
     long Z;
     file >> Z;
     check_econd21(Z, < 1 ||, > 110, mcerr);
-    atom.push_back(ElElasticScatData(Z, qe));
+    atom.emplace_back(ElElasticScatData(Z, qe));
     for (int nc = 0; nc < 4; ++nc) {
       for (long ne = 0; ne < qe; ++ne) {
         file >> atom.back().data[ne].A[nc];

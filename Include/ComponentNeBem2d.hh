@@ -15,15 +15,12 @@ class ComponentNeBem2d : public ComponentBase {
   /// Destructor
   ~ComponentNeBem2d() {}
 
-  // Calculate the drift field [V/cm] at (x, y, z)
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
-  // Calculate the drift field [V/cm] and potential [V] at (x, y, z)
+                     double& ey, double& ez, Medium*& m, int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
-  // Calculate the voltage range [V]
-  bool GetVoltageRange(double& vmin, double& vmax);
+                     int& status) override;
+  bool GetVoltageRange(double& vmin, double& vmax) override;
 
   void SetProjectionX() { projAxis = 0; }
   void SetProjectionY() { projAxis = 1; }
@@ -53,11 +50,6 @@ class ComponentNeBem2d : public ComponentBase {
   static const int Global2Local = 1;
   static const double InvEpsilon0;
   static const double InvTwoPiEpsilon0;
-
-  // Influence matrix
-  // std::vector<std::vector<double> > influenceMatrix;
-  // Inverse of the influence matrix
-  // std::vector<std::vector<double> > inverseMatrix;
 
   int projAxis = 2;
   unsigned int m_nDivisions = 5;
@@ -179,8 +171,8 @@ class ComponentNeBem2d : public ComponentBase {
   void WireFlux(const double r0, const double x, const double y, double& ex,
                 double& ey) const;
 
-  void Reset();
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 };
 }
 

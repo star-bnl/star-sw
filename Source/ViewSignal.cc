@@ -36,7 +36,7 @@ void ViewSignal::SetCanvas(TCanvas* c) {
   if (!c) return;
   if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = NULL;
+    m_canvas = nullptr;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
@@ -65,7 +65,7 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
   if (total) {
     if (m_hSignal) {
       delete m_hSignal;
-      m_hSignal = NULL;
+      m_hSignal = nullptr;
     }
     const std::string hname = FindHistogramName("hSignal_");
     m_hSignal = new TH1D(hname.c_str(), label.c_str(), nBins, t0, t0 + nBins * dt);
@@ -80,7 +80,7 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
   
     if (m_gCrossings) {
       delete m_gCrossings;
-      m_gCrossings = NULL;
+      m_gCrossings = nullptr;
     }
   
     // Get threshold crossings.
@@ -107,7 +107,7 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
   if (electron) {
     if (m_hSignalElectrons) {
       delete m_hSignalElectrons;
-      m_hSignalElectrons = NULL;
+      m_hSignalElectrons = nullptr;
     }
     const std::string hname = FindHistogramName("hSignalElectrons_");
     m_hSignalElectrons = new TH1D(hname.c_str(), 
@@ -125,7 +125,7 @@ void ViewSignal::PlotSignal(const std::string& label, const bool total,
   if (ion) {
     if (m_hSignalIons) {
       delete m_hSignalIons;
-      m_hSignalIons = NULL;
+      m_hSignalIons = nullptr;
     }
     const std::string hname = FindHistogramName("hSignalIons_");
     m_hSignalIons = new TH1D(hname.c_str(), 

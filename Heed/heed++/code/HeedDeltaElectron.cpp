@@ -217,7 +217,7 @@ void HeedDeltaElectron::physics_after_new_speed(
     vav = currpos.tid.G_lavol();
     if (vav && vav->s_sensitive && m_fieldMap->inside(currpos.ptloc)) {
       if (s_print_listing) mcout << "Last conduction electron\n";
-      conduction_electrons.push_back(
+      conduction_electrons.emplace_back(
           HeedCondElectron(currpos.ptloc, currpos.time));
     }
     return;

@@ -15,29 +15,29 @@ namespace Garfield {
 class ComponentCST : public ComponentFieldMap {
 
  public:
-  // Constructor
+  /// Constructor
   ComponentCST();
-  // Destructor
+  /// Destructor
   ~ComponentCST() {}
 
   void ShiftComponent(const double xShift, const double yShift, const double zShift);
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  Medium* GetMedium(const double x, const double y, const double z) override;
   void GetNumberOfMeshLines(unsigned int &n_x, unsigned int &n_y, unsigned int &n_z);
   void GetElementBoundaries(unsigned int element, double &xmin, double &xmax,
       double &ymin, double &ymax, double &zmin, double &zmax);
   int GetElementMaterial(unsigned int element){return m_elementMaterial.at(element);}
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status);
+                     double& ey, double& ez, Medium*& m, int& status) override;
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) override;
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string& label);
+                      const std::string& label) override;
 
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string& label);
+                            const std::string& label) override;
   /**
    * Deprecated version of the interface based on text file import of field data.
    * \param elist Information about the element material of mesh cells. Each line contains the element number
@@ -104,14 +104,7 @@ class ComponentCST : public ComponentFieldMap {
   bool SetWeightingField(std::string prnsol, std::string label, bool isBinary = true);
 
   // Range
-  virtual bool IsInBoundingBox(const double x, const double y, 
-                               const double z) const {
-    return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
-           y >= yMinBoundingBox && y <= yMaxBoundingBox &&
-           z >= zMinBoundingBox && z <= zMaxBoundingBox;
-  }
-
-  void SetRange();
+  void SetRange() override;
   void SetRangeZ(const double zmin, const double zmax);
   /**
    * Use these functions to disable a certain field component.
@@ -181,9 +174,10 @@ class ComponentCST : public ComponentFieldMap {
       unsigned int &i, unsigned int &j, unsigned int &k);
  protected:
   // Verify periodicities
-  void UpdatePeriodicity();
-  double GetElementVolume(const unsigned int i);
-  void GetAspectRatio(const unsigned int i, double& dmin, double& dmax);
+  void UpdatePeriodicity() override;
+  double GetElementVolume(const unsigned int i) override;
+  void GetAspectRatio(const unsigned int i, 
+                      double& dmin, double& dmax) override;
 //  static bool Greater(const double& a, const double& b) {
 //    return (a > b);
 //  };

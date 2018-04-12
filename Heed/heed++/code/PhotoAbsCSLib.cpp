@@ -61,8 +61,8 @@ Heed::ExAtomPhotoAbsCS generate_Ar_PACS(const std::string& shelllist_dir,
   Heed::AtomicSecondaryProducts* asp = Argon_PACS_mod_esc.get_asp(1);
   std::vector<double> electron_energy;
   std::vector<double> photon_energy;
-  electron_energy.push_back(0.000200);
-  // electron_energy.push_back(0.002670);
+  electron_energy.emplace_back(0.000200);
+  // electron_energy.emplace_back(0.002670);
   asp->add_channel(0.65, electron_energy, photon_energy);
   electron_energy.resize(2);
   electron_energy[0] = 0.000050;

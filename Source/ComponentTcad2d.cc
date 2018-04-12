@@ -34,8 +34,7 @@ bool ComponentTcad2d::SetDonor(const unsigned int donorNumber,
 
 
   if (donorNumber >= m_donors.size()) {
-    std::cerr << m_className << "::SetDonor:\n"
-              << "    Index (" << donorNumber << ") out of range.\n";
+    std::cerr << m_className << "::SetDonor: Index out of range.\n";
     return false;
   }
   m_donors[donorNumber].xsece = eXsec;
@@ -51,8 +50,7 @@ bool ComponentTcad2d::SetAcceptor(const unsigned int acceptorNumber,
                                   const double conc) {
 
   if (acceptorNumber >= m_acceptors.size()) {
-    std::cerr << m_className << "::SetAcceptor:\n"
-              << "    Index (" << acceptorNumber << ") out of range.\n";
+    std::cerr << m_className << "::SetAcceptor: Index out of range.\n";
     return false;
   }
   m_acceptors[acceptorNumber].xsece = eXsec;
@@ -1164,7 +1162,7 @@ bool ComponentTcad2d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                      double& xmax, double& ymax, double& zmax) {
 
   if (!m_ready) return false;
-  if (m_xPeriodic || m_xMirrorPeriodic) {
+  if (m_periodic[0] || m_mirrorPeriodic[0]) {
     xmin = -INFINITY;
     xmax = +INFINITY;
   } else {
@@ -1172,7 +1170,7 @@ bool ComponentTcad2d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
     xmax = m_xMaxBB;
   }
 
-  if (m_yPeriodic || m_yMirrorPeriodic) {
+  if (m_periodic[1] || m_mirrorPeriodic[1]) {
     ymin = -INFINITY;
     ymax = +INFINITY;
   } else {
@@ -2316,36 +2314,24 @@ void ComponentTcad2d::UpdatePeriodicity() {
   }
 
   // Check for conflicts.
-  if (m_xPeriodic && m_xMirrorPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Both simple and mirror periodicity\n"
-              << "    along x requested; reset.\n";
-    m_xPeriodic = m_xMirrorPeriodic = false;
+  for (unsigned int i = 0; i < 3; ++i) {
+    if (m_periodic[i] && m_mirrorPeriodic[i]) {
+      std::cerr << m_className << "::UpdatePeriodicity:\n"
+                << "    Both simple and mirror periodicity requested. Reset.\n";
+      m_periodic[i] = m_mirrorPeriodic[i] = false;
+    }
   }
 
-  if (m_yPeriodic && m_yMirrorPeriodic) {
+  if (m_axiallyPeriodic[0] || m_axiallyPeriodic[1] || m_axiallyPeriodic[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Both simple and mirror periodicity\n"
-              << "    along y requested; reset.\n";
-    m_yPeriodic = m_yMirrorPeriodic = false;
+              << "    Axial symmetry is not supported. Reset.\n";
+    m_axiallyPeriodic.fill(false);
   }
 
-  if (m_zPeriodic || m_zMirrorPeriodic) {
+  if (m_rotationSymmetric[0] || m_rotationSymmetric[1] || m_rotationSymmetric[2]) {
     std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Periodicity along z requested; reset.\n";
-    m_zPeriodic = m_zMirrorPeriodic = false;
-  }
-
-  if (m_xAxiallyPeriodic || m_yAxiallyPeriodic || m_zAxiallyPeriodic) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Axial symmetry is not supported; reset.\n";
-    m_xAxiallyPeriodic = m_yAxiallyPeriodic = m_zAxiallyPeriodic = false;
-  }
-
-  if (m_xRotationSymmetry || m_yRotationSymmetry || m_zRotationSymmetry) {
-    std::cerr << m_className << "::UpdatePeriodicity:\n"
-              << "    Rotation symmetry is not supported; reset.\n";
-    m_xRotationSymmetry = m_yRotationSymmetry = m_zRotationSymmetry = false;
+              << "    Rotation symmetry is not supported. Reset.\n";
+    m_rotationSymmetric.fill(false);
   }
 }
 
@@ -2364,10 +2350,10 @@ void ComponentTcad2d::MapCoordinates(double& x, double& y,
   // In case of periodicity, reduce to the cell volume.
   xmirr = false;
   const double cellsx = m_xMaxBB - m_xMinBB;
-  if (m_xPeriodic) {
+  if (m_periodic[0]) {
     x = m_xMinBB + fmod(x - m_xMinBB, cellsx);
     if (x < m_xMinBB) x += cellsx;
-  } else if (m_xMirrorPeriodic) {
+  } else if (m_mirrorPeriodic[0]) {
     double xNew = m_xMinBB + fmod(x - m_xMinBB, cellsx);
     if (xNew < m_xMinBB) xNew += cellsx;
     const int nx = int(floor(0.5 + (xNew - x) / cellsx));
@@ -2379,10 +2365,10 @@ void ComponentTcad2d::MapCoordinates(double& x, double& y,
   }
   ymirr = false;
   const double cellsy = m_yMaxBB - m_yMinBB;
-  if (m_yPeriodic) {
+  if (m_periodic[1]) {
     y = m_yMinBB + fmod(y - m_yMinBB, cellsy);
     if (y < m_yMinBB) y += cellsy;
-  } else if (m_yMirrorPeriodic) {
+  } else if (m_mirrorPeriodic[1]) {
     double yNew = m_yMinBB + fmod(y - m_yMinBB, cellsy);
     if (yNew < m_yMinBB) yNew += cellsy;
     const int ny = int(floor(0.5 + (yNew - y) / cellsy));
@@ -2396,16 +2382,12 @@ void ComponentTcad2d::MapCoordinates(double& x, double& y,
 
 bool ComponentTcad2d::CheckTraps() const {
 
-  const unsigned int nDonors = m_donors.size();
-  for (unsigned int i = 0; i < nDonors; ++i) {
-    if (m_donors[i].xsece < 0. || m_donors[i].xsech < 0.) return false;
-    if (m_donors[i].conc < 0.) return false;
+  for (const auto& trap : m_donors) {
+    if (trap.xsece < 0. || trap.xsech < 0. || trap.conc < 0.) return false;
   }
 
-  const unsigned int nAcceptors = m_acceptors.size();
-  for (unsigned int i = 0; i < nAcceptors; ++i) {
-    if (m_acceptors[i].xsece < 0. || m_acceptors[i].xsech < 0.) return false;
-    if (m_acceptors[i].conc < 0.) return false;
+  for (const auto& trap : m_acceptors) {
+    if (trap.xsece < 0. || trap.xsech < 0. || trap.conc < 0.) return false;
   }
   return true;
 }

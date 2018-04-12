@@ -50,17 +50,15 @@ void DriftLineRKF::SetMaximumStepSize(const double ms) {
 void DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
   if (!view) {
-    std::cerr << m_className << "::EnablePlotting:\n    Null pointer.\n";
+    std::cerr << m_className << "::EnablePlotting: Null pointer.\n";
     return;
   }
-  m_usePlotting = true;
   m_view = view;
 }
 
 void DriftLineRKF::DisablePlotting() {
 
   m_view = nullptr;
-  m_usePlotting = false;
 }
 
 bool DriftLineRKF::DriftElectron(const double x0, const double y0,
@@ -132,7 +130,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
 
   // Start plotting a new line if requested.
   int iLine = 0;
-  if (m_usePlotting) {
+  if (m_view) {
     if (m_particleType == ParticleTypeIon) {
       m_view->NewIonDriftLine(1, iLine, x0, y0, z0);
     } else if (m_particleType == ParticleTypeElectron) {
@@ -432,7 +430,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
                 << std::setw(15) << m_path[i].z << "\n";
     }
   }
-  if (m_usePlotting) {
+  if (m_view) {
     for (unsigned int i = 0; i < m_nPoints; ++i) {
       m_view->AddDriftLinePoint(iLine, m_path[i].x, m_path[i].y, m_path[i].z);
     }

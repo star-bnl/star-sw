@@ -17,10 +17,10 @@ class ComponentTcad2d : public ComponentBase {
 
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
-                     int& status);
+                     int& status) override;
 
   void ElectricField(const double x, const double y, const double z, double& ex,
-                     double& ey, double& ez, Medium*& m, int& status) {
+                     double& ey, double& ez, Medium*& m, int& status) override {
 
     double v = 0.;
     ElectricField(x, y, z, ex, ey, ez, v, m, status);
@@ -28,13 +28,13 @@ class ComponentTcad2d : public ComponentBase {
 
   void WeightingField(const double x, const double y, const double z,
                             double& wx, double& wy, double& wz,
-                            const std::string& label); 
+                            const std::string& label) override; 
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  Medium* GetMedium(const double x, const double y, const double z) override;
 
-  bool GetVoltageRange(double& vmin, double& vmax);
+  bool GetVoltageRange(double& vmin, double& vmax) override;
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax);
+                      double& ymax, double& zmax) override;
   void SetRangeZ(const double zmin, const double zmax);
 
   // Import mesh and field map from files.
@@ -71,15 +71,15 @@ class ComponentTcad2d : public ComponentBase {
   // Velocity field maps
   void ElectronVelocity(const double x, const double y, const double z,
                         double& vx, double& vy, double& vz,
-                        Medium*& m, int& status);
+                        Medium*& m, int& status) override;
   void HoleVelocity(const double x, const double y, const double z,
                     double& vx, double& vy, double& vz,
-                    Medium*& m, int& status);
+                    Medium*& m, int& status) override;
   // Lifetime field maps
   bool GetElectronLifetime(const double x, const double y, const double z, 
-                           double& etau);
+                           double& etau) override;
   bool GetHoleLifetime(const double x, const double y, const double z, 
-                       double& htau);
+                       double& htau) override;
 
   // Trapping 
   int GetNumberOfDonors() { return m_donors.size(); }
@@ -99,9 +99,9 @@ class ComponentTcad2d : public ComponentBase {
                    const double concentration);
 
   bool ElectronAttachment(const double x, const double y, const double z,
-                          double& eta);
+                          double& eta) override;
   bool HoleAttachment(const double x, const double y, const double z,
-                      double& eta);
+                      double& eta) override;
 
  private:
   // Max. number of vertices per element
@@ -193,10 +193,8 @@ class ComponentTcad2d : public ComponentBase {
   // Element from the previous call
   int m_lastElement = 0;
 
-  // Reset the component
-  void Reset();
-  // Periodicities
-  void UpdatePeriodicity();
+  void Reset() override;
+  void UpdatePeriodicity() override;
 
   // Check whether a point is inside a given element and calculate the  
   // shape functions if it is.

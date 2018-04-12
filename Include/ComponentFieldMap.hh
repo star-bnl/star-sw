@@ -23,11 +23,16 @@ class ComponentFieldMap : public ComponentBase {
   /// Show x, y, z, V and angular ranges
   void PrintRange();
 
-  virtual bool IsInBoundingBox(const double x, const double y, const double z) const;
-  virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                              double& xmax, double& ymax, double& zmax);
+  bool IsInBoundingBox(const double x, const double y, const double z) const {
+    return x >= m_minBoundingBox[0] && x <= m_maxBoundingBox[0] &&
+           y >= m_minBoundingBox[1] && y <= m_maxBoundingBox[1] &&
+           z >= m_minBoundingBox[2] && y <= m_maxBoundingBox[2];
+  }
 
-  virtual bool GetVoltageRange(double& vmin, double& vmax) {
+  virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
+                              double& xmax, double& ymax, double& zmax) override;
+
+  virtual bool GetVoltageRange(double& vmin, double& vmax) override {
     vmin = mapvmin;
     vmax = mapvmax;
     return true;
@@ -50,7 +55,7 @@ class ComponentFieldMap : public ComponentBase {
   /// Return the Medium associated to a field map material.
   Medium* GetMedium(const unsigned int i) const;
 
-  Medium* GetMedium(const double x, const double y, const double z) = 0;
+  Medium* GetMedium(const double x, const double y, const double z) override = 0;
   unsigned int GetNumberOfMedia() const { return m_nMaterials; }
 
   /// Return the number of mesh elements.
@@ -61,18 +66,18 @@ class ComponentFieldMap : public ComponentBase {
 
   virtual void ElectricField(const double x, const double y, const double z,
                              double& ex, double& ey, double& ez, Medium*& m,
-                             int& status) = 0;
+                             int& status) override = 0;
   virtual void ElectricField(const double x, const double y, const double z,
                              double& ex, double& ey, double& ez, double& v,
-                             Medium*& m, int& status) = 0;
+                             Medium*& m, int& status) override = 0;
 
   virtual void WeightingField(const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
-                              const std::string& label) = 0;
+                              const std::string& label) override = 0;
 
   virtual double WeightingPotential(const double x, const double y,
                                     const double z,
-                                    const std::string& label) = 0;
+                                    const std::string& label) override = 0;
 
   // Options
   void EnableCheckMapIndices() {
@@ -138,21 +143,21 @@ class ComponentFieldMap : public ComponentBase {
 
   // Bounding box
   bool hasBoundingBox = false;
-  double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
-  double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+  std::array<double, 3> m_minBoundingBox;
+  std::array<double, 3> m_maxBoundingBox;
 
   // Ranges and periodicities
-  double mapxmin, mapymin, mapzmin;
-  double mapxmax, mapymax, mapzmax;
-  double mapxamin, mapyamin, mapzamin;
-  double mapxamax, mapyamax, mapzamax;
+  std::array<double, 3> m_mapmin;
+  std::array<double, 3> m_mapmax;
+  std::array<double, 3> m_mapamin;
+  std::array<double, 3> m_mapamax;
+  std::array<double, 3> m_mapna;
+  std::array<double, 3> m_cells;
+
   double mapvmin, mapvmax;
 
   bool setangx, setangy, setangz;
   double mapsx, mapsy, mapsz;
-
-  double cellsx, cellsy, cellsz;
-  double mapnxa, mapnya, mapnza;
 
   // Option to delete meshing in conductors
   bool m_deleteBackground = true;
@@ -162,10 +167,10 @@ class ComponentFieldMap : public ComponentBase {
   unsigned int m_nWarnings = 0;
 
   // Reset the component
-  void Reset() {};
+  void Reset() override {};
 
   // Periodicities
-  virtual void UpdatePeriodicity() = 0;
+  // virtual void UpdatePeriodicity() = 0;
   void UpdatePeriodicity2d();
   void UpdatePeriodicityCommon();
 
@@ -210,7 +215,7 @@ class ComponentFieldMap : public ComponentBase {
   }
   void PrintElement(const std::string& header, const double x, const double y,
                     const double z, const double t1, const double t2,
-                    const double t3, const double t4, const unsigned int i,
+                    const double t3, const double t4, const Element& element,
                     const unsigned int n, const int iw = -1) const;
 
  private:
@@ -231,41 +236,41 @@ class ComponentFieldMap : public ComponentBase {
   /// Calculate local coordinates for curved quadratic triangles.
   int Coordinates3(double x, double y, double z, double& t1, double& t2,
                    double& t3, double& t4, double jac[4][4], double& det,
-                   const unsigned int imap) const;
+                   const Element& element) const;
   /// Calculate local coordinates for linear quadrilaterals.
   int Coordinates4(const double x, const double y, const double z, double& t1,
                    double& t2, double& t3, double& t4, double jac[4][4],
-                   double& det, const unsigned int imap) const;
+                   double& det, const Element& element) const;
   /// Calculate local coordinates for curved quadratic quadrilaterals.
   int Coordinates5(const double x, const double y, const double z, double& t1,
                    double& t2, double& t3, double& t4, double jac[4][4],
-                   double& det, const unsigned int imap) const;
+                   double& det, const Element& element) const;
   /// Calculate local coordinates in linear tetrahedra.
   int Coordinates12(const double x, const double y, const double z, double& t1,
                     double& t2, double& t3, double& t4,
-                    const unsigned int imap) const;
+                    const Element& element) const;
   /// Calculate local coordinates for curved quadratic tetrahedra.
   int Coordinates13(const double x, const double y, const double z, double& t1,
                     double& t2, double& t3, double& t4, double jac[4][4],
-                    double& det, const unsigned int imap) const;
+                    double& det, const Element& element) const;
   /// Calculate local coordinates for a cube.
   int CoordinatesCube(const double x, const double y, const double z,
                       double& t1, double& t2, double& t3, TMatrixD*& jac,
                       std::vector<TMatrixD*>& dN,
-                      const unsigned int imap) const;
+                      const Element& element) const;
 
   /// Calculate Jacobian for curved quadratic triangles.
-  void Jacobian3(const unsigned int i, const double u, const double v,
+  void Jacobian3(const Element& element, const double u, const double v,
                  const double w, double& det, double jac[4][4]) const;
   /// Calculate Jacobian for curved quadratic quadrilaterals.
-  void Jacobian5(const unsigned int i, const double u, const double v,
+  void Jacobian5(const Element& element, const double u, const double v,
                  double& det, double jac[4][4]) const;
   /// Calculate Jacobian for curved quadratic tetrahedra.
-  void Jacobian13(const unsigned int i, const double t, const double u,
+  void Jacobian13(const Element& element, const double t, const double u,
                   const double v, const double w, double& det,
                   double jac[4][4]) const;
   /// Calculate Jacobian for a cube.
-  void JacobianCube(const unsigned int i, const double t1, const double t2,
+  void JacobianCube(const Element& element, const double t1, const double t2,
                     const double t3, TMatrixD*& jac,
                     std::vector<TMatrixD*>& dN) const;
 

@@ -135,7 +135,7 @@ void ComponentNeBem2d::AddPanel(const double x0, const double y0,
   newPanel.bcType = bctype;
   newPanel.bcValue = bcval;
   newPanel.lambda = lambda;
-  m_panels.push_back(newPanel);
+  m_panels.push_back(std::move(newPanel));
 
   if (m_debug) {
     std::cout << m_className << "::AddPanel:\n"
@@ -179,7 +179,7 @@ void ComponentNeBem2d::AddWire(const double x0, const double y0, const double d,
   newWire.cY = y0;
   newWire.d = d;
   newWire.bcValue = bcval;
-  m_wires.push_back(newWire);
+  m_wires.push_back(std::move(newWire));
 
   if (m_debug) {
     std::cout << m_className << "::AddWire:\n"
@@ -354,7 +354,7 @@ bool ComponentNeBem2d::Discretise() {
     newElement.cY = wire.cY;
     newElement.len = wire.d / 2.;
     newElement.bcValue = wire.bcValue;
-    m_elements.push_back(newElement);
+    m_elements.push_back(std::move(newElement));
   }
 
   return true;
@@ -466,7 +466,7 @@ void ComponentNeBem2d::SplitElement(const unsigned int iel) {
   newElement.cX = x0 - dx;
   newElement.cY = y0 - dx;
 
-  m_elements.push_back(newElement);
+  m_elements.push_back(std::move(newElement));
 }
 
 bool ComponentNeBem2d::InvertMatrix(
