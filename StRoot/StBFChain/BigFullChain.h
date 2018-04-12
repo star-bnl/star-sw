@@ -1716,6 +1716,7 @@ Bfc_st BFC[] = { // standard chains
   {"NoSstIT"     ,""  ,"","-SstIT",""                    ,"","ITTF: track with switch off SST geom",kFALSE},
   {"NoPxlIT"     ,""  ,"","-PxlIT",""                    ,"","ITTF: track with switch off PXL geom",kFALSE},
   {"NoIstIT"     ,""  ,"","-IstIT",""                    ,"","ITTF: track with switch off IST geom",kFALSE},
+  {"NoiTpcIT"    ,""  ,"","",""                         ,"","ITTF: track with switch off iTPC geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},

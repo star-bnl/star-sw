@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.236 2018/04/10 11:32:10 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.237 2018/04/12 18:43:59 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -256,7 +256,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("useTpc") && gStTpcDb)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc")));
+      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"), IAttr("activeiTpc")));
       group->setGroupId(kTpcId);
       StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
       if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row
@@ -736,8 +736,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.236 2018/04/10 11:32:10 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.237 2018/04/12 18:43:59 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.237  2018/04/12 18:43:59  smirnovd
+// Add new option to deactivate iTpc hits
+//
 // Revision 1.236  2018/04/10 11:32:10  smirnovd
 // Minor corrections across multiple files
 //
