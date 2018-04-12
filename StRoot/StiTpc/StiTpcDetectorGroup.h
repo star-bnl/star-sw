@@ -12,6 +12,7 @@ class StiTpcDetectorGroup : public StiDetectorGroup<StEvent>
 {
   public:
   StiTpcDetectorGroup(bool active);
+  StiTpcDetectorGroup(bool active_Tpc, bool active_iTpc);
   ~StiTpcDetectorGroup();
 };
 

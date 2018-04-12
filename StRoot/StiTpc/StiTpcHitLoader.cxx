@@ -18,9 +18,13 @@
 #include "Sti/StiKalmanTrackNode.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+
 //________________________________________________________________________________
-StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
-				    _minRow(1), _maxRow(100), _minSector(1), _maxSector(24) {}
+StiTpcHitLoader::StiTpcHitLoader(bool active_iTpc): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"),
+                                 _minRow(1), _maxRow(100), _minSector(1), _maxSector(24),
+                                 _active_iTpc(active_iTpc)
+{ }
+
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
@@ -58,6 +62,11 @@ void StiTpcHitLoader::loadHits(StEvent* source,
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
+
+      // Do not load iTpc hits from disabled iTpc padrows
+      if ( St_tpcPadConfigC::instance()->isiTpcPadRow(sector+1, row+1) && !_active_iTpc )
+        continue;
+
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
       if (!padrowHits) break;
       const StSPtrVecTpcHit& hitvec = padrowHits->hits();
