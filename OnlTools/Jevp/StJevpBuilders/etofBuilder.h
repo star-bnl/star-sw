@@ -31,17 +31,18 @@ class etofBuilder : public JevpBuilder {
     int disable_builder;
 
     union {
-      TH1 *array[];
+      TH1* array[];
       struct {
-        TH1 * nHits;
-        TH1 * nEpochMismatch;
-        TH1 * nEpochLoss;
-        TH1 * nEpochDataLoss;
-        TH1 * nEpochSync;
-        TH1 * totAll;
-        TH2 * hitMap;
-        TH1 * fineTime[20];
-
+        TH1* nHits;
+        TH1* nEpochMismatch;
+        TH1* nEpochLoss;
+        TH1* nEpochDataLoss;
+        TH1* nEpochSync;
+        TH1* totAll;
+        TH1* hitTimeToTrigger;
+        TH1* hitMap;
+        TH1* hitMapChannelId;
+        TH1* fineTime[20];
       };
     } contents;
 
