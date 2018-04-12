@@ -88,6 +88,10 @@ void itpcPed::clear()
 // sector, rdo, port, channel, timebin, value
 void itpcPed::accum(int sector, int rdo, int port,int fee_id, int ch, int tb, int adc_val)
 {
+//	if(port==0 && ch==0 && tb==0) {
+//		LOG(TERR,"%s: %d",__PRETTY_FUNCTION__,adc_val) ;
+//	}
+
 	ped_t *pt = ped_p[sector][rdo][port][ch] ;
 	
 	pt->ped[tb] += adc_val ;
@@ -122,7 +126,10 @@ void itpcPed::calc()
 
 				pt->c_ped /= pt->c_cou ;
 				pt->c_rms /= pt->c_cou ;
-				pt->c_rms = sqrt(pt->c_rms - pt->c_ped*pt->c_ped) ;
+				pt->c_rms = pt->c_rms - pt->c_ped*pt->c_ped ;
+
+				if(pt->c_rms <= 0.0) pt->c_rms = 0.0 ;
+				else pt->c_rms = sqrt(pt->c_rms) ;
 
 				for(int t=0;t<512;t++) {
 					if(pt->cou[t]==0) {
@@ -133,7 +140,9 @@ void itpcPed::calc()
 
 					pt->ped[t] /= pt->cou[t] ;
 					pt->rms[t] /= pt->cou[t] ;
-					pt->rms[t] = sqrt(pt->rms[t] - pt->ped[t]*pt->ped[t]) ;
+					pt->rms[t] = pt->rms[t] - pt->ped[t]*pt->ped[t] ;
+					if(pt->rms[t] <= 0.0) pt->rms[t] = 0.0 ;
+					else sqrt(pt->rms[t]) ;
 				}
 			}
 		}
@@ -260,13 +269,12 @@ int itpcPed::to_cache(const char *fname)
 
 				for(int t=0;t<=20;t++) {
 					m_ped += pt->ped[t] ;
-					m_rms += pt->ped[t] * pt->ped[t] ;
+					m_rms += pt->rms[t] ;
 					m_cou++ ;
 				}
 
 				m_ped /= m_cou ;
 				m_rms /= m_cou ;
-				m_rms = sqrt(m_rms - m_ped*m_ped) ;
 
 				fprintf(outf,"%2d %d %2d %2d %2d %2d %2d %3d %3d %.3f %.3f %.3f %.3f \n",s+1,r+1,p+1,c,fee_id,pin,row,pad,-1,pt->c_ped,pt->c_rms, m_ped, m_rms) ;
 			}
