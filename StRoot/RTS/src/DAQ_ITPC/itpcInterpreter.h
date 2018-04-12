@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <I386/atomic.h>
 
 class itpcData ;
 
@@ -41,9 +42,10 @@ public:
 	u_int *sampa_ch_hunt(u_int *start, u_int *end) ;
 	int sampa_ch_scan() ;
 
-	
+	void run_err_add(int rdo1, int type) ;
 
 	// filled by client
+	int id ;
 	int dbg_level ;
 	int realtime ;	// running in realtime
 	u_int run_number ;
@@ -62,7 +64,10 @@ public:
 
 	itpcData *ped_c ;
 
-	u_int evt_err[8] ;
+	u_int evt_err[8] ;	// zapped before every event, logged after
+
+	//run errors, for all RDOs, for all workers!
+	static atomic_t run_errors[4][8] ;
 
 	// various variables filled in as we go
 	u_int rdo_wire1_id ;

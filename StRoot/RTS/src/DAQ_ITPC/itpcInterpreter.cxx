@@ -9,6 +9,7 @@
 #include <rtsLog.h>
 #include <DAQ_READER/daq_dta.h>
 
+#include <I386/atomic.h>
 
 #include "itpcInterpreter.h"
 #include "itpcPed.h"
@@ -17,6 +18,8 @@ static void hammingdecode(unsigned int buffer[2], bool& error, bool& uncorrectab
 
 itpcInterpreter::itpcInterpreter()
 {
+	id = 0 ;	// not valid
+
 	evt_ix = 0 ;
 	realtime = 0 ;
 	dbg_level = 0 ;
@@ -33,6 +36,8 @@ itpcInterpreter::itpcInterpreter()
 	ped_c = 0 ;
 }
 
+atomic_t itpcInterpreter::run_errors[4][8] ;
+
 void itpcInterpreter::run_start(u_int run)
 {
 	run_number = run ;
@@ -44,7 +49,14 @@ void itpcInterpreter::run_start(u_int run)
 		fflush(fout) ;
 	}
 
+	if(id==1) memset(run_errors,0,sizeof(run_errors)) ;
+
 	LOG(DBG,"Starting run %08u",run_number) ;
+}
+
+void itpcInterpreter::run_err_add(int rdo1, int type)
+{
+	atomic_inc(&run_errors[rdo1-1][type]) ;
 }
 
 void itpcInterpreter::run_stop()
@@ -57,8 +69,17 @@ void itpcInterpreter::run_stop()
 		fout = 0 ;
 	}
 
-	LOG(INFO,"Stopping run %08u after %d/%d events",run_number,fee_evt_cou,evt_ix) ;
-	
+	LOG(INFO,"%d: stopping run %08u after %d/%d events",id,run_number,fee_evt_cou,evt_ix) ;
+
+	if(id==1) {
+		for(int i=0;i<4;i++) {
+			for(int j=0;j<8;j++) {
+				if(atomic_read(&run_errors[i][j])) {
+					LOG(WARN,"RDO %d: error type %d = %u",i+1,j,atomic_read(&run_errors[i][j])) ;
+				}
+			}
+		}
+	}
 }
 
 
@@ -747,13 +768,13 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 		case 0 :
 		case 2 :
 			if(sampa_ch != 0) {
-				LOG(ERR,"sampa_ch %d",sampa_ch) ;
+				LOG(WARN,"sampa_ch %d",sampa_ch) ;
 			}
 			break ;
 		case 1 :
 		case 3 :
 			if(sampa_ch != 16) {
-				LOG(ERR,"sampa_ch %d",sampa_ch) ;
+				LOG(WARN,"sampa_ch %d",sampa_ch) ;
 			}
 			break ;
 		}
@@ -1201,6 +1222,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	if((data[0] & 0xFFC0FFFF)==0x80000001) {
 		fee_version = 0 ;
+		fee_id = (data[0]>>16) & 0xFF ;
 	}
 	//data is now at the first 0x80xx0010 of the FEE
 	else if((data[0] & 0xFFC0FFFF)!=0x80000010) {
@@ -1210,16 +1232,26 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		//  with previous FEEs 0x40yy0010
 		//  and the first word is the 0x4321 signature already
 
-		if((data[0]&0xFF00FFFF)==0x98004321) {
-			if((data[1]&0xFF00FFFF)==0x98008765) ;
+		run_err_add(rdo_id,0) ;
+
+
+		if((data[0]&0x0000FFFF)==0x00004321) {	// this is for the case 0x800 is missing
+			if((data[1]&0x0000FFFF)==0x00008765) {
+				fee_id = (data[1]>>16) & 0xFF ;
+				fee_version = 1 ;
+				data = data - 1 ;	// go back one!
+			}
 			else {
 				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
 				err |= 2 ;
 				goto done ;
 			}
 		}
-		else if((data[1]&0xFF00FFFF)==0x98004321) {
-			if((data[2]&0xFF00FFFF)==0x98008765) ;
+		else if((data[1]&0x0000FFFF)==0x00004321) {	// this is if it's corrupted
+			if((data[2]&0x0000FFFF)==0x00008765) {
+				fee_id = (data[2]>>16) & 0xFF ;
+				fee_version = 1 ;
+			}
 			else {
 				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
 				err |= 2 ;
@@ -1227,18 +1259,19 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			}
 		}
 		else {
-				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-				err |= 2 ;
-				goto done ;
+			LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
+			err |= 2 ;
+			goto done ;
 
 		}
 
 	}
 	else {
 		fee_version = 1 ;
+		fee_id = (data[0]>>16) & 0xFF ;
 	}
 
-	fee_id = (data[0]>>16) & 0xFF ;
+
 		
 		
 	switch(fee_version) {
@@ -1275,7 +1308,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		u_int expect_mask ;
 
 		if((*data & 0xFC000000) != 0xB0000000) {
-			LOG(ERR,"port %d: SAMPA %d: bad sig 0x%08X",fee_port,i+1,*data) ;
+			run_err_add(rdo_id,1) ;
+			LOG(ERR,"%d:#%02d: SAMPA %d: bad sig 0x%08X",rdo_id,fee_port,i+1,*data) ;
 			err |= 0x100 ;
 			goto done ;
 		}
@@ -1294,6 +1328,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		data = sampa_lane_scan(data,data_end) ;
 
 		if(found_ch_mask != expect_mask) {
+			run_err_add(rdo_id,2) ;
 			dbg_level = 1 ;
 			LOG(ERR,"%d: fee_port %d: missing channels in lane %d: expect 0x%08X, got 0x%08X",
 				rdo_id,fee_port,i,expect_mask,found_ch_mask) ;
@@ -1389,8 +1424,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	// end of FEE
 	
 	if(err || soft_err) {
-		LOG(ERR,"Event %d: error 0x%X 0x%08X",evt_ix,err,soft_err) ;
-		for(int i=-8;i<8;i++) {
+		LOG(ERR,"%d: evt %d: error 0x%X 0x%08X",rdo_id,evt_ix,err,soft_err) ;
+		for(int i=-4;i<4;i++) {
 			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
 		}
 		
