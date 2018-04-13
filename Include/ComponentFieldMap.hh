@@ -33,8 +33,8 @@ class ComponentFieldMap : public ComponentBase {
                               double& xmax, double& ymax, double& zmax) override;
 
   virtual bool GetVoltageRange(double& vmin, double& vmax) override {
-    vmin = mapvmin;
-    vmax = mapvmax;
+    vmin = m_mapvmin;
+    vmax = m_mapvmax;
     return true;
   }
 
@@ -154,10 +154,10 @@ class ComponentFieldMap : public ComponentBase {
   std::array<double, 3> m_mapna;
   std::array<double, 3> m_cells;
 
-  double mapvmin, mapvmax;
+  double m_mapvmin, m_mapvmax;
 
-  bool setangx, setangy, setangz;
-  double mapsx, mapsy, mapsz;
+  std::array<bool, 3> m_setang;
+  // double mapsx, mapsy, mapsz;
 
   // Option to delete meshing in conductors
   bool m_deleteBackground = true;

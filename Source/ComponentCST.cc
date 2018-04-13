@@ -717,9 +717,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit) {
   }
   if (m_debug) {
     std::cout << st.str();
-    for (std::vector<Material>::iterator it = materials.begin(),
-                                         it_end = materials.end();
-         it != it_end; it++) {
+    for (auto it = materials.begin(), it_end = materials.end(); it != it_end; it++) {
       std::cout << "Material id: " << std::distance(materials.begin(), it)
                 << " \t driftable: " << (*it).driftmedium << std::endl;
     }
@@ -781,8 +779,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label,
     return false;
   }
   // Check if a weighting field with the same label already exists.
-  std::map<std::string, std::vector<float> >::iterator it =
-      m_weightingFields.find(label);
+  auto it = m_weightingFields.find(label);
   if (it != m_weightingFields.end()) {
     std::cout << m_className << "::SetWeightingField:" << std::endl;
     std::cout << "    Replacing existing weighting field " << label << "."
@@ -1016,8 +1013,7 @@ void ComponentCST::WeightingField(const double xin, const double yin,
   if (!m_ready) return;
 
   // Look for the label.
-  std::map<std::string, std::vector<float> >::iterator it =
-      m_weightingFields.find(label);
+  auto it = m_weightingFields.find(label);
   if (it == m_weightingFields.end()) {
     // Do not proceed if the requested weighting field does not exist.
     std::cerr << "No weighting field named " << label.c_str() << " found!"
@@ -1077,8 +1073,7 @@ double ComponentCST::WeightingPotential(const double xin, const double yin,
   if (!m_ready) return 0.;
 
   // Look for the label.
-  std::map<std::string, std::vector<float> >::iterator it =
-      m_weightingFields.find(label);
+  auto it = m_weightingFields.find(label);
   if (it == m_weightingFields.end()) {
     // Do not proceed if the requested weighting field does not exist.
     std::cerr << "No weighting field named " << label.c_str() << " found!"
@@ -1191,8 +1186,8 @@ void ComponentCST::SetRange() {
   m_mapmax[1] = *(m_ylines.end() - 1);
   m_mapmin[2] = *m_zlines.begin();
   m_mapmax[2] = *(m_zlines.end() - 1);
-  mapvmin = *std::min_element(m_potential.begin(), m_potential.end());
-  mapvmax = *std::max_element(m_potential.begin(), m_potential.end());
+  m_mapvmin = *std::min_element(m_potential.begin(), m_potential.end());
+  m_mapvmax = *std::max_element(m_potential.begin(), m_potential.end());
 
   // Set provisional cell dimensions.
   m_minBoundingBox[0] = m_mapmin[0];
@@ -1251,10 +1246,9 @@ bool ComponentCST::Coordinate2Index(const double xin, const double yin,
   MapCoordinates(position_mapped[0], position_mapped[1], position_mapped[2],
                  mirrored[0], mirrored[1], mirrored[2], rcoordinate, rotation);
 
-  std::vector<double>::iterator it_x, it_y, it_z;
-  it_x = std::lower_bound(m_xlines.begin(), m_xlines.end(), position_mapped[0]);
-  it_y = std::lower_bound(m_ylines.begin(), m_ylines.end(), position_mapped[1]);
-  it_z = std::lower_bound(m_zlines.begin(), m_zlines.end(), position_mapped[2]);
+  auto it_x = std::lower_bound(m_xlines.begin(), m_xlines.end(), position_mapped[0]);
+  auto it_y = std::lower_bound(m_ylines.begin(), m_ylines.end(), position_mapped[1]);
+  auto it_z = std::lower_bound(m_zlines.begin(), m_zlines.end(), position_mapped[2]);
   if (it_x == m_xlines.end() || it_y == m_ylines.end() ||
       it_z == m_zlines.end() || position_mapped[0] < m_xlines.at(0) ||
       position_mapped[1] < m_ylines.at(0) ||
