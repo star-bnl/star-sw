@@ -75,7 +75,7 @@ void itpcInterpreter::run_stop()
 		for(int i=0;i<4;i++) {
 			for(int j=0;j<8;j++) {
 				if(atomic_read(&run_errors[i][j])) {
-					LOG(WARN,"RDO %d: error type %d = %u",i+1,j,atomic_read(&run_errors[i][j])) ;
+					LOG(ERR,"RDO %d: error type %d = %u",i+1,j,atomic_read(&run_errors[i][j])) ;
 				}
 			}
 		}
@@ -1190,8 +1190,8 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 	}
 		
 
-
-	LOG(WARN,"at end 0x%08X [%d]",*data,data_end-data) ;
+	if((data_end-data)==0) ;
+	else LOG(ERR,"at end 0x%08X [%d]",*data,data_end-data) ;
 
 	return 0 ;
 }
@@ -1201,6 +1201,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	u_int trg ;
 	u_int err = 0 ;
 	u_int soft_err = 0 ;
+	int fee_cou = 0 ;
 
 	fee_port = 0 ;
 
@@ -1220,6 +1221,12 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	fee_version = 0 ;
 	if(data[0] == 0x98001000) return 0 ;	// no FEEs
 
+	fee_port = 0 ;	// claim unknown
+	fee_id = 0 ;	// claim unknown
+	fee_cou++ ;	// so it starts from 1
+
+
+
 	if((data[0] & 0xFFC0FFFF)==0x80000001) {
 		fee_version = 0 ;
 		fee_id = (data[0]>>16) & 0xFF ;
@@ -1232,6 +1239,14 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		//  with previous FEEs 0x40yy0010
 		//  and the first word is the 0x4321 signature already
 
+		/* Alright: I can have
+			option A:  0x80000010 is garbled, data[1] should be 0x1234
+			option B:  0x80000010 is missing, data[0] _is_ 0x1234
+			option C:  0x80000010 is there but is from the previous event!
+					data[1] is again 0x80000010 but this time correct
+
+		*/
+
 		run_err_add(rdo_id,0) ;
 
 
@@ -1242,8 +1257,9 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 				data = data - 1 ;	// go back one!
 			}
 			else {
+
 				LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-				err |= 2 ;
+				err |= 1 ;
 				goto done ;
 			}
 		}
@@ -1260,7 +1276,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		}
 		else {
 			LOG(ERR,"evt %d: port %d: fee sig bad 0x%08X, expect 0x80000010",evt_ix,fee_port,data[0]) ;
-			err |= 2 ;
+			err |= 4 ;
 			goto done ;
 
 		}
@@ -1268,22 +1284,39 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	}
 	else {
 		fee_version = 1 ;
+		
+		// looks OK but I need one more check!
+		u_int fee_id_1 = (data[1]>>16) & 0xFF ;
+
 		fee_id = (data[0]>>16) & 0xFF ;
+
+		if(fee_id != fee_id_1) {	// data[0] was from a previous event!!!
+			//LOG(WARN,"FEE id odd: 0x%08X 0x%08X 0x%08X 0x%08X",data[-1],data[0],data[1],data[2]) ;
+			fee_id = fee_id_1 ;
+			data = data + 1 ;
+		}
 	}
 
-
+	
 		
 		
 	switch(fee_version) {
 	case 1 :
 		if(data[1] != ((fee_id<<16)|0x4321)) err |= 0x10000 ;
 		if(data[2] != ((fee_id<<16)|0x8765)) err |= 0x20000 ;
-		if(fee_version != (data[3] & 0xFFFF)) err |= 0x40000 ;
-		fee_port = (data[4] & 0xFFFF) + 1 ;
-		//data[5] & data[6] are BX
-		if(data[7] != ((fee_id<<16)|0x60000010)) err |= 0x80000 ;
 
-		if(err) goto done ;
+		if(fee_version != (data[3] & 0xFFFF)) err |= 0x40000 ;
+		if(data[4]&0xFFF0) err |= 0x40000 ; 
+
+		fee_port = (data[4] & 0xF) + 1 ;
+		//data[5] & data[6] are BX
+
+		if(data[7] != ((fee_id<<16)|0x60000010)) err |= 0x80000 ;	// end of FEE hdr
+
+		if(err) {
+			run_err_add(rdo_id,3) ;
+			goto done ;
+		}
 
 		break ;
 	default :
@@ -1310,6 +1343,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		if((*data & 0xFC000000) != 0xB0000000) {
 			run_err_add(rdo_id,1) ;
 			LOG(ERR,"%d:#%02d: SAMPA %d: bad sig 0x%08X",rdo_id,fee_port,i+1,*data) ;
+			run_err_add(rdo_id,4) ;
 			err |= 0x100 ;
 			goto done ;
 		}
@@ -1332,12 +1366,12 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			dbg_level = 1 ;
 			LOG(ERR,"%d: fee_port %d: missing channels in lane %d: expect 0x%08X, got 0x%08X",
 				rdo_id,fee_port,i,expect_mask,found_ch_mask) ;
-			soft_err |= 0x200 ;
+			soft_err |= 0x100 ;
 		}
 
 		if(data==0) {
 			LOG(ERR,"data 0!!!!") ;
-			err |= 0x1000 ;
+			err |= 0x200 ;
 			goto done ;
 		}
 	}
@@ -1399,12 +1433,15 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 					
 		}
 
-		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 1 ;
-		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 1 ;
+		if(data[0] != ((fee_id<<16)|0xA0000010)) err |= 0x10 ;
+		if(data[7] != ((fee_id<<16)|0x40000010)) err |= 0x20 ;
 		if((data[1] & 0xFFFF)||(data[2]&0xFFFF)||(data[3]&0xFFFF)||(data[4]&0xFFFF)) {
-			LOG(WARN,"Event errors") ;
+			LOG(WARN,"%d:#%02d: event errors",rdo_id,fee_port) ;
 		}
-		if(err) goto done ;
+		if(err) {
+			run_err_add(rdo_id,5) ;
+			goto done ;
+		}
 		break ;
 	}
 
@@ -1424,12 +1461,14 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	// end of FEE
 	
 	if(err || soft_err) {
-		LOG(ERR,"%d: evt %d: error 0x%X 0x%08X",rdo_id,evt_ix,err,soft_err) ;
+		run_err_add(rdo_id,7) ;
+
+		LOG(ERR,"%d:#%02d(id %d,cou %d) evt %d: error 0x%X 0x%X",rdo_id,fee_port,fee_id,fee_cou,evt_ix,err,soft_err) ;
 		for(int i=-4;i<4;i++) {
 			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
 		}
 		
-		return -1 ;
+		if(err || soft_err) return -1 ;
 	}
 
 	after_fee:;
@@ -1446,7 +1485,6 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		while(data<data_end) {
 			u_int d = *data++ ;
 
-			
 			if((d&0xFFFFFF00)==0x9800F500) {
 				int c = d & 0xFF ;
 
@@ -1469,8 +1507,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 		break ;
 	default :	
-		for(int i=0;i<32;i++) {
-			LOG(WARN,"After FEE: %d [%d] = 0x%08X",i,data_end-data,*data) ;
+		for(int i=0;i<16;i++) {
+			LOG(ERR,"After FEE: %d [%d] = 0x%08X",i,data_end-data,*data) ;
 			data++ ;
 		}
 		break ;
