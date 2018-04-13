@@ -1,8 +1,0 @@
-<Document name="tpcegeo3.xml">
-<Module name="TPCEGEO3" comment="Dummy module calling TPCEGEO3a">
-<CDE>AGECOM,GCUNIT</CDE>
-<Export language="Mortran">
-Call TpceGeo3a
-</Export>
-</Module>
-</Document>
